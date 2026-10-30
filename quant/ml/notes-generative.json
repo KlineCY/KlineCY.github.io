@@ -1,0 +1,677 @@
+{
+  "version": 1,
+  "notes": [
+    {
+      "id": "generative-n01-01",
+      "node_id": "generative-n01-01",
+      "title": "生成模型与判别模型",
+      "definition": "生成模型关注数据联合或边缘分布，判别模型关注条件标签概率或直接决策边界。",
+      "assumptions": "要求明确训练语料、预训练/生成目标、概率定义、时间信息和实验基准；生成结果不能自动视为事实。",
+      "properties": [
+        "生成模型关注数据联合或边缘分布，判别模型关注条件标签概率或直接决策边界。。",
+        "模型效果应在未参与训练的样本验证，复杂生成系统还需要校验幻觉、隐私和多样性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心目标或模型关系",
+          "tex": "p_\\theta(x,y)=p_\\theta(y\\mid x)p_\\theta(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从模型概率分解、注意力或对抗训练目标建立上述公式。生成模型关注数据联合或边缘分布，判别模型关注条件标签概率或直接决策边界。",
+          "tex": "p_\\theta(x,y)=p_\\theta(y\\mid x)p_\\theta(x)"
+        },
+        {
+          "explanation": "通过训练、采样或检索执行公式中的目标计算，并检查其依赖的假设。",
+          "tex": "p_\\theta(x,y)=p_\\theta(y\\mid x)p_\\theta(x)"
+        }
+      ],
+      "code": "# 生成模型与判别模型：本学科基本原理演示\nimport numpy as np\nrng=np.random.default_rng(0)\nreal=rng.standard_t(5,size=500)\nsynthetic=rng.normal(real.mean(),real.std(),size=500)\nfor name,r in [(\"real\",real),(\"synthetic\",synthetic)]:\n print(name,\"mean\",r.mean(),\"q01/q99\",np.quantile(r,[.01,.99]))\n print(\"lag1\",np.corrcoef(r[:-1],r[1:])[0,1])",
+      "packages": "numpy",
+      "application": "用于金融大模型、文本检索增强、财经语料微调及市场收益情景生成。",
+      "limits": "这是知识点扩展笔记，基础代码展示本学科相关计算，并非完整LLM训练或生成网络实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "generative-n02-01",
+      "node_id": "generative-n02-01",
+      "title": "似然建模",
+      "definition": "通过最大化观测数据在参数模型下的概率密度拟合生成过程。",
+      "assumptions": "要求明确训练语料、预训练/生成目标、概率定义、时间信息和实验基准；生成结果不能自动视为事实。",
+      "properties": [
+        "通过最大化观测数据在参数模型下的概率密度拟合生成过程。。",
+        "模型效果应在未参与训练的样本验证，复杂生成系统还需要校验幻觉、隐私和多样性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心目标或模型关系",
+          "tex": "\\hat\\theta=\\arg\\max_\\theta\\sum_i\\log p_\\theta(x_i)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从模型概率分解、注意力或对抗训练目标建立上述公式。通过最大化观测数据在参数模型下的概率密度拟合生成过程。",
+          "tex": "\\hat\\theta=\\arg\\max_\\theta\\sum_i\\log p_\\theta(x_i)"
+        },
+        {
+          "explanation": "通过训练、采样或检索执行公式中的目标计算，并检查其依赖的假设。",
+          "tex": "\\hat\\theta=\\arg\\max_\\theta\\sum_i\\log p_\\theta(x_i)"
+        }
+      ],
+      "code": "# 似然建模：本学科基本原理演示\nimport numpy as np\nrng=np.random.default_rng(0)\nreal=rng.standard_t(5,size=500)\nsynthetic=rng.normal(real.mean(),real.std(),size=500)\nfor name,r in [(\"real\",real),(\"synthetic\",synthetic)]:\n print(name,\"mean\",r.mean(),\"q01/q99\",np.quantile(r,[.01,.99]))\n print(\"lag1\",np.corrcoef(r[:-1],r[1:])[0,1])",
+      "packages": "numpy",
+      "application": "用于金融大模型、文本检索增强、财经语料微调及市场收益情景生成。",
+      "limits": "这是知识点扩展笔记，基础代码展示本学科相关计算，并非完整LLM训练或生成网络实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "generative-n03-01",
+      "node_id": "generative-n03-01",
+      "title": "自回归生成",
+      "definition": "利用概率链式分解按顺序生成Token、图像像素或序列数据。",
+      "assumptions": "要求明确训练语料、预训练/生成目标、概率定义、时间信息和实验基准；生成结果不能自动视为事实。",
+      "properties": [
+        "利用概率链式分解按顺序生成Token、图像像素或序列数据。。",
+        "模型效果应在未参与训练的样本验证，复杂生成系统还需要校验幻觉、隐私和多样性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心目标或模型关系",
+          "tex": "p(x_{1:T})=\\prod_tp(x_t\\mid x_{<t})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从模型概率分解、注意力或对抗训练目标建立上述公式。利用概率链式分解按顺序生成Token、图像像素或序列数据。",
+          "tex": "p(x_{1:T})=\\prod_tp(x_t\\mid x_{<t})"
+        },
+        {
+          "explanation": "通过训练、采样或检索执行公式中的目标计算，并检查其依赖的假设。",
+          "tex": "p(x_{1:T})=\\prod_tp(x_t\\mid x_{<t})"
+        }
+      ],
+      "code": "# 自回归生成：本学科基本原理演示\nimport numpy as np\nrng=np.random.default_rng(0)\nreal=rng.standard_t(5,size=500)\nsynthetic=rng.normal(real.mean(),real.std(),size=500)\nfor name,r in [(\"real\",real),(\"synthetic\",synthetic)]:\n print(name,\"mean\",r.mean(),\"q01/q99\",np.quantile(r,[.01,.99]))\n print(\"lag1\",np.corrcoef(r[:-1],r[1:])[0,1])",
+      "packages": "numpy",
+      "application": "用于金融大模型、文本检索增强、财经语料微调及市场收益情景生成。",
+      "limits": "这是知识点扩展笔记，基础代码展示本学科相关计算，并非完整LLM训练或生成网络实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "generative-n04-01",
+      "node_id": "generative-n04-01",
+      "title": "潜变量",
+      "definition": "引入不可观测随机变量z表示数据背后的低维驱动因素。",
+      "assumptions": "要求明确训练语料、预训练/生成目标、概率定义、时间信息和实验基准；生成结果不能自动视为事实。",
+      "properties": [
+        "引入不可观测随机变量z表示数据背后的低维驱动因素。。",
+        "模型效果应在未参与训练的样本验证，复杂生成系统还需要校验幻觉、隐私和多样性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心目标或模型关系",
+          "tex": "p(x)=\\int p(x\\mid z)p(z)\\,dz"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从模型概率分解、注意力或对抗训练目标建立上述公式。引入不可观测随机变量z表示数据背后的低维驱动因素。",
+          "tex": "p(x)=\\int p(x\\mid z)p(z)\\,dz"
+        },
+        {
+          "explanation": "通过训练、采样或检索执行公式中的目标计算，并检查其依赖的假设。",
+          "tex": "p(x)=\\int p(x\\mid z)p(z)\\,dz"
+        }
+      ],
+      "code": "# 潜变量：本学科基本原理演示\nimport numpy as np\nrng=np.random.default_rng(0)\nreal=rng.standard_t(5,size=500)\nsynthetic=rng.normal(real.mean(),real.std(),size=500)\nfor name,r in [(\"real\",real),(\"synthetic\",synthetic)]:\n print(name,\"mean\",r.mean(),\"q01/q99\",np.quantile(r,[.01,.99]))\n print(\"lag1\",np.corrcoef(r[:-1],r[1:])[0,1])",
+      "packages": "numpy",
+      "application": "用于金融大模型、文本检索增强、财经语料微调及市场收益情景生成。",
+      "limits": "这是知识点扩展笔记，基础代码展示本学科相关计算，并非完整LLM训练或生成网络实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "generative-n05-01",
+      "node_id": "generative-n05-01",
+      "title": "生成评价",
+      "definition": "用分布拟合度、样本多样性及下游任务保真度评价生成结果。",
+      "assumptions": "要求明确训练语料、预训练/生成目标、概率定义、时间信息和实验基准；生成结果不能自动视为事实。",
+      "properties": [
+        "用分布拟合度、样本多样性及下游任务保真度评价生成结果。。",
+        "模型效果应在未参与训练的样本验证，复杂生成系统还需要校验幻觉、隐私和多样性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心目标或模型关系",
+          "tex": "D(P_{\\rm real},P_{\\rm fake})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从模型概率分解、注意力或对抗训练目标建立上述公式。用分布拟合度、样本多样性及下游任务保真度评价生成结果。",
+          "tex": "D(P_{\\rm real},P_{\\rm fake})"
+        },
+        {
+          "explanation": "通过训练、采样或检索执行公式中的目标计算，并检查其依赖的假设。",
+          "tex": "D(P_{\\rm real},P_{\\rm fake})"
+        }
+      ],
+      "code": "# 生成评价：本学科基本原理演示\nimport numpy as np\nrng=np.random.default_rng(0)\nreal=rng.standard_t(5,size=500)\nsynthetic=rng.normal(real.mean(),real.std(),size=500)\nfor name,r in [(\"real\",real),(\"synthetic\",synthetic)]:\n print(name,\"mean\",r.mean(),\"q01/q99\",np.quantile(r,[.01,.99]))\n print(\"lag1\",np.corrcoef(r[:-1],r[1:])[0,1])",
+      "packages": "numpy",
+      "application": "用于金融大模型、文本检索增强、财经语料微调及市场收益情景生成。",
+      "limits": "这是知识点扩展笔记，基础代码展示本学科相关计算，并非完整LLM训练或生成网络实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "generative-n06-01",
+      "node_id": "generative-n06-01",
+      "title": "分布匹配",
+      "definition": "通过KL、JS、Wasserstein或核距离衡量生成分布与真实分布的差异。",
+      "assumptions": "要求明确训练语料、预训练/生成目标、概率定义、时间信息和实验基准；生成结果不能自动视为事实。",
+      "properties": [
+        "通过KL、JS、Wasserstein或核距离衡量生成分布与真实分布的差异。。",
+        "模型效果应在未参与训练的样本验证，复杂生成系统还需要校验幻觉、隐私和多样性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心目标或模型关系",
+          "tex": "D_{\\rm KL}(P\\|Q)=E_P[\\log(p/q)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从模型概率分解、注意力或对抗训练目标建立上述公式。通过KL、JS、Wasserstein或核距离衡量生成分布与真实分布的差异。",
+          "tex": "D_{\\rm KL}(P\\|Q)=E_P[\\log(p/q)]"
+        },
+        {
+          "explanation": "通过训练、采样或检索执行公式中的目标计算，并检查其依赖的假设。",
+          "tex": "D_{\\rm KL}(P\\|Q)=E_P[\\log(p/q)]"
+        }
+      ],
+      "code": "# 分布匹配：本学科基本原理演示\nimport numpy as np\nrng=np.random.default_rng(0)\nreal=rng.standard_t(5,size=500)\nsynthetic=rng.normal(real.mean(),real.std(),size=500)\nfor name,r in [(\"real\",real),(\"synthetic\",synthetic)]:\n print(name,\"mean\",r.mean(),\"q01/q99\",np.quantile(r,[.01,.99]))\n print(\"lag1\",np.corrcoef(r[:-1],r[1:])[0,1])",
+      "packages": "numpy",
+      "application": "用于金融大模型、文本检索增强、财经语料微调及市场收益情景生成。",
+      "limits": "这是知识点扩展笔记，基础代码展示本学科相关计算，并非完整LLM训练或生成网络实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "generative-n05-02",
+      "node_id": "generative-n05-02",
+      "title": "β-VAE",
+      "definition": "β-VAE在VAE证据下界上提高或降低KL正则权重控制潜变量容量。",
+      "assumptions": "要求明确训练语料、预训练/生成目标、概率定义、时间信息和实验基准；生成结果不能自动视为事实。",
+      "properties": [
+        "β-VAE在VAE证据下界上提高或降低KL正则权重控制潜变量容量。。",
+        "模型效果应在未参与训练的样本验证，复杂生成系统还需要校验幻觉、隐私和多样性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心目标或模型关系",
+          "tex": "L=-E_q[\\log p(x\\mid z)]+\\beta D_{\\rm KL}(q\\|p)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从模型概率分解、注意力或对抗训练目标建立上述公式。β-VAE在VAE证据下界上提高或降低KL正则权重控制潜变量容量。",
+          "tex": "L=-E_q[\\log p(x\\mid z)]+\\beta D_{\\rm KL}(q\\|p)"
+        },
+        {
+          "explanation": "通过训练、采样或检索执行公式中的目标计算，并检查其依赖的假设。",
+          "tex": "L=-E_q[\\log p(x\\mid z)]+\\beta D_{\\rm KL}(q\\|p)"
+        }
+      ],
+      "code": "# β-VAE：本学科基本原理演示\nimport numpy as np\nrng=np.random.default_rng(0)\nreal=rng.standard_t(5,size=500)\nsynthetic=rng.normal(real.mean(),real.std(),size=500)\nfor name,r in [(\"real\",real),(\"synthetic\",synthetic)]:\n print(name,\"mean\",r.mean(),\"q01/q99\",np.quantile(r,[.01,.99]))\n print(\"lag1\",np.corrcoef(r[:-1],r[1:])[0,1])",
+      "packages": "numpy",
+      "application": "用于金融大模型、文本检索增强、财经语料微调及市场收益情景生成。",
+      "limits": "这是知识点扩展笔记，基础代码展示本学科相关计算，并非完整LLM训练或生成网络实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "generative-n06-02",
+      "node_id": "generative-n06-02",
+      "title": "离散潜变量",
+      "definition": "潜状态可取离散类别，需处理离散采样不可直接微分的问题。",
+      "assumptions": "要求明确训练语料、预训练/生成目标、概率定义、时间信息和实验基准；生成结果不能自动视为事实。",
+      "properties": [
+        "潜状态可取离散类别，需处理离散采样不可直接微分的问题。。",
+        "模型效果应在未参与训练的样本验证，复杂生成系统还需要校验幻觉、隐私和多样性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心目标或模型关系",
+          "tex": "p(z\\mid x)=\\operatorname{Categorical}(\\pi_\\theta(x))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从模型概率分解、注意力或对抗训练目标建立上述公式。潜状态可取离散类别，需处理离散采样不可直接微分的问题。",
+          "tex": "p(z\\mid x)=\\operatorname{Categorical}(\\pi_\\theta(x))"
+        },
+        {
+          "explanation": "通过训练、采样或检索执行公式中的目标计算，并检查其依赖的假设。",
+          "tex": "p(z\\mid x)=\\operatorname{Categorical}(\\pi_\\theta(x))"
+        }
+      ],
+      "code": "# 离散潜变量：本学科基本原理演示\nimport numpy as np\nrng=np.random.default_rng(0)\nreal=rng.standard_t(5,size=500)\nsynthetic=rng.normal(real.mean(),real.std(),size=500)\nfor name,r in [(\"real\",real),(\"synthetic\",synthetic)]:\n print(name,\"mean\",r.mean(),\"q01/q99\",np.quantile(r,[.01,.99]))\n print(\"lag1\",np.corrcoef(r[:-1],r[1:])[0,1])",
+      "packages": "numpy",
+      "application": "用于金融大模型、文本检索增强、财经语料微调及市场收益情景生成。",
+      "limits": "这是知识点扩展笔记，基础代码展示本学科相关计算，并非完整LLM训练或生成网络实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "generative-n02-03",
+      "node_id": "generative-n02-03",
+      "title": "判别器生成器",
+      "definition": "GAN中生成器产生假样本，判别器学习区分真假，两者进行对抗优化。",
+      "assumptions": "要求明确训练语料、预训练/生成目标、概率定义、时间信息和实验基准；生成结果不能自动视为事实。",
+      "properties": [
+        "GAN中生成器产生假样本，判别器学习区分真假，两者进行对抗优化。。",
+        "模型效果应在未参与训练的样本验证，复杂生成系统还需要校验幻觉、隐私和多样性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心目标或模型关系",
+          "tex": "\\min_G\\max_D E[\\log D(x)]+E[\\log(1-D(G(z)))]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从模型概率分解、注意力或对抗训练目标建立上述公式。GAN中生成器产生假样本，判别器学习区分真假，两者进行对抗优化。",
+          "tex": "\\min_G\\max_D E[\\log D(x)]+E[\\log(1-D(G(z)))]"
+        },
+        {
+          "explanation": "通过训练、采样或检索执行公式中的目标计算，并检查其依赖的假设。",
+          "tex": "\\min_G\\max_D E[\\log D(x)]+E[\\log(1-D(G(z)))]"
+        }
+      ],
+      "code": "# 判别器生成器：本学科基本原理演示\nimport numpy as np\nrng=np.random.default_rng(0)\nreal=rng.standard_t(5,size=500)\nsynthetic=rng.normal(real.mean(),real.std(),size=500)\nfor name,r in [(\"real\",real),(\"synthetic\",synthetic)]:\n print(name,\"mean\",r.mean(),\"q01/q99\",np.quantile(r,[.01,.99]))\n print(\"lag1\",np.corrcoef(r[:-1],r[1:])[0,1])",
+      "packages": "numpy",
+      "application": "用于金融大模型、文本检索增强、财经语料微调及市场收益情景生成。",
+      "limits": "这是知识点扩展笔记，基础代码展示本学科相关计算，并非完整LLM训练或生成网络实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "generative-n04-03",
+      "node_id": "generative-n04-03",
+      "title": "梯度惩罚",
+      "definition": "WGAN-GP沿真实和生成样本插值，惩罚Critic梯度范数偏离1。",
+      "assumptions": "要求明确训练语料、预训练/生成目标、概率定义、时间信息和实验基准；生成结果不能自动视为事实。",
+      "properties": [
+        "WGAN-GP沿真实和生成样本插值，惩罚Critic梯度范数偏离1。。",
+        "模型效果应在未参与训练的样本验证，复杂生成系统还需要校验幻觉、隐私和多样性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心目标或模型关系",
+          "tex": "L_{\\rm GP}=\\lambda E[(\\|\\nabla_{\\hat x}D(\\hat x)\\|_2-1)^2]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从模型概率分解、注意力或对抗训练目标建立上述公式。WGAN-GP沿真实和生成样本插值，惩罚Critic梯度范数偏离1。",
+          "tex": "L_{\\rm GP}=\\lambda E[(\\|\\nabla_{\\hat x}D(\\hat x)\\|_2-1)^2]"
+        },
+        {
+          "explanation": "通过训练、采样或检索执行公式中的目标计算，并检查其依赖的假设。",
+          "tex": "L_{\\rm GP}=\\lambda E[(\\|\\nabla_{\\hat x}D(\\hat x)\\|_2-1)^2]"
+        }
+      ],
+      "code": "# 梯度惩罚：本学科基本原理演示\nimport numpy as np\nrng=np.random.default_rng(0)\nreal=rng.standard_t(5,size=500)\nsynthetic=rng.normal(real.mean(),real.std(),size=500)\nfor name,r in [(\"real\",real),(\"synthetic\",synthetic)]:\n print(name,\"mean\",r.mean(),\"q01/q99\",np.quantile(r,[.01,.99]))\n print(\"lag1\",np.corrcoef(r[:-1],r[1:])[0,1])",
+      "packages": "numpy",
+      "application": "用于金融大模型、文本检索增强、财经语料微调及市场收益情景生成。",
+      "limits": "这是知识点扩展笔记，基础代码展示本学科相关计算，并非完整LLM训练或生成网络实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "generative-n05-03",
+      "node_id": "generative-n05-03",
+      "title": "模式崩塌",
+      "definition": "GAN可能只产生少数类型样本而忽略真实数据分布中其他模式。",
+      "assumptions": "要求明确训练语料、预训练/生成目标、概率定义、时间信息和实验基准；生成结果不能自动视为事实。",
+      "properties": [
+        "GAN可能只产生少数类型样本而忽略真实数据分布中其他模式。。",
+        "模型效果应在未参与训练的样本验证，复杂生成系统还需要校验幻觉、隐私和多样性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心目标或模型关系",
+          "tex": "\\operatorname{supp}(P_G)\\subsetneq\\operatorname{supp}(P_{\\rm real})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从模型概率分解、注意力或对抗训练目标建立上述公式。GAN可能只产生少数类型样本而忽略真实数据分布中其他模式。",
+          "tex": "\\operatorname{supp}(P_G)\\subsetneq\\operatorname{supp}(P_{\\rm real})"
+        },
+        {
+          "explanation": "通过训练、采样或检索执行公式中的目标计算，并检查其依赖的假设。",
+          "tex": "\\operatorname{supp}(P_G)\\subsetneq\\operatorname{supp}(P_{\\rm real})"
+        }
+      ],
+      "code": "# 模式崩塌：本学科基本原理演示\nimport numpy as np\nrng=np.random.default_rng(0)\nreal=rng.standard_t(5,size=500)\nsynthetic=rng.normal(real.mean(),real.std(),size=500)\nfor name,r in [(\"real\",real),(\"synthetic\",synthetic)]:\n print(name,\"mean\",r.mean(),\"q01/q99\",np.quantile(r,[.01,.99]))\n print(\"lag1\",np.corrcoef(r[:-1],r[1:])[0,1])",
+      "packages": "numpy",
+      "application": "用于金融大模型、文本检索增强、财经语料微调及市场收益情景生成。",
+      "limits": "这是知识点扩展笔记，基础代码展示本学科相关计算，并非完整LLM训练或生成网络实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "generative-n06-03",
+      "node_id": "generative-n06-03",
+      "title": "对抗稳定性",
+      "definition": "对抗训练的双优化器学习率、更新比和正则影响训练震荡。",
+      "assumptions": "要求明确训练语料、预训练/生成目标、概率定义、时间信息和实验基准；生成结果不能自动视为事实。",
+      "properties": [
+        "对抗训练的双优化器学习率、更新比和正则影响训练震荡。。",
+        "模型效果应在未参与训练的样本验证，复杂生成系统还需要校验幻觉、隐私和多样性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心目标或模型关系",
+          "tex": "\\min_\\theta\\max_\\phi V(\\theta,\\phi)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从模型概率分解、注意力或对抗训练目标建立上述公式。对抗训练的双优化器学习率、更新比和正则影响训练震荡。",
+          "tex": "\\min_\\theta\\max_\\phi V(\\theta,\\phi)"
+        },
+        {
+          "explanation": "通过训练、采样或检索执行公式中的目标计算，并检查其依赖的假设。",
+          "tex": "\\min_\\theta\\max_\\phi V(\\theta,\\phi)"
+        }
+      ],
+      "code": "# 对抗稳定性：本学科基本原理演示\nimport numpy as np\nrng=np.random.default_rng(0)\nreal=rng.standard_t(5,size=500)\nsynthetic=rng.normal(real.mean(),real.std(),size=500)\nfor name,r in [(\"real\",real),(\"synthetic\",synthetic)]:\n print(name,\"mean\",r.mean(),\"q01/q99\",np.quantile(r,[.01,.99]))\n print(\"lag1\",np.corrcoef(r[:-1],r[1:])[0,1])",
+      "packages": "numpy",
+      "application": "用于金融大模型、文本检索增强、财经语料微调及市场收益情景生成。",
+      "limits": "这是知识点扩展笔记，基础代码展示本学科相关计算，并非完整LLM训练或生成网络实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "generative-n03-04",
+      "node_id": "generative-n03-04",
+      "title": "Score Matching",
+      "definition": "分数匹配学习数据概率密度对输入的梯度而无需直接计算归一化常数。",
+      "assumptions": "要求明确训练语料、预训练/生成目标、概率定义、时间信息和实验基准；生成结果不能自动视为事实。",
+      "properties": [
+        "分数匹配学习数据概率密度对输入的梯度而无需直接计算归一化常数。。",
+        "模型效果应在未参与训练的样本验证，复杂生成系统还需要校验幻觉、隐私和多样性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心目标或模型关系",
+          "tex": "s_\\theta(x)\\approx\\nabla_x\\log p(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从模型概率分解、注意力或对抗训练目标建立上述公式。分数匹配学习数据概率密度对输入的梯度而无需直接计算归一化常数。",
+          "tex": "s_\\theta(x)\\approx\\nabla_x\\log p(x)"
+        },
+        {
+          "explanation": "通过训练、采样或检索执行公式中的目标计算，并检查其依赖的假设。",
+          "tex": "s_\\theta(x)\\approx\\nabla_x\\log p(x)"
+        }
+      ],
+      "code": "# Score Matching：本学科基本原理演示\nimport numpy as np\nrng=np.random.default_rng(0)\nreal=rng.standard_t(5,size=500)\nsynthetic=rng.normal(real.mean(),real.std(),size=500)\nfor name,r in [(\"real\",real),(\"synthetic\",synthetic)]:\n print(name,\"mean\",r.mean(),\"q01/q99\",np.quantile(r,[.01,.99]))\n print(\"lag1\",np.corrcoef(r[:-1],r[1:])[0,1])",
+      "packages": "numpy",
+      "application": "用于金融大模型、文本检索增强、财经语料微调及市场收益情景生成。",
+      "limits": "这是知识点扩展笔记，基础代码展示本学科相关计算，并非完整LLM训练或生成网络实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "generative-n04-04",
+      "node_id": "generative-n04-04",
+      "title": "反向采样",
+      "definition": "扩散模型沿时间逆向反复去噪，从近似高斯噪声恢复样本。",
+      "assumptions": "要求明确训练语料、预训练/生成目标、概率定义、时间信息和实验基准；生成结果不能自动视为事实。",
+      "properties": [
+        "扩散模型沿时间逆向反复去噪，从近似高斯噪声恢复样本。。",
+        "模型效果应在未参与训练的样本验证，复杂生成系统还需要校验幻觉、隐私和多样性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心目标或模型关系",
+          "tex": "p_\\theta(x_{t-1}\\mid x_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从模型概率分解、注意力或对抗训练目标建立上述公式。扩散模型沿时间逆向反复去噪，从近似高斯噪声恢复样本。",
+          "tex": "p_\\theta(x_{t-1}\\mid x_t)"
+        },
+        {
+          "explanation": "通过训练、采样或检索执行公式中的目标计算，并检查其依赖的假设。",
+          "tex": "p_\\theta(x_{t-1}\\mid x_t)"
+        }
+      ],
+      "code": "# 反向采样：本学科基本原理演示\nimport numpy as np\nrng=np.random.default_rng(0)\nreal=rng.standard_t(5,size=500)\nsynthetic=rng.normal(real.mean(),real.std(),size=500)\nfor name,r in [(\"real\",real),(\"synthetic\",synthetic)]:\n print(name,\"mean\",r.mean(),\"q01/q99\",np.quantile(r,[.01,.99]))\n print(\"lag1\",np.corrcoef(r[:-1],r[1:])[0,1])",
+      "packages": "numpy",
+      "application": "用于金融大模型、文本检索增强、财经语料微调及市场收益情景生成。",
+      "limits": "这是知识点扩展笔记，基础代码展示本学科相关计算，并非完整LLM训练或生成网络实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "generative-n05-04",
+      "node_id": "generative-n05-04",
+      "title": "Classifier-Free Guidance",
+      "definition": "CFG通过条件与无条件分数差调整生成对条件信息的遵循程度。",
+      "assumptions": "要求明确训练语料、预训练/生成目标、概率定义、时间信息和实验基准；生成结果不能自动视为事实。",
+      "properties": [
+        "CFG通过条件与无条件分数差调整生成对条件信息的遵循程度。。",
+        "模型效果应在未参与训练的样本验证，复杂生成系统还需要校验幻觉、隐私和多样性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心目标或模型关系",
+          "tex": "\\hat\\epsilon=(1+w)\\epsilon_{\\rm cond}-w\\epsilon_{\\rm uncond}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从模型概率分解、注意力或对抗训练目标建立上述公式。CFG通过条件与无条件分数差调整生成对条件信息的遵循程度。",
+          "tex": "\\hat\\epsilon=(1+w)\\epsilon_{\\rm cond}-w\\epsilon_{\\rm uncond}"
+        },
+        {
+          "explanation": "通过训练、采样或检索执行公式中的目标计算，并检查其依赖的假设。",
+          "tex": "\\hat\\epsilon=(1+w)\\epsilon_{\\rm cond}-w\\epsilon_{\\rm uncond}"
+        }
+      ],
+      "code": "# Classifier-Free Guidance：本学科基本原理演示\nimport numpy as np\nrng=np.random.default_rng(0)\nreal=rng.standard_t(5,size=500)\nsynthetic=rng.normal(real.mean(),real.std(),size=500)\nfor name,r in [(\"real\",real),(\"synthetic\",synthetic)]:\n print(name,\"mean\",r.mean(),\"q01/q99\",np.quantile(r,[.01,.99]))\n print(\"lag1\",np.corrcoef(r[:-1],r[1:])[0,1])",
+      "packages": "numpy",
+      "application": "用于金融大模型、文本检索增强、财经语料微调及市场收益情景生成。",
+      "limits": "这是知识点扩展笔记，基础代码展示本学科相关计算，并非完整LLM训练或生成网络实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "generative-n06-04",
+      "node_id": "generative-n06-04",
+      "title": "DDIM",
+      "definition": "DDIM使用非马尔可夫或确定性逆采样路径减少生成步数。",
+      "assumptions": "要求明确训练语料、预训练/生成目标、概率定义、时间信息和实验基准；生成结果不能自动视为事实。",
+      "properties": [
+        "DDIM使用非马尔可夫或确定性逆采样路径减少生成步数。。",
+        "模型效果应在未参与训练的样本验证，复杂生成系统还需要校验幻觉、隐私和多样性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心目标或模型关系",
+          "tex": "x_{t-1}=\\sqrt{\\bar\\alpha_{t-1}}\\hat x_0+\\sqrt{1-\\bar\\alpha_{t-1}}\\hat\\epsilon"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从模型概率分解、注意力或对抗训练目标建立上述公式。DDIM使用非马尔可夫或确定性逆采样路径减少生成步数。",
+          "tex": "x_{t-1}=\\sqrt{\\bar\\alpha_{t-1}}\\hat x_0+\\sqrt{1-\\bar\\alpha_{t-1}}\\hat\\epsilon"
+        },
+        {
+          "explanation": "通过训练、采样或检索执行公式中的目标计算，并检查其依赖的假设。",
+          "tex": "x_{t-1}=\\sqrt{\\bar\\alpha_{t-1}}\\hat x_0+\\sqrt{1-\\bar\\alpha_{t-1}}\\hat\\epsilon"
+        }
+      ],
+      "code": "# DDIM：本学科基本原理演示\nimport numpy as np\nrng=np.random.default_rng(0)\nreal=rng.standard_t(5,size=500)\nsynthetic=rng.normal(real.mean(),real.std(),size=500)\nfor name,r in [(\"real\",real),(\"synthetic\",synthetic)]:\n print(name,\"mean\",r.mean(),\"q01/q99\",np.quantile(r,[.01,.99]))\n print(\"lag1\",np.corrcoef(r[:-1],r[1:])[0,1])",
+      "packages": "numpy",
+      "application": "用于金融大模型、文本检索增强、财经语料微调及市场收益情景生成。",
+      "limits": "这是知识点扩展笔记，基础代码展示本学科相关计算，并非完整LLM训练或生成网络实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "generative-n01-05",
+      "node_id": "generative-n01-05",
+      "title": "金融收益情景生成",
+      "definition": "生成模型需复现收益边际分布、尾部、资产关联与波动聚集特征。",
+      "assumptions": "要求明确训练语料、预训练/生成目标、概率定义、时间信息和实验基准；生成结果不能自动视为事实。",
+      "properties": [
+        "生成模型需复现收益边际分布、尾部、资产关联与波动聚集特征。。",
+        "模型效果应在未参与训练的样本验证，复杂生成系统还需要校验幻觉、隐私和多样性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心目标或模型关系",
+          "tex": "R_{\\rm synthetic}\\sim\\hat P_\\theta(R)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从模型概率分解、注意力或对抗训练目标建立上述公式。生成模型需复现收益边际分布、尾部、资产关联与波动聚集特征。",
+          "tex": "R_{\\rm synthetic}\\sim\\hat P_\\theta(R)"
+        },
+        {
+          "explanation": "通过训练、采样或检索执行公式中的目标计算，并检查其依赖的假设。",
+          "tex": "R_{\\rm synthetic}\\sim\\hat P_\\theta(R)"
+        }
+      ],
+      "code": "# 金融收益情景生成：本学科基本原理演示\nimport numpy as np\nrng=np.random.default_rng(0)\nreal=rng.standard_t(5,size=500)\nsynthetic=rng.normal(real.mean(),real.std(),size=500)\nfor name,r in [(\"real\",real),(\"synthetic\",synthetic)]:\n print(name,\"mean\",r.mean(),\"q01/q99\",np.quantile(r,[.01,.99]))\n print(\"lag1\",np.corrcoef(r[:-1],r[1:])[0,1])",
+      "packages": "numpy",
+      "application": "用于金融大模型、文本检索增强、财经语料微调及市场收益情景生成。",
+      "limits": "这是知识点扩展笔记，基础代码展示本学科相关计算，并非完整LLM训练或生成网络实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "generative-n02-05",
+      "node_id": "generative-n02-05",
+      "title": "合成时间序列",
+      "definition": "生成多步时间序列样本以研究序列模型鲁棒性，须保留时间依赖。",
+      "assumptions": "要求明确训练语料、预训练/生成目标、概率定义、时间信息和实验基准；生成结果不能自动视为事实。",
+      "properties": [
+        "生成多步时间序列样本以研究序列模型鲁棒性，须保留时间依赖。。",
+        "模型效果应在未参与训练的样本验证，复杂生成系统还需要校验幻觉、隐私和多样性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心目标或模型关系",
+          "tex": "p(x_{1:T})=p(x_1)\\prod_{t=2}^Tp(x_t\\mid x_{<t})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从模型概率分解、注意力或对抗训练目标建立上述公式。生成多步时间序列样本以研究序列模型鲁棒性，须保留时间依赖。",
+          "tex": "p(x_{1:T})=p(x_1)\\prod_{t=2}^Tp(x_t\\mid x_{<t})"
+        },
+        {
+          "explanation": "通过训练、采样或检索执行公式中的目标计算，并检查其依赖的假设。",
+          "tex": "p(x_{1:T})=p(x_1)\\prod_{t=2}^Tp(x_t\\mid x_{<t})"
+        }
+      ],
+      "code": "# 合成时间序列：本学科基本原理演示\nimport numpy as np\nrng=np.random.default_rng(0)\nreal=rng.standard_t(5,size=500)\nsynthetic=rng.normal(real.mean(),real.std(),size=500)\nfor name,r in [(\"real\",real),(\"synthetic\",synthetic)]:\n print(name,\"mean\",r.mean(),\"q01/q99\",np.quantile(r,[.01,.99]))\n print(\"lag1\",np.corrcoef(r[:-1],r[1:])[0,1])",
+      "packages": "numpy",
+      "application": "用于金融大模型、文本检索增强、财经语料微调及市场收益情景生成。",
+      "limits": "这是知识点扩展笔记，基础代码展示本学科相关计算，并非完整LLM训练或生成网络实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "generative-n03-05",
+      "node_id": "generative-n03-05",
+      "title": "TimeGAN",
+      "definition": "TimeGAN联合对抗生成和监督序列动态目标，尝试保留时间转移关系。",
+      "assumptions": "要求明确训练语料、预训练/生成目标、概率定义、时间信息和实验基准；生成结果不能自动视为事实。",
+      "properties": [
+        "TimeGAN联合对抗生成和监督序列动态目标，尝试保留时间转移关系。。",
+        "模型效果应在未参与训练的样本验证，复杂生成系统还需要校验幻觉、隐私和多样性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心目标或模型关系",
+          "tex": "L=L_{\\rm adv}+\\lambda L_{\\rm supervised}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从模型概率分解、注意力或对抗训练目标建立上述公式。TimeGAN联合对抗生成和监督序列动态目标，尝试保留时间转移关系。",
+          "tex": "L=L_{\\rm adv}+\\lambda L_{\\rm supervised}"
+        },
+        {
+          "explanation": "通过训练、采样或检索执行公式中的目标计算，并检查其依赖的假设。",
+          "tex": "L=L_{\\rm adv}+\\lambda L_{\\rm supervised}"
+        }
+      ],
+      "code": "# TimeGAN：本学科基本原理演示\nimport numpy as np\nrng=np.random.default_rng(0)\nreal=rng.standard_t(5,size=500)\nsynthetic=rng.normal(real.mean(),real.std(),size=500)\nfor name,r in [(\"real\",real),(\"synthetic\",synthetic)]:\n print(name,\"mean\",r.mean(),\"q01/q99\",np.quantile(r,[.01,.99]))\n print(\"lag1\",np.corrcoef(r[:-1],r[1:])[0,1])",
+      "packages": "numpy",
+      "application": "用于金融大模型、文本检索增强、财经语料微调及市场收益情景生成。",
+      "limits": "这是知识点扩展笔记，基础代码展示本学科相关计算，并非完整LLM训练或生成网络实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "generative-n04-05",
+      "node_id": "generative-n04-05",
+      "title": "分布保真",
+      "definition": "比较合成与真实数据的收益分位、协方差和滞后相关结构。",
+      "assumptions": "要求明确训练语料、预训练/生成目标、概率定义、时间信息和实验基准；生成结果不能自动视为事实。",
+      "properties": [
+        "比较合成与真实数据的收益分位、协方差和滞后相关结构。。",
+        "模型效果应在未参与训练的样本验证，复杂生成系统还需要校验幻觉、隐私和多样性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心目标或模型关系",
+          "tex": "\\Delta_\\rho=|\\rho_{\\rm real}(k)-\\rho_{\\rm synthetic}(k)|"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从模型概率分解、注意力或对抗训练目标建立上述公式。比较合成与真实数据的收益分位、协方差和滞后相关结构。",
+          "tex": "\\Delta_\\rho=|\\rho_{\\rm real}(k)-\\rho_{\\rm synthetic}(k)|"
+        },
+        {
+          "explanation": "通过训练、采样或检索执行公式中的目标计算，并检查其依赖的假设。",
+          "tex": "\\Delta_\\rho=|\\rho_{\\rm real}(k)-\\rho_{\\rm synthetic}(k)|"
+        }
+      ],
+      "code": "# 分布保真：本学科基本原理演示\nimport numpy as np\nrng=np.random.default_rng(0)\nreal=rng.standard_t(5,size=500)\nsynthetic=rng.normal(real.mean(),real.std(),size=500)\nfor name,r in [(\"real\",real),(\"synthetic\",synthetic)]:\n print(name,\"mean\",r.mean(),\"q01/q99\",np.quantile(r,[.01,.99]))\n print(\"lag1\",np.corrcoef(r[:-1],r[1:])[0,1])",
+      "packages": "numpy",
+      "application": "用于金融大模型、文本检索增强、财经语料微调及市场收益情景生成。",
+      "limits": "这是知识点扩展笔记，基础代码展示本学科相关计算，并非完整LLM训练或生成网络实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "generative-n05-05",
+      "node_id": "generative-n05-05",
+      "title": "隐私与成员推断",
+      "definition": "生成模型记忆训练样本可能导致隐私泄露，成员推断测试估计攻击成功率。",
+      "assumptions": "要求明确训练语料、预训练/生成目标、概率定义、时间信息和实验基准；生成结果不能自动视为事实。",
+      "properties": [
+        "生成模型记忆训练样本可能导致隐私泄露，成员推断测试估计攻击成功率。。",
+        "模型效果应在未参与训练的样本验证，复杂生成系统还需要校验幻觉、隐私和多样性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心目标或模型关系",
+          "tex": "A_{\\rm MIA}=P(\\hat m=m)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从模型概率分解、注意力或对抗训练目标建立上述公式。生成模型记忆训练样本可能导致隐私泄露，成员推断测试估计攻击成功率。",
+          "tex": "A_{\\rm MIA}=P(\\hat m=m)"
+        },
+        {
+          "explanation": "通过训练、采样或检索执行公式中的目标计算，并检查其依赖的假设。",
+          "tex": "A_{\\rm MIA}=P(\\hat m=m)"
+        }
+      ],
+      "code": "# 隐私与成员推断：本学科基本原理演示\nimport numpy as np\nrng=np.random.default_rng(0)\nreal=rng.standard_t(5,size=500)\nsynthetic=rng.normal(real.mean(),real.std(),size=500)\nfor name,r in [(\"real\",real),(\"synthetic\",synthetic)]:\n print(name,\"mean\",r.mean(),\"q01/q99\",np.quantile(r,[.01,.99]))\n print(\"lag1\",np.corrcoef(r[:-1],r[1:])[0,1])",
+      "packages": "numpy",
+      "application": "用于金融大模型、文本检索增强、财经语料微调及市场收益情景生成。",
+      "limits": "这是知识点扩展笔记，基础代码展示本学科相关计算，并非完整LLM训练或生成网络实现。",
+      "coverage": "expanded"
+    }
+  ]
+}
