@@ -292,6 +292,22 @@ Promise.all([
   const drafts=draftResults.flatMap(x=>x.notes||[]);
   if(drafts.length!==manifest.notes_count)throw Error("扩展笔记清单数量不一致");
   noteMap=new Map(drafts.filter(n=>!lessons.some(l=>l.node_id===n.node_id)).map(n=>[n.node_id,n]));
+  const focusedResults=await Promise.all((manifest.example_files||[]).map(async file=>{
+    const r=await fetch("./"+file);
+    if(!r.ok)throw Error("专属示例 "+file+": HTTP "+r.status);
+    return r.json();
+  }));
+  for(const candidate of focusedResults.flatMap(x=>x.lessons||[])){
+    const note=noteMap.get(candidate.node_id);
+    if(!note)continue;
+    const candidateCode=(candidate.code||"").trim();
+    if(candidateCode.length>0){
+      note.code=candidateCode;
+      note.packages=(candidate.packages||note.packages);
+      note.limits=note.limits+" 已补充该知识点的专属基础代码；完整理论证明尚待深化。";
+    }
+  }
+
 
 nodeMap=new Map(nodes.map(n=>[n.id,n]));chapMap=new Map(chapters.map(c=>[c.id,c]));deptMap=new Map(depts.map(d=>[d.id,d]));lessonMap=new Map(lessons.map(l=>[l.node_id,l]));
 if(lessonMap.size+noteMap.size!==nodes.length||nodes.some(n=>!lessonMap.has(n.id)&&!noteMap.has(n.id)))
