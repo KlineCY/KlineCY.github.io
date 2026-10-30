@@ -1,0 +1,718 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "features-n01-01",
+      "node_id": "features-n01-01",
+      "title": "数据Schema",
+      "definition": "Schema规定列名、类型、单位、主键、可空约束及时间字段，建立数据训练与服务的一致契约。",
+      "assumptions": "必须对数据的训练范围、可用时间、截面与时序轴以及异常边界作明确约定。",
+      "properties": [
+        "该变换或检验应只从允许的历史数据估计参数，并与其他预处理共同放入训练流水线。",
+        "应用前需要测量样本外稳定性以及特征与目标之间可能存在的泄漏或伪相关。"
+      ],
+      "formulas": [
+        {
+          "label": "基本数学定义",
+          "tex": "\\mathrm{Valid}(D)=\\bigwedge_{j=1}^p(\\mathrm{dtype}_j\\in S_j\\land \\mathrm{range}_j\\subseteq R_j)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据特征定义确定可使用的样本集合、统计量与计算维度。",
+          "tex": "\\mathrm{Valid}(D)=\\bigwedge_{j=1}^p(\\mathrm{dtype}_j\\in S_j\\land \\mathrm{range}_j\\subseteq R_j)"
+        },
+        {
+          "explanation": "将训练数据估计出的规则应用至目标记录，保持预测时点的信息约束。",
+          "tex": "\\mathrm{Valid}(D)=\\bigwedge_{j=1}^p(\\mathrm{dtype}_j\\in S_j\\land \\mathrm{range}_j\\subseteq R_j)"
+        }
+      ],
+      "code": "import pandas as pd\ndf=pd.DataFrame({'asset':['A'],'close':[101.]})\nassert df['close'].gt(0).all();assert df['asset'].notna().all()",
+      "packages": "Python及相应科学计算库（见代码导入）",
+      "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n02-01",
+      "node_id": "features-n02-01",
+      "title": "缺失值机制MCAR/MAR/MNAR",
+      "definition": "MCAR与缺失无关；MAR在观测变量条件下可忽略未观测值；MNAR还依赖未观测数据。",
+      "assumptions": "必须对数据的训练范围、可用时间、截面与时序轴以及异常边界作明确约定。",
+      "properties": [
+        "该变换或检验应只从允许的历史数据估计参数，并与其他预处理共同放入训练流水线。",
+        "应用前需要测量样本外稳定性以及特征与目标之间可能存在的泄漏或伪相关。"
+      ],
+      "formulas": [
+        {
+          "label": "基本数学定义",
+          "tex": "P(M\\mid X_{\\rm obs},X_{\\rm mis})=\\begin{cases}P(M)&\\text{MCAR}\\\\P(M\\mid X_{\\rm obs})&\\text{MAR}\\end{cases}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据特征定义确定可使用的样本集合、统计量与计算维度。",
+          "tex": "P(M\\mid X_{\\rm obs},X_{\\rm mis})=\\begin{cases}P(M)&\\text{MCAR}\\\\P(M\\mid X_{\\rm obs})&\\text{MAR}\\end{cases}"
+        },
+        {
+          "explanation": "将训练数据估计出的规则应用至目标记录，保持预测时点的信息约束。",
+          "tex": "P(M\\mid X_{\\rm obs},X_{\\rm mis})=\\begin{cases}P(M)&\\text{MCAR}\\\\P(M\\mid X_{\\rm obs})&\\text{MAR}\\end{cases}"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([1.,np.nan,3.]);print('missing ratio:',np.isnan(x).mean())",
+      "packages": "Python及相应科学计算库（见代码导入）",
+      "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n03-01",
+      "node_id": "features-n03-01",
+      "title": "异常值与截尾",
+      "definition": "截尾（Winsorization）将过大或过小观测限制到分位阈值以内，减弱极值影响但保留样本数。",
+      "assumptions": "必须对数据的训练范围、可用时间、截面与时序轴以及异常边界作明确约定。",
+      "properties": [
+        "该变换或检验应只从允许的历史数据估计参数，并与其他预处理共同放入训练流水线。",
+        "应用前需要测量样本外稳定性以及特征与目标之间可能存在的泄漏或伪相关。"
+      ],
+      "formulas": [
+        {
+          "label": "基本数学定义",
+          "tex": "\\tilde x_i=\\min(q_{1-\\alpha},\\max(q_\\alpha,x_i))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据特征定义确定可使用的样本集合、统计量与计算维度。",
+          "tex": "\\tilde x_i=\\min(q_{1-\\alpha},\\max(q_\\alpha,x_i))"
+        },
+        {
+          "explanation": "将训练数据估计出的规则应用至目标记录，保持预测时点的信息约束。",
+          "tex": "\\tilde x_i=\\min(q_{1-\\alpha},\\max(q_\\alpha,x_i))"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([1.,2.,3.,4.,100.]);print(np.clip(x,*np.quantile(x,[.1,.9])))",
+      "packages": "Python及相应科学计算库（见代码导入）",
+      "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n04-01",
+      "node_id": "features-n04-01",
+      "title": "重复记录",
+      "definition": "同一实体、时间和数据版本出现多条记录时应识别其原因，明确是重复还是多条合法事件。",
+      "assumptions": "必须对数据的训练范围、可用时间、截面与时序轴以及异常边界作明确约定。",
+      "properties": [
+        "该变换或检验应只从允许的历史数据估计参数，并与其他预处理共同放入训练流水线。",
+        "应用前需要测量样本外稳定性以及特征与目标之间可能存在的泄漏或伪相关。"
+      ],
+      "formulas": [
+        {
+          "label": "基本数学定义",
+          "tex": "K_i=(\\mathrm{asset}_i,\\mathrm{time}_i,\\mathrm{version}_i)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据特征定义确定可使用的样本集合、统计量与计算维度。",
+          "tex": "K_i=(\\mathrm{asset}_i,\\mathrm{time}_i,\\mathrm{version}_i)"
+        },
+        {
+          "explanation": "将训练数据估计出的规则应用至目标记录，保持预测时点的信息约束。",
+          "tex": "K_i=(\\mathrm{asset}_i,\\mathrm{time}_i,\\mathrm{version}_i)"
+        }
+      ],
+      "code": "import pandas as pd\ndf=pd.DataFrame({'asset':['A','A'],'date':[1,1]})\nprint(df.duplicated(['asset','date']).tolist())",
+      "packages": "Python及相应科学计算库（见代码导入）",
+      "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n05-01",
+      "node_id": "features-n05-01",
+      "title": "时间戳对齐",
+      "definition": "跨资产、跨频率特征对齐必须遵守信息可得时刻，不应以最近数值填入过去时间。",
+      "assumptions": "必须对数据的训练范围、可用时间、截面与时序轴以及异常边界作明确约定。",
+      "properties": [
+        "该变换或检验应只从允许的历史数据估计参数，并与其他预处理共同放入训练流水线。",
+        "应用前需要测量样本外稳定性以及特征与目标之间可能存在的泄漏或伪相关。"
+      ],
+      "formulas": [
+        {
+          "label": "基本数学定义",
+          "tex": "X_t=\\mathrm{last}\\{z_i:t_i^{\\rm avail}\\le t\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据特征定义确定可使用的样本集合、统计量与计算维度。",
+          "tex": "X_t=\\mathrm{last}\\{z_i:t_i^{\\rm avail}\\le t\\}"
+        },
+        {
+          "explanation": "将训练数据估计出的规则应用至目标记录，保持预测时点的信息约束。",
+          "tex": "X_t=\\mathrm{last}\\{z_i:t_i^{\\rm avail}\\le t\\}"
+        }
+      ],
+      "code": "import pandas as pd\nleft=pd.DataFrame({'t':[2,4,6]});right=pd.DataFrame({'t':[1,3,5],'x':[10,20,30]})\nprint(pd.merge_asof(left,right,on='t',direction='backward'))",
+      "packages": "Python及相应科学计算库（见代码导入）",
+      "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n06-01",
+      "node_id": "features-n06-01",
+      "title": "数据版本",
+      "definition": "数据版本记录供应商批次、原始文件哈希和修订时间，使模型历史结果可重新构建。",
+      "assumptions": "必须对数据的训练范围、可用时间、截面与时序轴以及异常边界作明确约定。",
+      "properties": [
+        "该变换或检验应只从允许的历史数据估计参数，并与其他预处理共同放入训练流水线。",
+        "应用前需要测量样本外稳定性以及特征与目标之间可能存在的泄漏或伪相关。"
+      ],
+      "formulas": [
+        {
+          "label": "基本数学定义",
+          "tex": "D^{(v)}=\\{(x_i,t_i^{\\rm observed},t_i^{\\rm recorded},v)\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据特征定义确定可使用的样本集合、统计量与计算维度。",
+          "tex": "D^{(v)}=\\{(x_i,t_i^{\\rm observed},t_i^{\\rm recorded},v)\\}"
+        },
+        {
+          "explanation": "将训练数据估计出的规则应用至目标记录，保持预测时点的信息约束。",
+          "tex": "D^{(v)}=\\{(x_i,t_i^{\\rm observed},t_i^{\\rm recorded},v)\\}"
+        }
+      ],
+      "code": "import hashlib\npayload=b'ETF,2025-01-01,100.0';print(hashlib.sha256(payload).hexdigest()[:12])",
+      "packages": "Python及相应科学计算库（见代码导入）",
+      "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n02-02",
+      "node_id": "features-n02-02",
+      "title": "MinMax缩放",
+      "definition": "将数值映射到固定区间，常使用训练数据最小值与最大值；测试值可超出区间。",
+      "assumptions": "必须对数据的训练范围、可用时间、截面与时序轴以及异常边界作明确约定。",
+      "properties": [
+        "该变换或检验应只从允许的历史数据估计参数，并与其他预处理共同放入训练流水线。",
+        "应用前需要测量样本外稳定性以及特征与目标之间可能存在的泄漏或伪相关。"
+      ],
+      "formulas": [
+        {
+          "label": "基本数学定义",
+          "tex": "z_i=(x_i-\\min_{\\rm tr}X)/(\\max_{\\rm tr}X-\\min_{\\rm tr}X)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据特征定义确定可使用的样本集合、统计量与计算维度。",
+          "tex": "z_i=(x_i-\\min_{\\rm tr}X)/(\\max_{\\rm tr}X-\\min_{\\rm tr}X)"
+        },
+        {
+          "explanation": "将训练数据估计出的规则应用至目标记录，保持预测时点的信息约束。",
+          "tex": "z_i=(x_i-\\min_{\\rm tr}X)/(\\max_{\\rm tr}X-\\min_{\\rm tr}X)"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([2.,4.,6.]);print((x-x.min())/(x.max()-x.min()))",
+      "packages": "Python及相应科学计算库（见代码导入）",
+      "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n05-02",
+      "node_id": "features-n05-02",
+      "title": "目标编码",
+      "definition": "将类别替换为训练数据中对应目标均值的平滑估计，通常需折外编码以避免泄漏。",
+      "assumptions": "必须对数据的训练范围、可用时间、截面与时序轴以及异常边界作明确约定。",
+      "properties": [
+        "该变换或检验应只从允许的历史数据估计参数，并与其他预处理共同放入训练流水线。",
+        "应用前需要测量样本外稳定性以及特征与目标之间可能存在的泄漏或伪相关。"
+      ],
+      "formulas": [
+        {
+          "label": "基本数学定义",
+          "tex": "\\mathrm{TE}(c)=\\frac{n_c\\bar y_c+\\alpha\\bar y}{n_c+\\alpha}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据特征定义确定可使用的样本集合、统计量与计算维度。",
+          "tex": "\\mathrm{TE}(c)=\\frac{n_c\\bar y_c+\\alpha\\bar y}{n_c+\\alpha}"
+        },
+        {
+          "explanation": "将训练数据估计出的规则应用至目标记录，保持预测时点的信息约束。",
+          "tex": "\\mathrm{TE}(c)=\\frac{n_c\\bar y_c+\\alpha\\bar y}{n_c+\\alpha}"
+        }
+      ],
+      "code": "import numpy as np\ny=np.array([1.,0.,1.,1.]);cat=np.array(['A','B','A','B']);\nprint({c:y[cat==c].mean() for c in set(cat)})",
+      "packages": "Python及相应科学计算库（见代码导入）",
+      "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n01-03",
+      "node_id": "features-n01-03",
+      "title": "对数与Box-Cox",
+      "definition": "对数变换压缩右偏正值；Box-Cox在正值上用参数λ平滑变换，使分布更接近对称。",
+      "assumptions": "必须对数据的训练范围、可用时间、截面与时序轴以及异常边界作明确约定。",
+      "properties": [
+        "该变换或检验应只从允许的历史数据估计参数，并与其他预处理共同放入训练流水线。",
+        "应用前需要测量样本外稳定性以及特征与目标之间可能存在的泄漏或伪相关。"
+      ],
+      "formulas": [
+        {
+          "label": "基本数学定义",
+          "tex": "T_\\lambda(x)=\\begin{cases}(x^\\lambda-1)/\\lambda&\\lambda\\ne0\\\\\\log x&\\lambda=0\\end{cases}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据特征定义确定可使用的样本集合、统计量与计算维度。",
+          "tex": "T_\\lambda(x)=\\begin{cases}(x^\\lambda-1)/\\lambda&\\lambda\\ne0\\\\\\log x&\\lambda=0\\end{cases}"
+        },
+        {
+          "explanation": "将训练数据估计出的规则应用至目标记录，保持预测时点的信息约束。",
+          "tex": "T_\\lambda(x)=\\begin{cases}(x^\\lambda-1)/\\lambda&\\lambda\\ne0\\\\\\log x&\\lambda=0\\end{cases}"
+        }
+      ],
+      "code": "import numpy as np\nfrom scipy.stats import boxcox\nx=np.array([1.,2.,5.,10.,30.]);print(boxcox(x)[1])",
+      "packages": "Python及相应科学计算库（见代码导入）",
+      "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n02-03",
+      "node_id": "features-n02-03",
+      "title": "分箱与离散化",
+      "definition": "把连续变量转换为固定或分位区间，便于表达阈值效应和非线性，但丢失精确位置信息。",
+      "assumptions": "必须对数据的训练范围、可用时间、截面与时序轴以及异常边界作明确约定。",
+      "properties": [
+        "该变换或检验应只从允许的历史数据估计参数，并与其他预处理共同放入训练流水线。",
+        "应用前需要测量样本外稳定性以及特征与目标之间可能存在的泄漏或伪相关。"
+      ],
+      "formulas": [
+        {
+          "label": "基本数学定义",
+          "tex": "b(x)=\\sum_{k=1}^{K-1}\\mathbf1[x>c_k]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据特征定义确定可使用的样本集合、统计量与计算维度。",
+          "tex": "b(x)=\\sum_{k=1}^{K-1}\\mathbf1[x>c_k]"
+        },
+        {
+          "explanation": "将训练数据估计出的规则应用至目标记录，保持预测时点的信息约束。",
+          "tex": "b(x)=\\sum_{k=1}^{K-1}\\mathbf1[x>c_k]"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([.1,.4,.8]);print(np.digitize(x,[.3,.6]))",
+      "packages": "Python及相应科学计算库（见代码导入）",
+      "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n03-03",
+      "node_id": "features-n03-03",
+      "title": "交互特征",
+      "definition": "用多个原始特征的乘积或逻辑组合表达非加性效应，常用于宏观状态与因子间相互作用。",
+      "assumptions": "必须对数据的训练范围、可用时间、截面与时序轴以及异常边界作明确约定。",
+      "properties": [
+        "该变换或检验应只从允许的历史数据估计参数，并与其他预处理共同放入训练流水线。",
+        "应用前需要测量样本外稳定性以及特征与目标之间可能存在的泄漏或伪相关。"
+      ],
+      "formulas": [
+        {
+          "label": "基本数学定义",
+          "tex": "f(x_1,x_2)=\\beta_0+\\beta_1x_1+\\beta_2x_2+\\beta_{12}x_1x_2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据特征定义确定可使用的样本集合、统计量与计算维度。",
+          "tex": "f(x_1,x_2)=\\beta_0+\\beta_1x_1+\\beta_2x_2+\\beta_{12}x_1x_2"
+        },
+        {
+          "explanation": "将训练数据估计出的规则应用至目标记录，保持预测时点的信息约束。",
+          "tex": "f(x_1,x_2)=\\beta_0+\\beta_1x_1+\\beta_2x_2+\\beta_{12}x_1x_2"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([[1.,2.],[3.,4.]]);print((x[:,0]*x[:,1]).reshape(-1,1))",
+      "packages": "Python及相应科学计算库（见代码导入）",
+      "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n04-03",
+      "node_id": "features-n04-03",
+      "title": "多项式特征",
+      "definition": "在原特征基础上展开指定阶数的幂与交叉项，使线性模型能拟合多项式形式的非线性关系。",
+      "assumptions": "必须对数据的训练范围、可用时间、截面与时序轴以及异常边界作明确约定。",
+      "properties": [
+        "该变换或检验应只从允许的历史数据估计参数，并与其他预处理共同放入训练流水线。",
+        "应用前需要测量样本外稳定性以及特征与目标之间可能存在的泄漏或伪相关。"
+      ],
+      "formulas": [
+        {
+          "label": "基本数学定义",
+          "tex": "\\phi_2(x_1,x_2)=(1,x_1,x_2,x_1^2,x_1x_2,x_2^2)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据特征定义确定可使用的样本集合、统计量与计算维度。",
+          "tex": "\\phi_2(x_1,x_2)=(1,x_1,x_2,x_1^2,x_1x_2,x_2^2)"
+        },
+        {
+          "explanation": "将训练数据估计出的规则应用至目标记录，保持预测时点的信息约束。",
+          "tex": "\\phi_2(x_1,x_2)=(1,x_1,x_2,x_1^2,x_1x_2,x_2^2)"
+        }
+      ],
+      "code": "from sklearn.preprocessing import PolynomialFeatures\nprint(PolynomialFeatures(2).fit_transform([[2.,3.]]))",
+      "packages": "Python及相应科学计算库（见代码导入）",
+      "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n05-03",
+      "node_id": "features-n05-03",
+      "title": "单调变换",
+      "definition": "单调变换保留样本排序但改变绝对距离，可使长尾特征更适合优化，须检查其经济含义。",
+      "assumptions": "必须对数据的训练范围、可用时间、截面与时序轴以及异常边界作明确约定。",
+      "properties": [
+        "该变换或检验应只从允许的历史数据估计参数，并与其他预处理共同放入训练流水线。",
+        "应用前需要测量样本外稳定性以及特征与目标之间可能存在的泄漏或伪相关。"
+      ],
+      "formulas": [
+        {
+          "label": "基本数学定义",
+          "tex": "x_i<x_j\\Rightarrow g(x_i)\\le g(x_j)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据特征定义确定可使用的样本集合、统计量与计算维度。",
+          "tex": "x_i<x_j\\Rightarrow g(x_i)\\le g(x_j)"
+        },
+        {
+          "explanation": "将训练数据估计出的规则应用至目标记录，保持预测时点的信息约束。",
+          "tex": "x_i<x_j\\Rightarrow g(x_i)\\le g(x_j)"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([1.,2.,10.]);print(np.log1p(x))",
+      "packages": "Python及相应科学计算库（见代码导入）",
+      "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n06-03",
+      "node_id": "features-n06-03",
+      "title": "周期编码",
+      "definition": "将日内时刻、星期或月份等循环变量映射为正弦和余弦，使周期首尾接近。",
+      "assumptions": "必须对数据的训练范围、可用时间、截面与时序轴以及异常边界作明确约定。",
+      "properties": [
+        "该变换或检验应只从允许的历史数据估计参数，并与其他预处理共同放入训练流水线。",
+        "应用前需要测量样本外稳定性以及特征与目标之间可能存在的泄漏或伪相关。"
+      ],
+      "formulas": [
+        {
+          "label": "基本数学定义",
+          "tex": "\\phi(t)=(\\sin(2\\pi t/P),\\cos(2\\pi t/P))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据特征定义确定可使用的样本集合、统计量与计算维度。",
+          "tex": "\\phi(t)=(\\sin(2\\pi t/P),\\cos(2\\pi t/P))"
+        },
+        {
+          "explanation": "将训练数据估计出的规则应用至目标记录，保持预测时点的信息约束。",
+          "tex": "\\phi(t)=(\\sin(2\\pi t/P),\\cos(2\\pi t/P))"
+        }
+      ],
+      "code": "import numpy as np\nt=np.array([0,6,12,18]);print(np.column_stack([np.sin(2*np.pi*t/24),np.cos(2*np.pi*t/24)]))",
+      "packages": "Python及相应科学计算库（见代码导入）",
+      "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n01-04",
+      "node_id": "features-n01-04",
+      "title": "过滤式特征选择",
+      "definition": "在训练数据中先按相关、方差或互信息等单变量统计指标选取候选特征，计算成本低但易忽略交互。",
+      "assumptions": "必须对数据的训练范围、可用时间、截面与时序轴以及异常边界作明确约定。",
+      "properties": [
+        "该变换或检验应只从允许的历史数据估计参数，并与其他预处理共同放入训练流水线。",
+        "应用前需要测量样本外稳定性以及特征与目标之间可能存在的泄漏或伪相关。"
+      ],
+      "formulas": [
+        {
+          "label": "基本数学定义",
+          "tex": "S_k=\\operatorname{TopK}_{j} \\operatorname{Score}(X_j,Y)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据特征定义确定可使用的样本集合、统计量与计算维度。",
+          "tex": "S_k=\\operatorname{TopK}_{j} \\operatorname{Score}(X_j,Y)"
+        },
+        {
+          "explanation": "将训练数据估计出的规则应用至目标记录，保持预测时点的信息约束。",
+          "tex": "S_k=\\operatorname{TopK}_{j} \\operatorname{Score}(X_j,Y)"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.feature_selection import SelectKBest,f_regression\nX=np.random.default_rng(0).normal(size=(60,5));y=X[:,0]+np.random.default_rng(1).normal(size=60)\nprint(SelectKBest(f_regression,k=2).fit(X,y).get_support())",
+      "packages": "Python及相应科学计算库（见代码导入）",
+      "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n02-04",
+      "node_id": "features-n02-04",
+      "title": "递归特征消除RFE",
+      "definition": "RFE重复拟合模型并删除权重最弱的特征，直到达到预设特征数。",
+      "assumptions": "必须对数据的训练范围、可用时间、截面与时序轴以及异常边界作明确约定。",
+      "properties": [
+        "该变换或检验应只从允许的历史数据估计参数，并与其他预处理共同放入训练流水线。",
+        "应用前需要测量样本外稳定性以及特征与目标之间可能存在的泄漏或伪相关。"
+      ],
+      "formulas": [
+        {
+          "label": "基本数学定义",
+          "tex": "S_{k+1}=S_k\\setminus\\{\\arg\\min_{j\\in S_k}I_j(\\hat f_k)\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据特征定义确定可使用的样本集合、统计量与计算维度。",
+          "tex": "S_{k+1}=S_k\\setminus\\{\\arg\\min_{j\\in S_k}I_j(\\hat f_k)\\}"
+        },
+        {
+          "explanation": "将训练数据估计出的规则应用至目标记录，保持预测时点的信息约束。",
+          "tex": "S_{k+1}=S_k\\setminus\\{\\arg\\min_{j\\in S_k}I_j(\\hat f_k)\\}"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.feature_selection import RFE\nfrom sklearn.linear_model import Ridge\nX=np.random.default_rng(0).normal(size=(60,5));y=X[:,0]-X[:,3]\nprint(RFE(Ridge(),n_features_to_select=2).fit(X,y).support_)",
+      "packages": "Python及相应科学计算库（见代码导入）",
+      "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n05-04",
+      "node_id": "features-n05-04",
+      "title": "稀疏特征筛选",
+      "definition": "利用L1正则、稳定性选择等方法让无用系数精确为零，从高维候选因子中筛选少量信号。",
+      "assumptions": "必须对数据的训练范围、可用时间、截面与时序轴以及异常边界作明确约定。",
+      "properties": [
+        "该变换或检验应只从允许的历史数据估计参数，并与其他预处理共同放入训练流水线。",
+        "应用前需要测量样本外稳定性以及特征与目标之间可能存在的泄漏或伪相关。"
+      ],
+      "formulas": [
+        {
+          "label": "基本数学定义",
+          "tex": "\\min_\\beta \\frac1{2n}\\|y-X\\beta\\|^2+\\lambda\\|\\beta\\|_1"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据特征定义确定可使用的样本集合、统计量与计算维度。",
+          "tex": "\\min_\\beta \\frac1{2n}\\|y-X\\beta\\|^2+\\lambda\\|\\beta\\|_1"
+        },
+        {
+          "explanation": "将训练数据估计出的规则应用至目标记录，保持预测时点的信息约束。",
+          "tex": "\\min_\\beta \\frac1{2n}\\|y-X\\beta\\|^2+\\lambda\\|\\beta\\|_1"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.linear_model import Lasso\nX=np.random.default_rng(0).normal(size=(100,8));y=2*X[:,0]\nprint(Lasso(alpha=.1).fit(X,y).coef_)",
+      "packages": "Python及相应科学计算库（见代码导入）",
+      "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n06-04",
+      "node_id": "features-n06-04",
+      "title": "特征重要性",
+      "definition": "特征重要性度量模型预测对某个变量的依赖，可来自置换、梯度或Shapley分解，不等于因果效应。",
+      "assumptions": "必须对数据的训练范围、可用时间、截面与时序轴以及异常边界作明确约定。",
+      "properties": [
+        "该变换或检验应只从允许的历史数据估计参数，并与其他预处理共同放入训练流水线。",
+        "应用前需要测量样本外稳定性以及特征与目标之间可能存在的泄漏或伪相关。"
+      ],
+      "formulas": [
+        {
+          "label": "基本数学定义",
+          "tex": "I_j=R_{\\rm permute(j)}-R_{\\rm original}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据特征定义确定可使用的样本集合、统计量与计算维度。",
+          "tex": "I_j=R_{\\rm permute(j)}-R_{\\rm original}"
+        },
+        {
+          "explanation": "将训练数据估计出的规则应用至目标记录，保持预测时点的信息约束。",
+          "tex": "I_j=R_{\\rm permute(j)}-R_{\\rm original}"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.ensemble import RandomForestRegressor\nX=np.random.default_rng(0).normal(size=(70,3));y=X[:,0]**2\nprint(RandomForestRegressor(n_estimators=20,random_state=0).fit(X,y).feature_importances_)",
+      "packages": "Python及相应科学计算库（见代码导入）",
+      "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n01-05",
+      "node_id": "features-n01-05",
+      "title": "历史复权",
+      "definition": "将公司行动导致的名义价格跳变调整为收益可比的价格序列；调整因子和真实成交价格不可混淆。",
+      "assumptions": "必须对数据的训练范围、可用时间、截面与时序轴以及异常边界作明确约定。",
+      "properties": [
+        "该变换或检验应只从允许的历史数据估计参数，并与其他预处理共同放入训练流水线。",
+        "应用前需要测量样本外稳定性以及特征与目标之间可能存在的泄漏或伪相关。"
+      ],
+      "formulas": [
+        {
+          "label": "基本数学定义",
+          "tex": "P_t^{\\rm adj}=P_tA_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据特征定义确定可使用的样本集合、统计量与计算维度。",
+          "tex": "P_t^{\\rm adj}=P_tA_t"
+        },
+        {
+          "explanation": "将训练数据估计出的规则应用至目标记录，保持预测时点的信息约束。",
+          "tex": "P_t^{\\rm adj}=P_tA_t"
+        }
+      ],
+      "code": "import numpy as np\nraw=np.array([100.,50.,51.]);A=np.array([.5,1.,1.]);print(raw*A)",
+      "packages": "Python及相应科学计算库（见代码导入）",
+      "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n02-05",
+      "node_id": "features-n02-05",
+      "title": "PIT财报时间",
+      "definition": "财务报表特征应按公告实际发布和供应商可用时间生效，而非按对应财报期末日期回填。",
+      "assumptions": "必须对数据的训练范围、可用时间、截面与时序轴以及异常边界作明确约定。",
+      "properties": [
+        "该变换或检验应只从允许的历史数据估计参数，并与其他预处理共同放入训练流水线。",
+        "应用前需要测量样本外稳定性以及特征与目标之间可能存在的泄漏或伪相关。"
+      ],
+      "formulas": [
+        {
+          "label": "基本数学定义",
+          "tex": "t_i^{\\rm available}\\le t_{\\rm decision}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据特征定义确定可使用的样本集合、统计量与计算维度。",
+          "tex": "t_i^{\\rm available}\\le t_{\\rm decision}"
+        },
+        {
+          "explanation": "将训练数据估计出的规则应用至目标记录，保持预测时点的信息约束。",
+          "tex": "t_i^{\\rm available}\\le t_{\\rm decision}"
+        }
+      ],
+      "code": "from datetime import date\nrelease=date(2025,4,30);decision=date(2025,3,31)\nprint('available:',release<=decision)",
+      "packages": "Python及相应科学计算库（见代码导入）",
+      "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n03-05",
+      "node_id": "features-n03-05",
+      "title": "截面中性化",
+      "definition": "在每个交易日期对因子回归规模、行业等风险暴露并取残差，使训练截面因子与所控线性暴露正交。",
+      "assumptions": "必须对数据的训练范围、可用时间、截面与时序轴以及异常边界作明确约定。",
+      "properties": [
+        "该变换或检验应只从允许的历史数据估计参数，并与其他预处理共同放入训练流水线。",
+        "应用前需要测量样本外稳定性以及特征与目标之间可能存在的泄漏或伪相关。"
+      ],
+      "formulas": [
+        {
+          "label": "基本数学定义",
+          "tex": "f_\\perp=(I-X(X^\\top X)^{+}X^\\top)f"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据特征定义确定可使用的样本集合、统计量与计算维度。",
+          "tex": "f_\\perp=(I-X(X^\\top X)^{+}X^\\top)f"
+        },
+        {
+          "explanation": "将训练数据估计出的规则应用至目标记录，保持预测时点的信息约束。",
+          "tex": "f_\\perp=(I-X(X^\\top X)^{+}X^\\top)f"
+        }
+      ],
+      "code": "import numpy as np\nX=np.column_stack([np.ones(5),np.arange(5)]);f=np.array([2.,3.,5.,4.,8.]);print(f-X@np.linalg.lstsq(X,f,rcond=None)[0])",
+      "packages": "Python及相应科学计算库（见代码导入）",
+      "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n04-05",
+      "node_id": "features-n04-05",
+      "title": "行业与市值标准化",
+      "definition": "先按行业分组进行截面去均值或按市值特征回归取残差，减少风格暴露对目标因子的干扰。",
+      "assumptions": "必须对数据的训练范围、可用时间、截面与时序轴以及异常边界作明确约定。",
+      "properties": [
+        "该变换或检验应只从允许的历史数据估计参数，并与其他预处理共同放入训练流水线。",
+        "应用前需要测量样本外稳定性以及特征与目标之间可能存在的泄漏或伪相关。"
+      ],
+      "formulas": [
+        {
+          "label": "基本数学定义",
+          "tex": "z_{i,t}=(f_{i,t}-\\bar f_{g(i),t})/s_{g(i),t}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据特征定义确定可使用的样本集合、统计量与计算维度。",
+          "tex": "z_{i,t}=(f_{i,t}-\\bar f_{g(i),t})/s_{g(i),t}"
+        },
+        {
+          "explanation": "将训练数据估计出的规则应用至目标记录，保持预测时点的信息约束。",
+          "tex": "z_{i,t}=(f_{i,t}-\\bar f_{g(i),t})/s_{g(i),t}"
+        }
+      ],
+      "code": "import numpy as np\nf=np.array([1.,2.,3.,4.]);industry=np.array([0,0,1,1]);\nprint(np.array([v-f[industry==g].mean() for v,g in zip(f,industry)]))",
+      "packages": "Python及相应科学计算库（见代码导入）",
+      "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n06-05",
+      "node_id": "features-n06-05",
+      "title": "未来函数检测",
+      "definition": "未来函数是特征在历史决策时刻依赖不可得观察值的问题，需通过时点断言、窗口检查和数据版本审计检测。",
+      "assumptions": "必须对数据的训练范围、可用时间、截面与时序轴以及异常边界作明确约定。",
+      "properties": [
+        "该变换或检验应只从允许的历史数据估计参数，并与其他预处理共同放入训练流水线。",
+        "应用前需要测量样本外稳定性以及特征与目标之间可能存在的泄漏或伪相关。"
+      ],
+      "formulas": [
+        {
+          "label": "基本数学定义",
+          "tex": "X_t\\text{ 可测于 }\\mathcal F_t,\\quad\\max_i t_i^{\\rm available}\\le t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据特征定义确定可使用的样本集合、统计量与计算维度。",
+          "tex": "X_t\\text{ 可测于 }\\mathcal F_t,\\quad\\max_i t_i^{\\rm available}\\le t"
+        },
+        {
+          "explanation": "将训练数据估计出的规则应用至目标记录，保持预测时点的信息约束。",
+          "tex": "X_t\\text{ 可测于 }\\mathcal F_t,\\quad\\max_i t_i^{\\rm available}\\le t"
+        }
+      ],
+      "code": "import pandas as pd\ndf=pd.DataFrame({'decision':[3,5],'available':[2,6]});print(df.assign(leak=df.available>df.decision))",
+      "packages": "Python及相应科学计算库（见代码导入）",
+      "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
+      "coverage": "complete"
+    }
+  ]
+}
