@@ -1,0 +1,613 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "llm-n02-01",
+      "node_id": "llm-n02-01",
+      "title": "QKV投影",
+      "definition": "由输入Token表示通过三组线性矩阵分别生成查询、键和值向量，作为Attention的基本操作。",
+      "assumptions": "Token序列、Mask、模型输入输出、上下文限制与语料授权须明确；金融知识问答必须从可核验文件获取事实。",
+      "properties": [
+        "由输入Token表示通过三组线性矩阵分别生成查询、键和值向量，作为Attention的基本操作。",
+        "模型输出并不自动具备事实性、校准性或交易执行权限，须独立评测与权限控制。"
+      ],
+      "formulas": [
+        {
+          "label": "方法数学形式",
+          "tex": "Q=XW_Q,\\ K=XW_K,\\ V=XW_V"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从Transformer内部映射、序列条件概率或检索评分的数学定义构造任务目标。",
+          "tex": "Q=XW_Q,\\ K=XW_K,\\ V=XW_V"
+        },
+        {
+          "explanation": "据此计算训练损失、采样分布或候选评分，再用独立数据评估行为。",
+          "tex": "Q=XW_Q,\\ K=XW_K,\\ V=XW_V"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(2,5,16);q=torch.nn.Linear(16,16)(x)\nprint(q.shape)",
+      "packages": "torch",
+      "application": "用于金融文献RAG、财报摘要、机构报告检索及金融研究Agent。",
+      "limits": "代码是章节级数学操作展示，非完整大模型训练、在线检索服务或安全评估体系。所有外部引用需核查原文。",
+      "coverage": "complete"
+    },
+    {
+      "id": "llm-n03-01",
+      "node_id": "llm-n03-01",
+      "title": "多头注意力",
+      "definition": "多个注意力头在不同子空间并行提取Token依赖，再拼接并线性投影。",
+      "assumptions": "Token序列、Mask、模型输入输出、上下文限制与语料授权须明确；金融知识问答必须从可核验文件获取事实。",
+      "properties": [
+        "多个注意力头在不同子空间并行提取Token依赖，再拼接并线性投影。",
+        "模型输出并不自动具备事实性、校准性或交易执行权限，须独立评测与权限控制。"
+      ],
+      "formulas": [
+        {
+          "label": "方法数学形式",
+          "tex": "H=\\operatorname{Concat}(\\operatorname{Attn}_1,\\ldots,\\operatorname{Attn}_h)W_O"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从Transformer内部映射、序列条件概率或检索评分的数学定义构造任务目标。",
+          "tex": "H=\\operatorname{Concat}(\\operatorname{Attn}_1,\\ldots,\\operatorname{Attn}_h)W_O"
+        },
+        {
+          "explanation": "据此计算训练损失、采样分布或候选评分，再用独立数据评估行为。",
+          "tex": "H=\\operatorname{Concat}(\\operatorname{Attn}_1,\\ldots,\\operatorname{Attn}_h)W_O"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(2,5,16);q=torch.nn.Linear(16,16)(x)\nprint(q.shape)",
+      "packages": "torch",
+      "application": "用于金融文献RAG、财报摘要、机构报告检索及金融研究Agent。",
+      "limits": "代码是章节级数学操作展示，非完整大模型训练、在线检索服务或安全评估体系。所有外部引用需核查原文。",
+      "coverage": "complete"
+    },
+    {
+      "id": "llm-n06-01",
+      "node_id": "llm-n06-01",
+      "title": "Encoder与Decoder",
+      "definition": "Encoder双向编码已观察输入，Decoder通常使用因果掩码自回归生成输出。",
+      "assumptions": "Token序列、Mask、模型输入输出、上下文限制与语料授权须明确；金融知识问答必须从可核验文件获取事实。",
+      "properties": [
+        "Encoder双向编码已观察输入，Decoder通常使用因果掩码自回归生成输出。",
+        "模型输出并不自动具备事实性、校准性或交易执行权限，须独立评测与权限控制。"
+      ],
+      "formulas": [
+        {
+          "label": "方法数学形式",
+          "tex": "p(y|x)=\\prod_tp(y_t|y_{<t},\\operatorname{Enc}(x))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从Transformer内部映射、序列条件概率或检索评分的数学定义构造任务目标。",
+          "tex": "p(y|x)=\\prod_tp(y_t|y_{<t},\\operatorname{Enc}(x))"
+        },
+        {
+          "explanation": "据此计算训练损失、采样分布或候选评分，再用独立数据评估行为。",
+          "tex": "p(y|x)=\\prod_tp(y_t|y_{<t},\\operatorname{Enc}(x))"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(2,5,16);q=torch.nn.Linear(16,16)(x)\nprint(q.shape)",
+      "packages": "torch",
+      "application": "用于金融文献RAG、财报摘要、机构报告检索及金融研究Agent。",
+      "limits": "代码是章节级数学操作展示，非完整大模型训练、在线检索服务或安全评估体系。所有外部引用需核查原文。",
+      "coverage": "complete"
+    },
+    {
+      "id": "llm-n02-02",
+      "node_id": "llm-n02-02",
+      "title": "Masked Language Modeling",
+      "definition": "随机遮蔽部分输入Token，只对遮蔽位置训练上下文条件预测。",
+      "assumptions": "Token序列、Mask、模型输入输出、上下文限制与语料授权须明确；金融知识问答必须从可核验文件获取事实。",
+      "properties": [
+        "随机遮蔽部分输入Token，只对遮蔽位置训练上下文条件预测。",
+        "模型输出并不自动具备事实性、校准性或交易执行权限，须独立评测与权限控制。"
+      ],
+      "formulas": [
+        {
+          "label": "方法数学形式",
+          "tex": "L=-\\sum_{t\\in M}\\log p_\\theta(x_t|x_{\\setminus M})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从Transformer内部映射、序列条件概率或检索评分的数学定义构造任务目标。",
+          "tex": "L=-\\sum_{t\\in M}\\log p_\\theta(x_t|x_{\\setminus M})"
+        },
+        {
+          "explanation": "据此计算训练损失、采样分布或候选评分，再用独立数据评估行为。",
+          "tex": "L=-\\sum_{t\\in M}\\log p_\\theta(x_t|x_{\\setminus M})"
+        }
+      ],
+      "code": "import torch\nlogits=torch.randn(2,4,12);targets=torch.randint(0,12,(2,4))\nprint(torch.nn.functional.cross_entropy(logits.reshape(-1,12),targets.flatten()).item())",
+      "packages": "torch",
+      "application": "用于金融文献RAG、财报摘要、机构报告检索及金融研究Agent。",
+      "limits": "代码是章节级数学操作展示，非完整大模型训练、在线检索服务或安全评估体系。所有外部引用需核查原文。",
+      "coverage": "complete"
+    },
+    {
+      "id": "llm-n03-02",
+      "node_id": "llm-n03-02",
+      "title": "Tokenization BPE",
+      "definition": "字节对编码根据训练语料频率反复合并相邻Token构建高效子词词表。",
+      "assumptions": "Token序列、Mask、模型输入输出、上下文限制与语料授权须明确；金融知识问答必须从可核验文件获取事实。",
+      "properties": [
+        "字节对编码根据训练语料频率反复合并相邻Token构建高效子词词表。",
+        "模型输出并不自动具备事实性、校准性或交易执行权限，须独立评测与权限控制。"
+      ],
+      "formulas": [
+        {
+          "label": "方法数学形式",
+          "tex": "(u,v)^*=\\arg\\max_{(u,v)}\\operatorname{count}(u,v)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从Transformer内部映射、序列条件概率或检索评分的数学定义构造任务目标。",
+          "tex": "(u,v)^*=\\arg\\max_{(u,v)}\\operatorname{count}(u,v)"
+        },
+        {
+          "explanation": "据此计算训练损失、采样分布或候选评分，再用独立数据评估行为。",
+          "tex": "(u,v)^*=\\arg\\max_{(u,v)}\\operatorname{count}(u,v)"
+        }
+      ],
+      "code": "import torch\nlogits=torch.randn(2,4,12);targets=torch.randint(0,12,(2,4))\nprint(torch.nn.functional.cross_entropy(logits.reshape(-1,12),targets.flatten()).item())",
+      "packages": "torch",
+      "application": "用于金融文献RAG、财报摘要、机构报告检索及金融研究Agent。",
+      "limits": "代码是章节级数学操作展示，非完整大模型训练、在线检索服务或安全评估体系。所有外部引用需核查原文。",
+      "coverage": "complete"
+    },
+    {
+      "id": "llm-n05-02",
+      "node_id": "llm-n05-02",
+      "title": "预训练语料处理",
+      "definition": "大型语料须进行去重、清洗、许可审查、混合采样和训练/评测污染排查。",
+      "assumptions": "Token序列、Mask、模型输入输出、上下文限制与语料授权须明确；金融知识问答必须从可核验文件获取事实。",
+      "properties": [
+        "大型语料须进行去重、清洗、许可审查、混合采样和训练/评测污染排查。",
+        "模型输出并不自动具备事实性、校准性或交易执行权限，须独立评测与权限控制。"
+      ],
+      "formulas": [
+        {
+          "label": "方法数学形式",
+          "tex": "D_{\\rm train}=\\operatorname{Filter}(\\operatorname{Dedup}(D_{\\rm raw}))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从Transformer内部映射、序列条件概率或检索评分的数学定义构造任务目标。",
+          "tex": "D_{\\rm train}=\\operatorname{Filter}(\\operatorname{Dedup}(D_{\\rm raw}))"
+        },
+        {
+          "explanation": "据此计算训练损失、采样分布或候选评分，再用独立数据评估行为。",
+          "tex": "D_{\\rm train}=\\operatorname{Filter}(\\operatorname{Dedup}(D_{\\rm raw}))"
+        }
+      ],
+      "code": "import torch\nlogits=torch.randn(2,4,12);targets=torch.randint(0,12,(2,4))\nprint(torch.nn.functional.cross_entropy(logits.reshape(-1,12),targets.flatten()).item())",
+      "packages": "torch",
+      "application": "用于金融文献RAG、财报摘要、机构报告检索及金融研究Agent。",
+      "limits": "代码是章节级数学操作展示，非完整大模型训练、在线检索服务或安全评估体系。所有外部引用需核查原文。",
+      "coverage": "complete"
+    },
+    {
+      "id": "llm-n06-02",
+      "node_id": "llm-n06-02",
+      "title": "上下文窗口",
+      "definition": "上下文窗口限制模型在一次推理或训练中直接处理的Token数，并影响注意力计算成本。",
+      "assumptions": "Token序列、Mask、模型输入输出、上下文限制与语料授权须明确；金融知识问答必须从可核验文件获取事实。",
+      "properties": [
+        "上下文窗口限制模型在一次推理或训练中直接处理的Token数，并影响注意力计算成本。",
+        "模型输出并不自动具备事实性、校准性或交易执行权限，须独立评测与权限控制。"
+      ],
+      "formulas": [
+        {
+          "label": "方法数学形式",
+          "tex": "T\\le T_{\\max}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从Transformer内部映射、序列条件概率或检索评分的数学定义构造任务目标。",
+          "tex": "T\\le T_{\\max}"
+        },
+        {
+          "explanation": "据此计算训练损失、采样分布或候选评分，再用独立数据评估行为。",
+          "tex": "T\\le T_{\\max}"
+        }
+      ],
+      "code": "import torch\nlogits=torch.randn(2,4,12);targets=torch.randint(0,12,(2,4))\nprint(torch.nn.functional.cross_entropy(logits.reshape(-1,12),targets.flatten()).item())",
+      "packages": "torch",
+      "application": "用于金融文献RAG、财报摘要、机构报告检索及金融研究Agent。",
+      "limits": "代码是章节级数学操作展示，非完整大模型训练、在线检索服务或安全评估体系。所有外部引用需核查原文。",
+      "coverage": "complete"
+    },
+    {
+      "id": "llm-n04-03",
+      "node_id": "llm-n04-03",
+      "title": "奖励模型",
+      "definition": "奖励模型依据人类或规则偏好对候选回答评分，可支持RLHF或样本排序。",
+      "assumptions": "Token序列、Mask、模型输入输出、上下文限制与语料授权须明确；金融知识问答必须从可核验文件获取事实。",
+      "properties": [
+        "奖励模型依据人类或规则偏好对候选回答评分，可支持RLHF或样本排序。",
+        "模型输出并不自动具备事实性、校准性或交易执行权限，须独立评测与权限控制。"
+      ],
+      "formulas": [
+        {
+          "label": "方法数学形式",
+          "tex": "r_\\phi(x,y)\\in\\mathbb R"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从Transformer内部映射、序列条件概率或检索评分的数学定义构造任务目标。",
+          "tex": "r_\\phi(x,y)\\in\\mathbb R"
+        },
+        {
+          "explanation": "据此计算训练损失、采样分布或候选评分，再用独立数据评估行为。",
+          "tex": "r_\\phi(x,y)\\in\\mathbb R"
+        }
+      ],
+      "code": "import torch\nscores=torch.randn(6);print(torch.softmax(scores/.7,dim=0))",
+      "packages": "torch",
+      "application": "用于金融文献RAG、财报摘要、机构报告检索及金融研究Agent。",
+      "limits": "代码是章节级数学操作展示，非完整大模型训练、在线检索服务或安全评估体系。所有外部引用需核查原文。",
+      "coverage": "complete"
+    },
+    {
+      "id": "llm-n05-03",
+      "node_id": "llm-n05-03",
+      "title": "RLHF",
+      "definition": "基于人类偏好训练奖励或偏好目标，再用策略优化对语言模型输出进行约束更新。",
+      "assumptions": "Token序列、Mask、模型输入输出、上下文限制与语料授权须明确；金融知识问答必须从可核验文件获取事实。",
+      "properties": [
+        "基于人类偏好训练奖励或偏好目标，再用策略优化对语言模型输出进行约束更新。",
+        "模型输出并不自动具备事实性、校准性或交易执行权限，须独立评测与权限控制。"
+      ],
+      "formulas": [
+        {
+          "label": "方法数学形式",
+          "tex": "\\max_\\pi E[r_\\phi(x,y)]-\\beta D_{\\rm KL}(\\pi\\|\\pi_{\\rm ref})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从Transformer内部映射、序列条件概率或检索评分的数学定义构造任务目标。",
+          "tex": "\\max_\\pi E[r_\\phi(x,y)]-\\beta D_{\\rm KL}(\\pi\\|\\pi_{\\rm ref})"
+        },
+        {
+          "explanation": "据此计算训练损失、采样分布或候选评分，再用独立数据评估行为。",
+          "tex": "\\max_\\pi E[r_\\phi(x,y)]-\\beta D_{\\rm KL}(\\pi\\|\\pi_{\\rm ref})"
+        }
+      ],
+      "code": "import torch\nscores=torch.randn(6);print(torch.softmax(scores/.7,dim=0))",
+      "packages": "torch",
+      "application": "用于金融文献RAG、财报摘要、机构报告检索及金融研究Agent。",
+      "limits": "代码是章节级数学操作展示，非完整大模型训练、在线检索服务或安全评估体系。所有外部引用需核查原文。",
+      "coverage": "complete"
+    },
+    {
+      "id": "llm-n06-03",
+      "node_id": "llm-n06-03",
+      "title": "拒答与安全评估",
+      "definition": "用覆盖正常、越权及恶意任务的测试集评估模型合规拒答、事实性与误拒率。",
+      "assumptions": "Token序列、Mask、模型输入输出、上下文限制与语料授权须明确；金融知识问答必须从可核验文件获取事实。",
+      "properties": [
+        "用覆盖正常、越权及恶意任务的测试集评估模型合规拒答、事实性与误拒率。",
+        "模型输出并不自动具备事实性、校准性或交易执行权限，须独立评测与权限控制。"
+      ],
+      "formulas": [
+        {
+          "label": "方法数学形式",
+          "tex": "\\operatorname{FNR}_{\\rm safe}=FN/(TP+FN)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从Transformer内部映射、序列条件概率或检索评分的数学定义构造任务目标。",
+          "tex": "\\operatorname{FNR}_{\\rm safe}=FN/(TP+FN)"
+        },
+        {
+          "explanation": "据此计算训练损失、采样分布或候选评分，再用独立数据评估行为。",
+          "tex": "\\operatorname{FNR}_{\\rm safe}=FN/(TP+FN)"
+        }
+      ],
+      "code": "import torch\nscores=torch.randn(6);print(torch.softmax(scores/.7,dim=0))",
+      "packages": "torch",
+      "application": "用于金融文献RAG、财报摘要、机构报告检索及金融研究Agent。",
+      "limits": "代码是章节级数学操作展示，非完整大模型训练、在线检索服务或安全评估体系。所有外部引用需核查原文。",
+      "coverage": "complete"
+    },
+    {
+      "id": "llm-n01-04",
+      "node_id": "llm-n01-04",
+      "title": "温度采样",
+      "definition": "用温度缩放Logits改变采样分布的熵，低温度使高概率Token更集中。",
+      "assumptions": "Token序列、Mask、模型输入输出、上下文限制与语料授权须明确；金融知识问答必须从可核验文件获取事实。",
+      "properties": [
+        "用温度缩放Logits改变采样分布的熵，低温度使高概率Token更集中。",
+        "模型输出并不自动具备事实性、校准性或交易执行权限，须独立评测与权限控制。"
+      ],
+      "formulas": [
+        {
+          "label": "方法数学形式",
+          "tex": "p_i(\\tau)=e^{z_i/\\tau}/\\sum_je^{z_j/\\tau}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从Transformer内部映射、序列条件概率或检索评分的数学定义构造任务目标。",
+          "tex": "p_i(\\tau)=e^{z_i/\\tau}/\\sum_je^{z_j/\\tau}"
+        },
+        {
+          "explanation": "据此计算训练损失、采样分布或候选评分，再用独立数据评估行为。",
+          "tex": "p_i(\\tau)=e^{z_i/\\tau}/\\sum_je^{z_j/\\tau}"
+        }
+      ],
+      "code": "import torch\nlogits=torch.randn(8);p=torch.softmax(logits/.7,dim=0)\nprint(torch.multinomial(p,1))",
+      "packages": "torch",
+      "application": "用于金融文献RAG、财报摘要、机构报告检索及金融研究Agent。",
+      "limits": "代码是章节级数学操作展示，非完整大模型训练、在线检索服务或安全评估体系。所有外部引用需核查原文。",
+      "coverage": "complete"
+    },
+    {
+      "id": "llm-n03-04",
+      "node_id": "llm-n03-04",
+      "title": "KV Cache",
+      "definition": "自回归解码缓存历史Token的Key/Value，避免每次生成重复计算前缀表示。",
+      "assumptions": "Token序列、Mask、模型输入输出、上下文限制与语料授权须明确；金融知识问答必须从可核验文件获取事实。",
+      "properties": [
+        "自回归解码缓存历史Token的Key/Value，避免每次生成重复计算前缀表示。",
+        "模型输出并不自动具备事实性、校准性或交易执行权限，须独立评测与权限控制。"
+      ],
+      "formulas": [
+        {
+          "label": "方法数学形式",
+          "tex": "K_{1:t}=[K_{1:t-1};K_t]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从Transformer内部映射、序列条件概率或检索评分的数学定义构造任务目标。",
+          "tex": "K_{1:t}=[K_{1:t-1};K_t]"
+        },
+        {
+          "explanation": "据此计算训练损失、采样分布或候选评分，再用独立数据评估行为。",
+          "tex": "K_{1:t}=[K_{1:t-1};K_t]"
+        }
+      ],
+      "code": "import torch\nlogits=torch.randn(8);p=torch.softmax(logits/.7,dim=0)\nprint(torch.multinomial(p,1))",
+      "packages": "torch",
+      "application": "用于金融文献RAG、财报摘要、机构报告检索及金融研究Agent。",
+      "limits": "代码是章节级数学操作展示，非完整大模型训练、在线检索服务或安全评估体系。所有外部引用需核查原文。",
+      "coverage": "complete"
+    },
+    {
+      "id": "llm-n04-04",
+      "node_id": "llm-n04-04",
+      "title": "量化推理",
+      "definition": "把模型权重和激活压缩到低精度表示以降低推理显存与带宽需求。",
+      "assumptions": "Token序列、Mask、模型输入输出、上下文限制与语料授权须明确；金融知识问答必须从可核验文件获取事实。",
+      "properties": [
+        "把模型权重和激活压缩到低精度表示以降低推理显存与带宽需求。",
+        "模型输出并不自动具备事实性、校准性或交易执行权限，须独立评测与权限控制。"
+      ],
+      "formulas": [
+        {
+          "label": "方法数学形式",
+          "tex": "q=\\operatorname{clip}(\\operatorname{round}(x/s)+z,q_{\\min},q_{\\max})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从Transformer内部映射、序列条件概率或检索评分的数学定义构造任务目标。",
+          "tex": "q=\\operatorname{clip}(\\operatorname{round}(x/s)+z,q_{\\min},q_{\\max})"
+        },
+        {
+          "explanation": "据此计算训练损失、采样分布或候选评分，再用独立数据评估行为。",
+          "tex": "q=\\operatorname{clip}(\\operatorname{round}(x/s)+z,q_{\\min},q_{\\max})"
+        }
+      ],
+      "code": "import torch\nlogits=torch.randn(8);p=torch.softmax(logits/.7,dim=0)\nprint(torch.multinomial(p,1))",
+      "packages": "torch",
+      "application": "用于金融文献RAG、财报摘要、机构报告检索及金融研究Agent。",
+      "limits": "代码是章节级数学操作展示，非完整大模型训练、在线检索服务或安全评估体系。所有外部引用需核查原文。",
+      "coverage": "complete"
+    },
+    {
+      "id": "llm-n05-04",
+      "node_id": "llm-n05-04",
+      "title": "批处理",
+      "definition": "把多请求组织为Tensor批次以提高硬件利用率，同时处理长度差异与Padding掩码。",
+      "assumptions": "Token序列、Mask、模型输入输出、上下文限制与语料授权须明确；金融知识问答必须从可核验文件获取事实。",
+      "properties": [
+        "把多请求组织为Tensor批次以提高硬件利用率，同时处理长度差异与Padding掩码。",
+        "模型输出并不自动具备事实性、校准性或交易执行权限，须独立评测与权限控制。"
+      ],
+      "formulas": [
+        {
+          "label": "方法数学形式",
+          "tex": "X\\in\\mathbb R^{B\\times T\\times d}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从Transformer内部映射、序列条件概率或检索评分的数学定义构造任务目标。",
+          "tex": "X\\in\\mathbb R^{B\\times T\\times d}"
+        },
+        {
+          "explanation": "据此计算训练损失、采样分布或候选评分，再用独立数据评估行为。",
+          "tex": "X\\in\\mathbb R^{B\\times T\\times d}"
+        }
+      ],
+      "code": "import torch\nlogits=torch.randn(8);p=torch.softmax(logits/.7,dim=0)\nprint(torch.multinomial(p,1))",
+      "packages": "torch",
+      "application": "用于金融文献RAG、财报摘要、机构报告检索及金融研究Agent。",
+      "limits": "代码是章节级数学操作展示，非完整大模型训练、在线检索服务或安全评估体系。所有外部引用需核查原文。",
+      "coverage": "complete"
+    },
+    {
+      "id": "llm-n06-04",
+      "node_id": "llm-n06-04",
+      "title": "长上下文",
+      "definition": "长上下文模型处理大量文档或时间Token，需控制注意力代价、检索噪声和中间遗忘。",
+      "assumptions": "Token序列、Mask、模型输入输出、上下文限制与语料授权须明确；金融知识问答必须从可核验文件获取事实。",
+      "properties": [
+        "长上下文模型处理大量文档或时间Token，需控制注意力代价、检索噪声和中间遗忘。",
+        "模型输出并不自动具备事实性、校准性或交易执行权限，须独立评测与权限控制。"
+      ],
+      "formulas": [
+        {
+          "label": "方法数学形式",
+          "tex": "C_{\\rm full-attention}=O(T^2d)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从Transformer内部映射、序列条件概率或检索评分的数学定义构造任务目标。",
+          "tex": "C_{\\rm full-attention}=O(T^2d)"
+        },
+        {
+          "explanation": "据此计算训练损失、采样分布或候选评分，再用独立数据评估行为。",
+          "tex": "C_{\\rm full-attention}=O(T^2d)"
+        }
+      ],
+      "code": "import torch\nlogits=torch.randn(8);p=torch.softmax(logits/.7,dim=0)\nprint(torch.multinomial(p,1))",
+      "packages": "torch",
+      "application": "用于金融文献RAG、财报摘要、机构报告检索及金融研究Agent。",
+      "limits": "代码是章节级数学操作展示，非完整大模型训练、在线检索服务或安全评估体系。所有外部引用需核查原文。",
+      "coverage": "complete"
+    },
+    {
+      "id": "llm-n02-05",
+      "node_id": "llm-n02-05",
+      "title": "向量检索",
+      "definition": "将查询和文档编码为同维向量，再按余弦或内积选最相关文档片段。",
+      "assumptions": "Token序列、Mask、模型输入输出、上下文限制与语料授权须明确；金融知识问答必须从可核验文件获取事实。",
+      "properties": [
+        "将查询和文档编码为同维向量，再按余弦或内积选最相关文档片段。",
+        "模型输出并不自动具备事实性、校准性或交易执行权限，须独立评测与权限控制。"
+      ],
+      "formulas": [
+        {
+          "label": "方法数学形式",
+          "tex": "d^*=\\arg\\max_{d\\in D}q^\\top e_d"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从Transformer内部映射、序列条件概率或检索评分的数学定义构造任务目标。",
+          "tex": "d^*=\\arg\\max_{d\\in D}q^\\top e_d"
+        },
+        {
+          "explanation": "据此计算训练损失、采样分布或候选评分，再用独立数据评估行为。",
+          "tex": "d^*=\\arg\\max_{d\\in D}q^\\top e_d"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);q=rng.normal(size=8);documents=rng.normal(size=(5,8))\nprint(np.argsort(-(documents@q))[:3])",
+      "packages": "numpy",
+      "application": "用于金融文献RAG、财报摘要、机构报告检索及金融研究Agent。",
+      "limits": "代码是章节级数学操作展示，非完整大模型训练、在线检索服务或安全评估体系。所有外部引用需核查原文。",
+      "coverage": "complete"
+    },
+    {
+      "id": "llm-n04-05",
+      "node_id": "llm-n04-05",
+      "title": "重排序Reranking",
+      "definition": "在初次检索候选集中使用交叉编码器或更昂贵评分模型重新排列结果。",
+      "assumptions": "Token序列、Mask、模型输入输出、上下文限制与语料授权须明确；金融知识问答必须从可核验文件获取事实。",
+      "properties": [
+        "在初次检索候选集中使用交叉编码器或更昂贵评分模型重新排列结果。",
+        "模型输出并不自动具备事实性、校准性或交易执行权限，须独立评测与权限控制。"
+      ],
+      "formulas": [
+        {
+          "label": "方法数学形式",
+          "tex": "\\operatorname{TopK}_{d\\in D_q}r_\\theta(q,d)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从Transformer内部映射、序列条件概率或检索评分的数学定义构造任务目标。",
+          "tex": "\\operatorname{TopK}_{d\\in D_q}r_\\theta(q,d)"
+        },
+        {
+          "explanation": "据此计算训练损失、采样分布或候选评分，再用独立数据评估行为。",
+          "tex": "\\operatorname{TopK}_{d\\in D_q}r_\\theta(q,d)"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);q=rng.normal(size=8);documents=rng.normal(size=(5,8))\nprint(np.argsort(-(documents@q))[:3])",
+      "packages": "numpy",
+      "application": "用于金融文献RAG、财报摘要、机构报告检索及金融研究Agent。",
+      "limits": "代码是章节级数学操作展示，非完整大模型训练、在线检索服务或安全评估体系。所有外部引用需核查原文。",
+      "coverage": "complete"
+    },
+    {
+      "id": "llm-n05-05",
+      "node_id": "llm-n05-05",
+      "title": "工具调用",
+      "definition": "模型把计划转换为结构化外部函数名称与参数，执行端校验权限后返回结果。",
+      "assumptions": "Token序列、Mask、模型输入输出、上下文限制与语料授权须明确；金融知识问答必须从可核验文件获取事实。",
+      "properties": [
+        "模型把计划转换为结构化外部函数名称与参数，执行端校验权限后返回结果。",
+        "模型输出并不自动具备事实性、校准性或交易执行权限，须独立评测与权限控制。"
+      ],
+      "formulas": [
+        {
+          "label": "方法数学形式",
+          "tex": "a=(\\operatorname{tool},\\operatorname{args})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从Transformer内部映射、序列条件概率或检索评分的数学定义构造任务目标。",
+          "tex": "a=(\\operatorname{tool},\\operatorname{args})"
+        },
+        {
+          "explanation": "据此计算训练损失、采样分布或候选评分，再用独立数据评估行为。",
+          "tex": "a=(\\operatorname{tool},\\operatorname{args})"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);q=rng.normal(size=8);documents=rng.normal(size=(5,8))\nprint(np.argsort(-(documents@q))[:3])",
+      "packages": "numpy",
+      "application": "用于金融文献RAG、财报摘要、机构报告检索及金融研究Agent。",
+      "limits": "代码是章节级数学操作展示，非完整大模型训练、在线检索服务或安全评估体系。所有外部引用需核查原文。",
+      "coverage": "complete"
+    },
+    {
+      "id": "llm-n06-05",
+      "node_id": "llm-n06-05",
+      "title": "评估引用可信度",
+      "definition": "检查生成句子是否被具体原始文献段落支持，防止无来源断言或引用错配。",
+      "assumptions": "Token序列、Mask、模型输入输出、上下文限制与语料授权须明确；金融知识问答必须从可核验文件获取事实。",
+      "properties": [
+        "检查生成句子是否被具体原始文献段落支持，防止无来源断言或引用错配。",
+        "模型输出并不自动具备事实性、校准性或交易执行权限，须独立评测与权限控制。"
+      ],
+      "formulas": [
+        {
+          "label": "方法数学形式",
+          "tex": "\\operatorname{Support}(c,s)\\in\\{0,1\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从Transformer内部映射、序列条件概率或检索评分的数学定义构造任务目标。",
+          "tex": "\\operatorname{Support}(c,s)\\in\\{0,1\\}"
+        },
+        {
+          "explanation": "据此计算训练损失、采样分布或候选评分，再用独立数据评估行为。",
+          "tex": "\\operatorname{Support}(c,s)\\in\\{0,1\\}"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);q=rng.normal(size=8);documents=rng.normal(size=(5,8))\nprint(np.argsort(-(documents@q))[:3])",
+      "packages": "numpy",
+      "application": "用于金融文献RAG、财报摘要、机构报告检索及金融研究Agent。",
+      "limits": "代码是章节级数学操作展示，非完整大模型训练、在线检索服务或安全评估体系。所有外部引用需核查原文。",
+      "coverage": "complete"
+    }
+  ]
+}
