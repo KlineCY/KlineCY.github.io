@@ -1,0 +1,837 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "python-n01-01",
+      "node_id": "python-n01-01",
+      "title": "Python数据类型",
+      "definition": "Python的数值、布尔、字符串、容器对象等类型控制计算语义；浮点类型不保证数学实数精确。",
+      "assumptions": "本知识点要求输入数据类型、维度、时间与索引规范一致；若涉及训练或统计估计，应只用训练样本拟合参数。",
+      "properties": [
+        "关键的数学或程序关系由“Python数据类型”对应的定义公式给出，需结合执行结果校验维度与边界。",
+        "实际使用时需核查数值稳定性、输入校验、重复性及运行环境。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "\\texttt{type}(x)\\in\\{\\texttt{int},\\texttt{float},\\texttt{str},\\ldots\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确认输入对象、索引以及该操作所依赖的数学数据结构。",
+          "tex": "\\texttt{type}(x)\\in\\{\\texttt{int},\\texttt{float},\\texttt{str},\\ldots\\}"
+        },
+        {
+          "explanation": "据此按公式计算输出，并以基本可运行的Python程序校验结果和数据类型。",
+          "tex": "\\texttt{type}(x)\\in\\{\\texttt{int},\\texttt{float},\\texttt{str},\\ldots\\}"
+        }
+      ],
+      "code": "x=3;y=3.5;z='ETF'\nprint(type(x),type(y),type(z),x+y)",
+      "packages": "Python, NumPy, pandas, SciPy（视具体示例import而定）",
+      "application": "构建和处理ETF多资产面板、财务指标或量化模型训练管线，保障特征、目标与交易日期一致。",
+      "limits": "隐式类型转换和浮点误差可能破坏金额精度。",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n02-01",
+      "node_id": "python-n02-01",
+      "title": "列表推导与生成器",
+      "definition": "列表推导立即构造结果容器，生成器按需逐项产生序列，可减少大规模迭代的内存占用。",
+      "assumptions": "本知识点要求输入数据类型、维度、时间与索引规范一致；若涉及训练或统计估计，应只用训练样本拟合参数。",
+      "properties": [
+        "关键的数学或程序关系由“列表推导与生成器”对应的定义公式给出，需结合执行结果校验维度与边界。",
+        "实际使用时需核查数值稳定性、输入校验、重复性及运行环境。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "g(i)=f(x_i),\\quad i=1,\\ldots,n"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确认输入对象、索引以及该操作所依赖的数学数据结构。",
+          "tex": "g(i)=f(x_i),\\quad i=1,\\ldots,n"
+        },
+        {
+          "explanation": "据此按公式计算输出，并以基本可运行的Python程序校验结果和数据类型。",
+          "tex": "g(i)=f(x_i),\\quad i=1,\\ldots,n"
+        }
+      ],
+      "code": "items=[1,2,3];squares=[x*x for x in items]\ng=(x*x for x in items)\nprint(squares,list(g))",
+      "packages": "Python, NumPy, pandas, SciPy（视具体示例import而定）",
+      "application": "构建和处理ETF多资产面板、财务指标或量化模型训练管线，保障特征、目标与交易日期一致。",
+      "limits": "生成器消费后不可自动回到起点；延迟求值并非免费。",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n03-01",
+      "node_id": "python-n03-01",
+      "title": "函数和闭包",
+      "definition": "函数封装输入到输出的映射；闭包使内部函数保留外层变量环境，适合参数化信号和损失。",
+      "assumptions": "本知识点要求输入数据类型、维度、时间与索引规范一致；若涉及训练或统计估计，应只用训练样本拟合参数。",
+      "properties": [
+        "关键的数学或程序关系由“函数和闭包”对应的定义公式给出，需结合执行结果校验维度与边界。",
+        "实际使用时需核查数值稳定性、输入校验、重复性及运行环境。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "f_\\lambda(x)=\\ell(x)+\\lambda\\Omega(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确认输入对象、索引以及该操作所依赖的数学数据结构。",
+          "tex": "f_\\lambda(x)=\\ell(x)+\\lambda\\Omega(x)"
+        },
+        {
+          "explanation": "据此按公式计算输出，并以基本可运行的Python程序校验结果和数据类型。",
+          "tex": "f_\\lambda(x)=\\ell(x)+\\lambda\\Omega(x)"
+        }
+      ],
+      "code": "def make_penalty(lam):\n    def loss(x):return x*x+lam*abs(x)\n    return loss\nprint(make_penalty(.2)(3.))",
+      "packages": "Python, NumPy, pandas, SciPy（视具体示例import而定）",
+      "application": "构建和处理ETF多资产面板、财务指标或量化模型训练管线，保障特征、目标与交易日期一致。",
+      "limits": "捕获可变对象的共享状态可能造成意外副作用。",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n04-01",
+      "node_id": "python-n04-01",
+      "title": "类型标注",
+      "definition": "类型标注记录函数和数据结构预期类型，配合静态检查器提高工程可读性，但Python默认不会运行时强制检查。",
+      "assumptions": "本知识点要求输入数据类型、维度、时间与索引规范一致；若涉及训练或统计估计，应只用训练样本拟合参数。",
+      "properties": [
+        "关键的数学或程序关系由“类型标注”对应的定义公式给出，需结合执行结果校验维度与边界。",
+        "实际使用时需核查数值稳定性、输入校验、重复性及运行环境。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "f:\\mathbb R^n\\to\\mathbb R"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确认输入对象、索引以及该操作所依赖的数学数据结构。",
+          "tex": "f:\\mathbb R^n\\to\\mathbb R"
+        },
+        {
+          "explanation": "据此按公式计算输出，并以基本可运行的Python程序校验结果和数据类型。",
+          "tex": "f:\\mathbb R^n\\to\\mathbb R"
+        }
+      ],
+      "code": "def mean(values:list[float])->float:\n    return sum(values)/len(values)\nprint(mean([1.0,2.0,3.0]))",
+      "packages": "Python, NumPy, pandas, SciPy（视具体示例import而定）",
+      "application": "构建和处理ETF多资产面板、财务指标或量化模型训练管线，保障特征、目标与交易日期一致。",
+      "limits": "类型标注不能代替输入数据的运行时验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n05-01",
+      "node_id": "python-n05-01",
+      "title": "异常处理",
+      "definition": "通过异常机制区分正常输出与失败路径，避免输入错误、数据丢失被悄然写成有效数值。",
+      "assumptions": "本知识点要求输入数据类型、维度、时间与索引规范一致；若涉及训练或统计估计，应只用训练样本拟合参数。",
+      "properties": [
+        "关键的数学或程序关系由“异常处理”对应的定义公式给出，需结合执行结果校验维度与边界。",
+        "实际使用时需核查数值稳定性、输入校验、重复性及运行环境。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "\\operatorname{validate}(x)=\\begin{cases}x,&x\\in\\mathcal D\\\\\\operatorname{raise},&x\\notin\\mathcal D\\end{cases}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确认输入对象、索引以及该操作所依赖的数学数据结构。",
+          "tex": "\\operatorname{validate}(x)=\\begin{cases}x,&x\\in\\mathcal D\\\\\\operatorname{raise},&x\\notin\\mathcal D\\end{cases}"
+        },
+        {
+          "explanation": "据此按公式计算输出，并以基本可运行的Python程序校验结果和数据类型。",
+          "tex": "\\operatorname{validate}(x)=\\begin{cases}x,&x\\in\\mathcal D\\\\\\operatorname{raise},&x\\notin\\mathcal D\\end{cases}"
+        }
+      ],
+      "code": "def safe_divide(a,b):\n    if b==0:raise ZeroDivisionError('zero divisor')\n    return a/b\ntry:print(safe_divide(1,0))\nexcept ZeroDivisionError as e:print(type(e).__name__)",
+      "packages": "Python, NumPy, pandas, SciPy（视具体示例import而定）",
+      "application": "构建和处理ETF多资产面板、财务指标或量化模型训练管线，保障特征、目标与交易日期一致。",
+      "limits": "捕获过宽的异常会掩盖数据质量问题。",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n06-01",
+      "node_id": "python-n06-01",
+      "title": "模块与环境",
+      "definition": "模块组织可复用代码；虚拟环境、依赖清单和锁定版本保障不同研究机器可复现。",
+      "assumptions": "本知识点要求输入数据类型、维度、时间与索引规范一致；若涉及训练或统计估计，应只用训练样本拟合参数。",
+      "properties": [
+        "关键的数学或程序关系由“模块与环境”对应的定义公式给出，需结合执行结果校验维度与边界。",
+        "实际使用时需核查数值稳定性、输入校验、重复性及运行环境。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "\\operatorname{Result}=F(D,\\mathrm{CodeVersion},\\mathrm{Dependencies})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确认输入对象、索引以及该操作所依赖的数学数据结构。",
+          "tex": "\\operatorname{Result}=F(D,\\mathrm{CodeVersion},\\mathrm{Dependencies})"
+        },
+        {
+          "explanation": "据此按公式计算输出，并以基本可运行的Python程序校验结果和数据类型。",
+          "tex": "\\operatorname{Result}=F(D,\\mathrm{CodeVersion},\\mathrm{Dependencies})"
+        }
+      ],
+      "code": "import sys,math\nprint(sys.version_info[:2],math.sqrt(2))",
+      "packages": "Python, NumPy, pandas, SciPy（视具体示例import而定）",
+      "application": "构建和处理ETF多资产面板、财务指标或量化模型训练管线，保障特征、目标与交易日期一致。",
+      "limits": "不同数值库与GPU算子可能导致计算差异。",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n03-02",
+      "node_id": "python-n03-02",
+      "title": "向量化运算",
+      "definition": "向量化通过NumPy数组运算批量执行元素级计算，避免逐元素Python循环开销。",
+      "assumptions": "本知识点要求输入数据类型、维度、时间与索引规范一致；若涉及训练或统计估计，应只用训练样本拟合参数。",
+      "properties": [
+        "关键的数学或程序关系由“向量化运算”对应的定义公式给出，需结合执行结果校验维度与边界。",
+        "实际使用时需核查数值稳定性、输入校验、重复性及运行环境。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "z_i=a x_i+b,\\quad z=a x+b\\mathbf 1"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确认输入对象、索引以及该操作所依赖的数学数据结构。",
+          "tex": "z_i=a x_i+b,\\quad z=a x+b\\mathbf 1"
+        },
+        {
+          "explanation": "据此按公式计算输出，并以基本可运行的Python程序校验结果和数据类型。",
+          "tex": "z_i=a x_i+b,\\quad z=a x+b\\mathbf 1"
+        }
+      ],
+      "code": "import numpy as np\nx=np.arange(5.);print(2*x+3)",
+      "packages": "Python, NumPy, pandas, SciPy（视具体示例import而定）",
+      "application": "构建和处理ETF多资产面板、财务指标或量化模型训练管线，保障特征、目标与交易日期一致。",
+      "limits": "广播的轴与单位必须一致，不能为速度牺牲数据对齐。",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n04-02",
+      "node_id": "python-n04-02",
+      "title": "矩阵乘法einsum",
+      "definition": "爱因斯坦求和约定用索引规则表达张量求和与收缩，np.einsum可以显式控制高维计算轴。",
+      "assumptions": "本知识点要求输入数据类型、维度、时间与索引规范一致；若涉及训练或统计估计，应只用训练样本拟合参数。",
+      "properties": [
+        "关键的数学或程序关系由“矩阵乘法einsum”对应的定义公式给出，需结合执行结果校验维度与边界。",
+        "实际使用时需核查数值稳定性、输入校验、重复性及运行环境。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "C_{ij}=\\sum_kA_{ik}B_{kj}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确认输入对象、索引以及该操作所依赖的数学数据结构。",
+          "tex": "C_{ij}=\\sum_kA_{ik}B_{kj}"
+        },
+        {
+          "explanation": "据此按公式计算输出，并以基本可运行的Python程序校验结果和数据类型。",
+          "tex": "C_{ij}=\\sum_kA_{ik}B_{kj}"
+        }
+      ],
+      "code": "import numpy as np\nA=np.arange(6).reshape(2,3);B=np.arange(12).reshape(3,4)\nprint(np.einsum('ik,kj->ij',A,B).shape)",
+      "packages": "Python, NumPy, pandas, SciPy（视具体示例import而定）",
+      "application": "构建和处理ETF多资产面板、财务指标或量化模型训练管线，保障特征、目标与交易日期一致。",
+      "limits": "误写索引可能产生合法形状却错误的张量结果。",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n05-02",
+      "node_id": "python-n05-02",
+      "title": "随机数生成器",
+      "definition": "伪随机生成器在确定种子下产生可重复的随机序列，适合模拟、Bootstrap及随机初始化。",
+      "assumptions": "本知识点要求输入数据类型、维度、时间与索引规范一致；若涉及训练或统计估计，应只用训练样本拟合参数。",
+      "properties": [
+        "关键的数学或程序关系由“随机数生成器”对应的定义公式给出，需结合执行结果校验维度与边界。",
+        "实际使用时需核查数值稳定性、输入校验、重复性及运行环境。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "X_1,\\ldots,X_n\\overset{\\rm pseudo}{\\sim}P_\\theta"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确认输入对象、索引以及该操作所依赖的数学数据结构。",
+          "tex": "X_1,\\ldots,X_n\\overset{\\rm pseudo}{\\sim}P_\\theta"
+        },
+        {
+          "explanation": "据此按公式计算输出，并以基本可运行的Python程序校验结果和数据类型。",
+          "tex": "X_1,\\ldots,X_n\\overset{\\rm pseudo}{\\sim}P_\\theta"
+        }
+      ],
+      "code": "import numpy as np\nr=np.random.default_rng(9);print(r.normal(size=4),r.choice(10,3,replace=False))",
+      "packages": "Python, NumPy, pandas, SciPy（视具体示例import而定）",
+      "application": "构建和处理ETF多资产面板、财务指标或量化模型训练管线，保障特征、目标与交易日期一致。",
+      "limits": "可重复随机数不等同于抽样独立性或密码安全。",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n06-02",
+      "node_id": "python-n06-02",
+      "title": "数值精度",
+      "definition": "浮点数按有限二进制尾数近似实数，舍入误差、抵消与溢出需要采用稳定算法处理。",
+      "assumptions": "本知识点要求输入数据类型、维度、时间与索引规范一致；若涉及训练或统计估计，应只用训练样本拟合参数。",
+      "properties": [
+        "关键的数学或程序关系由“数值精度”对应的定义公式给出，需结合执行结果校验维度与边界。",
+        "实际使用时需核查数值稳定性、输入校验、重复性及运行环境。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "|\\operatorname{fl}(x\\circ y)-(x\\circ y)|\\le u|x\\circ y|\\ \\text{（常见模型）}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确认输入对象、索引以及该操作所依赖的数学数据结构。",
+          "tex": "|\\operatorname{fl}(x\\circ y)-(x\\circ y)|\\le u|x\\circ y|\\ \\text{（常见模型）}"
+        },
+        {
+          "explanation": "据此按公式计算输出，并以基本可运行的Python程序校验结果和数据类型。",
+          "tex": "|\\operatorname{fl}(x\\circ y)-(x\\circ y)|\\le u|x\\circ y|\\ \\text{（常见模型）}"
+        }
+      ],
+      "code": "import numpy as np\nprint(.1+.2==.3,np.isclose(.1+.2,.3))\nprint(np.finfo(np.float32).eps,np.finfo(np.float64).eps)",
+      "packages": "Python, NumPy, pandas, SciPy（视具体示例import而定）",
+      "application": "构建和处理ETF多资产面板、财务指标或量化模型训练管线，保障特征、目标与交易日期一致。",
+      "limits": "此误差模型有前提，不能对零分母或溢出运算直接套用。",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n01-03",
+      "node_id": "python-n01-03",
+      "title": "索引与对齐",
+      "definition": "Pandas通过索引标签对Series和DataFrame运算对齐，标签不同会产生缺失值；金融面板应同时核查证券和日期。",
+      "assumptions": "本知识点要求输入数据类型、维度、时间与索引规范一致；若涉及训练或统计估计，应只用训练样本拟合参数。",
+      "properties": [
+        "关键的数学或程序关系由“索引与对齐”对应的定义公式给出，需结合执行结果校验维度与边界。",
+        "实际使用时需核查数值稳定性、输入校验、重复性及运行环境。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "(X+Y)_{i,t}=X_{i,t}+Y_{i,t}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确认输入对象、索引以及该操作所依赖的数学数据结构。",
+          "tex": "(X+Y)_{i,t}=X_{i,t}+Y_{i,t}"
+        },
+        {
+          "explanation": "据此按公式计算输出，并以基本可运行的Python程序校验结果和数据类型。",
+          "tex": "(X+Y)_{i,t}=X_{i,t}+Y_{i,t}"
+        }
+      ],
+      "code": "import pandas as pd\na=pd.Series([1,2],index=['A','B'])\nb=pd.Series([3,4],index=['B','C'])\nprint(a+b)",
+      "packages": "Python, NumPy, pandas, SciPy（视具体示例import而定）",
+      "application": "构建和处理ETF多资产面板、财务指标或量化模型训练管线，保障特征、目标与交易日期一致。",
+      "limits": "位置和标签索引混用可能将错误资产数据相加。",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n02-03",
+      "node_id": "python-n02-03",
+      "title": "DataFrame重塑",
+      "definition": "长表和宽表重塑在证券×日期等多维数据中改变存储视图；常用pivot、melt与stack。",
+      "assumptions": "本知识点要求输入数据类型、维度、时间与索引规范一致；若涉及训练或统计估计，应只用训练样本拟合参数。",
+      "properties": [
+        "关键的数学或程序关系由“DataFrame重塑”对应的定义公式给出，需结合执行结果校验维度与边界。",
+        "实际使用时需核查数值稳定性、输入校验、重复性及运行环境。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "X_{(t,i)}\\leftrightarrow X_{t,i}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确认输入对象、索引以及该操作所依赖的数学数据结构。",
+          "tex": "X_{(t,i)}\\leftrightarrow X_{t,i}"
+        },
+        {
+          "explanation": "据此按公式计算输出，并以基本可运行的Python程序校验结果和数据类型。",
+          "tex": "X_{(t,i)}\\leftrightarrow X_{t,i}"
+        }
+      ],
+      "code": "import pandas as pd\ndf=pd.DataFrame({'date':[1,1,2,2],'asset':['A','B','A','B'],'ret':[.1,.2,.3,.4]})\nprint(df.pivot(index='date',columns='asset',values='ret'))",
+      "packages": "Python, NumPy, pandas, SciPy（视具体示例import而定）",
+      "application": "构建和处理ETF多资产面板、财务指标或量化模型训练管线，保障特征、目标与交易日期一致。",
+      "limits": "重塑前必须验证键的唯一性，避免重复记录被错误聚合。",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n04-03",
+      "node_id": "python-n04-03",
+      "title": "缺失值",
+      "definition": "缺失值可能来自未交易、未披露或数据接口问题，应先区分缺失机制再选择填补、删除或标记。",
+      "assumptions": "本知识点要求输入数据类型、维度、时间与索引规范一致；若涉及训练或统计估计，应只用训练样本拟合参数。",
+      "properties": [
+        "关键的数学或程序关系由“缺失值”对应的定义公式给出，需结合执行结果校验维度与边界。",
+        "实际使用时需核查数值稳定性、输入校验、重复性及运行环境。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "M_{it}=\\mathbf1[X_{it}\\text{ 缺失}]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确认输入对象、索引以及该操作所依赖的数学数据结构。",
+          "tex": "M_{it}=\\mathbf1[X_{it}\\text{ 缺失}]"
+        },
+        {
+          "explanation": "据此按公式计算输出，并以基本可运行的Python程序校验结果和数据类型。",
+          "tex": "M_{it}=\\mathbf1[X_{it}\\text{ 缺失}]"
+        }
+      ],
+      "code": "import pandas as pd\ns=pd.Series([1.,None,3.]);print(s.isna().to_list(),s.ffill().to_list())",
+      "packages": "Python, NumPy, pandas, SciPy（视具体示例import而定）",
+      "application": "构建和处理ETF多资产面板、财务指标或量化模型训练管线，保障特征、目标与交易日期一致。",
+      "limits": "跨日期向前填充需要限制最大延迟，不能从未来回填。",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n05-03",
+      "node_id": "python-n05-03",
+      "title": "时间索引",
+      "definition": "时间索引用于排序、重采样和As-Of连接，应区分事件时间、发布时刻、时区和交易日历。",
+      "assumptions": "本知识点要求输入数据类型、维度、时间与索引规范一致；若涉及训练或统计估计，应只用训练样本拟合参数。",
+      "properties": [
+        "关键的数学或程序关系由“时间索引”对应的定义公式给出，需结合执行结果校验维度与边界。",
+        "实际使用时需核查数值稳定性、输入校验、重复性及运行环境。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "t_{\\rm available}\\le t_{\\rm decision}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确认输入对象、索引以及该操作所依赖的数学数据结构。",
+          "tex": "t_{\\rm available}\\le t_{\\rm decision}"
+        },
+        {
+          "explanation": "据此按公式计算输出，并以基本可运行的Python程序校验结果和数据类型。",
+          "tex": "t_{\\rm available}\\le t_{\\rm decision}"
+        }
+      ],
+      "code": "import pandas as pd\nidx=pd.to_datetime(['2026-01-02','2026-01-05'])\nprint(pd.Series([1,2],index=idx).index.tz_localize('Asia/Tokyo'))",
+      "packages": "Python, NumPy, pandas, SciPy（视具体示例import而定）",
+      "application": "构建和处理ETF多资产面板、财务指标或量化模型训练管线，保障特征、目标与交易日期一致。",
+      "limits": "自然日与交易日混用会造成错误滞后与回报窗口。",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n06-03",
+      "node_id": "python-n06-03",
+      "title": "多资产面板",
+      "definition": "金融面板在资产和时间两个维度组织特征，支持横截面排名与每资产时间窗口。",
+      "assumptions": "本知识点要求输入数据类型、维度、时间与索引规范一致；若涉及训练或统计估计，应只用训练样本拟合参数。",
+      "properties": [
+        "关键的数学或程序关系由“多资产面板”对应的定义公式给出，需结合执行结果校验维度与边界。",
+        "实际使用时需核查数值稳定性、输入校验、重复性及运行环境。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "X\\in\\mathbb R^{T\\times N\\times P}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确认输入对象、索引以及该操作所依赖的数学数据结构。",
+          "tex": "X\\in\\mathbb R^{T\\times N\\times P}"
+        },
+        {
+          "explanation": "据此按公式计算输出，并以基本可运行的Python程序校验结果和数据类型。",
+          "tex": "X\\in\\mathbb R^{T\\times N\\times P}"
+        }
+      ],
+      "code": "import numpy as np\nX=np.zeros((10,4,3))\nprint('Time, assets, factors:',X.shape)",
+      "packages": "Python, NumPy, pandas, SciPy（视具体示例import而定）",
+      "application": "构建和处理ETF多资产面板、财务指标或量化模型训练管线，保障特征、目标与交易日期一致。",
+      "limits": "资产缺失和成分股变迁不能盲目用完整平衡面板代替。",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n01-04",
+      "node_id": "python-n01-04",
+      "title": "稀疏矩阵",
+      "definition": "稀疏矩阵仅存非零元素及坐标，适用于高维文本向量、行业哑变量和大型图邻接。",
+      "assumptions": "本知识点要求输入数据类型、维度、时间与索引规范一致；若涉及训练或统计估计，应只用训练样本拟合参数。",
+      "properties": [
+        "关键的数学或程序关系由“稀疏矩阵”对应的定义公式给出，需结合执行结果校验维度与边界。",
+        "实际使用时需核查数值稳定性、输入校验、重复性及运行环境。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "\\operatorname{density}(X)=\\mathrm{nnz}(X)/(mn)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确认输入对象、索引以及该操作所依赖的数学数据结构。",
+          "tex": "\\operatorname{density}(X)=\\mathrm{nnz}(X)/(mn)"
+        },
+        {
+          "explanation": "据此按公式计算输出，并以基本可运行的Python程序校验结果和数据类型。",
+          "tex": "\\operatorname{density}(X)=\\mathrm{nnz}(X)/(mn)"
+        }
+      ],
+      "code": "import numpy as np\nfrom scipy.sparse import csr_matrix\nA=csr_matrix(([1,2],([0,2],[1,3])),shape=(4,5))\nprint(A.nnz,A.toarray())",
+      "packages": "Python, NumPy, pandas, SciPy（视具体示例import而定）",
+      "application": "构建和处理ETF多资产面板、财务指标或量化模型训练管线，保障特征、目标与交易日期一致。",
+      "limits": "某些操作会把稀疏矩阵转换成密集矩阵，耗尽内存。",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n02-04",
+      "node_id": "python-n02-04",
+      "title": "线性代数分解",
+      "definition": "数值线性代数采用QR、SVD、Cholesky等分解提升求解稳定性，通常优于显式求矩阵逆。",
+      "assumptions": "本知识点要求输入数据类型、维度、时间与索引规范一致；若涉及训练或统计估计，应只用训练样本拟合参数。",
+      "properties": [
+        "关键的数学或程序关系由“线性代数分解”对应的定义公式给出，需结合执行结果校验维度与边界。",
+        "实际使用时需核查数值稳定性、输入校验、重复性及运行环境。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "A=QR,\\quad A=U\\Sigma V^\\top"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确认输入对象、索引以及该操作所依赖的数学数据结构。",
+          "tex": "A=QR,\\quad A=U\\Sigma V^\\top"
+        },
+        {
+          "explanation": "据此按公式计算输出，并以基本可运行的Python程序校验结果和数据类型。",
+          "tex": "A=QR,\\quad A=U\\Sigma V^\\top"
+        }
+      ],
+      "code": "import numpy as np\nA=np.array([[2.,1.],[1.,3.]])\nprint(np.linalg.qr(A)[0]);print(np.linalg.svd(A)[1])",
+      "packages": "Python, NumPy, pandas, SciPy（视具体示例import而定）",
+      "application": "构建和处理ETF多资产面板、财务指标或量化模型训练管线，保障特征、目标与交易日期一致。",
+      "limits": "条件数过大时分解也无法消除数据本身的信息不足。",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n03-04",
+      "node_id": "python-n03-04",
+      "title": "统计分布",
+      "definition": "SciPy统计分布提供密度、分布函数、分位数和随机抽样接口，用于风险情景与概率推断。",
+      "assumptions": "本知识点要求输入数据类型、维度、时间与索引规范一致；若涉及训练或统计估计，应只用训练样本拟合参数。",
+      "properties": [
+        "关键的数学或程序关系由“统计分布”对应的定义公式给出，需结合执行结果校验维度与边界。",
+        "实际使用时需核查数值稳定性、输入校验、重复性及运行环境。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "F(x)=P(X\\le x),\\quad q_\\alpha=F^{-1}(\\alpha)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确认输入对象、索引以及该操作所依赖的数学数据结构。",
+          "tex": "F(x)=P(X\\le x),\\quad q_\\alpha=F^{-1}(\\alpha)"
+        },
+        {
+          "explanation": "据此按公式计算输出，并以基本可运行的Python程序校验结果和数据类型。",
+          "tex": "F(x)=P(X\\le x),\\quad q_\\alpha=F^{-1}(\\alpha)"
+        }
+      ],
+      "code": "from scipy.stats import norm\nprint(norm.cdf(1.96),norm.ppf(.975))",
+      "packages": "Python, NumPy, pandas, SciPy（视具体示例import而定）",
+      "application": "构建和处理ETF多资产面板、财务指标或量化模型训练管线，保障特征、目标与交易日期一致。",
+      "limits": "指定正态分布不代表金融收益尾部满足正态假设。",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n04-04",
+      "node_id": "python-n04-04",
+      "title": "数值优化",
+      "definition": "数值优化用目标函数、梯度和约束搜索参数极值，需核查求解器收敛状态与边界条件。",
+      "assumptions": "本知识点要求输入数据类型、维度、时间与索引规范一致；若涉及训练或统计估计，应只用训练样本拟合参数。",
+      "properties": [
+        "关键的数学或程序关系由“数值优化”对应的定义公式给出，需结合执行结果校验维度与边界。",
+        "实际使用时需核查数值稳定性、输入校验、重复性及运行环境。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "\\theta^*=\\arg\\min_{\\theta\\in\\Theta}L(\\theta)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确认输入对象、索引以及该操作所依赖的数学数据结构。",
+          "tex": "\\theta^*=\\arg\\min_{\\theta\\in\\Theta}L(\\theta)"
+        },
+        {
+          "explanation": "据此按公式计算输出，并以基本可运行的Python程序校验结果和数据类型。",
+          "tex": "\\theta^*=\\arg\\min_{\\theta\\in\\Theta}L(\\theta)"
+        }
+      ],
+      "code": "from scipy.optimize import minimize\nr=minimize(lambda z:(z[0]-2)**2,[0.])\nprint(r.success,r.x)",
+      "packages": "Python, NumPy, pandas, SciPy（视具体示例import而定）",
+      "application": "构建和处理ETF多资产面板、财务指标或量化模型训练管线，保障特征、目标与交易日期一致。",
+      "limits": "数值求解器成功退出不保证非凸问题的全局最优。",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n05-04",
+      "node_id": "python-n05-04",
+      "title": "插值与信号处理",
+      "definition": "插值根据已知采样点推断区间内的连续值；信号处理可分离平滑趋势与高频波动。",
+      "assumptions": "本知识点要求输入数据类型、维度、时间与索引规范一致；若涉及训练或统计估计，应只用训练样本拟合参数。",
+      "properties": [
+        "关键的数学或程序关系由“插值与信号处理”对应的定义公式给出，需结合执行结果校验维度与边界。",
+        "实际使用时需核查数值稳定性、输入校验、重复性及运行环境。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "\\tilde x(t)=(1-\\lambda)x(t_0)+\\lambda x(t_1)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确认输入对象、索引以及该操作所依赖的数学数据结构。",
+          "tex": "\\tilde x(t)=(1-\\lambda)x(t_0)+\\lambda x(t_1)"
+        },
+        {
+          "explanation": "据此按公式计算输出，并以基本可运行的Python程序校验结果和数据类型。",
+          "tex": "\\tilde x(t)=(1-\\lambda)x(t_0)+\\lambda x(t_1)"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([0,2,4]);y=np.array([1,3,9]);print(np.interp([1,3],x,y))",
+      "packages": "Python, NumPy, pandas, SciPy（视具体示例import而定）",
+      "application": "构建和处理ETF多资产面板、财务指标或量化模型训练管线，保障特征、目标与交易日期一致。",
+      "limits": "金融预测不得在历史时点用未来观测做双向插值。",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n06-04",
+      "node_id": "python-n06-04",
+      "title": "数值稳定性",
+      "definition": "稳定算法对输入和舍入误差不敏感，例如LogSumExp通过减最大值避免exp溢出。",
+      "assumptions": "本知识点要求输入数据类型、维度、时间与索引规范一致；若涉及训练或统计估计，应只用训练样本拟合参数。",
+      "properties": [
+        "关键的数学或程序关系由“数值稳定性”对应的定义公式给出，需结合执行结果校验维度与边界。",
+        "实际使用时需核查数值稳定性、输入校验、重复性及运行环境。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "\\log\\sum_ie^{x_i}=m+\\log\\sum_ie^{x_i-m}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确认输入对象、索引以及该操作所依赖的数学数据结构。",
+          "tex": "\\log\\sum_ie^{x_i}=m+\\log\\sum_ie^{x_i-m}"
+        },
+        {
+          "explanation": "据此按公式计算输出，并以基本可运行的Python程序校验结果和数据类型。",
+          "tex": "\\log\\sum_ie^{x_i}=m+\\log\\sum_ie^{x_i-m}"
+        }
+      ],
+      "code": "import numpy as np\nz=np.array([1000.,1001.]);m=z.max();print(m+np.log(np.exp(z-m).sum()))",
+      "packages": "Python, NumPy, pandas, SciPy（视具体示例import而定）",
+      "application": "构建和处理ETF多资产面板、财务指标或量化模型训练管线，保障特征、目标与交易日期一致。",
+      "limits": "简单公式直接计算可能溢出，应按稳定形式实现。",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n02-05",
+      "node_id": "python-n02-05",
+      "title": "PyTorch基本API",
+      "definition": "Tensor、自动微分、Module及Optimizer构成PyTorch训练的基础，张量dtype和device决定执行行为。",
+      "assumptions": "本知识点要求输入数据类型、维度、时间与索引规范一致；若涉及训练或统计估计，应只用训练样本拟合参数。",
+      "properties": [
+        "关键的数学或程序关系由“PyTorch基本API”对应的定义公式给出，需结合执行结果校验维度与边界。",
+        "实际使用时需核查数值稳定性、输入校验、重复性及运行环境。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "y=f_\\theta(x),\\quad g=\\nabla_\\theta\\ell(y,\\hat y)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确认输入对象、索引以及该操作所依赖的数学数据结构。",
+          "tex": "y=f_\\theta(x),\\quad g=\\nabla_\\theta\\ell(y,\\hat y)"
+        },
+        {
+          "explanation": "据此按公式计算输出，并以基本可运行的Python程序校验结果和数据类型。",
+          "tex": "y=f_\\theta(x),\\quad g=\\nabla_\\theta\\ell(y,\\hat y)"
+        }
+      ],
+      "code": "import torch\nx=torch.tensor([1.,2.],requires_grad=True)\ny=(x*x).sum();y.backward();print(x.grad)",
+      "packages": "torch",
+      "application": "构建和处理ETF多资产面板、财务指标或量化模型训练管线，保障特征、目标与交易日期一致。",
+      "limits": "GPU与CPU张量混用、意外detach会导致错误或失去梯度。",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n03-05",
+      "node_id": "python-n03-05",
+      "title": "数据加载器",
+      "definition": "PyTorch Dataset和DataLoader将样本以批次形式交给训练循环，管理批处理和采样顺序。",
+      "assumptions": "本知识点要求输入数据类型、维度、时间与索引规范一致；若涉及训练或统计估计，应只用训练样本拟合参数。",
+      "properties": [
+        "关键的数学或程序关系由“数据加载器”对应的定义公式给出，需结合执行结果校验维度与边界。",
+        "实际使用时需核查数值稳定性、输入校验、重复性及运行环境。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "B_k=\\{(x_i,y_i):i\\in I_k\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确认输入对象、索引以及该操作所依赖的数学数据结构。",
+          "tex": "B_k=\\{(x_i,y_i):i\\in I_k\\}"
+        },
+        {
+          "explanation": "据此按公式计算输出，并以基本可运行的Python程序校验结果和数据类型。",
+          "tex": "B_k=\\{(x_i,y_i):i\\in I_k\\}"
+        }
+      ],
+      "code": "import torch\nfrom torch.utils.data import TensorDataset,DataLoader\nx=torch.randn(9,2);y=torch.randn(9,1)\nfor xb,yb in DataLoader(TensorDataset(x,y),batch_size=4):print(xb.shape)",
+      "packages": "torch",
+      "application": "构建和处理ETF多资产面板、财务指标或量化模型训练管线，保障特征、目标与交易日期一致。",
+      "limits": "序列模型需要避免把高度重叠的样本随机分至训练和验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n04-05",
+      "node_id": "python-n04-05",
+      "title": "训练与推断模式",
+      "definition": "训练模式使Dropout与BatchNorm使用训练逻辑；推断模式关闭随机Dropout并使用适当统计值。",
+      "assumptions": "本知识点要求输入数据类型、维度、时间与索引规范一致；若涉及训练或统计估计，应只用训练样本拟合参数。",
+      "properties": [
+        "关键的数学或程序关系由“训练与推断模式”对应的定义公式给出，需结合执行结果校验维度与边界。",
+        "实际使用时需核查数值稳定性、输入校验、重复性及运行环境。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "f_{\\theta}^{\\rm train}(x)\\ne f_{\\theta}^{\\rm eval}(x)\\ \\text{（某些层）}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确认输入对象、索引以及该操作所依赖的数学数据结构。",
+          "tex": "f_{\\theta}^{\\rm train}(x)\\ne f_{\\theta}^{\\rm eval}(x)\\ \\text{（某些层）}"
+        },
+        {
+          "explanation": "据此按公式计算输出，并以基本可运行的Python程序校验结果和数据类型。",
+          "tex": "f_{\\theta}^{\\rm train}(x)\\ne f_{\\theta}^{\\rm eval}(x)\\ \\text{（某些层）}"
+        }
+      ],
+      "code": "import torch\nm=torch.nn.Dropout(.5);x=torch.ones(5)\nm.train();print('train',m(x));m.eval();print('eval',m(x))",
+      "packages": "torch",
+      "application": "构建和处理ETF多资产面板、财务指标或量化模型训练管线，保障特征、目标与交易日期一致。",
+      "limits": "eval()不自动禁用梯度记录，推断还应使用no_grad或inference_mode。",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n05-05",
+      "node_id": "python-n05-05",
+      "title": "模型保存",
+      "definition": "模型保存保留参数与训练配置，恢复时需核对架构、字段顺序和预处理状态。",
+      "assumptions": "本知识点要求输入数据类型、维度、时间与索引规范一致；若涉及训练或统计估计，应只用训练样本拟合参数。",
+      "properties": [
+        "关键的数学或程序关系由“模型保存”对应的定义公式给出，需结合执行结果校验维度与边界。",
+        "实际使用时需核查数值稳定性、输入校验、重复性及运行环境。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "\\hat y=f_{\\theta_v}(T_{\\psi_v}(x))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确认输入对象、索引以及该操作所依赖的数学数据结构。",
+          "tex": "\\hat y=f_{\\theta_v}(T_{\\psi_v}(x))"
+        },
+        {
+          "explanation": "据此按公式计算输出，并以基本可运行的Python程序校验结果和数据类型。",
+          "tex": "\\hat y=f_{\\theta_v}(T_{\\psi_v}(x))"
+        }
+      ],
+      "code": "import torch,io\nm=torch.nn.Linear(2,1);f=io.BytesIO();torch.save(m.state_dict(),f);f.seek(0)\nn=torch.nn.Linear(2,1);n.load_state_dict(torch.load(f,weights_only=True));print(n.weight.shape)",
+      "packages": "torch",
+      "application": "构建和处理ETF多资产面板、财务指标或量化模型训练管线，保障特征、目标与交易日期一致。",
+      "limits": "仅保存权重不足以完整保存数据变换或运行环境。",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n06-05",
+      "node_id": "python-n06-05",
+      "title": "单元测试",
+      "definition": "单元测试用边界输入和已知输出验证函数的局部正确性，是金融模型工程化的基本质量门槛。",
+      "assumptions": "本知识点要求输入数据类型、维度、时间与索引规范一致；若涉及训练或统计估计，应只用训练样本拟合参数。",
+      "properties": [
+        "关键的数学或程序关系由“单元测试”对应的定义公式给出，需结合执行结果校验维度与边界。",
+        "实际使用时需核查数值稳定性、输入校验、重复性及运行环境。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "|f(x_{\\rm test})-y_{\\rm expected}|\\le\\epsilon"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确认输入对象、索引以及该操作所依赖的数学数据结构。",
+          "tex": "|f(x_{\\rm test})-y_{\\rm expected}|\\le\\epsilon"
+        },
+        {
+          "explanation": "据此按公式计算输出，并以基本可运行的Python程序校验结果和数据类型。",
+          "tex": "|f(x_{\\rm test})-y_{\\rm expected}|\\le\\epsilon"
+        }
+      ],
+      "code": "import unittest\nclass TestMean(unittest.TestCase):\n    def test_mean(self):self.assertEqual(sum([1,3])/2,2)\nunittest.main(argv=['test'],exit=False)",
+      "packages": "Python standard library",
+      "application": "构建和处理ETF多资产面板、财务指标或量化模型训练管线，保障特征、目标与交易日期一致。",
+      "limits": "测试覆盖有限，无法单独保证金融策略真实性与系统安全。",
+      "coverage": "complete"
+    }
+  ]
+}
