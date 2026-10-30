@@ -1,0 +1,549 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "probabilistic-n01-01",
+      "node_id": "probabilistic-n01-01",
+      "title": "联合与条件概率",
+      "definition": "联合概率刻画多个随机变量同时取值的分布，条件概率描述在给定一个事件后的概率更新。",
+      "assumptions": "指定先验、数据似然、状态条件与可得时点，区分模型不确定性和真实随机噪声。",
+      "properties": [
+        "概率推断依赖明确的模型设定与数值积分或近似方法。",
+        "预测区间与后验概率需要样本外校准，金融非平稳性会改变覆盖效果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心概率公式",
+          "tex": "p(x,y)=p(x)p(y|x),\\qquad p(y|x)=p(x,y)/p(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "以所述概率模型、条件分布和概率分解定义目标量。",
+          "tex": "p(x,y)=p(x)p(y|x),\\qquad p(y|x)=p(x,y)/p(x)"
+        },
+        {
+          "explanation": "选择解析更新或数值近似，检查归一化、条件独立性及参数估计敏感度。",
+          "tex": "p(x,y)=p(x)p(y|x),\\qquad p(y|x)=p(x,y)/p(x)"
+        }
+      ],
+      "code": "import numpy as np\njoint=np.array([[.1,.3],[.2,.4]])\nprint(\"P(Y=1|X=0):\",joint[0,1]/joint[0].sum())",
+      "packages": "numpy",
+      "application": "用概率模型进行金融状态过滤、条件波动估计、收益预测区间和风险事件概率分析。",
+      "limits": "示例为数学机制或基本模拟，不构成经检验的风险预测模型。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n06-02",
+      "node_id": "probabilistic-n06-02",
+      "title": "粒子滤波",
+      "definition": "序贯Monte Carlo用加权随机粒子近似非线性、非高斯状态后验，并按有效样本量重采样。",
+      "assumptions": "指定先验、数据似然、状态条件与可得时点，区分模型不确定性和真实随机噪声。",
+      "properties": [
+        "概率推断依赖明确的模型设定与数值积分或近似方法。",
+        "预测区间与后验概率需要样本外校准，金融非平稳性会改变覆盖效果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心概率公式",
+          "tex": "p(x_t|y_{1:t})\\approx\\sum_{i=1}^Nw_t^{(i)}\\delta(x_t-x_t^{(i)})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "以所述概率模型、条件分布和概率分解定义目标量。",
+          "tex": "p(x_t|y_{1:t})\\approx\\sum_{i=1}^Nw_t^{(i)}\\delta(x_t-x_t^{(i)})"
+        },
+        {
+          "explanation": "选择解析更新或数值近似，检查归一化、条件独立性及参数估计敏感度。",
+          "tex": "p(x_t|y_{1:t})\\approx\\sum_{i=1}^Nw_t^{(i)}\\delta(x_t-x_t^{(i)})"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);particles=rng.normal(size=500)\nobs=.5\nw=np.exp(-.5*((particles-obs)/.3)**2);w/=w.sum()\nidx=rng.choice(len(particles),size=len(particles),p=w)\nprint(\"Filtered mean:\",particles[idx].mean())",
+      "packages": "numpy",
+      "application": "用概率模型进行金融状态过滤、条件波动估计、收益预测区间和风险事件概率分析。",
+      "limits": "示例为数学机制或基本模拟，不构成经检验的风险预测模型。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n02-03",
+      "node_id": "probabilistic-n02-03",
+      "title": "Markov链Monte Carlo",
+      "definition": "MCMC构造以目标分布为不变分布的马尔可夫链，利用相关样本近似后验期望。",
+      "assumptions": "指定先验、数据似然、状态条件与可得时点，区分模型不确定性和真实随机噪声。",
+      "properties": [
+        "概率推断依赖明确的模型设定与数值积分或近似方法。",
+        "预测区间与后验概率需要样本外校准，金融非平稳性会改变覆盖效果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心概率公式",
+          "tex": "E_\\pi[f(X)]\\approx\\frac1N\\sum_{t=1}^Nf(X_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "以所述概率模型、条件分布和概率分解定义目标量。",
+          "tex": "E_\\pi[f(X)]\\approx\\frac1N\\sum_{t=1}^Nf(X_t)"
+        },
+        {
+          "explanation": "选择解析更新或数值近似，检查归一化、条件独立性及参数估计敏感度。",
+          "tex": "E_\\pi[f(X)]\\approx\\frac1N\\sum_{t=1}^Nf(X_t)"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);x=0.;draw=[]\nfor _ in range(1000):\n    z=x+rng.normal(0,.5)\n    if np.log(rng.random())<min(0.,-(z*z-x*x)/2):x=z\n    draw.append(x)\nprint(np.mean(draw[200:]))",
+      "packages": "numpy",
+      "application": "用概率模型进行金融状态过滤、条件波动估计、收益预测区间和风险事件概率分析。",
+      "limits": "示例为数学机制或基本模拟，不构成经检验的风险预测模型。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n04-03",
+      "node_id": "probabilistic-n04-03",
+      "title": "Hamiltonian Monte Carlo",
+      "definition": "HMC引入辅助动量与Hamiltonian动力学，使用Leapfrog积分提出远距离候选并以MH接受步骤校正。",
+      "assumptions": "指定先验、数据似然、状态条件与可得时点，区分模型不确定性和真实随机噪声。",
+      "properties": [
+        "概率推断依赖明确的模型设定与数值积分或近似方法。",
+        "预测区间与后验概率需要样本外校准，金融非平稳性会改变覆盖效果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心概率公式",
+          "tex": "H(q,p)=U(q)+\\tfrac12p^\\top M^{-1}p,\\quad U(q)=-\\log\\pi(q)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "以所述概率模型、条件分布和概率分解定义目标量。",
+          "tex": "H(q,p)=U(q)+\\tfrac12p^\\top M^{-1}p,\\quad U(q)=-\\log\\pi(q)"
+        },
+        {
+          "explanation": "选择解析更新或数值近似，检查归一化、条件独立性及参数估计敏感度。",
+          "tex": "H(q,p)=U(q)+\\tfrac12p^\\top M^{-1}p,\\quad U(q)=-\\log\\pi(q)"
+        }
+      ],
+      "code": "import numpy as np\nq=1.;p=.5;epsilon=.1\ngrad=lambda x:x\np-=epsilon*grad(q)/2\nq+=epsilon*p\np-=epsilon*grad(q)/2\nprint(\"One leapfrog state:\",q,p)",
+      "packages": "numpy",
+      "application": "用概率模型进行金融状态过滤、条件波动估计、收益预测区间和风险事件概率分析。",
+      "limits": "示例为数学机制或基本模拟，不构成经检验的风险预测模型。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n05-03",
+      "node_id": "probabilistic-n05-03",
+      "title": "变分推断VI",
+      "definition": "变分推断将后验积分改写为选择一个近似分布族，使其KL散度最小，通常最大化ELBO。",
+      "assumptions": "指定先验、数据似然、状态条件与可得时点，区分模型不确定性和真实随机噪声。",
+      "properties": [
+        "概率推断依赖明确的模型设定与数值积分或近似方法。",
+        "预测区间与后验概率需要样本外校准，金融非平稳性会改变覆盖效果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心概率公式",
+          "tex": "q^*=\\arg\\min_{q\\in\\mathcal Q}D_{\\rm KL}(q\\|p(\\theta|D))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "以所述概率模型、条件分布和概率分解定义目标量。",
+          "tex": "q^*=\\arg\\min_{q\\in\\mathcal Q}D_{\\rm KL}(q\\|p(\\theta|D))"
+        },
+        {
+          "explanation": "选择解析更新或数值近似，检查归一化、条件独立性及参数估计敏感度。",
+          "tex": "q^*=\\arg\\min_{q\\in\\mathcal Q}D_{\\rm KL}(q\\|p(\\theta|D))"
+        }
+      ],
+      "code": "import numpy as np\np=np.array([.3,.7]);q=np.array([.4,.6])\nprint(\"KL(q||p):\",np.sum(q*np.log(q/p)))",
+      "packages": "numpy",
+      "application": "用概率模型进行金融状态过滤、条件波动估计、收益预测区间和风险事件概率分析。",
+      "limits": "示例为数学机制或基本模拟，不构成经检验的风险预测模型。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n06-03",
+      "node_id": "probabilistic-n06-03",
+      "title": "ELBO",
+      "definition": "证据下界通过Jensen不等式建立可优化的后验近似目标，由重构项减去对先验的KL正则构成。",
+      "assumptions": "指定先验、数据似然、状态条件与可得时点，区分模型不确定性和真实随机噪声。",
+      "properties": [
+        "概率推断依赖明确的模型设定与数值积分或近似方法。",
+        "预测区间与后验概率需要样本外校准，金融非平稳性会改变覆盖效果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心概率公式",
+          "tex": "\\mathcal L=E_q[\\log p(x|z)]-D_{\\rm KL}(q(z|x)\\|p(z))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "以所述概率模型、条件分布和概率分解定义目标量。",
+          "tex": "\\mathcal L=E_q[\\log p(x|z)]-D_{\\rm KL}(q(z|x)\\|p(z))"
+        },
+        {
+          "explanation": "选择解析更新或数值近似，检查归一化、条件独立性及参数估计敏感度。",
+          "tex": "\\mathcal L=E_q[\\log p(x|z)]-D_{\\rm KL}(q(z|x)\\|p(z))"
+        }
+      ],
+      "code": "import numpy as np\nmu=np.array([.2,-.1]);logvar=np.zeros(2)\nkl=-.5*np.sum(1+logvar-mu**2-np.exp(logvar))\nprint(\"Gaussian posterior KL:\",kl)",
+      "packages": "numpy",
+      "application": "用概率模型进行金融状态过滤、条件波动估计、收益预测区间和风险事件概率分析。",
+      "limits": "示例为数学机制或基本模拟，不构成经检验的风险预测模型。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n01-04",
+      "node_id": "probabilistic-n01-04",
+      "title": "Aleatoric不确定性",
+      "definition": "偶然不确定性来源于给定输入后目标自身不可约的随机噪声，可建模为条件方差。",
+      "assumptions": "指定先验、数据似然、状态条件与可得时点，区分模型不确定性和真实随机噪声。",
+      "properties": [
+        "概率推断依赖明确的模型设定与数值积分或近似方法。",
+        "预测区间与后验概率需要样本外校准，金融非平稳性会改变覆盖效果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心概率公式",
+          "tex": "\\operatorname{Var}(Y|X=x)=\\sigma_{\\rm aleatoric}^2(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "以所述概率模型、条件分布和概率分解定义目标量。",
+          "tex": "\\operatorname{Var}(Y|X=x)=\\sigma_{\\rm aleatoric}^2(x)"
+        },
+        {
+          "explanation": "选择解析更新或数值近似，检查归一化、条件独立性及参数估计敏感度。",
+          "tex": "\\operatorname{Var}(Y|X=x)=\\sigma_{\\rm aleatoric}^2(x)"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0)\nx=np.ones(100);y=2*x+rng.normal(0,.5,100)\nprint(\"Residual noise std:\",np.std(y-2*x))",
+      "packages": "numpy",
+      "application": "用概率模型进行金融状态过滤、条件波动估计、收益预测区间和风险事件概率分析。",
+      "limits": "示例为数学机制或基本模拟，不构成经检验的风险预测模型。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n02-04",
+      "node_id": "probabilistic-n02-04",
+      "title": "Epistemic不确定性",
+      "definition": "认知不确定性反映参数或模型知识不足，通常可随更多有效样本缩小。",
+      "assumptions": "指定先验、数据似然、状态条件与可得时点，区分模型不确定性和真实随机噪声。",
+      "properties": [
+        "概率推断依赖明确的模型设定与数值积分或近似方法。",
+        "预测区间与后验概率需要样本外校准，金融非平稳性会改变覆盖效果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心概率公式",
+          "tex": "\\operatorname{Var}_{\\theta|D}(E[Y|X,\\theta])"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "以所述概率模型、条件分布和概率分解定义目标量。",
+          "tex": "\\operatorname{Var}_{\\theta|D}(E[Y|X,\\theta])"
+        },
+        {
+          "explanation": "选择解析更新或数值近似，检查归一化、条件独立性及参数估计敏感度。",
+          "tex": "\\operatorname{Var}_{\\theta|D}(E[Y|X,\\theta])"
+        }
+      ],
+      "code": "import numpy as np\npred=np.array([[1.,1.2],[.9,1.4],[1.1,1.3]])\nprint(\"Model uncertainty variance:\",pred.var(axis=0))",
+      "packages": "numpy",
+      "application": "用概率模型进行金融状态过滤、条件波动估计、收益预测区间和风险事件概率分析。",
+      "limits": "示例为数学机制或基本模拟，不构成经检验的风险预测模型。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n03-04",
+      "node_id": "probabilistic-n03-04",
+      "title": "Bayesian Neural Network",
+      "definition": "贝叶斯神经网络为网络权重赋予先验并使用后验分布，而非只求单组点估计权重。",
+      "assumptions": "指定先验、数据似然、状态条件与可得时点，区分模型不确定性和真实随机噪声。",
+      "properties": [
+        "概率推断依赖明确的模型设定与数值积分或近似方法。",
+        "预测区间与后验概率需要样本外校准，金融非平稳性会改变覆盖效果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心概率公式",
+          "tex": "p(w|D)\\propto p(D|w)p(w)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "以所述概率模型、条件分布和概率分解定义目标量。",
+          "tex": "p(w|D)\\propto p(D|w)p(w)"
+        },
+        {
+          "explanation": "选择解析更新或数值近似，检查归一化、条件独立性及参数估计敏感度。",
+          "tex": "p(w|D)\\propto p(D|w)p(w)"
+        }
+      ],
+      "code": "import torch\nmu=torch.nn.Parameter(torch.tensor(0.))\nlogstd=torch.nn.Parameter(torch.tensor(-1.))\nsample=mu+logstd.exp()*torch.randn(())\nprint(\"Sampled weight:\",sample.item())",
+      "packages": "torch",
+      "application": "用概率模型进行金融状态过滤、条件波动估计、收益预测区间和风险事件概率分析。",
+      "limits": "示例为数学机制或基本模拟，不构成经检验的风险预测模型。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n04-04",
+      "node_id": "probabilistic-n04-04",
+      "title": "温度缩放",
+      "definition": "温度缩放在保留集拟合单一温度参数以调整分类Logits幅度，通常不改变类别排名。",
+      "assumptions": "指定先验、数据似然、状态条件与可得时点，区分模型不确定性和真实随机噪声。",
+      "properties": [
+        "概率推断依赖明确的模型设定与数值积分或近似方法。",
+        "预测区间与后验概率需要样本外校准，金融非平稳性会改变覆盖效果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心概率公式",
+          "tex": "p_k(T)=\\frac{\\exp(z_k/T)}{\\sum_j\\exp(z_j/T)}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "以所述概率模型、条件分布和概率分解定义目标量。",
+          "tex": "p_k(T)=\\frac{\\exp(z_k/T)}{\\sum_j\\exp(z_j/T)}"
+        },
+        {
+          "explanation": "选择解析更新或数值近似，检查归一化、条件独立性及参数估计敏感度。",
+          "tex": "p_k(T)=\\frac{\\exp(z_k/T)}{\\sum_j\\exp(z_j/T)}"
+        }
+      ],
+      "code": "import numpy as np\nz=np.array([1.,2.,3.])\nfor T in [.5,2.]:\n    p=np.exp(z/T-np.max(z/T));print(T,p/p.sum())",
+      "packages": "numpy",
+      "application": "用概率模型进行金融状态过滤、条件波动估计、收益预测区间和风险事件概率分析。",
+      "limits": "示例为数学机制或基本模拟，不构成经检验的风险预测模型。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n06-04",
+      "node_id": "probabilistic-n06-04",
+      "title": "预测区间",
+      "definition": "预测区间针对未来观测本身构造覆盖范围，通常包括参数不确定性与未来噪声，区别于均值置信区间。",
+      "assumptions": "指定先验、数据似然、状态条件与可得时点，区分模型不确定性和真实随机噪声。",
+      "properties": [
+        "概率推断依赖明确的模型设定与数值积分或近似方法。",
+        "预测区间与后验概率需要样本外校准，金融非平稳性会改变覆盖效果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心概率公式",
+          "tex": "P(Y_{\\rm new}\\in[L(X_{\\rm new}),U(X_{\\rm new})])\\ge1-\\alpha"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "以所述概率模型、条件分布和概率分解定义目标量。",
+          "tex": "P(Y_{\\rm new}\\in[L(X_{\\rm new}),U(X_{\\rm new})])\\ge1-\\alpha"
+        },
+        {
+          "explanation": "选择解析更新或数值近似，检查归一化、条件独立性及参数估计敏感度。",
+          "tex": "P(Y_{\\rm new}\\in[L(X_{\\rm new}),U(X_{\\rm new})])\\ge1-\\alpha"
+        }
+      ],
+      "code": "import numpy as np\nmean=.1;std=.2\nprint(\"Gaussian 95% PI:\",(mean-1.96*std,mean+1.96*std))",
+      "packages": "numpy",
+      "application": "用概率模型进行金融状态过滤、条件波动估计、收益预测区间和风险事件概率分析。",
+      "limits": "示例为数学机制或基本模拟，不构成经检验的风险预测模型。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n01-05",
+      "node_id": "probabilistic-n01-05",
+      "title": "市场状态HMM",
+      "definition": "隐马尔可夫市场模型使用隐藏的波动或趋势状态转移解释不同收益状态的发射分布。",
+      "assumptions": "指定先验、数据似然、状态条件与可得时点，区分模型不确定性和真实随机噪声。",
+      "properties": [
+        "概率推断依赖明确的模型设定与数值积分或近似方法。",
+        "预测区间与后验概率需要样本外校准，金融非平稳性会改变覆盖效果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心概率公式",
+          "tex": "P(S_t=j|S_{t-1}=i)=A_{ij}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "以所述概率模型、条件分布和概率分解定义目标量。",
+          "tex": "P(S_t=j|S_{t-1}=i)=A_{ij}"
+        },
+        {
+          "explanation": "选择解析更新或数值近似，检查归一化、条件独立性及参数估计敏感度。",
+          "tex": "P(S_t=j|S_{t-1}=i)=A_{ij}"
+        }
+      ],
+      "code": "import numpy as np\nP=np.array([[.9,.1],[.2,.8]])\nstate=np.array([.6,.4])\nprint(\"Next state probabilities:\",state@P)",
+      "packages": "numpy",
+      "application": "用概率模型进行金融状态过滤、条件波动估计、收益预测区间和风险事件概率分析。",
+      "limits": "示例为数学机制或基本模拟，不构成经检验的风险预测模型。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n02-05",
+      "node_id": "probabilistic-n02-05",
+      "title": "贝叶斯收益率估计",
+      "definition": "贝叶斯收益估计结合历史观测及均值先验，减少小样本收益估计的不稳定性。",
+      "assumptions": "指定先验、数据似然、状态条件与可得时点，区分模型不确定性和真实随机噪声。",
+      "properties": [
+        "概率推断依赖明确的模型设定与数值积分或近似方法。",
+        "预测区间与后验概率需要样本外校准，金融非平稳性会改变覆盖效果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心概率公式",
+          "tex": "E[\\mu|D]=\\frac{\\mu_0/\\tau^2+\\sum_i r_i/\\sigma^2}{1/\\tau^2+n/\\sigma^2}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "以所述概率模型、条件分布和概率分解定义目标量。",
+          "tex": "E[\\mu|D]=\\frac{\\mu_0/\\tau^2+\\sum_i r_i/\\sigma^2}{1/\\tau^2+n/\\sigma^2}"
+        },
+        {
+          "explanation": "选择解析更新或数值近似，检查归一化、条件独立性及参数估计敏感度。",
+          "tex": "E[\\mu|D]=\\frac{\\mu_0/\\tau^2+\\sum_i r_i/\\sigma^2}{1/\\tau^2+n/\\sigma^2}"
+        }
+      ],
+      "code": "import numpy as np\nr=np.array([.02,-.03,.04]);mu0=0.;tv=.01;sv=.04\npost=(mu0/tv+r.sum()/sv)/(1/tv+len(r)/sv)\nprint(post)",
+      "packages": "numpy",
+      "application": "用概率模型进行金融状态过滤、条件波动估计、收益预测区间和风险事件概率分析。",
+      "limits": "示例为数学机制或基本模拟，不构成经检验的风险预测模型。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n03-05",
+      "node_id": "probabilistic-n03-05",
+      "title": "GARCH与随机波动率",
+      "definition": "GARCH用过去冲击和方差递推条件波动率；SV则把对数波动建模为具有自身噪声的潜变量。",
+      "assumptions": "指定先验、数据似然、状态条件与可得时点，区分模型不确定性和真实随机噪声。",
+      "properties": [
+        "概率推断依赖明确的模型设定与数值积分或近似方法。",
+        "预测区间与后验概率需要样本外校准，金融非平稳性会改变覆盖效果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心概率公式",
+          "tex": "\\sigma_t^2=\\omega+\\alpha\\epsilon_{t-1}^2+\\beta\\sigma_{t-1}^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "以所述概率模型、条件分布和概率分解定义目标量。",
+          "tex": "\\sigma_t^2=\\omega+\\alpha\\epsilon_{t-1}^2+\\beta\\sigma_{t-1}^2"
+        },
+        {
+          "explanation": "选择解析更新或数值近似，检查归一化、条件独立性及参数估计敏感度。",
+          "tex": "\\sigma_t^2=\\omega+\\alpha\\epsilon_{t-1}^2+\\beta\\sigma_{t-1}^2"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);eps=rng.normal(0,.01,20)\nv=np.empty(20);v[0]=.0001\nfor t in range(1,20):v[t]=.000001+.08*eps[t-1]**2+.9*v[t-1]\nprint(v[-1])",
+      "packages": "numpy",
+      "application": "用概率模型进行金融状态过滤、条件波动估计、收益预测区间和风险事件概率分析。",
+      "limits": "示例为数学机制或基本模拟，不构成经检验的风险预测模型。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n04-05",
+      "node_id": "probabilistic-n04-05",
+      "title": "尾部概率",
+      "definition": "尾部概率度量极端损失发生的概率，不能仅凭收益方差刻画。",
+      "assumptions": "指定先验、数据似然、状态条件与可得时点，区分模型不确定性和真实随机噪声。",
+      "properties": [
+        "概率推断依赖明确的模型设定与数值积分或近似方法。",
+        "预测区间与后验概率需要样本外校准，金融非平稳性会改变覆盖效果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心概率公式",
+          "tex": "P(L>\\ell)=1-F_L(\\ell)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "以所述概率模型、条件分布和概率分解定义目标量。",
+          "tex": "P(L>\\ell)=1-F_L(\\ell)"
+        },
+        {
+          "explanation": "选择解析更新或数值近似，检查归一化、条件独立性及参数估计敏感度。",
+          "tex": "P(L>\\ell)=1-F_L(\\ell)"
+        }
+      ],
+      "code": "from scipy.stats import t\nprint(\"Student-t tail:\",t.sf(3,df=5))",
+      "packages": "numpy, scipy",
+      "application": "用概率模型进行金融状态过滤、条件波动估计、收益预测区间和风险事件概率分析。",
+      "limits": "示例为数学机制或基本模拟，不构成经检验的风险预测模型。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n05-05",
+      "node_id": "probabilistic-n05-05",
+      "title": "动态Beta",
+      "definition": "动态Beta允许市场暴露随时间变化，可通过滚动回归、状态空间模型或过滤方法估计。",
+      "assumptions": "指定先验、数据似然、状态条件与可得时点，区分模型不确定性和真实随机噪声。",
+      "properties": [
+        "概率推断依赖明确的模型设定与数值积分或近似方法。",
+        "预测区间与后验概率需要样本外校准，金融非平稳性会改变覆盖效果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心概率公式",
+          "tex": "r_{i,t}=\\alpha_t+\\beta_t r_{m,t}+\\epsilon_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "以所述概率模型、条件分布和概率分解定义目标量。",
+          "tex": "r_{i,t}=\\alpha_t+\\beta_t r_{m,t}+\\epsilon_t"
+        },
+        {
+          "explanation": "选择解析更新或数值近似，检查归一化、条件独立性及参数估计敏感度。",
+          "tex": "r_{i,t}=\\alpha_t+\\beta_t r_{m,t}+\\epsilon_t"
+        }
+      ],
+      "code": "import numpy as np\nr=np.array([.01,-.02,.03,.02]);p=1.4*r\nprint(np.cov(r,p)[0,1]/np.var(r,ddof=1))",
+      "packages": "numpy",
+      "application": "用概率模型进行金融状态过滤、条件波动估计、收益预测区间和风险事件概率分析。",
+      "limits": "示例为数学机制或基本模拟，不构成经检验的风险预测模型。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n06-05",
+      "node_id": "probabilistic-n06-05",
+      "title": "信用事件概率",
+      "definition": "信用事件模型估计违约或信用转移在预测窗口内发生的条件概率，常使用生存概率或分类模型。",
+      "assumptions": "指定先验、数据似然、状态条件与可得时点，区分模型不确定性和真实随机噪声。",
+      "properties": [
+        "概率推断依赖明确的模型设定与数值积分或近似方法。",
+        "预测区间与后验概率需要样本外校准，金融非平稳性会改变覆盖效果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心概率公式",
+          "tex": "P(T\\le t+h|T>t,X)=1-\\exp(-\\int_t^{t+h}\\lambda(u|X)\\,du)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "以所述概率模型、条件分布和概率分解定义目标量。",
+          "tex": "P(T\\le t+h|T>t,X)=1-\\exp(-\\int_t^{t+h}\\lambda(u|X)\\,du)"
+        },
+        {
+          "explanation": "选择解析更新或数值近似，检查归一化、条件独立性及参数估计敏感度。",
+          "tex": "P(T\\le t+h|T>t,X)=1-\\exp(-\\int_t^{t+h}\\lambda(u|X)\\,du)"
+        }
+      ],
+      "code": "import numpy as np\nhazard=.02;years=5\nprint(\"Constant-hazard default probability:\",1-np.exp(-hazard*years))",
+      "packages": "numpy",
+      "application": "用概率模型进行金融状态过滤、条件波动估计、收益预测区间和风险事件概率分析。",
+      "limits": "示例为数学机制或基本模拟，不构成经检验的风险预测模型。",
+      "coverage": "complete"
+    }
+  ]
+}
