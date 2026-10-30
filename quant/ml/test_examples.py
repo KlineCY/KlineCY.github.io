@@ -47,7 +47,15 @@ SMOKE={
     "多重检验修正","风险平价","均值方差组合","Black-Litterman",
     "R²","数据漂移","OOD检测","测试与CI","线上特征一致性",
     "k近邻kNN","高斯朴素贝叶斯","线性判别分析LDA",
-    "熵和信息增益","层次聚类","嵌套交叉验证","实验假设和消融"
+    "熵和信息增益","层次聚类","嵌套交叉验证","实验假设和消融",
+    "谱聚类","聚类稳定性","核PCA","Local Outlier Factor","One-Class SVM",
+    "粒子滤波","变分推断VI","Hamiltonian Monte Carlo","AdaGrad",
+    "投影梯度","BFGS/L-BFGS","避免图像数据泄漏","跨ETF泛化",
+    "Importance Sampling","UCB","最优停止","事件采样CUSUM",
+    "样本唯一性","Deflated Sharpe","Probability of Backtest Overfitting",
+    "工具变量","断点回归","事件研究","Beam Search","GloVe",
+    "Tokenization BPE","重排序Reranking","特征存储Feature Store",
+    "漂移与再训练","Shadow Deployment","回滚与审计"
 }
 class MLExamplesTest(unittest.TestCase):
     def test_all_code_compiles(self):
