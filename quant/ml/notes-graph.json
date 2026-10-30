@@ -1,0 +1,773 @@
+{
+  "version": 1,
+  "notes": [
+    {
+      "id": "graph-n02-01",
+      "node_id": "graph-n02-01",
+      "title": "度矩阵",
+      "definition": "无向图度矩阵是以各节点邻边权重和为对角元素的矩阵。",
+      "assumptions": "图的节点、边类型、时间和权重必须明确；金融关系数据只能使用在预测时已披露的网络。",
+      "properties": [
+        "无向图度矩阵是以各节点邻边权重和为对角元素的矩阵。。",
+        "图结构可能同时反映行业共因子、信息滞后和数据收集偏差，不能直接视为因果传播。"
+      ],
+      "formulas": [
+        {
+          "label": "网络与表示关系",
+          "tex": "D_{ii}=\\sum_jA_{ij}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义节点、邻接或关系得分后建立图上的数学运算。无向图度矩阵是以各节点邻边权重和为对角元素的矩阵。",
+          "tex": "D_{ii}=\\sum_jA_{ij}"
+        },
+        {
+          "explanation": "利用已知边和节点特征聚合表示，再在时间保留集评价效果。",
+          "tex": "D_{ii}=\\sum_jA_{ij}"
+        }
+      ],
+      "code": "# 度矩阵：图表示运算基础代码\nimport numpy as np\nA=np.array([[0.,1.,0.],[1.,0.,1.],[0.,1.,0.]])\nD=np.diag(A.sum(1));L=D-A\nx=np.array([[1.,0.],[0.,1.],[2.,1.]])\nnorm=(D+np.eye(3))**0   # placeholder overwritten with normalized adjacency\nB=A+np.eye(3);degree=B.sum(1)\nG=(degree**-.5)[:,None]*B*(degree**-.5)[None,:]\nprint(\"Graph-Laplacian eigenvalues:\",np.linalg.eigvalsh(L))\nprint(\"One message-passing step:\",G@x)",
+      "packages": "numpy",
+      "application": "用于ETF持仓图、行业风险传染与金融新闻实体网络。",
+      "limits": "这是一篇概念扩展笔记，代码仅为图邻接及信息聚合演示，而非每个GNN算法完整训练。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "graph-n04-01",
+      "node_id": "graph-n04-01",
+      "title": "图谱基础",
+      "definition": "图谱分析研究邻接矩阵、Laplacian及特征向量如何描述网络整体结构。",
+      "assumptions": "图的节点、边类型、时间和权重必须明确；金融关系数据只能使用在预测时已披露的网络。",
+      "properties": [
+        "图谱分析研究邻接矩阵、Laplacian及特征向量如何描述网络整体结构。。",
+        "图结构可能同时反映行业共因子、信息滞后和数据收集偏差，不能直接视为因果传播。"
+      ],
+      "formulas": [
+        {
+          "label": "网络与表示关系",
+          "tex": "L=D-A"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义节点、邻接或关系得分后建立图上的数学运算。图谱分析研究邻接矩阵、Laplacian及特征向量如何描述网络整体结构。",
+          "tex": "L=D-A"
+        },
+        {
+          "explanation": "利用已知边和节点特征聚合表示，再在时间保留集评价效果。",
+          "tex": "L=D-A"
+        }
+      ],
+      "code": "# 图谱基础：图表示运算基础代码\nimport numpy as np\nA=np.array([[0.,1.,0.],[1.,0.,1.],[0.,1.,0.]])\nD=np.diag(A.sum(1));L=D-A\nx=np.array([[1.,0.],[0.,1.],[2.,1.]])\nnorm=(D+np.eye(3))**0   # placeholder overwritten with normalized adjacency\nB=A+np.eye(3);degree=B.sum(1)\nG=(degree**-.5)[:,None]*B*(degree**-.5)[None,:]\nprint(\"Graph-Laplacian eigenvalues:\",np.linalg.eigvalsh(L))\nprint(\"One message-passing step:\",G@x)",
+      "packages": "numpy",
+      "application": "用于ETF持仓图、行业风险传染与金融新闻实体网络。",
+      "limits": "这是一篇概念扩展笔记，代码仅为图邻接及信息聚合演示，而非每个GNN算法完整训练。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "graph-n05-01",
+      "node_id": "graph-n05-01",
+      "title": "同配与异配",
+      "definition": "同配图相邻节点倾向具有相似标签，异配图相邻节点标签不同。",
+      "assumptions": "图的节点、边类型、时间和权重必须明确；金融关系数据只能使用在预测时已披露的网络。",
+      "properties": [
+        "同配图相邻节点倾向具有相似标签，异配图相邻节点标签不同。。",
+        "图结构可能同时反映行业共因子、信息滞后和数据收集偏差，不能直接视为因果传播。"
+      ],
+      "formulas": [
+        {
+          "label": "网络与表示关系",
+          "tex": "h=\\frac{|\\{(u,v)\\in E:y_u=y_v\\}|}{|E|}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义节点、邻接或关系得分后建立图上的数学运算。同配图相邻节点倾向具有相似标签，异配图相邻节点标签不同。",
+          "tex": "h=\\frac{|\\{(u,v)\\in E:y_u=y_v\\}|}{|E|}"
+        },
+        {
+          "explanation": "利用已知边和节点特征聚合表示，再在时间保留集评价效果。",
+          "tex": "h=\\frac{|\\{(u,v)\\in E:y_u=y_v\\}|}{|E|}"
+        }
+      ],
+      "code": "# 同配与异配：图表示运算基础代码\nimport numpy as np\nA=np.array([[0.,1.,0.],[1.,0.,1.],[0.,1.,0.]])\nD=np.diag(A.sum(1));L=D-A\nx=np.array([[1.,0.],[0.,1.],[2.,1.]])\nnorm=(D+np.eye(3))**0   # placeholder overwritten with normalized adjacency\nB=A+np.eye(3);degree=B.sum(1)\nG=(degree**-.5)[:,None]*B*(degree**-.5)[None,:]\nprint(\"Graph-Laplacian eigenvalues:\",np.linalg.eigvalsh(L))\nprint(\"One message-passing step:\",G@x)",
+      "packages": "numpy",
+      "application": "用于ETF持仓图、行业风险传染与金融新闻实体网络。",
+      "limits": "这是一篇概念扩展笔记，代码仅为图邻接及信息聚合演示，而非每个GNN算法完整训练。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "graph-n06-01",
+      "node_id": "graph-n06-01",
+      "title": "图神经网络任务",
+      "definition": "GNN可用于节点分类、边预测以及整图回归等不同粒度任务。",
+      "assumptions": "图的节点、边类型、时间和权重必须明确；金融关系数据只能使用在预测时已披露的网络。",
+      "properties": [
+        "GNN可用于节点分类、边预测以及整图回归等不同粒度任务。。",
+        "图结构可能同时反映行业共因子、信息滞后和数据收集偏差，不能直接视为因果传播。"
+      ],
+      "formulas": [
+        {
+          "label": "网络与表示关系",
+          "tex": "\\hat y_v=f_\\theta(G,X)_v"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义节点、邻接或关系得分后建立图上的数学运算。GNN可用于节点分类、边预测以及整图回归等不同粒度任务。",
+          "tex": "\\hat y_v=f_\\theta(G,X)_v"
+        },
+        {
+          "explanation": "利用已知边和节点特征聚合表示，再在时间保留集评价效果。",
+          "tex": "\\hat y_v=f_\\theta(G,X)_v"
+        }
+      ],
+      "code": "# 图神经网络任务：图表示运算基础代码\nimport numpy as np\nA=np.array([[0.,1.,0.],[1.,0.,1.],[0.,1.,0.]])\nD=np.diag(A.sum(1));L=D-A\nx=np.array([[1.,0.],[0.,1.],[2.,1.]])\nnorm=(D+np.eye(3))**0   # placeholder overwritten with normalized adjacency\nB=A+np.eye(3);degree=B.sum(1)\nG=(degree**-.5)[:,None]*B*(degree**-.5)[None,:]\nprint(\"Graph-Laplacian eigenvalues:\",np.linalg.eigvalsh(L))\nprint(\"One message-passing step:\",G@x)",
+      "packages": "numpy",
+      "application": "用于ETF持仓图、行业风险传染与金融新闻实体网络。",
+      "limits": "这是一篇概念扩展笔记，代码仅为图邻接及信息聚合演示，而非每个GNN算法完整训练。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "graph-n05-02",
+      "node_id": "graph-n05-02",
+      "title": "图池化",
+      "definition": "图池化对节点表示汇总或筛选，以形成较小图或整图特征。",
+      "assumptions": "图的节点、边类型、时间和权重必须明确；金融关系数据只能使用在预测时已披露的网络。",
+      "properties": [
+        "图池化对节点表示汇总或筛选，以形成较小图或整图特征。。",
+        "图结构可能同时反映行业共因子、信息滞后和数据收集偏差，不能直接视为因果传播。"
+      ],
+      "formulas": [
+        {
+          "label": "网络与表示关系",
+          "tex": "h_G=\\operatorname{POOL}\\{h_v:v\\in V\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义节点、邻接或关系得分后建立图上的数学运算。图池化对节点表示汇总或筛选，以形成较小图或整图特征。",
+          "tex": "h_G=\\operatorname{POOL}\\{h_v:v\\in V\\}"
+        },
+        {
+          "explanation": "利用已知边和节点特征聚合表示，再在时间保留集评价效果。",
+          "tex": "h_G=\\operatorname{POOL}\\{h_v:v\\in V\\}"
+        }
+      ],
+      "code": "# 图池化：图表示运算基础代码\nimport numpy as np\nA=np.array([[0.,1.,0.],[1.,0.,1.],[0.,1.,0.]])\nD=np.diag(A.sum(1));L=D-A\nx=np.array([[1.,0.],[0.,1.],[2.,1.]])\nnorm=(D+np.eye(3))**0   # placeholder overwritten with normalized adjacency\nB=A+np.eye(3);degree=B.sum(1)\nG=(degree**-.5)[:,None]*B*(degree**-.5)[None,:]\nprint(\"Graph-Laplacian eigenvalues:\",np.linalg.eigvalsh(L))\nprint(\"One message-passing step:\",G@x)",
+      "packages": "numpy",
+      "application": "用于ETF持仓图、行业风险传染与金融新闻实体网络。",
+      "limits": "这是一篇概念扩展笔记，代码仅为图邻接及信息聚合演示，而非每个GNN算法完整训练。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "graph-n06-02",
+      "node_id": "graph-n06-02",
+      "title": "图级读出",
+      "definition": "图级读出将不定节点数表示映射为固定长度的全图向量。",
+      "assumptions": "图的节点、边类型、时间和权重必须明确；金融关系数据只能使用在预测时已披露的网络。",
+      "properties": [
+        "图级读出将不定节点数表示映射为固定长度的全图向量。。",
+        "图结构可能同时反映行业共因子、信息滞后和数据收集偏差，不能直接视为因果传播。"
+      ],
+      "formulas": [
+        {
+          "label": "网络与表示关系",
+          "tex": "h_G=\\sum_{v\\in V}h_v"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义节点、邻接或关系得分后建立图上的数学运算。图级读出将不定节点数表示映射为固定长度的全图向量。",
+          "tex": "h_G=\\sum_{v\\in V}h_v"
+        },
+        {
+          "explanation": "利用已知边和节点特征聚合表示，再在时间保留集评价效果。",
+          "tex": "h_G=\\sum_{v\\in V}h_v"
+        }
+      ],
+      "code": "# 图级读出：图表示运算基础代码\nimport numpy as np\nA=np.array([[0.,1.,0.],[1.,0.,1.],[0.,1.,0.]])\nD=np.diag(A.sum(1));L=D-A\nx=np.array([[1.,0.],[0.,1.],[2.,1.]])\nnorm=(D+np.eye(3))**0   # placeholder overwritten with normalized adjacency\nB=A+np.eye(3);degree=B.sum(1)\nG=(degree**-.5)[:,None]*B*(degree**-.5)[None,:]\nprint(\"Graph-Laplacian eigenvalues:\",np.linalg.eigvalsh(L))\nprint(\"One message-passing step:\",G@x)",
+      "packages": "numpy",
+      "application": "用于ETF持仓图、行业风险传染与金融新闻实体网络。",
+      "limits": "这是一篇概念扩展笔记，代码仅为图邻接及信息聚合演示，而非每个GNN算法完整训练。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "graph-n01-03",
+      "node_id": "graph-n01-03",
+      "title": "Node2Vec",
+      "definition": "使用偏置随机游走生成节点序列并从上下文共现学习节点Embedding。",
+      "assumptions": "图的节点、边类型、时间和权重必须明确；金融关系数据只能使用在预测时已披露的网络。",
+      "properties": [
+        "使用偏置随机游走生成节点序列并从上下文共现学习节点Embedding。。",
+        "图结构可能同时反映行业共因子、信息滞后和数据收集偏差，不能直接视为因果传播。"
+      ],
+      "formulas": [
+        {
+          "label": "网络与表示关系",
+          "tex": "p(v_{t+1}=x\\mid v_t,v_{t-1})\\propto\\alpha_{pq}(u,x)w_{vx}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义节点、邻接或关系得分后建立图上的数学运算。使用偏置随机游走生成节点序列并从上下文共现学习节点Embedding。",
+          "tex": "p(v_{t+1}=x\\mid v_t,v_{t-1})\\propto\\alpha_{pq}(u,x)w_{vx}"
+        },
+        {
+          "explanation": "利用已知边和节点特征聚合表示，再在时间保留集评价效果。",
+          "tex": "p(v_{t+1}=x\\mid v_t,v_{t-1})\\propto\\alpha_{pq}(u,x)w_{vx}"
+        }
+      ],
+      "code": "# Node2Vec：图表示运算基础代码\nimport numpy as np\nA=np.array([[0.,1.,0.],[1.,0.,1.],[0.,1.,0.]])\nD=np.diag(A.sum(1));L=D-A\nx=np.array([[1.,0.],[0.,1.],[2.,1.]])\nnorm=(D+np.eye(3))**0   # placeholder overwritten with normalized adjacency\nB=A+np.eye(3);degree=B.sum(1)\nG=(degree**-.5)[:,None]*B*(degree**-.5)[None,:]\nprint(\"Graph-Laplacian eigenvalues:\",np.linalg.eigvalsh(L))\nprint(\"One message-passing step:\",G@x)",
+      "packages": "numpy",
+      "application": "用于ETF持仓图、行业风险传染与金融新闻实体网络。",
+      "limits": "这是一篇概念扩展笔记，代码仅为图邻接及信息聚合演示，而非每个GNN算法完整训练。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "graph-n02-03",
+      "node_id": "graph-n02-03",
+      "title": "DeepWalk",
+      "definition": "DeepWalk用均匀图随机游走构建节点语料，再使用Skip-gram训练向量。",
+      "assumptions": "图的节点、边类型、时间和权重必须明确；金融关系数据只能使用在预测时已披露的网络。",
+      "properties": [
+        "DeepWalk用均匀图随机游走构建节点语料，再使用Skip-gram训练向量。。",
+        "图结构可能同时反映行业共因子、信息滞后和数据收集偏差，不能直接视为因果传播。"
+      ],
+      "formulas": [
+        {
+          "label": "网络与表示关系",
+          "tex": "\\max_\\theta\\sum_{(u,v)\\in W}\\log p_\\theta(v\\mid u)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义节点、邻接或关系得分后建立图上的数学运算。DeepWalk用均匀图随机游走构建节点语料，再使用Skip-gram训练向量。",
+          "tex": "\\max_\\theta\\sum_{(u,v)\\in W}\\log p_\\theta(v\\mid u)"
+        },
+        {
+          "explanation": "利用已知边和节点特征聚合表示，再在时间保留集评价效果。",
+          "tex": "\\max_\\theta\\sum_{(u,v)\\in W}\\log p_\\theta(v\\mid u)"
+        }
+      ],
+      "code": "# DeepWalk：图表示运算基础代码\nimport numpy as np\nA=np.array([[0.,1.,0.],[1.,0.,1.],[0.,1.,0.]])\nD=np.diag(A.sum(1));L=D-A\nx=np.array([[1.,0.],[0.,1.],[2.,1.]])\nnorm=(D+np.eye(3))**0   # placeholder overwritten with normalized adjacency\nB=A+np.eye(3);degree=B.sum(1)\nG=(degree**-.5)[:,None]*B*(degree**-.5)[None,:]\nprint(\"Graph-Laplacian eigenvalues:\",np.linalg.eigvalsh(L))\nprint(\"One message-passing step:\",G@x)",
+      "packages": "numpy",
+      "application": "用于ETF持仓图、行业风险传染与金融新闻实体网络。",
+      "limits": "这是一篇概念扩展笔记，代码仅为图邻接及信息聚合演示，而非每个GNN算法完整训练。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "graph-n03-03",
+      "node_id": "graph-n03-03",
+      "title": "图自编码器",
+      "definition": "图自编码器编码节点表示并重构邻接关系，以进行无监督图表征学习。",
+      "assumptions": "图的节点、边类型、时间和权重必须明确；金融关系数据只能使用在预测时已披露的网络。",
+      "properties": [
+        "图自编码器编码节点表示并重构邻接关系，以进行无监督图表征学习。。",
+        "图结构可能同时反映行业共因子、信息滞后和数据收集偏差，不能直接视为因果传播。"
+      ],
+      "formulas": [
+        {
+          "label": "网络与表示关系",
+          "tex": "L=-\\sum_{u,v}[A_{uv}\\log\\hat A_{uv}+(1-A_{uv})\\log(1-\\hat A_{uv})]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义节点、邻接或关系得分后建立图上的数学运算。图自编码器编码节点表示并重构邻接关系，以进行无监督图表征学习。",
+          "tex": "L=-\\sum_{u,v}[A_{uv}\\log\\hat A_{uv}+(1-A_{uv})\\log(1-\\hat A_{uv})]"
+        },
+        {
+          "explanation": "利用已知边和节点特征聚合表示，再在时间保留集评价效果。",
+          "tex": "L=-\\sum_{u,v}[A_{uv}\\log\\hat A_{uv}+(1-A_{uv})\\log(1-\\hat A_{uv})]"
+        }
+      ],
+      "code": "# 图自编码器：图表示运算基础代码\nimport numpy as np\nA=np.array([[0.,1.,0.],[1.,0.,1.],[0.,1.,0.]])\nD=np.diag(A.sum(1));L=D-A\nx=np.array([[1.,0.],[0.,1.],[2.,1.]])\nnorm=(D+np.eye(3))**0   # placeholder overwritten with normalized adjacency\nB=A+np.eye(3);degree=B.sum(1)\nG=(degree**-.5)[:,None]*B*(degree**-.5)[None,:]\nprint(\"Graph-Laplacian eigenvalues:\",np.linalg.eigvalsh(L))\nprint(\"One message-passing step:\",G@x)",
+      "packages": "numpy",
+      "application": "用于ETF持仓图、行业风险传染与金融新闻实体网络。",
+      "limits": "这是一篇概念扩展笔记，代码仅为图邻接及信息聚合演示，而非每个GNN算法完整训练。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "graph-n04-03",
+      "node_id": "graph-n04-03",
+      "title": "知识图谱嵌入",
+      "definition": "把实体和关系表示成向量，用关系评分预测知识三元组是否成立。",
+      "assumptions": "图的节点、边类型、时间和权重必须明确；金融关系数据只能使用在预测时已披露的网络。",
+      "properties": [
+        "把实体和关系表示成向量，用关系评分预测知识三元组是否成立。。",
+        "图结构可能同时反映行业共因子、信息滞后和数据收集偏差，不能直接视为因果传播。"
+      ],
+      "formulas": [
+        {
+          "label": "网络与表示关系",
+          "tex": "s(h,r,t)=\\|h+r-t\\|"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义节点、邻接或关系得分后建立图上的数学运算。把实体和关系表示成向量，用关系评分预测知识三元组是否成立。",
+          "tex": "s(h,r,t)=\\|h+r-t\\|"
+        },
+        {
+          "explanation": "利用已知边和节点特征聚合表示，再在时间保留集评价效果。",
+          "tex": "s(h,r,t)=\\|h+r-t\\|"
+        }
+      ],
+      "code": "# 知识图谱嵌入：图表示运算基础代码\nimport numpy as np\nA=np.array([[0.,1.,0.],[1.,0.,1.],[0.,1.,0.]])\nD=np.diag(A.sum(1));L=D-A\nx=np.array([[1.,0.],[0.,1.],[2.,1.]])\nnorm=(D+np.eye(3))**0   # placeholder overwritten with normalized adjacency\nB=A+np.eye(3);degree=B.sum(1)\nG=(degree**-.5)[:,None]*B*(degree**-.5)[None,:]\nprint(\"Graph-Laplacian eigenvalues:\",np.linalg.eigvalsh(L))\nprint(\"One message-passing step:\",G@x)",
+      "packages": "numpy",
+      "application": "用于ETF持仓图、行业风险传染与金融新闻实体网络。",
+      "limits": "这是一篇概念扩展笔记，代码仅为图邻接及信息聚合演示，而非每个GNN算法完整训练。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "graph-n05-03",
+      "node_id": "graph-n05-03",
+      "title": "TransE",
+      "definition": "TransE希望正确三元组满足头实体向量加关系向量接近尾实体。",
+      "assumptions": "图的节点、边类型、时间和权重必须明确；金融关系数据只能使用在预测时已披露的网络。",
+      "properties": [
+        "TransE希望正确三元组满足头实体向量加关系向量接近尾实体。。",
+        "图结构可能同时反映行业共因子、信息滞后和数据收集偏差，不能直接视为因果传播。"
+      ],
+      "formulas": [
+        {
+          "label": "网络与表示关系",
+          "tex": "h+r\\approx t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义节点、邻接或关系得分后建立图上的数学运算。TransE希望正确三元组满足头实体向量加关系向量接近尾实体。",
+          "tex": "h+r\\approx t"
+        },
+        {
+          "explanation": "利用已知边和节点特征聚合表示，再在时间保留集评价效果。",
+          "tex": "h+r\\approx t"
+        }
+      ],
+      "code": "# TransE：图表示运算基础代码\nimport numpy as np\nA=np.array([[0.,1.,0.],[1.,0.,1.],[0.,1.,0.]])\nD=np.diag(A.sum(1));L=D-A\nx=np.array([[1.,0.],[0.,1.],[2.,1.]])\nnorm=(D+np.eye(3))**0   # placeholder overwritten with normalized adjacency\nB=A+np.eye(3);degree=B.sum(1)\nG=(degree**-.5)[:,None]*B*(degree**-.5)[None,:]\nprint(\"Graph-Laplacian eigenvalues:\",np.linalg.eigvalsh(L))\nprint(\"One message-passing step:\",G@x)",
+      "packages": "numpy",
+      "application": "用于ETF持仓图、行业风险传染与金融新闻实体网络。",
+      "limits": "这是一篇概念扩展笔记，代码仅为图邻接及信息聚合演示，而非每个GNN算法完整训练。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "graph-n06-03",
+      "node_id": "graph-n06-03",
+      "title": "链接预测",
+      "definition": "链接预测根据节点表征和现有关系估计未来或隐藏边的概率。",
+      "assumptions": "图的节点、边类型、时间和权重必须明确；金融关系数据只能使用在预测时已披露的网络。",
+      "properties": [
+        "链接预测根据节点表征和现有关系估计未来或隐藏边的概率。。",
+        "图结构可能同时反映行业共因子、信息滞后和数据收集偏差，不能直接视为因果传播。"
+      ],
+      "formulas": [
+        {
+          "label": "网络与表示关系",
+          "tex": "P(A_{uv}=1\\mid h_u,h_v)=\\sigma(h_u^\\top h_v)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义节点、邻接或关系得分后建立图上的数学运算。链接预测根据节点表征和现有关系估计未来或隐藏边的概率。",
+          "tex": "P(A_{uv}=1\\mid h_u,h_v)=\\sigma(h_u^\\top h_v)"
+        },
+        {
+          "explanation": "利用已知边和节点特征聚合表示，再在时间保留集评价效果。",
+          "tex": "P(A_{uv}=1\\mid h_u,h_v)=\\sigma(h_u^\\top h_v)"
+        }
+      ],
+      "code": "# 链接预测：图表示运算基础代码\nimport numpy as np\nA=np.array([[0.,1.,0.],[1.,0.,1.],[0.,1.,0.]])\nD=np.diag(A.sum(1));L=D-A\nx=np.array([[1.,0.],[0.,1.],[2.,1.]])\nnorm=(D+np.eye(3))**0   # placeholder overwritten with normalized adjacency\nB=A+np.eye(3);degree=B.sum(1)\nG=(degree**-.5)[:,None]*B*(degree**-.5)[None,:]\nprint(\"Graph-Laplacian eigenvalues:\",np.linalg.eigvalsh(L))\nprint(\"One message-passing step:\",G@x)",
+      "packages": "numpy",
+      "application": "用于ETF持仓图、行业风险传染与金融新闻实体网络。",
+      "limits": "这是一篇概念扩展笔记，代码仅为图邻接及信息聚合演示，而非每个GNN算法完整训练。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "graph-n01-04",
+      "node_id": "graph-n01-04",
+      "title": "异构图Heterogeneous GNN",
+      "definition": "异构图含多类型节点和边，消息传递可为不同关系使用不同参数。",
+      "assumptions": "图的节点、边类型、时间和权重必须明确；金融关系数据只能使用在预测时已披露的网络。",
+      "properties": [
+        "异构图含多类型节点和边，消息传递可为不同关系使用不同参数。。",
+        "图结构可能同时反映行业共因子、信息滞后和数据收集偏差，不能直接视为因果传播。"
+      ],
+      "formulas": [
+        {
+          "label": "网络与表示关系",
+          "tex": "h_v'=\\sum_{r\\in\\mathcal R}\\sum_{u\\in N_r(v)}W_rh_u"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义节点、邻接或关系得分后建立图上的数学运算。异构图含多类型节点和边，消息传递可为不同关系使用不同参数。",
+          "tex": "h_v'=\\sum_{r\\in\\mathcal R}\\sum_{u\\in N_r(v)}W_rh_u"
+        },
+        {
+          "explanation": "利用已知边和节点特征聚合表示，再在时间保留集评价效果。",
+          "tex": "h_v'=\\sum_{r\\in\\mathcal R}\\sum_{u\\in N_r(v)}W_rh_u"
+        }
+      ],
+      "code": "# 异构图Heterogeneous GNN：图表示运算基础代码\nimport numpy as np\nA=np.array([[0.,1.,0.],[1.,0.,1.],[0.,1.,0.]])\nD=np.diag(A.sum(1));L=D-A\nx=np.array([[1.,0.],[0.,1.],[2.,1.]])\nnorm=(D+np.eye(3))**0   # placeholder overwritten with normalized adjacency\nB=A+np.eye(3);degree=B.sum(1)\nG=(degree**-.5)[:,None]*B*(degree**-.5)[None,:]\nprint(\"Graph-Laplacian eigenvalues:\",np.linalg.eigvalsh(L))\nprint(\"One message-passing step:\",G@x)",
+      "packages": "numpy",
+      "application": "用于ETF持仓图、行业风险传染与金融新闻实体网络。",
+      "limits": "这是一篇概念扩展笔记，代码仅为图邻接及信息聚合演示，而非每个GNN算法完整训练。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "graph-n02-04",
+      "node_id": "graph-n02-04",
+      "title": "时间动态图",
+      "definition": "动态图中的边和节点状态随时间变化，需要明确每条关系的生成时刻。",
+      "assumptions": "图的节点、边类型、时间和权重必须明确；金融关系数据只能使用在预测时已披露的网络。",
+      "properties": [
+        "动态图中的边和节点状态随时间变化，需要明确每条关系的生成时刻。。",
+        "图结构可能同时反映行业共因子、信息滞后和数据收集偏差，不能直接视为因果传播。"
+      ],
+      "formulas": [
+        {
+          "label": "网络与表示关系",
+          "tex": "G_t=(V_t,E_t,X_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义节点、邻接或关系得分后建立图上的数学运算。动态图中的边和节点状态随时间变化，需要明确每条关系的生成时刻。",
+          "tex": "G_t=(V_t,E_t,X_t)"
+        },
+        {
+          "explanation": "利用已知边和节点特征聚合表示，再在时间保留集评价效果。",
+          "tex": "G_t=(V_t,E_t,X_t)"
+        }
+      ],
+      "code": "# 时间动态图：图表示运算基础代码\nimport numpy as np\nA=np.array([[0.,1.,0.],[1.,0.,1.],[0.,1.,0.]])\nD=np.diag(A.sum(1));L=D-A\nx=np.array([[1.,0.],[0.,1.],[2.,1.]])\nnorm=(D+np.eye(3))**0   # placeholder overwritten with normalized adjacency\nB=A+np.eye(3);degree=B.sum(1)\nG=(degree**-.5)[:,None]*B*(degree**-.5)[None,:]\nprint(\"Graph-Laplacian eigenvalues:\",np.linalg.eigvalsh(L))\nprint(\"One message-passing step:\",G@x)",
+      "packages": "numpy",
+      "application": "用于ETF持仓图、行业风险传染与金融新闻实体网络。",
+      "limits": "这是一篇概念扩展笔记，代码仅为图邻接及信息聚合演示，而非每个GNN算法完整训练。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "graph-n03-04",
+      "node_id": "graph-n03-04",
+      "title": "Temporal GNN",
+      "definition": "Temporal GNN同时整合图邻域和时间变化以建模动态交互。",
+      "assumptions": "图的节点、边类型、时间和权重必须明确；金融关系数据只能使用在预测时已披露的网络。",
+      "properties": [
+        "Temporal GNN同时整合图邻域和时间变化以建模动态交互。。",
+        "图结构可能同时反映行业共因子、信息滞后和数据收集偏差，不能直接视为因果传播。"
+      ],
+      "formulas": [
+        {
+          "label": "网络与表示关系",
+          "tex": "h_{v,t}=f(h_{v,t-1},N_t(v))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义节点、邻接或关系得分后建立图上的数学运算。Temporal GNN同时整合图邻域和时间变化以建模动态交互。",
+          "tex": "h_{v,t}=f(h_{v,t-1},N_t(v))"
+        },
+        {
+          "explanation": "利用已知边和节点特征聚合表示，再在时间保留集评价效果。",
+          "tex": "h_{v,t}=f(h_{v,t-1},N_t(v))"
+        }
+      ],
+      "code": "# Temporal GNN：图表示运算基础代码\nimport numpy as np\nA=np.array([[0.,1.,0.],[1.,0.,1.],[0.,1.,0.]])\nD=np.diag(A.sum(1));L=D-A\nx=np.array([[1.,0.],[0.,1.],[2.,1.]])\nnorm=(D+np.eye(3))**0   # placeholder overwritten with normalized adjacency\nB=A+np.eye(3);degree=B.sum(1)\nG=(degree**-.5)[:,None]*B*(degree**-.5)[None,:]\nprint(\"Graph-Laplacian eigenvalues:\",np.linalg.eigvalsh(L))\nprint(\"One message-passing step:\",G@x)",
+      "packages": "numpy",
+      "application": "用于ETF持仓图、行业风险传染与金融新闻实体网络。",
+      "limits": "这是一篇概念扩展笔记，代码仅为图邻接及信息聚合演示，而非每个GNN算法完整训练。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "graph-n04-04",
+      "node_id": "graph-n04-04",
+      "title": "动态图链接预测",
+      "definition": "用历史动态网络预测下一时点可能出现的新边。",
+      "assumptions": "图的节点、边类型、时间和权重必须明确；金融关系数据只能使用在预测时已披露的网络。",
+      "properties": [
+        "用历史动态网络预测下一时点可能出现的新边。。",
+        "图结构可能同时反映行业共因子、信息滞后和数据收集偏差，不能直接视为因果传播。"
+      ],
+      "formulas": [
+        {
+          "label": "网络与表示关系",
+          "tex": "p(A_{uv,t+1}=1\\mid G_{\\le t})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义节点、邻接或关系得分后建立图上的数学运算。用历史动态网络预测下一时点可能出现的新边。",
+          "tex": "p(A_{uv,t+1}=1\\mid G_{\\le t})"
+        },
+        {
+          "explanation": "利用已知边和节点特征聚合表示，再在时间保留集评价效果。",
+          "tex": "p(A_{uv,t+1}=1\\mid G_{\\le t})"
+        }
+      ],
+      "code": "# 动态图链接预测：图表示运算基础代码\nimport numpy as np\nA=np.array([[0.,1.,0.],[1.,0.,1.],[0.,1.,0.]])\nD=np.diag(A.sum(1));L=D-A\nx=np.array([[1.,0.],[0.,1.],[2.,1.]])\nnorm=(D+np.eye(3))**0   # placeholder overwritten with normalized adjacency\nB=A+np.eye(3);degree=B.sum(1)\nG=(degree**-.5)[:,None]*B*(degree**-.5)[None,:]\nprint(\"Graph-Laplacian eigenvalues:\",np.linalg.eigvalsh(L))\nprint(\"One message-passing step:\",G@x)",
+      "packages": "numpy",
+      "application": "用于ETF持仓图、行业风险传染与金融新闻实体网络。",
+      "limits": "这是一篇概念扩展笔记，代码仅为图邻接及信息聚合演示，而非每个GNN算法完整训练。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "graph-n05-04",
+      "node_id": "graph-n05-04",
+      "title": "动态图采样",
+      "definition": "按历史时间戳选择动态邻居，避免从未来边采样信息。",
+      "assumptions": "图的节点、边类型、时间和权重必须明确；金融关系数据只能使用在预测时已披露的网络。",
+      "properties": [
+        "按历史时间戳选择动态邻居，避免从未来边采样信息。。",
+        "图结构可能同时反映行业共因子、信息滞后和数据收集偏差，不能直接视为因果传播。"
+      ],
+      "formulas": [
+        {
+          "label": "网络与表示关系",
+          "tex": "N_t(v)=\\{u:(u,v,\\tau)\\in E,\\tau\\le t\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义节点、邻接或关系得分后建立图上的数学运算。按历史时间戳选择动态邻居，避免从未来边采样信息。",
+          "tex": "N_t(v)=\\{u:(u,v,\\tau)\\in E,\\tau\\le t\\}"
+        },
+        {
+          "explanation": "利用已知边和节点特征聚合表示，再在时间保留集评价效果。",
+          "tex": "N_t(v)=\\{u:(u,v,\\tau)\\in E,\\tau\\le t\\}"
+        }
+      ],
+      "code": "# 动态图采样：图表示运算基础代码\nimport numpy as np\nA=np.array([[0.,1.,0.],[1.,0.,1.],[0.,1.,0.]])\nD=np.diag(A.sum(1));L=D-A\nx=np.array([[1.,0.],[0.,1.],[2.,1.]])\nnorm=(D+np.eye(3))**0   # placeholder overwritten with normalized adjacency\nB=A+np.eye(3);degree=B.sum(1)\nG=(degree**-.5)[:,None]*B*(degree**-.5)[None,:]\nprint(\"Graph-Laplacian eigenvalues:\",np.linalg.eigvalsh(L))\nprint(\"One message-passing step:\",G@x)",
+      "packages": "numpy",
+      "application": "用于ETF持仓图、行业风险传染与金融新闻实体网络。",
+      "limits": "这是一篇概念扩展笔记，代码仅为图邻接及信息聚合演示，而非每个GNN算法完整训练。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "graph-n06-04",
+      "node_id": "graph-n06-04",
+      "title": "动态图信息泄漏",
+      "definition": "使用尚未形成的供应链关系或未来持仓边会导致图模型前视偏差。",
+      "assumptions": "图的节点、边类型、时间和权重必须明确；金融关系数据只能使用在预测时已披露的网络。",
+      "properties": [
+        "使用尚未形成的供应链关系或未来持仓边会导致图模型前视偏差。。",
+        "图结构可能同时反映行业共因子、信息滞后和数据收集偏差，不能直接视为因果传播。"
+      ],
+      "formulas": [
+        {
+          "label": "网络与表示关系",
+          "tex": "E_t\\subseteq\\mathcal F_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义节点、邻接或关系得分后建立图上的数学运算。使用尚未形成的供应链关系或未来持仓边会导致图模型前视偏差。",
+          "tex": "E_t\\subseteq\\mathcal F_t"
+        },
+        {
+          "explanation": "利用已知边和节点特征聚合表示，再在时间保留集评价效果。",
+          "tex": "E_t\\subseteq\\mathcal F_t"
+        }
+      ],
+      "code": "# 动态图信息泄漏：图表示运算基础代码\nimport numpy as np\nA=np.array([[0.,1.,0.],[1.,0.,1.],[0.,1.,0.]])\nD=np.diag(A.sum(1));L=D-A\nx=np.array([[1.,0.],[0.,1.],[2.,1.]])\nnorm=(D+np.eye(3))**0   # placeholder overwritten with normalized adjacency\nB=A+np.eye(3);degree=B.sum(1)\nG=(degree**-.5)[:,None]*B*(degree**-.5)[None,:]\nprint(\"Graph-Laplacian eigenvalues:\",np.linalg.eigvalsh(L))\nprint(\"One message-passing step:\",G@x)",
+      "packages": "numpy",
+      "application": "用于ETF持仓图、行业风险传染与金融新闻实体网络。",
+      "limits": "这是一篇概念扩展笔记，代码仅为图邻接及信息聚合演示，而非每个GNN算法完整训练。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "graph-n01-05",
+      "node_id": "graph-n01-05",
+      "title": "供应链网络",
+      "definition": "供应链图连接采购方和供应商，用于研究公司经营冲击的网络传播。",
+      "assumptions": "图的节点、边类型、时间和权重必须明确；金融关系数据只能使用在预测时已披露的网络。",
+      "properties": [
+        "供应链图连接采购方和供应商，用于研究公司经营冲击的网络传播。。",
+        "图结构可能同时反映行业共因子、信息滞后和数据收集偏差，不能直接视为因果传播。"
+      ],
+      "formulas": [
+        {
+          "label": "网络与表示关系",
+          "tex": "A_{ij}=\\mathbf1[i\\to j\\text{ supply}]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义节点、邻接或关系得分后建立图上的数学运算。供应链图连接采购方和供应商，用于研究公司经营冲击的网络传播。",
+          "tex": "A_{ij}=\\mathbf1[i\\to j\\text{ supply}]"
+        },
+        {
+          "explanation": "利用已知边和节点特征聚合表示，再在时间保留集评价效果。",
+          "tex": "A_{ij}=\\mathbf1[i\\to j\\text{ supply}]"
+        }
+      ],
+      "code": "# 供应链网络：图表示运算基础代码\nimport numpy as np\nA=np.array([[0.,1.,0.],[1.,0.,1.],[0.,1.,0.]])\nD=np.diag(A.sum(1));L=D-A\nx=np.array([[1.,0.],[0.,1.],[2.,1.]])\nnorm=(D+np.eye(3))**0   # placeholder overwritten with normalized adjacency\nB=A+np.eye(3);degree=B.sum(1)\nG=(degree**-.5)[:,None]*B*(degree**-.5)[None,:]\nprint(\"Graph-Laplacian eigenvalues:\",np.linalg.eigvalsh(L))\nprint(\"One message-passing step:\",G@x)",
+      "packages": "numpy",
+      "application": "用于ETF持仓图、行业风险传染与金融新闻实体网络。",
+      "limits": "这是一篇概念扩展笔记，代码仅为图邻接及信息聚合演示，而非每个GNN算法完整训练。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "graph-n02-05",
+      "node_id": "graph-n02-05",
+      "title": "ETF持仓关系图",
+      "definition": "ETF持仓图将基金与成分资产连接，连接权重可采用披露持仓比例。",
+      "assumptions": "图的节点、边类型、时间和权重必须明确；金融关系数据只能使用在预测时已披露的网络。",
+      "properties": [
+        "ETF持仓图将基金与成分资产连接，连接权重可采用披露持仓比例。。",
+        "图结构可能同时反映行业共因子、信息滞后和数据收集偏差，不能直接视为因果传播。"
+      ],
+      "formulas": [
+        {
+          "label": "网络与表示关系",
+          "tex": "A_{ij,t}=w_{i,j,t}^{\\rm holdings}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义节点、邻接或关系得分后建立图上的数学运算。ETF持仓图将基金与成分资产连接，连接权重可采用披露持仓比例。",
+          "tex": "A_{ij,t}=w_{i,j,t}^{\\rm holdings}"
+        },
+        {
+          "explanation": "利用已知边和节点特征聚合表示，再在时间保留集评价效果。",
+          "tex": "A_{ij,t}=w_{i,j,t}^{\\rm holdings}"
+        }
+      ],
+      "code": "# ETF持仓关系图：图表示运算基础代码\nimport numpy as np\nA=np.array([[0.,1.,0.],[1.,0.,1.],[0.,1.,0.]])\nD=np.diag(A.sum(1));L=D-A\nx=np.array([[1.,0.],[0.,1.],[2.,1.]])\nnorm=(D+np.eye(3))**0   # placeholder overwritten with normalized adjacency\nB=A+np.eye(3);degree=B.sum(1)\nG=(degree**-.5)[:,None]*B*(degree**-.5)[None,:]\nprint(\"Graph-Laplacian eigenvalues:\",np.linalg.eigvalsh(L))\nprint(\"One message-passing step:\",G@x)",
+      "packages": "numpy",
+      "application": "用于ETF持仓图、行业风险传染与金融新闻实体网络。",
+      "limits": "这是一篇概念扩展笔记，代码仅为图邻接及信息聚合演示，而非每个GNN算法完整训练。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "graph-n03-05",
+      "node_id": "graph-n03-05",
+      "title": "新闻实体图",
+      "definition": "金融文本实体与事件构成多关系图，用于跨公司新闻影响分析。",
+      "assumptions": "图的节点、边类型、时间和权重必须明确；金融关系数据只能使用在预测时已披露的网络。",
+      "properties": [
+        "金融文本实体与事件构成多关系图，用于跨公司新闻影响分析。。",
+        "图结构可能同时反映行业共因子、信息滞后和数据收集偏差，不能直接视为因果传播。"
+      ],
+      "formulas": [
+        {
+          "label": "网络与表示关系",
+          "tex": "e=(\\mathrm{issuer},\\mathrm{event},\\mathrm{time})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义节点、邻接或关系得分后建立图上的数学运算。金融文本实体与事件构成多关系图，用于跨公司新闻影响分析。",
+          "tex": "e=(\\mathrm{issuer},\\mathrm{event},\\mathrm{time})"
+        },
+        {
+          "explanation": "利用已知边和节点特征聚合表示，再在时间保留集评价效果。",
+          "tex": "e=(\\mathrm{issuer},\\mathrm{event},\\mathrm{time})"
+        }
+      ],
+      "code": "# 新闻实体图：图表示运算基础代码\nimport numpy as np\nA=np.array([[0.,1.,0.],[1.,0.,1.],[0.,1.,0.]])\nD=np.diag(A.sum(1));L=D-A\nx=np.array([[1.,0.],[0.,1.],[2.,1.]])\nnorm=(D+np.eye(3))**0   # placeholder overwritten with normalized adjacency\nB=A+np.eye(3);degree=B.sum(1)\nG=(degree**-.5)[:,None]*B*(degree**-.5)[None,:]\nprint(\"Graph-Laplacian eigenvalues:\",np.linalg.eigvalsh(L))\nprint(\"One message-passing step:\",G@x)",
+      "packages": "numpy",
+      "application": "用于ETF持仓图、行业风险传染与金融新闻实体网络。",
+      "limits": "这是一篇概念扩展笔记，代码仅为图邻接及信息聚合演示，而非每个GNN算法完整训练。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "graph-n04-05",
+      "node_id": "graph-n04-05",
+      "title": "相关性网络",
+      "definition": "按历史滚动相关系数构造资产关系边，不应把相关误判为因果。",
+      "assumptions": "图的节点、边类型、时间和权重必须明确；金融关系数据只能使用在预测时已披露的网络。",
+      "properties": [
+        "按历史滚动相关系数构造资产关系边，不应把相关误判为因果。。",
+        "图结构可能同时反映行业共因子、信息滞后和数据收集偏差，不能直接视为因果传播。"
+      ],
+      "formulas": [
+        {
+          "label": "网络与表示关系",
+          "tex": "A_{ij,t}=\\mathbf1[|\\rho_{ij,t}|>\\tau]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义节点、邻接或关系得分后建立图上的数学运算。按历史滚动相关系数构造资产关系边，不应把相关误判为因果。",
+          "tex": "A_{ij,t}=\\mathbf1[|\\rho_{ij,t}|>\\tau]"
+        },
+        {
+          "explanation": "利用已知边和节点特征聚合表示，再在时间保留集评价效果。",
+          "tex": "A_{ij,t}=\\mathbf1[|\\rho_{ij,t}|>\\tau]"
+        }
+      ],
+      "code": "# 相关性网络：图表示运算基础代码\nimport numpy as np\nA=np.array([[0.,1.,0.],[1.,0.,1.],[0.,1.,0.]])\nD=np.diag(A.sum(1));L=D-A\nx=np.array([[1.,0.],[0.,1.],[2.,1.]])\nnorm=(D+np.eye(3))**0   # placeholder overwritten with normalized adjacency\nB=A+np.eye(3);degree=B.sum(1)\nG=(degree**-.5)[:,None]*B*(degree**-.5)[None,:]\nprint(\"Graph-Laplacian eigenvalues:\",np.linalg.eigvalsh(L))\nprint(\"One message-passing step:\",G@x)",
+      "packages": "numpy",
+      "application": "用于ETF持仓图、行业风险传染与金融新闻实体网络。",
+      "limits": "这是一篇概念扩展笔记，代码仅为图邻接及信息聚合演示，而非每个GNN算法完整训练。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "graph-n05-05",
+      "node_id": "graph-n05-05",
+      "title": "行业传染",
+      "definition": "通过图邻接和暴露权重研究行业风险从一个节点传播到其他节点。",
+      "assumptions": "图的节点、边类型、时间和权重必须明确；金融关系数据只能使用在预测时已披露的网络。",
+      "properties": [
+        "通过图邻接和暴露权重研究行业风险从一个节点传播到其他节点。。",
+        "图结构可能同时反映行业共因子、信息滞后和数据收集偏差，不能直接视为因果传播。"
+      ],
+      "formulas": [
+        {
+          "label": "网络与表示关系",
+          "tex": "r_{t+1}=\\alpha A_tr_t+\\epsilon_{t+1}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义节点、邻接或关系得分后建立图上的数学运算。通过图邻接和暴露权重研究行业风险从一个节点传播到其他节点。",
+          "tex": "r_{t+1}=\\alpha A_tr_t+\\epsilon_{t+1}"
+        },
+        {
+          "explanation": "利用已知边和节点特征聚合表示，再在时间保留集评价效果。",
+          "tex": "r_{t+1}=\\alpha A_tr_t+\\epsilon_{t+1}"
+        }
+      ],
+      "code": "# 行业传染：图表示运算基础代码\nimport numpy as np\nA=np.array([[0.,1.,0.],[1.,0.,1.],[0.,1.,0.]])\nD=np.diag(A.sum(1));L=D-A\nx=np.array([[1.,0.],[0.,1.],[2.,1.]])\nnorm=(D+np.eye(3))**0   # placeholder overwritten with normalized adjacency\nB=A+np.eye(3);degree=B.sum(1)\nG=(degree**-.5)[:,None]*B*(degree**-.5)[None,:]\nprint(\"Graph-Laplacian eigenvalues:\",np.linalg.eigvalsh(L))\nprint(\"One message-passing step:\",G@x)",
+      "packages": "numpy",
+      "application": "用于ETF持仓图、行业风险传染与金融新闻实体网络。",
+      "limits": "这是一篇概念扩展笔记，代码仅为图邻接及信息聚合演示，而非每个GNN算法完整训练。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "graph-n06-05",
+      "node_id": "graph-n06-05",
+      "title": "图结构风险因子",
+      "definition": "从节点度、图中心性或邻居风险暴露提取可用于预测的风险特征。",
+      "assumptions": "图的节点、边类型、时间和权重必须明确；金融关系数据只能使用在预测时已披露的网络。",
+      "properties": [
+        "从节点度、图中心性或邻居风险暴露提取可用于预测的风险特征。。",
+        "图结构可能同时反映行业共因子、信息滞后和数据收集偏差，不能直接视为因果传播。"
+      ],
+      "formulas": [
+        {
+          "label": "网络与表示关系",
+          "tex": "f_{v,t}=\\sum_{u\\in N(v)}A_{vu,t}\\sigma_{u,t}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义节点、邻接或关系得分后建立图上的数学运算。从节点度、图中心性或邻居风险暴露提取可用于预测的风险特征。",
+          "tex": "f_{v,t}=\\sum_{u\\in N(v)}A_{vu,t}\\sigma_{u,t}"
+        },
+        {
+          "explanation": "利用已知边和节点特征聚合表示，再在时间保留集评价效果。",
+          "tex": "f_{v,t}=\\sum_{u\\in N(v)}A_{vu,t}\\sigma_{u,t}"
+        }
+      ],
+      "code": "# 图结构风险因子：图表示运算基础代码\nimport numpy as np\nA=np.array([[0.,1.,0.],[1.,0.,1.],[0.,1.,0.]])\nD=np.diag(A.sum(1));L=D-A\nx=np.array([[1.,0.],[0.,1.],[2.,1.]])\nnorm=(D+np.eye(3))**0   # placeholder overwritten with normalized adjacency\nB=A+np.eye(3);degree=B.sum(1)\nG=(degree**-.5)[:,None]*B*(degree**-.5)[None,:]\nprint(\"Graph-Laplacian eigenvalues:\",np.linalg.eigvalsh(L))\nprint(\"One message-passing step:\",G@x)",
+      "packages": "numpy",
+      "application": "用于ETF持仓图、行业风险传染与金融新闻实体网络。",
+      "limits": "这是一篇概念扩展笔记，代码仅为图邻接及信息聚合演示，而非每个GNN算法完整训练。",
+      "coverage": "expanded"
+    }
+  ]
+}
