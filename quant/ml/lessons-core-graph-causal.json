@@ -1,0 +1,325 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "graph-n05-03",
+      "node_id": "graph-n05-03",
+      "title": "TransE",
+      "definition": "TransE知识图谱将头实体和关系投影到同一向量空间，使真实三元组的头向量加关系向量尽量接近尾实体向量。",
+      "assumptions": "关系是实体之间可定义的有向语义，训练需构造正确与负采样三元组。",
+      "properties": [
+        "适用于实体关系预测的基础嵌入模型。",
+        "一对多、多对一与对称关系表达可能受简单平移模型限制。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "f(h,r,t)=\\|\\mathbf e_h+\\mathbf e_r-\\mathbf e_t\\|_p"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "为头实体、关系及尾实体分配Embedding",
+          "tex": "e_h,e_r,e_t\\in\\mathbb R^d"
+        },
+        {
+          "explanation": "要求真实三元组的几何平移残差较小",
+          "tex": "e_h+e_r\\approx e_t"
+        },
+        {
+          "explanation": "用Margin Ranking对正例和破坏三元组形成训练目标",
+          "tex": "L=\\max(0,\\gamma+f(h,r,t)-f(h',r,t'))"
+        }
+      ],
+      "code": "import torch\ntorch.manual_seed(0)\nentity=torch.nn.Embedding(6,4);relation=torch.nn.Embedding(3,4)\nh=torch.tensor([0,1,2]);r=torch.tensor([1,1,2]);t=torch.tensor([3,4,5])\nscore=(entity(h)+relation(r)-entity(t)).norm(dim=-1)\nprint(\"TransE distance:\",score)",
+      "packages": "torch",
+      "application": "财报关联的公司、行业、产品和供应链实体知识图谱。",
+      "limits": "代码计算正三元组分数，不包含负采样、训练或图数据时间戳校验。",
+      "coverage": "complete"
+    },
+    {
+      "id": "graph-n01-04",
+      "node_id": "graph-n01-04",
+      "title": "异构图Heterogeneous GNN",
+      "definition": "异构图包含多种节点与边类型，可为不同关系分别学习消息函数，再聚合得到节点状态。",
+      "assumptions": "必须明确定义实体类型、关系方向、时间有效区间和关系多重性。",
+      "properties": [
+        "不同关系可以有不同投影矩阵。",
+        "多个关系的样本量差异会导致参数估计偏差。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "h_v'=\\sigma\\left(\\sum_{r\\in\\mathcal R}\\sum_{u\\in N_r(v)}\\frac1{c_{v,r}}W_rh_u+W_0h_v\\right)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "为每种关系r定义独立邻居集合",
+          "tex": "N_r(v)=\\{u:(u,r,v)\\in E\\}"
+        },
+        {
+          "explanation": "根据关系类型用独立权重矩阵计算消息",
+          "tex": "m_{u\\to v}^{(r)}=W_rh_u"
+        },
+        {
+          "explanation": "按关系归一化后加权聚合并应用非线性",
+          "tex": "h_v'=\\sigma(W_0h_v+\\sum_r|N_r(v)|^{-1}\\sum_{u\\in N_r(v)}W_rh_u)"
+        }
+      ],
+      "code": "import torch\ntorch.manual_seed(0)\nfeatures=torch.randn(4,3)\nedges={\"supplier\":[(0,1),(2,1)],\"industry\":[(3,1)]}\nlayers={k:torch.nn.Linear(3,2,bias=False) for k in edges}\nout=torch.zeros(2)\nfor relation,edge_list in edges.items():\n    out=out+torch.stack([layers[relation](features[u]) for u,v in edge_list if v==1]).mean(0)\nprint(\"Target heterogeneous messages:\",out)",
+      "packages": "torch",
+      "application": "在公司、行业、ETF持仓节点组成的异构网络上建模关联收益。",
+      "limits": "示例只演示一个目标节点、两个关系类型的聚合；正式GNN需要批量化训练和完整自环更新。",
+      "coverage": "complete"
+    },
+    {
+      "id": "graph-n02-04",
+      "node_id": "graph-n02-04",
+      "title": "时间动态图",
+      "definition": "时间动态图让边和节点特征随着日期变化，避免将未来才出现的持仓、合作或新闻关系用于过去预测。",
+      "assumptions": "每条边要有首次生效和失效时间；数据供应商的历史修订必须记录。",
+      "properties": [
+        "静态快照图会隐藏关系形成与消失的信息。",
+        "网络的结构变化本身可作为预测信号，但必须PIT。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "G_t=(V_t,E_t,X_t),\\quad E_t=\\{e:t_e^{\\rm start}\\le t<t_e^{\\rm end}\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "为关系边记录生效时间与失效时间",
+          "tex": "e=(u,v,t^{\\rm start},t^{\\rm end})"
+        },
+        {
+          "explanation": "按历史时刻生成快照，只保留当时已生效关系",
+          "tex": "E_t=\\{e:t_e^{\\rm start}\\le t<t_e^{\\rm end}\\}"
+        },
+        {
+          "explanation": "再在对应快照上计算图Embedding或风险传播",
+          "tex": "z_t=f_\\theta(G_t)"
+        }
+      ],
+      "code": "edges=[(\"A\",\"B\",2023,2025),(\"B\",\"C\",2025,2028),(\"A\",\"C\",2024,2027)]\ndef snapshot(year):\n    return [(u,v) for u,v,start,end in edges if start<=year<end]\nfor year in [2023,2024,2025]:\n    print(year,snapshot(year))",
+      "packages": "Python standard library",
+      "application": "使用历史ETF成分与公司供应链事件更新图因子。",
+      "limits": "边的首次报道时间可能晚于合同实际生效时间，必须使用真正可获取的日期。",
+      "coverage": "complete"
+    },
+    {
+      "id": "graph-n06-03",
+      "node_id": "graph-n06-03",
+      "title": "链接预测",
+      "definition": "链接预测根据现有图结构和节点属性，对尚未观测到的边分配评分，训练时需要正边与合理的未连接边负例。",
+      "assumptions": "负例中可能包含真实但尚未公开的关系；图训练与测试需要时间先后隔离。",
+      "properties": [
+        "可利用点积、距离或神经解码器构造边评分。",
+        "AUC高不等于预测的关系具备因果影响。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "p((u,v)\\in E)=\\sigma(z_u^\\top z_v)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "编码节点成连续表示",
+          "tex": "z_u=f_\\theta(G,X)_u"
+        },
+        {
+          "explanation": "用两端节点点积计算边Logit",
+          "tex": "s_{uv}=z_u^\\top z_v"
+        },
+        {
+          "explanation": "通过正负边二元交叉熵训练",
+          "tex": "L=-\\sum_{(u,v)}[y_{uv}\\log\\sigma(s_{uv})+(1-y_{uv})\\log(1-\\sigma(s_{uv}))]"
+        }
+      ],
+      "code": "import torch\nZ=torch.randn(5,8,requires_grad=True)\nedges=torch.tensor([[0,1],[1,2],[0,4],[2,4]])\ny=torch.tensor([1.,1.,0.,0.])\nscores=(Z[edges[:,0]]*Z[edges[:,1]]).sum(-1)\nloss=torch.nn.functional.binary_cross_entropy_with_logits(scores,y)\nloss.backward()\nprint(\"Link prediction loss:\",loss.item())",
+      "packages": "torch",
+      "application": "预测新的供应链边或金融新闻中的实体关联。",
+      "limits": "负边采样必须合理；不能把未来才知道的关系纳入历史节点编码。",
+      "coverage": "complete"
+    },
+    {
+      "id": "causal-n04-02",
+      "node_id": "causal-n04-02",
+      "title": "双重稳健估计",
+      "definition": "AIPW把结果模型预测与逆倾向得分校正相结合，在一定条件下只要倾向模型或结果模型之一正确指定即可一致估计ATE。",
+      "assumptions": "需要一致性、可忽略性、正重叠；机器学习模型最好交叉拟合以降低过拟合影响。",
+      "properties": [
+        "双重稳健不意味着两个模型都错时仍可识别。",
+        "接近0或1的倾向得分使方差不稳定。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "\\hat\\tau=\\frac1n\\sum_i\\left[\\hat m_1(X_i)-\\hat m_0(X_i)+\\frac{D_i(Y_i-\\hat m_1(X_i))}{\\hat e_i}-\\frac{(1-D_i)(Y_i-\\hat m_0(X_i))}{1-\\hat e_i}\\right]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "用结果回归估计两种潜在处理结果的条件均值",
+          "tex": "m_d(x)=E[Y\\mid D=d,X=x]"
+        },
+        {
+          "explanation": "倾向得分估计受处理概率",
+          "tex": "e(x)=P(D=1\\mid X=x)"
+        },
+        {
+          "explanation": "为观测残差加入IPW校正项，再对所有样本平均",
+          "tex": "\\psi_i=\\hat m_1-\\hat m_0+\\frac{D_i(Y_i-\\hat m_1)}{\\hat e_i}-\\frac{(1-D_i)(Y_i-\\hat m_0)}{1-\\hat e_i}"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0)\nn=500;X=rng.normal(size=n)\ne=1/(1+np.exp(-X));d=rng.binomial(1,e)\nm0=.5*X;m1=m0+.8\ny=np.where(d==1,m1,m0)+rng.normal(size=n)\nscore=m1-m0+d*(y-m1)/e-(1-d)*(y-m0)/(1-e)\nprint(\"AIPW (known nuisance functions):\",score.mean())",
+      "packages": "numpy",
+      "application": "识别政策冲击或交易费率变动对ETF流动性的平均因果影响。",
+      "limits": "示例使用已知生成机制的真实Nuisance函数，不是实际数据估计；现实问题还需因果识别检查。",
+      "coverage": "complete"
+    },
+    {
+      "id": "causal-n06-03",
+      "node_id": "causal-n06-03",
+      "title": "异质性效应CATE",
+      "definition": "CATE表示给定可观测特征条件下处理相对不处理的平均因果效应，帮助识别政策或市场干预对不同资产类型的差异。",
+      "assumptions": "需要条件可忽略性、重叠以及足够的支持样本；因果模型外推到未覆盖群体通常不可信。",
+      "properties": [
+        "CATE依赖选择的条件特征。",
+        "估计异质性需要独立验证或诚实分样本方法以降低选择偏差。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "\\tau(x)=E[Y(1)-Y(0)\\mid X=x]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义个体潜在结果但无法同时观察两种结果",
+          "tex": "Y=D\\,Y(1)+(1-D)Y(0)"
+        },
+        {
+          "explanation": "条件化到协变量子群体X=x",
+          "tex": "\\tau(x)=E[Y(1)\\mid X=x]-E[Y(0)\\mid X=x]"
+        },
+        {
+          "explanation": "在可忽略性条件下用观测结果模型识别",
+          "tex": "\\tau(x)=m_1(x)-m_0(x)"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0)\nx=rng.normal(size=300);d=rng.binomial(1,.5,size=300)\ny=.4*x+d*(.5+.7*x)+rng.normal(0,.2,size=300)\nfor group in [x<0,x>=0]:\n    print(\"Subgroup effect:\",y[group&(d==1)].mean()-y[group&(d==0)].mean())",
+      "packages": "numpy",
+      "application": "研究宏观政策对高波动和低波动ETF的差异化影响。",
+      "limits": "分组均值差的示例在随机处理条件下可解释；观察性资产研究必须控制协变量混杂。",
+      "coverage": "complete"
+    },
+    {
+      "id": "causal-n05-04",
+      "node_id": "causal-n05-04",
+      "title": "工具变量",
+      "definition": "工具变量用与内生解释变量相关、但除通过该变量外不影响结果的外生工具识别因果参数。",
+      "assumptions": "需要工具相关性、排除限制、适当外生性；异质处理效应下还需其他条件解释LATE。",
+      "properties": [
+        "弱工具会使2SLS估计偏差和置信区间不可靠。",
+        "不能仅凭第一阶段相关性证明排除限制成立。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "\\hat\\beta_{\\rm 2SLS}=(X^\\top P_ZX)^{-1}X^\\top P_ZY,\\quad P_Z=Z(Z^\\top Z)^{-1}Z^\\top"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "第一阶段把内生处理变量投影到工具变量线性空间",
+          "tex": "\\hat X=P_ZX"
+        },
+        {
+          "explanation": "第二阶段使用投影后的预测部分解释结果",
+          "tex": "\\hat\\beta=(\\hat X^\\top X)^{-1}\\hat X^\\top Y"
+        },
+        {
+          "explanation": "投影矩阵满足幂等和对称性质",
+          "tex": "P_Z^\\top=P_Z,\\quad P_Z^2=P_Z"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);n=400\nz=rng.normal(size=n);u=rng.normal(size=n)\nx=.9*z+.7*u+rng.normal(size=n)*.3\ny=1.5*x+u+rng.normal(size=n)*.3\nZ=np.column_stack([np.ones(n),z]);X=np.column_stack([np.ones(n),x])\nPZ=Z@np.linalg.inv(Z.T@Z)@Z.T\nbeta=np.linalg.solve(X.T@PZ@X,X.T@PZ@y)\nprint(\"2SLS treatment coefficient:\",beta[1])",
+      "packages": "numpy",
+      "application": "研究特定准随机资本流冲击对价格影响，需论证工具的制度来源。",
+      "limits": "随机模拟仅满足人为生成的排除限制，真实金融工具变量可能有直接市场效应。",
+      "coverage": "complete"
+    },
+    {
+      "id": "causal-n06-02",
+      "node_id": "causal-n06-02",
+      "title": "断点回归",
+      "definition": "回归不连续设计在处理概率随运行变量越过明确阈值发生跳跃、潜在结果在阈值附近连续时识别局部因果效应。",
+      "assumptions": "阈值附近不得被精确操纵；协变量及潜在结果应局部平滑。",
+      "properties": [
+        "识别的是阈值处局部效应，不一定适用于所有资产。",
+        "带宽和多项式阶数会显著影响估计。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "\\tau_{\\rm RD}=\\lim_{x\\downarrow c}E[Y\\mid X=x]-\\lim_{x\\uparrow c}E[Y\\mid X=x]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "比较阈值c右侧和左侧非常接近的观测",
+          "tex": "X\\to c^+,\\quad X\\to c^-"
+        },
+        {
+          "explanation": "在潜在结果条件均值连续的假设下，阈值跳跃归于处理差异",
+          "tex": "\\tau(c)=\\mu_+(c)-\\mu_-(c)"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(2)\nx=rng.uniform(-1,1,400)\ny=.5*x+.8*(x>=0)+rng.normal(0,.2,400)\nbw=.2\nabove=(x>=0)&(x<bw);below=(x<0)&(x>-bw)\nprint(\"Local mean jump:\",y[above].mean()-y[below].mean())",
+      "packages": "numpy",
+      "application": "金融制度按明确市值或指数资格阈值施加规则时的局部政策效应。",
+      "limits": "简单两侧均值未控制平滑趋势，正式RD应使用局部线性拟合、带宽选择和操纵检验。",
+      "coverage": "complete"
+    },
+    {
+      "id": "causal-n04-04",
+      "node_id": "causal-n04-04",
+      "title": "事件研究",
+      "definition": "事件研究以事件前估计的正常回报模型构造异常收益，再在事件窗口中汇总累计异常收益检验价格反应。",
+      "assumptions": "事件发生时点必须准确；估计窗口不能受同一事件或未来信息污染。",
+      "properties": [
+        "事件窗口可捕捉短期公开信息冲击。",
+        "同时发生的市场/行业事件会混淆归因。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "AR_{i,t}=R_{i,t}-\\hat\\alpha_i-\\hat\\beta_iR_{m,t},\\quad CAR_{i,[a,b]}=\\sum_{t=a}^bAR_{i,t}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先在事件前估计市场模型参数",
+          "tex": "R_{i,t}=\\alpha_i+\\beta_iR_{m,t}+\\varepsilon_{i,t}"
+        },
+        {
+          "explanation": "事件窗口用实现收益减去模型预期收益",
+          "tex": "AR_{i,t}=R_{i,t}-(\\hat\\alpha_i+\\hat\\beta_iR_{m,t})"
+        },
+        {
+          "explanation": "对事件窗口求累计异常收益",
+          "tex": "CAR_i=\\sum_{t=a}^{b}AR_{i,t}"
+        }
+      ],
+      "code": "import numpy as np\nmarket=np.array([.01,-.02,.005,.01])\nasset=np.array([.015,-.01,.03,.005])\nalpha=.002;beta=1.1\nabnormal=asset-(alpha+beta*market)\nprint(\"Abnormal:\",abnormal,\"CAR:\",abnormal.sum())",
+      "packages": "numpy",
+      "application": "研究监管发布、ETF成分调整与重大财报的短期价格反应。",
+      "limits": "预估参数在此直接给定；真实事件研究还要解决事件重叠和标准误聚类。",
+      "coverage": "complete"
+    }
+  ]
+}
