@@ -1,0 +1,640 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "stochastic-n0280",
+      "node_id": "stochastic-n0280",
+      "title": "不变分布",
+      "definition": "若马尔可夫链状态分布在一步转移后保持不变，则该分布为平稳（不变）分布。",
+      "assumptions": "有限状态链，行随机转移矩阵 $P$。",
+      "properties": [
+        "有限不可约链至少有唯一不变分布。",
+        "不可约且非周期时分布趋向不变分布。"
+      ],
+      "formulas": [
+        {
+          "label": "平稳方程",
+          "tex": "\\pi^\\top P=\\pi^\\top,\\quad \\sum_i\\pi_i=1"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "设初始分布为行向量 $\\pi^\\top$，一步后分布为",
+          "tex": "p_{t+1}^\\top=p_t^\\top P"
+        },
+        {
+          "explanation": "要求经过任意一次转移后分布不改变",
+          "tex": "\\pi^\\top P=\\pi^\\top"
+        },
+        {
+          "explanation": "再加入概率归一与非负约束",
+          "tex": "\\pi_i\\ge0,\\quad\\sum_i\\pi_i=1"
+        }
+      ],
+      "example": "两状态市场制度转移矩阵 $P=\\begin{pmatrix}0.9&0.1\\\\0.2&0.8\\end{pmatrix}$，不变分布为 $(2/3,1/3)$。",
+      "application": "牛熊状态切换、隐马尔可夫模型、市场制度概率。",
+      "caveat": "有不变分布不代表从任意初始分布必然收敛；周期性和不可约性要检查。",
+      "checked_status": "完整讲义：定义、条件、性质、公式、推导及应用"
+    },
+    {
+      "id": "stochastic-n0273",
+      "node_id": "stochastic-n0273",
+      "title": "Poisson过程",
+      "definition": "计数过程 $N_t$ 满足独立平稳增量，长度 $t$ 的事件数服从均值 $\\lambda t$ 的Poisson分布。",
+      "assumptions": "$\\lambda>0$，事件到达独立且恒定强度。",
+      "properties": [
+        "无记忆的到达间隔服从指数分布。",
+        "独立时间区间事件数独立。"
+      ],
+      "formulas": [
+        {
+          "label": "Poisson计数分布",
+          "tex": "P(N_t=k)=e^{-\\lambda t}\\frac{(\\lambda t)^k}{k!}"
+        },
+        {
+          "label": "首次等待时间",
+          "tex": "P(T_1>t)=e^{-\\lambda t}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首次等待超过 $t$ 等于时间内零事件",
+          "tex": "\\{T_1>t\\}=\\{N_t=0\\}"
+        },
+        {
+          "explanation": "利用Poisson零次计数概率",
+          "tex": "P(T_1>t)=P(N_t=0)=e^{-\\lambda t}"
+        },
+        {
+          "explanation": "对生存函数求导得到指数密度",
+          "tex": "f_{T_1}(t)=\\lambda e^{-\\lambda t},\\ t\\ge0"
+        }
+      ],
+      "example": "若订单平均每分钟到达3笔，未来1分钟零次到达概率为 $e^{-3}$。",
+      "application": "成交与撤单到达过程、信用违约强度的基础。",
+      "caveat": "真实市场的事件到达经常簇集，固定强度Poisson可能不足。",
+      "checked_status": "完整讲义：定义、条件、性质、公式、推导及应用"
+    },
+    {
+      "id": "stochastic-n0293",
+      "node_id": "stochastic-n0293",
+      "title": "可选停止定理",
+      "definition": "对满足适当停止时间及可积条件的鞅，停止后的期望可保持初始值。",
+      "assumptions": "例如有界停时 $T$，且鞅可积；一般无界停时需要额外一致可积等条件。",
+      "properties": [
+        "不是任意赌徒停止策略都能改变公平游戏期望。",
+        "必须明确是有界停时、非负超鞅或一致可积等哪套充分条件。"
+      ],
+      "formulas": [
+        {
+          "label": "有界停时版本",
+          "tex": "\\mathbb E[M_T]=\\mathbb E[M_0]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "若 $T\\le n$，将停止过程写为增量之和",
+          "tex": "M_T=M_0+\\sum_{k=1}^n\\mathbf 1_{\\{T\\ge k\\}}(M_k-M_{k-1})"
+        },
+        {
+          "explanation": "因 $\\{T\\ge k\\}\\in\\mathcal F_{k-1}$，条件期望消掉每项",
+          "tex": "E[\\mathbf1_{\\{T\\ge k\\}}\\Delta M_k]=E[\\mathbf1_{\\{T\\ge k\\}}E[\\Delta M_k\\mid\\mathcal F_{k-1}]]=0"
+        },
+        {
+          "explanation": "求和得到有界停时等式",
+          "tex": "E[M_T]=E[M_0]"
+        }
+      ],
+      "example": "公平随机游走遇到有限时限的停止规则不改变其期望。",
+      "application": "最优停止、无套利定价、执行策略。",
+      "caveat": "无界停时时不能忽略额外条件；加倍下注不是无风险套利。",
+      "checked_status": "完整讲义：定义、条件、性质、公式、推导及应用"
+    },
+    {
+      "id": "ito-n0303",
+      "node_id": "ito-n0303",
+      "title": "布朗运动二次变差",
+      "definition": "标准布朗运动沿足够细的分割，其增量平方和收敛到区间长度，这构成Itô计算与普通微积分的关键区别。",
+      "assumptions": "标准布朗运动，分割网格最大宽度趋于0。",
+      "properties": [
+        "路径几乎处处不可微。",
+        "形式记号 $(dW_t)^2=dt$ 只是Itô规则，不能当普通微分等式。"
+      ],
+      "formulas": [
+        {
+          "label": "二次变差",
+          "tex": "\\sum_{k=1}^n(W_{t_k}-W_{t_{k-1}})^2\\xrightarrow{P}t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "各独立增量满足正态分布",
+          "tex": "\\Delta W_k\\sim N(0,\\Delta t_k)"
+        },
+        {
+          "explanation": "故平方增量和的期望为时间长度",
+          "tex": "E[\\sum_k(\\Delta W_k)^2]=\\sum_k\\Delta t_k=t"
+        },
+        {
+          "explanation": "正态四阶矩给出方差",
+          "tex": "\\operatorname{Var}(\\sum_k(\\Delta W_k)^2)=2\\sum_k(\\Delta t_k)^2\\to0"
+        },
+        {
+          "explanation": "因此在 $L^2$ 从而依概率收敛",
+          "tex": "\\sum_k(\\Delta W_k)^2\\xrightarrow{L^2}t"
+        }
+      ],
+      "example": "欧式期权定价Itô引理中出现二阶导数项。",
+      "application": "布朗驱动资产价格、随机积分、期权定价。",
+      "caveat": "这不是逐路径对任意分割都自动成立的陈述，应说明收敛模式。",
+      "checked_status": "完整讲义：定义、条件、性质、公式、推导及应用"
+    },
+    {
+      "id": "ito-n0309",
+      "node_id": "ito-n0309",
+      "title": "Itô引理一维",
+      "definition": "对Itô过程 $dX_t=\\mu_tdt+\\sigma_tdW_t$ 的光滑函数 $f(t,X_t)$，微分含有二次变差引起的二阶项。",
+      "assumptions": "$f\\in C^{1,2}$，系数与过程满足Itô积分所需正则可积条件。",
+      "properties": [
+        "与普通链式法则相比多了 $\\frac12\\sigma^2 f_{xx}dt$。",
+        "多变量推广还需二次协变差项。"
+      ],
+      "formulas": [
+        {
+          "label": "一维Itô公式",
+          "tex": "df(t,X_t)=\\left(f_t+\\mu_t f_x+\\tfrac12\\sigma_t^2f_{xx}\\right)dt+\\sigma_tf_x\\,dW_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从二阶Taylor展开开始",
+          "tex": "df=f_tdt+f_xdX+\\tfrac12f_{xx}(dX)^2+o(dt)"
+        },
+        {
+          "explanation": "代入 $dX=\\mu dt+\\sigma dW$ 和Itô乘法表",
+          "tex": "(dW)^2=dt,\\quad dt\\,dW=(dt)^2=0"
+        },
+        {
+          "explanation": "保留 $dt$ 和 $dW$ 阶项",
+          "tex": "df=\\left(f_t+\\mu f_x+\\tfrac12\\sigma^2f_{xx}\\right)dt+\\sigma f_xdW"
+        }
+      ],
+      "example": "取 $f(x)=\\log x$ 且 $dS/S=\\mu dt+\\sigma dW$，可得 $d\\log S=(\\mu-\\sigma^2/2)dt+\\sigma dW$。",
+      "application": "期权定价、风险中性资产价格、随机微分方程。",
+      "caveat": "二阶Itô项不可省略，普通链式法则不适用。",
+      "checked_status": "完整讲义：定义、条件、性质、公式、推导及应用"
+    },
+    {
+      "id": "ito-n0314",
+      "node_id": "ito-n0314",
+      "title": "GBM精确解",
+      "definition": "几何布朗运动以相对漂移和相对波动率描述资产价格，严格正值且对数服从正态分布。",
+      "assumptions": "常数 $\\mu,\\sigma$，初值 $S_0>0$，布朗驱动。",
+      "properties": [
+        "$\\log S_t$ 的漂移包含 $-\\sigma^2/2$ 修正。",
+        "GBM的简单回报为对数正态变换。"
+      ],
+      "formulas": [
+        {
+          "label": "GBM方程",
+          "tex": "dS_t=\\mu S_tdt+\\sigma S_tdW_t"
+        },
+        {
+          "label": "精确解",
+          "tex": "S_t=S_0\\exp\\!\\big((\\mu-\\tfrac12\\sigma^2)t+\\sigma W_t\\big)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对 $f(S)=\\log S$ 应用Itô公式",
+          "tex": "d\\log S_t=\\left(\\mu-\\tfrac12\\sigma^2\\right)dt+\\sigma dW_t"
+        },
+        {
+          "explanation": "两端从0积分到t",
+          "tex": "\\log S_t-\\log S_0=(\\mu-\\tfrac12\\sigma^2)t+\\sigma W_t"
+        },
+        {
+          "explanation": "指数化得到正值解",
+          "tex": "S_t=S_0e^{(\\mu-\\sigma^2/2)t+\\sigma W_t}"
+        }
+      ],
+      "example": "用GBM生成日收益模拟路径，验证时间步长变化时均值和方差。",
+      "application": "期权定价、风险场景模拟。",
+      "caveat": "真实资产存在随机波动、跳跃和厚尾，GBM是基础近似而非事实。",
+      "checked_status": "完整讲义：定义、条件、性质、公式、推导及应用"
+    },
+    {
+      "id": "optimization-n0338",
+      "node_id": "optimization-n0338",
+      "title": "KKT条件",
+      "definition": "对带等式和不等式约束的可微优化问题，Karush-Kuhn-Tucker条件给出一定约束资格条件下的局部最优必要条件；凸问题满足适当条件时亦可充分。",
+      "assumptions": "不等式写成 $g_i(x)\\le0$，并具备约束资格；凸充分性还要求目标和约束凸、等式仿射。",
+      "properties": [
+        "包括原始可行、对偶可行、驻点与互补松弛。",
+        "满足Slater条件可用于凸问题强对偶。"
+      ],
+      "formulas": [
+        {
+          "label": "Lagrangian",
+          "tex": "\\mathcal L(x,\\lambda,\\nu)=f(x)+\\sum_i\\lambda_i g_i(x)+\\sum_j\\nu_j h_j(x)"
+        },
+        {
+          "label": "KKT四条件",
+          "tex": "\\nabla_x\\mathcal L=0,\\quad g_i(x)\\le0,\\ h_j(x)=0,\\ \\lambda_i\\ge0,\\ \\lambda_i g_i(x)=0"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "构造约束问题Lagrangian",
+          "tex": "\\mathcal L=f+\\lambda^\\top g+\\nu^\\top h"
+        },
+        {
+          "explanation": "驻点要求最优点附近一阶变化不能继续下降",
+          "tex": "\\nabla f+\\sum_i\\lambda_i\\nabla g_i+\\sum_j\\nu_j\\nabla h_j=0"
+        },
+        {
+          "explanation": "对不活跃约束 $g_i(x)<0$，互补松弛强制乘子为0",
+          "tex": "\\lambda_i g_i(x)=0\\quad\\Rightarrow\\quad \\lambda_i=0\\text{ if }g_i(x)<0"
+        }
+      ],
+      "example": "在ETF最小方差配置中加入单票权重非负与权重和为1约束。",
+      "application": "量化组合优化、交易约束及风险预算。",
+      "caveat": "非凸问题满足KKT不保证全局最优；约束资格不可忽略。",
+      "checked_status": "完整讲义：定义、条件、性质、公式、推导及应用"
+    },
+    {
+      "id": "optimization-n0351",
+      "node_id": "optimization-n0351",
+      "title": "全球最小方差",
+      "definition": "在权重总和为1、未加入持仓上下限的情况下，最小化 $w^\\top\\Sigma w$ 的封闭解。",
+      "assumptions": "$\\Sigma$ 对称正定，允许空头且仅约束 $1^\\top w=1$。",
+      "properties": [
+        "不需要预期收益向量。",
+        "加入多空限制或交易成本后通常不再有此封闭解。"
+      ],
+      "formulas": [
+        {
+          "label": "最小方差组合",
+          "tex": "w^*=\\frac{\\Sigma^{-1}\\mathbf1}{\\mathbf1^\\top\\Sigma^{-1}\\mathbf1}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "建立Lagrangian",
+          "tex": "\\mathcal L(w,\\lambda)=\\tfrac12w^\\top\\Sigma w-\\lambda(\\mathbf1^\\top w-1)"
+        },
+        {
+          "explanation": "对 $w$ 求梯度",
+          "tex": "\\nabla_w\\mathcal L=\\Sigma w-\\lambda\\mathbf1=0"
+        },
+        {
+          "explanation": "得到 $w=\\lambda\\Sigma^{-1}\\mathbf1$，代入归一条件",
+          "tex": "\\lambda=\\frac1{\\mathbf1^\\top\\Sigma^{-1}\\mathbf1}"
+        },
+        {
+          "explanation": "整理得到最小方差权重",
+          "tex": "w^*=\\Sigma^{-1}\\mathbf1/(\\mathbf1^\\top\\Sigma^{-1}\\mathbf1)"
+        }
+      ],
+      "example": "对37只ETF先估计协方差，再求无约束最小方差基准。",
+      "application": "均值方差资产配置、基准组合构建。",
+      "caveat": "样本协方差不稳定时，求逆会产生极端权重；宜采用正则化与限制。",
+      "checked_status": "完整讲义：定义、条件、性质、公式、推导及应用"
+    },
+    {
+      "id": "numerical-n0382",
+      "node_id": "numerical-n0382",
+      "title": "控制变量法",
+      "definition": "用与目标收益高度相关、且期望可知的随机变量减少Monte Carlo估计方差。",
+      "assumptions": "目标变量 $X$ 可积且二阶矩有限；控制变量 $Y$ 的期望已知。",
+      "properties": [
+        "最优系数依赖协方差和方差。",
+        "有效性取决于控制变量与目标的相关程度。"
+      ],
+      "formulas": [
+        {
+          "label": "控制变量估计",
+          "tex": "\\hat\\mu_{CV}=\\bar X-\\beta(\\bar Y-\\mathbb E[Y])"
+        },
+        {
+          "label": "最优系数",
+          "tex": "\\beta^*=\\frac{\\operatorname{Cov}(X,Y)}{\\operatorname{Var}(Y)}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对单次调整量写出方差",
+          "tex": "\\operatorname{Var}(X-\\beta Y)=\\operatorname{Var}(X)-2\\beta\\operatorname{Cov}(X,Y)+\\beta^2\\operatorname{Var}(Y)"
+        },
+        {
+          "explanation": "对 $\\beta$ 求导并设为零",
+          "tex": "-2\\operatorname{Cov}(X,Y)+2\\beta\\operatorname{Var}(Y)=0"
+        },
+        {
+          "explanation": "解得最优系数并降低方差",
+          "tex": "\\beta^*=\\operatorname{Cov}(X,Y)/\\operatorname{Var}(Y)"
+        }
+      ],
+      "example": "估计障碍期权时以易计算的普通欧式期权作为控制变量。",
+      "application": "路径依赖衍生品Monte Carlo定价。",
+      "caveat": "样本内估计的控制变量系数也带有误差，应验证方差缩减效能。",
+      "checked_status": "完整讲义：定义、条件、性质、公式、推导及应用"
+    },
+    {
+      "id": "diffeq-n0409",
+      "node_id": "diffeq-n0409",
+      "title": "Black-Scholes PDE",
+      "definition": "通过Delta对冲消去扩散风险，在无套利及连续对冲假设下导出欧式衍生品价格满足的偏微分方程。",
+      "assumptions": "无交易摩擦、可连续交易、常数 $r,\\sigma$、标的GBM、可对冲。",
+      "properties": [
+        "PDE是风险中性定价与对冲复制的核心。",
+        "终端支付给出边界条件。"
+      ],
+      "formulas": [
+        {
+          "label": "Black-Scholes PDE",
+          "tex": "V_t+\\tfrac12\\sigma^2S^2V_{SS}+rSV_S-rV=0"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "假设标的在真实测度下",
+          "tex": "dS=\\mu Sdt+\\sigma SdW"
+        },
+        {
+          "explanation": "对 $V(t,S)$ 用Itô公式",
+          "tex": "dV=(V_t+\\mu SV_S+\\tfrac12\\sigma^2S^2V_{SS})dt+\\sigma SV_SdW"
+        },
+        {
+          "explanation": "构造对冲组合 $\\Pi=V-V_SS$ 消去 $dW$ 项",
+          "tex": "d\\Pi=(V_t+\\tfrac12\\sigma^2S^2V_{SS})dt"
+        },
+        {
+          "explanation": "无套利要求无风险对冲组合收益率为 $r$",
+          "tex": "d\\Pi=r(V-SV_S)dt"
+        },
+        {
+          "explanation": "整理得到PDE",
+          "tex": "V_t+\\tfrac12\\sigma^2S^2V_{SS}+rSV_S-rV=0"
+        }
+      ],
+      "example": "看涨欧式期权的终端条件是 $V(T,S)=\\max(S-K,0)$。",
+      "application": "Black-Scholes定价、Greeks和有限差分。",
+      "caveat": "这段复制忽略离散对冲误差、跳跃和流动性限制。",
+      "checked_status": "完整讲义：定义、条件、性质、公式、推导及应用"
+    },
+    {
+      "id": "finance-n0433",
+      "node_id": "finance-n0433",
+      "title": "二叉树风险中性复制",
+      "definition": "在单期二叉树市场中，通过现金和标的构造与衍生品支付完全一致的复制组合，得到风险中性概率定价。",
+      "assumptions": "一期标的上涨因子 $u$、下跌因子 $d$，无套利要求 $d<e^{r\\Delta t}<u$。",
+      "properties": [
+        "风险中性概率取决于无套利与复制，不是实际上涨概率。",
+        "若完整可复制，衍生品价格等于折现后风险中性期望。"
+      ],
+      "formulas": [
+        {
+          "label": "风险中性上涨概率",
+          "tex": "q=\\frac{e^{r\\Delta t}-d}{u-d}"
+        },
+        {
+          "label": "衍生品定价",
+          "tex": "V_0=e^{-r\\Delta t}\\{qV_u+(1-q)V_d\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "用股票 $\\Delta$ 份加现金 $B$ 复制两种结果",
+          "tex": "\\Delta S_0u+B e^{r\\Delta t}=V_u,\\quad \\Delta S_0d+B e^{r\\Delta t}=V_d"
+        },
+        {
+          "explanation": "两式相减求Delta",
+          "tex": "\\Delta=\\frac{V_u-V_d}{S_0(u-d)}"
+        },
+        {
+          "explanation": "代入 $V_0=\\Delta S_0+B$ 并整理",
+          "tex": "V_0=e^{-r\\Delta t}\\big(qV_u+(1-q)V_d\\big)"
+        }
+      ],
+      "example": "若 $S_0=100$、$u=1.1$、$d=0.9$、$r=0$，则风险中性概率为0.5。",
+      "application": "欧式期权与无套利风险中性估值。",
+      "caveat": "风险中性概率不是标的真实世界涨跌频率。",
+      "checked_status": "完整讲义：定义、条件、性质、公式、推导及应用"
+    },
+    {
+      "id": "finance-n0435",
+      "node_id": "finance-n0435",
+      "title": "Put-Call平价",
+      "definition": "相同标的、执行价和到期日的欧式看涨、看跌期权满足的无套利价格关系。",
+      "assumptions": "无分红欧式期权、相同 $K,T$，无套利且可借贷，利率常数。",
+      "properties": [
+        "可以由两组终端支付完全相同的组合复制得到。",
+        "若有连续股息收益率 $q$，现货贴现项调整为 $Se^{-qT}$。"
+      ],
+      "formulas": [
+        {
+          "label": "无股息平价",
+          "tex": "C-P=S_0-Ke^{-rT}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "看涨减看跌终端支付",
+          "tex": "\\max(S_T-K,0)-\\max(K-S_T,0)=S_T-K"
+        },
+        {
+          "explanation": "复制一份股票减一张到期支付 $K$ 的无风险零息债",
+          "tex": "S_T-K"
+        },
+        {
+          "explanation": "两者到期现金流一致，无套利要求现值相等",
+          "tex": "C-P=S_0-Ke^{-rT}"
+        }
+      ],
+      "example": "利用SPY同到期Call和Put报价检查平价偏离（应考虑实际交易成本及分红）。",
+      "application": "期权套利、合成远期与隐含融资率。",
+      "caveat": "美式期权及股息存在时需使用对应平价关系或不等式。",
+      "checked_status": "完整讲义：定义、条件、性质、公式、推导及应用"
+    },
+    {
+      "id": "mlmath-n0457",
+      "node_id": "mlmath-n0457",
+      "title": "链式法则与反向传播",
+      "definition": "反向传播通过计算图将最终损失对中间变量的导数逐层向前传递。",
+      "assumptions": "每层映射可微，在ReLU等不可微点选用实现定义的次梯度。",
+      "properties": [
+        "计算梯度的复杂度通常与前向图规模同阶。",
+        "对参数共享/分支节点需合并来自不同路径的梯度。"
+      ],
+      "formulas": [
+        {
+          "label": "单层梯度",
+          "tex": "z=Wx+b,\\quad a=\\phi(z),\\quad \\frac{\\partial L}{\\partial W}=\\delta_z x^\\top"
+        },
+        {
+          "label": "递推形式",
+          "tex": "\\delta_l=(W_{l+1}^\\top\\delta_{l+1})\\odot\\phi'(z_l)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "设网络输出的损失对激活的梯度为 $\\delta_a=\\partial L/\\partial a$",
+          "tex": "\\delta_z=\\delta_a\\odot\\phi'(z)"
+        },
+        {
+          "explanation": "线性变换 $z=Wx+b$ 的微分为",
+          "tex": "dz=(dW)x+W(dx)+db"
+        },
+        {
+          "explanation": "由微分内积识别参数梯度",
+          "tex": "dL=\\delta_z^\\top(dW)x+\\cdots\\quad\\Longrightarrow\\quad \\nabla_WL=\\delta_z x^\\top"
+        }
+      ],
+      "example": "在ETF价格图像CNN中通过链式法则计算卷积核的梯度。",
+      "application": "CNN/Transformer训练、金融机器学习和强化学习策略网络。",
+      "caveat": "梯度计算正确不意味着信号在样本外稳定。",
+      "checked_status": "完整讲义：定义、条件、性质、公式、推导及应用"
+    },
+    {
+      "id": "mlmath-n0478",
+      "node_id": "mlmath-n0478",
+      "title": "Bellman方程",
+      "definition": "最优控制的价值函数满足当前回报与折现后未来最优价值的递归关系。",
+      "assumptions": "折现因子 $0<\\gamma<1$、可测状态和动作、期望有限。",
+      "properties": [
+        "Bellman最优算子在合适范数下是压缩映射。",
+        "值迭代收敛需要相应有界和折现条件。"
+      ],
+      "formulas": [
+        {
+          "label": "最优Bellman方程",
+          "tex": "V^*(s)=\\max_a\\Big\\{r(s,a)+\\gamma\\,\\mathbb E[V^*(S')\\mid s,a]\\Big\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义策略 $\\pi$ 的折现累计奖励",
+          "tex": "V^\\pi(s)=E^\\pi[\\sum_{t=0}^{\\infty}\\gamma^t r_t\\mid S_0=s]"
+        },
+        {
+          "explanation": "分离第一期奖励与后续时段",
+          "tex": "V^\\pi(s)=E^\\pi[r_0+\\gamma V^\\pi(S_1)\\mid S_0=s]"
+        },
+        {
+          "explanation": "对当前可选动作取最优后构成最优方程",
+          "tex": "V^*(s)=\\max_a(r(s,a)+\\gamma EV^*(S'))"
+        }
+      ],
+      "example": "把仓位、手续费和市场状态纳入动态配置的奖励与转移模型。",
+      "application": "强化学习、最优执行、期权最优行权。",
+      "caveat": "错误奖励和不真实的市场转移可能产生严重策略失真。",
+      "checked_status": "完整讲义：定义、条件、性质、公式、推导及应用"
+    },
+    {
+      "id": "information-n0483",
+      "node_id": "information-n0483",
+      "title": "KL散度",
+      "definition": "两个概率分布之间的相对熵，度量用分布 $Q$ 近似真实分布 $P$ 的信息损失。",
+      "assumptions": "$P$ 对 $Q$ 绝对连续；离散情形在 $P(x)>0$ 时需 $Q(x)>0$。",
+      "properties": [
+        "非负性：$D_{KL}(P\\|Q)\\ge0$。",
+        "一般不对称，故不是度量距离。"
+      ],
+      "formulas": [
+        {
+          "label": "KL散度",
+          "tex": "D_{\\mathrm{KL}}(P\\|Q)=\\sum_x P(x)\\log\\frac{P(x)}{Q(x)}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对每个 $Q$ 分布下的比率使用Jensen或 $\\log z\\le z-1$",
+          "tex": "-\\log\\left(\\frac{Q(x)}{P(x)}\\right)\\ge1-\\frac{Q(x)}{P(x)}"
+        },
+        {
+          "explanation": "乘以 $P(x)$ 后求和",
+          "tex": "D_{\\mathrm{KL}}(P\\|Q)\\ge\\sum_x(P(x)-Q(x))=0"
+        }
+      ],
+      "example": "衡量不同市场状态下的收益分布变化；分布转移可作为数据漂移指标。",
+      "application": "概率预测校准、变分推断、信息论与强化学习。",
+      "caveat": "当 $Q$ 在 $P$ 正概率位置为零时KL可能无穷大。",
+      "checked_status": "完整讲义：定义、条件、性质、公式、推导及应用"
+    },
+    {
+      "id": "discrete-n0523",
+      "node_id": "discrete-n0523",
+      "title": "图Laplace矩阵",
+      "definition": "图拉普拉斯矩阵刻画节点之间的连接与平滑度，常用于谱聚类与网络传播。",
+      "assumptions": "无向非负加权图，邻接矩阵 $A=A^\\top$ 且权重非负。",
+      "properties": [
+        "$L=D-A$ 对称半正定。",
+        "连通分量数量等于零特征值重数。"
+      ],
+      "formulas": [
+        {
+          "label": "图拉普拉斯",
+          "tex": "L=D-A"
+        },
+        {
+          "label": "二次型",
+          "tex": "x^\\top Lx=\\tfrac12\\sum_{i,j}A_{ij}(x_i-x_j)^2\\ge0"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "展开拉普拉斯二次型",
+          "tex": "x^\\top(D-A)x=\\sum_i d_ix_i^2-\\sum_{ij}A_{ij}x_ix_j"
+        },
+        {
+          "explanation": "利用 $d_i=\\sum_jA_{ij}$ 且 $A$ 对称重排",
+          "tex": "=\\frac12\\sum_{ij}A_{ij}(x_i-x_j)^2"
+        },
+        {
+          "explanation": "权重非负，因此全体项非负",
+          "tex": "x^\\top Lx\\ge0"
+        }
+      ],
+      "example": "产业链公司图用于寻找聚类或估计供应链价格冲击传播。",
+      "application": "图神经网络、金融知识图谱、网络风险。",
+      "caveat": "有向图的拉普拉斯及谱性质不能直接套无向对称公式。",
+      "checked_status": "完整讲义：定义、条件、性质、公式、推导及应用"
+    },
+    {
+      "id": "riskmath-n0574",
+      "node_id": "riskmath-n0574",
+      "title": "极值理论",
+      "definition": "研究样本极端值在归一化后可能收敛的分布族，用于尾部风险建模。",
+      "assumptions": "独立同分布极值渐近理论或满足对应弱依赖条件；尾部阈值需足够高。",
+      "properties": [
+        "块极大值与超阈值法是两套常用表述。",
+        "广义极值GEV与广义帕累托GPD参数的形状参数刻画厚尾。"
+      ],
+      "formulas": [
+        {
+          "label": "GPD超阈值近似",
+          "tex": "P(X-u\\le y\\mid X>u)\\approx 1-\\left(1+\\xi\\frac{y}{\\beta}\\right)^{-1/\\xi}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将损失超过阈值 $u$ 的剩余量记为 $Y=X-u$",
+          "tex": "Y\\mid X>u"
+        },
+        {
+          "explanation": "在极值域吸引条件与高阈值下，超阈值条件分布近似GPD",
+          "tex": "F_u(y)\\approx G_{\\xi,\\beta}(y)"
+        },
+        {
+          "explanation": "根据估计尾部概率换算高分位风险",
+          "tex": "P(X>x)\\approx P(X>u)\\{1-G_{\\xi,\\beta}(x-u)\\}"
+        }
+      ],
+      "example": "用历史指数下跌事件超阈值样本估计极端损失概率。",
+      "application": "VaR/ES、期权尾部风险、系统性风险监控。",
+      "caveat": "金融尾部强时间依赖且样本稀疏，参数置信区间必须报告。",
+      "checked_status": "完整讲义：定义、条件、性质、公式、推导及应用"
+    }
+  ]
+}
