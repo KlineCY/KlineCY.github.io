@@ -1,0 +1,613 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "rl-n02-01",
+      "node_id": "rl-n02-01",
+      "title": "状态与动作",
+      "definition": "状态概括环境当前决策信息，动作表示智能体可执行的控制选择。",
+      "assumptions": "MDP、策略、奖励、动作集合及时间折现须预先定义；金融市场未必满足严格Markov性与平稳性。",
+      "properties": [
+        "状态概括环境当前决策信息，动作表示智能体可执行的控制选择。",
+        "强化学习中环境交互与离线历史回放不是同一个实验，策略改善需要明确行为策略覆盖度。"
+      ],
+      "formulas": [
+        {
+          "label": "Bellman及序贯决策公式",
+          "tex": "a_t\\in\\mathcal A(s_t),\\quad s_t\\in\\mathcal S"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从状态、动作、奖励和折现回报的定义构造该策略评价或改进对象。",
+          "tex": "a_t\\in\\mathcal A(s_t),\\quad s_t\\in\\mathcal S"
+        },
+        {
+          "explanation": "依据转移概率、采样轨迹或策略分布进行期望、递归或重要性权重计算。",
+          "tex": "a_t\\in\\mathcal A(s_t),\\quad s_t\\in\\mathcal S"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0)\nP=np.array([[.8,.2],[.3,.7]]);print(rng.choice(2,p=P[0]))",
+      "packages": "numpy",
+      "application": "用于ETF再平衡、订单执行和风险限制下的策略动态控制。",
+      "limits": "代码只展示基本MDP与序贯计算，并非市场仿真或安全可用的交易智能体；真实交易应将费用、执行延迟和仓位约束纳入环境。",
+      "coverage": "complete"
+    },
+    {
+      "id": "rl-n03-01",
+      "node_id": "rl-n03-01",
+      "title": "即时奖励",
+      "definition": "奖励以标量反馈单次动作或状态转移的价值，并决定RL优化目标。",
+      "assumptions": "MDP、策略、奖励、动作集合及时间折现须预先定义；金融市场未必满足严格Markov性与平稳性。",
+      "properties": [
+        "奖励以标量反馈单次动作或状态转移的价值，并决定RL优化目标。",
+        "强化学习中环境交互与离线历史回放不是同一个实验，策略改善需要明确行为策略覆盖度。"
+      ],
+      "formulas": [
+        {
+          "label": "Bellman及序贯决策公式",
+          "tex": "r_t=r(s_t,a_t,s_{t+1})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从状态、动作、奖励和折现回报的定义构造该策略评价或改进对象。",
+          "tex": "r_t=r(s_t,a_t,s_{t+1})"
+        },
+        {
+          "explanation": "依据转移概率、采样轨迹或策略分布进行期望、递归或重要性权重计算。",
+          "tex": "r_t=r(s_t,a_t,s_{t+1})"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0)\nP=np.array([[.8,.2],[.3,.7]]);print(rng.choice(2,p=P[0]))",
+      "packages": "numpy",
+      "application": "用于ETF再平衡、订单执行和风险限制下的策略动态控制。",
+      "limits": "代码只展示基本MDP与序贯计算，并非市场仿真或安全可用的交易智能体；真实交易应将费用、执行延迟和仓位约束纳入环境。",
+      "coverage": "complete"
+    },
+    {
+      "id": "rl-n04-01",
+      "node_id": "rl-n04-01",
+      "title": "折现回报",
+      "definition": "折现累计回报对近未来奖励赋予更高权重，γ控制远期价值影响。",
+      "assumptions": "MDP、策略、奖励、动作集合及时间折现须预先定义；金融市场未必满足严格Markov性与平稳性。",
+      "properties": [
+        "折现累计回报对近未来奖励赋予更高权重，γ控制远期价值影响。",
+        "强化学习中环境交互与离线历史回放不是同一个实验，策略改善需要明确行为策略覆盖度。"
+      ],
+      "formulas": [
+        {
+          "label": "Bellman及序贯决策公式",
+          "tex": "G_t=\\sum_{k=0}^\\infty\\gamma^k r_{t+k+1}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从状态、动作、奖励和折现回报的定义构造该策略评价或改进对象。",
+          "tex": "G_t=\\sum_{k=0}^\\infty\\gamma^k r_{t+k+1}"
+        },
+        {
+          "explanation": "依据转移概率、采样轨迹或策略分布进行期望、递归或重要性权重计算。",
+          "tex": "G_t=\\sum_{k=0}^\\infty\\gamma^k r_{t+k+1}"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0)\nP=np.array([[.8,.2],[.3,.7]]);print(rng.choice(2,p=P[0]))",
+      "packages": "numpy",
+      "application": "用于ETF再平衡、订单执行和风险限制下的策略动态控制。",
+      "limits": "代码只展示基本MDP与序贯计算，并非市场仿真或安全可用的交易智能体；真实交易应将费用、执行延迟和仓位约束纳入环境。",
+      "coverage": "complete"
+    },
+    {
+      "id": "rl-n05-01",
+      "node_id": "rl-n05-01",
+      "title": "转移核",
+      "definition": "状态转移核刻画当前状态动作下下一状态的条件分布。",
+      "assumptions": "MDP、策略、奖励、动作集合及时间折现须预先定义；金融市场未必满足严格Markov性与平稳性。",
+      "properties": [
+        "状态转移核刻画当前状态动作下下一状态的条件分布。",
+        "强化学习中环境交互与离线历史回放不是同一个实验，策略改善需要明确行为策略覆盖度。"
+      ],
+      "formulas": [
+        {
+          "label": "Bellman及序贯决策公式",
+          "tex": "P(s'|s,a)=P(S_{t+1}=s'|S_t=s,A_t=a)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从状态、动作、奖励和折现回报的定义构造该策略评价或改进对象。",
+          "tex": "P(s'|s,a)=P(S_{t+1}=s'|S_t=s,A_t=a)"
+        },
+        {
+          "explanation": "依据转移概率、采样轨迹或策略分布进行期望、递归或重要性权重计算。",
+          "tex": "P(s'|s,a)=P(S_{t+1}=s'|S_t=s,A_t=a)"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0)\nP=np.array([[.8,.2],[.3,.7]]);print(rng.choice(2,p=P[0]))",
+      "packages": "numpy",
+      "application": "用于ETF再平衡、订单执行和风险限制下的策略动态控制。",
+      "limits": "代码只展示基本MDP与序贯计算，并非市场仿真或安全可用的交易智能体；真实交易应将费用、执行延迟和仓位约束纳入环境。",
+      "coverage": "complete"
+    },
+    {
+      "id": "rl-n06-01",
+      "node_id": "rl-n06-01",
+      "title": "Markov性质",
+      "definition": "给定充分状态和当前动作后，下一状态条件分布不再依赖更早历史。",
+      "assumptions": "MDP、策略、奖励、动作集合及时间折现须预先定义；金融市场未必满足严格Markov性与平稳性。",
+      "properties": [
+        "给定充分状态和当前动作后，下一状态条件分布不再依赖更早历史。",
+        "强化学习中环境交互与离线历史回放不是同一个实验，策略改善需要明确行为策略覆盖度。"
+      ],
+      "formulas": [
+        {
+          "label": "Bellman及序贯决策公式",
+          "tex": "P(S_{t+1}|S_{0:t},A_{0:t})=P(S_{t+1}|S_t,A_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从状态、动作、奖励和折现回报的定义构造该策略评价或改进对象。",
+          "tex": "P(S_{t+1}|S_{0:t},A_{0:t})=P(S_{t+1}|S_t,A_t)"
+        },
+        {
+          "explanation": "依据转移概率、采样轨迹或策略分布进行期望、递归或重要性权重计算。",
+          "tex": "P(S_{t+1}|S_{0:t},A_{0:t})=P(S_{t+1}|S_t,A_t)"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0)\nP=np.array([[.8,.2],[.3,.7]]);print(rng.choice(2,p=P[0]))",
+      "packages": "numpy",
+      "application": "用于ETF再平衡、订单执行和风险限制下的策略动态控制。",
+      "limits": "代码只展示基本MDP与序贯计算，并非市场仿真或安全可用的交易智能体；真实交易应将费用、执行延迟和仓位约束纳入环境。",
+      "coverage": "complete"
+    },
+    {
+      "id": "rl-n03-02",
+      "node_id": "rl-n03-02",
+      "title": "Bellman期望方程",
+      "definition": "固定策略的价值等于当前预期奖励与下一状态折现价值之和。",
+      "assumptions": "MDP、策略、奖励、动作集合及时间折现须预先定义；金融市场未必满足严格Markov性与平稳性。",
+      "properties": [
+        "固定策略的价值等于当前预期奖励与下一状态折现价值之和。",
+        "强化学习中环境交互与离线历史回放不是同一个实验，策略改善需要明确行为策略覆盖度。"
+      ],
+      "formulas": [
+        {
+          "label": "Bellman及序贯决策公式",
+          "tex": "V^\\pi(s)=\\sum_a\\pi(a|s)[r(s,a)+\\gamma E(V^\\pi(S')|s,a)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从状态、动作、奖励和折现回报的定义构造该策略评价或改进对象。",
+          "tex": "V^\\pi(s)=\\sum_a\\pi(a|s)[r(s,a)+\\gamma E(V^\\pi(S')|s,a)]"
+        },
+        {
+          "explanation": "依据转移概率、采样轨迹或策略分布进行期望、递归或重要性权重计算。",
+          "tex": "V^\\pi(s)=\\sum_a\\pi(a|s)[r(s,a)+\\gamma E(V^\\pi(S')|s,a)]"
+        }
+      ],
+      "code": "import numpy as np\nv=np.zeros(2);P=np.array([[.8,.2],[.3,.7]]);r=np.array([1.,2.])\nfor i in range(20):v=r+.9*P@v\nprint(v)",
+      "packages": "numpy",
+      "application": "用于ETF再平衡、订单执行和风险限制下的策略动态控制。",
+      "limits": "代码只展示基本MDP与序贯计算，并非市场仿真或安全可用的交易智能体；真实交易应将费用、执行延迟和仓位约束纳入环境。",
+      "coverage": "complete"
+    },
+    {
+      "id": "rl-n06-02",
+      "node_id": "rl-n06-02",
+      "title": "策略改进",
+      "definition": "利用已估计Q值对当前策略做贪心或软贪心改善，得到更高或不低的策略价值。",
+      "assumptions": "MDP、策略、奖励、动作集合及时间折现须预先定义；金融市场未必满足严格Markov性与平稳性。",
+      "properties": [
+        "利用已估计Q值对当前策略做贪心或软贪心改善，得到更高或不低的策略价值。",
+        "强化学习中环境交互与离线历史回放不是同一个实验，策略改善需要明确行为策略覆盖度。"
+      ],
+      "formulas": [
+        {
+          "label": "Bellman及序贯决策公式",
+          "tex": "\\pi'(s)\\in\\arg\\max_a Q^\\pi(s,a)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从状态、动作、奖励和折现回报的定义构造该策略评价或改进对象。",
+          "tex": "\\pi'(s)\\in\\arg\\max_a Q^\\pi(s,a)"
+        },
+        {
+          "explanation": "依据转移概率、采样轨迹或策略分布进行期望、递归或重要性权重计算。",
+          "tex": "\\pi'(s)\\in\\arg\\max_a Q^\\pi(s,a)"
+        }
+      ],
+      "code": "import numpy as np\nv=np.zeros(2);P=np.array([[.8,.2],[.3,.7]]);r=np.array([1.,2.])\nfor i in range(20):v=r+.9*P@v\nprint(v)",
+      "packages": "numpy",
+      "application": "用于ETF再平衡、订单执行和风险限制下的策略动态控制。",
+      "limits": "代码只展示基本MDP与序贯计算，并非市场仿真或安全可用的交易智能体；真实交易应将费用、执行延迟和仓位约束纳入环境。",
+      "coverage": "complete"
+    },
+    {
+      "id": "rl-n03-03",
+      "node_id": "rl-n03-03",
+      "title": "广义策略迭代GPI",
+      "definition": "策略评估与策略改进可交替或并行近似执行，推动价值函数与策略共同优化。",
+      "assumptions": "MDP、策略、奖励、动作集合及时间折现须预先定义；金融市场未必满足严格Markov性与平稳性。",
+      "properties": [
+        "策略评估与策略改进可交替或并行近似执行，推动价值函数与策略共同优化。",
+        "强化学习中环境交互与离线历史回放不是同一个实验，策略改善需要明确行为策略覆盖度。"
+      ],
+      "formulas": [
+        {
+          "label": "Bellman及序贯决策公式",
+          "tex": "(\\pi_k,V_k)\\to(\\pi_{k+1},V_{k+1})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从状态、动作、奖励和折现回报的定义构造该策略评价或改进对象。",
+          "tex": "(\\pi_k,V_k)\\to(\\pi_{k+1},V_{k+1})"
+        },
+        {
+          "explanation": "依据转移概率、采样轨迹或策略分布进行期望、递归或重要性权重计算。",
+          "tex": "(\\pi_k,V_k)\\to(\\pi_{k+1},V_{k+1})"
+        }
+      ],
+      "code": "import numpy as np\nv=np.array([0.,1.]);r=np.array([1.,.3]);print(np.maximum(r,.9*v))",
+      "packages": "numpy",
+      "application": "用于ETF再平衡、订单执行和风险限制下的策略动态控制。",
+      "limits": "代码只展示基本MDP与序贯计算，并非市场仿真或安全可用的交易智能体；真实交易应将费用、执行延迟和仓位约束纳入环境。",
+      "coverage": "complete"
+    },
+    {
+      "id": "rl-n04-03",
+      "node_id": "rl-n04-03",
+      "title": "最优停止",
+      "definition": "在随机环境中比较立即停止的回报与继续行动的期望价值，选择最优停止时刻。",
+      "assumptions": "MDP、策略、奖励、动作集合及时间折现须预先定义；金融市场未必满足严格Markov性与平稳性。",
+      "properties": [
+        "在随机环境中比较立即停止的回报与继续行动的期望价值，选择最优停止时刻。",
+        "强化学习中环境交互与离线历史回放不是同一个实验，策略改善需要明确行为策略覆盖度。"
+      ],
+      "formulas": [
+        {
+          "label": "Bellman及序贯决策公式",
+          "tex": "V(s)=\\max[g(s),E[\\gamma V(S')|s]]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从状态、动作、奖励和折现回报的定义构造该策略评价或改进对象。",
+          "tex": "V(s)=\\max[g(s),E[\\gamma V(S')|s]]"
+        },
+        {
+          "explanation": "依据转移概率、采样轨迹或策略分布进行期望、递归或重要性权重计算。",
+          "tex": "V(s)=\\max[g(s),E[\\gamma V(S')|s]]"
+        }
+      ],
+      "code": "import numpy as np\nv=np.array([0.,1.]);r=np.array([1.,.3]);print(np.maximum(r,.9*v))",
+      "packages": "numpy",
+      "application": "用于ETF再平衡、订单执行和风险限制下的策略动态控制。",
+      "limits": "代码只展示基本MDP与序贯计算，并非市场仿真或安全可用的交易智能体；真实交易应将费用、执行延迟和仓位约束纳入环境。",
+      "coverage": "complete"
+    },
+    {
+      "id": "rl-n05-03",
+      "node_id": "rl-n05-03",
+      "title": "有限时域DP",
+      "definition": "有限步长动态规划以终值条件逆时间递推每个状态的最优行动价值。",
+      "assumptions": "MDP、策略、奖励、动作集合及时间折现须预先定义；金融市场未必满足严格Markov性与平稳性。",
+      "properties": [
+        "有限步长动态规划以终值条件逆时间递推每个状态的最优行动价值。",
+        "强化学习中环境交互与离线历史回放不是同一个实验，策略改善需要明确行为策略覆盖度。"
+      ],
+      "formulas": [
+        {
+          "label": "Bellman及序贯决策公式",
+          "tex": "V_t(s)=\\max_a[r_t(s,a)+E(V_{t+1}(S')|s,a)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从状态、动作、奖励和折现回报的定义构造该策略评价或改进对象。",
+          "tex": "V_t(s)=\\max_a[r_t(s,a)+E(V_{t+1}(S')|s,a)]"
+        },
+        {
+          "explanation": "依据转移概率、采样轨迹或策略分布进行期望、递归或重要性权重计算。",
+          "tex": "V_t(s)=\\max_a[r_t(s,a)+E(V_{t+1}(S')|s,a)]"
+        }
+      ],
+      "code": "import numpy as np\nv=np.array([0.,1.]);r=np.array([1.,.3]);print(np.maximum(r,.9*v))",
+      "packages": "numpy",
+      "application": "用于ETF再平衡、订单执行和风险限制下的策略动态控制。",
+      "limits": "代码只展示基本MDP与序贯计算，并非市场仿真或安全可用的交易智能体；真实交易应将费用、执行延迟和仓位约束纳入环境。",
+      "coverage": "complete"
+    },
+    {
+      "id": "rl-n06-03",
+      "node_id": "rl-n06-03",
+      "title": "折现收敛",
+      "definition": "折现Bellman算子在有界价值函数空间按无穷范数是γ压缩映射。",
+      "assumptions": "MDP、策略、奖励、动作集合及时间折现须预先定义；金融市场未必满足严格Markov性与平稳性。",
+      "properties": [
+        "折现Bellman算子在有界价值函数空间按无穷范数是γ压缩映射。",
+        "强化学习中环境交互与离线历史回放不是同一个实验，策略改善需要明确行为策略覆盖度。"
+      ],
+      "formulas": [
+        {
+          "label": "Bellman及序贯决策公式",
+          "tex": "\\|TV-TW\\|_\\infty\\le\\gamma\\|V-W\\|_\\infty"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从状态、动作、奖励和折现回报的定义构造该策略评价或改进对象。",
+          "tex": "\\|TV-TW\\|_\\infty\\le\\gamma\\|V-W\\|_\\infty"
+        },
+        {
+          "explanation": "依据转移概率、采样轨迹或策略分布进行期望、递归或重要性权重计算。",
+          "tex": "\\|TV-TW\\|_\\infty\\le\\gamma\\|V-W\\|_\\infty"
+        }
+      ],
+      "code": "import numpy as np\nv=np.array([0.,1.]);r=np.array([1.,.3]);print(np.maximum(r,.9*v))",
+      "packages": "numpy",
+      "application": "用于ETF再平衡、订单执行和风险限制下的策略动态控制。",
+      "limits": "代码只展示基本MDP与序贯计算，并非市场仿真或安全可用的交易智能体；真实交易应将费用、执行延迟和仓位约束纳入环境。",
+      "coverage": "complete"
+    },
+    {
+      "id": "rl-n01-04",
+      "node_id": "rl-n01-04",
+      "title": "Monte Carlo策略估计",
+      "definition": "使用完整Episode回报的样本平均估计给定策略下的状态价值。",
+      "assumptions": "MDP、策略、奖励、动作集合及时间折现须预先定义；金融市场未必满足严格Markov性与平稳性。",
+      "properties": [
+        "使用完整Episode回报的样本平均估计给定策略下的状态价值。",
+        "强化学习中环境交互与离线历史回放不是同一个实验，策略改善需要明确行为策略覆盖度。"
+      ],
+      "formulas": [
+        {
+          "label": "Bellman及序贯决策公式",
+          "tex": "\\hat V^\\pi(s)=\\frac1{N_s}\\sum_{j:S_j=s}G_j"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从状态、动作、奖励和折现回报的定义构造该策略评价或改进对象。",
+          "tex": "\\hat V^\\pi(s)=\\frac1{N_s}\\sum_{j:S_j=s}G_j"
+        },
+        {
+          "explanation": "依据转移概率、采样轨迹或策略分布进行期望、递归或重要性权重计算。",
+          "tex": "\\hat V^\\pi(s)=\\frac1{N_s}\\sum_{j:S_j=s}G_j"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);returns=rng.normal(size=(20,6)).sum(1)\nprint('MC estimate',returns.mean())",
+      "packages": "numpy",
+      "application": "用于ETF再平衡、订单执行和风险限制下的策略动态控制。",
+      "limits": "代码只展示基本MDP与序贯计算，并非市场仿真或安全可用的交易智能体；真实交易应将费用、执行延迟和仓位约束纳入环境。",
+      "coverage": "complete"
+    },
+    {
+      "id": "rl-n05-04",
+      "node_id": "rl-n05-04",
+      "title": "Eligibility Traces",
+      "definition": "资格迹累计过去活跃状态/特征的衰减权重，使TD误差能更新更远历史。",
+      "assumptions": "MDP、策略、奖励、动作集合及时间折现须预先定义；金融市场未必满足严格Markov性与平稳性。",
+      "properties": [
+        "资格迹累计过去活跃状态/特征的衰减权重，使TD误差能更新更远历史。",
+        "强化学习中环境交互与离线历史回放不是同一个实验，策略改善需要明确行为策略覆盖度。"
+      ],
+      "formulas": [
+        {
+          "label": "Bellman及序贯决策公式",
+          "tex": "e_t=\\gamma\\lambda e_{t-1}+\\phi(s_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从状态、动作、奖励和折现回报的定义构造该策略评价或改进对象。",
+          "tex": "e_t=\\gamma\\lambda e_{t-1}+\\phi(s_t)"
+        },
+        {
+          "explanation": "依据转移概率、采样轨迹或策略分布进行期望、递归或重要性权重计算。",
+          "tex": "e_t=\\gamma\\lambda e_{t-1}+\\phi(s_t)"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);returns=rng.normal(size=(20,6)).sum(1)\nprint('MC estimate',returns.mean())",
+      "packages": "numpy",
+      "application": "用于ETF再平衡、订单执行和风险限制下的策略动态控制。",
+      "limits": "代码只展示基本MDP与序贯计算，并非市场仿真或安全可用的交易智能体；真实交易应将费用、执行延迟和仓位约束纳入环境。",
+      "coverage": "complete"
+    },
+    {
+      "id": "rl-n06-04",
+      "node_id": "rl-n06-04",
+      "title": "TD(λ)",
+      "definition": "TD(λ)组合多步Bootstrap回报，使用资格迹或前向λ-return实现时序差分估计。",
+      "assumptions": "MDP、策略、奖励、动作集合及时间折现须预先定义；金融市场未必满足严格Markov性与平稳性。",
+      "properties": [
+        "TD(λ)组合多步Bootstrap回报，使用资格迹或前向λ-return实现时序差分估计。",
+        "强化学习中环境交互与离线历史回放不是同一个实验，策略改善需要明确行为策略覆盖度。"
+      ],
+      "formulas": [
+        {
+          "label": "Bellman及序贯决策公式",
+          "tex": "G_t^\\lambda=(1-\\lambda)\\sum_{n=1}^\\infty\\lambda^{n-1}G_t^{(n)}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从状态、动作、奖励和折现回报的定义构造该策略评价或改进对象。",
+          "tex": "G_t^\\lambda=(1-\\lambda)\\sum_{n=1}^\\infty\\lambda^{n-1}G_t^{(n)}"
+        },
+        {
+          "explanation": "依据转移概率、采样轨迹或策略分布进行期望、递归或重要性权重计算。",
+          "tex": "G_t^\\lambda=(1-\\lambda)\\sum_{n=1}^\\infty\\lambda^{n-1}G_t^{(n)}"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);returns=rng.normal(size=(20,6)).sum(1)\nprint('MC estimate',returns.mean())",
+      "packages": "numpy",
+      "application": "用于ETF再平衡、订单执行和风险限制下的策略动态控制。",
+      "limits": "代码只展示基本MDP与序贯计算，并非市场仿真或安全可用的交易智能体；真实交易应将费用、执行延迟和仓位约束纳入环境。",
+      "coverage": "complete"
+    },
+    {
+      "id": "rl-n02-05",
+      "node_id": "rl-n02-05",
+      "title": "UCB",
+      "definition": "上置信界方法在估计平均奖励上加入探索奖励，优先尝试不确定动作。",
+      "assumptions": "MDP、策略、奖励、动作集合及时间折现须预先定义；金融市场未必满足严格Markov性与平稳性。",
+      "properties": [
+        "上置信界方法在估计平均奖励上加入探索奖励，优先尝试不确定动作。",
+        "强化学习中环境交互与离线历史回放不是同一个实验，策略改善需要明确行为策略覆盖度。"
+      ],
+      "formulas": [
+        {
+          "label": "Bellman及序贯决策公式",
+          "tex": "a_t=\\arg\\max_a[\\hat\\mu_a+c\\sqrt{\\log t/N_a}]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从状态、动作、奖励和折现回报的定义构造该策略评价或改进对象。",
+          "tex": "a_t=\\arg\\max_a[\\hat\\mu_a+c\\sqrt{\\log t/N_a}]"
+        },
+        {
+          "explanation": "依据转移概率、采样轨迹或策略分布进行期望、递归或重要性权重计算。",
+          "tex": "a_t=\\arg\\max_a[\\hat\\mu_a+c\\sqrt{\\log t/N_a}]"
+        }
+      ],
+      "code": "import numpy as np\nn=np.array([5.,20.,3.]);mean=np.array([.4,.5,.3]);t=40\nprint(np.argmax(mean+np.sqrt(2*np.log(t)/n)))",
+      "packages": "numpy",
+      "application": "用于ETF再平衡、订单执行和风险限制下的策略动态控制。",
+      "limits": "代码只展示基本MDP与序贯计算，并非市场仿真或安全可用的交易智能体；真实交易应将费用、执行延迟和仓位约束纳入环境。",
+      "coverage": "complete"
+    },
+    {
+      "id": "rl-n03-05",
+      "node_id": "rl-n03-05",
+      "title": "多臂老虎机",
+      "definition": "多臂老虎机在多个未知奖励分布动作中平衡探索和利用，没有复杂状态转移。",
+      "assumptions": "MDP、策略、奖励、动作集合及时间折现须预先定义；金融市场未必满足严格Markov性与平稳性。",
+      "properties": [
+        "多臂老虎机在多个未知奖励分布动作中平衡探索和利用，没有复杂状态转移。",
+        "强化学习中环境交互与离线历史回放不是同一个实验，策略改善需要明确行为策略覆盖度。"
+      ],
+      "formulas": [
+        {
+          "label": "Bellman及序贯决策公式",
+          "tex": "\\max_\\pi E\\sum_{t=1}^T r_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从状态、动作、奖励和折现回报的定义构造该策略评价或改进对象。",
+          "tex": "\\max_\\pi E\\sum_{t=1}^T r_t"
+        },
+        {
+          "explanation": "依据转移概率、采样轨迹或策略分布进行期望、递归或重要性权重计算。",
+          "tex": "\\max_\\pi E\\sum_{t=1}^T r_t"
+        }
+      ],
+      "code": "import numpy as np\nn=np.array([5.,20.,3.]);mean=np.array([.4,.5,.3]);t=40\nprint(np.argmax(mean+np.sqrt(2*np.log(t)/n)))",
+      "packages": "numpy",
+      "application": "用于ETF再平衡、订单执行和风险限制下的策略动态控制。",
+      "limits": "代码只展示基本MDP与序贯计算，并非市场仿真或安全可用的交易智能体；真实交易应将费用、执行延迟和仓位约束纳入环境。",
+      "coverage": "complete"
+    },
+    {
+      "id": "rl-n04-05",
+      "node_id": "rl-n04-05",
+      "title": "Regret",
+      "definition": "累积后悔衡量策略收益相对最佳可行动作或基准的累计损失。",
+      "assumptions": "MDP、策略、奖励、动作集合及时间折现须预先定义；金融市场未必满足严格Markov性与平稳性。",
+      "properties": [
+        "累积后悔衡量策略收益相对最佳可行动作或基准的累计损失。",
+        "强化学习中环境交互与离线历史回放不是同一个实验，策略改善需要明确行为策略覆盖度。"
+      ],
+      "formulas": [
+        {
+          "label": "Bellman及序贯决策公式",
+          "tex": "\\operatorname{Regret}(T)=T\\mu^*-\\sum_{t=1}^TE[r_t]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从状态、动作、奖励和折现回报的定义构造该策略评价或改进对象。",
+          "tex": "\\operatorname{Regret}(T)=T\\mu^*-\\sum_{t=1}^TE[r_t]"
+        },
+        {
+          "explanation": "依据转移概率、采样轨迹或策略分布进行期望、递归或重要性权重计算。",
+          "tex": "\\operatorname{Regret}(T)=T\\mu^*-\\sum_{t=1}^TE[r_t]"
+        }
+      ],
+      "code": "import numpy as np\nn=np.array([5.,20.,3.]);mean=np.array([.4,.5,.3]);t=40\nprint(np.argmax(mean+np.sqrt(2*np.log(t)/n)))",
+      "packages": "numpy",
+      "application": "用于ETF再平衡、订单执行和风险限制下的策略动态控制。",
+      "limits": "代码只展示基本MDP与序贯计算，并非市场仿真或安全可用的交易智能体；真实交易应将费用、执行延迟和仓位约束纳入环境。",
+      "coverage": "complete"
+    },
+    {
+      "id": "rl-n05-05",
+      "node_id": "rl-n05-05",
+      "title": "Off-policy评估",
+      "definition": "离策略评价使用行为策略产生的数据估计另一目标策略的价值，需要检查行动覆盖与重要性权重。",
+      "assumptions": "MDP、策略、奖励、动作集合及时间折现须预先定义；金融市场未必满足严格Markov性与平稳性。",
+      "properties": [
+        "离策略评价使用行为策略产生的数据估计另一目标策略的价值，需要检查行动覆盖与重要性权重。",
+        "强化学习中环境交互与离线历史回放不是同一个实验，策略改善需要明确行为策略覆盖度。"
+      ],
+      "formulas": [
+        {
+          "label": "Bellman及序贯决策公式",
+          "tex": "V^\\pi=E_\\beta[w(\\tau)G(\\tau)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从状态、动作、奖励和折现回报的定义构造该策略评价或改进对象。",
+          "tex": "V^\\pi=E_\\beta[w(\\tau)G(\\tau)]"
+        },
+        {
+          "explanation": "依据转移概率、采样轨迹或策略分布进行期望、递归或重要性权重计算。",
+          "tex": "V^\\pi=E_\\beta[w(\\tau)G(\\tau)]"
+        }
+      ],
+      "code": "import numpy as np\nn=np.array([5.,20.,3.]);mean=np.array([.4,.5,.3]);t=40\nprint(np.argmax(mean+np.sqrt(2*np.log(t)/n)))",
+      "packages": "numpy",
+      "application": "用于ETF再平衡、订单执行和风险限制下的策略动态控制。",
+      "limits": "代码只展示基本MDP与序贯计算，并非市场仿真或安全可用的交易智能体；真实交易应将费用、执行延迟和仓位约束纳入环境。",
+      "coverage": "complete"
+    },
+    {
+      "id": "rl-n06-05",
+      "node_id": "rl-n06-05",
+      "title": "Importance Sampling",
+      "definition": "用目标分布与采样分布的密度比对观测重新加权，估计目标期望。",
+      "assumptions": "MDP、策略、奖励、动作集合及时间折现须预先定义；金融市场未必满足严格Markov性与平稳性。",
+      "properties": [
+        "用目标分布与采样分布的密度比对观测重新加权，估计目标期望。",
+        "强化学习中环境交互与离线历史回放不是同一个实验，策略改善需要明确行为策略覆盖度。"
+      ],
+      "formulas": [
+        {
+          "label": "Bellman及序贯决策公式",
+          "tex": "E_p[f(X)]=E_q[\\frac{p(X)}{q(X)}f(X)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从状态、动作、奖励和折现回报的定义构造该策略评价或改进对象。",
+          "tex": "E_p[f(X)]=E_q[\\frac{p(X)}{q(X)}f(X)]"
+        },
+        {
+          "explanation": "依据转移概率、采样轨迹或策略分布进行期望、递归或重要性权重计算。",
+          "tex": "E_p[f(X)]=E_q[\\frac{p(X)}{q(X)}f(X)]"
+        }
+      ],
+      "code": "import numpy as np\nn=np.array([5.,20.,3.]);mean=np.array([.4,.5,.3]);t=40\nprint(np.argmax(mean+np.sqrt(2*np.log(t)/n)))",
+      "packages": "numpy",
+      "application": "用于ETF再平衡、订单执行和风险限制下的策略动态控制。",
+      "limits": "代码只展示基本MDP与序贯计算，并非市场仿真或安全可用的交易智能体；真实交易应将费用、执行延迟和仓位约束纳入环境。",
+      "coverage": "complete"
+    }
+  ]
+}
