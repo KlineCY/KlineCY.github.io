@@ -1,0 +1,613 @@
+{
+  "version": 1,
+  "notes": [
+    {
+      "id": "llm-n02-01",
+      "node_id": "llm-n02-01",
+      "title": "QKV投影",
+      "definition": "自注意力把输入Token嵌入经三组矩阵映射为查询、键和值。",
+      "assumptions": "要求明确训练语料、预训练/生成目标、概率定义、时间信息和实验基准；生成结果不能自动视为事实。",
+      "properties": [
+        "自注意力把输入Token嵌入经三组矩阵映射为查询、键和值。。",
+        "模型效果应在未参与训练的样本验证，复杂生成系统还需要校验幻觉、隐私和多样性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心目标或模型关系",
+          "tex": "Q=XW_Q,\\quad K=XW_K,\\quad V=XW_V"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从模型概率分解、注意力或对抗训练目标建立上述公式。自注意力把输入Token嵌入经三组矩阵映射为查询、键和值。",
+          "tex": "Q=XW_Q,\\quad K=XW_K,\\quad V=XW_V"
+        },
+        {
+          "explanation": "通过训练、采样或检索执行公式中的目标计算，并检查其依赖的假设。",
+          "tex": "Q=XW_Q,\\quad K=XW_K,\\quad V=XW_V"
+        }
+      ],
+      "code": "# QKV投影：本学科基本原理演示\nimport numpy as np\nrng=np.random.default_rng(1)\nX=rng.normal(size=(2,5,8))\nQ=X;K=X;V=X\nscores=Q@K.transpose(0,2,1)/np.sqrt(8)\nweights=np.exp(scores-scores.max(axis=-1,keepdims=True))\nweights/=weights.sum(axis=-1,keepdims=True)\nprint(\"Attention:\",(weights@V).shape)",
+      "packages": "numpy",
+      "application": "用于金融大模型、文本检索增强、财经语料微调及市场收益情景生成。",
+      "limits": "这是知识点扩展笔记，基础代码展示本学科相关计算，并非完整LLM训练或生成网络实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "llm-n03-01",
+      "node_id": "llm-n03-01",
+      "title": "多头注意力",
+      "definition": "不同注意力头对Token信息进行不同线性投影，再拼接融合。",
+      "assumptions": "要求明确训练语料、预训练/生成目标、概率定义、时间信息和实验基准；生成结果不能自动视为事实。",
+      "properties": [
+        "不同注意力头对Token信息进行不同线性投影，再拼接融合。。",
+        "模型效果应在未参与训练的样本验证，复杂生成系统还需要校验幻觉、隐私和多样性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心目标或模型关系",
+          "tex": "H=\\operatorname{Concat}(H_1,\\ldots,H_h)W_O"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从模型概率分解、注意力或对抗训练目标建立上述公式。不同注意力头对Token信息进行不同线性投影，再拼接融合。",
+          "tex": "H=\\operatorname{Concat}(H_1,\\ldots,H_h)W_O"
+        },
+        {
+          "explanation": "通过训练、采样或检索执行公式中的目标计算，并检查其依赖的假设。",
+          "tex": "H=\\operatorname{Concat}(H_1,\\ldots,H_h)W_O"
+        }
+      ],
+      "code": "# 多头注意力：本学科基本原理演示\nimport numpy as np\nrng=np.random.default_rng(1)\nX=rng.normal(size=(2,5,8))\nQ=X;K=X;V=X\nscores=Q@K.transpose(0,2,1)/np.sqrt(8)\nweights=np.exp(scores-scores.max(axis=-1,keepdims=True))\nweights/=weights.sum(axis=-1,keepdims=True)\nprint(\"Attention:\",(weights@V).shape)",
+      "packages": "numpy",
+      "application": "用于金融大模型、文本检索增强、财经语料微调及市场收益情景生成。",
+      "limits": "这是知识点扩展笔记，基础代码展示本学科相关计算，并非完整LLM训练或生成网络实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "llm-n06-01",
+      "node_id": "llm-n06-01",
+      "title": "Encoder与Decoder",
+      "definition": "编码器可双向读取输入上下文，因果解码器根据前缀逐步生成输出。",
+      "assumptions": "要求明确训练语料、预训练/生成目标、概率定义、时间信息和实验基准；生成结果不能自动视为事实。",
+      "properties": [
+        "编码器可双向读取输入上下文，因果解码器根据前缀逐步生成输出。。",
+        "模型效果应在未参与训练的样本验证，复杂生成系统还需要校验幻觉、隐私和多样性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心目标或模型关系",
+          "tex": "p(y_{1:T}\\mid x)=\\prod_tp(y_t\\mid y_{<t},x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从模型概率分解、注意力或对抗训练目标建立上述公式。编码器可双向读取输入上下文，因果解码器根据前缀逐步生成输出。",
+          "tex": "p(y_{1:T}\\mid x)=\\prod_tp(y_t\\mid y_{<t},x)"
+        },
+        {
+          "explanation": "通过训练、采样或检索执行公式中的目标计算，并检查其依赖的假设。",
+          "tex": "p(y_{1:T}\\mid x)=\\prod_tp(y_t\\mid y_{<t},x)"
+        }
+      ],
+      "code": "# Encoder与Decoder：本学科基本原理演示\nimport numpy as np\nrng=np.random.default_rng(1)\nX=rng.normal(size=(2,5,8))\nQ=X;K=X;V=X\nscores=Q@K.transpose(0,2,1)/np.sqrt(8)\nweights=np.exp(scores-scores.max(axis=-1,keepdims=True))\nweights/=weights.sum(axis=-1,keepdims=True)\nprint(\"Attention:\",(weights@V).shape)",
+      "packages": "numpy",
+      "application": "用于金融大模型、文本检索增强、财经语料微调及市场收益情景生成。",
+      "limits": "这是知识点扩展笔记，基础代码展示本学科相关计算，并非完整LLM训练或生成网络实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "llm-n02-02",
+      "node_id": "llm-n02-02",
+      "title": "Masked Language Modeling",
+      "definition": "随机遮蔽部分输入Token并预测对应原始Token的条件概率。",
+      "assumptions": "要求明确训练语料、预训练/生成目标、概率定义、时间信息和实验基准；生成结果不能自动视为事实。",
+      "properties": [
+        "随机遮蔽部分输入Token并预测对应原始Token的条件概率。。",
+        "模型效果应在未参与训练的样本验证，复杂生成系统还需要校验幻觉、隐私和多样性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心目标或模型关系",
+          "tex": "L=-\\sum_{t\\in M}\\log p_\\theta(x_t\\mid x_{\\neg M})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从模型概率分解、注意力或对抗训练目标建立上述公式。随机遮蔽部分输入Token并预测对应原始Token的条件概率。",
+          "tex": "L=-\\sum_{t\\in M}\\log p_\\theta(x_t\\mid x_{\\neg M})"
+        },
+        {
+          "explanation": "通过训练、采样或检索执行公式中的目标计算，并检查其依赖的假设。",
+          "tex": "L=-\\sum_{t\\in M}\\log p_\\theta(x_t\\mid x_{\\neg M})"
+        }
+      ],
+      "code": "# Masked Language Modeling：本学科基本原理演示\nimport numpy as np\nrng=np.random.default_rng(1)\nX=rng.normal(size=(2,5,8))\nQ=X;K=X;V=X\nscores=Q@K.transpose(0,2,1)/np.sqrt(8)\nweights=np.exp(scores-scores.max(axis=-1,keepdims=True))\nweights/=weights.sum(axis=-1,keepdims=True)\nprint(\"Attention:\",(weights@V).shape)",
+      "packages": "numpy",
+      "application": "用于金融大模型、文本检索增强、财经语料微调及市场收益情景生成。",
+      "limits": "这是知识点扩展笔记，基础代码展示本学科相关计算，并非完整LLM训练或生成网络实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "llm-n03-02",
+      "node_id": "llm-n03-02",
+      "title": "Tokenization BPE",
+      "definition": "字节对编码反复合并高频相邻子串以形成子词词表。",
+      "assumptions": "要求明确训练语料、预训练/生成目标、概率定义、时间信息和实验基准；生成结果不能自动视为事实。",
+      "properties": [
+        "字节对编码反复合并高频相邻子串以形成子词词表。。",
+        "模型效果应在未参与训练的样本验证，复杂生成系统还需要校验幻觉、隐私和多样性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心目标或模型关系",
+          "tex": "(a,b)^*=\\arg\\max_{a,b}\\operatorname{count}(a,b)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从模型概率分解、注意力或对抗训练目标建立上述公式。字节对编码反复合并高频相邻子串以形成子词词表。",
+          "tex": "(a,b)^*=\\arg\\max_{a,b}\\operatorname{count}(a,b)"
+        },
+        {
+          "explanation": "通过训练、采样或检索执行公式中的目标计算，并检查其依赖的假设。",
+          "tex": "(a,b)^*=\\arg\\max_{a,b}\\operatorname{count}(a,b)"
+        }
+      ],
+      "code": "# Tokenization BPE：本学科基本原理演示\nimport numpy as np\nrng=np.random.default_rng(1)\nX=rng.normal(size=(2,5,8))\nQ=X;K=X;V=X\nscores=Q@K.transpose(0,2,1)/np.sqrt(8)\nweights=np.exp(scores-scores.max(axis=-1,keepdims=True))\nweights/=weights.sum(axis=-1,keepdims=True)\nprint(\"Attention:\",(weights@V).shape)",
+      "packages": "numpy",
+      "application": "用于金融大模型、文本检索增强、财经语料微调及市场收益情景生成。",
+      "limits": "这是知识点扩展笔记，基础代码展示本学科相关计算，并非完整LLM训练或生成网络实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "llm-n05-02",
+      "node_id": "llm-n05-02",
+      "title": "预训练语料处理",
+      "definition": "语料清洗、去重、授权、时间过滤和分词影响模型的统计学习目标。",
+      "assumptions": "要求明确训练语料、预训练/生成目标、概率定义、时间信息和实验基准；生成结果不能自动视为事实。",
+      "properties": [
+        "语料清洗、去重、授权、时间过滤和分词影响模型的统计学习目标。。",
+        "模型效果应在未参与训练的样本验证，复杂生成系统还需要校验幻觉、隐私和多样性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心目标或模型关系",
+          "tex": "D_{\\rm train}=\\operatorname{Filter}(D_{\\rm raw})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从模型概率分解、注意力或对抗训练目标建立上述公式。语料清洗、去重、授权、时间过滤和分词影响模型的统计学习目标。",
+          "tex": "D_{\\rm train}=\\operatorname{Filter}(D_{\\rm raw})"
+        },
+        {
+          "explanation": "通过训练、采样或检索执行公式中的目标计算，并检查其依赖的假设。",
+          "tex": "D_{\\rm train}=\\operatorname{Filter}(D_{\\rm raw})"
+        }
+      ],
+      "code": "# 预训练语料处理：本学科基本原理演示\nimport numpy as np\nrng=np.random.default_rng(1)\nX=rng.normal(size=(2,5,8))\nQ=X;K=X;V=X\nscores=Q@K.transpose(0,2,1)/np.sqrt(8)\nweights=np.exp(scores-scores.max(axis=-1,keepdims=True))\nweights/=weights.sum(axis=-1,keepdims=True)\nprint(\"Attention:\",(weights@V).shape)",
+      "packages": "numpy",
+      "application": "用于金融大模型、文本检索增强、财经语料微调及市场收益情景生成。",
+      "limits": "这是知识点扩展笔记，基础代码展示本学科相关计算，并非完整LLM训练或生成网络实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "llm-n06-02",
+      "node_id": "llm-n06-02",
+      "title": "上下文窗口",
+      "definition": "模型每次预测实际可访问的历史Token长度受最大上下文长度和注意力结构限制。",
+      "assumptions": "要求明确训练语料、预训练/生成目标、概率定义、时间信息和实验基准；生成结果不能自动视为事实。",
+      "properties": [
+        "模型每次预测实际可访问的历史Token长度受最大上下文长度和注意力结构限制。。",
+        "模型效果应在未参与训练的样本验证，复杂生成系统还需要校验幻觉、隐私和多样性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心目标或模型关系",
+          "tex": "p(y_t\\mid x_{t-L:t-1})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从模型概率分解、注意力或对抗训练目标建立上述公式。模型每次预测实际可访问的历史Token长度受最大上下文长度和注意力结构限制。",
+          "tex": "p(y_t\\mid x_{t-L:t-1})"
+        },
+        {
+          "explanation": "通过训练、采样或检索执行公式中的目标计算，并检查其依赖的假设。",
+          "tex": "p(y_t\\mid x_{t-L:t-1})"
+        }
+      ],
+      "code": "# 上下文窗口：本学科基本原理演示\nimport numpy as np\nrng=np.random.default_rng(1)\nX=rng.normal(size=(2,5,8))\nQ=X;K=X;V=X\nscores=Q@K.transpose(0,2,1)/np.sqrt(8)\nweights=np.exp(scores-scores.max(axis=-1,keepdims=True))\nweights/=weights.sum(axis=-1,keepdims=True)\nprint(\"Attention:\",(weights@V).shape)",
+      "packages": "numpy",
+      "application": "用于金融大模型、文本检索增强、财经语料微调及市场收益情景生成。",
+      "limits": "这是知识点扩展笔记，基础代码展示本学科相关计算，并非完整LLM训练或生成网络实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "llm-n04-03",
+      "node_id": "llm-n04-03",
+      "title": "奖励模型",
+      "definition": "奖励模型从偏好样本学习对回答质量的相对评分。",
+      "assumptions": "要求明确训练语料、预训练/生成目标、概率定义、时间信息和实验基准；生成结果不能自动视为事实。",
+      "properties": [
+        "奖励模型从偏好样本学习对回答质量的相对评分。。",
+        "模型效果应在未参与训练的样本验证，复杂生成系统还需要校验幻觉、隐私和多样性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心目标或模型关系",
+          "tex": "P(y_w\\succ y_l)=\\sigma(r_\\phi(x,y_w)-r_\\phi(x,y_l))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从模型概率分解、注意力或对抗训练目标建立上述公式。奖励模型从偏好样本学习对回答质量的相对评分。",
+          "tex": "P(y_w\\succ y_l)=\\sigma(r_\\phi(x,y_w)-r_\\phi(x,y_l))"
+        },
+        {
+          "explanation": "通过训练、采样或检索执行公式中的目标计算，并检查其依赖的假设。",
+          "tex": "P(y_w\\succ y_l)=\\sigma(r_\\phi(x,y_w)-r_\\phi(x,y_l))"
+        }
+      ],
+      "code": "# 奖励模型：本学科基本原理演示\nimport numpy as np\nrng=np.random.default_rng(1)\nX=rng.normal(size=(2,5,8))\nQ=X;K=X;V=X\nscores=Q@K.transpose(0,2,1)/np.sqrt(8)\nweights=np.exp(scores-scores.max(axis=-1,keepdims=True))\nweights/=weights.sum(axis=-1,keepdims=True)\nprint(\"Attention:\",(weights@V).shape)",
+      "packages": "numpy",
+      "application": "用于金融大模型、文本检索增强、财经语料微调及市场收益情景生成。",
+      "limits": "这是知识点扩展笔记，基础代码展示本学科相关计算，并非完整LLM训练或生成网络实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "llm-n05-03",
+      "node_id": "llm-n05-03",
+      "title": "RLHF",
+      "definition": "人类偏好反馈强化学习通过奖励模型及策略优化提升回答偏好表现。",
+      "assumptions": "要求明确训练语料、预训练/生成目标、概率定义、时间信息和实验基准；生成结果不能自动视为事实。",
+      "properties": [
+        "人类偏好反馈强化学习通过奖励模型及策略优化提升回答偏好表现。。",
+        "模型效果应在未参与训练的样本验证，复杂生成系统还需要校验幻觉、隐私和多样性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心目标或模型关系",
+          "tex": "J(\\pi)=E_\\pi[r_\\phi(x,y)]-\\beta D_{\\rm KL}(\\pi\\|\\pi_{\\rm ref})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从模型概率分解、注意力或对抗训练目标建立上述公式。人类偏好反馈强化学习通过奖励模型及策略优化提升回答偏好表现。",
+          "tex": "J(\\pi)=E_\\pi[r_\\phi(x,y)]-\\beta D_{\\rm KL}(\\pi\\|\\pi_{\\rm ref})"
+        },
+        {
+          "explanation": "通过训练、采样或检索执行公式中的目标计算，并检查其依赖的假设。",
+          "tex": "J(\\pi)=E_\\pi[r_\\phi(x,y)]-\\beta D_{\\rm KL}(\\pi\\|\\pi_{\\rm ref})"
+        }
+      ],
+      "code": "# RLHF：本学科基本原理演示\nimport numpy as np\nrng=np.random.default_rng(1)\nX=rng.normal(size=(2,5,8))\nQ=X;K=X;V=X\nscores=Q@K.transpose(0,2,1)/np.sqrt(8)\nweights=np.exp(scores-scores.max(axis=-1,keepdims=True))\nweights/=weights.sum(axis=-1,keepdims=True)\nprint(\"Attention:\",(weights@V).shape)",
+      "packages": "numpy",
+      "application": "用于金融大模型、文本检索增强、财经语料微调及市场收益情景生成。",
+      "limits": "这是知识点扩展笔记，基础代码展示本学科相关计算，并非完整LLM训练或生成网络实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "llm-n06-03",
+      "node_id": "llm-n06-03",
+      "title": "拒答与安全评估",
+      "definition": "安全评估对有害请求、错误事实和越权工具调用建立不同情形的测试。",
+      "assumptions": "要求明确训练语料、预训练/生成目标、概率定义、时间信息和实验基准；生成结果不能自动视为事实。",
+      "properties": [
+        "安全评估对有害请求、错误事实和越权工具调用建立不同情形的测试。。",
+        "模型效果应在未参与训练的样本验证，复杂生成系统还需要校验幻觉、隐私和多样性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心目标或模型关系",
+          "tex": "R_{\\rm unsafe}=P(\\mathrm{unsafe\\ output})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从模型概率分解、注意力或对抗训练目标建立上述公式。安全评估对有害请求、错误事实和越权工具调用建立不同情形的测试。",
+          "tex": "R_{\\rm unsafe}=P(\\mathrm{unsafe\\ output})"
+        },
+        {
+          "explanation": "通过训练、采样或检索执行公式中的目标计算，并检查其依赖的假设。",
+          "tex": "R_{\\rm unsafe}=P(\\mathrm{unsafe\\ output})"
+        }
+      ],
+      "code": "# 拒答与安全评估：本学科基本原理演示\nimport numpy as np\nrng=np.random.default_rng(1)\nX=rng.normal(size=(2,5,8))\nQ=X;K=X;V=X\nscores=Q@K.transpose(0,2,1)/np.sqrt(8)\nweights=np.exp(scores-scores.max(axis=-1,keepdims=True))\nweights/=weights.sum(axis=-1,keepdims=True)\nprint(\"Attention:\",(weights@V).shape)",
+      "packages": "numpy",
+      "application": "用于金融大模型、文本检索增强、财经语料微调及市场收益情景生成。",
+      "limits": "这是知识点扩展笔记，基础代码展示本学科相关计算，并非完整LLM训练或生成网络实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "llm-n01-04",
+      "node_id": "llm-n01-04",
+      "title": "温度采样",
+      "definition": "采样温度T缩放Token Logits，影响分布平滑程度和输出随机性。",
+      "assumptions": "要求明确训练语料、预训练/生成目标、概率定义、时间信息和实验基准；生成结果不能自动视为事实。",
+      "properties": [
+        "采样温度T缩放Token Logits，影响分布平滑程度和输出随机性。。",
+        "模型效果应在未参与训练的样本验证，复杂生成系统还需要校验幻觉、隐私和多样性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心目标或模型关系",
+          "tex": "p_i(T)=\\frac{e^{z_i/T}}{\\sum_je^{z_j/T}}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从模型概率分解、注意力或对抗训练目标建立上述公式。采样温度T缩放Token Logits，影响分布平滑程度和输出随机性。",
+          "tex": "p_i(T)=\\frac{e^{z_i/T}}{\\sum_je^{z_j/T}}"
+        },
+        {
+          "explanation": "通过训练、采样或检索执行公式中的目标计算，并检查其依赖的假设。",
+          "tex": "p_i(T)=\\frac{e^{z_i/T}}{\\sum_je^{z_j/T}}"
+        }
+      ],
+      "code": "# 温度采样：本学科基本原理演示\nimport numpy as np\nrng=np.random.default_rng(1)\nX=rng.normal(size=(2,5,8))\nQ=X;K=X;V=X\nscores=Q@K.transpose(0,2,1)/np.sqrt(8)\nweights=np.exp(scores-scores.max(axis=-1,keepdims=True))\nweights/=weights.sum(axis=-1,keepdims=True)\nprint(\"Attention:\",(weights@V).shape)",
+      "packages": "numpy",
+      "application": "用于金融大模型、文本检索增强、财经语料微调及市场收益情景生成。",
+      "limits": "这是知识点扩展笔记，基础代码展示本学科相关计算，并非完整LLM训练或生成网络实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "llm-n03-04",
+      "node_id": "llm-n03-04",
+      "title": "KV Cache",
+      "definition": "自回归生成缓存前缀Token的Key与Value，避免每步重复计算所有历史投影。",
+      "assumptions": "要求明确训练语料、预训练/生成目标、概率定义、时间信息和实验基准；生成结果不能自动视为事实。",
+      "properties": [
+        "自回归生成缓存前缀Token的Key与Value，避免每步重复计算所有历史投影。。",
+        "模型效果应在未参与训练的样本验证，复杂生成系统还需要校验幻觉、隐私和多样性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心目标或模型关系",
+          "tex": "K_{1:t}=[K_{1:t-1};K_t]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从模型概率分解、注意力或对抗训练目标建立上述公式。自回归生成缓存前缀Token的Key与Value，避免每步重复计算所有历史投影。",
+          "tex": "K_{1:t}=[K_{1:t-1};K_t]"
+        },
+        {
+          "explanation": "通过训练、采样或检索执行公式中的目标计算，并检查其依赖的假设。",
+          "tex": "K_{1:t}=[K_{1:t-1};K_t]"
+        }
+      ],
+      "code": "# KV Cache：本学科基本原理演示\nimport numpy as np\nrng=np.random.default_rng(1)\nX=rng.normal(size=(2,5,8))\nQ=X;K=X;V=X\nscores=Q@K.transpose(0,2,1)/np.sqrt(8)\nweights=np.exp(scores-scores.max(axis=-1,keepdims=True))\nweights/=weights.sum(axis=-1,keepdims=True)\nprint(\"Attention:\",(weights@V).shape)",
+      "packages": "numpy",
+      "application": "用于金融大模型、文本检索增强、财经语料微调及市场收益情景生成。",
+      "limits": "这是知识点扩展笔记，基础代码展示本学科相关计算，并非完整LLM训练或生成网络实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "llm-n04-04",
+      "node_id": "llm-n04-04",
+      "title": "量化推理",
+      "definition": "将权重映射为低比特整数和对应缩放参数以减小存储与带宽。",
+      "assumptions": "要求明确训练语料、预训练/生成目标、概率定义、时间信息和实验基准；生成结果不能自动视为事实。",
+      "properties": [
+        "将权重映射为低比特整数和对应缩放参数以减小存储与带宽。。",
+        "模型效果应在未参与训练的样本验证，复杂生成系统还需要校验幻觉、隐私和多样性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心目标或模型关系",
+          "tex": "q=\\operatorname{round}(x/s)+z"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从模型概率分解、注意力或对抗训练目标建立上述公式。将权重映射为低比特整数和对应缩放参数以减小存储与带宽。",
+          "tex": "q=\\operatorname{round}(x/s)+z"
+        },
+        {
+          "explanation": "通过训练、采样或检索执行公式中的目标计算，并检查其依赖的假设。",
+          "tex": "q=\\operatorname{round}(x/s)+z"
+        }
+      ],
+      "code": "# 量化推理：本学科基本原理演示\nimport numpy as np\nrng=np.random.default_rng(1)\nX=rng.normal(size=(2,5,8))\nQ=X;K=X;V=X\nscores=Q@K.transpose(0,2,1)/np.sqrt(8)\nweights=np.exp(scores-scores.max(axis=-1,keepdims=True))\nweights/=weights.sum(axis=-1,keepdims=True)\nprint(\"Attention:\",(weights@V).shape)",
+      "packages": "numpy",
+      "application": "用于金融大模型、文本检索增强、财经语料微调及市场收益情景生成。",
+      "limits": "这是知识点扩展笔记，基础代码展示本学科相关计算，并非完整LLM训练或生成网络实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "llm-n05-04",
+      "node_id": "llm-n05-04",
+      "title": "批处理",
+      "definition": "把多个推断序列组成Batch提高加速器利用率，需要正确处理Padding和长度差。",
+      "assumptions": "要求明确训练语料、预训练/生成目标、概率定义、时间信息和实验基准；生成结果不能自动视为事实。",
+      "properties": [
+        "把多个推断序列组成Batch提高加速器利用率，需要正确处理Padding和长度差。。",
+        "模型效果应在未参与训练的样本验证，复杂生成系统还需要校验幻觉、隐私和多样性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心目标或模型关系",
+          "tex": "X\\in\\mathbb R^{B\\times T\\times d}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从模型概率分解、注意力或对抗训练目标建立上述公式。把多个推断序列组成Batch提高加速器利用率，需要正确处理Padding和长度差。",
+          "tex": "X\\in\\mathbb R^{B\\times T\\times d}"
+        },
+        {
+          "explanation": "通过训练、采样或检索执行公式中的目标计算，并检查其依赖的假设。",
+          "tex": "X\\in\\mathbb R^{B\\times T\\times d}"
+        }
+      ],
+      "code": "# 批处理：本学科基本原理演示\nimport numpy as np\nrng=np.random.default_rng(1)\nX=rng.normal(size=(2,5,8))\nQ=X;K=X;V=X\nscores=Q@K.transpose(0,2,1)/np.sqrt(8)\nweights=np.exp(scores-scores.max(axis=-1,keepdims=True))\nweights/=weights.sum(axis=-1,keepdims=True)\nprint(\"Attention:\",(weights@V).shape)",
+      "packages": "numpy",
+      "application": "用于金融大模型、文本检索增强、财经语料微调及市场收益情景生成。",
+      "limits": "这是知识点扩展笔记，基础代码展示本学科相关计算，并非完整LLM训练或生成网络实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "llm-n06-04",
+      "node_id": "llm-n06-04",
+      "title": "长上下文",
+      "definition": "处理长文档要考虑Attention成本、位置信息和长序列信息衰减。",
+      "assumptions": "要求明确训练语料、预训练/生成目标、概率定义、时间信息和实验基准；生成结果不能自动视为事实。",
+      "properties": [
+        "处理长文档要考虑Attention成本、位置信息和长序列信息衰减。。",
+        "模型效果应在未参与训练的样本验证，复杂生成系统还需要校验幻觉、隐私和多样性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心目标或模型关系",
+          "tex": "C_{\\rm attn}=O(T^2d)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从模型概率分解、注意力或对抗训练目标建立上述公式。处理长文档要考虑Attention成本、位置信息和长序列信息衰减。",
+          "tex": "C_{\\rm attn}=O(T^2d)"
+        },
+        {
+          "explanation": "通过训练、采样或检索执行公式中的目标计算，并检查其依赖的假设。",
+          "tex": "C_{\\rm attn}=O(T^2d)"
+        }
+      ],
+      "code": "# 长上下文：本学科基本原理演示\nimport numpy as np\nrng=np.random.default_rng(1)\nX=rng.normal(size=(2,5,8))\nQ=X;K=X;V=X\nscores=Q@K.transpose(0,2,1)/np.sqrt(8)\nweights=np.exp(scores-scores.max(axis=-1,keepdims=True))\nweights/=weights.sum(axis=-1,keepdims=True)\nprint(\"Attention:\",(weights@V).shape)",
+      "packages": "numpy",
+      "application": "用于金融大模型、文本检索增强、财经语料微调及市场收益情景生成。",
+      "limits": "这是知识点扩展笔记，基础代码展示本学科相关计算，并非完整LLM训练或生成网络实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "llm-n02-05",
+      "node_id": "llm-n02-05",
+      "title": "向量检索",
+      "definition": "通过Embedding索引选择与问题向量最相近的文档候选。",
+      "assumptions": "要求明确训练语料、预训练/生成目标、概率定义、时间信息和实验基准；生成结果不能自动视为事实。",
+      "properties": [
+        "通过Embedding索引选择与问题向量最相近的文档候选。。",
+        "模型效果应在未参与训练的样本验证，复杂生成系统还需要校验幻觉、隐私和多样性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心目标或模型关系",
+          "tex": "d^*=\\arg\\max_d\\frac{q^\\top d}{\\|q\\|\\|d\\|}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从模型概率分解、注意力或对抗训练目标建立上述公式。通过Embedding索引选择与问题向量最相近的文档候选。",
+          "tex": "d^*=\\arg\\max_d\\frac{q^\\top d}{\\|q\\|\\|d\\|}"
+        },
+        {
+          "explanation": "通过训练、采样或检索执行公式中的目标计算，并检查其依赖的假设。",
+          "tex": "d^*=\\arg\\max_d\\frac{q^\\top d}{\\|q\\|\\|d\\|}"
+        }
+      ],
+      "code": "# 向量检索：本学科基本原理演示\nimport numpy as np\nrng=np.random.default_rng(1)\nX=rng.normal(size=(2,5,8))\nQ=X;K=X;V=X\nscores=Q@K.transpose(0,2,1)/np.sqrt(8)\nweights=np.exp(scores-scores.max(axis=-1,keepdims=True))\nweights/=weights.sum(axis=-1,keepdims=True)\nprint(\"Attention:\",(weights@V).shape)",
+      "packages": "numpy",
+      "application": "用于金融大模型、文本检索增强、财经语料微调及市场收益情景生成。",
+      "limits": "这是知识点扩展笔记，基础代码展示本学科相关计算，并非完整LLM训练或生成网络实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "llm-n04-05",
+      "node_id": "llm-n04-05",
+      "title": "重排序Reranking",
+      "definition": "对初检索结果使用更复杂的交互模型重新估计与问题的相关性。",
+      "assumptions": "要求明确训练语料、预训练/生成目标、概率定义、时间信息和实验基准；生成结果不能自动视为事实。",
+      "properties": [
+        "对初检索结果使用更复杂的交互模型重新估计与问题的相关性。。",
+        "模型效果应在未参与训练的样本验证，复杂生成系统还需要校验幻觉、隐私和多样性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心目标或模型关系",
+          "tex": "d^*=\\arg\\max_{d\\in D_{\\rm topK}}s_{\\rm cross}(q,d)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从模型概率分解、注意力或对抗训练目标建立上述公式。对初检索结果使用更复杂的交互模型重新估计与问题的相关性。",
+          "tex": "d^*=\\arg\\max_{d\\in D_{\\rm topK}}s_{\\rm cross}(q,d)"
+        },
+        {
+          "explanation": "通过训练、采样或检索执行公式中的目标计算，并检查其依赖的假设。",
+          "tex": "d^*=\\arg\\max_{d\\in D_{\\rm topK}}s_{\\rm cross}(q,d)"
+        }
+      ],
+      "code": "# 重排序Reranking：本学科基本原理演示\nimport numpy as np\nrng=np.random.default_rng(1)\nX=rng.normal(size=(2,5,8))\nQ=X;K=X;V=X\nscores=Q@K.transpose(0,2,1)/np.sqrt(8)\nweights=np.exp(scores-scores.max(axis=-1,keepdims=True))\nweights/=weights.sum(axis=-1,keepdims=True)\nprint(\"Attention:\",(weights@V).shape)",
+      "packages": "numpy",
+      "application": "用于金融大模型、文本检索增强、财经语料微调及市场收益情景生成。",
+      "limits": "这是知识点扩展笔记，基础代码展示本学科相关计算，并非完整LLM训练或生成网络实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "llm-n05-05",
+      "node_id": "llm-n05-05",
+      "title": "工具调用",
+      "definition": "模型选择受允许范围约束的工具及参数，得到结构化返回后继续推理。",
+      "assumptions": "要求明确训练语料、预训练/生成目标、概率定义、时间信息和实验基准；生成结果不能自动视为事实。",
+      "properties": [
+        "模型选择受允许范围约束的工具及参数，得到结构化返回后继续推理。。",
+        "模型效果应在未参与训练的样本验证，复杂生成系统还需要校验幻觉、隐私和多样性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心目标或模型关系",
+          "tex": "a=(\\mathrm{tool},\\mathrm{args})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从模型概率分解、注意力或对抗训练目标建立上述公式。模型选择受允许范围约束的工具及参数，得到结构化返回后继续推理。",
+          "tex": "a=(\\mathrm{tool},\\mathrm{args})"
+        },
+        {
+          "explanation": "通过训练、采样或检索执行公式中的目标计算，并检查其依赖的假设。",
+          "tex": "a=(\\mathrm{tool},\\mathrm{args})"
+        }
+      ],
+      "code": "# 工具调用：本学科基本原理演示\nimport numpy as np\nrng=np.random.default_rng(1)\nX=rng.normal(size=(2,5,8))\nQ=X;K=X;V=X\nscores=Q@K.transpose(0,2,1)/np.sqrt(8)\nweights=np.exp(scores-scores.max(axis=-1,keepdims=True))\nweights/=weights.sum(axis=-1,keepdims=True)\nprint(\"Attention:\",(weights@V).shape)",
+      "packages": "numpy",
+      "application": "用于金融大模型、文本检索增强、财经语料微调及市场收益情景生成。",
+      "limits": "这是知识点扩展笔记，基础代码展示本学科相关计算，并非完整LLM训练或生成网络实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "llm-n06-05",
+      "node_id": "llm-n06-05",
+      "title": "评估引用可信度",
+      "definition": "验证回答引用是否真实存在、在语义上支持断言并且与发布日期一致。",
+      "assumptions": "要求明确训练语料、预训练/生成目标、概率定义、时间信息和实验基准；生成结果不能自动视为事实。",
+      "properties": [
+        "验证回答引用是否真实存在、在语义上支持断言并且与发布日期一致。。",
+        "模型效果应在未参与训练的样本验证，复杂生成系统还需要校验幻觉、隐私和多样性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心目标或模型关系",
+          "tex": "\\operatorname{support}(c,d)\\in[0,1]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从模型概率分解、注意力或对抗训练目标建立上述公式。验证回答引用是否真实存在、在语义上支持断言并且与发布日期一致。",
+          "tex": "\\operatorname{support}(c,d)\\in[0,1]"
+        },
+        {
+          "explanation": "通过训练、采样或检索执行公式中的目标计算，并检查其依赖的假设。",
+          "tex": "\\operatorname{support}(c,d)\\in[0,1]"
+        }
+      ],
+      "code": "# 评估引用可信度：本学科基本原理演示\nimport numpy as np\nrng=np.random.default_rng(1)\nX=rng.normal(size=(2,5,8))\nQ=X;K=X;V=X\nscores=Q@K.transpose(0,2,1)/np.sqrt(8)\nweights=np.exp(scores-scores.max(axis=-1,keepdims=True))\nweights/=weights.sum(axis=-1,keepdims=True)\nprint(\"Attention:\",(weights@V).shape)",
+      "packages": "numpy",
+      "application": "用于金融大模型、文本检索增强、财经语料微调及市场收益情景生成。",
+      "limits": "这是知识点扩展笔记，基础代码展示本学科相关计算，并非完整LLM训练或生成网络实现。",
+      "coverage": "expanded"
+    }
+  ]
+}
