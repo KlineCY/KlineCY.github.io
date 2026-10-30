@@ -1,0 +1,613 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "deep-n04-01",
+      "node_id": "deep-n04-01",
+      "title": "输出层与损失",
+      "definition": "神经网络输出层必须与预测任务匹配，回归可用线性输出和MSE，互斥分类常用Logits与交叉熵。",
+      "assumptions": "必须明确网络输入张量形状、损失定义、训练与评估模式，并为样本外验证保留独立数据。",
+      "properties": [
+        "神经网络输出层必须与预测任务匹配，回归可用线性输出和MSE，互斥分类常用Logits与交叉熵。",
+        "实际训练还依赖学习率、正则化、初始化和优化过程；应报告多次实验及失败边界。"
+      ],
+      "formulas": [
+        {
+          "label": "网络理论与算法公式",
+          "tex": "L=-\\sum_ky_k\\log\\mathrm{softmax}(z)_k"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由网络前向计算、微分关系或容量定义建立该知识点的基本数学对象。",
+          "tex": "L=-\\sum_ky_k\\log\\mathrm{softmax}(z)_k"
+        },
+        {
+          "explanation": "将其作用于训练或推断流程，检查梯度传播、模型容量与样本外损失。",
+          "tex": "L=-\\sum_ky_k\\log\\mathrm{softmax}(z)_k"
+        }
+      ],
+      "code": "import torch\nm=torch.nn.Sequential(torch.nn.Linear(3,8),torch.nn.ReLU(),torch.nn.Linear(8,2))\nprint(m(torch.randn(4,3)).shape)",
+      "packages": "torch",
+      "application": "用于量化价格图像CNN、ETF序列Transformer和金融领域文本模型训练。",
+      "limits": "示例只验证对应章节最小张量流程；万能逼近、优化收敛和金融泛化是不同问题，不可互相推导。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n05-01",
+      "node_id": "deep-n05-01",
+      "title": "万能逼近定理",
+      "definition": "在适当连续非多项式激活和紧集条件下，足够宽的单隐藏层网络可一致逼近连续函数。",
+      "assumptions": "必须明确网络输入张量形状、损失定义、训练与评估模式，并为样本外验证保留独立数据。",
+      "properties": [
+        "在适当连续非多项式激活和紧集条件下，足够宽的单隐藏层网络可一致逼近连续函数。",
+        "实际训练还依赖学习率、正则化、初始化和优化过程；应报告多次实验及失败边界。"
+      ],
+      "formulas": [
+        {
+          "label": "网络理论与算法公式",
+          "tex": "\\forall\\epsilon>0,\\ \\exists f_\\theta:\\sup_{x\\in K}|f_\\theta(x)-g(x)|<\\epsilon"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由网络前向计算、微分关系或容量定义建立该知识点的基本数学对象。",
+          "tex": "\\forall\\epsilon>0,\\ \\exists f_\\theta:\\sup_{x\\in K}|f_\\theta(x)-g(x)|<\\epsilon"
+        },
+        {
+          "explanation": "将其作用于训练或推断流程，检查梯度传播、模型容量与样本外损失。",
+          "tex": "\\forall\\epsilon>0,\\ \\exists f_\\theta:\\sup_{x\\in K}|f_\\theta(x)-g(x)|<\\epsilon"
+        }
+      ],
+      "code": "import torch\nm=torch.nn.Sequential(torch.nn.Linear(3,8),torch.nn.ReLU(),torch.nn.Linear(8,2))\nprint(m(torch.randn(4,3)).shape)",
+      "packages": "torch",
+      "application": "用于量化价格图像CNN、ETF序列Transformer和金融领域文本模型训练。",
+      "limits": "示例只验证对应章节最小张量流程；万能逼近、优化收敛和金融泛化是不同问题，不可互相推导。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n06-01",
+      "node_id": "deep-n06-01",
+      "title": "网络深度与宽度",
+      "definition": "网络深度影响组合结构与感受野，宽度影响每层特征容量和参数规模。",
+      "assumptions": "必须明确网络输入张量形状、损失定义、训练与评估模式，并为样本外验证保留独立数据。",
+      "properties": [
+        "网络深度影响组合结构与感受野，宽度影响每层特征容量和参数规模。",
+        "实际训练还依赖学习率、正则化、初始化和优化过程；应报告多次实验及失败边界。"
+      ],
+      "formulas": [
+        {
+          "label": "网络理论与算法公式",
+          "tex": "f_\\theta=W_L\\phi(W_{L-1}\\cdots\\phi(W_1x))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由网络前向计算、微分关系或容量定义建立该知识点的基本数学对象。",
+          "tex": "f_\\theta=W_L\\phi(W_{L-1}\\cdots\\phi(W_1x))"
+        },
+        {
+          "explanation": "将其作用于训练或推断流程，检查梯度传播、模型容量与样本外损失。",
+          "tex": "f_\\theta=W_L\\phi(W_{L-1}\\cdots\\phi(W_1x))"
+        }
+      ],
+      "code": "import torch\nm=torch.nn.Sequential(torch.nn.Linear(3,8),torch.nn.ReLU(),torch.nn.Linear(8,2))\nprint(m(torch.randn(4,3)).shape)",
+      "packages": "torch",
+      "application": "用于量化价格图像CNN、ETF序列Transformer和金融领域文本模型训练。",
+      "limits": "示例只验证对应章节最小张量流程；万能逼近、优化收敛和金融泛化是不同问题，不可互相推导。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n02-02",
+      "node_id": "deep-n02-02",
+      "title": "链式法则",
+      "definition": "反向传播利用复合函数导数链式法则把损失梯度从输出逐层传给参数。",
+      "assumptions": "必须明确网络输入张量形状、损失定义、训练与评估模式，并为样本外验证保留独立数据。",
+      "properties": [
+        "反向传播利用复合函数导数链式法则把损失梯度从输出逐层传给参数。",
+        "实际训练还依赖学习率、正则化、初始化和优化过程；应报告多次实验及失败边界。"
+      ],
+      "formulas": [
+        {
+          "label": "网络理论与算法公式",
+          "tex": "\\frac{\\partial L}{\\partial x}=\\frac{\\partial z}{\\partial x}^\\top\\frac{\\partial L}{\\partial z}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由网络前向计算、微分关系或容量定义建立该知识点的基本数学对象。",
+          "tex": "\\frac{\\partial L}{\\partial x}=\\frac{\\partial z}{\\partial x}^\\top\\frac{\\partial L}{\\partial z}"
+        },
+        {
+          "explanation": "将其作用于训练或推断流程，检查梯度传播、模型容量与样本外损失。",
+          "tex": "\\frac{\\partial L}{\\partial x}=\\frac{\\partial z}{\\partial x}^\\top\\frac{\\partial L}{\\partial z}"
+        }
+      ],
+      "code": "import torch\nx=torch.tensor([1.,2.],requires_grad=True);loss=(x*x).sum();loss.backward();print(x.grad)",
+      "packages": "torch",
+      "application": "用于量化价格图像CNN、ETF序列Transformer和金融领域文本模型训练。",
+      "limits": "示例只验证对应章节最小张量流程；万能逼近、优化收敛和金融泛化是不同问题，不可互相推导。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n04-02",
+      "node_id": "deep-n04-02",
+      "title": "Jacobian向量积",
+      "definition": "JVP计算Jacobian与指定切向量之积，无需显式构造全部Jacobian。",
+      "assumptions": "必须明确网络输入张量形状、损失定义、训练与评估模式，并为样本外验证保留独立数据。",
+      "properties": [
+        "JVP计算Jacobian与指定切向量之积，无需显式构造全部Jacobian。",
+        "实际训练还依赖学习率、正则化、初始化和优化过程；应报告多次实验及失败边界。"
+      ],
+      "formulas": [
+        {
+          "label": "网络理论与算法公式",
+          "tex": "\\operatorname{JVP}(f,x,v)=J_f(x)v"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由网络前向计算、微分关系或容量定义建立该知识点的基本数学对象。",
+          "tex": "\\operatorname{JVP}(f,x,v)=J_f(x)v"
+        },
+        {
+          "explanation": "将其作用于训练或推断流程，检查梯度传播、模型容量与样本外损失。",
+          "tex": "\\operatorname{JVP}(f,x,v)=J_f(x)v"
+        }
+      ],
+      "code": "import torch\nx=torch.tensor([1.,2.],requires_grad=True);loss=(x*x).sum();loss.backward();print(x.grad)",
+      "packages": "torch",
+      "application": "用于量化价格图像CNN、ETF序列Transformer和金融领域文本模型训练。",
+      "limits": "示例只验证对应章节最小张量流程；万能逼近、优化收敛和金融泛化是不同问题，不可互相推导。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n05-02",
+      "node_id": "deep-n05-02",
+      "title": "向量Jacobian积",
+      "definition": "VJP计算给定上游向量对Jacobian的乘积，是反向模式自动微分的核心。",
+      "assumptions": "必须明确网络输入张量形状、损失定义、训练与评估模式，并为样本外验证保留独立数据。",
+      "properties": [
+        "VJP计算给定上游向量对Jacobian的乘积，是反向模式自动微分的核心。",
+        "实际训练还依赖学习率、正则化、初始化和优化过程；应报告多次实验及失败边界。"
+      ],
+      "formulas": [
+        {
+          "label": "网络理论与算法公式",
+          "tex": "\\operatorname{VJP}(f,x,v)=v^\\top J_f(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由网络前向计算、微分关系或容量定义建立该知识点的基本数学对象。",
+          "tex": "\\operatorname{VJP}(f,x,v)=v^\\top J_f(x)"
+        },
+        {
+          "explanation": "将其作用于训练或推断流程，检查梯度传播、模型容量与样本外损失。",
+          "tex": "\\operatorname{VJP}(f,x,v)=v^\\top J_f(x)"
+        }
+      ],
+      "code": "import torch\nx=torch.tensor([1.,2.],requires_grad=True);loss=(x*x).sum();loss.backward();print(x.grad)",
+      "packages": "torch",
+      "application": "用于量化价格图像CNN、ETF序列Transformer和金融领域文本模型训练。",
+      "limits": "示例只验证对应章节最小张量流程；万能逼近、优化收敛和金融泛化是不同问题，不可互相推导。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n06-02",
+      "node_id": "deep-n06-02",
+      "title": "梯度检查",
+      "definition": "通过有限差分与自动微分的梯度比较验证自定义层及损失的导数实现。",
+      "assumptions": "必须明确网络输入张量形状、损失定义、训练与评估模式，并为样本外验证保留独立数据。",
+      "properties": [
+        "通过有限差分与自动微分的梯度比较验证自定义层及损失的导数实现。",
+        "实际训练还依赖学习率、正则化、初始化和优化过程；应报告多次实验及失败边界。"
+      ],
+      "formulas": [
+        {
+          "label": "网络理论与算法公式",
+          "tex": "\\partial_jf(x)\\approx\\frac{f(x+he_j)-f(x-he_j)}{2h}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由网络前向计算、微分关系或容量定义建立该知识点的基本数学对象。",
+          "tex": "\\partial_jf(x)\\approx\\frac{f(x+he_j)-f(x-he_j)}{2h}"
+        },
+        {
+          "explanation": "将其作用于训练或推断流程，检查梯度传播、模型容量与样本外损失。",
+          "tex": "\\partial_jf(x)\\approx\\frac{f(x+he_j)-f(x-he_j)}{2h}"
+        }
+      ],
+      "code": "import torch\nx=torch.tensor([1.,2.],requires_grad=True);loss=(x*x).sum();loss.backward();print(x.grad)",
+      "packages": "torch",
+      "application": "用于量化价格图像CNN、ETF序列Transformer和金融领域文本模型训练。",
+      "limits": "示例只验证对应章节最小张量流程；万能逼近、优化收敛和金融泛化是不同问题，不可互相推导。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n01-03",
+      "node_id": "deep-n01-03",
+      "title": "torch.Tensor",
+      "definition": "Tensor承载多维数值并记录dtype、device和是否需要梯度，是神经网络运行基础。",
+      "assumptions": "必须明确网络输入张量形状、损失定义、训练与评估模式，并为样本外验证保留独立数据。",
+      "properties": [
+        "Tensor承载多维数值并记录dtype、device和是否需要梯度，是神经网络运行基础。",
+        "实际训练还依赖学习率、正则化、初始化和优化过程；应报告多次实验及失败边界。"
+      ],
+      "formulas": [
+        {
+          "label": "网络理论与算法公式",
+          "tex": "X\\in\\mathbb R^{N\\times C\\times T}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由网络前向计算、微分关系或容量定义建立该知识点的基本数学对象。",
+          "tex": "X\\in\\mathbb R^{N\\times C\\times T}"
+        },
+        {
+          "explanation": "将其作用于训练或推断流程，检查梯度传播、模型容量与样本外损失。",
+          "tex": "X\\in\\mathbb R^{N\\times C\\times T}"
+        }
+      ],
+      "code": "import torch\nfrom torch import nn\nlayer=nn.Linear(3,2);print(layer(torch.randn(4,3)).shape)",
+      "packages": "torch",
+      "application": "用于量化价格图像CNN、ETF序列Transformer和金融领域文本模型训练。",
+      "limits": "示例只验证对应章节最小张量流程；万能逼近、优化收敛和金融泛化是不同问题，不可互相推导。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n02-03",
+      "node_id": "deep-n02-03",
+      "title": "nn.Module",
+      "definition": "Module封装可训练参数、子层和前向传播函数，便于优化器查找参数及保存状态。",
+      "assumptions": "必须明确网络输入张量形状、损失定义、训练与评估模式，并为样本外验证保留独立数据。",
+      "properties": [
+        "Module封装可训练参数、子层和前向传播函数，便于优化器查找参数及保存状态。",
+        "实际训练还依赖学习率、正则化、初始化和优化过程；应报告多次实验及失败边界。"
+      ],
+      "formulas": [
+        {
+          "label": "网络理论与算法公式",
+          "tex": "h=f_\\theta(x),\\quad\\theta\\in\\operatorname{parameters}(M)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由网络前向计算、微分关系或容量定义建立该知识点的基本数学对象。",
+          "tex": "h=f_\\theta(x),\\quad\\theta\\in\\operatorname{parameters}(M)"
+        },
+        {
+          "explanation": "将其作用于训练或推断流程，检查梯度传播、模型容量与样本外损失。",
+          "tex": "h=f_\\theta(x),\\quad\\theta\\in\\operatorname{parameters}(M)"
+        }
+      ],
+      "code": "import torch\nfrom torch import nn\nlayer=nn.Linear(3,2);print(layer(torch.randn(4,3)).shape)",
+      "packages": "torch",
+      "application": "用于量化价格图像CNN、ETF序列Transformer和金融领域文本模型训练。",
+      "limits": "示例只验证对应章节最小张量流程；万能逼近、优化收敛和金融泛化是不同问题，不可互相推导。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n05-03",
+      "node_id": "deep-n05-03",
+      "title": "验证循环",
+      "definition": "验证阶段固定模型权重并关闭训练专用随机层，评价未参加当前训练的数据。",
+      "assumptions": "必须明确网络输入张量形状、损失定义、训练与评估模式，并为样本外验证保留独立数据。",
+      "properties": [
+        "验证阶段固定模型权重并关闭训练专用随机层，评价未参加当前训练的数据。",
+        "实际训练还依赖学习率、正则化、初始化和优化过程；应报告多次实验及失败边界。"
+      ],
+      "formulas": [
+        {
+          "label": "网络理论与算法公式",
+          "tex": "R_{\\rm val}=n_{\\rm val}^{-1}\\sum_i\\ell(f_{\\hat\\theta}(x_i),y_i)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由网络前向计算、微分关系或容量定义建立该知识点的基本数学对象。",
+          "tex": "R_{\\rm val}=n_{\\rm val}^{-1}\\sum_i\\ell(f_{\\hat\\theta}(x_i),y_i)"
+        },
+        {
+          "explanation": "将其作用于训练或推断流程，检查梯度传播、模型容量与样本外损失。",
+          "tex": "R_{\\rm val}=n_{\\rm val}^{-1}\\sum_i\\ell(f_{\\hat\\theta}(x_i),y_i)"
+        }
+      ],
+      "code": "import torch\nfrom torch import nn\nlayer=nn.Linear(3,2);print(layer(torch.randn(4,3)).shape)",
+      "packages": "torch",
+      "application": "用于量化价格图像CNN、ETF序列Transformer和金融领域文本模型训练。",
+      "limits": "示例只验证对应章节最小张量流程；万能逼近、优化收敛和金融泛化是不同问题，不可互相推导。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n06-03",
+      "node_id": "deep-n06-03",
+      "title": "模型保存与加载",
+      "definition": "保存模型权重与架构、预处理版本和输入Schema，加载时核查状态键一致性。",
+      "assumptions": "必须明确网络输入张量形状、损失定义、训练与评估模式，并为样本外验证保留独立数据。",
+      "properties": [
+        "保存模型权重与架构、预处理版本和输入Schema，加载时核查状态键一致性。",
+        "实际训练还依赖学习率、正则化、初始化和优化过程；应报告多次实验及失败边界。"
+      ],
+      "formulas": [
+        {
+          "label": "网络理论与算法公式",
+          "tex": "\\hat y=f_{\\theta_v}(T_{\\psi_v}(x))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由网络前向计算、微分关系或容量定义建立该知识点的基本数学对象。",
+          "tex": "\\hat y=f_{\\theta_v}(T_{\\psi_v}(x))"
+        },
+        {
+          "explanation": "将其作用于训练或推断流程，检查梯度传播、模型容量与样本外损失。",
+          "tex": "\\hat y=f_{\\theta_v}(T_{\\psi_v}(x))"
+        }
+      ],
+      "code": "import torch\nfrom torch import nn\nlayer=nn.Linear(3,2);print(layer(torch.randn(4,3)).shape)",
+      "packages": "torch",
+      "application": "用于量化价格图像CNN、ETF序列Transformer和金融领域文本模型训练。",
+      "limits": "示例只验证对应章节最小张量流程；万能逼近、优化收敛和金融泛化是不同问题，不可互相推导。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n05-04",
+      "node_id": "deep-n05-04",
+      "title": "Weight Decay",
+      "definition": "权重衰减按步缩小参数，提高部分网络泛化与数值稳定性。",
+      "assumptions": "必须明确网络输入张量形状、损失定义、训练与评估模式，并为样本外验证保留独立数据。",
+      "properties": [
+        "权重衰减按步缩小参数，提高部分网络泛化与数值稳定性。",
+        "实际训练还依赖学习率、正则化、初始化和优化过程；应报告多次实验及失败边界。"
+      ],
+      "formulas": [
+        {
+          "label": "网络理论与算法公式",
+          "tex": "\\theta_{t+1}=(1-\\eta\\lambda)\\theta_t-\\eta g_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由网络前向计算、微分关系或容量定义建立该知识点的基本数学对象。",
+          "tex": "\\theta_{t+1}=(1-\\eta\\lambda)\\theta_t-\\eta g_t"
+        },
+        {
+          "explanation": "将其作用于训练或推断流程，检查梯度传播、模型容量与样本外损失。",
+          "tex": "\\theta_{t+1}=(1-\\eta\\lambda)\\theta_t-\\eta g_t"
+        }
+      ],
+      "code": "import torch\nnet=torch.nn.Linear(3,2);opt=torch.optim.AdamW(net.parameters(),lr=.001)\nprint(net(torch.randn(2,3)).shape)",
+      "packages": "torch",
+      "application": "用于量化价格图像CNN、ETF序列Transformer和金融领域文本模型训练。",
+      "limits": "示例只验证对应章节最小张量流程；万能逼近、优化收敛和金融泛化是不同问题，不可互相推导。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n06-04",
+      "node_id": "deep-n06-04",
+      "title": "初始化",
+      "definition": "依据层激活类型选择Xavier/He等初始化以保持前向/反向信号的方差尺度。",
+      "assumptions": "必须明确网络输入张量形状、损失定义、训练与评估模式，并为样本外验证保留独立数据。",
+      "properties": [
+        "依据层激活类型选择Xavier/He等初始化以保持前向/反向信号的方差尺度。",
+        "实际训练还依赖学习率、正则化、初始化和优化过程；应报告多次实验及失败边界。"
+      ],
+      "formulas": [
+        {
+          "label": "网络理论与算法公式",
+          "tex": "\\operatorname{Var}(W_{\\rm He})=2/n_{\\rm in}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由网络前向计算、微分关系或容量定义建立该知识点的基本数学对象。",
+          "tex": "\\operatorname{Var}(W_{\\rm He})=2/n_{\\rm in}"
+        },
+        {
+          "explanation": "将其作用于训练或推断流程，检查梯度传播、模型容量与样本外损失。",
+          "tex": "\\operatorname{Var}(W_{\\rm He})=2/n_{\\rm in}"
+        }
+      ],
+      "code": "import torch\nnet=torch.nn.Linear(3,2);opt=torch.optim.AdamW(net.parameters(),lr=.001)\nprint(net(torch.randn(2,3)).shape)",
+      "packages": "torch",
+      "application": "用于量化价格图像CNN、ETF序列Transformer和金融领域文本模型训练。",
+      "limits": "示例只验证对应章节最小张量流程；万能逼近、优化收敛和金融泛化是不同问题，不可互相推导。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n01-05",
+      "node_id": "deep-n01-05",
+      "title": "容量与过参数化",
+      "definition": "模型参数数目可能超过训练样本数，仍可能在特定优化偏置下泛化，但不保证没有过拟合。",
+      "assumptions": "必须明确网络输入张量形状、损失定义、训练与评估模式，并为样本外验证保留独立数据。",
+      "properties": [
+        "模型参数数目可能超过训练样本数，仍可能在特定优化偏置下泛化，但不保证没有过拟合。",
+        "实际训练还依赖学习率、正则化、初始化和优化过程；应报告多次实验及失败边界。"
+      ],
+      "formulas": [
+        {
+          "label": "网络理论与算法公式",
+          "tex": "\\operatorname{Parameters}(\\theta)\\gg n_{\\rm train}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由网络前向计算、微分关系或容量定义建立该知识点的基本数学对象。",
+          "tex": "\\operatorname{Parameters}(\\theta)\\gg n_{\\rm train}"
+        },
+        {
+          "explanation": "将其作用于训练或推断流程，检查梯度传播、模型容量与样本外损失。",
+          "tex": "\\operatorname{Parameters}(\\theta)\\gg n_{\\rm train}"
+        }
+      ],
+      "code": "import torch\nnet=torch.nn.Linear(2,1);opt=torch.optim.SGD(net.parameters(),lr=.1)\nprint(opt.param_groups[0]['lr'])",
+      "packages": "torch",
+      "application": "用于量化价格图像CNN、ETF序列Transformer和金融领域文本模型训练。",
+      "limits": "示例只验证对应章节最小张量流程；万能逼近、优化收敛和金融泛化是不同问题，不可互相推导。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n02-05",
+      "node_id": "deep-n02-05",
+      "title": "双下降",
+      "definition": "部分模型在容量增加时测试误差先降后升再降，峰值常在插值临界区域附近。",
+      "assumptions": "必须明确网络输入张量形状、损失定义、训练与评估模式，并为样本外验证保留独立数据。",
+      "properties": [
+        "部分模型在容量增加时测试误差先降后升再降，峰值常在插值临界区域附近。",
+        "实际训练还依赖学习率、正则化、初始化和优化过程；应报告多次实验及失败边界。"
+      ],
+      "formulas": [
+        {
+          "label": "网络理论与算法公式",
+          "tex": "R_{\\rm test}=R(\\text{capacity},n)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由网络前向计算、微分关系或容量定义建立该知识点的基本数学对象。",
+          "tex": "R_{\\rm test}=R(\\text{capacity},n)"
+        },
+        {
+          "explanation": "将其作用于训练或推断流程，检查梯度传播、模型容量与样本外损失。",
+          "tex": "R_{\\rm test}=R(\\text{capacity},n)"
+        }
+      ],
+      "code": "import torch\nnet=torch.nn.Linear(2,1);opt=torch.optim.SGD(net.parameters(),lr=.1)\nprint(opt.param_groups[0]['lr'])",
+      "packages": "torch",
+      "application": "用于量化价格图像CNN、ETF序列Transformer和金融领域文本模型训练。",
+      "limits": "示例只验证对应章节最小张量流程；万能逼近、优化收敛和金融泛化是不同问题，不可互相推导。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n03-05",
+      "node_id": "deep-n03-05",
+      "title": "Early Stopping",
+      "definition": "早停用独立验证表现决定何时停止参数更新，避免一直优化训练损失。",
+      "assumptions": "必须明确网络输入张量形状、损失定义、训练与评估模式，并为样本外验证保留独立数据。",
+      "properties": [
+        "早停用独立验证表现决定何时停止参数更新，避免一直优化训练损失。",
+        "实际训练还依赖学习率、正则化、初始化和优化过程；应报告多次实验及失败边界。"
+      ],
+      "formulas": [
+        {
+          "label": "网络理论与算法公式",
+          "tex": "t^*=\\arg\\min_{t\\le T}L_{\\rm val}(\\theta_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由网络前向计算、微分关系或容量定义建立该知识点的基本数学对象。",
+          "tex": "t^*=\\arg\\min_{t\\le T}L_{\\rm val}(\\theta_t)"
+        },
+        {
+          "explanation": "将其作用于训练或推断流程，检查梯度传播、模型容量与样本外损失。",
+          "tex": "t^*=\\arg\\min_{t\\le T}L_{\\rm val}(\\theta_t)"
+        }
+      ],
+      "code": "import torch\nnet=torch.nn.Linear(2,1);opt=torch.optim.SGD(net.parameters(),lr=.1)\nprint(opt.param_groups[0]['lr'])",
+      "packages": "torch",
+      "application": "用于量化价格图像CNN、ETF序列Transformer和金融领域文本模型训练。",
+      "limits": "示例只验证对应章节最小张量流程；万能逼近、优化收敛和金融泛化是不同问题，不可互相推导。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n04-05",
+      "node_id": "deep-n04-05",
+      "title": "数据增强",
+      "definition": "对训练输入施加保留标签的合理扰动以增大有效样本覆盖范围。",
+      "assumptions": "必须明确网络输入张量形状、损失定义、训练与评估模式，并为样本外验证保留独立数据。",
+      "properties": [
+        "对训练输入施加保留标签的合理扰动以增大有效样本覆盖范围。",
+        "实际训练还依赖学习率、正则化、初始化和优化过程；应报告多次实验及失败边界。"
+      ],
+      "formulas": [
+        {
+          "label": "网络理论与算法公式",
+          "tex": "L=E_{T\\sim\\mathcal T}\\ell(f_\\theta(T(x)),y)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由网络前向计算、微分关系或容量定义建立该知识点的基本数学对象。",
+          "tex": "L=E_{T\\sim\\mathcal T}\\ell(f_\\theta(T(x)),y)"
+        },
+        {
+          "explanation": "将其作用于训练或推断流程，检查梯度传播、模型容量与样本外损失。",
+          "tex": "L=E_{T\\sim\\mathcal T}\\ell(f_\\theta(T(x)),y)"
+        }
+      ],
+      "code": "import torch\nnet=torch.nn.Linear(2,1);opt=torch.optim.SGD(net.parameters(),lr=.1)\nprint(opt.param_groups[0]['lr'])",
+      "packages": "torch",
+      "application": "用于量化价格图像CNN、ETF序列Transformer和金融领域文本模型训练。",
+      "limits": "示例只验证对应章节最小张量流程；万能逼近、优化收敛和金融泛化是不同问题，不可互相推导。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n05-05",
+      "node_id": "deep-n05-05",
+      "title": "学习率调度",
+      "definition": "随训练步数动态调整步长，帮助模型早期搜索及后期收敛。",
+      "assumptions": "必须明确网络输入张量形状、损失定义、训练与评估模式，并为样本外验证保留独立数据。",
+      "properties": [
+        "随训练步数动态调整步长，帮助模型早期搜索及后期收敛。",
+        "实际训练还依赖学习率、正则化、初始化和优化过程；应报告多次实验及失败边界。"
+      ],
+      "formulas": [
+        {
+          "label": "网络理论与算法公式",
+          "tex": "\\theta^+=\\theta-\\eta_t\\nabla L(\\theta)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由网络前向计算、微分关系或容量定义建立该知识点的基本数学对象。",
+          "tex": "\\theta^+=\\theta-\\eta_t\\nabla L(\\theta)"
+        },
+        {
+          "explanation": "将其作用于训练或推断流程，检查梯度传播、模型容量与样本外损失。",
+          "tex": "\\theta^+=\\theta-\\eta_t\\nabla L(\\theta)"
+        }
+      ],
+      "code": "import torch\nnet=torch.nn.Linear(2,1);opt=torch.optim.SGD(net.parameters(),lr=.1)\nprint(opt.param_groups[0]['lr'])",
+      "packages": "torch",
+      "application": "用于量化价格图像CNN、ETF序列Transformer和金融领域文本模型训练。",
+      "limits": "示例只验证对应章节最小张量流程；万能逼近、优化收敛和金融泛化是不同问题，不可互相推导。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n06-05",
+      "node_id": "deep-n06-05",
+      "title": "分布外泛化",
+      "definition": "研究当测试环境与训练分布不同时模型预测的稳定性，需要显式环境、风险和漂移定义。",
+      "assumptions": "必须明确网络输入张量形状、损失定义、训练与评估模式，并为样本外验证保留独立数据。",
+      "properties": [
+        "研究当测试环境与训练分布不同时模型预测的稳定性，需要显式环境、风险和漂移定义。",
+        "实际训练还依赖学习率、正则化、初始化和优化过程；应报告多次实验及失败边界。"
+      ],
+      "formulas": [
+        {
+          "label": "网络理论与算法公式",
+          "tex": "P_{\\rm test}(X,Y)\\ne P_{\\rm train}(X,Y)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由网络前向计算、微分关系或容量定义建立该知识点的基本数学对象。",
+          "tex": "P_{\\rm test}(X,Y)\\ne P_{\\rm train}(X,Y)"
+        },
+        {
+          "explanation": "将其作用于训练或推断流程，检查梯度传播、模型容量与样本外损失。",
+          "tex": "P_{\\rm test}(X,Y)\\ne P_{\\rm train}(X,Y)"
+        }
+      ],
+      "code": "import torch\nnet=torch.nn.Linear(2,1);opt=torch.optim.SGD(net.parameters(),lr=.1)\nprint(opt.param_groups[0]['lr'])",
+      "packages": "torch",
+      "application": "用于量化价格图像CNN、ETF序列Transformer和金融领域文本模型训练。",
+      "limits": "示例只验证对应章节最小张量流程；万能逼近、优化收敛和金融泛化是不同问题，不可互相推导。",
+      "coverage": "complete"
+    }
+  ]
+}
