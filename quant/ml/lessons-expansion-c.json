@@ -1,0 +1,613 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "rl-n01-02",
+      "node_id": "rl-n01-02",
+      "title": "状态价值V",
+      "definition": "在给定策略π下，从状态s开始按策略行动的预期折现累计奖励称为状态价值。",
+      "assumptions": "折现因子γ在(0,1)且奖励适当有界，可保证无穷级数可积。",
+      "properties": [
+        "折现因子γ在(0,1)且奖励适当有界，可保证无穷级数可积。",
+        "策略改变后价值函数也随之改变。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "V^\\pi(s)=E^\\pi[\\sum_{k=0}^\\infty\\gamma^kR_{t+k+1}|S_t=s]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将总折现奖励分离成第一步和后续步骤",
+          "tex": "G_t=R_{t+1}+\\gamma G_{t+1}"
+        },
+        {
+          "explanation": "对给定状态与策略取条件期望",
+          "tex": "V^\\pi(s)=E_\\pi[R_{t+1}+\\gamma V^\\pi(S_{t+1})|S_t=s]"
+        }
+      ],
+      "code": "import numpy as np\nP=np.array([[.8,.2],[.1,.9]])\nreward=np.array([1.,2.]);gamma=.9\nvalue=np.linalg.solve(np.eye(2)-gamma*P,reward)\nprint(value)",
+      "application": "衡量不同市场持仓状态下的长期风险调整回报。",
+      "limits": "价值依赖转移估计和奖励设计，不能直接外推真实市场。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "rl-n02-02",
+      "node_id": "rl-n02-02",
+      "title": "动作价值Q",
+      "definition": "在状态s采取动作a，然后遵循策略π所得到的预期累计回报称为动作价值。",
+      "assumptions": "动作必须属于允许集合。",
+      "properties": [
+        "动作必须属于允许集合。",
+        "Q值依赖策略及环境动态。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "Q^\\pi(s,a)=E[R_{t+1}+\\gamma V^\\pi(S_{t+1})|s,a]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "条件于初始行动后递归表示未来奖励",
+          "tex": "G_t=R_{t+1}+\\gamma G_{t+1}"
+        },
+        {
+          "explanation": "后续按照π行动，可写成Vπ期望",
+          "tex": "Q^\\pi(s,a)=r(s,a)+\\gamma\\sum_{s'}P(s'|s,a)V^\\pi(s')"
+        }
+      ],
+      "code": "import numpy as np\nP=np.array([[[.8,.2],[.2,.8]],[[.4,.6],[.1,.9]]])\nr=np.array([[1.,0.],[.5,2.]])\nv=np.array([4.,7.])\nq=r+.9*np.einsum(\"ask,k->sa\",P,v)\nprint(q)",
+      "application": "比较交易持有和再平衡等动作的条件长期价值。",
+      "limits": "示例P数组按动作-当前状态-下一状态顺序存储。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "rl-n05-02",
+      "node_id": "rl-n05-02",
+      "title": "策略评估",
+      "definition": "策略评估在策略固定时求解其Bellman期望方程，可以通过线性系统或迭代进行。",
+      "assumptions": "有限状态折现MDP的Bellman期望算子为压缩映射。",
+      "properties": [
+        "有限状态折现MDP的Bellman期望算子为压缩映射。",
+        "要把策略混合后的奖励和转移概率正确聚合。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "V^\\pi=(I-\\gamma P^\\pi)^{-1}r^\\pi"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "固定策略π后得到诱导状态转移矩阵",
+          "tex": "P^\\pi_{ss'}=\\sum_a\\pi(a|s)P(s'|s,a)"
+        },
+        {
+          "explanation": "Bellman方程写成线性系统",
+          "tex": "V^\\pi=r^\\pi+\\gamma P^\\pi V^\\pi"
+        }
+      ],
+      "code": "import numpy as np\nP=np.array([[.8,.2],[.3,.7]])\nr=np.array([1.,1.5])\nprint(np.linalg.solve(np.eye(2)-.9*P,r))",
+      "application": "固定交易策略的理论价值估计。",
+      "limits": "真实交易状态空间可能很大，需函数近似或采样评估。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "rl-n02-03",
+      "node_id": "rl-n02-03",
+      "title": "策略迭代Policy Iteration",
+      "definition": "策略迭代交替求当前策略价值、再按动作价值贪心改善策略，直至不再变化。",
+      "assumptions": "有限折现MDP在精确评估下可收敛到最优策略。",
+      "properties": [
+        "有限折现MDP在精确评估下可收敛到最优策略。",
+        "近似价值误差可能影响改善步骤。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "\\pi_{k+1}(s)\\in\\arg\\max_a[r(s,a)+\\gamma E(V^{\\pi_k}(S')|s,a)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "在固定πk下求解价值",
+          "tex": "V^{\\pi_k}=r^{\\pi_k}+\\gamma P^{\\pi_k}V^{\\pi_k}"
+        },
+        {
+          "explanation": "逐状态选择更高动作价值的行动",
+          "tex": "\\pi_{k+1}(s)=\\arg\\max_aQ^{\\pi_k}(s,a)"
+        }
+      ],
+      "code": "import numpy as np\nP=np.array([[[.9,.1],[.3,.7]],[[.4,.6],[.2,.8]]])\nR=np.array([[1.,0.],[.5,1.5]])\npolicy=np.zeros(2,dtype=int)\nfor k in range(20):\n    p=P[policy,np.arange(2)]\n    v=np.linalg.solve(np.eye(2)-.9*p,R[np.arange(2),policy])\n    nxt=(R+.9*np.einsum(\"ask,k->sa\",P,v)).argmax(1)\n    if np.array_equal(nxt,policy):break\n    policy=nxt\nprint(\"policy:\",policy,\"V:\",v)",
+      "application": "小型交易状态决策的可解释动态规划基线。",
+      "limits": "实际高维连续仓位动作不适合直接表格策略迭代。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "rl-n03-04",
+      "node_id": "rl-n03-04",
+      "title": "SARSA",
+      "definition": "SARSA是On-policy时序差分控制：利用行为策略实际选出的下一动作Q值更新当前动作。",
+      "assumptions": "更新目标使用a(t+1)而非动作最大值。",
+      "properties": [
+        "更新目标使用a(t+1)而非动作最大值。",
+        "探索策略本身会影响所学习的Q。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "Q(s_t,a_t)\\leftarrow Q(s_t,a_t)+\\alpha[r+\\gamma Q(s_{t+1},a_{t+1})-Q(s_t,a_t)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "Sarsa用真实观察到的下一行动代替未来策略期望",
+          "tex": "y=r+\\gamma Q(s',a')"
+        },
+        {
+          "explanation": "通过一步TD误差更新Q",
+          "tex": "\\delta=y-Q(s,a)"
+        }
+      ],
+      "code": "import numpy as np\nQ=np.zeros((2,2))\nevents=[(0,0,1.,1,0),(1,0,.5,0,1),(0,1,.2,1,1)]\nfor _ in range(100):\n    for s,a,r,s2,a2 in events:\n        Q[s,a]+=.1*(r+.9*Q[s2,a2]-Q[s,a])\nprint(Q)",
+      "application": "比较在不同探索风险条件下的仓位控制策略。",
+      "limits": "示例是固定样本回放，不具备与真实环境交互的探索过程。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "rl-n01-05",
+      "node_id": "rl-n01-05",
+      "title": "ε-greedy",
+      "definition": "ε-greedy以1−ε概率选择当前估计最佳动作，并以ε概率随机探索动作。",
+      "assumptions": "探索率必须属于[0,1]。",
+      "properties": [
+        "探索率必须属于[0,1]。",
+        "市场实际交易探索可能具有不可忽视的成本和风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "\\pi(a|s)=(1-\\epsilon)\\mathbf1[a=a^*]+\\epsilon/|\\mathcal A|"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义贪心动作a*",
+          "tex": "a^*(s)=\\arg\\max_a Q(s,a)"
+        },
+        {
+          "explanation": "把确定性贪心策略和均匀随机策略做混合",
+          "tex": "\\pi=(1-\\epsilon)\\pi_{\\rm greedy}+\\epsilon\\pi_{\\rm uniform}"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0)\nq=np.array([.2,.6,.5]);eps=.1\naction=int(rng.integers(len(q))) if rng.random()<eps else int(q.argmax())\nprint(\"Selected action:\",action)",
+      "application": "强化学习的探索机制教学，离线金融策略可研究行为策略覆盖度。",
+      "limits": "真实交易不宜为了学习而无风控随机探索亏损动作。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-rl-n03-01",
+      "node_id": "deep-rl-n03-01",
+      "title": "Target Network",
+      "definition": "目标网络在若干梯度步期间保留滞后参数，减缓Q学习中预测值与Bootstrap目标同时变化的问题。",
+      "assumptions": "目标网络与在线网络初始结构匹配。",
+      "properties": [
+        "目标网络与在线网络初始结构匹配。",
+        "更新周期和软更新率影响训练稳定性。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "\\theta^-\\leftarrow\\tau\\theta+(1-\\tau)\\theta^-"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "在TD目标中使用冻结目标参数",
+          "tex": "y=r+\\gamma\\max_{a'}Q_{\\theta^-}(s',a')"
+        },
+        {
+          "explanation": "定期硬复制或用指数滑动平均软更新",
+          "tex": "\\theta^-\\gets\\tau\\theta+(1-\\tau)\\theta^-"
+        }
+      ],
+      "code": "import torch\nonline=torch.nn.Linear(3,2)\ntarget=torch.nn.Linear(3,2)\ntau=.05\nwith torch.no_grad():\n    for t,o in zip(target.parameters(),online.parameters()):\n        t.mul_(1-tau).add_(o,alpha=tau)\nprint(\"Soft update complete\")",
+      "application": "稳定金融状态动作Q价值的离线近似训练。",
+      "limits": "目标网络无法消除离线数据分布外动作高估。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-rl-n02-01",
+      "node_id": "deep-rl-n02-01",
+      "title": "Experience Replay",
+      "definition": "经验回放把环境转移存入缓冲区，随机采样小批量以降低连续样本相关性并复用历史交互。",
+      "assumptions": "实际样本应携带done标记，明确终止状态。",
+      "properties": [
+        "实际样本应携带done标记，明确终止状态。",
+        "非平稳金融环境中旧经验可能属于已改变的制度。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "(s_t,a_t,r_{t+1},s_{t+1},d_t)\\sim \\mathcal D_{\\rm replay}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将每条转移追加到固定长度缓冲区",
+          "tex": "\\mathcal D=\\{(s,a,r,s',d)\\}"
+        },
+        {
+          "explanation": "以批次形式抽样估计TD误差梯度",
+          "tex": "\\nabla_\\theta L\\approx|B|^{-1}\\sum_{i\\in B}\\nabla_\\theta\\delta_i^2"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(1)\nbuffer=[(i,i%2,float(i)/10,i+1,False) for i in range(20)]\nidx=rng.choice(len(buffer),5,replace=False)\nprint([buffer[i] for i in idx])",
+      "application": "历史持仓与执行经验离线采样机制。",
+      "limits": "不同市场制度间随机混合经验可能破坏因果时间隔离。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-rl-n04-01",
+      "node_id": "deep-rl-n04-01",
+      "title": "Double DQN",
+      "definition": "Double DQN使用在线网络选择下一步动作，再使用目标网络对选中动作估值，减少最大化估计中的高估偏差。",
+      "assumptions": "在线网络与目标网络分开更新。",
+      "properties": [
+        "在线网络与目标网络分开更新。",
+        "双估计不保证完全消除所有估值偏差。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "y=r+\\gamma Q_{\\theta^-}(s',\\arg\\max_a Q_\\theta(s',a))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先通过在线网络选择贪心动作",
+          "tex": "a^*=\\arg\\max_aQ_\\theta(s',a)"
+        },
+        {
+          "explanation": "用目标网络读取a*的价值以形成Bootstrap目标",
+          "tex": "y=r+\\gamma Q_{\\theta^-}(s',a^*)"
+        }
+      ],
+      "code": "import torch\nonline=torch.tensor([[2.,3.],[4.,1.]])\ntarget=torch.tensor([[3.,2.],[2.,5.]])\nactions=online.argmax(1)\nvalues=target.gather(1,actions[:,None]).squeeze(1)\nprint(actions,values)",
+      "application": "缓解DQN在离散交易行为价值估计中的最大化偏差。",
+      "limits": "这只是目标选择逻辑，不包含完整Double DQN训练。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-rl-n06-02",
+      "node_id": "deep-rl-n06-02",
+      "title": "Actor-Critic",
+      "definition": "Actor产生动作策略，Critic估计状态价值或动作价值；策略更新可使用Critic提供的优势信号。",
+      "assumptions": "Actor策略可微，Critic回归目标定义明确。",
+      "properties": [
+        "Actor策略可微，Critic回归目标定义明确。",
+        "Critic偏差可能使Actor更新朝错误方向移动。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "\\nabla_\\theta J\\simeq E[\\nabla_\\theta\\log\\pi_\\theta(a|s)\\,A^\\pi(s,a)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "通过Critic估计价值与TD残差",
+          "tex": "\\hat A_t=r_t+\\gamma V_\\phi(s_{t+1})-V_\\phi(s_t)"
+        },
+        {
+          "explanation": "使用该优势为策略log概率的梯度加权",
+          "tex": "L_{\\rm actor}=-E[\\log\\pi_\\theta(a_t|s_t)\\hat A_t]"
+        }
+      ],
+      "code": "import torch\nlogits=torch.nn.Parameter(torch.zeros(3))\ndist=torch.distributions.Categorical(logits=logits)\naction=dist.sample()\nadvantage=torch.tensor(.8)\nloss=-dist.log_prob(action)*advantage\nloss.backward()\nprint(\"Actor grad:\",logits.grad)",
+      "application": "连续配置和执行策略的动态学习基线。",
+      "limits": "最小示例未训练Critic，也不保证策略现实中收益为正。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-rl-n04-02",
+      "node_id": "deep-rl-n04-02",
+      "title": "GAE",
+      "definition": "广义优势估计将不同时间长度的TD残差以γλ衰减叠加，折中优势估计偏差与方差。",
+      "assumptions": "γ为折现因子，λ∈[0,1]。",
+      "properties": [
+        "γ为折现因子，λ∈[0,1]。",
+        "终止状态必须截断未来Bootstrap。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "\\hat A_t^{\\rm GAE}=\\sum_{l=0}^{T-t-1}(\\gamma\\lambda)^l\\delta_{t+l}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义单步TD残差",
+          "tex": "\\delta_t=r_t+\\gamma V(s_{t+1})-V(s_t)"
+        },
+        {
+          "explanation": "将未来残差以γλ加权递推相加",
+          "tex": "\\hat A_t=\\delta_t+\\gamma\\lambda \\hat A_{t+1}"
+        }
+      ],
+      "code": "import numpy as np\ndelta=np.array([.1,-.2,.4,.3]);gamma=.99;lam=.95\nadv=np.zeros_like(delta)\nacc=0.\nfor t in range(len(delta)-1,-1,-1):\n    acc=delta[t]+gamma*lam*acc;adv[t]=acc\nprint(adv)",
+      "application": "PPO交易智能体的优势估计和波动控制。",
+      "limits": "此处没有终止标记；多Episode训练必须在边界将acc清零。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-rl-n01-04",
+      "node_id": "deep-rl-n01-04",
+      "title": "Offline RL",
+      "definition": "离线强化学习只使用历史固定轨迹训练策略，不通过在线环境交互收集新数据。",
+      "assumptions": "训练数据对可行动作的覆盖度影响可靠性。",
+      "properties": [
+        "训练数据对可行动作的覆盖度影响可靠性。",
+        "数据中未出现的行动无法直接验证其真实价值。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "\\mathcal D=\\{(s_i,a_i,r_i,s'_i)\\}_{i=1}^n"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "训练仅使用记录行为策略产生的转移数据",
+          "tex": "(s_i,a_i)\\sim d^\\beta(s,a)"
+        },
+        {
+          "explanation": "对目标策略采取分布外动作必须控制外推误差",
+          "tex": "d^\\pi(s,a)\\not\\subset d^\\beta(s,a)\\Rightarrow\\text{可能失效}"
+        }
+      ],
+      "code": "import numpy as np\ndata=np.array([[0,0,1.],[0,1,-1.],[1,0,.3],[1,1,.7]])\ncounts=np.zeros((2,2),dtype=int)\nfor s,a,r in data: counts[int(s),int(a)]+=1\nprint(\"Action support:\",counts)",
+      "application": "金融交易通常无法安全进行在线强化学习探索，离线RL更贴合历史数据。",
+      "limits": "记录的历史成交不能说明未执行动作会怎样成交。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "timeseries-n01-04",
+      "node_id": "timeseries-n01-04",
+      "title": "Direct vs Recursive",
+      "definition": "多步预测可直接训练不同未来期限的模型，或训练一步模型并逐步把预测回填作为下一步输入。",
+      "assumptions": "递归预测会累积预测误差。",
+      "properties": [
+        "递归预测会累积预测误差。",
+        "Direct可能需要为每个预测期限训练更高复杂度模型。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "\\hat y_{t+h|t}^{\\rm direct}=f_h(X_t),\\quad\\hat y_{t+h|t}^{\\rm rec}=f_1(\\hat y_{t+h-1|t},\\ldots)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "递归方案把已预测值代回后续输入",
+          "tex": "\\hat y_{t+2|t}=f_1(\\hat y_{t+1|t})"
+        },
+        {
+          "explanation": "Direct方案分别拟合第h步目标",
+          "tex": "\\hat f_h=\\arg\\min_f\\sum_t \\ell(f(X_t),y_{t+h})"
+        }
+      ],
+      "code": "import numpy as np\na=.8;y0=10.\none_step=a*y0\nrecursive=[a**h*y0 for h in range(1,5)]\ndirect=[.8**h*y0 for h in range(1,5)]\nprint(one_step,recursive,direct)",
+      "application": "比较ETF 1日、5日、20日收益预测的训练目标。",
+      "limits": "本例只有固定线性规则，并未实际估计不同Direct模型。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "timeseries-n05-03",
+      "node_id": "timeseries-n05-03",
+      "title": "PatchTST",
+      "definition": "PatchTST把多变量时间序列分割成重叠或非重叠时间Patch，使用Transformer编码局部时间块。",
+      "assumptions": "Patch长度和步幅决定Token数量与局部信息粒度。",
+      "properties": [
+        "Patch长度和步幅决定Token数量与局部信息粒度。",
+        "原方法包含通道独立建模的设计选择。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "N_{\\rm patches}=\\left\\lfloor\\frac{L-P}{S}\\right\\rfloor+1"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "长度L窗口分为长度P、步幅S的局部片段",
+          "tex": "X^{(k)}=X_{kS:kS+P}"
+        },
+        {
+          "explanation": "片段展平后线性投影为Token并送入Transformer",
+          "tex": "Z^{(k)}=W_e\\operatorname{vec}(X^{(k)})+p_k"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(4,5,64)\npatch=x.unfold(dimension=-1,size=16,step=8)\ntokens=patch.reshape(4,5,-1,16)\nprint(patch.shape,tokens.shape)",
+      "application": "37只ETF多频率收益和宏观特征长序列预测。",
+      "limits": "示例仅展示Patch切分，不是完整PatchTST模型。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "timeseries-n04-04",
+      "node_id": "timeseries-n04-04",
+      "title": "多步损失",
+      "definition": "多步预测训练可对未来不同期限的预测误差加权汇总，选择权重反映投资目标和预测难度。",
+      "assumptions": "各horizon的目标需在相应观测未来可得。",
+      "properties": [
+        "各horizon的目标需在相应观测未来可得。",
+        "若不同期限波动尺度差异大，应考虑归一化。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "L=\\sum_{h=1}^H w_h\\frac1n\\sum_t(\\hat y_{t+h|t}-y_{t+h})^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "分别计算每个未来期限h的预测误差",
+          "tex": "e_{t,h}=\\hat y_{t+h|t}-y_{t+h}"
+        },
+        {
+          "explanation": "用非负权重对期限误差汇总",
+          "tex": "L=\\sum_hw_hE_n[e_{t,h}^2]"
+        }
+      ],
+      "code": "import torch\npred=torch.randn(10,3,requires_grad=True)\ntarget=torch.randn(10,3)\nweights=torch.tensor([.5,.3,.2])\nloss=((pred-target).square().mean(0)*weights).sum()\nloss.backward()\nprint(loss.item(),pred.grad.shape)",
+      "application": "联合训练未来1日、5日和20日风险预测模型。",
+      "limits": "未来目标可能时间重叠，CV边界须Purging。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "finml-n01-04",
+      "node_id": "finml-n01-04",
+      "title": "Walk-Forward",
+      "definition": "Walk-Forward依时间逐轮拟合模型，在从未用于该轮训练的未来窗口预测，并将结果拼接进行稳健性评价。",
+      "assumptions": "每一轮所有预处理、特征筛选及模型调参都限于训练窗。",
+      "properties": [
+        "每一轮所有预处理、特征筛选及模型调参都限于训练窗。",
+        "标签跨测试边界时仍需要额外隔离。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "\\hat y_{t\\in I_k^{\\rm test}}=f_{\\hat\\theta_k}(X_t),\\quad\\hat\\theta_k=\\operatorname{fit}(D_{I_k^{\\rm train}})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "选定滚动或扩展训练区间",
+          "tex": "I_k^{\\rm train}=[t_k-W,t_k)"
+        },
+        {
+          "explanation": "只对未来窗口输出预测",
+          "tex": "I_k^{\\rm test}=[t_k,t_k+H)"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.model_selection import TimeSeriesSplit\nfrom sklearn.linear_model import Ridge\nrng=np.random.default_rng(1)\nX=rng.normal(size=(120,3));y=X[:,0]+rng.normal(size=120)\nfor tr,te in TimeSeriesSplit(n_splits=3).split(X):\n    m=Ridge().fit(X[tr],y[tr])\n    print(te[0],te[-1],m.score(X[te],y[te]))",
+      "application": "量化策略动态再训练以及对历史过拟合的检验。",
+      "limits": "小样本外窗口容易产生统计噪声，需结合经济性和置信区间。",
+      "packages": "numpy, scikit-learn",
+      "coverage": "complete"
+    },
+    {
+      "id": "finml-n03-04",
+      "node_id": "finml-n03-04",
+      "title": "Embargo",
+      "definition": "Embargo在验证或测试区间相邻的训练记录之间留出禁运间隔，以降低标签、特征及信息时间交错。",
+      "assumptions": "禁运长度应基于特征窗口、标签持有期和数据延迟。",
+      "properties": [
+        "禁运长度应基于特征窗口、标签持有期和数据延迟。",
+        "只固定删去几天并不自动保证无泄漏。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "I_{\\rm train}\\cap[t_{\\rm val,end},t_{\\rm val,end}+\\Delta]=\\varnothing"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "设定验证结束时间和禁运跨度",
+          "tex": "[T,T+\\Delta]"
+        },
+        {
+          "explanation": "从训练集合中剔除落入禁运区间的记录",
+          "tex": "I_{\\rm train}'=I_{\\rm train}\\setminus[T,T+\\Delta]"
+        }
+      ],
+      "code": "import numpy as np\ndates=np.arange(30);validation=np.arange(10,16);embargo=3\ntrain=np.setdiff1d(dates,validation)\ntrain=train[(train<validation.min())|(train>validation.max()+embargo)]\nprint(train)",
+      "application": "ETF持仓周期、重叠事件标签交叉验证边界防护。",
+      "limits": "此演示禁运仅在验证后侧，需与Purging及具体CPCV设计配合。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "finml-n03-02",
+      "node_id": "finml-n03-02",
+      "title": "分层组合",
+      "definition": "根据横截面因子值排序把资产分为多个组合，分别计算后续收益以检验单调性和经济意义。",
+      "assumptions": "因子排序时点先于收益实现。",
+      "properties": [
+        "因子排序时点先于收益实现。",
+        "分组权重和交易成本口径必须统一。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "R_{q,t+1}=\\sum_{i\\in G_{q,t}}w_{i,q,t}r_{i,t+1}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "用时点t因子对资产排名并划分分组",
+          "tex": "G_{q,t}=\\{i:\\operatorname{rank}(f_{i,t})\\in Q_q\\}"
+        },
+        {
+          "explanation": "下期对每组用预先指定权重计算收益",
+          "tex": "R_{q,t+1}=\\sum_{i\\in G_{q,t}}w_{i,q,t}r_{i,t+1}"
+        }
+      ],
+      "code": "import numpy as np\nfactor=np.array([.4,.9,-.2,.1,.8,.3])\nfuture=np.array([.01,.03,-.02,.005,.02,.007])\nidx=np.argsort(factor)\nprint(\"bottom:\",future[idx[:2]].mean(),\"top:\",future[idx[-2:]].mean())",
+      "application": "观察ETF RankIC与分组收益排序是否一致。",
+      "limits": "高组减低组的毛收益未计入做空限制及频繁再平衡成本。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "finml-n05-05",
+      "node_id": "finml-n05-05",
+      "title": "滑点与冲击模型",
+      "definition": "滑点模拟预期价与实际成交价偏差，冲击模型描述自己订单对市场价格的内生影响。",
+      "assumptions": "买卖方向、参考价、成交时点必须定义。",
+      "properties": [
+        "买卖方向、参考价、成交时点必须定义。",
+        "价差、滑点和冲击的成本拆分应避免双重扣费。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "P_{\\rm fill}=P_{\\rm ref}(1+\\operatorname{side}\\cdot c_{\\rm slip}),\\quad \\operatorname{side}\\in\\{-1,+1\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "买入取正方向，卖出取负方向",
+          "tex": "\\operatorname{side}=1\\text{ (buy)},-1\\text{ (sell)}"
+        },
+        {
+          "explanation": "按bps相对于参考价调整模拟成交",
+          "tex": "c_{\\rm slip}=\\mathrm{bps}/10^4"
+        }
+      ],
+      "code": "def fill(reference, side, bps=5):\n    return reference*(1+side*bps/10000)\nprint(\"buy\",fill(100,1),\"sell\",fill(100,-1))",
+      "application": "将交易摩擦纳入ETF动量、多因子和高换手策略回测。",
+      "limits": "固定bps仅是粗略模型，大单真实冲击需订单簿/成交量等数据。",
+      "packages": "Python standard library",
+      "coverage": "complete"
+    }
+  ]
+}
