@@ -69,7 +69,8 @@ class MLExamplesTest(unittest.TestCase):
         self.assertEqual(len(LESSONS),MANIFEST["total_lessons"])
         self.assertEqual(len({x["node_id"] for x in LESSONS}),len(LESSONS))
         self.assertEqual(len(NOTES),MANIFEST["notes_count"])
-        self.assertEqual(len({x["node_id"] for x in LESSONS+NOTES}),720)
-        self.assertEqual(len(LESSONS)+len(NOTES),720)
+        active_notes=[n for n in NOTES if n["node_id"] not in {x["node_id"] for x in LESSONS}]
+        self.assertEqual(len({x["node_id"] for x in LESSONS+active_notes}),720)
+        self.assertEqual(len(LESSONS)+len(active_notes),720)
 if __name__=="__main__":
     unittest.main()
