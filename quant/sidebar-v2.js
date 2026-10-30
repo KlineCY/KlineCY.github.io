@@ -12,6 +12,7 @@
     ["companies","量化公司"],
     ["assets","金融资产分类"],
     ["feeds","核心数据源 Data Feeds"],
+    ["research","策略研究与回测"],
     ["papers","每周机器学习论文"],
     ["rankings","学术排名与资源"],
     ["news","全球宏观 News"]
@@ -39,6 +40,10 @@
       '<a class="q-menu-link" href="'+route("feeds")+'">全部数据字段</a>'+
       '<a class="q-menu-link" href="'+route("feeds")+'?mode=providers">数据供应商目录</a>'+
       subsection("feedsCategoryNav","按数据类别","feedChoices",page==="feeds"),
+    research:
+      '<a class="q-menu-link" href="'+route("research")+'">在线 Python 回测</a>'+
+      '<a class="q-menu-link" href="'+route("research")+'?strategy=ma">策略超市 / Python 示例</a>'+
+      subsection("researchStrategyNav","按策略选择","strategyChoices",page==="research"),
     papers:
       '<a class="q-menu-link" href="'+route("papers")+'">全部论文</a>'+
       subsection("weekNav","按周浏览","weeks",page==="papers"),
@@ -111,6 +116,11 @@
         handled=true;
       }
     }
+    if(page==="research"&&typeof window.selectStrategy==="function"){
+      const id=params.get("strategy");
+      if(id)window.selectStrategy(id);
+      handled=true;
+    }
     if(page==="feeds"){
       const mode=params.get("mode");
       if(mode==="providers"){
@@ -181,6 +191,10 @@
   getJson(route("feeds")+"catalog.json").then(d=>{
     if(!d?.categories)return;
     fill("feedChoices",d.categories.map(c=>({name:c.id,label:c.title+" ("+c.subgroups.reduce((n,g)=>n+g.item_ids.length,0)+")"})),r=>route("feeds")+"?category="+encodeURIComponent(r.name));
+  });
+  getJson(route("research")+"strategies.json").then(d=>{
+    if(!d?.strategies)return;
+    fill("strategyChoices",[...d.strategies].sort((a,b)=>alpha(a.name,b.name)).map(t=>({name:t.id,label:t.name})),r=>route("research")+"?strategy="+encodeURIComponent(r.name));
   });
   if(page!=="papers"){
     getJson(route("papers")+"data.json").then(d=>{
