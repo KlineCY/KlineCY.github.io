@@ -33,7 +33,19 @@ SMOKE={
     "逆概率加权IPW","差分中的差分","Cross-Fitting","频谱图",
     "数据延迟与可用时间","Alpha和Beta估计","Elastic Net",
     "分位数回归","残差分析","概率校准",
-    "Permutation Importance","RAG检索增强","窗口滚动特征"
+    "Permutation Importance","RAG检索增强","窗口滚动特征",
+    "最大似然MLE","指数族","共轭先验","后验预测",
+    "高斯混合模型GMM","状态空间模型","Kalman滤波",
+    "Metropolis-Hastings","Conformal Prediction","Mini-batch SGD",
+    "Nesterov加速","RMSProp","Newton法","近端梯度",
+    "N-gram","新闻情绪得分","披露时点对齐","位置编码RoPE",
+    "Top-k与Top-p","文本Embedding","图像归一化","图像增强",
+    "Dice/IoU","生成数据风险检验",
+    "复权OHLCV","PIT因子","未来收益标签","动量与均值回复",
+    "多重检验修正","风险平价","均值方差组合","Black-Litterman",
+    "R²","数据漂移","OOD检测","测试与CI","线上特征一致性",
+    "k近邻kNN","高斯朴素贝叶斯","线性判别分析LDA",
+    "熵和信息增益","层次聚类","嵌套交叉验证","实验假设和消融"
 }
 class MLExamplesTest(unittest.TestCase):
     def test_all_code_compiles(self):
