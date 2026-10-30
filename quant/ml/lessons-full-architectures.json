@@ -1,0 +1,645 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "architectures-n03-01",
+      "node_id": "architectures-n03-01",
+      "title": "卷积参数共享",
+      "definition": "卷积核在输入不同位置使用同一组参数，降低局部特征提取的参数数量并提供位置平移等变性。",
+      "assumptions": "网络形状、序列位置、可见时间范围及训练/推断模式必须正确；对有未来标签的金融任务采用因果限制。",
+      "properties": [
+        "卷积核在输入不同位置使用同一组参数，降低局部特征提取的参数数量并提供位置平移等变性。",
+        "参数量、感受野、时间/空间复杂度和泛化需要同时比较，架构更复杂不必然更优。"
+      ],
+      "formulas": [
+        {
+          "label": "网络结构核心公式",
+          "tex": "y_t=\\sum_kw_kx_{t+k}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "构建该网络模块的输入与状态关系，确保各张量的维度和时间位置正确。",
+          "tex": "y_t=\\sum_kw_kx_{t+k}"
+        },
+        {
+          "explanation": "通过前向模块与损失梯度学习参数，或按压缩/微调操作限制可更新部分。",
+          "tex": "y_t=\\sum_kw_kx_{t+k}"
+        }
+      ],
+      "code": "import torch\nm=torch.nn.Conv1d(4,8,kernel_size=3,dilation=2)\nprint(m(torch.randn(2,4,20)).shape)",
+      "packages": "torch",
+      "application": "用于ETF长序列预测、OHLCV价格图像与金融自然语言模型。",
+      "limits": "代码用于说明所属结构的最小前向运算，不等于完整Mamba、蒸馏或压缩训练框架；金融应用须检验计算开销、时间泄漏与交易成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n05-01",
+      "node_id": "architectures-n05-01",
+      "title": "残差网络ResNet",
+      "definition": "用恒等捷径连接卷积块，让深层网络学习输入的增量修正以改善优化。",
+      "assumptions": "网络形状、序列位置、可见时间范围及训练/推断模式必须正确；对有未来标签的金融任务采用因果限制。",
+      "properties": [
+        "用恒等捷径连接卷积块，让深层网络学习输入的增量修正以改善优化。",
+        "参数量、感受野、时间/空间复杂度和泛化需要同时比较，架构更复杂不必然更优。"
+      ],
+      "formulas": [
+        {
+          "label": "网络结构核心公式",
+          "tex": "h_{\\ell+1}=h_\\ell+F_\\ell(h_\\ell)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "构建该网络模块的输入与状态关系，确保各张量的维度和时间位置正确。",
+          "tex": "h_{\\ell+1}=h_\\ell+F_\\ell(h_\\ell)"
+        },
+        {
+          "explanation": "通过前向模块与损失梯度学习参数，或按压缩/微调操作限制可更新部分。",
+          "tex": "h_{\\ell+1}=h_\\ell+F_\\ell(h_\\ell)"
+        }
+      ],
+      "code": "import torch\nm=torch.nn.Conv1d(4,8,kernel_size=3,dilation=2)\nprint(m(torch.randn(2,4,20)).shape)",
+      "packages": "torch",
+      "application": "用于ETF长序列预测、OHLCV价格图像与金融自然语言模型。",
+      "limits": "代码用于说明所属结构的最小前向运算，不等于完整Mamba、蒸馏或压缩训练框架；金融应用须检验计算开销、时间泄漏与交易成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n06-01",
+      "node_id": "architectures-n06-01",
+      "title": "空洞卷积",
+      "definition": "在卷积核相邻采样点之间设置间隔，以少量参数扩大时间感受野。",
+      "assumptions": "网络形状、序列位置、可见时间范围及训练/推断模式必须正确；对有未来标签的金融任务采用因果限制。",
+      "properties": [
+        "在卷积核相邻采样点之间设置间隔，以少量参数扩大时间感受野。",
+        "参数量、感受野、时间/空间复杂度和泛化需要同时比较，架构更复杂不必然更优。"
+      ],
+      "formulas": [
+        {
+          "label": "网络结构核心公式",
+          "tex": "y_t=\\sum_kw_kx_{t-dk}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "构建该网络模块的输入与状态关系，确保各张量的维度和时间位置正确。",
+          "tex": "y_t=\\sum_kw_kx_{t-dk}"
+        },
+        {
+          "explanation": "通过前向模块与损失梯度学习参数，或按压缩/微调操作限制可更新部分。",
+          "tex": "y_t=\\sum_kw_kx_{t-dk}"
+        }
+      ],
+      "code": "import torch\nm=torch.nn.Conv1d(4,8,kernel_size=3,dilation=2)\nprint(m(torch.randn(2,4,20)).shape)",
+      "packages": "torch",
+      "application": "用于ETF长序列预测、OHLCV价格图像与金融自然语言模型。",
+      "limits": "代码用于说明所属结构的最小前向运算，不等于完整Mamba、蒸馏或压缩训练框架；金融应用须检验计算开销、时间泄漏与交易成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n02-02",
+      "node_id": "architectures-n02-02",
+      "title": "Backpropagation Through Time",
+      "definition": "把循环网络沿时间展开并通过链式法则累积每个时点的参数梯度。",
+      "assumptions": "网络形状、序列位置、可见时间范围及训练/推断模式必须正确；对有未来标签的金融任务采用因果限制。",
+      "properties": [
+        "把循环网络沿时间展开并通过链式法则累积每个时点的参数梯度。",
+        "参数量、感受野、时间/空间复杂度和泛化需要同时比较，架构更复杂不必然更优。"
+      ],
+      "formulas": [
+        {
+          "label": "网络结构核心公式",
+          "tex": "\\nabla_\\theta L=\\sum_t\\frac{\\partial L_t}{\\partial h_t}\\frac{\\partial h_t}{\\partial\\theta}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "构建该网络模块的输入与状态关系，确保各张量的维度和时间位置正确。",
+          "tex": "\\nabla_\\theta L=\\sum_t\\frac{\\partial L_t}{\\partial h_t}\\frac{\\partial h_t}{\\partial\\theta}"
+        },
+        {
+          "explanation": "通过前向模块与损失梯度学习参数，或按压缩/微调操作限制可更新部分。",
+          "tex": "\\nabla_\\theta L=\\sum_t\\frac{\\partial L_t}{\\partial h_t}\\frac{\\partial h_t}{\\partial\\theta}"
+        }
+      ],
+      "code": "import torch\nm=torch.nn.GRU(5,10,batch_first=True,bidirectional=True)\nprint(m(torch.randn(3,12,5))[0].shape)",
+      "packages": "torch",
+      "application": "用于ETF长序列预测、OHLCV价格图像与金融自然语言模型。",
+      "limits": "代码用于说明所属结构的最小前向运算，不等于完整Mamba、蒸馏或压缩训练框架；金融应用须检验计算开销、时间泄漏与交易成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n05-02",
+      "node_id": "architectures-n05-02",
+      "title": "双向RNN",
+      "definition": "在正向和逆向序列上分别编码并拼接隐藏状态，适用于整个输入窗口已经可见的任务。",
+      "assumptions": "网络形状、序列位置、可见时间范围及训练/推断模式必须正确；对有未来标签的金融任务采用因果限制。",
+      "properties": [
+        "在正向和逆向序列上分别编码并拼接隐藏状态，适用于整个输入窗口已经可见的任务。",
+        "参数量、感受野、时间/空间复杂度和泛化需要同时比较，架构更复杂不必然更优。"
+      ],
+      "formulas": [
+        {
+          "label": "网络结构核心公式",
+          "tex": "h_t=[\\overrightarrow h_t\\Vert\\overleftarrow h_t]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "构建该网络模块的输入与状态关系，确保各张量的维度和时间位置正确。",
+          "tex": "h_t=[\\overrightarrow h_t\\Vert\\overleftarrow h_t]"
+        },
+        {
+          "explanation": "通过前向模块与损失梯度学习参数，或按压缩/微调操作限制可更新部分。",
+          "tex": "h_t=[\\overrightarrow h_t\\Vert\\overleftarrow h_t]"
+        }
+      ],
+      "code": "import torch\nm=torch.nn.GRU(5,10,batch_first=True,bidirectional=True)\nprint(m(torch.randn(3,12,5))[0].shape)",
+      "packages": "torch",
+      "application": "用于ETF长序列预测、OHLCV价格图像与金融自然语言模型。",
+      "limits": "代码用于说明所属结构的最小前向运算，不等于完整Mamba、蒸馏或压缩训练框架；金融应用须检验计算开销、时间泄漏与交易成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n06-02",
+      "node_id": "architectures-n06-02",
+      "title": "Teacher Forcing",
+      "definition": "训练自回归序列解码器时把真实上一时刻Token作为下一时刻输入，以稳定监督学习。",
+      "assumptions": "网络形状、序列位置、可见时间范围及训练/推断模式必须正确；对有未来标签的金融任务采用因果限制。",
+      "properties": [
+        "训练自回归序列解码器时把真实上一时刻Token作为下一时刻输入，以稳定监督学习。",
+        "参数量、感受野、时间/空间复杂度和泛化需要同时比较，架构更复杂不必然更优。"
+      ],
+      "formulas": [
+        {
+          "label": "网络结构核心公式",
+          "tex": "p(y_t\\mid y_{<t}^{\\rm true},x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "构建该网络模块的输入与状态关系，确保各张量的维度和时间位置正确。",
+          "tex": "p(y_t\\mid y_{<t}^{\\rm true},x)"
+        },
+        {
+          "explanation": "通过前向模块与损失梯度学习参数，或按压缩/微调操作限制可更新部分。",
+          "tex": "p(y_t\\mid y_{<t}^{\\rm true},x)"
+        }
+      ],
+      "code": "import torch\nm=torch.nn.GRU(5,10,batch_first=True,bidirectional=True)\nprint(m(torch.randn(3,12,5))[0].shape)",
+      "packages": "torch",
+      "application": "用于ETF长序列预测、OHLCV价格图像与金融自然语言模型。",
+      "limits": "代码用于说明所属结构的最小前向运算，不等于完整Mamba、蒸馏或压缩训练框架；金融应用须检验计算开销、时间泄漏与交易成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n05-03",
+      "node_id": "architectures-n05-03",
+      "title": "Transformer Decoder",
+      "definition": "使用因果Self-Attention和前馈层逐步生成输出，可在Encoder–Decoder架构中使用Cross-Attention。",
+      "assumptions": "网络形状、序列位置、可见时间范围及训练/推断模式必须正确；对有未来标签的金融任务采用因果限制。",
+      "properties": [
+        "使用因果Self-Attention和前馈层逐步生成输出，可在Encoder–Decoder架构中使用Cross-Attention。",
+        "参数量、感受野、时间/空间复杂度和泛化需要同时比较，架构更复杂不必然更优。"
+      ],
+      "formulas": [
+        {
+          "label": "网络结构核心公式",
+          "tex": "H=\\operatorname{MaskedAttention}(Q,K,V)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "构建该网络模块的输入与状态关系，确保各张量的维度和时间位置正确。",
+          "tex": "H=\\operatorname{MaskedAttention}(Q,K,V)"
+        },
+        {
+          "explanation": "通过前向模块与损失梯度学习参数，或按压缩/微调操作限制可更新部分。",
+          "tex": "H=\\operatorname{MaskedAttention}(Q,K,V)"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(2,7,16)\nm=torch.nn.MultiheadAttention(16,4,batch_first=True)\ny,_=m(x,x,x,is_causal=False);print(y.shape)",
+      "packages": "torch",
+      "application": "用于ETF长序列预测、OHLCV价格图像与金融自然语言模型。",
+      "limits": "代码用于说明所属结构的最小前向运算，不等于完整Mamba、蒸馏或压缩训练框架；金融应用须检验计算开销、时间泄漏与交易成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n06-03",
+      "node_id": "architectures-n06-03",
+      "title": "交叉注意力",
+      "definition": "用目标序列Query检索另一来源序列Key和Value，实现条件信息融合。",
+      "assumptions": "网络形状、序列位置、可见时间范围及训练/推断模式必须正确；对有未来标签的金融任务采用因果限制。",
+      "properties": [
+        "用目标序列Query检索另一来源序列Key和Value，实现条件信息融合。",
+        "参数量、感受野、时间/空间复杂度和泛化需要同时比较，架构更复杂不必然更优。"
+      ],
+      "formulas": [
+        {
+          "label": "网络结构核心公式",
+          "tex": "\\operatorname{CrossAttn}(Q_X,K_Y,V_Y)=\\operatorname{softmax}(Q_XK_Y^\\top/\\sqrt d)V_Y"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "构建该网络模块的输入与状态关系，确保各张量的维度和时间位置正确。",
+          "tex": "\\operatorname{CrossAttn}(Q_X,K_Y,V_Y)=\\operatorname{softmax}(Q_XK_Y^\\top/\\sqrt d)V_Y"
+        },
+        {
+          "explanation": "通过前向模块与损失梯度学习参数，或按压缩/微调操作限制可更新部分。",
+          "tex": "\\operatorname{CrossAttn}(Q_X,K_Y,V_Y)=\\operatorname{softmax}(Q_XK_Y^\\top/\\sqrt d)V_Y"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(2,7,16)\nm=torch.nn.MultiheadAttention(16,4,batch_first=True)\ny,_=m(x,x,x,is_causal=False);print(y.shape)",
+      "packages": "torch",
+      "application": "用于ETF长序列预测、OHLCV价格图像与金融自然语言模型。",
+      "limits": "代码用于说明所属结构的最小前向运算，不等于完整Mamba、蒸馏或压缩训练框架；金融应用须检验计算开销、时间泄漏与交易成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n01-04",
+      "node_id": "architectures-n01-04",
+      "title": "TCN时间卷积",
+      "definition": "因果空洞卷积与残差块堆叠，使序列预测有可控的历史感受野。",
+      "assumptions": "网络形状、序列位置、可见时间范围及训练/推断模式必须正确；对有未来标签的金融任务采用因果限制。",
+      "properties": [
+        "因果空洞卷积与残差块堆叠，使序列预测有可控的历史感受野。",
+        "参数量、感受野、时间/空间复杂度和泛化需要同时比较，架构更复杂不必然更优。"
+      ],
+      "formulas": [
+        {
+          "label": "网络结构核心公式",
+          "tex": "R=1+(K-1)\\sum_{\\ell=0}^{L-1}d_\\ell"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "构建该网络模块的输入与状态关系，确保各张量的维度和时间位置正确。",
+          "tex": "R=1+(K-1)\\sum_{\\ell=0}^{L-1}d_\\ell"
+        },
+        {
+          "explanation": "通过前向模块与损失梯度学习参数，或按压缩/微调操作限制可更新部分。",
+          "tex": "R=1+(K-1)\\sum_{\\ell=0}^{L-1}d_\\ell"
+        }
+      ],
+      "code": "import torch\nA=torch.eye(3)*.9;h=torch.zeros(3)\nfor x in torch.randn(5,3):h=A@h+x\nprint(h)",
+      "packages": "torch",
+      "application": "用于ETF长序列预测、OHLCV价格图像与金融自然语言模型。",
+      "limits": "代码用于说明所属结构的最小前向运算，不等于完整Mamba、蒸馏或压缩训练框架；金融应用须检验计算开销、时间泄漏与交易成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n02-04",
+      "node_id": "architectures-n02-04",
+      "title": "Seq2Seq",
+      "definition": "编码器把输入序列转换为上下文表示，解码器逐步输出另一个序列。",
+      "assumptions": "网络形状、序列位置、可见时间范围及训练/推断模式必须正确；对有未来标签的金融任务采用因果限制。",
+      "properties": [
+        "编码器把输入序列转换为上下文表示，解码器逐步输出另一个序列。",
+        "参数量、感受野、时间/空间复杂度和泛化需要同时比较，架构更复杂不必然更优。"
+      ],
+      "formulas": [
+        {
+          "label": "网络结构核心公式",
+          "tex": "p(y_{1:T}\\mid x)=\\prod_tp(y_t\\mid y_{<t},x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "构建该网络模块的输入与状态关系，确保各张量的维度和时间位置正确。",
+          "tex": "p(y_{1:T}\\mid x)=\\prod_tp(y_t\\mid y_{<t},x)"
+        },
+        {
+          "explanation": "通过前向模块与损失梯度学习参数，或按压缩/微调操作限制可更新部分。",
+          "tex": "p(y_{1:T}\\mid x)=\\prod_tp(y_t\\mid y_{<t},x)"
+        }
+      ],
+      "code": "import torch\nA=torch.eye(3)*.9;h=torch.zeros(3)\nfor x in torch.randn(5,3):h=A@h+x\nprint(h)",
+      "packages": "torch",
+      "application": "用于ETF长序列预测、OHLCV价格图像与金融自然语言模型。",
+      "limits": "代码用于说明所属结构的最小前向运算，不等于完整Mamba、蒸馏或压缩训练框架；金融应用须检验计算开销、时间泄漏与交易成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n03-04",
+      "node_id": "architectures-n03-04",
+      "title": "门控卷积",
+      "definition": "卷积特征与Sigmoid门控逐元素相乘，有选择地控制序列信息通过。",
+      "assumptions": "网络形状、序列位置、可见时间范围及训练/推断模式必须正确；对有未来标签的金融任务采用因果限制。",
+      "properties": [
+        "卷积特征与Sigmoid门控逐元素相乘，有选择地控制序列信息通过。",
+        "参数量、感受野、时间/空间复杂度和泛化需要同时比较，架构更复杂不必然更优。"
+      ],
+      "formulas": [
+        {
+          "label": "网络结构核心公式",
+          "tex": "h=\\tanh(W_a*x)\\odot\\sigma(W_g*x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "构建该网络模块的输入与状态关系，确保各张量的维度和时间位置正确。",
+          "tex": "h=\\tanh(W_a*x)\\odot\\sigma(W_g*x)"
+        },
+        {
+          "explanation": "通过前向模块与损失梯度学习参数，或按压缩/微调操作限制可更新部分。",
+          "tex": "h=\\tanh(W_a*x)\\odot\\sigma(W_g*x)"
+        }
+      ],
+      "code": "import torch\nA=torch.eye(3)*.9;h=torch.zeros(3)\nfor x in torch.randn(5,3):h=A@h+x\nprint(h)",
+      "packages": "torch",
+      "application": "用于ETF长序列预测、OHLCV价格图像与金融自然语言模型。",
+      "limits": "代码用于说明所属结构的最小前向运算，不等于完整Mamba、蒸馏或压缩训练框架；金融应用须检验计算开销、时间泄漏与交易成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n04-04",
+      "node_id": "architectures-n04-04",
+      "title": "状态空间模型SSM",
+      "definition": "以隐状态转移和输出投影表示序列演化，现代SSM使用可并行的离散化和卷积实现。",
+      "assumptions": "网络形状、序列位置、可见时间范围及训练/推断模式必须正确；对有未来标签的金融任务采用因果限制。",
+      "properties": [
+        "以隐状态转移和输出投影表示序列演化，现代SSM使用可并行的离散化和卷积实现。",
+        "参数量、感受野、时间/空间复杂度和泛化需要同时比较，架构更复杂不必然更优。"
+      ],
+      "formulas": [
+        {
+          "label": "网络结构核心公式",
+          "tex": "h_{t+1}=Ah_t+Bx_t,\\quad y_t=Ch_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "构建该网络模块的输入与状态关系，确保各张量的维度和时间位置正确。",
+          "tex": "h_{t+1}=Ah_t+Bx_t,\\quad y_t=Ch_t"
+        },
+        {
+          "explanation": "通过前向模块与损失梯度学习参数，或按压缩/微调操作限制可更新部分。",
+          "tex": "h_{t+1}=Ah_t+Bx_t,\\quad y_t=Ch_t"
+        }
+      ],
+      "code": "import torch\nA=torch.eye(3)*.9;h=torch.zeros(3)\nfor x in torch.randn(5,3):h=A@h+x\nprint(h)",
+      "packages": "torch",
+      "application": "用于ETF长序列预测、OHLCV价格图像与金融自然语言模型。",
+      "limits": "代码用于说明所属结构的最小前向运算，不等于完整Mamba、蒸馏或压缩训练框架；金融应用须检验计算开销、时间泄漏与交易成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n05-04",
+      "node_id": "architectures-n05-04",
+      "title": "Mamba选择性状态空间",
+      "definition": "根据当前输入动态生成部分SSM参数，使长序列模型有内容依赖的选择性状态更新。",
+      "assumptions": "网络形状、序列位置、可见时间范围及训练/推断模式必须正确；对有未来标签的金融任务采用因果限制。",
+      "properties": [
+        "根据当前输入动态生成部分SSM参数，使长序列模型有内容依赖的选择性状态更新。",
+        "参数量、感受野、时间/空间复杂度和泛化需要同时比较，架构更复杂不必然更优。"
+      ],
+      "formulas": [
+        {
+          "label": "网络结构核心公式",
+          "tex": "h_t=\\bar A(x_t)h_{t-1}+\\bar B(x_t)x_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "构建该网络模块的输入与状态关系，确保各张量的维度和时间位置正确。",
+          "tex": "h_t=\\bar A(x_t)h_{t-1}+\\bar B(x_t)x_t"
+        },
+        {
+          "explanation": "通过前向模块与损失梯度学习参数，或按压缩/微调操作限制可更新部分。",
+          "tex": "h_t=\\bar A(x_t)h_{t-1}+\\bar B(x_t)x_t"
+        }
+      ],
+      "code": "import torch\nA=torch.eye(3)*.9;h=torch.zeros(3)\nfor x in torch.randn(5,3):h=A@h+x\nprint(h)",
+      "packages": "torch",
+      "application": "用于ETF长序列预测、OHLCV价格图像与金融自然语言模型。",
+      "limits": "代码用于说明所属结构的最小前向运算，不等于完整Mamba、蒸馏或压缩训练框架；金融应用须检验计算开销、时间泄漏与交易成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n06-04",
+      "node_id": "architectures-n06-04",
+      "title": "长序列建模",
+      "definition": "需要在较长输入长度下平衡上下文有效性、计算开销和因果时间可得性。",
+      "assumptions": "网络形状、序列位置、可见时间范围及训练/推断模式必须正确；对有未来标签的金融任务采用因果限制。",
+      "properties": [
+        "需要在较长输入长度下平衡上下文有效性、计算开销和因果时间可得性。",
+        "参数量、感受野、时间/空间复杂度和泛化需要同时比较，架构更复杂不必然更优。"
+      ],
+      "formulas": [
+        {
+          "label": "网络结构核心公式",
+          "tex": "C_{\\rm attention}=O(T^2d)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "构建该网络模块的输入与状态关系，确保各张量的维度和时间位置正确。",
+          "tex": "C_{\\rm attention}=O(T^2d)"
+        },
+        {
+          "explanation": "通过前向模块与损失梯度学习参数，或按压缩/微调操作限制可更新部分。",
+          "tex": "C_{\\rm attention}=O(T^2d)"
+        }
+      ],
+      "code": "import torch\nA=torch.eye(3)*.9;h=torch.zeros(3)\nfor x in torch.randn(5,3):h=A@h+x\nprint(h)",
+      "packages": "torch",
+      "application": "用于ETF长序列预测、OHLCV价格图像与金融自然语言模型。",
+      "limits": "代码用于说明所属结构的最小前向运算，不等于完整Mamba、蒸馏或压缩训练框架；金融应用须检验计算开销、时间泄漏与交易成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n01-05",
+      "node_id": "architectures-n01-05",
+      "title": "预训练与微调",
+      "definition": "先在通用数据上预训练共享表征，再用任务数据更新全部或部分权重。",
+      "assumptions": "网络形状、序列位置、可见时间范围及训练/推断模式必须正确；对有未来标签的金融任务采用因果限制。",
+      "properties": [
+        "先在通用数据上预训练共享表征，再用任务数据更新全部或部分权重。",
+        "参数量、感受野、时间/空间复杂度和泛化需要同时比较，架构更复杂不必然更优。"
+      ],
+      "formulas": [
+        {
+          "label": "网络结构核心公式",
+          "tex": "\\theta_{\\rm task}=\\operatorname{Finetune}(\\theta_{\\rm pre},D_{\\rm target})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "构建该网络模块的输入与状态关系，确保各张量的维度和时间位置正确。",
+          "tex": "\\theta_{\\rm task}=\\operatorname{Finetune}(\\theta_{\\rm pre},D_{\\rm target})"
+        },
+        {
+          "explanation": "通过前向模块与损失梯度学习参数，或按压缩/微调操作限制可更新部分。",
+          "tex": "\\theta_{\\rm task}=\\operatorname{Finetune}(\\theta_{\\rm pre},D_{\\rm target})"
+        }
+      ],
+      "code": "import torch\nW=torch.randn(6,4);A=torch.randn(2,4)*.01;B=torch.zeros(6,2)\nprint((W+B@A).shape)",
+      "packages": "torch",
+      "application": "用于ETF长序列预测、OHLCV价格图像与金融自然语言模型。",
+      "limits": "代码用于说明所属结构的最小前向运算，不等于完整Mamba、蒸馏或压缩训练框架；金融应用须检验计算开销、时间泄漏与交易成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n02-05",
+      "node_id": "architectures-n02-05",
+      "title": "冻结层",
+      "definition": "微调时固定一部分预训练参数，只训练其余参数或附加头。",
+      "assumptions": "网络形状、序列位置、可见时间范围及训练/推断模式必须正确；对有未来标签的金融任务采用因果限制。",
+      "properties": [
+        "微调时固定一部分预训练参数，只训练其余参数或附加头。",
+        "参数量、感受野、时间/空间复杂度和泛化需要同时比较，架构更复杂不必然更优。"
+      ],
+      "formulas": [
+        {
+          "label": "网络结构核心公式",
+          "tex": "\\nabla_{\\theta_{\\rm frozen}}L=0"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "构建该网络模块的输入与状态关系，确保各张量的维度和时间位置正确。",
+          "tex": "\\nabla_{\\theta_{\\rm frozen}}L=0"
+        },
+        {
+          "explanation": "通过前向模块与损失梯度学习参数，或按压缩/微调操作限制可更新部分。",
+          "tex": "\\nabla_{\\theta_{\\rm frozen}}L=0"
+        }
+      ],
+      "code": "import torch\nW=torch.randn(6,4);A=torch.randn(2,4)*.01;B=torch.zeros(6,2)\nprint((W+B@A).shape)",
+      "packages": "torch",
+      "application": "用于ETF长序列预测、OHLCV价格图像与金融自然语言模型。",
+      "limits": "代码用于说明所属结构的最小前向运算，不等于完整Mamba、蒸馏或压缩训练框架；金融应用须检验计算开销、时间泄漏与交易成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n03-05",
+      "node_id": "architectures-n03-05",
+      "title": "知识蒸馏",
+      "definition": "学生模型通过拟合教师模型的软概率或中间表示提升小模型表达能力。",
+      "assumptions": "网络形状、序列位置、可见时间范围及训练/推断模式必须正确；对有未来标签的金融任务采用因果限制。",
+      "properties": [
+        "学生模型通过拟合教师模型的软概率或中间表示提升小模型表达能力。",
+        "参数量、感受野、时间/空间复杂度和泛化需要同时比较，架构更复杂不必然更优。"
+      ],
+      "formulas": [
+        {
+          "label": "网络结构核心公式",
+          "tex": "L_{\\rm KD}=T^2D_{\\rm KL}(p_T^{\\rm teacher}\\|p_T^{\\rm student})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "构建该网络模块的输入与状态关系，确保各张量的维度和时间位置正确。",
+          "tex": "L_{\\rm KD}=T^2D_{\\rm KL}(p_T^{\\rm teacher}\\|p_T^{\\rm student})"
+        },
+        {
+          "explanation": "通过前向模块与损失梯度学习参数，或按压缩/微调操作限制可更新部分。",
+          "tex": "L_{\\rm KD}=T^2D_{\\rm KL}(p_T^{\\rm teacher}\\|p_T^{\\rm student})"
+        }
+      ],
+      "code": "import torch\nW=torch.randn(6,4);A=torch.randn(2,4)*.01;B=torch.zeros(6,2)\nprint((W+B@A).shape)",
+      "packages": "torch",
+      "application": "用于ETF长序列预测、OHLCV价格图像与金融自然语言模型。",
+      "limits": "代码用于说明所属结构的最小前向运算，不等于完整Mamba、蒸馏或压缩训练框架；金融应用须检验计算开销、时间泄漏与交易成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n04-05",
+      "node_id": "architectures-n04-05",
+      "title": "剪枝",
+      "definition": "删除不重要的权重、通道或结构，以降低模型存储与推理成本。",
+      "assumptions": "网络形状、序列位置、可见时间范围及训练/推断模式必须正确；对有未来标签的金融任务采用因果限制。",
+      "properties": [
+        "删除不重要的权重、通道或结构，以降低模型存储与推理成本。",
+        "参数量、感受野、时间/空间复杂度和泛化需要同时比较，架构更复杂不必然更优。"
+      ],
+      "formulas": [
+        {
+          "label": "网络结构核心公式",
+          "tex": "W_{\\rm prune}=M\\odot W,\\quad M\\in\\{0,1\\}^{m\\times n}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "构建该网络模块的输入与状态关系，确保各张量的维度和时间位置正确。",
+          "tex": "W_{\\rm prune}=M\\odot W,\\quad M\\in\\{0,1\\}^{m\\times n}"
+        },
+        {
+          "explanation": "通过前向模块与损失梯度学习参数，或按压缩/微调操作限制可更新部分。",
+          "tex": "W_{\\rm prune}=M\\odot W,\\quad M\\in\\{0,1\\}^{m\\times n}"
+        }
+      ],
+      "code": "import torch\nW=torch.randn(6,4);A=torch.randn(2,4)*.01;B=torch.zeros(6,2)\nprint((W+B@A).shape)",
+      "packages": "torch",
+      "application": "用于ETF长序列预测、OHLCV价格图像与金融自然语言模型。",
+      "limits": "代码用于说明所属结构的最小前向运算，不等于完整Mamba、蒸馏或压缩训练框架；金融应用须检验计算开销、时间泄漏与交易成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n05-05",
+      "node_id": "architectures-n05-05",
+      "title": "量化",
+      "definition": "将浮点权重或激活映射为低比特整数，减少计算与存储开销。",
+      "assumptions": "网络形状、序列位置、可见时间范围及训练/推断模式必须正确；对有未来标签的金融任务采用因果限制。",
+      "properties": [
+        "将浮点权重或激活映射为低比特整数，减少计算与存储开销。",
+        "参数量、感受野、时间/空间复杂度和泛化需要同时比较，架构更复杂不必然更优。"
+      ],
+      "formulas": [
+        {
+          "label": "网络结构核心公式",
+          "tex": "q=\\operatorname{round}(x/s)+z,\\quad\\hat x=s(q-z)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "构建该网络模块的输入与状态关系，确保各张量的维度和时间位置正确。",
+          "tex": "q=\\operatorname{round}(x/s)+z,\\quad\\hat x=s(q-z)"
+        },
+        {
+          "explanation": "通过前向模块与损失梯度学习参数，或按压缩/微调操作限制可更新部分。",
+          "tex": "q=\\operatorname{round}(x/s)+z,\\quad\\hat x=s(q-z)"
+        }
+      ],
+      "code": "import torch\nW=torch.randn(6,4);A=torch.randn(2,4)*.01;B=torch.zeros(6,2)\nprint((W+B@A).shape)",
+      "packages": "torch",
+      "application": "用于ETF长序列预测、OHLCV价格图像与金融自然语言模型。",
+      "limits": "代码用于说明所属结构的最小前向运算，不等于完整Mamba、蒸馏或压缩训练框架；金融应用须检验计算开销、时间泄漏与交易成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n06-05",
+      "node_id": "architectures-n06-05",
+      "title": "低秩适配LoRA",
+      "definition": "冻结原权重并训练低秩矩阵乘积表示可学习权重增量。",
+      "assumptions": "网络形状、序列位置、可见时间范围及训练/推断模式必须正确；对有未来标签的金融任务采用因果限制。",
+      "properties": [
+        "冻结原权重并训练低秩矩阵乘积表示可学习权重增量。",
+        "参数量、感受野、时间/空间复杂度和泛化需要同时比较，架构更复杂不必然更优。"
+      ],
+      "formulas": [
+        {
+          "label": "网络结构核心公式",
+          "tex": "W'=W+\\frac\\alpha r BA"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "构建该网络模块的输入与状态关系，确保各张量的维度和时间位置正确。",
+          "tex": "W'=W+\\frac\\alpha r BA"
+        },
+        {
+          "explanation": "通过前向模块与损失梯度学习参数，或按压缩/微调操作限制可更新部分。",
+          "tex": "W'=W+\\frac\\alpha r BA"
+        }
+      ],
+      "code": "import torch\nW=torch.randn(6,4);A=torch.randn(2,4)*.01;B=torch.zeros(6,2)\nprint((W+B@A).shape)",
+      "packages": "torch",
+      "application": "用于ETF长序列预测、OHLCV价格图像与金融自然语言模型。",
+      "limits": "代码用于说明所属结构的最小前向运算，不等于完整Mamba、蒸馏或压缩训练框架；金融应用须检验计算开销、时间泄漏与交易成本。",
+      "coverage": "complete"
+    }
+  ]
+}
