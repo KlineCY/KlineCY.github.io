@@ -1,0 +1,805 @@
+{
+  "version": 1,
+  "notes": [
+    {
+      "id": "multimodal-n04-01",
+      "node_id": "multimodal-n04-01",
+      "title": "共享嵌入",
+      "definition": "将图像、文本和音频编码到共同向量空间，便于跨模态检索或融合。",
+      "assumptions": "图像、文本、音频必须有合法来源、清晰的实体关联与各自发布时间；模型不应把外部内容当作高权限指令。",
+      "properties": [
+        "将图像、文本和音频编码到共同向量空间，便于跨模态检索或融合。。",
+        "模态缺失、信息延迟和模型幻觉可能引入决策偏差，须保留来源与人工复核。"
+      ],
+      "formulas": [
+        {
+          "label": "多模态建模关系",
+          "tex": "f_I(I),f_T(T)\\in\\mathbb R^d"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先明确涉及的各模态输入、条件关系和共享表征。将图像、文本和音频编码到共同向量空间，便于跨模态检索或融合。",
+          "tex": "f_I(I),f_T(T)\\in\\mathbb R^d"
+        },
+        {
+          "explanation": "利用对齐后的特征开展融合或检测，并审查结果可验证性。",
+          "tex": "f_I(I),f_T(T)\\in\\mathbb R^d"
+        }
+      ],
+      "code": "# 共享嵌入：跨模态向量相似度示例\nimport numpy as np\nrng=np.random.default_rng(0)\nimage=rng.normal(size=(4,8));text=rng.normal(size=(4,8))\nimage=image/np.linalg.norm(image,axis=1,keepdims=True)\ntext=text/np.linalg.norm(text,axis=1,keepdims=True)\nscores=image@text.T\nprint(\"Cross-modal similarity:\",scores.shape)\nprint(\"Best text match:\",scores.argmax(1))",
+      "packages": "numpy",
+      "application": "用于金融图表理解、公司公告文本、电话会议及量化研究Agent。",
+      "limits": "本页提供概念公式和通用向量对齐示例，未包含完整语音识别、视觉语言模型或Agent系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "multimodal-n05-01",
+      "node_id": "multimodal-n05-01",
+      "title": "多模态融合",
+      "definition": "把不同模态的特征按拼接、门控或跨注意力方式组合为统一预测表示。",
+      "assumptions": "图像、文本、音频必须有合法来源、清晰的实体关联与各自发布时间；模型不应把外部内容当作高权限指令。",
+      "properties": [
+        "把不同模态的特征按拼接、门控或跨注意力方式组合为统一预测表示。。",
+        "模态缺失、信息延迟和模型幻觉可能引入决策偏差，须保留来源与人工复核。"
+      ],
+      "formulas": [
+        {
+          "label": "多模态建模关系",
+          "tex": "z=\\operatorname{Fuse}(z_I,z_T,z_A)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先明确涉及的各模态输入、条件关系和共享表征。把不同模态的特征按拼接、门控或跨注意力方式组合为统一预测表示。",
+          "tex": "z=\\operatorname{Fuse}(z_I,z_T,z_A)"
+        },
+        {
+          "explanation": "利用对齐后的特征开展融合或检测，并审查结果可验证性。",
+          "tex": "z=\\operatorname{Fuse}(z_I,z_T,z_A)"
+        }
+      ],
+      "code": "# 多模态融合：跨模态向量相似度示例\nimport numpy as np\nrng=np.random.default_rng(0)\nimage=rng.normal(size=(4,8));text=rng.normal(size=(4,8))\nimage=image/np.linalg.norm(image,axis=1,keepdims=True)\ntext=text/np.linalg.norm(text,axis=1,keepdims=True)\nscores=image@text.T\nprint(\"Cross-modal similarity:\",scores.shape)\nprint(\"Best text match:\",scores.argmax(1))",
+      "packages": "numpy",
+      "application": "用于金融图表理解、公司公告文本、电话会议及量化研究Agent。",
+      "limits": "本页提供概念公式和通用向量对齐示例，未包含完整语音识别、视觉语言模型或Agent系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "multimodal-n06-01",
+      "node_id": "multimodal-n06-01",
+      "title": "缺失模态",
+      "definition": "多模态系统应在图片、文本或音频部分缺失时仍能输出有界预测并表示不确定性。",
+      "assumptions": "图像、文本、音频必须有合法来源、清晰的实体关联与各自发布时间；模型不应把外部内容当作高权限指令。",
+      "properties": [
+        "多模态系统应在图片、文本或音频部分缺失时仍能输出有界预测并表示不确定性。。",
+        "模态缺失、信息延迟和模型幻觉可能引入决策偏差，须保留来源与人工复核。"
+      ],
+      "formulas": [
+        {
+          "label": "多模态建模关系",
+          "tex": "z=\\operatorname{Fuse}(m_Iz_I,m_Tz_T)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先明确涉及的各模态输入、条件关系和共享表征。多模态系统应在图片、文本或音频部分缺失时仍能输出有界预测并表示不确定性。",
+          "tex": "z=\\operatorname{Fuse}(m_Iz_I,m_Tz_T)"
+        },
+        {
+          "explanation": "利用对齐后的特征开展融合或检测，并审查结果可验证性。",
+          "tex": "z=\\operatorname{Fuse}(m_Iz_I,m_Tz_T)"
+        }
+      ],
+      "code": "# 缺失模态：跨模态向量相似度示例\nimport numpy as np\nrng=np.random.default_rng(0)\nimage=rng.normal(size=(4,8));text=rng.normal(size=(4,8))\nimage=image/np.linalg.norm(image,axis=1,keepdims=True)\ntext=text/np.linalg.norm(text,axis=1,keepdims=True)\nscores=image@text.T\nprint(\"Cross-modal similarity:\",scores.shape)\nprint(\"Best text match:\",scores.argmax(1))",
+      "packages": "numpy",
+      "application": "用于金融图表理解、公司公告文本、电话会议及量化研究Agent。",
+      "limits": "本页提供概念公式和通用向量对齐示例，未包含完整语音识别、视觉语言模型或Agent系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "multimodal-n02-02",
+      "node_id": "multimodal-n02-02",
+      "title": "音频编码器",
+      "definition": "把原始波形或频谱映射为时间序列特征或句子级嵌入。",
+      "assumptions": "图像、文本、音频必须有合法来源、清晰的实体关联与各自发布时间；模型不应把外部内容当作高权限指令。",
+      "properties": [
+        "把原始波形或频谱映射为时间序列特征或句子级嵌入。。",
+        "模态缺失、信息延迟和模型幻觉可能引入决策偏差，须保留来源与人工复核。"
+      ],
+      "formulas": [
+        {
+          "label": "多模态建模关系",
+          "tex": "h=f_\\theta(\\operatorname{STFT}(x))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先明确涉及的各模态输入、条件关系和共享表征。把原始波形或频谱映射为时间序列特征或句子级嵌入。",
+          "tex": "h=f_\\theta(\\operatorname{STFT}(x))"
+        },
+        {
+          "explanation": "利用对齐后的特征开展融合或检测，并审查结果可验证性。",
+          "tex": "h=f_\\theta(\\operatorname{STFT}(x))"
+        }
+      ],
+      "code": "# 音频编码器：跨模态向量相似度示例\nimport numpy as np\nrng=np.random.default_rng(0)\nimage=rng.normal(size=(4,8));text=rng.normal(size=(4,8))\nimage=image/np.linalg.norm(image,axis=1,keepdims=True)\ntext=text/np.linalg.norm(text,axis=1,keepdims=True)\nscores=image@text.T\nprint(\"Cross-modal similarity:\",scores.shape)\nprint(\"Best text match:\",scores.argmax(1))",
+      "packages": "numpy",
+      "application": "用于金融图表理解、公司公告文本、电话会议及量化研究Agent。",
+      "limits": "本页提供概念公式和通用向量对齐示例，未包含完整语音识别、视觉语言模型或Agent系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "multimodal-n03-02",
+      "node_id": "multimodal-n03-02",
+      "title": "语音识别ASR",
+      "definition": "ASR根据音频条件概率生成文字序列，可使用CTC或编码解码模型。",
+      "assumptions": "图像、文本、音频必须有合法来源、清晰的实体关联与各自发布时间；模型不应把外部内容当作高权限指令。",
+      "properties": [
+        "ASR根据音频条件概率生成文字序列，可使用CTC或编码解码模型。。",
+        "模态缺失、信息延迟和模型幻觉可能引入决策偏差，须保留来源与人工复核。"
+      ],
+      "formulas": [
+        {
+          "label": "多模态建模关系",
+          "tex": "\\hat y=\\arg\\max_y p_\\theta(y\\mid x_{\\rm audio})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先明确涉及的各模态输入、条件关系和共享表征。ASR根据音频条件概率生成文字序列，可使用CTC或编码解码模型。",
+          "tex": "\\hat y=\\arg\\max_y p_\\theta(y\\mid x_{\\rm audio})"
+        },
+        {
+          "explanation": "利用对齐后的特征开展融合或检测，并审查结果可验证性。",
+          "tex": "\\hat y=\\arg\\max_y p_\\theta(y\\mid x_{\\rm audio})"
+        }
+      ],
+      "code": "# 语音识别ASR：跨模态向量相似度示例\nimport numpy as np\nrng=np.random.default_rng(0)\nimage=rng.normal(size=(4,8));text=rng.normal(size=(4,8))\nimage=image/np.linalg.norm(image,axis=1,keepdims=True)\ntext=text/np.linalg.norm(text,axis=1,keepdims=True)\nscores=image@text.T\nprint(\"Cross-modal similarity:\",scores.shape)\nprint(\"Best text match:\",scores.argmax(1))",
+      "packages": "numpy",
+      "application": "用于金融图表理解、公司公告文本、电话会议及量化研究Agent。",
+      "limits": "本页提供概念公式和通用向量对齐示例，未包含完整语音识别、视觉语言模型或Agent系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "multimodal-n04-02",
+      "node_id": "multimodal-n04-02",
+      "title": "说话人分离",
+      "definition": "说话人分离将同一音频中的不同发言人时间片段映射到身份段落。",
+      "assumptions": "图像、文本、音频必须有合法来源、清晰的实体关联与各自发布时间；模型不应把外部内容当作高权限指令。",
+      "properties": [
+        "说话人分离将同一音频中的不同发言人时间片段映射到身份段落。。",
+        "模态缺失、信息延迟和模型幻觉可能引入决策偏差，须保留来源与人工复核。"
+      ],
+      "formulas": [
+        {
+          "label": "多模态建模关系",
+          "tex": "D=\\{(t_{\\rm start},t_{\\rm end},speaker)\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先明确涉及的各模态输入、条件关系和共享表征。说话人分离将同一音频中的不同发言人时间片段映射到身份段落。",
+          "tex": "D=\\{(t_{\\rm start},t_{\\rm end},speaker)\\}"
+        },
+        {
+          "explanation": "利用对齐后的特征开展融合或检测，并审查结果可验证性。",
+          "tex": "D=\\{(t_{\\rm start},t_{\\rm end},speaker)\\}"
+        }
+      ],
+      "code": "# 说话人分离：跨模态向量相似度示例\nimport numpy as np\nrng=np.random.default_rng(0)\nimage=rng.normal(size=(4,8));text=rng.normal(size=(4,8))\nimage=image/np.linalg.norm(image,axis=1,keepdims=True)\ntext=text/np.linalg.norm(text,axis=1,keepdims=True)\nscores=image@text.T\nprint(\"Cross-modal similarity:\",scores.shape)\nprint(\"Best text match:\",scores.argmax(1))",
+      "packages": "numpy",
+      "application": "用于金融图表理解、公司公告文本、电话会议及量化研究Agent。",
+      "limits": "本页提供概念公式和通用向量对齐示例，未包含完整语音识别、视觉语言模型或Agent系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "multimodal-n05-02",
+      "node_id": "multimodal-n05-02",
+      "title": "声学Transformer",
+      "definition": "声学Transformer利用自注意力学习语音帧与较长时间语境的关系。",
+      "assumptions": "图像、文本、音频必须有合法来源、清晰的实体关联与各自发布时间；模型不应把外部内容当作高权限指令。",
+      "properties": [
+        "声学Transformer利用自注意力学习语音帧与较长时间语境的关系。。",
+        "模态缺失、信息延迟和模型幻觉可能引入决策偏差，须保留来源与人工复核。"
+      ],
+      "formulas": [
+        {
+          "label": "多模态建模关系",
+          "tex": "H=\\operatorname{Attn}(Q,K,V)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先明确涉及的各模态输入、条件关系和共享表征。声学Transformer利用自注意力学习语音帧与较长时间语境的关系。",
+          "tex": "H=\\operatorname{Attn}(Q,K,V)"
+        },
+        {
+          "explanation": "利用对齐后的特征开展融合或检测，并审查结果可验证性。",
+          "tex": "H=\\operatorname{Attn}(Q,K,V)"
+        }
+      ],
+      "code": "# 声学Transformer：跨模态向量相似度示例\nimport numpy as np\nrng=np.random.default_rng(0)\nimage=rng.normal(size=(4,8));text=rng.normal(size=(4,8))\nimage=image/np.linalg.norm(image,axis=1,keepdims=True)\ntext=text/np.linalg.norm(text,axis=1,keepdims=True)\nscores=image@text.T\nprint(\"Cross-modal similarity:\",scores.shape)\nprint(\"Best text match:\",scores.argmax(1))",
+      "packages": "numpy",
+      "application": "用于金融图表理解、公司公告文本、电话会议及量化研究Agent。",
+      "limits": "本页提供概念公式和通用向量对齐示例，未包含完整语音识别、视觉语言模型或Agent系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "multimodal-n06-02",
+      "node_id": "multimodal-n06-02",
+      "title": "语音事件检测",
+      "definition": "对音频时间片段分类财报电话会议中的笑声、停顿等声音事件。",
+      "assumptions": "图像、文本、音频必须有合法来源、清晰的实体关联与各自发布时间；模型不应把外部内容当作高权限指令。",
+      "properties": [
+        "对音频时间片段分类财报电话会议中的笑声、停顿等声音事件。。",
+        "模态缺失、信息延迟和模型幻觉可能引入决策偏差，须保留来源与人工复核。"
+      ],
+      "formulas": [
+        {
+          "label": "多模态建模关系",
+          "tex": "p(e_t\\mid x_{t-W:t})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先明确涉及的各模态输入、条件关系和共享表征。对音频时间片段分类财报电话会议中的笑声、停顿等声音事件。",
+          "tex": "p(e_t\\mid x_{t-W:t})"
+        },
+        {
+          "explanation": "利用对齐后的特征开展融合或检测，并审查结果可验证性。",
+          "tex": "p(e_t\\mid x_{t-W:t})"
+        }
+      ],
+      "code": "# 语音事件检测：跨模态向量相似度示例\nimport numpy as np\nrng=np.random.default_rng(0)\nimage=rng.normal(size=(4,8));text=rng.normal(size=(4,8))\nimage=image/np.linalg.norm(image,axis=1,keepdims=True)\ntext=text/np.linalg.norm(text,axis=1,keepdims=True)\nscores=image@text.T\nprint(\"Cross-modal similarity:\",scores.shape)\nprint(\"Best text match:\",scores.argmax(1))",
+      "packages": "numpy",
+      "application": "用于金融图表理解、公司公告文本、电话会议及量化研究Agent。",
+      "limits": "本页提供概念公式和通用向量对齐示例，未包含完整语音识别、视觉语言模型或Agent系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "multimodal-n01-03",
+      "node_id": "multimodal-n01-03",
+      "title": "视觉语言模型VLM",
+      "definition": "VLM把视觉Token与文本Token结合，支持图像问答和图表理解。",
+      "assumptions": "图像、文本、音频必须有合法来源、清晰的实体关联与各自发布时间；模型不应把外部内容当作高权限指令。",
+      "properties": [
+        "VLM把视觉Token与文本Token结合，支持图像问答和图表理解。。",
+        "模态缺失、信息延迟和模型幻觉可能引入决策偏差，须保留来源与人工复核。"
+      ],
+      "formulas": [
+        {
+          "label": "多模态建模关系",
+          "tex": "p(y\\mid I,T)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先明确涉及的各模态输入、条件关系和共享表征。VLM把视觉Token与文本Token结合，支持图像问答和图表理解。",
+          "tex": "p(y\\mid I,T)"
+        },
+        {
+          "explanation": "利用对齐后的特征开展融合或检测，并审查结果可验证性。",
+          "tex": "p(y\\mid I,T)"
+        }
+      ],
+      "code": "# 视觉语言模型VLM：跨模态向量相似度示例\nimport numpy as np\nrng=np.random.default_rng(0)\nimage=rng.normal(size=(4,8));text=rng.normal(size=(4,8))\nimage=image/np.linalg.norm(image,axis=1,keepdims=True)\ntext=text/np.linalg.norm(text,axis=1,keepdims=True)\nscores=image@text.T\nprint(\"Cross-modal similarity:\",scores.shape)\nprint(\"Best text match:\",scores.argmax(1))",
+      "packages": "numpy",
+      "application": "用于金融图表理解、公司公告文本、电话会议及量化研究Agent。",
+      "limits": "本页提供概念公式和通用向量对齐示例，未包含完整语音识别、视觉语言模型或Agent系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "multimodal-n02-03",
+      "node_id": "multimodal-n02-03",
+      "title": "图文问答",
+      "definition": "结合图片内容与文本提问得到条件回答，需检查是否忠实对应图像。",
+      "assumptions": "图像、文本、音频必须有合法来源、清晰的实体关联与各自发布时间；模型不应把外部内容当作高权限指令。",
+      "properties": [
+        "结合图片内容与文本提问得到条件回答，需检查是否忠实对应图像。。",
+        "模态缺失、信息延迟和模型幻觉可能引入决策偏差，须保留来源与人工复核。"
+      ],
+      "formulas": [
+        {
+          "label": "多模态建模关系",
+          "tex": "a^*=\\arg\\max_ap_\\theta(a\\mid I,q)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先明确涉及的各模态输入、条件关系和共享表征。结合图片内容与文本提问得到条件回答，需检查是否忠实对应图像。",
+          "tex": "a^*=\\arg\\max_ap_\\theta(a\\mid I,q)"
+        },
+        {
+          "explanation": "利用对齐后的特征开展融合或检测，并审查结果可验证性。",
+          "tex": "a^*=\\arg\\max_ap_\\theta(a\\mid I,q)"
+        }
+      ],
+      "code": "# 图文问答：跨模态向量相似度示例\nimport numpy as np\nrng=np.random.default_rng(0)\nimage=rng.normal(size=(4,8));text=rng.normal(size=(4,8))\nimage=image/np.linalg.norm(image,axis=1,keepdims=True)\ntext=text/np.linalg.norm(text,axis=1,keepdims=True)\nscores=image@text.T\nprint(\"Cross-modal similarity:\",scores.shape)\nprint(\"Best text match:\",scores.argmax(1))",
+      "packages": "numpy",
+      "application": "用于金融图表理解、公司公告文本、电话会议及量化研究Agent。",
+      "limits": "本页提供概念公式和通用向量对齐示例，未包含完整语音识别、视觉语言模型或Agent系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "multimodal-n03-03",
+      "node_id": "multimodal-n03-03",
+      "title": "图像文本生成",
+      "definition": "利用文本条件控制图像生成分布，并按语义或审美评估输出。",
+      "assumptions": "图像、文本、音频必须有合法来源、清晰的实体关联与各自发布时间；模型不应把外部内容当作高权限指令。",
+      "properties": [
+        "利用文本条件控制图像生成分布，并按语义或审美评估输出。。",
+        "模态缺失、信息延迟和模型幻觉可能引入决策偏差，须保留来源与人工复核。"
+      ],
+      "formulas": [
+        {
+          "label": "多模态建模关系",
+          "tex": "p_\\theta(I\\mid T)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先明确涉及的各模态输入、条件关系和共享表征。利用文本条件控制图像生成分布，并按语义或审美评估输出。",
+          "tex": "p_\\theta(I\\mid T)"
+        },
+        {
+          "explanation": "利用对齐后的特征开展融合或检测，并审查结果可验证性。",
+          "tex": "p_\\theta(I\\mid T)"
+        }
+      ],
+      "code": "# 图像文本生成：跨模态向量相似度示例\nimport numpy as np\nrng=np.random.default_rng(0)\nimage=rng.normal(size=(4,8));text=rng.normal(size=(4,8))\nimage=image/np.linalg.norm(image,axis=1,keepdims=True)\ntext=text/np.linalg.norm(text,axis=1,keepdims=True)\nscores=image@text.T\nprint(\"Cross-modal similarity:\",scores.shape)\nprint(\"Best text match:\",scores.argmax(1))",
+      "packages": "numpy",
+      "application": "用于金融图表理解、公司公告文本、电话会议及量化研究Agent。",
+      "limits": "本页提供概念公式和通用向量对齐示例，未包含完整语音识别、视觉语言模型或Agent系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "multimodal-n04-03",
+      "node_id": "multimodal-n04-03",
+      "title": "扩散编辑",
+      "definition": "在扩散生成模型中加入原图、掩码或文字指令作为条件以局部编辑。",
+      "assumptions": "图像、文本、音频必须有合法来源、清晰的实体关联与各自发布时间；模型不应把外部内容当作高权限指令。",
+      "properties": [
+        "在扩散生成模型中加入原图、掩码或文字指令作为条件以局部编辑。。",
+        "模态缺失、信息延迟和模型幻觉可能引入决策偏差，须保留来源与人工复核。"
+      ],
+      "formulas": [
+        {
+          "label": "多模态建模关系",
+          "tex": "p_\\theta(x_{t-1}\\mid x_t,I_{\\rm source},T)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先明确涉及的各模态输入、条件关系和共享表征。在扩散生成模型中加入原图、掩码或文字指令作为条件以局部编辑。",
+          "tex": "p_\\theta(x_{t-1}\\mid x_t,I_{\\rm source},T)"
+        },
+        {
+          "explanation": "利用对齐后的特征开展融合或检测，并审查结果可验证性。",
+          "tex": "p_\\theta(x_{t-1}\\mid x_t,I_{\\rm source},T)"
+        }
+      ],
+      "code": "# 扩散编辑：跨模态向量相似度示例\nimport numpy as np\nrng=np.random.default_rng(0)\nimage=rng.normal(size=(4,8));text=rng.normal(size=(4,8))\nimage=image/np.linalg.norm(image,axis=1,keepdims=True)\ntext=text/np.linalg.norm(text,axis=1,keepdims=True)\nscores=image@text.T\nprint(\"Cross-modal similarity:\",scores.shape)\nprint(\"Best text match:\",scores.argmax(1))",
+      "packages": "numpy",
+      "application": "用于金融图表理解、公司公告文本、电话会议及量化研究Agent。",
+      "limits": "本页提供概念公式和通用向量对齐示例，未包含完整语音识别、视觉语言模型或Agent系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "multimodal-n05-03",
+      "node_id": "multimodal-n05-03",
+      "title": "视频模型",
+      "definition": "视频模型同时编码空间内容与随时间变化的帧信息。",
+      "assumptions": "图像、文本、音频必须有合法来源、清晰的实体关联与各自发布时间；模型不应把外部内容当作高权限指令。",
+      "properties": [
+        "视频模型同时编码空间内容与随时间变化的帧信息。。",
+        "模态缺失、信息延迟和模型幻觉可能引入决策偏差，须保留来源与人工复核。"
+      ],
+      "formulas": [
+        {
+          "label": "多模态建模关系",
+          "tex": "X\\in\\mathbb R^{T\\times H\\times W\\times C}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先明确涉及的各模态输入、条件关系和共享表征。视频模型同时编码空间内容与随时间变化的帧信息。",
+          "tex": "X\\in\\mathbb R^{T\\times H\\times W\\times C}"
+        },
+        {
+          "explanation": "利用对齐后的特征开展融合或检测，并审查结果可验证性。",
+          "tex": "X\\in\\mathbb R^{T\\times H\\times W\\times C}"
+        }
+      ],
+      "code": "# 视频模型：跨模态向量相似度示例\nimport numpy as np\nrng=np.random.default_rng(0)\nimage=rng.normal(size=(4,8));text=rng.normal(size=(4,8))\nimage=image/np.linalg.norm(image,axis=1,keepdims=True)\ntext=text/np.linalg.norm(text,axis=1,keepdims=True)\nscores=image@text.T\nprint(\"Cross-modal similarity:\",scores.shape)\nprint(\"Best text match:\",scores.argmax(1))",
+      "packages": "numpy",
+      "application": "用于金融图表理解、公司公告文本、电话会议及量化研究Agent。",
+      "limits": "本页提供概念公式和通用向量对齐示例，未包含完整语音识别、视觉语言模型或Agent系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "multimodal-n06-03",
+      "node_id": "multimodal-n06-03",
+      "title": "结构化多模态",
+      "definition": "结合表格数值、图像和文本等多类型数据，保持时间、实体和来源关联。",
+      "assumptions": "图像、文本、音频必须有合法来源、清晰的实体关联与各自发布时间；模型不应把外部内容当作高权限指令。",
+      "properties": [
+        "结合表格数值、图像和文本等多类型数据，保持时间、实体和来源关联。。",
+        "模态缺失、信息延迟和模型幻觉可能引入决策偏差，须保留来源与人工复核。"
+      ],
+      "formulas": [
+        {
+          "label": "多模态建模关系",
+          "tex": "z=f(X_{\\rm tab},X_{\\rm image},X_{\\rm text})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先明确涉及的各模态输入、条件关系和共享表征。结合表格数值、图像和文本等多类型数据，保持时间、实体和来源关联。",
+          "tex": "z=f(X_{\\rm tab},X_{\\rm image},X_{\\rm text})"
+        },
+        {
+          "explanation": "利用对齐后的特征开展融合或检测，并审查结果可验证性。",
+          "tex": "z=f(X_{\\rm tab},X_{\\rm image},X_{\\rm text})"
+        }
+      ],
+      "code": "# 结构化多模态：跨模态向量相似度示例\nimport numpy as np\nrng=np.random.default_rng(0)\nimage=rng.normal(size=(4,8));text=rng.normal(size=(4,8))\nimage=image/np.linalg.norm(image,axis=1,keepdims=True)\ntext=text/np.linalg.norm(text,axis=1,keepdims=True)\nscores=image@text.T\nprint(\"Cross-modal similarity:\",scores.shape)\nprint(\"Best text match:\",scores.argmax(1))",
+      "packages": "numpy",
+      "application": "用于金融图表理解、公司公告文本、电话会议及量化研究Agent。",
+      "limits": "本页提供概念公式和通用向量对齐示例，未包含完整语音识别、视觉语言模型或Agent系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "multimodal-n02-04",
+      "node_id": "multimodal-n02-04",
+      "title": "ReAct",
+      "definition": "ReAct交替执行简要推理、工具行动与观察更新以完成多步骤任务。",
+      "assumptions": "图像、文本、音频必须有合法来源、清晰的实体关联与各自发布时间；模型不应把外部内容当作高权限指令。",
+      "properties": [
+        "ReAct交替执行简要推理、工具行动与观察更新以完成多步骤任务。。",
+        "模态缺失、信息延迟和模型幻觉可能引入决策偏差，须保留来源与人工复核。"
+      ],
+      "formulas": [
+        {
+          "label": "多模态建模关系",
+          "tex": "a_t=\\pi(s_t),\\quad s_{t+1}=F(s_t,a_t,o_{t+1})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先明确涉及的各模态输入、条件关系和共享表征。ReAct交替执行简要推理、工具行动与观察更新以完成多步骤任务。",
+          "tex": "a_t=\\pi(s_t),\\quad s_{t+1}=F(s_t,a_t,o_{t+1})"
+        },
+        {
+          "explanation": "利用对齐后的特征开展融合或检测，并审查结果可验证性。",
+          "tex": "a_t=\\pi(s_t),\\quad s_{t+1}=F(s_t,a_t,o_{t+1})"
+        }
+      ],
+      "code": "# ReAct：跨模态向量相似度示例\nimport numpy as np\nrng=np.random.default_rng(0)\nimage=rng.normal(size=(4,8));text=rng.normal(size=(4,8))\nimage=image/np.linalg.norm(image,axis=1,keepdims=True)\ntext=text/np.linalg.norm(text,axis=1,keepdims=True)\nscores=image@text.T\nprint(\"Cross-modal similarity:\",scores.shape)\nprint(\"Best text match:\",scores.argmax(1))",
+      "packages": "numpy",
+      "application": "用于金融图表理解、公司公告文本、电话会议及量化研究Agent。",
+      "limits": "本页提供概念公式和通用向量对齐示例，未包含完整语音识别、视觉语言模型或Agent系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "multimodal-n03-04",
+      "node_id": "multimodal-n03-04",
+      "title": "记忆与上下文",
+      "definition": "Agent记忆包括长期偏好、任务状态和近期工具结果，必须遵守权限与隐私。",
+      "assumptions": "图像、文本、音频必须有合法来源、清晰的实体关联与各自发布时间；模型不应把外部内容当作高权限指令。",
+      "properties": [
+        "Agent记忆包括长期偏好、任务状态和近期工具结果，必须遵守权限与隐私。。",
+        "模态缺失、信息延迟和模型幻觉可能引入决策偏差，须保留来源与人工复核。"
+      ],
+      "formulas": [
+        {
+          "label": "多模态建模关系",
+          "tex": "s_t=f(h_{1:t},m_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先明确涉及的各模态输入、条件关系和共享表征。Agent记忆包括长期偏好、任务状态和近期工具结果，必须遵守权限与隐私。",
+          "tex": "s_t=f(h_{1:t},m_t)"
+        },
+        {
+          "explanation": "利用对齐后的特征开展融合或检测，并审查结果可验证性。",
+          "tex": "s_t=f(h_{1:t},m_t)"
+        }
+      ],
+      "code": "# 记忆与上下文：跨模态向量相似度示例\nimport numpy as np\nrng=np.random.default_rng(0)\nimage=rng.normal(size=(4,8));text=rng.normal(size=(4,8))\nimage=image/np.linalg.norm(image,axis=1,keepdims=True)\ntext=text/np.linalg.norm(text,axis=1,keepdims=True)\nscores=image@text.T\nprint(\"Cross-modal similarity:\",scores.shape)\nprint(\"Best text match:\",scores.argmax(1))",
+      "packages": "numpy",
+      "application": "用于金融图表理解、公司公告文本、电话会议及量化研究Agent。",
+      "limits": "本页提供概念公式和通用向量对齐示例，未包含完整语音识别、视觉语言模型或Agent系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "multimodal-n04-04",
+      "node_id": "multimodal-n04-04",
+      "title": "多智能体协作",
+      "definition": "多智能体分别承担研究、执行和验证任务，通过消息或共享状态协调。",
+      "assumptions": "图像、文本、音频必须有合法来源、清晰的实体关联与各自发布时间；模型不应把外部内容当作高权限指令。",
+      "properties": [
+        "多智能体分别承担研究、执行和验证任务，通过消息或共享状态协调。。",
+        "模态缺失、信息延迟和模型幻觉可能引入决策偏差，须保留来源与人工复核。"
+      ],
+      "formulas": [
+        {
+          "label": "多模态建模关系",
+          "tex": "a_i=\\pi_i(s_i,m_{-i})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先明确涉及的各模态输入、条件关系和共享表征。多智能体分别承担研究、执行和验证任务，通过消息或共享状态协调。",
+          "tex": "a_i=\\pi_i(s_i,m_{-i})"
+        },
+        {
+          "explanation": "利用对齐后的特征开展融合或检测，并审查结果可验证性。",
+          "tex": "a_i=\\pi_i(s_i,m_{-i})"
+        }
+      ],
+      "code": "# 多智能体协作：跨模态向量相似度示例\nimport numpy as np\nrng=np.random.default_rng(0)\nimage=rng.normal(size=(4,8));text=rng.normal(size=(4,8))\nimage=image/np.linalg.norm(image,axis=1,keepdims=True)\ntext=text/np.linalg.norm(text,axis=1,keepdims=True)\nscores=image@text.T\nprint(\"Cross-modal similarity:\",scores.shape)\nprint(\"Best text match:\",scores.argmax(1))",
+      "packages": "numpy",
+      "application": "用于金融图表理解、公司公告文本、电话会议及量化研究Agent。",
+      "limits": "本页提供概念公式和通用向量对齐示例，未包含完整语音识别、视觉语言模型或Agent系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "multimodal-n05-04",
+      "node_id": "multimodal-n05-04",
+      "title": "环境反馈",
+      "definition": "Agent根据工具操作结果或环境奖励纠正下一步行动，不应将操作成功等同于目标正确。",
+      "assumptions": "图像、文本、音频必须有合法来源、清晰的实体关联与各自发布时间；模型不应把外部内容当作高权限指令。",
+      "properties": [
+        "Agent根据工具操作结果或环境奖励纠正下一步行动，不应将操作成功等同于目标正确。。",
+        "模态缺失、信息延迟和模型幻觉可能引入决策偏差，须保留来源与人工复核。"
+      ],
+      "formulas": [
+        {
+          "label": "多模态建模关系",
+          "tex": "s_{t+1}=F(s_t,a_t,o_{t+1})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先明确涉及的各模态输入、条件关系和共享表征。Agent根据工具操作结果或环境奖励纠正下一步行动，不应将操作成功等同于目标正确。",
+          "tex": "s_{t+1}=F(s_t,a_t,o_{t+1})"
+        },
+        {
+          "explanation": "利用对齐后的特征开展融合或检测，并审查结果可验证性。",
+          "tex": "s_{t+1}=F(s_t,a_t,o_{t+1})"
+        }
+      ],
+      "code": "# 环境反馈：跨模态向量相似度示例\nimport numpy as np\nrng=np.random.default_rng(0)\nimage=rng.normal(size=(4,8));text=rng.normal(size=(4,8))\nimage=image/np.linalg.norm(image,axis=1,keepdims=True)\ntext=text/np.linalg.norm(text,axis=1,keepdims=True)\nscores=image@text.T\nprint(\"Cross-modal similarity:\",scores.shape)\nprint(\"Best text match:\",scores.argmax(1))",
+      "packages": "numpy",
+      "application": "用于金融图表理解、公司公告文本、电话会议及量化研究Agent。",
+      "limits": "本页提供概念公式和通用向量对齐示例，未包含完整语音识别、视觉语言模型或Agent系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "multimodal-n06-04",
+      "node_id": "multimodal-n06-04",
+      "title": "Agent基准",
+      "definition": "Agent评测需同时统计任务成功、执行费用、安全错误和可复现性。",
+      "assumptions": "图像、文本、音频必须有合法来源、清晰的实体关联与各自发布时间；模型不应把外部内容当作高权限指令。",
+      "properties": [
+        "Agent评测需同时统计任务成功、执行费用、安全错误和可复现性。。",
+        "模态缺失、信息延迟和模型幻觉可能引入决策偏差，须保留来源与人工复核。"
+      ],
+      "formulas": [
+        {
+          "label": "多模态建模关系",
+          "tex": "S=\\frac{\\#\\mathrm{successful\\ tasks}}{\\#\\mathrm{all\\ tasks}}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先明确涉及的各模态输入、条件关系和共享表征。Agent评测需同时统计任务成功、执行费用、安全错误和可复现性。",
+          "tex": "S=\\frac{\\#\\mathrm{successful\\ tasks}}{\\#\\mathrm{all\\ tasks}}"
+        },
+        {
+          "explanation": "利用对齐后的特征开展融合或检测，并审查结果可验证性。",
+          "tex": "S=\\frac{\\#\\mathrm{successful\\ tasks}}{\\#\\mathrm{all\\ tasks}}"
+        }
+      ],
+      "code": "# Agent基准：跨模态向量相似度示例\nimport numpy as np\nrng=np.random.default_rng(0)\nimage=rng.normal(size=(4,8));text=rng.normal(size=(4,8))\nimage=image/np.linalg.norm(image,axis=1,keepdims=True)\ntext=text/np.linalg.norm(text,axis=1,keepdims=True)\nscores=image@text.T\nprint(\"Cross-modal similarity:\",scores.shape)\nprint(\"Best text match:\",scores.argmax(1))",
+      "packages": "numpy",
+      "application": "用于金融图表理解、公司公告文本、电话会议及量化研究Agent。",
+      "limits": "本页提供概念公式和通用向量对齐示例，未包含完整语音识别、视觉语言模型或Agent系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "multimodal-n01-05",
+      "node_id": "multimodal-n01-05",
+      "title": "财报图表理解",
+      "definition": "识别财报柱状图、表格与文字标签并转换为带来源和单位的结构化数据。",
+      "assumptions": "图像、文本、音频必须有合法来源、清晰的实体关联与各自发布时间；模型不应把外部内容当作高权限指令。",
+      "properties": [
+        "识别财报柱状图、表格与文字标签并转换为带来源和单位的结构化数据。。",
+        "模态缺失、信息延迟和模型幻觉可能引入决策偏差，须保留来源与人工复核。"
+      ],
+      "formulas": [
+        {
+          "label": "多模态建模关系",
+          "tex": "X_{\\rm table}=\\operatorname{Parse}(I_{\\rm report})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先明确涉及的各模态输入、条件关系和共享表征。识别财报柱状图、表格与文字标签并转换为带来源和单位的结构化数据。",
+          "tex": "X_{\\rm table}=\\operatorname{Parse}(I_{\\rm report})"
+        },
+        {
+          "explanation": "利用对齐后的特征开展融合或检测，并审查结果可验证性。",
+          "tex": "X_{\\rm table}=\\operatorname{Parse}(I_{\\rm report})"
+        }
+      ],
+      "code": "# 财报图表理解：跨模态向量相似度示例\nimport numpy as np\nrng=np.random.default_rng(0)\nimage=rng.normal(size=(4,8));text=rng.normal(size=(4,8))\nimage=image/np.linalg.norm(image,axis=1,keepdims=True)\ntext=text/np.linalg.norm(text,axis=1,keepdims=True)\nscores=image@text.T\nprint(\"Cross-modal similarity:\",scores.shape)\nprint(\"Best text match:\",scores.argmax(1))",
+      "packages": "numpy",
+      "application": "用于金融图表理解、公司公告文本、电话会议及量化研究Agent。",
+      "limits": "本页提供概念公式和通用向量对齐示例，未包含完整语音识别、视觉语言模型或Agent系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "multimodal-n02-05",
+      "node_id": "multimodal-n02-05",
+      "title": "电话会议语音情感",
+      "definition": "会议音频情绪可由语音韵律和文本语义联合估计，但需防止时间错配。",
+      "assumptions": "图像、文本、音频必须有合法来源、清晰的实体关联与各自发布时间；模型不应把外部内容当作高权限指令。",
+      "properties": [
+        "会议音频情绪可由语音韵律和文本语义联合估计，但需防止时间错配。。",
+        "模态缺失、信息延迟和模型幻觉可能引入决策偏差，须保留来源与人工复核。"
+      ],
+      "formulas": [
+        {
+          "label": "多模态建模关系",
+          "tex": "s_t=f(x_{\\rm audio,t},x_{\\rm transcript,t})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先明确涉及的各模态输入、条件关系和共享表征。会议音频情绪可由语音韵律和文本语义联合估计，但需防止时间错配。",
+          "tex": "s_t=f(x_{\\rm audio,t},x_{\\rm transcript,t})"
+        },
+        {
+          "explanation": "利用对齐后的特征开展融合或检测，并审查结果可验证性。",
+          "tex": "s_t=f(x_{\\rm audio,t},x_{\\rm transcript,t})"
+        }
+      ],
+      "code": "# 电话会议语音情感：跨模态向量相似度示例\nimport numpy as np\nrng=np.random.default_rng(0)\nimage=rng.normal(size=(4,8));text=rng.normal(size=(4,8))\nimage=image/np.linalg.norm(image,axis=1,keepdims=True)\ntext=text/np.linalg.norm(text,axis=1,keepdims=True)\nscores=image@text.T\nprint(\"Cross-modal similarity:\",scores.shape)\nprint(\"Best text match:\",scores.argmax(1))",
+      "packages": "numpy",
+      "application": "用于金融图表理解、公司公告文本、电话会议及量化研究Agent。",
+      "limits": "本页提供概念公式和通用向量对齐示例，未包含完整语音识别、视觉语言模型或Agent系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "multimodal-n03-05",
+      "node_id": "multimodal-n03-05",
+      "title": "公告图文解析",
+      "definition": "将公告图表与文字正文进行实体和时间对齐，形成可检索的多模态事件资料。",
+      "assumptions": "图像、文本、音频必须有合法来源、清晰的实体关联与各自发布时间；模型不应把外部内容当作高权限指令。",
+      "properties": [
+        "将公告图表与文字正文进行实体和时间对齐，形成可检索的多模态事件资料。。",
+        "模态缺失、信息延迟和模型幻觉可能引入决策偏差，须保留来源与人工复核。"
+      ],
+      "formulas": [
+        {
+          "label": "多模态建模关系",
+          "tex": "e=\\operatorname{Extract}(I,T,t_{\\rm publish})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先明确涉及的各模态输入、条件关系和共享表征。将公告图表与文字正文进行实体和时间对齐，形成可检索的多模态事件资料。",
+          "tex": "e=\\operatorname{Extract}(I,T,t_{\\rm publish})"
+        },
+        {
+          "explanation": "利用对齐后的特征开展融合或检测，并审查结果可验证性。",
+          "tex": "e=\\operatorname{Extract}(I,T,t_{\\rm publish})"
+        }
+      ],
+      "code": "# 公告图文解析：跨模态向量相似度示例\nimport numpy as np\nrng=np.random.default_rng(0)\nimage=rng.normal(size=(4,8));text=rng.normal(size=(4,8))\nimage=image/np.linalg.norm(image,axis=1,keepdims=True)\ntext=text/np.linalg.norm(text,axis=1,keepdims=True)\nscores=image@text.T\nprint(\"Cross-modal similarity:\",scores.shape)\nprint(\"Best text match:\",scores.argmax(1))",
+      "packages": "numpy",
+      "application": "用于金融图表理解、公司公告文本、电话会议及量化研究Agent。",
+      "limits": "本页提供概念公式和通用向量对齐示例，未包含完整语音识别、视觉语言模型或Agent系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "multimodal-n04-05",
+      "node_id": "multimodal-n04-05",
+      "title": "新闻图像事件",
+      "definition": "将新闻图片中的对象与同一事件文字及发布时间关联以辅助事件识别。",
+      "assumptions": "图像、文本、音频必须有合法来源、清晰的实体关联与各自发布时间；模型不应把外部内容当作高权限指令。",
+      "properties": [
+        "将新闻图片中的对象与同一事件文字及发布时间关联以辅助事件识别。。",
+        "模态缺失、信息延迟和模型幻觉可能引入决策偏差，须保留来源与人工复核。"
+      ],
+      "formulas": [
+        {
+          "label": "多模态建模关系",
+          "tex": "p(e\\mid I,T)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先明确涉及的各模态输入、条件关系和共享表征。将新闻图片中的对象与同一事件文字及发布时间关联以辅助事件识别。",
+          "tex": "p(e\\mid I,T)"
+        },
+        {
+          "explanation": "利用对齐后的特征开展融合或检测，并审查结果可验证性。",
+          "tex": "p(e\\mid I,T)"
+        }
+      ],
+      "code": "# 新闻图像事件：跨模态向量相似度示例\nimport numpy as np\nrng=np.random.default_rng(0)\nimage=rng.normal(size=(4,8));text=rng.normal(size=(4,8))\nimage=image/np.linalg.norm(image,axis=1,keepdims=True)\ntext=text/np.linalg.norm(text,axis=1,keepdims=True)\nscores=image@text.T\nprint(\"Cross-modal similarity:\",scores.shape)\nprint(\"Best text match:\",scores.argmax(1))",
+      "packages": "numpy",
+      "application": "用于金融图表理解、公司公告文本、电话会议及量化研究Agent。",
+      "limits": "本页提供概念公式和通用向量对齐示例，未包含完整语音识别、视觉语言模型或Agent系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "multimodal-n05-05",
+      "node_id": "multimodal-n05-05",
+      "title": "跨模态事件对齐",
+      "definition": "图片、音频、文字和行情应按实际可获得时间对齐，避免未来信息。",
+      "assumptions": "图像、文本、音频必须有合法来源、清晰的实体关联与各自发布时间；模型不应把外部内容当作高权限指令。",
+      "properties": [
+        "图片、音频、文字和行情应按实际可获得时间对齐，避免未来信息。。",
+        "模态缺失、信息延迟和模型幻觉可能引入决策偏差，须保留来源与人工复核。"
+      ],
+      "formulas": [
+        {
+          "label": "多模态建模关系",
+          "tex": "t_{\\rm available}=\\max(t_I,t_T,t_A)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先明确涉及的各模态输入、条件关系和共享表征。图片、音频、文字和行情应按实际可获得时间对齐，避免未来信息。",
+          "tex": "t_{\\rm available}=\\max(t_I,t_T,t_A)"
+        },
+        {
+          "explanation": "利用对齐后的特征开展融合或检测，并审查结果可验证性。",
+          "tex": "t_{\\rm available}=\\max(t_I,t_T,t_A)"
+        }
+      ],
+      "code": "# 跨模态事件对齐：跨模态向量相似度示例\nimport numpy as np\nrng=np.random.default_rng(0)\nimage=rng.normal(size=(4,8));text=rng.normal(size=(4,8))\nimage=image/np.linalg.norm(image,axis=1,keepdims=True)\ntext=text/np.linalg.norm(text,axis=1,keepdims=True)\nscores=image@text.T\nprint(\"Cross-modal similarity:\",scores.shape)\nprint(\"Best text match:\",scores.argmax(1))",
+      "packages": "numpy",
+      "application": "用于金融图表理解、公司公告文本、电话会议及量化研究Agent。",
+      "limits": "本页提供概念公式和通用向量对齐示例，未包含完整语音识别、视觉语言模型或Agent系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "multimodal-n06-05",
+      "node_id": "multimodal-n06-05",
+      "title": "信息时点审计",
+      "definition": "为多模态流水线记录原始生成、媒体发布、处理和策略接收时间以检测前视。",
+      "assumptions": "图像、文本、音频必须有合法来源、清晰的实体关联与各自发布时间；模型不应把外部内容当作高权限指令。",
+      "properties": [
+        "为多模态流水线记录原始生成、媒体发布、处理和策略接收时间以检测前视。。",
+        "模态缺失、信息延迟和模型幻觉可能引入决策偏差，须保留来源与人工复核。"
+      ],
+      "formulas": [
+        {
+          "label": "多模态建模关系",
+          "tex": "t_{\\rm visible}\\le t_{\\rm decision}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先明确涉及的各模态输入、条件关系和共享表征。为多模态流水线记录原始生成、媒体发布、处理和策略接收时间以检测前视。",
+          "tex": "t_{\\rm visible}\\le t_{\\rm decision}"
+        },
+        {
+          "explanation": "利用对齐后的特征开展融合或检测，并审查结果可验证性。",
+          "tex": "t_{\\rm visible}\\le t_{\\rm decision}"
+        }
+      ],
+      "code": "# 信息时点审计：跨模态向量相似度示例\nimport numpy as np\nrng=np.random.default_rng(0)\nimage=rng.normal(size=(4,8));text=rng.normal(size=(4,8))\nimage=image/np.linalg.norm(image,axis=1,keepdims=True)\ntext=text/np.linalg.norm(text,axis=1,keepdims=True)\nscores=image@text.T\nprint(\"Cross-modal similarity:\",scores.shape)\nprint(\"Best text match:\",scores.argmax(1))",
+      "packages": "numpy",
+      "application": "用于金融图表理解、公司公告文本、电话会议及量化研究Agent。",
+      "limits": "本页提供概念公式和通用向量对齐示例，未包含完整语音识别、视觉语言模型或Agent系统。",
+      "coverage": "expanded"
+    }
+  ]
+}
