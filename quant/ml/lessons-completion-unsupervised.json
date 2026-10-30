@@ -1,0 +1,805 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "unsupervised-n04-01",
+      "node_id": "unsupervised-n04-01",
+      "title": "Gaussian Mixture",
+      "definition": "GMM以加权高斯成分近似多峰数据，并通过EM软归属估计模型。",
+      "assumptions": "数据尺度、距离/相似性、样本窗口、模型参数和先验都需明确定义；对未来时期不得全样本拟合。",
+      "properties": [
+        "无监督结构不能直接证明市场的因果机制或净策略收益。",
+        "算法解可能随随机初始化、样本分布和超参数发生变化，需稳定性检验。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学定义",
+          "tex": "p(x)=\\sum_k\\pi_k\\mathcal N(x;\\mu_k,\\Sigma_k)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先将该概念转换为明确的距离、密度、投影或自监督目标。",
+          "tex": "p(x)=\\sum_k\\pi_k\\mathcal N(x;\\mu_k,\\Sigma_k)"
+        },
+        {
+          "explanation": "用独立样本和不同随机初始化检查结果的可重复性与下游贡献。",
+          "tex": "p(x)=\\sum_k\\pi_k\\mathcal N(x;\\mu_k,\\Sigma_k)"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.mixture import GaussianMixture\nx=np.r_[np.random.default_rng(0).normal(-2,.5,40),np.random.default_rng(1).normal(2,.5,40)].reshape(-1,1)\nprint(GaussianMixture(2,random_state=0).fit(x).means_)",
+      "packages": "numpy, scikit-learn",
+      "application": "探索ETF风险聚类、市场状态、潜在因子与异常交易特征。",
+      "limits": "示例是局部算法演示，分组的经济解释和信号可交易性须独立实证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n05-01",
+      "node_id": "unsupervised-n05-01",
+      "title": "谱聚类",
+      "definition": "谱聚类使用图Laplacian的特征向量嵌入节点，再在低维空间分组。",
+      "assumptions": "数据尺度、距离/相似性、样本窗口、模型参数和先验都需明确定义；对未来时期不得全样本拟合。",
+      "properties": [
+        "无监督结构不能直接证明市场的因果机制或净策略收益。",
+        "算法解可能随随机初始化、样本分布和超参数发生变化，需稳定性检验。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学定义",
+          "tex": "Lv=\\lambda Dv"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先将该概念转换为明确的距离、密度、投影或自监督目标。",
+          "tex": "Lv=\\lambda Dv"
+        },
+        {
+          "explanation": "用独立样本和不同随机初始化检查结果的可重复性与下游贡献。",
+          "tex": "Lv=\\lambda Dv"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.cluster import SpectralClustering\nX=np.array([[0.,0.],[.1,.1],[2.,2.],[2.1,2.1]])\nprint(SpectralClustering(2,random_state=0,affinity=\"nearest_neighbors\",n_neighbors=2).fit_predict(X))",
+      "packages": "numpy, scikit-learn",
+      "application": "探索ETF风险聚类、市场状态、潜在因子与异常交易特征。",
+      "limits": "示例是局部算法演示，分组的经济解释和信号可交易性须独立实证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n06-01",
+      "node_id": "unsupervised-n06-01",
+      "title": "聚类稳定性",
+      "definition": "通过不同抽样或时间窗口比较分组一致性，避免将某一次聚类标签当成确定经济实体。",
+      "assumptions": "数据尺度、距离/相似性、样本窗口、模型参数和先验都需明确定义；对未来时期不得全样本拟合。",
+      "properties": [
+        "无监督结构不能直接证明市场的因果机制或净策略收益。",
+        "算法解可能随随机初始化、样本分布和超参数发生变化，需稳定性检验。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学定义",
+          "tex": "\\mathrm{ARI}(C^{(a)},C^{(b)})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先将该概念转换为明确的距离、密度、投影或自监督目标。",
+          "tex": "\\mathrm{ARI}(C^{(a)},C^{(b)})"
+        },
+        {
+          "explanation": "用独立样本和不同随机初始化检查结果的可重复性与下游贡献。",
+          "tex": "\\mathrm{ARI}(C^{(a)},C^{(b)})"
+        }
+      ],
+      "code": "from sklearn.metrics import adjusted_rand_score\nprint(adjusted_rand_score([0,0,1,1],[1,1,0,0]))",
+      "packages": "numpy, scikit-learn",
+      "application": "探索ETF风险聚类、市场状态、潜在因子与异常交易特征。",
+      "limits": "示例是局部算法演示，分组的经济解释和信号可交易性须独立实证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n01-02",
+      "node_id": "unsupervised-n01-02",
+      "title": "PCA",
+      "definition": "PCA在单位向量约束下最大化投影方差，得到协方差矩阵的主特征向量。",
+      "assumptions": "数据尺度、距离/相似性、样本窗口、模型参数和先验都需明确定义；对未来时期不得全样本拟合。",
+      "properties": [
+        "无监督结构不能直接证明市场的因果机制或净策略收益。",
+        "算法解可能随随机初始化、样本分布和超参数发生变化，需稳定性检验。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学定义",
+          "tex": "v_1=\\arg\\max_{\\|v\\|=1}v^\\top\\Sigma v"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先将该概念转换为明确的距离、密度、投影或自监督目标。",
+          "tex": "v_1=\\arg\\max_{\\|v\\|=1}v^\\top\\Sigma v"
+        },
+        {
+          "explanation": "用独立样本和不同随机初始化检查结果的可重复性与下游贡献。",
+          "tex": "v_1=\\arg\\max_{\\|v\\|=1}v^\\top\\Sigma v"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.decomposition import PCA\nx=np.random.default_rng(0).normal(size=(50,4))\nprint(PCA(2).fit(x).explained_variance_ratio_)",
+      "packages": "numpy, scikit-learn",
+      "application": "探索ETF风险聚类、市场状态、潜在因子与异常交易特征。",
+      "limits": "示例是局部算法演示，分组的经济解释和信号可交易性须独立实证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n02-02",
+      "node_id": "unsupervised-n02-02",
+      "title": "随机SVD",
+      "definition": "随机SVD通过随机投影压缩矩阵后求小矩阵分解，加速大规模近似低秩计算。",
+      "assumptions": "数据尺度、距离/相似性、样本窗口、模型参数和先验都需明确定义；对未来时期不得全样本拟合。",
+      "properties": [
+        "无监督结构不能直接证明市场的因果机制或净策略收益。",
+        "算法解可能随随机初始化、样本分布和超参数发生变化，需稳定性检验。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学定义",
+          "tex": "Y=X\\Omega,\\quad X\\approx QQ^\\top X"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先将该概念转换为明确的距离、密度、投影或自监督目标。",
+          "tex": "Y=X\\Omega,\\quad X\\approx QQ^\\top X"
+        },
+        {
+          "explanation": "用独立样本和不同随机初始化检查结果的可重复性与下游贡献。",
+          "tex": "Y=X\\Omega,\\quad X\\approx QQ^\\top X"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.utils.extmath import randomized_svd\nx=np.random.default_rng(0).normal(size=(30,20))\nprint(randomized_svd(x,n_components=3,random_state=0)[1])",
+      "packages": "numpy, scikit-learn",
+      "application": "探索ETF风险聚类、市场状态、潜在因子与异常交易特征。",
+      "limits": "示例是局部算法演示，分组的经济解释和信号可交易性须独立实证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n03-02",
+      "node_id": "unsupervised-n03-02",
+      "title": "独立成分分析ICA",
+      "definition": "ICA从线性混合数据中寻找统计上尽可能独立的非高斯潜变量。",
+      "assumptions": "数据尺度、距离/相似性、样本窗口、模型参数和先验都需明确定义；对未来时期不得全样本拟合。",
+      "properties": [
+        "无监督结构不能直接证明市场的因果机制或净策略收益。",
+        "算法解可能随随机初始化、样本分布和超参数发生变化，需稳定性检验。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学定义",
+          "tex": "X=AS,\\quad\\hat S=WX"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先将该概念转换为明确的距离、密度、投影或自监督目标。",
+          "tex": "X=AS,\\quad\\hat S=WX"
+        },
+        {
+          "explanation": "用独立样本和不同随机初始化检查结果的可重复性与下游贡献。",
+          "tex": "X=AS,\\quad\\hat S=WX"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.decomposition import FastICA\nx=np.random.default_rng(0).laplace(size=(100,3))\nprint(FastICA(2,whiten=\"unit-variance\",random_state=0).fit_transform(x).shape)",
+      "packages": "numpy, scikit-learn",
+      "application": "探索ETF风险聚类、市场状态、潜在因子与异常交易特征。",
+      "limits": "示例是局部算法演示，分组的经济解释和信号可交易性须独立实证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n04-02",
+      "node_id": "unsupervised-n04-02",
+      "title": "非负矩阵分解NMF",
+      "definition": "NMF把非负矩阵近似成两个非负低秩因子，形成加法式表示。",
+      "assumptions": "数据尺度、距离/相似性、样本窗口、模型参数和先验都需明确定义；对未来时期不得全样本拟合。",
+      "properties": [
+        "无监督结构不能直接证明市场的因果机制或净策略收益。",
+        "算法解可能随随机初始化、样本分布和超参数发生变化，需稳定性检验。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学定义",
+          "tex": "\\min_{W,H\\ge0}\\|X-WH\\|_F^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先将该概念转换为明确的距离、密度、投影或自监督目标。",
+          "tex": "\\min_{W,H\\ge0}\\|X-WH\\|_F^2"
+        },
+        {
+          "explanation": "用独立样本和不同随机初始化检查结果的可重复性与下游贡献。",
+          "tex": "\\min_{W,H\\ge0}\\|X-WH\\|_F^2"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.decomposition import NMF\nx=np.abs(np.random.default_rng(0).normal(size=(30,5)))\nprint(NMF(2,init=\"nndsvda\",max_iter=500,random_state=0).fit_transform(x).shape)",
+      "packages": "numpy, scikit-learn",
+      "application": "探索ETF风险聚类、市场状态、潜在因子与异常交易特征。",
+      "limits": "示例是局部算法演示，分组的经济解释和信号可交易性须独立实证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n05-02",
+      "node_id": "unsupervised-n05-02",
+      "title": "核PCA",
+      "definition": "核PCA通过核Gram矩阵的特征向量找到非线性特征空间主成分。",
+      "assumptions": "数据尺度、距离/相似性、样本窗口、模型参数和先验都需明确定义；对未来时期不得全样本拟合。",
+      "properties": [
+        "无监督结构不能直接证明市场的因果机制或净策略收益。",
+        "算法解可能随随机初始化、样本分布和超参数发生变化，需稳定性检验。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学定义",
+          "tex": "K_c v=\\lambda v"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先将该概念转换为明确的距离、密度、投影或自监督目标。",
+          "tex": "K_c v=\\lambda v"
+        },
+        {
+          "explanation": "用独立样本和不同随机初始化检查结果的可重复性与下游贡献。",
+          "tex": "K_c v=\\lambda v"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.decomposition import KernelPCA\nx=np.random.default_rng(0).normal(size=(30,2))\nprint(KernelPCA(2,kernel=\"rbf\").fit_transform(x).shape)",
+      "packages": "numpy, scikit-learn",
+      "application": "探索ETF风险聚类、市场状态、潜在因子与异常交易特征。",
+      "limits": "示例是局部算法演示，分组的经济解释和信号可交易性须独立实证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n06-02",
+      "node_id": "unsupervised-n06-02",
+      "title": "t-SNE与UMAP",
+      "definition": "t-SNE用局部邻域概率匹配降维，UMAP基于近邻图模糊拓扑结构，适合低维可视化。",
+      "assumptions": "数据尺度、距离/相似性、样本窗口、模型参数和先验都需明确定义；对未来时期不得全样本拟合。",
+      "properties": [
+        "无监督结构不能直接证明市场的因果机制或净策略收益。",
+        "算法解可能随随机初始化、样本分布和超参数发生变化，需稳定性检验。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学定义",
+          "tex": "L_{\\rm tSNE}=D_{\\rm KL}(P\\|Q)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先将该概念转换为明确的距离、密度、投影或自监督目标。",
+          "tex": "L_{\\rm tSNE}=D_{\\rm KL}(P\\|Q)"
+        },
+        {
+          "explanation": "用独立样本和不同随机初始化检查结果的可重复性与下游贡献。",
+          "tex": "L_{\\rm tSNE}=D_{\\rm KL}(P\\|Q)"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.manifold import TSNE\nx=np.random.default_rng(0).normal(size=(40,4))\nprint(TSNE(perplexity=5,random_state=0).fit_transform(x).shape)",
+      "packages": "numpy, scikit-learn",
+      "application": "探索ETF风险聚类、市场状态、潜在因子与异常交易特征。",
+      "limits": "示例是局部算法演示，分组的经济解释和信号可交易性须独立实证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n02-03",
+      "node_id": "unsupervised-n02-03",
+      "title": "Local Outlier Factor",
+      "definition": "LOF通过比较点及其邻居的局部可达密度度量异常程度。",
+      "assumptions": "数据尺度、距离/相似性、样本窗口、模型参数和先验都需明确定义；对未来时期不得全样本拟合。",
+      "properties": [
+        "无监督结构不能直接证明市场的因果机制或净策略收益。",
+        "算法解可能随随机初始化、样本分布和超参数发生变化，需稳定性检验。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学定义",
+          "tex": "\\mathrm{LOF}_k(x)=|N_k(x)|^{-1}\\sum_{o\\in N_k(x)}\\frac{\\mathrm{lrd}(o)}{\\mathrm{lrd}(x)}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先将该概念转换为明确的距离、密度、投影或自监督目标。",
+          "tex": "\\mathrm{LOF}_k(x)=|N_k(x)|^{-1}\\sum_{o\\in N_k(x)}\\frac{\\mathrm{lrd}(o)}{\\mathrm{lrd}(x)}"
+        },
+        {
+          "explanation": "用独立样本和不同随机初始化检查结果的可重复性与下游贡献。",
+          "tex": "\\mathrm{LOF}_k(x)=|N_k(x)|^{-1}\\sum_{o\\in N_k(x)}\\frac{\\mathrm{lrd}(o)}{\\mathrm{lrd}(x)}"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.neighbors import LocalOutlierFactor\nx=np.r_[np.random.default_rng(0).normal(size=(30,2)),[[9.,9.]]]\nprint(LocalOutlierFactor(n_neighbors=8).fit_predict(x)[-1])",
+      "packages": "numpy, scikit-learn",
+      "application": "探索ETF风险聚类、市场状态、潜在因子与异常交易特征。",
+      "limits": "示例是局部算法演示，分组的经济解释和信号可交易性须独立实证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n03-03",
+      "node_id": "unsupervised-n03-03",
+      "title": "One-Class SVM",
+      "definition": "One-Class SVM学习正常样本的支持区域边界，将偏离该区域的观测视作异常。",
+      "assumptions": "数据尺度、距离/相似性、样本窗口、模型参数和先验都需明确定义；对未来时期不得全样本拟合。",
+      "properties": [
+        "无监督结构不能直接证明市场的因果机制或净策略收益。",
+        "算法解可能随随机初始化、样本分布和超参数发生变化，需稳定性检验。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学定义",
+          "tex": "\\min_{w,\\rho,\\xi}\\frac12\\|w\\|^2+\\frac1{\\nu n}\\sum_i\\xi_i-\\rho"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先将该概念转换为明确的距离、密度、投影或自监督目标。",
+          "tex": "\\min_{w,\\rho,\\xi}\\frac12\\|w\\|^2+\\frac1{\\nu n}\\sum_i\\xi_i-\\rho"
+        },
+        {
+          "explanation": "用独立样本和不同随机初始化检查结果的可重复性与下游贡献。",
+          "tex": "\\min_{w,\\rho,\\xi}\\frac12\\|w\\|^2+\\frac1{\\nu n}\\sum_i\\xi_i-\\rho"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.svm import OneClassSVM\nx=np.random.default_rng(0).normal(size=(40,2))\nprint(OneClassSVM(nu=.1).fit(x).predict([[10.,10.]]))",
+      "packages": "numpy, scikit-learn",
+      "application": "探索ETF风险聚类、市场状态、潜在因子与异常交易特征。",
+      "limits": "示例是局部算法演示，分组的经济解释和信号可交易性须独立实证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n04-03",
+      "node_id": "unsupervised-n04-03",
+      "title": "自编码器异常检测",
+      "definition": "自编码器在正常数据上学习重建，当新样本的重建误差较大时标记异常。",
+      "assumptions": "数据尺度、距离/相似性、样本窗口、模型参数和先验都需明确定义；对未来时期不得全样本拟合。",
+      "properties": [
+        "无监督结构不能直接证明市场的因果机制或净策略收益。",
+        "算法解可能随随机初始化、样本分布和超参数发生变化，需稳定性检验。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学定义",
+          "tex": "e(x)=\\|x-g_\\theta(f_\\phi(x))\\|^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先将该概念转换为明确的距离、密度、投影或自监督目标。",
+          "tex": "e(x)=\\|x-g_\\theta(f_\\phi(x))\\|^2"
+        },
+        {
+          "explanation": "用独立样本和不同随机初始化检查结果的可重复性与下游贡献。",
+          "tex": "e(x)=\\|x-g_\\theta(f_\\phi(x))\\|^2"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(10,5);net=torch.nn.Sequential(torch.nn.Linear(5,2),torch.nn.Linear(2,5))\nprint((x-net(x)).square().sum(-1).shape)",
+      "packages": "torch",
+      "application": "探索ETF风险聚类、市场状态、潜在因子与异常交易特征。",
+      "limits": "示例是局部算法演示，分组的经济解释和信号可交易性须独立实证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n05-03",
+      "node_id": "unsupervised-n05-03",
+      "title": "密度异常",
+      "definition": "低概率密度样本被认为是统计异常，可用核密度或混合模型近似密度。",
+      "assumptions": "数据尺度、距离/相似性、样本窗口、模型参数和先验都需明确定义；对未来时期不得全样本拟合。",
+      "properties": [
+        "无监督结构不能直接证明市场的因果机制或净策略收益。",
+        "算法解可能随随机初始化、样本分布和超参数发生变化，需稳定性检验。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学定义",
+          "tex": "A(x)=-\\log \\hat p(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先将该概念转换为明确的距离、密度、投影或自监督目标。",
+          "tex": "A(x)=-\\log \\hat p(x)"
+        },
+        {
+          "explanation": "用独立样本和不同随机初始化检查结果的可重复性与下游贡献。",
+          "tex": "A(x)=-\\log \\hat p(x)"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.neighbors import KernelDensity\nx=np.random.default_rng(0).normal(size=(30,1))\nprint(-KernelDensity().fit(x).score_samples([[5.]]))",
+      "packages": "numpy, scikit-learn",
+      "application": "探索ETF风险聚类、市场状态、潜在因子与异常交易特征。",
+      "limits": "示例是局部算法演示，分组的经济解释和信号可交易性须独立实证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n06-03",
+      "node_id": "unsupervised-n06-03",
+      "title": "概念漂移",
+      "definition": "概念漂移指条件预测关系P(Y|X)随时间变化，区别于仅输入分布改变的协变量漂移。",
+      "assumptions": "数据尺度、距离/相似性、样本窗口、模型参数和先验都需明确定义；对未来时期不得全样本拟合。",
+      "properties": [
+        "无监督结构不能直接证明市场的因果机制或净策略收益。",
+        "算法解可能随随机初始化、样本分布和超参数发生变化，需稳定性检验。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学定义",
+          "tex": "P_{t_1}(Y|X)\\ne P_{t_2}(Y|X)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先将该概念转换为明确的距离、密度、投影或自监督目标。",
+          "tex": "P_{t_1}(Y|X)\\ne P_{t_2}(Y|X)"
+        },
+        {
+          "explanation": "用独立样本和不同随机初始化检查结果的可重复性与下游贡献。",
+          "tex": "P_{t_1}(Y|X)\\ne P_{t_2}(Y|X)"
+        }
+      ],
+      "code": "import numpy as np\nfrom scipy.stats import ks_2samp\nrng=np.random.default_rng(0)\nprint(ks_2samp(rng.normal(size=100),rng.normal(1,size=100)))",
+      "packages": "numpy, scipy",
+      "application": "探索ETF风险聚类、市场状态、潜在因子与异常交易特征。",
+      "limits": "示例是局部算法演示，分组的经济解释和信号可交易性须独立实证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n02-04",
+      "node_id": "unsupervised-n02-04",
+      "title": "SimCLR",
+      "definition": "SimCLR对同一样本两次有效增强形成正例、批内其余样本为负例，优化NT-Xent。",
+      "assumptions": "数据尺度、距离/相似性、样本窗口、模型参数和先验都需明确定义；对未来时期不得全样本拟合。",
+      "properties": [
+        "无监督结构不能直接证明市场的因果机制或净策略收益。",
+        "算法解可能随随机初始化、样本分布和超参数发生变化，需稳定性检验。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学定义",
+          "tex": "L=-\\log\\frac{\\exp(s_{i,i^+}/\\tau)}{\\sum_{k\\ne i}\\exp(s_{ik}/\\tau)}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先将该概念转换为明确的距离、密度、投影或自监督目标。",
+          "tex": "L=-\\log\\frac{\\exp(s_{i,i^+}/\\tau)}{\\sum_{k\\ne i}\\exp(s_{ik}/\\tau)}"
+        },
+        {
+          "explanation": "用独立样本和不同随机初始化检查结果的可重复性与下游贡献。",
+          "tex": "L=-\\log\\frac{\\exp(s_{i,i^+}/\\tau)}{\\sum_{k\\ne i}\\exp(s_{ik}/\\tau)}"
+        }
+      ],
+      "code": "import torch\na=torch.nn.functional.normalize(torch.randn(4,8),dim=-1)\nb=torch.nn.functional.normalize(torch.randn(4,8),dim=-1)\nprint(torch.nn.functional.cross_entropy(a@b.T/.1,torch.arange(4)).item())",
+      "packages": "torch",
+      "application": "探索ETF风险聚类、市场状态、潜在因子与异常交易特征。",
+      "limits": "示例是局部算法演示，分组的经济解释和信号可交易性须独立实证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n03-04",
+      "node_id": "unsupervised-n03-04",
+      "title": "BYOL",
+      "definition": "BYOL使用在线与目标编码器对两种增强视图进行预测一致性学习，目标编码器以EMA更新。",
+      "assumptions": "数据尺度、距离/相似性、样本窗口、模型参数和先验都需明确定义；对未来时期不得全样本拟合。",
+      "properties": [
+        "无监督结构不能直接证明市场的因果机制或净策略收益。",
+        "算法解可能随随机初始化、样本分布和超参数发生变化，需稳定性检验。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学定义",
+          "tex": "\\theta_{\\rm target}\\leftarrow\\tau\\theta_{\\rm target}+(1-\\tau)\\theta_{\\rm online}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先将该概念转换为明确的距离、密度、投影或自监督目标。",
+          "tex": "\\theta_{\\rm target}\\leftarrow\\tau\\theta_{\\rm target}+(1-\\tau)\\theta_{\\rm online}"
+        },
+        {
+          "explanation": "用独立样本和不同随机初始化检查结果的可重复性与下游贡献。",
+          "tex": "\\theta_{\\rm target}\\leftarrow\\tau\\theta_{\\rm target}+(1-\\tau)\\theta_{\\rm online}"
+        }
+      ],
+      "code": "import numpy as np\nonline=np.array([1.,3.]);target=np.array([0.,0.])\nprint(.99*target+.01*online)",
+      "packages": "numpy",
+      "application": "探索ETF风险聚类、市场状态、潜在因子与异常交易特征。",
+      "limits": "示例是局部算法演示，分组的经济解释和信号可交易性须独立实证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n04-04",
+      "node_id": "unsupervised-n04-04",
+      "title": "掩码建模",
+      "definition": "随机遮蔽输入部分片段，用可见上下文预测被遮蔽部分，构成自监督目标。",
+      "assumptions": "数据尺度、距离/相似性、样本窗口、模型参数和先验都需明确定义；对未来时期不得全样本拟合。",
+      "properties": [
+        "无监督结构不能直接证明市场的因果机制或净策略收益。",
+        "算法解可能随随机初始化、样本分布和超参数发生变化，需稳定性检验。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学定义",
+          "tex": "L=\\|\\hat X_M-X_M\\|^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先将该概念转换为明确的距离、密度、投影或自监督目标。",
+          "tex": "L=\\|\\hat X_M-X_M\\|^2"
+        },
+        {
+          "explanation": "用独立样本和不同随机初始化检查结果的可重复性与下游贡献。",
+          "tex": "L=\\|\\hat X_M-X_M\\|^2"
+        }
+      ],
+      "code": "import numpy as np\nx=np.arange(12.).reshape(3,4);mask=np.random.default_rng(0).random(x.shape)<.25\nprint(np.where(mask,0,x))",
+      "packages": "numpy",
+      "application": "探索ETF风险聚类、市场状态、潜在因子与异常交易特征。",
+      "limits": "示例是局部算法演示，分组的经济解释和信号可交易性须独立实证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n05-04",
+      "node_id": "unsupervised-n05-04",
+      "title": "自监督预训练",
+      "definition": "在无标签历史数据上通过对比、重建或预测代理任务预训练表征，再微调下游任务。",
+      "assumptions": "数据尺度、距离/相似性、样本窗口、模型参数和先验都需明确定义；对未来时期不得全样本拟合。",
+      "properties": [
+        "无监督结构不能直接证明市场的因果机制或净策略收益。",
+        "算法解可能随随机初始化、样本分布和超参数发生变化，需稳定性检验。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学定义",
+          "tex": "\\theta_0=\\arg\\min_\\theta L_{\\rm SSL}(\\theta)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先将该概念转换为明确的距离、密度、投影或自监督目标。",
+          "tex": "\\theta_0=\\arg\\min_\\theta L_{\\rm SSL}(\\theta)"
+        },
+        {
+          "explanation": "用独立样本和不同随机初始化检查结果的可重复性与下游贡献。",
+          "tex": "\\theta_0=\\arg\\min_\\theta L_{\\rm SSL}(\\theta)"
+        }
+      ],
+      "code": "import torch\na=torch.nn.functional.normalize(torch.randn(4,8),dim=-1)\nb=torch.nn.functional.normalize(torch.randn(4,8),dim=-1)\nprint(torch.nn.functional.cross_entropy(a@b.T/.1,torch.arange(4)).item())",
+      "packages": "torch",
+      "application": "探索ETF风险聚类、市场状态、潜在因子与异常交易特征。",
+      "limits": "示例是局部算法演示，分组的经济解释和信号可交易性须独立实证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n06-04",
+      "node_id": "unsupervised-n06-04",
+      "title": "嵌入表示",
+      "definition": "Embedding将离散实体或复杂输入映射为稠密向量，使相似度与下游模型可计算。",
+      "assumptions": "数据尺度、距离/相似性、样本窗口、模型参数和先验都需明确定义；对未来时期不得全样本拟合。",
+      "properties": [
+        "无监督结构不能直接证明市场的因果机制或净策略收益。",
+        "算法解可能随随机初始化、样本分布和超参数发生变化，需稳定性检验。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学定义",
+          "tex": "e:V\\to\\mathbb R^d"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先将该概念转换为明确的距离、密度、投影或自监督目标。",
+          "tex": "e:V\\to\\mathbb R^d"
+        },
+        {
+          "explanation": "用独立样本和不同随机初始化检查结果的可重复性与下游贡献。",
+          "tex": "e:V\\to\\mathbb R^d"
+        }
+      ],
+      "code": "import torch\nemb=torch.nn.Embedding(10,4)\nprint(emb(torch.tensor([1,4,6])).shape)",
+      "packages": "torch",
+      "application": "探索ETF风险聚类、市场状态、潜在因子与异常交易特征。",
+      "limits": "示例是局部算法演示，分组的经济解释和信号可交易性须独立实证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n01-05",
+      "node_id": "unsupervised-n01-05",
+      "title": "ETF风险聚类",
+      "definition": "根据ETF历史波动、相关和尾部表现构造特征，再按相似风险性质分组。",
+      "assumptions": "数据尺度、距离/相似性、样本窗口、模型参数和先验都需明确定义；对未来时期不得全样本拟合。",
+      "properties": [
+        "无监督结构不能直接证明市场的因果机制或净策略收益。",
+        "算法解可能随随机初始化、样本分布和超参数发生变化，需稳定性检验。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学定义",
+          "tex": "c_i=\\arg\\min_k\\|z_i-\\mu_k\\|^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先将该概念转换为明确的距离、密度、投影或自监督目标。",
+          "tex": "c_i=\\arg\\min_k\\|z_i-\\mu_k\\|^2"
+        },
+        {
+          "explanation": "用独立样本和不同随机初始化检查结果的可重复性与下游贡献。",
+          "tex": "c_i=\\arg\\min_k\\|z_i-\\mu_k\\|^2"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.cluster import KMeans\nx=np.random.default_rng(0).normal(size=(30,4))\nprint(KMeans(n_clusters=3,n_init=10,random_state=0).fit_predict(x))",
+      "packages": "numpy, scikit-learn",
+      "application": "探索ETF风险聚类、市场状态、潜在因子与异常交易特征。",
+      "limits": "示例是局部算法演示，分组的经济解释和信号可交易性须独立实证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n02-05",
+      "node_id": "unsupervised-n02-05",
+      "title": "收益协方差主成分",
+      "definition": "收益协方差主成分代表多资产共同波动方向，可作为风险暴露和降维特征。",
+      "assumptions": "数据尺度、距离/相似性、样本窗口、模型参数和先验都需明确定义；对未来时期不得全样本拟合。",
+      "properties": [
+        "无监督结构不能直接证明市场的因果机制或净策略收益。",
+        "算法解可能随随机初始化、样本分布和超参数发生变化，需稳定性检验。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学定义",
+          "tex": "\\Sigma v_j=\\lambda_jv_j"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先将该概念转换为明确的距离、密度、投影或自监督目标。",
+          "tex": "\\Sigma v_j=\\lambda_jv_j"
+        },
+        {
+          "explanation": "用独立样本和不同随机初始化检查结果的可重复性与下游贡献。",
+          "tex": "\\Sigma v_j=\\lambda_jv_j"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.decomposition import PCA\nx=np.random.default_rng(0).normal(size=(50,4))\nprint(PCA(2).fit(x).explained_variance_ratio_)",
+      "packages": "numpy, scikit-learn",
+      "application": "探索ETF风险聚类、市场状态、潜在因子与异常交易特征。",
+      "limits": "示例是局部算法演示，分组的经济解释和信号可交易性须独立实证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n03-05",
+      "node_id": "unsupervised-n03-05",
+      "title": "市场状态聚类",
+      "definition": "滚动计算市场波动、收益和成交等状态变量，用无监督模型识别相似历史时期。",
+      "assumptions": "数据尺度、距离/相似性、样本窗口、模型参数和先验都需明确定义；对未来时期不得全样本拟合。",
+      "properties": [
+        "无监督结构不能直接证明市场的因果机制或净策略收益。",
+        "算法解可能随随机初始化、样本分布和超参数发生变化，需稳定性检验。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学定义",
+          "tex": "S_t=\\operatorname{Cluster}(X_{t-W:t})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先将该概念转换为明确的距离、密度、投影或自监督目标。",
+          "tex": "S_t=\\operatorname{Cluster}(X_{t-W:t})"
+        },
+        {
+          "explanation": "用独立样本和不同随机初始化检查结果的可重复性与下游贡献。",
+          "tex": "S_t=\\operatorname{Cluster}(X_{t-W:t})"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.cluster import KMeans\nx=np.random.default_rng(0).normal(size=(30,4))\nprint(KMeans(n_clusters=3,n_init=10,random_state=0).fit_predict(x))",
+      "packages": "numpy, scikit-learn",
+      "application": "探索ETF风险聚类、市场状态、潜在因子与异常交易特征。",
+      "limits": "示例是局部算法演示，分组的经济解释和信号可交易性须独立实证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n04-05",
+      "node_id": "unsupervised-n04-05",
+      "title": "交易异常检测",
+      "definition": "交易异常检测对量价、订单活动等特征计算异常评分，识别偏离正常样本模式的观测。",
+      "assumptions": "数据尺度、距离/相似性、样本窗口、模型参数和先验都需明确定义；对未来时期不得全样本拟合。",
+      "properties": [
+        "无监督结构不能直接证明市场的因果机制或净策略收益。",
+        "算法解可能随随机初始化、样本分布和超参数发生变化，需稳定性检验。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学定义",
+          "tex": "A_t=-\\log p(X_t)\\text{ 或 }\\operatorname{IForestScore}(X_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先将该概念转换为明确的距离、密度、投影或自监督目标。",
+          "tex": "A_t=-\\log p(X_t)\\text{ 或 }\\operatorname{IForestScore}(X_t)"
+        },
+        {
+          "explanation": "用独立样本和不同随机初始化检查结果的可重复性与下游贡献。",
+          "tex": "A_t=-\\log p(X_t)\\text{ 或 }\\operatorname{IForestScore}(X_t)"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.ensemble import IsolationForest\nx=np.r_[np.random.default_rng(0).normal(size=(30,2)),[[8,9]]]\nprint(IsolationForest(random_state=0,contamination=.05).fit_predict(x)[-1])",
+      "packages": "numpy, scikit-learn",
+      "application": "探索ETF风险聚类、市场状态、潜在因子与异常交易特征。",
+      "limits": "示例是局部算法演示，分组的经济解释和信号可交易性须独立实证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n05-05",
+      "node_id": "unsupervised-n05-05",
+      "title": "因子去相关",
+      "definition": "因子去相关使用协方差白化或线性残差投影，降低特征之间的冗余。",
+      "assumptions": "数据尺度、距离/相似性、样本窗口、模型参数和先验都需明确定义；对未来时期不得全样本拟合。",
+      "properties": [
+        "无监督结构不能直接证明市场的因果机制或净策略收益。",
+        "算法解可能随随机初始化、样本分布和超参数发生变化，需稳定性检验。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学定义",
+          "tex": "Z=X\\Sigma^{-1/2}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先将该概念转换为明确的距离、密度、投影或自监督目标。",
+          "tex": "Z=X\\Sigma^{-1/2}"
+        },
+        {
+          "explanation": "用独立样本和不同随机初始化检查结果的可重复性与下游贡献。",
+          "tex": "Z=X\\Sigma^{-1/2}"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);X=rng.normal(size=(200,3))\nS=np.cov(X,rowvar=False);eig,V=np.linalg.eigh(S)\nZ=(X-X.mean(0))@V@np.diag(1/np.sqrt(eig))\nprint(np.cov(Z,rowvar=False))",
+      "packages": "numpy",
+      "application": "探索ETF风险聚类、市场状态、潜在因子与异常交易特征。",
+      "limits": "示例是局部算法演示，分组的经济解释和信号可交易性须独立实证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n06-05",
+      "node_id": "unsupervised-n06-05",
+      "title": "无监督信号验证",
+      "definition": "无监督簇或嵌入应先用独立时间窗口评估稳定性，再检验其能否解释后续风险或收益。",
+      "assumptions": "数据尺度、距离/相似性、样本窗口、模型参数和先验都需明确定义；对未来时期不得全样本拟合。",
+      "properties": [
+        "无监督结构不能直接证明市场的因果机制或净策略收益。",
+        "算法解可能随随机初始化、样本分布和超参数发生变化，需稳定性检验。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学定义",
+          "tex": "\\Delta R=R_{\\rm baseline}-R_{\\rm enriched}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先将该概念转换为明确的距离、密度、投影或自监督目标。",
+          "tex": "\\Delta R=R_{\\rm baseline}-R_{\\rm enriched}"
+        },
+        {
+          "explanation": "用独立样本和不同随机初始化检查结果的可重复性与下游贡献。",
+          "tex": "\\Delta R=R_{\\rm baseline}-R_{\\rm enriched}"
+        }
+      ],
+      "code": "from sklearn.metrics import adjusted_rand_score\nprint(adjusted_rand_score([0,0,1,1],[1,1,0,0]))",
+      "packages": "numpy, scikit-learn",
+      "application": "探索ETF风险聚类、市场状态、潜在因子与异常交易特征。",
+      "limits": "示例是局部算法演示，分组的经济解释和信号可交易性须独立实证。",
+      "coverage": "complete"
+    }
+  ]
+}
