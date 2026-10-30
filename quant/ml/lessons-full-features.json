@@ -30,7 +30,8 @@
       "code": "import pandas as pd\ndf=pd.DataFrame({'asset':['A'],'close':[101.]})\nassert df['close'].gt(0).all();assert df['asset'].notna().all()",
       "packages": "Python及相应科学计算库（见代码导入）",
       "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
-      "coverage": "complete"
+      "coverage": "complete",
+      "limits": "字段名、计量单位和主键不一致可能使训练与服务静默出错；Schema检查不能替代经济含义和可用时间审查。"
     },
     {
       "id": "features-n02-01",
@@ -61,7 +62,8 @@
       "code": "import numpy as np\nx=np.array([1.,np.nan,3.]);print('missing ratio:',np.isnan(x).mean())",
       "packages": "Python及相应科学计算库（见代码导入）",
       "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
-      "coverage": "complete"
+      "coverage": "complete",
+      "limits": "仅凭观测数据通常无法完全区分MAR和MNAR；停牌、退市和财报未披露可能具有系统选择偏差。"
     },
     {
       "id": "features-n03-01",
@@ -92,7 +94,8 @@
       "code": "import numpy as np\nx=np.array([1.,2.,3.,4.,100.]);print(np.clip(x,*np.quantile(x,[.1,.9])))",
       "packages": "Python及相应科学计算库（见代码导入）",
       "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
-      "coverage": "complete"
+      "coverage": "complete",
+      "limits": "截尾会抹去极端风险事件的真实尾部信息；阈值必须训练期确定并结合异常成因复核。"
     },
     {
       "id": "features-n04-01",
@@ -123,7 +126,8 @@
       "code": "import pandas as pd\ndf=pd.DataFrame({'asset':['A','A'],'date':[1,1]})\nprint(df.duplicated(['asset','date']).tolist())",
       "packages": "Python及相应科学计算库（见代码导入）",
       "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
-      "coverage": "complete"
+      "coverage": "complete",
+      "limits": "简单删除相同键可能错误丢弃真实逐笔成交；应先区分重复入库、修订版本与真实多笔事件。"
     },
     {
       "id": "features-n05-01",
@@ -154,7 +158,8 @@
       "code": "import pandas as pd\nleft=pd.DataFrame({'t':[2,4,6]});right=pd.DataFrame({'t':[1,3,5],'x':[10,20,30]})\nprint(pd.merge_asof(left,right,on='t',direction='backward'))",
       "packages": "Python及相应科学计算库（见代码导入）",
       "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
-      "coverage": "complete"
+      "coverage": "complete",
+      "limits": "相同日期不等于同一时点可得；需处理交易所时区、宏观公告盘中时点和供应商到达延迟。"
     },
     {
       "id": "features-n06-01",
@@ -185,7 +190,8 @@
       "code": "import hashlib\npayload=b'ETF,2025-01-01,100.0';print(hashlib.sha256(payload).hexdigest()[:12])",
       "packages": "Python及相应科学计算库（见代码导入）",
       "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
-      "coverage": "complete"
+      "coverage": "complete",
+      "limits": "历史修订会导致旧回测无法重现；必须保留原始文件校验值、更新时间与处理代码版本。"
     },
     {
       "id": "features-n02-02",
@@ -216,7 +222,8 @@
       "code": "import numpy as np\nx=np.array([2.,4.,6.]);print((x-x.min())/(x.max()-x.min()))",
       "packages": "Python及相应科学计算库（见代码导入）",
       "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
-      "coverage": "complete"
+      "coverage": "complete",
+      "limits": "样本外数值可能超过训练期最大最小值，变换后不一定仍在[0,1]；禁止使用全样本极值。"
     },
     {
       "id": "features-n05-02",
@@ -247,7 +254,8 @@
       "code": "import numpy as np\ny=np.array([1.,0.,1.,1.]);cat=np.array(['A','B','A','B']);\nprint({c:y[cat==c].mean() for c in set(cat)})",
       "packages": "Python及相应科学计算库（见代码导入）",
       "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
-      "coverage": "complete"
+      "coverage": "complete",
+      "limits": "直接用本行标签编码类别会引起目标泄漏；需交叉拟合并对稀有类别使用平滑和先验回退。"
     },
     {
       "id": "features-n01-03",
@@ -278,7 +286,8 @@
       "code": "import numpy as np\nfrom scipy.stats import boxcox\nx=np.array([1.,2.,5.,10.,30.]);print(boxcox(x)[1])",
       "packages": "Python及相应科学计算库（见代码导入）",
       "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
-      "coverage": "complete"
+      "coverage": "complete",
+      "limits": "Box-Cox通常要求正值；负收益不能直接变换，偏态改善也不意味着条件分布正态。"
     },
     {
       "id": "features-n02-03",
@@ -309,7 +318,8 @@
       "code": "import numpy as np\nx=np.array([.1,.4,.8]);print(np.digitize(x,[.3,.6]))",
       "packages": "Python及相应科学计算库（见代码导入）",
       "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
-      "coverage": "complete"
+      "coverage": "complete",
+      "limits": "分箱阈值会损失排序信息，固定阈值可能随市场制度变化而失效；使用标签分箱可能造成泄漏。"
     },
     {
       "id": "features-n03-03",
@@ -340,7 +350,8 @@
       "code": "import numpy as np\nx=np.array([[1.,2.],[3.,4.]]);print((x[:,0]*x[:,1]).reshape(-1,1))",
       "packages": "Python及相应科学计算库（见代码导入）",
       "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
-      "coverage": "complete"
+      "coverage": "complete",
+      "limits": "组合特征数可能平方增长并增大多重检验风险，尤其应限制金融样本外模型复杂度。"
     },
     {
       "id": "features-n04-03",
@@ -371,7 +382,8 @@
       "code": "from sklearn.preprocessing import PolynomialFeatures\nprint(PolynomialFeatures(2).fit_transform([[2.,3.]]))",
       "packages": "Python及相应科学计算库（见代码导入）",
       "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
-      "coverage": "complete"
+      "coverage": "complete",
+      "limits": "高阶幂会放大输入尺度和异常值，可能导致严重共线性及数值不稳定。"
     },
     {
       "id": "features-n05-03",
@@ -402,7 +414,8 @@
       "code": "import numpy as np\nx=np.array([1.,2.,10.]);print(np.log1p(x))",
       "packages": "Python及相应科学计算库（见代码导入）",
       "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
-      "coverage": "complete"
+      "coverage": "complete",
+      "limits": "单调变换保留排序不等于保留线性关系，且对零值、负数与缺失值须明确处理。"
     },
     {
       "id": "features-n06-03",
@@ -433,7 +446,8 @@
       "code": "import numpy as np\nt=np.array([0,6,12,18]);print(np.column_stack([np.sin(2*np.pi*t/24),np.cos(2*np.pi*t/24)]))",
       "packages": "Python及相应科学计算库（见代码导入）",
       "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
-      "coverage": "complete"
+      "coverage": "complete",
+      "limits": "周期特征适用于明确循环的时间量；股票交易日历和节假日会使自然日周期出现偏移。"
     },
     {
       "id": "features-n01-04",
@@ -464,7 +478,8 @@
       "code": "import numpy as np\nfrom sklearn.feature_selection import SelectKBest,f_regression\nX=np.random.default_rng(0).normal(size=(60,5));y=X[:,0]+np.random.default_rng(1).normal(size=60)\nprint(SelectKBest(f_regression,k=2).fit(X,y).get_support())",
       "packages": "Python及相应科学计算库（见代码导入）",
       "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
-      "coverage": "complete"
+      "coverage": "complete",
+      "limits": "在全样本上筛选特征后再交叉验证属于数据泄漏；单变量评分无法发现非线性交互。"
     },
     {
       "id": "features-n02-04",
@@ -495,7 +510,8 @@
       "code": "import numpy as np\nfrom sklearn.feature_selection import RFE\nfrom sklearn.linear_model import Ridge\nX=np.random.default_rng(0).normal(size=(60,5));y=X[:,0]-X[:,3]\nprint(RFE(Ridge(),n_features_to_select=2).fit(X,y).support_)",
       "packages": "Python及相应科学计算库（见代码导入）",
       "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
-      "coverage": "complete"
+      "coverage": "complete",
+      "limits": "RFE需要重复拟合，计算成本高；相关因子之间选择不稳定，应在训练折内部执行。"
     },
     {
       "id": "features-n05-04",
@@ -526,7 +542,8 @@
       "code": "import numpy as np\nfrom sklearn.linear_model import Lasso\nX=np.random.default_rng(0).normal(size=(100,8));y=2*X[:,0]\nprint(Lasso(alpha=.1).fit(X,y).coef_)",
       "packages": "Python及相应科学计算库（见代码导入）",
       "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
-      "coverage": "complete"
+      "coverage": "complete",
+      "limits": "正则化筛选对特征尺度及共线性敏感；非零系数不证明经济因果作用。"
     },
     {
       "id": "features-n06-04",
@@ -557,7 +574,8 @@
       "code": "import numpy as np\nfrom sklearn.ensemble import RandomForestRegressor\nX=np.random.default_rng(0).normal(size=(70,3));y=X[:,0]**2\nprint(RandomForestRegressor(n_estimators=20,random_state=0).fit(X,y).feature_importances_)",
       "packages": "Python及相应科学计算库（见代码导入）",
       "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
-      "coverage": "complete"
+      "coverage": "complete",
+      "limits": "重要性数值依赖模型、训练数据和度量；相关变量及市场共同冲击可能扭曲贡献归因。"
     },
     {
       "id": "features-n01-05",
@@ -588,7 +606,8 @@
       "code": "import numpy as np\nraw=np.array([100.,50.,51.]);A=np.array([.5,1.,1.]);print(raw*A)",
       "packages": "Python及相应科学计算库（见代码导入）",
       "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
-      "coverage": "complete"
+      "coverage": "complete",
+      "limits": "复权价用于连续收益研究，通常不是历史实际成交价；企业行动和分红现金流必须与策略持仓一致。"
     },
     {
       "id": "features-n02-05",
@@ -619,7 +638,8 @@
       "code": "from datetime import date\nrelease=date(2025,4,30);decision=date(2025,3,31)\nprint('available:',release<=decision)",
       "packages": "Python及相应科学计算库（见代码导入）",
       "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
-      "coverage": "complete"
+      "coverage": "complete",
+      "limits": "财报所属季度与信息发布时间不同，不能在报告期末提前使用后续公告数值或修订值。"
     },
     {
       "id": "features-n03-05",
@@ -650,7 +670,8 @@
       "code": "import numpy as np\nX=np.column_stack([np.ones(5),np.arange(5)]);f=np.array([2.,3.,5.,4.,8.]);print(f-X@np.linalg.lstsq(X,f,rcond=None)[0])",
       "packages": "Python及相应科学计算库（见代码导入）",
       "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
-      "coverage": "complete"
+      "coverage": "complete",
+      "limits": "把公共风险暴露回归掉可能同时移除有价值的信号；残差仅保证样本内线性正交。"
     },
     {
       "id": "features-n04-05",
@@ -681,7 +702,8 @@
       "code": "import numpy as np\nf=np.array([1.,2.,3.,4.]);industry=np.array([0,0,1,1]);\nprint(np.array([v-f[industry==g].mean() for v,g in zip(f,industry)]))",
       "packages": "Python及相应科学计算库（见代码导入）",
       "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
-      "coverage": "complete"
+      "coverage": "complete",
+      "limits": "行业分类和市值因子在历史中变化，应采用当期可得行业、自由流通市值和统一权重定义。"
     },
     {
       "id": "features-n06-05",
@@ -712,7 +734,8 @@
       "code": "import pandas as pd\ndf=pd.DataFrame({'decision':[3,5],'available':[2,6]});print(df.assign(leak=df.available>df.decision))",
       "packages": "Python及相应科学计算库（见代码导入）",
       "application": "量化ETF行情、财报及多因子建模的特征计算与严格时间序列验证。",
-      "coverage": "complete"
+      "coverage": "complete",
+      "limits": "检查单个特征列的日期仍不足以排除泄漏；标签重叠、全样本PCA、最新指数成分都可能携带未来信息。"
     }
   ]
 }
