@@ -1,0 +1,613 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "deep-n04-01",
+      "node_id": "deep-n04-01",
+      "title": "输出层与损失",
+      "definition": "网络输出层必须与标签结构匹配：回归常用线性输出，互斥多分类常用Softmax交叉熵。",
+      "assumptions": "模型输入维度、训练/验证拆分、参数梯度和随机状态必须严格定义。",
+      "properties": [
+        "架构更复杂不保证真实收益预测更准确，应对比简单基线和泛化。",
+        "前向计算、反向传播、训练模式和推断模式须保持正确的软件语义。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "L_{\\rm reg}=\\|y-\\hat y\\|^2,\\quad L_{\\rm cls}=-\\log p_y"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义计算图、模型容量或相应训练目标，检查张量维度及梯度路径。",
+          "tex": "L_{\\rm reg}=\\|y-\\hat y\\|^2,\\quad L_{\\rm cls}=-\\log p_y"
+        },
+        {
+          "explanation": "在可控制输入上验证前向/反向数值行为，再通过独立保留数据检验其泛化。",
+          "tex": "L_{\\rm reg}=\\|y-\\hat y\\|^2,\\quad L_{\\rm cls}=-\\log p_y"
+        }
+      ],
+      "code": "import torch\nz=torch.randn(6,3);y=torch.randint(0,3,(6,))\nprint(torch.nn.functional.cross_entropy(z,y))",
+      "packages": "torch",
+      "application": "深度ETF因子模型、价格图像CNN、金融文本Transformer和风险预测网络的构建基础。",
+      "limits": "代码是概念层最小运行演示，不包含完整训练、调参与财务时点审计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n05-01",
+      "node_id": "deep-n05-01",
+      "title": "万能逼近定理",
+      "definition": "在合适的激活条件下，充分宽的单隐层网络可在紧集上任意逼近连续函数，但不保证训练可找到该解。",
+      "assumptions": "模型输入维度、训练/验证拆分、参数梯度和随机状态必须严格定义。",
+      "properties": [
+        "架构更复杂不保证真实收益预测更准确，应对比简单基线和泛化。",
+        "前向计算、反向传播、训练模式和推断模式须保持正确的软件语义。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "\\forall\\epsilon>0,\\ \\exists f_\\theta:\\sup_{x\\in K}|f_\\theta(x)-g(x)|<\\epsilon"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义计算图、模型容量或相应训练目标，检查张量维度及梯度路径。",
+          "tex": "\\forall\\epsilon>0,\\ \\exists f_\\theta:\\sup_{x\\in K}|f_\\theta(x)-g(x)|<\\epsilon"
+        },
+        {
+          "explanation": "在可控制输入上验证前向/反向数值行为，再通过独立保留数据检验其泛化。",
+          "tex": "\\forall\\epsilon>0,\\ \\exists f_\\theta:\\sup_{x\\in K}|f_\\theta(x)-g(x)|<\\epsilon"
+        }
+      ],
+      "code": "import torch\nm=torch.nn.Sequential(torch.nn.Linear(3,16),torch.nn.ReLU(),torch.nn.Linear(16,1))\nprint(m(torch.randn(4,3)).shape)",
+      "packages": "torch",
+      "application": "深度ETF因子模型、价格图像CNN、金融文本Transformer和风险预测网络的构建基础。",
+      "limits": "代码是概念层最小运行演示，不包含完整训练、调参与财务时点审计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n06-01",
+      "node_id": "deep-n06-01",
+      "title": "网络深度与宽度",
+      "definition": "增加宽度提升单层容量，增加深度允许层级复合与特征重用；两者改变参数效率及优化难度。",
+      "assumptions": "模型输入维度、训练/验证拆分、参数梯度和随机状态必须严格定义。",
+      "properties": [
+        "架构更复杂不保证真实收益预测更准确，应对比简单基线和泛化。",
+        "前向计算、反向传播、训练模式和推断模式须保持正确的软件语义。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "h^{(L)}=\\phi_L\\circ\\cdots\\circ\\phi_1(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义计算图、模型容量或相应训练目标，检查张量维度及梯度路径。",
+          "tex": "h^{(L)}=\\phi_L\\circ\\cdots\\circ\\phi_1(x)"
+        },
+        {
+          "explanation": "在可控制输入上验证前向/反向数值行为，再通过独立保留数据检验其泛化。",
+          "tex": "h^{(L)}=\\phi_L\\circ\\cdots\\circ\\phi_1(x)"
+        }
+      ],
+      "code": "import torch\nm=torch.nn.Sequential(torch.nn.Linear(3,16),torch.nn.ReLU(),torch.nn.Linear(16,1))\nprint(m(torch.randn(4,3)).shape)",
+      "packages": "torch",
+      "application": "深度ETF因子模型、价格图像CNN、金融文本Transformer和风险预测网络的构建基础。",
+      "limits": "代码是概念层最小运行演示，不包含完整训练、调参与财务时点审计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n02-02",
+      "node_id": "deep-n02-02",
+      "title": "链式法则",
+      "definition": "复合函数求导按计算图各路径的局部Jacobian连乘，反向传播由此得到参数梯度。",
+      "assumptions": "模型输入维度、训练/验证拆分、参数梯度和随机状态必须严格定义。",
+      "properties": [
+        "架构更复杂不保证真实收益预测更准确，应对比简单基线和泛化。",
+        "前向计算、反向传播、训练模式和推断模式须保持正确的软件语义。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "\\frac{\\partial L}{\\partial x}=\\frac{\\partial z}{\\partial x}^\\top\\frac{\\partial L}{\\partial z}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义计算图、模型容量或相应训练目标，检查张量维度及梯度路径。",
+          "tex": "\\frac{\\partial L}{\\partial x}=\\frac{\\partial z}{\\partial x}^\\top\\frac{\\partial L}{\\partial z}"
+        },
+        {
+          "explanation": "在可控制输入上验证前向/反向数值行为，再通过独立保留数据检验其泛化。",
+          "tex": "\\frac{\\partial L}{\\partial x}=\\frac{\\partial z}{\\partial x}^\\top\\frac{\\partial L}{\\partial z}"
+        }
+      ],
+      "code": "import torch\nx=torch.tensor(2.,requires_grad=True)\ny=(x*x+1)**2;y.backward();print(x.grad)",
+      "packages": "torch",
+      "application": "深度ETF因子模型、价格图像CNN、金融文本Transformer和风险预测网络的构建基础。",
+      "limits": "代码是概念层最小运行演示，不包含完整训练、调参与财务时点审计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n04-02",
+      "node_id": "deep-n04-02",
+      "title": "Jacobian向量积",
+      "definition": "JVP按前向模式计算Jacobian作用于给定方向向量，而不构造完整矩阵。",
+      "assumptions": "模型输入维度、训练/验证拆分、参数梯度和随机状态必须严格定义。",
+      "properties": [
+        "架构更复杂不保证真实收益预测更准确，应对比简单基线和泛化。",
+        "前向计算、反向传播、训练模式和推断模式须保持正确的软件语义。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "J_f(x)v=\\left.\\frac{d}{d\\epsilon}f(x+\\epsilon v)\\right|_{\\epsilon=0}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义计算图、模型容量或相应训练目标，检查张量维度及梯度路径。",
+          "tex": "J_f(x)v=\\left.\\frac{d}{d\\epsilon}f(x+\\epsilon v)\\right|_{\\epsilon=0}"
+        },
+        {
+          "explanation": "在可控制输入上验证前向/反向数值行为，再通过独立保留数据检验其泛化。",
+          "tex": "J_f(x)v=\\left.\\frac{d}{d\\epsilon}f(x+\\epsilon v)\\right|_{\\epsilon=0}"
+        }
+      ],
+      "code": "import torch\nfrom torch.func import jvp\nf=lambda x:x.square()\nprint(jvp(f,(torch.tensor([2.,3.]),),(torch.ones(2),)))",
+      "packages": "torch",
+      "application": "深度ETF因子模型、价格图像CNN、金融文本Transformer和风险预测网络的构建基础。",
+      "limits": "代码是概念层最小运行演示，不包含完整训练、调参与财务时点审计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n05-02",
+      "node_id": "deep-n05-02",
+      "title": "向量Jacobian积",
+      "definition": "VJP按反向模式计算输出线性组合对输入的梯度，是自动微分反向传播的基础。",
+      "assumptions": "模型输入维度、训练/验证拆分、参数梯度和随机状态必须严格定义。",
+      "properties": [
+        "架构更复杂不保证真实收益预测更准确，应对比简单基线和泛化。",
+        "前向计算、反向传播、训练模式和推断模式须保持正确的软件语义。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "v^\\top J_f(x)=\\nabla_x(v^\\top f(x))^\\top"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义计算图、模型容量或相应训练目标，检查张量维度及梯度路径。",
+          "tex": "v^\\top J_f(x)=\\nabla_x(v^\\top f(x))^\\top"
+        },
+        {
+          "explanation": "在可控制输入上验证前向/反向数值行为，再通过独立保留数据检验其泛化。",
+          "tex": "v^\\top J_f(x)=\\nabla_x(v^\\top f(x))^\\top"
+        }
+      ],
+      "code": "import torch\nx=torch.tensor([2.,3.],requires_grad=True);y=x.square()\nprint(torch.autograd.grad(y,x,grad_outputs=torch.ones_like(y)))",
+      "packages": "torch",
+      "application": "深度ETF因子模型、价格图像CNN、金融文本Transformer和风险预测网络的构建基础。",
+      "limits": "代码是概念层最小运行演示，不包含完整训练、调参与财务时点审计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n06-02",
+      "node_id": "deep-n06-02",
+      "title": "梯度检查",
+      "definition": "梯度检查使用有限差分与自动微分结果比较，定位自定义运算的反传错误。",
+      "assumptions": "模型输入维度、训练/验证拆分、参数梯度和随机状态必须严格定义。",
+      "properties": [
+        "架构更复杂不保证真实收益预测更准确，应对比简单基线和泛化。",
+        "前向计算、反向传播、训练模式和推断模式须保持正确的软件语义。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "g_i^{FD}\\approx[f(\\theta+\\epsilon e_i)-f(\\theta-\\epsilon e_i)]/(2\\epsilon)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义计算图、模型容量或相应训练目标，检查张量维度及梯度路径。",
+          "tex": "g_i^{FD}\\approx[f(\\theta+\\epsilon e_i)-f(\\theta-\\epsilon e_i)]/(2\\epsilon)"
+        },
+        {
+          "explanation": "在可控制输入上验证前向/反向数值行为，再通过独立保留数据检验其泛化。",
+          "tex": "g_i^{FD}\\approx[f(\\theta+\\epsilon e_i)-f(\\theta-\\epsilon e_i)]/(2\\epsilon)"
+        }
+      ],
+      "code": "import torch\nfrom torch.autograd import gradcheck\nx=torch.randn(3,dtype=torch.double,requires_grad=True)\nprint(gradcheck(lambda z:(z*z).sum(),(x,)))",
+      "packages": "torch",
+      "application": "深度ETF因子模型、价格图像CNN、金融文本Transformer和风险预测网络的构建基础。",
+      "limits": "代码是概念层最小运行演示，不包含完整训练、调参与财务时点审计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n01-03",
+      "node_id": "deep-n01-03",
+      "title": "torch.Tensor",
+      "definition": "Tensor是PyTorch的多维数组，可位于CPU/GPU并参与可微计算图。",
+      "assumptions": "模型输入维度、训练/验证拆分、参数梯度和随机状态必须严格定义。",
+      "properties": [
+        "架构更复杂不保证真实收益预测更准确，应对比简单基线和泛化。",
+        "前向计算、反向传播、训练模式和推断模式须保持正确的软件语义。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "X\\in\\mathbb R^{B\\times T\\times d}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义计算图、模型容量或相应训练目标，检查张量维度及梯度路径。",
+          "tex": "X\\in\\mathbb R^{B\\times T\\times d}"
+        },
+        {
+          "explanation": "在可控制输入上验证前向/反向数值行为，再通过独立保留数据检验其泛化。",
+          "tex": "X\\in\\mathbb R^{B\\times T\\times d}"
+        }
+      ],
+      "code": "import torch\nx=torch.arange(24,dtype=torch.float32).reshape(2,3,4)\nprint(x.shape,x.mean(-1))",
+      "packages": "torch",
+      "application": "深度ETF因子模型、价格图像CNN、金融文本Transformer和风险预测网络的构建基础。",
+      "limits": "代码是概念层最小运行演示，不包含完整训练、调参与财务时点审计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n02-03",
+      "node_id": "deep-n02-03",
+      "title": "nn.Module",
+      "definition": "nn.Module登记可训练参数与子模块，定义前向传播和模型状态。",
+      "assumptions": "模型输入维度、训练/验证拆分、参数梯度和随机状态必须严格定义。",
+      "properties": [
+        "架构更复杂不保证真实收益预测更准确，应对比简单基线和泛化。",
+        "前向计算、反向传播、训练模式和推断模式须保持正确的软件语义。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "y=f_\\theta(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义计算图、模型容量或相应训练目标，检查张量维度及梯度路径。",
+          "tex": "y=f_\\theta(x)"
+        },
+        {
+          "explanation": "在可控制输入上验证前向/反向数值行为，再通过独立保留数据检验其泛化。",
+          "tex": "y=f_\\theta(x)"
+        }
+      ],
+      "code": "import torch\nclass Net(torch.nn.Module):\n    def __init__(self):\n        super().__init__();self.fc=torch.nn.Linear(3,1)\n    def forward(self,x):return self.fc(x)\nprint(Net()(torch.ones(1,3)))",
+      "packages": "torch",
+      "application": "深度ETF因子模型、价格图像CNN、金融文本Transformer和风险预测网络的构建基础。",
+      "limits": "代码是概念层最小运行演示，不包含完整训练、调参与财务时点审计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n05-03",
+      "node_id": "deep-n05-03",
+      "title": "验证循环",
+      "definition": "验证模式关闭训练随机层并禁止参数更新，在保留样本上计算独立损失。",
+      "assumptions": "模型输入维度、训练/验证拆分、参数梯度和随机状态必须严格定义。",
+      "properties": [
+        "架构更复杂不保证真实收益预测更准确，应对比简单基线和泛化。",
+        "前向计算、反向传播、训练模式和推断模式须保持正确的软件语义。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "L_{\\rm val}=|V|^{-1}\\sum_{i\\in V}\\ell(f_{\\hat\\theta}(x_i),y_i)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义计算图、模型容量或相应训练目标，检查张量维度及梯度路径。",
+          "tex": "L_{\\rm val}=|V|^{-1}\\sum_{i\\in V}\\ell(f_{\\hat\\theta}(x_i),y_i)"
+        },
+        {
+          "explanation": "在可控制输入上验证前向/反向数值行为，再通过独立保留数据检验其泛化。",
+          "tex": "L_{\\rm val}=|V|^{-1}\\sum_{i\\in V}\\ell(f_{\\hat\\theta}(x_i),y_i)"
+        }
+      ],
+      "code": "import torch\nnet=torch.nn.Sequential(torch.nn.Linear(2,1),torch.nn.Dropout(.2))\nnet.eval()\nwith torch.no_grad():print(net(torch.ones(1,2)))",
+      "packages": "torch",
+      "application": "深度ETF因子模型、价格图像CNN、金融文本Transformer和风险预测网络的构建基础。",
+      "limits": "代码是概念层最小运行演示，不包含完整训练、调参与财务时点审计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n06-03",
+      "node_id": "deep-n06-03",
+      "title": "模型保存与加载",
+      "definition": "保存state_dict并验证模型版本、张量维度和输入Schema，避免推理与训练实现错位。",
+      "assumptions": "模型输入维度、训练/验证拆分、参数梯度和随机状态必须严格定义。",
+      "properties": [
+        "架构更复杂不保证真实收益预测更准确，应对比简单基线和泛化。",
+        "前向计算、反向传播、训练模式和推断模式须保持正确的软件语义。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "\\hat\\theta=\\operatorname{Load}(\\operatorname{Save}(\\theta))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义计算图、模型容量或相应训练目标，检查张量维度及梯度路径。",
+          "tex": "\\hat\\theta=\\operatorname{Load}(\\operatorname{Save}(\\theta))"
+        },
+        {
+          "explanation": "在可控制输入上验证前向/反向数值行为，再通过独立保留数据检验其泛化。",
+          "tex": "\\hat\\theta=\\operatorname{Load}(\\operatorname{Save}(\\theta))"
+        }
+      ],
+      "code": "import io,torch\nnet=torch.nn.Linear(2,1);file=io.BytesIO()\ntorch.save(net.state_dict(),file);file.seek(0)\nnet.load_state_dict(torch.load(file,weights_only=True));print(\"loaded\")",
+      "packages": "torch",
+      "application": "深度ETF因子模型、价格图像CNN、金融文本Transformer和风险预测网络的构建基础。",
+      "limits": "代码是概念层最小运行演示，不包含完整训练、调参与财务时点审计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n05-04",
+      "node_id": "deep-n05-04",
+      "title": "Weight Decay",
+      "definition": "权重衰减持续压缩参数范数，限制部分过大权重对预测的不稳定影响。",
+      "assumptions": "模型输入维度、训练/验证拆分、参数梯度和随机状态必须严格定义。",
+      "properties": [
+        "架构更复杂不保证真实收益预测更准确，应对比简单基线和泛化。",
+        "前向计算、反向传播、训练模式和推断模式须保持正确的软件语义。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "\\theta^+=(1-\\eta\\lambda)\\theta-\\eta g"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义计算图、模型容量或相应训练目标，检查张量维度及梯度路径。",
+          "tex": "\\theta^+=(1-\\eta\\lambda)\\theta-\\eta g"
+        },
+        {
+          "explanation": "在可控制输入上验证前向/反向数值行为，再通过独立保留数据检验其泛化。",
+          "tex": "\\theta^+=(1-\\eta\\lambda)\\theta-\\eta g"
+        }
+      ],
+      "code": "import torch\nx=torch.nn.Parameter(torch.tensor(2.))\nopt=torch.optim.AdamW([x],lr=.1,weight_decay=.1)\nopt.zero_grad();(x-1).square().backward();opt.step()\nprint(x.item())",
+      "packages": "torch",
+      "application": "深度ETF因子模型、价格图像CNN、金融文本Transformer和风险预测网络的构建基础。",
+      "limits": "代码是概念层最小运行演示，不包含完整训练、调参与财务时点审计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n06-04",
+      "node_id": "deep-n06-04",
+      "title": "初始化",
+      "definition": "初始权重方差需匹配激活和扇入规模，避免深层特征/梯度过度放大与衰减。",
+      "assumptions": "模型输入维度、训练/验证拆分、参数梯度和随机状态必须严格定义。",
+      "properties": [
+        "架构更复杂不保证真实收益预测更准确，应对比简单基线和泛化。",
+        "前向计算、反向传播、训练模式和推断模式须保持正确的软件语义。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "\\operatorname{Var}(W_{\\rm He})=2/n_{\\rm in}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义计算图、模型容量或相应训练目标，检查张量维度及梯度路径。",
+          "tex": "\\operatorname{Var}(W_{\\rm He})=2/n_{\\rm in}"
+        },
+        {
+          "explanation": "在可控制输入上验证前向/反向数值行为，再通过独立保留数据检验其泛化。",
+          "tex": "\\operatorname{Var}(W_{\\rm He})=2/n_{\\rm in}"
+        }
+      ],
+      "code": "import torch\nm=torch.nn.Linear(40,20);torch.nn.init.kaiming_normal_(m.weight)\nprint(m.weight.std())",
+      "packages": "torch",
+      "application": "深度ETF因子模型、价格图像CNN、金融文本Transformer和风险预测网络的构建基础。",
+      "limits": "代码是概念层最小运行演示，不包含完整训练、调参与财务时点审计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n01-05",
+      "node_id": "deep-n01-05",
+      "title": "容量与过参数化",
+      "definition": "模型参数数量超过样本数时仍可能获得较好泛化，受初始化、优化、数据结构和隐式正则影响。",
+      "assumptions": "模型输入维度、训练/验证拆分、参数梯度和随机状态必须严格定义。",
+      "properties": [
+        "架构更复杂不保证真实收益预测更准确，应对比简单基线和泛化。",
+        "前向计算、反向传播、训练模式和推断模式须保持正确的软件语义。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "p_\\theta\\gg n_{\\rm train}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义计算图、模型容量或相应训练目标，检查张量维度及梯度路径。",
+          "tex": "p_\\theta\\gg n_{\\rm train}"
+        },
+        {
+          "explanation": "在可控制输入上验证前向/反向数值行为，再通过独立保留数据检验其泛化。",
+          "tex": "p_\\theta\\gg n_{\\rm train}"
+        }
+      ],
+      "code": "import torch\nfor width in [4,64]:\n    m=torch.nn.Sequential(torch.nn.Linear(3,width),torch.nn.ReLU(),torch.nn.Linear(width,1))\n    print(width,sum(p.numel() for p in m.parameters()))",
+      "packages": "torch",
+      "application": "深度ETF因子模型、价格图像CNN、金融文本Transformer和风险预测网络的构建基础。",
+      "limits": "代码是概念层最小运行演示，不包含完整训练、调参与财务时点审计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n02-05",
+      "node_id": "deep-n02-05",
+      "title": "双下降",
+      "definition": "双下降现象指模型复杂度接近插值阈值时测试误差可能先升后降，不等于任何任务必然出现。",
+      "assumptions": "模型输入维度、训练/验证拆分、参数梯度和随机状态必须严格定义。",
+      "properties": [
+        "架构更复杂不保证真实收益预测更准确，应对比简单基线和泛化。",
+        "前向计算、反向传播、训练模式和推断模式须保持正确的软件语义。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "R_{\\rm test}=R(\\mathrm{model\\ capacity})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义计算图、模型容量或相应训练目标，检查张量维度及梯度路径。",
+          "tex": "R_{\\rm test}=R(\\mathrm{model\\ capacity})"
+        },
+        {
+          "explanation": "在可控制输入上验证前向/反向数值行为，再通过独立保留数据检验其泛化。",
+          "tex": "R_{\\rm test}=R(\\mathrm{model\\ capacity})"
+        }
+      ],
+      "code": "import torch\nfor width in [4,64]:\n    m=torch.nn.Sequential(torch.nn.Linear(3,width),torch.nn.ReLU(),torch.nn.Linear(width,1))\n    print(width,sum(p.numel() for p in m.parameters()))",
+      "packages": "torch",
+      "application": "深度ETF因子模型、价格图像CNN、金融文本Transformer和风险预测网络的构建基础。",
+      "limits": "代码是概念层最小运行演示，不包含完整训练、调参与财务时点审计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n03-05",
+      "node_id": "deep-n03-05",
+      "title": "Early Stopping",
+      "definition": "根据保留样本验证误差选择训练结束时点，而不是仅追求训练损失持续下降。",
+      "assumptions": "模型输入维度、训练/验证拆分、参数梯度和随机状态必须严格定义。",
+      "properties": [
+        "架构更复杂不保证真实收益预测更准确，应对比简单基线和泛化。",
+        "前向计算、反向传播、训练模式和推断模式须保持正确的软件语义。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "t^*=\\arg\\min_tL_{\\rm val}(\\theta_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义计算图、模型容量或相应训练目标，检查张量维度及梯度路径。",
+          "tex": "t^*=\\arg\\min_tL_{\\rm val}(\\theta_t)"
+        },
+        {
+          "explanation": "在可控制输入上验证前向/反向数值行为，再通过独立保留数据检验其泛化。",
+          "tex": "t^*=\\arg\\min_tL_{\\rm val}(\\theta_t)"
+        }
+      ],
+      "code": "train=[1.,.7,.4,.3,.2];valid=[.9,.6,.35,.38,.5]\nprint(\"Best epoch:\",min(range(5),key=lambda i:valid[i]))",
+      "packages": "Python standard library",
+      "application": "深度ETF因子模型、价格图像CNN、金融文本Transformer和风险预测网络的构建基础。",
+      "limits": "代码是概念层最小运行演示，不包含完整训练、调参与财务时点审计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n04-05",
+      "node_id": "deep-n04-05",
+      "title": "数据增强",
+      "definition": "训练期施加保持标签语义的变换，增大有效数据多样性并学习必要的不变性。",
+      "assumptions": "模型输入维度、训练/验证拆分、参数梯度和随机状态必须严格定义。",
+      "properties": [
+        "架构更复杂不保证真实收益预测更准确，应对比简单基线和泛化。",
+        "前向计算、反向传播、训练模式和推断模式须保持正确的软件语义。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "L=E_{T\\sim\\mathcal T}[\\ell(f_\\theta(T(x)),y)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义计算图、模型容量或相应训练目标，检查张量维度及梯度路径。",
+          "tex": "L=E_{T\\sim\\mathcal T}[\\ell(f_\\theta(T(x)),y)]"
+        },
+        {
+          "explanation": "在可控制输入上验证前向/反向数值行为，再通过独立保留数据检验其泛化。",
+          "tex": "L=E_{T\\sim\\mathcal T}[\\ell(f_\\theta(T(x)),y)]"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(10,4);noise=.01*torch.randn_like(x)\nprint((x+noise).shape)",
+      "packages": "torch",
+      "application": "深度ETF因子模型、价格图像CNN、金融文本Transformer和风险预测网络的构建基础。",
+      "limits": "代码是概念层最小运行演示，不包含完整训练、调参与财务时点审计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n05-05",
+      "node_id": "deep-n05-05",
+      "title": "学习率调度",
+      "definition": "根据迭代步数调整学习率，常用余弦退火、阶梯衰减或预热策略。",
+      "assumptions": "模型输入维度、训练/验证拆分、参数梯度和随机状态必须严格定义。",
+      "properties": [
+        "架构更复杂不保证真实收益预测更准确，应对比简单基线和泛化。",
+        "前向计算、反向传播、训练模式和推断模式须保持正确的软件语义。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "\\eta_t=\\eta_{\\min}+(\\eta_{\\max}-\\eta_{\\min})(1+\\cos(\\pi t/T))/2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义计算图、模型容量或相应训练目标，检查张量维度及梯度路径。",
+          "tex": "\\eta_t=\\eta_{\\min}+(\\eta_{\\max}-\\eta_{\\min})(1+\\cos(\\pi t/T))/2"
+        },
+        {
+          "explanation": "在可控制输入上验证前向/反向数值行为，再通过独立保留数据检验其泛化。",
+          "tex": "\\eta_t=\\eta_{\\min}+(\\eta_{\\max}-\\eta_{\\min})(1+\\cos(\\pi t/T))/2"
+        }
+      ],
+      "code": "import math\nprint([.001*(1+math.cos(math.pi*t/10))/2 for t in range(11)])",
+      "packages": "Python standard library",
+      "application": "深度ETF因子模型、价格图像CNN、金融文本Transformer和风险预测网络的构建基础。",
+      "limits": "代码是概念层最小运行演示，不包含完整训练、调参与财务时点审计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n06-05",
+      "node_id": "deep-n06-05",
+      "title": "分布外泛化",
+      "definition": "OOD泛化检验模型在训练分布之外的资产、时期或极端风险状态上的表现。",
+      "assumptions": "模型输入维度、训练/验证拆分、参数梯度和随机状态必须严格定义。",
+      "properties": [
+        "架构更复杂不保证真实收益预测更准确，应对比简单基线和泛化。",
+        "前向计算、反向传播、训练模式和推断模式须保持正确的软件语义。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "P_{\\rm train}(X,Y)\\ne P_{\\rm test}(X,Y)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义计算图、模型容量或相应训练目标，检查张量维度及梯度路径。",
+          "tex": "P_{\\rm train}(X,Y)\\ne P_{\\rm test}(X,Y)"
+        },
+        {
+          "explanation": "在可控制输入上验证前向/反向数值行为，再通过独立保留数据检验其泛化。",
+          "tex": "P_{\\rm train}(X,Y)\\ne P_{\\rm test}(X,Y)"
+        }
+      ],
+      "code": "import numpy as np\ntrain=np.random.default_rng(0).normal(size=(100,2))\npoint=np.array([5.,4.])\nprint(np.linalg.norm((point-train.mean(0))/train.std(0)))",
+      "packages": "numpy",
+      "application": "深度ETF因子模型、价格图像CNN、金融文本Transformer和风险预测网络的构建基础。",
+      "limits": "代码是概念层最小运行演示，不包含完整训练、调参与财务时点审计。",
+      "coverage": "complete"
+    }
+  ]
+}
