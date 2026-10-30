@@ -1,0 +1,677 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "classification-n01-01",
+      "node_id": "classification-n01-01",
+      "title": "感知机Perceptron",
+      "definition": "感知机误分类时依据样本标签调整线性判别权重，是经典在线线性分类算法。",
+      "assumptions": "依据任务类别定义、特征尺度与决策成本选择分类算法，全部校准与阈值选择须限定在训练/验证样本内。",
+      "properties": [
+        "分类分数、类别标签和校准概率具有不同含义，不能混同。",
+        "类别基准率和样本分布变化会显著影响模型样本外表现。"
+      ],
+      "formulas": [
+        {
+          "label": "分类目标或数学关系",
+          "tex": "w^{+}=w+\\eta y_ix_i\\quad(y_iw^\\top x_i\\le0)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义输入样本、类别和相应假设下的决策分数或条件概率。",
+          "tex": "w^{+}=w+\\eta y_ix_i\\quad(y_iw^\\top x_i\\le0)"
+        },
+        {
+          "explanation": "根据所示目标训练参数，再用独立验证样本决定超参数与阈值。",
+          "tex": "w^{+}=w+\\eta y_ix_i\\quad(y_iw^\\top x_i\\le0)"
+        }
+      ],
+      "code": "import numpy as np\nX=np.array([[1,1],[-1,-1],[2,1],[-2,-1]]);y=np.array([1,-1,1,-1]);w=np.zeros(2)\nfor _ in range(5):\n for x,t in zip(X,y):\n  if t*(w@x)<=0:w+=t*x\nprint(w)",
+      "packages": "numpy及sklearn等依赖按代码中的import安装",
+      "application": "用于ETF收益方向、金融事件风险或财报文本分类的基线构造与严谨评估。",
+      "limits": "在非平稳市场中，类别比例和概率校准会变化；任何准确率结果均需扣成本的策略检验。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n04-01",
+      "node_id": "classification-n04-01",
+      "title": "二元交叉熵",
+      "definition": "Bernoulli模型中使用预测正类概率计算真实0/1标签的负对数似然。",
+      "assumptions": "依据任务类别定义、特征尺度与决策成本选择分类算法，全部校准与阈值选择须限定在训练/验证样本内。",
+      "properties": [
+        "分类分数、类别标签和校准概率具有不同含义，不能混同。",
+        "类别基准率和样本分布变化会显著影响模型样本外表现。"
+      ],
+      "formulas": [
+        {
+          "label": "分类目标或数学关系",
+          "tex": "L=-y\\log p-(1-y)\\log(1-p)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义输入样本、类别和相应假设下的决策分数或条件概率。",
+          "tex": "L=-y\\log p-(1-y)\\log(1-p)"
+        },
+        {
+          "explanation": "根据所示目标训练参数，再用独立验证样本决定超参数与阈值。",
+          "tex": "L=-y\\log p-(1-y)\\log(1-p)"
+        }
+      ],
+      "code": "import numpy as np\ny=np.array([1,0,1]);p=np.array([.8,.2,.6]);print(np.mean(-y*np.log(p)-(1-y)*np.log1p(-p)))",
+      "packages": "numpy及sklearn等依赖按代码中的import安装",
+      "application": "用于ETF收益方向、金融事件风险或财报文本分类的基线构造与严谨评估。",
+      "limits": "在非平稳市场中，类别比例和概率校准会变化；任何准确率结果均需扣成本的策略检验。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n05-01",
+      "node_id": "classification-n05-01",
+      "title": "多分类交叉熵",
+      "definition": "多分类交叉熵对互斥类别的Softmax概率使用负对数目标。",
+      "assumptions": "依据任务类别定义、特征尺度与决策成本选择分类算法，全部校准与阈值选择须限定在训练/验证样本内。",
+      "properties": [
+        "分类分数、类别标签和校准概率具有不同含义，不能混同。",
+        "类别基准率和样本分布变化会显著影响模型样本外表现。"
+      ],
+      "formulas": [
+        {
+          "label": "分类目标或数学关系",
+          "tex": "L=-\\sum_{k=1}^Ky_k\\log p_k"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义输入样本、类别和相应假设下的决策分数或条件概率。",
+          "tex": "L=-\\sum_{k=1}^Ky_k\\log p_k"
+        },
+        {
+          "explanation": "根据所示目标训练参数，再用独立验证样本决定超参数与阈值。",
+          "tex": "L=-\\sum_{k=1}^Ky_k\\log p_k"
+        }
+      ],
+      "code": "import numpy as np\nz=np.array([1.,2.,.5]);e=np.exp(z-z.max());p=e/e.sum();print(-np.log(p[1]))",
+      "packages": "numpy及sklearn等依赖按代码中的import安装",
+      "application": "用于ETF收益方向、金融事件风险或财报文本分类的基线构造与严谨评估。",
+      "limits": "在非平稳市场中，类别比例和概率校准会变化；任何准确率结果均需扣成本的策略检验。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n06-01",
+      "node_id": "classification-n06-01",
+      "title": "类别权重",
+      "definition": "对稀有类别给予更高损失权重，减少训练目标被多数类完全主导的风险。",
+      "assumptions": "依据任务类别定义、特征尺度与决策成本选择分类算法，全部校准与阈值选择须限定在训练/验证样本内。",
+      "properties": [
+        "分类分数、类别标签和校准概率具有不同含义，不能混同。",
+        "类别基准率和样本分布变化会显著影响模型样本外表现。"
+      ],
+      "formulas": [
+        {
+          "label": "分类目标或数学关系",
+          "tex": "L=\\sum_iw_{y_i}\\ell(f(x_i),y_i)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义输入样本、类别和相应假设下的决策分数或条件概率。",
+          "tex": "L=\\sum_iw_{y_i}\\ell(f(x_i),y_i)"
+        },
+        {
+          "explanation": "根据所示目标训练参数，再用独立验证样本决定超参数与阈值。",
+          "tex": "L=\\sum_iw_{y_i}\\ell(f(x_i),y_i)"
+        }
+      ],
+      "code": "import numpy as np\ny=np.array([0,0,0,0,1]);weights={0:1.,1:4.};print([weights[v] for v in y])",
+      "packages": "numpy及sklearn等依赖按代码中的import安装",
+      "application": "用于ETF收益方向、金融事件风险或财报文本分类的基线构造与严谨评估。",
+      "limits": "在非平稳市场中，类别比例和概率校准会变化；任何准确率结果均需扣成本的策略检验。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n02-02",
+      "node_id": "classification-n02-02",
+      "title": "距离与度量",
+      "definition": "距离函数定义最近邻及核分类的样本相似性，欧氏距离、余弦和Mahalanobis反映不同几何假设。",
+      "assumptions": "依据任务类别定义、特征尺度与决策成本选择分类算法，全部校准与阈值选择须限定在训练/验证样本内。",
+      "properties": [
+        "分类分数、类别标签和校准概率具有不同含义，不能混同。",
+        "类别基准率和样本分布变化会显著影响模型样本外表现。"
+      ],
+      "formulas": [
+        {
+          "label": "分类目标或数学关系",
+          "tex": "d_M(x,y)=\\sqrt{(x-y)^\\top M(x-y)}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义输入样本、类别和相应假设下的决策分数或条件概率。",
+          "tex": "d_M(x,y)=\\sqrt{(x-y)^\\top M(x-y)}"
+        },
+        {
+          "explanation": "根据所示目标训练参数，再用独立验证样本决定超参数与阈值。",
+          "tex": "d_M(x,y)=\\sqrt{(x-y)^\\top M(x-y)}"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([1.,2.]);y=np.array([2.,0.]);print(np.linalg.norm(x-y))",
+      "packages": "numpy及sklearn等依赖按代码中的import安装",
+      "application": "用于ETF收益方向、金融事件风险或财报文本分类的基线构造与严谨评估。",
+      "limits": "在非平稳市场中，类别比例和概率校准会变化；任何准确率结果均需扣成本的策略检验。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n04-02",
+      "node_id": "classification-n04-02",
+      "title": "Multinomial NB",
+      "definition": "多项式朴素贝叶斯把文档词计数视为条件独立的多项式似然，适合稀疏文本分类。",
+      "assumptions": "依据任务类别定义、特征尺度与决策成本选择分类算法，全部校准与阈值选择须限定在训练/验证样本内。",
+      "properties": [
+        "分类分数、类别标签和校准概率具有不同含义，不能混同。",
+        "类别基准率和样本分布变化会显著影响模型样本外表现。"
+      ],
+      "formulas": [
+        {
+          "label": "分类目标或数学关系",
+          "tex": "P(y=k|x)\\propto P(y=k)\\prod_jP(w_j|k)^{x_j}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义输入样本、类别和相应假设下的决策分数或条件概率。",
+          "tex": "P(y=k|x)\\propto P(y=k)\\prod_jP(w_j|k)^{x_j}"
+        },
+        {
+          "explanation": "根据所示目标训练参数，再用独立验证样本决定超参数与阈值。",
+          "tex": "P(y=k|x)\\propto P(y=k)\\prod_jP(w_j|k)^{x_j}"
+        }
+      ],
+      "code": "from sklearn.naive_bayes import MultinomialNB\nimport numpy as np\nX=np.array([[3,0],[2,0],[0,3],[0,4]]);y=[0,0,1,1]\nprint(MultinomialNB().fit(X,y).predict([[1,3]]))",
+      "packages": "numpy及sklearn等依赖按代码中的import安装",
+      "application": "用于ETF收益方向、金融事件风险或财报文本分类的基线构造与严谨评估。",
+      "limits": "在非平稳市场中，类别比例和概率校准会变化；任何准确率结果均需扣成本的策略检验。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n05-02",
+      "node_id": "classification-n05-02",
+      "title": "先验与后验",
+      "definition": "分类中的先验是看到特征前各类别的概率，后验用类条件特征似然更新类别概率。",
+      "assumptions": "依据任务类别定义、特征尺度与决策成本选择分类算法，全部校准与阈值选择须限定在训练/验证样本内。",
+      "properties": [
+        "分类分数、类别标签和校准概率具有不同含义，不能混同。",
+        "类别基准率和样本分布变化会显著影响模型样本外表现。"
+      ],
+      "formulas": [
+        {
+          "label": "分类目标或数学关系",
+          "tex": "P(Y=k|X=x)=\\frac{p(x|Y=k)P(Y=k)}{\\sum_jp(x|Y=j)P(Y=j)}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义输入样本、类别和相应假设下的决策分数或条件概率。",
+          "tex": "P(Y=k|X=x)=\\frac{p(x|Y=k)P(Y=k)}{\\sum_jp(x|Y=j)P(Y=j)}"
+        },
+        {
+          "explanation": "根据所示目标训练参数，再用独立验证样本决定超参数与阈值。",
+          "tex": "P(Y=k|X=x)=\\frac{p(x|Y=k)P(Y=k)}{\\sum_jp(x|Y=j)P(Y=j)}"
+        }
+      ],
+      "code": "import numpy as np\nprior=np.array([.7,.3]);lik=np.array([.2,.8]);posterior=prior*lik;print(posterior/posterior.sum())",
+      "packages": "numpy及sklearn等依赖按代码中的import安装",
+      "application": "用于ETF收益方向、金融事件风险或财报文本分类的基线构造与严谨评估。",
+      "limits": "在非平稳市场中，类别比例和概率校准会变化；任何准确率结果均需扣成本的策略检验。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n06-02",
+      "node_id": "classification-n06-02",
+      "title": "概率校准",
+      "definition": "概率校准要求预测概率等于相应分组事件长期发生频率，可用温度缩放或Isotonic修正。",
+      "assumptions": "依据任务类别定义、特征尺度与决策成本选择分类算法，全部校准与阈值选择须限定在训练/验证样本内。",
+      "properties": [
+        "分类分数、类别标签和校准概率具有不同含义，不能混同。",
+        "类别基准率和样本分布变化会显著影响模型样本外表现。"
+      ],
+      "formulas": [
+        {
+          "label": "分类目标或数学关系",
+          "tex": "P(Y=1|\\hat p=p)\\approx p"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义输入样本、类别和相应假设下的决策分数或条件概率。",
+          "tex": "P(Y=1|\\hat p=p)\\approx p"
+        },
+        {
+          "explanation": "根据所示目标训练参数，再用独立验证样本决定超参数与阈值。",
+          "tex": "P(Y=1|\\hat p=p)\\approx p"
+        }
+      ],
+      "code": "import numpy as np\ny=np.array([0,1,0,1,1]);p=np.array([.1,.7,.2,.9,.6]);print(np.mean((p-y)**2))",
+      "packages": "numpy及sklearn等依赖按代码中的import安装",
+      "application": "用于ETF收益方向、金融事件风险或财报文本分类的基线构造与严谨评估。",
+      "limits": "在非平稳市场中，类别比例和概率校准会变化；任何准确率结果均需扣成本的策略检验。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n02-03",
+      "node_id": "classification-n02-03",
+      "title": "二次判别分析QDA",
+      "definition": "QDA允许不同类别使用独立高斯协方差，因此判别边界通常为二次曲面。",
+      "assumptions": "依据任务类别定义、特征尺度与决策成本选择分类算法，全部校准与阈值选择须限定在训练/验证样本内。",
+      "properties": [
+        "分类分数、类别标签和校准概率具有不同含义，不能混同。",
+        "类别基准率和样本分布变化会显著影响模型样本外表现。"
+      ],
+      "formulas": [
+        {
+          "label": "分类目标或数学关系",
+          "tex": "\\delta_k(x)=-\\frac12\\log|\\Sigma_k|-\\frac12(x-\\mu_k)^\\top\\Sigma_k^{-1}(x-\\mu_k)+\\log\\pi_k"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义输入样本、类别和相应假设下的决策分数或条件概率。",
+          "tex": "\\delta_k(x)=-\\frac12\\log|\\Sigma_k|-\\frac12(x-\\mu_k)^\\top\\Sigma_k^{-1}(x-\\mu_k)+\\log\\pi_k"
+        },
+        {
+          "explanation": "根据所示目标训练参数，再用独立验证样本决定超参数与阈值。",
+          "tex": "\\delta_k(x)=-\\frac12\\log|\\Sigma_k|-\\frac12(x-\\mu_k)^\\top\\Sigma_k^{-1}(x-\\mu_k)+\\log\\pi_k"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis\nrng=np.random.default_rng(0);X=np.r_[rng.normal(size=(30,2)),rng.normal(2,size=(30,2))];y=[0]*30+[1]*30\nprint(QuadraticDiscriminantAnalysis().fit(X,y).predict([[1,1]]))",
+      "packages": "numpy及sklearn等依赖按代码中的import安装",
+      "application": "用于ETF收益方向、金融事件风险或财报文本分类的基线构造与严谨评估。",
+      "limits": "在非平稳市场中，类别比例和概率校准会变化；任何准确率结果均需扣成本的策略检验。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n03-03",
+      "node_id": "classification-n03-03",
+      "title": "Fisher判别",
+      "definition": "Fisher线性判别寻找类间投影均值差最大且类内离散度最小的方向。",
+      "assumptions": "依据任务类别定义、特征尺度与决策成本选择分类算法，全部校准与阈值选择须限定在训练/验证样本内。",
+      "properties": [
+        "分类分数、类别标签和校准概率具有不同含义，不能混同。",
+        "类别基准率和样本分布变化会显著影响模型样本外表现。"
+      ],
+      "formulas": [
+        {
+          "label": "分类目标或数学关系",
+          "tex": "J(w)=\\frac{[w^\\top(\\mu_1-\\mu_0)]^2}{w^\\top S_W w}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义输入样本、类别和相应假设下的决策分数或条件概率。",
+          "tex": "J(w)=\\frac{[w^\\top(\\mu_1-\\mu_0)]^2}{w^\\top S_W w}"
+        },
+        {
+          "explanation": "根据所示目标训练参数，再用独立验证样本决定超参数与阈值。",
+          "tex": "J(w)=\\frac{[w^\\top(\\mu_1-\\mu_0)]^2}{w^\\top S_W w}"
+        }
+      ],
+      "code": "import numpy as np\nm0=np.array([0.,0.]);m1=np.array([1.,2.]);S=np.eye(2);print(np.linalg.solve(S,m1-m0))",
+      "packages": "numpy及sklearn等依赖按代码中的import安装",
+      "application": "用于ETF收益方向、金融事件风险或财报文本分类的基线构造与严谨评估。",
+      "limits": "在非平稳市场中，类别比例和概率校准会变化；任何准确率结果均需扣成本的策略检验。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n04-03",
+      "node_id": "classification-n04-03",
+      "title": "广义线性判别",
+      "definition": "广义判别分析通过非线性映射或核技巧等扩展线性Fisher思想，尝试学习非线性区分方向。",
+      "assumptions": "依据任务类别定义、特征尺度与决策成本选择分类算法，全部校准与阈值选择须限定在训练/验证样本内。",
+      "properties": [
+        "分类分数、类别标签和校准概率具有不同含义，不能混同。",
+        "类别基准率和样本分布变化会显著影响模型样本外表现。"
+      ],
+      "formulas": [
+        {
+          "label": "分类目标或数学关系",
+          "tex": "\\max_w\\frac{w^\\top S_Bw}{w^\\top S_Ww}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义输入样本、类别和相应假设下的决策分数或条件概率。",
+          "tex": "\\max_w\\frac{w^\\top S_Bw}{w^\\top S_Ww}"
+        },
+        {
+          "explanation": "根据所示目标训练参数，再用独立验证样本决定超参数与阈值。",
+          "tex": "\\max_w\\frac{w^\\top S_Bw}{w^\\top S_Ww}"
+        }
+      ],
+      "code": "import numpy as np\nX=np.array([[1.,2.],[2.,3.]])\nprint(np.column_stack([X,X[:,0]*X[:,1]]))",
+      "packages": "numpy及sklearn等依赖按代码中的import安装",
+      "application": "用于ETF收益方向、金融事件风险或财报文本分类的基线构造与严谨评估。",
+      "limits": "在非平稳市场中，类别比例和概率校准会变化；任何准确率结果均需扣成本的策略检验。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n05-03",
+      "node_id": "classification-n05-03",
+      "title": "判别阈值",
+      "definition": "概率分类可根据业务成本选择不同于0.5的决策阈值，平衡漏报与误报。",
+      "assumptions": "依据任务类别定义、特征尺度与决策成本选择分类算法，全部校准与阈值选择须限定在训练/验证样本内。",
+      "properties": [
+        "分类分数、类别标签和校准概率具有不同含义，不能混同。",
+        "类别基准率和样本分布变化会显著影响模型样本外表现。"
+      ],
+      "formulas": [
+        {
+          "label": "分类目标或数学关系",
+          "tex": "\\hat y=\\mathbf1[\\hat p>\\tau]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义输入样本、类别和相应假设下的决策分数或条件概率。",
+          "tex": "\\hat y=\\mathbf1[\\hat p>\\tau]"
+        },
+        {
+          "explanation": "根据所示目标训练参数，再用独立验证样本决定超参数与阈值。",
+          "tex": "\\hat y=\\mathbf1[\\hat p>\\tau]"
+        }
+      ],
+      "code": "import numpy as np\np=np.array([.2,.5,.8]);print((p>.7).astype(int))",
+      "packages": "numpy及sklearn等依赖按代码中的import安装",
+      "application": "用于ETF收益方向、金融事件风险或财报文本分类的基线构造与严谨评估。",
+      "limits": "在非平稳市场中，类别比例和概率校准会变化；任何准确率结果均需扣成本的策略检验。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n06-03",
+      "node_id": "classification-n06-03",
+      "title": "成本敏感分类",
+      "definition": "当假阳性与假阴性的经济损失不同时，分类阈值应最小化预期误判成本而非最大化准确率。",
+      "assumptions": "依据任务类别定义、特征尺度与决策成本选择分类算法，全部校准与阈值选择须限定在训练/验证样本内。",
+      "properties": [
+        "分类分数、类别标签和校准概率具有不同含义，不能混同。",
+        "类别基准率和样本分布变化会显著影响模型样本外表现。"
+      ],
+      "formulas": [
+        {
+          "label": "分类目标或数学关系",
+          "tex": "L=C_{FP}\\mathbf1[\\hat y=1,y=0]+C_{FN}\\mathbf1[\\hat y=0,y=1]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义输入样本、类别和相应假设下的决策分数或条件概率。",
+          "tex": "L=C_{FP}\\mathbf1[\\hat y=1,y=0]+C_{FN}\\mathbf1[\\hat y=0,y=1]"
+        },
+        {
+          "explanation": "根据所示目标训练参数，再用独立验证样本决定超参数与阈值。",
+          "tex": "L=C_{FP}\\mathbf1[\\hat y=1,y=0]+C_{FN}\\mathbf1[\\hat y=0,y=1]"
+        }
+      ],
+      "code": "fp_cost=2.;fn_cost=8.;threshold=fp_cost/(fp_cost+fn_cost);print(threshold)",
+      "packages": "numpy及sklearn等依赖按代码中的import安装",
+      "application": "用于ETF收益方向、金融事件风险或财报文本分类的基线构造与严谨评估。",
+      "limits": "在非平稳市场中，类别比例和概率校准会变化；任何准确率结果均需扣成本的策略检验。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n01-04",
+      "node_id": "classification-n01-04",
+      "title": "SVM硬间隔",
+      "definition": "线性可分时硬间隔SVM最大化几何间隔，同时强制所有训练样本被正确分类。",
+      "assumptions": "依据任务类别定义、特征尺度与决策成本选择分类算法，全部校准与阈值选择须限定在训练/验证样本内。",
+      "properties": [
+        "分类分数、类别标签和校准概率具有不同含义，不能混同。",
+        "类别基准率和样本分布变化会显著影响模型样本外表现。"
+      ],
+      "formulas": [
+        {
+          "label": "分类目标或数学关系",
+          "tex": "\\min_{w,b}\\frac12\\|w\\|^2\\quad \\mathrm{s.t.}\\ y_i(w^\\top x_i+b)\\ge1"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义输入样本、类别和相应假设下的决策分数或条件概率。",
+          "tex": "\\min_{w,b}\\frac12\\|w\\|^2\\quad \\mathrm{s.t.}\\ y_i(w^\\top x_i+b)\\ge1"
+        },
+        {
+          "explanation": "根据所示目标训练参数，再用独立验证样本决定超参数与阈值。",
+          "tex": "\\min_{w,b}\\frac12\\|w\\|^2\\quad \\mathrm{s.t.}\\ y_i(w^\\top x_i+b)\\ge1"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.svm import SVC\nX=np.array([[-2,-1],[-1,-2],[1,2],[2,1]]);y=[0,0,1,1]\nprint(SVC(kernel='linear',C=1e6).fit(X,y).coef_)",
+      "packages": "numpy及sklearn等依赖按代码中的import安装",
+      "application": "用于ETF收益方向、金融事件风险或财报文本分类的基线构造与严谨评估。",
+      "limits": "在非平稳市场中，类别比例和概率校准会变化；任何准确率结果均需扣成本的策略检验。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n03-04",
+      "node_id": "classification-n03-04",
+      "title": "Hinge损失",
+      "definition": "Hinge损失对分类间隔小于1的样本惩罚，边界以外的正确预测损失为零。",
+      "assumptions": "依据任务类别定义、特征尺度与决策成本选择分类算法，全部校准与阈值选择须限定在训练/验证样本内。",
+      "properties": [
+        "分类分数、类别标签和校准概率具有不同含义，不能混同。",
+        "类别基准率和样本分布变化会显著影响模型样本外表现。"
+      ],
+      "formulas": [
+        {
+          "label": "分类目标或数学关系",
+          "tex": "\\ell(y,f)=\\max(0,1-yf)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义输入样本、类别和相应假设下的决策分数或条件概率。",
+          "tex": "\\ell(y,f)=\\max(0,1-yf)"
+        },
+        {
+          "explanation": "根据所示目标训练参数，再用独立验证样本决定超参数与阈值。",
+          "tex": "\\ell(y,f)=\\max(0,1-yf)"
+        }
+      ],
+      "code": "import numpy as np\nprint(np.maximum(0,1-np.array([1,-1])*np.array([.5,.2])))",
+      "packages": "numpy及sklearn等依赖按代码中的import安装",
+      "application": "用于ETF收益方向、金融事件风险或财报文本分类的基线构造与严谨评估。",
+      "limits": "在非平稳市场中，类别比例和概率校准会变化；任何准确率结果均需扣成本的策略检验。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n04-04",
+      "node_id": "classification-n04-04",
+      "title": "核技巧",
+      "definition": "核技巧利用正定核函数隐式计算高维映射空间中的内积，从而避免显式构造所有特征。",
+      "assumptions": "依据任务类别定义、特征尺度与决策成本选择分类算法，全部校准与阈值选择须限定在训练/验证样本内。",
+      "properties": [
+        "分类分数、类别标签和校准概率具有不同含义，不能混同。",
+        "类别基准率和样本分布变化会显著影响模型样本外表现。"
+      ],
+      "formulas": [
+        {
+          "label": "分类目标或数学关系",
+          "tex": "K(x,z)=\\langle\\phi(x),\\phi(z)\\rangle"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义输入样本、类别和相应假设下的决策分数或条件概率。",
+          "tex": "K(x,z)=\\langle\\phi(x),\\phi(z)\\rangle"
+        },
+        {
+          "explanation": "根据所示目标训练参数，再用独立验证样本决定超参数与阈值。",
+          "tex": "K(x,z)=\\langle\\phi(x),\\phi(z)\\rangle"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([1.,2.]);z=np.array([2.,1.]);print((1+x@z)**2)",
+      "packages": "numpy及sklearn等依赖按代码中的import安装",
+      "application": "用于ETF收益方向、金融事件风险或财报文本分类的基线构造与严谨评估。",
+      "limits": "在非平稳市场中，类别比例和概率校准会变化；任何准确率结果均需扣成本的策略检验。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n05-04",
+      "node_id": "classification-n05-04",
+      "title": "RBF核",
+      "definition": "径向基函数核按样本欧氏距离指数衰减，控制非线性支持向量机的局部相似范围。",
+      "assumptions": "依据任务类别定义、特征尺度与决策成本选择分类算法，全部校准与阈值选择须限定在训练/验证样本内。",
+      "properties": [
+        "分类分数、类别标签和校准概率具有不同含义，不能混同。",
+        "类别基准率和样本分布变化会显著影响模型样本外表现。"
+      ],
+      "formulas": [
+        {
+          "label": "分类目标或数学关系",
+          "tex": "K(x,z)=\\exp(-\\gamma\\|x-z\\|_2^2)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义输入样本、类别和相应假设下的决策分数或条件概率。",
+          "tex": "K(x,z)=\\exp(-\\gamma\\|x-z\\|_2^2)"
+        },
+        {
+          "explanation": "根据所示目标训练参数，再用独立验证样本决定超参数与阈值。",
+          "tex": "K(x,z)=\\exp(-\\gamma\\|x-z\\|_2^2)"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([1.,2.]);z=np.array([2.,1.]);print(np.exp(-.5*np.sum((x-z)**2)))",
+      "packages": "numpy及sklearn等依赖按代码中的import安装",
+      "application": "用于ETF收益方向、金融事件风险或财报文本分类的基线构造与严谨评估。",
+      "limits": "在非平稳市场中，类别比例和概率校准会变化；任何准确率结果均需扣成本的策略检验。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n06-04",
+      "node_id": "classification-n06-04",
+      "title": "核参数选择",
+      "definition": "核带宽、惩罚系数等超参数控制分类边界平滑程度，应在训练区间内交叉验证。",
+      "assumptions": "依据任务类别定义、特征尺度与决策成本选择分类算法，全部校准与阈值选择须限定在训练/验证样本内。",
+      "properties": [
+        "分类分数、类别标签和校准概率具有不同含义，不能混同。",
+        "类别基准率和样本分布变化会显著影响模型样本外表现。"
+      ],
+      "formulas": [
+        {
+          "label": "分类目标或数学关系",
+          "tex": "\\lambda^*=\\arg\\min_{\\lambda\\in\\Lambda}\\hat R_{\\rm CV}(f_\\lambda)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义输入样本、类别和相应假设下的决策分数或条件概率。",
+          "tex": "\\lambda^*=\\arg\\min_{\\lambda\\in\\Lambda}\\hat R_{\\rm CV}(f_\\lambda)"
+        },
+        {
+          "explanation": "根据所示目标训练参数，再用独立验证样本决定超参数与阈值。",
+          "tex": "\\lambda^*=\\arg\\min_{\\lambda\\in\\Lambda}\\hat R_{\\rm CV}(f_\\lambda)"
+        }
+      ],
+      "code": "from sklearn.svm import SVC\nfrom sklearn.model_selection import GridSearchCV\nimport numpy as np\nX=np.random.default_rng(0).normal(size=(30,2));y=(X[:,0]>0).astype(int)\nprint(GridSearchCV(SVC(),{'C':[.1,1.],'gamma':['scale',.1]},cv=3).fit(X,y).best_params_)",
+      "packages": "numpy及sklearn等依赖按代码中的import安装",
+      "application": "用于ETF收益方向、金融事件风险或财报文本分类的基线构造与严谨评估。",
+      "limits": "在非平稳市场中，类别比例和概率校准会变化；任何准确率结果均需扣成本的策略检验。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n04-05",
+      "node_id": "classification-n04-05",
+      "title": "阈值选择",
+      "definition": "给定概率分数，依据预期成本、F1、召回或目标误报率选择分类阈值。",
+      "assumptions": "依据任务类别定义、特征尺度与决策成本选择分类算法，全部校准与阈值选择须限定在训练/验证样本内。",
+      "properties": [
+        "分类分数、类别标签和校准概率具有不同含义，不能混同。",
+        "类别基准率和样本分布变化会显著影响模型样本外表现。"
+      ],
+      "formulas": [
+        {
+          "label": "分类目标或数学关系",
+          "tex": "\\tau^*=\\arg\\min_\\tau\\widehat C(\\mathbf1[p_i\\ge\\tau],y_i)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义输入样本、类别和相应假设下的决策分数或条件概率。",
+          "tex": "\\tau^*=\\arg\\min_\\tau\\widehat C(\\mathbf1[p_i\\ge\\tau],y_i)"
+        },
+        {
+          "explanation": "根据所示目标训练参数，再用独立验证样本决定超参数与阈值。",
+          "tex": "\\tau^*=\\arg\\min_\\tau\\widehat C(\\mathbf1[p_i\\ge\\tau],y_i)"
+        }
+      ],
+      "code": "import numpy as np\ny=np.array([0,1,1,0]);p=np.array([.2,.8,.4,.6]);print({t:np.mean((p>=t)!=y) for t in [.3,.5,.7]})",
+      "packages": "numpy及sklearn等依赖按代码中的import安装",
+      "application": "用于ETF收益方向、金融事件风险或财报文本分类的基线构造与严谨评估。",
+      "limits": "在非平稳市场中，类别比例和概率校准会变化；任何准确率结果均需扣成本的策略检验。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n05-05",
+      "node_id": "classification-n05-05",
+      "title": "Platt/Isotonic校准",
+      "definition": "Platt在决策分数上拟合Logistic曲线，Isotonic用单调非参数映射把分数转换为更可靠的概率。",
+      "assumptions": "依据任务类别定义、特征尺度与决策成本选择分类算法，全部校准与阈值选择须限定在训练/验证样本内。",
+      "properties": [
+        "分类分数、类别标签和校准概率具有不同含义，不能混同。",
+        "类别基准率和样本分布变化会显著影响模型样本外表现。"
+      ],
+      "formulas": [
+        {
+          "label": "分类目标或数学关系",
+          "tex": "P(Y=1|s)=\\sigma(As+B)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义输入样本、类别和相应假设下的决策分数或条件概率。",
+          "tex": "P(Y=1|s)=\\sigma(As+B)"
+        },
+        {
+          "explanation": "根据所示目标训练参数，再用独立验证样本决定超参数与阈值。",
+          "tex": "P(Y=1|s)=\\sigma(As+B)"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.isotonic import IsotonicRegression\nscore=np.array([.1,.3,.5,.7,.9]);y=np.array([0,0,1,1,1]);print(IsotonicRegression(out_of_bounds='clip').fit(score,y).predict([.6]))",
+      "packages": "numpy及sklearn等依赖按代码中的import安装",
+      "application": "用于ETF收益方向、金融事件风险或财报文本分类的基线构造与严谨评估。",
+      "limits": "在非平稳市场中，类别比例和概率校准会变化；任何准确率结果均需扣成本的策略检验。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n06-05",
+      "node_id": "classification-n06-05",
+      "title": "不平衡类别评价",
+      "definition": "正类稀少时应同时检查PR-AUC、召回、查准率、成本曲线及概率校准，而不只看准确率。",
+      "assumptions": "依据任务类别定义、特征尺度与决策成本选择分类算法，全部校准与阈值选择须限定在训练/验证样本内。",
+      "properties": [
+        "分类分数、类别标签和校准概率具有不同含义，不能混同。",
+        "类别基准率和样本分布变化会显著影响模型样本外表现。"
+      ],
+      "formulas": [
+        {
+          "label": "分类目标或数学关系",
+          "tex": "\\mathrm{Precision}=TP/(TP+FP),\\quad\\mathrm{Recall}=TP/(TP+FN)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义输入样本、类别和相应假设下的决策分数或条件概率。",
+          "tex": "\\mathrm{Precision}=TP/(TP+FP),\\quad\\mathrm{Recall}=TP/(TP+FN)"
+        },
+        {
+          "explanation": "根据所示目标训练参数，再用独立验证样本决定超参数与阈值。",
+          "tex": "\\mathrm{Precision}=TP/(TP+FP),\\quad\\mathrm{Recall}=TP/(TP+FN)"
+        }
+      ],
+      "code": "from sklearn.metrics import average_precision_score\nprint(average_precision_score([0,0,0,1],[.1,.2,.3,.8]))",
+      "packages": "numpy及sklearn等依赖按代码中的import安装",
+      "application": "用于ETF收益方向、金融事件风险或财报文本分类的基线构造与严谨评估。",
+      "limits": "在非平稳市场中，类别比例和概率校准会变化；任何准确率结果均需扣成本的策略检验。",
+      "coverage": "complete"
+    }
+  ]
+}
