@@ -1,0 +1,645 @@
+{
+  "version": 1,
+  "notes": [
+    {
+      "id": "architectures-n03-01",
+      "node_id": "architectures-n03-01",
+      "title": "卷积参数共享",
+      "definition": "卷积核在不同位置共享同一组权重，降低参数量并提取局部模式。",
+      "assumptions": "必须明确张量维度、训练与推断阶段、时间因果遮罩及可微优化条件。复杂架构需要实测泛化与计算负担。",
+      "properties": [
+        "卷积核在不同位置共享同一组权重，降低参数量并提取局部模式。。",
+        "模型表现依赖训练数据与目标任务；价格图像或金融序列不得泄漏未来信息。"
+      ],
+      "formulas": [
+        {
+          "label": "基础数学公式",
+          "tex": "y_t=\\sum_kw_kx_{t+k}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据该结构的计算定义建立前向或优化关系。卷积核在不同位置共享同一组权重，降低参数量并提取局部模式。",
+          "tex": "y_t=\\sum_kw_kx_{t+k}"
+        },
+        {
+          "explanation": "根据链式法则或状态递推解释该结构如何对输入或参数产生影响。",
+          "tex": "y_t=\\sum_kw_kx_{t+k}"
+        }
+      ],
+      "code": "# 卷积参数共享：相关网络基础示例\nimport torch\ntorch.manual_seed(0)\nx=torch.randn(2,20,12)\nenc=torch.nn.TransformerEncoderLayer(d_model=12,nhead=3,batch_first=True)\nprint(\"Transformer output:\",enc(x).shape)\nrnn=torch.nn.GRU(12,8,batch_first=True)\nprint(\"GRU output:\",rnn(x)[0].shape)\nconv=torch.nn.Conv1d(12,8,3,dilation=2)\nprint(\"Dilated conv:\",conv(x.transpose(1,2)).shape)",
+      "packages": "torch",
+      "application": "用于ETF价格图像CNN、金融文本Transformer、长序列预测以及训练工程。",
+      "limits": "这是专题扩展笔记：代码是相应网络家族的基础演示，尚非本知识点全部理论证明或完整生产实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "architectures-n05-01",
+      "node_id": "architectures-n05-01",
+      "title": "残差网络ResNet",
+      "definition": "残差模块将输入与学习到的增量相加，提供显式恒等梯度通路。",
+      "assumptions": "必须明确张量维度、训练与推断阶段、时间因果遮罩及可微优化条件。复杂架构需要实测泛化与计算负担。",
+      "properties": [
+        "残差模块将输入与学习到的增量相加，提供显式恒等梯度通路。。",
+        "模型表现依赖训练数据与目标任务；价格图像或金融序列不得泄漏未来信息。"
+      ],
+      "formulas": [
+        {
+          "label": "基础数学公式",
+          "tex": "h_{l+1}=h_l+F(h_l)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据该结构的计算定义建立前向或优化关系。残差模块将输入与学习到的增量相加，提供显式恒等梯度通路。",
+          "tex": "h_{l+1}=h_l+F(h_l)"
+        },
+        {
+          "explanation": "根据链式法则或状态递推解释该结构如何对输入或参数产生影响。",
+          "tex": "h_{l+1}=h_l+F(h_l)"
+        }
+      ],
+      "code": "# 残差网络ResNet：相关网络基础示例\nimport torch\ntorch.manual_seed(0)\nx=torch.randn(2,20,12)\nenc=torch.nn.TransformerEncoderLayer(d_model=12,nhead=3,batch_first=True)\nprint(\"Transformer output:\",enc(x).shape)\nrnn=torch.nn.GRU(12,8,batch_first=True)\nprint(\"GRU output:\",rnn(x)[0].shape)\nconv=torch.nn.Conv1d(12,8,3,dilation=2)\nprint(\"Dilated conv:\",conv(x.transpose(1,2)).shape)",
+      "packages": "torch",
+      "application": "用于ETF价格图像CNN、金融文本Transformer、长序列预测以及训练工程。",
+      "limits": "这是专题扩展笔记：代码是相应网络家族的基础演示，尚非本知识点全部理论证明或完整生产实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "architectures-n06-01",
+      "node_id": "architectures-n06-01",
+      "title": "空洞卷积",
+      "definition": "扩张卷积在核采样点之间插入间隔，增大感受野而不同比例增加参数。",
+      "assumptions": "必须明确张量维度、训练与推断阶段、时间因果遮罩及可微优化条件。复杂架构需要实测泛化与计算负担。",
+      "properties": [
+        "扩张卷积在核采样点之间插入间隔，增大感受野而不同比例增加参数。。",
+        "模型表现依赖训练数据与目标任务；价格图像或金融序列不得泄漏未来信息。"
+      ],
+      "formulas": [
+        {
+          "label": "基础数学公式",
+          "tex": "y_t=\\sum_{k=0}^{K-1}w_kx_{t+dk}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据该结构的计算定义建立前向或优化关系。扩张卷积在核采样点之间插入间隔，增大感受野而不同比例增加参数。",
+          "tex": "y_t=\\sum_{k=0}^{K-1}w_kx_{t+dk}"
+        },
+        {
+          "explanation": "根据链式法则或状态递推解释该结构如何对输入或参数产生影响。",
+          "tex": "y_t=\\sum_{k=0}^{K-1}w_kx_{t+dk}"
+        }
+      ],
+      "code": "# 空洞卷积：相关网络基础示例\nimport torch\ntorch.manual_seed(0)\nx=torch.randn(2,20,12)\nenc=torch.nn.TransformerEncoderLayer(d_model=12,nhead=3,batch_first=True)\nprint(\"Transformer output:\",enc(x).shape)\nrnn=torch.nn.GRU(12,8,batch_first=True)\nprint(\"GRU output:\",rnn(x)[0].shape)\nconv=torch.nn.Conv1d(12,8,3,dilation=2)\nprint(\"Dilated conv:\",conv(x.transpose(1,2)).shape)",
+      "packages": "torch",
+      "application": "用于ETF价格图像CNN、金融文本Transformer、长序列预测以及训练工程。",
+      "limits": "这是专题扩展笔记：代码是相应网络家族的基础演示，尚非本知识点全部理论证明或完整生产实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "architectures-n02-02",
+      "node_id": "architectures-n02-02",
+      "title": "Backpropagation Through Time",
+      "definition": "BPTT将循环网络按时间展开，并对共享参数沿全部时间路径求梯度。",
+      "assumptions": "必须明确张量维度、训练与推断阶段、时间因果遮罩及可微优化条件。复杂架构需要实测泛化与计算负担。",
+      "properties": [
+        "BPTT将循环网络按时间展开，并对共享参数沿全部时间路径求梯度。。",
+        "模型表现依赖训练数据与目标任务；价格图像或金融序列不得泄漏未来信息。"
+      ],
+      "formulas": [
+        {
+          "label": "基础数学公式",
+          "tex": "\\nabla_\\theta L=\\sum_t\\frac{\\partial L}{\\partial h_t}\\frac{\\partial h_t}{\\partial\\theta}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据该结构的计算定义建立前向或优化关系。BPTT将循环网络按时间展开，并对共享参数沿全部时间路径求梯度。",
+          "tex": "\\nabla_\\theta L=\\sum_t\\frac{\\partial L}{\\partial h_t}\\frac{\\partial h_t}{\\partial\\theta}"
+        },
+        {
+          "explanation": "根据链式法则或状态递推解释该结构如何对输入或参数产生影响。",
+          "tex": "\\nabla_\\theta L=\\sum_t\\frac{\\partial L}{\\partial h_t}\\frac{\\partial h_t}{\\partial\\theta}"
+        }
+      ],
+      "code": "# Backpropagation Through Time：相关网络基础示例\nimport torch\ntorch.manual_seed(0)\nx=torch.randn(2,20,12)\nenc=torch.nn.TransformerEncoderLayer(d_model=12,nhead=3,batch_first=True)\nprint(\"Transformer output:\",enc(x).shape)\nrnn=torch.nn.GRU(12,8,batch_first=True)\nprint(\"GRU output:\",rnn(x)[0].shape)\nconv=torch.nn.Conv1d(12,8,3,dilation=2)\nprint(\"Dilated conv:\",conv(x.transpose(1,2)).shape)",
+      "packages": "torch",
+      "application": "用于ETF价格图像CNN、金融文本Transformer、长序列预测以及训练工程。",
+      "limits": "这是专题扩展笔记：代码是相应网络家族的基础演示，尚非本知识点全部理论证明或完整生产实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "architectures-n05-02",
+      "node_id": "architectures-n05-02",
+      "title": "双向RNN",
+      "definition": "双向RNN由正反两个方向的隐藏状态拼接编码序列上下文。",
+      "assumptions": "必须明确张量维度、训练与推断阶段、时间因果遮罩及可微优化条件。复杂架构需要实测泛化与计算负担。",
+      "properties": [
+        "双向RNN由正反两个方向的隐藏状态拼接编码序列上下文。。",
+        "模型表现依赖训练数据与目标任务；价格图像或金融序列不得泄漏未来信息。"
+      ],
+      "formulas": [
+        {
+          "label": "基础数学公式",
+          "tex": "h_t=[\\overrightarrow h_t;\\overleftarrow h_t]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据该结构的计算定义建立前向或优化关系。双向RNN由正反两个方向的隐藏状态拼接编码序列上下文。",
+          "tex": "h_t=[\\overrightarrow h_t;\\overleftarrow h_t]"
+        },
+        {
+          "explanation": "根据链式法则或状态递推解释该结构如何对输入或参数产生影响。",
+          "tex": "h_t=[\\overrightarrow h_t;\\overleftarrow h_t]"
+        }
+      ],
+      "code": "# 双向RNN：相关网络基础示例\nimport torch\ntorch.manual_seed(0)\nx=torch.randn(2,20,12)\nenc=torch.nn.TransformerEncoderLayer(d_model=12,nhead=3,batch_first=True)\nprint(\"Transformer output:\",enc(x).shape)\nrnn=torch.nn.GRU(12,8,batch_first=True)\nprint(\"GRU output:\",rnn(x)[0].shape)\nconv=torch.nn.Conv1d(12,8,3,dilation=2)\nprint(\"Dilated conv:\",conv(x.transpose(1,2)).shape)",
+      "packages": "torch",
+      "application": "用于ETF价格图像CNN、金融文本Transformer、长序列预测以及训练工程。",
+      "limits": "这是专题扩展笔记：代码是相应网络家族的基础演示，尚非本知识点全部理论证明或完整生产实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "architectures-n06-02",
+      "node_id": "architectures-n06-02",
+      "title": "Teacher Forcing",
+      "definition": "序列训练时使用真实上一Token作为下一步输入，区别于推断时回填预测。",
+      "assumptions": "必须明确张量维度、训练与推断阶段、时间因果遮罩及可微优化条件。复杂架构需要实测泛化与计算负担。",
+      "properties": [
+        "序列训练时使用真实上一Token作为下一步输入，区别于推断时回填预测。。",
+        "模型表现依赖训练数据与目标任务；价格图像或金融序列不得泄漏未来信息。"
+      ],
+      "formulas": [
+        {
+          "label": "基础数学公式",
+          "tex": "p(y_t\\mid y_{<t},x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据该结构的计算定义建立前向或优化关系。序列训练时使用真实上一Token作为下一步输入，区别于推断时回填预测。",
+          "tex": "p(y_t\\mid y_{<t},x)"
+        },
+        {
+          "explanation": "根据链式法则或状态递推解释该结构如何对输入或参数产生影响。",
+          "tex": "p(y_t\\mid y_{<t},x)"
+        }
+      ],
+      "code": "# Teacher Forcing：相关网络基础示例\nimport torch\ntorch.manual_seed(0)\nx=torch.randn(2,20,12)\nenc=torch.nn.TransformerEncoderLayer(d_model=12,nhead=3,batch_first=True)\nprint(\"Transformer output:\",enc(x).shape)\nrnn=torch.nn.GRU(12,8,batch_first=True)\nprint(\"GRU output:\",rnn(x)[0].shape)\nconv=torch.nn.Conv1d(12,8,3,dilation=2)\nprint(\"Dilated conv:\",conv(x.transpose(1,2)).shape)",
+      "packages": "torch",
+      "application": "用于ETF价格图像CNN、金融文本Transformer、长序列预测以及训练工程。",
+      "limits": "这是专题扩展笔记：代码是相应网络家族的基础演示，尚非本知识点全部理论证明或完整生产实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "architectures-n05-03",
+      "node_id": "architectures-n05-03",
+      "title": "Transformer Decoder",
+      "definition": "Decoder用因果自注意力和可选跨注意力生成下一Token分布。",
+      "assumptions": "必须明确张量维度、训练与推断阶段、时间因果遮罩及可微优化条件。复杂架构需要实测泛化与计算负担。",
+      "properties": [
+        "Decoder用因果自注意力和可选跨注意力生成下一Token分布。。",
+        "模型表现依赖训练数据与目标任务；价格图像或金融序列不得泄漏未来信息。"
+      ],
+      "formulas": [
+        {
+          "label": "基础数学公式",
+          "tex": "p(y_t\\mid y_{<t},x)=\\operatorname{softmax}(W h_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据该结构的计算定义建立前向或优化关系。Decoder用因果自注意力和可选跨注意力生成下一Token分布。",
+          "tex": "p(y_t\\mid y_{<t},x)=\\operatorname{softmax}(W h_t)"
+        },
+        {
+          "explanation": "根据链式法则或状态递推解释该结构如何对输入或参数产生影响。",
+          "tex": "p(y_t\\mid y_{<t},x)=\\operatorname{softmax}(W h_t)"
+        }
+      ],
+      "code": "# Transformer Decoder：相关网络基础示例\nimport torch\ntorch.manual_seed(0)\nx=torch.randn(2,20,12)\nenc=torch.nn.TransformerEncoderLayer(d_model=12,nhead=3,batch_first=True)\nprint(\"Transformer output:\",enc(x).shape)\nrnn=torch.nn.GRU(12,8,batch_first=True)\nprint(\"GRU output:\",rnn(x)[0].shape)\nconv=torch.nn.Conv1d(12,8,3,dilation=2)\nprint(\"Dilated conv:\",conv(x.transpose(1,2)).shape)",
+      "packages": "torch",
+      "application": "用于ETF价格图像CNN、金融文本Transformer、长序列预测以及训练工程。",
+      "limits": "这是专题扩展笔记：代码是相应网络家族的基础演示，尚非本知识点全部理论证明或完整生产实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "architectures-n06-03",
+      "node_id": "architectures-n06-03",
+      "title": "交叉注意力",
+      "definition": "Query来自目标序列而Key与Value来自外部上下文，实现条件信息融合。",
+      "assumptions": "必须明确张量维度、训练与推断阶段、时间因果遮罩及可微优化条件。复杂架构需要实测泛化与计算负担。",
+      "properties": [
+        "Query来自目标序列而Key与Value来自外部上下文，实现条件信息融合。。",
+        "模型表现依赖训练数据与目标任务；价格图像或金融序列不得泄漏未来信息。"
+      ],
+      "formulas": [
+        {
+          "label": "基础数学公式",
+          "tex": "H=\\operatorname{softmax}(Q_XK_Y^\\top/\\sqrt d)V_Y"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据该结构的计算定义建立前向或优化关系。Query来自目标序列而Key与Value来自外部上下文，实现条件信息融合。",
+          "tex": "H=\\operatorname{softmax}(Q_XK_Y^\\top/\\sqrt d)V_Y"
+        },
+        {
+          "explanation": "根据链式法则或状态递推解释该结构如何对输入或参数产生影响。",
+          "tex": "H=\\operatorname{softmax}(Q_XK_Y^\\top/\\sqrt d)V_Y"
+        }
+      ],
+      "code": "# 交叉注意力：相关网络基础示例\nimport torch\ntorch.manual_seed(0)\nx=torch.randn(2,20,12)\nenc=torch.nn.TransformerEncoderLayer(d_model=12,nhead=3,batch_first=True)\nprint(\"Transformer output:\",enc(x).shape)\nrnn=torch.nn.GRU(12,8,batch_first=True)\nprint(\"GRU output:\",rnn(x)[0].shape)\nconv=torch.nn.Conv1d(12,8,3,dilation=2)\nprint(\"Dilated conv:\",conv(x.transpose(1,2)).shape)",
+      "packages": "torch",
+      "application": "用于ETF价格图像CNN、金融文本Transformer、长序列预测以及训练工程。",
+      "limits": "这是专题扩展笔记：代码是相应网络家族的基础演示，尚非本知识点全部理论证明或完整生产实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "architectures-n01-04",
+      "node_id": "architectures-n01-04",
+      "title": "TCN时间卷积",
+      "definition": "TCN组合因果卷积与扩张卷积形成长历史感受野并保持时序因果性。",
+      "assumptions": "必须明确张量维度、训练与推断阶段、时间因果遮罩及可微优化条件。复杂架构需要实测泛化与计算负担。",
+      "properties": [
+        "TCN组合因果卷积与扩张卷积形成长历史感受野并保持时序因果性。。",
+        "模型表现依赖训练数据与目标任务；价格图像或金融序列不得泄漏未来信息。"
+      ],
+      "formulas": [
+        {
+          "label": "基础数学公式",
+          "tex": "R=1+\\sum_l(K_l-1)d_l"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据该结构的计算定义建立前向或优化关系。TCN组合因果卷积与扩张卷积形成长历史感受野并保持时序因果性。",
+          "tex": "R=1+\\sum_l(K_l-1)d_l"
+        },
+        {
+          "explanation": "根据链式法则或状态递推解释该结构如何对输入或参数产生影响。",
+          "tex": "R=1+\\sum_l(K_l-1)d_l"
+        }
+      ],
+      "code": "# TCN时间卷积：相关网络基础示例\nimport torch\ntorch.manual_seed(0)\nx=torch.randn(2,20,12)\nenc=torch.nn.TransformerEncoderLayer(d_model=12,nhead=3,batch_first=True)\nprint(\"Transformer output:\",enc(x).shape)\nrnn=torch.nn.GRU(12,8,batch_first=True)\nprint(\"GRU output:\",rnn(x)[0].shape)\nconv=torch.nn.Conv1d(12,8,3,dilation=2)\nprint(\"Dilated conv:\",conv(x.transpose(1,2)).shape)",
+      "packages": "torch",
+      "application": "用于ETF价格图像CNN、金融文本Transformer、长序列预测以及训练工程。",
+      "limits": "这是专题扩展笔记：代码是相应网络家族的基础演示，尚非本知识点全部理论证明或完整生产实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "architectures-n02-04",
+      "node_id": "architectures-n02-04",
+      "title": "Seq2Seq",
+      "definition": "编码器提取输入序列信息，解码器按条件分布逐步预测输出序列。",
+      "assumptions": "必须明确张量维度、训练与推断阶段、时间因果遮罩及可微优化条件。复杂架构需要实测泛化与计算负担。",
+      "properties": [
+        "编码器提取输入序列信息，解码器按条件分布逐步预测输出序列。。",
+        "模型表现依赖训练数据与目标任务；价格图像或金融序列不得泄漏未来信息。"
+      ],
+      "formulas": [
+        {
+          "label": "基础数学公式",
+          "tex": "p(y_{1:T}\\mid x)=\\prod_tp(y_t\\mid y_{<t},x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据该结构的计算定义建立前向或优化关系。编码器提取输入序列信息，解码器按条件分布逐步预测输出序列。",
+          "tex": "p(y_{1:T}\\mid x)=\\prod_tp(y_t\\mid y_{<t},x)"
+        },
+        {
+          "explanation": "根据链式法则或状态递推解释该结构如何对输入或参数产生影响。",
+          "tex": "p(y_{1:T}\\mid x)=\\prod_tp(y_t\\mid y_{<t},x)"
+        }
+      ],
+      "code": "# Seq2Seq：相关网络基础示例\nimport torch\ntorch.manual_seed(0)\nx=torch.randn(2,20,12)\nenc=torch.nn.TransformerEncoderLayer(d_model=12,nhead=3,batch_first=True)\nprint(\"Transformer output:\",enc(x).shape)\nrnn=torch.nn.GRU(12,8,batch_first=True)\nprint(\"GRU output:\",rnn(x)[0].shape)\nconv=torch.nn.Conv1d(12,8,3,dilation=2)\nprint(\"Dilated conv:\",conv(x.transpose(1,2)).shape)",
+      "packages": "torch",
+      "application": "用于ETF价格图像CNN、金融文本Transformer、长序列预测以及训练工程。",
+      "limits": "这是专题扩展笔记：代码是相应网络家族的基础演示，尚非本知识点全部理论证明或完整生产实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "architectures-n03-04",
+      "node_id": "architectures-n03-04",
+      "title": "门控卷积",
+      "definition": "门控卷积用一个变换产生特征、另一个产生Sigmoid门值并逐元素相乘。",
+      "assumptions": "必须明确张量维度、训练与推断阶段、时间因果遮罩及可微优化条件。复杂架构需要实测泛化与计算负担。",
+      "properties": [
+        "门控卷积用一个变换产生特征、另一个产生Sigmoid门值并逐元素相乘。。",
+        "模型表现依赖训练数据与目标任务；价格图像或金融序列不得泄漏未来信息。"
+      ],
+      "formulas": [
+        {
+          "label": "基础数学公式",
+          "tex": "h=(W_a*x)\\odot\\sigma(W_b*x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据该结构的计算定义建立前向或优化关系。门控卷积用一个变换产生特征、另一个产生Sigmoid门值并逐元素相乘。",
+          "tex": "h=(W_a*x)\\odot\\sigma(W_b*x)"
+        },
+        {
+          "explanation": "根据链式法则或状态递推解释该结构如何对输入或参数产生影响。",
+          "tex": "h=(W_a*x)\\odot\\sigma(W_b*x)"
+        }
+      ],
+      "code": "# 门控卷积：相关网络基础示例\nimport torch\ntorch.manual_seed(0)\nx=torch.randn(2,20,12)\nenc=torch.nn.TransformerEncoderLayer(d_model=12,nhead=3,batch_first=True)\nprint(\"Transformer output:\",enc(x).shape)\nrnn=torch.nn.GRU(12,8,batch_first=True)\nprint(\"GRU output:\",rnn(x)[0].shape)\nconv=torch.nn.Conv1d(12,8,3,dilation=2)\nprint(\"Dilated conv:\",conv(x.transpose(1,2)).shape)",
+      "packages": "torch",
+      "application": "用于ETF价格图像CNN、金融文本Transformer、长序列预测以及训练工程。",
+      "limits": "这是专题扩展笔记：代码是相应网络家族的基础演示，尚非本知识点全部理论证明或完整生产实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "architectures-n04-04",
+      "node_id": "architectures-n04-04",
+      "title": "状态空间模型SSM",
+      "definition": "状态空间序列模型以状态递推和读出表示长期历史，并可获得卷积形式。",
+      "assumptions": "必须明确张量维度、训练与推断阶段、时间因果遮罩及可微优化条件。复杂架构需要实测泛化与计算负担。",
+      "properties": [
+        "状态空间序列模型以状态递推和读出表示长期历史，并可获得卷积形式。。",
+        "模型表现依赖训练数据与目标任务；价格图像或金融序列不得泄漏未来信息。"
+      ],
+      "formulas": [
+        {
+          "label": "基础数学公式",
+          "tex": "h_t=Ah_{t-1}+Bx_t,\\quad y_t=Ch_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据该结构的计算定义建立前向或优化关系。状态空间序列模型以状态递推和读出表示长期历史，并可获得卷积形式。",
+          "tex": "h_t=Ah_{t-1}+Bx_t,\\quad y_t=Ch_t"
+        },
+        {
+          "explanation": "根据链式法则或状态递推解释该结构如何对输入或参数产生影响。",
+          "tex": "h_t=Ah_{t-1}+Bx_t,\\quad y_t=Ch_t"
+        }
+      ],
+      "code": "# 状态空间模型SSM：相关网络基础示例\nimport torch\ntorch.manual_seed(0)\nx=torch.randn(2,20,12)\nenc=torch.nn.TransformerEncoderLayer(d_model=12,nhead=3,batch_first=True)\nprint(\"Transformer output:\",enc(x).shape)\nrnn=torch.nn.GRU(12,8,batch_first=True)\nprint(\"GRU output:\",rnn(x)[0].shape)\nconv=torch.nn.Conv1d(12,8,3,dilation=2)\nprint(\"Dilated conv:\",conv(x.transpose(1,2)).shape)",
+      "packages": "torch",
+      "application": "用于ETF价格图像CNN、金融文本Transformer、长序列预测以及训练工程。",
+      "limits": "这是专题扩展笔记：代码是相应网络家族的基础演示，尚非本知识点全部理论证明或完整生产实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "architectures-n05-04",
+      "node_id": "architectures-n05-04",
+      "title": "Mamba选择性状态空间",
+      "definition": "Mamba让状态空间参数或离散更新选择性依赖当前输入，用于高效长序列建模。",
+      "assumptions": "必须明确张量维度、训练与推断阶段、时间因果遮罩及可微优化条件。复杂架构需要实测泛化与计算负担。",
+      "properties": [
+        "Mamba让状态空间参数或离散更新选择性依赖当前输入，用于高效长序列建模。。",
+        "模型表现依赖训练数据与目标任务；价格图像或金融序列不得泄漏未来信息。"
+      ],
+      "formulas": [
+        {
+          "label": "基础数学公式",
+          "tex": "h_t=\\overline A(x_t)h_{t-1}+\\overline B(x_t)x_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据该结构的计算定义建立前向或优化关系。Mamba让状态空间参数或离散更新选择性依赖当前输入，用于高效长序列建模。",
+          "tex": "h_t=\\overline A(x_t)h_{t-1}+\\overline B(x_t)x_t"
+        },
+        {
+          "explanation": "根据链式法则或状态递推解释该结构如何对输入或参数产生影响。",
+          "tex": "h_t=\\overline A(x_t)h_{t-1}+\\overline B(x_t)x_t"
+        }
+      ],
+      "code": "# Mamba选择性状态空间：相关网络基础示例\nimport torch\ntorch.manual_seed(0)\nx=torch.randn(2,20,12)\nenc=torch.nn.TransformerEncoderLayer(d_model=12,nhead=3,batch_first=True)\nprint(\"Transformer output:\",enc(x).shape)\nrnn=torch.nn.GRU(12,8,batch_first=True)\nprint(\"GRU output:\",rnn(x)[0].shape)\nconv=torch.nn.Conv1d(12,8,3,dilation=2)\nprint(\"Dilated conv:\",conv(x.transpose(1,2)).shape)",
+      "packages": "torch",
+      "application": "用于ETF价格图像CNN、金融文本Transformer、长序列预测以及训练工程。",
+      "limits": "这是专题扩展笔记：代码是相应网络家族的基础演示，尚非本知识点全部理论证明或完整生产实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "architectures-n06-04",
+      "node_id": "architectures-n06-04",
+      "title": "长序列建模",
+      "definition": "长序列学习需要比较注意力二次复杂度、状态空间线性递推和信息保留能力。",
+      "assumptions": "必须明确张量维度、训练与推断阶段、时间因果遮罩及可微优化条件。复杂架构需要实测泛化与计算负担。",
+      "properties": [
+        "长序列学习需要比较注意力二次复杂度、状态空间线性递推和信息保留能力。。",
+        "模型表现依赖训练数据与目标任务；价格图像或金融序列不得泄漏未来信息。"
+      ],
+      "formulas": [
+        {
+          "label": "基础数学公式",
+          "tex": "C_{\\rm attn}=O(T^2d)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据该结构的计算定义建立前向或优化关系。长序列学习需要比较注意力二次复杂度、状态空间线性递推和信息保留能力。",
+          "tex": "C_{\\rm attn}=O(T^2d)"
+        },
+        {
+          "explanation": "根据链式法则或状态递推解释该结构如何对输入或参数产生影响。",
+          "tex": "C_{\\rm attn}=O(T^2d)"
+        }
+      ],
+      "code": "# 长序列建模：相关网络基础示例\nimport torch\ntorch.manual_seed(0)\nx=torch.randn(2,20,12)\nenc=torch.nn.TransformerEncoderLayer(d_model=12,nhead=3,batch_first=True)\nprint(\"Transformer output:\",enc(x).shape)\nrnn=torch.nn.GRU(12,8,batch_first=True)\nprint(\"GRU output:\",rnn(x)[0].shape)\nconv=torch.nn.Conv1d(12,8,3,dilation=2)\nprint(\"Dilated conv:\",conv(x.transpose(1,2)).shape)",
+      "packages": "torch",
+      "application": "用于ETF价格图像CNN、金融文本Transformer、长序列预测以及训练工程。",
+      "limits": "这是专题扩展笔记：代码是相应网络家族的基础演示，尚非本知识点全部理论证明或完整生产实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "architectures-n01-05",
+      "node_id": "architectures-n01-05",
+      "title": "预训练与微调",
+      "definition": "先在广泛任务上训练通用表示，再在领域数据上更新部分或全部参数。",
+      "assumptions": "必须明确张量维度、训练与推断阶段、时间因果遮罩及可微优化条件。复杂架构需要实测泛化与计算负担。",
+      "properties": [
+        "先在广泛任务上训练通用表示，再在领域数据上更新部分或全部参数。。",
+        "模型表现依赖训练数据与目标任务；价格图像或金融序列不得泄漏未来信息。"
+      ],
+      "formulas": [
+        {
+          "label": "基础数学公式",
+          "tex": "\\theta_{\\rm task}=\\operatorname{Finetune}(\\theta_{\\rm pre})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据该结构的计算定义建立前向或优化关系。先在广泛任务上训练通用表示，再在领域数据上更新部分或全部参数。",
+          "tex": "\\theta_{\\rm task}=\\operatorname{Finetune}(\\theta_{\\rm pre})"
+        },
+        {
+          "explanation": "根据链式法则或状态递推解释该结构如何对输入或参数产生影响。",
+          "tex": "\\theta_{\\rm task}=\\operatorname{Finetune}(\\theta_{\\rm pre})"
+        }
+      ],
+      "code": "# 预训练与微调：相关网络基础示例\nimport torch\ntorch.manual_seed(0)\nx=torch.randn(2,20,12)\nenc=torch.nn.TransformerEncoderLayer(d_model=12,nhead=3,batch_first=True)\nprint(\"Transformer output:\",enc(x).shape)\nrnn=torch.nn.GRU(12,8,batch_first=True)\nprint(\"GRU output:\",rnn(x)[0].shape)\nconv=torch.nn.Conv1d(12,8,3,dilation=2)\nprint(\"Dilated conv:\",conv(x.transpose(1,2)).shape)",
+      "packages": "torch",
+      "application": "用于ETF价格图像CNN、金融文本Transformer、长序列预测以及训练工程。",
+      "limits": "这是专题扩展笔记：代码是相应网络家族的基础演示，尚非本知识点全部理论证明或完整生产实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "architectures-n02-05",
+      "node_id": "architectures-n02-05",
+      "title": "冻结层",
+      "definition": "训练时对部分模型参数关闭梯度更新，仅微调头部或适配器。",
+      "assumptions": "必须明确张量维度、训练与推断阶段、时间因果遮罩及可微优化条件。复杂架构需要实测泛化与计算负担。",
+      "properties": [
+        "训练时对部分模型参数关闭梯度更新，仅微调头部或适配器。。",
+        "模型表现依赖训练数据与目标任务；价格图像或金融序列不得泄漏未来信息。"
+      ],
+      "formulas": [
+        {
+          "label": "基础数学公式",
+          "tex": "\\nabla_{\\theta_{\\rm frozen}}L=0"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据该结构的计算定义建立前向或优化关系。训练时对部分模型参数关闭梯度更新，仅微调头部或适配器。",
+          "tex": "\\nabla_{\\theta_{\\rm frozen}}L=0"
+        },
+        {
+          "explanation": "根据链式法则或状态递推解释该结构如何对输入或参数产生影响。",
+          "tex": "\\nabla_{\\theta_{\\rm frozen}}L=0"
+        }
+      ],
+      "code": "# 冻结层：相关网络基础示例\nimport torch\ntorch.manual_seed(0)\nx=torch.randn(2,20,12)\nenc=torch.nn.TransformerEncoderLayer(d_model=12,nhead=3,batch_first=True)\nprint(\"Transformer output:\",enc(x).shape)\nrnn=torch.nn.GRU(12,8,batch_first=True)\nprint(\"GRU output:\",rnn(x)[0].shape)\nconv=torch.nn.Conv1d(12,8,3,dilation=2)\nprint(\"Dilated conv:\",conv(x.transpose(1,2)).shape)",
+      "packages": "torch",
+      "application": "用于ETF价格图像CNN、金融文本Transformer、长序列预测以及训练工程。",
+      "limits": "这是专题扩展笔记：代码是相应网络家族的基础演示，尚非本知识点全部理论证明或完整生产实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "architectures-n03-05",
+      "node_id": "architectures-n03-05",
+      "title": "知识蒸馏",
+      "definition": "学生网络拟合教师网络的软概率分布，压缩模型并转移部分预测知识。",
+      "assumptions": "必须明确张量维度、训练与推断阶段、时间因果遮罩及可微优化条件。复杂架构需要实测泛化与计算负担。",
+      "properties": [
+        "学生网络拟合教师网络的软概率分布，压缩模型并转移部分预测知识。。",
+        "模型表现依赖训练数据与目标任务；价格图像或金融序列不得泄漏未来信息。"
+      ],
+      "formulas": [
+        {
+          "label": "基础数学公式",
+          "tex": "L_{\\rm KD}=T^2D_{\\rm KL}(p_T^{\\rm teacher}\\|p_T^{\\rm student})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据该结构的计算定义建立前向或优化关系。学生网络拟合教师网络的软概率分布，压缩模型并转移部分预测知识。",
+          "tex": "L_{\\rm KD}=T^2D_{\\rm KL}(p_T^{\\rm teacher}\\|p_T^{\\rm student})"
+        },
+        {
+          "explanation": "根据链式法则或状态递推解释该结构如何对输入或参数产生影响。",
+          "tex": "L_{\\rm KD}=T^2D_{\\rm KL}(p_T^{\\rm teacher}\\|p_T^{\\rm student})"
+        }
+      ],
+      "code": "# 知识蒸馏：相关网络基础示例\nimport torch\ntorch.manual_seed(0)\nx=torch.randn(2,20,12)\nenc=torch.nn.TransformerEncoderLayer(d_model=12,nhead=3,batch_first=True)\nprint(\"Transformer output:\",enc(x).shape)\nrnn=torch.nn.GRU(12,8,batch_first=True)\nprint(\"GRU output:\",rnn(x)[0].shape)\nconv=torch.nn.Conv1d(12,8,3,dilation=2)\nprint(\"Dilated conv:\",conv(x.transpose(1,2)).shape)",
+      "packages": "torch",
+      "application": "用于ETF价格图像CNN、金融文本Transformer、长序列预测以及训练工程。",
+      "limits": "这是专题扩展笔记：代码是相应网络家族的基础演示，尚非本知识点全部理论证明或完整生产实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "architectures-n04-05",
+      "node_id": "architectures-n04-05",
+      "title": "剪枝",
+      "definition": "按权重大小或重要性移除网络参数或结构以减少计算开销。",
+      "assumptions": "必须明确张量维度、训练与推断阶段、时间因果遮罩及可微优化条件。复杂架构需要实测泛化与计算负担。",
+      "properties": [
+        "按权重大小或重要性移除网络参数或结构以减少计算开销。。",
+        "模型表现依赖训练数据与目标任务；价格图像或金融序列不得泄漏未来信息。"
+      ],
+      "formulas": [
+        {
+          "label": "基础数学公式",
+          "tex": "W'=W\\odot M,\\quad M_{ij}\\in\\{0,1\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据该结构的计算定义建立前向或优化关系。按权重大小或重要性移除网络参数或结构以减少计算开销。",
+          "tex": "W'=W\\odot M,\\quad M_{ij}\\in\\{0,1\\}"
+        },
+        {
+          "explanation": "根据链式法则或状态递推解释该结构如何对输入或参数产生影响。",
+          "tex": "W'=W\\odot M,\\quad M_{ij}\\in\\{0,1\\}"
+        }
+      ],
+      "code": "# 剪枝：相关网络基础示例\nimport torch\ntorch.manual_seed(0)\nx=torch.randn(2,20,12)\nenc=torch.nn.TransformerEncoderLayer(d_model=12,nhead=3,batch_first=True)\nprint(\"Transformer output:\",enc(x).shape)\nrnn=torch.nn.GRU(12,8,batch_first=True)\nprint(\"GRU output:\",rnn(x)[0].shape)\nconv=torch.nn.Conv1d(12,8,3,dilation=2)\nprint(\"Dilated conv:\",conv(x.transpose(1,2)).shape)",
+      "packages": "torch",
+      "application": "用于ETF价格图像CNN、金融文本Transformer、长序列预测以及训练工程。",
+      "limits": "这是专题扩展笔记：代码是相应网络家族的基础演示，尚非本知识点全部理论证明或完整生产实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "architectures-n05-05",
+      "node_id": "architectures-n05-05",
+      "title": "量化",
+      "definition": "将浮点权重映射到有限整数级别，降低模型存储及部分硬件计算成本。",
+      "assumptions": "必须明确张量维度、训练与推断阶段、时间因果遮罩及可微优化条件。复杂架构需要实测泛化与计算负担。",
+      "properties": [
+        "将浮点权重映射到有限整数级别，降低模型存储及部分硬件计算成本。。",
+        "模型表现依赖训练数据与目标任务；价格图像或金融序列不得泄漏未来信息。"
+      ],
+      "formulas": [
+        {
+          "label": "基础数学公式",
+          "tex": "q=\\operatorname{round}(x/s)+z"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据该结构的计算定义建立前向或优化关系。将浮点权重映射到有限整数级别，降低模型存储及部分硬件计算成本。",
+          "tex": "q=\\operatorname{round}(x/s)+z"
+        },
+        {
+          "explanation": "根据链式法则或状态递推解释该结构如何对输入或参数产生影响。",
+          "tex": "q=\\operatorname{round}(x/s)+z"
+        }
+      ],
+      "code": "# 量化：相关网络基础示例\nimport torch\ntorch.manual_seed(0)\nx=torch.randn(2,20,12)\nenc=torch.nn.TransformerEncoderLayer(d_model=12,nhead=3,batch_first=True)\nprint(\"Transformer output:\",enc(x).shape)\nrnn=torch.nn.GRU(12,8,batch_first=True)\nprint(\"GRU output:\",rnn(x)[0].shape)\nconv=torch.nn.Conv1d(12,8,3,dilation=2)\nprint(\"Dilated conv:\",conv(x.transpose(1,2)).shape)",
+      "packages": "torch",
+      "application": "用于ETF价格图像CNN、金融文本Transformer、长序列预测以及训练工程。",
+      "limits": "这是专题扩展笔记：代码是相应网络家族的基础演示，尚非本知识点全部理论证明或完整生产实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "architectures-n06-05",
+      "node_id": "architectures-n06-05",
+      "title": "低秩适配LoRA",
+      "definition": "冻结大矩阵并用两块低秩矩阵乘积学习权重增量。",
+      "assumptions": "必须明确张量维度、训练与推断阶段、时间因果遮罩及可微优化条件。复杂架构需要实测泛化与计算负担。",
+      "properties": [
+        "冻结大矩阵并用两块低秩矩阵乘积学习权重增量。。",
+        "模型表现依赖训练数据与目标任务；价格图像或金融序列不得泄漏未来信息。"
+      ],
+      "formulas": [
+        {
+          "label": "基础数学公式",
+          "tex": "W'=W+\\alpha BA/r"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据该结构的计算定义建立前向或优化关系。冻结大矩阵并用两块低秩矩阵乘积学习权重增量。",
+          "tex": "W'=W+\\alpha BA/r"
+        },
+        {
+          "explanation": "根据链式法则或状态递推解释该结构如何对输入或参数产生影响。",
+          "tex": "W'=W+\\alpha BA/r"
+        }
+      ],
+      "code": "# 低秩适配LoRA：相关网络基础示例\nimport torch\ntorch.manual_seed(0)\nx=torch.randn(2,20,12)\nenc=torch.nn.TransformerEncoderLayer(d_model=12,nhead=3,batch_first=True)\nprint(\"Transformer output:\",enc(x).shape)\nrnn=torch.nn.GRU(12,8,batch_first=True)\nprint(\"GRU output:\",rnn(x)[0].shape)\nconv=torch.nn.Conv1d(12,8,3,dilation=2)\nprint(\"Dilated conv:\",conv(x.transpose(1,2)).shape)",
+      "packages": "torch",
+      "application": "用于ETF价格图像CNN、金融文本Transformer、长序列预测以及训练工程。",
+      "limits": "这是专题扩展笔记：代码是相应网络家族的基础演示，尚非本知识点全部理论证明或完整生产实现。",
+      "coverage": "expanded"
+    }
+  ]
+}
