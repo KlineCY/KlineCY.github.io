@@ -1,0 +1,549 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "probabilistic-n01-01",
+      "node_id": "probabilistic-n01-01",
+      "title": "联合与条件概率",
+      "definition": "联合分布描述随机变量同时取值的概率，条件概率在给定观察值后重新归一化。",
+      "assumptions": "概率模型必须指定随机变量的条件结构、似然与先验；真实金融序列往往存在状态转移和分布变化。",
+      "properties": [
+        "联合分布描述随机变量同时取值的概率，条件概率在给定观察值后重新归一化。",
+        "要区别参数不确定性、观测噪声、预测区间以及概率校准，不能仅由点估计推断风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心概率关系",
+          "tex": "p(x,y)=p(y\\mid x)p(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先写出指定概率模型的联合密度、条件分解或推断目标，再明确需要积分或最大化的未知变量。",
+          "tex": "p(x,y)=p(y\\mid x)p(x)"
+        },
+        {
+          "explanation": "在所述先验、似然或转移假设下进行抽样、过滤、数值优化或概率估计。",
+          "tex": "p(x,y)=p(y\\mid x)p(x)"
+        }
+      ],
+      "code": "import numpy as np\np=np.array([.2,.8]);print(p/p.sum())",
+      "packages": "numpy 或 scipy（随import）",
+      "application": "用于ETF收益概率预测、市场状态滤波、信用风险与时变波动率研究。",
+      "limits": "代码是本章基础数学操作的可运行示例，不能替代完整贝叶斯采样器、神经网络或金融波动模型；模型设定与收敛诊断尤其重要。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n06-02",
+      "node_id": "probabilistic-n06-02",
+      "title": "粒子滤波",
+      "definition": "用带权状态粒子近似非高斯非线性状态后验，随新观测递推权重和粒子。",
+      "assumptions": "概率模型必须指定随机变量的条件结构、似然与先验；真实金融序列往往存在状态转移和分布变化。",
+      "properties": [
+        "用带权状态粒子近似非高斯非线性状态后验，随新观测递推权重和粒子。",
+        "要区别参数不确定性、观测噪声、预测区间以及概率校准，不能仅由点估计推断风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心概率关系",
+          "tex": "p(x_t\\mid y_{1:t})\\approx\\sum_iw_t^{(i)}\\delta_{x_t^{(i)}}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先写出指定概率模型的联合密度、条件分解或推断目标，再明确需要积分或最大化的未知变量。",
+          "tex": "p(x_t\\mid y_{1:t})\\approx\\sum_iw_t^{(i)}\\delta_{x_t^{(i)}}"
+        },
+        {
+          "explanation": "在所述先验、似然或转移假设下进行抽样、过滤、数值优化或概率估计。",
+          "tex": "p(x_t\\mid y_{1:t})\\approx\\sum_iw_t^{(i)}\\delta_{x_t^{(i)}}"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);states=rng.normal(size=5);obs=states+rng.normal(0,.2,5);print(states,obs)",
+      "packages": "numpy 或 scipy（随import）",
+      "application": "用于ETF收益概率预测、市场状态滤波、信用风险与时变波动率研究。",
+      "limits": "代码是本章基础数学操作的可运行示例，不能替代完整贝叶斯采样器、神经网络或金融波动模型；模型设定与收敛诊断尤其重要。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n02-03",
+      "node_id": "probabilistic-n02-03",
+      "title": "Markov链Monte Carlo",
+      "definition": "构造以目标后验为平稳分布的马尔可夫链，用样本均值估计后验期望。",
+      "assumptions": "概率模型必须指定随机变量的条件结构、似然与先验；真实金融序列往往存在状态转移和分布变化。",
+      "properties": [
+        "构造以目标后验为平稳分布的马尔可夫链，用样本均值估计后验期望。",
+        "要区别参数不确定性、观测噪声、预测区间以及概率校准，不能仅由点估计推断风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心概率关系",
+          "tex": "E_\\pi[g(\\theta)]\\approx N^{-1}\\sum_ig(\\theta_i)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先写出指定概率模型的联合密度、条件分解或推断目标，再明确需要积分或最大化的未知变量。",
+          "tex": "E_\\pi[g(\\theta)]\\approx N^{-1}\\sum_ig(\\theta_i)"
+        },
+        {
+          "explanation": "在所述先验、似然或转移假设下进行抽样、过滤、数值优化或概率估计。",
+          "tex": "E_\\pi[g(\\theta)]\\approx N^{-1}\\sum_ig(\\theta_i)"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);samples=rng.normal(size=300);print(samples.mean(),samples.std())",
+      "packages": "numpy 或 scipy（随import）",
+      "application": "用于ETF收益概率预测、市场状态滤波、信用风险与时变波动率研究。",
+      "limits": "代码是本章基础数学操作的可运行示例，不能替代完整贝叶斯采样器、神经网络或金融波动模型；模型设定与收敛诊断尤其重要。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n04-03",
+      "node_id": "probabilistic-n04-03",
+      "title": "Hamiltonian Monte Carlo",
+      "definition": "引入辅助动量和哈密顿动力学，形成相关性较低的长距离后验采样提议。",
+      "assumptions": "概率模型必须指定随机变量的条件结构、似然与先验；真实金融序列往往存在状态转移和分布变化。",
+      "properties": [
+        "引入辅助动量和哈密顿动力学，形成相关性较低的长距离后验采样提议。",
+        "要区别参数不确定性、观测噪声、预测区间以及概率校准，不能仅由点估计推断风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心概率关系",
+          "tex": "H(q,p)=U(q)+\\tfrac12p^\\top M^{-1}p"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先写出指定概率模型的联合密度、条件分解或推断目标，再明确需要积分或最大化的未知变量。",
+          "tex": "H(q,p)=U(q)+\\tfrac12p^\\top M^{-1}p"
+        },
+        {
+          "explanation": "在所述先验、似然或转移假设下进行抽样、过滤、数值优化或概率估计。",
+          "tex": "H(q,p)=U(q)+\\tfrac12p^\\top M^{-1}p"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);samples=rng.normal(size=300);print(samples.mean(),samples.std())",
+      "packages": "numpy 或 scipy（随import）",
+      "application": "用于ETF收益概率预测、市场状态滤波、信用风险与时变波动率研究。",
+      "limits": "代码是本章基础数学操作的可运行示例，不能替代完整贝叶斯采样器、神经网络或金融波动模型；模型设定与收敛诊断尤其重要。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n05-03",
+      "node_id": "probabilistic-n05-03",
+      "title": "变分推断VI",
+      "definition": "在易求解的分布族内寻找接近真实后验的近似分布，通常最大化证据下界。",
+      "assumptions": "概率模型必须指定随机变量的条件结构、似然与先验；真实金融序列往往存在状态转移和分布变化。",
+      "properties": [
+        "在易求解的分布族内寻找接近真实后验的近似分布，通常最大化证据下界。",
+        "要区别参数不确定性、观测噪声、预测区间以及概率校准，不能仅由点估计推断风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心概率关系",
+          "tex": "q^*=\\arg\\min_{q\\in\\mathcal Q}D_{\\rm KL}(q\\|p(\\theta\\mid D))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先写出指定概率模型的联合密度、条件分解或推断目标，再明确需要积分或最大化的未知变量。",
+          "tex": "q^*=\\arg\\min_{q\\in\\mathcal Q}D_{\\rm KL}(q\\|p(\\theta\\mid D))"
+        },
+        {
+          "explanation": "在所述先验、似然或转移假设下进行抽样、过滤、数值优化或概率估计。",
+          "tex": "q^*=\\arg\\min_{q\\in\\mathcal Q}D_{\\rm KL}(q\\|p(\\theta\\mid D))"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);samples=rng.normal(size=300);print(samples.mean(),samples.std())",
+      "packages": "numpy 或 scipy（随import）",
+      "application": "用于ETF收益概率预测、市场状态滤波、信用风险与时变波动率研究。",
+      "limits": "代码是本章基础数学操作的可运行示例，不能替代完整贝叶斯采样器、神经网络或金融波动模型；模型设定与收敛诊断尤其重要。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n06-03",
+      "node_id": "probabilistic-n06-03",
+      "title": "ELBO",
+      "definition": "证据下界由期望对数联合概率减去变分密度的对数期望组成。",
+      "assumptions": "概率模型必须指定随机变量的条件结构、似然与先验；真实金融序列往往存在状态转移和分布变化。",
+      "properties": [
+        "证据下界由期望对数联合概率减去变分密度的对数期望组成。",
+        "要区别参数不确定性、观测噪声、预测区间以及概率校准，不能仅由点估计推断风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心概率关系",
+          "tex": "\\operatorname{ELBO}=E_q[\\log p(D,\\theta)-\\log q(\\theta)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先写出指定概率模型的联合密度、条件分解或推断目标，再明确需要积分或最大化的未知变量。",
+          "tex": "\\operatorname{ELBO}=E_q[\\log p(D,\\theta)-\\log q(\\theta)]"
+        },
+        {
+          "explanation": "在所述先验、似然或转移假设下进行抽样、过滤、数值优化或概率估计。",
+          "tex": "\\operatorname{ELBO}=E_q[\\log p(D,\\theta)-\\log q(\\theta)]"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);samples=rng.normal(size=300);print(samples.mean(),samples.std())",
+      "packages": "numpy 或 scipy（随import）",
+      "application": "用于ETF收益概率预测、市场状态滤波、信用风险与时变波动率研究。",
+      "limits": "代码是本章基础数学操作的可运行示例，不能替代完整贝叶斯采样器、神经网络或金融波动模型；模型设定与收敛诊断尤其重要。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n01-04",
+      "node_id": "probabilistic-n01-04",
+      "title": "Aleatoric不确定性",
+      "definition": "给定输入仍存在的观测过程噪声，更多训练样本通常不能消除这种随机性。",
+      "assumptions": "概率模型必须指定随机变量的条件结构、似然与先验；真实金融序列往往存在状态转移和分布变化。",
+      "properties": [
+        "给定输入仍存在的观测过程噪声，更多训练样本通常不能消除这种随机性。",
+        "要区别参数不确定性、观测噪声、预测区间以及概率校准，不能仅由点估计推断风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心概率关系",
+          "tex": "\\operatorname{Var}(Y\\mid X,\\theta)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先写出指定概率模型的联合密度、条件分解或推断目标，再明确需要积分或最大化的未知变量。",
+          "tex": "\\operatorname{Var}(Y\\mid X,\\theta)"
+        },
+        {
+          "explanation": "在所述先验、似然或转移假设下进行抽样、过滤、数值优化或概率估计。",
+          "tex": "\\operatorname{Var}(Y\\mid X,\\theta)"
+        }
+      ],
+      "code": "import numpy as np\nscores=np.array([1.,2.,3.]);p=np.exp(scores-scores.max());print(p/p.sum())",
+      "packages": "numpy 或 scipy（随import）",
+      "application": "用于ETF收益概率预测、市场状态滤波、信用风险与时变波动率研究。",
+      "limits": "代码是本章基础数学操作的可运行示例，不能替代完整贝叶斯采样器、神经网络或金融波动模型；模型设定与收敛诊断尤其重要。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n02-04",
+      "node_id": "probabilistic-n02-04",
+      "title": "Epistemic不确定性",
+      "definition": "模型参数有限样本估计带来的认知不确定性，可用后验或模型集成衡量。",
+      "assumptions": "概率模型必须指定随机变量的条件结构、似然与先验；真实金融序列往往存在状态转移和分布变化。",
+      "properties": [
+        "模型参数有限样本估计带来的认知不确定性，可用后验或模型集成衡量。",
+        "要区别参数不确定性、观测噪声、预测区间以及概率校准，不能仅由点估计推断风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心概率关系",
+          "tex": "\\operatorname{Var}_{\\theta\\mid D}[E(Y\\mid X,\\theta)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先写出指定概率模型的联合密度、条件分解或推断目标，再明确需要积分或最大化的未知变量。",
+          "tex": "\\operatorname{Var}_{\\theta\\mid D}[E(Y\\mid X,\\theta)]"
+        },
+        {
+          "explanation": "在所述先验、似然或转移假设下进行抽样、过滤、数值优化或概率估计。",
+          "tex": "\\operatorname{Var}_{\\theta\\mid D}[E(Y\\mid X,\\theta)]"
+        }
+      ],
+      "code": "import numpy as np\nscores=np.array([1.,2.,3.]);p=np.exp(scores-scores.max());print(p/p.sum())",
+      "packages": "numpy 或 scipy（随import）",
+      "application": "用于ETF收益概率预测、市场状态滤波、信用风险与时变波动率研究。",
+      "limits": "代码是本章基础数学操作的可运行示例，不能替代完整贝叶斯采样器、神经网络或金融波动模型；模型设定与收敛诊断尤其重要。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n03-04",
+      "node_id": "probabilistic-n03-04",
+      "title": "Bayesian Neural Network",
+      "definition": "对神经网络权重使用贝叶斯后验，再对权重不确定性进行预测积分。",
+      "assumptions": "概率模型必须指定随机变量的条件结构、似然与先验；真实金融序列往往存在状态转移和分布变化。",
+      "properties": [
+        "对神经网络权重使用贝叶斯后验，再对权重不确定性进行预测积分。",
+        "要区别参数不确定性、观测噪声、预测区间以及概率校准，不能仅由点估计推断风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心概率关系",
+          "tex": "p(y\\mid x,D)=\\int p(y\\mid x,\\theta)p(\\theta\\mid D)d\\theta"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先写出指定概率模型的联合密度、条件分解或推断目标，再明确需要积分或最大化的未知变量。",
+          "tex": "p(y\\mid x,D)=\\int p(y\\mid x,\\theta)p(\\theta\\mid D)d\\theta"
+        },
+        {
+          "explanation": "在所述先验、似然或转移假设下进行抽样、过滤、数值优化或概率估计。",
+          "tex": "p(y\\mid x,D)=\\int p(y\\mid x,\\theta)p(\\theta\\mid D)d\\theta"
+        }
+      ],
+      "code": "import numpy as np\nscores=np.array([1.,2.,3.]);p=np.exp(scores-scores.max());print(p/p.sum())",
+      "packages": "numpy 或 scipy（随import）",
+      "application": "用于ETF收益概率预测、市场状态滤波、信用风险与时变波动率研究。",
+      "limits": "代码是本章基础数学操作的可运行示例，不能替代完整贝叶斯采样器、神经网络或金融波动模型；模型设定与收敛诊断尤其重要。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n04-04",
+      "node_id": "probabilistic-n04-04",
+      "title": "温度缩放",
+      "definition": "通过调整Logits除数T改变Softmax置信度，保留类别排序。",
+      "assumptions": "概率模型必须指定随机变量的条件结构、似然与先验；真实金融序列往往存在状态转移和分布变化。",
+      "properties": [
+        "通过调整Logits除数T改变Softmax置信度，保留类别排序。",
+        "要区别参数不确定性、观测噪声、预测区间以及概率校准，不能仅由点估计推断风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心概率关系",
+          "tex": "p_k(T)=e^{z_k/T}/\\sum_je^{z_j/T}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先写出指定概率模型的联合密度、条件分解或推断目标，再明确需要积分或最大化的未知变量。",
+          "tex": "p_k(T)=e^{z_k/T}/\\sum_je^{z_j/T}"
+        },
+        {
+          "explanation": "在所述先验、似然或转移假设下进行抽样、过滤、数值优化或概率估计。",
+          "tex": "p_k(T)=e^{z_k/T}/\\sum_je^{z_j/T}"
+        }
+      ],
+      "code": "import numpy as np\nscores=np.array([1.,2.,3.]);p=np.exp(scores-scores.max());print(p/p.sum())",
+      "packages": "numpy 或 scipy（随import）",
+      "application": "用于ETF收益概率预测、市场状态滤波、信用风险与时变波动率研究。",
+      "limits": "代码是本章基础数学操作的可运行示例，不能替代完整贝叶斯采样器、神经网络或金融波动模型；模型设定与收敛诊断尤其重要。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n06-04",
+      "node_id": "probabilistic-n06-04",
+      "title": "预测区间",
+      "definition": "预测区间用于描述未来单次观测可能落入的范围，不等同于条件均值的置信区间。",
+      "assumptions": "概率模型必须指定随机变量的条件结构、似然与先验；真实金融序列往往存在状态转移和分布变化。",
+      "properties": [
+        "预测区间用于描述未来单次观测可能落入的范围，不等同于条件均值的置信区间。",
+        "要区别参数不确定性、观测噪声、预测区间以及概率校准，不能仅由点估计推断风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心概率关系",
+          "tex": "P(Y_{\\rm new}\\in[L(X),U(X)])\\approx1-\\alpha"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先写出指定概率模型的联合密度、条件分解或推断目标，再明确需要积分或最大化的未知变量。",
+          "tex": "P(Y_{\\rm new}\\in[L(X),U(X)])\\approx1-\\alpha"
+        },
+        {
+          "explanation": "在所述先验、似然或转移假设下进行抽样、过滤、数值优化或概率估计。",
+          "tex": "P(Y_{\\rm new}\\in[L(X),U(X)])\\approx1-\\alpha"
+        }
+      ],
+      "code": "import numpy as np\nscores=np.array([1.,2.,3.]);p=np.exp(scores-scores.max());print(p/p.sum())",
+      "packages": "numpy 或 scipy（随import）",
+      "application": "用于ETF收益概率预测、市场状态滤波、信用风险与时变波动率研究。",
+      "limits": "代码是本章基础数学操作的可运行示例，不能替代完整贝叶斯采样器、神经网络或金融波动模型；模型设定与收敛诊断尤其重要。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n01-05",
+      "node_id": "probabilistic-n01-05",
+      "title": "市场状态HMM",
+      "definition": "用隐状态Markov转移及状态条件行情分布跟踪市场制度变化。",
+      "assumptions": "概率模型必须指定随机变量的条件结构、似然与先验；真实金融序列往往存在状态转移和分布变化。",
+      "properties": [
+        "用隐状态Markov转移及状态条件行情分布跟踪市场制度变化。",
+        "要区别参数不确定性、观测噪声、预测区间以及概率校准，不能仅由点估计推断风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心概率关系",
+          "tex": "\\alpha_t(k)=p(y_t\\mid z_t=k)\\sum_j\\alpha_{t-1}(j)A_{jk}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先写出指定概率模型的联合密度、条件分解或推断目标，再明确需要积分或最大化的未知变量。",
+          "tex": "\\alpha_t(k)=p(y_t\\mid z_t=k)\\sum_j\\alpha_{t-1}(j)A_{jk}"
+        },
+        {
+          "explanation": "在所述先验、似然或转移假设下进行抽样、过滤、数值优化或概率估计。",
+          "tex": "\\alpha_t(k)=p(y_t\\mid z_t=k)\\sum_j\\alpha_{t-1}(j)A_{jk}"
+        }
+      ],
+      "code": "import numpy as np\nfrom scipy.stats import norm\nprint(norm.ppf(.05),norm.cdf(-2.))",
+      "packages": "numpy 或 scipy（随import）",
+      "application": "用于ETF收益概率预测、市场状态滤波、信用风险与时变波动率研究。",
+      "limits": "代码是本章基础数学操作的可运行示例，不能替代完整贝叶斯采样器、神经网络或金融波动模型；模型设定与收敛诊断尤其重要。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n02-05",
+      "node_id": "probabilistic-n02-05",
+      "title": "贝叶斯收益率估计",
+      "definition": "将资产回报的先验均值与有限样本信息结合，减少样本均值估计波动。",
+      "assumptions": "概率模型必须指定随机变量的条件结构、似然与先验；真实金融序列往往存在状态转移和分布变化。",
+      "properties": [
+        "将资产回报的先验均值与有限样本信息结合，减少样本均值估计波动。",
+        "要区别参数不确定性、观测噪声、预测区间以及概率校准，不能仅由点估计推断风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心概率关系",
+          "tex": "\\mu_{\\rm post}=V_{\\rm post}(V_0^{-1}\\mu_0+n\\Sigma^{-1}\\bar r)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先写出指定概率模型的联合密度、条件分解或推断目标，再明确需要积分或最大化的未知变量。",
+          "tex": "\\mu_{\\rm post}=V_{\\rm post}(V_0^{-1}\\mu_0+n\\Sigma^{-1}\\bar r)"
+        },
+        {
+          "explanation": "在所述先验、似然或转移假设下进行抽样、过滤、数值优化或概率估计。",
+          "tex": "\\mu_{\\rm post}=V_{\\rm post}(V_0^{-1}\\mu_0+n\\Sigma^{-1}\\bar r)"
+        }
+      ],
+      "code": "import numpy as np\nfrom scipy.stats import norm\nprint(norm.ppf(.05),norm.cdf(-2.))",
+      "packages": "numpy 或 scipy（随import）",
+      "application": "用于ETF收益概率预测、市场状态滤波、信用风险与时变波动率研究。",
+      "limits": "代码是本章基础数学操作的可运行示例，不能替代完整贝叶斯采样器、神经网络或金融波动模型；模型设定与收敛诊断尤其重要。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n03-05",
+      "node_id": "probabilistic-n03-05",
+      "title": "GARCH与随机波动率",
+      "definition": "GARCH递归确定条件方差，随机波动率模型则引入随机潜在方差状态。",
+      "assumptions": "概率模型必须指定随机变量的条件结构、似然与先验；真实金融序列往往存在状态转移和分布变化。",
+      "properties": [
+        "GARCH递归确定条件方差，随机波动率模型则引入随机潜在方差状态。",
+        "要区别参数不确定性、观测噪声、预测区间以及概率校准，不能仅由点估计推断风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心概率关系",
+          "tex": "\\sigma_t^2=\\omega+\\alpha\\epsilon_{t-1}^2+\\beta\\sigma_{t-1}^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先写出指定概率模型的联合密度、条件分解或推断目标，再明确需要积分或最大化的未知变量。",
+          "tex": "\\sigma_t^2=\\omega+\\alpha\\epsilon_{t-1}^2+\\beta\\sigma_{t-1}^2"
+        },
+        {
+          "explanation": "在所述先验、似然或转移假设下进行抽样、过滤、数值优化或概率估计。",
+          "tex": "\\sigma_t^2=\\omega+\\alpha\\epsilon_{t-1}^2+\\beta\\sigma_{t-1}^2"
+        }
+      ],
+      "code": "import numpy as np\nfrom scipy.stats import norm\nprint(norm.ppf(.05),norm.cdf(-2.))",
+      "packages": "numpy 或 scipy（随import）",
+      "application": "用于ETF收益概率预测、市场状态滤波、信用风险与时变波动率研究。",
+      "limits": "代码是本章基础数学操作的可运行示例，不能替代完整贝叶斯采样器、神经网络或金融波动模型；模型设定与收敛诊断尤其重要。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n04-05",
+      "node_id": "probabilistic-n04-05",
+      "title": "尾部概率",
+      "definition": "利用收益率左尾概率或极端分位数描述超出预定风险阈值的事件。",
+      "assumptions": "概率模型必须指定随机变量的条件结构、似然与先验；真实金融序列往往存在状态转移和分布变化。",
+      "properties": [
+        "利用收益率左尾概率或极端分位数描述超出预定风险阈值的事件。",
+        "要区别参数不确定性、观测噪声、预测区间以及概率校准，不能仅由点估计推断风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心概率关系",
+          "tex": "P(R_t\\le q_\\alpha)=\\alpha"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先写出指定概率模型的联合密度、条件分解或推断目标，再明确需要积分或最大化的未知变量。",
+          "tex": "P(R_t\\le q_\\alpha)=\\alpha"
+        },
+        {
+          "explanation": "在所述先验、似然或转移假设下进行抽样、过滤、数值优化或概率估计。",
+          "tex": "P(R_t\\le q_\\alpha)=\\alpha"
+        }
+      ],
+      "code": "import numpy as np\nfrom scipy.stats import norm\nprint(norm.ppf(.05),norm.cdf(-2.))",
+      "packages": "numpy 或 scipy（随import）",
+      "application": "用于ETF收益概率预测、市场状态滤波、信用风险与时变波动率研究。",
+      "limits": "代码是本章基础数学操作的可运行示例，不能替代完整贝叶斯采样器、神经网络或金融波动模型；模型设定与收敛诊断尤其重要。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n05-05",
+      "node_id": "probabilistic-n05-05",
+      "title": "动态Beta",
+      "definition": "允许市场暴露随时变状态更新，而非用整个历史的固定回归系数。",
+      "assumptions": "概率模型必须指定随机变量的条件结构、似然与先验；真实金融序列往往存在状态转移和分布变化。",
+      "properties": [
+        "允许市场暴露随时变状态更新，而非用整个历史的固定回归系数。",
+        "要区别参数不确定性、观测噪声、预测区间以及概率校准，不能仅由点估计推断风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心概率关系",
+          "tex": "r_t=\\alpha_t+\\beta_t r_{m,t}+\\epsilon_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先写出指定概率模型的联合密度、条件分解或推断目标，再明确需要积分或最大化的未知变量。",
+          "tex": "r_t=\\alpha_t+\\beta_t r_{m,t}+\\epsilon_t"
+        },
+        {
+          "explanation": "在所述先验、似然或转移假设下进行抽样、过滤、数值优化或概率估计。",
+          "tex": "r_t=\\alpha_t+\\beta_t r_{m,t}+\\epsilon_t"
+        }
+      ],
+      "code": "import numpy as np\nfrom scipy.stats import norm\nprint(norm.ppf(.05),norm.cdf(-2.))",
+      "packages": "numpy 或 scipy（随import）",
+      "application": "用于ETF收益概率预测、市场状态滤波、信用风险与时变波动率研究。",
+      "limits": "代码是本章基础数学操作的可运行示例，不能替代完整贝叶斯采样器、神经网络或金融波动模型；模型设定与收敛诊断尤其重要。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n06-05",
+      "node_id": "probabilistic-n06-05",
+      "title": "信用事件概率",
+      "definition": "根据信用质量、利率和其他可得特征估计指定期限内违约事件概率。",
+      "assumptions": "概率模型必须指定随机变量的条件结构、似然与先验；真实金融序列往往存在状态转移和分布变化。",
+      "properties": [
+        "根据信用质量、利率和其他可得特征估计指定期限内违约事件概率。",
+        "要区别参数不确定性、观测噪声、预测区间以及概率校准，不能仅由点估计推断风险。"
+      ],
+      "formulas": [
+        {
+          "label": "核心概率关系",
+          "tex": "PD_t=P(D_{t,t+h}=1\\mid\\mathcal F_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先写出指定概率模型的联合密度、条件分解或推断目标，再明确需要积分或最大化的未知变量。",
+          "tex": "PD_t=P(D_{t,t+h}=1\\mid\\mathcal F_t)"
+        },
+        {
+          "explanation": "在所述先验、似然或转移假设下进行抽样、过滤、数值优化或概率估计。",
+          "tex": "PD_t=P(D_{t,t+h}=1\\mid\\mathcal F_t)"
+        }
+      ],
+      "code": "import numpy as np\nfrom scipy.stats import norm\nprint(norm.ppf(.05),norm.cdf(-2.))",
+      "packages": "numpy 或 scipy（随import）",
+      "application": "用于ETF收益概率预测、市场状态滤波、信用风险与时变波动率研究。",
+      "limits": "代码是本章基础数学操作的可运行示例，不能替代完整贝叶斯采样器、神经网络或金融波动模型；模型设定与收敛诊断尤其重要。",
+      "coverage": "complete"
+    }
+  ]
+}
