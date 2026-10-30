@@ -11,6 +11,7 @@
   const groups=[
     ["companies","量化公司"],
     ["assets","金融资产分类"],
+    ["feeds","核心数据源 Data Feeds"],
     ["papers","每周机器学习论文"],
     ["rankings","学术排名与资源"],
     ["news","全球宏观 News"]
@@ -34,6 +35,10 @@
       '<a class="q-menu-link" href="'+route("assets")+'">全部金融资产</a>'+
       subsection("marketNav","按市场 / 地区","marketChoices",page==="assets")+
       subsection("typeNav","按金融工具类型","typeChoices"),
+    feeds:
+      '<a class="q-menu-link" href="'+route("feeds")+'">全部数据字段</a>'+
+      '<a class="q-menu-link" href="'+route("feeds")+'?mode=providers">数据供应商目录</a>'+
+      subsection("feedsCategoryNav","按数据类别","feedChoices",page==="feeds"),
     papers:
       '<a class="q-menu-link" href="'+route("papers")+'">全部论文</a>'+
       subsection("weekNav","按周浏览","weeks",page==="papers"),
@@ -91,6 +96,11 @@
       fill("typeChoices",names("instrument_group").map(n=>({name:n,label:n+" ("+arr.filter(x=>x.instrument_group===n).length+")"})),r=>route("assets")+"?view=type&focus="+encodeURIComponent(r.name));
     });
   }
+  // Every module can browse the core data feed taxonomy without losing its parent tree.
+  getJson(route("feeds")+"catalog.json").then(d=>{
+    if(!d?.categories)return;
+    fill("feedChoices",d.categories.map(c=>({name:c.id,label:c.title+" ("+c.subgroups.reduce((n,g)=>n+g.item_ids.length,0)+")"})),r=>route("feeds")+"?category="+encodeURIComponent(r.name));
+  });
   if(page!=="papers"){
     getJson(route("papers")+"data.json").then(d=>{
       if(!d?.issues)return;
