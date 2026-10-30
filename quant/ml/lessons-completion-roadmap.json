@@ -1,0 +1,709 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "roadmap-n03-01",
+      "node_id": "roadmap-n03-01",
+      "title": "半监督学习",
+      "definition": "有标签样本与大量无标签样本共同学习决策规则；常用伪标签和一致性正则。",
+      "assumptions": "训练、验证和样本可得时点须与该概念的统计前提一致，不能使用预测时尚未知的数据。",
+      "properties": [
+        "先以有标签数据拟合基准模型，再给高置信度未标注样本产生软/硬伪标签。",
+        "必须验证伪标签不会放大错误；金融跨期样本要按信息可得时间隔离。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "L=L_{\\mathrm{sup}}+\\lambda L_{\\mathrm{unsup}}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先以有标签数据拟合基准模型，再给高置信度未标注样本产生软/硬伪标签。",
+          "tex": "L=L_{\\mathrm{sup}}+\\lambda L_{\\mathrm{unsup}}"
+        },
+        {
+          "explanation": "在实际研究中，应验证相应的统计前提并检查模型输出是否符合该目标或约束。",
+          "tex": "L=L_{\\mathrm{sup}}+\\lambda L_{\\mathrm{unsup}}"
+        }
+      ],
+      "code": "from sklearn.semi_supervised import SelfTrainingClassifier\nfrom sklearn.linear_model import LogisticRegression\nimport numpy as np\nX=np.r_[np.random.default_rng(0).normal(-1,1,(20,2)),np.random.default_rng(1).normal(1,1,(20,2))]\ny=np.r_[np.zeros(20),np.ones(20)].astype(int);y[[2,4,25,27]]=-1\nm=SelfTrainingClassifier(LogisticRegression(),threshold=.8).fit(X,y)\nprint(np.bincount(m.transduction_[m.transduction_>=0]))",
+      "packages": "numpy, scikit-learn",
+      "application": "作为量化机器学习从问题定义、训练到样本外验证的重要环节，需与ETF收益预测、风险管理或新闻特征管线中的数据时点约束结合。",
+      "limits": "必须验证伪标签不会放大错误；金融跨期样本要按信息可得时间隔离。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n04-01",
+      "node_id": "roadmap-n04-01",
+      "title": "自监督学习",
+      "definition": "由原始数据本身构造监督信号，如遮蔽预测与对比学习；标签并非外部人工标注。",
+      "assumptions": "训练、验证和样本可得时点须与该概念的统计前提一致，不能使用预测时尚未知的数据。",
+      "properties": [
+        "选择信息屏蔽或增强任务，模型需要从可见部分推断缺失部分。",
+        "要证明预训练表征具有下游样本外增益，不应把重构能力等同于收益预测。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "L_{\\mathrm{SSL}}=\\mathbb E_{x,M}[\\ell(f_\\theta(M(x)),x_{\\bar M})]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "选择信息屏蔽或增强任务，模型需要从可见部分推断缺失部分。",
+          "tex": "L_{\\mathrm{SSL}}=\\mathbb E_{x,M}[\\ell(f_\\theta(M(x)),x_{\\bar M})]"
+        },
+        {
+          "explanation": "在实际研究中，应验证相应的统计前提并检查模型输出是否符合该目标或约束。",
+          "tex": "L_{\\mathrm{SSL}}=\\mathbb E_{x,M}[\\ell(f_\\theta(M(x)),x_{\\bar M})]"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);x=rng.normal(size=(6,8))\nmask=rng.random(x.shape)<.25\nvisible=x.copy();visible[mask]=0\nprint(\"Masked cells:\",mask.sum(),\"example input:\",visible[0])",
+      "packages": "numpy or Python standard library",
+      "application": "作为量化机器学习从问题定义、训练到样本外验证的重要环节，需与ETF收益预测、风险管理或新闻特征管线中的数据时点约束结合。",
+      "limits": "要证明预训练表征具有下游样本外增益，不应把重构能力等同于收益预测。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n05-01",
+      "node_id": "roadmap-n05-01",
+      "title": "强化学习",
+      "definition": "智能体根据环境状态选择动作，并依据奖励及未来状态反馈学习序贯决策策略。",
+      "assumptions": "训练、验证和样本可得时点须与该概念的统计前提一致，不能使用预测时尚未知的数据。",
+      "properties": [
+        "环境通过转移概率给出下一状态，策略最大化期望折现累计奖励。",
+        "在市场中需要交易成本、杠杆限制和离线策略评估，历史样本不足以模拟反事实成交。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "J(\\pi)=\\mathbb E_\\pi[\\sum_{t=0}^{T}\\gamma^t r_t]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "环境通过转移概率给出下一状态，策略最大化期望折现累计奖励。",
+          "tex": "J(\\pi)=\\mathbb E_\\pi[\\sum_{t=0}^{T}\\gamma^t r_t]"
+        },
+        {
+          "explanation": "在实际研究中，应验证相应的统计前提并检查模型输出是否符合该目标或约束。",
+          "tex": "J(\\pi)=\\mathbb E_\\pi[\\sum_{t=0}^{T}\\gamma^t r_t]"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);q=np.zeros(2)\nfor reward in [.2,-.1,.3,.4]:\n    a=int(rng.integers(2));q[a]+=.2*(reward-q[a])\nprint(\"Toy action values:\",q)",
+      "packages": "numpy or Python standard library",
+      "application": "作为量化机器学习从问题定义、训练到样本外验证的重要环节，需与ETF收益预测、风险管理或新闻特征管线中的数据时点约束结合。",
+      "limits": "在市场中需要交易成本、杠杆限制和离线策略评估，历史样本不足以模拟反事实成交。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n06-01",
+      "node_id": "roadmap-n06-01",
+      "title": "在线学习",
+      "definition": "模型按数据到达顺序增量更新参数，无需每次使用全部历史数据重新训练。",
+      "assumptions": "训练、验证和样本可得时点须与该概念的统计前提一致，不能使用预测时尚未知的数据。",
+      "properties": [
+        "先在时刻t形成预测，再观察真实标签并更新参数，防止预测时读取标签。",
+        "非平稳市场需防概念漂移，历史标签延迟可能使在线更新滞后。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "\\theta_{t+1}=\\theta_t-\\eta_t\\nabla\\ell_t(\\theta_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先在时刻t形成预测，再观察真实标签并更新参数，防止预测时读取标签。",
+          "tex": "\\theta_{t+1}=\\theta_t-\\eta_t\\nabla\\ell_t(\\theta_t)"
+        },
+        {
+          "explanation": "在实际研究中，应验证相应的统计前提并检查模型输出是否符合该目标或约束。",
+          "tex": "\\theta_{t+1}=\\theta_t-\\eta_t\\nabla\\ell_t(\\theta_t)"
+        }
+      ],
+      "code": "from sklearn.linear_model import SGDRegressor\nimport numpy as np\nmodel=SGDRegressor(random_state=0)\nfor t in range(5):\n    x=np.array([[float(t)]]);y=np.array([2.*t])\n    model.partial_fit(x,y)\nprint(model.predict([[6.]]))",
+      "packages": "numpy, scikit-learn",
+      "application": "作为量化机器学习从问题定义、训练到样本外验证的重要环节，需与ETF收益预测、风险管理或新闻特征管线中的数据时点约束结合。",
+      "limits": "非平稳市场需防概念漂移，历史标签延迟可能使在线更新滞后。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n02-02",
+      "node_id": "roadmap-n02-02",
+      "title": "真实风险与泛化误差",
+      "definition": "总体风险是模型在目标数据分布上的期望损失；泛化误差反映经验风险与总体风险差异。",
+      "assumptions": "训练、验证和样本可得时点须与该概念的统计前提一致，不能使用预测时尚未知的数据。",
+      "properties": [
+        "经验损失是样本平均，独立测试集可近似估计未知总体风险。",
+        "金融非平稳性意味着训练和未来分布可能不同，不能直接套独立同分布泛化界。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "R(f)=\\mathbb E[\\ell(f(X),Y)],\\quad G(f)=R(f)-\\hat R_n(f)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "经验损失是样本平均，独立测试集可近似估计未知总体风险。",
+          "tex": "R(f)=\\mathbb E[\\ell(f(X),Y)],\\quad G(f)=R(f)-\\hat R_n(f)"
+        },
+        {
+          "explanation": "在实际研究中，应验证相应的统计前提并检查模型输出是否符合该目标或约束。",
+          "tex": "R(f)=\\mathbb E[\\ell(f(X),Y)],\\quad G(f)=R(f)-\\hat R_n(f)"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);x=rng.normal(size=1000);y=2*x+rng.normal(size=1000)\nf=lambda z:1.8*z\nprint(\"Estimated risk:\",np.mean((f(x)-y)**2))",
+      "packages": "numpy or Python standard library",
+      "application": "作为量化机器学习从问题定义、训练到样本外验证的重要环节，需与ETF收益预测、风险管理或新闻特征管线中的数据时点约束结合。",
+      "limits": "金融非平稳性意味着训练和未来分布可能不同，不能直接套独立同分布泛化界。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n04-02",
+      "node_id": "roadmap-n04-02",
+      "title": "VC维与学习曲线",
+      "definition": "VC维刻画假设类可打散样本点的最大数量；学习曲线展示训练规模与训练/验证误差的关系。",
+      "assumptions": "训练、验证和样本可得时点须与该概念的统计前提一致，不能使用预测时尚未知的数据。",
+      "properties": [
+        "固定假设类与置信度，容量越大对样本量的理论要求越高。",
+        "仅展示典型阶数量级；实际常数及非IID金融序列不符合所有界的前提。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "\\mathcal R_{\\rm bound}\\lesssim\\hat R_n+O(\\sqrt{(d_{\\rm VC}\\log n+\\log(1/\\delta))/n})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "固定假设类与置信度，容量越大对样本量的理论要求越高。",
+          "tex": "\\mathcal R_{\\rm bound}\\lesssim\\hat R_n+O(\\sqrt{(d_{\\rm VC}\\log n+\\log(1/\\delta))/n})"
+        },
+        {
+          "explanation": "在实际研究中，应验证相应的统计前提并检查模型输出是否符合该目标或约束。",
+          "tex": "\\mathcal R_{\\rm bound}\\lesssim\\hat R_n+O(\\sqrt{(d_{\\rm VC}\\log n+\\log(1/\\delta))/n})"
+        }
+      ],
+      "code": "from sklearn.model_selection import learning_curve\nfrom sklearn.linear_model import Ridge\nimport numpy as np\nX=np.arange(90).reshape(-1,1);y=.4*X[:,0]\nsizes,tr,val=learning_curve(Ridge(),X,y,cv=3,train_sizes=[.3,.6,1.])\nprint(sizes,val.mean(1))",
+      "packages": "numpy, scikit-learn",
+      "application": "作为量化机器学习从问题定义、训练到样本外验证的重要环节，需与ETF收益预测、风险管理或新闻特征管线中的数据时点约束结合。",
+      "limits": "仅展示典型阶数量级；实际常数及非IID金融序列不符合所有界的前提。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n05-02",
+      "node_id": "roadmap-n05-02",
+      "title": "正则化",
+      "definition": "在训练损失中加入参数或函数复杂度惩罚，使模型更偏向稳定解。",
+      "assumptions": "训练、验证和样本可得时点须与该概念的统计前提一致，不能使用预测时尚未知的数据。",
+      "properties": [
+        "模型选择实际优化目标中增加非负复杂度项，λ调节拟合与约束。",
+        "正则项不保证无泄漏，也不能让错误的标签自动正确。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "L_\\lambda(\\theta)=\\hat R_n(\\theta)+\\lambda\\Omega(\\theta)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "模型选择实际优化目标中增加非负复杂度项，λ调节拟合与约束。",
+          "tex": "L_\\lambda(\\theta)=\\hat R_n(\\theta)+\\lambda\\Omega(\\theta)"
+        },
+        {
+          "explanation": "在实际研究中，应验证相应的统计前提并检查模型输出是否符合该目标或约束。",
+          "tex": "L_\\lambda(\\theta)=\\hat R_n(\\theta)+\\lambda\\Omega(\\theta)"
+        }
+      ],
+      "code": "from sklearn.linear_model import Ridge\nimport numpy as np\nrng=np.random.default_rng(0);X=rng.normal(size=(30,8));y=X[:,0]+rng.normal(size=30)\nfor a in [.01,10.]:print(a,np.linalg.norm(Ridge(alpha=a).fit(X,y).coef_))",
+      "packages": "numpy, scikit-learn",
+      "application": "作为量化机器学习从问题定义、训练到样本外验证的重要环节，需与ETF收益预测、风险管理或新闻特征管线中的数据时点约束结合。",
+      "limits": "正则项不保证无泄漏，也不能让错误的标签自动正确。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n06-02",
+      "node_id": "roadmap-n06-02",
+      "title": "奥卡姆剃刀与模型选择",
+      "definition": "在样本外效果相近时倾向较简单模型；比较应同时包括参数规模、稳定性与计算成本。",
+      "assumptions": "训练、验证和样本可得时点须与该概念的统计前提一致，不能使用预测时尚未知的数据。",
+      "properties": [
+        "候选模型在同一时间窗口与指标下比较，并把复杂度作为决策标准。",
+        "复杂度惩罚不是普适公式；模型库越大，选择偏差越需要控制。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "\\hat M=\\arg\\min_{M\\in\\mathcal M}(\\hat R_{\\rm val}(M)+\\lambda C(M))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "候选模型在同一时间窗口与指标下比较，并把复杂度作为决策标准。",
+          "tex": "\\hat M=\\arg\\min_{M\\in\\mathcal M}(\\hat R_{\\rm val}(M)+\\lambda C(M))"
+        },
+        {
+          "explanation": "在实际研究中，应验证相应的统计前提并检查模型输出是否符合该目标或约束。",
+          "tex": "\\hat M=\\arg\\min_{M\\in\\mathcal M}(\\hat R_{\\rm val}(M)+\\lambda C(M))"
+        }
+      ],
+      "code": "from sklearn.linear_model import Ridge\nfrom sklearn.tree import DecisionTreeRegressor\nmodels=[Ridge(),DecisionTreeRegressor(max_depth=3)]\nprint([type(m).__name__ for m in models])",
+      "packages": "numpy, scikit-learn",
+      "application": "作为量化机器学习从问题定义、训练到样本外验证的重要环节，需与ETF收益预测、风险管理或新闻特征管线中的数据时点约束结合。",
+      "limits": "复杂度惩罚不是普适公式；模型库越大，选择偏差越需要控制。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n01-03",
+      "node_id": "roadmap-n01-03",
+      "title": "平方误差MSE",
+      "definition": "平方损失对较大预测偏差施加二次惩罚，是高斯误差假设下均值回归的常见目标。",
+      "assumptions": "训练、验证和样本可得时点须与该概念的统计前提一致，不能使用预测时尚未知的数据。",
+      "properties": [
+        "对常数预测c求导，最优解是目标样本均值。",
+        "对金融极端波动非常敏感，不适合所有厚尾风险目标。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "L=\\frac1n\\sum_i(y_i-\\hat y_i)^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对常数预测c求导，最优解是目标样本均值。",
+          "tex": "L=\\frac1n\\sum_i(y_i-\\hat y_i)^2"
+        },
+        {
+          "explanation": "在实际研究中，应验证相应的统计前提并检查模型输出是否符合该目标或约束。",
+          "tex": "L=\\frac1n\\sum_i(y_i-\\hat y_i)^2"
+        }
+      ],
+      "code": "import numpy as np\ny=np.array([1.,2.,8.]);p=np.array([1.2,1.8,3.])\nprint(np.mean((y-p)**2))",
+      "packages": "numpy or Python standard library",
+      "application": "作为量化机器学习从问题定义、训练到样本外验证的重要环节，需与ETF收益预测、风险管理或新闻特征管线中的数据时点约束结合。",
+      "limits": "对金融极端波动非常敏感，不适合所有厚尾风险目标。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n02-03",
+      "node_id": "roadmap-n02-03",
+      "title": "交叉熵Cross Entropy",
+      "definition": "交叉熵度量目标类别分布与预测分布的负期望对数概率，常用于概率分类。",
+      "assumptions": "训练、验证和样本可得时点须与该概念的统计前提一致，不能使用预测时尚未知的数据。",
+      "properties": [
+        "One-hot标签时损失为真实类别预测概率的负对数。",
+        "类别不平衡下可调整类权重，预测概率仍应校准。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "H(p,q)=-\\sum_k p_k\\log q_k"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "One-hot标签时损失为真实类别预测概率的负对数。",
+          "tex": "H(p,q)=-\\sum_k p_k\\log q_k"
+        },
+        {
+          "explanation": "在实际研究中，应验证相应的统计前提并检查模型输出是否符合该目标或约束。",
+          "tex": "H(p,q)=-\\sum_k p_k\\log q_k"
+        }
+      ],
+      "code": "import numpy as np\np=np.array([.1,.7,.2]);y=1\nprint(-np.log(p[y]))",
+      "packages": "numpy or Python standard library",
+      "application": "作为量化机器学习从问题定义、训练到样本外验证的重要环节，需与ETF收益预测、风险管理或新闻特征管线中的数据时点约束结合。",
+      "limits": "类别不平衡下可调整类权重，预测概率仍应校准。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n03-03",
+      "node_id": "roadmap-n03-03",
+      "title": "负对数似然NLL",
+      "definition": "最大似然估计的负目标；把数据的条件概率密度转化为可最小化的数值损失。",
+      "assumptions": "训练、验证和样本可得时点须与该概念的统计前提一致，不能使用预测时尚未知的数据。",
+      "properties": [
+        "独立样本联合似然是单样本概率乘积，取负对数变为求和。",
+        "所选分布错误时NLL小不一定有正确尾部预测。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "\\operatorname{NLL}(\\theta)=-\\sum_i\\log p_\\theta(y_i\\mid x_i)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "独立样本联合似然是单样本概率乘积，取负对数变为求和。",
+          "tex": "\\operatorname{NLL}(\\theta)=-\\sum_i\\log p_\\theta(y_i\\mid x_i)"
+        },
+        {
+          "explanation": "在实际研究中，应验证相应的统计前提并检查模型输出是否符合该目标或约束。",
+          "tex": "\\operatorname{NLL}(\\theta)=-\\sum_i\\log p_\\theta(y_i\\mid x_i)"
+        }
+      ],
+      "code": "from scipy.stats import norm\nimport numpy as np\ny=np.array([0.,1.,2.])\nprint(-norm.logpdf(y,loc=1.,scale=1.).sum())",
+      "packages": "numpy, scipy",
+      "application": "作为量化机器学习从问题定义、训练到样本外验证的重要环节，需与ETF收益预测、风险管理或新闻特征管线中的数据时点约束结合。",
+      "limits": "所选分布错误时NLL小不一定有正确尾部预测。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n04-03",
+      "node_id": "roadmap-n04-03",
+      "title": "Huber损失",
+      "definition": "结合小残差平方损失与大残差线性增长，降低离群点对估计的影响。",
+      "assumptions": "训练、验证和样本可得时点须与该概念的统计前提一致，不能使用预测时尚未知的数据。",
+      "properties": [
+        "分段函数在边界具有连续的一阶导数，小偏差按平方处理，大偏差按绝对值处理。",
+        "阈值δ依赖量纲与收益波动，需训练期调优。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "L_\\delta(r)=\\begin{cases}r^2/2,&|r|\\le\\delta\\\\\\delta(|r|-\\delta/2),&|r|>\\delta\\end{cases}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "分段函数在边界具有连续的一阶导数，小偏差按平方处理，大偏差按绝对值处理。",
+          "tex": "L_\\delta(r)=\\begin{cases}r^2/2,&|r|\\le\\delta\\\\\\delta(|r|-\\delta/2),&|r|>\\delta\\end{cases}"
+        },
+        {
+          "explanation": "在实际研究中，应验证相应的统计前提并检查模型输出是否符合该目标或约束。",
+          "tex": "L_\\delta(r)=\\begin{cases}r^2/2,&|r|\\le\\delta\\\\\\delta(|r|-\\delta/2),&|r|>\\delta\\end{cases}"
+        }
+      ],
+      "code": "import numpy as np\nr=np.array([.2,-.5,3.]);delta=1.\nloss=np.where(abs(r)<=delta,.5*r*r,delta*(abs(r)-.5*delta))\nprint(loss)",
+      "packages": "numpy or Python standard library",
+      "application": "作为量化机器学习从问题定义、训练到样本外验证的重要环节，需与ETF收益预测、风险管理或新闻特征管线中的数据时点约束结合。",
+      "limits": "阈值δ依赖量纲与收益波动，需训练期调优。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n05-03",
+      "node_id": "roadmap-n05-03",
+      "title": "Margin损失",
+      "definition": "分类间隔以带符号分类分数yf度量正确程度；间隔损失鼓励正确类别分数更高。",
+      "assumptions": "训练、验证和样本可得时点须与该概念的统计前提一致，不能使用预测时尚未知的数据。",
+      "properties": [
+        "正负类标签取−1/+1，若分数方向正确且大于单位边界则Hinge损失为零。",
+        "判别分数不是校准概率；交易中的误报代价应另外建模。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "m_i=y_if(x_i),\\quad L=(1-m_i)_+"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "正负类标签取−1/+1，若分数方向正确且大于单位边界则Hinge损失为零。",
+          "tex": "m_i=y_if(x_i),\\quad L=(1-m_i)_+"
+        },
+        {
+          "explanation": "在实际研究中，应验证相应的统计前提并检查模型输出是否符合该目标或约束。",
+          "tex": "m_i=y_if(x_i),\\quad L=(1-m_i)_+"
+        }
+      ],
+      "code": "import numpy as np\ny=np.array([1,-1,1]);score=np.array([.2,-.4,2.])\nprint(np.maximum(0,1-y*score))",
+      "packages": "numpy or Python standard library",
+      "application": "作为量化机器学习从问题定义、训练到样本外验证的重要环节，需与ETF收益预测、风险管理或新闻特征管线中的数据时点约束结合。",
+      "limits": "判别分数不是校准概率；交易中的误报代价应另外建模。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n06-03",
+      "node_id": "roadmap-n06-03",
+      "title": "自定义目标函数",
+      "definition": "训练目标应与任务经济损失一致，可组合预测偏差、稳定性、稀疏性及其他可微成本。",
+      "assumptions": "训练、验证和样本可得时点须与该概念的统计前提一致，不能使用预测时尚未知的数据。",
+      "properties": [
+        "先确定各损失项的单位及范围，再对可微参数求联合梯度。",
+        "非平滑交易成本可采用次梯度或可微近似，不能假定目标越复杂越好。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "L=L_{\\rm prediction}+\\lambda_1L_{\\rm risk}+\\lambda_2L_{\\rm turnover}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先确定各损失项的单位及范围，再对可微参数求联合梯度。",
+          "tex": "L=L_{\\rm prediction}+\\lambda_1L_{\\rm risk}+\\lambda_2L_{\\rm turnover}"
+        },
+        {
+          "explanation": "在实际研究中，应验证相应的统计前提并检查模型输出是否符合该目标或约束。",
+          "tex": "L=L_{\\rm prediction}+\\lambda_1L_{\\rm risk}+\\lambda_2L_{\\rm turnover}"
+        }
+      ],
+      "code": "import torch\nw=torch.tensor([.3,.7],requires_grad=True)\ny=torch.tensor([.2,-.1])\nloss=(w@y-0.05).square()+.01*w.square().sum()\nloss.backward();print(w.grad)",
+      "packages": "torch",
+      "application": "作为量化机器学习从问题定义、训练到样本外验证的重要环节，需与ETF收益预测、风险管理或新闻特征管线中的数据时点约束结合。",
+      "limits": "非平滑交易成本可采用次梯度或可微近似，不能假定目标越复杂越好。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n02-04",
+      "node_id": "roadmap-n02-04",
+      "title": "分层抽样",
+      "definition": "按类别分别保持近似的训练与测试比例，避免罕见类别随机划分后缺失。",
+      "assumptions": "训练、验证和样本可得时点须与该概念的统计前提一致，不能使用预测时尚未知的数据。",
+      "properties": [
+        "对每类内部独立抽取训练、验证索引再合并。",
+        "不能对时间序列盲目分层随机抽样而破坏先后顺序。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "n_{k,\\rm train}\\approx \\rho n_k"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对每类内部独立抽取训练、验证索引再合并。",
+          "tex": "n_{k,\\rm train}\\approx \\rho n_k"
+        },
+        {
+          "explanation": "在实际研究中，应验证相应的统计前提并检查模型输出是否符合该目标或约束。",
+          "tex": "n_{k,\\rm train}\\approx \\rho n_k"
+        }
+      ],
+      "code": "from sklearn.model_selection import train_test_split\nimport numpy as np\ny=np.r_[np.zeros(90),np.ones(10)]\na,b=train_test_split(np.arange(100),test_size=.2,stratify=y,random_state=0)\nprint(y[a].sum(),y[b].sum())",
+      "packages": "numpy, scikit-learn",
+      "application": "作为量化机器学习从问题定义、训练到样本外验证的重要环节，需与ETF收益预测、风险管理或新闻特征管线中的数据时点约束结合。",
+      "limits": "不能对时间序列盲目分层随机抽样而破坏先后顺序。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n03-04",
+      "node_id": "roadmap-n03-04",
+      "title": "K折交叉验证",
+      "definition": "把样本分成K个互斥测试折，每次用其他K−1折训练并对保留折评估。",
+      "assumptions": "训练、验证和样本可得时点须与该概念的统计前提一致，不能使用预测时尚未知的数据。",
+      "properties": [
+        "每条记录恰在一个保留折被评估，按折聚合估计平均验证误差。",
+        "独立同分布K折不适用于所有重叠标签或时间序列样本。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "\\hat R_{\\rm CV}=\\frac1K\\sum_{k=1}^KR_k"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "每条记录恰在一个保留折被评估，按折聚合估计平均验证误差。",
+          "tex": "\\hat R_{\\rm CV}=\\frac1K\\sum_{k=1}^KR_k"
+        },
+        {
+          "explanation": "在实际研究中，应验证相应的统计前提并检查模型输出是否符合该目标或约束。",
+          "tex": "\\hat R_{\\rm CV}=\\frac1K\\sum_{k=1}^KR_k"
+        }
+      ],
+      "code": "from sklearn.model_selection import KFold\nimport numpy as np\nfor tr,te in KFold(4,shuffle=True,random_state=0).split(np.arange(12)):\n    print(\"train\",len(tr),\"test\",te)",
+      "packages": "numpy, scikit-learn",
+      "application": "作为量化机器学习从问题定义、训练到样本外验证的重要环节，需与ETF收益预测、风险管理或新闻特征管线中的数据时点约束结合。",
+      "limits": "独立同分布K折不适用于所有重叠标签或时间序列样本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n01-05",
+      "node_id": "roadmap-n01-05",
+      "title": "基线模型",
+      "definition": "基线是简单、透明且有意义的参照模型，例如零收益预测、上期值预测或线性模型。",
+      "assumptions": "训练、验证和样本可得时点须与该概念的统计前提一致，不能使用预测时尚未知的数据。",
+      "properties": [
+        "首先计算基线在保留样本上的损失，再要求复杂候选在相同数据下显著改善。",
+        "选择很弱的基线会夸大复杂模型的贡献，应包含合理业务/统计基准。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "\\Delta L=L_{\\rm baseline}-L_{\\rm candidate}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先计算基线在保留样本上的损失，再要求复杂候选在相同数据下显著改善。",
+          "tex": "\\Delta L=L_{\\rm baseline}-L_{\\rm candidate}"
+        },
+        {
+          "explanation": "在实际研究中，应验证相应的统计前提并检查模型输出是否符合该目标或约束。",
+          "tex": "\\Delta L=L_{\\rm baseline}-L_{\\rm candidate}"
+        }
+      ],
+      "code": "import numpy as np\ny=np.array([.01,-.02,.03,.001]);zero=np.zeros_like(y)\nprint(\"Zero return baseline MSE:\",np.mean((y-zero)**2))",
+      "packages": "numpy or Python standard library",
+      "application": "作为量化机器学习从问题定义、训练到样本外验证的重要环节，需与ETF收益预测、风险管理或新闻特征管线中的数据时点约束结合。",
+      "limits": "选择很弱的基线会夸大复杂模型的贡献，应包含合理业务/统计基准。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n02-05",
+      "node_id": "roadmap-n02-05",
+      "title": "实验假设和消融",
+      "definition": "检验模型模块是否真正贡献性能，采用固定评价条件分别移除组件。",
+      "assumptions": "训练、验证和样本可得时点须与该概念的统计前提一致，不能使用预测时尚未知的数据。",
+      "properties": [
+        "先定义完整架构与去除组件j的版本，再在相同样本外期比较误差。",
+        "多个组件的交互无法通过单因素消融完全分离。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "\\Delta_j=R(M_{-j})-R(M_{\\rm full})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义完整架构与去除组件j的版本，再在相同样本外期比较误差。",
+          "tex": "\\Delta_j=R(M_{-j})-R(M_{\\rm full})"
+        },
+        {
+          "explanation": "在实际研究中，应验证相应的统计前提并检查模型输出是否符合该目标或约束。",
+          "tex": "\\Delta_j=R(M_{-j})-R(M_{\\rm full})"
+        }
+      ],
+      "code": "import numpy as np\nbase=np.array([.4,.3,.35]);full=np.array([.33,.31,.28])\nprint(\"Ablation loss improvement:\",np.mean(base-full))",
+      "packages": "numpy or Python standard library",
+      "application": "作为量化机器学习从问题定义、训练到样本外验证的重要环节，需与ETF收益预测、风险管理或新闻特征管线中的数据时点约束结合。",
+      "limits": "多个组件的交互无法通过单因素消融完全分离。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n03-05",
+      "node_id": "roadmap-n03-05",
+      "title": "随机种子",
+      "definition": "随机种子初始化伪随机数生成器，使相同软件与执行路径下的采样结果可重现。",
+      "assumptions": "训练、验证和样本可得时点须与该概念的统计前提一致，不能使用预测时尚未知的数据。",
+      "properties": [
+        "将种子与数据版本、模型参数和运行环境一起记录。",
+        "固定种子不保证不同GPU、编译器或库版本完全确定。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "X^{(s)}=G(s),\\quad G(s)=G(s)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将种子与数据版本、模型参数和运行环境一起记录。",
+          "tex": "X^{(s)}=G(s),\\quad G(s)=G(s)"
+        },
+        {
+          "explanation": "在实际研究中，应验证相应的统计前提并检查模型输出是否符合该目标或约束。",
+          "tex": "X^{(s)}=G(s),\\quad G(s)=G(s)"
+        }
+      ],
+      "code": "import random,numpy as np\nrandom.seed(42);rng=np.random.default_rng(42)\nprint(random.random(),rng.normal())",
+      "packages": "numpy or Python standard library",
+      "application": "作为量化机器学习从问题定义、训练到样本外验证的重要环节，需与ETF收益预测、风险管理或新闻特征管线中的数据时点约束结合。",
+      "limits": "固定种子不保证不同GPU、编译器或库版本完全确定。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n04-05",
+      "node_id": "roadmap-n04-05",
+      "title": "超参数搜索",
+      "definition": "在未用于最终测试的数据上选择学习率、正则参数、树深等控制模型训练的超参数。",
+      "assumptions": "训练、验证和样本可得时点须与该概念的统计前提一致，不能使用预测时尚未知的数据。",
+      "properties": [
+        "比较同一时间切分下各超参数的验证风险，并保留最终独立测试集。",
+        "搜索空间越大，验证集过拟合风险越高，应使用嵌套CV或谨慎比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "\\lambda^*=\\arg\\min_{\\lambda\\in\\Lambda}\\hat R_{\\rm val}(\\lambda)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "比较同一时间切分下各超参数的验证风险，并保留最终独立测试集。",
+          "tex": "\\lambda^*=\\arg\\min_{\\lambda\\in\\Lambda}\\hat R_{\\rm val}(\\lambda)"
+        },
+        {
+          "explanation": "在实际研究中，应验证相应的统计前提并检查模型输出是否符合该目标或约束。",
+          "tex": "\\lambda^*=\\arg\\min_{\\lambda\\in\\Lambda}\\hat R_{\\rm val}(\\lambda)"
+        }
+      ],
+      "code": "from sklearn.model_selection import ParameterGrid\nfor p in ParameterGrid({\"alpha\":[.1,1.,10.],\"fit_intercept\":[True,False]}):\n    print(p)",
+      "packages": "numpy, scikit-learn",
+      "application": "作为量化机器学习从问题定义、训练到样本外验证的重要环节，需与ETF收益预测、风险管理或新闻特征管线中的数据时点约束结合。",
+      "limits": "搜索空间越大，验证集过拟合风险越高，应使用嵌套CV或谨慎比较。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n05-05",
+      "node_id": "roadmap-n05-05",
+      "title": "统计显著性",
+      "definition": "统计显著性考察观察到的指标与零假设下样本波动是否一致，区分统计证据和经济价值。",
+      "assumptions": "训练、验证和样本可得时点须与该概念的统计前提一致，不能使用预测时尚未知的数据。",
+      "properties": [
+        "以配对模型误差差d定义可检验零假设，再计算标准误与统计量。",
+        "金融自相关需要HAC、区块Bootstrap或其他适当方法，P值不等于策略有效概率。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "t=\\frac{\\bar d}{s_d/\\sqrt n}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "以配对模型误差差d定义可检验零假设，再计算标准误与统计量。",
+          "tex": "t=\\frac{\\bar d}{s_d/\\sqrt n}"
+        },
+        {
+          "explanation": "在实际研究中，应验证相应的统计前提并检查模型输出是否符合该目标或约束。",
+          "tex": "t=\\frac{\\bar d}{s_d/\\sqrt n}"
+        }
+      ],
+      "code": "import numpy as np\nd=np.array([.1,-.1,.2,.05,.3])\nprint(\"t statistic:\",d.mean()/(d.std(ddof=1)/len(d)**.5))",
+      "packages": "numpy or Python standard library",
+      "application": "作为量化机器学习从问题定义、训练到样本外验证的重要环节，需与ETF收益预测、风险管理或新闻特征管线中的数据时点约束结合。",
+      "limits": "金融自相关需要HAC、区块Bootstrap或其他适当方法，P值不等于策略有效概率。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n06-05",
+      "node_id": "roadmap-n06-05",
+      "title": "模型卡与研究报告",
+      "definition": "模型卡记录用途、数据、局限、验证结果、版本及误用风险，支持研究复现和部署审计。",
+      "assumptions": "训练、验证和样本可得时点须与该概念的统计前提一致，不能使用预测时尚未知的数据。",
+      "properties": [
+        "记录样本区间、训练特征和核心评估指标，以便后续复算。",
+        "可复现文档不能替代代码、训练数据和计算日志；敏感数据需要权限控制。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "\\mathcal M=(D,\\Theta,\\operatorname{Metrics},\\operatorname{Limits},\\operatorname{Version})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "记录样本区间、训练特征和核心评估指标，以便后续复算。",
+          "tex": "\\mathcal M=(D,\\Theta,\\operatorname{Metrics},\\operatorname{Limits},\\operatorname{Version})"
+        },
+        {
+          "explanation": "在实际研究中，应验证相应的统计前提并检查模型输出是否符合该目标或约束。",
+          "tex": "\\mathcal M=(D,\\Theta,\\operatorname{Metrics},\\operatorname{Limits},\\operatorname{Version})"
+        }
+      ],
+      "code": "import json\ncard={\"model\":\"ETF_Ridge\",\"train_end\":\"2026-06-30\",\"metric\":\"MSE\",\"limitation\":\"Nonstationarity\"}\nprint(json.dumps(card,ensure_ascii=False,indent=2))",
+      "packages": "numpy or Python standard library",
+      "application": "作为量化机器学习从问题定义、训练到样本外验证的重要环节，需与ETF收益预测、风险管理或新闻特征管线中的数据时点约束结合。",
+      "limits": "可复现文档不能替代代码、训练数据和计算日志；敏感数据需要权限控制。",
+      "coverage": "complete"
+    }
+  ]
+}
