@@ -1,0 +1,741 @@
+{
+  "version": 1,
+  "notes": [
+    {
+      "id": "trees-n04-01",
+      "node_id": "trees-n04-01",
+      "title": "回归树平方损失",
+      "definition": "回归树在每个叶节点用目标均值预测，并以子节点平方残差和选择切分。",
+      "assumptions": "需要明确训练样本、损失、模型复杂度和样本外验证。金融时序回测需按真实信息可用时刻排列。",
+      "properties": [
+        "固定叶节点样本时平方误差最优常数是均值。",
+        "模型参数与性能依赖数据分布、随机种子和验证条件；需要量化不确定性与成本。"
+      ],
+      "formulas": [
+        {
+          "label": "核心原理",
+          "tex": "L=\\sum_{\\ell}\\sum_{i\\in R_\\ell}(y_i-\\bar y_\\ell)^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "回归树在每个叶节点用目标均值预测，并以子节点平方残差和选择切分。",
+          "tex": "L=\\sum_{\\ell}\\sum_{i\\in R_\\ell}(y_i-\\bar y_\\ell)^2"
+        },
+        {
+          "explanation": "固定叶节点样本时平方误差最优常数是均值",
+          "tex": "L=\\sum_{\\ell}\\sum_{i\\in R_\\ell}(y_i-\\bar y_\\ell)^2"
+        }
+      ],
+      "code": "# 回归树平方损失：相关章节综合实践\nimport numpy as np\nfrom sklearn.tree import DecisionTreeRegressor,DecisionTreeClassifier\nrng=np.random.default_rng(0);X=rng.normal(size=(90,2));y=X[:,0]**2+.2*rng.normal(size=90)\nfor depth in [2,5]:\n m=DecisionTreeRegressor(max_depth=depth).fit(X[:65],y[:65])\n print(depth,m.score(X[65:],y[65:]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化ETF多因子、市场状态分类、风险预警与策略交易成本评价。",
+      "limits": "代码是章节级算法基础示例；本知识点更深的理论证明与生产级实现仍需要单独扩展。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "trees-n05-01",
+      "node_id": "trees-n05-01",
+      "title": "剪枝",
+      "definition": "对复杂树增加叶节点惩罚，选择在误差与结构复杂度间折中的子树。",
+      "assumptions": "需要明确训练样本、损失、模型复杂度和样本外验证。金融时序回测需按真实信息可用时刻排列。",
+      "properties": [
+        "通过代价复杂度惩罚叶数。",
+        "模型参数与性能依赖数据分布、随机种子和验证条件；需要量化不确定性与成本。"
+      ],
+      "formulas": [
+        {
+          "label": "核心原理",
+          "tex": "R_\\alpha(T)=R(T)+\\alpha|T|"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对复杂树增加叶节点惩罚，选择在误差与结构复杂度间折中的子树。",
+          "tex": "R_\\alpha(T)=R(T)+\\alpha|T|"
+        },
+        {
+          "explanation": "通过代价复杂度惩罚叶数",
+          "tex": "R_\\alpha(T)=R(T)+\\alpha|T|"
+        }
+      ],
+      "code": "# 剪枝：相关章节综合实践\nimport numpy as np\nfrom sklearn.tree import DecisionTreeRegressor,DecisionTreeClassifier\nrng=np.random.default_rng(0);X=rng.normal(size=(90,2));y=X[:,0]**2+.2*rng.normal(size=90)\nfor depth in [2,5]:\n m=DecisionTreeRegressor(max_depth=depth).fit(X[:65],y[:65])\n print(depth,m.score(X[65:],y[65:]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化ETF多因子、市场状态分类、风险预警与策略交易成本评价。",
+      "limits": "代码是章节级算法基础示例；本知识点更深的理论证明与生产级实现仍需要单独扩展。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "trees-n06-01",
+      "node_id": "trees-n06-01",
+      "title": "类别与缺失值分裂",
+      "definition": "树模型可处理类别输入和缺失标志，但分裂逻辑依赖具体库的支持与配置。",
+      "assumptions": "需要明确训练样本、损失、模型复杂度和样本外验证。金融时序回测需按真实信息可用时刻排列。",
+      "properties": [
+        "对有效候选分裂计算子节点加权不纯度。",
+        "模型参数与性能依赖数据分布、随机种子和验证条件；需要量化不确定性与成本。"
+      ],
+      "formulas": [
+        {
+          "label": "核心原理",
+          "tex": "I_{\\rm split}=\\sum_c\\frac{|S_c|}{|S|}I(S_c)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "树模型可处理类别输入和缺失标志，但分裂逻辑依赖具体库的支持与配置。",
+          "tex": "I_{\\rm split}=\\sum_c\\frac{|S_c|}{|S|}I(S_c)"
+        },
+        {
+          "explanation": "对有效候选分裂计算子节点加权不纯度",
+          "tex": "I_{\\rm split}=\\sum_c\\frac{|S_c|}{|S|}I(S_c)"
+        }
+      ],
+      "code": "# 类别与缺失值分裂：相关章节综合实践\nimport numpy as np\nfrom sklearn.tree import DecisionTreeRegressor,DecisionTreeClassifier\nrng=np.random.default_rng(0);X=rng.normal(size=(90,2));y=X[:,0]**2+.2*rng.normal(size=90)\nfor depth in [2,5]:\n m=DecisionTreeRegressor(max_depth=depth).fit(X[:65],y[:65])\n print(depth,m.score(X[65:],y[65:]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化ETF多因子、市场状态分类、风险预警与策略交易成本评价。",
+      "limits": "代码是章节级算法基础示例；本知识点更深的理论证明与生产级实现仍需要单独扩展。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "trees-n01-02",
+      "node_id": "trees-n01-02",
+      "title": "Bootstrap抽样",
+      "definition": "从n个训练样本中有放回抽n次，构造不同的重采样数据集。",
+      "assumptions": "需要明确训练样本、损失、模型复杂度和样本外验证。金融时序回测需按真实信息可用时刻排列。",
+      "properties": [
+        "计算单点未被n次抽中概率。",
+        "模型参数与性能依赖数据分布、随机种子和验证条件；需要量化不确定性与成本。"
+      ],
+      "formulas": [
+        {
+          "label": "核心原理",
+          "tex": "P(i\\notin D_b)=(1-1/n)^n\\to e^{-1}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从n个训练样本中有放回抽n次，构造不同的重采样数据集。",
+          "tex": "P(i\\notin D_b)=(1-1/n)^n\\to e^{-1}"
+        },
+        {
+          "explanation": "计算单点未被n次抽中概率",
+          "tex": "P(i\\notin D_b)=(1-1/n)^n\\to e^{-1}"
+        }
+      ],
+      "code": "# Bootstrap抽样：相关章节综合实践\nimport numpy as np\nfrom sklearn.ensemble import ExtraTreesRegressor,BaggingRegressor\nrng=np.random.default_rng(1);X=rng.normal(size=(80,3));y=X[:,0]+rng.normal(size=80)\nfor m in [ExtraTreesRegressor(n_estimators=30),BaggingRegressor(n_estimators=30)]:\n m.fit(X[:60],y[:60]);print(m.score(X[60:],y[60:]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化ETF多因子、市场状态分类、风险预警与策略交易成本评价。",
+      "limits": "代码是章节级算法基础示例；本知识点更深的理论证明与生产级实现仍需要单独扩展。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "trees-n02-02",
+      "node_id": "trees-n02-02",
+      "title": "Bagging",
+      "definition": "在多个Bootstrap训练集上分别训练基学习器，再平均回归输出或投票分类。",
+      "assumptions": "需要明确训练样本、损失、模型复杂度和样本外验证。金融时序回测需按真实信息可用时刻排列。",
+      "properties": [
+        "对不同重采样模型的预测取平均。",
+        "模型参数与性能依赖数据分布、随机种子和验证条件；需要量化不确定性与成本。"
+      ],
+      "formulas": [
+        {
+          "label": "核心原理",
+          "tex": "\\hat f(x)=B^{-1}\\sum_{b=1}^BT_b(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "在多个Bootstrap训练集上分别训练基学习器，再平均回归输出或投票分类。",
+          "tex": "\\hat f(x)=B^{-1}\\sum_{b=1}^BT_b(x)"
+        },
+        {
+          "explanation": "对不同重采样模型的预测取平均",
+          "tex": "\\hat f(x)=B^{-1}\\sum_{b=1}^BT_b(x)"
+        }
+      ],
+      "code": "# Bagging：相关章节综合实践\nimport numpy as np\nfrom sklearn.ensemble import ExtraTreesRegressor,BaggingRegressor\nrng=np.random.default_rng(1);X=rng.normal(size=(80,3));y=X[:,0]+rng.normal(size=80)\nfor m in [ExtraTreesRegressor(n_estimators=30),BaggingRegressor(n_estimators=30)]:\n m.fit(X[:60],y[:60]);print(m.score(X[60:],y[60:]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化ETF多因子、市场状态分类、风险预警与策略交易成本评价。",
+      "limits": "代码是章节级算法基础示例；本知识点更深的理论证明与生产级实现仍需要单独扩展。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "trees-n05-02",
+      "node_id": "trees-n05-02",
+      "title": "ExtraTrees",
+      "definition": "极端随机树在候选特征上随机选择切分阈值，再通过多树平均降低方差。",
+      "assumptions": "需要明确训练样本、损失、模型复杂度和样本外验证。金融时序回测需按真实信息可用时刻排列。",
+      "properties": [
+        "结合随机分裂和集成平均。",
+        "模型参数与性能依赖数据分布、随机种子和验证条件；需要量化不确定性与成本。"
+      ],
+      "formulas": [
+        {
+          "label": "核心原理",
+          "tex": "\\hat f=B^{-1}\\sum_bT_b(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "极端随机树在候选特征上随机选择切分阈值，再通过多树平均降低方差。",
+          "tex": "\\hat f=B^{-1}\\sum_bT_b(x)"
+        },
+        {
+          "explanation": "结合随机分裂和集成平均",
+          "tex": "\\hat f=B^{-1}\\sum_bT_b(x)"
+        }
+      ],
+      "code": "# ExtraTrees：相关章节综合实践\nimport numpy as np\nfrom sklearn.ensemble import ExtraTreesRegressor,BaggingRegressor\nrng=np.random.default_rng(1);X=rng.normal(size=(80,3));y=X[:,0]+rng.normal(size=80)\nfor m in [ExtraTreesRegressor(n_estimators=30),BaggingRegressor(n_estimators=30)]:\n m.fit(X[:60],y[:60]);print(m.score(X[60:],y[60:]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化ETF多因子、市场状态分类、风险预警与策略交易成本评价。",
+      "limits": "代码是章节级算法基础示例；本知识点更深的理论证明与生产级实现仍需要单独扩展。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "trees-n06-02",
+      "node_id": "trees-n06-02",
+      "title": "Permutation Importance",
+      "definition": "打乱验证集某一特征，比较预测评分变化衡量模型对此特征的依赖。",
+      "assumptions": "需要明确训练样本、损失、模型复杂度和样本外验证。金融时序回测需按真实信息可用时刻排列。",
+      "properties": [
+        "扰乱特征后重新计算验证分数。",
+        "模型参数与性能依赖数据分布、随机种子和验证条件；需要量化不确定性与成本。"
+      ],
+      "formulas": [
+        {
+          "label": "核心原理",
+          "tex": "I_j=S(X)-E_\\pi S(X_{\\mathrm{perm}j})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "打乱验证集某一特征，比较预测评分变化衡量模型对此特征的依赖。",
+          "tex": "I_j=S(X)-E_\\pi S(X_{\\mathrm{perm}j})"
+        },
+        {
+          "explanation": "扰乱特征后重新计算验证分数",
+          "tex": "I_j=S(X)-E_\\pi S(X_{\\mathrm{perm}j})"
+        }
+      ],
+      "code": "# Permutation Importance：相关章节综合实践\nimport numpy as np\nfrom sklearn.ensemble import ExtraTreesRegressor,BaggingRegressor\nrng=np.random.default_rng(1);X=rng.normal(size=(80,3));y=X[:,0]+rng.normal(size=80)\nfor m in [ExtraTreesRegressor(n_estimators=30),BaggingRegressor(n_estimators=30)]:\n m.fit(X[:60],y[:60]);print(m.score(X[60:],y[60:]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化ETF多因子、市场状态分类、风险预警与策略交易成本评价。",
+      "limits": "代码是章节级算法基础示例；本知识点更深的理论证明与生产级实现仍需要单独扩展。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "trees-n03-03",
+      "node_id": "trees-n03-03",
+      "title": "残差拟合",
+      "definition": "提升树在回归时逐轮拟合前一阶段预测残差或损失负梯度。",
+      "assumptions": "需要明确训练样本、损失、模型复杂度和样本外验证。金融时序回测需按真实信息可用时刻排列。",
+      "properties": [
+        "利用损失的负梯度构造下一树目标。",
+        "模型参数与性能依赖数据分布、随机种子和验证条件；需要量化不确定性与成本。"
+      ],
+      "formulas": [
+        {
+          "label": "核心原理",
+          "tex": "r_{im}=-\\partial_FL(y_i,F(x_i))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "提升树在回归时逐轮拟合前一阶段预测残差或损失负梯度。",
+          "tex": "r_{im}=-\\partial_FL(y_i,F(x_i))"
+        },
+        {
+          "explanation": "利用损失的负梯度构造下一树目标",
+          "tex": "r_{im}=-\\partial_FL(y_i,F(x_i))"
+        }
+      ],
+      "code": "# 残差拟合：相关章节综合实践\nimport numpy as np\nfrom sklearn.ensemble import HistGradientBoostingRegressor\nrng=np.random.default_rng(0);X=rng.normal(size=(120,3))\ny=X[:,0]**2+X[:,1]+rng.normal(size=120)*.3\nm=HistGradientBoostingRegressor(max_iter=50,max_leaf_nodes=7).fit(X[:90],y[:90])\nprint(\"Holdout R2:\",m.score(X[90:],y[90:]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化ETF多因子、市场状态分类、风险预警与策略交易成本评价。",
+      "limits": "代码是章节级算法基础示例；本知识点更深的理论证明与生产级实现仍需要单独扩展。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "trees-n04-03",
+      "node_id": "trees-n04-03",
+      "title": "LightGBM",
+      "definition": "LightGBM使用直方图分箱和高效叶子优先增长等策略实现大规模梯度提升树。",
+      "assumptions": "需要明确训练样本、损失、模型复杂度和样本外验证。金融时序回测需按真实信息可用时刻排列。",
+      "properties": [
+        "每轮新树学习当前目标残差信息。",
+        "模型参数与性能依赖数据分布、随机种子和验证条件；需要量化不确定性与成本。"
+      ],
+      "formulas": [
+        {
+          "label": "核心原理",
+          "tex": "F_m=F_{m-1}+\\eta h_m"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "LightGBM使用直方图分箱和高效叶子优先增长等策略实现大规模梯度提升树。",
+          "tex": "F_m=F_{m-1}+\\eta h_m"
+        },
+        {
+          "explanation": "每轮新树学习当前目标残差信息",
+          "tex": "F_m=F_{m-1}+\\eta h_m"
+        }
+      ],
+      "code": "# LightGBM：相关章节综合实践\nimport numpy as np\nfrom sklearn.ensemble import HistGradientBoostingRegressor\nrng=np.random.default_rng(0);X=rng.normal(size=(120,3))\ny=X[:,0]**2+X[:,1]+rng.normal(size=120)*.3\nm=HistGradientBoostingRegressor(max_iter=50,max_leaf_nodes=7).fit(X[:90],y[:90])\nprint(\"Holdout R2:\",m.score(X[90:],y[90:]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化ETF多因子、市场状态分类、风险预警与策略交易成本评价。",
+      "limits": "代码是章节级算法基础示例；本知识点更深的理论证明与生产级实现仍需要单独扩展。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "trees-n05-03",
+      "node_id": "trees-n05-03",
+      "title": "XGBoost",
+      "definition": "XGBoost在加法树模型中结合一二阶梯度近似与叶权重、结构复杂度正则。",
+      "assumptions": "需要明确训练样本、损失、模型复杂度和样本外验证。金融时序回测需按真实信息可用时刻排列。",
+      "properties": [
+        "对损失做二阶Taylor近似并加树正则。",
+        "模型参数与性能依赖数据分布、随机种子和验证条件；需要量化不确定性与成本。"
+      ],
+      "formulas": [
+        {
+          "label": "核心原理",
+          "tex": "L^{(m)}\\approx\\sum_i[g_ih_m(x_i)+\\frac12h_i h_m(x_i)^2]+\\Omega(h_m)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "XGBoost在加法树模型中结合一二阶梯度近似与叶权重、结构复杂度正则。",
+          "tex": "L^{(m)}\\approx\\sum_i[g_ih_m(x_i)+\\frac12h_i h_m(x_i)^2]+\\Omega(h_m)"
+        },
+        {
+          "explanation": "对损失做二阶Taylor近似并加树正则",
+          "tex": "L^{(m)}\\approx\\sum_i[g_ih_m(x_i)+\\frac12h_i h_m(x_i)^2]+\\Omega(h_m)"
+        }
+      ],
+      "code": "# XGBoost：相关章节综合实践\nimport numpy as np\nfrom sklearn.ensemble import HistGradientBoostingRegressor\nrng=np.random.default_rng(0);X=rng.normal(size=(120,3))\ny=X[:,0]**2+X[:,1]+rng.normal(size=120)*.3\nm=HistGradientBoostingRegressor(max_iter=50,max_leaf_nodes=7).fit(X[:90],y[:90])\nprint(\"Holdout R2:\",m.score(X[90:],y[90:]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化ETF多因子、市场状态分类、风险预警与策略交易成本评价。",
+      "limits": "代码是章节级算法基础示例；本知识点更深的理论证明与生产级实现仍需要单独扩展。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "trees-n06-03",
+      "node_id": "trees-n06-03",
+      "title": "CatBoost",
+      "definition": "CatBoost使用有序目标统计及树Boosting减少类别编码所导致的标签泄漏。",
+      "assumptions": "需要明确训练样本、损失、模型复杂度和样本外验证。金融时序回测需按真实信息可用时刻排列。",
+      "properties": [
+        "编码只使用随机排列中较早类别样本。",
+        "模型参数与性能依赖数据分布、随机种子和验证条件；需要量化不确定性与成本。"
+      ],
+      "formulas": [
+        {
+          "label": "核心原理",
+          "tex": "\\hat E[Y\\mid C=c]\\approx\\frac{\\sum_{i\\in\\mathrm{past}(c)}y_i+a\\mu}{|\\mathrm{past}(c)|+a}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "CatBoost使用有序目标统计及树Boosting减少类别编码所导致的标签泄漏。",
+          "tex": "\\hat E[Y\\mid C=c]\\approx\\frac{\\sum_{i\\in\\mathrm{past}(c)}y_i+a\\mu}{|\\mathrm{past}(c)|+a}"
+        },
+        {
+          "explanation": "编码只使用随机排列中较早类别样本",
+          "tex": "\\hat E[Y\\mid C=c]\\approx\\frac{\\sum_{i\\in\\mathrm{past}(c)}y_i+a\\mu}{|\\mathrm{past}(c)|+a}"
+        }
+      ],
+      "code": "# CatBoost：相关章节综合实践\nimport numpy as np\nfrom sklearn.ensemble import HistGradientBoostingRegressor\nrng=np.random.default_rng(0);X=rng.normal(size=(120,3))\ny=X[:,0]**2+X[:,1]+rng.normal(size=120)*.3\nm=HistGradientBoostingRegressor(max_iter=50,max_leaf_nodes=7).fit(X[:90],y[:90])\nprint(\"Holdout R2:\",m.score(X[90:],y[90:]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化ETF多因子、市场状态分类、风险预警与策略交易成本评价。",
+      "limits": "代码是章节级算法基础示例；本知识点更深的理论证明与生产级实现仍需要单独扩展。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "trees-n01-04",
+      "node_id": "trees-n01-04",
+      "title": "树深与叶节点",
+      "definition": "深度和最小叶样本数限制树容量，控制训练方差。",
+      "assumptions": "需要明确训练样本、损失、模型复杂度和样本外验证。金融时序回测需按真实信息可用时刻排列。",
+      "properties": [
+        "二叉树每一层叶节点数最多翻倍。",
+        "模型参数与性能依赖数据分布、随机种子和验证条件；需要量化不确定性与成本。"
+      ],
+      "formulas": [
+        {
+          "label": "核心原理",
+          "tex": "N_{\\rm leaf}\\le2^d"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "深度和最小叶样本数限制树容量，控制训练方差。",
+          "tex": "N_{\\rm leaf}\\le2^d"
+        },
+        {
+          "explanation": "二叉树每一层叶节点数最多翻倍",
+          "tex": "N_{\\rm leaf}\\le2^d"
+        }
+      ],
+      "code": "# 树深与叶节点：相关章节综合实践\nimport numpy as np\nfrom sklearn.ensemble import RandomForestClassifier\nrng=np.random.default_rng(0);X=rng.normal(size=(100,4));y=(X[:,0]>0).astype(int)\nm=RandomForestClassifier(n_estimators=60,min_samples_leaf=3).fit(X[:70],y[:70])\nprint(\"Validation accuracy:\",m.score(X[70:],y[70:]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化ETF多因子、市场状态分类、风险预警与策略交易成本评价。",
+      "limits": "代码是章节级算法基础示例；本知识点更深的理论证明与生产级实现仍需要单独扩展。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "trees-n02-04",
+      "node_id": "trees-n02-04",
+      "title": "学习率与基学习器数",
+      "definition": "Boosting每轮弱学习器贡献由学习率缩放，通常与树数量存在折中。",
+      "assumptions": "需要明确训练样本、损失、模型复杂度和样本外验证。金融时序回测需按真实信息可用时刻排列。",
+      "properties": [
+        "将每轮增量按学习率加权。",
+        "模型参数与性能依赖数据分布、随机种子和验证条件；需要量化不确定性与成本。"
+      ],
+      "formulas": [
+        {
+          "label": "核心原理",
+          "tex": "F_M=F_0+\\eta\\sum_{m=1}^Mh_m"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "Boosting每轮弱学习器贡献由学习率缩放，通常与树数量存在折中。",
+          "tex": "F_M=F_0+\\eta\\sum_{m=1}^Mh_m"
+        },
+        {
+          "explanation": "将每轮增量按学习率加权",
+          "tex": "F_M=F_0+\\eta\\sum_{m=1}^Mh_m"
+        }
+      ],
+      "code": "# 学习率与基学习器数：相关章节综合实践\nimport numpy as np\nfrom sklearn.ensemble import RandomForestClassifier\nrng=np.random.default_rng(0);X=rng.normal(size=(100,4));y=(X[:,0]>0).astype(int)\nm=RandomForestClassifier(n_estimators=60,min_samples_leaf=3).fit(X[:70],y[:70])\nprint(\"Validation accuracy:\",m.score(X[70:],y[70:]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化ETF多因子、市场状态分类、风险预警与策略交易成本评价。",
+      "limits": "代码是章节级算法基础示例；本知识点更深的理论证明与生产级实现仍需要单独扩展。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "trees-n03-04",
+      "node_id": "trees-n03-04",
+      "title": "样本与特征抽样",
+      "definition": "行、列采样减少训练相关性和计算量，可改善部分数据上的泛化。",
+      "assumptions": "需要明确训练样本、损失、模型复杂度和样本外验证。金融时序回测需按真实信息可用时刻排列。",
+      "properties": [
+        "对每棵树取不同记录与候选特征。",
+        "模型参数与性能依赖数据分布、随机种子和验证条件；需要量化不确定性与成本。"
+      ],
+      "formulas": [
+        {
+          "label": "核心原理",
+          "tex": "D_m\\sim\\mathrm{SampleRows}(D),\\ S_m\\subseteq\\{1,\\ldots,p\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "行、列采样减少训练相关性和计算量，可改善部分数据上的泛化。",
+          "tex": "D_m\\sim\\mathrm{SampleRows}(D),\\ S_m\\subseteq\\{1,\\ldots,p\\}"
+        },
+        {
+          "explanation": "对每棵树取不同记录与候选特征",
+          "tex": "D_m\\sim\\mathrm{SampleRows}(D),\\ S_m\\subseteq\\{1,\\ldots,p\\}"
+        }
+      ],
+      "code": "# 样本与特征抽样：相关章节综合实践\nimport numpy as np\nfrom sklearn.ensemble import RandomForestClassifier\nrng=np.random.default_rng(0);X=rng.normal(size=(100,4));y=(X[:,0]>0).astype(int)\nm=RandomForestClassifier(n_estimators=60,min_samples_leaf=3).fit(X[:70],y[:70])\nprint(\"Validation accuracy:\",m.score(X[70:],y[70:]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化ETF多因子、市场状态分类、风险预警与策略交易成本评价。",
+      "limits": "代码是章节级算法基础示例；本知识点更深的理论证明与生产级实现仍需要单独扩展。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "trees-n04-04",
+      "node_id": "trees-n04-04",
+      "title": "早停",
+      "definition": "根据验证集损失确定Boosting迭代轮数，防止继续训练导致过拟合。",
+      "assumptions": "需要明确训练样本、损失、模型复杂度和样本外验证。金融时序回测需按真实信息可用时刻排列。",
+      "properties": [
+        "在验证误差最小时停止。",
+        "模型参数与性能依赖数据分布、随机种子和验证条件；需要量化不确定性与成本。"
+      ],
+      "formulas": [
+        {
+          "label": "核心原理",
+          "tex": "M^*=\\arg\\min_MR_{\\rm val}(F_M)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据验证集损失确定Boosting迭代轮数，防止继续训练导致过拟合。",
+          "tex": "M^*=\\arg\\min_MR_{\\rm val}(F_M)"
+        },
+        {
+          "explanation": "在验证误差最小时停止",
+          "tex": "M^*=\\arg\\min_MR_{\\rm val}(F_M)"
+        }
+      ],
+      "code": "# 早停：相关章节综合实践\nimport numpy as np\nfrom sklearn.ensemble import RandomForestClassifier\nrng=np.random.default_rng(0);X=rng.normal(size=(100,4));y=(X[:,0]>0).astype(int)\nm=RandomForestClassifier(n_estimators=60,min_samples_leaf=3).fit(X[:70],y[:70])\nprint(\"Validation accuracy:\",m.score(X[70:],y[70:]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化ETF多因子、市场状态分类、风险预警与策略交易成本评价。",
+      "limits": "代码是章节级算法基础示例；本知识点更深的理论证明与生产级实现仍需要单独扩展。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "trees-n05-04",
+      "node_id": "trees-n05-04",
+      "title": "类别不平衡",
+      "definition": "对样本权重或类别目标调整树模型训练，防止多数类主导分裂与损失。",
+      "assumptions": "需要明确训练样本、损失、模型复杂度和样本外验证。金融时序回测需按真实信息可用时刻排列。",
+      "properties": [
+        "为不同类别设定不同权重。",
+        "模型参数与性能依赖数据分布、随机种子和验证条件；需要量化不确定性与成本。"
+      ],
+      "formulas": [
+        {
+          "label": "核心原理",
+          "tex": "L=\\sum_iw_{y_i}\\ell(y_i,F(x_i))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对样本权重或类别目标调整树模型训练，防止多数类主导分裂与损失。",
+          "tex": "L=\\sum_iw_{y_i}\\ell(y_i,F(x_i))"
+        },
+        {
+          "explanation": "为不同类别设定不同权重",
+          "tex": "L=\\sum_iw_{y_i}\\ell(y_i,F(x_i))"
+        }
+      ],
+      "code": "# 类别不平衡：相关章节综合实践\nimport numpy as np\nfrom sklearn.ensemble import RandomForestClassifier\nrng=np.random.default_rng(0);X=rng.normal(size=(100,4));y=(X[:,0]>0).astype(int)\nm=RandomForestClassifier(n_estimators=60,min_samples_leaf=3).fit(X[:70],y[:70])\nprint(\"Validation accuracy:\",m.score(X[70:],y[70:]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化ETF多因子、市场状态分类、风险预警与策略交易成本评价。",
+      "limits": "代码是章节级算法基础示例；本知识点更深的理论证明与生产级实现仍需要单独扩展。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "trees-n06-04",
+      "node_id": "trees-n06-04",
+      "title": "模型校准",
+      "definition": "树模型输出分类得分与真实概率可能不一致，可在独立验证集校准。",
+      "assumptions": "需要明确训练样本、损失、模型复杂度和样本外验证。金融时序回测需按真实信息可用时刻排列。",
+      "properties": [
+        "比较概率和实际频率。",
+        "模型参数与性能依赖数据分布、随机种子和验证条件；需要量化不确定性与成本。"
+      ],
+      "formulas": [
+        {
+          "label": "核心原理",
+          "tex": "P(Y=1\\mid\\hat p=p)\\approx p"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "树模型输出分类得分与真实概率可能不一致，可在独立验证集校准。",
+          "tex": "P(Y=1\\mid\\hat p=p)\\approx p"
+        },
+        {
+          "explanation": "比较概率和实际频率",
+          "tex": "P(Y=1\\mid\\hat p=p)\\approx p"
+        }
+      ],
+      "code": "# 模型校准：相关章节综合实践\nimport numpy as np\nfrom sklearn.ensemble import RandomForestClassifier\nrng=np.random.default_rng(0);X=rng.normal(size=(100,4));y=(X[:,0]>0).astype(int)\nm=RandomForestClassifier(n_estimators=60,min_samples_leaf=3).fit(X[:70],y[:70])\nprint(\"Validation accuracy:\",m.score(X[70:],y[70:]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化ETF多因子、市场状态分类、风险预警与策略交易成本评价。",
+      "limits": "代码是章节级算法基础示例；本知识点更深的理论证明与生产级实现仍需要单独扩展。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "trees-n01-05",
+      "node_id": "trees-n01-05",
+      "title": "非线性因子组合",
+      "definition": "树通过分裂和交互自动拟合非线性的因子收益映射。",
+      "assumptions": "需要明确训练样本、损失、模型复杂度和样本外验证。金融时序回测需按真实信息可用时刻排列。",
+      "properties": [
+        "用树分段区域近似非线性函数。",
+        "模型参数与性能依赖数据分布、随机种子和验证条件；需要量化不确定性与成本。"
+      ],
+      "formulas": [
+        {
+          "label": "核心原理",
+          "tex": "\\hat r=f(\\mathrm{MOM},\\mathrm{VOL},\\mathrm{VALUE})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "树通过分裂和交互自动拟合非线性的因子收益映射。",
+          "tex": "\\hat r=f(\\mathrm{MOM},\\mathrm{VOL},\\mathrm{VALUE})"
+        },
+        {
+          "explanation": "用树分段区域近似非线性函数",
+          "tex": "\\hat r=f(\\mathrm{MOM},\\mathrm{VOL},\\mathrm{VALUE})"
+        }
+      ],
+      "code": "# 非线性因子组合：相关章节综合实践\nimport numpy as np\nfrom sklearn.ensemble import RandomForestRegressor\nrng=np.random.default_rng(0);X=rng.normal(size=(120,4));y=X[:,0]+.5*X[:,1]+rng.normal(size=120)\nm=RandomForestRegressor(n_estimators=40,random_state=0).fit(X[:80],y[:80])\nprint(\"Holdout error:\",np.mean((m.predict(X[80:])-y[80:])**2))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化ETF多因子、市场状态分类、风险预警与策略交易成本评价。",
+      "limits": "代码是章节级算法基础示例；本知识点更深的理论证明与生产级实现仍需要单独扩展。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "trees-n02-05",
+      "node_id": "trees-n02-05",
+      "title": "因子交互",
+      "definition": "树的连续分裂能表达当某条件成立时其他特征边际效应发生变化。",
+      "assumptions": "需要明确训练样本、损失、模型复杂度和样本外验证。金融时序回测需按真实信息可用时刻排列。",
+      "properties": [
+        "通过交互项刻画变量协同效应。",
+        "模型参数与性能依赖数据分布、随机种子和验证条件；需要量化不确定性与成本。"
+      ],
+      "formulas": [
+        {
+          "label": "核心原理",
+          "tex": "f(x_1,x_2)=\\beta_1x_1+\\beta_2x_2+\\beta_{12}x_1x_2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "树的连续分裂能表达当某条件成立时其他特征边际效应发生变化。",
+          "tex": "f(x_1,x_2)=\\beta_1x_1+\\beta_2x_2+\\beta_{12}x_1x_2"
+        },
+        {
+          "explanation": "通过交互项刻画变量协同效应",
+          "tex": "f(x_1,x_2)=\\beta_1x_1+\\beta_2x_2+\\beta_{12}x_1x_2"
+        }
+      ],
+      "code": "# 因子交互：相关章节综合实践\nimport numpy as np\nfrom sklearn.ensemble import RandomForestRegressor\nrng=np.random.default_rng(0);X=rng.normal(size=(120,4));y=X[:,0]+.5*X[:,1]+rng.normal(size=120)\nm=RandomForestRegressor(n_estimators=40,random_state=0).fit(X[:80],y[:80])\nprint(\"Holdout error:\",np.mean((m.predict(X[80:])-y[80:])**2))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化ETF多因子、市场状态分类、风险预警与策略交易成本评价。",
+      "limits": "代码是章节级算法基础示例；本知识点更深的理论证明与生产级实现仍需要单独扩展。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "trees-n03-05",
+      "node_id": "trees-n03-05",
+      "title": "按时间滚动训练",
+      "definition": "按日期向前滚动训练窗口，避免将测试时期数据用于历史策略拟合。",
+      "assumptions": "需要明确训练样本、损失、模型复杂度和样本外验证。金融时序回测需按真实信息可用时刻排列。",
+      "properties": [
+        "用最近W期历史训练模型。",
+        "模型参数与性能依赖数据分布、随机种子和验证条件；需要量化不确定性与成本。"
+      ],
+      "formulas": [
+        {
+          "label": "核心原理",
+          "tex": "\\theta_t=\\operatorname{Fit}(D_{[t-W,t)})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按日期向前滚动训练窗口，避免将测试时期数据用于历史策略拟合。",
+          "tex": "\\theta_t=\\operatorname{Fit}(D_{[t-W,t)})"
+        },
+        {
+          "explanation": "用最近W期历史训练模型",
+          "tex": "\\theta_t=\\operatorname{Fit}(D_{[t-W,t)})"
+        }
+      ],
+      "code": "# 按时间滚动训练：相关章节综合实践\nimport numpy as np\nfrom sklearn.ensemble import RandomForestRegressor\nrng=np.random.default_rng(0);X=rng.normal(size=(120,4));y=X[:,0]+.5*X[:,1]+rng.normal(size=120)\nm=RandomForestRegressor(n_estimators=40,random_state=0).fit(X[:80],y[:80])\nprint(\"Holdout error:\",np.mean((m.predict(X[80:])-y[80:])**2))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化ETF多因子、市场状态分类、风险预警与策略交易成本评价。",
+      "limits": "代码是章节级算法基础示例；本知识点更深的理论证明与生产级实现仍需要单独扩展。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "trees-n04-05",
+      "node_id": "trees-n04-05",
+      "title": "SHAP解释",
+      "definition": "TreeSHAP等方法在给定背景值定义下分解模型预测对各特征的贡献。",
+      "assumptions": "需要明确训练样本、损失、模型复杂度和样本外验证。金融时序回测需按真实信息可用时刻排列。",
+      "properties": [
+        "使用Shapley分摊边际贡献。",
+        "模型参数与性能依赖数据分布、随机种子和验证条件；需要量化不确定性与成本。"
+      ],
+      "formulas": [
+        {
+          "label": "核心原理",
+          "tex": "f(x)=\\phi_0+\\sum_j\\phi_j"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "TreeSHAP等方法在给定背景值定义下分解模型预测对各特征的贡献。",
+          "tex": "f(x)=\\phi_0+\\sum_j\\phi_j"
+        },
+        {
+          "explanation": "使用Shapley分摊边际贡献",
+          "tex": "f(x)=\\phi_0+\\sum_j\\phi_j"
+        }
+      ],
+      "code": "# SHAP解释：相关章节综合实践\nimport numpy as np\nfrom sklearn.ensemble import RandomForestRegressor\nrng=np.random.default_rng(0);X=rng.normal(size=(120,4));y=X[:,0]+.5*X[:,1]+rng.normal(size=120)\nm=RandomForestRegressor(n_estimators=40,random_state=0).fit(X[:80],y[:80])\nprint(\"Holdout error:\",np.mean((m.predict(X[80:])-y[80:])**2))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化ETF多因子、市场状态分类、风险预警与策略交易成本评价。",
+      "limits": "代码是章节级算法基础示例；本知识点更深的理论证明与生产级实现仍需要单独扩展。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "trees-n05-05",
+      "node_id": "trees-n05-05",
+      "title": "单调约束",
+      "definition": "对某些变量施加预测函数单调性限制，减少与经济先验冲突的局部拟合。",
+      "assumptions": "需要明确训练样本、损失、模型复杂度和样本外验证。金融时序回测需按真实信息可用时刻排列。",
+      "properties": [
+        "固定其他变量要求输出单调不减。",
+        "模型参数与性能依赖数据分布、随机种子和验证条件；需要量化不确定性与成本。"
+      ],
+      "formulas": [
+        {
+          "label": "核心原理",
+          "tex": "x_j'>x_j\\Rightarrow f(x')\\ge f(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对某些变量施加预测函数单调性限制，减少与经济先验冲突的局部拟合。",
+          "tex": "x_j'>x_j\\Rightarrow f(x')\\ge f(x)"
+        },
+        {
+          "explanation": "固定其他变量要求输出单调不减",
+          "tex": "x_j'>x_j\\Rightarrow f(x')\\ge f(x)"
+        }
+      ],
+      "code": "# 单调约束：相关章节综合实践\nimport numpy as np\nfrom sklearn.ensemble import RandomForestRegressor\nrng=np.random.default_rng(0);X=rng.normal(size=(120,4));y=X[:,0]+.5*X[:,1]+rng.normal(size=120)\nm=RandomForestRegressor(n_estimators=40,random_state=0).fit(X[:80],y[:80])\nprint(\"Holdout error:\",np.mean((m.predict(X[80:])-y[80:])**2))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化ETF多因子、市场状态分类、风险预警与策略交易成本评价。",
+      "limits": "代码是章节级算法基础示例；本知识点更深的理论证明与生产级实现仍需要单独扩展。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "trees-n06-05",
+      "node_id": "trees-n06-05",
+      "title": "交易成本后的收益检验",
+      "definition": "根据模型信号构造仓位并扣手续费、滑点和换手成本，评估可执行净绩效。",
+      "assumptions": "需要明确训练样本、损失、模型复杂度和样本外验证。金融时序回测需按真实信息可用时刻排列。",
+      "properties": [
+        "毛收益扣除交易成本后再聚合。",
+        "模型参数与性能依赖数据分布、随机种子和验证条件；需要量化不确定性与成本。"
+      ],
+      "formulas": [
+        {
+          "label": "核心原理",
+          "tex": "r_t^{\\rm net}=w_{t-1}^\\top r_t-c\\|w_t-w_{t-1}\\|_1"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据模型信号构造仓位并扣手续费、滑点和换手成本，评估可执行净绩效。",
+          "tex": "r_t^{\\rm net}=w_{t-1}^\\top r_t-c\\|w_t-w_{t-1}\\|_1"
+        },
+        {
+          "explanation": "毛收益扣除交易成本后再聚合",
+          "tex": "r_t^{\\rm net}=w_{t-1}^\\top r_t-c\\|w_t-w_{t-1}\\|_1"
+        }
+      ],
+      "code": "# 交易成本后的收益检验：相关章节综合实践\nimport numpy as np\nfrom sklearn.ensemble import RandomForestRegressor\nrng=np.random.default_rng(0);X=rng.normal(size=(120,4));y=X[:,0]+.5*X[:,1]+rng.normal(size=120)\nm=RandomForestRegressor(n_estimators=40,random_state=0).fit(X[:80],y[:80])\nprint(\"Holdout error:\",np.mean((m.predict(X[80:])-y[80:])**2))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化ETF多因子、市场状态分类、风险预警与策略交易成本评价。",
+      "limits": "代码是章节级算法基础示例；本知识点更深的理论证明与生产级实现仍需要单独扩展。",
+      "coverage": "expanded"
+    }
+  ]
+}
