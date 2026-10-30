@@ -1,0 +1,773 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "vision-n01-01",
+      "node_id": "vision-n01-01",
+      "title": "像素通道与张量",
+      "definition": "数字图像按颜色/特征通道和空间尺寸组织为张量，CNN通常使用批次×通道×高×宽。",
+      "assumptions": "图像像素与标签在相同历史信息窗口中构造，增强和训练数据分割必须保留语义及时间先后关系。",
+      "properties": [
+        "数字图像按颜色/特征通道和空间尺寸组织为张量，CNN通常使用批次×通道×高×宽。",
+        "图像骨干、分割与表征学习解决不同任务，不能仅凭网络架构名称判断适用性。"
+      ],
+      "formulas": [
+        {
+          "label": "模型或视觉任务公式",
+          "tex": "X\\in\\mathbb R^{N\\times C\\times H\\times W}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按该任务的图像张量形状、Patch或卷积空间确定基本特征表示与损失。",
+          "tex": "X\\in\\mathbb R^{N\\times C\\times H\\times W}"
+        },
+        {
+          "explanation": "在训练期拟合网络或计算可视化、空间分割、对比表示，并在分离的图像或时间段测试。",
+          "tex": "X\\in\\mathbb R^{N\\times C\\times H\\times W}"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(2,3,32,32);print(x.shape,torch.nn.Conv2d(3,8,3)(x).shape)",
+      "packages": "torch",
+      "application": "研究基于ETF价格图的CNN/ViT预测、财报图像识别及跨市场视觉表示。",
+      "limits": "代码为视觉任务所在章节的基础形状或数学演示，完整检测器、DINO和ViT还需独立工程实现；价格图像缩放与前视偏差需专项验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n02-01",
+      "node_id": "vision-n02-01",
+      "title": "卷积滤波",
+      "definition": "用局部卷积核加权聚合图像像素，检测局部边缘、纹理与模式。",
+      "assumptions": "图像像素与标签在相同历史信息窗口中构造，增强和训练数据分割必须保留语义及时间先后关系。",
+      "properties": [
+        "用局部卷积核加权聚合图像像素，检测局部边缘、纹理与模式。",
+        "图像骨干、分割与表征学习解决不同任务，不能仅凭网络架构名称判断适用性。"
+      ],
+      "formulas": [
+        {
+          "label": "模型或视觉任务公式",
+          "tex": "y_{u,v}=\\sum_{i,j}w_{ij}x_{u+i,v+j}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按该任务的图像张量形状、Patch或卷积空间确定基本特征表示与损失。",
+          "tex": "y_{u,v}=\\sum_{i,j}w_{ij}x_{u+i,v+j}"
+        },
+        {
+          "explanation": "在训练期拟合网络或计算可视化、空间分割、对比表示，并在分离的图像或时间段测试。",
+          "tex": "y_{u,v}=\\sum_{i,j}w_{ij}x_{u+i,v+j}"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(2,3,32,32);print(x.shape,torch.nn.Conv2d(3,8,3)(x).shape)",
+      "packages": "torch",
+      "application": "研究基于ETF价格图的CNN/ViT预测、财报图像识别及跨市场视觉表示。",
+      "limits": "代码为视觉任务所在章节的基础形状或数学演示，完整检测器、DINO和ViT还需独立工程实现；价格图像缩放与前视偏差需专项验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n05-01",
+      "node_id": "vision-n05-01",
+      "title": "图像分类",
+      "definition": "图像分类模型将整个输入图像映射到互斥类别概率或标签。",
+      "assumptions": "图像像素与标签在相同历史信息窗口中构造，增强和训练数据分割必须保留语义及时间先后关系。",
+      "properties": [
+        "图像分类模型将整个输入图像映射到互斥类别概率或标签。",
+        "图像骨干、分割与表征学习解决不同任务，不能仅凭网络架构名称判断适用性。"
+      ],
+      "formulas": [
+        {
+          "label": "模型或视觉任务公式",
+          "tex": "p(y=k\\mid I)=\\operatorname{softmax}_k(f_\\theta(I))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按该任务的图像张量形状、Patch或卷积空间确定基本特征表示与损失。",
+          "tex": "p(y=k\\mid I)=\\operatorname{softmax}_k(f_\\theta(I))"
+        },
+        {
+          "explanation": "在训练期拟合网络或计算可视化、空间分割、对比表示，并在分离的图像或时间段测试。",
+          "tex": "p(y=k\\mid I)=\\operatorname{softmax}_k(f_\\theta(I))"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(2,3,32,32);print(x.shape,torch.nn.Conv2d(3,8,3)(x).shape)",
+      "packages": "torch",
+      "application": "研究基于ETF价格图的CNN/ViT预测、财报图像识别及跨市场视觉表示。",
+      "limits": "代码为视觉任务所在章节的基础形状或数学演示，完整检测器、DINO和ViT还需独立工程实现；价格图像缩放与前视偏差需专项验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n06-01",
+      "node_id": "vision-n06-01",
+      "title": "视觉验证集",
+      "definition": "视觉数据划分需防止近重复图像、相同主体或相邻历史窗口进入训练和验证两侧。",
+      "assumptions": "图像像素与标签在相同历史信息窗口中构造，增强和训练数据分割必须保留语义及时间先后关系。",
+      "properties": [
+        "视觉数据划分需防止近重复图像、相同主体或相邻历史窗口进入训练和验证两侧。",
+        "图像骨干、分割与表征学习解决不同任务，不能仅凭网络架构名称判断适用性。"
+      ],
+      "formulas": [
+        {
+          "label": "模型或视觉任务公式",
+          "tex": "I_{\\rm train}\\cap I_{\\rm val}=\\varnothing"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按该任务的图像张量形状、Patch或卷积空间确定基本特征表示与损失。",
+          "tex": "I_{\\rm train}\\cap I_{\\rm val}=\\varnothing"
+        },
+        {
+          "explanation": "在训练期拟合网络或计算可视化、空间分割、对比表示，并在分离的图像或时间段测试。",
+          "tex": "I_{\\rm train}\\cap I_{\\rm val}=\\varnothing"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(2,3,32,32);print(x.shape,torch.nn.Conv2d(3,8,3)(x).shape)",
+      "packages": "torch",
+      "application": "研究基于ETF价格图的CNN/ViT预测、财报图像识别及跨市场视觉表示。",
+      "limits": "代码为视觉任务所在章节的基础形状或数学演示，完整检测器、DINO和ViT还需独立工程实现；价格图像缩放与前视偏差需专项验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n02-02",
+      "node_id": "vision-n02-02",
+      "title": "AlexNet",
+      "definition": "AlexNet使用多层卷积与全连接层、ReLU及Dropout学习图像分类特征。",
+      "assumptions": "图像像素与标签在相同历史信息窗口中构造，增强和训练数据分割必须保留语义及时间先后关系。",
+      "properties": [
+        "AlexNet使用多层卷积与全连接层、ReLU及Dropout学习图像分类特征。",
+        "图像骨干、分割与表征学习解决不同任务，不能仅凭网络架构名称判断适用性。"
+      ],
+      "formulas": [
+        {
+          "label": "模型或视觉任务公式",
+          "tex": "h_{\\ell+1}=\\operatorname{ReLU}(W_\\ell*h_\\ell+b_\\ell)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按该任务的图像张量形状、Patch或卷积空间确定基本特征表示与损失。",
+          "tex": "h_{\\ell+1}=\\operatorname{ReLU}(W_\\ell*h_\\ell+b_\\ell)"
+        },
+        {
+          "explanation": "在训练期拟合网络或计算可视化、空间分割、对比表示，并在分离的图像或时间段测试。",
+          "tex": "h_{\\ell+1}=\\operatorname{ReLU}(W_\\ell*h_\\ell+b_\\ell)"
+        }
+      ],
+      "code": "import torch\nnet=torch.nn.Sequential(torch.nn.Conv2d(3,6,3),torch.nn.ReLU(),torch.nn.AdaptiveAvgPool2d(1),torch.nn.Flatten(),torch.nn.Linear(6,2))\nprint(net(torch.randn(3,3,32,32)).shape)",
+      "packages": "torch",
+      "application": "研究基于ETF价格图的CNN/ViT预测、财报图像识别及跨市场视觉表示。",
+      "limits": "代码为视觉任务所在章节的基础形状或数学演示，完整检测器、DINO和ViT还需独立工程实现；价格图像缩放与前视偏差需专项验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n03-02",
+      "node_id": "vision-n03-02",
+      "title": "VGG",
+      "definition": "VGG采用重复的小尺寸卷积块逐层构造深层图像表征。",
+      "assumptions": "图像像素与标签在相同历史信息窗口中构造，增强和训练数据分割必须保留语义及时间先后关系。",
+      "properties": [
+        "VGG采用重复的小尺寸卷积块逐层构造深层图像表征。",
+        "图像骨干、分割与表征学习解决不同任务，不能仅凭网络架构名称判断适用性。"
+      ],
+      "formulas": [
+        {
+          "label": "模型或视觉任务公式",
+          "tex": "h_{\\ell+1}=\\operatorname{ReLU}(\\operatorname{Conv}_{3\\times3}(h_\\ell))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按该任务的图像张量形状、Patch或卷积空间确定基本特征表示与损失。",
+          "tex": "h_{\\ell+1}=\\operatorname{ReLU}(\\operatorname{Conv}_{3\\times3}(h_\\ell))"
+        },
+        {
+          "explanation": "在训练期拟合网络或计算可视化、空间分割、对比表示，并在分离的图像或时间段测试。",
+          "tex": "h_{\\ell+1}=\\operatorname{ReLU}(\\operatorname{Conv}_{3\\times3}(h_\\ell))"
+        }
+      ],
+      "code": "import torch\nnet=torch.nn.Sequential(torch.nn.Conv2d(3,6,3),torch.nn.ReLU(),torch.nn.AdaptiveAvgPool2d(1),torch.nn.Flatten(),torch.nn.Linear(6,2))\nprint(net(torch.randn(3,3,32,32)).shape)",
+      "packages": "torch",
+      "application": "研究基于ETF价格图的CNN/ViT预测、财报图像识别及跨市场视觉表示。",
+      "limits": "代码为视觉任务所在章节的基础形状或数学演示，完整检测器、DINO和ViT还需独立工程实现；价格图像缩放与前视偏差需专项验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n05-02",
+      "node_id": "vision-n05-02",
+      "title": "EfficientNet",
+      "definition": "EfficientNet通过统一缩放宽度、深度和输入分辨率平衡准确率与计算量。",
+      "assumptions": "图像像素与标签在相同历史信息窗口中构造，增强和训练数据分割必须保留语义及时间先后关系。",
+      "properties": [
+        "EfficientNet通过统一缩放宽度、深度和输入分辨率平衡准确率与计算量。",
+        "图像骨干、分割与表征学习解决不同任务，不能仅凭网络架构名称判断适用性。"
+      ],
+      "formulas": [
+        {
+          "label": "模型或视觉任务公式",
+          "tex": "d=\\alpha^\\phi,\\quad w=\\beta^\\phi,\\quad r=\\gamma^\\phi"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按该任务的图像张量形状、Patch或卷积空间确定基本特征表示与损失。",
+          "tex": "d=\\alpha^\\phi,\\quad w=\\beta^\\phi,\\quad r=\\gamma^\\phi"
+        },
+        {
+          "explanation": "在训练期拟合网络或计算可视化、空间分割、对比表示，并在分离的图像或时间段测试。",
+          "tex": "d=\\alpha^\\phi,\\quad w=\\beta^\\phi,\\quad r=\\gamma^\\phi"
+        }
+      ],
+      "code": "import torch\nnet=torch.nn.Sequential(torch.nn.Conv2d(3,6,3),torch.nn.ReLU(),torch.nn.AdaptiveAvgPool2d(1),torch.nn.Flatten(),torch.nn.Linear(6,2))\nprint(net(torch.randn(3,3,32,32)).shape)",
+      "packages": "torch",
+      "application": "研究基于ETF价格图的CNN/ViT预测、财报图像识别及跨市场视觉表示。",
+      "limits": "代码为视觉任务所在章节的基础形状或数学演示，完整检测器、DINO和ViT还需独立工程实现；价格图像缩放与前视偏差需专项验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n06-02",
+      "node_id": "vision-n06-02",
+      "title": "Vision Transformer",
+      "definition": "ViT将图像切成Patch、嵌入为Token并用Self-Attention建模全局关系。",
+      "assumptions": "图像像素与标签在相同历史信息窗口中构造，增强和训练数据分割必须保留语义及时间先后关系。",
+      "properties": [
+        "ViT将图像切成Patch、嵌入为Token并用Self-Attention建模全局关系。",
+        "图像骨干、分割与表征学习解决不同任务，不能仅凭网络架构名称判断适用性。"
+      ],
+      "formulas": [
+        {
+          "label": "模型或视觉任务公式",
+          "tex": "z_i=W_e\\operatorname{vec}(P_i)+p_i"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按该任务的图像张量形状、Patch或卷积空间确定基本特征表示与损失。",
+          "tex": "z_i=W_e\\operatorname{vec}(P_i)+p_i"
+        },
+        {
+          "explanation": "在训练期拟合网络或计算可视化、空间分割、对比表示，并在分离的图像或时间段测试。",
+          "tex": "z_i=W_e\\operatorname{vec}(P_i)+p_i"
+        }
+      ],
+      "code": "import torch\nnet=torch.nn.Sequential(torch.nn.Conv2d(3,6,3),torch.nn.ReLU(),torch.nn.AdaptiveAvgPool2d(1),torch.nn.Flatten(),torch.nn.Linear(6,2))\nprint(net(torch.randn(3,3,32,32)).shape)",
+      "packages": "torch",
+      "application": "研究基于ETF价格图的CNN/ViT预测、财报图像识别及跨市场视觉表示。",
+      "limits": "代码为视觉任务所在章节的基础形状或数学演示，完整检测器、DINO和ViT还需独立工程实现；价格图像缩放与前视偏差需专项验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n01-03",
+      "node_id": "vision-n01-03",
+      "title": "物体检测",
+      "definition": "物体检测同时预测目标类别及其在图像中的位置框。",
+      "assumptions": "图像像素与标签在相同历史信息窗口中构造，增强和训练数据分割必须保留语义及时间先后关系。",
+      "properties": [
+        "物体检测同时预测目标类别及其在图像中的位置框。",
+        "图像骨干、分割与表征学习解决不同任务，不能仅凭网络架构名称判断适用性。"
+      ],
+      "formulas": [
+        {
+          "label": "模型或视觉任务公式",
+          "tex": "L=L_{\\rm cls}+\\lambda L_{\\rm box}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按该任务的图像张量形状、Patch或卷积空间确定基本特征表示与损失。",
+          "tex": "L=L_{\\rm cls}+\\lambda L_{\\rm box}"
+        },
+        {
+          "explanation": "在训练期拟合网络或计算可视化、空间分割、对比表示，并在分离的图像或时间段测试。",
+          "tex": "L=L_{\\rm cls}+\\lambda L_{\\rm box}"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(2,3,32,32);mask=(x[:,0]>0).float();print('pixel masks',mask.shape)",
+      "packages": "torch",
+      "application": "研究基于ETF价格图的CNN/ViT预测、财报图像识别及跨市场视觉表示。",
+      "limits": "代码为视觉任务所在章节的基础形状或数学演示，完整检测器、DINO和ViT还需独立工程实现；价格图像缩放与前视偏差需专项验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n02-03",
+      "node_id": "vision-n02-03",
+      "title": "区域建议R-CNN",
+      "definition": "R-CNN架构先生成潜在目标区域，再用卷积特征或区域特征分类与框回归。",
+      "assumptions": "图像像素与标签在相同历史信息窗口中构造，增强和训练数据分割必须保留语义及时间先后关系。",
+      "properties": [
+        "R-CNN架构先生成潜在目标区域，再用卷积特征或区域特征分类与框回归。",
+        "图像骨干、分割与表征学习解决不同任务，不能仅凭网络架构名称判断适用性。"
+      ],
+      "formulas": [
+        {
+          "label": "模型或视觉任务公式",
+          "tex": "P(y,b\\mid I,R)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按该任务的图像张量形状、Patch或卷积空间确定基本特征表示与损失。",
+          "tex": "P(y,b\\mid I,R)"
+        },
+        {
+          "explanation": "在训练期拟合网络或计算可视化、空间分割、对比表示，并在分离的图像或时间段测试。",
+          "tex": "P(y,b\\mid I,R)"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(2,3,32,32);mask=(x[:,0]>0).float();print('pixel masks',mask.shape)",
+      "packages": "torch",
+      "application": "研究基于ETF价格图的CNN/ViT预测、财报图像识别及跨市场视觉表示。",
+      "limits": "代码为视觉任务所在章节的基础形状或数学演示，完整检测器、DINO和ViT还需独立工程实现；价格图像缩放与前视偏差需专项验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n03-03",
+      "node_id": "vision-n03-03",
+      "title": "YOLO",
+      "definition": "YOLO把目标检测组织为单次网络前向输出的框、置信度和类别预测。",
+      "assumptions": "图像像素与标签在相同历史信息窗口中构造，增强和训练数据分割必须保留语义及时间先后关系。",
+      "properties": [
+        "YOLO把目标检测组织为单次网络前向输出的框、置信度和类别预测。",
+        "图像骨干、分割与表征学习解决不同任务，不能仅凭网络架构名称判断适用性。"
+      ],
+      "formulas": [
+        {
+          "label": "模型或视觉任务公式",
+          "tex": "\\hat y=\\{(b_i,c_i,p_i)\\}_{i=1}^K"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按该任务的图像张量形状、Patch或卷积空间确定基本特征表示与损失。",
+          "tex": "\\hat y=\\{(b_i,c_i,p_i)\\}_{i=1}^K"
+        },
+        {
+          "explanation": "在训练期拟合网络或计算可视化、空间分割、对比表示，并在分离的图像或时间段测试。",
+          "tex": "\\hat y=\\{(b_i,c_i,p_i)\\}_{i=1}^K"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(2,3,32,32);mask=(x[:,0]>0).float();print('pixel masks',mask.shape)",
+      "packages": "torch",
+      "application": "研究基于ETF价格图的CNN/ViT预测、财报图像识别及跨市场视觉表示。",
+      "limits": "代码为视觉任务所在章节的基础形状或数学演示，完整检测器、DINO和ViT还需独立工程实现；价格图像缩放与前视偏差需专项验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n04-03",
+      "node_id": "vision-n04-03",
+      "title": "语义分割U-Net",
+      "definition": "U-Net通过编码器下采样与解码器上采样、跳跃连接，实现像素级分割。",
+      "assumptions": "图像像素与标签在相同历史信息窗口中构造，增强和训练数据分割必须保留语义及时间先后关系。",
+      "properties": [
+        "U-Net通过编码器下采样与解码器上采样、跳跃连接，实现像素级分割。",
+        "图像骨干、分割与表征学习解决不同任务，不能仅凭网络架构名称判断适用性。"
+      ],
+      "formulas": [
+        {
+          "label": "模型或视觉任务公式",
+          "tex": "Y=\\operatorname{Decoder}(\\operatorname{Encoder}(X),\\operatorname{Skips})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按该任务的图像张量形状、Patch或卷积空间确定基本特征表示与损失。",
+          "tex": "Y=\\operatorname{Decoder}(\\operatorname{Encoder}(X),\\operatorname{Skips})"
+        },
+        {
+          "explanation": "在训练期拟合网络或计算可视化、空间分割、对比表示，并在分离的图像或时间段测试。",
+          "tex": "Y=\\operatorname{Decoder}(\\operatorname{Encoder}(X),\\operatorname{Skips})"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(2,3,32,32);mask=(x[:,0]>0).float();print('pixel masks',mask.shape)",
+      "packages": "torch",
+      "application": "研究基于ETF价格图的CNN/ViT预测、财报图像识别及跨市场视觉表示。",
+      "limits": "代码为视觉任务所在章节的基础形状或数学演示，完整检测器、DINO和ViT还需独立工程实现；价格图像缩放与前视偏差需专项验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n05-03",
+      "node_id": "vision-n05-03",
+      "title": "实例分割",
+      "definition": "实例分割同时区分对象类别、位置及同类不同对象的像素掩码。",
+      "assumptions": "图像像素与标签在相同历史信息窗口中构造，增强和训练数据分割必须保留语义及时间先后关系。",
+      "properties": [
+        "实例分割同时区分对象类别、位置及同类不同对象的像素掩码。",
+        "图像骨干、分割与表征学习解决不同任务，不能仅凭网络架构名称判断适用性。"
+      ],
+      "formulas": [
+        {
+          "label": "模型或视觉任务公式",
+          "tex": "Y=\\{(b_i,c_i,M_i)\\}_{i=1}^{K}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按该任务的图像张量形状、Patch或卷积空间确定基本特征表示与损失。",
+          "tex": "Y=\\{(b_i,c_i,M_i)\\}_{i=1}^{K}"
+        },
+        {
+          "explanation": "在训练期拟合网络或计算可视化、空间分割、对比表示，并在分离的图像或时间段测试。",
+          "tex": "Y=\\{(b_i,c_i,M_i)\\}_{i=1}^{K}"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(2,3,32,32);mask=(x[:,0]>0).float();print('pixel masks',mask.shape)",
+      "packages": "torch",
+      "application": "研究基于ETF价格图的CNN/ViT预测、财报图像识别及跨市场视觉表示。",
+      "limits": "代码为视觉任务所在章节的基础形状或数学演示，完整检测器、DINO和ViT还需独立工程实现；价格图像缩放与前视偏差需专项验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n01-04",
+      "node_id": "vision-n01-04",
+      "title": "SimCLR视觉对比",
+      "definition": "SimCLR在增强图像上使用对比损失，使同一图像的两个视图表示接近。",
+      "assumptions": "图像像素与标签在相同历史信息窗口中构造，增强和训练数据分割必须保留语义及时间先后关系。",
+      "properties": [
+        "SimCLR在增强图像上使用对比损失，使同一图像的两个视图表示接近。",
+        "图像骨干、分割与表征学习解决不同任务，不能仅凭网络架构名称判断适用性。"
+      ],
+      "formulas": [
+        {
+          "label": "模型或视觉任务公式",
+          "tex": "L=-\\log\\frac{e^{s(z_i,z_i^+)/\\tau}}{\\sum_je^{s(z_i,z_j)/\\tau}}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按该任务的图像张量形状、Patch或卷积空间确定基本特征表示与损失。",
+          "tex": "L=-\\log\\frac{e^{s(z_i,z_i^+)/\\tau}}{\\sum_je^{s(z_i,z_j)/\\tau}}"
+        },
+        {
+          "explanation": "在训练期拟合网络或计算可视化、空间分割、对比表示，并在分离的图像或时间段测试。",
+          "tex": "L=-\\log\\frac{e^{s(z_i,z_i^+)/\\tau}}{\\sum_je^{s(z_i,z_j)/\\tau}}"
+        }
+      ],
+      "code": "import torch\nz=torch.nn.functional.normalize(torch.randn(5,8),dim=-1);print('pairwise similarity',(z@z.T).shape)",
+      "packages": "torch",
+      "application": "研究基于ETF价格图的CNN/ViT预测、财报图像识别及跨市场视觉表示。",
+      "limits": "代码为视觉任务所在章节的基础形状或数学演示，完整检测器、DINO和ViT还需独立工程实现；价格图像缩放与前视偏差需专项验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n02-04",
+      "node_id": "vision-n02-04",
+      "title": "DINO",
+      "definition": "DINO利用教师学生自蒸馏、中心化与温度机制，在无标签图像上学习语义表示。",
+      "assumptions": "图像像素与标签在相同历史信息窗口中构造，增强和训练数据分割必须保留语义及时间先后关系。",
+      "properties": [
+        "DINO利用教师学生自蒸馏、中心化与温度机制，在无标签图像上学习语义表示。",
+        "图像骨干、分割与表征学习解决不同任务，不能仅凭网络架构名称判断适用性。"
+      ],
+      "formulas": [
+        {
+          "label": "模型或视觉任务公式",
+          "tex": "L=-\\sum_kp_T(k)\\log p_S(k)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按该任务的图像张量形状、Patch或卷积空间确定基本特征表示与损失。",
+          "tex": "L=-\\sum_kp_T(k)\\log p_S(k)"
+        },
+        {
+          "explanation": "在训练期拟合网络或计算可视化、空间分割、对比表示，并在分离的图像或时间段测试。",
+          "tex": "L=-\\sum_kp_T(k)\\log p_S(k)"
+        }
+      ],
+      "code": "import torch\nz=torch.nn.functional.normalize(torch.randn(5,8),dim=-1);print('pairwise similarity',(z@z.T).shape)",
+      "packages": "torch",
+      "application": "研究基于ETF价格图的CNN/ViT预测、财报图像识别及跨市场视觉表示。",
+      "limits": "代码为视觉任务所在章节的基础形状或数学演示，完整检测器、DINO和ViT还需独立工程实现；价格图像缩放与前视偏差需专项验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n03-04",
+      "node_id": "vision-n03-04",
+      "title": "MAE掩码自编码",
+      "definition": "掩码自编码器随机遮蔽大量图像Patch，仅根据可见Patch重构隐藏图像块。",
+      "assumptions": "图像像素与标签在相同历史信息窗口中构造，增强和训练数据分割必须保留语义及时间先后关系。",
+      "properties": [
+        "掩码自编码器随机遮蔽大量图像Patch，仅根据可见Patch重构隐藏图像块。",
+        "图像骨干、分割与表征学习解决不同任务，不能仅凭网络架构名称判断适用性。"
+      ],
+      "formulas": [
+        {
+          "label": "模型或视觉任务公式",
+          "tex": "L=\\frac1{|M|}\\sum_{i\\in M}\\|\\hat P_i-P_i\\|^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按该任务的图像张量形状、Patch或卷积空间确定基本特征表示与损失。",
+          "tex": "L=\\frac1{|M|}\\sum_{i\\in M}\\|\\hat P_i-P_i\\|^2"
+        },
+        {
+          "explanation": "在训练期拟合网络或计算可视化、空间分割、对比表示，并在分离的图像或时间段测试。",
+          "tex": "L=\\frac1{|M|}\\sum_{i\\in M}\\|\\hat P_i-P_i\\|^2"
+        }
+      ],
+      "code": "import torch\nz=torch.nn.functional.normalize(torch.randn(5,8),dim=-1);print('pairwise similarity',(z@z.T).shape)",
+      "packages": "torch",
+      "application": "研究基于ETF价格图的CNN/ViT预测、财报图像识别及跨市场视觉表示。",
+      "limits": "代码为视觉任务所在章节的基础形状或数学演示，完整检测器、DINO和ViT还需独立工程实现；价格图像缩放与前视偏差需专项验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n04-04",
+      "node_id": "vision-n04-04",
+      "title": "CLIP",
+      "definition": "CLIP使用图像与文本配对的双向对比损失对齐两种模态的嵌入空间。",
+      "assumptions": "图像像素与标签在相同历史信息窗口中构造，增强和训练数据分割必须保留语义及时间先后关系。",
+      "properties": [
+        "CLIP使用图像与文本配对的双向对比损失对齐两种模态的嵌入空间。",
+        "图像骨干、分割与表征学习解决不同任务，不能仅凭网络架构名称判断适用性。"
+      ],
+      "formulas": [
+        {
+          "label": "模型或视觉任务公式",
+          "tex": "L_{\\rm clip}=\\frac12(L_{I\\to T}+L_{T\\to I})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按该任务的图像张量形状、Patch或卷积空间确定基本特征表示与损失。",
+          "tex": "L_{\\rm clip}=\\frac12(L_{I\\to T}+L_{T\\to I})"
+        },
+        {
+          "explanation": "在训练期拟合网络或计算可视化、空间分割、对比表示，并在分离的图像或时间段测试。",
+          "tex": "L_{\\rm clip}=\\frac12(L_{I\\to T}+L_{T\\to I})"
+        }
+      ],
+      "code": "import torch\nz=torch.nn.functional.normalize(torch.randn(5,8),dim=-1);print('pairwise similarity',(z@z.T).shape)",
+      "packages": "torch",
+      "application": "研究基于ETF价格图的CNN/ViT预测、财报图像识别及跨市场视觉表示。",
+      "limits": "代码为视觉任务所在章节的基础形状或数学演示，完整检测器、DINO和ViT还需独立工程实现；价格图像缩放与前视偏差需专项验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n05-04",
+      "node_id": "vision-n05-04",
+      "title": "视觉嵌入",
+      "definition": "视觉编码器把图像转为低维向量表示，用于相似检索、聚类及下游任务。",
+      "assumptions": "图像像素与标签在相同历史信息窗口中构造，增强和训练数据分割必须保留语义及时间先后关系。",
+      "properties": [
+        "视觉编码器把图像转为低维向量表示，用于相似检索、聚类及下游任务。",
+        "图像骨干、分割与表征学习解决不同任务，不能仅凭网络架构名称判断适用性。"
+      ],
+      "formulas": [
+        {
+          "label": "模型或视觉任务公式",
+          "tex": "z=f_\\theta(I)\\in\\mathbb R^d"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按该任务的图像张量形状、Patch或卷积空间确定基本特征表示与损失。",
+          "tex": "z=f_\\theta(I)\\in\\mathbb R^d"
+        },
+        {
+          "explanation": "在训练期拟合网络或计算可视化、空间分割、对比表示，并在分离的图像或时间段测试。",
+          "tex": "z=f_\\theta(I)\\in\\mathbb R^d"
+        }
+      ],
+      "code": "import torch\nz=torch.nn.functional.normalize(torch.randn(5,8),dim=-1);print('pairwise similarity',(z@z.T).shape)",
+      "packages": "torch",
+      "application": "研究基于ETF价格图的CNN/ViT预测、财报图像识别及跨市场视觉表示。",
+      "limits": "代码为视觉任务所在章节的基础形状或数学演示，完整检测器、DINO和ViT还需独立工程实现；价格图像缩放与前视偏差需专项验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n06-04",
+      "node_id": "vision-n06-04",
+      "title": "特征可视化",
+      "definition": "通过激活图、梯度显著图或过滤器响应检查模型关注的图像区域。",
+      "assumptions": "图像像素与标签在相同历史信息窗口中构造，增强和训练数据分割必须保留语义及时间先后关系。",
+      "properties": [
+        "通过激活图、梯度显著图或过滤器响应检查模型关注的图像区域。",
+        "图像骨干、分割与表征学习解决不同任务，不能仅凭网络架构名称判断适用性。"
+      ],
+      "formulas": [
+        {
+          "label": "模型或视觉任务公式",
+          "tex": "S=\\left|\\frac{\\partial f_\\theta(I)}{\\partial I}\\right|"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按该任务的图像张量形状、Patch或卷积空间确定基本特征表示与损失。",
+          "tex": "S=\\left|\\frac{\\partial f_\\theta(I)}{\\partial I}\\right|"
+        },
+        {
+          "explanation": "在训练期拟合网络或计算可视化、空间分割、对比表示，并在分离的图像或时间段测试。",
+          "tex": "S=\\left|\\frac{\\partial f_\\theta(I)}{\\partial I}\\right|"
+        }
+      ],
+      "code": "import torch\nz=torch.nn.functional.normalize(torch.randn(5,8),dim=-1);print('pairwise similarity',(z@z.T).shape)",
+      "packages": "torch",
+      "application": "研究基于ETF价格图的CNN/ViT预测、财报图像识别及跨市场视觉表示。",
+      "limits": "代码为视觉任务所在章节的基础形状或数学演示，完整检测器、DINO和ViT还需独立工程实现；价格图像缩放与前视偏差需专项验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n02-05",
+      "node_id": "vision-n02-05",
+      "title": "CNN价格趋势预测",
+      "definition": "将仅含过去OHLCV的图像输入CNN预测未来回报排序或涨跌标签。",
+      "assumptions": "图像像素与标签在相同历史信息窗口中构造，增强和训练数据分割必须保留语义及时间先后关系。",
+      "properties": [
+        "将仅含过去OHLCV的图像输入CNN预测未来回报排序或涨跌标签。",
+        "图像骨干、分割与表征学习解决不同任务，不能仅凭网络架构名称判断适用性。"
+      ],
+      "formulas": [
+        {
+          "label": "模型或视觉任务公式",
+          "tex": "\\hat p_{t+h}=\\operatorname{CNN}(I_{t-W+1:t})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按该任务的图像张量形状、Patch或卷积空间确定基本特征表示与损失。",
+          "tex": "\\hat p_{t+h}=\\operatorname{CNN}(I_{t-W+1:t})"
+        },
+        {
+          "explanation": "在训练期拟合网络或计算可视化、空间分割、对比表示，并在分离的图像或时间段测试。",
+          "tex": "\\hat p_{t+h}=\\operatorname{CNN}(I_{t-W+1:t})"
+        }
+      ],
+      "code": "import numpy as np\np=np.array([100.,102.,101.,105.]);scale=(p-p.min())/(p.max()-p.min());print('past-only image intensities:',scale)",
+      "packages": "numpy",
+      "application": "研究基于ETF价格图的CNN/ViT预测、财报图像识别及跨市场视觉表示。",
+      "limits": "代码为视觉任务所在章节的基础形状或数学演示，完整检测器、DINO和ViT还需独立工程实现；价格图像缩放与前视偏差需专项验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n03-05",
+      "node_id": "vision-n03-05",
+      "title": "图像时间窗口",
+      "definition": "价格图像的横轴窗口必须严格止于预测时点，窗口长度决定所观察市场形态。",
+      "assumptions": "图像像素与标签在相同历史信息窗口中构造，增强和训练数据分割必须保留语义及时间先后关系。",
+      "properties": [
+        "价格图像的横轴窗口必须严格止于预测时点，窗口长度决定所观察市场形态。",
+        "图像骨干、分割与表征学习解决不同任务，不能仅凭网络架构名称判断适用性。"
+      ],
+      "formulas": [
+        {
+          "label": "模型或视觉任务公式",
+          "tex": "I_t=\\operatorname{Render}(X_{t-W+1:t})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按该任务的图像张量形状、Patch或卷积空间确定基本特征表示与损失。",
+          "tex": "I_t=\\operatorname{Render}(X_{t-W+1:t})"
+        },
+        {
+          "explanation": "在训练期拟合网络或计算可视化、空间分割、对比表示，并在分离的图像或时间段测试。",
+          "tex": "I_t=\\operatorname{Render}(X_{t-W+1:t})"
+        }
+      ],
+      "code": "import numpy as np\np=np.array([100.,102.,101.,105.]);scale=(p-p.min())/(p.max()-p.min());print('past-only image intensities:',scale)",
+      "packages": "numpy",
+      "application": "研究基于ETF价格图的CNN/ViT预测、财报图像识别及跨市场视觉表示。",
+      "limits": "代码为视觉任务所在章节的基础形状或数学演示，完整检测器、DINO和ViT还需独立工程实现；价格图像缩放与前视偏差需专项验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n04-05",
+      "node_id": "vision-n04-05",
+      "title": "复权与图像尺度",
+      "definition": "价格图像缩放和复权方式决定图像的可比较性及是否保留绝对价格变化。",
+      "assumptions": "图像像素与标签在相同历史信息窗口中构造，增强和训练数据分割必须保留语义及时间先后关系。",
+      "properties": [
+        "价格图像缩放和复权方式决定图像的可比较性及是否保留绝对价格变化。",
+        "图像骨干、分割与表征学习解决不同任务，不能仅凭网络架构名称判断适用性。"
+      ],
+      "formulas": [
+        {
+          "label": "模型或视觉任务公式",
+          "tex": "I_t=\\mathcal R(A_sP_s,\\ s\\in[t-W+1,t])"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按该任务的图像张量形状、Patch或卷积空间确定基本特征表示与损失。",
+          "tex": "I_t=\\mathcal R(A_sP_s,\\ s\\in[t-W+1,t])"
+        },
+        {
+          "explanation": "在训练期拟合网络或计算可视化、空间分割、对比表示，并在分离的图像或时间段测试。",
+          "tex": "I_t=\\mathcal R(A_sP_s,\\ s\\in[t-W+1,t])"
+        }
+      ],
+      "code": "import numpy as np\np=np.array([100.,102.,101.,105.]);scale=(p-p.min())/(p.max()-p.min());print('past-only image intensities:',scale)",
+      "packages": "numpy",
+      "application": "研究基于ETF价格图的CNN/ViT预测、财报图像识别及跨市场视觉表示。",
+      "limits": "代码为视觉任务所在章节的基础形状或数学演示，完整检测器、DINO和ViT还需独立工程实现；价格图像缩放与前视偏差需专项验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n05-05",
+      "node_id": "vision-n05-05",
+      "title": "避免图像数据泄漏",
+      "definition": "图像像素、归一化和标签定义不能使用预测时点未来信息或全样本统计量。",
+      "assumptions": "图像像素与标签在相同历史信息窗口中构造，增强和训练数据分割必须保留语义及时间先后关系。",
+      "properties": [
+        "图像像素、归一化和标签定义不能使用预测时点未来信息或全样本统计量。",
+        "图像骨干、分割与表征学习解决不同任务，不能仅凭网络架构名称判断适用性。"
+      ],
+      "formulas": [
+        {
+          "label": "模型或视觉任务公式",
+          "tex": "I_t\\in\\mathcal F_t,\\quad y_{t+h}\\notin\\mathcal F_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按该任务的图像张量形状、Patch或卷积空间确定基本特征表示与损失。",
+          "tex": "I_t\\in\\mathcal F_t,\\quad y_{t+h}\\notin\\mathcal F_t"
+        },
+        {
+          "explanation": "在训练期拟合网络或计算可视化、空间分割、对比表示，并在分离的图像或时间段测试。",
+          "tex": "I_t\\in\\mathcal F_t,\\quad y_{t+h}\\notin\\mathcal F_t"
+        }
+      ],
+      "code": "import numpy as np\np=np.array([100.,102.,101.,105.]);scale=(p-p.min())/(p.max()-p.min());print('past-only image intensities:',scale)",
+      "packages": "numpy",
+      "application": "研究基于ETF价格图的CNN/ViT预测、财报图像识别及跨市场视觉表示。",
+      "limits": "代码为视觉任务所在章节的基础形状或数学演示，完整检测器、DINO和ViT还需独立工程实现；价格图像缩放与前视偏差需专项验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n06-05",
+      "node_id": "vision-n06-05",
+      "title": "跨ETF泛化",
+      "definition": "检验模型是否能在未参与训练的ETF、资产类别或新时期继续具有预测能力。",
+      "assumptions": "图像像素与标签在相同历史信息窗口中构造，增强和训练数据分割必须保留语义及时间先后关系。",
+      "properties": [
+        "检验模型是否能在未参与训练的ETF、资产类别或新时期继续具有预测能力。",
+        "图像骨干、分割与表征学习解决不同任务，不能仅凭网络架构名称判断适用性。"
+      ],
+      "formulas": [
+        {
+          "label": "模型或视觉任务公式",
+          "tex": "R_{\\rm OOD}=E_{(I,y)\\sim P_{\\rm ETF,new}}\\ell(f(I),y)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按该任务的图像张量形状、Patch或卷积空间确定基本特征表示与损失。",
+          "tex": "R_{\\rm OOD}=E_{(I,y)\\sim P_{\\rm ETF,new}}\\ell(f(I),y)"
+        },
+        {
+          "explanation": "在训练期拟合网络或计算可视化、空间分割、对比表示，并在分离的图像或时间段测试。",
+          "tex": "R_{\\rm OOD}=E_{(I,y)\\sim P_{\\rm ETF,new}}\\ell(f(I),y)"
+        }
+      ],
+      "code": "import numpy as np\np=np.array([100.,102.,101.,105.]);scale=(p-p.min())/(p.max()-p.min());print('past-only image intensities:',scale)",
+      "packages": "numpy",
+      "application": "研究基于ETF价格图的CNN/ViT预测、财报图像识别及跨市场视觉表示。",
+      "limits": "代码为视觉任务所在章节的基础形状或数学演示，完整检测器、DINO和ViT还需独立工程实现；价格图像缩放与前视偏差需专项验证。",
+      "coverage": "complete"
+    }
+  ]
+}
