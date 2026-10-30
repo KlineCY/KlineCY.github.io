@@ -1,0 +1,741 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "features-n01-01",
+      "node_id": "features-n01-01",
+      "title": "数据Schema",
+      "definition": "Schema规定字段名、dtype、可空性与键约束，是量化数据管道的输入合同。",
+      "assumptions": "所有分箱、统计量、截断阈值、字典和映射都须在对应训练区间内确定，避免用未来数据配置特征。",
+      "properties": [
+        "该变换改变输入表示，却不保证改善样本外预测性能。",
+        "参数选择需结合金融特征的重尾、缺失、横截面差异和可执行时点。"
+      ],
+      "formulas": [
+        {
+          "label": "定义或计算规则",
+          "tex": "D=(\\mathrm{columns},\\mathrm{types},\\mathrm{constraints})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义变量、窗口及样本可用时点，再按公式从训练集估计全部有状态参数。",
+          "tex": "D=(\\mathrm{columns},\\mathrm{types},\\mathrm{constraints})"
+        },
+        {
+          "explanation": "仅用锁定的训练参数变换验证或实时样本，再检测输出是否满足所需范围和数值条件。",
+          "tex": "D=(\\mathrm{columns},\\mathrm{types},\\mathrm{constraints})"
+        }
+      ],
+      "code": "import pandas as pd\ndf=pd.DataFrame({\"ticker\":[\"A\"],\"price\":[1.2]})\nassert list(df.columns)==[\"ticker\",\"price\"]\nassert df[\"price\"].dtype.kind==\"f\"\nprint(\"Schema valid\")",
+      "packages": "pandas",
+      "application": "用于ETF、股票和宏观金融数据的无泄漏特征工程，支持因子筛选、风险预测和策略回测。",
+      "limits": "示例为局部功能验证；真正的量化实证必须纳入时间戳、资产退市、交易费用与稳健性分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n02-01",
+      "node_id": "features-n02-01",
+      "title": "缺失值机制MCAR/MAR/MNAR",
+      "definition": "MCAR指缺失与观测和未观测变量独立；MAR在条件给定已观测值后独立；MNAR依赖未观测变量本身。",
+      "assumptions": "所有分箱、统计量、截断阈值、字典和映射都须在对应训练区间内确定，避免用未来数据配置特征。",
+      "properties": [
+        "该变换改变输入表示，却不保证改善样本外预测性能。",
+        "参数选择需结合金融特征的重尾、缺失、横截面差异和可执行时点。"
+      ],
+      "formulas": [
+        {
+          "label": "定义或计算规则",
+          "tex": "P(M|X_{\\rm obs},X_{\\rm mis})=P(M|X_{\\rm obs})\\quad(\\mathrm{MAR})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义变量、窗口及样本可用时点，再按公式从训练集估计全部有状态参数。",
+          "tex": "P(M|X_{\\rm obs},X_{\\rm mis})=P(M|X_{\\rm obs})\\quad(\\mathrm{MAR})"
+        },
+        {
+          "explanation": "仅用锁定的训练参数变换验证或实时样本，再检测输出是否满足所需范围和数值条件。",
+          "tex": "P(M|X_{\\rm obs},X_{\\rm mis})=P(M|X_{\\rm obs})\\quad(\\mathrm{MAR})"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);x=rng.normal(size=100)\nmissing=rng.random(100)<.2\nprint(\"Missing rate:\",missing.mean(),\"observed mean:\",x[~missing].mean())",
+      "packages": "numpy or Python standard library",
+      "application": "用于ETF、股票和宏观金融数据的无泄漏特征工程，支持因子筛选、风险预测和策略回测。",
+      "limits": "示例为局部功能验证；真正的量化实证必须纳入时间戳、资产退市、交易费用与稳健性分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n03-01",
+      "node_id": "features-n03-01",
+      "title": "异常值与截尾",
+      "definition": "截尾把超出训练期分位阈值的数值限制到阈值范围，降低极端记录对回归的影响。",
+      "assumptions": "所有分箱、统计量、截断阈值、字典和映射都须在对应训练区间内确定，避免用未来数据配置特征。",
+      "properties": [
+        "该变换改变输入表示，却不保证改善样本外预测性能。",
+        "参数选择需结合金融特征的重尾、缺失、横截面差异和可执行时点。"
+      ],
+      "formulas": [
+        {
+          "label": "定义或计算规则",
+          "tex": "\\tilde x=\\min(\\max(x,q_\\alpha),q_{1-\\alpha})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义变量、窗口及样本可用时点，再按公式从训练集估计全部有状态参数。",
+          "tex": "\\tilde x=\\min(\\max(x,q_\\alpha),q_{1-\\alpha})"
+        },
+        {
+          "explanation": "仅用锁定的训练参数变换验证或实时样本，再检测输出是否满足所需范围和数值条件。",
+          "tex": "\\tilde x=\\min(\\max(x,q_\\alpha),q_{1-\\alpha})"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([-8.,-1.,0.,1.,15.]);lo,hi=np.quantile(x,[.1,.9])\nprint(np.clip(x,lo,hi))",
+      "packages": "numpy or Python standard library",
+      "application": "用于ETF、股票和宏观金融数据的无泄漏特征工程，支持因子筛选、风险预测和策略回测。",
+      "limits": "示例为局部功能验证；真正的量化实证必须纳入时间戳、资产退市、交易费用与稳健性分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n04-01",
+      "node_id": "features-n04-01",
+      "title": "重复记录",
+      "definition": "去重应依据经济实体、事件有效时间及供应商版本键，而非简单删除相同价格行。",
+      "assumptions": "所有分箱、统计量、截断阈值、字典和映射都须在对应训练区间内确定，避免用未来数据配置特征。",
+      "properties": [
+        "该变换改变输入表示，却不保证改善样本外预测性能。",
+        "参数选择需结合金融特征的重尾、缺失、横截面差异和可执行时点。"
+      ],
+      "formulas": [
+        {
+          "label": "定义或计算规则",
+          "tex": "\\operatorname{UniqueKey}=(\\mathrm{asset},t_{\\rm event},\\mathrm{version})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义变量、窗口及样本可用时点，再按公式从训练集估计全部有状态参数。",
+          "tex": "\\operatorname{UniqueKey}=(\\mathrm{asset},t_{\\rm event},\\mathrm{version})"
+        },
+        {
+          "explanation": "仅用锁定的训练参数变换验证或实时样本，再检测输出是否满足所需范围和数值条件。",
+          "tex": "\\operatorname{UniqueKey}=(\\mathrm{asset},t_{\\rm event},\\mathrm{version})"
+        }
+      ],
+      "code": "import pandas as pd\ndf=pd.DataFrame({\"symbol\":[\"A\",\"A\"],\"day\":[1,1],\"close\":[10,11]})\nprint(df.drop_duplicates([\"symbol\",\"day\"],keep=\"last\"))",
+      "packages": "pandas",
+      "application": "用于ETF、股票和宏观金融数据的无泄漏特征工程，支持因子筛选、风险预测和策略回测。",
+      "limits": "示例为局部功能验证；真正的量化实证必须纳入时间戳、资产退市、交易费用与稳健性分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n05-01",
+      "node_id": "features-n05-01",
+      "title": "时间戳对齐",
+      "definition": "交易特征以实际可得时间为准进行as-of关联，避免向前填入未来宏观发布值。",
+      "assumptions": "所有分箱、统计量、截断阈值、字典和映射都须在对应训练区间内确定，避免用未来数据配置特征。",
+      "properties": [
+        "该变换改变输入表示，却不保证改善样本外预测性能。",
+        "参数选择需结合金融特征的重尾、缺失、横截面差异和可执行时点。"
+      ],
+      "formulas": [
+        {
+          "label": "定义或计算规则",
+          "tex": "x(t)=x_{j^*},\\ j^*=\\arg\\max_{j:t_j^{\\rm avail}\\le t}t_j^{\\rm avail}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义变量、窗口及样本可用时点，再按公式从训练集估计全部有状态参数。",
+          "tex": "x(t)=x_{j^*},\\ j^*=\\arg\\max_{j:t_j^{\\rm avail}\\le t}t_j^{\\rm avail}"
+        },
+        {
+          "explanation": "仅用锁定的训练参数变换验证或实时样本，再检测输出是否满足所需范围和数值条件。",
+          "tex": "x(t)=x_{j^*},\\ j^*=\\arg\\max_{j:t_j^{\\rm avail}\\le t}t_j^{\\rm avail}"
+        }
+      ],
+      "code": "import pandas as pd\nleft=pd.DataFrame({\"time\":[2,5,8]})\nright=pd.DataFrame({\"time\":[1,4,7],\"macro\":[10,20,30]})\nprint(pd.merge_asof(left,right,on=\"time\",direction=\"backward\"))",
+      "packages": "pandas",
+      "application": "用于ETF、股票和宏观金融数据的无泄漏特征工程，支持因子筛选、风险预测和策略回测。",
+      "limits": "示例为局部功能验证；真正的量化实证必须纳入时间戳、资产退市、交易费用与稳健性分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n06-01",
+      "node_id": "features-n06-01",
+      "title": "数据版本",
+      "definition": "数据版本化记录原始文件、复权规则和修订历史，确保相同实验能使用同一版本重复执行。",
+      "assumptions": "所有分箱、统计量、截断阈值、字典和映射都须在对应训练区间内确定，避免用未来数据配置特征。",
+      "properties": [
+        "该变换改变输入表示，却不保证改善样本外预测性能。",
+        "参数选择需结合金融特征的重尾、缺失、横截面差异和可执行时点。"
+      ],
+      "formulas": [
+        {
+          "label": "定义或计算规则",
+          "tex": "D^{(v)}=\\operatorname{Snapshot}(D,t_v)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义变量、窗口及样本可用时点，再按公式从训练集估计全部有状态参数。",
+          "tex": "D^{(v)}=\\operatorname{Snapshot}(D,t_v)"
+        },
+        {
+          "explanation": "仅用锁定的训练参数变换验证或实时样本，再检测输出是否满足所需范围和数值条件。",
+          "tex": "D^{(v)}=\\operatorname{Snapshot}(D,t_v)"
+        }
+      ],
+      "code": "import hashlib\npayload=b\"ETF,2026-01-01,100.0\"\nprint(hashlib.sha256(payload).hexdigest()[:16])",
+      "packages": "numpy or Python standard library",
+      "application": "用于ETF、股票和宏观金融数据的无泄漏特征工程，支持因子筛选、风险预测和策略回测。",
+      "limits": "示例为局部功能验证；真正的量化实证必须纳入时间戳、资产退市、交易费用与稳健性分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n02-02",
+      "node_id": "features-n02-02",
+      "title": "MinMax缩放",
+      "definition": "训练期上下界缩放特征到指定区间，在验证/测试期不重估范围。",
+      "assumptions": "所有分箱、统计量、截断阈值、字典和映射都须在对应训练区间内确定，避免用未来数据配置特征。",
+      "properties": [
+        "该变换改变输入表示，却不保证改善样本外预测性能。",
+        "参数选择需结合金融特征的重尾、缺失、横截面差异和可执行时点。"
+      ],
+      "formulas": [
+        {
+          "label": "定义或计算规则",
+          "tex": "z=(x-x_{\\min})/(x_{\\max}-x_{\\min})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义变量、窗口及样本可用时点，再按公式从训练集估计全部有状态参数。",
+          "tex": "z=(x-x_{\\min})/(x_{\\max}-x_{\\min})"
+        },
+        {
+          "explanation": "仅用锁定的训练参数变换验证或实时样本，再检测输出是否满足所需范围和数值条件。",
+          "tex": "z=(x-x_{\\min})/(x_{\\max}-x_{\\min})"
+        }
+      ],
+      "code": "from sklearn.preprocessing import MinMaxScaler\nprint(MinMaxScaler().fit_transform([[2],[5],[9]]).ravel())",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF、股票和宏观金融数据的无泄漏特征工程，支持因子筛选、风险预测和策略回测。",
+      "limits": "示例为局部功能验证；真正的量化实证必须纳入时间戳、资产退市、交易费用与稳健性分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n05-02",
+      "node_id": "features-n05-02",
+      "title": "目标编码",
+      "definition": "类别目标编码以各类别训练期目标统计作为数值特征，必须通过折外估计避免直接学习目标标签。",
+      "assumptions": "所有分箱、统计量、截断阈值、字典和映射都须在对应训练区间内确定，避免用未来数据配置特征。",
+      "properties": [
+        "该变换改变输入表示，却不保证改善样本外预测性能。",
+        "参数选择需结合金融特征的重尾、缺失、横截面差异和可执行时点。"
+      ],
+      "formulas": [
+        {
+          "label": "定义或计算规则",
+          "tex": "z(c)=\\frac{\\sum_{i:c_i=c}y_i+\\alpha\\bar y}{n_c+\\alpha}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义变量、窗口及样本可用时点，再按公式从训练集估计全部有状态参数。",
+          "tex": "z(c)=\\frac{\\sum_{i:c_i=c}y_i+\\alpha\\bar y}{n_c+\\alpha}"
+        },
+        {
+          "explanation": "仅用锁定的训练参数变换验证或实时样本，再检测输出是否满足所需范围和数值条件。",
+          "tex": "z(c)=\\frac{\\sum_{i:c_i=c}y_i+\\alpha\\bar y}{n_c+\\alpha}"
+        }
+      ],
+      "code": "import numpy as np\ny=np.array([1.,0.,1.,.2]);cat=np.array([\"A\",\"A\",\"B\",\"B\"])\nprint({c:y[cat==c].mean() for c in np.unique(cat)})",
+      "packages": "numpy or Python standard library",
+      "application": "用于ETF、股票和宏观金融数据的无泄漏特征工程，支持因子筛选、风险预测和策略回测。",
+      "limits": "示例为局部功能验证；真正的量化实证必须纳入时间戳、资产退市、交易费用与稳健性分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n01-03",
+      "node_id": "features-n01-03",
+      "title": "对数与Box-Cox",
+      "definition": "对正且偏态的变量使用对数或Box-Cox幂变换，压缩大数值尾部并调节分布偏度。",
+      "assumptions": "所有分箱、统计量、截断阈值、字典和映射都须在对应训练区间内确定，避免用未来数据配置特征。",
+      "properties": [
+        "该变换改变输入表示，却不保证改善样本外预测性能。",
+        "参数选择需结合金融特征的重尾、缺失、横截面差异和可执行时点。"
+      ],
+      "formulas": [
+        {
+          "label": "定义或计算规则",
+          "tex": "T_\\lambda(x)=\\begin{cases}(x^\\lambda-1)/\\lambda,&\\lambda\\ne0\\\\\\log x,&\\lambda=0\\end{cases}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义变量、窗口及样本可用时点，再按公式从训练集估计全部有状态参数。",
+          "tex": "T_\\lambda(x)=\\begin{cases}(x^\\lambda-1)/\\lambda,&\\lambda\\ne0\\\\\\log x,&\\lambda=0\\end{cases}"
+        },
+        {
+          "explanation": "仅用锁定的训练参数变换验证或实时样本，再检测输出是否满足所需范围和数值条件。",
+          "tex": "T_\\lambda(x)=\\begin{cases}(x^\\lambda-1)/\\lambda,&\\lambda\\ne0\\\\\\log x,&\\lambda=0\\end{cases}"
+        }
+      ],
+      "code": "import numpy as np\nfrom scipy.stats import boxcox\nx=np.array([1.,2.,4.,8.,16.])\nprint(np.log(x),boxcox(x)[1])",
+      "packages": "numpy, scipy",
+      "application": "用于ETF、股票和宏观金融数据的无泄漏特征工程，支持因子筛选、风险预测和策略回测。",
+      "limits": "示例为局部功能验证；真正的量化实证必须纳入时间戳、资产退市、交易费用与稳健性分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n02-03",
+      "node_id": "features-n02-03",
+      "title": "分箱与离散化",
+      "definition": "把连续变量分到固定或分位数区间，可构造非线性分段输入，阈值应在训练期决定。",
+      "assumptions": "所有分箱、统计量、截断阈值、字典和映射都须在对应训练区间内确定，避免用未来数据配置特征。",
+      "properties": [
+        "该变换改变输入表示，却不保证改善样本外预测性能。",
+        "参数选择需结合金融特征的重尾、缺失、横截面差异和可执行时点。"
+      ],
+      "formulas": [
+        {
+          "label": "定义或计算规则",
+          "tex": "b(x)=\\sum_{k=1}^K k\\mathbf1[a_{k-1}\\le x<a_k]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义变量、窗口及样本可用时点，再按公式从训练集估计全部有状态参数。",
+          "tex": "b(x)=\\sum_{k=1}^K k\\mathbf1[a_{k-1}\\le x<a_k]"
+        },
+        {
+          "explanation": "仅用锁定的训练参数变换验证或实时样本，再检测输出是否满足所需范围和数值条件。",
+          "tex": "b(x)=\\sum_{k=1}^K k\\mathbf1[a_{k-1}\\le x<a_k]"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([-2.,-.2,.5,1.3]);print(np.digitize(x,[-1,0,1]))",
+      "packages": "numpy or Python standard library",
+      "application": "用于ETF、股票和宏观金融数据的无泄漏特征工程，支持因子筛选、风险预测和策略回测。",
+      "limits": "示例为局部功能验证；真正的量化实证必须纳入时间戳、资产退市、交易费用与稳健性分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n03-03",
+      "node_id": "features-n03-03",
+      "title": "交互特征",
+      "definition": "交互特征显式表示不同变量乘积或联合条件，帮助线性模型捕捉非可加效应。",
+      "assumptions": "所有分箱、统计量、截断阈值、字典和映射都须在对应训练区间内确定，避免用未来数据配置特征。",
+      "properties": [
+        "该变换改变输入表示，却不保证改善样本外预测性能。",
+        "参数选择需结合金融特征的重尾、缺失、横截面差异和可执行时点。"
+      ],
+      "formulas": [
+        {
+          "label": "定义或计算规则",
+          "tex": "f(x_1,x_2)=\\beta_0+\\beta_1x_1+\\beta_2x_2+\\beta_{12}x_1x_2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义变量、窗口及样本可用时点，再按公式从训练集估计全部有状态参数。",
+          "tex": "f(x_1,x_2)=\\beta_0+\\beta_1x_1+\\beta_2x_2+\\beta_{12}x_1x_2"
+        },
+        {
+          "explanation": "仅用锁定的训练参数变换验证或实时样本，再检测输出是否满足所需范围和数值条件。",
+          "tex": "f(x_1,x_2)=\\beta_0+\\beta_1x_1+\\beta_2x_2+\\beta_{12}x_1x_2"
+        }
+      ],
+      "code": "import numpy as np\nX=np.array([[1,2],[3,4]])\nprint(np.column_stack([X,X[:,0]*X[:,1]]))",
+      "packages": "numpy or Python standard library",
+      "application": "用于ETF、股票和宏观金融数据的无泄漏特征工程，支持因子筛选、风险预测和策略回测。",
+      "limits": "示例为局部功能验证；真正的量化实证必须纳入时间戳、资产退市、交易费用与稳健性分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n04-03",
+      "node_id": "features-n04-03",
+      "title": "多项式特征",
+      "definition": "多项式扩展生成变量的幂和交叉项，令线性回归在扩展空间拟合非线性关系。",
+      "assumptions": "所有分箱、统计量、截断阈值、字典和映射都须在对应训练区间内确定，避免用未来数据配置特征。",
+      "properties": [
+        "该变换改变输入表示，却不保证改善样本外预测性能。",
+        "参数选择需结合金融特征的重尾、缺失、横截面差异和可执行时点。"
+      ],
+      "formulas": [
+        {
+          "label": "定义或计算规则",
+          "tex": "\\phi(x)=(1,x,x^2,\\ldots,x^d)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义变量、窗口及样本可用时点，再按公式从训练集估计全部有状态参数。",
+          "tex": "\\phi(x)=(1,x,x^2,\\ldots,x^d)"
+        },
+        {
+          "explanation": "仅用锁定的训练参数变换验证或实时样本，再检测输出是否满足所需范围和数值条件。",
+          "tex": "\\phi(x)=(1,x,x^2,\\ldots,x^d)"
+        }
+      ],
+      "code": "from sklearn.preprocessing import PolynomialFeatures\nprint(PolynomialFeatures(degree=2).fit_transform([[2.,3.]]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF、股票和宏观金融数据的无泄漏特征工程，支持因子筛选、风险预测和策略回测。",
+      "limits": "示例为局部功能验证；真正的量化实证必须纳入时间戳、资产退市、交易费用与稳健性分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n05-03",
+      "node_id": "features-n05-03",
+      "title": "单调变换",
+      "definition": "单调变换保留变量的排序关系，但可能显著改变欧氏距离、相关系数和损失尺度。",
+      "assumptions": "所有分箱、统计量、截断阈值、字典和映射都须在对应训练区间内确定，避免用未来数据配置特征。",
+      "properties": [
+        "该变换改变输入表示，却不保证改善样本外预测性能。",
+        "参数选择需结合金融特征的重尾、缺失、横截面差异和可执行时点。"
+      ],
+      "formulas": [
+        {
+          "label": "定义或计算规则",
+          "tex": "x_i<x_j\\Rightarrow T(x_i)<T(x_j)\\quad(T\\text{严格递增})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义变量、窗口及样本可用时点，再按公式从训练集估计全部有状态参数。",
+          "tex": "x_i<x_j\\Rightarrow T(x_i)<T(x_j)\\quad(T\\text{严格递增})"
+        },
+        {
+          "explanation": "仅用锁定的训练参数变换验证或实时样本，再检测输出是否满足所需范围和数值条件。",
+          "tex": "x_i<x_j\\Rightarrow T(x_i)<T(x_j)\\quad(T\\text{严格递增})"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([1.,2.,10.])\nprint(np.log1p(x),np.argsort(x),np.argsort(np.log1p(x)))",
+      "packages": "numpy or Python standard library",
+      "application": "用于ETF、股票和宏观金融数据的无泄漏特征工程，支持因子筛选、风险预测和策略回测。",
+      "limits": "示例为局部功能验证；真正的量化实证必须纳入时间戳、资产退市、交易费用与稳健性分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n06-03",
+      "node_id": "features-n06-03",
+      "title": "周期编码",
+      "definition": "日期、时刻等圆周变量用正弦余弦编码，消除周期首尾的人工距离断点。",
+      "assumptions": "所有分箱、统计量、截断阈值、字典和映射都须在对应训练区间内确定，避免用未来数据配置特征。",
+      "properties": [
+        "该变换改变输入表示，却不保证改善样本外预测性能。",
+        "参数选择需结合金融特征的重尾、缺失、横截面差异和可执行时点。"
+      ],
+      "formulas": [
+        {
+          "label": "定义或计算规则",
+          "tex": "\\phi(t)=(\\sin(2\\pi t/P),\\cos(2\\pi t/P))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义变量、窗口及样本可用时点，再按公式从训练集估计全部有状态参数。",
+          "tex": "\\phi(t)=(\\sin(2\\pi t/P),\\cos(2\\pi t/P))"
+        },
+        {
+          "explanation": "仅用锁定的训练参数变换验证或实时样本，再检测输出是否满足所需范围和数值条件。",
+          "tex": "\\phi(t)=(\\sin(2\\pi t/P),\\cos(2\\pi t/P))"
+        }
+      ],
+      "code": "import numpy as np\nday=np.array([1,182,365]);print(np.c_[np.sin(2*np.pi*day/365),np.cos(2*np.pi*day/365)])",
+      "packages": "numpy or Python standard library",
+      "application": "用于ETF、股票和宏观金融数据的无泄漏特征工程，支持因子筛选、风险预测和策略回测。",
+      "limits": "示例为局部功能验证；真正的量化实证必须纳入时间戳、资产退市、交易费用与稳健性分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n01-04",
+      "node_id": "features-n01-04",
+      "title": "过滤式特征选择",
+      "definition": "过滤式特征选择在模型拟合前按统计指标筛选变量，筛选统计必须在训练折内计算。",
+      "assumptions": "所有分箱、统计量、截断阈值、字典和映射都须在对应训练区间内确定，避免用未来数据配置特征。",
+      "properties": [
+        "该变换改变输入表示，却不保证改善样本外预测性能。",
+        "参数选择需结合金融特征的重尾、缺失、横截面差异和可执行时点。"
+      ],
+      "formulas": [
+        {
+          "label": "定义或计算规则",
+          "tex": "S_k=\\operatorname{TopK}_j\\operatorname{Score}(X_j,Y)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义变量、窗口及样本可用时点，再按公式从训练集估计全部有状态参数。",
+          "tex": "S_k=\\operatorname{TopK}_j\\operatorname{Score}(X_j,Y)"
+        },
+        {
+          "explanation": "仅用锁定的训练参数变换验证或实时样本，再检测输出是否满足所需范围和数值条件。",
+          "tex": "S_k=\\operatorname{TopK}_j\\operatorname{Score}(X_j,Y)"
+        }
+      ],
+      "code": "from sklearn.feature_selection import SelectKBest,f_regression\nimport numpy as np\nX=np.random.default_rng(0).normal(size=(60,6));y=X[:,0]\nprint(SelectKBest(f_regression,k=2).fit(X,y).get_support())",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF、股票和宏观金融数据的无泄漏特征工程，支持因子筛选、风险预测和策略回测。",
+      "limits": "示例为局部功能验证；真正的量化实证必须纳入时间戳、资产退市、交易费用与稳健性分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n02-04",
+      "node_id": "features-n02-04",
+      "title": "递归特征消除RFE",
+      "definition": "RFE迭代拟合基模型、剔除最不重要的特征，直到目标特征数。",
+      "assumptions": "所有分箱、统计量、截断阈值、字典和映射都须在对应训练区间内确定，避免用未来数据配置特征。",
+      "properties": [
+        "该变换改变输入表示，却不保证改善样本外预测性能。",
+        "参数选择需结合金融特征的重尾、缺失、横截面差异和可执行时点。"
+      ],
+      "formulas": [
+        {
+          "label": "定义或计算规则",
+          "tex": "S_{k+1}=S_k\\setminus\\operatorname{argmin}_{j\\in S_k}I_j"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义变量、窗口及样本可用时点，再按公式从训练集估计全部有状态参数。",
+          "tex": "S_{k+1}=S_k\\setminus\\operatorname{argmin}_{j\\in S_k}I_j"
+        },
+        {
+          "explanation": "仅用锁定的训练参数变换验证或实时样本，再检测输出是否满足所需范围和数值条件。",
+          "tex": "S_{k+1}=S_k\\setminus\\operatorname{argmin}_{j\\in S_k}I_j"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.feature_selection import RFE\nfrom sklearn.linear_model import Ridge\nX=np.random.default_rng(0).normal(size=(60,4));y=X[:,0]\nprint(RFE(Ridge(),n_features_to_select=2).fit(X,y).support_)",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF、股票和宏观金融数据的无泄漏特征工程，支持因子筛选、风险预测和策略回测。",
+      "limits": "示例为局部功能验证；真正的量化实证必须纳入时间戳、资产退市、交易费用与稳健性分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n05-04",
+      "node_id": "features-n05-04",
+      "title": "稀疏特征筛选",
+      "definition": "以L1等惩罚获得部分精确为零的模型系数，用非零项选择候选变量。",
+      "assumptions": "所有分箱、统计量、截断阈值、字典和映射都须在对应训练区间内确定，避免用未来数据配置特征。",
+      "properties": [
+        "该变换改变输入表示，却不保证改善样本外预测性能。",
+        "参数选择需结合金融特征的重尾、缺失、横截面差异和可执行时点。"
+      ],
+      "formulas": [
+        {
+          "label": "定义或计算规则",
+          "tex": "\\min_\\beta\\tfrac1{2n}\\|y-X\\beta\\|^2+\\lambda\\|\\beta\\|_1"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义变量、窗口及样本可用时点，再按公式从训练集估计全部有状态参数。",
+          "tex": "\\min_\\beta\\tfrac1{2n}\\|y-X\\beta\\|^2+\\lambda\\|\\beta\\|_1"
+        },
+        {
+          "explanation": "仅用锁定的训练参数变换验证或实时样本，再检测输出是否满足所需范围和数值条件。",
+          "tex": "\\min_\\beta\\tfrac1{2n}\\|y-X\\beta\\|^2+\\lambda\\|\\beta\\|_1"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.linear_model import Lasso\nX=np.random.default_rng(0).normal(size=(70,8));y=X[:,0]*2\nprint(np.flatnonzero(Lasso(alpha=.05).fit(X,y).coef_))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF、股票和宏观金融数据的无泄漏特征工程，支持因子筛选、风险预测和策略回测。",
+      "limits": "示例为局部功能验证；真正的量化实证必须纳入时间戳、资产退市、交易费用与稳健性分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n06-04",
+      "node_id": "features-n06-04",
+      "title": "特征重要性",
+      "definition": "特征重要性度量模型预测对变量的依赖，可用Permutation、SHAP或线性系数等不同定义。",
+      "assumptions": "所有分箱、统计量、截断阈值、字典和映射都须在对应训练区间内确定，避免用未来数据配置特征。",
+      "properties": [
+        "该变换改变输入表示，却不保证改善样本外预测性能。",
+        "参数选择需结合金融特征的重尾、缺失、横截面差异和可执行时点。"
+      ],
+      "formulas": [
+        {
+          "label": "定义或计算规则",
+          "tex": "I_j=R(\\hat f,X^{\\rm perm(j)})-R(\\hat f,X)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义变量、窗口及样本可用时点，再按公式从训练集估计全部有状态参数。",
+          "tex": "I_j=R(\\hat f,X^{\\rm perm(j)})-R(\\hat f,X)"
+        },
+        {
+          "explanation": "仅用锁定的训练参数变换验证或实时样本，再检测输出是否满足所需范围和数值条件。",
+          "tex": "I_j=R(\\hat f,X^{\\rm perm(j)})-R(\\hat f,X)"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.ensemble import RandomForestRegressor\nX=np.random.default_rng(0).normal(size=(100,3));y=X[:,0]\nm=RandomForestRegressor(n_estimators=30,random_state=0).fit(X,y)\nprint(m.feature_importances_)",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF、股票和宏观金融数据的无泄漏特征工程，支持因子筛选、风险预测和策略回测。",
+      "limits": "示例为局部功能验证；真正的量化实证必须纳入时间戳、资产退市、交易费用与稳健性分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n01-05",
+      "node_id": "features-n01-05",
+      "title": "历史复权",
+      "definition": "历史复权按股本拆分、分红和其他公司行动调整可比价格，不能直接用于模拟未复权成交。",
+      "assumptions": "所有分箱、统计量、截断阈值、字典和映射都须在对应训练区间内确定，避免用未来数据配置特征。",
+      "properties": [
+        "该变换改变输入表示，却不保证改善样本外预测性能。",
+        "参数选择需结合金融特征的重尾、缺失、横截面差异和可执行时点。"
+      ],
+      "formulas": [
+        {
+          "label": "定义或计算规则",
+          "tex": "r_t^{\\rm adj}=P_t^{\\rm adj}/P_{t-1}^{\\rm adj}-1"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义变量、窗口及样本可用时点，再按公式从训练集估计全部有状态参数。",
+          "tex": "r_t^{\\rm adj}=P_t^{\\rm adj}/P_{t-1}^{\\rm adj}-1"
+        },
+        {
+          "explanation": "仅用锁定的训练参数变换验证或实时样本，再检测输出是否满足所需范围和数值条件。",
+          "tex": "r_t^{\\rm adj}=P_t^{\\rm adj}/P_{t-1}^{\\rm adj}-1"
+        }
+      ],
+      "code": "import numpy as np\nclose=np.array([100.,50.,52.]);factor=np.array([.5,1.,1.])\np=close*factor\nprint(p[1:]/p[:-1]-1)",
+      "packages": "numpy or Python standard library",
+      "application": "用于ETF、股票和宏观金融数据的无泄漏特征工程，支持因子筛选、风险预测和策略回测。",
+      "limits": "示例为局部功能验证；真正的量化实证必须纳入时间戳、资产退市、交易费用与稳健性分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n02-05",
+      "node_id": "features-n02-05",
+      "title": "PIT财报时间",
+      "definition": "财报特征以公开披露和实际供应商可用时刻为准，而非财务期截止日。",
+      "assumptions": "所有分箱、统计量、截断阈值、字典和映射都须在对应训练区间内确定，避免用未来数据配置特征。",
+      "properties": [
+        "该变换改变输入表示，却不保证改善样本外预测性能。",
+        "参数选择需结合金融特征的重尾、缺失、横截面差异和可执行时点。"
+      ],
+      "formulas": [
+        {
+          "label": "定义或计算规则",
+          "tex": "t_{\\rm available}\\le t_{\\rm decision}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义变量、窗口及样本可用时点，再按公式从训练集估计全部有状态参数。",
+          "tex": "t_{\\rm available}\\le t_{\\rm decision}"
+        },
+        {
+          "explanation": "仅用锁定的训练参数变换验证或实时样本，再检测输出是否满足所需范围和数值条件。",
+          "tex": "t_{\\rm available}\\le t_{\\rm decision}"
+        }
+      ],
+      "code": "from datetime import datetime\nrelease=datetime.fromisoformat(\"2026-04-30T17:00\")\ndecision=datetime.fromisoformat(\"2026-04-30T15:00\")\nprint(\"Available?\",release<=decision)",
+      "packages": "numpy or Python standard library",
+      "application": "用于ETF、股票和宏观金融数据的无泄漏特征工程，支持因子筛选、风险预测和策略回测。",
+      "limits": "示例为局部功能验证；真正的量化实证必须纳入时间戳、资产退市、交易费用与稳健性分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n03-05",
+      "node_id": "features-n03-05",
+      "title": "截面中性化",
+      "definition": "截面中性化对市值、行业等控制变量回归并取残差，去掉目标因子对这些变量的线性暴露。",
+      "assumptions": "所有分箱、统计量、截断阈值、字典和映射都须在对应训练区间内确定，避免用未来数据配置特征。",
+      "properties": [
+        "该变换改变输入表示，却不保证改善样本外预测性能。",
+        "参数选择需结合金融特征的重尾、缺失、横截面差异和可执行时点。"
+      ],
+      "formulas": [
+        {
+          "label": "定义或计算规则",
+          "tex": "f_\\perp=f-X(X^\\top X)^\\dagger X^\\top f"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义变量、窗口及样本可用时点，再按公式从训练集估计全部有状态参数。",
+          "tex": "f_\\perp=f-X(X^\\top X)^\\dagger X^\\top f"
+        },
+        {
+          "explanation": "仅用锁定的训练参数变换验证或实时样本，再检测输出是否满足所需范围和数值条件。",
+          "tex": "f_\\perp=f-X(X^\\top X)^\\dagger X^\\top f"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0)\nX=np.column_stack([np.ones(30),rng.normal(size=30)])\nf=X[:,1]+rng.normal(size=30)\nres=f-X@np.linalg.lstsq(X,f,rcond=None)[0]\nprint(X.T@res)",
+      "packages": "numpy or Python standard library",
+      "application": "用于ETF、股票和宏观金融数据的无泄漏特征工程，支持因子筛选、风险预测和策略回测。",
+      "limits": "示例为局部功能验证；真正的量化实证必须纳入时间戳、资产退市、交易费用与稳健性分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n04-05",
+      "node_id": "features-n04-05",
+      "title": "行业与市值标准化",
+      "definition": "按行业或市值组对特征做中心化与尺度控制，减少截面可比较性问题。",
+      "assumptions": "所有分箱、统计量、截断阈值、字典和映射都须在对应训练区间内确定，避免用未来数据配置特征。",
+      "properties": [
+        "该变换改变输入表示，却不保证改善样本外预测性能。",
+        "参数选择需结合金融特征的重尾、缺失、横截面差异和可执行时点。"
+      ],
+      "formulas": [
+        {
+          "label": "定义或计算规则",
+          "tex": "z_{i,g}=(x_i-\\bar x_g)/s_g"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义变量、窗口及样本可用时点，再按公式从训练集估计全部有状态参数。",
+          "tex": "z_{i,g}=(x_i-\\bar x_g)/s_g"
+        },
+        {
+          "explanation": "仅用锁定的训练参数变换验证或实时样本，再检测输出是否满足所需范围和数值条件。",
+          "tex": "z_{i,g}=(x_i-\\bar x_g)/s_g"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([1.,3.,5.,6.]);g=np.array([0,0,1,1])\nz=np.zeros_like(x)\nfor key in np.unique(g):\n    s=x[g==key];z[g==key]=(s-s.mean())/(s.std()+1e-9)\nprint(z)",
+      "packages": "numpy or Python standard library",
+      "application": "用于ETF、股票和宏观金融数据的无泄漏特征工程，支持因子筛选、风险预测和策略回测。",
+      "limits": "示例为局部功能验证；真正的量化实证必须纳入时间戳、资产退市、交易费用与稳健性分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n06-05",
+      "node_id": "features-n06-05",
+      "title": "未来函数检测",
+      "definition": "通过检查全部输入时间戳及其依赖链，发现信号计算时包含未来才发布或才实现的数据。",
+      "assumptions": "所有分箱、统计量、截断阈值、字典和映射都须在对应训练区间内确定，避免用未来数据配置特征。",
+      "properties": [
+        "该变换改变输入表示，却不保证改善样本外预测性能。",
+        "参数选择需结合金融特征的重尾、缺失、横截面差异和可执行时点。"
+      ],
+      "formulas": [
+        {
+          "label": "定义或计算规则",
+          "tex": "X_t\\in\\mathcal F_t,\\quad \\max_i t_i^{\\rm available}\\le t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义变量、窗口及样本可用时点，再按公式从训练集估计全部有状态参数。",
+          "tex": "X_t\\in\\mathcal F_t,\\quad \\max_i t_i^{\\rm available}\\le t"
+        },
+        {
+          "explanation": "仅用锁定的训练参数变换验证或实时样本，再检测输出是否满足所需范围和数值条件。",
+          "tex": "X_t\\in\\mathcal F_t,\\quad \\max_i t_i^{\\rm available}\\le t"
+        }
+      ],
+      "code": "available=[1,3,8];decision=5\nassert max(t for t in available if t<=decision)<=decision\nprint(\"Visible observations:\",[t for t in available if t<=decision])",
+      "packages": "numpy or Python standard library",
+      "application": "用于ETF、股票和宏观金融数据的无泄漏特征工程，支持因子筛选、风险预测和策略回测。",
+      "limits": "示例为局部功能验证；真正的量化实证必须纳入时间戳、资产退市、交易费用与稳健性分析。",
+      "coverage": "complete"
+    }
+  ]
+}
