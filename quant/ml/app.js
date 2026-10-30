@@ -5,15 +5,16 @@ const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,x=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[x]));
 const alpha=(a,b)=>String(a).localeCompare(String(b),"en",{sensitivity:"base"});
 const link=(u,label)=>/^https:\/\//.test(u||"")?'<a href="'+esc(u)+'" target="_blank" rel="noopener noreferrer">'+esc(label)+'</a>':"";
-let curriculum=null,depts=[],chapters=[],nodes=[],lessons=[],lessonMap=new Map(),noteMap=new Map();
+let curriculum=null,depts=[],chapters=[],nodes=[],lessons=[],lessonMap=new Map(),noteMap=new Map(),draftLessonIds=new Set(),coreLessonIds=new Set();
 let nodeMap=new Map(),chapMap=new Map(),deptMap=new Map(),activeId="",filterDept="",filterLevel="",filterStatus="",query="";
 const progressKey="kline-quant-ml-progress-v1";
 let studied=new Set();
 try{const saved=JSON.parse(localStorage.getItem(progressKey)||"[]");if(Array.isArray(saved))studied=new Set(saved)}catch(_){}
 const saveProgress=()=>{try{localStorage.setItem(progressKey,JSON.stringify([...studied]))}catch(_){}};
 const getDept=id=>deptMap.get(id),getChap=id=>chapMap.get(id),getNode=id=>nodeMap.get(id);
-const humanStatus=node=>lessonMap.has(node.id)?"完整算法讲义":noteMap.has(node.id)?"专题扩展笔记 · 待补全":"课程目录";
-const isComplete=node=>lessonMap.has(node.id);
+const humanStatus=node=>coreLessonIds.has(node.id)?"独立算法讲义":draftLessonIds.has(node.id)?"专属代码讲义初稿 · 待审校":noteMap.has(node.id)?"专题扩展笔记 · 待补全":"课程目录";
+const isComplete=node=>coreLessonIds.has(node.id);
+const isDraft=node=>draftLessonIds.has(node.id);
 function setURL(updates){
  const url=new URL(location.href);
  for(const [key,value] of Object.entries(updates))value?url.searchParams.set(key,value):url.searchParams.delete(key);
@@ -62,22 +63,23 @@ function isMatch(n){
  if(filterDept&&n.discipline_id!==filterDept)return false;
  if(filterLevel&&n.level!==filterLevel)return false;
  if(filterStatus==="complete"&&!isComplete(n))return false;
+ if(filterStatus==="draft"&&!isDraft(n))return false;
  if(filterStatus==="expanded"&&!noteMap.has(n.id))return false;
- if(filterStatus==="outline"&&(isComplete(n)||noteMap.has(n.id)))return false;
+ if(filterStatus==="outline"&&(lessonMap.has(n.id)||noteMap.has(n.id)))return false;
  if(!query.trim())return true;
  const dept=getDept(n.discipline_id),chap=getChap(n.chapter_id);
  return [n.title,dept?.title,dept?.english,chap?.title].join(" ").toLocaleLowerCase().includes(query.trim().toLocaleLowerCase());
 }
 function nodeButton(n){
 const b=document.createElement("button");b.className="node"+(n.id===activeId?" active":"");b.type="button";b.dataset.node=n.id;
-const ok=isComplete(n);b.innerHTML='<span class="complete-mark" aria-hidden="true">'+(studied.has(n.id)?"✓":ok?"●":"·")+'</span><span class="node-name">'+esc(n.title)+'</span><span class="node-label'+(ok?" complete":"")+'">'+(ok?"详解":noteMap.has(n.id)?"笔记":"目录")+'</span>';
+const ok=isComplete(n);b.innerHTML='<span class="complete-mark" aria-hidden="true">'+(studied.has(n.id)?"✓":ok?"●":"·")+'</span><span class="node-name">'+esc(n.title)+'</span><span class="node-label'+(ok?" complete":"")+'">'+(ok?"详解":isDraft(n)?"独立稿":noteMap.has(n.id)?"笔记":"目录")+'</span>';
 b.addEventListener("click",()=>selectNode(n.id,true,true));
 return b;
 }
 function makeChapter(c,visible,open){
 const out=document.createElement("details");out.className="chapter";out.open=open;
 const summary=document.createElement("summary");
-summary.innerHTML='<span class="chapter-label">'+String(c.order).padStart(2,"0")+'. '+esc(c.title)+'</span><span class="count">'+visible.filter(isComplete).length+' 详解 · '+visible.filter(n=>noteMap.has(n.id)).length+' 笔记</span><span class="chev" aria-hidden="true">▸</span>';out.appendChild(summary);
+summary.innerHTML='<span class="chapter-label">'+String(c.order).padStart(2,"0")+'. '+esc(c.title)+'</span><span class="count">'+visible.filter(isComplete).length+' 详解 · '+visible.filter(isDraft).length+' 独立稿 · '+visible.filter(n=>noteMap.has(n.id)).length+' 笔记</span><span class="chev" aria-hidden="true">▸</span>';out.appendChild(summary);
 const ul=document.createElement("div");ul.className="nodes";for(const n of visible)ul.appendChild(nodeButton(n));out.appendChild(ul);return out;
 }
 function renderTree(){
@@ -96,7 +98,7 @@ for(const d of depts){
  const summary=document.createElement("summary");
  const n=groups.reduce((acc,g)=>acc+g.nodes.length,0);
  const finished=groups.reduce((acc,g)=>acc+g.nodes.filter(isComplete).length,0);
- summary.innerHTML='<span class="number">'+String(d.order).padStart(2,"0")+'</span><span class="dept-label"><strong>'+esc(d.title)+'</strong><span>'+esc(d.english)+'</span></span><span class="count">'+finished+' 详解 · '+groups.reduce((acc,g)=>acc+g.nodes.filter(x=>noteMap.has(x.id)).length,0)+' 笔记</span><span class="chev" aria-hidden="true">▸</span>';
+ summary.innerHTML='<span class="number">'+String(d.order).padStart(2,"0")+'</span><span class="dept-label"><strong>'+esc(d.title)+'</strong><span>'+esc(d.english)+'</span></span><span class="count">'+finished+' 详解 · '+groups.reduce((acc,g)=>acc+g.nodes.filter(isDraft).length,0)+' 独立稿 · '+groups.reduce((acc,g)=>acc+g.nodes.filter(x=>noteMap.has(x.id)).length,0)+' 笔记</span><span class="chev" aria-hidden="true">▸</span>';
  whole.appendChild(summary);
  const chapterBox=document.createElement("div");chapterBox.className="chapters";
  for(const [i,g] of groups.entries())chapterBox.appendChild(makeChapter(g.chapter,g.nodes,g.chapter.id===getNode(activeId)?.chapter_id||!!query||Boolean(filterDept)));
@@ -108,7 +110,7 @@ for(const d of depts){
  }whole.appendChild(resourceLine);
  container.appendChild(whole);
 }
-$("status").textContent="显示 "+visibleCount+" / "+nodes.length+" 个知识点 · "+departmentCount+" 个学科 · "+totalComplete+" 篇完整讲义 · "+noteMap.size+" 篇扩展笔记";
+$("status").textContent="显示 "+visibleCount+" / "+nodes.length+" 个知识点 · "+departmentCount+" 个学科 · "+totalComplete+" 篇原有独立讲义 · "+draftLessonIds.size+" 篇代码初稿 · "+noteMap.size+" 篇扩展笔记";
 if(!visibleCount){const p=document.createElement("p");p.className="notice";p.textContent="当前条件无匹配知识点。请清除搜索或筛选。";container.appendChild(p)}
 $("mastered").textContent=studied.size;
 document.querySelectorAll(".roadmap-chip").forEach(b=>b.classList.toggle("active",b.dataset.dept===filterDept));
@@ -175,9 +177,11 @@ function lessonArticle(n,lesson,container){
  const limitations=makeSection("八、局限、失效条件与常见误区");
  paragraph(limitations,lesson.limits,"warn");container.appendChild(limitations);
 }
-function noteArticle(n,note,container){
- const notice=makeSection("内容说明 · 扩展笔记，尚未达到完整讲义标准");
- paragraph(notice,"本节包含主题概念、适用前提、核心数学关系与基础示例。代码多为所在学科或章节的综合演示，公式解读不能代替完整定理证明或独立模型实现。","warn");
+function noteArticle(n,note,container,kind="扩展笔记"){
+ const notice=makeSection("内容说明 · "+kind+"（尚未完成完整推导审校）");
+ paragraph(notice,kind==="专属代码讲义初稿"
+   ?"本节已有针对知识点的独立Python示例与数学定义，但原理推导和算法性质仍需逐条深化，不能把公式重复写出视为严格证明。"
+   :"本节包含主题概念、适用前提、核心数学关系与基础示例。代码多为所在学科或章节的综合演示，公式解读不能代替完整定理证明或独立模型实现。","warn");
  container.appendChild(notice);
  const before=container.children.length;
  lessonArticle(n,note,container);
@@ -235,7 +239,8 @@ function selectNode(id,update=true,preserveTree=false){
  badges.innerHTML='<span class="status-pill'+(isComplete(node)?"":" outline")+'">'+humanStatus(node)+'</span><span class="level-pill">'+esc(node.level)+'</span>';
  article.appendChild(badges);
  const lesson=lessonMap.get(id);
- if(lesson)lessonArticle(node,lesson,article);
+ if(lesson&&coreLessonIds.has(id))lessonArticle(node,lesson,article);
+ else if(lesson&&isDraft(node))noteArticle(node,lesson,article,"专属代码讲义初稿");
  else if(noteMap.has(id))noteArticle(node,noteMap.get(id),article);
  else outlineArticle(node,article);
  article.appendChild(resourceArea(dept));
@@ -284,6 +289,8 @@ Promise.all([
   curriculum=c;depts=c.disciplines;chapters=c.chapters;nodes=c.nodes;
   lessons=results.flatMap(x=>x.lessons);
   if(lessons.length!==manifest.total_lessons)throw Error("讲义清单与实际数据数量不一致");
+  coreLessonIds=new Set(results.flatMap((result,i)=>/^lessons-full-/.test(manifest.lesson_files[i])?[]:result.lessons.map(l=>l.node_id)));
+  draftLessonIds=new Set(results.flatMap((result,i)=>/^lessons-full-/.test(manifest.lesson_files[i])?result.lessons.map(l=>l.node_id):[]).filter(id=>!coreLessonIds.has(id)));
   const draftResults=await Promise.all((manifest.note_files||[]).map(async file=>{
     const r=await fetch("./"+file);
     if(!r.ok)throw Error(file+": HTTP "+r.status);
@@ -312,7 +319,7 @@ Promise.all([
 nodeMap=new Map(nodes.map(n=>[n.id,n]));chapMap=new Map(chapters.map(c=>[c.id,c]));deptMap=new Map(depts.map(d=>[d.id,d]));lessonMap=new Map(lessons.map(l=>[l.node_id,l]));
 if(lessonMap.size+noteMap.size!==nodes.length||nodes.some(n=>!lessonMap.has(n.id)&&!noteMap.has(n.id)))
  throw Error("课程知识点覆盖不完整：讲义与笔记未覆盖所有720个节点");
-$("disciplines").textContent=depts.length;$("chapters").textContent=chapters.length;$("nodes").textContent=nodes.length;$("written").textContent=lessonMap.size;if($("notes"))$("notes").textContent=noteMap.size;
+$("disciplines").textContent=depts.length;$("chapters").textContent=chapters.length;$("nodes").textContent=nodes.length;$("written").textContent=coreLessonIds.size;if($("drafts"))$("drafts").textContent=draftLessonIds.size;if($("notes"))$("notes").textContent=noteMap.size;
 for(const d of depts){
  const option=document.createElement("option");option.value=d.id;option.textContent=String(d.order).padStart(2,"0")+" · "+d.title;$("disciplineFilter").appendChild(option);
  const chip=document.createElement("button");chip.type="button";chip.className="roadmap-chip";chip.dataset.dept=d.id;chip.textContent=d.order+" · "+d.title;chip.onclick=()=>window.mlSelectDiscipline(filterDept===d.id?"":d.id);$("roadmap").appendChild(chip);
@@ -320,7 +327,7 @@ for(const d of depts){
 const params=new URLSearchParams(location.search);
 const d=params.get("discipline"),requested=params.get("topic"),status=params.get("status");
 if(d&&deptMap.has(d)){filterDept=d;$("disciplineFilter").value=d}
-if(["complete","expanded","outline"].includes(status)){
+if(["complete","draft","expanded","outline"].includes(status)){
  filterStatus=status==="outline"?"expanded":status;
  $("coverageFilter").value=filterStatus
 }
