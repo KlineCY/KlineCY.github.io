@@ -1,0 +1,741 @@
+{
+  "version": 1,
+  "notes": [
+    {
+      "id": "linear-n02-01",
+      "node_id": "linear-n02-01",
+      "title": "正规方程",
+      "definition": "OLS对平方残差求导并令梯度为零形成正规方程。",
+      "assumptions": "必须明确误差模型、设计矩阵、样本独立性与训练时间边界。回归系数关联不等于因果关系。",
+      "properties": [
+        "目标函数一阶条件是残差与列空间正交。",
+        "估计系数和标准误都依赖样本量、噪声与矩阵秩；金融异方差与自相关需要谨慎处理。"
+      ],
+      "formulas": [
+        {
+          "label": "关键数学表达",
+          "tex": "X^\\top X\\hat\\beta=X^\\top y"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "OLS对平方残差求导并令梯度为零形成正规方程。",
+          "tex": "X^\\top X\\hat\\beta=X^\\top y"
+        },
+        {
+          "explanation": "目标函数一阶条件是残差与列空间正交",
+          "tex": "X^\\top X\\hat\\beta=X^\\top y"
+        }
+      ],
+      "code": "# 正规方程：本章基础代码\nimport numpy as np\nrng=np.random.default_rng(0);X=rng.normal(size=(100,3))\ny=1+X@[2.,-.3,.8]+rng.normal(size=100)*.4\nD=np.c_[np.ones(len(X)),X]\ncoef=np.linalg.lstsq(D,y,rcond=None)[0]\nprint(\"OLS coefficients:\",coef)",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益预测、横截面因子回归、残差正交化和风险暴露估计。",
+      "limits": "示例覆盖本章节典型算法，独立算法的高级数值实现和严格证明仍需进一步核对。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "linear-n03-01",
+      "node_id": "linear-n03-01",
+      "title": "梯度下降求OLS",
+      "definition": "通过平方损失梯度迭代寻找OLS参数，不需要显式求矩阵逆。",
+      "assumptions": "必须明确误差模型、设计矩阵、样本独立性与训练时间边界。回归系数关联不等于因果关系。",
+      "properties": [
+        "对二次损失求导后做梯度步。",
+        "估计系数和标准误都依赖样本量、噪声与矩阵秩；金融异方差与自相关需要谨慎处理。"
+      ],
+      "formulas": [
+        {
+          "label": "关键数学表达",
+          "tex": "\\beta^+=\\beta-\\eta X^\\top(X\\beta-y)/n"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "通过平方损失梯度迭代寻找OLS参数，不需要显式求矩阵逆。",
+          "tex": "\\beta^+=\\beta-\\eta X^\\top(X\\beta-y)/n"
+        },
+        {
+          "explanation": "对二次损失求导后做梯度步",
+          "tex": "\\beta^+=\\beta-\\eta X^\\top(X\\beta-y)/n"
+        }
+      ],
+      "code": "# 梯度下降求OLS：本章基础代码\nimport numpy as np\nrng=np.random.default_rng(0);X=rng.normal(size=(100,3))\ny=1+X@[2.,-.3,.8]+rng.normal(size=100)*.4\nD=np.c_[np.ones(len(X)),X]\ncoef=np.linalg.lstsq(D,y,rcond=None)[0]\nprint(\"OLS coefficients:\",coef)",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益预测、横截面因子回归、残差正交化和风险暴露估计。",
+      "limits": "示例覆盖本章节典型算法，独立算法的高级数值实现和严格证明仍需进一步核对。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "linear-n01-02",
+      "node_id": "linear-n01-02",
+      "title": "条件期望",
+      "definition": "条件期望给出已知特征下的目标平均，是平方误差最优预测函数。",
+      "assumptions": "必须明确误差模型、设计矩阵、样本独立性与训练时间边界。回归系数关联不等于因果关系。",
+      "properties": [
+        "平方损失按条件期望分解后由条件均值最小化。",
+        "估计系数和标准误都依赖样本量、噪声与矩阵秩；金融异方差与自相关需要谨慎处理。"
+      ],
+      "formulas": [
+        {
+          "label": "关键数学表达",
+          "tex": "f^*(x)=E[Y\\mid X=x]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "条件期望给出已知特征下的目标平均，是平方误差最优预测函数。",
+          "tex": "f^*(x)=E[Y\\mid X=x]"
+        },
+        {
+          "explanation": "平方损失按条件期望分解后由条件均值最小化",
+          "tex": "f^*(x)=E[Y\\mid X=x]"
+        }
+      ],
+      "code": "# 条件期望：本章基础代码\nimport numpy as np\nfrom sklearn.linear_model import Ridge\nrng=np.random.default_rng(0);X=rng.normal(size=(90,3))\ny=X[:,0]+rng.normal(size=90)\nm=Ridge().fit(X[:60],y[:60]);res=y[60:]-m.predict(X[60:])\nprint(\"Residual variance and lag1 corr:\",res.var(),np.corrcoef(res[1:],res[:-1])[0,1])",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益预测、横截面因子回归、残差正交化和风险暴露估计。",
+      "limits": "示例覆盖本章节典型算法，独立算法的高级数值实现和严格证明仍需进一步核对。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "linear-n02-02",
+      "node_id": "linear-n02-02",
+      "title": "高斯误差与MLE",
+      "definition": "高斯误差假设下最大似然拟合线性回归等价于最小二乘。",
+      "assumptions": "必须明确误差模型、设计矩阵、样本独立性与训练时间边界。回归系数关联不等于因果关系。",
+      "properties": [
+        "高斯对数似然中的参数相关项是平方残差。",
+        "估计系数和标准误都依赖样本量、噪声与矩阵秩；金融异方差与自相关需要谨慎处理。"
+      ],
+      "formulas": [
+        {
+          "label": "关键数学表达",
+          "tex": "Y\\mid X\\sim N(X\\beta,\\sigma^2I)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "高斯误差假设下最大似然拟合线性回归等价于最小二乘。",
+          "tex": "Y\\mid X\\sim N(X\\beta,\\sigma^2I)"
+        },
+        {
+          "explanation": "高斯对数似然中的参数相关项是平方残差",
+          "tex": "Y\\mid X\\sim N(X\\beta,\\sigma^2I)"
+        }
+      ],
+      "code": "# 高斯误差与MLE：本章基础代码\nimport numpy as np\nfrom sklearn.linear_model import Ridge\nrng=np.random.default_rng(0);X=rng.normal(size=(90,3))\ny=X[:,0]+rng.normal(size=90)\nm=Ridge().fit(X[:60],y[:60]);res=y[60:]-m.predict(X[60:])\nprint(\"Residual variance and lag1 corr:\",res.var(),np.corrcoef(res[1:],res[:-1])[0,1])",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益预测、横截面因子回归、残差正交化和风险暴露估计。",
+      "limits": "示例覆盖本章节典型算法，独立算法的高级数值实现和严格证明仍需进一步核对。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "linear-n03-02",
+      "node_id": "linear-n03-02",
+      "title": "异方差稳健标准误",
+      "definition": "异方差稳健协方差采用残差平方加权设计矩阵构造三明治估计。",
+      "assumptions": "必须明确误差模型、设计矩阵、样本独立性与训练时间边界。回归系数关联不等于因果关系。",
+      "properties": [
+        "用观测异方差估计代替同方差假设。",
+        "估计系数和标准误都依赖样本量、噪声与矩阵秩；金融异方差与自相关需要谨慎处理。"
+      ],
+      "formulas": [
+        {
+          "label": "关键数学表达",
+          "tex": "\\widehat V=(X^\\top X)^{-1}X^\\top\\operatorname{diag}(e_i^2)X(X^\\top X)^{-1}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "异方差稳健协方差采用残差平方加权设计矩阵构造三明治估计。",
+          "tex": "\\widehat V=(X^\\top X)^{-1}X^\\top\\operatorname{diag}(e_i^2)X(X^\\top X)^{-1}"
+        },
+        {
+          "explanation": "用观测异方差估计代替同方差假设",
+          "tex": "\\widehat V=(X^\\top X)^{-1}X^\\top\\operatorname{diag}(e_i^2)X(X^\\top X)^{-1}"
+        }
+      ],
+      "code": "# 异方差稳健标准误：本章基础代码\nimport numpy as np\nfrom sklearn.linear_model import Ridge\nrng=np.random.default_rng(0);X=rng.normal(size=(90,3))\ny=X[:,0]+rng.normal(size=90)\nm=Ridge().fit(X[:60],y[:60]);res=y[60:]-m.predict(X[60:])\nprint(\"Residual variance and lag1 corr:\",res.var(),np.corrcoef(res[1:],res[:-1])[0,1])",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益预测、横截面因子回归、残差正交化和风险暴露估计。",
+      "limits": "示例覆盖本章节典型算法，独立算法的高级数值实现和严格证明仍需进一步核对。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "linear-n04-02",
+      "node_id": "linear-n04-02",
+      "title": "偏差方差分解",
+      "definition": "平方误差可分解为偏差平方、模型随机估计方差和不可约噪声。",
+      "assumptions": "必须明确误差模型、设计矩阵、样本独立性与训练时间边界。回归系数关联不等于因果关系。",
+      "properties": [
+        "加减模型期望并利用正交交叉项为零。",
+        "估计系数和标准误都依赖样本量、噪声与矩阵秩；金融异方差与自相关需要谨慎处理。"
+      ],
+      "formulas": [
+        {
+          "label": "关键数学表达",
+          "tex": "\\operatorname{MSE}=\\operatorname{Bias}^2+\\operatorname{Var}+\\sigma_\\epsilon^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "平方误差可分解为偏差平方、模型随机估计方差和不可约噪声。",
+          "tex": "\\operatorname{MSE}=\\operatorname{Bias}^2+\\operatorname{Var}+\\sigma_\\epsilon^2"
+        },
+        {
+          "explanation": "加减模型期望并利用正交交叉项为零",
+          "tex": "\\operatorname{MSE}=\\operatorname{Bias}^2+\\operatorname{Var}+\\sigma_\\epsilon^2"
+        }
+      ],
+      "code": "# 偏差方差分解：本章基础代码\nimport numpy as np\nfrom sklearn.linear_model import Ridge\nrng=np.random.default_rng(0);X=rng.normal(size=(90,3))\ny=X[:,0]+rng.normal(size=90)\nm=Ridge().fit(X[:60],y[:60]);res=y[60:]-m.predict(X[60:])\nprint(\"Residual variance and lag1 corr:\",res.var(),np.corrcoef(res[1:],res[:-1])[0,1])",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益预测、横截面因子回归、残差正交化和风险暴露估计。",
+      "limits": "示例覆盖本章节典型算法，独立算法的高级数值实现和严格证明仍需进一步核对。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "linear-n06-02",
+      "node_id": "linear-n06-02",
+      "title": "误差相关",
+      "definition": "残差若有时间序列自相关，普通OLS标准误通常失效，需要HAC等修正。",
+      "assumptions": "必须明确误差模型、设计矩阵、样本独立性与训练时间边界。回归系数关联不等于因果关系。",
+      "properties": [
+        "按滞后协方差检测误差相关。",
+        "估计系数和标准误都依赖样本量、噪声与矩阵秩；金融异方差与自相关需要谨慎处理。"
+      ],
+      "formulas": [
+        {
+          "label": "关键数学表达",
+          "tex": "\\operatorname{Cov}(\\epsilon_t,\\epsilon_{t-k})\\ne0"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "残差若有时间序列自相关，普通OLS标准误通常失效，需要HAC等修正。",
+          "tex": "\\operatorname{Cov}(\\epsilon_t,\\epsilon_{t-k})\\ne0"
+        },
+        {
+          "explanation": "按滞后协方差检测误差相关",
+          "tex": "\\operatorname{Cov}(\\epsilon_t,\\epsilon_{t-k})\\ne0"
+        }
+      ],
+      "code": "# 误差相关：本章基础代码\nimport numpy as np\nfrom sklearn.linear_model import Ridge\nrng=np.random.default_rng(0);X=rng.normal(size=(90,3))\ny=X[:,0]+rng.normal(size=90)\nm=Ridge().fit(X[:60],y[:60]);res=y[60:]-m.predict(X[60:])\nprint(\"Residual variance and lag1 corr:\",res.var(),np.corrcoef(res[1:],res[:-1])[0,1])",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益预测、横截面因子回归、残差正交化和风险暴露估计。",
+      "limits": "示例覆盖本章节典型算法，独立算法的高级数值实现和严格证明仍需进一步核对。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "linear-n01-03",
+      "node_id": "linear-n01-03",
+      "title": "Poisson回归",
+      "definition": "Poisson GLM用对数链接估计非负整数计数的条件均值。",
+      "assumptions": "必须明确误差模型、设计矩阵、样本独立性与训练时间边界。回归系数关联不等于因果关系。",
+      "properties": [
+        "指数链接保证强度参数为正。",
+        "估计系数和标准误都依赖样本量、噪声与矩阵秩；金融异方差与自相关需要谨慎处理。"
+      ],
+      "formulas": [
+        {
+          "label": "关键数学表达",
+          "tex": "Y\\mid X\\sim\\operatorname{Poisson}(\\lambda),\\quad\\log\\lambda=x^\\top\\beta"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "Poisson GLM用对数链接估计非负整数计数的条件均值。",
+          "tex": "Y\\mid X\\sim\\operatorname{Poisson}(\\lambda),\\quad\\log\\lambda=x^\\top\\beta"
+        },
+        {
+          "explanation": "指数链接保证强度参数为正",
+          "tex": "Y\\mid X\\sim\\operatorname{Poisson}(\\lambda),\\quad\\log\\lambda=x^\\top\\beta"
+        }
+      ],
+      "code": "# Poisson回归：本章基础代码\nimport numpy as np\nfrom sklearn.linear_model import PoissonRegressor,HuberRegressor\nrng=np.random.default_rng(0);X=rng.normal(size=(100,2))\ncounts=rng.poisson(np.exp(.2+.3*X[:,0]))\nprint(PoissonRegressor().fit(X,counts).coef_)\ny=X[:,0]+rng.normal(size=100);y[0]+=20\nprint(HuberRegressor().fit(X,y).coef_)",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益预测、横截面因子回归、残差正交化和风险暴露估计。",
+      "limits": "示例覆盖本章节典型算法，独立算法的高级数值实现和严格证明仍需进一步核对。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "linear-n02-03",
+      "node_id": "linear-n02-03",
+      "title": "Gamma回归",
+      "definition": "Gamma GLM适合正值且右偏连续目标，如交易规模或某类费用。",
+      "assumptions": "必须明确误差模型、设计矩阵、样本独立性与训练时间边界。回归系数关联不等于因果关系。",
+      "properties": [
+        "均值-方差关系由Gamma族决定。",
+        "估计系数和标准误都依赖样本量、噪声与矩阵秩；金融异方差与自相关需要谨慎处理。"
+      ],
+      "formulas": [
+        {
+          "label": "关键数学表达",
+          "tex": "E[Y\\mid x]=\\mu,\\quad\\operatorname{Var}(Y\\mid x)=\\phi\\mu^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "Gamma GLM适合正值且右偏连续目标，如交易规模或某类费用。",
+          "tex": "E[Y\\mid x]=\\mu,\\quad\\operatorname{Var}(Y\\mid x)=\\phi\\mu^2"
+        },
+        {
+          "explanation": "均值-方差关系由Gamma族决定",
+          "tex": "E[Y\\mid x]=\\mu,\\quad\\operatorname{Var}(Y\\mid x)=\\phi\\mu^2"
+        }
+      ],
+      "code": "# Gamma回归：本章基础代码\nimport numpy as np\nfrom sklearn.linear_model import PoissonRegressor,HuberRegressor\nrng=np.random.default_rng(0);X=rng.normal(size=(100,2))\ncounts=rng.poisson(np.exp(.2+.3*X[:,0]))\nprint(PoissonRegressor().fit(X,counts).coef_)\ny=X[:,0]+rng.normal(size=100);y[0]+=20\nprint(HuberRegressor().fit(X,y).coef_)",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益预测、横截面因子回归、残差正交化和风险暴露估计。",
+      "limits": "示例覆盖本章节典型算法，独立算法的高级数值实现和严格证明仍需进一步核对。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "linear-n03-03",
+      "node_id": "linear-n03-03",
+      "title": "Tweedie回归",
+      "definition": "Tweedie GLM包含多类复合分布，适合含大量零值并同时有正连续值的目标。",
+      "assumptions": "必须明确误差模型、设计矩阵、样本独立性与训练时间边界。回归系数关联不等于因果关系。",
+      "properties": [
+        "按方差函数的幂指数连接均值和离散程度。",
+        "估计系数和标准误都依赖样本量、噪声与矩阵秩；金融异方差与自相关需要谨慎处理。"
+      ],
+      "formulas": [
+        {
+          "label": "关键数学表达",
+          "tex": "\\operatorname{Var}(Y\\mid X)=\\phi\\mu^p"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "Tweedie GLM包含多类复合分布，适合含大量零值并同时有正连续值的目标。",
+          "tex": "\\operatorname{Var}(Y\\mid X)=\\phi\\mu^p"
+        },
+        {
+          "explanation": "按方差函数的幂指数连接均值和离散程度",
+          "tex": "\\operatorname{Var}(Y\\mid X)=\\phi\\mu^p"
+        }
+      ],
+      "code": "# Tweedie回归：本章基础代码\nimport numpy as np\nfrom sklearn.linear_model import PoissonRegressor,HuberRegressor\nrng=np.random.default_rng(0);X=rng.normal(size=(100,2))\ncounts=rng.poisson(np.exp(.2+.3*X[:,0]))\nprint(PoissonRegressor().fit(X,counts).coef_)\ny=X[:,0]+rng.normal(size=100);y[0]+=20\nprint(HuberRegressor().fit(X,y).coef_)",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益预测、横截面因子回归、残差正交化和风险暴露估计。",
+      "limits": "示例覆盖本章节典型算法，独立算法的高级数值实现和严格证明仍需进一步核对。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "linear-n05-03",
+      "node_id": "linear-n05-03",
+      "title": "Huber回归",
+      "definition": "以Huber损失替换平方损失，平衡对小残差的效率与大残差的稳健性。",
+      "assumptions": "必须明确误差模型、设计矩阵、样本独立性与训练时间边界。回归系数关联不等于因果关系。",
+      "properties": [
+        "在阈值以下采用平方罚项，以上线性增长。",
+        "估计系数和标准误都依赖样本量、噪声与矩阵秩；金融异方差与自相关需要谨慎处理。"
+      ],
+      "formulas": [
+        {
+          "label": "关键数学表达",
+          "tex": "\\rho_\\delta(e)=\\begin{cases}e^2/2,&|e|\\le\\delta\\\\\\delta(|e|-\\delta/2),&|e|>\\delta\\end{cases}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "以Huber损失替换平方损失，平衡对小残差的效率与大残差的稳健性。",
+          "tex": "\\rho_\\delta(e)=\\begin{cases}e^2/2,&|e|\\le\\delta\\\\\\delta(|e|-\\delta/2),&|e|>\\delta\\end{cases}"
+        },
+        {
+          "explanation": "在阈值以下采用平方罚项，以上线性增长",
+          "tex": "\\rho_\\delta(e)=\\begin{cases}e^2/2,&|e|\\le\\delta\\\\\\delta(|e|-\\delta/2),&|e|>\\delta\\end{cases}"
+        }
+      ],
+      "code": "# Huber回归：本章基础代码\nimport numpy as np\nfrom sklearn.linear_model import PoissonRegressor,HuberRegressor\nrng=np.random.default_rng(0);X=rng.normal(size=(100,2))\ncounts=rng.poisson(np.exp(.2+.3*X[:,0]))\nprint(PoissonRegressor().fit(X,counts).coef_)\ny=X[:,0]+rng.normal(size=100);y[0]+=20\nprint(HuberRegressor().fit(X,y).coef_)",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益预测、横截面因子回归、残差正交化和风险暴露估计。",
+      "limits": "示例覆盖本章节典型算法，独立算法的高级数值实现和严格证明仍需进一步核对。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "linear-n06-03",
+      "node_id": "linear-n06-03",
+      "title": "RANSAC",
+      "definition": "随机抽取最小子集拟合模型并寻找支持该模型的内点，增强对极端离群样本的抵抗力。",
+      "assumptions": "必须明确误差模型、设计矩阵、样本独立性与训练时间边界。回归系数关联不等于因果关系。",
+      "properties": [
+        "以共识内点数量选择拟合模型。",
+        "估计系数和标准误都依赖样本量、噪声与矩阵秩；金融异方差与自相关需要谨慎处理。"
+      ],
+      "formulas": [
+        {
+          "label": "关键数学表达",
+          "tex": "\\hat\\theta=\\arg\\max_\\theta\\sum_i\\mathbf1[|e_i(\\theta)|<\\tau]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "随机抽取最小子集拟合模型并寻找支持该模型的内点，增强对极端离群样本的抵抗力。",
+          "tex": "\\hat\\theta=\\arg\\max_\\theta\\sum_i\\mathbf1[|e_i(\\theta)|<\\tau]"
+        },
+        {
+          "explanation": "以共识内点数量选择拟合模型",
+          "tex": "\\hat\\theta=\\arg\\max_\\theta\\sum_i\\mathbf1[|e_i(\\theta)|<\\tau]"
+        }
+      ],
+      "code": "# RANSAC：本章基础代码\nimport numpy as np\nfrom sklearn.linear_model import PoissonRegressor,HuberRegressor\nrng=np.random.default_rng(0);X=rng.normal(size=(100,2))\ncounts=rng.poisson(np.exp(.2+.3*X[:,0]))\nprint(PoissonRegressor().fit(X,counts).coef_)\ny=X[:,0]+rng.normal(size=100);y[0]+=20\nprint(HuberRegressor().fit(X,y).coef_)",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益预测、横截面因子回归、残差正交化和风险暴露估计。",
+      "limits": "示例覆盖本章节典型算法，独立算法的高级数值实现和严格证明仍需进一步核对。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "linear-n01-04",
+      "node_id": "linear-n01-04",
+      "title": "多项式回归",
+      "definition": "对输入添加幂与交互项后做线性回归，拟合输入与目标的非线性函数。",
+      "assumptions": "必须明确误差模型、设计矩阵、样本独立性与训练时间边界。回归系数关联不等于因果关系。",
+      "properties": [
+        "在多项式基上仍用线性系数拟合。",
+        "估计系数和标准误都依赖样本量、噪声与矩阵秩；金融异方差与自相关需要谨慎处理。"
+      ],
+      "formulas": [
+        {
+          "label": "关键数学表达",
+          "tex": "f(x)=\\sum_{k=0}^p\\beta_k x^k"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对输入添加幂与交互项后做线性回归，拟合输入与目标的非线性函数。",
+          "tex": "f(x)=\\sum_{k=0}^p\\beta_k x^k"
+        },
+        {
+          "explanation": "在多项式基上仍用线性系数拟合",
+          "tex": "f(x)=\\sum_{k=0}^p\\beta_k x^k"
+        }
+      ],
+      "code": "# 多项式回归：本章基础代码\nimport numpy as np\nfrom sklearn.preprocessing import PolynomialFeatures,SplineTransformer\nfrom sklearn.linear_model import Ridge\nx=np.linspace(-2,2,60).reshape(-1,1);y=np.sin(x[:,0])\nfor transform in [PolynomialFeatures(3),SplineTransformer(n_knots=5)]:\n X=transform.fit_transform(x)\n print(\"basis\",X.shape,\"fit\",Ridge().fit(X,y).score(X,y))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益预测、横截面因子回归、残差正交化和风险暴露估计。",
+      "limits": "示例覆盖本章节典型算法，独立算法的高级数值实现和严格证明仍需进一步核对。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "linear-n02-04",
+      "node_id": "linear-n02-04",
+      "title": "样条Spline",
+      "definition": "样条以分段低阶多项式和连接处连续条件构造平滑非线性函数。",
+      "assumptions": "必须明确误差模型、设计矩阵、样本独立性与训练时间边界。回归系数关联不等于因果关系。",
+      "properties": [
+        "将局部基函数加权组合得到函数。",
+        "估计系数和标准误都依赖样本量、噪声与矩阵秩；金融异方差与自相关需要谨慎处理。"
+      ],
+      "formulas": [
+        {
+          "label": "关键数学表达",
+          "tex": "f(x)=\\sum_j\\beta_jB_j(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "样条以分段低阶多项式和连接处连续条件构造平滑非线性函数。",
+          "tex": "f(x)=\\sum_j\\beta_jB_j(x)"
+        },
+        {
+          "explanation": "将局部基函数加权组合得到函数",
+          "tex": "f(x)=\\sum_j\\beta_jB_j(x)"
+        }
+      ],
+      "code": "# 样条Spline：本章基础代码\nimport numpy as np\nfrom sklearn.preprocessing import PolynomialFeatures,SplineTransformer\nfrom sklearn.linear_model import Ridge\nx=np.linspace(-2,2,60).reshape(-1,1);y=np.sin(x[:,0])\nfor transform in [PolynomialFeatures(3),SplineTransformer(n_knots=5)]:\n X=transform.fit_transform(x)\n print(\"basis\",X.shape,\"fit\",Ridge().fit(X,y).score(X,y))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益预测、横截面因子回归、残差正交化和风险暴露估计。",
+      "limits": "示例覆盖本章节典型算法，独立算法的高级数值实现和严格证明仍需进一步核对。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "linear-n03-04",
+      "node_id": "linear-n03-04",
+      "title": "核回归",
+      "definition": "核回归按输入点与历史样本相近程度加权平均目标，构造非参数平滑估计。",
+      "assumptions": "必须明确误差模型、设计矩阵、样本独立性与训练时间边界。回归系数关联不等于因果关系。",
+      "properties": [
+        "核函数权重的正规化加权平均。",
+        "估计系数和标准误都依赖样本量、噪声与矩阵秩；金融异方差与自相关需要谨慎处理。"
+      ],
+      "formulas": [
+        {
+          "label": "关键数学表达",
+          "tex": "\\hat f(x)=\\frac{\\sum_iK_h(x-x_i)y_i}{\\sum_iK_h(x-x_i)}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "核回归按输入点与历史样本相近程度加权平均目标，构造非参数平滑估计。",
+          "tex": "\\hat f(x)=\\frac{\\sum_iK_h(x-x_i)y_i}{\\sum_iK_h(x-x_i)}"
+        },
+        {
+          "explanation": "核函数权重的正规化加权平均",
+          "tex": "\\hat f(x)=\\frac{\\sum_iK_h(x-x_i)y_i}{\\sum_iK_h(x-x_i)}"
+        }
+      ],
+      "code": "# 核回归：本章基础代码\nimport numpy as np\nfrom sklearn.preprocessing import PolynomialFeatures,SplineTransformer\nfrom sklearn.linear_model import Ridge\nx=np.linspace(-2,2,60).reshape(-1,1);y=np.sin(x[:,0])\nfor transform in [PolynomialFeatures(3),SplineTransformer(n_knots=5)]:\n X=transform.fit_transform(x)\n print(\"basis\",X.shape,\"fit\",Ridge().fit(X,y).score(X,y))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益预测、横截面因子回归、残差正交化和风险暴露估计。",
+      "limits": "示例覆盖本章节典型算法，独立算法的高级数值实现和严格证明仍需进一步核对。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "linear-n04-04",
+      "node_id": "linear-n04-04",
+      "title": "局部回归LOESS",
+      "definition": "LOESS在目标输入附近根据距离加权拟合低次多项式，生成局部平滑预测。",
+      "assumptions": "必须明确误差模型、设计矩阵、样本独立性与训练时间边界。回归系数关联不等于因果关系。",
+      "properties": [
+        "对局部样本按距离赋权并最小化平方残差。",
+        "估计系数和标准误都依赖样本量、噪声与矩阵秩；金融异方差与自相关需要谨慎处理。"
+      ],
+      "formulas": [
+        {
+          "label": "关键数学表达",
+          "tex": "\\hat\\beta(x)=\\arg\\min_\\beta\\sum_iw_i(x)(y_i-p_\\beta(x_i))^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "LOESS在目标输入附近根据距离加权拟合低次多项式，生成局部平滑预测。",
+          "tex": "\\hat\\beta(x)=\\arg\\min_\\beta\\sum_iw_i(x)(y_i-p_\\beta(x_i))^2"
+        },
+        {
+          "explanation": "对局部样本按距离赋权并最小化平方残差",
+          "tex": "\\hat\\beta(x)=\\arg\\min_\\beta\\sum_iw_i(x)(y_i-p_\\beta(x_i))^2"
+        }
+      ],
+      "code": "# 局部回归LOESS：本章基础代码\nimport numpy as np\nfrom sklearn.preprocessing import PolynomialFeatures,SplineTransformer\nfrom sklearn.linear_model import Ridge\nx=np.linspace(-2,2,60).reshape(-1,1);y=np.sin(x[:,0])\nfor transform in [PolynomialFeatures(3),SplineTransformer(n_knots=5)]:\n X=transform.fit_transform(x)\n print(\"basis\",X.shape,\"fit\",Ridge().fit(X,y).score(X,y))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益预测、横截面因子回归、残差正交化和风险暴露估计。",
+      "limits": "示例覆盖本章节典型算法，独立算法的高级数值实现和严格证明仍需进一步核对。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "linear-n05-04",
+      "node_id": "linear-n05-04",
+      "title": "广义可加模型GAM",
+      "definition": "GAM将目标的链接函数建模为多个单变量平滑函数之和，兼顾非线性与可解释性。",
+      "assumptions": "必须明确误差模型、设计矩阵、样本独立性与训练时间边界。回归系数关联不等于因果关系。",
+      "properties": [
+        "各特征的非线性贡献相加。",
+        "估计系数和标准误都依赖样本量、噪声与矩阵秩；金融异方差与自相关需要谨慎处理。"
+      ],
+      "formulas": [
+        {
+          "label": "关键数学表达",
+          "tex": "g(E[Y\\mid X])=\\beta_0+\\sum_jf_j(x_j)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "GAM将目标的链接函数建模为多个单变量平滑函数之和，兼顾非线性与可解释性。",
+          "tex": "g(E[Y\\mid X])=\\beta_0+\\sum_jf_j(x_j)"
+        },
+        {
+          "explanation": "各特征的非线性贡献相加",
+          "tex": "g(E[Y\\mid X])=\\beta_0+\\sum_jf_j(x_j)"
+        }
+      ],
+      "code": "# 广义可加模型GAM：本章基础代码\nimport numpy as np\nfrom sklearn.preprocessing import PolynomialFeatures,SplineTransformer\nfrom sklearn.linear_model import Ridge\nx=np.linspace(-2,2,60).reshape(-1,1);y=np.sin(x[:,0])\nfor transform in [PolynomialFeatures(3),SplineTransformer(n_knots=5)]:\n X=transform.fit_transform(x)\n print(\"basis\",X.shape,\"fit\",Ridge().fit(X,y).score(X,y))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益预测、横截面因子回归、残差正交化和风险暴露估计。",
+      "limits": "示例覆盖本章节典型算法，独立算法的高级数值实现和严格证明仍需进一步核对。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "linear-n06-04",
+      "node_id": "linear-n06-04",
+      "title": "高斯过程回归",
+      "definition": "高斯过程给函数值集合定义联合高斯先验，通过核矩阵获得预测均值和方差。",
+      "assumptions": "必须明确误差模型、设计矩阵、样本独立性与训练时间边界。回归系数关联不等于因果关系。",
+      "properties": [
+        "条件高斯分布求条件均值。",
+        "估计系数和标准误都依赖样本量、噪声与矩阵秩；金融异方差与自相关需要谨慎处理。"
+      ],
+      "formulas": [
+        {
+          "label": "关键数学表达",
+          "tex": "m_*=k_*^\\top(K+\\sigma^2I)^{-1}y"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "高斯过程给函数值集合定义联合高斯先验，通过核矩阵获得预测均值和方差。",
+          "tex": "m_*=k_*^\\top(K+\\sigma^2I)^{-1}y"
+        },
+        {
+          "explanation": "条件高斯分布求条件均值",
+          "tex": "m_*=k_*^\\top(K+\\sigma^2I)^{-1}y"
+        }
+      ],
+      "code": "# 高斯过程回归：本章基础代码\nimport numpy as np\nfrom sklearn.preprocessing import PolynomialFeatures,SplineTransformer\nfrom sklearn.linear_model import Ridge\nx=np.linspace(-2,2,60).reshape(-1,1);y=np.sin(x[:,0])\nfor transform in [PolynomialFeatures(3),SplineTransformer(n_knots=5)]:\n X=transform.fit_transform(x)\n print(\"basis\",X.shape,\"fit\",Ridge().fit(X,y).score(X,y))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益预测、横截面因子回归、残差正交化和风险暴露估计。",
+      "limits": "示例覆盖本章节典型算法，独立算法的高级数值实现和严格证明仍需进一步核对。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "linear-n01-05",
+      "node_id": "linear-n01-05",
+      "title": "收益预测回归",
+      "definition": "用预测时点的已知因子解释或预测未来资产收益，需要严格前向标签和时点对齐。",
+      "assumptions": "必须明确误差模型、设计矩阵、样本独立性与训练时间边界。回归系数关联不等于因果关系。",
+      "properties": [
+        "当期已知特征预测下一期收益。",
+        "估计系数和标准误都依赖样本量、噪声与矩阵秩；金融异方差与自相关需要谨慎处理。"
+      ],
+      "formulas": [
+        {
+          "label": "关键数学表达",
+          "tex": "r_{i,t+1}=\\beta^\\top X_{i,t}+\\epsilon_{i,t+1}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "用预测时点的已知因子解释或预测未来资产收益，需要严格前向标签和时点对齐。",
+          "tex": "r_{i,t+1}=\\beta^\\top X_{i,t}+\\epsilon_{i,t+1}"
+        },
+        {
+          "explanation": "当期已知特征预测下一期收益",
+          "tex": "r_{i,t+1}=\\beta^\\top X_{i,t}+\\epsilon_{i,t+1}"
+        }
+      ],
+      "code": "# 收益预测回归：本章基础代码\nimport numpy as np\nfrom sklearn.linear_model import LinearRegression\nrng=np.random.default_rng(0);X=rng.normal(size=(100,3))\ny=.4*X[:,0]+rng.normal(size=100)*.5\nfor end in [40,60,80]:\n m=LinearRegression().fit(X[end-30:end],y[end-30:end])\n print(\"time\",end,\"forward prediction\",m.predict(X[end:end+1]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益预测、横截面因子回归、残差正交化和风险暴露估计。",
+      "limits": "示例覆盖本章节典型算法，独立算法的高级数值实现和严格证明仍需进一步核对。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "linear-n03-05",
+      "node_id": "linear-n03-05",
+      "title": "横截面因子回归",
+      "definition": "在同一交易日横截面对资产收益和因子暴露回归，估计因子溢价与特质残差。",
+      "assumptions": "必须明确误差模型、设计矩阵、样本独立性与训练时间边界。回归系数关联不等于因果关系。",
+      "properties": [
+        "用上一期已知暴露解释当期横截面收益。",
+        "估计系数和标准误都依赖样本量、噪声与矩阵秩；金融异方差与自相关需要谨慎处理。"
+      ],
+      "formulas": [
+        {
+          "label": "关键数学表达",
+          "tex": "r_{i,t}=\\sum_k\\beta_{ik,t-1}\\lambda_{k,t}+\\epsilon_{i,t}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "在同一交易日横截面对资产收益和因子暴露回归，估计因子溢价与特质残差。",
+          "tex": "r_{i,t}=\\sum_k\\beta_{ik,t-1}\\lambda_{k,t}+\\epsilon_{i,t}"
+        },
+        {
+          "explanation": "用上一期已知暴露解释当期横截面收益",
+          "tex": "r_{i,t}=\\sum_k\\beta_{ik,t-1}\\lambda_{k,t}+\\epsilon_{i,t}"
+        }
+      ],
+      "code": "# 横截面因子回归：本章基础代码\nimport numpy as np\nfrom sklearn.linear_model import LinearRegression\nrng=np.random.default_rng(0);X=rng.normal(size=(100,3))\ny=.4*X[:,0]+rng.normal(size=100)*.5\nfor end in [40,60,80]:\n m=LinearRegression().fit(X[end-30:end],y[end-30:end])\n print(\"time\",end,\"forward prediction\",m.predict(X[end:end+1]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益预测、横截面因子回归、残差正交化和风险暴露估计。",
+      "limits": "示例覆盖本章节典型算法，独立算法的高级数值实现和严格证明仍需进一步核对。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "linear-n04-05",
+      "node_id": "linear-n04-05",
+      "title": "正交化",
+      "definition": "把新特征对已有特征投影后的残差作为增量信号，考察超出基础特征的信息。",
+      "assumptions": "必须明确误差模型、设计矩阵、样本独立性与训练时间边界。回归系数关联不等于因果关系。",
+      "properties": [
+        "最小二乘投影后取残差。",
+        "估计系数和标准误都依赖样本量、噪声与矩阵秩；金融异方差与自相关需要谨慎处理。"
+      ],
+      "formulas": [
+        {
+          "label": "关键数学表达",
+          "tex": "x_\\perp=x-X(X^\\top X)^{-1}X^\\top x"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "把新特征对已有特征投影后的残差作为增量信号，考察超出基础特征的信息。",
+          "tex": "x_\\perp=x-X(X^\\top X)^{-1}X^\\top x"
+        },
+        {
+          "explanation": "最小二乘投影后取残差",
+          "tex": "x_\\perp=x-X(X^\\top X)^{-1}X^\\top x"
+        }
+      ],
+      "code": "# 正交化：本章基础代码\nimport numpy as np\nfrom sklearn.linear_model import LinearRegression\nrng=np.random.default_rng(0);X=rng.normal(size=(100,3))\ny=.4*X[:,0]+rng.normal(size=100)*.5\nfor end in [40,60,80]:\n m=LinearRegression().fit(X[end-30:end],y[end-30:end])\n print(\"time\",end,\"forward prediction\",m.predict(X[end:end+1]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益预测、横截面因子回归、残差正交化和风险暴露估计。",
+      "limits": "示例覆盖本章节典型算法，独立算法的高级数值实现和严格证明仍需进一步核对。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "linear-n05-05",
+      "node_id": "linear-n05-05",
+      "title": "滚动回归",
+      "definition": "每个预测日期仅用最近W期历史样本重新估计回归系数，以适应参数变化。",
+      "assumptions": "必须明确误差模型、设计矩阵、样本独立性与训练时间边界。回归系数关联不等于因果关系。",
+      "properties": [
+        "滑动训练窗口不包含预测期目标。",
+        "估计系数和标准误都依赖样本量、噪声与矩阵秩；金融异方差与自相关需要谨慎处理。"
+      ],
+      "formulas": [
+        {
+          "label": "关键数学表达",
+          "tex": "\\hat\\beta_t=\\arg\\min_\\beta\\sum_{s=t-W}^{t-1}(y_s-X_s\\beta)^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "每个预测日期仅用最近W期历史样本重新估计回归系数，以适应参数变化。",
+          "tex": "\\hat\\beta_t=\\arg\\min_\\beta\\sum_{s=t-W}^{t-1}(y_s-X_s\\beta)^2"
+        },
+        {
+          "explanation": "滑动训练窗口不包含预测期目标",
+          "tex": "\\hat\\beta_t=\\arg\\min_\\beta\\sum_{s=t-W}^{t-1}(y_s-X_s\\beta)^2"
+        }
+      ],
+      "code": "# 滚动回归：本章基础代码\nimport numpy as np\nfrom sklearn.linear_model import LinearRegression\nrng=np.random.default_rng(0);X=rng.normal(size=(100,3))\ny=.4*X[:,0]+rng.normal(size=100)*.5\nfor end in [40,60,80]:\n m=LinearRegression().fit(X[end-30:end],y[end-30:end])\n print(\"time\",end,\"forward prediction\",m.predict(X[end:end+1]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益预测、横截面因子回归、残差正交化和风险暴露估计。",
+      "limits": "示例覆盖本章节典型算法，独立算法的高级数值实现和严格证明仍需进一步核对。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "linear-n06-05",
+      "node_id": "linear-n06-05",
+      "title": "预测收益置信区间",
+      "definition": "根据估计参数不确定性与模型误差构造均值响应或新观测的预测区间。",
+      "assumptions": "必须明确误差模型、设计矩阵、样本独立性与训练时间边界。回归系数关联不等于因果关系。",
+      "properties": [
+        "由估计标准误和参考分布分位数构造区间。",
+        "估计系数和标准误都依赖样本量、噪声与矩阵秩；金融异方差与自相关需要谨慎处理。"
+      ],
+      "formulas": [
+        {
+          "label": "关键数学表达",
+          "tex": "\\hat y_*\\pm t_{1-\\alpha/2,\\nu}\\widehat{\\operatorname{SE}}(\\hat y_*)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据估计参数不确定性与模型误差构造均值响应或新观测的预测区间。",
+          "tex": "\\hat y_*\\pm t_{1-\\alpha/2,\\nu}\\widehat{\\operatorname{SE}}(\\hat y_*)"
+        },
+        {
+          "explanation": "由估计标准误和参考分布分位数构造区间",
+          "tex": "\\hat y_*\\pm t_{1-\\alpha/2,\\nu}\\widehat{\\operatorname{SE}}(\\hat y_*)"
+        }
+      ],
+      "code": "# 预测收益置信区间：本章基础代码\nimport numpy as np\nfrom sklearn.linear_model import LinearRegression\nrng=np.random.default_rng(0);X=rng.normal(size=(100,3))\ny=.4*X[:,0]+rng.normal(size=100)*.5\nfor end in [40,60,80]:\n m=LinearRegression().fit(X[end-30:end],y[end-30:end])\n print(\"time\",end,\"forward prediction\",m.predict(X[end:end+1]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益预测、横截面因子回归、残差正交化和风险暴露估计。",
+      "limits": "示例覆盖本章节典型算法，独立算法的高级数值实现和严格证明仍需进一步核对。",
+      "coverage": "expanded"
+    }
+  ]
+}
