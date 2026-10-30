@@ -1,0 +1,23 @@
+name: Validate quant mathematics
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'quant/math/**'
+      - 'quant/sidebar-v2.js'
+      - '.github/workflows/test-quant-math.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated KaTeX parser for formula QA
+        run: npm install --no-save --no-package-lock katex@0.16.11
+      - name: Validate content and LaTeX proof formula syntax
+        run: node quant/math/test_math.mjs
