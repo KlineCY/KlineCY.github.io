@@ -22,7 +22,9 @@ for(const item of examples){
 }
 
 assert.equal(notes.length,manifest.notes_count,"supplemental note manifest mismatch");
-assert.equal(lessons.length+notes.length,curriculum.nodes.length,"some topics have no reading content");
+const lessonIds=new Set(lessons.map(l=>l.node_id));
+const activeNotes=notes.filter(n=>!lessonIds.has(n.node_id));
+assert.equal(lessons.length+activeNotes.length,curriculum.nodes.length,"some topics have no reading content after promotion");
 assert.equal(lessons.length,manifest.total_lessons,"manifest count mismatch");
 const topicIDs=new Set(),chapterIDs=new Set(),deptIDs=new Set();
 assert.equal(curriculum.disciplines.length,24);
@@ -50,7 +52,7 @@ for(const n of curriculum.nodes){
 for(const ch of curriculum.chapters)for(const id of ch.node_ids)assert.equal(nodeMap.get(id)?.chapter_id,ch.id);
 assert(lessons.length>=150,"tutorial expansion unexpectedly missing");
 const covered=new Set(),katexErrors=[];
-for(const l of [...lessons,...notes]){
+for(const l of [...lessons,...activeNotes]){
  assert(topicIDs.has(l.node_id),"lesson missing from curriculum "+l.node_id);
  assert(!covered.has(l.node_id),"duplicate tutorial "+l.node_id);covered.add(l.node_id);
  assert.equal(l.title,nodeMap.get(l.node_id).title);
@@ -77,4 +79,4 @@ for(const marker of ['id="quantSidebar"','id="tree"','id="article"','id="coverag
 assert(nav.includes('["ml","机器学习 Machine Learning"]'));
 assert(app.includes("复制代码"));
 assert(app.includes("manifest.lesson_files"));
-console.log("PASS: 24 ML disciplines, 120 chapters, 720 nodes, "+lessons.length+" full tutorials, "+notes.length+" supplementary notes, all topics covered, LaTeX parses, navigation and JS syntax valid.");
+console.log("PASS: 24 ML disciplines, 120 chapters, 720 nodes, "+lessons.length+" indexed independent entries, "+activeNotes.length+" active supplemental notes, all topics covered, LaTeX parses, navigation and JS syntax valid.");
