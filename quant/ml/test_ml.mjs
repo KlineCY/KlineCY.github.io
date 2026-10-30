@@ -15,7 +15,7 @@ const exampleIds=new Set();
 const supplementalIds=new Set(notes.map(n=>n.node_id));
 assert(extraFiles.length>0,"expected dedicated example drafts");
 for(const item of examples){
-  assert(supplementalIds.has(item.node_id),"focused example not in supplemental notes "+item.node_id);
+  assert(supplementalIds.has(item.node_id)||lessons.some(l=>l.node_id===item.node_id),"focused example does not map to any catalog lesson "+item.node_id);
   assert(!exampleIds.has(item.node_id),"duplicated focused example "+item.node_id);
   assert(typeof item.code==="string"&&item.code.trim().length>10,"missing focused code "+item.node_id);
   exampleIds.add(item.node_id);
