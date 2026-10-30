@@ -1,0 +1,709 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "roadmap-n01-01",
+      "node_id": "roadmap-n01-01",
+      "title": "监督学习",
+      "definition": "给定输入和目标标签的样本，学习可泛化的映射以预测新样本。",
+      "assumptions": "标签应在预测时点之后才被观测并且与输入正确匹配。",
+      "properties": [
+        "标签应在预测时点之后才被观测并且与输入正确匹配。",
+        "回归输出连续值，分类输出类别或条件概率。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "\\hat f=\\arg\\min_{f\\in\\mathcal F}\\frac1n\\sum_{i=1}^n\\ell(f(x_i),y_i)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "目标由带标签样本的平均损失定义",
+          "tex": "D=\\{(x_i,y_i)\\}_{i=1}^n"
+        },
+        {
+          "explanation": "训练优化并使用未参与拟合的数据评价",
+          "tex": "\\hat R_{\\rm test}=\\frac1m\\sum_{j=1}^m\\ell(\\hat f(x_j^{\\rm test}),y_j^{\\rm test})"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.linear_model import LinearRegression\nX=np.arange(20).reshape(-1,1);y=2*X[:,0]+1\nm=LinearRegression().fit(X[:14],y[:14])\nprint(m.predict(X[14:17]))",
+      "application": "根据历史因子预测下期ETF收益或风险。",
+      "limits": "可预测不表示可交易；必须比较持仓、成本与基准。",
+      "packages": "numpy, scikit-learn",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n02-01",
+      "node_id": "roadmap-n02-01",
+      "title": "无监督学习",
+      "definition": "只使用输入变量，不依赖人工目标标签，发现样本簇、低维方向或分布结构。",
+      "assumptions": "输入的缩放和距离定义对聚类具有重大影响。",
+      "properties": [
+        "输入的缩放和距离定义对聚类具有重大影响。",
+        "发现聚类不等于发现可以获利的投资规律。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "\\min_{\\mu_1,\\ldots,\\mu_K}\\sum_i\\min_k\\|x_i-\\mu_k\\|_2^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "例如KMeans分配样本至最近中心",
+          "tex": "c_i=\\arg\\min_k\\|x_i-\\mu_k\\|_2^2"
+        },
+        {
+          "explanation": "用簇内样本均值更新中心",
+          "tex": "\\mu_k=\\frac1{n_k}\\sum_{i:c_i=k}x_i"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.cluster import KMeans\nrng=np.random.default_rng(0)\nX=np.r_[rng.normal(-2,1,(50,2)),rng.normal(2,1,(50,2))]\nprint(KMeans(n_clusters=2,n_init=10,random_state=0).fit_predict(X)[:10])",
+      "application": "ETF风险簇识别或市场制度聚类。",
+      "limits": "K值和结果稳定性需敏感性分析。",
+      "packages": "numpy, scikit-learn",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n01-04",
+      "node_id": "roadmap-n01-04",
+      "title": "训练集验证集测试集",
+      "definition": "训练集拟合模型参数，验证集选择超参数与模型方案，测试集只用于最终独立评估。",
+      "assumptions": "最终测试集不参与标准化拟合或超参数搜索。",
+      "properties": [
+        "最终测试集不参与标准化拟合或超参数搜索。",
+        "金融时间序列应优先按发生时间先后隔离。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "D=D_{\\rm train}\\cup D_{\\rm val}\\cup D_{\\rm test},\\qquad D_a\\cap D_b=\\varnothing"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "参数优化仅在训练集执行",
+          "tex": "\\hat\\theta_\\lambda=\\arg\\min_\\theta \\hat R_{\\rm train}(\\theta;\\lambda)"
+        },
+        {
+          "explanation": "验证选择λ，测试只评估一次",
+          "tex": "\\lambda^*=\\arg\\min_\\lambda \\hat R_{\\rm val}(\\hat\\theta_\\lambda)"
+        }
+      ],
+      "code": "import numpy as np\nn=120\ntrain=np.arange(0,70);valid=np.arange(70,95);test=np.arange(95,n)\nprint(len(train),len(valid),len(test))\nassert train.max()<valid.min()<test.min()",
+      "application": "避免用2025年价格信息调参后宣称2025年属于样本外。",
+      "limits": "标签跨度重叠时还需隔离共享未来信息区间。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n05-04",
+      "node_id": "roadmap-n05-04",
+      "title": "时间序列划分",
+      "definition": "按照时间顺序构造训练、验证区间，避免用未来时期样本训练过去预测。",
+      "assumptions": "训练窗口的末端必须早于相应验证窗口。",
+      "properties": [
+        "训练窗口的末端必须早于相应验证窗口。",
+        "若标签跨多个日期，边界可能仍需Purging。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "\\max(t\\in I_{\\rm train})<\\min(t\\in I_{\\rm test})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "扩展窗口随时间持续加入过去数据",
+          "tex": "I_k^{\\rm train}=[1,T_k],\\ I_k^{\\rm test}=(T_k,T_{k+1}]"
+        },
+        {
+          "explanation": "按多个窗口取平均验证损失",
+          "tex": "\\bar L=\\frac1K\\sum_{k=1}^K L_k^{\\rm test}"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.model_selection import TimeSeriesSplit\nfor tr,te in TimeSeriesSplit(n_splits=4).split(np.zeros((60,2))):\n    print(tr[0],tr[-1],te[0],te[-1])",
+      "application": "滚动评估ETF预测和风险模型。",
+      "limits": "数据预处理必须在每个训练折重新拟合。",
+      "packages": "numpy, scikit-learn",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n01-02",
+      "node_id": "python-n01-02",
+      "title": "ndarray形状dtype",
+      "definition": "NumPy ndarray用多维形状、统一元素dtype和内存布局表示数值计算。",
+      "assumptions": "广播与矩阵乘法依赖维度兼容性。",
+      "properties": [
+        "广播与矩阵乘法依赖维度兼容性。",
+        "浮点dtype影响精度与内存成本。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "X\\in\\mathbb R^{n\\times p},\\quad y\\in\\mathbb R^n"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "矩阵每行可看成一个样本，每列是特征",
+          "tex": "X=(x_{ij})_{n\\times p}"
+        },
+        {
+          "explanation": "矩阵乘法按内维度求和",
+          "tex": "(Xw)_i=\\sum_{j=1}^{p}X_{ij}w_j"
+        }
+      ],
+      "code": "import numpy as np\nX=np.arange(12,dtype=np.float64).reshape(4,3)\nw=np.array([.1,.2,.3])\nprint(X.shape,X.dtype,X@w)",
+      "application": "把ETF资产×因子面板映射为训练矩阵。",
+      "limits": "形状错误可静默广播成不符合建模假设的结果。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n02-02",
+      "node_id": "python-n02-02",
+      "title": "广播规则",
+      "definition": "NumPy按尾部维度对齐，长度相等或为1的维度可以在运算中逻辑扩展。",
+      "assumptions": "广播不代表数据物理复制，但结果可能分配新数组。",
+      "properties": [
+        "广播不代表数据物理复制，但结果可能分配新数组。",
+        "维度不兼容时需显式reshape避免隐含错误。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "X\\in\\mathbb R^{n\\times p},\\ \\mu\\in\\mathbb R^p\\Rightarrow X-\\mu\\in\\mathbb R^{n\\times p}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "每个样本向量减同一个均值向量",
+          "tex": "Z_{ij}=X_{ij}-\\mu_j"
+        },
+        {
+          "explanation": "行向量通过隐式扩展参与元素运算",
+          "tex": "Z=X-\\mathbf1_n\\mu^\\top"
+        }
+      ],
+      "code": "import numpy as np\nX=np.arange(12).reshape(4,3)\nprint(X-X.mean(axis=0))\nprint((X/np.array([1,2,3])).shape)",
+      "application": "大规模市场数据特征归一化。",
+      "limits": "时间轴、资产轴混淆可能导致严重的数据泄漏。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n03-03",
+      "node_id": "python-n03-03",
+      "title": "GroupBy与窗口",
+      "definition": "按资产、日期或行业分组后，计算组内聚合与窗口统计，不应跨不同证券混用历史。",
+      "assumptions": "每只证券的滚动统计应在其自身时间顺序上计算。",
+      "properties": [
+        "每只证券的滚动统计应在其自身时间顺序上计算。",
+        "中心滚动窗口会包含未来信息。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "\\mathrm{MA}_{i,t}^{(w)}=\\frac1w\\sum_{k=0}^{w-1}P_{i,t-k}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "组内按日期排序后形成滚动窗口",
+          "tex": "\\mathcal W_{i,t}=\\{P_{i,t-w+1},\\ldots,P_{i,t}\\}"
+        },
+        {
+          "explanation": "窗口均值作为当前时点已知特征",
+          "tex": "\\mathrm{MA}_{i,t}^{(w)}=E_{\\rm sample}(P_{i,\\mathcal W})"
+        }
+      ],
+      "code": "import pandas as pd\ndf=pd.DataFrame({\"asset\":[\"A\",\"A\",\"A\",\"B\",\"B\",\"B\"],\"close\":[2,4,6,8,10,12]})\ndf[\"ma2\"]=df.groupby(\"asset\")[\"close\"].transform(lambda s:s.rolling(2).mean())\nprint(df)",
+      "application": "批量生成ETF历史移动均线和波动率特征。",
+      "limits": "真实面板应先按资产与日期排序，并处理缺失交易日。",
+      "packages": "pandas",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n01-05",
+      "node_id": "python-n01-05",
+      "title": "scikit-learn Pipeline",
+      "definition": "Pipeline把预处理与预测器依次连接，确保交叉验证每一折仅在训练分块拟合状态。",
+      "assumptions": "预处理步骤必须实现fit/transform接口。",
+      "properties": [
+        "预处理步骤必须实现fit/transform接口。",
+        "时间切分之外的事件标签重叠问题仍需额外处理。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "\\hat y=f_{\\hat\\theta}\\big(T_{\\hat\\psi_{\\rm train}}(X)\\big)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先仅用训练样本拟合缩放器参数",
+          "tex": "\\hat\\psi=\\operatorname{fit}_{\\rm train}(X)"
+        },
+        {
+          "explanation": "缩放后的训练特征用于拟合回归器",
+          "tex": "\\hat\\theta=\\arg\\min_\\theta L(f_\\theta(T_{\\hat\\psi}(X_{\\rm train})),y_{\\rm train})"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.pipeline import make_pipeline\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.linear_model import Ridge\nX=np.arange(100).reshape(50,2);y=X[:,0]*.3\nm=make_pipeline(StandardScaler(),Ridge(alpha=1.))\nm.fit(X[:35],y[:35])\nprint(m.predict(X[35:38]))",
+      "application": "金融因子训练链统一管理标准化、筛选和预测。",
+      "limits": "若先对全数据做筛选再进入Pipeline，仍然存在泄漏。",
+      "packages": "numpy, scikit-learn",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n06-02",
+      "node_id": "features-n06-02",
+      "title": "缺失值填补",
+      "definition": "在明确缺失机制及特征时间可得性的情况下，使用训练期估计的规则替换或显式标记缺失值。",
+      "assumptions": "前向填充仅可沿时间向后传播历史可见数值。",
+      "properties": [
+        "前向填充仅可沿时间向后传播历史可见数值。",
+        "缺失可能不是随机发生的，缺失指示变量有时有预测价值。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "\\tilde x_{ij}=\\begin{cases}x_{ij},&x_{ij}\\text{可见}\\\\ \\hat m_j,&x_{ij}\\text{缺失}\\end{cases}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "用训练折计算列中位数",
+          "tex": "\\hat m_j=\\operatorname{median}_{i\\in I_{\\rm train}} x_{ij}"
+        },
+        {
+          "explanation": "保持训练与测试使用相同的已拟合参数",
+          "tex": "T(X_{\\rm test})=T_{\\hat m}(X_{\\rm test})"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.impute import SimpleImputer\nX=np.array([[1.,np.nan],[2.,4.],[3.,6.],[np.nan,8.]])\nimp=SimpleImputer(strategy=\"median\").fit(X[:3])\nprint(imp.transform(X))",
+      "application": "财务指标未披露值与ETF成交量缺失处理。",
+      "limits": "缺失值本身可能反映停牌、下市和选择偏差。",
+      "packages": "numpy, scikit-learn",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n04-02",
+      "node_id": "features-n04-02",
+      "title": "One-Hot编码",
+      "definition": "把离散类别转为各类别指示变量，避免对无序类别赋予人为大小关系。",
+      "assumptions": "类别全集须仅从训练数据学习，未知类别要有明确处理。",
+      "properties": [
+        "类别全集须仅从训练数据学习，未知类别要有明确处理。",
+        "高基数类别可能产生非常稀疏的矩阵。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "z_k(x)=\\mathbf1[x=k]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "每种类别对应一个二值指示特征",
+          "tex": "z_k\\in\\{0,1\\}"
+        },
+        {
+          "explanation": "类别没有序数关系时采用独立坐标表示",
+          "tex": "\\sum_k z_k(x)=1\\quad\\text{(已知唯一类别)}"
+        }
+      ],
+      "code": "from sklearn.preprocessing import OneHotEncoder\nimport numpy as np\nX=np.array([[\"tech\"],[\"finance\"],[\"health\"]])\no=OneHotEncoder(handle_unknown=\"ignore\",sparse_output=False).fit(X)\nprint(o.transform([[\"tech\"],[\"energy\"]]))",
+      "application": "行业、交易所和板块类别特征输入。",
+      "limits": "将行业字符串编码为1、2、3会产生无意义的欧氏距离。",
+      "packages": "numpy, scikit-learn",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n03-01",
+      "node_id": "classification-n03-01",
+      "title": "Sigmoid与Softmax",
+      "definition": "Sigmoid将标量Logit映射到二元概率，Softmax将多个Logit归一成类别概率分布。",
+      "assumptions": "Softmax的分子与分母共享同一个稳定化常数。",
+      "properties": [
+        "Softmax的分子与分母共享同一个稳定化常数。",
+        "多标签问题通常逐类Sigmoid，而互斥多分类常用Softmax。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "\\sigma(z)=\\frac1{1+e^{-z}},\\qquad p_k=\\frac{e^{z_k}}{\\sum_je^{z_j}}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对所有Logit减去最大值保持Softmax不变",
+          "tex": "\\frac{e^{z_k-c}}{\\sum_je^{z_j-c}}=\\frac{e^{z_k}}{\\sum_je^{z_j}}"
+        },
+        {
+          "explanation": "Softmax输出和为1",
+          "tex": "\\sum_kp_k=1"
+        }
+      ],
+      "code": "import numpy as np\nz=np.array([1.,3.,2.]);e=np.exp(z-z.max())\nprint(\"softmax:\",e/e.sum())\nprint(\"sigmoid:\",1/(1+np.exp(-1.)))",
+      "application": "预测ETF行情上涨/震荡/下跌的互斥三分类。",
+      "limits": "Softmax概率是否校准必须单独验证。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n01-05",
+      "node_id": "classification-n01-05",
+      "title": "混淆矩阵",
+      "definition": "分类预测按真实与预测结果分为TP、FP、TN、FN，从而计算查全率与查准率。",
+      "assumptions": "需事先指定正类及预测阈值。",
+      "properties": [
+        "需事先指定正类及预测阈值。",
+        "不同类别基数下准确率不一定具有比较价值。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "\\mathrm{Precision}=\\frac{TP}{TP+FP},\\quad\\mathrm{Recall}=\\frac{TP}{TP+FN}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按真实标签与阈值预测生成四类计数",
+          "tex": "TP=\\sum_i\\mathbf1[y_i=1,\\hat y_i=1]"
+        },
+        {
+          "explanation": "在四类计数基础上计算统计指标",
+          "tex": "\\mathrm{Accuracy}=\\frac{TP+TN}{TP+FP+FN+TN}"
+        }
+      ],
+      "code": "from sklearn.metrics import confusion_matrix, classification_report\ny=[0,1,0,1,1,0];pred=[0,1,1,0,1,0]\nprint(confusion_matrix(y,pred))\nprint(classification_report(y,pred,zero_division=0))",
+      "application": "极端风险事件预测的漏报与误报分析。",
+      "limits": "金融情景不同错误代价可能相差很大，阈值需经济性分析。",
+      "packages": "scikit-learn",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n03-05",
+      "node_id": "classification-n03-05",
+      "title": "PR曲线和AP",
+      "definition": "Precision-Recall曲线显示查准率与查全率随阈值变化，Average Precision汇总不同召回区间的预测精度。",
+      "assumptions": "在正例稀少时PR比ROC更敏感于误报数量。",
+      "properties": [
+        "在正例稀少时PR比ROC更敏感于误报数量。",
+        "AP不是简单对所有阈值Precision做算术平均。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "\\mathrm{AP}=\\sum_k(R_k-R_{k-1})P_k"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按分数阈值排序计算每个决策点的Precision与Recall",
+          "tex": "P=\\frac{TP}{TP+FP},\\quad R=\\frac{TP}{TP+FN}"
+        },
+        {
+          "explanation": "以Recall增量对Precision做加权求和",
+          "tex": "\\mathrm{AP}=\\sum_k\\Delta R_kP_k"
+        }
+      ],
+      "code": "from sklearn.metrics import average_precision_score,precision_recall_curve\ny=[0,0,0,1,0,1,0,0,1,0]\ns=[.1,.2,.4,.7,.5,.6,.3,.2,.8,.1]\nprint(average_precision_score(y,s))\np,r,_=precision_recall_curve(y,s)\nprint(p[:3],r[:3])",
+      "application": "稀有风险事件或暴跌信号预测效果。",
+      "limits": "AP会受到正例基准发生率影响。",
+      "packages": "scikit-learn",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n02-01",
+      "node_id": "trees-n02-01",
+      "title": "基尼不纯度",
+      "definition": "Gini衡量一个节点随机样本的类别混杂程度，节点更纯则Gini更低。",
+      "assumptions": "类别概率按当前节点样本计数估计。",
+      "properties": [
+        "类别概率按当前节点样本计数估计。",
+        "二元分类中p=0.5时Gini最大为0.5。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "G(S)=1-\\sum_{k=1}^K p_k^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "同类别两次独立抽样的概率为类别概率平方和",
+          "tex": "P(Y=Y')=\\sum_kp_k^2"
+        },
+        {
+          "explanation": "不一致概率即Gini不纯度",
+          "tex": "P(Y\\ne Y')=1-\\sum_kp_k^2"
+        }
+      ],
+      "code": "import numpy as np\ndef gini(p): return 1-np.sum(np.asarray(p)**2)\nfor p in ([1,0],[.5,.5],[.8,.2]):\n    print(p,gini(p))",
+      "application": "理解分类树选取量化特征切分的原则。",
+      "limits": "Gini下降未必对应策略收益的提升。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n04-02",
+      "node_id": "trees-n04-02",
+      "title": "袋外估计OOB",
+      "definition": "Bootstrap树训练时，未被某棵树抽到的样本可作为这棵树的袋外验证样本。",
+      "assumptions": "Bootstrap抽样后每棵树约有36.8%训练样本未被抽中。",
+      "properties": [
+        "Bootstrap抽样后每棵树约有36.8%训练样本未被抽中。",
+        "时序金融数据不能直接把OOB当做未来期测试。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "P(i\\notin D_b)=(1-1/n)^n\\to e^{-1}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "单次抽取某记录未被选中概率为1−1/n",
+          "tex": "P(\\text{未抽中})=1-1/n"
+        },
+        {
+          "explanation": "n次独立有放回采样后未被选中概率为其n次方",
+          "tex": "\\lim_{n\\to\\infty}(1-1/n)^n=e^{-1}"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.ensemble import RandomForestRegressor\nrng=np.random.default_rng(1)\nX=rng.normal(size=(100,3));y=X[:,0]+rng.normal(size=100)\nm=RandomForestRegressor(n_estimators=80,oob_score=True,random_state=0)\nm.fit(X,y)\nprint(m.oob_score_)",
+      "application": "比较随机森林的通用Bagging评估机制。",
+      "limits": "OOB失去了明确的金融时间先后隔离，不可替代Walk-Forward。",
+      "packages": "numpy, scikit-learn",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n03-01",
+      "node_id": "unsupervised-n03-01",
+      "title": "DBSCAN",
+      "definition": "密度聚类根据半径ε内邻居个数识别核心点并扩展密度连通的簇，将稀疏点标记为噪声。",
+      "assumptions": "参数eps与min_samples决定密度尺度，受特征归一化影响。",
+      "properties": [
+        "参数eps与min_samples决定密度尺度，受特征归一化影响。",
+        "可以发现非球形簇，不必预设聚类簇数。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "N_\\epsilon(x)=\\{x_j:\\|x-x_j\\|\\le\\epsilon\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "核心点判定要求ε邻域包含足够样本",
+          "tex": "|N_\\epsilon(x)|\\ge\\mathrm{min\\_samples}"
+        },
+        {
+          "explanation": "沿密度可达关系扩展聚类连通分量",
+          "tex": "x\\leadsto_\\epsilon y"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.cluster import DBSCAN\nrng=np.random.default_rng(0)\nX=np.r_[rng.normal(0,.1,(30,2)),rng.normal(3,.1,(30,2)),[[7,7]]]\nprint(np.unique(DBSCAN(eps=.3,min_samples=4).fit_predict(X),return_counts=True))",
+      "application": "检测异常市场状态或异常ETF交易日。",
+      "limits": "高维距离退化可能降低密度聚类效果。",
+      "packages": "numpy, scikit-learn",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n01-03",
+      "node_id": "unsupervised-n01-03",
+      "title": "Isolation Forest",
+      "definition": "Isolation Forest以随机特征与随机切分隔离样本，异常点通常在较短路径就被单独隔离。",
+      "assumptions": "依赖训练期数据的异常比例和切分尺度。",
+      "properties": [
+        "依赖训练期数据的异常比例和切分尺度。",
+        "异常分数解释为模型离群程度，而非自动识别欺诈或结构突变。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "s(x,n)=2^{-E[h(x)]/c(n)}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "构建随机切分树并测量隔离样本的路径长度",
+          "tex": "h(x)=\\text{root-to-leaf depth}"
+        },
+        {
+          "explanation": "与随机二叉搜索树的正常化路径长度比较",
+          "tex": "s(x,n)=2^{-E[h(x)]/c(n)}"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.ensemble import IsolationForest\nrng=np.random.default_rng(1)\nX=np.r_[rng.normal(size=(100,2)),[[8,8],[-9,-8]]]\nm=IsolationForest(contamination=.02,random_state=0).fit(X)\nprint(m.predict(X[-2:]))",
+      "application": "监测异常大单、异常波动和交易记录。",
+      "limits": "若训练数据包含历史金融危机，异常定义可能随市场制度变化。",
+      "packages": "numpy, scikit-learn",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n04-01",
+      "node_id": "probabilistic-n04-01",
+      "title": "MAP估计",
+      "definition": "最大后验估计在贝叶斯先验和似然共同作用下选择后验密度最大的位置。",
+      "assumptions": "与MLE相比加入先验信息。",
+      "properties": [
+        "与MLE相比加入先验信息。",
+        "高维连续参数的MAP对参数化方式敏感。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "\\hat\\theta_{\\rm MAP}=\\arg\\max_\\theta\\{\\log p(D|\\theta)+\\log p(\\theta)\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "利用Bayes定理并去掉与θ无关的证据",
+          "tex": "\\log p(\\theta|D)=\\log p(D|\\theta)+\\log p(\\theta)-\\log p(D)"
+        },
+        {
+          "explanation": "最大化后验等价于最小化负对数似然加先验惩罚",
+          "tex": "-\\log p(D|\\theta)-\\log p(\\theta)"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([.2,.1,-.3,.4]);prior_mean=0.;prior_var=1.;noise_var=.5\npost_var=1/(1/prior_var+len(x)/noise_var)\npost_mean=post_var*(prior_mean/prior_var+x.sum()/noise_var)\nprint(\"Gaussian MAP:\",post_mean)",
+      "application": "将盈利预测参数与历史先验相结合。",
+      "limits": "若先验与现实经济环境不匹配，MAP可能出现系统偏差。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "evaluation-n01-01",
+      "node_id": "evaluation-n01-01",
+      "title": "MAE与RMSE",
+      "definition": "MAE是绝对误差平均，RMSE是平方误差均值的平方根；后者更强烈惩罚大误差。",
+      "assumptions": "两个指标必须使用与目标一致的单位。",
+      "properties": [
+        "两个指标必须使用与目标一致的单位。",
+        "异常值多时RMSE比MAE更敏感。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "\\mathrm{MAE}=\\frac1n\\sum_i|y_i-\\hat y_i|,\\quad\\mathrm{RMSE}=\\sqrt{\\frac1n\\sum_i(y_i-\\hat y_i)^2}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义每笔预测残差",
+          "tex": "e_i=y_i-\\hat y_i"
+        },
+        {
+          "explanation": "分别采用L1和L2聚合误差",
+          "tex": "\\mathrm{MAE}=n^{-1}\\|e\\|_1,\\quad\\mathrm{RMSE}=n^{-1/2}\\|e\\|_2"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.metrics import mean_absolute_error,mean_squared_error\ny=np.array([1.,2.,3.,5.]);p=np.array([1.1,2.4,2.8,4.])\nprint(mean_absolute_error(y,p),mean_squared_error(y,p)**.5)",
+      "application": "比较ETF收益率、波动率和交易成本预测误差。",
+      "limits": "样本外误差低不代表投资组合净收益高。",
+      "packages": "numpy, scikit-learn",
+      "coverage": "complete"
+    },
+    {
+      "id": "evaluation-n04-01",
+      "node_id": "evaluation-n04-01",
+      "title": "Brier Score",
+      "definition": "Brier分数度量二分类预测概率相对于真实0/1标签的均方误差，是概率预测的正确评分规则。",
+      "assumptions": "目标必须是概率而非未经缩放的Logit。",
+      "properties": [
+        "目标必须是概率而非未经缩放的Logit。",
+        "Brier同时反映校准与辨别能力，但要与事件发生率基准比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "\\mathrm{BS}=\\frac1n\\sum_i(p_i-y_i)^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "Bernoulli事件的概率预测为p",
+          "tex": "Y_i\\in\\{0,1\\},\\quad p_i=P(Y_i=1|x_i)"
+        },
+        {
+          "explanation": "平方偏差取平均得到Brier损失",
+          "tex": "\\mathrm{BS}=E_n[(p_i-Y_i)^2]"
+        }
+      ],
+      "code": "from sklearn.metrics import brier_score_loss\ny=[0,1,0,1,1];p=[.1,.8,.4,.7,.6]\nprint(\"Brier score:\",brier_score_loss(y,p))",
+      "application": "金融违约、暴跌、市场状态切换的概率风险预测。",
+      "limits": "Brier低不保证极端事件尾部校准充分。",
+      "packages": "scikit-learn",
+      "coverage": "complete"
+    },
+    {
+      "id": "timeseries-n01-02",
+      "node_id": "timeseries-n01-02",
+      "title": "Naive Forecast",
+      "definition": "朴素预测将上一期值用于预测下一期，是评估复杂时间序列算法是否有增益的重要基线。",
+      "assumptions": "适合具有持续性或接近随机游走的水平序列。",
+      "properties": [
+        "适合具有持续性或接近随机游走的水平序列。",
+        "周期性序列通常还需季节朴素预测。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "\\hat y_{t+h|t}=y_t,\\qquad h\\ge1"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "以最新已观测值作为未来所有步的估计",
+          "tex": "\\hat y_{t+1|t}=y_t"
+        },
+        {
+          "explanation": "在随机游走加零均值独立增量模型中条件期望恰为当前值",
+          "tex": "E[y_{t+h}|\\mathcal F_t]=y_t"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([100.,101.,99.,103.,102.])\nforecast=x[:-1];truth=x[1:]\nprint(\"Naive RMSE:\",np.mean((forecast-truth)**2)**.5)",
+      "application": "检验深度ETF价格预测模型是否超过朴素基线。",
+      "limits": "对收益率预测，零预测往往是更合适的朴素基线。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "mlops-n03-01",
+      "node_id": "mlops-n03-01",
+      "title": "实验跟踪MLflow",
+      "definition": "实验跟踪记录模型参数、性能指标、工件和运行环境，便于复现实验与比较模型选择。",
+      "assumptions": "参数、代码、数据版本必须共同记录。",
+      "properties": [
+        "参数、代码、数据版本必须共同记录。",
+        "跟踪工具仅记录运行，不负责证明模型因果有效。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "\\mathcal E=(D_{\\rm version},C_{\\rm commit},\\theta,\\mathrm{metrics},\\mathrm{artifacts})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将同一次训练的参数与结果绑定到唯一Run",
+          "tex": "\\mathrm{run}\\mapsto (\\theta,L_{\\rm val})"
+        },
+        {
+          "explanation": "记录训练与验证窗口，避免在比较时混淆样本范围",
+          "tex": "\\mathrm{run}\\mapsto(I_{\\rm train},I_{\\rm val})"
+        }
+      ],
+      "code": "import json\nrecord={\"model\":\"ridge\",\"alpha\":1.0,\"seed\":42,\"valid_rmse\":0.12}\nprint(json.dumps(record,ensure_ascii=False,indent=2))\n# 若已安装mlflow，可用mlflow.log_params/log_metrics记录",
+      "application": "量化因子模型多轮实验和版本审计。",
+      "limits": "示例展示可移植记录结构，不会自动创建MLflow远程服务器。",
+      "packages": "Python standard library",
+      "coverage": "complete"
+    }
+  ]
+}
