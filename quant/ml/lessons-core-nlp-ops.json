@@ -1,0 +1,401 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "nlp-n02-04",
+      "node_id": "nlp-n02-04",
+      "title": "条件随机场CRF",
+      "definition": "线性链条件随机场在给定输入序列时，为整个标签序列赋予归一化概率，显式建模相邻标签间约束。",
+      "assumptions": "标签集合与转移得分可学习；与逐Token独立分类不同，CRF建模全局标签路径。",
+      "properties": [
+        "Viterbi可在O(TK²)复杂度内解码最优序列。",
+        "长序列和大标签集增加动态规划成本。"
+      ],
+      "formulas": [
+        {
+          "label": "数学表达",
+          "tex": "p(y\\mid x)=\\frac{\\exp(\\sum_t A_{y_{t-1},y_t}+P_{t,y_t})}{Z(x)}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "给每条标签序列累加转移得分和发射得分",
+          "tex": "s(x,y)=\\sum_t(A_{y_{t-1},y_t}+P_{t,y_t})"
+        },
+        {
+          "explanation": "对所有标签路径的分数指数求和形成配分函数",
+          "tex": "Z(x)=\\sum_{y'}\\exp(s(x,y'))"
+        },
+        {
+          "explanation": "利用前向递推计算配分函数与最大路径",
+          "tex": "\\alpha_t(j)=P_{t,j}+\\log\\sum_i\\exp(\\alpha_{t-1}(i)+A_{ij})"
+        }
+      ],
+      "code": "import numpy as np\nem=np.array([[1.,0.],[.2,1.2],[1.,.3]])\ntrans=np.array([[.5,-.3],[-.2,.4]])\ndp=em[0]\nfor t in range(1,len(em)):\n    dp=(dp[:,None]+trans).max(axis=0)+em[t]\nprint(\"Best CRF-style sequence score:\",dp.max())",
+      "application": "金融实体NER标签识别，保持B/I/O序列结构一致。",
+      "limits": "代码只有Viterbi路径得分递推，不含完整CRF似然训练与回溯。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n06-04",
+      "node_id": "nlp-n06-04",
+      "title": "Beam Search",
+      "definition": "Beam Search在自回归生成的每一步仅保留累计对数概率最高的B条候选序列，以近似搜索高概率完整答案。",
+      "assumptions": "模型能够提供下一个Token概率；需设定终止符、长度惩罚和Beam宽度。",
+      "properties": [
+        "Beam宽度1退化为贪心解码。",
+        "Beam增大会增加计算成本，也不一定改善事实性。"
+      ],
+      "formulas": [
+        {
+          "label": "数学表达",
+          "tex": "\\mathcal B_t=\\operatorname{TopB}\\{(y_{1:t-1},v),\\ \\log p(y_{1:t-1})+\\log p(v\\mid y_{<t})\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对每个保留候选计算下个Token的条件对数概率",
+          "tex": "\\ell_t=\\ell_{t-1}+\\log p_\\theta(y_t\\mid y_{<t})"
+        },
+        {
+          "explanation": "把全部扩展候选按累积得分排序",
+          "tex": "\\mathcal C_t=\\bigcup_{b\\in\\mathcal B_{t-1}}\\mathrm{Expand}(b)"
+        },
+        {
+          "explanation": "只保留前B个候选进入下一步",
+          "tex": "\\mathcal B_t=\\mathrm{TopB}(\\mathcal C_t)"
+        }
+      ],
+      "code": "import numpy as np\nvocab=[\"up\",\"down\",\"flat\"]\ntrans=np.log(np.array([[.7,.2,.1],[.2,.6,.2],[.3,.3,.4]]))\nbeam=[([0],0.)]\nfor _ in range(3):\n    candidates=[]\n    for seq,score in beam:\n        for j in range(3):candidates.append((seq+[j],score+trans[seq[-1],j]))\n    beam=sorted(candidates,key=lambda x:x[1],reverse=True)[:2]\nprint(\"Top sequences:\",[([vocab[i] for i in seq],score) for seq,score in beam])",
+      "application": "财经摘要生成、金融文本序列标注的近似解码。",
+      "limits": "示例采用人为定义状态转移概率，不是LLM生成概率。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n04-03",
+      "node_id": "nlp-n04-03",
+      "title": "GloVe",
+      "definition": "GloVe通过全局词共现计数矩阵拟合词向量内积，使词向量编码词与上下文的对数共现结构。",
+      "assumptions": "词共现矩阵需构建于训练语料；零计数无法直接取对数。",
+      "properties": [
+        "结合全局共现统计而非只做局部上下文分类。",
+        "共现语义不等于财务事件因果关联。"
+      ],
+      "formulas": [
+        {
+          "label": "数学表达",
+          "tex": "J=\\sum_{i,j}f(X_{ij})\\left(w_i^\\top\\tilde w_j+b_i+\\tilde b_j-\\log X_{ij}\\right)^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按窗口统计中心词i与上下文词j的共现次数",
+          "tex": "X_{ij}=\\#(w_i\\text{ 附近出现 }w_j)"
+        },
+        {
+          "explanation": "用向量内积和偏置拟合对数共现次数",
+          "tex": "w_i^\\top\\tilde w_j+b_i+\\tilde b_j\\approx\\log X_{ij}"
+        },
+        {
+          "explanation": "按词频权重函数降低极低频与极高频对损失的影响",
+          "tex": "J=\\sum f(X_{ij})(\\hat{\\log X}_{ij}-\\log X_{ij})^2"
+        }
+      ],
+      "code": "import numpy as np\nX=np.array([[0,10,2],[10,0,5],[2,5,0]],dtype=float)\ni,j=np.where(X>0)\ntarget=np.log(X[i,j])\nprint(\"Observed log co-occurrences:\",list(zip(i,j,target.round(3))))",
+      "application": "从金融新闻语料训练静态专业词向量与行业术语关系。",
+      "limits": "演示只构建非零共现观测与目标值，不包含GloVe参数优化。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "llm-n03-02",
+      "node_id": "llm-n03-02",
+      "title": "Tokenization BPE",
+      "definition": "字节对编码BPE从基础字符或字节词表出发，反复合并语料中频繁出现的相邻符号对，形成可复用的子词词表。",
+      "assumptions": "分词训练必须固定语料与词表版本；Unicode和字节编码可能影响多语言划分。",
+      "properties": [
+        "能在词表大小与序列长度之间权衡。",
+        "子词合并频率不保证具备语义单位边界。"
+      ],
+      "formulas": [
+        {
+          "label": "数学表达",
+          "tex": "(a^*,b^*)=\\arg\\max_{(a,b)}\\operatorname{count}_{\\mathcal D}(a,b)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "初始化每个词对应字符或字节序列",
+          "tex": "w=(c_1,c_2,\\ldots,c_L)"
+        },
+        {
+          "explanation": "统计相邻符号对的出现频率并选出最大者",
+          "tex": "(a^*,b^*)=\\arg\\max\\mathrm{count}(a,b)"
+        },
+        {
+          "explanation": "将该相邻对替换为合并Token，重复至词表目标大小",
+          "tex": "(a^*,b^*)\\mapsto (a^*b^*)"
+        }
+      ],
+      "code": "from collections import Counter\nwords=[list(w) for w in [\"market\",\"mark\",\"market\",\"mark\"]]\npair_counts=Counter((a,b) for word in words for a,b in zip(word,word[1:]))\npair=pair_counts.most_common(1)[0][0]\nprint(\"Next BPE merge:\",pair,\"count:\",pair_counts[pair])",
+      "application": "构建金融专业术语与代码混合语料的子词词表。",
+      "limits": "示例只演示一次最频繁字符对选择，不是完整Byte-Level BPE训练。",
+      "packages": "Python standard library",
+      "coverage": "complete"
+    },
+    {
+      "id": "llm-n02-02",
+      "node_id": "llm-n02-02",
+      "title": "Masked Language Modeling",
+      "definition": "掩码语言模型随机遮盖输入部分Token，利用可见双向上下文预测被遮盖的真实Token，以学习文本表示。",
+      "assumptions": "掩码位置应只在输入中标记，不应把目标答案同时提供给模型。",
+      "properties": [
+        "适合Encoder式文本表示预训练。",
+        "与自回归模型不同，MLM不直接定义标准的逐Token文本生成因子分解。"
+      ],
+      "formulas": [
+        {
+          "label": "数学表达",
+          "tex": "L_{\\rm MLM}=-\\sum_{t\\in\\mathcal M}\\log p_\\theta(x_t\\mid x_{\\setminus\\mathcal M})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "随机选取一组需要预测的位置",
+          "tex": "\\mathcal M\\subseteq\\{1,\\ldots,T\\}"
+        },
+        {
+          "explanation": "对这些位置替换输入为掩码或其他指定替换方案",
+          "tex": "\\tilde x_t=[MASK],\\quad t\\in\\mathcal M"
+        },
+        {
+          "explanation": "仅对被掩码目标计算交叉熵",
+          "tex": "L=-\\sum_{t\\in\\mathcal M}\\log p_\\theta(x_t\\mid\\tilde x)"
+        }
+      ],
+      "code": "import torch\nlogits=torch.randn(2,5,20,requires_grad=True)\ntrue=torch.randint(0,20,(2,5))\nmasked=torch.tensor([[False,True,False,True,False],[True,False,False,True,False]])\nlabels=true.clone();labels[~masked]=-100\nloss=torch.nn.functional.cross_entropy(logits.view(-1,20),labels.view(-1),ignore_index=-100)\nloss.backward()\nprint(\"Masked-only loss:\",loss.item())",
+      "application": "基于未标注财报和研究报告进行金融文本Encoder预训练。",
+      "limits": "代码仅演示MLM损失掩码，不包含输入Token替换或Transformer网络。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "llm-n03-04",
+      "node_id": "llm-n03-04",
+      "title": "KV Cache",
+      "definition": "KV缓存保存已处理历史Token在各自注意力层的Key和Value，在逐Token自回归生成中只计算新Token的Q/K/V以减少重复工作。",
+      "assumptions": "缓存必须对应同一模型权重、位置编码和上下文；并发请求需独立维护缓存。",
+      "properties": [
+        "标准注意力缓存可显著减少重复投影计算。",
+        "缓存内存随序列长度、层数和头维度增加。"
+      ],
+      "formulas": [
+        {
+          "label": "数学表达",
+          "tex": "K_{1:t}=[K_{1:t-1};k_t],\\quad V_{1:t}=[V_{1:t-1};v_t]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "第一步计算初始前缀所有Token的K/V",
+          "tex": "K_{1:p}=X_{1:p}W_K,\\quad V_{1:p}=X_{1:p}W_V"
+        },
+        {
+          "explanation": "生成后续Token时只计算新增位置的K/V并拼接",
+          "tex": "K_{1:t}=\\operatorname{concat}(K_{1:t-1},k_t)"
+        },
+        {
+          "explanation": "当前查询向量读取缓存中的完整历史K/V",
+          "tex": "h_t=\\operatorname{softmax}(q_tK_{1:t}^\\top/\\sqrt d)V_{1:t}"
+        }
+      ],
+      "code": "import torch\ntorch.manual_seed(0)\nk_cache=torch.empty(0,8);v_cache=torch.empty(0,8)\nfor t in range(4):\n    k=torch.randn(1,8);v=torch.randn(1,8);q=torch.randn(1,8)\n    k_cache=torch.cat([k_cache,k],dim=0)\n    v_cache=torch.cat([v_cache,v],dim=0)\n    context=(q@k_cache.T/(8**.5)).softmax(-1)@v_cache\n    print(t,\"cache\",k_cache.shape,\"context\",context.shape)",
+      "application": "金融文献RAG和长篇财报问答的LLM推理效率优化。",
+      "limits": "该示例只模拟单层注意力缓存，未处理RoPE位置、批推理或缓存回收。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "llm-n04-05",
+      "node_id": "llm-n04-05",
+      "title": "重排序Reranking",
+      "definition": "Reranking在初次召回候选文档之后，使用更精细的匹配模型重新排列结果，提高进入生成上下文的证据相关性。",
+      "assumptions": "重排模型需在相关标注上训练；候选召回不到的文档无法靠重排恢复。",
+      "properties": [
+        "Cross-Encoder可同时读取问题和文档以捕获细粒度交互。",
+        "额外模型调用增加推理成本与延迟。"
+      ],
+      "formulas": [
+        {
+          "label": "数学表达",
+          "tex": "\\operatorname{rank}(d\\mid q)=\\operatorname{argsort}_{d\\in C_q}[-s_\\theta(q,d)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先用关键词或向量召回候选集合",
+          "tex": "C_q=\\mathrm{RetrieveTopK}(q,D)"
+        },
+        {
+          "explanation": "对每个候选调用更精细的相关性评分",
+          "tex": "s_d=s_\\theta(q,d)"
+        },
+        {
+          "explanation": "按相关性分数重新排序后保留前k个文档",
+          "tex": "R_q=\\mathrm{Topk}_{d\\in C_q}s_d"
+        }
+      ],
+      "code": "query=\"ETF volatility\"\ndocs=[\"ETF volatility and risk\",\"Macroeconomic fiscal report\",\"ETF duration hedging\"]\nterms=set(query.lower().split())\nscore=lambda d:sum(w in d.lower().split() for w in terms)\nranked=sorted(docs,key=score,reverse=True)\nprint(\"Toy lexical rerank:\",ranked)",
+      "application": "对量化金融论文、公告和宏观发布源做RAG检索增强。",
+      "limits": "示例是关键词重排，并非训练好的Cross-Encoder或深度Reranker。",
+      "packages": "Python standard library",
+      "coverage": "complete"
+    },
+    {
+      "id": "mlops-n02-02",
+      "node_id": "mlops-n02-02",
+      "title": "特征存储Feature Store",
+      "definition": "Feature Store统一管理特征定义、历史离线回放与在线低延迟查询，减少训练与推断之间的计算偏差。",
+      "assumptions": "应保存特征实体ID、事件时间、可用时间、版本及有效期。",
+      "properties": [
+        "离线PIT join与在线最新值查询必须遵守同一可用时间规则。",
+        "特征名称一致不保证计算口径一致。"
+      ],
+      "formulas": [
+        {
+          "label": "数学表达",
+          "tex": "X_{i,t}=\\operatorname{Latest}\\{z_{i,s}:t_s^{\\rm available}\\le t\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "每条特征按实体和可用时间存储",
+          "tex": "z=(\\mathrm{entity},t_{\\rm event},t_{\\rm available},\\mathrm{value})"
+        },
+        {
+          "explanation": "历史训练样本通过As-Of join选择决策时刻前最新已知值",
+          "tex": "s^*=\\max\\{s:t_s^{\\rm available}\\le t\\}"
+        },
+        {
+          "explanation": "在线服务读取同一字段定义且只用当前已可用数据",
+          "tex": "X_t=\\mathrm{Serve}(\\mathrm{entity},t)"
+        }
+      ],
+      "code": "from bisect import bisect_right\ntimes=[1,4,7];values=[.2,.3,.5]\ndef asof(t):\n    j=bisect_right(times,t)-1\n    return values[j] if j>=0 else None\nfor t in [0,3,5,9]:print(t,asof(t))",
+      "application": "管理新闻情绪、ETF因子和宏观经济发布时间一致的在线特征。",
+      "limits": "这里只演示As-Of逻辑，不是具有数据版本和权限控制的生产Feature Store。",
+      "packages": "Python standard library",
+      "coverage": "complete"
+    },
+    {
+      "id": "mlops-n03-05",
+      "node_id": "mlops-n03-05",
+      "title": "漂移与再训练",
+      "definition": "漂移监控追踪特征分布、模型预测及目标关系变化；再训练应根据检测证据和独立验证结果触发。",
+      "assumptions": "在线标签通常延迟可得，不可把所有预测错误都立即归因于概念漂移。",
+      "properties": [
+        "输入漂移不等于目标条件关系改变。",
+        "频繁再训练可使模型追逐噪声，需要Champion–Challenger评估。"
+      ],
+      "formulas": [
+        {
+          "label": "数学表达",
+          "tex": "P_t(X)\\ne P_{\\rm train}(X),\\qquad P_t(Y\\mid X)\\ne P_{\\rm train}(Y\\mid X)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "比较近期与训练期输入分布以检测Covariate Drift",
+          "tex": "D(P_t(X),P_0(X))>\\delta"
+        },
+        {
+          "explanation": "标签可得后再比较条件预测误差或校准",
+          "tex": "\\hat R_t(f)-\\hat R_0(f)>\\epsilon"
+        },
+        {
+          "explanation": "只有候选模型在独立窗口改善且通过风险审查才替换线上版本",
+          "tex": "R_{\\rm challenger}<R_{\\rm champion}\\ \\text{（预定评价标准）}"
+        }
+      ],
+      "code": "import numpy as np\nfrom scipy.stats import ks_2samp\nrng=np.random.default_rng(0)\ntrain=rng.normal(size=150)\nlive=rng.normal(loc=.6,size=150)\ntest=ks_2samp(train,live)\nprint(\"Input KS:\",test.statistic,\"p-value:\",test.pvalue)",
+      "application": "监控量化因子、风控模型和新闻NLP信号的时间漂移。",
+      "limits": "监控窗口自相关、重复检测和重尾分布都会影响KS的标准P值解释。",
+      "packages": "numpy, scipy",
+      "coverage": "complete"
+    },
+    {
+      "id": "mlops-n05-05",
+      "node_id": "mlops-n05-05",
+      "title": "Shadow Deployment",
+      "definition": "Shadow Deployment并行让候选模型接收线上真实输入并记录预测，但不让其控制真实交易或客户可见结果，以降低上线风险。",
+      "assumptions": "候选服务只应获得被授权的输入；日志须有版本和追溯字段。",
+      "properties": [
+        "可观察延迟、特征一致性和预测分布。",
+        "不能直接得出候选交易策略在真实成交下的反事实收益。"
+      ],
+      "formulas": [
+        {
+          "label": "数学表达",
+          "tex": "\\hat y_t^{(A)}=f_A(X_t),\\quad\\hat y_t^{(B)}=f_B(X_t),\\quad a_t=a_t^{(A)}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "同一时刻把已可用特征传给线上模型A和影子模型B",
+          "tex": "X_t\\to(f_A,f_B)"
+        },
+        {
+          "explanation": "两个模型各自产生预测并记录差异",
+          "tex": "\\Delta_t=\\hat y_t^{(B)}-\\hat y_t^{(A)}"
+        },
+        {
+          "explanation": "真实决策仍由既有受控策略执行",
+          "tex": "a_t=\\pi_A(\\hat y_t^{(A)})"
+        }
+      ],
+      "code": "def production(x):return .3*x\ndef shadow(x):return .35*x\nstream=[1.,-2.,.5]\nfor x in stream:\n    main=production(x)\n    candidate=shadow(x)\n    executed=main\n    print(\"executed\",executed,\"shadow_delta\",candidate-main)",
+      "application": "量化策略升级前对信号延迟、漂移和错误进行影子验证。",
+      "limits": "影子模型没有真实订单的成交反馈，不能替代后续审慎灰度发布。",
+      "packages": "Python standard library",
+      "coverage": "complete"
+    },
+    {
+      "id": "mlops-n06-05",
+      "node_id": "mlops-n06-05",
+      "title": "回滚与审计",
+      "definition": "量化生产部署需保留模型版本、输入数据快照、特征配置、决策日志和风险限额，出现异常时能快速切回已验证版本。",
+      "assumptions": "要维护可恢复的上一版本和完整的依赖工件；权限及日志完整性应可审计。",
+      "properties": [
+        "模型参数回滚但数据Schema不回滚可能仍会失败。",
+        "回滚后需要核查在途订单、当前仓位和风险状态。"
+      ],
+      "formulas": [
+        {
+          "label": "数学表达",
+          "tex": "\\mathrm{Deployment}=(\\mathrm{model\\_id},\\mathrm{data\\_version},\\mathrm{feature\\_schema},\\mathrm{risk\\_limits})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "记录每个部署版本对应的模型、特征Schema和环境配置",
+          "tex": "v\\mapsto(\\theta_v,\\psi_v,\\mathrm{schema}_v)"
+        },
+        {
+          "explanation": "风险事件触发时将服务指针切换至已验证版本",
+          "tex": "v_{\\rm active}\\leftarrow v_{\\rm stable}"
+        },
+        {
+          "explanation": "复核仓位和订单状态，确保回滚不仅停留在模型参数",
+          "tex": "\\mathrm{Risk}(w_t)\\le L_t"
+        }
+      ],
+      "code": "versions={\"stable\":{\"coef\":.2},\"candidate\":{\"coef\":.35}}\nactive=\"candidate\"\nrisk_alarm=True\nif risk_alarm:active=\"stable\"\nprint(\"Active version:\",active,\"output:\",versions[active][\"coef\"]*2)",
+      "application": "确保量化策略模型升级中的版本可追溯与风险控制。",
+      "limits": "代码只是版本切换状态机，不能替代生产订单、数据库与权限审计。",
+      "packages": "Python standard library",
+      "coverage": "complete"
+    }
+  ]
+}
