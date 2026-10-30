@@ -1,0 +1,677 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "nlp-n01-01",
+      "node_id": "nlp-n01-01",
+      "title": "文本清洗",
+      "definition": "移除无关标记、统一大小写或编码，保留金融术语、数字和时间上下文。",
+      "assumptions": "文本输入的分词、语言和金融实体定义应一致；金融预测特征必须对齐到真实发布和接收时间。",
+      "properties": [
+        "移除无关标记、统一大小写或编码，保留金融术语、数字和时间上下文。",
+        "同一算法在通用文本与金融公告中的效果可能显著不同，语义评价需要独立标注样本。"
+      ],
+      "formulas": [
+        {
+          "label": "NLP模型目标或映射",
+          "tex": "T_{\\rm clean}:\\mathrm{Text}\\to\\mathrm{Tokens}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义文档、Token、标签和语料时间属性，再按模型建立词频、序列概率或表示。",
+          "tex": "T_{\\rm clean}:\\mathrm{Text}\\to\\mathrm{Tokens}"
+        },
+        {
+          "explanation": "对样本构造训练目标或推断映射，并在独立文本和金融事件上测试。",
+          "tex": "T_{\\rm clean}:\\mathrm{Text}\\to\\mathrm{Tokens}"
+        }
+      ],
+      "code": "import re\ntext='AAPL profit grew 12%';print(re.findall(r'[A-Za-z]+|\\d+%',text))",
+      "packages": "Python standard library",
+      "application": "用于财报文本结构化、金融新闻情绪因子、公司事件检索和财经大语言模型预训练。",
+      "limits": "代码演示对应NLP章节的基本预处理或建模操作，不能替代完整词向量训练、CRF或事件抽取流程。时间对齐和金融实体链接尤为重要。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n03-01",
+      "node_id": "nlp-n03-01",
+      "title": "词形还原",
+      "definition": "将不同屈折形态映射到词元，减少词汇稀疏度但可能损失时态信息。",
+      "assumptions": "文本输入的分词、语言和金融实体定义应一致；金融预测特征必须对齐到真实发布和接收时间。",
+      "properties": [
+        "将不同屈折形态映射到词元，减少词汇稀疏度但可能损失时态信息。",
+        "同一算法在通用文本与金融公告中的效果可能显著不同，语义评价需要独立标注样本。"
+      ],
+      "formulas": [
+        {
+          "label": "NLP模型目标或映射",
+          "tex": "\\operatorname{lemma}(\\text{profits})=\\text{profit}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义文档、Token、标签和语料时间属性，再按模型建立词频、序列概率或表示。",
+          "tex": "\\operatorname{lemma}(\\text{profits})=\\text{profit}"
+        },
+        {
+          "explanation": "对样本构造训练目标或推断映射，并在独立文本和金融事件上测试。",
+          "tex": "\\operatorname{lemma}(\\text{profits})=\\text{profit}"
+        }
+      ],
+      "code": "import re\ntext='AAPL profit grew 12%';print(re.findall(r'[A-Za-z]+|\\d+%',text))",
+      "packages": "Python standard library",
+      "application": "用于财报文本结构化、金融新闻情绪因子、公司事件检索和财经大语言模型预训练。",
+      "limits": "代码演示对应NLP章节的基本预处理或建模操作，不能替代完整词向量训练、CRF或事件抽取流程。时间对齐和金融实体链接尤为重要。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n04-01",
+      "node_id": "nlp-n04-01",
+      "title": "停用词",
+      "definition": "根据任务需要过滤高频低信息词，注意否定词不能一概删去。",
+      "assumptions": "文本输入的分词、语言和金融实体定义应一致；金融预测特征必须对齐到真实发布和接收时间。",
+      "properties": [
+        "根据任务需要过滤高频低信息词，注意否定词不能一概删去。",
+        "同一算法在通用文本与金融公告中的效果可能显著不同，语义评价需要独立标注样本。"
+      ],
+      "formulas": [
+        {
+          "label": "NLP模型目标或映射",
+          "tex": "V'=V\\setminus V_{\\rm stop}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义文档、Token、标签和语料时间属性，再按模型建立词频、序列概率或表示。",
+          "tex": "V'=V\\setminus V_{\\rm stop}"
+        },
+        {
+          "explanation": "对样本构造训练目标或推断映射，并在独立文本和金融事件上测试。",
+          "tex": "V'=V\\setminus V_{\\rm stop}"
+        }
+      ],
+      "code": "import re\ntext='AAPL profit grew 12%';print(re.findall(r'[A-Za-z]+|\\d+%',text))",
+      "packages": "Python standard library",
+      "application": "用于财报文本结构化、金融新闻情绪因子、公司事件检索和财经大语言模型预训练。",
+      "limits": "代码演示对应NLP章节的基本预处理或建模操作，不能替代完整词向量训练、CRF或事件抽取流程。时间对齐和金融实体链接尤为重要。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n05-01",
+      "node_id": "nlp-n05-01",
+      "title": "文本正则",
+      "definition": "用有限模式规则匹配金额、股票代码、日期和财务指标等文本片段。",
+      "assumptions": "文本输入的分词、语言和金融实体定义应一致；金融预测特征必须对齐到真实发布和接收时间。",
+      "properties": [
+        "用有限模式规则匹配金额、股票代码、日期和财务指标等文本片段。",
+        "同一算法在通用文本与金融公告中的效果可能显著不同，语义评价需要独立标注样本。"
+      ],
+      "formulas": [
+        {
+          "label": "NLP模型目标或映射",
+          "tex": "\\operatorname{Match}(r,s)\\in\\{0,1\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义文档、Token、标签和语料时间属性，再按模型建立词频、序列概率或表示。",
+          "tex": "\\operatorname{Match}(r,s)\\in\\{0,1\\}"
+        },
+        {
+          "explanation": "对样本构造训练目标或推断映射，并在独立文本和金融事件上测试。",
+          "tex": "\\operatorname{Match}(r,s)\\in\\{0,1\\}"
+        }
+      ],
+      "code": "import re\ntext='AAPL profit grew 12%';print(re.findall(r'[A-Za-z]+|\\d+%',text))",
+      "packages": "Python standard library",
+      "application": "用于财报文本结构化、金融新闻情绪因子、公司事件检索和财经大语言模型预训练。",
+      "limits": "代码演示对应NLP章节的基本预处理或建模操作，不能替代完整词向量训练、CRF或事件抽取流程。时间对齐和金融实体链接尤为重要。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n06-01",
+      "node_id": "nlp-n06-01",
+      "title": "语料库时间戳",
+      "definition": "语料必须记录文档首发、修订和可得时间，才能用于金融时点预测。",
+      "assumptions": "文本输入的分词、语言和金融实体定义应一致；金融预测特征必须对齐到真实发布和接收时间。",
+      "properties": [
+        "语料必须记录文档首发、修订和可得时间，才能用于金融时点预测。",
+        "同一算法在通用文本与金融公告中的效果可能显著不同，语义评价需要独立标注样本。"
+      ],
+      "formulas": [
+        {
+          "label": "NLP模型目标或映射",
+          "tex": "t_i^{\\rm available}\\le t_{\\rm decision}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义文档、Token、标签和语料时间属性，再按模型建立词频、序列概率或表示。",
+          "tex": "t_i^{\\rm available}\\le t_{\\rm decision}"
+        },
+        {
+          "explanation": "对样本构造训练目标或推断映射，并在独立文本和金融事件上测试。",
+          "tex": "t_i^{\\rm available}\\le t_{\\rm decision}"
+        }
+      ],
+      "code": "import re\ntext='AAPL profit grew 12%';print(re.findall(r'[A-Za-z]+|\\d+%',text))",
+      "packages": "Python standard library",
+      "application": "用于财报文本结构化、金融新闻情绪因子、公司事件检索和财经大语言模型预训练。",
+      "limits": "代码演示对应NLP章节的基本预处理或建模操作，不能替代完整词向量训练、CRF或事件抽取流程。时间对齐和金融实体链接尤为重要。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n05-02",
+      "node_id": "nlp-n05-02",
+      "title": "词共现矩阵",
+      "definition": "按窗口统计词与上下文词共同出现次数，为词向量和主题模型提供基础统计。",
+      "assumptions": "文本输入的分词、语言和金融实体定义应一致；金融预测特征必须对齐到真实发布和接收时间。",
+      "properties": [
+        "按窗口统计词与上下文词共同出现次数，为词向量和主题模型提供基础统计。",
+        "同一算法在通用文本与金融公告中的效果可能显著不同，语义评价需要独立标注样本。"
+      ],
+      "formulas": [
+        {
+          "label": "NLP模型目标或映射",
+          "tex": "C_{ij}=\\sum_t\\mathbf1[w_t=i,w_{t+k}=j]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义文档、Token、标签和语料时间属性，再按模型建立词频、序列概率或表示。",
+          "tex": "C_{ij}=\\sum_t\\mathbf1[w_t=i,w_{t+k}=j]"
+        },
+        {
+          "explanation": "对样本构造训练目标或推断映射，并在独立文本和金融事件上测试。",
+          "tex": "C_{ij}=\\sum_t\\mathbf1[w_t=i,w_{t+k}=j]"
+        }
+      ],
+      "code": "from sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\ntexts=['profit rose','profit fell','loss fell','revenue grew'];y=[1,0,0,1]\nprint(LogisticRegression().fit(TfidfVectorizer().fit_transform(texts),y).classes_)",
+      "packages": "scikit-learn",
+      "application": "用于财报文本结构化、金融新闻情绪因子、公司事件检索和财经大语言模型预训练。",
+      "limits": "代码演示对应NLP章节的基本预处理或建模操作，不能替代完整词向量训练、CRF或事件抽取流程。时间对齐和金融实体链接尤为重要。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n06-02",
+      "node_id": "nlp-n06-02",
+      "title": "稀疏文本分类",
+      "definition": "把词袋或TF-IDF表示输入线性分类器，是文本信号的可解释基线。",
+      "assumptions": "文本输入的分词、语言和金融实体定义应一致；金融预测特征必须对齐到真实发布和接收时间。",
+      "properties": [
+        "把词袋或TF-IDF表示输入线性分类器，是文本信号的可解释基线。",
+        "同一算法在通用文本与金融公告中的效果可能显著不同，语义评价需要独立标注样本。"
+      ],
+      "formulas": [
+        {
+          "label": "NLP模型目标或映射",
+          "tex": "P(y=1|x)=\\sigma(w^\\top\\operatorname{TFIDF}(x))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义文档、Token、标签和语料时间属性，再按模型建立词频、序列概率或表示。",
+          "tex": "P(y=1|x)=\\sigma(w^\\top\\operatorname{TFIDF}(x))"
+        },
+        {
+          "explanation": "对样本构造训练目标或推断映射，并在独立文本和金融事件上测试。",
+          "tex": "P(y=1|x)=\\sigma(w^\\top\\operatorname{TFIDF}(x))"
+        }
+      ],
+      "code": "from sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\ntexts=['profit rose','profit fell','loss fell','revenue grew'];y=[1,0,0,1]\nprint(LogisticRegression().fit(TfidfVectorizer().fit_transform(texts),y).classes_)",
+      "packages": "scikit-learn",
+      "application": "用于财报文本结构化、金融新闻情绪因子、公司事件检索和财经大语言模型预训练。",
+      "limits": "代码演示对应NLP章节的基本预处理或建模操作，不能替代完整词向量训练、CRF或事件抽取流程。时间对齐和金融实体链接尤为重要。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n01-03",
+      "node_id": "nlp-n01-03",
+      "title": "Word2Vec Skip-gram",
+      "definition": "用中心词预测上下文词，通过共同出现关系学习词向量。",
+      "assumptions": "文本输入的分词、语言和金融实体定义应一致；金融预测特征必须对齐到真实发布和接收时间。",
+      "properties": [
+        "用中心词预测上下文词，通过共同出现关系学习词向量。",
+        "同一算法在通用文本与金融公告中的效果可能显著不同，语义评价需要独立标注样本。"
+      ],
+      "formulas": [
+        {
+          "label": "NLP模型目标或映射",
+          "tex": "L=-\\sum_{(c,o)}\\log p(o|c)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义文档、Token、标签和语料时间属性，再按模型建立词频、序列概率或表示。",
+          "tex": "L=-\\sum_{(c,o)}\\log p(o|c)"
+        },
+        {
+          "explanation": "对样本构造训练目标或推断映射，并在独立文本和金融事件上测试。",
+          "tex": "L=-\\sum_{(c,o)}\\log p(o|c)"
+        }
+      ],
+      "code": "import torch\nemb=torch.nn.Embedding(30,8);ids=torch.tensor([[1,2,3],[4,5,6]])\nprint(emb(ids).mean(1).shape)",
+      "packages": "torch",
+      "application": "用于财报文本结构化、金融新闻情绪因子、公司事件检索和财经大语言模型预训练。",
+      "limits": "代码演示对应NLP章节的基本预处理或建模操作，不能替代完整词向量训练、CRF或事件抽取流程。时间对齐和金融实体链接尤为重要。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n02-03",
+      "node_id": "nlp-n02-03",
+      "title": "Word2Vec CBOW",
+      "definition": "根据上下文词的嵌入平均来预测中心词，常比逐中心词Skip-gram更高效。",
+      "assumptions": "文本输入的分词、语言和金融实体定义应一致；金融预测特征必须对齐到真实发布和接收时间。",
+      "properties": [
+        "根据上下文词的嵌入平均来预测中心词，常比逐中心词Skip-gram更高效。",
+        "同一算法在通用文本与金融公告中的效果可能显著不同，语义评价需要独立标注样本。"
+      ],
+      "formulas": [
+        {
+          "label": "NLP模型目标或映射",
+          "tex": "p(c\\mid o_1,\\ldots,o_m)=\\operatorname{softmax}(W\\bar v)_c"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义文档、Token、标签和语料时间属性，再按模型建立词频、序列概率或表示。",
+          "tex": "p(c\\mid o_1,\\ldots,o_m)=\\operatorname{softmax}(W\\bar v)_c"
+        },
+        {
+          "explanation": "对样本构造训练目标或推断映射，并在独立文本和金融事件上测试。",
+          "tex": "p(c\\mid o_1,\\ldots,o_m)=\\operatorname{softmax}(W\\bar v)_c"
+        }
+      ],
+      "code": "import torch\nemb=torch.nn.Embedding(30,8);ids=torch.tensor([[1,2,3],[4,5,6]])\nprint(emb(ids).mean(1).shape)",
+      "packages": "torch",
+      "application": "用于财报文本结构化、金融新闻情绪因子、公司事件检索和财经大语言模型预训练。",
+      "limits": "代码演示对应NLP章节的基本预处理或建模操作，不能替代完整词向量训练、CRF或事件抽取流程。时间对齐和金融实体链接尤为重要。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n04-03",
+      "node_id": "nlp-n04-03",
+      "title": "GloVe",
+      "definition": "通过词对共现次数的对数拟合词向量内积，得到全局统计型词表示。",
+      "assumptions": "文本输入的分词、语言和金融实体定义应一致；金融预测特征必须对齐到真实发布和接收时间。",
+      "properties": [
+        "通过词对共现次数的对数拟合词向量内积，得到全局统计型词表示。",
+        "同一算法在通用文本与金融公告中的效果可能显著不同，语义评价需要独立标注样本。"
+      ],
+      "formulas": [
+        {
+          "label": "NLP模型目标或映射",
+          "tex": "L=\\sum_{ij}f(C_{ij})(u_i^\\top v_j+b_i+\\tilde b_j-\\log C_{ij})^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义文档、Token、标签和语料时间属性，再按模型建立词频、序列概率或表示。",
+          "tex": "L=\\sum_{ij}f(C_{ij})(u_i^\\top v_j+b_i+\\tilde b_j-\\log C_{ij})^2"
+        },
+        {
+          "explanation": "对样本构造训练目标或推断映射，并在独立文本和金融事件上测试。",
+          "tex": "L=\\sum_{ij}f(C_{ij})(u_i^\\top v_j+b_i+\\tilde b_j-\\log C_{ij})^2"
+        }
+      ],
+      "code": "import torch\nemb=torch.nn.Embedding(30,8);ids=torch.tensor([[1,2,3],[4,5,6]])\nprint(emb(ids).mean(1).shape)",
+      "packages": "torch",
+      "application": "用于财报文本结构化、金融新闻情绪因子、公司事件检索和财经大语言模型预训练。",
+      "limits": "代码演示对应NLP章节的基本预处理或建模操作，不能替代完整词向量训练、CRF或事件抽取流程。时间对齐和金融实体链接尤为重要。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n05-03",
+      "node_id": "nlp-n05-03",
+      "title": "子词FastText",
+      "definition": "将字符n-gram子词向量组合表示完整词，改善低频词和未登录词。",
+      "assumptions": "文本输入的分词、语言和金融实体定义应一致；金融预测特征必须对齐到真实发布和接收时间。",
+      "properties": [
+        "将字符n-gram子词向量组合表示完整词，改善低频词和未登录词。",
+        "同一算法在通用文本与金融公告中的效果可能显著不同，语义评价需要独立标注样本。"
+      ],
+      "formulas": [
+        {
+          "label": "NLP模型目标或映射",
+          "tex": "v_w=\\sum_{g\\in G(w)}z_g"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义文档、Token、标签和语料时间属性，再按模型建立词频、序列概率或表示。",
+          "tex": "v_w=\\sum_{g\\in G(w)}z_g"
+        },
+        {
+          "explanation": "对样本构造训练目标或推断映射，并在独立文本和金融事件上测试。",
+          "tex": "v_w=\\sum_{g\\in G(w)}z_g"
+        }
+      ],
+      "code": "import torch\nemb=torch.nn.Embedding(30,8);ids=torch.tensor([[1,2,3],[4,5,6]])\nprint(emb(ids).mean(1).shape)",
+      "packages": "torch",
+      "application": "用于财报文本结构化、金融新闻情绪因子、公司事件检索和财经大语言模型预训练。",
+      "limits": "代码演示对应NLP章节的基本预处理或建模操作，不能替代完整词向量训练、CRF或事件抽取流程。时间对齐和金融实体链接尤为重要。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n06-03",
+      "node_id": "nlp-n06-03",
+      "title": "句子嵌入",
+      "definition": "将多Token的上下文特征池化为单个句子向量以支持语义检索。",
+      "assumptions": "文本输入的分词、语言和金融实体定义应一致；金融预测特征必须对齐到真实发布和接收时间。",
+      "properties": [
+        "将多Token的上下文特征池化为单个句子向量以支持语义检索。",
+        "同一算法在通用文本与金融公告中的效果可能显著不同，语义评价需要独立标注样本。"
+      ],
+      "formulas": [
+        {
+          "label": "NLP模型目标或映射",
+          "tex": "z_s=\\operatorname{Pool}(h_1,\\ldots,h_T)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义文档、Token、标签和语料时间属性，再按模型建立词频、序列概率或表示。",
+          "tex": "z_s=\\operatorname{Pool}(h_1,\\ldots,h_T)"
+        },
+        {
+          "explanation": "对样本构造训练目标或推断映射，并在独立文本和金融事件上测试。",
+          "tex": "z_s=\\operatorname{Pool}(h_1,\\ldots,h_T)"
+        }
+      ],
+      "code": "import torch\nemb=torch.nn.Embedding(30,8);ids=torch.tensor([[1,2,3],[4,5,6]])\nprint(emb(ids).mean(1).shape)",
+      "packages": "torch",
+      "application": "用于财报文本结构化、金融新闻情绪因子、公司事件检索和财经大语言模型预训练。",
+      "limits": "代码演示对应NLP章节的基本预处理或建模操作，不能替代完整词向量训练、CRF或事件抽取流程。时间对齐和金融实体链接尤为重要。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n01-04",
+      "node_id": "nlp-n01-04",
+      "title": "n-gram语言模型",
+      "definition": "仅依赖最近n−1个Token建模下一个词条件概率。",
+      "assumptions": "文本输入的分词、语言和金融实体定义应一致；金融预测特征必须对齐到真实发布和接收时间。",
+      "properties": [
+        "仅依赖最近n−1个Token建模下一个词条件概率。",
+        "同一算法在通用文本与金融公告中的效果可能显著不同，语义评价需要独立标注样本。"
+      ],
+      "formulas": [
+        {
+          "label": "NLP模型目标或映射",
+          "tex": "p(w_t\\mid w_{<t})\\approx p(w_t\\mid w_{t-n+1:t-1})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义文档、Token、标签和语料时间属性，再按模型建立词频、序列概率或表示。",
+          "tex": "p(w_t\\mid w_{<t})\\approx p(w_t\\mid w_{t-n+1:t-1})"
+        },
+        {
+          "explanation": "对样本构造训练目标或推断映射，并在独立文本和金融事件上测试。",
+          "tex": "p(w_t\\mid w_{<t})\\approx p(w_t\\mid w_{t-n+1:t-1})"
+        }
+      ],
+      "code": "import torch\nlogits=torch.randn(3,4,20);labels=torch.randint(0,20,(3,4))\nprint(torch.nn.functional.cross_entropy(logits.flatten(0,1),labels.flatten()).item())",
+      "packages": "torch",
+      "application": "用于财报文本结构化、金融新闻情绪因子、公司事件检索和财经大语言模型预训练。",
+      "limits": "代码演示对应NLP章节的基本预处理或建模操作，不能替代完整词向量训练、CRF或事件抽取流程。时间对齐和金融实体链接尤为重要。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n02-04",
+      "node_id": "nlp-n02-04",
+      "title": "条件随机场CRF",
+      "definition": "为序列标签引入相邻标签的转移分数与全局归一化以保证结构一致性。",
+      "assumptions": "文本输入的分词、语言和金融实体定义应一致；金融预测特征必须对齐到真实发布和接收时间。",
+      "properties": [
+        "为序列标签引入相邻标签的转移分数与全局归一化以保证结构一致性。",
+        "同一算法在通用文本与金融公告中的效果可能显著不同，语义评价需要独立标注样本。"
+      ],
+      "formulas": [
+        {
+          "label": "NLP模型目标或映射",
+          "tex": "p(y|x)=\\frac{\\exp(\\sum_t \\psi(y_{t-1},y_t,x))}{Z(x)}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义文档、Token、标签和语料时间属性，再按模型建立词频、序列概率或表示。",
+          "tex": "p(y|x)=\\frac{\\exp(\\sum_t \\psi(y_{t-1},y_t,x))}{Z(x)}"
+        },
+        {
+          "explanation": "对样本构造训练目标或推断映射，并在独立文本和金融事件上测试。",
+          "tex": "p(y|x)=\\frac{\\exp(\\sum_t \\psi(y_{t-1},y_t,x))}{Z(x)}"
+        }
+      ],
+      "code": "import torch\nlogits=torch.randn(3,4,20);labels=torch.randint(0,20,(3,4))\nprint(torch.nn.functional.cross_entropy(logits.flatten(0,1),labels.flatten()).item())",
+      "packages": "torch",
+      "application": "用于财报文本结构化、金融新闻情绪因子、公司事件检索和财经大语言模型预训练。",
+      "limits": "代码演示对应NLP章节的基本预处理或建模操作，不能替代完整词向量训练、CRF或事件抽取流程。时间对齐和金融实体链接尤为重要。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n04-04",
+      "node_id": "nlp-n04-04",
+      "title": "词性标注",
+      "definition": "给每个词标注名词、动词等语法类别，属于序列标注基础任务。",
+      "assumptions": "文本输入的分词、语言和金融实体定义应一致；金融预测特征必须对齐到真实发布和接收时间。",
+      "properties": [
+        "给每个词标注名词、动词等语法类别，属于序列标注基础任务。",
+        "同一算法在通用文本与金融公告中的效果可能显著不同，语义评价需要独立标注样本。"
+      ],
+      "formulas": [
+        {
+          "label": "NLP模型目标或映射",
+          "tex": "\\hat y_{1:T}=\\arg\\max_y p(y_{1:T}|x_{1:T})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义文档、Token、标签和语料时间属性，再按模型建立词频、序列概率或表示。",
+          "tex": "\\hat y_{1:T}=\\arg\\max_y p(y_{1:T}|x_{1:T})"
+        },
+        {
+          "explanation": "对样本构造训练目标或推断映射，并在独立文本和金融事件上测试。",
+          "tex": "\\hat y_{1:T}=\\arg\\max_y p(y_{1:T}|x_{1:T})"
+        }
+      ],
+      "code": "import torch\nlogits=torch.randn(3,4,20);labels=torch.randint(0,20,(3,4))\nprint(torch.nn.functional.cross_entropy(logits.flatten(0,1),labels.flatten()).item())",
+      "packages": "torch",
+      "application": "用于财报文本结构化、金融新闻情绪因子、公司事件检索和财经大语言模型预训练。",
+      "limits": "代码演示对应NLP章节的基本预处理或建模操作，不能替代完整词向量训练、CRF或事件抽取流程。时间对齐和金融实体链接尤为重要。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n05-04",
+      "node_id": "nlp-n05-04",
+      "title": "序列到序列Seq2Seq",
+      "definition": "编码器从输入序列提取表示，解码器基于前缀与编码信息生成目标序列。",
+      "assumptions": "文本输入的分词、语言和金融实体定义应一致；金融预测特征必须对齐到真实发布和接收时间。",
+      "properties": [
+        "编码器从输入序列提取表示，解码器基于前缀与编码信息生成目标序列。",
+        "同一算法在通用文本与金融公告中的效果可能显著不同，语义评价需要独立标注样本。"
+      ],
+      "formulas": [
+        {
+          "label": "NLP模型目标或映射",
+          "tex": "p(y_{1:T}|x)=\\prod_tp(y_t|y_{<t},x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义文档、Token、标签和语料时间属性，再按模型建立词频、序列概率或表示。",
+          "tex": "p(y_{1:T}|x)=\\prod_tp(y_t|y_{<t},x)"
+        },
+        {
+          "explanation": "对样本构造训练目标或推断映射，并在独立文本和金融事件上测试。",
+          "tex": "p(y_{1:T}|x)=\\prod_tp(y_t|y_{<t},x)"
+        }
+      ],
+      "code": "import torch\nlogits=torch.randn(3,4,20);labels=torch.randint(0,20,(3,4))\nprint(torch.nn.functional.cross_entropy(logits.flatten(0,1),labels.flatten()).item())",
+      "packages": "torch",
+      "application": "用于财报文本结构化、金融新闻情绪因子、公司事件检索和财经大语言模型预训练。",
+      "limits": "代码演示对应NLP章节的基本预处理或建模操作，不能替代完整词向量训练、CRF或事件抽取流程。时间对齐和金融实体链接尤为重要。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n06-04",
+      "node_id": "nlp-n06-04",
+      "title": "Beam Search",
+      "definition": "解码时每步保留最高的B条部分序列，近似寻找高概率的完整输出。",
+      "assumptions": "文本输入的分词、语言和金融实体定义应一致；金融预测特征必须对齐到真实发布和接收时间。",
+      "properties": [
+        "解码时每步保留最高的B条部分序列，近似寻找高概率的完整输出。",
+        "同一算法在通用文本与金融公告中的效果可能显著不同，语义评价需要独立标注样本。"
+      ],
+      "formulas": [
+        {
+          "label": "NLP模型目标或映射",
+          "tex": "\\hat y=\\arg\\max_y\\sum_t\\log p(y_t|y_{<t},x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义文档、Token、标签和语料时间属性，再按模型建立词频、序列概率或表示。",
+          "tex": "\\hat y=\\arg\\max_y\\sum_t\\log p(y_t|y_{<t},x)"
+        },
+        {
+          "explanation": "对样本构造训练目标或推断映射，并在独立文本和金融事件上测试。",
+          "tex": "\\hat y=\\arg\\max_y\\sum_t\\log p(y_t|y_{<t},x)"
+        }
+      ],
+      "code": "import torch\nlogits=torch.randn(3,4,20);labels=torch.randint(0,20,(3,4))\nprint(torch.nn.functional.cross_entropy(logits.flatten(0,1),labels.flatten()).item())",
+      "packages": "torch",
+      "application": "用于财报文本结构化、金融新闻情绪因子、公司事件检索和财经大语言模型预训练。",
+      "limits": "代码演示对应NLP章节的基本预处理或建模操作，不能替代完整词向量训练、CRF或事件抽取流程。时间对齐和金融实体链接尤为重要。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n01-05",
+      "node_id": "nlp-n01-05",
+      "title": "财报文本解析",
+      "definition": "从年报、季报的表格和叙述中提取结构化字段，记录实体、期间、单位和公告时点。",
+      "assumptions": "文本输入的分词、语言和金融实体定义应一致；金融预测特征必须对齐到真实发布和接收时间。",
+      "properties": [
+        "从年报、季报的表格和叙述中提取结构化字段，记录实体、期间、单位和公告时点。",
+        "同一算法在通用文本与金融公告中的效果可能显著不同，语义评价需要独立标注样本。"
+      ],
+      "formulas": [
+        {
+          "label": "NLP模型目标或映射",
+          "tex": "z=(\\mathrm{entity},\\mathrm{metric},\\mathrm{period},\\mathrm{value},t_{\\rm pub})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义文档、Token、标签和语料时间属性，再按模型建立词频、序列概率或表示。",
+          "tex": "z=(\\mathrm{entity},\\mathrm{metric},\\mathrm{period},\\mathrm{value},t_{\\rm pub})"
+        },
+        {
+          "explanation": "对样本构造训练目标或推断映射，并在独立文本和金融事件上测试。",
+          "tex": "z=(\\mathrm{entity},\\mathrm{metric},\\mathrm{period},\\mathrm{value},t_{\\rm pub})"
+        }
+      ],
+      "code": "import re\ntext='AAPL reported revenue 120 million on 2025-01-31'\nprint(re.findall(r'[A-Z]{2,5}|\\d{4}-\\d{2}-\\d{2}|\\d+',text))",
+      "packages": "Python standard library",
+      "application": "用于财报文本结构化、金融新闻情绪因子、公司事件检索和财经大语言模型预训练。",
+      "limits": "代码演示对应NLP章节的基本预处理或建模操作，不能替代完整词向量训练、CRF或事件抽取流程。时间对齐和金融实体链接尤为重要。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n03-05",
+      "node_id": "nlp-n03-05",
+      "title": "事件抽取",
+      "definition": "识别金融文本中的触发词、参与主体、事件类型与发生时间以结构化事件。",
+      "assumptions": "文本输入的分词、语言和金融实体定义应一致；金融预测特征必须对齐到真实发布和接收时间。",
+      "properties": [
+        "识别金融文本中的触发词、参与主体、事件类型与发生时间以结构化事件。",
+        "同一算法在通用文本与金融公告中的效果可能显著不同，语义评价需要独立标注样本。"
+      ],
+      "formulas": [
+        {
+          "label": "NLP模型目标或映射",
+          "tex": "e=(\\mathrm{actor},\\mathrm{action},\\mathrm{target},\\mathrm{time})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义文档、Token、标签和语料时间属性，再按模型建立词频、序列概率或表示。",
+          "tex": "e=(\\mathrm{actor},\\mathrm{action},\\mathrm{target},\\mathrm{time})"
+        },
+        {
+          "explanation": "对样本构造训练目标或推断映射，并在独立文本和金融事件上测试。",
+          "tex": "e=(\\mathrm{actor},\\mathrm{action},\\mathrm{target},\\mathrm{time})"
+        }
+      ],
+      "code": "import re\ntext='AAPL reported revenue 120 million on 2025-01-31'\nprint(re.findall(r'[A-Z]{2,5}|\\d{4}-\\d{2}-\\d{2}|\\d+',text))",
+      "packages": "Python standard library",
+      "application": "用于财报文本结构化、金融新闻情绪因子、公司事件检索和财经大语言模型预训练。",
+      "limits": "代码演示对应NLP章节的基本预处理或建模操作，不能替代完整词向量训练、CRF或事件抽取流程。时间对齐和金融实体链接尤为重要。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n04-05",
+      "node_id": "nlp-n04-05",
+      "title": "实体链接",
+      "definition": "把文本中的简称或同名实体映射到规范公司/证券ID，解决歧义与合并问题。",
+      "assumptions": "文本输入的分词、语言和金融实体定义应一致；金融预测特征必须对齐到真实发布和接收时间。",
+      "properties": [
+        "把文本中的简称或同名实体映射到规范公司/证券ID，解决歧义与合并问题。",
+        "同一算法在通用文本与金融公告中的效果可能显著不同，语义评价需要独立标注样本。"
+      ],
+      "formulas": [
+        {
+          "label": "NLP模型目标或映射",
+          "tex": "\\hat e=\\arg\\max_{e\\in E}P(e\\mid m,c)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义文档、Token、标签和语料时间属性，再按模型建立词频、序列概率或表示。",
+          "tex": "\\hat e=\\arg\\max_{e\\in E}P(e\\mid m,c)"
+        },
+        {
+          "explanation": "对样本构造训练目标或推断映射，并在独立文本和金融事件上测试。",
+          "tex": "\\hat e=\\arg\\max_{e\\in E}P(e\\mid m,c)"
+        }
+      ],
+      "code": "import re\ntext='AAPL reported revenue 120 million on 2025-01-31'\nprint(re.findall(r'[A-Z]{2,5}|\\d{4}-\\d{2}-\\d{2}|\\d+',text))",
+      "packages": "Python standard library",
+      "application": "用于财报文本结构化、金融新闻情绪因子、公司事件检索和财经大语言模型预训练。",
+      "limits": "代码演示对应NLP章节的基本预处理或建模操作，不能替代完整词向量训练、CRF或事件抽取流程。时间对齐和金融实体链接尤为重要。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n05-05",
+      "node_id": "nlp-n05-05",
+      "title": "新闻去重",
+      "definition": "识别同源转载与语义近重复文章，避免对同一事件进行重复计数。",
+      "assumptions": "文本输入的分词、语言和金融实体定义应一致；金融预测特征必须对齐到真实发布和接收时间。",
+      "properties": [
+        "识别同源转载与语义近重复文章，避免对同一事件进行重复计数。",
+        "同一算法在通用文本与金融公告中的效果可能显著不同，语义评价需要独立标注样本。"
+      ],
+      "formulas": [
+        {
+          "label": "NLP模型目标或映射",
+          "tex": "\\operatorname{sim}(d_i,d_j)>\\tau"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义文档、Token、标签和语料时间属性，再按模型建立词频、序列概率或表示。",
+          "tex": "\\operatorname{sim}(d_i,d_j)>\\tau"
+        },
+        {
+          "explanation": "对样本构造训练目标或推断映射，并在独立文本和金融事件上测试。",
+          "tex": "\\operatorname{sim}(d_i,d_j)>\\tau"
+        }
+      ],
+      "code": "import re\ntext='AAPL reported revenue 120 million on 2025-01-31'\nprint(re.findall(r'[A-Z]{2,5}|\\d{4}-\\d{2}-\\d{2}|\\d+',text))",
+      "packages": "Python standard library",
+      "application": "用于财报文本结构化、金融新闻情绪因子、公司事件检索和财经大语言模型预训练。",
+      "limits": "代码演示对应NLP章节的基本预处理或建模操作，不能替代完整词向量训练、CRF或事件抽取流程。时间对齐和金融实体链接尤为重要。",
+      "coverage": "complete"
+    }
+  ]
+}
