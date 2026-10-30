@@ -24,7 +24,14 @@ for(const item of examples){
 assert.equal(notes.length,manifest.notes_count,"supplemental note manifest mismatch");
 const lessonIds=new Set(lessons.map(l=>l.node_id));
 const activeNotes=notes.filter(n=>!lessonIds.has(n.node_id));
-assert.equal(lessons.length+activeNotes.length,curriculum.nodes.length,"some topics have no reading content after promotion");
+const catalogIds=new Set(curriculum.nodes.map(n=>n.id));
+const activeIds=[...lessons,...activeNotes].map(n=>n.node_id);
+const duplicateIds=activeIds.filter((id,i)=>activeIds.indexOf(id)!==i);
+const missingIds=[...catalogIds].filter(id=>!activeIds.includes(id));
+const unexpectedIds=[...new Set(activeIds)].filter(id=>!catalogIds.has(id));
+assert.equal(missingIds.length,0,"catalog topics missing reading content: "+missingIds.join(","));
+assert.equal(unexpectedIds.length,0,"unexpected tutorial or note IDs: "+unexpectedIds.join(","));
+assert.equal(duplicateIds.length,0,"duplicated tutorial or active note IDs: "+duplicateIds.join(","));
 assert.equal(lessons.length,manifest.total_lessons,"manifest count mismatch");
 const topicIDs=new Set(),chapterIDs=new Set(),deptIDs=new Set();
 assert.equal(curriculum.disciplines.length,24);
