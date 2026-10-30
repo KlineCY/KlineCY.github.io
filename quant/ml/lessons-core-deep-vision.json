@@ -1,0 +1,469 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "deep-n05-02",
+      "node_id": "deep-n05-02",
+      "title": "向量Jacobian积",
+      "definition": "反向模式自动微分直接计算给定输出协向量乘Jacobian的结果，而无需显式存储完整Jacobian矩阵。",
+      "assumptions": "函数局部可微，提供的输出侧向量维度须与函数输出维度一致。",
+      "properties": [
+        "标量损失的反向传播就是向量Jacobian积的特例。",
+        "当参数维度非常高、输出为少数标量时尤其高效。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "v^\\top J_f(x)=\\nabla_x\\big(v^\\top f(x)\\big)^\\top"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对向量函数y=f(x)定义Jacobian",
+          "tex": "J_{ij}=\\partial f_i(x)/\\partial x_j"
+        },
+        {
+          "explanation": "固定v后对标量线性组合求梯度",
+          "tex": "\\partial_{x_j}(v^\\top f)=\\sum_i v_iJ_{ij}"
+        },
+        {
+          "explanation": "因此一次反向自动微分即可计算乘积",
+          "tex": "\\nabla_x(v^\\top f)=J_f(x)^\\top v"
+        }
+      ],
+      "code": "import torch\nx=torch.tensor([1.,2.],requires_grad=True)\nf=lambda z:torch.stack([z[0]**2+z[1],z[0]*z[1]])\nv=torch.tensor([.3,-.4])\ny=f(x)\nvjp=torch.autograd.grad(y,x,grad_outputs=v)[0]\nprint(\"VJP:\",vjp)",
+      "packages": "torch",
+      "application": "实现量化神经网络的梯度归因与大规模参数训练。",
+      "limits": "VJP给的是针对指定输出方向的梯度，不是完整Jacobian。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n04-02",
+      "node_id": "deep-n04-02",
+      "title": "Jacobian向量积",
+      "definition": "正向模式自动微分计算Jacobian对输入方向向量的乘积，表示输入沿某方向微变时输出的局部变化。",
+      "assumptions": "函数沿给定方向可微，方向v维度等于输入维度。",
+      "properties": [
+        "适合输入维度较小或只需少数输入方向敏感度的任务。",
+        "与VJP不同，JVP的乘法顺序是Jv。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "J_f(x)v=\\left.\\frac{d}{d\\epsilon}f(x+\\epsilon v)\\right|_{\\epsilon=0}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按方向v对输入扰动",
+          "tex": "x(\\epsilon)=x+\\epsilon v"
+        },
+        {
+          "explanation": "复合函数链式法则给出方向导数",
+          "tex": "\\frac{d}{d\\epsilon}f(x+\\epsilon v)=J_f(x+\\epsilon v)v"
+        },
+        {
+          "explanation": "令扰动趋于零",
+          "tex": "D_vf(x)=J_f(x)v"
+        }
+      ],
+      "code": "import torch\nx=torch.tensor([1.,2.]);v=torch.tensor([.1,.3])\nf=lambda z:torch.stack([z[0]**2+z[1],z[0]*z[1]])\n_,jvp=torch.autograd.functional.jvp(f,x,v)\nprint(\"Directional derivative:\",jvp)",
+      "packages": "torch",
+      "application": "衡量模型预测对某种风险因子联合冲击方向的局部敏感度。",
+      "limits": "仅为局部一阶灵敏度，大冲击下需检验非线性误差。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n06-02",
+      "node_id": "deep-n06-02",
+      "title": "梯度检查",
+      "definition": "用有限差分近似导数，与自动微分结果对照，检验自定义梯度实现是否一致。",
+      "assumptions": "损失应在检查点附近光滑；随机层与批次统计应固定或关闭。",
+      "properties": [
+        "中心差分误差通常为O(h²)加浮点舍入误差。",
+        "检查极小或极大步长均可能导致数值失真。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "\\frac{\\partial L}{\\partial\\theta_j}\\approx\\frac{L(\\theta+he_j)-L(\\theta-he_j)}{2h}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "在当前参数两侧作Taylor展开",
+          "tex": "L(\\theta\\pm he_j)=L(\\theta)\\pm hL'_j+\\tfrac12h^2L''_{jj}+O(h^3)"
+        },
+        {
+          "explanation": "两式相减消去偶次项",
+          "tex": "L(\\theta+he_j)-L(\\theta-he_j)=2hL'_j+O(h^3)"
+        },
+        {
+          "explanation": "除以2h得到中心差分近似",
+          "tex": "\\hat L'_j=L'_j+O(h^2)"
+        }
+      ],
+      "code": "import torch\nx=torch.tensor(1.3,requires_grad=True)\nf=lambda z:torch.sin(z)*z*z\nf(x).backward()\nh=1e-4\nnumerical=(f(x.detach()+h)-f(x.detach()-h))/(2*h)\nprint(\"autograd vs numerical:\",x.grad.item(),numerical.item())",
+      "packages": "torch",
+      "application": "核对自定义ETF策略损失、风险惩罚和优化器中的梯度。",
+      "limits": "浮点32位可能放大差分误差，实际检查宜用float64并锁定随机状态。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n05-03",
+      "node_id": "deep-n05-03",
+      "title": "验证循环",
+      "definition": "验证循环切换模型为评估模式并停止梯度记录，用不参与参数更新的数据评估泛化误差。",
+      "assumptions": "数据转换器需只在训练区间拟合；验证集必须是未参与当前训练更新的样本。",
+      "properties": [
+        "eval()影响Dropout与BatchNorm；no_grad()不影响模型状态。",
+        "验证集被多次用于选择模型也可能发生过拟合。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "\\hat R_{\\mathrm{val}}(\\theta)=\\frac1m\\sum_{i\\in I_{\\mathrm{val}}}\\ell(f_\\theta(x_i),y_i)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "训练模式只在训练样本上更新参数",
+          "tex": "\\theta^+=\\theta-\\eta\\nabla_\\theta\\hat R_{\\rm train}(\\theta)"
+        },
+        {
+          "explanation": "切换评估状态并保持参数不变",
+          "tex": "\\theta_{\\rm val}=\\theta^+"
+        },
+        {
+          "explanation": "计算独立验证样本的平均损失",
+          "tex": "\\hat R_{\\rm val}=\\frac1m\\sum_{i\\in I_{\\rm val}}\\ell(f_{\\theta^+}(x_i),y_i)"
+        }
+      ],
+      "code": "import torch\nnet=torch.nn.Sequential(torch.nn.Linear(3,8),torch.nn.Dropout(.3),torch.nn.Linear(8,1))\nx=torch.randn(25,3);y=torch.randn(25,1)\nnet.eval()\nwith torch.no_grad():\n    val_loss=torch.nn.functional.mse_loss(net(x),y)\nprint(\"Validation MSE:\",val_loss.item())",
+      "packages": "torch",
+      "application": "金融神经网络Walk-Forward每期训练与验证循环隔离。",
+      "limits": "这一示例没有训练阶段，重点演示验证模式而非模型效果。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n05-01",
+      "node_id": "deep-n05-01",
+      "title": "万能逼近定理",
+      "definition": "在适当激活函数、紧致定义域和网络宽度条件下，单隐藏层网络可任意精度逼近连续函数，但并不保证有限样本能够学到它。",
+      "assumptions": "需明确激活、网络结构、逼近范数、紧集以及目标函数正则性。",
+      "properties": [
+        "表达能力的存在性结论不意味着SGD一定找到相应参数。",
+        "不保证样本复杂度、训练效率或样本外泛化。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "\\forall\\epsilon>0,\\ \\exists N,\\theta:\\sup_{x\\in K}|f(x)-f_\\theta(x)|<\\epsilon"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "考虑紧集K上任意连续目标函数f",
+          "tex": "f\\in C(K)"
+        },
+        {
+          "explanation": "可用适当激活的有限线性组合逼近连续目标",
+          "tex": "f_N(x)=\\sum_{j=1}^Na_j\\sigma(w_j^\\top x+b_j)"
+        },
+        {
+          "explanation": "存在N和参数使一致逼近误差小于预定epsilon",
+          "tex": "\\|f-f_N\\|_\\infty<\\epsilon"
+        }
+      ],
+      "code": "import torch\ntorch.manual_seed(0)\nx=torch.linspace(-1,1,120).unsqueeze(1)\ny=x.pow(2)\nnet=torch.nn.Sequential(torch.nn.Linear(1,32),torch.nn.Tanh(),torch.nn.Linear(32,1))\nopt=torch.optim.Adam(net.parameters(),lr=.02)\nfor _ in range(140):\n    opt.zero_grad();loss=(net(x)-y).square().mean()\n    loss.backward();opt.step()\nprint(\"Demonstration MSE:\",loss.item())",
+      "packages": "torch",
+      "application": "理解深度因子模型可表达非线性，但与真实金融信号是否存在可学习结构是两个问题。",
+      "limits": "演示只能表明某个低维函数拟合，不是万能逼近定理的完整数学证明。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n06-01",
+      "node_id": "architectures-n06-01",
+      "title": "空洞卷积",
+      "definition": "空洞卷积在卷积核采样位置之间插入间隔，以较少参数扩大时间感受野，常用于TCN。",
+      "assumptions": "膨胀率d为正整数；用于时序预测时需要保证只访问历史位置。",
+      "properties": [
+        "有效核宽K_eff=(K−1)d+1。",
+        "过大膨胀率可能遗漏局部短期细节。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "y_t=\\sum_{k=0}^{K-1}w_kx_{t-dk},\\quad K_{\\rm eff}=1+(K-1)d"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "普通因果卷积核查看最近K个历史位置",
+          "tex": "y_t=\\sum_{k=0}^{K-1}w_kx_{t-k}"
+        },
+        {
+          "explanation": "将相邻采样点间隔从1扩大到d",
+          "tex": "y_t=\\sum_{k=0}^{K-1}w_kx_{t-dk}"
+        },
+        {
+          "explanation": "最远采样位置距离当前时刻(K−1)d",
+          "tex": "K_{\\rm eff}=1+(K-1)d"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(2,4,30)\nconv=torch.nn.Conv1d(4,8,kernel_size=3,dilation=4,padding=8)\nout=conv(x)[...,:30]\nprint(\"Dilated conv:\",out.shape)",
+      "packages": "torch",
+      "application": "用多尺度历史窗口构造高低频金融因子特征。",
+      "limits": "示例通过右侧裁剪形成因果长度，但真实TCN需检查全部层的Padding和输出对齐。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n02-02",
+      "node_id": "architectures-n02-02",
+      "title": "Backpropagation Through Time",
+      "definition": "BPTT将RNN沿时间展开为共享参数的深计算图，再从末端损失反向积累每个时间步对参数的梯度。",
+      "assumptions": "RNN状态递推可微，训练截断长度与隐藏状态边界必须定义。",
+      "properties": [
+        "跨多个时间步的Jacobian乘积导致梯度消失或爆炸。",
+        "Truncated BPTT降低内存，但会截断长程梯度。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "\\frac{\\partial L}{\\partial h_k}=\\sum_{t\\ge k}\\frac{\\partial L_t}{\\partial h_t}\\prod_{j=k+1}^t\\frac{\\partial h_j}{\\partial h_{j-1}}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将h_t表示为历史状态与当前输入的函数",
+          "tex": "h_t=f_\\theta(h_{t-1},x_t)"
+        },
+        {
+          "explanation": "远期损失对早期状态的梯度包含多个状态Jacobian乘积",
+          "tex": "\\partial h_t/\\partial h_k=\\prod_{j=k+1}^tJ_j"
+        },
+        {
+          "explanation": "总参数梯度对所有时间步的共享参数贡献求和",
+          "tex": "\\nabla_\\theta L=\\sum_t\\nabla_\\theta L_t"
+        }
+      ],
+      "code": "import torch\nrnn=torch.nn.RNN(3,5,batch_first=True)\nx=torch.randn(2,12,3)\nout,_=rnn(x)\nloss=out[:,-1].square().mean()\nloss.backward()\nprint(\"Recurrent parameter gradient:\",rnn.weight_hh_l0.grad.norm().item())",
+      "packages": "torch",
+      "application": "在ETF价格序列RNN训练中理解远期依赖和梯度稳定性。",
+      "limits": "此处使用完整12步反向，较长序列需考虑梯度裁剪和状态截断。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n06-02",
+      "node_id": "architectures-n06-02",
+      "title": "Teacher Forcing",
+      "definition": "Teacher Forcing在训练自回归序列解码器时，把上一步真实Token或观测作为下一步输入，而不是始终使用模型自己预测。",
+      "assumptions": "训练目标序列已知；推断时真实未来目标不可获得。",
+      "properties": [
+        "常加快早期训练。",
+        "训练/推断输入分布不一致会产生Exposure Bias。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "p_\\theta(y_{1:T}\\mid x)=\\prod_{t=1}^Tp_\\theta(y_t\\mid y_{<t}^{\\rm true},x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "训练中每步输入上一步真实输出",
+          "tex": "u_t=y_{t-1}^{\\rm true}"
+        },
+        {
+          "explanation": "以这些输入计算下一个Token条件概率",
+          "tex": "p_\\theta(y_t\\mid u_{\\le t},x)"
+        },
+        {
+          "explanation": "推断阶段只能使用先前生成值",
+          "tex": "u_t=\\hat y_{t-1}"
+        }
+      ],
+      "code": "import torch\ntarget=torch.tensor([[1,2,3,4,5]])\nbos=torch.zeros((1,1),dtype=torch.long)\ndecoder_input=torch.cat([bos,target[:,:-1]],dim=1)\nprint(\"Inputs:\",decoder_input,\"Targets:\",target)",
+      "packages": "torch",
+      "application": "多步收益/波动预测Seq2Seq和金融文字生成训练。",
+      "limits": "若把未来真实价格作为回测推断输入，就是不可接受的未来函数。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n01-04",
+      "node_id": "architectures-n01-04",
+      "title": "TCN时间卷积",
+      "definition": "TCN把因果卷积、空洞卷积和常见残差结构组合以建模长时间依赖，不要求递归隐藏状态。",
+      "assumptions": "每一层需采用因果Padding，数据归一化只能使用训练窗统计。",
+      "properties": [
+        "空洞倍增可让有效感受野快速扩大。",
+        "不保证远距离金融依赖真实可预测。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "R=1+\\sum_{l=1}^{L}(K_l-1)d_l\\quad\\text{（步幅1、单卷积/层）}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "一层核宽K、膨胀率d扩展过去(K−1)d个位置",
+          "tex": "R_1=1+(K-1)d_1"
+        },
+        {
+          "explanation": "串联多层时感受野相加（步幅1条件）",
+          "tex": "R_L=1+\\sum_{l=1}^L(K_l-1)d_l"
+        }
+      ],
+      "code": "import torch\nfrom torch import nn\nclass CausalConv(nn.Module):\n    def __init__(self,channels,d):\n        super().__init__();self.pad=2*d;self.conv=nn.Conv1d(channels,channels,3,dilation=d)\n    def forward(self,x):\n        return self.conv(nn.functional.pad(x,(self.pad,0)))\nx=torch.randn(3,5,64)\nfor d in [1,2,4]:\n    x=CausalConv(5,d)(x)\nprint(\"TCN output:\",x.shape)",
+      "packages": "torch",
+      "application": "以历史OHLCV与宏观序列训练多尺度深度收益预测器。",
+      "limits": "感受野公式对应每层单个卷积；残差块若有双卷积需按实际核数调整。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n05-03",
+      "node_id": "architectures-n05-03",
+      "title": "Transformer Decoder",
+      "definition": "Transformer解码器通过因果自注意力保证当前预测不依赖未来Token，可选Cross-Attention读取外部编码上下文。",
+      "assumptions": "必须构造正确的未来遮挡与Padding Mask；自回归任务的输入标签要错开一位。",
+      "properties": [
+        "解码器可用于下一Token语言建模。",
+        "有Cross-Attention的Encoder–Decoder与只有Decoder的GPT式架构不同。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "H_l=\\operatorname{FFN}(\\operatorname{MaskedAttn}(H_{l-1}))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对输入Token添加位置表示",
+          "tex": "H_0=E(x_{1:T})+PE(1:T)"
+        },
+        {
+          "explanation": "对自注意力分数在未来位置设置−∞",
+          "tex": "M_{ij}=\\begin{cases}0,&j\\le i\\\\-\\infty,&j>i\\end{cases}"
+        },
+        {
+          "explanation": "因果表示预测下一个Token概率",
+          "tex": "p(x_{t+1}\\mid x_{\\le t})=\\operatorname{softmax}(W_{\\rm out}h_t)"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(2,6,16)\nmask=torch.triu(torch.full((6,6),float(\"-inf\")),diagonal=1)\nlayer=torch.nn.TransformerEncoderLayer(d_model=16,nhead=4,batch_first=True)\nprint(\"Decoder-only-style causal layer:\",layer(x,src_mask=mask).shape)",
+      "packages": "torch",
+      "application": "金融公告生成模型及收益自回归Transformer的防泄漏基础。",
+      "limits": "示例为带因果Mask的Encoder层，仅演示Decoder-only核心计算，并非完整跨注意力解码器。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n02-05",
+      "node_id": "vision-n02-05",
+      "title": "CNN价格趋势预测",
+      "definition": "以历史窗口渲染价格图像作为CNN输入，用明确的未来收益标签训练分类或回归模型，并对未见过的未来日期评估。",
+      "assumptions": "图像窗口仅包含预测时刻已可得OHLCV，未来收益标签不得进入图像，证券池和复权规则须PIT。",
+      "properties": [
+        "图像模型可能表达非线性时间形态。",
+        "样本切分、复权、窗口重叠与手续费对经济结论极为重要。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "\\hat p_{i,t}=\\sigma(f_\\theta(\\operatorname{Render}(\\mathrm{OHLCV}_{i,t-W+1:t}))),\\quad y_{i,t}=\\mathbf1[r_{i,t+H}>0]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由完整历史窗口确定可见的价格图像",
+          "tex": "I_{i,t}=\\operatorname{Render}(\\mathrm{OHLCV}_{i,t-W+1:t})"
+        },
+        {
+          "explanation": "将未来实现收益转换为监督目标，但仅作为训练标签",
+          "tex": "y_{i,t}=\\mathbf1[P_{i,t+H}^{adj}/P_{i,t}^{adj}-1>0]"
+        },
+        {
+          "explanation": "对二分类输出最小化交叉熵",
+          "tex": "L=-E[y\\log\\hat p+(1-y)\\log(1-\\hat p)]"
+        }
+      ],
+      "code": "import torch\nfrom torch import nn\nnet=nn.Sequential(nn.Conv2d(1,8,3,padding=1),nn.ReLU(),\n    nn.AdaptiveAvgPool2d(1),nn.Flatten(),nn.Linear(8,1))\nimages=torch.randn(16,1,32,32)\nlabels=torch.randint(0,2,(16,1)).float()\nlogits=net(images)\nloss=nn.functional.binary_cross_entropy_with_logits(logits,labels)\nloss.backward()\nprint(\"CNN loss:\",loss.item())",
+      "packages": "torch",
+      "application": "研究ETF历史K线图是否比传统动量特征提供增量样本外预测能力。",
+      "limits": "代码用随机图像，仅说明网络与损失；没有重现特定论文的完整图像生成、交易时点和回测。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n05-05",
+      "node_id": "vision-n05-05",
+      "title": "避免图像数据泄漏",
+      "definition": "价格图像可能从归一化窗口、裁切、复权版本、训练图像重叠及未来事件回填中泄漏未来信息。",
+      "assumptions": "所有样本需要记录图像起止日期、可交易决策时刻和标签结束日期。",
+      "properties": [
+        "随机拆分高度重叠的价格图像会产生跨折相关。",
+        "按日期切分还需检查标签区间跨越边界的样本。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "I_{i,t}=g(\\mathcal F_t),\\quad\\operatorname{maxdate}(I_{i,t})\\le t_{\\rm decision}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "记录图像历史覆盖区间和未来标签区间",
+          "tex": "W_i=[t-W+1,t],\\quad Y_i=[t,t+H]"
+        },
+        {
+          "explanation": "仅用历史窗口计算缩放因子",
+          "tex": "s_t=h(\\{P_u:u\\le t\\})"
+        },
+        {
+          "explanation": "若训练标签未来区间与测试区间相交，应执行隔离",
+          "tex": "Y_i\\cap I_{\\rm test}=\\varnothing"
+        }
+      ],
+      "code": "import numpy as np\nstart=np.array([0,2,4,6,8,10])\nend=start+4 # label holding end\ntest_start=9\ntrain=np.where(end<test_start)[0]\ntest=np.where(start>=test_start)[0]\nprint(\"Purged train:\",train,\"test:\",test)\nassert all(end[train]<start[test].min())",
+      "packages": "numpy",
+      "application": "保障ETF CNN图像策略滚动回测的样本外真实性。",
+      "limits": "此代码只示意标签区间Purging；多资产、Embargo和供应商版本仍需额外检查。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n06-05",
+      "node_id": "vision-n06-05",
+      "title": "跨ETF泛化",
+      "definition": "跨ETF泛化检验模型在不同标的、行业、波动尺度和训练期之外的数据上的预测能力。",
+      "assumptions": "要区分对新日期、未见标的和未见市场状态三类不同泛化问题。",
+      "properties": [
+        "GroupKFold可隔离资产分组，但未自动保证时间先后。",
+        "真实跨资产模型应报告每ETF指标的分布而非只有全体均值。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "\\hat R_{\\rm heldout\\ assets}=\\frac1{|\\mathcal U_{\\rm test}|}\\sum_{i\\in\\mathcal U_{\\rm test}}R_i(f_{\\hat\\theta})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "把资产集合划分为训练与未见资产",
+          "tex": "\\mathcal U_{\\rm train}\\cap\\mathcal U_{\\rm test}=\\emptyset"
+        },
+        {
+          "explanation": "训练阶段仅拟合训练资产，预处理器也只用训练资产数据",
+          "tex": "\\hat\\theta=\\arg\\min_\\theta\\sum_{i\\in\\mathcal U_{\\rm train}}L_i(\\theta)"
+        },
+        {
+          "explanation": "独立比较资产外与时间外指标",
+          "tex": "R_{\\rm asset\\ OOS}\\ne R_{\\rm time\\ OOS}"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.model_selection import GroupKFold\nX=np.random.default_rng(0).normal(size=(60,4))\ngroups=np.repeat(np.arange(6),10)\nfor tr,te in GroupKFold(n_splits=3).split(X,groups=groups):\n    print(\"train assets\",np.unique(groups[tr]),\"test\",np.unique(groups[te]))",
+      "packages": "numpy, scikit-learn",
+      "application": "37只ETF模型的行业留出、资产留出和滚动日期留出实验设计。",
+      "limits": "按资产分组并不替代按时间顺序验证，现实研究可能需双重阻断。",
+      "coverage": "complete"
+    }
+  ]
+}
