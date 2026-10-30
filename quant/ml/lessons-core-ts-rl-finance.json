@@ -1,0 +1,497 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "timeseries-n02-02",
+      "node_id": "timeseries-n02-02",
+      "title": "ARIMA",
+      "definition": "ARIMA(p,d,q)对序列做d阶差分后，用自身历史值的AR部分及历史创新项的MA部分建模平稳动态。",
+      "assumptions": "差分后序列应具备近似平稳性；ARMA参数需满足相应平稳与可逆条件。",
+      "properties": [
+        "适合作为点预测与残差诊断基线。",
+        "不能自动刻画条件异方差、结构突变或非线性关系。"
+      ],
+      "formulas": [
+        {
+          "label": "数学定义/算法目标",
+          "tex": "\\phi(B)(1-B)^dy_t=c+\\theta(B)\\varepsilon_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "用滞后算子B表示历史位置",
+          "tex": "By_t=y_{t-1}"
+        },
+        {
+          "explanation": "d阶差分移除随机趋势",
+          "tex": "\\Delta^dy_t=(1-B)^dy_t"
+        },
+        {
+          "explanation": "差分序列满足ARMA创新方程",
+          "tex": "\\phi(B)\\Delta^dy_t=c+\\theta(B)\\varepsilon_t"
+        }
+      ],
+      "code": "import numpy as np\nfrom statsmodels.tsa.arima.model import ARIMA\nrng=np.random.default_rng(0)\ny=np.cumsum(rng.normal(size=110))\nmodel=ARIMA(y[:90],order=(1,1,1)).fit()\nprint(\"Next forecasts:\",model.forecast(steps=3))",
+      "application": "ETF对数价格基准预测、季节调整前的序列建模。",
+      "limits": "真实资产收益常接近白噪声，ARIMA拟合良好未必可形成净交易利润。",
+      "packages": "numpy, statsmodels",
+      "coverage": "complete"
+    },
+    {
+      "id": "timeseries-n03-02",
+      "node_id": "timeseries-n03-02",
+      "title": "ETS",
+      "definition": "指数平滑状态空间模型通过递推更新水平、趋势和季节成分，对结构相对稳定的时间序列进行预测。",
+      "assumptions": "不同ETS结构需确定误差、趋势、季节的加性/乘性形式；乘性结构通常要求正值。",
+      "properties": [
+        "指数权重让近期观察更重要。",
+        "对金融高波动价格与收益并非必然优于朴素预测。"
+      ],
+      "formulas": [
+        {
+          "label": "数学定义/算法目标",
+          "tex": "\\ell_t=\\alpha y_t+(1-\\alpha)\\ell_{t-1},\\qquad\\hat y_{t+h|t}=\\ell_t\\quad\\text{（SES）}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对近期观察给权重α、历史水平给1−α",
+          "tex": "\\ell_t=\\alpha y_t+(1-\\alpha)\\ell_{t-1}"
+        },
+        {
+          "explanation": "递归展开得到过去观测的指数衰减权重",
+          "tex": "\\ell_t=\\alpha\\sum_{k=0}^{t-1}(1-\\alpha)^ky_{t-k}+(1-\\alpha)^t\\ell_0"
+        },
+        {
+          "explanation": "简单指数平滑的未来各期预测为当前水平",
+          "tex": "\\hat y_{t+h|t}=\\ell_t"
+        }
+      ],
+      "code": "import numpy as np\nfrom statsmodels.tsa.holtwinters import SimpleExpSmoothing\ny=np.array([9.,10.,10.5,10.,11.,11.2,11.1])\nfit=SimpleExpSmoothing(y,initialization_method=\"estimated\").fit()\nprint(\"Forecast:\",fit.forecast(3))",
+      "application": "成交量、波动率水平和部分宏观数据预测基线。",
+      "limits": "对季节性或非线性市场状态需扩展ETS模型结构。",
+      "packages": "numpy, statsmodels",
+      "coverage": "complete"
+    },
+    {
+      "id": "timeseries-n06-02",
+      "node_id": "timeseries-n06-02",
+      "title": "SARIMAX",
+      "definition": "SARIMAX在季节性ARIMA模型中加入外生协变量，从而联合建模自身滞后、季节效应与可预测时已知的外部信息。",
+      "assumptions": "未来h步外生变量若尚不可观测，则必须先预测这些变量，不能把真实未来数值送入模型。",
+      "properties": [
+        "可处理明确季节周期和外生解释量。",
+        "外生解释变量在此模型下仅表示预测关联，并不自动具有因果解释。"
+      ],
+      "formulas": [
+        {
+          "label": "数学定义/算法目标",
+          "tex": "\\Phi(B^s)\\phi(B)(1-B)^d(1-B^s)^Dy_t=\\beta^\\top x_t+\\Theta(B^s)\\theta(B)\\varepsilon_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "季节差分用步幅s消去季节变化",
+          "tex": "\\Delta_s y_t=(1-B^s)y_t"
+        },
+        {
+          "explanation": "加入非季节与季节ARMA结构",
+          "tex": "\\Phi(B^s)\\phi(B)\\Delta^d\\Delta_s^Dy_t=\\cdots"
+        },
+        {
+          "explanation": "增加外生协变量并条件于未来可得值进行预测",
+          "tex": "\\hat y_{T+h|T}=\\hat f(y_{\\le T},x_{\\le T},x_{T+1:T+h}^{\\rm available})"
+        }
+      ],
+      "code": "import numpy as np\nfrom statsmodels.tsa.statespace.sarimax import SARIMAX\nrng=np.random.default_rng(1)\nx=rng.normal(size=80)\ny=.7*x+rng.normal(size=80)\nm=SARIMAX(y[:60],exog=x[:60,None],order=(1,0,0),\n          trend=\"c\").fit(disp=False)\nprint(m.get_forecast(steps=3,exog=x[60:63,None]).predicted_mean)",
+      "application": "用已公告宏观协变量预测ETF风险或交易量。",
+      "limits": "此处合成x在未来已知只是演示；真实宏观x的未来观测不能泄漏。",
+      "packages": "numpy, statsmodels",
+      "coverage": "complete"
+    },
+    {
+      "id": "timeseries-n01-03",
+      "node_id": "timeseries-n01-03",
+      "title": "DeepAR",
+      "definition": "DeepAR用RNN预测条件分布参数，并以概率似然目标训练跨多个相关时间序列的自回归概率预测模型。",
+      "assumptions": "模型输入应只包含历史目标和未来可预先知道的协变量；必须明确分布族。",
+      "properties": [
+        "可输出多个未来场景的概率预测，而不是单一数值。",
+        "非平稳金融厚尾可能与常用简单高斯或计数分布假设不符。"
+      ],
+      "formulas": [
+        {
+          "label": "数学定义/算法目标",
+          "tex": "p_\\theta(y_{T+1:T+H}\\mid y_{\\le T},x)=\\prod_{t=T+1}^{T+H}p_{\\theta}(y_t\\mid h_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "共享RNN在每一步融合历史目标与协变量",
+          "tex": "h_t=f_\\theta(h_{t-1},y_{t-1},x_t)"
+        },
+        {
+          "explanation": "隐状态产生所选预测分布参数",
+          "tex": "(\\mu_t,\\sigma_t)=g_\\theta(h_t)"
+        },
+        {
+          "explanation": "用观测值的负对数似然拟合参数",
+          "tex": "L=-\\sum_t\\log p_{\\mu_t,\\sigma_t}(y_t)"
+        }
+      ],
+      "code": "import torch\nfrom torch import nn\ntorch.manual_seed(0)\nrnn=nn.GRU(input_size=2,hidden_size=12,batch_first=True)\nhead=nn.Linear(12,2)\nseq=torch.randn(6,14,2)\nh,_=rnn(seq)\nparams=head(h)\nmu=params[...,0];scale=torch.nn.functional.softplus(params[...,1])+.01\ny=torch.randn(6,14)\nloss=-torch.distributions.Normal(mu,scale).log_prob(y).mean()\nloss.backward()\nprint(\"Gaussian sequence NLL:\",loss.item())",
+      "application": "多ETF波动风险或流量的共享概率预测研究。",
+      "limits": "示例展示分布头和NLL，不包含完整DeepAR的历史目标错位、预测采样和未来协变量逻辑。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "timeseries-n02-03",
+      "node_id": "timeseries-n02-03",
+      "title": "N-BEATS",
+      "definition": "N-BEATS以多个前馈块迭代解释输入回看窗口并输出预测增量，累加各块Forecast可形成最终多步预测。",
+      "assumptions": "需固定回看长度和预测长度；不同块的基础形式决定是否可解释趋势、季节贡献。",
+      "properties": [
+        "残差递推提供多块的分工结构。",
+        "在低信噪比金融收益中仍需与Naive、ARIMA和线性模型比较。"
+      ],
+      "formulas": [
+        {
+          "label": "数学定义/算法目标",
+          "tex": "r_{k+1}=r_k-b_k(r_k),\\quad \\hat y=\\sum_{k=1}^Kf_k(r_k)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "第k块同时产生回看拟合和未来预测",
+          "tex": "(b_k,f_k)=g_{\\theta_k}(r_k)"
+        },
+        {
+          "explanation": "通过Backcast移除该块解释的历史分量",
+          "tex": "r_{k+1}=r_k-b_k"
+        },
+        {
+          "explanation": "累加每个块对未来预测的贡献",
+          "tex": "\\hat y_{1:H}=\\sum_kf_k"
+        }
+      ],
+      "code": "import torch\nfrom torch import nn\ntorch.manual_seed(0)\nlookback=12;horizon=3\nclass Block(nn.Module):\n    def __init__(self):\n        super().__init__()\n        self.net=nn.Sequential(nn.Linear(12,24),nn.ReLU(),nn.Linear(24,15))\n    def forward(self,x):\n        out=self.net(x)\n        return out[:,:12],out[:,12:]\nx=torch.randn(4,lookback)\nforecast=torch.zeros(4,horizon)\nfor block in [Block(),Block()]:\n    back,pred=block(x);x=x-back;forecast=forecast+pred\nprint(\"N-BEATS-style:\",forecast.shape)",
+      "application": "比较ETF收益/波动多步预测的深度残差块架构。",
+      "limits": "网络是两块结构教学演示，未实现论文全部训练与可解释基函数设计。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "timeseries-n04-03",
+      "node_id": "timeseries-n04-03",
+      "title": "Temporal Fusion Transformer",
+      "definition": "TFT综合静态协变量、时间变化的历史与已知未来特征，并结合变量选择、门控机制和时间注意力做多步预测。",
+      "assumptions": "必须明确未来协变量哪些在预测时已知；静态资产特征与动态时间特征需要区分。",
+      "properties": [
+        "变量选择模块可以产生特征权重，但并非因果贡献。",
+        "模型组件较多，在较小金融数据集上容易过拟合。"
+      ],
+      "formulas": [
+        {
+          "label": "数学定义/算法目标",
+          "tex": "h_t=\\operatorname{Attn}(\\operatorname{GRN}(\\operatorname{VSN}(x_t))),\\qquad\\hat q_{\\tau,t+h}=g_\\tau(h_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "变量选择网络对各输入变量嵌入分配权重",
+          "tex": "z_t=\\sum_j\\alpha_{j,t}\\phi_j(x_{j,t})"
+        },
+        {
+          "explanation": "门控残差网络和时间注意力组合序列信息",
+          "tex": "h_t=\\operatorname{GRN}(\\operatorname{Attention}(z_{\\le t}))"
+        },
+        {
+          "explanation": "可用分位数头训练不同预测置信水平",
+          "tex": "L=\\sum_{\\tau\\in\\mathcal T}\\rho_\\tau(y-\\hat q_\\tau)"
+        }
+      ],
+      "code": "import torch\ntorch.manual_seed(0)\nx=torch.randn(3,15,6)\nscore=torch.nn.Linear(6,6)(x).softmax(-1)\nselected=x*score\nenc=torch.nn.TransformerEncoderLayer(d_model=6,nhead=2,batch_first=True)\nout=enc(selected)\nquantiles=torch.nn.Linear(6,3)(out[:,-1])\nprint(\"Variable selection + quantile head:\",quantiles.shape)",
+      "application": "宏观及ETF跨资产协变量多步预测与分位风险预测。",
+      "limits": "仅演示变量权重、Attention和分位头；不包含完整TFT的全部组件与已知未来输入处理。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "rl-n01-04",
+      "node_id": "rl-n01-04",
+      "title": "Monte Carlo策略估计",
+      "definition": "Monte Carlo策略评估使用完整Episode实际获得的折现回报，估计给定状态在策略下的价值，不做下一状态Bootstrap。",
+      "assumptions": "需要可明确终止或截断的Episode；截断任务必须定义终端价值处理。",
+      "properties": [
+        "不引入Bootstrap偏差，但回报方差可能较高。",
+        "持续无穷时域任务通常需要截断或其他估计技术。"
+      ],
+      "formulas": [
+        {
+          "label": "数学定义/算法目标",
+          "tex": "\\hat V(s)=\\frac1{N_s}\\sum_{i=1}^{N_s}G_i(s),\\qquad G_t=\\sum_{k=0}^{T-t-1}\\gamma^kr_{t+k+1}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对每条Episode从后向前累计实际奖励",
+          "tex": "G_t=r_{t+1}+\\gamma G_{t+1}"
+        },
+        {
+          "explanation": "对访问状态s对应的回报集合求样本均值",
+          "tex": "\\hat V(s)=N_s^{-1}\\sum_{i:S_i=s}G_i"
+        }
+      ],
+      "code": "import numpy as np\nrewards=[1.,-.5,2.,.3];gamma=.9\nret=np.zeros(len(rewards));g=0.\nfor t in range(len(rewards)-1,-1,-1):\n    g=rewards[t]+gamma*g;ret[t]=g\nprint(\"Monte Carlo returns:\",ret)",
+      "application": "评价已记录完整交易决策Episode的历史折现奖励。",
+      "limits": "同一Episode多次访问同一状态时需明确First-Visit或Every-Visit规则。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "rl-n06-05",
+      "node_id": "rl-n06-05",
+      "title": "Importance Sampling",
+      "definition": "重要性采样利用目标策略与行为策略的动作概率比，将行为策略采集的样本重加权来评价另一策略。",
+      "assumptions": "目标策略需要对行为策略支持范围内的动作有可计算概率，不能对未覆盖动作任意外推。",
+      "properties": [
+        "普通IS在支持条件满足时可无偏，但权重方差可能极高。",
+        "自归一化IS通常降低方差但有有限样本偏差。"
+      ],
+      "formulas": [
+        {
+          "label": "数学定义/算法目标",
+          "tex": "\\rho_{0:T}=\\prod_{t=0}^T\\frac{\\pi(a_t\\mid s_t)}{b(a_t\\mid s_t)},\\quad\\hat V_{\\rm IS}=\\frac1N\\sum_i\\rho_iG_i"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "轨迹概率中的环境转移部分在两策略比值中抵消",
+          "tex": "P_\\pi(\\tau)/P_b(\\tau)=\\prod_t\\pi(a_t|s_t)/b(a_t|s_t)"
+        },
+        {
+          "explanation": "对行为策略样本回报按该似然比加权",
+          "tex": "E_b[\\rho(\\tau)G(\\tau)]=E_\\pi[G(\\tau)]"
+        }
+      ],
+      "code": "import numpy as np\nbehavior=np.array([.5,.5,.5])\ntarget=np.array([.7,.4,.6])\nreturns=np.array([1.2,-.2,.8])\nweights=target/behavior\nprint(\"IS estimate:\",np.mean(weights*returns),\n      \"SNIS:\",np.sum(weights*returns)/weights.sum())",
+      "application": "离线评估历史基金组合动作策略的反事实收益。",
+      "limits": "此示例是一步决策样本；多步IS权重乘积可能指数级放大方差。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "rl-n02-05",
+      "node_id": "rl-n02-05",
+      "title": "UCB",
+      "definition": "UCB以样本平均奖励加不确定度奖励构造行动上界，在多臂老虎机中平衡探索与利用。",
+      "assumptions": "经典UCB1理论常假设各臂奖励独立、有界且随时间分布不变。",
+      "properties": [
+        "置信宽度随该臂采样次数增加而缩小。",
+        "非平稳金融奖励序列不满足经典静态Regret保证。"
+      ],
+      "formulas": [
+        {
+          "label": "数学定义/算法目标",
+          "tex": "a_t=\\arg\\max_a\\left(\\hat\\mu_a+\\sqrt{\\frac{2\\log t}{N_a(t)}}\\right)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对每个动作估计经验平均收益",
+          "tex": "\\hat\\mu_a=N_a^{-1}\\sum_{i:a_i=a}r_i"
+        },
+        {
+          "explanation": "利用Hoeffding型不确定度随采样量减小",
+          "tex": "b_a(t)=\\sqrt{2\\log(t)/N_a(t)}"
+        },
+        {
+          "explanation": "选择样本均值加探索奖励最大的动作",
+          "tex": "a_t=\\arg\\max_a(\\hat\\mu_a+b_a(t))"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0)\ntrue=np.array([.15,.22,.05])\nn=np.zeros(3,dtype=int);sum_r=np.zeros(3)\nfor t in range(1,101):\n    a=int(np.argmin(n)) if (n==0).any() else int(np.argmax(sum_r/n+np.sqrt(2*np.log(t)/n)))\n    reward=float(rng.normal(true[a],.2))\n    n[a]+=1;sum_r[a]+=reward\nprint(\"Arm counts:\",n)",
+      "application": "动态比较不同交易信号探索-利用的教学模型。",
+      "limits": "真实交易在线随机探索需风控；均值漂移时应考虑滑动窗口UCB等改造。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "rl-n04-03",
+      "node_id": "rl-n04-03",
+      "title": "最优停止",
+      "definition": "最优停止研究何时选择立即停止并领取奖励，或继续等待获得未来折现期望价值，常用于美式期权定价。",
+      "assumptions": "状态需满足Markov性质或包含足够历史信息；停止回报和转移动态应清楚。",
+      "properties": [
+        "Bellman方程包含立即收益与继续价值的最大值。",
+        "美式期权的停止边界取决于风险中性动态、折现和支付函数。"
+      ],
+      "formulas": [
+        {
+          "label": "数学定义/算法目标",
+          "tex": "V_t(s)=\\max\\{g_t(s),\\gamma E[V_{t+1}(S')\\mid S_t=s]\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "终端时点没有继续动作，价值等于支付",
+          "tex": "V_T(s)=g_T(s)"
+        },
+        {
+          "explanation": "前一时点计算立即执行支付与继续期望",
+          "tex": "C_t(s)=\\gamma E[V_{t+1}(S')\\mid S_t=s]"
+        },
+        {
+          "explanation": "择优得到最优停止Bellman递推",
+          "tex": "V_t(s)=\\max(g_t(s),C_t(s))"
+        }
+      ],
+      "code": "import numpy as np\nS=np.array([80.,100.,120.]);K=100.;discount=.99\nterminal=np.maximum(K-S,0)\nP=np.array([[.7,.3,0],[.2,.6,.2],[0,.3,.7]])\ncontinuation=discount*(P@terminal)\nnow=np.maximum(K-S,0)\nprint(\"Exercise now?\",now>=continuation,\"value:\",np.maximum(now,continuation))",
+      "application": "学习美式看跌期权的提前执行逻辑与交易退出策略。",
+      "limits": "例子用人为指定离散转移矩阵，不是无套利校准的真实美式期权定价。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "finml-n05-01",
+      "node_id": "finml-n05-01",
+      "title": "事件采样CUSUM",
+      "definition": "CUSUM过滤器在价格或其他序列的累计偏移达到阈值时触发事件点，可减少等间隔采样对平稳小波动的重复观察。",
+      "assumptions": "阈值h与用于计算增量的价格尺度/波动率应匹配；需要只用历史数据确定阈值。",
+      "properties": [
+        "事件采样数量依赖阈值，阈值越高通常越少事件。",
+        "事件发现并不等于产生有预测能力的交易信号。"
+      ],
+      "formulas": [
+        {
+          "label": "数学定义/算法目标",
+          "tex": "S_t^+=\\max(0,S_{t-1}^++\\Delta x_t),\\quad S_t^-=\\min(0,S_{t-1}^-+\\Delta x_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据新一期价格或对数价格变化更新正负累计偏差",
+          "tex": "\\Delta x_t=x_t-x_{t-1}"
+        },
+        {
+          "explanation": "若正累计超过h或负累计低于−h则触发事件并重置",
+          "tex": "e_t=\\mathbf1[S_t^+>h\\text{ or }S_t^-<-h]"
+        }
+      ],
+      "code": "import numpy as np\nchanges=np.array([.1,.1,.5,-.2,-.6,.1,.8,-.1])\nh=.5;positive=negative=0.;events=[]\nfor t,d in enumerate(changes):\n    positive=max(0,positive+d);negative=min(0,negative+d)\n    if positive>h or negative<-h:\n        events.append(t);positive=negative=0.\nprint(\"CUSUM events:\",events)",
+      "application": "选择ETF显著变化日进行事件驱动标签和训练样本构建。",
+      "limits": "累积事件阈值需按波动率调整；不能在训练中用未来收益确定触发点。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "finml-n06-01",
+      "node_id": "finml-n06-01",
+      "title": "样本唯一性",
+      "definition": "金融事件标签的持有区间可能互相重叠；样本唯一性度量单个事件在其有效期内与多少事件共享时间资源。",
+      "assumptions": "每个事件的起止时间应被记录；在交易日历上建立并发事件数。",
+      "properties": [
+        "重叠程度大时有效独立样本量低于标签总数。",
+        "可以用并发度加权或序贯Bootstrap改善样本选择。"
+      ],
+      "formulas": [
+        {
+          "label": "数学定义/算法目标",
+          "tex": "u_i=\\frac1{|I_i|}\\sum_{t\\in I_i}\\frac1{c_t},\\quad c_t=\\sum_j\\mathbf1[t\\in I_j]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将每个事件映射为其标签信息覆盖区间",
+          "tex": "I_i=[t_i^{\\rm start},t_i^{\\rm end}]"
+        },
+        {
+          "explanation": "逐日计算同时活跃事件数",
+          "tex": "c_t=\\sum_j\\mathbf1[t\\in I_j]"
+        },
+        {
+          "explanation": "对事件有效期的1/c取平均得到唯一性",
+          "tex": "u_i=|I_i|^{-1}\\sum_{t\\in I_i}c_t^{-1}"
+        }
+      ],
+      "code": "import numpy as np\nevents=[(0,3),(2,5),(5,7)]\ntime=np.arange(8)\nconcurrency=np.array([sum(a<=t<=b for a,b in events) for t in time])\nunique=[np.mean(1/concurrency[a:b+1]) for a,b in events]\nprint(\"Uniqueness:\",unique)",
+      "application": "在多期ETF收益标签中判断相邻重叠事件的有效独立信息量。",
+      "limits": "该指标反映时间重叠，不直接说明不同资产经济冲击的相关性。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "finml-n04-04",
+      "node_id": "finml-n04-04",
+      "title": "Deflated Sharpe",
+      "definition": "Deflated Sharpe指标试图在收益非正态和大量策略搜索的情形下，校正观察到的最大Sharpe可能被数据挖掘夸大的问题。",
+      "assumptions": "需要明确独立或有效试验次数、观察长度与收益偏度/峰度；不同DSR公式依赖特定统计近似。",
+      "properties": [
+        "与普通Sharpe只看单策略相比，DSR考虑选择性报告的最优表现。",
+        "大量强相关试验的有效次数估计不确定。"
+      ],
+      "formulas": [
+        {
+          "label": "数学定义/算法目标",
+          "tex": "DSR=\\Phi\\!\\left(\\frac{(\\widehat{SR}-SR^*)\\sqrt{T-1}}{\\sqrt{1-\\hat\\gamma_3\\widehat{SR}+(\\hat\\gamma_4-1)\\widehat{SR}^2/4}}\\right)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "估计被选策略Sharpe及收益分布的偏度和峰度",
+          "tex": "\\widehat{SR}=\\bar r/s_r,\\quad\\hat\\gamma_3,\\hat\\gamma_4"
+        },
+        {
+          "explanation": "以搜索试验数对应的预期最大基准Sharpe SR*替换零假设基准",
+          "tex": "SR^*=E[\\max_{1\\le j\\le M_{\\rm eff}}SR_j\\mid H_0]"
+        },
+        {
+          "explanation": "用修正标准误构造正态近似概率",
+          "tex": "DSR=\\Phi((\\widehat{SR}-SR^*)/\\widehat{\\operatorname{SE}}(SR))"
+        }
+      ],
+      "code": "import numpy as np\nfrom scipy.stats import norm,skew,kurtosis\nrng=np.random.default_rng(1)\nr=rng.normal(.0005,.01,size=252)\nsr=r.mean()/r.std(ddof=1)\ng3=skew(r,bias=False);g4=kurtosis(r,fisher=False,bias=False)\nbaseline=.08 # illustrative reference, NOT calibrated multiple-testing SR*\nden=np.sqrt((1-g3*sr+(g4-1)*sr*sr/4)/(len(r)-1))\nprint(\"Illustrative adjusted probability:\",norm.cdf((sr-baseline)/den))",
+      "application": "研究大规模ETF超参数搜索或策略超市的选择偏差。",
+      "limits": "代码里的SR*人为给定，仅演示公式计算；没有实现正确的有效独立试验数估计，不应报告为正式DSR。",
+      "packages": "numpy, scipy",
+      "coverage": "complete"
+    },
+    {
+      "id": "finml-n05-04",
+      "node_id": "finml-n05-04",
+      "title": "Probability of Backtest Overfitting",
+      "definition": "PBO评估在多个样本切分下，样本内最优策略在样本外表现恶化为较差排名的频率，常采用组合对称交叉验证构造。",
+      "assumptions": "候选策略集合和全部历史结果需要完整记录；切分必须符合时间依赖与标签结构。",
+      "properties": [
+        "越常出现样本内赢家在样本外落入后半排名，PBO越高。",
+        "不证明策略在未来一定失败，只反映样本搜索过拟合风险。"
+      ],
+      "formulas": [
+        {
+          "label": "数学定义/算法目标",
+          "tex": "PBO=P(\\omega<0),\\quad\\omega=\\log\\frac{\\lambda}{1-\\lambda},\\quad\\lambda=\\operatorname{RankPct}_{\\rm OOS}(\\mathrm{IS\\ winner})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对多个训练测试组合，按样本内指标挑选赢家",
+          "tex": "j^*=\\arg\\max_j S_j^{\\rm IS}"
+        },
+        {
+          "explanation": "计算赢家在样本外候选策略中的百分位排名",
+          "tex": "\\lambda=\\operatorname{RankPct}(S_{j^*}^{\\rm OOS})"
+        },
+        {
+          "explanation": "以低于中位数的概率表示回测过拟合风险",
+          "tex": "PBO\\approx\\frac1K\\sum_k\\mathbf1[\\lambda_k<.5]"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0)\ninsample=np.array([[1.2,.8,.6],[.4,1.4,.7],[1.,.8,1.1]])\noutsample=np.array([[.1,.5,.8],[1.,.1,.3],[.5,.7,.2]])\nranks=[]\nfor ins,out in zip(insample,outsample):\n    winner=int(ins.argmax())\n    ranks.append((np.argsort(np.argsort(out))[winner]+.5)/len(out))\nprint(\"Toy overfitting frequency:\",np.mean(np.array(ranks)<.5))",
+      "application": "识别策略优化报告中频繁挑选最佳参数的选择偏差。",
+      "limits": "此代码仅是三个切分的直观排名演示，不是严格CPCV或完整PBO估计。",
+      "packages": "numpy",
+      "coverage": "complete"
+    }
+  ]
+}
