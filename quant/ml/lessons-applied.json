@@ -1,0 +1,465 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "probabilistic-n02-01",
+      "node_id": "probabilistic-n02-01",
+      "title": "贝叶斯定理",
+      "definition": "Bayes定理用条件似然和先验推断后验分布，是概率预测和状态不确定性分析的基础。",
+      "assumptions": "按所列数据生成与训练假设使用；需要独立样本外评估、适当数据质量检查和合规授权。",
+      "properties": [
+        "每个研究算法都依赖具体数据粒度、参数定义和评估方式。",
+        "示例为可复现的最小教学实现，不等于已验证的金融生产系统。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "p(\\theta\\mid x)=\\frac{p(x\\mid\\theta)p(\\theta)}{\\int p(x\\mid\\theta')p(\\theta')\\,d\\theta'}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从联合概率的两种分解写起",
+          "tex": "p(x,\\theta)=p(x\\mid\\theta)p(\\theta)=p(\\theta\\mid x)p(x)"
+        },
+        {
+          "explanation": "用全概率积分计算归一化证据",
+          "tex": "p(x)=\\int p(x\\mid\\theta)p(\\theta)d\\theta"
+        }
+      ],
+      "code": "import numpy as np\nprior=.01; sensitivity=.9; false_positive=.05\nposterior=sensitivity*prior/(sensitivity*prior+false_positive*(1-prior))\nprint(\"Event posterior:\",posterior)",
+      "packages": "numpy",
+      "application": "市场极端事件发生概率的序贯更新。",
+      "limits": "先验选择和似然错误可能大幅扭曲后验。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n02-02",
+      "node_id": "probabilistic-n02-02",
+      "title": "EM算法",
+      "definition": "EM交替执行隐变量后验责任度估计（E步）和期望完整数据对数似然优化（M步）。",
+      "assumptions": "按所列数据生成与训练假设使用；需要独立样本外评估、适当数据质量检查和合规授权。",
+      "properties": [
+        "每个研究算法都依赖具体数据粒度、参数定义和评估方式。",
+        "示例为可复现的最小教学实现，不等于已验证的金融生产系统。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "Q(\\theta\\mid\\theta^{(t)})=E_{Z\\mid X,\\theta^{(t)}}[\\log p(X,Z\\mid\\theta)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "利用条件分布构造对数似然的下界",
+          "tex": "\\log p_\\theta(X)=\\log\\sum_Zq(Z)\\frac{p_\\theta(X,Z)}{q(Z)}"
+        },
+        {
+          "explanation": "Jensen不等式形成期望完整数据对数似然",
+          "tex": "\\log p_\\theta(X)\\ge E_q[\\log p_\\theta(X,Z)-\\log q(Z)]"
+        },
+        {
+          "explanation": "E步更新q；M步最大化相应下界",
+          "tex": "q^{(t)}(Z)=p(Z|X,\\theta^{(t)}),\\quad\\theta^{(t+1)}=\\arg\\max_\\theta Q(\\theta|\\theta^{(t)})"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.mixture import GaussianMixture\nrng=np.random.default_rng(0)\nX=np.r_[rng.normal(-2,.5,100),rng.normal(2,.6,120)].reshape(-1,1)\ngmm=GaussianMixture(2,random_state=0).fit(X)\nprint(\"Means:\",np.sort(gmm.means_.ravel()))\nprint(\"Posterior responsibilities:\",gmm.predict_proba(X[:2]))",
+      "packages": "numpy, scikit-learn",
+      "application": "市场状态混合分布、波动率Regime识别。",
+      "limits": "EM通常只保证局部改善，不能保证全局最优；结果依赖初始化。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n03-02",
+      "node_id": "probabilistic-n03-02",
+      "title": "隐马尔可夫模型HMM",
+      "definition": "HMM通过隐藏状态的Markov转移和各状态条件观测分布描述可观察时间序列。",
+      "assumptions": "按所列数据生成与训练假设使用；需要独立样本外评估、适当数据质量检查和合规授权。",
+      "properties": [
+        "每个研究算法都依赖具体数据粒度、参数定义和评估方式。",
+        "示例为可复现的最小教学实现，不等于已验证的金融生产系统。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "p(z_{1:T},x_{1:T})=p(z_1)\\prod_{t=2}^Tp(z_t|z_{t-1})\\prod_{t=1}^Tp(x_t|z_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "模型包含状态转移矩阵和发射概率",
+          "tex": "A_{ij}=p(z_t=j|z_{t-1}=i),\\quad B_j(x)=p(x|z_t=j)"
+        },
+        {
+          "explanation": "前向递推整合前一时点状态概率",
+          "tex": "\\alpha_t(j)=B_j(x_t)\\sum_i\\alpha_{t-1}(i)A_{ij}"
+        }
+      ],
+      "code": "import numpy as np\nA=np.array([[.9,.1],[.2,.8]])\nB=np.array([[.8,.2],[.25,.75]])\nobserved=[0,0,1,1,0]\nalpha=np.array([.6,.4])\nfor obs in observed:\n    alpha=(alpha@A)*B[:,obs]\n    alpha/=alpha.sum()\n    print(\"Filtered state:\",alpha.round(3))",
+      "packages": "numpy",
+      "application": "牛市、熊市或高波动市场状态的在线概率追踪。",
+      "limits": "示例给定模型参数，仅实现状态过滤；真实HMM还需参数估计和模型选择。",
+      "coverage": "complete"
+    },
+    {
+      "id": "evaluation-n05-01",
+      "node_id": "evaluation-n05-01",
+      "title": "ROC-AUC",
+      "definition": "ROC-AUC衡量分类模型在所有阈值下对正负样本的排序区分能力。",
+      "assumptions": "按所列数据生成与训练假设使用；需要独立样本外评估、适当数据质量检查和合规授权。",
+      "properties": [
+        "每个研究算法都依赖具体数据粒度、参数定义和评估方式。",
+        "示例为可复现的最小教学实现，不等于已验证的金融生产系统。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "\\operatorname{AUC}=P(s(X^+)>s(X^-))+\\frac12P(s(X^+)=s(X^-))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对给定阈值计算真正率和假正率",
+          "tex": "\\mathrm{TPR}=\\frac{TP}{TP+FN},\\quad\\mathrm{FPR}=\\frac{FP}{FP+TN}"
+        },
+        {
+          "explanation": "沿假正率计算ROC曲线面积",
+          "tex": "\\mathrm{AUC}=\\int_0^1\\mathrm{TPR}(u)\\,du"
+        }
+      ],
+      "code": "from sklearn.metrics import roc_auc_score\ny=[0,1,0,1,1,0]\nscore=[.1,.9,.3,.5,.7,.2]\nprint(\"ROC-AUC:\",roc_auc_score(y,score))",
+      "packages": "scikit-learn",
+      "application": "方向分类和金融违约预警评估。",
+      "limits": "AUC不是概率校准指标，也不直接衡量净收益。",
+      "coverage": "complete"
+    },
+    {
+      "id": "evaluation-n04-02",
+      "node_id": "evaluation-n04-02",
+      "title": "Bootstrap",
+      "definition": "Bootstrap对样本有放回重复抽样，近似统计量抽样分布并构造不确定性区间。",
+      "assumptions": "按所列数据生成与训练假设使用；需要独立样本外评估、适当数据质量检查和合规授权。",
+      "properties": [
+        "每个研究算法都依赖具体数据粒度、参数定义和评估方式。",
+        "示例为可复现的最小教学实现，不等于已验证的金融生产系统。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "\\mathrm{CI}_{1-\\alpha}=[\\hat q_{\\alpha/2}(\\hat\\theta^*),\\hat q_{1-\\alpha/2}(\\hat\\theta^*)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从经验分布有放回抽取n个观测",
+          "tex": "X_i^*\\overset{iid}\\sim \\hat F_n"
+        },
+        {
+          "explanation": "重复计算统计量并求经验分位",
+          "tex": "\\hat q_{.025},\\hat q_{.975}\\text{ of }\\{\\hat\\theta_b^*\\}"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0)\nx=rng.normal(size=60)\nboots=[rng.choice(x,size=len(x),replace=True).mean() for _ in range(2000)]\nprint(\"95% percentile CI:\",np.percentile(boots,[2.5,97.5]))",
+      "packages": "numpy",
+      "application": "风险指标、AUC和策略Sharpe的不确定性估计。",
+      "limits": "i.i.d. Bootstrap不适合直接忽略收益自相关；金融序列可使用Block Bootstrap。",
+      "coverage": "complete"
+    },
+    {
+      "id": "evaluation-n02-04",
+      "node_id": "evaluation-n02-04",
+      "title": "SHAP",
+      "definition": "SHAP将模型预测相对某基准的差分归因于各个特征，基于合作博弈Shapley值。",
+      "assumptions": "按所列数据生成与训练假设使用；需要独立样本外评估、适当数据质量检查和合规授权。",
+      "properties": [
+        "每个研究算法都依赖具体数据粒度、参数定义和评估方式。",
+        "示例为可复现的最小教学实现，不等于已验证的金融生产系统。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "f(x)-E[f(X)]=\\sum_{j=1}^d\\phi_j"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "Shapley值在所有特征子集排列上的边际贡献平均",
+          "tex": "\\phi_j=\\sum_{S\\subseteq F\\setminus\\{j\\}}\\frac{|S|!(d-|S|-1)!}{d!}[v(S\\cup\\{j\\})-v(S)]"
+        },
+        {
+          "explanation": "在可加解释形式下归因总和等于模型相对基线输出",
+          "tex": "f(x)=\\phi_0+\\sum_j\\phi_j"
+        }
+      ],
+      "code": "import numpy as np\ncoef=np.array([.2,-.4,.1])\nx=np.array([1.5,.5,2.])\nbaseline=np.zeros(3)\ncontribution=coef*(x-baseline) # exact for linear model, fixed baseline\nprint(\"Contributions:\",contribution,\"Prediction difference:\",contribution.sum())",
+      "packages": "numpy",
+      "application": "解释多因子模型中动量、VIX与成交量对预测的贡献。",
+      "limits": "示例仅展示线性模型精确分解；真实非线性SHAP解释依赖背景分布，不能作因果解释。",
+      "coverage": "complete"
+    },
+    {
+      "id": "graph-n02-02",
+      "node_id": "graph-n02-02",
+      "title": "Graph Convolution GCN",
+      "definition": "GCN通过加入自环并对邻接矩阵度归一化，把邻居特征加权聚合到节点表示。",
+      "assumptions": "按所列数据生成与训练假设使用；需要独立样本外评估、适当数据质量检查和合规授权。",
+      "properties": [
+        "每个研究算法都依赖具体数据粒度、参数定义和评估方式。",
+        "示例为可复现的最小教学实现，不等于已验证的金融生产系统。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "H^{(l+1)}=\\sigma(\\tilde D^{-1/2}\\tilde A\\tilde D^{-1/2}H^{(l)}W^{(l)})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "添加自环并重算节点度",
+          "tex": "\\tilde A=A+I,\\quad\\tilde D_{ii}=\\sum_j\\tilde A_{ij}"
+        },
+        {
+          "explanation": "归一化邻接矩阵聚合邻居节点并作线性变换",
+          "tex": "H'=\\sigma(\\tilde D^{-1/2}\\tilde A\\tilde D^{-1/2}HW)"
+        }
+      ],
+      "code": "import torch\nA=torch.tensor([[0.,1.,0.],[1.,0.,1.],[0.,1.,0.]])\nA=A+torch.eye(3)\nd=A.sum(1).pow(-.5)\nnorm=d[:,None]*A*d[None,:]\nH=torch.tensor([[1.,0.],[0.,1.],[1.,1.]])\nW=torch.nn.Linear(2,2,bias=False)\nprint(torch.relu(norm@W(H)).shape)",
+      "packages": "torch",
+      "application": "用供应链、同业关联或ETF持仓关系图研究跨资产传染。",
+      "limits": "该代码为一层GCN前向传播；未来股票关系也存在PIT时间戳风险。",
+      "coverage": "complete"
+    },
+    {
+      "id": "causal-n01-01",
+      "node_id": "causal-n01-01",
+      "title": "潜在结果",
+      "definition": "潜在结果框架以个体在处理与不处理两种反事实世界的结果定义因果效应。",
+      "assumptions": "按所列数据生成与训练假设使用；需要独立样本外评估、适当数据质量检查和合规授权。",
+      "properties": [
+        "每个研究算法都依赖具体数据粒度、参数定义和评估方式。",
+        "示例为可复现的最小教学实现，不等于已验证的金融生产系统。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "\\tau=E[Y(1)-Y(0)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "个体处理结果由实际处理状态选出",
+          "tex": "Y=DY(1)+(1-D)Y(0)"
+        },
+        {
+          "explanation": "同一个体通常无法同时观测两种结果",
+          "tex": "(Y(1),Y(0))\\text{ 无法同时观测}"
+        },
+        {
+          "explanation": "随机处理可让样本均值差在相应假设下估计平均处理效应",
+          "tex": "E[Y|D=1]-E[Y|D=0]=\\tau"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(7)\nn=500; treatment=rng.binomial(1,.5,size=n)\ny0=rng.normal(size=n)\neffect=.7\ny=y0+effect*treatment\nprint(\"Difference in means:\",y[treatment==1].mean()-y[treatment==0].mean())",
+      "packages": "numpy",
+      "application": "识别政策冲击影响股票ETF回报的平均处理效应。",
+      "limits": "随机试验例子不适用于直接观察性市场数据，真实研究需要因果识别。",
+      "coverage": "complete"
+    },
+    {
+      "id": "causal-n04-03",
+      "node_id": "causal-n04-03",
+      "title": "Double Machine Learning",
+      "definition": "DML利用正交化得分和样本折间交叉拟合，在高维协变量下估计低维因果参数并降低一阶Nuisance模型误差。",
+      "assumptions": "按所列数据生成与训练假设使用；需要独立样本外评估、适当数据质量检查和合规授权。",
+      "properties": [
+        "每个研究算法都依赖具体数据粒度、参数定义和评估方式。",
+        "示例为可复现的最小教学实现，不等于已验证的金融生产系统。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "Y=\\theta D+g(X)+\\epsilon,\\quad D=m(X)+v,\\quad \\hat\\theta=\\frac{\\sum_i\\hat v_i(Y_i-\\hat g_i)}{\\sum_i\\hat v_iD_i}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先在不包含当前样本的训练折估计干扰函数",
+          "tex": "\\hat g^{(-k)}(X),\\quad\\hat m^{(-k)}(X)"
+        },
+        {
+          "explanation": "在保留折计算残差",
+          "tex": "\\hat u=Y-\\hat g(X),\\quad\\hat v=D-\\hat m(X)"
+        },
+        {
+          "explanation": "使用正交矩条件估计目标参数",
+          "tex": "\\frac1n\\sum_i(D_i-\\hat m_i)[Y_i-\\hat g_i-\\theta D_i]=0"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.model_selection import KFold\nfrom sklearn.ensemble import RandomForestRegressor\nrng=np.random.default_rng(0)\nn=200; X=rng.normal(size=(n,3))\nD=X[:,0]+rng.normal(size=n)\nY=.5*D+X[:,1]+rng.normal(size=n)\ng=np.zeros(n); m=np.zeros(n)\nfor tr,te in KFold(2,shuffle=True,random_state=0).split(X):\n    g[te]=RandomForestRegressor(n_estimators=40,random_state=0).fit(X[tr],Y[tr]).predict(X[te])\n    m[te]=RandomForestRegressor(n_estimators=40,random_state=1).fit(X[tr],D[tr]).predict(X[te])\nv=D-m\nprint(\"Approximate DML effect:\",(v@(Y-g))/(v@D))",
+      "packages": "numpy, scikit-learn",
+      "application": "控制宏观和行业特征后研究资金流与价格冲击。",
+      "limits": "展示部分线性DML的核心计算；需要排除混杂和适当时间序列交叉拟合。",
+      "coverage": "complete"
+    },
+    {
+      "id": "finml-n04-01",
+      "node_id": "finml-n04-01",
+      "title": "三重障碍标签Triple Barrier",
+      "definition": "对事件进入时刻设置止盈、止损与最长持有期限，标记最先触发的价格路径事件。",
+      "assumptions": "按所列数据生成与训练假设使用；需要独立样本外评估、适当数据质量检查和合规授权。",
+      "properties": [
+        "每个研究算法都依赖具体数据粒度、参数定义和评估方式。",
+        "示例为可复现的最小教学实现，不等于已验证的金融生产系统。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "y_i=\\begin{cases}+1,&\\text{先触发上障碍}\\\\-1,&\\text{先触发下障碍}\\\\0,&\\text{到期未触发}\\end{cases}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "在事件发生时刻依据已知历史波动设定阈值",
+          "tex": "U_i=P_{t_i}(1+u_i),\\quad L_i=P_{t_i}(1-\\ell_i)"
+        },
+        {
+          "explanation": "考察未来路径第一次触及上/下障碍或垂直期限的事件",
+          "tex": "\\tau_i=\\min(\\tau_U,\\tau_L,\\tau_V)"
+        }
+      ],
+      "code": "import numpy as np\nclose=np.array([100.,101.,103.,101.,98.,100.])\nentry=close[0]; up=entry*1.02; down=entry*.98\nout=0\nfor price in close[1:5]:\n    if price>=up: out=1; break\n    if price<=down: out=-1; break\nprint(\"Triple barrier label:\",out)",
+      "packages": "numpy",
+      "application": "量化金融事件驱动标签和不对称风险预测。",
+      "limits": "仅演示单事件的止盈止损；真实实现需处理成交时间、跳空、交易费用和重叠事件。",
+      "coverage": "complete"
+    },
+    {
+      "id": "finml-n04-02",
+      "node_id": "finml-n04-02",
+      "title": "因子中性化",
+      "definition": "通过截面回归或投影移除信号对规模、行业等公共风险的线性暴露。",
+      "assumptions": "按所列数据生成与训练假设使用；需要独立样本外评估、适当数据质量检查和合规授权。",
+      "properties": [
+        "每个研究算法都依赖具体数据粒度、参数定义和评估方式。",
+        "示例为可复现的最小教学实现，不等于已验证的金融生产系统。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "f_\\perp=f-X(X^\\top X)^{-1}X^\\top f"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对信号做横截面最小二乘",
+          "tex": "\\hat\\beta=(X^\\top X)^{-1}X^\\top f"
+        },
+        {
+          "explanation": "取残差与训练样本中的解释特征正交",
+          "tex": "X^\\top f_\\perp=0"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0)\nn=40; size=rng.normal(size=n)\nX=np.column_stack([np.ones(n),size])\nfactor=.5*size+rng.normal(size=n)\nresid=factor-X@np.linalg.lstsq(X,factor,rcond=None)[0]\nprint(\"Residual exposure:\",X.T@resid)",
+      "packages": "numpy",
+      "application": "对动量与市值、行业暴露进行Orthogonalize，研究增量选股信息。",
+      "limits": "残差正交只对样本的线性投影成立，可能同时移除有预测价值信号。",
+      "coverage": "complete"
+    },
+    {
+      "id": "mlops-n04-01",
+      "node_id": "mlops-n04-01",
+      "title": "随机种子",
+      "definition": "固定随机数生成器状态以提高相同环境下实验重复性，帮助区分实现随机性与策略选择误差。",
+      "assumptions": "按所列数据生成与训练假设使用；需要独立样本外评估、适当数据质量检查和合规授权。",
+      "properties": [
+        "每个研究算法都依赖具体数据粒度、参数定义和评估方式。",
+        "示例为可复现的最小教学实现，不等于已验证的金融生产系统。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "X^{(b)}\\sim P_{\\mathrm{seed}(b)},\\quad b=1,\\ldots,B"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "随机算法输出依赖数据及算法随机状态",
+          "tex": "\\hat\\theta=\\mathcal A(D,\\omega)"
+        },
+        {
+          "explanation": "控制随机状态后可在相同条件下复现实验轨迹",
+          "tex": "\\mathcal A(D,\\omega_0)=\\mathcal A(D,\\omega_0)"
+        }
+      ],
+      "code": "import random\nimport numpy as np\nrandom.seed(42)\nrng=np.random.default_rng(42)\nprint(\"Repeatable NumPy sample:\",rng.normal(size=3))\ntry:\n    import torch\n    torch.manual_seed(42)\n    print(\"Torch:\",torch.rand(3))\nexcept ImportError:\n    print(\"PyTorch optional\")",
+      "packages": "numpy; optional torch",
+      "application": "严格对照不同ETF模型和超参数实验版本。",
+      "limits": "固定种子仍不能保证全部GPU算子跨设备与不同软件版本完全确定。",
+      "coverage": "complete"
+    },
+    {
+      "id": "mlops-n01-05",
+      "node_id": "mlops-n01-05",
+      "title": "数据延迟与可用时间",
+      "definition": "特征可用时间必须同时考虑事件发生、发布、供应商处理和策略接收时间，避免线上预测接触未来数据。",
+      "assumptions": "按所列数据生成与训练假设使用；需要独立样本外评估、适当数据质量检查和合规授权。",
+      "properties": [
+        "每个研究算法都依赖具体数据粒度、参数定义和评估方式。",
+        "示例为可复现的最小教学实现，不等于已验证的金融生产系统。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "t_{\\mathrm{available}}=\\max(t_{\\mathrm{publish}},t_{\\mathrm{vendor}},t_{\\mathrm{received}})\\le t_{\\mathrm{decision}}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "每条特征记录事件时间与系统可见时间",
+          "tex": "t_{\\mathrm{event}}\\le t_{\\mathrm{publish}}\\le t_{\\mathrm{available}}"
+        },
+        {
+          "explanation": "只合并决策时刻已可得的数据",
+          "tex": "X_t=\\{x_i:t_{\\mathrm{available},i}\\le t\\}"
+        }
+      ],
+      "code": "from datetime import datetime\nitems=[\n    {\"name\":\"macro\",\"available\":\"2024-01-02T09:01\",\"value\":1.2},\n    {\"name\":\"earnings\",\"available\":\"2024-01-02T16:05\",\"value\":2.1},\n]\ndecision=datetime.fromisoformat(\"2024-01-02T15:30\")\nfeatures={i[\"name\"]:i[\"value\"] for i in items\n          if datetime.fromisoformat(i[\"available\"])<=decision}\nprint(\"Features available at decision:\",features)",
+      "packages": "Python standard library",
+      "application": "金融新闻、财报、宏观经济数据与实时交易信号的PIT审计。",
+      "limits": "历史文件时间戳错误或供应商重新修订可能产生难以察觉的回测泄漏。",
+      "coverage": "complete"
+    },
+    {
+      "id": "multimodal-n02-01",
+      "node_id": "multimodal-n02-01",
+      "title": "CLIP对比学习",
+      "definition": "CLIP在视觉与文本嵌入间对齐同一样本对，并对其他批内样本形成对比Softmax损失。",
+      "assumptions": "按所列数据生成与训练假设使用；需要独立样本外评估、适当数据质量检查和合规授权。",
+      "properties": [
+        "每个研究算法都依赖具体数据粒度、参数定义和评估方式。",
+        "示例为可复现的最小教学实现，不等于已验证的金融生产系统。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "L=-\\frac1N\\sum_i\\log\\frac{\\exp(s(v_i,t_i)/\\tau)}{\\sum_j\\exp(s(v_i,t_j)/\\tau)}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "图像和文本编码成归一化向量",
+          "tex": "v_i=\\frac{f_I(I_i)}{\\|f_I(I_i)\\|},\\quad t_i=\\frac{f_T(T_i)}{\\|f_T(T_i)\\|}"
+        },
+        {
+          "explanation": "构造批内相似度矩阵及对比分类目标",
+          "tex": "S_{ij}=v_i^\\top t_j/\\tau"
+        }
+      ],
+      "code": "import torch\ntorch.manual_seed(0)\nimage=torch.nn.functional.normalize(torch.randn(4,8),dim=-1)\ntext=torch.nn.functional.normalize(torch.randn(4,8),dim=-1)\nscores=image@text.T/.07\nlabels=torch.arange(4)\nloss=(torch.nn.functional.cross_entropy(scores,labels)+\n      torch.nn.functional.cross_entropy(scores.T,labels))/2\nprint(\"Contrastive loss:\",loss.item())",
+      "packages": "torch",
+      "application": "将财报图表、公告文本和新闻图像信息映射到共同空间。",
+      "limits": "仅演示批内对比损失，不包含真正的视觉或文本编码器预训练。",
+      "coverage": "complete"
+    }
+  ]
+}
