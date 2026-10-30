@@ -1,0 +1,421 @@
+{
+  "version": 1,
+  "notes": [
+    {
+      "id": "finml-n05-01",
+      "node_id": "finml-n05-01",
+      "title": "事件采样CUSUM",
+      "definition": "CUSUM累计价格变化超过阈值才产生事件，减少等间距样本中缺少信息的观测。",
+      "assumptions": "市场数据必须按资产和发布时间对齐；标签、图像、回测与成交成本不能包含当期决策未可见的信息。",
+      "properties": [
+        "CUSUM累计价格变化超过阈值才产生事件，减少等间距样本中缺少信息的观测。。",
+        "模型改善需要以时间切分的样本外净收益、统计不确定性和风险暴露检验。"
+      ],
+      "formulas": [
+        {
+          "label": "金融机器学习核心指标",
+          "tex": "S_t^+=\\max(0,S_{t-1}^++r_t-h)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义资产、决策时点、标签期限和金融统计量。CUSUM累计价格变化超过阈值才产生事件，减少等间距样本中缺少信息的观测。",
+          "tex": "S_t^+=\\max(0,S_{t-1}^++r_t-h)"
+        },
+        {
+          "explanation": "在该定义下估计预测量或成本指标，检验其样本外可信程度。",
+          "tex": "S_t^+=\\max(0,S_{t-1}^++r_t-h)"
+        }
+      ],
+      "code": "# 事件采样CUSUM：金融因子与风险综合示例\nimport numpy as np\nrng=np.random.default_rng(0)\nret=rng.normal(size=(60,5))*.01\nmu=ret.mean(0);sigma=np.cov(ret,rowvar=False)\nw=np.ones(5)/5\nprint(\"Portfolio expected return:\",mu@w)\nprint(\"Volatility:\",np.sqrt(w@sigma@w))\nshift=np.array([.3,.2,.2,.2,.1])\nprint(\"One-way turnover:\",.5*np.abs(shift-w).sum())",
+      "packages": "numpy",
+      "application": "ETF收益预测、金融因子选择、净成本回测及策略过拟合研究。",
+      "limits": "本条为数学和数据定义的专题扩展笔记，不等同于完整的DSR/PBO算法实现或真实交易回测。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "finml-n06-01",
+      "node_id": "finml-n06-01",
+      "title": "样本唯一性",
+      "definition": "金融重叠持有标签共享部分收益路径，样本唯一性反映同时活动标签数造成的信息重合。",
+      "assumptions": "市场数据必须按资产和发布时间对齐；标签、图像、回测与成交成本不能包含当期决策未可见的信息。",
+      "properties": [
+        "金融重叠持有标签共享部分收益路径，样本唯一性反映同时活动标签数造成的信息重合。。",
+        "模型改善需要以时间切分的样本外净收益、统计不确定性和风险暴露检验。"
+      ],
+      "formulas": [
+        {
+          "label": "金融机器学习核心指标",
+          "tex": "u_i=\\frac1{|I_i|}\\sum_{t\\in I_i}\\frac1{c_t}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义资产、决策时点、标签期限和金融统计量。金融重叠持有标签共享部分收益路径，样本唯一性反映同时活动标签数造成的信息重合。",
+          "tex": "u_i=\\frac1{|I_i|}\\sum_{t\\in I_i}\\frac1{c_t}"
+        },
+        {
+          "explanation": "在该定义下估计预测量或成本指标，检验其样本外可信程度。",
+          "tex": "u_i=\\frac1{|I_i|}\\sum_{t\\in I_i}\\frac1{c_t}"
+        }
+      ],
+      "code": "# 样本唯一性：金融因子与风险综合示例\nimport numpy as np\nrng=np.random.default_rng(0)\nret=rng.normal(size=(60,5))*.01\nmu=ret.mean(0);sigma=np.cov(ret,rowvar=False)\nw=np.ones(5)/5\nprint(\"Portfolio expected return:\",mu@w)\nprint(\"Volatility:\",np.sqrt(w@sigma@w))\nshift=np.array([.3,.2,.2,.2,.1])\nprint(\"One-way turnover:\",.5*np.abs(shift-w).sum())",
+      "packages": "numpy",
+      "application": "ETF收益预测、金融因子选择、净成本回测及策略过拟合研究。",
+      "limits": "本条为数学和数据定义的专题扩展笔记，不等同于完整的DSR/PBO算法实现或真实交易回测。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "finml-n05-02",
+      "node_id": "finml-n05-02",
+      "title": "稳定性选择",
+      "definition": "多次重采样执行特征筛选，并根据候选变量被选中的频率筛选稳健信号。",
+      "assumptions": "市场数据必须按资产和发布时间对齐；标签、图像、回测与成交成本不能包含当期决策未可见的信息。",
+      "properties": [
+        "多次重采样执行特征筛选，并根据候选变量被选中的频率筛选稳健信号。。",
+        "模型改善需要以时间切分的样本外净收益、统计不确定性和风险暴露检验。"
+      ],
+      "formulas": [
+        {
+          "label": "金融机器学习核心指标",
+          "tex": "\\hat\\pi_j=B^{-1}\\sum_{b=1}^B\\mathbf1[j\\in S_b]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义资产、决策时点、标签期限和金融统计量。多次重采样执行特征筛选，并根据候选变量被选中的频率筛选稳健信号。",
+          "tex": "\\hat\\pi_j=B^{-1}\\sum_{b=1}^B\\mathbf1[j\\in S_b]"
+        },
+        {
+          "explanation": "在该定义下估计预测量或成本指标，检验其样本外可信程度。",
+          "tex": "\\hat\\pi_j=B^{-1}\\sum_{b=1}^B\\mathbf1[j\\in S_b]"
+        }
+      ],
+      "code": "# 稳定性选择：金融因子与风险综合示例\nimport numpy as np\nrng=np.random.default_rng(0)\nret=rng.normal(size=(60,5))*.01\nmu=ret.mean(0);sigma=np.cov(ret,rowvar=False)\nw=np.ones(5)/5\nprint(\"Portfolio expected return:\",mu@w)\nprint(\"Volatility:\",np.sqrt(w@sigma@w))\nshift=np.array([.3,.2,.2,.2,.1])\nprint(\"One-way turnover:\",.5*np.abs(shift-w).sum())",
+      "packages": "numpy",
+      "application": "ETF收益预测、金融因子选择、净成本回测及策略过拟合研究。",
+      "limits": "本条为数学和数据定义的专题扩展笔记，不等同于完整的DSR/PBO算法实现或真实交易回测。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "finml-n01-03",
+      "node_id": "finml-n01-03",
+      "title": "ETF回报回归",
+      "definition": "用预测时可用的ETF历史因子回归未来收益，必须明确收益期限和样本外评价。",
+      "assumptions": "市场数据必须按资产和发布时间对齐；标签、图像、回测与成交成本不能包含当期决策未可见的信息。",
+      "properties": [
+        "用预测时可用的ETF历史因子回归未来收益，必须明确收益期限和样本外评价。。",
+        "模型改善需要以时间切分的样本外净收益、统计不确定性和风险暴露检验。"
+      ],
+      "formulas": [
+        {
+          "label": "金融机器学习核心指标",
+          "tex": "r_{i,t+h}=\\beta^\\top X_{i,t}+\\epsilon_{i,t+h}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义资产、决策时点、标签期限和金融统计量。用预测时可用的ETF历史因子回归未来收益，必须明确收益期限和样本外评价。",
+          "tex": "r_{i,t+h}=\\beta^\\top X_{i,t}+\\epsilon_{i,t+h}"
+        },
+        {
+          "explanation": "在该定义下估计预测量或成本指标，检验其样本外可信程度。",
+          "tex": "r_{i,t+h}=\\beta^\\top X_{i,t}+\\epsilon_{i,t+h}"
+        }
+      ],
+      "code": "# ETF回报回归：金融因子与风险综合示例\nimport numpy as np\nrng=np.random.default_rng(0)\nret=rng.normal(size=(60,5))*.01\nmu=ret.mean(0);sigma=np.cov(ret,rowvar=False)\nw=np.ones(5)/5\nprint(\"Portfolio expected return:\",mu@w)\nprint(\"Volatility:\",np.sqrt(w@sigma@w))\nshift=np.array([.3,.2,.2,.2,.1])\nprint(\"One-way turnover:\",.5*np.abs(shift-w).sum())",
+      "packages": "numpy",
+      "application": "ETF收益预测、金融因子选择、净成本回测及策略过拟合研究。",
+      "limits": "本条为数学和数据定义的专题扩展笔记，不等同于完整的DSR/PBO算法实现或真实交易回测。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "finml-n02-03",
+      "node_id": "finml-n02-03",
+      "title": "涨跌方向分类",
+      "definition": "将未来收益阈值化为上涨或下跌标签，并训练概率分类模型。",
+      "assumptions": "市场数据必须按资产和发布时间对齐；标签、图像、回测与成交成本不能包含当期决策未可见的信息。",
+      "properties": [
+        "将未来收益阈值化为上涨或下跌标签，并训练概率分类模型。。",
+        "模型改善需要以时间切分的样本外净收益、统计不确定性和风险暴露检验。"
+      ],
+      "formulas": [
+        {
+          "label": "金融机器学习核心指标",
+          "tex": "Y_{i,t}=\\mathbf1[r_{i,t+h}>0]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义资产、决策时点、标签期限和金融统计量。将未来收益阈值化为上涨或下跌标签，并训练概率分类模型。",
+          "tex": "Y_{i,t}=\\mathbf1[r_{i,t+h}>0]"
+        },
+        {
+          "explanation": "在该定义下估计预测量或成本指标，检验其样本外可信程度。",
+          "tex": "Y_{i,t}=\\mathbf1[r_{i,t+h}>0]"
+        }
+      ],
+      "code": "# 涨跌方向分类：金融因子与风险综合示例\nimport numpy as np\nrng=np.random.default_rng(0)\nret=rng.normal(size=(60,5))*.01\nmu=ret.mean(0);sigma=np.cov(ret,rowvar=False)\nw=np.ones(5)/5\nprint(\"Portfolio expected return:\",mu@w)\nprint(\"Volatility:\",np.sqrt(w@sigma@w))\nshift=np.array([.3,.2,.2,.2,.1])\nprint(\"One-way turnover:\",.5*np.abs(shift-w).sum())",
+      "packages": "numpy",
+      "application": "ETF收益预测、金融因子选择、净成本回测及策略过拟合研究。",
+      "limits": "本条为数学和数据定义的专题扩展笔记，不等同于完整的DSR/PBO算法实现或真实交易回测。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "finml-n03-03",
+      "node_id": "finml-n03-03",
+      "title": "Transformer序列预测",
+      "definition": "Transformer以历史已知多变量序列为输入，通过注意力输出未来收益或波动预测。",
+      "assumptions": "市场数据必须按资产和发布时间对齐；标签、图像、回测与成交成本不能包含当期决策未可见的信息。",
+      "properties": [
+        "Transformer以历史已知多变量序列为输入，通过注意力输出未来收益或波动预测。。",
+        "模型改善需要以时间切分的样本外净收益、统计不确定性和风险暴露检验。"
+      ],
+      "formulas": [
+        {
+          "label": "金融机器学习核心指标",
+          "tex": "\\hat y_{t+h}=f_\\theta(X_{t-W+1:t})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义资产、决策时点、标签期限和金融统计量。Transformer以历史已知多变量序列为输入，通过注意力输出未来收益或波动预测。",
+          "tex": "\\hat y_{t+h}=f_\\theta(X_{t-W+1:t})"
+        },
+        {
+          "explanation": "在该定义下估计预测量或成本指标，检验其样本外可信程度。",
+          "tex": "\\hat y_{t+h}=f_\\theta(X_{t-W+1:t})"
+        }
+      ],
+      "code": "# Transformer序列预测：金融因子与风险综合示例\nimport numpy as np\nrng=np.random.default_rng(0)\nret=rng.normal(size=(60,5))*.01\nmu=ret.mean(0);sigma=np.cov(ret,rowvar=False)\nw=np.ones(5)/5\nprint(\"Portfolio expected return:\",mu@w)\nprint(\"Volatility:\",np.sqrt(w@sigma@w))\nshift=np.array([.3,.2,.2,.2,.1])\nprint(\"One-way turnover:\",.5*np.abs(shift-w).sum())",
+      "packages": "numpy",
+      "application": "ETF收益预测、金融因子选择、净成本回测及策略过拟合研究。",
+      "limits": "本条为数学和数据定义的专题扩展笔记，不等同于完整的DSR/PBO算法实现或真实交易回测。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "finml-n04-03",
+      "node_id": "finml-n04-03",
+      "title": "CNN价格图像",
+      "definition": "从历史OHLCV窗口生成只包含过去信息的价格图像，用CNN学习趋势信号。",
+      "assumptions": "市场数据必须按资产和发布时间对齐；标签、图像、回测与成交成本不能包含当期决策未可见的信息。",
+      "properties": [
+        "从历史OHLCV窗口生成只包含过去信息的价格图像，用CNN学习趋势信号。。",
+        "模型改善需要以时间切分的样本外净收益、统计不确定性和风险暴露检验。"
+      ],
+      "formulas": [
+        {
+          "label": "金融机器学习核心指标",
+          "tex": "I_t=\\operatorname{Render}(OHLCV_{t-W+1:t})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义资产、决策时点、标签期限和金融统计量。从历史OHLCV窗口生成只包含过去信息的价格图像，用CNN学习趋势信号。",
+          "tex": "I_t=\\operatorname{Render}(OHLCV_{t-W+1:t})"
+        },
+        {
+          "explanation": "在该定义下估计预测量或成本指标，检验其样本外可信程度。",
+          "tex": "I_t=\\operatorname{Render}(OHLCV_{t-W+1:t})"
+        }
+      ],
+      "code": "# CNN价格图像：金融因子与风险综合示例\nimport numpy as np\nrng=np.random.default_rng(0)\nret=rng.normal(size=(60,5))*.01\nmu=ret.mean(0);sigma=np.cov(ret,rowvar=False)\nw=np.ones(5)/5\nprint(\"Portfolio expected return:\",mu@w)\nprint(\"Volatility:\",np.sqrt(w@sigma@w))\nshift=np.array([.3,.2,.2,.2,.1])\nprint(\"One-way turnover:\",.5*np.abs(shift-w).sum())",
+      "packages": "numpy",
+      "application": "ETF收益预测、金融因子选择、净成本回测及策略过拟合研究。",
+      "limits": "本条为数学和数据定义的专题扩展笔记，不等同于完整的DSR/PBO算法实现或真实交易回测。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "finml-n05-03",
+      "node_id": "finml-n05-03",
+      "title": "截面多因子",
+      "definition": "对同日各ETF因子暴露加权生成截面收益预测或打分。",
+      "assumptions": "市场数据必须按资产和发布时间对齐；标签、图像、回测与成交成本不能包含当期决策未可见的信息。",
+      "properties": [
+        "对同日各ETF因子暴露加权生成截面收益预测或打分。。",
+        "模型改善需要以时间切分的样本外净收益、统计不确定性和风险暴露检验。"
+      ],
+      "formulas": [
+        {
+          "label": "金融机器学习核心指标",
+          "tex": "\\hat r_{i,t+1}=\\sum_k\\beta_kf_{i,t}^{(k)}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义资产、决策时点、标签期限和金融统计量。对同日各ETF因子暴露加权生成截面收益预测或打分。",
+          "tex": "\\hat r_{i,t+1}=\\sum_k\\beta_kf_{i,t}^{(k)}"
+        },
+        {
+          "explanation": "在该定义下估计预测量或成本指标，检验其样本外可信程度。",
+          "tex": "\\hat r_{i,t+1}=\\sum_k\\beta_kf_{i,t}^{(k)}"
+        }
+      ],
+      "code": "# 截面多因子：金融因子与风险综合示例\nimport numpy as np\nrng=np.random.default_rng(0)\nret=rng.normal(size=(60,5))*.01\nmu=ret.mean(0);sigma=np.cov(ret,rowvar=False)\nw=np.ones(5)/5\nprint(\"Portfolio expected return:\",mu@w)\nprint(\"Volatility:\",np.sqrt(w@sigma@w))\nshift=np.array([.3,.2,.2,.2,.1])\nprint(\"One-way turnover:\",.5*np.abs(shift-w).sum())",
+      "packages": "numpy",
+      "application": "ETF收益预测、金融因子选择、净成本回测及策略过拟合研究。",
+      "limits": "本条为数学和数据定义的专题扩展笔记，不等同于完整的DSR/PBO算法实现或真实交易回测。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "finml-n06-03",
+      "node_id": "finml-n06-03",
+      "title": "市场状态模型",
+      "definition": "将牛熊、波动或流动性环境编码成潜在状态并条件化预测与风险。",
+      "assumptions": "市场数据必须按资产和发布时间对齐；标签、图像、回测与成交成本不能包含当期决策未可见的信息。",
+      "properties": [
+        "将牛熊、波动或流动性环境编码成潜在状态并条件化预测与风险。。",
+        "模型改善需要以时间切分的样本外净收益、统计不确定性和风险暴露检验。"
+      ],
+      "formulas": [
+        {
+          "label": "金融机器学习核心指标",
+          "tex": "p(r_t)=\\sum_kp(z_t=k)p(r_t\\mid z_t=k)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义资产、决策时点、标签期限和金融统计量。将牛熊、波动或流动性环境编码成潜在状态并条件化预测与风险。",
+          "tex": "p(r_t)=\\sum_kp(z_t=k)p(r_t\\mid z_t=k)"
+        },
+        {
+          "explanation": "在该定义下估计预测量或成本指标，检验其样本外可信程度。",
+          "tex": "p(r_t)=\\sum_kp(z_t=k)p(r_t\\mid z_t=k)"
+        }
+      ],
+      "code": "# 市场状态模型：金融因子与风险综合示例\nimport numpy as np\nrng=np.random.default_rng(0)\nret=rng.normal(size=(60,5))*.01\nmu=ret.mean(0);sigma=np.cov(ret,rowvar=False)\nw=np.ones(5)/5\nprint(\"Portfolio expected return:\",mu@w)\nprint(\"Volatility:\",np.sqrt(w@sigma@w))\nshift=np.array([.3,.2,.2,.2,.1])\nprint(\"One-way turnover:\",.5*np.abs(shift-w).sum())",
+      "packages": "numpy",
+      "application": "ETF收益预测、金融因子选择、净成本回测及策略过拟合研究。",
+      "limits": "本条为数学和数据定义的专题扩展笔记，不等同于完整的DSR/PBO算法实现或真实交易回测。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "finml-n04-04",
+      "node_id": "finml-n04-04",
+      "title": "Deflated Sharpe",
+      "definition": "Deflated Sharpe对回测Sharpe统计量进行多重试验和收益分布偏度峰度相关的修正。",
+      "assumptions": "市场数据必须按资产和发布时间对齐；标签、图像、回测与成交成本不能包含当期决策未可见的信息。",
+      "properties": [
+        "Deflated Sharpe对回测Sharpe统计量进行多重试验和收益分布偏度峰度相关的修正。。",
+        "模型改善需要以时间切分的样本外净收益、统计不确定性和风险暴露检验。"
+      ],
+      "formulas": [
+        {
+          "label": "金融机器学习核心指标",
+          "tex": "\\operatorname{DSR}=P(\\widehat{SR}>SR^*)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义资产、决策时点、标签期限和金融统计量。Deflated Sharpe对回测Sharpe统计量进行多重试验和收益分布偏度峰度相关的修正。",
+          "tex": "\\operatorname{DSR}=P(\\widehat{SR}>SR^*)"
+        },
+        {
+          "explanation": "在该定义下估计预测量或成本指标，检验其样本外可信程度。",
+          "tex": "\\operatorname{DSR}=P(\\widehat{SR}>SR^*)"
+        }
+      ],
+      "code": "# Deflated Sharpe：金融因子与风险综合示例\nimport numpy as np\nrng=np.random.default_rng(0)\nret=rng.normal(size=(60,5))*.01\nmu=ret.mean(0);sigma=np.cov(ret,rowvar=False)\nw=np.ones(5)/5\nprint(\"Portfolio expected return:\",mu@w)\nprint(\"Volatility:\",np.sqrt(w@sigma@w))\nshift=np.array([.3,.2,.2,.2,.1])\nprint(\"One-way turnover:\",.5*np.abs(shift-w).sum())",
+      "packages": "numpy",
+      "application": "ETF收益预测、金融因子选择、净成本回测及策略过拟合研究。",
+      "limits": "本条为数学和数据定义的专题扩展笔记，不等同于完整的DSR/PBO算法实现或真实交易回测。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "finml-n05-04",
+      "node_id": "finml-n05-04",
+      "title": "Probability of Backtest Overfitting",
+      "definition": "PBO估计多策略选择中样本内最优策略在样本外落入较差排名的概率。",
+      "assumptions": "市场数据必须按资产和发布时间对齐；标签、图像、回测与成交成本不能包含当期决策未可见的信息。",
+      "properties": [
+        "PBO估计多策略选择中样本内最优策略在样本外落入较差排名的概率。。",
+        "模型改善需要以时间切分的样本外净收益、统计不确定性和风险暴露检验。"
+      ],
+      "formulas": [
+        {
+          "label": "金融机器学习核心指标",
+          "tex": "\\operatorname{PBO}=P(\\operatorname{rank}_{\\rm OOS}(m_{\\rm IS}^*)<1/2)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义资产、决策时点、标签期限和金融统计量。PBO估计多策略选择中样本内最优策略在样本外落入较差排名的概率。",
+          "tex": "\\operatorname{PBO}=P(\\operatorname{rank}_{\\rm OOS}(m_{\\rm IS}^*)<1/2)"
+        },
+        {
+          "explanation": "在该定义下估计预测量或成本指标，检验其样本外可信程度。",
+          "tex": "\\operatorname{PBO}=P(\\operatorname{rank}_{\\rm OOS}(m_{\\rm IS}^*)<1/2)"
+        }
+      ],
+      "code": "# Probability of Backtest Overfitting：金融因子与风险综合示例\nimport numpy as np\nrng=np.random.default_rng(0)\nret=rng.normal(size=(60,5))*.01\nmu=ret.mean(0);sigma=np.cov(ret,rowvar=False)\nw=np.ones(5)/5\nprint(\"Portfolio expected return:\",mu@w)\nprint(\"Volatility:\",np.sqrt(w@sigma@w))\nshift=np.array([.3,.2,.2,.2,.1])\nprint(\"One-way turnover:\",.5*np.abs(shift-w).sum())",
+      "packages": "numpy",
+      "application": "ETF收益预测、金融因子选择、净成本回测及策略过拟合研究。",
+      "limits": "本条为数学和数据定义的专题扩展笔记，不等同于完整的DSR/PBO算法实现或真实交易回测。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "finml-n01-05",
+      "node_id": "finml-n01-05",
+      "title": "预期收益与协方差",
+      "definition": "组合优化需要期望收益向量与协方差矩阵，其估计误差直接影响最优权重。",
+      "assumptions": "市场数据必须按资产和发布时间对齐；标签、图像、回测与成交成本不能包含当期决策未可见的信息。",
+      "properties": [
+        "组合优化需要期望收益向量与协方差矩阵，其估计误差直接影响最优权重。。",
+        "模型改善需要以时间切分的样本外净收益、统计不确定性和风险暴露检验。"
+      ],
+      "formulas": [
+        {
+          "label": "金融机器学习核心指标",
+          "tex": "\\mu=E[r],\\quad\\Sigma=E[(r-\\mu)(r-\\mu)^\\top]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义资产、决策时点、标签期限和金融统计量。组合优化需要期望收益向量与协方差矩阵，其估计误差直接影响最优权重。",
+          "tex": "\\mu=E[r],\\quad\\Sigma=E[(r-\\mu)(r-\\mu)^\\top]"
+        },
+        {
+          "explanation": "在该定义下估计预测量或成本指标，检验其样本外可信程度。",
+          "tex": "\\mu=E[r],\\quad\\Sigma=E[(r-\\mu)(r-\\mu)^\\top]"
+        }
+      ],
+      "code": "# 预期收益与协方差：金融因子与风险综合示例\nimport numpy as np\nrng=np.random.default_rng(0)\nret=rng.normal(size=(60,5))*.01\nmu=ret.mean(0);sigma=np.cov(ret,rowvar=False)\nw=np.ones(5)/5\nprint(\"Portfolio expected return:\",mu@w)\nprint(\"Volatility:\",np.sqrt(w@sigma@w))\nshift=np.array([.3,.2,.2,.2,.1])\nprint(\"One-way turnover:\",.5*np.abs(shift-w).sum())",
+      "packages": "numpy",
+      "application": "ETF收益预测、金融因子选择、净成本回测及策略过拟合研究。",
+      "limits": "本条为数学和数据定义的专题扩展笔记，不等同于完整的DSR/PBO算法实现或真实交易回测。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "finml-n06-05",
+      "node_id": "finml-n06-05",
+      "title": "容量与换手",
+      "definition": "策略容量取决于交易量、市场冲击与净成本，换手越高未必净收益越好。",
+      "assumptions": "市场数据必须按资产和发布时间对齐；标签、图像、回测与成交成本不能包含当期决策未可见的信息。",
+      "properties": [
+        "策略容量取决于交易量、市场冲击与净成本，换手越高未必净收益越好。。",
+        "模型改善需要以时间切分的样本外净收益、统计不确定性和风险暴露检验。"
+      ],
+      "formulas": [
+        {
+          "label": "金融机器学习核心指标",
+          "tex": "\\mathrm{turnover}_t=\\frac12\\sum_i|w_{i,t}-w_{i,t-1}|"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义资产、决策时点、标签期限和金融统计量。策略容量取决于交易量、市场冲击与净成本，换手越高未必净收益越好。",
+          "tex": "\\mathrm{turnover}_t=\\frac12\\sum_i|w_{i,t}-w_{i,t-1}|"
+        },
+        {
+          "explanation": "在该定义下估计预测量或成本指标，检验其样本外可信程度。",
+          "tex": "\\mathrm{turnover}_t=\\frac12\\sum_i|w_{i,t}-w_{i,t-1}|"
+        }
+      ],
+      "code": "# 容量与换手：金融因子与风险综合示例\nimport numpy as np\nrng=np.random.default_rng(0)\nret=rng.normal(size=(60,5))*.01\nmu=ret.mean(0);sigma=np.cov(ret,rowvar=False)\nw=np.ones(5)/5\nprint(\"Portfolio expected return:\",mu@w)\nprint(\"Volatility:\",np.sqrt(w@sigma@w))\nshift=np.array([.3,.2,.2,.2,.1])\nprint(\"One-way turnover:\",.5*np.abs(shift-w).sum())",
+      "packages": "numpy",
+      "application": "ETF收益预测、金融因子选择、净成本回测及策略过拟合研究。",
+      "limits": "本条为数学和数据定义的专题扩展笔记，不等同于完整的DSR/PBO算法实现或真实交易回测。",
+      "coverage": "expanded"
+    }
+  ]
+}
