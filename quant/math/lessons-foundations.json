@@ -1,0 +1,696 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "calculus-n0032",
+      "node_id": "calculus-n0032",
+      "title": "链式法则",
+      "definition": "复合可微函数的导数由各层导数相乘得到；多元情形表现为Jacobian矩阵乘法。",
+      "assumptions": "内层函数在点处可微，外层在内层取值处可微。",
+      "properties": [
+        "多元映射的导数是线性近似算子。",
+        "Jacobian顺序取决于向量分子/分母布局约定。"
+      ],
+      "formulas": [
+        {
+          "label": "一元链式法则",
+          "tex": "\\frac{\\mathrm d}{\\mathrm dx}f(g(x))=f'(g(x))g'(x)"
+        },
+        {
+          "label": "矩阵链式法则",
+          "tex": "D(f\\circ g)(x)=Df(g(x))Dg(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "令 $h(x)=f(g(x))$，使用一阶微分近似",
+          "tex": "g(x+\\Delta x)=g(x)+Dg(x)\\Delta x+o(\\|\\Delta x\\|)"
+        },
+        {
+          "explanation": "将内层增量代入外层微分式",
+          "tex": "h(x+\\Delta x)-h(x)=Df(g(x))Dg(x)\\Delta x+o(\\|\\Delta x\\|)"
+        },
+        {
+          "explanation": "比较线性主项即可得复合导数",
+          "tex": "Dh(x)=Df(g(x))Dg(x)"
+        }
+      ],
+      "example": "设 $f(z)=z^2$、$g(x)=3x+1$，则导数为 $6(3x+1)$。",
+      "application": "神经网络反向传播与损失对参数的敏感度。",
+      "caveat": "多层矩阵求导时检查维度；并非所有偏导存在就能断言可微。",
+      "checked_status": "独立编辑的重点讲义；按列出的条件理解公式与证明"
+    },
+    {
+      "id": "calculus-n0042",
+      "node_id": "calculus-n0042",
+      "title": "多元Taylor展开",
+      "definition": "多元函数在一点附近可由梯度和Hessian的局部项逼近，用于优化曲率与误差分析。",
+      "assumptions": "函数在邻域具有连续二阶导数，向量扰动足够小。",
+      "properties": [
+        "Hessian对称性由混合偏导连续条件保证。",
+        "二次项表示沿方向 $h$ 的局部曲率。"
+      ],
+      "formulas": [
+        {
+          "label": "二阶Taylor式",
+          "tex": "f(x+h)=f(x)+\\nabla f(x)^\\top h+\\frac12 h^\\top \\nabla^2 f(x)h+o(\\|h\\|^2)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义一元辅助函数 $g(t)=f(x+th)$",
+          "tex": "g'(t)=\\nabla f(x+th)^\\top h"
+        },
+        {
+          "explanation": "求二阶导并在零点展开",
+          "tex": "g''(t)=h^\\top \\nabla^2 f(x+th)h"
+        },
+        {
+          "explanation": "应用一元二阶Taylor，再令 $t=1$",
+          "tex": "g(1)=g(0)+g'(0)+\\frac12g''(0)+o(\\|h\\|^2)"
+        }
+      ],
+      "example": "若 $f(x_1,x_2)=x_1^2+2x_2^2$，其Hessian为 $\\mathrm{diag}(2,4)$，二阶展开是精确等式。",
+      "application": "Newton法、风险模型二阶近似、期权Gamma。",
+      "caveat": "仅连续可微无法保证具有所写二阶小 $o$ 余项。",
+      "checked_status": "独立编辑的重点讲义；按列出的条件理解公式与证明"
+    },
+    {
+      "id": "calculus-n0056",
+      "node_id": "calculus-n0056",
+      "title": "二次型梯度",
+      "definition": "二次型是矩阵优化的基本目标，梯度依赖矩阵的对称部分。",
+      "assumptions": "$x\\in\\mathbb R^n$，$A$ 为常数实方阵。",
+      "properties": [
+        "若 $A=A^\\top$，梯度简化为 $2Ax$。",
+        "Hessian为 $A+A^\\top$。"
+      ],
+      "formulas": [
+        {
+          "label": "二次型导数",
+          "tex": "\\nabla_x(x^\\top A x)=(A+A^\\top)x"
+        },
+        {
+          "label": "对称特例",
+          "tex": "\\nabla_x\\left(\\frac12x^\\top\\Sigma x\\right)=\\Sigma x\\quad(\\Sigma=\\Sigma^\\top)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "逐元素求偏导",
+          "tex": "\\frac{\\partial}{\\partial x_k}\\sum_{i,j}a_{ij}x_ix_j=\\sum_ja_{kj}x_j+\\sum_ia_{ik}x_i"
+        },
+        {
+          "explanation": "将所有分量排列成向量",
+          "tex": "\\nabla f=(A+A^\\top)x"
+        }
+      ],
+      "example": "若组合方差为 $w^\\top\\Sigma w$，边际风险方向是 $2\\Sigma w$。",
+      "application": "均值方差配置、L2正则、二次规划。",
+      "caveat": "若矩阵不是对称的，直接写 $2Ax$ 一般错误。",
+      "checked_status": "独立编辑的重点讲义；按列出的条件理解公式与证明"
+    },
+    {
+      "id": "linear-n0075",
+      "node_id": "linear-n0075",
+      "title": "正交投影",
+      "definition": "向列空间投影得到距离原观测向量最短的向量；残差与该子空间正交。",
+      "assumptions": "$X\\in\\mathbb R^{n\\times p}$ 且列满秩。",
+      "properties": [
+        "投影矩阵对称：$P^\\top=P$。",
+        "幂等：$P^2=P$。",
+        "残差投影 $M=I-P$ 也对称幂等。"
+      ],
+      "formulas": [
+        {
+          "label": "正交投影矩阵",
+          "tex": "P_X=X(X^\\top X)^{-1}X^\\top"
+        },
+        {
+          "label": "残差正交性",
+          "tex": "X^\\top(y-P_Xy)=0"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义最小二乘目标函数",
+          "tex": "L(\\beta)=\\|y-X\\beta\\|_2^2"
+        },
+        {
+          "explanation": "一阶条件产生正规方程",
+          "tex": "\\nabla_\\beta L=-2X^\\top(y-X\\beta)=0"
+        },
+        {
+          "explanation": "解出投影与残差",
+          "tex": "\\hat\\beta=(X^\\top X)^{-1}X^\\top y,\\quad \\hat y=P_Xy"
+        }
+      ],
+      "example": "将一组ETF收益对市场指数回归，残差不再与截距和样本内解释变量线性相关。",
+      "application": "OLS、因子中性化与几何投影。",
+      "caveat": "不满秩时必须改用伪逆或正则化，不能硬求逆。",
+      "checked_status": "独立编辑的重点讲义；按列出的条件理解公式与证明"
+    },
+    {
+      "id": "linear-n0083",
+      "node_id": "linear-n0083",
+      "title": "奇异值分解SVD",
+      "definition": "任意实矩阵可由左右正交基和非负奇异值分解；按大奇异值截断给出最佳低秩近似。",
+      "assumptions": "$A\\in\\mathbb R^{m\\times n}$，无需方阵或满秩。",
+      "properties": [
+        "奇异值是 $A^\\top A$ 非负特征值的平方根。",
+        "Frobenius范数下的最优秩 $k$ 近似由截断SVD给出。"
+      ],
+      "formulas": [
+        {
+          "label": "紧SVD",
+          "tex": "A=U\\Sigma V^\\top"
+        },
+        {
+          "label": "低秩最佳逼近",
+          "tex": "A_k=\\sum_{i=1}^k\\sigma_i u_iv_i^\\top,\\quad \\|A-A_k\\|_F^2=\\sum_{i>k}\\sigma_i^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从对称半正定矩阵出发进行谱分解",
+          "tex": "A^\\top A v_i=\\sigma_i^2v_i"
+        },
+        {
+          "explanation": "对非零奇异值定义左奇异向量",
+          "tex": "u_i=Av_i/\\sigma_i"
+        },
+        {
+          "explanation": "代回验证并将非零方向展开",
+          "tex": "Av_i=\\sigma_i u_i\\ \\Longrightarrow\\ A=\\sum_i\\sigma_i u_iv_i^\\top"
+        }
+      ],
+      "example": "对资产收益矩阵SVD可提取解释最大样本方差的主要方向。",
+      "application": "降维、PCA、协方差估计、去噪和风险模型。",
+      "caveat": "主成分的解释方差大小不直接代表投资可预测收益。",
+      "checked_status": "独立编辑的重点讲义；按列出的条件理解公式与证明"
+    },
+    {
+      "id": "linear-n0082",
+      "node_id": "linear-n0082",
+      "title": "正定半正定矩阵",
+      "definition": "实对称矩阵 $A$ 对全部非零向量有正二次型为正定；非负则为半正定。",
+      "assumptions": "$A$ 实对称。",
+      "properties": [
+        "正定矩阵所有特征值严格为正。",
+        "协方差矩阵总是半正定，样本不足时可能奇异。"
+      ],
+      "formulas": [
+        {
+          "label": "正定定义",
+          "tex": "x^\\top Ax>0\\quad\\forall x\\neq 0"
+        },
+        {
+          "label": "半正定定义",
+          "tex": "x^\\top Ax\\ge0\\quad\\forall x"
+        },
+        {
+          "label": "协方差半正定",
+          "tex": "x^\\top \\Sigma x=\\operatorname{Var}(x^\\top R)\\ge0"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对协方差矩阵取任意向量 $x$",
+          "tex": "x^\\top\\Sigma x=\\sum_{ij}x_ix_j\\operatorname{Cov}(R_i,R_j)"
+        },
+        {
+          "explanation": "利用方差的双线性展开",
+          "tex": "=\\operatorname{Var}\\left(\\sum_i x_iR_i\\right)\\ge0"
+        }
+      ],
+      "example": "若两只ETF收益完全线性相关，协方差可能只有半正定而无法逆。",
+      "application": "组合优化、Cholesky、协方差收缩。",
+      "caveat": "半正定不代表可以求逆；负特征值通常说明估计或数值存在问题。",
+      "checked_status": "独立编辑的重点讲义；按列出的条件理解公式与证明"
+    },
+    {
+      "id": "probability-n0096",
+      "node_id": "probability-n0096",
+      "title": "Bayes定理",
+      "definition": "用先验概率与条件似然将新证据转成后验概率。",
+      "assumptions": "事件 $B$ 满足 $P(B)>0$。",
+      "properties": [
+        "分母是所有互斥假设对观测证据的加权概率。",
+        "低先验事件可能在高似然比证据后依然不常见。"
+      ],
+      "formulas": [
+        {
+          "label": "Bayes公式",
+          "tex": "P(A\\mid B)=\\frac{P(B\\mid A)P(A)}{P(B)}"
+        },
+        {
+          "label": "多假设版",
+          "tex": "P(H_i\\mid B)=\\frac{P(B\\mid H_i)P(H_i)}{\\sum_jP(B\\mid H_j)P(H_j)}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由条件概率两种写法出发",
+          "tex": "P(A\\cap B)=P(A\\mid B)P(B)=P(B\\mid A)P(A)"
+        },
+        {
+          "explanation": "假设 $P(B)>0$，对等式除以 $P(B)$",
+          "tex": "P(A\\mid B)=P(B\\mid A)P(A)/P(B)"
+        }
+      ],
+      "example": "设事件先验1%，报警对事件敏感度90%，假阳性率5%；报警后的事件概率约15.4%。",
+      "application": "宏观状态贝叶斯更新、风险事件预警、信号置信度。",
+      "caveat": "不要把 $P(B\\mid A)$ 误当作 $P(A\\mid B)$。",
+      "checked_status": "独立编辑的重点讲义；按列出的条件理解公式与证明"
+    },
+    {
+      "id": "probability-n0108",
+      "node_id": "probability-n0108",
+      "title": "全方差公式",
+      "definition": "把随机变量总方差分解为条件内随机波动与条件均值变动两部分。",
+      "assumptions": "$X$ 二阶可积，给定随机信息 $Y$。",
+      "properties": [
+        "方差总为非负。",
+        "第一项为条件方差的均值，第二项是条件均值的方差。"
+      ],
+      "formulas": [
+        {
+          "label": "全方差分解",
+          "tex": "\\operatorname{Var}(X)=\\mathbb E[\\operatorname{Var}(X\\mid Y)]+\\operatorname{Var}(\\mathbb E[X\\mid Y])"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "分解 $X-mu$ 为组内与组间两部分",
+          "tex": "X-\\mu=(X-\\mathbb E[X\\mid Y])+(\\mathbb E[X\\mid Y]-\\mu)"
+        },
+        {
+          "explanation": "平方并取期望",
+          "tex": "\\mathbb E[(X-\\mu)^2]=\\mathbb E[(X-m_Y)^2]+\\mathbb E[(m_Y-\\mu)^2]+2\\mathbb E[(X-m_Y)(m_Y-\\mu)]"
+        },
+        {
+          "explanation": "通过迭代期望证明交叉项为零",
+          "tex": "\\mathbb E[(X-m_Y)(m_Y-\\mu)]=\\mathbb E[(m_Y-\\mu)\\mathbb E[X-m_Y\\mid Y]]=0"
+        }
+      ],
+      "example": "分市场状态Y，高波动与低波动期间的收益方差差异可拆成状态内和状态均值之间。",
+      "application": "状态切换风险、信号条件方差、收益归因。",
+      "caveat": "条件方差不是对条件期望做方差。",
+      "checked_status": "独立编辑的重点讲义；按列出的条件理解公式与证明"
+    },
+    {
+      "id": "probability-n0119",
+      "node_id": "probability-n0119",
+      "title": "中心极限定理",
+      "definition": "独立同分布、有限方差样本均值在标准化后弱收敛于标准正态分布。",
+      "assumptions": "$X_i$ i.i.d.，$E[X_i]=\\mu$，$0<\\sigma^2<\\infty$。",
+      "properties": [
+        "这是依分布收敛，不是每次实验的精确分布相等。",
+        "重尾且无限方差时经典CLT可能不适用。"
+      ],
+      "formulas": [
+        {
+          "label": "经典CLT",
+          "tex": "\\frac{\\sqrt n(\\bar X_n-\\mu)}{\\sigma}\\xrightarrow{d}N(0,1)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "写成标准化随机变量之和",
+          "tex": "\\frac{\\sqrt n(\\bar X_n-\\mu)}{\\sigma}=\\frac{1}{\\sqrt n}\\sum_{i=1}^n\\frac{X_i-\\mu}{\\sigma}"
+        },
+        {
+          "explanation": "利用特征函数在零点的二阶展开（证明要点）",
+          "tex": "\\varphi_Z(t)=1-\\frac{t^2}{2}+o(t^2)"
+        },
+        {
+          "explanation": "独立性令和的特征函数变成乘积",
+          "tex": "\\left[\\varphi_Z(t/\\sqrt n)\\right]^n\\to e^{-t^2/2}"
+        },
+        {
+          "explanation": "Lévy连续性定理识别极限分布",
+          "tex": "e^{-t^2/2}\\text{ 对应 }N(0,1)"
+        }
+      ],
+      "example": "在可近似独立的日收益条件下估计样本均值标准误；真实金融收益可能自相关。",
+      "application": "统计检验、置信区间与均值估计。",
+      "caveat": "金融收益若序列相关或强厚尾，应使用相应CLT或HAC估计。",
+      "checked_status": "独立编辑的重点讲义；按列出的条件理解公式与证明"
+    },
+    {
+      "id": "probability-n0114",
+      "node_id": "probability-n0114",
+      "title": "多元正态分布",
+      "definition": "由均值向量与协方差矩阵确定的一族多变量连续分布。",
+      "assumptions": "$\\Sigma$ 正定给出非退化密度；半正定时可退化到低维子空间。",
+      "properties": [
+        "任意线性组合仍是正态。",
+        "联合正态下零协方差推出独立。"
+      ],
+      "formulas": [
+        {
+          "label": "密度",
+          "tex": "f(x)=\\frac{\\exp[-\\frac12(x-\\mu)^\\top\\Sigma^{-1}(x-\\mu)]}{(2\\pi)^{d/2}|\\Sigma|^{1/2}}"
+        },
+        {
+          "label": "仿射变换",
+          "tex": "AX+b\\sim N(A\\mu+b,A\\Sigma A^\\top)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "令 $Z$ 是独立标准正态随机向量",
+          "tex": "Z\\sim N(0,I_d)"
+        },
+        {
+          "explanation": "选择矩阵 $L$ 满足 $LL^\\top=\\Sigma$",
+          "tex": "X=\\mu+LZ"
+        },
+        {
+          "explanation": "计算均值与协方差",
+          "tex": "E[X]=\\mu,\\quad\\operatorname{Cov}(X)=LIL^\\top=\\Sigma"
+        }
+      ],
+      "example": "Cholesky分解协方差并模拟相关ETF日收益。",
+      "application": "多资产Monte Carlo、风险模型、相关情景生成。",
+      "caveat": "正态模型可能低估跳跃、偏度和尾部极端风险。",
+      "checked_status": "独立编辑的重点讲义；按列出的条件理解公式与证明"
+    },
+    {
+      "id": "statistics-n0158",
+      "node_id": "statistics-n0158",
+      "title": "极大似然估计MLE",
+      "definition": "通过最大化观测数据在参数条件下的联合概率密度或质量来估计参数。",
+      "assumptions": "观测模型需可识别；样本似然与分布假设需明确。",
+      "properties": [
+        "对独立样本，联合对数似然是单点对数似然之和。",
+        "MLE的渐近性质依赖正则条件。"
+      ],
+      "formulas": [
+        {
+          "label": "对数似然",
+          "tex": "\\hat\\theta_{\\mathrm{MLE}}=\\arg\\max_\\theta\\sum_{i=1}^n\\log f(X_i;\\theta)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "设收益样本独立正态且均值未知、方差已知",
+          "tex": "\\ell(\\mu)=-\\frac{n}{2}\\log(2\\pi\\sigma^2)-\\frac{1}{2\\sigma^2}\\sum_i(X_i-\\mu)^2"
+        },
+        {
+          "explanation": "对均值求导并设为零",
+          "tex": "\\ell'(\\mu)=\\frac{1}{\\sigma^2}\\sum_i(X_i-\\mu)=0"
+        },
+        {
+          "explanation": "解得最大似然均值并核对二阶导",
+          "tex": "\\hat\\mu=\\bar X,\\quad \\ell''(\\mu)=-n/\\sigma^2<0"
+        }
+      ],
+      "example": "用历史ETF收益拟合正态模型参数并比较样本外似然。",
+      "application": "分布拟合、波动率模型、状态空间最大似然估计。",
+      "caveat": "MLE不是无需假设的估计；正态假设错时可能偏离真实尾部。",
+      "checked_status": "独立编辑的重点讲义；按列出的条件理解公式与证明"
+    },
+    {
+      "id": "statistics-n0161",
+      "node_id": "statistics-n0161",
+      "title": "Cramér-Rao下界",
+      "definition": "在正则条件下给出无偏估计量方差的下界，反映Fisher信息量。",
+      "assumptions": "参数可微、支持集和积分交换符合正则性；估计量无偏。",
+      "properties": [
+        "Fisher信息对独立样本通常累加。",
+        "达到下界的估计量称为有效估计量（满足相应条件）。"
+      ],
+      "formulas": [
+        {
+          "label": "CRLB",
+          "tex": "\\operatorname{Var}(\\hat\\theta)\\ge\\frac{1}{I_n(\\theta)}"
+        },
+        {
+          "label": "Fisher信息",
+          "tex": "I_n(\\theta)=\\mathbb E_\\theta\\left[\\left(\\frac{\\partial}{\\partial\\theta}\\log L(\\theta;X)\\right)^2\\right]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "令得分函数 $S=\\partial_\\theta\\log L$，在正则条件下",
+          "tex": "\\mathbb E[S]=0,\\qquad \\mathbb E[(\\hat\\theta-\\theta)S]=1"
+        },
+        {
+          "explanation": "应用Cauchy-Schwarz不等式",
+          "tex": "1^2\\le \\operatorname{Var}(\\hat\\theta)\\operatorname{Var}(S)"
+        },
+        {
+          "explanation": "因 $\\operatorname{Var}(S)=I_n(\\theta)$，得下界",
+          "tex": "\\operatorname{Var}(\\hat\\theta)\\ge1/I_n(\\theta)"
+        }
+      ],
+      "example": "正态已知方差均值模型的样本均值达到该方差下界 $\\sigma^2/n$。",
+      "application": "估计效率和参数不确定性。",
+      "caveat": "对有偏估计量不能直接套用无偏版本CRLB。",
+      "checked_status": "独立编辑的重点讲义；按列出的条件理解公式与证明"
+    },
+    {
+      "id": "regression-n0182",
+      "node_id": "regression-n0182",
+      "title": "多元OLS",
+      "definition": "将响应变量在解释变量列空间上投影，选择残差平方和最小的线性系数。",
+      "assumptions": "$X$ 满列秩、样本数不少于参数数，误差零条件均值用于无偏性。",
+      "properties": [
+        "满列秩下OLS解唯一。",
+        "OLS无偏需要 $E[\\varepsilon\\mid X]=0$，BLUE另需同方差不相关误差。"
+      ],
+      "formulas": [
+        {
+          "label": "OLS估计",
+          "tex": "\\hat\\beta=(X^\\top X)^{-1}X^\\top y"
+        },
+        {
+          "label": "回归分解",
+          "tex": "y=X\\hat\\beta+\\hat\\varepsilon,\\quad X^\\top\\hat\\varepsilon=0"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "最小化残差平方和",
+          "tex": "S(\\beta)=(y-X\\beta)^\\top(y-X\\beta)"
+        },
+        {
+          "explanation": "展开并求梯度",
+          "tex": "\\nabla_\\beta S=-2X^\\top y+2X^\\top X\\beta"
+        },
+        {
+          "explanation": "一阶条件得到正规方程",
+          "tex": "X^\\top X\\hat\\beta=X^\\top y"
+        },
+        {
+          "explanation": "在可逆条件下求解",
+          "tex": "\\hat\\beta=(X^\\top X)^{-1}X^\\top y"
+        }
+      ],
+      "example": "用SPY收益和VIX变化拟合某ETF的收益，检查残差暴露。",
+      "application": "量化因子检验、Alpha估计、正交化。",
+      "caveat": "时序收益回归残差通常不满足同方差独立误差。",
+      "checked_status": "独立编辑的重点讲义；按列出的条件理解公式与证明"
+    },
+    {
+      "id": "regression-n0205",
+      "node_id": "regression-n0205",
+      "title": "Ridge回归",
+      "definition": "用L2范数惩罚抑制系数过大、改善共线性下的估计稳定性。",
+      "assumptions": "通常对特征先标准化，不惩罚截距；$\\lambda\\ge0$。",
+      "properties": [
+        "对 $\\lambda>0$，$X^\\top X+\\lambda I$ 正定。",
+        "带来偏差以换取方差收缩。"
+      ],
+      "formulas": [
+        {
+          "label": "Ridge目标",
+          "tex": "\\min_\\beta\\ \\|y-X\\beta\\|_2^2+\\lambda\\|\\beta\\|_2^2"
+        },
+        {
+          "label": "封闭解",
+          "tex": "\\hat\\beta_\\lambda=(X^\\top X+\\lambda I)^{-1}X^\\top y"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "展开目标并对 $\\beta$ 求梯度",
+          "tex": "\\nabla L=-2X^\\top(y-X\\beta)+2\\lambda\\beta"
+        },
+        {
+          "explanation": "设为零并整理",
+          "tex": "(X^\\top X+\\lambda I)\\beta=X^\\top y"
+        },
+        {
+          "explanation": "若 $\\lambda>0$，矩阵可逆，从而得到结果",
+          "tex": "\\hat\\beta_\\lambda=(X^\\top X+\\lambda I)^{-1}X^\\top y"
+        }
+      ],
+      "example": "37支ETF中高度相关收益列可使用Ridge收缩预测回归系数。",
+      "application": "高维因子预测、共线性处理、收缩组合模型。",
+      "caveat": "Ridge一般不产生稀疏系数；不要在全数据选择 $\\lambda$ 后宣称独立测试。",
+      "checked_status": "独立编辑的重点讲义；按列出的条件理解公式与证明"
+    },
+    {
+      "id": "regression-n0199",
+      "node_id": "regression-n0199",
+      "title": "逻辑回归Logit",
+      "definition": "使用logistic链接把特征的线性组合转成二分类概率，并以Bernoulli似然拟合参数。",
+      "assumptions": "标签 $y_i\\in\\{0,1\\}$；独立样本或条件似然假设须说明。",
+      "properties": [
+        "预测概率在0与1之间。",
+        "系数解释是对数优势比变化，不直接是概率的固定增量。"
+      ],
+      "formulas": [
+        {
+          "label": "Sigmoid",
+          "tex": "p_i=\\sigma(x_i^\\top\\beta)=\\frac1{1+e^{-x_i^\\top\\beta}}"
+        },
+        {
+          "label": "负对数似然",
+          "tex": "L(\\beta)=-\\sum_i[y_i\\log p_i+(1-y_i)\\log(1-p_i)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "Bernoulli样本似然",
+          "tex": "P(y_i\\mid x_i)=p_i^{y_i}(1-p_i)^{1-y_i}"
+        },
+        {
+          "explanation": "取对数并对每条样本求和",
+          "tex": "\\ell=\\sum_i[y_i\\log p_i+(1-y_i)\\log(1-p_i)]"
+        },
+        {
+          "explanation": "链式求导得梯度",
+          "tex": "\\nabla_\\beta L=X^\\top(p-y)"
+        }
+      ],
+      "example": "预测某ETF未来5日超额收益是否为正，并用时间序列划分验证。",
+      "application": "方向分类、风险事件预测、信用违约概率。",
+      "caveat": "分类概率校准、阈值、真实交易成本都要单独评价。",
+      "checked_status": "独立编辑的重点讲义；按列出的条件理解公式与证明"
+    },
+    {
+      "id": "econometrics-n0217",
+      "node_id": "econometrics-n0217",
+      "title": "两阶段最小二乘2SLS",
+      "definition": "当解释变量与结构误差相关时，借助满足相关性及外生性的工具变量识别系数。",
+      "assumptions": "工具变量 $Z$ 满足相关性与排除限制；矩阵满足识别秩条件。",
+      "properties": [
+        "弱工具变量会导致估计偏差和不可靠的置信区间。",
+        "2SLS等价于用 $Z$ 列空间投影后的解释变量进行第二阶段回归。"
+      ],
+      "formulas": [
+        {
+          "label": "2SLS系数",
+          "tex": "\\hat\\beta_{2SLS}=(X^\\top P_Z X)^{-1}X^\\top P_Z y"
+        },
+        {
+          "label": "工具投影",
+          "tex": "P_Z=Z(Z^\\top Z)^{-1}Z^\\top"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "第一阶段将内生解释变量对工具变量投影",
+          "tex": "\\hat X=P_ZX"
+        },
+        {
+          "explanation": "对第二阶段目标做OLS",
+          "tex": "\\hat\\beta=(\\hat X^\\top\\hat X)^{-1}\\hat X^\\top y"
+        },
+        {
+          "explanation": "利用 $P_Z^2=P_Z^\\top=P_Z$ 整理",
+          "tex": "\\hat\\beta=(X^\\top P_ZX)^{-1}X^\\top P_Z y"
+        }
+      ],
+      "example": "利用外生政策冲击作为工具研究流动性变化与风险收益的因果关系。",
+      "application": "识别金融变量的内生性与政策冲击。",
+      "caveat": "只有相关性没有排除限制不是有效工具变量。",
+      "checked_status": "独立编辑的重点讲义；按列出的条件理解公式与证明"
+    },
+    {
+      "id": "timeseries-n0247",
+      "node_id": "timeseries-n0247",
+      "title": "AR(p)",
+      "definition": "自回归模型将当前值表示为若干滞后值的线性组合及不可预测冲击。",
+      "assumptions": "弱平稳AR模型需要特征多项式的根位于单位圆之外。",
+      "properties": [
+        "AR(1)的均值为常数项除以 $(1-\\phi)$。",
+        "平稳AR(1)自相关按 $\\phi^k$ 衰减。"
+      ],
+      "formulas": [
+        {
+          "label": "AR(p)表达式",
+          "tex": "X_t=c+\\sum_{j=1}^p\\phi_jX_{t-j}+\\epsilon_t"
+        },
+        {
+          "label": "平稳AR(1)方差",
+          "tex": "\\operatorname{Var}(X_t)=\\frac{\\sigma_\\epsilon^2}{1-\\phi^2},\\quad |\\phi|<1"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "AR(1)去均值形式",
+          "tex": "Y_t=\\phi Y_{t-1}+\\epsilon_t"
+        },
+        {
+          "explanation": "对两边取方差并利用白噪声与过去不相关",
+          "tex": "\\gamma_0=\\phi^2\\gamma_0+\\sigma_\\epsilon^2"
+        },
+        {
+          "explanation": "移项得平稳方差",
+          "tex": "\\gamma_0=\\sigma_\\epsilon^2/(1-\\phi^2)"
+        },
+        {
+          "explanation": "乘 $Y_{t-k}$ 取期望得到自相关递推",
+          "tex": "\\rho(k)=\\phi^k,\\quad k\\ge0"
+        }
+      ],
+      "example": "对某些利差和波动率代理拟合AR(1)；价格水平往往含单位根。",
+      "application": "预测宏观指标、价差与波动状态。",
+      "caveat": "收益序列自相关弱时AR模型未必优于零均值基准。",
+      "checked_status": "独立编辑的重点讲义；按列出的条件理解公式与证明"
+    },
+    {
+      "id": "timeseries-n0265",
+      "node_id": "timeseries-n0265",
+      "title": "ARCH/GARCH",
+      "definition": "用过去收益冲击和条件方差动态预测波动率的模型族。",
+      "assumptions": "GARCH(1,1)中 $\\omega>0$，$\\alpha,\\beta\\ge0$；有限无条件方差需 $\\alpha+\\beta<1$。",
+      "properties": [
+        "捕捉波动聚集。",
+        "误差分布假设会影响尾部概率估计。"
+      ],
+      "formulas": [
+        {
+          "label": "GARCH(1,1)",
+          "tex": "\\epsilon_t=\\sigma_t z_t,\\quad\\sigma_t^2=\\omega+\\alpha\\epsilon_{t-1}^2+\\beta\\sigma_{t-1}^2"
+        },
+        {
+          "label": "无条件方差",
+          "tex": "\\bar\\sigma^2=\\frac{\\omega}{1-\\alpha-\\beta}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "在平稳条件下对条件方差方程取期望",
+          "tex": "E[\\sigma_t^2]=\\omega+\\alpha E[\\epsilon_{t-1}^2]+\\beta E[\\sigma_{t-1}^2]"
+        },
+        {
+          "explanation": "标准化冲击方差为1，故 $E[\\epsilon^2]=E[\\sigma^2]=\\bar\\sigma^2$",
+          "tex": "\\bar\\sigma^2=\\omega+(\\alpha+\\beta)\\bar\\sigma^2"
+        },
+        {
+          "explanation": "在 $\\alpha+\\beta<1$ 时求得平稳无条件方差",
+          "tex": "\\bar\\sigma^2=\\omega/(1-\\alpha-\\beta)"
+        }
+      ],
+      "example": "在ETF日度收益上拟合GARCH，预测下一日风险并控制仓位。",
+      "application": "波动率预测、VaR和杠杆调整。",
+      "caveat": "GARCH条件方差不是方向收益预测；估计需留意结构变化。",
+      "checked_status": "独立编辑的重点讲义；按列出的条件理解公式与证明"
+    }
+  ]
+}
