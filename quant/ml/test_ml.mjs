@@ -5,8 +5,10 @@ import katex from "katex";
 const here=new URL("./",import.meta.url);
 const read=filename=>JSON.parse(fs.readFileSync(new URL(filename,here),"utf8"));
 const curriculum=read("curriculum.json");
-const files=["lessons-classic.json","lessons-deep.json","lessons-rl-finance.json","lessons-applied.json"];
+const manifest=read("manifest.json");
+const files=manifest.lesson_files;
 const lessons=files.flatMap(p=>read(p).lessons);
+assert.equal(lessons.length,manifest.total_lessons,"manifest count mismatch");
 const topicIDs=new Set(),chapterIDs=new Set(),deptIDs=new Set();
 assert.equal(curriculum.disciplines.length,24);
 assert.equal(curriculum.chapters.length,120);
@@ -31,7 +33,7 @@ for(const n of curriculum.nodes){
  assert(deptIDs.has(n.discipline_id),"unknown discipline "+n.id);
 }
 for(const ch of curriculum.chapters)for(const id of ch.node_ids)assert.equal(nodeMap.get(id)?.chapter_id,ch.id);
-assert.equal(lessons.length,60);
+assert(lessons.length>=150,"tutorial expansion unexpectedly missing");
 const covered=new Set(),katexErrors=[];
 for(const l of lessons){
  assert(topicIDs.has(l.node_id),"lesson missing from curriculum "+l.node_id);
@@ -59,5 +61,5 @@ new vm.Script(nav);
 for(const marker of ['id="quantSidebar"','id="tree"','id="article"','id="coverageFilter"','id="status"'])assert(html.includes(marker));
 assert(nav.includes('["ml","机器学习 Machine Learning"]'));
 assert(app.includes("复制代码"));
-assert(app.includes("...l4.lessons"));
-console.log("PASS: 24 ML disciplines, 120 chapters, 720 nodes, 60 complete tutorials, LaTeX parses, navigation and JS syntax valid.");
+assert(app.includes("manifest.lesson_files"));
+console.log("PASS: 24 ML disciplines, 120 chapters, 720 nodes, "+lessons.length+" full tutorials, LaTeX parses, navigation and JS syntax valid.");
