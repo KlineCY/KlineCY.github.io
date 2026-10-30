@@ -15,6 +15,7 @@
     ["research","策略研究与回测"],
     ["wiki","量化百科 Wiki"],
     ["math","量化数学 Mathematics"],
+    ["ml","机器学习 Machine Learning"],
     ["papers","每周机器学习论文"],
     ["rankings","学术排名与资源"],
     ["news","全球宏观 News"]
@@ -54,6 +55,10 @@
       '<a class="q-menu-link" href="'+route("math")+'">完整数学知识树</a>'+
       '<a class="q-menu-link" href="'+route("math")+'?status=complete">已写讲义</a>'+
       subsection("mathDisciplineNav","按学科推进","mathDisciplineChoices",page==="math"),
+    ml:
+      '<a class="q-menu-link" href="'+route("ml")+'">完整机器学习课程树</a>'+
+      '<a class="q-menu-link" href="'+route("ml")+'?status=complete">已编写算法讲义</a>'+
+      subsection("mlDisciplineNav","按专题推进","mlDisciplineChoices",page==="ml"),
     papers:
       '<a class="q-menu-link" href="'+route("papers")+'">全部论文</a>'+
       subsection("weekNav","按周浏览","weeks",page==="papers"),
@@ -129,6 +134,15 @@
     if(page==="research"&&typeof window.selectStrategy==="function"){
       const id=params.get("strategy");
       if(id)window.selectStrategy(id);
+      handled=true;
+    }
+    if(page==="ml"&&typeof window.mlSelectDiscipline==="function"){
+      window.mlSelectDiscipline(params.get("discipline")||"");
+      const coverage=document.getElementById("coverageFilter");
+      if(coverage&&params.has("status")){
+        coverage.value=params.get("status");
+        coverage.dispatchEvent(new Event("change",{bubbles:true}));
+      }
       handled=true;
     }
     if(page==="math"&&typeof window.mathSelectDiscipline==="function"){
@@ -230,6 +244,10 @@
   getJson(route("math")+"curriculum.json").then(d=>{
     if(!d?.disciplines)return;
     fill("mathDisciplineChoices",d.disciplines.map(x=>({name:x.id,label:x.title})),r=>route("math")+"?discipline="+encodeURIComponent(r.name));
+  });
+  getJson(route("ml")+"curriculum.json").then(d=>{
+    if(!d?.disciplines)return;
+    fill("mlDisciplineChoices",d.disciplines.map(x=>({name:x.id,label:x.title})),r=>route("ml")+"?discipline="+encodeURIComponent(r.name));
   });
   if(page!=="papers"){
     getJson(route("papers")+"data.json").then(d=>{
