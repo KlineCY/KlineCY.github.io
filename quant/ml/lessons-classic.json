@@ -1,0 +1,569 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "roadmap-n01-02",
+      "node_id": "roadmap-n01-02",
+      "title": "经验风险最小化ERM",
+      "definition": "机器学习用经验样本损失近似未知总体风险，再在假设函数类中选取使训练目标最小的参数。",
+      "assumptions": "数据与标签定义一致；训练样本需要适合所使用的统计学习假设；测试数据不得参与优化。",
+      "properties": [
+        "训练风险下降不保证样本外风险同步下降。",
+        "复杂模型可以加入显式复杂度正则项。"
+      ],
+      "formulas": [
+        {
+          "label": "总体风险",
+          "tex": "R(\\theta)=\\mathbb E_{(X,Y)\\sim P}[\\ell(f_\\theta(X),Y)]"
+        },
+        {
+          "label": "正则化ERM",
+          "tex": "\\hat\\theta=\\arg\\min_\\theta\\left[\\frac1n\\sum_{i=1}^n\\ell(f_\\theta(x_i),y_i)+\\lambda\\Omega(\\theta)\\right]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将不可观测总体期望替换为经验平均",
+          "tex": "R(\\theta)\\approx\\hat R_n(\\theta)=\\frac1n\\sum_i\\ell(f_\\theta(x_i),y_i)"
+        },
+        {
+          "explanation": "加入复杂度惩罚以平衡拟合和泛化",
+          "tex": "\\hat R_\\lambda(\\theta)=\\hat R_n(\\theta)+\\lambda\\Omega(\\theta)"
+        },
+        {
+          "explanation": "最小化该目标得到经验解",
+          "tex": "\\hat\\theta\\in\\arg\\min_\\theta\\hat R_\\lambda(\\theta)"
+        }
+      ],
+      "code": "import numpy as np\nx = np.arange(10, dtype=float)\ny = 2*x + 1 + np.random.default_rng(0).normal(0, .5, 10)\nX = np.column_stack([np.ones_like(x), x])\ntheta = np.linalg.lstsq(X, y, rcond=None)[0]\nprint(\"intercept, slope =\", theta)\nprint(\"train MSE =\", np.mean((y - X @ theta)**2))",
+      "packages": "numpy",
+      "application": "所有量化预测任务的训练损失设计，包括收益回归、分类与风险预测。",
+      "limits": "金融样本存在自相关、结构变化和选择偏差；不能仅凭训练损失宣称可交易。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n03-02",
+      "node_id": "roadmap-n03-02",
+      "title": "偏差方差权衡",
+      "definition": "在平方损失下，模型预测的总体期望误差可拆为系统性偏差、估计波动与数据不可约噪声。",
+      "assumptions": "训练样本重复抽取，目标条件均值定义明确；标准分解针对平方误差。",
+      "properties": [
+        "更强正则常增大偏差并减少方差。",
+        "金融场景还存在分布漂移，不在经典恒定分布分解中。"
+      ],
+      "formulas": [
+        {
+          "label": "条件点误差分解",
+          "tex": "\\mathbb E[(Y-\\hat f(x))^2]=\\operatorname{Bias}^2[\\hat f(x)]+\\operatorname{Var}[\\hat f(x)]+\\sigma_\\epsilon^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "写 $Y=f^*(x)+epsilon$，令 $E[epsilon|x]=0$",
+          "tex": "Y-\\hat f(x)=(f^*(x)-\\hat f(x))+\\epsilon"
+        },
+        {
+          "explanation": "加减 $E[hat f(x)]$ 后平方取期望，交叉项为零",
+          "tex": "\\mathbb E[(f^*-\\hat f)^2]=(f^*-\\mathbb E\\hat f)^2+\\operatorname{Var}(\\hat f)"
+        },
+        {
+          "explanation": "与噪声项方差相加即得分解",
+          "tex": "\\mathrm{MSE}=\\mathrm{Bias}^2+\\mathrm{Variance}+\\sigma_\\epsilon^2"
+        }
+      ],
+      "code": "import numpy as np\nrng = np.random.default_rng(3)\ngrid = np.linspace(-1, 1, 100)\ntruth = grid**2\nfor degree in [1, 2, 8]:\n    preds = []\n    for _ in range(50):\n        x = rng.uniform(-1, 1, 30)\n        y = x*x + rng.normal(0, .15, 30)\n        coef = np.polyfit(x, y, degree)\n        preds.append(np.polyval(coef, grid))\n    preds = np.asarray(preds)\n    print(degree, np.mean((preds.mean(0)-truth)**2),\n          np.mean(preds.var(0)))",
+      "packages": "numpy",
+      "application": "比较线性、树和深度网络在ETF预测中的泛化表现，避免只看样本内拟合优度。",
+      "limits": "该代码验证静态独立数据上的偏差方差，不可直接推广到非平稳金融回报。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n06-04",
+      "node_id": "roadmap-n06-04",
+      "title": "数据泄漏",
+      "definition": "模型在拟合、特征预处理、标签构造或模型选择中接触了预测时不可能获得的信息，导致测试成绩虚高。",
+      "assumptions": "严格确定每条特征的可得时间，以及训练与验证窗口。",
+      "properties": [
+        "全样本标准化、跨期重叠标签和反复调试测试集都可能泄漏。",
+        "需要把所有有状态的预处理放进交叉验证训练折内部。"
+      ],
+      "formulas": [
+        {
+          "label": "时序因果约束",
+          "tex": "\\mathcal F_t=\\sigma(\\text{在 }t\\text{ 时已发布信息}),\\quad X_t\\in\\mathcal F_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "把特征定义为可得信息集合上的可测函数",
+          "tex": "X_t=g(\\mathcal F_t)"
+        },
+        {
+          "explanation": "若标准化参数使用全历史样本含未来数据，则违反信息约束",
+          "tex": "\\hat\\mu_{\\mathrm{all}}=\\frac1T\\sum_{s=1}^T X_s\\quad (t<T)"
+        },
+        {
+          "explanation": "按训练折拟合预处理器，并在验证折只使用transform",
+          "tex": "\\hat\\mu_{\\mathrm{train}}=\\frac1{|\\mathcal I_{\\mathrm{train}}|}\\sum_{s\\in\\mathcal I_{\\mathrm{train}}}X_s"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.pipeline import make_pipeline\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.linear_model import Ridge\nfrom sklearn.model_selection import TimeSeriesSplit, cross_val_score\nrng = np.random.default_rng(0)\nX = rng.normal(size=(120, 5))\ny = np.roll(X[:, 0], 1) + rng.normal(size=120)\nmodel = make_pipeline(StandardScaler(), Ridge(alpha=1.))\ncv = TimeSeriesSplit(n_splits=4)\nprint(cross_val_score(model, X[1:], y[1:], cv=cv, scoring=\"neg_mean_squared_error\"))",
+      "packages": "numpy, scikit-learn",
+      "application": "防止PIT财报、宏观修订值、历史成分股和价格图像编码中隐含未来信息。",
+      "limits": "严格时间切分并不足以处理所有重叠标签，金融事件样本还可能需要Purging与Embargo。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n01-02",
+      "node_id": "features-n01-02",
+      "title": "标准化StandardScaler",
+      "definition": "对每个特征用训练样本均值和标准差做中心化及尺度归一，避免不同量纲扭曲距离或正则惩罚。",
+      "assumptions": "仅在训练数据上估计均值与标准差；常数特征需特殊处理。",
+      "properties": [
+        "仿射标准化保留变量线性相关结构。",
+        "非高斯重尾特征不因标准化变为正态分布。"
+      ],
+      "formulas": [
+        {
+          "label": "Z-score标准化",
+          "tex": "z_{ij}=\\frac{x_{ij}-\\hat\\mu_j}{\\hat\\sigma_j}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "以训练折求均值和方差",
+          "tex": "\\hat\\mu_j=\\frac1n\\sum_i x_{ij},\\quad \\hat\\sigma_j^2=\\frac1n\\sum_i(x_{ij}-\\hat\\mu_j)^2"
+        },
+        {
+          "explanation": "对训练与测试都应用同一组训练参数",
+          "tex": "Z_{\\mathrm{test},j}=(X_{\\mathrm{test},j}-\\hat\\mu_j)/\\hat\\sigma_j"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.preprocessing import StandardScaler\nrng = np.random.default_rng(0)\nX = rng.normal(size=(100, 3)) * [1, 100, 1000]\nscaler = StandardScaler().fit(X[:80])\nprint(scaler.transform(X[80:])[:2])",
+      "packages": "numpy, scikit-learn",
+      "application": "让波动率、交易量、动量等因子在回归或聚类前具有可比尺度。",
+      "limits": "金融横截面标准化与时序标准化不同；行业中性化和Winsorize需另行处理。",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n04-04",
+      "node_id": "features-n04-04",
+      "title": "PCA",
+      "definition": "寻找样本中保留最大投影方差的相互正交的线性方向，用于无监督降维和风险共同方向提取。",
+      "assumptions": "标准PCA需先中心化；若量纲差异巨大，需要明确是否先标准化。",
+      "properties": [
+        "第一主成分最大化单位向量上的样本方差。",
+        "PCA最小化投影重构平方误差，但不保证预测收益最大。"
+      ],
+      "formulas": [
+        {
+          "label": "最大方差方向",
+          "tex": "v_1=\\arg\\max_{\\|v\\|=1}v^\\top\\hat\\Sigma v"
+        },
+        {
+          "label": "谱方程",
+          "tex": "\\hat\\Sigma v_j=\\lambda_jv_j"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "原始数据中心化，构建样本协方差",
+          "tex": "\\hat\\Sigma=\\frac{1}{n-1}X_c^\\top X_c"
+        },
+        {
+          "explanation": "对单位方向$v$，投影方差是二次型",
+          "tex": "\\operatorname{Var}(X_cv)=v^\\top\\hat\\Sigma v"
+        },
+        {
+          "explanation": "对约束$|v|^2=1$引入Lagrange乘子",
+          "tex": "\\nabla_v(v^\\top\\hat\\Sigma v-\\lambda(v^\\top v-1))=0\\Longrightarrow \\hat\\Sigma v=\\lambda v"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.decomposition import PCA\nrng = np.random.default_rng(1)\nfactors = rng.normal(size=(250, 2))\nloadings = rng.normal(size=(2, 8))\nreturns = factors @ loadings + .2*rng.normal(size=(250, 8))\npca = PCA(n_components=2).fit(returns)\nprint(\"Variance explained:\", pca.explained_variance_ratio_)\nprint(\"Factor scores:\", pca.transform(returns).shape)",
+      "packages": "numpy, scikit-learn",
+      "application": "把多ETF收益压缩成共同市场风险方向、构建降维风控特征。",
+      "limits": "如果全样本PCA跨过测试区间，会发生未来信息泄漏。",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n01-01",
+      "node_id": "linear-n01-01",
+      "title": "线性回归与OLS",
+      "definition": "OLS选择使残差平方和最小的系数，是监督回归的核心线性基线。",
+      "assumptions": "设计矩阵满列秩可得唯一正规方程解；统计无偏与推断还需额外误差条件。",
+      "properties": [
+        "残差与解释变量列空间正交。",
+        "在符合高斯–马尔可夫假设时OLS为BLUE。"
+      ],
+      "formulas": [
+        {
+          "label": "OLS正规方程",
+          "tex": "\\hat\\beta=(X^\\top X)^{-1}X^\\top y"
+        },
+        {
+          "label": "平方误差",
+          "tex": "L(\\beta)=\\frac1n\\|y-X\\beta\\|_2^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对目标展开",
+          "tex": "L=n^{-1}(y^\\top y-2\\beta^\\top X^\\top y+\\beta^\\top X^\\top X\\beta)"
+        },
+        {
+          "explanation": "令梯度为零",
+          "tex": "\\nabla_\\beta L=2n^{-1}X^\\top(X\\beta-y)=0"
+        },
+        {
+          "explanation": "在满列秩条件下反解",
+          "tex": "\\hat\\beta=(X^\\top X)^{-1}X^\\top y"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.linear_model import LinearRegression\nrng = np.random.default_rng(5)\nX = rng.normal(size=(200, 3))\ny = X @ np.array([.3, -.6, .2]) + .1*rng.normal(size=200)\nfit = LinearRegression().fit(X[:150], y[:150])\nprint(\"Coefficients:\", fit.coef_)\nprint(\"Holdout R2:\", fit.score(X[150:], y[150:]))",
+      "packages": "numpy, scikit-learn",
+      "application": "解释动量、VIX等信号与ETF收益的线性关系，作为复杂模型比较基准。",
+      "limits": "金融收益序列常异方差和自相关，线性回归拟合系数不等于因果关系。",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n04-01",
+      "node_id": "linear-n04-01",
+      "title": "Ridge回归",
+      "definition": "岭回归通过对系数施加L2平方惩罚收缩模型，改善高相关或高维特征下预测稳定性。",
+      "assumptions": "惩罚强度$lambdage0$；截距通常不惩罚；变量宜缩放。",
+      "properties": [
+        "惩罚会引入偏差但可降低估计方差。",
+        "正则化系数大于零时可在特征共线下稳定求解。"
+      ],
+      "formulas": [
+        {
+          "label": "目标",
+          "tex": "\\min_\\beta \\frac12\\|y-X\\beta\\|_2^2+\\frac{\\lambda}{2}\\|\\beta\\|_2^2"
+        },
+        {
+          "label": "封闭解",
+          "tex": "\\hat\\beta_\\lambda=(X^\\top X+\\lambda I)^{-1}X^\\top y"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "计算梯度",
+          "tex": "\\nabla_\\beta L=-X^\\top(y-X\\beta)+\\lambda\\beta"
+        },
+        {
+          "explanation": "令梯度为零得线性系统",
+          "tex": "(X^\\top X+\\lambda I)\\beta=X^\\top y"
+        },
+        {
+          "explanation": "若$lambda>0$，系数矩阵正定可逆",
+          "tex": "\\hat\\beta_\\lambda=(X^\\top X+\\lambda I)^{-1}X^\\top y"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.linear_model import Ridge\nrng = np.random.default_rng(1)\nX = rng.normal(size=(100, 5))\nX[:, 4] = X[:, 0] + .01*rng.normal(size=100)\ny = X @ [1, 0, 0, 0, 0] + .3*rng.normal(size=100)\nfor alpha in [0.01, 1, 100]:\n    model = Ridge(alpha=alpha).fit(X[:75], y[:75])\n    print(alpha, model.score(X[75:], y[75:]))",
+      "packages": "numpy, scikit-learn",
+      "application": "高相关ETF或重复技术指标的预测系数收缩。",
+      "limits": "Ridge不会直接进行精确稀疏特征选择，λ必须在训练折调优。",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n05-01",
+      "node_id": "linear-n05-01",
+      "title": "LASSO回归",
+      "definition": "LASSO使用L1绝对值惩罚同时收缩系数与筛选特征，使部分系数精确为零。",
+      "assumptions": "特征需要可比尺度；强相关特征可能造成选择不稳定。",
+      "properties": [
+        "目标函数是凸函数但通常不可处处微分。",
+        "最优性条件使用次梯度；零系数可能出现于软阈值作用。"
+      ],
+      "formulas": [
+        {
+          "label": "LASSO目标",
+          "tex": "\\min_\\beta\\frac1{2n}\\|y-X\\beta\\|_2^2+\\lambda\\|\\beta\\|_1"
+        },
+        {
+          "label": "次梯度条件",
+          "tex": "0\\in\\frac1nX^\\top(X\\hat\\beta-y)+\\lambda\\partial\\|\\hat\\beta\\|_1"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "可微平方损失梯度",
+          "tex": "\\nabla_\\beta\\tfrac1{2n}\\|y-X\\beta\\|^2=X^\\top(X\\beta-y)/n"
+        },
+        {
+          "explanation": "零点处的L1次梯度落在闭区间",
+          "tex": "\\partial|\\beta_j|=\\begin{cases}\\{\\operatorname{sign}(\\beta_j)\\},&\\beta_j\\neq0\\\\ \\left[-1,1\\right],&\\beta_j=0\\end{cases}"
+        },
+        {
+          "explanation": "两部分次梯度相加包含零时为凸最优解",
+          "tex": "0\\in \\nabla L_{\\mathrm{data}}(\\hat\\beta)+\\lambda\\partial\\|\\hat\\beta\\|_1"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.linear_model import Lasso\nfrom sklearn.pipeline import make_pipeline\nfrom sklearn.preprocessing import StandardScaler\nrng = np.random.default_rng(3)\nX = rng.normal(size=(150, 20))\ny = 2*X[:, 0] - 1.5*X[:, 6] + .6*rng.normal(size=150)\nmodel = make_pipeline(StandardScaler(), Lasso(alpha=.08, max_iter=5000))\nmodel.fit(X[:100], y[:100])\nprint(\"Nonzero coefficients:\", np.flatnonzero(model[-1].coef_))\nprint(\"Holdout R2:\", model.score(X[100:], y[100:]))",
+      "packages": "numpy, scikit-learn",
+      "application": "数百候选因子或宏观特征的稀疏筛选。",
+      "limits": "特征选择必须只在训练期内进行，相关因素可能任意替换；不应把非零系数认作因果信号。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n02-01",
+      "node_id": "classification-n02-01",
+      "title": "Logistic回归",
+      "definition": "把线性预测值经Sigmoid映射成二分类概率，以Bernoulli负对数似然优化参数。",
+      "assumptions": "标签为0/1；有标签样本具备有效时点，模型的条件对数优势比线性。",
+      "properties": [
+        "概率输出位于(0,1)。",
+        "系数是对数优势比的边际线性变化，不是概率恒定变化。"
+      ],
+      "formulas": [
+        {
+          "label": "Sigmoid",
+          "tex": "p_i=\\sigma(x_i^\\top\\beta)=\\frac{1}{1+\\exp(-x_i^\\top\\beta)}"
+        },
+        {
+          "label": "负对数似然",
+          "tex": "L=-\\sum_i[y_i\\log p_i+(1-y_i)\\log(1-p_i)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "假设$Y_i$服从Bernoulli",
+          "tex": "P(Y_i=y_i|x_i)=p_i^{y_i}(1-p_i)^{1-y_i}"
+        },
+        {
+          "explanation": "取对数并累加独立样本",
+          "tex": "\\ell=\\sum_i[y_i\\log p_i+(1-y_i)\\log(1-p_i)]"
+        },
+        {
+          "explanation": "利用$sigma'(z)=sigma(z)(1-sigma(z))$求得梯度",
+          "tex": "\\nabla_\\beta L=X^\\top(p-y)"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.linear_model import LogisticRegression\nrng = np.random.default_rng(0)\nX = rng.normal(size=(180, 3))\nprob = 1/(1+np.exp(-(X @ [1.2,-.7,.3])))\ny = rng.binomial(1, prob)\nclf = LogisticRegression(max_iter=500).fit(X[:120], y[:120])\nprint(\"Positive probability:\", clf.predict_proba(X[120:123])[:, 1])",
+      "packages": "numpy, scikit-learn",
+      "application": "预测下一期ETF超额收益为正的概率，决定信号阈值或仓位。",
+      "limits": "分类概率须独立校准且要考虑交易成本，不可直接把准确率解释为投资收益。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n02-04",
+      "node_id": "classification-n02-04",
+      "title": "SVM软间隔",
+      "definition": "软间隔支持向量机在分类边际最大化的同时容忍违反边际的样本，以$C$控制惩罚强度。",
+      "assumptions": "二分类标签通常写作$y_iin{-1,+1}$；线性可分不是必要条件。",
+      "properties": [
+        "Hinge损失只惩罚未达到单位边际的样本。",
+        "支持向量支配判别边界；核技巧可处理非线性边界。"
+      ],
+      "formulas": [
+        {
+          "label": "软间隔原始问题",
+          "tex": "\\min_{w,b,\\xi}\\frac12\\|w\\|^2+C\\sum_i\\xi_i\\quad\\mathrm{s.t.}\\ y_i(w^\\top x_i+b)\\ge1-\\xi_i,\\ \\xi_i\\ge0"
+        },
+        {
+          "label": "Hinge形式",
+          "tex": "L=\\frac12\\|w\\|^2+C\\sum_i\\max(0,1-y_if(x_i))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对固定$(w,b)$，满足约束的最小松弛变量是",
+          "tex": "\\xi_i^*=\\max(0,1-y_i(w^\\top x_i+b))"
+        },
+        {
+          "explanation": "将最优松弛量代回目标",
+          "tex": "L(w,b)=\\tfrac12\\|w\\|^2+C\\sum_i\\max(0,1-y_if(x_i))"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.svm import SVC\nrng = np.random.default_rng(0)\nX = rng.normal(size=(150, 2))\ny = ((X[:, 0]*X[:, 1]) > 0).astype(int)\nmodel = SVC(kernel=\"rbf\", C=1., gamma=\"scale\")\nmodel.fit(X[:100], y[:100])\nprint(\"Holdout accuracy:\", model.score(X[100:], y[100:]))\nprint(\"Support vectors:\", len(model.support_))",
+      "packages": "numpy, scikit-learn",
+      "application": "非线性财务特征分类、市场状态判别。",
+      "limits": "核SVM大规模训练昂贵，决策分数不天然是已校准概率。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n02-05",
+      "node_id": "classification-n02-05",
+      "title": "ROC曲线和AUC",
+      "definition": "ROC展示阈值变化时TPR与FPR的权衡，AUC概括模型对正负样本的排名区分能力。",
+      "assumptions": "验证样本中含正负类别；预测分数与标签严格对齐。",
+      "properties": [
+        "AUC可解释为随机正样本分数超过负样本的概率（并对相等者计半）。",
+        "类别极端不平衡时PR曲线可能更有决策意义。"
+      ],
+      "formulas": [
+        {
+          "label": "ROC定义",
+          "tex": "\\mathrm{TPR}=\\frac{TP}{TP+FN},\\quad\\mathrm{FPR}=\\frac{FP}{FP+TN}"
+        },
+        {
+          "label": "AUC排名解释",
+          "tex": "\\mathrm{AUC}=P(s(X^+)>s(X^-))+\\tfrac12P(s(X^+)=s(X^-))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "阈值$t$产生一组预测标签",
+          "tex": "\\hat y=\\mathbf1[s(x)\\ge t]"
+        },
+        {
+          "explanation": "逐阈值计算TPR、FPR并沿横轴积分",
+          "tex": "\\mathrm{AUC}=\\int_0^1\\mathrm{TPR}(u)\\,du"
+        }
+      ],
+      "code": "from sklearn.metrics import roc_auc_score, roc_curve\ny = [0, 1, 0, 1, 1, 0]\ns = [.1, .9, .45, .6, .55, .3]\nfpr, tpr, thresholds = roc_curve(y, s)\nprint(\"AUC:\", roc_auc_score(y, s))\nprint(\"FPR:\", fpr, \"TPR:\", tpr)",
+      "packages": "scikit-learn",
+      "application": "预测趋势方向、极端风险事件的模型区分能力。",
+      "limits": "高AUC不表示输出概率已校准，也不保证策略净收益大于零。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n01-01",
+      "node_id": "trees-n01-01",
+      "title": "分类回归树CART",
+      "definition": "通过递归分割特征空间让每个叶节点内部目标更一致，回归用平方损失、分类可用Gini不纯度。",
+      "assumptions": "训练数据可按特征阈值划分，需通过深度、叶节点数等控制复杂度。",
+      "properties": [
+        "树拟合非线性与交互而不需标准化。",
+        "深树可严重过拟合；小数据扰动可能改变分裂结构。"
+      ],
+      "formulas": [
+        {
+          "label": "Gini不纯度",
+          "tex": "G(S)=1-\\sum_{k=1}^Kp_k^2"
+        },
+        {
+          "label": "划分收益",
+          "tex": "\\Delta I=I(S)-\\frac{|S_L|}{|S|}I(S_L)-\\frac{|S_R|}{|S|}I(S_R)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "计算父节点类别概率$p_k$",
+          "tex": "I(S)=1-\\sum_kp_k^2"
+        },
+        {
+          "explanation": "针对候选阈值分成$S_L,S_R$，计算样本数加权子节点不纯度",
+          "tex": "I_{\\mathrm{split}}=|S_L|I(S_L)/|S|+|S_R|I(S_R)/|S|"
+        },
+        {
+          "explanation": "选择最大不纯度下降的分裂",
+          "tex": "s^*=\\arg\\max_s(I(S)-I_{\\mathrm{split}}(s))"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.tree import DecisionTreeClassifier, export_text\nrng = np.random.default_rng(2)\nX = rng.normal(size=(120, 2))\ny = ((X[:, 0] > 0) & (X[:, 1] < .5)).astype(int)\ntree = DecisionTreeClassifier(max_depth=2, random_state=0).fit(X, y)\nprint(export_text(tree, feature_names=[\"momentum\",\"volatility\"]))",
+      "packages": "numpy, scikit-learn",
+      "application": "量化因子交互、非线性市场状态规则的可解释基线。",
+      "limits": "特征阈值仅来自样本数据，未来分布变换会改变决策可靠性。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n03-02",
+      "node_id": "trees-n03-02",
+      "title": "随机森林Random Forest",
+      "definition": "通过Bootstrap重采样数据并在每次节点分裂时随机抽取候选特征，平均多棵树以降低单树方差。",
+      "assumptions": "样本训练，特征抽取与Bootstrap配置明确；分类投票或概率平均。",
+      "properties": [
+        "多棵相关性低的树平均后通常比单树更稳定。",
+        "可使用袋外数据OOB近似验证，但时间序列直接OOB会产生未来样本泄漏。"
+      ],
+      "formulas": [
+        {
+          "label": "Bagging回归预测",
+          "tex": "\\hat f(x)=\\frac1B\\sum_{b=1}^B T_b(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "每棵树训练集由原始样本有放回重采样得到",
+          "tex": "D_b\\sim\\mathrm{Bootstrap}(D)"
+        },
+        {
+          "explanation": "回归预测取树平均，误差方差受树之间相关性控制",
+          "tex": "\\operatorname{Var}(\\bar T)=\\sigma_T^2\\big[\\rho+(1-\\rho)/B\\big]"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.ensemble import RandomForestRegressor\nrng = np.random.default_rng(3)\nX = rng.normal(size=(150, 4))\ny = X[:, 0]*X[:, 1] + .2*rng.normal(size=150)\nrf = RandomForestRegressor(n_estimators=80, min_samples_leaf=5, random_state=0)\nrf.fit(X[:110], y[:110])\nprint(\"Holdout R2:\", rf.score(X[110:], y[110:]))",
+      "packages": "numpy, scikit-learn",
+      "application": "处理横截面非线性多因子、交易量与动量交互。",
+      "limits": "森林无法自动处理股票跨期样本泄漏；对训练时间窗口要明确控制。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n02-03",
+      "node_id": "trees-n02-03",
+      "title": "梯度提升Gradient Boosting",
+      "definition": "逐轮训练弱学习器去拟合当前损失对模型预测的负梯度，将它们相加改善目标。",
+      "assumptions": "损失可导或有可用次梯度，基学习器与学习率需控制。",
+      "properties": [
+        "平方损失的伪残差等价于真实残差（按特定归一）。",
+        "增大学习器个数可能过拟合，常配合学习率和早停。"
+      ],
+      "formulas": [
+        {
+          "label": "函数空间更新",
+          "tex": "F_m(x)=F_{m-1}(x)+\\eta h_m(x)"
+        },
+        {
+          "label": "负梯度伪残差",
+          "tex": "r_{im}=-\\left[\\frac{\\partial \\ell(y_i,F(x_i))}{\\partial F(x_i)}\\right]_{F=F_{m-1}}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对当前预测$F_{m-1}$求样本损失负梯度",
+          "tex": "r_{im}=-\\partial_{F}\\ell(y_i,F_{m-1}(x_i))"
+        },
+        {
+          "explanation": "训练弱学习器$h_m$近似伪残差",
+          "tex": "h_m\\approx r_m"
+        },
+        {
+          "explanation": "以缩放学习率更新函数预测",
+          "tex": "F_m=F_{m-1}+\\eta h_m"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.ensemble import HistGradientBoostingRegressor\nrng = np.random.default_rng(0)\nX = rng.normal(size=(300, 5))\ny = np.sin(X[:, 0]) + X[:, 1]**2 + .2*rng.normal(size=300)\nm = HistGradientBoostingRegressor(max_iter=60, max_leaf_nodes=7, random_state=0)\nm.fit(X[:240], y[:240])\nprint(\"Holdout R2:\", m.score(X[240:], y[240:]))",
+      "packages": "numpy, scikit-learn",
+      "application": "非线性ETF因子组合和宏观状态与技术因子交互。",
+      "limits": "Boosting的样本内收益对特征时点、模型选择和成本敏感。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n01-01",
+      "node_id": "unsupervised-n01-01",
+      "title": "KMeans",
+      "definition": "将观测划分为K组，交替分配最近中心和更新簇均值以降低簇内平方距离。",
+      "assumptions": "用户预设K，数据需按合理距离尺度表示；算法可能收敛到局部最优。",
+      "properties": [
+        "每轮标准Lloyd更新不会增加目标。",
+        "结果依赖初始化和距离尺度，对离群点敏感。"
+      ],
+      "formulas": [
+        {
+          "label": "KMeans目标",
+          "tex": "\\min_{\\mu_1,\\dots,\\mu_K}\\sum_{i=1}^n\\min_{k}\\|x_i-\\mu_k\\|^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "固定聚类中心，分配最近中心",
+          "tex": "c_i=\\arg\\min_k\\|x_i-\\mu_k\\|^2"
+        },
+        {
+          "explanation": "固定样本归属，平方损失对中心求导",
+          "tex": "\\frac{\\partial}{\\partial\\mu_k}\\sum_{i:c_i=k}\\|x_i-\\mu_k\\|^2=2n_k\\mu_k-2\\sum_{i:c_i=k}x_i"
+        },
+        {
+          "explanation": "梯度为零得到簇均值",
+          "tex": "\\mu_k=\\frac1{n_k}\\sum_{i:c_i=k}x_i"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.cluster import KMeans\nrng = np.random.default_rng(8)\nX = np.vstack([rng.normal(loc=-2, size=(60, 2)),rng.normal(loc=2, size=(60, 2))])\nmodel = KMeans(n_clusters=2, random_state=0, n_init=10).fit(X)\nprint(\"Centers:\", model.cluster_centers_)\nprint(\"Cluster sizes:\", np.bincount(model.labels_))",
+      "packages": "numpy, scikit-learn",
+      "application": "用ETF收益风险特征聚类寻找相似资产与风险簇。",
+      "limits": "无监督簇标签不必具有经济意义；量化绩效需独立检验。",
+      "coverage": "complete"
+    }
+  ]
+}
