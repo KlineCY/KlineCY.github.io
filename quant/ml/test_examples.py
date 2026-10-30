@@ -10,6 +10,7 @@ ROOT=pathlib.Path(__file__).resolve().parent
 MANIFEST=json.loads((ROOT/"manifest.json").read_text(encoding="utf-8"))
 FILES=MANIFEST["lesson_files"]
 LESSONS=[x for f in FILES for x in json.loads((ROOT/f).read_text(encoding="utf-8"))["lessons"]]
+NOTES=[x for f in MANIFEST.get("note_files",[]) for x in json.loads((ROOT/f).read_text(encoding="utf-8"))["notes"]]
 SMOKE={
     "经验风险最小化ERM","偏差方差权衡","数据泄漏","标准化StandardScaler",
     "PCA","线性回归与OLS","Ridge回归","LASSO回归","Logistic回归",
@@ -49,7 +50,7 @@ SMOKE={
 }
 class MLExamplesTest(unittest.TestCase):
     def test_all_code_compiles(self):
-        for item in LESSONS:
+        for item in LESSONS+NOTES:
             with self.subTest(lesson=item["title"]):
                 compile(item["code"],item["title"],"exec",dont_inherit=True)
     def test_selected_snippets_run(self):
@@ -66,5 +67,8 @@ class MLExamplesTest(unittest.TestCase):
     def test_no_duplicate_tutorials(self):
         self.assertEqual(len(LESSONS),MANIFEST["total_lessons"])
         self.assertEqual(len({x["node_id"] for x in LESSONS}),len(LESSONS))
+        self.assertEqual(len(NOTES),MANIFEST["notes_count"])
+        self.assertEqual(len({x["node_id"] for x in LESSONS+NOTES}),720)
+        self.assertEqual(len(LESSONS)+len(NOTES),720)
 if __name__=="__main__":
     unittest.main()
