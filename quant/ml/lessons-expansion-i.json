@@ -1,0 +1,261 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "classification-n01-02",
+      "node_id": "classification-n01-02",
+      "title": "k近邻kNN",
+      "definition": "k近邻依据训练样本与新样本之间的特征距离，选择最近k个训练样本，按类别投票或回归均值预测。",
+      "assumptions": "模型输入、目标、训练时间与评估分割需要事先定义；超参数应在独立验证集选择。",
+      "properties": [
+        "参数、数据规模和建模假设决定该方法的适用范围，实际复杂度需要检查。",
+        "必须与更简单的基线模型做严格样本外比较，不能由样本内拟合表现宣称预测优势。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "\\hat f(x)=\\frac1k\\sum_{i\\in N_k(x)}y_i"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对每个训练样本计算输入空间距离",
+          "tex": "d_i(x)=\\|x-x_i\\|_2"
+        },
+        {
+          "explanation": "选择最近k条记录并对回归目标求均值",
+          "tex": "N_k(x)=\\operatorname{arg\\,min}_{|S|=k}\\sum_{i\\in S}d_i(x)"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.neighbors import KNeighborsClassifier\nX=np.array([[0,0],[0,1],[1,0],[3,3],[4,3],[3,4]])\ny=np.array([0,0,0,1,1,1])\nmodel=KNeighborsClassifier(n_neighbors=3).fit(X,y)\nprint(model.predict([[.3,.3],[3.5,3.5]]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用历史ETF动量和波动率特征检索相似市场状态。",
+      "limits": "高维距离退化和历史状态改变会降低预测有效性。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n03-02",
+      "node_id": "classification-n03-02",
+      "title": "高斯朴素贝叶斯",
+      "definition": "高斯朴素贝叶斯假定各连续特征在给定类别下条件独立且分别服从高斯分布，使用Bayes公式分类。",
+      "assumptions": "模型输入、目标、训练时间与评估分割需要事先定义；超参数应在独立验证集选择。",
+      "properties": [
+        "参数、数据规模和建模假设决定该方法的适用范围，实际复杂度需要检查。",
+        "必须与更简单的基线模型做严格样本外比较，不能由样本内拟合表现宣称预测优势。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "p(y=k|x)\\propto p(y=k)\\prod_j\\mathcal N(x_j;\\mu_{kj},\\sigma_{kj}^2)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "用条件独立假设分解联合似然",
+          "tex": "p(x|y=k)=\\prod_jp(x_j|y=k)"
+        },
+        {
+          "explanation": "代入类别先验并对所有类别归一化",
+          "tex": "p(y=k|x)=\\frac{p(y=k)p(x|y=k)}{\\sum_c p(y=c)p(x|y=c)}"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.naive_bayes import GaussianNB\nX=np.array([[1,1],[1,2],[3,3],[4,4],[4,5],[5,4]])\ny=np.array([0,0,1,1,1,1])\nm=GaussianNB().fit(X,y)\nprint(m.predict_proba([[2,2]]))",
+      "packages": "numpy, scikit-learn",
+      "application": "金融风险事件和市场状态方向分类的快速基线。",
+      "limits": "特征高度相关时独立性假设失真，概率输出需要独立校准。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n01-03",
+      "node_id": "classification-n01-03",
+      "title": "线性判别分析LDA",
+      "definition": "LDA假设各类别具有共享协方差高斯分布，得到线性判别边界；Fisher准则寻找类间距离相对类内散度最大的投影。",
+      "assumptions": "模型输入、目标、训练时间与评估分割需要事先定义；超参数应在独立验证集选择。",
+      "properties": [
+        "参数、数据规模和建模假设决定该方法的适用范围，实际复杂度需要检查。",
+        "必须与更简单的基线模型做严格样本外比较，不能由样本内拟合表现宣称预测优势。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "w\\propto S_W^{-1}(\\mu_1-\\mu_0)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "Fisher投影准则为类间均值差平方除类内方差",
+          "tex": "J(w)=\\frac{(w^\\top(\\mu_1-\\mu_0))^2}{w^\\top S_Ww}"
+        },
+        {
+          "explanation": "广义Rayleigh商极值给出判别方向",
+          "tex": "S_Ww\\propto\\mu_1-\\mu_0"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.discriminant_analysis import LinearDiscriminantAnalysis\nrng=np.random.default_rng(1)\nX=np.r_[rng.normal(-.5,1,(40,3)),rng.normal(.5,1,(40,3))]\ny=np.r_[np.zeros(40),np.ones(40)]\nprint(LinearDiscriminantAnalysis().fit(X,y).coef_)",
+      "packages": "numpy, scikit-learn",
+      "application": "较小金融样本的低方差状态分类基线。",
+      "limits": "共享协方差与高斯条件可能不满足。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n03-01",
+      "node_id": "trees-n03-01",
+      "title": "熵和信息增益",
+      "definition": "树模型利用熵表示一个节点中类别分布的不确定程度；选取切分后加权子节点熵下降最大的特征阈值。",
+      "assumptions": "模型输入、目标、训练时间与评估分割需要事先定义；超参数应在独立验证集选择。",
+      "properties": [
+        "参数、数据规模和建模假设决定该方法的适用范围，实际复杂度需要检查。",
+        "必须与更简单的基线模型做严格样本外比较，不能由样本内拟合表现宣称预测优势。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "I=H(Y)-\\frac{n_L}{n}H(Y_L)-\\frac{n_R}{n}H(Y_R)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按类别概率定义节点熵",
+          "tex": "H(Y)=-\\sum_kp_k\\log_2p_k"
+        },
+        {
+          "explanation": "扣除加权子节点熵得到切分的信息增益",
+          "tex": "\\operatorname{Gain}=H_{\\rm parent}-H_{\\rm split}"
+        }
+      ],
+      "code": "import numpy as np\ndef H(y):\n    p=np.unique(y,return_counts=True)[1]/len(y)\n    return -(p*np.log2(p)).sum()\ny=np.array([0,0,1,1,1,0])\nprint(H(y)-.5*H(y[:3])-.5*H(y[3:]))",
+      "packages": "numpy",
+      "application": "解释决策树根据因子阈值划分市场状态的原理。",
+      "limits": "信息增益是训练标签纯度指标，不直接表示交易盈利。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n02-01",
+      "node_id": "unsupervised-n02-01",
+      "title": "层次聚类",
+      "definition": "层次聚类从单个样本开始反复合并最相近的两个簇，记录嵌套树结构，可按不同高度截断形成资产分组。",
+      "assumptions": "模型输入、目标、训练时间与评估分割需要事先定义；超参数应在独立验证集选择。",
+      "properties": [
+        "参数、数据规模和建模假设决定该方法的适用范围，实际复杂度需要检查。",
+        "必须与更简单的基线模型做严格样本外比较，不能由样本内拟合表现宣称预测优势。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "\\Delta_{\\rm Ward}(A,B)=\\frac{|A||B|}{|A|+|B|}\\|\\bar x_A-\\bar x_B\\|_2^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "Ward准则衡量合并两簇导致的簇内平方和增量",
+          "tex": "\\Delta_{\\rm Ward}=\\mathrm{SSE}_{A\\cup B}-\\mathrm{SSE}_A-\\mathrm{SSE}_B"
+        },
+        {
+          "explanation": "每步选择最小增量的一对簇合并",
+          "tex": "(A,B)=\\arg\\min\\Delta_{\\rm Ward}(A,B)"
+        }
+      ],
+      "code": "import numpy as np\nfrom scipy.cluster.hierarchy import linkage,fcluster\nrng=np.random.default_rng(0)\nX=np.r_[rng.normal(-1,.3,(8,2)),rng.normal(2,.3,(8,2))]\ntree=linkage(X,method=\"ward\")\nprint(fcluster(tree,t=2,criterion=\"maxclust\"))",
+      "packages": "numpy, scipy",
+      "application": "ETF风险分群与相关资产分层。",
+      "limits": "资产距离往往随波动率状态变化，分组需要滚动检验。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n01-04",
+      "node_id": "unsupervised-n01-04",
+      "title": "对比学习InfoNCE",
+      "definition": "InfoNCE使同一样本的不同有效增强视图编码表示彼此接近，同时与其他样本表示拉开距离。",
+      "assumptions": "模型输入、目标、训练时间与评估分割需要事先定义；超参数应在独立验证集选择。",
+      "properties": [
+        "参数、数据规模和建模假设决定该方法的适用范围，实际复杂度需要检查。",
+        "必须与更简单的基线模型做严格样本外比较，不能由样本内拟合表现宣称预测优势。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "L_i=-\\log\\frac{\\exp(\\mathrm{sim}(z_i,z_i^+)/\\tau)}{\\sum_j\\exp(\\mathrm{sim}(z_i,z_j)/\\tau)}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对一个样本构建正视图对并计算相似度",
+          "tex": "z_i=f_\\theta(T_1(x_i)),\\quad z_i^+=f_\\theta(T_2(x_i))"
+        },
+        {
+          "explanation": "用温度缩放Softmax将正匹配视为分类目标",
+          "tex": "p(j=i|z_i)=\\frac{\\exp(s_{ii}/\\tau)}{\\sum_j\\exp(s_{ij}/\\tau)}"
+        }
+      ],
+      "code": "import torch\na=torch.nn.functional.normalize(torch.randn(4,8),dim=-1)\nb=torch.nn.functional.normalize(torch.randn(4,8),dim=-1)\nloss=torch.nn.functional.cross_entropy(a@b.T/.2,torch.arange(4))\nprint(loss.item())",
+      "packages": "torch",
+      "application": "金融价格图像和新闻表示自监督预训练。",
+      "limits": "真实样本的增强规则和假负例会影响学习目标可靠性。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n04-04",
+      "node_id": "roadmap-n04-04",
+      "title": "嵌套交叉验证",
+      "definition": "嵌套交叉验证把模型选择安排在内层训练验证流程，而外层测试仅用于评价完整模型选择流程的泛化结果。",
+      "assumptions": "模型输入、目标、训练时间与评估分割需要事先定义；超参数应在独立验证集选择。",
+      "properties": [
+        "参数、数据规模和建模假设决定该方法的适用范围，实际复杂度需要检查。",
+        "必须与更简单的基线模型做严格样本外比较，不能由样本内拟合表现宣称预测优势。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "\\hat R_{\\rm outer}=\\frac1K\\sum_{k=1}^K R_{I_k^{\\rm test}}(f_{\\hat\\lambda_{-k}})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "内层验证折选择超参数λ",
+          "tex": "\\hat\\lambda_{-k}=\\arg\\min_\\lambda \\hat R_{\\rm inner}(\\lambda)"
+        },
+        {
+          "explanation": "外层保留折评价用内层选参结果重训后的模型",
+          "tex": "R_k=R_{D_k^{\\rm outer-test}}(f_{\\hat\\lambda_{-k}})"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.model_selection import GridSearchCV,TimeSeriesSplit,cross_val_score\nfrom sklearn.linear_model import Ridge\nrng=np.random.default_rng(0);X=rng.normal(size=(80,3))\ny=X[:,0]+rng.normal(size=80)\ninner=GridSearchCV(Ridge(),{\"alpha\":[.1,1.,10.]},cv=TimeSeriesSplit(3))\nprint(cross_val_score(inner,X,y,cv=TimeSeriesSplit(3)).mean())",
+      "packages": "numpy, scikit-learn",
+      "application": "防止金融策略调参时把验证效果误写成样本外测试。",
+      "limits": "时序嵌套CV还需处理重叠标签和跨时点依赖。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n02-05",
+      "node_id": "roadmap-n02-05",
+      "title": "实验假设和消融",
+      "definition": "消融实验在固定数据、训练过程和评价规则条件下逐一移除模型组件，检查性能提升来自哪些功能。",
+      "assumptions": "模型输入、目标、训练时间与评估分割需要事先定义；超参数应在独立验证集选择。",
+      "properties": [
+        "参数、数据规模和建模假设决定该方法的适用范围，实际复杂度需要检查。",
+        "必须与更简单的基线模型做严格样本外比较，不能由样本内拟合表现宣称预测优势。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "\\Delta_j=R(M_{-j})-R(M_{\\rm full})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义完整模型与去除组件j的模型",
+          "tex": "M_{\\rm full}=(A,B,C),\\quad M_{-B}=(A,C)"
+        },
+        {
+          "explanation": "对两模型用相同验证集及度量计算损失差",
+          "tex": "\\Delta_B=R(M_{-B})-R(M_{\\rm full})"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.linear_model import Ridge\nrng=np.random.default_rng(0);X=rng.normal(size=(120,3))\ny=X[:,0]+.5*X[:,1]+rng.normal(size=120)*.2\nfor cols in [[0],[0,1],[0,1,2]]:\n    m=Ridge().fit(X[:80,cols],y[:80])\n    print(cols,m.score(X[80:][:,cols],y[80:]))",
+      "packages": "numpy, scikit-learn",
+      "application": "检验CNN价格图像中的成交量通道和Attention模块是否有增量作用。",
+      "limits": "一次消融不代表统计显著，需多个随机种子和不同窗口复核。",
+      "coverage": "complete"
+    }
+  ]
+}
