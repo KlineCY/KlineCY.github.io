@@ -1,0 +1,421 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "finml-n05-01",
+      "node_id": "finml-n05-01",
+      "title": "事件采样CUSUM",
+      "definition": "累积和事件采样在收益偏离基准达到阈值时触发新事件，有助于减少密集冗余标签。",
+      "assumptions": "所有因子必须点时可得，标签时间、复权、交易成本和资产可投资集合均按历史实际情况构造。",
+      "properties": [
+        "累积和事件采样在收益偏离基准达到阈值时触发新事件，有助于减少密集冗余标签。",
+        "需要独立的时间序列验证、策略多重检验控制与可执行净成本回测，模型分数并非自动盈利。"
+      ],
+      "formulas": [
+        {
+          "label": "金融机器学习核心统计量",
+          "tex": "S_t^+=\\max(0,S_{t-1}^++r_t-h)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按照事件、样本、策略或风险模型的定义构造所需统计量与历史时点。",
+          "tex": "S_t^+=\\max(0,S_{t-1}^++r_t-h)"
+        },
+        {
+          "explanation": "在独立窗口上计算预测、信号选择或风险评价，并处理交易成本与样本重叠。",
+          "tex": "S_t^+=\\max(0,S_{t-1}^++r_t-h)"
+        }
+      ],
+      "code": "import numpy as np\nr=np.array([.01,.01,-.03,.02,.02]);s=0.;events=[]\nfor t,v in enumerate(r):\n s=max(0,s+v-.01)\n if s>.02:events.append(t);s=0.\nprint(events)",
+      "packages": "numpy, scikit-learn",
+      "application": "直接用于美国ETF机器学习研究、因子稳定性、金融CNN和多策略回测评估。",
+      "limits": "代码是教学示意，不包括完整DSR/PBO框架、真实撮合或历史复权数据库。资金容量必须根据成交量和价格冲击独立估计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "finml-n06-01",
+      "node_id": "finml-n06-01",
+      "title": "样本唯一性",
+      "definition": "对未来标签窗口的重叠程度量化样本唯一性，避免把高度共享未来路径的观测当作独立。",
+      "assumptions": "所有因子必须点时可得，标签时间、复权、交易成本和资产可投资集合均按历史实际情况构造。",
+      "properties": [
+        "对未来标签窗口的重叠程度量化样本唯一性，避免把高度共享未来路径的观测当作独立。",
+        "需要独立的时间序列验证、策略多重检验控制与可执行净成本回测，模型分数并非自动盈利。"
+      ],
+      "formulas": [
+        {
+          "label": "金融机器学习核心统计量",
+          "tex": "u_i=|I_i|^{-1}\\sum_{t\\in I_i}1/c_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按照事件、样本、策略或风险模型的定义构造所需统计量与历史时点。",
+          "tex": "u_i=|I_i|^{-1}\\sum_{t\\in I_i}1/c_t"
+        },
+        {
+          "explanation": "在独立窗口上计算预测、信号选择或风险评价，并处理交易成本与样本重叠。",
+          "tex": "u_i=|I_i|^{-1}\\sum_{t\\in I_i}1/c_t"
+        }
+      ],
+      "code": "import numpy as np\nr=np.array([.01,.01,-.03,.02,.02]);s=0.;events=[]\nfor t,v in enumerate(r):\n s=max(0,s+v-.01)\n if s>.02:events.append(t);s=0.\nprint(events)",
+      "packages": "numpy, scikit-learn",
+      "application": "直接用于美国ETF机器学习研究、因子稳定性、金融CNN和多策略回测评估。",
+      "limits": "代码是教学示意，不包括完整DSR/PBO框架、真实撮合或历史复权数据库。资金容量必须根据成交量和价格冲击独立估计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "finml-n05-02",
+      "node_id": "finml-n05-02",
+      "title": "稳定性选择",
+      "definition": "在多次重抽样中统计某因子被稀疏模型选中的频率，以筛选稳定特征。",
+      "assumptions": "所有因子必须点时可得，标签时间、复权、交易成本和资产可投资集合均按历史实际情况构造。",
+      "properties": [
+        "在多次重抽样中统计某因子被稀疏模型选中的频率，以筛选稳定特征。",
+        "需要独立的时间序列验证、策略多重检验控制与可执行净成本回测，模型分数并非自动盈利。"
+      ],
+      "formulas": [
+        {
+          "label": "金融机器学习核心统计量",
+          "tex": "\\hat\\pi_j=B^{-1}\\sum_{b=1}^B\\mathbf1[j\\in\\hat S_b]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按照事件、样本、策略或风险模型的定义构造所需统计量与历史时点。",
+          "tex": "\\hat\\pi_j=B^{-1}\\sum_{b=1}^B\\mathbf1[j\\in\\hat S_b]"
+        },
+        {
+          "explanation": "在独立窗口上计算预测、信号选择或风险评价，并处理交易成本与样本重叠。",
+          "tex": "\\hat\\pi_j=B^{-1}\\sum_{b=1}^B\\mathbf1[j\\in\\hat S_b]"
+        }
+      ],
+      "code": "import numpy as np\nr=np.array([.01,-.02,.03]);print('momentum:',np.prod(1+r)-1)",
+      "packages": "numpy, scikit-learn",
+      "application": "直接用于美国ETF机器学习研究、因子稳定性、金融CNN和多策略回测评估。",
+      "limits": "代码是教学示意，不包括完整DSR/PBO框架、真实撮合或历史复权数据库。资金容量必须根据成交量和价格冲击独立估计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "finml-n01-03",
+      "node_id": "finml-n01-03",
+      "title": "ETF回报回归",
+      "definition": "以过去已知ETF特征预测固定未来持有期回报，严格区分历史特征与未来标签。",
+      "assumptions": "所有因子必须点时可得，标签时间、复权、交易成本和资产可投资集合均按历史实际情况构造。",
+      "properties": [
+        "以过去已知ETF特征预测固定未来持有期回报，严格区分历史特征与未来标签。",
+        "需要独立的时间序列验证、策略多重检验控制与可执行净成本回测，模型分数并非自动盈利。"
+      ],
+      "formulas": [
+        {
+          "label": "金融机器学习核心统计量",
+          "tex": "r_{i,t+h}=\\beta^\\top X_{i,t}+\\epsilon_{i,t+h}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按照事件、样本、策略或风险模型的定义构造所需统计量与历史时点。",
+          "tex": "r_{i,t+h}=\\beta^\\top X_{i,t}+\\epsilon_{i,t+h}"
+        },
+        {
+          "explanation": "在独立窗口上计算预测、信号选择或风险评价，并处理交易成本与样本重叠。",
+          "tex": "r_{i,t+h}=\\beta^\\top X_{i,t}+\\epsilon_{i,t+h}"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.linear_model import Ridge\nX=np.random.default_rng(0).normal(size=(50,3));y=X[:,0]\nprint(Ridge().fit(X[:40],y[:40]).predict(X[40:42]))",
+      "packages": "numpy, scikit-learn",
+      "application": "直接用于美国ETF机器学习研究、因子稳定性、金融CNN和多策略回测评估。",
+      "limits": "代码是教学示意，不包括完整DSR/PBO框架、真实撮合或历史复权数据库。资金容量必须根据成交量和价格冲击独立估计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "finml-n02-03",
+      "node_id": "finml-n02-03",
+      "title": "涨跌方向分类",
+      "definition": "根据ETF未来收益是否超过预定阈值构造二元标签，并使用分类概率与成本评价。",
+      "assumptions": "所有因子必须点时可得，标签时间、复权、交易成本和资产可投资集合均按历史实际情况构造。",
+      "properties": [
+        "根据ETF未来收益是否超过预定阈值构造二元标签，并使用分类概率与成本评价。",
+        "需要独立的时间序列验证、策略多重检验控制与可执行净成本回测，模型分数并非自动盈利。"
+      ],
+      "formulas": [
+        {
+          "label": "金融机器学习核心统计量",
+          "tex": "y_{i,t}=\\mathbf1[r_{i,t+h}>0]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按照事件、样本、策略或风险模型的定义构造所需统计量与历史时点。",
+          "tex": "y_{i,t}=\\mathbf1[r_{i,t+h}>0]"
+        },
+        {
+          "explanation": "在独立窗口上计算预测、信号选择或风险评价，并处理交易成本与样本重叠。",
+          "tex": "y_{i,t}=\\mathbf1[r_{i,t+h}>0]"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.linear_model import Ridge\nX=np.random.default_rng(0).normal(size=(50,3));y=X[:,0]\nprint(Ridge().fit(X[:40],y[:40]).predict(X[40:42]))",
+      "packages": "numpy, scikit-learn",
+      "application": "直接用于美国ETF机器学习研究、因子稳定性、金融CNN和多策略回测评估。",
+      "limits": "代码是教学示意，不包括完整DSR/PBO框架、真实撮合或历史复权数据库。资金容量必须根据成交量和价格冲击独立估计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "finml-n03-03",
+      "node_id": "finml-n03-03",
+      "title": "Transformer序列预测",
+      "definition": "用仅含已知历史的Token窗口输入Transformer，预测未来收益或条件波动率。",
+      "assumptions": "所有因子必须点时可得，标签时间、复权、交易成本和资产可投资集合均按历史实际情况构造。",
+      "properties": [
+        "用仅含已知历史的Token窗口输入Transformer，预测未来收益或条件波动率。",
+        "需要独立的时间序列验证、策略多重检验控制与可执行净成本回测，模型分数并非自动盈利。"
+      ],
+      "formulas": [
+        {
+          "label": "金融机器学习核心统计量",
+          "tex": "\\hat y_{t+h}=f_{\\rm Tr}(X_{t-W+1:t})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按照事件、样本、策略或风险模型的定义构造所需统计量与历史时点。",
+          "tex": "\\hat y_{t+h}=f_{\\rm Tr}(X_{t-W+1:t})"
+        },
+        {
+          "explanation": "在独立窗口上计算预测、信号选择或风险评价，并处理交易成本与样本重叠。",
+          "tex": "\\hat y_{t+h}=f_{\\rm Tr}(X_{t-W+1:t})"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.linear_model import Ridge\nX=np.random.default_rng(0).normal(size=(50,3));y=X[:,0]\nprint(Ridge().fit(X[:40],y[:40]).predict(X[40:42]))",
+      "packages": "numpy, scikit-learn",
+      "application": "直接用于美国ETF机器学习研究、因子稳定性、金融CNN和多策略回测评估。",
+      "limits": "代码是教学示意，不包括完整DSR/PBO框架、真实撮合或历史复权数据库。资金容量必须根据成交量和价格冲击独立估计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "finml-n04-03",
+      "node_id": "finml-n04-03",
+      "title": "CNN价格图像",
+      "definition": "将历史OHLCV转换成图像输入CNN，并在独立日期和资产上测试。",
+      "assumptions": "所有因子必须点时可得，标签时间、复权、交易成本和资产可投资集合均按历史实际情况构造。",
+      "properties": [
+        "将历史OHLCV转换成图像输入CNN，并在独立日期和资产上测试。",
+        "需要独立的时间序列验证、策略多重检验控制与可执行净成本回测，模型分数并非自动盈利。"
+      ],
+      "formulas": [
+        {
+          "label": "金融机器学习核心统计量",
+          "tex": "\\hat p_{i,t+h}=\\operatorname{CNN}(I_{i,t-W+1:t})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按照事件、样本、策略或风险模型的定义构造所需统计量与历史时点。",
+          "tex": "\\hat p_{i,t+h}=\\operatorname{CNN}(I_{i,t-W+1:t})"
+        },
+        {
+          "explanation": "在独立窗口上计算预测、信号选择或风险评价，并处理交易成本与样本重叠。",
+          "tex": "\\hat p_{i,t+h}=\\operatorname{CNN}(I_{i,t-W+1:t})"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.linear_model import Ridge\nX=np.random.default_rng(0).normal(size=(50,3));y=X[:,0]\nprint(Ridge().fit(X[:40],y[:40]).predict(X[40:42]))",
+      "packages": "numpy, scikit-learn",
+      "application": "直接用于美国ETF机器学习研究、因子稳定性、金融CNN和多策略回测评估。",
+      "limits": "代码是教学示意，不包括完整DSR/PBO框架、真实撮合或历史复权数据库。资金容量必须根据成交量和价格冲击独立估计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "finml-n05-03",
+      "node_id": "finml-n05-03",
+      "title": "截面多因子",
+      "definition": "在同一交易日把多个资产因子组合成预测分数并按截面排序构建组合。",
+      "assumptions": "所有因子必须点时可得，标签时间、复权、交易成本和资产可投资集合均按历史实际情况构造。",
+      "properties": [
+        "在同一交易日把多个资产因子组合成预测分数并按截面排序构建组合。",
+        "需要独立的时间序列验证、策略多重检验控制与可执行净成本回测，模型分数并非自动盈利。"
+      ],
+      "formulas": [
+        {
+          "label": "金融机器学习核心统计量",
+          "tex": "s_{i,t}=\\sum_k\\beta_kf_{i,k,t}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按照事件、样本、策略或风险模型的定义构造所需统计量与历史时点。",
+          "tex": "s_{i,t}=\\sum_k\\beta_kf_{i,k,t}"
+        },
+        {
+          "explanation": "在独立窗口上计算预测、信号选择或风险评价，并处理交易成本与样本重叠。",
+          "tex": "s_{i,t}=\\sum_k\\beta_kf_{i,k,t}"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.linear_model import Ridge\nX=np.random.default_rng(0).normal(size=(50,3));y=X[:,0]\nprint(Ridge().fit(X[:40],y[:40]).predict(X[40:42]))",
+      "packages": "numpy, scikit-learn",
+      "application": "直接用于美国ETF机器学习研究、因子稳定性、金融CNN和多策略回测评估。",
+      "limits": "代码是教学示意，不包括完整DSR/PBO框架、真实撮合或历史复权数据库。资金容量必须根据成交量和价格冲击独立估计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "finml-n06-03",
+      "node_id": "finml-n06-03",
+      "title": "市场状态模型",
+      "definition": "用隐状态或聚类刻画不同波动环境，并对策略风险和预测参数分状态检验。",
+      "assumptions": "所有因子必须点时可得，标签时间、复权、交易成本和资产可投资集合均按历史实际情况构造。",
+      "properties": [
+        "用隐状态或聚类刻画不同波动环境，并对策略风险和预测参数分状态检验。",
+        "需要独立的时间序列验证、策略多重检验控制与可执行净成本回测，模型分数并非自动盈利。"
+      ],
+      "formulas": [
+        {
+          "label": "金融机器学习核心统计量",
+          "tex": "P(z_t=k\\mid X_{\\le t})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按照事件、样本、策略或风险模型的定义构造所需统计量与历史时点。",
+          "tex": "P(z_t=k\\mid X_{\\le t})"
+        },
+        {
+          "explanation": "在独立窗口上计算预测、信号选择或风险评价，并处理交易成本与样本重叠。",
+          "tex": "P(z_t=k\\mid X_{\\le t})"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.linear_model import Ridge\nX=np.random.default_rng(0).normal(size=(50,3));y=X[:,0]\nprint(Ridge().fit(X[:40],y[:40]).predict(X[40:42]))",
+      "packages": "numpy, scikit-learn",
+      "application": "直接用于美国ETF机器学习研究、因子稳定性、金融CNN和多策略回测评估。",
+      "limits": "代码是教学示意，不包括完整DSR/PBO框架、真实撮合或历史复权数据库。资金容量必须根据成交量和价格冲击独立估计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "finml-n04-04",
+      "node_id": "finml-n04-04",
+      "title": "Deflated Sharpe",
+      "definition": "校正大量策略试验和非正态收益引起的Sharpe显著性膨胀，防止数据挖掘选择偏差。",
+      "assumptions": "所有因子必须点时可得，标签时间、复权、交易成本和资产可投资集合均按历史实际情况构造。",
+      "properties": [
+        "校正大量策略试验和非正态收益引起的Sharpe显著性膨胀，防止数据挖掘选择偏差。",
+        "需要独立的时间序列验证、策略多重检验控制与可执行净成本回测，模型分数并非自动盈利。"
+      ],
+      "formulas": [
+        {
+          "label": "金融机器学习核心统计量",
+          "tex": "\\operatorname{DSR}=\\Phi\\left(\\frac{(\\widehat{SR}-SR^*)\\sqrt{T-1}}{\\sqrt{1-\\hat\\gamma_3\\widehat{SR}+( \\hat\\gamma_4-1)\\widehat{SR}^2/4}}\\right)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按照事件、样本、策略或风险模型的定义构造所需统计量与历史时点。",
+          "tex": "\\operatorname{DSR}=\\Phi\\left(\\frac{(\\widehat{SR}-SR^*)\\sqrt{T-1}}{\\sqrt{1-\\hat\\gamma_3\\widehat{SR}+( \\hat\\gamma_4-1)\\widehat{SR}^2/4}}\\right)"
+        },
+        {
+          "explanation": "在独立窗口上计算预测、信号选择或风险评价，并处理交易成本与样本重叠。",
+          "tex": "\\operatorname{DSR}=\\Phi\\left(\\frac{(\\widehat{SR}-SR^*)\\sqrt{T-1}}{\\sqrt{1-\\hat\\gamma_3\\widehat{SR}+( \\hat\\gamma_4-1)\\widehat{SR}^2/4}}\\right)"
+        }
+      ],
+      "code": "import numpy as np\nr=np.array([.01,-.03,.02,.04]);print('Sharpe illustrative:',r.mean()/r.std(ddof=1))",
+      "packages": "numpy, scikit-learn",
+      "application": "直接用于美国ETF机器学习研究、因子稳定性、金融CNN和多策略回测评估。",
+      "limits": "代码是教学示意，不包括完整DSR/PBO框架、真实撮合或历史复权数据库。资金容量必须根据成交量和价格冲击独立估计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "finml-n05-04",
+      "node_id": "finml-n05-04",
+      "title": "Probability of Backtest Overfitting",
+      "definition": "通过组合对称交叉验证或类似方法估计样本内最佳策略在样本外排名较差的概率。",
+      "assumptions": "所有因子必须点时可得，标签时间、复权、交易成本和资产可投资集合均按历史实际情况构造。",
+      "properties": [
+        "通过组合对称交叉验证或类似方法估计样本内最佳策略在样本外排名较差的概率。",
+        "需要独立的时间序列验证、策略多重检验控制与可执行净成本回测，模型分数并非自动盈利。"
+      ],
+      "formulas": [
+        {
+          "label": "金融机器学习核心统计量",
+          "tex": "\\operatorname{PBO}=P(\\lambda_{\\rm OOS}<0\\mid\\text{IS selection})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按照事件、样本、策略或风险模型的定义构造所需统计量与历史时点。",
+          "tex": "\\operatorname{PBO}=P(\\lambda_{\\rm OOS}<0\\mid\\text{IS selection})"
+        },
+        {
+          "explanation": "在独立窗口上计算预测、信号选择或风险评价，并处理交易成本与样本重叠。",
+          "tex": "\\operatorname{PBO}=P(\\lambda_{\\rm OOS}<0\\mid\\text{IS selection})"
+        }
+      ],
+      "code": "import numpy as np\nr=np.array([.01,-.03,.02,.04]);print('Sharpe illustrative:',r.mean()/r.std(ddof=1))",
+      "packages": "numpy, scikit-learn",
+      "application": "直接用于美国ETF机器学习研究、因子稳定性、金融CNN和多策略回测评估。",
+      "limits": "代码是教学示意，不包括完整DSR/PBO框架、真实撮合或历史复权数据库。资金容量必须根据成交量和价格冲击独立估计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "finml-n01-05",
+      "node_id": "finml-n01-05",
+      "title": "预期收益与协方差",
+      "definition": "多资产优化须联合估计未来资产期望收益向量与收益协方差矩阵。",
+      "assumptions": "所有因子必须点时可得，标签时间、复权、交易成本和资产可投资集合均按历史实际情况构造。",
+      "properties": [
+        "多资产优化须联合估计未来资产期望收益向量与收益协方差矩阵。",
+        "需要独立的时间序列验证、策略多重检验控制与可执行净成本回测，模型分数并非自动盈利。"
+      ],
+      "formulas": [
+        {
+          "label": "金融机器学习核心统计量",
+          "tex": "\\mu=E[R],\\quad\\Sigma=E[(R-\\mu)(R-\\mu)^\\top]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按照事件、样本、策略或风险模型的定义构造所需统计量与历史时点。",
+          "tex": "\\mu=E[R],\\quad\\Sigma=E[(R-\\mu)(R-\\mu)^\\top]"
+        },
+        {
+          "explanation": "在独立窗口上计算预测、信号选择或风险评价，并处理交易成本与样本重叠。",
+          "tex": "\\mu=E[R],\\quad\\Sigma=E[(R-\\mu)(R-\\mu)^\\top]"
+        }
+      ],
+      "code": "import numpy as np\nw=np.array([[.5,.5],[.7,.3]]);print('turnover:',np.abs(np.diff(w,axis=0)).sum())",
+      "packages": "numpy, scikit-learn",
+      "application": "直接用于美国ETF机器学习研究、因子稳定性、金融CNN和多策略回测评估。",
+      "limits": "代码是教学示意，不包括完整DSR/PBO框架、真实撮合或历史复权数据库。资金容量必须根据成交量和价格冲击独立估计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "finml-n06-05",
+      "node_id": "finml-n06-05",
+      "title": "容量与换手",
+      "definition": "策略容量取决于订单相对市场成交量及冲击；换手反映仓位变化频率和成本。",
+      "assumptions": "所有因子必须点时可得，标签时间、复权、交易成本和资产可投资集合均按历史实际情况构造。",
+      "properties": [
+        "策略容量取决于订单相对市场成交量及冲击；换手反映仓位变化频率和成本。",
+        "需要独立的时间序列验证、策略多重检验控制与可执行净成本回测，模型分数并非自动盈利。"
+      ],
+      "formulas": [
+        {
+          "label": "金融机器学习核心统计量",
+          "tex": "\\operatorname{Turnover}_t=\\sum_i|w_{i,t}-w_{i,t-1}|"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按照事件、样本、策略或风险模型的定义构造所需统计量与历史时点。",
+          "tex": "\\operatorname{Turnover}_t=\\sum_i|w_{i,t}-w_{i,t-1}|"
+        },
+        {
+          "explanation": "在独立窗口上计算预测、信号选择或风险评价，并处理交易成本与样本重叠。",
+          "tex": "\\operatorname{Turnover}_t=\\sum_i|w_{i,t}-w_{i,t-1}|"
+        }
+      ],
+      "code": "import numpy as np\nw=np.array([[.5,.5],[.7,.3]]);print('turnover:',np.abs(np.diff(w,axis=0)).sum())",
+      "packages": "numpy, scikit-learn",
+      "application": "直接用于美国ETF机器学习研究、因子稳定性、金融CNN和多策略回测评估。",
+      "limits": "代码是教学示意，不包括完整DSR/PBO框架、真实撮合或历史复权数据库。资金容量必须根据成交量和价格冲击独立估计。",
+      "coverage": "complete"
+    }
+  ]
+}
