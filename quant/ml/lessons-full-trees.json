@@ -1,0 +1,741 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "trees-n04-01",
+      "node_id": "trees-n04-01",
+      "title": "回归树平方损失",
+      "definition": "回归树在每个叶节点用目标平均值预测，分裂时最大化左右分区平方残差下降。",
+      "assumptions": "拟合分区和模型参数必须只使用历史训练数据；类别、回归目标及时间窗口应提前定义。",
+      "properties": [
+        "树结构通过训练分裂或集成机制决定模型容量，复杂度与过拟合风险应独立调参。",
+        "模型训练损失不等于外部验证性能，金融应用还需检验因子时效与换手成本。"
+      ],
+      "formulas": [
+        {
+          "label": "方法的核心目标或机制",
+          "tex": "\\min_{\\mathcal P}\\sum_{R\\in\\mathcal P}\\sum_{i:x_i\\in R}(y_i-\\bar y_R)^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按照算法指定的数据分区、样本权重或迭代方式构造局部统计量。",
+          "tex": "\\min_{\\mathcal P}\\sum_{R\\in\\mathcal P}\\sum_{i:x_i\\in R}(y_i-\\bar y_R)^2"
+        },
+        {
+          "explanation": "通过最小化局部损失或累加弱学习器来得到最终判别、回归或解释结果。",
+          "tex": "\\min_{\\mathcal P}\\sum_{R\\in\\mathcal P}\\sum_{i:x_i\\in R}(y_i-\\bar y_R)^2"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.tree import DecisionTreeRegressor\nrng=np.random.default_rng(0);X=rng.normal(size=(80,3));y=X[:,0]**2+.1*rng.normal(size=80)\nmodel=DecisionTreeRegressor(max_depth=3,min_samples_leaf=5).fit(X[:60],y[:60]);print(model.score(X[60:],y[60:]))",
+      "packages": "numpy, scikit-learn（视示例导入）",
+      "application": "对ETF多因子横截面收益、非线性风险关系和市场状态建模，并进行Walk-Forward验证。",
+      "limits": "复杂树模型可能过度拟合历史行情；分裂统计值、解释重要性和测试收益不能混淆，所有金融策略需扣交易成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n05-01",
+      "node_id": "trees-n05-01",
+      "title": "剪枝",
+      "definition": "剪枝通过限制复杂度或在拟合后删除无效分支，降低树模型对训练噪声的过拟合。",
+      "assumptions": "拟合分区和模型参数必须只使用历史训练数据；类别、回归目标及时间窗口应提前定义。",
+      "properties": [
+        "树结构通过训练分裂或集成机制决定模型容量，复杂度与过拟合风险应独立调参。",
+        "模型训练损失不等于外部验证性能，金融应用还需检验因子时效与换手成本。"
+      ],
+      "formulas": [
+        {
+          "label": "方法的核心目标或机制",
+          "tex": "C_\\alpha(T)=\\sum_{R\\in T}\\mathrm{SSE}(R)+\\alpha|T|"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按照算法指定的数据分区、样本权重或迭代方式构造局部统计量。",
+          "tex": "C_\\alpha(T)=\\sum_{R\\in T}\\mathrm{SSE}(R)+\\alpha|T|"
+        },
+        {
+          "explanation": "通过最小化局部损失或累加弱学习器来得到最终判别、回归或解释结果。",
+          "tex": "C_\\alpha(T)=\\sum_{R\\in T}\\mathrm{SSE}(R)+\\alpha|T|"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.tree import DecisionTreeRegressor\nrng=np.random.default_rng(0);X=rng.normal(size=(80,3));y=X[:,0]**2+.1*rng.normal(size=80)\nmodel=DecisionTreeRegressor(max_depth=3,min_samples_leaf=5).fit(X[:60],y[:60]);print(model.score(X[60:],y[60:]))",
+      "packages": "numpy, scikit-learn（视示例导入）",
+      "application": "对ETF多因子横截面收益、非线性风险关系和市场状态建模，并进行Walk-Forward验证。",
+      "limits": "复杂树模型可能过度拟合历史行情；分裂统计值、解释重要性和测试收益不能混淆，所有金融策略需扣交易成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n06-01",
+      "node_id": "trees-n06-01",
+      "title": "类别与缺失值分裂",
+      "definition": "树的类别分裂按类别集合或数值编码形成分区；缺失值需明确单独分支或学习缺失方向。",
+      "assumptions": "拟合分区和模型参数必须只使用历史训练数据；类别、回归目标及时间窗口应提前定义。",
+      "properties": [
+        "树结构通过训练分裂或集成机制决定模型容量，复杂度与过拟合风险应独立调参。",
+        "模型训练损失不等于外部验证性能，金融应用还需检验因子时效与换手成本。"
+      ],
+      "formulas": [
+        {
+          "label": "方法的核心目标或机制",
+          "tex": "R_L=\\{i:x_{ij}\\in S\\},\\quad R_R=\\{i:x_{ij}\\notin S\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按照算法指定的数据分区、样本权重或迭代方式构造局部统计量。",
+          "tex": "R_L=\\{i:x_{ij}\\in S\\},\\quad R_R=\\{i:x_{ij}\\notin S\\}"
+        },
+        {
+          "explanation": "通过最小化局部损失或累加弱学习器来得到最终判别、回归或解释结果。",
+          "tex": "R_L=\\{i:x_{ij}\\in S\\},\\quad R_R=\\{i:x_{ij}\\notin S\\}"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.tree import DecisionTreeRegressor\nrng=np.random.default_rng(0);X=rng.normal(size=(80,3));y=X[:,0]**2+.1*rng.normal(size=80)\nmodel=DecisionTreeRegressor(max_depth=3,min_samples_leaf=5).fit(X[:60],y[:60]);print(model.score(X[60:],y[60:]))",
+      "packages": "numpy, scikit-learn（视示例导入）",
+      "application": "对ETF多因子横截面收益、非线性风险关系和市场状态建模，并进行Walk-Forward验证。",
+      "limits": "复杂树模型可能过度拟合历史行情；分裂统计值、解释重要性和测试收益不能混淆，所有金融策略需扣交易成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n01-02",
+      "node_id": "trees-n01-02",
+      "title": "Bootstrap抽样",
+      "definition": "Bootstrap有放回从训练集抽n次样本，供Bagging估计模型的重复抽样变异。",
+      "assumptions": "拟合分区和模型参数必须只使用历史训练数据；类别、回归目标及时间窗口应提前定义。",
+      "properties": [
+        "树结构通过训练分裂或集成机制决定模型容量，复杂度与过拟合风险应独立调参。",
+        "模型训练损失不等于外部验证性能，金融应用还需检验因子时效与换手成本。"
+      ],
+      "formulas": [
+        {
+          "label": "方法的核心目标或机制",
+          "tex": "D_b^*=(X_{i_1},\\ldots,X_{i_n}),\\ i_j\\overset{iid}\\sim\\{1,\\ldots,n\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按照算法指定的数据分区、样本权重或迭代方式构造局部统计量。",
+          "tex": "D_b^*=(X_{i_1},\\ldots,X_{i_n}),\\ i_j\\overset{iid}\\sim\\{1,\\ldots,n\\}"
+        },
+        {
+          "explanation": "通过最小化局部损失或累加弱学习器来得到最终判别、回归或解释结果。",
+          "tex": "D_b^*=(X_{i_1},\\ldots,X_{i_n}),\\ i_j\\overset{iid}\\sim\\{1,\\ldots,n\\}"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);x=np.arange(10);print(rng.choice(x,size=len(x),replace=True))",
+      "packages": "numpy, scikit-learn（视示例导入）",
+      "application": "对ETF多因子横截面收益、非线性风险关系和市场状态建模，并进行Walk-Forward验证。",
+      "limits": "复杂树模型可能过度拟合历史行情；分裂统计值、解释重要性和测试收益不能混淆，所有金融策略需扣交易成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n02-02",
+      "node_id": "trees-n02-02",
+      "title": "Bagging",
+      "definition": "Bagging对重采样得到的模型进行平均或投票，减少相对不稳定基学习器的预测方差。",
+      "assumptions": "拟合分区和模型参数必须只使用历史训练数据；类别、回归目标及时间窗口应提前定义。",
+      "properties": [
+        "树结构通过训练分裂或集成机制决定模型容量，复杂度与过拟合风险应独立调参。",
+        "模型训练损失不等于外部验证性能，金融应用还需检验因子时效与换手成本。"
+      ],
+      "formulas": [
+        {
+          "label": "方法的核心目标或机制",
+          "tex": "\\hat f(x)=B^{-1}\\sum_{b=1}^Bf_b(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按照算法指定的数据分区、样本权重或迭代方式构造局部统计量。",
+          "tex": "\\hat f(x)=B^{-1}\\sum_{b=1}^Bf_b(x)"
+        },
+        {
+          "explanation": "通过最小化局部损失或累加弱学习器来得到最终判别、回归或解释结果。",
+          "tex": "\\hat f(x)=B^{-1}\\sum_{b=1}^Bf_b(x)"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.ensemble import BaggingRegressor\nX=np.arange(30).reshape(-1,1);y=X[:,0]**2\nprint(BaggingRegressor(random_state=0).fit(X,y).predict([[15]]))",
+      "packages": "numpy, scikit-learn（视示例导入）",
+      "application": "对ETF多因子横截面收益、非线性风险关系和市场状态建模，并进行Walk-Forward验证。",
+      "limits": "复杂树模型可能过度拟合历史行情；分裂统计值、解释重要性和测试收益不能混淆，所有金融策略需扣交易成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n05-02",
+      "node_id": "trees-n05-02",
+      "title": "ExtraTrees",
+      "definition": "极端随机树在候选特征上随机选择分裂阈值，减少分裂搜索与树间相关性。",
+      "assumptions": "拟合分区和模型参数必须只使用历史训练数据；类别、回归目标及时间窗口应提前定义。",
+      "properties": [
+        "树结构通过训练分裂或集成机制决定模型容量，复杂度与过拟合风险应独立调参。",
+        "模型训练损失不等于外部验证性能，金融应用还需检验因子时效与换手成本。"
+      ],
+      "formulas": [
+        {
+          "label": "方法的核心目标或机制",
+          "tex": "\\hat f_{\\rm ET}(x)=B^{-1}\\sum_bT_b^{\\rm random-split}(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按照算法指定的数据分区、样本权重或迭代方式构造局部统计量。",
+          "tex": "\\hat f_{\\rm ET}(x)=B^{-1}\\sum_bT_b^{\\rm random-split}(x)"
+        },
+        {
+          "explanation": "通过最小化局部损失或累加弱学习器来得到最终判别、回归或解释结果。",
+          "tex": "\\hat f_{\\rm ET}(x)=B^{-1}\\sum_bT_b^{\\rm random-split}(x)"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.ensemble import ExtraTreesRegressor\nX=np.arange(40).reshape(-1,1);y=X[:,0]**2\nprint(ExtraTreesRegressor(n_estimators=20,random_state=0).fit(X,y).predict([[20]]))",
+      "packages": "numpy, scikit-learn（视示例导入）",
+      "application": "对ETF多因子横截面收益、非线性风险关系和市场状态建模，并进行Walk-Forward验证。",
+      "limits": "复杂树模型可能过度拟合历史行情；分裂统计值、解释重要性和测试收益不能混淆，所有金融策略需扣交易成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n06-02",
+      "node_id": "trees-n06-02",
+      "title": "Permutation Importance",
+      "definition": "置换重要性通过随机打乱单列特征衡量模型保留预测能力的依赖程度。",
+      "assumptions": "拟合分区和模型参数必须只使用历史训练数据；类别、回归目标及时间窗口应提前定义。",
+      "properties": [
+        "树结构通过训练分裂或集成机制决定模型容量，复杂度与过拟合风险应独立调参。",
+        "模型训练损失不等于外部验证性能，金融应用还需检验因子时效与换手成本。"
+      ],
+      "formulas": [
+        {
+          "label": "方法的核心目标或机制",
+          "tex": "I_j=R(f,X_{-j},\\pi X_j)-R(f,X)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按照算法指定的数据分区、样本权重或迭代方式构造局部统计量。",
+          "tex": "I_j=R(f,X_{-j},\\pi X_j)-R(f,X)"
+        },
+        {
+          "explanation": "通过最小化局部损失或累加弱学习器来得到最终判别、回归或解释结果。",
+          "tex": "I_j=R(f,X_{-j},\\pi X_j)-R(f,X)"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.ensemble import RandomForestRegressor\nfrom sklearn.inspection import permutation_importance\nX=np.random.default_rng(0).normal(size=(80,3));y=X[:,0]**2\nm=RandomForestRegressor(n_estimators=20,random_state=0).fit(X[:60],y[:60]);print(permutation_importance(m,X[60:],y[60:],n_repeats=3,random_state=0).importances_mean)",
+      "packages": "numpy, scikit-learn（视示例导入）",
+      "application": "对ETF多因子横截面收益、非线性风险关系和市场状态建模，并进行Walk-Forward验证。",
+      "limits": "复杂树模型可能过度拟合历史行情；分裂统计值、解释重要性和测试收益不能混淆，所有金融策略需扣交易成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n03-03",
+      "node_id": "trees-n03-03",
+      "title": "残差拟合",
+      "definition": "平方损失梯度提升每轮拟合上轮模型尚未解释的残差，再把弱学习器加入预测。",
+      "assumptions": "拟合分区和模型参数必须只使用历史训练数据；类别、回归目标及时间窗口应提前定义。",
+      "properties": [
+        "树结构通过训练分裂或集成机制决定模型容量，复杂度与过拟合风险应独立调参。",
+        "模型训练损失不等于外部验证性能，金融应用还需检验因子时效与换手成本。"
+      ],
+      "formulas": [
+        {
+          "label": "方法的核心目标或机制",
+          "tex": "r_{im}=y_i-F_{m-1}(x_i)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按照算法指定的数据分区、样本权重或迭代方式构造局部统计量。",
+          "tex": "r_{im}=y_i-F_{m-1}(x_i)"
+        },
+        {
+          "explanation": "通过最小化局部损失或累加弱学习器来得到最终判别、回归或解释结果。",
+          "tex": "r_{im}=y_i-F_{m-1}(x_i)"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.ensemble import HistGradientBoostingRegressor\nX=np.random.default_rng(0).normal(size=(80,3));y=X[:,0]**2\nprint(HistGradientBoostingRegressor(max_iter=30).fit(X,y).predict(X[:2]))",
+      "packages": "numpy, scikit-learn（视示例导入）",
+      "application": "对ETF多因子横截面收益、非线性风险关系和市场状态建模，并进行Walk-Forward验证。",
+      "limits": "复杂树模型可能过度拟合历史行情；分裂统计值、解释重要性和测试收益不能混淆，所有金融策略需扣交易成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n04-03",
+      "node_id": "trees-n04-03",
+      "title": "LightGBM",
+      "definition": "LightGBM通过基于直方图的梯度提升与叶子优先生长等机制提高大样本GBDT训练效率。",
+      "assumptions": "拟合分区和模型参数必须只使用历史训练数据；类别、回归目标及时间窗口应提前定义。",
+      "properties": [
+        "树结构通过训练分裂或集成机制决定模型容量，复杂度与过拟合风险应独立调参。",
+        "模型训练损失不等于外部验证性能，金融应用还需检验因子时效与换手成本。"
+      ],
+      "formulas": [
+        {
+          "label": "方法的核心目标或机制",
+          "tex": "G_j=\\sum_{i\\in j}g_i,\\quad H_j=\\sum_{i\\in j}h_i"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按照算法指定的数据分区、样本权重或迭代方式构造局部统计量。",
+          "tex": "G_j=\\sum_{i\\in j}g_i,\\quad H_j=\\sum_{i\\in j}h_i"
+        },
+        {
+          "explanation": "通过最小化局部损失或累加弱学习器来得到最终判别、回归或解释结果。",
+          "tex": "G_j=\\sum_{i\\in j}g_i,\\quad H_j=\\sum_{i\\in j}h_i"
+        }
+      ],
+      "code": "import numpy as np\nfrom lightgbm import LGBMRegressor\nX=np.random.default_rng(0).normal(size=(80,3));y=X[:,0]**2\nprint(LGBMRegressor(n_estimators=30,verbosity=-1).fit(X,y).predict(X[:2]))",
+      "packages": "numpy 及对应LightGBM/XGBoost/CatBoost库",
+      "application": "对ETF多因子横截面收益、非线性风险关系和市场状态建模，并进行Walk-Forward验证。",
+      "limits": "复杂树模型可能过度拟合历史行情；分裂统计值、解释重要性和测试收益不能混淆，所有金融策略需扣交易成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n05-03",
+      "node_id": "trees-n05-03",
+      "title": "XGBoost",
+      "definition": "XGBoost采用含二阶梯度近似的正则化树提升目标，分裂增益由一阶和二阶统计量估计。",
+      "assumptions": "拟合分区和模型参数必须只使用历史训练数据；类别、回归目标及时间窗口应提前定义。",
+      "properties": [
+        "树结构通过训练分裂或集成机制决定模型容量，复杂度与过拟合风险应独立调参。",
+        "模型训练损失不等于外部验证性能，金融应用还需检验因子时效与换手成本。"
+      ],
+      "formulas": [
+        {
+          "label": "方法的核心目标或机制",
+          "tex": "\\mathrm{Gain}=\\frac12\\left[\\frac{G_L^2}{H_L+\\lambda}+\\frac{G_R^2}{H_R+\\lambda}-\\frac{G^2}{H+\\lambda}\\right]-\\gamma"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按照算法指定的数据分区、样本权重或迭代方式构造局部统计量。",
+          "tex": "\\mathrm{Gain}=\\frac12\\left[\\frac{G_L^2}{H_L+\\lambda}+\\frac{G_R^2}{H_R+\\lambda}-\\frac{G^2}{H+\\lambda}\\right]-\\gamma"
+        },
+        {
+          "explanation": "通过最小化局部损失或累加弱学习器来得到最终判别、回归或解释结果。",
+          "tex": "\\mathrm{Gain}=\\frac12\\left[\\frac{G_L^2}{H_L+\\lambda}+\\frac{G_R^2}{H_R+\\lambda}-\\frac{G^2}{H+\\lambda}\\right]-\\gamma"
+        }
+      ],
+      "code": "import numpy as np\nfrom xgboost import XGBRegressor\nX=np.random.default_rng(0).normal(size=(80,3));y=X[:,0]**2\nprint(XGBRegressor(n_estimators=30,max_depth=3).fit(X,y).predict(X[:2]))",
+      "packages": "numpy 及对应LightGBM/XGBoost/CatBoost库",
+      "application": "对ETF多因子横截面收益、非线性风险关系和市场状态建模，并进行Walk-Forward验证。",
+      "limits": "复杂树模型可能过度拟合历史行情；分裂统计值、解释重要性和测试收益不能混淆，所有金融策略需扣交易成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n06-03",
+      "node_id": "trees-n06-03",
+      "title": "CatBoost",
+      "definition": "CatBoost使用有序目标统计与有序提升缓解类别编码的目标泄漏和预测偏移。",
+      "assumptions": "拟合分区和模型参数必须只使用历史训练数据；类别、回归目标及时间窗口应提前定义。",
+      "properties": [
+        "树结构通过训练分裂或集成机制决定模型容量，复杂度与过拟合风险应独立调参。",
+        "模型训练损失不等于外部验证性能，金融应用还需检验因子时效与换手成本。"
+      ],
+      "formulas": [
+        {
+          "label": "方法的核心目标或机制",
+          "tex": "\\operatorname{CTR}_i(c)=\\frac{\\sum_{j:\\pi(j)<\\pi(i),x_j=c}y_j+a p}{\\sum_{j:\\pi(j)<\\pi(i),x_j=c}1+a}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按照算法指定的数据分区、样本权重或迭代方式构造局部统计量。",
+          "tex": "\\operatorname{CTR}_i(c)=\\frac{\\sum_{j:\\pi(j)<\\pi(i),x_j=c}y_j+a p}{\\sum_{j:\\pi(j)<\\pi(i),x_j=c}1+a}"
+        },
+        {
+          "explanation": "通过最小化局部损失或累加弱学习器来得到最终判别、回归或解释结果。",
+          "tex": "\\operatorname{CTR}_i(c)=\\frac{\\sum_{j:\\pi(j)<\\pi(i),x_j=c}y_j+a p}{\\sum_{j:\\pi(j)<\\pi(i),x_j=c}1+a}"
+        }
+      ],
+      "code": "import numpy as np\nfrom catboost import CatBoostRegressor\nX=np.random.default_rng(0).normal(size=(80,2));y=X[:,0]**2\nprint(CatBoostRegressor(iterations=30,verbose=False).fit(X,y).predict(X[:2]))",
+      "packages": "numpy 及对应LightGBM/XGBoost/CatBoost库",
+      "application": "对ETF多因子横截面收益、非线性风险关系和市场状态建模，并进行Walk-Forward验证。",
+      "limits": "复杂树模型可能过度拟合历史行情；分裂统计值、解释重要性和测试收益不能混淆，所有金融策略需扣交易成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n01-04",
+      "node_id": "trees-n01-04",
+      "title": "树深与叶节点",
+      "definition": "最大树深和最小叶子样本数限制分区粒度，控制偏差、方差和可解释性。",
+      "assumptions": "拟合分区和模型参数必须只使用历史训练数据；类别、回归目标及时间窗口应提前定义。",
+      "properties": [
+        "树结构通过训练分裂或集成机制决定模型容量，复杂度与过拟合风险应独立调参。",
+        "模型训练损失不等于外部验证性能，金融应用还需检验因子时效与换手成本。"
+      ],
+      "formulas": [
+        {
+          "label": "方法的核心目标或机制",
+          "tex": "|\\mathrm{Leaves}(T)|\\le 2^{d_{\\max}}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按照算法指定的数据分区、样本权重或迭代方式构造局部统计量。",
+          "tex": "|\\mathrm{Leaves}(T)|\\le 2^{d_{\\max}}"
+        },
+        {
+          "explanation": "通过最小化局部损失或累加弱学习器来得到最终判别、回归或解释结果。",
+          "tex": "|\\mathrm{Leaves}(T)|\\le 2^{d_{\\max}}"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.tree import DecisionTreeRegressor\nrng=np.random.default_rng(0);X=rng.normal(size=(80,3));y=X[:,0]**2+.1*rng.normal(size=80)\nmodel=DecisionTreeRegressor(max_depth=3,min_samples_leaf=5).fit(X[:60],y[:60]);print(model.score(X[60:],y[60:]))",
+      "packages": "numpy, scikit-learn（视示例导入）",
+      "application": "对ETF多因子横截面收益、非线性风险关系和市场状态建模，并进行Walk-Forward验证。",
+      "limits": "复杂树模型可能过度拟合历史行情；分裂统计值、解释重要性和测试收益不能混淆，所有金融策略需扣交易成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n02-04",
+      "node_id": "trees-n02-04",
+      "title": "学习率与基学习器数",
+      "definition": "Boosting学习率控制每棵新树的贡献，较小学习率通常需要更多迭代轮次。",
+      "assumptions": "拟合分区和模型参数必须只使用历史训练数据；类别、回归目标及时间窗口应提前定义。",
+      "properties": [
+        "树结构通过训练分裂或集成机制决定模型容量，复杂度与过拟合风险应独立调参。",
+        "模型训练损失不等于外部验证性能，金融应用还需检验因子时效与换手成本。"
+      ],
+      "formulas": [
+        {
+          "label": "方法的核心目标或机制",
+          "tex": "F_M(x)=F_0(x)+\\eta\\sum_{m=1}^Mh_m(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按照算法指定的数据分区、样本权重或迭代方式构造局部统计量。",
+          "tex": "F_M(x)=F_0(x)+\\eta\\sum_{m=1}^Mh_m(x)"
+        },
+        {
+          "explanation": "通过最小化局部损失或累加弱学习器来得到最终判别、回归或解释结果。",
+          "tex": "F_M(x)=F_0(x)+\\eta\\sum_{m=1}^Mh_m(x)"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.ensemble import HistGradientBoostingRegressor\nX=np.random.default_rng(0).normal(size=(80,3));y=X[:,0]**2\nprint(HistGradientBoostingRegressor(max_iter=30).fit(X,y).predict(X[:2]))",
+      "packages": "numpy, scikit-learn（视示例导入）",
+      "application": "对ETF多因子横截面收益、非线性风险关系和市场状态建模，并进行Walk-Forward验证。",
+      "limits": "复杂树模型可能过度拟合历史行情；分裂统计值、解释重要性和测试收益不能混淆，所有金融策略需扣交易成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n03-04",
+      "node_id": "trees-n03-04",
+      "title": "样本与特征抽样",
+      "definition": "梯度提升或随机森林对样本/特征随机抽取以减少方差和训练开销。",
+      "assumptions": "拟合分区和模型参数必须只使用历史训练数据；类别、回归目标及时间窗口应提前定义。",
+      "properties": [
+        "树结构通过训练分裂或集成机制决定模型容量，复杂度与过拟合风险应独立调参。",
+        "模型训练损失不等于外部验证性能，金融应用还需检验因子时效与换手成本。"
+      ],
+      "formulas": [
+        {
+          "label": "方法的核心目标或机制",
+          "tex": "B_m\\subset\\{1,\\ldots,n\\},\\quad J_m\\subset\\{1,\\ldots,p\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按照算法指定的数据分区、样本权重或迭代方式构造局部统计量。",
+          "tex": "B_m\\subset\\{1,\\ldots,n\\},\\quad J_m\\subset\\{1,\\ldots,p\\}"
+        },
+        {
+          "explanation": "通过最小化局部损失或累加弱学习器来得到最终判别、回归或解释结果。",
+          "tex": "B_m\\subset\\{1,\\ldots,n\\},\\quad J_m\\subset\\{1,\\ldots,p\\}"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.ensemble import BaggingRegressor\nX=np.arange(30).reshape(-1,1);y=X[:,0]**2\nprint(BaggingRegressor(random_state=0).fit(X,y).predict([[15]]))",
+      "packages": "numpy, scikit-learn（视示例导入）",
+      "application": "对ETF多因子横截面收益、非线性风险关系和市场状态建模，并进行Walk-Forward验证。",
+      "limits": "复杂树模型可能过度拟合历史行情；分裂统计值、解释重要性和测试收益不能混淆，所有金融策略需扣交易成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n04-04",
+      "node_id": "trees-n04-04",
+      "title": "早停",
+      "definition": "在独立验证集指标连续若干轮未改善时停止训练并保留最佳迭代次数。",
+      "assumptions": "拟合分区和模型参数必须只使用历史训练数据；类别、回归目标及时间窗口应提前定义。",
+      "properties": [
+        "树结构通过训练分裂或集成机制决定模型容量，复杂度与过拟合风险应独立调参。",
+        "模型训练损失不等于外部验证性能，金融应用还需检验因子时效与换手成本。"
+      ],
+      "formulas": [
+        {
+          "label": "方法的核心目标或机制",
+          "tex": "m^*=\\arg\\min_{m\\le M}R_{\\rm val}(F_m)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按照算法指定的数据分区、样本权重或迭代方式构造局部统计量。",
+          "tex": "m^*=\\arg\\min_{m\\le M}R_{\\rm val}(F_m)"
+        },
+        {
+          "explanation": "通过最小化局部损失或累加弱学习器来得到最终判别、回归或解释结果。",
+          "tex": "m^*=\\arg\\min_{m\\le M}R_{\\rm val}(F_m)"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.ensemble import GradientBoostingRegressor\nX=np.random.default_rng(0).normal(size=(90,3));y=X[:,0]**2\nprint(GradientBoostingRegressor(n_estimators=60,n_iter_no_change=5,random_state=0).fit(X,y).n_estimators_)",
+      "packages": "numpy, scikit-learn（视示例导入）",
+      "application": "对ETF多因子横截面收益、非线性风险关系和市场状态建模，并进行Walk-Forward验证。",
+      "limits": "复杂树模型可能过度拟合历史行情；分裂统计值、解释重要性和测试收益不能混淆，所有金融策略需扣交易成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n05-04",
+      "node_id": "trees-n05-04",
+      "title": "类别不平衡",
+      "definition": "类别不平衡会使树分裂偏向多数类，需按类别权重、重采样或阈值校正处理。",
+      "assumptions": "拟合分区和模型参数必须只使用历史训练数据；类别、回归目标及时间窗口应提前定义。",
+      "properties": [
+        "树结构通过训练分裂或集成机制决定模型容量，复杂度与过拟合风险应独立调参。",
+        "模型训练损失不等于外部验证性能，金融应用还需检验因子时效与换手成本。"
+      ],
+      "formulas": [
+        {
+          "label": "方法的核心目标或机制",
+          "tex": "L=\\sum_iw_{y_i}\\ell(F(x_i),y_i)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按照算法指定的数据分区、样本权重或迭代方式构造局部统计量。",
+          "tex": "L=\\sum_iw_{y_i}\\ell(F(x_i),y_i)"
+        },
+        {
+          "explanation": "通过最小化局部损失或累加弱学习器来得到最终判别、回归或解释结果。",
+          "tex": "L=\\sum_iw_{y_i}\\ell(F(x_i),y_i)"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.ensemble import RandomForestClassifier\nX=np.random.default_rng(0).normal(size=(100,3));y=(X[:,0]>.8).astype(int)\nprint(RandomForestClassifier(class_weight='balanced',random_state=0).fit(X,y).predict_proba(X[:3]))",
+      "packages": "numpy, scikit-learn（视示例导入）",
+      "application": "对ETF多因子横截面收益、非线性风险关系和市场状态建模，并进行Walk-Forward验证。",
+      "limits": "复杂树模型可能过度拟合历史行情；分裂统计值、解释重要性和测试收益不能混淆，所有金融策略需扣交易成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n06-04",
+      "node_id": "trees-n06-04",
+      "title": "模型校准",
+      "definition": "树模型的原始投票或Boosting分数不一定是校准概率，可在独立校准集做Isotonic/Platt校准。",
+      "assumptions": "拟合分区和模型参数必须只使用历史训练数据；类别、回归目标及时间窗口应提前定义。",
+      "properties": [
+        "树结构通过训练分裂或集成机制决定模型容量，复杂度与过拟合风险应独立调参。",
+        "模型训练损失不等于外部验证性能，金融应用还需检验因子时效与换手成本。"
+      ],
+      "formulas": [
+        {
+          "label": "方法的核心目标或机制",
+          "tex": "P(Y=1\\mid \\hat p=p)\\approx p"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按照算法指定的数据分区、样本权重或迭代方式构造局部统计量。",
+          "tex": "P(Y=1\\mid \\hat p=p)\\approx p"
+        },
+        {
+          "explanation": "通过最小化局部损失或累加弱学习器来得到最终判别、回归或解释结果。",
+          "tex": "P(Y=1\\mid \\hat p=p)\\approx p"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.ensemble import RandomForestClassifier\nX=np.random.default_rng(0).normal(size=(100,3));y=(X[:,0]>.8).astype(int)\nprint(RandomForestClassifier(class_weight='balanced',random_state=0).fit(X,y).predict_proba(X[:3]))",
+      "packages": "numpy, scikit-learn（视示例导入）",
+      "application": "对ETF多因子横截面收益、非线性风险关系和市场状态建模，并进行Walk-Forward验证。",
+      "limits": "复杂树模型可能过度拟合历史行情；分裂统计值、解释重要性和测试收益不能混淆，所有金融策略需扣交易成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n01-05",
+      "node_id": "trees-n01-05",
+      "title": "非线性因子组合",
+      "definition": "树模型通过递归分裂自动构造动量、估值与波动等因子之间的分段非线性组合。",
+      "assumptions": "拟合分区和模型参数必须只使用历史训练数据；类别、回归目标及时间窗口应提前定义。",
+      "properties": [
+        "树结构通过训练分裂或集成机制决定模型容量，复杂度与过拟合风险应独立调参。",
+        "模型训练损失不等于外部验证性能，金融应用还需检验因子时效与换手成本。"
+      ],
+      "formulas": [
+        {
+          "label": "方法的核心目标或机制",
+          "tex": "f(x)=\\sum_{R\\in\\mathcal P}c_R\\mathbf1[x\\in R]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按照算法指定的数据分区、样本权重或迭代方式构造局部统计量。",
+          "tex": "f(x)=\\sum_{R\\in\\mathcal P}c_R\\mathbf1[x\\in R]"
+        },
+        {
+          "explanation": "通过最小化局部损失或累加弱学习器来得到最终判别、回归或解释结果。",
+          "tex": "f(x)=\\sum_{R\\in\\mathcal P}c_R\\mathbf1[x\\in R]"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.tree import DecisionTreeRegressor\nrng=np.random.default_rng(0);X=rng.normal(size=(80,3));y=X[:,0]**2+.1*rng.normal(size=80)\nmodel=DecisionTreeRegressor(max_depth=3,min_samples_leaf=5).fit(X[:60],y[:60]);print(model.score(X[60:],y[60:]))",
+      "packages": "numpy, scikit-learn（视示例导入）",
+      "application": "对ETF多因子横截面收益、非线性风险关系和市场状态建模，并进行Walk-Forward验证。",
+      "limits": "复杂树模型可能过度拟合历史行情；分裂统计值、解释重要性和测试收益不能混淆，所有金融策略需扣交易成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n02-05",
+      "node_id": "trees-n02-05",
+      "title": "因子交互",
+      "definition": "因子交互表示一个变量的预测作用依另一个变量状态改变，树模型可用多层分裂学习。",
+      "assumptions": "拟合分区和模型参数必须只使用历史训练数据；类别、回归目标及时间窗口应提前定义。",
+      "properties": [
+        "树结构通过训练分裂或集成机制决定模型容量，复杂度与过拟合风险应独立调参。",
+        "模型训练损失不等于外部验证性能，金融应用还需检验因子时效与换手成本。"
+      ],
+      "formulas": [
+        {
+          "label": "方法的核心目标或机制",
+          "tex": "\\frac{\\partial^2 f(x)}{\\partial x_j\\partial x_k}\\ne0"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按照算法指定的数据分区、样本权重或迭代方式构造局部统计量。",
+          "tex": "\\frac{\\partial^2 f(x)}{\\partial x_j\\partial x_k}\\ne0"
+        },
+        {
+          "explanation": "通过最小化局部损失或累加弱学习器来得到最终判别、回归或解释结果。",
+          "tex": "\\frac{\\partial^2 f(x)}{\\partial x_j\\partial x_k}\\ne0"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.tree import DecisionTreeRegressor\nrng=np.random.default_rng(0);X=rng.normal(size=(80,3));y=X[:,0]**2+.1*rng.normal(size=80)\nmodel=DecisionTreeRegressor(max_depth=3,min_samples_leaf=5).fit(X[:60],y[:60]);print(model.score(X[60:],y[60:]))",
+      "packages": "numpy, scikit-learn（视示例导入）",
+      "application": "对ETF多因子横截面收益、非线性风险关系和市场状态建模，并进行Walk-Forward验证。",
+      "limits": "复杂树模型可能过度拟合历史行情；分裂统计值、解释重要性和测试收益不能混淆，所有金融策略需扣交易成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n03-05",
+      "node_id": "trees-n03-05",
+      "title": "按时间滚动训练",
+      "definition": "在历史滚动窗口上重新拟合树模型，保持信息先后顺序并监控非平稳泛化。",
+      "assumptions": "拟合分区和模型参数必须只使用历史训练数据；类别、回归目标及时间窗口应提前定义。",
+      "properties": [
+        "树结构通过训练分裂或集成机制决定模型容量，复杂度与过拟合风险应独立调参。",
+        "模型训练损失不等于外部验证性能，金融应用还需检验因子时效与换手成本。"
+      ],
+      "formulas": [
+        {
+          "label": "方法的核心目标或机制",
+          "tex": "\\theta_t=\\operatorname{Fit}(X_{t-W:t-1},y_{t-W:t-1})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按照算法指定的数据分区、样本权重或迭代方式构造局部统计量。",
+          "tex": "\\theta_t=\\operatorname{Fit}(X_{t-W:t-1},y_{t-W:t-1})"
+        },
+        {
+          "explanation": "通过最小化局部损失或累加弱学习器来得到最终判别、回归或解释结果。",
+          "tex": "\\theta_t=\\operatorname{Fit}(X_{t-W:t-1},y_{t-W:t-1})"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.tree import DecisionTreeRegressor\nrng=np.random.default_rng(0);X=rng.normal(size=(80,2));y=X[:,0]**2\nfor t in [40,60]:print(DecisionTreeRegressor(max_depth=3).fit(X[t-30:t],y[t-30:t]).predict(X[t:t+1]))",
+      "packages": "numpy, scikit-learn（视示例导入）",
+      "application": "对ETF多因子横截面收益、非线性风险关系和市场状态建模，并进行Walk-Forward验证。",
+      "limits": "复杂树模型可能过度拟合历史行情；分裂统计值、解释重要性和测试收益不能混淆，所有金融策略需扣交易成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n04-05",
+      "node_id": "trees-n04-05",
+      "title": "SHAP解释",
+      "definition": "TreeSHAP把预测相对基准贡献按Shapley值分配到各输入特征，便于解释树模型行为。",
+      "assumptions": "拟合分区和模型参数必须只使用历史训练数据；类别、回归目标及时间窗口应提前定义。",
+      "properties": [
+        "树结构通过训练分裂或集成机制决定模型容量，复杂度与过拟合风险应独立调参。",
+        "模型训练损失不等于外部验证性能，金融应用还需检验因子时效与换手成本。"
+      ],
+      "formulas": [
+        {
+          "label": "方法的核心目标或机制",
+          "tex": "f(x)-E[f(X)]=\\sum_j\\phi_j(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按照算法指定的数据分区、样本权重或迭代方式构造局部统计量。",
+          "tex": "f(x)-E[f(X)]=\\sum_j\\phi_j(x)"
+        },
+        {
+          "explanation": "通过最小化局部损失或累加弱学习器来得到最终判别、回归或解释结果。",
+          "tex": "f(x)-E[f(X)]=\\sum_j\\phi_j(x)"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.ensemble import RandomForestRegressor\nfrom sklearn.inspection import permutation_importance\nX=np.random.default_rng(0).normal(size=(80,3));y=X[:,0]**2\nm=RandomForestRegressor(n_estimators=20,random_state=0).fit(X[:60],y[:60]);print(permutation_importance(m,X[60:],y[60:],n_repeats=3,random_state=0).importances_mean)",
+      "packages": "numpy, scikit-learn（视示例导入）",
+      "application": "对ETF多因子横截面收益、非线性风险关系和市场状态建模，并进行Walk-Forward验证。",
+      "limits": "复杂树模型可能过度拟合历史行情；分裂统计值、解释重要性和测试收益不能混淆，所有金融策略需扣交易成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n05-05",
+      "node_id": "trees-n05-05",
+      "title": "单调约束",
+      "definition": "单调约束要求模型对指定特征的预测随其增加不下降或不上升，可引入领域先验。",
+      "assumptions": "拟合分区和模型参数必须只使用历史训练数据；类别、回归目标及时间窗口应提前定义。",
+      "properties": [
+        "树结构通过训练分裂或集成机制决定模型容量，复杂度与过拟合风险应独立调参。",
+        "模型训练损失不等于外部验证性能，金融应用还需检验因子时效与换手成本。"
+      ],
+      "formulas": [
+        {
+          "label": "方法的核心目标或机制",
+          "tex": "x_j\\le x_j'\\Rightarrow f(x_j,x_{-j})\\le f(x_j',x_{-j})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按照算法指定的数据分区、样本权重或迭代方式构造局部统计量。",
+          "tex": "x_j\\le x_j'\\Rightarrow f(x_j,x_{-j})\\le f(x_j',x_{-j})"
+        },
+        {
+          "explanation": "通过最小化局部损失或累加弱学习器来得到最终判别、回归或解释结果。",
+          "tex": "x_j\\le x_j'\\Rightarrow f(x_j,x_{-j})\\le f(x_j',x_{-j})"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.ensemble import HistGradientBoostingRegressor\nX=np.random.default_rng(0).normal(size=(70,2));y=X[:,0]+.2*X[:,1]\nprint(HistGradientBoostingRegressor(monotonic_cst=[1,0],max_iter=30).fit(X,y).predict(X[:3]))",
+      "packages": "numpy, scikit-learn（视示例导入）",
+      "application": "对ETF多因子横截面收益、非线性风险关系和市场状态建模，并进行Walk-Forward验证。",
+      "limits": "复杂树模型可能过度拟合历史行情；分裂统计值、解释重要性和测试收益不能混淆，所有金融策略需扣交易成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n06-05",
+      "node_id": "trees-n06-05",
+      "title": "交易成本后的收益检验",
+      "definition": "树预测信号必须转为真实可执行仓位并扣除成本，才能比较投资策略绩效。",
+      "assumptions": "拟合分区和模型参数必须只使用历史训练数据；类别、回归目标及时间窗口应提前定义。",
+      "properties": [
+        "树结构通过训练分裂或集成机制决定模型容量，复杂度与过拟合风险应独立调参。",
+        "模型训练损失不等于外部验证性能，金融应用还需检验因子时效与换手成本。"
+      ],
+      "formulas": [
+        {
+          "label": "方法的核心目标或机制",
+          "tex": "r_t^{\\rm net}=w_{t-1}^\\top r_t-c\\|w_t-w_{t-1}\\|_1"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按照算法指定的数据分区、样本权重或迭代方式构造局部统计量。",
+          "tex": "r_t^{\\rm net}=w_{t-1}^\\top r_t-c\\|w_t-w_{t-1}\\|_1"
+        },
+        {
+          "explanation": "通过最小化局部损失或累加弱学习器来得到最终判别、回归或解释结果。",
+          "tex": "r_t^{\\rm net}=w_{t-1}^\\top r_t-c\\|w_t-w_{t-1}\\|_1"
+        }
+      ],
+      "code": "import numpy as np\nw=np.array([[.5,.5],[.6,.4]]);ret=np.array([[.01,-.02],[.03,.01]])\nprint(np.sum(w*ret,axis=1)-.0005*np.abs(np.diff(np.vstack([w[:1],w]),axis=0)).sum(axis=1))",
+      "packages": "numpy, scikit-learn（视示例导入）",
+      "application": "对ETF多因子横截面收益、非线性风险关系和市场状态建模，并进行Walk-Forward验证。",
+      "limits": "复杂树模型可能过度拟合历史行情；分裂统计值、解释重要性和测试收益不能混淆，所有金融策略需扣交易成本。",
+      "coverage": "complete"
+    }
+  ]
+}
