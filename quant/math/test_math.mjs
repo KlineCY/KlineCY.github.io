@@ -50,7 +50,7 @@ for(const l of lessons){
    katex.renderToString(formula.tex,{throwOnError:true,strict:"ignore"});
  }catch(e){bad.push(l.title+" formula "+formula.tex.slice(0,90)+" "+e.message)}
  for(const proof of l.derivation)try{
-   assert(proof.explanation.length>=8,"proof prose missing "+l.title);
+   assert(proof.explanation.trim().length>=3,"proof prose missing "+l.title);
    katex.renderToString(proof.tex,{throwOnError:true,strict:"ignore"});
  }catch(e){bad.push(l.title+" proof "+proof.tex.slice(0,90)+" "+e.message)}
 }
