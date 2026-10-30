@@ -1,0 +1,741 @@
+{
+  "version": 1,
+  "notes": [
+    {
+      "id": "timeseries-n01-01",
+      "node_id": "timeseries-n01-01",
+      "title": "点预测与区间预测",
+      "definition": "点预测输出未来目标的中心位置，区间预测输出指定覆盖概率的范围。",
+      "assumptions": "预测输入必须在决策时可得。滞后特征、未来协变量、跨期标签及验证窗口应按时间校验。",
+      "properties": [
+        "点预测输出未来目标的中心位置，区间预测输出指定覆盖概率的范围。。",
+        "样本相关、制度漂移、成本与预测期限都会影响模型比较，须报告有效样本外绩效。"
+      ],
+      "formulas": [
+        {
+          "label": "基本预测关系",
+          "tex": "\\hat y_{t+h}=E[Y_{t+h}\\mid\\mathcal F_t]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义历史信息集、预测时间窗与模型结构。点预测输出未来目标的中心位置，区间预测输出指定覆盖概率的范围。",
+          "tex": "\\hat y_{t+h}=E[Y_{t+h}\\mid\\mathcal F_t]"
+        },
+        {
+          "explanation": "按时序顺序构造训练和验证，计算相应损失及置信区间。",
+          "tex": "\\hat y_{t+h}=E[Y_{t+h}\\mid\\mathcal F_t]"
+        }
+      ],
+      "code": "# 点预测与区间预测 — 时序预测综合示例\nimport numpy as np\nfrom sklearn.linear_model import Ridge\nfrom sklearn.model_selection import TimeSeriesSplit\nrng=np.random.default_rng(0)\nseries=np.cumsum(rng.normal(size=120))\np=5\nX=np.array([series[t-p:t] for t in range(p,len(series))])\ny=series[p:]\nfor tr,te in TimeSeriesSplit(4).split(X):\n    m=Ridge(alpha=1.).fit(X[tr],y[tr])\n    print(\"Holdout MSE:\",np.mean((m.predict(X[te])-y[te])**2))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益/波动预测、深度序列建模与滚动回测。",
+      "limits": "这里提供时序建模原理摘要和可运行基础例子，非每一个深度模型的完整独立架构实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "timeseries-n02-01",
+      "node_id": "timeseries-n02-01",
+      "title": "时间索引与频率",
+      "definition": "交易日、分钟、Tick等频率定义了窗口和收益聚合，跨频率对齐需考虑时区和停牌。",
+      "assumptions": "预测输入必须在决策时可得。滞后特征、未来协变量、跨期标签及验证窗口应按时间校验。",
+      "properties": [
+        "交易日、分钟、Tick等频率定义了窗口和收益聚合，跨频率对齐需考虑时区和停牌。。",
+        "样本相关、制度漂移、成本与预测期限都会影响模型比较，须报告有效样本外绩效。"
+      ],
+      "formulas": [
+        {
+          "label": "基本预测关系",
+          "tex": "\\Delta t=t_{i+1}-t_i"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义历史信息集、预测时间窗与模型结构。交易日、分钟、Tick等频率定义了窗口和收益聚合，跨频率对齐需考虑时区和停牌。",
+          "tex": "\\Delta t=t_{i+1}-t_i"
+        },
+        {
+          "explanation": "按时序顺序构造训练和验证，计算相应损失及置信区间。",
+          "tex": "\\Delta t=t_{i+1}-t_i"
+        }
+      ],
+      "code": "# 时间索引与频率 — 时序预测综合示例\nimport numpy as np\nfrom sklearn.linear_model import Ridge\nfrom sklearn.model_selection import TimeSeriesSplit\nrng=np.random.default_rng(0)\nseries=np.cumsum(rng.normal(size=120))\np=5\nX=np.array([series[t-p:t] for t in range(p,len(series))])\ny=series[p:]\nfor tr,te in TimeSeriesSplit(4).split(X):\n    m=Ridge(alpha=1.).fit(X[tr],y[tr])\n    print(\"Holdout MSE:\",np.mean((m.predict(X[te])-y[te])**2))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益/波动预测、深度序列建模与滚动回测。",
+      "limits": "这里提供时序建模原理摘要和可运行基础例子，非每一个深度模型的完整独立架构实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "timeseries-n03-01",
+      "node_id": "timeseries-n03-01",
+      "title": "趋势季节性",
+      "definition": "趋势捕捉长期变化，季节性捕捉周期重复模式，均需避免用未来样本估计当前趋势。",
+      "assumptions": "预测输入必须在决策时可得。滞后特征、未来协变量、跨期标签及验证窗口应按时间校验。",
+      "properties": [
+        "趋势捕捉长期变化，季节性捕捉周期重复模式，均需避免用未来样本估计当前趋势。。",
+        "样本相关、制度漂移、成本与预测期限都会影响模型比较，须报告有效样本外绩效。"
+      ],
+      "formulas": [
+        {
+          "label": "基本预测关系",
+          "tex": "y_t=T_t+S_t+\\epsilon_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义历史信息集、预测时间窗与模型结构。趋势捕捉长期变化，季节性捕捉周期重复模式，均需避免用未来样本估计当前趋势。",
+          "tex": "y_t=T_t+S_t+\\epsilon_t"
+        },
+        {
+          "explanation": "按时序顺序构造训练和验证，计算相应损失及置信区间。",
+          "tex": "y_t=T_t+S_t+\\epsilon_t"
+        }
+      ],
+      "code": "# 趋势季节性 — 时序预测综合示例\nimport numpy as np\nfrom sklearn.linear_model import Ridge\nfrom sklearn.model_selection import TimeSeriesSplit\nrng=np.random.default_rng(0)\nseries=np.cumsum(rng.normal(size=120))\np=5\nX=np.array([series[t-p:t] for t in range(p,len(series))])\ny=series[p:]\nfor tr,te in TimeSeriesSplit(4).split(X):\n    m=Ridge(alpha=1.).fit(X[tr],y[tr])\n    print(\"Holdout MSE:\",np.mean((m.predict(X[te])-y[te])**2))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益/波动预测、深度序列建模与滚动回测。",
+      "limits": "这里提供时序建模原理摘要和可运行基础例子，非每一个深度模型的完整独立架构实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "timeseries-n06-01",
+      "node_id": "timeseries-n06-01",
+      "title": "预测窗口",
+      "definition": "预测期限h与回看窗口W共同定义训练样本和目标可得时间。",
+      "assumptions": "预测输入必须在决策时可得。滞后特征、未来协变量、跨期标签及验证窗口应按时间校验。",
+      "properties": [
+        "预测期限h与回看窗口W共同定义训练样本和目标可得时间。。",
+        "样本相关、制度漂移、成本与预测期限都会影响模型比较，须报告有效样本外绩效。"
+      ],
+      "formulas": [
+        {
+          "label": "基本预测关系",
+          "tex": "X_t=(x_{t-W+1},\\ldots,x_t),\\quad y_{t+h}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义历史信息集、预测时间窗与模型结构。预测期限h与回看窗口W共同定义训练样本和目标可得时间。",
+          "tex": "X_t=(x_{t-W+1},\\ldots,x_t),\\quad y_{t+h}"
+        },
+        {
+          "explanation": "按时序顺序构造训练和验证，计算相应损失及置信区间。",
+          "tex": "X_t=(x_{t-W+1},\\ldots,x_t),\\quad y_{t+h}"
+        }
+      ],
+      "code": "# 预测窗口 — 时序预测综合示例\nimport numpy as np\nfrom sklearn.linear_model import Ridge\nfrom sklearn.model_selection import TimeSeriesSplit\nrng=np.random.default_rng(0)\nseries=np.cumsum(rng.normal(size=120))\np=5\nX=np.array([series[t-p:t] for t in range(p,len(series))])\ny=series[p:]\nfor tr,te in TimeSeriesSplit(4).split(X):\n    m=Ridge(alpha=1.).fit(X[tr],y[tr])\n    print(\"Holdout MSE:\",np.mean((m.predict(X[te])-y[te])**2))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益/波动预测、深度序列建模与滚动回测。",
+      "limits": "这里提供时序建模原理摘要和可运行基础例子，非每一个深度模型的完整独立架构实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "timeseries-n02-02",
+      "node_id": "timeseries-n02-02",
+      "title": "ARIMA",
+      "definition": "ARIMA通过差分后的自回归与移动平均滞后项建模平稳序列。",
+      "assumptions": "预测输入必须在决策时可得。滞后特征、未来协变量、跨期标签及验证窗口应按时间校验。",
+      "properties": [
+        "ARIMA通过差分后的自回归与移动平均滞后项建模平稳序列。。",
+        "样本相关、制度漂移、成本与预测期限都会影响模型比较，须报告有效样本外绩效。"
+      ],
+      "formulas": [
+        {
+          "label": "基本预测关系",
+          "tex": "\\phi(B)(1-B)^dy_t=\\theta(B)\\epsilon_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义历史信息集、预测时间窗与模型结构。ARIMA通过差分后的自回归与移动平均滞后项建模平稳序列。",
+          "tex": "\\phi(B)(1-B)^dy_t=\\theta(B)\\epsilon_t"
+        },
+        {
+          "explanation": "按时序顺序构造训练和验证，计算相应损失及置信区间。",
+          "tex": "\\phi(B)(1-B)^dy_t=\\theta(B)\\epsilon_t"
+        }
+      ],
+      "code": "# ARIMA — 时序预测综合示例\nimport numpy as np\nfrom sklearn.linear_model import Ridge\nfrom sklearn.model_selection import TimeSeriesSplit\nrng=np.random.default_rng(0)\nseries=np.cumsum(rng.normal(size=120))\np=5\nX=np.array([series[t-p:t] for t in range(p,len(series))])\ny=series[p:]\nfor tr,te in TimeSeriesSplit(4).split(X):\n    m=Ridge(alpha=1.).fit(X[tr],y[tr])\n    print(\"Holdout MSE:\",np.mean((m.predict(X[te])-y[te])**2))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益/波动预测、深度序列建模与滚动回测。",
+      "limits": "这里提供时序建模原理摘要和可运行基础例子，非每一个深度模型的完整独立架构实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "timeseries-n03-02",
+      "node_id": "timeseries-n03-02",
+      "title": "ETS",
+      "definition": "指数平滑状态空间模型用水平、趋势和季节项递推预测。",
+      "assumptions": "预测输入必须在决策时可得。滞后特征、未来协变量、跨期标签及验证窗口应按时间校验。",
+      "properties": [
+        "指数平滑状态空间模型用水平、趋势和季节项递推预测。。",
+        "样本相关、制度漂移、成本与预测期限都会影响模型比较，须报告有效样本外绩效。"
+      ],
+      "formulas": [
+        {
+          "label": "基本预测关系",
+          "tex": "\\ell_t=\\alpha y_t+(1-\\alpha)\\ell_{t-1}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义历史信息集、预测时间窗与模型结构。指数平滑状态空间模型用水平、趋势和季节项递推预测。",
+          "tex": "\\ell_t=\\alpha y_t+(1-\\alpha)\\ell_{t-1}"
+        },
+        {
+          "explanation": "按时序顺序构造训练和验证，计算相应损失及置信区间。",
+          "tex": "\\ell_t=\\alpha y_t+(1-\\alpha)\\ell_{t-1}"
+        }
+      ],
+      "code": "# ETS — 时序预测综合示例\nimport numpy as np\nfrom sklearn.linear_model import Ridge\nfrom sklearn.model_selection import TimeSeriesSplit\nrng=np.random.default_rng(0)\nseries=np.cumsum(rng.normal(size=120))\np=5\nX=np.array([series[t-p:t] for t in range(p,len(series))])\ny=series[p:]\nfor tr,te in TimeSeriesSplit(4).split(X):\n    m=Ridge(alpha=1.).fit(X[tr],y[tr])\n    print(\"Holdout MSE:\",np.mean((m.predict(X[te])-y[te])**2))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益/波动预测、深度序列建模与滚动回测。",
+      "limits": "这里提供时序建模原理摘要和可运行基础例子，非每一个深度模型的完整独立架构实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "timeseries-n05-02",
+      "node_id": "timeseries-n05-02",
+      "title": "XGBoost滞后预测",
+      "definition": "把时间序列变为滞后特征表，使用Boosting树学习非线性条件预测。",
+      "assumptions": "预测输入必须在决策时可得。滞后特征、未来协变量、跨期标签及验证窗口应按时间校验。",
+      "properties": [
+        "把时间序列变为滞后特征表，使用Boosting树学习非线性条件预测。。",
+        "样本相关、制度漂移、成本与预测期限都会影响模型比较，须报告有效样本外绩效。"
+      ],
+      "formulas": [
+        {
+          "label": "基本预测关系",
+          "tex": "\\hat y_t=f(x_{t-1},\\ldots,x_{t-p})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义历史信息集、预测时间窗与模型结构。把时间序列变为滞后特征表，使用Boosting树学习非线性条件预测。",
+          "tex": "\\hat y_t=f(x_{t-1},\\ldots,x_{t-p})"
+        },
+        {
+          "explanation": "按时序顺序构造训练和验证，计算相应损失及置信区间。",
+          "tex": "\\hat y_t=f(x_{t-1},\\ldots,x_{t-p})"
+        }
+      ],
+      "code": "# XGBoost滞后预测 — 时序预测综合示例\nimport numpy as np\nfrom sklearn.linear_model import Ridge\nfrom sklearn.model_selection import TimeSeriesSplit\nrng=np.random.default_rng(0)\nseries=np.cumsum(rng.normal(size=120))\np=5\nX=np.array([series[t-p:t] for t in range(p,len(series))])\ny=series[p:]\nfor tr,te in TimeSeriesSplit(4).split(X):\n    m=Ridge(alpha=1.).fit(X[tr],y[tr])\n    print(\"Holdout MSE:\",np.mean((m.predict(X[te])-y[te])**2))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益/波动预测、深度序列建模与滚动回测。",
+      "limits": "这里提供时序建模原理摘要和可运行基础例子，非每一个深度模型的完整独立架构实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "timeseries-n06-02",
+      "node_id": "timeseries-n06-02",
+      "title": "SARIMAX",
+      "definition": "SARIMAX扩展季节性ARIMA并加入外生协变量。",
+      "assumptions": "预测输入必须在决策时可得。滞后特征、未来协变量、跨期标签及验证窗口应按时间校验。",
+      "properties": [
+        "SARIMAX扩展季节性ARIMA并加入外生协变量。。",
+        "样本相关、制度漂移、成本与预测期限都会影响模型比较，须报告有效样本外绩效。"
+      ],
+      "formulas": [
+        {
+          "label": "基本预测关系",
+          "tex": "\\Phi(B^s)\\phi(B)(1-B)^d(1-B^s)^Dy_t=\\Theta(B^s)\\theta(B)\\epsilon_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义历史信息集、预测时间窗与模型结构。SARIMAX扩展季节性ARIMA并加入外生协变量。",
+          "tex": "\\Phi(B^s)\\phi(B)(1-B)^d(1-B^s)^Dy_t=\\Theta(B^s)\\theta(B)\\epsilon_t"
+        },
+        {
+          "explanation": "按时序顺序构造训练和验证，计算相应损失及置信区间。",
+          "tex": "\\Phi(B^s)\\phi(B)(1-B)^d(1-B^s)^Dy_t=\\Theta(B^s)\\theta(B)\\epsilon_t"
+        }
+      ],
+      "code": "# SARIMAX — 时序预测综合示例\nimport numpy as np\nfrom sklearn.linear_model import Ridge\nfrom sklearn.model_selection import TimeSeriesSplit\nrng=np.random.default_rng(0)\nseries=np.cumsum(rng.normal(size=120))\np=5\nX=np.array([series[t-p:t] for t in range(p,len(series))])\ny=series[p:]\nfor tr,te in TimeSeriesSplit(4).split(X):\n    m=Ridge(alpha=1.).fit(X[tr],y[tr])\n    print(\"Holdout MSE:\",np.mean((m.predict(X[te])-y[te])**2))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益/波动预测、深度序列建模与滚动回测。",
+      "limits": "这里提供时序建模原理摘要和可运行基础例子，非每一个深度模型的完整独立架构实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "timeseries-n01-03",
+      "node_id": "timeseries-n01-03",
+      "title": "DeepAR",
+      "definition": "DeepAR用自回归深度网络预测下一期条件概率分布并滚动采样未来路径。",
+      "assumptions": "预测输入必须在决策时可得。滞后特征、未来协变量、跨期标签及验证窗口应按时间校验。",
+      "properties": [
+        "DeepAR用自回归深度网络预测下一期条件概率分布并滚动采样未来路径。。",
+        "样本相关、制度漂移、成本与预测期限都会影响模型比较，须报告有效样本外绩效。"
+      ],
+      "formulas": [
+        {
+          "label": "基本预测关系",
+          "tex": "p(y_{t+1:T}\\mid y_{\\le t},X)=\\prod_{s=t+1}^Tp(y_s\\mid y_{<s},X)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义历史信息集、预测时间窗与模型结构。DeepAR用自回归深度网络预测下一期条件概率分布并滚动采样未来路径。",
+          "tex": "p(y_{t+1:T}\\mid y_{\\le t},X)=\\prod_{s=t+1}^Tp(y_s\\mid y_{<s},X)"
+        },
+        {
+          "explanation": "按时序顺序构造训练和验证，计算相应损失及置信区间。",
+          "tex": "p(y_{t+1:T}\\mid y_{\\le t},X)=\\prod_{s=t+1}^Tp(y_s\\mid y_{<s},X)"
+        }
+      ],
+      "code": "# DeepAR — 时序预测综合示例\nimport numpy as np\nfrom sklearn.linear_model import Ridge\nfrom sklearn.model_selection import TimeSeriesSplit\nrng=np.random.default_rng(0)\nseries=np.cumsum(rng.normal(size=120))\np=5\nX=np.array([series[t-p:t] for t in range(p,len(series))])\ny=series[p:]\nfor tr,te in TimeSeriesSplit(4).split(X):\n    m=Ridge(alpha=1.).fit(X[tr],y[tr])\n    print(\"Holdout MSE:\",np.mean((m.predict(X[te])-y[te])**2))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益/波动预测、深度序列建模与滚动回测。",
+      "limits": "这里提供时序建模原理摘要和可运行基础例子，非每一个深度模型的完整独立架构实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "timeseries-n02-03",
+      "node_id": "timeseries-n02-03",
+      "title": "N-BEATS",
+      "definition": "N-BEATS通过堆叠全连接块输出Backcast和Forecast残差实现时间序列预测。",
+      "assumptions": "预测输入必须在决策时可得。滞后特征、未来协变量、跨期标签及验证窗口应按时间校验。",
+      "properties": [
+        "N-BEATS通过堆叠全连接块输出Backcast和Forecast残差实现时间序列预测。。",
+        "样本相关、制度漂移、成本与预测期限都会影响模型比较，须报告有效样本外绩效。"
+      ],
+      "formulas": [
+        {
+          "label": "基本预测关系",
+          "tex": "\\hat y=\\sum_b\\hat y^{(b)}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义历史信息集、预测时间窗与模型结构。N-BEATS通过堆叠全连接块输出Backcast和Forecast残差实现时间序列预测。",
+          "tex": "\\hat y=\\sum_b\\hat y^{(b)}"
+        },
+        {
+          "explanation": "按时序顺序构造训练和验证，计算相应损失及置信区间。",
+          "tex": "\\hat y=\\sum_b\\hat y^{(b)}"
+        }
+      ],
+      "code": "# N-BEATS — 时序预测综合示例\nimport numpy as np\nfrom sklearn.linear_model import Ridge\nfrom sklearn.model_selection import TimeSeriesSplit\nrng=np.random.default_rng(0)\nseries=np.cumsum(rng.normal(size=120))\np=5\nX=np.array([series[t-p:t] for t in range(p,len(series))])\ny=series[p:]\nfor tr,te in TimeSeriesSplit(4).split(X):\n    m=Ridge(alpha=1.).fit(X[tr],y[tr])\n    print(\"Holdout MSE:\",np.mean((m.predict(X[te])-y[te])**2))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益/波动预测、深度序列建模与滚动回测。",
+      "limits": "这里提供时序建模原理摘要和可运行基础例子，非每一个深度模型的完整独立架构实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "timeseries-n03-03",
+      "node_id": "timeseries-n03-03",
+      "title": "N-HiTS",
+      "definition": "N-HiTS通过多分辨率插值结构学习较长时间跨度的预测模式。",
+      "assumptions": "预测输入必须在决策时可得。滞后特征、未来协变量、跨期标签及验证窗口应按时间校验。",
+      "properties": [
+        "N-HiTS通过多分辨率插值结构学习较长时间跨度的预测模式。。",
+        "样本相关、制度漂移、成本与预测期限都会影响模型比较，须报告有效样本外绩效。"
+      ],
+      "formulas": [
+        {
+          "label": "基本预测关系",
+          "tex": "\\hat y=\\sum_l\\operatorname{Interp}(\\theta_l)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义历史信息集、预测时间窗与模型结构。N-HiTS通过多分辨率插值结构学习较长时间跨度的预测模式。",
+          "tex": "\\hat y=\\sum_l\\operatorname{Interp}(\\theta_l)"
+        },
+        {
+          "explanation": "按时序顺序构造训练和验证，计算相应损失及置信区间。",
+          "tex": "\\hat y=\\sum_l\\operatorname{Interp}(\\theta_l)"
+        }
+      ],
+      "code": "# N-HiTS — 时序预测综合示例\nimport numpy as np\nfrom sklearn.linear_model import Ridge\nfrom sklearn.model_selection import TimeSeriesSplit\nrng=np.random.default_rng(0)\nseries=np.cumsum(rng.normal(size=120))\np=5\nX=np.array([series[t-p:t] for t in range(p,len(series))])\ny=series[p:]\nfor tr,te in TimeSeriesSplit(4).split(X):\n    m=Ridge(alpha=1.).fit(X[tr],y[tr])\n    print(\"Holdout MSE:\",np.mean((m.predict(X[te])-y[te])**2))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益/波动预测、深度序列建模与滚动回测。",
+      "limits": "这里提供时序建模原理摘要和可运行基础例子，非每一个深度模型的完整独立架构实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "timeseries-n04-03",
+      "node_id": "timeseries-n04-03",
+      "title": "Temporal Fusion Transformer",
+      "definition": "TFT结合变量选择、门控、注意力和多步分位预测处理多变量序列。",
+      "assumptions": "预测输入必须在决策时可得。滞后特征、未来协变量、跨期标签及验证窗口应按时间校验。",
+      "properties": [
+        "TFT结合变量选择、门控、注意力和多步分位预测处理多变量序列。。",
+        "样本相关、制度漂移、成本与预测期限都会影响模型比较，须报告有效样本外绩效。"
+      ],
+      "formulas": [
+        {
+          "label": "基本预测关系",
+          "tex": "L_\\tau=\\sum_t\\rho_\\tau(y_t-\\hat y_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义历史信息集、预测时间窗与模型结构。TFT结合变量选择、门控、注意力和多步分位预测处理多变量序列。",
+          "tex": "L_\\tau=\\sum_t\\rho_\\tau(y_t-\\hat y_t)"
+        },
+        {
+          "explanation": "按时序顺序构造训练和验证，计算相应损失及置信区间。",
+          "tex": "L_\\tau=\\sum_t\\rho_\\tau(y_t-\\hat y_t)"
+        }
+      ],
+      "code": "# Temporal Fusion Transformer — 时序预测综合示例\nimport numpy as np\nfrom sklearn.linear_model import Ridge\nfrom sklearn.model_selection import TimeSeriesSplit\nrng=np.random.default_rng(0)\nseries=np.cumsum(rng.normal(size=120))\np=5\nX=np.array([series[t-p:t] for t in range(p,len(series))])\ny=series[p:]\nfor tr,te in TimeSeriesSplit(4).split(X):\n    m=Ridge(alpha=1.).fit(X[tr],y[tr])\n    print(\"Holdout MSE:\",np.mean((m.predict(X[te])-y[te])**2))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益/波动预测、深度序列建模与滚动回测。",
+      "limits": "这里提供时序建模原理摘要和可运行基础例子，非每一个深度模型的完整独立架构实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "timeseries-n06-03",
+      "node_id": "timeseries-n06-03",
+      "title": "TimesNet",
+      "definition": "TimesNet按估计周期把一维序列转换为二维周期内与跨周期结构进行卷积建模。",
+      "assumptions": "预测输入必须在决策时可得。滞后特征、未来协变量、跨期标签及验证窗口应按时间校验。",
+      "properties": [
+        "TimesNet按估计周期把一维序列转换为二维周期内与跨周期结构进行卷积建模。。",
+        "样本相关、制度漂移、成本与预测期限都会影响模型比较，须报告有效样本外绩效。"
+      ],
+      "formulas": [
+        {
+          "label": "基本预测关系",
+          "tex": "X\\in\\mathbb R^{T\\times C}\\rightarrow X'\\in\\mathbb R^{P\\times K\\times C}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义历史信息集、预测时间窗与模型结构。TimesNet按估计周期把一维序列转换为二维周期内与跨周期结构进行卷积建模。",
+          "tex": "X\\in\\mathbb R^{T\\times C}\\rightarrow X'\\in\\mathbb R^{P\\times K\\times C}"
+        },
+        {
+          "explanation": "按时序顺序构造训练和验证，计算相应损失及置信区间。",
+          "tex": "X\\in\\mathbb R^{T\\times C}\\rightarrow X'\\in\\mathbb R^{P\\times K\\times C}"
+        }
+      ],
+      "code": "# TimesNet — 时序预测综合示例\nimport numpy as np\nfrom sklearn.linear_model import Ridge\nfrom sklearn.model_selection import TimeSeriesSplit\nrng=np.random.default_rng(0)\nseries=np.cumsum(rng.normal(size=120))\np=5\nX=np.array([series[t-p:t] for t in range(p,len(series))])\ny=series[p:]\nfor tr,te in TimeSeriesSplit(4).split(X):\n    m=Ridge(alpha=1.).fit(X[tr],y[tr])\n    print(\"Holdout MSE:\",np.mean((m.predict(X[te])-y[te])**2))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益/波动预测、深度序列建模与滚动回测。",
+      "limits": "这里提供时序建模原理摘要和可运行基础例子，非每一个深度模型的完整独立架构实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "timeseries-n02-04",
+      "node_id": "timeseries-n02-04",
+      "title": "Teacher Forcing",
+      "definition": "多步序列训练时使用真实上一步目标作为当前预测输入，推断时则使用模型自身的预测。",
+      "assumptions": "预测输入必须在决策时可得。滞后特征、未来协变量、跨期标签及验证窗口应按时间校验。",
+      "properties": [
+        "多步序列训练时使用真实上一步目标作为当前预测输入，推断时则使用模型自身的预测。。",
+        "样本相关、制度漂移、成本与预测期限都会影响模型比较，须报告有效样本外绩效。"
+      ],
+      "formulas": [
+        {
+          "label": "基本预测关系",
+          "tex": "p(y_t\\mid y_{<t},X)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义历史信息集、预测时间窗与模型结构。多步序列训练时使用真实上一步目标作为当前预测输入，推断时则使用模型自身的预测。",
+          "tex": "p(y_t\\mid y_{<t},X)"
+        },
+        {
+          "explanation": "按时序顺序构造训练和验证，计算相应损失及置信区间。",
+          "tex": "p(y_t\\mid y_{<t},X)"
+        }
+      ],
+      "code": "# Teacher Forcing — 时序预测综合示例\nimport numpy as np\nfrom sklearn.linear_model import Ridge\nfrom sklearn.model_selection import TimeSeriesSplit\nrng=np.random.default_rng(0)\nseries=np.cumsum(rng.normal(size=120))\np=5\nX=np.array([series[t-p:t] for t in range(p,len(series))])\ny=series[p:]\nfor tr,te in TimeSeriesSplit(4).split(X):\n    m=Ridge(alpha=1.).fit(X[tr],y[tr])\n    print(\"Holdout MSE:\",np.mean((m.predict(X[te])-y[te])**2))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益/波动预测、深度序列建模与滚动回测。",
+      "limits": "这里提供时序建模原理摘要和可运行基础例子，非每一个深度模型的完整独立架构实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "timeseries-n03-04",
+      "node_id": "timeseries-n03-04",
+      "title": "Seq2Seq Forecast",
+      "definition": "编码历史协变量和目标序列，再由解码器输出未来多期预测。",
+      "assumptions": "预测输入必须在决策时可得。滞后特征、未来协变量、跨期标签及验证窗口应按时间校验。",
+      "properties": [
+        "编码历史协变量和目标序列，再由解码器输出未来多期预测。。",
+        "样本相关、制度漂移、成本与预测期限都会影响模型比较，须报告有效样本外绩效。"
+      ],
+      "formulas": [
+        {
+          "label": "基本预测关系",
+          "tex": "p(y_{t+1:t+H}\\mid X_{\\le t})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义历史信息集、预测时间窗与模型结构。编码历史协变量和目标序列，再由解码器输出未来多期预测。",
+          "tex": "p(y_{t+1:t+H}\\mid X_{\\le t})"
+        },
+        {
+          "explanation": "按时序顺序构造训练和验证，计算相应损失及置信区间。",
+          "tex": "p(y_{t+1:t+H}\\mid X_{\\le t})"
+        }
+      ],
+      "code": "# Seq2Seq Forecast — 时序预测综合示例\nimport numpy as np\nfrom sklearn.linear_model import Ridge\nfrom sklearn.model_selection import TimeSeriesSplit\nrng=np.random.default_rng(0)\nseries=np.cumsum(rng.normal(size=120))\np=5\nX=np.array([series[t-p:t] for t in range(p,len(series))])\ny=series[p:]\nfor tr,te in TimeSeriesSplit(4).split(X):\n    m=Ridge(alpha=1.).fit(X[tr],y[tr])\n    print(\"Holdout MSE:\",np.mean((m.predict(X[te])-y[te])**2))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益/波动预测、深度序列建模与滚动回测。",
+      "limits": "这里提供时序建模原理摘要和可运行基础例子，非每一个深度模型的完整独立架构实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "timeseries-n05-04",
+      "node_id": "timeseries-n05-04",
+      "title": "协变量可得性",
+      "definition": "未来协变量只有在预测时已知时才可以加入推断输入，如日历变量与已发布政策安排。",
+      "assumptions": "预测输入必须在决策时可得。滞后特征、未来协变量、跨期标签及验证窗口应按时间校验。",
+      "properties": [
+        "未来协变量只有在预测时已知时才可以加入推断输入，如日历变量与已发布政策安排。。",
+        "样本相关、制度漂移、成本与预测期限都会影响模型比较，须报告有效样本外绩效。"
+      ],
+      "formulas": [
+        {
+          "label": "基本预测关系",
+          "tex": "X_{t+h}^{\\rm known}\\in\\mathcal F_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义历史信息集、预测时间窗与模型结构。未来协变量只有在预测时已知时才可以加入推断输入，如日历变量与已发布政策安排。",
+          "tex": "X_{t+h}^{\\rm known}\\in\\mathcal F_t"
+        },
+        {
+          "explanation": "按时序顺序构造训练和验证，计算相应损失及置信区间。",
+          "tex": "X_{t+h}^{\\rm known}\\in\\mathcal F_t"
+        }
+      ],
+      "code": "# 协变量可得性 — 时序预测综合示例\nimport numpy as np\nfrom sklearn.linear_model import Ridge\nfrom sklearn.model_selection import TimeSeriesSplit\nrng=np.random.default_rng(0)\nseries=np.cumsum(rng.normal(size=120))\np=5\nX=np.array([series[t-p:t] for t in range(p,len(series))])\ny=series[p:]\nfor tr,te in TimeSeriesSplit(4).split(X):\n    m=Ridge(alpha=1.).fit(X[tr],y[tr])\n    print(\"Holdout MSE:\",np.mean((m.predict(X[te])-y[te])**2))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益/波动预测、深度序列建模与滚动回测。",
+      "limits": "这里提供时序建模原理摘要和可运行基础例子，非每一个深度模型的完整独立架构实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "timeseries-n06-04",
+      "node_id": "timeseries-n06-04",
+      "title": "多资产同步",
+      "definition": "多个资产的非同步交易、停牌和不同市场时区需要构造共同面板与可用掩码。",
+      "assumptions": "预测输入必须在决策时可得。滞后特征、未来协变量、跨期标签及验证窗口应按时间校验。",
+      "properties": [
+        "多个资产的非同步交易、停牌和不同市场时区需要构造共同面板与可用掩码。。",
+        "样本相关、制度漂移、成本与预测期限都会影响模型比较，须报告有效样本外绩效。"
+      ],
+      "formulas": [
+        {
+          "label": "基本预测关系",
+          "tex": "M_{t,i}\\in\\{0,1\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义历史信息集、预测时间窗与模型结构。多个资产的非同步交易、停牌和不同市场时区需要构造共同面板与可用掩码。",
+          "tex": "M_{t,i}\\in\\{0,1\\}"
+        },
+        {
+          "explanation": "按时序顺序构造训练和验证，计算相应损失及置信区间。",
+          "tex": "M_{t,i}\\in\\{0,1\\}"
+        }
+      ],
+      "code": "# 多资产同步 — 时序预测综合示例\nimport numpy as np\nfrom sklearn.linear_model import Ridge\nfrom sklearn.model_selection import TimeSeriesSplit\nrng=np.random.default_rng(0)\nseries=np.cumsum(rng.normal(size=120))\np=5\nX=np.array([series[t-p:t] for t in range(p,len(series))])\ny=series[p:]\nfor tr,te in TimeSeriesSplit(4).split(X):\n    m=Ridge(alpha=1.).fit(X[tr],y[tr])\n    print(\"Holdout MSE:\",np.mean((m.predict(X[te])-y[te])**2))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益/波动预测、深度序列建模与滚动回测。",
+      "limits": "这里提供时序建模原理摘要和可运行基础例子，非每一个深度模型的完整独立架构实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "timeseries-n01-05",
+      "node_id": "timeseries-n01-05",
+      "title": "收益与波动预测",
+      "definition": "收益均值与条件波动率是不同预测目标，需选用相符的损失和风险指标。",
+      "assumptions": "预测输入必须在决策时可得。滞后特征、未来协变量、跨期标签及验证窗口应按时间校验。",
+      "properties": [
+        "收益均值与条件波动率是不同预测目标，需选用相符的损失和风险指标。。",
+        "样本相关、制度漂移、成本与预测期限都会影响模型比较，须报告有效样本外绩效。"
+      ],
+      "formulas": [
+        {
+          "label": "基本预测关系",
+          "tex": "r_{t+1}=\\mu_t+\\sigma_t\\epsilon_{t+1}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义历史信息集、预测时间窗与模型结构。收益均值与条件波动率是不同预测目标，需选用相符的损失和风险指标。",
+          "tex": "r_{t+1}=\\mu_t+\\sigma_t\\epsilon_{t+1}"
+        },
+        {
+          "explanation": "按时序顺序构造训练和验证，计算相应损失及置信区间。",
+          "tex": "r_{t+1}=\\mu_t+\\sigma_t\\epsilon_{t+1}"
+        }
+      ],
+      "code": "# 收益与波动预测 — 时序预测综合示例\nimport numpy as np\nfrom sklearn.linear_model import Ridge\nfrom sklearn.model_selection import TimeSeriesSplit\nrng=np.random.default_rng(0)\nseries=np.cumsum(rng.normal(size=120))\np=5\nX=np.array([series[t-p:t] for t in range(p,len(series))])\ny=series[p:]\nfor tr,te in TimeSeriesSplit(4).split(X):\n    m=Ridge(alpha=1.).fit(X[tr],y[tr])\n    print(\"Holdout MSE:\",np.mean((m.predict(X[te])-y[te])**2))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益/波动预测、深度序列建模与滚动回测。",
+      "limits": "这里提供时序建模原理摘要和可运行基础例子，非每一个深度模型的完整独立架构实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "timeseries-n02-05",
+      "node_id": "timeseries-n02-05",
+      "title": "ETF横截面排序",
+      "definition": "在同日资产集合上按预测未来收益排序，使用RankIC或分组净收益衡量质量。",
+      "assumptions": "预测输入必须在决策时可得。滞后特征、未来协变量、跨期标签及验证窗口应按时间校验。",
+      "properties": [
+        "在同日资产集合上按预测未来收益排序，使用RankIC或分组净收益衡量质量。。",
+        "样本相关、制度漂移、成本与预测期限都会影响模型比较，须报告有效样本外绩效。"
+      ],
+      "formulas": [
+        {
+          "label": "基本预测关系",
+          "tex": "\\operatorname{RankIC}_t=\\operatorname{Spearman}_i(\\hat r_{i,t},r_{i,t+1})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义历史信息集、预测时间窗与模型结构。在同日资产集合上按预测未来收益排序，使用RankIC或分组净收益衡量质量。",
+          "tex": "\\operatorname{RankIC}_t=\\operatorname{Spearman}_i(\\hat r_{i,t},r_{i,t+1})"
+        },
+        {
+          "explanation": "按时序顺序构造训练和验证，计算相应损失及置信区间。",
+          "tex": "\\operatorname{RankIC}_t=\\operatorname{Spearman}_i(\\hat r_{i,t},r_{i,t+1})"
+        }
+      ],
+      "code": "# ETF横截面排序 — 时序预测综合示例\nimport numpy as np\nfrom sklearn.linear_model import Ridge\nfrom sklearn.model_selection import TimeSeriesSplit\nrng=np.random.default_rng(0)\nseries=np.cumsum(rng.normal(size=120))\np=5\nX=np.array([series[t-p:t] for t in range(p,len(series))])\ny=series[p:]\nfor tr,te in TimeSeriesSplit(4).split(X):\n    m=Ridge(alpha=1.).fit(X[tr],y[tr])\n    print(\"Holdout MSE:\",np.mean((m.predict(X[te])-y[te])**2))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益/波动预测、深度序列建模与滚动回测。",
+      "limits": "这里提供时序建模原理摘要和可运行基础例子，非每一个深度模型的完整独立架构实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "timeseries-n03-05",
+      "node_id": "timeseries-n03-05",
+      "title": "微观结构序列",
+      "definition": "订单簿盘口、成交和报价信息高频变化，预测需要事件时钟和价格时点一致。",
+      "assumptions": "预测输入必须在决策时可得。滞后特征、未来协变量、跨期标签及验证窗口应按时间校验。",
+      "properties": [
+        "订单簿盘口、成交和报价信息高频变化，预测需要事件时钟和价格时点一致。。",
+        "样本相关、制度漂移、成本与预测期限都会影响模型比较，须报告有效样本外绩效。"
+      ],
+      "formulas": [
+        {
+          "label": "基本预测关系",
+          "tex": "m_t=(b_t+a_t)/2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义历史信息集、预测时间窗与模型结构。订单簿盘口、成交和报价信息高频变化，预测需要事件时钟和价格时点一致。",
+          "tex": "m_t=(b_t+a_t)/2"
+        },
+        {
+          "explanation": "按时序顺序构造训练和验证，计算相应损失及置信区间。",
+          "tex": "m_t=(b_t+a_t)/2"
+        }
+      ],
+      "code": "# 微观结构序列 — 时序预测综合示例\nimport numpy as np\nfrom sklearn.linear_model import Ridge\nfrom sklearn.model_selection import TimeSeriesSplit\nrng=np.random.default_rng(0)\nseries=np.cumsum(rng.normal(size=120))\np=5\nX=np.array([series[t-p:t] for t in range(p,len(series))])\ny=series[p:]\nfor tr,te in TimeSeriesSplit(4).split(X):\n    m=Ridge(alpha=1.).fit(X[tr],y[tr])\n    print(\"Holdout MSE:\",np.mean((m.predict(X[te])-y[te])**2))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益/波动预测、深度序列建模与滚动回测。",
+      "limits": "这里提供时序建模原理摘要和可运行基础例子，非每一个深度模型的完整独立架构实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "timeseries-n04-05",
+      "node_id": "timeseries-n04-05",
+      "title": "状态切换",
+      "definition": "时序模型允许不同潜在制度对应不同的收益、波动和转移结构。",
+      "assumptions": "预测输入必须在决策时可得。滞后特征、未来协变量、跨期标签及验证窗口应按时间校验。",
+      "properties": [
+        "时序模型允许不同潜在制度对应不同的收益、波动和转移结构。。",
+        "样本相关、制度漂移、成本与预测期限都会影响模型比较，须报告有效样本外绩效。"
+      ],
+      "formulas": [
+        {
+          "label": "基本预测关系",
+          "tex": "p(y_t\\mid z_t=k)=p_k(y_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义历史信息集、预测时间窗与模型结构。时序模型允许不同潜在制度对应不同的收益、波动和转移结构。",
+          "tex": "p(y_t\\mid z_t=k)=p_k(y_t)"
+        },
+        {
+          "explanation": "按时序顺序构造训练和验证，计算相应损失及置信区间。",
+          "tex": "p(y_t\\mid z_t=k)=p_k(y_t)"
+        }
+      ],
+      "code": "# 状态切换 — 时序预测综合示例\nimport numpy as np\nfrom sklearn.linear_model import Ridge\nfrom sklearn.model_selection import TimeSeriesSplit\nrng=np.random.default_rng(0)\nseries=np.cumsum(rng.normal(size=120))\np=5\nX=np.array([series[t-p:t] for t in range(p,len(series))])\ny=series[p:]\nfor tr,te in TimeSeriesSplit(4).split(X):\n    m=Ridge(alpha=1.).fit(X[tr],y[tr])\n    print(\"Holdout MSE:\",np.mean((m.predict(X[te])-y[te])**2))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益/波动预测、深度序列建模与滚动回测。",
+      "limits": "这里提供时序建模原理摘要和可运行基础例子，非每一个深度模型的完整独立架构实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "timeseries-n05-05",
+      "node_id": "timeseries-n05-05",
+      "title": "不重叠评估",
+      "definition": "标签窗口跨期重叠会使训练与测试样本共享未来信息，应采用Purging和独立评价。",
+      "assumptions": "预测输入必须在决策时可得。滞后特征、未来协变量、跨期标签及验证窗口应按时间校验。",
+      "properties": [
+        "标签窗口跨期重叠会使训练与测试样本共享未来信息，应采用Purging和独立评价。。",
+        "样本相关、制度漂移、成本与预测期限都会影响模型比较，须报告有效样本外绩效。"
+      ],
+      "formulas": [
+        {
+          "label": "基本预测关系",
+          "tex": "I_i\\cap I_j=\\varnothing\\ \\text{for independent labels}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义历史信息集、预测时间窗与模型结构。标签窗口跨期重叠会使训练与测试样本共享未来信息，应采用Purging和独立评价。",
+          "tex": "I_i\\cap I_j=\\varnothing\\ \\text{for independent labels}"
+        },
+        {
+          "explanation": "按时序顺序构造训练和验证，计算相应损失及置信区间。",
+          "tex": "I_i\\cap I_j=\\varnothing\\ \\text{for independent labels}"
+        }
+      ],
+      "code": "# 不重叠评估 — 时序预测综合示例\nimport numpy as np\nfrom sklearn.linear_model import Ridge\nfrom sklearn.model_selection import TimeSeriesSplit\nrng=np.random.default_rng(0)\nseries=np.cumsum(rng.normal(size=120))\np=5\nX=np.array([series[t-p:t] for t in range(p,len(series))])\ny=series[p:]\nfor tr,te in TimeSeriesSplit(4).split(X):\n    m=Ridge(alpha=1.).fit(X[tr],y[tr])\n    print(\"Holdout MSE:\",np.mean((m.predict(X[te])-y[te])**2))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益/波动预测、深度序列建模与滚动回测。",
+      "limits": "这里提供时序建模原理摘要和可运行基础例子，非每一个深度模型的完整独立架构实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "timeseries-n06-05",
+      "node_id": "timeseries-n06-05",
+      "title": "滑动窗口回测",
+      "definition": "按历史可得顺序逐轮训练、预测、执行并计算扣成本绩效。",
+      "assumptions": "预测输入必须在决策时可得。滞后特征、未来协变量、跨期标签及验证窗口应按时间校验。",
+      "properties": [
+        "按历史可得顺序逐轮训练、预测、执行并计算扣成本绩效。。",
+        "样本相关、制度漂移、成本与预测期限都会影响模型比较，须报告有效样本外绩效。"
+      ],
+      "formulas": [
+        {
+          "label": "基本预测关系",
+          "tex": "\\hat y_t=f_{\\theta_t}(X_t),\\quad\\theta_t=\\operatorname{Fit}(D_{<t})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义历史信息集、预测时间窗与模型结构。按历史可得顺序逐轮训练、预测、执行并计算扣成本绩效。",
+          "tex": "\\hat y_t=f_{\\theta_t}(X_t),\\quad\\theta_t=\\operatorname{Fit}(D_{<t})"
+        },
+        {
+          "explanation": "按时序顺序构造训练和验证，计算相应损失及置信区间。",
+          "tex": "\\hat y_t=f_{\\theta_t}(X_t),\\quad\\theta_t=\\operatorname{Fit}(D_{<t})"
+        }
+      ],
+      "code": "# 滑动窗口回测 — 时序预测综合示例\nimport numpy as np\nfrom sklearn.linear_model import Ridge\nfrom sklearn.model_selection import TimeSeriesSplit\nrng=np.random.default_rng(0)\nseries=np.cumsum(rng.normal(size=120))\np=5\nX=np.array([series[t-p:t] for t in range(p,len(series))])\ny=series[p:]\nfor tr,te in TimeSeriesSplit(4).split(X):\n    m=Ridge(alpha=1.).fit(X[tr],y[tr])\n    print(\"Holdout MSE:\",np.mean((m.predict(X[te])-y[te])**2))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益/波动预测、深度序列建模与滚动回测。",
+      "limits": "这里提供时序建模原理摘要和可运行基础例子，非每一个深度模型的完整独立架构实现。",
+      "coverage": "expanded"
+    }
+  ]
+}
