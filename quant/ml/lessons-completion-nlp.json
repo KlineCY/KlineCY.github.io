@@ -1,0 +1,677 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "nlp-n01-01",
+      "node_id": "nlp-n01-01",
+      "title": "文本清洗",
+      "definition": "规范化文本中的编码、HTML、空白及符号，但保留金融金额、代码与否定语义。",
+      "assumptions": "必须定义分词、语言、金融实体、文本来源和实际发布时间，不能把未来披露内容当成历史特征。",
+      "properties": [
+        "传统词法方法可解释且计算低廉，深度表示可捕捉更丰富上下文，但都需域内验证。",
+        "文本标签、时间对齐、实体歧义和新闻转载会实质影响策略统计结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心模型或数据关系",
+          "tex": "T:\\mathrm{RawText}\\to\\mathrm{NormalizedText}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将原始文本转换为Token、计数、概率或结构化事件表示。",
+          "tex": "T:\\mathrm{RawText}\\to\\mathrm{NormalizedText}"
+        },
+        {
+          "explanation": "对来源、时间戳和下游预测目标施加约束，并在独立文本保留集检查表现。",
+          "tex": "T:\\mathrm{RawText}\\to\\mathrm{NormalizedText}"
+        }
+      ],
+      "code": "import re,html\ns=\"<p>ETF   profit  rose &amp; volume grew!</p>\"\nprint(re.sub(r\"\\s+\",\" \",re.sub(r\"<[^>]+>\",\" \",html.unescape(s))).strip())",
+      "packages": "Python standard library (optional nltk for lemmatization)",
+      "application": "用于财报信息抽取、金融新闻情绪、研报语义检索和资产事件因子。",
+      "limits": "示例是语言处理基本运算或结构演示，非现成训练完毕的金融NLP模型。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n03-01",
+      "node_id": "nlp-n03-01",
+      "title": "词形还原",
+      "definition": "词形还原依据语言规则把屈折形式映射到词元，如increased→increase，以减少特征稀疏。",
+      "assumptions": "必须定义分词、语言、金融实体、文本来源和实际发布时间，不能把未来披露内容当成历史特征。",
+      "properties": [
+        "传统词法方法可解释且计算低廉，深度表示可捕捉更丰富上下文，但都需域内验证。",
+        "文本标签、时间对齐、实体歧义和新闻转载会实质影响策略统计结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心模型或数据关系",
+          "tex": "\\operatorname{Lemma}(w)=w_{\\rm base}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将原始文本转换为Token、计数、概率或结构化事件表示。",
+          "tex": "\\operatorname{Lemma}(w)=w_{\\rm base}"
+        },
+        {
+          "explanation": "对来源、时间戳和下游预测目标施加约束，并在独立文本保留集检查表现。",
+          "tex": "\\operatorname{Lemma}(w)=w_{\\rm base}"
+        }
+      ],
+      "code": "from nltk.stem import PorterStemmer\nprint([PorterStemmer().stem(x) for x in [\"growing\",\"increased\",\"trading\"]])",
+      "packages": "Python standard library (optional nltk for lemmatization)",
+      "application": "用于财报信息抽取、金融新闻情绪、研报语义检索和资产事件因子。",
+      "limits": "示例是语言处理基本运算或结构演示，非现成训练完毕的金融NLP模型。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n04-01",
+      "node_id": "nlp-n04-01",
+      "title": "停用词",
+      "definition": "停用词过滤从词袋中移除高频通用词，但金融否定词和程度词可能不可删除。",
+      "assumptions": "必须定义分词、语言、金融实体、文本来源和实际发布时间，不能把未来披露内容当成历史特征。",
+      "properties": [
+        "传统词法方法可解释且计算低廉，深度表示可捕捉更丰富上下文，但都需域内验证。",
+        "文本标签、时间对齐、实体歧义和新闻转载会实质影响策略统计结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心模型或数据关系",
+          "tex": "V'=V\\setminus S_{\\rm stop}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将原始文本转换为Token、计数、概率或结构化事件表示。",
+          "tex": "V'=V\\setminus S_{\\rm stop}"
+        },
+        {
+          "explanation": "对来源、时间戳和下游预测目标施加约束，并在独立文本保留集检查表现。",
+          "tex": "V'=V\\setminus S_{\\rm stop}"
+        }
+      ],
+      "code": "tokens=\"the company did not report a loss\".split()\nstop={\"the\",\"a\"}\nprint([x for x in tokens if x not in stop])",
+      "packages": "Python standard library (optional nltk for lemmatization)",
+      "application": "用于财报信息抽取、金融新闻情绪、研报语义检索和资产事件因子。",
+      "limits": "示例是语言处理基本运算或结构演示，非现成训练完毕的金融NLP模型。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n05-01",
+      "node_id": "nlp-n05-01",
+      "title": "文本正则",
+      "definition": "正则表达式定义字符串匹配模式，可抽取股票代码、货币金额或报告日期。",
+      "assumptions": "必须定义分词、语言、金融实体、文本来源和实际发布时间，不能把未来披露内容当成历史特征。",
+      "properties": [
+        "传统词法方法可解释且计算低廉，深度表示可捕捉更丰富上下文，但都需域内验证。",
+        "文本标签、时间对齐、实体歧义和新闻转载会实质影响策略统计结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心模型或数据关系",
+          "tex": "\\operatorname{Matches}(p,s)=\\{(i,j):s_{i:j}\\in\\mathcal L(p)\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将原始文本转换为Token、计数、概率或结构化事件表示。",
+          "tex": "\\operatorname{Matches}(p,s)=\\{(i,j):s_{i:j}\\in\\mathcal L(p)\\}"
+        },
+        {
+          "explanation": "对来源、时间戳和下游预测目标施加约束，并在独立文本保留集检查表现。",
+          "tex": "\\operatorname{Matches}(p,s)=\\{(i,j):s_{i:j}\\in\\mathcal L(p)\\}"
+        }
+      ],
+      "code": "import re\ntext=\"AAPL gained 2.5% after the report\"\nprint(re.findall(r\"\\b[A-Z]{2,5}\\b|\\d+(?:\\.\\d+)?%\",text))",
+      "packages": "Python standard library (optional nltk for lemmatization)",
+      "application": "用于财报信息抽取、金融新闻情绪、研报语义检索和资产事件因子。",
+      "limits": "示例是语言处理基本运算或结构演示，非现成训练完毕的金融NLP模型。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n06-01",
+      "node_id": "nlp-n06-01",
+      "title": "语料库时间戳",
+      "definition": "语料库必须同时记录文本所属期和实际发布/获取时刻，以支持金融事件时序分析。",
+      "assumptions": "必须定义分词、语言、金融实体、文本来源和实际发布时间，不能把未来披露内容当成历史特征。",
+      "properties": [
+        "传统词法方法可解释且计算低廉，深度表示可捕捉更丰富上下文，但都需域内验证。",
+        "文本标签、时间对齐、实体歧义和新闻转载会实质影响策略统计结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心模型或数据关系",
+          "tex": "t_{\\rm available}=\\max(t_{\\rm publish},t_{\\rm provider})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将原始文本转换为Token、计数、概率或结构化事件表示。",
+          "tex": "t_{\\rm available}=\\max(t_{\\rm publish},t_{\\rm provider})"
+        },
+        {
+          "explanation": "对来源、时间戳和下游预测目标施加约束，并在独立文本保留集检查表现。",
+          "tex": "t_{\\rm available}=\\max(t_{\\rm publish},t_{\\rm provider})"
+        }
+      ],
+      "code": "from datetime import datetime\nrelease=datetime.fromisoformat(\"2026-01-05T16:00\")\ndecision=datetime.fromisoformat(\"2026-01-05T15:00\")\nprint(\"Available?\",release<=decision)",
+      "packages": "Python standard library (optional nltk for lemmatization)",
+      "application": "用于财报信息抽取、金融新闻情绪、研报语义检索和资产事件因子。",
+      "limits": "示例是语言处理基本运算或结构演示，非现成训练完毕的金融NLP模型。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n05-02",
+      "node_id": "nlp-n05-02",
+      "title": "词共现矩阵",
+      "definition": "词共现矩阵统计窗口内词对共同出现频率，构成分布式词表示的统计基础。",
+      "assumptions": "必须定义分词、语言、金融实体、文本来源和实际发布时间，不能把未来披露内容当成历史特征。",
+      "properties": [
+        "传统词法方法可解释且计算低廉，深度表示可捕捉更丰富上下文，但都需域内验证。",
+        "文本标签、时间对齐、实体歧义和新闻转载会实质影响策略统计结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心模型或数据关系",
+          "tex": "C_{ij}=\\sum_t\\mathbf1[w_t=i]\\sum_{s:|s-t|\\le h}\\mathbf1[w_s=j]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将原始文本转换为Token、计数、概率或结构化事件表示。",
+          "tex": "C_{ij}=\\sum_t\\mathbf1[w_t=i]\\sum_{s:|s-t|\\le h}\\mathbf1[w_s=j]"
+        },
+        {
+          "explanation": "对来源、时间戳和下游预测目标施加约束，并在独立文本保留集检查表现。",
+          "tex": "C_{ij}=\\sum_t\\mathbf1[w_t=i]\\sum_{s:|s-t|\\le h}\\mathbf1[w_s=j]"
+        }
+      ],
+      "code": "from collections import Counter\ntokens=\"profit growth improves profit outlook\".split();h=1\nprint(Counter((tokens[i],tokens[j]) for i in range(len(tokens))\n    for j in range(max(0,i-h),min(len(tokens),i+h+1)) if i!=j))",
+      "packages": "Python standard library (optional nltk for lemmatization)",
+      "application": "用于财报信息抽取、金融新闻情绪、研报语义检索和资产事件因子。",
+      "limits": "示例是语言处理基本运算或结构演示，非现成训练完毕的金融NLP模型。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n06-02",
+      "node_id": "nlp-n06-02",
+      "title": "稀疏文本分类",
+      "definition": "稀疏文本分类以词袋或TF-IDF向量训练线性分类器，适合作为深度NLP的可解释基线。",
+      "assumptions": "必须定义分词、语言、金融实体、文本来源和实际发布时间，不能把未来披露内容当成历史特征。",
+      "properties": [
+        "传统词法方法可解释且计算低廉，深度表示可捕捉更丰富上下文，但都需域内验证。",
+        "文本标签、时间对齐、实体歧义和新闻转载会实质影响策略统计结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心模型或数据关系",
+          "tex": "p(y=1|x)=\\sigma(w^\\top x+b)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将原始文本转换为Token、计数、概率或结构化事件表示。",
+          "tex": "p(y=1|x)=\\sigma(w^\\top x+b)"
+        },
+        {
+          "explanation": "对来源、时间戳和下游预测目标施加约束，并在独立文本保留集检查表现。",
+          "tex": "p(y=1|x)=\\sigma(w^\\top x+b)"
+        }
+      ],
+      "code": "from sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\ndocs=[\"good profit\",\"bad loss\",\"profit grew\",\"loss expanded\"]\nX=TfidfVectorizer().fit_transform(docs)\nprint(LogisticRegression().fit(X,[1,0,1,0]).predict(X))",
+      "packages": "scikit-learn",
+      "application": "用于财报信息抽取、金融新闻情绪、研报语义检索和资产事件因子。",
+      "limits": "示例是语言处理基本运算或结构演示，非现成训练完毕的金融NLP模型。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n01-03",
+      "node_id": "nlp-n01-03",
+      "title": "Word2Vec Skip-gram",
+      "definition": "Skip-gram用中心词预测上下文词，通过上下文对数似然学习语义词向量。",
+      "assumptions": "必须定义分词、语言、金融实体、文本来源和实际发布时间，不能把未来披露内容当成历史特征。",
+      "properties": [
+        "传统词法方法可解释且计算低廉，深度表示可捕捉更丰富上下文，但都需域内验证。",
+        "文本标签、时间对齐、实体歧义和新闻转载会实质影响策略统计结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心模型或数据关系",
+          "tex": "L=-\\sum_{(c,o)}\\log p(o|c)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将原始文本转换为Token、计数、概率或结构化事件表示。",
+          "tex": "L=-\\sum_{(c,o)}\\log p(o|c)"
+        },
+        {
+          "explanation": "对来源、时间戳和下游预测目标施加约束，并在独立文本保留集检查表现。",
+          "tex": "L=-\\sum_{(c,o)}\\log p(o|c)"
+        }
+      ],
+      "code": "import torch\nemb=torch.nn.Embedding(50,8)\nprint(emb(torch.tensor([1,2,3])).shape)",
+      "packages": "torch",
+      "application": "用于财报信息抽取、金融新闻情绪、研报语义检索和资产事件因子。",
+      "limits": "示例是语言处理基本运算或结构演示，非现成训练完毕的金融NLP模型。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n02-03",
+      "node_id": "nlp-n02-03",
+      "title": "Word2Vec CBOW",
+      "definition": "CBOW将邻居词Embedding聚合为上下文表示，用其预测中心词。",
+      "assumptions": "必须定义分词、语言、金融实体、文本来源和实际发布时间，不能把未来披露内容当成历史特征。",
+      "properties": [
+        "传统词法方法可解释且计算低廉，深度表示可捕捉更丰富上下文，但都需域内验证。",
+        "文本标签、时间对齐、实体歧义和新闻转载会实质影响策略统计结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心模型或数据关系",
+          "tex": "p(w_t|\\{w_{t+j}:j\\ne0\\})=\\operatorname{softmax}(U\\bar v)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将原始文本转换为Token、计数、概率或结构化事件表示。",
+          "tex": "p(w_t|\\{w_{t+j}:j\\ne0\\})=\\operatorname{softmax}(U\\bar v)"
+        },
+        {
+          "explanation": "对来源、时间戳和下游预测目标施加约束，并在独立文本保留集检查表现。",
+          "tex": "p(w_t|\\{w_{t+j}:j\\ne0\\})=\\operatorname{softmax}(U\\bar v)"
+        }
+      ],
+      "code": "import torch\nemb=torch.nn.Embedding(50,8)\nprint(emb(torch.tensor([1,2,3])).shape)",
+      "packages": "torch",
+      "application": "用于财报信息抽取、金融新闻情绪、研报语义检索和资产事件因子。",
+      "limits": "示例是语言处理基本运算或结构演示，非现成训练完毕的金融NLP模型。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n04-03",
+      "node_id": "nlp-n04-03",
+      "title": "GloVe",
+      "definition": "GloVe通过全局词共现统计和词向量内积拟合对数共现频数。",
+      "assumptions": "必须定义分词、语言、金融实体、文本来源和实际发布时间，不能把未来披露内容当成历史特征。",
+      "properties": [
+        "传统词法方法可解释且计算低廉，深度表示可捕捉更丰富上下文，但都需域内验证。",
+        "文本标签、时间对齐、实体歧义和新闻转载会实质影响策略统计结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心模型或数据关系",
+          "tex": "L=\\sum_{i,j}f(C_{ij})(u_i^\\top v_j+b_i+\\tilde b_j-\\log C_{ij})^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将原始文本转换为Token、计数、概率或结构化事件表示。",
+          "tex": "L=\\sum_{i,j}f(C_{ij})(u_i^\\top v_j+b_i+\\tilde b_j-\\log C_{ij})^2"
+        },
+        {
+          "explanation": "对来源、时间戳和下游预测目标施加约束，并在独立文本保留集检查表现。",
+          "tex": "L=\\sum_{i,j}f(C_{ij})(u_i^\\top v_j+b_i+\\tilde b_j-\\log C_{ij})^2"
+        }
+      ],
+      "code": "from collections import Counter\ntokens=\"profit growth improves profit outlook\".split();h=1\nprint(Counter((tokens[i],tokens[j]) for i in range(len(tokens))\n    for j in range(max(0,i-h),min(len(tokens),i+h+1)) if i!=j))",
+      "packages": "Python standard library (optional nltk for lemmatization)",
+      "application": "用于财报信息抽取、金融新闻情绪、研报语义检索和资产事件因子。",
+      "limits": "示例是语言处理基本运算或结构演示，非现成训练完毕的金融NLP模型。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n05-03",
+      "node_id": "nlp-n05-03",
+      "title": "子词FastText",
+      "definition": "FastText将词表示拆成字符n-gram的向量和，改善罕见词与未知词的表示。",
+      "assumptions": "必须定义分词、语言、金融实体、文本来源和实际发布时间，不能把未来披露内容当成历史特征。",
+      "properties": [
+        "传统词法方法可解释且计算低廉，深度表示可捕捉更丰富上下文，但都需域内验证。",
+        "文本标签、时间对齐、实体歧义和新闻转载会实质影响策略统计结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心模型或数据关系",
+          "tex": "v_w=\\sum_{g\\in G(w)}z_g"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将原始文本转换为Token、计数、概率或结构化事件表示。",
+          "tex": "v_w=\\sum_{g\\in G(w)}z_g"
+        },
+        {
+          "explanation": "对来源、时间戳和下游预测目标施加约束，并在独立文本保留集检查表现。",
+          "tex": "v_w=\\sum_{g\\in G(w)}z_g"
+        }
+      ],
+      "code": "word=\"<trading>\";ngrams=[word[i:i+3] for i in range(len(word)-2)]\nprint(ngrams)",
+      "packages": "Python standard library (optional nltk for lemmatization)",
+      "application": "用于财报信息抽取、金融新闻情绪、研报语义检索和资产事件因子。",
+      "limits": "示例是语言处理基本运算或结构演示，非现成训练完毕的金融NLP模型。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n06-03",
+      "node_id": "nlp-n06-03",
+      "title": "句子嵌入",
+      "definition": "句子嵌入把不同长度文本映射为固定维向量，用于语义相似性、检索与聚类。",
+      "assumptions": "必须定义分词、语言、金融实体、文本来源和实际发布时间，不能把未来披露内容当成历史特征。",
+      "properties": [
+        "传统词法方法可解释且计算低廉，深度表示可捕捉更丰富上下文，但都需域内验证。",
+        "文本标签、时间对齐、实体歧义和新闻转载会实质影响策略统计结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心模型或数据关系",
+          "tex": "e(s)\\in\\mathbb R^d,\\quad\\operatorname{sim}(s,t)=\\cos(e(s),e(t))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将原始文本转换为Token、计数、概率或结构化事件表示。",
+          "tex": "e(s)\\in\\mathbb R^d,\\quad\\operatorname{sim}(s,t)=\\cos(e(s),e(t))"
+        },
+        {
+          "explanation": "对来源、时间戳和下游预测目标施加约束，并在独立文本保留集检查表现。",
+          "tex": "e(s)\\in\\mathbb R^d,\\quad\\operatorname{sim}(s,t)=\\cos(e(s),e(t))"
+        }
+      ],
+      "code": "import numpy as np\nv=np.array([[1.,2.],[2.,1.]])\nprint(v@v.T/(np.linalg.norm(v,axis=1)[:,None]*np.linalg.norm(v,axis=1)[None,:]))",
+      "packages": "numpy",
+      "application": "用于财报信息抽取、金融新闻情绪、研报语义检索和资产事件因子。",
+      "limits": "示例是语言处理基本运算或结构演示，非现成训练完毕的金融NLP模型。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n01-04",
+      "node_id": "nlp-n01-04",
+      "title": "n-gram语言模型",
+      "definition": "有限历史语言模型近似下一个词只依赖最近n−1个Token，用平滑处理未出现词组。",
+      "assumptions": "必须定义分词、语言、金融实体、文本来源和实际发布时间，不能把未来披露内容当成历史特征。",
+      "properties": [
+        "传统词法方法可解释且计算低廉，深度表示可捕捉更丰富上下文，但都需域内验证。",
+        "文本标签、时间对齐、实体歧义和新闻转载会实质影响策略统计结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心模型或数据关系",
+          "tex": "p(w_t|w_{<t})\\approx p(w_t|w_{t-n+1:t-1})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将原始文本转换为Token、计数、概率或结构化事件表示。",
+          "tex": "p(w_t|w_{<t})\\approx p(w_t|w_{t-n+1:t-1})"
+        },
+        {
+          "explanation": "对来源、时间戳和下游预测目标施加约束，并在独立文本保留集检查表现。",
+          "tex": "p(w_t|w_{<t})\\approx p(w_t|w_{t-n+1:t-1})"
+        }
+      ],
+      "code": "from collections import Counter\nt=\"market risk market return market\".split()\nprint(Counter(zip(t,t[1:])))",
+      "packages": "Python standard library (optional nltk for lemmatization)",
+      "application": "用于财报信息抽取、金融新闻情绪、研报语义检索和资产事件因子。",
+      "limits": "示例是语言处理基本运算或结构演示，非现成训练完毕的金融NLP模型。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n02-04",
+      "node_id": "nlp-n02-04",
+      "title": "条件随机场CRF",
+      "definition": "线性链CRF对整个标签序列打分并归一化，显式建模相邻命名实体标签之间的依赖。",
+      "assumptions": "必须定义分词、语言、金融实体、文本来源和实际发布时间，不能把未来披露内容当成历史特征。",
+      "properties": [
+        "传统词法方法可解释且计算低廉，深度表示可捕捉更丰富上下文，但都需域内验证。",
+        "文本标签、时间对齐、实体歧义和新闻转载会实质影响策略统计结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心模型或数据关系",
+          "tex": "p(y|x)=\\frac{\\exp(\\sum_t\\psi(y_{t-1},y_t,x))}{Z(x)}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将原始文本转换为Token、计数、概率或结构化事件表示。",
+          "tex": "p(y|x)=\\frac{\\exp(\\sum_t\\psi(y_{t-1},y_t,x))}{Z(x)}"
+        },
+        {
+          "explanation": "对来源、时间戳和下游预测目标施加约束，并在独立文本保留集检查表现。",
+          "tex": "p(y|x)=\\frac{\\exp(\\sum_t\\psi(y_{t-1},y_t,x))}{Z(x)}"
+        }
+      ],
+      "code": "import numpy as np\nlogits=np.array([[1.,2.],[2.,1.],[1.,3.]])\ntrans=np.array([[.2,.1],[.1,.3]])\nscores=logits[0]\nfor step in logits[1:]:\n    scores=(scores[:,None]+trans).max(0)+step\nprint(\"Best path total score:\",scores.max())",
+      "packages": "numpy",
+      "application": "用于财报信息抽取、金融新闻情绪、研报语义检索和资产事件因子。",
+      "limits": "示例是语言处理基本运算或结构演示，非现成训练完毕的金融NLP模型。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n04-04",
+      "node_id": "nlp-n04-04",
+      "title": "词性标注",
+      "definition": "词性标注为每个Token预测名词、动词、形容词等语法类别，可作为传统实体抽取的辅助信号。",
+      "assumptions": "必须定义分词、语言、金融实体、文本来源和实际发布时间，不能把未来披露内容当成历史特征。",
+      "properties": [
+        "传统词法方法可解释且计算低廉，深度表示可捕捉更丰富上下文，但都需域内验证。",
+        "文本标签、时间对齐、实体歧义和新闻转载会实质影响策略统计结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心模型或数据关系",
+          "tex": "\\hat y_{1:T}=\\arg\\max p(y_{1:T}|w_{1:T})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将原始文本转换为Token、计数、概率或结构化事件表示。",
+          "tex": "\\hat y_{1:T}=\\arg\\max p(y_{1:T}|w_{1:T})"
+        },
+        {
+          "explanation": "对来源、时间戳和下游预测目标施加约束，并在独立文本保留集检查表现。",
+          "tex": "\\hat y_{1:T}=\\arg\\max p(y_{1:T}|w_{1:T})"
+        }
+      ],
+      "code": "tokens=\"ETF trading volumes rose\".split()\nprint(list(zip(tokens,[\"NOUN\",\"NOUN\",\"NOUN\",\"VERB\"])))",
+      "packages": "Python standard library (optional nltk for lemmatization)",
+      "application": "用于财报信息抽取、金融新闻情绪、研报语义检索和资产事件因子。",
+      "limits": "示例是语言处理基本运算或结构演示，非现成训练完毕的金融NLP模型。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n05-04",
+      "node_id": "nlp-n05-04",
+      "title": "序列到序列Seq2Seq",
+      "definition": "Seq2Seq编码源文本，再由条件解码器逐步生成翻译或摘要序列。",
+      "assumptions": "必须定义分词、语言、金融实体、文本来源和实际发布时间，不能把未来披露内容当成历史特征。",
+      "properties": [
+        "传统词法方法可解释且计算低廉，深度表示可捕捉更丰富上下文，但都需域内验证。",
+        "文本标签、时间对齐、实体歧义和新闻转载会实质影响策略统计结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心模型或数据关系",
+          "tex": "p(y_{1:T}|x)=\\prod_tp(y_t|y_{<t},x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将原始文本转换为Token、计数、概率或结构化事件表示。",
+          "tex": "p(y_{1:T}|x)=\\prod_tp(y_t|y_{<t},x)"
+        },
+        {
+          "explanation": "对来源、时间戳和下游预测目标施加约束，并在独立文本保留集检查表现。",
+          "tex": "p(y_{1:T}|x)=\\prod_tp(y_t|y_{<t},x)"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(2,6,10)\nenc=torch.nn.GRU(10,8,batch_first=True)\nout,h=enc(x);print(h.shape)",
+      "packages": "torch",
+      "application": "用于财报信息抽取、金融新闻情绪、研报语义检索和资产事件因子。",
+      "limits": "示例是语言处理基本运算或结构演示，非现成训练完毕的金融NLP模型。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n06-04",
+      "node_id": "nlp-n06-04",
+      "title": "Beam Search",
+      "definition": "束搜索逐步保留累计对数概率最高的B条部分序列，近似搜索最可能生成文本。",
+      "assumptions": "必须定义分词、语言、金融实体、文本来源和实际发布时间，不能把未来披露内容当成历史特征。",
+      "properties": [
+        "传统词法方法可解释且计算低廉，深度表示可捕捉更丰富上下文，但都需域内验证。",
+        "文本标签、时间对齐、实体歧义和新闻转载会实质影响策略统计结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心模型或数据关系",
+          "tex": "\\operatorname{Score}(y_{1:t})=\\sum_{k=1}^t\\log p(y_k|y_{<k},x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将原始文本转换为Token、计数、概率或结构化事件表示。",
+          "tex": "\\operatorname{Score}(y_{1:t})=\\sum_{k=1}^t\\log p(y_k|y_{<k},x)"
+        },
+        {
+          "explanation": "对来源、时间戳和下游预测目标施加约束，并在独立文本保留集检查表现。",
+          "tex": "\\operatorname{Score}(y_{1:t})=\\sum_{k=1}^t\\log p(y_k|y_{<k},x)"
+        }
+      ],
+      "code": "beams=[(\"\",0.)]\nfor options in [[(\"A\",-.1),(\"B\",-.9)],[(\"C\",-.2),(\"D\",-.5)]]:\n    beams=sorted([(s+c,score+p) for s,score in beams for c,p in options],key=lambda v:-v[1])[:2]\nprint(beams)",
+      "packages": "Python standard library (optional nltk for lemmatization)",
+      "application": "用于财报信息抽取、金融新闻情绪、研报语义检索和资产事件因子。",
+      "limits": "示例是语言处理基本运算或结构演示，非现成训练完毕的金融NLP模型。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n01-05",
+      "node_id": "nlp-n01-05",
+      "title": "财报文本解析",
+      "definition": "财报解析识别披露章节、表格、科目及对应期间，形成可溯源结构化数据。",
+      "assumptions": "必须定义分词、语言、金融实体、文本来源和实际发布时间，不能把未来披露内容当成历史特征。",
+      "properties": [
+        "传统词法方法可解释且计算低廉，深度表示可捕捉更丰富上下文，但都需域内验证。",
+        "文本标签、时间对齐、实体歧义和新闻转载会实质影响策略统计结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心模型或数据关系",
+          "tex": "D=\\{(\\mathrm{entity},\\mathrm{metric},\\mathrm{period},\\mathrm{value},t_{\\rm release})\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将原始文本转换为Token、计数、概率或结构化事件表示。",
+          "tex": "D=\\{(\\mathrm{entity},\\mathrm{metric},\\mathrm{period},\\mathrm{value},t_{\\rm release})\\}"
+        },
+        {
+          "explanation": "对来源、时间戳和下游预测目标施加约束，并在独立文本保留集检查表现。",
+          "tex": "D=\\{(\\mathrm{entity},\\mathrm{metric},\\mathrm{period},\\mathrm{value},t_{\\rm release})\\}"
+        }
+      ],
+      "code": "import re\ntext=\"Revenue: 123.4 million. Profit: 7.8 million.\"\nprint(re.findall(r\"(Revenue|Profit):\\s*([\\d.]+)\",text))",
+      "packages": "Python standard library (optional nltk for lemmatization)",
+      "application": "用于财报信息抽取、金融新闻情绪、研报语义检索和资产事件因子。",
+      "limits": "示例是语言处理基本运算或结构演示，非现成训练完毕的金融NLP模型。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n03-05",
+      "node_id": "nlp-n03-05",
+      "title": "事件抽取",
+      "definition": "事件抽取从新闻定位触发词与参与实体，生成结构化事件类型、时间和主体对象。",
+      "assumptions": "必须定义分词、语言、金融实体、文本来源和实际发布时间，不能把未来披露内容当成历史特征。",
+      "properties": [
+        "传统词法方法可解释且计算低廉，深度表示可捕捉更丰富上下文，但都需域内验证。",
+        "文本标签、时间对齐、实体歧义和新闻转载会实质影响策略统计结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心模型或数据关系",
+          "tex": "e=(\\mathrm{type},\\mathrm{trigger},\\mathrm{arguments},t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将原始文本转换为Token、计数、概率或结构化事件表示。",
+          "tex": "e=(\\mathrm{type},\\mathrm{trigger},\\mathrm{arguments},t)"
+        },
+        {
+          "explanation": "对来源、时间戳和下游预测目标施加约束，并在独立文本保留集检查表现。",
+          "tex": "e=(\\mathrm{type},\\mathrm{trigger},\\mathrm{arguments},t)"
+        }
+      ],
+      "code": "text=\"Company A announced a buyback on Friday\"\nprint({\"type\":\"buyback\",\"issuer\":\"Company A\",\"trigger\":\"announced\"})",
+      "packages": "Python standard library (optional nltk for lemmatization)",
+      "application": "用于财报信息抽取、金融新闻情绪、研报语义检索和资产事件因子。",
+      "limits": "示例是语言处理基本运算或结构演示，非现成训练完毕的金融NLP模型。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n04-05",
+      "node_id": "nlp-n04-05",
+      "title": "实体链接",
+      "definition": "实体链接把新闻中可能歧义的公司称谓映射到唯一证券实体，考虑时间变化和多市场代码。",
+      "assumptions": "必须定义分词、语言、金融实体、文本来源和实际发布时间，不能把未来披露内容当成历史特征。",
+      "properties": [
+        "传统词法方法可解释且计算低廉，深度表示可捕捉更丰富上下文，但都需域内验证。",
+        "文本标签、时间对齐、实体歧义和新闻转载会实质影响策略统计结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心模型或数据关系",
+          "tex": "\\hat e=\\arg\\max_{e\\in\\mathcal E}P(e|\\mathrm{mention},\\mathrm{context})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将原始文本转换为Token、计数、概率或结构化事件表示。",
+          "tex": "\\hat e=\\arg\\max_{e\\in\\mathcal E}P(e|\\mathrm{mention},\\mathrm{context})"
+        },
+        {
+          "explanation": "对来源、时间戳和下游预测目标施加约束，并在独立文本保留集检查表现。",
+          "tex": "\\hat e=\\arg\\max_{e\\in\\mathcal E}P(e|\\mathrm{mention},\\mathrm{context})"
+        }
+      ],
+      "code": "aliases={\"Apple\":\"AAPL\",\"Microsoft\":\"MSFT\"}\nprint(aliases.get(\"Apple\"))",
+      "packages": "Python standard library (optional nltk for lemmatization)",
+      "application": "用于财报信息抽取、金融新闻情绪、研报语义检索和资产事件因子。",
+      "limits": "示例是语言处理基本运算或结构演示，非现成训练完毕的金融NLP模型。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n05-05",
+      "node_id": "nlp-n05-05",
+      "title": "新闻去重",
+      "definition": "新闻去重识别转载和近重复文本，防止同一事件被重复计数而夸大舆情热度。",
+      "assumptions": "必须定义分词、语言、金融实体、文本来源和实际发布时间，不能把未来披露内容当成历史特征。",
+      "properties": [
+        "传统词法方法可解释且计算低廉，深度表示可捕捉更丰富上下文，但都需域内验证。",
+        "文本标签、时间对齐、实体歧义和新闻转载会实质影响策略统计结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心模型或数据关系",
+          "tex": "J(A,B)=|A\\cap B|/|A\\cup B|"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将原始文本转换为Token、计数、概率或结构化事件表示。",
+          "tex": "J(A,B)=|A\\cap B|/|A\\cup B|"
+        },
+        {
+          "explanation": "对来源、时间戳和下游预测目标施加约束，并在独立文本保留集检查表现。",
+          "tex": "J(A,B)=|A\\cap B|/|A\\cup B|"
+        }
+      ],
+      "code": "a=set(\"ETF fund inflows rise\".split());b=set(\"ETF fund inflows increase\".split())\nprint(len(a&b)/len(a|b))",
+      "packages": "Python standard library (optional nltk for lemmatization)",
+      "application": "用于财报信息抽取、金融新闻情绪、研报语义检索和资产事件因子。",
+      "limits": "示例是语言处理基本运算或结构演示，非现成训练完毕的金融NLP模型。",
+      "coverage": "complete"
+    }
+  ]
+}
