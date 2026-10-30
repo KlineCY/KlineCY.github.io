@@ -1,0 +1,741 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "trees-n04-01",
+      "node_id": "trees-n04-01",
+      "title": "回归树平方损失",
+      "definition": "叶节点预测样本均值，最优切分降低两侧残差平方和。",
+      "assumptions": "模型拟合和分裂阈值只能使用当前训练期数据；验证集需保留严格时序。",
+      "properties": [
+        "树模型具有分段非线性表达能力，但高容量和噪声标签会造成过拟合。",
+        "节点划分与特征重要性不是因果识别，必须通过样本外评价。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "SSE=\\sum_{i\\in L}(y_i-\\bar y_L)^2+\\sum_{i\\in R}(y_i-\\bar y_R)^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据分裂损失、增强目标或相似性规则定义局部候选模型。",
+          "tex": "SSE=\\sum_{i\\in L}(y_i-\\bar y_L)^2+\\sum_{i\\in R}(y_i-\\bar y_R)^2"
+        },
+        {
+          "explanation": "对多个树或候选超参数比较训练损失和保留验证误差，区分训练拟合与泛化。",
+          "tex": "SSE=\\sum_{i\\in L}(y_i-\\bar y_L)^2+\\sum_{i\\in R}(y_i-\\bar y_R)^2"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.tree import DecisionTreeRegressor\nrng=np.random.default_rng(0)\nX=rng.normal(size=(70,2))\ny=X[:,0]*X[:,1]+rng.normal(0,.1,70)\nm=DecisionTreeRegressor(max_depth=3,random_state=0).fit(X[:50],y[:50])\nprint(\"Holdout R2:\",m.score(X[50:],y[50:]))",
+      "packages": "numpy, scikit-learn",
+      "application": "量化因子非线性组合、风险事件预测和交易成本后的策略评价。",
+      "limits": "代码为核心算法或API的最小演示，不代表完整金融回测结果。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n05-01",
+      "node_id": "trees-n05-01",
+      "title": "剪枝",
+      "definition": "复杂度惩罚按叶子数量控制树深，减少过拟合。",
+      "assumptions": "模型拟合和分裂阈值只能使用当前训练期数据；验证集需保留严格时序。",
+      "properties": [
+        "树模型具有分段非线性表达能力，但高容量和噪声标签会造成过拟合。",
+        "节点划分与特征重要性不是因果识别，必须通过样本外评价。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "R_\\alpha(T)=R(T)+\\alpha|T|"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据分裂损失、增强目标或相似性规则定义局部候选模型。",
+          "tex": "R_\\alpha(T)=R(T)+\\alpha|T|"
+        },
+        {
+          "explanation": "对多个树或候选超参数比较训练损失和保留验证误差，区分训练拟合与泛化。",
+          "tex": "R_\\alpha(T)=R(T)+\\alpha|T|"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.tree import DecisionTreeRegressor\nrng=np.random.default_rng(0)\nX=rng.normal(size=(70,2))\ny=X[:,0]*X[:,1]+rng.normal(0,.1,70)\nm=DecisionTreeRegressor(max_depth=3,random_state=0).fit(X[:50],y[:50])\nprint(\"Holdout R2:\",m.score(X[50:],y[50:]))",
+      "packages": "numpy, scikit-learn",
+      "application": "量化因子非线性组合、风险事件预测和交易成本后的策略评价。",
+      "limits": "代码为核心算法或API的最小演示，不代表完整金融回测结果。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n06-01",
+      "node_id": "trees-n06-01",
+      "title": "类别与缺失值分裂",
+      "definition": "按类别集合划分，缺失值可显式设置默认方向或让模型学习路由。",
+      "assumptions": "模型拟合和分裂阈值只能使用当前训练期数据；验证集需保留严格时序。",
+      "properties": [
+        "树模型具有分段非线性表达能力，但高容量和噪声标签会造成过拟合。",
+        "节点划分与特征重要性不是因果识别，必须通过样本外评价。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "L=\\{i:x_{ij}\\in S\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据分裂损失、增强目标或相似性规则定义局部候选模型。",
+          "tex": "L=\\{i:x_{ij}\\in S\\}"
+        },
+        {
+          "explanation": "对多个树或候选超参数比较训练损失和保留验证误差，区分训练拟合与泛化。",
+          "tex": "L=\\{i:x_{ij}\\in S\\}"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.tree import DecisionTreeRegressor\nrng=np.random.default_rng(0)\nX=rng.normal(size=(70,2))\ny=X[:,0]*X[:,1]+rng.normal(0,.1,70)\nm=DecisionTreeRegressor(max_depth=3,random_state=0).fit(X[:50],y[:50])\nprint(\"Holdout R2:\",m.score(X[50:],y[50:]))",
+      "packages": "numpy, scikit-learn",
+      "application": "量化因子非线性组合、风险事件预测和交易成本后的策略评价。",
+      "limits": "代码为核心算法或API的最小演示，不代表完整金融回测结果。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n01-02",
+      "node_id": "trees-n01-02",
+      "title": "Bootstrap抽样",
+      "definition": "有放回随机抽取原样本形成树训练子集。",
+      "assumptions": "模型拟合和分裂阈值只能使用当前训练期数据；验证集需保留严格时序。",
+      "properties": [
+        "树模型具有分段非线性表达能力，但高容量和噪声标签会造成过拟合。",
+        "节点划分与特征重要性不是因果识别，必须通过样本外评价。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "D^*=\\{z_{i_1},\\ldots,z_{i_n}\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据分裂损失、增强目标或相似性规则定义局部候选模型。",
+          "tex": "D^*=\\{z_{i_1},\\ldots,z_{i_n}\\}"
+        },
+        {
+          "explanation": "对多个树或候选超参数比较训练损失和保留验证误差，区分训练拟合与泛化。",
+          "tex": "D^*=\\{z_{i_1},\\ldots,z_{i_n}\\}"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);x=np.arange(10)\nprint(rng.choice(x,size=len(x),replace=True))",
+      "packages": "numpy, scikit-learn",
+      "application": "量化因子非线性组合、风险事件预测和交易成本后的策略评价。",
+      "limits": "代码为核心算法或API的最小演示，不代表完整金融回测结果。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n02-02",
+      "node_id": "trees-n02-02",
+      "title": "Bagging",
+      "definition": "多棵在重采样数据上拟合的树取平均，降低单树方差。",
+      "assumptions": "模型拟合和分裂阈值只能使用当前训练期数据；验证集需保留严格时序。",
+      "properties": [
+        "树模型具有分段非线性表达能力，但高容量和噪声标签会造成过拟合。",
+        "节点划分与特征重要性不是因果识别，必须通过样本外评价。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "\\hat f=B^{-1}\\sum_{b=1}^BT_b"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据分裂损失、增强目标或相似性规则定义局部候选模型。",
+          "tex": "\\hat f=B^{-1}\\sum_{b=1}^BT_b"
+        },
+        {
+          "explanation": "对多个树或候选超参数比较训练损失和保留验证误差，区分训练拟合与泛化。",
+          "tex": "\\hat f=B^{-1}\\sum_{b=1}^BT_b"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.tree import DecisionTreeRegressor\nrng=np.random.default_rng(0)\nX=rng.normal(size=(70,2))\ny=X[:,0]*X[:,1]+rng.normal(0,.1,70)\nm=DecisionTreeRegressor(max_depth=3,random_state=0).fit(X[:50],y[:50])\nprint(\"Holdout R2:\",m.score(X[50:],y[50:]))",
+      "packages": "numpy, scikit-learn",
+      "application": "量化因子非线性组合、风险事件预测和交易成本后的策略评价。",
+      "limits": "代码为核心算法或API的最小演示，不代表完整金融回测结果。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n05-02",
+      "node_id": "trees-n05-02",
+      "title": "ExtraTrees",
+      "definition": "极随机树在候选特征上随机提出阈值，提高模型多样性。",
+      "assumptions": "模型拟合和分裂阈值只能使用当前训练期数据；验证集需保留严格时序。",
+      "properties": [
+        "树模型具有分段非线性表达能力，但高容量和噪声标签会造成过拟合。",
+        "节点划分与特征重要性不是因果识别，必须通过样本外评价。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "T_b=\\operatorname{Tree}(D,\\operatorname{RandomThresholds})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据分裂损失、增强目标或相似性规则定义局部候选模型。",
+          "tex": "T_b=\\operatorname{Tree}(D,\\operatorname{RandomThresholds})"
+        },
+        {
+          "explanation": "对多个树或候选超参数比较训练损失和保留验证误差，区分训练拟合与泛化。",
+          "tex": "T_b=\\operatorname{Tree}(D,\\operatorname{RandomThresholds})"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.tree import DecisionTreeRegressor\nrng=np.random.default_rng(0)\nX=rng.normal(size=(70,2))\ny=X[:,0]*X[:,1]+rng.normal(0,.1,70)\nm=DecisionTreeRegressor(max_depth=3,random_state=0).fit(X[:50],y[:50])\nprint(\"Holdout R2:\",m.score(X[50:],y[50:]))",
+      "packages": "numpy, scikit-learn",
+      "application": "量化因子非线性组合、风险事件预测和交易成本后的策略评价。",
+      "limits": "代码为核心算法或API的最小演示，不代表完整金融回测结果。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n06-02",
+      "node_id": "trees-n06-02",
+      "title": "Permutation Importance",
+      "definition": "扰乱一个特征后测量验证损失的增加量。",
+      "assumptions": "模型拟合和分裂阈值只能使用当前训练期数据；验证集需保留严格时序。",
+      "properties": [
+        "树模型具有分段非线性表达能力，但高容量和噪声标签会造成过拟合。",
+        "节点划分与特征重要性不是因果识别，必须通过样本外评价。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "I_j=L(X^{\\pi(j)},y)-L(X,y)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据分裂损失、增强目标或相似性规则定义局部候选模型。",
+          "tex": "I_j=L(X^{\\pi(j)},y)-L(X,y)"
+        },
+        {
+          "explanation": "对多个树或候选超参数比较训练损失和保留验证误差，区分训练拟合与泛化。",
+          "tex": "I_j=L(X^{\\pi(j)},y)-L(X,y)"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.inspection import permutation_importance\nfrom sklearn.ensemble import RandomForestRegressor\nX=np.random.default_rng(0).normal(size=(80,2));y=X[:,0]\nm=RandomForestRegressor(n_estimators=20,random_state=0).fit(X[:50],y[:50])\nprint(permutation_importance(m,X[50:],y[50:],n_repeats=3,random_state=0).importances_mean)",
+      "packages": "numpy, scikit-learn",
+      "application": "量化因子非线性组合、风险事件预测和交易成本后的策略评价。",
+      "limits": "代码为核心算法或API的最小演示，不代表完整金融回测结果。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n03-03",
+      "node_id": "trees-n03-03",
+      "title": "残差拟合",
+      "definition": "平方损失梯度提升逐轮拟合当前残差。",
+      "assumptions": "模型拟合和分裂阈值只能使用当前训练期数据；验证集需保留严格时序。",
+      "properties": [
+        "树模型具有分段非线性表达能力，但高容量和噪声标签会造成过拟合。",
+        "节点划分与特征重要性不是因果识别，必须通过样本外评价。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "r_i=y_i-F_{m-1}(x_i)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据分裂损失、增强目标或相似性规则定义局部候选模型。",
+          "tex": "r_i=y_i-F_{m-1}(x_i)"
+        },
+        {
+          "explanation": "对多个树或候选超参数比较训练损失和保留验证误差，区分训练拟合与泛化。",
+          "tex": "r_i=y_i-F_{m-1}(x_i)"
+        }
+      ],
+      "code": "import numpy as np\ny=np.array([1.,2.,3.]);pred=np.array([.7,1.6,2.1])\nprint(\"Pseudo-residual:\",y-pred)",
+      "packages": "numpy, scikit-learn",
+      "application": "量化因子非线性组合、风险事件预测和交易成本后的策略评价。",
+      "limits": "代码为核心算法或API的最小演示，不代表完整金融回测结果。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n04-03",
+      "node_id": "trees-n04-03",
+      "title": "LightGBM",
+      "definition": "LightGBM通过直方图分箱与按叶优先生长加速梯度提升树。",
+      "assumptions": "模型拟合和分裂阈值只能使用当前训练期数据；验证集需保留严格时序。",
+      "properties": [
+        "树模型具有分段非线性表达能力，但高容量和噪声标签会造成过拟合。",
+        "节点划分与特征重要性不是因果识别，必须通过样本外评价。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "F_m=F_{m-1}+\\eta h_m"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据分裂损失、增强目标或相似性规则定义局部候选模型。",
+          "tex": "F_m=F_{m-1}+\\eta h_m"
+        },
+        {
+          "explanation": "对多个树或候选超参数比较训练损失和保留验证误差，区分训练拟合与泛化。",
+          "tex": "F_m=F_{m-1}+\\eta h_m"
+        }
+      ],
+      "code": "import importlib.util\nprint(\"LightGBM library installed:\",importlib.util.find_spec(\"lightgbm\") is not None)\n# Install the package before fitting its specific estimator",
+      "packages": "numpy, scikit-learn",
+      "application": "量化因子非线性组合、风险事件预测和交易成本后的策略评价。",
+      "limits": "代码为核心算法或API的最小演示，不代表完整金融回测结果。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n05-03",
+      "node_id": "trees-n05-03",
+      "title": "XGBoost",
+      "definition": "XGBoost使用一二阶损失展开与正则化评估分裂和叶值。",
+      "assumptions": "模型拟合和分裂阈值只能使用当前训练期数据；验证集需保留严格时序。",
+      "properties": [
+        "树模型具有分段非线性表达能力，但高容量和噪声标签会造成过拟合。",
+        "节点划分与特征重要性不是因果识别，必须通过样本外评价。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "\\tilde L=\\sum_i(g_if_i+\\tfrac12h_if_i^2)+\\Omega(f)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据分裂损失、增强目标或相似性规则定义局部候选模型。",
+          "tex": "\\tilde L=\\sum_i(g_if_i+\\tfrac12h_if_i^2)+\\Omega(f)"
+        },
+        {
+          "explanation": "对多个树或候选超参数比较训练损失和保留验证误差，区分训练拟合与泛化。",
+          "tex": "\\tilde L=\\sum_i(g_if_i+\\tfrac12h_if_i^2)+\\Omega(f)"
+        }
+      ],
+      "code": "import importlib.util\nprint(\"XGBoost library installed:\",importlib.util.find_spec(\"xgboost\") is not None)\n# Install the package before fitting its specific estimator",
+      "packages": "numpy, scikit-learn",
+      "application": "量化因子非线性组合、风险事件预测和交易成本后的策略评价。",
+      "limits": "代码为核心算法或API的最小演示，不代表完整金融回测结果。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n06-03",
+      "node_id": "trees-n06-03",
+      "title": "CatBoost",
+      "definition": "CatBoost针对类别特征设计顺序目标统计和对称树以控制目标泄漏。",
+      "assumptions": "模型拟合和分裂阈值只能使用当前训练期数据；验证集需保留严格时序。",
+      "properties": [
+        "树模型具有分段非线性表达能力，但高容量和噪声标签会造成过拟合。",
+        "节点划分与特征重要性不是因果识别，必须通过样本外评价。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "\\mathrm{CTR}(c)=\\frac{n_{c,+}+\\alpha p_0}{n_c+\\alpha}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据分裂损失、增强目标或相似性规则定义局部候选模型。",
+          "tex": "\\mathrm{CTR}(c)=\\frac{n_{c,+}+\\alpha p_0}{n_c+\\alpha}"
+        },
+        {
+          "explanation": "对多个树或候选超参数比较训练损失和保留验证误差，区分训练拟合与泛化。",
+          "tex": "\\mathrm{CTR}(c)=\\frac{n_{c,+}+\\alpha p_0}{n_c+\\alpha}"
+        }
+      ],
+      "code": "import importlib.util\nprint(\"CatBoost library installed:\",importlib.util.find_spec(\"catboost\") is not None)\n# Install the package before fitting its specific estimator",
+      "packages": "numpy, scikit-learn",
+      "application": "量化因子非线性组合、风险事件预测和交易成本后的策略评价。",
+      "limits": "代码为核心算法或API的最小演示，不代表完整金融回测结果。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n01-04",
+      "node_id": "trees-n01-04",
+      "title": "树深与叶节点",
+      "definition": "树深决定可能的最大叶节点数量，影响模型容量。",
+      "assumptions": "模型拟合和分裂阈值只能使用当前训练期数据；验证集需保留严格时序。",
+      "properties": [
+        "树模型具有分段非线性表达能力，但高容量和噪声标签会造成过拟合。",
+        "节点划分与特征重要性不是因果识别，必须通过样本外评价。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "|\\mathrm{leaves}|\\le2^{d}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据分裂损失、增强目标或相似性规则定义局部候选模型。",
+          "tex": "|\\mathrm{leaves}|\\le2^{d}"
+        },
+        {
+          "explanation": "对多个树或候选超参数比较训练损失和保留验证误差，区分训练拟合与泛化。",
+          "tex": "|\\mathrm{leaves}|\\le2^{d}"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.tree import DecisionTreeRegressor\nrng=np.random.default_rng(0)\nX=rng.normal(size=(70,2))\ny=X[:,0]*X[:,1]+rng.normal(0,.1,70)\nm=DecisionTreeRegressor(max_depth=3,random_state=0).fit(X[:50],y[:50])\nprint(\"Holdout R2:\",m.score(X[50:],y[50:]))",
+      "packages": "numpy, scikit-learn",
+      "application": "量化因子非线性组合、风险事件预测和交易成本后的策略评价。",
+      "limits": "代码为核心算法或API的最小演示，不代表完整金融回测结果。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n02-04",
+      "node_id": "trees-n02-04",
+      "title": "学习率与基学习器数",
+      "definition": "Boosting迭代次数和学习率共同决定弱学习器的总贡献。",
+      "assumptions": "模型拟合和分裂阈值只能使用当前训练期数据；验证集需保留严格时序。",
+      "properties": [
+        "树模型具有分段非线性表达能力，但高容量和噪声标签会造成过拟合。",
+        "节点划分与特征重要性不是因果识别，必须通过样本外评价。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "F_M=F_0+\\eta\\sum_{m=1}^Mh_m"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据分裂损失、增强目标或相似性规则定义局部候选模型。",
+          "tex": "F_M=F_0+\\eta\\sum_{m=1}^Mh_m"
+        },
+        {
+          "explanation": "对多个树或候选超参数比较训练损失和保留验证误差，区分训练拟合与泛化。",
+          "tex": "F_M=F_0+\\eta\\sum_{m=1}^Mh_m"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.tree import DecisionTreeRegressor\nrng=np.random.default_rng(0)\nX=rng.normal(size=(70,2))\ny=X[:,0]*X[:,1]+rng.normal(0,.1,70)\nm=DecisionTreeRegressor(max_depth=3,random_state=0).fit(X[:50],y[:50])\nprint(\"Holdout R2:\",m.score(X[50:],y[50:]))",
+      "packages": "numpy, scikit-learn",
+      "application": "量化因子非线性组合、风险事件预测和交易成本后的策略评价。",
+      "limits": "代码为核心算法或API的最小演示，不代表完整金融回测结果。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n03-04",
+      "node_id": "trees-n03-04",
+      "title": "样本与特征抽样",
+      "definition": "对训练行、特征列分别抽样降低集成成员相关性。",
+      "assumptions": "模型拟合和分裂阈值只能使用当前训练期数据；验证集需保留严格时序。",
+      "properties": [
+        "树模型具有分段非线性表达能力，但高容量和噪声标签会造成过拟合。",
+        "节点划分与特征重要性不是因果识别，必须通过样本外评价。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "D_b\\subseteq D,\\quad S_b\\subseteq\\{1,\\ldots,p\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据分裂损失、增强目标或相似性规则定义局部候选模型。",
+          "tex": "D_b\\subseteq D,\\quad S_b\\subseteq\\{1,\\ldots,p\\}"
+        },
+        {
+          "explanation": "对多个树或候选超参数比较训练损失和保留验证误差，区分训练拟合与泛化。",
+          "tex": "D_b\\subseteq D,\\quad S_b\\subseteq\\{1,\\ldots,p\\}"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);X=rng.normal(size=(20,6))\nprint(X[rng.choice(20,10,replace=False)][:,rng.choice(6,3,replace=False)].shape)",
+      "packages": "numpy, scikit-learn",
+      "application": "量化因子非线性组合、风险事件预测和交易成本后的策略评价。",
+      "limits": "代码为核心算法或API的最小演示，不代表完整金融回测结果。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n04-04",
+      "node_id": "trees-n04-04",
+      "title": "早停",
+      "definition": "按验证误差在追加新学习器时停止训练。",
+      "assumptions": "模型拟合和分裂阈值只能使用当前训练期数据；验证集需保留严格时序。",
+      "properties": [
+        "树模型具有分段非线性表达能力，但高容量和噪声标签会造成过拟合。",
+        "节点划分与特征重要性不是因果识别，必须通过样本外评价。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "m^*=\\arg\\min_m L_{\\rm validation}(F_m)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据分裂损失、增强目标或相似性规则定义局部候选模型。",
+          "tex": "m^*=\\arg\\min_m L_{\\rm validation}(F_m)"
+        },
+        {
+          "explanation": "对多个树或候选超参数比较训练损失和保留验证误差，区分训练拟合与泛化。",
+          "tex": "m^*=\\arg\\min_m L_{\\rm validation}(F_m)"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.tree import DecisionTreeRegressor\nrng=np.random.default_rng(0)\nX=rng.normal(size=(70,2))\ny=X[:,0]*X[:,1]+rng.normal(0,.1,70)\nm=DecisionTreeRegressor(max_depth=3,random_state=0).fit(X[:50],y[:50])\nprint(\"Holdout R2:\",m.score(X[50:],y[50:]))",
+      "packages": "numpy, scikit-learn",
+      "application": "量化因子非线性组合、风险事件预测和交易成本后的策略评价。",
+      "limits": "代码为核心算法或API的最小演示，不代表完整金融回测结果。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n05-04",
+      "node_id": "trees-n05-04",
+      "title": "类别不平衡",
+      "definition": "按类别频率或成本加权损失以避免多数类支配训练。",
+      "assumptions": "模型拟合和分裂阈值只能使用当前训练期数据；验证集需保留严格时序。",
+      "properties": [
+        "树模型具有分段非线性表达能力，但高容量和噪声标签会造成过拟合。",
+        "节点划分与特征重要性不是因果识别，必须通过样本外评价。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "L=\\sum_iw_{y_i}\\ell_i"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据分裂损失、增强目标或相似性规则定义局部候选模型。",
+          "tex": "L=\\sum_iw_{y_i}\\ell_i"
+        },
+        {
+          "explanation": "对多个树或候选超参数比较训练损失和保留验证误差，区分训练拟合与泛化。",
+          "tex": "L=\\sum_iw_{y_i}\\ell_i"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.tree import DecisionTreeRegressor\nrng=np.random.default_rng(0)\nX=rng.normal(size=(70,2))\ny=X[:,0]*X[:,1]+rng.normal(0,.1,70)\nm=DecisionTreeRegressor(max_depth=3,random_state=0).fit(X[:50],y[:50])\nprint(\"Holdout R2:\",m.score(X[50:],y[50:]))",
+      "packages": "numpy, scikit-learn",
+      "application": "量化因子非线性组合、风险事件预测和交易成本后的策略评价。",
+      "limits": "代码为核心算法或API的最小演示，不代表完整金融回测结果。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n06-04",
+      "node_id": "trees-n06-04",
+      "title": "模型校准",
+      "definition": "树预测概率可由保留数据上的Sigmoid或单调变换校准。",
+      "assumptions": "模型拟合和分裂阈值只能使用当前训练期数据；验证集需保留严格时序。",
+      "properties": [
+        "树模型具有分段非线性表达能力，但高容量和噪声标签会造成过拟合。",
+        "节点划分与特征重要性不是因果识别，必须通过样本外评价。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "P(Y=1\\mid\\hat p=p)\\approx p"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据分裂损失、增强目标或相似性规则定义局部候选模型。",
+          "tex": "P(Y=1\\mid\\hat p=p)\\approx p"
+        },
+        {
+          "explanation": "对多个树或候选超参数比较训练损失和保留验证误差，区分训练拟合与泛化。",
+          "tex": "P(Y=1\\mid\\hat p=p)\\approx p"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.calibration import CalibratedClassifierCV\nfrom sklearn.ensemble import RandomForestClassifier\nX=np.random.default_rng(0).normal(size=(70,2));y=(X[:,0]>0).astype(int)\nprint(CalibratedClassifierCV(RandomForestClassifier(n_estimators=15,random_state=0),cv=3).fit(X,y).predict_proba(X[:2]))",
+      "packages": "numpy, scikit-learn",
+      "application": "量化因子非线性组合、风险事件预测和交易成本后的策略评价。",
+      "limits": "代码为核心算法或API的最小演示，不代表完整金融回测结果。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n01-05",
+      "node_id": "trees-n01-05",
+      "title": "非线性因子组合",
+      "definition": "树以分段区域规则表达动量与波动等因子的非线性作用。",
+      "assumptions": "模型拟合和分裂阈值只能使用当前训练期数据；验证集需保留严格时序。",
+      "properties": [
+        "树模型具有分段非线性表达能力，但高容量和噪声标签会造成过拟合。",
+        "节点划分与特征重要性不是因果识别，必须通过样本外评价。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "f(x)=\\sum_l v_l\\mathbf1[x\\in R_l]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据分裂损失、增强目标或相似性规则定义局部候选模型。",
+          "tex": "f(x)=\\sum_l v_l\\mathbf1[x\\in R_l]"
+        },
+        {
+          "explanation": "对多个树或候选超参数比较训练损失和保留验证误差，区分训练拟合与泛化。",
+          "tex": "f(x)=\\sum_l v_l\\mathbf1[x\\in R_l]"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.tree import DecisionTreeRegressor\nrng=np.random.default_rng(0)\nX=rng.normal(size=(70,2))\ny=X[:,0]*X[:,1]+rng.normal(0,.1,70)\nm=DecisionTreeRegressor(max_depth=3,random_state=0).fit(X[:50],y[:50])\nprint(\"Holdout R2:\",m.score(X[50:],y[50:]))",
+      "packages": "numpy, scikit-learn",
+      "application": "量化因子非线性组合、风险事件预测和交易成本后的策略评价。",
+      "limits": "代码为核心算法或API的最小演示，不代表完整金融回测结果。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n02-05",
+      "node_id": "trees-n02-05",
+      "title": "因子交互",
+      "definition": "树的多层切分产生条件于另一变量的因子效应。",
+      "assumptions": "模型拟合和分裂阈值只能使用当前训练期数据；验证集需保留严格时序。",
+      "properties": [
+        "树模型具有分段非线性表达能力，但高容量和噪声标签会造成过拟合。",
+        "节点划分与特征重要性不是因果识别，必须通过样本外评价。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "f(x_1,x_2)\\ne f_1(x_1)+f_2(x_2)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据分裂损失、增强目标或相似性规则定义局部候选模型。",
+          "tex": "f(x_1,x_2)\\ne f_1(x_1)+f_2(x_2)"
+        },
+        {
+          "explanation": "对多个树或候选超参数比较训练损失和保留验证误差，区分训练拟合与泛化。",
+          "tex": "f(x_1,x_2)\\ne f_1(x_1)+f_2(x_2)"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([[1.,2.],[2.,3.]])\nprint(\"Pairwise product:\",x[:,0]*x[:,1])",
+      "packages": "numpy, scikit-learn",
+      "application": "量化因子非线性组合、风险事件预测和交易成本后的策略评价。",
+      "limits": "代码为核心算法或API的最小演示，不代表完整金融回测结果。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n03-05",
+      "node_id": "trees-n03-05",
+      "title": "按时间滚动训练",
+      "definition": "每个预测时点仅用之前的固定历史窗口重新拟合。",
+      "assumptions": "模型拟合和分裂阈值只能使用当前训练期数据；验证集需保留严格时序。",
+      "properties": [
+        "树模型具有分段非线性表达能力，但高容量和噪声标签会造成过拟合。",
+        "节点划分与特征重要性不是因果识别，必须通过样本外评价。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "\\hat f_t=\\operatorname{Fit}(D_{t-W:t-1})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据分裂损失、增强目标或相似性规则定义局部候选模型。",
+          "tex": "\\hat f_t=\\operatorname{Fit}(D_{t-W:t-1})"
+        },
+        {
+          "explanation": "对多个树或候选超参数比较训练损失和保留验证误差，区分训练拟合与泛化。",
+          "tex": "\\hat f_t=\\operatorname{Fit}(D_{t-W:t-1})"
+        }
+      ],
+      "code": "from sklearn.model_selection import TimeSeriesSplit\nimport numpy as np\nfor tr,te in TimeSeriesSplit(3).split(np.arange(30)):\n    print(tr[-1],te[0])",
+      "packages": "numpy, scikit-learn",
+      "application": "量化因子非线性组合、风险事件预测和交易成本后的策略评价。",
+      "limits": "代码为核心算法或API的最小演示，不代表完整金融回测结果。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n04-05",
+      "node_id": "trees-n04-05",
+      "title": "SHAP解释",
+      "definition": "按Shapley公平分配规则估计模型特征的相对基线贡献。",
+      "assumptions": "模型拟合和分裂阈值只能使用当前训练期数据；验证集需保留严格时序。",
+      "properties": [
+        "树模型具有分段非线性表达能力，但高容量和噪声标签会造成过拟合。",
+        "节点划分与特征重要性不是因果识别，必须通过样本外评价。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "f(x)=\\phi_0+\\sum_j\\phi_j"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据分裂损失、增强目标或相似性规则定义局部候选模型。",
+          "tex": "f(x)=\\phi_0+\\sum_j\\phi_j"
+        },
+        {
+          "explanation": "对多个树或候选超参数比较训练损失和保留验证误差，区分训练拟合与泛化。",
+          "tex": "f(x)=\\phi_0+\\sum_j\\phi_j"
+        }
+      ],
+      "code": "import numpy as np\ncoeff=np.array([.3,-.2]);x=np.array([2.,3.])\nprint(\"Exact linear additive contributions:\",coeff*x)",
+      "packages": "numpy, scikit-learn",
+      "application": "量化因子非线性组合、风险事件预测和交易成本后的策略评价。",
+      "limits": "代码为核心算法或API的最小演示，不代表完整金融回测结果。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n05-05",
+      "node_id": "trees-n05-05",
+      "title": "单调约束",
+      "definition": "要求某特征上升时预测值不得下降或不得上升。",
+      "assumptions": "模型拟合和分裂阈值只能使用当前训练期数据；验证集需保留严格时序。",
+      "properties": [
+        "树模型具有分段非线性表达能力，但高容量和噪声标签会造成过拟合。",
+        "节点划分与特征重要性不是因果识别，必须通过样本外评价。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "x_j\\le x'_j\\Rightarrow f(x)\\le f(x')"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据分裂损失、增强目标或相似性规则定义局部候选模型。",
+          "tex": "x_j\\le x'_j\\Rightarrow f(x)\\le f(x')"
+        },
+        {
+          "explanation": "对多个树或候选超参数比较训练损失和保留验证误差，区分训练拟合与泛化。",
+          "tex": "x_j\\le x'_j\\Rightarrow f(x)\\le f(x')"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.tree import DecisionTreeRegressor\nrng=np.random.default_rng(0)\nX=rng.normal(size=(70,2))\ny=X[:,0]*X[:,1]+rng.normal(0,.1,70)\nm=DecisionTreeRegressor(max_depth=3,random_state=0).fit(X[:50],y[:50])\nprint(\"Holdout R2:\",m.score(X[50:],y[50:]))",
+      "packages": "numpy, scikit-learn",
+      "application": "量化因子非线性组合、风险事件预测和交易成本后的策略评价。",
+      "limits": "代码为核心算法或API的最小演示，不代表完整金融回测结果。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n06-05",
+      "node_id": "trees-n06-05",
+      "title": "交易成本后的收益检验",
+      "definition": "仓位回报减去换手引起的交易摩擦才得到可比较的净收益。",
+      "assumptions": "模型拟合和分裂阈值只能使用当前训练期数据；验证集需保留严格时序。",
+      "properties": [
+        "树模型具有分段非线性表达能力，但高容量和噪声标签会造成过拟合。",
+        "节点划分与特征重要性不是因果识别，必须通过样本外评价。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学关系",
+          "tex": "r_t^{net}=w_{t-1}^\\top r_t-c\\|\\Delta w_t\\|_1"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据分裂损失、增强目标或相似性规则定义局部候选模型。",
+          "tex": "r_t^{net}=w_{t-1}^\\top r_t-c\\|\\Delta w_t\\|_1"
+        },
+        {
+          "explanation": "对多个树或候选超参数比较训练损失和保留验证误差，区分训练拟合与泛化。",
+          "tex": "r_t^{net}=w_{t-1}^\\top r_t-c\\|\\Delta w_t\\|_1"
+        }
+      ],
+      "code": "import numpy as np\nret=np.array([.01,-.02]);w=np.array([.6,.4]);old=np.array([.5,.5])\nprint(w@ret-.0005*np.abs(w-old).sum())",
+      "packages": "numpy, scikit-learn",
+      "application": "量化因子非线性组合、风险事件预测和交易成本后的策略评价。",
+      "limits": "代码为核心算法或API的最小演示，不代表完整金融回测结果。",
+      "coverage": "complete"
+    }
+  ]
+}
