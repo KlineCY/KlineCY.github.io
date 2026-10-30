@@ -1,0 +1,525 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "optimization-n03-01",
+      "node_id": "optimization-n03-01",
+      "title": "SGD",
+      "definition": "随机梯度下降使用样本小批量构成梯度估计，沿负梯度方向迭代优化参数。",
+      "assumptions": "所示代码使用合成或结构演示输入；需要独立训练/验证集，且输入标签时间可得性正确。",
+      "properties": [
+        "模型的参数、状态和张量维度必须与公式对应。",
+        "超参数需在独立验证数据上选择，研究结果须报告样本外误差和计算开销。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "\\theta_{t+1}=\\theta_t-\\eta_t\\frac1{|B_t|}\\sum_{i\\in B_t}\\nabla_\\theta\\ell_i(\\theta_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "用经验损失表示目标",
+          "tex": "L(\\theta)=n^{-1}\\sum_i\\ell_i(\\theta)"
+        },
+        {
+          "explanation": "均匀小批量梯度在相应采样条件下对全梯度无偏",
+          "tex": "E_{B_t}[g_t\\mid\\theta_t]=\\nabla L(\\theta_t)"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0)\nx=rng.normal(size=100); y=2*x+.1*rng.normal(size=100)\nw=0.\nfor epoch in range(40):\n    for ids in np.array_split(rng.permutation(100),20):\n        w-=.1*np.mean(2*x[ids]*(w*x[ids]-y[ids]))\nprint(\"Slope:\",w)",
+      "packages": "numpy",
+      "application": "收益回归和神经网络参数训练。",
+      "limits": "学习率过大可能发散；时间序列训练不能用测试期信息。",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n05-02",
+      "node_id": "optimization-n05-02",
+      "title": "Adam",
+      "definition": "Adam以指数移动平均追踪梯度一阶矩和平方梯度，使用偏差修正形成自适应更新。",
+      "assumptions": "所示代码使用合成或结构演示输入；需要独立训练/验证集，且输入标签时间可得性正确。",
+      "properties": [
+        "模型的参数、状态和张量维度必须与公式对应。",
+        "超参数需在独立验证数据上选择，研究结果须报告样本外误差和计算开销。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "m_t=\\beta_1m_{t-1}+(1-\\beta_1)g_t,\\ v_t=\\beta_2v_{t-1}+(1-\\beta_2)g_t^2,\\ \\theta_{t+1}=\\theta_t-\\eta\\frac{\\hat m_t}{\\sqrt{\\hat v_t}+\\epsilon}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "零初始动量有权重衰减偏差",
+          "tex": "E[m_t]\\approx(1-\\beta_1^t)E[g_t]"
+        },
+        {
+          "explanation": "用偏差修正",
+          "tex": "\\hat m_t=m_t/(1-\\beta_1^t),\\quad\\hat v_t=v_t/(1-\\beta_2^t)"
+        }
+      ],
+      "code": "import torch\nw=torch.nn.Parameter(torch.tensor(0.))\nopt=torch.optim.Adam([w],lr=.1)\nfor _ in range(100):\n    opt.zero_grad()\n    loss=(w-3)**2\n    loss.backward()\n    opt.step()\nprint(w.item())",
+      "packages": "torch",
+      "application": "金融CNN与文本模型训练的常用优化器。",
+      "limits": "需调学习率与权重衰减；Adam并不保证非凸全局最优。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n02-01",
+      "node_id": "deep-n02-01",
+      "title": "MLP多层感知机",
+      "definition": "前馈网络反复复合仿射变换与非线性激活，可近似复杂函数。",
+      "assumptions": "所示代码使用合成或结构演示输入；需要独立训练/验证集，且输入标签时间可得性正确。",
+      "properties": [
+        "模型的参数、状态和张量维度必须与公式对应。",
+        "超参数需在独立验证数据上选择，研究结果须报告样本外误差和计算开销。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "h^{(l)}=\\phi(W^{(l)}h^{(l-1)}+b^{(l)})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "第一层把输入映射到隐藏表示",
+          "tex": "h^{(1)}=\\phi(W^{(1)}x+b^{(1)})"
+        },
+        {
+          "explanation": "通过输出层和损失进行梯度训练",
+          "tex": "\\hat y=W^{(2)}h^{(1)}+b^{(2)}"
+        }
+      ],
+      "code": "import torch\ntorch.manual_seed(0)\nx=torch.linspace(-2,2,80).reshape(-1,1)\ny=x**2\nnet=torch.nn.Sequential(torch.nn.Linear(1,16),torch.nn.Tanh(),torch.nn.Linear(16,1))\nopt=torch.optim.Adam(net.parameters(),lr=.02)\nfor _ in range(120):\n    opt.zero_grad()\n    loss=torch.nn.functional.mse_loss(net(x),y)\n    loss.backward();opt.step()\nprint(\"MSE\",loss.item())",
+      "packages": "torch",
+      "application": "非线性因子交互与回报预测。",
+      "limits": "训练误差低不代表扣成本后的真实交易收益。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n03-02",
+      "node_id": "deep-n03-02",
+      "title": "反向传播Backpropagation",
+      "definition": "反向传播沿计算图逆序用链式法则计算损失相对全部参数的导数。",
+      "assumptions": "所示代码使用合成或结构演示输入；需要独立训练/验证集，且输入标签时间可得性正确。",
+      "properties": [
+        "模型的参数、状态和张量维度必须与公式对应。",
+        "超参数需在独立验证数据上选择，研究结果须报告样本外误差和计算开销。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "\\delta_l=(W_{l+1}^{\\top}\\delta_{l+1})\\odot\\phi'(z_l),\\quad\\nabla_{W_l}L=\\delta_l a_{l-1}^{\\top}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义隐藏单元",
+          "tex": "z_l=W_la_{l-1}+b_l,\\quad a_l=\\phi(z_l)"
+        },
+        {
+          "explanation": "反向传播损失对隐藏线性输入的梯度",
+          "tex": "\\delta_l=\\partial L/\\partial z_l"
+        },
+        {
+          "explanation": "由微分识别权重梯度",
+          "tex": "dL=\\delta_l^\\top(dW_l)a_{l-1}"
+        }
+      ],
+      "code": "import torch\nlayer=torch.nn.Linear(2,1,bias=False)\nx=torch.tensor([[1.,2.]])\nloss=(layer(x)-torch.tensor([[3.]])).square().mean()\nloss.backward()\nprint(\"Gradient:\",layer.weight.grad)",
+      "packages": "torch",
+      "application": "所有可微神经网络的参数优化核心。",
+      "limits": "in-place修改或detach可能中断梯度。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n01-04",
+      "node_id": "deep-n01-04",
+      "title": "批归一化BatchNorm",
+      "definition": "批归一化使用训练批次统计量归一化隐藏激活，并通过可学习的$gamma,\beta$恢复表达能力。",
+      "assumptions": "所示代码使用合成或结构演示输入；需要独立训练/验证集，且输入标签时间可得性正确。",
+      "properties": [
+        "模型的参数、状态和张量维度必须与公式对应。",
+        "超参数需在独立验证数据上选择，研究结果须报告样本外误差和计算开销。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "\\hat x=\\frac{x-\\mu_B}{\\sqrt{\\sigma_B^2+\\epsilon}},\\quad y=\\gamma\\hat x+\\beta"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "计算单批次均值和方差",
+          "tex": "\\mu_B=m^{-1}\\sum_i x_i,\\quad\\sigma_B^2=m^{-1}\\sum_i(x_i-\\mu_B)^2"
+        },
+        {
+          "explanation": "归一化后再缩放与平移",
+          "tex": "y_i=\\gamma(x_i-\\mu_B)/\\sqrt{\\sigma_B^2+\\epsilon}+\\beta"
+        }
+      ],
+      "code": "import torch\nlayer=torch.nn.BatchNorm1d(4)\nx=torch.randn(16,4)*5+3\nlayer.train();print(layer(x).mean(0))\nlayer.eval();print(layer(x).shape)",
+      "packages": "torch",
+      "application": "CNN视觉模型和稳定大批次训练。",
+      "limits": "小批次/非IID金融样本的统计可能不稳定；推理需使用正确状态。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n04-04",
+      "node_id": "deep-n04-04",
+      "title": "Dropout",
+      "definition": "训练中随机将隐藏单元置零并按保留概率反比缩放，以减轻部分特征共适应。",
+      "assumptions": "所示代码使用合成或结构演示输入；需要独立训练/验证集，且输入标签时间可得性正确。",
+      "properties": [
+        "模型的参数、状态和张量维度必须与公式对应。",
+        "超参数需在独立验证数据上选择，研究结果须报告样本外误差和计算开销。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "\\tilde h_j=\\frac{m_jh_j}{1-p},\\qquad m_j\\sim\\mathrm{Bernoulli}(1-p)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "随机掩码的均值",
+          "tex": "E[m_j]=1-p"
+        },
+        {
+          "explanation": "倒置缩放维持激活期望",
+          "tex": "E[\\tilde h_j]=h_j"
+        }
+      ],
+      "code": "import torch\nx=torch.ones(1000,4)\ndrop=torch.nn.Dropout(.4)\ndrop.train();print(drop(x).mean().item())\ndrop.eval();print(drop(x)[0])",
+      "packages": "torch",
+      "application": "小样本模型常见正则化手段。",
+      "limits": "高Dropout可能导致欠拟合；MC Dropout不自动保证概率校准。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n01-01",
+      "node_id": "architectures-n01-01",
+      "title": "一维卷积",
+      "definition": "一维卷积沿历史序列移动共享权重窗口，提取局部模式；深度学习框架通常实现互相关形式。",
+      "assumptions": "所示代码使用合成或结构演示输入；需要独立训练/验证集，且输入标签时间可得性正确。",
+      "properties": [
+        "模型的参数、状态和张量维度必须与公式对应。",
+        "超参数需在独立验证数据上选择，研究结果须报告样本外误差和计算开销。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "y_{c,t}=\\sum_{j=1}^{C_{\\rm in}}\\sum_{k=0}^{K-1}W_{cjk}x_{j,t+k}+b_c"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "每个时间位置取长度K窗口",
+          "tex": "(x_{t},\\ldots,x_{t+K-1})"
+        },
+        {
+          "explanation": "共享同一核得到多个时间位置输出",
+          "tex": "y_t=\\sum_kw_kx_{t+k}"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(8,5,60)\nconv=torch.nn.Conv1d(5,16,kernel_size=3)\nprint(conv(x).shape)",
+      "packages": "torch",
+      "application": "在ETF历史因子窗口上训练TCN或卷积特征提取器。",
+      "limits": "预测时只能使用历史窗口，需正确处理因果Padding。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n03-02",
+      "node_id": "architectures-n03-02",
+      "title": "LSTM",
+      "definition": "LSTM通过遗忘门、输入门和输出门调整细胞状态，使循环网络能维持较长信息依赖。",
+      "assumptions": "所示代码使用合成或结构演示输入；需要独立训练/验证集，且输入标签时间可得性正确。",
+      "properties": [
+        "模型的参数、状态和张量维度必须与公式对应。",
+        "超参数需在独立验证数据上选择，研究结果须报告样本外误差和计算开销。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "c_t=f_t\\odot c_{t-1}+i_t\\odot\\tilde c_t,\\quad h_t=o_t\\odot\\tanh(c_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "输入和前一隐藏状态共同决定各个门",
+          "tex": "i_t=\\sigma(W_ix_t+U_ih_{t-1}+b_i)"
+        },
+        {
+          "explanation": "以遗忘与输入门混合旧状态和候选状态",
+          "tex": "c_t=f_t\\odot c_{t-1}+i_t\\odot\\tilde c_t"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(8,30,5)\nm=torch.nn.LSTM(input_size=5,hidden_size=12,batch_first=True)\nout,(h,c)=m(x)\nprint(out.shape,h.shape,c.shape)",
+      "packages": "torch",
+      "application": "多资产波动率和序列状态预测。",
+      "limits": "非平稳收益信号复杂LSTM不一定优于简单基线。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n01-03",
+      "node_id": "architectures-n01-03",
+      "title": "Scaled Dot-Product Attention",
+      "definition": "缩放点积注意力使用Query和Key的相似度对Value进行加权，可建模不同位置间的依赖。",
+      "assumptions": "所示代码使用合成或结构演示输入；需要独立训练/验证集，且输入标签时间可得性正确。",
+      "properties": [
+        "模型的参数、状态和张量维度必须与公式对应。",
+        "超参数需在独立验证数据上选择，研究结果须报告样本外误差和计算开销。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "\\operatorname{Attn}(Q,K,V)=\\operatorname{softmax}\\!\\left(QK^\\top/\\sqrt{d_k}+M\\right)V"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "点积形成相似度",
+          "tex": "S=QK^\\top/\\sqrt{d_k}"
+        },
+        {
+          "explanation": "加入可选Mask并做Softmax",
+          "tex": "A_{ij}=e^{S_{ij}+M_{ij}}/\\sum_k e^{S_{ik}+M_{ik}}"
+        },
+        {
+          "explanation": "与V相乘得到位置表示",
+          "tex": "H=AV"
+        }
+      ],
+      "code": "import torch,math\ntorch.manual_seed(0)\nx=torch.randn(2,6,8)\ns=x@x.transpose(-1,-2)/math.sqrt(8)\nmask=torch.triu(torch.ones(6,6,dtype=torch.bool),diagonal=1)\na=s.masked_fill(mask,-float(\"inf\")).softmax(-1)\nprint((a@x).shape)",
+      "packages": "torch",
+      "application": "Transformer因子编码及金融新闻序列。",
+      "limits": "未来时点必须正确Masked以避免数据泄漏。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n01-02",
+      "node_id": "vision-n01-02",
+      "title": "LeNet",
+      "definition": "LeNet以卷积和池化提取图像局部特征，再通过全连接层分类，是研究CNN最直接的结构范式。",
+      "assumptions": "所示代码使用合成或结构演示输入；需要独立训练/验证集，且输入标签时间可得性正确。",
+      "properties": [
+        "模型的参数、状态和张量维度必须与公式对应。",
+        "超参数需在独立验证数据上选择，研究结果须报告样本外误差和计算开销。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "H_{\\rm out}=H_{\\rm in}-K_h+1,\\quad W_{\\rm out}=W_{\\rm in}-K_w+1"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "卷积产生多通道局部特征",
+          "tex": "h_1=\\operatorname{ReLU}(\\operatorname{Conv}(x))"
+        },
+        {
+          "explanation": "池化后映射到类别得分",
+          "tex": "\\hat y=\\operatorname{Linear}(\\operatorname{Flatten}(\\operatorname{Pool}(h_1)))"
+        }
+      ],
+      "code": "import torch\nfrom torch import nn\nmodel=nn.Sequential(nn.Conv2d(1,6,5),nn.ReLU(),nn.AvgPool2d(2),\n    nn.Conv2d(6,16,5),nn.ReLU(),nn.AvgPool2d(2),\n    nn.Flatten(),nn.Linear(16*4*4,10))\nprint(model(torch.randn(3,1,28,28)).shape)",
+      "packages": "torch",
+      "application": "从MNIST迁移到OHLCV价格图像模型架构比较。",
+      "limits": "该实现只演示前向网络；价格图像尺度和数据时点至关重要。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n02-02",
+      "node_id": "nlp-n02-02",
+      "title": "TF-IDF",
+      "definition": "TF-IDF把词的局部出现次数与语料稀有程度结合成稀疏向量，适合文本检索和分类基线。",
+      "assumptions": "所示代码使用合成或结构演示输入；需要独立训练/验证集，且输入标签时间可得性正确。",
+      "properties": [
+        "模型的参数、状态和张量维度必须与公式对应。",
+        "超参数需在独立验证数据上选择，研究结果须报告样本外误差和计算开销。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "\\mathrm{tfidf}(w,d)=\\mathrm{tf}(w,d)\\log\\frac{N}{\\mathrm{df}(w)}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "计算单文档词频",
+          "tex": "\\mathrm{tf}(w,d)=\\#(w\\in d)"
+        },
+        {
+          "explanation": "用逆文档频率降低跨文档常见词的权重",
+          "tex": "\\mathrm{idf}(w)=\\log(N/\\mathrm{df}(w))"
+        }
+      ],
+      "code": "from sklearn.feature_extraction.text import TfidfVectorizer\ndocs=[\"profit grows steadily\",\"loss risk increases\",\"profit margin improves\"]\nv=TfidfVectorizer()\nX=v.fit_transform(docs)\nprint(v.get_feature_names_out(),X.shape)",
+      "packages": "scikit-learn",
+      "application": "公司公告情感分类、研报关键词检索基线。",
+      "limits": "中文材料需要预先选择分词方式；IDF只用训练语料拟合。",
+      "coverage": "complete"
+    },
+    {
+      "id": "llm-n01-01",
+      "node_id": "llm-n01-01",
+      "title": "Self-Attention",
+      "definition": "自注意力从同一Token序列构造Q/K/V，动态聚合各位置上下文表示。",
+      "assumptions": "所示代码使用合成或结构演示输入；需要独立训练/验证集，且输入标签时间可得性正确。",
+      "properties": [
+        "模型的参数、状态和张量维度必须与公式对应。",
+        "超参数需在独立验证数据上选择，研究结果须报告样本外误差和计算开销。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "Q=XW_Q,\\ K=XW_K,\\ V=XW_V,\\quad H=\\operatorname{softmax}(QK^\\top/\\sqrt{d_k})V"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对同一X做三组线性变换",
+          "tex": "Q=XW_Q,\\quad K=XW_K,\\quad V=XW_V"
+        },
+        {
+          "explanation": "归一化注意力权重并线性组合Value",
+          "tex": "H=AV,\\quad A=\\operatorname{softmax}(QK^\\top/\\sqrt{d_k})"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(2,7,32)\nattn=torch.nn.MultiheadAttention(32,4,batch_first=True)\nout,weights=attn(x,x,x,need_weights=True)\nprint(out.shape,weights.shape)",
+      "packages": "torch",
+      "application": "金融新闻或财报上下文建模。",
+      "limits": "代码无因果遮蔽，不能用于偷看未来Token的预测任务。",
+      "coverage": "complete"
+    },
+    {
+      "id": "llm-n04-01",
+      "node_id": "llm-n04-01",
+      "title": "因果掩码",
+      "definition": "因果遮罩阻止自回归Token在位置t使用更靠后的Token，从结构上实现顺序预测。",
+      "assumptions": "所示代码使用合成或结构演示输入；需要独立训练/验证集，且输入标签时间可得性正确。",
+      "properties": [
+        "模型的参数、状态和张量维度必须与公式对应。",
+        "超参数需在独立验证数据上选择，研究结果须报告样本外误差和计算开销。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "M_{ij}=\\begin{cases}0,&j\\le i\\\\-\\infty,&j>i\\end{cases}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "给未来Token的注意力Logit设置负无穷",
+          "tex": "\\tilde S_{ij}=S_{ij}+M_{ij}"
+        },
+        {
+          "explanation": "Softmax后未来位置权重为零",
+          "tex": "\\exp(-\\infty)=0"
+        }
+      ],
+      "code": "import torch\ns=torch.randn(5,5)\nfuture=torch.triu(torch.ones(5,5,dtype=torch.bool),diagonal=1)\na=s.masked_fill(future,-float(\"inf\")).softmax(-1)\nprint(torch.all(a[future]==0).item())",
+      "packages": "torch",
+      "application": "LLM自回归生成与防止ETF时序Transformer偷看未来。",
+      "limits": "Mask维度错误时会隐蔽泄漏。",
+      "coverage": "complete"
+    },
+    {
+      "id": "llm-n02-03",
+      "node_id": "llm-n02-03",
+      "title": "LoRA/QLoRA",
+      "definition": "LoRA保持预训练矩阵冻结，用低秩矩阵乘积近似权重增量；QLoRA还结合量化基座和低秩适配。",
+      "assumptions": "所示代码使用合成或结构演示输入；需要独立训练/验证集，且输入标签时间可得性正确。",
+      "properties": [
+        "模型的参数、状态和张量维度必须与公式对应。",
+        "超参数需在独立验证数据上选择，研究结果须报告样本外误差和计算开销。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "W'=W+\\frac{\\alpha}{r}BA,\\quad B\\in\\mathbb R^{m\\times r},\\ A\\in\\mathbb R^{r\\times n}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "原始W被冻结，更新只通过A、B进入模型",
+          "tex": "\\Delta W=BA"
+        },
+        {
+          "explanation": "低秩参数量从mn降为r(m+n)",
+          "tex": "N_{\\mathrm{train}}=r(m+n)"
+        }
+      ],
+      "code": "import torch\nW=torch.randn(6,4)\nA=torch.nn.Parameter(torch.randn(2,4)*.01)\nB=torch.nn.Parameter(torch.zeros(6,2))\nx=torch.randn(3,4)\ny=x@W.T+(x@A.T)@B.T\nprint(y.shape,A.numel()+B.numel())",
+      "packages": "torch",
+      "application": "金融领域财报和研报模型的参数高效微调。",
+      "limits": "本代码只是LoRA前向算子，不包括量化基座及完整QLoRA训练实现。",
+      "coverage": "complete"
+    },
+    {
+      "id": "generative-n02-02",
+      "node_id": "generative-n02-02",
+      "title": "变分自编码VAE",
+      "definition": "VAE构造潜变量生成分布及近似后验，通过最大化ELBO训练可采样的生成模型。",
+      "assumptions": "所示代码使用合成或结构演示输入；需要独立训练/验证集，且输入标签时间可得性正确。",
+      "properties": [
+        "模型的参数、状态和张量维度必须与公式对应。",
+        "超参数需在独立验证数据上选择，研究结果须报告样本外误差和计算开销。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "\\mathrm{ELBO}=E_{q_\\phi(z|x)}[\\log p_\\theta(x|z)]-D_{\\mathrm{KL}}(q_\\phi(z|x)\\|p(z))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "证据写为近似后验下的期望",
+          "tex": "\\log p_\\theta(x)=\\log E_q[p_\\theta(x,z)/q_\\phi(z|x)]"
+        },
+        {
+          "explanation": "Jensen不等式形成证据下界",
+          "tex": "\\log p_\\theta(x)\\ge E_q[\\log p_\\theta(x,z)-\\log q_\\phi(z|x)]"
+        }
+      ],
+      "code": "import torch\ntorch.manual_seed(0)\nmu=torch.randn(6,3,requires_grad=True)\nlv=torch.zeros(6,3,requires_grad=True)\nz=mu+torch.exp(.5*lv)*torch.randn_like(mu)\ndecoder=torch.nn.Linear(3,5)\nrec=decoder(z)\nloss=rec.square().mean()+.01*(-.5*(1+lv-mu.square()-lv.exp())).sum(-1).mean()\nloss.backward()\nprint(\"Loss:\",loss.item())",
+      "packages": "torch",
+      "application": "生成风险情景或表示学习的研究起点。",
+      "limits": "为演示ELBO的构成，代码缺少真实输入重构目标与完整编码器。",
+      "coverage": "complete"
+    },
+    {
+      "id": "generative-n01-04",
+      "node_id": "generative-n01-04",
+      "title": "前向噪声扩散",
+      "definition": "扩散模型的前向Markov链逐步加高斯噪声，使复杂数据分布趋向容易采样的参考噪声。",
+      "assumptions": "所示代码使用合成或结构演示输入；需要独立训练/验证集，且输入标签时间可得性正确。",
+      "properties": [
+        "模型的参数、状态和张量维度必须与公式对应。",
+        "超参数需在独立验证数据上选择，研究结果须报告样本外误差和计算开销。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "x_t=\\sqrt{\\bar\\alpha_t}x_0+\\sqrt{1-\\bar\\alpha_t}\\epsilon,\\quad\\bar\\alpha_t=\\prod_{s=1}^t(1-\\beta_s)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "单步高斯噪声机制",
+          "tex": "x_t=\\sqrt{1-\\beta_t}x_{t-1}+\\sqrt{\\beta_t}\\epsilon_t"
+        },
+        {
+          "explanation": "累积独立高斯噪声可等价一次采样",
+          "tex": "x_t\\mid x_0\\sim N(\\sqrt{\\bar\\alpha_t}x_0,(1-\\bar\\alpha_t)I)"
+        }
+      ],
+      "code": "import torch\ntorch.manual_seed(0)\nx=torch.randn(8,4)\nb=torch.linspace(.0001,.02,100)\nabar=torch.cumprod(1-b,dim=0)\nt=49\nxt=abar[t].sqrt()*x+(1-abar[t]).sqrt()*torch.randn_like(x)\nprint(xt.shape)",
+      "packages": "torch",
+      "application": "金融时间序列情景生成的数学基础。",
+      "limits": "仅演示前向扩散；真实生成还需要训练去噪模型并做反向采样。",
+      "coverage": "complete"
+    }
+  ]
+}
