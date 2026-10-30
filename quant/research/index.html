@@ -86,9 +86,14 @@ function activateDataset(csv,name,source){dataText=csv;label=name;$("dataStatus"
 function renderLibrary(){
 $("strategies").innerHTML=library.map(s=>{const r=results[s.id];const status=r?'<strong>总收益 '+pct(r.metrics.total_return)+' · Sharpe '+num(r.metrics.sharpe)+'</strong>':'<span>未在当前数据上运行</span>';return '<article class="strategy'+(selected?.id===s.id?" selected":"")+'"><span class="type">'+esc(s.category)+" · "+esc(s.level)+'</span><h3>'+esc(s.name)+'</h3><p>'+esc(s.description)+'</p><p><strong>数据需求：</strong>'+esc(s.requirements)+'</p><div class="result">'+status+'</div><button type="button" data-select="'+esc(s.id)+'">加载并编辑 Python 代码</button></article>'}).join("");
 }
-function selectStrategy(id){const s=library.find(x=>x.id===id);if(!s)return;selected=s;$("editor").value=s.code;$("selectedName").textContent="· "+s.name;renderLibrary();}
+function selectStrategy(id){const s=library.find(x=>x.id===id);if(!s)return;selected=s;$("editor").value=s.code;$("selectedName").textContent="· "+s.name;report=null;$("report").classList.remove("visible");renderLibrary();}
 $("strategies").addEventListener("click",e=>{const b=e.target.closest("button[data-select]");if(b)selectStrategy(b.dataset.select)});
-$("resetCode").onclick=()=>{if(selected)$("editor").value=selected.code};
+function invalidateReport(reason,all=false){report=null;$("report").classList.remove("visible");if(all)results={};else if(selected)delete results[selected.id];renderLibrary();if(reason)$("runtimeStatus").textContent=reason;}
+$("editor").addEventListener("input",()=>{if(!running)invalidateReport("策略代码已修改，旧报告已失效；请重新回测。")});
+for(const id of ["commission","slippage","borrow","riskfree"]){
+  $(id).addEventListener("input",()=>{if(!running)invalidateReport("回测成本或无风险利率已变更，请重新运行以更新指标。",true)});
+}
+$("resetCode").onclick=()=>{if(selected){$("editor").value=selected.code;invalidateReport("已恢复示例代码；需要重新运行回测。")}};
 $("sourceType").addEventListener("change",e=>{if(e.target.value==="demo")activateDataset(demoCSV(),"合成模拟数据（非真实历史行情）","demo");else if(!e.target.querySelector('option[value="upload"]').disabled){$("dataStatus").textContent=label;}});
 $("csvFile").addEventListener("change",async e=>{const file=e.target.files?.[0];if(!file)return;if(file.size>12*1024*1024){$("runtimeStatus").textContent="文件大于12MB，请先裁剪至120,000行内的日线CSV";return}try{const text=await file.text();if(!/date|datetime|timestamp/i.test(text.slice(0,400))){$("runtimeStatus").textContent="CSV需要日期列Date；请检查表头";return}activateDataset(text,"上传真实CSV："+file.name,"upload");$("runtimeStatus").textContent="已读取CSV，请检查复权、时间、缺失数据并运行策略。"}catch(err){$("runtimeStatus").textContent="文件读取失败："+err.message}});
 function downloadFile(name,text,type){const blob=new Blob([text],{type}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
