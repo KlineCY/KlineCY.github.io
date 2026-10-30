@@ -1,0 +1,869 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "unsupervised-n02-01",
+      "node_id": "unsupervised-n02-01",
+      "title": "层次聚类",
+      "definition": "递归合并最近的样本簇并记录层级树，可选不同截断高度划分资产。",
+      "assumptions": "需要事先定义距离/相似性、训练样本时间范围和目标数据分布；无监督发现不构成未来可预测或因果结论。",
+      "properties": [
+        "递归合并最近的样本簇并记录层级树，可选不同截断高度划分资产。",
+        "聚类、降维和表示学习的结果应通过稳定性、分布变化及独立下游任务验证。"
+      ],
+      "formulas": [
+        {
+          "label": "方法核心数学目标",
+          "tex": "\\Delta(A,B)=\\frac{|A||B|}{|A|+|B|}\\|\\bar x_A-\\bar x_B\\|^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确输入样本的特征空间、相似度或无监督训练目标，再选择适当的优化/分解规则。",
+          "tex": "\\Delta(A,B)=\\frac{|A||B|}{|A|+|B|}\\|\\bar x_A-\\bar x_B\\|^2"
+        },
+        {
+          "explanation": "按该目标求解潜在分组、映射或异常分数，并通过重抽样和测试期验证其稳定性。",
+          "tex": "\\Delta(A,B)=\\frac{|A||B|}{|A|+|B|}\\|\\bar x_A-\\bar x_B\\|^2"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.cluster import AgglomerativeClustering\nX=np.random.default_rng(0).normal(size=(30,2));print(AgglomerativeClustering(n_clusters=3).fit_predict(X)[:8])",
+      "packages": "numpy, scikit-learn 或 torch（见import）",
+      "application": "用于ETF风险聚类、市场状态识别、异常交易检测及无监督金融特征学习。",
+      "limits": "上述Python示例是所在章节的基础计算示范，不是每一种复杂模型的完整工程实现。时序泄漏、距离尺度和市场非平稳是主要失效来源。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n04-01",
+      "node_id": "unsupervised-n04-01",
+      "title": "Gaussian Mixture",
+      "definition": "用多个高斯分布的加权混合拟合多峰数据，常用EM更新软状态责任度。",
+      "assumptions": "需要事先定义距离/相似性、训练样本时间范围和目标数据分布；无监督发现不构成未来可预测或因果结论。",
+      "properties": [
+        "用多个高斯分布的加权混合拟合多峰数据，常用EM更新软状态责任度。",
+        "聚类、降维和表示学习的结果应通过稳定性、分布变化及独立下游任务验证。"
+      ],
+      "formulas": [
+        {
+          "label": "方法核心数学目标",
+          "tex": "p(x)=\\sum_k\\pi_k\\mathcal N(x;\\mu_k,\\Sigma_k)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确输入样本的特征空间、相似度或无监督训练目标，再选择适当的优化/分解规则。",
+          "tex": "p(x)=\\sum_k\\pi_k\\mathcal N(x;\\mu_k,\\Sigma_k)"
+        },
+        {
+          "explanation": "按该目标求解潜在分组、映射或异常分数，并通过重抽样和测试期验证其稳定性。",
+          "tex": "p(x)=\\sum_k\\pi_k\\mathcal N(x;\\mu_k,\\Sigma_k)"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.cluster import AgglomerativeClustering\nX=np.random.default_rng(0).normal(size=(30,2));print(AgglomerativeClustering(n_clusters=3).fit_predict(X)[:8])",
+      "packages": "numpy, scikit-learn 或 torch（见import）",
+      "application": "用于ETF风险聚类、市场状态识别、异常交易检测及无监督金融特征学习。",
+      "limits": "上述Python示例是所在章节的基础计算示范，不是每一种复杂模型的完整工程实现。时序泄漏、距离尺度和市场非平稳是主要失效来源。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n05-01",
+      "node_id": "unsupervised-n05-01",
+      "title": "谱聚类",
+      "definition": "由相似图的拉普拉斯特征向量做低维嵌入后聚类。",
+      "assumptions": "需要事先定义距离/相似性、训练样本时间范围和目标数据分布；无监督发现不构成未来可预测或因果结论。",
+      "properties": [
+        "由相似图的拉普拉斯特征向量做低维嵌入后聚类。",
+        "聚类、降维和表示学习的结果应通过稳定性、分布变化及独立下游任务验证。"
+      ],
+      "formulas": [
+        {
+          "label": "方法核心数学目标",
+          "tex": "L v_k=\\lambda_k Dv_k"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确输入样本的特征空间、相似度或无监督训练目标，再选择适当的优化/分解规则。",
+          "tex": "L v_k=\\lambda_k Dv_k"
+        },
+        {
+          "explanation": "按该目标求解潜在分组、映射或异常分数，并通过重抽样和测试期验证其稳定性。",
+          "tex": "L v_k=\\lambda_k Dv_k"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.cluster import AgglomerativeClustering\nX=np.random.default_rng(0).normal(size=(30,2));print(AgglomerativeClustering(n_clusters=3).fit_predict(X)[:8])",
+      "packages": "numpy, scikit-learn 或 torch（见import）",
+      "application": "用于ETF风险聚类、市场状态识别、异常交易检测及无监督金融特征学习。",
+      "limits": "上述Python示例是所在章节的基础计算示范，不是每一种复杂模型的完整工程实现。时序泄漏、距离尺度和市场非平稳是主要失效来源。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n06-01",
+      "node_id": "unsupervised-n06-01",
+      "title": "聚类稳定性",
+      "definition": "利用样本扰动和重抽样比较分组一致性，检验聚类是否只是随机划分。",
+      "assumptions": "需要事先定义距离/相似性、训练样本时间范围和目标数据分布；无监督发现不构成未来可预测或因果结论。",
+      "properties": [
+        "利用样本扰动和重抽样比较分组一致性，检验聚类是否只是随机划分。",
+        "聚类、降维和表示学习的结果应通过稳定性、分布变化及独立下游任务验证。"
+      ],
+      "formulas": [
+        {
+          "label": "方法核心数学目标",
+          "tex": "S=E[\\operatorname{ARI}(c^{(a)},c^{(b)})]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确输入样本的特征空间、相似度或无监督训练目标，再选择适当的优化/分解规则。",
+          "tex": "S=E[\\operatorname{ARI}(c^{(a)},c^{(b)})]"
+        },
+        {
+          "explanation": "按该目标求解潜在分组、映射或异常分数，并通过重抽样和测试期验证其稳定性。",
+          "tex": "S=E[\\operatorname{ARI}(c^{(a)},c^{(b)})]"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.cluster import AgglomerativeClustering\nX=np.random.default_rng(0).normal(size=(30,2));print(AgglomerativeClustering(n_clusters=3).fit_predict(X)[:8])",
+      "packages": "numpy, scikit-learn 或 torch（见import）",
+      "application": "用于ETF风险聚类、市场状态识别、异常交易检测及无监督金融特征学习。",
+      "limits": "上述Python示例是所在章节的基础计算示范，不是每一种复杂模型的完整工程实现。时序泄漏、距离尺度和市场非平稳是主要失效来源。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n01-02",
+      "node_id": "unsupervised-n01-02",
+      "title": "PCA",
+      "definition": "寻找样本协方差矩阵上最大方差的正交主成分。",
+      "assumptions": "需要事先定义距离/相似性、训练样本时间范围和目标数据分布；无监督发现不构成未来可预测或因果结论。",
+      "properties": [
+        "寻找样本协方差矩阵上最大方差的正交主成分。",
+        "聚类、降维和表示学习的结果应通过稳定性、分布变化及独立下游任务验证。"
+      ],
+      "formulas": [
+        {
+          "label": "方法核心数学目标",
+          "tex": "\\Sigma v=\\lambda v"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确输入样本的特征空间、相似度或无监督训练目标，再选择适当的优化/分解规则。",
+          "tex": "\\Sigma v=\\lambda v"
+        },
+        {
+          "explanation": "按该目标求解潜在分组、映射或异常分数，并通过重抽样和测试期验证其稳定性。",
+          "tex": "\\Sigma v=\\lambda v"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.decomposition import PCA\nX=np.random.default_rng(0).normal(size=(30,5));print(PCA(2).fit_transform(X).shape)",
+      "packages": "numpy, scikit-learn 或 torch（见import）",
+      "application": "用于ETF风险聚类、市场状态识别、异常交易检测及无监督金融特征学习。",
+      "limits": "上述Python示例是所在章节的基础计算示范，不是每一种复杂模型的完整工程实现。时序泄漏、距离尺度和市场非平稳是主要失效来源。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n02-02",
+      "node_id": "unsupervised-n02-02",
+      "title": "随机SVD",
+      "definition": "使用随机投影捕捉矩阵主导奇异空间，降低大矩阵分解开销。",
+      "assumptions": "需要事先定义距离/相似性、训练样本时间范围和目标数据分布；无监督发现不构成未来可预测或因果结论。",
+      "properties": [
+        "使用随机投影捕捉矩阵主导奇异空间，降低大矩阵分解开销。",
+        "聚类、降维和表示学习的结果应通过稳定性、分布变化及独立下游任务验证。"
+      ],
+      "formulas": [
+        {
+          "label": "方法核心数学目标",
+          "tex": "A\\approx QQ^\\top A"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确输入样本的特征空间、相似度或无监督训练目标，再选择适当的优化/分解规则。",
+          "tex": "A\\approx QQ^\\top A"
+        },
+        {
+          "explanation": "按该目标求解潜在分组、映射或异常分数，并通过重抽样和测试期验证其稳定性。",
+          "tex": "A\\approx QQ^\\top A"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.decomposition import PCA\nX=np.random.default_rng(0).normal(size=(30,5));print(PCA(2).fit_transform(X).shape)",
+      "packages": "numpy, scikit-learn 或 torch（见import）",
+      "application": "用于ETF风险聚类、市场状态识别、异常交易检测及无监督金融特征学习。",
+      "limits": "上述Python示例是所在章节的基础计算示范，不是每一种复杂模型的完整工程实现。时序泄漏、距离尺度和市场非平稳是主要失效来源。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n03-02",
+      "node_id": "unsupervised-n03-02",
+      "title": "独立成分分析ICA",
+      "definition": "寻找线性混合观测中的尽量统计独立的潜在非高斯来源。",
+      "assumptions": "需要事先定义距离/相似性、训练样本时间范围和目标数据分布；无监督发现不构成未来可预测或因果结论。",
+      "properties": [
+        "寻找线性混合观测中的尽量统计独立的潜在非高斯来源。",
+        "聚类、降维和表示学习的结果应通过稳定性、分布变化及独立下游任务验证。"
+      ],
+      "formulas": [
+        {
+          "label": "方法核心数学目标",
+          "tex": "X=AS,\\quad \\hat S=WX"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确输入样本的特征空间、相似度或无监督训练目标，再选择适当的优化/分解规则。",
+          "tex": "X=AS,\\quad \\hat S=WX"
+        },
+        {
+          "explanation": "按该目标求解潜在分组、映射或异常分数，并通过重抽样和测试期验证其稳定性。",
+          "tex": "X=AS,\\quad \\hat S=WX"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.decomposition import PCA\nX=np.random.default_rng(0).normal(size=(30,5));print(PCA(2).fit_transform(X).shape)",
+      "packages": "numpy, scikit-learn 或 torch（见import）",
+      "application": "用于ETF风险聚类、市场状态识别、异常交易检测及无监督金融特征学习。",
+      "limits": "上述Python示例是所在章节的基础计算示范，不是每一种复杂模型的完整工程实现。时序泄漏、距离尺度和市场非平稳是主要失效来源。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n04-02",
+      "node_id": "unsupervised-n04-02",
+      "title": "非负矩阵分解NMF",
+      "definition": "把非负矩阵近似拆为非负低秩载荷与成分，保留加法解释。",
+      "assumptions": "需要事先定义距离/相似性、训练样本时间范围和目标数据分布；无监督发现不构成未来可预测或因果结论。",
+      "properties": [
+        "把非负矩阵近似拆为非负低秩载荷与成分，保留加法解释。",
+        "聚类、降维和表示学习的结果应通过稳定性、分布变化及独立下游任务验证。"
+      ],
+      "formulas": [
+        {
+          "label": "方法核心数学目标",
+          "tex": "\\min_{W,H\\ge0}\\|X-WH\\|_F^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确输入样本的特征空间、相似度或无监督训练目标，再选择适当的优化/分解规则。",
+          "tex": "\\min_{W,H\\ge0}\\|X-WH\\|_F^2"
+        },
+        {
+          "explanation": "按该目标求解潜在分组、映射或异常分数，并通过重抽样和测试期验证其稳定性。",
+          "tex": "\\min_{W,H\\ge0}\\|X-WH\\|_F^2"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.decomposition import PCA\nX=np.random.default_rng(0).normal(size=(30,5));print(PCA(2).fit_transform(X).shape)",
+      "packages": "numpy, scikit-learn 或 torch（见import）",
+      "application": "用于ETF风险聚类、市场状态识别、异常交易检测及无监督金融特征学习。",
+      "limits": "上述Python示例是所在章节的基础计算示范，不是每一种复杂模型的完整工程实现。时序泄漏、距离尺度和市场非平稳是主要失效来源。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n05-02",
+      "node_id": "unsupervised-n05-02",
+      "title": "核PCA",
+      "definition": "对核Gram矩阵特征分解，实现隐式非线性降维。",
+      "assumptions": "需要事先定义距离/相似性、训练样本时间范围和目标数据分布；无监督发现不构成未来可预测或因果结论。",
+      "properties": [
+        "对核Gram矩阵特征分解，实现隐式非线性降维。",
+        "聚类、降维和表示学习的结果应通过稳定性、分布变化及独立下游任务验证。"
+      ],
+      "formulas": [
+        {
+          "label": "方法核心数学目标",
+          "tex": "K\\alpha=\\lambda\\alpha"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确输入样本的特征空间、相似度或无监督训练目标，再选择适当的优化/分解规则。",
+          "tex": "K\\alpha=\\lambda\\alpha"
+        },
+        {
+          "explanation": "按该目标求解潜在分组、映射或异常分数，并通过重抽样和测试期验证其稳定性。",
+          "tex": "K\\alpha=\\lambda\\alpha"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.decomposition import PCA\nX=np.random.default_rng(0).normal(size=(30,5));print(PCA(2).fit_transform(X).shape)",
+      "packages": "numpy, scikit-learn 或 torch（见import）",
+      "application": "用于ETF风险聚类、市场状态识别、异常交易检测及无监督金融特征学习。",
+      "limits": "上述Python示例是所在章节的基础计算示范，不是每一种复杂模型的完整工程实现。时序泄漏、距离尺度和市场非平稳是主要失效来源。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n06-02",
+      "node_id": "unsupervised-n06-02",
+      "title": "t-SNE与UMAP",
+      "definition": "低维嵌入尽量保留局部邻域结构，主要服务可视化和结构探索。",
+      "assumptions": "需要事先定义距离/相似性、训练样本时间范围和目标数据分布；无监督发现不构成未来可预测或因果结论。",
+      "properties": [
+        "低维嵌入尽量保留局部邻域结构，主要服务可视化和结构探索。",
+        "聚类、降维和表示学习的结果应通过稳定性、分布变化及独立下游任务验证。"
+      ],
+      "formulas": [
+        {
+          "label": "方法核心数学目标",
+          "tex": "L_{\\rm tSNE}=\\sum_{ij}p_{ij}\\log\\frac{p_{ij}}{q_{ij}}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确输入样本的特征空间、相似度或无监督训练目标，再选择适当的优化/分解规则。",
+          "tex": "L_{\\rm tSNE}=\\sum_{ij}p_{ij}\\log\\frac{p_{ij}}{q_{ij}}"
+        },
+        {
+          "explanation": "按该目标求解潜在分组、映射或异常分数，并通过重抽样和测试期验证其稳定性。",
+          "tex": "L_{\\rm tSNE}=\\sum_{ij}p_{ij}\\log\\frac{p_{ij}}{q_{ij}}"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.decomposition import PCA\nX=np.random.default_rng(0).normal(size=(30,5));print(PCA(2).fit_transform(X).shape)",
+      "packages": "numpy, scikit-learn 或 torch（见import）",
+      "application": "用于ETF风险聚类、市场状态识别、异常交易检测及无监督金融特征学习。",
+      "limits": "上述Python示例是所在章节的基础计算示范，不是每一种复杂模型的完整工程实现。时序泄漏、距离尺度和市场非平稳是主要失效来源。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n02-03",
+      "node_id": "unsupervised-n02-03",
+      "title": "Local Outlier Factor",
+      "definition": "比较目标点与近邻的可达密度，异常点的局部密度显著偏低。",
+      "assumptions": "需要事先定义距离/相似性、训练样本时间范围和目标数据分布；无监督发现不构成未来可预测或因果结论。",
+      "properties": [
+        "比较目标点与近邻的可达密度，异常点的局部密度显著偏低。",
+        "聚类、降维和表示学习的结果应通过稳定性、分布变化及独立下游任务验证。"
+      ],
+      "formulas": [
+        {
+          "label": "方法核心数学目标",
+          "tex": "\\operatorname{LOF}_k(x)=\\frac1k\\sum_{o\\in N_k(x)}\\frac{\\operatorname{lrd}_k(o)}{\\operatorname{lrd}_k(x)}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确输入样本的特征空间、相似度或无监督训练目标，再选择适当的优化/分解规则。",
+          "tex": "\\operatorname{LOF}_k(x)=\\frac1k\\sum_{o\\in N_k(x)}\\frac{\\operatorname{lrd}_k(o)}{\\operatorname{lrd}_k(x)}"
+        },
+        {
+          "explanation": "按该目标求解潜在分组、映射或异常分数，并通过重抽样和测试期验证其稳定性。",
+          "tex": "\\operatorname{LOF}_k(x)=\\frac1k\\sum_{o\\in N_k(x)}\\frac{\\operatorname{lrd}_k(o)}{\\operatorname{lrd}_k(x)}"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.neighbors import LocalOutlierFactor\nX=np.r_[np.random.default_rng(0).normal(size=(30,2)),[[9,9]]]\nprint(LocalOutlierFactor(n_neighbors=5).fit_predict(X)[-1])",
+      "packages": "numpy, scikit-learn 或 torch（见import）",
+      "application": "用于ETF风险聚类、市场状态识别、异常交易检测及无监督金融特征学习。",
+      "limits": "上述Python示例是所在章节的基础计算示范，不是每一种复杂模型的完整工程实现。时序泄漏、距离尺度和市场非平稳是主要失效来源。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n03-03",
+      "node_id": "unsupervised-n03-03",
+      "title": "One-Class SVM",
+      "definition": "在核空间估计包围正常样本的判别边界，识别与训练正常分布偏离的输入。",
+      "assumptions": "需要事先定义距离/相似性、训练样本时间范围和目标数据分布；无监督发现不构成未来可预测或因果结论。",
+      "properties": [
+        "在核空间估计包围正常样本的判别边界，识别与训练正常分布偏离的输入。",
+        "聚类、降维和表示学习的结果应通过稳定性、分布变化及独立下游任务验证。"
+      ],
+      "formulas": [
+        {
+          "label": "方法核心数学目标",
+          "tex": "\\min_{w,\\rho,\\xi}\\frac12\\|w\\|^2+\\frac1{\\nu n}\\sum_i\\xi_i-\\rho"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确输入样本的特征空间、相似度或无监督训练目标，再选择适当的优化/分解规则。",
+          "tex": "\\min_{w,\\rho,\\xi}\\frac12\\|w\\|^2+\\frac1{\\nu n}\\sum_i\\xi_i-\\rho"
+        },
+        {
+          "explanation": "按该目标求解潜在分组、映射或异常分数，并通过重抽样和测试期验证其稳定性。",
+          "tex": "\\min_{w,\\rho,\\xi}\\frac12\\|w\\|^2+\\frac1{\\nu n}\\sum_i\\xi_i-\\rho"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.neighbors import LocalOutlierFactor\nX=np.r_[np.random.default_rng(0).normal(size=(30,2)),[[9,9]]]\nprint(LocalOutlierFactor(n_neighbors=5).fit_predict(X)[-1])",
+      "packages": "numpy, scikit-learn 或 torch（见import）",
+      "application": "用于ETF风险聚类、市场状态识别、异常交易检测及无监督金融特征学习。",
+      "limits": "上述Python示例是所在章节的基础计算示范，不是每一种复杂模型的完整工程实现。时序泄漏、距离尺度和市场非平稳是主要失效来源。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n04-03",
+      "node_id": "unsupervised-n04-03",
+      "title": "自编码器异常检测",
+      "definition": "训练自编码器重建常态样本，用异常高的重建误差识别离群输入。",
+      "assumptions": "需要事先定义距离/相似性、训练样本时间范围和目标数据分布；无监督发现不构成未来可预测或因果结论。",
+      "properties": [
+        "训练自编码器重建常态样本，用异常高的重建误差识别离群输入。",
+        "聚类、降维和表示学习的结果应通过稳定性、分布变化及独立下游任务验证。"
+      ],
+      "formulas": [
+        {
+          "label": "方法核心数学目标",
+          "tex": "s(x)=\\|x-g_\\theta(f_\\phi(x))\\|_2^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确输入样本的特征空间、相似度或无监督训练目标，再选择适当的优化/分解规则。",
+          "tex": "s(x)=\\|x-g_\\theta(f_\\phi(x))\\|_2^2"
+        },
+        {
+          "explanation": "按该目标求解潜在分组、映射或异常分数，并通过重抽样和测试期验证其稳定性。",
+          "tex": "s(x)=\\|x-g_\\theta(f_\\phi(x))\\|_2^2"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.neighbors import LocalOutlierFactor\nX=np.r_[np.random.default_rng(0).normal(size=(30,2)),[[9,9]]]\nprint(LocalOutlierFactor(n_neighbors=5).fit_predict(X)[-1])",
+      "packages": "numpy, scikit-learn 或 torch（见import）",
+      "application": "用于ETF风险聚类、市场状态识别、异常交易检测及无监督金融特征学习。",
+      "limits": "上述Python示例是所在章节的基础计算示范，不是每一种复杂模型的完整工程实现。时序泄漏、距离尺度和市场非平稳是主要失效来源。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n05-03",
+      "node_id": "unsupervised-n05-03",
+      "title": "密度异常",
+      "definition": "把估计概率密度极低的样本视为异常候选。",
+      "assumptions": "需要事先定义距离/相似性、训练样本时间范围和目标数据分布；无监督发现不构成未来可预测或因果结论。",
+      "properties": [
+        "把估计概率密度极低的样本视为异常候选。",
+        "聚类、降维和表示学习的结果应通过稳定性、分布变化及独立下游任务验证。"
+      ],
+      "formulas": [
+        {
+          "label": "方法核心数学目标",
+          "tex": "s(x)=-\\log\\hat p(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确输入样本的特征空间、相似度或无监督训练目标，再选择适当的优化/分解规则。",
+          "tex": "s(x)=-\\log\\hat p(x)"
+        },
+        {
+          "explanation": "按该目标求解潜在分组、映射或异常分数，并通过重抽样和测试期验证其稳定性。",
+          "tex": "s(x)=-\\log\\hat p(x)"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.neighbors import LocalOutlierFactor\nX=np.r_[np.random.default_rng(0).normal(size=(30,2)),[[9,9]]]\nprint(LocalOutlierFactor(n_neighbors=5).fit_predict(X)[-1])",
+      "packages": "numpy, scikit-learn 或 torch（见import）",
+      "application": "用于ETF风险聚类、市场状态识别、异常交易检测及无监督金融特征学习。",
+      "limits": "上述Python示例是所在章节的基础计算示范，不是每一种复杂模型的完整工程实现。时序泄漏、距离尺度和市场非平稳是主要失效来源。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n06-03",
+      "node_id": "unsupervised-n06-03",
+      "title": "概念漂移",
+      "definition": "监督目标与输入之间的条件关系随时间改变，导致固定模型效果衰减。",
+      "assumptions": "需要事先定义距离/相似性、训练样本时间范围和目标数据分布；无监督发现不构成未来可预测或因果结论。",
+      "properties": [
+        "监督目标与输入之间的条件关系随时间改变，导致固定模型效果衰减。",
+        "聚类、降维和表示学习的结果应通过稳定性、分布变化及独立下游任务验证。"
+      ],
+      "formulas": [
+        {
+          "label": "方法核心数学目标",
+          "tex": "P_t(Y\\mid X)\\ne P_{t+\\Delta}(Y\\mid X)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确输入样本的特征空间、相似度或无监督训练目标，再选择适当的优化/分解规则。",
+          "tex": "P_t(Y\\mid X)\\ne P_{t+\\Delta}(Y\\mid X)"
+        },
+        {
+          "explanation": "按该目标求解潜在分组、映射或异常分数，并通过重抽样和测试期验证其稳定性。",
+          "tex": "P_t(Y\\mid X)\\ne P_{t+\\Delta}(Y\\mid X)"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.neighbors import LocalOutlierFactor\nX=np.r_[np.random.default_rng(0).normal(size=(30,2)),[[9,9]]]\nprint(LocalOutlierFactor(n_neighbors=5).fit_predict(X)[-1])",
+      "packages": "numpy, scikit-learn 或 torch（见import）",
+      "application": "用于ETF风险聚类、市场状态识别、异常交易检测及无监督金融特征学习。",
+      "limits": "上述Python示例是所在章节的基础计算示范，不是每一种复杂模型的完整工程实现。时序泄漏、距离尺度和市场非平稳是主要失效来源。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n01-04",
+      "node_id": "unsupervised-n01-04",
+      "title": "对比学习InfoNCE",
+      "definition": "对正样本表示给予相对高Softmax概率，批内负样本用于形成对比目标。",
+      "assumptions": "需要事先定义距离/相似性、训练样本时间范围和目标数据分布；无监督发现不构成未来可预测或因果结论。",
+      "properties": [
+        "对正样本表示给予相对高Softmax概率，批内负样本用于形成对比目标。",
+        "聚类、降维和表示学习的结果应通过稳定性、分布变化及独立下游任务验证。"
+      ],
+      "formulas": [
+        {
+          "label": "方法核心数学目标",
+          "tex": "L_i=-\\log\\frac{e^{s_i^+/\\tau}}{\\sum_je^{s_{ij}/\\tau}}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确输入样本的特征空间、相似度或无监督训练目标，再选择适当的优化/分解规则。",
+          "tex": "L_i=-\\log\\frac{e^{s_i^+/\\tau}}{\\sum_je^{s_{ij}/\\tau}}"
+        },
+        {
+          "explanation": "按该目标求解潜在分组、映射或异常分数，并通过重抽样和测试期验证其稳定性。",
+          "tex": "L_i=-\\log\\frac{e^{s_i^+/\\tau}}{\\sum_je^{s_{ij}/\\tau}}"
+        }
+      ],
+      "code": "import torch\nz=torch.nn.functional.normalize(torch.randn(4,8),dim=-1)\nprint((z@z.T).shape)",
+      "packages": "numpy, scikit-learn 或 torch（见import）",
+      "application": "用于ETF风险聚类、市场状态识别、异常交易检测及无监督金融特征学习。",
+      "limits": "上述Python示例是所在章节的基础计算示范，不是每一种复杂模型的完整工程实现。时序泄漏、距离尺度和市场非平稳是主要失效来源。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n02-04",
+      "node_id": "unsupervised-n02-04",
+      "title": "SimCLR",
+      "definition": "从同一图像生成两种增强视图，通过温度缩放对比损失学习表征。",
+      "assumptions": "需要事先定义距离/相似性、训练样本时间范围和目标数据分布；无监督发现不构成未来可预测或因果结论。",
+      "properties": [
+        "从同一图像生成两种增强视图，通过温度缩放对比损失学习表征。",
+        "聚类、降维和表示学习的结果应通过稳定性、分布变化及独立下游任务验证。"
+      ],
+      "formulas": [
+        {
+          "label": "方法核心数学目标",
+          "tex": "L=\\sum_i-\\log p(z_i^+\\mid z_i)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确输入样本的特征空间、相似度或无监督训练目标，再选择适当的优化/分解规则。",
+          "tex": "L=\\sum_i-\\log p(z_i^+\\mid z_i)"
+        },
+        {
+          "explanation": "按该目标求解潜在分组、映射或异常分数，并通过重抽样和测试期验证其稳定性。",
+          "tex": "L=\\sum_i-\\log p(z_i^+\\mid z_i)"
+        }
+      ],
+      "code": "import torch\nz=torch.nn.functional.normalize(torch.randn(4,8),dim=-1)\nprint((z@z.T).shape)",
+      "packages": "numpy, scikit-learn 或 torch（见import）",
+      "application": "用于ETF风险聚类、市场状态识别、异常交易检测及无监督金融特征学习。",
+      "limits": "上述Python示例是所在章节的基础计算示范，不是每一种复杂模型的完整工程实现。时序泄漏、距离尺度和市场非平稳是主要失效来源。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n03-04",
+      "node_id": "unsupervised-n03-04",
+      "title": "BYOL",
+      "definition": "在线编码器匹配目标编码器的停止梯度表示，目标网络以EMA更新。",
+      "assumptions": "需要事先定义距离/相似性、训练样本时间范围和目标数据分布；无监督发现不构成未来可预测或因果结论。",
+      "properties": [
+        "在线编码器匹配目标编码器的停止梯度表示，目标网络以EMA更新。",
+        "聚类、降维和表示学习的结果应通过稳定性、分布变化及独立下游任务验证。"
+      ],
+      "formulas": [
+        {
+          "label": "方法核心数学目标",
+          "tex": "L=\\|q_\\theta(z_1)-\\operatorname{sg}(z_2)\\|^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确输入样本的特征空间、相似度或无监督训练目标，再选择适当的优化/分解规则。",
+          "tex": "L=\\|q_\\theta(z_1)-\\operatorname{sg}(z_2)\\|^2"
+        },
+        {
+          "explanation": "按该目标求解潜在分组、映射或异常分数，并通过重抽样和测试期验证其稳定性。",
+          "tex": "L=\\|q_\\theta(z_1)-\\operatorname{sg}(z_2)\\|^2"
+        }
+      ],
+      "code": "import torch\nz=torch.nn.functional.normalize(torch.randn(4,8),dim=-1)\nprint((z@z.T).shape)",
+      "packages": "numpy, scikit-learn 或 torch（见import）",
+      "application": "用于ETF风险聚类、市场状态识别、异常交易检测及无监督金融特征学习。",
+      "limits": "上述Python示例是所在章节的基础计算示范，不是每一种复杂模型的完整工程实现。时序泄漏、距离尺度和市场非平稳是主要失效来源。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n04-04",
+      "node_id": "unsupervised-n04-04",
+      "title": "掩码建模",
+      "definition": "随机屏蔽输入片段，只根据可见部分重建遮蔽内容。",
+      "assumptions": "需要事先定义距离/相似性、训练样本时间范围和目标数据分布；无监督发现不构成未来可预测或因果结论。",
+      "properties": [
+        "随机屏蔽输入片段，只根据可见部分重建遮蔽内容。",
+        "聚类、降维和表示学习的结果应通过稳定性、分布变化及独立下游任务验证。"
+      ],
+      "formulas": [
+        {
+          "label": "方法核心数学目标",
+          "tex": "L=E[\\sum_{i\\in M}\\ell(\\hat x_i,x_i)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确输入样本的特征空间、相似度或无监督训练目标，再选择适当的优化/分解规则。",
+          "tex": "L=E[\\sum_{i\\in M}\\ell(\\hat x_i,x_i)]"
+        },
+        {
+          "explanation": "按该目标求解潜在分组、映射或异常分数，并通过重抽样和测试期验证其稳定性。",
+          "tex": "L=E[\\sum_{i\\in M}\\ell(\\hat x_i,x_i)]"
+        }
+      ],
+      "code": "import torch\nz=torch.nn.functional.normalize(torch.randn(4,8),dim=-1)\nprint((z@z.T).shape)",
+      "packages": "numpy, scikit-learn 或 torch（见import）",
+      "application": "用于ETF风险聚类、市场状态识别、异常交易检测及无监督金融特征学习。",
+      "limits": "上述Python示例是所在章节的基础计算示范，不是每一种复杂模型的完整工程实现。时序泄漏、距离尺度和市场非平稳是主要失效来源。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n05-04",
+      "node_id": "unsupervised-n05-04",
+      "title": "自监督预训练",
+      "definition": "利用输入自身生成的标签训练表示，再微调解决特定金融预测目标。",
+      "assumptions": "需要事先定义距离/相似性、训练样本时间范围和目标数据分布；无监督发现不构成未来可预测或因果结论。",
+      "properties": [
+        "利用输入自身生成的标签训练表示，再微调解决特定金融预测目标。",
+        "聚类、降维和表示学习的结果应通过稳定性、分布变化及独立下游任务验证。"
+      ],
+      "formulas": [
+        {
+          "label": "方法核心数学目标",
+          "tex": "\\theta_{\\rm pre}=\\arg\\min_\\theta L_{\\rm SSL}(\\theta)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确输入样本的特征空间、相似度或无监督训练目标，再选择适当的优化/分解规则。",
+          "tex": "\\theta_{\\rm pre}=\\arg\\min_\\theta L_{\\rm SSL}(\\theta)"
+        },
+        {
+          "explanation": "按该目标求解潜在分组、映射或异常分数，并通过重抽样和测试期验证其稳定性。",
+          "tex": "\\theta_{\\rm pre}=\\arg\\min_\\theta L_{\\rm SSL}(\\theta)"
+        }
+      ],
+      "code": "import torch\nz=torch.nn.functional.normalize(torch.randn(4,8),dim=-1)\nprint((z@z.T).shape)",
+      "packages": "numpy, scikit-learn 或 torch（见import）",
+      "application": "用于ETF风险聚类、市场状态识别、异常交易检测及无监督金融特征学习。",
+      "limits": "上述Python示例是所在章节的基础计算示范，不是每一种复杂模型的完整工程实现。时序泄漏、距离尺度和市场非平稳是主要失效来源。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n06-04",
+      "node_id": "unsupervised-n06-04",
+      "title": "嵌入表示",
+      "definition": "把对象或序列映射为固定维连续向量，以构造相似度、检索或下游模型输入。",
+      "assumptions": "需要事先定义距离/相似性、训练样本时间范围和目标数据分布；无监督发现不构成未来可预测或因果结论。",
+      "properties": [
+        "把对象或序列映射为固定维连续向量，以构造相似度、检索或下游模型输入。",
+        "聚类、降维和表示学习的结果应通过稳定性、分布变化及独立下游任务验证。"
+      ],
+      "formulas": [
+        {
+          "label": "方法核心数学目标",
+          "tex": "z=f_\\theta(x)\\in\\mathbb R^d"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确输入样本的特征空间、相似度或无监督训练目标，再选择适当的优化/分解规则。",
+          "tex": "z=f_\\theta(x)\\in\\mathbb R^d"
+        },
+        {
+          "explanation": "按该目标求解潜在分组、映射或异常分数，并通过重抽样和测试期验证其稳定性。",
+          "tex": "z=f_\\theta(x)\\in\\mathbb R^d"
+        }
+      ],
+      "code": "import torch\nz=torch.nn.functional.normalize(torch.randn(4,8),dim=-1)\nprint((z@z.T).shape)",
+      "packages": "numpy, scikit-learn 或 torch（见import）",
+      "application": "用于ETF风险聚类、市场状态识别、异常交易检测及无监督金融特征学习。",
+      "limits": "上述Python示例是所在章节的基础计算示范，不是每一种复杂模型的完整工程实现。时序泄漏、距离尺度和市场非平稳是主要失效来源。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n01-05",
+      "node_id": "unsupervised-n01-05",
+      "title": "ETF风险聚类",
+      "definition": "基于ETF历史收益波动和相关性特征将资产分组，识别共同风险来源。",
+      "assumptions": "需要事先定义距离/相似性、训练样本时间范围和目标数据分布；无监督发现不构成未来可预测或因果结论。",
+      "properties": [
+        "基于ETF历史收益波动和相关性特征将资产分组，识别共同风险来源。",
+        "聚类、降维和表示学习的结果应通过稳定性、分布变化及独立下游任务验证。"
+      ],
+      "formulas": [
+        {
+          "label": "方法核心数学目标",
+          "tex": "c_i=\\arg\\min_k\\|z_i-\\mu_k\\|^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确输入样本的特征空间、相似度或无监督训练目标，再选择适当的优化/分解规则。",
+          "tex": "c_i=\\arg\\min_k\\|z_i-\\mu_k\\|^2"
+        },
+        {
+          "explanation": "按该目标求解潜在分组、映射或异常分数，并通过重抽样和测试期验证其稳定性。",
+          "tex": "c_i=\\arg\\min_k\\|z_i-\\mu_k\\|^2"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.cluster import KMeans\nX=np.random.default_rng(0).normal(size=(40,4))\nprint(KMeans(n_clusters=3,n_init=10,random_state=0).fit_predict(X)[:10])",
+      "packages": "numpy, scikit-learn 或 torch（见import）",
+      "application": "用于ETF风险聚类、市场状态识别、异常交易检测及无监督金融特征学习。",
+      "limits": "上述Python示例是所在章节的基础计算示范，不是每一种复杂模型的完整工程实现。时序泄漏、距离尺度和市场非平稳是主要失效来源。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n02-05",
+      "node_id": "unsupervised-n02-05",
+      "title": "收益协方差主成分",
+      "definition": "在多资产收益协方差矩阵上提取领先特征方向与解释方差。",
+      "assumptions": "需要事先定义距离/相似性、训练样本时间范围和目标数据分布；无监督发现不构成未来可预测或因果结论。",
+      "properties": [
+        "在多资产收益协方差矩阵上提取领先特征方向与解释方差。",
+        "聚类、降维和表示学习的结果应通过稳定性、分布变化及独立下游任务验证。"
+      ],
+      "formulas": [
+        {
+          "label": "方法核心数学目标",
+          "tex": "\\Sigma_Rv_j=\\lambda_jv_j"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确输入样本的特征空间、相似度或无监督训练目标，再选择适当的优化/分解规则。",
+          "tex": "\\Sigma_Rv_j=\\lambda_jv_j"
+        },
+        {
+          "explanation": "按该目标求解潜在分组、映射或异常分数，并通过重抽样和测试期验证其稳定性。",
+          "tex": "\\Sigma_Rv_j=\\lambda_jv_j"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.cluster import KMeans\nX=np.random.default_rng(0).normal(size=(40,4))\nprint(KMeans(n_clusters=3,n_init=10,random_state=0).fit_predict(X)[:10])",
+      "packages": "numpy, scikit-learn 或 torch（见import）",
+      "application": "用于ETF风险聚类、市场状态识别、异常交易检测及无监督金融特征学习。",
+      "limits": "上述Python示例是所在章节的基础计算示范，不是每一种复杂模型的完整工程实现。时序泄漏、距离尺度和市场非平稳是主要失效来源。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n03-05",
+      "node_id": "unsupervised-n03-05",
+      "title": "市场状态聚类",
+      "definition": "使用过去可得的滚动宏观和行情特征识别相似市场状态。",
+      "assumptions": "需要事先定义距离/相似性、训练样本时间范围和目标数据分布；无监督发现不构成未来可预测或因果结论。",
+      "properties": [
+        "使用过去可得的滚动宏观和行情特征识别相似市场状态。",
+        "聚类、降维和表示学习的结果应通过稳定性、分布变化及独立下游任务验证。"
+      ],
+      "formulas": [
+        {
+          "label": "方法核心数学目标",
+          "tex": "c_t=\\operatorname{Cluster}(X_{t-W:t})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确输入样本的特征空间、相似度或无监督训练目标，再选择适当的优化/分解规则。",
+          "tex": "c_t=\\operatorname{Cluster}(X_{t-W:t})"
+        },
+        {
+          "explanation": "按该目标求解潜在分组、映射或异常分数，并通过重抽样和测试期验证其稳定性。",
+          "tex": "c_t=\\operatorname{Cluster}(X_{t-W:t})"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.cluster import KMeans\nX=np.random.default_rng(0).normal(size=(40,4))\nprint(KMeans(n_clusters=3,n_init=10,random_state=0).fit_predict(X)[:10])",
+      "packages": "numpy, scikit-learn 或 torch（见import）",
+      "application": "用于ETF风险聚类、市场状态识别、异常交易检测及无监督金融特征学习。",
+      "limits": "上述Python示例是所在章节的基础计算示范，不是每一种复杂模型的完整工程实现。时序泄漏、距离尺度和市场非平稳是主要失效来源。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n04-05",
+      "node_id": "unsupervised-n04-05",
+      "title": "交易异常检测",
+      "definition": "对点差、成交额、订单流等输入计算相对历史基准的异常分数。",
+      "assumptions": "需要事先定义距离/相似性、训练样本时间范围和目标数据分布；无监督发现不构成未来可预测或因果结论。",
+      "properties": [
+        "对点差、成交额、订单流等输入计算相对历史基准的异常分数。",
+        "聚类、降维和表示学习的结果应通过稳定性、分布变化及独立下游任务验证。"
+      ],
+      "formulas": [
+        {
+          "label": "方法核心数学目标",
+          "tex": "a_t=(x_t-\\mu)^\\top\\Sigma^{-1}(x_t-\\mu)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确输入样本的特征空间、相似度或无监督训练目标，再选择适当的优化/分解规则。",
+          "tex": "a_t=(x_t-\\mu)^\\top\\Sigma^{-1}(x_t-\\mu)"
+        },
+        {
+          "explanation": "按该目标求解潜在分组、映射或异常分数，并通过重抽样和测试期验证其稳定性。",
+          "tex": "a_t=(x_t-\\mu)^\\top\\Sigma^{-1}(x_t-\\mu)"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.cluster import KMeans\nX=np.random.default_rng(0).normal(size=(40,4))\nprint(KMeans(n_clusters=3,n_init=10,random_state=0).fit_predict(X)[:10])",
+      "packages": "numpy, scikit-learn 或 torch（见import）",
+      "application": "用于ETF风险聚类、市场状态识别、异常交易检测及无监督金融特征学习。",
+      "limits": "上述Python示例是所在章节的基础计算示范，不是每一种复杂模型的完整工程实现。时序泄漏、距离尺度和市场非平稳是主要失效来源。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n05-05",
+      "node_id": "unsupervised-n05-05",
+      "title": "因子去相关",
+      "definition": "通过白化或残差化处理减少候选因子中的线性重叠信息。",
+      "assumptions": "需要事先定义距离/相似性、训练样本时间范围和目标数据分布；无监督发现不构成未来可预测或因果结论。",
+      "properties": [
+        "通过白化或残差化处理减少候选因子中的线性重叠信息。",
+        "聚类、降维和表示学习的结果应通过稳定性、分布变化及独立下游任务验证。"
+      ],
+      "formulas": [
+        {
+          "label": "方法核心数学目标",
+          "tex": "Z=X\\Sigma_X^{-1/2}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确输入样本的特征空间、相似度或无监督训练目标，再选择适当的优化/分解规则。",
+          "tex": "Z=X\\Sigma_X^{-1/2}"
+        },
+        {
+          "explanation": "按该目标求解潜在分组、映射或异常分数，并通过重抽样和测试期验证其稳定性。",
+          "tex": "Z=X\\Sigma_X^{-1/2}"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.cluster import KMeans\nX=np.random.default_rng(0).normal(size=(40,4))\nprint(KMeans(n_clusters=3,n_init=10,random_state=0).fit_predict(X)[:10])",
+      "packages": "numpy, scikit-learn 或 torch（见import）",
+      "application": "用于ETF风险聚类、市场状态识别、异常交易检测及无监督金融特征学习。",
+      "limits": "上述Python示例是所在章节的基础计算示范，不是每一种复杂模型的完整工程实现。时序泄漏、距离尺度和市场非平稳是主要失效来源。",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n06-05",
+      "node_id": "unsupervised-n06-05",
+      "title": "无监督信号验证",
+      "definition": "无监督得到的组别需经独立未来收益标签和真实交易成本验证经济价值。",
+      "assumptions": "需要事先定义距离/相似性、训练样本时间范围和目标数据分布；无监督发现不构成未来可预测或因果结论。",
+      "properties": [
+        "无监督得到的组别需经独立未来收益标签和真实交易成本验证经济价值。",
+        "聚类、降维和表示学习的结果应通过稳定性、分布变化及独立下游任务验证。"
+      ],
+      "formulas": [
+        {
+          "label": "方法核心数学目标",
+          "tex": "\\Delta R=R_{\\rm baseline}-R_{\\rm proposed}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确输入样本的特征空间、相似度或无监督训练目标，再选择适当的优化/分解规则。",
+          "tex": "\\Delta R=R_{\\rm baseline}-R_{\\rm proposed}"
+        },
+        {
+          "explanation": "按该目标求解潜在分组、映射或异常分数，并通过重抽样和测试期验证其稳定性。",
+          "tex": "\\Delta R=R_{\\rm baseline}-R_{\\rm proposed}"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.cluster import KMeans\nX=np.random.default_rng(0).normal(size=(40,4))\nprint(KMeans(n_clusters=3,n_init=10,random_state=0).fit_predict(X)[:10])",
+      "packages": "numpy, scikit-learn 或 torch（见import）",
+      "application": "用于ETF风险聚类、市场状态识别、异常交易检测及无监督金融特征学习。",
+      "limits": "上述Python示例是所在章节的基础计算示范，不是每一种复杂模型的完整工程实现。时序泄漏、距离尺度和市场非平稳是主要失效来源。",
+      "coverage": "complete"
+    }
+  ]
+}
