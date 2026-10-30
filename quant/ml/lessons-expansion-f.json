@@ -1,0 +1,509 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "probabilistic-n03-01",
+      "node_id": "probabilistic-n03-01",
+      "title": "最大似然MLE",
+      "definition": "最大似然估计选择最能解释已观察数据的概率模型参数；在条件独立样本下，联合似然为单样本概率的乘积。",
+      "assumptions": "必须定义参数化密度或质量函数，并明确样本是否独立以及分布假设。",
+      "properties": [
+        "对数运算将乘积变为求和，便于数值优化。",
+        "在正则性条件下，MLE具有渐近正态性和渐近效率，但小样本可能有偏。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "\\hat\\theta=\\arg\\max_\\theta\\sum_{i=1}^n\\log p_\\theta(x_i)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "独立同分布样本的联合密度为单点乘积",
+          "tex": "p_\\theta(x_{1:n})=\\prod_{i=1}^np_\\theta(x_i)"
+        },
+        {
+          "explanation": "取对数保持极大值位置不变",
+          "tex": "\\log L(\\theta)=\\sum_i\\log p_\\theta(x_i)"
+        },
+        {
+          "explanation": "正态同方差样本对均值求导，得到样本均值",
+          "tex": "\\frac{\\partial\\log L}{\\partial\\mu}=\\frac1{\\sigma^2}\\sum_i(x_i-\\mu)=0\\ \\Rightarrow\\ \\hat\\mu=\\bar x"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0)\nx=rng.normal(loc=2.,scale=1.5,size=150)\nmu=x.mean()\nvar=((x-mu)**2).mean()\nprint(\"Gaussian MLE mean and variance:\",mu,var)",
+      "packages": "numpy",
+      "application": "估计市场收益分布、隐状态模型发射分布及预测模型噪声参数。",
+      "limits": "价格收益尾部可能明显偏离正态，误设的似然会低估尾部风险。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n05-01",
+      "node_id": "probabilistic-n05-01",
+      "title": "指数族",
+      "definition": "指数族把许多概率分布写成充分统计量、自然参数和对数配分函数的统一形式；GLM常建立在其基础上。",
+      "assumptions": "基准测度、支持集与参数定义需明确；并非全部金融收益分布都属于简单指数族。",
+      "properties": [
+        "配分函数的一阶导给出充分统计量的期望。",
+        "其二阶导通常等于充分统计量的协方差。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "p(x\\mid\\eta)=h(x)\\exp\\{\\eta^\\top T(x)-A(\\eta)\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "归一化条件决定对数配分函数",
+          "tex": "A(\\eta)=\\log\\int h(x)e^{\\eta^\\top T(x)}dx"
+        },
+        {
+          "explanation": "在允许微分与积分交换条件下求导",
+          "tex": "\\nabla_\\eta A(\\eta)=E_\\eta[T(X)]"
+        },
+        {
+          "explanation": "二阶导给出指数族的统计量协方差",
+          "tex": "\\nabla_\\eta^2A(\\eta)=\\operatorname{Cov}_\\eta[T(X)]"
+        }
+      ],
+      "code": "import numpy as np\neta=np.log(.7/.3)\np=np.exp(eta)/(1+np.exp(eta))\nA=np.logaddexp(0.,eta)\nprint(\"Bernoulli E[T] =\",p,\"log partition =\",A)",
+      "packages": "numpy",
+      "application": "理解Logistic回归、Poisson事件计数模型和贝叶斯共轭分析。",
+      "limits": "对金融极端分布直接套用轻尾指数族会产生模型风险。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n01-03",
+      "node_id": "probabilistic-n01-03",
+      "title": "共轭先验",
+      "definition": "当某类先验与似然结合后，后验仍落在相同分布族中，称为共轭先验；可获得封闭形式的参数更新。",
+      "assumptions": "共轭性依赖选定似然与先验搭配；先验超参数代表真实的模型假设。",
+      "properties": [
+        "Beta先验对Bernoulli似然共轭。",
+        "共轭更新便于序贯学习，但不保证先验或似然正确。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "p\\sim\\operatorname{Beta}(a,b),\\quad s=\\sum y_i\\Rightarrow p\\mid y\\sim\\operatorname{Beta}(a+s,b+n-s)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "Bernoulli数据似然按成功次数收集幂次",
+          "tex": "L(p)\\propto p^s(1-p)^{n-s}"
+        },
+        {
+          "explanation": "Beta先验的核为相同变量幂的乘积",
+          "tex": "\\pi(p)\\propto p^{a-1}(1-p)^{b-1}"
+        },
+        {
+          "explanation": "相乘后重新归一化识别后验参数",
+          "tex": "\\pi(p\\mid y)\\propto p^{a+s-1}(1-p)^{b+n-s-1}"
+        }
+      ],
+      "code": "import numpy as np\na,b=2.,2.\noutcomes=np.array([1,0,1,1,0,1,1])\nap=a+outcomes.sum(); bp=b+len(outcomes)-outcomes.sum()\nprint(\"Posterior Beta(a,b):\",ap,bp,\"mean:\",ap/(ap+bp))",
+      "packages": "numpy",
+      "application": "将风险事件发生频率与历史先验结合，分析小样本概率估计。",
+      "limits": "财务事件在不同时期可能不服从相同Bernoulli概率，需要状态依赖建模。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n06-01",
+      "node_id": "probabilistic-n06-01",
+      "title": "后验预测",
+      "definition": "后验预测分布对参数不确定性进行积分，预测新观测而不是仅把单个参数点估计带入似然。",
+      "assumptions": "参数先验、似然和观测数据应属于一致的概率模型。",
+      "properties": [
+        "包含参数估计的不确定性，可能比插件式点估计更分散。",
+        "模型误设不会因为做贝叶斯积分而消失。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "p(x_{\\rm new}\\mid D)=\\int p(x_{\\rm new}\\mid\\theta)p(\\theta\\mid D)\\,d\\theta"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "用全概率公式对未知参数积分",
+          "tex": "p(x_{\\rm new}\\mid D)=\\int p(x_{\\rm new},\\theta\\mid D)d\\theta"
+        },
+        {
+          "explanation": "在给定参数后新样本与旧样本条件独立时分解",
+          "tex": "p(x_{\\rm new},\\theta\\mid D)=p(x_{\\rm new}\\mid\\theta)p(\\theta\\mid D)"
+        },
+        {
+          "explanation": "Beta-Bernoulli中下次成功的概率为后验均值",
+          "tex": "P(Y_{\\rm new}=1\\mid D)=\\frac{a+s}{a+b+n}"
+        }
+      ],
+      "code": "import numpy as np\na,b=1.,1.; y=np.array([1,0,0,1,1,1])\npred=(a+y.sum())/(a+b+len(y))\nprint(\"Next-event posterior predictive P:\",pred)",
+      "packages": "numpy",
+      "application": "信用违约、趋势持续事件的预测分布与小样本风险评估。",
+      "limits": "若市场制度发生切换，历史事件频率不再代表未来概率。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n01-02",
+      "node_id": "probabilistic-n01-02",
+      "title": "高斯混合模型GMM",
+      "definition": "高斯混合将数据密度表示为多个高斯成分的凸组合，用潜在类别描述多峰、不同波动状态。",
+      "assumptions": "混合系数非负且和为1，协方差矩阵需要正定或正则化。",
+      "properties": [
+        "EM算法可交替更新软成分归属与参数。",
+        "成分标签可交换，不应把第1类永久解释成牛市。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "p(x)=\\sum_{k=1}^K\\pi_k\\,\\mathcal N(x\\mid\\mu_k,\\Sigma_k),\\quad \\sum_k\\pi_k=1"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "引入潜在状态Z并对其求边缘分布",
+          "tex": "p(x)=\\sum_kp(Z=k)p(x\\mid Z=k)"
+        },
+        {
+          "explanation": "E步按Bayes定理计算软归属概率",
+          "tex": "\\gamma_{ik}=\\frac{\\pi_k\\mathcal N(x_i\\mid\\mu_k,\\Sigma_k)}{\\sum_j\\pi_j\\mathcal N(x_i\\mid\\mu_j,\\Sigma_j)}"
+        },
+        {
+          "explanation": "M步用加权频率、均值和协方差更新模型",
+          "tex": "\\mu_k=\\frac{\\sum_i\\gamma_{ik}x_i}{\\sum_i\\gamma_{ik}},\\quad \\pi_k=\\frac1n\\sum_i\\gamma_{ik}"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.mixture import GaussianMixture\nrng=np.random.default_rng(2)\nx=np.r_[rng.normal(-1,.3,90),rng.normal(2,.6,110)].reshape(-1,1)\ng=GaussianMixture(n_components=2,random_state=2).fit(x)\nprint(\"means:\",np.sort(g.means_.ravel()))\nprint(\"responsibilities:\",g.predict_proba(x[:2]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用收益和波动特征识别不同市场状态或混合收益分布。",
+      "limits": "混合高斯不能直接刻画所有金融厚尾，需检查模型稳定性。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n04-02",
+      "node_id": "probabilistic-n04-02",
+      "title": "状态空间模型",
+      "definition": "状态空间模型将不可观察的动态状态与带噪观测相分离，可用过滤和光滑方法逐期推断。",
+      "assumptions": "状态转移及观测方程必须定义，时间索引和观测发布时点需一致。",
+      "properties": [
+        "线性高斯模型可以用Kalman滤波解析递推。",
+        "非线性/非高斯可考虑扩展滤波或粒子方法。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "x_t=Fx_{t-1}+w_t,\\quad y_t=Hx_t+v_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "状态转移方程描述状态在时间中的演化",
+          "tex": "x_t\\mid x_{t-1}\\sim N(Fx_{t-1},Q)"
+        },
+        {
+          "explanation": "观测模型把不可见状态映射到可观测量",
+          "tex": "y_t\\mid x_t\\sim N(Hx_t,R)"
+        },
+        {
+          "explanation": "联合分布由转移与发射概率依次相乘",
+          "tex": "p(x_{0:T},y_{1:T})=p(x_0)\\prod_tp(x_t\\mid x_{t-1})p(y_t\\mid x_t)"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0)\nx=0.;series=[]\nfor t in range(8):\n    x=.8*x+rng.normal(0,.3)\n    series.append(x+rng.normal(0,.2))\nprint(\"Noisy observations:\",np.round(series,3))",
+      "packages": "numpy",
+      "application": "动态Beta、潜在市场趋势和短期波动状态估计。",
+      "limits": "这段代码只是模拟状态与观测，未包含状态估计算法。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n05-02",
+      "node_id": "probabilistic-n05-02",
+      "title": "Kalman滤波",
+      "definition": "Kalman滤波在线性高斯模型中用先验预测与新观测的创新残差逐期更新潜在状态均值与方差。",
+      "assumptions": "状态和观测方程线性、噪声具有已知协方差且与初始条件独立，标准最优性需高斯条件。",
+      "properties": [
+        "滤波更新使用截至当前的观察，不使用未来观测。",
+        "Kalman增益在模型噪声之间权衡预测与新观测。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "K_t=P_t^-H^\\top(HP_t^-H^\\top+R)^{-1},\\quad \\hat x_t^+=\\hat x_t^-+K_t(y_t-H\\hat x_t^-)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据状态方程产生先验预测",
+          "tex": "\\hat x_t^-=F\\hat x_{t-1}^+,\\quad P_t^-=FP_{t-1}^+F^\\top+Q"
+        },
+        {
+          "explanation": "用观测创新表示新信息",
+          "tex": "e_t=y_t-H\\hat x_t^-,\\quad S_t=HP_t^-H^\\top+R"
+        },
+        {
+          "explanation": "以创新的最小方差线性权重更新",
+          "tex": "\\hat x_t^+=\\hat x_t^-+K_te_t,\\quad P_t^+=(I-K_tH)P_t^-"
+        }
+      ],
+      "code": "import numpy as np\ny=[.3,.5,.4,1.2,.9]\nx=0.;P=1.;F=1.;Q=.05;R=.2;H=1.\nfor obs in y:\n    x_pred=F*x;P_pred=F*P*F+Q\n    K=P_pred*H/(H*P_pred*H+R)\n    x=x_pred+K*(obs-H*x_pred)\n    P=(1-K*H)*P_pred\n    print(round(x,3),round(P,3))",
+      "packages": "numpy",
+      "application": "动态因子回归、时变市场Beta和实时潜在波动状态跟踪。",
+      "limits": "当噪声分布重尾或状态动态错设时，滤波均值与置信区间可能不可靠。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n03-03",
+      "node_id": "probabilistic-n03-03",
+      "title": "Metropolis-Hastings",
+      "definition": "MH通过提议分布构造接受/拒绝转移，使目标后验在适当可逆性与不可约性条件下成为马尔可夫链的平稳分布。",
+      "assumptions": "目标密度仅需知道归一化常数以外的比例；提议分布应允许状态空间充分探索。",
+      "properties": [
+        "接受率修正提议不对称性。",
+        "样本可能高度自相关；需要诊断收敛和有效样本量。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "\\alpha(x,x')=\\min\\left(1,\\frac{\\pi(x')q(x\\mid x')}{\\pi(x)q(x'\\mid x)}\\right)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "希望平衡从x到x'与反向流量",
+          "tex": "\\pi(x)q(x'|x)\\alpha(x,x')=\\pi(x')q(x|x')\\alpha(x',x)"
+        },
+        {
+          "explanation": "选取上述最小接受率满足详细平衡",
+          "tex": "\\frac{\\alpha(x,x')}{\\alpha(x',x)}=\\frac{\\pi(x')q(x\\mid x')}{\\pi(x)q(x'\\mid x)}"
+        },
+        {
+          "explanation": "对称提议时q比率消去，只需后验密度比",
+          "tex": "\\alpha=\\min(1,\\pi(x')/\\pi(x))"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);x=0.;draw=[]\nfor _ in range(2000):\n    proposal=x+rng.normal(0,.7)\n    log_ratio=-.5*(proposal**2-x**2)\n    if np.log(rng.random())<min(0.,log_ratio):x=proposal\n    draw.append(x)\nprint(\"Mean, sd (after burn-in):\",np.mean(draw[400:]),np.std(draw[400:]))",
+      "packages": "numpy",
+      "application": "对金融参数后验抽样，研究风险指标与收益预测区间的不确定性。",
+      "limits": "示例抽取的是标准正态目标分布，不是金融实际模型；需诊断混合、收敛和自相关。",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n05-04",
+      "node_id": "probabilistic-n05-04",
+      "title": "Conformal Prediction",
+      "definition": "Conformal预测利用校准集非一致性分数的秩分位数构造预测集合；交换性下具有有限样本边际覆盖保证。",
+      "assumptions": "标准split conformal需要训练/校准/未来测试样本可交换；非平稳金融序列不自动满足。",
+      "properties": [
+        "对模型形式要求弱，但依赖样本分割与分数定义。",
+        "保证通常是边际覆盖率，而非每个条件状态均保证覆盖。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "C(x)=[\\hat f(x)-\\hat q_{1-\\alpha},\\ \\hat f(x)+\\hat q_{1-\\alpha}]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "在独立校准集计算绝对残差",
+          "tex": "r_i=|y_i-\\hat f(x_i)|,\\quad i\\in I_{\\rm calib}"
+        },
+        {
+          "explanation": "用有限样本修正秩选取覆盖分位",
+          "tex": "k=\\lceil(n_{\\rm calib}+1)(1-\\alpha)\\rceil"
+        },
+        {
+          "explanation": "新的预测加减校准残差分位数得到区间",
+          "tex": "P(Y_{\\rm new}\\in C(X_{\\rm new}))\\ge1-\\alpha"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.linear_model import LinearRegression\nrng=np.random.default_rng(0)\nX=rng.normal(size=(100,1));y=2*X[:,0]+rng.normal(size=100)\nm=LinearRegression().fit(X[:50],y[:50])\nres=np.abs(y[50:80]-m.predict(X[50:80]))\nalpha=.1;k=min(len(res),int(np.ceil((len(res)+1)*(1-alpha))))\nq=np.sort(res)[k-1]\np=m.predict(X[80:83])\nprint(\"Intervals:\",np.column_stack([p-q,p+q]))",
+      "packages": "numpy, scikit-learn",
+      "application": "为ETF波动率、收益或交易量预测添加覆盖风险度量。",
+      "limits": "金融分布漂移和标签重叠可能破坏交换性，不能直接宣称90%时序覆盖。",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n04-01",
+      "node_id": "optimization-n04-01",
+      "title": "Mini-batch SGD",
+      "definition": "Mini-batch SGD在每次参数更新时以一个小批量估计经验风险梯度，兼顾计算效率和随机梯度噪声。",
+      "assumptions": "批次通常从训练样本抽取，不能包含验证/测试样本；学习率与批次尺度要共同设置。",
+      "properties": [
+        "批次较大通常减少梯度方差，但增加内存消耗。",
+        "对时间序列顺序依赖的任务应正确构造窗口与状态。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "g_B(\\theta)=\\frac1{|B|}\\sum_{i\\in B}\\nabla_\\theta\\ell_i(\\theta),\\quad\\theta^+=\\theta-\\eta g_B"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "经验风险梯度为单样本梯度的均值",
+          "tex": "\\nabla L(\\theta)=\\frac1n\\sum_i\\nabla\\ell_i(\\theta)"
+        },
+        {
+          "explanation": "均匀抽样时小批量梯度期望等于完整梯度",
+          "tex": "E_B[g_B\\mid\\theta]=\\nabla L(\\theta)"
+        },
+        {
+          "explanation": "每次取批次损失并更新后进入下一批",
+          "tex": "\\theta_{t+1}=\\theta_t-\\eta\\,\\nabla L_{B_t}(\\theta_t)"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(1)\nx=rng.normal(size=96);y=1.7*x+.2*rng.normal(size=96);w=0.\nfor epoch in range(30):\n    for ids in np.array_split(rng.permutation(len(x)),12):\n        w-=.08*2*np.mean(x[ids]*(w*x[ids]-y[ids]))\nprint(\"Estimated coefficient:\",round(w,3))",
+      "packages": "numpy",
+      "application": "训练多因子Logistic模型或深度金融价格图像网络。",
+      "limits": "批次更新的演示拟合线性斜率，不能说明深度模型的泛化能力。",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n02-02",
+      "node_id": "optimization-n02-02",
+      "title": "Nesterov加速",
+      "definition": "Nesterov动量在前瞻点计算梯度，再进行动量更新；在适当凸光滑问题上具备比普通梯度法更快的理论收敛速率。",
+      "assumptions": "不同优化器框架采用的Nesterov写法略有差别，比较时需统一定义。",
+      "properties": [
+        "光滑凸问题有O(1/k²)函数值收敛界的加速方案。",
+        "非凸神经网络中的实际收敛速度必须实验检验。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "y_k=x_k+\\beta_k(x_k-x_{k-1}),\\quad x_{k+1}=y_k-\\eta\\nabla f(y_k)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先按历史更新方向得到前瞻点",
+          "tex": "y_k=x_k+\\beta_k(x_k-x_{k-1})"
+        },
+        {
+          "explanation": "在前瞻点而不是旧位置评估梯度",
+          "tex": "g_k=\\nabla f(y_k)"
+        },
+        {
+          "explanation": "执行下降步并继续更新动量",
+          "tex": "x_{k+1}=y_k-\\eta g_k"
+        }
+      ],
+      "code": "x_prev=5.;x=5.;step=.1;beta=.8\nfor _ in range(30):\n    look=x+beta*(x-x_prev)\n    new=look-step*2*(look-1.)\n    x_prev,x=x,new\nprint(\"Nesterov scalar minimizer:\",x)",
+      "packages": "Python standard library",
+      "application": "金融神经网络或线性模型优化器的加速策略比较。",
+      "limits": "固定β的示例不自动具备标准最优O(1/k²)理论保证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n04-02",
+      "node_id": "optimization-n04-02",
+      "title": "RMSProp",
+      "definition": "RMSProp通过梯度平方的指数移动平均缩放每维更新，使不同参数方向拥有不同的有效步长。",
+      "assumptions": "梯度可计算；平滑系数β属于(0,1)，稳定项ε为正。",
+      "properties": [
+        "对变化尺度不同的特征通常比固定步幅更方便。",
+        "自适应步长仍可能造成非凸问题训练不稳定。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "v_t=\\beta v_{t-1}+(1-\\beta)g_t^2,\\quad\\theta_{t+1}=\\theta_t-\\eta\\frac{g_t}{\\sqrt{v_t}+\\epsilon}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "每次更新当前梯度的平方原点矩估计",
+          "tex": "v_t=\\beta v_{t-1}+(1-\\beta)g_t^2"
+        },
+        {
+          "explanation": "用该估计的平方根逐元素缩放当前梯度",
+          "tex": "\\tilde g_t=g_t/(\\sqrt{v_t}+\\epsilon)"
+        },
+        {
+          "explanation": "参数沿缩放后的负梯度移动",
+          "tex": "\\theta_{t+1}=\\theta_t-\\eta\\tilde g_t"
+        }
+      ],
+      "code": "import numpy as np\ntheta=np.array([5.,-3.]);target=np.array([1.,2.])\nv=np.zeros(2)\nfor _ in range(80):\n    g=2*(theta-target)\n    v=.9*v+.1*g*g\n    theta-=.1*g/(np.sqrt(v)+1e-8)\nprint(theta)",
+      "packages": "numpy",
+      "application": "对尺度不同的金融特征训练序列网络。",
+      "limits": "代码是简单二次目标，没有训练完整神经网络。",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n01-03",
+      "node_id": "optimization-n01-03",
+      "title": "Newton法",
+      "definition": "Newton优化使用梯度与Hessian构造局部二阶近似，求其驻点以产生参数更新。",
+      "assumptions": "Hessian必须可逆，且为正定时Newton方向才保证局部下降；实际通常配合线搜索或阻尼。",
+      "properties": [
+        "在最优点附近满足适当条件时可有二次局部收敛。",
+        "高维神经网络直接求Hessian逆非常昂贵。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "\\theta_{k+1}=\\theta_k-H(\\theta_k)^{-1}\\nabla f(\\theta_k)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对当前参数处的目标作二阶Taylor近似",
+          "tex": "f(\\theta+\\Delta)\\approx f(\\theta)+g^\\top\\Delta+\\tfrac12\\Delta^\\top H\\Delta"
+        },
+        {
+          "explanation": "令局部二次模型对增量的梯度为零",
+          "tex": "g+H\\Delta=0"
+        },
+        {
+          "explanation": "解方程得到Newton步",
+          "tex": "\\Delta=-H^{-1}g"
+        }
+      ],
+      "code": "import numpy as np\nA=np.array([[4.,1.],[1.,3.]])\nb=np.array([1.,2.])\ntheta=np.array([5.,-2.])\ng=A@theta-b\ntheta=theta-np.linalg.solve(A,g)\nprint(\"Quadratic optimum:\",theta)",
+      "packages": "numpy",
+      "application": "理解GLM拟合、优化收敛和投资组合二阶求解器。",
+      "limits": "非凸损失的Hessian可能不定，须加阻尼或信赖域控制。",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n05-03",
+      "node_id": "optimization-n05-03",
+      "title": "近端梯度",
+      "definition": "近端梯度把目标分成可微光滑部分与可求近端算子的非光滑部分，用下降步加近端映射处理L1等惩罚。",
+      "assumptions": "光滑部分梯度Lipschitz，合适步长通常不超过1/L；非光滑项的近端操作需可实现。",
+      "properties": [
+        "L1的近端算子是软阈值运算。",
+        "是理解ISTA/FISTA和稀疏因子模型的重要算法。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "\\theta_{k+1}=\\operatorname{prox}_{\\eta g}\\big(\\theta_k-\\eta\\nabla f(\\theta_k)\\big)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "在当前点对光滑f做一阶梯度步",
+          "tex": "z_k=\\theta_k-\\eta\\nabla f(\\theta_k)"
+        },
+        {
+          "explanation": "最小化非光滑罚项与到z的距离平方",
+          "tex": "\\operatorname{prox}_{\\eta g}(z)=\\arg\\min_x\\{\\tfrac1{2\\eta}\\|x-z\\|^2+g(x)\\}"
+        },
+        {
+          "explanation": "对g(x)=λ|x|得到逐元素软阈值",
+          "tex": "\\operatorname{prox}_{\\eta\\lambda|\\cdot|}(z)=\\operatorname{sign}(z)(|z|-\\eta\\lambda)_+"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0)\nX=rng.normal(size=(120,4));y=X[:,0]-2*X[:,2]+.2*rng.normal(size=120)\nw=np.zeros(4);lam=.1;step=.08\nfor _ in range(300):\n    z=w-step*(X.T@(X@w-y))/len(y)\n    w=np.sign(z)*np.maximum(np.abs(z)-step*lam,0)\nprint(\"Sparse weights:\",w)",
+      "packages": "numpy",
+      "application": "实现LASSO稀疏因子选择、组合持仓惩罚。",
+      "limits": "必须校核梯度Lipschitz常数与实际步长，否则可能发散。",
+      "coverage": "complete"
+    }
+  ]
+}
