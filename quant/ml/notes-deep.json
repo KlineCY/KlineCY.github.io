@@ -1,0 +1,613 @@
+{
+  "version": 1,
+  "notes": [
+    {
+      "id": "deep-n04-01",
+      "node_id": "deep-n04-01",
+      "title": "输出层与损失",
+      "definition": "输出层根据回归、分类或分布参数任务选择线性、Sigmoid或Softmax与匹配损失。",
+      "assumptions": "必须明确张量维度、训练与推断阶段、时间因果遮罩及可微优化条件。复杂架构需要实测泛化与计算负担。",
+      "properties": [
+        "输出层根据回归、分类或分布参数任务选择线性、Sigmoid或Softmax与匹配损失。。",
+        "模型表现依赖训练数据与目标任务；价格图像或金融序列不得泄漏未来信息。"
+      ],
+      "formulas": [
+        {
+          "label": "基础数学公式",
+          "tex": "\\hat y=f_\\theta(x),\\quad L=\\ell(\\hat y,y)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据该结构的计算定义建立前向或优化关系。输出层根据回归、分类或分布参数任务选择线性、Sigmoid或Softmax与匹配损失。",
+          "tex": "\\hat y=f_\\theta(x),\\quad L=\\ell(\\hat y,y)"
+        },
+        {
+          "explanation": "根据链式法则或状态递推解释该结构如何对输入或参数产生影响。",
+          "tex": "\\hat y=f_\\theta(x),\\quad L=\\ell(\\hat y,y)"
+        }
+      ],
+      "code": "# 输出层与损失：相关网络基础示例\nimport torch\ntorch.manual_seed(0)\nx=torch.randn(24,4);y=x[:,0:1]*2\nnet=torch.nn.Sequential(torch.nn.Linear(4,8),torch.nn.ReLU(),torch.nn.Linear(8,1))\nopt=torch.optim.AdamW(net.parameters(),lr=.03)\nfor _ in range(40):\n opt.zero_grad();loss=(net(x)-y).square().mean();loss.backward();opt.step()\nnet.eval()\nwith torch.no_grad():print(\"MSE:\",((net(x)-y)**2).mean().item())",
+      "packages": "torch",
+      "application": "用于ETF价格图像CNN、金融文本Transformer、长序列预测以及训练工程。",
+      "limits": "这是专题扩展笔记：代码是相应网络家族的基础演示，尚非本知识点全部理论证明或完整生产实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "deep-n05-01",
+      "node_id": "deep-n05-01",
+      "title": "万能逼近定理",
+      "definition": "满足适当非线性激活条件的前馈网络在紧集上可逼近连续函数。",
+      "assumptions": "必须明确张量维度、训练与推断阶段、时间因果遮罩及可微优化条件。复杂架构需要实测泛化与计算负担。",
+      "properties": [
+        "满足适当非线性激活条件的前馈网络在紧集上可逼近连续函数。。",
+        "模型表现依赖训练数据与目标任务；价格图像或金融序列不得泄漏未来信息。"
+      ],
+      "formulas": [
+        {
+          "label": "基础数学公式",
+          "tex": "\\sup_{x\\in K}|f_\\theta(x)-f(x)|<\\epsilon"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据该结构的计算定义建立前向或优化关系。满足适当非线性激活条件的前馈网络在紧集上可逼近连续函数。",
+          "tex": "\\sup_{x\\in K}|f_\\theta(x)-f(x)|<\\epsilon"
+        },
+        {
+          "explanation": "根据链式法则或状态递推解释该结构如何对输入或参数产生影响。",
+          "tex": "\\sup_{x\\in K}|f_\\theta(x)-f(x)|<\\epsilon"
+        }
+      ],
+      "code": "# 万能逼近定理：相关网络基础示例\nimport torch\ntorch.manual_seed(0)\nx=torch.randn(24,4);y=x[:,0:1]*2\nnet=torch.nn.Sequential(torch.nn.Linear(4,8),torch.nn.ReLU(),torch.nn.Linear(8,1))\nopt=torch.optim.AdamW(net.parameters(),lr=.03)\nfor _ in range(40):\n opt.zero_grad();loss=(net(x)-y).square().mean();loss.backward();opt.step()\nnet.eval()\nwith torch.no_grad():print(\"MSE:\",((net(x)-y)**2).mean().item())",
+      "packages": "torch",
+      "application": "用于ETF价格图像CNN、金融文本Transformer、长序列预测以及训练工程。",
+      "limits": "这是专题扩展笔记：代码是相应网络家族的基础演示，尚非本知识点全部理论证明或完整生产实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "deep-n06-01",
+      "node_id": "deep-n06-01",
+      "title": "网络深度与宽度",
+      "definition": "网络层数和隐藏单元数共同影响表达复杂度、参数量与优化。",
+      "assumptions": "必须明确张量维度、训练与推断阶段、时间因果遮罩及可微优化条件。复杂架构需要实测泛化与计算负担。",
+      "properties": [
+        "网络层数和隐藏单元数共同影响表达复杂度、参数量与优化。。",
+        "模型表现依赖训练数据与目标任务；价格图像或金融序列不得泄漏未来信息。"
+      ],
+      "formulas": [
+        {
+          "label": "基础数学公式",
+          "tex": "h^{(l+1)}=\\phi(W_lh^{(l)}+b_l)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据该结构的计算定义建立前向或优化关系。网络层数和隐藏单元数共同影响表达复杂度、参数量与优化。",
+          "tex": "h^{(l+1)}=\\phi(W_lh^{(l)}+b_l)"
+        },
+        {
+          "explanation": "根据链式法则或状态递推解释该结构如何对输入或参数产生影响。",
+          "tex": "h^{(l+1)}=\\phi(W_lh^{(l)}+b_l)"
+        }
+      ],
+      "code": "# 网络深度与宽度：相关网络基础示例\nimport torch\ntorch.manual_seed(0)\nx=torch.randn(24,4);y=x[:,0:1]*2\nnet=torch.nn.Sequential(torch.nn.Linear(4,8),torch.nn.ReLU(),torch.nn.Linear(8,1))\nopt=torch.optim.AdamW(net.parameters(),lr=.03)\nfor _ in range(40):\n opt.zero_grad();loss=(net(x)-y).square().mean();loss.backward();opt.step()\nnet.eval()\nwith torch.no_grad():print(\"MSE:\",((net(x)-y)**2).mean().item())",
+      "packages": "torch",
+      "application": "用于ETF价格图像CNN、金融文本Transformer、长序列预测以及训练工程。",
+      "limits": "这是专题扩展笔记：代码是相应网络家族的基础演示，尚非本知识点全部理论证明或完整生产实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "deep-n02-02",
+      "node_id": "deep-n02-02",
+      "title": "链式法则",
+      "definition": "复合函数的梯度等于每层Jacobian的连乘。",
+      "assumptions": "必须明确张量维度、训练与推断阶段、时间因果遮罩及可微优化条件。复杂架构需要实测泛化与计算负担。",
+      "properties": [
+        "复合函数的梯度等于每层Jacobian的连乘。。",
+        "模型表现依赖训练数据与目标任务；价格图像或金融序列不得泄漏未来信息。"
+      ],
+      "formulas": [
+        {
+          "label": "基础数学公式",
+          "tex": "\\nabla_xL=J_f(x)^\\top\\nabla_fL"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据该结构的计算定义建立前向或优化关系。复合函数的梯度等于每层Jacobian的连乘。",
+          "tex": "\\nabla_xL=J_f(x)^\\top\\nabla_fL"
+        },
+        {
+          "explanation": "根据链式法则或状态递推解释该结构如何对输入或参数产生影响。",
+          "tex": "\\nabla_xL=J_f(x)^\\top\\nabla_fL"
+        }
+      ],
+      "code": "# 链式法则：相关网络基础示例\nimport torch\ntorch.manual_seed(0)\nx=torch.randn(24,4);y=x[:,0:1]*2\nnet=torch.nn.Sequential(torch.nn.Linear(4,8),torch.nn.ReLU(),torch.nn.Linear(8,1))\nopt=torch.optim.AdamW(net.parameters(),lr=.03)\nfor _ in range(40):\n opt.zero_grad();loss=(net(x)-y).square().mean();loss.backward();opt.step()\nnet.eval()\nwith torch.no_grad():print(\"MSE:\",((net(x)-y)**2).mean().item())",
+      "packages": "torch",
+      "application": "用于ETF价格图像CNN、金融文本Transformer、长序列预测以及训练工程。",
+      "limits": "这是专题扩展笔记：代码是相应网络家族的基础演示，尚非本知识点全部理论证明或完整生产实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "deep-n04-02",
+      "node_id": "deep-n04-02",
+      "title": "Jacobian向量积",
+      "definition": "JVP给出输入方向v导致的函数一阶变化，常用于前向模式微分。",
+      "assumptions": "必须明确张量维度、训练与推断阶段、时间因果遮罩及可微优化条件。复杂架构需要实测泛化与计算负担。",
+      "properties": [
+        "JVP给出输入方向v导致的函数一阶变化，常用于前向模式微分。。",
+        "模型表现依赖训练数据与目标任务；价格图像或金融序列不得泄漏未来信息。"
+      ],
+      "formulas": [
+        {
+          "label": "基础数学公式",
+          "tex": "J_f(x)v=\\left.\\frac{d}{dt}f(x+tv)\\right|_{t=0}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据该结构的计算定义建立前向或优化关系。JVP给出输入方向v导致的函数一阶变化，常用于前向模式微分。",
+          "tex": "J_f(x)v=\\left.\\frac{d}{dt}f(x+tv)\\right|_{t=0}"
+        },
+        {
+          "explanation": "根据链式法则或状态递推解释该结构如何对输入或参数产生影响。",
+          "tex": "J_f(x)v=\\left.\\frac{d}{dt}f(x+tv)\\right|_{t=0}"
+        }
+      ],
+      "code": "# Jacobian向量积：相关网络基础示例\nimport torch\ntorch.manual_seed(0)\nx=torch.randn(24,4);y=x[:,0:1]*2\nnet=torch.nn.Sequential(torch.nn.Linear(4,8),torch.nn.ReLU(),torch.nn.Linear(8,1))\nopt=torch.optim.AdamW(net.parameters(),lr=.03)\nfor _ in range(40):\n opt.zero_grad();loss=(net(x)-y).square().mean();loss.backward();opt.step()\nnet.eval()\nwith torch.no_grad():print(\"MSE:\",((net(x)-y)**2).mean().item())",
+      "packages": "torch",
+      "application": "用于ETF价格图像CNN、金融文本Transformer、长序列预测以及训练工程。",
+      "limits": "这是专题扩展笔记：代码是相应网络家族的基础演示，尚非本知识点全部理论证明或完整生产实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "deep-n05-02",
+      "node_id": "deep-n05-02",
+      "title": "向量Jacobian积",
+      "definition": "VJP把输出方向v乘以函数Jacobian，常用于反向自动微分。",
+      "assumptions": "必须明确张量维度、训练与推断阶段、时间因果遮罩及可微优化条件。复杂架构需要实测泛化与计算负担。",
+      "properties": [
+        "VJP把输出方向v乘以函数Jacobian，常用于反向自动微分。。",
+        "模型表现依赖训练数据与目标任务；价格图像或金融序列不得泄漏未来信息。"
+      ],
+      "formulas": [
+        {
+          "label": "基础数学公式",
+          "tex": "v^\\top J_f(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据该结构的计算定义建立前向或优化关系。VJP把输出方向v乘以函数Jacobian，常用于反向自动微分。",
+          "tex": "v^\\top J_f(x)"
+        },
+        {
+          "explanation": "根据链式法则或状态递推解释该结构如何对输入或参数产生影响。",
+          "tex": "v^\\top J_f(x)"
+        }
+      ],
+      "code": "# 向量Jacobian积：相关网络基础示例\nimport torch\ntorch.manual_seed(0)\nx=torch.randn(24,4);y=x[:,0:1]*2\nnet=torch.nn.Sequential(torch.nn.Linear(4,8),torch.nn.ReLU(),torch.nn.Linear(8,1))\nopt=torch.optim.AdamW(net.parameters(),lr=.03)\nfor _ in range(40):\n opt.zero_grad();loss=(net(x)-y).square().mean();loss.backward();opt.step()\nnet.eval()\nwith torch.no_grad():print(\"MSE:\",((net(x)-y)**2).mean().item())",
+      "packages": "torch",
+      "application": "用于ETF价格图像CNN、金融文本Transformer、长序列预测以及训练工程。",
+      "limits": "这是专题扩展笔记：代码是相应网络家族的基础演示，尚非本知识点全部理论证明或完整生产实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "deep-n06-02",
+      "node_id": "deep-n06-02",
+      "title": "梯度检查",
+      "definition": "用有限差分近似梯度并与自动微分结果比较，发现计算图实现错误。",
+      "assumptions": "必须明确张量维度、训练与推断阶段、时间因果遮罩及可微优化条件。复杂架构需要实测泛化与计算负担。",
+      "properties": [
+        "用有限差分近似梯度并与自动微分结果比较，发现计算图实现错误。。",
+        "模型表现依赖训练数据与目标任务；价格图像或金融序列不得泄漏未来信息。"
+      ],
+      "formulas": [
+        {
+          "label": "基础数学公式",
+          "tex": "\\partial_jf\\approx\\frac{f(x+he_j)-f(x-he_j)}{2h}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据该结构的计算定义建立前向或优化关系。用有限差分近似梯度并与自动微分结果比较，发现计算图实现错误。",
+          "tex": "\\partial_jf\\approx\\frac{f(x+he_j)-f(x-he_j)}{2h}"
+        },
+        {
+          "explanation": "根据链式法则或状态递推解释该结构如何对输入或参数产生影响。",
+          "tex": "\\partial_jf\\approx\\frac{f(x+he_j)-f(x-he_j)}{2h}"
+        }
+      ],
+      "code": "# 梯度检查：相关网络基础示例\nimport torch\ntorch.manual_seed(0)\nx=torch.randn(24,4);y=x[:,0:1]*2\nnet=torch.nn.Sequential(torch.nn.Linear(4,8),torch.nn.ReLU(),torch.nn.Linear(8,1))\nopt=torch.optim.AdamW(net.parameters(),lr=.03)\nfor _ in range(40):\n opt.zero_grad();loss=(net(x)-y).square().mean();loss.backward();opt.step()\nnet.eval()\nwith torch.no_grad():print(\"MSE:\",((net(x)-y)**2).mean().item())",
+      "packages": "torch",
+      "application": "用于ETF价格图像CNN、金融文本Transformer、长序列预测以及训练工程。",
+      "limits": "这是专题扩展笔记：代码是相应网络家族的基础演示，尚非本知识点全部理论证明或完整生产实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "deep-n01-03",
+      "node_id": "deep-n01-03",
+      "title": "torch.Tensor",
+      "definition": "PyTorch Tensor同时具有数据、dtype、device和形状，可被自动微分追踪。",
+      "assumptions": "必须明确张量维度、训练与推断阶段、时间因果遮罩及可微优化条件。复杂架构需要实测泛化与计算负担。",
+      "properties": [
+        "PyTorch Tensor同时具有数据、dtype、device和形状，可被自动微分追踪。。",
+        "模型表现依赖训练数据与目标任务；价格图像或金融序列不得泄漏未来信息。"
+      ],
+      "formulas": [
+        {
+          "label": "基础数学公式",
+          "tex": "X\\in\\mathbb R^{B\\times C\\times T}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据该结构的计算定义建立前向或优化关系。PyTorch Tensor同时具有数据、dtype、device和形状，可被自动微分追踪。",
+          "tex": "X\\in\\mathbb R^{B\\times C\\times T}"
+        },
+        {
+          "explanation": "根据链式法则或状态递推解释该结构如何对输入或参数产生影响。",
+          "tex": "X\\in\\mathbb R^{B\\times C\\times T}"
+        }
+      ],
+      "code": "# torch.Tensor：相关网络基础示例\nimport torch\ntorch.manual_seed(0)\nx=torch.randn(24,4);y=x[:,0:1]*2\nnet=torch.nn.Sequential(torch.nn.Linear(4,8),torch.nn.ReLU(),torch.nn.Linear(8,1))\nopt=torch.optim.AdamW(net.parameters(),lr=.03)\nfor _ in range(40):\n opt.zero_grad();loss=(net(x)-y).square().mean();loss.backward();opt.step()\nnet.eval()\nwith torch.no_grad():print(\"MSE:\",((net(x)-y)**2).mean().item())",
+      "packages": "torch",
+      "application": "用于ETF价格图像CNN、金融文本Transformer、长序列预测以及训练工程。",
+      "limits": "这是专题扩展笔记：代码是相应网络家族的基础演示，尚非本知识点全部理论证明或完整生产实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "deep-n02-03",
+      "node_id": "deep-n02-03",
+      "title": "nn.Module",
+      "definition": "nn.Module管理网络层、可训练参数和前向计算结构。",
+      "assumptions": "必须明确张量维度、训练与推断阶段、时间因果遮罩及可微优化条件。复杂架构需要实测泛化与计算负担。",
+      "properties": [
+        "nn.Module管理网络层、可训练参数和前向计算结构。。",
+        "模型表现依赖训练数据与目标任务；价格图像或金融序列不得泄漏未来信息。"
+      ],
+      "formulas": [
+        {
+          "label": "基础数学公式",
+          "tex": "f_\\theta(x)=\\operatorname{Module}(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据该结构的计算定义建立前向或优化关系。nn.Module管理网络层、可训练参数和前向计算结构。",
+          "tex": "f_\\theta(x)=\\operatorname{Module}(x)"
+        },
+        {
+          "explanation": "根据链式法则或状态递推解释该结构如何对输入或参数产生影响。",
+          "tex": "f_\\theta(x)=\\operatorname{Module}(x)"
+        }
+      ],
+      "code": "# nn.Module：相关网络基础示例\nimport torch\ntorch.manual_seed(0)\nx=torch.randn(24,4);y=x[:,0:1]*2\nnet=torch.nn.Sequential(torch.nn.Linear(4,8),torch.nn.ReLU(),torch.nn.Linear(8,1))\nopt=torch.optim.AdamW(net.parameters(),lr=.03)\nfor _ in range(40):\n opt.zero_grad();loss=(net(x)-y).square().mean();loss.backward();opt.step()\nnet.eval()\nwith torch.no_grad():print(\"MSE:\",((net(x)-y)**2).mean().item())",
+      "packages": "torch",
+      "application": "用于ETF价格图像CNN、金融文本Transformer、长序列预测以及训练工程。",
+      "limits": "这是专题扩展笔记：代码是相应网络家族的基础演示，尚非本知识点全部理论证明或完整生产实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "deep-n05-03",
+      "node_id": "deep-n05-03",
+      "title": "验证循环",
+      "definition": "验证阶段关闭梯度更新，并使用模型推断模式检查未见过的数据。",
+      "assumptions": "必须明确张量维度、训练与推断阶段、时间因果遮罩及可微优化条件。复杂架构需要实测泛化与计算负担。",
+      "properties": [
+        "验证阶段关闭梯度更新，并使用模型推断模式检查未见过的数据。。",
+        "模型表现依赖训练数据与目标任务；价格图像或金融序列不得泄漏未来信息。"
+      ],
+      "formulas": [
+        {
+          "label": "基础数学公式",
+          "tex": "R_{\\rm val}=\\frac1m\\sum_i\\ell(f_\\theta(x_i),y_i)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据该结构的计算定义建立前向或优化关系。验证阶段关闭梯度更新，并使用模型推断模式检查未见过的数据。",
+          "tex": "R_{\\rm val}=\\frac1m\\sum_i\\ell(f_\\theta(x_i),y_i)"
+        },
+        {
+          "explanation": "根据链式法则或状态递推解释该结构如何对输入或参数产生影响。",
+          "tex": "R_{\\rm val}=\\frac1m\\sum_i\\ell(f_\\theta(x_i),y_i)"
+        }
+      ],
+      "code": "# 验证循环：相关网络基础示例\nimport torch\ntorch.manual_seed(0)\nx=torch.randn(24,4);y=x[:,0:1]*2\nnet=torch.nn.Sequential(torch.nn.Linear(4,8),torch.nn.ReLU(),torch.nn.Linear(8,1))\nopt=torch.optim.AdamW(net.parameters(),lr=.03)\nfor _ in range(40):\n opt.zero_grad();loss=(net(x)-y).square().mean();loss.backward();opt.step()\nnet.eval()\nwith torch.no_grad():print(\"MSE:\",((net(x)-y)**2).mean().item())",
+      "packages": "torch",
+      "application": "用于ETF价格图像CNN、金融文本Transformer、长序列预测以及训练工程。",
+      "limits": "这是专题扩展笔记：代码是相应网络家族的基础演示，尚非本知识点全部理论证明或完整生产实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "deep-n06-03",
+      "node_id": "deep-n06-03",
+      "title": "模型保存与加载",
+      "definition": "保存模型权重和训练配置并在相同架构下加载执行预测。",
+      "assumptions": "必须明确张量维度、训练与推断阶段、时间因果遮罩及可微优化条件。复杂架构需要实测泛化与计算负担。",
+      "properties": [
+        "保存模型权重和训练配置并在相同架构下加载执行预测。。",
+        "模型表现依赖训练数据与目标任务；价格图像或金融序列不得泄漏未来信息。"
+      ],
+      "formulas": [
+        {
+          "label": "基础数学公式",
+          "tex": "\\theta_{\\rm loaded}=\\operatorname{Deserialize}(\\operatorname{Serialize}(\\theta))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据该结构的计算定义建立前向或优化关系。保存模型权重和训练配置并在相同架构下加载执行预测。",
+          "tex": "\\theta_{\\rm loaded}=\\operatorname{Deserialize}(\\operatorname{Serialize}(\\theta))"
+        },
+        {
+          "explanation": "根据链式法则或状态递推解释该结构如何对输入或参数产生影响。",
+          "tex": "\\theta_{\\rm loaded}=\\operatorname{Deserialize}(\\operatorname{Serialize}(\\theta))"
+        }
+      ],
+      "code": "# 模型保存与加载：相关网络基础示例\nimport torch\ntorch.manual_seed(0)\nx=torch.randn(24,4);y=x[:,0:1]*2\nnet=torch.nn.Sequential(torch.nn.Linear(4,8),torch.nn.ReLU(),torch.nn.Linear(8,1))\nopt=torch.optim.AdamW(net.parameters(),lr=.03)\nfor _ in range(40):\n opt.zero_grad();loss=(net(x)-y).square().mean();loss.backward();opt.step()\nnet.eval()\nwith torch.no_grad():print(\"MSE:\",((net(x)-y)**2).mean().item())",
+      "packages": "torch",
+      "application": "用于ETF价格图像CNN、金融文本Transformer、长序列预测以及训练工程。",
+      "limits": "这是专题扩展笔记：代码是相应网络家族的基础演示，尚非本知识点全部理论证明或完整生产实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "deep-n05-04",
+      "node_id": "deep-n05-04",
+      "title": "Weight Decay",
+      "definition": "权重衰减通过参数收缩控制参数尺度，适用于部分深度学习优化器。",
+      "assumptions": "必须明确张量维度、训练与推断阶段、时间因果遮罩及可微优化条件。复杂架构需要实测泛化与计算负担。",
+      "properties": [
+        "权重衰减通过参数收缩控制参数尺度，适用于部分深度学习优化器。。",
+        "模型表现依赖训练数据与目标任务；价格图像或金融序列不得泄漏未来信息。"
+      ],
+      "formulas": [
+        {
+          "label": "基础数学公式",
+          "tex": "\\theta^+=(1-\\eta\\lambda)\\theta-\\eta g"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据该结构的计算定义建立前向或优化关系。权重衰减通过参数收缩控制参数尺度，适用于部分深度学习优化器。",
+          "tex": "\\theta^+=(1-\\eta\\lambda)\\theta-\\eta g"
+        },
+        {
+          "explanation": "根据链式法则或状态递推解释该结构如何对输入或参数产生影响。",
+          "tex": "\\theta^+=(1-\\eta\\lambda)\\theta-\\eta g"
+        }
+      ],
+      "code": "# Weight Decay：相关网络基础示例\nimport torch\ntorch.manual_seed(0)\nx=torch.randn(24,4);y=x[:,0:1]*2\nnet=torch.nn.Sequential(torch.nn.Linear(4,8),torch.nn.ReLU(),torch.nn.Linear(8,1))\nopt=torch.optim.AdamW(net.parameters(),lr=.03)\nfor _ in range(40):\n opt.zero_grad();loss=(net(x)-y).square().mean();loss.backward();opt.step()\nnet.eval()\nwith torch.no_grad():print(\"MSE:\",((net(x)-y)**2).mean().item())",
+      "packages": "torch",
+      "application": "用于ETF价格图像CNN、金融文本Transformer、长序列预测以及训练工程。",
+      "limits": "这是专题扩展笔记：代码是相应网络家族的基础演示，尚非本知识点全部理论证明或完整生产实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "deep-n06-04",
+      "node_id": "deep-n06-04",
+      "title": "初始化",
+      "definition": "初始参数分布影响激活与梯度方差，常采用Xavier或He。",
+      "assumptions": "必须明确张量维度、训练与推断阶段、时间因果遮罩及可微优化条件。复杂架构需要实测泛化与计算负担。",
+      "properties": [
+        "初始参数分布影响激活与梯度方差，常采用Xavier或He。。",
+        "模型表现依赖训练数据与目标任务；价格图像或金融序列不得泄漏未来信息。"
+      ],
+      "formulas": [
+        {
+          "label": "基础数学公式",
+          "tex": "\\operatorname{Var}(W_{\\rm He})=2/n_{\\rm in}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据该结构的计算定义建立前向或优化关系。初始参数分布影响激活与梯度方差，常采用Xavier或He。",
+          "tex": "\\operatorname{Var}(W_{\\rm He})=2/n_{\\rm in}"
+        },
+        {
+          "explanation": "根据链式法则或状态递推解释该结构如何对输入或参数产生影响。",
+          "tex": "\\operatorname{Var}(W_{\\rm He})=2/n_{\\rm in}"
+        }
+      ],
+      "code": "# 初始化：相关网络基础示例\nimport torch\ntorch.manual_seed(0)\nx=torch.randn(24,4);y=x[:,0:1]*2\nnet=torch.nn.Sequential(torch.nn.Linear(4,8),torch.nn.ReLU(),torch.nn.Linear(8,1))\nopt=torch.optim.AdamW(net.parameters(),lr=.03)\nfor _ in range(40):\n opt.zero_grad();loss=(net(x)-y).square().mean();loss.backward();opt.step()\nnet.eval()\nwith torch.no_grad():print(\"MSE:\",((net(x)-y)**2).mean().item())",
+      "packages": "torch",
+      "application": "用于ETF价格图像CNN、金融文本Transformer、长序列预测以及训练工程。",
+      "limits": "这是专题扩展笔记：代码是相应网络家族的基础演示，尚非本知识点全部理论证明或完整生产实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "deep-n01-05",
+      "node_id": "deep-n01-05",
+      "title": "容量与过参数化",
+      "definition": "模型参数数目超过训练样本仍可能拟合甚至泛化，结果依赖优化和隐式正则。",
+      "assumptions": "必须明确张量维度、训练与推断阶段、时间因果遮罩及可微优化条件。复杂架构需要实测泛化与计算负担。",
+      "properties": [
+        "模型参数数目超过训练样本仍可能拟合甚至泛化，结果依赖优化和隐式正则。。",
+        "模型表现依赖训练数据与目标任务；价格图像或金融序列不得泄漏未来信息。"
+      ],
+      "formulas": [
+        {
+          "label": "基础数学公式",
+          "tex": "p_{\\rm params}\\gg n"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据该结构的计算定义建立前向或优化关系。模型参数数目超过训练样本仍可能拟合甚至泛化，结果依赖优化和隐式正则。",
+          "tex": "p_{\\rm params}\\gg n"
+        },
+        {
+          "explanation": "根据链式法则或状态递推解释该结构如何对输入或参数产生影响。",
+          "tex": "p_{\\rm params}\\gg n"
+        }
+      ],
+      "code": "# 容量与过参数化：相关网络基础示例\nimport torch\ntorch.manual_seed(0)\nx=torch.randn(24,4);y=x[:,0:1]*2\nnet=torch.nn.Sequential(torch.nn.Linear(4,8),torch.nn.ReLU(),torch.nn.Linear(8,1))\nopt=torch.optim.AdamW(net.parameters(),lr=.03)\nfor _ in range(40):\n opt.zero_grad();loss=(net(x)-y).square().mean();loss.backward();opt.step()\nnet.eval()\nwith torch.no_grad():print(\"MSE:\",((net(x)-y)**2).mean().item())",
+      "packages": "torch",
+      "application": "用于ETF价格图像CNN、金融文本Transformer、长序列预测以及训练工程。",
+      "limits": "这是专题扩展笔记：代码是相应网络家族的基础演示，尚非本知识点全部理论证明或完整生产实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "deep-n02-05",
+      "node_id": "deep-n02-05",
+      "title": "双下降",
+      "definition": "部分任务测试风险随容量增加先下降后升高，越过插值阈值又下降。",
+      "assumptions": "必须明确张量维度、训练与推断阶段、时间因果遮罩及可微优化条件。复杂架构需要实测泛化与计算负担。",
+      "properties": [
+        "部分任务测试风险随容量增加先下降后升高，越过插值阈值又下降。。",
+        "模型表现依赖训练数据与目标任务；价格图像或金融序列不得泄漏未来信息。"
+      ],
+      "formulas": [
+        {
+          "label": "基础数学公式",
+          "tex": "R_{\\rm test}=R_{\\rm test}(p_{\\rm params}/n)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据该结构的计算定义建立前向或优化关系。部分任务测试风险随容量增加先下降后升高，越过插值阈值又下降。",
+          "tex": "R_{\\rm test}=R_{\\rm test}(p_{\\rm params}/n)"
+        },
+        {
+          "explanation": "根据链式法则或状态递推解释该结构如何对输入或参数产生影响。",
+          "tex": "R_{\\rm test}=R_{\\rm test}(p_{\\rm params}/n)"
+        }
+      ],
+      "code": "# 双下降：相关网络基础示例\nimport torch\ntorch.manual_seed(0)\nx=torch.randn(24,4);y=x[:,0:1]*2\nnet=torch.nn.Sequential(torch.nn.Linear(4,8),torch.nn.ReLU(),torch.nn.Linear(8,1))\nopt=torch.optim.AdamW(net.parameters(),lr=.03)\nfor _ in range(40):\n opt.zero_grad();loss=(net(x)-y).square().mean();loss.backward();opt.step()\nnet.eval()\nwith torch.no_grad():print(\"MSE:\",((net(x)-y)**2).mean().item())",
+      "packages": "torch",
+      "application": "用于ETF价格图像CNN、金融文本Transformer、长序列预测以及训练工程。",
+      "limits": "这是专题扩展笔记：代码是相应网络家族的基础演示，尚非本知识点全部理论证明或完整生产实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "deep-n03-05",
+      "node_id": "deep-n03-05",
+      "title": "Early Stopping",
+      "definition": "根据验证损失选定模型检查点，限制训练过多轮次后的过拟合。",
+      "assumptions": "必须明确张量维度、训练与推断阶段、时间因果遮罩及可微优化条件。复杂架构需要实测泛化与计算负担。",
+      "properties": [
+        "根据验证损失选定模型检查点，限制训练过多轮次后的过拟合。。",
+        "模型表现依赖训练数据与目标任务；价格图像或金融序列不得泄漏未来信息。"
+      ],
+      "formulas": [
+        {
+          "label": "基础数学公式",
+          "tex": "t^*=\\arg\\min_tR_{\\rm val}(\\theta_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据该结构的计算定义建立前向或优化关系。根据验证损失选定模型检查点，限制训练过多轮次后的过拟合。",
+          "tex": "t^*=\\arg\\min_tR_{\\rm val}(\\theta_t)"
+        },
+        {
+          "explanation": "根据链式法则或状态递推解释该结构如何对输入或参数产生影响。",
+          "tex": "t^*=\\arg\\min_tR_{\\rm val}(\\theta_t)"
+        }
+      ],
+      "code": "# Early Stopping：相关网络基础示例\nimport torch\ntorch.manual_seed(0)\nx=torch.randn(24,4);y=x[:,0:1]*2\nnet=torch.nn.Sequential(torch.nn.Linear(4,8),torch.nn.ReLU(),torch.nn.Linear(8,1))\nopt=torch.optim.AdamW(net.parameters(),lr=.03)\nfor _ in range(40):\n opt.zero_grad();loss=(net(x)-y).square().mean();loss.backward();opt.step()\nnet.eval()\nwith torch.no_grad():print(\"MSE:\",((net(x)-y)**2).mean().item())",
+      "packages": "torch",
+      "application": "用于ETF价格图像CNN、金融文本Transformer、长序列预测以及训练工程。",
+      "limits": "这是专题扩展笔记：代码是相应网络家族的基础演示，尚非本知识点全部理论证明或完整生产实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "deep-n04-05",
+      "node_id": "deep-n04-05",
+      "title": "数据增强",
+      "definition": "对训练输入应用保留标签语义的变换以扩大有效数据分布。",
+      "assumptions": "必须明确张量维度、训练与推断阶段、时间因果遮罩及可微优化条件。复杂架构需要实测泛化与计算负担。",
+      "properties": [
+        "对训练输入应用保留标签语义的变换以扩大有效数据分布。。",
+        "模型表现依赖训练数据与目标任务；价格图像或金融序列不得泄漏未来信息。"
+      ],
+      "formulas": [
+        {
+          "label": "基础数学公式",
+          "tex": "L_{\\rm aug}=E_T[\\ell(f_\\theta(T(x)),y)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据该结构的计算定义建立前向或优化关系。对训练输入应用保留标签语义的变换以扩大有效数据分布。",
+          "tex": "L_{\\rm aug}=E_T[\\ell(f_\\theta(T(x)),y)]"
+        },
+        {
+          "explanation": "根据链式法则或状态递推解释该结构如何对输入或参数产生影响。",
+          "tex": "L_{\\rm aug}=E_T[\\ell(f_\\theta(T(x)),y)]"
+        }
+      ],
+      "code": "# 数据增强：相关网络基础示例\nimport torch\ntorch.manual_seed(0)\nx=torch.randn(24,4);y=x[:,0:1]*2\nnet=torch.nn.Sequential(torch.nn.Linear(4,8),torch.nn.ReLU(),torch.nn.Linear(8,1))\nopt=torch.optim.AdamW(net.parameters(),lr=.03)\nfor _ in range(40):\n opt.zero_grad();loss=(net(x)-y).square().mean();loss.backward();opt.step()\nnet.eval()\nwith torch.no_grad():print(\"MSE:\",((net(x)-y)**2).mean().item())",
+      "packages": "torch",
+      "application": "用于ETF价格图像CNN、金融文本Transformer、长序列预测以及训练工程。",
+      "limits": "这是专题扩展笔记：代码是相应网络家族的基础演示，尚非本知识点全部理论证明或完整生产实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "deep-n05-05",
+      "node_id": "deep-n05-05",
+      "title": "学习率调度",
+      "definition": "随迭代步数或验证表现变化调整学习率改善训练稳定性。",
+      "assumptions": "必须明确张量维度、训练与推断阶段、时间因果遮罩及可微优化条件。复杂架构需要实测泛化与计算负担。",
+      "properties": [
+        "随迭代步数或验证表现变化调整学习率改善训练稳定性。。",
+        "模型表现依赖训练数据与目标任务；价格图像或金融序列不得泄漏未来信息。"
+      ],
+      "formulas": [
+        {
+          "label": "基础数学公式",
+          "tex": "\\eta_t=\\eta_0/(1+\\lambda t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据该结构的计算定义建立前向或优化关系。随迭代步数或验证表现变化调整学习率改善训练稳定性。",
+          "tex": "\\eta_t=\\eta_0/(1+\\lambda t)"
+        },
+        {
+          "explanation": "根据链式法则或状态递推解释该结构如何对输入或参数产生影响。",
+          "tex": "\\eta_t=\\eta_0/(1+\\lambda t)"
+        }
+      ],
+      "code": "# 学习率调度：相关网络基础示例\nimport torch\ntorch.manual_seed(0)\nx=torch.randn(24,4);y=x[:,0:1]*2\nnet=torch.nn.Sequential(torch.nn.Linear(4,8),torch.nn.ReLU(),torch.nn.Linear(8,1))\nopt=torch.optim.AdamW(net.parameters(),lr=.03)\nfor _ in range(40):\n opt.zero_grad();loss=(net(x)-y).square().mean();loss.backward();opt.step()\nnet.eval()\nwith torch.no_grad():print(\"MSE:\",((net(x)-y)**2).mean().item())",
+      "packages": "torch",
+      "application": "用于ETF价格图像CNN、金融文本Transformer、长序列预测以及训练工程。",
+      "limits": "这是专题扩展笔记：代码是相应网络家族的基础演示，尚非本知识点全部理论证明或完整生产实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "deep-n06-05",
+      "node_id": "deep-n06-05",
+      "title": "分布外泛化",
+      "definition": "测试数据的联合分布与训练不同，需分析输入漂移和目标条件关系变化。",
+      "assumptions": "必须明确张量维度、训练与推断阶段、时间因果遮罩及可微优化条件。复杂架构需要实测泛化与计算负担。",
+      "properties": [
+        "测试数据的联合分布与训练不同，需分析输入漂移和目标条件关系变化。。",
+        "模型表现依赖训练数据与目标任务；价格图像或金融序列不得泄漏未来信息。"
+      ],
+      "formulas": [
+        {
+          "label": "基础数学公式",
+          "tex": "P_{\\rm train}(X,Y)\\ne P_{\\rm test}(X,Y)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据该结构的计算定义建立前向或优化关系。测试数据的联合分布与训练不同，需分析输入漂移和目标条件关系变化。",
+          "tex": "P_{\\rm train}(X,Y)\\ne P_{\\rm test}(X,Y)"
+        },
+        {
+          "explanation": "根据链式法则或状态递推解释该结构如何对输入或参数产生影响。",
+          "tex": "P_{\\rm train}(X,Y)\\ne P_{\\rm test}(X,Y)"
+        }
+      ],
+      "code": "# 分布外泛化：相关网络基础示例\nimport torch\ntorch.manual_seed(0)\nx=torch.randn(24,4);y=x[:,0:1]*2\nnet=torch.nn.Sequential(torch.nn.Linear(4,8),torch.nn.ReLU(),torch.nn.Linear(8,1))\nopt=torch.optim.AdamW(net.parameters(),lr=.03)\nfor _ in range(40):\n opt.zero_grad();loss=(net(x)-y).square().mean();loss.backward();opt.step()\nnet.eval()\nwith torch.no_grad():print(\"MSE:\",((net(x)-y)**2).mean().item())",
+      "packages": "torch",
+      "application": "用于ETF价格图像CNN、金融文本Transformer、长序列预测以及训练工程。",
+      "limits": "这是专题扩展笔记：代码是相应网络家族的基础演示，尚非本知识点全部理论证明或完整生产实现。",
+      "coverage": "expanded"
+    }
+  ]
+}
