@@ -23,8 +23,8 @@
           "tex": "A_{ij}in{0,1}"
         },
         {
-          "explanation": "使用上述关系构建算法实现，并对误差与可得信息进行核查。",
-          "tex": "A_{ij}=mathbf1[(i,j)in E]"
+          "explanation": "对无向边同时设置两个对称位置；没有自环时对角元为零。",
+          "tex": "A_{ij}=A_{ji},\\quad A_{ii}=0\\ (\\text{无自环})"
         }
       ],
       "code": "import numpy as np\nA=np.zeros((3,3))\nfor i,j in [(0,1),(1,2)]:A[i,j]=A[j,i]=1\nprint(A)",
@@ -87,8 +87,8 @@
           "tex": "m_{u\to v}=M(h_v,h_u,e_{uv})"
         },
         {
-          "explanation": "使用上述关系构建算法实现，并对误差与可得信息进行核查。",
-          "tex": "h_v' =U(h_v,operatorname{AGG}_{uin N(v)}M(h_v,h_u,e_{uv}))"
+          "explanation": "使用排列不变的聚合算子合并全部邻居消息，得到节点更新。",
+          "tex": "h'_v=U\\!\\left(h_v,\\sum_{u\\in N(v)}m_{u\\to v}\\right)"
         }
       ],
       "code": "import torch\nx=torch.tensor([[1.,0.],[0.,1.],[2.,2.]])\nedges=[(0,1),(1,0),(1,2),(2,1)]\nout=torch.zeros_like(x)\nfor source,target in edges:out[target]+=x[source]\nprint(out)",
@@ -119,8 +119,8 @@
           "tex": "m_v=|N(v)|^{-1}sum_{uin N(v)}h_u"
         },
         {
-          "explanation": "使用上述关系构建算法实现，并对误差与可得信息进行核查。",
-          "tex": "h'_v=sigma(W[h_vVertoperatorname{MEAN}_{uin N(v)}h_u])"
+          "explanation": "将聚合的邻居表示与中心表示拼接，经过可训练投影。",
+          "tex": "h'_v=\\sigma(W[h_v\\Vert m_v])"
         }
       ],
       "code": "import torch\nx=torch.randn(4,3)\nneighbors={0:[1,2],1:[0,3],2:[0],3:[1]}\nmeans=torch.stack([x[neighbors[i]].mean(0) for i in range(4)])\nlayer=torch.nn.Linear(6,4)\nprint(layer(torch.cat([x,means],dim=1)).shape)",
@@ -151,8 +151,8 @@
           "tex": "e_{vu}=a^\top[Wh_vVert Wh_u]"
         },
         {
-          "explanation": "使用上述关系构建算法实现，并对误差与可得信息进行核查。",
-          "tex": "\\alpha_{vu}=\\frac{e^{e_{vu}}}{\\sum_{k\\in N(v)}e^{e_{vk}}},\\quad h_v'=\\sigma(\\sum_u\\alpha_{vu}Wh_u)"
+          "explanation": "只在邻域内Softmax归一化，然后计算加权邻居消息。",
+          "tex": "\\alpha_{vu}=\\frac{\\exp(e_{vu})}{\\sum_{k\\in N(v)}\\exp(e_{vk})},\\quad h'_v=\\sigma(\\sum_u\\alpha_{vu}Wh_u)"
         }
       ],
       "code": "import torch\nscore=torch.tensor([.2,-.1,1.])\nnbr=torch.randn(3,4)\nprint(score.softmax(0)@nbr)",
@@ -183,8 +183,8 @@
           "tex": "X\\rightarrow(D,Y)"
         },
         {
-          "explanation": "使用上述关系构建算法实现，并对误差与可得信息进行核查。",
-          "tex": "X\to D,quad X\to Y,quad D\to Y"
+          "explanation": "若X充分包含全部共同原因且满足相应后门调整条件，平均干预效应可通过条件差异积分表示。",
+          "tex": "\\operatorname{ATE}=\\mathbb E_X\\!\\left[\\mathbb E(Y\\mid D=1,X)-\\mathbb E(Y\\mid D=0,X)\\right]"
         }
       ],
       "code": "edges=[(\"market\",\"flow\"),(\"market\",\"return\"),(\"flow\",\"return\")]\nfor x,y in edges:print(x,\"->\",y)",
@@ -215,8 +215,8 @@
           "tex": "0<e(x)<1"
         },
         {
-          "explanation": "使用上述关系构建算法实现，并对误差与可得信息进行核查。",
-          "tex": "e(x)=P(D=1|X=x)"
+          "explanation": "在可忽略性与重叠条件下，倾向得分可用于形成处理组与对照组的逆概率权重。",
+          "tex": "w_i=\\frac{D_i}{e(X_i)}+\\frac{1-D_i}{1-e(X_i)}"
         }
       ],
       "code": "import numpy as np\nfrom sklearn.linear_model import LogisticRegression\nrng=np.random.default_rng(3)\nX=rng.normal(size=(120,2));D=rng.binomial(1,1/(1+np.exp(-X[:,0])))\nm=LogisticRegression().fit(X,D)\nprint(m.predict_proba(X[:3])[:,1])",
@@ -247,8 +247,8 @@
           "tex": "w_1=D/e,\\quad w_0=(1-D)/(1-e)"
         },
         {
-          "explanation": "使用上述关系构建算法实现，并对误差与可得信息进行核查。",
-          "tex": "\\hat\\tau=\\frac1n\\sum_i\\left(\\frac{D_iY_i}{e_i}-\\frac{(1-D_i)Y_i}{1-e_i}\\right)"
+          "explanation": "将两组加权结果取差，得到Horvitz–Thompson型ATE样本估计。",
+          "tex": "\\hat\\tau=\\frac1n\\sum_i\\left[\\frac{D_iY_i}{\\hat e_i}-\\frac{(1-D_i)Y_i}{1-\\hat e_i}\\right]"
         }
       ],
       "code": "import numpy as np\nrng=np.random.default_rng(0)\np=rng.uniform(.3,.7,300);d=rng.binomial(1,p);y=1.5*d+rng.normal(size=300)\nprint(np.mean(d*y/p-(1-d)*y/(1-p)))",
@@ -279,8 +279,8 @@
           "tex": "\\Delta_g=\\bar Y_{g,post}-\\bar Y_{g,pre}"
         },
         {
-          "explanation": "使用上述关系构建算法实现，并对误差与可得信息进行核查。",
-          "tex": "\\tau_{\\rm DID}=(\\bar Y_{T,post}-\\bar Y_{T,pre})-(\\bar Y_{C,post}-\\bar Y_{C,pre})"
+          "explanation": "若无处理情况下两组平均结果遵循平行趋势，减去对照组变化即可识别处理效应。",
+          "tex": "\\hat\\tau=(Y_{T,post}-Y_{T,pre})-(Y_{C,post}-Y_{C,pre})"
         }
       ],
       "code": "treated=[100,116];control=[90,98]\nprint((treated[1]-treated[0])-(control[1]-control[0]))",
@@ -311,8 +311,8 @@
           "tex": "I=\\bigcup_{k=1}^KI_k"
         },
         {
-          "explanation": "使用上述关系构建算法实现，并对误差与可得信息进行核查。",
-          "tex": "\\hat\\eta_i=\\hat\\eta^{(-k)}(X_i),\\qquad i\\in I_k"
+          "explanation": "对每条记录使用其他折训练得到的模型做预测，从而避免该记录参与自身Nuisance参数拟合。",
+          "tex": "\\hat\\eta_i=\\hat\\eta^{(-k(i))}(X_i),\\qquad i\\in I_{k(i)}"
         }
       ],
       "code": "import numpy as np\nfrom sklearn.model_selection import KFold\nfrom sklearn.linear_model import Ridge\nrng=np.random.default_rng(0);X=rng.normal(size=(50,3));y=X[:,0]+rng.normal(size=50)\npred=np.zeros(50)\nfor tr,te in KFold(5,shuffle=True,random_state=0).split(X):\n    pred[te]=Ridge().fit(X[tr],y[tr]).predict(X[te])\nprint(pred[:5])",
@@ -343,8 +343,8 @@
           "tex": "\\min_{\\phi,\\theta}\\mathbb E[\\|x-g_\\theta(f_\\phi(x))\\|^2]"
         },
         {
-          "explanation": "使用上述关系构建算法实现，并对误差与可得信息进行核查。",
-          "tex": "z=f_\\phi(x),\\quad \\hat x=g_\\theta(z),\\quad L=\\|x-\\hat x\\|^2"
+          "explanation": "编码器与解码器联合最小化输入和重构的经验平均平方距离。",
+          "tex": "\\min_{\\phi,\\theta}\\frac1n\\sum_i\\|x_i-g_\\theta(f_\\phi(x_i))\\|_2^2"
         }
       ],
       "code": "import torch\nnet=torch.nn.Sequential(torch.nn.Linear(6,2),torch.nn.Tanh(),torch.nn.Linear(2,6))\nx=torch.randn(10,6);loss=(net(x)-x).square().mean()\nloss.backward();print(loss.item())",
@@ -375,8 +375,8 @@
           "tex": "\\log p(x)=\\log E_q[p(x,z)/q(z|x)]"
         },
         {
-          "explanation": "使用上述关系构建算法实现，并对误差与可得信息进行核查。",
-          "tex": "\\mathrm{ELBO}=E_q[\\log p_\\theta(x|z)]-D_{\\rm KL}(q_\\phi(z|x)\\|p(z))"
+          "explanation": "把对数联合概率分解为条件重构概率与先验，整理得到重构项减KL项。",
+          "tex": "\\mathrm{ELBO}=\\mathbb E_{q_\\phi(z\\mid x)}[\\log p_\\theta(x\\mid z)]-D_{\\mathrm{KL}}(q_\\phi(z\\mid x)\\|p(z))"
         }
       ],
       "code": "import torch\nmu=torch.randn(5,2);logvar=torch.randn(5,2)*.1\nkl=(-.5*(1+logvar-mu.square()-logvar.exp())).sum(-1).mean()\nprint(kl.item())",
@@ -407,8 +407,8 @@
           "tex": "\\frac{\\partial z}{\\partial\\mu}=I"
         },
         {
-          "explanation": "使用上述关系构建算法实现，并对误差与可得信息进行核查。",
-          "tex": "z=\\mu_\\phi(x)+\\sigma_\\phi(x)\\odot\\epsilon,\\quad\\epsilon\\sim N(0,I)"
+          "explanation": "由线性变换求导，采样路径对均值的导数为1，对标准差的导数等于噪声。",
+          "tex": "\\frac{\\partial z}{\\partial\\mu}=1,\\qquad \\frac{\\partial z}{\\partial\\sigma}=\\epsilon"
         }
       ],
       "code": "import torch\nmu=torch.tensor([1.],requires_grad=True);logvar=torch.tensor([0.],requires_grad=True)\nz=mu+torch.exp(.5*logvar)*torch.randn(1)\nz.square().sum().backward();print(mu.grad,logvar.grad)",
@@ -439,8 +439,8 @@
           "tex": "x_t=\\sqrt{\\bar\\alpha_t}x_0+\\sqrt{1-\\bar\\alpha_t}\\epsilon"
         },
         {
-          "explanation": "使用上述关系构建算法实现，并对误差与可得信息进行核查。",
-          "tex": "L=E_{x_0,\\epsilon,t}\\|\\epsilon-\\epsilon_\\theta(x_t,t)\\|_2^2"
+          "explanation": "训练噪声预测器最小化注入噪声与估计噪声的均方差。",
+          "tex": "L_{\\rm simple}=\\mathbb E_{\\epsilon,t,x_0}\\!\\left[\\|\\epsilon-\\epsilon_\\theta(x_t,t)\\|_2^2\\right]"
         }
       ],
       "code": "import torch\nx=torch.randn(12,3);eps=torch.randn_like(x);a=.6\nxt=a**.5*x+(1-a)**.5*eps\nnet=torch.nn.Linear(3,3)\nloss=(net(xt)-eps).square().mean()\nloss.backward();print(loss.item())",
@@ -471,8 +471,8 @@
           "tex": "K_Y=YW_K,\\quad V_Y=YW_V"
         },
         {
-          "explanation": "使用上述关系构建算法实现，并对误差与可得信息进行核查。",
-          "tex": "\\mathrm{Attn}(Q_X,K_Y,V_Y)=\\operatorname{softmax}(Q_XK_Y^\\top/\\sqrt d)V_Y"
+          "explanation": "目标模态Q与来源模态K求相似度，再将归一化权重施加在来源V上。",
+          "tex": "H_X=\\operatorname{softmax}(Q_XK_Y^\\top/\\sqrt d)V_Y"
         }
       ],
       "code": "import torch\nm=torch.nn.MultiheadAttention(16,4,batch_first=True)\nq=torch.randn(2,3,16);s=torch.randn(2,6,16)\ny,w=m(q,s,s);print(y.shape,w.shape)",
@@ -503,8 +503,8 @@
           "tex": "v=f_I(I),\\quad t=f_T(T)"
         },
         {
-          "explanation": "使用上述关系构建算法实现，并对误差与可得信息进行核查。",
-          "tex": "s(I,T)=\\frac{f_I(I)^\\top f_T(T)}{\\|f_I(I)\\|\\|f_T(T)\\|}"
+          "explanation": "将两个模态的输出作L2归一化，利用向量内积表示余弦相似度。",
+          "tex": "s(I,T)=\\frac{v^\\top t}{\\|v\\|_2\\|t\\|_2}"
         }
       ],
       "code": "import torch\nfrom torch.nn import functional as F\nv=F.normalize(torch.randn(3,8),dim=-1)\nt=F.normalize(torch.randn(3,8),dim=-1)\nprint((v@t.T).shape)",
@@ -535,8 +535,8 @@
           "tex": "S(m,\\omega)=|X(m,\\omega)|^2"
         },
         {
-          "explanation": "使用上述关系构建算法实现，并对误差与可得信息进行核查。",
-          "tex": "X(m,\\omega)=\\sum_n x[n]w[n-mH]e^{-j\\omega n}"
+          "explanation": "对每帧的复数频率系数取模的平方，构成时间-频率能量图。",
+          "tex": "S(m,\\omega)=|X(m,\\omega)|^2"
         }
       ],
       "code": "import numpy as np\nfrom scipy.signal import stft\nt=np.arange(1000)/1000\nx=np.sin(2*np.pi*50*t)\nf,tm,z=stft(x,1000,nperseg=128)\nprint(abs(z).shape)",
@@ -567,8 +567,8 @@
           "tex": "a_t=\\pi(s_t)"
         },
         {
-          "explanation": "使用上述关系构建算法实现，并对误差与可得信息进行核查。",
-          "tex": "a_t=(\\mathrm{tool},\\mathrm{args}),\\quad o_{t+1}=\\mathrm{Execute}(a_t)"
+          "explanation": "执行受控函数并校验返回值后，更新智能体状态供下一次决策。",
+          "tex": "o_{t+1}=\\operatorname{Execute}(a_t),\\quad s_{t+1}=F(s_t,a_t,o_{t+1})"
         }
       ],
       "code": "def mean(values):return sum(values)/len(values)\naction={\"tool\":\"mean\",\"args\":{\"values\":[1.,2.,3.]}}\nallowed={\"mean\":mean}\nprint(allowed[action[\"tool\"]](**action[\"args\"]))",
