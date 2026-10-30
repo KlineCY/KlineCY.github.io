@@ -1,0 +1,613 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "foundation-n0012",
+      "node_id": "foundation-n0012",
+      "title": "数学归纳法",
+      "definition": "对自然数命题证明初始情况成立，并证明若对某个整数成立则对其后继也成立，从而建立全体自然数上的结论。",
+      "assumptions": "命题 $P(n)$ 定义于 $n\\ge n_0$ 的整数集合。",
+      "properties": [
+        "归纳可从任意起点 $n_0$ 开始。",
+        "强归纳法可使用所有更早整数成立作为假设。"
+      ],
+      "formulas": [
+        {
+          "label": "归纳原理",
+          "tex": "P(n_0)\\ \\land\\ \\forall n\\ge n_0\\big(P(n)\\Rightarrow P(n+1)\\big)\\ \\Rightarrow\\ \\forall n\\ge n_0\\,P(n)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "基础步：直接计算",
+          "tex": "\\sum_{k=1}^{1}k=1=\\frac{1(1+1)}2"
+        },
+        {
+          "explanation": "归纳假设：当 $n$ 时成立",
+          "tex": "\\sum_{k=1}^{n}k=\\frac{n(n+1)}2"
+        },
+        {
+          "explanation": "归纳步：在前一公式上加 $n+1$",
+          "tex": "\\sum_{k=1}^{n+1}k=\\frac{n(n+1)}2+(n+1)=\\frac{(n+1)(n+2)}2"
+        }
+      ],
+      "example": "证明前 $n$ 项整数和公式；同样逻辑可证明递推算法的循环不变量。",
+      "application": "动态规划正确性、递推矩阵等式、复杂度界。",
+      "caveat": "必须同时证明基础步与归纳步，不能仅举若干例子。",
+      "checked_status": "定义、适用条件、性质、公式、分步推导与应用"
+    },
+    {
+      "id": "calculus-n0046",
+      "node_id": "calculus-n0046",
+      "title": "变量替换与Jacobian行列式",
+      "definition": "多元积分在光滑可逆变量替换下，面积或体积元素由Jacobian行列式绝对值缩放。",
+      "assumptions": "变换 $T:U\\to V$ 在有关区域内一一、足够光滑且Jacobian不为零；多块区域可分段处理。",
+      "properties": [
+        "行列式绝对值表示局部体积缩放。",
+        "对概率密度变换，逆映射的Jacobian也必须考虑。"
+      ],
+      "formulas": [
+        {
+          "label": "二维变量替换",
+          "tex": "\\int_V f(x)\\,dx=\\int_U f(T(u))\\,|\\det DT(u)|\\,du"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "在局部小区域作一阶线性近似",
+          "tex": "T(u+\\Delta u)\\approx T(u)+DT(u)\\Delta u"
+        },
+        {
+          "explanation": "线性变换使小体积近似按绝对行列式缩放",
+          "tex": "\\Delta V\\approx|\\det DT(u)|\\Delta U"
+        },
+        {
+          "explanation": "令分割细化并在适当可积性条件下取极限",
+          "tex": "\\int_V f(x)\\,dx=\\int_U f(T(u))|\\det DT(u)|\\,du"
+        }
+      ],
+      "example": "二维标准正态积分常通过极坐标变换使用 $dx\\,dy=r\\,dr\\,d\\theta$。",
+      "application": "联合概率密度变换、风险因子变量代换。",
+      "caveat": "若变换不是一一映射或Jacobian退化，需修正变量替换条件。",
+      "checked_status": "定义、适用条件、性质、公式、分步推导与应用"
+    },
+    {
+      "id": "linear-n0084",
+      "node_id": "linear-n0084",
+      "title": "PCA与低秩近似",
+      "definition": "主成分分析寻找样本协方差中最大方差的正交方向；前 $k$ 个特征向量张成保留最多样本平方差能量的子空间。",
+      "assumptions": "先中心化数据；使用有限样本协方差矩阵。",
+      "properties": [
+        "各主成分方向两两正交。",
+        "特征值反映样本方差解释量。"
+      ],
+      "formulas": [
+        {
+          "label": "PCA特征分解",
+          "tex": "\\hat\\Sigma v_j=\\lambda_jv_j,\\quad\\lambda_1\\ge\\cdots\\ge\\lambda_p\\ge0"
+        },
+        {
+          "label": "解释方差占比",
+          "tex": "\\mathrm{EVR}_k=\\frac{\\sum_{j=1}^k\\lambda_j}{\\sum_{j=1}^p\\lambda_j}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对单位向量 $v$，样本投影方差为",
+          "tex": "\\operatorname{Var}(Xv)=v^\\top\\hat\\Sigma v"
+        },
+        {
+          "explanation": "加入单位长度约束作Lagrange极值",
+          "tex": "\\mathcal L=v^\\top\\hat\\Sigma v-\\lambda(v^\\top v-1)"
+        },
+        {
+          "explanation": "一阶条件与约束给出特征方程",
+          "tex": "\\hat\\Sigma v=\\lambda v"
+        },
+        {
+          "explanation": "Rayleigh商最大值是最大特征值，重复加入正交限制选后续主成分",
+          "tex": "v_1=\\arg\\max_{\\|v\\|=1}v^\\top\\hat\\Sigma v"
+        }
+      ],
+      "example": "将37只ETF收益向量压缩为少数共同行情主成分。",
+      "application": "风险因子提取、降维、协方差收缩。",
+      "caveat": "PCA解释样本方差而非自动预测下期收益。",
+      "checked_status": "定义、适用条件、性质、公式、分步推导与应用"
+    },
+    {
+      "id": "probability-n0107",
+      "node_id": "probability-n0107",
+      "title": "条件期望",
+      "definition": "给定子σ-代数的条件期望，是对现有信息可测、并在每个给定信息事件上保持原变量积分的随机变量。",
+      "assumptions": "$X$ 可积；给定子σ-代数 $\\mathcal G\\subseteq\\mathcal F$。",
+      "properties": [
+        "迭代期望：$E[E(X|\\mathcal G)]=E(X)$。",
+        "在平方可积情形，条件期望也是到 $L^2(\\mathcal G)$ 的正交投影。"
+      ],
+      "formulas": [
+        {
+          "label": "定义性质",
+          "tex": "Y=\\mathbb E[X\\mid\\mathcal G],\\quad Y\\text{ 为 }\\mathcal G\\text{-可测},\\quad\\int_GY\\,dP=\\int_GX\\,dP\\ \\forall G\\in\\mathcal G"
+        },
+        {
+          "label": "平方误差最优性",
+          "tex": "\\mathbb E[(X-Y)^2]\\le\\mathbb E[(X-Z)^2]\\quad \\forall Z\\in L^2(\\mathcal G)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "设 $Y=E[X|\\mathcal G]$，$Z$ 为任何 $\\mathcal G$ 可测平方可积变量",
+          "tex": "X-Z=(X-Y)+(Y-Z)"
+        },
+        {
+          "explanation": "平方展开并取期望",
+          "tex": "E[(X-Z)^2]=E[(X-Y)^2]+E[(Y-Z)^2]+2E[(X-Y)(Y-Z)]"
+        },
+        {
+          "explanation": "用条件期望使交叉项为零",
+          "tex": "E[(X-Y)(Y-Z)]=E[(Y-Z)E[X-Y|\\mathcal G]]=0"
+        }
+      ],
+      "example": "用可观察宏观状态预测ETF下一日收益的最小均方误差最优预测为条件期望。",
+      "application": "马尔可夫过程、金融预测、滤波与资产定价。",
+      "caveat": "条件期望是随机变量，不等同于无条件数值平均。",
+      "checked_status": "定义、适用条件、性质、公式、分步推导与应用"
+    },
+    {
+      "id": "measure-n0132",
+      "node_id": "measure-n0132",
+      "title": "控制收敛定理",
+      "definition": "若可测函数列几乎处处收敛且被一个可积函数统一控制，可以把极限移入Lebesgue积分。",
+      "assumptions": "$f_n\\to f$ 几乎处处，且存在可积 $g$ 满足 $|f_n|\\le g$。",
+      "properties": [
+        "限制函数 $g$ 必须可积。",
+        "允许函数取正负值且可以不单调。"
+      ],
+      "formulas": [
+        {
+          "label": "控制收敛定理",
+          "tex": "\\lim_{n\\to\\infty}\\int f_n\\,d\\mu=\\int f\\,d\\mu"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由控制关系推出 $g\\pm f_n\\ge0$，且极限是 $g\\pm f$",
+          "tex": "g+f_n\\ge0,\\quad g-f_n\\ge0"
+        },
+        {
+          "explanation": "对非负函数列两次使用Fatou引理",
+          "tex": "\\int(g\\pm f)\\,d\\mu\\le\\liminf_n\\int(g\\pm f_n)\\,d\\mu"
+        },
+        {
+          "explanation": "分别整理得到积分的下极限和上极限夹住同一个值",
+          "tex": "\\limsup_n\\int f_n\\,d\\mu\\le\\int f\\,d\\mu\\le\\liminf_n\\int f_n\\,d\\mu"
+        },
+        {
+          "explanation": "因此极限积分交换成立",
+          "tex": "\\lim_n\\int f_n\\,d\\mu=\\int f\\,d\\mu"
+        }
+      ],
+      "example": "研究金融模型的路径积分与参数极限交换是否合法。",
+      "application": "随机积分、风险中性定价和极限定理证明。",
+      "caveat": "逐点收敛本身不足以交换极限和积分。",
+      "checked_status": "定义、适用条件、性质、公式、分步推导与应用"
+    },
+    {
+      "id": "statistics-n0169",
+      "node_id": "statistics-n0169",
+      "title": "Bootstrap百分位置信区间",
+      "definition": "通过对样本有放回抽样反复估计统计量，用重抽样统计量的经验分位数形成近似置信区间。",
+      "assumptions": "样本能近似目标总体，统计量的Bootstrap分布具有适当一致性。",
+      "properties": [
+        "简单百分位法不一定校正偏差或偏斜。",
+        "时间序列不能直接假定每个日收益独立，可考虑区块Bootstrap。"
+      ],
+      "formulas": [
+        {
+          "label": "百分位区间",
+          "tex": "\\mathrm{CI}_{1-\\alpha}^{perc}=[q_{\\alpha/2}(\\hat\\theta^*),q_{1-\\alpha/2}(\\hat\\theta^*)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从原样本构造经验分布",
+          "tex": "\\hat F_n=\\frac1n\\sum_{i=1}^n\\delta_{X_i}"
+        },
+        {
+          "explanation": "有放回独立抽取 $n$ 次得到第 $b$ 组Bootstrap样本，计算 $\\hat\\theta_b^*$",
+          "tex": "\\hat\\theta_b^*=T(X_1^{*(b)},\\dots,X_n^{*(b)})"
+        },
+        {
+          "explanation": "对所有 $B$ 个Bootstrap估计量计算经验分位数",
+          "tex": "\\mathrm{CI}=[\\hat q_{\\alpha/2},\\hat q_{1-\\alpha/2}]"
+        }
+      ],
+      "example": "对ETF策略Sharpe使用区块Bootstrap估计区间，而不是只报告单个估计值。",
+      "application": "收益风险置信区间、模型稳定性检验。",
+      "caveat": "普通i.i.d. Bootstrap会破坏金融收益时间依赖。",
+      "checked_status": "定义、适用条件、性质、公式、分步推导与应用"
+    },
+    {
+      "id": "regression-n0184",
+      "node_id": "regression-n0184",
+      "title": "高斯-马尔可夫定理",
+      "definition": "经典线性回归在零条件均值、同方差且误差不相关、设计矩阵满秩等条件下，OLS为线性无偏估计量中方差最小者（BLUE）。",
+      "assumptions": "$y=X\\beta+\\epsilon$，给定 $X$，$E[\\epsilon|X]=0$ 且 $\\operatorname{Var}(\\epsilon|X)=\\sigma^2I$，$X$ 满列秩。",
+      "properties": [
+        "BLUE不等于一切估计量中最小均方误差。",
+        "不要求误差正态分布。"
+      ],
+      "formulas": [
+        {
+          "label": "OLS方差",
+          "tex": "\\operatorname{Var}(\\hat\\beta_{\\mathrm{OLS}}\\mid X)=\\sigma^2(X^\\top X)^{-1}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "任意线性无偏估计量写作 $Ay$，须满足 $AX=I$",
+          "tex": "A=(X^\\top X)^{-1}X^\\top+D,\\quad DX=0"
+        },
+        {
+          "explanation": "代入方差并展开",
+          "tex": "\\operatorname{Var}(Ay\\mid X)=\\sigma^2AA^\\top"
+        },
+        {
+          "explanation": "交叉项因 $DX=0$ 为零，故与OLS相比多出半正定项",
+          "tex": "\\sigma^2AA^\\top=\\sigma^2(X^\\top X)^{-1}+\\sigma^2DD^\\top"
+        }
+      ],
+      "example": "在股票收益回归中发现异方差时，OLS仍可能无偏，但不满足该BLUE的同方差结论。",
+      "application": "因子回归的标准误和GLS选择依据。",
+      "caveat": "高斯-马尔可夫不证明OLS在所有分布下都是最优估计。",
+      "checked_status": "定义、适用条件、性质、公式、分步推导与应用"
+    },
+    {
+      "id": "regression-n0206",
+      "node_id": "regression-n0206",
+      "title": "LASSO回归",
+      "definition": "通过L1系数惩罚进行稀疏回归，可能将部分系数压到精确零。",
+      "assumptions": "$\\lambda\\ge0$，截距通常不惩罚，特征标准化帮助比较惩罚尺度。",
+      "properties": [
+        "目标函数凸但在强相关或秩不足情形解可能不唯一。",
+        "L1惩罚导致稀疏、也引入估计偏差。"
+      ],
+      "formulas": [
+        {
+          "label": "LASSO目标",
+          "tex": "\\min_\\beta\\ \\frac{1}{2n}\\|y-X\\beta\\|_2^2+\\lambda\\|\\beta\\|_1"
+        },
+        {
+          "label": "最优性条件",
+          "tex": "0\\in\\frac1n X^\\top(X\\hat\\beta-y)+\\lambda\\,\\partial\\|\\hat\\beta\\|_1"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "可微部分的梯度为",
+          "tex": "\\nabla_\\beta\\frac{1}{2n}\\|y-X\\beta\\|^2=\\frac1nX^\\top(X\\beta-y)"
+        },
+        {
+          "explanation": "对 $|\\beta_j|$ 使用次梯度：非零为符号、零时区间 $[-1,1]$",
+          "tex": "\\partial|\\beta_j|=\\begin{cases}\\{\\operatorname{sign}(\\beta_j)\\},&\\beta_j\\neq0\\\\[-1,1],&\\beta_j=0\\end{cases}"
+        },
+        {
+          "explanation": "凸目标极小点满足零包含于次梯度",
+          "tex": "0\\in X^\\top(X\\hat\\beta-y)/n+\\lambda\\partial\\|\\hat\\beta\\|_1"
+        }
+      ],
+      "example": "从数百个候选因子中先在训练期做稀疏筛选，再评估样本外表现。",
+      "application": "高维因子筛选和特征压缩。",
+      "caveat": "多重搜索及相关变量选择可能让样本外效果不稳定。",
+      "checked_status": "定义、适用条件、性质、公式、分步推导与应用"
+    },
+    {
+      "id": "econometrics-n0223",
+      "node_id": "econometrics-n0223",
+      "title": "固定效应FE",
+      "definition": "面板固定效应估计通过个体内去均值剔除时间不变的不可观察个体异质性。",
+      "assumptions": "模型 $y_{it}=\\alpha_i+x_{it}^\\top\\beta+u_{it}$，严格外生性等假设；需要个体内有解释变量变化。",
+      "properties": [
+        "Within变换消除 $\\alpha_i$。",
+        "时间不变的解释变量主效应与个体固定效应不可同时识别。"
+      ],
+      "formulas": [
+        {
+          "label": "个体内变换",
+          "tex": "y_{it}-\\bar y_i=(x_{it}-\\bar x_i)^\\top\\beta+(u_{it}-\\bar u_i)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对同一主体 $i$ 的时间观测求均值",
+          "tex": "\\bar y_i=\\alpha_i+\\bar x_i^\\top\\beta+\\bar u_i"
+        },
+        {
+          "explanation": "原方程减去个体均值",
+          "tex": "y_{it}-\\bar y_i=(x_{it}-\\bar x_i)^\\top\\beta+(u_{it}-\\bar u_i)"
+        },
+        {
+          "explanation": "对变换后的样本实施OLS",
+          "tex": "\\hat\\beta_{FE}=(\\tilde X^\\top\\tilde X)^{-1}\\tilde X^\\top\\tilde y"
+        }
+      ],
+      "example": "对ETF面板回归加入ETF个体效应，剔除时间不变的基金差异。",
+      "application": "面板因子、资产特征收益回归。",
+      "caveat": "若解释变量与未来误差相关，固定效应本身不能消除全部内生性。",
+      "checked_status": "定义、适用条件、性质、公式、分步推导与应用"
+    },
+    {
+      "id": "econometrics-n0235",
+      "node_id": "econometrics-n0235",
+      "title": "Fama-MacBeth横截面回归",
+      "definition": "按时间逐期对资产收益进行横截面回归，再平均各期斜率估计风险溢价。",
+      "assumptions": "每期存在可比横截面；因子暴露与未来收益时间对齐，标准误需要处理时间依赖。",
+      "properties": [
+        "斜率的时间均值用于估计风险价格。",
+        "标准误基于跨期斜率变化而非简单把所有股票期数当独立样本。"
+      ],
+      "formulas": [
+        {
+          "label": "逐期横截面回归",
+          "tex": "R_{i,t+1}=a_t+\\lambda_t^\\top z_{it}+\\epsilon_{i,t+1}"
+        },
+        {
+          "label": "溢价均值",
+          "tex": "\\bar\\lambda=\\frac1T\\sum_{t=1}^T\\hat\\lambda_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "在每个日期 $t$ 拟合横截面OLS，取得斜率",
+          "tex": "\\hat\\lambda_t=(Z_t^\\top Z_t)^{-1}Z_t^\\top R_{t+1}"
+        },
+        {
+          "explanation": "对 $T$ 个日期的估计系数取平均",
+          "tex": "\\bar\\lambda=T^{-1}\\sum_t\\hat\\lambda_t"
+        },
+        {
+          "explanation": "若斜率序列独立，则均值方差按时间方差估计；存在自相关需修正",
+          "tex": "\\operatorname{SE}(\\bar\\lambda)\\approx s_{\\lambda}/\\sqrt{T}"
+        }
+      ],
+      "example": "研究37只ETF的波动率敏感度是否能解释后续横截面收益。",
+      "application": "资产定价风险溢价检验与因子投资。",
+      "caveat": "横截面资产数量与回归期数不足时显著性脆弱。",
+      "checked_status": "定义、适用条件、性质、公式、分步推导与应用"
+    },
+    {
+      "id": "timeseries-n0264",
+      "node_id": "timeseries-n0264",
+      "title": "Kalman滤波",
+      "definition": "对线性高斯状态空间模型，通过预测与更新递推估计潜在状态的条件均值和协方差。",
+      "assumptions": "状态与观测为线性，噪声零均值独立高斯；对应协方差矩阵适当正定。",
+      "properties": [
+        "预测结合状态方程。",
+        "更新使用创新残差和Kalman增益。"
+      ],
+      "formulas": [
+        {
+          "label": "预测",
+          "tex": "\\hat x_{t|t-1}=F\\hat x_{t-1|t-1},\\quad P_{t|t-1}=FP_{t-1|t-1}F^\\top+Q"
+        },
+        {
+          "label": "更新",
+          "tex": "K_t=P^-H^\\top(HP^-H^\\top+R)^{-1},\\quad \\hat x^+=\\hat x^-+K_t(y_t-H\\hat x^-)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由状态方程计算先验预测的均值和方差",
+          "tex": "x_t=Fx_{t-1}+w_t,\\quad P^-_t=FP^+_{t-1}F^\\top+Q"
+        },
+        {
+          "explanation": "创新与协方差",
+          "tex": "v_t=y_t-H\\hat x_t^-,\\quad S_t=HP^-_tH^\\top+R"
+        },
+        {
+          "explanation": "用创新对潜在状态线性最小方差更新",
+          "tex": "K_t=P^-_tH^\\top S_t^{-1},\\quad\\hat x_t^+=\\hat x_t^-+K_tv_t"
+        }
+      ],
+      "example": "估计无法直接观测的市场趋势/时间变化Beta。",
+      "application": "动态因子模型、价差追踪、风险状态估计。",
+      "caveat": "非高斯跳跃过程和强非线性需扩展滤波或粒子滤波。",
+      "checked_status": "定义、适用条件、性质、公式、分步推导与应用"
+    },
+    {
+      "id": "ito-n0325",
+      "node_id": "ito-n0325",
+      "title": "Feynman-Kac公式",
+      "definition": "将满足终端条件的某类抛物型PDE解表示为扩散过程终端支付的条件期望。",
+      "assumptions": "系数、边界和解满足所需光滑、增长与可积条件；扩散由相应SDE生成。",
+      "properties": [
+        "联系风险中性期权定价与PDE。",
+        "折现的价值过程在适当条件下为鞅。"
+      ],
+      "formulas": [
+        {
+          "label": "Feynman-Kac表达式",
+          "tex": "u(t,x)=\\mathbb E_{t,x}\\left[e^{-\\int_t^T r(X_s,s)\\,ds}g(X_T)\\right]"
+        },
+        {
+          "label": "对应PDE",
+          "tex": "u_t+\\mathcal Lu-ru=0,\\quad u(T,x)=g(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对扩散生成元 $\\mathcal L$ 写Itô公式",
+          "tex": "du(t,X_t)=(u_t+\\mathcal Lu)dt+u_x\\sigma\\,dW_t"
+        },
+        {
+          "explanation": "定义贴现过程 $M_s=e^{-\\int_t^s r du}u(s,X_s)$，应用乘积法则",
+          "tex": "dM_s=e^{-\\int_t^s r du}\\big[(u_t+\\mathcal Lu-ru)ds+u_x\\sigma\\,dW_s\\big]"
+        },
+        {
+          "explanation": "若PDE成立，漂移消失；在真鞅与可积条件下取期望",
+          "tex": "u(t,x)=E_{t,x}[e^{-\\int_t^Trds}g(X_T)]"
+        }
+      ],
+      "example": "Black–Scholes PDE的Call价格可表述为风险中性折现终端支付期望。",
+      "application": "风险中性衍生品估值、最优停止PDE。",
+      "caveat": "局部鞅不一定是真鞅；证明需要确保可积性与边界条件。",
+      "checked_status": "定义、适用条件、性质、公式、分步推导与应用"
+    },
+    {
+      "id": "mlmath-n0452",
+      "node_id": "mlmath-n0452",
+      "title": "经验风险最小化ERM",
+      "definition": "在样本上选择使平均训练损失最小的模型参数，是监督学习的基本优化框架。",
+      "assumptions": "观测抽样与损失函数已指定；泛化需要额外假设或检验。",
+      "properties": [
+        "训练误差最小不意味着样本外风险最低。",
+        "正则化可控制模型复杂度，改变优化目标。"
+      ],
+      "formulas": [
+        {
+          "label": "经验风险",
+          "tex": "\\hat R_n(\\theta)=\\frac1n\\sum_{i=1}^n\\ell(f_\\theta(x_i),y_i)"
+        },
+        {
+          "label": "ERM",
+          "tex": "\\hat\\theta=\\arg\\min_\\theta\\hat R_n(\\theta)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "目标是真实总体预测风险",
+          "tex": "R(\\theta)=E_{(X,Y)}[\\ell(f_\\theta(X),Y)]"
+        },
+        {
+          "explanation": "未知总体分布时以样本平均替代期望",
+          "tex": "\\hat R_n(\\theta)=n^{-1}\\sum_i\\ell(f_\\theta(x_i),y_i)"
+        },
+        {
+          "explanation": "对模型参数最小化经验风险产生训练解",
+          "tex": "\\hat\\theta=\\arg\\min_\\theta\\hat R_n(\\theta)"
+        }
+      ],
+      "example": "用ETF过去价格图像与未来回报标签训练CNN。",
+      "application": "量化机器学习训练、正则化、交叉验证。",
+      "caveat": "金融数据不独立同分布，训练损失与未来真实回报可差异很大。",
+      "checked_status": "定义、适用条件、性质、公式、分步推导与应用"
+    },
+    {
+      "id": "information-n0481",
+      "node_id": "information-n0481",
+      "title": "Shannon熵",
+      "definition": "离散随机变量分布的不确定性，用对数概率的平均负值度量。",
+      "assumptions": "离散概率分布；约定 $0\\log0=0$。",
+      "properties": [
+        "熵非负，均匀分布最大。",
+        "熵度量不确定性，不直接测量真实投资价值。"
+      ],
+      "formulas": [
+        {
+          "label": "信息熵",
+          "tex": "H(X)=-\\sum_i p_i\\log p_i"
+        },
+        {
+          "label": "均匀分布上界",
+          "tex": "H(X)\\le\\log n"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "与同样支持集上的均匀分布 $U$ 比较KL散度",
+          "tex": "D_{KL}(P\\|U)=\\sum_i p_i\\log\\frac{p_i}{1/n}"
+        },
+        {
+          "explanation": "展开并使用KL非负",
+          "tex": "D_{KL}(P\\|U)=\\log n-H(P)\\ge0"
+        },
+        {
+          "explanation": "得到熵上界，且均匀时取等",
+          "tex": "H(P)\\le\\log n"
+        }
+      ],
+      "example": "在3种市场状态的概率预测上用熵衡量模型的不确定程度。",
+      "application": "市场状态预测、探索奖励、分布检测。",
+      "caveat": "高熵状态不直接等于未来收益波动高。",
+      "checked_status": "定义、适用条件、性质、公式、分步推导与应用"
+    },
+    {
+      "id": "control-n0541",
+      "node_id": "control-n0541",
+      "title": "Bellman算子",
+      "definition": "把任意候选未来价值函数映射为当前最优一步回报加折现后的续值，是动态规划的核心算子。",
+      "assumptions": "折现因子 $0<\\gamma<1$、有界奖励、有限或适当可测状态动作。",
+      "properties": [
+        "在有界函数的sup范数下，Bellman最优算子是 $\\gamma$-压缩。",
+        "唯一不动点是最优价值函数。"
+      ],
+      "formulas": [
+        {
+          "label": "Bellman算子",
+          "tex": "(TV)(s)=\\max_a\\{r(s,a)+\\gamma E[V(S')\\mid s,a]\\}"
+        },
+        {
+          "label": "压缩性",
+          "tex": "\\|TV-TW\\|_\\infty\\le\\gamma\\|V-W\\|_\\infty"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "利用最大算子的Lipschitz性质",
+          "tex": "|\\max_a f_a-\\max_a g_a|\\le\\max_a|f_a-g_a|"
+        },
+        {
+          "explanation": "对任意状态的回报差应用条件期望界",
+          "tex": "|(TV)(s)-(TW)(s)|\\le\\gamma\\max_a E[|V(S')-W(S')|\\mid s,a]"
+        },
+        {
+          "explanation": "用sup范数界住所有状态",
+          "tex": "\\|TV-TW\\|_\\infty\\le\\gamma\\|V-W\\|_\\infty"
+        }
+      ],
+      "example": "对有限状态交易时机MDP使用值迭代寻找最优持仓动作。",
+      "application": "资产配置动态规划、强化学习和最优执行。",
+      "caveat": "不折现或无界回报时压缩结论不一定成立。",
+      "checked_status": "定义、适用条件、性质、公式、分步推导与应用"
+    },
+    {
+      "id": "riskmath-n0582",
+      "node_id": "riskmath-n0582",
+      "title": "Expected Shortfall",
+      "definition": "给定尾部概率水平下最严重损失的平均程度，是常用凸风险度量。",
+      "assumptions": "损失变量 $L$ 可积；离散分布含VaR处原子质量时用积分分位表达式更严谨。",
+      "properties": [
+        "相较VaR，ES考虑阈值之外的损失严重程度。",
+        "在常见设置下满足次可加性等一致性风险度量性质。"
+      ],
+      "formulas": [
+        {
+          "label": "分位数表达",
+          "tex": "ES_\\alpha(L)=\\frac{1}{1-\\alpha}\\int_\\alpha^1 VaR_u(L)\\,du"
+        },
+        {
+          "label": "连续分布的直观表达",
+          "tex": "ES_\\alpha(L)=E[L\\mid L\\ge VaR_\\alpha(L)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对损失变量分布的上分位函数积分",
+          "tex": "\\int_\\alpha^1 VaR_u(L)\\,du"
+        },
+        {
+          "explanation": "该积分表示最差 $1-\\alpha$ 分位质量上的累计期望损失",
+          "tex": "ES_\\alpha=\\frac{1}{1-\\alpha}\\int_\\alpha^1VaR_u\\,du"
+        },
+        {
+          "explanation": "若分布连续，则分位积分等于相应条件尾部均值",
+          "tex": "ES_\\alpha=E[L\\mid L\\ge VaR_\\alpha]"
+        }
+      ],
+      "example": "用ETF组合1年日损失计算99% ES并与95% VaR比较。",
+      "application": "尾部风险管理、期权风险、风险预算。",
+      "caveat": "真实样本尾部极少，置信区间与极端行情外推必须谨慎。",
+      "checked_status": "定义、适用条件、性质、公式、分步推导与应用"
+    }
+  ]
+}
