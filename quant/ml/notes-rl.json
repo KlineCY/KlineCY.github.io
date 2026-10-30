@@ -1,0 +1,613 @@
+{
+  "version": 1,
+  "notes": [
+    {
+      "id": "rl-n02-01",
+      "node_id": "rl-n02-01",
+      "title": "状态与动作",
+      "definition": "环境状态概括可用于决策的信息，动作表示智能体可执行的选择。",
+      "assumptions": "需要明确状态Markov性、奖励定义、转移模型、数据支持范围和可执行的交易动作。离线金融数据不允许任意行动的反事实成交被直接观测。",
+      "properties": [
+        "环境状态概括可用于决策的信息，动作表示智能体可执行的选择。。",
+        "探索、离线数据覆盖度与非平稳环境会改变策略最优性或估值误差。"
+      ],
+      "formulas": [
+        {
+          "label": "策略或价值公式",
+          "tex": "S_t\\in\\mathcal S,\\quad A_t\\in\\mathcal A(S_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据状态、动作或回报的定义建立序贯决策关系。环境状态概括可用于决策的信息，动作表示智能体可执行的选择。",
+          "tex": "S_t\\in\\mathcal S,\\quad A_t\\in\\mathcal A(S_t)"
+        },
+        {
+          "explanation": "通过Bellman分解、策略梯度或离线目标函数解释上述公式的学习作用。",
+          "tex": "S_t\\in\\mathcal S,\\quad A_t\\in\\mathcal A(S_t)"
+        }
+      ],
+      "code": "# 状态与动作：强化学习基础实验\nimport numpy as np\nrng=np.random.default_rng(0)\nQ=np.zeros((2,2))\nfor _ in range(100):\n s=int(rng.integers(2));a=int(rng.integers(2))\n sp=(s+a)%2;r=1. if sp==1 else 0.\n Q[s,a]+=.2*(r+.9*Q[sp].max()-Q[s,a])\nprint(\"Q values:\",Q)",
+      "packages": "numpy",
+      "application": "用于ETF组合再平衡、交易执行模拟、连续权重和风险约束智能体研究。",
+      "limits": "本笔记提供对应核心公式与基础演示，不是完整可交易强化学习策略训练或环境模拟。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "rl-n03-01",
+      "node_id": "rl-n03-01",
+      "title": "即时奖励",
+      "definition": "即时奖励量化一次状态转移的收益或成本，是序贯优化目标的原子项。",
+      "assumptions": "需要明确状态Markov性、奖励定义、转移模型、数据支持范围和可执行的交易动作。离线金融数据不允许任意行动的反事实成交被直接观测。",
+      "properties": [
+        "即时奖励量化一次状态转移的收益或成本，是序贯优化目标的原子项。。",
+        "探索、离线数据覆盖度与非平稳环境会改变策略最优性或估值误差。"
+      ],
+      "formulas": [
+        {
+          "label": "策略或价值公式",
+          "tex": "R_{t+1}=r(S_t,A_t,S_{t+1})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据状态、动作或回报的定义建立序贯决策关系。即时奖励量化一次状态转移的收益或成本，是序贯优化目标的原子项。",
+          "tex": "R_{t+1}=r(S_t,A_t,S_{t+1})"
+        },
+        {
+          "explanation": "通过Bellman分解、策略梯度或离线目标函数解释上述公式的学习作用。",
+          "tex": "R_{t+1}=r(S_t,A_t,S_{t+1})"
+        }
+      ],
+      "code": "# 即时奖励：强化学习基础实验\nimport numpy as np\nrng=np.random.default_rng(0)\nQ=np.zeros((2,2))\nfor _ in range(100):\n s=int(rng.integers(2));a=int(rng.integers(2))\n sp=(s+a)%2;r=1. if sp==1 else 0.\n Q[s,a]+=.2*(r+.9*Q[sp].max()-Q[s,a])\nprint(\"Q values:\",Q)",
+      "packages": "numpy",
+      "application": "用于ETF组合再平衡、交易执行模拟、连续权重和风险约束智能体研究。",
+      "limits": "本笔记提供对应核心公式与基础演示，不是完整可交易强化学习策略训练或环境模拟。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "rl-n04-01",
+      "node_id": "rl-n04-01",
+      "title": "折现回报",
+      "definition": "折现回报对将来的奖励按折现因子γ逐期加权。",
+      "assumptions": "需要明确状态Markov性、奖励定义、转移模型、数据支持范围和可执行的交易动作。离线金融数据不允许任意行动的反事实成交被直接观测。",
+      "properties": [
+        "折现回报对将来的奖励按折现因子γ逐期加权。。",
+        "探索、离线数据覆盖度与非平稳环境会改变策略最优性或估值误差。"
+      ],
+      "formulas": [
+        {
+          "label": "策略或价值公式",
+          "tex": "G_t=\\sum_{k=0}^\\infty\\gamma^kR_{t+k+1}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据状态、动作或回报的定义建立序贯决策关系。折现回报对将来的奖励按折现因子γ逐期加权。",
+          "tex": "G_t=\\sum_{k=0}^\\infty\\gamma^kR_{t+k+1}"
+        },
+        {
+          "explanation": "通过Bellman分解、策略梯度或离线目标函数解释上述公式的学习作用。",
+          "tex": "G_t=\\sum_{k=0}^\\infty\\gamma^kR_{t+k+1}"
+        }
+      ],
+      "code": "# 折现回报：强化学习基础实验\nimport numpy as np\nrng=np.random.default_rng(0)\nQ=np.zeros((2,2))\nfor _ in range(100):\n s=int(rng.integers(2));a=int(rng.integers(2))\n sp=(s+a)%2;r=1. if sp==1 else 0.\n Q[s,a]+=.2*(r+.9*Q[sp].max()-Q[s,a])\nprint(\"Q values:\",Q)",
+      "packages": "numpy",
+      "application": "用于ETF组合再平衡、交易执行模拟、连续权重和风险约束智能体研究。",
+      "limits": "本笔记提供对应核心公式与基础演示，不是完整可交易强化学习策略训练或环境模拟。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "rl-n05-01",
+      "node_id": "rl-n05-01",
+      "title": "转移核",
+      "definition": "转移核给定当前状态动作后下一状态的概率分布。",
+      "assumptions": "需要明确状态Markov性、奖励定义、转移模型、数据支持范围和可执行的交易动作。离线金融数据不允许任意行动的反事实成交被直接观测。",
+      "properties": [
+        "转移核给定当前状态动作后下一状态的概率分布。。",
+        "探索、离线数据覆盖度与非平稳环境会改变策略最优性或估值误差。"
+      ],
+      "formulas": [
+        {
+          "label": "策略或价值公式",
+          "tex": "P(s'\\mid s,a)=P(S_{t+1}=s'\\mid S_t=s,A_t=a)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据状态、动作或回报的定义建立序贯决策关系。转移核给定当前状态动作后下一状态的概率分布。",
+          "tex": "P(s'\\mid s,a)=P(S_{t+1}=s'\\mid S_t=s,A_t=a)"
+        },
+        {
+          "explanation": "通过Bellman分解、策略梯度或离线目标函数解释上述公式的学习作用。",
+          "tex": "P(s'\\mid s,a)=P(S_{t+1}=s'\\mid S_t=s,A_t=a)"
+        }
+      ],
+      "code": "# 转移核：强化学习基础实验\nimport numpy as np\nrng=np.random.default_rng(0)\nQ=np.zeros((2,2))\nfor _ in range(100):\n s=int(rng.integers(2));a=int(rng.integers(2))\n sp=(s+a)%2;r=1. if sp==1 else 0.\n Q[s,a]+=.2*(r+.9*Q[sp].max()-Q[s,a])\nprint(\"Q values:\",Q)",
+      "packages": "numpy",
+      "application": "用于ETF组合再平衡、交易执行模拟、连续权重和风险约束智能体研究。",
+      "limits": "本笔记提供对应核心公式与基础演示，不是完整可交易强化学习策略训练或环境模拟。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "rl-n06-01",
+      "node_id": "rl-n06-01",
+      "title": "Markov性质",
+      "definition": "下一期状态在已知当前状态和动作后不再依赖更早的完整历史。",
+      "assumptions": "需要明确状态Markov性、奖励定义、转移模型、数据支持范围和可执行的交易动作。离线金融数据不允许任意行动的反事实成交被直接观测。",
+      "properties": [
+        "下一期状态在已知当前状态和动作后不再依赖更早的完整历史。。",
+        "探索、离线数据覆盖度与非平稳环境会改变策略最优性或估值误差。"
+      ],
+      "formulas": [
+        {
+          "label": "策略或价值公式",
+          "tex": "P(S_{t+1}\\mid S_{0:t},A_{0:t})=P(S_{t+1}\\mid S_t,A_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据状态、动作或回报的定义建立序贯决策关系。下一期状态在已知当前状态和动作后不再依赖更早的完整历史。",
+          "tex": "P(S_{t+1}\\mid S_{0:t},A_{0:t})=P(S_{t+1}\\mid S_t,A_t)"
+        },
+        {
+          "explanation": "通过Bellman分解、策略梯度或离线目标函数解释上述公式的学习作用。",
+          "tex": "P(S_{t+1}\\mid S_{0:t},A_{0:t})=P(S_{t+1}\\mid S_t,A_t)"
+        }
+      ],
+      "code": "# Markov性质：强化学习基础实验\nimport numpy as np\nrng=np.random.default_rng(0)\nQ=np.zeros((2,2))\nfor _ in range(100):\n s=int(rng.integers(2));a=int(rng.integers(2))\n sp=(s+a)%2;r=1. if sp==1 else 0.\n Q[s,a]+=.2*(r+.9*Q[sp].max()-Q[s,a])\nprint(\"Q values:\",Q)",
+      "packages": "numpy",
+      "application": "用于ETF组合再平衡、交易执行模拟、连续权重和风险约束智能体研究。",
+      "limits": "本笔记提供对应核心公式与基础演示，不是完整可交易强化学习策略训练或环境模拟。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "rl-n03-02",
+      "node_id": "rl-n03-02",
+      "title": "Bellman期望方程",
+      "definition": "固定策略的价值函数等于即时奖励和未来价值的折现条件期望。",
+      "assumptions": "需要明确状态Markov性、奖励定义、转移模型、数据支持范围和可执行的交易动作。离线金融数据不允许任意行动的反事实成交被直接观测。",
+      "properties": [
+        "固定策略的价值函数等于即时奖励和未来价值的折现条件期望。。",
+        "探索、离线数据覆盖度与非平稳环境会改变策略最优性或估值误差。"
+      ],
+      "formulas": [
+        {
+          "label": "策略或价值公式",
+          "tex": "V^\\pi(s)=E_\\pi[R_{t+1}+\\gamma V^\\pi(S_{t+1})\\mid S_t=s]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据状态、动作或回报的定义建立序贯决策关系。固定策略的价值函数等于即时奖励和未来价值的折现条件期望。",
+          "tex": "V^\\pi(s)=E_\\pi[R_{t+1}+\\gamma V^\\pi(S_{t+1})\\mid S_t=s]"
+        },
+        {
+          "explanation": "通过Bellman分解、策略梯度或离线目标函数解释上述公式的学习作用。",
+          "tex": "V^\\pi(s)=E_\\pi[R_{t+1}+\\gamma V^\\pi(S_{t+1})\\mid S_t=s]"
+        }
+      ],
+      "code": "# Bellman期望方程：强化学习基础实验\nimport numpy as np\nrng=np.random.default_rng(0)\nQ=np.zeros((2,2))\nfor _ in range(100):\n s=int(rng.integers(2));a=int(rng.integers(2))\n sp=(s+a)%2;r=1. if sp==1 else 0.\n Q[s,a]+=.2*(r+.9*Q[sp].max()-Q[s,a])\nprint(\"Q values:\",Q)",
+      "packages": "numpy",
+      "application": "用于ETF组合再平衡、交易执行模拟、连续权重和风险约束智能体研究。",
+      "limits": "本笔记提供对应核心公式与基础演示，不是完整可交易强化学习策略训练或环境模拟。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "rl-n06-02",
+      "node_id": "rl-n06-02",
+      "title": "策略改进",
+      "definition": "在已有策略价值下选择更高的动作价值能够在相应MDP条件下改进策略。",
+      "assumptions": "需要明确状态Markov性、奖励定义、转移模型、数据支持范围和可执行的交易动作。离线金融数据不允许任意行动的反事实成交被直接观测。",
+      "properties": [
+        "在已有策略价值下选择更高的动作价值能够在相应MDP条件下改进策略。。",
+        "探索、离线数据覆盖度与非平稳环境会改变策略最优性或估值误差。"
+      ],
+      "formulas": [
+        {
+          "label": "策略或价值公式",
+          "tex": "\\pi'(s)\\in\\arg\\max_aQ^\\pi(s,a)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据状态、动作或回报的定义建立序贯决策关系。在已有策略价值下选择更高的动作价值能够在相应MDP条件下改进策略。",
+          "tex": "\\pi'(s)\\in\\arg\\max_aQ^\\pi(s,a)"
+        },
+        {
+          "explanation": "通过Bellman分解、策略梯度或离线目标函数解释上述公式的学习作用。",
+          "tex": "\\pi'(s)\\in\\arg\\max_aQ^\\pi(s,a)"
+        }
+      ],
+      "code": "# 策略改进：强化学习基础实验\nimport numpy as np\nrng=np.random.default_rng(0)\nQ=np.zeros((2,2))\nfor _ in range(100):\n s=int(rng.integers(2));a=int(rng.integers(2))\n sp=(s+a)%2;r=1. if sp==1 else 0.\n Q[s,a]+=.2*(r+.9*Q[sp].max()-Q[s,a])\nprint(\"Q values:\",Q)",
+      "packages": "numpy",
+      "application": "用于ETF组合再平衡、交易执行模拟、连续权重和风险约束智能体研究。",
+      "limits": "本笔记提供对应核心公式与基础演示，不是完整可交易强化学习策略训练或环境模拟。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "rl-n03-03",
+      "node_id": "rl-n03-03",
+      "title": "广义策略迭代GPI",
+      "definition": "广义策略迭代交替推进价值估计和策略改进，不要求每次完整收敛。",
+      "assumptions": "需要明确状态Markov性、奖励定义、转移模型、数据支持范围和可执行的交易动作。离线金融数据不允许任意行动的反事实成交被直接观测。",
+      "properties": [
+        "广义策略迭代交替推进价值估计和策略改进，不要求每次完整收敛。。",
+        "探索、离线数据覆盖度与非平稳环境会改变策略最优性或估值误差。"
+      ],
+      "formulas": [
+        {
+          "label": "策略或价值公式",
+          "tex": "V_{k+1}\\approx T^{\\pi_k}V_k"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据状态、动作或回报的定义建立序贯决策关系。广义策略迭代交替推进价值估计和策略改进，不要求每次完整收敛。",
+          "tex": "V_{k+1}\\approx T^{\\pi_k}V_k"
+        },
+        {
+          "explanation": "通过Bellman分解、策略梯度或离线目标函数解释上述公式的学习作用。",
+          "tex": "V_{k+1}\\approx T^{\\pi_k}V_k"
+        }
+      ],
+      "code": "# 广义策略迭代GPI：强化学习基础实验\nimport numpy as np\nrng=np.random.default_rng(0)\nQ=np.zeros((2,2))\nfor _ in range(100):\n s=int(rng.integers(2));a=int(rng.integers(2))\n sp=(s+a)%2;r=1. if sp==1 else 0.\n Q[s,a]+=.2*(r+.9*Q[sp].max()-Q[s,a])\nprint(\"Q values:\",Q)",
+      "packages": "numpy",
+      "application": "用于ETF组合再平衡、交易执行模拟、连续权重和风险约束智能体研究。",
+      "limits": "本笔记提供对应核心公式与基础演示，不是完整可交易强化学习策略训练或环境模拟。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "rl-n04-03",
+      "node_id": "rl-n04-03",
+      "title": "最优停止",
+      "definition": "最优停止决定继续等待还是立即终止以最大化预期价值。",
+      "assumptions": "需要明确状态Markov性、奖励定义、转移模型、数据支持范围和可执行的交易动作。离线金融数据不允许任意行动的反事实成交被直接观测。",
+      "properties": [
+        "最优停止决定继续等待还是立即终止以最大化预期价值。。",
+        "探索、离线数据覆盖度与非平稳环境会改变策略最优性或估值误差。"
+      ],
+      "formulas": [
+        {
+          "label": "策略或价值公式",
+          "tex": "V(s)=\\max\\{g(s),E[\\gamma V(S')\\mid s]\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据状态、动作或回报的定义建立序贯决策关系。最优停止决定继续等待还是立即终止以最大化预期价值。",
+          "tex": "V(s)=\\max\\{g(s),E[\\gamma V(S')\\mid s]\\}"
+        },
+        {
+          "explanation": "通过Bellman分解、策略梯度或离线目标函数解释上述公式的学习作用。",
+          "tex": "V(s)=\\max\\{g(s),E[\\gamma V(S')\\mid s]\\}"
+        }
+      ],
+      "code": "# 最优停止：强化学习基础实验\nimport numpy as np\nrng=np.random.default_rng(0)\nQ=np.zeros((2,2))\nfor _ in range(100):\n s=int(rng.integers(2));a=int(rng.integers(2))\n sp=(s+a)%2;r=1. if sp==1 else 0.\n Q[s,a]+=.2*(r+.9*Q[sp].max()-Q[s,a])\nprint(\"Q values:\",Q)",
+      "packages": "numpy",
+      "application": "用于ETF组合再平衡、交易执行模拟、连续权重和风险约束智能体研究。",
+      "limits": "本笔记提供对应核心公式与基础演示，不是完整可交易强化学习策略训练或环境模拟。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "rl-n05-03",
+      "node_id": "rl-n05-03",
+      "title": "有限时域DP",
+      "definition": "在有限终止期T按时间倒序计算动作价值和最优策略。",
+      "assumptions": "需要明确状态Markov性、奖励定义、转移模型、数据支持范围和可执行的交易动作。离线金融数据不允许任意行动的反事实成交被直接观测。",
+      "properties": [
+        "在有限终止期T按时间倒序计算动作价值和最优策略。。",
+        "探索、离线数据覆盖度与非平稳环境会改变策略最优性或估值误差。"
+      ],
+      "formulas": [
+        {
+          "label": "策略或价值公式",
+          "tex": "V_t(s)=\\max_a E[r_t+\\gamma V_{t+1}(S')\\mid s,a]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据状态、动作或回报的定义建立序贯决策关系。在有限终止期T按时间倒序计算动作价值和最优策略。",
+          "tex": "V_t(s)=\\max_a E[r_t+\\gamma V_{t+1}(S')\\mid s,a]"
+        },
+        {
+          "explanation": "通过Bellman分解、策略梯度或离线目标函数解释上述公式的学习作用。",
+          "tex": "V_t(s)=\\max_a E[r_t+\\gamma V_{t+1}(S')\\mid s,a]"
+        }
+      ],
+      "code": "# 有限时域DP：强化学习基础实验\nimport numpy as np\nrng=np.random.default_rng(0)\nQ=np.zeros((2,2))\nfor _ in range(100):\n s=int(rng.integers(2));a=int(rng.integers(2))\n sp=(s+a)%2;r=1. if sp==1 else 0.\n Q[s,a]+=.2*(r+.9*Q[sp].max()-Q[s,a])\nprint(\"Q values:\",Q)",
+      "packages": "numpy",
+      "application": "用于ETF组合再平衡、交易执行模拟、连续权重和风险约束智能体研究。",
+      "limits": "本笔记提供对应核心公式与基础演示，不是完整可交易强化学习策略训练或环境模拟。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "rl-n06-03",
+      "node_id": "rl-n06-03",
+      "title": "折现收敛",
+      "definition": "有限折现MDP的Bellman最优算子在无穷范数下是γ压缩映射。",
+      "assumptions": "需要明确状态Markov性、奖励定义、转移模型、数据支持范围和可执行的交易动作。离线金融数据不允许任意行动的反事实成交被直接观测。",
+      "properties": [
+        "有限折现MDP的Bellman最优算子在无穷范数下是γ压缩映射。。",
+        "探索、离线数据覆盖度与非平稳环境会改变策略最优性或估值误差。"
+      ],
+      "formulas": [
+        {
+          "label": "策略或价值公式",
+          "tex": "\\|TV-TW\\|_\\infty\\le\\gamma\\|V-W\\|_\\infty"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据状态、动作或回报的定义建立序贯决策关系。有限折现MDP的Bellman最优算子在无穷范数下是γ压缩映射。",
+          "tex": "\\|TV-TW\\|_\\infty\\le\\gamma\\|V-W\\|_\\infty"
+        },
+        {
+          "explanation": "通过Bellman分解、策略梯度或离线目标函数解释上述公式的学习作用。",
+          "tex": "\\|TV-TW\\|_\\infty\\le\\gamma\\|V-W\\|_\\infty"
+        }
+      ],
+      "code": "# 折现收敛：强化学习基础实验\nimport numpy as np\nrng=np.random.default_rng(0)\nQ=np.zeros((2,2))\nfor _ in range(100):\n s=int(rng.integers(2));a=int(rng.integers(2))\n sp=(s+a)%2;r=1. if sp==1 else 0.\n Q[s,a]+=.2*(r+.9*Q[sp].max()-Q[s,a])\nprint(\"Q values:\",Q)",
+      "packages": "numpy",
+      "application": "用于ETF组合再平衡、交易执行模拟、连续权重和风险约束智能体研究。",
+      "limits": "本笔记提供对应核心公式与基础演示，不是完整可交易强化学习策略训练或环境模拟。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "rl-n01-04",
+      "node_id": "rl-n01-04",
+      "title": "Monte Carlo策略估计",
+      "definition": "蒙特卡洛策略评价利用完整回合观测回报的样本均值估计价值。",
+      "assumptions": "需要明确状态Markov性、奖励定义、转移模型、数据支持范围和可执行的交易动作。离线金融数据不允许任意行动的反事实成交被直接观测。",
+      "properties": [
+        "蒙特卡洛策略评价利用完整回合观测回报的样本均值估计价值。。",
+        "探索、离线数据覆盖度与非平稳环境会改变策略最优性或估值误差。"
+      ],
+      "formulas": [
+        {
+          "label": "策略或价值公式",
+          "tex": "\\hat V(s)=\\frac1{N(s)}\\sum_{i:S_i=s}G_i"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据状态、动作或回报的定义建立序贯决策关系。蒙特卡洛策略评价利用完整回合观测回报的样本均值估计价值。",
+          "tex": "\\hat V(s)=\\frac1{N(s)}\\sum_{i:S_i=s}G_i"
+        },
+        {
+          "explanation": "通过Bellman分解、策略梯度或离线目标函数解释上述公式的学习作用。",
+          "tex": "\\hat V(s)=\\frac1{N(s)}\\sum_{i:S_i=s}G_i"
+        }
+      ],
+      "code": "# Monte Carlo策略估计：强化学习基础实验\nimport numpy as np\nrng=np.random.default_rng(0)\nQ=np.zeros((2,2))\nfor _ in range(100):\n s=int(rng.integers(2));a=int(rng.integers(2))\n sp=(s+a)%2;r=1. if sp==1 else 0.\n Q[s,a]+=.2*(r+.9*Q[sp].max()-Q[s,a])\nprint(\"Q values:\",Q)",
+      "packages": "numpy",
+      "application": "用于ETF组合再平衡、交易执行模拟、连续权重和风险约束智能体研究。",
+      "limits": "本笔记提供对应核心公式与基础演示，不是完整可交易强化学习策略训练或环境模拟。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "rl-n05-04",
+      "node_id": "rl-n05-04",
+      "title": "Eligibility Traces",
+      "definition": "资格迹对过去状态动作赋衰减权重，使当前TD误差更新多个历史位置。",
+      "assumptions": "需要明确状态Markov性、奖励定义、转移模型、数据支持范围和可执行的交易动作。离线金融数据不允许任意行动的反事实成交被直接观测。",
+      "properties": [
+        "资格迹对过去状态动作赋衰减权重，使当前TD误差更新多个历史位置。。",
+        "探索、离线数据覆盖度与非平稳环境会改变策略最优性或估值误差。"
+      ],
+      "formulas": [
+        {
+          "label": "策略或价值公式",
+          "tex": "e_t=\\gamma\\lambda e_{t-1}+\\nabla_\\theta V_\\theta(S_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据状态、动作或回报的定义建立序贯决策关系。资格迹对过去状态动作赋衰减权重，使当前TD误差更新多个历史位置。",
+          "tex": "e_t=\\gamma\\lambda e_{t-1}+\\nabla_\\theta V_\\theta(S_t)"
+        },
+        {
+          "explanation": "通过Bellman分解、策略梯度或离线目标函数解释上述公式的学习作用。",
+          "tex": "e_t=\\gamma\\lambda e_{t-1}+\\nabla_\\theta V_\\theta(S_t)"
+        }
+      ],
+      "code": "# Eligibility Traces：强化学习基础实验\nimport numpy as np\nrng=np.random.default_rng(0)\nQ=np.zeros((2,2))\nfor _ in range(100):\n s=int(rng.integers(2));a=int(rng.integers(2))\n sp=(s+a)%2;r=1. if sp==1 else 0.\n Q[s,a]+=.2*(r+.9*Q[sp].max()-Q[s,a])\nprint(\"Q values:\",Q)",
+      "packages": "numpy",
+      "application": "用于ETF组合再平衡、交易执行模拟、连续权重和风险约束智能体研究。",
+      "limits": "本笔记提供对应核心公式与基础演示，不是完整可交易强化学习策略训练或环境模拟。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "rl-n06-04",
+      "node_id": "rl-n06-04",
+      "title": "TD(λ)",
+      "definition": "TD(λ)结合一步TD误差与随时间衰减的资格迹更新参数。",
+      "assumptions": "需要明确状态Markov性、奖励定义、转移模型、数据支持范围和可执行的交易动作。离线金融数据不允许任意行动的反事实成交被直接观测。",
+      "properties": [
+        "TD(λ)结合一步TD误差与随时间衰减的资格迹更新参数。。",
+        "探索、离线数据覆盖度与非平稳环境会改变策略最优性或估值误差。"
+      ],
+      "formulas": [
+        {
+          "label": "策略或价值公式",
+          "tex": "\\theta^+=\\theta+\\alpha\\delta_t e_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据状态、动作或回报的定义建立序贯决策关系。TD(λ)结合一步TD误差与随时间衰减的资格迹更新参数。",
+          "tex": "\\theta^+=\\theta+\\alpha\\delta_t e_t"
+        },
+        {
+          "explanation": "通过Bellman分解、策略梯度或离线目标函数解释上述公式的学习作用。",
+          "tex": "\\theta^+=\\theta+\\alpha\\delta_t e_t"
+        }
+      ],
+      "code": "# TD(λ)：强化学习基础实验\nimport numpy as np\nrng=np.random.default_rng(0)\nQ=np.zeros((2,2))\nfor _ in range(100):\n s=int(rng.integers(2));a=int(rng.integers(2))\n sp=(s+a)%2;r=1. if sp==1 else 0.\n Q[s,a]+=.2*(r+.9*Q[sp].max()-Q[s,a])\nprint(\"Q values:\",Q)",
+      "packages": "numpy",
+      "application": "用于ETF组合再平衡、交易执行模拟、连续权重和风险约束智能体研究。",
+      "limits": "本笔记提供对应核心公式与基础演示，不是完整可交易强化学习策略训练或环境模拟。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "rl-n02-05",
+      "node_id": "rl-n02-05",
+      "title": "UCB",
+      "definition": "置信上界算法在估计奖励上加入随采样次数缩小的探索奖励。",
+      "assumptions": "需要明确状态Markov性、奖励定义、转移模型、数据支持范围和可执行的交易动作。离线金融数据不允许任意行动的反事实成交被直接观测。",
+      "properties": [
+        "置信上界算法在估计奖励上加入随采样次数缩小的探索奖励。。",
+        "探索、离线数据覆盖度与非平稳环境会改变策略最优性或估值误差。"
+      ],
+      "formulas": [
+        {
+          "label": "策略或价值公式",
+          "tex": "\\mathrm{UCB}_a=\\bar r_a+c\\sqrt{\\log t/n_a}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据状态、动作或回报的定义建立序贯决策关系。置信上界算法在估计奖励上加入随采样次数缩小的探索奖励。",
+          "tex": "\\mathrm{UCB}_a=\\bar r_a+c\\sqrt{\\log t/n_a}"
+        },
+        {
+          "explanation": "通过Bellman分解、策略梯度或离线目标函数解释上述公式的学习作用。",
+          "tex": "\\mathrm{UCB}_a=\\bar r_a+c\\sqrt{\\log t/n_a}"
+        }
+      ],
+      "code": "# UCB：强化学习基础实验\nimport numpy as np\nrng=np.random.default_rng(0)\nQ=np.zeros((2,2))\nfor _ in range(100):\n s=int(rng.integers(2));a=int(rng.integers(2))\n sp=(s+a)%2;r=1. if sp==1 else 0.\n Q[s,a]+=.2*(r+.9*Q[sp].max()-Q[s,a])\nprint(\"Q values:\",Q)",
+      "packages": "numpy",
+      "application": "用于ETF组合再平衡、交易执行模拟、连续权重和风险约束智能体研究。",
+      "limits": "本笔记提供对应核心公式与基础演示，不是完整可交易强化学习策略训练或环境模拟。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "rl-n03-05",
+      "node_id": "rl-n03-05",
+      "title": "多臂老虎机",
+      "definition": "Bandit仅关注动作与奖励的探索利用权衡，无长期环境状态转移。",
+      "assumptions": "需要明确状态Markov性、奖励定义、转移模型、数据支持范围和可执行的交易动作。离线金融数据不允许任意行动的反事实成交被直接观测。",
+      "properties": [
+        "Bandit仅关注动作与奖励的探索利用权衡，无长期环境状态转移。。",
+        "探索、离线数据覆盖度与非平稳环境会改变策略最优性或估值误差。"
+      ],
+      "formulas": [
+        {
+          "label": "策略或价值公式",
+          "tex": "a_t=\\arg\\max_a\\hat\\mu_a+\\mathrm{bonus}_a"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据状态、动作或回报的定义建立序贯决策关系。Bandit仅关注动作与奖励的探索利用权衡，无长期环境状态转移。",
+          "tex": "a_t=\\arg\\max_a\\hat\\mu_a+\\mathrm{bonus}_a"
+        },
+        {
+          "explanation": "通过Bellman分解、策略梯度或离线目标函数解释上述公式的学习作用。",
+          "tex": "a_t=\\arg\\max_a\\hat\\mu_a+\\mathrm{bonus}_a"
+        }
+      ],
+      "code": "# 多臂老虎机：强化学习基础实验\nimport numpy as np\nrng=np.random.default_rng(0)\nQ=np.zeros((2,2))\nfor _ in range(100):\n s=int(rng.integers(2));a=int(rng.integers(2))\n sp=(s+a)%2;r=1. if sp==1 else 0.\n Q[s,a]+=.2*(r+.9*Q[sp].max()-Q[s,a])\nprint(\"Q values:\",Q)",
+      "packages": "numpy",
+      "application": "用于ETF组合再平衡、交易执行模拟、连续权重和风险约束智能体研究。",
+      "limits": "本笔记提供对应核心公式与基础演示，不是完整可交易强化学习策略训练或环境模拟。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "rl-n04-05",
+      "node_id": "rl-n04-05",
+      "title": "Regret",
+      "definition": "遗憾度衡量实际决策累积奖励与最佳参考决策累积奖励之间的差。",
+      "assumptions": "需要明确状态Markov性、奖励定义、转移模型、数据支持范围和可执行的交易动作。离线金融数据不允许任意行动的反事实成交被直接观测。",
+      "properties": [
+        "遗憾度衡量实际决策累积奖励与最佳参考决策累积奖励之间的差。。",
+        "探索、离线数据覆盖度与非平稳环境会改变策略最优性或估值误差。"
+      ],
+      "formulas": [
+        {
+          "label": "策略或价值公式",
+          "tex": "\\mathrm{Regret}(T)=T\\mu^*-\\sum_{t=1}^TE[r_{a_t}]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据状态、动作或回报的定义建立序贯决策关系。遗憾度衡量实际决策累积奖励与最佳参考决策累积奖励之间的差。",
+          "tex": "\\mathrm{Regret}(T)=T\\mu^*-\\sum_{t=1}^TE[r_{a_t}]"
+        },
+        {
+          "explanation": "通过Bellman分解、策略梯度或离线目标函数解释上述公式的学习作用。",
+          "tex": "\\mathrm{Regret}(T)=T\\mu^*-\\sum_{t=1}^TE[r_{a_t}]"
+        }
+      ],
+      "code": "# Regret：强化学习基础实验\nimport numpy as np\nrng=np.random.default_rng(0)\nQ=np.zeros((2,2))\nfor _ in range(100):\n s=int(rng.integers(2));a=int(rng.integers(2))\n sp=(s+a)%2;r=1. if sp==1 else 0.\n Q[s,a]+=.2*(r+.9*Q[sp].max()-Q[s,a])\nprint(\"Q values:\",Q)",
+      "packages": "numpy",
+      "application": "用于ETF组合再平衡、交易执行模拟、连续权重和风险约束智能体研究。",
+      "limits": "本笔记提供对应核心公式与基础演示，不是完整可交易强化学习策略训练或环境模拟。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "rl-n05-05",
+      "node_id": "rl-n05-05",
+      "title": "Off-policy评估",
+      "definition": "离策略评估用行为策略数据估计另一目标策略的期望回报。",
+      "assumptions": "需要明确状态Markov性、奖励定义、转移模型、数据支持范围和可执行的交易动作。离线金融数据不允许任意行动的反事实成交被直接观测。",
+      "properties": [
+        "离策略评估用行为策略数据估计另一目标策略的期望回报。。",
+        "探索、离线数据覆盖度与非平稳环境会改变策略最优性或估值误差。"
+      ],
+      "formulas": [
+        {
+          "label": "策略或价值公式",
+          "tex": "V^\\pi=E_\\beta[\\rho(\\tau)G(\\tau)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据状态、动作或回报的定义建立序贯决策关系。离策略评估用行为策略数据估计另一目标策略的期望回报。",
+          "tex": "V^\\pi=E_\\beta[\\rho(\\tau)G(\\tau)]"
+        },
+        {
+          "explanation": "通过Bellman分解、策略梯度或离线目标函数解释上述公式的学习作用。",
+          "tex": "V^\\pi=E_\\beta[\\rho(\\tau)G(\\tau)]"
+        }
+      ],
+      "code": "# Off-policy评估：强化学习基础实验\nimport numpy as np\nrng=np.random.default_rng(0)\nQ=np.zeros((2,2))\nfor _ in range(100):\n s=int(rng.integers(2));a=int(rng.integers(2))\n sp=(s+a)%2;r=1. if sp==1 else 0.\n Q[s,a]+=.2*(r+.9*Q[sp].max()-Q[s,a])\nprint(\"Q values:\",Q)",
+      "packages": "numpy",
+      "application": "用于ETF组合再平衡、交易执行模拟、连续权重和风险约束智能体研究。",
+      "limits": "本笔记提供对应核心公式与基础演示，不是完整可交易强化学习策略训练或环境模拟。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "rl-n06-05",
+      "node_id": "rl-n06-05",
+      "title": "Importance Sampling",
+      "definition": "重要性采样用目标分布与采样分布的比率修正期望估计。",
+      "assumptions": "需要明确状态Markov性、奖励定义、转移模型、数据支持范围和可执行的交易动作。离线金融数据不允许任意行动的反事实成交被直接观测。",
+      "properties": [
+        "重要性采样用目标分布与采样分布的比率修正期望估计。。",
+        "探索、离线数据覆盖度与非平稳环境会改变策略最优性或估值误差。"
+      ],
+      "formulas": [
+        {
+          "label": "策略或价值公式",
+          "tex": "E_p[f(X)]=E_q[(p(X)/q(X))f(X)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据状态、动作或回报的定义建立序贯决策关系。重要性采样用目标分布与采样分布的比率修正期望估计。",
+          "tex": "E_p[f(X)]=E_q[(p(X)/q(X))f(X)]"
+        },
+        {
+          "explanation": "通过Bellman分解、策略梯度或离线目标函数解释上述公式的学习作用。",
+          "tex": "E_p[f(X)]=E_q[(p(X)/q(X))f(X)]"
+        }
+      ],
+      "code": "# Importance Sampling：强化学习基础实验\nimport numpy as np\nrng=np.random.default_rng(0)\nQ=np.zeros((2,2))\nfor _ in range(100):\n s=int(rng.integers(2));a=int(rng.integers(2))\n sp=(s+a)%2;r=1. if sp==1 else 0.\n Q[s,a]+=.2*(r+.9*Q[sp].max()-Q[s,a])\nprint(\"Q values:\",Q)",
+      "packages": "numpy",
+      "application": "用于ETF组合再平衡、交易执行模拟、连续权重和风险约束智能体研究。",
+      "limits": "本笔记提供对应核心公式与基础演示，不是完整可交易强化学习策略训练或环境模拟。",
+      "coverage": "expanded"
+    }
+  ]
+}
