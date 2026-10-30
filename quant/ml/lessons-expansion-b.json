@@ -1,0 +1,709 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "deep-n01-01",
+      "node_id": "deep-n01-01",
+      "title": "人工神经元",
+      "definition": "神经元将若干输入的线性组合与偏置送入激活函数，构成神经网络最基本运算单元。",
+      "assumptions": "输入与权重维度必须匹配。",
+      "properties": [
+        "输入与权重维度必须匹配。",
+        "非线性激活使多层网络具备不同于单线性模型的表达能力。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "z=w^\\top x+b,\\qquad h=\\phi(z)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先执行向量内积形成线性响应",
+          "tex": "z=\\sum_{j=1}^dw_jx_j+b"
+        },
+        {
+          "explanation": "非线性函数产生输出激活",
+          "tex": "h=\\max(0,z)\\quad\\text{(ReLU示例)}"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([2.,-1.,.5]);w=np.array([.1,.4,.8]);b=.2\nprint(\"Neuron ReLU:\",max(0.,x@w+b))",
+      "application": "结合量化信号构造多层非线性收益预测器。",
+      "limits": "神经元输出在未校准前不代表收益概率。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n03-01",
+      "node_id": "deep-n03-01",
+      "title": "ReLU/GELU激活",
+      "definition": "ReLU使用正半轴线性、负半轴零响应；GELU根据输入值进行平滑门控，常用于Transformer。",
+      "assumptions": "激活的导数决定反向传播梯度分配。",
+      "properties": [
+        "激活的导数决定反向传播梯度分配。",
+        "ReLU可能出现长期负输入使梯度为零的失活现象。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "\\operatorname{ReLU}(x)=\\max(0,x),\\qquad\\operatorname{GELU}(x)=x\\Phi(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "ReLU的分段函数导数几乎处处存在",
+          "tex": "\\operatorname{ReLU}'(x)=\\mathbf1[x>0]\\quad(x\\ne0)"
+        },
+        {
+          "explanation": "GELU用标准正态分布函数平滑调节输入",
+          "tex": "\\Phi(x)=\\int_{-\\infty}^x\\frac{e^{-u^2/2}}{\\sqrt{2\\pi}}du"
+        }
+      ],
+      "code": "import torch\nx=torch.tensor([-2.,-.5,0.,.5,2.])\nprint(torch.relu(x))\nprint(torch.nn.functional.gelu(x))",
+      "application": "在CNN和Transformer隐藏层选择合适非线性。",
+      "limits": "激活函数并没有对任何金融数据的普适最优性。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n01-02",
+      "node_id": "deep-n01-02",
+      "title": "自动微分Autograd",
+      "definition": "自动微分对由可微运算组成的计算图逐节点应用链式法则，可求精确至浮点误差的梯度。",
+      "assumptions": "参与梯度的张量需要正确设置requires_grad。",
+      "properties": [
+        "参与梯度的张量需要正确设置requires_grad。",
+        "切断计算图的detach会改变求导路径。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "\\frac{dL}{dw}=\\frac{dL}{dz}\\frac{dz}{dw}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "前向计算中记录张量依赖",
+          "tex": "z=wx,\\quad L=(z-y)^2"
+        },
+        {
+          "explanation": "逆向累积局部导数",
+          "tex": "\\frac{dL}{dw}=2(wx-y)x"
+        }
+      ],
+      "code": "import torch\nw=torch.tensor(2.,requires_grad=True)\nx=torch.tensor(3.);target=torch.tensor(5.)\nloss=(w*x-target)**2\nloss.backward()\nprint(\"autograd:\",w.grad.item(),\"manual:\",(2*(w.item()*3-5)*3))",
+      "application": "校验自定义损失函数和神经组合优化器梯度。",
+      "limits": "Autograd只知道实现的图，不会纠正数据标签或模型目标错误。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n03-03",
+      "node_id": "deep-n03-03",
+      "title": "DataLoader",
+      "definition": "DataLoader按指定batch大小和采样策略向训练循环提供张量批次，降低复杂数据读取的手工逻辑。",
+      "assumptions": "普通监督训练可shuffle；具有时序状态依赖的训练不宜盲目打乱。",
+      "properties": [
+        "普通监督训练可shuffle；具有时序状态依赖的训练不宜盲目打乱。",
+        "每个epoch最后一批可能少于batch_size。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "B_k=\\{(x_i,y_i):i\\in I_k\\},\\qquad |I_k|\\le B"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将原始样本封装为Dataset",
+          "tex": "D=\\{(x_i,y_i)\\}_{i=1}^{n}"
+        },
+        {
+          "explanation": "采样器将样本索引分成批次供训练器读取",
+          "tex": "I_1\\cup\\cdots\\cup I_K=\\{1,\\ldots,n\\}"
+        }
+      ],
+      "code": "import torch\nfrom torch.utils.data import TensorDataset,DataLoader\nx=torch.randn(15,3);y=torch.randn(15,1)\nloader=DataLoader(TensorDataset(x,y),batch_size=4,shuffle=False)\nfor xb,yb in loader:\n    print(xb.shape,yb.shape)",
+      "application": "大规模ETF时序切片和图像Batch加载。",
+      "limits": "序列输入还需确保同一事件的相邻窗口没有泄漏至验证集。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n04-03",
+      "node_id": "deep-n04-03",
+      "title": "训练循环",
+      "definition": "神经网络的一个标准训练步包含清梯度、前向预测、损失计算、反向传播和参数更新。",
+      "assumptions": "训练与测试阶段必须切换model.train()/eval()。",
+      "properties": [
+        "训练与测试阶段必须切换model.train()/eval()。",
+        "验证阶段一般禁止更新模型梯度和BatchNorm统计。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "\\theta_{k+1}=\\theta_k-\\eta\\nabla_\\theta L_{B_k}(\\theta_k)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先前向计算当前批次损失",
+          "tex": "L_B(\\theta)=|B|^{-1}\\sum_{i\\in B}\\ell(f_\\theta(x_i),y_i)"
+        },
+        {
+          "explanation": "反向求导并由优化器更新参数",
+          "tex": "\\theta\\leftarrow\\operatorname{OptimizerStep}(\\nabla_\\theta L_B)"
+        }
+      ],
+      "code": "import torch\nx=torch.linspace(-1,1,40).reshape(-1,1);y=2*x+1\nnet=torch.nn.Linear(1,1)\nopt=torch.optim.SGD(net.parameters(),lr=.15)\nfor epoch in range(80):\n    net.train();opt.zero_grad()\n    loss=torch.nn.functional.mse_loss(net(x),y)\n    loss.backward();opt.step()\nnet.eval()\nwith torch.no_grad():print(net(torch.tensor([[.5]])))",
+      "application": "从研究模型原型到可复现训练脚本的基本流程。",
+      "limits": "这里只演示训练，正式实验应追加独立验证、早停和日志。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n02-04",
+      "node_id": "deep-n02-04",
+      "title": "层归一化LayerNorm",
+      "definition": "LayerNorm沿单样本指定特征维度计算均值和方差，归一化后学习重缩放和平移。",
+      "assumptions": "与BatchNorm不同，通常不依赖其他样本的批次统计量。",
+      "properties": [
+        "与BatchNorm不同，通常不依赖其他样本的批次统计量。",
+        "实际归一化轴由normalized_shape参数决定。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "y_i=\\gamma_i\\frac{x_i-\\mu}{\\sqrt{\\sigma^2+\\epsilon}}+\\beta_i"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对单个样本的d维特征计算均值",
+          "tex": "\\mu=\\frac1d\\sum_{j=1}^dx_j"
+        },
+        {
+          "explanation": "按该样本特征方差标准化",
+          "tex": "\\sigma^2=\\frac1d\\sum_j(x_j-\\mu)^2"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(2,5,8)\nnorm=torch.nn.LayerNorm(8)\nout=norm(x)\nprint(out.mean(-1),out.var(-1,unbiased=False))",
+      "application": "金融序列Transformer与语言模型训练稳定性。",
+      "limits": "特征尺度和归一化位置Pre-LN/Post-LN影响训练行为。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-n03-04",
+      "node_id": "deep-n03-04",
+      "title": "残差连接",
+      "definition": "残差连接让网络层学习对输入的增量修正，通过恒等路径改善深层梯度传播。",
+      "assumptions": "残差两端张量形状需匹配，或使用投影调整。",
+      "properties": [
+        "残差两端张量形状需匹配，或使用投影调整。",
+        "恒等支路缓解退化不等于完全消除梯度问题。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "h_{l+1}=h_l+F(h_l;\\theta_l)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对输入求导，得到恒等项与残差项之和",
+          "tex": "\\frac{\\partial h_{l+1}}{\\partial h_l}=I+J_F(h_l)"
+        },
+        {
+          "explanation": "在反向传播时保留显式梯度通路",
+          "tex": "\\nabla_{h_l}L=(I+J_F)^\\top\\nabla_{h_{l+1}}L"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(4,16,requires_grad=True)\nf=torch.nn.Linear(16,16)\ny=x+torch.relu(f(x))\ny.square().mean().backward()\nprint(y.shape,x.grad.norm().item())",
+      "application": "ResNet价格图像模型与深层Transformer网络。",
+      "limits": "过深残差模型仍可能在小数据上过拟合。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n02-01",
+      "node_id": "architectures-n02-01",
+      "title": "二维卷积",
+      "definition": "二维卷积在图像空间滑动共享的局部核，输出多通道特征图；深度学习库常采用互相关约定。",
+      "assumptions": "padding、stride与dilation共同决定输出形状。",
+      "properties": [
+        "padding、stride与dilation共同决定输出形状。",
+        "输入通道数需与卷积层权重一致。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "y_{c,u,v}=\\sum_{j,k,l}W_{c,j,k,l}x_{j,u+k,v+l}+b_c"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "沿图像的两个空间维度滑动局部核",
+          "tex": "X_{u:u+K_h,\\ v:v+K_w}"
+        },
+        {
+          "explanation": "在输入通道和核位置求加权和",
+          "tex": "Y_c=\\sum_jW_{c,j}\\star X_j"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(4,3,32,32)\nconv=torch.nn.Conv2d(3,12,kernel_size=3,padding=1)\nprint(conv(x).shape)",
+      "application": "价格图像、市场热图和金融文本截图视觉识别。",
+      "limits": "图像采样比例和时间窗编码可能改变信号含义。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n04-01",
+      "node_id": "architectures-n04-01",
+      "title": "池化",
+      "definition": "池化在局部空间窗口聚合特征响应，如最大池化取最大激活、平均池化求局部平均。",
+      "assumptions": "池化可能提供一定局部位移鲁棒性。",
+      "properties": [
+        "池化可能提供一定局部位移鲁棒性。",
+        "过度下采样可能丢失价格图细粒度变化。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "y_{u,v}=\\max_{(i,j)\\in\\mathcal N(u,v)}x_{i,j}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对指定窗口定义局部索引集合",
+          "tex": "\\mathcal N(u,v)=\\{(i,j)\\text{ in window}\\}"
+        },
+        {
+          "explanation": "对窗口执行Max或Mean统计",
+          "tex": "y_{u,v}=\\frac1{|\\mathcal N|}\\sum_{(i,j)\\in\\mathcal N}x_{ij}"
+        }
+      ],
+      "code": "import torch\nx=torch.arange(16,dtype=torch.float32).reshape(1,1,4,4)\nprint(\"max:\",torch.nn.functional.max_pool2d(x,2))\nprint(\"avg:\",torch.nn.functional.avg_pool2d(x,2))",
+      "application": "理解CNN图像大小压缩、感受野及降采样。",
+      "limits": "池化会丢失位置信息，价格图像是否适合须单独研究。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n01-02",
+      "node_id": "architectures-n01-02",
+      "title": "RNN状态递推",
+      "definition": "循环神经网络在序列每个位置用当前输入与过去隐藏状态计算新隐藏状态。",
+      "assumptions": "同一循环权重在各时刻共享。",
+      "properties": [
+        "同一循环权重在各时刻共享。",
+        "训练依赖跨时间反向传播，较长序列易梯度消失或爆炸。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "h_t=\\phi(W_xx_t+W_hh_{t-1}+b)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "当前输入通过权重映射",
+          "tex": "a_t=W_xx_t"
+        },
+        {
+          "explanation": "结合过去隐藏状态并通过激活",
+          "tex": "h_t=\\phi(a_t+W_hh_{t-1}+b)"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(3,12,5)\nrnn=torch.nn.RNN(input_size=5,hidden_size=8,batch_first=True)\nout,h=rnn(x)\nprint(out.shape,h.shape)",
+      "application": "基于历史日频ETF特征的递归预测模型。",
+      "limits": "RNN记忆长度受优化与数据非平稳性限制。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n04-02",
+      "node_id": "architectures-n04-02",
+      "title": "GRU",
+      "definition": "GRU使用更新门和重置门控制隐藏状态融合，为LSTM的常见参数较少的替代。",
+      "assumptions": "门控函数通过Sigmoid产生0至1之间的权重。",
+      "properties": [
+        "门控函数通过Sigmoid产生0至1之间的权重。",
+        "不同框架门控公式顺序可能略有不同。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "h_t=(1-z_t)\\odot n_t+z_t\\odot h_{t-1}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "计算更新门和重置门",
+          "tex": "z_t=\\sigma(W_zx_t+U_zh_{t-1}+b_z)"
+        },
+        {
+          "explanation": "按更新门插值新候选与过去隐藏状态",
+          "tex": "h_t=(1-z_t)\\odot n_t+z_t\\odot h_{t-1}"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(8,20,7)\ngru=torch.nn.GRU(7,10,batch_first=True)\nout,h=gru(x)\nprint(out.shape,h.shape)",
+      "application": "较轻量的金融收益、波动率序列预测。",
+      "limits": "高维小样本下即使参数较少也未必优于线性基线。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n02-03",
+      "node_id": "architectures-n02-03",
+      "title": "Multi-Head Attention",
+      "definition": "多头注意力独立投影多组Q/K/V，在不同表示子空间并行执行注意力后拼接。",
+      "assumptions": "总隐藏维度通常能被头数整除。",
+      "properties": [
+        "总隐藏维度通常能被头数整除。",
+        "不同头不自动具有独立可解释的经济意义。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "\\mathrm{MHA}(Q,K,V)=\\operatorname{Concat}(H_1,\\ldots,H_h)W_O"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对第j头构造专用Q/K/V投影",
+          "tex": "H_j=\\mathrm{Attn}(QW_Q^{(j)},KW_K^{(j)},VW_V^{(j)})"
+        },
+        {
+          "explanation": "沿特征维拼接并映射回模型维度",
+          "tex": "H=\\operatorname{Concat}_j(H_j)W_O"
+        }
+      ],
+      "code": "import torch\nm=torch.nn.MultiheadAttention(embed_dim=24,num_heads=4,batch_first=True)\nx=torch.randn(2,6,24)\ny,w=m(x,x,x)\nprint(y.shape,w.shape)",
+      "application": "金融多资产与宏观事件序列表示学习。",
+      "limits": "若多头输入有未来时点，仍需因果Mask和PIT对齐。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n03-03",
+      "node_id": "architectures-n03-03",
+      "title": "位置编码",
+      "definition": "位置编码将Token位置注入注意力架构，解决纯注意力本身不区分序列顺序的问题。",
+      "assumptions": "位置编码可为固定正弦或学习所得。",
+      "properties": [
+        "位置编码可为固定正弦或学习所得。",
+        "交易日与自然日间隔不规则时需慎重定义位置。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "PE_{pos,2i}=\\sin(pos/10000^{2i/d}),\\quad PE_{pos,2i+1}=\\cos(pos/10000^{2i/d})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "每个位置按不同频率构造周期性信号",
+          "tex": "\\omega_i=10000^{-2i/d}"
+        },
+        {
+          "explanation": "交替写入正弦和余弦分量",
+          "tex": "PE_{pos}=(\\sin(pos\\,\\omega_i),\\cos(pos\\,\\omega_i))_i"
+        }
+      ],
+      "code": "import torch,math\npos=torch.arange(10).unsqueeze(1)\nfreq=torch.exp(torch.arange(0,16,2)*(-math.log(10000.)/16))\npe=torch.zeros(10,16)\npe[:,0::2]=torch.sin(pos*freq)\npe[:,1::2]=torch.cos(pos*freq)\nprint(pe.shape,pe[0])",
+      "application": "编码ETF历史事件顺序，区别距离预测时点的天数。",
+      "limits": "位置编码不自动解决停牌、节假日与不规则事件时间。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n04-03",
+      "node_id": "architectures-n04-03",
+      "title": "Transformer Encoder",
+      "definition": "Transformer编码器使用双向自注意力、前馈网络及残差归一化将输入序列映射成上下文表示。",
+      "assumptions": "编码任务允许双向访问的前提是整个输入窗口在预测时已观测。",
+      "properties": [
+        "编码任务允许双向访问的前提是整个输入窗口在预测时已观测。",
+        "Mask可区分有效Token和Padding。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "H'=\\mathrm{LN}(H+\\mathrm{MHA}(H)),\\quad Y=\\mathrm{LN}(H'+\\mathrm{FFN}(H'))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "残差注意力提取位置间交互",
+          "tex": "\\tilde H=H+\\mathrm{MHA}(H,H,H)"
+        },
+        {
+          "explanation": "用逐Token前馈网络增加非线性表达",
+          "tex": "Y=\\mathrm{LN}(\\tilde H+\\mathrm{FFN}(\\mathrm{LN}(\\tilde H)))"
+        }
+      ],
+      "code": "import torch\nenc=torch.nn.TransformerEncoderLayer(d_model=16,nhead=4,batch_first=True)\nx=torch.randn(3,12,16)\nprint(enc(x).shape)",
+      "application": "价格图像Patch、金融文本和历史多因子窗口编码。",
+      "limits": "简化公式为示意，实际Pre-LN/Post-LN结构取决于实现。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n04-02",
+      "node_id": "vision-n04-02",
+      "title": "ResNet",
+      "definition": "ResNet以带恒等捷径的卷积残差块堆叠深层网络，改善深层优化退化问题。",
+      "assumptions": "输入输出通道不同时需要投影捷径。",
+      "properties": [
+        "输入输出通道不同时需要投影捷径。",
+        "深层视觉骨干通常依赖大量数据或预训练。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "y=x+F(x;W),\\quad\\nabla_xL=(I+\\nabla_xF)^\\top\\nabla_yL"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "把残差块表示成输入加可训练变换",
+          "tex": "F(x;W)=W_2\\sigma(W_1x)"
+        },
+        {
+          "explanation": "梯度通过单位映射路径传回",
+          "tex": "\\frac{dy}{dx}=I+J_F"
+        }
+      ],
+      "code": "import torch\nclass ResBlock(torch.nn.Module):\n    def __init__(self,d):\n        super().__init__();self.f=torch.nn.Sequential(torch.nn.Linear(d,d),torch.nn.ReLU(),torch.nn.Linear(d,d))\n    def forward(self,x):return x+self.f(x)\nprint(ResBlock(8)(torch.randn(4,8)).shape)",
+      "application": "价格图像趋势预测中对比CNN/ResNet的表达能力。",
+      "limits": "这里为残差概念演示，非完整图像ResNet模型。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n01-05",
+      "node_id": "vision-n01-05",
+      "title": "OHLCV价格图编码",
+      "definition": "把历史价格与成交量窗口映射成图像通道，作为视觉模型输入，必须明确价格复权和归一化规则。",
+      "assumptions": "图像的最右端不得晚于预测决策时点。",
+      "properties": [
+        "图像的最右端不得晚于预测决策时点。",
+        "跨ETF的价格量纲、图像高度缩放规则需一致。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "I_t=\\mathcal R(P_{t-W+1:t},V_{t-W+1:t})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "抽取过去W日OHLCV片段并归一化",
+          "tex": "P'_\\tau=(P_\\tau-\\min P_{\\rm window})/(\\max P_{\\rm window}-\\min P_{\\rm window})"
+        },
+        {
+          "explanation": "按预定映射方式将历史序列转换为像素栅格",
+          "tex": "I_t=\\operatorname{Render}(P'_{t-W+1:t})"
+        }
+      ],
+      "code": "import numpy as np\np=np.array([100,102,99,104,103],dtype=float)\nnorm=(p-p.min())/(p.max()-p.min())\nimage=np.zeros((16,len(p)),dtype=np.uint8)\nfor j,v in enumerate(norm):\n    image[15-round(v*15),j]=255\nprint(image.shape,image.sum())",
+      "application": "复现价格图像CNN研究并扩展到多ETF历史数据。",
+      "limits": "演示是归一化轨迹像素，不是标准OHLCV蜡烛图或论文中全部图像生成细节。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n02-01",
+      "node_id": "nlp-n02-01",
+      "title": "分词Tokenization",
+      "definition": "分词将原始文本映射为字符串片段或Token ID，是NLP模型的输入前处理步骤。",
+      "assumptions": "分词词表可能基于字符、词或子词。",
+      "properties": [
+        "分词词表可能基于字符、词或子词。",
+        "金融缩写、数字和特殊符号的分词会影响模型含义。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "x=(w_1,\\ldots,w_T),\\quad w_t\\in V"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "把文本分割为有限长度Token序列",
+          "tex": "\\mathrm{Tokenizer}:\\mathrm{Text}\\to V^T"
+        },
+        {
+          "explanation": "将Token编码成整数索引供Embedding查表",
+          "tex": "\\mathrm{Embed}:V\\to\\mathbb R^d"
+        }
+      ],
+      "code": "text=\"ETF returns rose after earnings\"\ntokens=text.lower().split()\nvocab={token:i+1 for i,token in enumerate(sorted(set(tokens)))}\nprint(tokens,[vocab[t] for t in tokens])",
+      "application": "建立财报、新闻和研究报告分类模型输入。",
+      "limits": "代码只演示英语空格切词；中文和LLM实际通常采用专门的BPE/SentencePiece。",
+      "packages": "Python standard library",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n01-02",
+      "node_id": "nlp-n01-02",
+      "title": "Bag of Words",
+      "definition": "词袋模型统计文档中各词的出现次数，不考虑词序，是经典文本特征基线。",
+      "assumptions": "需要固定词表和tokenizer处理规则。",
+      "properties": [
+        "需要固定词表和tokenizer处理规则。",
+        "忽略语序会丢失否定词与远距离上下文。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "x_{d,w}=\\operatorname{count}(w\\text{ in document }d)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "把训练语料的词表映射到维度索引",
+          "tex": "V=\\{w_1,\\ldots,w_p\\}"
+        },
+        {
+          "explanation": "每篇文档转为词计数向量",
+          "tex": "x_d=(c(w_1,d),\\ldots,c(w_p,d))"
+        }
+      ],
+      "code": "from sklearn.feature_extraction.text import CountVectorizer\ntexts=[\"profit grows\",\"profit drops\",\"risk grows\"]\nv=CountVectorizer()\nprint(v.fit_transform(texts).toarray())\nprint(v.get_feature_names_out())",
+      "application": "金融公告文本关键词分类基线。",
+      "limits": "词袋忽略时序、情感方向与语义组合。",
+      "packages": "scikit-learn",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n04-02",
+      "node_id": "nlp-n04-02",
+      "title": "BM25",
+      "definition": "BM25根据词频饱和与文档长度归一计算查询和文档的相关性，是全文检索常用排序方法。",
+      "assumptions": "适用于明确查询词的词法检索。",
+      "properties": [
+        "适用于明确查询词的词法检索。",
+        "模型不是语义Embedding，无法自动识别同义表达。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "\\mathrm{BM25}(q,d)=\\sum_{w\\in q}\\mathrm{IDF}(w)\\frac{f(w,d)(k_1+1)}{f(w,d)+k_1(1-b+b|d|/\\overline{|d|})}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将词出现频率调整为非线性饱和函数",
+          "tex": "\\mathrm{TF}_{\\rm sat}=\\frac{f(k_1+1)}{f+k_1(1-b+b|d|/\\bar l)}"
+        },
+        {
+          "explanation": "乘以词的逆文档频率并对查询词累加",
+          "tex": "S(q,d)=\\sum_{w\\in q}\\mathrm{IDF}(w)\\mathrm{TF}_{\\rm sat}(w,d)"
+        }
+      ],
+      "code": "import math\ndocs=[\"profit growth\",\"market profit risk\",\"profit risk risk\"]\nquery=\"profit\"\nN=len(docs);df=sum(query in d.split() for d in docs)\nidf=math.log(1+(N-df+.5)/(df+.5));avg=sum(len(d.split()) for d in docs)/N\nfor d in docs:\n    f=d.split().count(query);length=len(d.split())\n    score=idf*f*2.2/(f+1.2*(.25+.75*length/avg))\n    print(d,round(score,3))",
+      "application": "研究报告关键词检索与RAG的词法检索基线。",
+      "limits": "实务实现还需中文分词、分段、去重和检索评价。",
+      "packages": "Python standard library",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n03-04",
+      "node_id": "nlp-n03-04",
+      "title": "命名实体识别NER",
+      "definition": "命名实体识别从文本中定位公司、人物、地点和金融指标等实体的边界与类别。",
+      "assumptions": "标注体系通常采用BIO/BILOU等序列标签。",
+      "properties": [
+        "标注体系通常采用BIO/BILOU等序列标签。",
+        "金融公司简称可能多义，需要后续实体消歧。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "\\hat y_{1:T}=\\arg\\max_{y_{1:T}}p(y_{1:T}\\mid x_{1:T})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "把Token序列的每个位置映射为实体标签",
+          "tex": "x_{1:T}\\to(y_1,\\ldots,y_T)"
+        },
+        {
+          "explanation": "可用逐Token分类或CRF约束序列标签",
+          "tex": "p(y|x)\\propto\\exp\\{\\sum_t\\psi_t(y_{t-1},y_t,x)\\}"
+        }
+      ],
+      "code": "import re\ntext=\"AAPL rose 2%, while MSFT was flat.\"\nentities=re.findall(r\"\\b[A-Z]{2,5}\\b\",text)\nprint(\"Ticker-like tokens:\",entities)",
+      "application": "新闻中的上市公司实体识别并与证券代码关联。",
+      "limits": "正则只是Ticker候选提取，并非完整训练型NER系统。",
+      "packages": "Python standard library",
+      "coverage": "complete"
+    },
+    {
+      "id": "llm-n01-02",
+      "node_id": "llm-n01-02",
+      "title": "自回归语言建模",
+      "definition": "自回归模型通过已知前缀条件概率的乘积定义整段序列的联合分布，逐Token训练预测下一个Token。",
+      "assumptions": "训练输入和目标需按一个Token错位对齐。",
+      "properties": [
+        "训练输入和目标需按一个Token错位对齐。",
+        "正确使用因果掩码，不允许当前位置访问未来目标。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "p_\\theta(x_{1:T})=\\prod_{t=1}^Tp_\\theta(x_t\\mid x_{<t})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "使用概率链式法则分解任意序列联合概率",
+          "tex": "p(x_1,\\ldots,x_T)=p(x_1)\\prod_{t=2}^Tp(x_t|x_{<t})"
+        },
+        {
+          "explanation": "训练最大化真实Token条件对数概率",
+          "tex": "L=-\\sum_t\\log p_\\theta(x_t|x_{<t})"
+        }
+      ],
+      "code": "import torch\nlogits=torch.randn(2,4,8) # batch, sequence, vocab\ntokens=torch.randint(0,8,(2,5))\nloss=torch.nn.functional.cross_entropy(logits.reshape(-1,8),tokens[:,1:].reshape(-1))\nprint(\"Next-token loss:\",loss.item())",
+      "application": "财报文本摘要、金融语言模型继续预训练。",
+      "limits": "代码只展示损失计算，未构建Transformer或进行迭代训练。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "llm-n04-02",
+      "node_id": "llm-n04-02",
+      "title": "交叉熵损失",
+      "definition": "交叉熵在离散标签上惩罚模型对真实类别赋予的概率过低，是分类和语言模型训练目标。",
+      "assumptions": "目标可为整数标签或正确归一化的分布。",
+      "properties": [
+        "目标可为整数标签或正确归一化的分布。",
+        "数值稳定实现通常直接处理Logits。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "L_{\\rm CE}=-\\sum_{k=1}^Ky_k\\log p_k"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "单标签One-hot情形仅有真实类别分量非零",
+          "tex": "L=-\\log p_y"
+        },
+        {
+          "explanation": "对Softmax logits的梯度为概率减真实标签",
+          "tex": "\\frac{\\partial L}{\\partial z_k}=p_k-y_k"
+        }
+      ],
+      "code": "import torch\nz=torch.tensor([[1.0,2.0,-1.0]],requires_grad=True)\nloss=torch.nn.functional.cross_entropy(z,torch.tensor([1]))\nloss.backward()\nprint(loss.item(),z.grad)",
+      "application": "涨跌分类、金融情感分类及Token预测。",
+      "limits": "类别不平衡和时间分布转移需要单独处理。",
+      "packages": "torch",
+      "coverage": "complete"
+    }
+  ]
+}
