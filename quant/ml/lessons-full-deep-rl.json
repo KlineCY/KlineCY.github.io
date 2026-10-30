@@ -1,0 +1,581 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "deep-rl-n05-01",
+      "node_id": "deep-rl-n05-01",
+      "title": "Dueling DQN",
+      "definition": "将Q网络分为状态价值V和动作优势A两个分支再组合，以提高某些环境下状态价值学习效率。",
+      "assumptions": "需定义可行动作域、行为数据覆盖和奖励时点，真实金融环境的非平稳性及交易成本会影响学习目标。",
+      "properties": [
+        "将Q网络分为状态价值V和动作优势A两个分支再组合，以提高某些环境下状态价值学习效率。",
+        "离线估值不应直接用于证明未见过动作的真实交易效果，应结合行为分布和风险评估。"
+      ],
+      "formulas": [
+        {
+          "label": "策略优化或深度Q目标",
+          "tex": "Q(s,a)=V(s)+A(s,a)-|A|^{-1}\\sum_{a'}A(s,a')"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由状态动作价值、策略概率或经验回放分布构造该方法的优化对象。",
+          "tex": "Q(s,a)=V(s)+A(s,a)-|A|^{-1}\\sum_{a'}A(s,a')"
+        },
+        {
+          "explanation": "通过Actor/Critic或保守离线目标更新，评估行为覆盖与风险敏感度。",
+          "tex": "Q(s,a)=V(s)+A(s,a)-|A|^{-1}\\sum_{a'}A(s,a')"
+        }
+      ],
+      "code": "import torch\nV=torch.nn.Linear(4,1);A=torch.nn.Linear(4,3);x=torch.randn(2,4)\na=A(x);print((V(x)+a-a.mean(1,keepdim=True)).shape)",
+      "packages": "torch",
+      "application": "探索ETF动态再平衡、风险预算、订单执行和离线金融决策学习。",
+      "limits": "最小代码只体现章节主要张量或数值关系，完整DQN/PPO/SAC/CQL需要环境、经验回放和系统性样本外评估；此处不宣称实盘可用。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-rl-n06-01",
+      "node_id": "deep-rl-n06-01",
+      "title": "Prioritized Replay",
+      "definition": "按TD误差大小优先抽取经验样本，并使用重要性权重校正非均匀抽样偏差。",
+      "assumptions": "需定义可行动作域、行为数据覆盖和奖励时点，真实金融环境的非平稳性及交易成本会影响学习目标。",
+      "properties": [
+        "按TD误差大小优先抽取经验样本，并使用重要性权重校正非均匀抽样偏差。",
+        "离线估值不应直接用于证明未见过动作的真实交易效果，应结合行为分布和风险评估。"
+      ],
+      "formulas": [
+        {
+          "label": "策略优化或深度Q目标",
+          "tex": "P(i)=p_i^\\alpha/\\sum_jp_j^\\alpha"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由状态动作价值、策略概率或经验回放分布构造该方法的优化对象。",
+          "tex": "P(i)=p_i^\\alpha/\\sum_jp_j^\\alpha"
+        },
+        {
+          "explanation": "通过Actor/Critic或保守离线目标更新，评估行为覆盖与风险敏感度。",
+          "tex": "P(i)=p_i^\\alpha/\\sum_jp_j^\\alpha"
+        }
+      ],
+      "code": "import torch\nV=torch.nn.Linear(4,1);A=torch.nn.Linear(4,3);x=torch.randn(2,4)\na=A(x);print((V(x)+a-a.mean(1,keepdim=True)).shape)",
+      "packages": "torch",
+      "application": "探索ETF动态再平衡、风险预算、订单执行和离线金融决策学习。",
+      "limits": "最小代码只体现章节主要张量或数值关系，完整DQN/PPO/SAC/CQL需要环境、经验回放和系统性样本外评估；此处不宣称实盘可用。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-rl-n02-02",
+      "node_id": "deep-rl-n02-02",
+      "title": "Policy Gradient Theorem",
+      "definition": "策略梯度可通过动作对数概率的梯度与动作价值加权估计，不必对环境转移求导。",
+      "assumptions": "需定义可行动作域、行为数据覆盖和奖励时点，真实金融环境的非平稳性及交易成本会影响学习目标。",
+      "properties": [
+        "策略梯度可通过动作对数概率的梯度与动作价值加权估计，不必对环境转移求导。",
+        "离线估值不应直接用于证明未见过动作的真实交易效果，应结合行为分布和风险评估。"
+      ],
+      "formulas": [
+        {
+          "label": "策略优化或深度Q目标",
+          "tex": "\\nabla_\\theta J=E[\\nabla_\\theta\\log\\pi_\\theta(a|s)Q^\\pi(s,a)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由状态动作价值、策略概率或经验回放分布构造该方法的优化对象。",
+          "tex": "\\nabla_\\theta J=E[\\nabla_\\theta\\log\\pi_\\theta(a|s)Q^\\pi(s,a)]"
+        },
+        {
+          "explanation": "通过Actor/Critic或保守离线目标更新，评估行为覆盖与风险敏感度。",
+          "tex": "\\nabla_\\theta J=E[\\nabla_\\theta\\log\\pi_\\theta(a|s)Q^\\pi(s,a)]"
+        }
+      ],
+      "code": "import torch\nlogits=torch.randn(4,2,requires_grad=True);adv=torch.randn(4)\nloss=-(torch.log_softmax(logits,dim=1)[:,0]*adv).mean();loss.backward();print(loss.item())",
+      "packages": "torch",
+      "application": "探索ETF动态再平衡、风险预算、订单执行和离线金融决策学习。",
+      "limits": "最小代码只体现章节主要张量或数值关系，完整DQN/PPO/SAC/CQL需要环境、经验回放和系统性样本外评估；此处不宣称实盘可用。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-rl-n03-02",
+      "node_id": "deep-rl-n03-02",
+      "title": "Baseline与优势函数",
+      "definition": "从Q中减去状态相关基线V可降低策略梯度方差，而不改变理想期望梯度。",
+      "assumptions": "需定义可行动作域、行为数据覆盖和奖励时点，真实金融环境的非平稳性及交易成本会影响学习目标。",
+      "properties": [
+        "从Q中减去状态相关基线V可降低策略梯度方差，而不改变理想期望梯度。",
+        "离线估值不应直接用于证明未见过动作的真实交易效果，应结合行为分布和风险评估。"
+      ],
+      "formulas": [
+        {
+          "label": "策略优化或深度Q目标",
+          "tex": "A^\\pi(s,a)=Q^\\pi(s,a)-V^\\pi(s)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由状态动作价值、策略概率或经验回放分布构造该方法的优化对象。",
+          "tex": "A^\\pi(s,a)=Q^\\pi(s,a)-V^\\pi(s)"
+        },
+        {
+          "explanation": "通过Actor/Critic或保守离线目标更新，评估行为覆盖与风险敏感度。",
+          "tex": "A^\\pi(s,a)=Q^\\pi(s,a)-V^\\pi(s)"
+        }
+      ],
+      "code": "import torch\nlogits=torch.randn(4,2,requires_grad=True);adv=torch.randn(4)\nloss=-(torch.log_softmax(logits,dim=1)[:,0]*adv).mean();loss.backward();print(loss.item())",
+      "packages": "torch",
+      "application": "探索ETF动态再平衡、风险预算、订单执行和离线金融决策学习。",
+      "limits": "最小代码只体现章节主要张量或数值关系，完整DQN/PPO/SAC/CQL需要环境、经验回放和系统性样本外评估；此处不宣称实盘可用。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-rl-n05-02",
+      "node_id": "deep-rl-n05-02",
+      "title": "Entropy Regularization",
+      "definition": "策略目标添加熵奖励促进探索，降低过早收敛到确定性动作的风险。",
+      "assumptions": "需定义可行动作域、行为数据覆盖和奖励时点，真实金融环境的非平稳性及交易成本会影响学习目标。",
+      "properties": [
+        "策略目标添加熵奖励促进探索，降低过早收敛到确定性动作的风险。",
+        "离线估值不应直接用于证明未见过动作的真实交易效果，应结合行为分布和风险评估。"
+      ],
+      "formulas": [
+        {
+          "label": "策略优化或深度Q目标",
+          "tex": "J=E[\\sum_t(r_t+\\alpha H(\\pi(\\cdot|s_t)))]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由状态动作价值、策略概率或经验回放分布构造该方法的优化对象。",
+          "tex": "J=E[\\sum_t(r_t+\\alpha H(\\pi(\\cdot|s_t)))]"
+        },
+        {
+          "explanation": "通过Actor/Critic或保守离线目标更新，评估行为覆盖与风险敏感度。",
+          "tex": "J=E[\\sum_t(r_t+\\alpha H(\\pi(\\cdot|s_t)))]"
+        }
+      ],
+      "code": "import torch\nlogits=torch.randn(4,2,requires_grad=True);adv=torch.randn(4)\nloss=-(torch.log_softmax(logits,dim=1)[:,0]*adv).mean();loss.backward();print(loss.item())",
+      "packages": "torch",
+      "application": "探索ETF动态再平衡、风险预算、订单执行和离线金融决策学习。",
+      "limits": "最小代码只体现章节主要张量或数值关系，完整DQN/PPO/SAC/CQL需要环境、经验回放和系统性样本外评估；此处不宣称实盘可用。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-rl-n01-03",
+      "node_id": "deep-rl-n01-03",
+      "title": "A2C/A3C",
+      "definition": "Actor-Critic使用价值网络的TD信号更新策略，A2C同步采样，A3C采用异步工作器。",
+      "assumptions": "需定义可行动作域、行为数据覆盖和奖励时点，真实金融环境的非平稳性及交易成本会影响学习目标。",
+      "properties": [
+        "Actor-Critic使用价值网络的TD信号更新策略，A2C同步采样，A3C采用异步工作器。",
+        "离线估值不应直接用于证明未见过动作的真实交易效果，应结合行为分布和风险评估。"
+      ],
+      "formulas": [
+        {
+          "label": "策略优化或深度Q目标",
+          "tex": "L_\\pi=-E[\\log\\pi_\\theta(a_t|s_t)\\hat A_t]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由状态动作价值、策略概率或经验回放分布构造该方法的优化对象。",
+          "tex": "L_\\pi=-E[\\log\\pi_\\theta(a_t|s_t)\\hat A_t]"
+        },
+        {
+          "explanation": "通过Actor/Critic或保守离线目标更新，评估行为覆盖与风险敏感度。",
+          "tex": "L_\\pi=-E[\\log\\pi_\\theta(a_t|s_t)\\hat A_t]"
+        }
+      ],
+      "code": "import torch\ns=torch.randn(6,3);actor=torch.nn.Linear(3,2);critic=torch.nn.Linear(5,1)\na=actor(s);print(critic(torch.cat([s,a],dim=1)).shape)",
+      "packages": "torch",
+      "application": "探索ETF动态再平衡、风险预算、订单执行和离线金融决策学习。",
+      "limits": "最小代码只体现章节主要张量或数值关系，完整DQN/PPO/SAC/CQL需要环境、经验回放和系统性样本外评估；此处不宣称实盘可用。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-rl-n03-03",
+      "node_id": "deep-rl-n03-03",
+      "title": "TRPO",
+      "definition": "信赖域策略优化用KL约束限制每次策略改变幅度，改善局部更新可靠性。",
+      "assumptions": "需定义可行动作域、行为数据覆盖和奖励时点，真实金融环境的非平稳性及交易成本会影响学习目标。",
+      "properties": [
+        "信赖域策略优化用KL约束限制每次策略改变幅度，改善局部更新可靠性。",
+        "离线估值不应直接用于证明未见过动作的真实交易效果，应结合行为分布和风险评估。"
+      ],
+      "formulas": [
+        {
+          "label": "策略优化或深度Q目标",
+          "tex": "\\max_\\theta E[r_t(\\theta)\\hat A_t]\\quad\\mathrm{s.t.}\\ E[D_{\\rm KL}(\\pi_{\\rm old}\\|\\pi_\\theta)]\\le\\delta"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由状态动作价值、策略概率或经验回放分布构造该方法的优化对象。",
+          "tex": "\\max_\\theta E[r_t(\\theta)\\hat A_t]\\quad\\mathrm{s.t.}\\ E[D_{\\rm KL}(\\pi_{\\rm old}\\|\\pi_\\theta)]\\le\\delta"
+        },
+        {
+          "explanation": "通过Actor/Critic或保守离线目标更新，评估行为覆盖与风险敏感度。",
+          "tex": "\\max_\\theta E[r_t(\\theta)\\hat A_t]\\quad\\mathrm{s.t.}\\ E[D_{\\rm KL}(\\pi_{\\rm old}\\|\\pi_\\theta)]\\le\\delta"
+        }
+      ],
+      "code": "import torch\ns=torch.randn(6,3);actor=torch.nn.Linear(3,2);critic=torch.nn.Linear(5,1)\na=actor(s);print(critic(torch.cat([s,a],dim=1)).shape)",
+      "packages": "torch",
+      "application": "探索ETF动态再平衡、风险预算、订单执行和离线金融决策学习。",
+      "limits": "最小代码只体现章节主要张量或数值关系，完整DQN/PPO/SAC/CQL需要环境、经验回放和系统性样本外评估；此处不宣称实盘可用。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-rl-n04-03",
+      "node_id": "deep-rl-n04-03",
+      "title": "DDPG",
+      "definition": "DDPG为连续动作任务采用确定性Actor、Q-Critic、目标网络和经验回放。",
+      "assumptions": "需定义可行动作域、行为数据覆盖和奖励时点，真实金融环境的非平稳性及交易成本会影响学习目标。",
+      "properties": [
+        "DDPG为连续动作任务采用确定性Actor、Q-Critic、目标网络和经验回放。",
+        "离线估值不应直接用于证明未见过动作的真实交易效果，应结合行为分布和风险评估。"
+      ],
+      "formulas": [
+        {
+          "label": "策略优化或深度Q目标",
+          "tex": "\\nabla_\\theta J=E[\\nabla_\\theta\\mu_\\theta(s)\\nabla_a Q(s,a)|_{a=\\mu_\\theta(s)}]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由状态动作价值、策略概率或经验回放分布构造该方法的优化对象。",
+          "tex": "\\nabla_\\theta J=E[\\nabla_\\theta\\mu_\\theta(s)\\nabla_a Q(s,a)|_{a=\\mu_\\theta(s)}]"
+        },
+        {
+          "explanation": "通过Actor/Critic或保守离线目标更新，评估行为覆盖与风险敏感度。",
+          "tex": "\\nabla_\\theta J=E[\\nabla_\\theta\\mu_\\theta(s)\\nabla_a Q(s,a)|_{a=\\mu_\\theta(s)}]"
+        }
+      ],
+      "code": "import torch\ns=torch.randn(6,3);actor=torch.nn.Linear(3,2);critic=torch.nn.Linear(5,1)\na=actor(s);print(critic(torch.cat([s,a],dim=1)).shape)",
+      "packages": "torch",
+      "application": "探索ETF动态再平衡、风险预算、订单执行和离线金融决策学习。",
+      "limits": "最小代码只体现章节主要张量或数值关系，完整DQN/PPO/SAC/CQL需要环境、经验回放和系统性样本外评估；此处不宣称实盘可用。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-rl-n05-03",
+      "node_id": "deep-rl-n05-03",
+      "title": "TD3",
+      "definition": "TD3使用双Q目标取最小值、延迟策略更新和目标动作平滑，减少连续控制Q值过高估计。",
+      "assumptions": "需定义可行动作域、行为数据覆盖和奖励时点，真实金融环境的非平稳性及交易成本会影响学习目标。",
+      "properties": [
+        "TD3使用双Q目标取最小值、延迟策略更新和目标动作平滑，减少连续控制Q值过高估计。",
+        "离线估值不应直接用于证明未见过动作的真实交易效果，应结合行为分布和风险评估。"
+      ],
+      "formulas": [
+        {
+          "label": "策略优化或深度Q目标",
+          "tex": "y=r+\\gamma\\min_{i=1,2}Q_i^-(s',\\mu^-(s')+\\epsilon)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由状态动作价值、策略概率或经验回放分布构造该方法的优化对象。",
+          "tex": "y=r+\\gamma\\min_{i=1,2}Q_i^-(s',\\mu^-(s')+\\epsilon)"
+        },
+        {
+          "explanation": "通过Actor/Critic或保守离线目标更新，评估行为覆盖与风险敏感度。",
+          "tex": "y=r+\\gamma\\min_{i=1,2}Q_i^-(s',\\mu^-(s')+\\epsilon)"
+        }
+      ],
+      "code": "import torch\ns=torch.randn(6,3);actor=torch.nn.Linear(3,2);critic=torch.nn.Linear(5,1)\na=actor(s);print(critic(torch.cat([s,a],dim=1)).shape)",
+      "packages": "torch",
+      "application": "探索ETF动态再平衡、风险预算、订单执行和离线金融决策学习。",
+      "limits": "最小代码只体现章节主要张量或数值关系，完整DQN/PPO/SAC/CQL需要环境、经验回放和系统性样本外评估；此处不宣称实盘可用。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-rl-n02-04",
+      "node_id": "deep-rl-n02-04",
+      "title": "行为策略约束",
+      "definition": "离线强化学习约束学得策略不偏离收集历史数据的行为策略太远，减轻分布外动作估值错误。",
+      "assumptions": "需定义可行动作域、行为数据覆盖和奖励时点，真实金融环境的非平稳性及交易成本会影响学习目标。",
+      "properties": [
+        "离线强化学习约束学得策略不偏离收集历史数据的行为策略太远，减轻分布外动作估值错误。",
+        "离线估值不应直接用于证明未见过动作的真实交易效果，应结合行为分布和风险评估。"
+      ],
+      "formulas": [
+        {
+          "label": "策略优化或深度Q目标",
+          "tex": "D_{\\rm KL}(\\pi(\\cdot|s)\\|\\beta(\\cdot|s))\\le\\epsilon"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由状态动作价值、策略概率或经验回放分布构造该方法的优化对象。",
+          "tex": "D_{\\rm KL}(\\pi(\\cdot|s)\\|\\beta(\\cdot|s))\\le\\epsilon"
+        },
+        {
+          "explanation": "通过Actor/Critic或保守离线目标更新，评估行为覆盖与风险敏感度。",
+          "tex": "D_{\\rm KL}(\\pi(\\cdot|s)\\|\\beta(\\cdot|s))\\le\\epsilon"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);s=rng.normal(size=(5,3));a=rng.integers(0,2,5);print(s.shape,a.shape)",
+      "packages": "numpy",
+      "application": "探索ETF动态再平衡、风险预算、订单执行和离线金融决策学习。",
+      "limits": "最小代码只体现章节主要张量或数值关系，完整DQN/PPO/SAC/CQL需要环境、经验回放和系统性样本外评估；此处不宣称实盘可用。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-rl-n03-04",
+      "node_id": "deep-rl-n03-04",
+      "title": "CQL",
+      "definition": "保守Q学习对数据集以外动作Q值施加下压惩罚，改善离线策略价值估计。",
+      "assumptions": "需定义可行动作域、行为数据覆盖和奖励时点，真实金融环境的非平稳性及交易成本会影响学习目标。",
+      "properties": [
+        "保守Q学习对数据集以外动作Q值施加下压惩罚，改善离线策略价值估计。",
+        "离线估值不应直接用于证明未见过动作的真实交易效果，应结合行为分布和风险评估。"
+      ],
+      "formulas": [
+        {
+          "label": "策略优化或深度Q目标",
+          "tex": "L_{\\rm CQL}=L_{\\rm TD}+\\alpha(E_s\\log\\sum_a e^{Q(s,a)}-E_{s,a\\sim D}Q(s,a))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由状态动作价值、策略概率或经验回放分布构造该方法的优化对象。",
+          "tex": "L_{\\rm CQL}=L_{\\rm TD}+\\alpha(E_s\\log\\sum_a e^{Q(s,a)}-E_{s,a\\sim D}Q(s,a))"
+        },
+        {
+          "explanation": "通过Actor/Critic或保守离线目标更新，评估行为覆盖与风险敏感度。",
+          "tex": "L_{\\rm CQL}=L_{\\rm TD}+\\alpha(E_s\\log\\sum_a e^{Q(s,a)}-E_{s,a\\sim D}Q(s,a))"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);s=rng.normal(size=(5,3));a=rng.integers(0,2,5);print(s.shape,a.shape)",
+      "packages": "numpy",
+      "application": "探索ETF动态再平衡、风险预算、订单执行和离线金融决策学习。",
+      "limits": "最小代码只体现章节主要张量或数值关系，完整DQN/PPO/SAC/CQL需要环境、经验回放和系统性样本外评估；此处不宣称实盘可用。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-rl-n04-04",
+      "node_id": "deep-rl-n04-04",
+      "title": "Imitation Learning",
+      "definition": "模仿学习使用专家历史动作作为目标，学习从状态到行动的映射。",
+      "assumptions": "需定义可行动作域、行为数据覆盖和奖励时点，真实金融环境的非平稳性及交易成本会影响学习目标。",
+      "properties": [
+        "模仿学习使用专家历史动作作为目标，学习从状态到行动的映射。",
+        "离线估值不应直接用于证明未见过动作的真实交易效果，应结合行为分布和风险评估。"
+      ],
+      "formulas": [
+        {
+          "label": "策略优化或深度Q目标",
+          "tex": "\\min_\\theta E_{(s,a)\\sim D_E}[-\\log\\pi_\\theta(a|s)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由状态动作价值、策略概率或经验回放分布构造该方法的优化对象。",
+          "tex": "\\min_\\theta E_{(s,a)\\sim D_E}[-\\log\\pi_\\theta(a|s)]"
+        },
+        {
+          "explanation": "通过Actor/Critic或保守离线目标更新，评估行为覆盖与风险敏感度。",
+          "tex": "\\min_\\theta E_{(s,a)\\sim D_E}[-\\log\\pi_\\theta(a|s)]"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);s=rng.normal(size=(5,3));a=rng.integers(0,2,5);print(s.shape,a.shape)",
+      "packages": "numpy",
+      "application": "探索ETF动态再平衡、风险预算、订单执行和离线金融决策学习。",
+      "limits": "最小代码只体现章节主要张量或数值关系，完整DQN/PPO/SAC/CQL需要环境、经验回放和系统性样本外评估；此处不宣称实盘可用。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-rl-n05-04",
+      "node_id": "deep-rl-n05-04",
+      "title": "Model-based RL",
+      "definition": "先拟合环境状态转移和奖励模型，再用模型规划或生成模拟轨迹优化策略。",
+      "assumptions": "需定义可行动作域、行为数据覆盖和奖励时点，真实金融环境的非平稳性及交易成本会影响学习目标。",
+      "properties": [
+        "先拟合环境状态转移和奖励模型，再用模型规划或生成模拟轨迹优化策略。",
+        "离线估值不应直接用于证明未见过动作的真实交易效果，应结合行为分布和风险评估。"
+      ],
+      "formulas": [
+        {
+          "label": "策略优化或深度Q目标",
+          "tex": "\\hat P(s'|s,a),\\quad\\hat r(s,a)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由状态动作价值、策略概率或经验回放分布构造该方法的优化对象。",
+          "tex": "\\hat P(s'|s,a),\\quad\\hat r(s,a)"
+        },
+        {
+          "explanation": "通过Actor/Critic或保守离线目标更新，评估行为覆盖与风险敏感度。",
+          "tex": "\\hat P(s'|s,a),\\quad\\hat r(s,a)"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);s=rng.normal(size=(5,3));a=rng.integers(0,2,5);print(s.shape,a.shape)",
+      "packages": "numpy",
+      "application": "探索ETF动态再平衡、风险预算、订单执行和离线金融决策学习。",
+      "limits": "最小代码只体现章节主要张量或数值关系，完整DQN/PPO/SAC/CQL需要环境、经验回放和系统性样本外评估；此处不宣称实盘可用。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-rl-n06-04",
+      "node_id": "deep-rl-n06-04",
+      "title": "World Models",
+      "definition": "世界模型把复杂观察压缩为潜在状态，预测潜在动态及奖励以供规划或策略学习。",
+      "assumptions": "需定义可行动作域、行为数据覆盖和奖励时点，真实金融环境的非平稳性及交易成本会影响学习目标。",
+      "properties": [
+        "世界模型把复杂观察压缩为潜在状态，预测潜在动态及奖励以供规划或策略学习。",
+        "离线估值不应直接用于证明未见过动作的真实交易效果，应结合行为分布和风险评估。"
+      ],
+      "formulas": [
+        {
+          "label": "策略优化或深度Q目标",
+          "tex": "z_{t+1}=f_\\theta(z_t,a_t,\\epsilon_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由状态动作价值、策略概率或经验回放分布构造该方法的优化对象。",
+          "tex": "z_{t+1}=f_\\theta(z_t,a_t,\\epsilon_t)"
+        },
+        {
+          "explanation": "通过Actor/Critic或保守离线目标更新，评估行为覆盖与风险敏感度。",
+          "tex": "z_{t+1}=f_\\theta(z_t,a_t,\\epsilon_t)"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);s=rng.normal(size=(5,3));a=rng.integers(0,2,5);print(s.shape,a.shape)",
+      "packages": "numpy",
+      "application": "探索ETF动态再平衡、风险预算、订单执行和离线金融决策学习。",
+      "limits": "最小代码只体现章节主要张量或数值关系，完整DQN/PPO/SAC/CQL需要环境、经验回放和系统性样本外评估；此处不宣称实盘可用。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-rl-n01-05",
+      "node_id": "deep-rl-n01-05",
+      "title": "组合再平衡MDP",
+      "definition": "把持仓、市场因子和现金定义为状态，动作是新的目标持仓，并在状态转移中处理交易。",
+      "assumptions": "需定义可行动作域、行为数据覆盖和奖励时点，真实金融环境的非平稳性及交易成本会影响学习目标。",
+      "properties": [
+        "把持仓、市场因子和现金定义为状态，动作是新的目标持仓，并在状态转移中处理交易。",
+        "离线估值不应直接用于证明未见过动作的真实交易效果，应结合行为分布和风险评估。"
+      ],
+      "formulas": [
+        {
+          "label": "策略优化或深度Q目标",
+          "tex": "s_t=(w_{t-1},X_t,c_t),\\quad a_t=w_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由状态动作价值、策略概率或经验回放分布构造该方法的优化对象。",
+          "tex": "s_t=(w_{t-1},X_t,c_t),\\quad a_t=w_t"
+        },
+        {
+          "explanation": "通过Actor/Critic或保守离线目标更新，评估行为覆盖与风险敏感度。",
+          "tex": "s_t=(w_{t-1},X_t,c_t),\\quad a_t=w_t"
+        }
+      ],
+      "code": "import numpy as np\nweights=np.array([.6,.4]);ret=np.array([.02,-.01]);print(weights@ret)",
+      "packages": "numpy",
+      "application": "探索ETF动态再平衡、风险预算、订单执行和离线金融决策学习。",
+      "limits": "最小代码只体现章节主要张量或数值关系，完整DQN/PPO/SAC/CQL需要环境、经验回放和系统性样本外评估；此处不宣称实盘可用。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-rl-n04-05",
+      "node_id": "deep-rl-n04-05",
+      "title": "离线交易策略检验",
+      "definition": "离线RL应采用可交易回测、行为策略覆盖和重要性评估，不能用已观测资产回报代表未执行订单成交。",
+      "assumptions": "需定义可行动作域、行为数据覆盖和奖励时点，真实金融环境的非平稳性及交易成本会影响学习目标。",
+      "properties": [
+        "离线RL应采用可交易回测、行为策略覆盖和重要性评估，不能用已观测资产回报代表未执行订单成交。",
+        "离线估值不应直接用于证明未见过动作的真实交易效果，应结合行为分布和风险评估。"
+      ],
+      "formulas": [
+        {
+          "label": "策略优化或深度Q目标",
+          "tex": "\\hat V_{\\rm IS}=N^{-1}\\sum_iw_iG_i"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由状态动作价值、策略概率或经验回放分布构造该方法的优化对象。",
+          "tex": "\\hat V_{\\rm IS}=N^{-1}\\sum_iw_iG_i"
+        },
+        {
+          "explanation": "通过Actor/Critic或保守离线目标更新，评估行为覆盖与风险敏感度。",
+          "tex": "\\hat V_{\\rm IS}=N^{-1}\\sum_iw_iG_i"
+        }
+      ],
+      "code": "import numpy as np\nweights=np.array([.6,.4]);ret=np.array([.02,-.01]);print(weights@ret)",
+      "packages": "numpy",
+      "application": "探索ETF动态再平衡、风险预算、订单执行和离线金融决策学习。",
+      "limits": "最小代码只体现章节主要张量或数值关系，完整DQN/PPO/SAC/CQL需要环境、经验回放和系统性样本外评估；此处不宣称实盘可用。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-rl-n05-05",
+      "node_id": "deep-rl-n05-05",
+      "title": "非平稳状态",
+      "definition": "金融动态和奖励随市场环境变化时，固定策略参数可能失效。",
+      "assumptions": "需定义可行动作域、行为数据覆盖和奖励时点，真实金融环境的非平稳性及交易成本会影响学习目标。",
+      "properties": [
+        "金融动态和奖励随市场环境变化时，固定策略参数可能失效。",
+        "离线估值不应直接用于证明未见过动作的真实交易效果，应结合行为分布和风险评估。"
+      ],
+      "formulas": [
+        {
+          "label": "策略优化或深度Q目标",
+          "tex": "P_t(s'|s,a)\\ne P_{t+\\Delta}(s'|s,a)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由状态动作价值、策略概率或经验回放分布构造该方法的优化对象。",
+          "tex": "P_t(s'|s,a)\\ne P_{t+\\Delta}(s'|s,a)"
+        },
+        {
+          "explanation": "通过Actor/Critic或保守离线目标更新，评估行为覆盖与风险敏感度。",
+          "tex": "P_t(s'|s,a)\\ne P_{t+\\Delta}(s'|s,a)"
+        }
+      ],
+      "code": "import numpy as np\nweights=np.array([.6,.4]);ret=np.array([.02,-.01]);print(weights@ret)",
+      "packages": "numpy",
+      "application": "探索ETF动态再平衡、风险预算、订单执行和离线金融决策学习。",
+      "limits": "最小代码只体现章节主要张量或数值关系，完整DQN/PPO/SAC/CQL需要环境、经验回放和系统性样本外评估；此处不宣称实盘可用。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-rl-n06-05",
+      "node_id": "deep-rl-n06-05",
+      "title": "风险敏感RL",
+      "definition": "风险敏感决策把回报尾部或风险度量纳入优化，权衡期望回报与损失风险。",
+      "assumptions": "需定义可行动作域、行为数据覆盖和奖励时点，真实金融环境的非平稳性及交易成本会影响学习目标。",
+      "properties": [
+        "风险敏感决策把回报尾部或风险度量纳入优化，权衡期望回报与损失风险。",
+        "离线估值不应直接用于证明未见过动作的真实交易效果，应结合行为分布和风险评估。"
+      ],
+      "formulas": [
+        {
+          "label": "策略优化或深度Q目标",
+          "tex": "\\max_\\pi E[G^\\pi]-\\lambda\\operatorname{CVaR}_\\alpha(-G^\\pi)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由状态动作价值、策略概率或经验回放分布构造该方法的优化对象。",
+          "tex": "\\max_\\pi E[G^\\pi]-\\lambda\\operatorname{CVaR}_\\alpha(-G^\\pi)"
+        },
+        {
+          "explanation": "通过Actor/Critic或保守离线目标更新，评估行为覆盖与风险敏感度。",
+          "tex": "\\max_\\pi E[G^\\pi]-\\lambda\\operatorname{CVaR}_\\alpha(-G^\\pi)"
+        }
+      ],
+      "code": "import numpy as np\nweights=np.array([.6,.4]);ret=np.array([.02,-.01]);print(weights@ret)",
+      "packages": "numpy",
+      "application": "探索ETF动态再平衡、风险预算、订单执行和离线金融决策学习。",
+      "limits": "最小代码只体现章节主要张量或数值关系，完整DQN/PPO/SAC/CQL需要环境、经验回放和系统性样本外评估；此处不宣称实盘可用。",
+      "coverage": "complete"
+    }
+  ]
+}
