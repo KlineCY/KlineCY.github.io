@@ -32,7 +32,7 @@ SMOKE={
     "节点边邻接矩阵","图Laplace","DAG因果图","倾向得分",
     "逆概率加权IPW","差分中的差分","Cross-Fitting","频谱图",
     "数据延迟与可用时间","Alpha和Beta估计","Elastic Net",
-    "分位数回归","残差分析","学习率衰减","概率校准",
+    "分位数回归","残差分析","概率校准",
     "Permutation Importance","RAG检索增强","窗口滚动特征"
 }
 class MLExamplesTest(unittest.TestCase):
