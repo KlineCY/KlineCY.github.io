@@ -1,0 +1,645 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "architectures-n03-01",
+      "node_id": "architectures-n03-01",
+      "title": "卷积参数共享",
+      "definition": "卷积核在不同位置复用同一权重，提取局部平移相关模式且参数量不随空间位置增加。",
+      "assumptions": "必须确认输入张量形状、因果注意力约束和实际预测时可用的历史长度；预训练权重也需版本一致。",
+      "properties": [
+        "序列架构的计算复杂度、长程依赖和泛化效果受数据长度与模型容量影响。",
+        "训练与推断模式的掩码、缓存和权重配置必须一致，不能让历史金融预测访问未来数据。"
+      ],
+      "formulas": [
+        {
+          "label": "结构公式",
+          "tex": "y_t=\\sum_{k=0}^{K-1}w_kx_{t+k}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入序列映射到隐藏状态或注意力特征，按该结构关系定义计算路径。",
+          "tex": "y_t=\\sum_{k=0}^{K-1}w_kx_{t+k}"
+        },
+        {
+          "explanation": "检查输出形状、可计算的时序依赖和有效的参数更新范围，再评价样本外误差。",
+          "tex": "y_t=\\sum_{k=0}^{K-1}w_kx_{t+k}"
+        }
+      ],
+      "code": "import torch\nm=torch.nn.Conv1d(3,8,kernel_size=3)\nprint(m(torch.randn(4,3,20)).shape,m.weight.shape)",
+      "packages": "torch",
+      "application": "在金融文本、ETF价格图像和长时间序列预测模型中构建可复现的网络组件。",
+      "limits": "代码仅演示该架构的关键算子，尚非可直接用于交易的完整深度网络。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n05-01",
+      "node_id": "architectures-n05-01",
+      "title": "残差网络ResNet",
+      "definition": "残差网络通过恒等捷径连接多个网络块，学习对输入的增量修正，改善深层优化。",
+      "assumptions": "必须确认输入张量形状、因果注意力约束和实际预测时可用的历史长度；预训练权重也需版本一致。",
+      "properties": [
+        "序列架构的计算复杂度、长程依赖和泛化效果受数据长度与模型容量影响。",
+        "训练与推断模式的掩码、缓存和权重配置必须一致，不能让历史金融预测访问未来数据。"
+      ],
+      "formulas": [
+        {
+          "label": "结构公式",
+          "tex": "h^{l+1}=h^l+F(h^l;W_l)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入序列映射到隐藏状态或注意力特征，按该结构关系定义计算路径。",
+          "tex": "h^{l+1}=h^l+F(h^l;W_l)"
+        },
+        {
+          "explanation": "检查输出形状、可计算的时序依赖和有效的参数更新范围，再评价样本外误差。",
+          "tex": "h^{l+1}=h^l+F(h^l;W_l)"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(3,8);f=torch.nn.Linear(8,8)\nprint((x+f(x)).shape)",
+      "packages": "torch",
+      "application": "在金融文本、ETF价格图像和长时间序列预测模型中构建可复现的网络组件。",
+      "limits": "代码仅演示该架构的关键算子，尚非可直接用于交易的完整深度网络。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n06-01",
+      "node_id": "architectures-n06-01",
+      "title": "空洞卷积",
+      "definition": "空洞卷积在相邻核元素之间隔开d−1个输入位置，扩展感受野而不等比增加参数。",
+      "assumptions": "必须确认输入张量形状、因果注意力约束和实际预测时可用的历史长度；预训练权重也需版本一致。",
+      "properties": [
+        "序列架构的计算复杂度、长程依赖和泛化效果受数据长度与模型容量影响。",
+        "训练与推断模式的掩码、缓存和权重配置必须一致，不能让历史金融预测访问未来数据。"
+      ],
+      "formulas": [
+        {
+          "label": "结构公式",
+          "tex": "y_t=\\sum_{k=0}^{K-1}w_kx_{t+dk}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入序列映射到隐藏状态或注意力特征，按该结构关系定义计算路径。",
+          "tex": "y_t=\\sum_{k=0}^{K-1}w_kx_{t+dk}"
+        },
+        {
+          "explanation": "检查输出形状、可计算的时序依赖和有效的参数更新范围，再评价样本外误差。",
+          "tex": "y_t=\\sum_{k=0}^{K-1}w_kx_{t+dk}"
+        }
+      ],
+      "code": "import torch\nm=torch.nn.Conv1d(2,4,3,dilation=3)\nprint(m(torch.randn(2,2,24)).shape)",
+      "packages": "torch",
+      "application": "在金融文本、ETF价格图像和长时间序列预测模型中构建可复现的网络组件。",
+      "limits": "代码仅演示该架构的关键算子，尚非可直接用于交易的完整深度网络。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n02-02",
+      "node_id": "architectures-n02-02",
+      "title": "Backpropagation Through Time",
+      "definition": "BPTT将RNN按时间展开，通过每个时刻的状态Jacobian反传长期序列损失。",
+      "assumptions": "必须确认输入张量形状、因果注意力约束和实际预测时可用的历史长度；预训练权重也需版本一致。",
+      "properties": [
+        "序列架构的计算复杂度、长程依赖和泛化效果受数据长度与模型容量影响。",
+        "训练与推断模式的掩码、缓存和权重配置必须一致，不能让历史金融预测访问未来数据。"
+      ],
+      "formulas": [
+        {
+          "label": "结构公式",
+          "tex": "\\partial L/\\partial h_t=\\sum_{s\\ge t}(\\partial L_s/\\partial h_s)\\prod_{k=t+1}^sJ_k"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入序列映射到隐藏状态或注意力特征，按该结构关系定义计算路径。",
+          "tex": "\\partial L/\\partial h_t=\\sum_{s\\ge t}(\\partial L_s/\\partial h_s)\\prod_{k=t+1}^sJ_k"
+        },
+        {
+          "explanation": "检查输出形状、可计算的时序依赖和有效的参数更新范围，再评价样本外误差。",
+          "tex": "\\partial L/\\partial h_t=\\sum_{s\\ge t}(\\partial L_s/\\partial h_s)\\prod_{k=t+1}^sJ_k"
+        }
+      ],
+      "code": "import torch\nm=torch.nn.RNN(3,5,batch_first=True)\nx=torch.randn(2,8,3,requires_grad=True)\nm(x)[0].sum().backward();print(x.grad.shape)",
+      "packages": "torch",
+      "application": "在金融文本、ETF价格图像和长时间序列预测模型中构建可复现的网络组件。",
+      "limits": "代码仅演示该架构的关键算子，尚非可直接用于交易的完整深度网络。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n05-02",
+      "node_id": "architectures-n05-02",
+      "title": "双向RNN",
+      "definition": "双向RNN分别正序和逆序处理同一完整输入窗口，拼接两个方向的表示。",
+      "assumptions": "必须确认输入张量形状、因果注意力约束和实际预测时可用的历史长度；预训练权重也需版本一致。",
+      "properties": [
+        "序列架构的计算复杂度、长程依赖和泛化效果受数据长度与模型容量影响。",
+        "训练与推断模式的掩码、缓存和权重配置必须一致，不能让历史金融预测访问未来数据。"
+      ],
+      "formulas": [
+        {
+          "label": "结构公式",
+          "tex": "h_t=[\\overrightarrow h_t\\Vert\\overleftarrow h_t]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入序列映射到隐藏状态或注意力特征，按该结构关系定义计算路径。",
+          "tex": "h_t=[\\overrightarrow h_t\\Vert\\overleftarrow h_t]"
+        },
+        {
+          "explanation": "检查输出形状、可计算的时序依赖和有效的参数更新范围，再评价样本外误差。",
+          "tex": "h_t=[\\overrightarrow h_t\\Vert\\overleftarrow h_t]"
+        }
+      ],
+      "code": "import torch\nm=torch.nn.GRU(4,6,bidirectional=True,batch_first=True)\nprint(m(torch.randn(2,10,4))[0].shape)",
+      "packages": "torch",
+      "application": "在金融文本、ETF价格图像和长时间序列预测模型中构建可复现的网络组件。",
+      "limits": "代码仅演示该架构的关键算子，尚非可直接用于交易的完整深度网络。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n06-02",
+      "node_id": "architectures-n06-02",
+      "title": "Teacher Forcing",
+      "definition": "训练序列解码器时，将真实上一步Token而非模型上一步预测作为下一步输入。",
+      "assumptions": "必须确认输入张量形状、因果注意力约束和实际预测时可用的历史长度；预训练权重也需版本一致。",
+      "properties": [
+        "序列架构的计算复杂度、长程依赖和泛化效果受数据长度与模型容量影响。",
+        "训练与推断模式的掩码、缓存和权重配置必须一致，不能让历史金融预测访问未来数据。"
+      ],
+      "formulas": [
+        {
+          "label": "结构公式",
+          "tex": "p(y_t|y_{<t}^{\\rm true},x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入序列映射到隐藏状态或注意力特征，按该结构关系定义计算路径。",
+          "tex": "p(y_t|y_{<t}^{\\rm true},x)"
+        },
+        {
+          "explanation": "检查输出形状、可计算的时序依赖和有效的参数更新范围，再评价样本外误差。",
+          "tex": "p(y_t|y_{<t}^{\\rm true},x)"
+        }
+      ],
+      "code": "import torch\ntokens=torch.tensor([[2,3,4,5]])\nprint(\"Decoder inputs:\",tokens[:,:-1],\"targets:\",tokens[:,1:])",
+      "packages": "torch",
+      "application": "在金融文本、ETF价格图像和长时间序列预测模型中构建可复现的网络组件。",
+      "limits": "代码仅演示该架构的关键算子，尚非可直接用于交易的完整深度网络。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n05-03",
+      "node_id": "architectures-n05-03",
+      "title": "Transformer Decoder",
+      "definition": "Decoder使用因果自注意力、可选交叉注意力和前馈网络生成序列表示。",
+      "assumptions": "必须确认输入张量形状、因果注意力约束和实际预测时可用的历史长度；预训练权重也需版本一致。",
+      "properties": [
+        "序列架构的计算复杂度、长程依赖和泛化效果受数据长度与模型容量影响。",
+        "训练与推断模式的掩码、缓存和权重配置必须一致，不能让历史金融预测访问未来数据。"
+      ],
+      "formulas": [
+        {
+          "label": "结构公式",
+          "tex": "H=\\mathrm{CausalAttn}(X,X,X)+\\mathrm{CrossAttn}(X,E,E)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入序列映射到隐藏状态或注意力特征，按该结构关系定义计算路径。",
+          "tex": "H=\\mathrm{CausalAttn}(X,X,X)+\\mathrm{CrossAttn}(X,E,E)"
+        },
+        {
+          "explanation": "检查输出形状、可计算的时序依赖和有效的参数更新范围，再评价样本外误差。",
+          "tex": "H=\\mathrm{CausalAttn}(X,X,X)+\\mathrm{CrossAttn}(X,E,E)"
+        }
+      ],
+      "code": "import torch\nlayer=torch.nn.TransformerDecoderLayer(d_model=16,nhead=4,batch_first=True)\ntgt=torch.randn(2,4,16);memory=torch.randn(2,7,16)\nmask=torch.nn.Transformer.generate_square_subsequent_mask(4)\nprint(layer(tgt,memory,tgt_mask=mask).shape)",
+      "packages": "torch",
+      "application": "在金融文本、ETF价格图像和长时间序列预测模型中构建可复现的网络组件。",
+      "limits": "代码仅演示该架构的关键算子，尚非可直接用于交易的完整深度网络。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n06-03",
+      "node_id": "architectures-n06-03",
+      "title": "交叉注意力",
+      "definition": "交叉注意力用目标序列Query检索另一来源序列Key/Value，常用于条件生成。",
+      "assumptions": "必须确认输入张量形状、因果注意力约束和实际预测时可用的历史长度；预训练权重也需版本一致。",
+      "properties": [
+        "序列架构的计算复杂度、长程依赖和泛化效果受数据长度与模型容量影响。",
+        "训练与推断模式的掩码、缓存和权重配置必须一致，不能让历史金融预测访问未来数据。"
+      ],
+      "formulas": [
+        {
+          "label": "结构公式",
+          "tex": "H=\\operatorname{softmax}(Q_XK_Y^\\top/\\sqrt d)V_Y"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入序列映射到隐藏状态或注意力特征，按该结构关系定义计算路径。",
+          "tex": "H=\\operatorname{softmax}(Q_XK_Y^\\top/\\sqrt d)V_Y"
+        },
+        {
+          "explanation": "检查输出形状、可计算的时序依赖和有效的参数更新范围，再评价样本外误差。",
+          "tex": "H=\\operatorname{softmax}(Q_XK_Y^\\top/\\sqrt d)V_Y"
+        }
+      ],
+      "code": "import torch\nattn=torch.nn.MultiheadAttention(16,4,batch_first=True)\nq=torch.randn(2,3,16);src=torch.randn(2,6,16)\nprint(attn(q,src,src)[0].shape)",
+      "packages": "torch",
+      "application": "在金融文本、ETF价格图像和长时间序列预测模型中构建可复现的网络组件。",
+      "limits": "代码仅演示该架构的关键算子，尚非可直接用于交易的完整深度网络。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n01-04",
+      "node_id": "architectures-n01-04",
+      "title": "TCN时间卷积",
+      "definition": "TCN使用一维因果卷积、膨胀卷积和残差结构扩大有效历史感受野。",
+      "assumptions": "必须确认输入张量形状、因果注意力约束和实际预测时可用的历史长度；预训练权重也需版本一致。",
+      "properties": [
+        "序列架构的计算复杂度、长程依赖和泛化效果受数据长度与模型容量影响。",
+        "训练与推断模式的掩码、缓存和权重配置必须一致，不能让历史金融预测访问未来数据。"
+      ],
+      "formulas": [
+        {
+          "label": "结构公式",
+          "tex": "R=1+(K-1)\\sum_{l=0}^{L-1}d_l"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入序列映射到隐藏状态或注意力特征，按该结构关系定义计算路径。",
+          "tex": "R=1+(K-1)\\sum_{l=0}^{L-1}d_l"
+        },
+        {
+          "explanation": "检查输出形状、可计算的时序依赖和有效的参数更新范围，再评价样本外误差。",
+          "tex": "R=1+(K-1)\\sum_{l=0}^{L-1}d_l"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(2,3,30)\nm=torch.nn.Conv1d(3,6,3,dilation=4)\nprint(m(x).shape)",
+      "packages": "torch",
+      "application": "在金融文本、ETF价格图像和长时间序列预测模型中构建可复现的网络组件。",
+      "limits": "代码仅演示该架构的关键算子，尚非可直接用于交易的完整深度网络。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n02-04",
+      "node_id": "architectures-n02-04",
+      "title": "Seq2Seq",
+      "definition": "序列到序列模型将可变长源序列编码，并由解码器按条件逐步生成目标序列。",
+      "assumptions": "必须确认输入张量形状、因果注意力约束和实际预测时可用的历史长度；预训练权重也需版本一致。",
+      "properties": [
+        "序列架构的计算复杂度、长程依赖和泛化效果受数据长度与模型容量影响。",
+        "训练与推断模式的掩码、缓存和权重配置必须一致，不能让历史金融预测访问未来数据。"
+      ],
+      "formulas": [
+        {
+          "label": "结构公式",
+          "tex": "p(y_{1:T}|x)=\\prod_{t=1}^Tp(y_t|y_{<t},x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入序列映射到隐藏状态或注意力特征，按该结构关系定义计算路径。",
+          "tex": "p(y_{1:T}|x)=\\prod_{t=1}^Tp(y_t|y_{<t},x)"
+        },
+        {
+          "explanation": "检查输出形状、可计算的时序依赖和有效的参数更新范围，再评价样本外误差。",
+          "tex": "p(y_{1:T}|x)=\\prod_{t=1}^Tp(y_t|y_{<t},x)"
+        }
+      ],
+      "code": "import torch\nenc=torch.nn.GRU(5,8,batch_first=True)\ndec=torch.nn.GRU(8,8,batch_first=True)\n_,h=enc(torch.randn(2,10,5))\nprint(dec(torch.randn(2,4,8),h)[0].shape)",
+      "packages": "torch",
+      "application": "在金融文本、ETF价格图像和长时间序列预测模型中构建可复现的网络组件。",
+      "limits": "代码仅演示该架构的关键算子，尚非可直接用于交易的完整深度网络。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n03-04",
+      "node_id": "architectures-n03-04",
+      "title": "门控卷积",
+      "definition": "门控卷积把卷积特征与Sigmoid门相乘，控制局部时序信息的通过程度。",
+      "assumptions": "必须确认输入张量形状、因果注意力约束和实际预测时可用的历史长度；预训练权重也需版本一致。",
+      "properties": [
+        "序列架构的计算复杂度、长程依赖和泛化效果受数据长度与模型容量影响。",
+        "训练与推断模式的掩码、缓存和权重配置必须一致，不能让历史金融预测访问未来数据。"
+      ],
+      "formulas": [
+        {
+          "label": "结构公式",
+          "tex": "h=\\tanh(W_f*x)\\odot\\sigma(W_g*x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入序列映射到隐藏状态或注意力特征，按该结构关系定义计算路径。",
+          "tex": "h=\\tanh(W_f*x)\\odot\\sigma(W_g*x)"
+        },
+        {
+          "explanation": "检查输出形状、可计算的时序依赖和有效的参数更新范围，再评价样本外误差。",
+          "tex": "h=\\tanh(W_f*x)\\odot\\sigma(W_g*x)"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(2,4,20)\nf=torch.nn.Conv1d(4,6,3);g=torch.nn.Conv1d(4,6,3)\nprint((f(x).tanh()*g(x).sigmoid()).shape)",
+      "packages": "torch",
+      "application": "在金融文本、ETF价格图像和长时间序列预测模型中构建可复现的网络组件。",
+      "limits": "代码仅演示该架构的关键算子，尚非可直接用于交易的完整深度网络。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n04-04",
+      "node_id": "architectures-n04-04",
+      "title": "状态空间模型SSM",
+      "definition": "线性状态空间架构通过潜在状态递推刻画长序列，输出由状态映射得到。",
+      "assumptions": "必须确认输入张量形状、因果注意力约束和实际预测时可用的历史长度；预训练权重也需版本一致。",
+      "properties": [
+        "序列架构的计算复杂度、长程依赖和泛化效果受数据长度与模型容量影响。",
+        "训练与推断模式的掩码、缓存和权重配置必须一致，不能让历史金融预测访问未来数据。"
+      ],
+      "formulas": [
+        {
+          "label": "结构公式",
+          "tex": "h_t=Ah_{t-1}+Bx_t,\\quad y_t=Ch_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入序列映射到隐藏状态或注意力特征，按该结构关系定义计算路径。",
+          "tex": "h_t=Ah_{t-1}+Bx_t,\\quad y_t=Ch_t"
+        },
+        {
+          "explanation": "检查输出形状、可计算的时序依赖和有效的参数更新范围，再评价样本外误差。",
+          "tex": "h_t=Ah_{t-1}+Bx_t,\\quad y_t=Ch_t"
+        }
+      ],
+      "code": "import numpy as np\nA=.9;B=.2;C=1.;h=0.\nfor x in [.1,.5,-.2,.3]:\n    h=A*h+B*x;print(round(C*h,4))",
+      "packages": "numpy",
+      "application": "在金融文本、ETF价格图像和长时间序列预测模型中构建可复现的网络组件。",
+      "limits": "代码仅演示该架构的关键算子，尚非可直接用于交易的完整深度网络。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n05-04",
+      "node_id": "architectures-n05-04",
+      "title": "Mamba选择性状态空间",
+      "definition": "Mamba让部分状态空间参数依赖当前输入，以选择性读写与结构化扫描适应长序列。",
+      "assumptions": "必须确认输入张量形状、因果注意力约束和实际预测时可用的历史长度；预训练权重也需版本一致。",
+      "properties": [
+        "序列架构的计算复杂度、长程依赖和泛化效果受数据长度与模型容量影响。",
+        "训练与推断模式的掩码、缓存和权重配置必须一致，不能让历史金融预测访问未来数据。"
+      ],
+      "formulas": [
+        {
+          "label": "结构公式",
+          "tex": "h_t=\\bar A(x_t)h_{t-1}+\\bar B(x_t)x_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入序列映射到隐藏状态或注意力特征，按该结构关系定义计算路径。",
+          "tex": "h_t=\\bar A(x_t)h_{t-1}+\\bar B(x_t)x_t"
+        },
+        {
+          "explanation": "检查输出形状、可计算的时序依赖和有效的参数更新范围，再评价样本外误差。",
+          "tex": "h_t=\\bar A(x_t)h_{t-1}+\\bar B(x_t)x_t"
+        }
+      ],
+      "code": "import numpy as np\nA=.9;B=.2;C=1.;h=0.\nfor x in [.1,.5,-.2,.3]:\n    h=A*h+B*x;print(round(C*h,4))",
+      "packages": "numpy",
+      "application": "在金融文本、ETF价格图像和长时间序列预测模型中构建可复现的网络组件。",
+      "limits": "代码仅演示该架构的关键算子，尚非可直接用于交易的完整深度网络。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n06-04",
+      "node_id": "architectures-n06-04",
+      "title": "长序列建模",
+      "definition": "长序列模型设计需考虑上下文长度、内存复杂度、有效历史信息及截断策略。",
+      "assumptions": "必须确认输入张量形状、因果注意力约束和实际预测时可用的历史长度；预训练权重也需版本一致。",
+      "properties": [
+        "序列架构的计算复杂度、长程依赖和泛化效果受数据长度与模型容量影响。",
+        "训练与推断模式的掩码、缓存和权重配置必须一致，不能让历史金融预测访问未来数据。"
+      ],
+      "formulas": [
+        {
+          "label": "结构公式",
+          "tex": "\\operatorname{Cost}_{\\rm attention}=O(T^2d)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入序列映射到隐藏状态或注意力特征，按该结构关系定义计算路径。",
+          "tex": "\\operatorname{Cost}_{\\rm attention}=O(T^2d)"
+        },
+        {
+          "explanation": "检查输出形状、可计算的时序依赖和有效的参数更新范围，再评价样本外误差。",
+          "tex": "\\operatorname{Cost}_{\\rm attention}=O(T^2d)"
+        }
+      ],
+      "code": "import math\nfor n in [256,1024,4096]:print(n,\"attention score cells:\",n*n)",
+      "packages": "Python standard library",
+      "application": "在金融文本、ETF价格图像和长时间序列预测模型中构建可复现的网络组件。",
+      "limits": "代码仅演示该架构的关键算子，尚非可直接用于交易的完整深度网络。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n01-05",
+      "node_id": "architectures-n01-05",
+      "title": "预训练与微调",
+      "definition": "预训练在大量数据上学通用表征，再用目标任务继续优化网络参数或适配层。",
+      "assumptions": "必须确认输入张量形状、因果注意力约束和实际预测时可用的历史长度；预训练权重也需版本一致。",
+      "properties": [
+        "序列架构的计算复杂度、长程依赖和泛化效果受数据长度与模型容量影响。",
+        "训练与推断模式的掩码、缓存和权重配置必须一致，不能让历史金融预测访问未来数据。"
+      ],
+      "formulas": [
+        {
+          "label": "结构公式",
+          "tex": "\\theta^*=\\arg\\min_\\theta L_{\\rm target}(\\theta;\\theta_0)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入序列映射到隐藏状态或注意力特征，按该结构关系定义计算路径。",
+          "tex": "\\theta^*=\\arg\\min_\\theta L_{\\rm target}(\\theta;\\theta_0)"
+        },
+        {
+          "explanation": "检查输出形状、可计算的时序依赖和有效的参数更新范围，再评价样本外误差。",
+          "tex": "\\theta^*=\\arg\\min_\\theta L_{\\rm target}(\\theta;\\theta_0)"
+        }
+      ],
+      "code": "import torch\nnet=torch.nn.Sequential(torch.nn.Linear(3,8),torch.nn.ReLU(),torch.nn.Linear(8,1))\nprint(sum(p.numel() for p in net.parameters()))",
+      "packages": "torch",
+      "application": "在金融文本、ETF价格图像和长时间序列预测模型中构建可复现的网络组件。",
+      "limits": "代码仅演示该架构的关键算子，尚非可直接用于交易的完整深度网络。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n02-05",
+      "node_id": "architectures-n02-05",
+      "title": "冻结层",
+      "definition": "微调时冻结网络部分参数只训练指定层，可以减少训练成本与过拟合风险。",
+      "assumptions": "必须确认输入张量形状、因果注意力约束和实际预测时可用的历史长度；预训练权重也需版本一致。",
+      "properties": [
+        "序列架构的计算复杂度、长程依赖和泛化效果受数据长度与模型容量影响。",
+        "训练与推断模式的掩码、缓存和权重配置必须一致，不能让历史金融预测访问未来数据。"
+      ],
+      "formulas": [
+        {
+          "label": "结构公式",
+          "tex": "\\nabla_{\\theta_{\\rm frozen}}L=0"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入序列映射到隐藏状态或注意力特征，按该结构关系定义计算路径。",
+          "tex": "\\nabla_{\\theta_{\\rm frozen}}L=0"
+        },
+        {
+          "explanation": "检查输出形状、可计算的时序依赖和有效的参数更新范围，再评价样本外误差。",
+          "tex": "\\nabla_{\\theta_{\\rm frozen}}L=0"
+        }
+      ],
+      "code": "import torch\nm=torch.nn.Sequential(torch.nn.Linear(3,8),torch.nn.Linear(8,1))\nfor p in m[0].parameters():p.requires_grad=False\nprint([p.requires_grad for p in m.parameters()])",
+      "packages": "torch",
+      "application": "在金融文本、ETF价格图像和长时间序列预测模型中构建可复现的网络组件。",
+      "limits": "代码仅演示该架构的关键算子，尚非可直接用于交易的完整深度网络。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n03-05",
+      "node_id": "architectures-n03-05",
+      "title": "知识蒸馏",
+      "definition": "学生模型拟合教师模型的软输出和真实标签，在有限参数下传递模型行为。",
+      "assumptions": "必须确认输入张量形状、因果注意力约束和实际预测时可用的历史长度；预训练权重也需版本一致。",
+      "properties": [
+        "序列架构的计算复杂度、长程依赖和泛化效果受数据长度与模型容量影响。",
+        "训练与推断模式的掩码、缓存和权重配置必须一致，不能让历史金融预测访问未来数据。"
+      ],
+      "formulas": [
+        {
+          "label": "结构公式",
+          "tex": "L=(1-\\alpha)L_{\\rm CE}+\\alpha T^2D_{\\rm KL}(p_T^{\\rm teacher}\\|p_T^{\\rm student})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入序列映射到隐藏状态或注意力特征，按该结构关系定义计算路径。",
+          "tex": "L=(1-\\alpha)L_{\\rm CE}+\\alpha T^2D_{\\rm KL}(p_T^{\\rm teacher}\\|p_T^{\\rm student})"
+        },
+        {
+          "explanation": "检查输出形状、可计算的时序依赖和有效的参数更新范围，再评价样本外误差。",
+          "tex": "L=(1-\\alpha)L_{\\rm CE}+\\alpha T^2D_{\\rm KL}(p_T^{\\rm teacher}\\|p_T^{\\rm student})"
+        }
+      ],
+      "code": "import torch\nteacher=torch.randn(3,5);student=torch.randn(3,5,requires_grad=True)\nT=2.\nloss=torch.nn.functional.kl_div(\n    torch.nn.functional.log_softmax(student/T,-1),\n    torch.nn.functional.softmax(teacher/T,-1),\n    reduction=\"batchmean\")*T*T\nloss.backward();print(loss.item())",
+      "packages": "torch",
+      "application": "在金融文本、ETF价格图像和长时间序列预测模型中构建可复现的网络组件。",
+      "limits": "代码仅演示该架构的关键算子，尚非可直接用于交易的完整深度网络。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n04-05",
+      "node_id": "architectures-n04-05",
+      "title": "剪枝",
+      "definition": "剪枝删除权重、通道或注意力头，减少模型大小和推断成本，需后续精度评估。",
+      "assumptions": "必须确认输入张量形状、因果注意力约束和实际预测时可用的历史长度；预训练权重也需版本一致。",
+      "properties": [
+        "序列架构的计算复杂度、长程依赖和泛化效果受数据长度与模型容量影响。",
+        "训练与推断模式的掩码、缓存和权重配置必须一致，不能让历史金融预测访问未来数据。"
+      ],
+      "formulas": [
+        {
+          "label": "结构公式",
+          "tex": "\\theta'=\\theta\\odot m,\\quad m\\in\\{0,1\\}^p"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入序列映射到隐藏状态或注意力特征，按该结构关系定义计算路径。",
+          "tex": "\\theta'=\\theta\\odot m,\\quad m\\in\\{0,1\\}^p"
+        },
+        {
+          "explanation": "检查输出形状、可计算的时序依赖和有效的参数更新范围，再评价样本外误差。",
+          "tex": "\\theta'=\\theta\\odot m,\\quad m\\in\\{0,1\\}^p"
+        }
+      ],
+      "code": "import torch\nfrom torch.nn.utils import prune\nm=torch.nn.Linear(4,2)\nprune.l1_unstructured(m,\"weight\",amount=.5)\nprint((m.weight==0).sum().item())",
+      "packages": "torch",
+      "application": "在金融文本、ETF价格图像和长时间序列预测模型中构建可复现的网络组件。",
+      "limits": "代码仅演示该架构的关键算子，尚非可直接用于交易的完整深度网络。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n05-05",
+      "node_id": "architectures-n05-05",
+      "title": "量化",
+      "definition": "模型量化把浮点权重或激活映射到较少位宽的离散表示，用缩放和零点近似恢复数值。",
+      "assumptions": "必须确认输入张量形状、因果注意力约束和实际预测时可用的历史长度；预训练权重也需版本一致。",
+      "properties": [
+        "序列架构的计算复杂度、长程依赖和泛化效果受数据长度与模型容量影响。",
+        "训练与推断模式的掩码、缓存和权重配置必须一致，不能让历史金融预测访问未来数据。"
+      ],
+      "formulas": [
+        {
+          "label": "结构公式",
+          "tex": "q=\\operatorname{clip}(\\operatorname{round}(x/s)+z,q_{\\min},q_{\\max})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入序列映射到隐藏状态或注意力特征，按该结构关系定义计算路径。",
+          "tex": "q=\\operatorname{clip}(\\operatorname{round}(x/s)+z,q_{\\min},q_{\\max})"
+        },
+        {
+          "explanation": "检查输出形状、可计算的时序依赖和有效的参数更新范围，再评价样本外误差。",
+          "tex": "q=\\operatorname{clip}(\\operatorname{round}(x/s)+z,q_{\\min},q_{\\max})"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([-.7,.1,1.2]);scale=.01;z=0\nq=np.clip(np.round(x/scale)+z,-128,127).astype(np.int8)\nprint(q,q.astype(float)*scale)",
+      "packages": "numpy",
+      "application": "在金融文本、ETF价格图像和长时间序列预测模型中构建可复现的网络组件。",
+      "limits": "代码仅演示该架构的关键算子，尚非可直接用于交易的完整深度网络。",
+      "coverage": "complete"
+    },
+    {
+      "id": "architectures-n06-05",
+      "node_id": "architectures-n06-05",
+      "title": "低秩适配LoRA",
+      "definition": "LoRA冻结预训练权重，只训练两个小矩阵组成的低秩权重增量。",
+      "assumptions": "必须确认输入张量形状、因果注意力约束和实际预测时可用的历史长度；预训练权重也需版本一致。",
+      "properties": [
+        "序列架构的计算复杂度、长程依赖和泛化效果受数据长度与模型容量影响。",
+        "训练与推断模式的掩码、缓存和权重配置必须一致，不能让历史金融预测访问未来数据。"
+      ],
+      "formulas": [
+        {
+          "label": "结构公式",
+          "tex": "W'=W+\\frac{\\alpha}{r}BA,\\quad\\operatorname{rank}(BA)\\le r"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入序列映射到隐藏状态或注意力特征，按该结构关系定义计算路径。",
+          "tex": "W'=W+\\frac{\\alpha}{r}BA,\\quad\\operatorname{rank}(BA)\\le r"
+        },
+        {
+          "explanation": "检查输出形状、可计算的时序依赖和有效的参数更新范围，再评价样本外误差。",
+          "tex": "W'=W+\\frac{\\alpha}{r}BA,\\quad\\operatorname{rank}(BA)\\le r"
+        }
+      ],
+      "code": "import torch\nW=torch.randn(6,4);A=torch.randn(2,4)*.01;B=torch.zeros(6,2);x=torch.randn(3,4)\nprint((x@W.T+(x@A.T)@B.T).shape)",
+      "packages": "torch",
+      "application": "在金融文本、ETF价格图像和长时间序列预测模型中构建可复现的网络组件。",
+      "limits": "代码仅演示该架构的关键算子，尚非可直接用于交易的完整深度网络。",
+      "coverage": "complete"
+    }
+  ]
+}
