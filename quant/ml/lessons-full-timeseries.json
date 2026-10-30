@@ -1,0 +1,741 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "timeseries-n01-01",
+      "node_id": "timeseries-n01-01",
+      "title": "点预测与区间预测",
+      "definition": "点预测给出未来目标的单值估计，区间预测量化未来观测的不确定范围。",
+      "assumptions": "输入特征在预测时已可得，训练/测试按时间严格分离；多期限标签可能重叠，且协变量未来可用性须明确。",
+      "properties": [
+        "点预测给出未来目标的单值估计，区间预测量化未来观测的不确定范围。",
+        "评估应报告朴素基线、预测误差、稳定性和真实成本后的收益，不能只展示样本内拟合。"
+      ],
+      "formulas": [
+        {
+          "label": "序列预测结构或条件关系",
+          "tex": "\\hat y_{t+h|t}=E[Y_{t+h}\\mid\\mathcal F_t]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确定历史窗口与预测时点，区分目标、过去协变量和已知未来信息。",
+          "tex": "\\hat y_{t+h|t}=E[Y_{t+h}\\mid\\mathcal F_t]"
+        },
+        {
+          "explanation": "按序列模型的滞后、递归、状态或深度映射构造预测并作时间感知验证。",
+          "tex": "\\hat y_{t+h|t}=E[Y_{t+h}\\mid\\mathcal F_t]"
+        }
+      ],
+      "code": "import numpy as np\nx=np.arange(12.).reshape(-1,1);print('history',x[-5:].ravel())",
+      "packages": "numpy, scikit-learn",
+      "application": "使用37只美国上市ETF的OHLCV进行短中期收益与波动率样本外预测。",
+      "limits": "代码为本章节的最小数学计算示范，并非TFT、DeepAR、TimesNet完整训练。滚动训练仍须处理标签重叠、修订数据和实际执行时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "timeseries-n02-01",
+      "node_id": "timeseries-n02-01",
+      "title": "时间索引与频率",
+      "definition": "时间序列应区分交易日历、采样周期、经济事件时刻与信息发布延迟。",
+      "assumptions": "输入特征在预测时已可得，训练/测试按时间严格分离；多期限标签可能重叠，且协变量未来可用性须明确。",
+      "properties": [
+        "时间序列应区分交易日历、采样周期、经济事件时刻与信息发布延迟。",
+        "评估应报告朴素基线、预测误差、稳定性和真实成本后的收益，不能只展示样本内拟合。"
+      ],
+      "formulas": [
+        {
+          "label": "序列预测结构或条件关系",
+          "tex": "X_t\\in\\mathcal F_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确定历史窗口与预测时点，区分目标、过去协变量和已知未来信息。",
+          "tex": "X_t\\in\\mathcal F_t"
+        },
+        {
+          "explanation": "按序列模型的滞后、递归、状态或深度映射构造预测并作时间感知验证。",
+          "tex": "X_t\\in\\mathcal F_t"
+        }
+      ],
+      "code": "import numpy as np\nx=np.arange(12.).reshape(-1,1);print('history',x[-5:].ravel())",
+      "packages": "numpy, scikit-learn",
+      "application": "使用37只美国上市ETF的OHLCV进行短中期收益与波动率样本外预测。",
+      "limits": "代码为本章节的最小数学计算示范，并非TFT、DeepAR、TimesNet完整训练。滚动训练仍须处理标签重叠、修订数据和实际执行时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "timeseries-n03-01",
+      "node_id": "timeseries-n03-01",
+      "title": "趋势季节性",
+      "definition": "趋势刻画长期水平变化，季节性描述周期重复结构，可使用可加或乘性分解。",
+      "assumptions": "输入特征在预测时已可得，训练/测试按时间严格分离；多期限标签可能重叠，且协变量未来可用性须明确。",
+      "properties": [
+        "趋势刻画长期水平变化，季节性描述周期重复结构，可使用可加或乘性分解。",
+        "评估应报告朴素基线、预测误差、稳定性和真实成本后的收益，不能只展示样本内拟合。"
+      ],
+      "formulas": [
+        {
+          "label": "序列预测结构或条件关系",
+          "tex": "y_t=T_t+S_t+\\epsilon_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确定历史窗口与预测时点，区分目标、过去协变量和已知未来信息。",
+          "tex": "y_t=T_t+S_t+\\epsilon_t"
+        },
+        {
+          "explanation": "按序列模型的滞后、递归、状态或深度映射构造预测并作时间感知验证。",
+          "tex": "y_t=T_t+S_t+\\epsilon_t"
+        }
+      ],
+      "code": "import numpy as np\nx=np.arange(12.).reshape(-1,1);print('history',x[-5:].ravel())",
+      "packages": "numpy, scikit-learn",
+      "application": "使用37只美国上市ETF的OHLCV进行短中期收益与波动率样本外预测。",
+      "limits": "代码为本章节的最小数学计算示范，并非TFT、DeepAR、TimesNet完整训练。滚动训练仍须处理标签重叠、修订数据和实际执行时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "timeseries-n06-01",
+      "node_id": "timeseries-n06-01",
+      "title": "预测窗口",
+      "definition": "输入历史长度和预测期限共同决定序列预测任务的难度与可用信息集合。",
+      "assumptions": "输入特征在预测时已可得，训练/测试按时间严格分离；多期限标签可能重叠，且协变量未来可用性须明确。",
+      "properties": [
+        "输入历史长度和预测期限共同决定序列预测任务的难度与可用信息集合。",
+        "评估应报告朴素基线、预测误差、稳定性和真实成本后的收益，不能只展示样本内拟合。"
+      ],
+      "formulas": [
+        {
+          "label": "序列预测结构或条件关系",
+          "tex": "X_t=(x_{t-W+1},\\ldots,x_t),\\quad y=y_{t+h}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确定历史窗口与预测时点，区分目标、过去协变量和已知未来信息。",
+          "tex": "X_t=(x_{t-W+1},\\ldots,x_t),\\quad y=y_{t+h}"
+        },
+        {
+          "explanation": "按序列模型的滞后、递归、状态或深度映射构造预测并作时间感知验证。",
+          "tex": "X_t=(x_{t-W+1},\\ldots,x_t),\\quad y=y_{t+h}"
+        }
+      ],
+      "code": "import numpy as np\nx=np.arange(12.).reshape(-1,1);print('history',x[-5:].ravel())",
+      "packages": "numpy, scikit-learn",
+      "application": "使用37只美国上市ETF的OHLCV进行短中期收益与波动率样本外预测。",
+      "limits": "代码为本章节的最小数学计算示范，并非TFT、DeepAR、TimesNet完整训练。滚动训练仍须处理标签重叠、修订数据和实际执行时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "timeseries-n02-02",
+      "node_id": "timeseries-n02-02",
+      "title": "ARIMA",
+      "definition": "差分后的序列使用自回归滞后与移动平均残差建模，适用于相对平稳的线性依赖。",
+      "assumptions": "输入特征在预测时已可得，训练/测试按时间严格分离；多期限标签可能重叠，且协变量未来可用性须明确。",
+      "properties": [
+        "差分后的序列使用自回归滞后与移动平均残差建模，适用于相对平稳的线性依赖。",
+        "评估应报告朴素基线、预测误差、稳定性和真实成本后的收益，不能只展示样本内拟合。"
+      ],
+      "formulas": [
+        {
+          "label": "序列预测结构或条件关系",
+          "tex": "\\phi(B)(1-B)^d y_t=\\theta(B)\\epsilon_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确定历史窗口与预测时点，区分目标、过去协变量和已知未来信息。",
+          "tex": "\\phi(B)(1-B)^d y_t=\\theta(B)\\epsilon_t"
+        },
+        {
+          "explanation": "按序列模型的滞后、递归、状态或深度映射构造预测并作时间感知验证。",
+          "tex": "\\phi(B)(1-B)^d y_t=\\theta(B)\\epsilon_t"
+        }
+      ],
+      "code": "import numpy as np\nfrom statsmodels.tsa.arima.model import ARIMA\nx=np.random.default_rng(0).normal(size=80).cumsum()\nprint(ARIMA(x,order=(1,1,0)).fit().forecast(2))",
+      "packages": "numpy, statsmodels",
+      "application": "使用37只美国上市ETF的OHLCV进行短中期收益与波动率样本外预测。",
+      "limits": "代码为本章节的最小数学计算示范，并非TFT、DeepAR、TimesNet完整训练。滚动训练仍须处理标签重叠、修订数据和实际执行时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "timeseries-n03-02",
+      "node_id": "timeseries-n03-02",
+      "title": "ETS",
+      "definition": "指数平滑状态模型递推估计水平、趋势和季节性分量，适合时间序列预测基线。",
+      "assumptions": "输入特征在预测时已可得，训练/测试按时间严格分离；多期限标签可能重叠，且协变量未来可用性须明确。",
+      "properties": [
+        "指数平滑状态模型递推估计水平、趋势和季节性分量，适合时间序列预测基线。",
+        "评估应报告朴素基线、预测误差、稳定性和真实成本后的收益，不能只展示样本内拟合。"
+      ],
+      "formulas": [
+        {
+          "label": "序列预测结构或条件关系",
+          "tex": "\\ell_t=\\alpha y_t+(1-\\alpha)\\ell_{t-1}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确定历史窗口与预测时点，区分目标、过去协变量和已知未来信息。",
+          "tex": "\\ell_t=\\alpha y_t+(1-\\alpha)\\ell_{t-1}"
+        },
+        {
+          "explanation": "按序列模型的滞后、递归、状态或深度映射构造预测并作时间感知验证。",
+          "tex": "\\ell_t=\\alpha y_t+(1-\\alpha)\\ell_{t-1}"
+        }
+      ],
+      "code": "import numpy as np\nfrom statsmodels.tsa.arima.model import ARIMA\nx=np.random.default_rng(0).normal(size=80).cumsum()\nprint(ARIMA(x,order=(1,1,0)).fit().forecast(2))",
+      "packages": "numpy, statsmodels",
+      "application": "使用37只美国上市ETF的OHLCV进行短中期收益与波动率样本外预测。",
+      "limits": "代码为本章节的最小数学计算示范，并非TFT、DeepAR、TimesNet完整训练。滚动训练仍须处理标签重叠、修订数据和实际执行时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "timeseries-n05-02",
+      "node_id": "timeseries-n05-02",
+      "title": "XGBoost滞后预测",
+      "definition": "把滞后值、滚动统计和已知协变量转为监督训练表，使用梯度提升树预测未来目标。",
+      "assumptions": "输入特征在预测时已可得，训练/测试按时间严格分离；多期限标签可能重叠，且协变量未来可用性须明确。",
+      "properties": [
+        "把滞后值、滚动统计和已知协变量转为监督训练表，使用梯度提升树预测未来目标。",
+        "评估应报告朴素基线、预测误差、稳定性和真实成本后的收益，不能只展示样本内拟合。"
+      ],
+      "formulas": [
+        {
+          "label": "序列预测结构或条件关系",
+          "tex": "\\hat y_{t+h}=f_{\\rm XGB}(x_{t},x_{t-1},\\ldots)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确定历史窗口与预测时点，区分目标、过去协变量和已知未来信息。",
+          "tex": "\\hat y_{t+h}=f_{\\rm XGB}(x_{t},x_{t-1},\\ldots)"
+        },
+        {
+          "explanation": "按序列模型的滞后、递归、状态或深度映射构造预测并作时间感知验证。",
+          "tex": "\\hat y_{t+h}=f_{\\rm XGB}(x_{t},x_{t-1},\\ldots)"
+        }
+      ],
+      "code": "import numpy as np\nfrom statsmodels.tsa.arima.model import ARIMA\nx=np.random.default_rng(0).normal(size=80).cumsum()\nprint(ARIMA(x,order=(1,1,0)).fit().forecast(2))",
+      "packages": "numpy, statsmodels",
+      "application": "使用37只美国上市ETF的OHLCV进行短中期收益与波动率样本外预测。",
+      "limits": "代码为本章节的最小数学计算示范，并非TFT、DeepAR、TimesNet完整训练。滚动训练仍须处理标签重叠、修订数据和实际执行时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "timeseries-n06-02",
+      "node_id": "timeseries-n06-02",
+      "title": "SARIMAX",
+      "definition": "SARIMA扩展纳入季节项与外生变量以建模可预测的季节性和宏观输入。",
+      "assumptions": "输入特征在预测时已可得，训练/测试按时间严格分离；多期限标签可能重叠，且协变量未来可用性须明确。",
+      "properties": [
+        "SARIMA扩展纳入季节项与外生变量以建模可预测的季节性和宏观输入。",
+        "评估应报告朴素基线、预测误差、稳定性和真实成本后的收益，不能只展示样本内拟合。"
+      ],
+      "formulas": [
+        {
+          "label": "序列预测结构或条件关系",
+          "tex": "\\phi(B)\\Phi(B^s)(1-B)^d(1-B^s)^D y_t=\\theta(B)\\Theta(B^s)\\epsilon_t+\\beta^\\top X_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确定历史窗口与预测时点，区分目标、过去协变量和已知未来信息。",
+          "tex": "\\phi(B)\\Phi(B^s)(1-B)^d(1-B^s)^D y_t=\\theta(B)\\Theta(B^s)\\epsilon_t+\\beta^\\top X_t"
+        },
+        {
+          "explanation": "按序列模型的滞后、递归、状态或深度映射构造预测并作时间感知验证。",
+          "tex": "\\phi(B)\\Phi(B^s)(1-B)^d(1-B^s)^D y_t=\\theta(B)\\Theta(B^s)\\epsilon_t+\\beta^\\top X_t"
+        }
+      ],
+      "code": "import numpy as np\nfrom statsmodels.tsa.arima.model import ARIMA\nx=np.random.default_rng(0).normal(size=80).cumsum()\nprint(ARIMA(x,order=(1,1,0)).fit().forecast(2))",
+      "packages": "numpy, statsmodels",
+      "application": "使用37只美国上市ETF的OHLCV进行短中期收益与波动率样本外预测。",
+      "limits": "代码为本章节的最小数学计算示范，并非TFT、DeepAR、TimesNet完整训练。滚动训练仍须处理标签重叠、修订数据和实际执行时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "timeseries-n01-03",
+      "node_id": "timeseries-n01-03",
+      "title": "DeepAR",
+      "definition": "自回归RNN建模条件参数分布，并根据递归历史状态生成多步概率预测。",
+      "assumptions": "输入特征在预测时已可得，训练/测试按时间严格分离；多期限标签可能重叠，且协变量未来可用性须明确。",
+      "properties": [
+        "自回归RNN建模条件参数分布，并根据递归历史状态生成多步概率预测。",
+        "评估应报告朴素基线、预测误差、稳定性和真实成本后的收益，不能只展示样本内拟合。"
+      ],
+      "formulas": [
+        {
+          "label": "序列预测结构或条件关系",
+          "tex": "p(y_{t+1:t+H}\\mid\\mathcal F_t)=\\prod_hp(y_{t+h}\\mid h_{t+h})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确定历史窗口与预测时点，区分目标、过去协变量和已知未来信息。",
+          "tex": "p(y_{t+1:t+H}\\mid\\mathcal F_t)=\\prod_hp(y_{t+h}\\mid h_{t+h})"
+        },
+        {
+          "explanation": "按序列模型的滞后、递归、状态或深度映射构造预测并作时间感知验证。",
+          "tex": "p(y_{t+1:t+H}\\mid\\mathcal F_t)=\\prod_hp(y_{t+h}\\mid h_{t+h})"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(3,20,5);m=torch.nn.GRU(5,8,batch_first=True)\nprint(m(x)[0].shape)",
+      "packages": "torch",
+      "application": "使用37只美国上市ETF的OHLCV进行短中期收益与波动率样本外预测。",
+      "limits": "代码为本章节的最小数学计算示范，并非TFT、DeepAR、TimesNet完整训练。滚动训练仍须处理标签重叠、修订数据和实际执行时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "timeseries-n02-03",
+      "node_id": "timeseries-n02-03",
+      "title": "N-BEATS",
+      "definition": "通过堆叠残差前向块并分解后向拟合与前向预测，学习时间序列形态。",
+      "assumptions": "输入特征在预测时已可得，训练/测试按时间严格分离；多期限标签可能重叠，且协变量未来可用性须明确。",
+      "properties": [
+        "通过堆叠残差前向块并分解后向拟合与前向预测，学习时间序列形态。",
+        "评估应报告朴素基线、预测误差、稳定性和真实成本后的收益，不能只展示样本内拟合。"
+      ],
+      "formulas": [
+        {
+          "label": "序列预测结构或条件关系",
+          "tex": "y=\\sum_b\\hat y_b+\\operatorname{residual}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确定历史窗口与预测时点，区分目标、过去协变量和已知未来信息。",
+          "tex": "y=\\sum_b\\hat y_b+\\operatorname{residual}"
+        },
+        {
+          "explanation": "按序列模型的滞后、递归、状态或深度映射构造预测并作时间感知验证。",
+          "tex": "y=\\sum_b\\hat y_b+\\operatorname{residual}"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(3,20,5);m=torch.nn.GRU(5,8,batch_first=True)\nprint(m(x)[0].shape)",
+      "packages": "torch",
+      "application": "使用37只美国上市ETF的OHLCV进行短中期收益与波动率样本外预测。",
+      "limits": "代码为本章节的最小数学计算示范，并非TFT、DeepAR、TimesNet完整训练。滚动训练仍须处理标签重叠、修订数据和实际执行时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "timeseries-n03-03",
+      "node_id": "timeseries-n03-03",
+      "title": "N-HiTS",
+      "definition": "N-HiTS将层级插值与多分辨率采样相结合，强化长预测期序列建模。",
+      "assumptions": "输入特征在预测时已可得，训练/测试按时间严格分离；多期限标签可能重叠，且协变量未来可用性须明确。",
+      "properties": [
+        "N-HiTS将层级插值与多分辨率采样相结合，强化长预测期序列建模。",
+        "评估应报告朴素基线、预测误差、稳定性和真实成本后的收益，不能只展示样本内拟合。"
+      ],
+      "formulas": [
+        {
+          "label": "序列预测结构或条件关系",
+          "tex": "\\hat y^{(l)}=\\operatorname{Interp}_l(\\theta_l)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确定历史窗口与预测时点，区分目标、过去协变量和已知未来信息。",
+          "tex": "\\hat y^{(l)}=\\operatorname{Interp}_l(\\theta_l)"
+        },
+        {
+          "explanation": "按序列模型的滞后、递归、状态或深度映射构造预测并作时间感知验证。",
+          "tex": "\\hat y^{(l)}=\\operatorname{Interp}_l(\\theta_l)"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(3,20,5);m=torch.nn.GRU(5,8,batch_first=True)\nprint(m(x)[0].shape)",
+      "packages": "torch",
+      "application": "使用37只美国上市ETF的OHLCV进行短中期收益与波动率样本外预测。",
+      "limits": "代码为本章节的最小数学计算示范，并非TFT、DeepAR、TimesNet完整训练。滚动训练仍须处理标签重叠、修订数据和实际执行时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "timeseries-n04-03",
+      "node_id": "timeseries-n04-03",
+      "title": "Temporal Fusion Transformer",
+      "definition": "TFT结合变量选择、门控残差和时序注意力处理静态、已知未来及仅过去可得协变量。",
+      "assumptions": "输入特征在预测时已可得，训练/测试按时间严格分离；多期限标签可能重叠，且协变量未来可用性须明确。",
+      "properties": [
+        "TFT结合变量选择、门控残差和时序注意力处理静态、已知未来及仅过去可得协变量。",
+        "评估应报告朴素基线、预测误差、稳定性和真实成本后的收益，不能只展示样本内拟合。"
+      ],
+      "formulas": [
+        {
+          "label": "序列预测结构或条件关系",
+          "tex": "\\hat y_{t+h}=f_\\theta(X_{\\le t},K_{t+1:t+h})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确定历史窗口与预测时点，区分目标、过去协变量和已知未来信息。",
+          "tex": "\\hat y_{t+h}=f_\\theta(X_{\\le t},K_{t+1:t+h})"
+        },
+        {
+          "explanation": "按序列模型的滞后、递归、状态或深度映射构造预测并作时间感知验证。",
+          "tex": "\\hat y_{t+h}=f_\\theta(X_{\\le t},K_{t+1:t+h})"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(3,20,5);m=torch.nn.GRU(5,8,batch_first=True)\nprint(m(x)[0].shape)",
+      "packages": "torch",
+      "application": "使用37只美国上市ETF的OHLCV进行短中期收益与波动率样本外预测。",
+      "limits": "代码为本章节的最小数学计算示范，并非TFT、DeepAR、TimesNet完整训练。滚动训练仍须处理标签重叠、修订数据和实际执行时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "timeseries-n06-03",
+      "node_id": "timeseries-n06-03",
+      "title": "TimesNet",
+      "definition": "TimesNet通过频域主周期发现把一维序列重排为二维周期内/周期间张量进行建模。",
+      "assumptions": "输入特征在预测时已可得，训练/测试按时间严格分离；多期限标签可能重叠，且协变量未来可用性须明确。",
+      "properties": [
+        "TimesNet通过频域主周期发现把一维序列重排为二维周期内/周期间张量进行建模。",
+        "评估应报告朴素基线、预测误差、稳定性和真实成本后的收益，不能只展示样本内拟合。"
+      ],
+      "formulas": [
+        {
+          "label": "序列预测结构或条件关系",
+          "tex": "X^{(k)}=\\operatorname{Reshape}_{p_k}(X_{1:T})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确定历史窗口与预测时点，区分目标、过去协变量和已知未来信息。",
+          "tex": "X^{(k)}=\\operatorname{Reshape}_{p_k}(X_{1:T})"
+        },
+        {
+          "explanation": "按序列模型的滞后、递归、状态或深度映射构造预测并作时间感知验证。",
+          "tex": "X^{(k)}=\\operatorname{Reshape}_{p_k}(X_{1:T})"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(3,20,5);m=torch.nn.GRU(5,8,batch_first=True)\nprint(m(x)[0].shape)",
+      "packages": "torch",
+      "application": "使用37只美国上市ETF的OHLCV进行短中期收益与波动率样本外预测。",
+      "limits": "代码为本章节的最小数学计算示范，并非TFT、DeepAR、TimesNet完整训练。滚动训练仍须处理标签重叠、修订数据和实际执行时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "timeseries-n02-04",
+      "node_id": "timeseries-n02-04",
+      "title": "Teacher Forcing",
+      "definition": "序列训练时用真实上一时刻目标作为解码器输入，推断时一般只能使用自己生成的输出。",
+      "assumptions": "输入特征在预测时已可得，训练/测试按时间严格分离；多期限标签可能重叠，且协变量未来可用性须明确。",
+      "properties": [
+        "序列训练时用真实上一时刻目标作为解码器输入，推断时一般只能使用自己生成的输出。",
+        "评估应报告朴素基线、预测误差、稳定性和真实成本后的收益，不能只展示样本内拟合。"
+      ],
+      "formulas": [
+        {
+          "label": "序列预测结构或条件关系",
+          "tex": "p(y_t\\mid y_{<t}^{\\rm train},X)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确定历史窗口与预测时点，区分目标、过去协变量和已知未来信息。",
+          "tex": "p(y_t\\mid y_{<t}^{\\rm train},X)"
+        },
+        {
+          "explanation": "按序列模型的滞后、递归、状态或深度映射构造预测并作时间感知验证。",
+          "tex": "p(y_t\\mid y_{<t}^{\\rm train},X)"
+        }
+      ],
+      "code": "import numpy as np\nx=np.arange(24.).reshape(4,6)\nprint('multi-horizon shape:',x[:,1:].shape)",
+      "packages": "numpy, scikit-learn",
+      "application": "使用37只美国上市ETF的OHLCV进行短中期收益与波动率样本外预测。",
+      "limits": "代码为本章节的最小数学计算示范，并非TFT、DeepAR、TimesNet完整训练。滚动训练仍须处理标签重叠、修订数据和实际执行时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "timeseries-n03-04",
+      "node_id": "timeseries-n03-04",
+      "title": "Seq2Seq Forecast",
+      "definition": "编码器读取历史窗口，解码器从编码状态生成未来H步序列。",
+      "assumptions": "输入特征在预测时已可得，训练/测试按时间严格分离；多期限标签可能重叠，且协变量未来可用性须明确。",
+      "properties": [
+        "编码器读取历史窗口，解码器从编码状态生成未来H步序列。",
+        "评估应报告朴素基线、预测误差、稳定性和真实成本后的收益，不能只展示样本内拟合。"
+      ],
+      "formulas": [
+        {
+          "label": "序列预测结构或条件关系",
+          "tex": "p(y_{t+1:t+H}\\mid X_{\\le t})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确定历史窗口与预测时点，区分目标、过去协变量和已知未来信息。",
+          "tex": "p(y_{t+1:t+H}\\mid X_{\\le t})"
+        },
+        {
+          "explanation": "按序列模型的滞后、递归、状态或深度映射构造预测并作时间感知验证。",
+          "tex": "p(y_{t+1:t+H}\\mid X_{\\le t})"
+        }
+      ],
+      "code": "import numpy as np\nx=np.arange(24.).reshape(4,6)\nprint('multi-horizon shape:',x[:,1:].shape)",
+      "packages": "numpy, scikit-learn",
+      "application": "使用37只美国上市ETF的OHLCV进行短中期收益与波动率样本外预测。",
+      "limits": "代码为本章节的最小数学计算示范，并非TFT、DeepAR、TimesNet完整训练。滚动训练仍须处理标签重叠、修订数据和实际执行时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "timeseries-n05-04",
+      "node_id": "timeseries-n05-04",
+      "title": "协变量可得性",
+      "definition": "历史观测、已知未来日历特征和未知未来宏观变量应分别建模，避免直接传入未来实际值。",
+      "assumptions": "输入特征在预测时已可得，训练/测试按时间严格分离；多期限标签可能重叠，且协变量未来可用性须明确。",
+      "properties": [
+        "历史观测、已知未来日历特征和未知未来宏观变量应分别建模，避免直接传入未来实际值。",
+        "评估应报告朴素基线、预测误差、稳定性和真实成本后的收益，不能只展示样本内拟合。"
+      ],
+      "formulas": [
+        {
+          "label": "序列预测结构或条件关系",
+          "tex": "X_{t+h}^{\\rm known}\\in\\mathcal F_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确定历史窗口与预测时点，区分目标、过去协变量和已知未来信息。",
+          "tex": "X_{t+h}^{\\rm known}\\in\\mathcal F_t"
+        },
+        {
+          "explanation": "按序列模型的滞后、递归、状态或深度映射构造预测并作时间感知验证。",
+          "tex": "X_{t+h}^{\\rm known}\\in\\mathcal F_t"
+        }
+      ],
+      "code": "import numpy as np\nx=np.arange(24.).reshape(4,6)\nprint('multi-horizon shape:',x[:,1:].shape)",
+      "packages": "numpy, scikit-learn",
+      "application": "使用37只美国上市ETF的OHLCV进行短中期收益与波动率样本外预测。",
+      "limits": "代码为本章节的最小数学计算示范，并非TFT、DeepAR、TimesNet完整训练。滚动训练仍须处理标签重叠、修订数据和实际执行时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "timeseries-n06-04",
+      "node_id": "timeseries-n06-04",
+      "title": "多资产同步",
+      "definition": "多资产输入需对齐交易时间与缺失日，区分真实共同事件与不同时区收盘的错位。",
+      "assumptions": "输入特征在预测时已可得，训练/测试按时间严格分离；多期限标签可能重叠，且协变量未来可用性须明确。",
+      "properties": [
+        "多资产输入需对齐交易时间与缺失日，区分真实共同事件与不同时区收盘的错位。",
+        "评估应报告朴素基线、预测误差、稳定性和真实成本后的收益，不能只展示样本内拟合。"
+      ],
+      "formulas": [
+        {
+          "label": "序列预测结构或条件关系",
+          "tex": "X_t\\in\\mathbb R^{N\\times P}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确定历史窗口与预测时点，区分目标、过去协变量和已知未来信息。",
+          "tex": "X_t\\in\\mathbb R^{N\\times P}"
+        },
+        {
+          "explanation": "按序列模型的滞后、递归、状态或深度映射构造预测并作时间感知验证。",
+          "tex": "X_t\\in\\mathbb R^{N\\times P}"
+        }
+      ],
+      "code": "import numpy as np\nx=np.arange(24.).reshape(4,6)\nprint('multi-horizon shape:',x[:,1:].shape)",
+      "packages": "numpy, scikit-learn",
+      "application": "使用37只美国上市ETF的OHLCV进行短中期收益与波动率样本外预测。",
+      "limits": "代码为本章节的最小数学计算示范，并非TFT、DeepAR、TimesNet完整训练。滚动训练仍须处理标签重叠、修订数据和实际执行时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "timeseries-n01-05",
+      "node_id": "timeseries-n01-05",
+      "title": "收益与波动预测",
+      "definition": "收益均值与条件方差是不同监督目标，应使用合适损失和风险指标评价。",
+      "assumptions": "输入特征在预测时已可得，训练/测试按时间严格分离；多期限标签可能重叠，且协变量未来可用性须明确。",
+      "properties": [
+        "收益均值与条件方差是不同监督目标，应使用合适损失和风险指标评价。",
+        "评估应报告朴素基线、预测误差、稳定性和真实成本后的收益，不能只展示样本内拟合。"
+      ],
+      "formulas": [
+        {
+          "label": "序列预测结构或条件关系",
+          "tex": "E[r_{t+h}\\mid\\mathcal F_t],\\quad \\operatorname{Var}(r_{t+h}\\mid\\mathcal F_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确定历史窗口与预测时点，区分目标、过去协变量和已知未来信息。",
+          "tex": "E[r_{t+h}\\mid\\mathcal F_t],\\quad \\operatorname{Var}(r_{t+h}\\mid\\mathcal F_t)"
+        },
+        {
+          "explanation": "按序列模型的滞后、递归、状态或深度映射构造预测并作时间感知验证。",
+          "tex": "E[r_{t+h}\\mid\\mathcal F_t],\\quad \\operatorname{Var}(r_{t+h}\\mid\\mathcal F_t)"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.metrics import mean_squared_error\nreal=np.array([.01,-.02,.03]);pred=np.zeros_like(real)\nprint(mean_squared_error(real,pred))",
+      "packages": "numpy, scikit-learn",
+      "application": "使用37只美国上市ETF的OHLCV进行短中期收益与波动率样本外预测。",
+      "limits": "代码为本章节的最小数学计算示范，并非TFT、DeepAR、TimesNet完整训练。滚动训练仍须处理标签重叠、修订数据和实际执行时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "timeseries-n02-05",
+      "node_id": "timeseries-n02-05",
+      "title": "ETF横截面排序",
+      "definition": "同一时刻按多个ETF的预测分数排序，评价RankIC及净交易成本后的组合表现。",
+      "assumptions": "输入特征在预测时已可得，训练/测试按时间严格分离；多期限标签可能重叠，且协变量未来可用性须明确。",
+      "properties": [
+        "同一时刻按多个ETF的预测分数排序，评价RankIC及净交易成本后的组合表现。",
+        "评估应报告朴素基线、预测误差、稳定性和真实成本后的收益，不能只展示样本内拟合。"
+      ],
+      "formulas": [
+        {
+          "label": "序列预测结构或条件关系",
+          "tex": "\\hat s_{i,t}=f_\\theta(X_{i,\\le t})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确定历史窗口与预测时点，区分目标、过去协变量和已知未来信息。",
+          "tex": "\\hat s_{i,t}=f_\\theta(X_{i,\\le t})"
+        },
+        {
+          "explanation": "按序列模型的滞后、递归、状态或深度映射构造预测并作时间感知验证。",
+          "tex": "\\hat s_{i,t}=f_\\theta(X_{i,\\le t})"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.metrics import mean_squared_error\nreal=np.array([.01,-.02,.03]);pred=np.zeros_like(real)\nprint(mean_squared_error(real,pred))",
+      "packages": "numpy, scikit-learn",
+      "application": "使用37只美国上市ETF的OHLCV进行短中期收益与波动率样本外预测。",
+      "limits": "代码为本章节的最小数学计算示范，并非TFT、DeepAR、TimesNet完整训练。滚动训练仍须处理标签重叠、修订数据和实际执行时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "timeseries-n03-05",
+      "node_id": "timeseries-n03-05",
+      "title": "微观结构序列",
+      "definition": "订单簿与成交事件按不规则事件时间到达，需要建模买卖盘变化、价差与市场冲击。",
+      "assumptions": "输入特征在预测时已可得，训练/测试按时间严格分离；多期限标签可能重叠，且协变量未来可用性须明确。",
+      "properties": [
+        "订单簿与成交事件按不规则事件时间到达，需要建模买卖盘变化、价差与市场冲击。",
+        "评估应报告朴素基线、预测误差、稳定性和真实成本后的收益，不能只展示样本内拟合。"
+      ],
+      "formulas": [
+        {
+          "label": "序列预测结构或条件关系",
+          "tex": "m_t=(\\mathrm{bid}_t+\\mathrm{ask}_t)/2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确定历史窗口与预测时点，区分目标、过去协变量和已知未来信息。",
+          "tex": "m_t=(\\mathrm{bid}_t+\\mathrm{ask}_t)/2"
+        },
+        {
+          "explanation": "按序列模型的滞后、递归、状态或深度映射构造预测并作时间感知验证。",
+          "tex": "m_t=(\\mathrm{bid}_t+\\mathrm{ask}_t)/2"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.metrics import mean_squared_error\nreal=np.array([.01,-.02,.03]);pred=np.zeros_like(real)\nprint(mean_squared_error(real,pred))",
+      "packages": "numpy, scikit-learn",
+      "application": "使用37只美国上市ETF的OHLCV进行短中期收益与波动率样本外预测。",
+      "limits": "代码为本章节的最小数学计算示范，并非TFT、DeepAR、TimesNet完整训练。滚动训练仍须处理标签重叠、修订数据和实际执行时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "timeseries-n04-05",
+      "node_id": "timeseries-n04-05",
+      "title": "状态切换",
+      "definition": "时间序列关系在市场制度之间变动，可用HMM或状态切换自回归模型。",
+      "assumptions": "输入特征在预测时已可得，训练/测试按时间严格分离；多期限标签可能重叠，且协变量未来可用性须明确。",
+      "properties": [
+        "时间序列关系在市场制度之间变动，可用HMM或状态切换自回归模型。",
+        "评估应报告朴素基线、预测误差、稳定性和真实成本后的收益，不能只展示样本内拟合。"
+      ],
+      "formulas": [
+        {
+          "label": "序列预测结构或条件关系",
+          "tex": "p(y_t\\mid s_t=k)=p_k(y_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确定历史窗口与预测时点，区分目标、过去协变量和已知未来信息。",
+          "tex": "p(y_t\\mid s_t=k)=p_k(y_t)"
+        },
+        {
+          "explanation": "按序列模型的滞后、递归、状态或深度映射构造预测并作时间感知验证。",
+          "tex": "p(y_t\\mid s_t=k)=p_k(y_t)"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.metrics import mean_squared_error\nreal=np.array([.01,-.02,.03]);pred=np.zeros_like(real)\nprint(mean_squared_error(real,pred))",
+      "packages": "numpy, scikit-learn",
+      "application": "使用37只美国上市ETF的OHLCV进行短中期收益与波动率样本外预测。",
+      "limits": "代码为本章节的最小数学计算示范，并非TFT、DeepAR、TimesNet完整训练。滚动训练仍须处理标签重叠、修订数据和实际执行时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "timeseries-n05-05",
+      "node_id": "timeseries-n05-05",
+      "title": "不重叠评估",
+      "definition": "预测标签持有期重叠会让样本绩效高度相关，验证需避免训练和测试共享同一未来窗口。",
+      "assumptions": "输入特征在预测时已可得，训练/测试按时间严格分离；多期限标签可能重叠，且协变量未来可用性须明确。",
+      "properties": [
+        "预测标签持有期重叠会让样本绩效高度相关，验证需避免训练和测试共享同一未来窗口。",
+        "评估应报告朴素基线、预测误差、稳定性和真实成本后的收益，不能只展示样本内拟合。"
+      ],
+      "formulas": [
+        {
+          "label": "序列预测结构或条件关系",
+          "tex": "I_i^{\\rm label}\\cap I_j^{\\rm test}=\\emptyset"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确定历史窗口与预测时点，区分目标、过去协变量和已知未来信息。",
+          "tex": "I_i^{\\rm label}\\cap I_j^{\\rm test}=\\emptyset"
+        },
+        {
+          "explanation": "按序列模型的滞后、递归、状态或深度映射构造预测并作时间感知验证。",
+          "tex": "I_i^{\\rm label}\\cap I_j^{\\rm test}=\\emptyset"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.metrics import mean_squared_error\nreal=np.array([.01,-.02,.03]);pred=np.zeros_like(real)\nprint(mean_squared_error(real,pred))",
+      "packages": "numpy, scikit-learn",
+      "application": "使用37只美国上市ETF的OHLCV进行短中期收益与波动率样本外预测。",
+      "limits": "代码为本章节的最小数学计算示范，并非TFT、DeepAR、TimesNet完整训练。滚动训练仍须处理标签重叠、修订数据和实际执行时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "timeseries-n06-05",
+      "node_id": "timeseries-n06-05",
+      "title": "滑动窗口回测",
+      "definition": "每轮用过去固定长度训练区间拟合模型，仅在后续独立窗口预测和交易。",
+      "assumptions": "输入特征在预测时已可得，训练/测试按时间严格分离；多期限标签可能重叠，且协变量未来可用性须明确。",
+      "properties": [
+        "每轮用过去固定长度训练区间拟合模型，仅在后续独立窗口预测和交易。",
+        "评估应报告朴素基线、预测误差、稳定性和真实成本后的收益，不能只展示样本内拟合。"
+      ],
+      "formulas": [
+        {
+          "label": "序列预测结构或条件关系",
+          "tex": "\\theta_t=\\operatorname{Fit}(X_{t-W:t-1})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先确定历史窗口与预测时点，区分目标、过去协变量和已知未来信息。",
+          "tex": "\\theta_t=\\operatorname{Fit}(X_{t-W:t-1})"
+        },
+        {
+          "explanation": "按序列模型的滞后、递归、状态或深度映射构造预测并作时间感知验证。",
+          "tex": "\\theta_t=\\operatorname{Fit}(X_{t-W:t-1})"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.metrics import mean_squared_error\nreal=np.array([.01,-.02,.03]);pred=np.zeros_like(real)\nprint(mean_squared_error(real,pred))",
+      "packages": "numpy, scikit-learn",
+      "application": "使用37只美国上市ETF的OHLCV进行短中期收益与波动率样本外预测。",
+      "limits": "代码为本章节的最小数学计算示范，并非TFT、DeepAR、TimesNet完整训练。滚动训练仍须处理标签重叠、修订数据和实际执行时点。",
+      "coverage": "complete"
+    }
+  ]
+}
