@@ -1,0 +1,545 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "finml-n01-01",
+      "node_id": "finml-n01-01",
+      "title": "复权OHLCV",
+      "definition": "OHLCV包含开、高、低、收、量；股票拆分、现金分红等公司行动会影响可比较的价格序列，需区分原始行情与复权序列。",
+      "assumptions": "复权价格的计算规则、企业行动事件日期、执行价格及成交量是否反向调整必须明确。",
+      "properties": [
+        "复权收益更适合长期资产回报研究，但复权收盘价通常不是历史真实可成交价格。",
+        "不能把未来公司行动用于当时尚不可获得的信号处理。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "P_t^{\\rm adj}=A_t P_t,\\quad r_t^{\\rm adj}=\\frac{P_t^{\\rm adj}}{P_{t-1}^{\\rm adj}}-1"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对每个历史日期定义对应的公司行动调整因子",
+          "tex": "A_t=\\prod_{j:\\,t_j>t}a_j\\ \\text{（示意，具体按复权约定）}"
+        },
+        {
+          "explanation": "调整同一日价格字段并计算可比的相邻收益",
+          "tex": "r_t^{\\rm adj}=P_t^{\\rm adj}/P_{t-1}^{\\rm adj}-1"
+        },
+        {
+          "explanation": "回测成交价和策略信号使用一致但用途不同的行情定义",
+          "tex": "P_{\\rm execution}\\ne P^{\\rm adj}\\ \\text{（一般情况下）}"
+        }
+      ],
+      "code": "import numpy as np\nraw=np.array([100.,50.,51.])  # 2-for-1 split between day 1 and day 2\nfactor=np.array([.5,1.,1.])\nadj=raw*factor\nprint(\"Adjusted closes:\",adj)\nprint(\"Comparable returns:\",adj[1:]/adj[:-1]-1)",
+      "packages": "numpy",
+      "application": "37只ETF的历史复权OHLCV建模、价格图像和长期策略评价。",
+      "limits": "示例只有拆分因子，不包含现金股息再投资或完整真实调整规则。",
+      "coverage": "complete"
+    },
+    {
+      "id": "finml-n02-01",
+      "node_id": "finml-n02-01",
+      "title": "PIT因子",
+      "definition": "Point-in-Time因子要求每个历史时点的特征值只依赖当时实际可获得的信息与当时的证券集合。",
+      "assumptions": "财务披露、宏观修订、指数成分和交易所时间戳应保留历史版本。",
+      "properties": [
+        "回填财报数值或使用当前成分股容易产生幸存者偏差和前视偏差。",
+        "严格PIT通常需版本化数据库和双时间轴。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "X_{i,t}\\in\\mathcal F_t,\\quad\\mathcal F_t=\\sigma\\{z_j:t_j^{\\rm available}\\le t\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将记录拆成经济事件时刻与真正可取得时刻",
+          "tex": "t_j^{\\rm event}\\ne t_j^{\\rm available}"
+        },
+        {
+          "explanation": "决策时点只能选出已经可得的记录",
+          "tex": "\\mathcal D_t=\\{z_j:t_j^{\\rm available}\\le t\\}"
+        },
+        {
+          "explanation": "对历史证券名单也应遵守相同时点约束",
+          "tex": "\\mathcal U_t=\\{i:i\\text{ 在 }t\\text{ 可投资}\\}"
+        }
+      ],
+      "code": "from datetime import date\ndata=[\n {\"asset\":\"ETF-A\",\"available\":date(2025,1,3),\"value\":1.2},\n {\"asset\":\"ETF-A\",\"available\":date(2025,2,4),\"value\":1.5}\n]\ndecision=date(2025,1,15)\nvalues=[r[\"value\"] for r in data if r[\"available\"]<=decision]\nprint(\"PIT latest value:\",values[-1] if values else None)",
+      "packages": "Python standard library",
+      "application": "避免收益预测中使用未来财报、未来纳入ETF或最新宏观修订值。",
+      "limits": "示例只演示可用日期筛选，不具备真实数据供应商版本控制。",
+      "coverage": "complete"
+    },
+    {
+      "id": "finml-n03-01",
+      "node_id": "finml-n03-01",
+      "title": "未来收益标签",
+      "definition": "未来收益标签把预测决策时点t与约定的未来收益实现窗口关联，必须明确复权、预测期限与信号可执行时刻。",
+      "assumptions": "收益标签由未来价格构成，但未来值只能用于监督训练目标，不得作为时点t输入。",
+      "properties": [
+        "多步标签可能高度重叠，使相邻样本并非独立。",
+        "收盘价构造信号时，通常不能假定同一个收盘瞬间成交。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "y_{i,t}^{(h)}=\\frac{P_{i,t+h}^{\\rm adj}}{P_{i,t}^{\\rm adj}}-1"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "给定时刻t及固定预测期限h",
+          "tex": "h\\in\\{1,5,20\\}"
+        },
+        {
+          "explanation": "按时间顺序选取未来复权价格并计算区间回报",
+          "tex": "y_t^{(h)}=P_{t+h}^{\\rm adj}/P_t^{\\rm adj}-1"
+        },
+        {
+          "explanation": "在评估时防止不同训练标签的未来区间与测试区间交叠",
+          "tex": "[t,t+h]\\cap I_{\\rm test}=\\emptyset\\text{（相应训练标签）}"
+        }
+      ],
+      "code": "import numpy as np\nclose=np.array([100.,101.,98.,102.,103.,105.])\nh=2\nlabels=close[h:]/close[:-h]-1\nprint(\"2-day forward returns:\",labels)",
+      "packages": "numpy",
+      "application": "ETF回报回归、价格图像二分类和跨资产排序标签生成。",
+      "limits": "代码没有考虑复权价来源、可交易日历及交易滑点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "finml-n01-02",
+      "node_id": "finml-n01-02",
+      "title": "动量与均值回复",
+      "definition": "动量表示资产价格或回报变化的延续性，均值回复则是假设偏离某参照水平后出现反向修正。",
+      "assumptions": "信号窗口和目标回报窗口应分离；不同市场、频率和交易成本可能改变效应。",
+      "properties": [
+        "动量与均值回复并非逻辑互斥，可作用于不同周期。",
+        "显著样本内相关性不足以证明未来交易获利。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "\\mathrm{MOM}_{t,k}=P_t/P_{t-k}-1,\\quad z_t=(P_t-\\overline P_{t,W})/s_{t,W}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "过去k期复权价格计算累计收益动量",
+          "tex": "\\mathrm{MOM}_{t,k}=P_t/P_{t-k}-1"
+        },
+        {
+          "explanation": "历史窗口计算局部均值和标准差",
+          "tex": "\\overline P_{t,W}=W^{-1}\\sum_{j=0}^{W-1}P_{t-j}"
+        },
+        {
+          "explanation": "对偏离度形成标准化反转信号",
+          "tex": "z_t=(P_t-\\overline P_{t,W})/s_{t,W}"
+        }
+      ],
+      "code": "import numpy as np\np=np.array([100,101,99,103,105,104,107.],dtype=float)\nmomentum=p[-1]/p[-4]-1\nmean=p[-5:].mean();std=p[-5:].std(ddof=1)\nprint(\"Momentum:\",momentum,\"Deviation z:\",(p[-1]-mean)/std)",
+      "packages": "numpy",
+      "application": "研究不同ETF短期反转与中期趋势的横截面预测。",
+      "limits": "对单条价格路径展示指标，不能据此推断策略利润。",
+      "coverage": "complete"
+    },
+    {
+      "id": "finml-n06-02",
+      "node_id": "finml-n06-02",
+      "title": "多重检验修正",
+      "definition": "对大量因子、窗口和模型同时试验时，最优结果可能来自偶然噪声；需要控制家族错误率或错误发现率。",
+      "assumptions": "原始P值需要对应有效的统计检验；检验之间的依赖结构影响校正方法的有效性。",
+      "properties": [
+        "Bonferroni在任意依赖下控制家族错误率但保守。",
+        "Benjamini–Hochberg在独立或特定正相关假设下控制FDR。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "p_{(i)}\\le\\frac{i}{m}q\\quad\\text{（BH阶梯阈值）}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "把m个检验P值从小到大排序",
+          "tex": "p_{(1)}\\le\\cdots\\le p_{(m)}"
+        },
+        {
+          "explanation": "找出满足BH阈值的最大索引k",
+          "tex": "k=\\max\\{i:p_{(i)}\\le iq/m\\}"
+        },
+        {
+          "explanation": "拒绝全部前k个零假设",
+          "tex": "\\mathcal R=\\{H_{(1)},\\ldots,H_{(k)}\\}"
+        }
+      ],
+      "code": "import numpy as np\np=np.array([.004,.02,.14,.001,.7,.08])\nq=.05;m=len(p);order=np.argsort(p);sorted_p=p[order]\neligible=np.where(sorted_p<=q*np.arange(1,m+1)/m)[0]\nk=eligible[-1]+1 if len(eligible) else 0\nprint(\"BH discoveries:\",order[:k])",
+      "packages": "numpy",
+      "application": "因子挖掘、超参数组合测试和策略超市历史绩效筛选。",
+      "limits": "金融时间依赖可能违反独立P值假设，BH并非所有数据结构下都自动有效。",
+      "coverage": "complete"
+    },
+    {
+      "id": "finml-n04-05",
+      "node_id": "finml-n04-05",
+      "title": "风险平价",
+      "definition": "风险平价按组合资产对总体风险的边际贡献构造配置，而不是直接让所有资产权重相等。",
+      "assumptions": "需要稳定可用的协方差矩阵；空头限制、杠杆和目标风险贡献需明确。",
+      "properties": [
+        "等风险贡献的权重通常不相等。",
+        "当所有资产风险结构相同且完全对称时，等权可成为特例。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "RC_i=w_i\\frac{(\\Sigma w)_i}{\\sqrt{w^\\top\\Sigma w}},\\qquad\\sum_iRC_i=\\sigma_p"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "组合波动率为协方差二次型的平方根",
+          "tex": "\\sigma_p=(w^\\top\\Sigma w)^{1/2}"
+        },
+        {
+          "explanation": "对每一权重求边际风险贡献",
+          "tex": "\\frac{\\partial\\sigma_p}{\\partial w_i}=\\frac{(\\Sigma w)_i}{\\sigma_p}"
+        },
+        {
+          "explanation": "乘以资产权重并用Euler齐次性求和",
+          "tex": "\\sum_iRC_i=\\frac{w^\\top\\Sigma w}{\\sigma_p}=\\sigma_p"
+        }
+      ],
+      "code": "import numpy as np\nsig=np.array([.1,.2,.3])\nw=(1/sig)/(1/sig).sum()   # equal risk contribution ONLY for diagonal Sigma\ncov=np.diag(sig**2)\nvol=np.sqrt(w@cov@w)\nrc=w*(cov@w)/vol\nprint(\"Weights:\",w,\"risk contributions:\",rc)",
+      "packages": "numpy",
+      "application": "ETF资产配置、行业风险预算和多策略组合风险控制。",
+      "limits": "反波动率权重仅在忽略协方差（对角Σ）时符合等风险贡献。",
+      "coverage": "complete"
+    },
+    {
+      "id": "finml-n03-05",
+      "node_id": "finml-n03-05",
+      "title": "均值方差组合",
+      "definition": "均值–方差配置在给定期望收益与协方差模型下权衡预期回报和组合方差，是经典投资组合优化基线。",
+      "assumptions": "样本期望收益、协方差矩阵、预算和空头约束需要清楚定义。",
+      "properties": [
+        "组合方差是二次型，协方差半正定时目标为凸问题。",
+        "资产预期收益估计误差可能导致极端最优权重。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "\\max_w\\left(\\mu^\\top w-\\frac{\\gamma}{2}w^\\top\\Sigma w\\right),\\quad\\mathbf1^\\top w=1"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "组合预期收益为权重与资产期望收益的内积",
+          "tex": "E[R_p]=w^\\top\\mu"
+        },
+        {
+          "explanation": "组合风险的方差由协方差矩阵给出",
+          "tex": "\\operatorname{Var}(R_p)=w^\\top\\Sigma w"
+        },
+        {
+          "explanation": "以风险厌恶系数γ联合形成收益-风险目标",
+          "tex": "J(w)=w^\\top\\mu-\\gamma w^\\top\\Sigma w/2"
+        }
+      ],
+      "code": "import numpy as np\nfrom scipy.optimize import minimize\nmu=np.array([.05,.08,.06])\ncov=np.diag([.01,.03,.015])\ngamma=3.\nobj=lambda w:gamma*.5*(w@cov@w)-mu@w\nr=minimize(obj,np.ones(3)/3,bounds=[(0,1)]*3,\n           constraints=[{\"type\":\"eq\",\"fun\":lambda w:w.sum()-1}])\nprint(\"Long-only weights:\",r.x)",
+      "packages": "numpy, scipy",
+      "application": "用37只ETF和估计协方差进行基础多资产优化。",
+      "limits": "样本均值极不稳定，实际应用需要收缩、约束与样本外检验。",
+      "coverage": "complete"
+    },
+    {
+      "id": "finml-n02-05",
+      "node_id": "finml-n02-05",
+      "title": "Black-Litterman",
+      "definition": "Black–Litterman把市场均衡预期收益与投资者观点按不确定度结合，形成新的期望收益，用于后续组合优化。",
+      "assumptions": "参考市值权重、风险厌恶参数、观点矩阵P及观点协方差Ω需要定义。",
+      "properties": [
+        "观点不确定度越大，其对最终后验预期的影响通常越弱。",
+        "BL并不自动解决真实收益分布非正态与协方差估计不准。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "\\mu_{\\rm BL}=\\left[(\\tau\\Sigma)^{-1}+P^\\top\\Omega^{-1}P\\right]^{-1}\\!\\left[(\\tau\\Sigma)^{-1}\\pi+P^\\top\\Omega^{-1}q\\right]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先构造市场均衡隐含收益",
+          "tex": "\\pi=\\delta\\Sigma w_{\\rm mkt}"
+        },
+        {
+          "explanation": "把均衡收益看作均值先验、观点q看作线性观测",
+          "tex": "q=P\\mu+\\varepsilon,\\quad\\varepsilon\\sim N(0,\\Omega)"
+        },
+        {
+          "explanation": "高斯线性后验的精度矩阵和均值为信息加权之和",
+          "tex": "\\Lambda_{\\rm post}=(\\tau\\Sigma)^{-1}+P^\\top\\Omega^{-1}P"
+        }
+      ],
+      "code": "import numpy as np\nsigma=np.diag([.04,.09]);pi=np.array([.06,.09]);tau=.1\nP=np.array([[1.,-1.]])\nq=np.array([.01]);omega=np.array([[.01]])\nprior=np.linalg.inv(tau*sigma)\ncov=np.linalg.inv(prior+P.T@np.linalg.inv(omega)@P)\npost=cov@(prior@pi+P.T@np.linalg.inv(omega)@q)\nprint(\"BL expected returns:\",post)",
+      "packages": "numpy",
+      "application": "研究对ETF行业/市场方向有先验观点时的风险预算配置。",
+      "limits": "公式只实现均值后验融合，不包含完整组合限制与估计风险。",
+      "coverage": "complete"
+    },
+    {
+      "id": "evaluation-n02-01",
+      "node_id": "evaluation-n02-01",
+      "title": "R²",
+      "definition": "决定系数R²衡量平方误差相对参考均值模型的改善比例；样本外也可能出现负值。",
+      "assumptions": "分母参考均值应明确；评估集若目标常量需特殊处理。",
+      "properties": [
+        "R²为1表示误差为零。",
+        "样本外R²为负表示比参考均值预测更差。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "R^2=1-\\frac{\\sum_i(y_i-\\hat y_i)^2}{\\sum_i(y_i-\\bar y)^2}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义残差平方和SSE",
+          "tex": "\\mathrm{SSE}=\\sum_i(y_i-\\hat y_i)^2"
+        },
+        {
+          "explanation": "定义目标相对参考均值的总平方和SST",
+          "tex": "\\mathrm{SST}=\\sum_i(y_i-\\bar y)^2"
+        },
+        {
+          "explanation": "取相对改善比例",
+          "tex": "R^2=1-\\mathrm{SSE}/\\mathrm{SST}"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.metrics import r2_score\ny=np.array([1.,2.,3.,4.]);bad=np.array([4.,3.,2.,1.])\nprint(\"R2:\",r2_score(y,bad))",
+      "packages": "numpy, scikit-learn",
+      "application": "量化收益回归与波动率预测的相对基线检验。",
+      "limits": "金融收益预测常有很小甚至负的样本外R²，不能单看训练R²。",
+      "coverage": "complete"
+    },
+    {
+      "id": "evaluation-n05-03",
+      "node_id": "evaluation-n05-03",
+      "title": "数据漂移",
+      "definition": "数据漂移指模型实际接收到的输入分布与训练期分布发生改变，可影响模型预测与风险。",
+      "assumptions": "特征版本和数据获取规则应保持可比较；时间窗口需有足够样本。",
+      "properties": [
+        "输入漂移并不必然意味着预测关系发生改变。",
+        "监控需考虑季节性、波动状态和多重阈值误报。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "D_{\\rm KS}=\\sup_x|F_{\\rm train}(x)-F_{\\rm live}(x)|"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "分别构建训练期和最新样本的经验累计分布函数",
+          "tex": "\\hat F_a(x)=n_a^{-1}\\sum_i\\mathbf1[X_i^{(a)}\\le x]"
+        },
+        {
+          "explanation": "求两分布的最大经验累计差",
+          "tex": "D_{\\rm KS}=\\sup_x|\\hat F_1(x)-\\hat F_2(x)|"
+        },
+        {
+          "explanation": "若监测异常，应进一步检查数据管道和模型目标关系",
+          "tex": "P_{\\rm train}(X)\\ne P_{\\rm live}(X)"
+        }
+      ],
+      "code": "import numpy as np\nfrom scipy.stats import ks_2samp\nrng=np.random.default_rng(0)\ntrain=rng.normal(size=200)\nlive=rng.normal(loc=.7,size=200)\nprint(ks_2samp(train,live))",
+      "packages": "numpy, scipy",
+      "application": "发现ETF成交量、新闻情绪或宏观特征分布偏移。",
+      "limits": "KS P值在时间依赖与频繁监控下不宜直接当作独立假设检验。",
+      "coverage": "complete"
+    },
+    {
+      "id": "evaluation-n04-03",
+      "node_id": "evaluation-n04-03",
+      "title": "OOD检测",
+      "definition": "分布外检测识别与训练分布明显不同的新输入，帮助模型在异常环境下触发警报或保守决策。",
+      "assumptions": "OOD定义必须与具体输入及训练范围对应；单一异常评分不能覆盖全部风险。",
+      "properties": [
+        "高置信度Softmax不代表样本在训练分布内。",
+        "训练期间没有的新市场事件可能无法用固定阈值识别。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "d_M(x)=\\sqrt{(x-\\mu)^\\top\\Sigma^{-1}(x-\\mu)}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "训练样本估计均值和协方差",
+          "tex": "\\hat\\mu=E_n[X],\\quad\\hat\\Sigma=\\operatorname{Cov}_n(X)"
+        },
+        {
+          "explanation": "输入与训练中心的偏离通过逆协方差标准化",
+          "tex": "d_M^2=(x-\\hat\\mu)^\\top\\hat\\Sigma^{-1}(x-\\hat\\mu)"
+        },
+        {
+          "explanation": "校准期选择风险阈值并在部署期监控",
+          "tex": "\\operatorname{flag}(x)=\\mathbf1[d_M(x)>c]"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0)\nX=rng.normal(size=(80,2));mu=X.mean(0)\ncov=np.cov(X,rowvar=False)\nnew=np.array([[0.,0.],[5.,6.]])\ndelta=new-mu\nscores=np.sqrt(np.einsum(\"ni,ij,nj->n\",delta,np.linalg.inv(cov),delta))\nprint(\"Mahalanobis OOD scores:\",scores)",
+      "packages": "numpy",
+      "application": "量化策略遭遇罕见市场状态时的输入风控监测。",
+      "limits": "协方差估计在高维小样本中可能病态，应采用收缩或稳健方法。",
+      "coverage": "complete"
+    },
+    {
+      "id": "mlops-n06-01",
+      "node_id": "mlops-n06-01",
+      "title": "测试与CI",
+      "definition": "持续集成在代码或数据内容变更后自动运行语法、单元、集成及质量检查，减少模型与讲义回归错误。",
+      "assumptions": "测试需可重复、对外部依赖有明确版本，且覆盖实际使用入口。",
+      "properties": [
+        "单元测试可检验算法的边界和数值不变量。",
+        "测试通过只表示已定义的检查成立，不保证模型交易策略有效。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "\\mathrm{CI\\ PASS}\\iff \\bigwedge_{j=1}^m \\mathrm{Test}_j=\\mathrm{PASS}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对算法确定可测试的性质与异常边界",
+          "tex": "f(x_{\\rm known})=y_{\\rm expected}"
+        },
+        {
+          "explanation": "固定随机状态并校验数值结果在容差内",
+          "tex": "|\\hat y-y|<\\varepsilon"
+        },
+        {
+          "explanation": "所有必须通过的检查共同构成部署门槛",
+          "tex": "\\mathrm{deploy}\\Rightarrow\\bigwedge_j\\mathrm{Test}_j"
+        }
+      ],
+      "code": "import unittest\ndef normalize(v):\n    s=sum(v)\n    if s<=0:raise ValueError(\"sum must be positive\")\n    return [x/s for x in v]\nclass Tests(unittest.TestCase):\n    def test_sum(self):\n        self.assertAlmostEqual(sum(normalize([1,2,3])),1.)\n    def test_invalid(self):\n        with self.assertRaises(ValueError):normalize([0,0])\nunittest.main(argv=[\"ignored\"],exit=False)",
+      "packages": "Python standard library",
+      "application": "对金融因子、风险模型、策略回测引擎和讲义Python示例实施CI检查。",
+      "limits": "CI只能覆盖写出的断言，需要另外监控生产数据质量和漂移。",
+      "coverage": "complete"
+    },
+    {
+      "id": "mlops-n02-05",
+      "node_id": "mlops-n02-05",
+      "title": "线上特征一致性",
+      "definition": "训练/服务一致性确保在线推断所用特征计算函数、字段顺序、缺失处理和归一化参数与研究阶段一致。",
+      "assumptions": "同一版本的处理函数、特征字段与资产标识应固定。",
+      "properties": [
+        "训练/服务偏斜可能产生与模型本身无关的预测误差。",
+        "时间延迟需要按实际可用时间重放测试。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "T_{\\rm train}(x;\\psi)=T_{\\rm serve}(x;\\psi)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "训练阶段拟合并保存预处理参数ψ",
+          "tex": "\\psi=\\operatorname{FitTransformParams}(D_{\\rm train})"
+        },
+        {
+          "explanation": "服务阶段应用保存参数，禁止重拟合",
+          "tex": "\\hat y=f_\\theta(T(x;\\psi))"
+        },
+        {
+          "explanation": "对同一固定样本比较两个处理端的输出",
+          "tex": "\\|T_{\\rm train}(x)-T_{\\rm serve}(x)\\|<\\varepsilon"
+        }
+      ],
+      "code": "import numpy as np\ntrain=np.array([[1.,10.],[2.,20.],[3.,30.]])\nmu=train.mean(0);std=train.std(0)\nsample=np.array([2.,15.])\nresearch=(sample-mu)/std\nserving=(sample-mu)/std\nassert np.allclose(research,serving)\nprint(\"Offline-online consistent:\",serving)",
+      "packages": "numpy",
+      "application": "确保ETF实盘信号不会因字段排序、缩放或缓存错乱而产生偏差。",
+      "limits": "示例使用同一公式，正式项目须独立执行两个生产实现的对照测试。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-rl-n02-05",
+      "node_id": "deep-rl-n02-05",
+      "title": "交易成本奖励",
+      "definition": "交易RL的即时奖励需要明确持仓收益、手续费、滑点和风险限制，不应只最大化毛收益。",
+      "assumptions": "收益必须按动作执行后的时间顺序计算，不能用未来回报决定前一时刻仓位。",
+      "properties": [
+        "成本惩罚可能鼓励低换手。",
+        "奖励按步加总不一定与最终复利财富最大化一致。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "r_t^{\\rm RL}=w_{t-1}^\\top R_t-c\\|w_t-w_{t-1}\\|_1-\\lambda_{\\rm risk}\\,\\mathcal R_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "期间实际持仓产生毛回报",
+          "tex": "r_t^{\\rm gross}=w_{t-1}^\\top R_t"
+        },
+        {
+          "explanation": "仓位改变引入交易成本",
+          "tex": "c_t=c\\sum_i|w_{i,t}-w_{i,t-1}|"
+        },
+        {
+          "explanation": "再扣风险惩罚构成用于学习的单期奖励",
+          "tex": "r_t^{\\rm RL}=r_t^{\\rm gross}-c_t-\\lambda_{\\rm risk}\\mathcal R_t"
+        }
+      ],
+      "code": "import numpy as np\nold=np.array([.5,.5]);new=np.array([.7,.3])\nreturns=np.array([.02,-.01]);risk=.002;fee=.0005\nreward=old@returns-fee*np.abs(new-old).sum()-2*risk\nprint(\"Trading RL reward:\",reward)",
+      "packages": "numpy",
+      "application": "用于ETF动态配置PPO、SAC和风险敏感策略奖励设计。",
+      "limits": "此示例是简化线性成本模型，未模拟成交冲击和现金账户。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-rl-n03-05",
+      "node_id": "deep-rl-n03-05",
+      "title": "仓位与杠杆约束",
+      "definition": "金融RL的动作应映射到可执行仓位域，施加预算、杠杆与单资产限制防止不可交易建议。",
+      "assumptions": "资产价格、保证金和监管约束在动作执行时已知。",
+      "properties": [
+        "Softmax适用于仅多头且权重和为1的动作表示。",
+        "允许空头时需要显式L1杠杆或保证金约束。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "\\mathcal A=\\{w:\\mathbf1^\\top w=1,\\ \\|w\\|_1\\le L,\\ w_{\\min}\\le w_i\\le w_{\\max}\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对仅多头预算约束，先将任意Logits映射为非负权重",
+          "tex": "w_i=e^{z_i}/\\sum_je^{z_j}"
+        },
+        {
+          "explanation": "Softmax天然满足和为1与每维非负",
+          "tex": "\\sum_iw_i=1,\\quad w_i\\ge0"
+        },
+        {
+          "explanation": "含空头动作还需投影至可行集合",
+          "tex": "w^{\\rm feasible}=\\operatorname{Proj}_{\\mathcal A}(w^{\\rm raw})"
+        }
+      ],
+      "code": "import numpy as np\nz=np.array([2.,-1.,.5])\nw=np.exp(z-z.max());w/=w.sum()\nprint(\"Long-only weights:\",w,\"sum:\",w.sum(),\"leverage:\",abs(w).sum())",
+      "packages": "numpy",
+      "application": "将连续交易智能体的原始动作转为ETF组合持仓。",
+      "limits": "Softmax只适用多头权重，不能替代真实杠杆、交易量和融资约束。",
+      "coverage": "complete"
+    }
+  ]
+}
