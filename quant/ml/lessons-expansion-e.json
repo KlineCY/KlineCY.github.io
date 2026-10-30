@@ -1,0 +1,549 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "linear-n06-01",
+      "node_id": "linear-n06-01",
+      "title": "Elastic Net",
+      "definition": "Elastic Net同时采用L1与L2惩罚，可在控制系数规模的同时产生稀疏特征，缓解LASSO相关特征不稳定。",
+      "assumptions": "惩罚参数非负，α决定总体惩罚强度。",
+      "properties": [
+        "惩罚参数非负，α决定总体惩罚强度。",
+        "L1_ratio决定L1与L2项的相对权重。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "L=\\frac1{2n}\\|y-X\\beta\\|^2+\\lambda\\rho\\|\\beta\\|_1+\\frac{\\lambda(1-\\rho)}2\\|\\beta\\|_2^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "线性残差采用平方误差损失",
+          "tex": "L_{\\rm data}=(2n)^{-1}\\|y-X\\beta\\|^2"
+        },
+        {
+          "explanation": "叠加稀疏与平滑两类惩罚",
+          "tex": "L=L_{\\rm data}+\\lambda\\rho\\|\\beta\\|_1+\\lambda(1-\\rho)\\|\\beta\\|_2^2/2"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.linear_model import ElasticNet\nrng=np.random.default_rng(0)\nX=rng.normal(size=(150,15));y=2*X[:,0]-.8*X[:,3]+rng.normal(size=150)*.3\nm=ElasticNet(alpha=.1,l1_ratio=.5).fit(X,y)\nprint(m.coef_)",
+      "application": "高相关宏观因子与ETF技术特征的稳定选择。",
+      "limits": "此模型需训练期标准化，正则参数必须独立验证。",
+      "packages": "numpy, scikit-learn",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n04-03",
+      "node_id": "linear-n04-03",
+      "title": "分位数回归",
+      "definition": "分位数回归通过最小化不对称绝对损失估计条件分布的特定分位点，而不只估计条件均值。",
+      "assumptions": "分位水平τ严格位于0与1之间。",
+      "properties": [
+        "分位水平τ严格位于0与1之间。",
+        "误差不需要服从正态分布。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "\\hat\\beta_\\tau=\\arg\\min_\\beta\\sum_i\\rho_\\tau(y_i-x_i^\\top\\beta),\\quad\\rho_\\tau(u)=u(\\tau-\\mathbf1[u<0])"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "正误差按τ加权，负误差按1−τ加权",
+          "tex": "\\rho_\\tau(u)=\\begin{cases}\\tau u,&u\\ge0\\\\(\\tau-1)u,&u<0\\end{cases}"
+        },
+        {
+          "explanation": "最小化不对称绝对偏差得到条件τ分位函数",
+          "tex": "Q_\\tau(Y|X=x)\\approx x^\\top\\hat\\beta_\\tau"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.linear_model import QuantileRegressor\nrng=np.random.default_rng(0);X=rng.normal(size=(70,1))\ny=2*X[:,0]+rng.standard_t(4,size=70)\nm=QuantileRegressor(quantile=.1,alpha=.05,solver=\"highs\").fit(X,y)\nprint(m.predict([[0],[1]]))",
+      "application": "直接研究下行收益分位与尾部风险阈值。",
+      "limits": "不同分位点回归可能交叉，需要额外单调性约束。",
+      "packages": "numpy, scikit-learn",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n05-02",
+      "node_id": "linear-n05-02",
+      "title": "残差分析",
+      "definition": "残差是观测目标与模型拟合值之差，分析残差结构可检验线性、同方差及时间相关假设。",
+      "assumptions": "拟合残差的训练集均值可能因截距而机械接近零。",
+      "properties": [
+        "拟合残差的训练集均值可能因截距而机械接近零。",
+        "残差的零相关不等于误差随机独立。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "e_i=y_i-\\hat y_i,\\qquad \\mathrm{SSE}=\\sum_ie_i^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "预测值由拟合模型给出",
+          "tex": "\\hat y_i=f_{\\hat\\theta}(x_i)"
+        },
+        {
+          "explanation": "计算残差并对解释变量或时间排序检验模式",
+          "tex": "e_i=y_i-\\hat y_i"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.linear_model import LinearRegression\nrng=np.random.default_rng(4);X=rng.normal(size=(50,2))\ny=X[:,0]+rng.normal(size=50)\nm=LinearRegression().fit(X,y);res=y-m.predict(X)\nprint(res.mean(),np.corrcoef(res[1:],res[:-1])[0,1])",
+      "application": "识别因子模型遗漏的非线性、异方差或自相关。",
+      "limits": "训练残差很小不代表样本外预测误差很小。",
+      "packages": "numpy, scikit-learn",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n02-05",
+      "node_id": "linear-n02-05",
+      "title": "Alpha和Beta估计",
+      "definition": "对资产超额收益与市场超额收益线性回归，截距解释为给定模型的Alpha，斜率为市场Beta。",
+      "assumptions": "需要明确基准指数、采样频率、无风险收益口径。",
+      "properties": [
+        "需要明确基准指数、采样频率、无风险收益口径。",
+        "Alpha并不必然属于因果或可重复的投资技能。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "r_{p,t}-r_{f,t}=\\alpha+\\beta(r_{m,t}-r_{f,t})+\\epsilon_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "市场Beta等于资产与市场收益协方差对市场方差的比值",
+          "tex": "\\beta=\\operatorname{Cov}(r_p,r_m)/\\operatorname{Var}(r_m)"
+        },
+        {
+          "explanation": "截距由样本均值关系得到",
+          "tex": "\\hat\\alpha=\\overline{r_p-r_f}-\\hat\\beta\\overline{r_m-r_f}"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);m=rng.normal(0,.01,200)\np=.0002+1.2*m+rng.normal(0,.003,200)\nbeta=np.cov(m,p)[0,1]/np.var(m,ddof=1)\nalpha=p.mean()-beta*m.mean()\nprint(\"Alpha per period:\",alpha,\"Beta:\",beta)",
+      "application": "ETF相对市场基准的风险暴露与超额表现归因。",
+      "limits": "省略多因子风险或错误的无风险利率会影响Alpha估计。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n01-01",
+      "node_id": "optimization-n01-01",
+      "title": "梯度与Jacobian",
+      "definition": "梯度是标量函数相对所有输入的偏导向量，Jacobian是向量函数各输出对各输入的偏导矩阵。",
+      "assumptions": "必须明确输入和输出维度以及矩阵排布约定。",
+      "properties": [
+        "必须明确输入和输出维度以及矩阵排布约定。",
+        "可微性是使用局部线性近似的必要条件。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "\\nabla f(x)=\\left(\\partial f/\\partial x_i\\right)_i,\\quad J_F(x)_{ij}=\\partial F_i/\\partial x_j"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对标量函数逐维求偏导",
+          "tex": "df\\approx\\nabla f(x)^\\top dx"
+        },
+        {
+          "explanation": "对向量函数汇总每个输出的局部偏导",
+          "tex": "dF\\approx J_F(x)dx"
+        }
+      ],
+      "code": "import torch\nx=torch.tensor([2.,3.],requires_grad=True)\nf=(x.square()).sum()\nprint(torch.autograd.grad(f,x)[0])",
+      "application": "优化损失对多因子权重与网络参数的敏感度。",
+      "limits": "梯度方向依赖目标函数的尺度与单位。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n02-01",
+      "node_id": "optimization-n02-01",
+      "title": "Hessian矩阵",
+      "definition": "Hessian汇集标量函数的二阶偏导，描述局部曲率并用于Newton更新及凸性分析。",
+      "assumptions": "二阶连续可微时Hessian通常对称。",
+      "properties": [
+        "二阶连续可微时Hessian通常对称。",
+        "非凸损失Hessian可存在负特征值。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "H_{ij}(x)=\\frac{\\partial^2 f}{\\partial x_i\\partial x_j}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先求标量目标的梯度",
+          "tex": "g_i=\\partial_i f"
+        },
+        {
+          "explanation": "再对每个梯度分量求偏导",
+          "tex": "H_{ij}=\\partial_jg_i"
+        }
+      ],
+      "code": "import torch\nx=torch.tensor([1.,2.],requires_grad=True)\nH=torch.autograd.functional.hessian(lambda z:(z[0]**2+2*z[1]**2),x)\nprint(H)",
+      "application": "组合优化二阶近似、神经网络曲率诊断。",
+      "limits": "高维Hessian显式构建昂贵，实际常用矩阵-向量乘积。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n06-01",
+      "node_id": "optimization-n06-01",
+      "title": "梯度裁剪",
+      "definition": "梯度裁剪在更新前限制梯度范数，控制单次异常梯度对参数的冲击。",
+      "assumptions": "裁剪阈值需要结合梯度分布和学习率。",
+      "properties": [
+        "裁剪阈值需要结合梯度分布和学习率。",
+        "裁剪会改变原始梯度方向幅度，可能引入偏差。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "\\tilde g=g\\min(1,c/\\|g\\|_2)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "若梯度范数未超过阈值则保持原值",
+          "tex": "\\|g\\|\\le c\\Rightarrow\\tilde g=g"
+        },
+        {
+          "explanation": "超过阈值时按比例缩小",
+          "tex": "\\|g\\|>c\\Rightarrow\\|\\tilde g\\|=c"
+        }
+      ],
+      "code": "import torch\nw=torch.nn.Parameter(torch.tensor(10.))\n((w-0.)**2).backward()\nbefore=w.grad.item()\ntorch.nn.utils.clip_grad_norm_([w],max_norm=1.)\nprint(before,w.grad.item())",
+      "application": "稳定RNN和强化学习策略网络的大梯度更新。",
+      "limits": "裁剪无法修复错误奖励和错误数据标签。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n01-02",
+      "node_id": "optimization-n01-02",
+      "title": "Momentum动量法",
+      "definition": "动量优化器累积过去梯度方向形成速度，在持续一致的方向上加速更新并缓解震荡。",
+      "assumptions": "动量系数β通常属于0到1之间。",
+      "properties": [
+        "动量系数β通常属于0到1之间。",
+        "动量过高可能在曲率方向上过冲。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "v_t=\\beta v_{t-1}+g_t,\\quad\\theta_{t+1}=\\theta_t-\\eta v_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对过去梯度做指数加权累加",
+          "tex": "v_t=\\sum_{k=0}^t\\beta^kg_{t-k}"
+        },
+        {
+          "explanation": "沿累计速度进行参数迭代",
+          "tex": "\\theta_{t+1}=\\theta_t-\\eta v_t"
+        }
+      ],
+      "code": "import torch\nw=torch.nn.Parameter(torch.tensor(4.))\nopt=torch.optim.SGD([w],lr=.1,momentum=.9)\nfor _ in range(15):\n    opt.zero_grad();loss=(w-1.)**2;loss.backward();opt.step()\nprint(w.item())",
+      "application": "金融网络训练加速和梯度震荡处理。",
+      "limits": "示例不保证动量超参数普适最优。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n06-02",
+      "node_id": "optimization-n06-02",
+      "title": "AdamW",
+      "definition": "AdamW把权重衰减从动量梯度分量中解耦，避免L2惩罚经Adam自适应缩放产生不同效果。",
+      "assumptions": "权重衰减λ和学习率η要区分。",
+      "properties": [
+        "权重衰减λ和学习率η要区分。",
+        "部分参数如偏置、Norm权重通常不衰减，依任务设计。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "\\theta_{t+1}=(1-\\eta\\lambda)\\theta_t-\\eta\\frac{\\hat m_t}{\\sqrt{\\hat v_t}+\\epsilon}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "Adam梯度更新使用自适应一二阶矩",
+          "tex": "\\Delta_{\\rm grad}=-\\eta\\hat m_t/(\\sqrt{\\hat v_t}+\\epsilon)"
+        },
+        {
+          "explanation": "权重衰减另行乘以因子",
+          "tex": "\\Delta_{\\rm decay}=-\\eta\\lambda\\theta_t"
+        }
+      ],
+      "code": "import torch\nw=torch.nn.Parameter(torch.tensor(3.))\nopt=torch.optim.AdamW([w],lr=.05,weight_decay=.01)\nfor _ in range(30):\n    opt.zero_grad();loss=(w-1.)**2;loss.backward();opt.step()\nprint(w.item())",
+      "application": "Transformer金融文本模型的优化与正则控制。",
+      "limits": "AdamW会影响参数大小而非自动解决过拟合。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n05-01",
+      "node_id": "optimization-n05-01",
+      "title": "学习率衰减",
+      "definition": "学习率调度控制训练迭代中更新步幅，可减少后期振荡并促进收敛。",
+      "assumptions": "衰减计划需与训练总步数匹配。",
+      "properties": [
+        "衰减计划需与训练总步数匹配。",
+        "学习率小不代表不会陷入不合适的局部区域。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "\\eta_t=\\frac{\\eta_0}{1+\\lambda t}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "初始步长η0影响早期搜索速度",
+          "tex": "\\theta_{t+1}=\\theta_t-\\eta_tg_t"
+        },
+        {
+          "explanation": "逐步减小步幅以缓和后期梯度噪声",
+          "tex": "\\eta_t\\downarrow0"
+        }
+      ],
+      "code": "import torch\nw=torch.nn.Parameter(torch.tensor(4.))\nopt=torch.optim.SGD([w],lr=.2)\nschedule=torch.optim.lr_scheduler.StepLR(opt,step_size=5,gamma=.5)\nfor _ in range(12):\n    opt.zero_grad();loss=(w-1.)**2;loss.backward();opt.step();schedule.step()\nprint(opt.param_groups[0][\"lr\"],w.item())",
+      "application": "金融深度时序模型与图像CNN训练调度。",
+      "limits": "示例采用阶梯衰减，与公式的有理式衰减是两种实现。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n03-02",
+      "node_id": "features-n03-02",
+      "title": "稳健缩放RobustScaler",
+      "definition": "RobustScaler按中位数和四分位间距对特征缩放，使极端值对中心与尺度的影响相对较小。",
+      "assumptions": "IQR为零时需要特殊处理。",
+      "properties": [
+        "IQR为零时需要特殊处理。",
+        "缩放不等于自动剔除异常值。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "z_i=\\frac{x_i-\\mathrm{median}(X_{\\rm train})}{Q_{.75}(X_{\\rm train})-Q_{.25}(X_{\\rm train})}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "以训练样本中位数作为中心",
+          "tex": "m=\\mathrm{median}(X_{\\rm train})"
+        },
+        {
+          "explanation": "用训练数据的四分位距离缩放",
+          "tex": "IQR=Q_{.75}-Q_{.25}"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.preprocessing import RobustScaler\nx=np.array([1.,2.,3.,4.,90.]).reshape(-1,1)\nprint(RobustScaler().fit_transform(x).ravel())",
+      "application": "处理成交量和高偏态财经特征。",
+      "limits": "仍必须在训练窗口内拟合，且保留异常事件的信息需要权衡。",
+      "packages": "numpy, scikit-learn",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n03-04",
+      "node_id": "features-n03-04",
+      "title": "互信息",
+      "definition": "互信息刻画两个随机变量分布之间的统计依赖，包含非线性关系，不限定于线性相关。",
+      "assumptions": "互信息非负。",
+      "properties": [
+        "互信息非负。",
+        "连续变量互信息估计在小样本高维情况下可能不稳定。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "I(X;Y)=E_{X,Y}\\!\\left[\\log\\frac{p(X,Y)}{p(X)p(Y)}\\right]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "独立时联合密度等于边际密度乘积",
+          "tex": "p(x,y)=p(x)p(y)\\Rightarrow I(X;Y)=0"
+        },
+        {
+          "explanation": "互信息也是联合分布对边际乘积的KL散度",
+          "tex": "I(X;Y)=D_{\\rm KL}(p_{XY}\\|p_Xp_Y)"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.feature_selection import mutual_info_regression\nrng=np.random.default_rng(0)\nx=rng.normal(size=(200,2));y=x[:,0]**2+rng.normal(size=200)*.1\nprint(mutual_info_regression(x,y,random_state=0))",
+      "application": "筛选对收益分布有非线性信息的因子。",
+      "limits": "互信息并非因果效应，也无法自动纠正多重检验问题。",
+      "packages": "numpy, scikit-learn",
+      "coverage": "complete"
+    },
+    {
+      "id": "features-n05-05",
+      "node_id": "features-n05-05",
+      "title": "窗口滚动特征",
+      "definition": "滚动特征对每个时点只聚合历史窗口的数据，通常形成动量、波动率、成交量均线等信号。",
+      "assumptions": "窗口必须以预测时可见日期为终点。",
+      "properties": [
+        "窗口必须以预测时可见日期为终点。",
+        "不同交易日历和缺失记录需对齐。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "f_t=\\frac1W\\sum_{k=0}^{W-1}x_{t-k}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "以决策时刻t为窗口末尾",
+          "tex": "\\mathcal W_t=\\{t-W+1,\\ldots,t\\}"
+        },
+        {
+          "explanation": "在窗口内求均值或其他统计量",
+          "tex": "f_t=\\operatorname{stat}(x_{\\mathcal W_t})"
+        }
+      ],
+      "code": "import pandas as pd\nx=pd.Series([100,101,102,99,103])\nma=x.rolling(3).mean()\nret=x.pct_change()\nprint(ma.tolist(),ret.tolist())",
+      "application": "ETF 20日波动率、60日动量和成交量异常信号。",
+      "limits": "以当日收盘价计算的信号不能在同一收盘价假设瞬时执行。",
+      "packages": "pandas",
+      "coverage": "complete"
+    },
+    {
+      "id": "evaluation-n03-03",
+      "node_id": "evaluation-n03-03",
+      "title": "概率校准",
+      "definition": "校准要求一组预测为p的事件，长期实际发生率也接近p；区分能力高不等于概率可信。",
+      "assumptions": "校准应在未用于拟合的验证样本上评估。",
+      "properties": [
+        "校准应在未用于拟合的验证样本上评估。",
+        "事件稀少时各概率分箱的频率估计不稳定。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "P(Y=1\\mid\\hat p=p)\\approx p"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将预测概率按区间分组",
+          "tex": "B_b=\\{i:\\hat p_i\\in I_b\\}"
+        },
+        {
+          "explanation": "比较组内平均预测概率和实际发生频率",
+          "tex": "\\operatorname{gap}_b=|\\overline{\\hat p}_{B_b}-\\bar y_{B_b}|"
+        }
+      ],
+      "code": "import numpy as np\np=np.array([.1,.2,.4,.6,.8,.9]);y=np.array([0,0,1,0,1,1])\nfor low,high in [(0,.5),(.5,1.01)]:\n    idx=(p>=low)&(p<high)\n    print(\"mean forecast\",p[idx].mean(),\"actual\",y[idx].mean())",
+      "application": "金融风险预警概率的阈值和仓位转换。",
+      "limits": "例子样本很少，只演示校准检验的思路。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "evaluation-n01-04",
+      "node_id": "evaluation-n01-04",
+      "title": "Permutation Importance",
+      "definition": "Permutation Importance通过在验证集打乱一个特征并测量绩效下降来估计模型对该特征的依赖。",
+      "assumptions": "应在独立测试或验证集计算。",
+      "properties": [
+        "应在独立测试或验证集计算。",
+        "强相关特征互为替代时单一变量重要性可能偏低。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "I_j=\\mathrm{Score}(X,y)-E_\\pi[\\mathrm{Score}(X_{-j},\\pi X_j,y)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先得到原始验证分数",
+          "tex": "S_0=\\mathrm{Score}(X_{\\rm val},y_{\\rm val})"
+        },
+        {
+          "explanation": "随机打乱特征j再测模型分数变化",
+          "tex": "I_j=S_0-E[S_j^{\\rm perm}]"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.inspection import permutation_importance\nfrom sklearn.ensemble import RandomForestRegressor\nrng=np.random.default_rng(0);X=rng.normal(size=(200,3));y=2*X[:,0]+rng.normal(size=200)*.1\nm=RandomForestRegressor(n_estimators=30,random_state=0).fit(X[:150],y[:150])\nr=permutation_importance(m,X[150:],y[150:],n_repeats=3,random_state=0)\nprint(r.importances_mean)",
+      "application": "比较动量、波动率和宏观特征对ETF模型预测的增量价值。",
+      "limits": "打乱样本可能生成不符合真实数据联合分布的组合。",
+      "packages": "numpy, scikit-learn",
+      "coverage": "complete"
+    },
+    {
+      "id": "mlops-n01-04",
+      "node_id": "mlops-n01-04",
+      "title": "模型序列化",
+      "definition": "模型序列化将拟合参数、架构或整个处理流水线转存为文件，便于后续加载推断。",
+      "assumptions": "文件来源可信时才应反序列化不安全格式。",
+      "properties": [
+        "文件来源可信时才应反序列化不安全格式。",
+        "训练预处理参数与模型参数应作为同一版本保存。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "\\hat y=T_{\\theta_{\\rm model},\\theta_{\\rm preprocess}}(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将模型权重和预处理状态写入可验证工件",
+          "tex": "A=\\operatorname{Serialize}(\\theta,\\mathrm{schema})"
+        },
+        {
+          "explanation": "加载时核对版本及输入schema一致性",
+          "tex": "\\theta=\\operatorname{Deserialize}(A)"
+        }
+      ],
+      "code": "import io,torch\nm=torch.nn.Linear(2,1)\nbuf=io.BytesIO()\ntorch.save(m.state_dict(),buf)\nbuf.seek(0)\nother=torch.nn.Linear(2,1)\nother.load_state_dict(torch.load(buf,weights_only=True))\nprint(other.weight.shape)",
+      "application": "保存ETF预测模型并在研究和执行端使用相同参数。",
+      "limits": "state_dict不保存全部数据处理逻辑；加载前需核验模型架构与输入顺序。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "llm-n03-05",
+      "node_id": "llm-n03-05",
+      "title": "RAG检索增强",
+      "definition": "RAG先根据问题检索外部文档，再把选中的材料与问题一起输入生成模型以支持有来源的回答。",
+      "assumptions": "检索语料需要时效性、权限控制与索引维护。",
+      "properties": [
+        "检索语料需要时效性、权限控制与索引维护。",
+        "生成器仍可能错误引用或歪曲资料。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "p(y|q,D)\\approx\\sum_{d\\in\\mathrm{Retrieve}(q,D)}p(y|q,d)p(d|q)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "给定问题检索与问题相关的文档片段",
+          "tex": "D_q=\\mathrm{TopK}(\\mathrm{sim}(q,d))"
+        },
+        {
+          "explanation": "把检索到的片段作为条件上下文输入生成器",
+          "tex": "y\\sim p_\\theta(y|q,D_q)"
+        }
+      ],
+      "code": "docs=[\"ETF risk exposure\",\"CPI inflation macro data\",\"Alpha factor research\"]\nquery=\"macro inflation\"\nterms=set(query.lower().split())\nranked=sorted(docs,key=lambda s:len(terms&set(s.lower().split())),reverse=True)\nprint(\"Retrieved:\",ranked[0])",
+      "application": "对公告、论文和金融机构官方报告构建可溯源知识问答。",
+      "limits": "代码只是词法检索示例，不包含真实LLM生成；必须提供可核查原文。",
+      "packages": "Python standard library",
+      "coverage": "complete"
+    }
+  ]
+}
