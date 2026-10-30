@@ -65,6 +65,87 @@
   host.querySelectorAll(".q-nav-group > summary > a").forEach(a=>{
     a.addEventListener("click",e=>e.stopPropagation());
   });
+  // Keep navigation within the current document. Reloading the same page for
+  // a category was causing a visible flash and a scroll position reset.
+  const cleanPath=p=>p.replace(/\/index\.html$/,"/").replace(/\/+$/,"/");
+  host.addEventListener("click",event=>{
+    const a=event.target.closest("a[href]");
+    if(!a||!host.contains(a))return;
+    const dest=new URL(a.href,location.href);
+    if(dest.origin!==location.origin || cleanPath(dest.pathname)!==cleanPath(location.pathname))return;
+    const params=dest.searchParams;
+    if(a.classList.contains("q-nav-title")){
+      event.preventDefault();
+      const group=a.closest(".q-nav-group");
+      if(group)group.open=!group.open;
+      return;
+    }
+    let handled=false;
+    if(page==="companies"&&typeof window.apply==="function"){
+      const type=params.get("kind"),value=params.get("value");
+      if((type==="type"||type==="region")&&value){
+        window.apply(type,value);
+        const toggle=document.getElementById(type+"Toggle");
+        if(toggle&&toggle.getAttribute("aria-expanded")!=="true")toggle.click();
+        handled=true;
+      }else if(!dest.search){window.apply("all","");handled=true;}
+    }
+    if(page==="assets"&&typeof window.selectView==="function"){
+      const v=params.get("view")==="type"?"type":"market",focus=params.get("focus")||"";
+      window.selectView(v,focus,false);
+      handled=true;
+    }
+    if(page==="papers"&&typeof window.setIssue==="function"){
+      window.setIssue(params.get("issue")||"");handled=true;
+    }
+    if(page==="rankings"){
+      const category=document.getElementById("cat");
+      if(category){category.value=params.get("category")||"";category.dispatchEvent(new Event("change",{bubbles:true}));handled=true;}
+    }
+    if(page==="news"){
+      const region=document.getElementById("region"),topic=document.getElementById("category");
+      if(region&&topic){
+        region.value=params.get("region")||"";
+        topic.value=params.get("category")||"";
+        topic.dispatchEvent(new Event("change",{bubbles:true}));
+        handled=true;
+      }
+    }
+    if(page==="feeds"){
+      const mode=params.get("mode");
+      if(mode==="providers"){
+        document.getElementById("modeProviders")?.click();
+        handled=true;
+      }else{
+        document.getElementById("modeFields")?.click();
+        const category=document.getElementById("category");
+        if(category){
+          category.value=params.get("category")||"";
+          category.dispatchEvent(new Event("change",{bubbles:true}));
+          handled=true;
+        }
+      }
+    }
+    if(handled){
+      event.preventDefault();
+      history.replaceState(null,"",dest.pathname+dest.search+dest.hash);
+    }
+  },true);
+  // Prevent a scrollbar reanchor inside the independent sidebar when a tree
+  // node expands or contracts. The document itself must not move.
+  let lastNavTop=null;
+  host.addEventListener("pointerdown",event=>{
+    if(window.innerWidth<=820)return;
+    if(event.target.closest(".q-nav-group > summary,.q-nav-subgroup > summary,.q-sub-toggle"))
+      lastNavTop=host.scrollTop;
+  },true);
+  host.addEventListener("toggle",()=>{
+    if(lastNavTop===null||window.innerWidth<=820)return;
+    const top=lastNavTop;
+    lastNavTop=null;
+    requestAnimationFrame(()=>{host.scrollTop=top});
+  },true);
+
   // For an inactive module, turn its data-backed subcategories into true links.
   function fill(id,values,onClick){
     const target=document.getElementById(id);if(!target)return;
