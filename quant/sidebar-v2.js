@@ -139,8 +139,8 @@
     if(page==="ml"&&typeof window.mlSelectDiscipline==="function"){
       window.mlSelectDiscipline(params.get("discipline")||"");
       const coverage=document.getElementById("coverageFilter");
-      if(coverage&&params.has("status")){
-        coverage.value=params.get("status");
+      if(coverage){
+        coverage.value=params.get("status")==="complete"?"complete":"";
         coverage.dispatchEvent(new Event("change",{bubbles:true}));
       }
       handled=true;
