@@ -1,0 +1,741 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "linear-n02-01",
+      "node_id": "linear-n02-01",
+      "title": "正规方程",
+      "definition": "线性回归对平方残差求梯度为零时得到的线性方程，满列秩时有唯一OLS解。",
+      "assumptions": "明确线性、条件分布或平滑假设，正确区分训练估计、推断与独立时间序列验证。",
+      "properties": [
+        "统计解释依赖模型及误差条件；拟合与预测不代表因果效应。",
+        "参数估计、超参数及特征处理仅应使用训练时间窗口内的信息。"
+      ],
+      "formulas": [
+        {
+          "label": "目标与基本性质",
+          "tex": "X^\\top X\\hat\\beta=X^\\top y"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先写出模型对目标变量的预测函数、条件分布或目标损失的数学形式。",
+          "tex": "X^\\top X\\hat\\beta=X^\\top y"
+        },
+        {
+          "explanation": "依据相应最小二乘、最大似然、平滑或局部加权条件得到所示优化关系。",
+          "tex": "X^\\top X\\hat\\beta=X^\\top y"
+        }
+      ],
+      "code": "import numpy as np\nX=np.array([[1,0],[1,1],[1,2]],float);y=np.array([1,3,5]);print(np.linalg.lstsq(X,y,rcond=None)[0])",
+      "packages": "Python与NumPy（按import安装其他依赖）",
+      "application": "用于ETF收益预测、金融因子估计、资产风险暴露和模型残差分析。",
+      "limits": "直接求逆数值稳定性差，应优先QR/SVD或lstsq。",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n03-01",
+      "node_id": "linear-n03-01",
+      "title": "梯度下降求OLS",
+      "definition": "最小化平方残差时，可以在迭代中沿解析梯度负方向更新系数。",
+      "assumptions": "明确线性、条件分布或平滑假设，正确区分训练估计、推断与独立时间序列验证。",
+      "properties": [
+        "统计解释依赖模型及误差条件；拟合与预测不代表因果效应。",
+        "参数估计、超参数及特征处理仅应使用训练时间窗口内的信息。"
+      ],
+      "formulas": [
+        {
+          "label": "目标与基本性质",
+          "tex": "\\beta^+=\\beta-\\eta\\frac2nX^\\top(X\\beta-y)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先写出模型对目标变量的预测函数、条件分布或目标损失的数学形式。",
+          "tex": "\\beta^+=\\beta-\\eta\\frac2nX^\\top(X\\beta-y)"
+        },
+        {
+          "explanation": "依据相应最小二乘、最大似然、平滑或局部加权条件得到所示优化关系。",
+          "tex": "\\beta^+=\\beta-\\eta\\frac2nX^\\top(X\\beta-y)"
+        }
+      ],
+      "code": "import numpy as np\nX=np.arange(1,10).reshape(-1,1)/10;y=2*X[:,0];b=np.zeros(1)\nfor _ in range(300):b-=.1*2*X.T@(X@b-y)/len(y)\nprint(b)",
+      "packages": "Python与NumPy（按import安装其他依赖）",
+      "application": "用于ETF收益预测、金融因子估计、资产风险暴露和模型残差分析。",
+      "limits": "学习率过大可能发散，收敛速度依赖特征尺度。",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n01-02",
+      "node_id": "linear-n01-02",
+      "title": "条件期望",
+      "definition": "给定解释变量X后的目标随机变量条件均值，是平方损失下总体最优的回归函数。",
+      "assumptions": "明确线性、条件分布或平滑假设，正确区分训练估计、推断与独立时间序列验证。",
+      "properties": [
+        "统计解释依赖模型及误差条件；拟合与预测不代表因果效应。",
+        "参数估计、超参数及特征处理仅应使用训练时间窗口内的信息。"
+      ],
+      "formulas": [
+        {
+          "label": "目标与基本性质",
+          "tex": "f^*(x)=E[Y\\mid X=x]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先写出模型对目标变量的预测函数、条件分布或目标损失的数学形式。",
+          "tex": "f^*(x)=E[Y\\mid X=x]"
+        },
+        {
+          "explanation": "依据相应最小二乘、最大似然、平滑或局部加权条件得到所示优化关系。",
+          "tex": "f^*(x)=E[Y\\mid X=x]"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([0,0,1,1]);y=np.array([1.,3.,5.,7.]);print([y[x==k].mean() for k in [0,1]])",
+      "packages": "Python与NumPy（按import安装其他依赖）",
+      "application": "用于ETF收益预测、金融因子估计、资产风险暴露和模型残差分析。",
+      "limits": "均值本身不刻画尾部分布或决策成本。",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n02-02",
+      "node_id": "linear-n02-02",
+      "title": "高斯误差与MLE",
+      "definition": "同方差独立高斯误差模型的负对数似然与残差平方和只差常数及比例。",
+      "assumptions": "明确线性、条件分布或平滑假设，正确区分训练估计、推断与独立时间序列验证。",
+      "properties": [
+        "统计解释依赖模型及误差条件；拟合与预测不代表因果效应。",
+        "参数估计、超参数及特征处理仅应使用训练时间窗口内的信息。"
+      ],
+      "formulas": [
+        {
+          "label": "目标与基本性质",
+          "tex": "-\\log L(\\beta)=\\frac1{2\\sigma^2}\\sum_i(y_i-x_i^\\top\\beta)^2+C"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先写出模型对目标变量的预测函数、条件分布或目标损失的数学形式。",
+          "tex": "-\\log L(\\beta)=\\frac1{2\\sigma^2}\\sum_i(y_i-x_i^\\top\\beta)^2+C"
+        },
+        {
+          "explanation": "依据相应最小二乘、最大似然、平滑或局部加权条件得到所示优化关系。",
+          "tex": "-\\log L(\\beta)=\\frac1{2\\sigma^2}\\sum_i(y_i-x_i^\\top\\beta)^2+C"
+        }
+      ],
+      "code": "import numpy as np\nres=np.array([.1,-.2,.3]);sig=.5\nprint(.5*np.sum((res/sig)**2))",
+      "packages": "Python与NumPy（按import安装其他依赖）",
+      "application": "用于ETF收益预测、金融因子估计、资产风险暴露和模型残差分析。",
+      "limits": "真实金融误差经常重尾、异方差，不应盲信高斯推断。",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n03-02",
+      "node_id": "linear-n03-02",
+      "title": "异方差稳健标准误",
+      "definition": "在误差方差依解释变量而变化时，三明治协方差估计可纠正OLS标准误而不改变OLS系数。",
+      "assumptions": "明确线性、条件分布或平滑假设，正确区分训练估计、推断与独立时间序列验证。",
+      "properties": [
+        "统计解释依赖模型及误差条件；拟合与预测不代表因果效应。",
+        "参数估计、超参数及特征处理仅应使用训练时间窗口内的信息。"
+      ],
+      "formulas": [
+        {
+          "label": "目标与基本性质",
+          "tex": "\\widehat V_{\\rm HC0}=(X^\\top X)^{-1}X^\\top\\operatorname{diag}(\\hat e_i^2)X(X^\\top X)^{-1}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先写出模型对目标变量的预测函数、条件分布或目标损失的数学形式。",
+          "tex": "\\widehat V_{\\rm HC0}=(X^\\top X)^{-1}X^\\top\\operatorname{diag}(\\hat e_i^2)X(X^\\top X)^{-1}"
+        },
+        {
+          "explanation": "依据相应最小二乘、最大似然、平滑或局部加权条件得到所示优化关系。",
+          "tex": "\\widehat V_{\\rm HC0}=(X^\\top X)^{-1}X^\\top\\operatorname{diag}(\\hat e_i^2)X(X^\\top X)^{-1}"
+        }
+      ],
+      "code": "import numpy as np\nX=np.column_stack([np.ones(5),np.arange(5)]);y=np.array([1.,2.,1.7,4.,5.]);b=np.linalg.lstsq(X,y,rcond=None)[0];e=y-X@b\ninv=np.linalg.inv(X.T@X);print(inv@X.T@np.diag(e*e)@X@inv)",
+      "packages": "Python与NumPy（按import安装其他依赖）",
+      "application": "用于ETF收益预测、金融因子估计、资产风险暴露和模型残差分析。",
+      "limits": "仅修正异方差，不自动修正序列自相关；金融数据可考虑HAC。",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n04-02",
+      "node_id": "linear-n04-02",
+      "title": "偏差方差分解",
+      "definition": "平方预测误差可拆分为模型系统偏差平方、训练随机性导致的预测方差与不可约噪声。",
+      "assumptions": "明确线性、条件分布或平滑假设，正确区分训练估计、推断与独立时间序列验证。",
+      "properties": [
+        "统计解释依赖模型及误差条件；拟合与预测不代表因果效应。",
+        "参数估计、超参数及特征处理仅应使用训练时间窗口内的信息。"
+      ],
+      "formulas": [
+        {
+          "label": "目标与基本性质",
+          "tex": "E[(Y-\\hat f)^2]=\\operatorname{Bias}^2+\\operatorname{Var}(\\hat f)+\\sigma_\\epsilon^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先写出模型对目标变量的预测函数、条件分布或目标损失的数学形式。",
+          "tex": "E[(Y-\\hat f)^2]=\\operatorname{Bias}^2+\\operatorname{Var}(\\hat f)+\\sigma_\\epsilon^2"
+        },
+        {
+          "explanation": "依据相应最小二乘、最大似然、平滑或局部加权条件得到所示优化关系。",
+          "tex": "E[(Y-\\hat f)^2]=\\operatorname{Bias}^2+\\operatorname{Var}(\\hat f)+\\sigma_\\epsilon^2"
+        }
+      ],
+      "code": "import numpy as np\npred=np.array([1.,2.,1.5]);truth=2.;print('bias^2',(pred.mean()-truth)**2,'var',pred.var())",
+      "packages": "Python与NumPy（按import安装其他依赖）",
+      "application": "用于ETF收益预测、金融因子估计、资产风险暴露和模型残差分析。",
+      "limits": "要求定义重复抽样和固定真实分布，时间漂移是额外误差来源。",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n06-02",
+      "node_id": "linear-n06-02",
+      "title": "误差相关",
+      "definition": "回归残差跨时间或跨资产相关会影响经典推断及模型训练的有效独立样本数。",
+      "assumptions": "明确线性、条件分布或平滑假设，正确区分训练估计、推断与独立时间序列验证。",
+      "properties": [
+        "统计解释依赖模型及误差条件；拟合与预测不代表因果效应。",
+        "参数估计、超参数及特征处理仅应使用训练时间窗口内的信息。"
+      ],
+      "formulas": [
+        {
+          "label": "目标与基本性质",
+          "tex": "\\operatorname{Cov}(\\epsilon_t,\\epsilon_{t-k})\\ne0"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先写出模型对目标变量的预测函数、条件分布或目标损失的数学形式。",
+          "tex": "\\operatorname{Cov}(\\epsilon_t,\\epsilon_{t-k})\\ne0"
+        },
+        {
+          "explanation": "依据相应最小二乘、最大似然、平滑或局部加权条件得到所示优化关系。",
+          "tex": "\\operatorname{Cov}(\\epsilon_t,\\epsilon_{t-k})\\ne0"
+        }
+      ],
+      "code": "import numpy as np\nr=np.array([1.,2.,1.,3.,2.,4.]);print(np.corrcoef(r[:-1],r[1:])[0,1])",
+      "packages": "Python与NumPy（按import安装其他依赖）",
+      "application": "用于ETF收益预测、金融因子估计、资产风险暴露和模型残差分析。",
+      "limits": "普通异方差稳健标准误无法自动处理时间自相关。",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n01-03",
+      "node_id": "linear-n01-03",
+      "title": "Poisson回归",
+      "definition": "用Poisson条件分布建模非负整数计数，并以对数链接保证预测率非负。",
+      "assumptions": "明确线性、条件分布或平滑假设，正确区分训练估计、推断与独立时间序列验证。",
+      "properties": [
+        "统计解释依赖模型及误差条件；拟合与预测不代表因果效应。",
+        "参数估计、超参数及特征处理仅应使用训练时间窗口内的信息。"
+      ],
+      "formulas": [
+        {
+          "label": "目标与基本性质",
+          "tex": "Y_i\\mid x_i\\sim\\mathrm{Pois}(\\lambda_i),\\quad\\log\\lambda_i=x_i^\\top\\beta"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先写出模型对目标变量的预测函数、条件分布或目标损失的数学形式。",
+          "tex": "Y_i\\mid x_i\\sim\\mathrm{Pois}(\\lambda_i),\\quad\\log\\lambda_i=x_i^\\top\\beta"
+        },
+        {
+          "explanation": "依据相应最小二乘、最大似然、平滑或局部加权条件得到所示优化关系。",
+          "tex": "Y_i\\mid x_i\\sim\\mathrm{Pois}(\\lambda_i),\\quad\\log\\lambda_i=x_i^\\top\\beta"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.linear_model import PoissonRegressor\nX=np.arange(1,21).reshape(-1,1);y=np.round(np.exp(.04*X[:,0]))\nprint(PoissonRegressor(alpha=.1).fit(X,y).predict([[12.]]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益预测、金融因子估计、资产风险暴露和模型残差分析。",
+      "limits": "过度离散或零膨胀会破坏简单Poisson方差等于均值假设。",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n02-03",
+      "node_id": "linear-n02-03",
+      "title": "Gamma回归",
+      "definition": "对严格正且右偏的连续目标，如成交额或损失金额，可用Gamma分布和合适GLM链接建模。",
+      "assumptions": "明确线性、条件分布或平滑假设，正确区分训练估计、推断与独立时间序列验证。",
+      "properties": [
+        "统计解释依赖模型及误差条件；拟合与预测不代表因果效应。",
+        "参数估计、超参数及特征处理仅应使用训练时间窗口内的信息。"
+      ],
+      "formulas": [
+        {
+          "label": "目标与基本性质",
+          "tex": "E[Y|x]=\\mu(x)>0,\\quad\\operatorname{Var}(Y|x)=\\phi\\mu(x)^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先写出模型对目标变量的预测函数、条件分布或目标损失的数学形式。",
+          "tex": "E[Y|x]=\\mu(x)>0,\\quad\\operatorname{Var}(Y|x)=\\phi\\mu(x)^2"
+        },
+        {
+          "explanation": "依据相应最小二乘、最大似然、平滑或局部加权条件得到所示优化关系。",
+          "tex": "E[Y|x]=\\mu(x)>0,\\quad\\operatorname{Var}(Y|x)=\\phi\\mu(x)^2"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.linear_model import GammaRegressor\nX=np.arange(1,21).reshape(-1,1);y=np.exp(.04*X[:,0])\nprint(GammaRegressor(alpha=.1,max_iter=500).fit(X,y).predict([[13.]]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益预测、金融因子估计、资产风险暴露和模型残差分析。",
+      "limits": "不能用于含零或负数的未变换目标。",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n03-03",
+      "node_id": "linear-n03-03",
+      "title": "Tweedie回归",
+      "definition": "Tweedie指数离散模型用方差幂关系统一Poisson、Gamma及复合Poisson–Gamma等目标。",
+      "assumptions": "明确线性、条件分布或平滑假设，正确区分训练估计、推断与独立时间序列验证。",
+      "properties": [
+        "统计解释依赖模型及误差条件；拟合与预测不代表因果效应。",
+        "参数估计、超参数及特征处理仅应使用训练时间窗口内的信息。"
+      ],
+      "formulas": [
+        {
+          "label": "目标与基本性质",
+          "tex": "\\operatorname{Var}(Y|X)=\\phi\\mu^p"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先写出模型对目标变量的预测函数、条件分布或目标损失的数学形式。",
+          "tex": "\\operatorname{Var}(Y|X)=\\phi\\mu^p"
+        },
+        {
+          "explanation": "依据相应最小二乘、最大似然、平滑或局部加权条件得到所示优化关系。",
+          "tex": "\\operatorname{Var}(Y|X)=\\phi\\mu^p"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.linear_model import TweedieRegressor\nX=np.arange(1,31).reshape(-1,1);y=np.exp(.02*X[:,0])\nprint(TweedieRegressor(power=1.5,max_iter=500).fit(X,y).predict([[10.]]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益预测、金融因子估计、资产风险暴露和模型残差分析。",
+      "limits": "幂指数p决定适合的目标支持集；选择不当会导致估计偏差。",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n05-03",
+      "node_id": "linear-n05-03",
+      "title": "Huber回归",
+      "definition": "通过Huber损失减弱极端残差对线性回归系数的影响，保留对小误差的平方拟合。",
+      "assumptions": "明确线性、条件分布或平滑假设，正确区分训练估计、推断与独立时间序列验证。",
+      "properties": [
+        "统计解释依赖模型及误差条件；拟合与预测不代表因果效应。",
+        "参数估计、超参数及特征处理仅应使用训练时间窗口内的信息。"
+      ],
+      "formulas": [
+        {
+          "label": "目标与基本性质",
+          "tex": "L_\\delta(e)=\\begin{cases}\\tfrac12e^2,&|e|\\le\\delta\\\\\\delta(|e|-\\delta/2),&|e|>\\delta\\end{cases}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先写出模型对目标变量的预测函数、条件分布或目标损失的数学形式。",
+          "tex": "L_\\delta(e)=\\begin{cases}\\tfrac12e^2,&|e|\\le\\delta\\\\\\delta(|e|-\\delta/2),&|e|>\\delta\\end{cases}"
+        },
+        {
+          "explanation": "依据相应最小二乘、最大似然、平滑或局部加权条件得到所示优化关系。",
+          "tex": "L_\\delta(e)=\\begin{cases}\\tfrac12e^2,&|e|\\le\\delta\\\\\\delta(|e|-\\delta/2),&|e|>\\delta\\end{cases}"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.linear_model import HuberRegressor\nX=np.arange(15).reshape(-1,1);y=2*X[:,0].astype(float);y[-1]=100\nprint(HuberRegressor().fit(X,y).coef_)",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益预测、金融因子估计、资产风险暴露和模型残差分析。",
+      "limits": "稳健损失不代表可忽略尾部黑天鹅；异常值也可能是目标信号。",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n06-03",
+      "node_id": "linear-n06-03",
+      "title": "RANSAC",
+      "definition": "RANSAC反复用随机小样本拟合模型，再据残差阈值选择最大一致样本集，对离群样本较稳健。",
+      "assumptions": "明确线性、条件分布或平滑假设，正确区分训练估计、推断与独立时间序列验证。",
+      "properties": [
+        "统计解释依赖模型及误差条件；拟合与预测不代表因果效应。",
+        "参数估计、超参数及特征处理仅应使用训练时间窗口内的信息。"
+      ],
+      "formulas": [
+        {
+          "label": "目标与基本性质",
+          "tex": "\\mathcal I(\\theta)=\\{i:|y_i-f_\\theta(x_i)|<\\tau\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先写出模型对目标变量的预测函数、条件分布或目标损失的数学形式。",
+          "tex": "\\mathcal I(\\theta)=\\{i:|y_i-f_\\theta(x_i)|<\\tau\\}"
+        },
+        {
+          "explanation": "依据相应最小二乘、最大似然、平滑或局部加权条件得到所示优化关系。",
+          "tex": "\\mathcal I(\\theta)=\\{i:|y_i-f_\\theta(x_i)|<\\tau\\}"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.linear_model import RANSACRegressor,LinearRegression\nX=np.arange(20).reshape(-1,1);y=2*X[:,0].astype(float);y[3]=100\nm=RANSACRegressor(estimator=LinearRegression(),random_state=0).fit(X,y)\nprint(m.estimator_.coef_,m.inlier_mask_.sum())",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益预测、金融因子估计、资产风险暴露和模型残差分析。",
+      "limits": "残差阈值与最小样本数敏感，不能保证找到真实金融机制。",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n01-04",
+      "node_id": "linear-n01-04",
+      "title": "多项式回归",
+      "definition": "在输入空间展开多项式基函数后训练线性系数，形成非线性预测曲线。",
+      "assumptions": "明确线性、条件分布或平滑假设，正确区分训练估计、推断与独立时间序列验证。",
+      "properties": [
+        "统计解释依赖模型及误差条件；拟合与预测不代表因果效应。",
+        "参数估计、超参数及特征处理仅应使用训练时间窗口内的信息。"
+      ],
+      "formulas": [
+        {
+          "label": "目标与基本性质",
+          "tex": "f(x)=\\sum_{k=0}^d\\beta_kx^k"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先写出模型对目标变量的预测函数、条件分布或目标损失的数学形式。",
+          "tex": "f(x)=\\sum_{k=0}^d\\beta_kx^k"
+        },
+        {
+          "explanation": "依据相应最小二乘、最大似然、平滑或局部加权条件得到所示优化关系。",
+          "tex": "f(x)=\\sum_{k=0}^d\\beta_kx^k"
+        }
+      ],
+      "code": "import numpy as np\nx=np.linspace(-1,1,20);y=x*x\nprint(np.polyfit(x,y,2))",
+      "packages": "Python与NumPy（按import安装其他依赖）",
+      "application": "用于ETF收益预测、金融因子估计、资产风险暴露和模型残差分析。",
+      "limits": "高阶多项式可能产生边界振荡和严重样本外外推错误。",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n02-04",
+      "node_id": "linear-n02-04",
+      "title": "样条Spline",
+      "definition": "样条将预测函数构造为分段低阶多项式，在结点处满足连续及适当阶导数连续条件。",
+      "assumptions": "明确线性、条件分布或平滑假设，正确区分训练估计、推断与独立时间序列验证。",
+      "properties": [
+        "统计解释依赖模型及误差条件；拟合与预测不代表因果效应。",
+        "参数估计、超参数及特征处理仅应使用训练时间窗口内的信息。"
+      ],
+      "formulas": [
+        {
+          "label": "目标与基本性质",
+          "tex": "f(x)=\\sum_{j=1}^{J}\\beta_j B_j(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先写出模型对目标变量的预测函数、条件分布或目标损失的数学形式。",
+          "tex": "f(x)=\\sum_{j=1}^{J}\\beta_j B_j(x)"
+        },
+        {
+          "explanation": "依据相应最小二乘、最大似然、平滑或局部加权条件得到所示优化关系。",
+          "tex": "f(x)=\\sum_{j=1}^{J}\\beta_j B_j(x)"
+        }
+      ],
+      "code": "import numpy as np\nfrom scipy.interpolate import CubicSpline\nx=np.array([0.,1.,2.,3.]);y=np.array([0.,1.,0.,2.]);f=CubicSpline(x,y)\nprint(f([.5,1.5]))",
+      "packages": "numpy, scipy",
+      "application": "用于ETF收益预测、金融因子估计、资产风险暴露和模型残差分析。",
+      "limits": "结点选择和边界外推决定模型复杂度及稳健性。",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n03-04",
+      "node_id": "linear-n03-04",
+      "title": "核回归",
+      "definition": "核回归通过距离核函数对邻近观测加权，估计输入条件下的局部目标均值。",
+      "assumptions": "明确线性、条件分布或平滑假设，正确区分训练估计、推断与独立时间序列验证。",
+      "properties": [
+        "统计解释依赖模型及误差条件；拟合与预测不代表因果效应。",
+        "参数估计、超参数及特征处理仅应使用训练时间窗口内的信息。"
+      ],
+      "formulas": [
+        {
+          "label": "目标与基本性质",
+          "tex": "\\hat m(x)=\\frac{\\sum_iK((x-x_i)/h)y_i}{\\sum_iK((x-x_i)/h)}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先写出模型对目标变量的预测函数、条件分布或目标损失的数学形式。",
+          "tex": "\\hat m(x)=\\frac{\\sum_iK((x-x_i)/h)y_i}{\\sum_iK((x-x_i)/h)}"
+        },
+        {
+          "explanation": "依据相应最小二乘、最大似然、平滑或局部加权条件得到所示优化关系。",
+          "tex": "\\hat m(x)=\\frac{\\sum_iK((x-x_i)/h)y_i}{\\sum_iK((x-x_i)/h)}"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([0.,1.,2.,3.]);y=np.array([0.,1.,4.,9.]);q=1.5;w=np.exp(-.5*((x-q)/.7)**2);print((w@y)/w.sum())",
+      "packages": "Python与NumPy（按import安装其他依赖）",
+      "application": "用于ETF收益预测、金融因子估计、资产风险暴露和模型残差分析。",
+      "limits": "高维数据中局部样本稀疏，带宽选择尤其敏感。",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n04-04",
+      "node_id": "linear-n04-04",
+      "title": "局部回归LOESS",
+      "definition": "LOESS在每个预测点按距离给样本加权并拟合局部低阶多项式，形成平滑非参数回归。",
+      "assumptions": "明确线性、条件分布或平滑假设，正确区分训练估计、推断与独立时间序列验证。",
+      "properties": [
+        "统计解释依赖模型及误差条件；拟合与预测不代表因果效应。",
+        "参数估计、超参数及特征处理仅应使用训练时间窗口内的信息。"
+      ],
+      "formulas": [
+        {
+          "label": "目标与基本性质",
+          "tex": "\\hat\\beta(x)=\\arg\\min_\\beta\\sum_iw_i(x)(y_i-\\phi(x_i)^\\top\\beta)^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先写出模型对目标变量的预测函数、条件分布或目标损失的数学形式。",
+          "tex": "\\hat\\beta(x)=\\arg\\min_\\beta\\sum_iw_i(x)(y_i-\\phi(x_i)^\\top\\beta)^2"
+        },
+        {
+          "explanation": "依据相应最小二乘、最大似然、平滑或局部加权条件得到所示优化关系。",
+          "tex": "\\hat\\beta(x)=\\arg\\min_\\beta\\sum_iw_i(x)(y_i-\\phi(x_i)^\\top\\beta)^2"
+        }
+      ],
+      "code": "import numpy as np\nx=np.linspace(0,2,15);y=np.sin(x);q=1.\nw=np.exp(-((x-q)/.5)**2);X=np.column_stack([np.ones(len(x)),x-q]);print(np.linalg.lstsq(X*np.sqrt(w[:,None]),y*np.sqrt(w),rcond=None)[0][0])",
+      "packages": "Python与NumPy（按import安装其他依赖）",
+      "application": "用于ETF收益预测、金融因子估计、资产风险暴露和模型残差分析。",
+      "limits": "平滑窗口太小会过拟合，太大可能掩盖状态切换。",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n05-04",
+      "node_id": "linear-n05-04",
+      "title": "广义可加模型GAM",
+      "definition": "GAM假设多个输入特征的贡献通过各自平滑函数相加，可以兼顾非线性和解释性。",
+      "assumptions": "明确线性、条件分布或平滑假设，正确区分训练估计、推断与独立时间序列验证。",
+      "properties": [
+        "统计解释依赖模型及误差条件；拟合与预测不代表因果效应。",
+        "参数估计、超参数及特征处理仅应使用训练时间窗口内的信息。"
+      ],
+      "formulas": [
+        {
+          "label": "目标与基本性质",
+          "tex": "g(E[Y|X])=\\beta_0+\\sum_j f_j(X_j)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先写出模型对目标变量的预测函数、条件分布或目标损失的数学形式。",
+          "tex": "g(E[Y|X])=\\beta_0+\\sum_j f_j(X_j)"
+        },
+        {
+          "explanation": "依据相应最小二乘、最大似然、平滑或局部加权条件得到所示优化关系。",
+          "tex": "g(E[Y|X])=\\beta_0+\\sum_j f_j(X_j)"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([-.5,0.,.5]);f=x*x+np.sin(x)\nprint(f)",
+      "packages": "Python与NumPy（按import安装其他依赖）",
+      "application": "用于ETF收益预测、金融因子估计、资产风险暴露和模型残差分析。",
+      "limits": "加法结构不自动包含变量间交互，需要显式添加。",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n06-04",
+      "node_id": "linear-n06-04",
+      "title": "高斯过程回归",
+      "definition": "高斯过程对函数赋予联合高斯先验，通过核函数编码输入之间的相关性，并给出预测分布。",
+      "assumptions": "明确线性、条件分布或平滑假设，正确区分训练估计、推断与独立时间序列验证。",
+      "properties": [
+        "统计解释依赖模型及误差条件；拟合与预测不代表因果效应。",
+        "参数估计、超参数及特征处理仅应使用训练时间窗口内的信息。"
+      ],
+      "formulas": [
+        {
+          "label": "目标与基本性质",
+          "tex": "f\\sim\\mathrm{GP}(m,k),\\quad \\mu_*=k_*^\\top(K+\\sigma^2I)^{-1}y"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先写出模型对目标变量的预测函数、条件分布或目标损失的数学形式。",
+          "tex": "f\\sim\\mathrm{GP}(m,k),\\quad \\mu_*=k_*^\\top(K+\\sigma^2I)^{-1}y"
+        },
+        {
+          "explanation": "依据相应最小二乘、最大似然、平滑或局部加权条件得到所示优化关系。",
+          "tex": "f\\sim\\mathrm{GP}(m,k),\\quad \\mu_*=k_*^\\top(K+\\sigma^2I)^{-1}y"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.gaussian_process import GaussianProcessRegressor\nfrom sklearn.gaussian_process.kernels import RBF\nX=np.array([[0.],[1.],[2.]]);y=np.sin(X[:,0]);m=GaussianProcessRegressor(kernel=RBF()).fit(X,y)\nprint(m.predict([[1.5]],return_std=True))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益预测、金融因子估计、资产风险暴露和模型残差分析。",
+      "limits": "大样本通常有立方矩阵计算负担；核假设需要独立检验。",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n01-05",
+      "node_id": "linear-n01-05",
+      "title": "收益预测回归",
+      "definition": "将历史已知的资产特征映射到未来持有期回报目标，要求严格时序对齐和样本外评估。",
+      "assumptions": "明确线性、条件分布或平滑假设，正确区分训练估计、推断与独立时间序列验证。",
+      "properties": [
+        "统计解释依赖模型及误差条件；拟合与预测不代表因果效应。",
+        "参数估计、超参数及特征处理仅应使用训练时间窗口内的信息。"
+      ],
+      "formulas": [
+        {
+          "label": "目标与基本性质",
+          "tex": "r_{i,t+h}=\\alpha+\\beta^\\top X_{i,t}+\\epsilon_{i,t+h}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先写出模型对目标变量的预测函数、条件分布或目标损失的数学形式。",
+          "tex": "r_{i,t+h}=\\alpha+\\beta^\\top X_{i,t}+\\epsilon_{i,t+h}"
+        },
+        {
+          "explanation": "依据相应最小二乘、最大似然、平滑或局部加权条件得到所示优化关系。",
+          "tex": "r_{i,t+h}=\\alpha+\\beta^\\top X_{i,t}+\\epsilon_{i,t+h}"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.linear_model import Ridge\nX=np.arange(60).reshape(20,3)/100.;y=.2*X[:,0]\nprint(Ridge().fit(X[:14],y[:14]).predict(X[14:16]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益预测、金融因子估计、资产风险暴露和模型残差分析。",
+      "limits": "收益信噪比极低，任何预测能力都需和交易成本、置信区间一起报告。",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n03-05",
+      "node_id": "linear-n03-05",
+      "title": "横截面因子回归",
+      "definition": "在每个交易日用不同资产的回报或目标量对当期因子暴露回归，提取风险因子收益或残差。",
+      "assumptions": "明确线性、条件分布或平滑假设，正确区分训练估计、推断与独立时间序列验证。",
+      "properties": [
+        "统计解释依赖模型及误差条件；拟合与预测不代表因果效应。",
+        "参数估计、超参数及特征处理仅应使用训练时间窗口内的信息。"
+      ],
+      "formulas": [
+        {
+          "label": "目标与基本性质",
+          "tex": "r_{i,t}=a_t+\\sum_k\\beta_{i,k,t}f_{k,t}+\\epsilon_{i,t}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先写出模型对目标变量的预测函数、条件分布或目标损失的数学形式。",
+          "tex": "r_{i,t}=a_t+\\sum_k\\beta_{i,k,t}f_{k,t}+\\epsilon_{i,t}"
+        },
+        {
+          "explanation": "依据相应最小二乘、最大似然、平滑或局部加权条件得到所示优化关系。",
+          "tex": "r_{i,t}=a_t+\\sum_k\\beta_{i,k,t}f_{k,t}+\\epsilon_{i,t}"
+        }
+      ],
+      "code": "import numpy as np\nX=np.array([[1,1],[1,2],[1,3],[1,4]],float);y=np.array([.01,.02,.03,.05])\nprint(np.linalg.lstsq(X,y,rcond=None)[0])",
+      "packages": "Python与NumPy（按import安装其他依赖）",
+      "application": "用于ETF收益预测、金融因子估计、资产风险暴露和模型残差分析。",
+      "limits": "截面回归与跨时点回归含义不同，样本数少时结果不稳定。",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n04-05",
+      "node_id": "linear-n04-05",
+      "title": "正交化",
+      "definition": "把一个信号在指定控制变量上的线性投影扣除，留下与控制变量列空间样本正交的残差。",
+      "assumptions": "明确线性、条件分布或平滑假设，正确区分训练估计、推断与独立时间序列验证。",
+      "properties": [
+        "统计解释依赖模型及误差条件；拟合与预测不代表因果效应。",
+        "参数估计、超参数及特征处理仅应使用训练时间窗口内的信息。"
+      ],
+      "formulas": [
+        {
+          "label": "目标与基本性质",
+          "tex": "z_\\perp=z-X(X^\\top X)^+X^\\top z"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先写出模型对目标变量的预测函数、条件分布或目标损失的数学形式。",
+          "tex": "z_\\perp=z-X(X^\\top X)^+X^\\top z"
+        },
+        {
+          "explanation": "依据相应最小二乘、最大似然、平滑或局部加权条件得到所示优化关系。",
+          "tex": "z_\\perp=z-X(X^\\top X)^+X^\\top z"
+        }
+      ],
+      "code": "import numpy as np\nX=np.column_stack([np.ones(6),np.arange(6)]);z=np.array([1.,1.,2.,3.,5.,8.]);print(z-X@np.linalg.lstsq(X,z,rcond=None)[0])",
+      "packages": "Python与NumPy（按import安装其他依赖）",
+      "application": "用于ETF收益预测、金融因子估计、资产风险暴露和模型残差分析。",
+      "limits": "正交只在当前样本与线性意义下成立，可能删除有预测价值的信息。",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n05-05",
+      "node_id": "linear-n05-05",
+      "title": "滚动回归",
+      "definition": "滚动回归在固定历史窗口内不断更新系数，允许参数随市场环境变化而局部调整。",
+      "assumptions": "明确线性、条件分布或平滑假设，正确区分训练估计、推断与独立时间序列验证。",
+      "properties": [
+        "统计解释依赖模型及误差条件；拟合与预测不代表因果效应。",
+        "参数估计、超参数及特征处理仅应使用训练时间窗口内的信息。"
+      ],
+      "formulas": [
+        {
+          "label": "目标与基本性质",
+          "tex": "\\hat\\beta_t=\\arg\\min_\\beta\\sum_{s=t-W+1}^t(y_s-x_s^\\top\\beta)^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先写出模型对目标变量的预测函数、条件分布或目标损失的数学形式。",
+          "tex": "\\hat\\beta_t=\\arg\\min_\\beta\\sum_{s=t-W+1}^t(y_s-x_s^\\top\\beta)^2"
+        },
+        {
+          "explanation": "依据相应最小二乘、最大似然、平滑或局部加权条件得到所示优化关系。",
+          "tex": "\\hat\\beta_t=\\arg\\min_\\beta\\sum_{s=t-W+1}^t(y_s-x_s^\\top\\beta)^2"
+        }
+      ],
+      "code": "import numpy as np\nx=np.arange(15.).reshape(-1,1);y=2*x[:,0]+1\nfor t in [8,11,14]:print(np.polyfit(x[t-4:t+1,0],y[t-4:t+1],1))",
+      "packages": "Python与NumPy（按import安装其他依赖）",
+      "application": "用于ETF收益预测、金融因子估计、资产风险暴露和模型残差分析。",
+      "limits": "窗口长度控制估计方差和适应变化的速度；不能用未来窗口。",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n06-05",
+      "node_id": "linear-n06-05",
+      "title": "预测收益置信区间",
+      "definition": "预测不确定度可分为条件均值估计误差和新收益本身的随机扰动，均值置信区间与预测区间不同。",
+      "assumptions": "明确线性、条件分布或平滑假设，正确区分训练估计、推断与独立时间序列验证。",
+      "properties": [
+        "统计解释依赖模型及误差条件；拟合与预测不代表因果效应。",
+        "参数估计、超参数及特征处理仅应使用训练时间窗口内的信息。"
+      ],
+      "formulas": [
+        {
+          "label": "目标与基本性质",
+          "tex": "\\hat y_*\\pm t_{n-p,1-\\alpha/2}\\hat\\sigma\\sqrt{1+x_*^\\top(X^\\top X)^{-1}x_*}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先写出模型对目标变量的预测函数、条件分布或目标损失的数学形式。",
+          "tex": "\\hat y_*\\pm t_{n-p,1-\\alpha/2}\\hat\\sigma\\sqrt{1+x_*^\\top(X^\\top X)^{-1}x_*}"
+        },
+        {
+          "explanation": "依据相应最小二乘、最大似然、平滑或局部加权条件得到所示优化关系。",
+          "tex": "\\hat y_*\\pm t_{n-p,1-\\alpha/2}\\hat\\sigma\\sqrt{1+x_*^\\top(X^\\top X)^{-1}x_*}"
+        }
+      ],
+      "code": "import numpy as np\nfrom scipy.stats import t\nn=40;p=2;sigma=.1;se=sigma*np.sqrt(1+1/n)\nprint(t.ppf(.975,n-p)*se)",
+      "packages": "numpy, scipy",
+      "application": "用于ETF收益预测、金融因子估计、资产风险暴露和模型残差分析。",
+      "limits": "重尾及时间相关收益会破坏简单线性正态预测区间覆盖。",
+      "coverage": "complete"
+    }
+  ]
+}
