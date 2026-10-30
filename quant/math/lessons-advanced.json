@@ -635,6 +635,80 @@
       "application": "VaR/ES、期权尾部风险、系统性风险监控。",
       "caveat": "金融尾部强时间依赖且样本稀疏，参数置信区间必须报告。",
       "checked_status": "完整讲义：定义、条件、性质、公式、推导及应用"
+    },
+    {
+      "id": "optimization-n0342",
+      "node_id": "optimization-n0342",
+      "title": "Slater条件",
+      "definition": "凸优化的严格可行性条件之一，用于保证满足适当技术条件的问题具有强Lagrange对偶。",
+      "assumptions": "最小化凸目标，凸不等式约束、仿射等式约束。存在满足所有非仿射不等式严格小于零的点，并满足等式。",
+      "properties": [
+        "弱对偶对所有可行乘子成立。",
+        "Slater条件在相应凸优化设置下使原始与对偶最优值相等，但它不是强对偶成立的必要条件。"
+      ],
+      "formulas": [
+        {
+          "label": "Slater严格可行",
+          "tex": "g_i(\\bar{x})<0,\\quad A\\bar{x}=b"
+        },
+        {
+          "label": "强对偶",
+          "tex": "p^\\star=d^\\star"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义Lagrange函数与对偶函数，非负乘子确保弱对偶。",
+          "tex": "\\mathcal{L}(x,\\lambda,\\nu)=f(x)+\\lambda^\\top g(x)+\\nu^\\top(Ax-b),\\quad \\lambda\\ge0"
+        },
+        {
+          "explanation": "任意原始可行点使Lagrange函数不超过原始目标，因而对偶下界不大于原始最优值。",
+          "tex": "q(\\lambda,\\nu)=\\inf_x\\mathcal L(x,\\lambda,\\nu)\\le p^\\star"
+        },
+        {
+          "explanation": "在凸性与严格可行条件下，凸分离定理可建立零对偶间隙；此为关键理论步骤而非由前一不等式直接推得。",
+          "tex": "d^\\star=\\sup_{\\lambda\\ge0,\\nu}q(\\lambda,\\nu)=p^\\star"
+        }
+      ],
+      "example": "在限制 $w_i\\ge0$ 且 $\\sum_i w_i=1$ 的凸组合配置中，等权 $w_i=1/n>0$ 是严格满足非负约束的候选点。",
+      "application": "检验投资组合凸优化的KKT和对偶证书。",
+      "caveat": "Slater充分性需要凸问题及约束资格，不能在非凸情况下直接套用。",
+      "checked_status": "定义、条件、公式、推导及应用"
+    },
+    {
+      "id": "numerical-n0386",
+      "node_id": "numerical-n0386",
+      "title": "Euler-Maruyama",
+      "definition": "使用时间小步长及独立正态增量对随机微分方程漂移项和扩散项进行左端点近似。",
+      "assumptions": "SDE为 $dX_t=a(X_t,t)dt+b(X_t,t)dW_t$；典型强收敛结论需要Lipschitz及线性增长等条件。",
+      "properties": [
+        "通常强收敛阶为 $1/2$，在合适光滑条件下弱阶可达1。",
+        "GBM、OU等有闭式离散解的过程可用于测试数值误差。"
+      ],
+      "formulas": [
+        {
+          "label": "Euler-Maruyama格式",
+          "tex": "X_{n+1}=X_n+a(X_n,t_n)\\Delta t+b(X_n,t_n)\\sqrt{\\Delta t}Z_n,\\quad Z_n\\overset{\\mathrm{iid}}{\\sim}N(0,1)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对SDE在一个时间间隔积分。",
+          "tex": "X_{t_{n+1}}-X_{t_n}=\\int_{t_n}^{t_{n+1}}a(X_s,s)\\,ds+\\int_{t_n}^{t_{n+1}}b(X_s,s)\\,dW_s"
+        },
+        {
+          "explanation": "用时间片左端点对漂移和扩散系数做近似。",
+          "tex": "\\Delta X_n\\approx a(X_n,t_n)\\Delta t+b(X_n,t_n)\\Delta W_n"
+        },
+        {
+          "explanation": "利用标准布朗增量分布生成样本。",
+          "tex": "\\Delta W_n\\sim N(0,\\Delta t)=\\sqrt{\\Delta t}\\,Z_n"
+        }
+      ],
+      "example": "取 $a(x)=\\kappa(\\theta-x)$、$b(x)=\\sigma$，得到OU过程每一步的模拟更新。",
+      "application": "Monte Carlo期权定价、随机波动率路径、金融状态仿真。",
+      "caveat": "若真实SDE保正，普通Euler格式仍可能产生负值；时间步长需要做收敛分析。",
+      "checked_status": "定义、条件、公式、推导及应用"
     }
   ]
 }
