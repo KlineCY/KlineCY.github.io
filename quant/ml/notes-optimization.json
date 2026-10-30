@@ -1,0 +1,549 @@
+{
+  "version": 1,
+  "notes": [
+    {
+      "id": "optimization-n03-02",
+      "node_id": "optimization-n03-02",
+      "title": "AdaGrad",
+      "definition": "累积过去梯度平方并按坐标缩放学习率。",
+      "assumptions": "需要明确概率模型、训练样本、数值算法和数据可得时间；非平稳金融序列不自动满足经典独立假设。",
+      "properties": [
+        "累积过去梯度平方并按坐标缩放学习率。。",
+        "实际不确定性、稳定性与超参数选择要通过保留样本评估。"
+      ],
+      "formulas": [
+        {
+          "label": "数学表达",
+          "tex": "G_t=\\sum_{s=1}^tg_s^2,\\quad\\theta^+=\\theta-\\eta g_t/(\\sqrt{G_t}+\\epsilon)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据该知识点的定义，首先确立相关的概率、梯度或优化对象。累积过去梯度平方并按坐标缩放学习率。",
+          "tex": "G_t=\\sum_{s=1}^tg_s^2,\\quad\\theta^+=\\theta-\\eta g_t/(\\sqrt{G_t}+\\epsilon)"
+        },
+        {
+          "explanation": "将公式作为数值计算或推断的基础，进一步估计其参数并核验条件。",
+          "tex": "G_t=\\sum_{s=1}^tg_s^2,\\quad\\theta^+=\\theta-\\eta g_t/(\\sqrt{G_t}+\\epsilon)"
+        }
+      ],
+      "code": "# AdaGrad — 学科基本数值示例\nimport numpy as np\nfrom scipy.optimize import minimize\nfun=lambda x:(x[0]-1)**2+(x[1]+2)**2\nfor method in [\"BFGS\",\"L-BFGS-B\"]:\n print(method,minimize(fun,[4.,4.],method=method).x)\ny=np.array([1.,0.,0.]);print(\"Smoothed:\",.9*y+.1/3)",
+      "packages": "numpy, scipy",
+      "application": "应用于金融概率风险预测、动态状态估计、量化模型优化与训练稳定性分析。",
+      "limits": "这是一篇包含专属公式与阅读指引的扩展笔记，代码属于学科综合示例，不能替代该具体算法的严谨完整实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "optimization-n02-03",
+      "node_id": "optimization-n02-03",
+      "title": "BFGS/L-BFGS",
+      "definition": "利用参数变化与梯度变化构造准Newton曲率近似。",
+      "assumptions": "需要明确概率模型、训练样本、数值算法和数据可得时间；非平稳金融序列不自动满足经典独立假设。",
+      "properties": [
+        "利用参数变化与梯度变化构造准Newton曲率近似。。",
+        "实际不确定性、稳定性与超参数选择要通过保留样本评估。"
+      ],
+      "formulas": [
+        {
+          "label": "数学表达",
+          "tex": "y_k=\\nabla f(x_{k+1})-\\nabla f(x_k)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据该知识点的定义，首先确立相关的概率、梯度或优化对象。利用参数变化与梯度变化构造准Newton曲率近似。",
+          "tex": "y_k=\\nabla f(x_{k+1})-\\nabla f(x_k)"
+        },
+        {
+          "explanation": "将公式作为数值计算或推断的基础，进一步估计其参数并核验条件。",
+          "tex": "y_k=\\nabla f(x_{k+1})-\\nabla f(x_k)"
+        }
+      ],
+      "code": "# BFGS/L-BFGS — 学科基本数值示例\nimport numpy as np\nfrom scipy.optimize import minimize\nfun=lambda x:(x[0]-1)**2+(x[1]+2)**2\nfor method in [\"BFGS\",\"L-BFGS-B\"]:\n print(method,minimize(fun,[4.,4.],method=method).x)\ny=np.array([1.,0.,0.]);print(\"Smoothed:\",.9*y+.1/3)",
+      "packages": "numpy, scipy",
+      "application": "应用于金融概率风险预测、动态状态估计、量化模型优化与训练稳定性分析。",
+      "limits": "这是一篇包含专属公式与阅读指引的扩展笔记，代码属于学科综合示例，不能替代该具体算法的严谨完整实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "optimization-n03-03",
+      "node_id": "optimization-n03-03",
+      "title": "凸与非凸损失",
+      "definition": "凸函数在两点间的函数值不超过相应端点函数值的线性插值。",
+      "assumptions": "需要明确概率模型、训练样本、数值算法和数据可得时间；非平稳金融序列不自动满足经典独立假设。",
+      "properties": [
+        "凸函数在两点间的函数值不超过相应端点函数值的线性插值。。",
+        "实际不确定性、稳定性与超参数选择要通过保留样本评估。"
+      ],
+      "formulas": [
+        {
+          "label": "数学表达",
+          "tex": "f(\\lambda x+(1-\\lambda)y)\\le\\lambda f(x)+(1-\\lambda)f(y)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据该知识点的定义，首先确立相关的概率、梯度或优化对象。凸函数在两点间的函数值不超过相应端点函数值的线性插值。",
+          "tex": "f(\\lambda x+(1-\\lambda)y)\\le\\lambda f(x)+(1-\\lambda)f(y)"
+        },
+        {
+          "explanation": "将公式作为数值计算或推断的基础，进一步估计其参数并核验条件。",
+          "tex": "f(\\lambda x+(1-\\lambda)y)\\le\\lambda f(x)+(1-\\lambda)f(y)"
+        }
+      ],
+      "code": "# 凸与非凸损失 — 学科基本数值示例\nimport numpy as np\nfrom scipy.optimize import minimize\nfun=lambda x:(x[0]-1)**2+(x[1]+2)**2\nfor method in [\"BFGS\",\"L-BFGS-B\"]:\n print(method,minimize(fun,[4.,4.],method=method).x)\ny=np.array([1.,0.,0.]);print(\"Smoothed:\",.9*y+.1/3)",
+      "packages": "numpy, scipy",
+      "application": "应用于金融概率风险预测、动态状态估计、量化模型优化与训练稳定性分析。",
+      "limits": "这是一篇包含专属公式与阅读指引的扩展笔记，代码属于学科综合示例，不能替代该具体算法的严谨完整实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "optimization-n04-03",
+      "node_id": "optimization-n04-03",
+      "title": "投影梯度",
+      "definition": "先沿负梯度更新，再投影到满足约束的可行集合。",
+      "assumptions": "需要明确概率模型、训练样本、数值算法和数据可得时间；非平稳金融序列不自动满足经典独立假设。",
+      "properties": [
+        "先沿负梯度更新，再投影到满足约束的可行集合。。",
+        "实际不确定性、稳定性与超参数选择要通过保留样本评估。"
+      ],
+      "formulas": [
+        {
+          "label": "数学表达",
+          "tex": "x^+=\\Pi_{\\mathcal C}(x-\\eta\\nabla f(x))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据该知识点的定义，首先确立相关的概率、梯度或优化对象。先沿负梯度更新，再投影到满足约束的可行集合。",
+          "tex": "x^+=\\Pi_{\\mathcal C}(x-\\eta\\nabla f(x))"
+        },
+        {
+          "explanation": "将公式作为数值计算或推断的基础，进一步估计其参数并核验条件。",
+          "tex": "x^+=\\Pi_{\\mathcal C}(x-\\eta\\nabla f(x))"
+        }
+      ],
+      "code": "# 投影梯度 — 学科基本数值示例\nimport numpy as np\nfrom scipy.optimize import minimize\nfun=lambda x:(x[0]-1)**2+(x[1]+2)**2\nfor method in [\"BFGS\",\"L-BFGS-B\"]:\n print(method,minimize(fun,[4.,4.],method=method).x)\ny=np.array([1.,0.,0.]);print(\"Smoothed:\",.9*y+.1/3)",
+      "packages": "numpy, scipy",
+      "application": "应用于金融概率风险预测、动态状态估计、量化模型优化与训练稳定性分析。",
+      "limits": "这是一篇包含专属公式与阅读指引的扩展笔记，代码属于学科综合示例，不能替代该具体算法的严谨完整实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "optimization-n06-03",
+      "node_id": "optimization-n06-03",
+      "title": "ADMM",
+      "definition": "通过增广Lagrangian将可分目标与线性约束拆成交替更新。",
+      "assumptions": "需要明确概率模型、训练样本、数值算法和数据可得时间；非平稳金融序列不自动满足经典独立假设。",
+      "properties": [
+        "通过增广Lagrangian将可分目标与线性约束拆成交替更新。。",
+        "实际不确定性、稳定性与超参数选择要通过保留样本评估。"
+      ],
+      "formulas": [
+        {
+          "label": "数学表达",
+          "tex": "\\min f(x)+g(z)\\quad\\mathrm{s.t.}\\ Ax+Bz=c"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据该知识点的定义，首先确立相关的概率、梯度或优化对象。通过增广Lagrangian将可分目标与线性约束拆成交替更新。",
+          "tex": "\\min f(x)+g(z)\\quad\\mathrm{s.t.}\\ Ax+Bz=c"
+        },
+        {
+          "explanation": "将公式作为数值计算或推断的基础，进一步估计其参数并核验条件。",
+          "tex": "\\min f(x)+g(z)\\quad\\mathrm{s.t.}\\ Ax+Bz=c"
+        }
+      ],
+      "code": "# ADMM — 学科基本数值示例\nimport numpy as np\nfrom scipy.optimize import minimize\nfun=lambda x:(x[0]-1)**2+(x[1]+2)**2\nfor method in [\"BFGS\",\"L-BFGS-B\"]:\n print(method,minimize(fun,[4.,4.],method=method).x)\ny=np.array([1.,0.,0.]);print(\"Smoothed:\",.9*y+.1/3)",
+      "packages": "numpy, scipy",
+      "application": "应用于金融概率风险预测、动态状态估计、量化模型优化与训练稳定性分析。",
+      "limits": "这是一篇包含专属公式与阅读指引的扩展笔记，代码属于学科综合示例，不能替代该具体算法的严谨完整实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "optimization-n01-04",
+      "node_id": "optimization-n01-04",
+      "title": "初始化Xavier/He",
+      "definition": "依据输入输出连接规模设定初始权重方差，以稳定前向激活与反向梯度。",
+      "assumptions": "需要明确概率模型、训练样本、数值算法和数据可得时间；非平稳金融序列不自动满足经典独立假设。",
+      "properties": [
+        "依据输入输出连接规模设定初始权重方差，以稳定前向激活与反向梯度。。",
+        "实际不确定性、稳定性与超参数选择要通过保留样本评估。"
+      ],
+      "formulas": [
+        {
+          "label": "数学表达",
+          "tex": "\\operatorname{Var}(W_{\\rm He})=2/n_{\\rm in}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据该知识点的定义，首先确立相关的概率、梯度或优化对象。依据输入输出连接规模设定初始权重方差，以稳定前向激活与反向梯度。",
+          "tex": "\\operatorname{Var}(W_{\\rm He})=2/n_{\\rm in}"
+        },
+        {
+          "explanation": "将公式作为数值计算或推断的基础，进一步估计其参数并核验条件。",
+          "tex": "\\operatorname{Var}(W_{\\rm He})=2/n_{\\rm in}"
+        }
+      ],
+      "code": "# 初始化Xavier/He — 学科基本数值示例\nimport numpy as np\nfrom scipy.optimize import minimize\nfun=lambda x:(x[0]-1)**2+(x[1]+2)**2\nfor method in [\"BFGS\",\"L-BFGS-B\"]:\n print(method,minimize(fun,[4.,4.],method=method).x)\ny=np.array([1.,0.,0.]);print(\"Smoothed:\",.9*y+.1/3)",
+      "packages": "numpy, scipy",
+      "application": "应用于金融概率风险预测、动态状态估计、量化模型优化与训练稳定性分析。",
+      "limits": "这是一篇包含专属公式与阅读指引的扩展笔记，代码属于学科综合示例，不能替代该具体算法的严谨完整实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "optimization-n02-04",
+      "node_id": "optimization-n02-04",
+      "title": "梯度消失爆炸",
+      "definition": "深层网络梯度由Jacobian连乘而产生指数缩小或放大的风险。",
+      "assumptions": "需要明确概率模型、训练样本、数值算法和数据可得时间；非平稳金融序列不自动满足经典独立假设。",
+      "properties": [
+        "深层网络梯度由Jacobian连乘而产生指数缩小或放大的风险。。",
+        "实际不确定性、稳定性与超参数选择要通过保留样本评估。"
+      ],
+      "formulas": [
+        {
+          "label": "数学表达",
+          "tex": "\\nabla_{h_0}L=(\\prod_tJ_t)^\\top\\nabla_{h_T}L"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据该知识点的定义，首先确立相关的概率、梯度或优化对象。深层网络梯度由Jacobian连乘而产生指数缩小或放大的风险。",
+          "tex": "\\nabla_{h_0}L=(\\prod_tJ_t)^\\top\\nabla_{h_T}L"
+        },
+        {
+          "explanation": "将公式作为数值计算或推断的基础，进一步估计其参数并核验条件。",
+          "tex": "\\nabla_{h_0}L=(\\prod_tJ_t)^\\top\\nabla_{h_T}L"
+        }
+      ],
+      "code": "# 梯度消失爆炸 — 学科基本数值示例\nimport numpy as np\nfrom scipy.optimize import minimize\nfun=lambda x:(x[0]-1)**2+(x[1]+2)**2\nfor method in [\"BFGS\",\"L-BFGS-B\"]:\n print(method,minimize(fun,[4.,4.],method=method).x)\ny=np.array([1.,0.,0.]);print(\"Smoothed:\",.9*y+.1/3)",
+      "packages": "numpy, scipy",
+      "application": "应用于金融概率风险预测、动态状态估计、量化模型优化与训练稳定性分析。",
+      "limits": "这是一篇包含专属公式与阅读指引的扩展笔记，代码属于学科综合示例，不能替代该具体算法的严谨完整实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "optimization-n03-04",
+      "node_id": "optimization-n03-04",
+      "title": "混合精度",
+      "definition": "以低精度存储及计算部分张量而保留关键计算高精度，减少显存。",
+      "assumptions": "需要明确概率模型、训练样本、数值算法和数据可得时间；非平稳金融序列不自动满足经典独立假设。",
+      "properties": [
+        "以低精度存储及计算部分张量而保留关键计算高精度，减少显存。。",
+        "实际不确定性、稳定性与超参数选择要通过保留样本评估。"
+      ],
+      "formulas": [
+        {
+          "label": "数学表达",
+          "tex": "x_{\\rm low}=\\operatorname{cast}_{\\rm bf16}(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据该知识点的定义，首先确立相关的概率、梯度或优化对象。以低精度存储及计算部分张量而保留关键计算高精度，减少显存。",
+          "tex": "x_{\\rm low}=\\operatorname{cast}_{\\rm bf16}(x)"
+        },
+        {
+          "explanation": "将公式作为数值计算或推断的基础，进一步估计其参数并核验条件。",
+          "tex": "x_{\\rm low}=\\operatorname{cast}_{\\rm bf16}(x)"
+        }
+      ],
+      "code": "# 混合精度 — 学科基本数值示例\nimport numpy as np\nfrom scipy.optimize import minimize\nfun=lambda x:(x[0]-1)**2+(x[1]+2)**2\nfor method in [\"BFGS\",\"L-BFGS-B\"]:\n print(method,minimize(fun,[4.,4.],method=method).x)\ny=np.array([1.,0.,0.]);print(\"Smoothed:\",.9*y+.1/3)",
+      "packages": "numpy, scipy",
+      "application": "应用于金融概率风险预测、动态状态估计、量化模型优化与训练稳定性分析。",
+      "limits": "这是一篇包含专属公式与阅读指引的扩展笔记，代码属于学科综合示例，不能替代该具体算法的严谨完整实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "optimization-n04-04",
+      "node_id": "optimization-n04-04",
+      "title": "梯度累计",
+      "definition": "多个小批次反向传播后的梯度求平均，再执行一次优化器更新。",
+      "assumptions": "需要明确概率模型、训练样本、数值算法和数据可得时间；非平稳金融序列不自动满足经典独立假设。",
+      "properties": [
+        "多个小批次反向传播后的梯度求平均，再执行一次优化器更新。。",
+        "实际不确定性、稳定性与超参数选择要通过保留样本评估。"
+      ],
+      "formulas": [
+        {
+          "label": "数学表达",
+          "tex": "g_{\\rm accum}=K^{-1}\\sum_{k=1}^Kg_{B_k}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据该知识点的定义，首先确立相关的概率、梯度或优化对象。多个小批次反向传播后的梯度求平均，再执行一次优化器更新。",
+          "tex": "g_{\\rm accum}=K^{-1}\\sum_{k=1}^Kg_{B_k}"
+        },
+        {
+          "explanation": "将公式作为数值计算或推断的基础，进一步估计其参数并核验条件。",
+          "tex": "g_{\\rm accum}=K^{-1}\\sum_{k=1}^Kg_{B_k}"
+        }
+      ],
+      "code": "# 梯度累计 — 学科基本数值示例\nimport numpy as np\nfrom scipy.optimize import minimize\nfun=lambda x:(x[0]-1)**2+(x[1]+2)**2\nfor method in [\"BFGS\",\"L-BFGS-B\"]:\n print(method,minimize(fun,[4.,4.],method=method).x)\ny=np.array([1.,0.,0.]);print(\"Smoothed:\",.9*y+.1/3)",
+      "packages": "numpy, scipy",
+      "application": "应用于金融概率风险预测、动态状态估计、量化模型优化与训练稳定性分析。",
+      "limits": "这是一篇包含专属公式与阅读指引的扩展笔记，代码属于学科综合示例，不能替代该具体算法的严谨完整实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "optimization-n05-04",
+      "node_id": "optimization-n05-04",
+      "title": "数值溢出",
+      "definition": "极大Logits的指数化会溢出，应用LogSumExp和Max-Shift稳定计算。",
+      "assumptions": "需要明确概率模型、训练样本、数值算法和数据可得时间；非平稳金融序列不自动满足经典独立假设。",
+      "properties": [
+        "极大Logits的指数化会溢出，应用LogSumExp和Max-Shift稳定计算。。",
+        "实际不确定性、稳定性与超参数选择要通过保留样本评估。"
+      ],
+      "formulas": [
+        {
+          "label": "数学表达",
+          "tex": "\\log\\sum_ie^{z_i}=m+\\log\\sum_ie^{z_i-m}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据该知识点的定义，首先确立相关的概率、梯度或优化对象。极大Logits的指数化会溢出，应用LogSumExp和Max-Shift稳定计算。",
+          "tex": "\\log\\sum_ie^{z_i}=m+\\log\\sum_ie^{z_i-m}"
+        },
+        {
+          "explanation": "将公式作为数值计算或推断的基础，进一步估计其参数并核验条件。",
+          "tex": "\\log\\sum_ie^{z_i}=m+\\log\\sum_ie^{z_i-m}"
+        }
+      ],
+      "code": "# 数值溢出 — 学科基本数值示例\nimport numpy as np\nfrom scipy.optimize import minimize\nfun=lambda x:(x[0]-1)**2+(x[1]+2)**2\nfor method in [\"BFGS\",\"L-BFGS-B\"]:\n print(method,minimize(fun,[4.,4.],method=method).x)\ny=np.array([1.,0.,0.]);print(\"Smoothed:\",.9*y+.1/3)",
+      "packages": "numpy, scipy",
+      "application": "应用于金融概率风险预测、动态状态估计、量化模型优化与训练稳定性分析。",
+      "limits": "这是一篇包含专属公式与阅读指引的扩展笔记，代码属于学科综合示例，不能替代该具体算法的严谨完整实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "optimization-n06-04",
+      "node_id": "optimization-n06-04",
+      "title": "收敛监控",
+      "definition": "使用参数变化、梯度范数和独立验证损失判断训练是否稳定。",
+      "assumptions": "需要明确概率模型、训练样本、数值算法和数据可得时间；非平稳金融序列不自动满足经典独立假设。",
+      "properties": [
+        "使用参数变化、梯度范数和独立验证损失判断训练是否稳定。。",
+        "实际不确定性、稳定性与超参数选择要通过保留样本评估。"
+      ],
+      "formulas": [
+        {
+          "label": "数学表达",
+          "tex": "\\|\\theta_{t+1}-\\theta_t\\|<\\varepsilon"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据该知识点的定义，首先确立相关的概率、梯度或优化对象。使用参数变化、梯度范数和独立验证损失判断训练是否稳定。",
+          "tex": "\\|\\theta_{t+1}-\\theta_t\\|<\\varepsilon"
+        },
+        {
+          "explanation": "将公式作为数值计算或推断的基础，进一步估计其参数并核验条件。",
+          "tex": "\\|\\theta_{t+1}-\\theta_t\\|<\\varepsilon"
+        }
+      ],
+      "code": "# 收敛监控 — 学科基本数值示例\nimport numpy as np\nfrom scipy.optimize import minimize\nfun=lambda x:(x[0]-1)**2+(x[1]+2)**2\nfor method in [\"BFGS\",\"L-BFGS-B\"]:\n print(method,minimize(fun,[4.,4.],method=method).x)\ny=np.array([1.,0.,0.]);print(\"Smoothed:\",.9*y+.1/3)",
+      "packages": "numpy, scipy",
+      "application": "应用于金融概率风险预测、动态状态估计、量化模型优化与训练稳定性分析。",
+      "limits": "这是一篇包含专属公式与阅读指引的扩展笔记，代码属于学科综合示例，不能替代该具体算法的严谨完整实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "optimization-n01-05",
+      "node_id": "optimization-n01-05",
+      "title": "权重衰减",
+      "definition": "对模型权重施加乘法收缩以减轻参数过大和过拟合。",
+      "assumptions": "需要明确概率模型、训练样本、数值算法和数据可得时间；非平稳金融序列不自动满足经典独立假设。",
+      "properties": [
+        "对模型权重施加乘法收缩以减轻参数过大和过拟合。。",
+        "实际不确定性、稳定性与超参数选择要通过保留样本评估。"
+      ],
+      "formulas": [
+        {
+          "label": "数学表达",
+          "tex": "\\theta^+=(1-\\eta\\lambda)\\theta-\\eta g"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据该知识点的定义，首先确立相关的概率、梯度或优化对象。对模型权重施加乘法收缩以减轻参数过大和过拟合。",
+          "tex": "\\theta^+=(1-\\eta\\lambda)\\theta-\\eta g"
+        },
+        {
+          "explanation": "将公式作为数值计算或推断的基础，进一步估计其参数并核验条件。",
+          "tex": "\\theta^+=(1-\\eta\\lambda)\\theta-\\eta g"
+        }
+      ],
+      "code": "# 权重衰减 — 学科基本数值示例\nimport numpy as np\nfrom scipy.optimize import minimize\nfun=lambda x:(x[0]-1)**2+(x[1]+2)**2\nfor method in [\"BFGS\",\"L-BFGS-B\"]:\n print(method,minimize(fun,[4.,4.],method=method).x)\ny=np.array([1.,0.,0.]);print(\"Smoothed:\",.9*y+.1/3)",
+      "packages": "numpy, scipy",
+      "application": "应用于金融概率风险预测、动态状态估计、量化模型优化与训练稳定性分析。",
+      "limits": "这是一篇包含专属公式与阅读指引的扩展笔记，代码属于学科综合示例，不能替代该具体算法的严谨完整实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "optimization-n02-05",
+      "node_id": "optimization-n02-05",
+      "title": "Dropout",
+      "definition": "训练时以Bernoulli掩码随机置零隐藏激活，并按保留概率缩放。",
+      "assumptions": "需要明确概率模型、训练样本、数值算法和数据可得时间；非平稳金融序列不自动满足经典独立假设。",
+      "properties": [
+        "训练时以Bernoulli掩码随机置零隐藏激活，并按保留概率缩放。。",
+        "实际不确定性、稳定性与超参数选择要通过保留样本评估。"
+      ],
+      "formulas": [
+        {
+          "label": "数学表达",
+          "tex": "\\tilde h=mh/(1-p),\\quad m\\sim\\operatorname{Bernoulli}(1-p)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据该知识点的定义，首先确立相关的概率、梯度或优化对象。训练时以Bernoulli掩码随机置零隐藏激活，并按保留概率缩放。",
+          "tex": "\\tilde h=mh/(1-p),\\quad m\\sim\\operatorname{Bernoulli}(1-p)"
+        },
+        {
+          "explanation": "将公式作为数值计算或推断的基础，进一步估计其参数并核验条件。",
+          "tex": "\\tilde h=mh/(1-p),\\quad m\\sim\\operatorname{Bernoulli}(1-p)"
+        }
+      ],
+      "code": "# Dropout — 学科基本数值示例\nimport numpy as np\nfrom scipy.optimize import minimize\nfun=lambda x:(x[0]-1)**2+(x[1]+2)**2\nfor method in [\"BFGS\",\"L-BFGS-B\"]:\n print(method,minimize(fun,[4.,4.],method=method).x)\ny=np.array([1.,0.,0.]);print(\"Smoothed:\",.9*y+.1/3)",
+      "packages": "numpy, scipy",
+      "application": "应用于金融概率风险预测、动态状态估计、量化模型优化与训练稳定性分析。",
+      "limits": "这是一篇包含专属公式与阅读指引的扩展笔记，代码属于学科综合示例，不能替代该具体算法的严谨完整实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "optimization-n03-05",
+      "node_id": "optimization-n03-05",
+      "title": "BatchNorm",
+      "definition": "根据训练批次的均值方差标准化激活，配合可学习尺度及偏置。",
+      "assumptions": "需要明确概率模型、训练样本、数值算法和数据可得时间；非平稳金融序列不自动满足经典独立假设。",
+      "properties": [
+        "根据训练批次的均值方差标准化激活，配合可学习尺度及偏置。。",
+        "实际不确定性、稳定性与超参数选择要通过保留样本评估。"
+      ],
+      "formulas": [
+        {
+          "label": "数学表达",
+          "tex": "y=\\gamma(x-\\mu_B)/\\sqrt{\\sigma_B^2+\\epsilon}+\\beta"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据该知识点的定义，首先确立相关的概率、梯度或优化对象。根据训练批次的均值方差标准化激活，配合可学习尺度及偏置。",
+          "tex": "y=\\gamma(x-\\mu_B)/\\sqrt{\\sigma_B^2+\\epsilon}+\\beta"
+        },
+        {
+          "explanation": "将公式作为数值计算或推断的基础，进一步估计其参数并核验条件。",
+          "tex": "y=\\gamma(x-\\mu_B)/\\sqrt{\\sigma_B^2+\\epsilon}+\\beta"
+        }
+      ],
+      "code": "# BatchNorm — 学科基本数值示例\nimport numpy as np\nfrom scipy.optimize import minimize\nfun=lambda x:(x[0]-1)**2+(x[1]+2)**2\nfor method in [\"BFGS\",\"L-BFGS-B\"]:\n print(method,minimize(fun,[4.,4.],method=method).x)\ny=np.array([1.,0.,0.]);print(\"Smoothed:\",.9*y+.1/3)",
+      "packages": "numpy, scipy",
+      "application": "应用于金融概率风险预测、动态状态估计、量化模型优化与训练稳定性分析。",
+      "limits": "这是一篇包含专属公式与阅读指引的扩展笔记，代码属于学科综合示例，不能替代该具体算法的严谨完整实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "optimization-n04-05",
+      "node_id": "optimization-n04-05",
+      "title": "Label Smoothing",
+      "definition": "将One-Hot目标与均匀类别分布混合，减少过度置信。",
+      "assumptions": "需要明确概率模型、训练样本、数值算法和数据可得时间；非平稳金融序列不自动满足经典独立假设。",
+      "properties": [
+        "将One-Hot目标与均匀类别分布混合，减少过度置信。。",
+        "实际不确定性、稳定性与超参数选择要通过保留样本评估。"
+      ],
+      "formulas": [
+        {
+          "label": "数学表达",
+          "tex": "\\tilde y=(1-\\epsilon)y+\\epsilon/K"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据该知识点的定义，首先确立相关的概率、梯度或优化对象。将One-Hot目标与均匀类别分布混合，减少过度置信。",
+          "tex": "\\tilde y=(1-\\epsilon)y+\\epsilon/K"
+        },
+        {
+          "explanation": "将公式作为数值计算或推断的基础，进一步估计其参数并核验条件。",
+          "tex": "\\tilde y=(1-\\epsilon)y+\\epsilon/K"
+        }
+      ],
+      "code": "# Label Smoothing — 学科基本数值示例\nimport numpy as np\nfrom scipy.optimize import minimize\nfun=lambda x:(x[0]-1)**2+(x[1]+2)**2\nfor method in [\"BFGS\",\"L-BFGS-B\"]:\n print(method,minimize(fun,[4.,4.],method=method).x)\ny=np.array([1.,0.,0.]);print(\"Smoothed:\",.9*y+.1/3)",
+      "packages": "numpy, scipy",
+      "application": "应用于金融概率风险预测、动态状态估计、量化模型优化与训练稳定性分析。",
+      "limits": "这是一篇包含专属公式与阅读指引的扩展笔记，代码属于学科综合示例，不能替代该具体算法的严谨完整实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "optimization-n05-05",
+      "node_id": "optimization-n05-05",
+      "title": "Mixup",
+      "definition": "用同一随机权重把两条样本与对应目标做线性组合。",
+      "assumptions": "需要明确概率模型、训练样本、数值算法和数据可得时间；非平稳金融序列不自动满足经典独立假设。",
+      "properties": [
+        "用同一随机权重把两条样本与对应目标做线性组合。。",
+        "实际不确定性、稳定性与超参数选择要通过保留样本评估。"
+      ],
+      "formulas": [
+        {
+          "label": "数学表达",
+          "tex": "\\tilde x=\\lambda x_i+(1-\\lambda)x_j"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据该知识点的定义，首先确立相关的概率、梯度或优化对象。用同一随机权重把两条样本与对应目标做线性组合。",
+          "tex": "\\tilde x=\\lambda x_i+(1-\\lambda)x_j"
+        },
+        {
+          "explanation": "将公式作为数值计算或推断的基础，进一步估计其参数并核验条件。",
+          "tex": "\\tilde x=\\lambda x_i+(1-\\lambda)x_j"
+        }
+      ],
+      "code": "# Mixup — 学科基本数值示例\nimport numpy as np\nfrom scipy.optimize import minimize\nfun=lambda x:(x[0]-1)**2+(x[1]+2)**2\nfor method in [\"BFGS\",\"L-BFGS-B\"]:\n print(method,minimize(fun,[4.,4.],method=method).x)\ny=np.array([1.,0.,0.]);print(\"Smoothed:\",.9*y+.1/3)",
+      "packages": "numpy, scipy",
+      "application": "应用于金融概率风险预测、动态状态估计、量化模型优化与训练稳定性分析。",
+      "limits": "这是一篇包含专属公式与阅读指引的扩展笔记，代码属于学科综合示例，不能替代该具体算法的严谨完整实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "optimization-n06-05",
+      "node_id": "optimization-n06-05",
+      "title": "早停与模型集成",
+      "definition": "基于验证损失选择训练停止轮数，并平均多个模型结果降低预测方差。",
+      "assumptions": "需要明确概率模型、训练样本、数值算法和数据可得时间；非平稳金融序列不自动满足经典独立假设。",
+      "properties": [
+        "基于验证损失选择训练停止轮数，并平均多个模型结果降低预测方差。。",
+        "实际不确定性、稳定性与超参数选择要通过保留样本评估。"
+      ],
+      "formulas": [
+        {
+          "label": "数学表达",
+          "tex": "\\hat f_{\\rm ens}=M^{-1}\\sum_mf_m"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据该知识点的定义，首先确立相关的概率、梯度或优化对象。基于验证损失选择训练停止轮数，并平均多个模型结果降低预测方差。",
+          "tex": "\\hat f_{\\rm ens}=M^{-1}\\sum_mf_m"
+        },
+        {
+          "explanation": "将公式作为数值计算或推断的基础，进一步估计其参数并核验条件。",
+          "tex": "\\hat f_{\\rm ens}=M^{-1}\\sum_mf_m"
+        }
+      ],
+      "code": "# 早停与模型集成 — 学科基本数值示例\nimport numpy as np\nfrom scipy.optimize import minimize\nfun=lambda x:(x[0]-1)**2+(x[1]+2)**2\nfor method in [\"BFGS\",\"L-BFGS-B\"]:\n print(method,minimize(fun,[4.,4.],method=method).x)\ny=np.array([1.,0.,0.]);print(\"Smoothed:\",.9*y+.1/3)",
+      "packages": "numpy, scipy",
+      "application": "应用于金融概率风险预测、动态状态估计、量化模型优化与训练稳定性分析。",
+      "limits": "这是一篇包含专属公式与阅读指引的扩展笔记，代码属于学科综合示例，不能替代该具体算法的严谨完整实现。",
+      "coverage": "expanded"
+    }
+  ]
+}
