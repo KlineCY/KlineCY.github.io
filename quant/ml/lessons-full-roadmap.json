@@ -1,0 +1,761 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "roadmap-n03-01",
+      "node_id": "roadmap-n03-01",
+      "title": "半监督学习",
+      "definition": "用少量带标签数据与大量未标注数据共同拟合预测器，常通过伪标签或一致性约束利用无标签样本。",
+      "assumptions": "先明确任务类型、数据生成假设、训练与验证的时间边界；所示公式依赖其对应的统计或优化前提。",
+      "properties": [
+        "该方法属于「学习问题与范式」的基本概念，应通过可复现的实验比较其作用和边界。",
+        "核心计算由所列公式定义，实施时须明确参数尺度、信息可得时点与验证指标。"
+      ],
+      "formulas": [
+        {
+          "label": "核心定义或目标",
+          "tex": "L=L_{\\rm sup}+\\lambda L_{\\rm unsup}"
+        },
+        {
+          "label": "推导所用关系",
+          "tex": "L_{\\rm unsup}=E_x\\|f_\\theta(T_1x)-f_\\theta(T_2x)\\|^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据定义，将目标量写为可计算的数学形式，并核对变量含义与适用假设。",
+          "tex": "L_{\\rm unsup}=E_x\\|f_\\theta(T_1x)-f_\\theta(T_2x)\\|^2"
+        },
+        {
+          "explanation": "整理得到可用于训练、评估或推断的核心目标表达式。",
+          "tex": "L=L_{\\rm sup}+\\lambda L_{\\rm unsup}"
+        }
+      ],
+      "code": "import numpy as np\nconf=np.array([.95,.61,.89]);pseudo=np.array([1,0,1]);print(pseudo[conf>.85])",
+      "packages": "numpy（或Python标准库，见示例import）",
+      "application": "用于量化金融研究中规范地进行数据处理、模型训练与样本外验证；应与时间序列和交易成本框架结合。",
+      "limits": "伪标签错误会自我强化；无标签分布和目标任务偏离时可能有害。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n04-01",
+      "node_id": "roadmap-n04-01",
+      "title": "自监督学习",
+      "definition": "从未标注输入自身构造训练目标，例如遮蔽预测、未来片段预测或对比视图匹配。",
+      "assumptions": "先明确任务类型、数据生成假设、训练与验证的时间边界；所示公式依赖其对应的统计或优化前提。",
+      "properties": [
+        "该方法属于「学习问题与范式」的基本概念，应通过可复现的实验比较其作用和边界。",
+        "核心计算由所列公式定义，实施时须明确参数尺度、信息可得时点与验证指标。"
+      ],
+      "formulas": [
+        {
+          "label": "核心定义或目标",
+          "tex": "L_{\\rm SSL}=E_x[\\ell(f_\\theta(T_1x),T_2x)]"
+        },
+        {
+          "label": "推导所用关系",
+          "tex": "\\hat\\theta=\\arg\\min_\\theta L_{\\rm SSL}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据定义，将目标量写为可计算的数学形式，并核对变量含义与适用假设。",
+          "tex": "\\hat\\theta=\\arg\\min_\\theta L_{\\rm SSL}"
+        },
+        {
+          "explanation": "整理得到可用于训练、评估或推断的核心目标表达式。",
+          "tex": "L_{\\rm SSL}=E_x[\\ell(f_\\theta(T_1x),T_2x)]"
+        }
+      ],
+      "code": "import numpy as np\nx=np.arange(10.);visible=x.copy();visible[[2,5]] = 0\nprint('masked positions:',np.where(visible==0)[0])",
+      "packages": "numpy（或Python标准库，见示例import）",
+      "application": "用于量化金融研究中规范地进行数据处理、模型训练与样本外验证；应与时间序列和交易成本框架结合。",
+      "limits": "自监督目标和下游回报预测可能不一致，需独立下游评估。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n05-01",
+      "node_id": "roadmap-n05-01",
+      "title": "强化学习",
+      "definition": "智能体在环境中依策略选动作，通过奖励与状态转移学习长期累计回报最优的行为。",
+      "assumptions": "先明确任务类型、数据生成假设、训练与验证的时间边界；所示公式依赖其对应的统计或优化前提。",
+      "properties": [
+        "该方法属于「学习问题与范式」的基本概念，应通过可复现的实验比较其作用和边界。",
+        "核心计算由所列公式定义，实施时须明确参数尺度、信息可得时点与验证指标。"
+      ],
+      "formulas": [
+        {
+          "label": "核心定义或目标",
+          "tex": "J(\\pi)=E_\\pi[\\sum_{t=0}^{T}\\gamma^t r_t]"
+        },
+        {
+          "label": "推导所用关系",
+          "tex": "a_t\\sim\\pi(\\cdot|s_t),\\quad s_{t+1}\\sim P(\\cdot|s_t,a_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据定义，将目标量写为可计算的数学形式，并核对变量含义与适用假设。",
+          "tex": "a_t\\sim\\pi(\\cdot|s_t),\\quad s_{t+1}\\sim P(\\cdot|s_t,a_t)"
+        },
+        {
+          "explanation": "整理得到可用于训练、评估或推断的核心目标表达式。",
+          "tex": "J(\\pi)=E_\\pi[\\sum_{t=0}^{T}\\gamma^t r_t]"
+        }
+      ],
+      "code": "import numpy as np\nreward=np.array([1.,-.5,2.]);print(sum(.95**t*r for t,r in enumerate(reward)))",
+      "packages": "numpy（或Python标准库，见示例import）",
+      "application": "用于量化金融研究中规范地进行数据处理、模型训练与样本外验证；应与时间序列和交易成本框架结合。",
+      "limits": "金融真实探索可能有严重成本，须区别离线评估与线上控制。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n06-01",
+      "node_id": "roadmap-n06-01",
+      "title": "在线学习",
+      "definition": "模型在数据逐步到达时增量更新，不要求每次完整重训，适合有数据流的系统。",
+      "assumptions": "先明确任务类型、数据生成假设、训练与验证的时间边界；所示公式依赖其对应的统计或优化前提。",
+      "properties": [
+        "该方法属于「学习问题与范式」的基本概念，应通过可复现的实验比较其作用和边界。",
+        "核心计算由所列公式定义，实施时须明确参数尺度、信息可得时点与验证指标。"
+      ],
+      "formulas": [
+        {
+          "label": "核心定义或目标",
+          "tex": "\\theta_{t+1}=\\theta_t-\\eta_t\\nabla_\\theta\\ell(f_{\\theta_t}(x_t),y_t)"
+        },
+        {
+          "label": "推导所用关系",
+          "tex": "L_T=\\sum_{t=1}^T\\ell_t(\\theta_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据定义，将目标量写为可计算的数学形式，并核对变量含义与适用假设。",
+          "tex": "L_T=\\sum_{t=1}^T\\ell_t(\\theta_t)"
+        },
+        {
+          "explanation": "整理得到可用于训练、评估或推断的核心目标表达式。",
+          "tex": "\\theta_{t+1}=\\theta_t-\\eta_t\\nabla_\\theta\\ell(f_{\\theta_t}(x_t),y_t)"
+        }
+      ],
+      "code": "w=0.\nfor x,y in [(1.,2.),(2.,4.),(3.,6.)]:w-=.1*2*x*(w*x-y)\nprint('online coefficient',w)",
+      "packages": "numpy（或Python标准库，见示例import）",
+      "application": "用于量化金融研究中规范地进行数据处理、模型训练与样本外验证；应与时间序列和交易成本框架结合。",
+      "limits": "需要处理数据延迟、概念漂移和单样本高方差。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n02-02",
+      "node_id": "roadmap-n02-02",
+      "title": "真实风险与泛化误差",
+      "definition": "真实风险是总体分布上的期望损失；泛化差异衡量训练经验风险和未知数据风险的偏离。",
+      "assumptions": "先明确任务类型、数据生成假设、训练与验证的时间边界；所示公式依赖其对应的统计或优化前提。",
+      "properties": [
+        "该方法属于「泛化与统计学习」的基本概念，应通过可复现的实验比较其作用和边界。",
+        "核心计算由所列公式定义，实施时须明确参数尺度、信息可得时点与验证指标。"
+      ],
+      "formulas": [
+        {
+          "label": "核心定义或目标",
+          "tex": "R(f)=E_{(X,Y)\\sim P}\\ell(f(X),Y)"
+        },
+        {
+          "label": "推导所用关系",
+          "tex": "\\Delta_{\\rm gen}=R(f)-\\hat R_n(f)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据定义，将目标量写为可计算的数学形式，并核对变量含义与适用假设。",
+          "tex": "\\Delta_{\\rm gen}=R(f)-\\hat R_n(f)"
+        },
+        {
+          "explanation": "整理得到可用于训练、评估或推断的核心目标表达式。",
+          "tex": "R(f)=E_{(X,Y)\\sim P}\\ell(f(X),Y)"
+        }
+      ],
+      "code": "import numpy as np\ntrain=np.array([1,2,1,2]);test=np.array([1,3,2,4]);print('risk gap',np.mean(test**2)-np.mean(train**2))",
+      "packages": "numpy（或Python标准库，见示例import）",
+      "application": "用于量化金融研究中规范地进行数据处理、模型训练与样本外验证；应与时间序列和交易成本框架结合。",
+      "limits": "金融分布P随时间变化时，i.i.d.泛化界通常不能直接使用。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n04-02",
+      "node_id": "roadmap-n04-02",
+      "title": "VC维与学习曲线",
+      "definition": "VC维刻画一个假设类可打散的最大点集规模，学习曲线对比训练样本量与泛化误差。",
+      "assumptions": "先明确任务类型、数据生成假设、训练与验证的时间边界；所示公式依赖其对应的统计或优化前提。",
+      "properties": [
+        "该方法属于「泛化与统计学习」的基本概念，应通过可复现的实验比较其作用和边界。",
+        "核心计算由所列公式定义，实施时须明确参数尺度、信息可得时点与验证指标。"
+      ],
+      "formulas": [
+        {
+          "label": "核心定义或目标",
+          "tex": "R(f)\\lesssim\\hat R_n(f)+O(\\sqrt{(d_{\\rm VC}\\log n+\\log(1/\\delta))/n})"
+        },
+        {
+          "label": "推导所用关系",
+          "tex": "d_{\\rm VC}=\\max\\{m:\\exists\\text{被}\\mathcal H\\text{打散的}m\\text{点}\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据定义，将目标量写为可计算的数学形式，并核对变量含义与适用假设。",
+          "tex": "d_{\\rm VC}=\\max\\{m:\\exists\\text{被}\\mathcal H\\text{打散的}m\\text{点}\\}"
+        },
+        {
+          "explanation": "整理得到可用于训练、评估或推断的核心目标表达式。",
+          "tex": "R(f)\\lesssim\\hat R_n(f)+O(\\sqrt{(d_{\\rm VC}\\log n+\\log(1/\\delta))/n})"
+        }
+      ],
+      "code": "import numpy as np\nn=np.array([50,100,200,400]);d=3\nprint('capacity term',np.sqrt(d*np.log(n)/n))",
+      "packages": "numpy（或Python标准库，见示例import）",
+      "application": "用于量化金融研究中规范地进行数据处理、模型训练与样本外验证；应与时间序列和交易成本框架结合。",
+      "limits": "该公式是示意量级，常数及精确形式依赖具体VC泛化定理。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n05-02",
+      "node_id": "roadmap-n05-02",
+      "title": "正则化",
+      "definition": "在拟合误差外加入参数或函数复杂度惩罚，缓解过拟合并控制估计方差。",
+      "assumptions": "先明确任务类型、数据生成假设、训练与验证的时间边界；所示公式依赖其对应的统计或优化前提。",
+      "properties": [
+        "该方法属于「泛化与统计学习」的基本概念，应通过可复现的实验比较其作用和边界。",
+        "核心计算由所列公式定义，实施时须明确参数尺度、信息可得时点与验证指标。"
+      ],
+      "formulas": [
+        {
+          "label": "核心定义或目标",
+          "tex": "L_\\lambda(\\theta)=\\hat R_n(\\theta)+\\lambda\\Omega(\\theta)"
+        },
+        {
+          "label": "推导所用关系",
+          "tex": "\\Omega_{L_2}=\\|\\theta\\|_2^2,\\quad\\Omega_{L_1}=\\|\\theta\\|_1"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据定义，将目标量写为可计算的数学形式，并核对变量含义与适用假设。",
+          "tex": "\\Omega_{L_2}=\\|\\theta\\|_2^2,\\quad\\Omega_{L_1}=\\|\\theta\\|_1"
+        },
+        {
+          "explanation": "整理得到可用于训练、评估或推断的核心目标表达式。",
+          "tex": "L_\\lambda(\\theta)=\\hat R_n(\\theta)+\\lambda\\Omega(\\theta)"
+        }
+      ],
+      "code": "import numpy as np\nw=np.array([1.,-2.,.5]);print('L1',abs(w).sum(),'L2',w@w)",
+      "packages": "numpy（或Python标准库，见示例import）",
+      "application": "用于量化金融研究中规范地进行数据处理、模型训练与样本外验证；应与时间序列和交易成本框架结合。",
+      "limits": "惩罚强度必须通过训练期验证选取，过强正则化会欠拟合。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n06-02",
+      "node_id": "roadmap-n06-02",
+      "title": "奥卡姆剃刀与模型选择",
+      "definition": "在预测能力相近时偏向更简单、可解释或计算成本更小的模型；真正的模型选择应由独立数据支持。",
+      "assumptions": "先明确任务类型、数据生成假设、训练与验证的时间边界；所示公式依赖其对应的统计或优化前提。",
+      "properties": [
+        "该方法属于「泛化与统计学习」的基本概念，应通过可复现的实验比较其作用和边界。",
+        "核心计算由所列公式定义，实施时须明确参数尺度、信息可得时点与验证指标。"
+      ],
+      "formulas": [
+        {
+          "label": "核心定义或目标",
+          "tex": "M^*=\\arg\\min_M[\\widehat R_{\\rm val}(M)+\\lambda C(M)]"
+        },
+        {
+          "label": "推导所用关系",
+          "tex": "C(M)=\\operatorname{parameters}(M)\\ \\text{（一种复杂度近似）}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据定义，将目标量写为可计算的数学形式，并核对变量含义与适用假设。",
+          "tex": "C(M)=\\operatorname{parameters}(M)\\ \\text{（一种复杂度近似）}"
+        },
+        {
+          "explanation": "整理得到可用于训练、评估或推断的核心目标表达式。",
+          "tex": "M^*=\\arg\\min_M[\\widehat R_{\\rm val}(M)+\\lambda C(M)]"
+        }
+      ],
+      "code": "models=[('linear',.15,2),('deep',.14,120)];print(min(models,key=lambda a:a[1]+.0002*a[2]))",
+      "packages": "numpy（或Python标准库，见示例import）",
+      "application": "用于量化金融研究中规范地进行数据处理、模型训练与样本外验证；应与时间序列和交易成本框架结合。",
+      "limits": "参数量不是唯一复杂度定义；不可用测试集反复选模型。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n01-03",
+      "node_id": "roadmap-n01-03",
+      "title": "平方误差MSE",
+      "definition": "回归中对残差平方取平均，可将大误差施以更强惩罚；高斯同方差模型下与负对数似然相联系。",
+      "assumptions": "先明确任务类型、数据生成假设、训练与验证的时间边界；所示公式依赖其对应的统计或优化前提。",
+      "properties": [
+        "该方法属于「学习目标与损失」的基本概念，应通过可复现的实验比较其作用和边界。",
+        "核心计算由所列公式定义，实施时须明确参数尺度、信息可得时点与验证指标。"
+      ],
+      "formulas": [
+        {
+          "label": "核心定义或目标",
+          "tex": "L_{\\rm MSE}=\\frac1n\\sum_i(y_i-\\hat y_i)^2"
+        },
+        {
+          "label": "推导所用关系",
+          "tex": "\\frac{\\partial L}{\\partial \\hat y_i}=\\frac2n(\\hat y_i-y_i)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据定义，将目标量写为可计算的数学形式，并核对变量含义与适用假设。",
+          "tex": "\\frac{\\partial L}{\\partial \\hat y_i}=\\frac2n(\\hat y_i-y_i)"
+        },
+        {
+          "explanation": "整理得到可用于训练、评估或推断的核心目标表达式。",
+          "tex": "L_{\\rm MSE}=\\frac1n\\sum_i(y_i-\\hat y_i)^2"
+        }
+      ],
+      "code": "import numpy as np\ny=np.array([1.,2.,3.]);p=np.array([1.,1.5,4.]);print(np.mean((y-p)**2))",
+      "packages": "numpy（或Python标准库，见示例import）",
+      "application": "用于量化金融研究中规范地进行数据处理、模型训练与样本外验证；应与时间序列和交易成本框架结合。",
+      "limits": "尾部极端观测可能主导MSE，需与稳健损失比较。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n02-03",
+      "node_id": "roadmap-n02-03",
+      "title": "交叉熵Cross Entropy",
+      "definition": "对目标类别分布赋予的预测概率计算负对数损失，常用于互斥多分类及语言模型训练。",
+      "assumptions": "先明确任务类型、数据生成假设、训练与验证的时间边界；所示公式依赖其对应的统计或优化前提。",
+      "properties": [
+        "该方法属于「学习目标与损失」的基本概念，应通过可复现的实验比较其作用和边界。",
+        "核心计算由所列公式定义，实施时须明确参数尺度、信息可得时点与验证指标。"
+      ],
+      "formulas": [
+        {
+          "label": "核心定义或目标",
+          "tex": "H(p,q)=-\\sum_kp_k\\log q_k"
+        },
+        {
+          "label": "推导所用关系",
+          "tex": "L_{\\rm onehot}=-\\log q_y"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据定义，将目标量写为可计算的数学形式，并核对变量含义与适用假设。",
+          "tex": "L_{\\rm onehot}=-\\log q_y"
+        },
+        {
+          "explanation": "整理得到可用于训练、评估或推断的核心目标表达式。",
+          "tex": "H(p,q)=-\\sum_kp_k\\log q_k"
+        }
+      ],
+      "code": "import numpy as np\nq=np.array([.1,.7,.2]);target=1;print(-np.log(q[target]))",
+      "packages": "numpy（或Python标准库，见示例import）",
+      "application": "用于量化金融研究中规范地进行数据处理、模型训练与样本外验证；应与时间序列和交易成本框架结合。",
+      "limits": "未经校准的类别概率和高准确率不能直接转化为真实风险。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n03-03",
+      "node_id": "roadmap-n03-03",
+      "title": "负对数似然NLL",
+      "definition": "NLL是给定概率模型下对观测结果的对数似然取负，是统一概率回归与分类训练的标准目标。",
+      "assumptions": "先明确任务类型、数据生成假设、训练与验证的时间边界；所示公式依赖其对应的统计或优化前提。",
+      "properties": [
+        "该方法属于「学习目标与损失」的基本概念，应通过可复现的实验比较其作用和边界。",
+        "核心计算由所列公式定义，实施时须明确参数尺度、信息可得时点与验证指标。"
+      ],
+      "formulas": [
+        {
+          "label": "核心定义或目标",
+          "tex": "L_{\\rm NLL}(\\theta)=-\\sum_i\\log p_\\theta(y_i|x_i)"
+        },
+        {
+          "label": "推导所用关系",
+          "tex": "\\arg\\min_\\theta L_{\\rm NLL}=\\arg\\max_\\theta\\prod_i p_\\theta(y_i|x_i)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据定义，将目标量写为可计算的数学形式，并核对变量含义与适用假设。",
+          "tex": "\\arg\\min_\\theta L_{\\rm NLL}=\\arg\\max_\\theta\\prod_i p_\\theta(y_i|x_i)"
+        },
+        {
+          "explanation": "整理得到可用于训练、评估或推断的核心目标表达式。",
+          "tex": "L_{\\rm NLL}(\\theta)=-\\sum_i\\log p_\\theta(y_i|x_i)"
+        }
+      ],
+      "code": "import numpy as np\np=np.array([.9,.75,.6]);print('NLL',-np.log(p).sum())",
+      "packages": "numpy（或Python标准库，见示例import）",
+      "application": "用于量化金融研究中规范地进行数据处理、模型训练与样本外验证；应与时间序列和交易成本框架结合。",
+      "limits": "设定错误的条件分布会造成参数与不确定度估计偏差。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n04-03",
+      "node_id": "roadmap-n04-03",
+      "title": "Huber损失",
+      "definition": "Huber损失小残差时采用平方损失、大残差时采用线性增长，兼顾平滑优化与稳健性。",
+      "assumptions": "先明确任务类型、数据生成假设、训练与验证的时间边界；所示公式依赖其对应的统计或优化前提。",
+      "properties": [
+        "该方法属于「学习目标与损失」的基本概念，应通过可复现的实验比较其作用和边界。",
+        "核心计算由所列公式定义，实施时须明确参数尺度、信息可得时点与验证指标。"
+      ],
+      "formulas": [
+        {
+          "label": "核心定义或目标",
+          "tex": "L_\\delta(e)=\\begin{cases}\\tfrac12e^2,&|e|\\le\\delta\\\\\\delta(|e|-\\delta/2),&|e|>\\delta\\end{cases}"
+        },
+        {
+          "label": "推导所用关系",
+          "tex": "L_\\delta'(e)=\\begin{cases}e,&|e|\\le\\delta\\\\\\delta\\,\\mathrm{sign}(e),&|e|>\\delta\\end{cases}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据定义，将目标量写为可计算的数学形式，并核对变量含义与适用假设。",
+          "tex": "L_\\delta'(e)=\\begin{cases}e,&|e|\\le\\delta\\\\\\delta\\,\\mathrm{sign}(e),&|e|>\\delta\\end{cases}"
+        },
+        {
+          "explanation": "整理得到可用于训练、评估或推断的核心目标表达式。",
+          "tex": "L_\\delta(e)=\\begin{cases}\\tfrac12e^2,&|e|\\le\\delta\\\\\\delta(|e|-\\delta/2),&|e|>\\delta\\end{cases}"
+        }
+      ],
+      "code": "import numpy as np\ne=np.array([.1,1.,5.]);d=1.\nprint(np.where(abs(e)<=d,.5*e**2,d*(abs(e)-.5*d)))",
+      "packages": "numpy（或Python标准库，见示例import）",
+      "application": "用于量化金融研究中规范地进行数据处理、模型训练与样本外验证；应与时间序列和交易成本框架结合。",
+      "limits": "阈值δ要与目标单位配合；过度削弱尾部误差会掩盖重要金融风险。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n05-03",
+      "node_id": "roadmap-n05-03",
+      "title": "Margin损失",
+      "definition": "间隔型损失关注分类边界的安全距离，典型Hinge损失在错误或间隔不足时给予惩罚。",
+      "assumptions": "先明确任务类型、数据生成假设、训练与验证的时间边界；所示公式依赖其对应的统计或优化前提。",
+      "properties": [
+        "该方法属于「学习目标与损失」的基本概念，应通过可复现的实验比较其作用和边界。",
+        "核心计算由所列公式定义，实施时须明确参数尺度、信息可得时点与验证指标。"
+      ],
+      "formulas": [
+        {
+          "label": "核心定义或目标",
+          "tex": "L_{\\rm margin}=\\max(0,1-yf(x))"
+        },
+        {
+          "label": "推导所用关系",
+          "tex": "m=yf(x),\\quad L=(1-m)_+"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据定义，将目标量写为可计算的数学形式，并核对变量含义与适用假设。",
+          "tex": "m=yf(x),\\quad L=(1-m)_+"
+        },
+        {
+          "explanation": "整理得到可用于训练、评估或推断的核心目标表达式。",
+          "tex": "L_{\\rm margin}=\\max(0,1-yf(x))"
+        }
+      ],
+      "code": "import numpy as np\ny=np.array([1.,-1.,1.]);s=np.array([2.,.2,-.5]);print(np.maximum(0,1-y*s))",
+      "packages": "numpy（或Python标准库，见示例import）",
+      "application": "用于量化金融研究中规范地进行数据处理、模型训练与样本外验证；应与时间序列和交易成本框架结合。",
+      "limits": "间隔分数不天然构成校准概率。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n06-03",
+      "node_id": "roadmap-n06-03",
+      "title": "自定义目标函数",
+      "definition": "根据实际任务把预测损失、经济成本和约束组合成可优化函数，需检查可微性、数值尺度和目标一致性。",
+      "assumptions": "先明确任务类型、数据生成假设、训练与验证的时间边界；所示公式依赖其对应的统计或优化前提。",
+      "properties": [
+        "该方法属于「学习目标与损失」的基本概念，应通过可复现的实验比较其作用和边界。",
+        "核心计算由所列公式定义，实施时须明确参数尺度、信息可得时点与验证指标。"
+      ],
+      "formulas": [
+        {
+          "label": "核心定义或目标",
+          "tex": "L=L_{\\rm pred}+\\lambda_1L_{\\rm turnover}+\\lambda_2L_{\\rm risk}"
+        },
+        {
+          "label": "推导所用关系",
+          "tex": "L_{\\rm turnover}=\\sum_t\\|w_t-w_{t-1}\\|_1"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据定义，将目标量写为可计算的数学形式，并核对变量含义与适用假设。",
+          "tex": "L_{\\rm turnover}=\\sum_t\\|w_t-w_{t-1}\\|_1"
+        },
+        {
+          "explanation": "整理得到可用于训练、评估或推断的核心目标表达式。",
+          "tex": "L=L_{\\rm pred}+\\lambda_1L_{\\rm turnover}+\\lambda_2L_{\\rm risk}"
+        }
+      ],
+      "code": "import numpy as np\nmse=.12;turnover=.3;risk=.04\nprint('total objective',mse+.05*turnover+.2*risk)",
+      "packages": "numpy（或Python标准库，见示例import）",
+      "application": "用于量化金融研究中规范地进行数据处理、模型训练与样本外验证；应与时间序列和交易成本框架结合。",
+      "limits": "预测误差最小化和策略净收益最大化不等价，参数需要OOS调优。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n02-04",
+      "node_id": "roadmap-n02-04",
+      "title": "分层抽样",
+      "definition": "按类别比例在各数据子集中抽样，使小类别不会被随机划分意外遗漏。",
+      "assumptions": "先明确任务类型、数据生成假设、训练与验证的时间边界；所示公式依赖其对应的统计或优化前提。",
+      "properties": [
+        "该方法属于「数据划分与验证」的基本概念，应通过可复现的实验比较其作用和边界。",
+        "核心计算由所列公式定义，实施时须明确参数尺度、信息可得时点与验证指标。"
+      ],
+      "formulas": [
+        {
+          "label": "核心定义或目标",
+          "tex": "\\hat p_k^{\\rm train}\\approx\\hat p_k^{\\rm full}"
+        },
+        {
+          "label": "推导所用关系",
+          "tex": "n_{k,{\\rm train}}\\approx\\rho n_k"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据定义，将目标量写为可计算的数学形式，并核对变量含义与适用假设。",
+          "tex": "n_{k,{\\rm train}}\\approx\\rho n_k"
+        },
+        {
+          "explanation": "整理得到可用于训练、评估或推断的核心目标表达式。",
+          "tex": "\\hat p_k^{\\rm train}\\approx\\hat p_k^{\\rm full}"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.model_selection import train_test_split\ny=np.array([0]*80+[1]*20);X=np.arange(100)\na,b=train_test_split(X,test_size=.2,stratify=y,random_state=0)\nprint(y[a].mean(),y[b].mean())",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化金融研究中规范地进行数据处理、模型训练与样本外验证；应与时间序列和交易成本框架结合。",
+      "limits": "普通分层随机抽样不遵守时序结构，不能直接用于未来回报预测。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n03-04",
+      "node_id": "roadmap-n03-04",
+      "title": "K折交叉验证",
+      "definition": "把样本划为K个互斥折，每次用K−1折训练、剩下一折验证，再对各折评价取平均。",
+      "assumptions": "先明确任务类型、数据生成假设、训练与验证的时间边界；所示公式依赖其对应的统计或优化前提。",
+      "properties": [
+        "该方法属于「数据划分与验证」的基本概念，应通过可复现的实验比较其作用和边界。",
+        "核心计算由所列公式定义，实施时须明确参数尺度、信息可得时点与验证指标。"
+      ],
+      "formulas": [
+        {
+          "label": "核心定义或目标",
+          "tex": "\\widehat R_{\\rm CV}=\\frac1K\\sum_{k=1}^KR_k"
+        },
+        {
+          "label": "推导所用关系",
+          "tex": "I=\\bigcup_{k=1}^KI_k,\\quad I_j\\cap I_k=\\varnothing"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据定义，将目标量写为可计算的数学形式，并核对变量含义与适用假设。",
+          "tex": "I=\\bigcup_{k=1}^KI_k,\\quad I_j\\cap I_k=\\varnothing"
+        },
+        {
+          "explanation": "整理得到可用于训练、评估或推断的核心目标表达式。",
+          "tex": "\\widehat R_{\\rm CV}=\\frac1K\\sum_{k=1}^KR_k"
+        }
+      ],
+      "code": "from sklearn.model_selection import KFold\nimport numpy as np\nfor tr,te in KFold(4,shuffle=True,random_state=1).split(np.arange(20)):\n    print(len(tr),len(te))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化金融研究中规范地进行数据处理、模型训练与样本外验证；应与时间序列和交易成本框架结合。",
+      "limits": "时间序列和重叠金融标签需要时间切分、Purging，而不是随机K折。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n01-05",
+      "node_id": "roadmap-n01-05",
+      "title": "基线模型",
+      "definition": "基线模型提供简单、可解释、低计算成本的参照，任何复杂模型都应证明相对于基线的增益。",
+      "assumptions": "先明确任务类型、数据生成假设、训练与验证的时间边界；所示公式依赖其对应的统计或优化前提。",
+      "properties": [
+        "该方法属于「可复现研究框架」的基本概念，应通过可复现的实验比较其作用和边界。",
+        "核心计算由所列公式定义，实施时须明确参数尺度、信息可得时点与验证指标。"
+      ],
+      "formulas": [
+        {
+          "label": "核心定义或目标",
+          "tex": "\\Delta R=R_{\\rm baseline}-R_{\\rm candidate}"
+        },
+        {
+          "label": "推导所用关系",
+          "tex": "R_{\\rm baseline}=E[(Y-\\hat y_{\\rm naive})^2]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据定义，将目标量写为可计算的数学形式，并核对变量含义与适用假设。",
+          "tex": "R_{\\rm baseline}=E[(Y-\\hat y_{\\rm naive})^2]"
+        },
+        {
+          "explanation": "整理得到可用于训练、评估或推断的核心目标表达式。",
+          "tex": "\\Delta R=R_{\\rm baseline}-R_{\\rm candidate}"
+        }
+      ],
+      "code": "import numpy as np\ny=np.array([1.,2.,3.,2.]);mean=np.mean(y[:3]);print('constant baseline MSE',(y[-1]-mean)**2)",
+      "packages": "numpy（或Python标准库，见示例import）",
+      "application": "用于量化金融研究中规范地进行数据处理、模型训练与样本外验证；应与时间序列和交易成本框架结合。",
+      "limits": "不能只对比随机猜测，应至少包含交易可执行的持有或零预测基线。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n03-05",
+      "node_id": "roadmap-n03-05",
+      "title": "随机种子",
+      "definition": "随机种子用于控制伪随机数生成器的初始状态，利于重复运行相同数据和模型实验。",
+      "assumptions": "先明确任务类型、数据生成假设、训练与验证的时间边界；所示公式依赖其对应的统计或优化前提。",
+      "properties": [
+        "该方法属于「可复现研究框架」的基本概念，应通过可复现的实验比较其作用和边界。",
+        "核心计算由所列公式定义，实施时须明确参数尺度、信息可得时点与验证指标。"
+      ],
+      "formulas": [
+        {
+          "label": "核心定义或目标",
+          "tex": "\\hat\\theta=\\mathcal A(D,\\omega_{\\rm seed})"
+        },
+        {
+          "label": "推导所用关系",
+          "tex": "\\omega_{\\rm seed}=\\operatorname{PRNG}(s)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据定义，将目标量写为可计算的数学形式，并核对变量含义与适用假设。",
+          "tex": "\\omega_{\\rm seed}=\\operatorname{PRNG}(s)"
+        },
+        {
+          "explanation": "整理得到可用于训练、评估或推断的核心目标表达式。",
+          "tex": "\\hat\\theta=\\mathcal A(D,\\omega_{\\rm seed})"
+        }
+      ],
+      "code": "import numpy as np\nprint(np.random.default_rng(42).normal(size=3))\nprint(np.random.default_rng(42).normal(size=3))",
+      "packages": "numpy（或Python标准库，见示例import）",
+      "application": "用于量化金融研究中规范地进行数据处理、模型训练与样本外验证；应与时间序列和交易成本框架结合。",
+      "limits": "不同硬件、并行算子和版本可能使结果不完全确定；应汇报多种子分布。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n04-05",
+      "node_id": "roadmap-n04-05",
+      "title": "超参数搜索",
+      "definition": "超参数搜索在预先定义的候选空间内比较模型验证表现，采用网格、随机或贝叶斯优化等策略。",
+      "assumptions": "先明确任务类型、数据生成假设、训练与验证的时间边界；所示公式依赖其对应的统计或优化前提。",
+      "properties": [
+        "该方法属于「可复现研究框架」的基本概念，应通过可复现的实验比较其作用和边界。",
+        "核心计算由所列公式定义，实施时须明确参数尺度、信息可得时点与验证指标。"
+      ],
+      "formulas": [
+        {
+          "label": "核心定义或目标",
+          "tex": "\\lambda^*=\\arg\\min_{\\lambda\\in\\Lambda}R_{\\rm val}(f_{\\hat\\theta(\\lambda)})"
+        },
+        {
+          "label": "推导所用关系",
+          "tex": "\\hat\\theta(\\lambda)=\\arg\\min_\\theta L_{\\rm train}(\\theta;\\lambda)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据定义，将目标量写为可计算的数学形式，并核对变量含义与适用假设。",
+          "tex": "\\hat\\theta(\\lambda)=\\arg\\min_\\theta L_{\\rm train}(\\theta;\\lambda)"
+        },
+        {
+          "explanation": "整理得到可用于训练、评估或推断的核心目标表达式。",
+          "tex": "\\lambda^*=\\arg\\min_{\\lambda\\in\\Lambda}R_{\\rm val}(f_{\\hat\\theta(\\lambda)})"
+        }
+      ],
+      "code": "from sklearn.model_selection import GridSearchCV\nfrom sklearn.linear_model import Ridge\nimport numpy as np\nX=np.arange(30).reshape(15,2);y=X[:,0]*.2\nprint(GridSearchCV(Ridge(),{'alpha':[.1,1.,10.]},cv=3).fit(X,y).best_params_)",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化金融研究中规范地进行数据处理、模型训练与样本外验证；应与时间序列和交易成本框架结合。",
+      "limits": "调参次数越多，验证集过拟合风险越高；最终评估应独立保留测试区间。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n05-05",
+      "node_id": "roadmap-n05-05",
+      "title": "统计显著性",
+      "definition": "统计显著性用于评价在零假设成立时观测到当前或更极端统计量的概率，需结合效应大小与多重检验。",
+      "assumptions": "先明确任务类型、数据生成假设、训练与验证的时间边界；所示公式依赖其对应的统计或优化前提。",
+      "properties": [
+        "该方法属于「可复现研究框架」的基本概念，应通过可复现的实验比较其作用和边界。",
+        "核心计算由所列公式定义，实施时须明确参数尺度、信息可得时点与验证指标。"
+      ],
+      "formulas": [
+        {
+          "label": "核心定义或目标",
+          "tex": "p=P_{H_0}(|T|\\ge|T_{\\rm obs}|)"
+        },
+        {
+          "label": "推导所用关系",
+          "tex": "T=\\frac{\\bar X-\\mu_0}{s/\\sqrt n}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据定义，将目标量写为可计算的数学形式，并核对变量含义与适用假设。",
+          "tex": "T=\\frac{\\bar X-\\mu_0}{s/\\sqrt n}"
+        },
+        {
+          "explanation": "整理得到可用于训练、评估或推断的核心目标表达式。",
+          "tex": "p=P_{H_0}(|T|\\ge|T_{\\rm obs}|)"
+        }
+      ],
+      "code": "import numpy as np\nfrom scipy.stats import ttest_1samp\nx=np.array([.01,.02,-.01,.03,0.,.02]);print(ttest_1samp(x,0.))",
+      "packages": "numpy, scipy",
+      "application": "用于量化金融研究中规范地进行数据处理、模型训练与样本外验证；应与时间序列和交易成本框架结合。",
+      "limits": "金融收益常异方差与自相关，简单独立t检验可能不适合。",
+      "coverage": "complete"
+    },
+    {
+      "id": "roadmap-n06-05",
+      "node_id": "roadmap-n06-05",
+      "title": "模型卡与研究报告",
+      "definition": "模型卡结构化记录任务、训练数据、评价、限制和风险；研究报告还需注明特征时点、基线、回测成本及复现环境。",
+      "assumptions": "先明确任务类型、数据生成假设、训练与验证的时间边界；所示公式依赖其对应的统计或优化前提。",
+      "properties": [
+        "该方法属于「可复现研究框架」的基本概念，应通过可复现的实验比较其作用和边界。",
+        "核心计算由所列公式定义，实施时须明确参数尺度、信息可得时点与验证指标。"
+      ],
+      "formulas": [
+        {
+          "label": "核心定义或目标",
+          "tex": "\\mathcal M=(\\text{Task},\\text{Data},\\text{Metrics},\\text{Limits},\\text{Version})"
+        },
+        {
+          "label": "推导所用关系",
+          "tex": "\\operatorname{Reproduce}(D_v,C_v,\\theta_v)\\to R_v"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "依据定义，将目标量写为可计算的数学形式，并核对变量含义与适用假设。",
+          "tex": "\\operatorname{Reproduce}(D_v,C_v,\\theta_v)\\to R_v"
+        },
+        {
+          "explanation": "整理得到可用于训练、评估或推断的核心目标表达式。",
+          "tex": "\\mathcal M=(\\text{Task},\\text{Data},\\text{Metrics},\\text{Limits},\\text{Version})"
+        }
+      ],
+      "code": "card={'model':'ETF baseline','data_end':'2025-12-31','metric':'OOS RMSE','limitation':'no costs'}\nprint(card)",
+      "packages": "记录字段不是独立验证；还要保留可核查的数据源和测试日志。",
+      "application": "用于量化金融研究中规范地进行数据处理、模型训练与样本外验证；应与时间序列和交易成本框架结合。",
+      "limits": "模型审计、量化策略交接、实习研究报告与方法可复现性。",
+      "coverage": "complete"
+    }
+  ]
+}
