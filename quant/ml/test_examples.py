@@ -11,6 +11,7 @@ MANIFEST=json.loads((ROOT/"manifest.json").read_text(encoding="utf-8"))
 FILES=MANIFEST["lesson_files"]
 LESSONS=[x for f in FILES for x in json.loads((ROOT/f).read_text(encoding="utf-8"))["lessons"]]
 NOTES=[x for f in MANIFEST.get("note_files",[]) for x in json.loads((ROOT/f).read_text(encoding="utf-8"))["notes"]]
+EXAMPLES=[x for f in MANIFEST.get("example_files",[]) for x in json.loads((ROOT/f).read_text(encoding="utf-8"))["lessons"]]
 SMOKE={
     "经验风险最小化ERM","偏差方差权衡","数据泄漏","标准化StandardScaler",
     "PCA","线性回归与OLS","Ridge回归","LASSO回归","Logistic回归",
@@ -50,7 +51,7 @@ SMOKE={
 }
 class MLExamplesTest(unittest.TestCase):
     def test_all_code_compiles(self):
-        for item in LESSONS+NOTES:
+        for item in LESSONS+NOTES+EXAMPLES:
             with self.subTest(lesson=item["title"]):
                 compile(item["code"],item["title"],"exec",dont_inherit=True)
     def test_selected_snippets_run(self):
