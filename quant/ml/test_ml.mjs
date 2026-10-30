@@ -8,6 +8,9 @@ const curriculum=read("curriculum.json");
 const manifest=read("manifest.json");
 const files=manifest.lesson_files;
 const lessons=files.flatMap(p=>read(p).lessons);
+const notes=(manifest.note_files||[]).flatMap(p=>read(p).notes);
+assert.equal(notes.length,manifest.notes_count,"supplemental note manifest mismatch");
+assert.equal(lessons.length+notes.length,curriculum.nodes.length,"some topics have no reading content");
 assert.equal(lessons.length,manifest.total_lessons,"manifest count mismatch");
 const topicIDs=new Set(),chapterIDs=new Set(),deptIDs=new Set();
 assert.equal(curriculum.disciplines.length,24);
@@ -35,7 +38,7 @@ for(const n of curriculum.nodes){
 for(const ch of curriculum.chapters)for(const id of ch.node_ids)assert.equal(nodeMap.get(id)?.chapter_id,ch.id);
 assert(lessons.length>=150,"tutorial expansion unexpectedly missing");
 const covered=new Set(),katexErrors=[];
-for(const l of lessons){
+for(const l of [...lessons,...notes]){
  assert(topicIDs.has(l.node_id),"lesson missing from curriculum "+l.node_id);
  assert(!covered.has(l.node_id),"duplicate tutorial "+l.node_id);covered.add(l.node_id);
  assert.equal(l.title,nodeMap.get(l.node_id).title);
@@ -62,4 +65,4 @@ for(const marker of ['id="quantSidebar"','id="tree"','id="article"','id="coverag
 assert(nav.includes('["ml","机器学习 Machine Learning"]'));
 assert(app.includes("复制代码"));
 assert(app.includes("manifest.lesson_files"));
-console.log("PASS: 24 ML disciplines, 120 chapters, 720 nodes, "+lessons.length+" full tutorials, LaTeX parses, navigation and JS syntax valid.");
+console.log("PASS: 24 ML disciplines, 120 chapters, 720 nodes, "+lessons.length+" full tutorials, "+notes.length+" supplementary notes, all topics covered, LaTeX parses, navigation and JS syntax valid.");
