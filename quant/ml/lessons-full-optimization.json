@@ -1,0 +1,549 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "optimization-n03-02",
+      "node_id": "optimization-n03-02",
+      "title": "AdaGrad",
+      "definition": "逐维累积历史平方梯度并据其平方根缩放当前更新步幅。",
+      "assumptions": "优化方法依赖目标函数的光滑性、约束、梯度与数值精度；正则化效果还应通过独立验证样本判断。",
+      "properties": [
+        "逐维累积历史平方梯度并据其平方根缩放当前更新步幅。",
+        "方法的收敛与泛化性质须区分，优化器收敛并不保证模型在新时期金融数据上有效。"
+      ],
+      "formulas": [
+        {
+          "label": "主要目标或更新规则",
+          "tex": "G_t=\\sum_{s=1}^tg_s^2,\\quad\\theta^+=\\theta-\\eta g_t/(\\sqrt{G_t}+\\epsilon)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从原始损失、正则化或约束形式构造该算法对应的梯度、近端或归一化更新。",
+          "tex": "G_t=\\sum_{s=1}^tg_s^2,\\quad\\theta^+=\\theta-\\eta g_t/(\\sqrt{G_t}+\\epsilon)"
+        },
+        {
+          "explanation": "按更新公式实现计算步骤并检查学习率、范数、数值稳定和验证误差。",
+          "tex": "G_t=\\sum_{s=1}^tg_s^2,\\quad\\theta^+=\\theta-\\eta g_t/(\\sqrt{G_t}+\\epsilon)"
+        }
+      ],
+      "code": "import numpy as np\nfrom scipy.optimize import minimize\nres=minimize(lambda x:(x[0]-2)**2,[0.],method='BFGS');print(res.x,res.success)",
+      "packages": "PyTorch/NumPy/SciPy（依据示例导入）",
+      "application": "用于金融时序深度模型、多因子监督学习和交易智能体的稳定训练。",
+      "limits": "代码仅演示所属章节的基础优化机制而非整个大型模型训练。不同硬件和模型目标需要独立调参和收敛性审计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n02-03",
+      "node_id": "optimization-n02-03",
+      "title": "BFGS/L-BFGS",
+      "definition": "用相邻参数和梯度差近似更新Hessian逆，而无需构造精确二阶矩阵。",
+      "assumptions": "优化方法依赖目标函数的光滑性、约束、梯度与数值精度；正则化效果还应通过独立验证样本判断。",
+      "properties": [
+        "用相邻参数和梯度差近似更新Hessian逆，而无需构造精确二阶矩阵。",
+        "方法的收敛与泛化性质须区分，优化器收敛并不保证模型在新时期金融数据上有效。"
+      ],
+      "formulas": [
+        {
+          "label": "主要目标或更新规则",
+          "tex": "H_{k+1}=(I-\\rho sy^\\top)H_k(I-\\rho ys^\\top)+\\rho ss^\\top"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从原始损失、正则化或约束形式构造该算法对应的梯度、近端或归一化更新。",
+          "tex": "H_{k+1}=(I-\\rho sy^\\top)H_k(I-\\rho ys^\\top)+\\rho ss^\\top"
+        },
+        {
+          "explanation": "按更新公式实现计算步骤并检查学习率、范数、数值稳定和验证误差。",
+          "tex": "H_{k+1}=(I-\\rho sy^\\top)H_k(I-\\rho ys^\\top)+\\rho ss^\\top"
+        }
+      ],
+      "code": "import torch\nlayer=torch.nn.Linear(4,8);torch.nn.init.kaiming_normal_(layer.weight)\nprint(layer.weight.std().item())",
+      "packages": "PyTorch/NumPy/SciPy（依据示例导入）",
+      "application": "用于金融时序深度模型、多因子监督学习和交易智能体的稳定训练。",
+      "limits": "代码仅演示所属章节的基础优化机制而非整个大型模型训练。不同硬件和模型目标需要独立调参和收敛性审计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n03-03",
+      "node_id": "optimization-n03-03",
+      "title": "凸与非凸损失",
+      "definition": "凸损失任意局部极小也是全局极小，非凸网络可能有鞍点与多个局部最小值。",
+      "assumptions": "优化方法依赖目标函数的光滑性、约束、梯度与数值精度；正则化效果还应通过独立验证样本判断。",
+      "properties": [
+        "凸损失任意局部极小也是全局极小，非凸网络可能有鞍点与多个局部最小值。",
+        "方法的收敛与泛化性质须区分，优化器收敛并不保证模型在新时期金融数据上有效。"
+      ],
+      "formulas": [
+        {
+          "label": "主要目标或更新规则",
+          "tex": "f(\\lambda x+(1-\\lambda)y)\\le\\lambda f(x)+(1-\\lambda)f(y)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从原始损失、正则化或约束形式构造该算法对应的梯度、近端或归一化更新。",
+          "tex": "f(\\lambda x+(1-\\lambda)y)\\le\\lambda f(x)+(1-\\lambda)f(y)"
+        },
+        {
+          "explanation": "按更新公式实现计算步骤并检查学习率、范数、数值稳定和验证误差。",
+          "tex": "f(\\lambda x+(1-\\lambda)y)\\le\\lambda f(x)+(1-\\lambda)f(y)"
+        }
+      ],
+      "code": "import torch\nlayer=torch.nn.Linear(4,8);torch.nn.init.kaiming_normal_(layer.weight)\nprint(layer.weight.std().item())",
+      "packages": "PyTorch/NumPy/SciPy（依据示例导入）",
+      "application": "用于金融时序深度模型、多因子监督学习和交易智能体的稳定训练。",
+      "limits": "代码仅演示所属章节的基础优化机制而非整个大型模型训练。不同硬件和模型目标需要独立调参和收敛性审计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n04-03",
+      "node_id": "optimization-n04-03",
+      "title": "投影梯度",
+      "definition": "先沿梯度下降再投影至满足预算或其他约束的可行域。",
+      "assumptions": "优化方法依赖目标函数的光滑性、约束、梯度与数值精度；正则化效果还应通过独立验证样本判断。",
+      "properties": [
+        "先沿梯度下降再投影至满足预算或其他约束的可行域。",
+        "方法的收敛与泛化性质须区分，优化器收敛并不保证模型在新时期金融数据上有效。"
+      ],
+      "formulas": [
+        {
+          "label": "主要目标或更新规则",
+          "tex": "\\theta^+=\\Pi_{\\mathcal C}(\\theta-\\eta\\nabla f(\\theta))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从原始损失、正则化或约束形式构造该算法对应的梯度、近端或归一化更新。",
+          "tex": "\\theta^+=\\Pi_{\\mathcal C}(\\theta-\\eta\\nabla f(\\theta))"
+        },
+        {
+          "explanation": "按更新公式实现计算步骤并检查学习率、范数、数值稳定和验证误差。",
+          "tex": "\\theta^+=\\Pi_{\\mathcal C}(\\theta-\\eta\\nabla f(\\theta))"
+        }
+      ],
+      "code": "import torch\nlayer=torch.nn.Linear(4,8);torch.nn.init.kaiming_normal_(layer.weight)\nprint(layer.weight.std().item())",
+      "packages": "PyTorch/NumPy/SciPy（依据示例导入）",
+      "application": "用于金融时序深度模型、多因子监督学习和交易智能体的稳定训练。",
+      "limits": "代码仅演示所属章节的基础优化机制而非整个大型模型训练。不同硬件和模型目标需要独立调参和收敛性审计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n06-03",
+      "node_id": "optimization-n06-03",
+      "title": "ADMM",
+      "definition": "增广拉格朗日法通过变量拆分和对偶更新求解带线性耦合约束的优化问题。",
+      "assumptions": "优化方法依赖目标函数的光滑性、约束、梯度与数值精度；正则化效果还应通过独立验证样本判断。",
+      "properties": [
+        "增广拉格朗日法通过变量拆分和对偶更新求解带线性耦合约束的优化问题。",
+        "方法的收敛与泛化性质须区分，优化器收敛并不保证模型在新时期金融数据上有效。"
+      ],
+      "formulas": [
+        {
+          "label": "主要目标或更新规则",
+          "tex": "L_\\rho(x,z,u)=f(x)+g(z)+\\frac\\rho2\\|Ax+Bz-c+u\\|^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从原始损失、正则化或约束形式构造该算法对应的梯度、近端或归一化更新。",
+          "tex": "L_\\rho(x,z,u)=f(x)+g(z)+\\frac\\rho2\\|Ax+Bz-c+u\\|^2"
+        },
+        {
+          "explanation": "按更新公式实现计算步骤并检查学习率、范数、数值稳定和验证误差。",
+          "tex": "L_\\rho(x,z,u)=f(x)+g(z)+\\frac\\rho2\\|Ax+Bz-c+u\\|^2"
+        }
+      ],
+      "code": "import torch\nlayer=torch.nn.Linear(4,8);torch.nn.init.kaiming_normal_(layer.weight)\nprint(layer.weight.std().item())",
+      "packages": "PyTorch/NumPy/SciPy（依据示例导入）",
+      "application": "用于金融时序深度模型、多因子监督学习和交易智能体的稳定训练。",
+      "limits": "代码仅演示所属章节的基础优化机制而非整个大型模型训练。不同硬件和模型目标需要独立调参和收敛性审计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n01-04",
+      "node_id": "optimization-n01-04",
+      "title": "初始化Xavier/He",
+      "definition": "按层输入输出规模设置初始权重方差，防止信号随层深度迅速放大或缩小。",
+      "assumptions": "优化方法依赖目标函数的光滑性、约束、梯度与数值精度；正则化效果还应通过独立验证样本判断。",
+      "properties": [
+        "按层输入输出规模设置初始权重方差，防止信号随层深度迅速放大或缩小。",
+        "方法的收敛与泛化性质须区分，优化器收敛并不保证模型在新时期金融数据上有效。"
+      ],
+      "formulas": [
+        {
+          "label": "主要目标或更新规则",
+          "tex": "\\operatorname{Var}(W_{\\rm He})=2/n_{\\rm in}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从原始损失、正则化或约束形式构造该算法对应的梯度、近端或归一化更新。",
+          "tex": "\\operatorname{Var}(W_{\\rm He})=2/n_{\\rm in}"
+        },
+        {
+          "explanation": "按更新公式实现计算步骤并检查学习率、范数、数值稳定和验证误差。",
+          "tex": "\\operatorname{Var}(W_{\\rm He})=2/n_{\\rm in}"
+        }
+      ],
+      "code": "import torch\nx=torch.tensor([1000.,1001.]);m=x.max();print(m+torch.log(torch.exp(x-m).sum()))",
+      "packages": "PyTorch/NumPy/SciPy（依据示例导入）",
+      "application": "用于金融时序深度模型、多因子监督学习和交易智能体的稳定训练。",
+      "limits": "代码仅演示所属章节的基础优化机制而非整个大型模型训练。不同硬件和模型目标需要独立调参和收敛性审计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n02-04",
+      "node_id": "optimization-n02-04",
+      "title": "梯度消失爆炸",
+      "definition": "反向链式法则反复乘积Jacobian，导致深层梯度范数趋近零或增长过大。",
+      "assumptions": "优化方法依赖目标函数的光滑性、约束、梯度与数值精度；正则化效果还应通过独立验证样本判断。",
+      "properties": [
+        "反向链式法则反复乘积Jacobian，导致深层梯度范数趋近零或增长过大。",
+        "方法的收敛与泛化性质须区分，优化器收敛并不保证模型在新时期金融数据上有效。"
+      ],
+      "formulas": [
+        {
+          "label": "主要目标或更新规则",
+          "tex": "\\frac{\\partial L}{\\partial h_0}=\\prod_{\\ell=1}^LJ_\\ell^\\top\\frac{\\partial L}{\\partial h_L}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从原始损失、正则化或约束形式构造该算法对应的梯度、近端或归一化更新。",
+          "tex": "\\frac{\\partial L}{\\partial h_0}=\\prod_{\\ell=1}^LJ_\\ell^\\top\\frac{\\partial L}{\\partial h_L}"
+        },
+        {
+          "explanation": "按更新公式实现计算步骤并检查学习率、范数、数值稳定和验证误差。",
+          "tex": "\\frac{\\partial L}{\\partial h_0}=\\prod_{\\ell=1}^LJ_\\ell^\\top\\frac{\\partial L}{\\partial h_L}"
+        }
+      ],
+      "code": "import torch\nx=torch.tensor([1000.,1001.]);m=x.max();print(m+torch.log(torch.exp(x-m).sum()))",
+      "packages": "PyTorch/NumPy/SciPy（依据示例导入）",
+      "application": "用于金融时序深度模型、多因子监督学习和交易智能体的稳定训练。",
+      "limits": "代码仅演示所属章节的基础优化机制而非整个大型模型训练。不同硬件和模型目标需要独立调参和收敛性审计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n03-04",
+      "node_id": "optimization-n03-04",
+      "title": "混合精度",
+      "definition": "用低精度张量进行大部分矩阵计算，并在需要时使用更高精度累积以兼顾显存和稳定性。",
+      "assumptions": "优化方法依赖目标函数的光滑性、约束、梯度与数值精度；正则化效果还应通过独立验证样本判断。",
+      "properties": [
+        "用低精度张量进行大部分矩阵计算，并在需要时使用更高精度累积以兼顾显存和稳定性。",
+        "方法的收敛与泛化性质须区分，优化器收敛并不保证模型在新时期金融数据上有效。"
+      ],
+      "formulas": [
+        {
+          "label": "主要目标或更新规则",
+          "tex": "\\operatorname{AMP}=\\text{低精度算子}+\\text{高精度累积}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从原始损失、正则化或约束形式构造该算法对应的梯度、近端或归一化更新。",
+          "tex": "\\operatorname{AMP}=\\text{低精度算子}+\\text{高精度累积}"
+        },
+        {
+          "explanation": "按更新公式实现计算步骤并检查学习率、范数、数值稳定和验证误差。",
+          "tex": "\\operatorname{AMP}=\\text{低精度算子}+\\text{高精度累积}"
+        }
+      ],
+      "code": "import torch\nx=torch.tensor([1000.,1001.]);m=x.max();print(m+torch.log(torch.exp(x-m).sum()))",
+      "packages": "PyTorch/NumPy/SciPy（依据示例导入）",
+      "application": "用于金融时序深度模型、多因子监督学习和交易智能体的稳定训练。",
+      "limits": "代码仅演示所属章节的基础优化机制而非整个大型模型训练。不同硬件和模型目标需要独立调参和收敛性审计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n04-04",
+      "node_id": "optimization-n04-04",
+      "title": "梯度累计",
+      "definition": "连续多个小批次累加梯度后执行一次优化器更新，近似较大有效批量。",
+      "assumptions": "优化方法依赖目标函数的光滑性、约束、梯度与数值精度；正则化效果还应通过独立验证样本判断。",
+      "properties": [
+        "连续多个小批次累加梯度后执行一次优化器更新，近似较大有效批量。",
+        "方法的收敛与泛化性质须区分，优化器收敛并不保证模型在新时期金融数据上有效。"
+      ],
+      "formulas": [
+        {
+          "label": "主要目标或更新规则",
+          "tex": "g_{\\rm eff}=\\frac1K\\sum_{k=1}^Kg_{B_k}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从原始损失、正则化或约束形式构造该算法对应的梯度、近端或归一化更新。",
+          "tex": "g_{\\rm eff}=\\frac1K\\sum_{k=1}^Kg_{B_k}"
+        },
+        {
+          "explanation": "按更新公式实现计算步骤并检查学习率、范数、数值稳定和验证误差。",
+          "tex": "g_{\\rm eff}=\\frac1K\\sum_{k=1}^Kg_{B_k}"
+        }
+      ],
+      "code": "import torch\nx=torch.tensor([1000.,1001.]);m=x.max();print(m+torch.log(torch.exp(x-m).sum()))",
+      "packages": "PyTorch/NumPy/SciPy（依据示例导入）",
+      "application": "用于金融时序深度模型、多因子监督学习和交易智能体的稳定训练。",
+      "limits": "代码仅演示所属章节的基础优化机制而非整个大型模型训练。不同硬件和模型目标需要独立调参和收敛性审计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n05-04",
+      "node_id": "optimization-n05-04",
+      "title": "数值溢出",
+      "definition": "指数、除法和浮点范围会引入无穷大或NaN，需要采用数值稳定表达和监控。",
+      "assumptions": "优化方法依赖目标函数的光滑性、约束、梯度与数值精度；正则化效果还应通过独立验证样本判断。",
+      "properties": [
+        "指数、除法和浮点范围会引入无穷大或NaN，需要采用数值稳定表达和监控。",
+        "方法的收敛与泛化性质须区分，优化器收敛并不保证模型在新时期金融数据上有效。"
+      ],
+      "formulas": [
+        {
+          "label": "主要目标或更新规则",
+          "tex": "\\log\\sum_ie^{z_i}=m+\\log\\sum_ie^{z_i-m}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从原始损失、正则化或约束形式构造该算法对应的梯度、近端或归一化更新。",
+          "tex": "\\log\\sum_ie^{z_i}=m+\\log\\sum_ie^{z_i-m}"
+        },
+        {
+          "explanation": "按更新公式实现计算步骤并检查学习率、范数、数值稳定和验证误差。",
+          "tex": "\\log\\sum_ie^{z_i}=m+\\log\\sum_ie^{z_i-m}"
+        }
+      ],
+      "code": "import torch\nx=torch.tensor([1000.,1001.]);m=x.max();print(m+torch.log(torch.exp(x-m).sum()))",
+      "packages": "PyTorch/NumPy/SciPy（依据示例导入）",
+      "application": "用于金融时序深度模型、多因子监督学习和交易智能体的稳定训练。",
+      "limits": "代码仅演示所属章节的基础优化机制而非整个大型模型训练。不同硬件和模型目标需要独立调参和收敛性审计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n06-04",
+      "node_id": "optimization-n06-04",
+      "title": "收敛监控",
+      "definition": "同时检查训练损失、验证损失、梯度范数、参数更新与数值异常来判断训练是否稳定。",
+      "assumptions": "优化方法依赖目标函数的光滑性、约束、梯度与数值精度；正则化效果还应通过独立验证样本判断。",
+      "properties": [
+        "同时检查训练损失、验证损失、梯度范数、参数更新与数值异常来判断训练是否稳定。",
+        "方法的收敛与泛化性质须区分，优化器收敛并不保证模型在新时期金融数据上有效。"
+      ],
+      "formulas": [
+        {
+          "label": "主要目标或更新规则",
+          "tex": "\\Delta_t=|L_{t+1}-L_t|"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从原始损失、正则化或约束形式构造该算法对应的梯度、近端或归一化更新。",
+          "tex": "\\Delta_t=|L_{t+1}-L_t|"
+        },
+        {
+          "explanation": "按更新公式实现计算步骤并检查学习率、范数、数值稳定和验证误差。",
+          "tex": "\\Delta_t=|L_{t+1}-L_t|"
+        }
+      ],
+      "code": "import torch\nx=torch.tensor([1000.,1001.]);m=x.max();print(m+torch.log(torch.exp(x-m).sum()))",
+      "packages": "PyTorch/NumPy/SciPy（依据示例导入）",
+      "application": "用于金融时序深度模型、多因子监督学习和交易智能体的稳定训练。",
+      "limits": "代码仅演示所属章节的基础优化机制而非整个大型模型训练。不同硬件和模型目标需要独立调参和收敛性审计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n01-05",
+      "node_id": "optimization-n01-05",
+      "title": "权重衰减",
+      "definition": "以训练更新中逐步收缩权重控制模型复杂度，AdamW可将衰减与梯度矩估计解耦。",
+      "assumptions": "优化方法依赖目标函数的光滑性、约束、梯度与数值精度；正则化效果还应通过独立验证样本判断。",
+      "properties": [
+        "以训练更新中逐步收缩权重控制模型复杂度，AdamW可将衰减与梯度矩估计解耦。",
+        "方法的收敛与泛化性质须区分，优化器收敛并不保证模型在新时期金融数据上有效。"
+      ],
+      "formulas": [
+        {
+          "label": "主要目标或更新规则",
+          "tex": "\\theta^+=(1-\\eta\\lambda)\\theta-\\eta g"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从原始损失、正则化或约束形式构造该算法对应的梯度、近端或归一化更新。",
+          "tex": "\\theta^+=(1-\\eta\\lambda)\\theta-\\eta g"
+        },
+        {
+          "explanation": "按更新公式实现计算步骤并检查学习率、范数、数值稳定和验证误差。",
+          "tex": "\\theta^+=(1-\\eta\\lambda)\\theta-\\eta g"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(4,6);print(torch.nn.functional.dropout(x,p=.2,training=True).shape)",
+      "packages": "PyTorch/NumPy/SciPy（依据示例导入）",
+      "application": "用于金融时序深度模型、多因子监督学习和交易智能体的稳定训练。",
+      "limits": "代码仅演示所属章节的基础优化机制而非整个大型模型训练。不同硬件和模型目标需要独立调参和收敛性审计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n02-05",
+      "node_id": "optimization-n02-05",
+      "title": "Dropout",
+      "definition": "随机屏蔽训练时的激活并按保留概率倒置缩放，减轻部分网络共适应。",
+      "assumptions": "优化方法依赖目标函数的光滑性、约束、梯度与数值精度；正则化效果还应通过独立验证样本判断。",
+      "properties": [
+        "随机屏蔽训练时的激活并按保留概率倒置缩放，减轻部分网络共适应。",
+        "方法的收敛与泛化性质须区分，优化器收敛并不保证模型在新时期金融数据上有效。"
+      ],
+      "formulas": [
+        {
+          "label": "主要目标或更新规则",
+          "tex": "\\tilde h=h\\odot m/(1-p)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从原始损失、正则化或约束形式构造该算法对应的梯度、近端或归一化更新。",
+          "tex": "\\tilde h=h\\odot m/(1-p)"
+        },
+        {
+          "explanation": "按更新公式实现计算步骤并检查学习率、范数、数值稳定和验证误差。",
+          "tex": "\\tilde h=h\\odot m/(1-p)"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(4,6);print(torch.nn.functional.dropout(x,p=.2,training=True).shape)",
+      "packages": "PyTorch/NumPy/SciPy（依据示例导入）",
+      "application": "用于金融时序深度模型、多因子监督学习和交易智能体的稳定训练。",
+      "limits": "代码仅演示所属章节的基础优化机制而非整个大型模型训练。不同硬件和模型目标需要独立调参和收敛性审计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n03-05",
+      "node_id": "optimization-n03-05",
+      "title": "BatchNorm",
+      "definition": "按训练批统计量归一化隐藏激活，并用可学习缩放和平移参数恢复表达能力。",
+      "assumptions": "优化方法依赖目标函数的光滑性、约束、梯度与数值精度；正则化效果还应通过独立验证样本判断。",
+      "properties": [
+        "按训练批统计量归一化隐藏激活，并用可学习缩放和平移参数恢复表达能力。",
+        "方法的收敛与泛化性质须区分，优化器收敛并不保证模型在新时期金融数据上有效。"
+      ],
+      "formulas": [
+        {
+          "label": "主要目标或更新规则",
+          "tex": "y=\\gamma(x-\\mu_B)/\\sqrt{\\sigma_B^2+\\epsilon}+\\beta"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从原始损失、正则化或约束形式构造该算法对应的梯度、近端或归一化更新。",
+          "tex": "y=\\gamma(x-\\mu_B)/\\sqrt{\\sigma_B^2+\\epsilon}+\\beta"
+        },
+        {
+          "explanation": "按更新公式实现计算步骤并检查学习率、范数、数值稳定和验证误差。",
+          "tex": "y=\\gamma(x-\\mu_B)/\\sqrt{\\sigma_B^2+\\epsilon}+\\beta"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(4,6);print(torch.nn.functional.dropout(x,p=.2,training=True).shape)",
+      "packages": "PyTorch/NumPy/SciPy（依据示例导入）",
+      "application": "用于金融时序深度模型、多因子监督学习和交易智能体的稳定训练。",
+      "limits": "代码仅演示所属章节的基础优化机制而非整个大型模型训练。不同硬件和模型目标需要独立调参和收敛性审计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n04-05",
+      "node_id": "optimization-n04-05",
+      "title": "Label Smoothing",
+      "definition": "把硬标签与均匀标签分布混合，降低分类训练对极端概率的激励。",
+      "assumptions": "优化方法依赖目标函数的光滑性、约束、梯度与数值精度；正则化效果还应通过独立验证样本判断。",
+      "properties": [
+        "把硬标签与均匀标签分布混合，降低分类训练对极端概率的激励。",
+        "方法的收敛与泛化性质须区分，优化器收敛并不保证模型在新时期金融数据上有效。"
+      ],
+      "formulas": [
+        {
+          "label": "主要目标或更新规则",
+          "tex": "y'_k=(1-\\epsilon)\\mathbf1[k=y]+\\epsilon/K"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从原始损失、正则化或约束形式构造该算法对应的梯度、近端或归一化更新。",
+          "tex": "y'_k=(1-\\epsilon)\\mathbf1[k=y]+\\epsilon/K"
+        },
+        {
+          "explanation": "按更新公式实现计算步骤并检查学习率、范数、数值稳定和验证误差。",
+          "tex": "y'_k=(1-\\epsilon)\\mathbf1[k=y]+\\epsilon/K"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(4,6);print(torch.nn.functional.dropout(x,p=.2,training=True).shape)",
+      "packages": "PyTorch/NumPy/SciPy（依据示例导入）",
+      "application": "用于金融时序深度模型、多因子监督学习和交易智能体的稳定训练。",
+      "limits": "代码仅演示所属章节的基础优化机制而非整个大型模型训练。不同硬件和模型目标需要独立调参和收敛性审计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n05-05",
+      "node_id": "optimization-n05-05",
+      "title": "Mixup",
+      "definition": "把两个样本及其标签按同一随机系数线性混合以增强训练集。",
+      "assumptions": "优化方法依赖目标函数的光滑性、约束、梯度与数值精度；正则化效果还应通过独立验证样本判断。",
+      "properties": [
+        "把两个样本及其标签按同一随机系数线性混合以增强训练集。",
+        "方法的收敛与泛化性质须区分，优化器收敛并不保证模型在新时期金融数据上有效。"
+      ],
+      "formulas": [
+        {
+          "label": "主要目标或更新规则",
+          "tex": "\\tilde x=\\lambda x_i+(1-\\lambda)x_j,\\quad\\tilde y=\\lambda y_i+(1-\\lambda)y_j"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从原始损失、正则化或约束形式构造该算法对应的梯度、近端或归一化更新。",
+          "tex": "\\tilde x=\\lambda x_i+(1-\\lambda)x_j,\\quad\\tilde y=\\lambda y_i+(1-\\lambda)y_j"
+        },
+        {
+          "explanation": "按更新公式实现计算步骤并检查学习率、范数、数值稳定和验证误差。",
+          "tex": "\\tilde x=\\lambda x_i+(1-\\lambda)x_j,\\quad\\tilde y=\\lambda y_i+(1-\\lambda)y_j"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(4,6);print(torch.nn.functional.dropout(x,p=.2,training=True).shape)",
+      "packages": "PyTorch/NumPy/SciPy（依据示例导入）",
+      "application": "用于金融时序深度模型、多因子监督学习和交易智能体的稳定训练。",
+      "limits": "代码仅演示所属章节的基础优化机制而非整个大型模型训练。不同硬件和模型目标需要独立调参和收敛性审计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n06-05",
+      "node_id": "optimization-n06-05",
+      "title": "早停与模型集成",
+      "definition": "早停选择验证集最佳迭代点，模型集成对多个独立模型输出进行平均或投票。",
+      "assumptions": "优化方法依赖目标函数的光滑性、约束、梯度与数值精度；正则化效果还应通过独立验证样本判断。",
+      "properties": [
+        "早停选择验证集最佳迭代点，模型集成对多个独立模型输出进行平均或投票。",
+        "方法的收敛与泛化性质须区分，优化器收敛并不保证模型在新时期金融数据上有效。"
+      ],
+      "formulas": [
+        {
+          "label": "主要目标或更新规则",
+          "tex": "f_{\\rm ens}(x)=B^{-1}\\sum_b f_{\\theta_b}(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从原始损失、正则化或约束形式构造该算法对应的梯度、近端或归一化更新。",
+          "tex": "f_{\\rm ens}(x)=B^{-1}\\sum_b f_{\\theta_b}(x)"
+        },
+        {
+          "explanation": "按更新公式实现计算步骤并检查学习率、范数、数值稳定和验证误差。",
+          "tex": "f_{\\rm ens}(x)=B^{-1}\\sum_b f_{\\theta_b}(x)"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(4,6);print(torch.nn.functional.dropout(x,p=.2,training=True).shape)",
+      "packages": "PyTorch/NumPy/SciPy（依据示例导入）",
+      "application": "用于金融时序深度模型、多因子监督学习和交易智能体的稳定训练。",
+      "limits": "代码仅演示所属章节的基础优化机制而非整个大型模型训练。不同硬件和模型目标需要独立调参和收敛性审计。",
+      "coverage": "complete"
+    }
+  ]
+}
