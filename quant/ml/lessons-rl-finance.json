@@ -1,0 +1,493 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "rl-n01-01",
+      "node_id": "rl-n01-01",
+      "title": "Markov Decision Process",
+      "definition": "马尔可夫决策过程(MDP)以状态、动作、奖励、转移概率与折现因子定义序贯随机决策问题。",
+      "assumptions": "所有计算在明确模型与参数假设下进行；交易环境和历史数据时点需要额外验证。",
+      "properties": [
+        "需要区别理论优化目标、有限样本估计与样本外可实现结果。",
+        "数据、奖励、成本、动作约束的定义会实质改变所学习模型。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "\\mathcal M=(\\mathcal S,\\mathcal A,P,r,\\gamma),\\quad P(s'|s,a)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "Markov性质：下一状态仅条件依赖当前状态和动作",
+          "tex": "P(S_{t+1}|S_0,A_0,\\ldots,S_t,A_t)=P(S_{t+1}|S_t,A_t)"
+        },
+        {
+          "explanation": "策略诱导状态与回报分布",
+          "tex": "A_t\\sim\\pi(\\cdot|S_t),\\quad G_t=\\sum_{k=0}^{\\infty}\\gamma^kR_{t+k+1}"
+        }
+      ],
+      "code": "import numpy as np\nP=np.array([[[.8,.2],[.3,.7]],[[.4,.6],[.1,.9]]])\n# P[action,current_state,next_state]\nrng=np.random.default_rng(1)\ns=0\nfor a in [0,1,0,1]:\n    s=rng.choice(2,p=P[a,s])\n    print(\"Next state:\",s)",
+      "packages": "numpy",
+      "application": "组合状态含持仓、现金和市场特征；动作是再平衡权重。",
+      "limits": "若市场历史依赖不被当前状态充分捕捉，Markov假设可能不成立。",
+      "coverage": "complete"
+    },
+    {
+      "id": "rl-n04-02",
+      "node_id": "rl-n04-02",
+      "title": "Bellman最优方程",
+      "definition": "最优价值函数把当前行动的奖励和下一状态的折现最优未来价值递归连接。",
+      "assumptions": "所有计算在明确模型与参数假设下进行；交易环境和历史数据时点需要额外验证。",
+      "properties": [
+        "需要区别理论优化目标、有限样本估计与样本外可实现结果。",
+        "数据、奖励、成本、动作约束的定义会实质改变所学习模型。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "V^*(s)=\\max_a\\left[r(s,a)+\\gamma\\sum_{s'}P(s'|s,a)V^*(s')\\right]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义最优价值是所有策略价值的上确界",
+          "tex": "V^*(s)=\\sup_\\pi E^\\pi[\\sum_{k\\ge0}\\gamma^kr_{t+k}|S_t=s]"
+        },
+        {
+          "explanation": "将第一步奖励与剩余序列分离",
+          "tex": "G_t=r_t+\\gamma G_{t+1}"
+        },
+        {
+          "explanation": "对当前动作取最大得到递推",
+          "tex": "V^*(s)=\\max_a[r(s,a)+\\gamma E(V^*(S')|s,a)]"
+        }
+      ],
+      "code": "import numpy as np\nP=np.array([[[.9,.1],[.3,.7]],[[.4,.6],[.2,.8]]])\nR=np.array([[1.,0.],[.5,1.5]])\nv=np.zeros(2); gamma=.9\nfor _ in range(500):\n    q=R+gamma*np.einsum(\"ask,k->sa\",P,v)\n    v=q.max(axis=1)\nprint(\"Optimal values:\",v)",
+      "packages": "numpy",
+      "application": "在交易成本和风险惩罚下寻找最优持仓决策。",
+      "limits": "该例是有限状态精确MDP，不包括真实金融市场的随机估计误差。",
+      "coverage": "complete"
+    },
+    {
+      "id": "rl-n01-03",
+      "node_id": "rl-n01-03",
+      "title": "值迭代Value Iteration",
+      "definition": "值迭代反复作用Bellman最优算子，折现有限MDP中会收敛到唯一最优价值函数。",
+      "assumptions": "所有计算在明确模型与参数假设下进行；交易环境和历史数据时点需要额外验证。",
+      "properties": [
+        "需要区别理论优化目标、有限样本估计与样本外可实现结果。",
+        "数据、奖励、成本、动作约束的定义会实质改变所学习模型。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "V_{k+1}=TV_k,\\quad(TV)(s)=\\max_a[r(s,a)+\\gamma E(V(S')|s,a)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "最大值算子对输入有上界",
+          "tex": "|\\max_a f_a-\\max_a g_a|\\le\\max_a|f_a-g_a|"
+        },
+        {
+          "explanation": "利用折现因子得到压缩性",
+          "tex": "\\|TV-TW\\|_\\infty\\le\\gamma\\|V-W\\|_\\infty"
+        }
+      ],
+      "code": "import numpy as np\nP=np.array([[[1.,0.],[.5,.5]],[[0.,1.],[.2,.8]]])\nreward=np.array([[1.,0.],[0.,2.]])\nv=np.zeros(2)\nfor k in range(150):\n    v=np.max(reward+.9*np.einsum(\"ask,k->sa\",P,v),axis=1)\nprint(\"V:\",v)",
+      "packages": "numpy",
+      "application": "小型执行/再平衡模型的动态规划基线。",
+      "limits": "大规模状态空间会遭遇维度灾难，需函数近似。",
+      "coverage": "complete"
+    },
+    {
+      "id": "rl-n02-04",
+      "node_id": "rl-n02-04",
+      "title": "TD(0)",
+      "definition": "时序差分学习通过一步奖励和下一状态价值构建bootstrap目标，在线更新状态价值估计。",
+      "assumptions": "所有计算在明确模型与参数假设下进行；交易环境和历史数据时点需要额外验证。",
+      "properties": [
+        "需要区别理论优化目标、有限样本估计与样本外可实现结果。",
+        "数据、奖励、成本、动作约束的定义会实质改变所学习模型。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "V(s_t)\\leftarrow V(s_t)+\\alpha[r_{t+1}+\\gamma V(s_{t+1})-V(s_t)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "TD误差衡量当前与一步bootstrap目标差",
+          "tex": "\\delta_t=r_{t+1}+\\gamma V(s_{t+1})-V(s_t)"
+        },
+        {
+          "explanation": "沿该差更新当前状态价值",
+          "tex": "V(s_t)\\leftarrow V(s_t)+\\alpha\\delta_t"
+        }
+      ],
+      "code": "import numpy as np\nv=np.zeros(2); alpha=.2; gamma=.9\nepisodes=[(0,1.,1),(1,0.,1),(0,.4,0),(1,1.,0)]\nfor _ in range(100):\n    for s,r,s2 in episodes:\n        v[s]+=alpha*(r+gamma*v[s2]-v[s])\nprint(\"TD values:\",v)",
+      "packages": "numpy",
+      "application": "增量学习状态价值、研究交易状态与执行质量。",
+      "limits": "该示例为手工固定样本迭代，未生成随机环境交互。",
+      "coverage": "complete"
+    },
+    {
+      "id": "rl-n04-04",
+      "node_id": "rl-n04-04",
+      "title": "Q-learning",
+      "definition": "离策略时序差分控制用下一状态所有动作的最大Q估计更新当前状态动作价值。",
+      "assumptions": "所有计算在明确模型与参数假设下进行；交易环境和历史数据时点需要额外验证。",
+      "properties": [
+        "需要区别理论优化目标、有限样本估计与样本外可实现结果。",
+        "数据、奖励、成本、动作约束的定义会实质改变所学习模型。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "Q(s_t,a_t)\\leftarrow Q(s_t,a_t)+\\alpha[r_{t+1}+\\gamma\\max_aQ(s_{t+1},a)-Q(s_t,a_t)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "最优动作价值Bellman关系",
+          "tex": "Q^*(s,a)=E[r+\\gamma\\max_{a'}Q^*(s',a')|s,a]"
+        },
+        {
+          "explanation": "以采样转移替换期望得到TD目标",
+          "tex": "y_t=r_{t+1}+\\gamma\\max_{a'}Q(s_{t+1},a')"
+        }
+      ],
+      "code": "import numpy as np\nq=np.zeros((2,2)); gamma=.9; alpha=.2\nexperiences=[(0,0,1.,1),(1,1,2.,0),(0,1,.3,0)]\nfor _ in range(150):\n    for s,a,r,s2 in experiences:\n        q[s,a]+=alpha*(r+gamma*q[s2].max()-q[s,a])\nprint(\"Q:\",q,\"policy:\",q.argmax(1))",
+      "packages": "numpy",
+      "application": "离散仓位状态下的Q控制与动态风险限制。",
+      "limits": "离线样本不足以覆盖全部动作时，Q函数可能高估未见过的动作。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-rl-n01-01",
+      "node_id": "deep-rl-n01-01",
+      "title": "DQN",
+      "definition": "DQN以神经网络近似Q值，通常结合经验回放和滞后目标网络，以缓解函数逼近与Bootstrap交互的不稳定。",
+      "assumptions": "所有计算在明确模型与参数假设下进行；交易环境和历史数据时点需要额外验证。",
+      "properties": [
+        "需要区别理论优化目标、有限样本估计与样本外可实现结果。",
+        "数据、奖励、成本、动作约束的定义会实质改变所学习模型。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "L(\\theta)=E_{(s,a,r,s')\\sim D}[(Q_\\theta(s,a)-(r+\\gamma\\max_{a'}Q_{\\theta^-}(s',a')))^2]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "经验元组从Replay Buffer随机抽样",
+          "tex": "(s,a,r,s')\\sim D"
+        },
+        {
+          "explanation": "目标网络参数在若干训练步内保持固定",
+          "tex": "y=r+\\gamma(1-d)\\max_{a'}Q_{\\theta^-}(s',a')"
+        },
+        {
+          "explanation": "最小化当前网络对目标的平方误差",
+          "tex": "L=(Q_\\theta(s,a)-y)^2"
+        }
+      ],
+      "code": "import torch\nimport torch.nn as nn\ntorch.manual_seed(0)\nnet=nn.Sequential(nn.Linear(3,16),nn.ReLU(),nn.Linear(16,2))\ntarget=nn.Sequential(nn.Linear(3,16),nn.ReLU(),nn.Linear(16,2))\ntarget.load_state_dict(net.state_dict())\ns=torch.randn(10,3); a=torch.randint(0,2,(10,))\nr=torch.randn(10); s2=torch.randn(10,3)\nwith torch.no_grad():\n    y=r+.95*target(s2).max(dim=1).values\npred=net(s).gather(1,a[:,None]).squeeze(1)\nloss=(pred-y).square().mean()\nloss.backward()\nprint(\"DQN TD loss:\",loss.item())",
+      "packages": "torch",
+      "application": "小规模离散交易动作的值函数估计。",
+      "limits": "示例仅展示损失，不是完整环境训练；真实DQN需要探索、Buffer与目标同步。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-rl-n01-02",
+      "node_id": "deep-rl-n01-02",
+      "title": "REINFORCE",
+      "definition": "Monte Carlo策略梯度通过轨迹回报乘以所采动作对数概率梯度，估计可微随机策略的期望回报梯度。",
+      "assumptions": "所有计算在明确模型与参数假设下进行；交易环境和历史数据时点需要额外验证。",
+      "properties": [
+        "需要区别理论优化目标、有限样本估计与样本外可实现结果。",
+        "数据、奖励、成本、动作约束的定义会实质改变所学习模型。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "\\nabla_\\theta J(\\theta)=E_{\\tau\\sim\\pi_\\theta}\\!\\left[\\sum_t G_t\\nabla_\\theta\\log\\pi_\\theta(a_t|s_t)\\right]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对轨迹概率的梯度使用log-derivative技巧",
+          "tex": "\\nabla_\\theta p_\\theta(\\tau)=p_\\theta(\\tau)\\nabla_\\theta\\log p_\\theta(\\tau)"
+        },
+        {
+          "explanation": "环境转移概率若不依赖参数，则轨迹对数概率梯度由策略项贡献",
+          "tex": "\\nabla_\\theta\\log p_\\theta(\\tau)=\\sum_t\\nabla_\\theta\\log\\pi_\\theta(a_t|s_t)"
+        }
+      ],
+      "code": "import torch\ntorch.manual_seed(0)\nlogits=torch.nn.Parameter(torch.tensor([0.,0.]))\ndist=torch.distributions.Categorical(logits=logits)\na=dist.sample()\nreward=torch.tensor(1. if a.item()==0 else -1.)\nloss=-dist.log_prob(a)*reward\nloss.backward()\nprint(\"Action:\",a.item(),\"Gradient:\",logits.grad)",
+      "packages": "torch",
+      "application": "探索随机仓位选择策略和风险感知奖励。",
+      "limits": "单轨迹梯度方差高；实际训练需环境交互和优势估计。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-rl-n02-03",
+      "node_id": "deep-rl-n02-03",
+      "title": "PPO",
+      "definition": "PPO通过截断新旧策略概率比率限制更新过大，使策略优化在经验上较稳定。",
+      "assumptions": "所有计算在明确模型与参数假设下进行；交易环境和历史数据时点需要额外验证。",
+      "properties": [
+        "需要区别理论优化目标、有限样本估计与样本外可实现结果。",
+        "数据、奖励、成本、动作约束的定义会实质改变所学习模型。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "L^{\\mathrm{CLIP}}=E[\\min(r_t(\\theta)\\hat A_t,\\operatorname{clip}(r_t(\\theta),1-\\epsilon,1+\\epsilon)\\hat A_t)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "重要性比率比较新旧策略采样概率",
+          "tex": "r_t(\\theta)=\\frac{\\pi_\\theta(a_t|s_t)}{\\pi_{\\theta_{\\mathrm{old}}}(a_t|s_t)}"
+        },
+        {
+          "explanation": "截断函数限制优势目标的过度收益",
+          "tex": "L_t=\\min(r_t\\hat A_t,\\operatorname{clip}(r_t,1-\\epsilon,1+\\epsilon)\\hat A_t)"
+        }
+      ],
+      "code": "import torch\nold_logp=torch.tensor([-.7,-.4,-1.2])\nnew_logp=torch.tensor([-.6,-.5,-.9],requires_grad=True)\nadv=torch.tensor([1.,-.3,.4])\nratio=(new_logp-old_logp).exp()\neps=.2\nobjective=torch.minimum(ratio*adv,ratio.clamp(1-eps,1+eps)*adv)\nloss=-objective.mean()\nloss.backward()\nprint(\"PPO objective:\",-loss.item(),\"gradient:\",new_logp.grad)",
+      "packages": "torch",
+      "application": "风险约束下的连续或离散再平衡策略。",
+      "limits": "代码只展示Clipped Surrogate目标，并未包括Critic、环境或多轮优化。",
+      "coverage": "complete"
+    },
+    {
+      "id": "deep-rl-n06-03",
+      "node_id": "deep-rl-n06-03",
+      "title": "SAC",
+      "definition": "软Actor-Critic在最大化奖励同时鼓励策略熵，适合连续动作与离策略学习。",
+      "assumptions": "所有计算在明确模型与参数假设下进行；交易环境和历史数据时点需要额外验证。",
+      "properties": [
+        "需要区别理论优化目标、有限样本估计与样本外可实现结果。",
+        "数据、奖励、成本、动作约束的定义会实质改变所学习模型。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "J(\\pi)=E[\\sum_t\\gamma^t(r_t+\\alpha\\mathcal H(\\pi(\\cdot|s_t)))]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "软价值目标包含奖励与未来熵项",
+          "tex": "V^\\pi(s)=E_{a\\sim\\pi}[Q^\\pi(s,a)-\\alpha\\log\\pi(a|s)]"
+        },
+        {
+          "explanation": "最大熵目标控制探索与确定性收益的权衡",
+          "tex": "J_{\\pi}=E_{s,a}[\\alpha\\log\\pi(a|s)-Q(s,a)]"
+        }
+      ],
+      "code": "import torch\ntorch.manual_seed(0)\nnormal=torch.distributions.Normal(torch.zeros(4),torch.ones(4))\nz=normal.rsample()\na=torch.tanh(z)\nlogp=normal.log_prob(z)-torch.log(1-a.square()+1e-6)\nreward=-(a-0.3).square()\nentropy_bonus=-.2*logp\nprint(\"Soft objective:\",(reward+entropy_bonus).mean().item())",
+      "packages": "torch",
+      "application": "连续组合权重调整和交易执行动作研究。",
+      "limits": "仅展示熵奖励概念，不是完整双Q网络和目标网络SAC实现。",
+      "coverage": "complete"
+    },
+    {
+      "id": "timeseries-n04-01",
+      "node_id": "timeseries-n04-01",
+      "title": "滞后特征",
+      "definition": "利用过去观察值构造滞后特征，供回归、树和神经网络预测未来时点目标。",
+      "assumptions": "所有计算在明确模型与参数假设下进行；交易环境和历史数据时点需要额外验证。",
+      "properties": [
+        "需要区别理论优化目标、有限样本估计与样本外可实现结果。",
+        "数据、奖励、成本、动作约束的定义会实质改变所学习模型。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "X_t=[y_{t-1},y_{t-2},\\ldots,y_{t-p}],\\quad \\hat y_t=f(X_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "严格以预测目标日期为锚构建特征",
+          "tex": "X_t\\in\\sigma(y_1,\\ldots,y_{t-1})"
+        },
+        {
+          "explanation": "按时间先后分割训练与测试",
+          "tex": "t_{\\mathrm{train}}<t_{\\mathrm{test}}"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.linear_model import Ridge\nrng=np.random.default_rng(0)\nseries=np.cumsum(rng.normal(size=120))\np=5\nX=np.array([series[t-p:t] for t in range(p,len(series))])\ny=series[p:]\ncut=80\nmodel=Ridge(alpha=1.).fit(X[:cut],y[:cut])\nprint(\"Out-of-sample MSE:\",np.mean((model.predict(X[cut:])-y[cut:])**2))",
+      "packages": "numpy, scikit-learn",
+      "application": "用历史日线收益、波动率和成交额预测下一交易期。",
+      "limits": "示例为随机游走价格序列，绝不暗示模型真实具有可交易预测力。",
+      "coverage": "complete"
+    },
+    {
+      "id": "timeseries-n05-01",
+      "node_id": "timeseries-n05-01",
+      "title": "滚动验证",
+      "definition": "在多个逐步向前推进的时间窗口中重新拟合模型，并仅在训练窗口之后评估预测质量。",
+      "assumptions": "所有计算在明确模型与参数假设下进行；交易环境和历史数据时点需要额外验证。",
+      "properties": [
+        "需要区别理论优化目标、有限样本估计与样本外可实现结果。",
+        "数据、奖励、成本、动作约束的定义会实质改变所学习模型。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "\\mathcal I_{\\mathrm{train},k}=[t_k-W,t_k),\\quad\\mathcal I_{\\mathrm{test},k}=[t_k,t_k+H)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "每轮训练和测试区间遵守先后约束",
+          "tex": "\\max\\mathcal I_{\\mathrm{train},k}<\\min\\mathcal I_{\\mathrm{test},k}"
+        },
+        {
+          "explanation": "将所有测试预测拼接成真实的历史样本外绩效",
+          "tex": "\\hat y_t=f_{\\hat\\theta_{k(t)}}(X_t)"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.model_selection import TimeSeriesSplit\nfrom sklearn.linear_model import Ridge\nrng=np.random.default_rng(7)\nX=rng.normal(size=(120,4))\ny=.3*X[:,0]+rng.normal(size=120)\nerrors=[]\nfor tr,te in TimeSeriesSplit(n_splits=4,max_train_size=60).split(X):\n    m=Ridge().fit(X[tr],y[tr])\n    errors.extend((y[te]-m.predict(X[te]))**2)\nprint(\"Walk-forward MSE:\",np.mean(errors))",
+      "packages": "numpy, scikit-learn",
+      "application": "滚动再训练ETF横截面因子模型、对比不同市场状态。",
+      "limits": "重叠标签仍需Purging与Embargo；窗口内预处理也必须独立拟合。",
+      "coverage": "complete"
+    },
+    {
+      "id": "timeseries-n04-02",
+      "node_id": "timeseries-n04-02",
+      "title": "GARCH",
+      "definition": "GARCH以历史收益冲击平方与上期条件方差递归预测收益波动。",
+      "assumptions": "所有计算在明确模型与参数假设下进行；交易环境和历史数据时点需要额外验证。",
+      "properties": [
+        "需要区别理论优化目标、有限样本估计与样本外可实现结果。",
+        "数据、奖励、成本、动作约束的定义会实质改变所学习模型。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "\\sigma_t^2=\\omega+\\alpha\\epsilon_{t-1}^2+\\beta\\sigma_{t-1}^2,\\quad\\alpha+\\beta<1"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "平稳时对方差方程取期望",
+          "tex": "E[\\sigma_t^2]=\\omega+(\\alpha+\\beta)E[\\sigma_t^2]"
+        },
+        {
+          "explanation": "得到无条件方差",
+          "tex": "\\bar\\sigma^2=\\frac{\\omega}{1-\\alpha-\\beta}"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(1)\ne=rng.normal(scale=.01,size=100)\nomega=1e-6; alpha=.08; beta=.88\nvariance=np.empty(len(e))\nvariance[0]=omega/(1-alpha-beta)\nfor t in range(1,len(e)):\n    variance[t]=omega+alpha*e[t-1]**2+beta*variance[t-1]\nprint(\"Latest annualized volatility:\",np.sqrt(252*variance[-1]))",
+      "packages": "numpy",
+      "application": "ETF条件波动率、动态风险与VaR估计。",
+      "limits": "示例只计算给定参数的条件方差递推，未拟合GARCH参数。",
+      "coverage": "complete"
+    },
+    {
+      "id": "finml-n02-02",
+      "node_id": "finml-n02-02",
+      "title": "横截面RankIC",
+      "definition": "RankIC计算同一时刻资产因子值与后续收益之间的Spearman秩相关，衡量横截面排序预测能力。",
+      "assumptions": "所有计算在明确模型与参数假设下进行；交易环境和历史数据时点需要额外验证。",
+      "properties": [
+        "需要区别理论优化目标、有限样本估计与样本外可实现结果。",
+        "数据、奖励、成本、动作约束的定义会实质改变所学习模型。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "\\mathrm{RankIC}_t=\\operatorname{Spearman}_i(f_{i,t},r_{i,t+1})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "在同一日期对个券因子与下期收益分别排序",
+          "tex": "u_i=\\operatorname{rank}(f_{i,t}),\\quad v_i=\\operatorname{rank}(r_{i,t+1})"
+        },
+        {
+          "explanation": "计算两个秩向量的Pearson相关",
+          "tex": "\\rho_t=\\operatorname{Corr}_i(u_i,v_i)"
+        }
+      ],
+      "code": "import numpy as np\nfrom scipy.stats import spearmanr\nfactor=np.array([.4,.2,-.1,.8,.3])\nfuture_return=np.array([.02,.01,-.02,.04,.00])\nprint(\"RankIC:\",spearmanr(factor,future_return).statistic)",
+      "packages": "numpy, scipy",
+      "application": "量化ETF多因子排序稳定性和信号方向验证。",
+      "limits": "横截面资产数量少时相关估计波动很大，必须报告时间序列置信区间。",
+      "coverage": "complete"
+    },
+    {
+      "id": "finml-n02-04",
+      "node_id": "finml-n02-04",
+      "title": "Purged交叉验证",
+      "definition": "Purging移除训练中标签使用的未来观察区间与验证标签区间重叠的样本，减少金融事件标签泄漏。",
+      "assumptions": "所有计算在明确模型与参数假设下进行；交易环境和历史数据时点需要额外验证。",
+      "properties": [
+        "需要区别理论优化目标、有限样本估计与样本外可实现结果。",
+        "数据、奖励、成本、动作约束的定义会实质改变所学习模型。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "\\text{删除 }i\\text{ 当 }[t_i^{\\mathrm{start}},t_i^{\\mathrm{end}}]\\cap [t_j^{\\mathrm{start}},t_j^{\\mathrm{end}}]\\neq\\varnothing"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "每个观测标注信息开始与结束时间",
+          "tex": "I_i=[t_i,t_i^{\\mathrm{end}}]"
+        },
+        {
+          "explanation": "若训练标签窗口与验证窗口相交，就剔除该训练样本",
+          "tex": "I_i\\cap I_j\\neq\\emptyset\\Rightarrow i\\notin\\mathcal I_{\\mathrm{train}}"
+        }
+      ],
+      "code": "import numpy as np\nstart=np.arange(15)\nend=start+3\nvalidation=np.array([8,9,10])\ntrain=np.setdiff1d(np.arange(15),validation)\noverlap=np.array([any(start[i]<=end[j] and end[i]>=start[j]\n                      for j in validation) for i in train])\nprint(\"Purged train indices:\",train[~overlap])",
+      "packages": "numpy",
+      "application": "事件驱动收益标签、三重障碍标签和金融交叉验证。",
+      "limits": "此代码仅演示重叠区间剔除，不包含完整CPCV、Embargo及模型训练。",
+      "coverage": "complete"
+    },
+    {
+      "id": "finml-n06-04",
+      "node_id": "finml-n06-04",
+      "title": "净成本回测",
+      "definition": "净收益应在每次可执行交易时扣佣金、滑点、价差与冲击等，不能把预测精度等同于投资绩效。",
+      "assumptions": "所有计算在明确模型与参数假设下进行；交易环境和历史数据时点需要额外验证。",
+      "properties": [
+        "需要区别理论优化目标、有限样本估计与样本外可实现结果。",
+        "数据、奖励、成本、动作约束的定义会实质改变所学习模型。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "r_{p,t}^{\\mathrm{net}}\\approx w_{t-1}^{\\top}r_t-c\\,\\|w_t-w_{t-1}\\|_1"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "以前一时刻可执行目标仓位计算期间毛收益",
+          "tex": "r_{p,t}^{\\mathrm{gross}}=w_{t-1}^\\top r_t"
+        },
+        {
+          "explanation": "以每次仓位变动估算线性成本并扣除",
+          "tex": "r_{p,t}^{\\mathrm{net}}=r_{p,t}^{\\mathrm{gross}}-c\\,\\|\\Delta w_t\\|_1"
+        }
+      ],
+      "code": "import numpy as np\nret=np.array([[.01,-.01],[.005,.004],[-.01,.02]])\nweights=np.array([[.5,.5],[.8,.2],[.4,.6]])\nprev=np.vstack([np.zeros((1,2)),weights[:-1]])\ncost=.0005*np.abs(weights-prev).sum(axis=1)\nnet=(weights*ret).sum(axis=1)-cost\nprint(\"Net returns:\",net,\"Total:\",np.prod(1+net)-1)",
+      "packages": "numpy",
+      "application": "多因子选股与ETF信号在真实交易约束下的净收益研究。",
+      "limits": "此示例只有线性成本与简单持仓收益，不模拟真实订单成交、现金权重漂移或冲击。",
+      "coverage": "complete"
+    }
+  ]
+}
