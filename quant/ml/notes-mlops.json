@@ -1,0 +1,773 @@
+{
+  "version": 1,
+  "notes": [
+    {
+      "id": "mlops-n01-01",
+      "node_id": "mlops-n01-01",
+      "title": "项目结构与配置",
+      "definition": "机器学习项目应隔离数据、模型、训练、测试和配置文件，并记录环境版本。",
+      "assumptions": "必须记录代码、数据版本、字段Schema、推断时间和模型权限；训练/服务行为差异及数据延迟可能导致风险。",
+      "properties": [
+        "机器学习项目应隔离数据、模型、训练、测试和配置文件，并记录环境版本。。",
+        "可复现与监控不证明交易策略有效；部署前仍须执行端到端样本外测试和风险审批。"
+      ],
+      "formulas": [
+        {
+          "label": "工程指标与关键关系",
+          "tex": "\\mathcal P=(D,M,T,C)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义系统输入输出、处理版本、风险门槛与部署状态。机器学习项目应隔离数据、模型、训练、测试和配置文件，并记录环境版本。",
+          "tex": "\\mathcal P=(D,M,T,C)"
+        },
+        {
+          "explanation": "把该约束或计算关系落实为可检查的流程和持续监控指标。",
+          "tex": "\\mathcal P=(D,M,T,C)"
+        }
+      ],
+      "code": "# 项目结构与配置：可复现配置与风控检查示例\nimport json,hashlib\nconfig={\"model\":\"ridge\",\"seed\":42,\"features\":[\"momentum\",\"volatility\"],\"version\":\"v1\"}\ntext=json.dumps(config,sort_keys=True)\nprint(\"Model configuration:\",text)\nprint(\"Configuration hash:\",hashlib.sha256(text.encode()).hexdigest()[:16])\ndef guard(position,limit):\n    if abs(position)>limit:raise ValueError(\"Risk limit exceeded\")\nguard(.4,.5)\nprint(\"Risk guard passed\")",
+      "packages": "Python standard library",
+      "application": "用于量化模型训练部署、金融数据流治理、低延迟推断和实盘风险监控。",
+      "limits": "本笔记介绍工程原则和示范性代码，尚未实现真实训练集群、模型服务、数据平台或自动交易系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "mlops-n02-01",
+      "node_id": "mlops-n02-01",
+      "title": "数据版本DVC",
+      "definition": "数据版本工具关联训练数据内容标识与代码版本，支持结果重现。",
+      "assumptions": "必须记录代码、数据版本、字段Schema、推断时间和模型权限；训练/服务行为差异及数据延迟可能导致风险。",
+      "properties": [
+        "数据版本工具关联训练数据内容标识与代码版本，支持结果重现。。",
+        "可复现与监控不证明交易策略有效；部署前仍须执行端到端样本外测试和风险审批。"
+      ],
+      "formulas": [
+        {
+          "label": "工程指标与关键关系",
+          "tex": "\\operatorname{hash}(D)=h_D"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义系统输入输出、处理版本、风险门槛与部署状态。数据版本工具关联训练数据内容标识与代码版本，支持结果重现。",
+          "tex": "\\operatorname{hash}(D)=h_D"
+        },
+        {
+          "explanation": "把该约束或计算关系落实为可检查的流程和持续监控指标。",
+          "tex": "\\operatorname{hash}(D)=h_D"
+        }
+      ],
+      "code": "# 数据版本DVC：可复现配置与风控检查示例\nimport json,hashlib\nconfig={\"model\":\"ridge\",\"seed\":42,\"features\":[\"momentum\",\"volatility\"],\"version\":\"v1\"}\ntext=json.dumps(config,sort_keys=True)\nprint(\"Model configuration:\",text)\nprint(\"Configuration hash:\",hashlib.sha256(text.encode()).hexdigest()[:16])\ndef guard(position,limit):\n    if abs(position)>limit:raise ValueError(\"Risk limit exceeded\")\nguard(.4,.5)\nprint(\"Risk guard passed\")",
+      "packages": "Python standard library",
+      "application": "用于量化模型训练部署、金融数据流治理、低延迟推断和实盘风险监控。",
+      "limits": "本笔记介绍工程原则和示范性代码，尚未实现真实训练集群、模型服务、数据平台或自动交易系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "mlops-n05-01",
+      "node_id": "mlops-n05-01",
+      "title": "环境锁定",
+      "definition": "固定Python解释器和第三方库版本可降低不同环境导致的行为变化。",
+      "assumptions": "必须记录代码、数据版本、字段Schema、推断时间和模型权限；训练/服务行为差异及数据延迟可能导致风险。",
+      "properties": [
+        "固定Python解释器和第三方库版本可降低不同环境导致的行为变化。。",
+        "可复现与监控不证明交易策略有效；部署前仍须执行端到端样本外测试和风险审批。"
+      ],
+      "formulas": [
+        {
+          "label": "工程指标与关键关系",
+          "tex": "\\mathcal E=(v_{\\rm python},v_1,\\ldots,v_k)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义系统输入输出、处理版本、风险门槛与部署状态。固定Python解释器和第三方库版本可降低不同环境导致的行为变化。",
+          "tex": "\\mathcal E=(v_{\\rm python},v_1,\\ldots,v_k)"
+        },
+        {
+          "explanation": "把该约束或计算关系落实为可检查的流程和持续监控指标。",
+          "tex": "\\mathcal E=(v_{\\rm python},v_1,\\ldots,v_k)"
+        }
+      ],
+      "code": "# 环境锁定：可复现配置与风控检查示例\nimport json,hashlib\nconfig={\"model\":\"ridge\",\"seed\":42,\"features\":[\"momentum\",\"volatility\"],\"version\":\"v1\"}\ntext=json.dumps(config,sort_keys=True)\nprint(\"Model configuration:\",text)\nprint(\"Configuration hash:\",hashlib.sha256(text.encode()).hexdigest()[:16])\ndef guard(position,limit):\n    if abs(position)>limit:raise ValueError(\"Risk limit exceeded\")\nguard(.4,.5)\nprint(\"Risk guard passed\")",
+      "packages": "Python standard library",
+      "application": "用于量化模型训练部署、金融数据流治理、低延迟推断和实盘风险监控。",
+      "limits": "本笔记介绍工程原则和示范性代码，尚未实现真实训练集群、模型服务、数据平台或自动交易系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "mlops-n01-02",
+      "node_id": "mlops-n01-02",
+      "title": "ETL数据管道",
+      "definition": "ETL将来源数据提取、清洗转换并加载到统一特征或研究数据库。",
+      "assumptions": "必须记录代码、数据版本、字段Schema、推断时间和模型权限；训练/服务行为差异及数据延迟可能导致风险。",
+      "properties": [
+        "ETL将来源数据提取、清洗转换并加载到统一特征或研究数据库。。",
+        "可复现与监控不证明交易策略有效；部署前仍须执行端到端样本外测试和风险审批。"
+      ],
+      "formulas": [
+        {
+          "label": "工程指标与关键关系",
+          "tex": "D_{\\rm clean}=T(E(D_{\\rm source}))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义系统输入输出、处理版本、风险门槛与部署状态。ETL将来源数据提取、清洗转换并加载到统一特征或研究数据库。",
+          "tex": "D_{\\rm clean}=T(E(D_{\\rm source}))"
+        },
+        {
+          "explanation": "把该约束或计算关系落实为可检查的流程和持续监控指标。",
+          "tex": "D_{\\rm clean}=T(E(D_{\\rm source}))"
+        }
+      ],
+      "code": "# ETL数据管道：可复现配置与风控检查示例\nimport json,hashlib\nconfig={\"model\":\"ridge\",\"seed\":42,\"features\":[\"momentum\",\"volatility\"],\"version\":\"v1\"}\ntext=json.dumps(config,sort_keys=True)\nprint(\"Model configuration:\",text)\nprint(\"Configuration hash:\",hashlib.sha256(text.encode()).hexdigest()[:16])\ndef guard(position,limit):\n    if abs(position)>limit:raise ValueError(\"Risk limit exceeded\")\nguard(.4,.5)\nprint(\"Risk guard passed\")",
+      "packages": "Python standard library",
+      "application": "用于量化模型训练部署、金融数据流治理、低延迟推断和实盘风险监控。",
+      "limits": "本笔记介绍工程原则和示范性代码，尚未实现真实训练集群、模型服务、数据平台或自动交易系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "mlops-n02-02",
+      "node_id": "mlops-n02-02",
+      "title": "特征存储Feature Store",
+      "definition": "特征存储统一定义离线和在线特征，保证字段、时间和转换口径一致。",
+      "assumptions": "必须记录代码、数据版本、字段Schema、推断时间和模型权限；训练/服务行为差异及数据延迟可能导致风险。",
+      "properties": [
+        "特征存储统一定义离线和在线特征，保证字段、时间和转换口径一致。。",
+        "可复现与监控不证明交易策略有效；部署前仍须执行端到端样本外测试和风险审批。"
+      ],
+      "formulas": [
+        {
+          "label": "工程指标与关键关系",
+          "tex": "X_{\\rm offline}(t)=X_{\\rm online}(t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义系统输入输出、处理版本、风险门槛与部署状态。特征存储统一定义离线和在线特征，保证字段、时间和转换口径一致。",
+          "tex": "X_{\\rm offline}(t)=X_{\\rm online}(t)"
+        },
+        {
+          "explanation": "把该约束或计算关系落实为可检查的流程和持续监控指标。",
+          "tex": "X_{\\rm offline}(t)=X_{\\rm online}(t)"
+        }
+      ],
+      "code": "# 特征存储Feature Store：可复现配置与风控检查示例\nimport json,hashlib\nconfig={\"model\":\"ridge\",\"seed\":42,\"features\":[\"momentum\",\"volatility\"],\"version\":\"v1\"}\ntext=json.dumps(config,sort_keys=True)\nprint(\"Model configuration:\",text)\nprint(\"Configuration hash:\",hashlib.sha256(text.encode()).hexdigest()[:16])\ndef guard(position,limit):\n    if abs(position)>limit:raise ValueError(\"Risk limit exceeded\")\nguard(.4,.5)\nprint(\"Risk guard passed\")",
+      "packages": "Python standard library",
+      "application": "用于量化模型训练部署、金融数据流治理、低延迟推断和实盘风险监控。",
+      "limits": "本笔记介绍工程原则和示范性代码，尚未实现真实训练集群、模型服务、数据平台或自动交易系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "mlops-n03-02",
+      "node_id": "mlops-n03-02",
+      "title": "训练工作流",
+      "definition": "训练流水线将预处理、特征构造、拟合、验证与模型注册组织为可追踪步骤。",
+      "assumptions": "必须记录代码、数据版本、字段Schema、推断时间和模型权限；训练/服务行为差异及数据延迟可能导致风险。",
+      "properties": [
+        "训练流水线将预处理、特征构造、拟合、验证与模型注册组织为可追踪步骤。。",
+        "可复现与监控不证明交易策略有效；部署前仍须执行端到端样本外测试和风险审批。"
+      ],
+      "formulas": [
+        {
+          "label": "工程指标与关键关系",
+          "tex": "\\theta^*=\\operatorname{Train}(T(D_{\\rm train}))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义系统输入输出、处理版本、风险门槛与部署状态。训练流水线将预处理、特征构造、拟合、验证与模型注册组织为可追踪步骤。",
+          "tex": "\\theta^*=\\operatorname{Train}(T(D_{\\rm train}))"
+        },
+        {
+          "explanation": "把该约束或计算关系落实为可检查的流程和持续监控指标。",
+          "tex": "\\theta^*=\\operatorname{Train}(T(D_{\\rm train}))"
+        }
+      ],
+      "code": "# 训练工作流：可复现配置与风控检查示例\nimport json,hashlib\nconfig={\"model\":\"ridge\",\"seed\":42,\"features\":[\"momentum\",\"volatility\"],\"version\":\"v1\"}\ntext=json.dumps(config,sort_keys=True)\nprint(\"Model configuration:\",text)\nprint(\"Configuration hash:\",hashlib.sha256(text.encode()).hexdigest()[:16])\ndef guard(position,limit):\n    if abs(position)>limit:raise ValueError(\"Risk limit exceeded\")\nguard(.4,.5)\nprint(\"Risk guard passed\")",
+      "packages": "Python standard library",
+      "application": "用于量化模型训练部署、金融数据流治理、低延迟推断和实盘风险监控。",
+      "limits": "本笔记介绍工程原则和示范性代码，尚未实现真实训练集群、模型服务、数据平台或自动交易系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "mlops-n04-02",
+      "node_id": "mlops-n04-02",
+      "title": "超参数搜索Optuna",
+      "definition": "Optuna等搜索器根据历史Trial选择下一超参数配置并记录实验目标。",
+      "assumptions": "必须记录代码、数据版本、字段Schema、推断时间和模型权限；训练/服务行为差异及数据延迟可能导致风险。",
+      "properties": [
+        "Optuna等搜索器根据历史Trial选择下一超参数配置并记录实验目标。。",
+        "可复现与监控不证明交易策略有效；部署前仍须执行端到端样本外测试和风险审批。"
+      ],
+      "formulas": [
+        {
+          "label": "工程指标与关键关系",
+          "tex": "\\lambda^*=\\arg\\min_\\lambda R_{\\rm val}(\\lambda)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义系统输入输出、处理版本、风险门槛与部署状态。Optuna等搜索器根据历史Trial选择下一超参数配置并记录实验目标。",
+          "tex": "\\lambda^*=\\arg\\min_\\lambda R_{\\rm val}(\\lambda)"
+        },
+        {
+          "explanation": "把该约束或计算关系落实为可检查的流程和持续监控指标。",
+          "tex": "\\lambda^*=\\arg\\min_\\lambda R_{\\rm val}(\\lambda)"
+        }
+      ],
+      "code": "# 超参数搜索Optuna：可复现配置与风控检查示例\nimport json,hashlib\nconfig={\"model\":\"ridge\",\"seed\":42,\"features\":[\"momentum\",\"volatility\"],\"version\":\"v1\"}\ntext=json.dumps(config,sort_keys=True)\nprint(\"Model configuration:\",text)\nprint(\"Configuration hash:\",hashlib.sha256(text.encode()).hexdigest()[:16])\ndef guard(position,limit):\n    if abs(position)>limit:raise ValueError(\"Risk limit exceeded\")\nguard(.4,.5)\nprint(\"Risk guard passed\")",
+      "packages": "Python standard library",
+      "application": "用于量化模型训练部署、金融数据流治理、低延迟推断和实盘风险监控。",
+      "limits": "本笔记介绍工程原则和示范性代码，尚未实现真实训练集群、模型服务、数据平台或自动交易系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "mlops-n05-02",
+      "node_id": "mlops-n05-02",
+      "title": "模型注册",
+      "definition": "模型注册记录版本、签名、指标和部署状态，避免错误版本上线。",
+      "assumptions": "必须记录代码、数据版本、字段Schema、推断时间和模型权限；训练/服务行为差异及数据延迟可能导致风险。",
+      "properties": [
+        "模型注册记录版本、签名、指标和部署状态，避免错误版本上线。。",
+        "可复现与监控不证明交易策略有效；部署前仍须执行端到端样本外测试和风险审批。"
+      ],
+      "formulas": [
+        {
+          "label": "工程指标与关键关系",
+          "tex": "M^{(v)}=(\\theta_v,\\mathrm{schema}_v,\\mathrm{metrics}_v)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义系统输入输出、处理版本、风险门槛与部署状态。模型注册记录版本、签名、指标和部署状态，避免错误版本上线。",
+          "tex": "M^{(v)}=(\\theta_v,\\mathrm{schema}_v,\\mathrm{metrics}_v)"
+        },
+        {
+          "explanation": "把该约束或计算关系落实为可检查的流程和持续监控指标。",
+          "tex": "M^{(v)}=(\\theta_v,\\mathrm{schema}_v,\\mathrm{metrics}_v)"
+        }
+      ],
+      "code": "# 模型注册：可复现配置与风控检查示例\nimport json,hashlib\nconfig={\"model\":\"ridge\",\"seed\":42,\"features\":[\"momentum\",\"volatility\"],\"version\":\"v1\"}\ntext=json.dumps(config,sort_keys=True)\nprint(\"Model configuration:\",text)\nprint(\"Configuration hash:\",hashlib.sha256(text.encode()).hexdigest()[:16])\ndef guard(position,limit):\n    if abs(position)>limit:raise ValueError(\"Risk limit exceeded\")\nguard(.4,.5)\nprint(\"Risk guard passed\")",
+      "packages": "Python standard library",
+      "application": "用于量化模型训练部署、金融数据流治理、低延迟推断和实盘风险监控。",
+      "limits": "本笔记介绍工程原则和示范性代码，尚未实现真实训练集群、模型服务、数据平台或自动交易系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "mlops-n06-02",
+      "node_id": "mlops-n06-02",
+      "title": "谱系追踪",
+      "definition": "数据谱系关联原始来源、加工步骤、训练数据、模型版本及推断输出。",
+      "assumptions": "必须记录代码、数据版本、字段Schema、推断时间和模型权限；训练/服务行为差异及数据延迟可能导致风险。",
+      "properties": [
+        "数据谱系关联原始来源、加工步骤、训练数据、模型版本及推断输出。。",
+        "可复现与监控不证明交易策略有效；部署前仍须执行端到端样本外测试和风险审批。"
+      ],
+      "formulas": [
+        {
+          "label": "工程指标与关键关系",
+          "tex": "D_0\\to D_1\\to M_v\\to\\hat y"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义系统输入输出、处理版本、风险门槛与部署状态。数据谱系关联原始来源、加工步骤、训练数据、模型版本及推断输出。",
+          "tex": "D_0\\to D_1\\to M_v\\to\\hat y"
+        },
+        {
+          "explanation": "把该约束或计算关系落实为可检查的流程和持续监控指标。",
+          "tex": "D_0\\to D_1\\to M_v\\to\\hat y"
+        }
+      ],
+      "code": "# 谱系追踪：可复现配置与风控检查示例\nimport json,hashlib\nconfig={\"model\":\"ridge\",\"seed\":42,\"features\":[\"momentum\",\"volatility\"],\"version\":\"v1\"}\ntext=json.dumps(config,sort_keys=True)\nprint(\"Model configuration:\",text)\nprint(\"Configuration hash:\",hashlib.sha256(text.encode()).hexdigest()[:16])\ndef guard(position,limit):\n    if abs(position)>limit:raise ValueError(\"Risk limit exceeded\")\nguard(.4,.5)\nprint(\"Risk guard passed\")",
+      "packages": "Python standard library",
+      "application": "用于量化模型训练部署、金融数据流治理、低延迟推断和实盘风险监控。",
+      "limits": "本笔记介绍工程原则和示范性代码，尚未实现真实训练集群、模型服务、数据平台或自动交易系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "mlops-n01-03",
+      "node_id": "mlops-n01-03",
+      "title": "GPU数据加载",
+      "definition": "GPU训练吞吐受数据读取、CPU预处理与主机设备传输限制。",
+      "assumptions": "必须记录代码、数据版本、字段Schema、推断时间和模型权限；训练/服务行为差异及数据延迟可能导致风险。",
+      "properties": [
+        "GPU训练吞吐受数据读取、CPU预处理与主机设备传输限制。。",
+        "可复现与监控不证明交易策略有效；部署前仍须执行端到端样本外测试和风险审批。"
+      ],
+      "formulas": [
+        {
+          "label": "工程指标与关键关系",
+          "tex": "T_{\\rm step}=T_{\\rm load}+T_{\\rm compute}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义系统输入输出、处理版本、风险门槛与部署状态。GPU训练吞吐受数据读取、CPU预处理与主机设备传输限制。",
+          "tex": "T_{\\rm step}=T_{\\rm load}+T_{\\rm compute}"
+        },
+        {
+          "explanation": "把该约束或计算关系落实为可检查的流程和持续监控指标。",
+          "tex": "T_{\\rm step}=T_{\\rm load}+T_{\\rm compute}"
+        }
+      ],
+      "code": "# GPU数据加载：可复现配置与风控检查示例\nimport json,hashlib\nconfig={\"model\":\"ridge\",\"seed\":42,\"features\":[\"momentum\",\"volatility\"],\"version\":\"v1\"}\ntext=json.dumps(config,sort_keys=True)\nprint(\"Model configuration:\",text)\nprint(\"Configuration hash:\",hashlib.sha256(text.encode()).hexdigest()[:16])\ndef guard(position,limit):\n    if abs(position)>limit:raise ValueError(\"Risk limit exceeded\")\nguard(.4,.5)\nprint(\"Risk guard passed\")",
+      "packages": "Python standard library",
+      "application": "用于量化模型训练部署、金融数据流治理、低延迟推断和实盘风险监控。",
+      "limits": "本笔记介绍工程原则和示范性代码，尚未实现真实训练集群、模型服务、数据平台或自动交易系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "mlops-n02-03",
+      "node_id": "mlops-n02-03",
+      "title": "混合精度AMP",
+      "definition": "自动混合精度按算子选择低精度或高精度运算以降低显存和提升吞吐。",
+      "assumptions": "必须记录代码、数据版本、字段Schema、推断时间和模型权限；训练/服务行为差异及数据延迟可能导致风险。",
+      "properties": [
+        "自动混合精度按算子选择低精度或高精度运算以降低显存和提升吞吐。。",
+        "可复现与监控不证明交易策略有效；部署前仍须执行端到端样本外测试和风险审批。"
+      ],
+      "formulas": [
+        {
+          "label": "工程指标与关键关系",
+          "tex": "x_{\\rm low}=\\operatorname{cast}_{\\rm bf16}(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义系统输入输出、处理版本、风险门槛与部署状态。自动混合精度按算子选择低精度或高精度运算以降低显存和提升吞吐。",
+          "tex": "x_{\\rm low}=\\operatorname{cast}_{\\rm bf16}(x)"
+        },
+        {
+          "explanation": "把该约束或计算关系落实为可检查的流程和持续监控指标。",
+          "tex": "x_{\\rm low}=\\operatorname{cast}_{\\rm bf16}(x)"
+        }
+      ],
+      "code": "# 混合精度AMP：可复现配置与风控检查示例\nimport json,hashlib\nconfig={\"model\":\"ridge\",\"seed\":42,\"features\":[\"momentum\",\"volatility\"],\"version\":\"v1\"}\ntext=json.dumps(config,sort_keys=True)\nprint(\"Model configuration:\",text)\nprint(\"Configuration hash:\",hashlib.sha256(text.encode()).hexdigest()[:16])\ndef guard(position,limit):\n    if abs(position)>limit:raise ValueError(\"Risk limit exceeded\")\nguard(.4,.5)\nprint(\"Risk guard passed\")",
+      "packages": "Python standard library",
+      "application": "用于量化模型训练部署、金融数据流治理、低延迟推断和实盘风险监控。",
+      "limits": "本笔记介绍工程原则和示范性代码，尚未实现真实训练集群、模型服务、数据平台或自动交易系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "mlops-n03-03",
+      "node_id": "mlops-n03-03",
+      "title": "分布式数据并行DDP",
+      "definition": "DDP在多个设备上复制模型并各自处理样本分片，聚合梯度实现同步训练。",
+      "assumptions": "必须记录代码、数据版本、字段Schema、推断时间和模型权限；训练/服务行为差异及数据延迟可能导致风险。",
+      "properties": [
+        "DDP在多个设备上复制模型并各自处理样本分片，聚合梯度实现同步训练。。",
+        "可复现与监控不证明交易策略有效；部署前仍须执行端到端样本外测试和风险审批。"
+      ],
+      "formulas": [
+        {
+          "label": "工程指标与关键关系",
+          "tex": "g=\\frac1K\\sum_{k=1}^Kg_k"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义系统输入输出、处理版本、风险门槛与部署状态。DDP在多个设备上复制模型并各自处理样本分片，聚合梯度实现同步训练。",
+          "tex": "g=\\frac1K\\sum_{k=1}^Kg_k"
+        },
+        {
+          "explanation": "把该约束或计算关系落实为可检查的流程和持续监控指标。",
+          "tex": "g=\\frac1K\\sum_{k=1}^Kg_k"
+        }
+      ],
+      "code": "# 分布式数据并行DDP：可复现配置与风控检查示例\nimport json,hashlib\nconfig={\"model\":\"ridge\",\"seed\":42,\"features\":[\"momentum\",\"volatility\"],\"version\":\"v1\"}\ntext=json.dumps(config,sort_keys=True)\nprint(\"Model configuration:\",text)\nprint(\"Configuration hash:\",hashlib.sha256(text.encode()).hexdigest()[:16])\ndef guard(position,limit):\n    if abs(position)>limit:raise ValueError(\"Risk limit exceeded\")\nguard(.4,.5)\nprint(\"Risk guard passed\")",
+      "packages": "Python standard library",
+      "application": "用于量化模型训练部署、金融数据流治理、低延迟推断和实盘风险监控。",
+      "limits": "本笔记介绍工程原则和示范性代码，尚未实现真实训练集群、模型服务、数据平台或自动交易系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "mlops-n04-03",
+      "node_id": "mlops-n04-03",
+      "title": "梯度检查点",
+      "definition": "梯度检查点不存储部分前向激活，而在反向时重新计算以减少显存。",
+      "assumptions": "必须记录代码、数据版本、字段Schema、推断时间和模型权限；训练/服务行为差异及数据延迟可能导致风险。",
+      "properties": [
+        "梯度检查点不存储部分前向激活，而在反向时重新计算以减少显存。。",
+        "可复现与监控不证明交易策略有效；部署前仍须执行端到端样本外测试和风险审批。"
+      ],
+      "formulas": [
+        {
+          "label": "工程指标与关键关系",
+          "tex": "M_{\\rm checkpoint}<M_{\\rm full}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义系统输入输出、处理版本、风险门槛与部署状态。梯度检查点不存储部分前向激活，而在反向时重新计算以减少显存。",
+          "tex": "M_{\\rm checkpoint}<M_{\\rm full}"
+        },
+        {
+          "explanation": "把该约束或计算关系落实为可检查的流程和持续监控指标。",
+          "tex": "M_{\\rm checkpoint}<M_{\\rm full}"
+        }
+      ],
+      "code": "# 梯度检查点：可复现配置与风控检查示例\nimport json,hashlib\nconfig={\"model\":\"ridge\",\"seed\":42,\"features\":[\"momentum\",\"volatility\"],\"version\":\"v1\"}\ntext=json.dumps(config,sort_keys=True)\nprint(\"Model configuration:\",text)\nprint(\"Configuration hash:\",hashlib.sha256(text.encode()).hexdigest()[:16])\ndef guard(position,limit):\n    if abs(position)>limit:raise ValueError(\"Risk limit exceeded\")\nguard(.4,.5)\nprint(\"Risk guard passed\")",
+      "packages": "Python standard library",
+      "application": "用于量化模型训练部署、金融数据流治理、低延迟推断和实盘风险监控。",
+      "limits": "本笔记介绍工程原则和示范性代码，尚未实现真实训练集群、模型服务、数据平台或自动交易系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "mlops-n05-03",
+      "node_id": "mlops-n05-03",
+      "title": "批大小扩展",
+      "definition": "增加有效批大小通常降低梯度估计方差，但可能改变优化动态与泛化。",
+      "assumptions": "必须记录代码、数据版本、字段Schema、推断时间和模型权限；训练/服务行为差异及数据延迟可能导致风险。",
+      "properties": [
+        "增加有效批大小通常降低梯度估计方差，但可能改变优化动态与泛化。。",
+        "可复现与监控不证明交易策略有效；部署前仍须执行端到端样本外测试和风险审批。"
+      ],
+      "formulas": [
+        {
+          "label": "工程指标与关键关系",
+          "tex": "g_B=B^{-1}\\sum_{i\\in B}\\nabla\\ell_i"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义系统输入输出、处理版本、风险门槛与部署状态。增加有效批大小通常降低梯度估计方差，但可能改变优化动态与泛化。",
+          "tex": "g_B=B^{-1}\\sum_{i\\in B}\\nabla\\ell_i"
+        },
+        {
+          "explanation": "把该约束或计算关系落实为可检查的流程和持续监控指标。",
+          "tex": "g_B=B^{-1}\\sum_{i\\in B}\\nabla\\ell_i"
+        }
+      ],
+      "code": "# 批大小扩展：可复现配置与风控检查示例\nimport json,hashlib\nconfig={\"model\":\"ridge\",\"seed\":42,\"features\":[\"momentum\",\"volatility\"],\"version\":\"v1\"}\ntext=json.dumps(config,sort_keys=True)\nprint(\"Model configuration:\",text)\nprint(\"Configuration hash:\",hashlib.sha256(text.encode()).hexdigest()[:16])\ndef guard(position,limit):\n    if abs(position)>limit:raise ValueError(\"Risk limit exceeded\")\nguard(.4,.5)\nprint(\"Risk guard passed\")",
+      "packages": "Python standard library",
+      "application": "用于量化模型训练部署、金融数据流治理、低延迟推断和实盘风险监控。",
+      "limits": "本笔记介绍工程原则和示范性代码，尚未实现真实训练集群、模型服务、数据平台或自动交易系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "mlops-n06-03",
+      "node_id": "mlops-n06-03",
+      "title": "性能剖析",
+      "definition": "性能分析区分数据加载、GPU计算和设备传输的瓶颈。",
+      "assumptions": "必须记录代码、数据版本、字段Schema、推断时间和模型权限；训练/服务行为差异及数据延迟可能导致风险。",
+      "properties": [
+        "性能分析区分数据加载、GPU计算和设备传输的瓶颈。。",
+        "可复现与监控不证明交易策略有效；部署前仍须执行端到端样本外测试和风险审批。"
+      ],
+      "formulas": [
+        {
+          "label": "工程指标与关键关系",
+          "tex": "T_{\\rm total}=\\sum_{k=1}^KT_k"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义系统输入输出、处理版本、风险门槛与部署状态。性能分析区分数据加载、GPU计算和设备传输的瓶颈。",
+          "tex": "T_{\\rm total}=\\sum_{k=1}^KT_k"
+        },
+        {
+          "explanation": "把该约束或计算关系落实为可检查的流程和持续监控指标。",
+          "tex": "T_{\\rm total}=\\sum_{k=1}^KT_k"
+        }
+      ],
+      "code": "# 性能剖析：可复现配置与风控检查示例\nimport json,hashlib\nconfig={\"model\":\"ridge\",\"seed\":42,\"features\":[\"momentum\",\"volatility\"],\"version\":\"v1\"}\ntext=json.dumps(config,sort_keys=True)\nprint(\"Model configuration:\",text)\nprint(\"Configuration hash:\",hashlib.sha256(text.encode()).hexdigest()[:16])\ndef guard(position,limit):\n    if abs(position)>limit:raise ValueError(\"Risk limit exceeded\")\nguard(.4,.5)\nprint(\"Risk guard passed\")",
+      "packages": "Python standard library",
+      "application": "用于量化模型训练部署、金融数据流治理、低延迟推断和实盘风险监控。",
+      "limits": "本笔记介绍工程原则和示范性代码，尚未实现真实训练集群、模型服务、数据平台或自动交易系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "mlops-n02-04",
+      "node_id": "mlops-n02-04",
+      "title": "REST推断服务",
+      "definition": "REST推断服务以规范HTTP接口接收特征并返回模型预测及版本。",
+      "assumptions": "必须记录代码、数据版本、字段Schema、推断时间和模型权限；训练/服务行为差异及数据延迟可能导致风险。",
+      "properties": [
+        "REST推断服务以规范HTTP接口接收特征并返回模型预测及版本。。",
+        "可复现与监控不证明交易策略有效；部署前仍须执行端到端样本外测试和风险审批。"
+      ],
+      "formulas": [
+        {
+          "label": "工程指标与关键关系",
+          "tex": "\\hat y=f_{\\theta_v}(X_{\\rm request})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义系统输入输出、处理版本、风险门槛与部署状态。REST推断服务以规范HTTP接口接收特征并返回模型预测及版本。",
+          "tex": "\\hat y=f_{\\theta_v}(X_{\\rm request})"
+        },
+        {
+          "explanation": "把该约束或计算关系落实为可检查的流程和持续监控指标。",
+          "tex": "\\hat y=f_{\\theta_v}(X_{\\rm request})"
+        }
+      ],
+      "code": "# REST推断服务：可复现配置与风控检查示例\nimport json,hashlib\nconfig={\"model\":\"ridge\",\"seed\":42,\"features\":[\"momentum\",\"volatility\"],\"version\":\"v1\"}\ntext=json.dumps(config,sort_keys=True)\nprint(\"Model configuration:\",text)\nprint(\"Configuration hash:\",hashlib.sha256(text.encode()).hexdigest()[:16])\ndef guard(position,limit):\n    if abs(position)>limit:raise ValueError(\"Risk limit exceeded\")\nguard(.4,.5)\nprint(\"Risk guard passed\")",
+      "packages": "Python standard library",
+      "application": "用于量化模型训练部署、金融数据流治理、低延迟推断和实盘风险监控。",
+      "limits": "本笔记介绍工程原则和示范性代码，尚未实现真实训练集群、模型服务、数据平台或自动交易系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "mlops-n03-04",
+      "node_id": "mlops-n03-04",
+      "title": "批推理",
+      "definition": "批推理对一批已就绪样本统一计算结果，适合收盘后因子更新等。",
+      "assumptions": "必须记录代码、数据版本、字段Schema、推断时间和模型权限；训练/服务行为差异及数据延迟可能导致风险。",
+      "properties": [
+        "批推理对一批已就绪样本统一计算结果，适合收盘后因子更新等。。",
+        "可复现与监控不证明交易策略有效；部署前仍须执行端到端样本外测试和风险审批。"
+      ],
+      "formulas": [
+        {
+          "label": "工程指标与关键关系",
+          "tex": "Y_{\\rm batch}=f_\\theta(X_{1:B})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义系统输入输出、处理版本、风险门槛与部署状态。批推理对一批已就绪样本统一计算结果，适合收盘后因子更新等。",
+          "tex": "Y_{\\rm batch}=f_\\theta(X_{1:B})"
+        },
+        {
+          "explanation": "把该约束或计算关系落实为可检查的流程和持续监控指标。",
+          "tex": "Y_{\\rm batch}=f_\\theta(X_{1:B})"
+        }
+      ],
+      "code": "# 批推理：可复现配置与风控检查示例\nimport json,hashlib\nconfig={\"model\":\"ridge\",\"seed\":42,\"features\":[\"momentum\",\"volatility\"],\"version\":\"v1\"}\ntext=json.dumps(config,sort_keys=True)\nprint(\"Model configuration:\",text)\nprint(\"Configuration hash:\",hashlib.sha256(text.encode()).hexdigest()[:16])\ndef guard(position,limit):\n    if abs(position)>limit:raise ValueError(\"Risk limit exceeded\")\nguard(.4,.5)\nprint(\"Risk guard passed\")",
+      "packages": "Python standard library",
+      "application": "用于量化模型训练部署、金融数据流治理、低延迟推断和实盘风险监控。",
+      "limits": "本笔记介绍工程原则和示范性代码，尚未实现真实训练集群、模型服务、数据平台或自动交易系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "mlops-n04-04",
+      "node_id": "mlops-n04-04",
+      "title": "在线推理",
+      "definition": "在线推理在请求到达时使用当前可用特征低延迟返回预测。",
+      "assumptions": "必须记录代码、数据版本、字段Schema、推断时间和模型权限；训练/服务行为差异及数据延迟可能导致风险。",
+      "properties": [
+        "在线推理在请求到达时使用当前可用特征低延迟返回预测。。",
+        "可复现与监控不证明交易策略有效；部署前仍须执行端到端样本外测试和风险审批。"
+      ],
+      "formulas": [
+        {
+          "label": "工程指标与关键关系",
+          "tex": "\\hat y_t=f_\\theta(X_t^{\\rm available})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义系统输入输出、处理版本、风险门槛与部署状态。在线推理在请求到达时使用当前可用特征低延迟返回预测。",
+          "tex": "\\hat y_t=f_\\theta(X_t^{\\rm available})"
+        },
+        {
+          "explanation": "把该约束或计算关系落实为可检查的流程和持续监控指标。",
+          "tex": "\\hat y_t=f_\\theta(X_t^{\\rm available})"
+        }
+      ],
+      "code": "# 在线推理：可复现配置与风控检查示例\nimport json,hashlib\nconfig={\"model\":\"ridge\",\"seed\":42,\"features\":[\"momentum\",\"volatility\"],\"version\":\"v1\"}\ntext=json.dumps(config,sort_keys=True)\nprint(\"Model configuration:\",text)\nprint(\"Configuration hash:\",hashlib.sha256(text.encode()).hexdigest()[:16])\ndef guard(position,limit):\n    if abs(position)>limit:raise ValueError(\"Risk limit exceeded\")\nguard(.4,.5)\nprint(\"Risk guard passed\")",
+      "packages": "Python standard library",
+      "application": "用于量化模型训练部署、金融数据流治理、低延迟推断和实盘风险监控。",
+      "limits": "本笔记介绍工程原则和示范性代码，尚未实现真实训练集群、模型服务、数据平台或自动交易系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "mlops-n05-04",
+      "node_id": "mlops-n05-04",
+      "title": "ONNX",
+      "definition": "ONNX把部分模型导出为标准计算图格式以支持不同运行时推理。",
+      "assumptions": "必须记录代码、数据版本、字段Schema、推断时间和模型权限；训练/服务行为差异及数据延迟可能导致风险。",
+      "properties": [
+        "ONNX把部分模型导出为标准计算图格式以支持不同运行时推理。。",
+        "可复现与监控不证明交易策略有效；部署前仍须执行端到端样本外测试和风险审批。"
+      ],
+      "formulas": [
+        {
+          "label": "工程指标与关键关系",
+          "tex": "G=(V_{\\rm op},E_{\\rm tensor})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义系统输入输出、处理版本、风险门槛与部署状态。ONNX把部分模型导出为标准计算图格式以支持不同运行时推理。",
+          "tex": "G=(V_{\\rm op},E_{\\rm tensor})"
+        },
+        {
+          "explanation": "把该约束或计算关系落实为可检查的流程和持续监控指标。",
+          "tex": "G=(V_{\\rm op},E_{\\rm tensor})"
+        }
+      ],
+      "code": "# ONNX：可复现配置与风控检查示例\nimport json,hashlib\nconfig={\"model\":\"ridge\",\"seed\":42,\"features\":[\"momentum\",\"volatility\"],\"version\":\"v1\"}\ntext=json.dumps(config,sort_keys=True)\nprint(\"Model configuration:\",text)\nprint(\"Configuration hash:\",hashlib.sha256(text.encode()).hexdigest()[:16])\ndef guard(position,limit):\n    if abs(position)>limit:raise ValueError(\"Risk limit exceeded\")\nguard(.4,.5)\nprint(\"Risk guard passed\")",
+      "packages": "Python standard library",
+      "application": "用于量化模型训练部署、金融数据流治理、低延迟推断和实盘风险监控。",
+      "limits": "本笔记介绍工程原则和示范性代码，尚未实现真实训练集群、模型服务、数据平台或自动交易系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "mlops-n06-04",
+      "node_id": "mlops-n06-04",
+      "title": "量化和延迟优化",
+      "definition": "权重量化、批处理和计算图融合可减少模型推断资源与延迟。",
+      "assumptions": "必须记录代码、数据版本、字段Schema、推断时间和模型权限；训练/服务行为差异及数据延迟可能导致风险。",
+      "properties": [
+        "权重量化、批处理和计算图融合可减少模型推断资源与延迟。。",
+        "可复现与监控不证明交易策略有效；部署前仍须执行端到端样本外测试和风险审批。"
+      ],
+      "formulas": [
+        {
+          "label": "工程指标与关键关系",
+          "tex": "q=\\operatorname{round}(x/s)+z"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义系统输入输出、处理版本、风险门槛与部署状态。权重量化、批处理和计算图融合可减少模型推断资源与延迟。",
+          "tex": "q=\\operatorname{round}(x/s)+z"
+        },
+        {
+          "explanation": "把该约束或计算关系落实为可检查的流程和持续监控指标。",
+          "tex": "q=\\operatorname{round}(x/s)+z"
+        }
+      ],
+      "code": "# 量化和延迟优化：可复现配置与风控检查示例\nimport json,hashlib\nconfig={\"model\":\"ridge\",\"seed\":42,\"features\":[\"momentum\",\"volatility\"],\"version\":\"v1\"}\ntext=json.dumps(config,sort_keys=True)\nprint(\"Model configuration:\",text)\nprint(\"Configuration hash:\",hashlib.sha256(text.encode()).hexdigest()[:16])\ndef guard(position,limit):\n    if abs(position)>limit:raise ValueError(\"Risk limit exceeded\")\nguard(.4,.5)\nprint(\"Risk guard passed\")",
+      "packages": "Python standard library",
+      "application": "用于量化模型训练部署、金融数据流治理、低延迟推断和实盘风险监控。",
+      "limits": "本笔记介绍工程原则和示范性代码，尚未实现真实训练集群、模型服务、数据平台或自动交易系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "mlops-n03-05",
+      "node_id": "mlops-n03-05",
+      "title": "漂移与再训练",
+      "definition": "数据或目标分布发生显著变化时，需要评估是否重新训练并以影子验证降低风险。",
+      "assumptions": "必须记录代码、数据版本、字段Schema、推断时间和模型权限；训练/服务行为差异及数据延迟可能导致风险。",
+      "properties": [
+        "数据或目标分布发生显著变化时，需要评估是否重新训练并以影子验证降低风险。。",
+        "可复现与监控不证明交易策略有效；部署前仍须执行端到端样本外测试和风险审批。"
+      ],
+      "formulas": [
+        {
+          "label": "工程指标与关键关系",
+          "tex": "D(P_{\\rm train},P_{\\rm live})>\\tau"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义系统输入输出、处理版本、风险门槛与部署状态。数据或目标分布发生显著变化时，需要评估是否重新训练并以影子验证降低风险。",
+          "tex": "D(P_{\\rm train},P_{\\rm live})>\\tau"
+        },
+        {
+          "explanation": "把该约束或计算关系落实为可检查的流程和持续监控指标。",
+          "tex": "D(P_{\\rm train},P_{\\rm live})>\\tau"
+        }
+      ],
+      "code": "# 漂移与再训练：可复现配置与风控检查示例\nimport json,hashlib\nconfig={\"model\":\"ridge\",\"seed\":42,\"features\":[\"momentum\",\"volatility\"],\"version\":\"v1\"}\ntext=json.dumps(config,sort_keys=True)\nprint(\"Model configuration:\",text)\nprint(\"Configuration hash:\",hashlib.sha256(text.encode()).hexdigest()[:16])\ndef guard(position,limit):\n    if abs(position)>limit:raise ValueError(\"Risk limit exceeded\")\nguard(.4,.5)\nprint(\"Risk guard passed\")",
+      "packages": "Python standard library",
+      "application": "用于量化模型训练部署、金融数据流治理、低延迟推断和实盘风险监控。",
+      "limits": "本笔记介绍工程原则和示范性代码，尚未实现真实训练集群、模型服务、数据平台或自动交易系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "mlops-n04-05",
+      "node_id": "mlops-n04-05",
+      "title": "风险限额监控",
+      "definition": "监控系统检验仓位、杠杆、亏损和数据延迟是否超过风险限额。",
+      "assumptions": "必须记录代码、数据版本、字段Schema、推断时间和模型权限；训练/服务行为差异及数据延迟可能导致风险。",
+      "properties": [
+        "监控系统检验仓位、杠杆、亏损和数据延迟是否超过风险限额。。",
+        "可复现与监控不证明交易策略有效；部署前仍须执行端到端样本外测试和风险审批。"
+      ],
+      "formulas": [
+        {
+          "label": "工程指标与关键关系",
+          "tex": "\\operatorname{risk}(w_t)\\le L_{\\rm risk}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义系统输入输出、处理版本、风险门槛与部署状态。监控系统检验仓位、杠杆、亏损和数据延迟是否超过风险限额。",
+          "tex": "\\operatorname{risk}(w_t)\\le L_{\\rm risk}"
+        },
+        {
+          "explanation": "把该约束或计算关系落实为可检查的流程和持续监控指标。",
+          "tex": "\\operatorname{risk}(w_t)\\le L_{\\rm risk}"
+        }
+      ],
+      "code": "# 风险限额监控：可复现配置与风控检查示例\nimport json,hashlib\nconfig={\"model\":\"ridge\",\"seed\":42,\"features\":[\"momentum\",\"volatility\"],\"version\":\"v1\"}\ntext=json.dumps(config,sort_keys=True)\nprint(\"Model configuration:\",text)\nprint(\"Configuration hash:\",hashlib.sha256(text.encode()).hexdigest()[:16])\ndef guard(position,limit):\n    if abs(position)>limit:raise ValueError(\"Risk limit exceeded\")\nguard(.4,.5)\nprint(\"Risk guard passed\")",
+      "packages": "Python standard library",
+      "application": "用于量化模型训练部署、金融数据流治理、低延迟推断和实盘风险监控。",
+      "limits": "本笔记介绍工程原则和示范性代码，尚未实现真实训练集群、模型服务、数据平台或自动交易系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "mlops-n05-05",
+      "node_id": "mlops-n05-05",
+      "title": "Shadow Deployment",
+      "definition": "影子部署让候选模型接收真实流量但不产生真实交易动作，用于线上对照。",
+      "assumptions": "必须记录代码、数据版本、字段Schema、推断时间和模型权限；训练/服务行为差异及数据延迟可能导致风险。",
+      "properties": [
+        "影子部署让候选模型接收真实流量但不产生真实交易动作，用于线上对照。。",
+        "可复现与监控不证明交易策略有效；部署前仍须执行端到端样本外测试和风险审批。"
+      ],
+      "formulas": [
+        {
+          "label": "工程指标与关键关系",
+          "tex": "\\Delta=\\operatorname{Metric}(M_{\\rm shadow})-\\operatorname{Metric}(M_{\\rm prod})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义系统输入输出、处理版本、风险门槛与部署状态。影子部署让候选模型接收真实流量但不产生真实交易动作，用于线上对照。",
+          "tex": "\\Delta=\\operatorname{Metric}(M_{\\rm shadow})-\\operatorname{Metric}(M_{\\rm prod})"
+        },
+        {
+          "explanation": "把该约束或计算关系落实为可检查的流程和持续监控指标。",
+          "tex": "\\Delta=\\operatorname{Metric}(M_{\\rm shadow})-\\operatorname{Metric}(M_{\\rm prod})"
+        }
+      ],
+      "code": "# Shadow Deployment：可复现配置与风控检查示例\nimport json,hashlib\nconfig={\"model\":\"ridge\",\"seed\":42,\"features\":[\"momentum\",\"volatility\"],\"version\":\"v1\"}\ntext=json.dumps(config,sort_keys=True)\nprint(\"Model configuration:\",text)\nprint(\"Configuration hash:\",hashlib.sha256(text.encode()).hexdigest()[:16])\ndef guard(position,limit):\n    if abs(position)>limit:raise ValueError(\"Risk limit exceeded\")\nguard(.4,.5)\nprint(\"Risk guard passed\")",
+      "packages": "Python standard library",
+      "application": "用于量化模型训练部署、金融数据流治理、低延迟推断和实盘风险监控。",
+      "limits": "本笔记介绍工程原则和示范性代码，尚未实现真实训练集群、模型服务、数据平台或自动交易系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "mlops-n06-05",
+      "node_id": "mlops-n06-05",
+      "title": "回滚与审计",
+      "definition": "部署失败或超出风险阈值时应能恢复已验证版本并追踪原因。",
+      "assumptions": "必须记录代码、数据版本、字段Schema、推断时间和模型权限；训练/服务行为差异及数据延迟可能导致风险。",
+      "properties": [
+        "部署失败或超出风险阈值时应能恢复已验证版本并追踪原因。。",
+        "可复现与监控不证明交易策略有效；部署前仍须执行端到端样本外测试和风险审批。"
+      ],
+      "formulas": [
+        {
+          "label": "工程指标与关键关系",
+          "tex": "M_{\\rm prod}\\leftarrow M_{\\rm approved}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义系统输入输出、处理版本、风险门槛与部署状态。部署失败或超出风险阈值时应能恢复已验证版本并追踪原因。",
+          "tex": "M_{\\rm prod}\\leftarrow M_{\\rm approved}"
+        },
+        {
+          "explanation": "把该约束或计算关系落实为可检查的流程和持续监控指标。",
+          "tex": "M_{\\rm prod}\\leftarrow M_{\\rm approved}"
+        }
+      ],
+      "code": "# 回滚与审计：可复现配置与风控检查示例\nimport json,hashlib\nconfig={\"model\":\"ridge\",\"seed\":42,\"features\":[\"momentum\",\"volatility\"],\"version\":\"v1\"}\ntext=json.dumps(config,sort_keys=True)\nprint(\"Model configuration:\",text)\nprint(\"Configuration hash:\",hashlib.sha256(text.encode()).hexdigest()[:16])\ndef guard(position,limit):\n    if abs(position)>limit:raise ValueError(\"Risk limit exceeded\")\nguard(.4,.5)\nprint(\"Risk guard passed\")",
+      "packages": "Python standard library",
+      "application": "用于量化模型训练部署、金融数据流治理、低延迟推断和实盘风险监控。",
+      "limits": "本笔记介绍工程原则和示范性代码，尚未实现真实训练集群、模型服务、数据平台或自动交易系统。",
+      "coverage": "expanded"
+    }
+  ]
+}
