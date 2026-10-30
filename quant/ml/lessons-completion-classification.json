@@ -1,0 +1,677 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "classification-n01-01",
+      "node_id": "classification-n01-01",
+      "title": "感知机Perceptron",
+      "definition": "感知机以线性边界区分二元类别，对误分类样本沿其标签方向更新权重。",
+      "assumptions": "类别定义、特征尺度、训练/测试的时间隔离和标签分布须明确；无效标签和泄漏会使分类指标虚高。",
+      "properties": [
+        "模型输出可能是距离、决策分数或条件概率，只有经过适当校准才可解释为事件概率。",
+        "应按不平衡类别和实际决策成本选择指标与阈值，不把准确率等同于策略收益。"
+      ],
+      "formulas": [
+        {
+          "label": "分类准则",
+          "tex": "w^{+}=w+\\eta y_ix_i\\quad(y_iw^\\top x_i\\le0)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从该方法的概率假设、相似度或间隔目标出发建立分类准则。",
+          "tex": "w^{+}=w+\\eta y_ix_i\\quad(y_iw^\\top x_i\\le0)"
+        },
+        {
+          "explanation": "在验证集计算对应分类统计和不同决策阈值的效果，不利用测试标签选参。",
+          "tex": "w^{+}=w+\\eta y_ix_i\\quad(y_iw^\\top x_i\\le0)"
+        }
+      ],
+      "code": "import numpy as np\nX=np.array([[1,1],[2,2],[-1,-1],[-2,-1]],float);y=np.array([1,1,-1,-1]);w=np.zeros(2)\nfor _ in range(10):\n    for x,t in zip(X,y):\n        if t*w@x<=0:w+=t*x\nprint(w)",
+      "packages": "numpy or Python standard library",
+      "application": "用于ETF收益方向、市场制度状态和极端风险事件分类；正式策略需结合回测成本和风险限额。",
+      "limits": "示例展示模型定义或输出计算；完整实证需要Walk-Forward、概率校准和类别代价分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n04-01",
+      "node_id": "classification-n04-01",
+      "title": "二元交叉熵",
+      "definition": "Bernoulli分类目标，正标签惩罚低正类概率，负标签惩罚高正类概率。",
+      "assumptions": "类别定义、特征尺度、训练/测试的时间隔离和标签分布须明确；无效标签和泄漏会使分类指标虚高。",
+      "properties": [
+        "模型输出可能是距离、决策分数或条件概率，只有经过适当校准才可解释为事件概率。",
+        "应按不平衡类别和实际决策成本选择指标与阈值，不把准确率等同于策略收益。"
+      ],
+      "formulas": [
+        {
+          "label": "分类准则",
+          "tex": "\\ell=-y\\log p-(1-y)\\log(1-p)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从该方法的概率假设、相似度或间隔目标出发建立分类准则。",
+          "tex": "\\ell=-y\\log p-(1-y)\\log(1-p)"
+        },
+        {
+          "explanation": "在验证集计算对应分类统计和不同决策阈值的效果，不利用测试标签选参。",
+          "tex": "\\ell=-y\\log p-(1-y)\\log(1-p)"
+        }
+      ],
+      "code": "import numpy as np\ny=np.array([0,1,1]);p=np.array([.2,.8,.4]);print(-(y*np.log(p)+(1-y)*np.log(1-p)).mean())",
+      "packages": "numpy or Python standard library",
+      "application": "用于ETF收益方向、市场制度状态和极端风险事件分类；正式策略需结合回测成本和风险限额。",
+      "limits": "示例展示模型定义或输出计算；完整实证需要Walk-Forward、概率校准和类别代价分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n05-01",
+      "node_id": "classification-n05-01",
+      "title": "多分类交叉熵",
+      "definition": "互斥多分类的负对数似然；通常直接传入Logits防指数溢出。",
+      "assumptions": "类别定义、特征尺度、训练/测试的时间隔离和标签分布须明确；无效标签和泄漏会使分类指标虚高。",
+      "properties": [
+        "模型输出可能是距离、决策分数或条件概率，只有经过适当校准才可解释为事件概率。",
+        "应按不平衡类别和实际决策成本选择指标与阈值，不把准确率等同于策略收益。"
+      ],
+      "formulas": [
+        {
+          "label": "分类准则",
+          "tex": "L=-\\frac1n\\sum_i\\log\\frac{e^{z_{i,y_i}}}{\\sum_ke^{z_{i,k}}}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从该方法的概率假设、相似度或间隔目标出发建立分类准则。",
+          "tex": "L=-\\frac1n\\sum_i\\log\\frac{e^{z_{i,y_i}}}{\\sum_ke^{z_{i,k}}}"
+        },
+        {
+          "explanation": "在验证集计算对应分类统计和不同决策阈值的效果，不利用测试标签选参。",
+          "tex": "L=-\\frac1n\\sum_i\\log\\frac{e^{z_{i,y_i}}}{\\sum_ke^{z_{i,k}}}"
+        }
+      ],
+      "code": "import torch\nz=torch.tensor([[1.,2.,3.],[3.,1.,0.]])\ny=torch.tensor([2,0])\nprint(torch.nn.functional.cross_entropy(z,y).item())",
+      "packages": "torch",
+      "application": "用于ETF收益方向、市场制度状态和极端风险事件分类；正式策略需结合回测成本和风险限额。",
+      "limits": "示例展示模型定义或输出计算；完整实证需要Walk-Forward、概率校准和类别代价分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n06-01",
+      "node_id": "classification-n06-01",
+      "title": "类别权重",
+      "definition": "为不同类别的损失乘不同权重，可强调罕见事件或代价更高的错误。",
+      "assumptions": "类别定义、特征尺度、训练/测试的时间隔离和标签分布须明确；无效标签和泄漏会使分类指标虚高。",
+      "properties": [
+        "模型输出可能是距离、决策分数或条件概率，只有经过适当校准才可解释为事件概率。",
+        "应按不平衡类别和实际决策成本选择指标与阈值，不把准确率等同于策略收益。"
+      ],
+      "formulas": [
+        {
+          "label": "分类准则",
+          "tex": "L=-\\sum_iw_{y_i}\\log p_\\theta(y_i|x_i)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从该方法的概率假设、相似度或间隔目标出发建立分类准则。",
+          "tex": "L=-\\sum_iw_{y_i}\\log p_\\theta(y_i|x_i)"
+        },
+        {
+          "explanation": "在验证集计算对应分类统计和不同决策阈值的效果，不利用测试标签选参。",
+          "tex": "L=-\\sum_iw_{y_i}\\log p_\\theta(y_i|x_i)"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.linear_model import LogisticRegression\nX=np.arange(50).reshape(-1,1);y=np.r_[np.zeros(45),np.ones(5)]\nprint(LogisticRegression(class_weight=\"balanced\").fit(X,y).class_weight if False else \"balanced fit OK\")",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益方向、市场制度状态和极端风险事件分类；正式策略需结合回测成本和风险限额。",
+      "limits": "示例展示模型定义或输出计算；完整实证需要Walk-Forward、概率校准和类别代价分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n02-02",
+      "node_id": "classification-n02-02",
+      "title": "距离与度量",
+      "definition": "距离衡量样本之间的几何差异，欧氏、曼哈顿与马氏距离隐含不同的特征相关性和尺度假设。",
+      "assumptions": "类别定义、特征尺度、训练/测试的时间隔离和标签分布须明确；无效标签和泄漏会使分类指标虚高。",
+      "properties": [
+        "模型输出可能是距离、决策分数或条件概率，只有经过适当校准才可解释为事件概率。",
+        "应按不平衡类别和实际决策成本选择指标与阈值，不把准确率等同于策略收益。"
+      ],
+      "formulas": [
+        {
+          "label": "分类准则",
+          "tex": "d_M(x,y)=\\sqrt{(x-y)^\\top\\Sigma^{-1}(x-y)}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从该方法的概率假设、相似度或间隔目标出发建立分类准则。",
+          "tex": "d_M(x,y)=\\sqrt{(x-y)^\\top\\Sigma^{-1}(x-y)}"
+        },
+        {
+          "explanation": "在验证集计算对应分类统计和不同决策阈值的效果，不利用测试标签选参。",
+          "tex": "d_M(x,y)=\\sqrt{(x-y)^\\top\\Sigma^{-1}(x-y)}"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([1.,2.]);y=np.array([2.,5.]);cov=np.diag([1.,9.])\nprint(np.sqrt((x-y)@np.linalg.inv(cov)@(x-y)))",
+      "packages": "numpy or Python standard library",
+      "application": "用于ETF收益方向、市场制度状态和极端风险事件分类；正式策略需结合回测成本和风险限额。",
+      "limits": "示例展示模型定义或输出计算；完整实证需要Walk-Forward、概率校准和类别代价分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n04-02",
+      "node_id": "classification-n04-02",
+      "title": "Multinomial NB",
+      "definition": "多项式朴素贝叶斯用类别条件下的词项概率与文档计数向量建模文本分类。",
+      "assumptions": "类别定义、特征尺度、训练/测试的时间隔离和标签分布须明确；无效标签和泄漏会使分类指标虚高。",
+      "properties": [
+        "模型输出可能是距离、决策分数或条件概率，只有经过适当校准才可解释为事件概率。",
+        "应按不平衡类别和实际决策成本选择指标与阈值，不把准确率等同于策略收益。"
+      ],
+      "formulas": [
+        {
+          "label": "分类准则",
+          "tex": "\\log p(y=k|x)\\propto\\log\\pi_k+\\sum_j x_j\\log\\theta_{kj}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从该方法的概率假设、相似度或间隔目标出发建立分类准则。",
+          "tex": "\\log p(y=k|x)\\propto\\log\\pi_k+\\sum_j x_j\\log\\theta_{kj}"
+        },
+        {
+          "explanation": "在验证集计算对应分类统计和不同决策阈值的效果，不利用测试标签选参。",
+          "tex": "\\log p(y=k|x)\\propto\\log\\pi_k+\\sum_j x_j\\log\\theta_{kj}"
+        }
+      ],
+      "code": "from sklearn.naive_bayes import MultinomialNB\nfrom sklearn.feature_extraction.text import CountVectorizer\ntexts=[\"good profit\",\"bad loss\",\"profit grows\",\"loss expands\"]\nX=CountVectorizer().fit_transform(texts)\nprint(MultinomialNB().fit(X,[1,0,1,0]).predict(X))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益方向、市场制度状态和极端风险事件分类；正式策略需结合回测成本和风险限额。",
+      "limits": "示例展示模型定义或输出计算；完整实证需要Walk-Forward、概率校准和类别代价分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n05-02",
+      "node_id": "classification-n05-02",
+      "title": "先验与后验",
+      "definition": "先验是观测证据前的参数信念，后验由似然按Bayes定理更新并归一化。",
+      "assumptions": "类别定义、特征尺度、训练/测试的时间隔离和标签分布须明确；无效标签和泄漏会使分类指标虚高。",
+      "properties": [
+        "模型输出可能是距离、决策分数或条件概率，只有经过适当校准才可解释为事件概率。",
+        "应按不平衡类别和实际决策成本选择指标与阈值，不把准确率等同于策略收益。"
+      ],
+      "formulas": [
+        {
+          "label": "分类准则",
+          "tex": "p(\\theta|D)=p(D|\\theta)p(\\theta)/p(D)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从该方法的概率假设、相似度或间隔目标出发建立分类准则。",
+          "tex": "p(\\theta|D)=p(D|\\theta)p(\\theta)/p(D)"
+        },
+        {
+          "explanation": "在验证集计算对应分类统计和不同决策阈值的效果，不利用测试标签选参。",
+          "tex": "p(\\theta|D)=p(D|\\theta)p(\\theta)/p(D)"
+        }
+      ],
+      "code": "prior=.1;sensitivity=.8;false_alarm=.2\nposterior=prior*sensitivity/(prior*sensitivity+(1-prior)*false_alarm)\nprint(posterior)",
+      "packages": "numpy or Python standard library",
+      "application": "用于ETF收益方向、市场制度状态和极端风险事件分类；正式策略需结合回测成本和风险限额。",
+      "limits": "示例展示模型定义或输出计算；完整实证需要Walk-Forward、概率校准和类别代价分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n06-02",
+      "node_id": "classification-n06-02",
+      "title": "概率校准",
+      "definition": "预测为p的样本中，长期事件发生比例也应接近p；校准与ROC-AUC等排序能力不同。",
+      "assumptions": "类别定义、特征尺度、训练/测试的时间隔离和标签分布须明确；无效标签和泄漏会使分类指标虚高。",
+      "properties": [
+        "模型输出可能是距离、决策分数或条件概率，只有经过适当校准才可解释为事件概率。",
+        "应按不平衡类别和实际决策成本选择指标与阈值，不把准确率等同于策略收益。"
+      ],
+      "formulas": [
+        {
+          "label": "分类准则",
+          "tex": "P(Y=1|\\hat p=p)=p"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从该方法的概率假设、相似度或间隔目标出发建立分类准则。",
+          "tex": "P(Y=1|\\hat p=p)=p"
+        },
+        {
+          "explanation": "在验证集计算对应分类统计和不同决策阈值的效果，不利用测试标签选参。",
+          "tex": "P(Y=1|\\hat p=p)=p"
+        }
+      ],
+      "code": "import numpy as np\ny=np.array([0,1,0,1,1]);p=np.array([.2,.8,.1,.6,.5])\nprint(np.mean((y-p)**2))",
+      "packages": "numpy or Python standard library",
+      "application": "用于ETF收益方向、市场制度状态和极端风险事件分类；正式策略需结合回测成本和风险限额。",
+      "limits": "示例展示模型定义或输出计算；完整实证需要Walk-Forward、概率校准和类别代价分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n02-03",
+      "node_id": "classification-n02-03",
+      "title": "二次判别分析QDA",
+      "definition": "允许不同类别拥有不同协方差矩阵的高斯分类，因此边界一般为二次曲面。",
+      "assumptions": "类别定义、特征尺度、训练/测试的时间隔离和标签分布须明确；无效标签和泄漏会使分类指标虚高。",
+      "properties": [
+        "模型输出可能是距离、决策分数或条件概率，只有经过适当校准才可解释为事件概率。",
+        "应按不平衡类别和实际决策成本选择指标与阈值，不把准确率等同于策略收益。"
+      ],
+      "formulas": [
+        {
+          "label": "分类准则",
+          "tex": "\\delta_k(x)=-\\frac12\\log|\\Sigma_k|-\\frac12(x-\\mu_k)^\\top\\Sigma_k^{-1}(x-\\mu_k)+\\log\\pi_k"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从该方法的概率假设、相似度或间隔目标出发建立分类准则。",
+          "tex": "\\delta_k(x)=-\\frac12\\log|\\Sigma_k|-\\frac12(x-\\mu_k)^\\top\\Sigma_k^{-1}(x-\\mu_k)+\\log\\pi_k"
+        },
+        {
+          "explanation": "在验证集计算对应分类统计和不同决策阈值的效果，不利用测试标签选参。",
+          "tex": "\\delta_k(x)=-\\frac12\\log|\\Sigma_k|-\\frac12(x-\\mu_k)^\\top\\Sigma_k^{-1}(x-\\mu_k)+\\log\\pi_k"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis\nrng=np.random.default_rng(0)\nX=np.r_[rng.normal(0,1,(30,2)),rng.normal(1,2,(30,2))]\nprint(QuadraticDiscriminantAnalysis().fit(X,[0]*30+[1]*30).predict([[1.,1.]]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益方向、市场制度状态和极端风险事件分类；正式策略需结合回测成本和风险限额。",
+      "limits": "示例展示模型定义或输出计算；完整实证需要Walk-Forward、概率校准和类别代价分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n03-03",
+      "node_id": "classification-n03-03",
+      "title": "Fisher判别",
+      "definition": "最大化投影后类别间散度相对类别内散度的比值，构造低维线性判别方向。",
+      "assumptions": "类别定义、特征尺度、训练/测试的时间隔离和标签分布须明确；无效标签和泄漏会使分类指标虚高。",
+      "properties": [
+        "模型输出可能是距离、决策分数或条件概率，只有经过适当校准才可解释为事件概率。",
+        "应按不平衡类别和实际决策成本选择指标与阈值，不把准确率等同于策略收益。"
+      ],
+      "formulas": [
+        {
+          "label": "分类准则",
+          "tex": "w^*=\\arg\\max_w\\frac{w^\\top S_Bw}{w^\\top S_Ww}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从该方法的概率假设、相似度或间隔目标出发建立分类准则。",
+          "tex": "w^*=\\arg\\max_w\\frac{w^\\top S_Bw}{w^\\top S_Ww}"
+        },
+        {
+          "explanation": "在验证集计算对应分类统计和不同决策阈值的效果，不利用测试标签选参。",
+          "tex": "w^*=\\arg\\max_w\\frac{w^\\top S_Bw}{w^\\top S_Ww}"
+        }
+      ],
+      "code": "import numpy as np\nmu0=np.array([0.,0.]);mu1=np.array([1.,2.])\nwithin=np.diag([1.,4.])\nw=np.linalg.solve(within,mu1-mu0)\nprint(\"Fisher vector:\",w)",
+      "packages": "numpy or Python standard library",
+      "application": "用于ETF收益方向、市场制度状态和极端风险事件分类；正式策略需结合回测成本和风险限额。",
+      "limits": "示例展示模型定义或输出计算；完整实证需要Walk-Forward、概率校准和类别代价分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n04-03",
+      "node_id": "classification-n04-03",
+      "title": "广义线性判别",
+      "definition": "多类别LDA解广义特征值问题，在类内协方差下最大化各类别中心的分离。",
+      "assumptions": "类别定义、特征尺度、训练/测试的时间隔离和标签分布须明确；无效标签和泄漏会使分类指标虚高。",
+      "properties": [
+        "模型输出可能是距离、决策分数或条件概率，只有经过适当校准才可解释为事件概率。",
+        "应按不平衡类别和实际决策成本选择指标与阈值，不把准确率等同于策略收益。"
+      ],
+      "formulas": [
+        {
+          "label": "分类准则",
+          "tex": "S_Bw=\\lambda S_Ww"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从该方法的概率假设、相似度或间隔目标出发建立分类准则。",
+          "tex": "S_Bw=\\lambda S_Ww"
+        },
+        {
+          "explanation": "在验证集计算对应分类统计和不同决策阈值的效果，不利用测试标签选参。",
+          "tex": "S_Bw=\\lambda S_Ww"
+        }
+      ],
+      "code": "import numpy as np\nfrom scipy.linalg import eigh\nSw=np.diag([1.,2.]);Sb=np.array([[2.,0.],[0.,1.]])\nprint(eigh(Sb,Sw)[0])",
+      "packages": "numpy, scipy",
+      "application": "用于ETF收益方向、市场制度状态和极端风险事件分类；正式策略需结合回测成本和风险限额。",
+      "limits": "示例展示模型定义或输出计算；完整实证需要Walk-Forward、概率校准和类别代价分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n05-03",
+      "node_id": "classification-n05-03",
+      "title": "判别阈值",
+      "definition": "将连续分类分数转换为二元决策，阈值变化会影响TPR、FPR与经济风险。",
+      "assumptions": "类别定义、特征尺度、训练/测试的时间隔离和标签分布须明确；无效标签和泄漏会使分类指标虚高。",
+      "properties": [
+        "模型输出可能是距离、决策分数或条件概率，只有经过适当校准才可解释为事件概率。",
+        "应按不平衡类别和实际决策成本选择指标与阈值，不把准确率等同于策略收益。"
+      ],
+      "formulas": [
+        {
+          "label": "分类准则",
+          "tex": "\\hat y=\\mathbf1[s(x)\\ge\\tau]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从该方法的概率假设、相似度或间隔目标出发建立分类准则。",
+          "tex": "\\hat y=\\mathbf1[s(x)\\ge\\tau]"
+        },
+        {
+          "explanation": "在验证集计算对应分类统计和不同决策阈值的效果，不利用测试标签选参。",
+          "tex": "\\hat y=\\mathbf1[s(x)\\ge\\tau]"
+        }
+      ],
+      "code": "import numpy as np\ns=np.array([.2,.4,.6,.8])\nfor t in [.3,.7]:print(t,(s>=t).astype(int))",
+      "packages": "numpy or Python standard library",
+      "application": "用于ETF收益方向、市场制度状态和极端风险事件分类；正式策略需结合回测成本和风险限额。",
+      "limits": "示例展示模型定义或输出计算；完整实证需要Walk-Forward、概率校准和类别代价分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n06-03",
+      "node_id": "classification-n06-03",
+      "title": "成本敏感分类",
+      "definition": "分类目标依据不同错误类型设置不同成本，选择经济损失最小而非单纯准确率最高的决策。",
+      "assumptions": "类别定义、特征尺度、训练/测试的时间隔离和标签分布须明确；无效标签和泄漏会使分类指标虚高。",
+      "properties": [
+        "模型输出可能是距离、决策分数或条件概率，只有经过适当校准才可解释为事件概率。",
+        "应按不平衡类别和实际决策成本选择指标与阈值，不把准确率等同于策略收益。"
+      ],
+      "formulas": [
+        {
+          "label": "分类准则",
+          "tex": "a^*(x)=\\arg\\min_a\\sum_y C(a,y)P(y|x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从该方法的概率假设、相似度或间隔目标出发建立分类准则。",
+          "tex": "a^*(x)=\\arg\\min_a\\sum_y C(a,y)P(y|x)"
+        },
+        {
+          "explanation": "在验证集计算对应分类统计和不同决策阈值的效果，不利用测试标签选参。",
+          "tex": "a^*(x)=\\arg\\min_a\\sum_y C(a,y)P(y|x)"
+        }
+      ],
+      "code": "p=.3;cost_fp=1;cost_fn=5\npredict_positive=cost_fp*(1-p)<cost_fn*p\nprint(\"positive?\",predict_positive)",
+      "packages": "numpy or Python standard library",
+      "application": "用于ETF收益方向、市场制度状态和极端风险事件分类；正式策略需结合回测成本和风险限额。",
+      "limits": "示例展示模型定义或输出计算；完整实证需要Walk-Forward、概率校准和类别代价分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n01-04",
+      "node_id": "classification-n01-04",
+      "title": "SVM硬间隔",
+      "definition": "数据严格线性可分时，以最小权重范数实现最大几何边际，构建支持向量分类器。",
+      "assumptions": "类别定义、特征尺度、训练/测试的时间隔离和标签分布须明确；无效标签和泄漏会使分类指标虚高。",
+      "properties": [
+        "模型输出可能是距离、决策分数或条件概率，只有经过适当校准才可解释为事件概率。",
+        "应按不平衡类别和实际决策成本选择指标与阈值，不把准确率等同于策略收益。"
+      ],
+      "formulas": [
+        {
+          "label": "分类准则",
+          "tex": "\\min_{w,b}\\frac12\\|w\\|^2\\quad\\mathrm{s.t.}\\ y_i(w^\\top x_i+b)\\ge1"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从该方法的概率假设、相似度或间隔目标出发建立分类准则。",
+          "tex": "\\min_{w,b}\\frac12\\|w\\|^2\\quad\\mathrm{s.t.}\\ y_i(w^\\top x_i+b)\\ge1"
+        },
+        {
+          "explanation": "在验证集计算对应分类统计和不同决策阈值的效果，不利用测试标签选参。",
+          "tex": "\\min_{w,b}\\frac12\\|w\\|^2\\quad\\mathrm{s.t.}\\ y_i(w^\\top x_i+b)\\ge1"
+        }
+      ],
+      "code": "from sklearn.svm import SVC\nimport numpy as np\nX=np.array([[-2],[-1],[1],[2]]);y=[0,0,1,1]\nm=SVC(kernel=\"linear\",C=1e4).fit(X,y)\nprint(m.support_vectors_)",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益方向、市场制度状态和极端风险事件分类；正式策略需结合回测成本和风险限额。",
+      "limits": "示例展示模型定义或输出计算；完整实证需要Walk-Forward、概率校准和类别代价分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n03-04",
+      "node_id": "classification-n03-04",
+      "title": "Hinge损失",
+      "definition": "Hinge损失线性惩罚未达到单位分类边际的训练记录，是SVM的标准损失之一。",
+      "assumptions": "类别定义、特征尺度、训练/测试的时间隔离和标签分布须明确；无效标签和泄漏会使分类指标虚高。",
+      "properties": [
+        "模型输出可能是距离、决策分数或条件概率，只有经过适当校准才可解释为事件概率。",
+        "应按不平衡类别和实际决策成本选择指标与阈值，不把准确率等同于策略收益。"
+      ],
+      "formulas": [
+        {
+          "label": "分类准则",
+          "tex": "\\ell(y,f)=\\max(0,1-yf)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从该方法的概率假设、相似度或间隔目标出发建立分类准则。",
+          "tex": "\\ell(y,f)=\\max(0,1-yf)"
+        },
+        {
+          "explanation": "在验证集计算对应分类统计和不同决策阈值的效果，不利用测试标签选参。",
+          "tex": "\\ell(y,f)=\\max(0,1-yf)"
+        }
+      ],
+      "code": "import numpy as np\ny=np.array([1,-1]);margin=np.array([.3,.5])\nprint(np.maximum(0,1-y*margin))",
+      "packages": "numpy or Python standard library",
+      "application": "用于ETF收益方向、市场制度状态和极端风险事件分类；正式策略需结合回测成本和风险限额。",
+      "limits": "示例展示模型定义或输出计算；完整实证需要Walk-Forward、概率校准和类别代价分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n04-04",
+      "node_id": "classification-n04-04",
+      "title": "核技巧",
+      "definition": "在隐式高维特征空间求内积，以核函数代替显式计算特征映射。",
+      "assumptions": "类别定义、特征尺度、训练/测试的时间隔离和标签分布须明确；无效标签和泄漏会使分类指标虚高。",
+      "properties": [
+        "模型输出可能是距离、决策分数或条件概率，只有经过适当校准才可解释为事件概率。",
+        "应按不平衡类别和实际决策成本选择指标与阈值，不把准确率等同于策略收益。"
+      ],
+      "formulas": [
+        {
+          "label": "分类准则",
+          "tex": "K(x,z)=\\langle\\phi(x),\\phi(z)\\rangle"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从该方法的概率假设、相似度或间隔目标出发建立分类准则。",
+          "tex": "K(x,z)=\\langle\\phi(x),\\phi(z)\\rangle"
+        },
+        {
+          "explanation": "在验证集计算对应分类统计和不同决策阈值的效果，不利用测试标签选参。",
+          "tex": "K(x,z)=\\langle\\phi(x),\\phi(z)\\rangle"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.metrics.pairwise import rbf_kernel\nprint(rbf_kernel(np.array([[0.],[1.]]),gamma=1.))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益方向、市场制度状态和极端风险事件分类；正式策略需结合回测成本和风险限额。",
+      "limits": "示例展示模型定义或输出计算；完整实证需要Walk-Forward、概率校准和类别代价分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n05-04",
+      "node_id": "classification-n05-04",
+      "title": "RBF核",
+      "definition": "径向基核利用样本平方距离的指数衰减构造相似度，具有无限维特征映射解释。",
+      "assumptions": "类别定义、特征尺度、训练/测试的时间隔离和标签分布须明确；无效标签和泄漏会使分类指标虚高。",
+      "properties": [
+        "模型输出可能是距离、决策分数或条件概率，只有经过适当校准才可解释为事件概率。",
+        "应按不平衡类别和实际决策成本选择指标与阈值，不把准确率等同于策略收益。"
+      ],
+      "formulas": [
+        {
+          "label": "分类准则",
+          "tex": "K(x,z)=\\exp(-\\gamma\\|x-z\\|_2^2)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从该方法的概率假设、相似度或间隔目标出发建立分类准则。",
+          "tex": "K(x,z)=\\exp(-\\gamma\\|x-z\\|_2^2)"
+        },
+        {
+          "explanation": "在验证集计算对应分类统计和不同决策阈值的效果，不利用测试标签选参。",
+          "tex": "K(x,z)=\\exp(-\\gamma\\|x-z\\|_2^2)"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([0.,0.]);z=np.array([1.,2.])\nprint(np.exp(-.5*np.sum((x-z)**2)))",
+      "packages": "numpy or Python standard library",
+      "application": "用于ETF收益方向、市场制度状态和极端风险事件分类；正式策略需结合回测成本和风险限额。",
+      "limits": "示例展示模型定义或输出计算；完整实证需要Walk-Forward、概率校准和类别代价分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n06-04",
+      "node_id": "classification-n06-04",
+      "title": "核参数选择",
+      "definition": "核宽、正则强度和模型复杂度应在训练时间窗口内交叉验证，避免验证集过拟合。",
+      "assumptions": "类别定义、特征尺度、训练/测试的时间隔离和标签分布须明确；无效标签和泄漏会使分类指标虚高。",
+      "properties": [
+        "模型输出可能是距离、决策分数或条件概率，只有经过适当校准才可解释为事件概率。",
+        "应按不平衡类别和实际决策成本选择指标与阈值，不把准确率等同于策略收益。"
+      ],
+      "formulas": [
+        {
+          "label": "分类准则",
+          "tex": "(\\gamma,C)^*=\\arg\\min_{\\gamma,C}\\hat R_{\\rm val}(\\gamma,C)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从该方法的概率假设、相似度或间隔目标出发建立分类准则。",
+          "tex": "(\\gamma,C)^*=\\arg\\min_{\\gamma,C}\\hat R_{\\rm val}(\\gamma,C)"
+        },
+        {
+          "explanation": "在验证集计算对应分类统计和不同决策阈值的效果，不利用测试标签选参。",
+          "tex": "(\\gamma,C)^*=\\arg\\min_{\\gamma,C}\\hat R_{\\rm val}(\\gamma,C)"
+        }
+      ],
+      "code": "from sklearn.model_selection import ParameterGrid\nprint(list(ParameterGrid({\"C\":[.1,1.],\"gamma\":[.01,.1]})))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益方向、市场制度状态和极端风险事件分类；正式策略需结合回测成本和风险限额。",
+      "limits": "示例展示模型定义或输出计算；完整实证需要Walk-Forward、概率校准和类别代价分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n04-05",
+      "node_id": "classification-n04-05",
+      "title": "阈值选择",
+      "definition": "分类阈值应基于目标函数（如F1或预期经济损失）用独立验证集决定。",
+      "assumptions": "类别定义、特征尺度、训练/测试的时间隔离和标签分布须明确；无效标签和泄漏会使分类指标虚高。",
+      "properties": [
+        "模型输出可能是距离、决策分数或条件概率，只有经过适当校准才可解释为事件概率。",
+        "应按不平衡类别和实际决策成本选择指标与阈值，不把准确率等同于策略收益。"
+      ],
+      "formulas": [
+        {
+          "label": "分类准则",
+          "tex": "\\tau^*=\\arg\\max_\\tau U(\\hat y_\\tau,y)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从该方法的概率假设、相似度或间隔目标出发建立分类准则。",
+          "tex": "\\tau^*=\\arg\\max_\\tau U(\\hat y_\\tau,y)"
+        },
+        {
+          "explanation": "在验证集计算对应分类统计和不同决策阈值的效果，不利用测试标签选参。",
+          "tex": "\\tau^*=\\arg\\max_\\tau U(\\hat y_\\tau,y)"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.metrics import f1_score\ny=[0,1,1,0];score=[.2,.4,.8,.6]\nprint([(t,f1_score(y,np.array(score)>=t)) for t in [.3,.5,.7]])",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益方向、市场制度状态和极端风险事件分类；正式策略需结合回测成本和风险限额。",
+      "limits": "示例展示模型定义或输出计算；完整实证需要Walk-Forward、概率校准和类别代价分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n05-05",
+      "node_id": "classification-n05-05",
+      "title": "Platt/Isotonic校准",
+      "definition": "Platt用Sigmoid拟合决策分数到概率，Isotonic用单调非参数映射获得校准概率。",
+      "assumptions": "类别定义、特征尺度、训练/测试的时间隔离和标签分布须明确；无效标签和泄漏会使分类指标虚高。",
+      "properties": [
+        "模型输出可能是距离、决策分数或条件概率，只有经过适当校准才可解释为事件概率。",
+        "应按不平衡类别和实际决策成本选择指标与阈值，不把准确率等同于策略收益。"
+      ],
+      "formulas": [
+        {
+          "label": "分类准则",
+          "tex": "p=\\sigma(As+B)\\quad\\text{(Platt)}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从该方法的概率假设、相似度或间隔目标出发建立分类准则。",
+          "tex": "p=\\sigma(As+B)\\quad\\text{(Platt)}"
+        },
+        {
+          "explanation": "在验证集计算对应分类统计和不同决策阈值的效果，不利用测试标签选参。",
+          "tex": "p=\\sigma(As+B)\\quad\\text{(Platt)}"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.isotonic import IsotonicRegression\ns=[.1,.3,.5,.7,.9];y=[0,0,1,1,1]\nprint(IsotonicRegression(out_of_bounds=\"clip\").fit(s,y).predict([.2,.6]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益方向、市场制度状态和极端风险事件分类；正式策略需结合回测成本和风险限额。",
+      "limits": "示例展示模型定义或输出计算；完整实证需要Walk-Forward、概率校准和类别代价分析。",
+      "coverage": "complete"
+    },
+    {
+      "id": "classification-n06-05",
+      "node_id": "classification-n06-05",
+      "title": "不平衡类别评价",
+      "definition": "极低事件发生率下准确率容易虚高，须报告Precision、Recall、PR-AUC与阈值经济代价。",
+      "assumptions": "类别定义、特征尺度、训练/测试的时间隔离和标签分布须明确；无效标签和泄漏会使分类指标虚高。",
+      "properties": [
+        "模型输出可能是距离、决策分数或条件概率，只有经过适当校准才可解释为事件概率。",
+        "应按不平衡类别和实际决策成本选择指标与阈值，不把准确率等同于策略收益。"
+      ],
+      "formulas": [
+        {
+          "label": "分类准则",
+          "tex": "\\operatorname{Precision}=\\frac{TP}{TP+FP},\\quad\\operatorname{Recall}=\\frac{TP}{TP+FN}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从该方法的概率假设、相似度或间隔目标出发建立分类准则。",
+          "tex": "\\operatorname{Precision}=\\frac{TP}{TP+FP},\\quad\\operatorname{Recall}=\\frac{TP}{TP+FN}"
+        },
+        {
+          "explanation": "在验证集计算对应分类统计和不同决策阈值的效果，不利用测试标签选参。",
+          "tex": "\\operatorname{Precision}=\\frac{TP}{TP+FP},\\quad\\operatorname{Recall}=\\frac{TP}{TP+FN}"
+        }
+      ],
+      "code": "from sklearn.metrics import classification_report\ny=[0]*9+[1];pred=[0]*10\nprint(classification_report(y,pred,zero_division=0))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF收益方向、市场制度状态和极端风险事件分类；正式策略需结合回测成本和风险限额。",
+      "limits": "示例展示模型定义或输出计算；完整实证需要Walk-Forward、概率校准和类别代价分析。",
+      "coverage": "complete"
+    }
+  ]
+}
