@@ -46,17 +46,17 @@
       "formulas": [
         {
           "label": "核心表达",
-          "tex": "L=D-A,quad x^\top Lx=\frac12sum_{ij}A_{ij}(x_i-x_j)^2"
+          "tex": "L=D-A,\\qquad x^\\top Lx=\\frac12\\sum_{ij}A_{ij}(x_i-x_j)^2"
         }
       ],
       "derivation": [
         {
           "explanation": "展开度矩阵和邻接矩阵对应的二次型",
-          "tex": "x^\top Dx=sum_id_ix_i^2"
+          "tex": "x^\\top D x=\\sum_i d_i x_i^2"
         },
         {
-          "explanation": "使用上述关系构建算法实现，并对误差与可得信息进行核查。",
-          "tex": "L=D-A,quad x^\top Lx=\frac12sum_{ij}A_{ij}(x_i-x_j)^2"
+          "explanation": "因A对称且d_i等于邻接行和，交叉项重排为边差平方之和，得到半正定性。",
+          "tex": "x^\\top Lx=\\frac12\\sum_{i,j}A_{ij}(x_i-x_j)^2\\ge0"
         }
       ],
       "code": "import numpy as np\nA=np.array([[0.,1.,0.],[1.,0.,1.],[0.,1.,0.]])\nL=np.diag(A.sum(1))-A\nprint(np.linalg.eigvalsh(L))",
