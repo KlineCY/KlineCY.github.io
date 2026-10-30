@@ -1,0 +1,118 @@
+/* Kline Quant v2 — each major module is its own collapsible rounded card.
+   Every submenu stays *inside its own parent card*. */
+#quantSidebar {
+  position:fixed;inset:0 auto 0 0;width:272px;overflow-y:auto;overscroll-behavior:contain;
+  z-index:50;padding:21px 15px 25px;display:block;
+  background:#102a43;color:#e5f0f8;box-sizing:border-box;
+  font:13px/1.6 "Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+}
+#quantSidebar *{box-sizing:border-box}
+#quantSidebar .q-brand{display:block;text-decoration:none;color:white;font:700 28px/1.2 Georgia,serif;letter-spacing:-1px;margin:5px 11px 27px}
+#quantSidebar .q-brand span{color:#d89b3d}
+#quantSidebar .q-nav-tree{display:block;width:100%}
+#quantSidebar .q-nav-group{
+  display:block;border:1px solid #3c5870;border-radius:15px;
+  background:#18364f;margin:0 0 13px;overflow:hidden;
+  box-shadow:0 4px 14px #061a2a24;
+}
+#quantSidebar .q-nav-group[open]{border-color:#617c91;background:#1a3952}
+#quantSidebar .q-nav-group>summary{
+  display:flex;align-items:center;gap:10px;min-height:57px;padding:10px 12px 10px 16px;
+  cursor:pointer;list-style:none;background:transparent;
+}
+#quantSidebar .q-nav-group>summary::-webkit-details-marker,
+#quantSidebar .q-nav-subgroup>summary::-webkit-details-marker{display:none}
+#quantSidebar .q-nav-group>summary::marker,
+#quantSidebar .q-nav-subgroup>summary::marker{content:""}
+#quantSidebar .q-nav-title{flex:1;min-width:0;display:block;color:#eaf4fa;
+  text-decoration:none;font:650 16px/1.45 "Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  overflow-wrap:anywhere}
+#quantSidebar .q-nav-title:hover{color:white;text-decoration:underline;text-decoration-color:#d89b3d;text-underline-offset:4px}
+#quantSidebar .q-nav-title.is-active{color:#fff}
+#quantSidebar .q-nav-group[data-group]:has(.q-nav-title.is-active)>summary{background:#2b506a;box-shadow:inset 4px 0 #d89b3d}
+#quantSidebar .q-chevron,#quantSidebar .q-sub-chevron{
+  display:flex;align-items:center;justify-content:center;flex:0 0 27px;
+  width:27px;height:27px;border:1px solid #7694aa;border-radius:8px;
+  color:#eaf4fa;font:700 17px/1 Georgia,serif;transition:transform .18s ease,border-color .18s ease;
+}
+#quantSidebar .q-nav-group[open]>summary .q-chevron{transform:rotate(90deg);border-color:#d89b3d;color:#f4cf83}
+#quantSidebar .q-nav-items{
+  display:block;margin:0;padding:10px 12px 14px;
+  border-top:1px solid #41647c;background:#17334a;
+}
+#quantSidebar .q-nav-group:not([open])>.q-nav-items{display:none!important}
+#quantSidebar a.q-menu-link,#quantSidebar button.q-menu-link,#quantSidebar button.nav-item,
+#quantSidebar a.nav-item{
+  display:block;width:100%;text-align:left;
+  text-decoration:none;color:#d7e6f0;background:none;border:0;
+  font:12.5px/1.55 "Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  padding:9px 10px;margin:0 0 3px;border-radius:8px;cursor:pointer;
+}
+#quantSidebar .q-menu-link:hover,#quantSidebar .nav-item:hover,
+#quantSidebar .q-menu-link.active,#quantSidebar .nav-item.active,
+#quantSidebar .q-menu-link.chosen,#quantSidebar .nav-item.chosen{
+  background:#365a73;color:#fff;
+}
+#quantSidebar .q-menu-link.active,#quantSidebar .nav-item.active{
+  box-shadow:inset 3px 0 #d89b3d;
+}
+#quantSidebar .q-menu-count{float:right;color:#b7cede}
+#quantSidebar .q-nav-subgroup{display:block;margin:7px 0 5px;border-top:1px solid #3c5a72}
+#quantSidebar .q-nav-subgroup>summary,#quantSidebar .q-sub-toggle{
+  display:flex;width:100%;align-items:center;justify-content:space-between;gap:8px;
+  min-height:43px;padding:10px 9px;margin:0;
+  border:0;border-radius:7px;background:none;
+  color:#e3eef6;cursor:pointer;text-align:left;
+  list-style:none;font:600 13px/1.45 "Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+}
+#quantSidebar .q-nav-subgroup>summary:hover,#quantSidebar .q-sub-toggle:hover{
+  background:#284c65
+}
+#quantSidebar .q-sub-chevron{flex-basis:21px;width:21px;height:21px;font-size:12px;border-radius:6px}
+#quantSidebar .q-nav-subgroup[open]>summary .q-sub-chevron,
+#quantSidebar .q-sub-toggle[aria-expanded="true"] .q-sub-chevron{transform:rotate(90deg);color:#f4cf83}
+#quantSidebar .q-nav-leaves{
+  display:block;margin:2px 0 6px 11px;padding:3px 0 5px 9px;
+  border-left:2px solid #66869e;
+}
+#quantSidebar .q-nav-leaves[hidden]{display:none!important}
+#quantSidebar .q-nav-subgroup:not([open])>.q-nav-leaves{display:none!important}
+#quantSidebar .q-nav-leaves button,#quantSidebar .q-nav-leaves a,
+#quantSidebar .q-nav-leaves .issue-btn{
+  display:block;width:100%;max-width:100%;
+  margin:1px 0;padding:8px 9px;
+  background:none;color:#bed5e5;text-decoration:none;border:0;border-radius:7px;
+  text-align:left;cursor:pointer;overflow-wrap:anywhere;
+  font:12px/1.48 "Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+}
+#quantSidebar .q-nav-leaves a:hover,#quantSidebar .q-nav-leaves button:hover,
+#quantSidebar .q-nav-leaves .active,#quantSidebar .q-nav-leaves .chosen{
+  background:#3a6079;color:white;
+}
+#quantSidebar .q-home-link{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  margin:22px 2px 4px;padding:11px 15px;border:1px solid #58758c;
+  background:#203f57;border-radius:12px;text-decoration:none;color:#deebf4;font-size:13px;
+}
+#quantSidebar .q-home-link:hover{background:#31536e;color:white}
+#quantSidebar .q-home-link span{color:#d89b3d;font-size:17px}
+/* Override the old layout margins only on pages using the unified navigation. */
+body:has(#quantSidebar) .main,body:has(#quantSidebar) .wrap,
+body:has(#quantSidebar) .workspace{margin-left:272px;padding-left:30px;padding-right:30px}
+@media(max-width:820px){
+  #quantSidebar{position:relative;inset:auto;width:100%;overflow:visible;padding:15px;display:block}
+  #quantSidebar .q-brand{margin:0 5px 17px}
+  #quantSidebar .q-nav-tree{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;gap:10px}
+  #quantSidebar .q-nav-group{margin:0;min-width:0}
+  #quantSidebar .q-nav-group>summary{padding:10px;min-height:54px}
+  #quantSidebar .q-nav-title{font-size:14px}
+  #quantSidebar .q-chevron{flex:0 0 23px;width:23px;height:23px}
+  #quantSidebar .q-home-link{margin:12px 0 0}
+  body:has(#quantSidebar) .main,body:has(#quantSidebar) .wrap,
+  body:has(#quantSidebar) .workspace{margin:0 auto;padding:0 16px}
+}
+@media(max-width:520px){
+  #quantSidebar .q-nav-tree{grid-template-columns:1fr}
+  #quantSidebar .q-nav-group>summary{padding:11px 14px}
+  #quantSidebar .q-nav-title{font-size:15px}
+}
