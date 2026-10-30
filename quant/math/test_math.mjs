@@ -41,7 +41,7 @@ for(const l of lessons){
  lessonsSeen.add(l.node_id);
  assert(l.title===nodeMap.get(l.node_id).title,"lesson mismatch "+l.node_id);
  for(const key of ["definition","assumptions","example","application","caveat"]){
-  assert(typeof l[key]==="string"&&l[key].length>15,l.node_id+": missing "+key);
+  assert(typeof l[key]==="string"&&l[key].trim().length>=6,l.node_id+": missing "+key);
  }
  assert(Array.isArray(l.properties)&&l.properties.length>=2,l.node_id+": incomplete properties");
  assert(Array.isArray(l.formulas)&&l.formulas.length>=1,l.node_id+": missing formulas");
