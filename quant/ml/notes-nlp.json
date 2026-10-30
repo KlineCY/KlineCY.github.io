@@ -1,0 +1,645 @@
+{
+  "version": 1,
+  "notes": [
+    {
+      "id": "nlp-n01-01",
+      "node_id": "nlp-n01-01",
+      "title": "文本清洗",
+      "definition": "文本清洗去除无效编码、格式噪声和重复内容，同时保留金融术语与数字信息。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "文本清洗去除无效编码、格式噪声和重复内容，同时保留金融术语与数字信息。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "T_{\\rm clean}=\\operatorname{Normalize}(T_{\\rm raw})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。文本清洗去除无效编码、格式噪声和重复内容，同时保留金融术语与数字信息。",
+          "tex": "T_{\\rm clean}=\\operatorname{Normalize}(T_{\\rm raw})"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "T_{\\rm clean}=\\operatorname{Normalize}(T_{\\rm raw})"
+        }
+      ],
+      "code": "# 文本清洗：相关学科综合示例\nfrom sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\ntexts=[\"profit rose revenue improved\",\"loss grew and guidance fell\",\n       \"earnings beat expectations\",\"higher expenses risk\"]\ny=[1,0,1,0]\nv=TfidfVectorizer(ngram_range=(1,2))\nX=v.fit_transform(texts)\nclf=LogisticRegression().fit(X,y)\nprint(\"Words:\",len(v.vocabulary_))\nprint(\"Class:\",clf.predict(v.transform([\"revenue and profit improved\"])))",
+      "packages": "scikit-learn",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "nlp-n03-01",
+      "node_id": "nlp-n03-01",
+      "title": "词形还原",
+      "definition": "词形还原将不同语法变形恢复为基础词元，以降低稀疏词表规模。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "词形还原将不同语法变形恢复为基础词元，以降低稀疏词表规模。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "\\operatorname{lemma}(\\text{running})=\\text{run}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。词形还原将不同语法变形恢复为基础词元，以降低稀疏词表规模。",
+          "tex": "\\operatorname{lemma}(\\text{running})=\\text{run}"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "\\operatorname{lemma}(\\text{running})=\\text{run}"
+        }
+      ],
+      "code": "# 词形还原：相关学科综合示例\nfrom sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\ntexts=[\"profit rose revenue improved\",\"loss grew and guidance fell\",\n       \"earnings beat expectations\",\"higher expenses risk\"]\ny=[1,0,1,0]\nv=TfidfVectorizer(ngram_range=(1,2))\nX=v.fit_transform(texts)\nclf=LogisticRegression().fit(X,y)\nprint(\"Words:\",len(v.vocabulary_))\nprint(\"Class:\",clf.predict(v.transform([\"revenue and profit improved\"])))",
+      "packages": "scikit-learn",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "nlp-n04-01",
+      "node_id": "nlp-n04-01",
+      "title": "停用词",
+      "definition": "高频功能词可在稀疏模型中移除，但金融否定词往往不可作为通用停用词删除。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "高频功能词可在稀疏模型中移除，但金融否定词往往不可作为通用停用词删除。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "V'=V\\setminus S_{\\rm stop}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。高频功能词可在稀疏模型中移除，但金融否定词往往不可作为通用停用词删除。",
+          "tex": "V'=V\\setminus S_{\\rm stop}"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "V'=V\\setminus S_{\\rm stop}"
+        }
+      ],
+      "code": "# 停用词：相关学科综合示例\nfrom sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\ntexts=[\"profit rose revenue improved\",\"loss grew and guidance fell\",\n       \"earnings beat expectations\",\"higher expenses risk\"]\ny=[1,0,1,0]\nv=TfidfVectorizer(ngram_range=(1,2))\nX=v.fit_transform(texts)\nclf=LogisticRegression().fit(X,y)\nprint(\"Words:\",len(v.vocabulary_))\nprint(\"Class:\",clf.predict(v.transform([\"revenue and profit improved\"])))",
+      "packages": "scikit-learn",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "nlp-n05-01",
+      "node_id": "nlp-n05-01",
+      "title": "文本正则",
+      "definition": "正则表达式以模式匹配提取日期、证券代码和财务金额等文本片段。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "正则表达式以模式匹配提取日期、证券代码和财务金额等文本片段。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "\\operatorname{match}(r,T)\\to\\{s_i\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。正则表达式以模式匹配提取日期、证券代码和财务金额等文本片段。",
+          "tex": "\\operatorname{match}(r,T)\\to\\{s_i\\}"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "\\operatorname{match}(r,T)\\to\\{s_i\\}"
+        }
+      ],
+      "code": "# 文本正则：相关学科综合示例\nfrom sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\ntexts=[\"profit rose revenue improved\",\"loss grew and guidance fell\",\n       \"earnings beat expectations\",\"higher expenses risk\"]\ny=[1,0,1,0]\nv=TfidfVectorizer(ngram_range=(1,2))\nX=v.fit_transform(texts)\nclf=LogisticRegression().fit(X,y)\nprint(\"Words:\",len(v.vocabulary_))\nprint(\"Class:\",clf.predict(v.transform([\"revenue and profit improved\"])))",
+      "packages": "scikit-learn",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "nlp-n06-01",
+      "node_id": "nlp-n06-01",
+      "title": "语料库时间戳",
+      "definition": "每份文本要区分事件日期、发表日期和模型实际可获取时间。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "每份文本要区分事件日期、发表日期和模型实际可获取时间。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "t_{\\rm available}\\le t_{\\rm prediction}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。每份文本要区分事件日期、发表日期和模型实际可获取时间。",
+          "tex": "t_{\\rm available}\\le t_{\\rm prediction}"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "t_{\\rm available}\\le t_{\\rm prediction}"
+        }
+      ],
+      "code": "# 语料库时间戳：相关学科综合示例\nfrom sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\ntexts=[\"profit rose revenue improved\",\"loss grew and guidance fell\",\n       \"earnings beat expectations\",\"higher expenses risk\"]\ny=[1,0,1,0]\nv=TfidfVectorizer(ngram_range=(1,2))\nX=v.fit_transform(texts)\nclf=LogisticRegression().fit(X,y)\nprint(\"Words:\",len(v.vocabulary_))\nprint(\"Class:\",clf.predict(v.transform([\"revenue and profit improved\"])))",
+      "packages": "scikit-learn",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "nlp-n05-02",
+      "node_id": "nlp-n05-02",
+      "title": "词共现矩阵",
+      "definition": "按上下文窗口计数词与词共同出现次数形成词共现统计矩阵。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "按上下文窗口计数词与词共同出现次数形成词共现统计矩阵。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "C_{ij}=\\sum_t\\mathbf1[w_t=i,w_{t+\\Delta}=j]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。按上下文窗口计数词与词共同出现次数形成词共现统计矩阵。",
+          "tex": "C_{ij}=\\sum_t\\mathbf1[w_t=i,w_{t+\\Delta}=j]"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "C_{ij}=\\sum_t\\mathbf1[w_t=i,w_{t+\\Delta}=j]"
+        }
+      ],
+      "code": "# 词共现矩阵：相关学科综合示例\nfrom sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\ntexts=[\"profit rose revenue improved\",\"loss grew and guidance fell\",\n       \"earnings beat expectations\",\"higher expenses risk\"]\ny=[1,0,1,0]\nv=TfidfVectorizer(ngram_range=(1,2))\nX=v.fit_transform(texts)\nclf=LogisticRegression().fit(X,y)\nprint(\"Words:\",len(v.vocabulary_))\nprint(\"Class:\",clf.predict(v.transform([\"revenue and profit improved\"])))",
+      "packages": "scikit-learn",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "nlp-n06-02",
+      "node_id": "nlp-n06-02",
+      "title": "稀疏文本分类",
+      "definition": "用词袋或TF-IDF稀疏向量配合线性分类器构建稳健基线。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "用词袋或TF-IDF稀疏向量配合线性分类器构建稳健基线。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "p(y=1\\mid x)=\\sigma(w^\\top\\operatorname{tfidf}(x)+b)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。用词袋或TF-IDF稀疏向量配合线性分类器构建稳健基线。",
+          "tex": "p(y=1\\mid x)=\\sigma(w^\\top\\operatorname{tfidf}(x)+b)"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "p(y=1\\mid x)=\\sigma(w^\\top\\operatorname{tfidf}(x)+b)"
+        }
+      ],
+      "code": "# 稀疏文本分类：相关学科综合示例\nfrom sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\ntexts=[\"profit rose revenue improved\",\"loss grew and guidance fell\",\n       \"earnings beat expectations\",\"higher expenses risk\"]\ny=[1,0,1,0]\nv=TfidfVectorizer(ngram_range=(1,2))\nX=v.fit_transform(texts)\nclf=LogisticRegression().fit(X,y)\nprint(\"Words:\",len(v.vocabulary_))\nprint(\"Class:\",clf.predict(v.transform([\"revenue and profit improved\"])))",
+      "packages": "scikit-learn",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "nlp-n02-03",
+      "node_id": "nlp-n02-03",
+      "title": "Word2Vec CBOW",
+      "definition": "CBOW使用邻近词表示预测中心词，与Skip-gram反向建模。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "CBOW使用邻近词表示预测中心词，与Skip-gram反向建模。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "p(w_t\\mid w_{t-c:t-1},w_{t+1:t+c})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。CBOW使用邻近词表示预测中心词，与Skip-gram反向建模。",
+          "tex": "p(w_t\\mid w_{t-c:t-1},w_{t+1:t+c})"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "p(w_t\\mid w_{t-c:t-1},w_{t+1:t+c})"
+        }
+      ],
+      "code": "# Word2Vec CBOW：相关学科综合示例\nfrom sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\ntexts=[\"profit rose revenue improved\",\"loss grew and guidance fell\",\n       \"earnings beat expectations\",\"higher expenses risk\"]\ny=[1,0,1,0]\nv=TfidfVectorizer(ngram_range=(1,2))\nX=v.fit_transform(texts)\nclf=LogisticRegression().fit(X,y)\nprint(\"Words:\",len(v.vocabulary_))\nprint(\"Class:\",clf.predict(v.transform([\"revenue and profit improved\"])))",
+      "packages": "scikit-learn",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "nlp-n04-03",
+      "node_id": "nlp-n04-03",
+      "title": "GloVe",
+      "definition": "GloVe用加权词向量内积重构全局词共现概率的对数。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "GloVe用加权词向量内积重构全局词共现概率的对数。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "L=\\sum_{ij}f(C_{ij})(w_i^\\top\\tilde w_j+b_i+\\tilde b_j-\\log C_{ij})^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。GloVe用加权词向量内积重构全局词共现概率的对数。",
+          "tex": "L=\\sum_{ij}f(C_{ij})(w_i^\\top\\tilde w_j+b_i+\\tilde b_j-\\log C_{ij})^2"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "L=\\sum_{ij}f(C_{ij})(w_i^\\top\\tilde w_j+b_i+\\tilde b_j-\\log C_{ij})^2"
+        }
+      ],
+      "code": "# GloVe：相关学科综合示例\nfrom sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\ntexts=[\"profit rose revenue improved\",\"loss grew and guidance fell\",\n       \"earnings beat expectations\",\"higher expenses risk\"]\ny=[1,0,1,0]\nv=TfidfVectorizer(ngram_range=(1,2))\nX=v.fit_transform(texts)\nclf=LogisticRegression().fit(X,y)\nprint(\"Words:\",len(v.vocabulary_))\nprint(\"Class:\",clf.predict(v.transform([\"revenue and profit improved\"])))",
+      "packages": "scikit-learn",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "nlp-n05-03",
+      "node_id": "nlp-n05-03",
+      "title": "子词FastText",
+      "definition": "FastText用字符N-gram向量之和表示词，可缓解词表外词问题。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "FastText用字符N-gram向量之和表示词，可缓解词表外词问题。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "v_w=\\sum_{g\\in G(w)}z_g"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。FastText用字符N-gram向量之和表示词，可缓解词表外词问题。",
+          "tex": "v_w=\\sum_{g\\in G(w)}z_g"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "v_w=\\sum_{g\\in G(w)}z_g"
+        }
+      ],
+      "code": "# 子词FastText：相关学科综合示例\nfrom sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\ntexts=[\"profit rose revenue improved\",\"loss grew and guidance fell\",\n       \"earnings beat expectations\",\"higher expenses risk\"]\ny=[1,0,1,0]\nv=TfidfVectorizer(ngram_range=(1,2))\nX=v.fit_transform(texts)\nclf=LogisticRegression().fit(X,y)\nprint(\"Words:\",len(v.vocabulary_))\nprint(\"Class:\",clf.predict(v.transform([\"revenue and profit improved\"])))",
+      "packages": "scikit-learn",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "nlp-n06-03",
+      "node_id": "nlp-n06-03",
+      "title": "句子嵌入",
+      "definition": "将整句或段落编码为向量并用语义相似度检索文本。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "将整句或段落编码为向量并用语义相似度检索文本。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "z=\\operatorname{Pool}(h_1,\\ldots,h_T)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。将整句或段落编码为向量并用语义相似度检索文本。",
+          "tex": "z=\\operatorname{Pool}(h_1,\\ldots,h_T)"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "z=\\operatorname{Pool}(h_1,\\ldots,h_T)"
+        }
+      ],
+      "code": "# 句子嵌入：相关学科综合示例\nfrom sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\ntexts=[\"profit rose revenue improved\",\"loss grew and guidance fell\",\n       \"earnings beat expectations\",\"higher expenses risk\"]\ny=[1,0,1,0]\nv=TfidfVectorizer(ngram_range=(1,2))\nX=v.fit_transform(texts)\nclf=LogisticRegression().fit(X,y)\nprint(\"Words:\",len(v.vocabulary_))\nprint(\"Class:\",clf.predict(v.transform([\"revenue and profit improved\"])))",
+      "packages": "scikit-learn",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "nlp-n01-04",
+      "node_id": "nlp-n01-04",
+      "title": "n-gram语言模型",
+      "definition": "近似只依赖有限历史Token的语言模型条件概率。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "近似只依赖有限历史Token的语言模型条件概率。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "p(w_t\\mid w_{<t})\\approx p(w_t\\mid w_{t-n+1:t-1})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。近似只依赖有限历史Token的语言模型条件概率。",
+          "tex": "p(w_t\\mid w_{<t})\\approx p(w_t\\mid w_{t-n+1:t-1})"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "p(w_t\\mid w_{<t})\\approx p(w_t\\mid w_{t-n+1:t-1})"
+        }
+      ],
+      "code": "# n-gram语言模型：相关学科综合示例\nfrom sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\ntexts=[\"profit rose revenue improved\",\"loss grew and guidance fell\",\n       \"earnings beat expectations\",\"higher expenses risk\"]\ny=[1,0,1,0]\nv=TfidfVectorizer(ngram_range=(1,2))\nX=v.fit_transform(texts)\nclf=LogisticRegression().fit(X,y)\nprint(\"Words:\",len(v.vocabulary_))\nprint(\"Class:\",clf.predict(v.transform([\"revenue and profit improved\"])))",
+      "packages": "scikit-learn",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "nlp-n02-04",
+      "node_id": "nlp-n02-04",
+      "title": "条件随机场CRF",
+      "definition": "线性链CRF用序列级归一化联合优化标签转移与发射得分。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "线性链CRF用序列级归一化联合优化标签转移与发射得分。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "p(y\\mid x)=\\frac{\\exp S(x,y)}{\\sum_{y'}\\exp S(x,y')}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。线性链CRF用序列级归一化联合优化标签转移与发射得分。",
+          "tex": "p(y\\mid x)=\\frac{\\exp S(x,y)}{\\sum_{y'}\\exp S(x,y')}"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "p(y\\mid x)=\\frac{\\exp S(x,y)}{\\sum_{y'}\\exp S(x,y')}"
+        }
+      ],
+      "code": "# 条件随机场CRF：相关学科综合示例\nfrom sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\ntexts=[\"profit rose revenue improved\",\"loss grew and guidance fell\",\n       \"earnings beat expectations\",\"higher expenses risk\"]\ny=[1,0,1,0]\nv=TfidfVectorizer(ngram_range=(1,2))\nX=v.fit_transform(texts)\nclf=LogisticRegression().fit(X,y)\nprint(\"Words:\",len(v.vocabulary_))\nprint(\"Class:\",clf.predict(v.transform([\"revenue and profit improved\"])))",
+      "packages": "scikit-learn",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "nlp-n04-04",
+      "node_id": "nlp-n04-04",
+      "title": "词性标注",
+      "definition": "按句内上下文为Token分配名词、动词等语法类别。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "按句内上下文为Token分配名词、动词等语法类别。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "\\hat y_{1:T}=\\arg\\max_y p(y_{1:T}\\mid x_{1:T})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。按句内上下文为Token分配名词、动词等语法类别。",
+          "tex": "\\hat y_{1:T}=\\arg\\max_y p(y_{1:T}\\mid x_{1:T})"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "\\hat y_{1:T}=\\arg\\max_y p(y_{1:T}\\mid x_{1:T})"
+        }
+      ],
+      "code": "# 词性标注：相关学科综合示例\nfrom sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\ntexts=[\"profit rose revenue improved\",\"loss grew and guidance fell\",\n       \"earnings beat expectations\",\"higher expenses risk\"]\ny=[1,0,1,0]\nv=TfidfVectorizer(ngram_range=(1,2))\nX=v.fit_transform(texts)\nclf=LogisticRegression().fit(X,y)\nprint(\"Words:\",len(v.vocabulary_))\nprint(\"Class:\",clf.predict(v.transform([\"revenue and profit improved\"])))",
+      "packages": "scikit-learn",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "nlp-n05-04",
+      "node_id": "nlp-n05-04",
+      "title": "序列到序列Seq2Seq",
+      "definition": "Seq2Seq用编码器表示源文本、解码器生成目标文本序列。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "Seq2Seq用编码器表示源文本、解码器生成目标文本序列。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "p(y_{1:T}\\mid x)=\\prod_tp(y_t\\mid y_{<t},x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。Seq2Seq用编码器表示源文本、解码器生成目标文本序列。",
+          "tex": "p(y_{1:T}\\mid x)=\\prod_tp(y_t\\mid y_{<t},x)"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "p(y_{1:T}\\mid x)=\\prod_tp(y_t\\mid y_{<t},x)"
+        }
+      ],
+      "code": "# 序列到序列Seq2Seq：相关学科综合示例\nfrom sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\ntexts=[\"profit rose revenue improved\",\"loss grew and guidance fell\",\n       \"earnings beat expectations\",\"higher expenses risk\"]\ny=[1,0,1,0]\nv=TfidfVectorizer(ngram_range=(1,2))\nX=v.fit_transform(texts)\nclf=LogisticRegression().fit(X,y)\nprint(\"Words:\",len(v.vocabulary_))\nprint(\"Class:\",clf.predict(v.transform([\"revenue and profit improved\"])))",
+      "packages": "scikit-learn",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "nlp-n06-04",
+      "node_id": "nlp-n06-04",
+      "title": "Beam Search",
+      "definition": "Beam Search每步保留累计对数概率最高的B条部分序列近似搜索。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "Beam Search每步保留累计对数概率最高的B条部分序列近似搜索。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "S(y_{1:t})=\\sum_{i=1}^t\\log p(y_i\\mid y_{<i},x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。Beam Search每步保留累计对数概率最高的B条部分序列近似搜索。",
+          "tex": "S(y_{1:t})=\\sum_{i=1}^t\\log p(y_i\\mid y_{<i},x)"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "S(y_{1:t})=\\sum_{i=1}^t\\log p(y_i\\mid y_{<i},x)"
+        }
+      ],
+      "code": "# Beam Search：相关学科综合示例\nfrom sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\ntexts=[\"profit rose revenue improved\",\"loss grew and guidance fell\",\n       \"earnings beat expectations\",\"higher expenses risk\"]\ny=[1,0,1,0]\nv=TfidfVectorizer(ngram_range=(1,2))\nX=v.fit_transform(texts)\nclf=LogisticRegression().fit(X,y)\nprint(\"Words:\",len(v.vocabulary_))\nprint(\"Class:\",clf.predict(v.transform([\"revenue and profit improved\"])))",
+      "packages": "scikit-learn",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "nlp-n01-05",
+      "node_id": "nlp-n01-05",
+      "title": "财报文本解析",
+      "definition": "对财务文件抽取表格、章节、企业名称及指标，同时维护披露时间和来源。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "对财务文件抽取表格、章节、企业名称及指标，同时维护披露时间和来源。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "F=\\operatorname{Extract}(\\mathrm{Document})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。对财务文件抽取表格、章节、企业名称及指标，同时维护披露时间和来源。",
+          "tex": "F=\\operatorname{Extract}(\\mathrm{Document})"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "F=\\operatorname{Extract}(\\mathrm{Document})"
+        }
+      ],
+      "code": "# 财报文本解析：相关学科综合示例\nfrom sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\ntexts=[\"profit rose revenue improved\",\"loss grew and guidance fell\",\n       \"earnings beat expectations\",\"higher expenses risk\"]\ny=[1,0,1,0]\nv=TfidfVectorizer(ngram_range=(1,2))\nX=v.fit_transform(texts)\nclf=LogisticRegression().fit(X,y)\nprint(\"Words:\",len(v.vocabulary_))\nprint(\"Class:\",clf.predict(v.transform([\"revenue and profit improved\"])))",
+      "packages": "scikit-learn",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "nlp-n03-05",
+      "node_id": "nlp-n03-05",
+      "title": "事件抽取",
+      "definition": "从财经新闻中提取事件触发词、主体、对象、方向与时间。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "从财经新闻中提取事件触发词、主体、对象、方向与时间。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "e=(\\mathrm{entity},\\mathrm{action},\\mathrm{time})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。从财经新闻中提取事件触发词、主体、对象、方向与时间。",
+          "tex": "e=(\\mathrm{entity},\\mathrm{action},\\mathrm{time})"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "e=(\\mathrm{entity},\\mathrm{action},\\mathrm{time})"
+        }
+      ],
+      "code": "# 事件抽取：相关学科综合示例\nfrom sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\ntexts=[\"profit rose revenue improved\",\"loss grew and guidance fell\",\n       \"earnings beat expectations\",\"higher expenses risk\"]\ny=[1,0,1,0]\nv=TfidfVectorizer(ngram_range=(1,2))\nX=v.fit_transform(texts)\nclf=LogisticRegression().fit(X,y)\nprint(\"Words:\",len(v.vocabulary_))\nprint(\"Class:\",clf.predict(v.transform([\"revenue and profit improved\"])))",
+      "packages": "scikit-learn",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "nlp-n04-05",
+      "node_id": "nlp-n04-05",
+      "title": "实体链接",
+      "definition": "将文本中的公司简称和人名关联到唯一真实实体或证券标识。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "将文本中的公司简称和人名关联到唯一真实实体或证券标识。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "e^*=\\arg\\max_eP(e\\mid\\mathrm{mention},\\mathrm{context})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。将文本中的公司简称和人名关联到唯一真实实体或证券标识。",
+          "tex": "e^*=\\arg\\max_eP(e\\mid\\mathrm{mention},\\mathrm{context})"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "e^*=\\arg\\max_eP(e\\mid\\mathrm{mention},\\mathrm{context})"
+        }
+      ],
+      "code": "# 实体链接：相关学科综合示例\nfrom sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\ntexts=[\"profit rose revenue improved\",\"loss grew and guidance fell\",\n       \"earnings beat expectations\",\"higher expenses risk\"]\ny=[1,0,1,0]\nv=TfidfVectorizer(ngram_range=(1,2))\nX=v.fit_transform(texts)\nclf=LogisticRegression().fit(X,y)\nprint(\"Words:\",len(v.vocabulary_))\nprint(\"Class:\",clf.predict(v.transform([\"revenue and profit improved\"])))",
+      "packages": "scikit-learn",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "nlp-n05-05",
+      "node_id": "nlp-n05-05",
+      "title": "新闻去重",
+      "definition": "对近似转载、同一事件的多个消息构建重复判断规则，防止重复计分。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "对近似转载、同一事件的多个消息构建重复判断规则，防止重复计分。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "\\operatorname{sim}(d_i,d_j)>\\tau"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。对近似转载、同一事件的多个消息构建重复判断规则，防止重复计分。",
+          "tex": "\\operatorname{sim}(d_i,d_j)>\\tau"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "\\operatorname{sim}(d_i,d_j)>\\tau"
+        }
+      ],
+      "code": "# 新闻去重：相关学科综合示例\nfrom sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\ntexts=[\"profit rose revenue improved\",\"loss grew and guidance fell\",\n       \"earnings beat expectations\",\"higher expenses risk\"]\ny=[1,0,1,0]\nv=TfidfVectorizer(ngram_range=(1,2))\nX=v.fit_transform(texts)\nclf=LogisticRegression().fit(X,y)\nprint(\"Words:\",len(v.vocabulary_))\nprint(\"Class:\",clf.predict(v.transform([\"revenue and profit improved\"])))",
+      "packages": "scikit-learn",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    }
+  ]
+}
