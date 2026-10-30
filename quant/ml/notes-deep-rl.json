@@ -1,0 +1,581 @@
+{
+  "version": 1,
+  "notes": [
+    {
+      "id": "deep-rl-n05-01",
+      "node_id": "deep-rl-n05-01",
+      "title": "Dueling DQN",
+      "definition": "分离状态价值函数和动作优势函数，聚合为每个动作的Q值。",
+      "assumptions": "需要可描述的状态与行动空间、环境奖励、训练行为分布和正确的终止/折现规则。金融离线数据有动作覆盖局限。",
+      "properties": [
+        "分离状态价值函数和动作优势函数，聚合为每个动作的Q值。。",
+        "价值外推、市场非平稳和交易成本会影响离线策略评估结果。"
+      ],
+      "formulas": [
+        {
+          "label": "目标或价值函数",
+          "tex": "Q(s,a)=V(s)+A(s,a)-|\\mathcal A|^{-1}\\sum_{a'}A(s,a')"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据状态、动作、奖励或策略的定义建立数学对象。分离状态价值函数和动作优势函数，聚合为每个动作的Q值。",
+          "tex": "Q(s,a)=V(s)+A(s,a)-|\\mathcal A|^{-1}\\sum_{a'}A(s,a')"
+        },
+        {
+          "explanation": "依据价值递推、策略梯度或离线正则项说明其学习目标。",
+          "tex": "Q(s,a)=V(s)+A(s,a)-|\\mathcal A|^{-1}\\sum_{a'}A(s,a')"
+        }
+      ],
+      "code": "# Dueling DQN / RL原理示例\nimport torch\ntorch.manual_seed(0)\nlogits=torch.nn.Parameter(torch.zeros(3))\ndist=torch.distributions.Categorical(logits=logits)\na=dist.sample()\nloss=-dist.log_prob(a)*torch.tensor(.7)\nloss.backward()\nprint(\"Policy gradient:\",logits.grad)\nq=torch.randn(4,3);v=q.mean(-1,keepdim=True)\nprint(\"Dueling output:\",(v+(q-v)).shape)",
+      "packages": "torch",
+      "application": "用于ETF再平衡、成本感知策略和离线金融序贯决策。",
+      "limits": "本页为原理扩展笔记，代码只演示策略梯度和Dueling值函数的基础计算。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "deep-rl-n06-01",
+      "node_id": "deep-rl-n06-01",
+      "title": "Prioritized Replay",
+      "definition": "按照TD误差的优先级抽取经验，并使用重要性权重修正抽样偏差。",
+      "assumptions": "需要可描述的状态与行动空间、环境奖励、训练行为分布和正确的终止/折现规则。金融离线数据有动作覆盖局限。",
+      "properties": [
+        "按照TD误差的优先级抽取经验，并使用重要性权重修正抽样偏差。。",
+        "价值外推、市场非平稳和交易成本会影响离线策略评估结果。"
+      ],
+      "formulas": [
+        {
+          "label": "目标或价值函数",
+          "tex": "P(i)=p_i^\\alpha/\\sum_jp_j^\\alpha"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据状态、动作、奖励或策略的定义建立数学对象。按照TD误差的优先级抽取经验，并使用重要性权重修正抽样偏差。",
+          "tex": "P(i)=p_i^\\alpha/\\sum_jp_j^\\alpha"
+        },
+        {
+          "explanation": "依据价值递推、策略梯度或离线正则项说明其学习目标。",
+          "tex": "P(i)=p_i^\\alpha/\\sum_jp_j^\\alpha"
+        }
+      ],
+      "code": "# Prioritized Replay / RL原理示例\nimport torch\ntorch.manual_seed(0)\nlogits=torch.nn.Parameter(torch.zeros(3))\ndist=torch.distributions.Categorical(logits=logits)\na=dist.sample()\nloss=-dist.log_prob(a)*torch.tensor(.7)\nloss.backward()\nprint(\"Policy gradient:\",logits.grad)\nq=torch.randn(4,3);v=q.mean(-1,keepdim=True)\nprint(\"Dueling output:\",(v+(q-v)).shape)",
+      "packages": "torch",
+      "application": "用于ETF再平衡、成本感知策略和离线金融序贯决策。",
+      "limits": "本页为原理扩展笔记，代码只演示策略梯度和Dueling值函数的基础计算。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "deep-rl-n02-02",
+      "node_id": "deep-rl-n02-02",
+      "title": "Policy Gradient Theorem",
+      "definition": "用动作Log概率梯度与动作价值的期望表示策略目标梯度。",
+      "assumptions": "需要可描述的状态与行动空间、环境奖励、训练行为分布和正确的终止/折现规则。金融离线数据有动作覆盖局限。",
+      "properties": [
+        "用动作Log概率梯度与动作价值的期望表示策略目标梯度。。",
+        "价值外推、市场非平稳和交易成本会影响离线策略评估结果。"
+      ],
+      "formulas": [
+        {
+          "label": "目标或价值函数",
+          "tex": "\\nabla_\\theta J=E[\\nabla_\\theta\\log\\pi_\\theta(a\\mid s)Q^\\pi(s,a)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据状态、动作、奖励或策略的定义建立数学对象。用动作Log概率梯度与动作价值的期望表示策略目标梯度。",
+          "tex": "\\nabla_\\theta J=E[\\nabla_\\theta\\log\\pi_\\theta(a\\mid s)Q^\\pi(s,a)]"
+        },
+        {
+          "explanation": "依据价值递推、策略梯度或离线正则项说明其学习目标。",
+          "tex": "\\nabla_\\theta J=E[\\nabla_\\theta\\log\\pi_\\theta(a\\mid s)Q^\\pi(s,a)]"
+        }
+      ],
+      "code": "# Policy Gradient Theorem / RL原理示例\nimport torch\ntorch.manual_seed(0)\nlogits=torch.nn.Parameter(torch.zeros(3))\ndist=torch.distributions.Categorical(logits=logits)\na=dist.sample()\nloss=-dist.log_prob(a)*torch.tensor(.7)\nloss.backward()\nprint(\"Policy gradient:\",logits.grad)\nq=torch.randn(4,3);v=q.mean(-1,keepdim=True)\nprint(\"Dueling output:\",(v+(q-v)).shape)",
+      "packages": "torch",
+      "application": "用于ETF再平衡、成本感知策略和离线金融序贯决策。",
+      "limits": "本页为原理扩展笔记，代码只演示策略梯度和Dueling值函数的基础计算。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "deep-rl-n03-02",
+      "node_id": "deep-rl-n03-02",
+      "title": "Baseline与优势函数",
+      "definition": "使用价值基线减少策略梯度方差，以优势函数描述动作相对平均的好坏。",
+      "assumptions": "需要可描述的状态与行动空间、环境奖励、训练行为分布和正确的终止/折现规则。金融离线数据有动作覆盖局限。",
+      "properties": [
+        "使用价值基线减少策略梯度方差，以优势函数描述动作相对平均的好坏。。",
+        "价值外推、市场非平稳和交易成本会影响离线策略评估结果。"
+      ],
+      "formulas": [
+        {
+          "label": "目标或价值函数",
+          "tex": "A(s,a)=Q(s,a)-V(s)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据状态、动作、奖励或策略的定义建立数学对象。使用价值基线减少策略梯度方差，以优势函数描述动作相对平均的好坏。",
+          "tex": "A(s,a)=Q(s,a)-V(s)"
+        },
+        {
+          "explanation": "依据价值递推、策略梯度或离线正则项说明其学习目标。",
+          "tex": "A(s,a)=Q(s,a)-V(s)"
+        }
+      ],
+      "code": "# Baseline与优势函数 / RL原理示例\nimport torch\ntorch.manual_seed(0)\nlogits=torch.nn.Parameter(torch.zeros(3))\ndist=torch.distributions.Categorical(logits=logits)\na=dist.sample()\nloss=-dist.log_prob(a)*torch.tensor(.7)\nloss.backward()\nprint(\"Policy gradient:\",logits.grad)\nq=torch.randn(4,3);v=q.mean(-1,keepdim=True)\nprint(\"Dueling output:\",(v+(q-v)).shape)",
+      "packages": "torch",
+      "application": "用于ETF再平衡、成本感知策略和离线金融序贯决策。",
+      "limits": "本页为原理扩展笔记，代码只演示策略梯度和Dueling值函数的基础计算。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "deep-rl-n05-02",
+      "node_id": "deep-rl-n05-02",
+      "title": "Entropy Regularization",
+      "definition": "在奖励目标中加入策略熵以鼓励探索并防止过早确定化。",
+      "assumptions": "需要可描述的状态与行动空间、环境奖励、训练行为分布和正确的终止/折现规则。金融离线数据有动作覆盖局限。",
+      "properties": [
+        "在奖励目标中加入策略熵以鼓励探索并防止过早确定化。。",
+        "价值外推、市场非平稳和交易成本会影响离线策略评估结果。"
+      ],
+      "formulas": [
+        {
+          "label": "目标或价值函数",
+          "tex": "J=E[R]+\\alpha\\mathcal H(\\pi)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据状态、动作、奖励或策略的定义建立数学对象。在奖励目标中加入策略熵以鼓励探索并防止过早确定化。",
+          "tex": "J=E[R]+\\alpha\\mathcal H(\\pi)"
+        },
+        {
+          "explanation": "依据价值递推、策略梯度或离线正则项说明其学习目标。",
+          "tex": "J=E[R]+\\alpha\\mathcal H(\\pi)"
+        }
+      ],
+      "code": "# Entropy Regularization / RL原理示例\nimport torch\ntorch.manual_seed(0)\nlogits=torch.nn.Parameter(torch.zeros(3))\ndist=torch.distributions.Categorical(logits=logits)\na=dist.sample()\nloss=-dist.log_prob(a)*torch.tensor(.7)\nloss.backward()\nprint(\"Policy gradient:\",logits.grad)\nq=torch.randn(4,3);v=q.mean(-1,keepdim=True)\nprint(\"Dueling output:\",(v+(q-v)).shape)",
+      "packages": "torch",
+      "application": "用于ETF再平衡、成本感知策略和离线金融序贯决策。",
+      "limits": "本页为原理扩展笔记，代码只演示策略梯度和Dueling值函数的基础计算。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "deep-rl-n01-03",
+      "node_id": "deep-rl-n01-03",
+      "title": "A2C/A3C",
+      "definition": "同步或异步Actor-Critic结合策略网络与价值网络迭代更新。",
+      "assumptions": "需要可描述的状态与行动空间、环境奖励、训练行为分布和正确的终止/折现规则。金融离线数据有动作覆盖局限。",
+      "properties": [
+        "同步或异步Actor-Critic结合策略网络与价值网络迭代更新。。",
+        "价值外推、市场非平稳和交易成本会影响离线策略评估结果。"
+      ],
+      "formulas": [
+        {
+          "label": "目标或价值函数",
+          "tex": "L_{\\rm actor}=-E[\\log\\pi(a_t\\mid s_t)\\hat A_t]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据状态、动作、奖励或策略的定义建立数学对象。同步或异步Actor-Critic结合策略网络与价值网络迭代更新。",
+          "tex": "L_{\\rm actor}=-E[\\log\\pi(a_t\\mid s_t)\\hat A_t]"
+        },
+        {
+          "explanation": "依据价值递推、策略梯度或离线正则项说明其学习目标。",
+          "tex": "L_{\\rm actor}=-E[\\log\\pi(a_t\\mid s_t)\\hat A_t]"
+        }
+      ],
+      "code": "# A2C/A3C / RL原理示例\nimport torch\ntorch.manual_seed(0)\nlogits=torch.nn.Parameter(torch.zeros(3))\ndist=torch.distributions.Categorical(logits=logits)\na=dist.sample()\nloss=-dist.log_prob(a)*torch.tensor(.7)\nloss.backward()\nprint(\"Policy gradient:\",logits.grad)\nq=torch.randn(4,3);v=q.mean(-1,keepdim=True)\nprint(\"Dueling output:\",(v+(q-v)).shape)",
+      "packages": "torch",
+      "application": "用于ETF再平衡、成本感知策略和离线金融序贯决策。",
+      "limits": "本页为原理扩展笔记，代码只演示策略梯度和Dueling值函数的基础计算。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "deep-rl-n03-03",
+      "node_id": "deep-rl-n03-03",
+      "title": "TRPO",
+      "definition": "限制新旧策略的平均KL散度，进行信赖域内的策略优化。",
+      "assumptions": "需要可描述的状态与行动空间、环境奖励、训练行为分布和正确的终止/折现规则。金融离线数据有动作覆盖局限。",
+      "properties": [
+        "限制新旧策略的平均KL散度，进行信赖域内的策略优化。。",
+        "价值外推、市场非平稳和交易成本会影响离线策略评估结果。"
+      ],
+      "formulas": [
+        {
+          "label": "目标或价值函数",
+          "tex": "E[D_{\\rm KL}(\\pi_{\\rm old}\\|\\pi_{\\rm new})]\\le\\delta"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据状态、动作、奖励或策略的定义建立数学对象。限制新旧策略的平均KL散度，进行信赖域内的策略优化。",
+          "tex": "E[D_{\\rm KL}(\\pi_{\\rm old}\\|\\pi_{\\rm new})]\\le\\delta"
+        },
+        {
+          "explanation": "依据价值递推、策略梯度或离线正则项说明其学习目标。",
+          "tex": "E[D_{\\rm KL}(\\pi_{\\rm old}\\|\\pi_{\\rm new})]\\le\\delta"
+        }
+      ],
+      "code": "# TRPO / RL原理示例\nimport torch\ntorch.manual_seed(0)\nlogits=torch.nn.Parameter(torch.zeros(3))\ndist=torch.distributions.Categorical(logits=logits)\na=dist.sample()\nloss=-dist.log_prob(a)*torch.tensor(.7)\nloss.backward()\nprint(\"Policy gradient:\",logits.grad)\nq=torch.randn(4,3);v=q.mean(-1,keepdim=True)\nprint(\"Dueling output:\",(v+(q-v)).shape)",
+      "packages": "torch",
+      "application": "用于ETF再平衡、成本感知策略和离线金融序贯决策。",
+      "limits": "本页为原理扩展笔记，代码只演示策略梯度和Dueling值函数的基础计算。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "deep-rl-n04-03",
+      "node_id": "deep-rl-n04-03",
+      "title": "DDPG",
+      "definition": "用确定性连续动作Actor和离策略Critic通过链式法则计算策略梯度。",
+      "assumptions": "需要可描述的状态与行动空间、环境奖励、训练行为分布和正确的终止/折现规则。金融离线数据有动作覆盖局限。",
+      "properties": [
+        "用确定性连续动作Actor和离策略Critic通过链式法则计算策略梯度。。",
+        "价值外推、市场非平稳和交易成本会影响离线策略评估结果。"
+      ],
+      "formulas": [
+        {
+          "label": "目标或价值函数",
+          "tex": "\\nabla_\\theta J=E[\\nabla_aQ(s,a)\\nabla_\\theta\\mu_\\theta(s)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据状态、动作、奖励或策略的定义建立数学对象。用确定性连续动作Actor和离策略Critic通过链式法则计算策略梯度。",
+          "tex": "\\nabla_\\theta J=E[\\nabla_aQ(s,a)\\nabla_\\theta\\mu_\\theta(s)]"
+        },
+        {
+          "explanation": "依据价值递推、策略梯度或离线正则项说明其学习目标。",
+          "tex": "\\nabla_\\theta J=E[\\nabla_aQ(s,a)\\nabla_\\theta\\mu_\\theta(s)]"
+        }
+      ],
+      "code": "# DDPG / RL原理示例\nimport torch\ntorch.manual_seed(0)\nlogits=torch.nn.Parameter(torch.zeros(3))\ndist=torch.distributions.Categorical(logits=logits)\na=dist.sample()\nloss=-dist.log_prob(a)*torch.tensor(.7)\nloss.backward()\nprint(\"Policy gradient:\",logits.grad)\nq=torch.randn(4,3);v=q.mean(-1,keepdim=True)\nprint(\"Dueling output:\",(v+(q-v)).shape)",
+      "packages": "torch",
+      "application": "用于ETF再平衡、成本感知策略和离线金融序贯决策。",
+      "limits": "本页为原理扩展笔记，代码只演示策略梯度和Dueling值函数的基础计算。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "deep-rl-n05-03",
+      "node_id": "deep-rl-n05-03",
+      "title": "TD3",
+      "definition": "双Critic取较小值、延迟Actor更新与目标动作平滑降低Q过高估计。",
+      "assumptions": "需要可描述的状态与行动空间、环境奖励、训练行为分布和正确的终止/折现规则。金融离线数据有动作覆盖局限。",
+      "properties": [
+        "双Critic取较小值、延迟Actor更新与目标动作平滑降低Q过高估计。。",
+        "价值外推、市场非平稳和交易成本会影响离线策略评估结果。"
+      ],
+      "formulas": [
+        {
+          "label": "目标或价值函数",
+          "tex": "y=r+\\gamma\\min_iQ_i^-(s',a')"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据状态、动作、奖励或策略的定义建立数学对象。双Critic取较小值、延迟Actor更新与目标动作平滑降低Q过高估计。",
+          "tex": "y=r+\\gamma\\min_iQ_i^-(s',a')"
+        },
+        {
+          "explanation": "依据价值递推、策略梯度或离线正则项说明其学习目标。",
+          "tex": "y=r+\\gamma\\min_iQ_i^-(s',a')"
+        }
+      ],
+      "code": "# TD3 / RL原理示例\nimport torch\ntorch.manual_seed(0)\nlogits=torch.nn.Parameter(torch.zeros(3))\ndist=torch.distributions.Categorical(logits=logits)\na=dist.sample()\nloss=-dist.log_prob(a)*torch.tensor(.7)\nloss.backward()\nprint(\"Policy gradient:\",logits.grad)\nq=torch.randn(4,3);v=q.mean(-1,keepdim=True)\nprint(\"Dueling output:\",(v+(q-v)).shape)",
+      "packages": "torch",
+      "application": "用于ETF再平衡、成本感知策略和离线金融序贯决策。",
+      "limits": "本页为原理扩展笔记，代码只演示策略梯度和Dueling值函数的基础计算。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "deep-rl-n02-04",
+      "node_id": "deep-rl-n02-04",
+      "title": "行为策略约束",
+      "definition": "离线RL控制新策略和产生数据的行为策略之间的偏离。",
+      "assumptions": "需要可描述的状态与行动空间、环境奖励、训练行为分布和正确的终止/折现规则。金融离线数据有动作覆盖局限。",
+      "properties": [
+        "离线RL控制新策略和产生数据的行为策略之间的偏离。。",
+        "价值外推、市场非平稳和交易成本会影响离线策略评估结果。"
+      ],
+      "formulas": [
+        {
+          "label": "目标或价值函数",
+          "tex": "D_{\\rm KL}(\\pi\\|\\beta)\\le\\epsilon"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据状态、动作、奖励或策略的定义建立数学对象。离线RL控制新策略和产生数据的行为策略之间的偏离。",
+          "tex": "D_{\\rm KL}(\\pi\\|\\beta)\\le\\epsilon"
+        },
+        {
+          "explanation": "依据价值递推、策略梯度或离线正则项说明其学习目标。",
+          "tex": "D_{\\rm KL}(\\pi\\|\\beta)\\le\\epsilon"
+        }
+      ],
+      "code": "# 行为策略约束 / RL原理示例\nimport torch\ntorch.manual_seed(0)\nlogits=torch.nn.Parameter(torch.zeros(3))\ndist=torch.distributions.Categorical(logits=logits)\na=dist.sample()\nloss=-dist.log_prob(a)*torch.tensor(.7)\nloss.backward()\nprint(\"Policy gradient:\",logits.grad)\nq=torch.randn(4,3);v=q.mean(-1,keepdim=True)\nprint(\"Dueling output:\",(v+(q-v)).shape)",
+      "packages": "torch",
+      "application": "用于ETF再平衡、成本感知策略和离线金融序贯决策。",
+      "limits": "本页为原理扩展笔记，代码只演示策略梯度和Dueling值函数的基础计算。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "deep-rl-n03-04",
+      "node_id": "deep-rl-n03-04",
+      "title": "CQL",
+      "definition": "保守Q学习通过惩罚未见动作高估值降低离线价值外推风险。",
+      "assumptions": "需要可描述的状态与行动空间、环境奖励、训练行为分布和正确的终止/折现规则。金融离线数据有动作覆盖局限。",
+      "properties": [
+        "保守Q学习通过惩罚未见动作高估值降低离线价值外推风险。。",
+        "价值外推、市场非平稳和交易成本会影响离线策略评估结果。"
+      ],
+      "formulas": [
+        {
+          "label": "目标或价值函数",
+          "tex": "L_{\\rm CQL}=\\alpha(E_{a\\sim\\pi}Q-E_{a\\sim D}Q)+L_{\\rm TD}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据状态、动作、奖励或策略的定义建立数学对象。保守Q学习通过惩罚未见动作高估值降低离线价值外推风险。",
+          "tex": "L_{\\rm CQL}=\\alpha(E_{a\\sim\\pi}Q-E_{a\\sim D}Q)+L_{\\rm TD}"
+        },
+        {
+          "explanation": "依据价值递推、策略梯度或离线正则项说明其学习目标。",
+          "tex": "L_{\\rm CQL}=\\alpha(E_{a\\sim\\pi}Q-E_{a\\sim D}Q)+L_{\\rm TD}"
+        }
+      ],
+      "code": "# CQL / RL原理示例\nimport torch\ntorch.manual_seed(0)\nlogits=torch.nn.Parameter(torch.zeros(3))\ndist=torch.distributions.Categorical(logits=logits)\na=dist.sample()\nloss=-dist.log_prob(a)*torch.tensor(.7)\nloss.backward()\nprint(\"Policy gradient:\",logits.grad)\nq=torch.randn(4,3);v=q.mean(-1,keepdim=True)\nprint(\"Dueling output:\",(v+(q-v)).shape)",
+      "packages": "torch",
+      "application": "用于ETF再平衡、成本感知策略和离线金融序贯决策。",
+      "limits": "本页为原理扩展笔记，代码只演示策略梯度和Dueling值函数的基础计算。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "deep-rl-n04-04",
+      "node_id": "deep-rl-n04-04",
+      "title": "Imitation Learning",
+      "definition": "直接拟合专家数据中的状态动作条件分布，避免在线随机探索。",
+      "assumptions": "需要可描述的状态与行动空间、环境奖励、训练行为分布和正确的终止/折现规则。金融离线数据有动作覆盖局限。",
+      "properties": [
+        "直接拟合专家数据中的状态动作条件分布，避免在线随机探索。。",
+        "价值外推、市场非平稳和交易成本会影响离线策略评估结果。"
+      ],
+      "formulas": [
+        {
+          "label": "目标或价值函数",
+          "tex": "L=-\\sum_i\\log\\pi_\\theta(a_i\\mid s_i)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据状态、动作、奖励或策略的定义建立数学对象。直接拟合专家数据中的状态动作条件分布，避免在线随机探索。",
+          "tex": "L=-\\sum_i\\log\\pi_\\theta(a_i\\mid s_i)"
+        },
+        {
+          "explanation": "依据价值递推、策略梯度或离线正则项说明其学习目标。",
+          "tex": "L=-\\sum_i\\log\\pi_\\theta(a_i\\mid s_i)"
+        }
+      ],
+      "code": "# Imitation Learning / RL原理示例\nimport torch\ntorch.manual_seed(0)\nlogits=torch.nn.Parameter(torch.zeros(3))\ndist=torch.distributions.Categorical(logits=logits)\na=dist.sample()\nloss=-dist.log_prob(a)*torch.tensor(.7)\nloss.backward()\nprint(\"Policy gradient:\",logits.grad)\nq=torch.randn(4,3);v=q.mean(-1,keepdim=True)\nprint(\"Dueling output:\",(v+(q-v)).shape)",
+      "packages": "torch",
+      "application": "用于ETF再平衡、成本感知策略和离线金融序贯决策。",
+      "limits": "本页为原理扩展笔记，代码只演示策略梯度和Dueling值函数的基础计算。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "deep-rl-n05-04",
+      "node_id": "deep-rl-n05-04",
+      "title": "Model-based RL",
+      "definition": "估计转移和奖励模型并使用学习的环境进行滚动规划。",
+      "assumptions": "需要可描述的状态与行动空间、环境奖励、训练行为分布和正确的终止/折现规则。金融离线数据有动作覆盖局限。",
+      "properties": [
+        "估计转移和奖励模型并使用学习的环境进行滚动规划。。",
+        "价值外推、市场非平稳和交易成本会影响离线策略评估结果。"
+      ],
+      "formulas": [
+        {
+          "label": "目标或价值函数",
+          "tex": "\\hat s_{t+1}\\sim\\hat P_\\phi(\\cdot\\mid s_t,a_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据状态、动作、奖励或策略的定义建立数学对象。估计转移和奖励模型并使用学习的环境进行滚动规划。",
+          "tex": "\\hat s_{t+1}\\sim\\hat P_\\phi(\\cdot\\mid s_t,a_t)"
+        },
+        {
+          "explanation": "依据价值递推、策略梯度或离线正则项说明其学习目标。",
+          "tex": "\\hat s_{t+1}\\sim\\hat P_\\phi(\\cdot\\mid s_t,a_t)"
+        }
+      ],
+      "code": "# Model-based RL / RL原理示例\nimport torch\ntorch.manual_seed(0)\nlogits=torch.nn.Parameter(torch.zeros(3))\ndist=torch.distributions.Categorical(logits=logits)\na=dist.sample()\nloss=-dist.log_prob(a)*torch.tensor(.7)\nloss.backward()\nprint(\"Policy gradient:\",logits.grad)\nq=torch.randn(4,3);v=q.mean(-1,keepdim=True)\nprint(\"Dueling output:\",(v+(q-v)).shape)",
+      "packages": "torch",
+      "application": "用于ETF再平衡、成本感知策略和离线金融序贯决策。",
+      "limits": "本页为原理扩展笔记，代码只演示策略梯度和Dueling值函数的基础计算。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "deep-rl-n06-04",
+      "node_id": "deep-rl-n06-04",
+      "title": "World Models",
+      "definition": "学习潜在状态的转移与观测模型，再基于内部模拟进行规划。",
+      "assumptions": "需要可描述的状态与行动空间、环境奖励、训练行为分布和正确的终止/折现规则。金融离线数据有动作覆盖局限。",
+      "properties": [
+        "学习潜在状态的转移与观测模型，再基于内部模拟进行规划。。",
+        "价值外推、市场非平稳和交易成本会影响离线策略评估结果。"
+      ],
+      "formulas": [
+        {
+          "label": "目标或价值函数",
+          "tex": "z_{t+1}=f_\\phi(z_t,a_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据状态、动作、奖励或策略的定义建立数学对象。学习潜在状态的转移与观测模型，再基于内部模拟进行规划。",
+          "tex": "z_{t+1}=f_\\phi(z_t,a_t)"
+        },
+        {
+          "explanation": "依据价值递推、策略梯度或离线正则项说明其学习目标。",
+          "tex": "z_{t+1}=f_\\phi(z_t,a_t)"
+        }
+      ],
+      "code": "# World Models / RL原理示例\nimport torch\ntorch.manual_seed(0)\nlogits=torch.nn.Parameter(torch.zeros(3))\ndist=torch.distributions.Categorical(logits=logits)\na=dist.sample()\nloss=-dist.log_prob(a)*torch.tensor(.7)\nloss.backward()\nprint(\"Policy gradient:\",logits.grad)\nq=torch.randn(4,3);v=q.mean(-1,keepdim=True)\nprint(\"Dueling output:\",(v+(q-v)).shape)",
+      "packages": "torch",
+      "application": "用于ETF再平衡、成本感知策略和离线金融序贯决策。",
+      "limits": "本页为原理扩展笔记，代码只演示策略梯度和Dueling值函数的基础计算。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "deep-rl-n01-05",
+      "node_id": "deep-rl-n01-05",
+      "title": "组合再平衡MDP",
+      "definition": "以行情和上一期持仓组成状态，以新目标权重作为动作。",
+      "assumptions": "需要可描述的状态与行动空间、环境奖励、训练行为分布和正确的终止/折现规则。金融离线数据有动作覆盖局限。",
+      "properties": [
+        "以行情和上一期持仓组成状态，以新目标权重作为动作。。",
+        "价值外推、市场非平稳和交易成本会影响离线策略评估结果。"
+      ],
+      "formulas": [
+        {
+          "label": "目标或价值函数",
+          "tex": "s_t=(X_t,w_{t-1}),\\quad a_t=w_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据状态、动作、奖励或策略的定义建立数学对象。以行情和上一期持仓组成状态，以新目标权重作为动作。",
+          "tex": "s_t=(X_t,w_{t-1}),\\quad a_t=w_t"
+        },
+        {
+          "explanation": "依据价值递推、策略梯度或离线正则项说明其学习目标。",
+          "tex": "s_t=(X_t,w_{t-1}),\\quad a_t=w_t"
+        }
+      ],
+      "code": "# 组合再平衡MDP / RL原理示例\nimport torch\ntorch.manual_seed(0)\nlogits=torch.nn.Parameter(torch.zeros(3))\ndist=torch.distributions.Categorical(logits=logits)\na=dist.sample()\nloss=-dist.log_prob(a)*torch.tensor(.7)\nloss.backward()\nprint(\"Policy gradient:\",logits.grad)\nq=torch.randn(4,3);v=q.mean(-1,keepdim=True)\nprint(\"Dueling output:\",(v+(q-v)).shape)",
+      "packages": "torch",
+      "application": "用于ETF再平衡、成本感知策略和离线金融序贯决策。",
+      "limits": "本页为原理扩展笔记，代码只演示策略梯度和Dueling值函数的基础计算。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "deep-rl-n04-05",
+      "node_id": "deep-rl-n04-05",
+      "title": "离线交易策略检验",
+      "definition": "在保留时期对预测仓位扣实际交易费用并检查行为策略覆盖度。",
+      "assumptions": "需要可描述的状态与行动空间、环境奖励、训练行为分布和正确的终止/折现规则。金融离线数据有动作覆盖局限。",
+      "properties": [
+        "在保留时期对预测仓位扣实际交易费用并检查行为策略覆盖度。。",
+        "价值外推、市场非平稳和交易成本会影响离线策略评估结果。"
+      ],
+      "formulas": [
+        {
+          "label": "目标或价值函数",
+          "tex": "J_{\\rm OOS}=\\sum_tr_t^{\\rm net}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据状态、动作、奖励或策略的定义建立数学对象。在保留时期对预测仓位扣实际交易费用并检查行为策略覆盖度。",
+          "tex": "J_{\\rm OOS}=\\sum_tr_t^{\\rm net}"
+        },
+        {
+          "explanation": "依据价值递推、策略梯度或离线正则项说明其学习目标。",
+          "tex": "J_{\\rm OOS}=\\sum_tr_t^{\\rm net}"
+        }
+      ],
+      "code": "# 离线交易策略检验 / RL原理示例\nimport torch\ntorch.manual_seed(0)\nlogits=torch.nn.Parameter(torch.zeros(3))\ndist=torch.distributions.Categorical(logits=logits)\na=dist.sample()\nloss=-dist.log_prob(a)*torch.tensor(.7)\nloss.backward()\nprint(\"Policy gradient:\",logits.grad)\nq=torch.randn(4,3);v=q.mean(-1,keepdim=True)\nprint(\"Dueling output:\",(v+(q-v)).shape)",
+      "packages": "torch",
+      "application": "用于ETF再平衡、成本感知策略和离线金融序贯决策。",
+      "limits": "本页为原理扩展笔记，代码只演示策略梯度和Dueling值函数的基础计算。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "deep-rl-n05-05",
+      "node_id": "deep-rl-n05-05",
+      "title": "非平稳状态",
+      "definition": "市场转移与奖励分布随时间改变，历史策略不必在新时期最优。",
+      "assumptions": "需要可描述的状态与行动空间、环境奖励、训练行为分布和正确的终止/折现规则。金融离线数据有动作覆盖局限。",
+      "properties": [
+        "市场转移与奖励分布随时间改变，历史策略不必在新时期最优。。",
+        "价值外推、市场非平稳和交易成本会影响离线策略评估结果。"
+      ],
+      "formulas": [
+        {
+          "label": "目标或价值函数",
+          "tex": "P_t(s'\\mid s,a)\\ne P_{t'}(s'\\mid s,a)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据状态、动作、奖励或策略的定义建立数学对象。市场转移与奖励分布随时间改变，历史策略不必在新时期最优。",
+          "tex": "P_t(s'\\mid s,a)\\ne P_{t'}(s'\\mid s,a)"
+        },
+        {
+          "explanation": "依据价值递推、策略梯度或离线正则项说明其学习目标。",
+          "tex": "P_t(s'\\mid s,a)\\ne P_{t'}(s'\\mid s,a)"
+        }
+      ],
+      "code": "# 非平稳状态 / RL原理示例\nimport torch\ntorch.manual_seed(0)\nlogits=torch.nn.Parameter(torch.zeros(3))\ndist=torch.distributions.Categorical(logits=logits)\na=dist.sample()\nloss=-dist.log_prob(a)*torch.tensor(.7)\nloss.backward()\nprint(\"Policy gradient:\",logits.grad)\nq=torch.randn(4,3);v=q.mean(-1,keepdim=True)\nprint(\"Dueling output:\",(v+(q-v)).shape)",
+      "packages": "torch",
+      "application": "用于ETF再平衡、成本感知策略和离线金融序贯决策。",
+      "limits": "本页为原理扩展笔记，代码只演示策略梯度和Dueling值函数的基础计算。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "deep-rl-n06-05",
+      "node_id": "deep-rl-n06-05",
+      "title": "风险敏感RL",
+      "definition": "将累计回报与回报波动或尾部损失共同纳入强化学习策略目标。",
+      "assumptions": "需要可描述的状态与行动空间、环境奖励、训练行为分布和正确的终止/折现规则。金融离线数据有动作覆盖局限。",
+      "properties": [
+        "将累计回报与回报波动或尾部损失共同纳入强化学习策略目标。。",
+        "价值外推、市场非平稳和交易成本会影响离线策略评估结果。"
+      ],
+      "formulas": [
+        {
+          "label": "目标或价值函数",
+          "tex": "J(\\pi)=E[G]-\\lambda\\operatorname{Var}(G)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据状态、动作、奖励或策略的定义建立数学对象。将累计回报与回报波动或尾部损失共同纳入强化学习策略目标。",
+          "tex": "J(\\pi)=E[G]-\\lambda\\operatorname{Var}(G)"
+        },
+        {
+          "explanation": "依据价值递推、策略梯度或离线正则项说明其学习目标。",
+          "tex": "J(\\pi)=E[G]-\\lambda\\operatorname{Var}(G)"
+        }
+      ],
+      "code": "# 风险敏感RL / RL原理示例\nimport torch\ntorch.manual_seed(0)\nlogits=torch.nn.Parameter(torch.zeros(3))\ndist=torch.distributions.Categorical(logits=logits)\na=dist.sample()\nloss=-dist.log_prob(a)*torch.tensor(.7)\nloss.backward()\nprint(\"Policy gradient:\",logits.grad)\nq=torch.randn(4,3);v=q.mean(-1,keepdim=True)\nprint(\"Dueling output:\",(v+(q-v)).shape)",
+      "packages": "torch",
+      "application": "用于ETF再平衡、成本感知策略和离线金融序贯决策。",
+      "limits": "本页为原理扩展笔记，代码只演示策略梯度和Dueling值函数的基础计算。",
+      "coverage": "expanded"
+    }
+  ]
+}
