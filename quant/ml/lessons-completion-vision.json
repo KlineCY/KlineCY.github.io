@@ -1,0 +1,773 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "vision-n01-01",
+      "node_id": "vision-n01-01",
+      "title": "像素通道与张量",
+      "definition": "图像按高宽与颜色通道排列成数值张量，CNN通常采用Batch×Channel×Height×Width格式。",
+      "assumptions": "输入图像的尺寸、通道顺序、训练样本来源和价格图的时序窗口须明确定义。",
+      "properties": [
+        "视觉结构的复杂度与不变性依赖训练数据和图像预处理规则。",
+        "对OHLCV图像来说，不能盲目套用自然图像增强、未来标准化和跨时间随机划分。"
+      ],
+      "formulas": [
+        {
+          "label": "数学形式",
+          "tex": "X\\in\\mathbb R^{B\\times C\\times H\\times W}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由输入图像或Patch构造该方法要求的空间表示、注意力特征或监督目标。",
+          "tex": "X\\in\\mathbb R^{B\\times C\\times H\\times W}"
+        },
+        {
+          "explanation": "通过具体代码核对张量形状、输出尺度，并在资产与时间独立的样本上评价泛化。",
+          "tex": "X\\in\\mathbb R^{B\\times C\\times H\\times W}"
+        }
+      ],
+      "code": "import numpy as np\nimg=np.zeros((4,3,32,32))\nprint(img.shape,img.dtype)",
+      "packages": "numpy",
+      "application": "用于价格趋势图像、财报图片、财经文档截图和视觉-文本联合研究。",
+      "limits": "结构示例不构成完整预训练或图像预测系统；真实任务需要训练循环、数据管线及验证指标。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n02-01",
+      "node_id": "vision-n02-01",
+      "title": "卷积滤波",
+      "definition": "卷积核对局部邻域作加权求和，常用于边缘、纹理或价格图形状提取。",
+      "assumptions": "输入图像的尺寸、通道顺序、训练样本来源和价格图的时序窗口须明确定义。",
+      "properties": [
+        "视觉结构的复杂度与不变性依赖训练数据和图像预处理规则。",
+        "对OHLCV图像来说，不能盲目套用自然图像增强、未来标准化和跨时间随机划分。"
+      ],
+      "formulas": [
+        {
+          "label": "数学形式",
+          "tex": "Y_{i,j}=\\sum_{u,v}K_{u,v}X_{i+u,j+v}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由输入图像或Patch构造该方法要求的空间表示、注意力特征或监督目标。",
+          "tex": "Y_{i,j}=\\sum_{u,v}K_{u,v}X_{i+u,j+v}"
+        },
+        {
+          "explanation": "通过具体代码核对张量形状、输出尺度，并在资产与时间独立的样本上评价泛化。",
+          "tex": "Y_{i,j}=\\sum_{u,v}K_{u,v}X_{i+u,j+v}"
+        }
+      ],
+      "code": "import torch\nm=torch.nn.Conv2d(1,4,3,padding=1)\nprint(m(torch.randn(2,1,28,28)).shape)",
+      "packages": "torch",
+      "application": "用于价格趋势图像、财报图片、财经文档截图和视觉-文本联合研究。",
+      "limits": "结构示例不构成完整预训练或图像预测系统；真实任务需要训练循环、数据管线及验证指标。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n05-01",
+      "node_id": "vision-n05-01",
+      "title": "图像分类",
+      "definition": "图像分类将整张图映射到类别概率，一般优化Softmax交叉熵。",
+      "assumptions": "输入图像的尺寸、通道顺序、训练样本来源和价格图的时序窗口须明确定义。",
+      "properties": [
+        "视觉结构的复杂度与不变性依赖训练数据和图像预处理规则。",
+        "对OHLCV图像来说，不能盲目套用自然图像增强、未来标准化和跨时间随机划分。"
+      ],
+      "formulas": [
+        {
+          "label": "数学形式",
+          "tex": "p_k=\\operatorname{softmax}_k(f_\\theta(I))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由输入图像或Patch构造该方法要求的空间表示、注意力特征或监督目标。",
+          "tex": "p_k=\\operatorname{softmax}_k(f_\\theta(I))"
+        },
+        {
+          "explanation": "通过具体代码核对张量形状、输出尺度，并在资产与时间独立的样本上评价泛化。",
+          "tex": "p_k=\\operatorname{softmax}_k(f_\\theta(I))"
+        }
+      ],
+      "code": "import torch\nnet=torch.nn.Sequential(torch.nn.Flatten(),torch.nn.Linear(28*28,3))\nprint(net(torch.randn(5,1,28,28)).softmax(-1).shape)",
+      "packages": "torch",
+      "application": "用于价格趋势图像、财报图片、财经文档截图和视觉-文本联合研究。",
+      "limits": "结构示例不构成完整预训练或图像预测系统；真实任务需要训练循环、数据管线及验证指标。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n06-01",
+      "node_id": "vision-n06-01",
+      "title": "视觉验证集",
+      "definition": "视觉验证需在图像样本来源或时间上隔离重复和高度相似的图，避免泄漏。",
+      "assumptions": "输入图像的尺寸、通道顺序、训练样本来源和价格图的时序窗口须明确定义。",
+      "properties": [
+        "视觉结构的复杂度与不变性依赖训练数据和图像预处理规则。",
+        "对OHLCV图像来说，不能盲目套用自然图像增强、未来标准化和跨时间随机划分。"
+      ],
+      "formulas": [
+        {
+          "label": "数学形式",
+          "tex": "I_{\\rm train}\\cap I_{\\rm test}=\\varnothing"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由输入图像或Patch构造该方法要求的空间表示、注意力特征或监督目标。",
+          "tex": "I_{\\rm train}\\cap I_{\\rm test}=\\varnothing"
+        },
+        {
+          "explanation": "通过具体代码核对张量形状、输出尺度，并在资产与时间独立的样本上评价泛化。",
+          "tex": "I_{\\rm train}\\cap I_{\\rm test}=\\varnothing"
+        }
+      ],
+      "code": "from sklearn.model_selection import GroupShuffleSplit\nimport numpy as np\ngroups=np.repeat(np.arange(10),3)\ntr,te=next(GroupShuffleSplit(n_splits=1,random_state=0).split(np.arange(30),groups=groups))\nprint(set(groups[tr]) & set(groups[te]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于价格趋势图像、财报图片、财经文档截图和视觉-文本联合研究。",
+      "limits": "结构示例不构成完整预训练或图像预测系统；真实任务需要训练循环、数据管线及验证指标。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n02-02",
+      "node_id": "vision-n02-02",
+      "title": "AlexNet",
+      "definition": "AlexNet使用多层卷积、ReLU、池化与全连接分类层，是深度视觉网络的早期代表。",
+      "assumptions": "输入图像的尺寸、通道顺序、训练样本来源和价格图的时序窗口须明确定义。",
+      "properties": [
+        "视觉结构的复杂度与不变性依赖训练数据和图像预处理规则。",
+        "对OHLCV图像来说，不能盲目套用自然图像增强、未来标准化和跨时间随机划分。"
+      ],
+      "formulas": [
+        {
+          "label": "数学形式",
+          "tex": "h_{l+1}=\\operatorname{Pool}(\\operatorname{ReLU}(\\operatorname{Conv}(h_l)))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由输入图像或Patch构造该方法要求的空间表示、注意力特征或监督目标。",
+          "tex": "h_{l+1}=\\operatorname{Pool}(\\operatorname{ReLU}(\\operatorname{Conv}(h_l)))"
+        },
+        {
+          "explanation": "通过具体代码核对张量形状、输出尺度，并在资产与时间独立的样本上评价泛化。",
+          "tex": "h_{l+1}=\\operatorname{Pool}(\\operatorname{ReLU}(\\operatorname{Conv}(h_l)))"
+        }
+      ],
+      "code": "import torch\nnet=torch.nn.Sequential(torch.nn.Conv2d(3,8,3),torch.nn.ReLU(),torch.nn.MaxPool2d(2))\nprint(net(torch.randn(2,3,32,32)).shape)",
+      "packages": "torch",
+      "application": "用于价格趋势图像、财报图片、财经文档截图和视觉-文本联合研究。",
+      "limits": "结构示例不构成完整预训练或图像预测系统；真实任务需要训练循环、数据管线及验证指标。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n03-02",
+      "node_id": "vision-n03-02",
+      "title": "VGG",
+      "definition": "VGG采用堆叠的小尺寸卷积核构造深层视觉网络，参数量较大。",
+      "assumptions": "输入图像的尺寸、通道顺序、训练样本来源和价格图的时序窗口须明确定义。",
+      "properties": [
+        "视觉结构的复杂度与不变性依赖训练数据和图像预处理规则。",
+        "对OHLCV图像来说，不能盲目套用自然图像增强、未来标准化和跨时间随机划分。"
+      ],
+      "formulas": [
+        {
+          "label": "数学形式",
+          "tex": "h^{(l+1)}=\\sigma(K_{3\\times3}^{(l)}*h^{(l)})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由输入图像或Patch构造该方法要求的空间表示、注意力特征或监督目标。",
+          "tex": "h^{(l+1)}=\\sigma(K_{3\\times3}^{(l)}*h^{(l)})"
+        },
+        {
+          "explanation": "通过具体代码核对张量形状、输出尺度，并在资产与时间独立的样本上评价泛化。",
+          "tex": "h^{(l+1)}=\\sigma(K_{3\\times3}^{(l)}*h^{(l)})"
+        }
+      ],
+      "code": "import torch\nnet=torch.nn.Sequential(torch.nn.Conv2d(3,8,3),torch.nn.ReLU(),torch.nn.MaxPool2d(2))\nprint(net(torch.randn(2,3,32,32)).shape)",
+      "packages": "torch",
+      "application": "用于价格趋势图像、财报图片、财经文档截图和视觉-文本联合研究。",
+      "limits": "结构示例不构成完整预训练或图像预测系统；真实任务需要训练循环、数据管线及验证指标。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n05-02",
+      "node_id": "vision-n05-02",
+      "title": "EfficientNet",
+      "definition": "EfficientNet协调增加网络深度、宽度与输入分辨率，以平衡准确率与计算成本。",
+      "assumptions": "输入图像的尺寸、通道顺序、训练样本来源和价格图的时序窗口须明确定义。",
+      "properties": [
+        "视觉结构的复杂度与不变性依赖训练数据和图像预处理规则。",
+        "对OHLCV图像来说，不能盲目套用自然图像增强、未来标准化和跨时间随机划分。"
+      ],
+      "formulas": [
+        {
+          "label": "数学形式",
+          "tex": "d=\\alpha^\\phi,\\quad w=\\beta^\\phi,\\quad r=\\gamma^\\phi"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由输入图像或Patch构造该方法要求的空间表示、注意力特征或监督目标。",
+          "tex": "d=\\alpha^\\phi,\\quad w=\\beta^\\phi,\\quad r=\\gamma^\\phi"
+        },
+        {
+          "explanation": "通过具体代码核对张量形状、输出尺度，并在资产与时间独立的样本上评价泛化。",
+          "tex": "d=\\alpha^\\phi,\\quad w=\\beta^\\phi,\\quad r=\\gamma^\\phi"
+        }
+      ],
+      "code": "import torch\nnet=torch.nn.Sequential(torch.nn.Conv2d(3,8,3),torch.nn.ReLU(),torch.nn.MaxPool2d(2))\nprint(net(torch.randn(2,3,32,32)).shape)",
+      "packages": "torch",
+      "application": "用于价格趋势图像、财报图片、财经文档截图和视觉-文本联合研究。",
+      "limits": "结构示例不构成完整预训练或图像预测系统；真实任务需要训练循环、数据管线及验证指标。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n06-02",
+      "node_id": "vision-n06-02",
+      "title": "Vision Transformer",
+      "definition": "ViT把图像分成Patch后线性映射为Token，并用注意力编码全局关系。",
+      "assumptions": "输入图像的尺寸、通道顺序、训练样本来源和价格图的时序窗口须明确定义。",
+      "properties": [
+        "视觉结构的复杂度与不变性依赖训练数据和图像预处理规则。",
+        "对OHLCV图像来说，不能盲目套用自然图像增强、未来标准化和跨时间随机划分。"
+      ],
+      "formulas": [
+        {
+          "label": "数学形式",
+          "tex": "N=HW/P^2,\\quad Z=\\mathrm{Transformer}(\\mathrm{PatchEmbed}(I))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由输入图像或Patch构造该方法要求的空间表示、注意力特征或监督目标。",
+          "tex": "N=HW/P^2,\\quad Z=\\mathrm{Transformer}(\\mathrm{PatchEmbed}(I))"
+        },
+        {
+          "explanation": "通过具体代码核对张量形状、输出尺度，并在资产与时间独立的样本上评价泛化。",
+          "tex": "N=HW/P^2,\\quad Z=\\mathrm{Transformer}(\\mathrm{PatchEmbed}(I))"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(2,3,32,32)\npatch=torch.nn.Conv2d(3,32,8,stride=8)\nprint(patch(x).flatten(2).transpose(1,2).shape)",
+      "packages": "torch",
+      "application": "用于价格趋势图像、财报图片、财经文档截图和视觉-文本联合研究。",
+      "limits": "结构示例不构成完整预训练或图像预测系统；真实任务需要训练循环、数据管线及验证指标。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n01-03",
+      "node_id": "vision-n01-03",
+      "title": "物体检测",
+      "definition": "目标检测同时预测候选物体的类别和边界框，需兼顾定位和分类损失。",
+      "assumptions": "输入图像的尺寸、通道顺序、训练样本来源和价格图的时序窗口须明确定义。",
+      "properties": [
+        "视觉结构的复杂度与不变性依赖训练数据和图像预处理规则。",
+        "对OHLCV图像来说，不能盲目套用自然图像增强、未来标准化和跨时间随机划分。"
+      ],
+      "formulas": [
+        {
+          "label": "数学形式",
+          "tex": "L=L_{\\rm cls}+\\lambda L_{\\rm box}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由输入图像或Patch构造该方法要求的空间表示、注意力特征或监督目标。",
+          "tex": "L=L_{\\rm cls}+\\lambda L_{\\rm box}"
+        },
+        {
+          "explanation": "通过具体代码核对张量形状、输出尺度，并在资产与时间独立的样本上评价泛化。",
+          "tex": "L=L_{\\rm cls}+\\lambda L_{\\rm box}"
+        }
+      ],
+      "code": "import numpy as np\nbox1=np.array([1,1,4,4]);box2=np.array([2,2,5,5])\narea=lambda b:(b[2]-b[0])*(b[3]-b[1])\ninter=4.;print(\"Toy IoU:\",inter/(area(box1)+area(box2)-inter))",
+      "packages": "numpy",
+      "application": "用于价格趋势图像、财报图片、财经文档截图和视觉-文本联合研究。",
+      "limits": "结构示例不构成完整预训练或图像预测系统；真实任务需要训练循环、数据管线及验证指标。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n02-03",
+      "node_id": "vision-n02-03",
+      "title": "区域建议R-CNN",
+      "definition": "R-CNN家族先产生候选区域，再对区域特征进行分类与框回归。",
+      "assumptions": "输入图像的尺寸、通道顺序、训练样本来源和价格图的时序窗口须明确定义。",
+      "properties": [
+        "视觉结构的复杂度与不变性依赖训练数据和图像预处理规则。",
+        "对OHLCV图像来说，不能盲目套用自然图像增强、未来标准化和跨时间随机划分。"
+      ],
+      "formulas": [
+        {
+          "label": "数学形式",
+          "tex": "R=\\operatorname{Proposal}(I),\\quad\\hat y_r=f(\\operatorname{ROI}(I,r))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由输入图像或Patch构造该方法要求的空间表示、注意力特征或监督目标。",
+          "tex": "R=\\operatorname{Proposal}(I),\\quad\\hat y_r=f(\\operatorname{ROI}(I,r))"
+        },
+        {
+          "explanation": "通过具体代码核对张量形状、输出尺度，并在资产与时间独立的样本上评价泛化。",
+          "tex": "R=\\operatorname{Proposal}(I),\\quad\\hat y_r=f(\\operatorname{ROI}(I,r))"
+        }
+      ],
+      "code": "import numpy as np\nbox1=np.array([1,1,4,4]);box2=np.array([2,2,5,5])\narea=lambda b:(b[2]-b[0])*(b[3]-b[1])\ninter=4.;print(\"Toy IoU:\",inter/(area(box1)+area(box2)-inter))",
+      "packages": "numpy",
+      "application": "用于价格趋势图像、财报图片、财经文档截图和视觉-文本联合研究。",
+      "limits": "结构示例不构成完整预训练或图像预测系统；真实任务需要训练循环、数据管线及验证指标。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n03-03",
+      "node_id": "vision-n03-03",
+      "title": "YOLO",
+      "definition": "YOLO类单阶段检测器在统一特征图上同时输出目标框与类别预测，偏向低延迟检测。",
+      "assumptions": "输入图像的尺寸、通道顺序、训练样本来源和价格图的时序窗口须明确定义。",
+      "properties": [
+        "视觉结构的复杂度与不变性依赖训练数据和图像预处理规则。",
+        "对OHLCV图像来说，不能盲目套用自然图像增强、未来标准化和跨时间随机划分。"
+      ],
+      "formulas": [
+        {
+          "label": "数学形式",
+          "tex": "(\\hat b,\\hat c,\\hat p)=f_\\theta(I)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由输入图像或Patch构造该方法要求的空间表示、注意力特征或监督目标。",
+          "tex": "(\\hat b,\\hat c,\\hat p)=f_\\theta(I)"
+        },
+        {
+          "explanation": "通过具体代码核对张量形状、输出尺度，并在资产与时间独立的样本上评价泛化。",
+          "tex": "(\\hat b,\\hat c,\\hat p)=f_\\theta(I)"
+        }
+      ],
+      "code": "import numpy as np\nbox1=np.array([1,1,4,4]);box2=np.array([2,2,5,5])\narea=lambda b:(b[2]-b[0])*(b[3]-b[1])\ninter=4.;print(\"Toy IoU:\",inter/(area(box1)+area(box2)-inter))",
+      "packages": "numpy",
+      "application": "用于价格趋势图像、财报图片、财经文档截图和视觉-文本联合研究。",
+      "limits": "结构示例不构成完整预训练或图像预测系统；真实任务需要训练循环、数据管线及验证指标。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n04-03",
+      "node_id": "vision-n04-03",
+      "title": "语义分割U-Net",
+      "definition": "U-Net使用编码下采样与解码上采样及跨层跳接恢复像素级类别。",
+      "assumptions": "输入图像的尺寸、通道顺序、训练样本来源和价格图的时序窗口须明确定义。",
+      "properties": [
+        "视觉结构的复杂度与不变性依赖训练数据和图像预处理规则。",
+        "对OHLCV图像来说，不能盲目套用自然图像增强、未来标准化和跨时间随机划分。"
+      ],
+      "formulas": [
+        {
+          "label": "数学形式",
+          "tex": "\\hat M=f_\\theta(I),\\quad \\hat M\\in[0,1]^{H\\times W}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由输入图像或Patch构造该方法要求的空间表示、注意力特征或监督目标。",
+          "tex": "\\hat M=f_\\theta(I),\\quad \\hat M\\in[0,1]^{H\\times W}"
+        },
+        {
+          "explanation": "通过具体代码核对张量形状、输出尺度，并在资产与时间独立的样本上评价泛化。",
+          "tex": "\\hat M=f_\\theta(I),\\quad \\hat M\\in[0,1]^{H\\times W}"
+        }
+      ],
+      "code": "import torch\nm=torch.nn.Conv2d(3,2,1)\nprint(m(torch.randn(2,3,16,16)).softmax(1).shape)",
+      "packages": "torch",
+      "application": "用于价格趋势图像、财报图片、财经文档截图和视觉-文本联合研究。",
+      "limits": "结构示例不构成完整预训练或图像预测系统；真实任务需要训练循环、数据管线及验证指标。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n05-03",
+      "node_id": "vision-n05-03",
+      "title": "实例分割",
+      "definition": "实例分割在像素级掩码上区分同类别不同对象，而不仅输出共同语义区域。",
+      "assumptions": "输入图像的尺寸、通道顺序、训练样本来源和价格图的时序窗口须明确定义。",
+      "properties": [
+        "视觉结构的复杂度与不变性依赖训练数据和图像预处理规则。",
+        "对OHLCV图像来说，不能盲目套用自然图像增强、未来标准化和跨时间随机划分。"
+      ],
+      "formulas": [
+        {
+          "label": "数学形式",
+          "tex": "\\{(b_j,c_j,M_j)\\}_{j=1}^K=f_\\theta(I)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由输入图像或Patch构造该方法要求的空间表示、注意力特征或监督目标。",
+          "tex": "\\{(b_j,c_j,M_j)\\}_{j=1}^K=f_\\theta(I)"
+        },
+        {
+          "explanation": "通过具体代码核对张量形状、输出尺度，并在资产与时间独立的样本上评价泛化。",
+          "tex": "\\{(b_j,c_j,M_j)\\}_{j=1}^K=f_\\theta(I)"
+        }
+      ],
+      "code": "import torch\nm=torch.nn.Conv2d(3,2,1)\nprint(m(torch.randn(2,3,16,16)).softmax(1).shape)",
+      "packages": "torch",
+      "application": "用于价格趋势图像、财报图片、财经文档截图和视觉-文本联合研究。",
+      "limits": "结构示例不构成完整预训练或图像预测系统；真实任务需要训练循环、数据管线及验证指标。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n01-04",
+      "node_id": "vision-n01-04",
+      "title": "SimCLR视觉对比",
+      "definition": "SimCLR使用两种增强视图形成正样本对，以批内对比损失学习视觉Embedding。",
+      "assumptions": "输入图像的尺寸、通道顺序、训练样本来源和价格图的时序窗口须明确定义。",
+      "properties": [
+        "视觉结构的复杂度与不变性依赖训练数据和图像预处理规则。",
+        "对OHLCV图像来说，不能盲目套用自然图像增强、未来标准化和跨时间随机划分。"
+      ],
+      "formulas": [
+        {
+          "label": "数学形式",
+          "tex": "L=-\\log\\frac{e^{s(z_i,z_i^+)/\\tau}}{\\sum_{j\\ne i}e^{s(z_i,z_j)/\\tau}}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由输入图像或Patch构造该方法要求的空间表示、注意力特征或监督目标。",
+          "tex": "L=-\\log\\frac{e^{s(z_i,z_i^+)/\\tau}}{\\sum_{j\\ne i}e^{s(z_i,z_j)/\\tau}}"
+        },
+        {
+          "explanation": "通过具体代码核对张量形状、输出尺度，并在资产与时间独立的样本上评价泛化。",
+          "tex": "L=-\\log\\frac{e^{s(z_i,z_i^+)/\\tau}}{\\sum_{j\\ne i}e^{s(z_i,z_j)/\\tau}}"
+        }
+      ],
+      "code": "import torch\nfrom torch.nn import functional as F\na=F.normalize(torch.randn(4,8),dim=-1)\nb=F.normalize(torch.randn(4,8),dim=-1)\nprint(F.cross_entropy(a@b.T/.1,torch.arange(4)))",
+      "packages": "torch",
+      "application": "用于价格趋势图像、财报图片、财经文档截图和视觉-文本联合研究。",
+      "limits": "结构示例不构成完整预训练或图像预测系统；真实任务需要训练循环、数据管线及验证指标。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n02-04",
+      "node_id": "vision-n02-04",
+      "title": "DINO",
+      "definition": "DINO通过教师-学生自蒸馏学习视觉表示，并以指数移动平均更新教师参数。",
+      "assumptions": "输入图像的尺寸、通道顺序、训练样本来源和价格图的时序窗口须明确定义。",
+      "properties": [
+        "视觉结构的复杂度与不变性依赖训练数据和图像预处理规则。",
+        "对OHLCV图像来说，不能盲目套用自然图像增强、未来标准化和跨时间随机划分。"
+      ],
+      "formulas": [
+        {
+          "label": "数学形式",
+          "tex": "\\theta_T\\leftarrow m\\theta_T+(1-m)\\theta_S"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由输入图像或Patch构造该方法要求的空间表示、注意力特征或监督目标。",
+          "tex": "\\theta_T\\leftarrow m\\theta_T+(1-m)\\theta_S"
+        },
+        {
+          "explanation": "通过具体代码核对张量形状、输出尺度，并在资产与时间独立的样本上评价泛化。",
+          "tex": "\\theta_T\\leftarrow m\\theta_T+(1-m)\\theta_S"
+        }
+      ],
+      "code": "import torch\nteacher=torch.tensor([1.,2.]);student=torch.tensor([0.,3.])\nprint(.99*teacher+.01*student)",
+      "packages": "torch",
+      "application": "用于价格趋势图像、财报图片、财经文档截图和视觉-文本联合研究。",
+      "limits": "结构示例不构成完整预训练或图像预测系统；真实任务需要训练循环、数据管线及验证指标。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n03-04",
+      "node_id": "vision-n03-04",
+      "title": "MAE掩码自编码",
+      "definition": "掩码图像自编码器隐藏大量图像Patch，并在可见Patch表示基础上重构被掩码部分。",
+      "assumptions": "输入图像的尺寸、通道顺序、训练样本来源和价格图的时序窗口须明确定义。",
+      "properties": [
+        "视觉结构的复杂度与不变性依赖训练数据和图像预处理规则。",
+        "对OHLCV图像来说，不能盲目套用自然图像增强、未来标准化和跨时间随机划分。"
+      ],
+      "formulas": [
+        {
+          "label": "数学形式",
+          "tex": "L_{\\rm MAE}=\\frac1{|M|}\\sum_{i\\in M}\\|\\hat P_i-P_i\\|^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由输入图像或Patch构造该方法要求的空间表示、注意力特征或监督目标。",
+          "tex": "L_{\\rm MAE}=\\frac1{|M|}\\sum_{i\\in M}\\|\\hat P_i-P_i\\|^2"
+        },
+        {
+          "explanation": "通过具体代码核对张量形状、输出尺度，并在资产与时间独立的样本上评价泛化。",
+          "tex": "L_{\\rm MAE}=\\frac1{|M|}\\sum_{i\\in M}\\|\\hat P_i-P_i\\|^2"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(2,10,16);mask=torch.rand(2,10)<.5\nprint(\"Masked tokens:\",mask.sum().item())",
+      "packages": "torch",
+      "application": "用于价格趋势图像、财报图片、财经文档截图和视觉-文本联合研究。",
+      "limits": "结构示例不构成完整预训练或图像预测系统；真实任务需要训练循环、数据管线及验证指标。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n04-04",
+      "node_id": "vision-n04-04",
+      "title": "CLIP",
+      "definition": "CLIP对齐图像与文本Embedding，以跨模态相似度对比学习匹配表示。",
+      "assumptions": "输入图像的尺寸、通道顺序、训练样本来源和价格图的时序窗口须明确定义。",
+      "properties": [
+        "视觉结构的复杂度与不变性依赖训练数据和图像预处理规则。",
+        "对OHLCV图像来说，不能盲目套用自然图像增强、未来标准化和跨时间随机划分。"
+      ],
+      "formulas": [
+        {
+          "label": "数学形式",
+          "tex": "s(I,T)=\\frac{f_I(I)^\\top f_T(T)}{\\|f_I(I)\\|\\|f_T(T)\\|}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由输入图像或Patch构造该方法要求的空间表示、注意力特征或监督目标。",
+          "tex": "s(I,T)=\\frac{f_I(I)^\\top f_T(T)}{\\|f_I(I)\\|\\|f_T(T)\\|}"
+        },
+        {
+          "explanation": "通过具体代码核对张量形状、输出尺度，并在资产与时间独立的样本上评价泛化。",
+          "tex": "s(I,T)=\\frac{f_I(I)^\\top f_T(T)}{\\|f_I(I)\\|\\|f_T(T)\\|}"
+        }
+      ],
+      "code": "import torch\nfrom torch.nn import functional as F\na=F.normalize(torch.randn(4,8),dim=-1)\nb=F.normalize(torch.randn(4,8),dim=-1)\nprint(F.cross_entropy(a@b.T/.1,torch.arange(4)))",
+      "packages": "torch",
+      "application": "用于价格趋势图像、财报图片、财经文档截图和视觉-文本联合研究。",
+      "limits": "结构示例不构成完整预训练或图像预测系统；真实任务需要训练循环、数据管线及验证指标。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n05-04",
+      "node_id": "vision-n05-04",
+      "title": "视觉嵌入",
+      "definition": "视觉编码器把整张图或Patch映射到潜在向量，用于检索、聚类和迁移分类。",
+      "assumptions": "输入图像的尺寸、通道顺序、训练样本来源和价格图的时序窗口须明确定义。",
+      "properties": [
+        "视觉结构的复杂度与不变性依赖训练数据和图像预处理规则。",
+        "对OHLCV图像来说，不能盲目套用自然图像增强、未来标准化和跨时间随机划分。"
+      ],
+      "formulas": [
+        {
+          "label": "数学形式",
+          "tex": "z=f_\\theta(I)\\in\\mathbb R^d"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由输入图像或Patch构造该方法要求的空间表示、注意力特征或监督目标。",
+          "tex": "z=f_\\theta(I)\\in\\mathbb R^d"
+        },
+        {
+          "explanation": "通过具体代码核对张量形状、输出尺度，并在资产与时间独立的样本上评价泛化。",
+          "tex": "z=f_\\theta(I)\\in\\mathbb R^d"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(2,3,32,32)\npatch=torch.nn.Conv2d(3,32,8,stride=8)\nprint(patch(x).flatten(2).transpose(1,2).shape)",
+      "packages": "torch",
+      "application": "用于价格趋势图像、财报图片、财经文档截图和视觉-文本联合研究。",
+      "limits": "结构示例不构成完整预训练或图像预测系统；真实任务需要训练循环、数据管线及验证指标。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n06-04",
+      "node_id": "vision-n06-04",
+      "title": "特征可视化",
+      "definition": "特征可视化检查网络中间激活或梯度敏感区域，以理解模型关注的局部模式。",
+      "assumptions": "输入图像的尺寸、通道顺序、训练样本来源和价格图的时序窗口须明确定义。",
+      "properties": [
+        "视觉结构的复杂度与不变性依赖训练数据和图像预处理规则。",
+        "对OHLCV图像来说，不能盲目套用自然图像增强、未来标准化和跨时间随机划分。"
+      ],
+      "formulas": [
+        {
+          "label": "数学形式",
+          "tex": "A^{(l)}=f_\\theta^{(l)}(I)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由输入图像或Patch构造该方法要求的空间表示、注意力特征或监督目标。",
+          "tex": "A^{(l)}=f_\\theta^{(l)}(I)"
+        },
+        {
+          "explanation": "通过具体代码核对张量形状、输出尺度，并在资产与时间独立的样本上评价泛化。",
+          "tex": "A^{(l)}=f_\\theta^{(l)}(I)"
+        }
+      ],
+      "code": "import torch\nnet=torch.nn.Conv2d(1,4,3)\nprint(net(torch.randn(1,1,20,20)).shape)",
+      "packages": "torch",
+      "application": "用于价格趋势图像、财报图片、财经文档截图和视觉-文本联合研究。",
+      "limits": "结构示例不构成完整预训练或图像预测系统；真实任务需要训练循环、数据管线及验证指标。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n02-05",
+      "node_id": "vision-n02-05",
+      "title": "CNN价格趋势预测",
+      "definition": "将历史价格窗编码为图像，训练CNN预测未来收益标签，必须严格执行时间切分。",
+      "assumptions": "输入图像的尺寸、通道顺序、训练样本来源和价格图的时序窗口须明确定义。",
+      "properties": [
+        "视觉结构的复杂度与不变性依赖训练数据和图像预处理规则。",
+        "对OHLCV图像来说，不能盲目套用自然图像增强、未来标准化和跨时间随机划分。"
+      ],
+      "formulas": [
+        {
+          "label": "数学形式",
+          "tex": "\\hat y_{t+h}=f_\\theta(\\operatorname{Render}(OHLCV_{t-W+1:t}))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由输入图像或Patch构造该方法要求的空间表示、注意力特征或监督目标。",
+          "tex": "\\hat y_{t+h}=f_\\theta(\\operatorname{Render}(OHLCV_{t-W+1:t}))"
+        },
+        {
+          "explanation": "通过具体代码核对张量形状、输出尺度，并在资产与时间独立的样本上评价泛化。",
+          "tex": "\\hat y_{t+h}=f_\\theta(\\operatorname{Render}(OHLCV_{t-W+1:t}))"
+        }
+      ],
+      "code": "import torch\nnet=torch.nn.Sequential(torch.nn.Flatten(),torch.nn.Linear(28*28,3))\nprint(net(torch.randn(5,1,28,28)).softmax(-1).shape)",
+      "packages": "torch",
+      "application": "用于价格趋势图像、财报图片、财经文档截图和视觉-文本联合研究。",
+      "limits": "结构示例不构成完整预训练或图像预测系统；真实任务需要训练循环、数据管线及验证指标。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n03-05",
+      "node_id": "vision-n03-05",
+      "title": "图像时间窗口",
+      "definition": "价格图像必须以预测决策时点为最右端，对每个窗口仅使用历史行情。",
+      "assumptions": "输入图像的尺寸、通道顺序、训练样本来源和价格图的时序窗口须明确定义。",
+      "properties": [
+        "视觉结构的复杂度与不变性依赖训练数据和图像预处理规则。",
+        "对OHLCV图像来说，不能盲目套用自然图像增强、未来标准化和跨时间随机划分。"
+      ],
+      "formulas": [
+        {
+          "label": "数学形式",
+          "tex": "I_t=\\mathcal R(P_{t-W+1:t},V_{t-W+1:t})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由输入图像或Patch构造该方法要求的空间表示、注意力特征或监督目标。",
+          "tex": "I_t=\\mathcal R(P_{t-W+1:t},V_{t-W+1:t})"
+        },
+        {
+          "explanation": "通过具体代码核对张量形状、输出尺度，并在资产与时间独立的样本上评价泛化。",
+          "tex": "I_t=\\mathcal R(P_{t-W+1:t},V_{t-W+1:t})"
+        }
+      ],
+      "code": "import numpy as np\np=np.array([100,102,101,106,104],dtype=float)\nnorm=(p-p.min())/(p.max()-p.min())\nprint(\"Window-scaled:\",norm)",
+      "packages": "numpy",
+      "application": "用于价格趋势图像、财报图片、财经文档截图和视觉-文本联合研究。",
+      "limits": "结构示例不构成完整预训练或图像预测系统；真实任务需要训练循环、数据管线及验证指标。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n04-05",
+      "node_id": "vision-n04-05",
+      "title": "复权与图像尺度",
+      "definition": "价格图像尺度和复权规则应统一，避免模型仅学习无意义的绝对价格或未来复权信息。",
+      "assumptions": "输入图像的尺寸、通道顺序、训练样本来源和价格图的时序窗口须明确定义。",
+      "properties": [
+        "视觉结构的复杂度与不变性依赖训练数据和图像预处理规则。",
+        "对OHLCV图像来说，不能盲目套用自然图像增强、未来标准化和跨时间随机划分。"
+      ],
+      "formulas": [
+        {
+          "label": "数学形式",
+          "tex": "\\tilde P_s=\\frac{P_s-P_{\\min,W}}{P_{\\max,W}-P_{\\min,W}}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由输入图像或Patch构造该方法要求的空间表示、注意力特征或监督目标。",
+          "tex": "\\tilde P_s=\\frac{P_s-P_{\\min,W}}{P_{\\max,W}-P_{\\min,W}}"
+        },
+        {
+          "explanation": "通过具体代码核对张量形状、输出尺度，并在资产与时间独立的样本上评价泛化。",
+          "tex": "\\tilde P_s=\\frac{P_s-P_{\\min,W}}{P_{\\max,W}-P_{\\min,W}}"
+        }
+      ],
+      "code": "import numpy as np\np=np.array([100,102,101,106,104],dtype=float)\nnorm=(p-p.min())/(p.max()-p.min())\nprint(\"Window-scaled:\",norm)",
+      "packages": "numpy",
+      "application": "用于价格趋势图像、财报图片、财经文档截图和视觉-文本联合研究。",
+      "limits": "结构示例不构成完整预训练或图像预测系统；真实任务需要训练循环、数据管线及验证指标。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n05-05",
+      "node_id": "vision-n05-05",
+      "title": "避免图像数据泄漏",
+      "definition": "图像预处理、重叠标签和复权因子须遵守信息可用时点，不能把未来收益形状编码在像素中。",
+      "assumptions": "输入图像的尺寸、通道顺序、训练样本来源和价格图的时序窗口须明确定义。",
+      "properties": [
+        "视觉结构的复杂度与不变性依赖训练数据和图像预处理规则。",
+        "对OHLCV图像来说，不能盲目套用自然图像增强、未来标准化和跨时间随机划分。"
+      ],
+      "formulas": [
+        {
+          "label": "数学形式",
+          "tex": "\\operatorname{Support}(I_t)\\subseteq(-\\infty,t]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由输入图像或Patch构造该方法要求的空间表示、注意力特征或监督目标。",
+          "tex": "\\operatorname{Support}(I_t)\\subseteq(-\\infty,t]"
+        },
+        {
+          "explanation": "通过具体代码核对张量形状、输出尺度，并在资产与时间独立的样本上评价泛化。",
+          "tex": "\\operatorname{Support}(I_t)\\subseteq(-\\infty,t]"
+        }
+      ],
+      "code": "from sklearn.model_selection import GroupShuffleSplit\nimport numpy as np\ngroups=np.repeat(np.arange(10),3)\ntr,te=next(GroupShuffleSplit(n_splits=1,random_state=0).split(np.arange(30),groups=groups))\nprint(set(groups[tr]) & set(groups[te]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于价格趋势图像、财报图片、财经文档截图和视觉-文本联合研究。",
+      "limits": "结构示例不构成完整预训练或图像预测系统；真实任务需要训练循环、数据管线及验证指标。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n06-05",
+      "node_id": "vision-n06-05",
+      "title": "跨ETF泛化",
+      "definition": "跨ETF泛化比较模型对训练中未出现资产的表现，测试是否仅记住特定ETF的尺度与历史噪声。",
+      "assumptions": "输入图像的尺寸、通道顺序、训练样本来源和价格图的时序窗口须明确定义。",
+      "properties": [
+        "视觉结构的复杂度与不变性依赖训练数据和图像预处理规则。",
+        "对OHLCV图像来说，不能盲目套用自然图像增强、未来标准化和跨时间随机划分。"
+      ],
+      "formulas": [
+        {
+          "label": "数学形式",
+          "tex": "R_{\\rm unseen}=\\mathbb E_{i\\notin\\mathcal U_{\\rm train}}[\\ell(f_\\theta(I_i),y_i)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由输入图像或Patch构造该方法要求的空间表示、注意力特征或监督目标。",
+          "tex": "R_{\\rm unseen}=\\mathbb E_{i\\notin\\mathcal U_{\\rm train}}[\\ell(f_\\theta(I_i),y_i)]"
+        },
+        {
+          "explanation": "通过具体代码核对张量形状、输出尺度，并在资产与时间独立的样本上评价泛化。",
+          "tex": "R_{\\rm unseen}=\\mathbb E_{i\\notin\\mathcal U_{\\rm train}}[\\ell(f_\\theta(I_i),y_i)]"
+        }
+      ],
+      "code": "from sklearn.model_selection import GroupShuffleSplit\nimport numpy as np\ngroups=np.repeat(np.arange(10),3)\ntr,te=next(GroupShuffleSplit(n_splits=1,random_state=0).split(np.arange(30),groups=groups))\nprint(set(groups[tr]) & set(groups[te]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于价格趋势图像、财报图片、财经文档截图和视觉-文本联合研究。",
+      "limits": "结构示例不构成完整预训练或图像预测系统；真实任务需要训练循环、数据管线及验证指标。",
+      "coverage": "complete"
+    }
+  ]
+}
