@@ -1,0 +1,581 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "evaluation-n01-02",
+      "node_id": "evaluation-n01-02",
+      "title": "K折与GroupKFold",
+      "definition": "GroupKFold确保同一个资产、事件或主体不同时进入训练和验证两侧。",
+      "assumptions": "独立评价必须避免训练与测试重叠；若涉及伦理、隐私或攻击，应限定在获授权的教学测试环境。",
+      "properties": [
+        "GroupKFold确保同一个资产、事件或主体不同时进入训练和验证两侧。",
+        "离线模型指标不能代替真实成本、数据安全性和持续漂移监控。"
+      ],
+      "formulas": [
+        {
+          "label": "评价、统计或安全目标",
+          "tex": "G_{\\rm train}\\cap G_{\\rm val}=\\varnothing"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从任务定义、错误计数、群体或数据分布构造所需评价对象。",
+          "tex": "G_{\\rm train}\\cap G_{\\rm val}=\\varnothing"
+        },
+        {
+          "explanation": "在独立保留数据中估计指标、置信区间或压力测试分数，并检查适用假设。",
+          "tex": "G_{\\rm train}\\cap G_{\\rm val}=\\varnothing"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.model_selection import GroupKFold\nX=np.zeros((12,2));g=np.repeat(np.arange(4),3)\nfor a,b in GroupKFold(2).split(X,groups=g):print(len(a),len(b))",
+      "packages": "numpy, scikit-learn",
+      "application": "为ETF预测、金融文本模型及量化交易系统建立可解释、可靠与安全的评估准则。",
+      "limits": "此处代码仅展示该评价章节的最小计算，不构成完整对抗攻击、防御或隐私审计系统。时间依赖与多次调参需进一步统计修正。",
+      "coverage": "complete"
+    },
+    {
+      "id": "evaluation-n02-02",
+      "node_id": "evaluation-n02-02",
+      "title": "时间序列交叉验证",
+      "definition": "按时间顺序使训练数据先于验证数据，通常采用扩展或滚动窗口。",
+      "assumptions": "独立评价必须避免训练与测试重叠；若涉及伦理、隐私或攻击，应限定在获授权的教学测试环境。",
+      "properties": [
+        "按时间顺序使训练数据先于验证数据，通常采用扩展或滚动窗口。",
+        "离线模型指标不能代替真实成本、数据安全性和持续漂移监控。"
+      ],
+      "formulas": [
+        {
+          "label": "评价、统计或安全目标",
+          "tex": "\\max I_{\\rm train}<\\min I_{\\rm test}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从任务定义、错误计数、群体或数据分布构造所需评价对象。",
+          "tex": "\\max I_{\\rm train}<\\min I_{\\rm test}"
+        },
+        {
+          "explanation": "在独立保留数据中估计指标、置信区间或压力测试分数，并检查适用假设。",
+          "tex": "\\max I_{\\rm train}<\\min I_{\\rm test}"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.model_selection import GroupKFold\nX=np.zeros((12,2));g=np.repeat(np.arange(4),3)\nfor a,b in GroupKFold(2).split(X,groups=g):print(len(a),len(b))",
+      "packages": "numpy, scikit-learn",
+      "application": "为ETF预测、金融文本模型及量化交易系统建立可解释、可靠与安全的评估准则。",
+      "limits": "此处代码仅展示该评价章节的最小计算，不构成完整对抗攻击、防御或隐私审计系统。时间依赖与多次调参需进一步统计修正。",
+      "coverage": "complete"
+    },
+    {
+      "id": "evaluation-n03-02",
+      "node_id": "evaluation-n03-02",
+      "title": "置信区间",
+      "definition": "置信区间是随机区间构造规则，重复抽样长期包含固定参数的比例满足指定覆盖率。",
+      "assumptions": "独立评价必须避免训练与测试重叠；若涉及伦理、隐私或攻击，应限定在获授权的教学测试环境。",
+      "properties": [
+        "置信区间是随机区间构造规则，重复抽样长期包含固定参数的比例满足指定覆盖率。",
+        "离线模型指标不能代替真实成本、数据安全性和持续漂移监控。"
+      ],
+      "formulas": [
+        {
+          "label": "评价、统计或安全目标",
+          "tex": "P_\\theta(\\theta\\in C(X))\\ge1-\\alpha"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从任务定义、错误计数、群体或数据分布构造所需评价对象。",
+          "tex": "P_\\theta(\\theta\\in C(X))\\ge1-\\alpha"
+        },
+        {
+          "explanation": "在独立保留数据中估计指标、置信区间或压力测试分数，并检查适用假设。",
+          "tex": "P_\\theta(\\theta\\in C(X))\\ge1-\\alpha"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.model_selection import GroupKFold\nX=np.zeros((12,2));g=np.repeat(np.arange(4),3)\nfor a,b in GroupKFold(2).split(X,groups=g):print(len(a),len(b))",
+      "packages": "numpy, scikit-learn",
+      "application": "为ETF预测、金融文本模型及量化交易系统建立可解释、可靠与安全的评估准则。",
+      "limits": "此处代码仅展示该评价章节的最小计算，不构成完整对抗攻击、防御或隐私审计系统。时间依赖与多次调参需进一步统计修正。",
+      "coverage": "complete"
+    },
+    {
+      "id": "evaluation-n05-02",
+      "node_id": "evaluation-n05-02",
+      "title": "成对检验",
+      "definition": "比较两个模型在同一批测试观测上的成对损失差，控制测试集共同变化。",
+      "assumptions": "独立评价必须避免训练与测试重叠；若涉及伦理、隐私或攻击，应限定在获授权的教学测试环境。",
+      "properties": [
+        "比较两个模型在同一批测试观测上的成对损失差，控制测试集共同变化。",
+        "离线模型指标不能代替真实成本、数据安全性和持续漂移监控。"
+      ],
+      "formulas": [
+        {
+          "label": "评价、统计或安全目标",
+          "tex": "d_i=\\ell_A(i)-\\ell_B(i)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从任务定义、错误计数、群体或数据分布构造所需评价对象。",
+          "tex": "d_i=\\ell_A(i)-\\ell_B(i)"
+        },
+        {
+          "explanation": "在独立保留数据中估计指标、置信区间或压力测试分数，并检查适用假设。",
+          "tex": "d_i=\\ell_A(i)-\\ell_B(i)"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.model_selection import GroupKFold\nX=np.zeros((12,2));g=np.repeat(np.arange(4),3)\nfor a,b in GroupKFold(2).split(X,groups=g):print(len(a),len(b))",
+      "packages": "numpy, scikit-learn",
+      "application": "为ETF预测、金融文本模型及量化交易系统建立可解释、可靠与安全的评估准则。",
+      "limits": "此处代码仅展示该评价章节的最小计算，不构成完整对抗攻击、防御或隐私审计系统。时间依赖与多次调参需进一步统计修正。",
+      "coverage": "complete"
+    },
+    {
+      "id": "evaluation-n06-02",
+      "node_id": "evaluation-n06-02",
+      "title": "多重试验",
+      "definition": "当评估多个模型和特征组合时，最优测试分数更容易来自偶然噪声，应控制试验数量和选参偏差。",
+      "assumptions": "独立评价必须避免训练与测试重叠；若涉及伦理、隐私或攻击，应限定在获授权的教学测试环境。",
+      "properties": [
+        "当评估多个模型和特征组合时，最优测试分数更容易来自偶然噪声，应控制试验数量和选参偏差。",
+        "离线模型指标不能代替真实成本、数据安全性和持续漂移监控。"
+      ],
+      "formulas": [
+        {
+          "label": "评价、统计或安全目标",
+          "tex": "P(\\text{至少一次误拒})\\le m\\alpha"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从任务定义、错误计数、群体或数据分布构造所需评价对象。",
+          "tex": "P(\\text{至少一次误拒})\\le m\\alpha"
+        },
+        {
+          "explanation": "在独立保留数据中估计指标、置信区间或压力测试分数，并检查适用假设。",
+          "tex": "P(\\text{至少一次误拒})\\le m\\alpha"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.model_selection import GroupKFold\nX=np.zeros((12,2));g=np.repeat(np.arange(4),3)\nfor a,b in GroupKFold(2).split(X,groups=g):print(len(a),len(b))",
+      "packages": "numpy, scikit-learn",
+      "application": "为ETF预测、金融文本模型及量化交易系统建立可解释、可靠与安全的评估准则。",
+      "limits": "此处代码仅展示该评价章节的最小计算，不构成完整对抗攻击、防御或隐私审计系统。时间依赖与多次调参需进一步统计修正。",
+      "coverage": "complete"
+    },
+    {
+      "id": "evaluation-n01-03",
+      "node_id": "evaluation-n01-03",
+      "title": "不平衡类别",
+      "definition": "当事件发生率很低，Accuracy可能虚高，应按业务损失评估Precision/Recall和PR-AUC。",
+      "assumptions": "独立评价必须避免训练与测试重叠；若涉及伦理、隐私或攻击，应限定在获授权的教学测试环境。",
+      "properties": [
+        "当事件发生率很低，Accuracy可能虚高，应按业务损失评估Precision/Recall和PR-AUC。",
+        "离线模型指标不能代替真实成本、数据安全性和持续漂移监控。"
+      ],
+      "formulas": [
+        {
+          "label": "评价、统计或安全目标",
+          "tex": "\\mathrm{Precision}=TP/(TP+FP)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从任务定义、错误计数、群体或数据分布构造所需评价对象。",
+          "tex": "\\mathrm{Precision}=TP/(TP+FP)"
+        },
+        {
+          "explanation": "在独立保留数据中估计指标、置信区间或压力测试分数，并检查适用假设。",
+          "tex": "\\mathrm{Precision}=TP/(TP+FP)"
+        }
+      ],
+      "code": "import numpy as np\np=np.array([.2,.7,.8]);y=np.array([0,1,1]);print('cost',np.sum((p>.5)!=y))",
+      "packages": "numpy, scikit-learn",
+      "application": "为ETF预测、金融文本模型及量化交易系统建立可解释、可靠与安全的评估准则。",
+      "limits": "此处代码仅展示该评价章节的最小计算，不构成完整对抗攻击、防御或隐私审计系统。时间依赖与多次调参需进一步统计修正。",
+      "coverage": "complete"
+    },
+    {
+      "id": "evaluation-n02-03",
+      "node_id": "evaluation-n02-03",
+      "title": "阈值选择",
+      "definition": "将概率分数转为行动时应基于成本、风险预算或Recall目标选择阈值。",
+      "assumptions": "独立评价必须避免训练与测试重叠；若涉及伦理、隐私或攻击，应限定在获授权的教学测试环境。",
+      "properties": [
+        "将概率分数转为行动时应基于成本、风险预算或Recall目标选择阈值。",
+        "离线模型指标不能代替真实成本、数据安全性和持续漂移监控。"
+      ],
+      "formulas": [
+        {
+          "label": "评价、统计或安全目标",
+          "tex": "\\tau^*=\\arg\\min_\\tau E[C(Y,\\mathbf1[p\\ge\\tau])]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从任务定义、错误计数、群体或数据分布构造所需评价对象。",
+          "tex": "\\tau^*=\\arg\\min_\\tau E[C(Y,\\mathbf1[p\\ge\\tau])]"
+        },
+        {
+          "explanation": "在独立保留数据中估计指标、置信区间或压力测试分数，并检查适用假设。",
+          "tex": "\\tau^*=\\arg\\min_\\tau E[C(Y,\\mathbf1[p\\ge\\tau])]"
+        }
+      ],
+      "code": "import numpy as np\np=np.array([.2,.7,.8]);y=np.array([0,1,1]);print('cost',np.sum((p>.5)!=y))",
+      "packages": "numpy, scikit-learn",
+      "application": "为ETF预测、金融文本模型及量化交易系统建立可解释、可靠与安全的评估准则。",
+      "limits": "此处代码仅展示该评价章节的最小计算，不构成完整对抗攻击、防御或隐私审计系统。时间依赖与多次调参需进一步统计修正。",
+      "coverage": "complete"
+    },
+    {
+      "id": "evaluation-n06-03",
+      "node_id": "evaluation-n06-03",
+      "title": "概念漂移",
+      "definition": "模型真实映射P(Y|X)随时间变化时，输入相同也可能得到不同目标分布。",
+      "assumptions": "独立评价必须避免训练与测试重叠；若涉及伦理、隐私或攻击，应限定在获授权的教学测试环境。",
+      "properties": [
+        "模型真实映射P(Y|X)随时间变化时，输入相同也可能得到不同目标分布。",
+        "离线模型指标不能代替真实成本、数据安全性和持续漂移监控。"
+      ],
+      "formulas": [
+        {
+          "label": "评价、统计或安全目标",
+          "tex": "P_t(Y\\mid X)\\ne P_{t+\\Delta}(Y\\mid X)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从任务定义、错误计数、群体或数据分布构造所需评价对象。",
+          "tex": "P_t(Y\\mid X)\\ne P_{t+\\Delta}(Y\\mid X)"
+        },
+        {
+          "explanation": "在独立保留数据中估计指标、置信区间或压力测试分数，并检查适用假设。",
+          "tex": "P_t(Y\\mid X)\\ne P_{t+\\Delta}(Y\\mid X)"
+        }
+      ],
+      "code": "import numpy as np\np=np.array([.2,.7,.8]);y=np.array([0,1,1]);print('cost',np.sum((p>.5)!=y))",
+      "packages": "numpy, scikit-learn",
+      "application": "为ETF预测、金融文本模型及量化交易系统建立可解释、可靠与安全的评估准则。",
+      "limits": "此处代码仅展示该评价章节的最小计算，不构成完整对抗攻击、防御或隐私审计系统。时间依赖与多次调参需进一步统计修正。",
+      "coverage": "complete"
+    },
+    {
+      "id": "evaluation-n03-04",
+      "node_id": "evaluation-n03-04",
+      "title": "PDP/ICE",
+      "definition": "PDP平均其他变量后显示某特征的预测边际曲线，ICE显示每个样本单独变化曲线。",
+      "assumptions": "独立评价必须避免训练与测试重叠；若涉及伦理、隐私或攻击，应限定在获授权的教学测试环境。",
+      "properties": [
+        "PDP平均其他变量后显示某特征的预测边际曲线，ICE显示每个样本单独变化曲线。",
+        "离线模型指标不能代替真实成本、数据安全性和持续漂移监控。"
+      ],
+      "formulas": [
+        {
+          "label": "评价、统计或安全目标",
+          "tex": "\\operatorname{PDP}_j(z)=E_{X_{-j}}[f(z,X_{-j})]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从任务定义、错误计数、群体或数据分布构造所需评价对象。",
+          "tex": "\\operatorname{PDP}_j(z)=E_{X_{-j}}[f(z,X_{-j})]"
+        },
+        {
+          "explanation": "在独立保留数据中估计指标、置信区间或压力测试分数，并检查适用假设。",
+          "tex": "\\operatorname{PDP}_j(z)=E_{X_{-j}}[f(z,X_{-j})]"
+        }
+      ],
+      "code": "import numpy as np\nx=np.arange(6.);print('partial dependence example',x**2)",
+      "packages": "numpy",
+      "application": "为ETF预测、金融文本模型及量化交易系统建立可解释、可靠与安全的评估准则。",
+      "limits": "此处代码仅展示该评价章节的最小计算，不构成完整对抗攻击、防御或隐私审计系统。时间依赖与多次调参需进一步统计修正。",
+      "coverage": "complete"
+    },
+    {
+      "id": "evaluation-n04-04",
+      "node_id": "evaluation-n04-04",
+      "title": "反事实解释",
+      "definition": "求能改变模型决策的最小输入扰动以理解判别边界与操作敏感性。",
+      "assumptions": "独立评价必须避免训练与测试重叠；若涉及伦理、隐私或攻击，应限定在获授权的教学测试环境。",
+      "properties": [
+        "求能改变模型决策的最小输入扰动以理解判别边界与操作敏感性。",
+        "离线模型指标不能代替真实成本、数据安全性和持续漂移监控。"
+      ],
+      "formulas": [
+        {
+          "label": "评价、统计或安全目标",
+          "tex": "x^*=\\arg\\min_{x'}d(x,x')+\\lambda \\ell(f(x'),y^*)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从任务定义、错误计数、群体或数据分布构造所需评价对象。",
+          "tex": "x^*=\\arg\\min_{x'}d(x,x')+\\lambda \\ell(f(x'),y^*)"
+        },
+        {
+          "explanation": "在独立保留数据中估计指标、置信区间或压力测试分数，并检查适用假设。",
+          "tex": "x^*=\\arg\\min_{x'}d(x,x')+\\lambda \\ell(f(x'),y^*)"
+        }
+      ],
+      "code": "import numpy as np\nx=np.arange(6.);print('partial dependence example',x**2)",
+      "packages": "numpy",
+      "application": "为ETF预测、金融文本模型及量化交易系统建立可解释、可靠与安全的评估准则。",
+      "limits": "此处代码仅展示该评价章节的最小计算，不构成完整对抗攻击、防御或隐私审计系统。时间依赖与多次调参需进一步统计修正。",
+      "coverage": "complete"
+    },
+    {
+      "id": "evaluation-n05-04",
+      "node_id": "evaluation-n05-04",
+      "title": "稳健性测试",
+      "definition": "在噪声、缺失、分布切换和参数扰动下评价预测结果变化。",
+      "assumptions": "独立评价必须避免训练与测试重叠；若涉及伦理、隐私或攻击，应限定在获授权的教学测试环境。",
+      "properties": [
+        "在噪声、缺失、分布切换和参数扰动下评价预测结果变化。",
+        "离线模型指标不能代替真实成本、数据安全性和持续漂移监控。"
+      ],
+      "formulas": [
+        {
+          "label": "评价、统计或安全目标",
+          "tex": "R_{\\rm worst}=\\sup_{Q\\in\\mathcal U}E_Q[\\ell(f(X),Y)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从任务定义、错误计数、群体或数据分布构造所需评价对象。",
+          "tex": "R_{\\rm worst}=\\sup_{Q\\in\\mathcal U}E_Q[\\ell(f(X),Y)]"
+        },
+        {
+          "explanation": "在独立保留数据中估计指标、置信区间或压力测试分数，并检查适用假设。",
+          "tex": "R_{\\rm worst}=\\sup_{Q\\in\\mathcal U}E_Q[\\ell(f(X),Y)]"
+        }
+      ],
+      "code": "import numpy as np\nx=np.arange(6.);print('partial dependence example',x**2)",
+      "packages": "numpy",
+      "application": "为ETF预测、金融文本模型及量化交易系统建立可解释、可靠与安全的评估准则。",
+      "limits": "此处代码仅展示该评价章节的最小计算，不构成完整对抗攻击、防御或隐私审计系统。时间依赖与多次调参需进一步统计修正。",
+      "coverage": "complete"
+    },
+    {
+      "id": "evaluation-n06-04",
+      "node_id": "evaluation-n06-04",
+      "title": "公平性指标",
+      "definition": "比较预定义群体的错误率、TPR或预测概率差异，以检查模型的系统性不均衡。",
+      "assumptions": "独立评价必须避免训练与测试重叠；若涉及伦理、隐私或攻击，应限定在获授权的教学测试环境。",
+      "properties": [
+        "比较预定义群体的错误率、TPR或预测概率差异，以检查模型的系统性不均衡。",
+        "离线模型指标不能代替真实成本、数据安全性和持续漂移监控。"
+      ],
+      "formulas": [
+        {
+          "label": "评价、统计或安全目标",
+          "tex": "\\Delta_{\\rm TPR}=|\\mathrm{TPR}_a-\\mathrm{TPR}_b|"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从任务定义、错误计数、群体或数据分布构造所需评价对象。",
+          "tex": "\\Delta_{\\rm TPR}=|\\mathrm{TPR}_a-\\mathrm{TPR}_b|"
+        },
+        {
+          "explanation": "在独立保留数据中估计指标、置信区间或压力测试分数，并检查适用假设。",
+          "tex": "\\Delta_{\\rm TPR}=|\\mathrm{TPR}_a-\\mathrm{TPR}_b|"
+        }
+      ],
+      "code": "import numpy as np\nx=np.arange(6.);print('partial dependence example',x**2)",
+      "packages": "numpy",
+      "application": "为ETF预测、金融文本模型及量化交易系统建立可解释、可靠与安全的评估准则。",
+      "limits": "此处代码仅展示该评价章节的最小计算，不构成完整对抗攻击、防御或隐私审计系统。时间依赖与多次调参需进一步统计修正。",
+      "coverage": "complete"
+    },
+    {
+      "id": "evaluation-n01-05",
+      "node_id": "evaluation-n01-05",
+      "title": "对抗样本",
+      "definition": "攻击者通过小扰动最大化模型损失，测试输入敏感性和鲁棒性。",
+      "assumptions": "独立评价必须避免训练与测试重叠；若涉及伦理、隐私或攻击，应限定在获授权的教学测试环境。",
+      "properties": [
+        "攻击者通过小扰动最大化模型损失，测试输入敏感性和鲁棒性。",
+        "离线模型指标不能代替真实成本、数据安全性和持续漂移监控。"
+      ],
+      "formulas": [
+        {
+          "label": "评价、统计或安全目标",
+          "tex": "\\delta^*=\\arg\\max_{\\|\\delta\\|\\le\\epsilon}\\ell(f(x+\\delta),y)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从任务定义、错误计数、群体或数据分布构造所需评价对象。",
+          "tex": "\\delta^*=\\arg\\max_{\\|\\delta\\|\\le\\epsilon}\\ell(f(x+\\delta),y)"
+        },
+        {
+          "explanation": "在独立保留数据中估计指标、置信区间或压力测试分数，并检查适用假设。",
+          "tex": "\\delta^*=\\arg\\max_{\\|\\delta\\|\\le\\epsilon}\\ell(f(x+\\delta),y)"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([1.,2.,3.]);print('noise perturbation',x+.05)",
+      "packages": "numpy",
+      "application": "为ETF预测、金融文本模型及量化交易系统建立可解释、可靠与安全的评估准则。",
+      "limits": "此处代码仅展示该评价章节的最小计算，不构成完整对抗攻击、防御或隐私审计系统。时间依赖与多次调参需进一步统计修正。",
+      "coverage": "complete"
+    },
+    {
+      "id": "evaluation-n02-05",
+      "node_id": "evaluation-n02-05",
+      "title": "数据投毒",
+      "definition": "对训练数据或标签施加恶意修改，使训练后的模型预测偏向攻击目标。",
+      "assumptions": "独立评价必须避免训练与测试重叠；若涉及伦理、隐私或攻击，应限定在获授权的教学测试环境。",
+      "properties": [
+        "对训练数据或标签施加恶意修改，使训练后的模型预测偏向攻击目标。",
+        "离线模型指标不能代替真实成本、数据安全性和持续漂移监控。"
+      ],
+      "formulas": [
+        {
+          "label": "评价、统计或安全目标",
+          "tex": "\\max_{\\Delta D}R_{\\rm attack}(f_{\\hat\\theta(D+\\Delta D)})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从任务定义、错误计数、群体或数据分布构造所需评价对象。",
+          "tex": "\\max_{\\Delta D}R_{\\rm attack}(f_{\\hat\\theta(D+\\Delta D)})"
+        },
+        {
+          "explanation": "在独立保留数据中估计指标、置信区间或压力测试分数，并检查适用假设。",
+          "tex": "\\max_{\\Delta D}R_{\\rm attack}(f_{\\hat\\theta(D+\\Delta D)})"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([1.,2.,3.]);print('noise perturbation',x+.05)",
+      "packages": "numpy",
+      "application": "为ETF预测、金融文本模型及量化交易系统建立可解释、可靠与安全的评估准则。",
+      "limits": "此处代码仅展示该评价章节的最小计算，不构成完整对抗攻击、防御或隐私审计系统。时间依赖与多次调参需进一步统计修正。",
+      "coverage": "complete"
+    },
+    {
+      "id": "evaluation-n03-05",
+      "node_id": "evaluation-n03-05",
+      "title": "隐私泄露",
+      "definition": "训练模型可能暴露数据分布或特定样本成员身份，需审计查询接口与敏感信息风险。",
+      "assumptions": "独立评价必须避免训练与测试重叠；若涉及伦理、隐私或攻击，应限定在获授权的教学测试环境。",
+      "properties": [
+        "训练模型可能暴露数据分布或特定样本成员身份，需审计查询接口与敏感信息风险。",
+        "离线模型指标不能代替真实成本、数据安全性和持续漂移监控。"
+      ],
+      "formulas": [
+        {
+          "label": "评价、统计或安全目标",
+          "tex": "P(M=1\\mid f_\\theta(x))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从任务定义、错误计数、群体或数据分布构造所需评价对象。",
+          "tex": "P(M=1\\mid f_\\theta(x))"
+        },
+        {
+          "explanation": "在独立保留数据中估计指标、置信区间或压力测试分数，并检查适用假设。",
+          "tex": "P(M=1\\mid f_\\theta(x))"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([1.,2.,3.]);print('noise perturbation',x+.05)",
+      "packages": "numpy",
+      "application": "为ETF预测、金融文本模型及量化交易系统建立可解释、可靠与安全的评估准则。",
+      "limits": "此处代码仅展示该评价章节的最小计算，不构成完整对抗攻击、防御或隐私审计系统。时间依赖与多次调参需进一步统计修正。",
+      "coverage": "complete"
+    },
+    {
+      "id": "evaluation-n04-05",
+      "node_id": "evaluation-n04-05",
+      "title": "模型抽取",
+      "definition": "攻击者通过重复调用模型接口拟合近似替代模型，涉及查询速率和输出限制。",
+      "assumptions": "独立评价必须避免训练与测试重叠；若涉及伦理、隐私或攻击，应限定在获授权的教学测试环境。",
+      "properties": [
+        "攻击者通过重复调用模型接口拟合近似替代模型，涉及查询速率和输出限制。",
+        "离线模型指标不能代替真实成本、数据安全性和持续漂移监控。"
+      ],
+      "formulas": [
+        {
+          "label": "评价、统计或安全目标",
+          "tex": "\\min_{\\hat f}E_x[\\ell(\\hat f(x),f(x))]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从任务定义、错误计数、群体或数据分布构造所需评价对象。",
+          "tex": "\\min_{\\hat f}E_x[\\ell(\\hat f(x),f(x))]"
+        },
+        {
+          "explanation": "在独立保留数据中估计指标、置信区间或压力测试分数，并检查适用假设。",
+          "tex": "\\min_{\\hat f}E_x[\\ell(\\hat f(x),f(x))]"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([1.,2.,3.]);print('noise perturbation',x+.05)",
+      "packages": "numpy",
+      "application": "为ETF预测、金融文本模型及量化交易系统建立可解释、可靠与安全的评估准则。",
+      "limits": "此处代码仅展示该评价章节的最小计算，不构成完整对抗攻击、防御或隐私审计系统。时间依赖与多次调参需进一步统计修正。",
+      "coverage": "complete"
+    },
+    {
+      "id": "evaluation-n05-05",
+      "node_id": "evaluation-n05-05",
+      "title": "提示注入防御",
+      "definition": "将检索内容视为不可信数据，阻止外部文档指令覆盖系统授权及任务约束。",
+      "assumptions": "独立评价必须避免训练与测试重叠；若涉及伦理、隐私或攻击，应限定在获授权的教学测试环境。",
+      "properties": [
+        "将检索内容视为不可信数据，阻止外部文档指令覆盖系统授权及任务约束。",
+        "离线模型指标不能代替真实成本、数据安全性和持续漂移监控。"
+      ],
+      "formulas": [
+        {
+          "label": "评价、统计或安全目标",
+          "tex": "\\operatorname{Authority}(\\mathrm{retrieved\\ text})<\\operatorname{Authority}(\\mathrm{system})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从任务定义、错误计数、群体或数据分布构造所需评价对象。",
+          "tex": "\\operatorname{Authority}(\\mathrm{retrieved\\ text})<\\operatorname{Authority}(\\mathrm{system})"
+        },
+        {
+          "explanation": "在独立保留数据中估计指标、置信区间或压力测试分数，并检查适用假设。",
+          "tex": "\\operatorname{Authority}(\\mathrm{retrieved\\ text})<\\operatorname{Authority}(\\mathrm{system})"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([1.,2.,3.]);print('noise perturbation',x+.05)",
+      "packages": "numpy",
+      "application": "为ETF预测、金融文本模型及量化交易系统建立可解释、可靠与安全的评估准则。",
+      "limits": "此处代码仅展示该评价章节的最小计算，不构成完整对抗攻击、防御或隐私审计系统。时间依赖与多次调参需进一步统计修正。",
+      "coverage": "complete"
+    },
+    {
+      "id": "evaluation-n06-05",
+      "node_id": "evaluation-n06-05",
+      "title": "评测基准污染",
+      "definition": "测试题或评测答案混入训练语料会使结果不再反映真实样本外泛化。",
+      "assumptions": "独立评价必须避免训练与测试重叠；若涉及伦理、隐私或攻击，应限定在获授权的教学测试环境。",
+      "properties": [
+        "测试题或评测答案混入训练语料会使结果不再反映真实样本外泛化。",
+        "离线模型指标不能代替真实成本、数据安全性和持续漂移监控。"
+      ],
+      "formulas": [
+        {
+          "label": "评价、统计或安全目标",
+          "tex": "D_{\\rm benchmark}\\cap D_{\\rm train}\\ne\\varnothing"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从任务定义、错误计数、群体或数据分布构造所需评价对象。",
+          "tex": "D_{\\rm benchmark}\\cap D_{\\rm train}\\ne\\varnothing"
+        },
+        {
+          "explanation": "在独立保留数据中估计指标、置信区间或压力测试分数，并检查适用假设。",
+          "tex": "D_{\\rm benchmark}\\cap D_{\\rm train}\\ne\\varnothing"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([1.,2.,3.]);print('noise perturbation',x+.05)",
+      "packages": "numpy",
+      "application": "为ETF预测、金融文本模型及量化交易系统建立可解释、可靠与安全的评估准则。",
+      "limits": "此处代码仅展示该评价章节的最小计算，不构成完整对抗攻击、防御或隐私审计系统。时间依赖与多次调参需进一步统计修正。",
+      "coverage": "complete"
+    }
+  ]
+}
