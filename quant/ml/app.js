@@ -61,21 +61,23 @@ return section;
 function isMatch(n){
  if(filterDept&&n.discipline_id!==filterDept)return false;
  if(filterLevel&&n.level!==filterLevel)return false;
- if(filterStatus&&(filterStatus==="complete")!==isComplete(n))return false;
+ if(filterStatus==="complete"&&!isComplete(n))return false;
+ if(filterStatus==="expanded"&&!noteMap.has(n.id))return false;
+ if(filterStatus==="outline"&&(isComplete(n)||noteMap.has(n.id)))return false;
  if(!query.trim())return true;
  const dept=getDept(n.discipline_id),chap=getChap(n.chapter_id);
  return [n.title,dept?.title,dept?.english,chap?.title].join(" ").toLocaleLowerCase().includes(query.trim().toLocaleLowerCase());
 }
 function nodeButton(n){
 const b=document.createElement("button");b.className="node"+(n.id===activeId?" active":"");b.type="button";b.dataset.node=n.id;
-const ok=isComplete(n);b.innerHTML='<span class="complete-mark" aria-hidden="true">'+(studied.has(n.id)?"✓":ok?"●":"·")+'</span><span class="node-name">'+esc(n.title)+'</span><span class="node-label'+(ok?" complete":"")+'">'+(ok?"讲义":"目录")+'</span>';
+const ok=isComplete(n);b.innerHTML='<span class="complete-mark" aria-hidden="true">'+(studied.has(n.id)?"✓":ok?"●":"·")+'</span><span class="node-name">'+esc(n.title)+'</span><span class="node-label'+(ok?" complete":"")+'">'+(ok?"详解":noteMap.has(n.id)?"笔记":"目录")+'</span>';
 b.addEventListener("click",()=>selectNode(n.id,true,true));
 return b;
 }
 function makeChapter(c,visible,open){
 const out=document.createElement("details");out.className="chapter";out.open=open;
 const summary=document.createElement("summary");
-summary.innerHTML='<span class="chapter-label">'+String(c.order).padStart(2,"0")+'. '+esc(c.title)+'</span><span class="count">'+visible.filter(isComplete).length+'/'+visible.length+' 讲义</span><span class="chev" aria-hidden="true">▸</span>';out.appendChild(summary);
+summary.innerHTML='<span class="chapter-label">'+String(c.order).padStart(2,"0")+'. '+esc(c.title)+'</span><span class="count">'+visible.filter(isComplete).length+' 详解 · '+visible.filter(n=>noteMap.has(n.id)).length+' 笔记</span><span class="chev" aria-hidden="true">▸</span>';out.appendChild(summary);
 const ul=document.createElement("div");ul.className="nodes";for(const n of visible)ul.appendChild(nodeButton(n));out.appendChild(ul);return out;
 }
 function renderTree(){
@@ -94,7 +96,7 @@ for(const d of depts){
  const summary=document.createElement("summary");
  const n=groups.reduce((acc,g)=>acc+g.nodes.length,0);
  const finished=groups.reduce((acc,g)=>acc+g.nodes.filter(isComplete).length,0);
- summary.innerHTML='<span class="number">'+String(d.order).padStart(2,"0")+'</span><span class="dept-label"><strong>'+esc(d.title)+'</strong><span>'+esc(d.english)+'</span></span><span class="count">'+finished+'/'+n+' 讲义</span><span class="chev" aria-hidden="true">▸</span>';
+ summary.innerHTML='<span class="number">'+String(d.order).padStart(2,"0")+'</span><span class="dept-label"><strong>'+esc(d.title)+'</strong><span>'+esc(d.english)+'</span></span><span class="count">'+finished+' 详解 · '+groups.reduce((acc,g)=>acc+g.nodes.filter(x=>noteMap.has(x.id)).length,0)+' 笔记</span><span class="chev" aria-hidden="true">▸</span>';
  whole.appendChild(summary);
  const chapterBox=document.createElement("div");chapterBox.className="chapters";
  for(const [i,g] of groups.entries())chapterBox.appendChild(makeChapter(g.chapter,g.nodes,g.chapter.id===getNode(activeId)?.chapter_id||!!query||Boolean(filterDept)));
@@ -106,7 +108,7 @@ for(const d of depts){
  }whole.appendChild(resourceLine);
  container.appendChild(whole);
 }
-$("status").textContent="显示 "+visibleCount+" / "+nodes.length+" 个知识点 · "+departmentCount+" 个学科 · "+totalComplete+" 个算法讲义";
+$("status").textContent="显示 "+visibleCount+" / "+nodes.length+" 个知识点 · "+departmentCount+" 个学科 · "+totalComplete+" 篇完整讲义 · "+noteMap.size+" 篇扩展笔记";
 if(!visibleCount){const p=document.createElement("p");p.className="notice";p.textContent="当前条件无匹配知识点。请清除搜索或筛选。";container.appendChild(p)}
 $("mastered").textContent=studied.size;
 document.querySelectorAll(".roadmap-chip").forEach(b=>b.classList.toggle("active",b.dataset.dept===filterDept));
@@ -173,6 +175,19 @@ function lessonArticle(n,lesson,container){
  const limitations=makeSection("八、局限、失效条件与常见误区");
  paragraph(limitations,lesson.limits,"warn");container.appendChild(limitations);
 }
+function noteArticle(n,note,container){
+ const notice=makeSection("内容说明 · 扩展笔记，尚未达到完整讲义标准");
+ paragraph(notice,"本节包含主题概念、适用前提、核心数学关系与基础示例。代码多为所在学科或章节的综合演示，公式解读不能代替完整定理证明或独立模型实现。","warn");
+ container.appendChild(notice);
+ const before=container.children.length;
+ lessonArticle(n,note,container);
+ const sections=Array.from(container.children).slice(before);
+ for(const section of sections){
+   const h=section.querySelector("h3");if(!h)continue;
+   if(h.textContent==="五、原理推导")h.textContent="五、基本推理线索（非完整证明）";
+   if(h.textContent==="六、基础 Python 代码")h.textContent="六、相关章节 Python 演示";
+ }
+}
 function outlineArticle(n,container){
  const ch=getChap(n.chapter_id),dept=getDept(n.discipline_id);
  const section=makeSection("课程位置与前置学习");
@@ -221,7 +236,7 @@ function selectNode(id,update=true,preserveTree=false){
  article.appendChild(badges);
  const lesson=lessonMap.get(id);
  if(lesson)lessonArticle(node,lesson,article);
- else if(noteMap.has(id))lessonArticle(node,noteMap.get(id),article);
+ else if(noteMap.has(id))noteArticle(node,noteMap.get(id),article);
  else outlineArticle(node,article);
  article.appendChild(resourceArea(dept));
  makeControls(node,article);
@@ -279,7 +294,9 @@ Promise.all([
   noteMap=new Map(drafts.filter(n=>!lessons.some(l=>l.node_id===n.node_id)).map(n=>[n.node_id,n]));
 
 nodeMap=new Map(nodes.map(n=>[n.id,n]));chapMap=new Map(chapters.map(c=>[c.id,c]));deptMap=new Map(depts.map(d=>[d.id,d]));lessonMap=new Map(lessons.map(l=>[l.node_id,l]));
-$("disciplines").textContent=depts.length;$("chapters").textContent=chapters.length;$("nodes").textContent=nodes.length;$("written").textContent=lessonMap.size;
+if(lessonMap.size+noteMap.size!==nodes.length||nodes.some(n=>!lessonMap.has(n.id)&&!noteMap.has(n.id)))
+ throw Error("课程知识点覆盖不完整：讲义与笔记未覆盖所有720个节点");
+$("disciplines").textContent=depts.length;$("chapters").textContent=chapters.length;$("nodes").textContent=nodes.length;$("written").textContent=lessonMap.size;if($("notes"))$("notes").textContent=noteMap.size;
 for(const d of depts){
  const option=document.createElement("option");option.value=d.id;option.textContent=String(d.order).padStart(2,"0")+" · "+d.title;$("disciplineFilter").appendChild(option);
  const chip=document.createElement("button");chip.type="button";chip.className="roadmap-chip";chip.dataset.dept=d.id;chip.textContent=d.order+" · "+d.title;chip.onclick=()=>window.mlSelectDiscipline(filterDept===d.id?"":d.id);$("roadmap").appendChild(chip);
@@ -287,7 +304,10 @@ for(const d of depts){
 const params=new URLSearchParams(location.search);
 const d=params.get("discipline"),requested=params.get("topic"),status=params.get("status");
 if(d&&deptMap.has(d)){filterDept=d;$("disciplineFilter").value=d}
-if(["complete","outline"].includes(status)){filterStatus=status;$("coverageFilter").value=status}
+if(["complete","expanded","outline"].includes(status)){
+ filterStatus=status==="outline"?"expanded":status;
+ $("coverageFilter").value=filterStatus
+}
 const defaultNode=nodes.find(n=>n.discipline_id==="roadmap"&&n.title==="经验风险最小化ERM")||nodes.find(n=>lessonMap.has(n.id))||nodes[0];
 const initial=(nodeMap.has(requested)?getNode(requested):null) ||
   (filterDept?nodes.find(n=>n.discipline_id===filterDept&&lessonMap.has(n.id))||nodes.find(n=>n.discipline_id===filterDept):null) ||
