@@ -1,0 +1,741 @@
+{
+  "version": 1,
+  "notes": [
+    {
+      "id": "vision-n01-01",
+      "node_id": "vision-n01-01",
+      "title": "像素通道与张量",
+      "definition": "数字图像按批次、通道、高度、宽度构成四维输入张量。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "数字图像按批次、通道、高度、宽度构成四维输入张量。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "X\\in\\mathbb R^{B\\times C\\times H\\times W}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。数字图像按批次、通道、高度、宽度构成四维输入张量。",
+          "tex": "X\\in\\mathbb R^{B\\times C\\times H\\times W}"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "X\\in\\mathbb R^{B\\times C\\times H\\times W}"
+        }
+      ],
+      "code": "# 像素通道与张量：相关学科综合示例\nimport torch\nfrom torch import nn\ntorch.manual_seed(0)\nx=torch.randn(4,1,28,28)\nencoder=nn.Sequential(nn.Conv2d(1,8,3,padding=1),nn.ReLU(),nn.MaxPool2d(2),\n                      nn.Flatten(),nn.Linear(8*14*14,16),nn.ReLU())\nclassifier=nn.Linear(16,2)\nlogits=classifier(encoder(x))\nprint(\"Image logits:\",logits.shape)\nprint(\"Probabilities:\",logits.softmax(dim=-1)[0])",
+      "packages": "torch",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "vision-n02-01",
+      "node_id": "vision-n02-01",
+      "title": "卷积滤波",
+      "definition": "图像滤波核在空间平移共享权重并提取局部边缘和纹理特征。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "图像滤波核在空间平移共享权重并提取局部边缘和纹理特征。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "y_{u,v}=\\sum_{i,j}w_{ij}x_{u+i,v+j}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。图像滤波核在空间平移共享权重并提取局部边缘和纹理特征。",
+          "tex": "y_{u,v}=\\sum_{i,j}w_{ij}x_{u+i,v+j}"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "y_{u,v}=\\sum_{i,j}w_{ij}x_{u+i,v+j}"
+        }
+      ],
+      "code": "# 卷积滤波：相关学科综合示例\nimport torch\nfrom torch import nn\ntorch.manual_seed(0)\nx=torch.randn(4,1,28,28)\nencoder=nn.Sequential(nn.Conv2d(1,8,3,padding=1),nn.ReLU(),nn.MaxPool2d(2),\n                      nn.Flatten(),nn.Linear(8*14*14,16),nn.ReLU())\nclassifier=nn.Linear(16,2)\nlogits=classifier(encoder(x))\nprint(\"Image logits:\",logits.shape)\nprint(\"Probabilities:\",logits.softmax(dim=-1)[0])",
+      "packages": "torch",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "vision-n05-01",
+      "node_id": "vision-n05-01",
+      "title": "图像分类",
+      "definition": "分类头将图像表示映射到类别Logits，再通过Softmax计算概率。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "分类头将图像表示映射到类别Logits，再通过Softmax计算概率。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "p_k=\\frac{e^{z_k}}{\\sum_je^{z_j}}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。分类头将图像表示映射到类别Logits，再通过Softmax计算概率。",
+          "tex": "p_k=\\frac{e^{z_k}}{\\sum_je^{z_j}}"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "p_k=\\frac{e^{z_k}}{\\sum_je^{z_j}}"
+        }
+      ],
+      "code": "# 图像分类：相关学科综合示例\nimport torch\nfrom torch import nn\ntorch.manual_seed(0)\nx=torch.randn(4,1,28,28)\nencoder=nn.Sequential(nn.Conv2d(1,8,3,padding=1),nn.ReLU(),nn.MaxPool2d(2),\n                      nn.Flatten(),nn.Linear(8*14*14,16),nn.ReLU())\nclassifier=nn.Linear(16,2)\nlogits=classifier(encoder(x))\nprint(\"Image logits:\",logits.shape)\nprint(\"Probabilities:\",logits.softmax(dim=-1)[0])",
+      "packages": "torch",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "vision-n06-01",
+      "node_id": "vision-n06-01",
+      "title": "视觉验证集",
+      "definition": "用训练集之外的数据选择模型并检查类别分布和数据来源泄漏。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "用训练集之外的数据选择模型并检查类别分布和数据来源泄漏。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "R_{\\rm val}=n_{\\rm val}^{-1}\\sum_i\\ell(f(x_i),y_i)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。用训练集之外的数据选择模型并检查类别分布和数据来源泄漏。",
+          "tex": "R_{\\rm val}=n_{\\rm val}^{-1}\\sum_i\\ell(f(x_i),y_i)"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "R_{\\rm val}=n_{\\rm val}^{-1}\\sum_i\\ell(f(x_i),y_i)"
+        }
+      ],
+      "code": "# 视觉验证集：相关学科综合示例\nimport torch\nfrom torch import nn\ntorch.manual_seed(0)\nx=torch.randn(4,1,28,28)\nencoder=nn.Sequential(nn.Conv2d(1,8,3,padding=1),nn.ReLU(),nn.MaxPool2d(2),\n                      nn.Flatten(),nn.Linear(8*14*14,16),nn.ReLU())\nclassifier=nn.Linear(16,2)\nlogits=classifier(encoder(x))\nprint(\"Image logits:\",logits.shape)\nprint(\"Probabilities:\",logits.softmax(dim=-1)[0])",
+      "packages": "torch",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "vision-n02-02",
+      "node_id": "vision-n02-02",
+      "title": "AlexNet",
+      "definition": "AlexNet使用多层卷积、ReLU和池化完成大规模视觉分类。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "AlexNet使用多层卷积、ReLU和池化完成大规模视觉分类。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "h^{(l+1)}=\\operatorname{ReLU}(W_l*h^{(l)}+b_l)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。AlexNet使用多层卷积、ReLU和池化完成大规模视觉分类。",
+          "tex": "h^{(l+1)}=\\operatorname{ReLU}(W_l*h^{(l)}+b_l)"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "h^{(l+1)}=\\operatorname{ReLU}(W_l*h^{(l)}+b_l)"
+        }
+      ],
+      "code": "# AlexNet：相关学科综合示例\nimport torch\nfrom torch import nn\ntorch.manual_seed(0)\nx=torch.randn(4,1,28,28)\nencoder=nn.Sequential(nn.Conv2d(1,8,3,padding=1),nn.ReLU(),nn.MaxPool2d(2),\n                      nn.Flatten(),nn.Linear(8*14*14,16),nn.ReLU())\nclassifier=nn.Linear(16,2)\nlogits=classifier(encoder(x))\nprint(\"Image logits:\",logits.shape)\nprint(\"Probabilities:\",logits.softmax(dim=-1)[0])",
+      "packages": "torch",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "vision-n03-02",
+      "node_id": "vision-n03-02",
+      "title": "VGG",
+      "definition": "VGG以大量小尺寸卷积核堆叠构建具有大感受野的深层视觉骨干。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "VGG以大量小尺寸卷积核堆叠构建具有大感受野的深层视觉骨干。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "R_L=1+\\sum_l(k_l-1)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。VGG以大量小尺寸卷积核堆叠构建具有大感受野的深层视觉骨干。",
+          "tex": "R_L=1+\\sum_l(k_l-1)"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "R_L=1+\\sum_l(k_l-1)"
+        }
+      ],
+      "code": "# VGG：相关学科综合示例\nimport torch\nfrom torch import nn\ntorch.manual_seed(0)\nx=torch.randn(4,1,28,28)\nencoder=nn.Sequential(nn.Conv2d(1,8,3,padding=1),nn.ReLU(),nn.MaxPool2d(2),\n                      nn.Flatten(),nn.Linear(8*14*14,16),nn.ReLU())\nclassifier=nn.Linear(16,2)\nlogits=classifier(encoder(x))\nprint(\"Image logits:\",logits.shape)\nprint(\"Probabilities:\",logits.softmax(dim=-1)[0])",
+      "packages": "torch",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "vision-n05-02",
+      "node_id": "vision-n05-02",
+      "title": "EfficientNet",
+      "definition": "EfficientNet结合深度、宽度和分辨率的复合缩放提升计算使用效率。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "EfficientNet结合深度、宽度和分辨率的复合缩放提升计算使用效率。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "d=\\alpha^\\phi,\\quad w=\\beta^\\phi,\\quad r=\\gamma^\\phi"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。EfficientNet结合深度、宽度和分辨率的复合缩放提升计算使用效率。",
+          "tex": "d=\\alpha^\\phi,\\quad w=\\beta^\\phi,\\quad r=\\gamma^\\phi"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "d=\\alpha^\\phi,\\quad w=\\beta^\\phi,\\quad r=\\gamma^\\phi"
+        }
+      ],
+      "code": "# EfficientNet：相关学科综合示例\nimport torch\nfrom torch import nn\ntorch.manual_seed(0)\nx=torch.randn(4,1,28,28)\nencoder=nn.Sequential(nn.Conv2d(1,8,3,padding=1),nn.ReLU(),nn.MaxPool2d(2),\n                      nn.Flatten(),nn.Linear(8*14*14,16),nn.ReLU())\nclassifier=nn.Linear(16,2)\nlogits=classifier(encoder(x))\nprint(\"Image logits:\",logits.shape)\nprint(\"Probabilities:\",logits.softmax(dim=-1)[0])",
+      "packages": "torch",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "vision-n01-03",
+      "node_id": "vision-n01-03",
+      "title": "物体检测",
+      "definition": "检测算法同时预测对象类别与图像中目标边界框。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "检测算法同时预测对象类别与图像中目标边界框。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "L=L_{\\rm cls}+\\lambda L_{\\rm box}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。检测算法同时预测对象类别与图像中目标边界框。",
+          "tex": "L=L_{\\rm cls}+\\lambda L_{\\rm box}"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "L=L_{\\rm cls}+\\lambda L_{\\rm box}"
+        }
+      ],
+      "code": "# 物体检测：相关学科综合示例\nimport torch\nfrom torch import nn\ntorch.manual_seed(0)\nx=torch.randn(4,1,28,28)\nencoder=nn.Sequential(nn.Conv2d(1,8,3,padding=1),nn.ReLU(),nn.MaxPool2d(2),\n                      nn.Flatten(),nn.Linear(8*14*14,16),nn.ReLU())\nclassifier=nn.Linear(16,2)\nlogits=classifier(encoder(x))\nprint(\"Image logits:\",logits.shape)\nprint(\"Probabilities:\",logits.softmax(dim=-1)[0])",
+      "packages": "torch",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "vision-n02-03",
+      "node_id": "vision-n02-03",
+      "title": "区域建议R-CNN",
+      "definition": "R-CNN家族通过区域候选提取并分类、回归框位置完成检测。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "R-CNN家族通过区域候选提取并分类、回归框位置完成检测。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "b^*=b+\\Delta b_\\theta"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。R-CNN家族通过区域候选提取并分类、回归框位置完成检测。",
+          "tex": "b^*=b+\\Delta b_\\theta"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "b^*=b+\\Delta b_\\theta"
+        }
+      ],
+      "code": "# 区域建议R-CNN：相关学科综合示例\nimport torch\nfrom torch import nn\ntorch.manual_seed(0)\nx=torch.randn(4,1,28,28)\nencoder=nn.Sequential(nn.Conv2d(1,8,3,padding=1),nn.ReLU(),nn.MaxPool2d(2),\n                      nn.Flatten(),nn.Linear(8*14*14,16),nn.ReLU())\nclassifier=nn.Linear(16,2)\nlogits=classifier(encoder(x))\nprint(\"Image logits:\",logits.shape)\nprint(\"Probabilities:\",logits.softmax(dim=-1)[0])",
+      "packages": "torch",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "vision-n03-03",
+      "node_id": "vision-n03-03",
+      "title": "YOLO",
+      "definition": "YOLO以单阶段密集预测完成类别、定位和目标性输出。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "YOLO以单阶段密集预测完成类别、定位和目标性输出。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "L=L_{\\rm box}+L_{\\rm obj}+L_{\\rm cls}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。YOLO以单阶段密集预测完成类别、定位和目标性输出。",
+          "tex": "L=L_{\\rm box}+L_{\\rm obj}+L_{\\rm cls}"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "L=L_{\\rm box}+L_{\\rm obj}+L_{\\rm cls}"
+        }
+      ],
+      "code": "# YOLO：相关学科综合示例\nimport torch\nfrom torch import nn\ntorch.manual_seed(0)\nx=torch.randn(4,1,28,28)\nencoder=nn.Sequential(nn.Conv2d(1,8,3,padding=1),nn.ReLU(),nn.MaxPool2d(2),\n                      nn.Flatten(),nn.Linear(8*14*14,16),nn.ReLU())\nclassifier=nn.Linear(16,2)\nlogits=classifier(encoder(x))\nprint(\"Image logits:\",logits.shape)\nprint(\"Probabilities:\",logits.softmax(dim=-1)[0])",
+      "packages": "torch",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "vision-n04-03",
+      "node_id": "vision-n04-03",
+      "title": "语义分割U-Net",
+      "definition": "U-Net使用编码下采样和跳跃连接的解码上采样输出像素级类别。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "U-Net使用编码下采样和跳跃连接的解码上采样输出像素级类别。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "P\\in[0,1]^{H\\times W\\times K}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。U-Net使用编码下采样和跳跃连接的解码上采样输出像素级类别。",
+          "tex": "P\\in[0,1]^{H\\times W\\times K}"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "P\\in[0,1]^{H\\times W\\times K}"
+        }
+      ],
+      "code": "# 语义分割U-Net：相关学科综合示例\nimport torch\nfrom torch import nn\ntorch.manual_seed(0)\nx=torch.randn(4,1,28,28)\nencoder=nn.Sequential(nn.Conv2d(1,8,3,padding=1),nn.ReLU(),nn.MaxPool2d(2),\n                      nn.Flatten(),nn.Linear(8*14*14,16),nn.ReLU())\nclassifier=nn.Linear(16,2)\nlogits=classifier(encoder(x))\nprint(\"Image logits:\",logits.shape)\nprint(\"Probabilities:\",logits.softmax(dim=-1)[0])",
+      "packages": "torch",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "vision-n05-03",
+      "node_id": "vision-n05-03",
+      "title": "实例分割",
+      "definition": "实例分割除像素语义类别外还区分同类不同对象实例。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "实例分割除像素语义类别外还区分同类不同对象实例。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "M_i\\in\\{0,1\\}^{H\\times W}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。实例分割除像素语义类别外还区分同类不同对象实例。",
+          "tex": "M_i\\in\\{0,1\\}^{H\\times W}"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "M_i\\in\\{0,1\\}^{H\\times W}"
+        }
+      ],
+      "code": "# 实例分割：相关学科综合示例\nimport torch\nfrom torch import nn\ntorch.manual_seed(0)\nx=torch.randn(4,1,28,28)\nencoder=nn.Sequential(nn.Conv2d(1,8,3,padding=1),nn.ReLU(),nn.MaxPool2d(2),\n                      nn.Flatten(),nn.Linear(8*14*14,16),nn.ReLU())\nclassifier=nn.Linear(16,2)\nlogits=classifier(encoder(x))\nprint(\"Image logits:\",logits.shape)\nprint(\"Probabilities:\",logits.softmax(dim=-1)[0])",
+      "packages": "torch",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "vision-n01-04",
+      "node_id": "vision-n01-04",
+      "title": "SimCLR视觉对比",
+      "definition": "通过两份图像增强视图构建正例、批内其他图构建负例的对比目标。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "通过两份图像增强视图构建正例、批内其他图构建负例的对比目标。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "L_i=-\\log\\frac{e^{s(z_i,z_i^+)/\\tau}}{\\sum_je^{s(z_i,z_j)/\\tau}}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。通过两份图像增强视图构建正例、批内其他图构建负例的对比目标。",
+          "tex": "L_i=-\\log\\frac{e^{s(z_i,z_i^+)/\\tau}}{\\sum_je^{s(z_i,z_j)/\\tau}}"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "L_i=-\\log\\frac{e^{s(z_i,z_i^+)/\\tau}}{\\sum_je^{s(z_i,z_j)/\\tau}}"
+        }
+      ],
+      "code": "# SimCLR视觉对比：相关学科综合示例\nimport torch\nfrom torch import nn\ntorch.manual_seed(0)\nx=torch.randn(4,1,28,28)\nencoder=nn.Sequential(nn.Conv2d(1,8,3,padding=1),nn.ReLU(),nn.MaxPool2d(2),\n                      nn.Flatten(),nn.Linear(8*14*14,16),nn.ReLU())\nclassifier=nn.Linear(16,2)\nlogits=classifier(encoder(x))\nprint(\"Image logits:\",logits.shape)\nprint(\"Probabilities:\",logits.softmax(dim=-1)[0])",
+      "packages": "torch",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "vision-n02-04",
+      "node_id": "vision-n02-04",
+      "title": "DINO",
+      "definition": "DINO通过教师-学生自蒸馏目标学习无标签视觉表示。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "DINO通过教师-学生自蒸馏目标学习无标签视觉表示。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "L=-\\sum_kp_k^{\\rm teacher}\\log p_k^{\\rm student}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。DINO通过教师-学生自蒸馏目标学习无标签视觉表示。",
+          "tex": "L=-\\sum_kp_k^{\\rm teacher}\\log p_k^{\\rm student}"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "L=-\\sum_kp_k^{\\rm teacher}\\log p_k^{\\rm student}"
+        }
+      ],
+      "code": "# DINO：相关学科综合示例\nimport torch\nfrom torch import nn\ntorch.manual_seed(0)\nx=torch.randn(4,1,28,28)\nencoder=nn.Sequential(nn.Conv2d(1,8,3,padding=1),nn.ReLU(),nn.MaxPool2d(2),\n                      nn.Flatten(),nn.Linear(8*14*14,16),nn.ReLU())\nclassifier=nn.Linear(16,2)\nlogits=classifier(encoder(x))\nprint(\"Image logits:\",logits.shape)\nprint(\"Probabilities:\",logits.softmax(dim=-1)[0])",
+      "packages": "torch",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "vision-n03-04",
+      "node_id": "vision-n03-04",
+      "title": "MAE掩码自编码",
+      "definition": "MAE遮蔽图像Patch并训练解码器重建被遮蔽像素。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "MAE遮蔽图像Patch并训练解码器重建被遮蔽像素。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "L=\\sum_{i\\in M}\\|x_i-\\hat x_i\\|_2^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。MAE遮蔽图像Patch并训练解码器重建被遮蔽像素。",
+          "tex": "L=\\sum_{i\\in M}\\|x_i-\\hat x_i\\|_2^2"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "L=\\sum_{i\\in M}\\|x_i-\\hat x_i\\|_2^2"
+        }
+      ],
+      "code": "# MAE掩码自编码：相关学科综合示例\nimport torch\nfrom torch import nn\ntorch.manual_seed(0)\nx=torch.randn(4,1,28,28)\nencoder=nn.Sequential(nn.Conv2d(1,8,3,padding=1),nn.ReLU(),nn.MaxPool2d(2),\n                      nn.Flatten(),nn.Linear(8*14*14,16),nn.ReLU())\nclassifier=nn.Linear(16,2)\nlogits=classifier(encoder(x))\nprint(\"Image logits:\",logits.shape)\nprint(\"Probabilities:\",logits.softmax(dim=-1)[0])",
+      "packages": "torch",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "vision-n04-04",
+      "node_id": "vision-n04-04",
+      "title": "CLIP",
+      "definition": "CLIP对配对图像和文本学习共享嵌入空间中的对比相似度。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "CLIP对配对图像和文本学习共享嵌入空间中的对比相似度。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "s(I,T)=\\frac{f_I(I)^\\top f_T(T)}{\\|f_I(I)\\|\\|f_T(T)\\|}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。CLIP对配对图像和文本学习共享嵌入空间中的对比相似度。",
+          "tex": "s(I,T)=\\frac{f_I(I)^\\top f_T(T)}{\\|f_I(I)\\|\\|f_T(T)\\|}"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "s(I,T)=\\frac{f_I(I)^\\top f_T(T)}{\\|f_I(I)\\|\\|f_T(T)\\|}"
+        }
+      ],
+      "code": "# CLIP：相关学科综合示例\nimport torch\nfrom torch import nn\ntorch.manual_seed(0)\nx=torch.randn(4,1,28,28)\nencoder=nn.Sequential(nn.Conv2d(1,8,3,padding=1),nn.ReLU(),nn.MaxPool2d(2),\n                      nn.Flatten(),nn.Linear(8*14*14,16),nn.ReLU())\nclassifier=nn.Linear(16,2)\nlogits=classifier(encoder(x))\nprint(\"Image logits:\",logits.shape)\nprint(\"Probabilities:\",logits.softmax(dim=-1)[0])",
+      "packages": "torch",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "vision-n05-04",
+      "node_id": "vision-n05-04",
+      "title": "视觉嵌入",
+      "definition": "视觉编码器将图像映射到低维特征供检索、聚类或分类。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "视觉编码器将图像映射到低维特征供检索、聚类或分类。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "z=f_\\theta(I)\\in\\mathbb R^d"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。视觉编码器将图像映射到低维特征供检索、聚类或分类。",
+          "tex": "z=f_\\theta(I)\\in\\mathbb R^d"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "z=f_\\theta(I)\\in\\mathbb R^d"
+        }
+      ],
+      "code": "# 视觉嵌入：相关学科综合示例\nimport torch\nfrom torch import nn\ntorch.manual_seed(0)\nx=torch.randn(4,1,28,28)\nencoder=nn.Sequential(nn.Conv2d(1,8,3,padding=1),nn.ReLU(),nn.MaxPool2d(2),\n                      nn.Flatten(),nn.Linear(8*14*14,16),nn.ReLU())\nclassifier=nn.Linear(16,2)\nlogits=classifier(encoder(x))\nprint(\"Image logits:\",logits.shape)\nprint(\"Probabilities:\",logits.softmax(dim=-1)[0])",
+      "packages": "torch",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "vision-n06-04",
+      "node_id": "vision-n06-04",
+      "title": "特征可视化",
+      "definition": "通过激活图、梯度或注意力热图探索网络的视觉响应。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "通过激活图、梯度或注意力热图探索网络的视觉响应。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "A_{c,u,v}=h_c(I)_{u,v}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。通过激活图、梯度或注意力热图探索网络的视觉响应。",
+          "tex": "A_{c,u,v}=h_c(I)_{u,v}"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "A_{c,u,v}=h_c(I)_{u,v}"
+        }
+      ],
+      "code": "# 特征可视化：相关学科综合示例\nimport torch\nfrom torch import nn\ntorch.manual_seed(0)\nx=torch.randn(4,1,28,28)\nencoder=nn.Sequential(nn.Conv2d(1,8,3,padding=1),nn.ReLU(),nn.MaxPool2d(2),\n                      nn.Flatten(),nn.Linear(8*14*14,16),nn.ReLU())\nclassifier=nn.Linear(16,2)\nlogits=classifier(encoder(x))\nprint(\"Image logits:\",logits.shape)\nprint(\"Probabilities:\",logits.softmax(dim=-1)[0])",
+      "packages": "torch",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "vision-n02-05",
+      "node_id": "vision-n02-05",
+      "title": "CNN价格趋势预测",
+      "definition": "历史OHLCV窗口编码成图像后，用CNN预测之后的收益标签。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "历史OHLCV窗口编码成图像后，用CNN预测之后的收益标签。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "\\hat p_t=\\sigma(f_\\theta(\\operatorname{Render}(OHLCV_{t-W+1:t})))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。历史OHLCV窗口编码成图像后，用CNN预测之后的收益标签。",
+          "tex": "\\hat p_t=\\sigma(f_\\theta(\\operatorname{Render}(OHLCV_{t-W+1:t})))"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "\\hat p_t=\\sigma(f_\\theta(\\operatorname{Render}(OHLCV_{t-W+1:t})))"
+        }
+      ],
+      "code": "# CNN价格趋势预测：相关学科综合示例\nimport torch\nfrom torch import nn\ntorch.manual_seed(0)\nx=torch.randn(4,1,28,28)\nencoder=nn.Sequential(nn.Conv2d(1,8,3,padding=1),nn.ReLU(),nn.MaxPool2d(2),\n                      nn.Flatten(),nn.Linear(8*14*14,16),nn.ReLU())\nclassifier=nn.Linear(16,2)\nlogits=classifier(encoder(x))\nprint(\"Image logits:\",logits.shape)\nprint(\"Probabilities:\",logits.softmax(dim=-1)[0])",
+      "packages": "torch",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "vision-n03-05",
+      "node_id": "vision-n03-05",
+      "title": "图像时间窗口",
+      "definition": "价格图像只使用决策时点之前完整可见的历史窗口。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "价格图像只使用决策时点之前完整可见的历史窗口。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "I_t=g(P_{t-W+1:t})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。价格图像只使用决策时点之前完整可见的历史窗口。",
+          "tex": "I_t=g(P_{t-W+1:t})"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "I_t=g(P_{t-W+1:t})"
+        }
+      ],
+      "code": "# 图像时间窗口：相关学科综合示例\nimport torch\nfrom torch import nn\ntorch.manual_seed(0)\nx=torch.randn(4,1,28,28)\nencoder=nn.Sequential(nn.Conv2d(1,8,3,padding=1),nn.ReLU(),nn.MaxPool2d(2),\n                      nn.Flatten(),nn.Linear(8*14*14,16),nn.ReLU())\nclassifier=nn.Linear(16,2)\nlogits=classifier(encoder(x))\nprint(\"Image logits:\",logits.shape)\nprint(\"Probabilities:\",logits.softmax(dim=-1)[0])",
+      "packages": "torch",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "vision-n04-05",
+      "node_id": "vision-n04-05",
+      "title": "复权与图像尺度",
+      "definition": "生成价格图时应统一复权规则和尺度，避免不同ETF价格名义水平误导网络。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "生成价格图时应统一复权规则和尺度，避免不同ETF价格名义水平误导网络。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "P'_t=(P_t-P_{\\min})/(P_{\\max}-P_{\\min})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。生成价格图时应统一复权规则和尺度，避免不同ETF价格名义水平误导网络。",
+          "tex": "P'_t=(P_t-P_{\\min})/(P_{\\max}-P_{\\min})"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "P'_t=(P_t-P_{\\min})/(P_{\\max}-P_{\\min})"
+        }
+      ],
+      "code": "# 复权与图像尺度：相关学科综合示例\nimport torch\nfrom torch import nn\ntorch.manual_seed(0)\nx=torch.randn(4,1,28,28)\nencoder=nn.Sequential(nn.Conv2d(1,8,3,padding=1),nn.ReLU(),nn.MaxPool2d(2),\n                      nn.Flatten(),nn.Linear(8*14*14,16),nn.ReLU())\nclassifier=nn.Linear(16,2)\nlogits=classifier(encoder(x))\nprint(\"Image logits:\",logits.shape)\nprint(\"Probabilities:\",logits.softmax(dim=-1)[0])",
+      "packages": "torch",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "vision-n05-05",
+      "node_id": "vision-n05-05",
+      "title": "避免图像数据泄漏",
+      "definition": "价格图渲染时所有像素必须来自决策时已知数据，标签发生在未来。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "价格图渲染时所有像素必须来自决策时已知数据，标签发生在未来。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "I_t\\in\\mathcal F_t,\\quad Y_{t+h}\\notin\\mathcal F_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。价格图渲染时所有像素必须来自决策时已知数据，标签发生在未来。",
+          "tex": "I_t\\in\\mathcal F_t,\\quad Y_{t+h}\\notin\\mathcal F_t"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "I_t\\in\\mathcal F_t,\\quad Y_{t+h}\\notin\\mathcal F_t"
+        }
+      ],
+      "code": "# 避免图像数据泄漏：相关学科综合示例\nimport torch\nfrom torch import nn\ntorch.manual_seed(0)\nx=torch.randn(4,1,28,28)\nencoder=nn.Sequential(nn.Conv2d(1,8,3,padding=1),nn.ReLU(),nn.MaxPool2d(2),\n                      nn.Flatten(),nn.Linear(8*14*14,16),nn.ReLU())\nclassifier=nn.Linear(16,2)\nlogits=classifier(encoder(x))\nprint(\"Image logits:\",logits.shape)\nprint(\"Probabilities:\",logits.softmax(dim=-1)[0])",
+      "packages": "torch",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "vision-n06-05",
+      "node_id": "vision-n06-05",
+      "title": "跨ETF泛化",
+      "definition": "跨资产模型要在未参与训练的ETF和日期检验迁移能力。",
+      "assumptions": "训练数据与预测期必须有清晰的分界；模型处理、类别标签或发布时点都需要独立验证。",
+      "properties": [
+        "跨资产模型要在未参与训练的ETF和日期检验迁移能力。。",
+        "计算成本、类别分布和数据版本可能影响泛化表现，需与简单基线比较。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "R_{\\rm OOS}=E_{i\\notin I_{\\rm train}}[\\ell(f(X_i),Y_i)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先明确模型输入、输出及假设。跨资产模型要在未参与训练的ETF和日期检验迁移能力。",
+          "tex": "R_{\\rm OOS}=E_{i\\notin I_{\\rm train}}[\\ell(f(X_i),Y_i)]"
+        },
+        {
+          "explanation": "再根据定义组织相应损失、更新方程或数据处理步骤，并在保留样本中检查。",
+          "tex": "R_{\\rm OOS}=E_{i\\notin I_{\\rm train}}[\\ell(f(X_i),Y_i)]"
+        }
+      ],
+      "code": "# 跨ETF泛化：相关学科综合示例\nimport torch\nfrom torch import nn\ntorch.manual_seed(0)\nx=torch.randn(4,1,28,28)\nencoder=nn.Sequential(nn.Conv2d(1,8,3,padding=1),nn.ReLU(),nn.MaxPool2d(2),\n                      nn.Flatten(),nn.Linear(8*14*14,16),nn.ReLU())\nclassifier=nn.Linear(16,2)\nlogits=classifier(encoder(x))\nprint(\"Image logits:\",logits.shape)\nprint(\"Probabilities:\",logits.softmax(dim=-1)[0])",
+      "packages": "torch",
+      "application": "应用于价格图像、财报文本、市场新闻情绪与多ETF量化预测研究。",
+      "limits": "本页属于专题扩展笔记。章节代码说明基础技术组件，不构成每个独立模型的完整实现或数学证明。",
+      "coverage": "expanded"
+    }
+  ]
+}
