@@ -42,7 +42,7 @@ const units={USD:"美元",CNY:"人民币",EUR:"欧元",GBP:"英镑",CHF:"瑞士�
 const unit=c=>c==="CNY"?"亿元":("亿"+(units[c]||c));
 const enfmt=n=>Number(n).toLocaleString("en-US",{maximumFractionDigits:0});
 const cnfmt=n=>Number(n).toLocaleString("zh-CN",{maximumFractionDigits:2});
-function isAum(c){let s=c.scale;return !!s&&!/投资资本|承诺资本|净资产|交易额|交易量|公司估值/.test(s.metric||"")&&(/AUM|管理资产|管理规模/.test(s.metric||""))}
+function isAum(c){let s=c.scale;return !!s&&!/投资资本|承诺资本|净资产|交易额|交易量|公司估值/.test(s.metric||"")&&(/AUM|管理资产|管理规模|规模区间/.test(s.metric||""))}
 function floorYi(c){let s=c.scale;if(!s)return null;if(Number.isFinite(s.range_yi_min))return s.range_yi_min;if(Number.isFinite(s.amount_billion))return s.amount_billion*10;return null}
 function qualified(c){return isAum(c)&&floorYi(c)!==null&&floorYi(c)>=1}
 function scaleText(s){if(!s)return"未披露 / 不适用";const low=s.range_yi_min,high=s.range_yi_max;
