@@ -5,14 +5,14 @@ const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,x=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[x]));
 const alpha=(a,b)=>String(a).localeCompare(String(b),"en",{sensitivity:"base"});
 const link=(u,label)=>/^https:\/\//.test(u||"")?'<a href="'+esc(u)+'" target="_blank" rel="noopener noreferrer">'+esc(label)+'</a>':"";
-let curriculum=null,depts=[],chapters=[],nodes=[],lessons=[],lessonMap=new Map();
+let curriculum=null,depts=[],chapters=[],nodes=[],lessons=[],lessonMap=new Map(),noteMap=new Map();
 let nodeMap=new Map(),chapMap=new Map(),deptMap=new Map(),activeId="",filterDept="",filterLevel="",filterStatus="",query="";
 const progressKey="kline-quant-ml-progress-v1";
 let studied=new Set();
 try{const saved=JSON.parse(localStorage.getItem(progressKey)||"[]");if(Array.isArray(saved))studied=new Set(saved)}catch(_){}
 const saveProgress=()=>{try{localStorage.setItem(progressKey,JSON.stringify([...studied]))}catch(_){}};
 const getDept=id=>deptMap.get(id),getChap=id=>chapMap.get(id),getNode=id=>nodeMap.get(id);
-const humanStatus=node=>lessonMap.has(node.id)?"完整算法讲义":"课程目录";
+const humanStatus=node=>lessonMap.has(node.id)?"完整算法讲义":noteMap.has(node.id)?"专题扩展笔记 · 待补全":"课程目录";
 const isComplete=node=>lessonMap.has(node.id);
 function setURL(updates){
  const url=new URL(location.href);
@@ -221,6 +221,7 @@ function selectNode(id,update=true,preserveTree=false){
  article.appendChild(badges);
  const lesson=lessonMap.get(id);
  if(lesson)lessonArticle(node,lesson,article);
+ else if(noteMap.has(id))lessonArticle(node,noteMap.get(id),article);
  else outlineArticle(node,article);
  article.appendChild(resourceArea(dept));
  makeControls(node,article);
@@ -268,6 +269,15 @@ Promise.all([
   curriculum=c;depts=c.disciplines;chapters=c.chapters;nodes=c.nodes;
   lessons=results.flatMap(x=>x.lessons);
   if(lessons.length!==manifest.total_lessons)throw Error("讲义清单与实际数据数量不一致");
+  const draftResults=await Promise.all((manifest.note_files||[]).map(async file=>{
+    const r=await fetch("./"+file);
+    if(!r.ok)throw Error(file+": HTTP "+r.status);
+    return r.json();
+  }));
+  const drafts=draftResults.flatMap(x=>x.notes||[]);
+  if(drafts.length!==manifest.notes_count)throw Error("扩展笔记清单数量不一致");
+  noteMap=new Map(drafts.filter(n=>!lessons.some(l=>l.node_id===n.node_id)).map(n=>[n.node_id,n]));
+
 nodeMap=new Map(nodes.map(n=>[n.id,n]));chapMap=new Map(chapters.map(c=>[c.id,c]));deptMap=new Map(depts.map(d=>[d.id,d]));lessonMap=new Map(lessons.map(l=>[l.node_id,l]));
 $("disciplines").textContent=depts.length;$("chapters").textContent=chapters.length;$("nodes").textContent=nodes.length;$("written").textContent=lessonMap.size;
 for(const d of depts){
