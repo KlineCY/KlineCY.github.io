@@ -9,9 +9,11 @@ const manifest=read("manifest.json");
 const files=manifest.lesson_files;
 const lessons=files.flatMap(p=>read(p).lessons);
 const notes=(manifest.note_files||[]).flatMap(p=>read(p).notes);
-const examples=(manifest.example_files||[]).flatMap(p=>read(p).lessons);
+const extraFiles=fs.readdirSync(new URL(".",here)).filter(name=>/^lessons-full-[a-z-]+\.json$/.test(name));
+const examples=extraFiles.flatMap(p=>read(p).lessons);
 const exampleIds=new Set();
 const supplementalIds=new Set(notes.map(n=>n.node_id));
+assert(extraFiles.length>0,"expected dedicated example drafts");
 for(const item of examples){
   assert(supplementalIds.has(item.node_id),"focused example not in supplemental notes "+item.node_id);
   assert(!exampleIds.has(item.node_id),"duplicated focused example "+item.node_id);
