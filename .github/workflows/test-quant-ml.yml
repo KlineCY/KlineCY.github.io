@@ -1,0 +1,30 @@
+name: Validate quant machine learning
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'quant/ml/**'
+      - 'quant/sidebar-v2.js'
+      - '.github/workflows/test-quant-ml.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate-math-and-js:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save --no-package-lock katex@0.16.11
+      - run: node quant/ml/test_ml.mjs
+  python-snippets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install numpy scipy scikit-learn
+      - run: python -m unittest discover quant/ml -p 'test_examples.py' -v
