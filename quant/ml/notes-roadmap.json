@@ -1,0 +1,677 @@
+{
+  "version": 1,
+  "notes": [
+    {
+      "id": "roadmap-n03-01",
+      "node_id": "roadmap-n03-01",
+      "title": "半监督学习",
+      "definition": "少量真实标签与大量无标签样本联合训练，借助一致性约束或置信伪标签减少标注需求。",
+      "assumptions": "该知识点依赖事先定义训练目标、信息时点和独立验证规则。时间相关的金融样本不能默认满足独立同分布。",
+      "properties": [
+        "有标签风险和无标签结构一致性正则共同优化。",
+        "适用范围取决于模型假设、样本数量与预测任务；不能由样本内效果推断样本外获利。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "L=L_{\\mathrm{sup}}+\\lambda L_{\\mathrm{unsup}}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从本节的变量、模型目标或统计约束出发建立关系。少量真实标签与大量无标签样本联合训练，借助一致性约束或置信伪标签减少标注需求。",
+          "tex": "L=L_{\\mathrm{sup}}+\\lambda L_{\\mathrm{unsup}}"
+        },
+        {
+          "explanation": "将上述定义应用到相应训练或验证计算中。有标签风险和无标签结构一致性正则共同优化",
+          "tex": "L=L_{\\mathrm{sup}}+\\lambda L_{\\mathrm{unsup}}"
+        }
+      ],
+      "code": "# 半监督学习：该章节基础示例\nimport numpy as np\nfrom sklearn.semi_supervised import SelfTrainingClassifier\nfrom sklearn.linear_model import LogisticRegression\nrng=np.random.default_rng(0)\nX=rng.normal(size=(50,3));y=(X[:,0]>0).astype(int)\ny[15:]=-1\nm=SelfTrainingClassifier(LogisticRegression(),threshold=.8).fit(X,y)\nprint(\"Predictions:\",m.predict(X[-5:]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化金融模型训练、策略信号筛选和避免历史数据泄漏。",
+      "limits": "示例展示相关章节的基础计算，不表示该具体算法的完整工程实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "roadmap-n04-01",
+      "node_id": "roadmap-n04-01",
+      "title": "自监督学习",
+      "definition": "利用输入自身的局部遮蔽、对比配对等构建预训练任务，再迁移下游预测。",
+      "assumptions": "该知识点依赖事先定义训练目标、信息时点和独立验证规则。时间相关的金融样本不能默认满足独立同分布。",
+      "properties": [
+        "已观测上下文预测被遮蔽位置形成自监督目标。",
+        "适用范围取决于模型假设、样本数量与预测任务；不能由样本内效果推断样本外获利。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "L_{\\mathrm{mask}}=-\\sum_{t\\in M}\\log p_\\theta(x_t\\mid x_{\\neg M})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从本节的变量、模型目标或统计约束出发建立关系。利用输入自身的局部遮蔽、对比配对等构建预训练任务，再迁移下游预测。",
+          "tex": "L_{\\mathrm{mask}}=-\\sum_{t\\in M}\\log p_\\theta(x_t\\mid x_{\\neg M})"
+        },
+        {
+          "explanation": "将上述定义应用到相应训练或验证计算中。已观测上下文预测被遮蔽位置形成自监督目标",
+          "tex": "L_{\\mathrm{mask}}=-\\sum_{t\\in M}\\log p_\\theta(x_t\\mid x_{\\neg M})"
+        }
+      ],
+      "code": "# 自监督学习：该章节基础示例\nimport numpy as np\nfrom sklearn.semi_supervised import SelfTrainingClassifier\nfrom sklearn.linear_model import LogisticRegression\nrng=np.random.default_rng(0)\nX=rng.normal(size=(50,3));y=(X[:,0]>0).astype(int)\ny[15:]=-1\nm=SelfTrainingClassifier(LogisticRegression(),threshold=.8).fit(X,y)\nprint(\"Predictions:\",m.predict(X[-5:]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化金融模型训练、策略信号筛选和避免历史数据泄漏。",
+      "limits": "示例展示相关章节的基础计算，不表示该具体算法的完整工程实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "roadmap-n05-01",
+      "node_id": "roadmap-n05-01",
+      "title": "强化学习",
+      "definition": "策略根据状态选择动作，通过环境奖励和状态转移学习长期最优序列决策。",
+      "assumptions": "该知识点依赖事先定义训练目标、信息时点和独立验证规则。时间相关的金融样本不能默认满足独立同分布。",
+      "properties": [
+        "把逐步奖励按折现因子加总并对轨迹取期望。",
+        "适用范围取决于模型假设、样本数量与预测任务；不能由样本内效果推断样本外获利。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "J(\\pi)=E_\\pi[\\sum_{t=0}^\\infty\\gamma^t r_t]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从本节的变量、模型目标或统计约束出发建立关系。策略根据状态选择动作，通过环境奖励和状态转移学习长期最优序列决策。",
+          "tex": "J(\\pi)=E_\\pi[\\sum_{t=0}^\\infty\\gamma^t r_t]"
+        },
+        {
+          "explanation": "将上述定义应用到相应训练或验证计算中。把逐步奖励按折现因子加总并对轨迹取期望",
+          "tex": "J(\\pi)=E_\\pi[\\sum_{t=0}^\\infty\\gamma^t r_t]"
+        }
+      ],
+      "code": "# 强化学习：该章节基础示例\nimport numpy as np\nfrom sklearn.semi_supervised import SelfTrainingClassifier\nfrom sklearn.linear_model import LogisticRegression\nrng=np.random.default_rng(0)\nX=rng.normal(size=(50,3));y=(X[:,0]>0).astype(int)\ny[15:]=-1\nm=SelfTrainingClassifier(LogisticRegression(),threshold=.8).fit(X,y)\nprint(\"Predictions:\",m.predict(X[-5:]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化金融模型训练、策略信号筛选和避免历史数据泄漏。",
+      "limits": "示例展示相关章节的基础计算，不表示该具体算法的完整工程实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "roadmap-n06-01",
+      "node_id": "roadmap-n06-01",
+      "title": "在线学习",
+      "definition": "新观测按顺序到达时立即用最新损失更新模型，减少重复训练全部历史数据的成本。",
+      "assumptions": "该知识点依赖事先定义训练目标、信息时点和独立验证规则。时间相关的金融样本不能默认满足独立同分布。",
+      "properties": [
+        "由当前样本损失的局部梯度作更新。",
+        "适用范围取决于模型假设、样本数量与预测任务；不能由样本内效果推断样本外获利。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "\\theta_{t+1}=\\theta_t-\\eta_t\\nabla_\\theta\\ell_t(\\theta_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从本节的变量、模型目标或统计约束出发建立关系。新观测按顺序到达时立即用最新损失更新模型，减少重复训练全部历史数据的成本。",
+          "tex": "\\theta_{t+1}=\\theta_t-\\eta_t\\nabla_\\theta\\ell_t(\\theta_t)"
+        },
+        {
+          "explanation": "将上述定义应用到相应训练或验证计算中。由当前样本损失的局部梯度作更新",
+          "tex": "\\theta_{t+1}=\\theta_t-\\eta_t\\nabla_\\theta\\ell_t(\\theta_t)"
+        }
+      ],
+      "code": "# 在线学习：该章节基础示例\nimport numpy as np\nfrom sklearn.semi_supervised import SelfTrainingClassifier\nfrom sklearn.linear_model import LogisticRegression\nrng=np.random.default_rng(0)\nX=rng.normal(size=(50,3));y=(X[:,0]>0).astype(int)\ny[15:]=-1\nm=SelfTrainingClassifier(LogisticRegression(),threshold=.8).fit(X,y)\nprint(\"Predictions:\",m.predict(X[-5:]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化金融模型训练、策略信号筛选和避免历史数据泄漏。",
+      "limits": "示例展示相关章节的基础计算，不表示该具体算法的完整工程实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "roadmap-n02-02",
+      "node_id": "roadmap-n02-02",
+      "title": "真实风险与泛化误差",
+      "definition": "真实风险是未知总体分布上的平均损失，泛化误差反映样本平均与总体期望的差异。",
+      "assumptions": "该知识点依赖事先定义训练目标、信息时点和独立验证规则。时间相关的金融样本不能默认满足独立同分布。",
+      "properties": [
+        "区分总体期望和有限样本均值。",
+        "适用范围取决于模型假设、样本数量与预测任务；不能由样本内效果推断样本外获利。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "R(f)=E[\\ell(f(X),Y)],\\quad\\hat R_n(f)=n^{-1}\\sum_i\\ell_i"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从本节的变量、模型目标或统计约束出发建立关系。真实风险是未知总体分布上的平均损失，泛化误差反映样本平均与总体期望的差异。",
+          "tex": "R(f)=E[\\ell(f(X),Y)],\\quad\\hat R_n(f)=n^{-1}\\sum_i\\ell_i"
+        },
+        {
+          "explanation": "将上述定义应用到相应训练或验证计算中。区分总体期望和有限样本均值",
+          "tex": "R(f)=E[\\ell(f(X),Y)],\\quad\\hat R_n(f)=n^{-1}\\sum_i\\ell_i"
+        }
+      ],
+      "code": "# 真实风险与泛化误差：该章节基础示例\nimport numpy as np\nrng=np.random.default_rng(0)\nx=rng.normal(size=100);test=rng.normal(size=100)\nfor capacity in [0.,.5,1.]:\n print(capacity,\"train\",np.mean((x-capacity)**2),\"test\",np.mean((test-capacity)**2))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化金融模型训练、策略信号筛选和避免历史数据泄漏。",
+      "limits": "示例展示相关章节的基础计算，不表示该具体算法的完整工程实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "roadmap-n04-02",
+      "node_id": "roadmap-n04-02",
+      "title": "VC维与学习曲线",
+      "definition": "VC维描述一个二元分类函数族可以完全打散的最大样本数，学习曲线刻画性能随样本量的变化。",
+      "assumptions": "该知识点依赖事先定义训练目标、信息时点和独立验证规则。时间相关的金融样本不能默认满足独立同分布。",
+      "properties": [
+        "典型容量界中复杂度和样本数形成折中。",
+        "适用范围取决于模型假设、样本数量与预测任务；不能由样本内效果推断样本外获利。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "R(f)\\lesssim\\hat R_n(f)+O(\\sqrt{d_{\\rm VC}/n})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从本节的变量、模型目标或统计约束出发建立关系。VC维描述一个二元分类函数族可以完全打散的最大样本数，学习曲线刻画性能随样本量的变化。",
+          "tex": "R(f)\\lesssim\\hat R_n(f)+O(\\sqrt{d_{\\rm VC}/n})"
+        },
+        {
+          "explanation": "将上述定义应用到相应训练或验证计算中。典型容量界中复杂度和样本数形成折中",
+          "tex": "R(f)\\lesssim\\hat R_n(f)+O(\\sqrt{d_{\\rm VC}/n})"
+        }
+      ],
+      "code": "# VC维与学习曲线：该章节基础示例\nimport numpy as np\nrng=np.random.default_rng(0)\nx=rng.normal(size=100);test=rng.normal(size=100)\nfor capacity in [0.,.5,1.]:\n print(capacity,\"train\",np.mean((x-capacity)**2),\"test\",np.mean((test-capacity)**2))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化金融模型训练、策略信号筛选和避免历史数据泄漏。",
+      "limits": "示例展示相关章节的基础计算，不表示该具体算法的完整工程实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "roadmap-n05-02",
+      "node_id": "roadmap-n05-02",
+      "title": "正则化",
+      "definition": "在训练损失之外加入参数复杂度惩罚，控制模型容量以减少过拟合。",
+      "assumptions": "该知识点依赖事先定义训练目标、信息时点和独立验证规则。时间相关的金融样本不能默认满足独立同分布。",
+      "properties": [
+        "将复杂度项加入经验目标。",
+        "适用范围取决于模型假设、样本数量与预测任务；不能由样本内效果推断样本外获利。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "\\hat\\theta=\\arg\\min_\\theta\\{\\hat R_n(\\theta)+\\lambda\\Omega(\\theta)\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从本节的变量、模型目标或统计约束出发建立关系。在训练损失之外加入参数复杂度惩罚，控制模型容量以减少过拟合。",
+          "tex": "\\hat\\theta=\\arg\\min_\\theta\\{\\hat R_n(\\theta)+\\lambda\\Omega(\\theta)\\}"
+        },
+        {
+          "explanation": "将上述定义应用到相应训练或验证计算中。将复杂度项加入经验目标",
+          "tex": "\\hat\\theta=\\arg\\min_\\theta\\{\\hat R_n(\\theta)+\\lambda\\Omega(\\theta)\\}"
+        }
+      ],
+      "code": "# 正则化：该章节基础示例\nimport numpy as np\nrng=np.random.default_rng(0)\nx=rng.normal(size=100);test=rng.normal(size=100)\nfor capacity in [0.,.5,1.]:\n print(capacity,\"train\",np.mean((x-capacity)**2),\"test\",np.mean((test-capacity)**2))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化金融模型训练、策略信号筛选和避免历史数据泄漏。",
+      "limits": "示例展示相关章节的基础计算，不表示该具体算法的完整工程实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "roadmap-n06-02",
+      "node_id": "roadmap-n06-02",
+      "title": "奥卡姆剃刀与模型选择",
+      "definition": "在统计效果相近时选择更简单、可解释且容易部署的模型，避免不必要自由度。",
+      "assumptions": "该知识点依赖事先定义训练目标、信息时点和独立验证规则。时间相关的金融样本不能默认满足独立同分布。",
+      "properties": [
+        "用验证风险与复杂度联合选择。",
+        "适用范围取决于模型假设、样本数量与预测任务；不能由样本内效果推断样本外获利。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "m^*=\\arg\\min_m\\{\\hat R_{\\rm val}(m)+\\lambda C(m)\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从本节的变量、模型目标或统计约束出发建立关系。在统计效果相近时选择更简单、可解释且容易部署的模型，避免不必要自由度。",
+          "tex": "m^*=\\arg\\min_m\\{\\hat R_{\\rm val}(m)+\\lambda C(m)\\}"
+        },
+        {
+          "explanation": "将上述定义应用到相应训练或验证计算中。用验证风险与复杂度联合选择",
+          "tex": "m^*=\\arg\\min_m\\{\\hat R_{\\rm val}(m)+\\lambda C(m)\\}"
+        }
+      ],
+      "code": "# 奥卡姆剃刀与模型选择：该章节基础示例\nimport numpy as np\nrng=np.random.default_rng(0)\nx=rng.normal(size=100);test=rng.normal(size=100)\nfor capacity in [0.,.5,1.]:\n print(capacity,\"train\",np.mean((x-capacity)**2),\"test\",np.mean((test-capacity)**2))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化金融模型训练、策略信号筛选和避免历史数据泄漏。",
+      "limits": "示例展示相关章节的基础计算，不表示该具体算法的完整工程实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "roadmap-n01-03",
+      "node_id": "roadmap-n01-03",
+      "title": "平方误差MSE",
+      "definition": "对残差平方取平均，大误差惩罚二次增加，适合条件均值回归目标。",
+      "assumptions": "该知识点依赖事先定义训练目标、信息时点和独立验证规则。时间相关的金融样本不能默认满足独立同分布。",
+      "properties": [
+        "平方损失是残差二次函数。",
+        "适用范围取决于模型假设、样本数量与预测任务；不能由样本内效果推断样本外获利。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "\\mathrm{MSE}=n^{-1}\\sum_i(y_i-\\hat y_i)^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从本节的变量、模型目标或统计约束出发建立关系。对残差平方取平均，大误差惩罚二次增加，适合条件均值回归目标。",
+          "tex": "\\mathrm{MSE}=n^{-1}\\sum_i(y_i-\\hat y_i)^2"
+        },
+        {
+          "explanation": "将上述定义应用到相应训练或验证计算中。平方损失是残差二次函数",
+          "tex": "\\mathrm{MSE}=n^{-1}\\sum_i(y_i-\\hat y_i)^2"
+        }
+      ],
+      "code": "# 平方误差MSE：该章节基础示例\nimport numpy as np\ny=np.array([0.,1.,1.,0.]);score=np.array([.2,.9,.8,.1])\nmse=np.mean((score-y)**2)\nce=-np.mean(y*np.log(score)+(1-y)*np.log(1-score))\nres=np.array([-.2,.3,-2.,1.])\nhuber=np.where(abs(res)<=1,res**2/2,abs(res)-.5)\nprint(\"MSE/CE/Huber:\",mse,ce,huber.mean())",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化金融模型训练、策略信号筛选和避免历史数据泄漏。",
+      "limits": "示例展示相关章节的基础计算，不表示该具体算法的完整工程实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "roadmap-n02-03",
+      "node_id": "roadmap-n02-03",
+      "title": "交叉熵Cross Entropy",
+      "definition": "使用真实标签分布对模型预测的类别概率计算负对数损失。",
+      "assumptions": "该知识点依赖事先定义训练目标、信息时点和独立验证规则。时间相关的金融样本不能默认满足独立同分布。",
+      "properties": [
+        "把真实分布的概率权重与预测对数概率相乘。",
+        "适用范围取决于模型假设、样本数量与预测任务；不能由样本内效果推断样本外获利。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "H(p,q)=-\\sum_kp_k\\log q_k"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从本节的变量、模型目标或统计约束出发建立关系。使用真实标签分布对模型预测的类别概率计算负对数损失。",
+          "tex": "H(p,q)=-\\sum_kp_k\\log q_k"
+        },
+        {
+          "explanation": "将上述定义应用到相应训练或验证计算中。把真实分布的概率权重与预测对数概率相乘",
+          "tex": "H(p,q)=-\\sum_kp_k\\log q_k"
+        }
+      ],
+      "code": "# 交叉熵Cross Entropy：该章节基础示例\nimport numpy as np\ny=np.array([0.,1.,1.,0.]);score=np.array([.2,.9,.8,.1])\nmse=np.mean((score-y)**2)\nce=-np.mean(y*np.log(score)+(1-y)*np.log(1-score))\nres=np.array([-.2,.3,-2.,1.])\nhuber=np.where(abs(res)<=1,res**2/2,abs(res)-.5)\nprint(\"MSE/CE/Huber:\",mse,ce,huber.mean())",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化金融模型训练、策略信号筛选和避免历史数据泄漏。",
+      "limits": "示例展示相关章节的基础计算，不表示该具体算法的完整工程实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "roadmap-n03-03",
+      "node_id": "roadmap-n03-03",
+      "title": "负对数似然NLL",
+      "definition": "把观测的概率密度或条件概率乘积取负对数，最小化即最大化似然。",
+      "assumptions": "该知识点依赖事先定义训练目标、信息时点和独立验证规则。时间相关的金融样本不能默认满足独立同分布。",
+      "properties": [
+        "独立样本的似然乘积化为对数求和。",
+        "适用范围取决于模型假设、样本数量与预测任务；不能由样本内效果推断样本外获利。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "L_{\\rm NLL}=-\\sum_i\\log p_\\theta(y_i\\mid x_i)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从本节的变量、模型目标或统计约束出发建立关系。把观测的概率密度或条件概率乘积取负对数，最小化即最大化似然。",
+          "tex": "L_{\\rm NLL}=-\\sum_i\\log p_\\theta(y_i\\mid x_i)"
+        },
+        {
+          "explanation": "将上述定义应用到相应训练或验证计算中。独立样本的似然乘积化为对数求和",
+          "tex": "L_{\\rm NLL}=-\\sum_i\\log p_\\theta(y_i\\mid x_i)"
+        }
+      ],
+      "code": "# 负对数似然NLL：该章节基础示例\nimport numpy as np\ny=np.array([0.,1.,1.,0.]);score=np.array([.2,.9,.8,.1])\nmse=np.mean((score-y)**2)\nce=-np.mean(y*np.log(score)+(1-y)*np.log(1-score))\nres=np.array([-.2,.3,-2.,1.])\nhuber=np.where(abs(res)<=1,res**2/2,abs(res)-.5)\nprint(\"MSE/CE/Huber:\",mse,ce,huber.mean())",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化金融模型训练、策略信号筛选和避免历史数据泄漏。",
+      "limits": "示例展示相关章节的基础计算，不表示该具体算法的完整工程实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "roadmap-n04-03",
+      "node_id": "roadmap-n04-03",
+      "title": "Huber损失",
+      "definition": "小残差采用平方罚项，超出阈值改成线性损失以降低离群值影响。",
+      "assumptions": "该知识点依赖事先定义训练目标、信息时点和独立验证规则。时间相关的金融样本不能默认满足独立同分布。",
+      "properties": [
+        "阈值处连接平方和绝对损失。",
+        "适用范围取决于模型假设、样本数量与预测任务；不能由样本内效果推断样本外获利。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "\\ell_\\delta(e)=\\begin{cases}e^2/2,&|e|\\le\\delta\\\\\\delta(|e|-\\delta/2),&|e|>\\delta\\end{cases}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从本节的变量、模型目标或统计约束出发建立关系。小残差采用平方罚项，超出阈值改成线性损失以降低离群值影响。",
+          "tex": "\\ell_\\delta(e)=\\begin{cases}e^2/2,&|e|\\le\\delta\\\\\\delta(|e|-\\delta/2),&|e|>\\delta\\end{cases}"
+        },
+        {
+          "explanation": "将上述定义应用到相应训练或验证计算中。阈值处连接平方和绝对损失",
+          "tex": "\\ell_\\delta(e)=\\begin{cases}e^2/2,&|e|\\le\\delta\\\\\\delta(|e|-\\delta/2),&|e|>\\delta\\end{cases}"
+        }
+      ],
+      "code": "# Huber损失：该章节基础示例\nimport numpy as np\ny=np.array([0.,1.,1.,0.]);score=np.array([.2,.9,.8,.1])\nmse=np.mean((score-y)**2)\nce=-np.mean(y*np.log(score)+(1-y)*np.log(1-score))\nres=np.array([-.2,.3,-2.,1.])\nhuber=np.where(abs(res)<=1,res**2/2,abs(res)-.5)\nprint(\"MSE/CE/Huber:\",mse,ce,huber.mean())",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化金融模型训练、策略信号筛选和避免历史数据泄漏。",
+      "limits": "示例展示相关章节的基础计算，不表示该具体算法的完整工程实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "roadmap-n05-03",
+      "node_id": "roadmap-n05-03",
+      "title": "Margin损失",
+      "definition": "利用类别符号乘以模型分数定义分类间隔，间隔不足时按程度惩罚。",
+      "assumptions": "该知识点依赖事先定义训练目标、信息时点和独立验证规则。时间相关的金融样本不能默认满足独立同分布。",
+      "properties": [
+        "正间隔越大分类越稳健，超过1可不再处罚。",
+        "适用范围取决于模型假设、样本数量与预测任务；不能由样本内效果推断样本外获利。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "\\ell(y,s)=\\max(0,1-ys)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从本节的变量、模型目标或统计约束出发建立关系。利用类别符号乘以模型分数定义分类间隔，间隔不足时按程度惩罚。",
+          "tex": "\\ell(y,s)=\\max(0,1-ys)"
+        },
+        {
+          "explanation": "将上述定义应用到相应训练或验证计算中。正间隔越大分类越稳健，超过1可不再处罚",
+          "tex": "\\ell(y,s)=\\max(0,1-ys)"
+        }
+      ],
+      "code": "# Margin损失：该章节基础示例\nimport numpy as np\ny=np.array([0.,1.,1.,0.]);score=np.array([.2,.9,.8,.1])\nmse=np.mean((score-y)**2)\nce=-np.mean(y*np.log(score)+(1-y)*np.log(1-score))\nres=np.array([-.2,.3,-2.,1.])\nhuber=np.where(abs(res)<=1,res**2/2,abs(res)-.5)\nprint(\"MSE/CE/Huber:\",mse,ce,huber.mean())",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化金融模型训练、策略信号筛选和避免历史数据泄漏。",
+      "limits": "示例展示相关章节的基础计算，不表示该具体算法的完整工程实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "roadmap-n06-03",
+      "node_id": "roadmap-n06-03",
+      "title": "自定义目标函数",
+      "definition": "把预测、风险、换手或其他商业目标转为明确定义的可微或可优化目标。",
+      "assumptions": "该知识点依赖事先定义训练目标、信息时点和独立验证规则。时间相关的金融样本不能默认满足独立同分布。",
+      "properties": [
+        "先统一量纲，再按损失权重合并。",
+        "适用范围取决于模型假设、样本数量与预测任务；不能由样本内效果推断样本外获利。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "L=\\lambda_1L_{\\rm pred}+\\lambda_2L_{\\rm risk}+\\lambda_3L_{\\rm cost}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从本节的变量、模型目标或统计约束出发建立关系。把预测、风险、换手或其他商业目标转为明确定义的可微或可优化目标。",
+          "tex": "L=\\lambda_1L_{\\rm pred}+\\lambda_2L_{\\rm risk}+\\lambda_3L_{\\rm cost}"
+        },
+        {
+          "explanation": "将上述定义应用到相应训练或验证计算中。先统一量纲，再按损失权重合并",
+          "tex": "L=\\lambda_1L_{\\rm pred}+\\lambda_2L_{\\rm risk}+\\lambda_3L_{\\rm cost}"
+        }
+      ],
+      "code": "# 自定义目标函数：该章节基础示例\nimport numpy as np\ny=np.array([0.,1.,1.,0.]);score=np.array([.2,.9,.8,.1])\nmse=np.mean((score-y)**2)\nce=-np.mean(y*np.log(score)+(1-y)*np.log(1-score))\nres=np.array([-.2,.3,-2.,1.])\nhuber=np.where(abs(res)<=1,res**2/2,abs(res)-.5)\nprint(\"MSE/CE/Huber:\",mse,ce,huber.mean())",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化金融模型训练、策略信号筛选和避免历史数据泄漏。",
+      "limits": "示例展示相关章节的基础计算，不表示该具体算法的完整工程实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "roadmap-n02-04",
+      "node_id": "roadmap-n02-04",
+      "title": "分层抽样",
+      "definition": "按类别分别划分训练与验证数据，使各集合类别分布近似相同。",
+      "assumptions": "该知识点依赖事先定义训练目标、信息时点和独立验证规则。时间相关的金融样本不能默认满足独立同分布。",
+      "properties": [
+        "先按类别分组抽样，再合并训练与验证索引。",
+        "适用范围取决于模型假设、样本数量与预测任务；不能由样本内效果推断样本外获利。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "\\hat p_k^{\\rm train}\\approx\\hat p_k^{\\rm valid}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从本节的变量、模型目标或统计约束出发建立关系。按类别分别划分训练与验证数据，使各集合类别分布近似相同。",
+          "tex": "\\hat p_k^{\\rm train}\\approx\\hat p_k^{\\rm valid}"
+        },
+        {
+          "explanation": "将上述定义应用到相应训练或验证计算中。先按类别分组抽样，再合并训练与验证索引",
+          "tex": "\\hat p_k^{\\rm train}\\approx\\hat p_k^{\\rm valid}"
+        }
+      ],
+      "code": "# 分层抽样：该章节基础示例\nimport numpy as np\nfrom sklearn.model_selection import StratifiedKFold,KFold\ny=np.array([0,1]*24)\nfor tr,te in StratifiedKFold(4,shuffle=True,random_state=0).split(np.zeros((48,2)),y):\n print(len(tr),len(te),y[te].mean())",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化金融模型训练、策略信号筛选和避免历史数据泄漏。",
+      "limits": "示例展示相关章节的基础计算，不表示该具体算法的完整工程实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "roadmap-n03-04",
+      "node_id": "roadmap-n03-04",
+      "title": "K折交叉验证",
+      "definition": "把数据分成K份，轮流在一份验证并用剩余部分训练，汇总验证误差。",
+      "assumptions": "该知识点依赖事先定义训练目标、信息时点和独立验证规则。时间相关的金融样本不能默认满足独立同分布。",
+      "properties": [
+        "对K个独立保留折计算损失均值。",
+        "适用范围取决于模型假设、样本数量与预测任务；不能由样本内效果推断样本外获利。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "\\hat R_{\\rm CV}=K^{-1}\\sum_{k=1}^K\\hat R_k"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从本节的变量、模型目标或统计约束出发建立关系。把数据分成K份，轮流在一份验证并用剩余部分训练，汇总验证误差。",
+          "tex": "\\hat R_{\\rm CV}=K^{-1}\\sum_{k=1}^K\\hat R_k"
+        },
+        {
+          "explanation": "将上述定义应用到相应训练或验证计算中。对K个独立保留折计算损失均值",
+          "tex": "\\hat R_{\\rm CV}=K^{-1}\\sum_{k=1}^K\\hat R_k"
+        }
+      ],
+      "code": "# K折交叉验证：该章节基础示例\nimport numpy as np\nfrom sklearn.model_selection import StratifiedKFold,KFold\ny=np.array([0,1]*24)\nfor tr,te in StratifiedKFold(4,shuffle=True,random_state=0).split(np.zeros((48,2)),y):\n print(len(tr),len(te),y[te].mean())",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化金融模型训练、策略信号筛选和避免历史数据泄漏。",
+      "limits": "示例展示相关章节的基础计算，不表示该具体算法的完整工程实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "roadmap-n01-05",
+      "node_id": "roadmap-n01-05",
+      "title": "基线模型",
+      "definition": "用最简单的可复现模型检验复杂算法是否带来真实增量预测价值。",
+      "assumptions": "该知识点依赖事先定义训练目标、信息时点和独立验证规则。时间相关的金融样本不能默认满足独立同分布。",
+      "properties": [
+        "用统一测试集比较预测风险的差异。",
+        "适用范围取决于模型假设、样本数量与预测任务；不能由样本内效果推断样本外获利。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "\\Delta R=R_{\\rm baseline}-R_{\\rm candidate}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从本节的变量、模型目标或统计约束出发建立关系。用最简单的可复现模型检验复杂算法是否带来真实增量预测价值。",
+          "tex": "\\Delta R=R_{\\rm baseline}-R_{\\rm candidate}"
+        },
+        {
+          "explanation": "将上述定义应用到相应训练或验证计算中。用统一测试集比较预测风险的差异",
+          "tex": "\\Delta R=R_{\\rm baseline}-R_{\\rm candidate}"
+        }
+      ],
+      "code": "# 基线模型：该章节基础示例\nimport numpy as np\nfrom sklearn.linear_model import Ridge\nrng=np.random.default_rng(0)\nX=rng.normal(size=(90,3));y=X[:,0]+rng.normal(size=90)*.2\nfor a in [.1,1.,10.]:\n m=Ridge(alpha=a).fit(X[:50],y[:50])\n print(\"alpha\",a,\"validation R2\",m.score(X[50:70],y[50:70]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化金融模型训练、策略信号筛选和避免历史数据泄漏。",
+      "limits": "示例展示相关章节的基础计算，不表示该具体算法的完整工程实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "roadmap-n03-05",
+      "node_id": "roadmap-n03-05",
+      "title": "随机种子",
+      "definition": "随机数生成器决定抽样、初始化和随机搜索次序，固定种子有助于复现。",
+      "assumptions": "该知识点依赖事先定义训练目标、信息时点和独立验证规则。时间相关的金融样本不能默认满足独立同分布。",
+      "properties": [
+        "固定生成器状态后按确定流程生成伪随机序列。",
+        "适用范围取决于模型假设、样本数量与预测任务；不能由样本内效果推断样本外获利。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "X^{(b)}\\sim P_{\\omega_b}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从本节的变量、模型目标或统计约束出发建立关系。随机数生成器决定抽样、初始化和随机搜索次序，固定种子有助于复现。",
+          "tex": "X^{(b)}\\sim P_{\\omega_b}"
+        },
+        {
+          "explanation": "将上述定义应用到相应训练或验证计算中。固定生成器状态后按确定流程生成伪随机序列",
+          "tex": "X^{(b)}\\sim P_{\\omega_b}"
+        }
+      ],
+      "code": "# 随机种子：该章节基础示例\nimport numpy as np\nfrom sklearn.linear_model import Ridge\nrng=np.random.default_rng(0)\nX=rng.normal(size=(90,3));y=X[:,0]+rng.normal(size=90)*.2\nfor a in [.1,1.,10.]:\n m=Ridge(alpha=a).fit(X[:50],y[:50])\n print(\"alpha\",a,\"validation R2\",m.score(X[50:70],y[50:70]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化金融模型训练、策略信号筛选和避免历史数据泄漏。",
+      "limits": "示例展示相关章节的基础计算，不表示该具体算法的完整工程实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "roadmap-n04-05",
+      "node_id": "roadmap-n04-05",
+      "title": "超参数搜索",
+      "definition": "通过验证窗口在候选配置上选择学习率、复杂度等超参数。",
+      "assumptions": "该知识点依赖事先定义训练目标、信息时点和独立验证规则。时间相关的金融样本不能默认满足独立同分布。",
+      "properties": [
+        "对每个候选训练模型并比较独立验证误差。",
+        "适用范围取决于模型假设、样本数量与预测任务；不能由样本内效果推断样本外获利。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "\\lambda^*=\\arg\\min_{\\lambda\\in\\Lambda}\\hat R_{\\rm valid}(\\lambda)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从本节的变量、模型目标或统计约束出发建立关系。通过验证窗口在候选配置上选择学习率、复杂度等超参数。",
+          "tex": "\\lambda^*=\\arg\\min_{\\lambda\\in\\Lambda}\\hat R_{\\rm valid}(\\lambda)"
+        },
+        {
+          "explanation": "将上述定义应用到相应训练或验证计算中。对每个候选训练模型并比较独立验证误差",
+          "tex": "\\lambda^*=\\arg\\min_{\\lambda\\in\\Lambda}\\hat R_{\\rm valid}(\\lambda)"
+        }
+      ],
+      "code": "# 超参数搜索：该章节基础示例\nimport numpy as np\nfrom sklearn.linear_model import Ridge\nrng=np.random.default_rng(0)\nX=rng.normal(size=(90,3));y=X[:,0]+rng.normal(size=90)*.2\nfor a in [.1,1.,10.]:\n m=Ridge(alpha=a).fit(X[:50],y[:50])\n print(\"alpha\",a,\"validation R2\",m.score(X[50:70],y[50:70]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化金融模型训练、策略信号筛选和避免历史数据泄漏。",
+      "limits": "示例展示相关章节的基础计算，不表示该具体算法的完整工程实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "roadmap-n05-05",
+      "node_id": "roadmap-n05-05",
+      "title": "统计显著性",
+      "definition": "针对模型效果或策略收益定义零假设，通过统计量与抽样分布推断不确定性。",
+      "assumptions": "该知识点依赖事先定义训练目标、信息时点和独立验证规则。时间相关的金融样本不能默认满足独立同分布。",
+      "properties": [
+        "估计点差与其标准误形成标准化检验统计量。",
+        "适用范围取决于模型假设、样本数量与预测任务；不能由样本内效果推断样本外获利。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "T=\\frac{\\hat\\theta-\\theta_0}{\\widehat{\\rm SE}(\\hat\\theta)}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从本节的变量、模型目标或统计约束出发建立关系。针对模型效果或策略收益定义零假设，通过统计量与抽样分布推断不确定性。",
+          "tex": "T=\\frac{\\hat\\theta-\\theta_0}{\\widehat{\\rm SE}(\\hat\\theta)}"
+        },
+        {
+          "explanation": "将上述定义应用到相应训练或验证计算中。估计点差与其标准误形成标准化检验统计量",
+          "tex": "T=\\frac{\\hat\\theta-\\theta_0}{\\widehat{\\rm SE}(\\hat\\theta)}"
+        }
+      ],
+      "code": "# 统计显著性：该章节基础示例\nimport numpy as np\nfrom sklearn.linear_model import Ridge\nrng=np.random.default_rng(0)\nX=rng.normal(size=(90,3));y=X[:,0]+rng.normal(size=90)*.2\nfor a in [.1,1.,10.]:\n m=Ridge(alpha=a).fit(X[:50],y[:50])\n print(\"alpha\",a,\"validation R2\",m.score(X[50:70],y[50:70]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化金融模型训练、策略信号筛选和避免历史数据泄漏。",
+      "limits": "示例展示相关章节的基础计算，不表示该具体算法的完整工程实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "roadmap-n06-05",
+      "node_id": "roadmap-n06-05",
+      "title": "模型卡与研究报告",
+      "definition": "记录数据、任务、训练设置、评价指标、风险、适用范围和更新历史以满足可复现要求。",
+      "assumptions": "该知识点依赖事先定义训练目标、信息时点和独立验证规则。时间相关的金融样本不能默认满足独立同分布。",
+      "properties": [
+        "将训练产物、验证证据和失效条件共同构成可审计报告。",
+        "适用范围取决于模型假设、样本数量与预测任务；不能由样本内效果推断样本外获利。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "\\mathcal M=(D,\\theta,\\mathrm{metrics},\\mathrm{risks})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从本节的变量、模型目标或统计约束出发建立关系。记录数据、任务、训练设置、评价指标、风险、适用范围和更新历史以满足可复现要求。",
+          "tex": "\\mathcal M=(D,\\theta,\\mathrm{metrics},\\mathrm{risks})"
+        },
+        {
+          "explanation": "将上述定义应用到相应训练或验证计算中。将训练产物、验证证据和失效条件共同构成可审计报告",
+          "tex": "\\mathcal M=(D,\\theta,\\mathrm{metrics},\\mathrm{risks})"
+        }
+      ],
+      "code": "# 模型卡与研究报告：该章节基础示例\nimport numpy as np\nfrom sklearn.linear_model import Ridge\nrng=np.random.default_rng(0)\nX=rng.normal(size=(90,3));y=X[:,0]+rng.normal(size=90)*.2\nfor a in [.1,1.,10.]:\n m=Ridge(alpha=a).fit(X[:50],y[:50])\n print(\"alpha\",a,\"validation R2\",m.score(X[50:70],y[50:70]))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于量化金融模型训练、策略信号筛选和避免历史数据泄漏。",
+      "limits": "示例展示相关章节的基础计算，不表示该具体算法的完整工程实现。",
+      "coverage": "expanded"
+    }
+  ]
+}
