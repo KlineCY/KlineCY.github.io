@@ -1,0 +1,741 @@
+{
+  "version": 1,
+  "notes": [
+    {
+      "id": "causal-n02-01",
+      "node_id": "causal-n02-01",
+      "title": "反事实",
+      "definition": "反事实描述同一个体在另一种未实际发生的处理状态下本来会得到的结果。",
+      "assumptions": "因果解释必须依赖明确的识别假设，包括处理定义、可忽略性、重叠、时间趋势或有效工具变量；机器学习本身不能消除未知混杂。",
+      "properties": [
+        "反事实描述同一个体在另一种未实际发生的处理状态下本来会得到的结果。。",
+        "应检查反向因果、样本选择、伪处理与前趋势，报告估计不确定性和稳健性。"
+      ],
+      "formulas": [
+        {
+          "label": "因果估计或识别公式",
+          "tex": "\\tau_i=Y_i(1)-Y_i(0)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义处理、潜在结果和所需识别假设。反事实描述同一个体在另一种未实际发生的处理状态下本来会得到的结果。",
+          "tex": "\\tau_i=Y_i(1)-Y_i(0)"
+        },
+        {
+          "explanation": "在相应条件成立时，将可观察数据中的差异解释为目标平均处理效应。",
+          "tex": "\\tau_i=Y_i(1)-Y_i(0)"
+        }
+      ],
+      "code": "# 反事实：基础随机实验与DiD示例\nimport numpy as np\nrng=np.random.default_rng(0)\nn=400;D=rng.binomial(1,.5,n)\nX=rng.normal(size=n);Y=1.5*D+X+rng.normal(size=n)\neffect=Y[D==1].mean()-Y[D==0].mean()\nprint(\"Randomized ATE estimate:\",effect)\npre_t,post_t=100.,116.;pre_c,post_c=90.,98.\nprint(\"DiD:\",(post_t-pre_t)-(post_c-pre_c))",
+      "packages": "numpy",
+      "application": "研究ETF资金流、交易制度、行业政策冲击与市场反应的因果关系。",
+      "limits": "本笔记是识别理论导读，代码只说明随机实验和双重差分，并不完整实现本节全部因果方法。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "causal-n04-01",
+      "node_id": "causal-n04-01",
+      "title": "背门路径",
+      "definition": "因果图中的背门路径可由共同原因产生虚假相关，需要合适变量集合阻断。",
+      "assumptions": "因果解释必须依赖明确的识别假设，包括处理定义、可忽略性、重叠、时间趋势或有效工具变量；机器学习本身不能消除未知混杂。",
+      "properties": [
+        "因果图中的背门路径可由共同原因产生虚假相关，需要合适变量集合阻断。。",
+        "应检查反向因果、样本选择、伪处理与前趋势，报告估计不确定性和稳健性。"
+      ],
+      "formulas": [
+        {
+          "label": "因果估计或识别公式",
+          "tex": "P(Y\\mid do(D=d))=\\sum_xP(Y\\mid D=d,X=x)P(X=x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义处理、潜在结果和所需识别假设。因果图中的背门路径可由共同原因产生虚假相关，需要合适变量集合阻断。",
+          "tex": "P(Y\\mid do(D=d))=\\sum_xP(Y\\mid D=d,X=x)P(X=x)"
+        },
+        {
+          "explanation": "在相应条件成立时，将可观察数据中的差异解释为目标平均处理效应。",
+          "tex": "P(Y\\mid do(D=d))=\\sum_xP(Y\\mid D=d,X=x)P(X=x)"
+        }
+      ],
+      "code": "# 背门路径：基础随机实验与DiD示例\nimport numpy as np\nrng=np.random.default_rng(0)\nn=400;D=rng.binomial(1,.5,n)\nX=rng.normal(size=n);Y=1.5*D+X+rng.normal(size=n)\neffect=Y[D==1].mean()-Y[D==0].mean()\nprint(\"Randomized ATE estimate:\",effect)\npre_t,post_t=100.,116.;pre_c,post_c=90.,98.\nprint(\"DiD:\",(post_t-pre_t)-(post_c-pre_c))",
+      "packages": "numpy",
+      "application": "研究ETF资金流、交易制度、行业政策冲击与市场反应的因果关系。",
+      "limits": "本笔记是识别理论导读，代码只说明随机实验和双重差分，并不完整实现本节全部因果方法。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "causal-n05-01",
+      "node_id": "causal-n05-01",
+      "title": "混杂因素",
+      "definition": "混杂变量共同影响处理选择和结果，是观察性因果估计的重要识别风险。",
+      "assumptions": "因果解释必须依赖明确的识别假设，包括处理定义、可忽略性、重叠、时间趋势或有效工具变量；机器学习本身不能消除未知混杂。",
+      "properties": [
+        "混杂变量共同影响处理选择和结果，是观察性因果估计的重要识别风险。。",
+        "应检查反向因果、样本选择、伪处理与前趋势，报告估计不确定性和稳健性。"
+      ],
+      "formulas": [
+        {
+          "label": "因果估计或识别公式",
+          "tex": "X\\to D,\\quad X\\to Y"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义处理、潜在结果和所需识别假设。混杂变量共同影响处理选择和结果，是观察性因果估计的重要识别风险。",
+          "tex": "X\\to D,\\quad X\\to Y"
+        },
+        {
+          "explanation": "在相应条件成立时，将可观察数据中的差异解释为目标平均处理效应。",
+          "tex": "X\\to D,\\quad X\\to Y"
+        }
+      ],
+      "code": "# 混杂因素：基础随机实验与DiD示例\nimport numpy as np\nrng=np.random.default_rng(0)\nn=400;D=rng.binomial(1,.5,n)\nX=rng.normal(size=n);Y=1.5*D+X+rng.normal(size=n)\neffect=Y[D==1].mean()-Y[D==0].mean()\nprint(\"Randomized ATE estimate:\",effect)\npre_t,post_t=100.,116.;pre_c,post_c=90.,98.\nprint(\"DiD:\",(post_t-pre_t)-(post_c-pre_c))",
+      "packages": "numpy",
+      "application": "研究ETF资金流、交易制度、行业政策冲击与市场反应的因果关系。",
+      "limits": "本笔记是识别理论导读，代码只说明随机实验和双重差分，并不完整实现本节全部因果方法。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "causal-n06-01",
+      "node_id": "causal-n06-01",
+      "title": "选择偏差",
+      "definition": "样本进入研究或接受处理的机制与结果相关时可能产生选择偏差。",
+      "assumptions": "因果解释必须依赖明确的识别假设，包括处理定义、可忽略性、重叠、时间趋势或有效工具变量；机器学习本身不能消除未知混杂。",
+      "properties": [
+        "样本进入研究或接受处理的机制与结果相关时可能产生选择偏差。。",
+        "应检查反向因果、样本选择、伪处理与前趋势，报告估计不确定性和稳健性。"
+      ],
+      "formulas": [
+        {
+          "label": "因果估计或识别公式",
+          "tex": "P(S=1\\mid X,Y)\\ne P(S=1)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义处理、潜在结果和所需识别假设。样本进入研究或接受处理的机制与结果相关时可能产生选择偏差。",
+          "tex": "P(S=1\\mid X,Y)\\ne P(S=1)"
+        },
+        {
+          "explanation": "在相应条件成立时，将可观察数据中的差异解释为目标平均处理效应。",
+          "tex": "P(S=1\\mid X,Y)\\ne P(S=1)"
+        }
+      ],
+      "code": "# 选择偏差：基础随机实验与DiD示例\nimport numpy as np\nrng=np.random.default_rng(0)\nn=400;D=rng.binomial(1,.5,n)\nX=rng.normal(size=n);Y=1.5*D+X+rng.normal(size=n)\neffect=Y[D==1].mean()-Y[D==0].mean()\nprint(\"Randomized ATE estimate:\",effect)\npre_t,post_t=100.,116.;pre_c,post_c=90.,98.\nprint(\"DiD:\",(post_t-pre_t)-(post_c-pre_c))",
+      "packages": "numpy",
+      "application": "研究ETF资金流、交易制度、行业政策冲击与市场反应的因果关系。",
+      "limits": "本笔记是识别理论导读，代码只说明随机实验和双重差分，并不完整实现本节全部因果方法。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "causal-n01-02",
+      "node_id": "causal-n01-02",
+      "title": "随机实验",
+      "definition": "随机分配处理使处理与潜在结果在设计下独立，平均组间差可估计因果效应。",
+      "assumptions": "因果解释必须依赖明确的识别假设，包括处理定义、可忽略性、重叠、时间趋势或有效工具变量；机器学习本身不能消除未知混杂。",
+      "properties": [
+        "随机分配处理使处理与潜在结果在设计下独立，平均组间差可估计因果效应。。",
+        "应检查反向因果、样本选择、伪处理与前趋势，报告估计不确定性和稳健性。"
+      ],
+      "formulas": [
+        {
+          "label": "因果估计或识别公式",
+          "tex": "D\\perp(Y(0),Y(1))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义处理、潜在结果和所需识别假设。随机分配处理使处理与潜在结果在设计下独立，平均组间差可估计因果效应。",
+          "tex": "D\\perp(Y(0),Y(1))"
+        },
+        {
+          "explanation": "在相应条件成立时，将可观察数据中的差异解释为目标平均处理效应。",
+          "tex": "D\\perp(Y(0),Y(1))"
+        }
+      ],
+      "code": "# 随机实验：基础随机实验与DiD示例\nimport numpy as np\nrng=np.random.default_rng(0)\nn=400;D=rng.binomial(1,.5,n)\nX=rng.normal(size=n);Y=1.5*D+X+rng.normal(size=n)\neffect=Y[D==1].mean()-Y[D==0].mean()\nprint(\"Randomized ATE estimate:\",effect)\npre_t,post_t=100.,116.;pre_c,post_c=90.,98.\nprint(\"DiD:\",(post_t-pre_t)-(post_c-pre_c))",
+      "packages": "numpy",
+      "application": "研究ETF资金流、交易制度、行业政策冲击与市场反应的因果关系。",
+      "limits": "本笔记是识别理论导读，代码只说明随机实验和双重差分，并不完整实现本节全部因果方法。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "causal-n04-02",
+      "node_id": "causal-n04-02",
+      "title": "双重稳健估计",
+      "definition": "AIPW结合倾向得分和结果模型，在两者之一正确且常规条件满足时仍可一致估计效应。",
+      "assumptions": "因果解释必须依赖明确的识别假设，包括处理定义、可忽略性、重叠、时间趋势或有效工具变量；机器学习本身不能消除未知混杂。",
+      "properties": [
+        "AIPW结合倾向得分和结果模型，在两者之一正确且常规条件满足时仍可一致估计效应。。",
+        "应检查反向因果、样本选择、伪处理与前趋势，报告估计不确定性和稳健性。"
+      ],
+      "formulas": [
+        {
+          "label": "因果估计或识别公式",
+          "tex": "\\hat\\tau=n^{-1}\\sum_i[\\hat\\mu_1(X_i)-\\hat\\mu_0(X_i)+\\frac{D_i(Y_i-\\hat\\mu_1)}{\\hat e_i}-\\frac{(1-D_i)(Y_i-\\hat\\mu_0)}{1-\\hat e_i}]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义处理、潜在结果和所需识别假设。AIPW结合倾向得分和结果模型，在两者之一正确且常规条件满足时仍可一致估计效应。",
+          "tex": "\\hat\\tau=n^{-1}\\sum_i[\\hat\\mu_1(X_i)-\\hat\\mu_0(X_i)+\\frac{D_i(Y_i-\\hat\\mu_1)}{\\hat e_i}-\\frac{(1-D_i)(Y_i-\\hat\\mu_0)}{1-\\hat e_i}]"
+        },
+        {
+          "explanation": "在相应条件成立时，将可观察数据中的差异解释为目标平均处理效应。",
+          "tex": "\\hat\\tau=n^{-1}\\sum_i[\\hat\\mu_1(X_i)-\\hat\\mu_0(X_i)+\\frac{D_i(Y_i-\\hat\\mu_1)}{\\hat e_i}-\\frac{(1-D_i)(Y_i-\\hat\\mu_0)}{1-\\hat e_i}]"
+        }
+      ],
+      "code": "# 双重稳健估计：基础随机实验与DiD示例\nimport numpy as np\nrng=np.random.default_rng(0)\nn=400;D=rng.binomial(1,.5,n)\nX=rng.normal(size=n);Y=1.5*D+X+rng.normal(size=n)\neffect=Y[D==1].mean()-Y[D==0].mean()\nprint(\"Randomized ATE estimate:\",effect)\npre_t,post_t=100.,116.;pre_c,post_c=90.,98.\nprint(\"DiD:\",(post_t-pre_t)-(post_c-pre_c))",
+      "packages": "numpy",
+      "application": "研究ETF资金流、交易制度、行业政策冲击与市场反应的因果关系。",
+      "limits": "本笔记是识别理论导读，代码只说明随机实验和双重差分，并不完整实现本节全部因果方法。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "causal-n06-02",
+      "node_id": "causal-n06-02",
+      "title": "断点回归",
+      "definition": "处理分配在阈值附近发生跃迁时，可比较阈值左右的条件均值以识别局部效应。",
+      "assumptions": "因果解释必须依赖明确的识别假设，包括处理定义、可忽略性、重叠、时间趋势或有效工具变量；机器学习本身不能消除未知混杂。",
+      "properties": [
+        "处理分配在阈值附近发生跃迁时，可比较阈值左右的条件均值以识别局部效应。。",
+        "应检查反向因果、样本选择、伪处理与前趋势，报告估计不确定性和稳健性。"
+      ],
+      "formulas": [
+        {
+          "label": "因果估计或识别公式",
+          "tex": "\\tau_{\\rm RD}=\\lim_{x\\downarrow c}E[Y\\mid X=x]-\\lim_{x\\uparrow c}E[Y\\mid X=x]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义处理、潜在结果和所需识别假设。处理分配在阈值附近发生跃迁时，可比较阈值左右的条件均值以识别局部效应。",
+          "tex": "\\tau_{\\rm RD}=\\lim_{x\\downarrow c}E[Y\\mid X=x]-\\lim_{x\\uparrow c}E[Y\\mid X=x]"
+        },
+        {
+          "explanation": "在相应条件成立时，将可观察数据中的差异解释为目标平均处理效应。",
+          "tex": "\\tau_{\\rm RD}=\\lim_{x\\downarrow c}E[Y\\mid X=x]-\\lim_{x\\uparrow c}E[Y\\mid X=x]"
+        }
+      ],
+      "code": "# 断点回归：基础随机实验与DiD示例\nimport numpy as np\nrng=np.random.default_rng(0)\nn=400;D=rng.binomial(1,.5,n)\nX=rng.normal(size=n);Y=1.5*D+X+rng.normal(size=n)\neffect=Y[D==1].mean()-Y[D==0].mean()\nprint(\"Randomized ATE estimate:\",effect)\npre_t,post_t=100.,116.;pre_c,post_c=90.,98.\nprint(\"DiD:\",(post_t-pre_t)-(post_c-pre_c))",
+      "packages": "numpy",
+      "application": "研究ETF资金流、交易制度、行业政策冲击与市场反应的因果关系。",
+      "limits": "本笔记是识别理论导读，代码只说明随机实验和双重差分，并不完整实现本节全部因果方法。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "causal-n01-03",
+      "node_id": "causal-n01-03",
+      "title": "Meta-Learner S/T/X",
+      "definition": "Meta-Learner以监督模型拟合不同处理状态下的潜在结果，再得到异质性效应。",
+      "assumptions": "因果解释必须依赖明确的识别假设，包括处理定义、可忽略性、重叠、时间趋势或有效工具变量；机器学习本身不能消除未知混杂。",
+      "properties": [
+        "Meta-Learner以监督模型拟合不同处理状态下的潜在结果，再得到异质性效应。。",
+        "应检查反向因果、样本选择、伪处理与前趋势，报告估计不确定性和稳健性。"
+      ],
+      "formulas": [
+        {
+          "label": "因果估计或识别公式",
+          "tex": "\\hat\\tau(x)=\\hat\\mu_1(x)-\\hat\\mu_0(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义处理、潜在结果和所需识别假设。Meta-Learner以监督模型拟合不同处理状态下的潜在结果，再得到异质性效应。",
+          "tex": "\\hat\\tau(x)=\\hat\\mu_1(x)-\\hat\\mu_0(x)"
+        },
+        {
+          "explanation": "在相应条件成立时，将可观察数据中的差异解释为目标平均处理效应。",
+          "tex": "\\hat\\tau(x)=\\hat\\mu_1(x)-\\hat\\mu_0(x)"
+        }
+      ],
+      "code": "# Meta-Learner S/T/X：基础随机实验与DiD示例\nimport numpy as np\nrng=np.random.default_rng(0)\nn=400;D=rng.binomial(1,.5,n)\nX=rng.normal(size=n);Y=1.5*D+X+rng.normal(size=n)\neffect=Y[D==1].mean()-Y[D==0].mean()\nprint(\"Randomized ATE estimate:\",effect)\npre_t,post_t=100.,116.;pre_c,post_c=90.,98.\nprint(\"DiD:\",(post_t-pre_t)-(post_c-pre_c))",
+      "packages": "numpy",
+      "application": "研究ETF资金流、交易制度、行业政策冲击与市场反应的因果关系。",
+      "limits": "本笔记是识别理论导读，代码只说明随机实验和双重差分，并不完整实现本节全部因果方法。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "causal-n02-03",
+      "node_id": "causal-n02-03",
+      "title": "Causal Forest",
+      "definition": "因果森林用异质处理效应相关的树分裂和集成估计条件处理效应。",
+      "assumptions": "因果解释必须依赖明确的识别假设，包括处理定义、可忽略性、重叠、时间趋势或有效工具变量；机器学习本身不能消除未知混杂。",
+      "properties": [
+        "因果森林用异质处理效应相关的树分裂和集成估计条件处理效应。。",
+        "应检查反向因果、样本选择、伪处理与前趋势，报告估计不确定性和稳健性。"
+      ],
+      "formulas": [
+        {
+          "label": "因果估计或识别公式",
+          "tex": "\\tau(x)=E[Y(1)-Y(0)\\mid X=x]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义处理、潜在结果和所需识别假设。因果森林用异质处理效应相关的树分裂和集成估计条件处理效应。",
+          "tex": "\\tau(x)=E[Y(1)-Y(0)\\mid X=x]"
+        },
+        {
+          "explanation": "在相应条件成立时，将可观察数据中的差异解释为目标平均处理效应。",
+          "tex": "\\tau(x)=E[Y(1)-Y(0)\\mid X=x]"
+        }
+      ],
+      "code": "# Causal Forest：基础随机实验与DiD示例\nimport numpy as np\nrng=np.random.default_rng(0)\nn=400;D=rng.binomial(1,.5,n)\nX=rng.normal(size=n);Y=1.5*D+X+rng.normal(size=n)\neffect=Y[D==1].mean()-Y[D==0].mean()\nprint(\"Randomized ATE estimate:\",effect)\npre_t,post_t=100.,116.;pre_c,post_c=90.,98.\nprint(\"DiD:\",(post_t-pre_t)-(post_c-pre_c))",
+      "packages": "numpy",
+      "application": "研究ETF资金流、交易制度、行业政策冲击与市场反应的因果关系。",
+      "limits": "本笔记是识别理论导读，代码只说明随机实验和双重差分，并不完整实现本节全部因果方法。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "causal-n03-03",
+      "node_id": "causal-n03-03",
+      "title": "Orthogonal Score",
+      "definition": "正交得分对干扰函数的一阶估计误差不敏感，常用于双重机器学习。",
+      "assumptions": "因果解释必须依赖明确的识别假设，包括处理定义、可忽略性、重叠、时间趋势或有效工具变量；机器学习本身不能消除未知混杂。",
+      "properties": [
+        "正交得分对干扰函数的一阶估计误差不敏感，常用于双重机器学习。。",
+        "应检查反向因果、样本选择、伪处理与前趋势，报告估计不确定性和稳健性。"
+      ],
+      "formulas": [
+        {
+          "label": "因果估计或识别公式",
+          "tex": "\\left.\\frac{\\partial}{\\partial\\eta}E[\\psi(W;\\theta_0,\\eta)]\\right|_{\\eta=\\eta_0}=0"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义处理、潜在结果和所需识别假设。正交得分对干扰函数的一阶估计误差不敏感，常用于双重机器学习。",
+          "tex": "\\left.\\frac{\\partial}{\\partial\\eta}E[\\psi(W;\\theta_0,\\eta)]\\right|_{\\eta=\\eta_0}=0"
+        },
+        {
+          "explanation": "在相应条件成立时，将可观察数据中的差异解释为目标平均处理效应。",
+          "tex": "\\left.\\frac{\\partial}{\\partial\\eta}E[\\psi(W;\\theta_0,\\eta)]\\right|_{\\eta=\\eta_0}=0"
+        }
+      ],
+      "code": "# Orthogonal Score：基础随机实验与DiD示例\nimport numpy as np\nrng=np.random.default_rng(0)\nn=400;D=rng.binomial(1,.5,n)\nX=rng.normal(size=n);Y=1.5*D+X+rng.normal(size=n)\neffect=Y[D==1].mean()-Y[D==0].mean()\nprint(\"Randomized ATE estimate:\",effect)\npre_t,post_t=100.,116.;pre_c,post_c=90.,98.\nprint(\"DiD:\",(post_t-pre_t)-(post_c-pre_c))",
+      "packages": "numpy",
+      "application": "研究ETF资金流、交易制度、行业政策冲击与市场反应的因果关系。",
+      "limits": "本笔记是识别理论导读，代码只说明随机实验和双重差分，并不完整实现本节全部因果方法。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "causal-n06-03",
+      "node_id": "causal-n06-03",
+      "title": "异质性效应CATE",
+      "definition": "CATE描述不同协变量条件下的平均个体处理效应。",
+      "assumptions": "因果解释必须依赖明确的识别假设，包括处理定义、可忽略性、重叠、时间趋势或有效工具变量；机器学习本身不能消除未知混杂。",
+      "properties": [
+        "CATE描述不同协变量条件下的平均个体处理效应。。",
+        "应检查反向因果、样本选择、伪处理与前趋势，报告估计不确定性和稳健性。"
+      ],
+      "formulas": [
+        {
+          "label": "因果估计或识别公式",
+          "tex": "\\tau(x)=E[Y(1)-Y(0)\\mid X=x]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义处理、潜在结果和所需识别假设。CATE描述不同协变量条件下的平均个体处理效应。",
+          "tex": "\\tau(x)=E[Y(1)-Y(0)\\mid X=x]"
+        },
+        {
+          "explanation": "在相应条件成立时，将可观察数据中的差异解释为目标平均处理效应。",
+          "tex": "\\tau(x)=E[Y(1)-Y(0)\\mid X=x]"
+        }
+      ],
+      "code": "# 异质性效应CATE：基础随机实验与DiD示例\nimport numpy as np\nrng=np.random.default_rng(0)\nn=400;D=rng.binomial(1,.5,n)\nX=rng.normal(size=n);Y=1.5*D+X+rng.normal(size=n)\neffect=Y[D==1].mean()-Y[D==0].mean()\nprint(\"Randomized ATE estimate:\",effect)\npre_t,post_t=100.,116.;pre_c,post_c=90.,98.\nprint(\"DiD:\",(post_t-pre_t)-(post_c-pre_c))",
+      "packages": "numpy",
+      "application": "研究ETF资金流、交易制度、行业政策冲击与市场反应的因果关系。",
+      "limits": "本笔记是识别理论导读，代码只说明随机实验和双重差分，并不完整实现本节全部因果方法。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "causal-n01-04",
+      "node_id": "causal-n01-04",
+      "title": "政策冲击资产反应",
+      "definition": "政策冲击的资产反应研究需要可识别的外生变化和合适的未受冲击对照组。",
+      "assumptions": "因果解释必须依赖明确的识别假设，包括处理定义、可忽略性、重叠、时间趋势或有效工具变量；机器学习本身不能消除未知混杂。",
+      "properties": [
+        "政策冲击的资产反应研究需要可识别的外生变化和合适的未受冲击对照组。。",
+        "应检查反向因果、样本选择、伪处理与前趋势，报告估计不确定性和稳健性。"
+      ],
+      "formulas": [
+        {
+          "label": "因果估计或识别公式",
+          "tex": "\\tau=E[R(1)-R(0)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义处理、潜在结果和所需识别假设。政策冲击的资产反应研究需要可识别的外生变化和合适的未受冲击对照组。",
+          "tex": "\\tau=E[R(1)-R(0)]"
+        },
+        {
+          "explanation": "在相应条件成立时，将可观察数据中的差异解释为目标平均处理效应。",
+          "tex": "\\tau=E[R(1)-R(0)]"
+        }
+      ],
+      "code": "# 政策冲击资产反应：基础随机实验与DiD示例\nimport numpy as np\nrng=np.random.default_rng(0)\nn=400;D=rng.binomial(1,.5,n)\nX=rng.normal(size=n);Y=1.5*D+X+rng.normal(size=n)\neffect=Y[D==1].mean()-Y[D==0].mean()\nprint(\"Randomized ATE estimate:\",effect)\npre_t,post_t=100.,116.;pre_c,post_c=90.,98.\nprint(\"DiD:\",(post_t-pre_t)-(post_c-pre_c))",
+      "packages": "numpy",
+      "application": "研究ETF资金流、交易制度、行业政策冲击与市场反应的因果关系。",
+      "limits": "本笔记是识别理论导读，代码只说明随机实验和双重差分，并不完整实现本节全部因果方法。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "causal-n02-04",
+      "node_id": "causal-n02-04",
+      "title": "交易成本变化",
+      "definition": "交易费率、税费或交易规则变化可作为潜在政策处理，分析市场流动性效应。",
+      "assumptions": "因果解释必须依赖明确的识别假设，包括处理定义、可忽略性、重叠、时间趋势或有效工具变量；机器学习本身不能消除未知混杂。",
+      "properties": [
+        "交易费率、税费或交易规则变化可作为潜在政策处理，分析市场流动性效应。。",
+        "应检查反向因果、样本选择、伪处理与前趋势，报告估计不确定性和稳健性。"
+      ],
+      "formulas": [
+        {
+          "label": "因果估计或识别公式",
+          "tex": "\\Delta\\mathrm{Cost}=\\mathrm{Cost}_{\\rm post}-\\mathrm{Cost}_{\\rm pre}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义处理、潜在结果和所需识别假设。交易费率、税费或交易规则变化可作为潜在政策处理，分析市场流动性效应。",
+          "tex": "\\Delta\\mathrm{Cost}=\\mathrm{Cost}_{\\rm post}-\\mathrm{Cost}_{\\rm pre}"
+        },
+        {
+          "explanation": "在相应条件成立时，将可观察数据中的差异解释为目标平均处理效应。",
+          "tex": "\\Delta\\mathrm{Cost}=\\mathrm{Cost}_{\\rm post}-\\mathrm{Cost}_{\\rm pre}"
+        }
+      ],
+      "code": "# 交易成本变化：基础随机实验与DiD示例\nimport numpy as np\nrng=np.random.default_rng(0)\nn=400;D=rng.binomial(1,.5,n)\nX=rng.normal(size=n);Y=1.5*D+X+rng.normal(size=n)\neffect=Y[D==1].mean()-Y[D==0].mean()\nprint(\"Randomized ATE estimate:\",effect)\npre_t,post_t=100.,116.;pre_c,post_c=90.,98.\nprint(\"DiD:\",(post_t-pre_t)-(post_c-pre_c))",
+      "packages": "numpy",
+      "application": "研究ETF资金流、交易制度、行业政策冲击与市场反应的因果关系。",
+      "limits": "本笔记是识别理论导读，代码只说明随机实验和双重差分，并不完整实现本节全部因果方法。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "causal-n03-04",
+      "node_id": "causal-n03-04",
+      "title": "ETF资金流与回报",
+      "definition": "ETF资金流和收益相互影响，直接回归系数可能包含反向因果和共同驱动。",
+      "assumptions": "因果解释必须依赖明确的识别假设，包括处理定义、可忽略性、重叠、时间趋势或有效工具变量；机器学习本身不能消除未知混杂。",
+      "properties": [
+        "ETF资金流和收益相互影响，直接回归系数可能包含反向因果和共同驱动。。",
+        "应检查反向因果、样本选择、伪处理与前趋势，报告估计不确定性和稳健性。"
+      ],
+      "formulas": [
+        {
+          "label": "因果估计或识别公式",
+          "tex": "R_t=\\alpha+\\beta F_t+\\epsilon_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义处理、潜在结果和所需识别假设。ETF资金流和收益相互影响，直接回归系数可能包含反向因果和共同驱动。",
+          "tex": "R_t=\\alpha+\\beta F_t+\\epsilon_t"
+        },
+        {
+          "explanation": "在相应条件成立时，将可观察数据中的差异解释为目标平均处理效应。",
+          "tex": "R_t=\\alpha+\\beta F_t+\\epsilon_t"
+        }
+      ],
+      "code": "# ETF资金流与回报：基础随机实验与DiD示例\nimport numpy as np\nrng=np.random.default_rng(0)\nn=400;D=rng.binomial(1,.5,n)\nX=rng.normal(size=n);Y=1.5*D+X+rng.normal(size=n)\neffect=Y[D==1].mean()-Y[D==0].mean()\nprint(\"Randomized ATE estimate:\",effect)\npre_t,post_t=100.,116.;pre_c,post_c=90.,98.\nprint(\"DiD:\",(post_t-pre_t)-(post_c-pre_c))",
+      "packages": "numpy",
+      "application": "研究ETF资金流、交易制度、行业政策冲击与市场反应的因果关系。",
+      "limits": "本笔记是识别理论导读，代码只说明随机实验和双重差分，并不完整实现本节全部因果方法。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "causal-n04-04",
+      "node_id": "causal-n04-04",
+      "title": "事件研究",
+      "definition": "事件研究计算事件附近资产收益相对基准模型预测收益的异常值。",
+      "assumptions": "因果解释必须依赖明确的识别假设，包括处理定义、可忽略性、重叠、时间趋势或有效工具变量；机器学习本身不能消除未知混杂。",
+      "properties": [
+        "事件研究计算事件附近资产收益相对基准模型预测收益的异常值。。",
+        "应检查反向因果、样本选择、伪处理与前趋势，报告估计不确定性和稳健性。"
+      ],
+      "formulas": [
+        {
+          "label": "因果估计或识别公式",
+          "tex": "AR_{i,t}=R_{i,t}-E[R_{i,t}\\mid\\mathcal F_{t-1}]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义处理、潜在结果和所需识别假设。事件研究计算事件附近资产收益相对基准模型预测收益的异常值。",
+          "tex": "AR_{i,t}=R_{i,t}-E[R_{i,t}\\mid\\mathcal F_{t-1}]"
+        },
+        {
+          "explanation": "在相应条件成立时，将可观察数据中的差异解释为目标平均处理效应。",
+          "tex": "AR_{i,t}=R_{i,t}-E[R_{i,t}\\mid\\mathcal F_{t-1}]"
+        }
+      ],
+      "code": "# 事件研究：基础随机实验与DiD示例\nimport numpy as np\nrng=np.random.default_rng(0)\nn=400;D=rng.binomial(1,.5,n)\nX=rng.normal(size=n);Y=1.5*D+X+rng.normal(size=n)\neffect=Y[D==1].mean()-Y[D==0].mean()\nprint(\"Randomized ATE estimate:\",effect)\npre_t,post_t=100.,116.;pre_c,post_c=90.,98.\nprint(\"DiD:\",(post_t-pre_t)-(post_c-pre_c))",
+      "packages": "numpy",
+      "application": "研究ETF资金流、交易制度、行业政策冲击与市场反应的因果关系。",
+      "limits": "本笔记是识别理论导读，代码只说明随机实验和双重差分，并不完整实现本节全部因果方法。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "causal-n05-04",
+      "node_id": "causal-n05-04",
+      "title": "工具变量",
+      "definition": "合格工具变量需影响处理并在识别假设下不直接影响结果或与结构误差相关。",
+      "assumptions": "因果解释必须依赖明确的识别假设，包括处理定义、可忽略性、重叠、时间趋势或有效工具变量；机器学习本身不能消除未知混杂。",
+      "properties": [
+        "合格工具变量需影响处理并在识别假设下不直接影响结果或与结构误差相关。。",
+        "应检查反向因果、样本选择、伪处理与前趋势，报告估计不确定性和稳健性。"
+      ],
+      "formulas": [
+        {
+          "label": "因果估计或识别公式",
+          "tex": "\\hat\\beta_{\\rm IV}=\\frac{\\operatorname{Cov}(Z,Y)}{\\operatorname{Cov}(Z,D)}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义处理、潜在结果和所需识别假设。合格工具变量需影响处理并在识别假设下不直接影响结果或与结构误差相关。",
+          "tex": "\\hat\\beta_{\\rm IV}=\\frac{\\operatorname{Cov}(Z,Y)}{\\operatorname{Cov}(Z,D)}"
+        },
+        {
+          "explanation": "在相应条件成立时，将可观察数据中的差异解释为目标平均处理效应。",
+          "tex": "\\hat\\beta_{\\rm IV}=\\frac{\\operatorname{Cov}(Z,Y)}{\\operatorname{Cov}(Z,D)}"
+        }
+      ],
+      "code": "# 工具变量：基础随机实验与DiD示例\nimport numpy as np\nrng=np.random.default_rng(0)\nn=400;D=rng.binomial(1,.5,n)\nX=rng.normal(size=n);Y=1.5*D+X+rng.normal(size=n)\neffect=Y[D==1].mean()-Y[D==0].mean()\nprint(\"Randomized ATE estimate:\",effect)\npre_t,post_t=100.,116.;pre_c,post_c=90.,98.\nprint(\"DiD:\",(post_t-pre_t)-(post_c-pre_c))",
+      "packages": "numpy",
+      "application": "研究ETF资金流、交易制度、行业政策冲击与市场反应的因果关系。",
+      "limits": "本笔记是识别理论导读，代码只说明随机实验和双重差分，并不完整实现本节全部因果方法。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "causal-n06-04",
+      "node_id": "causal-n06-04",
+      "title": "市场干预效果",
+      "definition": "评估市场干预需区分干预时点、处理组和外部市场共同变化。",
+      "assumptions": "因果解释必须依赖明确的识别假设，包括处理定义、可忽略性、重叠、时间趋势或有效工具变量；机器学习本身不能消除未知混杂。",
+      "properties": [
+        "评估市场干预需区分干预时点、处理组和外部市场共同变化。。",
+        "应检查反向因果、样本选择、伪处理与前趋势，报告估计不确定性和稳健性。"
+      ],
+      "formulas": [
+        {
+          "label": "因果估计或识别公式",
+          "tex": "\\mathrm{ATE}=E[Y(1)-Y(0)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义处理、潜在结果和所需识别假设。评估市场干预需区分干预时点、处理组和外部市场共同变化。",
+          "tex": "\\mathrm{ATE}=E[Y(1)-Y(0)]"
+        },
+        {
+          "explanation": "在相应条件成立时，将可观察数据中的差异解释为目标平均处理效应。",
+          "tex": "\\mathrm{ATE}=E[Y(1)-Y(0)]"
+        }
+      ],
+      "code": "# 市场干预效果：基础随机实验与DiD示例\nimport numpy as np\nrng=np.random.default_rng(0)\nn=400;D=rng.binomial(1,.5,n)\nX=rng.normal(size=n);Y=1.5*D+X+rng.normal(size=n)\neffect=Y[D==1].mean()-Y[D==0].mean()\nprint(\"Randomized ATE estimate:\",effect)\npre_t,post_t=100.,116.;pre_c,post_c=90.,98.\nprint(\"DiD:\",(post_t-pre_t)-(post_c-pre_c))",
+      "packages": "numpy",
+      "application": "研究ETF资金流、交易制度、行业政策冲击与市场反应的因果关系。",
+      "limits": "本笔记是识别理论导读，代码只说明随机实验和双重差分，并不完整实现本节全部因果方法。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "causal-n01-05",
+      "node_id": "causal-n01-05",
+      "title": "重叠假设",
+      "definition": "正重叠要求每种相关协变量状态下都有接受和不接受处理的可能性。",
+      "assumptions": "因果解释必须依赖明确的识别假设，包括处理定义、可忽略性、重叠、时间趋势或有效工具变量；机器学习本身不能消除未知混杂。",
+      "properties": [
+        "正重叠要求每种相关协变量状态下都有接受和不接受处理的可能性。。",
+        "应检查反向因果、样本选择、伪处理与前趋势，报告估计不确定性和稳健性。"
+      ],
+      "formulas": [
+        {
+          "label": "因果估计或识别公式",
+          "tex": "0<P(D=1\\mid X=x)<1"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义处理、潜在结果和所需识别假设。正重叠要求每种相关协变量状态下都有接受和不接受处理的可能性。",
+          "tex": "0<P(D=1\\mid X=x)<1"
+        },
+        {
+          "explanation": "在相应条件成立时，将可观察数据中的差异解释为目标平均处理效应。",
+          "tex": "0<P(D=1\\mid X=x)<1"
+        }
+      ],
+      "code": "# 重叠假设：基础随机实验与DiD示例\nimport numpy as np\nrng=np.random.default_rng(0)\nn=400;D=rng.binomial(1,.5,n)\nX=rng.normal(size=n);Y=1.5*D+X+rng.normal(size=n)\neffect=Y[D==1].mean()-Y[D==0].mean()\nprint(\"Randomized ATE estimate:\",effect)\npre_t,post_t=100.,116.;pre_c,post_c=90.,98.\nprint(\"DiD:\",(post_t-pre_t)-(post_c-pre_c))",
+      "packages": "numpy",
+      "application": "研究ETF资金流、交易制度、行业政策冲击与市场反应的因果关系。",
+      "limits": "本笔记是识别理论导读，代码只说明随机实验和双重差分，并不完整实现本节全部因果方法。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "causal-n02-05",
+      "node_id": "causal-n02-05",
+      "title": "共同趋势",
+      "definition": "共同趋势描述多个序列在未处理情况下具有可比的随时间变化规律。",
+      "assumptions": "因果解释必须依赖明确的识别假设，包括处理定义、可忽略性、重叠、时间趋势或有效工具变量；机器学习本身不能消除未知混杂。",
+      "properties": [
+        "共同趋势描述多个序列在未处理情况下具有可比的随时间变化规律。。",
+        "应检查反向因果、样本选择、伪处理与前趋势，报告估计不确定性和稳健性。"
+      ],
+      "formulas": [
+        {
+          "label": "因果估计或识别公式",
+          "tex": "E[\\Delta Y(0)\\mid D=1]=E[\\Delta Y(0)\\mid D=0]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义处理、潜在结果和所需识别假设。共同趋势描述多个序列在未处理情况下具有可比的随时间变化规律。",
+          "tex": "E[\\Delta Y(0)\\mid D=1]=E[\\Delta Y(0)\\mid D=0]"
+        },
+        {
+          "explanation": "在相应条件成立时，将可观察数据中的差异解释为目标平均处理效应。",
+          "tex": "E[\\Delta Y(0)\\mid D=1]=E[\\Delta Y(0)\\mid D=0]"
+        }
+      ],
+      "code": "# 共同趋势：基础随机实验与DiD示例\nimport numpy as np\nrng=np.random.default_rng(0)\nn=400;D=rng.binomial(1,.5,n)\nX=rng.normal(size=n);Y=1.5*D+X+rng.normal(size=n)\neffect=Y[D==1].mean()-Y[D==0].mean()\nprint(\"Randomized ATE estimate:\",effect)\npre_t,post_t=100.,116.;pre_c,post_c=90.,98.\nprint(\"DiD:\",(post_t-pre_t)-(post_c-pre_c))",
+      "packages": "numpy",
+      "application": "研究ETF资金流、交易制度、行业政策冲击与市场反应的因果关系。",
+      "limits": "本笔记是识别理论导读，代码只说明随机实验和双重差分，并不完整实现本节全部因果方法。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "causal-n03-05",
+      "node_id": "causal-n03-05",
+      "title": "平行趋势",
+      "definition": "DiD识别要求无处理情况下处理组与对照组平均变化相同。",
+      "assumptions": "因果解释必须依赖明确的识别假设，包括处理定义、可忽略性、重叠、时间趋势或有效工具变量；机器学习本身不能消除未知混杂。",
+      "properties": [
+        "DiD识别要求无处理情况下处理组与对照组平均变化相同。。",
+        "应检查反向因果、样本选择、伪处理与前趋势，报告估计不确定性和稳健性。"
+      ],
+      "formulas": [
+        {
+          "label": "因果估计或识别公式",
+          "tex": "E[Y_t(0)-Y_{t-1}(0)\\mid D=1]=E[Y_t(0)-Y_{t-1}(0)\\mid D=0]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义处理、潜在结果和所需识别假设。DiD识别要求无处理情况下处理组与对照组平均变化相同。",
+          "tex": "E[Y_t(0)-Y_{t-1}(0)\\mid D=1]=E[Y_t(0)-Y_{t-1}(0)\\mid D=0]"
+        },
+        {
+          "explanation": "在相应条件成立时，将可观察数据中的差异解释为目标平均处理效应。",
+          "tex": "E[Y_t(0)-Y_{t-1}(0)\\mid D=1]=E[Y_t(0)-Y_{t-1}(0)\\mid D=0]"
+        }
+      ],
+      "code": "# 平行趋势：基础随机实验与DiD示例\nimport numpy as np\nrng=np.random.default_rng(0)\nn=400;D=rng.binomial(1,.5,n)\nX=rng.normal(size=n);Y=1.5*D+X+rng.normal(size=n)\neffect=Y[D==1].mean()-Y[D==0].mean()\nprint(\"Randomized ATE estimate:\",effect)\npre_t,post_t=100.,116.;pre_c,post_c=90.,98.\nprint(\"DiD:\",(post_t-pre_t)-(post_c-pre_c))",
+      "packages": "numpy",
+      "application": "研究ETF资金流、交易制度、行业政策冲击与市场反应的因果关系。",
+      "limits": "本笔记是识别理论导读，代码只说明随机实验和双重差分，并不完整实现本节全部因果方法。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "causal-n04-05",
+      "node_id": "causal-n04-05",
+      "title": "敏感性分析",
+      "definition": "改变未观测混杂、样本窗口与模型配置检验因果估计是否稳定。",
+      "assumptions": "因果解释必须依赖明确的识别假设，包括处理定义、可忽略性、重叠、时间趋势或有效工具变量；机器学习本身不能消除未知混杂。",
+      "properties": [
+        "改变未观测混杂、样本窗口与模型配置检验因果估计是否稳定。。",
+        "应检查反向因果、样本选择、伪处理与前趋势，报告估计不确定性和稳健性。"
+      ],
+      "formulas": [
+        {
+          "label": "因果估计或识别公式",
+          "tex": "\\tau(\\delta)=E[Y(1)-Y(0)\\mid\\delta]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义处理、潜在结果和所需识别假设。改变未观测混杂、样本窗口与模型配置检验因果估计是否稳定。",
+          "tex": "\\tau(\\delta)=E[Y(1)-Y(0)\\mid\\delta]"
+        },
+        {
+          "explanation": "在相应条件成立时，将可观察数据中的差异解释为目标平均处理效应。",
+          "tex": "\\tau(\\delta)=E[Y(1)-Y(0)\\mid\\delta]"
+        }
+      ],
+      "code": "# 敏感性分析：基础随机实验与DiD示例\nimport numpy as np\nrng=np.random.default_rng(0)\nn=400;D=rng.binomial(1,.5,n)\nX=rng.normal(size=n);Y=1.5*D+X+rng.normal(size=n)\neffect=Y[D==1].mean()-Y[D==0].mean()\nprint(\"Randomized ATE estimate:\",effect)\npre_t,post_t=100.,116.;pre_c,post_c=90.,98.\nprint(\"DiD:\",(post_t-pre_t)-(post_c-pre_c))",
+      "packages": "numpy",
+      "application": "研究ETF资金流、交易制度、行业政策冲击与市场反应的因果关系。",
+      "limits": "本笔记是识别理论导读，代码只说明随机实验和双重差分，并不完整实现本节全部因果方法。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "causal-n05-05",
+      "node_id": "causal-n05-05",
+      "title": "Placebo Test",
+      "definition": "使用理论上无效的伪处理时期或伪处理组检查估计是否出现虚假显著性。",
+      "assumptions": "因果解释必须依赖明确的识别假设，包括处理定义、可忽略性、重叠、时间趋势或有效工具变量；机器学习本身不能消除未知混杂。",
+      "properties": [
+        "使用理论上无效的伪处理时期或伪处理组检查估计是否出现虚假显著性。。",
+        "应检查反向因果、样本选择、伪处理与前趋势，报告估计不确定性和稳健性。"
+      ],
+      "formulas": [
+        {
+          "label": "因果估计或识别公式",
+          "tex": "\\hat\\tau_{\\rm placebo}\\approx0"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义处理、潜在结果和所需识别假设。使用理论上无效的伪处理时期或伪处理组检查估计是否出现虚假显著性。",
+          "tex": "\\hat\\tau_{\\rm placebo}\\approx0"
+        },
+        {
+          "explanation": "在相应条件成立时，将可观察数据中的差异解释为目标平均处理效应。",
+          "tex": "\\hat\\tau_{\\rm placebo}\\approx0"
+        }
+      ],
+      "code": "# Placebo Test：基础随机实验与DiD示例\nimport numpy as np\nrng=np.random.default_rng(0)\nn=400;D=rng.binomial(1,.5,n)\nX=rng.normal(size=n);Y=1.5*D+X+rng.normal(size=n)\neffect=Y[D==1].mean()-Y[D==0].mean()\nprint(\"Randomized ATE estimate:\",effect)\npre_t,post_t=100.,116.;pre_c,post_c=90.,98.\nprint(\"DiD:\",(post_t-pre_t)-(post_c-pre_c))",
+      "packages": "numpy",
+      "application": "研究ETF资金流、交易制度、行业政策冲击与市场反应的因果关系。",
+      "limits": "本笔记是识别理论导读，代码只说明随机实验和双重差分，并不完整实现本节全部因果方法。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "causal-n06-05",
+      "node_id": "causal-n06-05",
+      "title": "弱工具变量",
+      "definition": "当工具变量对处理的相关性很弱时，IV估计可能大幅偏差且标准推断不可靠。",
+      "assumptions": "因果解释必须依赖明确的识别假设，包括处理定义、可忽略性、重叠、时间趋势或有效工具变量；机器学习本身不能消除未知混杂。",
+      "properties": [
+        "当工具变量对处理的相关性很弱时，IV估计可能大幅偏差且标准推断不可靠。。",
+        "应检查反向因果、样本选择、伪处理与前趋势，报告估计不确定性和稳健性。"
+      ],
+      "formulas": [
+        {
+          "label": "因果估计或识别公式",
+          "tex": "\\operatorname{Cov}(Z,D)\\approx0"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先定义处理、潜在结果和所需识别假设。当工具变量对处理的相关性很弱时，IV估计可能大幅偏差且标准推断不可靠。",
+          "tex": "\\operatorname{Cov}(Z,D)\\approx0"
+        },
+        {
+          "explanation": "在相应条件成立时，将可观察数据中的差异解释为目标平均处理效应。",
+          "tex": "\\operatorname{Cov}(Z,D)\\approx0"
+        }
+      ],
+      "code": "# 弱工具变量：基础随机实验与DiD示例\nimport numpy as np\nrng=np.random.default_rng(0)\nn=400;D=rng.binomial(1,.5,n)\nX=rng.normal(size=n);Y=1.5*D+X+rng.normal(size=n)\neffect=Y[D==1].mean()-Y[D==0].mean()\nprint(\"Randomized ATE estimate:\",effect)\npre_t,post_t=100.,116.;pre_c,post_c=90.,98.\nprint(\"DiD:\",(post_t-pre_t)-(post_c-pre_c))",
+      "packages": "numpy",
+      "application": "研究ETF资金流、交易制度、行业政策冲击与市场反应的因果关系。",
+      "limits": "本笔记是识别理论导读，代码只说明随机实验和双重差分，并不完整实现本节全部因果方法。",
+      "coverage": "expanded"
+    }
+  ]
+}
