@@ -1,0 +1,397 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "unsupervised-n05-01",
+      "node_id": "unsupervised-n05-01",
+      "title": "谱聚类",
+      "definition": "谱聚类从图相似度矩阵的Laplacian特征向量提取低维嵌入，然后对嵌入聚类；适用于非凸形状的数据簇。",
+      "assumptions": "相似度矩阵需要非负且对称；图的构造、谱特征数与聚类数需在训练中确定。",
+      "properties": [
+        "规范化Laplacian的特征值位于[0,2]。",
+        "谱聚类主要是转导式方法，对新样本在线预测需额外扩展。"
+      ],
+      "formulas": [
+        {
+          "label": "数学表达",
+          "tex": "L_{\\rm sym}=I-D^{-1/2}WD^{-1/2},\\quad U=[u_1,\\ldots,u_K]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "构造相似图，令节点度等于邻接权重行和",
+          "tex": "D_{ii}=\\sum_jW_{ij}"
+        },
+        {
+          "explanation": "对规范化图Laplacian求最小K个特征向量",
+          "tex": "L_{\\rm sym}u_j=\\lambda_ju_j"
+        },
+        {
+          "explanation": "将每个节点的特征向量行视作嵌入，用KMeans划分",
+          "tex": "z_i=U_{i,:}/\\|U_{i,:}\\|_2"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.datasets import make_moons\nfrom sklearn.cluster import SpectralClustering\nX,_=make_moons(n_samples=100,noise=.06,random_state=1)\nm=SpectralClustering(n_clusters=2,affinity=\"nearest_neighbors\",\n                     n_neighbors=10,random_state=0)\nlabels=m.fit_predict(X)\nprint(\"Cluster sizes:\",np.bincount(labels))",
+      "application": "按ETF收益相关结构寻找非线性相似资产簇；需要仅用截至当期的历史相关矩阵构图。",
+      "limits": "聚类结果依赖相似度核和样本窗口；图若包含未来共振信息会产生前视偏差。",
+      "packages": "numpy, scikit-learn",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n06-01",
+      "node_id": "unsupervised-n06-01",
+      "title": "聚类稳定性",
+      "definition": "聚类稳定性评估当训练样本、随机初始化或特征窗口变化时，模型得到的分组是否一致。",
+      "assumptions": "比较不同分组时不能直接对簇编号比较，因为标签可置换。",
+      "properties": [
+        "ARI可扣除随机分组的一致性基准。",
+        "稳定不意味着聚类具有经济含义或预测能力。"
+      ],
+      "formulas": [
+        {
+          "label": "数学表达",
+          "tex": "\\operatorname{ARI}=\\frac{\\operatorname{RI}-\\mathbb E[\\operatorname{RI}]}{\\max(\\operatorname{RI})-\\mathbb E[\\operatorname{RI}]}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对两次聚类统计同组/异组的样本对一致情况",
+          "tex": "\\operatorname{RI}=(a+b)/\\binom n2"
+        },
+        {
+          "explanation": "使用排列模型下随机一致性的期望校正",
+          "tex": "\\operatorname{ARI}=(\\mathrm{RI}-E[\\mathrm{RI}])/(\\max\\mathrm{RI}-E[\\mathrm{RI}])"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.cluster import KMeans\nfrom sklearn.metrics import adjusted_rand_score\nrng=np.random.default_rng(0)\nX=np.r_[rng.normal(-2,.6,(50,2)),rng.normal(2,.6,(50,2))]\np=KMeans(2,n_init=10,random_state=1).fit_predict(X)\nq=KMeans(2,n_init=10,random_state=3).fit_predict(X)\nprint(\"ARI across seeds:\",adjusted_rand_score(p,q))",
+      "application": "检验ETF风险聚类是否随种子改变而频繁翻转。",
+      "limits": "跨期资产池变化时需先对齐共同资产，ARl无法直接评价不同证券集合。",
+      "packages": "numpy, scikit-learn",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n05-02",
+      "node_id": "unsupervised-n05-02",
+      "title": "核PCA",
+      "definition": "核主成分分析通过特征映射中的中心化Gram矩阵寻找非线性低维方向，允许线性PCA无法表达的曲线结构。",
+      "assumptions": "核函数应产生半正定Gram矩阵；核参数需要基于训练数据选择。",
+      "properties": [
+        "核PCA的结果依赖核和尺度。",
+        "重建原始输入一般没有简单显式逆映射。"
+      ],
+      "formulas": [
+        {
+          "label": "数学表达",
+          "tex": "K_{ij}=k(x_i,x_j),\\quad K_c=HKH,\\quad H=I-\\tfrac1n\\mathbf1\\mathbf1^\\top"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "用核函数表示隐式特征空间内积",
+          "tex": "k(x_i,x_j)=\\langle\\phi(x_i),\\phi(x_j)\\rangle"
+        },
+        {
+          "explanation": "在样本特征空间进行中心化，相当于双侧投影",
+          "tex": "K_c=(I-\\mathbf1\\mathbf1^\\top/n)K(I-\\mathbf1\\mathbf1^\\top/n)"
+        },
+        {
+          "explanation": "对中心化Gram矩阵求特征向量构造样本嵌入",
+          "tex": "K_cv_j=\\lambda_jv_j"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.decomposition import KernelPCA\nrng=np.random.default_rng(2)\nz=rng.uniform(-2,2,100);X=np.column_stack([z,z*z])\nf=KernelPCA(n_components=2,kernel=\"rbf\",gamma=.3)\nprint(\"Nonlinear embedding:\",f.fit_transform(X).shape)",
+      "application": "对收益与波动率构成的弯曲风险状态进行非线性降维。",
+      "limits": "对样本外金融数据调用transform需使用训练期核中心化信息。",
+      "packages": "numpy, scikit-learn",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n02-03",
+      "node_id": "unsupervised-n02-03",
+      "title": "Local Outlier Factor",
+      "definition": "LOF通过比较样本局部可达密度与邻居密度判断离群程度；局部低密度点具有较高异常程度。",
+      "assumptions": "近邻数k和距离尺度应与数据密度相适配；常规LOF训练集识别和新样本Novelty模式不同。",
+      "properties": [
+        "可识别全局稠密度差异下的局部异常点。",
+        "高维和稀疏数据中距离衡量可能不稳定。"
+      ],
+      "formulas": [
+        {
+          "label": "数学表达",
+          "tex": "\\mathrm{LOF}_k(x)=\\frac1{|N_k(x)|}\\sum_{o\\in N_k(x)}\\frac{\\operatorname{lrd}_k(o)}{\\operatorname{lrd}_k(x)}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "局部可达距离对近邻的k-distance施加下界",
+          "tex": "\\operatorname{reachdist}_k(x,o)=\\max\\{k\\text{-dist}(o),d(x,o)\\}"
+        },
+        {
+          "explanation": "用平均可达距离的倒数定义局部可达密度",
+          "tex": "\\operatorname{lrd}_k(x)=\\left(\\frac1{|N_k(x)|}\\sum_o\\operatorname{reachdist}_k(x,o)\\right)^{-1}"
+        },
+        {
+          "explanation": "将邻居密度与自身密度之比取平均得到LOF",
+          "tex": "\\mathrm{LOF}_k(x)=E_{o\\in N_k(x)}[\\mathrm{lrd}_k(o)/\\mathrm{lrd}_k(x)]"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.neighbors import LocalOutlierFactor\nrng=np.random.default_rng(0)\nX=np.r_[rng.normal(size=(80,2)),[[8.,8.]]]\nlabels=LocalOutlierFactor(n_neighbors=15).fit_predict(X)\nprint(\"Extreme observation anomaly:\",labels[-1])",
+      "application": "检测异常ETF报价、交易量或波动偏离。",
+      "limits": "异常可能是重大真实市场事件，不能未经审核直接删除。",
+      "packages": "numpy, scikit-learn",
+      "coverage": "complete"
+    },
+    {
+      "id": "unsupervised-n03-03",
+      "node_id": "unsupervised-n03-03",
+      "title": "One-Class SVM",
+      "definition": "One-Class SVM在核特征空间构造将大部分正常训练样本与原点分开的超平面，预测低密度或不常见样本。",
+      "assumptions": "ν控制训练异常上界和支持向量比例下界（在相应优化条件下）；核与尺度影响形状。",
+      "properties": [
+        "可建模非线性正常样本边界。",
+        "在高维较大数据集上训练复杂度可能显著。"
+      ],
+      "formulas": [
+        {
+          "label": "数学表达",
+          "tex": "\\min_{w,\\rho,\\xi}\\tfrac12\\|w\\|^2+\\tfrac1{\\nu n}\\sum_i\\xi_i-\\rho,\\quad w^\\top\\phi(x_i)\\ge\\rho-\\xi_i"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "用核映射将观测置入特征空间",
+          "tex": "\\phi:\\mathbb R^p\\to\\mathcal H"
+        },
+        {
+          "explanation": "允许松弛变量容忍部分样本落在边界外",
+          "tex": "\\xi_i\\ge0"
+        },
+        {
+          "explanation": "新样本按其相对决策面的位置判断",
+          "tex": "f(x)=\\operatorname{sign}(w^\\top\\phi(x)-\\rho)"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.svm import OneClassSVM\nrng=np.random.default_rng(0)\nnormal=rng.normal(size=(80,2))\nm=OneClassSVM(gamma=\"scale\",nu=.05).fit(normal)\nprint(\"Normal / unusual:\",m.predict([[0,0],[10,10]]))",
+      "application": "用历史市场平稳状态作为正常分布识别突变日。",
+      "limits": "正常状态训练数据若已混合多个制度，需要重新定义异常及再训练策略。",
+      "packages": "numpy, scikit-learn",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n06-02",
+      "node_id": "probabilistic-n06-02",
+      "title": "粒子滤波",
+      "definition": "粒子滤波通过带权随机样本近似非线性或非高斯隐状态后验，执行传播、观测加权和重采样。",
+      "assumptions": "状态转移与观测似然必须已知或正确估计；粒子数有限时存在退化问题。",
+      "properties": [
+        "可处理非线性/非高斯状态空间。",
+        "有效样本量低表示大部分粒子权重趋于零，需要重采样。"
+      ],
+      "formulas": [
+        {
+          "label": "数学表达",
+          "tex": "p(x_t\\mid y_{1:t})\\approx\\sum_{i=1}^Nw_t^{(i)}\\delta_{x_t^{(i)}},\\quad N_{\\rm eff}=1/\\sum_i(w_t^{(i)})^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由上一时刻粒子模拟新状态",
+          "tex": "x_t^{(i)}\\sim p(x_t\\mid x_{t-1}^{(i)})"
+        },
+        {
+          "explanation": "根据新观测计算权重并归一",
+          "tex": "\\tilde w_t^{(i)}=w_{t-1}^{(i)}p(y_t\\mid x_t^{(i)}),\\quad w_t^{(i)}=\\tilde w_t^{(i)}/\\sum_j\\tilde w_t^{(j)}"
+        },
+        {
+          "explanation": "权重集中时按权重重采样",
+          "tex": "I_i\\sim\\operatorname{Categorical}(w_t^{(1:N)})"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);N=800\np=rng.normal(0,1,N);w=np.full(N,1/N)\nfor obs in [.3,.8,.4]:\n    p=.8*p+rng.normal(0,.3,N)\n    ll=-.5*((obs-p)/.25)**2\n    w=np.exp(ll-ll.max());w/=w.sum()\n    print(\"state mean\",p@w,\"ESS\",1/(w@w))\n    p=p[rng.choice(N,N,p=w)];w.fill(1/N)",
+      "application": "估计跳跃或厚尾市场状态、非线性动态Beta。",
+      "limits": "系统重采样更高效；示例只演示Bootstrap滤波，未拟合状态转移参数。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n05-03",
+      "node_id": "probabilistic-n05-03",
+      "title": "变分推断VI",
+      "definition": "变分推断在易处理的分布族中寻找近似后验，以优化证据下界替代直接计算不可积后验。",
+      "assumptions": "近似族与先验、似然需一致；ELBO优化可能陷入局部最优，均值场假设低估相关性。",
+      "properties": [
+        "可用随机梯度扩展到大数据。",
+        "最小化反向KL往往倾向于漏掉多模态后验的某些模态。"
+      ],
+      "formulas": [
+        {
+          "label": "数学表达",
+          "tex": "q^*=\\arg\\min_{q\\in\\mathcal Q}D_{\\rm KL}(q(z)\\|p(z\\mid x))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从KL定义分解出后验对数密度",
+          "tex": "D_{\\rm KL}(q\\|p(z|x))=E_q[\\log q(z)-\\log p(x,z)]+\\log p(x)"
+        },
+        {
+          "explanation": "将参数无关的证据分离",
+          "tex": "\\log p(x)=\\mathrm{ELBO}(q)+D_{\\rm KL}(q\\|p(z|x))"
+        },
+        {
+          "explanation": "最大化ELBO等价于在指定近似族中最小化KL",
+          "tex": "q^*=\\arg\\max_q\\mathrm{ELBO}(q)"
+        }
+      ],
+      "code": "import numpy as np\n# KL of q=N(mu,sigma^2) to p=N(0,1)\ndef kl(mu,sd):\n    return .5*(mu*mu+sd*sd-1-np.log(sd*sd))\nfor mu,sd in [(0,1),(.8,1),(.1,.5)]:\n    print(mu,sd,kl(mu,sd))",
+      "application": "估计金融潜在波动状态和贝叶斯模型参数分布。",
+      "limits": "代码计算一维高斯KL，未实现完整黑盒变分优化。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "probabilistic-n04-03",
+      "node_id": "probabilistic-n04-03",
+      "title": "Hamiltonian Monte Carlo",
+      "definition": "HMC通过引入动量变量并使用可逆保体积Hamilton动力学提出长距离候选，减少随机游走采样的自相关。",
+      "assumptions": "目标对数密度应可微，积分步长和轨迹步数要调节；数值积分误差需Metropolis校正。",
+      "properties": [
+        "Leapfrog在适当条件下具备时间可逆及体积保持性质。",
+        "高维复杂金融后验仍需要多个链和收敛诊断。"
+      ],
+      "formulas": [
+        {
+          "label": "数学表达",
+          "tex": "H(q,p)=U(q)+\\tfrac12p^\\top M^{-1}p,\\quad U(q)=-\\log\\pi(q)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将目标分布的负对数设为势能，并引入高斯动量动能",
+          "tex": "U(q)=-\\log\\pi(q),\\quad K(p)=\\tfrac12p^\\top M^{-1}p"
+        },
+        {
+          "explanation": "Hamilton方程决定位置和动量演化",
+          "tex": "\\dot q=M^{-1}p,\\quad\\dot p=-\\nabla U(q)"
+        },
+        {
+          "explanation": "对数值轨迹作Metropolis接受校正",
+          "tex": "\\alpha=\\min(1,\\exp(H(q,p)-H(q',p')))"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(1)\nq=2.;samples=[]\nfor _ in range(150):\n    momentum=rng.normal()\n    q0,p0=q,momentum\n    p=momentum-.05*q/2\n    for k in range(10):\n        q=q+.05*p\n        if k<9:p=p-.05*q\n    p=p-.05*q/2\n    old=.5*(q0*q0+p0*p0);new=.5*(q*q+p*p)\n    if np.log(rng.random())>=min(0,old-new):q=q0\n    samples.append(q)\nprint(\"HMC scalar sample mean:\",np.mean(samples))",
+      "application": "贝叶斯资产收益率与波动率参数的联合后验采样。",
+      "limits": "此教学HMC采用单位质量标准正态目标，步数较少，不适合直接用于生产后验推断。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n03-02",
+      "node_id": "optimization-n03-02",
+      "title": "AdaGrad",
+      "definition": "AdaGrad按历史累计平方梯度缩放每个参数的更新，频繁出现大梯度的维度获得更小有效步长。",
+      "assumptions": "梯度估计存在，累计历史梯度和稳定项ε要正确维护。",
+      "properties": [
+        "适用于稀疏特征的一些优化问题。",
+        "累计梯度平方只增不减，长期训练有效学习率可能过度衰减。"
+      ],
+      "formulas": [
+        {
+          "label": "数学表达",
+          "tex": "G_{t,j}=\\sum_{s=1}^tg_{s,j}^2,\\quad\\theta_{t+1,j}=\\theta_{t,j}-\\frac{\\eta g_{t,j}}{\\sqrt{G_{t,j}}+\\epsilon}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "逐参数累积过去梯度平方",
+          "tex": "G_{t,j}=G_{t-1,j}+g_{t,j}^2"
+        },
+        {
+          "explanation": "每个坐标按其累计梯度大小缩放当前步长",
+          "tex": "\\eta_{t,j}=\\eta/(\\sqrt{G_{t,j}}+\\epsilon)"
+        },
+        {
+          "explanation": "执行参数更新",
+          "tex": "\\theta_{t+1,j}=\\theta_{t,j}-\\eta_{t,j}g_{t,j}"
+        }
+      ],
+      "code": "import numpy as np\ntheta=np.array([5.,-5.]);target=np.array([1.,2.])\nacc=np.zeros(2)\nfor t in range(150):\n    grad=theta-target\n    acc+=grad**2\n    theta-=.4*grad/(np.sqrt(acc)+1e-8)\nprint(\"AdaGrad result:\",theta)",
+      "application": "文本稀疏词袋与财经事件特征的在线Logistic训练。",
+      "limits": "学习率与累计状态绑定，环境切换后可能需要重启或改用RMSProp。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n04-03",
+      "node_id": "optimization-n04-03",
+      "title": "投影梯度",
+      "definition": "投影梯度先做无约束梯度下降，再将临时结果投影回闭凸可行集合，以满足权重或模型参数约束。",
+      "assumptions": "可行集合应为闭凸且投影可求；收敛性需要合适步长和光滑凸目标。",
+      "properties": [
+        "迭代结果始终属于约束集合。",
+        "投影可能改变原始梯度方向，不同约束需要不同投影算子。"
+      ],
+      "formulas": [
+        {
+          "label": "数学表达",
+          "tex": "\\theta_{t+1}=\\Pi_{\\mathcal C}\\big(\\theta_t-\\eta\\nabla f(\\theta_t)\\big)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "目标在当前点给出局部下降方向",
+          "tex": "z_t=\\theta_t-\\eta\\nabla f(\\theta_t)"
+        },
+        {
+          "explanation": "用欧氏距离定义到可行集合的最短投影",
+          "tex": "\\Pi_{\\mathcal C}(z)=\\arg\\min_{x\\in\\mathcal C}\\|x-z\\|_2^2"
+        },
+        {
+          "explanation": "在标准单纯形上投影可保证非负和为一",
+          "tex": "\\mathcal C=\\{w:w_i\\ge0,\\ \\sum_iw_i=1\\}"
+        }
+      ],
+      "code": "import numpy as np\ndef simplex(z):\n    u=np.sort(z)[::-1]\n    css=np.cumsum(u)-1\n    rho=np.where(u-css/np.arange(1,len(z)+1)>0)[0][-1]\n    tau=css[rho]/(rho+1)\n    return np.maximum(z-tau,0)\nz=np.array([.8,-.4,.9])\nw=simplex(z)\nprint(\"Projected weights:\",w,\"sum:\",w.sum())",
+      "application": "将资产组合梯度更新严格限定在多头预算集合。",
+      "limits": "该代码只做单纯形投影，不包含换手、行业暴露和杠杆等额外约束。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n02-03",
+      "node_id": "optimization-n02-03",
+      "title": "BFGS/L-BFGS",
+      "definition": "BFGS用相邻梯度变化构造逆Hessian近似，L-BFGS只保留有限对历史更新向量，适合较大维度。",
+      "assumptions": "目标光滑，配合线搜索通常要求满足曲率条件sᵀy>0。",
+      "properties": [
+        "不必每步显式构造真实Hessian。",
+        "L-BFGS内存开销随历史对数而非参数平方增加。"
+      ],
+      "formulas": [
+        {
+          "label": "数学表达",
+          "tex": "H_{k+1}=(I-\\rho s y^\\top)H_k(I-\\rho ys^\\top)+\\rho ss^\\top,\\quad\\rho=(y^\\top s)^{-1}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义两次参数与梯度变化",
+          "tex": "s_k=x_{k+1}-x_k,\\quad y_k=\\nabla f(x_{k+1})-\\nabla f(x_k)"
+        },
+        {
+          "explanation": "若yᵀs>0，用秩二更新保持逆Hessian近似正定",
+          "tex": "\\rho_k=(y_k^\\top s_k)^{-1}"
+        },
+        {
+          "explanation": "利用近似二阶方向并线搜索",
+          "tex": "d_k=-H_k\\nabla f(x_k)"
+        }
+      ],
+      "code": "import numpy as np\nfrom scipy.optimize import minimize\nA=np.array([[4.,1.],[1.,2.]])\nb=np.array([1.,3.])\nfun=lambda x:.5*x@A@x-b@x\njac=lambda x:A@x-b\nr=minimize(fun,np.array([3.,-2.]),jac=jac,method=\"L-BFGS-B\")\nprint(\"minimizer:\",r.x,\"success:\",r.success)",
+      "application": "广义线性模型与中等维度金融模型的数值优化。",
+      "limits": "高随机梯度噪声下拟牛顿曲率估计可能不稳定。",
+      "packages": "numpy, scipy",
+      "coverage": "complete"
+    }
+  ]
+}
