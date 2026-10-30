@@ -1,0 +1,741 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "causal-n02-01",
+      "node_id": "causal-n02-01",
+      "title": "反事实",
+      "definition": "反事实是同一个单位在未发生实际处理时本可能出现的潜在结果，因果推断需要识别不可同时观察的状态。",
+      "assumptions": "识别因果效应需要明确处理分配、可忽略性、重叠、时间先后、共同趋势或工具变量排除限制等具体假设。",
+      "properties": [
+        "反事实是同一个单位在未发生实际处理时本可能出现的潜在结果，因果推断需要识别不可同时观察的状态。",
+        "预测能力和变量相关性不是因果效应；估计前应提供可信识别图、设计或制度背景。"
+      ],
+      "formulas": [
+        {
+          "label": "因果效应与识别表达",
+          "tex": "Y=D Y(1)+(1-D)Y(0)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义潜在结果、处理机制和可观测变量，再写出该识别设计要求的条件。",
+          "tex": "Y=D Y(1)+(1-D)Y(0)"
+        },
+        {
+          "explanation": "利用随机化、加权、趋势差异或工具变量矩条件推导目标估计量。",
+          "tex": "Y=D Y(1)+(1-D)Y(0)"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);D=rng.binomial(1,.5,100)\ny0=rng.normal(size=100);y=y0+.6*D\nprint(y[D==1].mean()-y[D==0].mean())",
+      "packages": "numpy",
+      "application": "研究ETF资金流、监管事件、市场规则与交易成本变化的因果影响。",
+      "limits": "示例展示因果设计的统计计算，不意味着观察性金融数据已满足识别条件；需检验平行趋势、遗漏混杂和政策时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "causal-n04-01",
+      "node_id": "causal-n04-01",
+      "title": "背门路径",
+      "definition": "因果图中由共同原因等产生的背门路径可能混淆处理与结果，适当控制集合可阻断该类路径。",
+      "assumptions": "识别因果效应需要明确处理分配、可忽略性、重叠、时间先后、共同趋势或工具变量排除限制等具体假设。",
+      "properties": [
+        "因果图中由共同原因等产生的背门路径可能混淆处理与结果，适当控制集合可阻断该类路径。",
+        "预测能力和变量相关性不是因果效应；估计前应提供可信识别图、设计或制度背景。"
+      ],
+      "formulas": [
+        {
+          "label": "因果效应与识别表达",
+          "tex": "D\\leftarrow X\\rightarrow Y"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义潜在结果、处理机制和可观测变量，再写出该识别设计要求的条件。",
+          "tex": "D\\leftarrow X\\rightarrow Y"
+        },
+        {
+          "explanation": "利用随机化、加权、趋势差异或工具变量矩条件推导目标估计量。",
+          "tex": "D\\leftarrow X\\rightarrow Y"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);D=rng.binomial(1,.5,100)\ny0=rng.normal(size=100);y=y0+.6*D\nprint(y[D==1].mean()-y[D==0].mean())",
+      "packages": "numpy",
+      "application": "研究ETF资金流、监管事件、市场规则与交易成本变化的因果影响。",
+      "limits": "示例展示因果设计的统计计算，不意味着观察性金融数据已满足识别条件；需检验平行趋势、遗漏混杂和政策时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "causal-n05-01",
+      "node_id": "causal-n05-01",
+      "title": "混杂因素",
+      "definition": "同时影响处理选择和结果的变量会扭曲观察组均值差，需要因果识别或实验设计。",
+      "assumptions": "识别因果效应需要明确处理分配、可忽略性、重叠、时间先后、共同趋势或工具变量排除限制等具体假设。",
+      "properties": [
+        "同时影响处理选择和结果的变量会扭曲观察组均值差，需要因果识别或实验设计。",
+        "预测能力和变量相关性不是因果效应；估计前应提供可信识别图、设计或制度背景。"
+      ],
+      "formulas": [
+        {
+          "label": "因果效应与识别表达",
+          "tex": "E[Y|D=1]-E[Y|D=0]\\ne E[Y(1)-Y(0)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义潜在结果、处理机制和可观测变量，再写出该识别设计要求的条件。",
+          "tex": "E[Y|D=1]-E[Y|D=0]\\ne E[Y(1)-Y(0)]"
+        },
+        {
+          "explanation": "利用随机化、加权、趋势差异或工具变量矩条件推导目标估计量。",
+          "tex": "E[Y|D=1]-E[Y|D=0]\\ne E[Y(1)-Y(0)]"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);D=rng.binomial(1,.5,100)\ny0=rng.normal(size=100);y=y0+.6*D\nprint(y[D==1].mean()-y[D==0].mean())",
+      "packages": "numpy",
+      "application": "研究ETF资金流、监管事件、市场规则与交易成本变化的因果影响。",
+      "limits": "示例展示因果设计的统计计算，不意味着观察性金融数据已满足识别条件；需检验平行趋势、遗漏混杂和政策时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "causal-n06-01",
+      "node_id": "causal-n06-01",
+      "title": "选择偏差",
+      "definition": "进入样本或接受处理的机制与潜在结果相关时，观测平均差异可能偏离目标总体。",
+      "assumptions": "识别因果效应需要明确处理分配、可忽略性、重叠、时间先后、共同趋势或工具变量排除限制等具体假设。",
+      "properties": [
+        "进入样本或接受处理的机制与潜在结果相关时，观测平均差异可能偏离目标总体。",
+        "预测能力和变量相关性不是因果效应；估计前应提供可信识别图、设计或制度背景。"
+      ],
+      "formulas": [
+        {
+          "label": "因果效应与识别表达",
+          "tex": "P(S=1|Y(0),Y(1),X)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义潜在结果、处理机制和可观测变量，再写出该识别设计要求的条件。",
+          "tex": "P(S=1|Y(0),Y(1),X)"
+        },
+        {
+          "explanation": "利用随机化、加权、趋势差异或工具变量矩条件推导目标估计量。",
+          "tex": "P(S=1|Y(0),Y(1),X)"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);D=rng.binomial(1,.5,100)\ny0=rng.normal(size=100);y=y0+.6*D\nprint(y[D==1].mean()-y[D==0].mean())",
+      "packages": "numpy",
+      "application": "研究ETF资金流、监管事件、市场规则与交易成本变化的因果影响。",
+      "limits": "示例展示因果设计的统计计算，不意味着观察性金融数据已满足识别条件；需检验平行趋势、遗漏混杂和政策时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "causal-n01-02",
+      "node_id": "causal-n01-02",
+      "title": "随机实验",
+      "definition": "随机分配处理使其与潜在结果在设计上独立，可识别处理组与对照组平均效应。",
+      "assumptions": "识别因果效应需要明确处理分配、可忽略性、重叠、时间先后、共同趋势或工具变量排除限制等具体假设。",
+      "properties": [
+        "随机分配处理使其与潜在结果在设计上独立，可识别处理组与对照组平均效应。",
+        "预测能力和变量相关性不是因果效应；估计前应提供可信识别图、设计或制度背景。"
+      ],
+      "formulas": [
+        {
+          "label": "因果效应与识别表达",
+          "tex": "D\\perp(Y(1),Y(0))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义潜在结果、处理机制和可观测变量，再写出该识别设计要求的条件。",
+          "tex": "D\\perp(Y(1),Y(0))"
+        },
+        {
+          "explanation": "利用随机化、加权、趋势差异或工具变量矩条件推导目标估计量。",
+          "tex": "D\\perp(Y(1),Y(0))"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([1,2,3,4]);print(np.diff(x))",
+      "packages": "numpy",
+      "application": "研究ETF资金流、监管事件、市场规则与交易成本变化的因果影响。",
+      "limits": "示例展示因果设计的统计计算，不意味着观察性金融数据已满足识别条件；需检验平行趋势、遗漏混杂和政策时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "causal-n04-02",
+      "node_id": "causal-n04-02",
+      "title": "双重稳健估计",
+      "definition": "结合倾向得分与结果回归模型，只要相应条件成立且其中一个辅助模型正确即可在总体极限下保持一致。",
+      "assumptions": "识别因果效应需要明确处理分配、可忽略性、重叠、时间先后、共同趋势或工具变量排除限制等具体假设。",
+      "properties": [
+        "结合倾向得分与结果回归模型，只要相应条件成立且其中一个辅助模型正确即可在总体极限下保持一致。",
+        "预测能力和变量相关性不是因果效应；估计前应提供可信识别图、设计或制度背景。"
+      ],
+      "formulas": [
+        {
+          "label": "因果效应与识别表达",
+          "tex": "\\psi=\\frac{D(Y-m_1(X))}{e(X)}-\\frac{(1-D)(Y-m_0(X))}{1-e(X)}+m_1(X)-m_0(X)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义潜在结果、处理机制和可观测变量，再写出该识别设计要求的条件。",
+          "tex": "\\psi=\\frac{D(Y-m_1(X))}{e(X)}-\\frac{(1-D)(Y-m_0(X))}{1-e(X)}+m_1(X)-m_0(X)"
+        },
+        {
+          "explanation": "利用随机化、加权、趋势差异或工具变量矩条件推导目标估计量。",
+          "tex": "\\psi=\\frac{D(Y-m_1(X))}{e(X)}-\\frac{(1-D)(Y-m_0(X))}{1-e(X)}+m_1(X)-m_0(X)"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([1,2,3,4]);print(np.diff(x))",
+      "packages": "numpy",
+      "application": "研究ETF资金流、监管事件、市场规则与交易成本变化的因果影响。",
+      "limits": "示例展示因果设计的统计计算，不意味着观察性金融数据已满足识别条件；需检验平行趋势、遗漏混杂和政策时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "causal-n06-02",
+      "node_id": "causal-n06-02",
+      "title": "断点回归",
+      "definition": "在处理概率于分数阈值发生跳变的设计中，阈值附近的结果不连续可识别局部处理效应。",
+      "assumptions": "识别因果效应需要明确处理分配、可忽略性、重叠、时间先后、共同趋势或工具变量排除限制等具体假设。",
+      "properties": [
+        "在处理概率于分数阈值发生跳变的设计中，阈值附近的结果不连续可识别局部处理效应。",
+        "预测能力和变量相关性不是因果效应；估计前应提供可信识别图、设计或制度背景。"
+      ],
+      "formulas": [
+        {
+          "label": "因果效应与识别表达",
+          "tex": "\\tau_{\\rm RD}=\\lim_{x\\downarrow c}E[Y|X=x]-\\lim_{x\\uparrow c}E[Y|X=x]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义潜在结果、处理机制和可观测变量，再写出该识别设计要求的条件。",
+          "tex": "\\tau_{\\rm RD}=\\lim_{x\\downarrow c}E[Y|X=x]-\\lim_{x\\uparrow c}E[Y|X=x]"
+        },
+        {
+          "explanation": "利用随机化、加权、趋势差异或工具变量矩条件推导目标估计量。",
+          "tex": "\\tau_{\\rm RD}=\\lim_{x\\downarrow c}E[Y|X=x]-\\lim_{x\\uparrow c}E[Y|X=x]"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([1,2,3,4]);print(np.diff(x))",
+      "packages": "numpy",
+      "application": "研究ETF资金流、监管事件、市场规则与交易成本变化的因果影响。",
+      "limits": "示例展示因果设计的统计计算，不意味着观察性金融数据已满足识别条件；需检验平行趋势、遗漏混杂和政策时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "causal-n01-03",
+      "node_id": "causal-n01-03",
+      "title": "Meta-Learner S/T/X",
+      "definition": "通过统一或分组回归模型估计处理和对照潜在结果，并由预测差构造个体异质性效应。",
+      "assumptions": "识别因果效应需要明确处理分配、可忽略性、重叠、时间先后、共同趋势或工具变量排除限制等具体假设。",
+      "properties": [
+        "通过统一或分组回归模型估计处理和对照潜在结果，并由预测差构造个体异质性效应。",
+        "预测能力和变量相关性不是因果效应；估计前应提供可信识别图、设计或制度背景。"
+      ],
+      "formulas": [
+        {
+          "label": "因果效应与识别表达",
+          "tex": "\\hat\\tau(x)=\\hat\\mu_1(x)-\\hat\\mu_0(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义潜在结果、处理机制和可观测变量，再写出该识别设计要求的条件。",
+          "tex": "\\hat\\tau(x)=\\hat\\mu_1(x)-\\hat\\mu_0(x)"
+        },
+        {
+          "explanation": "利用随机化、加权、趋势差异或工具变量矩条件推导目标估计量。",
+          "tex": "\\hat\\tau(x)=\\hat\\mu_1(x)-\\hat\\mu_0(x)"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.ensemble import RandomForestRegressor\nX=np.random.default_rng(0).normal(size=(50,2));y=X[:,0]\nprint(RandomForestRegressor(n_estimators=10,random_state=0).fit(X,y).predict(X[:2]))",
+      "packages": "numpy, scikit-learn",
+      "application": "研究ETF资金流、监管事件、市场规则与交易成本变化的因果影响。",
+      "limits": "示例展示因果设计的统计计算，不意味着观察性金融数据已满足识别条件；需检验平行趋势、遗漏混杂和政策时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "causal-n02-03",
+      "node_id": "causal-n02-03",
+      "title": "Causal Forest",
+      "definition": "因果森林通过多个树分区估计不同特征群体的局部处理效应，依赖识别和诚实分割假设。",
+      "assumptions": "识别因果效应需要明确处理分配、可忽略性、重叠、时间先后、共同趋势或工具变量排除限制等具体假设。",
+      "properties": [
+        "因果森林通过多个树分区估计不同特征群体的局部处理效应，依赖识别和诚实分割假设。",
+        "预测能力和变量相关性不是因果效应；估计前应提供可信识别图、设计或制度背景。"
+      ],
+      "formulas": [
+        {
+          "label": "因果效应与识别表达",
+          "tex": "\\tau(x)=E[Y(1)-Y(0)|X=x]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义潜在结果、处理机制和可观测变量，再写出该识别设计要求的条件。",
+          "tex": "\\tau(x)=E[Y(1)-Y(0)|X=x]"
+        },
+        {
+          "explanation": "利用随机化、加权、趋势差异或工具变量矩条件推导目标估计量。",
+          "tex": "\\tau(x)=E[Y(1)-Y(0)|X=x]"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.ensemble import RandomForestRegressor\nX=np.random.default_rng(0).normal(size=(50,2));y=X[:,0]\nprint(RandomForestRegressor(n_estimators=10,random_state=0).fit(X,y).predict(X[:2]))",
+      "packages": "numpy, scikit-learn",
+      "application": "研究ETF资金流、监管事件、市场规则与交易成本变化的因果影响。",
+      "limits": "示例展示因果设计的统计计算，不意味着观察性金融数据已满足识别条件；需检验平行趋势、遗漏混杂和政策时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "causal-n03-03",
+      "node_id": "causal-n03-03",
+      "title": "Orthogonal Score",
+      "definition": "正交矩条件使目标参数对辅助模型误差在真值附近的一阶敏感度为零。",
+      "assumptions": "识别因果效应需要明确处理分配、可忽略性、重叠、时间先后、共同趋势或工具变量排除限制等具体假设。",
+      "properties": [
+        "正交矩条件使目标参数对辅助模型误差在真值附近的一阶敏感度为零。",
+        "预测能力和变量相关性不是因果效应；估计前应提供可信识别图、设计或制度背景。"
+      ],
+      "formulas": [
+        {
+          "label": "因果效应与识别表达",
+          "tex": "\\frac{\\partial}{\\partial\\eta}E[\\psi(W;\\theta_0,\\eta)]\\big|_{\\eta_0}=0"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义潜在结果、处理机制和可观测变量，再写出该识别设计要求的条件。",
+          "tex": "\\frac{\\partial}{\\partial\\eta}E[\\psi(W;\\theta_0,\\eta)]\\big|_{\\eta_0}=0"
+        },
+        {
+          "explanation": "利用随机化、加权、趋势差异或工具变量矩条件推导目标估计量。",
+          "tex": "\\frac{\\partial}{\\partial\\eta}E[\\psi(W;\\theta_0,\\eta)]\\big|_{\\eta_0}=0"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.ensemble import RandomForestRegressor\nX=np.random.default_rng(0).normal(size=(50,2));y=X[:,0]\nprint(RandomForestRegressor(n_estimators=10,random_state=0).fit(X,y).predict(X[:2]))",
+      "packages": "numpy, scikit-learn",
+      "application": "研究ETF资金流、监管事件、市场规则与交易成本变化的因果影响。",
+      "limits": "示例展示因果设计的统计计算，不意味着观察性金融数据已满足识别条件；需检验平行趋势、遗漏混杂和政策时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "causal-n06-03",
+      "node_id": "causal-n06-03",
+      "title": "异质性效应CATE",
+      "definition": "条件平均处理效应描述不同X特征人群或资产的平均政策影响差异。",
+      "assumptions": "识别因果效应需要明确处理分配、可忽略性、重叠、时间先后、共同趋势或工具变量排除限制等具体假设。",
+      "properties": [
+        "条件平均处理效应描述不同X特征人群或资产的平均政策影响差异。",
+        "预测能力和变量相关性不是因果效应；估计前应提供可信识别图、设计或制度背景。"
+      ],
+      "formulas": [
+        {
+          "label": "因果效应与识别表达",
+          "tex": "\\tau(x)=E[Y(1)-Y(0)|X=x]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义潜在结果、处理机制和可观测变量，再写出该识别设计要求的条件。",
+          "tex": "\\tau(x)=E[Y(1)-Y(0)|X=x]"
+        },
+        {
+          "explanation": "利用随机化、加权、趋势差异或工具变量矩条件推导目标估计量。",
+          "tex": "\\tau(x)=E[Y(1)-Y(0)|X=x]"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.ensemble import RandomForestRegressor\nX=np.random.default_rng(0).normal(size=(50,2));y=X[:,0]\nprint(RandomForestRegressor(n_estimators=10,random_state=0).fit(X,y).predict(X[:2]))",
+      "packages": "numpy, scikit-learn",
+      "application": "研究ETF资金流、监管事件、市场规则与交易成本变化的因果影响。",
+      "limits": "示例展示因果设计的统计计算，不意味着观察性金融数据已满足识别条件；需检验平行趋势、遗漏混杂和政策时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "causal-n01-04",
+      "node_id": "causal-n01-04",
+      "title": "政策冲击资产反应",
+      "definition": "利用可信事件研究、DiD或工具变量识别政策公布对资产回报或交易行为的影响。",
+      "assumptions": "识别因果效应需要明确处理分配、可忽略性、重叠、时间先后、共同趋势或工具变量排除限制等具体假设。",
+      "properties": [
+        "利用可信事件研究、DiD或工具变量识别政策公布对资产回报或交易行为的影响。",
+        "预测能力和变量相关性不是因果效应；估计前应提供可信识别图、设计或制度背景。"
+      ],
+      "formulas": [
+        {
+          "label": "因果效应与识别表达",
+          "tex": "AR_{i,t}=R_{i,t}-E[R_{i,t}|\\mathcal F_{t^-}]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义潜在结果、处理机制和可观测变量，再写出该识别设计要求的条件。",
+          "tex": "AR_{i,t}=R_{i,t}-E[R_{i,t}|\\mathcal F_{t^-}]"
+        },
+        {
+          "explanation": "利用随机化、加权、趋势差异或工具变量矩条件推导目标估计量。",
+          "tex": "AR_{i,t}=R_{i,t}-E[R_{i,t}|\\mathcal F_{t^-}]"
+        }
+      ],
+      "code": "import numpy as np\nreturns=np.array([.01,-.02,.04]);baseline=np.array([.005,-.01,.02])\nprint('CAR:',np.sum(returns-baseline))",
+      "packages": "numpy",
+      "application": "研究ETF资金流、监管事件、市场规则与交易成本变化的因果影响。",
+      "limits": "示例展示因果设计的统计计算，不意味着观察性金融数据已满足识别条件；需检验平行趋势、遗漏混杂和政策时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "causal-n02-04",
+      "node_id": "causal-n02-04",
+      "title": "交易成本变化",
+      "definition": "交易费用或市场规则变化的因果分析应区分规则影响与同步市场波动变化。",
+      "assumptions": "识别因果效应需要明确处理分配、可忽略性、重叠、时间先后、共同趋势或工具变量排除限制等具体假设。",
+      "properties": [
+        "交易费用或市场规则变化的因果分析应区分规则影响与同步市场波动变化。",
+        "预测能力和变量相关性不是因果效应；估计前应提供可信识别图、设计或制度背景。"
+      ],
+      "formulas": [
+        {
+          "label": "因果效应与识别表达",
+          "tex": "\\tau=E[C(1)-C(0)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义潜在结果、处理机制和可观测变量，再写出该识别设计要求的条件。",
+          "tex": "\\tau=E[C(1)-C(0)]"
+        },
+        {
+          "explanation": "利用随机化、加权、趋势差异或工具变量矩条件推导目标估计量。",
+          "tex": "\\tau=E[C(1)-C(0)]"
+        }
+      ],
+      "code": "import numpy as np\nreturns=np.array([.01,-.02,.04]);baseline=np.array([.005,-.01,.02])\nprint('CAR:',np.sum(returns-baseline))",
+      "packages": "numpy",
+      "application": "研究ETF资金流、监管事件、市场规则与交易成本变化的因果影响。",
+      "limits": "示例展示因果设计的统计计算，不意味着观察性金融数据已满足识别条件；需检验平行趋势、遗漏混杂和政策时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "causal-n03-04",
+      "node_id": "causal-n03-04",
+      "title": "ETF资金流与回报",
+      "definition": "研究ETF资金流与价格影响需处理同时决定、共同市场冲击和反向因果。",
+      "assumptions": "识别因果效应需要明确处理分配、可忽略性、重叠、时间先后、共同趋势或工具变量排除限制等具体假设。",
+      "properties": [
+        "研究ETF资金流与价格影响需处理同时决定、共同市场冲击和反向因果。",
+        "预测能力和变量相关性不是因果效应；估计前应提供可信识别图、设计或制度背景。"
+      ],
+      "formulas": [
+        {
+          "label": "因果效应与识别表达",
+          "tex": "R_t=\\tau F_t+g(X_t)+\\epsilon_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义潜在结果、处理机制和可观测变量，再写出该识别设计要求的条件。",
+          "tex": "R_t=\\tau F_t+g(X_t)+\\epsilon_t"
+        },
+        {
+          "explanation": "利用随机化、加权、趋势差异或工具变量矩条件推导目标估计量。",
+          "tex": "R_t=\\tau F_t+g(X_t)+\\epsilon_t"
+        }
+      ],
+      "code": "import numpy as np\nreturns=np.array([.01,-.02,.04]);baseline=np.array([.005,-.01,.02])\nprint('CAR:',np.sum(returns-baseline))",
+      "packages": "numpy",
+      "application": "研究ETF资金流、监管事件、市场规则与交易成本变化的因果影响。",
+      "limits": "示例展示因果设计的统计计算，不意味着观察性金融数据已满足识别条件；需检验平行趋势、遗漏混杂和政策时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "causal-n04-04",
+      "node_id": "causal-n04-04",
+      "title": "事件研究",
+      "definition": "事件研究比较公告事件窗口实现回报与基准模型预测回报，以估计事件相关异常收益。",
+      "assumptions": "识别因果效应需要明确处理分配、可忽略性、重叠、时间先后、共同趋势或工具变量排除限制等具体假设。",
+      "properties": [
+        "事件研究比较公告事件窗口实现回报与基准模型预测回报，以估计事件相关异常收益。",
+        "预测能力和变量相关性不是因果效应；估计前应提供可信识别图、设计或制度背景。"
+      ],
+      "formulas": [
+        {
+          "label": "因果效应与识别表达",
+          "tex": "\\mathrm{CAR}_{[a,b]}=\\sum_{t=a}^b(R_t-\\hat R_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义潜在结果、处理机制和可观测变量，再写出该识别设计要求的条件。",
+          "tex": "\\mathrm{CAR}_{[a,b]}=\\sum_{t=a}^b(R_t-\\hat R_t)"
+        },
+        {
+          "explanation": "利用随机化、加权、趋势差异或工具变量矩条件推导目标估计量。",
+          "tex": "\\mathrm{CAR}_{[a,b]}=\\sum_{t=a}^b(R_t-\\hat R_t)"
+        }
+      ],
+      "code": "import numpy as np\nreturns=np.array([.01,-.02,.04]);baseline=np.array([.005,-.01,.02])\nprint('CAR:',np.sum(returns-baseline))",
+      "packages": "numpy",
+      "application": "研究ETF资金流、监管事件、市场规则与交易成本变化的因果影响。",
+      "limits": "示例展示因果设计的统计计算，不意味着观察性金融数据已满足识别条件；需检验平行趋势、遗漏混杂和政策时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "causal-n05-04",
+      "node_id": "causal-n05-04",
+      "title": "工具变量",
+      "definition": "工具变量影响处理变量，但在排除限制等条件下不直接作用于结果，可识别部分内生性问题。",
+      "assumptions": "识别因果效应需要明确处理分配、可忽略性、重叠、时间先后、共同趋势或工具变量排除限制等具体假设。",
+      "properties": [
+        "工具变量影响处理变量，但在排除限制等条件下不直接作用于结果，可识别部分内生性问题。",
+        "预测能力和变量相关性不是因果效应；估计前应提供可信识别图、设计或制度背景。"
+      ],
+      "formulas": [
+        {
+          "label": "因果效应与识别表达",
+          "tex": "\\beta_{\\rm IV}=\\frac{\\operatorname{Cov}(Z,Y)}{\\operatorname{Cov}(Z,D)}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义潜在结果、处理机制和可观测变量，再写出该识别设计要求的条件。",
+          "tex": "\\beta_{\\rm IV}=\\frac{\\operatorname{Cov}(Z,Y)}{\\operatorname{Cov}(Z,D)}"
+        },
+        {
+          "explanation": "利用随机化、加权、趋势差异或工具变量矩条件推导目标估计量。",
+          "tex": "\\beta_{\\rm IV}=\\frac{\\operatorname{Cov}(Z,Y)}{\\operatorname{Cov}(Z,D)}"
+        }
+      ],
+      "code": "import numpy as np\nreturns=np.array([.01,-.02,.04]);baseline=np.array([.005,-.01,.02])\nprint('CAR:',np.sum(returns-baseline))",
+      "packages": "numpy",
+      "application": "研究ETF资金流、监管事件、市场规则与交易成本变化的因果影响。",
+      "limits": "示例展示因果设计的统计计算，不意味着观察性金融数据已满足识别条件；需检验平行趋势、遗漏混杂和政策时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "causal-n06-04",
+      "node_id": "causal-n06-04",
+      "title": "市场干预效果",
+      "definition": "干预措施评价需明确受影响市场、政策时间、对照组及同时变化的制度因素。",
+      "assumptions": "识别因果效应需要明确处理分配、可忽略性、重叠、时间先后、共同趋势或工具变量排除限制等具体假设。",
+      "properties": [
+        "干预措施评价需明确受影响市场、政策时间、对照组及同时变化的制度因素。",
+        "预测能力和变量相关性不是因果效应；估计前应提供可信识别图、设计或制度背景。"
+      ],
+      "formulas": [
+        {
+          "label": "因果效应与识别表达",
+          "tex": "\\tau=E[Y(1)-Y(0)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义潜在结果、处理机制和可观测变量，再写出该识别设计要求的条件。",
+          "tex": "\\tau=E[Y(1)-Y(0)]"
+        },
+        {
+          "explanation": "利用随机化、加权、趋势差异或工具变量矩条件推导目标估计量。",
+          "tex": "\\tau=E[Y(1)-Y(0)]"
+        }
+      ],
+      "code": "import numpy as np\nreturns=np.array([.01,-.02,.04]);baseline=np.array([.005,-.01,.02])\nprint('CAR:',np.sum(returns-baseline))",
+      "packages": "numpy",
+      "application": "研究ETF资金流、监管事件、市场规则与交易成本变化的因果影响。",
+      "limits": "示例展示因果设计的统计计算，不意味着观察性金融数据已满足识别条件；需检验平行趋势、遗漏混杂和政策时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "causal-n01-05",
+      "node_id": "causal-n01-05",
+      "title": "重叠假设",
+      "definition": "每个相关协变量状态下处理和对照都必须有正概率，才能比较条件潜在结果。",
+      "assumptions": "识别因果效应需要明确处理分配、可忽略性、重叠、时间先后、共同趋势或工具变量排除限制等具体假设。",
+      "properties": [
+        "每个相关协变量状态下处理和对照都必须有正概率，才能比较条件潜在结果。",
+        "预测能力和变量相关性不是因果效应；估计前应提供可信识别图、设计或制度背景。"
+      ],
+      "formulas": [
+        {
+          "label": "因果效应与识别表达",
+          "tex": "0<P(D=1|X=x)<1"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义潜在结果、处理机制和可观测变量，再写出该识别设计要求的条件。",
+          "tex": "0<P(D=1|X=x)<1"
+        },
+        {
+          "explanation": "利用随机化、加权、趋势差异或工具变量矩条件推导目标估计量。",
+          "tex": "0<P(D=1|X=x)<1"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([0.,.1,-.1]);print('placebo mean:',x.mean())",
+      "packages": "numpy",
+      "application": "研究ETF资金流、监管事件、市场规则与交易成本变化的因果影响。",
+      "limits": "示例展示因果设计的统计计算，不意味着观察性金融数据已满足识别条件；需检验平行趋势、遗漏混杂和政策时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "causal-n02-05",
+      "node_id": "causal-n02-05",
+      "title": "共同趋势",
+      "definition": "两组未受处理结果在时间上的变化可能由共同冲击驱动，是准实验设计的重要组成。",
+      "assumptions": "识别因果效应需要明确处理分配、可忽略性、重叠、时间先后、共同趋势或工具变量排除限制等具体假设。",
+      "properties": [
+        "两组未受处理结果在时间上的变化可能由共同冲击驱动，是准实验设计的重要组成。",
+        "预测能力和变量相关性不是因果效应；估计前应提供可信识别图、设计或制度背景。"
+      ],
+      "formulas": [
+        {
+          "label": "因果效应与识别表达",
+          "tex": "\\Delta Y_{T,0}\\approx\\Delta Y_{C,0}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义潜在结果、处理机制和可观测变量，再写出该识别设计要求的条件。",
+          "tex": "\\Delta Y_{T,0}\\approx\\Delta Y_{C,0}"
+        },
+        {
+          "explanation": "利用随机化、加权、趋势差异或工具变量矩条件推导目标估计量。",
+          "tex": "\\Delta Y_{T,0}\\approx\\Delta Y_{C,0}"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([0.,.1,-.1]);print('placebo mean:',x.mean())",
+      "packages": "numpy",
+      "application": "研究ETF资金流、监管事件、市场规则与交易成本变化的因果影响。",
+      "limits": "示例展示因果设计的统计计算，不意味着观察性金融数据已满足识别条件；需检验平行趋势、遗漏混杂和政策时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "causal-n03-05",
+      "node_id": "causal-n03-05",
+      "title": "平行趋势",
+      "definition": "DiD要求无处理时处理组与对照组的平均结果变化一致，才能把差异中的差异解释为因果效应。",
+      "assumptions": "识别因果效应需要明确处理分配、可忽略性、重叠、时间先后、共同趋势或工具变量排除限制等具体假设。",
+      "properties": [
+        "DiD要求无处理时处理组与对照组的平均结果变化一致，才能把差异中的差异解释为因果效应。",
+        "预测能力和变量相关性不是因果效应；估计前应提供可信识别图、设计或制度背景。"
+      ],
+      "formulas": [
+        {
+          "label": "因果效应与识别表达",
+          "tex": "E[\\Delta Y(0)|D=1]=E[\\Delta Y(0)|D=0]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义潜在结果、处理机制和可观测变量，再写出该识别设计要求的条件。",
+          "tex": "E[\\Delta Y(0)|D=1]=E[\\Delta Y(0)|D=0]"
+        },
+        {
+          "explanation": "利用随机化、加权、趋势差异或工具变量矩条件推导目标估计量。",
+          "tex": "E[\\Delta Y(0)|D=1]=E[\\Delta Y(0)|D=0]"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([0.,.1,-.1]);print('placebo mean:',x.mean())",
+      "packages": "numpy",
+      "application": "研究ETF资金流、监管事件、市场规则与交易成本变化的因果影响。",
+      "limits": "示例展示因果设计的统计计算，不意味着观察性金融数据已满足识别条件；需检验平行趋势、遗漏混杂和政策时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "causal-n04-05",
+      "node_id": "causal-n04-05",
+      "title": "敏感性分析",
+      "definition": "考察隐藏混杂、模型误设和假设松动对因果估计方向与显著性的影响。",
+      "assumptions": "识别因果效应需要明确处理分配、可忽略性、重叠、时间先后、共同趋势或工具变量排除限制等具体假设。",
+      "properties": [
+        "考察隐藏混杂、模型误设和假设松动对因果估计方向与显著性的影响。",
+        "预测能力和变量相关性不是因果效应；估计前应提供可信识别图、设计或制度背景。"
+      ],
+      "formulas": [
+        {
+          "label": "因果效应与识别表达",
+          "tex": "\\hat\\tau(\\Gamma),\\quad\\Gamma\\ge1"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义潜在结果、处理机制和可观测变量，再写出该识别设计要求的条件。",
+          "tex": "\\hat\\tau(\\Gamma),\\quad\\Gamma\\ge1"
+        },
+        {
+          "explanation": "利用随机化、加权、趋势差异或工具变量矩条件推导目标估计量。",
+          "tex": "\\hat\\tau(\\Gamma),\\quad\\Gamma\\ge1"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([0.,.1,-.1]);print('placebo mean:',x.mean())",
+      "packages": "numpy",
+      "application": "研究ETF资金流、监管事件、市场规则与交易成本变化的因果影响。",
+      "limits": "示例展示因果设计的统计计算，不意味着观察性金融数据已满足识别条件；需检验平行趋势、遗漏混杂和政策时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "causal-n05-05",
+      "node_id": "causal-n05-05",
+      "title": "Placebo Test",
+      "definition": "在理论不应出现效应的虚假时间或伪处理组上重复估计，检查方法是否产生虚假因果结论。",
+      "assumptions": "识别因果效应需要明确处理分配、可忽略性、重叠、时间先后、共同趋势或工具变量排除限制等具体假设。",
+      "properties": [
+        "在理论不应出现效应的虚假时间或伪处理组上重复估计，检查方法是否产生虚假因果结论。",
+        "预测能力和变量相关性不是因果效应；估计前应提供可信识别图、设计或制度背景。"
+      ],
+      "formulas": [
+        {
+          "label": "因果效应与识别表达",
+          "tex": "\\hat\\tau_{\\rm placebo}\\approx0"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义潜在结果、处理机制和可观测变量，再写出该识别设计要求的条件。",
+          "tex": "\\hat\\tau_{\\rm placebo}\\approx0"
+        },
+        {
+          "explanation": "利用随机化、加权、趋势差异或工具变量矩条件推导目标估计量。",
+          "tex": "\\hat\\tau_{\\rm placebo}\\approx0"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([0.,.1,-.1]);print('placebo mean:',x.mean())",
+      "packages": "numpy",
+      "application": "研究ETF资金流、监管事件、市场规则与交易成本变化的因果影响。",
+      "limits": "示例展示因果设计的统计计算，不意味着观察性金融数据已满足识别条件；需检验平行趋势、遗漏混杂和政策时点。",
+      "coverage": "complete"
+    },
+    {
+      "id": "causal-n06-05",
+      "node_id": "causal-n06-05",
+      "title": "弱工具变量",
+      "definition": "工具变量与内生处理的第一阶段关联过弱会导致IV估计偏差、标准误失真及不稳定。",
+      "assumptions": "识别因果效应需要明确处理分配、可忽略性、重叠、时间先后、共同趋势或工具变量排除限制等具体假设。",
+      "properties": [
+        "工具变量与内生处理的第一阶段关联过弱会导致IV估计偏差、标准误失真及不稳定。",
+        "预测能力和变量相关性不是因果效应；估计前应提供可信识别图、设计或制度背景。"
+      ],
+      "formulas": [
+        {
+          "label": "因果效应与识别表达",
+          "tex": "\\operatorname{Cov}(Z,D)\\approx0"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先定义潜在结果、处理机制和可观测变量，再写出该识别设计要求的条件。",
+          "tex": "\\operatorname{Cov}(Z,D)\\approx0"
+        },
+        {
+          "explanation": "利用随机化、加权、趋势差异或工具变量矩条件推导目标估计量。",
+          "tex": "\\operatorname{Cov}(Z,D)\\approx0"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([0.,.1,-.1]);print('placebo mean:',x.mean())",
+      "packages": "numpy",
+      "application": "研究ETF资金流、监管事件、市场规则与交易成本变化的因果影响。",
+      "limits": "示例展示因果设计的统计计算，不意味着观察性金融数据已满足识别条件；需检验平行趋势、遗漏混杂和政策时点。",
+      "coverage": "complete"
+    }
+  ]
+}
