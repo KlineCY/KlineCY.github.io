@@ -186,8 +186,14 @@ function selectNode(id,update=true){
 window.mathSelectDiscipline=(id)=>{
  filterDept=deptMap.has(id)?id:"";
  $("disciplineFilter").value=filterDept;
- renderTree();
- setURL({discipline:filterDept});
+ let target=getNode(activeId);
+ if(filterDept&&target?.discipline_id!==filterDept){
+   target=nodes.find(n=>n.discipline_id===filterDept&&lessonMap.has(n.id))||
+          nodes.find(n=>n.discipline_id===filterDept);
+ }
+ if(target)selectNode(target.id,false);
+ else renderTree();
+ setURL({discipline:filterDept,topic:target?.id||null});
 };
 window.mathSelectTopic=(id)=>selectNode(id);
 $("search").addEventListener("input",e=>{query=e.target.value;renderTree()});
@@ -214,9 +220,13 @@ for(const d of depts){
  const chip=document.createElement("button");chip.type="button";chip.className="roadmap-chip";chip.dataset.dept=d.id;chip.textContent=d.order+" · "+d.title;chip.onclick=()=>window.mathSelectDiscipline(filterDept===d.id?"":d.id);$("roadmap").appendChild(chip);
 }
 const params=new URLSearchParams(location.search);
-const d=params.get("discipline"),requested=params.get("topic");
+const d=params.get("discipline"),requested=params.get("topic"),status=params.get("status");
 if(d&&deptMap.has(d)){filterDept=d;$("disciplineFilter").value=d}
+if(["complete","outline"].includes(status)){filterStatus=status;$("coverageFilter").value=status}
 const defaultNode=nodes.find(n=>n.discipline_id==="calculus"&&n.title==="链式法则")||nodes.find(n=>lessonMap.has(n.id))||nodes[0];
-selectNode(nodeMap.has(requested)?requested:defaultNode.id,false);
+const initial=(nodeMap.has(requested)?getNode(requested):null) ||
+  (filterDept?nodes.find(n=>n.discipline_id===filterDept&&lessonMap.has(n.id))||nodes.find(n=>n.discipline_id===filterDept):null) ||
+  defaultNode;
+selectNode(initial.id,false);
 }).catch(error=>{$("status").textContent="加载失败："+error.message;const div=document.createElement("p");div.className="notice";div.textContent="检查网络或站点数据文件： "+error.message;$("tree").appendChild(div)});
 })();
