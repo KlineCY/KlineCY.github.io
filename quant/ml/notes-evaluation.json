@@ -1,0 +1,645 @@
+{
+  "version": 1,
+  "notes": [
+    {
+      "id": "evaluation-n03-01",
+      "node_id": "evaluation-n03-01",
+      "title": "Log Loss",
+      "definition": "对真实类别的预测概率取负对数，低概率错判产生很大惩罚。",
+      "assumptions": "需要独立测试集、清晰的目标标签和数据采样条件。金融时间依赖、分布转移和多重选择会影响显著性结论。",
+      "properties": [
+        "对真实类别的预测概率取负对数，低概率错判产生很大惩罚。。",
+        "模型评价应考虑测量误差、置信区间、成本及可能的安全和公平性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "评价指标或风险关系",
+          "tex": "L=-n^{-1}\\sum_i[y_i\\log p_i+(1-y_i)\\log(1-p_i)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先确定评价对象、预测输出与参考样本分布。对真实类别的预测概率取负对数，低概率错判产生很大惩罚。",
+          "tex": "L=-n^{-1}\\sum_i[y_i\\log p_i+(1-y_i)\\log(1-p_i)]"
+        },
+        {
+          "explanation": "依据对应定义估计统计量，并检验不确定性及适用范围。",
+          "tex": "L=-n^{-1}\\sum_i[y_i\\log p_i+(1-y_i)\\log(1-p_i)]"
+        }
+      ],
+      "code": "# Log Loss：评价指标综合示例\nimport numpy as np\nfrom sklearn.metrics import log_loss,average_precision_score\ny=np.array([0,1,0,1,0,1]);p=np.array([.1,.8,.3,.6,.4,.7])\nprint(\"Log loss:\",log_loss(y,p))\nprint(\"Average precision:\",average_precision_score(y,p))\nfor thresh in [.3,.5,.7]:\n pred=p>=thresh\n print(\"threshold\",thresh,\"TP\",sum(pred&(y==1)),\"FP\",sum(pred&(y==0)))",
+      "packages": "numpy, scikit-learn",
+      "application": "量化分类模型、收益预测、多因子研究及金融LLM的稳健性验证。",
+      "limits": "此为专题扩展笔记：示例展示分类评价，不是安全/公平/对抗攻击的完整实验系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "evaluation-n06-01",
+      "node_id": "evaluation-n06-01",
+      "title": "PR-AUC",
+      "definition": "精确率召回率曲线评价不平衡数据的正类检出能力。",
+      "assumptions": "需要独立测试集、清晰的目标标签和数据采样条件。金融时间依赖、分布转移和多重选择会影响显著性结论。",
+      "properties": [
+        "精确率召回率曲线评价不平衡数据的正类检出能力。。",
+        "模型评价应考虑测量误差、置信区间、成本及可能的安全和公平性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "评价指标或风险关系",
+          "tex": "\\operatorname{AP}=\\sum_k(R_k-R_{k-1})P_k"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先确定评价对象、预测输出与参考样本分布。精确率召回率曲线评价不平衡数据的正类检出能力。",
+          "tex": "\\operatorname{AP}=\\sum_k(R_k-R_{k-1})P_k"
+        },
+        {
+          "explanation": "依据对应定义估计统计量，并检验不确定性及适用范围。",
+          "tex": "\\operatorname{AP}=\\sum_k(R_k-R_{k-1})P_k"
+        }
+      ],
+      "code": "# PR-AUC：评价指标综合示例\nimport numpy as np\nfrom sklearn.metrics import log_loss,average_precision_score\ny=np.array([0,1,0,1,0,1]);p=np.array([.1,.8,.3,.6,.4,.7])\nprint(\"Log loss:\",log_loss(y,p))\nprint(\"Average precision:\",average_precision_score(y,p))\nfor thresh in [.3,.5,.7]:\n pred=p>=thresh\n print(\"threshold\",thresh,\"TP\",sum(pred&(y==1)),\"FP\",sum(pred&(y==0)))",
+      "packages": "numpy, scikit-learn",
+      "application": "量化分类模型、收益预测、多因子研究及金融LLM的稳健性验证。",
+      "limits": "此为专题扩展笔记：示例展示分类评价，不是安全/公平/对抗攻击的完整实验系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "evaluation-n01-02",
+      "node_id": "evaluation-n01-02",
+      "title": "K折与GroupKFold",
+      "definition": "GroupKFold保证同一组的记录不会同时出现在训练与验证折。",
+      "assumptions": "需要独立测试集、清晰的目标标签和数据采样条件。金融时间依赖、分布转移和多重选择会影响显著性结论。",
+      "properties": [
+        "GroupKFold保证同一组的记录不会同时出现在训练与验证折。。",
+        "模型评价应考虑测量误差、置信区间、成本及可能的安全和公平性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "评价指标或风险关系",
+          "tex": "G_{\\rm train}\\cap G_{\\rm val}=\\varnothing"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先确定评价对象、预测输出与参考样本分布。GroupKFold保证同一组的记录不会同时出现在训练与验证折。",
+          "tex": "G_{\\rm train}\\cap G_{\\rm val}=\\varnothing"
+        },
+        {
+          "explanation": "依据对应定义估计统计量，并检验不确定性及适用范围。",
+          "tex": "G_{\\rm train}\\cap G_{\\rm val}=\\varnothing"
+        }
+      ],
+      "code": "# K折与GroupKFold：评价指标综合示例\nimport numpy as np\nfrom sklearn.metrics import log_loss,average_precision_score\ny=np.array([0,1,0,1,0,1]);p=np.array([.1,.8,.3,.6,.4,.7])\nprint(\"Log loss:\",log_loss(y,p))\nprint(\"Average precision:\",average_precision_score(y,p))\nfor thresh in [.3,.5,.7]:\n pred=p>=thresh\n print(\"threshold\",thresh,\"TP\",sum(pred&(y==1)),\"FP\",sum(pred&(y==0)))",
+      "packages": "numpy, scikit-learn",
+      "application": "量化分类模型、收益预测、多因子研究及金融LLM的稳健性验证。",
+      "limits": "此为专题扩展笔记：示例展示分类评价，不是安全/公平/对抗攻击的完整实验系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "evaluation-n02-02",
+      "node_id": "evaluation-n02-02",
+      "title": "时间序列交叉验证",
+      "definition": "每个验证窗口必须晚于对应训练窗口，支持扩展或滚动窗口。",
+      "assumptions": "需要独立测试集、清晰的目标标签和数据采样条件。金融时间依赖、分布转移和多重选择会影响显著性结论。",
+      "properties": [
+        "每个验证窗口必须晚于对应训练窗口，支持扩展或滚动窗口。。",
+        "模型评价应考虑测量误差、置信区间、成本及可能的安全和公平性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "评价指标或风险关系",
+          "tex": "\\max I_{\\rm train}<\\min I_{\\rm test}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先确定评价对象、预测输出与参考样本分布。每个验证窗口必须晚于对应训练窗口，支持扩展或滚动窗口。",
+          "tex": "\\max I_{\\rm train}<\\min I_{\\rm test}"
+        },
+        {
+          "explanation": "依据对应定义估计统计量，并检验不确定性及适用范围。",
+          "tex": "\\max I_{\\rm train}<\\min I_{\\rm test}"
+        }
+      ],
+      "code": "# 时间序列交叉验证：评价指标综合示例\nimport numpy as np\nfrom sklearn.metrics import log_loss,average_precision_score\ny=np.array([0,1,0,1,0,1]);p=np.array([.1,.8,.3,.6,.4,.7])\nprint(\"Log loss:\",log_loss(y,p))\nprint(\"Average precision:\",average_precision_score(y,p))\nfor thresh in [.3,.5,.7]:\n pred=p>=thresh\n print(\"threshold\",thresh,\"TP\",sum(pred&(y==1)),\"FP\",sum(pred&(y==0)))",
+      "packages": "numpy, scikit-learn",
+      "application": "量化分类模型、收益预测、多因子研究及金融LLM的稳健性验证。",
+      "limits": "此为专题扩展笔记：示例展示分类评价，不是安全/公平/对抗攻击的完整实验系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "evaluation-n03-02",
+      "node_id": "evaluation-n03-02",
+      "title": "置信区间",
+      "definition": "置信区间通过统计量抽样分布在重复采样意义下形成覆盖保证。",
+      "assumptions": "需要独立测试集、清晰的目标标签和数据采样条件。金融时间依赖、分布转移和多重选择会影响显著性结论。",
+      "properties": [
+        "置信区间通过统计量抽样分布在重复采样意义下形成覆盖保证。。",
+        "模型评价应考虑测量误差、置信区间、成本及可能的安全和公平性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "评价指标或风险关系",
+          "tex": "\\hat\\theta\\pm z_{1-\\alpha/2}\\widehat{\\mathrm{SE}}(\\hat\\theta)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先确定评价对象、预测输出与参考样本分布。置信区间通过统计量抽样分布在重复采样意义下形成覆盖保证。",
+          "tex": "\\hat\\theta\\pm z_{1-\\alpha/2}\\widehat{\\mathrm{SE}}(\\hat\\theta)"
+        },
+        {
+          "explanation": "依据对应定义估计统计量，并检验不确定性及适用范围。",
+          "tex": "\\hat\\theta\\pm z_{1-\\alpha/2}\\widehat{\\mathrm{SE}}(\\hat\\theta)"
+        }
+      ],
+      "code": "# 置信区间：评价指标综合示例\nimport numpy as np\nfrom sklearn.metrics import log_loss,average_precision_score\ny=np.array([0,1,0,1,0,1]);p=np.array([.1,.8,.3,.6,.4,.7])\nprint(\"Log loss:\",log_loss(y,p))\nprint(\"Average precision:\",average_precision_score(y,p))\nfor thresh in [.3,.5,.7]:\n pred=p>=thresh\n print(\"threshold\",thresh,\"TP\",sum(pred&(y==1)),\"FP\",sum(pred&(y==0)))",
+      "packages": "numpy, scikit-learn",
+      "application": "量化分类模型、收益预测、多因子研究及金融LLM的稳健性验证。",
+      "limits": "此为专题扩展笔记：示例展示分类评价，不是安全/公平/对抗攻击的完整实验系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "evaluation-n05-02",
+      "node_id": "evaluation-n05-02",
+      "title": "成对检验",
+      "definition": "对两个模型在相同观测上的预测损失取差，检验其平均差是否偏离零。",
+      "assumptions": "需要独立测试集、清晰的目标标签和数据采样条件。金融时间依赖、分布转移和多重选择会影响显著性结论。",
+      "properties": [
+        "对两个模型在相同观测上的预测损失取差，检验其平均差是否偏离零。。",
+        "模型评价应考虑测量误差、置信区间、成本及可能的安全和公平性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "评价指标或风险关系",
+          "tex": "d_i=\\ell_A(i)-\\ell_B(i)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先确定评价对象、预测输出与参考样本分布。对两个模型在相同观测上的预测损失取差，检验其平均差是否偏离零。",
+          "tex": "d_i=\\ell_A(i)-\\ell_B(i)"
+        },
+        {
+          "explanation": "依据对应定义估计统计量，并检验不确定性及适用范围。",
+          "tex": "d_i=\\ell_A(i)-\\ell_B(i)"
+        }
+      ],
+      "code": "# 成对检验：评价指标综合示例\nimport numpy as np\nfrom sklearn.metrics import log_loss,average_precision_score\ny=np.array([0,1,0,1,0,1]);p=np.array([.1,.8,.3,.6,.4,.7])\nprint(\"Log loss:\",log_loss(y,p))\nprint(\"Average precision:\",average_precision_score(y,p))\nfor thresh in [.3,.5,.7]:\n pred=p>=thresh\n print(\"threshold\",thresh,\"TP\",sum(pred&(y==1)),\"FP\",sum(pred&(y==0)))",
+      "packages": "numpy, scikit-learn",
+      "application": "量化分类模型、收益预测、多因子研究及金融LLM的稳健性验证。",
+      "limits": "此为专题扩展笔记：示例展示分类评价，不是安全/公平/对抗攻击的完整实验系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "evaluation-n06-02",
+      "node_id": "evaluation-n06-02",
+      "title": "多重试验",
+      "definition": "大量模型筛选会使最大样本内表现具有选择偏差，需调整显著性。",
+      "assumptions": "需要独立测试集、清晰的目标标签和数据采样条件。金融时间依赖、分布转移和多重选择会影响显著性结论。",
+      "properties": [
+        "大量模型筛选会使最大样本内表现具有选择偏差，需调整显著性。。",
+        "模型评价应考虑测量误差、置信区间、成本及可能的安全和公平性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "评价指标或风险关系",
+          "tex": "P(\\text{任意误报})\\le m\\alpha"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先确定评价对象、预测输出与参考样本分布。大量模型筛选会使最大样本内表现具有选择偏差，需调整显著性。",
+          "tex": "P(\\text{任意误报})\\le m\\alpha"
+        },
+        {
+          "explanation": "依据对应定义估计统计量，并检验不确定性及适用范围。",
+          "tex": "P(\\text{任意误报})\\le m\\alpha"
+        }
+      ],
+      "code": "# 多重试验：评价指标综合示例\nimport numpy as np\nfrom sklearn.metrics import log_loss,average_precision_score\ny=np.array([0,1,0,1,0,1]);p=np.array([.1,.8,.3,.6,.4,.7])\nprint(\"Log loss:\",log_loss(y,p))\nprint(\"Average precision:\",average_precision_score(y,p))\nfor thresh in [.3,.5,.7]:\n pred=p>=thresh\n print(\"threshold\",thresh,\"TP\",sum(pred&(y==1)),\"FP\",sum(pred&(y==0)))",
+      "packages": "numpy, scikit-learn",
+      "application": "量化分类模型、收益预测、多因子研究及金融LLM的稳健性验证。",
+      "limits": "此为专题扩展笔记：示例展示分类评价，不是安全/公平/对抗攻击的完整实验系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "evaluation-n01-03",
+      "node_id": "evaluation-n01-03",
+      "title": "不平衡类别",
+      "definition": "正例稀少时整体准确率可能掩盖模型对重要事件的漏报。",
+      "assumptions": "需要独立测试集、清晰的目标标签和数据采样条件。金融时间依赖、分布转移和多重选择会影响显著性结论。",
+      "properties": [
+        "正例稀少时整体准确率可能掩盖模型对重要事件的漏报。。",
+        "模型评价应考虑测量误差、置信区间、成本及可能的安全和公平性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "评价指标或风险关系",
+          "tex": "\\operatorname{Recall}=TP/(TP+FN)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先确定评价对象、预测输出与参考样本分布。正例稀少时整体准确率可能掩盖模型对重要事件的漏报。",
+          "tex": "\\operatorname{Recall}=TP/(TP+FN)"
+        },
+        {
+          "explanation": "依据对应定义估计统计量，并检验不确定性及适用范围。",
+          "tex": "\\operatorname{Recall}=TP/(TP+FN)"
+        }
+      ],
+      "code": "# 不平衡类别：评价指标综合示例\nimport numpy as np\nfrom sklearn.metrics import log_loss,average_precision_score\ny=np.array([0,1,0,1,0,1]);p=np.array([.1,.8,.3,.6,.4,.7])\nprint(\"Log loss:\",log_loss(y,p))\nprint(\"Average precision:\",average_precision_score(y,p))\nfor thresh in [.3,.5,.7]:\n pred=p>=thresh\n print(\"threshold\",thresh,\"TP\",sum(pred&(y==1)),\"FP\",sum(pred&(y==0)))",
+      "packages": "numpy, scikit-learn",
+      "application": "量化分类模型、收益预测、多因子研究及金融LLM的稳健性验证。",
+      "limits": "此为专题扩展笔记：示例展示分类评价，不是安全/公平/对抗攻击的完整实验系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "evaluation-n02-03",
+      "node_id": "evaluation-n02-03",
+      "title": "阈值选择",
+      "definition": "依据验证集误报漏报成本确定预测概率阈值。",
+      "assumptions": "需要独立测试集、清晰的目标标签和数据采样条件。金融时间依赖、分布转移和多重选择会影响显著性结论。",
+      "properties": [
+        "依据验证集误报漏报成本确定预测概率阈值。。",
+        "模型评价应考虑测量误差、置信区间、成本及可能的安全和公平性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "评价指标或风险关系",
+          "tex": "\\tau^*=\\arg\\min_\\tau E[C(\\hat y_\\tau,Y)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先确定评价对象、预测输出与参考样本分布。依据验证集误报漏报成本确定预测概率阈值。",
+          "tex": "\\tau^*=\\arg\\min_\\tau E[C(\\hat y_\\tau,Y)]"
+        },
+        {
+          "explanation": "依据对应定义估计统计量，并检验不确定性及适用范围。",
+          "tex": "\\tau^*=\\arg\\min_\\tau E[C(\\hat y_\\tau,Y)]"
+        }
+      ],
+      "code": "# 阈值选择：评价指标综合示例\nimport numpy as np\nfrom sklearn.metrics import log_loss,average_precision_score\ny=np.array([0,1,0,1,0,1]);p=np.array([.1,.8,.3,.6,.4,.7])\nprint(\"Log loss:\",log_loss(y,p))\nprint(\"Average precision:\",average_precision_score(y,p))\nfor thresh in [.3,.5,.7]:\n pred=p>=thresh\n print(\"threshold\",thresh,\"TP\",sum(pred&(y==1)),\"FP\",sum(pred&(y==0)))",
+      "packages": "numpy, scikit-learn",
+      "application": "量化分类模型、收益预测、多因子研究及金融LLM的稳健性验证。",
+      "limits": "此为专题扩展笔记：示例展示分类评价，不是安全/公平/对抗攻击的完整实验系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "evaluation-n06-03",
+      "node_id": "evaluation-n06-03",
+      "title": "概念漂移",
+      "definition": "目标条件关系随时间变化，与单纯的特征边缘分布漂移不同。",
+      "assumptions": "需要独立测试集、清晰的目标标签和数据采样条件。金融时间依赖、分布转移和多重选择会影响显著性结论。",
+      "properties": [
+        "目标条件关系随时间变化，与单纯的特征边缘分布漂移不同。。",
+        "模型评价应考虑测量误差、置信区间、成本及可能的安全和公平性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "评价指标或风险关系",
+          "tex": "P_t(Y\\mid X)\\ne P_s(Y\\mid X)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先确定评价对象、预测输出与参考样本分布。目标条件关系随时间变化，与单纯的特征边缘分布漂移不同。",
+          "tex": "P_t(Y\\mid X)\\ne P_s(Y\\mid X)"
+        },
+        {
+          "explanation": "依据对应定义估计统计量，并检验不确定性及适用范围。",
+          "tex": "P_t(Y\\mid X)\\ne P_s(Y\\mid X)"
+        }
+      ],
+      "code": "# 概念漂移：评价指标综合示例\nimport numpy as np\nfrom sklearn.metrics import log_loss,average_precision_score\ny=np.array([0,1,0,1,0,1]);p=np.array([.1,.8,.3,.6,.4,.7])\nprint(\"Log loss:\",log_loss(y,p))\nprint(\"Average precision:\",average_precision_score(y,p))\nfor thresh in [.3,.5,.7]:\n pred=p>=thresh\n print(\"threshold\",thresh,\"TP\",sum(pred&(y==1)),\"FP\",sum(pred&(y==0)))",
+      "packages": "numpy, scikit-learn",
+      "application": "量化分类模型、收益预测、多因子研究及金融LLM的稳健性验证。",
+      "limits": "此为专题扩展笔记：示例展示分类评价，不是安全/公平/对抗攻击的完整实验系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "evaluation-n03-04",
+      "node_id": "evaluation-n03-04",
+      "title": "PDP/ICE",
+      "definition": "PDP平均不同样本对特征变化的模型反应，ICE显示单个样本曲线。",
+      "assumptions": "需要独立测试集、清晰的目标标签和数据采样条件。金融时间依赖、分布转移和多重选择会影响显著性结论。",
+      "properties": [
+        "PDP平均不同样本对特征变化的模型反应，ICE显示单个样本曲线。。",
+        "模型评价应考虑测量误差、置信区间、成本及可能的安全和公平性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "评价指标或风险关系",
+          "tex": "\\operatorname{PDP}_j(z)=n^{-1}\\sum_if(z,x_{i,-j})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先确定评价对象、预测输出与参考样本分布。PDP平均不同样本对特征变化的模型反应，ICE显示单个样本曲线。",
+          "tex": "\\operatorname{PDP}_j(z)=n^{-1}\\sum_if(z,x_{i,-j})"
+        },
+        {
+          "explanation": "依据对应定义估计统计量，并检验不确定性及适用范围。",
+          "tex": "\\operatorname{PDP}_j(z)=n^{-1}\\sum_if(z,x_{i,-j})"
+        }
+      ],
+      "code": "# PDP/ICE：评价指标综合示例\nimport numpy as np\nfrom sklearn.metrics import log_loss,average_precision_score\ny=np.array([0,1,0,1,0,1]);p=np.array([.1,.8,.3,.6,.4,.7])\nprint(\"Log loss:\",log_loss(y,p))\nprint(\"Average precision:\",average_precision_score(y,p))\nfor thresh in [.3,.5,.7]:\n pred=p>=thresh\n print(\"threshold\",thresh,\"TP\",sum(pred&(y==1)),\"FP\",sum(pred&(y==0)))",
+      "packages": "numpy, scikit-learn",
+      "application": "量化分类模型、收益预测、多因子研究及金融LLM的稳健性验证。",
+      "limits": "此为专题扩展笔记：示例展示分类评价，不是安全/公平/对抗攻击的完整实验系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "evaluation-n04-04",
+      "node_id": "evaluation-n04-04",
+      "title": "反事实解释",
+      "definition": "寻找使模型预测改变且满足可行限制的最小输入变更。",
+      "assumptions": "需要独立测试集、清晰的目标标签和数据采样条件。金融时间依赖、分布转移和多重选择会影响显著性结论。",
+      "properties": [
+        "寻找使模型预测改变且满足可行限制的最小输入变更。。",
+        "模型评价应考虑测量误差、置信区间、成本及可能的安全和公平性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "评价指标或风险关系",
+          "tex": "x^*=\\arg\\min_{x'}d(x,x')+\\lambda\\ell(f(x'),y^*)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先确定评价对象、预测输出与参考样本分布。寻找使模型预测改变且满足可行限制的最小输入变更。",
+          "tex": "x^*=\\arg\\min_{x'}d(x,x')+\\lambda\\ell(f(x'),y^*)"
+        },
+        {
+          "explanation": "依据对应定义估计统计量，并检验不确定性及适用范围。",
+          "tex": "x^*=\\arg\\min_{x'}d(x,x')+\\lambda\\ell(f(x'),y^*)"
+        }
+      ],
+      "code": "# 反事实解释：评价指标综合示例\nimport numpy as np\nfrom sklearn.metrics import log_loss,average_precision_score\ny=np.array([0,1,0,1,0,1]);p=np.array([.1,.8,.3,.6,.4,.7])\nprint(\"Log loss:\",log_loss(y,p))\nprint(\"Average precision:\",average_precision_score(y,p))\nfor thresh in [.3,.5,.7]:\n pred=p>=thresh\n print(\"threshold\",thresh,\"TP\",sum(pred&(y==1)),\"FP\",sum(pred&(y==0)))",
+      "packages": "numpy, scikit-learn",
+      "application": "量化分类模型、收益预测、多因子研究及金融LLM的稳健性验证。",
+      "limits": "此为专题扩展笔记：示例展示分类评价，不是安全/公平/对抗攻击的完整实验系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "evaluation-n05-04",
+      "node_id": "evaluation-n05-04",
+      "title": "稳健性测试",
+      "definition": "检查噪声、缺失、子群、极端时期和参数变化下模型输出是否稳定。",
+      "assumptions": "需要独立测试集、清晰的目标标签和数据采样条件。金融时间依赖、分布转移和多重选择会影响显著性结论。",
+      "properties": [
+        "检查噪声、缺失、子群、极端时期和参数变化下模型输出是否稳定。。",
+        "模型评价应考虑测量误差、置信区间、成本及可能的安全和公平性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "评价指标或风险关系",
+          "tex": "\\sup_{\\|\\delta\\|\\le\\epsilon}\\ell(f(x+\\delta),y)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先确定评价对象、预测输出与参考样本分布。检查噪声、缺失、子群、极端时期和参数变化下模型输出是否稳定。",
+          "tex": "\\sup_{\\|\\delta\\|\\le\\epsilon}\\ell(f(x+\\delta),y)"
+        },
+        {
+          "explanation": "依据对应定义估计统计量，并检验不确定性及适用范围。",
+          "tex": "\\sup_{\\|\\delta\\|\\le\\epsilon}\\ell(f(x+\\delta),y)"
+        }
+      ],
+      "code": "# 稳健性测试：评价指标综合示例\nimport numpy as np\nfrom sklearn.metrics import log_loss,average_precision_score\ny=np.array([0,1,0,1,0,1]);p=np.array([.1,.8,.3,.6,.4,.7])\nprint(\"Log loss:\",log_loss(y,p))\nprint(\"Average precision:\",average_precision_score(y,p))\nfor thresh in [.3,.5,.7]:\n pred=p>=thresh\n print(\"threshold\",thresh,\"TP\",sum(pred&(y==1)),\"FP\",sum(pred&(y==0)))",
+      "packages": "numpy, scikit-learn",
+      "application": "量化分类模型、收益预测、多因子研究及金融LLM的稳健性验证。",
+      "limits": "此为专题扩展笔记：示例展示分类评价，不是安全/公平/对抗攻击的完整实验系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "evaluation-n06-04",
+      "node_id": "evaluation-n06-04",
+      "title": "公平性指标",
+      "definition": "比较不同群体的预测错误率或结果差异，评估模型可能的系统性不公平。",
+      "assumptions": "需要独立测试集、清晰的目标标签和数据采样条件。金融时间依赖、分布转移和多重选择会影响显著性结论。",
+      "properties": [
+        "比较不同群体的预测错误率或结果差异，评估模型可能的系统性不公平。。",
+        "模型评价应考虑测量误差、置信区间、成本及可能的安全和公平性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "评价指标或风险关系",
+          "tex": "P(\\hat Y=1\\mid A=a)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先确定评价对象、预测输出与参考样本分布。比较不同群体的预测错误率或结果差异，评估模型可能的系统性不公平。",
+          "tex": "P(\\hat Y=1\\mid A=a)"
+        },
+        {
+          "explanation": "依据对应定义估计统计量，并检验不确定性及适用范围。",
+          "tex": "P(\\hat Y=1\\mid A=a)"
+        }
+      ],
+      "code": "# 公平性指标：评价指标综合示例\nimport numpy as np\nfrom sklearn.metrics import log_loss,average_precision_score\ny=np.array([0,1,0,1,0,1]);p=np.array([.1,.8,.3,.6,.4,.7])\nprint(\"Log loss:\",log_loss(y,p))\nprint(\"Average precision:\",average_precision_score(y,p))\nfor thresh in [.3,.5,.7]:\n pred=p>=thresh\n print(\"threshold\",thresh,\"TP\",sum(pred&(y==1)),\"FP\",sum(pred&(y==0)))",
+      "packages": "numpy, scikit-learn",
+      "application": "量化分类模型、收益预测、多因子研究及金融LLM的稳健性验证。",
+      "limits": "此为专题扩展笔记：示例展示分类评价，不是安全/公平/对抗攻击的完整实验系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "evaluation-n01-05",
+      "node_id": "evaluation-n01-05",
+      "title": "对抗样本",
+      "definition": "对输入添加小幅扰动以最大化分类损失，检验模型局部脆弱性。",
+      "assumptions": "需要独立测试集、清晰的目标标签和数据采样条件。金融时间依赖、分布转移和多重选择会影响显著性结论。",
+      "properties": [
+        "对输入添加小幅扰动以最大化分类损失，检验模型局部脆弱性。。",
+        "模型评价应考虑测量误差、置信区间、成本及可能的安全和公平性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "评价指标或风险关系",
+          "tex": "\\delta^*=\\arg\\max_{\\|\\delta\\|\\le\\epsilon}L(f(x+\\delta),y)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先确定评价对象、预测输出与参考样本分布。对输入添加小幅扰动以最大化分类损失，检验模型局部脆弱性。",
+          "tex": "\\delta^*=\\arg\\max_{\\|\\delta\\|\\le\\epsilon}L(f(x+\\delta),y)"
+        },
+        {
+          "explanation": "依据对应定义估计统计量，并检验不确定性及适用范围。",
+          "tex": "\\delta^*=\\arg\\max_{\\|\\delta\\|\\le\\epsilon}L(f(x+\\delta),y)"
+        }
+      ],
+      "code": "# 对抗样本：评价指标综合示例\nimport numpy as np\nfrom sklearn.metrics import log_loss,average_precision_score\ny=np.array([0,1,0,1,0,1]);p=np.array([.1,.8,.3,.6,.4,.7])\nprint(\"Log loss:\",log_loss(y,p))\nprint(\"Average precision:\",average_precision_score(y,p))\nfor thresh in [.3,.5,.7]:\n pred=p>=thresh\n print(\"threshold\",thresh,\"TP\",sum(pred&(y==1)),\"FP\",sum(pred&(y==0)))",
+      "packages": "numpy, scikit-learn",
+      "application": "量化分类模型、收益预测、多因子研究及金融LLM的稳健性验证。",
+      "limits": "此为专题扩展笔记：示例展示分类评价，不是安全/公平/对抗攻击的完整实验系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "evaluation-n02-05",
+      "node_id": "evaluation-n02-05",
+      "title": "数据投毒",
+      "definition": "攻击者通过操纵训练样本或标签改变模型参数和样本外行为。",
+      "assumptions": "需要独立测试集、清晰的目标标签和数据采样条件。金融时间依赖、分布转移和多重选择会影响显著性结论。",
+      "properties": [
+        "攻击者通过操纵训练样本或标签改变模型参数和样本外行为。。",
+        "模型评价应考虑测量误差、置信区间、成本及可能的安全和公平性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "评价指标或风险关系",
+          "tex": "\\theta^*=\\operatorname{Train}(D\\cup D_{\\rm poison})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先确定评价对象、预测输出与参考样本分布。攻击者通过操纵训练样本或标签改变模型参数和样本外行为。",
+          "tex": "\\theta^*=\\operatorname{Train}(D\\cup D_{\\rm poison})"
+        },
+        {
+          "explanation": "依据对应定义估计统计量，并检验不确定性及适用范围。",
+          "tex": "\\theta^*=\\operatorname{Train}(D\\cup D_{\\rm poison})"
+        }
+      ],
+      "code": "# 数据投毒：评价指标综合示例\nimport numpy as np\nfrom sklearn.metrics import log_loss,average_precision_score\ny=np.array([0,1,0,1,0,1]);p=np.array([.1,.8,.3,.6,.4,.7])\nprint(\"Log loss:\",log_loss(y,p))\nprint(\"Average precision:\",average_precision_score(y,p))\nfor thresh in [.3,.5,.7]:\n pred=p>=thresh\n print(\"threshold\",thresh,\"TP\",sum(pred&(y==1)),\"FP\",sum(pred&(y==0)))",
+      "packages": "numpy, scikit-learn",
+      "application": "量化分类模型、收益预测、多因子研究及金融LLM的稳健性验证。",
+      "limits": "此为专题扩展笔记：示例展示分类评价，不是安全/公平/对抗攻击的完整实验系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "evaluation-n03-05",
+      "node_id": "evaluation-n03-05",
+      "title": "隐私泄露",
+      "definition": "训练数据可能通过模型输出被推断或复原，需要控制敏感信息暴露。",
+      "assumptions": "需要独立测试集、清晰的目标标签和数据采样条件。金融时间依赖、分布转移和多重选择会影响显著性结论。",
+      "properties": [
+        "训练数据可能通过模型输出被推断或复原，需要控制敏感信息暴露。。",
+        "模型评价应考虑测量误差、置信区间、成本及可能的安全和公平性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "评价指标或风险关系",
+          "tex": "P(\\mathrm{member}\\mid f_\\theta(x))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先确定评价对象、预测输出与参考样本分布。训练数据可能通过模型输出被推断或复原，需要控制敏感信息暴露。",
+          "tex": "P(\\mathrm{member}\\mid f_\\theta(x))"
+        },
+        {
+          "explanation": "依据对应定义估计统计量，并检验不确定性及适用范围。",
+          "tex": "P(\\mathrm{member}\\mid f_\\theta(x))"
+        }
+      ],
+      "code": "# 隐私泄露：评价指标综合示例\nimport numpy as np\nfrom sklearn.metrics import log_loss,average_precision_score\ny=np.array([0,1,0,1,0,1]);p=np.array([.1,.8,.3,.6,.4,.7])\nprint(\"Log loss:\",log_loss(y,p))\nprint(\"Average precision:\",average_precision_score(y,p))\nfor thresh in [.3,.5,.7]:\n pred=p>=thresh\n print(\"threshold\",thresh,\"TP\",sum(pred&(y==1)),\"FP\",sum(pred&(y==0)))",
+      "packages": "numpy, scikit-learn",
+      "application": "量化分类模型、收益预测、多因子研究及金融LLM的稳健性验证。",
+      "limits": "此为专题扩展笔记：示例展示分类评价，不是安全/公平/对抗攻击的完整实验系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "evaluation-n04-05",
+      "node_id": "evaluation-n04-05",
+      "title": "模型抽取",
+      "definition": "攻击者多次查询模型输入输出拟合替代模型，造成知识产权或安全风险。",
+      "assumptions": "需要独立测试集、清晰的目标标签和数据采样条件。金融时间依赖、分布转移和多重选择会影响显著性结论。",
+      "properties": [
+        "攻击者多次查询模型输入输出拟合替代模型，造成知识产权或安全风险。。",
+        "模型评价应考虑测量误差、置信区间、成本及可能的安全和公平性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "评价指标或风险关系",
+          "tex": "\\hat f=\\operatorname{Fit}\\{(x_i,f(x_i))\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先确定评价对象、预测输出与参考样本分布。攻击者多次查询模型输入输出拟合替代模型，造成知识产权或安全风险。",
+          "tex": "\\hat f=\\operatorname{Fit}\\{(x_i,f(x_i))\\}"
+        },
+        {
+          "explanation": "依据对应定义估计统计量，并检验不确定性及适用范围。",
+          "tex": "\\hat f=\\operatorname{Fit}\\{(x_i,f(x_i))\\}"
+        }
+      ],
+      "code": "# 模型抽取：评价指标综合示例\nimport numpy as np\nfrom sklearn.metrics import log_loss,average_precision_score\ny=np.array([0,1,0,1,0,1]);p=np.array([.1,.8,.3,.6,.4,.7])\nprint(\"Log loss:\",log_loss(y,p))\nprint(\"Average precision:\",average_precision_score(y,p))\nfor thresh in [.3,.5,.7]:\n pred=p>=thresh\n print(\"threshold\",thresh,\"TP\",sum(pred&(y==1)),\"FP\",sum(pred&(y==0)))",
+      "packages": "numpy, scikit-learn",
+      "application": "量化分类模型、收益预测、多因子研究及金融LLM的稳健性验证。",
+      "limits": "此为专题扩展笔记：示例展示分类评价，不是安全/公平/对抗攻击的完整实验系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "evaluation-n05-05",
+      "node_id": "evaluation-n05-05",
+      "title": "提示注入防御",
+      "definition": "外部网页和文档中的文本应视为不可信数据，不得覆盖系统规则或权限约束。",
+      "assumptions": "需要独立测试集、清晰的目标标签和数据采样条件。金融时间依赖、分布转移和多重选择会影响显著性结论。",
+      "properties": [
+        "外部网页和文档中的文本应视为不可信数据，不得覆盖系统规则或权限约束。。",
+        "模型评价应考虑测量误差、置信区间、成本及可能的安全和公平性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "评价指标或风险关系",
+          "tex": "\\mathrm{ToolAllow}(a)\\in\\{0,1\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先确定评价对象、预测输出与参考样本分布。外部网页和文档中的文本应视为不可信数据，不得覆盖系统规则或权限约束。",
+          "tex": "\\mathrm{ToolAllow}(a)\\in\\{0,1\\}"
+        },
+        {
+          "explanation": "依据对应定义估计统计量，并检验不确定性及适用范围。",
+          "tex": "\\mathrm{ToolAllow}(a)\\in\\{0,1\\}"
+        }
+      ],
+      "code": "# 提示注入防御：评价指标综合示例\nimport numpy as np\nfrom sklearn.metrics import log_loss,average_precision_score\ny=np.array([0,1,0,1,0,1]);p=np.array([.1,.8,.3,.6,.4,.7])\nprint(\"Log loss:\",log_loss(y,p))\nprint(\"Average precision:\",average_precision_score(y,p))\nfor thresh in [.3,.5,.7]:\n pred=p>=thresh\n print(\"threshold\",thresh,\"TP\",sum(pred&(y==1)),\"FP\",sum(pred&(y==0)))",
+      "packages": "numpy, scikit-learn",
+      "application": "量化分类模型、收益预测、多因子研究及金融LLM的稳健性验证。",
+      "limits": "此为专题扩展笔记：示例展示分类评价，不是安全/公平/对抗攻击的完整实验系统。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "evaluation-n06-05",
+      "node_id": "evaluation-n06-05",
+      "title": "评测基准污染",
+      "definition": "评测题目或答案进入训练集时，模型基准成绩可能无法代表真实泛化。",
+      "assumptions": "需要独立测试集、清晰的目标标签和数据采样条件。金融时间依赖、分布转移和多重选择会影响显著性结论。",
+      "properties": [
+        "评测题目或答案进入训练集时，模型基准成绩可能无法代表真实泛化。。",
+        "模型评价应考虑测量误差、置信区间、成本及可能的安全和公平性风险。"
+      ],
+      "formulas": [
+        {
+          "label": "评价指标或风险关系",
+          "tex": "D_{\\rm train}\\cap D_{\\rm benchmark}\\ne\\varnothing"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先确定评价对象、预测输出与参考样本分布。评测题目或答案进入训练集时，模型基准成绩可能无法代表真实泛化。",
+          "tex": "D_{\\rm train}\\cap D_{\\rm benchmark}\\ne\\varnothing"
+        },
+        {
+          "explanation": "依据对应定义估计统计量，并检验不确定性及适用范围。",
+          "tex": "D_{\\rm train}\\cap D_{\\rm benchmark}\\ne\\varnothing"
+        }
+      ],
+      "code": "# 评测基准污染：评价指标综合示例\nimport numpy as np\nfrom sklearn.metrics import log_loss,average_precision_score\ny=np.array([0,1,0,1,0,1]);p=np.array([.1,.8,.3,.6,.4,.7])\nprint(\"Log loss:\",log_loss(y,p))\nprint(\"Average precision:\",average_precision_score(y,p))\nfor thresh in [.3,.5,.7]:\n pred=p>=thresh\n print(\"threshold\",thresh,\"TP\",sum(pred&(y==1)),\"FP\",sum(pred&(y==0)))",
+      "packages": "numpy, scikit-learn",
+      "application": "量化分类模型、收益预测、多因子研究及金融LLM的稳健性验证。",
+      "limits": "此为专题扩展笔记：示例展示分类评价，不是安全/公平/对抗攻击的完整实验系统。",
+      "coverage": "expanded"
+    }
+  ]
+}
