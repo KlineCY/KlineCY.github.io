@@ -69,7 +69,7 @@ function isMatch(n){
 function nodeButton(n){
 const b=document.createElement("button");b.className="node"+(n.id===activeId?" active":"");b.type="button";b.dataset.node=n.id;
 const ok=isComplete(n);b.innerHTML='<span class="complete-mark" aria-hidden="true">'+(studied.has(n.id)?"✓":ok?"●":"·")+'</span><span class="node-name">'+esc(n.title)+'</span><span class="node-label'+(ok?" complete":"")+'">'+(ok?"讲义":"目录")+'</span>';
-b.addEventListener("click",()=>selectNode(n.id));
+b.addEventListener("click",()=>selectNode(n.id,true,true));
 return b;
 }
 function makeChapter(c,visible,open){
@@ -184,7 +184,7 @@ const chapterNodes=ch.node_ids.map(getNode).filter(Boolean);
 for(const topic of chapterNodes){const li=document.createElement("li");li.textContent=topic.title+(topic.id===n.id?"（当前知识点）":"");list.appendChild(li)}
 section.appendChild(list);container.appendChild(section);
 }
-function selectNode(id,update=true){
+function selectNode(id,update=true,preserveTree=false){
  const node=getNode(id);if(!node)return;
  activeId=id;
  const dept=getDept(node.discipline_id),chapter=getChap(node.chapter_id);
@@ -201,7 +201,9 @@ function selectNode(id,update=true){
  article.appendChild(resourceArea(dept));
  makeControls(node,article);
  typeset(article);
- renderTree();
+ if(preserveTree){
+   $("tree").querySelectorAll(".node").forEach(el=>el.classList.toggle("active",el.dataset.node===node.id));
+ }else renderTree();
  if(update)setURL({topic:node.id});
  // No automatic window.scrollIntoView to avoid sidebar interaction bounce.
  $("articlePane").scrollTop=0;
