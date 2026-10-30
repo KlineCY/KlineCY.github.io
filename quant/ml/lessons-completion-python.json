@@ -1,0 +1,837 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "python-n01-01",
+      "node_id": "python-n01-01",
+      "title": "Python数据类型",
+      "definition": "Python以整数、浮点、字符串、布尔和容器表达数据，类型决定可执行操作和精度。",
+      "assumptions": "依赖软件包版本、数据类型与输入形状等前提，需要在训练和部署环境中统一验证。",
+      "properties": [
+        "该技术改善特定的数据表示、数值计算或工程可维护性，不直接赋予预测模型统计有效性。",
+        "对时间、证券标识和缺失值做一致的边界检查可减少量化数据管线错误。"
+      ],
+      "formulas": [
+        {
+          "label": "形式化表达",
+          "tex": "x\\in\\{\\mathbb Z,\\mathbb R,\\mathrm{str},\\mathrm{bool},\\mathrm{List},\\mathrm{Dict}\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入数据和操作按所示数学关系明确化，再检查维度与类型。",
+          "tex": "x\\in\\{\\mathbb Z,\\mathbb R,\\mathrm{str},\\mathrm{bool},\\mathrm{List},\\mathrm{Dict}\\}"
+        },
+        {
+          "explanation": "通过最小可运行示例验证行为，复杂任务需要追加异常和性能测试。",
+          "tex": "x\\in\\{\\mathbb Z,\\mathbb R,\\mathrm{str},\\mathrm{bool},\\mathrm{List},\\mathrm{Dict}\\}"
+        }
+      ],
+      "code": "x=5; y=1.5; d={\"symbol\":\"SPY\",\"price\":500.}\nprint(type(x).__name__,type(y).__name__,d[\"symbol\"])",
+      "application": "用于ETFs多资产行情处理、数值模型拟合、训练与推断的一致性工程；示例展示该操作的核心语义而非完整交易策略。",
+      "limits": "应根据数据规模、浮点精度和时点一致性增加验证，示例不包含生产系统的全部错误处理。",
+      "packages": "Python standard library",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n02-01",
+      "node_id": "python-n02-01",
+      "title": "列表推导与生成器",
+      "definition": "列表推导一次构造结果，生成器惰性产生元素，适合流式处理行情记录。",
+      "assumptions": "依赖软件包版本、数据类型与输入形状等前提，需要在训练和部署环境中统一验证。",
+      "properties": [
+        "该技术改善特定的数据表示、数值计算或工程可维护性，不直接赋予预测模型统计有效性。",
+        "对时间、证券标识和缺失值做一致的边界检查可减少量化数据管线错误。"
+      ],
+      "formulas": [
+        {
+          "label": "形式化表达",
+          "tex": "L=[f(x):x\\in S,\\ P(x)],\\quad G=\\operatorname{yield}_{x\\in S}f(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入数据和操作按所示数学关系明确化，再检查维度与类型。",
+          "tex": "L=[f(x):x\\in S,\\ P(x)],\\quad G=\\operatorname{yield}_{x\\in S}f(x)"
+        },
+        {
+          "explanation": "通过最小可运行示例验证行为，复杂任务需要追加异常和性能测试。",
+          "tex": "L=[f(x):x\\in S,\\ P(x)],\\quad G=\\operatorname{yield}_{x\\in S}f(x)"
+        }
+      ],
+      "code": "prices=[100,102,99,103]\nreturns=[prices[i]/prices[i-1]-1 for i in range(1,len(prices))]\ngenerator=(x*x for x in range(4))\nprint(returns,list(generator))",
+      "application": "用于ETFs多资产行情处理、数值模型拟合、训练与推断的一致性工程；示例展示该操作的核心语义而非完整交易策略。",
+      "limits": "应根据数据规模、浮点精度和时点一致性增加验证，示例不包含生产系统的全部错误处理。",
+      "packages": "Python standard library",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n03-01",
+      "node_id": "python-n03-01",
+      "title": "函数和闭包",
+      "definition": "函数封装复用逻辑，闭包捕获外围作用域变量并持续在后续调用中使用。",
+      "assumptions": "依赖软件包版本、数据类型与输入形状等前提，需要在训练和部署环境中统一验证。",
+      "properties": [
+        "该技术改善特定的数据表示、数值计算或工程可维护性，不直接赋予预测模型统计有效性。",
+        "对时间、证券标识和缺失值做一致的边界检查可减少量化数据管线错误。"
+      ],
+      "formulas": [
+        {
+          "label": "形式化表达",
+          "tex": "f_\\lambda(x)=\\ell(x)+\\lambda\\Omega(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入数据和操作按所示数学关系明确化，再检查维度与类型。",
+          "tex": "f_\\lambda(x)=\\ell(x)+\\lambda\\Omega(x)"
+        },
+        {
+          "explanation": "通过最小可运行示例验证行为，复杂任务需要追加异常和性能测试。",
+          "tex": "f_\\lambda(x)=\\ell(x)+\\lambda\\Omega(x)"
+        }
+      ],
+      "code": "def objective(lam):\n    def score(error,penalty):return error+lam*penalty\n    return score\nprint(objective(.1)(.5,2.))",
+      "application": "用于ETFs多资产行情处理、数值模型拟合、训练与推断的一致性工程；示例展示该操作的核心语义而非完整交易策略。",
+      "limits": "应根据数据规模、浮点精度和时点一致性增加验证，示例不包含生产系统的全部错误处理。",
+      "packages": "Python standard library",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n04-01",
+      "node_id": "python-n04-01",
+      "title": "类型标注",
+      "definition": "类型标注表达函数参数与返回值的预期类型，配合静态工具减少接口错用。",
+      "assumptions": "依赖软件包版本、数据类型与输入形状等前提，需要在训练和部署环境中统一验证。",
+      "properties": [
+        "该技术改善特定的数据表示、数值计算或工程可维护性，不直接赋予预测模型统计有效性。",
+        "对时间、证券标识和缺失值做一致的边界检查可减少量化数据管线错误。"
+      ],
+      "formulas": [
+        {
+          "label": "形式化表达",
+          "tex": "f:\\mathbb R^n\\to\\mathbb R"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入数据和操作按所示数学关系明确化，再检查维度与类型。",
+          "tex": "f:\\mathbb R^n\\to\\mathbb R"
+        },
+        {
+          "explanation": "通过最小可运行示例验证行为，复杂任务需要追加异常和性能测试。",
+          "tex": "f:\\mathbb R^n\\to\\mathbb R"
+        }
+      ],
+      "code": "def mean(values: list[float])->float:\n    if not values:raise ValueError(\"empty\")\n    return sum(values)/len(values)\nprint(mean([.1,.2,.3]))",
+      "application": "用于ETFs多资产行情处理、数值模型拟合、训练与推断的一致性工程；示例展示该操作的核心语义而非完整交易策略。",
+      "limits": "应根据数据规模、浮点精度和时点一致性增加验证，示例不包含生产系统的全部错误处理。",
+      "packages": "Python standard library",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n05-01",
+      "node_id": "python-n05-01",
+      "title": "异常处理",
+      "definition": "异常捕获使缺失数据、错误维度和无效参数不会静默进入预测或交易管线。",
+      "assumptions": "依赖软件包版本、数据类型与输入形状等前提，需要在训练和部署环境中统一验证。",
+      "properties": [
+        "该技术改善特定的数据表示、数值计算或工程可维护性，不直接赋予预测模型统计有效性。",
+        "对时间、证券标识和缺失值做一致的边界检查可减少量化数据管线错误。"
+      ],
+      "formulas": [
+        {
+          "label": "形式化表达",
+          "tex": "\\mathrm{Valid}(x)=\\mathbf1[\\operatorname{Check}(x)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入数据和操作按所示数学关系明确化，再检查维度与类型。",
+          "tex": "\\mathrm{Valid}(x)=\\mathbf1[\\operatorname{Check}(x)]"
+        },
+        {
+          "explanation": "通过最小可运行示例验证行为，复杂任务需要追加异常和性能测试。",
+          "tex": "\\mathrm{Valid}(x)=\\mathbf1[\\operatorname{Check}(x)]"
+        }
+      ],
+      "code": "def safe_divide(a,b):\n    if b==0:raise ZeroDivisionError(\"denominator zero\")\n    return a/b\ntry:print(safe_divide(2,0))\nexcept ZeroDivisionError as e:print(\"caught:\",e)",
+      "application": "用于ETFs多资产行情处理、数值模型拟合、训练与推断的一致性工程；示例展示该操作的核心语义而非完整交易策略。",
+      "limits": "应根据数据规模、浮点精度和时点一致性增加验证，示例不包含生产系统的全部错误处理。",
+      "packages": "Python standard library",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n06-01",
+      "node_id": "python-n06-01",
+      "title": "模块与环境",
+      "definition": "模块分离业务逻辑，环境固定依赖及其版本，使模型训练能复现。",
+      "assumptions": "依赖软件包版本、数据类型与输入形状等前提，需要在训练和部署环境中统一验证。",
+      "properties": [
+        "该技术改善特定的数据表示、数值计算或工程可维护性，不直接赋予预测模型统计有效性。",
+        "对时间、证券标识和缺失值做一致的边界检查可减少量化数据管线错误。"
+      ],
+      "formulas": [
+        {
+          "label": "形式化表达",
+          "tex": "\\mathcal E=(\\mathrm{PythonVersion},\\{\\mathrm{package}_i,\\mathrm{version}_i\\})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入数据和操作按所示数学关系明确化，再检查维度与类型。",
+          "tex": "\\mathcal E=(\\mathrm{PythonVersion},\\{\\mathrm{package}_i,\\mathrm{version}_i\\})"
+        },
+        {
+          "explanation": "通过最小可运行示例验证行为，复杂任务需要追加异常和性能测试。",
+          "tex": "\\mathcal E=(\\mathrm{PythonVersion},\\{\\mathrm{package}_i,\\mathrm{version}_i\\})"
+        }
+      ],
+      "code": "import sys,importlib.metadata\nprint(sys.version.split()[0])\nprint(\"NumPy:\",importlib.metadata.version(\"numpy\"))",
+      "application": "用于ETFs多资产行情处理、数值模型拟合、训练与推断的一致性工程；示例展示该操作的核心语义而非完整交易策略。",
+      "limits": "应根据数据规模、浮点精度和时点一致性增加验证，示例不包含生产系统的全部错误处理。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n03-02",
+      "node_id": "python-n03-02",
+      "title": "向量化运算",
+      "definition": "将逐元素循环表达成数组广播或线性代数操作，通常降低Python解释器开销。",
+      "assumptions": "依赖软件包版本、数据类型与输入形状等前提，需要在训练和部署环境中统一验证。",
+      "properties": [
+        "该技术改善特定的数据表示、数值计算或工程可维护性，不直接赋予预测模型统计有效性。",
+        "对时间、证券标识和缺失值做一致的边界检查可减少量化数据管线错误。"
+      ],
+      "formulas": [
+        {
+          "label": "形式化表达",
+          "tex": "y_i=\\sigma(x_iw+b)\\quad(i=1,\\ldots,n)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入数据和操作按所示数学关系明确化，再检查维度与类型。",
+          "tex": "y_i=\\sigma(x_iw+b)\\quad(i=1,\\ldots,n)"
+        },
+        {
+          "explanation": "通过最小可运行示例验证行为，复杂任务需要追加异常和性能测试。",
+          "tex": "y_i=\\sigma(x_iw+b)\\quad(i=1,\\ldots,n)"
+        }
+      ],
+      "code": "import numpy as np\nx=np.arange(8.,dtype=float)\nprint(np.exp(-x)/(1+np.exp(-x)))",
+      "application": "用于ETFs多资产行情处理、数值模型拟合、训练与推断的一致性工程；示例展示该操作的核心语义而非完整交易策略。",
+      "limits": "应根据数据规模、浮点精度和时点一致性增加验证，示例不包含生产系统的全部错误处理。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n04-02",
+      "node_id": "python-n04-02",
+      "title": "矩阵乘法einsum",
+      "definition": "einsum按爱因斯坦求和标记明确张量收缩维度，可替代多层矩阵乘积与转置。",
+      "assumptions": "依赖软件包版本、数据类型与输入形状等前提，需要在训练和部署环境中统一验证。",
+      "properties": [
+        "该技术改善特定的数据表示、数值计算或工程可维护性，不直接赋予预测模型统计有效性。",
+        "对时间、证券标识和缺失值做一致的边界检查可减少量化数据管线错误。"
+      ],
+      "formulas": [
+        {
+          "label": "形式化表达",
+          "tex": "C_{ij}=\\sum_k A_{ik}B_{kj}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入数据和操作按所示数学关系明确化，再检查维度与类型。",
+          "tex": "C_{ij}=\\sum_k A_{ik}B_{kj}"
+        },
+        {
+          "explanation": "通过最小可运行示例验证行为，复杂任务需要追加异常和性能测试。",
+          "tex": "C_{ij}=\\sum_k A_{ik}B_{kj}"
+        }
+      ],
+      "code": "import numpy as np\nA=np.arange(6).reshape(2,3);B=np.arange(12).reshape(3,4)\nprint(np.allclose(np.einsum(\"ik,kj->ij\",A,B),A@B))",
+      "application": "用于ETFs多资产行情处理、数值模型拟合、训练与推断的一致性工程；示例展示该操作的核心语义而非完整交易策略。",
+      "limits": "应根据数据规模、浮点精度和时点一致性增加验证，示例不包含生产系统的全部错误处理。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n05-02",
+      "node_id": "python-n05-02",
+      "title": "随机数生成器",
+      "definition": "独立随机数生成器可复现模拟，并避免全局随机状态在不同模块之间相互污染。",
+      "assumptions": "依赖软件包版本、数据类型与输入形状等前提，需要在训练和部署环境中统一验证。",
+      "properties": [
+        "该技术改善特定的数据表示、数值计算或工程可维护性，不直接赋予预测模型统计有效性。",
+        "对时间、证券标识和缺失值做一致的边界检查可减少量化数据管线错误。"
+      ],
+      "formulas": [
+        {
+          "label": "形式化表达",
+          "tex": "X^{(s)}=G(s)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入数据和操作按所示数学关系明确化，再检查维度与类型。",
+          "tex": "X^{(s)}=G(s)"
+        },
+        {
+          "explanation": "通过最小可运行示例验证行为，复杂任务需要追加异常和性能测试。",
+          "tex": "X^{(s)}=G(s)"
+        }
+      ],
+      "code": "import numpy as np\nr1=np.random.default_rng(42);r2=np.random.default_rng(42)\nprint(np.array_equal(r1.standard_normal(5),r2.standard_normal(5)))",
+      "application": "用于ETFs多资产行情处理、数值模型拟合、训练与推断的一致性工程；示例展示该操作的核心语义而非完整交易策略。",
+      "limits": "应根据数据规模、浮点精度和时点一致性增加验证，示例不包含生产系统的全部错误处理。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n06-02",
+      "node_id": "python-n06-02",
+      "title": "数值精度",
+      "definition": "浮点数有限尾数造成舍入和相消误差，算法须考虑稳定求和、数据类型与尺度。",
+      "assumptions": "依赖软件包版本、数据类型与输入形状等前提，需要在训练和部署环境中统一验证。",
+      "properties": [
+        "该技术改善特定的数据表示、数值计算或工程可维护性，不直接赋予预测模型统计有效性。",
+        "对时间、证券标识和缺失值做一致的边界检查可减少量化数据管线错误。"
+      ],
+      "formulas": [
+        {
+          "label": "形式化表达",
+          "tex": "\\mathrm{fl}(a\\circ b)=(a\\circ b)(1+\\delta),\\quad |\\delta|\\lesssim u"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入数据和操作按所示数学关系明确化，再检查维度与类型。",
+          "tex": "\\mathrm{fl}(a\\circ b)=(a\\circ b)(1+\\delta),\\quad |\\delta|\\lesssim u"
+        },
+        {
+          "explanation": "通过最小可运行示例验证行为，复杂任务需要追加异常和性能测试。",
+          "tex": "\\mathrm{fl}(a\\circ b)=(a\\circ b)(1+\\delta),\\quad |\\delta|\\lesssim u"
+        }
+      ],
+      "code": "import numpy as np\na=np.array([1e16,1,-1e16],dtype=float)\nprint(\"sum:\",a.sum(),\"math.fsum:\",__import__(\"math\").fsum(a))",
+      "application": "用于ETFs多资产行情处理、数值模型拟合、训练与推断的一致性工程；示例展示该操作的核心语义而非完整交易策略。",
+      "limits": "应根据数据规模、浮点精度和时点一致性增加验证，示例不包含生产系统的全部错误处理。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n01-03",
+      "node_id": "python-n01-03",
+      "title": "索引与对齐",
+      "definition": "pandas按索引标签自动对齐数据；错误日期、交易日历或证券索引可能产生缺失和错位。",
+      "assumptions": "依赖软件包版本、数据类型与输入形状等前提，需要在训练和部署环境中统一验证。",
+      "properties": [
+        "该技术改善特定的数据表示、数值计算或工程可维护性，不直接赋予预测模型统计有效性。",
+        "对时间、证券标识和缺失值做一致的边界检查可减少量化数据管线错误。"
+      ],
+      "formulas": [
+        {
+          "label": "形式化表达",
+          "tex": "(X\\oplus Y)_i=X_i\\oplus Y_i\\quad\\text{按标签 }i"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入数据和操作按所示数学关系明确化，再检查维度与类型。",
+          "tex": "(X\\oplus Y)_i=X_i\\oplus Y_i\\quad\\text{按标签 }i"
+        },
+        {
+          "explanation": "通过最小可运行示例验证行为，复杂任务需要追加异常和性能测试。",
+          "tex": "(X\\oplus Y)_i=X_i\\oplus Y_i\\quad\\text{按标签 }i"
+        }
+      ],
+      "code": "import pandas as pd\na=pd.Series([1,2],index=[\"A\",\"B\"])\nb=pd.Series([3,4],index=[\"B\",\"A\"])\nprint(a+b)",
+      "application": "用于ETFs多资产行情处理、数值模型拟合、训练与推断的一致性工程；示例展示该操作的核心语义而非完整交易策略。",
+      "limits": "应根据数据规模、浮点精度和时点一致性增加验证，示例不包含生产系统的全部错误处理。",
+      "packages": "pandas",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n02-03",
+      "node_id": "python-n02-03",
+      "title": "DataFrame重塑",
+      "definition": "长表与宽表相互转换可表示资产×时间×因子的面板，pivot/melt需校验唯一键。",
+      "assumptions": "依赖软件包版本、数据类型与输入形状等前提，需要在训练和部署环境中统一验证。",
+      "properties": [
+        "该技术改善特定的数据表示、数值计算或工程可维护性，不直接赋予预测模型统计有效性。",
+        "对时间、证券标识和缺失值做一致的边界检查可减少量化数据管线错误。"
+      ],
+      "formulas": [
+        {
+          "label": "形式化表达",
+          "tex": "X_{t,i}=\\mathrm{Value}(t,i)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入数据和操作按所示数学关系明确化，再检查维度与类型。",
+          "tex": "X_{t,i}=\\mathrm{Value}(t,i)"
+        },
+        {
+          "explanation": "通过最小可运行示例验证行为，复杂任务需要追加异常和性能测试。",
+          "tex": "X_{t,i}=\\mathrm{Value}(t,i)"
+        }
+      ],
+      "code": "import pandas as pd\ndf=pd.DataFrame({\"day\":[1,1,2,2],\"asset\":[\"A\",\"B\",\"A\",\"B\"],\"return\":[.1,.2,-.1,0.]})\nprint(df.pivot(index=\"day\",columns=\"asset\",values=\"return\"))",
+      "application": "用于ETFs多资产行情处理、数值模型拟合、训练与推断的一致性工程；示例展示该操作的核心语义而非完整交易策略。",
+      "limits": "应根据数据规模、浮点精度和时点一致性增加验证，示例不包含生产系统的全部错误处理。",
+      "packages": "pandas",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n04-03",
+      "node_id": "python-n04-03",
+      "title": "缺失值",
+      "definition": "缺失值包括未披露、停牌和技术故障等原因，应先识别缺失机制再决定填补或保留。",
+      "assumptions": "依赖软件包版本、数据类型与输入形状等前提，需要在训练和部署环境中统一验证。",
+      "properties": [
+        "该技术改善特定的数据表示、数值计算或工程可维护性，不直接赋予预测模型统计有效性。",
+        "对时间、证券标识和缺失值做一致的边界检查可减少量化数据管线错误。"
+      ],
+      "formulas": [
+        {
+          "label": "形式化表达",
+          "tex": "M_{ij}=\\mathbf1[X_{ij}\\text{缺失}]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入数据和操作按所示数学关系明确化，再检查维度与类型。",
+          "tex": "M_{ij}=\\mathbf1[X_{ij}\\text{缺失}]"
+        },
+        {
+          "explanation": "通过最小可运行示例验证行为，复杂任务需要追加异常和性能测试。",
+          "tex": "M_{ij}=\\mathbf1[X_{ij}\\text{缺失}]"
+        }
+      ],
+      "code": "import pandas as pd,numpy as np\ns=pd.Series([1.,np.nan,3.,np.nan])\nprint(s.isna().sum(),s.ffill().to_list())",
+      "application": "用于ETFs多资产行情处理、数值模型拟合、训练与推断的一致性工程；示例展示该操作的核心语义而非完整交易策略。",
+      "limits": "应根据数据规模、浮点精度和时点一致性增加验证，示例不包含生产系统的全部错误处理。",
+      "packages": "pandas",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n05-03",
+      "node_id": "python-n05-03",
+      "title": "时间索引",
+      "definition": "时间索引把观测映射到明确时区和频率，支持重采样、对齐与滚动计算。",
+      "assumptions": "依赖软件包版本、数据类型与输入形状等前提，需要在训练和部署环境中统一验证。",
+      "properties": [
+        "该技术改善特定的数据表示、数值计算或工程可维护性，不直接赋予预测模型统计有效性。",
+        "对时间、证券标识和缺失值做一致的边界检查可减少量化数据管线错误。"
+      ],
+      "formulas": [
+        {
+          "label": "形式化表达",
+          "tex": "X=\\{(t_i,x_i)\\}_{i=1}^n"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入数据和操作按所示数学关系明确化，再检查维度与类型。",
+          "tex": "X=\\{(t_i,x_i)\\}_{i=1}^n"
+        },
+        {
+          "explanation": "通过最小可运行示例验证行为，复杂任务需要追加异常和性能测试。",
+          "tex": "X=\\{(t_i,x_i)\\}_{i=1}^n"
+        }
+      ],
+      "code": "import pandas as pd\nt=pd.date_range(\"2026-01-01\",periods=5,freq=\"D\",tz=\"UTC\")\nprint(pd.Series(range(5),index=t).resample(\"2D\").mean())",
+      "application": "用于ETFs多资产行情处理、数值模型拟合、训练与推断的一致性工程；示例展示该操作的核心语义而非完整交易策略。",
+      "limits": "应根据数据规模、浮点精度和时点一致性增加验证，示例不包含生产系统的全部错误处理。",
+      "packages": "pandas",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n06-03",
+      "node_id": "python-n06-03",
+      "title": "多资产面板",
+      "definition": "多资产面板同时索引日期和证券，滚动特征应按证券分组，横截面特征应按日期分组。",
+      "assumptions": "依赖软件包版本、数据类型与输入形状等前提，需要在训练和部署环境中统一验证。",
+      "properties": [
+        "该技术改善特定的数据表示、数值计算或工程可维护性，不直接赋予预测模型统计有效性。",
+        "对时间、证券标识和缺失值做一致的边界检查可减少量化数据管线错误。"
+      ],
+      "formulas": [
+        {
+          "label": "形式化表达",
+          "tex": "X\\in\\mathbb R^{T\\times N\\times P}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入数据和操作按所示数学关系明确化，再检查维度与类型。",
+          "tex": "X\\in\\mathbb R^{T\\times N\\times P}"
+        },
+        {
+          "explanation": "通过最小可运行示例验证行为，复杂任务需要追加异常和性能测试。",
+          "tex": "X\\in\\mathbb R^{T\\times N\\times P}"
+        }
+      ],
+      "code": "import pandas as pd\ndf=pd.DataFrame({\"date\":[1,2,1,2],\"asset\":[\"A\",\"A\",\"B\",\"B\"],\"r\":[.1,.2,-.1,.3]})\nprint(df.groupby(\"asset\")[\"r\"].mean())",
+      "application": "用于ETFs多资产行情处理、数值模型拟合、训练与推断的一致性工程；示例展示该操作的核心语义而非完整交易策略。",
+      "limits": "应根据数据规模、浮点精度和时点一致性增加验证，示例不包含生产系统的全部错误处理。",
+      "packages": "pandas",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n01-04",
+      "node_id": "python-n01-04",
+      "title": "稀疏矩阵",
+      "definition": "稀疏表示只存储非零项，适合词袋、用户-资产事件图和大规模邻接矩阵。",
+      "assumptions": "依赖软件包版本、数据类型与输入形状等前提，需要在训练和部署环境中统一验证。",
+      "properties": [
+        "该技术改善特定的数据表示、数值计算或工程可维护性，不直接赋予预测模型统计有效性。",
+        "对时间、证券标识和缺失值做一致的边界检查可减少量化数据管线错误。"
+      ],
+      "formulas": [
+        {
+          "label": "形式化表达",
+          "tex": "\\operatorname{nnz}(A)\\ll mn"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入数据和操作按所示数学关系明确化，再检查维度与类型。",
+          "tex": "\\operatorname{nnz}(A)\\ll mn"
+        },
+        {
+          "explanation": "通过最小可运行示例验证行为，复杂任务需要追加异常和性能测试。",
+          "tex": "\\operatorname{nnz}(A)\\ll mn"
+        }
+      ],
+      "code": "import numpy as np\nfrom scipy.sparse import csr_matrix\nA=csr_matrix(([1.,2.],([0,2],[1,3])),shape=(4,5))\nprint(A.shape,A.nnz,A.toarray())",
+      "application": "用于ETFs多资产行情处理、数值模型拟合、训练与推断的一致性工程；示例展示该操作的核心语义而非完整交易策略。",
+      "limits": "应根据数据规模、浮点精度和时点一致性增加验证，示例不包含生产系统的全部错误处理。",
+      "packages": "numpy, scipy",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n02-04",
+      "node_id": "python-n02-04",
+      "title": "线性代数分解",
+      "definition": "QR、SVD与特征值分解帮助稳定求解回归、降维与协方差问题。",
+      "assumptions": "依赖软件包版本、数据类型与输入形状等前提，需要在训练和部署环境中统一验证。",
+      "properties": [
+        "该技术改善特定的数据表示、数值计算或工程可维护性，不直接赋予预测模型统计有效性。",
+        "对时间、证券标识和缺失值做一致的边界检查可减少量化数据管线错误。"
+      ],
+      "formulas": [
+        {
+          "label": "形式化表达",
+          "tex": "X=U\\Sigma V^\\top"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入数据和操作按所示数学关系明确化，再检查维度与类型。",
+          "tex": "X=U\\Sigma V^\\top"
+        },
+        {
+          "explanation": "通过最小可运行示例验证行为，复杂任务需要追加异常和性能测试。",
+          "tex": "X=U\\Sigma V^\\top"
+        }
+      ],
+      "code": "import numpy as np\nX=np.array([[1.,2.],[3.,4.],[5.,6.]])\nU,S,Vt=np.linalg.svd(X,full_matrices=False)\nprint(np.allclose(U@np.diag(S)@Vt,X))",
+      "application": "用于ETFs多资产行情处理、数值模型拟合、训练与推断的一致性工程；示例展示该操作的核心语义而非完整交易策略。",
+      "limits": "应根据数据规模、浮点精度和时点一致性增加验证，示例不包含生产系统的全部错误处理。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n03-04",
+      "node_id": "python-n03-04",
+      "title": "统计分布",
+      "definition": "概率分布定义随机变量取值与概率密度或质量，选用模型前需检查支持集及尾部。",
+      "assumptions": "依赖软件包版本、数据类型与输入形状等前提，需要在训练和部署环境中统一验证。",
+      "properties": [
+        "该技术改善特定的数据表示、数值计算或工程可维护性，不直接赋予预测模型统计有效性。",
+        "对时间、证券标识和缺失值做一致的边界检查可减少量化数据管线错误。"
+      ],
+      "formulas": [
+        {
+          "label": "形式化表达",
+          "tex": "F_X(x)=P(X\\le x),\\quad f_X=F_X'"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入数据和操作按所示数学关系明确化，再检查维度与类型。",
+          "tex": "F_X(x)=P(X\\le x),\\quad f_X=F_X'"
+        },
+        {
+          "explanation": "通过最小可运行示例验证行为，复杂任务需要追加异常和性能测试。",
+          "tex": "F_X(x)=P(X\\le x),\\quad f_X=F_X'"
+        }
+      ],
+      "code": "from scipy.stats import norm\nprint(norm.cdf(1.),norm.pdf(1.),norm.ppf(.975))",
+      "application": "用于ETFs多资产行情处理、数值模型拟合、训练与推断的一致性工程；示例展示该操作的核心语义而非完整交易策略。",
+      "limits": "应根据数据规模、浮点精度和时点一致性增加验证，示例不包含生产系统的全部错误处理。",
+      "packages": "numpy, scipy",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n04-04",
+      "node_id": "python-n04-04",
+      "title": "数值优化",
+      "definition": "数值优化器通过目标函数、梯度及约束寻找近似最优解，需检查终止状态和约束残差。",
+      "assumptions": "依赖软件包版本、数据类型与输入形状等前提，需要在训练和部署环境中统一验证。",
+      "properties": [
+        "该技术改善特定的数据表示、数值计算或工程可维护性，不直接赋予预测模型统计有效性。",
+        "对时间、证券标识和缺失值做一致的边界检查可减少量化数据管线错误。"
+      ],
+      "formulas": [
+        {
+          "label": "形式化表达",
+          "tex": "\\hat x\\approx\\arg\\min_{x\\in\\mathcal C}f(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入数据和操作按所示数学关系明确化，再检查维度与类型。",
+          "tex": "\\hat x\\approx\\arg\\min_{x\\in\\mathcal C}f(x)"
+        },
+        {
+          "explanation": "通过最小可运行示例验证行为，复杂任务需要追加异常和性能测试。",
+          "tex": "\\hat x\\approx\\arg\\min_{x\\in\\mathcal C}f(x)"
+        }
+      ],
+      "code": "from scipy.optimize import minimize\nr=minimize(lambda x:(x[0]-2)**2,[0.],bounds=[(0,3)])\nprint(r.success,r.x)",
+      "application": "用于ETFs多资产行情处理、数值模型拟合、训练与推断的一致性工程；示例展示该操作的核心语义而非完整交易策略。",
+      "limits": "应根据数据规模、浮点精度和时点一致性增加验证，示例不包含生产系统的全部错误处理。",
+      "packages": "numpy, scipy",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n05-04",
+      "node_id": "python-n05-04",
+      "title": "插值与信号处理",
+      "definition": "插值在观测节点之间重建函数值，信号处理可使用平滑、卷积或滤波区分频带。",
+      "assumptions": "依赖软件包版本、数据类型与输入形状等前提，需要在训练和部署环境中统一验证。",
+      "properties": [
+        "该技术改善特定的数据表示、数值计算或工程可维护性，不直接赋予预测模型统计有效性。",
+        "对时间、证券标识和缺失值做一致的边界检查可减少量化数据管线错误。"
+      ],
+      "formulas": [
+        {
+          "label": "形式化表达",
+          "tex": "\\hat f(x)=\\sum_i w_i(x)y_i"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入数据和操作按所示数学关系明确化，再检查维度与类型。",
+          "tex": "\\hat f(x)=\\sum_i w_i(x)y_i"
+        },
+        {
+          "explanation": "通过最小可运行示例验证行为，复杂任务需要追加异常和性能测试。",
+          "tex": "\\hat f(x)=\\sum_i w_i(x)y_i"
+        }
+      ],
+      "code": "import numpy as np\nfrom scipy.interpolate import interp1d\nf=interp1d([0,1,2],[0,2,1],kind=\"linear\")\nprint(f(.5))",
+      "application": "用于ETFs多资产行情处理、数值模型拟合、训练与推断的一致性工程；示例展示该操作的核心语义而非完整交易策略。",
+      "limits": "应根据数据规模、浮点精度和时点一致性增加验证，示例不包含生产系统的全部错误处理。",
+      "packages": "numpy, scipy",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n06-04",
+      "node_id": "python-n06-04",
+      "title": "数值稳定性",
+      "definition": "数值稳定算法限制舍入误差的放大，常采用log-sum-exp、稳定线性求解与缩放。",
+      "assumptions": "依赖软件包版本、数据类型与输入形状等前提，需要在训练和部署环境中统一验证。",
+      "properties": [
+        "该技术改善特定的数据表示、数值计算或工程可维护性，不直接赋予预测模型统计有效性。",
+        "对时间、证券标识和缺失值做一致的边界检查可减少量化数据管线错误。"
+      ],
+      "formulas": [
+        {
+          "label": "形式化表达",
+          "tex": "\\operatorname{LSE}(z)=m+\\log\\sum_i e^{z_i-m},\\ m=\\max_i z_i"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入数据和操作按所示数学关系明确化，再检查维度与类型。",
+          "tex": "\\operatorname{LSE}(z)=m+\\log\\sum_i e^{z_i-m},\\ m=\\max_i z_i"
+        },
+        {
+          "explanation": "通过最小可运行示例验证行为，复杂任务需要追加异常和性能测试。",
+          "tex": "\\operatorname{LSE}(z)=m+\\log\\sum_i e^{z_i-m},\\ m=\\max_i z_i"
+        }
+      ],
+      "code": "import numpy as np\nfrom scipy.special import logsumexp\nprint(logsumexp([1000.,1001.,1002.]))",
+      "application": "用于ETFs多资产行情处理、数值模型拟合、训练与推断的一致性工程；示例展示该操作的核心语义而非完整交易策略。",
+      "limits": "应根据数据规模、浮点精度和时点一致性增加验证，示例不包含生产系统的全部错误处理。",
+      "packages": "numpy, scipy",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n02-05",
+      "node_id": "python-n02-05",
+      "title": "PyTorch基本API",
+      "definition": "张量、模块和自动微分组成PyTorch模型定义、训练与推断的基本接口。",
+      "assumptions": "依赖软件包版本、数据类型与输入形状等前提，需要在训练和部署环境中统一验证。",
+      "properties": [
+        "该技术改善特定的数据表示、数值计算或工程可维护性，不直接赋予预测模型统计有效性。",
+        "对时间、证券标识和缺失值做一致的边界检查可减少量化数据管线错误。"
+      ],
+      "formulas": [
+        {
+          "label": "形式化表达",
+          "tex": "\\nabla_\\theta L=\\operatorname{Autograd}(L,\\theta)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入数据和操作按所示数学关系明确化，再检查维度与类型。",
+          "tex": "\\nabla_\\theta L=\\operatorname{Autograd}(L,\\theta)"
+        },
+        {
+          "explanation": "通过最小可运行示例验证行为，复杂任务需要追加异常和性能测试。",
+          "tex": "\\nabla_\\theta L=\\operatorname{Autograd}(L,\\theta)"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(4,3)\nlayer=torch.nn.Linear(3,1)\nprint(layer(x).shape)",
+      "application": "用于ETFs多资产行情处理、数值模型拟合、训练与推断的一致性工程；示例展示该操作的核心语义而非完整交易策略。",
+      "limits": "应根据数据规模、浮点精度和时点一致性增加验证，示例不包含生产系统的全部错误处理。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n03-05",
+      "node_id": "python-n03-05",
+      "title": "数据加载器",
+      "definition": "Dataset定义样本访问，DataLoader负责采样、batch形成与并行读取。",
+      "assumptions": "依赖软件包版本、数据类型与输入形状等前提，需要在训练和部署环境中统一验证。",
+      "properties": [
+        "该技术改善特定的数据表示、数值计算或工程可维护性，不直接赋予预测模型统计有效性。",
+        "对时间、证券标识和缺失值做一致的边界检查可减少量化数据管线错误。"
+      ],
+      "formulas": [
+        {
+          "label": "形式化表达",
+          "tex": "D=\\bigcup_{b=1}^B D_b,\\quad |D_b|\\le k"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入数据和操作按所示数学关系明确化，再检查维度与类型。",
+          "tex": "D=\\bigcup_{b=1}^B D_b,\\quad |D_b|\\le k"
+        },
+        {
+          "explanation": "通过最小可运行示例验证行为，复杂任务需要追加异常和性能测试。",
+          "tex": "D=\\bigcup_{b=1}^B D_b,\\quad |D_b|\\le k"
+        }
+      ],
+      "code": "import torch\nfrom torch.utils.data import TensorDataset,DataLoader\nloader=DataLoader(TensorDataset(torch.arange(9)),batch_size=4)\nprint([batch[0].shape[0] for batch in loader])",
+      "application": "用于ETFs多资产行情处理、数值模型拟合、训练与推断的一致性工程；示例展示该操作的核心语义而非完整交易策略。",
+      "limits": "应根据数据规模、浮点精度和时点一致性增加验证，示例不包含生产系统的全部错误处理。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n04-05",
+      "node_id": "python-n04-05",
+      "title": "训练与推断模式",
+      "definition": "train/eval控制Dropout与BatchNorm等层行为；no_grad关闭不必要的梯度记录。",
+      "assumptions": "依赖软件包版本、数据类型与输入形状等前提，需要在训练和部署环境中统一验证。",
+      "properties": [
+        "该技术改善特定的数据表示、数值计算或工程可维护性，不直接赋予预测模型统计有效性。",
+        "对时间、证券标识和缺失值做一致的边界检查可减少量化数据管线错误。"
+      ],
+      "formulas": [
+        {
+          "label": "形式化表达",
+          "tex": "\\hat y=f_\\theta^{\\mathrm{eval}}(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入数据和操作按所示数学关系明确化，再检查维度与类型。",
+          "tex": "\\hat y=f_\\theta^{\\mathrm{eval}}(x)"
+        },
+        {
+          "explanation": "通过最小可运行示例验证行为，复杂任务需要追加异常和性能测试。",
+          "tex": "\\hat y=f_\\theta^{\\mathrm{eval}}(x)"
+        }
+      ],
+      "code": "import torch\nm=torch.nn.Sequential(torch.nn.Linear(2,2),torch.nn.Dropout(.5))\nm.eval()\nwith torch.no_grad():print(m(torch.ones(1,2)))",
+      "application": "用于ETFs多资产行情处理、数值模型拟合、训练与推断的一致性工程；示例展示该操作的核心语义而非完整交易策略。",
+      "limits": "应根据数据规模、浮点精度和时点一致性增加验证，示例不包含生产系统的全部错误处理。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n05-05",
+      "node_id": "python-n05-05",
+      "title": "模型保存",
+      "definition": "持久化训练权重与配置，加载后必须核对模型架构、特征顺序和输入dtype。",
+      "assumptions": "依赖软件包版本、数据类型与输入形状等前提，需要在训练和部署环境中统一验证。",
+      "properties": [
+        "该技术改善特定的数据表示、数值计算或工程可维护性，不直接赋予预测模型统计有效性。",
+        "对时间、证券标识和缺失值做一致的边界检查可减少量化数据管线错误。"
+      ],
+      "formulas": [
+        {
+          "label": "形式化表达",
+          "tex": "\\theta_{\\rm restored}=\\operatorname{Load}(\\operatorname{Save}(\\theta))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入数据和操作按所示数学关系明确化，再检查维度与类型。",
+          "tex": "\\theta_{\\rm restored}=\\operatorname{Load}(\\operatorname{Save}(\\theta))"
+        },
+        {
+          "explanation": "通过最小可运行示例验证行为，复杂任务需要追加异常和性能测试。",
+          "tex": "\\theta_{\\rm restored}=\\operatorname{Load}(\\operatorname{Save}(\\theta))"
+        }
+      ],
+      "code": "import io,torch\nm=torch.nn.Linear(2,1);b=io.BytesIO()\ntorch.save(m.state_dict(),b);b.seek(0)\nn=torch.nn.Linear(2,1)\nn.load_state_dict(torch.load(b,weights_only=True))\nprint(torch.equal(m.weight,n.weight))",
+      "application": "用于ETFs多资产行情处理、数值模型拟合、训练与推断的一致性工程；示例展示该操作的核心语义而非完整交易策略。",
+      "limits": "应根据数据规模、浮点精度和时点一致性增加验证，示例不包含生产系统的全部错误处理。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "python-n06-05",
+      "node_id": "python-n06-05",
+      "title": "单元测试",
+      "definition": "单元测试以明确输入和预期输出检验函数边界和数学不变量，是模型代码质量的基础。",
+      "assumptions": "依赖软件包版本、数据类型与输入形状等前提，需要在训练和部署环境中统一验证。",
+      "properties": [
+        "该技术改善特定的数据表示、数值计算或工程可维护性，不直接赋予预测模型统计有效性。",
+        "对时间、证券标识和缺失值做一致的边界检查可减少量化数据管线错误。"
+      ],
+      "formulas": [
+        {
+          "label": "形式化表达",
+          "tex": "|\\hat y-y_{\\rm expected}|\\le\\epsilon"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入数据和操作按所示数学关系明确化，再检查维度与类型。",
+          "tex": "|\\hat y-y_{\\rm expected}|\\le\\epsilon"
+        },
+        {
+          "explanation": "通过最小可运行示例验证行为，复杂任务需要追加异常和性能测试。",
+          "tex": "|\\hat y-y_{\\rm expected}|\\le\\epsilon"
+        }
+      ],
+      "code": "import unittest\nclass T(unittest.TestCase):\n    def test_mean(self):self.assertAlmostEqual(sum([1,2,3])/3,2.)\nunittest.main(argv=[\"\"],exit=False)",
+      "application": "用于ETFs多资产行情处理、数值模型拟合、训练与推断的一致性工程；示例展示该操作的核心语义而非完整交易策略。",
+      "limits": "应根据数据规模、浮点精度和时点一致性增加验证，示例不包含生产系统的全部错误处理。",
+      "packages": "Python standard library",
+      "coverage": "complete"
+    }
+  ]
+}
