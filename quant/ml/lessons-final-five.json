@@ -1,0 +1,229 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "classification-n03-04",
+      "node_id": "classification-n03-04",
+      "title": "Hinge损失",
+      "definition": "Hinge损失是最大间隔分类中用于惩罚分类间隔不足的凸分段线性损失。对二分类标签y∈{−1,+1}和实值分类分数f(x)，正确分类的带符号间隔m=yf(x)；若m≥1损失为0，若m<1损失为1−m。",
+      "assumptions": "标签应映射为−1与+1，模型输出须是实值决策分数。经典软间隔线性SVM另加L2权重惩罚；Hinge的数值不可直接理解为类别概率。",
+      "properties": [
+        "关于分类分数f的损失是凸的，但在m=1处不可微；可用次梯度优化。",
+        "只有落在单位间隔内部或被错分的样本才贡献非零Hinge损失。"
+      ],
+      "formulas": [
+        {
+          "label": "带符号间隔",
+          "tex": "m_i=y_if(x_i)"
+        },
+        {
+          "label": "Hinge定义",
+          "tex": "\\ell_i=\\max(0,1-m_i)"
+        },
+        {
+          "label": "线性SVM正则化目标",
+          "tex": "L(w,b)=\\frac12\\|w\\|_2^2+C\\sum_i\\max(0,1-y_i(w^\\top x_i+b))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "软间隔约束写为yi f(xi)至少为1−ξi，且松弛变量非负。",
+          "tex": "y_if(x_i)\\ge1-\\xi_i,\\qquad\\xi_i\\ge0"
+        },
+        {
+          "explanation": "给定模型后，最小允许松弛量恰为正部函数。",
+          "tex": "\\xi_i^*=\\max(0,1-y_if(x_i))"
+        },
+        {
+          "explanation": "代回软间隔目标后得到带Hinge损失的无显式松弛变量优化。",
+          "tex": "\\min_{w,b}\\frac12\\|w\\|^2+C\\sum_i\\ell_i"
+        }
+      ],
+      "code": "import numpy as np\ny=np.array([1.,-1.,1.,-1.])\nscore=np.array([2.,-.2,.1,.5])\nmargin=y*score\nhinge=np.maximum(0.,1.-margin)\nprint(\"Signed margins:\",margin)\nprint(\"Hinge losses:\",hinge,\"mean:\",hinge.mean())\n# Gradient wrt score away from margin=1\ngrad=np.where(margin<1,-y,0.)\nprint(\"Subgradients:\",grad)",
+      "packages": "numpy",
+      "application": "SVM因子方向分类、信用事件检测以及线性大间隔风险状态分类。",
+      "limits": "该损失不输出已校准的上涨或违约概率；仍须独立评价阈值、样本不平衡和交易净收益。",
+      "coverage": "complete"
+    },
+    {
+      "id": "trees-n01-03",
+      "node_id": "trees-n01-03",
+      "title": "AdaBoost",
+      "definition": "AdaBoost以加权训练样本不断拟合弱分类器，将本轮误分类样本权重提高、正确分类样本权重降低；最终把弱分类器按可信度加权组合。标准离散二分类版本使用标签−1/+1。",
+      "assumptions": "每轮弱分类器在当前样本权重下错误率应低于1/2；样本极端噪声和错误标签会导致权重集中，训练集仅能给出模型拟合依据。",
+      "properties": [
+        "弱学习器系数α随错误率ε减小而增大。",
+        "最终模型决策取所有弱学习器加权得分的符号。"
+      ],
+      "formulas": [
+        {
+          "label": "加权错误率",
+          "tex": "\\varepsilon_m=\\sum_{i=1}^nw_i^{(m)}\\mathbf1[h_m(x_i)\\ne y_i]"
+        },
+        {
+          "label": "弱学习器系数",
+          "tex": "\\alpha_m=\\frac12\\log\\frac{1-\\varepsilon_m}{\\varepsilon_m}"
+        },
+        {
+          "label": "样本权重更新",
+          "tex": "w_i^{(m+1)}=\\frac{w_i^{(m)}\\exp(-\\alpha_my_ih_m(x_i))}{Z_m}"
+        },
+        {
+          "label": "集成预测",
+          "tex": "H(x)=\\operatorname{sign}\\left(\\sum_{m=1}^M\\alpha_mh_m(x)\\right)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义本轮指数损失的归一化因子并按当前预测结果分组。",
+          "tex": "Z_m=(1-\\varepsilon_m)e^{-\\alpha_m}+\\varepsilon_me^{\\alpha_m}"
+        },
+        {
+          "explanation": "对α求导并令零，得到e的平方项与错误率比值。",
+          "tex": "\\frac{dZ_m}{d\\alpha_m}=-(1-\\varepsilon_m)e^{-\\alpha_m}+\\varepsilon_me^{\\alpha_m}=0"
+        },
+        {
+          "explanation": "整理获得弱分类器权重公式，之后重新归一化样本权重。",
+          "tex": "\\alpha_m=\\frac12\\log((1-\\varepsilon_m)/\\varepsilon_m)"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.ensemble import AdaBoostClassifier\nfrom sklearn.tree import DecisionTreeClassifier\nrng=np.random.default_rng(7)\nX=rng.normal(size=(180,3))\ny=((X[:,0]+.5*X[:,1])>0).astype(int)\nclf=AdaBoostClassifier(estimator=DecisionTreeClassifier(max_depth=1),\n                       n_estimators=40,learning_rate=.5,random_state=7)\nclf.fit(X[:130],y[:130])\nprint(\"Holdout accuracy:\",clf.score(X[130:],y[130:]))\nprint(\"Number of estimators:\",len(clf.estimators_))",
+      "packages": "numpy, scikit-learn",
+      "application": "非线性多因子分类、宏观风险事件识别与弱分类器集成对照。",
+      "limits": "金融时间序列不可随机混合未来和过去样本，代码只使用合成数据演示分类器API。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n06-02",
+      "node_id": "vision-n06-02",
+      "title": "Vision Transformer",
+      "definition": "ViT将图像划分为固定大小的Patch，把每个Patch展平并线性投影为Token，加上位置编码后通过Transformer Encoder处理全局区域依赖。分类头可读取CLS Token或池化后的Token表示。",
+      "assumptions": "图像尺寸与Patch尺寸匹配；D维特征可被注意力头数整除。位置编码和完整训练流程对真实分类效果不可缺省。",
+      "properties": [
+        "标准自注意力在Patch Token数N上有约O(N²D)的计算量。",
+        "ViT不直接内置CNN的局部平移共享先验，对小规模价格图数据可能需要更强正则或预训练。"
+      ],
+      "formulas": [
+        {
+          "label": "Patch数量",
+          "tex": "N=\\frac{HW}{P^2}"
+        },
+        {
+          "label": "Patch嵌入",
+          "tex": "z_i=W_e\\operatorname{vec}(P_i)+p_i"
+        },
+        {
+          "label": "注意力",
+          "tex": "\\operatorname{Attn}(Q,K,V)=\\operatorname{softmax}(QK^\\top/\\sqrt{d_k})V"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将每个P×P×C图像块展平后投影为D维Token。",
+          "tex": "X_{\\rm patch}\\in\\mathbb R^{B\\times N\\times CP^2},\\quad Z=X_{\\rm patch}W_e"
+        },
+        {
+          "explanation": "加入位置编码使网络能区分不同Patch的空间位置。",
+          "tex": "Z^{(0)}=Z+P_{\\rm pos}"
+        },
+        {
+          "explanation": "编码器多层聚合Token，分类头对池化表示映射类别Logits。",
+          "tex": "\\hat y=W_{\\rm cls}\\operatorname{Pool}(\\operatorname{Encoder}(Z^{(0)}))"
+        }
+      ],
+      "code": "import torch\nfrom torch import nn\ntorch.manual_seed(0)\nclass MiniViT(nn.Module):\n    def __init__(self):\n        super().__init__()\n        self.patch=nn.Conv2d(3,32,kernel_size=8,stride=8)\n        self.pos=nn.Parameter(torch.zeros(1,16,32))\n        layer=nn.TransformerEncoderLayer(d_model=32,nhead=4,batch_first=True)\n        self.encoder=nn.TransformerEncoder(layer,num_layers=2)\n        self.head=nn.Linear(32,2)\n    def forward(self,x):\n        z=self.patch(x).flatten(2).transpose(1,2)+self.pos\n        return self.head(self.encoder(z).mean(1))\nm=MiniViT()\nprint(\"Logits:\",m(torch.randn(4,3,32,32)).shape)",
+      "packages": "torch",
+      "application": "价格图像表示学习、财报图像和CNN-vs-ViT的ETF趋势预测实验。",
+      "limits": "使用随机权重的演示仅验证模型结构和张量形状，不表明有任何资产回报预测能力。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n01-03",
+      "node_id": "nlp-n01-03",
+      "title": "Word2Vec Skip-gram",
+      "definition": "Skip-gram用一个中心词预测其周围上下文词，通过训练词向量和上下文向量获得词共现驱动的稠密表示。大词表训练通常使用负采样或层次Softmax降低计算成本。",
+      "assumptions": "上下文窗口与Tokenization必须定义；正样本来自真实语料的中心/上下文配对，静态Embedding无法按句子自动消歧。",
+      "properties": [
+        "最大化真实上下文条件对数似然可以拉近经常共同出现的词向量。",
+        "负采样目标近似替代全词表Softmax，但不等于对所有词精确归一化。"
+      ],
+      "formulas": [
+        {
+          "label": "Skip-gram条件似然",
+          "tex": "L=-\\sum_t\\sum_{j=-c,j\\ne0}^{c}\\log p(w_{t+j}\\mid w_t)"
+        },
+        {
+          "label": "全词表Softmax",
+          "tex": "p(o\\mid c)=\\frac{\\exp(u_o^\\top v_c)}{\\sum_{w\\in V}\\exp(u_w^\\top v_c)}"
+        },
+        {
+          "label": "负采样训练目标",
+          "tex": "\\ell=-\\log\\sigma(u_o^\\top v_c)-\\sum_{k=1}^K\\log\\sigma(-u_{n_k}^\\top v_c)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "中心词向量vc与候选上下文向量uo构造点积Logit。",
+          "tex": "s(c,o)=u_o^\\top v_c"
+        },
+        {
+          "explanation": "若采用全Softmax，对所有词得分归一后形成条件概率。",
+          "tex": "p(o|c)=e^{s(c,o)}/\\sum_we^{s(c,w)}"
+        },
+        {
+          "explanation": "为了减少词表遍历，使用真实上下文正例和K个随机负例的LogSigmoid损失。",
+          "tex": "\\ell_{\\rm NS}=-\\log\\sigma(s^+)-\\sum_k\\log\\sigma(-s_k^-)"
+        }
+      ],
+      "code": "import torch\ntorch.manual_seed(0)\nvocab=15;dim=8\ninput_emb=torch.nn.Embedding(vocab,dim)\noutput_emb=torch.nn.Embedding(vocab,dim)\ncenter=torch.tensor([1,3,4,6])\npositive=torch.tensor([2,4,5,7])\nnegative=torch.randint(0,vocab,(4,5))\nv=input_emb(center)\npos=(v*output_emb(positive)).sum(-1)\nneg=(output_emb(negative)*v[:,None,:]).sum(-1)\nloss=-(torch.nn.functional.logsigmoid(pos)+\n        torch.nn.functional.logsigmoid(-neg).sum(-1)).mean()\nloss.backward()\nprint(\"Skip-gram negative sampling loss:\",loss.item())",
+      "packages": "torch",
+      "application": "财经新闻与研报的静态词Embedding、关键词聚类及情感分类基线。",
+      "limits": "代码演示一个小批次的负采样损失，未实现真实语料的上下文采样或整个训练循环。",
+      "coverage": "complete"
+    },
+    {
+      "id": "generative-n01-03",
+      "node_id": "generative-n01-03",
+      "title": "GAN极小极大目标",
+      "definition": "GAN由生成器G把随机噪声映射为合成样本，判别器D学习区分真实与合成样本。原始GAN让判别器最大化真假对数似然，让生成器最小化同一个对抗目标。",
+      "assumptions": "样本与生成分布定义明确，D输出0到1概率；实际常用非饱和生成器损失改善梯度，但其目标与原始极小极大目标需区分。",
+      "properties": [
+        "固定生成器时，理想最优判别器等于真实分布在真假混合密度中的比例。",
+        "代入最优判别器后，原始GAN优化与真实/生成分布的Jensen–Shannon散度有关。"
+      ],
+      "formulas": [
+        {
+          "label": "对抗目标",
+          "tex": "\\min_G\\max_D E_{x\\sim p_{\\rm data}}\\log D(x)+E_{z\\sim p(z)}\\log(1-D(G(z)))"
+        },
+        {
+          "label": "最优判别器",
+          "tex": "D^*(x)=\\frac{p_{\\rm data}(x)}{p_{\\rm data}(x)+p_g(x)}"
+        },
+        {
+          "label": "与JS散度关系",
+          "tex": "V(D^*,G)=-\\log4+2D_{\\rm JS}(p_{\\rm data}\\|p_g)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "固定生成器时，逐点最大化判别器的二元对数似然。",
+          "tex": "a\\log D+b\\log(1-D)"
+        },
+        {
+          "explanation": "对D求导并令零得到最优二分类概率。",
+          "tex": "a/D-b/(1-D)=0\\Longrightarrow D^*=a/(a+b)"
+        },
+        {
+          "explanation": "代入原始对抗目标后整理，得到两分布JS散度。",
+          "tex": "V(D^*,G)=-\\log4+2D_{\\rm JS}(p_{\\rm data}\\|p_g)"
+        }
+      ],
+      "code": "import torch\nfrom torch import nn\ntorch.manual_seed(0)\nG=nn.Linear(2,2)\nD=nn.Sequential(nn.Linear(2,1),nn.Sigmoid())\nreal=torch.randn(16,2)+1\nz=torch.randn(16,2)\nfake=G(z)\neps=1e-6\nd_loss=-(D(real).clamp_min(eps).log().mean()+\n          (1-D(fake.detach())).clamp_min(eps).log().mean())\ng_loss=-D(fake).clamp_min(eps).log().mean()\nprint(\"D loss:\",d_loss.item(),\"non-saturating G loss:\",g_loss.item())\n(d_loss+g_loss).backward()",
+      "packages": "torch",
+      "application": "合成收益率分布、波动率情景生成与生成模型稳定性比较。",
+      "limits": "代码展示对抗损失与反向传播的一次计算，没有完整交替训练、梯度惩罚或金融分布风险验证。",
+      "coverage": "complete"
+    }
+  ]
+}
