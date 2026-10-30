@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-10-30",
+  "engine": "Pyodide + 自建下一交易日开盘执行Python引擎（非Backtrader/Zipline）",
+  "strategies": [
+    {
+      "id": "buyhold",
+      "name": "等权持有 Buy & Hold",
+      "category": "基准策略",
+      "level": "入门",
+      "description": "等权买入所上传的证券并持续持有，适合作为策略性能对比。此处采用日度目标权重再平衡。",
+      "requirements": "至少1个Ticker",
+      "theory": "买入并持有 / 资产配置",
+      "code": "def signals(history):\n    names = sorted(history)\n    return {ticker: 1.0 / len(names) for ticker in names}\n",
+      "note": "等权每日再平衡，持仓于每天开盘重平衡；基准曲线本身不含交易成本。",
+      "metrics": null,
+      "equity": null,
+      "dataset": "未提供真实历史回测结果；运行模拟样本或上传CSV后生成。"
+    },
+    {
+      "id": "ma",
+      "name": "双均线交叉 SMA 10/40",
+      "category": "趋势跟踪",
+      "level": "入门",
+      "description": "短均线高于长均线时持有，否则空仓。只使用前一交易日收盘及之前数据。",
+      "requirements": "至少40个历史交易日",
+      "theory": "均线交叉 / 趋势",
+      "code": "def signals(history):\n    candidates = []\n    for ticker, bars in history.items():\n        close = [bar[\"close\"] for bar in bars]\n        if len(close) >= 40:\n            short = sum(close[-10:]) / 10\n            long = sum(close[-40:]) / 40\n            if short > long:\n                candidates.append(ticker)\n    return {ticker: 1.0 / len(candidates) for ticker in candidates} if candidates else {}\n",
+      "note": "趋势形成后才追随，震荡市可能频繁交易；输入价格应为统一复权口径。",
+      "metrics": null,
+      "equity": null,
+      "dataset": "未提供真实历史回测结果；运行模拟样本或上传CSV后生成。"
+    },
+    {
+      "id": "grid",
+      "name": "价格网格 Grid Trading",
+      "category": "均值回复",
+      "level": "入门",
+      "description": "基于20日均值与±2.5%阈值确定0%、50%、100%仓位。属于日频网格近似，不含盘中挂单撮合。",
+      "requirements": "至少20个历史交易日",
+      "theory": "价格网格 / 均值回复",
+      "code": "def signals(history):\n    ticker = sorted(history)[0]\n    close = [bar[\"close\"] for bar in history[ticker]]\n    if len(close) < 20:\n        return {}\n    center = sum(close[-20:]) / 20\n    if close[-1] <= center * 0.975:\n        weight = 1.0\n    elif close[-1] >= center * 1.025:\n        weight = 0.0\n    else:\n        weight = 0.5\n    return {ticker: weight}\n",
+      "note": "非订单级网格策略；不能把日线执行结果当成真实网格逐笔成交回测。",
+      "metrics": null,
+      "equity": null,
+      "dataset": "未提供真实历史回测结果；运行模拟样本或上传CSV后生成。"
+    },
+    {
+      "id": "momentum",
+      "name": "时间序列动量 TSMOM",
+      "category": "趋势跟踪",
+      "level": "中级",
+      "description": "以60日价格变化确定方向，多资产等权分配；允许做空、总绝对敞口不超过1。",
+      "requirements": "至少60个历史交易日",
+      "theory": "Time Series Momentum",
+      "code": "def signals(history):\n    names = sorted(history)\n    weights = {}\n    for ticker in names:\n        close = [b[\"close\"] for b in history[ticker]]\n        if len(close) < 61:\n            continue\n        ret60 = close[-1] / close[-61] - 1\n        if ret60 > 0.02:\n            weights[ticker] = 1.0 / len(names)\n        elif ret60 < -0.02:\n            weights[ticker] = -1.0 / len(names)\n    return weights\n",
+      "note": "做空费用可在页面输入年化借券成本，但尚未模拟融券库存、保证金及涨跌停。",
+      "metrics": null,
+      "equity": null,
+      "dataset": "未提供真实历史回测结果；运行模拟样本或上传CSV后生成。"
+    },
+    {
+      "id": "multifactor",
+      "name": "横截面多因子 Top-2",
+      "category": "因子策略",
+      "level": "中级",
+      "description": "结合20日动量与30日波动率排序，选择得分前两名等权持有。未使用价值、质量等财务因子。",
+      "requirements": "建议至少3只资产，每只60个交易日",
+      "theory": "动量 + 低波动率排序",
+      "code": "import statistics\n\ndef signals(history):\n    factors = []\n    for ticker, bars in history.items():\n        close = [x[\"close\"] for x in bars]\n        if len(close) < 61:\n            continue\n        returns = [close[i] / close[i-1] - 1 for i in range(len(close)-30, len(close))]\n        vol = statistics.pstdev(returns)\n        mom = close[-1] / close[-21] - 1\n        score = mom - 0.4 * vol\n        factors.append((score, ticker))\n    picks = [ticker for _, ticker in sorted(factors, reverse=True)[:2]]\n    return {ticker: 1.0 / len(picks) for ticker in picks} if picks else {}\n",
+      "note": "仅用于展示横截面排序。真实多因子选股还需PIT财报、行业中性化、风险暴露与交易成本控制。",
+      "metrics": null,
+      "equity": null,
+      "dataset": "未提供真实历史回测结果；运行模拟样本或上传CSV后生成。"
+    },
+    {
+      "id": "pairs",
+      "name": "配对交易 Pairs Trading",
+      "category": "统计套利",
+      "level": "进阶",
+      "description": "选取两只资产，以历史价格比率Z-score触发一多一空，演示统计套利思路。未验证协整与对冲比率。",
+      "requirements": "至少2个Ticker，且日期交集≥45天",
+      "theory": "价差均值回复 / 配对",
+      "code": "import statistics\n\ndef signals(history):\n    names = sorted(history)\n    if len(names) < 2:\n        return {}\n    a, b = names[:2]\n    a_close = [x[\"close\"] for x in history[a]]\n    b_close = [x[\"close\"] for x in history[b]]\n    if len(a_close) < 41:\n        return {}\n    ratio = [x/y for x,y in zip(a_close[-40:], b_close[-40:])]\n    mean = statistics.mean(ratio)\n    sigma = statistics.pstdev(ratio)\n    z = (ratio[-1] - mean) / sigma if sigma > 1e-10 else 0\n    if z > 1.2:\n        return {a: -0.5, b: 0.5}\n    if z < -1.2:\n        return {a: 0.5, b: -0.5}\n    return {}\n",
+      "note": "价格比率配对仅供教学。研究级策略应检验协整、价格单位归一、融资、借券与换手。",
+      "metrics": null,
+      "equity": null,
+      "dataset": "未提供真实历史回测结果；运行模拟样本或上传CSV后生成。"
+    }
+  ]
+}
