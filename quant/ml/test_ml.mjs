@@ -9,6 +9,16 @@ const manifest=read("manifest.json");
 const files=manifest.lesson_files;
 const lessons=files.flatMap(p=>read(p).lessons);
 const notes=(manifest.note_files||[]).flatMap(p=>read(p).notes);
+const examples=(manifest.example_files||[]).flatMap(p=>read(p).lessons);
+const exampleIds=new Set();
+const supplementalIds=new Set(notes.map(n=>n.node_id));
+for(const item of examples){
+  assert(supplementalIds.has(item.node_id),"focused example not in supplemental notes "+item.node_id);
+  assert(!exampleIds.has(item.node_id),"duplicated focused example "+item.node_id);
+  assert(typeof item.code==="string"&&item.code.trim().length>10,"missing focused code "+item.node_id);
+  exampleIds.add(item.node_id);
+}
+
 assert.equal(notes.length,manifest.notes_count,"supplemental note manifest mismatch");
 assert.equal(lessons.length+notes.length,curriculum.nodes.length,"some topics have no reading content");
 assert.equal(lessons.length,manifest.total_lessons,"manifest count mismatch");
