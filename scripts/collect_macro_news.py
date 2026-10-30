@@ -4,7 +4,6 @@
 The resulting JSON is a 365-day *collected* index, never a claim to exhaustive coverage.
 Uses Python standard library only; each source can fail without deleting existing news.
 """
-import calendar
 import datetime as dt
 import email.utils
 import hashlib
@@ -16,7 +15,7 @@ import urllib.request
 import urllib.error
 import xml.etree.ElementTree as ET
 
-ROOT = pathlib.Path(__file__).resolve().parents[2]
+ROOT = pathlib.Path(__file__).resolve().parents[1]
 NEWS = ROOT / "quant/news/news.json"
 SOURCES = ROOT / "quant/news/sources.json"
 MAX_ITEMS = 12000
