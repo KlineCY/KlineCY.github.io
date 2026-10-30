@@ -1,0 +1,581 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "graph-n01-01",
+      "node_id": "graph-n01-01",
+      "title": "节点边邻接矩阵",
+      "definition": "图以节点代表实体、以边代表关系，邻接矩阵刻画任意两节点是否连接。",
+      "assumptions": "无向简单图满足A对称，自环通常用对角线表示。",
+      "properties": [
+        "无向简单图满足A对称，自环通常用对角线表示。",
+        "该方法须在训练数据上正确设置参数，并通过独立样本外测试验证泛化。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "A_{ij}=mathbf1[(i,j)in E]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对节点编序并将有边位置置1",
+          "tex": "A_{ij}in{0,1}"
+        },
+        {
+          "explanation": "使用上述关系构建算法实现，并对误差与可得信息进行核查。",
+          "tex": "A_{ij}=mathbf1[(i,j)in E]"
+        }
+      ],
+      "code": "import numpy as np\nA=np.zeros((3,3))\nfor i,j in [(0,1),(1,2)]:A[i,j]=A[j,i]=1\nprint(A)",
+      "application": "上市公司供应链和ETF资产持仓网络。",
+      "limits": "相关性不是因果关系，图的边应有具体经济解释。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "graph-n03-01",
+      "node_id": "graph-n03-01",
+      "title": "图Laplace",
+      "definition": "图Laplacian刻画网络上的差异和平滑性，常用于谱聚类。",
+      "assumptions": "非负边权无向图的L是半正定的。",
+      "properties": [
+        "非负边权无向图的L是半正定的。",
+        "该方法须在训练数据上正确设置参数，并通过独立样本外测试验证泛化。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "L=D-A,quad x^\top Lx=\frac12sum_{ij}A_{ij}(x_i-x_j)^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "展开度矩阵和邻接矩阵对应的二次型",
+          "tex": "x^\top Dx=sum_id_ix_i^2"
+        },
+        {
+          "explanation": "使用上述关系构建算法实现，并对误差与可得信息进行核查。",
+          "tex": "L=D-A,quad x^\top Lx=\frac12sum_{ij}A_{ij}(x_i-x_j)^2"
+        }
+      ],
+      "code": "import numpy as np\nA=np.array([[0.,1.,0.],[1.,0.,1.],[0.,1.,0.]])\nL=np.diag(A.sum(1))-A\nprint(np.linalg.eigvalsh(L))",
+      "application": "行业金融网络中的共同冲击传导。",
+      "limits": "有向图不能直接套用全部对称谱结论。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "graph-n01-02",
+      "node_id": "graph-n01-02",
+      "title": "Message Passing",
+      "definition": "消息传递神经网络通过聚合邻居信息更新每个节点的隐藏表示。",
+      "assumptions": "聚合操作应对邻居排列不敏感。",
+      "properties": [
+        "聚合操作应对邻居排列不敏感。",
+        "该方法须在训练数据上正确设置参数，并通过独立样本外测试验证泛化。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "h_v' =U(h_v,operatorname{AGG}_{uin N(v)}M(h_v,h_u,e_{uv}))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "各边计算邻居消息",
+          "tex": "m_{u\to v}=M(h_v,h_u,e_{uv})"
+        },
+        {
+          "explanation": "使用上述关系构建算法实现，并对误差与可得信息进行核查。",
+          "tex": "h_v' =U(h_v,operatorname{AGG}_{uin N(v)}M(h_v,h_u,e_{uv}))"
+        }
+      ],
+      "code": "import torch\nx=torch.tensor([[1.,0.],[0.,1.],[2.,2.]])\nedges=[(0,1),(1,0),(1,2),(2,1)]\nout=torch.zeros_like(x)\nfor source,target in edges:out[target]+=x[source]\nprint(out)",
+      "application": "传播供应链公司财务与价格信号。",
+      "limits": "未核实的关联边会传播错误信息。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "graph-n03-02",
+      "node_id": "graph-n03-02",
+      "title": "GraphSAGE",
+      "definition": "GraphSAGE对子图邻居采样与聚合，学习能应用于新节点的归纳表示。",
+      "assumptions": "邻居采样数控制计算开销与方差。",
+      "properties": [
+        "邻居采样数控制计算开销与方差。",
+        "该方法须在训练数据上正确设置参数，并通过独立样本外测试验证泛化。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "h'_v=sigma(W[h_vVertoperatorname{MEAN}_{uin N(v)}h_u])"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先对节点的邻域表征取均值",
+          "tex": "m_v=|N(v)|^{-1}sum_{uin N(v)}h_u"
+        },
+        {
+          "explanation": "使用上述关系构建算法实现，并对误差与可得信息进行核查。",
+          "tex": "h'_v=sigma(W[h_vVertoperatorname{MEAN}_{uin N(v)}h_u])"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(4,3)\nneighbors={0:[1,2],1:[0,3],2:[0],3:[1]}\nmeans=torch.stack([x[neighbors[i]].mean(0) for i in range(4)])\nlayer=torch.nn.Linear(6,4)\nprint(layer(torch.cat([x,means],dim=1)).shape)",
+      "application": "新上市公司与行业邻居编码。",
+      "limits": "新节点的泛化仍依赖其特征和图结构与训练分布相近。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "graph-n04-02",
+      "node_id": "graph-n04-02",
+      "title": "Graph Attention GAT",
+      "definition": "GAT学习邻居权重并以邻居上的归一化注意力进行图消息聚合。",
+      "assumptions": "注意力归一只包含有效相邻节点。",
+      "properties": [
+        "注意力归一只包含有效相邻节点。",
+        "该方法须在训练数据上正确设置参数，并通过独立样本外测试验证泛化。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "\\alpha_{vu}=\\frac{e^{e_{vu}}}{\\sum_{k\\in N(v)}e^{e_{vk}}},\\quad h_v'=\\sigma(\\sum_u\\alpha_{vu}Wh_u)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "节点对评分再做softmax",
+          "tex": "e_{vu}=a^\top[Wh_vVert Wh_u]"
+        },
+        {
+          "explanation": "使用上述关系构建算法实现，并对误差与可得信息进行核查。",
+          "tex": "\\alpha_{vu}=\\frac{e^{e_{vu}}}{\\sum_{k\\in N(v)}e^{e_{vk}}},\\quad h_v'=\\sigma(\\sum_u\\alpha_{vu}Wh_u)"
+        }
+      ],
+      "code": "import torch\nscore=torch.tensor([.2,-.1,1.])\nnbr=torch.randn(3,4)\nprint(score.softmax(0)@nbr)",
+      "application": "行业之间关联程度的动态加权。",
+      "limits": "注意力权重不等同于因果贡献。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "causal-n03-01",
+      "node_id": "causal-n03-01",
+      "title": "DAG因果图",
+      "definition": "有向无环图将研究假设中的变量因果方向显式编码，以分析混杂和调整路径。",
+      "assumptions": "因果图箭头是识别假设而非相关矩阵的直接结论。",
+      "properties": [
+        "因果图箭头是识别假设而非相关矩阵的直接结论。",
+        "该方法须在训练数据上正确设置参数，并通过独立样本外测试验证泛化。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "X\to D,quad X\to Y,quad D\to Y"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "共同前因X可能同时影响处理D和结果Y",
+          "tex": "X\\rightarrow(D,Y)"
+        },
+        {
+          "explanation": "使用上述关系构建算法实现，并对误差与可得信息进行核查。",
+          "tex": "X\to D,quad X\to Y,quad D\to Y"
+        }
+      ],
+      "code": "edges=[(\"market\",\"flow\"),(\"market\",\"return\"),(\"flow\",\"return\")]\nfor x,y in edges:print(x,\"->\",y)",
+      "application": "研究ETF流量和收益关系中的市场共同冲击。",
+      "limits": "遗漏混杂会使处理和结果的相关性不是因果效应。",
+      "packages": "Python standard library",
+      "coverage": "complete"
+    },
+    {
+      "id": "causal-n02-02",
+      "node_id": "causal-n02-02",
+      "title": "倾向得分",
+      "definition": "倾向得分是在已知协变量条件下发生处理的概率，用于观察性研究的可比性调整。",
+      "assumptions": "使用需要潜在结果条件独立和正重叠假设。",
+      "properties": [
+        "使用需要潜在结果条件独立和正重叠假设。",
+        "该方法须在训练数据上正确设置参数，并通过独立样本外测试验证泛化。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "e(x)=P(D=1|X=x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "模型预测样本接受处理的条件概率",
+          "tex": "0<e(x)<1"
+        },
+        {
+          "explanation": "使用上述关系构建算法实现，并对误差与可得信息进行核查。",
+          "tex": "e(x)=P(D=1|X=x)"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.linear_model import LogisticRegression\nrng=np.random.default_rng(3)\nX=rng.normal(size=(120,2));D=rng.binomial(1,1/(1+np.exp(-X[:,0])))\nm=LogisticRegression().fit(X,D)\nprint(m.predict_proba(X[:3])[:,1])",
+      "application": "金融政策受影响公司与未受影响公司的比较。",
+      "limits": "不能依靠高分类准确率判断因果调整充分。",
+      "packages": "numpy, scikit-learn",
+      "coverage": "complete"
+    },
+    {
+      "id": "causal-n03-02",
+      "node_id": "causal-n03-02",
+      "title": "逆概率加权IPW",
+      "definition": "逆概率加权根据每个个体处理或对照出现的概率修正样本代表性。",
+      "assumptions": "估计需要一致性、无未测混杂和正重叠。",
+      "properties": [
+        "估计需要一致性、无未测混杂和正重叠。",
+        "该方法须在训练数据上正确设置参数，并通过独立样本外测试验证泛化。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "\\hat\\tau=\\frac1n\\sum_i\\left(\\frac{D_iY_i}{e_i}-\\frac{(1-D_i)Y_i}{1-e_i}\\right)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "处理与对照分别用相应倾向得分倒数加权",
+          "tex": "w_1=D/e,\\quad w_0=(1-D)/(1-e)"
+        },
+        {
+          "explanation": "使用上述关系构建算法实现，并对误差与可得信息进行核查。",
+          "tex": "\\hat\\tau=\\frac1n\\sum_i\\left(\\frac{D_iY_i}{e_i}-\\frac{(1-D_i)Y_i}{1-e_i}\\right)"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0)\np=rng.uniform(.3,.7,300);d=rng.binomial(1,p);y=1.5*d+rng.normal(size=300)\nprint(np.mean(d*y/p-(1-d)*y/(1-p)))",
+      "application": "金融事件处理效应的加权估计。",
+      "limits": "接近0或1的倾向得分可能使方差爆炸。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "causal-n05-02",
+      "node_id": "causal-n05-02",
+      "title": "差分中的差分",
+      "definition": "DiD把处理组政策前后变化减去对照组同期变化，在平行趋势假设下估计政策影响。",
+      "assumptions": "必须检验政策前趋势及其他同期差异。",
+      "properties": [
+        "必须检验政策前趋势及其他同期差异。",
+        "该方法须在训练数据上正确设置参数，并通过独立样本外测试验证泛化。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "\\tau_{\\rm DID}=(\\bar Y_{T,post}-\\bar Y_{T,pre})-(\\bar Y_{C,post}-\\bar Y_{C,pre})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先计算两组各自的时间变化",
+          "tex": "\\Delta_g=\\bar Y_{g,post}-\\bar Y_{g,pre}"
+        },
+        {
+          "explanation": "使用上述关系构建算法实现，并对误差与可得信息进行核查。",
+          "tex": "\\tau_{\\rm DID}=(\\bar Y_{T,post}-\\bar Y_{T,pre})-(\\bar Y_{C,post}-\\bar Y_{C,pre})"
+        }
+      ],
+      "code": "treated=[100,116];control=[90,98]\nprint((treated[1]-treated[0])-(control[1]-control[0]))",
+      "application": "交易制度变化对ETF流动性的影响。",
+      "limits": "共同趋势不成立时结果不能解释为因果效应。",
+      "packages": "Python standard library",
+      "coverage": "complete"
+    },
+    {
+      "id": "causal-n05-03",
+      "node_id": "causal-n05-03",
+      "title": "Cross-Fitting",
+      "definition": "Cross-Fitting在每个验证折使用其他折训练的Nuisance模型预测，减少机器学习过拟合对因果估计的影响。",
+      "assumptions": "每个保留折不得参加对应Nuisance模型训练。",
+      "properties": [
+        "每个保留折不得参加对应Nuisance模型训练。",
+        "该方法须在训练数据上正确设置参数，并通过独立样本外测试验证泛化。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "\\hat\\eta_i=\\hat\\eta^{(-k)}(X_i),\\qquad i\\in I_k"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将样本划分互不重叠的折并交叉拟合",
+          "tex": "I=\\bigcup_{k=1}^KI_k"
+        },
+        {
+          "explanation": "使用上述关系构建算法实现，并对误差与可得信息进行核查。",
+          "tex": "\\hat\\eta_i=\\hat\\eta^{(-k)}(X_i),\\qquad i\\in I_k"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.model_selection import KFold\nfrom sklearn.linear_model import Ridge\nrng=np.random.default_rng(0);X=rng.normal(size=(50,3));y=X[:,0]+rng.normal(size=50)\npred=np.zeros(50)\nfor tr,te in KFold(5,shuffle=True,random_state=0).split(X):\n    pred[te]=Ridge().fit(X[tr],y[tr]).predict(X[te])\nprint(pred[:5])",
+      "application": "DML双重稳健得分的样本外Nuisance预测。",
+      "limits": "金融时序数据不能盲目随机折分。",
+      "packages": "numpy, scikit-learn",
+      "coverage": "complete"
+    },
+    {
+      "id": "generative-n01-02",
+      "node_id": "generative-n01-02",
+      "title": "Autoencoder",
+      "definition": "自编码器把输入压缩为潜在变量，再通过解码器重建输入以学习无监督表示。",
+      "assumptions": "潜空间瓶颈和网络正则对表示学习非常重要。",
+      "properties": [
+        "潜空间瓶颈和网络正则对表示学习非常重要。",
+        "该方法须在训练数据上正确设置参数，并通过独立样本外测试验证泛化。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "z=f_\\phi(x),\\quad \\hat x=g_\\theta(z),\\quad L=\\|x-\\hat x\\|^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "最小化输入与重构之间的误差",
+          "tex": "\\min_{\\phi,\\theta}\\mathbb E[\\|x-g_\\theta(f_\\phi(x))\\|^2]"
+        },
+        {
+          "explanation": "使用上述关系构建算法实现，并对误差与可得信息进行核查。",
+          "tex": "z=f_\\phi(x),\\quad \\hat x=g_\\theta(z),\\quad L=\\|x-\\hat x\\|^2"
+        }
+      ],
+      "code": "import torch\nnet=torch.nn.Sequential(torch.nn.Linear(6,2),torch.nn.Tanh(),torch.nn.Linear(2,6))\nx=torch.randn(10,6);loss=(net(x)-x).square().mean()\nloss.backward();print(loss.item())",
+      "application": "收益矩阵降维与异常行情识别。",
+      "limits": "过强模型可能只是记忆训练样本。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "generative-n04-02",
+      "node_id": "generative-n04-02",
+      "title": "ELBO",
+      "definition": "ELBO是对边缘证据对数概率的可微下界，由重构期望和近似后验对先验的KL构成。",
+      "assumptions": "下界与真实证据之差为近似后验和真实后验的KL。",
+      "properties": [
+        "下界与真实证据之差为近似后验和真实后验的KL。",
+        "该方法须在训练数据上正确设置参数，并通过独立样本外测试验证泛化。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "\\mathrm{ELBO}=E_q[\\log p_\\theta(x|z)]-D_{\\rm KL}(q_\\phi(z|x)\\|p(z))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对数边缘似然使用Jensen不等式得到下界",
+          "tex": "\\log p(x)=\\log E_q[p(x,z)/q(z|x)]"
+        },
+        {
+          "explanation": "使用上述关系构建算法实现，并对误差与可得信息进行核查。",
+          "tex": "\\mathrm{ELBO}=E_q[\\log p_\\theta(x|z)]-D_{\\rm KL}(q_\\phi(z|x)\\|p(z))"
+        }
+      ],
+      "code": "import torch\nmu=torch.randn(5,2);logvar=torch.randn(5,2)*.1\nkl=(-.5*(1+logvar-mu.square()-logvar.exp())).sum(-1).mean()\nprint(kl.item())",
+      "application": "生成金融收益分布和风险场景的概率目标。",
+      "limits": "KL系数变化会改变潜变量信息容量。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "generative-n03-02",
+      "node_id": "generative-n03-02",
+      "title": "重参数化技巧",
+      "definition": "连续随机潜变量可表示为可微参数变换和固定噪声的组合，使梯度能沿采样路径回传。",
+      "assumptions": "噪声分布必须独立于优化参数。",
+      "properties": [
+        "噪声分布必须独立于优化参数。",
+        "该方法须在训练数据上正确设置参数，并通过独立样本外测试验证泛化。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "z=\\mu_\\phi(x)+\\sigma_\\phi(x)\\odot\\epsilon,\\quad\\epsilon\\sim N(0,I)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从固定标准正态抽样并做仿射变换",
+          "tex": "\\frac{\\partial z}{\\partial\\mu}=I"
+        },
+        {
+          "explanation": "使用上述关系构建算法实现，并对误差与可得信息进行核查。",
+          "tex": "z=\\mu_\\phi(x)+\\sigma_\\phi(x)\\odot\\epsilon,\\quad\\epsilon\\sim N(0,I)"
+        }
+      ],
+      "code": "import torch\nmu=torch.tensor([1.],requires_grad=True);logvar=torch.tensor([0.],requires_grad=True)\nz=mu+torch.exp(.5*logvar)*torch.randn(1)\nz.square().sum().backward();print(mu.grad,logvar.grad)",
+      "application": "VAE潜变量和随机策略训练。",
+      "limits": "离散抽样不能直接套用常规高斯重参数化。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "generative-n02-04",
+      "node_id": "generative-n02-04",
+      "title": "去噪目标DDPM",
+      "definition": "DDPM训练网络根据被扰动的样本和噪声时刻回归注入的高斯噪声，以学习扩散模型的去噪方向。",
+      "assumptions": "前向噪声日程和训练采样分布须明确。",
+      "properties": [
+        "前向噪声日程和训练采样分布须明确。",
+        "该方法须在训练数据上正确设置参数，并通过独立样本外测试验证泛化。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "L=E_{x_0,\\epsilon,t}\\|\\epsilon-\\epsilon_\\theta(x_t,t)\\|_2^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "直接构造指定时刻的含噪样本",
+          "tex": "x_t=\\sqrt{\\bar\\alpha_t}x_0+\\sqrt{1-\\bar\\alpha_t}\\epsilon"
+        },
+        {
+          "explanation": "使用上述关系构建算法实现，并对误差与可得信息进行核查。",
+          "tex": "L=E_{x_0,\\epsilon,t}\\|\\epsilon-\\epsilon_\\theta(x_t,t)\\|_2^2"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(12,3);eps=torch.randn_like(x);a=.6\nxt=a**.5*x+(1-a)**.5*eps\nnet=torch.nn.Linear(3,3)\nloss=(net(xt)-eps).square().mean()\nloss.backward();print(loss.item())",
+      "application": "模拟金融收益场景的生成建模。",
+      "limits": "前向加噪和一次损失计算不等于已经训练出完整生成模型。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "multimodal-n03-01",
+      "node_id": "multimodal-n03-01",
+      "title": "Cross-Attention",
+      "definition": "跨注意力用一类输入构造Query，另一类输入构造Key和Value，实现异构信息源的条件聚合。",
+      "assumptions": "输入和输出张量的时间可得性必须一致。",
+      "properties": [
+        "输入和输出张量的时间可得性必须一致。",
+        "该方法须在训练数据上正确设置参数，并通过独立样本外测试验证泛化。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "\\mathrm{Attn}(Q_X,K_Y,V_Y)=\\operatorname{softmax}(Q_XK_Y^\\top/\\sqrt d)V_Y"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "把来源模态Y变换为可检索Key和Value",
+          "tex": "K_Y=YW_K,\\quad V_Y=YW_V"
+        },
+        {
+          "explanation": "使用上述关系构建算法实现，并对误差与可得信息进行核查。",
+          "tex": "\\mathrm{Attn}(Q_X,K_Y,V_Y)=\\operatorname{softmax}(Q_XK_Y^\\top/\\sqrt d)V_Y"
+        }
+      ],
+      "code": "import torch\nm=torch.nn.MultiheadAttention(16,4,batch_first=True)\nq=torch.randn(2,3,16);s=torch.randn(2,6,16)\ny,w=m(q,s,s);print(y.shape,w.shape)",
+      "application": "财报表格图像和对应文本的融合。",
+      "limits": "Cross-Attention不是已自动完成模态时间戳对齐。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "multimodal-n01-01",
+      "node_id": "multimodal-n01-01",
+      "title": "视觉文本对齐",
+      "definition": "分别编码图像和文本，再用同一潜在空间的相似度衡量匹配关系。",
+      "assumptions": "正负样本应由真实配对关系构建。",
+      "properties": [
+        "正负样本应由真实配对关系构建。",
+        "该方法须在训练数据上正确设置参数，并通过独立样本外测试验证泛化。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "s(I,T)=\\frac{f_I(I)^\\top f_T(T)}{\\|f_I(I)\\|\\|f_T(T)\\|}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "图像和文本分别映射到d维表示",
+          "tex": "v=f_I(I),\\quad t=f_T(T)"
+        },
+        {
+          "explanation": "使用上述关系构建算法实现，并对误差与可得信息进行核查。",
+          "tex": "s(I,T)=\\frac{f_I(I)^\\top f_T(T)}{\\|f_I(I)\\|\\|f_T(T)\\|}"
+        }
+      ],
+      "code": "import torch\nfrom torch.nn import functional as F\nv=F.normalize(torch.randn(3,8),dim=-1)\nt=F.normalize(torch.randn(3,8),dim=-1)\nprint((v@t.T).shape)",
+      "application": "公告图表和研究文字的跨模态匹配。",
+      "limits": "相似性高并不代表模型理解了金融因果事件。",
+      "packages": "torch",
+      "coverage": "complete"
+    },
+    {
+      "id": "multimodal-n01-02",
+      "node_id": "multimodal-n01-02",
+      "title": "频谱图",
+      "definition": "短时傅里叶变换将非平稳时间信号分帧变换，展示每个时刻的频率能量分布。",
+      "assumptions": "窗口长度决定时频分辨率折中。",
+      "properties": [
+        "窗口长度决定时频分辨率折中。",
+        "该方法须在训练数据上正确设置参数，并通过独立样本外测试验证泛化。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "X(m,\\omega)=\\sum_n x[n]w[n-mH]e^{-j\\omega n}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "每帧乘以局部窗再做DFT",
+          "tex": "S(m,\\omega)=|X(m,\\omega)|^2"
+        },
+        {
+          "explanation": "使用上述关系构建算法实现，并对误差与可得信息进行核查。",
+          "tex": "X(m,\\omega)=\\sum_n x[n]w[n-mH]e^{-j\\omega n}"
+        }
+      ],
+      "code": "import numpy as np\nfrom scipy.signal import stft\nt=np.arange(1000)/1000\nx=np.sin(2*np.pi*50*t)\nf,tm,z=stft(x,1000,nperseg=128)\nprint(abs(z).shape)",
+      "application": "电话会议语音的音频特征提取。",
+      "limits": "STFT不是独立的金融收益预测指标。",
+      "packages": "numpy, scipy",
+      "coverage": "complete"
+    },
+    {
+      "id": "multimodal-n01-04",
+      "node_id": "multimodal-n01-04",
+      "title": "Tool Calling",
+      "definition": "Agent工具调用将模型提出的行动转换成参数结构化的外部函数调用，并基于可验证返回继续决策。",
+      "assumptions": "工具权限、输入参数和外部结果均需校验。",
+      "properties": [
+        "工具权限、输入参数和外部结果均需校验。",
+        "该方法须在训练数据上正确设置参数，并通过独立样本外测试验证泛化。"
+      ],
+      "formulas": [
+        {
+          "label": "核心表达",
+          "tex": "a_t=(\\mathrm{tool},\\mathrm{args}),\\quad o_{t+1}=\\mathrm{Execute}(a_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先选择工具和结构化参数",
+          "tex": "a_t=\\pi(s_t)"
+        },
+        {
+          "explanation": "使用上述关系构建算法实现，并对误差与可得信息进行核查。",
+          "tex": "a_t=(\\mathrm{tool},\\mathrm{args}),\\quad o_{t+1}=\\mathrm{Execute}(a_t)"
+        }
+      ],
+      "code": "def mean(values):return sum(values)/len(values)\naction={\"tool\":\"mean\",\"args\":{\"values\":[1.,2.,3.]}}\nallowed={\"mean\":mean}\nprint(allowed[action[\"tool\"]](**action[\"args\"]))",
+      "application": "金融研究Agent的资料检索、计算和回测流程。",
+      "limits": "模型文本不能自动授予账户和交易执行权限。",
+      "packages": "Python standard library",
+      "coverage": "complete"
+    }
+  ]
+}
