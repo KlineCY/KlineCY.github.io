@@ -75,7 +75,7 @@ return b;
 function makeChapter(c,visible,open){
 const out=document.createElement("details");out.className="chapter";out.open=open;
 const summary=document.createElement("summary");
-summary.innerHTML='<span class="chapter-label">'+String(c.order).padStart(2,"0")+'. '+esc(c.title)+'</span><span class="count">'+visible.length+' 点</span><span class="chev" aria-hidden="true">▸</span>';out.appendChild(summary);
+summary.innerHTML='<span class="chapter-label">'+String(c.order).padStart(2,"0")+'. '+esc(c.title)+'</span><span class="count">'+visible.filter(isComplete).length+'/'+visible.length+' 讲义</span><span class="chev" aria-hidden="true">▸</span>';out.appendChild(summary);
 const ul=document.createElement("div");ul.className="nodes";for(const n of visible)ul.appendChild(nodeButton(n));out.appendChild(ul);return out;
 }
 function renderTree(){
@@ -93,7 +93,8 @@ for(const d of depts){
  whole.open=d.id===(filterDept||getNode(activeId)?.discipline_id)||!!query;
  const summary=document.createElement("summary");
  const n=groups.reduce((acc,g)=>acc+g.nodes.length,0);
- summary.innerHTML='<span class="number">'+String(d.order).padStart(2,"0")+'</span><span class="dept-label"><strong>'+esc(d.title)+'</strong><span>'+esc(d.english)+'</span></span><span class="count">'+n+' 知识点</span><span class="chev" aria-hidden="true">▸</span>';
+ const finished=groups.reduce((acc,g)=>acc+g.nodes.filter(isComplete).length,0);
+ summary.innerHTML='<span class="number">'+String(d.order).padStart(2,"0")+'</span><span class="dept-label"><strong>'+esc(d.title)+'</strong><span>'+esc(d.english)+'</span></span><span class="count">'+finished+'/'+n+' 讲义</span><span class="chev" aria-hidden="true">▸</span>';
  whole.appendChild(summary);
  const chapterBox=document.createElement("div");chapterBox.className="chapters";
  for(const [i,g] of groups.entries())chapterBox.appendChild(makeChapter(g.chapter,g.nodes,g.chapter.id===getNode(activeId)?.chapter_id||!!query||Boolean(filterDept)));
@@ -173,16 +174,39 @@ function lessonArticle(n,lesson,container){
  paragraph(limitations,lesson.limits,"warn");container.appendChild(limitations);
 }
 function outlineArticle(n,container){
-const ch=getChap(n.chapter_id),dept=getDept(n.discipline_id);
-const section=makeSection("本知识点的学习位置");
-const c=document.createElement("p");c.textContent="此算法知识点位于「"+dept.title+" → "+ch.title+"」第 "+n.order+" 节，难度为 "+n.level+"。已经纳入系统性课程知识树，但目前尚未编写独立的原理、公式、推导和基础代码讲义。";section.appendChild(c);
-const guide=document.createElement("div");guide.className="outline-note";
-guide.textContent="当前状态：课程目录（尚未完成算法讲义）。请按本章节顺序学习，并结合下方官方教程与代码文档；完整讲义将逐节补充模型定义、理论依据、算法步骤、公式、Python示例和失效边界。";
-section.appendChild(guide);
-const list=document.createElement("ol");list.className="outline-list";
-const chapterNodes=ch.node_ids.map(getNode).filter(Boolean);
-for(const topic of chapterNodes){const li=document.createElement("li");li.textContent=topic.title+(topic.id===n.id?"（当前知识点）":"");list.appendChild(li)}
-section.appendChild(list);container.appendChild(section);
+ const ch=getChap(n.chapter_id),dept=getDept(n.discipline_id);
+ const section=makeSection("课程位置与前置学习");
+ paragraph(section,"该知识点位于「"+dept.title+" → "+ch.title+"」第"+n.order+"节。目前尚未完成该知识点的独立算法讲义；目录或相邻讲义不能替代它的完整证明。");
+ const note=document.createElement("div");note.className="outline-note";
+ note.textContent="待补充：严格定义、适用条件、算法步骤、LaTeX公式与推导、Python最小实现、量化应用和局限。以下列出章节学习次序及已完成的关联讲义。";
+ section.appendChild(note);
+ const list=document.createElement("ol");list.className="outline-list";
+ for(const id of ch.node_ids){
+  const topic=getNode(id);if(!topic)continue;
+  const li=document.createElement("li");
+  if(topic.id===n.id)li.textContent=topic.title+"（当前）";
+  else if(lessonMap.has(topic.id)){
+   const button=document.createElement("button");button.type="button";button.className="action";
+   button.textContent=topic.title+" · 已有讲义";
+   button.onclick=()=>selectNode(topic.id,true,false);
+   li.appendChild(button);
+  }else li.textContent=topic.title+"（课程目录）";
+  list.appendChild(li);
+ }
+ section.appendChild(list);container.appendChild(section);
+ const pos=nodes.findIndex(x=>x.id===n.id);
+ const near=nodes.filter(x=>x.discipline_id===n.discipline_id&&lessonMap.has(x.id)&&x.id!==n.id)
+ .sort((x,y)=>Math.abs(nodes.indexOf(x)-pos)-Math.abs(nodes.indexOf(y)-pos)).slice(0,5);
+ if(near.length){
+   const related=makeSection("相关的已完成讲义");
+   paragraph(related,"可先学习以下邻近主题，再回到该知识点阅读官方课程资料。");
+   const links=document.createElement("div");links.className="learnlinks";
+   for(const item of near){
+     const btn=document.createElement("button");btn.className="action";btn.type="button";
+     btn.textContent=item.title;btn.onclick=()=>selectNode(item.id,true,false);
+     links.appendChild(btn);
+   }related.appendChild(links);container.appendChild(related);
+ }
 }
 function selectNode(id,update=true,preserveTree=false){
  const node=getNode(id);if(!node)return;
@@ -233,14 +257,17 @@ renderTree();setURL({discipline:null})
 $("expandAll").onclick=()=>document.querySelectorAll("#tree details").forEach(d=>d.open=true);
 $("collapseAll").onclick=()=>document.querySelectorAll("#tree details").forEach(d=>d.open=false);
 Promise.all([
- fetch("./curriculum.json").then(r=>{if(!r.ok)throw Error("课程目录加载失败 "+r.status);return r.json()}),
- fetch("./lessons-classic.json").then(r=>{if(!r.ok)throw Error("经典算法讲义加载失败 "+r.status);return r.json()}),
- fetch("./lessons-deep.json").then(r=>{if(!r.ok)throw Error("深度学习讲义加载失败 "+r.status);return r.json()}),
- fetch("./lessons-rl-finance.json").then(r=>{if(!r.ok)throw Error("强化学习与量化讲义加载失败 "+r.status);return r.json()}),
- fetch("./lessons-applied.json").then(r=>{if(!r.ok)throw Error("应用专题讲义加载失败 "+r.status);return r.json()})
-]).then(([c,l1,l2,l3,l4])=>{
-
-curriculum=c;depts=c.disciplines;chapters=c.chapters;nodes=c.nodes;lessons=[...l1.lessons,...l2.lessons,...l3.lessons,...l4.lessons];
+  fetch("./curriculum.json").then(r=>{if(!r.ok)throw Error("课程目录: HTTP "+r.status);return r.json()}),
+  fetch("./manifest.json").then(r=>{if(!r.ok)throw Error("讲义目录: HTTP "+r.status);return r.json()})
+]).then(async([c,manifest])=>{
+  const results=await Promise.all(manifest.lesson_files.map(async file=>{
+    const r=await fetch("./"+file);
+    if(!r.ok)throw Error(file+": HTTP "+r.status);
+    return r.json();
+  }));
+  curriculum=c;depts=c.disciplines;chapters=c.chapters;nodes=c.nodes;
+  lessons=results.flatMap(x=>x.lessons);
+  if(lessons.length!==manifest.total_lessons)throw Error("讲义清单与实际数据数量不一致");
 nodeMap=new Map(nodes.map(n=>[n.id,n]));chapMap=new Map(chapters.map(c=>[c.id,c]));deptMap=new Map(depts.map(d=>[d.id,d]));lessonMap=new Map(lessons.map(l=>[l.node_id,l]));
 $("disciplines").textContent=depts.length;$("chapters").textContent=chapters.length;$("nodes").textContent=nodes.length;$("written").textContent=lessonMap.size;
 for(const d of depts){
