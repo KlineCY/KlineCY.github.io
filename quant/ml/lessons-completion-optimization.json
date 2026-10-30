@@ -1,0 +1,549 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "optimization-n03-02",
+      "node_id": "optimization-n03-02",
+      "title": "AdaGrad",
+      "definition": "AdaGrad累加每个参数坐标的历史梯度平方，以历史尺度自适应调节当前学习率。",
+      "assumptions": "损失目标、参数维度、梯度和学习率/约束假设须清楚；数值计算需检查稳定性。",
+      "properties": [
+        "优化算法提高求解效率和稳定性，但不自动提供预测能力。",
+        "不同数据规模、非凸性和Batch配置会影响算法收敛与最终泛化。"
+      ],
+      "formulas": [
+        {
+          "label": "更新或目标公式",
+          "tex": "G_t=\\sum_{s\\le t}g_s^2,\\quad\\theta_{t+1}=\\theta_t-\\eta g_t/(\\sqrt{G_t}+\\epsilon)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由该算法的局部目标或梯度规则构造更新，并按约束确定允许的方向或缩放。",
+          "tex": "G_t=\\sum_{s\\le t}g_s^2,\\quad\\theta_{t+1}=\\theta_t-\\eta g_t/(\\sqrt{G_t}+\\epsilon)"
+        },
+        {
+          "explanation": "通过损失、梯度范数及验证曲线区分数值收敛、过拟合和优化失败。",
+          "tex": "G_t=\\sum_{s\\le t}g_s^2,\\quad\\theta_{t+1}=\\theta_t-\\eta g_t/(\\sqrt{G_t}+\\epsilon)"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([4.,-2.]);G=np.zeros(2)\nfor _ in range(25):\n    g=2*(x-1);G+=g*g;x-=.2*g/(np.sqrt(G)+1e-8)\nprint(x)",
+      "packages": "numpy",
+      "application": "用于量化预测模型、Transformer/CNN训练与约束组合优化的算法实现。",
+      "limits": "代码仅为数值机制演示，严谨收敛界需另外限定凸性、光滑性及噪声条件。",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n02-03",
+      "node_id": "optimization-n02-03",
+      "title": "BFGS/L-BFGS",
+      "definition": "BFGS用梯度变化对Hessian逆进行低秩更新；L-BFGS仅保留有限历史向量以节省内存。",
+      "assumptions": "损失目标、参数维度、梯度和学习率/约束假设须清楚；数值计算需检查稳定性。",
+      "properties": [
+        "优化算法提高求解效率和稳定性，但不自动提供预测能力。",
+        "不同数据规模、非凸性和Batch配置会影响算法收敛与最终泛化。"
+      ],
+      "formulas": [
+        {
+          "label": "更新或目标公式",
+          "tex": "H_{k+1}=(I-\\rho sy^\\top)H_k(I-\\rho ys^\\top)+\\rho ss^\\top"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由该算法的局部目标或梯度规则构造更新，并按约束确定允许的方向或缩放。",
+          "tex": "H_{k+1}=(I-\\rho sy^\\top)H_k(I-\\rho ys^\\top)+\\rho ss^\\top"
+        },
+        {
+          "explanation": "通过损失、梯度范数及验证曲线区分数值收敛、过拟合和优化失败。",
+          "tex": "H_{k+1}=(I-\\rho sy^\\top)H_k(I-\\rho ys^\\top)+\\rho ss^\\top"
+        }
+      ],
+      "code": "from scipy.optimize import minimize\nimport numpy as np\nr=minimize(lambda z:(z[0]-3)**2+(z[1]+1)**2,[0.,0.],method=\"L-BFGS-B\")\nprint(r.x,r.success)",
+      "packages": "numpy, scipy",
+      "application": "用于量化预测模型、Transformer/CNN训练与约束组合优化的算法实现。",
+      "limits": "代码仅为数值机制演示，严谨收敛界需另外限定凸性、光滑性及噪声条件。",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n03-03",
+      "node_id": "optimization-n03-03",
+      "title": "凸与非凸损失",
+      "definition": "凸函数任意两点连线上的函数值不大于对应加权端点值；非凸损失可能具有局部极值。",
+      "assumptions": "损失目标、参数维度、梯度和学习率/约束假设须清楚；数值计算需检查稳定性。",
+      "properties": [
+        "优化算法提高求解效率和稳定性，但不自动提供预测能力。",
+        "不同数据规模、非凸性和Batch配置会影响算法收敛与最终泛化。"
+      ],
+      "formulas": [
+        {
+          "label": "更新或目标公式",
+          "tex": "f(\\lambda x+(1-\\lambda)y)\\le\\lambda f(x)+(1-\\lambda)f(y)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由该算法的局部目标或梯度规则构造更新，并按约束确定允许的方向或缩放。",
+          "tex": "f(\\lambda x+(1-\\lambda)y)\\le\\lambda f(x)+(1-\\lambda)f(y)"
+        },
+        {
+          "explanation": "通过损失、梯度范数及验证曲线区分数值收敛、过拟合和优化失败。",
+          "tex": "f(\\lambda x+(1-\\lambda)y)\\le\\lambda f(x)+(1-\\lambda)f(y)"
+        }
+      ],
+      "code": "import numpy as np\nx=np.linspace(-2,2,9)\nprint(\"convex\",x*x,\"nonconvex\",np.sin(3*x))",
+      "packages": "numpy",
+      "application": "用于量化预测模型、Transformer/CNN训练与约束组合优化的算法实现。",
+      "limits": "代码仅为数值机制演示，严谨收敛界需另外限定凸性、光滑性及噪声条件。",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n04-03",
+      "node_id": "optimization-n04-03",
+      "title": "投影梯度",
+      "definition": "投影梯度先做下降步，再将结果投影回允许的可行集合，适合仓位与权重约束。",
+      "assumptions": "损失目标、参数维度、梯度和学习率/约束假设须清楚；数值计算需检查稳定性。",
+      "properties": [
+        "优化算法提高求解效率和稳定性，但不自动提供预测能力。",
+        "不同数据规模、非凸性和Batch配置会影响算法收敛与最终泛化。"
+      ],
+      "formulas": [
+        {
+          "label": "更新或目标公式",
+          "tex": "x_{t+1}=\\Pi_{\\mathcal C}(x_t-\\eta\\nabla f(x_t))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由该算法的局部目标或梯度规则构造更新，并按约束确定允许的方向或缩放。",
+          "tex": "x_{t+1}=\\Pi_{\\mathcal C}(x_t-\\eta\\nabla f(x_t))"
+        },
+        {
+          "explanation": "通过损失、梯度范数及验证曲线区分数值收敛、过拟合和优化失败。",
+          "tex": "x_{t+1}=\\Pi_{\\mathcal C}(x_t-\\eta\\nabla f(x_t))"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([.8,-.2,.5])\ny=np.maximum(0,x);y/=y.sum()\nprint(\"Positive weights normalized:\",y)",
+      "packages": "numpy",
+      "application": "用于量化预测模型、Transformer/CNN训练与约束组合优化的算法实现。",
+      "limits": "代码仅为数值机制演示，严谨收敛界需另外限定凸性、光滑性及噪声条件。",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n06-03",
+      "node_id": "optimization-n06-03",
+      "title": "ADMM",
+      "definition": "交替方向乘子法把可分目标的局部优化与一致性约束通过增广Lagrangian耦合。",
+      "assumptions": "损失目标、参数维度、梯度和学习率/约束假设须清楚；数值计算需检查稳定性。",
+      "properties": [
+        "优化算法提高求解效率和稳定性，但不自动提供预测能力。",
+        "不同数据规模、非凸性和Batch配置会影响算法收敛与最终泛化。"
+      ],
+      "formulas": [
+        {
+          "label": "更新或目标公式",
+          "tex": "L_\\rho=f(x)+g(z)+y^\\top(Ax+Bz-c)+\\frac\\rho2\\|Ax+Bz-c\\|^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由该算法的局部目标或梯度规则构造更新，并按约束确定允许的方向或缩放。",
+          "tex": "L_\\rho=f(x)+g(z)+y^\\top(Ax+Bz-c)+\\frac\\rho2\\|Ax+Bz-c\\|^2"
+        },
+        {
+          "explanation": "通过损失、梯度范数及验证曲线区分数值收敛、过拟合和优化失败。",
+          "tex": "L_\\rho=f(x)+g(z)+y^\\top(Ax+Bz-c)+\\frac\\rho2\\|Ax+Bz-c\\|^2"
+        }
+      ],
+      "code": "import numpy as np\nx=np.array([2.,-1.]);z=np.zeros(2)\n# One proximal alternating step for quadratic f and l1 g\nrho=1.;lam=.2\nx=(np.array([2.,-1.])+rho*z)/(1+rho)\nz=np.sign(x)*np.maximum(abs(x)-lam/rho,0)\nprint(x,z)",
+      "packages": "numpy",
+      "application": "用于量化预测模型、Transformer/CNN训练与约束组合优化的算法实现。",
+      "limits": "代码仅为数值机制演示，严谨收敛界需另外限定凸性、光滑性及噪声条件。",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n01-04",
+      "node_id": "optimization-n01-04",
+      "title": "初始化Xavier/He",
+      "definition": "Xavier与He初始化根据输入/输出扇入扇出调整权重方差，缓和深层传播中的方差放大或衰减。",
+      "assumptions": "损失目标、参数维度、梯度和学习率/约束假设须清楚；数值计算需检查稳定性。",
+      "properties": [
+        "优化算法提高求解效率和稳定性，但不自动提供预测能力。",
+        "不同数据规模、非凸性和Batch配置会影响算法收敛与最终泛化。"
+      ],
+      "formulas": [
+        {
+          "label": "更新或目标公式",
+          "tex": "\\operatorname{Var}(W_{\\rm Xavier})\\approx 2/(n_{\\rm in}+n_{\\rm out}),\\quad\\operatorname{Var}(W_{\\rm He})\\approx2/n_{\\rm in}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由该算法的局部目标或梯度规则构造更新，并按约束确定允许的方向或缩放。",
+          "tex": "\\operatorname{Var}(W_{\\rm Xavier})\\approx 2/(n_{\\rm in}+n_{\\rm out}),\\quad\\operatorname{Var}(W_{\\rm He})\\approx2/n_{\\rm in}"
+        },
+        {
+          "explanation": "通过损失、梯度范数及验证曲线区分数值收敛、过拟合和优化失败。",
+          "tex": "\\operatorname{Var}(W_{\\rm Xavier})\\approx 2/(n_{\\rm in}+n_{\\rm out}),\\quad\\operatorname{Var}(W_{\\rm He})\\approx2/n_{\\rm in}"
+        }
+      ],
+      "code": "import torch\nlayer=torch.nn.Linear(16,8)\ntorch.nn.init.kaiming_normal_(layer.weight,nonlinearity=\"relu\")\nprint(layer.weight.std().item())",
+      "packages": "torch",
+      "application": "用于量化预测模型、Transformer/CNN训练与约束组合优化的算法实现。",
+      "limits": "代码仅为数值机制演示，严谨收敛界需另外限定凸性、光滑性及噪声条件。",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n02-04",
+      "node_id": "optimization-n02-04",
+      "title": "梯度消失爆炸",
+      "definition": "深层梯度由Jacobian连乘形成，当乘积谱范数持续小于或大于1时会衰减或增长。",
+      "assumptions": "损失目标、参数维度、梯度和学习率/约束假设须清楚；数值计算需检查稳定性。",
+      "properties": [
+        "优化算法提高求解效率和稳定性，但不自动提供预测能力。",
+        "不同数据规模、非凸性和Batch配置会影响算法收敛与最终泛化。"
+      ],
+      "formulas": [
+        {
+          "label": "更新或目标公式",
+          "tex": "\\nabla_{h_0}L=J_1^\\top J_2^\\top\\cdots J_L^\\top\\nabla_{h_L}L"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由该算法的局部目标或梯度规则构造更新，并按约束确定允许的方向或缩放。",
+          "tex": "\\nabla_{h_0}L=J_1^\\top J_2^\\top\\cdots J_L^\\top\\nabla_{h_L}L"
+        },
+        {
+          "explanation": "通过损失、梯度范数及验证曲线区分数值收敛、过拟合和优化失败。",
+          "tex": "\\nabla_{h_0}L=J_1^\\top J_2^\\top\\cdots J_L^\\top\\nabla_{h_L}L"
+        }
+      ],
+      "code": "import numpy as np\nfor gain in [.7,1.3]:print(gain,\"20-layer product\",gain**20)",
+      "packages": "numpy",
+      "application": "用于量化预测模型、Transformer/CNN训练与约束组合优化的算法实现。",
+      "limits": "代码仅为数值机制演示，严谨收敛界需另外限定凸性、光滑性及噪声条件。",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n03-04",
+      "node_id": "optimization-n03-04",
+      "title": "混合精度",
+      "definition": "混合精度训练在部分矩阵计算采用较低精度，同时保持关键累加与优化状态更高精度。",
+      "assumptions": "损失目标、参数维度、梯度和学习率/约束假设须清楚；数值计算需检查稳定性。",
+      "properties": [
+        "优化算法提高求解效率和稳定性，但不自动提供预测能力。",
+        "不同数据规模、非凸性和Batch配置会影响算法收敛与最终泛化。"
+      ],
+      "formulas": [
+        {
+          "label": "更新或目标公式",
+          "tex": "\\theta_{t+1}=\\theta_t-\\eta\\,\\mathrm{unscale}(g_{\\rm scaled})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由该算法的局部目标或梯度规则构造更新，并按约束确定允许的方向或缩放。",
+          "tex": "\\theta_{t+1}=\\theta_t-\\eta\\,\\mathrm{unscale}(g_{\\rm scaled})"
+        },
+        {
+          "explanation": "通过损失、梯度范数及验证曲线区分数值收敛、过拟合和优化失败。",
+          "tex": "\\theta_{t+1}=\\theta_t-\\eta\\,\\mathrm{unscale}(g_{\\rm scaled})"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(4,4,dtype=torch.float32)\nprint(\"f32\",x.dtype,\"f16\",x.half().dtype)",
+      "packages": "torch",
+      "application": "用于量化预测模型、Transformer/CNN训练与约束组合优化的算法实现。",
+      "limits": "代码仅为数值机制演示，严谨收敛界需另外限定凸性、光滑性及噪声条件。",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n04-04",
+      "node_id": "optimization-n04-04",
+      "title": "梯度累计",
+      "definition": "梯度累计在多个小批量前向反向后再更新参数，近似较大有效批次的梯度估计。",
+      "assumptions": "损失目标、参数维度、梯度和学习率/约束假设须清楚；数值计算需检查稳定性。",
+      "properties": [
+        "优化算法提高求解效率和稳定性，但不自动提供预测能力。",
+        "不同数据规模、非凸性和Batch配置会影响算法收敛与最终泛化。"
+      ],
+      "formulas": [
+        {
+          "label": "更新或目标公式",
+          "tex": "g_{\\rm eff}=\\frac1K\\sum_{k=1}^Kg_{B_k}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由该算法的局部目标或梯度规则构造更新，并按约束确定允许的方向或缩放。",
+          "tex": "g_{\\rm eff}=\\frac1K\\sum_{k=1}^Kg_{B_k}"
+        },
+        {
+          "explanation": "通过损失、梯度范数及验证曲线区分数值收敛、过拟合和优化失败。",
+          "tex": "g_{\\rm eff}=\\frac1K\\sum_{k=1}^Kg_{B_k}"
+        }
+      ],
+      "code": "import torch\nw=torch.nn.Parameter(torch.tensor(0.));o=torch.optim.SGD([w],lr=.1)\no.zero_grad()\nfor target in [1.,2.,3.,4.]:\n    ((w-target)**2/4).backward()\nprint(\"Accumulated gradient\",w.grad.item())\no.step()",
+      "packages": "torch",
+      "application": "用于量化预测模型、Transformer/CNN训练与约束组合优化的算法实现。",
+      "limits": "代码仅为数值机制演示，严谨收敛界需另外限定凸性、光滑性及噪声条件。",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n05-04",
+      "node_id": "optimization-n05-04",
+      "title": "数值溢出",
+      "definition": "当浮点指数或乘法超过表示范围时发生上溢；LogSumExp等代数变换避免直接计算巨大指数。",
+      "assumptions": "损失目标、参数维度、梯度和学习率/约束假设须清楚；数值计算需检查稳定性。",
+      "properties": [
+        "优化算法提高求解效率和稳定性，但不自动提供预测能力。",
+        "不同数据规模、非凸性和Batch配置会影响算法收敛与最终泛化。"
+      ],
+      "formulas": [
+        {
+          "label": "更新或目标公式",
+          "tex": "\\log\\sum_ie^{x_i}=m+\\log\\sum_ie^{x_i-m}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由该算法的局部目标或梯度规则构造更新，并按约束确定允许的方向或缩放。",
+          "tex": "\\log\\sum_ie^{x_i}=m+\\log\\sum_ie^{x_i-m}"
+        },
+        {
+          "explanation": "通过损失、梯度范数及验证曲线区分数值收敛、过拟合和优化失败。",
+          "tex": "\\log\\sum_ie^{x_i}=m+\\log\\sum_ie^{x_i-m}"
+        }
+      ],
+      "code": "import numpy as np\nfrom scipy.special import logsumexp\nprint(logsumexp([1000.,1001.]))",
+      "packages": "numpy, scipy",
+      "application": "用于量化预测模型、Transformer/CNN训练与约束组合优化的算法实现。",
+      "limits": "代码仅为数值机制演示，严谨收敛界需另外限定凸性、光滑性及噪声条件。",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n06-04",
+      "node_id": "optimization-n06-04",
+      "title": "收敛监控",
+      "definition": "训练收敛监控检查目标下降、梯度范数、更新量和独立验证误差，而非仅训练轮次数。",
+      "assumptions": "损失目标、参数维度、梯度和学习率/约束假设须清楚；数值计算需检查稳定性。",
+      "properties": [
+        "优化算法提高求解效率和稳定性，但不自动提供预测能力。",
+        "不同数据规模、非凸性和Batch配置会影响算法收敛与最终泛化。"
+      ],
+      "formulas": [
+        {
+          "label": "更新或目标公式",
+          "tex": "\\|\\nabla L(\\theta_t)\\|_2\\le\\varepsilon"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由该算法的局部目标或梯度规则构造更新，并按约束确定允许的方向或缩放。",
+          "tex": "\\|\\nabla L(\\theta_t)\\|_2\\le\\varepsilon"
+        },
+        {
+          "explanation": "通过损失、梯度范数及验证曲线区分数值收敛、过拟合和优化失败。",
+          "tex": "\\|\\nabla L(\\theta_t)\\|_2\\le\\varepsilon"
+        }
+      ],
+      "code": "import numpy as np\nx=4.;hist=[]\nfor t in range(30):\n    g=2*(x-1);hist.append(abs(g));x-=.1*g\nprint(\"Final gradient norm:\",hist[-1])",
+      "packages": "numpy",
+      "application": "用于量化预测模型、Transformer/CNN训练与约束组合优化的算法实现。",
+      "limits": "代码仅为数值机制演示，严谨收敛界需另外限定凸性、光滑性及噪声条件。",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n01-05",
+      "node_id": "optimization-n01-05",
+      "title": "权重衰减",
+      "definition": "参数权重衰减在更新时按比例缩小权重，可缓解过大参数幅度；AdamW是解耦版本。",
+      "assumptions": "损失目标、参数维度、梯度和学习率/约束假设须清楚；数值计算需检查稳定性。",
+      "properties": [
+        "优化算法提高求解效率和稳定性，但不自动提供预测能力。",
+        "不同数据规模、非凸性和Batch配置会影响算法收敛与最终泛化。"
+      ],
+      "formulas": [
+        {
+          "label": "更新或目标公式",
+          "tex": "\\theta_{t+1}=(1-\\eta\\lambda)\\theta_t-\\eta g_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由该算法的局部目标或梯度规则构造更新，并按约束确定允许的方向或缩放。",
+          "tex": "\\theta_{t+1}=(1-\\eta\\lambda)\\theta_t-\\eta g_t"
+        },
+        {
+          "explanation": "通过损失、梯度范数及验证曲线区分数值收敛、过拟合和优化失败。",
+          "tex": "\\theta_{t+1}=(1-\\eta\\lambda)\\theta_t-\\eta g_t"
+        }
+      ],
+      "code": "import torch\nw=torch.nn.Parameter(torch.tensor(3.))\nopt=torch.optim.AdamW([w],lr=.05,weight_decay=.1)\nopt.zero_grad();(w-1).square().backward();opt.step()\nprint(w.item())",
+      "packages": "torch",
+      "application": "用于量化预测模型、Transformer/CNN训练与约束组合优化的算法实现。",
+      "limits": "代码仅为数值机制演示，严谨收敛界需另外限定凸性、光滑性及噪声条件。",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n02-05",
+      "node_id": "optimization-n02-05",
+      "title": "Dropout",
+      "definition": "训练时随机遮蔽部分激活，并按保留比例缩放以保持激活期望；推断时通常关闭。",
+      "assumptions": "损失目标、参数维度、梯度和学习率/约束假设须清楚；数值计算需检查稳定性。",
+      "properties": [
+        "优化算法提高求解效率和稳定性，但不自动提供预测能力。",
+        "不同数据规模、非凸性和Batch配置会影响算法收敛与最终泛化。"
+      ],
+      "formulas": [
+        {
+          "label": "更新或目标公式",
+          "tex": "\\tilde h=h\\odot m/(1-p),\\quad m\\sim\\mathrm{Bernoulli}(1-p)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由该算法的局部目标或梯度规则构造更新，并按约束确定允许的方向或缩放。",
+          "tex": "\\tilde h=h\\odot m/(1-p),\\quad m\\sim\\mathrm{Bernoulli}(1-p)"
+        },
+        {
+          "explanation": "通过损失、梯度范数及验证曲线区分数值收敛、过拟合和优化失败。",
+          "tex": "\\tilde h=h\\odot m/(1-p),\\quad m\\sim\\mathrm{Bernoulli}(1-p)"
+        }
+      ],
+      "code": "import torch\nx=torch.ones(100,4);m=torch.nn.Dropout(.25)\nm.train();print(m(x).mean().item())\nm.eval();print(m(x)[0])",
+      "packages": "torch",
+      "application": "用于量化预测模型、Transformer/CNN训练与约束组合优化的算法实现。",
+      "limits": "代码仅为数值机制演示，严谨收敛界需另外限定凸性、光滑性及噪声条件。",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n03-05",
+      "node_id": "optimization-n03-05",
+      "title": "BatchNorm",
+      "definition": "BatchNorm对小批量特征进行标准化，然后按可训练的γ和β恢复缩放与偏置。",
+      "assumptions": "损失目标、参数维度、梯度和学习率/约束假设须清楚；数值计算需检查稳定性。",
+      "properties": [
+        "优化算法提高求解效率和稳定性，但不自动提供预测能力。",
+        "不同数据规模、非凸性和Batch配置会影响算法收敛与最终泛化。"
+      ],
+      "formulas": [
+        {
+          "label": "更新或目标公式",
+          "tex": "y=\\gamma(x-\\mu_B)/\\sqrt{\\sigma_B^2+\\epsilon}+\\beta"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由该算法的局部目标或梯度规则构造更新，并按约束确定允许的方向或缩放。",
+          "tex": "y=\\gamma(x-\\mu_B)/\\sqrt{\\sigma_B^2+\\epsilon}+\\beta"
+        },
+        {
+          "explanation": "通过损失、梯度范数及验证曲线区分数值收敛、过拟合和优化失败。",
+          "tex": "y=\\gamma(x-\\mu_B)/\\sqrt{\\sigma_B^2+\\epsilon}+\\beta"
+        }
+      ],
+      "code": "import torch\nlayer=torch.nn.BatchNorm1d(3)\nx=torch.randn(12,3)\nprint(layer(x).mean(0))",
+      "packages": "torch",
+      "application": "用于量化预测模型、Transformer/CNN训练与约束组合优化的算法实现。",
+      "limits": "代码仅为数值机制演示，严谨收敛界需另外限定凸性、光滑性及噪声条件。",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n04-05",
+      "node_id": "optimization-n04-05",
+      "title": "Label Smoothing",
+      "definition": "标签平滑将One-hot监督目标与均匀分布混合，抑制极端置信度并正则化分类器。",
+      "assumptions": "损失目标、参数维度、梯度和学习率/约束假设须清楚；数值计算需检查稳定性。",
+      "properties": [
+        "优化算法提高求解效率和稳定性，但不自动提供预测能力。",
+        "不同数据规模、非凸性和Batch配置会影响算法收敛与最终泛化。"
+      ],
+      "formulas": [
+        {
+          "label": "更新或目标公式",
+          "tex": "\\tilde y_k=(1-\\epsilon)\\mathbf1[k=y]+\\epsilon/K"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由该算法的局部目标或梯度规则构造更新，并按约束确定允许的方向或缩放。",
+          "tex": "\\tilde y_k=(1-\\epsilon)\\mathbf1[k=y]+\\epsilon/K"
+        },
+        {
+          "explanation": "通过损失、梯度范数及验证曲线区分数值收敛、过拟合和优化失败。",
+          "tex": "\\tilde y_k=(1-\\epsilon)\\mathbf1[k=y]+\\epsilon/K"
+        }
+      ],
+      "code": "import torch\nz=torch.randn(5,3);y=torch.randint(0,3,(5,))\nprint(torch.nn.functional.cross_entropy(z,y,label_smoothing=.1))",
+      "packages": "torch",
+      "application": "用于量化预测模型、Transformer/CNN训练与约束组合优化的算法实现。",
+      "limits": "代码仅为数值机制演示，严谨收敛界需另外限定凸性、光滑性及噪声条件。",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n05-05",
+      "node_id": "optimization-n05-05",
+      "title": "Mixup",
+      "definition": "Mixup用Beta随机权重在两个样本及目标之间做线性插值，鼓励预测对插值变化平滑。",
+      "assumptions": "损失目标、参数维度、梯度和学习率/约束假设须清楚；数值计算需检查稳定性。",
+      "properties": [
+        "优化算法提高求解效率和稳定性，但不自动提供预测能力。",
+        "不同数据规模、非凸性和Batch配置会影响算法收敛与最终泛化。"
+      ],
+      "formulas": [
+        {
+          "label": "更新或目标公式",
+          "tex": "\\tilde x=\\lambda x_i+(1-\\lambda)x_j,\\quad\\tilde y=\\lambda y_i+(1-\\lambda)y_j"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由该算法的局部目标或梯度规则构造更新，并按约束确定允许的方向或缩放。",
+          "tex": "\\tilde x=\\lambda x_i+(1-\\lambda)x_j,\\quad\\tilde y=\\lambda y_i+(1-\\lambda)y_j"
+        },
+        {
+          "explanation": "通过损失、梯度范数及验证曲线区分数值收敛、过拟合和优化失败。",
+          "tex": "\\tilde x=\\lambda x_i+(1-\\lambda)x_j,\\quad\\tilde y=\\lambda y_i+(1-\\lambda)y_j"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);x=np.array([[1.,2.],[3.,4.]])\nlam=rng.beta(.4,.4)\nprint(lam*x[0]+(1-lam)*x[1])",
+      "packages": "numpy",
+      "application": "用于量化预测模型、Transformer/CNN训练与约束组合优化的算法实现。",
+      "limits": "代码仅为数值机制演示，严谨收敛界需另外限定凸性、光滑性及噪声条件。",
+      "coverage": "complete"
+    },
+    {
+      "id": "optimization-n06-05",
+      "node_id": "optimization-n06-05",
+      "title": "早停与模型集成",
+      "definition": "早停依据独立验证误差选择训练轮次，集成则聚合多个模型输出减少部分估计方差。",
+      "assumptions": "损失目标、参数维度、梯度和学习率/约束假设须清楚；数值计算需检查稳定性。",
+      "properties": [
+        "优化算法提高求解效率和稳定性，但不自动提供预测能力。",
+        "不同数据规模、非凸性和Batch配置会影响算法收敛与最终泛化。"
+      ],
+      "formulas": [
+        {
+          "label": "更新或目标公式",
+          "tex": "\\hat f(x)=\\frac1M\\sum_{m=1}^M f_m(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由该算法的局部目标或梯度规则构造更新，并按约束确定允许的方向或缩放。",
+          "tex": "\\hat f(x)=\\frac1M\\sum_{m=1}^M f_m(x)"
+        },
+        {
+          "explanation": "通过损失、梯度范数及验证曲线区分数值收敛、过拟合和优化失败。",
+          "tex": "\\hat f(x)=\\frac1M\\sum_{m=1}^M f_m(x)"
+        }
+      ],
+      "code": "import numpy as np\npred=np.array([[.1,.3],[.2,.2],[.15,.25]])\nprint(\"Ensemble:\",pred.mean(0))",
+      "packages": "numpy",
+      "application": "用于量化预测模型、Transformer/CNN训练与约束组合优化的算法实现。",
+      "limits": "代码仅为数值机制演示，严谨收敛界需另外限定凸性、光滑性及噪声条件。",
+      "coverage": "complete"
+    }
+  ]
+}
