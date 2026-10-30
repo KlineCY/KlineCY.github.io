@@ -1,0 +1,709 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "generative-n01-01",
+      "node_id": "generative-n01-01",
+      "title": "生成模型与判别模型",
+      "definition": "生成模型拟合或采样数据分布，判别模型则预测给定输入的标签或类别边界。",
+      "assumptions": "应给出数据生成分布、训练目标及噪声或潜变量定义；金融数据需同时验证联合与时序风险结构。",
+      "properties": [
+        "生成模型拟合或采样数据分布，判别模型则预测给定输入的标签或类别边界。",
+        "生成样本不等于真实历史证据，概率拟合好坏和策略可交易性要分别检验。"
+      ],
+      "formulas": [
+        {
+          "label": "概率生成目标",
+          "tex": "p_\\theta(x,y)=p_\\theta(y|x)p_\\theta(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据显式似然、潜变量模型、对抗目标或扩散过程定义待训练的分布和损失。",
+          "tex": "p_\\theta(x,y)=p_\\theta(y|x)p_\\theta(x)"
+        },
+        {
+          "explanation": "由训练目标推导采样/判别的基本步骤，再检验生成分布及其限制。",
+          "tex": "p_\\theta(x,y)=p_\\theta(y|x)p_\\theta(x)"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);z=rng.normal(size=20)\nprint('Generated latent samples:',z[:4])",
+      "packages": "numpy",
+      "application": "构造ETF回报压力情景、金融风险模拟和合成市场特征研究。",
+      "limits": "示例只覆盖所在章节的最小概率运算；完整WGAN、TimeGAN和扩散反向采样需要专门训练。生成数据不可替代样本外真实市场验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "generative-n02-01",
+      "node_id": "generative-n02-01",
+      "title": "似然建模",
+      "definition": "显式概率生成模型最大化观测训练数据对数似然，以拟合数据分布。",
+      "assumptions": "应给出数据生成分布、训练目标及噪声或潜变量定义；金融数据需同时验证联合与时序风险结构。",
+      "properties": [
+        "显式概率生成模型最大化观测训练数据对数似然，以拟合数据分布。",
+        "生成样本不等于真实历史证据，概率拟合好坏和策略可交易性要分别检验。"
+      ],
+      "formulas": [
+        {
+          "label": "概率生成目标",
+          "tex": "\\max_\\theta\\sum_i\\log p_\\theta(x_i)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据显式似然、潜变量模型、对抗目标或扩散过程定义待训练的分布和损失。",
+          "tex": "\\max_\\theta\\sum_i\\log p_\\theta(x_i)"
+        },
+        {
+          "explanation": "由训练目标推导采样/判别的基本步骤，再检验生成分布及其限制。",
+          "tex": "\\max_\\theta\\sum_i\\log p_\\theta(x_i)"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);z=rng.normal(size=20)\nprint('Generated latent samples:',z[:4])",
+      "packages": "numpy",
+      "application": "构造ETF回报压力情景、金融风险模拟和合成市场特征研究。",
+      "limits": "示例只覆盖所在章节的最小概率运算；完整WGAN、TimeGAN和扩散反向采样需要专门训练。生成数据不可替代样本外真实市场验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "generative-n03-01",
+      "node_id": "generative-n03-01",
+      "title": "自回归生成",
+      "definition": "用概率链式法则把序列联合分布分解为逐步条件概率，并按顺序采样。",
+      "assumptions": "应给出数据生成分布、训练目标及噪声或潜变量定义；金融数据需同时验证联合与时序风险结构。",
+      "properties": [
+        "用概率链式法则把序列联合分布分解为逐步条件概率，并按顺序采样。",
+        "生成样本不等于真实历史证据，概率拟合好坏和策略可交易性要分别检验。"
+      ],
+      "formulas": [
+        {
+          "label": "概率生成目标",
+          "tex": "p(x_{1:T})=\\prod_tp(x_t\\mid x_{<t})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据显式似然、潜变量模型、对抗目标或扩散过程定义待训练的分布和损失。",
+          "tex": "p(x_{1:T})=\\prod_tp(x_t\\mid x_{<t})"
+        },
+        {
+          "explanation": "由训练目标推导采样/判别的基本步骤，再检验生成分布及其限制。",
+          "tex": "p(x_{1:T})=\\prod_tp(x_t\\mid x_{<t})"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);z=rng.normal(size=20)\nprint('Generated latent samples:',z[:4])",
+      "packages": "numpy",
+      "application": "构造ETF回报压力情景、金融风险模拟和合成市场特征研究。",
+      "limits": "示例只覆盖所在章节的最小概率运算；完整WGAN、TimeGAN和扩散反向采样需要专门训练。生成数据不可替代样本外真实市场验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "generative-n04-01",
+      "node_id": "generative-n04-01",
+      "title": "潜变量",
+      "definition": "引入不可观测Z表示影响X的低维隐含因素，通过积分形成数据边缘分布。",
+      "assumptions": "应给出数据生成分布、训练目标及噪声或潜变量定义；金融数据需同时验证联合与时序风险结构。",
+      "properties": [
+        "引入不可观测Z表示影响X的低维隐含因素，通过积分形成数据边缘分布。",
+        "生成样本不等于真实历史证据，概率拟合好坏和策略可交易性要分别检验。"
+      ],
+      "formulas": [
+        {
+          "label": "概率生成目标",
+          "tex": "p(x)=\\int p(x|z)p(z)dz"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据显式似然、潜变量模型、对抗目标或扩散过程定义待训练的分布和损失。",
+          "tex": "p(x)=\\int p(x|z)p(z)dz"
+        },
+        {
+          "explanation": "由训练目标推导采样/判别的基本步骤，再检验生成分布及其限制。",
+          "tex": "p(x)=\\int p(x|z)p(z)dz"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);z=rng.normal(size=20)\nprint('Generated latent samples:',z[:4])",
+      "packages": "numpy",
+      "application": "构造ETF回报压力情景、金融风险模拟和合成市场特征研究。",
+      "limits": "示例只覆盖所在章节的最小概率运算；完整WGAN、TimeGAN和扩散反向采样需要专门训练。生成数据不可替代样本外真实市场验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "generative-n05-01",
+      "node_id": "generative-n05-01",
+      "title": "生成评价",
+      "definition": "评价生成数据的分布保真、覆盖、多样性、时序相关、隐私及下游任务表现。",
+      "assumptions": "应给出数据生成分布、训练目标及噪声或潜变量定义；金融数据需同时验证联合与时序风险结构。",
+      "properties": [
+        "评价生成数据的分布保真、覆盖、多样性、时序相关、隐私及下游任务表现。",
+        "生成样本不等于真实历史证据，概率拟合好坏和策略可交易性要分别检验。"
+      ],
+      "formulas": [
+        {
+          "label": "概率生成目标",
+          "tex": "D(P_{\\rm data},P_{\\rm gen})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据显式似然、潜变量模型、对抗目标或扩散过程定义待训练的分布和损失。",
+          "tex": "D(P_{\\rm data},P_{\\rm gen})"
+        },
+        {
+          "explanation": "由训练目标推导采样/判别的基本步骤，再检验生成分布及其限制。",
+          "tex": "D(P_{\\rm data},P_{\\rm gen})"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);z=rng.normal(size=20)\nprint('Generated latent samples:',z[:4])",
+      "packages": "numpy",
+      "application": "构造ETF回报压力情景、金融风险模拟和合成市场特征研究。",
+      "limits": "示例只覆盖所在章节的最小概率运算；完整WGAN、TimeGAN和扩散反向采样需要专门训练。生成数据不可替代样本外真实市场验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "generative-n06-01",
+      "node_id": "generative-n06-01",
+      "title": "分布匹配",
+      "definition": "通过散度、核距离或对抗训练最小化真实数据分布与生成分布的差异。",
+      "assumptions": "应给出数据生成分布、训练目标及噪声或潜变量定义；金融数据需同时验证联合与时序风险结构。",
+      "properties": [
+        "通过散度、核距离或对抗训练最小化真实数据分布与生成分布的差异。",
+        "生成样本不等于真实历史证据，概率拟合好坏和策略可交易性要分别检验。"
+      ],
+      "formulas": [
+        {
+          "label": "概率生成目标",
+          "tex": "\\min_\\theta D(P_{\\rm real},P_\\theta)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据显式似然、潜变量模型、对抗目标或扩散过程定义待训练的分布和损失。",
+          "tex": "\\min_\\theta D(P_{\\rm real},P_\\theta)"
+        },
+        {
+          "explanation": "由训练目标推导采样/判别的基本步骤，再检验生成分布及其限制。",
+          "tex": "\\min_\\theta D(P_{\\rm real},P_\\theta)"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);z=rng.normal(size=20)\nprint('Generated latent samples:',z[:4])",
+      "packages": "numpy",
+      "application": "构造ETF回报压力情景、金融风险模拟和合成市场特征研究。",
+      "limits": "示例只覆盖所在章节的最小概率运算；完整WGAN、TimeGAN和扩散反向采样需要专门训练。生成数据不可替代样本外真实市场验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "generative-n05-02",
+      "node_id": "generative-n05-02",
+      "title": "β-VAE",
+      "definition": "将VAE的KL正则项乘上β，权衡重构保真度与潜变量解耦。",
+      "assumptions": "应给出数据生成分布、训练目标及噪声或潜变量定义；金融数据需同时验证联合与时序风险结构。",
+      "properties": [
+        "将VAE的KL正则项乘上β，权衡重构保真度与潜变量解耦。",
+        "生成样本不等于真实历史证据，概率拟合好坏和策略可交易性要分别检验。"
+      ],
+      "formulas": [
+        {
+          "label": "概率生成目标",
+          "tex": "L=-E_q[\\log p_\\theta(x|z)]+\\beta D_{\\rm KL}(q(z|x)\\|p(z))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据显式似然、潜变量模型、对抗目标或扩散过程定义待训练的分布和损失。",
+          "tex": "L=-E_q[\\log p_\\theta(x|z)]+\\beta D_{\\rm KL}(q(z|x)\\|p(z))"
+        },
+        {
+          "explanation": "由训练目标推导采样/判别的基本步骤，再检验生成分布及其限制。",
+          "tex": "L=-E_q[\\log p_\\theta(x|z)]+\\beta D_{\\rm KL}(q(z|x)\\|p(z))"
+        }
+      ],
+      "code": "import torch\nmu=torch.randn(6,3);lv=torch.zeros(6,3)\nz=mu+torch.exp(.5*lv)*torch.randn_like(mu)\nprint('Latent:',z.shape)",
+      "packages": "torch",
+      "application": "构造ETF回报压力情景、金融风险模拟和合成市场特征研究。",
+      "limits": "示例只覆盖所在章节的最小概率运算；完整WGAN、TimeGAN和扩散反向采样需要专门训练。生成数据不可替代样本外真实市场验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "generative-n06-02",
+      "node_id": "generative-n06-02",
+      "title": "离散潜变量",
+      "definition": "用离散类别变量表示潜在状态，可通过分类采样或Gumbel-Softmax近似优化。",
+      "assumptions": "应给出数据生成分布、训练目标及噪声或潜变量定义；金融数据需同时验证联合与时序风险结构。",
+      "properties": [
+        "用离散类别变量表示潜在状态，可通过分类采样或Gumbel-Softmax近似优化。",
+        "生成样本不等于真实历史证据，概率拟合好坏和策略可交易性要分别检验。"
+      ],
+      "formulas": [
+        {
+          "label": "概率生成目标",
+          "tex": "z\\sim\\operatorname{Categorical}(\\pi)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据显式似然、潜变量模型、对抗目标或扩散过程定义待训练的分布和损失。",
+          "tex": "z\\sim\\operatorname{Categorical}(\\pi)"
+        },
+        {
+          "explanation": "由训练目标推导采样/判别的基本步骤，再检验生成分布及其限制。",
+          "tex": "z\\sim\\operatorname{Categorical}(\\pi)"
+        }
+      ],
+      "code": "import torch\nmu=torch.randn(6,3);lv=torch.zeros(6,3)\nz=mu+torch.exp(.5*lv)*torch.randn_like(mu)\nprint('Latent:',z.shape)",
+      "packages": "torch",
+      "application": "构造ETF回报压力情景、金融风险模拟和合成市场特征研究。",
+      "limits": "示例只覆盖所在章节的最小概率运算；完整WGAN、TimeGAN和扩散反向采样需要专门训练。生成数据不可替代样本外真实市场验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "generative-n01-03",
+      "node_id": "generative-n01-03",
+      "title": "GAN极小极大目标",
+      "definition": "GAN交替优化判别器区分真假及生成器提高假样本真实分数的对抗目标。",
+      "assumptions": "应给出数据生成分布、训练目标及噪声或潜变量定义；金融数据需同时验证联合与时序风险结构。",
+      "properties": [
+        "GAN交替优化判别器区分真假及生成器提高假样本真实分数的对抗目标。",
+        "生成样本不等于真实历史证据，概率拟合好坏和策略可交易性要分别检验。"
+      ],
+      "formulas": [
+        {
+          "label": "概率生成目标",
+          "tex": "\\min_G\\max_D E_{p_r}\\log D(x)+E_z\\log(1-D(G(z)))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据显式似然、潜变量模型、对抗目标或扩散过程定义待训练的分布和损失。",
+          "tex": "\\min_G\\max_D E_{p_r}\\log D(x)+E_z\\log(1-D(G(z)))"
+        },
+        {
+          "explanation": "由训练目标推导采样/判别的基本步骤，再检验生成分布及其限制。",
+          "tex": "\\min_G\\max_D E_{p_r}\\log D(x)+E_z\\log(1-D(G(z)))"
+        }
+      ],
+      "code": "import torch\nG=torch.nn.Linear(3,2);D=torch.nn.Linear(2,1)\nprint(D(G(torch.randn(4,3))).shape)",
+      "packages": "torch",
+      "application": "构造ETF回报压力情景、金融风险模拟和合成市场特征研究。",
+      "limits": "示例只覆盖所在章节的最小概率运算；完整WGAN、TimeGAN和扩散反向采样需要专门训练。生成数据不可替代样本外真实市场验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "generative-n02-03",
+      "node_id": "generative-n02-03",
+      "title": "判别器生成器",
+      "definition": "生成器将噪声映射为假样本，判别器输出样本真实性评分并提供对抗梯度。",
+      "assumptions": "应给出数据生成分布、训练目标及噪声或潜变量定义；金融数据需同时验证联合与时序风险结构。",
+      "properties": [
+        "生成器将噪声映射为假样本，判别器输出样本真实性评分并提供对抗梯度。",
+        "生成样本不等于真实历史证据，概率拟合好坏和策略可交易性要分别检验。"
+      ],
+      "formulas": [
+        {
+          "label": "概率生成目标",
+          "tex": "x_{\\rm fake}=G_\\theta(z),\\quad s=D_\\phi(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据显式似然、潜变量模型、对抗目标或扩散过程定义待训练的分布和损失。",
+          "tex": "x_{\\rm fake}=G_\\theta(z),\\quad s=D_\\phi(x)"
+        },
+        {
+          "explanation": "由训练目标推导采样/判别的基本步骤，再检验生成分布及其限制。",
+          "tex": "x_{\\rm fake}=G_\\theta(z),\\quad s=D_\\phi(x)"
+        }
+      ],
+      "code": "import torch\nG=torch.nn.Linear(3,2);D=torch.nn.Linear(2,1)\nprint(D(G(torch.randn(4,3))).shape)",
+      "packages": "torch",
+      "application": "构造ETF回报压力情景、金融风险模拟和合成市场特征研究。",
+      "limits": "示例只覆盖所在章节的最小概率运算；完整WGAN、TimeGAN和扩散反向采样需要专门训练。生成数据不可替代样本外真实市场验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "generative-n04-03",
+      "node_id": "generative-n04-03",
+      "title": "梯度惩罚",
+      "definition": "WGAN-GP对Critic输入梯度范数偏离1的程度加罚，近似约束Lipschitz性。",
+      "assumptions": "应给出数据生成分布、训练目标及噪声或潜变量定义；金融数据需同时验证联合与时序风险结构。",
+      "properties": [
+        "WGAN-GP对Critic输入梯度范数偏离1的程度加罚，近似约束Lipschitz性。",
+        "生成样本不等于真实历史证据，概率拟合好坏和策略可交易性要分别检验。"
+      ],
+      "formulas": [
+        {
+          "label": "概率生成目标",
+          "tex": "L_{\\rm GP}=\\lambda E_{\\hat x}(\\|\\nabla_{\\hat x}D(\\hat x)\\|_2-1)^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据显式似然、潜变量模型、对抗目标或扩散过程定义待训练的分布和损失。",
+          "tex": "L_{\\rm GP}=\\lambda E_{\\hat x}(\\|\\nabla_{\\hat x}D(\\hat x)\\|_2-1)^2"
+        },
+        {
+          "explanation": "由训练目标推导采样/判别的基本步骤，再检验生成分布及其限制。",
+          "tex": "L_{\\rm GP}=\\lambda E_{\\hat x}(\\|\\nabla_{\\hat x}D(\\hat x)\\|_2-1)^2"
+        }
+      ],
+      "code": "import torch\nG=torch.nn.Linear(3,2);D=torch.nn.Linear(2,1)\nprint(D(G(torch.randn(4,3))).shape)",
+      "packages": "torch",
+      "application": "构造ETF回报压力情景、金融风险模拟和合成市场特征研究。",
+      "limits": "示例只覆盖所在章节的最小概率运算；完整WGAN、TimeGAN和扩散反向采样需要专门训练。生成数据不可替代样本外真实市场验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "generative-n05-03",
+      "node_id": "generative-n05-03",
+      "title": "模式崩塌",
+      "definition": "生成器只产生少数模式而忽略真实分布其他部分，导致生成多样性严重不足。",
+      "assumptions": "应给出数据生成分布、训练目标及噪声或潜变量定义；金融数据需同时验证联合与时序风险结构。",
+      "properties": [
+        "生成器只产生少数模式而忽略真实分布其他部分，导致生成多样性严重不足。",
+        "生成样本不等于真实历史证据，概率拟合好坏和策略可交易性要分别检验。"
+      ],
+      "formulas": [
+        {
+          "label": "概率生成目标",
+          "tex": "\\operatorname{supp}(P_g)\\subsetneq\\operatorname{supp}(P_r)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据显式似然、潜变量模型、对抗目标或扩散过程定义待训练的分布和损失。",
+          "tex": "\\operatorname{supp}(P_g)\\subsetneq\\operatorname{supp}(P_r)"
+        },
+        {
+          "explanation": "由训练目标推导采样/判别的基本步骤，再检验生成分布及其限制。",
+          "tex": "\\operatorname{supp}(P_g)\\subsetneq\\operatorname{supp}(P_r)"
+        }
+      ],
+      "code": "import torch\nG=torch.nn.Linear(3,2);D=torch.nn.Linear(2,1)\nprint(D(G(torch.randn(4,3))).shape)",
+      "packages": "torch",
+      "application": "构造ETF回报压力情景、金融风险模拟和合成市场特征研究。",
+      "limits": "示例只覆盖所在章节的最小概率运算；完整WGAN、TimeGAN和扩散反向采样需要专门训练。生成数据不可替代样本外真实市场验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "generative-n06-03",
+      "node_id": "generative-n06-03",
+      "title": "对抗稳定性",
+      "definition": "对抗训练是双目标动态优化，可能振荡或训练崩溃，需要监控两个网络梯度及生成多样性。",
+      "assumptions": "应给出数据生成分布、训练目标及噪声或潜变量定义；金融数据需同时验证联合与时序风险结构。",
+      "properties": [
+        "对抗训练是双目标动态优化，可能振荡或训练崩溃，需要监控两个网络梯度及生成多样性。",
+        "生成样本不等于真实历史证据，概率拟合好坏和策略可交易性要分别检验。"
+      ],
+      "formulas": [
+        {
+          "label": "概率生成目标",
+          "tex": "\\min_\\theta\\max_\\phi V(\\theta,\\phi)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据显式似然、潜变量模型、对抗目标或扩散过程定义待训练的分布和损失。",
+          "tex": "\\min_\\theta\\max_\\phi V(\\theta,\\phi)"
+        },
+        {
+          "explanation": "由训练目标推导采样/判别的基本步骤，再检验生成分布及其限制。",
+          "tex": "\\min_\\theta\\max_\\phi V(\\theta,\\phi)"
+        }
+      ],
+      "code": "import torch\nG=torch.nn.Linear(3,2);D=torch.nn.Linear(2,1)\nprint(D(G(torch.randn(4,3))).shape)",
+      "packages": "torch",
+      "application": "构造ETF回报压力情景、金融风险模拟和合成市场特征研究。",
+      "limits": "示例只覆盖所在章节的最小概率运算；完整WGAN、TimeGAN和扩散反向采样需要专门训练。生成数据不可替代样本外真实市场验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "generative-n03-04",
+      "node_id": "generative-n03-04",
+      "title": "Score Matching",
+      "definition": "学习对数数据密度的梯度场，在扩散模型中用于去噪或逆过程生成。",
+      "assumptions": "应给出数据生成分布、训练目标及噪声或潜变量定义；金融数据需同时验证联合与时序风险结构。",
+      "properties": [
+        "学习对数数据密度的梯度场，在扩散模型中用于去噪或逆过程生成。",
+        "生成样本不等于真实历史证据，概率拟合好坏和策略可交易性要分别检验。"
+      ],
+      "formulas": [
+        {
+          "label": "概率生成目标",
+          "tex": "s_\\theta(x)\\approx\\nabla_x\\log p(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据显式似然、潜变量模型、对抗目标或扩散过程定义待训练的分布和损失。",
+          "tex": "s_\\theta(x)\\approx\\nabla_x\\log p(x)"
+        },
+        {
+          "explanation": "由训练目标推导采样/判别的基本步骤，再检验生成分布及其限制。",
+          "tex": "s_\\theta(x)\\approx\\nabla_x\\log p(x)"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(6,4);eps=torch.randn_like(x)\nprint('Forward noising:',(.8*x+.6*eps).shape)",
+      "packages": "torch",
+      "application": "构造ETF回报压力情景、金融风险模拟和合成市场特征研究。",
+      "limits": "示例只覆盖所在章节的最小概率运算；完整WGAN、TimeGAN和扩散反向采样需要专门训练。生成数据不可替代样本外真实市场验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "generative-n04-04",
+      "node_id": "generative-n04-04",
+      "title": "反向采样",
+      "definition": "从高斯噪声逐步去噪生成样本，其转移参数由训练好的扩散网络预测。",
+      "assumptions": "应给出数据生成分布、训练目标及噪声或潜变量定义；金融数据需同时验证联合与时序风险结构。",
+      "properties": [
+        "从高斯噪声逐步去噪生成样本，其转移参数由训练好的扩散网络预测。",
+        "生成样本不等于真实历史证据，概率拟合好坏和策略可交易性要分别检验。"
+      ],
+      "formulas": [
+        {
+          "label": "概率生成目标",
+          "tex": "p_\\theta(x_{t-1}|x_t)=\\mathcal N(\\mu_\\theta(x_t,t),\\Sigma_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据显式似然、潜变量模型、对抗目标或扩散过程定义待训练的分布和损失。",
+          "tex": "p_\\theta(x_{t-1}|x_t)=\\mathcal N(\\mu_\\theta(x_t,t),\\Sigma_t)"
+        },
+        {
+          "explanation": "由训练目标推导采样/判别的基本步骤，再检验生成分布及其限制。",
+          "tex": "p_\\theta(x_{t-1}|x_t)=\\mathcal N(\\mu_\\theta(x_t,t),\\Sigma_t)"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(6,4);eps=torch.randn_like(x)\nprint('Forward noising:',(.8*x+.6*eps).shape)",
+      "packages": "torch",
+      "application": "构造ETF回报压力情景、金融风险模拟和合成市场特征研究。",
+      "limits": "示例只覆盖所在章节的最小概率运算；完整WGAN、TimeGAN和扩散反向采样需要专门训练。生成数据不可替代样本外真实市场验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "generative-n05-04",
+      "node_id": "generative-n05-04",
+      "title": "Classifier-Free Guidance",
+      "definition": "通过有条件和无条件噪声预测的线性插值加强生成条件约束。",
+      "assumptions": "应给出数据生成分布、训练目标及噪声或潜变量定义；金融数据需同时验证联合与时序风险结构。",
+      "properties": [
+        "通过有条件和无条件噪声预测的线性插值加强生成条件约束。",
+        "生成样本不等于真实历史证据，概率拟合好坏和策略可交易性要分别检验。"
+      ],
+      "formulas": [
+        {
+          "label": "概率生成目标",
+          "tex": "\\epsilon_{\\rm guided}=\\epsilon_{\\rm uncond}+w(\\epsilon_{\\rm cond}-\\epsilon_{\\rm uncond})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据显式似然、潜变量模型、对抗目标或扩散过程定义待训练的分布和损失。",
+          "tex": "\\epsilon_{\\rm guided}=\\epsilon_{\\rm uncond}+w(\\epsilon_{\\rm cond}-\\epsilon_{\\rm uncond})"
+        },
+        {
+          "explanation": "由训练目标推导采样/判别的基本步骤，再检验生成分布及其限制。",
+          "tex": "\\epsilon_{\\rm guided}=\\epsilon_{\\rm uncond}+w(\\epsilon_{\\rm cond}-\\epsilon_{\\rm uncond})"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(6,4);eps=torch.randn_like(x)\nprint('Forward noising:',(.8*x+.6*eps).shape)",
+      "packages": "torch",
+      "application": "构造ETF回报压力情景、金融风险模拟和合成市场特征研究。",
+      "limits": "示例只覆盖所在章节的最小概率运算；完整WGAN、TimeGAN和扩散反向采样需要专门训练。生成数据不可替代样本外真实市场验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "generative-n06-04",
+      "node_id": "generative-n06-04",
+      "title": "DDIM",
+      "definition": "DDIM使用与DDPM共享训练目标的非Markov反向采样，可在较少采样步数下生成。",
+      "assumptions": "应给出数据生成分布、训练目标及噪声或潜变量定义；金融数据需同时验证联合与时序风险结构。",
+      "properties": [
+        "DDIM使用与DDPM共享训练目标的非Markov反向采样，可在较少采样步数下生成。",
+        "生成样本不等于真实历史证据，概率拟合好坏和策略可交易性要分别检验。"
+      ],
+      "formulas": [
+        {
+          "label": "概率生成目标",
+          "tex": "x_{t-1}=\\sqrt{\\bar\\alpha_{t-1}}\\hat x_0+\\sqrt{1-\\bar\\alpha_{t-1}}\\hat\\epsilon"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据显式似然、潜变量模型、对抗目标或扩散过程定义待训练的分布和损失。",
+          "tex": "x_{t-1}=\\sqrt{\\bar\\alpha_{t-1}}\\hat x_0+\\sqrt{1-\\bar\\alpha_{t-1}}\\hat\\epsilon"
+        },
+        {
+          "explanation": "由训练目标推导采样/判别的基本步骤，再检验生成分布及其限制。",
+          "tex": "x_{t-1}=\\sqrt{\\bar\\alpha_{t-1}}\\hat x_0+\\sqrt{1-\\bar\\alpha_{t-1}}\\hat\\epsilon"
+        }
+      ],
+      "code": "import torch\nx=torch.randn(6,4);eps=torch.randn_like(x)\nprint('Forward noising:',(.8*x+.6*eps).shape)",
+      "packages": "torch",
+      "application": "构造ETF回报压力情景、金融风险模拟和合成市场特征研究。",
+      "limits": "示例只覆盖所在章节的最小概率运算；完整WGAN、TimeGAN和扩散反向采样需要专门训练。生成数据不可替代样本外真实市场验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "generative-n01-05",
+      "node_id": "generative-n01-05",
+      "title": "金融收益情景生成",
+      "definition": "生成具有指定边际与联合风险结构的未来收益样本，供风险压力测试而非历史回测替代。",
+      "assumptions": "应给出数据生成分布、训练目标及噪声或潜变量定义；金融数据需同时验证联合与时序风险结构。",
+      "properties": [
+        "生成具有指定边际与联合风险结构的未来收益样本，供风险压力测试而非历史回测替代。",
+        "生成样本不等于真实历史证据，概率拟合好坏和策略可交易性要分别检验。"
+      ],
+      "formulas": [
+        {
+          "label": "概率生成目标",
+          "tex": "R^{(b)}\\sim p_\\theta(R_{t+1:t+H}\\mid\\mathcal F_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据显式似然、潜变量模型、对抗目标或扩散过程定义待训练的分布和损失。",
+          "tex": "R^{(b)}\\sim p_\\theta(R_{t+1:t+H}\\mid\\mathcal F_t)"
+        },
+        {
+          "explanation": "由训练目标推导采样/判别的基本步骤，再检验生成分布及其限制。",
+          "tex": "R^{(b)}\\sim p_\\theta(R_{t+1:t+H}\\mid\\mathcal F_t)"
+        }
+      ],
+      "code": "import numpy as np\nx=np.random.default_rng(0).standard_t(5,200)\nprint('Tail 1%:',np.quantile(x,.01))",
+      "packages": "numpy",
+      "application": "构造ETF回报压力情景、金融风险模拟和合成市场特征研究。",
+      "limits": "示例只覆盖所在章节的最小概率运算；完整WGAN、TimeGAN和扩散反向采样需要专门训练。生成数据不可替代样本外真实市场验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "generative-n02-05",
+      "node_id": "generative-n02-05",
+      "title": "合成时间序列",
+      "definition": "合成序列除了边际分布还需保留序列自相关、波动聚集和多资产协方差。",
+      "assumptions": "应给出数据生成分布、训练目标及噪声或潜变量定义；金融数据需同时验证联合与时序风险结构。",
+      "properties": [
+        "合成序列除了边际分布还需保留序列自相关、波动聚集和多资产协方差。",
+        "生成样本不等于真实历史证据，概率拟合好坏和策略可交易性要分别检验。"
+      ],
+      "formulas": [
+        {
+          "label": "概率生成目标",
+          "tex": "\\tilde X_{1:T}\\sim P_\\theta(X_{1:T})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据显式似然、潜变量模型、对抗目标或扩散过程定义待训练的分布和损失。",
+          "tex": "\\tilde X_{1:T}\\sim P_\\theta(X_{1:T})"
+        },
+        {
+          "explanation": "由训练目标推导采样/判别的基本步骤，再检验生成分布及其限制。",
+          "tex": "\\tilde X_{1:T}\\sim P_\\theta(X_{1:T})"
+        }
+      ],
+      "code": "import numpy as np\nx=np.random.default_rng(0).standard_t(5,200)\nprint('Tail 1%:',np.quantile(x,.01))",
+      "packages": "numpy",
+      "application": "构造ETF回报压力情景、金融风险模拟和合成市场特征研究。",
+      "limits": "示例只覆盖所在章节的最小概率运算；完整WGAN、TimeGAN和扩散反向采样需要专门训练。生成数据不可替代样本外真实市场验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "generative-n03-05",
+      "node_id": "generative-n03-05",
+      "title": "TimeGAN",
+      "definition": "TimeGAN将对抗生成与时序嵌入/监督递推目标结合，以刻画时间依赖。",
+      "assumptions": "应给出数据生成分布、训练目标及噪声或潜变量定义；金融数据需同时验证联合与时序风险结构。",
+      "properties": [
+        "TimeGAN将对抗生成与时序嵌入/监督递推目标结合，以刻画时间依赖。",
+        "生成样本不等于真实历史证据，概率拟合好坏和策略可交易性要分别检验。"
+      ],
+      "formulas": [
+        {
+          "label": "概率生成目标",
+          "tex": "L=L_{\\rm adv}+\\lambda_{\\rm sup}L_{\\rm sup}+\\lambda_{\\rm rec}L_{\\rm rec}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据显式似然、潜变量模型、对抗目标或扩散过程定义待训练的分布和损失。",
+          "tex": "L=L_{\\rm adv}+\\lambda_{\\rm sup}L_{\\rm sup}+\\lambda_{\\rm rec}L_{\\rm rec}"
+        },
+        {
+          "explanation": "由训练目标推导采样/判别的基本步骤，再检验生成分布及其限制。",
+          "tex": "L=L_{\\rm adv}+\\lambda_{\\rm sup}L_{\\rm sup}+\\lambda_{\\rm rec}L_{\\rm rec}"
+        }
+      ],
+      "code": "import numpy as np\nx=np.random.default_rng(0).standard_t(5,200)\nprint('Tail 1%:',np.quantile(x,.01))",
+      "packages": "numpy",
+      "application": "构造ETF回报压力情景、金融风险模拟和合成市场特征研究。",
+      "limits": "示例只覆盖所在章节的最小概率运算；完整WGAN、TimeGAN和扩散反向采样需要专门训练。生成数据不可替代样本外真实市场验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "generative-n04-05",
+      "node_id": "generative-n04-05",
+      "title": "分布保真",
+      "definition": "通过均值、分位数、相关结构与专门的分布距离衡量生成数据是否接近真实参考样本。",
+      "assumptions": "应给出数据生成分布、训练目标及噪声或潜变量定义；金融数据需同时验证联合与时序风险结构。",
+      "properties": [
+        "通过均值、分位数、相关结构与专门的分布距离衡量生成数据是否接近真实参考样本。",
+        "生成样本不等于真实历史证据，概率拟合好坏和策略可交易性要分别检验。"
+      ],
+      "formulas": [
+        {
+          "label": "概率生成目标",
+          "tex": "D_{\\rm MMD}^2(P,Q)=E[k(X,X')]+E[k(Y,Y')]-2E[k(X,Y)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据显式似然、潜变量模型、对抗目标或扩散过程定义待训练的分布和损失。",
+          "tex": "D_{\\rm MMD}^2(P,Q)=E[k(X,X')]+E[k(Y,Y')]-2E[k(X,Y)]"
+        },
+        {
+          "explanation": "由训练目标推导采样/判别的基本步骤，再检验生成分布及其限制。",
+          "tex": "D_{\\rm MMD}^2(P,Q)=E[k(X,X')]+E[k(Y,Y')]-2E[k(X,Y)]"
+        }
+      ],
+      "code": "import numpy as np\nx=np.random.default_rng(0).standard_t(5,200)\nprint('Tail 1%:',np.quantile(x,.01))",
+      "packages": "numpy",
+      "application": "构造ETF回报压力情景、金融风险模拟和合成市场特征研究。",
+      "limits": "示例只覆盖所在章节的最小概率运算；完整WGAN、TimeGAN和扩散反向采样需要专门训练。生成数据不可替代样本外真实市场验证。",
+      "coverage": "complete"
+    },
+    {
+      "id": "generative-n05-05",
+      "node_id": "generative-n05-05",
+      "title": "隐私与成员推断",
+      "definition": "模型生成样本过度记忆训练集时可能泄漏样本是否参与训练，需要成员推断与最近邻查重。",
+      "assumptions": "应给出数据生成分布、训练目标及噪声或潜变量定义；金融数据需同时验证联合与时序风险结构。",
+      "properties": [
+        "模型生成样本过度记忆训练集时可能泄漏样本是否参与训练，需要成员推断与最近邻查重。",
+        "生成样本不等于真实历史证据，概率拟合好坏和策略可交易性要分别检验。"
+      ],
+      "formulas": [
+        {
+          "label": "概率生成目标",
+          "tex": "P(M=1\\mid f_\\theta(x))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据显式似然、潜变量模型、对抗目标或扩散过程定义待训练的分布和损失。",
+          "tex": "P(M=1\\mid f_\\theta(x))"
+        },
+        {
+          "explanation": "由训练目标推导采样/判别的基本步骤，再检验生成分布及其限制。",
+          "tex": "P(M=1\\mid f_\\theta(x))"
+        }
+      ],
+      "code": "import numpy as np\nx=np.random.default_rng(0).standard_t(5,200)\nprint('Tail 1%:',np.quantile(x,.01))",
+      "packages": "numpy",
+      "application": "构造ETF回报压力情景、金融风险模拟和合成市场特征研究。",
+      "limits": "示例只覆盖所在章节的最小概率运算；完整WGAN、TimeGAN和扩散反向采样需要专门训练。生成数据不可替代样本外真实市场验证。",
+      "coverage": "complete"
+    }
+  ]
+}
