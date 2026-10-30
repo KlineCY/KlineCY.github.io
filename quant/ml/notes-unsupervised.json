@@ -1,0 +1,805 @@
+{
+  "version": 1,
+  "notes": [
+    {
+      "id": "unsupervised-n04-01",
+      "node_id": "unsupervised-n04-01",
+      "title": "Gaussian Mixture",
+      "definition": "多个高斯分布按概率权重叠加以表达数据的多峰密度。",
+      "assumptions": "需要明确距离或相似度、样本量、随机状态和训练期特征缩放。金融市场状态会变化，不应默认数据独立同分布。",
+      "properties": [
+        "多个高斯分布按概率权重叠加以表达数据的多峰密度。。",
+        "聚类和低维表示并非已获验证的交易信号；不同抽样窗口与初始值可能改变结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "p(x)=\\sum_{k=1}^K\\pi_k\\mathcal N(x\\mid\\mu_k,\\Sigma_k)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "给定数据、距离和训练假设，建立此主题的目标或概率关系。多个高斯分布按概率权重叠加以表达数据的多峰密度。",
+          "tex": "p(x)=\\sum_{k=1}^K\\pi_k\\mathcal N(x\\mid\\mu_k,\\Sigma_k)"
+        },
+        {
+          "explanation": "依据该目标计算表示或状态估计，进而利用样本外数据检查其稳定性。",
+          "tex": "p(x)=\\sum_{k=1}^K\\pi_k\\mathcal N(x\\mid\\mu_k,\\Sigma_k)"
+        }
+      ],
+      "code": "# Gaussian Mixture / 章节综合示例\nimport numpy as np\nfrom sklearn.cluster import KMeans\nfrom sklearn.decomposition import PCA\nfrom sklearn.ensemble import IsolationForest\nrng=np.random.default_rng(0)\nX=rng.normal(size=(100,5))\nprint(\"PCA:\",PCA(2).fit_transform(X).shape)\nprint(\"Cluster:\",np.bincount(KMeans(3,n_init=10,random_state=0).fit_predict(X)))\nprint(\"Outliers:\",np.sum(IsolationForest(random_state=0).fit_predict(X)==-1))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF风险聚类、市场状态表征、异常交易检测与多因子去相关。",
+      "limits": "该代码为学科基础演示，具体命名模型的完整训练和推导尚未逐条实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "unsupervised-n05-01",
+      "node_id": "unsupervised-n05-01",
+      "title": "谱聚类",
+      "definition": "用相似度图Laplacian的低维特征向量进行聚类。",
+      "assumptions": "需要明确距离或相似度、样本量、随机状态和训练期特征缩放。金融市场状态会变化，不应默认数据独立同分布。",
+      "properties": [
+        "用相似度图Laplacian的低维特征向量进行聚类。。",
+        "聚类和低维表示并非已获验证的交易信号；不同抽样窗口与初始值可能改变结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "Lu=\\lambda Du"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "给定数据、距离和训练假设，建立此主题的目标或概率关系。用相似度图Laplacian的低维特征向量进行聚类。",
+          "tex": "Lu=\\lambda Du"
+        },
+        {
+          "explanation": "依据该目标计算表示或状态估计，进而利用样本外数据检查其稳定性。",
+          "tex": "Lu=\\lambda Du"
+        }
+      ],
+      "code": "# 谱聚类 / 章节综合示例\nimport numpy as np\nfrom sklearn.cluster import KMeans\nfrom sklearn.decomposition import PCA\nfrom sklearn.ensemble import IsolationForest\nrng=np.random.default_rng(0)\nX=rng.normal(size=(100,5))\nprint(\"PCA:\",PCA(2).fit_transform(X).shape)\nprint(\"Cluster:\",np.bincount(KMeans(3,n_init=10,random_state=0).fit_predict(X)))\nprint(\"Outliers:\",np.sum(IsolationForest(random_state=0).fit_predict(X)==-1))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF风险聚类、市场状态表征、异常交易检测与多因子去相关。",
+      "limits": "该代码为学科基础演示，具体命名模型的完整训练和推导尚未逐条实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "unsupervised-n06-01",
+      "node_id": "unsupervised-n06-01",
+      "title": "聚类稳定性",
+      "definition": "通过重采样比较聚类划分是否稳定。",
+      "assumptions": "需要明确距离或相似度、样本量、随机状态和训练期特征缩放。金融市场状态会变化，不应默认数据独立同分布。",
+      "properties": [
+        "通过重采样比较聚类划分是否稳定。。",
+        "聚类和低维表示并非已获验证的交易信号；不同抽样窗口与初始值可能改变结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "S=E[\\operatorname{ARI}(C^{(1)},C^{(2)})]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "给定数据、距离和训练假设，建立此主题的目标或概率关系。通过重采样比较聚类划分是否稳定。",
+          "tex": "S=E[\\operatorname{ARI}(C^{(1)},C^{(2)})]"
+        },
+        {
+          "explanation": "依据该目标计算表示或状态估计，进而利用样本外数据检查其稳定性。",
+          "tex": "S=E[\\operatorname{ARI}(C^{(1)},C^{(2)})]"
+        }
+      ],
+      "code": "# 聚类稳定性 / 章节综合示例\nimport numpy as np\nfrom sklearn.cluster import KMeans\nfrom sklearn.decomposition import PCA\nfrom sklearn.ensemble import IsolationForest\nrng=np.random.default_rng(0)\nX=rng.normal(size=(100,5))\nprint(\"PCA:\",PCA(2).fit_transform(X).shape)\nprint(\"Cluster:\",np.bincount(KMeans(3,n_init=10,random_state=0).fit_predict(X)))\nprint(\"Outliers:\",np.sum(IsolationForest(random_state=0).fit_predict(X)==-1))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF风险聚类、市场状态表征、异常交易检测与多因子去相关。",
+      "limits": "该代码为学科基础演示，具体命名模型的完整训练和推导尚未逐条实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "unsupervised-n01-02",
+      "node_id": "unsupervised-n01-02",
+      "title": "PCA",
+      "definition": "寻找使样本协方差投影方差最大的正交方向。",
+      "assumptions": "需要明确距离或相似度、样本量、随机状态和训练期特征缩放。金融市场状态会变化，不应默认数据独立同分布。",
+      "properties": [
+        "寻找使样本协方差投影方差最大的正交方向。。",
+        "聚类和低维表示并非已获验证的交易信号；不同抽样窗口与初始值可能改变结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "\\Sigma v=\\lambda v"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "给定数据、距离和训练假设，建立此主题的目标或概率关系。寻找使样本协方差投影方差最大的正交方向。",
+          "tex": "\\Sigma v=\\lambda v"
+        },
+        {
+          "explanation": "依据该目标计算表示或状态估计，进而利用样本外数据检查其稳定性。",
+          "tex": "\\Sigma v=\\lambda v"
+        }
+      ],
+      "code": "# PCA / 章节综合示例\nimport numpy as np\nfrom sklearn.cluster import KMeans\nfrom sklearn.decomposition import PCA\nfrom sklearn.ensemble import IsolationForest\nrng=np.random.default_rng(0)\nX=rng.normal(size=(100,5))\nprint(\"PCA:\",PCA(2).fit_transform(X).shape)\nprint(\"Cluster:\",np.bincount(KMeans(3,n_init=10,random_state=0).fit_predict(X)))\nprint(\"Outliers:\",np.sum(IsolationForest(random_state=0).fit_predict(X)==-1))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF风险聚类、市场状态表征、异常交易检测与多因子去相关。",
+      "limits": "该代码为学科基础演示，具体命名模型的完整训练和推导尚未逐条实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "unsupervised-n02-02",
+      "node_id": "unsupervised-n02-02",
+      "title": "随机SVD",
+      "definition": "先随机投影近似矩阵列空间再对小矩阵做奇异值分解。",
+      "assumptions": "需要明确距离或相似度、样本量、随机状态和训练期特征缩放。金融市场状态会变化，不应默认数据独立同分布。",
+      "properties": [
+        "先随机投影近似矩阵列空间再对小矩阵做奇异值分解。。",
+        "聚类和低维表示并非已获验证的交易信号；不同抽样窗口与初始值可能改变结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "Y=X\\Omega,\\quad Q=\\operatorname{orth}(Y)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "给定数据、距离和训练假设，建立此主题的目标或概率关系。先随机投影近似矩阵列空间再对小矩阵做奇异值分解。",
+          "tex": "Y=X\\Omega,\\quad Q=\\operatorname{orth}(Y)"
+        },
+        {
+          "explanation": "依据该目标计算表示或状态估计，进而利用样本外数据检查其稳定性。",
+          "tex": "Y=X\\Omega,\\quad Q=\\operatorname{orth}(Y)"
+        }
+      ],
+      "code": "# 随机SVD / 章节综合示例\nimport numpy as np\nfrom sklearn.cluster import KMeans\nfrom sklearn.decomposition import PCA\nfrom sklearn.ensemble import IsolationForest\nrng=np.random.default_rng(0)\nX=rng.normal(size=(100,5))\nprint(\"PCA:\",PCA(2).fit_transform(X).shape)\nprint(\"Cluster:\",np.bincount(KMeans(3,n_init=10,random_state=0).fit_predict(X)))\nprint(\"Outliers:\",np.sum(IsolationForest(random_state=0).fit_predict(X)==-1))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF风险聚类、市场状态表征、异常交易检测与多因子去相关。",
+      "limits": "该代码为学科基础演示，具体命名模型的完整训练和推导尚未逐条实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "unsupervised-n03-02",
+      "node_id": "unsupervised-n03-02",
+      "title": "独立成分分析ICA",
+      "definition": "从线性混合观测中估计尽可能独立的非高斯潜在来源。",
+      "assumptions": "需要明确距离或相似度、样本量、随机状态和训练期特征缩放。金融市场状态会变化，不应默认数据独立同分布。",
+      "properties": [
+        "从线性混合观测中估计尽可能独立的非高斯潜在来源。。",
+        "聚类和低维表示并非已获验证的交易信号；不同抽样窗口与初始值可能改变结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "X=AS,\\quad\\hat S=WX"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "给定数据、距离和训练假设，建立此主题的目标或概率关系。从线性混合观测中估计尽可能独立的非高斯潜在来源。",
+          "tex": "X=AS,\\quad\\hat S=WX"
+        },
+        {
+          "explanation": "依据该目标计算表示或状态估计，进而利用样本外数据检查其稳定性。",
+          "tex": "X=AS,\\quad\\hat S=WX"
+        }
+      ],
+      "code": "# 独立成分分析ICA / 章节综合示例\nimport numpy as np\nfrom sklearn.cluster import KMeans\nfrom sklearn.decomposition import PCA\nfrom sklearn.ensemble import IsolationForest\nrng=np.random.default_rng(0)\nX=rng.normal(size=(100,5))\nprint(\"PCA:\",PCA(2).fit_transform(X).shape)\nprint(\"Cluster:\",np.bincount(KMeans(3,n_init=10,random_state=0).fit_predict(X)))\nprint(\"Outliers:\",np.sum(IsolationForest(random_state=0).fit_predict(X)==-1))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF风险聚类、市场状态表征、异常交易检测与多因子去相关。",
+      "limits": "该代码为学科基础演示，具体命名模型的完整训练和推导尚未逐条实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "unsupervised-n04-02",
+      "node_id": "unsupervised-n04-02",
+      "title": "非负矩阵分解NMF",
+      "definition": "将非负数据矩阵近似表示为两个非负因子的乘积。",
+      "assumptions": "需要明确距离或相似度、样本量、随机状态和训练期特征缩放。金融市场状态会变化，不应默认数据独立同分布。",
+      "properties": [
+        "将非负数据矩阵近似表示为两个非负因子的乘积。。",
+        "聚类和低维表示并非已获验证的交易信号；不同抽样窗口与初始值可能改变结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "X\\approx WH,\\quad W,H\\ge0"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "给定数据、距离和训练假设，建立此主题的目标或概率关系。将非负数据矩阵近似表示为两个非负因子的乘积。",
+          "tex": "X\\approx WH,\\quad W,H\\ge0"
+        },
+        {
+          "explanation": "依据该目标计算表示或状态估计，进而利用样本外数据检查其稳定性。",
+          "tex": "X\\approx WH,\\quad W,H\\ge0"
+        }
+      ],
+      "code": "# 非负矩阵分解NMF / 章节综合示例\nimport numpy as np\nfrom sklearn.cluster import KMeans\nfrom sklearn.decomposition import PCA\nfrom sklearn.ensemble import IsolationForest\nrng=np.random.default_rng(0)\nX=rng.normal(size=(100,5))\nprint(\"PCA:\",PCA(2).fit_transform(X).shape)\nprint(\"Cluster:\",np.bincount(KMeans(3,n_init=10,random_state=0).fit_predict(X)))\nprint(\"Outliers:\",np.sum(IsolationForest(random_state=0).fit_predict(X)==-1))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF风险聚类、市场状态表征、异常交易检测与多因子去相关。",
+      "limits": "该代码为学科基础演示，具体命名模型的完整训练和推导尚未逐条实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "unsupervised-n05-02",
+      "node_id": "unsupervised-n05-02",
+      "title": "核PCA",
+      "definition": "使用中心化核Gram矩阵隐式完成非线性特征空间PCA。",
+      "assumptions": "需要明确距离或相似度、样本量、随机状态和训练期特征缩放。金融市场状态会变化，不应默认数据独立同分布。",
+      "properties": [
+        "使用中心化核Gram矩阵隐式完成非线性特征空间PCA。。",
+        "聚类和低维表示并非已获验证的交易信号；不同抽样窗口与初始值可能改变结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "K_c\\alpha=\\lambda\\alpha"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "给定数据、距离和训练假设，建立此主题的目标或概率关系。使用中心化核Gram矩阵隐式完成非线性特征空间PCA。",
+          "tex": "K_c\\alpha=\\lambda\\alpha"
+        },
+        {
+          "explanation": "依据该目标计算表示或状态估计，进而利用样本外数据检查其稳定性。",
+          "tex": "K_c\\alpha=\\lambda\\alpha"
+        }
+      ],
+      "code": "# 核PCA / 章节综合示例\nimport numpy as np\nfrom sklearn.cluster import KMeans\nfrom sklearn.decomposition import PCA\nfrom sklearn.ensemble import IsolationForest\nrng=np.random.default_rng(0)\nX=rng.normal(size=(100,5))\nprint(\"PCA:\",PCA(2).fit_transform(X).shape)\nprint(\"Cluster:\",np.bincount(KMeans(3,n_init=10,random_state=0).fit_predict(X)))\nprint(\"Outliers:\",np.sum(IsolationForest(random_state=0).fit_predict(X)==-1))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF风险聚类、市场状态表征、异常交易检测与多因子去相关。",
+      "limits": "该代码为学科基础演示，具体命名模型的完整训练和推导尚未逐条实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "unsupervised-n06-02",
+      "node_id": "unsupervised-n06-02",
+      "title": "t-SNE与UMAP",
+      "definition": "把高维局部近邻关系映射到低维空间以辅助探索。",
+      "assumptions": "需要明确距离或相似度、样本量、随机状态和训练期特征缩放。金融市场状态会变化，不应默认数据独立同分布。",
+      "properties": [
+        "把高维局部近邻关系映射到低维空间以辅助探索。。",
+        "聚类和低维表示并非已获验证的交易信号；不同抽样窗口与初始值可能改变结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "L_{\\mathrm{tSNE}}=D_{\\rm KL}(P\\|Q)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "给定数据、距离和训练假设，建立此主题的目标或概率关系。把高维局部近邻关系映射到低维空间以辅助探索。",
+          "tex": "L_{\\mathrm{tSNE}}=D_{\\rm KL}(P\\|Q)"
+        },
+        {
+          "explanation": "依据该目标计算表示或状态估计，进而利用样本外数据检查其稳定性。",
+          "tex": "L_{\\mathrm{tSNE}}=D_{\\rm KL}(P\\|Q)"
+        }
+      ],
+      "code": "# t-SNE与UMAP / 章节综合示例\nimport numpy as np\nfrom sklearn.cluster import KMeans\nfrom sklearn.decomposition import PCA\nfrom sklearn.ensemble import IsolationForest\nrng=np.random.default_rng(0)\nX=rng.normal(size=(100,5))\nprint(\"PCA:\",PCA(2).fit_transform(X).shape)\nprint(\"Cluster:\",np.bincount(KMeans(3,n_init=10,random_state=0).fit_predict(X)))\nprint(\"Outliers:\",np.sum(IsolationForest(random_state=0).fit_predict(X)==-1))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF风险聚类、市场状态表征、异常交易检测与多因子去相关。",
+      "limits": "该代码为学科基础演示，具体命名模型的完整训练和推导尚未逐条实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "unsupervised-n02-03",
+      "node_id": "unsupervised-n02-03",
+      "title": "Local Outlier Factor",
+      "definition": "比较样本局部可达密度与其近邻的密度来判断异常。",
+      "assumptions": "需要明确距离或相似度、样本量、随机状态和训练期特征缩放。金融市场状态会变化，不应默认数据独立同分布。",
+      "properties": [
+        "比较样本局部可达密度与其近邻的密度来判断异常。。",
+        "聚类和低维表示并非已获验证的交易信号；不同抽样窗口与初始值可能改变结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "\\operatorname{LOF}_k(x)=E[\\operatorname{lrd}_k(N_k(x))]/\\operatorname{lrd}_k(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "给定数据、距离和训练假设，建立此主题的目标或概率关系。比较样本局部可达密度与其近邻的密度来判断异常。",
+          "tex": "\\operatorname{LOF}_k(x)=E[\\operatorname{lrd}_k(N_k(x))]/\\operatorname{lrd}_k(x)"
+        },
+        {
+          "explanation": "依据该目标计算表示或状态估计，进而利用样本外数据检查其稳定性。",
+          "tex": "\\operatorname{LOF}_k(x)=E[\\operatorname{lrd}_k(N_k(x))]/\\operatorname{lrd}_k(x)"
+        }
+      ],
+      "code": "# Local Outlier Factor / 章节综合示例\nimport numpy as np\nfrom sklearn.cluster import KMeans\nfrom sklearn.decomposition import PCA\nfrom sklearn.ensemble import IsolationForest\nrng=np.random.default_rng(0)\nX=rng.normal(size=(100,5))\nprint(\"PCA:\",PCA(2).fit_transform(X).shape)\nprint(\"Cluster:\",np.bincount(KMeans(3,n_init=10,random_state=0).fit_predict(X)))\nprint(\"Outliers:\",np.sum(IsolationForest(random_state=0).fit_predict(X)==-1))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF风险聚类、市场状态表征、异常交易检测与多因子去相关。",
+      "limits": "该代码为学科基础演示，具体命名模型的完整训练和推导尚未逐条实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "unsupervised-n03-03",
+      "node_id": "unsupervised-n03-03",
+      "title": "One-Class SVM",
+      "definition": "基于正常样本训练核空间中的单类边界用于异常识别。",
+      "assumptions": "需要明确距离或相似度、样本量、随机状态和训练期特征缩放。金融市场状态会变化，不应默认数据独立同分布。",
+      "properties": [
+        "基于正常样本训练核空间中的单类边界用于异常识别。。",
+        "聚类和低维表示并非已获验证的交易信号；不同抽样窗口与初始值可能改变结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "f(x)=\\sum_i\\alpha_iK(x_i,x)-\\rho"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "给定数据、距离和训练假设，建立此主题的目标或概率关系。基于正常样本训练核空间中的单类边界用于异常识别。",
+          "tex": "f(x)=\\sum_i\\alpha_iK(x_i,x)-\\rho"
+        },
+        {
+          "explanation": "依据该目标计算表示或状态估计，进而利用样本外数据检查其稳定性。",
+          "tex": "f(x)=\\sum_i\\alpha_iK(x_i,x)-\\rho"
+        }
+      ],
+      "code": "# One-Class SVM / 章节综合示例\nimport numpy as np\nfrom sklearn.cluster import KMeans\nfrom sklearn.decomposition import PCA\nfrom sklearn.ensemble import IsolationForest\nrng=np.random.default_rng(0)\nX=rng.normal(size=(100,5))\nprint(\"PCA:\",PCA(2).fit_transform(X).shape)\nprint(\"Cluster:\",np.bincount(KMeans(3,n_init=10,random_state=0).fit_predict(X)))\nprint(\"Outliers:\",np.sum(IsolationForest(random_state=0).fit_predict(X)==-1))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF风险聚类、市场状态表征、异常交易检测与多因子去相关。",
+      "limits": "该代码为学科基础演示，具体命名模型的完整训练和推导尚未逐条实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "unsupervised-n04-03",
+      "node_id": "unsupervised-n04-03",
+      "title": "自编码器异常检测",
+      "definition": "以编码器与解码器的重构误差判断输入是否属于正常模式。",
+      "assumptions": "需要明确距离或相似度、样本量、随机状态和训练期特征缩放。金融市场状态会变化，不应默认数据独立同分布。",
+      "properties": [
+        "以编码器与解码器的重构误差判断输入是否属于正常模式。。",
+        "聚类和低维表示并非已获验证的交易信号；不同抽样窗口与初始值可能改变结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "s(x)=\\|x-g_\\theta(f_\\phi(x))\\|^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "给定数据、距离和训练假设，建立此主题的目标或概率关系。以编码器与解码器的重构误差判断输入是否属于正常模式。",
+          "tex": "s(x)=\\|x-g_\\theta(f_\\phi(x))\\|^2"
+        },
+        {
+          "explanation": "依据该目标计算表示或状态估计，进而利用样本外数据检查其稳定性。",
+          "tex": "s(x)=\\|x-g_\\theta(f_\\phi(x))\\|^2"
+        }
+      ],
+      "code": "# 自编码器异常检测 / 章节综合示例\nimport numpy as np\nfrom sklearn.cluster import KMeans\nfrom sklearn.decomposition import PCA\nfrom sklearn.ensemble import IsolationForest\nrng=np.random.default_rng(0)\nX=rng.normal(size=(100,5))\nprint(\"PCA:\",PCA(2).fit_transform(X).shape)\nprint(\"Cluster:\",np.bincount(KMeans(3,n_init=10,random_state=0).fit_predict(X)))\nprint(\"Outliers:\",np.sum(IsolationForest(random_state=0).fit_predict(X)==-1))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF风险聚类、市场状态表征、异常交易检测与多因子去相关。",
+      "limits": "该代码为学科基础演示，具体命名模型的完整训练和推导尚未逐条实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "unsupervised-n05-03",
+      "node_id": "unsupervised-n05-03",
+      "title": "密度异常",
+      "definition": "用训练分布下样本的负对数概率密度衡量异常。",
+      "assumptions": "需要明确距离或相似度、样本量、随机状态和训练期特征缩放。金融市场状态会变化，不应默认数据独立同分布。",
+      "properties": [
+        "用训练分布下样本的负对数概率密度衡量异常。。",
+        "聚类和低维表示并非已获验证的交易信号；不同抽样窗口与初始值可能改变结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "s(x)=-\\log\\hat p(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "给定数据、距离和训练假设，建立此主题的目标或概率关系。用训练分布下样本的负对数概率密度衡量异常。",
+          "tex": "s(x)=-\\log\\hat p(x)"
+        },
+        {
+          "explanation": "依据该目标计算表示或状态估计，进而利用样本外数据检查其稳定性。",
+          "tex": "s(x)=-\\log\\hat p(x)"
+        }
+      ],
+      "code": "# 密度异常 / 章节综合示例\nimport numpy as np\nfrom sklearn.cluster import KMeans\nfrom sklearn.decomposition import PCA\nfrom sklearn.ensemble import IsolationForest\nrng=np.random.default_rng(0)\nX=rng.normal(size=(100,5))\nprint(\"PCA:\",PCA(2).fit_transform(X).shape)\nprint(\"Cluster:\",np.bincount(KMeans(3,n_init=10,random_state=0).fit_predict(X)))\nprint(\"Outliers:\",np.sum(IsolationForest(random_state=0).fit_predict(X)==-1))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF风险聚类、市场状态表征、异常交易检测与多因子去相关。",
+      "limits": "该代码为学科基础演示，具体命名模型的完整训练和推导尚未逐条实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "unsupervised-n06-03",
+      "node_id": "unsupervised-n06-03",
+      "title": "概念漂移",
+      "definition": "特征与目标的条件关系随时间变化的现象称为概念漂移。",
+      "assumptions": "需要明确距离或相似度、样本量、随机状态和训练期特征缩放。金融市场状态会变化，不应默认数据独立同分布。",
+      "properties": [
+        "特征与目标的条件关系随时间变化的现象称为概念漂移。。",
+        "聚类和低维表示并非已获验证的交易信号；不同抽样窗口与初始值可能改变结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "P_t(Y\\mid X)\\ne P_s(Y\\mid X)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "给定数据、距离和训练假设，建立此主题的目标或概率关系。特征与目标的条件关系随时间变化的现象称为概念漂移。",
+          "tex": "P_t(Y\\mid X)\\ne P_s(Y\\mid X)"
+        },
+        {
+          "explanation": "依据该目标计算表示或状态估计，进而利用样本外数据检查其稳定性。",
+          "tex": "P_t(Y\\mid X)\\ne P_s(Y\\mid X)"
+        }
+      ],
+      "code": "# 概念漂移 / 章节综合示例\nimport numpy as np\nfrom sklearn.cluster import KMeans\nfrom sklearn.decomposition import PCA\nfrom sklearn.ensemble import IsolationForest\nrng=np.random.default_rng(0)\nX=rng.normal(size=(100,5))\nprint(\"PCA:\",PCA(2).fit_transform(X).shape)\nprint(\"Cluster:\",np.bincount(KMeans(3,n_init=10,random_state=0).fit_predict(X)))\nprint(\"Outliers:\",np.sum(IsolationForest(random_state=0).fit_predict(X)==-1))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF风险聚类、市场状态表征、异常交易检测与多因子去相关。",
+      "limits": "该代码为学科基础演示，具体命名模型的完整训练和推导尚未逐条实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "unsupervised-n02-04",
+      "node_id": "unsupervised-n02-04",
+      "title": "SimCLR",
+      "definition": "同一样本的增强视图作为正例，其他样本作为批内负例开展对比学习。",
+      "assumptions": "需要明确距离或相似度、样本量、随机状态和训练期特征缩放。金融市场状态会变化，不应默认数据独立同分布。",
+      "properties": [
+        "同一样本的增强视图作为正例，其他样本作为批内负例开展对比学习。。",
+        "聚类和低维表示并非已获验证的交易信号；不同抽样窗口与初始值可能改变结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "L_i=-\\log\\frac{e^{s(z_i,z_i^+)/\\tau}}{\\sum_je^{s(z_i,z_j)/\\tau}}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "给定数据、距离和训练假设，建立此主题的目标或概率关系。同一样本的增强视图作为正例，其他样本作为批内负例开展对比学习。",
+          "tex": "L_i=-\\log\\frac{e^{s(z_i,z_i^+)/\\tau}}{\\sum_je^{s(z_i,z_j)/\\tau}}"
+        },
+        {
+          "explanation": "依据该目标计算表示或状态估计，进而利用样本外数据检查其稳定性。",
+          "tex": "L_i=-\\log\\frac{e^{s(z_i,z_i^+)/\\tau}}{\\sum_je^{s(z_i,z_j)/\\tau}}"
+        }
+      ],
+      "code": "# SimCLR / 章节综合示例\nimport numpy as np\nfrom sklearn.cluster import KMeans\nfrom sklearn.decomposition import PCA\nfrom sklearn.ensemble import IsolationForest\nrng=np.random.default_rng(0)\nX=rng.normal(size=(100,5))\nprint(\"PCA:\",PCA(2).fit_transform(X).shape)\nprint(\"Cluster:\",np.bincount(KMeans(3,n_init=10,random_state=0).fit_predict(X)))\nprint(\"Outliers:\",np.sum(IsolationForest(random_state=0).fit_predict(X)==-1))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF风险聚类、市场状态表征、异常交易检测与多因子去相关。",
+      "limits": "该代码为学科基础演示，具体命名模型的完整训练和推导尚未逐条实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "unsupervised-n03-04",
+      "node_id": "unsupervised-n03-04",
+      "title": "BYOL",
+      "definition": "以动量更新的目标网络监督在线网络学习无负例表征。",
+      "assumptions": "需要明确距离或相似度、样本量、随机状态和训练期特征缩放。金融市场状态会变化，不应默认数据独立同分布。",
+      "properties": [
+        "以动量更新的目标网络监督在线网络学习无负例表征。。",
+        "聚类和低维表示并非已获验证的交易信号；不同抽样窗口与初始值可能改变结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "\\theta_{\\rm target}^{+}=\\tau\\theta_{\\rm target}+(1-\\tau)\\theta_{\\rm online}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "给定数据、距离和训练假设，建立此主题的目标或概率关系。以动量更新的目标网络监督在线网络学习无负例表征。",
+          "tex": "\\theta_{\\rm target}^{+}=\\tau\\theta_{\\rm target}+(1-\\tau)\\theta_{\\rm online}"
+        },
+        {
+          "explanation": "依据该目标计算表示或状态估计，进而利用样本外数据检查其稳定性。",
+          "tex": "\\theta_{\\rm target}^{+}=\\tau\\theta_{\\rm target}+(1-\\tau)\\theta_{\\rm online}"
+        }
+      ],
+      "code": "# BYOL / 章节综合示例\nimport numpy as np\nfrom sklearn.cluster import KMeans\nfrom sklearn.decomposition import PCA\nfrom sklearn.ensemble import IsolationForest\nrng=np.random.default_rng(0)\nX=rng.normal(size=(100,5))\nprint(\"PCA:\",PCA(2).fit_transform(X).shape)\nprint(\"Cluster:\",np.bincount(KMeans(3,n_init=10,random_state=0).fit_predict(X)))\nprint(\"Outliers:\",np.sum(IsolationForest(random_state=0).fit_predict(X)==-1))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF风险聚类、市场状态表征、异常交易检测与多因子去相关。",
+      "limits": "该代码为学科基础演示，具体命名模型的完整训练和推导尚未逐条实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "unsupervised-n04-04",
+      "node_id": "unsupervised-n04-04",
+      "title": "掩码建模",
+      "definition": "掩盖部分输入后要求模型恢复被遮蔽区域以提取数据结构。",
+      "assumptions": "需要明确距离或相似度、样本量、随机状态和训练期特征缩放。金融市场状态会变化，不应默认数据独立同分布。",
+      "properties": [
+        "掩盖部分输入后要求模型恢复被遮蔽区域以提取数据结构。。",
+        "聚类和低维表示并非已获验证的交易信号；不同抽样窗口与初始值可能改变结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "L=\\sum_{i\\in M}\\|x_i-\\hat x_i\\|^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "给定数据、距离和训练假设，建立此主题的目标或概率关系。掩盖部分输入后要求模型恢复被遮蔽区域以提取数据结构。",
+          "tex": "L=\\sum_{i\\in M}\\|x_i-\\hat x_i\\|^2"
+        },
+        {
+          "explanation": "依据该目标计算表示或状态估计，进而利用样本外数据检查其稳定性。",
+          "tex": "L=\\sum_{i\\in M}\\|x_i-\\hat x_i\\|^2"
+        }
+      ],
+      "code": "# 掩码建模 / 章节综合示例\nimport numpy as np\nfrom sklearn.cluster import KMeans\nfrom sklearn.decomposition import PCA\nfrom sklearn.ensemble import IsolationForest\nrng=np.random.default_rng(0)\nX=rng.normal(size=(100,5))\nprint(\"PCA:\",PCA(2).fit_transform(X).shape)\nprint(\"Cluster:\",np.bincount(KMeans(3,n_init=10,random_state=0).fit_predict(X)))\nprint(\"Outliers:\",np.sum(IsolationForest(random_state=0).fit_predict(X)==-1))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF风险聚类、市场状态表征、异常交易检测与多因子去相关。",
+      "limits": "该代码为学科基础演示，具体命名模型的完整训练和推导尚未逐条实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "unsupervised-n05-04",
+      "node_id": "unsupervised-n05-04",
+      "title": "自监督预训练",
+      "definition": "先从无标签数据学习表示，再迁移并微调下游预测模型。",
+      "assumptions": "需要明确距离或相似度、样本量、随机状态和训练期特征缩放。金融市场状态会变化，不应默认数据独立同分布。",
+      "properties": [
+        "先从无标签数据学习表示，再迁移并微调下游预测模型。。",
+        "聚类和低维表示并非已获验证的交易信号；不同抽样窗口与初始值可能改变结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "\\theta_{\\rm fine}=\\operatorname{Finetune}(\\theta_{\\rm pre})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "给定数据、距离和训练假设，建立此主题的目标或概率关系。先从无标签数据学习表示，再迁移并微调下游预测模型。",
+          "tex": "\\theta_{\\rm fine}=\\operatorname{Finetune}(\\theta_{\\rm pre})"
+        },
+        {
+          "explanation": "依据该目标计算表示或状态估计，进而利用样本外数据检查其稳定性。",
+          "tex": "\\theta_{\\rm fine}=\\operatorname{Finetune}(\\theta_{\\rm pre})"
+        }
+      ],
+      "code": "# 自监督预训练 / 章节综合示例\nimport numpy as np\nfrom sklearn.cluster import KMeans\nfrom sklearn.decomposition import PCA\nfrom sklearn.ensemble import IsolationForest\nrng=np.random.default_rng(0)\nX=rng.normal(size=(100,5))\nprint(\"PCA:\",PCA(2).fit_transform(X).shape)\nprint(\"Cluster:\",np.bincount(KMeans(3,n_init=10,random_state=0).fit_predict(X)))\nprint(\"Outliers:\",np.sum(IsolationForest(random_state=0).fit_predict(X)==-1))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF风险聚类、市场状态表征、异常交易检测与多因子去相关。",
+      "limits": "该代码为学科基础演示，具体命名模型的完整训练和推导尚未逐条实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "unsupervised-n06-04",
+      "node_id": "unsupervised-n06-04",
+      "title": "嵌入表示",
+      "definition": "将符号、图像或文本编码为固定维度向量以供后续模型使用。",
+      "assumptions": "需要明确距离或相似度、样本量、随机状态和训练期特征缩放。金融市场状态会变化，不应默认数据独立同分布。",
+      "properties": [
+        "将符号、图像或文本编码为固定维度向量以供后续模型使用。。",
+        "聚类和低维表示并非已获验证的交易信号；不同抽样窗口与初始值可能改变结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "f:\\mathcal X\\rightarrow\\mathbb R^d"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "给定数据、距离和训练假设，建立此主题的目标或概率关系。将符号、图像或文本编码为固定维度向量以供后续模型使用。",
+          "tex": "f:\\mathcal X\\rightarrow\\mathbb R^d"
+        },
+        {
+          "explanation": "依据该目标计算表示或状态估计，进而利用样本外数据检查其稳定性。",
+          "tex": "f:\\mathcal X\\rightarrow\\mathbb R^d"
+        }
+      ],
+      "code": "# 嵌入表示 / 章节综合示例\nimport numpy as np\nfrom sklearn.cluster import KMeans\nfrom sklearn.decomposition import PCA\nfrom sklearn.ensemble import IsolationForest\nrng=np.random.default_rng(0)\nX=rng.normal(size=(100,5))\nprint(\"PCA:\",PCA(2).fit_transform(X).shape)\nprint(\"Cluster:\",np.bincount(KMeans(3,n_init=10,random_state=0).fit_predict(X)))\nprint(\"Outliers:\",np.sum(IsolationForest(random_state=0).fit_predict(X)==-1))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF风险聚类、市场状态表征、异常交易检测与多因子去相关。",
+      "limits": "该代码为学科基础演示，具体命名模型的完整训练和推导尚未逐条实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "unsupervised-n01-05",
+      "node_id": "unsupervised-n01-05",
+      "title": "ETF风险聚类",
+      "definition": "以波动、回撤和Beta等风险指标聚类ETF资产。",
+      "assumptions": "需要明确距离或相似度、样本量、随机状态和训练期特征缩放。金融市场状态会变化，不应默认数据独立同分布。",
+      "properties": [
+        "以波动、回撤和Beta等风险指标聚类ETF资产。。",
+        "聚类和低维表示并非已获验证的交易信号；不同抽样窗口与初始值可能改变结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "g_i=(\\sigma_i,\\beta_i,\\mathrm{MDD}_i)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "给定数据、距离和训练假设，建立此主题的目标或概率关系。以波动、回撤和Beta等风险指标聚类ETF资产。",
+          "tex": "g_i=(\\sigma_i,\\beta_i,\\mathrm{MDD}_i)"
+        },
+        {
+          "explanation": "依据该目标计算表示或状态估计，进而利用样本外数据检查其稳定性。",
+          "tex": "g_i=(\\sigma_i,\\beta_i,\\mathrm{MDD}_i)"
+        }
+      ],
+      "code": "# ETF风险聚类 / 章节综合示例\nimport numpy as np\nfrom sklearn.cluster import KMeans\nfrom sklearn.decomposition import PCA\nfrom sklearn.ensemble import IsolationForest\nrng=np.random.default_rng(0)\nX=rng.normal(size=(100,5))\nprint(\"PCA:\",PCA(2).fit_transform(X).shape)\nprint(\"Cluster:\",np.bincount(KMeans(3,n_init=10,random_state=0).fit_predict(X)))\nprint(\"Outliers:\",np.sum(IsolationForest(random_state=0).fit_predict(X)==-1))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF风险聚类、市场状态表征、异常交易检测与多因子去相关。",
+      "limits": "该代码为学科基础演示，具体命名模型的完整训练和推导尚未逐条实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "unsupervised-n02-05",
+      "node_id": "unsupervised-n02-05",
+      "title": "收益协方差主成分",
+      "definition": "从收益协方差矩阵的谱分解中提取共同波动方向。",
+      "assumptions": "需要明确距离或相似度、样本量、随机状态和训练期特征缩放。金融市场状态会变化，不应默认数据独立同分布。",
+      "properties": [
+        "从收益协方差矩阵的谱分解中提取共同波动方向。。",
+        "聚类和低维表示并非已获验证的交易信号；不同抽样窗口与初始值可能改变结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "\\Sigma=V\\Lambda V^\\top"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "给定数据、距离和训练假设，建立此主题的目标或概率关系。从收益协方差矩阵的谱分解中提取共同波动方向。",
+          "tex": "\\Sigma=V\\Lambda V^\\top"
+        },
+        {
+          "explanation": "依据该目标计算表示或状态估计，进而利用样本外数据检查其稳定性。",
+          "tex": "\\Sigma=V\\Lambda V^\\top"
+        }
+      ],
+      "code": "# 收益协方差主成分 / 章节综合示例\nimport numpy as np\nfrom sklearn.cluster import KMeans\nfrom sklearn.decomposition import PCA\nfrom sklearn.ensemble import IsolationForest\nrng=np.random.default_rng(0)\nX=rng.normal(size=(100,5))\nprint(\"PCA:\",PCA(2).fit_transform(X).shape)\nprint(\"Cluster:\",np.bincount(KMeans(3,n_init=10,random_state=0).fit_predict(X)))\nprint(\"Outliers:\",np.sum(IsolationForest(random_state=0).fit_predict(X)==-1))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF风险聚类、市场状态表征、异常交易检测与多因子去相关。",
+      "limits": "该代码为学科基础演示，具体命名模型的完整训练和推导尚未逐条实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "unsupervised-n03-05",
+      "node_id": "unsupervised-n03-05",
+      "title": "市场状态聚类",
+      "definition": "对波动、相关性与流动性状态向量进行聚类。",
+      "assumptions": "需要明确距离或相似度、样本量、随机状态和训练期特征缩放。金融市场状态会变化，不应默认数据独立同分布。",
+      "properties": [
+        "对波动、相关性与流动性状态向量进行聚类。。",
+        "聚类和低维表示并非已获验证的交易信号；不同抽样窗口与初始值可能改变结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "z_t=\\operatorname{Cluster}(X_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "给定数据、距离和训练假设，建立此主题的目标或概率关系。对波动、相关性与流动性状态向量进行聚类。",
+          "tex": "z_t=\\operatorname{Cluster}(X_t)"
+        },
+        {
+          "explanation": "依据该目标计算表示或状态估计，进而利用样本外数据检查其稳定性。",
+          "tex": "z_t=\\operatorname{Cluster}(X_t)"
+        }
+      ],
+      "code": "# 市场状态聚类 / 章节综合示例\nimport numpy as np\nfrom sklearn.cluster import KMeans\nfrom sklearn.decomposition import PCA\nfrom sklearn.ensemble import IsolationForest\nrng=np.random.default_rng(0)\nX=rng.normal(size=(100,5))\nprint(\"PCA:\",PCA(2).fit_transform(X).shape)\nprint(\"Cluster:\",np.bincount(KMeans(3,n_init=10,random_state=0).fit_predict(X)))\nprint(\"Outliers:\",np.sum(IsolationForest(random_state=0).fit_predict(X)==-1))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF风险聚类、市场状态表征、异常交易检测与多因子去相关。",
+      "limits": "该代码为学科基础演示，具体命名模型的完整训练和推导尚未逐条实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "unsupervised-n04-05",
+      "node_id": "unsupervised-n04-05",
+      "title": "交易异常检测",
+      "definition": "用成交量、价差和波动的标准化偏离筛查异常交易时段。",
+      "assumptions": "需要明确距离或相似度、样本量、随机状态和训练期特征缩放。金融市场状态会变化，不应默认数据独立同分布。",
+      "properties": [
+        "用成交量、价差和波动的标准化偏离筛查异常交易时段。。",
+        "聚类和低维表示并非已获验证的交易信号；不同抽样窗口与初始值可能改变结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "z_t=(x_t-\\mu_{\\rm train})/\\sigma_{\\rm train}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "给定数据、距离和训练假设，建立此主题的目标或概率关系。用成交量、价差和波动的标准化偏离筛查异常交易时段。",
+          "tex": "z_t=(x_t-\\mu_{\\rm train})/\\sigma_{\\rm train}"
+        },
+        {
+          "explanation": "依据该目标计算表示或状态估计，进而利用样本外数据检查其稳定性。",
+          "tex": "z_t=(x_t-\\mu_{\\rm train})/\\sigma_{\\rm train}"
+        }
+      ],
+      "code": "# 交易异常检测 / 章节综合示例\nimport numpy as np\nfrom sklearn.cluster import KMeans\nfrom sklearn.decomposition import PCA\nfrom sklearn.ensemble import IsolationForest\nrng=np.random.default_rng(0)\nX=rng.normal(size=(100,5))\nprint(\"PCA:\",PCA(2).fit_transform(X).shape)\nprint(\"Cluster:\",np.bincount(KMeans(3,n_init=10,random_state=0).fit_predict(X)))\nprint(\"Outliers:\",np.sum(IsolationForest(random_state=0).fit_predict(X)==-1))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF风险聚类、市场状态表征、异常交易检测与多因子去相关。",
+      "limits": "该代码为学科基础演示，具体命名模型的完整训练和推导尚未逐条实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "unsupervised-n05-05",
+      "node_id": "unsupervised-n05-05",
+      "title": "因子去相关",
+      "definition": "通过正交投影或协方差白化降低因子之间的线性重叠。",
+      "assumptions": "需要明确距离或相似度、样本量、随机状态和训练期特征缩放。金融市场状态会变化，不应默认数据独立同分布。",
+      "properties": [
+        "通过正交投影或协方差白化降低因子之间的线性重叠。。",
+        "聚类和低维表示并非已获验证的交易信号；不同抽样窗口与初始值可能改变结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "Z=X\\Sigma^{-1/2}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "给定数据、距离和训练假设，建立此主题的目标或概率关系。通过正交投影或协方差白化降低因子之间的线性重叠。",
+          "tex": "Z=X\\Sigma^{-1/2}"
+        },
+        {
+          "explanation": "依据该目标计算表示或状态估计，进而利用样本外数据检查其稳定性。",
+          "tex": "Z=X\\Sigma^{-1/2}"
+        }
+      ],
+      "code": "# 因子去相关 / 章节综合示例\nimport numpy as np\nfrom sklearn.cluster import KMeans\nfrom sklearn.decomposition import PCA\nfrom sklearn.ensemble import IsolationForest\nrng=np.random.default_rng(0)\nX=rng.normal(size=(100,5))\nprint(\"PCA:\",PCA(2).fit_transform(X).shape)\nprint(\"Cluster:\",np.bincount(KMeans(3,n_init=10,random_state=0).fit_predict(X)))\nprint(\"Outliers:\",np.sum(IsolationForest(random_state=0).fit_predict(X)==-1))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF风险聚类、市场状态表征、异常交易检测与多因子去相关。",
+      "limits": "该代码为学科基础演示，具体命名模型的完整训练和推导尚未逐条实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "unsupervised-n06-05",
+      "node_id": "unsupervised-n06-05",
+      "title": "无监督信号验证",
+      "definition": "用独立历史窗口的下游预测表现检验无监督表征是否有增量价值。",
+      "assumptions": "需要明确距离或相似度、样本量、随机状态和训练期特征缩放。金融市场状态会变化，不应默认数据独立同分布。",
+      "properties": [
+        "用独立历史窗口的下游预测表现检验无监督表征是否有增量价值。。",
+        "聚类和低维表示并非已获验证的交易信号；不同抽样窗口与初始值可能改变结果。"
+      ],
+      "formulas": [
+        {
+          "label": "核心数学表达",
+          "tex": "\\Delta R=R_{\\rm base}-R_{\\rm learned}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "给定数据、距离和训练假设，建立此主题的目标或概率关系。用独立历史窗口的下游预测表现检验无监督表征是否有增量价值。",
+          "tex": "\\Delta R=R_{\\rm base}-R_{\\rm learned}"
+        },
+        {
+          "explanation": "依据该目标计算表示或状态估计，进而利用样本外数据检查其稳定性。",
+          "tex": "\\Delta R=R_{\\rm base}-R_{\\rm learned}"
+        }
+      ],
+      "code": "# 无监督信号验证 / 章节综合示例\nimport numpy as np\nfrom sklearn.cluster import KMeans\nfrom sklearn.decomposition import PCA\nfrom sklearn.ensemble import IsolationForest\nrng=np.random.default_rng(0)\nX=rng.normal(size=(100,5))\nprint(\"PCA:\",PCA(2).fit_transform(X).shape)\nprint(\"Cluster:\",np.bincount(KMeans(3,n_init=10,random_state=0).fit_predict(X)))\nprint(\"Outliers:\",np.sum(IsolationForest(random_state=0).fit_predict(X)==-1))",
+      "packages": "numpy, scikit-learn",
+      "application": "用于ETF风险聚类、市场状态表征、异常交易检测与多因子去相关。",
+      "limits": "该代码为学科基础演示，具体命名模型的完整训练和推导尚未逐条实现。",
+      "coverage": "expanded"
+    }
+  ]
+}
