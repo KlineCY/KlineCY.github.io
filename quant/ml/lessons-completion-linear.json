@@ -1,0 +1,741 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "linear-n02-01",
+      "node_id": "linear-n02-01",
+      "title": "正规方程",
+      "definition": "OLS最优系数满足设计矩阵与残差正交；满列秩时可求封闭解。",
+      "assumptions": "须先定义回归目标、样本筛选及分布/残差条件，并保持预测与标签严格时点隔离。",
+      "properties": [
+        "该方法的参数估计、数值稳定性和统计推断依赖所列分布、正则或模型容量前提。",
+        "参数显著与样本外预测有用是两个不同问题，需要独立验证。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "X^\\top X\\hat\\beta=X^\\top y"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从所示损失、条件分布或函数表示出发，对未知参数进行估计或求解。",
+          "tex": "X^\\top X\\hat\\beta=X^\\top y"
+        },
+        {
+          "explanation": "检验估计量和设计矩阵的约束，并在样本外计算预测误差与参数稳定性。",
+          "tex": "X^\\top X\\hat\\beta=X^\\top y"
+        }
+      ],
+      "code": "import numpy as np\nX=np.c_[np.ones(5),np.arange(5.)];y=np.array([1.,3.,5.,7.,9.])\nprint(np.linalg.lstsq(X,y,rcond=None)[0])",
+      "application": "用于ETF预期回报、横截面风险因子、动态Beta估计或金融尾部预测，对比样本外误差和交易后的经济价值。",
+      "limits": "示例仅展示核心算法或数学计算，金融时间依赖、数据修订及多重模型检验需额外处理。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n03-01",
+      "node_id": "linear-n03-01",
+      "title": "梯度下降求OLS",
+      "definition": "迭代最小化回归平方损失；梯度来源于残差平方和对系数的求导。",
+      "assumptions": "须先定义回归目标、样本筛选及分布/残差条件，并保持预测与标签严格时点隔离。",
+      "properties": [
+        "该方法的参数估计、数值稳定性和统计推断依赖所列分布、正则或模型容量前提。",
+        "参数显著与样本外预测有用是两个不同问题，需要独立验证。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "\\beta^{(k+1)}=\\beta^{(k)}-\\eta\\frac{2}{n}X^\\top(X\\beta^{(k)}-y)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从所示损失、条件分布或函数表示出发，对未知参数进行估计或求解。",
+          "tex": "\\beta^{(k+1)}=\\beta^{(k)}-\\eta\\frac{2}{n}X^\\top(X\\beta^{(k)}-y)"
+        },
+        {
+          "explanation": "检验估计量和设计矩阵的约束，并在样本外计算预测误差与参数稳定性。",
+          "tex": "\\beta^{(k+1)}=\\beta^{(k)}-\\eta\\frac{2}{n}X^\\top(X\\beta^{(k)}-y)"
+        }
+      ],
+      "code": "import numpy as np\nx=np.arange(6.);X=np.c_[np.ones(6),x];y=1+2*x\nb=np.zeros(2)\nfor _ in range(3000):b-=.02*(2/6)*X.T@(X@b-y)\nprint(b)",
+      "application": "用于ETF预期回报、横截面风险因子、动态Beta估计或金融尾部预测，对比样本外误差和交易后的经济价值。",
+      "limits": "示例仅展示核心算法或数学计算，金融时间依赖、数据修订及多重模型检验需额外处理。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n01-02",
+      "node_id": "linear-n01-02",
+      "title": "条件期望",
+      "definition": "条件期望是给定特征信息后目标变量的平均值，是平方损失意义下的最优预测函数。",
+      "assumptions": "须先定义回归目标、样本筛选及分布/残差条件，并保持预测与标签严格时点隔离。",
+      "properties": [
+        "该方法的参数估计、数值稳定性和统计推断依赖所列分布、正则或模型容量前提。",
+        "参数显著与样本外预测有用是两个不同问题，需要独立验证。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "f^*(x)=E[Y|X=x]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从所示损失、条件分布或函数表示出发，对未知参数进行估计或求解。",
+          "tex": "f^*(x)=E[Y|X=x]"
+        },
+        {
+          "explanation": "检验估计量和设计矩阵的约束，并在样本外计算预测误差与参数稳定性。",
+          "tex": "f^*(x)=E[Y|X=x]"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);x=rng.integers(0,2,100)\ny=2*x+rng.normal(size=100)\nprint([y[x==k].mean() for k in [0,1]])",
+      "application": "用于ETF预期回报、横截面风险因子、动态Beta估计或金融尾部预测，对比样本外误差和交易后的经济价值。",
+      "limits": "示例仅展示核心算法或数学计算，金融时间依赖、数据修订及多重模型检验需额外处理。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n02-02",
+      "node_id": "linear-n02-02",
+      "title": "高斯误差与MLE",
+      "definition": "条件独立、同方差高斯回归中最大化似然等价于最小化残差平方和。",
+      "assumptions": "须先定义回归目标、样本筛选及分布/残差条件，并保持预测与标签严格时点隔离。",
+      "properties": [
+        "该方法的参数估计、数值稳定性和统计推断依赖所列分布、正则或模型容量前提。",
+        "参数显著与样本外预测有用是两个不同问题，需要独立验证。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "\\log L=-\\frac{n}{2}\\log(2\\pi\\sigma^2)-\\frac{1}{2\\sigma^2}\\sum_i(y_i-x_i^\\top\\beta)^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从所示损失、条件分布或函数表示出发，对未知参数进行估计或求解。",
+          "tex": "\\log L=-\\frac{n}{2}\\log(2\\pi\\sigma^2)-\\frac{1}{2\\sigma^2}\\sum_i(y_i-x_i^\\top\\beta)^2"
+        },
+        {
+          "explanation": "检验估计量和设计矩阵的约束，并在样本外计算预测误差与参数稳定性。",
+          "tex": "\\log L=-\\frac{n}{2}\\log(2\\pi\\sigma^2)-\\frac{1}{2\\sigma^2}\\sum_i(y_i-x_i^\\top\\beta)^2"
+        }
+      ],
+      "code": "import numpy as np\nfrom scipy.stats import norm\nx=np.arange(5.);y=2*x+1\nprint(norm.logpdf(y,loc=2*x+1,scale=.3).sum())",
+      "application": "用于ETF预期回报、横截面风险因子、动态Beta估计或金融尾部预测，对比样本外误差和交易后的经济价值。",
+      "limits": "示例仅展示核心算法或数学计算，金融时间依赖、数据修订及多重模型检验需额外处理。",
+      "packages": "numpy, scipy",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n03-02",
+      "node_id": "linear-n03-02",
+      "title": "异方差稳健标准误",
+      "definition": "当误差条件方差不恒定时，Sandwich协方差估计修正OLS系数标准误的估计形式。",
+      "assumptions": "须先定义回归目标、样本筛选及分布/残差条件，并保持预测与标签严格时点隔离。",
+      "properties": [
+        "该方法的参数估计、数值稳定性和统计推断依赖所列分布、正则或模型容量前提。",
+        "参数显著与样本外预测有用是两个不同问题，需要独立验证。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "\\widehat{\\operatorname{Var}}(\\hat\\beta)=(X^\\top X)^{-1}X^\\top\\operatorname{diag}(\\hat e_i^2)X(X^\\top X)^{-1}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从所示损失、条件分布或函数表示出发，对未知参数进行估计或求解。",
+          "tex": "\\widehat{\\operatorname{Var}}(\\hat\\beta)=(X^\\top X)^{-1}X^\\top\\operatorname{diag}(\\hat e_i^2)X(X^\\top X)^{-1}"
+        },
+        {
+          "explanation": "检验估计量和设计矩阵的约束，并在样本外计算预测误差与参数稳定性。",
+          "tex": "\\widehat{\\operatorname{Var}}(\\hat\\beta)=(X^\\top X)^{-1}X^\\top\\operatorname{diag}(\\hat e_i^2)X(X^\\top X)^{-1}"
+        }
+      ],
+      "code": "import numpy as np\nx=np.arange(1.,10.);X=np.c_[np.ones(9),x];y=2*x+np.sin(x)\nb=np.linalg.lstsq(X,y,rcond=None)[0];e=y-X@b\ni=np.linalg.inv(X.T@X);se=np.sqrt(np.diag(i@X.T@np.diag(e**2)@X@i))\nprint(se)",
+      "application": "用于ETF预期回报、横截面风险因子、动态Beta估计或金融尾部预测，对比样本外误差和交易后的经济价值。",
+      "limits": "示例仅展示核心算法或数学计算，金融时间依赖、数据修订及多重模型检验需额外处理。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n04-02",
+      "node_id": "linear-n04-02",
+      "title": "偏差方差分解",
+      "definition": "平方预测误差可分为模型估计偏差、训练抽样方差与观测不可约噪声。",
+      "assumptions": "须先定义回归目标、样本筛选及分布/残差条件，并保持预测与标签严格时点隔离。",
+      "properties": [
+        "该方法的参数估计、数值稳定性和统计推断依赖所列分布、正则或模型容量前提。",
+        "参数显著与样本外预测有用是两个不同问题，需要独立验证。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "E[(Y-\\hat f)^2]=(\\operatorname{Bias}\\hat f)^2+\\operatorname{Var}\\hat f+\\sigma_\\epsilon^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从所示损失、条件分布或函数表示出发，对未知参数进行估计或求解。",
+          "tex": "E[(Y-\\hat f)^2]=(\\operatorname{Bias}\\hat f)^2+\\operatorname{Var}\\hat f+\\sigma_\\epsilon^2"
+        },
+        {
+          "explanation": "检验估计量和设计矩阵的约束，并在样本外计算预测误差与参数稳定性。",
+          "tex": "E[(Y-\\hat f)^2]=(\\operatorname{Bias}\\hat f)^2+\\operatorname{Var}\\hat f+\\sigma_\\epsilon^2"
+        }
+      ],
+      "code": "import numpy as np\np=np.array([[1.,2.],[2.,2.5],[1.5,1.]])\ntruth=np.array([1.,2.])\nprint(\"bias2\",np.mean((p.mean(0)-truth)**2),\"var\",p.var(0).mean())",
+      "application": "用于ETF预期回报、横截面风险因子、动态Beta估计或金融尾部预测，对比样本外误差和交易后的经济价值。",
+      "limits": "示例仅展示核心算法或数学计算，金融时间依赖、数据修订及多重模型检验需额外处理。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n06-02",
+      "node_id": "linear-n06-02",
+      "title": "误差相关",
+      "definition": "时间序列回归的残差可能存在自相关，违反经典独立噪声假设并影响标准误和预测区间。",
+      "assumptions": "须先定义回归目标、样本筛选及分布/残差条件，并保持预测与标签严格时点隔离。",
+      "properties": [
+        "该方法的参数估计、数值稳定性和统计推断依赖所列分布、正则或模型容量前提。",
+        "参数显著与样本外预测有用是两个不同问题，需要独立验证。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "\\rho_e(k)=\\operatorname{Corr}(e_t,e_{t-k})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从所示损失、条件分布或函数表示出发，对未知参数进行估计或求解。",
+          "tex": "\\rho_e(k)=\\operatorname{Corr}(e_t,e_{t-k})"
+        },
+        {
+          "explanation": "检验估计量和设计矩阵的约束，并在样本外计算预测误差与参数稳定性。",
+          "tex": "\\rho_e(k)=\\operatorname{Corr}(e_t,e_{t-k})"
+        }
+      ],
+      "code": "import numpy as np\ne=np.array([1.,.5,-.2,.8,.9])\nprint(np.corrcoef(e[1:],e[:-1])[0,1])",
+      "application": "用于ETF预期回报、横截面风险因子、动态Beta估计或金融尾部预测，对比样本外误差和交易后的经济价值。",
+      "limits": "示例仅展示核心算法或数学计算，金融时间依赖、数据修订及多重模型检验需额外处理。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n01-03",
+      "node_id": "linear-n01-03",
+      "title": "Poisson回归",
+      "definition": "Poisson GLM刻画条件期望为正的事件计数数据，通常采用指数链接。",
+      "assumptions": "须先定义回归目标、样本筛选及分布/残差条件，并保持预测与标签严格时点隔离。",
+      "properties": [
+        "该方法的参数估计、数值稳定性和统计推断依赖所列分布、正则或模型容量前提。",
+        "参数显著与样本外预测有用是两个不同问题，需要独立验证。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "Y|X\\sim\\operatorname{Poisson}(\\lambda),\\quad\\log\\lambda=x^\\top\\beta"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从所示损失、条件分布或函数表示出发，对未知参数进行估计或求解。",
+          "tex": "Y|X\\sim\\operatorname{Poisson}(\\lambda),\\quad\\log\\lambda=x^\\top\\beta"
+        },
+        {
+          "explanation": "检验估计量和设计矩阵的约束，并在样本外计算预测误差与参数稳定性。",
+          "tex": "Y|X\\sim\\operatorname{Poisson}(\\lambda),\\quad\\log\\lambda=x^\\top\\beta"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.linear_model import PoissonRegressor\nX=np.arange(8.).reshape(-1,1);y=np.array([1,2,1,3,4,5,3,6])\nprint(PoissonRegressor().fit(X,y).predict([[4.]]))",
+      "application": "用于ETF预期回报、横截面风险因子、动态Beta估计或金融尾部预测，对比样本外误差和交易后的经济价值。",
+      "limits": "示例仅展示核心算法或数学计算，金融时间依赖、数据修订及多重模型检验需额外处理。",
+      "packages": "numpy, scikit-learn",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n02-03",
+      "node_id": "linear-n02-03",
+      "title": "Gamma回归",
+      "definition": "Gamma GLM适合正值、偏态的连续目标，如某些损失严重度或成交持续时间。",
+      "assumptions": "须先定义回归目标、样本筛选及分布/残差条件，并保持预测与标签严格时点隔离。",
+      "properties": [
+        "该方法的参数估计、数值稳定性和统计推断依赖所列分布、正则或模型容量前提。",
+        "参数显著与样本外预测有用是两个不同问题，需要独立验证。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "Y|X\\sim\\operatorname{Gamma}(\\mu,\\phi),\\quad g(\\mu)=x^\\top\\beta"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从所示损失、条件分布或函数表示出发，对未知参数进行估计或求解。",
+          "tex": "Y|X\\sim\\operatorname{Gamma}(\\mu,\\phi),\\quad g(\\mu)=x^\\top\\beta"
+        },
+        {
+          "explanation": "检验估计量和设计矩阵的约束，并在样本外计算预测误差与参数稳定性。",
+          "tex": "Y|X\\sim\\operatorname{Gamma}(\\mu,\\phi),\\quad g(\\mu)=x^\\top\\beta"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.linear_model import GammaRegressor\nX=np.arange(1,9.).reshape(-1,1);y=np.exp(.15*X.ravel())+.1\nprint(GammaRegressor().fit(X,y).predict([[3.]]))",
+      "application": "用于ETF预期回报、横截面风险因子、动态Beta估计或金融尾部预测，对比样本外误差和交易后的经济价值。",
+      "limits": "示例仅展示核心算法或数学计算，金融时间依赖、数据修订及多重模型检验需额外处理。",
+      "packages": "numpy, scikit-learn",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n03-03",
+      "node_id": "linear-n03-03",
+      "title": "Tweedie回归",
+      "definition": "Tweedie回归通过方差幂函数连接多个指数离散族，适合零值与正连续金额混合等目标。",
+      "assumptions": "须先定义回归目标、样本筛选及分布/残差条件，并保持预测与标签严格时点隔离。",
+      "properties": [
+        "该方法的参数估计、数值稳定性和统计推断依赖所列分布、正则或模型容量前提。",
+        "参数显著与样本外预测有用是两个不同问题，需要独立验证。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "\\operatorname{Var}(Y|X)=\\phi\\mu^p"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从所示损失、条件分布或函数表示出发，对未知参数进行估计或求解。",
+          "tex": "\\operatorname{Var}(Y|X)=\\phi\\mu^p"
+        },
+        {
+          "explanation": "检验估计量和设计矩阵的约束，并在样本外计算预测误差与参数稳定性。",
+          "tex": "\\operatorname{Var}(Y|X)=\\phi\\mu^p"
+        }
+      ],
+      "code": "from sklearn.linear_model import TweedieRegressor\nimport numpy as np\nX=np.arange(1,10.).reshape(-1,1);y=np.maximum(0,X.ravel()*.5)\nprint(TweedieRegressor(power=1.5,link=\"log\",max_iter=300).fit(X,y).predict([[4.]]))",
+      "application": "用于ETF预期回报、横截面风险因子、动态Beta估计或金融尾部预测，对比样本外误差和交易后的经济价值。",
+      "limits": "示例仅展示核心算法或数学计算，金融时间依赖、数据修订及多重模型检验需额外处理。",
+      "packages": "numpy, scikit-learn",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n05-03",
+      "node_id": "linear-n05-03",
+      "title": "Huber回归",
+      "definition": "Huber回归对小残差按平方、大残差按线性惩罚，提升对严重异常值的稳定性。",
+      "assumptions": "须先定义回归目标、样本筛选及分布/残差条件，并保持预测与标签严格时点隔离。",
+      "properties": [
+        "该方法的参数估计、数值稳定性和统计推断依赖所列分布、正则或模型容量前提。",
+        "参数显著与样本外预测有用是两个不同问题，需要独立验证。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "\\min_\\beta\\sum_i\\rho_\\delta(y_i-x_i^\\top\\beta)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从所示损失、条件分布或函数表示出发，对未知参数进行估计或求解。",
+          "tex": "\\min_\\beta\\sum_i\\rho_\\delta(y_i-x_i^\\top\\beta)"
+        },
+        {
+          "explanation": "检验估计量和设计矩阵的约束，并在样本外计算预测误差与参数稳定性。",
+          "tex": "\\min_\\beta\\sum_i\\rho_\\delta(y_i-x_i^\\top\\beta)"
+        }
+      ],
+      "code": "from sklearn.linear_model import HuberRegressor\nimport numpy as np\nX=np.arange(10.).reshape(-1,1);y=2*X.ravel()+1;y[-1]=80\nprint(HuberRegressor().fit(X,y).coef_)",
+      "application": "用于ETF预期回报、横截面风险因子、动态Beta估计或金融尾部预测，对比样本外误差和交易后的经济价值。",
+      "limits": "示例仅展示核心算法或数学计算，金融时间依赖、数据修订及多重模型检验需额外处理。",
+      "packages": "numpy, scikit-learn",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n06-03",
+      "node_id": "linear-n06-03",
+      "title": "RANSAC",
+      "definition": "RANSAC重复用随机子集拟合候选模型、按残差阈值识别内点以抵抗大量离群观测。",
+      "assumptions": "须先定义回归目标、样本筛选及分布/残差条件，并保持预测与标签严格时点隔离。",
+      "properties": [
+        "该方法的参数估计、数值稳定性和统计推断依赖所列分布、正则或模型容量前提。",
+        "参数显著与样本外预测有用是两个不同问题，需要独立验证。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "\\hat M=\\arg\\max_M|\\{i:|y_i-M(x_i)|\\le\\tau\\}|"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从所示损失、条件分布或函数表示出发，对未知参数进行估计或求解。",
+          "tex": "\\hat M=\\arg\\max_M|\\{i:|y_i-M(x_i)|\\le\\tau\\}|"
+        },
+        {
+          "explanation": "检验估计量和设计矩阵的约束，并在样本外计算预测误差与参数稳定性。",
+          "tex": "\\hat M=\\arg\\max_M|\\{i:|y_i-M(x_i)|\\le\\tau\\}|"
+        }
+      ],
+      "code": "from sklearn.linear_model import RANSACRegressor\nimport numpy as np\nX=np.arange(12.).reshape(-1,1);y=2*X.ravel()+1;y[[2,8]]=80\nprint(RANSACRegressor(random_state=0).fit(X,y).inlier_mask_)",
+      "application": "用于ETF预期回报、横截面风险因子、动态Beta估计或金融尾部预测，对比样本外误差和交易后的经济价值。",
+      "limits": "示例仅展示核心算法或数学计算，金融时间依赖、数据修订及多重模型检验需额外处理。",
+      "packages": "numpy, scikit-learn",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n01-04",
+      "node_id": "linear-n01-04",
+      "title": "多项式回归",
+      "definition": "多项式回归把输入扩展成幂基函数，再以线性回归估计其系数。",
+      "assumptions": "须先定义回归目标、样本筛选及分布/残差条件，并保持预测与标签严格时点隔离。",
+      "properties": [
+        "该方法的参数估计、数值稳定性和统计推断依赖所列分布、正则或模型容量前提。",
+        "参数显著与样本外预测有用是两个不同问题，需要独立验证。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "y\\approx\\sum_{k=0}^d\\beta_kx^k"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从所示损失、条件分布或函数表示出发，对未知参数进行估计或求解。",
+          "tex": "y\\approx\\sum_{k=0}^d\\beta_kx^k"
+        },
+        {
+          "explanation": "检验估计量和设计矩阵的约束，并在样本外计算预测误差与参数稳定性。",
+          "tex": "y\\approx\\sum_{k=0}^d\\beta_kx^k"
+        }
+      ],
+      "code": "import numpy as np\nx=np.linspace(-1,1,20);y=2*x*x+1\nprint(np.polyfit(x,y,2))",
+      "application": "用于ETF预期回报、横截面风险因子、动态Beta估计或金融尾部预测，对比样本外误差和交易后的经济价值。",
+      "limits": "示例仅展示核心算法或数学计算，金融时间依赖、数据修订及多重模型检验需额外处理。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n02-04",
+      "node_id": "linear-n02-04",
+      "title": "样条Spline",
+      "definition": "样条用若干低阶多项式在结点处拼接，并约束相应导数连续以形成平滑非线性回归函数。",
+      "assumptions": "须先定义回归目标、样本筛选及分布/残差条件，并保持预测与标签严格时点隔离。",
+      "properties": [
+        "该方法的参数估计、数值稳定性和统计推断依赖所列分布、正则或模型容量前提。",
+        "参数显著与样本外预测有用是两个不同问题，需要独立验证。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "f(x)=\\sum_j\\beta_jB_j(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从所示损失、条件分布或函数表示出发，对未知参数进行估计或求解。",
+          "tex": "f(x)=\\sum_j\\beta_jB_j(x)"
+        },
+        {
+          "explanation": "检验估计量和设计矩阵的约束，并在样本外计算预测误差与参数稳定性。",
+          "tex": "f(x)=\\sum_j\\beta_jB_j(x)"
+        }
+      ],
+      "code": "import numpy as np\nfrom scipy.interpolate import CubicSpline\nx=np.arange(5.);y=np.array([1.,2.,0.,1.,3.])\ns=CubicSpline(x,y)\nprint(s(np.linspace(0,4,9)))",
+      "application": "用于ETF预期回报、横截面风险因子、动态Beta估计或金融尾部预测，对比样本外误差和交易后的经济价值。",
+      "limits": "示例仅展示核心算法或数学计算，金融时间依赖、数据修订及多重模型检验需额外处理。",
+      "packages": "numpy, scipy",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n03-04",
+      "node_id": "linear-n03-04",
+      "title": "核回归",
+      "definition": "核回归按输入与目标位置的距离对附近观测加权，得到局部平均条件期望估计。",
+      "assumptions": "须先定义回归目标、样本筛选及分布/残差条件，并保持预测与标签严格时点隔离。",
+      "properties": [
+        "该方法的参数估计、数值稳定性和统计推断依赖所列分布、正则或模型容量前提。",
+        "参数显著与样本外预测有用是两个不同问题，需要独立验证。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "\\hat m(x)=\\frac{\\sum_iK_h(x-x_i)y_i}{\\sum_iK_h(x-x_i)}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从所示损失、条件分布或函数表示出发，对未知参数进行估计或求解。",
+          "tex": "\\hat m(x)=\\frac{\\sum_iK_h(x-x_i)y_i}{\\sum_iK_h(x-x_i)}"
+        },
+        {
+          "explanation": "检验估计量和设计矩阵的约束，并在样本外计算预测误差与参数稳定性。",
+          "tex": "\\hat m(x)=\\frac{\\sum_iK_h(x-x_i)y_i}{\\sum_iK_h(x-x_i)}"
+        }
+      ],
+      "code": "import numpy as np\nx=np.arange(10.);y=np.sin(x)\nz=4.;w=np.exp(-.5*((x-z)/1.5)**2)\nprint(w@y/w.sum())",
+      "application": "用于ETF预期回报、横截面风险因子、动态Beta估计或金融尾部预测，对比样本外误差和交易后的经济价值。",
+      "limits": "示例仅展示核心算法或数学计算，金融时间依赖、数据修订及多重模型检验需额外处理。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n04-04",
+      "node_id": "linear-n04-04",
+      "title": "局部回归LOESS",
+      "definition": "LOESS对每个预测位置按邻近程度加权拟合局部低阶多项式，得到柔性平滑曲线。",
+      "assumptions": "须先定义回归目标、样本筛选及分布/残差条件，并保持预测与标签严格时点隔离。",
+      "properties": [
+        "该方法的参数估计、数值稳定性和统计推断依赖所列分布、正则或模型容量前提。",
+        "参数显著与样本外预测有用是两个不同问题，需要独立验证。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "\\hat\\beta_x=\\arg\\min_\\beta\\sum_iw_i(x)(y_i-\\beta_0-\\beta_1x_i)^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从所示损失、条件分布或函数表示出发，对未知参数进行估计或求解。",
+          "tex": "\\hat\\beta_x=\\arg\\min_\\beta\\sum_iw_i(x)(y_i-\\beta_0-\\beta_1x_i)^2"
+        },
+        {
+          "explanation": "检验估计量和设计矩阵的约束，并在样本外计算预测误差与参数稳定性。",
+          "tex": "\\hat\\beta_x=\\arg\\min_\\beta\\sum_iw_i(x)(y_i-\\beta_0-\\beta_1x_i)^2"
+        }
+      ],
+      "code": "import numpy as np\nx=np.linspace(0,1,20);y=np.sin(6*x)\nz=.4;w=np.maximum(0,1-(abs(x-z)/.3)**3)**3\nX=np.c_[np.ones(len(x)),x]\nb=np.linalg.lstsq(X*np.sqrt(w[:,None]),y*np.sqrt(w),rcond=None)[0]\nprint(b[0]+b[1]*z)",
+      "application": "用于ETF预期回报、横截面风险因子、动态Beta估计或金融尾部预测，对比样本外误差和交易后的经济价值。",
+      "limits": "示例仅展示核心算法或数学计算，金融时间依赖、数据修订及多重模型检验需额外处理。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n05-04",
+      "node_id": "linear-n05-04",
+      "title": "广义可加模型GAM",
+      "definition": "GAM将多变量影响分解为平滑的单变量函数加和，兼顾非线性拟合与部分可解释性。",
+      "assumptions": "须先定义回归目标、样本筛选及分布/残差条件，并保持预测与标签严格时点隔离。",
+      "properties": [
+        "该方法的参数估计、数值稳定性和统计推断依赖所列分布、正则或模型容量前提。",
+        "参数显著与样本外预测有用是两个不同问题，需要独立验证。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "g(E[Y|X])=\\beta_0+\\sum_jf_j(X_j)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从所示损失、条件分布或函数表示出发，对未知参数进行估计或求解。",
+          "tex": "g(E[Y|X])=\\beta_0+\\sum_jf_j(X_j)"
+        },
+        {
+          "explanation": "检验估计量和设计矩阵的约束，并在样本外计算预测误差与参数稳定性。",
+          "tex": "g(E[Y|X])=\\beta_0+\\sum_jf_j(X_j)"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.preprocessing import SplineTransformer\nfrom sklearn.linear_model import Ridge\nx=np.linspace(-1,1,50).reshape(-1,1);y=np.sin(3*x[:,0])\nbasis=SplineTransformer(n_knots=5).fit_transform(x)\nprint(Ridge().fit(basis,y).score(basis,y))",
+      "application": "用于ETF预期回报、横截面风险因子、动态Beta估计或金融尾部预测，对比样本外误差和交易后的经济价值。",
+      "limits": "示例仅展示核心算法或数学计算，金融时间依赖、数据修订及多重模型检验需额外处理。",
+      "packages": "numpy, scikit-learn",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n06-04",
+      "node_id": "linear-n06-04",
+      "title": "高斯过程回归",
+      "definition": "高斯过程对函数值指定联合高斯先验，利用核矩阵与观测噪声给出预测均值和协方差。",
+      "assumptions": "须先定义回归目标、样本筛选及分布/残差条件，并保持预测与标签严格时点隔离。",
+      "properties": [
+        "该方法的参数估计、数值稳定性和统计推断依赖所列分布、正则或模型容量前提。",
+        "参数显著与样本外预测有用是两个不同问题，需要独立验证。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "\\mu_*=K_{*X}(K_{XX}+\\sigma^2I)^{-1}y"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从所示损失、条件分布或函数表示出发，对未知参数进行估计或求解。",
+          "tex": "\\mu_*=K_{*X}(K_{XX}+\\sigma^2I)^{-1}y"
+        },
+        {
+          "explanation": "检验估计量和设计矩阵的约束，并在样本外计算预测误差与参数稳定性。",
+          "tex": "\\mu_*=K_{*X}(K_{XX}+\\sigma^2I)^{-1}y"
+        }
+      ],
+      "code": "from sklearn.gaussian_process import GaussianProcessRegressor\nimport numpy as np\nx=np.linspace(0,2,15).reshape(-1,1);y=np.sin(x[:,0])\nm=GaussianProcessRegressor(alpha=.01).fit(x,y)\nprint(m.predict([[1.5]],return_std=True))",
+      "application": "用于ETF预期回报、横截面风险因子、动态Beta估计或金融尾部预测，对比样本外误差和交易后的经济价值。",
+      "limits": "示例仅展示核心算法或数学计算，金融时间依赖、数据修订及多重模型检验需额外处理。",
+      "packages": "numpy, scikit-learn",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n01-05",
+      "node_id": "linear-n01-05",
+      "title": "收益预测回归",
+      "definition": "收益预测回归将时点t的可观测特征映射到t+h的未来收益，需独立样本外评估。",
+      "assumptions": "须先定义回归目标、样本筛选及分布/残差条件，并保持预测与标签严格时点隔离。",
+      "properties": [
+        "该方法的参数估计、数值稳定性和统计推断依赖所列分布、正则或模型容量前提。",
+        "参数显著与样本外预测有用是两个不同问题，需要独立验证。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "r_{t+h}=\\alpha+x_t^\\top\\beta+\\epsilon_{t+h}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从所示损失、条件分布或函数表示出发，对未知参数进行估计或求解。",
+          "tex": "r_{t+h}=\\alpha+x_t^\\top\\beta+\\epsilon_{t+h}"
+        },
+        {
+          "explanation": "检验估计量和设计矩阵的约束，并在样本外计算预测误差与参数稳定性。",
+          "tex": "r_{t+h}=\\alpha+x_t^\\top\\beta+\\epsilon_{t+h}"
+        }
+      ],
+      "code": "import numpy as np\nfrom sklearn.linear_model import Ridge\nrng=np.random.default_rng(0);X=rng.normal(size=(100,3));y=X[:,0]*.1+rng.normal(size=100)\nprint(Ridge().fit(X[:70],y[:70]).score(X[70:],y[70:]))",
+      "application": "用于ETF预期回报、横截面风险因子、动态Beta估计或金融尾部预测，对比样本外误差和交易后的经济价值。",
+      "limits": "示例仅展示核心算法或数学计算，金融时间依赖、数据修订及多重模型检验需额外处理。",
+      "packages": "numpy, scikit-learn",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n03-05",
+      "node_id": "linear-n03-05",
+      "title": "横截面因子回归",
+      "definition": "在同一交易日期以资产收益对多个因子暴露作回归，估计各因子横截面溢价。",
+      "assumptions": "须先定义回归目标、样本筛选及分布/残差条件，并保持预测与标签严格时点隔离。",
+      "properties": [
+        "该方法的参数估计、数值稳定性和统计推断依赖所列分布、正则或模型容量前提。",
+        "参数显著与样本外预测有用是两个不同问题，需要独立验证。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "r_{i,t+1}=\\alpha_t+\\sum_k\\beta_{k,t}f_{i,k,t}+\\epsilon_{i,t+1}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从所示损失、条件分布或函数表示出发，对未知参数进行估计或求解。",
+          "tex": "r_{i,t+1}=\\alpha_t+\\sum_k\\beta_{k,t}f_{i,k,t}+\\epsilon_{i,t+1}"
+        },
+        {
+          "explanation": "检验估计量和设计矩阵的约束，并在样本外计算预测误差与参数稳定性。",
+          "tex": "r_{i,t+1}=\\alpha_t+\\sum_k\\beta_{k,t}f_{i,k,t}+\\epsilon_{i,t+1}"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);X=rng.normal(size=(20,3))\nret=.03*X[:,0]+rng.normal(0,.02,20)\nprint(np.linalg.lstsq(np.c_[np.ones(20),X],ret,rcond=None)[0])",
+      "application": "用于ETF预期回报、横截面风险因子、动态Beta估计或金融尾部预测，对比样本外误差和交易后的经济价值。",
+      "limits": "示例仅展示核心算法或数学计算，金融时间依赖、数据修订及多重模型检验需额外处理。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n04-05",
+      "node_id": "linear-n04-05",
+      "title": "正交化",
+      "definition": "将变量对已有信号或风险因子回归后取残差，用于测量新增信号中不能被既有变量线性解释的部分。",
+      "assumptions": "须先定义回归目标、样本筛选及分布/残差条件，并保持预测与标签严格时点隔离。",
+      "properties": [
+        "该方法的参数估计、数值稳定性和统计推断依赖所列分布、正则或模型容量前提。",
+        "参数显著与样本外预测有用是两个不同问题，需要独立验证。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "z_\\perp=z-X(X^\\top X)^\\dagger X^\\top z"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从所示损失、条件分布或函数表示出发，对未知参数进行估计或求解。",
+          "tex": "z_\\perp=z-X(X^\\top X)^\\dagger X^\\top z"
+        },
+        {
+          "explanation": "检验估计量和设计矩阵的约束，并在样本外计算预测误差与参数稳定性。",
+          "tex": "z_\\perp=z-X(X^\\top X)^\\dagger X^\\top z"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0);x=rng.normal(size=(50,2))\nz=x[:,0]+.5*x[:,1]+rng.normal(size=50)\nprint(np.corrcoef(x[:,0],z-x@np.linalg.lstsq(x,z,rcond=None)[0])[0,1])",
+      "application": "用于ETF预期回报、横截面风险因子、动态Beta估计或金融尾部预测，对比样本外误差和交易后的经济价值。",
+      "limits": "示例仅展示核心算法或数学计算，金融时间依赖、数据修订及多重模型检验需额外处理。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n05-05",
+      "node_id": "linear-n05-05",
+      "title": "滚动回归",
+      "definition": "按时间移动固定长度窗口重新估计回归系数，以观察风险暴露或预测关系随时间改变。",
+      "assumptions": "须先定义回归目标、样本筛选及分布/残差条件，并保持预测与标签严格时点隔离。",
+      "properties": [
+        "该方法的参数估计、数值稳定性和统计推断依赖所列分布、正则或模型容量前提。",
+        "参数显著与样本外预测有用是两个不同问题，需要独立验证。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "\\hat\\beta_t=\\arg\\min_\\beta\\sum_{s=t-W+1}^t(y_s-x_s^\\top\\beta)^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从所示损失、条件分布或函数表示出发，对未知参数进行估计或求解。",
+          "tex": "\\hat\\beta_t=\\arg\\min_\\beta\\sum_{s=t-W+1}^t(y_s-x_s^\\top\\beta)^2"
+        },
+        {
+          "explanation": "检验估计量和设计矩阵的约束，并在样本外计算预测误差与参数稳定性。",
+          "tex": "\\hat\\beta_t=\\arg\\min_\\beta\\sum_{s=t-W+1}^t(y_s-x_s^\\top\\beta)^2"
+        }
+      ],
+      "code": "import numpy as np\nx=np.linspace(0,10,50);y=2*x+np.sin(x)\nout=[np.polyfit(x[i-9:i+1],y[i-9:i+1],1)[0] for i in range(9,50)]\nprint(out[-3:])",
+      "application": "用于ETF预期回报、横截面风险因子、动态Beta估计或金融尾部预测，对比样本外误差和交易后的经济价值。",
+      "limits": "示例仅展示核心算法或数学计算，金融时间依赖、数据修订及多重模型检验需额外处理。",
+      "packages": "numpy",
+      "coverage": "complete"
+    },
+    {
+      "id": "linear-n06-05",
+      "node_id": "linear-n06-05",
+      "title": "预测收益置信区间",
+      "definition": "预测区间考虑参数估计和未来观测噪声，通常比条件均值的置信区间更宽。",
+      "assumptions": "须先定义回归目标、样本筛选及分布/残差条件，并保持预测与标签严格时点隔离。",
+      "properties": [
+        "该方法的参数估计、数值稳定性和统计推断依赖所列分布、正则或模型容量前提。",
+        "参数显著与样本外预测有用是两个不同问题，需要独立验证。"
+      ],
+      "formulas": [
+        {
+          "label": "核心关系",
+          "tex": "\\hat y_*\\pm t_{1-\\alpha/2,\\nu}\\hat\\sigma\\sqrt{1+x_*^\\top(X^\\top X)^{-1}x_*}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从所示损失、条件分布或函数表示出发，对未知参数进行估计或求解。",
+          "tex": "\\hat y_*\\pm t_{1-\\alpha/2,\\nu}\\hat\\sigma\\sqrt{1+x_*^\\top(X^\\top X)^{-1}x_*}"
+        },
+        {
+          "explanation": "检验估计量和设计矩阵的约束，并在样本外计算预测误差与参数稳定性。",
+          "tex": "\\hat y_*\\pm t_{1-\\alpha/2,\\nu}\\hat\\sigma\\sqrt{1+x_*^\\top(X^\\top X)^{-1}x_*}"
+        }
+      ],
+      "code": "import numpy as np\nfrom scipy.stats import t\nx=np.arange(10.);X=np.c_[np.ones(10),x];y=1+2*x+np.sin(x)\nb=np.linalg.lstsq(X,y,rcond=None)[0];s2=np.sum((y-X@b)**2)/(len(y)-2)\nu=np.array([1.,11.]);se=np.sqrt(s2*(1+u@np.linalg.inv(X.T@X)@u))\nprint(u@b+np.array([-1,1])*t.ppf(.975,8)*se)",
+      "application": "用于ETF预期回报、横截面风险因子、动态Beta估计或金融尾部预测，对比样本外误差和交易后的经济价值。",
+      "limits": "示例仅展示核心算法或数学计算，金融时间依赖、数据修订及多重模型检验需额外处理。",
+      "packages": "numpy, scipy",
+      "coverage": "complete"
+    }
+  ]
+}
