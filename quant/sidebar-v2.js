@@ -13,6 +13,7 @@
     ["assets","金融资产分类"],
     ["feeds","核心数据源 Data Feeds"],
     ["research","策略研究与回测"],
+    ["wiki","量化百科 Wiki"],
     ["papers","每周机器学习论文"],
     ["rankings","学术排名与资源"],
     ["news","全球宏观 News"]
@@ -44,6 +45,10 @@
       '<a class="q-menu-link" href="'+route("research")+'">在线 Python 回测</a>'+
       '<a class="q-menu-link" href="'+route("research")+'?strategy=ma">策略超市 / Python 示例</a>'+
       subsection("researchStrategyNav","按策略选择","strategyChoices",page==="research"),
+    wiki:
+      '<a class="q-menu-link" href="'+route("wiki")+'">全部词条</a>'+
+      subsection("wikiCategoryNav","按知识主题","wikiCategories",page==="wiki")+
+      subsection("wikiLearningNav","系统学习路径","wikiPaths"),
     papers:
       '<a class="q-menu-link" href="'+route("papers")+'">全部论文</a>'+
       subsection("weekNav","按周浏览","weeks",page==="papers"),
@@ -121,6 +126,12 @@
       if(id)window.selectStrategy(id);
       handled=true;
     }
+    if(page==="wiki"&&typeof window.wikiSetCategory==="function"&&typeof window.wikiSetPath==="function"){
+      const c=params.get("category"),p=params.get("path");
+      if(p)window.wikiSetPath(p);
+      else window.wikiSetCategory(c||"");
+      handled=true;
+    }
     if(page==="feeds"){
       const mode=params.get("mode");
       if(mode==="providers"){
@@ -195,6 +206,11 @@
   getJson(route("research")+"strategies.json").then(d=>{
     if(!d?.strategies)return;
     fill("strategyChoices",[...d.strategies].sort((a,b)=>alpha(a.name,b.name)).map(t=>({name:t.id,label:t.name})),r=>route("research")+"?strategy="+encodeURIComponent(r.name));
+  });
+  getJson(route("wiki")+"manifest.json").then(d=>{
+    if(!d?.categories)return;
+    fill("wikiCategories",[...d.categories].sort((a,b)=>alpha(a.english,b.english)).map(c=>({name:c.id,label:c.name+" ("+c.count+")"})),r=>route("wiki")+"?category="+encodeURIComponent(r.name));
+    fill("wikiPaths",d.learning_paths.map(p=>({name:p.id,label:p.title})),r=>route("wiki")+"?path="+encodeURIComponent(r.name));
   });
   if(page!=="papers"){
     getJson(route("papers")+"data.json").then(d=>{
