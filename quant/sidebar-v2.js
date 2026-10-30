@@ -14,6 +14,7 @@
     ["feeds","核心数据源 Data Feeds"],
     ["research","策略研究与回测"],
     ["wiki","量化百科 Wiki"],
+    ["math","量化数学 Mathematics"],
     ["papers","每周机器学习论文"],
     ["rankings","学术排名与资源"],
     ["news","全球宏观 News"]
@@ -49,6 +50,10 @@
       '<a class="q-menu-link" href="'+route("wiki")+'">全部词条</a>'+
       subsection("wikiCategoryNav","按知识主题","wikiCategories",page==="wiki")+
       subsection("wikiLearningNav","系统学习路径","wikiPaths"),
+    math:
+      '<a class="q-menu-link" href="'+route("math")+'">完整数学知识树</a>'+
+      '<a class="q-menu-link" href="'+route("math")+'?status=complete">已写讲义</a>'+
+      subsection("mathDisciplineNav","按学科推进","mathDisciplineChoices",page==="math"),
     papers:
       '<a class="q-menu-link" href="'+route("papers")+'">全部论文</a>'+
       subsection("weekNav","按周浏览","weeks",page==="papers"),
@@ -124,6 +129,16 @@
     if(page==="research"&&typeof window.selectStrategy==="function"){
       const id=params.get("strategy");
       if(id)window.selectStrategy(id);
+      handled=true;
+    }
+    if(page==="math"&&typeof window.mathSelectDiscipline==="function"){
+      const discipline=params.get("discipline")||"";
+      window.mathSelectDiscipline(discipline);
+      const coverage=document.getElementById("coverageFilter");
+      if(coverage&&params.has("status")){
+        coverage.value=params.get("status");
+        coverage.dispatchEvent(new Event("change",{bubbles:true}));
+      }
       handled=true;
     }
     if(page==="wiki"&&typeof window.wikiSetCategory==="function"&&typeof window.wikiSetPath==="function"){
@@ -211,6 +226,10 @@
     if(!d?.categories)return;
     fill("wikiCategories",[...d.categories].sort((a,b)=>alpha(a.english,b.english)).map(c=>({name:c.id,label:c.name+" ("+c.count+")"})),r=>route("wiki")+"?category="+encodeURIComponent(r.name));
     fill("wikiPaths",d.learning_paths.map(p=>({name:p.id,label:p.title})),r=>route("wiki")+"?path="+encodeURIComponent(r.name));
+  });
+  getJson(route("math")+"curriculum.json").then(d=>{
+    if(!d?.disciplines)return;
+    fill("mathDisciplineChoices",d.disciplines.map(x=>({name:x.id,label:x.title})),r=>route("math")+"?discipline="+encodeURIComponent(r.name));
   });
   if(page!=="papers"){
     getJson(route("papers")+"data.json").then(d=>{
