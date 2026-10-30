@@ -1,0 +1,509 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "nlp-n03-02",
+      "node_id": "nlp-n03-02",
+      "title": "N-gram",
+      "definition": "N-gram以相邻n个Token组成的局部片段表示文本序列，既可以作为分类特征，也可以构造有限历史语言模型。",
+      "assumptions": "分词规则、文本编码以及训练语料必须统一；高阶N-gram在小语料中极为稀疏。",
+      "properties": [
+        "N越大能表达更长局部词序，但词表组合数量急剧增加。",
+        "N-gram不能直接捕捉远超窗口长度的长程依赖。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "p(w_t\\mid w_{<t})\\approx p(w_t\\mid w_{t-n+1:t-1})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "完整语言模型按链式规则分解联合概率",
+          "tex": "p(w_{1:T})=\\prod_{t=1}^Tp(w_t\\mid w_{<t})"
+        },
+        {
+          "explanation": "用n−1个历史Token近似条件分布",
+          "tex": "p(w_t\\mid w_{<t})\\approx p(w_t\\mid w_{t-n+1:t-1})"
+        },
+        {
+          "explanation": "对每个出现位置提取局部字符串片段用于计数",
+          "tex": "c(w_{t-n+1},\\ldots,w_t)=\\sum_s\\mathbf1[(w_s,\\ldots,w_{s+n-1})=(w_{t-n+1},\\ldots,w_t)]"
+        }
+      ],
+      "code": "from collections import Counter\ntokens=\"profit rose after stronger revenue report\".split()\nbigrams=Counter(zip(tokens,tokens[1:]))\nprint(\"Bigrams:\",bigrams)\nfrom sklearn.feature_extraction.text import CountVectorizer\nprint(CountVectorizer(ngram_range=(1,2)).fit_transform([\"profit rose\",\"profit fell\"]).shape)",
+      "packages": "scikit-learn",
+      "application": "用财报公告的词组搭配构造情感与事件特征。",
+      "limits": "罕见金融缩写和发行人名称会引起严重稀疏，可配合子词与语义Embedding。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n03-03",
+      "node_id": "nlp-n03-03",
+      "title": "负采样",
+      "definition": "负采样把Word2Vec的全词表Softmax分类改为少量正负词对的二元Logistic目标，降低训练开销。",
+      "assumptions": "负样本分布需合理，常按词频的幂次构造；正样本来自上下文窗口。",
+      "properties": [
+        "训练复杂度由完整词表规模转向抽取的负样本数。",
+        "负例是采样的非真实上下文，不一定代表语义真正不相关。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "\\log\\sigma(u_o^\\top v_c)+\\sum_{k=1}^K E_{w_k\\sim P_n}\\log\\sigma(-u_{w_k}^\\top v_c)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "中心词和真实上下文词的点积作为正例Logit",
+          "tex": "s^+=u_o^\\top v_c"
+        },
+        {
+          "explanation": "对负样本点积取负号以鼓励其概率下降",
+          "tex": "s_k^-=u_{w_k}^\\top v_c"
+        },
+        {
+          "explanation": "把正例与K个负例的对数Sigmoid概率求和",
+          "tex": "\\ell=\\log\\sigma(s^+)+\\sum_{k=1}^K\\log\\sigma(-s_k^-)"
+        }
+      ],
+      "code": "import torch\ntorch.manual_seed(0)\ncenter=torch.nn.Embedding(20,8)\ncontext=torch.nn.Embedding(20,8)\nc=torch.tensor([2,3,4]);positive=torch.tensor([3,4,5])\nnegative=torch.randint(0,20,(3,5))\nv=center(c);pos=(v*context(positive)).sum(-1)\nneg=torch.bmm(context(negative),v.unsqueeze(-1)).squeeze(-1)\nloss=-(torch.nn.functional.logsigmoid(pos)+\n       torch.nn.functional.logsigmoid(-neg).sum(-1)).mean()\nloss.backward()\nprint(\"Negative-sampling loss:\",loss.item())",
+      "packages": "torch",
+      "application": "训练财经语料词向量，用于语义分类与新闻检索。",
+      "limits": "代码未添加词频负采样分布、训练迭代或词频下采样。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n02-05",
+      "node_id": "nlp-n02-05",
+      "title": "新闻情绪得分",
+      "definition": "新闻情绪量化将文本映射为正向、负向或中性概率，形成时间戳明确的金融特征序列。",
+      "assumptions": "必须指定情绪标签定义、实体映射、文章发布时间和实际获取延迟。",
+      "properties": [
+        "金融文本的情绪不等于一般积极/消极措辞。",
+        "同一新闻被多家媒体转载时去重和聚合窗口会影响信号。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "s_t=P_\\theta(y=+\\mid\\text{news}_t)-P_\\theta(y=-\\mid\\text{news}_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "分类器计算三个互斥类别的Logits",
+          "tex": "p_k=\\frac{e^{z_k}}{\\sum_je^{z_j}}"
+        },
+        {
+          "explanation": "定义正面概率与负面概率之差作为有界情绪指标",
+          "tex": "s=p_+-p_-,\\quad -1\\le s\\le1"
+        },
+        {
+          "explanation": "聚合只能使用交易时刻前已发布且可读取的新闻",
+          "tex": "S_t=\\frac{\\sum_{i:t_i^{\\rm avail}\\le t}w_is_i}{\\sum_{i:t_i^{\\rm avail}\\le t}w_i}"
+        }
+      ],
+      "code": "import numpy as np\nlogits=np.array([[2.,1.,.2],[.3,2.,.5],[.4,.2,1.8]])\nprob=np.exp(logits-logits.max(axis=1,keepdims=True))\nprob/=prob.sum(axis=1,keepdims=True)\nprint(\"Positive minus negative sentiment:\",prob[:,0]-prob[:,1])",
+      "packages": "numpy",
+      "application": "用公司新闻和财报摘要构建ETF持仓加权情绪因子。",
+      "limits": "示例只有分类输出到情绪得分的转换，没有训练金融文本分类器。",
+      "coverage": "complete"
+    },
+    {
+      "id": "nlp-n06-05",
+      "node_id": "nlp-n06-05",
+      "title": "披露时点对齐",
+      "definition": "金融文本建模必须区分公告所属财务期、正式发布日期、供应商提供时间和可交易决策时间。",
+      "assumptions": "披露发布时间精度与交易所时区须一致；盘后公告不得算成盘中已知。",
+      "properties": [
+        "使用财报对应财年作为样本时点易产生严重未来信息泄漏。",
+        "同日多次修订文件应保留首发版本与修订版本的可用时间。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "t_{\\rm available}=\\max(t_{\\rm release},t_{\\rm vendor},t_{\\rm received})\\le t_{\\rm decision}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将每条文章与财务指标记录的正式发布时刻分离",
+          "tex": "t_{\\rm period}\\ne t_{\\rm release}"
+        },
+        {
+          "explanation": "仅在决策时刻满足可用性要求时纳入特征",
+          "tex": "\\mathcal I_t=\\{i:t_i^{\\rm available}\\le t\\}"
+        },
+        {
+          "explanation": "未来信息不可纳入历史特征构造",
+          "tex": "X_t=g(\\{z_i:i\\in\\mathcal I_t\\})"
+        }
+      ],
+      "code": "from datetime import datetime\nnews=[\n {\"published\":\"2026-01-05T08:30\",\"score\":.4},\n {\"published\":\"2026-01-05T16:05\",\"score\":-.6}\n]\ndecision=datetime.fromisoformat(\"2026-01-05T15:30\")\nknown=[a[\"score\"] for a in news if datetime.fromisoformat(a[\"published\"])<=decision]\nprint(\"Visible scores:\",known)",
+      "packages": "Python standard library",
+      "application": "公告事件驱动策略、财报图谱和宏观数据发布日历。",
+      "limits": "示例按已知发布时间过滤，实际还需供应商延迟和交易所时区。",
+      "coverage": "complete"
+    },
+    {
+      "id": "llm-n05-01",
+      "node_id": "llm-n05-01",
+      "title": "位置编码RoPE",
+      "definition": "RoPE将向量的二维子空间按位置施加旋转，使Query和Key内积携带相对位置差异；常用于自回归Transformer。",
+      "assumptions": "特征维度需为偶数或可成对划分；频率基数和上下文扩展策略影响长上下文表现。",
+      "properties": [
+        "旋转矩阵保持每对二维向量的L2范数。",
+        "相同频率下旋转位置的内积与相对距离有关。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "R(p,\\omega)=\\begin{pmatrix}\\cos(p\\omega)&-\\sin(p\\omega)\\\\\\sin(p\\omega)&\\cos(p\\omega)\\end{pmatrix}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将偶数维向量拆成二维对",
+          "tex": "(x_{2j},x_{2j+1})^\\top\\in\\mathbb R^2"
+        },
+        {
+          "explanation": "位置p乘频率ω后旋转二维子向量",
+          "tex": "q_p=R(p,\\omega)q,\\quad k_s=R(s,\\omega)k"
+        },
+        {
+          "explanation": "旋转矩阵正交，内积转为相对位置角差",
+          "tex": "q_p^\\top k_s=q^\\top R(s-p,\\omega)k"
+        }
+      ],
+      "code": "import numpy as np\ndef rotate(v,pos,omega=.25):\n    c,s=np.cos(pos*omega),np.sin(pos*omega)\n    R=np.array([[c,-s],[s,c]])\n    return R@v\nq=np.array([1.,2.]);k=np.array([3.,-.5])\nprint(\"Dot at relative distance 4:\",rotate(q,2)@rotate(k,6))",
+      "packages": "numpy",
+      "application": "LLM和长金融时间序列Transformer中的相对位置感知。",
+      "limits": "二维演示不等于完整多频率、注意力头和上下文外推的RoPE实现。",
+      "coverage": "complete"
+    },
+    {
+      "id": "llm-n01-03",
+      "node_id": "llm-n01-03",
+      "title": "监督微调SFT",
+      "definition": "SFT用有目标回答的输入输出示范继续训练预训练语言模型，提升指令遵循和特定领域任务表现。",
+      "assumptions": "训练样本应合法、准确且与目标任务一致；对话模板和损失Mask必须匹配。",
+      "properties": [
+        "常在回答Token上计算交叉熵，并屏蔽仅作上下文的提示Token。",
+        "微调可能让模型遗忘通用知识，需要独立评估。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "L_{\\rm SFT}(\\theta)=-\\sum_{t\\in\\mathcal A}\\log p_\\theta(y_t\\mid x,y_{<t})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将用户提示与目标回答Token串接成自回归输入",
+          "tex": "(x_1,\\ldots,x_P,y_1,\\ldots,y_T)"
+        },
+        {
+          "explanation": "仅对回答位置集合A计算负对数似然",
+          "tex": "L=-\\sum_{t\\in\\mathcal A}\\log p_\\theta(y_t\\mid x,y_{<t})"
+        },
+        {
+          "explanation": "使用反向传播更新模型中允许训练的参数",
+          "tex": "\\theta^+=\\theta-\\eta\\nabla_\\theta L_{\\rm SFT}"
+        }
+      ],
+      "code": "import torch\ntorch.manual_seed(0)\nlogits=torch.randn(2,5,20,requires_grad=True)\ntargets=torch.randint(0,20,(2,5))\ntargets[:,:2]=-100  # prompt tokens excluded\nloss=torch.nn.functional.cross_entropy(logits.reshape(-1,20),targets.reshape(-1),ignore_index=-100)\nloss.backward()\nprint(\"Masked SFT CE:\",loss.item())",
+      "packages": "torch",
+      "application": "金融公告摘要、研报问答与领域NER数据集的语言模型适配。",
+      "limits": "只演示目标掩码与损失，没有下载、训练或评估真实大语言模型。",
+      "coverage": "complete"
+    },
+    {
+      "id": "llm-n03-03",
+      "node_id": "llm-n03-03",
+      "title": "偏好优化DPO",
+      "definition": "DPO利用偏好样本中较优回答和较差回答的策略概率相对参考策略之差，直接优化偏好对数损失。",
+      "assumptions": "要求有可信的成对偏好标注和固定参考策略；偏好标签可能受到噪声或数据偏差影响。",
+      "properties": [
+        "不必显式运行在线强化学习轨迹。",
+        "温度系数β影响相对于参考模型的偏好更新力度。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "L_{\\rm DPO}=-E\\log\\sigma\\left(\\beta\\left[\\log\\frac{\\pi_\\theta(y_w|x)}{\\pi_{\\rm ref}(y_w|x)}-\\log\\frac{\\pi_\\theta(y_l|x)}{\\pi_{\\rm ref}(y_l|x)}\\right]\\right)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "比较候选偏好回答w与较差回答l的对数概率差",
+          "tex": "\\Delta_\\theta=\\log\\pi_\\theta(y_w|x)-\\log\\pi_\\theta(y_l|x)"
+        },
+        {
+          "explanation": "用参考策略修正基线偏好",
+          "tex": "\\Delta=\\Delta_\\theta-\\Delta_{\\rm ref}"
+        },
+        {
+          "explanation": "最小化偏好样本的负Log-Sigmoid损失",
+          "tex": "L=-\\log\\sigma(\\beta\\Delta)"
+        }
+      ],
+      "code": "import torch\nchosen=torch.tensor([-3.,-2.],requires_grad=True)\nrejected=torch.tensor([-4.,-1.],requires_grad=True)\nref_chosen=torch.tensor([-3.5,-2.5]);ref_rejected=torch.tensor([-4.,-1.5])\nbeta=.1\nmargin=(chosen-rejected)-(ref_chosen-ref_rejected)\nloss=-torch.nn.functional.logsigmoid(beta*margin).mean()\nloss.backward()\nprint(\"DPO objective:\",loss.item())",
+      "packages": "torch",
+      "application": "提升金融问答偏好，例如优先真实引用、完整风险说明和避免虚构数据。",
+      "limits": "代码展示成对序列对数概率的优化目标，非完整Transformer偏好微调。",
+      "coverage": "complete"
+    },
+    {
+      "id": "llm-n02-04",
+      "node_id": "llm-n02-04",
+      "title": "Top-k与Top-p",
+      "definition": "Top-k从概率最高的固定k个Token中采样；Top-p按累计概率动态保留最小概率质量达到p的候选集。",
+      "assumptions": "输入Logits应为可采样词表分数；温度、k和p的组合改变生成随机性。",
+      "properties": [
+        "Top-k候选数固定，Top-p候选数自适应。",
+        "截断式采样并不保证回答事实正确。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "S_p=\\min\\{S:\\sum_{i\\in S}p_i\\ge p,\\quad S\\text{按概率降序取前缀}\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "通过Softmax计算Token分布",
+          "tex": "p_i=\\exp(z_i/\\tau)/\\sum_j\\exp(z_j/\\tau)"
+        },
+        {
+          "explanation": "按概率从高到低排序构造达到阈值的前缀",
+          "tex": "K_p=\\min\\{k:\\sum_{j=1}^kp_{(j)}\\ge p\\}"
+        },
+        {
+          "explanation": "将其他Token概率设零并重新归一化",
+          "tex": "p_i'=\\frac{p_i\\mathbf1[i\\in S_p]}{\\sum_{j\\in S_p}p_j}"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0)\nlogits=np.array([3.,1.2,.7,-.5,0.])\np=np.exp(logits-logits.max());p/=p.sum()\norder=np.argsort(-p)\nkeep=order[:np.searchsorted(np.cumsum(p[order]),.9)+1]\nprob=p[keep]/p[keep].sum()\nprint(\"Top-p retained:\",keep,\"sample:\",rng.choice(keep,p=prob))",
+      "packages": "numpy",
+      "application": "控制金融研究Agent生成多样性、摘要措辞和候选解释。",
+      "limits": "金融报告事实核查不能通过降低采样温度替代。",
+      "coverage": "complete"
+    },
+    {
+      "id": "llm-n01-05",
+      "node_id": "llm-n01-05",
+      "title": "文本Embedding",
+      "definition": "文本Embedding将句子或文档编码为固定长度向量，使相似性检索和聚类可在向量空间进行。",
+      "assumptions": "编码模型应适合所用语言和专业术语；需要明确池化、长度及归一化方式。",
+      "properties": [
+        "余弦相似度对向量整体正比例缩放不敏感。",
+        "Embedding接近不代表事实同一或引用有效。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "\\operatorname{cos}(u,v)=\\frac{u^\\top v}{\\|u\\|_2\\|v\\|_2}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "文本编码模型把文档映射为实向量",
+          "tex": "f:\\mathrm{Text}\\to\\mathbb R^d"
+        },
+        {
+          "explanation": "对向量进行L2归一化",
+          "tex": "\\hat u=u/\\|u\\|_2,\\quad\\hat v=v/\\|v\\|_2"
+        },
+        {
+          "explanation": "归一化后内积等于余弦相似度",
+          "tex": "\\hat u^\\top\\hat v=\\cos(u,v)"
+        }
+      ],
+      "code": "import numpy as np\nvectors=np.array([[1.,2.,0.],[0.,1.,1.],[2.,1.,0.]])\nquery=np.array([1.,1.,0.])\nscore=vectors@query/(np.linalg.norm(vectors,axis=1)*np.linalg.norm(query))\nprint(\"Ranked documents:\",np.argsort(-score))",
+      "packages": "numpy",
+      "application": "构建量化论文、金融公告、财报RAG语义检索底座。",
+      "limits": "这段代码只对预先给定的向量计算相似度，没有训练真实文本编码器。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n03-01",
+      "node_id": "vision-n03-01",
+      "title": "图像归一化",
+      "definition": "图像归一化统一不同样本像素或通道的数值尺度，防止输入值域对梯度训练产生不必要影响。",
+      "assumptions": "均值、标准差等统计量必须从训练数据计算并锁定用于测试。",
+      "properties": [
+        "按通道标准化不同于逐图标准化，后者可能抹掉绝对尺度信息。",
+        "对价格图像应检查归一化是否改变经济含义。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "z_{c,h,w}=\\frac{x_{c,h,w}-\\mu_c}{\\sigma_c}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对训练样本在通道维聚合计算均值",
+          "tex": "\\mu_c=\\frac1{NHW}\\sum_{n,h,w}x_{n,c,h,w}"
+        },
+        {
+          "explanation": "计算标准差并对全部输入应用固定训练尺度",
+          "tex": "\\sigma_c^2=\\frac1{NHW}\\sum_{n,h,w}(x_{n,c,h,w}-\\mu_c)^2"
+        },
+        {
+          "explanation": "训练/验证/测试使用相同参数",
+          "tex": "X_{\\rm test}'=(X_{\\rm test}-\\mu_{\\rm train})/\\sigma_{\\rm train}"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0)\ntrain=rng.integers(0,256,size=(30,3,8,8))/255.\ntest=rng.integers(0,256,size=(5,3,8,8))/255.\nmean=train.mean(axis=(0,2,3),keepdims=True)\nstd=train.std(axis=(0,2,3),keepdims=True)\nprint(((test-mean)/(std+1e-8)).shape)",
+      "packages": "numpy",
+      "application": "CNN价格图编码时保持训练与样本外处理完全一致。",
+      "limits": "如果每张图依自身最大最小价格归一，可能消除某些跨资产绝对价格信息。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n04-01",
+      "node_id": "vision-n04-01",
+      "title": "图像增强",
+      "definition": "图像增强对训练样本施加语义应保持不变的变换，增加有效训练多样性并降低过拟合。",
+      "assumptions": "增强必须保持标签含义；金融时间序列不能任意水平翻转或倒转时间。",
+      "properties": [
+        "自然图像的随机平移、裁剪和颜色扰动不一定适合金融图表。",
+        "增强只应用于训练集，验证和测试通常使用确定性预处理。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "L_{\\rm aug}(\\theta)=E_{(x,y)}E_{T\\sim\\mathcal T}[\\ell(f_\\theta(T(x)),y)]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从预先定义的增强分布抽取变换T",
+          "tex": "T\\sim\\mathcal T"
+        },
+        {
+          "explanation": "将变换后的图像送入网络，但保持有效标签不变",
+          "tex": "(x,y)\\mapsto(T(x),y)"
+        },
+        {
+          "explanation": "最小化增强分布上的平均风险",
+          "tex": "\\hat L=\\frac1n\\sum_iE_T[\\ell(f_\\theta(T(x_i)),y_i)]"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0)\nimage=np.arange(36,dtype=float).reshape(6,6)\nnoise=rng.normal(0,.01,image.shape)\naug=image+noise    # small additive noise example\nprint(\"Original and augmented:\",image.shape,aug.shape)\n# Never reverse price-chart time axis without label justification",
+      "packages": "numpy",
+      "application": "增强CNN价格图时测试小幅度噪声鲁棒性。",
+      "limits": "即使噪声幅度很小，也可能改变高频金融信号；必须验证增强是否保留标签。",
+      "coverage": "complete"
+    },
+    {
+      "id": "vision-n06-03",
+      "node_id": "vision-n06-03",
+      "title": "Dice/IoU",
+      "definition": "Dice和Intersection-over-Union衡量预测分割掩码与真实区域的重叠，常用于评估图像分割质量。",
+      "assumptions": "掩码需要相同空间坐标与统一类别定义；空类别情况必须明确处理。",
+      "properties": [
+        "IoU惩罚假阳性与假阴性区域。",
+        "Dice通常对小区域有较直观的重叠敏感度。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "\\operatorname{IoU}=\\frac{|P\\cap G|}{|P\\cup G|},\\quad\\operatorname{Dice}=\\frac{2|P\\cap G|}{|P|+|G|}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义预测前景集合P与真实集合G的交集",
+          "tex": "I=|P\\cap G|"
+        },
+        {
+          "explanation": "并集大小等于两集合大小之和减交集",
+          "tex": "U=|P|+|G|-I"
+        },
+        {
+          "explanation": "分别计算IoU与Dice",
+          "tex": "\\mathrm{IoU}=I/U,\\quad\\mathrm{Dice}=2I/(|P|+|G|)"
+        }
+      ],
+      "code": "import numpy as np\npred=np.array([[1,1,0],[1,0,0]],dtype=bool)\ntrue=np.array([[1,0,0],[1,1,0]],dtype=bool)\ninter=np.logical_and(pred,true).sum()\nunion=np.logical_or(pred,true).sum()\nprint(\"IoU:\",inter/union,\"Dice:\",2*inter/(pred.sum()+true.sum()))",
+      "packages": "numpy",
+      "application": "医学影像、财报图表区域检测等视觉任务的分割评价。",
+      "limits": "价格方向分类没有像素分割任务时不应套用Dice/IoU。",
+      "coverage": "complete"
+    },
+    {
+      "id": "generative-n03-03",
+      "node_id": "generative-n03-03",
+      "title": "WGAN",
+      "definition": "WGAN以1-Lipschitz Critic近似Wasserstein-1距离，改善传统GAN饱和目标及训练信号问题。",
+      "assumptions": "Critic需满足1-Lipschitz约束；实际常用梯度惩罚或谱归一化。",
+      "properties": [
+        "Critic输出实数分数而非二元概率。",
+        "WGAN训练稳定性仍依赖约束形式和优化细节。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "W_1(P_r,P_g)=\\sup_{\\|f\\|_L\\le1}\\left(E_{x\\sim P_r}f(x)-E_{x\\sim P_g}f(x)\\right)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "Wasserstein距离的Kantorovich–Rubinstein对偶形式",
+          "tex": "W_1(P,Q)=\\sup_{\\|f\\|_L\\le1}\\{E_Pf-E_Qf\\}"
+        },
+        {
+          "explanation": "令神经网络fψ代表满足Lipschitz约束的Critic",
+          "tex": "\\max_\\psi E[f_\\psi(x_{\\rm real})]-E[f_\\psi(x_{\\rm fake})]"
+        },
+        {
+          "explanation": "生成器提升假样本Critic分数以减小距离",
+          "tex": "\\min_\\theta -E[f_\\psi(G_\\theta(z))]"
+        }
+      ],
+      "code": "import torch\nreal=torch.randn(20,2)+1.\nfake=torch.randn(20,2)-1.\ncritic=torch.nn.Linear(2,1)\n# Illustrative scores only; no Lipschitz constraint enforced\ngap=critic(real).mean()-critic(fake).mean()\nprint(\"Unconstrained critic gap:\",gap.item())",
+      "packages": "torch",
+      "application": "对比不同金融收益情景生成模型的分布距离目标。",
+      "limits": "此代码没有约束Critic的Lipschitz常数，也不是完整WGAN训练。",
+      "coverage": "complete"
+    },
+    {
+      "id": "generative-n06-05",
+      "node_id": "generative-n06-05",
+      "title": "生成数据风险检验",
+      "definition": "生成金融数据不仅应匹配均值和方差，还要检验相关性、自相关、厚尾、波动聚集及策略测试泄漏风险。",
+      "assumptions": "模拟与真实样本需在相同频率、日期粒度和标的范围下比较。",
+      "properties": [
+        "低一阶分布误差不代表时序依赖正确。",
+        "训练数据记忆可能夸大在生成数据上得到的策略绩效。"
+      ],
+      "formulas": [
+        {
+          "label": "核心公式",
+          "tex": "\\Delta_\\rho(k)=\\left|\\widehat{\\operatorname{Corr}}(r_t,r_{t-k})-\\widehat{\\operatorname{Corr}}(\\tilde r_t,\\tilde r_{t-k})\\right|"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对真实和生成样本分别计算均值、波动与分位数",
+          "tex": "\\mu_r=E_n[r],\\quad\\sigma_r^2=E_n[(r-\\mu_r)^2]"
+        },
+        {
+          "explanation": "对相同时间滞后k计算两种序列的自相关",
+          "tex": "\\rho_r(k)=\\operatorname{Corr}(r_t,r_{t-k})"
+        },
+        {
+          "explanation": "比较分布指标与相关结构的偏差",
+          "tex": "\\Delta_\\rho(k)=|\\rho_r(k)-\\rho_{\\tilde r}(k)|"
+        }
+      ],
+      "code": "import numpy as np\nrng=np.random.default_rng(0)\nreal=rng.standard_t(5,300)\nsynthetic=rng.normal(real.mean(),real.std(),300)\nfor name,x in [(\"real\",real),(\"synthetic\",synthetic)]:\n    ac=np.corrcoef(x[1:],x[:-1])[0,1]\n    print(name,\"q01/q99\",np.quantile(x,[.01,.99]),\"lag1\",ac)",
+      "packages": "numpy",
+      "application": "审核GAN或扩散模型生成的ETF回报场景是否保留关键风险结构。",
+      "limits": "这只是简单诊断；完整生成模型验证还需联合分布、多资产相关和隐私检查。",
+      "coverage": "complete"
+    }
+  ]
+}
