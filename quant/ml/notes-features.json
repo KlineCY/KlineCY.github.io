@@ -1,0 +1,741 @@
+{
+  "version": 1,
+  "notes": [
+    {
+      "id": "features-n01-01",
+      "node_id": "features-n01-01",
+      "title": "数据Schema",
+      "definition": "Schema指定字段名、数值类型、单位与复合主键，防止源数据结构变化造成无声错误。",
+      "assumptions": "相关统计量需在训练期拟合；上市公司财报、行情复权和行业类别必须明确真实可得时间与原始数据版本。",
+      "properties": [
+        "检查联合主键以及每列类型定义。",
+        "异常值、缺失和分布变化会影响特征稳定性，需按资产和训练区间检验。"
+      ],
+      "formulas": [
+        {
+          "label": "关键关系",
+          "tex": "D=\\{(t,i,x_1,\\ldots,x_k)\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "Schema指定字段名、数值类型、单位与复合主键，防止源数据结构变化造成无声错误。",
+          "tex": "D=\\{(t,i,x_1,\\ldots,x_k)\\}"
+        },
+        {
+          "explanation": "检查联合主键以及每列类型定义",
+          "tex": "D=\\{(t,i,x_1,\\ldots,x_k)\\}"
+        }
+      ],
+      "code": "# 数据Schema：本章综合数据示例\nimport pandas as pd\ndf=pd.DataFrame({\"date\":[1,1,2],\"asset\":[\"A\",\"A\",\"A\"],\"value\":[1.,2.,None]})\nprint(\"Duplicate key rows:\",df.duplicated([\"date\",\"asset\"]).sum())\nprint(\"Missing:\",df.isna().sum().to_dict())",
+      "packages": "numpy, pandas, scikit-learn",
+      "application": "用于ETF因子数据库、特征生成及时间感知建模。",
+      "limits": "代码为相邻知识点的共享基础演示，不等于所有概念的完整生产级实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "features-n02-01",
+      "node_id": "features-n02-01",
+      "title": "缺失值机制MCAR/MAR/MNAR",
+      "definition": "MCAR表示完全随机缺失，MAR表示条件于已观测信息随机，MNAR还依赖未观测值。",
+      "assumptions": "相关统计量需在训练期拟合；上市公司财报、行情复权和行业类别必须明确真实可得时间与原始数据版本。",
+      "properties": [
+        "以缺失指示M的条件分布区分机制。",
+        "异常值、缺失和分布变化会影响特征稳定性，需按资产和训练区间检验。"
+      ],
+      "formulas": [
+        {
+          "label": "关键关系",
+          "tex": "P(M\\mid X_{\\rm obs},X_{\\rm mis})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "MCAR表示完全随机缺失，MAR表示条件于已观测信息随机，MNAR还依赖未观测值。",
+          "tex": "P(M\\mid X_{\\rm obs},X_{\\rm mis})"
+        },
+        {
+          "explanation": "以缺失指示M的条件分布区分机制",
+          "tex": "P(M\\mid X_{\\rm obs},X_{\\rm mis})"
+        }
+      ],
+      "code": "# 缺失值机制MCAR/MAR/MNAR：本章综合数据示例\nimport pandas as pd\ndf=pd.DataFrame({\"date\":[1,1,2],\"asset\":[\"A\",\"A\",\"A\"],\"value\":[1.,2.,None]})\nprint(\"Duplicate key rows:\",df.duplicated([\"date\",\"asset\"]).sum())\nprint(\"Missing:\",df.isna().sum().to_dict())",
+      "packages": "numpy, pandas, scikit-learn",
+      "application": "用于ETF因子数据库、特征生成及时间感知建模。",
+      "limits": "代码为相邻知识点的共享基础演示，不等于所有概念的完整生产级实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "features-n03-01",
+      "node_id": "features-n03-01",
+      "title": "异常值与截尾",
+      "definition": "Winsorize用分位阈值钳制异常值以限制极端观测对估计量的影响。",
+      "assumptions": "相关统计量需在训练期拟合；上市公司财报、行情复权和行业类别必须明确真实可得时间与原始数据版本。",
+      "properties": [
+        "应用训练期分位阈值处理新样本。",
+        "异常值、缺失和分布变化会影响特征稳定性，需按资产和训练区间检验。"
+      ],
+      "formulas": [
+        {
+          "label": "关键关系",
+          "tex": "x'=\\min(\\max(x,q_{\\alpha}),q_{1-\\alpha})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "Winsorize用分位阈值钳制异常值以限制极端观测对估计量的影响。",
+          "tex": "x'=\\min(\\max(x,q_{\\alpha}),q_{1-\\alpha})"
+        },
+        {
+          "explanation": "应用训练期分位阈值处理新样本",
+          "tex": "x'=\\min(\\max(x,q_{\\alpha}),q_{1-\\alpha})"
+        }
+      ],
+      "code": "# 异常值与截尾：本章综合数据示例\nimport pandas as pd\ndf=pd.DataFrame({\"date\":[1,1,2],\"asset\":[\"A\",\"A\",\"A\"],\"value\":[1.,2.,None]})\nprint(\"Duplicate key rows:\",df.duplicated([\"date\",\"asset\"]).sum())\nprint(\"Missing:\",df.isna().sum().to_dict())",
+      "packages": "numpy, pandas, scikit-learn",
+      "application": "用于ETF因子数据库、特征生成及时间感知建模。",
+      "limits": "代码为相邻知识点的共享基础演示，不等于所有概念的完整生产级实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "features-n04-01",
+      "node_id": "features-n04-01",
+      "title": "重复记录",
+      "definition": "对每个资产和时间戳应有确定的唯一键和冲突处理策略。",
+      "assumptions": "相关统计量需在训练期拟合；上市公司财报、行情复权和行业类别必须明确真实可得时间与原始数据版本。",
+      "properties": [
+        "检查主键分组计数不超过1。",
+        "异常值、缺失和分布变化会影响特征稳定性，需按资产和训练区间检验。"
+      ],
+      "formulas": [
+        {
+          "label": "关键关系",
+          "tex": "\\operatorname{count}(t,i)\\le1"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对每个资产和时间戳应有确定的唯一键和冲突处理策略。",
+          "tex": "\\operatorname{count}(t,i)\\le1"
+        },
+        {
+          "explanation": "检查主键分组计数不超过1",
+          "tex": "\\operatorname{count}(t,i)\\le1"
+        }
+      ],
+      "code": "# 重复记录：本章综合数据示例\nimport pandas as pd\ndf=pd.DataFrame({\"date\":[1,1,2],\"asset\":[\"A\",\"A\",\"A\"],\"value\":[1.,2.,None]})\nprint(\"Duplicate key rows:\",df.duplicated([\"date\",\"asset\"]).sum())\nprint(\"Missing:\",df.isna().sum().to_dict())",
+      "packages": "numpy, pandas, scikit-learn",
+      "application": "用于ETF因子数据库、特征生成及时间感知建模。",
+      "limits": "代码为相邻知识点的共享基础演示，不等于所有概念的完整生产级实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "features-n05-01",
+      "node_id": "features-n05-01",
+      "title": "时间戳对齐",
+      "definition": "将交易所行情、新闻、宏观和财报时间统一到可获得时间尺度，避免读取未来数据。",
+      "assumptions": "相关统计量需在训练期拟合；上市公司财报、行情复权和行业类别必须明确真实可得时间与原始数据版本。",
+      "properties": [
+        "合并数据时按时间和可见性过滤。",
+        "异常值、缺失和分布变化会影响特征稳定性，需按资产和训练区间检验。"
+      ],
+      "formulas": [
+        {
+          "label": "关键关系",
+          "tex": "t_{\\rm available}\\le t_{\\rm decision}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将交易所行情、新闻、宏观和财报时间统一到可获得时间尺度，避免读取未来数据。",
+          "tex": "t_{\\rm available}\\le t_{\\rm decision}"
+        },
+        {
+          "explanation": "合并数据时按时间和可见性过滤",
+          "tex": "t_{\\rm available}\\le t_{\\rm decision}"
+        }
+      ],
+      "code": "# 时间戳对齐：本章综合数据示例\nimport pandas as pd\ndf=pd.DataFrame({\"date\":[1,1,2],\"asset\":[\"A\",\"A\",\"A\"],\"value\":[1.,2.,None]})\nprint(\"Duplicate key rows:\",df.duplicated([\"date\",\"asset\"]).sum())\nprint(\"Missing:\",df.isna().sum().to_dict())",
+      "packages": "numpy, pandas, scikit-learn",
+      "application": "用于ETF因子数据库、特征生成及时间感知建模。",
+      "limits": "代码为相邻知识点的共享基础演示，不等于所有概念的完整生产级实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "features-n06-01",
+      "node_id": "features-n06-01",
+      "title": "数据版本",
+      "definition": "保留源文件哈希、获取日期、修订记录和预处理规则以支持重现研究。",
+      "assumptions": "相关统计量需在训练期拟合；上市公司财报、行情复权和行业类别必须明确真实可得时间与原始数据版本。",
+      "properties": [
+        "固定版本号和转换规则对应的数据产物。",
+        "异常值、缺失和分布变化会影响特征稳定性，需按资产和训练区间检验。"
+      ],
+      "formulas": [
+        {
+          "label": "关键关系",
+          "tex": "D^{(v)}=T_v(D_{\\rm raw})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "保留源文件哈希、获取日期、修订记录和预处理规则以支持重现研究。",
+          "tex": "D^{(v)}=T_v(D_{\\rm raw})"
+        },
+        {
+          "explanation": "固定版本号和转换规则对应的数据产物",
+          "tex": "D^{(v)}=T_v(D_{\\rm raw})"
+        }
+      ],
+      "code": "# 数据版本：本章综合数据示例\nimport pandas as pd\ndf=pd.DataFrame({\"date\":[1,1,2],\"asset\":[\"A\",\"A\",\"A\"],\"value\":[1.,2.,None]})\nprint(\"Duplicate key rows:\",df.duplicated([\"date\",\"asset\"]).sum())\nprint(\"Missing:\",df.isna().sum().to_dict())",
+      "packages": "numpy, pandas, scikit-learn",
+      "application": "用于ETF因子数据库、特征生成及时间感知建模。",
+      "limits": "代码为相邻知识点的共享基础演示，不等于所有概念的完整生产级实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "features-n02-02",
+      "node_id": "features-n02-02",
+      "title": "MinMax缩放",
+      "definition": "以训练期最小最大值将连续特征映射到指定数值区间。",
+      "assumptions": "相关统计量需在训练期拟合；上市公司财报、行情复权和行业类别必须明确真实可得时间与原始数据版本。",
+      "properties": [
+        "执行训练期统计量确定的仿射变换。",
+        "异常值、缺失和分布变化会影响特征稳定性，需按资产和训练区间检验。"
+      ],
+      "formulas": [
+        {
+          "label": "关键关系",
+          "tex": "z=(x-x_{\\min})/(x_{\\max}-x_{\\min})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "以训练期最小最大值将连续特征映射到指定数值区间。",
+          "tex": "z=(x-x_{\\min})/(x_{\\max}-x_{\\min})"
+        },
+        {
+          "explanation": "执行训练期统计量确定的仿射变换",
+          "tex": "z=(x-x_{\\min})/(x_{\\max}-x_{\\min})"
+        }
+      ],
+      "code": "# MinMax缩放：本章综合数据示例\nimport numpy as np\nfrom sklearn.preprocessing import MinMaxScaler,OneHotEncoder\nx=np.array([[1.],[2.],[4.],[10.]])\nprint(\"Scaled:\",MinMaxScaler().fit_transform(x).ravel())\nprint(\"Category:\",OneHotEncoder(sparse_output=False).fit_transform([[\"A\"],[\"B\"],[\"A\"]]))",
+      "packages": "numpy, pandas, scikit-learn",
+      "application": "用于ETF因子数据库、特征生成及时间感知建模。",
+      "limits": "代码为相邻知识点的共享基础演示，不等于所有概念的完整生产级实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "features-n05-02",
+      "node_id": "features-n05-02",
+      "title": "目标编码",
+      "definition": "高基数类别可用目标条件均值编码，但需防止训练目标自身流入特征。",
+      "assumptions": "相关统计量需在训练期拟合；上市公司财报、行情复权和行业类别必须明确真实可得时间与原始数据版本。",
+      "properties": [
+        "在训练折以类别均值构造编码器。",
+        "异常值、缺失和分布变化会影响特征稳定性，需按资产和训练区间检验。"
+      ],
+      "formulas": [
+        {
+          "label": "关键关系",
+          "tex": "\\operatorname{enc}(c)=E[Y\\mid C=c]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "高基数类别可用目标条件均值编码，但需防止训练目标自身流入特征。",
+          "tex": "\\operatorname{enc}(c)=E[Y\\mid C=c]"
+        },
+        {
+          "explanation": "在训练折以类别均值构造编码器",
+          "tex": "\\operatorname{enc}(c)=E[Y\\mid C=c]"
+        }
+      ],
+      "code": "# 目标编码：本章综合数据示例\nimport numpy as np\nfrom sklearn.preprocessing import MinMaxScaler,OneHotEncoder\nx=np.array([[1.],[2.],[4.],[10.]])\nprint(\"Scaled:\",MinMaxScaler().fit_transform(x).ravel())\nprint(\"Category:\",OneHotEncoder(sparse_output=False).fit_transform([[\"A\"],[\"B\"],[\"A\"]]))",
+      "packages": "numpy, pandas, scikit-learn",
+      "application": "用于ETF因子数据库、特征生成及时间感知建模。",
+      "limits": "代码为相邻知识点的共享基础演示，不等于所有概念的完整生产级实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "features-n01-03",
+      "node_id": "features-n01-03",
+      "title": "对数与Box-Cox",
+      "definition": "正值偏态特征可用对数或Box-Cox减小动态范围、调整分布形状。",
+      "assumptions": "相关统计量需在训练期拟合；上市公司财报、行情复权和行业类别必须明确真实可得时间与原始数据版本。",
+      "properties": [
+        "对输入施加幂变换并处理零参数极限。",
+        "异常值、缺失和分布变化会影响特征稳定性，需按资产和训练区间检验。"
+      ],
+      "formulas": [
+        {
+          "label": "关键关系",
+          "tex": "T_\\lambda(x)=(x^\\lambda-1)/\\lambda\\quad(\\lambda\\ne0)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "正值偏态特征可用对数或Box-Cox减小动态范围、调整分布形状。",
+          "tex": "T_\\lambda(x)=(x^\\lambda-1)/\\lambda\\quad(\\lambda\\ne0)"
+        },
+        {
+          "explanation": "对输入施加幂变换并处理零参数极限",
+          "tex": "T_\\lambda(x)=(x^\\lambda-1)/\\lambda\\quad(\\lambda\\ne0)"
+        }
+      ],
+      "code": "# 对数与Box-Cox：本章综合数据示例\nimport numpy as np\nx=np.arange(1.,8.)\nprint(\"log:\",np.log(x))\nprint(\"interaction:\",(x*x).tolist())\nprint(\"periodic:\",np.sin(2*np.pi*x/7).round(3))",
+      "packages": "numpy, pandas, scikit-learn",
+      "application": "用于ETF因子数据库、特征生成及时间感知建模。",
+      "limits": "代码为相邻知识点的共享基础演示，不等于所有概念的完整生产级实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "features-n02-03",
+      "node_id": "features-n02-03",
+      "title": "分箱与离散化",
+      "definition": "把连续输入映射到固定阈值区间，增加阈值交互的表达能力。",
+      "assumptions": "相关统计量需在训练期拟合；上市公司财报、行情复权和行业类别必须明确真实可得时间与原始数据版本。",
+      "properties": [
+        "用训练期固定分位点定位区间。",
+        "异常值、缺失和分布变化会影响特征稳定性，需按资产和训练区间检验。"
+      ],
+      "formulas": [
+        {
+          "label": "关键关系",
+          "tex": "b(x)=k\\quad\\text{if }q_{k-1}\\le x<q_k"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "把连续输入映射到固定阈值区间，增加阈值交互的表达能力。",
+          "tex": "b(x)=k\\quad\\text{if }q_{k-1}\\le x<q_k"
+        },
+        {
+          "explanation": "用训练期固定分位点定位区间",
+          "tex": "b(x)=k\\quad\\text{if }q_{k-1}\\le x<q_k"
+        }
+      ],
+      "code": "# 分箱与离散化：本章综合数据示例\nimport numpy as np\nx=np.arange(1.,8.)\nprint(\"log:\",np.log(x))\nprint(\"interaction:\",(x*x).tolist())\nprint(\"periodic:\",np.sin(2*np.pi*x/7).round(3))",
+      "packages": "numpy, pandas, scikit-learn",
+      "application": "用于ETF因子数据库、特征生成及时间感知建模。",
+      "limits": "代码为相邻知识点的共享基础演示，不等于所有概念的完整生产级实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "features-n03-03",
+      "node_id": "features-n03-03",
+      "title": "交互特征",
+      "definition": "显式加入特征乘积以反映一个变量作用随其他变量变化。",
+      "assumptions": "相关统计量需在训练期拟合；上市公司财报、行情复权和行业类别必须明确真实可得时间与原始数据版本。",
+      "properties": [
+        "在回归设计矩阵附加逐元素乘积。",
+        "异常值、缺失和分布变化会影响特征稳定性，需按资产和训练区间检验。"
+      ],
+      "formulas": [
+        {
+          "label": "关键关系",
+          "tex": "z_{ij}=x_ix_j"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "显式加入特征乘积以反映一个变量作用随其他变量变化。",
+          "tex": "z_{ij}=x_ix_j"
+        },
+        {
+          "explanation": "在回归设计矩阵附加逐元素乘积",
+          "tex": "z_{ij}=x_ix_j"
+        }
+      ],
+      "code": "# 交互特征：本章综合数据示例\nimport numpy as np\nx=np.arange(1.,8.)\nprint(\"log:\",np.log(x))\nprint(\"interaction:\",(x*x).tolist())\nprint(\"periodic:\",np.sin(2*np.pi*x/7).round(3))",
+      "packages": "numpy, pandas, scikit-learn",
+      "application": "用于ETF因子数据库、特征生成及时间感知建模。",
+      "limits": "代码为相邻知识点的共享基础演示，不等于所有概念的完整生产级实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "features-n04-03",
+      "node_id": "features-n04-03",
+      "title": "多项式特征",
+      "definition": "将输入扩展为幂及交互项，让线性回归表示多项式非线性。",
+      "assumptions": "相关统计量需在训练期拟合；上市公司财报、行情复权和行业类别必须明确真实可得时间与原始数据版本。",
+      "properties": [
+        "把标量输入映射为高维多项式基。",
+        "异常值、缺失和分布变化会影响特征稳定性，需按资产和训练区间检验。"
+      ],
+      "formulas": [
+        {
+          "label": "关键关系",
+          "tex": "\\phi_2(x)=(1,x,x^2)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将输入扩展为幂及交互项，让线性回归表示多项式非线性。",
+          "tex": "\\phi_2(x)=(1,x,x^2)"
+        },
+        {
+          "explanation": "把标量输入映射为高维多项式基",
+          "tex": "\\phi_2(x)=(1,x,x^2)"
+        }
+      ],
+      "code": "# 多项式特征：本章综合数据示例\nimport numpy as np\nx=np.arange(1.,8.)\nprint(\"log:\",np.log(x))\nprint(\"interaction:\",(x*x).tolist())\nprint(\"periodic:\",np.sin(2*np.pi*x/7).round(3))",
+      "packages": "numpy, pandas, scikit-learn",
+      "application": "用于ETF因子数据库、特征生成及时间感知建模。",
+      "limits": "代码为相邻知识点的共享基础演示，不等于所有概念的完整生产级实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "features-n05-03",
+      "node_id": "features-n05-03",
+      "title": "单调变换",
+      "definition": "严格单调变换保留观察值秩次，但改变变量间距与回归系数解释。",
+      "assumptions": "相关统计量需在训练期拟合；上市公司财报、行情复权和行业类别必须明确真实可得时间与原始数据版本。",
+      "properties": [
+        "保持输入排序同时修改量纲。",
+        "异常值、缺失和分布变化会影响特征稳定性，需按资产和训练区间检验。"
+      ],
+      "formulas": [
+        {
+          "label": "关键关系",
+          "tex": "x_1<x_2\\Rightarrow g(x_1)<g(x_2)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "严格单调变换保留观察值秩次，但改变变量间距与回归系数解释。",
+          "tex": "x_1<x_2\\Rightarrow g(x_1)<g(x_2)"
+        },
+        {
+          "explanation": "保持输入排序同时修改量纲",
+          "tex": "x_1<x_2\\Rightarrow g(x_1)<g(x_2)"
+        }
+      ],
+      "code": "# 单调变换：本章综合数据示例\nimport numpy as np\nx=np.arange(1.,8.)\nprint(\"log:\",np.log(x))\nprint(\"interaction:\",(x*x).tolist())\nprint(\"periodic:\",np.sin(2*np.pi*x/7).round(3))",
+      "packages": "numpy, pandas, scikit-learn",
+      "application": "用于ETF因子数据库、特征生成及时间感知建模。",
+      "limits": "代码为相邻知识点的共享基础演示，不等于所有概念的完整生产级实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "features-n06-03",
+      "node_id": "features-n06-03",
+      "title": "周期编码",
+      "definition": "对交易日周序与月份等周期变量，以sin/cos映射保留周期边界邻近性。",
+      "assumptions": "相关统计量需在训练期拟合；上市公司财报、行情复权和行业类别必须明确真实可得时间与原始数据版本。",
+      "properties": [
+        "将周期位置映射为二维单位圆。",
+        "异常值、缺失和分布变化会影响特征稳定性，需按资产和训练区间检验。"
+      ],
+      "formulas": [
+        {
+          "label": "关键关系",
+          "tex": "x_t=(\\sin(2\\pi t/P),\\cos(2\\pi t/P))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对交易日周序与月份等周期变量，以sin/cos映射保留周期边界邻近性。",
+          "tex": "x_t=(\\sin(2\\pi t/P),\\cos(2\\pi t/P))"
+        },
+        {
+          "explanation": "将周期位置映射为二维单位圆",
+          "tex": "x_t=(\\sin(2\\pi t/P),\\cos(2\\pi t/P))"
+        }
+      ],
+      "code": "# 周期编码：本章综合数据示例\nimport numpy as np\nx=np.arange(1.,8.)\nprint(\"log:\",np.log(x))\nprint(\"interaction:\",(x*x).tolist())\nprint(\"periodic:\",np.sin(2*np.pi*x/7).round(3))",
+      "packages": "numpy, pandas, scikit-learn",
+      "application": "用于ETF因子数据库、特征生成及时间感知建模。",
+      "limits": "代码为相邻知识点的共享基础演示，不等于所有概念的完整生产级实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "features-n01-04",
+      "node_id": "features-n01-04",
+      "title": "过滤式特征选择",
+      "definition": "先按统计得分筛选输入特征，如互信息或单变量检验，不直接依赖最终模型。",
+      "assumptions": "相关统计量需在训练期拟合；上市公司财报、行情复权和行业类别必须明确真实可得时间与原始数据版本。",
+      "properties": [
+        "对每一特征估计得分后选择前K项。",
+        "异常值、缺失和分布变化会影响特征稳定性，需按资产和训练区间检验。"
+      ],
+      "formulas": [
+        {
+          "label": "关键关系",
+          "tex": "S=\\operatorname{TopK}_j I(X_j;Y)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先按统计得分筛选输入特征，如互信息或单变量检验，不直接依赖最终模型。",
+          "tex": "S=\\operatorname{TopK}_j I(X_j;Y)"
+        },
+        {
+          "explanation": "对每一特征估计得分后选择前K项",
+          "tex": "S=\\operatorname{TopK}_j I(X_j;Y)"
+        }
+      ],
+      "code": "# 过滤式特征选择：本章综合数据示例\nimport numpy as np\nfrom sklearn.feature_selection import SelectKBest,f_regression\nrng=np.random.default_rng(0);X=rng.normal(size=(120,9));y=X[:,0]+rng.normal(size=120)\nselector=SelectKBest(f_regression,k=3).fit(X[:90],y[:90])\nprint(\"Selected:\",selector.get_support(indices=True))",
+      "packages": "numpy, pandas, scikit-learn",
+      "application": "用于ETF因子数据库、特征生成及时间感知建模。",
+      "limits": "代码为相邻知识点的共享基础演示，不等于所有概念的完整生产级实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "features-n02-04",
+      "node_id": "features-n02-04",
+      "title": "递归特征消除RFE",
+      "definition": "RFE重复训练估计器、删除低重要性特征，直到达到预定特征数量。",
+      "assumptions": "相关统计量需在训练期拟合；上市公司财报、行情复权和行业类别必须明确真实可得时间与原始数据版本。",
+      "properties": [
+        "每轮去掉最弱的候选特征。",
+        "异常值、缺失和分布变化会影响特征稳定性，需按资产和训练区间检验。"
+      ],
+      "formulas": [
+        {
+          "label": "关键关系",
+          "tex": "S_{k+1}=S_k\\setminus\\arg\\min_{j\\in S_k} I_j"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "RFE重复训练估计器、删除低重要性特征，直到达到预定特征数量。",
+          "tex": "S_{k+1}=S_k\\setminus\\arg\\min_{j\\in S_k} I_j"
+        },
+        {
+          "explanation": "每轮去掉最弱的候选特征",
+          "tex": "S_{k+1}=S_k\\setminus\\arg\\min_{j\\in S_k} I_j"
+        }
+      ],
+      "code": "# 递归特征消除RFE：本章综合数据示例\nimport numpy as np\nfrom sklearn.feature_selection import SelectKBest,f_regression\nrng=np.random.default_rng(0);X=rng.normal(size=(120,9));y=X[:,0]+rng.normal(size=120)\nselector=SelectKBest(f_regression,k=3).fit(X[:90],y[:90])\nprint(\"Selected:\",selector.get_support(indices=True))",
+      "packages": "numpy, pandas, scikit-learn",
+      "application": "用于ETF因子数据库、特征生成及时间感知建模。",
+      "limits": "代码为相邻知识点的共享基础演示，不等于所有概念的完整生产级实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "features-n05-04",
+      "node_id": "features-n05-04",
+      "title": "稀疏特征筛选",
+      "definition": "使用带L1惩罚的线性模型使部分系数为0，再依据非零系数选择输入。",
+      "assumptions": "相关统计量需在训练期拟合；上市公司财报、行情复权和行业类别必须明确真实可得时间与原始数据版本。",
+      "properties": [
+        "稀疏优化结果决定保留集合。",
+        "异常值、缺失和分布变化会影响特征稳定性，需按资产和训练区间检验。"
+      ],
+      "formulas": [
+        {
+          "label": "关键关系",
+          "tex": "S=\\{j:\\hat\\beta_j\\ne0\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "使用带L1惩罚的线性模型使部分系数为0，再依据非零系数选择输入。",
+          "tex": "S=\\{j:\\hat\\beta_j\\ne0\\}"
+        },
+        {
+          "explanation": "稀疏优化结果决定保留集合",
+          "tex": "S=\\{j:\\hat\\beta_j\\ne0\\}"
+        }
+      ],
+      "code": "# 稀疏特征筛选：本章综合数据示例\nimport numpy as np\nfrom sklearn.feature_selection import SelectKBest,f_regression\nrng=np.random.default_rng(0);X=rng.normal(size=(120,9));y=X[:,0]+rng.normal(size=120)\nselector=SelectKBest(f_regression,k=3).fit(X[:90],y[:90])\nprint(\"Selected:\",selector.get_support(indices=True))",
+      "packages": "numpy, pandas, scikit-learn",
+      "application": "用于ETF因子数据库、特征生成及时间感知建模。",
+      "limits": "代码为相邻知识点的共享基础演示，不等于所有概念的完整生产级实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "features-n06-04",
+      "node_id": "features-n06-04",
+      "title": "特征重要性",
+      "definition": "比较输入变量被扰动前后的模型损失，估计预测对该变量的依赖。",
+      "assumptions": "相关统计量需在训练期拟合；上市公司财报、行情复权和行业类别必须明确真实可得时间与原始数据版本。",
+      "properties": [
+        "用相同测试集对特征做Permutation。",
+        "异常值、缺失和分布变化会影响特征稳定性，需按资产和训练区间检验。"
+      ],
+      "formulas": [
+        {
+          "label": "关键关系",
+          "tex": "I_j=R(X_{\\mathrm{perm}\\,j})-R(X)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "比较输入变量被扰动前后的模型损失，估计预测对该变量的依赖。",
+          "tex": "I_j=R(X_{\\mathrm{perm}\\,j})-R(X)"
+        },
+        {
+          "explanation": "用相同测试集对特征做Permutation",
+          "tex": "I_j=R(X_{\\mathrm{perm}\\,j})-R(X)"
+        }
+      ],
+      "code": "# 特征重要性：本章综合数据示例\nimport numpy as np\nfrom sklearn.feature_selection import SelectKBest,f_regression\nrng=np.random.default_rng(0);X=rng.normal(size=(120,9));y=X[:,0]+rng.normal(size=120)\nselector=SelectKBest(f_regression,k=3).fit(X[:90],y[:90])\nprint(\"Selected:\",selector.get_support(indices=True))",
+      "packages": "numpy, pandas, scikit-learn",
+      "application": "用于ETF因子数据库、特征生成及时间感知建模。",
+      "limits": "代码为相邻知识点的共享基础演示，不等于所有概念的完整生产级实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "features-n01-05",
+      "node_id": "features-n01-05",
+      "title": "历史复权",
+      "definition": "对拆分、现金股息等公司行动调整历史价格以构造可比收益序列。",
+      "assumptions": "相关统计量需在训练期拟合；上市公司财报、行情复权和行业类别必须明确真实可得时间与原始数据版本。",
+      "properties": [
+        "对原始行情乘对应日期的调整因子。",
+        "异常值、缺失和分布变化会影响特征稳定性，需按资产和训练区间检验。"
+      ],
+      "formulas": [
+        {
+          "label": "关键关系",
+          "tex": "P_t^{\\rm adj}=A_tP_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对拆分、现金股息等公司行动调整历史价格以构造可比收益序列。",
+          "tex": "P_t^{\\rm adj}=A_tP_t"
+        },
+        {
+          "explanation": "对原始行情乘对应日期的调整因子",
+          "tex": "P_t^{\\rm adj}=A_tP_t"
+        }
+      ],
+      "code": "# 历史复权：本章综合数据示例\nimport numpy as np\np=np.array([100.,102.,104.,101.,105.])\nvol=np.array([10.,12.,8.,15.,11.])\nfactor=p[-1]/p[-4]-1\nz=(vol[-1]-vol.mean())/vol.std()\nprint(\"Momentum:\",factor,\"Volume z:\",z)",
+      "packages": "numpy, pandas, scikit-learn",
+      "application": "用于ETF因子数据库、特征生成及时间感知建模。",
+      "limits": "代码为相邻知识点的共享基础演示，不等于所有概念的完整生产级实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "features-n02-05",
+      "node_id": "features-n02-05",
+      "title": "PIT财报时间",
+      "definition": "财报所指财年与实际公布日期不同，特征只能使用已公布版本。",
+      "assumptions": "相关统计量需在训练期拟合；上市公司财报、行情复权和行业类别必须明确真实可得时间与原始数据版本。",
+      "properties": [
+        "按照首次可用时间而非报告期间筛选。",
+        "异常值、缺失和分布变化会影响特征稳定性，需按资产和训练区间检验。"
+      ],
+      "formulas": [
+        {
+          "label": "关键关系",
+          "tex": "t_{\\rm release}\\le t_{\\rm decision}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "财报所指财年与实际公布日期不同，特征只能使用已公布版本。",
+          "tex": "t_{\\rm release}\\le t_{\\rm decision}"
+        },
+        {
+          "explanation": "按照首次可用时间而非报告期间筛选",
+          "tex": "t_{\\rm release}\\le t_{\\rm decision}"
+        }
+      ],
+      "code": "# PIT财报时间：本章综合数据示例\nimport numpy as np\np=np.array([100.,102.,104.,101.,105.])\nvol=np.array([10.,12.,8.,15.,11.])\nfactor=p[-1]/p[-4]-1\nz=(vol[-1]-vol.mean())/vol.std()\nprint(\"Momentum:\",factor,\"Volume z:\",z)",
+      "packages": "numpy, pandas, scikit-learn",
+      "application": "用于ETF因子数据库、特征生成及时间感知建模。",
+      "limits": "代码为相邻知识点的共享基础演示，不等于所有概念的完整生产级实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "features-n03-05",
+      "node_id": "features-n03-05",
+      "title": "截面中性化",
+      "definition": "在同一交易日横截面上回归控制行业与规模等变量，取残差移除线性暴露。",
+      "assumptions": "相关统计量需在训练期拟合；上市公司财报、行情复权和行业类别必须明确真实可得时间与原始数据版本。",
+      "properties": [
+        "按最小二乘投影求正交残差。",
+        "异常值、缺失和分布变化会影响特征稳定性，需按资产和训练区间检验。"
+      ],
+      "formulas": [
+        {
+          "label": "关键关系",
+          "tex": "f_\\perp=f-X(X^\\top X)^{-1}X^\\top f"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "在同一交易日横截面上回归控制行业与规模等变量，取残差移除线性暴露。",
+          "tex": "f_\\perp=f-X(X^\\top X)^{-1}X^\\top f"
+        },
+        {
+          "explanation": "按最小二乘投影求正交残差",
+          "tex": "f_\\perp=f-X(X^\\top X)^{-1}X^\\top f"
+        }
+      ],
+      "code": "# 截面中性化：本章综合数据示例\nimport numpy as np\np=np.array([100.,102.,104.,101.,105.])\nvol=np.array([10.,12.,8.,15.,11.])\nfactor=p[-1]/p[-4]-1\nz=(vol[-1]-vol.mean())/vol.std()\nprint(\"Momentum:\",factor,\"Volume z:\",z)",
+      "packages": "numpy, pandas, scikit-learn",
+      "application": "用于ETF因子数据库、特征生成及时间感知建模。",
+      "limits": "代码为相邻知识点的共享基础演示，不等于所有概念的完整生产级实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "features-n04-05",
+      "node_id": "features-n04-05",
+      "title": "行业与市值标准化",
+      "definition": "在当日行业内部估计均值方差，并可通过回归同时消除市值暴露。",
+      "assumptions": "相关统计量需在训练期拟合；上市公司财报、行情复权和行业类别必须明确真实可得时间与原始数据版本。",
+      "properties": [
+        "对每个行业和日期独立标准化。",
+        "异常值、缺失和分布变化会影响特征稳定性，需按资产和训练区间检验。"
+      ],
+      "formulas": [
+        {
+          "label": "关键关系",
+          "tex": "z_{i,t}=(f_{i,t}-\\bar f_{g(i),t})/s_{g(i),t}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "在当日行业内部估计均值方差，并可通过回归同时消除市值暴露。",
+          "tex": "z_{i,t}=(f_{i,t}-\\bar f_{g(i),t})/s_{g(i),t}"
+        },
+        {
+          "explanation": "对每个行业和日期独立标准化",
+          "tex": "z_{i,t}=(f_{i,t}-\\bar f_{g(i),t})/s_{g(i),t}"
+        }
+      ],
+      "code": "# 行业与市值标准化：本章综合数据示例\nimport numpy as np\np=np.array([100.,102.,104.,101.,105.])\nvol=np.array([10.,12.,8.,15.,11.])\nfactor=p[-1]/p[-4]-1\nz=(vol[-1]-vol.mean())/vol.std()\nprint(\"Momentum:\",factor,\"Volume z:\",z)",
+      "packages": "numpy, pandas, scikit-learn",
+      "application": "用于ETF因子数据库、特征生成及时间感知建模。",
+      "limits": "代码为相邻知识点的共享基础演示，不等于所有概念的完整生产级实现。",
+      "coverage": "expanded"
+    },
+    {
+      "id": "features-n06-05",
+      "node_id": "features-n06-05",
+      "title": "未来函数检测",
+      "definition": "审查数据预处理与预测是否读取当时尚未收盘或发布的数据。",
+      "assumptions": "相关统计量需在训练期拟合；上市公司财报、行情复权和行业类别必须明确真实可得时间与原始数据版本。",
+      "properties": [
+        "检查特征时间戳属于可用信息集。",
+        "异常值、缺失和分布变化会影响特征稳定性，需按资产和训练区间检验。"
+      ],
+      "formulas": [
+        {
+          "label": "关键关系",
+          "tex": "X_t\\in\\mathcal F_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "审查数据预处理与预测是否读取当时尚未收盘或发布的数据。",
+          "tex": "X_t\\in\\mathcal F_t"
+        },
+        {
+          "explanation": "检查特征时间戳属于可用信息集",
+          "tex": "X_t\\in\\mathcal F_t"
+        }
+      ],
+      "code": "# 未来函数检测：本章综合数据示例\nimport numpy as np\np=np.array([100.,102.,104.,101.,105.])\nvol=np.array([10.,12.,8.,15.,11.])\nfactor=p[-1]/p[-4]-1\nz=(vol[-1]-vol.mean())/vol.std()\nprint(\"Momentum:\",factor,\"Volume z:\",z)",
+      "packages": "numpy, pandas, scikit-learn",
+      "application": "用于ETF因子数据库、特征生成及时间感知建模。",
+      "limits": "代码为相邻知识点的共享基础演示，不等于所有概念的完整生产级实现。",
+      "coverage": "expanded"
+    }
+  ]
+}
