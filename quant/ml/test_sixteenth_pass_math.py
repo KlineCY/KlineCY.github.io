@@ -4,11 +4,16 @@ import math
 from pathlib import Path
 import unittest
 ROOT=Path(__file__).resolve().parent
-LESSONS=json.loads((ROOT/"atlas-depth-16-a.json").read_text(encoding="utf-8"))["lessons"]
+LESSONS={}
+for suffix in "ab":
+    data=json.loads((ROOT/f"atlas-depth-16-{suffix}.json").read_text(encoding="utf-8"))["lessons"]
+    for uid,entry in data.items():
+        assert uid not in LESSONS
+        LESSONS[uid]=entry
 class SixteenthPassMath(unittest.TestCase):
     def test_structure(self):
-        self.assertEqual(len(LESSONS),6)
-        self.assertEqual({id[:3] for id in LESSONS},{f"m{i:02d}" for i in range(1,7)})
+        self.assertEqual(len(LESSONS),12)
+        self.assertEqual({id[:3] for id in LESSONS},{f"m{i:02d}" for i in range(1,13)})
         for id,lesson in LESSONS.items():
             with self.subTest(id=id):
                 self.assertEqual(len(lesson["equations"]),3)
@@ -23,6 +28,12 @@ class SixteenthPassMath(unittest.TestCase):
             ("m04-c01-p03",.03+.04-.01,.06,"0.06"),
             ("m05-c01-p01",(2-2)**2,0,"值为0"),
             ("m06-c02-p01",(5-2)/1,3,"z=(5−2)/1=3"),
+            ("m07-c01-p02",(1+3)/2,2,"β=(1+3)/2=2"),
+            ("m08-c01-p05",5+1*2,7,"总代价为5+1×2=7"),
+            ("m09-c04-p03",1+.5,1.5,"特征值分别为1.5和0.5"),
+            ("m10-c01-p02",(4-1)/(4+2-2),.75,"MAP=(4−1)/(4+2−2)=3/4=0.75"),
+            ("m11-c04-p03",.12/(.12+.12),.5,"责任度为0.12/(0.12+0.12)=0.5"),
+            ("m12-c01-p04",3/4,.75,"ROC-AUC=3/4=0.75"),
         ]
         for uid,v,expected,fragment in cases:
             with self.subTest(uid=uid):
