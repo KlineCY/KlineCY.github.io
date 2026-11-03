@@ -4,11 +4,16 @@ import math
 from pathlib import Path
 import unittest
 ROOT=Path(__file__).resolve().parent
-LESSONS=json.loads((ROOT/"atlas-depth-14-a.json").read_text(encoding="utf8"))["lessons"]
+LESSONS={}
+for suffix in "ab":
+    data=json.loads((ROOT/f"atlas-depth-14-{suffix}.json").read_text(encoding="utf8"))["lessons"]
+    for uid,body in data.items():
+        assert uid not in LESSONS
+        LESSONS[uid]=body
 class FourteenthPassMath(unittest.TestCase):
     def test_structure(self):
-        self.assertEqual(len(LESSONS),6)
-        self.assertEqual({uid[:3] for uid in LESSONS},{f"m{i:02d}" for i in range(1,7)})
+        self.assertEqual(len(LESSONS),12)
+        self.assertEqual({uid[:3] for uid in LESSONS},{f"m{i:02d}" for i in range(1,13)})
         for uid,body in LESSONS.items():
             self.assertEqual(len(body["equations"]),3)
             self.assertGreaterEqual(len(body["derivation"]),3)
@@ -21,7 +26,13 @@ class FourteenthPassMath(unittest.TestCase):
            ("m03-c01-p02",.16/.24,2/3,"2/3"),
            ("m04-c01-p01",2*math.exp(-2*200*.1**2),2*math.exp(-4),"0.03663"),
            ("m05-c05-p05",1e-8*1024,1.024e-5,"1.024×10^-5"),
-           ("m06-c01-p06",10*60+5,605,"10:05")
+           ("m06-c01-p06",10*60+5,605,"10:05"),
+           ("m07-c02-p02",9/(9+1),.9,"0.9"),
+           ("m08-c03-p02",.5*(.5**2+.5**2),.25,"0.25"),
+           ("m09-c01-p04",2/.5,4,"2/0.5=4"),
+           ("m10-c01-p05",5/8,.625,"0.625"),
+           ("m11-c04-p01",1/(1+math.exp(-2)),.8807970779778823,"0.8808"),
+           ("m12-c03-p02",12-3+1,10,"10个")
         ]
         for uid,got,expected,token in cases:
             with self.subTest(uid=uid):
