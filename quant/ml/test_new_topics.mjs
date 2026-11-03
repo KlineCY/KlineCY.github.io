@@ -6,6 +6,11 @@ import katex from "katex";
 const root=new URL("./",import.meta.url);
 const read=path=>JSON.parse(fs.readFileSync(new URL(path,root),"utf8"));
 const bundle=read("./atlas-new-lessons.json");
+const landing=fs.readFileSync(new URL("./index.html",root),"utf8");
+for(const id of ["m11-c06-p01","m11-c06-p02","m11-c06-p03","m11-c06-p04"])
+ assert(landing.includes("#lesson/"+id),"ML spectral reading-path link missing "+id);
+for(const id of ["linear-x001","linear-x003"])
+ assert(landing.includes("../math/?topic="+id),"ML-to-mathematics bridge link missing "+id);
 const mathIds=new Set(read("../math/curriculum.json").nodes.map(x=>x.id));
 const bytes=Buffer.concat([1,2,3,4].map(n=>fs.readFileSync(new URL("./atlas/data.part"+n,root))));
 const archive=JSON.parse(gunzipSync(bytes).toString("utf8"));

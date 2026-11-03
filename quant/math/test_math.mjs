@@ -122,6 +122,9 @@ assert(app.includes("appendLearningSequence(node,article)")&&app.includes("math-
   assert(app.includes('fetch("./'+name+'",{cache:"no-cache"})'),"core math resource must revalidate cache "+name);
 assert(html.includes("app.js?v=20261103-math-depth-v1"),"versioned math loader missing");
 assert(html.includes("styles.css?v=20261104-spectral-v1"),"versioned math styles missing");
+for(const id of ["linear-x001","linear-x002","linear-x003","linear-x004","linear-x005","linear-x006"])
+ assert(html.includes("?topic="+id),"missing mathematical spectral path entry "+id);
+assert(html.includes("../ml/#lesson/m11-c06-p01"),"missing linked machine learning spectral path");
 assert(app.includes("renderMathDeepSections")&&app.includes("math-deep-toc"),"mathematics subchapter reader missing");
 assert(sidebar.includes('["math","量化数学 Mathematics"]'),"math missing from navigation");
 console.log("Math validation PASS: "+c.disciplines.length+" disciplines, "+c.chapters.length+" chapters, "+c.nodes.length+" nodes, "+lessons.length+" complete lessons, all displayed LaTeX formulas parseable.");
