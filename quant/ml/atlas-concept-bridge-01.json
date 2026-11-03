@@ -1,0 +1,209 @@
+{
+  "schema": 1,
+  "lessons": {
+    "m04-c01-p02": {
+      "source_title": "Hoeffding不等式：有界独立变量的非渐近保证",
+      "goal": "沿着固定预测器、集中不等式、有限类并集界、金融时间依赖四个步骤，推导经验误差何时能控制总体误差。明确概率和误差量词，不把统计预测的风险界当作策略净收益保证。",
+      "links": [
+        {
+          "kind": "math",
+          "id": "mlmath-x001",
+          "label": "固定函数的集中不等式"
+        },
+        {
+          "kind": "math",
+          "id": "mlmath-x002",
+          "label": "有限假设类和ERM"
+        },
+        {
+          "kind": "math",
+          "id": "statistics-x001",
+          "label": "时间序列有效样本量"
+        },
+        {
+          "kind": "ml",
+          "id": "m12-c03-p04",
+          "label": "多策略显著性"
+        }
+      ],
+      "sections": [
+        {
+          "title": "固定模型的风险",
+          "question": "为什么先固定模型，再讨论训练误差？",
+          "paragraphs": [
+            "设Z_i=ℓ(h(X_i),Y_i)，h在抽取这批观测之前已经固定，观测独立同分布且损失取值处于[0,1]。则总体风险是E[Z_i]，经验风险是样本平均。",
+            "如果h由同一份数据训练或挑选，必须控制整个候选集合或算法对样本的依赖，不能直接把最后选出的h当作事先固定。"
+          ],
+          "equations": [
+            {
+              "label": "经验风险",
+              "tex": "\\widehat R_n(h)=n^{-1}\\sum_{i=1}^n Z_i,\\quad R(h)=\\mathbb E[Z_i]"
+            }
+          ],
+          "worked": "五条分类记录的零一损失为(0,1,0,0,1)，经验风险等于2/5=0.4；真实未来风险无法由五条记录直接确定。",
+          "boundary": "平方误差通常无界，直接照用[0,1]假设需要重新证明损失范围。"
+        },
+        {
+          "title": "Hoeffding与置信半径",
+          "question": "如何从n和δ求出允许的偏差？",
+          "paragraphs": [
+            "独立有界损失的均值偏离其期望，可使用双边Hoeffding界。该界不依赖损失服从正态分布，但依赖观测独立以及统一的取值边界。",
+            "给定失败概率δ，将上界2exp(−2nε²)设为δ并解出ε。这是重复抽样意义下的误差概率，不是给定一次交易的盈利概率。"
+          ],
+          "equations": [
+            {
+              "label": "Hoeffding误差界",
+              "tex": "\\Pr(|\\widehat R_n(h)-R(h)|\\ge\\epsilon)\\le2e^{-2n\\epsilon^2}"
+            }
+          ],
+          "worked": "n=200、δ=0.05时，误差半径ε=√[ln(40)/400]≈0.09603。它只是保守的理论上界，并不代表实际标准误必为9.603%。",
+          "boundary": "持有期重叠或收益波动簇集打破独立性，不能直接以记录条数套用此界。"
+        },
+        {
+          "title": "并集界与ERM选择",
+          "question": "选了20个模型以后为何不能只检验冠军？",
+          "paragraphs": [
+            "对事先固定的有限假设类H逐个应用集中界，再使用并集界，便能同时控制所有模型的风险差。不同模型的坏事件允许相关，但每个模型所需的抽样条件仍要满足。",
+            "令h_hat最小化经验风险、h_star最小化真实风险；通过加减经验风险并利用h_hat的训练最优性，超额真实风险被两倍一致误差上界控制。"
+          ],
+          "equations": [
+            {
+              "label": "有限类统一保证",
+              "tex": "\\sup_{h\\in H}|\\widehat R(h)-R(h)|\\le\\sqrt{\\frac{\\log(2|H|/\\delta)}{2n}}"
+            }
+          ],
+          "worked": "取n=500、|H|=20、δ=0.05，统一半径√[ln(800)/1000]≈0.08176；ERM相对H内最佳真实模型的超额风险界是其两倍，约0.16352。",
+          "boundary": "此界需要在数据观察之前明确候选类；反复使用最终测试集扩大搜索空间会破坏保证。"
+        },
+        {
+          "title": "金融适用边界",
+          "question": "数学上有泛化界，为什么交易可能亏损？",
+          "paragraphs": [
+            "这些定理控制固定分布下特定损失的预测误差，不能自动跨越市场制度变迁。收益率样本常有时间依赖和事件标签重叠，必须先检查假设并改用合适的时间外验证。",
+            "把点时可得特征、标签成熟日期、训练窗口、候选策略数量、交易成本及最终样本外区间分别记录，才有可能讨论可执行的策略表现。"
+          ],
+          "equations": [
+            {
+              "label": "时间外风险差",
+              "tex": "R_{\\rm future}(h)-R_{\\rm train}(h)=\\mathbb E_{P_{\\rm future}}\\ell_h-\\mathbb E_{P_{\\rm train}}\\ell_h"
+            }
+          ],
+          "worked": "即便分类器样本错误率仅0.10、同分布风险上界为0.20，也不能推导ETF轮动收益为正；盈利还取决于收益幅度、仓位和交易费。",
+          "boundary": "分布漂移、市场影响和模型选择造成的污染需要分别检验；不能用单一Hoeffding界替代。"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Stanford CS229 学习理论",
+          "url": "https://see.stanford.edu/Course/CS229"
+        },
+        {
+          "title": "Stanford Statistical Learning Theory",
+          "url": "https://web.stanford.edu/class/cs229t/2016/notes.pdf"
+        }
+      ]
+    },
+    "m07-c02-p01": {
+      "source_title": "L2正则化：收缩为何降低方差",
+      "goal": "以统一的平方损失口径串起正则目标、Hessian强凸性、SVD谱收缩和时间外风险评价，区分求解唯一、估计方差较低及金融策略更赚钱这三个并不等价的命题。",
+      "links": [
+        {
+          "kind": "math",
+          "id": "optimization-x008",
+          "label": "强凸与线性收敛"
+        },
+        {
+          "kind": "math",
+          "id": "optimization-x009",
+          "label": "Ridge的强凸性和条件数"
+        },
+        {
+          "kind": "math",
+          "id": "optimization-x010",
+          "label": "LASSO次梯度比较"
+        },
+        {
+          "kind": "ml",
+          "id": "m12-c03-p04",
+          "label": "选择偏差"
+        }
+      ],
+      "sections": [
+        {
+          "title": "先固定目标函数",
+          "question": "为什么软件alpha与理论λ不一致？",
+          "paragraphs": [
+            "采用J(β)=||y−Xβ||²/(2n)+λ||β||²/2。若含不惩罚的截距，先对训练数据中心化或单独处理该方向；横截面特征尺度也必须在训练折中确定。",
+            "scikit-learn Ridge文档的目标为||y−Xβ||²+α||β||²，对这个明确的未加权目标而言，两种写法等价需设α=nλ。"
+          ],
+          "equations": [
+            {
+              "label": "尺度换算",
+              "tex": "\\frac{\\|y-X\\beta\\|^2}{2n}+\\frac\\lambda2\\|\\beta\\|^2\\equiv\\|y-X\\beta\\|^2+\\alpha\\|\\beta\\|^2,\\quad\\alpha=n\\lambda"
+            }
+          ],
+          "worked": "n=100时理论λ=0.1对应scikit-learn的alpha=10；传入alpha=0.1会得到不同的惩罚力度。",
+          "boundary": "样本权重、截距和不同代码库的损失归约方式都会改变这个换算。"
+        },
+        {
+          "title": "Hessian与唯一解",
+          "question": "完全共线的特征为何能被正则化稳定求解？",
+          "paragraphs": [
+            "对目标求导得(XᵀX/n+λI)β=Xᵀy/n。XᵀX/n半正定，λ>0令Hessian在所有惩罚方向正定，因此优化目标强凸且最优解唯一。",
+            "唯一系数只是数学求解性质，不代表两个高度共线的经济变量已经获得了独立因果识别。使用正规方程求解时还需注意数值实现和特征尺度。"
+          ],
+          "equations": [
+            {
+              "label": "Ridge最优性方程",
+              "tex": "(X^\\top X/n+\\lambda I)\\widehat\\beta=X^\\top y/n"
+            }
+          ],
+          "worked": "X两列都是(1,1)ᵀ，n=2、y=(2,2)、λ=1时，解得β=(2/3,2/3)。不加惩罚的Gram特征值为(2,0)，加λ后变成(3,1)，条件数降为3。",
+          "boundary": "不惩罚的截距方向和λ=0情况需要另外检查秩及唯一性。"
+        },
+        {
+          "title": "SVD与偏差方差",
+          "question": "为何较弱的谱方向收缩得更强？",
+          "paragraphs": [
+            "把设计矩阵分解为X=U diag(s_i)Vᵀ，Ridge在第i个谱方向的相对保留比例是s_i²/(s_i²+nλ)。小奇异值方向更容易被噪声扭曲，因而受到较强收缩。",
+            "收缩可以降低估计器对训练样本的敏感度，也可能抹掉真实但弱的预测方向。统计偏差与方差的权衡要基于真实数据机制，而不能由收缩比例单独决定。"
+          ],
+          "equations": [
+            {
+              "label": "谱收缩比例",
+              "tex": "q_i=\\frac{s_i^2}{s_i^2+n\\lambda}"
+            }
+          ],
+          "worked": "若某谱方向s²/n=9、λ=1，保留率0.9；另一方向s²/n=0.1，保留率约0.0909。被强烈收缩的方向不一定完全无经济信号。",
+          "boundary": "不同特征标准化改变奇异值，从而改变同一λ下的实际惩罚强度。"
+        },
+        {
+          "title": "样本外预测与策略评价",
+          "question": "正定Hessian能否证明收益改善？",
+          "paragraphs": [
+            "正则化强凸性保证的是给定训练目标的唯一解；未来预测误差、收益因子方向和成本后组合净值属于不同的统计与经济对象。",
+            "应滚动重估缩放器和λ，独立记录样本外MSE、权重波动、换手及市场冲击；最终测试区间不得参与选择。"
+          ],
+          "equations": [
+            {
+              "label": "未来平方预测风险",
+              "tex": "R_{\\rm future}(\\lambda)=\\mathbb E_{\\rm future}[(Y-X^\\top\\widehat\\beta_\\lambda)^2]"
+            }
+          ],
+          "worked": "即使例中Gram条件数由无穷变成3，也无法推导未来ETF组合Sharpe必然提高；需用严格时间外数据验证。",
+          "boundary": "惩罚项不能替代时点审计、成本建模和模型选择误差校正。"
+        }
+      ],
+      "sources": [
+        {
+          "title": "scikit-learn Ridge 官方目标及alpha",
+          "url": "https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Ridge.html"
+        },
+        {
+          "title": "Boyd与Vandenberghe凸优化公开教材",
+          "url": "https://web.stanford.edu/~boyd/cvxbook/"
+        }
+      ]
+    }
+  }
+}

@@ -359,6 +359,11 @@ async function start(){
   const conceptBundle=await fetchAtlasJson("./atlas-concept-chapters.json",{cache:"no-cache"});
   if(!window.quantMlConcepts?.mount)throw Error("知识链分层渲染器未加载");
   state.conceptChapters=window.quantMlConcepts.mount(data,conceptBundle);
+  const bridge=await fetchAtlasJson("./atlas-concept-bridge-01.json",{cache:"no-cache"});
+  for(const id of window.quantMlConcepts.mount(data,bridge)){
+   if(state.conceptChapters.has(id))throw Error("知识链ID重复："+id);
+   state.conceptChapters.add(id);
+  }
   for(const newId of newIds)state.conceptChapters.add(newId);
   state.index=data.catalog.items;state.byId=new Map(state.index.map(x=>[x.id,x]));state.domains=data.domains;
   const total=$("atlas-total-lessons");if(total)total.textContent=state.index.length+" 篇系统讲义（含新增专题）";
