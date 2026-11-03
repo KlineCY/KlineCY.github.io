@@ -12,6 +12,12 @@ FILES = [
     "atlas-depth-foundations-3.json",
     "atlas-depth-learning-3.json",
     "atlas-depth-quant-3.json",
+    "atlas-depth-foundations-4.json",
+    "atlas-depth-learning-4.json",
+    "atlas-depth-models-4.json",
+    "atlas-depth-deep-4.json",
+    "atlas-depth-crossdomain-4.json",
+    "atlas-depth-quant-4.json",
 ]
 LESSONS = {}
 for name in FILES:
@@ -105,6 +111,49 @@ class WorkedExamplesTest(unittest.TestCase):
         residuals = [x - sum(factors) / len(factors) for x in factors]
         self.assertEqual(residuals, [-1, 0, 1])
         self.assertEqual(sum(residuals), 0)
+
+
+    def test_fourth_pass_numerical_illustrations(self):
+        """Audit one named fourth-pass illustration per Atlas domain.
+
+        The expected number is independently calculated; matching a stated
+        numeral in the article guards against text drifting away from examples.
+        """
+        cases = [
+            ("m01-c02-p01", 0.6*1-0.4*2-0.1, -0.3, "−0.3"),
+            ("m02-c04-p04", .6**2*.04+2*.6*.4*.01+.4**2*.09, .0336, "0.0336"),
+            ("m03-c04-p05", .9*math.log(1.8)+.1*math.log(.2), .368, "0.368"),
+            ("m04-c01-p06", 1.1**3*.6-1, -.2014, "−20.14%"),
+            ("m05-c05-p04", .9**20, .122, "0.122"),
+            ("m06-c04-p04", sum([.01,-.01,.02,0,.03])/5, .01, "1%"),
+            ("m07-c03-p01", (.25*2)/(1+.25*2), 1/3, "1/3"),
+            ("m08-c05-p04", 0, 0, "重要性可能为0"),
+            ("m09-c03-p05", 1-2, -1, "−1"),
+            ("m10-c03-p04", 1/(1+math.exp(-.5*math.log(3))), .634, "0.634"),
+            ("m11-c01-p03", 3**2/(1**2+2**2+3**2), 9/14, "9/14"),
+            ("m12-c05-p02", 3*1+2*1, 5, "预测5"),
+            ("m13-c04-p04", .9+.1/4, .925, "0.925"),
+            ("m14-c02-p06", 3*3*32*64*28*28, 14450688, "14,450,688"),
+            ("m15-c02-p05", .95**40, .129, "0.129"),
+            ("m16-c05-p03", 98+5, 103, "103日"),
+            ("m17-c01-p04", (.8*1+.6*0)/(math.sqrt(1)*math.sqrt(.8**2+.6**2)), .8, "0.8"),
+            ("m18-c01-p06", 2/(1+2+1), .5, "1/2"),
+            ("m19-c05-p06", 1-.95**20, .642, "64.2%"),
+            ("m20-c05-p02", min(1.4*2,1.2*2), 2.4, "2.4"),
+            ("m21-c02-p04", 2-3, -1, "−1"),
+            ("m22-c03-p03", math.exp(.8), 2.23, "2.23"),
+            ("m23-c01-p03", (1+.5)/2, .75, "0.75"),
+            ("m24-c05-p06", .6*.01+(-.2)*(-.02)-.002, .008, "0.8%"),
+        ]
+        self.assertEqual(len(cases), 24)
+        for lesson_id, observed, expected, anchor in cases:
+            with self.subTest(lesson=lesson_id):
+                lesson = self.lesson(lesson_id)
+                self.assertIn(anchor, lesson["worked_example"])
+                if abs(expected) >= 100:
+                    self.assertAlmostEqual(observed, expected, delta=.5)
+                else:
+                    self.assertAlmostEqual(observed, expected, delta=.0011)
 
 
 if __name__ == "__main__":
