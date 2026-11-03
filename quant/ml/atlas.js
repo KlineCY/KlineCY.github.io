@@ -69,7 +69,7 @@ function applyDepth(data,patches,manifest){
      !Array.isArray(s.protocol)||s.protocol.length<3||!Array.isArray(s.pitfalls))throw Error("深化讲义内容不完整："+id);
   if(s.worked_example&&(typeof s.worked_example!=="string"||s.worked_example.length<50))
    throw Error("深化讲义数值例子不足："+id);
-  if(/-(?:[456]|0[78]-[a-l])\.json$/.test(manifest.modules[i].path)&&
+  if(/-(?:[456]|0[789]-[a-z])\.json$/.test(manifest.modules[i].path)&&
      (s.equations.length<3||!s.worked_example||s.worked_example.length<60))
    throw Error("进阶讲义缺少完整数学算例："+id);
   const formulas=s.equations.map(eq=>{
