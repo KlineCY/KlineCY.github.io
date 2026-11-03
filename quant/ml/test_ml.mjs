@@ -93,11 +93,11 @@ assert(atlas.includes("loadArchive")&&atlas.includes("renderMath")&&atlas.includ
 assert(atlas.includes("applyDepth")&&atlas.includes('fetch("./atlas-depth-manifest.json"'),"published Atlas must load manifest");
 const depthManifest=read("atlas-depth-manifest.json");
 assert.equal(depthManifest.schema,1);
-assert.equal(depthManifest.expected_lessons,80);
+assert.equal(depthManifest.expected_lessons,128);
 assert.equal(depthManifest.expected_domains,24);
-assert.equal(depthManifest.modules.length,10);
-assert.equal(new Set(depthManifest.modules.map(m=>m.path)).size,10);
-assert.equal(depthManifest.modules.reduce((n,m)=>n+m.lessons,0),80);
+assert.equal(depthManifest.modules.length,16);
+assert.equal(new Set(depthManifest.modules.map(m=>m.path)).size,16);
+assert.equal(depthManifest.modules.reduce((n,m)=>n+m.lessons,0),128);
 const depthFiles=depthManifest.modules.map(m=>m.path.replace(/^\.\//,""));
 const seen=new Set(),domains=new Set();let workedCount=0;
 for(let i=0;i<depthFiles.length;i++){
@@ -111,16 +111,17 @@ for(let i=0;i<depthFiles.length;i++){
   for(const field of ["derivation","protocol","pitfalls"])assert(Array.isArray(chapter[field])&&chapter[field].length>=2,"missing "+field+": "+id);
   assert(chapter.equations.length>=2,"missing advanced formulas: "+id);
   if(chapter.worked_example){assert(chapter.worked_example.length>=50,"thin worked example: "+id);workedCount++;}
-  if(file.endsWith("-3.json"))assert(chapter.worked_example,"third-pass lesson must contain a worked example: "+id);
+  if(file.endsWith("-3.json")||file.endsWith("-4.json"))assert(chapter.worked_example,"advanced lecture requires worked example: "+id);
+  if(file.endsWith("-4.json"))assert(chapter.equations.length>=3&&chapter.worked_example.length>=60,"fourth-pass equation/example incomplete: "+id);
   for(const f of chapter.equations){
    assert(f.label&&f.tex,"missing advanced formula metadata: "+id);
    katex.renderToString(f.tex,{throwOnError:true,strict:"ignore"});
   }
  }
 }
-assert.equal(seen.size,80,"must load eighty advanced lessons");
+assert.equal(seen.size,128,"must load 128 advanced lessons");
 assert.equal(domains.size,24,"must cover all twenty-four domains");
-assert.equal(workedCount,24,"third-pass requires twenty-four worked examples");
+assert.equal(workedCount,72,"third and fourth passes require seventy-two worked examples");
 const binary=Buffer.concat([1,2,3,4].map(i=>fs.readFileSync(new URL("atlas/data.part"+i,here))));
 assert.equal(binary.length,1969862,"published archive bytes changed unexpectedly");
 const archive=JSON.parse(gunzipSync(binary).toString("utf8"));
@@ -129,7 +130,7 @@ assert(depthFnText.startsWith("function applyDepth("),"Atlas runtime function mi
 const escapeHtml=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const applyRuntimeDepth=vm.runInNewContext(depthFnText+"\napplyDepth;",{esc:escapeHtml});
 const runtimeIds=applyRuntimeDepth(archive,depthFiles.map(read),depthManifest);
-assert.equal(runtimeIds.size,80,"runtime overlay count mismatch");
+assert.equal(runtimeIds.size,128,"runtime overlay count mismatch");
 for(const id of seen){
  assert(runtimeIds.has(id),"runtime deep-dive missing: "+id);
  const article=archive.domains[id.slice(0,3)][id].html;
@@ -140,4 +141,4 @@ for(const id of seen){
 }
 assert(atlas.includes("depthOnly")&&atlas.includes("atlas-advanced-mark"),"advanced lesson filter and directory labels missing");
 assert(app.includes("manifest.lesson_files"),"legacy lesson reader unexpectedly removed");
-console.log("PASS: 80 rigorous advanced lessons across 24 domains; legacy curriculum 24 disciplines / 120 chapters / 720 nodes; published Atlas navigation and JS parse; "+lessons.length+" legacy tutorials, "+activeNotes.length+" active notes; all legacy LaTeX syntax valid.");
+console.log("PASS: 128 rigorous advanced lessons across 24 domains; legacy curriculum 24 disciplines / 120 chapters / 720 nodes; published Atlas navigation and JS parse; "+lessons.length+" legacy tutorials, "+activeNotes.length+" active notes; all legacy LaTeX syntax valid.");
