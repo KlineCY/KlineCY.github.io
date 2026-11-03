@@ -189,7 +189,7 @@ def main():
                 (len(re.sub(r"<[^>]+>", "", by_id[lid]["html"])), lid)
                 for lid in by_id
                 if lid.startswith(f"m{i:02d}-") and lid not in supplements
-            )[:4]
+            )[:5]
         ] for i in range(1, 25)
     }
     report = {
