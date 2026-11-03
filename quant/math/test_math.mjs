@@ -8,8 +8,8 @@ const c=read("./curriculum.json");
 const sources=["./lessons-foundations.json","./lessons-advanced.json","./lessons-more.json"].map(read);
 const manifest=read("./lessons-manifest.json");
 assert.equal(manifest.version,1);
-assert.equal(manifest.expected_lessons,54);
-assert.equal(manifest.modules.length,22);
+assert.equal(manifest.expected_lessons,55);
+assert.equal(manifest.modules.length,23);
 assert.equal(new Set(manifest.modules.map(x=>x.path)).size,22);
 assert.equal(manifest.modules.reduce((s,x)=>s+x.lessons,0),manifest.expected_lessons);
 const extras=manifest.modules.flatMap(mod=>{
