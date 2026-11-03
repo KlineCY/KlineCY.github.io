@@ -9,7 +9,8 @@ assert(begin>=0&&end>begin,"bounded loader functions must exist");
 const loader=atlas.slice(begin,end);
 let active=0,maxActive=0;
 const attempts=new Map();
-const fetch=async(url)=>{
+const fetch=async(url,options={})=>{
+ if(url.startsWith("./chapter-"))assert.equal(options.cache,"no-cache","module request must revalidate cached content");
  active++;maxActive=Math.max(maxActive,active);
  const trial=(attempts.get(url)||0)+1;
  attempts.set(url,trial);

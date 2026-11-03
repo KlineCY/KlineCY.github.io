@@ -4,7 +4,7 @@ const $=id=>document.getElementById(id);
 const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const LESSON=/^#(?:lesson|ml)\/(m\d\d-c\d\d-p\d\d)$/;
 const KEY="kline-quant-atlas-read-v1";
-const state={index:[],byId:new Map(),domains:{},searchText:new Map(),term:"",topic:"",activeId:"",read:new Set(),enhanced:new Set(),depthOnly:false,unreadOnly:false};
+const state={index:[],byId:new Map(),domains:{},searchText:new Map(),term:"",topic:"",activeId:"",read:new Set(),enhanced:new Set(),worked:new Set(),depthOnly:false,unreadOnly:false};
 try {const saved=JSON.parse(localStorage.getItem(KEY)||"[]");if(Array.isArray(saved))state.read=new Set(saved.filter(v=>typeof v==="string"))}catch(_){}
 function saveRead(){try{localStorage.setItem(KEY,JSON.stringify([...state.read]))}catch(_){}}
 function serializeReadProgress(read,knownIds){
@@ -81,7 +81,7 @@ function applyDepth(data,patches,manifest){
    seen.add(id);allDomains.add(id.slice(0,3));
   const row=data.domains[id.slice(0,3)]?.[id];
   if(!row)throw Error("深化讲义未找到目标："+id);
-  if(s.source_title&&s.source_title!==row.title)throw Error("深化讲义标题与原知识点不匹配："+id+" / "+s.source_title);
+  if(typeof s.source_title!=="string"||s.source_title!==row.title)throw Error("深化讲义标题与原知识点不匹配："+id+" / "+s.source_title);
   if(typeof s.title!=="string"||s.title.length<8||typeof s.overview!=="string"||s.overview.length<60||
      !Array.isArray(s.equations)||s.equations.length<2||!Array.isArray(s.derivation)||s.derivation.length<3||
      !Array.isArray(s.protocol)||s.protocol.length<3||!Array.isArray(s.pitfalls))throw Error("深化讲义内容不完整："+id);
@@ -140,7 +140,7 @@ async function fetchAtlasModulesBounded(files,concurrency=6,onProgress=()=>{}){
  const workers=Array.from({length:Math.min(concurrency,files.length)},async()=>{
   while(cursor<files.length){
    const index=cursor++;
-   output[index]=await fetchAtlasJson(files[index]);
+   output[index]=await fetchAtlasJson(files[index],{cache:"no-cache"});
     onProgress(++completed,files.length);
   }
  });
@@ -171,7 +171,7 @@ async function loadArchive(){
 }
 function visibleLessons(){
  const words=state.term.split(/\s+/).filter(Boolean);
- return state.index.filter(x=>(!state.topic||x.domain_id===state.topic)&&(!state.depthOnly||state.enhanced.has(x.id))&&(!state.unreadOnly||!state.read.has(x.id))&&
+ return state.index.filter(x=>(!state.topic||x.domain_id===state.topic)&&(!state.depthOnly||state.worked.has(x.id))&&(!state.unreadOnly||!state.read.has(x.id))&&
  (words.length===0||words.every(word=>state.searchText.get(x.id)?.includes(word))));
 }
 function updateReadStats(){
@@ -196,7 +196,7 @@ function renderDirectory(){
   return '<details class="atlas-section"'+(open?' open':'')+'><summary>'+esc(rows[0].domain)+" / "+esc(rows[0].chapter)+
    '<span class="atlas-chapter-count">'+count+"/"+rows.length+'</span></summary><div class="atlas-chapter-items">'+
    rows.map(x=>'<a href="#lesson/'+x.id+'" data-id="'+x.id+'"'+(x.id===state.activeId?' class="active" aria-current="page"':'')+'>'+
-    (state.read.has(x.id)?'<span class="atlas-done-mark" aria-label="已学">✓ </span>':'')+esc(x.title)+(state.enhanced.has(x.id)?'<span class="atlas-advanced-mark"> · 进阶</span>':'')+'</a>').join("")+
+    (state.read.has(x.id)?'<span class="atlas-done-mark" aria-label="已学">✓ </span>':'')+esc(x.title)+(state.worked.has(x.id)?'<span class="atlas-advanced-mark"> · 含示例</span>':'')+'</a>').join("")+
    "</div></details>";
  }).join("");
  const toc=$("atlas-toc"),previousScroll=toc.scrollTop;
@@ -251,7 +251,7 @@ function display(){
  const data=state.domains[meta.domain_id]?.[id];
  if(!data){root.innerHTML='<p class="atlas-error">讲义正文缺失：'+esc(id)+'</p>';return}
  state.activeId=id;
- if(state.depthOnly&&!state.enhanced.has(id)){state.depthOnly=false;$("atlas-depth-only").checked=false}
+ if(state.depthOnly&&!state.worked.has(id)){state.depthOnly=false;$("atlas-depth-only").checked=false}
   if(state.unreadOnly&&state.read.has(id)){state.unreadOnly=false;$("atlas-unread-only").checked=false}
  // Keep the directory and URL filters synchronized when a cross-topic link is opened.
  if(state.topic&&state.topic!==meta.domain_id){
@@ -328,14 +328,16 @@ async function start(){
   if(manifest.modules.reduce((sum,m)=>sum+m.lessons,0)!==manifest.expected_lessons)
    throw Error("深化讲义目录数量不一致");
   // Keep parallel downloads bounded; failures retry individually without restarting all modules.
-  const editorial=await fetchAtlasJson("./atlas-editorial.json");
+  const editorial=await fetchAtlasJson("./atlas-editorial.json",{cache:"no-cache"});
   const depthPatches=await fetchAtlasModulesBounded(depthFiles,6,(done,total)=>{
    if(done===total||done%8===0)showStatus("正在传输进阶正文 "+done+" / "+total+" 个模块…");
   });
   showStatus("进阶内容已传输，正在校验公式与构建全文索引…");
   applyEditorial(data,editorial);
   state.enhanced=applyDepth(data,depthPatches,manifest);
-  $("atlas-depth-count").textContent=state.enhanced.size;
+  state.worked=new Set(depthPatches.flatMap(patch=>Object.entries(patch.lessons)
+    .filter(([,chapter])=>Boolean(chapter.worked_example)).map(([id])=>id)));
+  $("atlas-depth-count").textContent=state.worked.size;
   state.index=data.catalog.items;state.byId=new Map(state.index.map(x=>[x.id,x]));state.domains=data.domains;
   state.read=new Set([...state.read].filter(id=>state.byId.has(id)));
   // Index visible article text as well as titles, chapters and code symbols.

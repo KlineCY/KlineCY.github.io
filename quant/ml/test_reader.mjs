@@ -16,7 +16,7 @@ const state={
   {id:"m02-c01-p02",domain_id:"m02",title:"滚动验证"}
  ],
  byId:new Map(),searchText:new Map(),term:"",topic:"",depthOnly:false,unreadOnly:false,
- enhanced:new Set(["m01-c01-p02","m02-c01-p02"]),read:new Set(["m01-c01-p01"]),activeId:"m01-c01-p01"
+ enhanced:new Set(["m01-c01-p01","m01-c01-p02","m02-c01-p01","m02-c01-p02"]),worked:new Set(["m01-c01-p02","m02-c01-p02"]),read:new Set(["m01-c01-p01"]),activeId:"m01-c01-p01"
 };
 state.byId=new Map(state.index.map(x=>[x.id,x]));
 for(const x of state.index)state.searchText.set(x.id,x.title.toLowerCase());
@@ -32,7 +32,7 @@ assert.equal(reader.visibleLessons().length,4,"default must show all lessons");
 state.unreadOnly=true;
 assert.deepEqual(Array.from(reader.visibleLessons(),x=>x.id),["m01-c01-p02","m02-c01-p01","m02-c01-p02"]);
 state.depthOnly=true;
-assert.deepEqual(Array.from(reader.visibleLessons(),x=>x.id),["m01-c01-p02","m02-c01-p02"],"unread and advanced filters intersect");
+assert.deepEqual(Array.from(reader.visibleLessons(),x=>x.id),["m01-c01-p02","m02-c01-p02"],"unread and worked-example filters intersect");
 state.topic="m01";
 assert.deepEqual(Array.from(reader.visibleLessons(),x=>x.id),["m01-c01-p02"],"topic and progress filters intersect");
 state.topic="";state.depthOnly=false;state.unreadOnly=false;
@@ -49,4 +49,4 @@ location.hash="";
 reader.continueUnread();
 assert.equal(location.hash,"","all-complete progress must not navigate");
 assert(messages.at(-1).includes("全部 4 篇"),"all-complete status should be explanatory");
-console.log("PASS: unread and advanced filters, topic/search intersection, next-unread wrapping and complete state");
+console.log("PASS: unread and worked-example filters, topic/search intersection, next-unread wrapping and complete state");

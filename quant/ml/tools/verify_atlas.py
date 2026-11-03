@@ -111,6 +111,7 @@ def main():
         lid: by_id[lid]["title"] for lid, body in supplements.items()
         if not body.get("source_title")
     }
+    assert not missing_source_titles, ("advanced lessons without exact source titles", missing_source_titles)
     worked_count = sum(bool(x.get("worked_example")) for x in supplements.values())
     assert worked_count == 664, "advanced worked-example count mismatch"
     for module in modules:
@@ -123,8 +124,7 @@ def main():
     assert not any(GENERIC_A in b["html"] or GENERIC_B in b["html"] for b in by_id.values()), "generic editorial placeholders remain"
     for lid, lesson in supplements.items():
         assert lid in by_id, ("orphan in-lesson supplement", lid)
-        if "source_title" in lesson:
-            assert lesson["source_title"] == by_id[lid]["title"], ("source title mismatch", lid, lesson["source_title"], by_id[lid]["title"])
+        assert lesson["source_title"] == by_id[lid]["title"], ("source title mismatch", lid, lesson["source_title"], by_id[lid]["title"])
         assert len(lesson["title"]) >= 8 and len(lesson["overview"]) >= 60, lid
         assert len(lesson["equations"]) >= 2, lid
         if lesson.get("worked_example"):

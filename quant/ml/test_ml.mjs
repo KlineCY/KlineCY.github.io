@@ -100,14 +100,14 @@ assert.equal(depthManifest.modules.length,93);
 assert.equal(new Set(depthManifest.modules.map(m=>m.path)).size,93);
 assert.equal(depthManifest.modules.reduce((n,m)=>n+m.lessons,0),720);
 const depthFiles=depthManifest.modules.map(m=>m.path.replace(/^\.\//,""));
-const seen=new Set(),domains=new Set();let workedCount=0;
+const seen=new Set(),domains=new Set(),depthById=new Map();let workedCount=0;
 for(let i=0;i<depthFiles.length;i++){
  const file=depthFiles[i],depth=read(file);
  assert.equal(depth.schema,1,"advanced overlay schema mismatch: "+file);
  assert.equal(Object.keys(depth.lessons).length,depthManifest.modules[i].lessons,"count mismatch: "+file);
  for(const [id,chapter] of Object.entries(depth.lessons)){
   assert(/^m\d\d-c\d\d-p\d\d$/.test(id),"advanced topic ID invalid: "+id);
-  assert(!seen.has(id),"duplicate advanced lesson: "+id);seen.add(id);domains.add(id.slice(0,3));
+  assert(!seen.has(id),"duplicate advanced lesson: "+id);seen.add(id);domains.add(id.slice(0,3));depthById.set(id,chapter);
   assert(chapter.title.length>=8&&chapter.overview.length>=60,"thin advanced chapter: "+id);
   for(const field of ["derivation","protocol","pitfalls"])assert(Array.isArray(chapter[field])&&chapter[field].length>=2,"missing "+field+": "+id);
   assert(chapter.equations.length>=2,"missing advanced formulas: "+id);
@@ -129,6 +129,11 @@ assert.equal(workedCount,664,"advanced worked-example count mismatch");
 const binary=Buffer.concat([1,2,3,4].map(i=>fs.readFileSync(new URL("atlas/data.part"+i,here))));
 assert.equal(binary.length,1969862,"published archive bytes changed unexpectedly");
 const archive=JSON.parse(gunzipSync(binary).toString("utf8"));
+for(const [id,chapter] of depthById){
+ const original=archive.domains[id.slice(0,3)]?.[id];
+ assert(original,"missing original for "+id);
+ assert.equal(chapter.source_title,original.title,"advanced source title mismatch for "+id);
+}
 const depthFnText=atlas.slice(atlas.indexOf("function applyDepth("),atlas.indexOf("function cleanCodeComments("));
 assert(depthFnText.startsWith("function applyDepth("),"Atlas runtime function missing");
 const escapeHtml=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -140,10 +145,10 @@ for(const id of seen){
  const article=archive.domains[id.slice(0,3)][id].html;
  assert(article.includes('aria-label="进阶推导与研究实践"'),"advanced lesson not attached: "+id);
  assert(article.includes("推导与适用边界")&&article.includes("研究与实现流程"),"advanced sections missing: "+id);
- const mod=depthFiles.map(read).find(m=>m.lessons[id]);
- if(mod.lessons[id].worked_example)assert(article.includes("数值或研究示例"),"runtime worked example missing: "+id);
+ const mod=depthById.get(id);
+ if(mod.worked_example)assert(article.includes("数值或研究示例"),"runtime worked example missing: "+id);
 }
-assert(atlas.includes("depthOnly")&&atlas.includes("atlas-advanced-mark"),"advanced lesson filter and directory labels missing");
+assert(atlas.includes("depthOnly")&&atlas.includes("atlas-advanced-mark")&&atlas.includes("state.worked"),"advanced lesson filter and directory labels missing");
 assert(atlas.includes("unreadOnly")&&atlas.includes("continueUnread")&&atlas.includes("atlas-jump-depth"),"published reader must support unread filtering, resuming and in-lesson advanced navigation");
 assert(app.includes("manifest.lesson_files"),"legacy lesson reader unexpectedly removed");
 console.log("PASS: 720 rigorous advanced lessons across 24 domains; legacy curriculum 24 disciplines / 120 chapters / 720 nodes; published Atlas navigation and JS parse; "+lessons.length+" legacy tutorials, "+activeNotes.length+" active notes; all legacy LaTeX syntax valid.");
