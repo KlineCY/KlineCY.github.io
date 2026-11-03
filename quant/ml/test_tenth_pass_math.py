@@ -1,4 +1,4 @@
-"""Independent arithmetic checks for 12 stage-ten advanced lessons."""
+"""Independent arithmetic checks for 23 stage-ten advanced lessons."""
 import json
 import math
 from pathlib import Path
