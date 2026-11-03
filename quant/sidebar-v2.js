@@ -57,7 +57,7 @@
       subsection("mathDisciplineNav","按学科推进","mathDisciplineChoices",page==="math"),
     ml:
       '<a class="q-menu-link" href="'+route("ml")+'">完整机器学习课程树</a>'+
-      '<a class="q-menu-link" href="'+route("ml")+'?status=complete">已编写算法讲义</a>'+
+      '<a class="q-menu-link" href="'+route("ml")+'?status=complete">720篇系统讲义</a>'+
       subsection("mlDisciplineNav","按专题推进","mlDisciplineChoices",page==="ml"),
     papers:
       '<a class="q-menu-link" href="'+route("papers")+'">全部论文</a>'+
@@ -245,9 +245,9 @@
     if(!d?.disciplines)return;
     fill("mathDisciplineChoices",d.disciplines.map(x=>({name:x.id,label:x.title})),r=>route("math")+"?discipline="+encodeURIComponent(r.name));
   });
-  getJson(route("ml")+"curriculum.json").then(d=>{
-    if(!d?.disciplines)return;
-    fill("mlDisciplineChoices",d.disciplines.map(x=>({name:x.id,label:x.title})),r=>route("ml")+"?discipline="+encodeURIComponent(r.name));
+  getJson(route("ml")+"atlas-topics.json").then(d=>{
+    if(!d?.topics)return;
+    fill("mlDisciplineChoices",d.topics.map(x=>({name:x.id,label:x.title+" ("+x.count+")"})),r=>route("ml")+"?discipline="+encodeURIComponent(r.name));
   });
   if(page!=="papers"){
     getJson(route("papers")+"data.json").then(d=>{
