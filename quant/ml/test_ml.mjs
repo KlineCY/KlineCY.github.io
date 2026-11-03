@@ -90,7 +90,8 @@ assert(html.includes('src="./atlas.js"'),"published page must load Atlas reader"
 assert(nav.includes('["ml","机器学习 Machine Learning"]'));
 assert(atlas.includes("loadArchive")&&atlas.includes("renderMath")&&atlas.includes("copyText"),"Atlas reader features missing");
 assert(atlas.includes("applyDepth")&&atlas.includes('"./atlas-depth-foundations.json"')&&atlas.includes('"./atlas-depth-learning.json"')&&atlas.includes('"./atlas-depth-quant.json"'),"published Atlas must load all deep-dive modules");
-const depthFiles=["atlas-depth.json","atlas-depth-foundations.json","atlas-depth-learning.json","atlas-depth-quant.json"];
+const depthFiles=["atlas-depth.json","atlas-depth-foundations.json","atlas-depth-learning.json","atlas-depth-quant.json",
+ "atlas-depth-foundations-2.json","atlas-depth-learning-2.json","atlas-depth-quant-2.json"];
 const seen=new Set(),domains=new Set();
 for(const file of depthFiles){
  const depth=read(file);
@@ -108,7 +109,7 @@ for(const file of depthFiles){
   }
  }
 }
-assert.equal(seen.size,32,"must load 32 advanced lessons");
+assert.equal(seen.size,56,"must load 56 advanced lessons");
 assert.equal(domains.size,24,"must cover all 24 ML topics");
 assert(app.includes("manifest.lesson_files"),"legacy lesson reader unexpectedly removed");
-console.log("PASS: 32 rigorous advanced lessons across 24 domains; legacy curriculum 24 disciplines / 120 chapters / 720 nodes; published Atlas navigation and JS parse; "+lessons.length+" legacy tutorials, "+activeNotes.length+" active notes; all legacy LaTeX syntax valid.");
+console.log("PASS: 56 rigorous advanced lessons across 24 domains; legacy curriculum 24 disciplines / 120 chapters / 720 nodes; published Atlas navigation and JS parse; "+lessons.length+" legacy tutorials, "+activeNotes.length+" active notes; all legacy LaTeX syntax valid.");
