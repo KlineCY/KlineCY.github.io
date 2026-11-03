@@ -85,7 +85,7 @@ const nav=fs.readFileSync(new URL("../sidebar-v2.js",here),"utf8");
 new vm.Script(app);
 new vm.Script(atlas);
 new vm.Script(nav);
-for(const marker of ['id="quantSidebar"','id="atlas-search"','id="atlas-topic"','id="atlas-toc"','id="atlas-lesson"','id="atlas-status"'])assert(html.includes(marker),"published Atlas marker absent: "+marker);
+for(const marker of ['id="quantSidebar"','id="atlas-search"','id="atlas-topic"','id="atlas-toc"','id="atlas-lesson"','id="atlas-status"','id="atlas-depth-only"','id="atlas-depth-count"'])assert(html.includes(marker),"published Atlas marker absent: "+marker);
 assert(html.includes('src="./atlas.js"'),"published page must load Atlas reader");
 assert(nav.includes('["ml","机器学习 Machine Learning"]'));
 assert(atlas.includes("loadArchive")&&atlas.includes("renderMath")&&atlas.includes("copyText"),"Atlas reader features missing");
@@ -111,5 +111,6 @@ for(const file of depthFiles){
 }
 assert.equal(seen.size,56,"must load 56 advanced lessons");
 assert.equal(domains.size,24,"must cover all 24 ML topics");
+assert(atlas.includes("depthOnly")&&atlas.includes("atlas-advanced-mark"),"advanced lesson filter and directory labels missing");
 assert(app.includes("manifest.lesson_files"),"legacy lesson reader unexpectedly removed");
 console.log("PASS: 56 rigorous advanced lessons across 24 domains; legacy curriculum 24 disciplines / 120 chapters / 720 nodes; published Atlas navigation and JS parse; "+lessons.length+" legacy tutorials, "+activeNotes.length+" active notes; all legacy LaTeX syntax valid.");
