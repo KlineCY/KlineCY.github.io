@@ -40,14 +40,14 @@ for(const l of extras){
 const lessons=[...sources.flatMap(f=>f.lessons),...extras];
 const ids=new Set(),chIds=new Set(),deptIds=new Set(),nodeMap=new Map();
 assert.equal(c.disciplines.length,20,"discipline coverage count");
-assert.equal(c.chapters.length,106,"chapter coverage count");
-assert.equal(c.nodes.length,636,"expected expanded topic catalog");
+assert.equal(c.chapters.length,108,"chapter coverage count");
+assert.equal(c.nodes.length,648,"expected expanded topic catalog");
 for(let i=0;i<c.disciplines.length;i++){
  const d=c.disciplines[i];
  assert(!deptIds.has(d.id),"duplicate discipline "+d.id);
  deptIds.add(d.id);
  assert.equal(d.order,i+1,"discipline progression order");
- assert.equal(d.chapter_ids.length,["statistics","econometrics","timeseries","finance","optimization","riskmath"].includes(d.id)?6:5,"discipline chapter count "+d.id);
+ assert.equal(d.chapter_ids.length,d.id==="optimization"?7:["statistics","econometrics","timeseries","finance","riskmath","mlmath"].includes(d.id)?6:5,"discipline chapter count "+d.id);
  assert.equal(new Set(d.chapter_ids).size,d.chapter_ids.length,"duplicate chapter references "+d.id);
  for(const cid of d.chapter_ids)assert(c.chapters.some(ch=>ch.id===cid&&ch.discipline_id===d.id),"unlinked or misassigned chapter "+cid);
  assert(d.resources?.length>0,d.id+": no learning resources");
