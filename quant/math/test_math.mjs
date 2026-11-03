@@ -36,6 +36,9 @@ for(let i=0;i<c.disciplines.length;i++){
  assert(!deptIds.has(d.id),"duplicate discipline "+d.id);
  deptIds.add(d.id);
  assert.equal(d.order,i+1,"discipline progression order");
+ assert.equal(d.chapter_ids.length,["statistics","econometrics","timeseries","finance","optimization","riskmath"].includes(d.id)?6:5,"discipline chapter count "+d.id);
+ assert.equal(new Set(d.chapter_ids).size,d.chapter_ids.length,"duplicate chapter references "+d.id);
+ for(const cid of d.chapter_ids)assert(c.chapters.some(ch=>ch.id===cid&&ch.discipline_id===d.id),"unlinked or misassigned chapter "+cid);
  assert(d.resources?.length>0,d.id+": no learning resources");
  for(const r of d.resources){assert(/^https:\/\//.test(r.url),d.id+": invalid resource URL")}
 }
@@ -87,6 +90,9 @@ for(const marker of ['id="quantSidebar"','id="tree"','id="article"','id="discipl
  assert(html.includes(marker),"missing element "+marker);
 }
 assert(app.includes("loadMathAdditions()")&&app.includes("fetchMathJson("),"math module loader absent");
-assert(html.includes("app.js?v=20261103-math-02"),"versioned math loader missing");
+ for(const name of ["curriculum.json","lessons-foundations.json","lessons-advanced.json","lessons-more.json"])
+  assert(app.includes('fetch("./'+name+'",{cache:"no-cache"})'),"core math resource must revalidate cache "+name);
+assert(html.includes("app.js?v=20261103-math-03"),"versioned math loader missing");
+assert(html.includes("styles.css?v=20261103-math-03"),"versioned math styles missing");
 assert(sidebar.includes('["math","量化数学 Mathematics"]'),"math missing from navigation");
 console.log("Math validation PASS: "+c.disciplines.length+" disciplines, "+c.chapters.length+" chapters, "+c.nodes.length+" nodes, "+lessons.length+" complete lessons, all displayed LaTeX formulas parseable.");

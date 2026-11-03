@@ -256,10 +256,10 @@ async function loadMathAdditions(){
  return added;
 }
 Promise.all([
- fetch("./curriculum.json").then(r=>{if(!r.ok)throw Error("知识树加载失败 "+r.status);return r.json()}),
- fetch("./lessons-foundations.json").then(r=>{if(!r.ok)throw Error("基础讲义加载失败 "+r.status);return r.json()}),
- fetch("./lessons-advanced.json").then(r=>{if(!r.ok)throw Error("进阶讲义加载失败 "+r.status);return r.json()}),
- fetch("./lessons-more.json").then(r=>{if(!r.ok)throw Error("专题讲义加载失败 "+r.status);return r.json()}),
+ fetch("./curriculum.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw Error("知识树加载失败 "+r.status);return r.json()}),
+ fetch("./lessons-foundations.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw Error("基础讲义加载失败 "+r.status);return r.json()}),
+ fetch("./lessons-advanced.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw Error("进阶讲义加载失败 "+r.status);return r.json()}),
+ fetch("./lessons-more.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw Error("专题讲义加载失败 "+r.status);return r.json()}),
  loadMathAdditions()
 ]).then(([c,l1,l2,l3,extra])=>{
 curriculum=c;depts=c.disciplines;chapters=c.chapters;nodes=c.nodes;lessons=[...l1.lessons,...l2.lessons,...l3.lessons,...extra];
