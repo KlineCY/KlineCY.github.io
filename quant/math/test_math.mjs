@@ -53,6 +53,22 @@ for(let i=0;i<c.disciplines.length;i++){
  assert(d.resources?.length>0,d.id+": no learning resources");
  for(const r of d.resources){assert(/^https:\/\//.test(r.url),d.id+": invalid resource URL")}
 }
+const knowledge=new Map(c.nodes.map(n=>[n.id,n]));
+const memberships=new Map();
+for(const chapter of c.chapters)for(const id of chapter.node_ids)memberships.set(id,(memberships.get(id)||0)+1);
+for(const node of c.nodes)assert.equal(memberships.get(node.id),1,"topic appears in exactly one chapter: "+node.id);
+const verified=new Set(),exploring=new Set();
+function auditDependency(id){
+ if(exploring.has(id))throw Error("cyclic mathematical prerequisite: "+id);
+ if(verified.has(id))return;
+ exploring.add(id);
+ for(const p of knowledge.get(id).prerequisites||[]){
+  assert(knowledge.has(p),"broken prerequisite: "+id+" -> "+p);
+  auditDependency(p);
+ }
+ exploring.delete(id);verified.add(id);
+}
+for(const node of c.nodes)auditDependency(node.id);
 for(const chapter of c.chapters){
  assert(!chIds.has(chapter.id),"duplicate chapter "+chapter.id);chIds.add(chapter.id);
  assert(deptIds.has(chapter.discipline_id),"missing department "+chapter.id);

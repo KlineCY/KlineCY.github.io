@@ -14,6 +14,16 @@ assert.equal(bundle.schema,1);
 assert(bundle.chapters.length>=5,"at least two full ML extension chapters expected");
 const allNew=bundle.chapters.flatMap(ch=>ch.lessons);
 assert(allNew.length>=20,"all published additional courses must be verified");
+const byNewId=new Map(allNew.map(x=>[x.id,x]));
+const done=new Set(),stack=new Set();
+function auditNewCourse(id){
+ if(stack.has(id))throw Error("cyclic ML prerequisite: "+id);
+ if(done.has(id))return;
+ stack.add(id);
+ for(const link of byNewId.get(id).prerequisites||[])if(link.kind==="ml"&&byNewId.has(link.id))auditNewCourse(link.id);
+ stack.delete(id);done.add(id);
+}
+for(const id of byNewId.keys())auditNewCourse(id);
 const originalIds=new Set(archive.catalog.items.map(x=>x.id));
 const newIds=new Set(allNew.map(l=>l.id));
 assert.equal(newIds.size,allNew.length,"extended ML IDs must be unique");
@@ -29,6 +39,7 @@ for(const chapter of bundle.chapters){
    if(ref.kind==="math")assert(mathIds.has(ref.id),"math prerequisite missing "+ref.id);
    else assert(originalIds.has(ref.id)||newIds.has(ref.id),"machine learning prerequisite missing "+ref.id);
   }
+  assert.equal(new Set(lecture.sections.map(x=>x.title)).size,lecture.sections.length,"repeated mini-chapter heading "+lecture.id);
   for(const section of lecture.sections){
    assert(section.title&&section.question&&section.paragraphs.length>=2&&section.equations.length&&section.worked&&section.boundary,"incomplete chapter "+lecture.id);
    sectionCount++;
