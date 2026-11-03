@@ -4,7 +4,7 @@ const $=id=>document.getElementById(id);
 const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const LESSON=/^#(?:lesson|ml)\/(m\d\d-c\d\d-p\d\d)$/;
 const KEY="kline-quant-atlas-read-v1";
-const state={index:[],byId:new Map(),domains:{},searchText:new Map(),term:"",topic:"",activeId:"",read:new Set(),enhanced:new Set(),worked:new Set(),depthOnly:false,unreadOnly:false};
+const state={index:[],byId:new Map(),domains:{},searchText:new Map(),term:"",topic:"",activeId:"",read:new Set(),enhanced:new Set(),learnedOnly:false,unreadOnly:false};
 try {const saved=JSON.parse(localStorage.getItem(KEY)||"[]");if(Array.isArray(saved))state.read=new Set(saved.filter(v=>typeof v==="string"))}catch(_){}
 function saveRead(){try{localStorage.setItem(KEY,JSON.stringify([...state.read]))}catch(_){}}
 function serializeReadProgress(read,knownIds){
@@ -169,14 +169,23 @@ async function loadArchive(){
  }
  return parsed;
 }
+function setProgressFilter(kind,checked){
+ if(kind==="learned"){state.learnedOnly=checked;if(checked)state.unreadOnly=false}
+ else if(kind==="unread"){state.unreadOnly=checked;if(checked)state.learnedOnly=false}
+ else throw Error("未知学习进度筛选");
+ $("atlas-learned-only").checked=state.learnedOnly;
+ $("atlas-unread-only").checked=state.unreadOnly;
+ renderDirectory();
+}
 function visibleLessons(){
  const words=state.term.split(/\s+/).filter(Boolean);
- return state.index.filter(x=>(!state.topic||x.domain_id===state.topic)&&(!state.depthOnly||state.worked.has(x.id))&&(!state.unreadOnly||!state.read.has(x.id))&&
+ return state.index.filter(x=>(!state.topic||x.domain_id===state.topic)&&(!state.learnedOnly||state.read.has(x.id))&&(!state.unreadOnly||!state.read.has(x.id))&&
  (words.length===0||words.every(word=>state.searchText.get(x.id)?.includes(word))));
 }
 function updateReadStats(){
  const n=state.index.filter(x=>state.read.has(x.id)).length;
  const el=$("atlas-read-count");if(el)el.textContent=n+" / 720 篇已标记";
+ const count=$("atlas-learned-count");if(count)count.textContent=n;
  const b=$("atlas-read-toggle");
  if(b&&state.activeId){const done=state.read.has(state.activeId);b.setAttribute("aria-pressed",String(done));b.textContent=done?"已学 · 点击取消":"标记已学";}
 }
@@ -196,7 +205,7 @@ function renderDirectory(){
   return '<details class="atlas-section"'+(open?' open':'')+'><summary>'+esc(rows[0].domain)+" / "+esc(rows[0].chapter)+
    '<span class="atlas-chapter-count">'+count+"/"+rows.length+'</span></summary><div class="atlas-chapter-items">'+
    rows.map(x=>'<a href="#lesson/'+x.id+'" data-id="'+x.id+'"'+(x.id===state.activeId?' class="active" aria-current="page"':'')+'>'+
-    (state.read.has(x.id)?'<span class="atlas-done-mark" aria-label="已学">✓ </span>':'')+esc(x.title)+(state.worked.has(x.id)?'<span class="atlas-advanced-mark"> · 含示例</span>':'')+'</a>').join("")+
+    (state.read.has(x.id)?'<span class="atlas-done-mark" aria-label="已学">✓ </span>':'')+esc(x.title)++'</a>').join("")+
    "</div></details>";
  }).join("");
  const toc=$("atlas-toc"),previousScroll=toc.scrollTop;
@@ -251,7 +260,7 @@ function display(){
  const data=state.domains[meta.domain_id]?.[id];
  if(!data){root.innerHTML='<p class="atlas-error">讲义正文缺失：'+esc(id)+'</p>';return}
  state.activeId=id;
- if(state.depthOnly&&!state.worked.has(id)){state.depthOnly=false;$("atlas-depth-only").checked=false}
+ if(state.learnedOnly&&!state.read.has(id)){state.learnedOnly=false;$("atlas-learned-only").checked=false}
   if(state.unreadOnly&&state.read.has(id)){state.unreadOnly=false;$("atlas-unread-only").checked=false}
  // Keep the directory and URL filters synchronized when a cross-topic link is opened.
  if(state.topic&&state.topic!==meta.domain_id){
@@ -282,6 +291,8 @@ function display(){
  });
  $("atlas-read-toggle").addEventListener("click",()=>{
   if(state.read.has(id))state.read.delete(id);else state.read.add(id);
+  if(state.learnedOnly&&!state.read.has(id)){state.learnedOnly=false;$("atlas-learned-only").checked=false}
+  if(state.unreadOnly&&state.read.has(id)){state.unreadOnly=false;$("atlas-unread-only").checked=false}
   saveRead();renderDirectory();
  });
  fixInlineMarkdown(root.querySelector(".article"));
@@ -335,9 +346,6 @@ async function start(){
   showStatus("进阶内容已传输，正在校验公式与构建全文索引…");
   applyEditorial(data,editorial);
   state.enhanced=applyDepth(data,depthPatches,manifest);
-  state.worked=new Set(depthPatches.flatMap(patch=>Object.entries(patch.lessons)
-    .filter(([,chapter])=>Boolean(chapter.worked_example)).map(([id])=>id)));
-  $("atlas-depth-count").textContent=state.worked.size;
   state.index=data.catalog.items;state.byId=new Map(state.index.map(x=>[x.id,x]));state.domains=data.domains;
   state.read=new Set([...state.read].filter(id=>state.byId.has(id)));
   // Index visible article text as well as titles, chapters and code symbols.
@@ -358,8 +366,8 @@ async function start(){
   state.topic=groups.has(topic)?topic:"";$("atlas-topic").value=state.topic;
   $("atlas-search").addEventListener("input",e=>{state.term=e.target.value.trim().toLocaleLowerCase();renderDirectory()});
   $("atlas-topic").addEventListener("change",e=>setTopic(e.target.value));
-  $("atlas-depth-only").addEventListener("change",e=>{state.depthOnly=e.target.checked;renderDirectory()});
-  $("atlas-unread-only").addEventListener("change",e=>{state.unreadOnly=e.target.checked;renderDirectory()});
+  $("atlas-learned-only").addEventListener("change",e=>setProgressFilter("learned",e.target.checked));
+  $("atlas-unread-only").addEventListener("change",e=>setProgressFilter("unread",e.target.checked));
   $("atlas-resume").addEventListener("click",continueUnread);
   $("atlas-export").addEventListener("click",()=>{
    try{
@@ -385,7 +393,7 @@ async function start(){
     showStatus("进度合并完成，新增"+(state.read.size-before)+"篇已学记录；总计"+state.read.size+"篇。原有记录未清除。");
    }catch(error){showStatus("导入未执行："+error.message,true)}
   });
-  $("atlas-clear").addEventListener("click",()=>{state.term="";$("atlas-search").value="";state.depthOnly=false;$("atlas-depth-only").checked=false;state.unreadOnly=false;$("atlas-unread-only").checked=false;setTopic("");});
+  $("atlas-clear").addEventListener("click",()=>{state.term="";$("atlas-search").value="";state.learnedOnly=false;$("atlas-learned-only").checked=false;state.unreadOnly=false;$("atlas-unread-only").checked=false;setTopic("");});
   $("atlas-lesson").addEventListener("click",e=>{
    const button=e.target.closest("[data-ml-copy-point-code]");
    if(!button)return;

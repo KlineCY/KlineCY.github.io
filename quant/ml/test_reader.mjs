@@ -15,38 +15,44 @@ const state={
   {id:"m02-c01-p01",domain_id:"m02",title:"时间序列"},
   {id:"m02-c01-p02",domain_id:"m02",title:"滚动验证"}
  ],
- byId:new Map(),searchText:new Map(),term:"",topic:"",depthOnly:false,unreadOnly:false,
- enhanced:new Set(["m01-c01-p01","m01-c01-p02","m02-c01-p01","m02-c01-p02"]),worked:new Set(["m01-c01-p02","m02-c01-p02"]),read:new Set(["m01-c01-p01"]),activeId:"m01-c01-p01"
+ byId:new Map(),searchText:new Map(),term:"",topic:"",learnedOnly:false,unreadOnly:false,
+ enhanced:new Set(["m01-c01-p01","m01-c01-p02","m02-c01-p01","m02-c01-p02"]),
+ read:new Set(["m01-c01-p01"]),activeId:"m01-c01-p01"
 };
 state.byId=new Map(state.index.map(x=>[x.id,x]));
 for(const x of state.index)state.searchText.set(x.id,x.title.toLowerCase());
 const location={hash:""};
+const input={"atlas-learned-only":{checked:false},"atlas-unread-only":{checked:false}};
 const messages=[];
+let renders=0;
 const reader=vm.runInNewContext(
+ segment("function setProgressFilter(","function visibleLessons(){")+
  segment("function visibleLessons(){","function updateReadStats(){")+
  segment("function jump(id){","function display(){")+
- "\n({visibleLessons,continueUnread});",
- {state,location,showStatus:s=>messages.push(s)}
+ "\n({setProgressFilter,visibleLessons,continueUnread});",
+ {state,location,$:id=>input[id],renderDirectory:()=>{renders++},showStatus:s=>messages.push(s)}
 );
-assert.equal(reader.visibleLessons().length,4,"default must show all lessons");
-state.unreadOnly=true;
+assert.equal(reader.visibleLessons().length,4);
+reader.setProgressFilter("unread",true);
 assert.deepEqual(Array.from(reader.visibleLessons(),x=>x.id),["m01-c01-p02","m02-c01-p01","m02-c01-p02"]);
-state.depthOnly=true;
-assert.deepEqual(Array.from(reader.visibleLessons(),x=>x.id),["m01-c01-p02","m02-c01-p02"],"unread and worked-example filters intersect");
-state.topic="m01";
-assert.deepEqual(Array.from(reader.visibleLessons(),x=>x.id),["m01-c01-p02"],"topic and progress filters intersect");
-state.topic="";state.depthOnly=false;state.unreadOnly=false;
-state.term="时间";
-assert.deepEqual(Array.from(reader.visibleLessons(),x=>x.id),["m02-c01-p01"],"full-text term still filters lessons");
-state.term="";
+reader.setProgressFilter("learned",true);
+assert.deepEqual(Array.from(reader.visibleLessons(),x=>x.id),["m01-c01-p01"]);
+assert.equal(input["atlas-unread-only"].checked,false,"learned and unread filters must be mutually exclusive");
+assert.equal(input["atlas-learned-only"].checked,true);
+state.read.add("m02-c01-p02");state.topic="m02";
+assert.deepEqual(Array.from(reader.visibleLessons(),x=>x.id),["m02-c01-p02"],"learned and topic filters intersect");
+reader.setProgressFilter("learned",false);
+assert.deepEqual(Array.from(reader.visibleLessons(),x=>x.id),["m02-c01-p01","m02-c01-p02"]);
+state.topic="";state.term="时间";
+assert.deepEqual(Array.from(reader.visibleLessons(),x=>x.id),["m02-c01-p01"],"search filters");
+state.term="";reader.continueUnread();
+assert.equal(location.hash,"lesson/m01-c01-p02","resume next unread");
+state.activeId="m02-c01-p02";reader.continueUnread();
+assert.equal(location.hash,"lesson/m01-c01-p02","resume wraps");
+state.read=new Set(state.index.map(x=>x.id));location.hash="";
 reader.continueUnread();
-assert.equal(location.hash,"lesson/m01-c01-p02","resume finds next unread after current");
-state.activeId="m02-c01-p02";
-reader.continueUnread();
-assert.equal(location.hash,"lesson/m01-c01-p02","resume wraps to beginning");
-state.read=new Set(state.index.map(x=>x.id));
-location.hash="";
-reader.continueUnread();
-assert.equal(location.hash,"","all-complete progress must not navigate");
-assert(messages.at(-1).includes("全部 4 篇"),"all-complete status should be explanatory");
-console.log("PASS: unread and worked-example filters, topic/search intersection, next-unread wrapping and complete state");
+assert.equal(location.hash,"","all complete must not navigate");
+assert(messages.at(-1).includes("全部 4 篇"));
+assert(renders>=3);
+assert.throws(()=>reader.setProgressFilter("bad",true),/未知学习进度筛选/);
+console.log("PASS: learned/unread filters mutually exclusive, topic/search, resume and completion");
