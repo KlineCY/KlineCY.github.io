@@ -90,7 +90,8 @@ for(const marker of ['id="quantSidebar"','id="atlas-search"','id="atlas-topic"',
 assert(html.includes('src="./atlas.js"'),"published page must load Atlas reader");
 assert(nav.includes('["ml","机器学习 Machine Learning"]'));
 assert(atlas.includes("loadArchive")&&atlas.includes("renderMath")&&atlas.includes("copyText"),"Atlas reader features missing");
-assert(atlas.includes("applyDepth")&&atlas.includes('fetch("./atlas-depth-manifest.json"'),"published Atlas must load manifest");
+assert(atlas.includes("applyDepth")&&atlas.includes('fetchAtlasJson("./atlas-depth-manifest.json"'),"published Atlas must load manifest with bounded retries");
+assert(atlas.includes("fetchAtlasModulesBounded(depthFiles,6)"),"advanced modules must have bounded concurrency");
 const depthManifest=read("atlas-depth-manifest.json");
 assert.equal(depthManifest.schema,1);
 assert.equal(depthManifest.expected_lessons,416);
