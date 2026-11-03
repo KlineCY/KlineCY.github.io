@@ -86,7 +86,7 @@ const nav=fs.readFileSync(new URL("../sidebar-v2.js",here),"utf8");
 new vm.Script(app);
 new vm.Script(atlas);
 new vm.Script(nav);
-for(const marker of ['id="quantSidebar"','id="atlas-search"','id="atlas-topic"','id="atlas-toc"','id="atlas-lesson"','id="atlas-status"','id="atlas-depth-only"','id="atlas-depth-count"'])assert(html.includes(marker),"published Atlas marker absent: "+marker);
+for(const marker of ['id="quantSidebar"','id="atlas-search"','id="atlas-topic"','id="atlas-toc"','id="atlas-lesson"','id="atlas-status"','id="atlas-depth-only"','id="atlas-depth-count"','id="atlas-unread-only"','id="atlas-resume"'])assert(html.includes(marker),"published Atlas marker absent: "+marker);
 assert(html.includes('src="./atlas.js"'),"published page must load Atlas reader");
 assert(nav.includes('["ml","机器学习 Machine Learning"]'));
 assert(atlas.includes("loadArchive")&&atlas.includes("renderMath")&&atlas.includes("copyText"),"Atlas reader features missing");
@@ -120,12 +120,12 @@ for(let i=0;i<depthFiles.length;i++){
   }
  }
 }
-assert.equal(seen.size,538,"must load 416 advanced lessons");
+assert.equal(seen.size,538,"must load 538 advanced lessons");
 assert.equal(domains.size,24,"must cover all twenty-four domains");
 const perDomain=new Map();
 for(const id of seen)perDomain.set(id.slice(0,3),(perDomain.get(id.slice(0,3))||0)+1);
 assert([...perDomain.values()].every(n=>n>=22),"each of the 24 topics must have at least twenty-two rigorous in-lesson enhancements");
-assert.equal(workedCount,482,"third through eighth passes require 360 worked examples");
+assert.equal(workedCount,482,"third through ninth passes require 482 worked examples");
 const binary=Buffer.concat([1,2,3,4].map(i=>fs.readFileSync(new URL("atlas/data.part"+i,here))));
 assert.equal(binary.length,1969862,"published archive bytes changed unexpectedly");
 const archive=JSON.parse(gunzipSync(binary).toString("utf8"));
@@ -144,5 +144,6 @@ for(const id of seen){
  if(mod.lessons[id].worked_example)assert(article.includes("数值或研究示例"),"runtime worked example missing: "+id);
 }
 assert(atlas.includes("depthOnly")&&atlas.includes("atlas-advanced-mark"),"advanced lesson filter and directory labels missing");
+assert(atlas.includes("unreadOnly")&&atlas.includes("continueUnread")&&atlas.includes("atlas-jump-depth"),"published reader must support unread filtering, resuming and in-lesson advanced navigation");
 assert(app.includes("manifest.lesson_files"),"legacy lesson reader unexpectedly removed");
 console.log("PASS: 538 rigorous advanced lessons across 24 domains; legacy curriculum 24 disciplines / 120 chapters / 720 nodes; published Atlas navigation and JS parse; "+lessons.length+" legacy tutorials, "+activeNotes.length+" active notes; all legacy LaTeX syntax valid.");

@@ -4,7 +4,7 @@ const $=id=>document.getElementById(id);
 const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const LESSON=/^#(?:lesson|ml)\/(m\d\d-c\d\d-p\d\d)$/;
 const KEY="kline-quant-atlas-read-v1";
-const state={index:[],byId:new Map(),domains:{},searchText:new Map(),term:"",topic:"",activeId:"",read:new Set(),enhanced:new Set(),depthOnly:false};
+const state={index:[],byId:new Map(),domains:{},searchText:new Map(),term:"",topic:"",activeId:"",read:new Set(),enhanced:new Set(),depthOnly:false,unreadOnly:false};
 try {const saved=JSON.parse(localStorage.getItem(KEY)||"[]");if(Array.isArray(saved))state.read=new Set(saved.filter(v=>typeof v==="string"))}catch(_){}
 function saveRead(){try{localStorage.setItem(KEY,JSON.stringify([...state.read]))}catch(_){}}
 function showStatus(message,error=false){const el=$("atlas-status");el.textContent=message;el.classList.toggle("atlas-error",error)}
@@ -152,7 +152,7 @@ async function loadArchive(){
 }
 function visibleLessons(){
  const words=state.term.split(/\s+/).filter(Boolean);
- return state.index.filter(x=>(!state.topic||x.domain_id===state.topic)&&(!state.depthOnly||state.enhanced.has(x.id))&&
+ return state.index.filter(x=>(!state.topic||x.domain_id===state.topic)&&(!state.depthOnly||state.enhanced.has(x.id))&&(!state.unreadOnly||!state.read.has(x.id))&&
  (words.length===0||words.every(word=>state.searchText.get(x.id)?.includes(word))));
 }
 function updateReadStats(){
@@ -212,6 +212,16 @@ function renderMath(root){
  });
 }
 function jump(id){if(state.byId.has(id))location.hash="lesson/"+id}
+function continueUnread(){
+ const total=state.index.length;
+ if(!total)return;
+ const current=state.index.findIndex(x=>x.id===state.activeId);
+ for(let offset=1;offset<=total;offset++){
+  const row=state.index[(current+offset+total)%total];
+  if(!state.read.has(row.id)){jump(row.id);return}
+ }
+ showStatus("全部 "+total+" 篇讲义均已标记为已学。");
+}
 function display(){
  const id=parseID()||state.index[0]?.id;
  if(!id)return;
@@ -221,6 +231,7 @@ function display(){
  if(!data){root.innerHTML='<p class="atlas-error">讲义正文缺失：'+esc(id)+'</p>';return}
  state.activeId=id;
  if(state.depthOnly&&!state.enhanced.has(id)){state.depthOnly=false;$("atlas-depth-only").checked=false}
+  if(state.unreadOnly&&state.read.has(id)){state.unreadOnly=false;$("atlas-unread-only").checked=false}
  // Keep the directory and URL filters synchronized when a cross-topic link is opened.
  if(state.topic&&state.topic!==meta.domain_id){
   state.topic=meta.domain_id;$("atlas-topic").value=state.topic;
@@ -235,13 +246,15 @@ function display(){
  const actions='<div class="atlas-lesson-actions">'+
   '<button id="atlas-prev" type="button"'+(!prev?' disabled':'')+'>上一篇</button>'+
   '<button id="atlas-next" type="button"'+(!next?' disabled':'')+'>下一篇</button>'+
-  '<button id="atlas-copy-link" type="button">复制本文链接</button>'+
+  '<button id="atlas-copy-link" type="button">复制本文链接</button>'+ 
+   (state.enhanced.has(id)?'<button id="atlas-jump-depth" type="button">跳至进阶推导</button>':'')+
   '<button id="atlas-read-toggle" type="button" aria-pressed="false">标记已学</button></div>';
  root.innerHTML='<div class="atlas-crumb">'+esc(meta.domain)+" / "+esc(meta.chapter)+" / "+esc(id)+
   '</div><h1>'+esc(data.title)+'</h1>'+actions+
   '<div class="article">'+data.html+'</div><p class="atlas-note">系统教材 · 公式、证明和代码请按对应条件使用；示例不构成投资建议。</p>';
  $("atlas-prev").addEventListener("click",()=>prev&&jump(prev.id));
  $("atlas-next").addEventListener("click",()=>next&&jump(next.id));
+  $("atlas-jump-depth")?.addEventListener("click",()=>root.querySelector(".atlas-depth")?.scrollIntoView({block:"start",behavior:"smooth"}));
  $("atlas-copy-link").addEventListener("click",async()=>{
   const url=new URL(location.href);url.hash="lesson/"+id;
   await copyText(url.href,$("atlas-copy-link"),"已复制链接");
@@ -311,7 +324,9 @@ async function start(){
   $("atlas-search").addEventListener("input",e=>{state.term=e.target.value.trim().toLocaleLowerCase();renderDirectory()});
   $("atlas-topic").addEventListener("change",e=>setTopic(e.target.value));
   $("atlas-depth-only").addEventListener("change",e=>{state.depthOnly=e.target.checked;renderDirectory()});
-  $("atlas-clear").addEventListener("click",()=>{state.term="";$("atlas-search").value="";state.depthOnly=false;$("atlas-depth-only").checked=false;setTopic("");});
+  $("atlas-unread-only").addEventListener("change",e=>{state.unreadOnly=e.target.checked;renderDirectory()});
+  $("atlas-resume").addEventListener("click",continueUnread);
+  $("atlas-clear").addEventListener("click",()=>{state.term="";$("atlas-search").value="";state.depthOnly=false;$("atlas-depth-only").checked=false;state.unreadOnly=false;$("atlas-unread-only").checked=false;setTopic("");});
   $("atlas-lesson").addEventListener("click",e=>{
    const button=e.target.closest("[data-ml-copy-point-code]");
    if(!button)return;
