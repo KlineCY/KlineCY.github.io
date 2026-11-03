@@ -48,14 +48,16 @@ const cases=[
 ["riskmath-x003",.1/.01,10,"10倍"],
 ["mlmath-x001",2*Math.exp(-8),0.0006709252558,"0.000670925"],
 ["mlmath-x002",Math.sqrt(Math.log(400)/800),0.0865409191301,"0.0865409"],
-["optimization-x007",2*3**2,18,"18−18=0"]
+["optimization-x007",2*3**2,18,"18−18=0"],
+["linear-x001",(3+1+1+3)/2,4,"2≤3≤4"],
+["linear-x003",(1-1)**2+(1-0)**2,1,"fᵀLf=1"]
 ];
-assert.equal(chapters.size,45,"forty-five unique mathematics lesson IDs");
-assert.equal(cases.length,45);
+assert.equal(chapters.size,47,"forty-seven unique mathematics lesson IDs");
+assert.equal(cases.length,47);
 for(const [id,actual,expect,token] of cases){
  const lesson=chapters.get(id);
  assert(lesson,"missing numerical lesson "+id);
  assert(Math.abs(actual-expect)<1e-9,"wrong independent computation "+id);
  assert(lesson.example.includes(token),"worked example must contain checked arithmetic "+id+": "+token);
 }
-console.log("PASS: 20 mathematical disciplines, 45 independent numeric/research example invariants.");
+console.log("PASS: 20 mathematical disciplines, 47 independent numeric/research example invariants.");

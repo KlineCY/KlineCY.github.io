@@ -60,7 +60,10 @@ const arithmetic=[
  [1-.95**20,.6415140775914581],
  [4/(4+1),.8],
  [8-2-2-5,-1],
- [5.05+4.95,10]
+ [5.05+4.95,10],
+ [(1-1)**2+(1-0)**2,1],
+ [(3+1+1+3)/2,4],
+ [(0.5+2+0.5)/4,.75]
 ];
 for(const [actual,expect] of arithmetic)assert(Math.abs(actual-expect)<1e-9);
 console.log("PASS: "+(720+allNew.length)+" distinct navigable ML lessons including "+allNew.length+" expanded full tutorials, "+sectionCount+" subchapters, "+formulaCount+" KaTeX expressions, valid math references");

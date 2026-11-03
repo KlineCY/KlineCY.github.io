@@ -47,7 +47,7 @@ for(let i=0;i<c.disciplines.length;i++){
  assert(!deptIds.has(d.id),"duplicate discipline "+d.id);
  deptIds.add(d.id);
  assert.equal(d.order,i+1,"discipline progression order");
- assert.equal(d.chapter_ids.length,d.id==="optimization"?7:["statistics","econometrics","timeseries","finance","riskmath","mlmath"].includes(d.id)?6:5,"discipline chapter count "+d.id);
+ assert.equal(d.chapter_ids.length,d.id==="optimization"?7:["statistics","econometrics","timeseries","finance","riskmath","mlmath","linear"].includes(d.id)?6:5,"discipline chapter count "+d.id);
  assert.equal(new Set(d.chapter_ids).size,d.chapter_ids.length,"duplicate chapter references "+d.id);
  for(const cid of d.chapter_ids)assert(c.chapters.some(ch=>ch.id===cid&&ch.discipline_id===d.id),"unlinked or misassigned chapter "+cid);
  assert(d.resources?.length>0,d.id+": no learning resources");
