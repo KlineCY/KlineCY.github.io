@@ -89,5 +89,19 @@ for(const marker of ['id="quantSidebar"','id="atlas-search"','id="atlas-topic"',
 assert(html.includes('src="./atlas.js"'),"published page must load Atlas reader");
 assert(nav.includes('["ml","机器学习 Machine Learning"]'));
 assert(atlas.includes("loadArchive")&&atlas.includes("renderMath")&&atlas.includes("copyText"),"Atlas reader features missing");
+assert(atlas.includes("applyDepth")&&atlas.includes('fetch("./atlas-depth.json")'),"published Atlas must load its in-lesson deep dives");
+const depth=read("atlas-depth.json");
+assert.equal(depth.schema,1,"advanced lesson overlay schema mismatch");
+assert.equal(Object.keys(depth.lessons).length,8,"advanced lesson overlay incomplete");
+for(const [id,chapter] of Object.entries(depth.lessons)){
+ assert(/^m24-c\d\d-p\d\d$/.test(id),"advanced topic ID invalid: "+id);
+ assert(chapter.title.length>=8&&chapter.overview.length>=60,"thin advanced chapter: "+id);
+ for(const field of ["derivation","protocol","pitfalls"])assert(Array.isArray(chapter[field])&&chapter[field].length>=2,"missing "+field+": "+id);
+ assert(chapter.equations.length>=2,"missing advanced formulas: "+id);
+ for(const f of chapter.equations){
+  assert(f.label&&f.tex,"missing advanced formula metadata: "+id);
+  katex.renderToString(f.tex,{throwOnError:true,strict:"ignore"});
+ }
+}
 assert(app.includes("manifest.lesson_files"),"legacy lesson reader unexpectedly removed");
 console.log("PASS: legacy curriculum 24 disciplines / 120 chapters / 720 nodes; published Atlas navigation and JS parse; "+lessons.length+" legacy tutorials, "+activeNotes.length+" active notes; all legacy LaTeX syntax valid.");
