@@ -262,7 +262,7 @@ async function start(){
   console.error("ML Atlas:",e);
   showStatus("课程加载失败："+e.message,true);
   $("atlas-lesson").innerHTML='<h2>讲义暂时无法加载</h2><p>'+esc(e.message)+'</p>'+
-   '<p><a href="./legacy-before-atlas.html">打开保留的旧版页面</a></p>';
+   '<p>请刷新页面重试；若问题持续，请检查课程数据是否已完整部署。旧版备份不作为正式课程入口。</p>';
  }
 }
 start();
