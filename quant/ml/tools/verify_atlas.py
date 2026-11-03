@@ -182,8 +182,9 @@ def main():
             }
             for n, lid in sorted(
                 (len(re.sub(r"<[^>]+>", "", by_id[lid]["html"])), lid)
-                for lid in by_id if lid.startswith(f"m{i:02d}-")
-            )[:4]
+                for lid in by_id
+                if lid.startswith(f"m{i:02d}-") and lid not in supplements
+            )[:2]
         ] for i in range(1, 25)
     }
     report = {
@@ -210,7 +211,7 @@ def main():
         ],
         "generic_paragraphs_by_domain": generic_by_domain,
         "shortest_extracted_lesson_lengths": shortest,
-        "shortest_by_domain": shortest_by_domain,
+        "next_unenhanced_by_domain": shortest_by_domain,
         "note": "Checks archive and in-memory overlays; remaining generic text is measured, not automatically rewritten. Does not run Python examples or a real browser.",
     }
     print(json.dumps(report, ensure_ascii=False, indent=2))
