@@ -34,15 +34,15 @@ class EighteenthPassMath(unittest.TestCase):
         self.assertIn("8/3",CHAPTERS["m20-c02-p01"]["worked_example"])
 
     def test_off_policy_importance_sampling(self):
-        weights=(.5/.2,.5)
+        weights=(.5/.2,.5/.8)
         rewards=(4,0)
         ordinary=sum(w*r for w,r in zip(weights,rewards))/2
         self_normalized=sum(w*r for w,r in zip(weights,rewards))/sum(weights)
         effective=sum(weights)**2/sum(w*w for w in weights)
         self.assertAlmostEqual(ordinary,5)
-        self.assertAlmostEqual(self_normalized,10/3)
-        self.assertAlmostEqual(effective,9/6.5)
-        self.assertIn("1.3846",CHAPTERS["m21-c01-p03"]["worked_example"])
+        self.assertAlmostEqual(self_normalized,3.2)
+        self.assertAlmostEqual(effective,25/17)
+        self.assertIn("1.4706",CHAPTERS["m21-c01-p03"]["worked_example"])
 
     def test_dcc_covariance(self):
         q12=(1-.1-.8)*.2+.1*(-1)+.8*.2
@@ -58,11 +58,18 @@ class EighteenthPassMath(unittest.TestCase):
         initial=(50,50)
         before=(initial[0]*1.2,initial[1]*1)
         wealth=sum(before)
-        orders=(wealth/2-before[0],wealth/2-before[1])
+        # Equal post-cost holdings and zero cash: sell x, buy y, x+y=10, x-y=c(x+y).
+        gross_to_rebalance=before[0]-before[1]
+        sell=(gross_to_rebalance*(1+.01))/2
+        buy=(gross_to_rebalance*(1-.01))/2
+        orders=(-sell,buy)
         fee=.01*sum(abs(q) for q in orders)
         self.assertAlmostEqual(wealth,110)
         self.assertAlmostEqual(sum(abs(q) for q in orders),10)
         self.assertAlmostEqual(fee,.1)
+        self.assertAlmostEqual(before[0]-sell,before[1]+buy)
+        self.assertAlmostEqual(sell-buy-fee,0)
+        self.assertAlmostEqual(before[0]-sell,54.95)
         self.assertAlmostEqual((wealth-fee)/100-1,.099)
         self.assertIn("9.9%",CHAPTERS["m23-c04-p02"]["worked_example"])
 

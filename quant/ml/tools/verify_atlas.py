@@ -107,6 +107,10 @@ def main():
     assert len({lid[:3] for lid in supplements}) == depth_manifest["expected_domains"]
     assert all(sum(lid.startswith(f"m{i:02d}-") for lid in supplements) >= 22
                for i in range(1, 25)), "every domain must have at least twenty-two in-lesson supplements"
+    missing_source_titles = {
+        lid: by_id[lid]["title"] for lid, body in supplements.items()
+        if not body.get("source_title")
+    }
     worked_count = sum(bool(x.get("worked_example")) for x in supplements.values())
     assert worked_count == 664, "advanced worked-example count mismatch"
     for module in modules:
@@ -203,6 +207,7 @@ def main():
         "assumption_paragraphs_revised": fixed_b,
         "equations_corrected": fixed_math,
         "in_lesson_advanced_supplements": len(supplements),
+        "missing_source_titles": missing_source_titles,
         "worked_numerical_or_research_examples": worked_count,
         "historic_code_comment_labels_retained_in_source": legacy_comments,
         "remaining_generic_definition_paragraphs": len(generic_a_left),
