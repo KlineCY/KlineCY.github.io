@@ -105,6 +105,8 @@ def main():
             supplements[lid] = lesson
     assert len(supplements) == depth_manifest["expected_lessons"]
     assert len({lid[:3] for lid in supplements}) == depth_manifest["expected_domains"]
+    assert all(sum(lid.startswith(f"m{i:02d}-") for lid in supplements) >= 5
+               for i in range(1, 25)), "every domain must have at least five in-lesson supplements"
     worked_count = sum(bool(x.get("worked_example")) for x in supplements.values())
     assert worked_count == 72, "third and fourth passes must include 72 worked examples"
     for module in modules:
