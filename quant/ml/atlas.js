@@ -109,7 +109,7 @@ async function fetchAtlasJson(url,options={}){
     failure=problem;
    }else return await response.json();
   }catch(err){
-   if(/^HTTP 4\\d\\d/.test(err.message)&&!err.message.startsWith("HTTP 429"))throw err;
+   if(/^HTTP 4[0-9][0-9]/.test(err.message)&&!err.message.startsWith("HTTP 429"))throw err;
    failure=err;
   }
   if(attempt<2)await new Promise(resolve=>setTimeout(resolve,180*(attempt+1)));
