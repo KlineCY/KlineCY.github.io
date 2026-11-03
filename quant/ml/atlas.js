@@ -50,12 +50,14 @@ function applyEditorial(data,patch){
  if(sums.definitions!==20||sums.conditions!==31||sums.formulas!==2)throw Error("教材勘误应用数量不匹配");
  return sums;
 }
-function applyDepth(data,patches){
- if(!Array.isArray(patches)||patches.length!==7)throw Error("深化讲义资源列表不完整");
+function applyDepth(data,patches,manifest){
+ if(!Array.isArray(patches)||patches.length!==manifest.modules.length)throw Error("深化讲义资源列表不完整");
  const seen=new Set(),allDomains=new Set();
  function items(rows){return "<ol>"+rows.map(s=>"<li>"+esc(s)+"</li>").join("")+"</ol>"}
- for(const patch of patches){
+ for(let i=0;i<patches.length;i++){
+  const patch=patches[i];
   if(patch.schema!==1||!patch.lessons||typeof patch.lessons!=="object")throw Error("深化讲义资源格式错误");
+  if(Object.keys(patch.lessons).length!==manifest.modules[i].lessons)throw Error("深化讲义资源数量不匹配："+manifest.modules[i].path);
   for(const [id,s] of Object.entries(patch.lessons)){
    if(seen.has(id))throw Error("重复的深化讲义ID："+id);
    seen.add(id);allDomains.add(id.slice(0,3));
@@ -65,6 +67,8 @@ function applyDepth(data,patches){
   if(typeof s.title!=="string"||s.title.length<8||typeof s.overview!=="string"||s.overview.length<60||
      !Array.isArray(s.equations)||s.equations.length<2||!Array.isArray(s.derivation)||s.derivation.length<3||
      !Array.isArray(s.protocol)||s.protocol.length<3||!Array.isArray(s.pitfalls))throw Error("深化讲义内容不完整："+id);
+  if(s.worked_example&&(typeof s.worked_example!=="string"||s.worked_example.length<50))
+   throw Error("深化讲义数值例子不足："+id);
   const formulas=s.equations.map(eq=>{
    if(!eq.tex||!eq.label)throw Error("深化讲义公式不完整："+id);
    return '<div class="atlas-depth-equation"><h4>'+esc(eq.label)+'</h4><div class="ml-math-block"><span class="atlas-tex" data-tex="'+esc(eq.tex)+'"></span></div></div>';
@@ -73,11 +77,13 @@ function applyDepth(data,patches){
    '<h2>进阶专题：'+esc(s.title)+'</h2><p class="atlas-depth-intro">'+esc(s.overview)+'</p>'+
    '<h3>核心数学关系</h3>'+formulas+
    '<h3>推导与适用边界</h3>'+items(s.derivation)+
+   (s.worked_example?'<h3>数值或研究示例</h3><p class="atlas-depth-example">'+esc(s.worked_example)+'</p>':'')+
    '<h3>研究与实现流程</h3>'+items(s.protocol)+
    '<h3>常见误区</h3>'+items(s.pitfalls)+'</section>';
   }
  }
- if(seen.size!==56||allDomains.size!==24)throw Error("深化讲义覆盖不完整："+seen.size+"篇，"+allDomains.size+"专题");
+ if(seen.size!==manifest.expected_lessons||allDomains.size!==manifest.expected_domains)
+  throw Error("深化讲义覆盖不完整："+seen.size+"篇，"+allDomains.size+"专题");
  return seen;
 }
 function cleanCodeComments(root){
@@ -231,8 +237,20 @@ async function copyText(value,button,label){
 async function start(){
  try{
   const data=await loadArchive();
-  const depthFiles=["./atlas-depth.json","./atlas-depth-foundations.json","./atlas-depth-learning.json","./atlas-depth-quant.json",
-   "./atlas-depth-foundations-2.json","./atlas-depth-learning-2.json","./atlas-depth-quant-2.json"];
+  const manifestResponse=await fetch("./atlas-depth-manifest.json",{cache:"no-cache"});
+  if(!manifestResponse.ok)throw Error("深化讲义目录加载失败（HTTP "+manifestResponse.status+"）");
+  const manifest=await manifestResponse.json();
+  if(manifest.schema!==1||manifest.expected_lessons!==80||manifest.expected_domains!==24||
+     !Array.isArray(manifest.modules)||manifest.modules.length!==10)
+   throw Error("深化讲义目录版本或内容不完整");
+  const depthFiles=manifest.modules.map(m=>m.path);
+  if(new Set(depthFiles).size!==depthFiles.length||
+     manifest.modules.some(m=>!/^\.\/atlas-depth(?:-[a-z0-9]+)*\.json$/.test(m.path)||
+                                  m.path==="./atlas-depth-manifest.json"||
+                                  !Number.isInteger(m.lessons)||m.lessons<1))
+   throw Error("深化讲义目录包含非法路径或数量");
+  if(manifest.modules.reduce((sum,m)=>sum+m.lessons,0)!==manifest.expected_lessons)
+   throw Error("深化讲义目录数量不一致");
   const [editorialResponse,...depthResponses]=await Promise.all([
    fetch("./atlas-editorial.json"),...depthFiles.map(file=>fetch(file))
   ]);
@@ -241,7 +259,7 @@ async function start(){
    if(!depthResponses[i].ok)throw Error("深化讲义资源加载失败："+depthFiles[i]+"（HTTP "+depthResponses[i].status+"）");
   const editorial=await editorialResponse.json();
   applyEditorial(data,editorial);
-  state.enhanced=applyDepth(data,await Promise.all(depthResponses.map(r=>r.json())));
+  state.enhanced=applyDepth(data,await Promise.all(depthResponses.map(r=>r.json())),manifest);
   $("atlas-depth-count").textContent=state.enhanced.size;
   state.index=data.catalog.items;state.byId=new Map(state.index.map(x=>[x.id,x]));state.domains=data.domains;
   // Index visible article text as well as titles, chapters and code symbols.
