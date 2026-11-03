@@ -223,6 +223,32 @@ const chapterNodes=ch.node_ids.map(getNode).filter(Boolean);
 for(const topic of chapterNodes){const li=document.createElement("li");li.textContent=topic.title+(topic.id===n.id?"（当前知识点）":"");list.appendChild(li)}
 section.appendChild(list);container.appendChild(section);
 }
+function appendLearningSequence(node,container){
+ const chapter=getChap(node.chapter_id);
+ if(!chapter)return;
+ const position=chapter.node_ids.indexOf(node.id);
+ if(position<0)return;
+ const nextId=chapter.node_ids[position+1];
+ const prevId=chapter.node_ids[position-1];
+ const later=nodes.filter(n=>(n.prerequisites||[]).includes(node.id)&&n.id!==nextId).slice(0,4);
+ const navigation=makeSection("学习衔接：从本节走向下一结论");
+ navigation.classList.add("math-learning-sequence");
+ const explain=document.createElement("p");
+ explain.textContent="先掌握本节的定义与条件，再沿所在章节顺序继续；其他直接依赖本节的专题可作为延伸阅读。未完成的知识点会明确保留目录状态。";
+ navigation.appendChild(explain);
+ const row=document.createElement("div");row.className="math-learning-sequence-links";
+ function add(target,label){
+  const point=getNode(target);if(!point)return;
+  const button=document.createElement("button");button.type="button";button.className="action";
+  button.textContent=label+" · "+point.title+(lessonMap.has(target)?"":"（待扩写）");
+  button.addEventListener("click",()=>selectNode(target));row.appendChild(button);
+ }
+ if(prevId)add(prevId,"上一节");
+ if(nextId)add(nextId,"下一节");
+ for(const topic of later)add(topic.id,"关联延伸");
+ if(!row.childElementCount)return;
+ navigation.appendChild(row);container.appendChild(navigation);
+}
 function selectNode(id,update=true){
  const node=getNode(id);if(!node)return;
  activeId=id;
@@ -237,6 +263,7 @@ function selectNode(id,update=true){
  const lesson=lessonMap.get(id);
  if(lesson)lessonArticle(node,lesson,article);
  else outlineArticle(node,article);
+ appendLearningSequence(node,article);
  article.appendChild(resourceArea(dept));
  makeControls(node,article);
  typeset(article);

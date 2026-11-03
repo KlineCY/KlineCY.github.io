@@ -101,6 +101,7 @@ for(const marker of ['id="quantSidebar"','id="tree"','id="article"','id="discipl
  assert(html.includes(marker),"missing element "+marker);
 }
 assert(app.includes("loadMathAdditions()")&&app.includes("fetchMathJson("),"math module loader absent");
+assert(app.includes("appendLearningSequence(node,article)")&&app.includes("math-learning-sequence-links"),"mathematics reader must show previous and following linked knowledge points");
  for(const name of ["curriculum.json","lessons-foundations.json","lessons-advanced.json","lessons-more.json"])
   assert(app.includes('fetch("./'+name+'",{cache:"no-cache"})'),"core math resource must revalidate cache "+name);
 assert(html.includes("app.js?v=20261103-math-depth-v1"),"versioned math loader missing");
