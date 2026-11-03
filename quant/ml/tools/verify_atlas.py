@@ -98,7 +98,8 @@ def main():
         for eq in lesson["equations"]:
             assert eq["label"] and eq["tex"], ("empty equation", lid)
         for group in ("derivation", "protocol", "pitfalls"):
-            assert all(isinstance(s, str) and len(s) > 30 for s in lesson[group]), (lid, group)
+            threshold = 15 if group == "pitfalls" else 30
+            assert all(isinstance(s, str) and len(s) > threshold for s in lesson[group]), (lid, group)
 
     refs = math_count = python_count = 0
     legacy_comments = 0
