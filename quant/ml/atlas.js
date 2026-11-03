@@ -69,6 +69,9 @@ function applyDepth(data,patches,manifest){
      !Array.isArray(s.protocol)||s.protocol.length<3||!Array.isArray(s.pitfalls))throw Error("深化讲义内容不完整："+id);
   if(s.worked_example&&(typeof s.worked_example!=="string"||s.worked_example.length<50))
    throw Error("深化讲义数值例子不足："+id);
+  if(manifest.modules[i].path.endsWith("-4.json")&&
+     (s.equations.length<3||!s.worked_example||s.worked_example.length<60))
+   throw Error("第四阶段进阶讲义缺少完整数学算例："+id);
   const formulas=s.equations.map(eq=>{
    if(!eq.tex||!eq.label)throw Error("深化讲义公式不完整："+id);
    return '<div class="atlas-depth-equation"><h4>'+esc(eq.label)+'</h4><div class="ml-math-block"><span class="atlas-tex" data-tex="'+esc(eq.tex)+'"></span></div></div>';
@@ -240,8 +243,8 @@ async function start(){
   const manifestResponse=await fetch("./atlas-depth-manifest.json",{cache:"no-cache"});
   if(!manifestResponse.ok)throw Error("深化讲义目录加载失败（HTTP "+manifestResponse.status+"）");
   const manifest=await manifestResponse.json();
-  if(manifest.schema!==1||manifest.expected_lessons!==80||manifest.expected_domains!==24||
-     !Array.isArray(manifest.modules)||manifest.modules.length!==10)
+  if(manifest.schema!==1||!Number.isSafeInteger(manifest.expected_lessons)||manifest.expected_lessons<80||
+     manifest.expected_domains!==24||!Array.isArray(manifest.modules)||manifest.modules.length<10)
    throw Error("深化讲义目录版本或内容不完整");
   const depthFiles=manifest.modules.map(m=>m.path);
   if(new Set(depthFiles).size!==depthFiles.length||
