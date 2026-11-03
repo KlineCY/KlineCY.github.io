@@ -4,7 +4,7 @@ const $=id=>document.getElementById(id);
 const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const LESSON=/^#(?:lesson|ml)\/(m\d\d-c\d\d-p\d\d)$/;
 const KEY="kline-quant-atlas-read-v1";
-const state={index:[],byId:new Map(),domains:{},searchText:new Map(),term:"",topic:"",activeId:"",read:new Set(),enhanced:new Set(),chapterOpen:new Map(),learnedOnly:false,unreadOnly:false};
+const state={index:[],byId:new Map(),domains:{},searchText:new Map(),term:"",topic:"",activeId:"",read:new Set(),enhanced:new Set(),conceptChapters:new Set(),chapterOpen:new Map(),learnedOnly:false,unreadOnly:false};
 try {const saved=JSON.parse(localStorage.getItem(KEY)||"[]");if(Array.isArray(saved))state.read=new Set(saved.filter(v=>typeof v==="string"))}catch(_){}
 function saveRead(){try{localStorage.setItem(KEY,JSON.stringify([...state.read]))}catch(_){}}
 function serializeReadProgress(read,knownIds){
@@ -209,7 +209,7 @@ function renderDirectory(){
   return '<details class="atlas-section" data-key="'+esc(key)+'"'+(open?' open':'')+'><summary>'+esc(rows[0].domain)+" / "+esc(rows[0].chapter)+
    '<span class="atlas-chapter-count">'+count+"/"+rows.length+'</span></summary><div class="atlas-chapter-items">'+
    rows.map(x=>'<a href="#lesson/'+x.id+'" data-id="'+x.id+'"'+(x.id===state.activeId?' class="active" aria-current="page"':'')+'>'+
-    (state.read.has(x.id)?'<span class="atlas-done-mark" aria-label="已学">✓ </span>':'')+esc(x.title)+'</a>').join("")+
+    (state.read.has(x.id)?'<span class="atlas-done-mark" aria-label="已学">✓ </span>':'')+esc(x.title)+(state.conceptChapters.has(x.id)?'<span class="atlas-concept-small"> · 分层精讲</span>':'')+'</a>').join("")+
    "</div></details>";
  }).join("");
  const toc=$("atlas-toc"),previousScroll=toc.scrollTop;
@@ -299,6 +299,9 @@ function display(){
   if(state.unreadOnly&&state.read.has(id)){state.unreadOnly=false;$("atlas-unread-only").checked=false}
   saveRead();renderDirectory();
  });
+ root.querySelectorAll(".atlas-concept-jump").forEach(button=>button.addEventListener("click",()=>{
+  root.querySelector("#"+button.dataset.target)?.scrollIntoView({block:"start",behavior:"smooth"});
+ }));
  fixInlineMarkdown(root.querySelector(".article"));
  cleanCodeComments(root.querySelector(".article"));
  renderMath(root.querySelector(".article"));
@@ -350,6 +353,9 @@ async function start(){
   showStatus("进阶内容已传输，正在校验公式与构建全文索引…");
   applyEditorial(data,editorial);
   state.enhanced=applyDepth(data,depthPatches,manifest);
+  const conceptBundle=await fetchAtlasJson("./atlas-concept-chapters.json",{cache:"no-cache"});
+  if(!window.quantMlConcepts?.mount)throw Error("知识链分层渲染器未加载");
+  state.conceptChapters=window.quantMlConcepts.mount(data,conceptBundle);
   state.index=data.catalog.items;state.byId=new Map(state.index.map(x=>[x.id,x]));state.domains=data.domains;
   state.read=new Set([...state.read].filter(id=>state.byId.has(id)));
   // Index visible article text as well as titles, chapters and code symbols.
