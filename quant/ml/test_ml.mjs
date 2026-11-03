@@ -121,6 +121,9 @@ for(let i=0;i<depthFiles.length;i++){
 }
 assert.equal(seen.size,128,"must load 128 advanced lessons");
 assert.equal(domains.size,24,"must cover all twenty-four domains");
+const perDomain=new Map();
+for(const id of seen)perDomain.set(id.slice(0,3),(perDomain.get(id.slice(0,3))||0)+1);
+assert([...perDomain.values()].every(n=>n>=5),"each of the 24 topics must have at least five rigorous in-lesson enhancements");
 assert.equal(workedCount,72,"third and fourth passes require seventy-two worked examples");
 const binary=Buffer.concat([1,2,3,4].map(i=>fs.readFileSync(new URL("atlas/data.part"+i,here))));
 assert.equal(binary.length,1969862,"published archive bytes changed unexpectedly");
