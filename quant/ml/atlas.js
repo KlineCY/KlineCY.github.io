@@ -50,6 +50,30 @@ function applyEditorial(data,patch){
  if(sums.definitions!==20||sums.conditions!==22||sums.formulas!==2)throw Error("教材勘误应用数量不匹配");
  return sums;
 }
+function applyDepth(data,patch){
+ if(patch.schema!==1||!patch.lessons||typeof patch.lessons!=="object")throw Error("深化讲义资源格式错误");
+ const entries=Object.entries(patch.lessons);
+ if(entries.length!==8)throw Error("深化讲义数量不完整："+entries.length);
+ function items(rows){return "<ol>"+rows.map(s=>"<li>"+esc(s)+"</li>").join("")+"</ol>"}
+ for(const [id,s] of entries){
+  const row=data.domains[id.slice(0,3)]?.[id];
+  if(!row)throw Error("深化讲义未找到目标："+id);
+  if(typeof s.title!=="string"||s.title.length<8||typeof s.overview!=="string"||s.overview.length<60||
+     !Array.isArray(s.equations)||s.equations.length<2||!Array.isArray(s.derivation)||s.derivation.length<3||
+     !Array.isArray(s.protocol)||s.protocol.length<3||!Array.isArray(s.pitfalls))throw Error("深化讲义内容不完整："+id);
+  const formulas=s.equations.map(eq=>{
+   if(!eq.tex||!eq.label)throw Error("深化讲义公式不完整："+id);
+   return '<div class="atlas-depth-equation"><h4>'+esc(eq.label)+'</h4><div class="ml-math-block"><span class="atlas-tex" data-tex="'+esc(eq.tex)+'"></span></div></div>';
+  }).join("");
+  row.html+='<section class="atlas-depth" aria-label="进阶推导与研究实践">'+
+   '<h2>进阶专题：'+esc(s.title)+'</h2><p class="atlas-depth-intro">'+esc(s.overview)+'</p>'+
+   '<h3>核心数学关系</h3>'+formulas+
+   '<h3>推导与适用边界</h3>'+items(s.derivation)+
+   '<h3>研究与实现流程</h3>'+items(s.protocol)+
+   '<h3>常见误区</h3>'+items(s.pitfalls)+'</section>';
+ }
+ return entries.length;
+}
 function cleanCodeComments(root){
  root.querySelectorAll(".ml-point-code-wrap pre code").forEach(el=>{
   el.textContent=el.textContent.replace(/^([ \t]*#\s*)第\d+轮\s*[：:]?\s*/gm,"$1");
@@ -154,7 +178,7 @@ function display(){
   const u=new URL(location.href);u.searchParams.set("discipline",state.topic);
   history.replaceState(null,"",u.pathname+u.search+u.hash);
  }
- if(state.term&&![id,meta.title,meta.domain,meta.chapter].some(v=>String(v).toLocaleLowerCase().includes(state.term))){
+ if(state.term&&!state.term.split(/\s+/).filter(Boolean).every(word=>state.searchText.get(id)?.includes(word))){
   state.term="";$("atlas-search").value="";
  }
  const position=state.index.findIndex(x=>x.id===id);
@@ -200,10 +224,12 @@ async function copyText(value,button,label){
 async function start(){
  try{
   const data=await loadArchive();
-  const editorialResponse=await fetch("./atlas-editorial.json");
+  const [editorialResponse,depthResponse]=await Promise.all([fetch("./atlas-editorial.json"),fetch("./atlas-depth.json")]);
   if(!editorialResponse.ok)throw Error("教材勘误资源加载失败（HTTP "+editorialResponse.status+"）");
+  if(!depthResponse.ok)throw Error("深化讲义资源加载失败（HTTP "+depthResponse.status+"）");
   const editorial=await editorialResponse.json();
   applyEditorial(data,editorial);
+  applyDepth(data,await depthResponse.json());
   state.index=data.catalog.items;state.byId=new Map(state.index.map(x=>[x.id,x]));state.domains=data.domains;
   // Index visible article text as well as titles, chapters and code symbols.
   // This is computed once so subsequent searches do not repeatedly parse all 720 lessons.
