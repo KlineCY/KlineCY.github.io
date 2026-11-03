@@ -53,14 +53,15 @@ const cases=[
 ["linear-x003",(1-1)**2+(1-0)**2,1,"fᵀLf=1"],
 ["linear-x002",2*1+2*(-1),0,"内积2×1+2×(−1)=0"],
 ["linear-x004",1/4+2/4+1/4,1,"πP=π"],
-["linear-x005",Math.atan(.2)/2,.09869777992494039,"0.098698"]
+["linear-x005",Math.atan(.2)/2,.09869777992494039,"0.098698"],
+["linear-x006",.25*.04+.25*.09+.5*.018,.0415,"0.0415"]
 ];
-assert.equal(chapters.size,50,"fifty unique mathematics lesson IDs");
-assert.equal(cases.length,50);
+assert.equal(chapters.size,51,"fifty-one unique mathematics lesson IDs");
+assert.equal(cases.length,51);
 for(const [id,actual,expect,token] of cases){
  const lesson=chapters.get(id);
  assert(lesson,"missing numerical lesson "+id);
  assert(Math.abs(actual-expect)<1e-9,"wrong independent computation "+id);
  assert(lesson.example.includes(token),"worked example must contain checked arithmetic "+id+": "+token);
 }
-console.log("PASS: 20 mathematical disciplines, 50 independent numeric/research example invariants.");
+console.log("PASS: 20 mathematical disciplines, 51 independent numeric/research example invariants.");
