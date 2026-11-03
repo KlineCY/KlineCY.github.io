@@ -29,8 +29,8 @@ for(const l of extras){
 const lessons=[...sources.flatMap(f=>f.lessons),...extras];
 const ids=new Set(),chIds=new Set(),deptIds=new Set(),nodeMap=new Map();
 assert.equal(c.disciplines.length,20,"discipline coverage count");
-assert.equal(c.chapters.length,100,"chapter coverage count");
-assert(c.nodes.length>=600,"expected broad topic catalog");
+assert.equal(c.chapters.length,104,"chapter coverage count");
+assert.equal(c.nodes.length,624,"expected expanded topic catalog");
 for(let i=0;i<c.disciplines.length;i++){
  const d=c.disciplines[i];
  assert(!deptIds.has(d.id),"duplicate discipline "+d.id);
@@ -49,6 +49,8 @@ for(const node of c.nodes){
  assert(chIds.has(node.chapter_id),"missing chapter "+node.id);
  assert(deptIds.has(node.discipline_id),"missing discipline "+node.id);
  assert(node.title&&node.title.trim(),"empty title");
+ if(node.id.includes("-x"))assert(node.summary?.length>=28,"expanded topic must have a substantive scope: "+node.id);
+ for(const p of node.prerequisites||[])assert(c.nodes.some(n=>n.id===p),"invalid prerequisite "+node.id+" -> "+p);
 }
 for(const chapter of c.chapters)for(const id of chapter.node_ids){
  assert(ids.has(id),"unknown topic "+id);
@@ -85,6 +87,6 @@ for(const marker of ['id="quantSidebar"','id="tree"','id="article"','id="discipl
  assert(html.includes(marker),"missing element "+marker);
 }
 assert(app.includes("loadMathAdditions()")&&app.includes("fetchMathJson("),"math module loader absent");
-assert(html.includes("app.js?v=20261103-math-01"),"versioned math loader missing");
+assert(html.includes("app.js?v=20261103-math-02"),"versioned math loader missing");
 assert(sidebar.includes('["math","量化数学 Mathematics"]'),"math missing from navigation");
 console.log("Math validation PASS: "+c.disciplines.length+" disciplines, "+c.chapters.length+" chapters, "+c.nodes.length+" nodes, "+lessons.length+" complete lessons, all displayed LaTeX formulas parseable.");

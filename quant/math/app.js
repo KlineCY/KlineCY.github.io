@@ -153,6 +153,14 @@ function outlineArticle(n,container){
 const ch=getChap(n.chapter_id),dept=getDept(n.discipline_id);
 const section=makeSection("本知识点的学习位置");
 const c=document.createElement("p");c.textContent="此知识点位于「"+dept.title+" → "+ch.title+"」第 "+n.order+" 节，难度为 "+n.level+"。当前已纳入完整学习目录，但尚未编写独立的定义—性质—证明—例题讲义。";section.appendChild(c);
+if(n.summary){
+ const intro=makeSection("研究范围与学习目标");paragraph(intro,n.summary);container.appendChild(intro);
+ const pre=makeSection("先修知识");const links=document.createElement("div");links.className="math-prerequisites";
+ for(const id of n.prerequisites||[]){const item=getNode(id);if(!item)continue;
+  const b=document.createElement("button");b.className="action";b.type="button";b.textContent=item.title;
+  b.addEventListener("click",()=>selectNode(id));links.appendChild(b)}
+ pre.appendChild(links);container.appendChild(pre);
+}
 const guide=document.createElement("div");guide.className="outline-note";
 guide.textContent="当前状态：知识目录（未标记为完整讲义）。建议按本章节列示的顺序学习，先掌握前置章节，再阅读以下官方课件与教材。后续可以逐节增加严格定义、条件、LaTeX公式和完整推导。";
 section.appendChild(guide);
