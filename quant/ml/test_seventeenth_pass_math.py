@@ -5,15 +5,15 @@ from pathlib import Path
 import unittest
 ROOT=Path(__file__).resolve().parent
 LESSONS={}
-for suffix in "ab":
+for suffix in "abc":
     data=json.loads((ROOT/f"atlas-depth-17-{suffix}.json").read_text(encoding="utf-8"))["lessons"]
     for lid,chapter in data.items():
         assert lid not in LESSONS
         LESSONS[lid]=chapter
 class SeventeenthPassMath(unittest.TestCase):
     def test_structure(self):
-        self.assertEqual(len(LESSONS),12)
-        self.assertEqual({uid[:3] for uid in LESSONS},{f"m{i:02d}" for i in range(3,15)})
+        self.assertEqual(len(LESSONS),17)
+        self.assertEqual({uid[:3] for uid in LESSONS},{f"m{i:02d}" for i in range(3,20)})
         for uid,body in LESSONS.items():
             self.assertEqual(len(body["equations"]),3)
             self.assertGreaterEqual(len(body["derivation"]),3)
@@ -33,6 +33,11 @@ class SeventeenthPassMath(unittest.TestCase):
             ("m12-c03-p03",math.sqrt((1+2*.5*(-.75))/4),.25,"HAC标准误为√(0.25/4)=0.25"),
             ("m13-c02-p02",2*(3*2)*2,24,"梯度为(2z)×x=12×2=24"),
             ("m14-c01-p01",3-2,1,"输出长度为2"),
+            ("m15-c01-p05",.8**2*10,6.4,"两步条件均值为0.8²×10=6.4"),
+            ("m16-c01-p06",3*(3+1)/2,6,"合法配对为1+2+3=6"),
+            ("m17-c03-p01",-math.log(.5*.25)/2,1.03972077084,"平均响应token损失为1.0397"),
+            ("m18-c02-p02",.25*2+.75*6,5,"聚合结果为(1/4)×2+(3/4)×6=5"),
+            ("m19-c04-p01",math.sqrt(.64)*2+math.sqrt(1-.64)*(-1),1,"x_t=0.8×2+0.6×(−1)=1.0"),
         ]
         for uid,got,expected,token in examples:
             with self.subTest(uid=uid):

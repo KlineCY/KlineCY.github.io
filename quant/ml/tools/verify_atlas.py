@@ -86,10 +86,10 @@ def main():
 
     depth_manifest = json.loads((ROOT / "atlas-depth-manifest.json").read_text(encoding="utf-8"))
     assert depth_manifest["schema"] == 1
-    assert depth_manifest["expected_lessons"] == 711
+    assert depth_manifest["expected_lessons"] == 716
     assert depth_manifest["expected_domains"] == 24
     modules = depth_manifest["modules"]
-    assert len(modules) == 91
+    assert len(modules) == 92
     assert len({m["path"] for m in modules}) == len(modules)
     assert sum(m["lessons"] for m in modules) == depth_manifest["expected_lessons"]
     supplements = {}
@@ -108,7 +108,7 @@ def main():
     assert all(sum(lid.startswith(f"m{i:02d}-") for lid in supplements) >= 22
                for i in range(1, 25)), "every domain must have at least twenty-two in-lesson supplements"
     worked_count = sum(bool(x.get("worked_example")) for x in supplements.values())
-    assert worked_count == 655, "advanced worked-example count mismatch"
+    assert worked_count == 660, "advanced worked-example count mismatch"
     for module in modules:
         if module["path"].endswith(("-3.json", "-4.json", "-5.json", "-6.json")) or re.search(r"-(?:0[789]|1\d)-[a-z]\.json$", module["path"]):
             advanced = json.loads((ROOT / module["path"][2:]).read_text(encoding="utf-8"))
