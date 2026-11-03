@@ -112,6 +112,15 @@ function display(){
  const data=state.domains[meta.domain_id]?.[id];
  if(!data){root.innerHTML='<p class="atlas-error">讲义正文缺失：'+esc(id)+'</p>';return}
  state.activeId=id;
+ // Keep the directory and URL filters synchronized when a cross-topic link is opened.
+ if(state.topic&&state.topic!==meta.domain_id){
+  state.topic=meta.domain_id;$("atlas-topic").value=state.topic;
+  const u=new URL(location.href);u.searchParams.set("discipline",state.topic);
+  history.replaceState(null,"",u.pathname+u.search+u.hash);
+ }
+ if(state.term&&![id,meta.title,meta.domain,meta.chapter].some(v=>String(v).toLocaleLowerCase().includes(state.term))){
+  state.term="";$("atlas-search").value="";
+ }
  const position=state.index.findIndex(x=>x.id===id);
  const prev=state.index[position-1],next=state.index[position+1];
  const actions='<div class="atlas-lesson-actions">'+
