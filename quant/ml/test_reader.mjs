@@ -15,7 +15,7 @@ const state={
   {id:"m02-c01-p01",domain_id:"m02",title:"时间序列"},
   {id:"m02-c01-p02",domain_id:"m02",title:"滚动验证"}
  ],
- byId:new Map(),searchText:new Map(),term:"",topic:"",learnedOnly:false,unreadOnly:false,
+ byId:new Map(),searchText:new Map(),term:"",topic:"",chapterOpen:new Map(),learnedOnly:false,unreadOnly:false,
  enhanced:new Set(["m01-c01-p01","m01-c01-p02","m02-c01-p01","m02-c01-p02"]),
  read:new Set(["m01-c01-p01"]),activeId:"m01-c01-p01"
 };
@@ -28,11 +28,22 @@ let renders=0;
 const reader=vm.runInNewContext(
  segment("function setProgressFilter(","function visibleLessons(){")+
  segment("function visibleLessons(){","function updateReadStats(){")+
+ segment("function chapterShouldOpen(","function renderDirectory(){")+
  segment("function jump(id){","function display(){")+
- "\n({setProgressFilter,visibleLessons,continueUnread});",
+ "\n({setProgressFilter,visibleLessons,chapterShouldOpen,continueUnread});",
  {state,location,$:id=>input[id],renderDirectory:()=>{renders++},showStatus:s=>messages.push(s)}
 );
 assert.equal(reader.visibleLessons().length,4);
+const chapterKey="m01_第一章";
+assert.equal(reader.chapterShouldOpen(chapterKey,true),true,"active chapter auto opens");
+assert.equal(reader.chapterShouldOpen(chapterKey,false),false,"nonactive chapter defaults closed");
+state.chapterOpen.set(chapterKey,true);
+assert.equal(reader.chapterShouldOpen(chapterKey,false),true,"manual expansion survives navigation");
+state.chapterOpen.set(chapterKey,false);
+assert.equal(reader.chapterShouldOpen(chapterKey,true),false,"manual collapse survives directory re-render");
+state.term="检索";
+assert.equal(reader.chapterShouldOpen(chapterKey,false),true,"search can expand matching chapters");
+state.term="";
 reader.setProgressFilter("unread",true);
 assert.deepEqual(Array.from(reader.visibleLessons(),x=>x.id),["m01-c01-p02","m02-c01-p01","m02-c01-p02"]);
 reader.setProgressFilter("learned",true);

@@ -4,7 +4,7 @@ const $=id=>document.getElementById(id);
 const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const LESSON=/^#(?:lesson|ml)\/(m\d\d-c\d\d-p\d\d)$/;
 const KEY="kline-quant-atlas-read-v1";
-const state={index:[],byId:new Map(),domains:{},searchText:new Map(),term:"",topic:"",activeId:"",read:new Set(),enhanced:new Set(),learnedOnly:false,unreadOnly:false};
+const state={index:[],byId:new Map(),domains:{},searchText:new Map(),term:"",topic:"",activeId:"",read:new Set(),enhanced:new Set(),chapterOpen:new Map(),learnedOnly:false,unreadOnly:false};
 try {const saved=JSON.parse(localStorage.getItem(KEY)||"[]");if(Array.isArray(saved))state.read=new Set(saved.filter(v=>typeof v==="string"))}catch(_){}
 function saveRead(){try{localStorage.setItem(KEY,JSON.stringify([...state.read]))}catch(_){}}
 function serializeReadProgress(read,knownIds){
@@ -189,6 +189,10 @@ function updateReadStats(){
  const b=$("atlas-read-toggle");
  if(b&&state.activeId){const done=state.read.has(state.activeId);b.setAttribute("aria-pressed",String(done));b.textContent=done?"已学 · 点击取消":"标记已学";}
 }
+function chapterShouldOpen(key,active){
+ const preference=state.chapterOpen.get(key);
+ return state.term.length>0||(preference===undefined?active:preference);
+}
 function renderDirectory(){
  const matches=visibleLessons();
  showStatus("显示 "+matches.length+" / "+state.index.length+" 篇讲义 · "+matches.filter(x=>state.read.has(x.id)).length+" 篇已学");
@@ -198,11 +202,11 @@ function renderDirectory(){
   if(!grouped.has(key))grouped.set(key,[]);
   grouped.get(key).push(x);
  }
- const html=[...grouped.values()].map(rows=>{
+ const html=[...grouped.entries()].map(([key,rows])=>{
   const active=rows.some(x=>x.id===state.activeId);
-  const open=state.term.length>0||active;
+  const open=chapterShouldOpen(key,active);
   const count=rows.filter(x=>state.read.has(x.id)).length;
-  return '<details class="atlas-section"'+(open?' open':'')+'><summary>'+esc(rows[0].domain)+" / "+esc(rows[0].chapter)+
+  return '<details class="atlas-section" data-key="'+esc(key)+'"'+(open?' open':'')+'><summary>'+esc(rows[0].domain)+" / "+esc(rows[0].chapter)+
    '<span class="atlas-chapter-count">'+count+"/"+rows.length+'</span></summary><div class="atlas-chapter-items">'+
    rows.map(x=>'<a href="#lesson/'+x.id+'" data-id="'+x.id+'"'+(x.id===state.activeId?' class="active" aria-current="page"':'')+'>'+
     (state.read.has(x.id)?'<span class="atlas-done-mark" aria-label="已学">✓ </span>':'')+esc(x.title)+'</a>').join("")+
@@ -366,6 +370,12 @@ async function start(){
   state.topic=groups.has(topic)?topic:"";$("atlas-topic").value=state.topic;
   $("atlas-search").addEventListener("input",e=>{state.term=e.target.value.trim().toLocaleLowerCase();renderDirectory()});
   $("atlas-topic").addEventListener("change",e=>setTopic(e.target.value));
+  $("atlas-toc").addEventListener("click",e=>{
+   const summary=e.target.closest("summary");
+   const details=summary?.parentElement;
+   if(details?.matches(".atlas-section")&&details.dataset.key)
+    state.chapterOpen.set(details.dataset.key,!details.open);
+  });
   $("atlas-learned-only").addEventListener("change",e=>setProgressFilter("learned",e.target.checked));
   $("atlas-unread-only").addEventListener("change",e=>setProgressFilter("unread",e.target.checked));
   $("atlas-resume").addEventListener("click",continueUnread);
