@@ -84,6 +84,22 @@ def main():
         fixed_math += 1
     assert (fixed_a, fixed_b, fixed_math) == (20, 22, 2)
 
+    depth = json.loads((ROOT / "atlas-depth.json").read_text(encoding="utf-8"))
+    assert depth["schema"] == 1
+    supplements = depth["lessons"]
+    assert len(supplements) == 8, "expected eight in-lesson deep dives"
+    for lid, lesson in supplements.items():
+        assert lid in by_id, ("orphan in-lesson supplement", lid)
+        assert len(lesson["title"]) >= 8 and len(lesson["overview"]) >= 60, lid
+        assert len(lesson["equations"]) >= 2, lid
+        assert len(lesson["derivation"]) >= 3, lid
+        assert len(lesson["protocol"]) >= 3, lid
+        assert len(lesson["pitfalls"]) >= 2, lid
+        for eq in lesson["equations"]:
+            assert eq["label"] and eq["tex"], ("empty equation", lid)
+        for group in ("derivation", "protocol", "pitfalls"):
+            assert all(isinstance(s, str) and len(s) > 30 for s in lesson[group]), (lid, group)
+
     refs = math_count = python_count = 0
     legacy_comments = 0
     invalid = []
@@ -127,6 +143,7 @@ def main():
         "formal_definitions_revised": fixed_a,
         "assumption_paragraphs_revised": fixed_b,
         "equations_corrected": fixed_math,
+        "in_lesson_advanced_supplements": len(supplements),
         "historic_code_comment_labels_retained_in_source": legacy_comments,
         "note": "Checks archive and in-memory editorial overlay; does not run Python examples or a real browser.",
     }
