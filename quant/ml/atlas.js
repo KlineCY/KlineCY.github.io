@@ -4,7 +4,7 @@ const $=id=>document.getElementById(id);
 const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const LESSON=/^#(?:lesson|ml)\/(m\d\d-c\d\d-p\d\d)$/;
 const KEY="kline-quant-atlas-read-v1";
-const state={index:[],byId:new Map(),domains:{},term:"",topic:"",activeId:"",read:new Set()};
+const state={index:[],byId:new Map(),domains:{},searchText:new Map(),term:"",topic:"",activeId:"",read:new Set()};
 try {const saved=JSON.parse(localStorage.getItem(KEY)||"[]");if(Array.isArray(saved))state.read=new Set(saved.filter(v=>typeof v==="string"))}catch(_){}
 function saveRead(){try{localStorage.setItem(KEY,JSON.stringify([...state.read]))}catch(_){}}
 function showStatus(message,error=false){const el=$("atlas-status");el.textContent=message;el.classList.toggle("atlas-error",error)}
@@ -21,6 +21,41 @@ function setTopic(v,updateUrl=true){
  renderDirectory();
 }
 window.mlSelectDiscipline=id=>setTopic(id,false);
+
+const EDITORIAL_A="这里的随机对象、输入分布、样本索引和运算顺序都应在项目文档中写明。公式的作用是给出可审计的数量关系，并不自动提供统计一致性或金融收益保证。";
+const EDITORIAL_B="这些关系的成立还要求明确数据可得时间、参数单位、取样机制以及用于估计的训练区间。违反条件时不能由等式直接推断样本外效果。";
+function applyEditorial(data,patch){
+ if(patch.schema!==1)throw Error("教材勘误文件版本不受支持");
+ const sums={definitions:0,conditions:0,formulas:0};
+ function record(id,oldText,newText,key){
+  if(!/^m\d\d-c\d\d-p\d\d$/.test(id))throw Error("非法知识点勘误ID："+id);
+  const row=data.domains[id.slice(0,3)]?.[id];
+  if(!row)throw Error("勘误目标不存在："+id);
+  const original=row.html;
+  if(!original.includes(oldText))throw Error("勘误目标正文发生变化："+id+" / "+key);
+  row.html=original.replace(oldText,newText);
+  sums[key]++;
+ }
+ for(const [id,meaning] of Object.entries(patch.replacementA||{}))
+  record(id,"<p>"+EDITORIAL_A+"</p>","<p>"+esc(meaning)+"</p>","definitions");
+ for(const [id,meaning] of Object.entries(patch.replacementB||{}))
+  record(id,"<p>"+EDITORIAL_B+"</p>","<p>"+esc(meaning)+"</p>","conditions");
+ for(const fix of patch.math||[]){
+  if(!fix.from||!fix.to)throw Error("公式勘误缺失原式或新式："+fix.id);
+  const row=data.domains[fix.id.slice(0,3)]?.[fix.id];
+  if(!row||!row.html.includes(fix.from))throw Error("公式勘误原式缺失："+fix.id);
+  row.html=row.html.split(fix.from).join(fix.to);
+  sums.formulas++;
+ }
+ if(sums.definitions!==20||sums.conditions!==22||sums.formulas!==2)throw Error("教材勘误应用数量不匹配");
+ return sums;
+}
+function cleanCodeComments(root){
+ root.querySelectorAll(".ml-point-code-wrap pre code").forEach(el=>{
+  el.textContent=el.textContent.replace(/^([ \t]*#\s*)第\d+轮\s*[：:]?\s*/gm,"$1");
+ });
+}
+
 async function loadArchive(){
  if(typeof DecompressionStream==="undefined")throw Error("当前浏览器不支持gzip解压，请使用新版Chrome、Edge、Safari或Firefox");
  const buffers=await Promise.all([1,2,3,4].map(async n=>{
@@ -44,8 +79,9 @@ async function loadArchive(){
  return parsed;
 }
 function visibleLessons(){
+ const words=state.term.split(/\s+/).filter(Boolean);
  return state.index.filter(x=>(!state.topic||x.domain_id===state.topic)&&
- (!state.term||[x.id,x.title,x.domain,x.chapter].some(v=>String(v||"").toLocaleLowerCase().includes(state.term))));
+ (words.length===0||words.every(word=>state.searchText.get(x.id)?.includes(word))));
 }
 function updateReadStats(){
  const n=state.index.filter(x=>state.read.has(x.id)).length;
@@ -142,6 +178,7 @@ function display(){
   saveRead();renderDirectory();
  });
  fixInlineMarkdown(root.querySelector(".article"));
+ cleanCodeComments(root.querySelector(".article"));
  renderMath(root.querySelector(".article"));
  renderDirectory();
  if(location.hash)root.scrollIntoView({block:"start",behavior:"auto"});
@@ -163,7 +200,18 @@ async function copyText(value,button,label){
 async function start(){
  try{
   const data=await loadArchive();
+  const editorialResponse=await fetch("./atlas-editorial.json");
+  if(!editorialResponse.ok)throw Error("教材勘误资源加载失败（HTTP "+editorialResponse.status+"）");
+  const editorial=await editorialResponse.json();
+  applyEditorial(data,editorial);
   state.index=data.catalog.items;state.byId=new Map(state.index.map(x=>[x.id,x]));state.domains=data.domains;
+  // Index visible article text as well as titles, chapters and code symbols.
+  // This is computed once so subsequent searches do not repeatedly parse all 720 lessons.
+  for(const x of state.index){
+   const page=data.domains[x.domain_id][x.id].html;
+   const plain=page.replace(/<[^>]*>/g," ").replace(/&(lt|gt|amp|quot|nbsp);/g,(_,entity)=>({lt:"<",gt:">",amp:"&",quot:"\"",nbsp:" "}[entity]));
+   state.searchText.set(x.id,[x.id,x.title,x.domain,x.chapter,plain].join(" ").toLocaleLowerCase());
+  }
   const groups=new Set();
   for(const x of state.index){
    if(groups.has(x.domain_id))continue;
