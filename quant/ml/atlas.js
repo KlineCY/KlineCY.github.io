@@ -69,7 +69,7 @@ function applyDepth(data,patches,manifest){
      !Array.isArray(s.protocol)||s.protocol.length<3||!Array.isArray(s.pitfalls))throw Error("深化讲义内容不完整："+id);
   if(s.worked_example&&(typeof s.worked_example!=="string"||s.worked_example.length<50))
    throw Error("深化讲义数值例子不足："+id);
-  if(/-(?:[456]|07-[a-l])\.json$/.test(manifest.modules[i].path)&&
+  if(/-(?:[456]|0[78]-[a-l])\.json$/.test(manifest.modules[i].path)&&
      (s.equations.length<3||!s.worked_example||s.worked_example.length<60))
    throw Error("进阶讲义缺少完整数学算例："+id);
   const formulas=s.equations.map(eq=>{
@@ -89,7 +89,7 @@ function applyDepth(data,patches,manifest){
   throw Error("深化讲义覆盖不完整："+seen.size+"篇，"+allDomains.size+"专题");
  const coverage=new Map();
  for(const id of seen)coverage.set(id.slice(0,3),(coverage.get(id.slice(0,3))||0)+1);
- if([...coverage.values()].some(n=>n<12))throw Error("某机器学习专题的进阶内容少于12篇");
+ if([...coverage.values()].some(n=>n<17))throw Error("某机器学习专题的进阶内容少于17篇");
  return seen;
 }
 function cleanCodeComments(root){
