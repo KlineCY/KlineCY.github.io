@@ -87,6 +87,9 @@ function applyDepth(data,patches,manifest){
  }
  if(seen.size!==manifest.expected_lessons||allDomains.size!==manifest.expected_domains)
   throw Error("深化讲义覆盖不完整："+seen.size+"篇，"+allDomains.size+"专题");
+ const coverage=new Map();
+ for(const id of seen)coverage.set(id.slice(0,3),(coverage.get(id.slice(0,3))||0)+1);
+ if([...coverage.values()].some(n=>n<5))throw Error("某机器学习专题的进阶内容少于5篇");
  return seen;
 }
 function cleanCodeComments(root){
