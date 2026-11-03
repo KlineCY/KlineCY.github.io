@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import assert from "node:assert/strict";
 import vm from "node:vm";
+import {gunzipSync} from "node:zlib";
 import katex from "katex";
 const here=new URL("./",import.meta.url);
 const read=filename=>JSON.parse(fs.readFileSync(new URL(filename,here),"utf8"));
@@ -111,6 +112,21 @@ for(const file of depthFiles){
 }
 assert.equal(seen.size,56,"must load 56 advanced lessons");
 assert.equal(domains.size,24,"must cover all 24 ML topics");
+const binary=Buffer.concat([1,2,3,4].map(i=>fs.readFileSync(new URL("atlas/data.part"+i,here))));
+assert.equal(binary.length,1969862,"published archive bytes changed unexpectedly");
+const archive=JSON.parse(gunzipSync(binary).toString("utf8"));
+const depthFnText=atlas.slice(atlas.indexOf("function applyDepth("),atlas.indexOf("function cleanCodeComments("));
+assert(depthFnText.startsWith("function applyDepth("),"Atlas runtime deep-dive function missing");
+const escapeHtml=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const applyRuntimeDepth=vm.runInNewContext(depthFnText+"\napplyDepth;",{esc:escapeHtml});
+const runtimeIds=applyRuntimeDepth(archive,depthFiles.map(read));
+assert.equal(runtimeIds.size,56,"runtime overlay count mismatch");
+for(const id of seen){
+ assert(runtimeIds.has(id),"runtime deep-dive missing: "+id);
+ const article=archive.domains[id.slice(0,3)][id].html;
+ assert(article.includes('aria-label="进阶推导与研究实践"'),"advanced lesson did not attach to canonical page: "+id);
+ assert(article.includes("推导与适用边界")&&article.includes("研究与实现流程"),"advanced sections missing: "+id);
+}
 assert(atlas.includes("depthOnly")&&atlas.includes("atlas-advanced-mark"),"advanced lesson filter and directory labels missing");
 assert(app.includes("manifest.lesson_files"),"legacy lesson reader unexpectedly removed");
 console.log("PASS: 56 rigorous advanced lessons across 24 domains; legacy curriculum 24 disciplines / 120 chapters / 720 nodes; published Atlas navigation and JS parse; "+lessons.length+" legacy tutorials, "+activeNotes.length+" active notes; all legacy LaTeX syntax valid.");
