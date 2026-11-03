@@ -11,12 +11,12 @@ const bytes=Buffer.concat([1,2,3,4].map(n=>fs.readFileSync(new URL("./atlas/data
 const archive=JSON.parse(gunzipSync(bytes).toString("utf8"));
 assert.equal(archive.catalog.items.length,720);
 assert.equal(bundle.schema,1);
-assert.equal(bundle.chapters.length,1);
+assert(bundle.chapters.length>=2,"at least two full ML extension chapters expected");
 const allNew=bundle.chapters.flatMap(ch=>ch.lessons);
-assert.equal(allNew.length,4);
+assert(allNew.length>=8,"all published additional courses must be verified");
 const originalIds=new Set(archive.catalog.items.map(x=>x.id));
 const newIds=new Set(allNew.map(l=>l.id));
-assert.equal(newIds.size,4);
+assert.equal(newIds.size,allNew.length,"extended ML IDs must be unique");
 let sectionCount=0,formulaCount=0;
 for(const chapter of bundle.chapters){
  assert(archive.domains[chapter.domain_id],"domain missing "+chapter.domain_id);
@@ -42,18 +42,20 @@ new vm.Script(source,{filename:"quant/ml/new-topics.js"});
 const ctx={window:{},encodeURIComponent};
 vm.runInNewContext(source,ctx);
 const inserted=ctx.window.quantMlExpansion.install(archive,bundle);
-assert.equal(inserted.size,4);
-assert.equal(archive.catalog.items.length,724);
-assert.equal(new Set(archive.catalog.items.map(x=>x.id)).size,724);
+assert.equal(inserted.size,allNew.length);
+assert.equal(archive.catalog.items.length,720+allNew.length);
+assert.equal(new Set(archive.catalog.items.map(x=>x.id)).size,720+allNew.length);
 for(const id of inserted){
  const meta=archive.catalog.items.find(x=>x.id===id);
- assert(meta.chapter.includes("金融预测验证"),"new chapter placement");
+ assert(bundle.chapters.some(ch=>ch.chapter===meta.chapter&&ch.domain_id===meta.domain_id),"new chapter placement");
  const article=archive.domains[id.slice(0,3)]?.[id];
  assert(article&&article.html.includes("atlas-concept-toc"),"new article not published "+id);
- assert.equal((article.html.match(/class="atlas-concept-unit"/g)||[]).length,4);
+ assert.equal((article.html.match(/class="atlas-concept-unit"/g)||[]).length,allNew.find(x=>x.id===id).sections.length);
 }
-const sample=archive.catalog.items.filter(x=>x.domain_id==="m12");
-assert(sample.slice(-4).every(x=>newIds.has(x.id)),"new chapter must follow the original domain");
+for(const chapter of bundle.chapters){
+ const sample=archive.catalog.items.filter(x=>x.domain_id===chapter.domain_id);
+ assert(sample.slice(-chapter.lessons.length).every(x=>chapter.lessons.some(y=>y.id===x.id)),"extension must follow its canonical domain "+chapter.domain_id);
+}
 const arithmetic=[
  [1-.95**20,.6415140775914581],
  [4/(4+1),.8],
@@ -61,4 +63,4 @@ const arithmetic=[
  [5.05+4.95,10]
 ];
 for(const [actual,expect] of arithmetic)assert(Math.abs(actual-expect)<1e-9);
-console.log("PASS: 724 distinct navigable ML lessons including 4 new full tutorials, "+sectionCount+" subchapters, "+formulaCount+" KaTeX expressions, valid math references");
+console.log("PASS: "+(720+allNew.length)+" distinct navigable ML lessons including "+allNew.length+" expanded full tutorials, "+sectionCount+" subchapters, "+formulaCount+" KaTeX expressions, valid math references");
