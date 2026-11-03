@@ -94,11 +94,11 @@ assert(atlas.includes("applyDepth")&&atlas.includes('fetchAtlasJson("./atlas-dep
 assert(atlas.includes("fetchAtlasModulesBounded(depthFiles,6,")&&atlas.includes("onProgress(++completed,files.length)"),"advanced modules must have bounded concurrency and progress callbacks");
 const depthManifest=read("atlas-depth-manifest.json");
 assert.equal(depthManifest.schema,1);
-assert.equal(depthManifest.expected_lessons,653);
+assert.equal(depthManifest.expected_lessons,665);
 assert.equal(depthManifest.expected_domains,24);
-assert.equal(depthManifest.modules.length,81);
-assert.equal(new Set(depthManifest.modules.map(m=>m.path)).size,81);
-assert.equal(depthManifest.modules.reduce((n,m)=>n+m.lessons,0),653);
+assert.equal(depthManifest.modules.length,83);
+assert.equal(new Set(depthManifest.modules.map(m=>m.path)).size,83);
+assert.equal(depthManifest.modules.reduce((n,m)=>n+m.lessons,0),665);
 const depthFiles=depthManifest.modules.map(m=>m.path.replace(/^\.\//,""));
 const seen=new Set(),domains=new Set();let workedCount=0;
 for(let i=0;i<depthFiles.length;i++){
@@ -120,12 +120,12 @@ for(let i=0;i<depthFiles.length;i++){
   }
  }
 }
-assert.equal(seen.size,653,"must load 653 advanced lessons");
+assert.equal(seen.size,665,"must load 665 advanced lessons");
 assert.equal(domains.size,24,"must cover all twenty-four domains");
 const perDomain=new Map();
 for(const id of seen)perDomain.set(id.slice(0,3),(perDomain.get(id.slice(0,3))||0)+1);
 assert([...perDomain.values()].every(n=>n>=22),"each of the 24 topics must have at least twenty-two rigorous in-lesson enhancements");
-assert.equal(workedCount,597,"third through tenth passes require 517 worked examples");
+assert.equal(workedCount,609,"advanced worked-example count mismatch");
 const binary=Buffer.concat([1,2,3,4].map(i=>fs.readFileSync(new URL("atlas/data.part"+i,here))));
 assert.equal(binary.length,1969862,"published archive bytes changed unexpectedly");
 const archive=JSON.parse(gunzipSync(binary).toString("utf8"));
@@ -134,7 +134,7 @@ assert(depthFnText.startsWith("function applyDepth("),"Atlas runtime function mi
 const escapeHtml=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const applyRuntimeDepth=vm.runInNewContext(depthFnText+"\napplyDepth;",{esc:escapeHtml});
 const runtimeIds=applyRuntimeDepth(archive,depthFiles.map(read),depthManifest);
-assert.equal(runtimeIds.size,653,"runtime overlay count mismatch");
+assert.equal(runtimeIds.size,665,"runtime overlay count mismatch");
 for(const id of seen){
  assert(runtimeIds.has(id),"runtime deep-dive missing: "+id);
  const article=archive.domains[id.slice(0,3)][id].html;
@@ -146,4 +146,4 @@ for(const id of seen){
 assert(atlas.includes("depthOnly")&&atlas.includes("atlas-advanced-mark"),"advanced lesson filter and directory labels missing");
 assert(atlas.includes("unreadOnly")&&atlas.includes("continueUnread")&&atlas.includes("atlas-jump-depth"),"published reader must support unread filtering, resuming and in-lesson advanced navigation");
 assert(app.includes("manifest.lesson_files"),"legacy lesson reader unexpectedly removed");
-console.log("PASS: 653 rigorous advanced lessons across 24 domains; legacy curriculum 24 disciplines / 120 chapters / 720 nodes; published Atlas navigation and JS parse; "+lessons.length+" legacy tutorials, "+activeNotes.length+" active notes; all legacy LaTeX syntax valid.");
+console.log("PASS: 665 rigorous advanced lessons across 24 domains; legacy curriculum 24 disciplines / 120 chapters / 720 nodes; published Atlas navigation and JS parse; "+lessons.length+" legacy tutorials, "+activeNotes.length+" active notes; all legacy LaTeX syntax valid.");
