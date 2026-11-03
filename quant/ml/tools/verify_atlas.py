@@ -89,6 +89,9 @@ def main():
         "atlas-depth-foundations.json",
         "atlas-depth-learning.json",
         "atlas-depth-quant.json",
+        "atlas-depth-foundations-2.json",
+        "atlas-depth-learning-2.json",
+        "atlas-depth-quant-2.json",
     ]
     supplements = {}
     for path in depth_files:
@@ -98,7 +101,7 @@ def main():
         for lid, lesson in depth["lessons"].items():
             assert lid not in supplements, ("duplicate supplement ID", lid)
             supplements[lid] = lesson
-    assert len(supplements) == 32, "expected 32 in-lesson deep dives"
+    assert len(supplements) == 56, "expected 56 in-lesson deep dives"
     assert len({lid[:3] for lid in supplements}) == 24, "expected every Atlas topic represented"
     assert not any(GENERIC_A in b["html"] or GENERIC_B in b["html"] for b in by_id.values()), "generic editorial placeholders remain"
     for lid, lesson in supplements.items():
