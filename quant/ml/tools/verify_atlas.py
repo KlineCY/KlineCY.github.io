@@ -84,13 +84,27 @@ def main():
         fixed_math += 1
     assert (fixed_a, fixed_b, fixed_math) == (20, 31, 2)
 
-    depth = json.loads((ROOT / "atlas-depth.json").read_text(encoding="utf-8"))
-    assert depth["schema"] == 1
-    supplements = depth["lessons"]
-    assert len(supplements) == 8, "expected eight in-lesson deep dives"
+    depth_files = [
+        "atlas-depth.json",
+        "atlas-depth-foundations.json",
+        "atlas-depth-learning.json",
+        "atlas-depth-quant.json",
+    ]
+    supplements = {}
+    for path in depth_files:
+        depth = json.loads((ROOT / path).read_text(encoding="utf-8"))
+        assert depth["schema"] == 1, path
+        assert len(depth["lessons"]) == 8, ("incomplete supplement batch", path)
+        for lid, lesson in depth["lessons"].items():
+            assert lid not in supplements, ("duplicate supplement ID", lid)
+            supplements[lid] = lesson
+    assert len(supplements) == 32, "expected 32 in-lesson deep dives"
+    assert len({lid[:3] for lid in supplements}) == 24, "expected every Atlas topic represented"
     assert not any(GENERIC_A in b["html"] or GENERIC_B in b["html"] for b in by_id.values()), "generic editorial placeholders remain"
     for lid, lesson in supplements.items():
         assert lid in by_id, ("orphan in-lesson supplement", lid)
+        if "source_title" in lesson:
+            assert lesson["source_title"] == by_id[lid]["title"], ("source title mismatch", lid, lesson["source_title"], by_id[lid]["title"])
         assert len(lesson["title"]) >= 8 and len(lesson["overview"]) >= 60, lid
         assert len(lesson["equations"]) >= 2, lid
         assert len(lesson["derivation"]) >= 3, lid
