@@ -15,7 +15,7 @@ function parseReadProgress(source,knownIds){
  if(typeof source!=="string"||source.length>65536)throw Error("文件过大或类型不正确");
  const payload=JSON.parse(source);
  if(!payload||payload.format!=="kline-quant-ml-progress"||payload.version!==1||
-  !Array.isArray(payload.read_ids)||payload.read_ids.length>720)
+  !Array.isArray(payload.read_ids)||payload.read_ids.length>knownIds.size)
   throw Error("学习进度格式或版本不受支持");
  const result=new Set();
  for(const id of payload.read_ids){
@@ -184,7 +184,7 @@ function visibleLessons(){
 }
 function updateReadStats(){
  const n=state.index.filter(x=>state.read.has(x.id)).length;
- const el=$("atlas-read-count");if(el)el.textContent=n+" / 720 篇已标记";
+ const el=$("atlas-read-count");if(el)el.textContent=n+" / "+state.index.length+" 篇已标记";
  const count=$("atlas-learned-count");if(count)count.textContent=n;
  const b=$("atlas-read-toggle");
  if(b&&state.activeId){const done=state.read.has(state.activeId);b.setAttribute("aria-pressed",String(done));b.textContent=done?"已学 · 点击取消":"标记已学";}
@@ -353,10 +353,15 @@ async function start(){
   showStatus("进阶内容已传输，正在校验公式与构建全文索引…");
   applyEditorial(data,editorial);
   state.enhanced=applyDepth(data,depthPatches,manifest);
+  const added=await fetchAtlasJson("./atlas-new-lessons.json",{cache:"no-cache"});
+  if(!window.quantMlExpansion?.install)throw Error("新增专题阅读器未加载");
+  const newIds=window.quantMlExpansion.install(data,added);
   const conceptBundle=await fetchAtlasJson("./atlas-concept-chapters.json",{cache:"no-cache"});
   if(!window.quantMlConcepts?.mount)throw Error("知识链分层渲染器未加载");
   state.conceptChapters=window.quantMlConcepts.mount(data,conceptBundle);
+  for(const newId of newIds)state.conceptChapters.add(newId);
   state.index=data.catalog.items;state.byId=new Map(state.index.map(x=>[x.id,x]));state.domains=data.domains;
+  const total=$("atlas-total-lessons");if(total)total.textContent=state.index.length+" 篇系统讲义（含新增专题）";
   state.read=new Set([...state.read].filter(id=>state.byId.has(id)));
   // Index visible article text as well as titles, chapters and code symbols.
   // This is computed once so subsequent searches do not repeatedly parse all 720 lessons.
