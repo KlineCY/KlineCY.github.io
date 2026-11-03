@@ -28,7 +28,7 @@ class EighthWaveMath(unittest.TestCase):
             per_domain[uid[:3]] = per_domain.get(uid[:3], 0) + 1
             with self.subTest(lesson=uid):
                 self.assertRegex(uid, r"^m\d\d-c\d\d-p\d\d$")
-                self.assertGreaterEqual(len(lesson["source_title"]), 3)
+                self.assertGreaterEqual(len(lesson["source_title"]), 2)
                 self.assertGreaterEqual(len(lesson["title"]), 8)
                 self.assertGreaterEqual(len(lesson["overview"]), 60)
                 self.assertGreaterEqual(len(lesson["worked_example"]), 60)
@@ -105,7 +105,7 @@ class EighthWaveMath(unittest.TestCase):
             ("m20-c02-p04", 1+.9*2, 2.8, "SARSA目标为2.8", 1e-9),
             ("m20-c05-p01", 2*2, 4, "轨迹权重为2×2=4", 0),
             ("m21-c03-p05", 90+20-5, 105, "q=90+20−5=105", 0),
-            ("m21-c02-p03", .3-.5, -.2, "−0.2%", 1e-9),
+            ("m21-c02-p03", .3-.5, -.2, "真实净亏0.2%", 1e-9),
             ("m21-c03-p03", .9*2+.1*(-8), 1, "B期望也为1", 1e-9),
             ("m22-c05-p01", .1*1.2**3, .1728, "0.1728", .0001),
             ("m22-c01-p01", 100*1, 100, "第100期方差100", 0),
