@@ -98,6 +98,36 @@ function cleanCodeComments(root){
  });
 }
 
+async function fetchAtlasJson(url,options={}){
+ let failure=null;
+ for(let attempt=0;attempt<3;attempt++){
+  try{
+   const response=await fetch(url,options);
+   if(!response.ok){
+    const problem=Error("HTTP "+response.status+"："+url);
+    if(response.status!==429&&response.status<500)throw problem;
+    failure=problem;
+   }else return await response.json();
+  }catch(err){
+   if(/^HTTP 4\\d\\d/.test(err.message)&&!err.message.startsWith("HTTP 429"))throw err;
+   failure=err;
+  }
+  if(attempt<2)await new Promise(resolve=>setTimeout(resolve,180*(attempt+1)));
+ }
+ throw Error("资源下载失败（已尝试3次）："+url+"；"+(failure?.message||"未知网络故障"));
+}
+async function fetchAtlasModulesBounded(files,concurrency=6){
+ const output=new Array(files.length);
+ let cursor=0;
+ const workers=Array.from({length:Math.min(concurrency,files.length)},async()=>{
+  while(cursor<files.length){
+   const index=cursor++;
+   output[index]=await fetchAtlasJson(files[index]);
+  }
+ });
+ await Promise.all(workers);
+ return output;
+}
 async function loadArchive(){
  if(typeof DecompressionStream==="undefined")throw Error("当前浏览器不支持gzip解压，请使用新版Chrome、Edge、Safari或Firefox");
  const buffers=await Promise.all([1,2,3,4].map(async n=>{
@@ -243,9 +273,7 @@ async function copyText(value,button,label){
 async function start(){
  try{
   const data=await loadArchive();
-  const manifestResponse=await fetch("./atlas-depth-manifest.json",{cache:"no-cache"});
-  if(!manifestResponse.ok)throw Error("深化讲义目录加载失败（HTTP "+manifestResponse.status+"）");
-  const manifest=await manifestResponse.json();
+  const manifest=await fetchAtlasJson("./atlas-depth-manifest.json",{cache:"no-cache"});
   if(manifest.schema!==1||!Number.isSafeInteger(manifest.expected_lessons)||manifest.expected_lessons<80||
      manifest.expected_domains!==24||!Array.isArray(manifest.modules)||manifest.modules.length<10)
    throw Error("深化讲义目录版本或内容不完整");
@@ -257,15 +285,11 @@ async function start(){
    throw Error("深化讲义目录包含非法路径或数量");
   if(manifest.modules.reduce((sum,m)=>sum+m.lessons,0)!==manifest.expected_lessons)
    throw Error("深化讲义目录数量不一致");
-  const [editorialResponse,...depthResponses]=await Promise.all([
-   fetch("./atlas-editorial.json"),...depthFiles.map(file=>fetch(file))
-  ]);
-  if(!editorialResponse.ok)throw Error("教材勘误资源加载失败（HTTP "+editorialResponse.status+"）");
-  for(let i=0;i<depthResponses.length;i++)
-   if(!depthResponses[i].ok)throw Error("深化讲义资源加载失败："+depthFiles[i]+"（HTTP "+depthResponses[i].status+"）");
-  const editorial=await editorialResponse.json();
+  // Keep parallel downloads bounded; failures retry individually without restarting all modules.
+  const editorial=await fetchAtlasJson("./atlas-editorial.json");
+  const depthPatches=await fetchAtlasModulesBounded(depthFiles,6);
   applyEditorial(data,editorial);
-  state.enhanced=applyDepth(data,await Promise.all(depthResponses.map(r=>r.json())),manifest);
+  state.enhanced=applyDepth(data,depthPatches,manifest);
   $("atlas-depth-count").textContent=state.enhanced.size;
   state.index=data.catalog.items;state.byId=new Map(state.index.map(x=>[x.id,x]));state.domains=data.domains;
   // Index visible article text as well as titles, chapters and code symbols.
