@@ -77,13 +77,17 @@ for(const l of [...lessons,...activeNotes]){
  }catch(e){katexErrors.push(l.title+" PROOF: "+e.message+" "+step.tex.slice(0,100));}
 }
 assert.equal(katexErrors.length,0,"LaTeX errors:\n"+katexErrors.join("\n"));
+// The published ML entry is the Atlas reader. The former app is retained only as legacy.
 const app=fs.readFileSync(new URL("app.js",here),"utf8");
+const atlas=fs.readFileSync(new URL("atlas.js",here),"utf8");
 const html=fs.readFileSync(new URL("index.html",here),"utf8");
 const nav=fs.readFileSync(new URL("../sidebar-v2.js",here),"utf8");
 new vm.Script(app);
+new vm.Script(atlas);
 new vm.Script(nav);
-for(const marker of ['id="quantSidebar"','id="tree"','id="article"','id="coverageFilter"','id="status"'])assert(html.includes(marker));
+for(const marker of ['id="quantSidebar"','id="atlas-search"','id="atlas-topic"','id="atlas-toc"','id="atlas-lesson"','id="atlas-status"'])assert(html.includes(marker),"published Atlas marker absent: "+marker);
+assert(html.includes('src="./atlas.js"'),"published page must load Atlas reader");
 assert(nav.includes('["ml","机器学习 Machine Learning"]'));
-assert(app.includes("复制代码"));
-assert(app.includes("manifest.lesson_files"));
-console.log("PASS: 24 ML disciplines, 120 chapters, 720 nodes, "+lessons.length+" indexed independent entries, "+activeNotes.length+" active supplemental notes, all topics covered, LaTeX parses, navigation and JS syntax valid.");
+assert(atlas.includes("loadArchive")&&atlas.includes("renderMath")&&atlas.includes("copyText"),"Atlas reader features missing");
+assert(app.includes("manifest.lesson_files"),"legacy lesson reader unexpectedly removed");
+console.log("PASS: legacy curriculum 24 disciplines / 120 chapters / 720 nodes; published Atlas navigation and JS parse; "+lessons.length+" legacy tutorials, "+activeNotes.length+" active notes; all legacy LaTeX syntax valid.");
