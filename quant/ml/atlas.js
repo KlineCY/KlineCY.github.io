@@ -4,7 +4,7 @@ const $=id=>document.getElementById(id);
 const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const LESSON=/^#(?:lesson|ml)\/(m\d\d-c\d\d-p\d\d)$/;
 const KEY="kline-quant-atlas-read-v1";
-const state={index:[],byId:new Map(),domains:{},searchText:new Map(),term:"",topic:"",activeId:"",read:new Set()};
+const state={index:[],byId:new Map(),domains:{},searchText:new Map(),term:"",topic:"",activeId:"",read:new Set(),enhanced:new Set(),depthOnly:false};
 try {const saved=JSON.parse(localStorage.getItem(KEY)||"[]");if(Array.isArray(saved))state.read=new Set(saved.filter(v=>typeof v==="string"))}catch(_){}
 function saveRead(){try{localStorage.setItem(KEY,JSON.stringify([...state.read]))}catch(_){}}
 function showStatus(message,error=false){const el=$("atlas-status");el.textContent=message;el.classList.toggle("atlas-error",error)}
@@ -78,7 +78,7 @@ function applyDepth(data,patches){
   }
  }
  if(seen.size!==56||allDomains.size!==24)throw Error("深化讲义覆盖不完整："+seen.size+"篇，"+allDomains.size+"专题");
- return seen.size;
+ return seen;
 }
 function cleanCodeComments(root){
  root.querySelectorAll(".ml-point-code-wrap pre code").forEach(el=>{
@@ -110,7 +110,7 @@ async function loadArchive(){
 }
 function visibleLessons(){
  const words=state.term.split(/\s+/).filter(Boolean);
- return state.index.filter(x=>(!state.topic||x.domain_id===state.topic)&&
+ return state.index.filter(x=>(!state.topic||x.domain_id===state.topic)&&(!state.depthOnly||state.enhanced.has(x.id))&&
  (words.length===0||words.every(word=>state.searchText.get(x.id)?.includes(word))));
 }
 function updateReadStats(){
@@ -135,7 +135,7 @@ function renderDirectory(){
   return '<details class="atlas-section"'+(open?' open':'')+'><summary>'+esc(rows[0].domain)+" / "+esc(rows[0].chapter)+
    '<span class="atlas-chapter-count">'+count+"/"+rows.length+'</span></summary><div class="atlas-chapter-items">'+
    rows.map(x=>'<a href="#lesson/'+x.id+'" data-id="'+x.id+'"'+(x.id===state.activeId?' class="active" aria-current="page"':'')+'>'+
-    (state.read.has(x.id)?'<span class="atlas-done-mark" aria-label="已学">✓ </span>':'')+esc(x.title)+'</a>').join("")+
+    (state.read.has(x.id)?'<span class="atlas-done-mark" aria-label="已学">✓ </span>':'')+esc(x.title)+(state.enhanced.has(x.id)?'<span class="atlas-advanced-mark"> · 进阶</span>':'')+'</a>').join("")+
    "</div></details>";
  }).join("");
  $("atlas-toc").innerHTML=html||"<p>未找到匹配的讲义。可尝试其他关键词。</p>";
@@ -178,6 +178,7 @@ function display(){
  const data=state.domains[meta.domain_id]?.[id];
  if(!data){root.innerHTML='<p class="atlas-error">讲义正文缺失：'+esc(id)+'</p>';return}
  state.activeId=id;
+ if(state.depthOnly&&!state.enhanced.has(id)){state.depthOnly=false;$("atlas-depth-only").checked=false}
  // Keep the directory and URL filters synchronized when a cross-topic link is opened.
  if(state.topic&&state.topic!==meta.domain_id){
   state.topic=meta.domain_id;$("atlas-topic").value=state.topic;
@@ -240,7 +241,8 @@ async function start(){
    if(!depthResponses[i].ok)throw Error("深化讲义资源加载失败："+depthFiles[i]+"（HTTP "+depthResponses[i].status+"）");
   const editorial=await editorialResponse.json();
   applyEditorial(data,editorial);
-  applyDepth(data,await Promise.all(depthResponses.map(r=>r.json())));
+  state.enhanced=applyDepth(data,await Promise.all(depthResponses.map(r=>r.json())));
+  $("atlas-depth-count").textContent=state.enhanced.size;
   state.index=data.catalog.items;state.byId=new Map(state.index.map(x=>[x.id,x]));state.domains=data.domains;
   // Index visible article text as well as titles, chapters and code symbols.
   // This is computed once so subsequent searches do not repeatedly parse all 720 lessons.
@@ -260,7 +262,8 @@ async function start(){
   state.topic=groups.has(topic)?topic:"";$("atlas-topic").value=state.topic;
   $("atlas-search").addEventListener("input",e=>{state.term=e.target.value.trim().toLocaleLowerCase();renderDirectory()});
   $("atlas-topic").addEventListener("change",e=>setTopic(e.target.value));
-  $("atlas-clear").addEventListener("click",()=>{state.term="";$("atlas-search").value="";setTopic("");});
+  $("atlas-depth-only").addEventListener("change",e=>{state.depthOnly=e.target.checked;renderDirectory()});
+  $("atlas-clear").addEventListener("click",()=>{state.term="";$("atlas-search").value="";state.depthOnly=false;$("atlas-depth-only").checked=false;setTopic("");});
   $("atlas-lesson").addEventListener("click",e=>{
    const button=e.target.closest("[data-ml-copy-point-code]");
    if(!button)return;
