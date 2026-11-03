@@ -6,7 +6,27 @@ const dir=new URL("./",import.meta.url);
 const read=f=>JSON.parse(fs.readFileSync(new URL(f,dir),"utf8"));
 const c=read("./curriculum.json");
 const sources=["./lessons-foundations.json","./lessons-advanced.json","./lessons-more.json"].map(read);
-const lessons=sources.flatMap(f=>f.lessons);
+const manifest=read("./lessons-manifest.json");
+assert.equal(manifest.version,1);
+assert.equal(manifest.expected_lessons,6);
+assert.equal(manifest.modules.length,2);
+assert.equal(new Set(manifest.modules.map(x=>x.path)).size,2);
+assert.equal(manifest.modules.reduce((s,x)=>s+x.lessons,0),manifest.expected_lessons);
+const extras=manifest.modules.flatMap(mod=>{
+ assert(/^\.\/lessons-phase-\d\d-[a-z]\.json$/.test(mod.path),"invalid module path "+mod.path);
+ const body=read(mod.path);
+ assert.equal(body.version,1);
+ assert.equal(body.lessons.length,mod.lessons);
+ return body.lessons;
+});
+assert.equal(new Set(extras.map(x=>x.node_id)).size,extras.length);
+for(const l of extras){
+ for(const key of ["definition","assumptions","example","application","caveat"])
+  assert(typeof l[key]==="string"&&l[key].length>=50,"thin math "+l.node_id+" "+key);
+ assert(l.properties.length>=3&&l.formulas.length>=3&&l.derivation.length>=3,"incomplete proof "+l.node_id);
+ for(const step of l.derivation)assert(step.explanation.length>=35&&step.tex,"missing proof step "+l.node_id);
+}
+const lessons=[...sources.flatMap(f=>f.lessons),...extras];
 const ids=new Set(),chIds=new Set(),deptIds=new Set(),nodeMap=new Map();
 assert.equal(c.disciplines.length,20,"discipline coverage count");
 assert.equal(c.chapters.length,100,"chapter coverage count");
@@ -64,5 +84,7 @@ new vm.Script(sidebar,{filename:"quant/sidebar-v2.js"});
 for(const marker of ['id="quantSidebar"','id="tree"','id="article"','id="disciplineFilter"','id="status"']){
  assert(html.includes(marker),"missing element "+marker);
 }
+assert(app.includes("loadMathAdditions()")&&app.includes("fetchMathJson("),"math module loader absent");
+assert(html.includes("app.js?v=20261103-math-01"),"versioned math loader missing");
 assert(sidebar.includes('["math","量化数学 Mathematics"]'),"math missing from navigation");
 console.log("Math validation PASS: "+c.disciplines.length+" disciplines, "+c.chapters.length+" chapters, "+c.nodes.length+" nodes, "+lessons.length+" complete lessons, all displayed LaTeX formulas parseable.");

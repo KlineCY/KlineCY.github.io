@@ -207,14 +207,57 @@ renderTree();setURL({discipline:null})
 };
 $("expandAll").onclick=()=>document.querySelectorAll("#tree details").forEach(d=>d.open=true);
 $("collapseAll").onclick=()=>document.querySelectorAll("#tree details").forEach(d=>d.open=false);
+async function fetchMathJson(path){
+ let last=null;
+ for(let attempt=0;attempt<3;attempt++){
+  try{
+   const res=await fetch(path,{cache:"no-cache"});
+   if(!res.ok){
+    const error=Error("HTTP "+res.status+"："+path);
+    if(res.status!==429&&res.status<500)throw error;
+    last=error;
+   }else return await res.json();
+  }catch(e){
+   if(/^HTTP 4\d\d/.test(e.message)&&!e.message.startsWith("HTTP 429"))throw e;
+   last=e;
+  }
+  if(attempt<2)await new Promise(done=>setTimeout(done,160*(attempt+1)));
+ }
+ throw Error("数学讲义下载失败："+path+"；"+last?.message);
+}
+async function loadMathAdditions(){
+ const m=await fetchMathJson("./lessons-manifest.json");
+ if(m.version!==1||!Array.isArray(m.modules)||m.modules.length<2||
+   !Number.isInteger(m.expected_lessons)||m.expected_lessons<6)throw Error("数学讲义模块清单异常");
+ const names=m.modules.map(x=>x.path);
+ if(new Set(names).size!==names.length||
+    m.modules.some(x=>!/^\.\/lessons-phase-\d\d-[a-z]\.json$/.test(x.path)||!Number.isInteger(x.lessons)||x.lessons<1)||
+    m.modules.reduce((sum,x)=>sum+x.lessons,0)!==m.expected_lessons)throw Error("数学讲义模块路径或数量错误");
+ const results=new Array(names.length);let cursor=0;
+ await Promise.all(Array.from({length:Math.min(4,names.length)},async()=>{
+   while(cursor<names.length){
+    const i=cursor++,doc=await fetchMathJson(names[i]);
+    if(doc.version!==1||!Array.isArray(doc.lessons)||doc.lessons.length!==m.modules[i].lessons)
+     throw Error("数学讲义模块损坏："+names[i]);
+    results[i]=doc.lessons;
+   }
+ }));
+ const added=results.flat();
+ if(added.length!==m.expected_lessons||new Set(added.map(x=>x.node_id)).size!==added.length)
+  throw Error("数学讲义模块出现重复或缺页");
+ return added;
+}
 Promise.all([
  fetch("./curriculum.json").then(r=>{if(!r.ok)throw Error("知识树加载失败 "+r.status);return r.json()}),
  fetch("./lessons-foundations.json").then(r=>{if(!r.ok)throw Error("基础讲义加载失败 "+r.status);return r.json()}),
  fetch("./lessons-advanced.json").then(r=>{if(!r.ok)throw Error("进阶讲义加载失败 "+r.status);return r.json()}),
- fetch("./lessons-more.json").then(r=>{if(!r.ok)throw Error("专题讲义加载失败 "+r.status);return r.json()})
-]).then(([c,l1,l2,l3])=>{
-curriculum=c;depts=c.disciplines;chapters=c.chapters;nodes=c.nodes;lessons=[...l1.lessons,...l2.lessons,...l3.lessons];
+ fetch("./lessons-more.json").then(r=>{if(!r.ok)throw Error("专题讲义加载失败 "+r.status);return r.json()}),
+ loadMathAdditions()
+]).then(([c,l1,l2,l3,extra])=>{
+curriculum=c;depts=c.disciplines;chapters=c.chapters;nodes=c.nodes;lessons=[...l1.lessons,...l2.lessons,...l3.lessons,...extra];
 nodeMap=new Map(nodes.map(n=>[n.id,n]));chapMap=new Map(chapters.map(c=>[c.id,c]));deptMap=new Map(depts.map(d=>[d.id,d]));lessonMap=new Map(lessons.map(l=>[l.node_id,l]));
+if(lessonMap.size!==lessons.length||lessons.some(l=>!nodeMap.has(l.node_id)||nodeMap.get(l.node_id).title!==l.title))
+ throw Error("数学讲义ID重复、目标缺失或标题不匹配");
 $("disciplines").textContent=depts.length;$("chapters").textContent=chapters.length;$("nodes").textContent=nodes.length;$("written").textContent=lessonMap.size;
 for(const d of depts){
  const option=document.createElement("option");option.value=d.id;option.textContent=String(d.order).padStart(2,"0")+" · "+d.title;$("disciplineFilter").appendChild(option);

@@ -1,0 +1,141 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "foundation-n0013",
+      "node_id": "foundation-n0013",
+      "title": "数列收敛定义",
+      "definition": "数列收敛指对任何给定正误差容限，数列足够靠后的全部项与极限的距离都严格小于该容限。这是一条含有量词顺序的数学陈述，不等于数值迭代的前几步看起来接近。",
+      "assumptions": "考虑定义在自然数上的实数列(a_n)和候选极限L。量词必须按“任意ε>0，存在依赖ε的N，使所有n≥N”排列；不同ε可以使用不同N。",
+      "properties": [
+        "极限唯一，改变有限个前缀项不会改变极限。",
+        "收敛实数列必有界，且由实数完备性可推出Cauchy准则。",
+        "有限次差分看起来很小并不足以证明极限存在。"
+      ],
+      "formulas": [
+        {
+          "label": "ε–N极限",
+          "tex": "a_n\\to L\\iff \\forall\\varepsilon>0\\ \\exists N\\ \\forall n\\ge N:\\ |a_n-L|<\\varepsilon"
+        },
+        {
+          "label": "Cauchy判据",
+          "tex": "\\forall\\varepsilon>0\\ \\exists N\\ \\forall m,n\\ge N:\\ |a_m-a_n|<\\varepsilon"
+        },
+        {
+          "label": "极限唯一性",
+          "tex": "|L-M|\\le |L-a_n|+|a_n-M|<2\\varepsilon"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对a_n=1/n，先固定任意ε>0，再选大于1/ε的整数N；于是每个n≥N都满足极限定义，完成全体尾部而非有限样本的证明。",
+          "tex": "n\\ge N>1/\\varepsilon\\Rightarrow |1/n-0|<\\varepsilon"
+        },
+        {
+          "explanation": "假设L、M都是极限，分别取各自的尾部下界并令n大于二者最大值，就能同时利用两种极限条件。",
+          "tex": "n\\ge\\max\\{N_L,N_M\\}\\Rightarrow |L-M|<2\\varepsilon"
+        },
+        {
+          "explanation": "如果L≠M，选ε<|L−M|/2便与前述不等式冲突，因此同一个实数列的极限只能有一个。",
+          "tex": "\\forall\\varepsilon>0:\\ |L-M|<2\\varepsilon\\Rightarrow L=M"
+        }
+      ],
+      "example": "要求a_n=1/n与0的距离严格小于0.01时，1/n<0.01等价于n>100。因此N=101有效，且所有n≥101均满足要求；N=100不行，因为1/100=0.01而非严格小于。该计算展示了定义量词的实际用法，而不是通过只测试前101项来推断极限。",
+      "application": "优化算法常用迭代误差或目标函数变化衡量数值收敛，但只有证明残差上界确实控制真实求解误差时，才能将停止条件与极限性质连接；随机迭代另需区分依概率与几乎必然收敛。",
+      "caveat": "必须区分收敛的数学证明、算法终止阈值和浮点计算精度。ε可以任意小，N可随ε改变，但不能仅对某个固定误差容限验证后宣称已经证明所有ε均成立。",
+      "checked_status": "正式完整讲义：定义、条件、数学推导、数值演算与研究限制"
+    },
+    {
+      "id": "calculus-n0040",
+      "node_id": "calculus-n0040",
+      "title": "梯度与Jacobian矩阵",
+      "definition": "梯度描述标量值可微函数在各输入坐标上的一阶局部敏感度；Jacobian描述向量函数从输入增量到输出增量的线性映射。它们的维度约定是优化和反向传播正确实现的基础。",
+      "assumptions": "设f:R^n→R、g:R^n→R^m在考察点可微，梯度∇f约定为n维列向量，Jacobian第i行是第i个输出的各偏导，因此J_g是m×n矩阵。",
+      "properties": [
+        "单位方向u上的方向导数等于梯度内积∇fᵀu。",
+        "Cauchy–Schwarz不等式保证最大上升方向为梯度方向，最大斜率为梯度的L2范数。",
+        "Jacobian链式法则需要外层Jacobian左乘内层Jacobian。"
+      ],
+      "formulas": [
+        {
+          "label": "梯度",
+          "tex": "\\nabla f=(\\partial_1f,\\dots,\\partial_nf)^\\top"
+        },
+        {
+          "label": "可微线性近似",
+          "tex": "g(x+h)=g(x)+J_g(x)h+o(\\|h\\|_2)"
+        },
+        {
+          "label": "方向导数",
+          "tex": "D_uf(x)=\\nabla f(x)^\\top u,\\quad\\|u\\|_2=1"
+        },
+        {
+          "label": "复合Jacobian",
+          "tex": "J_{h\\circ g}(x)=J_h(g(x))J_g(x)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对标量f使用多元微分定义，并将增量设置为t乘单位向量u；两边除以t，令t趋近零便得到方向导数。",
+          "tex": "f(x+tu)-f(x)=t\\nabla f(x)^\\top u+o(|t|)"
+        },
+        {
+          "explanation": "对梯度与单位方向的内积应用Cauchy–Schwarz，得到方向导数的最大绝对值上界，以及等号成立方向。",
+          "tex": "|\\nabla f^\\top u|\\le \\|\\nabla f\\|_2"
+        },
+        {
+          "explanation": "先对内层映射g作一阶展开，再把其增量代入外层h的一阶微分，由线性主项识别复合Jacobian。",
+          "tex": "D(h\\circ g)=Dh(g(x))Dg(x)"
+        }
+      ],
+      "example": "令f(x,y)=x²+3xy。在点(1,2)，∂f/∂x=2x+3y=8、∂f/∂y=3x=3，故梯度为(8,3)。沿单位方向u=(3/5,4/5)，方向导数为(8×3+3×4)/5=36/5=7.2；最大斜率则为√(8²+3²)=√73≈8.544。两者不同，说明任意给定方向的变化率不等于最快上升速度。",
+      "application": "量化组合优化中∇f可解释边际仓位调整的局部方向；多因子预处理、期权敏感度和深度网络自动微分都要求核实Jacobian各轴的对应关系。",
+      "caveat": "偏导存在不保证Fréchet可微；Jacobian不是任意约定的转置，必须与输入输出轴一致。局部导数也不能代替大规模交易变动下的精确损益估计。",
+      "checked_status": "正式完整讲义：定义、条件、数学推导、数值演算与研究限制"
+    },
+    {
+      "id": "linear-n0065",
+      "node_id": "linear-n0065",
+      "title": "秩与零空间",
+      "definition": "矩阵秩刻画线性映射可以区分多少个独立输入方向，零空间包含所有被映射为零的输入方向。秩—零度定理把输入维度分解成可识别维度与不影响输出的维度。",
+      "assumptions": "考虑实数矩阵A∈R^{m×n}，秩是其列空间维数，零度是核空间维数。数学上的精确秩不等于浮点软件按默认容差得到的数值秩。",
+      "properties": [
+        "行秩和列秩相等。",
+        "rank(A)+dim ker(A)=n。",
+        "若Ax=b有解，则所有解构成某个特解加上零空间的仿射集合。"
+      ],
+      "formulas": [
+        {
+          "label": "秩—零度",
+          "tex": "\\operatorname{rank}(A)+\\dim\\ker(A)=n"
+        },
+        {
+          "label": "零空间",
+          "tex": "\\ker(A)=\\{x\\in\\mathbb R^n:Ax=0\\}"
+        },
+        {
+          "label": "方程通解",
+          "tex": "Ax=b\\Longrightarrow x=x_0+z,\\quad z\\in\\ker(A)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "取ker(A)的一组基v₁到v_k，将其扩充成整个n维输入空间的一组基，得到剩余的n−k个向量。",
+          "tex": "v_1,\\dots,v_k\\in\\ker(A),\\quad\\dim\\ker(A)=k"
+        },
+        {
+          "explanation": "证明余下的基向量在A作用后的像线性无关并张成像空间，因此像空间维度为n−k。",
+          "tex": "\\dim\\operatorname{Im}(A)=n-k"
+        },
+        {
+          "explanation": "若x和x₀都满足Ax=b，两式相减得A(x−x₀)=0；反过来加上任一核空间向量都保持原方程成立。",
+          "tex": "Ax=Ax_0=b\\iff A(x-x_0)=0"
+        }
+      ],
+      "example": "取A=[[1,2,3],[2,4,6]]。第二行恒等于第一行的两倍，所以rank(A)=1。Ax=0等价于x₁+2x₂+3x₃=0，零空间可以由(−2,1,0)和(−3,0,1)张成，这两向量线性无关且都满足Av=0，故零度为2，验证1+2=3。回归设计矩阵出现这样的线性依赖时，系数可能不唯一。",
+      "application": "多资产ETF因子、行业虚拟变量和多重共线回归可以通过奇异值与数值秩诊断区分预测空间与系数可识别性；计算时还需固定特征缩放与数值阈值。",
+      "caveat": "不能用矩阵形状直接推断秩，不能把小但非零的奇异值当作严格零，也不能将参数不可唯一识别误读为所有模型预测都毫无信息。",
+      "checked_status": "正式完整讲义：定义、条件、数学推导、数值演算与研究限制"
+    }
+  ]
+}

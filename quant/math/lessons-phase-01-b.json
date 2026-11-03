@@ -1,0 +1,137 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "probability-n0095",
+      "node_id": "probability-n0095",
+      "title": "全概率公式",
+      "definition": "全概率公式把目标事件按互斥穷尽的情形分解，再将各情形条件概率乘其权重相加，得到边际概率。其核心是同一概率空间内的事件划分，而不是贝叶斯公式的无条件倒置。",
+      "assumptions": "划分事件A_i必须两两互斥且覆盖样本空间，涉及P(B|A_i)的条件项需P(A_i)>0；对于P(A_i)=0的项应作适当处理。后验运算还需P(B)>0。",
+      "properties": [
+        "二元划分{A,Aᶜ}常用于罕见风险事件的检出与误报分析。",
+        "全概率分母与Bayes分子共同决定后验，检出率不等于告警后的阳性预测值。",
+        "混合模型的边际密度也是类条件密度的加权和。"
+      ],
+      "formulas": [
+        {
+          "label": "全概率",
+          "tex": "P(B)=\\sum_iP(B\\mid A_i)P(A_i)"
+        },
+        {
+          "label": "二元划分",
+          "tex": "P(B)=P(B\\mid A)P(A)+P(B\\mid A^c)P(A^c)"
+        },
+        {
+          "label": "Bayes更新",
+          "tex": "P(A_i\\mid B)=\\frac{P(B\\mid A_i)P(A_i)}{\\sum_jP(B\\mid A_j)P(A_j)}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由于B可写成不同划分情形下交事件的互斥并，使用概率可列可加性将目标事件概率拆成各部分概率之和。",
+          "tex": "B=\\biguplus_i(B\\cap A_i),\\quad P(B)=\\sum_iP(B\\cap A_i)"
+        },
+        {
+          "explanation": "将交事件概率按条件概率定义替换成P(B|A_i)与P(A_i)的乘积，即得到全概率公式。",
+          "tex": "P(B\\cap A_i)=P(B\\mid A_i)P(A_i)"
+        },
+        {
+          "explanation": "若P(B)>0，用定义P(A_i|B)=P(A_i∩B)/P(B)，再把分母代换为全概率求和，便得到Bayes更新。",
+          "tex": "P(A_i\\mid B)=P(A_i\\cap B)/P(B)"
+        }
+      ],
+      "example": "假设违约事件A先验发生率为2%，预警信号B在违约时检出率90%，未违约时误报率10%。信号边际概率是0.9×0.02+0.1×0.98=0.018+0.098=0.116；有信号后的违约概率为0.018/0.116=9/58≈15.52%。因此90%的检出率不意味着触发预警后有90%概率违约，低基准率可能主导后验。",
+      "application": "在信用风险、异常交易检测与危机状态概率预测中，需滚动估计基准率、条件检出率及校准误差；事件发生率漂移会导致相同信号对应不同后验。",
+      "caveat": "概率公式不提供因果结论，且样本内检出率不等于未来稳定参数。当条件事件概率为零时不能直接使用标准分式，需调整条件建模或定义。",
+      "checked_status": "正式完整讲义：定义、条件、数学推导、数值演算与研究限制"
+    },
+    {
+      "id": "measure-n0121",
+      "node_id": "measure-n0121",
+      "title": "σ-代数",
+      "definition": "σ-代数是样本空间内允许测量和赋予概率的一组事件，包含整个空间并对补集及可列并封闭。它同时描述了交易者在某个时刻实际能够辨认的事件集合，是条件期望和信息过滤的数学基础。",
+      "assumptions": "给定非空集合Ω，取事件族F⊆2^Ω。σ-代数本身只刻画事件结构，若要讨论期望或概率还需指定P；随着信息增加形成的过滤族应满足F_s⊆F_t。",
+      "properties": [
+        "σ-代数自动包含∅并且对可列交封闭。",
+        "最粗σ-代数{∅,Ω}只能表示没有状态信息；有限样本的幂集表达所有可区分状态。",
+        "策略在时刻t可执行通常要求它对当时信息F_t可测。"
+      ],
+      "formulas": [
+        {
+          "label": "三条公理",
+          "tex": "\\Omega\\in\\mathcal F,\\quad A\\in\\mathcal F\\Rightarrow A^c\\in\\mathcal F,\\quad A_i\\in\\mathcal F\\Rightarrow\\bigcup_iA_i\\in\\mathcal F"
+        },
+        {
+          "label": "De Morgan",
+          "tex": "\\bigcap_iA_i=\\left(\\bigcup_iA_i^c\\right)^c"
+        },
+        {
+          "label": "信息过滤",
+          "tex": "\\mathcal F_s\\subseteq\\mathcal F_t,\\quad s\\le t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由整个样本空间属于F并使用补集封闭，即可推出空集也属于F，形成最基本的可测事件。",
+          "tex": "\\varnothing=\\Omega^c\\in\\mathcal F"
+        },
+        {
+          "explanation": "对任意事件序列先逐个取补集，再取可列并，最后取补集，由De Morgan恒等式得到可列交封闭。",
+          "tex": "\\bigcap_iA_i=(\\bigcup_iA_i^c)^c\\in\\mathcal F"
+        },
+        {
+          "explanation": "在双状态样本空间中，幂集与平凡事件族都满足三条公理，但二者表达的信息丰富程度完全不同。",
+          "tex": "\\{\\varnothing,\\Omega\\}\\subseteq\\{\\varnothing,\\{u\\},\\{d\\},\\Omega\\}"
+        }
+      ],
+      "example": "设Ω={u,d}，状态等概率；收益变量X(u)=3、X(d)=1。完整信息F={∅,Ω,{u},{d}}允许识别实际状态，E[X|F]=X；粗信息G={∅,Ω}只知道两种情况都可能发生，E[X|G]=0.5×3+0.5×1=2。这个例子表明条件期望取决于可获得信息而非仅依赖一个无条件均值。",
+      "application": "利用随时间增加的σ-代数可以刻画行情、公告和订单状态披露的可用时刻。量化策略若使用t时点以后才观察到的信号，就无法称为F_t可测的可执行决策。",
+      "caveat": "有限事件集合若没有补集或可列并封闭就不是σ-代数。数据表中的业务日期不能代替第一次公开时间，测度论的信息可测性不能直接由字段名判断。",
+      "checked_status": "正式完整讲义：定义、条件、数学推导、数值演算与研究限制"
+    },
+    {
+      "id": "statistics-n0162",
+      "node_id": "statistics-n0162",
+      "title": "Delta方法",
+      "definition": "Delta方法利用参数估计量的渐近正态性和可微函数的局部线性近似，计算非线性变换后的近似分布与标准误。它适用于收益比率、标准差、风险度量和回归函数的参数不确定性。",
+      "assumptions": "假设√n(θ̂−θ)依分布收敛到N(0,V)，g在θ处可微且一阶导数有限。若导数为零，一阶渐近分布退化，必须考虑二阶Delta或其他非标准极限。",
+      "properties": [
+        "一维变换的渐近方差是[g′(θ)]²V。",
+        "多维变换使用Jacobian左、右乘原渐近协方差矩阵。",
+        "有限样本计算常采用一致估计的V̂及g′(θ̂)构造标准误，但结果并非精确置信概率。"
+      ],
+      "formulas": [
+        {
+          "label": "Delta极限",
+          "tex": "\\sqrt n[g(\\widehat\\theta)-g(\\theta)]\\Rightarrow N(0,[g'(\\theta)]^2V)"
+        },
+        {
+          "label": "近似标准误",
+          "tex": "\\widehat{\\mathrm{SE}}\\approx |g'(\\widehat\\theta)|\\sqrt{\\widehat V/n}"
+        },
+        {
+          "label": "多维Delta",
+          "tex": "J_g(\\theta)VJ_g(\\theta)^\\top"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对估计量附近的g进行一阶Taylor展开，提取g′(θ)乘估计误差的首阶项，并将余项写成较小概率阶。",
+          "tex": "g(\\widehat\\theta)-g(\\theta)=g'(\\theta)(\\widehat\\theta-\\theta)+o_p(n^{-1/2})"
+        },
+        {
+          "explanation": "两侧乘√n并使用估计量渐近正态性以及Slutsky定理，推出变换后渐近正态分布和方差表达式。",
+          "tex": "\\sqrt n[g(\\widehat\\theta)-g(\\theta)]=g'(\\theta)\\sqrt n(\\widehat\\theta-\\theta)+o_p(1)"
+        },
+        {
+          "explanation": "用一致的参数和方差估计取代未知真值，建立通常的近似置信区间；对时间相关样本需重新估计长期方差。",
+          "tex": "g(\\widehat\\theta)\\pm1.96\\,|g'(\\widehat\\theta)|\\sqrt{\\widehat V/n}"
+        }
+      ],
+      "example": "设独立观测总体均值μ=4、方差σ²=9，n=100。样本均值标准误为√(9/100)=0.3。若关心g(μ)=√μ，导数g′(4)=1/(2√4)=1/4，则变换后标准误近似为0.3×0.25=0.075；正态95%区间的半宽约为1.96×0.075=0.147。这里代入真实参数仅为展示算术，实践中使用样本一致估计。",
+      "application": "估计金融收益波动、Sharpe比率等非线性统计量的标准误时，可使用Delta方法，但应核实采样机制与函数的导数条件，并考虑跨资产、跨时点相关性。",
+      "caveat": "如果g′(θ)=0或参数处于边界，不能机械套用常规一阶正态区间；高频金融数据的有效样本量往往低于原始观测数量。",
+      "checked_status": "正式完整讲义：定义、条件、数学推导、数值演算与研究限制"
+    }
+  ]
+}
