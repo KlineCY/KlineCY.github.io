@@ -86,7 +86,7 @@ const nav=fs.readFileSync(new URL("../sidebar-v2.js",here),"utf8");
 new vm.Script(app);
 new vm.Script(atlas);
 new vm.Script(nav);
-for(const marker of ['id="quantSidebar"','id="atlas-search"','id="atlas-topic"','id="atlas-toc"','id="atlas-lesson"','id="atlas-status"','id="atlas-depth-only"','id="atlas-depth-count"','id="atlas-unread-only"','id="atlas-resume"'])assert(html.includes(marker),"published Atlas marker absent: "+marker);
+for(const marker of ['id="quantSidebar"','id="atlas-search"','id="atlas-topic"','id="atlas-toc"','id="atlas-lesson"','id="atlas-status"','id="atlas-depth-only"','id="atlas-depth-count"','id="atlas-unread-only"','id="atlas-resume"','id="atlas-export"','id="atlas-import"','id="atlas-import-file"'])assert(html.includes(marker),"published Atlas marker absent: "+marker);
 assert(html.includes('src="./atlas.js"'),"published page must load Atlas reader");
 assert(nav.includes('["ml","机器学习 Machine Learning"]'));
 assert(atlas.includes("loadArchive")&&atlas.includes("renderMath")&&atlas.includes("copyText"),"Atlas reader features missing");
