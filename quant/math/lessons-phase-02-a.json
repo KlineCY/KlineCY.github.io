@@ -1,0 +1,181 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "foundation-n0005",
+      "node_id": "foundation-n0005",
+      "title": "偏序关系与上下界",
+      "definition": "偏序关系是一类同时满足自反性、反对称性和传递性的二元关系，它允许集合中存在互不可比的元素。上界、下界、上确界与下确界都是相对于某个指定子集与偏序关系定义的，而不是仅按照数值大小选最大最小值。",
+      "assumptions": "考虑非空集合S及关系≼⊆S×S。讨论A⊆S的上界时，必须固定A与S；若上确界存在，它是所有上界中最小的那个，但不要求它属于A。偏序不同于要求每一对元素都可以比较的全序。",
+      "properties": [
+        "自反性指x≼x，反对称性指x≼y且y≼x时x=y，传递性指x≼y且y≼z时x≼z。",
+        "上确界sup A是所有上界的最小元素，下确界inf A是所有下界的最大元素；二者不一定落在A之内。",
+        "极大元只表示集合中没有严格更大的元素，最大元则要求大于等于集合中每个元素，不能混为一谈。"
+      ],
+      "formulas": [
+        {
+          "label": "偏序公理",
+          "tex": "x\\preceq x,\\quad(x\\preceq y\\land y\\preceq x)\\Rightarrow x=y"
+        },
+        {
+          "label": "传递性",
+          "tex": "(x\\preceq y\\land y\\preceq z)\\Rightarrow x\\preceq z"
+        },
+        {
+          "label": "上确界定义",
+          "tex": "s=\\sup A\\iff (\\forall a\\in A:\\ a\\preceq s)\\land(\\forall u\\text{ 上界}:s\\preceq u)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "在正整数整除关系a|b下，任意a都能整除自身；若a|b且b|a且均为正，则只能相等，满足反对称。",
+          "tex": "a\\mid a,\\quad(a\\mid b\\land b\\mid a)\\Rightarrow a=b"
+        },
+        {
+          "explanation": "若a|b且b|c，则可写b=ka及c=lb，代入得到c=lka，因此a|c，证明整除关系还满足传递性。",
+          "tex": "b=ka,\\ c=lb\\Rightarrow c=(lk)a"
+        },
+        {
+          "explanation": "对子集寻找上确界，需要列出所有同时被每个元素整除的上界，再取其中整除其他上界的最小者。",
+          "tex": "\\sup_{\\mid}\\{a,b\\}=\\operatorname{lcm}(a,b)"
+        }
+      ],
+      "example": "令S={1,2,3,6}，关系定义为a≼b当且仅当a整除b。子集A={2,3}的两个元素互不可比，因为2不整除3且3不整除2；但6同时被2与3整除，所以是上界。S中6是唯一共同上界，故sup A=6；1同时整除2与3，是唯一共同下界，故inf A=1。这说明偏序上下界由关系决定，不是仅看2与3谁的数值更大。",
+      "application": "量化约束常按可行集合包含关系形成偏序，例如加入风险限额会缩小可行域；信息集与数学假设集也可按包含关系比较强弱，避免把不可比较的模型简单排成单一优劣次序。",
+      "caveat": "不能只凭元素的自然数值大小判断偏序关系中的最大元或上确界。研究风险与收益两个目标的Pareto关系时尤其要注意，两个方案可能互不支配而不是某个方案普遍更优。",
+      "checked_status": "正式完整数学讲义：定义、证明、案例与量化适用条件"
+    },
+    {
+      "id": "calculus-n0041",
+      "node_id": "calculus-n0041",
+      "title": "Hessian矩阵",
+      "definition": "Hessian矩阵由标量函数的全部二阶偏导数组成，刻画沿不同向量方向的一阶梯度变化和局部曲率。它是凸性判断、Newton法、组合风险二次型和优化驻点分类的数学基础。",
+      "assumptions": "令f在考察点附近具有连续二阶偏导，则Hessian对称。若要借助正定Hessian证明严格局部极小，必须同时满足该点一阶梯度为零；半正定通常只提供必要条件而非严格充分条件。",
+      "properties": [
+        "二阶混合偏导连续时，Hessian H_f(x)是对称矩阵。",
+        "任意方向h上的二阶导数是hᵀHh，正定表示所有非零方向都有严格正曲率。",
+        "在驻点处Hessian正定推出严格局部极小；不定则说明附近存在正负曲率方向。"
+      ],
+      "formulas": [
+        {
+          "label": "Hessian定义",
+          "tex": "H_f(x)=\\left[\\frac{\\partial^2f(x)}{\\partial x_i\\partial x_j}\\right]_{ij}"
+        },
+        {
+          "label": "二阶Taylor式",
+          "tex": "f(x+h)=f(x)+\\nabla f(x)^\\top h+\\frac12h^\\top H_f(x)h+o(\\|h\\|^2)"
+        },
+        {
+          "label": "方向曲率",
+          "tex": "D_h^2f(x)=h^\\top H_f(x)h"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对给定方向h令一元函数g(t)=f(x+th)，以链式法则求导，得到该方向上的瞬时变化率。",
+          "tex": "g'(t)=\\nabla f(x+th)^\\top h"
+        },
+        {
+          "explanation": "再次对t求导，并使用梯度的Jacobian就是Hessian，获得二阶方向导数的二次型表达式。",
+          "tex": "g''(t)=h^\\top H_f(x+th)h"
+        },
+        {
+          "explanation": "若在驻点Hessian严格正定，则二阶Taylor主项在足够小的非零h上为正，因而f(x+h)>f(x)。",
+          "tex": "\\nabla f(x^*)=0,\\ H_f(x^*)\\succ0\\Rightarrow x^*\\text{ 为严格局部极小}"
+        }
+      ],
+      "example": "取f(x,y)=x²+2xy+3y²，Hessian恒为H=[[2,2],[2,6]]。首阶顺序主子式2>0、行列式2×6−2²=8>0，因此H正定；其特征值是4±2√2，都严格正。点(0,0)梯度为零，故为严格局部极小。沿单位方向h=(1,1)/√2的曲率hᵀHh=(2+4+6)/2=6，说明局部曲率随方向变化。",
+      "application": "在多资产均值方差目标中可以通过协方差构成的Hessian判断凸性，进而确定数值求解器和最优性条件；但真实权重通常还受预算、交易费和敞口限制。",
+      "caveat": "正定Hessian不表示所有点都是极小点，也不能将半正定简单等同于严格凸性。高维风险优化必须检查矩阵维度和特征值数值误差，不能凭有限差分的噪声判断正定。",
+      "checked_status": "正式完整数学讲义：定义、证明、案例与量化适用条件"
+    },
+    {
+      "id": "linear-n0070",
+      "node_id": "linear-n0070",
+      "title": "LU分解",
+      "definition": "LU分解通过高斯消元把矩阵拆成下三角和上三角两个因子，使线性方程Ax=b分解为易于求解的前代和回代。它是数值分析中重复求解线性系统的基本算法，但浮点计算时通常需要主元选取。",
+      "assumptions": "设A是n×n矩阵，讨论无主元A=LU时需要消元过程的所有主元非零。若需要行交换，应写成PA=LU，并在解方程时同时对右端向量作相应置换；不应省略P。",
+      "properties": [
+        "高斯消元乘数可记录在单位下三角L中，消元结果组成上三角U。",
+        "Ax=b求解可改为Ly=b、Ux=y，避免显式先计算A的逆矩阵。",
+        "带部分主元的LU在实践中比不换行的简单消元通常更稳定，但病态问题仍会放大误差。"
+      ],
+      "formulas": [
+        {
+          "label": "LU分解",
+          "tex": "A=LU"
+        },
+        {
+          "label": "主元置换",
+          "tex": "PA=LU"
+        },
+        {
+          "label": "两次三角求解",
+          "tex": "Ly=b,\\qquad Ux=y"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对第一列主元下方的每一行执行行消元，乘数定义为该行元素除以主元，并记录在L相应位置。",
+          "tex": "\\ell_{i1}=\\frac{a_{i1}}{a_{11}},\\quad R_i\\leftarrow R_i-\\ell_{i1}R_1"
+        },
+        {
+          "explanation": "对后续列重复同样过程，消元后的矩阵逐步成为上三角U，记录乘数的下三角矩阵形成L。",
+          "tex": "A=LU,\\quad L_{ii}=1"
+        },
+        {
+          "explanation": "定义中间向量y=Ux，先用前代从Ly=b得到y，再用回代从Ux=y恢复原未知向量。",
+          "tex": "Ly=b\\Rightarrow y,\\qquad Ux=y\\Rightarrow x"
+        }
+      ],
+      "example": "矩阵A=[[2,1],[4,3]]，消元乘数为4/2=2，故L=[[1,0],[2,1]]、U=[[2,1],[0,1]]。取b=(5,11)，前代得到y₁=5、y₂=11−2×5=1；回代得到x₂=1、x₁=(5−1)/2=2。验算Ax=(2×2+1,4×2+3)=(5,11)，结果完全一致。这里只是无需行交换的例子，不能推断任意矩阵都可以这样分解。",
+      "application": "在资产组合优化约束系统、因子模型参数估计和风险敏感度求解中，适合对同一矩阵反复求解多个右端；病态设计矩阵的最小二乘往往更适合QR或SVD。",
+      "caveat": "遇到零主元时不能直接继续除法；使用主元交换后必须同步交换右端。数值求解残差很小不自动证明结果误差也小，还要检验矩阵条件数。",
+      "checked_status": "正式完整数学讲义：定义、证明、案例与量化适用条件"
+    },
+    {
+      "id": "probability-n0100",
+      "node_id": "probability-n0100",
+      "title": "Bernoulli/Binomial",
+      "definition": "Bernoulli试验只有成功和失败两种结果，通常编码为1和0。若进行n次独立且成功概率同为p的Bernoulli试验，成功次数之和服从Binomial(n,p)。分布公式依赖两项假设，不能只看总成功次数便默认成立。",
+      "assumptions": "假设X_i∈{0,1}、P(X_i=1)=p且0≤p≤1，i=1,...,n；要得到标准Binomial分布，还要求各X_i相互独立、同一p。若成功率随时点变化，则和可能服从Poisson-binomial等更一般分布。",
+      "properties": [
+        "单次Bernoulli变量均值为p、方差为p(1−p)。",
+        "独立同分布成功次数S_n具有均值np、方差np(1−p)。",
+        "Binomial概率在所有k=0到n上求和为1；它不是对每次试验事件相关性的自动修正。"
+      ],
+      "formulas": [
+        {
+          "label": "Bernoulli PMF",
+          "tex": "P(X=x)=p^x(1-p)^{1-x},\\quad x\\in\\{0,1\\}"
+        },
+        {
+          "label": "Binomial PMF",
+          "tex": "P(S_n=k)=\\binom nk p^k(1-p)^{n-k}"
+        },
+        {
+          "label": "均值与方差",
+          "tex": "E[S_n]=np,\\quad\\operatorname{Var}(S_n)=np(1-p)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对任何指定的k次成功、n−k次失败的特定排列，由独立性可将单次概率相乘得到统一概率。",
+          "tex": "P(\\text{指定排列})=p^k(1-p)^{n-k}"
+        },
+        {
+          "explanation": "从n个独立试验位置选出成功的k个位置有组合数C(n,k)种，每一种互斥且概率相同，因此乘以组合数得到PMF。",
+          "tex": "\\#\\{\\text{成功位置}\\}=\\binom nk"
+        },
+        {
+          "explanation": "将n个独立Bernoulli变量相加，期望线性叠加，协方差为零使方差也可逐个相加，得到np及np(1−p)。",
+          "tex": "E[\\sum_iX_i]=np,\\quad\\operatorname{Var}(\\sum_iX_i)=\\sum_ip(1-p)"
+        }
+      ],
+      "example": "若n=10，单次成功概率p=0.2，恰好两次成功的概率为C(10,2)×0.2²×0.8⁸=45×0.04×0.16777216≈0.30199。总次数均值为10×0.2=2、方差为10×0.2×0.8=1.6。期望为2并不意味着恰好两次发生的概率为1，约30.2%是由全部可能排列贡献的具体概率。",
+      "application": "在信用事件、交易命中率和风控预警评价中可使用二项分布建立基线置信区间，但必须考虑多个交易共享风险状态、事件标签重叠以及胜率随市场变化的影响。",
+      "caveat": "不能将连续持仓同一行情下的多个观测误判为独立试验，也不能将期望成功次数误读为对应次数的精确概率。对小样本p值和置信区间还需注意有限样本离散性。",
+      "checked_status": "正式完整数学讲义：定义、证明、案例与量化适用条件"
+    }
+  ]
+}
