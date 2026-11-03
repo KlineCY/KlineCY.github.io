@@ -29,8 +29,8 @@ for(const l of extras){
 const lessons=[...sources.flatMap(f=>f.lessons),...extras];
 const ids=new Set(),chIds=new Set(),deptIds=new Set(),nodeMap=new Map();
 assert.equal(c.disciplines.length,20,"discipline coverage count");
-assert.equal(c.chapters.length,104,"chapter coverage count");
-assert.equal(c.nodes.length,624,"expected expanded topic catalog");
+assert.equal(c.chapters.length,106,"chapter coverage count");
+assert.equal(c.nodes.length,636,"expected expanded topic catalog");
 for(let i=0;i<c.disciplines.length;i++){
  const d=c.disciplines[i];
  assert(!deptIds.has(d.id),"duplicate discipline "+d.id);
