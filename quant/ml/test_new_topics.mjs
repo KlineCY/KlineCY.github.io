@@ -11,9 +11,9 @@ const bytes=Buffer.concat([1,2,3,4].map(n=>fs.readFileSync(new URL("./atlas/data
 const archive=JSON.parse(gunzipSync(bytes).toString("utf8"));
 assert.equal(archive.catalog.items.length,720);
 assert.equal(bundle.schema,1);
-assert(bundle.chapters.length>=2,"at least two full ML extension chapters expected");
+assert(bundle.chapters.length>=5,"at least two full ML extension chapters expected");
 const allNew=bundle.chapters.flatMap(ch=>ch.lessons);
-assert(allNew.length>=8,"all published additional courses must be verified");
+assert(allNew.length>=20,"all published additional courses must be verified");
 const originalIds=new Set(archive.catalog.items.map(x=>x.id));
 const newIds=new Set(allNew.map(l=>l.id));
 assert.equal(newIds.size,allNew.length,"extended ML IDs must be unique");
