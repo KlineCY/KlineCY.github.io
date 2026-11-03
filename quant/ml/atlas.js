@@ -47,7 +47,7 @@ function applyEditorial(data,patch){
   row.html=row.html.split(fix.from).join(fix.to);
   sums.formulas++;
  }
- if(sums.definitions!==20||sums.conditions!==22||sums.formulas!==2)throw Error("教材勘误应用数量不匹配");
+ if(sums.definitions!==20||sums.conditions!==31||sums.formulas!==2)throw Error("教材勘误应用数量不匹配");
  return sums;
 }
 function applyDepth(data,patch){
