@@ -134,6 +134,17 @@ def main():
     assert sorted({item["domain_id"] for item in items}) == [
         f"m{i:02d}" for i in range(1, 25)
     ]
+    generic_a_left = [lid for lid, body in by_id.items() if GENERIC_A in body["html"]]
+    generic_b_left = [lid for lid, body in by_id.items() if GENERIC_B in body["html"]]
+    generic_by_domain = {
+        f"m{i:02d}": {
+            "definition": sum(lid.startswith(f"m{i:02d}") for lid in generic_a_left),
+            "boundary": sum(lid.startswith(f"m{i:02d}") for lid in generic_b_left),
+        } for i in range(1, 25)
+    }
+    shortest = sorted(
+        ((len(re.sub(r"<[^>]+>", "", body["html"])), lid) for lid, body in by_id.items())
+    )[:10]
     report = {
         "result": "PASS",
         "lessons": len(items),
@@ -146,7 +157,11 @@ def main():
         "equations_corrected": fixed_math,
         "in_lesson_advanced_supplements": len(supplements),
         "historic_code_comment_labels_retained_in_source": legacy_comments,
-        "note": "Checks archive and in-memory editorial overlay; does not run Python examples or a real browser.",
+        "remaining_generic_definition_paragraphs": len(generic_a_left),
+        "remaining_generic_boundary_paragraphs": len(generic_b_left),
+        "generic_paragraphs_by_domain": generic_by_domain,
+        "shortest_extracted_lesson_lengths": shortest,
+        "note": "Checks archive and in-memory overlays; remaining generic text is measured, not automatically rewritten. Does not run Python examples or a real browser.",
     }
     print(json.dumps(report, ensure_ascii=False, indent=2))
     return 0
