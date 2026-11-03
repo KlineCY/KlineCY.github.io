@@ -26,8 +26,11 @@ const {fetchAtlasJson,fetchAtlasModulesBounded}=vm.runInNewContext(
  {fetch,setTimeout:(callback)=>callback(),console}
 );
 const urls=Array.from({length:20},(_,i)=>"./chapter-"+i);
-const data=await fetchAtlasModulesBounded(urls,6);
+const progress=[];
+const data=await fetchAtlasModulesBounded(urls,6,(done,total)=>progress.push([done,total]));
 assert.equal(data.length,20);
+assert.equal(progress.length,20,"progress must report each completed module");
+assert(progress.every(([done,total],i)=>done===i+1&&total===20),"progress counters must be complete and monotonic");
 for(let i=0;i<20;i++)assert.equal(data[i].url,urls[i],"worker results must preserve manifest order");
 assert(maxActive<=6,"must never exceed six in-flight module fetches");
 assert.equal(attempts.size,20);

@@ -116,13 +116,14 @@ async function fetchAtlasJson(url,options={}){
  }
  throw Error("资源下载失败（已尝试3次）："+url+"；"+(failure?.message||"未知网络故障"));
 }
-async function fetchAtlasModulesBounded(files,concurrency=6){
+async function fetchAtlasModulesBounded(files,concurrency=6,onProgress=()=>{}){
  const output=new Array(files.length);
- let cursor=0;
+ let cursor=0,completed=0;
  const workers=Array.from({length:Math.min(concurrency,files.length)},async()=>{
   while(cursor<files.length){
    const index=cursor++;
    output[index]=await fetchAtlasJson(files[index]);
+    onProgress(++completed,files.length);
   }
  });
  await Promise.all(workers);
@@ -285,7 +286,9 @@ async function copyText(value,button,label){
 }
 async function start(){
  try{
+  showStatus("正在读取并解压720篇正式讲义…");
   const data=await loadArchive();
+  showStatus("课程档案已校验，正在读取进阶模块清单…");
   const manifest=await fetchAtlasJson("./atlas-depth-manifest.json",{cache:"no-cache"});
   if(manifest.schema!==1||!Number.isSafeInteger(manifest.expected_lessons)||manifest.expected_lessons<80||
      manifest.expected_domains!==24||!Array.isArray(manifest.modules)||manifest.modules.length<10)
@@ -300,7 +303,10 @@ async function start(){
    throw Error("深化讲义目录数量不一致");
   // Keep parallel downloads bounded; failures retry individually without restarting all modules.
   const editorial=await fetchAtlasJson("./atlas-editorial.json");
-  const depthPatches=await fetchAtlasModulesBounded(depthFiles,6);
+  const depthPatches=await fetchAtlasModulesBounded(depthFiles,6,(done,total)=>{
+   if(done===total||done%8===0)showStatus("正在传输进阶正文 "+done+" / "+total+" 个模块…");
+  });
+  showStatus("进阶内容已传输，正在校验公式与构建全文索引…");
   applyEditorial(data,editorial);
   state.enhanced=applyDepth(data,depthPatches,manifest);
   $("atlas-depth-count").textContent=state.enhanced.size;
