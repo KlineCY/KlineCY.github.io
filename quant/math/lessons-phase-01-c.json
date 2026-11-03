@@ -1,0 +1,181 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "regression-n0188",
+      "node_id": "regression-n0188",
+      "title": "异方差与White检验",
+      "definition": "异方差指线性回归误差的条件方差随解释变量取值变化，而不是保持常数。White检验用残差平方对变量及其平方和交互项作辅助回归，检验误差尺度是否系统性依赖已观测协变量。",
+      "assumptions": "假设既定OLS回归中残差的条件均值为零并满足适当矩存在、样本规模及独立或弱依赖的渐近条件。辅助回归的有效解释变量不能完全共线；存在明显时间相关时原始nR²参考分布可能失效。",
+      "properties": [
+        "外生性成立时，异方差本身不使OLS系数估计产生必然偏差，但同方差标准误可能不一致。",
+        "White辅助回归的统计量通常为nR²，在合适的渐近条件下服从自由度为有效非截距辅助变量数q的χ²分布。",
+        "异方差稳健标准误改变的是推断，不等同于通过WLS或GLS改变点估计。"
+      ],
+      "formulas": [
+        {
+          "label": "条件方差",
+          "tex": "\\operatorname{Var}(u_i\\mid X_i)=\\sigma_i^2"
+        },
+        {
+          "label": "White辅助模型",
+          "tex": "\\widehat u_i^2=\\alpha_0+\\alpha_1x_i+\\alpha_2x_i^2+\\cdots+v_i"
+        },
+        {
+          "label": "LM形式",
+          "tex": "LM=nR_{\\rm aux}^2\\overset{a}{\\sim}\\chi_q^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先在预先固定的回归规格上拟合OLS，逐样本计算残差并平方，以此作为误差条件二阶矩的可观测代理。",
+          "tex": "\\widehat u_i=y_i-X_i^\\top\\widehat\\beta,\\quad z_i=\\widehat u_i^2"
+        },
+        {
+          "explanation": "用截距、原解释变量和指定平方及交互项拟合辅助线性模型，从而获得辅助决定系数。",
+          "tex": "R_{\\rm aux}^2=1-\\frac{\\sum_i(z_i-\\widehat z_i)^2}{\\sum_i(z_i-\\overline z)^2}"
+        },
+        {
+          "explanation": "在误差同方差的零假设与所需渐近条件下，将辅助决定系数乘样本量，按q维χ²临界值进行检验。",
+          "tex": "H_0:\\operatorname{Var}(u_i\\mid X_i)=\\sigma^2,\\quad LM=nR_{\\rm aux}^2"
+        }
+      ],
+      "example": "某回归有n=200个近似独立观测，White辅助回归含3个有效非截距解释变量，R²=0.06，则LM=200×0.06=12。χ²₃在5%显著性水平的临界值约为7.815，因12>7.815而拒绝同方差原假设。这个结论不能自动推断误差服从哪种GARCH过程，也不能证明OLS斜率没有内生性。",
+      "application": "检验股票因子回归残差时应同时报告HC标准误；当日频收益存在自相关和重叠持有期时，还需考虑HAC或按资产与日期聚类的推断方式。",
+      "caveat": "不能以未拒绝零假设证明同方差成立，也不能在强时间依赖或高维辅助回归中机械套用χ²界。HC稳健推断不解决内生性、选择偏差与前视信息问题。",
+      "checked_status": "正式完整讲义：数学条件、公式推导、独立算例、金融解释与失效边界"
+    },
+    {
+      "id": "econometrics-n0212",
+      "node_id": "econometrics-n0212",
+      "title": "遗漏变量偏差",
+      "definition": "当真实线性条件均值同时依赖X与Z，而研究者只把X放入回归，若遗漏变量Z与X相关且Z影响Y，则省略Z会使X的回归系数偏离完整模型中的β₁。偏差与样本多寡不同，关键是识别假设。",
+      "assumptions": "设Y=β₀+β₁X+γZ+u，E[u|X,Z]=0，且X、Z具有有限二阶矩与Var(X)>0。这里公式给出总体线性投影斜率；如果称β₁为因果效应，还需要附加干预和无混杂假设。",
+      "properties": [
+        "遗漏偏差由γCov(X,Z)/Var(X)确定方向与大小。",
+        "仅当γ=0或Cov(X,Z)=0时此种遗漏偏差为零，但不代表其他识别风险消失。",
+        "错误地控制处理后变量、碰撞变量或测量误差变量也可能制造新的偏差。"
+      ],
+      "formulas": [
+        {
+          "label": "完整模型",
+          "tex": "Y=\\beta_0+\\beta_1X+\\gamma Z+u"
+        },
+        {
+          "label": "简化模型总体斜率",
+          "tex": "\\widetilde\\beta_1=\\frac{\\operatorname{Cov}(X,Y)}{\\operatorname{Var}(X)}"
+        },
+        {
+          "label": "遗漏偏差",
+          "tex": "\\widetilde\\beta_1-\\beta_1=\\gamma\\frac{\\operatorname{Cov}(X,Z)}{\\operatorname{Var}(X)}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对完整模型与X两侧取协方差，常数项消失，且条件外生性意味着Cov(X,u)=0。",
+          "tex": "\\operatorname{Cov}(X,Y)=\\beta_1\\operatorname{Var}(X)+\\gamma\\operatorname{Cov}(X,Z)"
+        },
+        {
+          "explanation": "将协方差表达式除以正的Var(X)，得到忽略Z后的总体OLS斜率以及相对真实系数的差。",
+          "tex": "\\widetilde\\beta_1=\\beta_1+\\gamma\\frac{\\operatorname{Cov}(X,Z)}{\\operatorname{Var}(X)}"
+        },
+        {
+          "explanation": "根据Var(X)>0的符号关系，遗漏偏差由γ和Cov(X,Z)的乘积控制；当两者同号，简化回归斜率偏高。",
+          "tex": "\\operatorname{sign}(\\widetilde\\beta_1-\\beta_1)=\\operatorname{sign}(\\gamma\\operatorname{Cov}(X,Z))"
+        }
+      ],
+      "example": "假设完整模型中的β₁=2、γ=3，X的总体方差为2且Cov(X,Z)=1，则遗漏Z的系数偏差为3×1/2=1.5，省略变量后的回归斜率是2+1.5=3.5，而不是2。即使把训练样本扩大100倍，只要数据机制与遗漏原因不变，估计也仍倾向于错误的总体投影斜率。",
+      "application": "研究交易成本、资产持仓和收益之间的关系时，应考虑市场流动性、波动率等共同原因；必要时用可信控制、固定效应、IV等研究设计而非单纯提高R²。",
+      "caveat": "观察到的相关关系并不自动识别可干预的因果效应。遗漏变量偏差公式只在指定线性投影及外生性假设下成立，不能把所有模型设定错误都压缩为同一公式。",
+      "checked_status": "正式完整讲义：数学条件、公式推导、独立算例、金融解释与失效边界"
+    },
+    {
+      "id": "timeseries-n0241",
+      "node_id": "timeseries-n0241",
+      "title": "强平稳与弱平稳",
+      "definition": "强平稳要求过程的任意有限维联合分布在任意时间平移下保持不变。弱平稳只要求有限二阶矩、常数均值和只随滞后变化的自协方差。二者对金融收益的建模假设严格程度不同。",
+      "assumptions": "考虑双向离散时间过程(X_t)_{t∈Z}。强平稳无需提前要求二阶矩存在；弱平稳必须有E[X_t²]<∞。强平稳并具有有限二阶矩可推出弱平稳，但反向一般不成立。",
+      "properties": [
+        "弱平稳自协方差γ(h)仅依赖滞后h，而不是绝对时点t。",
+        "高斯过程由一二阶矩决定有限维分布，高斯弱平稳可以推出强平稳。",
+        "平稳不等于独立、白噪声或遍历，也不能代替时间外稳定性检验。"
+      ],
+      "formulas": [
+        {
+          "label": "强平稳",
+          "tex": "(X_{t_1},\\ldots,X_{t_k})\\overset d=(X_{t_1+h},\\ldots,X_{t_k+h})"
+        },
+        {
+          "label": "弱平稳",
+          "tex": "E[X_t]=\\mu,\\quad \\operatorname{Cov}(X_t,X_{t-h})=\\gamma(h)"
+        },
+        {
+          "label": "协方差对称与界",
+          "tex": "\\gamma(-h)=\\gamma(h),\\qquad|\\gamma(h)|\\le\\gamma(0)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "强平稳应用于单个时点的边际分布，若该分布有有限矩，则所有时刻的均值和方差都相同。",
+          "tex": "X_t\\overset d=X_{t+h}\\Longrightarrow E[X_t]=E[X_{t+h}]"
+        },
+        {
+          "explanation": "对任意两时点的联合分布施加平移不变性，协方差随绝对时刻平移不变，因此只能取决于时差。",
+          "tex": "\\operatorname{Cov}(X_t,X_{t-h})=\\operatorname{Cov}(X_{t+s},X_{t+s-h})"
+        },
+        {
+          "explanation": "通过Cauchy–Schwarz不等式，任何滞后协方差的绝对值不能超过边际标准差乘积，弱平稳下得到|γ(h)|≤γ(0)。",
+          "tex": "|\\operatorname{Cov}(X_t,X_{t-h})|\\le\\sqrt{\\operatorname{Var}(X_t)\\operatorname{Var}(X_{t-h})}"
+        }
+      ],
+      "example": "构造随机变量Z：以2/3的概率等于1，以1/3的概率等于−2，因此E[Z]=0、E[Z²]=2。定义X_t=(−1)^tZ，则均值始终为0，γ(h)=E[X_tX_(t−h)]=2(−1)^h，仅取决于滞后，故是弱平稳。然而奇数时点X_t的取值分布为−Z，偶数为Z，这两个边际分布不同，因此不满足强平稳。",
+      "application": "在收益率、成交量和波动率模型中，应分别检查均值、二阶相关结构与尾部分布稳定性；弱平稳检验或滚动自相关图不等于证明制度没有切换。",
+      "caveat": "弱平稳序列可能不遍历且强平稳在无限方差情况下不一定弱平稳。时间平稳性还必须与信息集、标签成熟时点和资产交易制度变更独立审查。",
+      "checked_status": "正式完整讲义：数学条件、公式推导、独立算例、金融解释与失效边界"
+    },
+    {
+      "id": "stochastic-n0279",
+      "node_id": "stochastic-n0279",
+      "title": "Chapman-Kolmogorov方程",
+      "definition": "Chapman–Kolmogorov方程通过所有可能的中间状态，把多步转移概率拆为分段转移概率的乘积求和。对有限状态齐次马尔可夫链，这一关系与转移矩阵P的乘法完全等价。",
+      "assumptions": "假定过程满足一阶马尔可夫性质，状态有限，转移矩阵按行给出条件概率，行和为1。若转移随时间变化，应使用正确顺序的不同时点矩阵而不是统一P的幂。",
+      "properties": [
+        "n步转移矩阵是P的n次矩阵乘积，而不是逐元素幂。",
+        "每个P^n都保持非负与各行之和为1。",
+        "状态描述若没有吸收足够历史，模型拟合出的经验P仍可能违背真正的马尔可夫充分性。"
+      ],
+      "formulas": [
+        {
+          "label": "CK两步式",
+          "tex": "P(X_{t+2}=j\\mid X_t=i)=\\sum_kP_{ik}P_{kj}"
+        },
+        {
+          "label": "n步矩阵",
+          "tex": "P^{(m+n)}=P^{(m)}P^{(n)}"
+        },
+        {
+          "label": "齐次链",
+          "tex": "P^{(n)}=P^n,\\quad\\sum_j(P^n)_{ij}=1"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "给定起点状态i，将终点状态j按照全部中间状态k划分；各中间状态情形互斥，因此可通过全概率求和。",
+          "tex": "P(X_{t+2}=j\\mid X_t=i)=\\sum_kP(X_{t+2}=j,X_{t+1}=k\\mid X_t=i)"
+        },
+        {
+          "explanation": "对每一项应用马尔可夫性质和齐次性，终点在下一步的条件概率不再依赖更早起点，得到P_{ik}P_{kj}。",
+          "tex": "P(X_{t+2}=j\\mid X_{t+1}=k,X_t=i)=P_{kj}"
+        },
+        {
+          "explanation": "矩阵乘法定义将所有i,j元素组合为P²；各行求和时对j、k交换有限求和，行随机性仍然成立。",
+          "tex": "\\sum_j(P^2)_{ij}=\\sum_kP_{ik}\\sum_jP_{kj}=1"
+        }
+      ],
+      "example": "用P=[[0.8,0.2],[0.3,0.7]]描述两个市场制度。一号状态两步后处于一号状态的概率为0.8×0.8+0.2×0.3=0.70，转到二号为0.8×0.2+0.2×0.7=0.30；二号状态对应0.3×0.8+0.7×0.3=0.45和0.3×0.2+0.7×0.7=0.55。因此P²=[[0.70,0.30],[0.45,0.55]]，两行均非负且和为1。",
+      "application": "金融市场制度转移、评级迁移与流动性状态预测都可用该矩阵递推，但应在时间外评价状态定义、转移估计稳定性与区间不确定性。",
+      "caveat": "矩阵乘法不交换，一般时间非齐次链不能把不同时点转移矩阵顺序调换。若市场状态存在未观测记忆或半马尔可夫驻留时间效应，一阶齐次假设可能不成立。",
+      "checked_status": "正式完整讲义：数学条件、公式推导、独立算例、金融解释与失效边界"
+    }
+  ]
+}
