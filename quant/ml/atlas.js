@@ -89,7 +89,7 @@ function applyDepth(data,patches,manifest){
   throw Error("深化讲义覆盖不完整："+seen.size+"篇，"+allDomains.size+"专题");
  const coverage=new Map();
  for(const id of seen)coverage.set(id.slice(0,3),(coverage.get(id.slice(0,3))||0)+1);
- if([...coverage.values()].some(n=>n<17))throw Error("某机器学习专题的进阶内容少于17篇");
+ if([...coverage.values()].some(n=>n<22))throw Error("某机器学习专题的进阶内容少于22篇");
  return seen;
 }
 function cleanCodeComments(root){
