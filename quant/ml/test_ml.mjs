@@ -90,43 +90,54 @@ for(const marker of ['id="quantSidebar"','id="atlas-search"','id="atlas-topic"',
 assert(html.includes('src="./atlas.js"'),"published page must load Atlas reader");
 assert(nav.includes('["ml","机器学习 Machine Learning"]'));
 assert(atlas.includes("loadArchive")&&atlas.includes("renderMath")&&atlas.includes("copyText"),"Atlas reader features missing");
-assert(atlas.includes("applyDepth")&&atlas.includes('"./atlas-depth-foundations.json"')&&atlas.includes('"./atlas-depth-learning.json"')&&atlas.includes('"./atlas-depth-quant.json"'),"published Atlas must load all deep-dive modules");
-const depthFiles=["atlas-depth.json","atlas-depth-foundations.json","atlas-depth-learning.json","atlas-depth-quant.json",
- "atlas-depth-foundations-2.json","atlas-depth-learning-2.json","atlas-depth-quant-2.json"];
-const seen=new Set(),domains=new Set();
-for(const file of depthFiles){
- const depth=read(file);
+assert(atlas.includes("applyDepth")&&atlas.includes('fetch("./atlas-depth-manifest.json"'),"published Atlas must load manifest");
+const depthManifest=read("atlas-depth-manifest.json");
+assert.equal(depthManifest.schema,1);
+assert.equal(depthManifest.expected_lessons,80);
+assert.equal(depthManifest.expected_domains,24);
+assert.equal(depthManifest.modules.length,10);
+assert.equal(new Set(depthManifest.modules.map(m=>m.path)).size,10);
+assert.equal(depthManifest.modules.reduce((n,m)=>n+m.lessons,0),80);
+const depthFiles=depthManifest.modules.map(m=>m.path.replace(/^\.\//,""));
+const seen=new Set(),domains=new Set();let workedCount=0;
+for(let i=0;i<depthFiles.length;i++){
+ const file=depthFiles[i],depth=read(file);
  assert.equal(depth.schema,1,"advanced overlay schema mismatch: "+file);
- assert.equal(Object.keys(depth.lessons).length,8,"expected eight advanced entries: "+file);
+ assert.equal(Object.keys(depth.lessons).length,depthManifest.modules[i].lessons,"count mismatch: "+file);
  for(const [id,chapter] of Object.entries(depth.lessons)){
   assert(/^m\d\d-c\d\d-p\d\d$/.test(id),"advanced topic ID invalid: "+id);
   assert(!seen.has(id),"duplicate advanced lesson: "+id);seen.add(id);domains.add(id.slice(0,3));
   assert(chapter.title.length>=8&&chapter.overview.length>=60,"thin advanced chapter: "+id);
   for(const field of ["derivation","protocol","pitfalls"])assert(Array.isArray(chapter[field])&&chapter[field].length>=2,"missing "+field+": "+id);
   assert(chapter.equations.length>=2,"missing advanced formulas: "+id);
+  if(chapter.worked_example){assert(chapter.worked_example.length>=50,"thin worked example: "+id);workedCount++;}
+  if(file.endsWith("-3.json"))assert(chapter.worked_example,"third-pass lesson must contain a worked example: "+id);
   for(const f of chapter.equations){
    assert(f.label&&f.tex,"missing advanced formula metadata: "+id);
    katex.renderToString(f.tex,{throwOnError:true,strict:"ignore"});
   }
  }
 }
-assert.equal(seen.size,56,"must load 56 advanced lessons");
-assert.equal(domains.size,24,"must cover all 24 ML topics");
+assert.equal(seen.size,80,"must load eighty advanced lessons");
+assert.equal(domains.size,24,"must cover all twenty-four domains");
+assert.equal(workedCount,24,"third-pass requires twenty-four worked examples");
 const binary=Buffer.concat([1,2,3,4].map(i=>fs.readFileSync(new URL("atlas/data.part"+i,here))));
 assert.equal(binary.length,1969862,"published archive bytes changed unexpectedly");
 const archive=JSON.parse(gunzipSync(binary).toString("utf8"));
 const depthFnText=atlas.slice(atlas.indexOf("function applyDepth("),atlas.indexOf("function cleanCodeComments("));
-assert(depthFnText.startsWith("function applyDepth("),"Atlas runtime deep-dive function missing");
+assert(depthFnText.startsWith("function applyDepth("),"Atlas runtime function missing");
 const escapeHtml=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const applyRuntimeDepth=vm.runInNewContext(depthFnText+"\napplyDepth;",{esc:escapeHtml});
-const runtimeIds=applyRuntimeDepth(archive,depthFiles.map(read));
-assert.equal(runtimeIds.size,56,"runtime overlay count mismatch");
+const runtimeIds=applyRuntimeDepth(archive,depthFiles.map(read),depthManifest);
+assert.equal(runtimeIds.size,80,"runtime overlay count mismatch");
 for(const id of seen){
  assert(runtimeIds.has(id),"runtime deep-dive missing: "+id);
  const article=archive.domains[id.slice(0,3)][id].html;
- assert(article.includes('aria-label="进阶推导与研究实践"'),"advanced lesson did not attach to canonical page: "+id);
+ assert(article.includes('aria-label="进阶推导与研究实践"'),"advanced lesson not attached: "+id);
  assert(article.includes("推导与适用边界")&&article.includes("研究与实现流程"),"advanced sections missing: "+id);
+ const mod=depthFiles.map(read).find(m=>m.lessons[id]);
+ if(mod.lessons[id].worked_example)assert(article.includes("数值或研究示例"),"runtime worked example missing: "+id);
 }
 assert(atlas.includes("depthOnly")&&atlas.includes("atlas-advanced-mark"),"advanced lesson filter and directory labels missing");
 assert(app.includes("manifest.lesson_files"),"legacy lesson reader unexpectedly removed");
-console.log("PASS: 56 rigorous advanced lessons across 24 domains; legacy curriculum 24 disciplines / 120 chapters / 720 nodes; published Atlas navigation and JS parse; "+lessons.length+" legacy tutorials, "+activeNotes.length+" active notes; all legacy LaTeX syntax valid.");
+console.log("PASS: 80 rigorous advanced lessons across 24 domains; legacy curriculum 24 disciplines / 120 chapters / 720 nodes; published Atlas navigation and JS parse; "+lessons.length+" legacy tutorials, "+activeNotes.length+" active notes; all legacy LaTeX syntax valid.");
