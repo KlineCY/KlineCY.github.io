@@ -5,17 +5,17 @@ from pathlib import Path
 import unittest
 ROOT=Path(__file__).resolve().parent
 LESSONS={}
-for suffix in "ab":
+for suffix in "abcd":
     data=json.loads((ROOT/f"atlas-depth-15-{suffix}.json").read_text(encoding="utf-8"))
-    assert data["schema"]==1 and len(data["lessons"])==6
+    assert data["schema"]==1 and len(data["lessons"])==(5 if suffix=="d" else 6)
     for lid,body in data["lessons"].items():
         assert lid not in LESSONS
         LESSONS[lid]=body
 
 class FifteenthPassMath(unittest.TestCase):
     def test_scope_and_completeness(self):
-        self.assertEqual(len(LESSONS),12)
-        self.assertEqual({lid[:3] for lid in LESSONS},{f"m{i:02d}" for i in range(1,13)})
+        self.assertEqual(len(LESSONS),23)
+        self.assertEqual({lid[:3] for lid in LESSONS},{f"m{i:02d}" for i in range(1,24)})
         for lid,chapter in LESSONS.items():
             with self.subTest(lid=lid):
                 self.assertTrue(chapter["source_title"])
@@ -39,6 +39,17 @@ class FifteenthPassMath(unittest.TestCase):
             ("m10-c04-p03", 0.499802, "0.499802"),
             ("m11-c04-p05", 18.75, "18.75"),
             ("m12-c04-p03", 0.5, "风险为0.5"),
+            ("m13-c03-p02", 2*((1-2)/1)+1, "仿射输出为(−1,3)"),
+            ("m14-c04-p01", (32//8)**2, "16×64"),
+            ("m15-c01-p02", .6*.7, "0.42"),
+            ("m16-c03-p02", 3*(3+1)//2, "各有6个"),
+            ("m17-c02-p03", -math.log(.8*.5), "0.9163"),
+            ("m18-c03-p02", 14/3, "4.6667"),
+            ("m19-c01-p01", 4**2, "损失为(3−3)²+(4−0)²=16"),
+            ("m20-c04-p03", ((2-1)**2+(0-1)**2)/2, "方差为1"),
+            ("m21-c05-p04", (10+2)/10000*10000, "即12bp"),
+            ("m22-c04-p05", 9, "ES_0.8=9"),
+            ("m23-c05-p06", 1.018*.988-1, "0.5784%"),
         ]
         self.assertEqual(len(cases),len(LESSONS))
         for lid,expected,token in cases:
