@@ -94,11 +94,11 @@ assert(atlas.includes("applyDepth")&&atlas.includes('fetchAtlasJson("./atlas-dep
 assert(atlas.includes("fetchAtlasModulesBounded(depthFiles,6)"),"advanced modules must have bounded concurrency");
 const depthManifest=read("atlas-depth-manifest.json");
 assert.equal(depthManifest.schema,1);
-assert.equal(depthManifest.expected_lessons,538);
+assert.equal(depthManifest.expected_lessons,550);
 assert.equal(depthManifest.expected_domains,24);
-assert.equal(depthManifest.modules.length,61);
-assert.equal(new Set(depthManifest.modules.map(m=>m.path)).size,61);
-assert.equal(depthManifest.modules.reduce((n,m)=>n+m.lessons,0),538);
+assert.equal(depthManifest.modules.length,63);
+assert.equal(new Set(depthManifest.modules.map(m=>m.path)).size,63);
+assert.equal(depthManifest.modules.reduce((n,m)=>n+m.lessons,0),550);
 const depthFiles=depthManifest.modules.map(m=>m.path.replace(/^\.\//,""));
 const seen=new Set(),domains=new Set();let workedCount=0;
 for(let i=0;i<depthFiles.length;i++){
@@ -112,20 +112,20 @@ for(let i=0;i<depthFiles.length;i++){
   for(const field of ["derivation","protocol","pitfalls"])assert(Array.isArray(chapter[field])&&chapter[field].length>=2,"missing "+field+": "+id);
   assert(chapter.equations.length>=2,"missing advanced formulas: "+id);
   if(chapter.worked_example){assert(chapter.worked_example.length>=50,"thin worked example: "+id);workedCount++;}
-  if(/-(?:[3456]|0[789]-[a-z])\.json$/.test(file))assert(chapter.worked_example,"advanced lecture requires worked example: "+id);
-  if(/-(?:[456]|0[789]-[a-z])\.json$/.test(file))assert(chapter.equations.length>=3&&chapter.worked_example.length>=60,"fourth-pass equation/example incomplete: "+id);
+  if(/-(?:[3456]|(?:0[789]|1\d)-[a-z])\.json$/.test(file))assert(chapter.worked_example,"advanced lecture requires worked example: "+id);
+  if(/-(?:[456]|(?:0[789]|1\d)-[a-z])\.json$/.test(file))assert(chapter.equations.length>=3&&chapter.worked_example.length>=60,"fourth-pass equation/example incomplete: "+id);
   for(const f of chapter.equations){
    assert(f.label&&f.tex,"missing advanced formula metadata: "+id);
    katex.renderToString(f.tex,{throwOnError:true,strict:"ignore"});
   }
  }
 }
-assert.equal(seen.size,538,"must load 538 advanced lessons");
+assert.equal(seen.size,550,"must load 538 advanced lessons");
 assert.equal(domains.size,24,"must cover all twenty-four domains");
 const perDomain=new Map();
 for(const id of seen)perDomain.set(id.slice(0,3),(perDomain.get(id.slice(0,3))||0)+1);
 assert([...perDomain.values()].every(n=>n>=22),"each of the 24 topics must have at least twenty-two rigorous in-lesson enhancements");
-assert.equal(workedCount,482,"third through ninth passes require 482 worked examples");
+assert.equal(workedCount,494,"third through ninth passes require 482 worked examples");
 const binary=Buffer.concat([1,2,3,4].map(i=>fs.readFileSync(new URL("atlas/data.part"+i,here))));
 assert.equal(binary.length,1969862,"published archive bytes changed unexpectedly");
 const archive=JSON.parse(gunzipSync(binary).toString("utf8"));
@@ -134,7 +134,7 @@ assert(depthFnText.startsWith("function applyDepth("),"Atlas runtime function mi
 const escapeHtml=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const applyRuntimeDepth=vm.runInNewContext(depthFnText+"\napplyDepth;",{esc:escapeHtml});
 const runtimeIds=applyRuntimeDepth(archive,depthFiles.map(read),depthManifest);
-assert.equal(runtimeIds.size,538,"runtime overlay count mismatch");
+assert.equal(runtimeIds.size,550,"runtime overlay count mismatch");
 for(const id of seen){
  assert(runtimeIds.has(id),"runtime deep-dive missing: "+id);
  const article=archive.domains[id.slice(0,3)][id].html;
@@ -146,4 +146,4 @@ for(const id of seen){
 assert(atlas.includes("depthOnly")&&atlas.includes("atlas-advanced-mark"),"advanced lesson filter and directory labels missing");
 assert(atlas.includes("unreadOnly")&&atlas.includes("continueUnread")&&atlas.includes("atlas-jump-depth"),"published reader must support unread filtering, resuming and in-lesson advanced navigation");
 assert(app.includes("manifest.lesson_files"),"legacy lesson reader unexpectedly removed");
-console.log("PASS: 538 rigorous advanced lessons across 24 domains; legacy curriculum 24 disciplines / 120 chapters / 720 nodes; published Atlas navigation and JS parse; "+lessons.length+" legacy tutorials, "+activeNotes.length+" active notes; all legacy LaTeX syntax valid.");
+console.log("PASS: 550 rigorous advanced lessons across 24 domains; legacy curriculum 24 disciplines / 120 chapters / 720 nodes; published Atlas navigation and JS parse; "+lessons.length+" legacy tutorials, "+activeNotes.length+" active notes; all legacy LaTeX syntax valid.");

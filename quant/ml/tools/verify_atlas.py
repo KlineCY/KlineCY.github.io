@@ -86,10 +86,10 @@ def main():
 
     depth_manifest = json.loads((ROOT / "atlas-depth-manifest.json").read_text(encoding="utf-8"))
     assert depth_manifest["schema"] == 1
-    assert depth_manifest["expected_lessons"] == 538
+    assert depth_manifest["expected_lessons"] == 550
     assert depth_manifest["expected_domains"] == 24
     modules = depth_manifest["modules"]
-    assert len(modules) == 61
+    assert len(modules) == 63
     assert len({m["path"] for m in modules}) == len(modules)
     assert sum(m["lessons"] for m in modules) == depth_manifest["expected_lessons"]
     supplements = {}
@@ -108,13 +108,13 @@ def main():
     assert all(sum(lid.startswith(f"m{i:02d}-") for lid in supplements) >= 22
                for i in range(1, 25)), "every domain must have at least twenty-two in-lesson supplements"
     worked_count = sum(bool(x.get("worked_example")) for x in supplements.values())
-    assert worked_count == 482, "third through eighth passes must include 360 worked examples"
+    assert worked_count == 494, "third through tenth passes must include 494 worked examples"
     for module in modules:
-        if module["path"].endswith(("-3.json", "-4.json", "-5.json", "-6.json")) or re.search(r"-0[789]-[a-z]\.json$", module["path"]):
+        if module["path"].endswith(("-3.json", "-4.json", "-5.json", "-6.json")) or re.search(r"-(?:0[789]|1\d)-[a-z]\.json$", module["path"]):
             advanced = json.loads((ROOT / module["path"][2:]).read_text(encoding="utf-8"))
-            assert all(len(v.get("worked_example", "")) >= (60 if module["path"].endswith(("-4.json", "-5.json", "-6.json")) or re.search(r"-0[789]-[a-z]\.json$", module["path"]) else 50)
+            assert all(len(v.get("worked_example", "")) >= (60 if module["path"].endswith(("-4.json", "-5.json", "-6.json")) or re.search(r"-(?:0[789]|1\d)-[a-z]\.json$", module["path"]) else 50)
                        for v in advanced["lessons"].values())
-            if module["path"].endswith(("-4.json", "-5.json", "-6.json")) or re.search(r"-0[789]-[a-z]\.json$", module["path"]):
+            if module["path"].endswith(("-4.json", "-5.json", "-6.json")) or re.search(r"-(?:0[789]|1\d)-[a-z]\.json$", module["path"]):
                 assert all(len(v["equations"]) >= 3 for v in advanced["lessons"].values())
     assert not any(GENERIC_A in b["html"] or GENERIC_B in b["html"] for b in by_id.values()), "generic editorial placeholders remain"
     for lid, lesson in supplements.items():
