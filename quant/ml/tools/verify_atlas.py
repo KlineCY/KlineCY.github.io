@@ -86,10 +86,10 @@ def main():
 
     depth_manifest = json.loads((ROOT / "atlas-depth-manifest.json").read_text(encoding="utf-8"))
     assert depth_manifest["schema"] == 1
-    assert depth_manifest["expected_lessons"] == 518
+    assert depth_manifest["expected_lessons"] == 538
     assert depth_manifest["expected_domains"] == 24
     modules = depth_manifest["modules"]
-    assert len(modules) == 59
+    assert len(modules) == 61
     assert len({m["path"] for m in modules}) == len(modules)
     assert sum(m["lessons"] for m in modules) == depth_manifest["expected_lessons"]
     supplements = {}
@@ -105,10 +105,10 @@ def main():
             supplements[lid] = lesson
     assert len(supplements) == depth_manifest["expected_lessons"]
     assert len({lid[:3] for lid in supplements}) == depth_manifest["expected_domains"]
-    assert all(sum(lid.startswith(f"m{i:02d}-") for lid in supplements) >= 17
-               for i in range(1, 25)), "every domain must have at least seventeen in-lesson supplements"
+    assert all(sum(lid.startswith(f"m{i:02d}-") for lid in supplements) >= 22
+               for i in range(1, 25)), "every domain must have at least twenty-two in-lesson supplements"
     worked_count = sum(bool(x.get("worked_example")) for x in supplements.values())
-    assert worked_count == 462, "third through eighth passes must include 360 worked examples"
+    assert worked_count == 482, "third through eighth passes must include 360 worked examples"
     for module in modules:
         if module["path"].endswith(("-3.json", "-4.json", "-5.json", "-6.json")) or re.search(r"-0[789]-[a-z]\.json$", module["path"]):
             advanced = json.loads((ROOT / module["path"][2:]).read_text(encoding="utf-8"))
