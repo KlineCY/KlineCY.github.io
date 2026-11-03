@@ -111,7 +111,7 @@ for(let i=0;i<depthFiles.length;i++){
   assert(chapter.title.length>=8&&chapter.overview.length>=60,"thin advanced chapter: "+id);
   for(const field of ["derivation","protocol","pitfalls"])assert(Array.isArray(chapter[field])&&chapter[field].length>=2,"missing "+field+": "+id);
   assert(chapter.equations.length>=2,"missing advanced formulas: "+id);
-  if(chapter.worked_example){assert(chapter.worked_example.length>=50,"thin worked example: "+id);workedCount++;}
+  assert(typeof chapter.worked_example==="string"&&chapter.worked_example.length>=50,"missing or thin worked example: "+id);workedCount++;
   if(/-(?:[3456]|(?:0[789]|1\d)-[a-z])\.json$/.test(file))assert(chapter.worked_example,"advanced lecture requires worked example: "+id);
   if(/-(?:[456]|(?:0[789]|1\d)-[a-z])\.json$/.test(file))assert(chapter.equations.length>=3&&chapter.worked_example.length>=60,"fourth-pass equation/example incomplete: "+id);
   for(const f of chapter.equations){
@@ -125,7 +125,7 @@ assert.equal(domains.size,24,"must cover all twenty-four domains");
 const perDomain=new Map();
 for(const id of seen)perDomain.set(id.slice(0,3),(perDomain.get(id.slice(0,3))||0)+1);
 assert([...perDomain.values()].every(n=>n>=22),"each of the 24 topics must have at least twenty-two rigorous in-lesson enhancements");
-assert.equal(workedCount,704,"advanced worked-example count mismatch");
+assert.equal(workedCount,720,"advanced worked-example count mismatch");
 const binary=Buffer.concat([1,2,3,4].map(i=>fs.readFileSync(new URL("atlas/data.part"+i,here))));
 assert.equal(binary.length,1969862,"published archive bytes changed unexpectedly");
 const archive=JSON.parse(gunzipSync(binary).toString("utf8"));

@@ -85,7 +85,7 @@ function applyDepth(data,patches,manifest){
   if(typeof s.title!=="string"||s.title.length<8||typeof s.overview!=="string"||s.overview.length<60||
      !Array.isArray(s.equations)||s.equations.length<2||!Array.isArray(s.derivation)||s.derivation.length<3||
      !Array.isArray(s.protocol)||s.protocol.length<3||!Array.isArray(s.pitfalls))throw Error("深化讲义内容不完整："+id);
-  if(s.worked_example&&(typeof s.worked_example!=="string"||s.worked_example.length<50))
+  if(typeof s.worked_example!=="string"||s.worked_example.length<50)
    throw Error("深化讲义数值例子不足："+id);
   if(/-(?:[456]|(?:0[789]|1\d)-[a-z])\.json$/.test(manifest.modules[i].path)&&
      (s.equations.length<3||!s.worked_example||s.worked_example.length<60))

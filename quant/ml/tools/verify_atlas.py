@@ -113,7 +113,7 @@ def main():
     }
     assert not missing_source_titles, ("advanced lessons without exact source titles", missing_source_titles)
     worked_count = sum(bool(x.get("worked_example")) for x in supplements.values())
-    assert worked_count == 704, "advanced worked-example count mismatch"
+    assert worked_count == 720, "advanced worked-example count mismatch"
     for module in modules:
         if module["path"].endswith(("-3.json", "-4.json", "-5.json", "-6.json")) or re.search(r"-(?:0[789]|1\d)-[a-z]\.json$", module["path"]):
             advanced = json.loads((ROOT / module["path"][2:]).read_text(encoding="utf-8"))
@@ -127,8 +127,7 @@ def main():
         assert lesson["source_title"] == by_id[lid]["title"], ("source title mismatch", lid, lesson["source_title"], by_id[lid]["title"])
         assert len(lesson["title"]) >= 8 and len(lesson["overview"]) >= 60, lid
         assert len(lesson["equations"]) >= 2, lid
-        if lesson.get("worked_example"):
-            assert len(lesson["worked_example"]) >= 50, ("thin worked example", lid)
+        assert isinstance(lesson.get("worked_example"), str) and len(lesson["worked_example"]) >= 50, ("missing or thin worked example", lid)
         assert len(lesson["derivation"]) >= 3, lid
         assert len(lesson["protocol"]) >= 3, lid
         assert len(lesson["pitfalls"]) >= 2, lid
