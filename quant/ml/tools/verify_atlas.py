@@ -159,6 +159,13 @@ def main():
         "historic_code_comment_labels_retained_in_source": legacy_comments,
         "remaining_generic_definition_paragraphs": len(generic_a_left),
         "remaining_generic_boundary_paragraphs": len(generic_b_left),
+        "generic_boundary_targets": [
+            {
+                "id": lid,
+                "title": by_id[lid]["title"],
+                "preceding_context": html.unescape(re.sub(r"<[^>]+>", " ", by_id[lid]["html"].split(GENERIC_B)[0])[-500:]).strip(),
+            } for lid in generic_b_left
+        ],
         "generic_paragraphs_by_domain": generic_by_domain,
         "shortest_extracted_lesson_lengths": shortest,
         "note": "Checks archive and in-memory overlays; remaining generic text is measured, not automatically rewritten. Does not run Python examples or a real browser.",
