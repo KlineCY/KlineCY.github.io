@@ -82,12 +82,13 @@ def main():
         by_id[lid]["html"] = by_id[lid]["html"].replace(before, after)
         assert before not in by_id[lid]["html"]
         fixed_math += 1
-    assert (fixed_a, fixed_b, fixed_math) == (20, 22, 2)
+    assert (fixed_a, fixed_b, fixed_math) == (20, 31, 2)
 
     depth = json.loads((ROOT / "atlas-depth.json").read_text(encoding="utf-8"))
     assert depth["schema"] == 1
     supplements = depth["lessons"]
     assert len(supplements) == 8, "expected eight in-lesson deep dives"
+    assert not any(GENERIC_A in b["html"] or GENERIC_B in b["html"] for b in by_id.values()), "generic editorial placeholders remain"
     for lid, lesson in supplements.items():
         assert lid in by_id, ("orphan in-lesson supplement", lid)
         assert len(lesson["title"]) >= 8 and len(lesson["overview"]) >= 60, lid
