@@ -1,0 +1,145 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "optimization-x010",
+      "node_id": "optimization-x010",
+      "title": "LASSO次梯度与软阈值",
+      "definition": "LASSO在平方损失上加入L1范数以产生稀疏系数。由于|β_j|在0处不可微，最优性由次梯度包含条件表示；对正交设计或坐标下降的单坐标子问题，解是显式软阈值算子。",
+      "assumptions": "考虑目标1/2||y−Xβ||²+λ||β||₁、λ>0，并单独处理截距。正交设计闭式解需要XᵀX=I；一般相关特征矩阵不满足此条件，须使用坐标下降、近端梯度或其他凸优化方法。",
+      "properties": [
+        "绝对值在非零点次梯度是符号，在零点次梯度集合为[−1,1]，因此允许精确零系数。",
+        "软阈值S_τ(z)=sign(z)max(|z|−τ,0)，体现小的梯度方向被完全压至零。",
+        "LASSO目标凸但在秩不足时解不一定唯一，与加入L2惩罚并保证强凸的Ridge不同。"
+      ],
+      "formulas": [
+        {
+          "label": "LASSO目标",
+          "tex": "\\min_\\beta\\tfrac12\\|y-X\\beta\\|_2^2+\\lambda\\|\\beta\\|_1"
+        },
+        {
+          "label": "绝对值次梯度",
+          "tex": "\\partial|z|=\\begin{cases}\\{1\\},&z>0\\\\[-1,1],&z=0\\\\\\{-1\\},&z<0\\end{cases}"
+        },
+        {
+          "label": "KKT包含条件",
+          "tex": "0\\in X^\\top(X\\widehat\\beta-y)+\\lambda\\partial\\|\\widehat\\beta\\|_1"
+        },
+        {
+          "label": "软阈值",
+          "tex": "S_\\lambda(z)=\\operatorname{sign}(z)\\max(|z|-\\lambda,0)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "固定其他坐标的情况下，把单一坐标子问题写成1/2(β−z)²+λ|β|，最优性要求0属于β−z加λ乘绝对值次梯度。",
+          "tex": "0\\in\\beta-z+\\lambda\\partial|\\beta|"
+        },
+        {
+          "explanation": "若β>0，次梯度为1，得到β=z−λ且仅当z>λ合法；若β<0，得到β=z+λ且仅当z<−λ合法。",
+          "tex": "\\beta=z-\\lambda\\quad(z>\\lambda),\\qquad\\beta=z+\\lambda\\quad(z<-\\lambda)"
+        },
+        {
+          "explanation": "若β=0，次梯度可以选任意s∈[−1,1]，最优条件要求z=λs，即|z|≤λ；与两侧拼合成软阈值。",
+          "tex": "\\beta=0\\iff|z|\\le\\lambda,\\quad\\widehat\\beta=S_\\lambda(z)"
+        }
+      ],
+      "example": "设正交设计XᵀX=I，充分统计量z=Xᵀy=(3,0.5,−2)，惩罚参数λ=1。逐坐标软阈值得β̂=(2,0,−1)。检验残差得分z−β̂=(1,0.5,−1)：第一、三项等于λsign(β̂_j)，中间零系数对应0.5落在[−1,1]，全部满足KKT。若改成Ridge，通常三个坐标均只是缩小而不精确等于0，因此稀疏与数值稳定的机制不同。",
+      "application": "金融因子筛选、宏观变量选择与高维预测可用LASSO作稀疏基线，但相关因子可能导致选择不稳定；应结合跨窗口稳定性、嵌套CV和经济解释。",
+      "caveat": "不能把某一折LASSO选择为非零的特征直接当作因果驱动。对非正交X，直接对Xᵀy逐坐标软阈值一般不是完整LASSO解；需使用正确的坐标下降或近端算法。",
+      "deep_sections": [
+        {
+          "title": "为什么L1在零处不可微反而有利",
+          "question": "绝对值的尖点如何帮助生成稀疏系数？",
+          "paragraphs": [
+            "在β=0附近L1惩罚的左右斜率为−1和1，不存在唯一普通导数。用区间[−1,1]表达次梯度正好给出零点合法的最优性条件。",
+            "相比平方L2惩罚在0处导数为0，L1允许一定范围的损失梯度被惩罚次梯度抵消，形成精确零。"
+          ],
+          "formulas": [
+            {
+              "label": "零点次梯度",
+              "tex": "\\partial|0|=[-1,1]"
+            }
+          ],
+          "proof": "由凸次梯度定义|z|≥|0|+sz对所有z成立，可验证且仅s∈[−1,1]有效。",
+          "worked": "z=0.5、λ=1时β=0满足0∈−0.5+[−1,1]。",
+          "limitation": "稀疏结构依赖损失与正则化强度，不保证真实经济世界本身稀疏。"
+        },
+        {
+          "title": "完整推导软阈值三个区间",
+          "question": "为什么大系数只收缩而小系数直接归零？",
+          "paragraphs": [
+            "对标量子问题先假设β>0、β<0、β=0分别求最优解，再检查每个分区假设是否一致。",
+            "三个候选区域自然拼接成S_λ(z)，而不是根据启发式把小系数随意设置为零。"
+          ],
+          "formulas": [
+            {
+              "label": "三段解",
+              "tex": "\\widehat\\beta=\\begin{cases}z-\\lambda,&z>\\lambda\\\\0,&|z|\\le\\lambda\\\\z+\\lambda,&z<-\\lambda\\end{cases}"
+            }
+          ],
+          "proof": "按次梯度包含条件分别代入正、零、负三个区域求得。",
+          "worked": "z=(3,0.5,−2)且λ=1得到(2,0,−1)。",
+          "limitation": "损失项若乘1/n或坐标列范数不同，阈值参数也需要按相应尺度调整。"
+        },
+        {
+          "title": "KKT如何进行程序实现验算",
+          "question": "为什么不能只比较优化器返回的损失函数值？",
+          "paragraphs": [
+            "对非零系数，残差得分必须等于λ乘系数符号；对零系数，残差得分绝对值不能超过λ。",
+            "这种坐标级KKT诊断比只看“迭代停止”更强，能发现优化器因容差设置过松而输出的假稀疏解。"
+          ],
+          "formulas": [
+            {
+              "label": "坐标KKT",
+              "tex": "X_j^\\top(y-X\\widehat\\beta)\\in\\lambda\\partial|\\widehat\\beta_j|"
+            }
+          ],
+          "proof": "从整体次梯度最优性逐坐标展开直接得到。",
+          "worked": "z−β̂=(1,0.5,−1)，两个非零系数恰在边界，中间零系数的0.5满足|0.5|≤1。",
+          "limitation": "即使数值KKT通过，数据泄漏和样本外泛化问题仍独立存在。"
+        },
+        {
+          "title": "高相关因子与金融模型选择",
+          "question": "为什么LASSO可能在两个相似特征中反复切换？",
+          "paragraphs": [
+            "当两列特征几乎相同，许多稀疏表示可能产生接近的拟合损失。L1偏好稀疏，并不意味着选择哪一列具有稳定、可识别的经济含义。",
+            "可以比较Elastic Net、Ridge和跨时间窗口的特征进入频率，在外层测试评价成本后表现，避免用同一个窗口同时做特征筛选和最终性能报告。"
+          ],
+          "formulas": [
+            {
+              "label": "选择稳定性",
+              "tex": "\\operatorname{freq}_j=\\frac1K\\sum_{k=1}^K\\mathbf1\\{\\widehat\\beta^{(k)}_j\\ne0\\}"
+            }
+          ],
+          "proof": "对K个合法训练窗口分别求系数并记录非零进入次数，频率是描述量而非推断保证。",
+          "worked": "若10个训练窗口中因子j有6次系数非零，经验进入频率是6/10=0.6，不代表有60%的因果概率。",
+          "limitation": "相邻窗口高度相关，进入频率并非独立二项样本的自然概率估计。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "optimization-x009",
+          "label": "Ridge的强凸性和条件数"
+        },
+        {
+          "kind": "ml",
+          "id": "m07-c01-p01",
+          "label": "线性模型基础"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Stanford CS229 Machine Learning",
+          "url": "https://cs229.stanford.edu/summer2020/syllabus.html"
+        },
+        {
+          "title": "MIT 18.06 Linear Algebra",
+          "url": "https://www.mit.edu/~18.06/"
+        }
+      ],
+      "checked_status": "完整教材：定义假设、严格证明、四层推导、独立算例与金融应用"
+    }
+  ]
+}
