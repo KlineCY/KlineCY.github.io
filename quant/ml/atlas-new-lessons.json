@@ -1215,6 +1215,482 @@
           ]
         }
       ]
+    },
+    {
+      "domain_id": "m16",
+      "chapter": "Transformer的数学机制：注意力、位置、因果掩码与推理状态",
+      "lessons": [
+        {
+          "id": "m16-c06-p01",
+          "title": "Scaled Dot-Product Attention：从QKV形状到概率权重",
+          "goal": "用一个可计算的二维例子解释Q、K、V的含义与矩阵形状，推导缩放因子、softmax权重和数值稳定性，最后讨论金融时间序列中注意力权重的解释限度。",
+          "prerequisites": [
+            {
+              "kind": "math",
+              "id": "linear-n0065",
+              "label": "矩阵线性映射与维度"
+            },
+            {
+              "kind": "math",
+              "id": "calculus-n0040",
+              "label": "Jacobian与梯度"
+            },
+            {
+              "kind": "ml",
+              "id": "m16-c01-p01",
+              "label": "Transformer基础"
+            }
+          ],
+          "sections": [
+            {
+              "title": "Q、K、V分别解决什么问题",
+              "question": "为什么同一个输入要投影成三组向量？",
+              "paragraphs": [
+                "查询Q表示当前token想匹配什么，键K表示其他位置提供怎样的相似特征，值V表示得到权重后实际聚合什么信息。三组向量通常由输入X乘以不同可学习矩阵产生。",
+                "若序列有T个token、每个token维度d_model，则单头Q,K∈R^{T×d_k}，V∈R^{T×d_v}。由QKᵀ得T×T查询—键得分，乘V后回到T×d_v。"
+              ],
+              "equations": [
+                {
+                  "label": "张量形状",
+                  "tex": "Q=XW_Q,\\ K=XW_K,\\ V=XW_V,\\quad QK^\\top\\in\\mathbb R^{T\\times T}"
+                }
+              ],
+              "worked": "T=3、d_k=2、d_v=4时，QKᵀ是3×3，注意力输出是3×4。不能将T×T得分矩阵误写成T×d_k。",
+              "boundary": "“权重高”不意味着该过去日期因果上导致收益；它首先是模型内部的条件表示权重。"
+            },
+            {
+              "title": "为什么除以根号d_k",
+              "question": "不缩放的内积会怎样影响softmax？",
+              "paragraphs": [
+                "若q和k各坐标近似独立、零均值、单位方差，点积Σq_jk_j的方差约为d_k。d_k越大，未经缩放的logit典型尺度越大，softmax越易饱和，梯度传播可能变差。",
+                "除以√d_k使该理想化初始化模型下的得分方差近似为1。此推理依赖坐标独立等假设，实际LayerNorm和参数训练后可能不再满足。"
+              ],
+              "equations": [
+                {
+                  "label": "缩放分数",
+                  "tex": "S=\\frac{QK^\\top}{\\sqrt{d_k}},\\quad \\operatorname{Var}(q^\\top k)\\approx d_k"
+                }
+              ],
+              "worked": "d_k=2、q=(1,0)、k₁=(1,0)、k₂=(0,1)，缩放得分为(1/√2,0)≈(0.7071,0)。",
+              "boundary": "缩放是优化与数值稳定的启发性机制，不保证注意力概率已经校准为资产收益概率。"
+            },
+            {
+              "title": "softmax从分数形成归一化权重",
+              "question": "得分怎样转换成输出向量？",
+              "paragraphs": [
+                "对每一行得分softmax，使合法键位置的权重非负且和为1。每个查询对应的输出是这些位置值向量的凸加权和；输出还可通过后续线性投影改变维度。",
+                "对于二维例子，权重为exp(0.7071)/(exp(0.7071)+1)与1/(exp(0.7071)+1)。计算时应使用减去行最大值的稳定softmax，而非对大logit直接求指数。"
+              ],
+              "equations": [
+                {
+                  "label": "注意力公式",
+                  "tex": "\\operatorname{Attention}(Q,K,V)=\\operatorname{softmax}\\!\\left(\\frac{QK^\\top}{\\sqrt{d_k}}\\right)V"
+                }
+              ],
+              "worked": "上例权重约(0.6697615,0.3302385)。若值向量分别为v₁=10、v₂=20，输出为0.6697615×10+0.3302385×20≈13.302385。",
+              "boundary": "softmax权重并非可解释的因果贡献份额；线性投影和多层残差会继续改变输出。"
+            },
+            {
+              "title": "掩码与稳定softmax的边界",
+              "question": "为什么非法位置必须在归一化之前被排除？",
+              "paragraphs": [
+                "因果预测或补齐短序列时，某些键不应被当前查询访问。应在softmax之前将非法位置加上−∞，使其归一化权重严格为0；若先计算softmax再任意把权重设0，则行和可能不再为1。",
+                "数值上常使用很大的负数近似−∞，但全屏蔽一行可能导致非法归一化；必须保证每个需要输出的查询至少有一个合法键，且正确处理padding。"
+              ],
+              "equations": [
+                {
+                  "label": "加性掩码",
+                  "tex": "A=\\operatorname{softmax}(S+M),\\quad M_{ij}\\in\\{0,-\\infty\\}"
+                }
+              ],
+              "worked": "若logit=(2,1)，第二个键被屏蔽，则新权重严格为(1,0)；若先softmax得到约(0.7311,0.2689)再清零，剩余权重只和为0.7311。",
+              "boundary": "布尔mask在不同框架API中可能使用相反的True语义，不能仅凭变量名认为True表示允许。"
+            },
+            {
+              "title": "时间序列表示的统计含义",
+              "question": "注意力是不是一种可直接交易的经济解释？",
+              "paragraphs": [
+                "金融模型可令每个token表示某日已知收益、成交量和因子状态；注意力使当前预测根据不同历史位置聚合信息，但token的字段必须先满足决策时点可得。",
+                "应对比简单滞后模型、RNN和注意力模型的时间外性能，记录权重可视化是否在跨市场状态下稳定，并在真实执行层单独核算成本与组合净值。"
+              ],
+              "equations": [
+                {
+                  "label": "决策可得性",
+                  "tex": "\\operatorname{features}(t)\\subseteq\\mathcal F_t,\\qquad \\widehat Y_{t+h}=f_\\theta(X_{\\le t})"
+                }
+              ],
+              "worked": "第10日开盘做预测，若某个token含第10日收盘收益，即使网络使用严格因果mask，该字段仍是未来信息，不属于合法历史输入。",
+              "boundary": "注意力mask只能防止序列位置互相访问，不能检查原始数据供应商是否事后回填或修订。"
+            }
+          ],
+          "protocol": [
+            "先核对Q、K、V和注意力矩阵形状",
+            "推导缩放、softmax和数值稳定处理",
+            "明确padding与因果mask的合法位置",
+            "用点时特征和时间外实验检验实际价值"
+          ],
+          "sources": [
+            {
+              "title": "Dive into Deep Learning：自注意力与位置编码",
+              "url": "https://d2l.ai/chapter_attention-mechanisms-and-transformers/self-attention-and-positional-encoding.html"
+            },
+            {
+              "title": "PyTorch：scaled_dot_product_attention",
+              "url": "https://docs.pytorch.org/docs/main/generated/torch.nn.functional.scaled_dot_product_attention.html"
+            }
+          ]
+        },
+        {
+          "id": "m16-c06-p02",
+          "title": "多头注意力与位置编码：表示、维度和顺序",
+          "goal": "从单头加权聚合的局限出发，逐项核对多头投影、输出拼接和参数规模，再说明自注意力对输入排列的对称性及位置表示如何打破这一限制。",
+          "prerequisites": [
+            {
+              "kind": "ml",
+              "id": "m16-c06-p01",
+              "label": "Scaled Attention与矩阵形状"
+            },
+            {
+              "kind": "math",
+              "id": "linear-n0065",
+              "label": "秩与线性映射"
+            }
+          ],
+          "sections": [
+            {
+              "title": "单个头能表达哪些信息",
+              "question": "为何需要不同的查询—键投影？",
+              "paragraphs": [
+                "一个头按照一套相似度几何形成一张权重矩阵，可能偏向某类历史模式。多头通过不同的W_Q、W_K、W_V，在不同表示子空间中分别形成聚合结果。",
+                "多头不保证每个头自动学出经济上独立的因素；训练后头之间可能高度冗余，解释时应检验消融或替代表示。"
+              ],
+              "equations": [
+                {
+                  "label": "第h个注意力头",
+                  "tex": "H_h=\\operatorname{Attention}(XW_Q^{(h)},XW_K^{(h)},XW_V^{(h)})"
+                }
+              ],
+              "worked": "假设两头分别学短期与长期关系，这只是可能的表示分工，并不能凭网络层数证明真实头已经形成该分工。",
+              "boundary": "所谓短期/长期头需实证消融验证，不能仅靠注意力热图命名。"
+            },
+            {
+              "title": "拼接与输出矩阵维度",
+              "question": "d_model、头数和每头宽度之间是什么关系？",
+              "paragraphs": [
+                "标准设计常设头数h、每头值宽度d_v=d_model/h；各头输出沿特征维拼接，再经W_O投影回d_model。各头注意力权重维度仍是T×T。",
+                "多头投影参数可按矩阵尺寸逐项核算。若Q、K、V三个总投影均为d_model×d_model、输出投影也同形，忽略偏置时总权重数约为4d_model²。"
+              ],
+              "equations": [
+                {
+                  "label": "多头拼接",
+                  "tex": "\\operatorname{MHA}(X)=\\operatorname{Concat}(H_1,\\ldots,H_h)W_O"
+                }
+              ],
+              "worked": "d_model=8、h=2，每头宽度d_v=4，两头拼接回8维。四个8×8投影共4×64=256个权重（不含偏置），不是256个注意力头。",
+              "boundary": "不同模型可使用GQA、MQA和不等宽头，不能把上述公式当作全部Transformer的唯一实现。"
+            },
+            {
+              "title": "为什么注意力需要位置表示",
+              "question": "没有位置输入的自注意力为何不能独立辨认时间顺序？",
+              "paragraphs": [
+                "若不提供任何位置、mask或其他顺序线索，纯自注意力层对一致的token重排列具有置换等变性：输入顺序换了，输出按同一方式换；它不能自行区别绝对日期序号。",
+                "位置编码可使用固定正余弦、可学习绝对位置、相对位置偏置或旋转位置表示。不同方法引入的归纳偏置和长序列外推性质不同。"
+              ],
+              "equations": [
+                {
+                  "label": "正弦位置编码",
+                  "tex": "P_{p,2i}=\\sin(p/10000^{2i/d}),\\qquad P_{p,2i+1}=\\cos(p/10000^{2i/d})"
+                }
+              ],
+              "worked": "位置p=0时所有正弦偶数位置通道为0、余弦奇数位置通道为1；因此不同时间索引可以拥有不同向量表示。",
+              "boundary": "因果掩码也提供相对次序结构，置换等变的陈述须明确“无位置且无遮罩”等条件。"
+            },
+            {
+              "title": "残差连接与归一化",
+              "question": "多头Attention本身就构成完整Transformer块了吗？",
+              "paragraphs": [
+                "实际Transformer块通常还包含输出投影、残差连接、归一化和逐token前馈网络。Pre-LN与Post-LN使用不同的归一化次序，对深层优化稳定性和梯度路径产生影响。",
+                "应明确张量形状与残差相加前后维度相同；LayerNorm对每token的特征维归一化，不应误称为时间序列均值标准化或交易特征全样本预处理。"
+              ],
+              "equations": [
+                {
+                  "label": "Pre-LN结构",
+                  "tex": "Z=X+\\operatorname{MHA}(\\operatorname{LN}(X)),\\quad Y=Z+\\operatorname{FFN}(\\operatorname{LN}(Z))"
+                }
+              ],
+              "worked": "当X形状为(批量2,时间5,特征8)时，残差路径与每个子层输出都必须是(2,5,8)才能相加。",
+              "boundary": "时间外金融预处理的均值和方差必须在训练窗估计，不能由神经网络内部LN替代数据层信息审计。"
+            },
+            {
+              "title": "金融token究竟表示什么",
+              "question": "把资产维和时间维混合会造成哪类设计错误？",
+              "paragraphs": [
+                "时序Transformer可把token定义为单资产某交易日，也可定义为资产—日期对或多资产共同日期。时间位置和资产身份分别承载不同语义，注意力范围必须与研究目标一致。",
+                "同一天不同资产是否允许互相访问、是否共享可得数据，需在构造token时决定。若模型使用过去数据预测未来交易，应对比单资产滞后基准与多资产联合模型的经济收益和稳定性。"
+              ],
+              "equations": [
+                {
+                  "label": "资产—日期索引",
+                  "tex": "\\operatorname{token}_{a,t}=[\\operatorname{features}_{a,t},\\,\\operatorname{assetID}_a,\\,\\operatorname{timePos}_t]"
+                }
+              ],
+              "worked": "2只ETF、5个交易日可形成10个资产—日期token，但这不意味着全部10个token在每个历史决策时点都合法可见。",
+              "boundary": "token顺序、可交易资产池、退市与市场休市时刻都必须逐项处理。"
+            }
+          ],
+          "protocol": [
+            "先确定token语义和模型维度",
+            "检查各头投影、拼接和残差张量形状",
+            "说明位置表示方式及其外推限制",
+            "用消融实验和时间外结果验证是否真正需要多头结构"
+          ],
+          "sources": [
+            {
+              "title": "Dive into Deep Learning：多头注意力",
+              "url": "https://d2l.ai/"
+            },
+            {
+              "title": "PyTorch注意力接口",
+              "url": "https://docs.pytorch.org/docs/main/generated/torch.nn.functional.scaled_dot_product_attention.html"
+            }
+          ]
+        },
+        {
+          "id": "m16-c06-p03",
+          "title": "Causal Mask与时间可得性：位置因果不等于金融因果",
+          "goal": "把自回归因果注意力的下三角可见性与金融数据的真实可得性严格区分，推导掩码矩阵、合法注意力数量，并给出直接检测未来token污染的单元测试原则。",
+          "prerequisites": [
+            {
+              "kind": "ml",
+              "id": "m16-c06-p01",
+              "label": "Attention与掩码"
+            },
+            {
+              "kind": "ml",
+              "id": "m12-c06-p01",
+              "label": "事件时间与数据可得性"
+            },
+            {
+              "kind": "math",
+              "id": "measure-n0121",
+              "label": "信息σ-代数"
+            }
+          ],
+          "sections": [
+            {
+              "title": "因果掩码定义了哪种“过去”",
+              "question": "为什么预测第t个位置只能依赖前缀？",
+              "paragraphs": [
+                "自回归预测使位置t的表示只访问位置j≤t的信息，以保证没有从较后序列位置直接流入当前表示。标准方形自注意力中，合法得分区域是包含主对角的下三角。",
+                "这一因果性是计算图的时间位置约束，不意味着观察到某个经济变量就能识别其因果效应，也不检验原始特征是否事后可得。"
+              ],
+              "equations": [
+                {
+                  "label": "下三角掩码",
+                  "tex": "M_{tj}=\\begin{cases}0&j\\le t\\\\-\\infty&j>t\\end{cases}"
+                }
+              ],
+              "worked": "长度T=4时合法位置分别为1、2、3、4个，共1+2+3+4=10个注意力对；完整4×4矩阵共16个潜在对，屏蔽6个。",
+              "boundary": "若跨序列拼接时token次序没有按真实时间定义，位置掩码本身不能恢复正确经济时序。"
+            },
+            {
+              "title": "如何在softmax之前排除未来键",
+              "question": "为什么不能先归一化再乘一个0/1矩阵？",
+              "paragraphs": [
+                "将非法位置的logit设成−∞，再在合法位置归一化，才保证不合法权重为0且剩余权重和为1。若先softmax再把某些权重乘0，剩余行权重总和可能小于1。",
+                "实际计算使用有限精度近似负无穷，还必须避免某行全部被屏蔽。padding mask与causal mask需要组合时，检查广播维度和布尔True语义。"
+              ],
+              "equations": [
+                {
+                  "label": "掩码注意力",
+                  "tex": "A_{tj}=\\frac{\\exp(S_{tj}+M_{tj})}{\\sum_{k=1}^{T}\\exp(S_{tk}+M_{tk})}"
+                }
+              ],
+              "worked": "若两个位置logit为(2,1)，第二位置非法，正确输出权重是(1,0)。先softmax约(0.7311,0.2689)再乘(1,0)仅余0.7311，已非概率权重。",
+              "boundary": "PyTorch不同接口布尔mask的True含义可能相反，训练与推理实现都需专门核对。"
+            },
+            {
+              "title": "位置可见与数据可得是两道闸门",
+              "question": "一个历史token里如果含未来修订数据，因果掩码能修好吗？",
+              "paragraphs": [
+                "设投资者在时点t可用的全部数据构成信息集F_t。合法预测必须是F_t可测的函数，而不仅是通过下三角mask计算得到的函数。",
+                "例如2025年年末财报数据于次年3月首次披露，标注2025日期不表示其在2025时就已可用；应为每个字段保存首次发布时间和事后修订版本。"
+              ],
+              "equations": [
+                {
+                  "label": "时间信息约束",
+                  "tex": "\\widehat Y_{t+h}=f_\\theta(X_{\\le t}),\\quad X_{\\le t}\\text{ 必须对 }\\mathcal F_t\\text{ 可测}"
+                }
+              ],
+              "worked": "第10日开盘做预测，某输入token即便被编码成“第9日数据”，若其中包含第10日收盘交易结果，依然构成前视信息。",
+              "boundary": "Mask防止未来位置连边，不保证数据源本身没有幸存者偏差、未来成分名单或修订数据。"
+            },
+            {
+              "title": "构建可复现的因果mask单元测试",
+              "question": "怎样验证代码中确实没有未来位置的信息进入当前输出？",
+              "paragraphs": [
+                "在关闭dropout并固定模型权重后，保持前缀tokens不变，仅任意修改位置t之后的输入，观察位置≤t输出是否严格保持数值一致（允许合理浮点容差）。如果变化，说明计算图存在未来位置通道。",
+                "此外要在数据层单独测试特征首次可得时间和标签截止时间，不能以模型mask测试通过代替数据审计。"
+              ],
+              "equations": [
+                {
+                  "label": "未来扰动不变性",
+                  "tex": "X_{\\le t}=X'_{\\le t}\\Longrightarrow f_\\theta(X)_{\\le t}=f_\\theta(X')_{\\le t}"
+                }
+              ],
+              "worked": "输入序列(1,2,3,4)与(1,2,999,−999)前两位置相同；严格因果模型前两位置输出应相同（推理模式且无全序列归一化泄漏）。",
+              "boundary": "如果网络含跨时间全样本BatchNorm、双向模块或未正确限定的全局池化，改变未来token可能影响过去输出。"
+            },
+            {
+              "title": "训练与交易验证时间轴",
+              "question": "自回归训练在完整序列上并行，是否就等于未来数据进入模型？",
+              "paragraphs": [
+                "教师强制训练可把完整序列作为输入并使用正确mask并行计算多个预测损失，数学上的每个位置仍只看其合法前缀。但训练数据所在历史时间和未来回测评价时点是另一个约束。",
+                "金融滚动回测需要每一期重新拟合或冻结模型，仅使用此前成熟的标签和特征；不能因为批训练时使用因果mask就让评估日之后的样本参与参数学习。"
+              ],
+              "equations": [
+                {
+                  "label": "训练与验证时间关系",
+                  "tex": "\\max_{i\\in{\\rm train}}e_i\\le t_{\\rm decision}<\\min_{j\\in{\\rm future\\ label}}e_j"
+                }
+              ],
+              "worked": "在第10日开盘预测，先在截至第9日成熟的标签上训练，再推理第10日合法输入；不能把第11—20日的标签训练进去而声称模型mask已足够。",
+              "boundary": "该表达是示意性训练—未来标签成熟顺序，真实协议要区分开盘与收盘、市场假日和资产异步交易。"
+            }
+          ],
+          "protocol": [
+            "固定token的时间顺序和信息语义",
+            "验证下三角加性mask与数值归一化",
+            "进行未来token扰动不变性测试",
+            "再独立核查原始数据披露和滚动训练时点"
+          ],
+          "sources": [
+            {
+              "title": "PyTorch：Scaled Dot Product Attention的mask语义",
+              "url": "https://docs.pytorch.org/docs/main/generated/torch.nn.functional.scaled_dot_product_attention.html"
+            },
+            {
+              "title": "scikit-learn：数据泄漏",
+              "url": "https://scikit-learn.org/stable/common_pitfalls"
+            }
+          ]
+        },
+        {
+          "id": "m16-c06-p04",
+          "title": "KV Cache与复杂度：训练、预填充和增量推理",
+          "goal": "从自回归计算图出发区分训练、prefill和逐token解码，准确解释缓存如何复用历史K/V、减少重复投影却不消除全部上下文注意力成本，并延伸到金融流式预测的部署权衡。",
+          "prerequisites": [
+            {
+              "kind": "ml",
+              "id": "m16-c06-p01",
+              "label": "注意力数学"
+            },
+            {
+              "kind": "ml",
+              "id": "m16-c06-p03",
+              "label": "因果mask与序列位置"
+            }
+          ],
+          "sections": [
+            {
+              "title": "训练与自回归推理并非同一计算任务",
+              "question": "为什么Transformer训练可并行而生成仍需逐token？",
+              "paragraphs": [
+                "训练时整段已知目标序列可通过下三角mask并行计算各位置损失；自回归生成时，下一个token取决于上一步生成值，因此token之间依旧存在顺序依赖。",
+                "部署时通常将已有提示序列一次性处理称为prefill，随后每次加入一个新token的阶段称为decode。两阶段的计算、内存和延迟瓶颈不同。"
+              ],
+              "equations": [
+                {
+                  "label": "自回归分解",
+                  "tex": "p(x_1,\\ldots,x_T)=\\prod_{t=1}^T p(x_t\\mid x_{<t})"
+                }
+              ],
+              "worked": "长度T=4的已知训练序列可并行算四个位置的因果注意力输出；但实际生成第4个token时必须先生成第1到第3个token。",
+              "boundary": "教师强制训练的标签可得性不等于金融回测的模型参数可用性，二者应分别审查。"
+            },
+            {
+              "title": "缓存究竟保存什么",
+              "question": "为什么存储K和V就能避免重复计算历史位置？",
+              "paragraphs": [
+                "在严格因果解码中，过去位置的表示不受未来token改变，因此已计算的各层历史K/V可以存储。下一步只对新token生成q_t、k_t、v_t，再让新查询访问已存的所有合法键值。",
+                "缓存按模型层和注意力头管理，需要正确维护位置编码、padding、流式截断及批量状态。当生成或历史输入被修改时，旧缓存可能失效。"
+              ],
+              "equations": [
+                {
+                  "label": "KV追加",
+                  "tex": "K_{\\rm cache}^{(t)}=[K_{\\rm cache}^{(t-1)};k_t],\\quad V_{\\rm cache}^{(t)}=[V_{\\rm cache}^{(t-1)};v_t]"
+                }
+              ],
+              "worked": "若已有128个合法历史键，下一步加入第129个键后，新查询需要与129个键计算得分，而不必重新计算前128个历史K/V的投影。",
+              "boundary": "该论证依赖历史状态在因果模型中不随未来token改变；双向注意力不适用同样的增量缓存逻辑。"
+            },
+            {
+              "title": "复杂度到底减少了什么",
+              "question": "KV Cache是否把完整长序列注意力复杂度变成O(1)？",
+              "paragraphs": [
+                "没有缓存时，若每次为了得到新token输出都重新对全部前缀执行一次完整密集注意力，会重复计算历史投影和大量历史查询。缓存避免了这些重复工作。",
+                "但新查询仍与当前所有历史键计算注意力，解码每步的核心查询—键计算随上下文长度近似线性增长；全部生成步骤相加仍可呈二次增长。"
+              ],
+              "equations": [
+                {
+                  "label": "逐步查询长度",
+                  "tex": "\\mathrm{scores\\ at\\ step}\\ t:\\ 1\\times t,\\quad\\sum_{t=1}^T t=\\frac{T(T+1)}2"
+                }
+              ],
+              "worked": "前缀长度129时，直接计算全129×129个稠密查询—键配对为16641；有缓存时只需新查询与129个合法键的129个配对。两者比较的是该步骤的配对数，不等于真实GPU延迟同比降低。",
+              "boundary": "FlashAttention等内核、批量长度、权重投影成本和内存带宽都会改变真实延迟收益。"
+            },
+            {
+              "title": "显存与延迟的相互制约",
+              "question": "缓存为什么可能让显存成为新的瓶颈？",
+              "paragraphs": [
+                "对于B个解码序列、L层、H个注意力键值头、缓存长度T、每头维度d、每数值b字节，K和V合计内存约2BLHTdb，不含模型权重与其他临时激活。",
+                "动态缓存随长度增加，静态缓存预分配可能浪费空间，量化缓存能减少字节数但可能造成精度、吞吐和延迟权衡；硬件测量应同时报告每token耗时与峰值内存。"
+              ],
+              "equations": [
+                {
+                  "label": "KV存储估算",
+                  "tex": "\\operatorname{bytes}_{KV}\\approx2BLHTd\\,b"
+                }
+              ],
+              "worked": "B=1、L=12、H=8、T=1024、d=64、b=2字节时，KV占约2×1×12×8×1024×64×2=25,165,824字节，即24MiB。",
+              "boundary": "本估计只计算KV张量，不包含模型权重、批量padding和分配器额外开销。"
+            },
+            {
+              "title": "金融流式预测何时有用",
+              "question": "把每个新报价都作为token会发生什么？",
+              "paragraphs": [
+                "若事件或行情持续到来，流式模型可缓存历史表示而只处理增量事件，降低重复投影。但资产异步成交、数据修订、时区和模型再训练都会影响缓存状态是否仍可复用。",
+                "应先设定流式特征更新规则、缓存过期与重建策略，再以真实端到端延迟、内存峰值、预测误差和成本后交易效果比较离线重算与增量预测。"
+              ],
+              "equations": [
+                {
+                  "label": "合法缓存状态",
+                  "tex": "S_t=\\operatorname{update}(S_{t-1},x_t),\\quad x_t\\in\\mathcal F_t"
+                }
+              ],
+              "worked": "如果一只ETF盘中增量报价未到，而另一只已更新，不能把两只资产的缓存时间戳当作同一同步快照。",
+              "boundary": "缓存是一种计算优化，不保证输入数据可靠，也不自动使预测策略具备获利或容量优势。"
+            }
+          ],
+          "protocol": [
+            "区分训练、prefill与decode阶段",
+            "核算每步Q/K/V新旧计算范围",
+            "同时估算注意力计算量与KV内存成本",
+            "在点时合法的流式数据上实测延迟和样本外效益"
+          ],
+          "sources": [
+            {
+              "title": "Hugging Face：KV Cache strategies",
+              "url": "https://huggingface.co/docs/transformers/main/kv_cache"
+            },
+            {
+              "title": "PyTorch：Attention计算接口",
+              "url": "https://docs.pytorch.org/docs/main/generated/torch.nn.functional.scaled_dot_product_attention.html"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
