@@ -84,25 +84,33 @@ def main():
         fixed_math += 1
     assert (fixed_a, fixed_b, fixed_math) == (20, 31, 2)
 
-    depth_files = [
-        "atlas-depth.json",
-        "atlas-depth-foundations.json",
-        "atlas-depth-learning.json",
-        "atlas-depth-quant.json",
-        "atlas-depth-foundations-2.json",
-        "atlas-depth-learning-2.json",
-        "atlas-depth-quant-2.json",
-    ]
+    depth_manifest = json.loads((ROOT / "atlas-depth-manifest.json").read_text(encoding="utf-8"))
+    assert depth_manifest["schema"] == 1
+    assert depth_manifest["expected_lessons"] == 80
+    assert depth_manifest["expected_domains"] == 24
+    modules = depth_manifest["modules"]
+    assert len(modules) == 10
+    assert len({m["path"] for m in modules}) == len(modules)
+    assert sum(m["lessons"] for m in modules) == depth_manifest["expected_lessons"]
     supplements = {}
-    for path in depth_files:
-        depth = json.loads((ROOT / path).read_text(encoding="utf-8"))
+    for module in modules:
+        path = module["path"]
+        assert re.fullmatch(r"\./atlas-depth(?:-[a-z0-9]+)*\.json", path)
+        assert path != "./atlas-depth-manifest.json"
+        depth = json.loads((ROOT / path[2:]).read_text(encoding="utf-8"))
         assert depth["schema"] == 1, path
-        assert len(depth["lessons"]) == 8, ("incomplete supplement batch", path)
+        assert len(depth["lessons"]) == module["lessons"], ("incomplete module", path)
         for lid, lesson in depth["lessons"].items():
-            assert lid not in supplements, ("duplicate supplement ID", lid)
+            assert lid not in supplements, ("duplicate advanced ID", lid)
             supplements[lid] = lesson
-    assert len(supplements) == 56, "expected 56 in-lesson deep dives"
-    assert len({lid[:3] for lid in supplements}) == 24, "expected every Atlas topic represented"
+    assert len(supplements) == depth_manifest["expected_lessons"]
+    assert len({lid[:3] for lid in supplements}) == depth_manifest["expected_domains"]
+    worked_count = sum(bool(x.get("worked_example")) for x in supplements.values())
+    assert worked_count == 24, "third pass must include 24 worked examples"
+    for module in modules:
+        if module["path"].endswith("-3.json"):
+            advanced = json.loads((ROOT / module["path"][2:]).read_text(encoding="utf-8"))
+            assert all(len(v.get("worked_example", "")) >= 50 for v in advanced["lessons"].values())
     assert not any(GENERIC_A in b["html"] or GENERIC_B in b["html"] for b in by_id.values()), "generic editorial placeholders remain"
     for lid, lesson in supplements.items():
         assert lid in by_id, ("orphan in-lesson supplement", lid)
@@ -110,6 +118,8 @@ def main():
             assert lesson["source_title"] == by_id[lid]["title"], ("source title mismatch", lid, lesson["source_title"], by_id[lid]["title"])
         assert len(lesson["title"]) >= 8 and len(lesson["overview"]) >= 60, lid
         assert len(lesson["equations"]) >= 2, lid
+        if lesson.get("worked_example"):
+            assert len(lesson["worked_example"]) >= 50, ("thin worked example", lid)
         assert len(lesson["derivation"]) >= 3, lid
         assert len(lesson["protocol"]) >= 3, lid
         assert len(lesson["pitfalls"]) >= 2, lid
@@ -187,6 +197,7 @@ def main():
         "assumption_paragraphs_revised": fixed_b,
         "equations_corrected": fixed_math,
         "in_lesson_advanced_supplements": len(supplements),
+        "worked_numerical_or_research_examples": worked_count,
         "historic_code_comment_labels_retained_in_source": legacy_comments,
         "remaining_generic_definition_paragraphs": len(generic_a_left),
         "remaining_generic_boundary_paragraphs": len(generic_b_left),
