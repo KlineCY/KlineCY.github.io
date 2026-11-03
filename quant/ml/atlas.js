@@ -51,7 +51,7 @@ function applyEditorial(data,patch){
  return sums;
 }
 function applyDepth(data,patches){
- if(!Array.isArray(patches)||patches.length!==4)throw Error("深化讲义资源列表不完整");
+ if(!Array.isArray(patches)||patches.length!==7)throw Error("深化讲义资源列表不完整");
  const seen=new Set(),allDomains=new Set();
  function items(rows){return "<ol>"+rows.map(s=>"<li>"+esc(s)+"</li>").join("")+"</ol>"}
  for(const patch of patches){
@@ -77,7 +77,7 @@ function applyDepth(data,patches){
    '<h3>常见误区</h3>'+items(s.pitfalls)+'</section>';
   }
  }
- if(seen.size!==32||allDomains.size!==24)throw Error("深化讲义覆盖不完整："+seen.size+"篇，"+allDomains.size+"专题");
+ if(seen.size!==56||allDomains.size!==24)throw Error("深化讲义覆盖不完整："+seen.size+"篇，"+allDomains.size+"专题");
  return seen.size;
 }
 function cleanCodeComments(root){
@@ -230,7 +230,8 @@ async function copyText(value,button,label){
 async function start(){
  try{
   const data=await loadArchive();
-  const depthFiles=["./atlas-depth.json","./atlas-depth-foundations.json","./atlas-depth-learning.json","./atlas-depth-quant.json"];
+  const depthFiles=["./atlas-depth.json","./atlas-depth-foundations.json","./atlas-depth-learning.json","./atlas-depth-quant.json",
+   "./atlas-depth-foundations-2.json","./atlas-depth-learning-2.json","./atlas-depth-quant-2.json"];
   const [editorialResponse,...depthResponses]=await Promise.all([
    fetch("./atlas-editorial.json"),...depthFiles.map(file=>fetch(file))
   ]);
