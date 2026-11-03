@@ -4,7 +4,7 @@ const $=id=>document.getElementById(id);
 const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const LESSON=/^#(?:lesson|ml)\/(m\d\d-c\d\d-p\d\d)$/;
 const KEY="kline-quant-atlas-read-v1";
-const state={index:[],byId:new Map(),domains:{},term:"",topic:"",activeId:"",read:new Set()};
+const state={index:[],byId:new Map(),domains:{},searchText:new Map(),term:"",topic:"",activeId:"",read:new Set()};
 try {const saved=JSON.parse(localStorage.getItem(KEY)||"[]");if(Array.isArray(saved))state.read=new Set(saved.filter(v=>typeof v==="string"))}catch(_){}
 function saveRead(){try{localStorage.setItem(KEY,JSON.stringify([...state.read]))}catch(_){}}
 function showStatus(message,error=false){const el=$("atlas-status");el.textContent=message;el.classList.toggle("atlas-error",error)}
@@ -79,8 +79,9 @@ async function loadArchive(){
  return parsed;
 }
 function visibleLessons(){
+ const words=state.term.split(/\s+/).filter(Boolean);
  return state.index.filter(x=>(!state.topic||x.domain_id===state.topic)&&
- (!state.term||[x.id,x.title,x.domain,x.chapter].some(v=>String(v||"").toLocaleLowerCase().includes(state.term))));
+ (words.length===0||words.every(word=>state.searchText.get(x.id)?.includes(word))));
 }
 function updateReadStats(){
  const n=state.index.filter(x=>state.read.has(x.id)).length;
@@ -204,6 +205,13 @@ async function start(){
   const editorial=await editorialResponse.json();
   applyEditorial(data,editorial);
   state.index=data.catalog.items;state.byId=new Map(state.index.map(x=>[x.id,x]));state.domains=data.domains;
+  // Index visible article text as well as titles, chapters and code symbols.
+  // This is computed once so subsequent searches do not repeatedly parse all 720 lessons.
+  for(const x of state.index){
+   const page=data.domains[x.domain_id][x.id].html;
+   const plain=page.replace(/<[^>]*>/g," ").replace(/&(lt|gt|amp|quot|nbsp);/g,(_,entity)=>({lt:"<",gt:">",amp:"&",quot:"\"",nbsp:" "}[entity]));
+   state.searchText.set(x.id,[x.id,x.title,x.domain,x.chapter,plain].join(" ").toLocaleLowerCase());
+  }
   const groups=new Set();
   for(const x of state.index){
    if(groups.has(x.domain_id))continue;
