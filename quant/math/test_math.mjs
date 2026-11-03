@@ -8,9 +8,9 @@ const c=read("./curriculum.json");
 const sources=["./lessons-foundations.json","./lessons-advanced.json","./lessons-more.json"].map(read);
 const manifest=read("./lessons-manifest.json");
 assert.equal(manifest.version,1);
-assert.equal(manifest.expected_lessons,36);
-assert.equal(manifest.modules.length,12);
-assert.equal(new Set(manifest.modules.map(x=>x.path)).size,12);
+assert.equal(manifest.expected_lessons,39);
+assert.equal(manifest.modules.length,13);
+assert.equal(new Set(manifest.modules.map(x=>x.path)).size,13);
 assert.equal(manifest.modules.reduce((s,x)=>s+x.lessons,0),manifest.expected_lessons);
 const extras=manifest.modules.flatMap(mod=>{
  assert(/^\.\/lessons-phase-\d\d-[a-z]\.json$/.test(mod.path),"invalid module path "+mod.path);
@@ -25,6 +25,17 @@ for(const l of extras){
   assert(typeof l[key]==="string"&&l[key].length>=50,"thin math "+l.node_id+" "+key);
  assert(l.properties.length>=3&&l.formulas.length>=3&&l.derivation.length>=3,"incomplete proof "+l.node_id);
  for(const step of l.derivation)assert(step.explanation.length>=35&&step.tex,"missing proof step "+l.node_id);
+ if(l.deep_sections){
+  assert(l.deep_sections.length>=4,"deep mathematical lecture requires logical mini-chapters "+l.node_id);
+  for(const s of l.deep_sections){
+   assert(s.title&&s.question&&s.paragraphs.length>=2&&s.formulas.length&&s.proof&&s.worked&&s.limitation,"incomplete mini-chapter "+l.node_id);
+   for(const eq of s.formulas)katex.renderToString(eq.tex,{throwOnError:true,strict:"ignore"});
+  }
+  for(const link of l.links||[]){
+   if(link.kind==="math")assert(c.nodes.some(n=>n.id===link.id),"broken mathematics link "+link.id);
+   else assert(/^m\d\d-c\d\d-p\d\d$/.test(link.id),"broken machine learning link "+link.id);
+  }
+ }
 }
 const lessons=[...sources.flatMap(f=>f.lessons),...extras];
 const ids=new Set(),chIds=new Set(),deptIds=new Set(),nodeMap=new Map();
@@ -92,7 +103,8 @@ for(const marker of ['id="quantSidebar"','id="tree"','id="article"','id="discipl
 assert(app.includes("loadMathAdditions()")&&app.includes("fetchMathJson("),"math module loader absent");
  for(const name of ["curriculum.json","lessons-foundations.json","lessons-advanced.json","lessons-more.json"])
   assert(app.includes('fetch("./'+name+'",{cache:"no-cache"})'),"core math resource must revalidate cache "+name);
-assert(html.includes("app.js?v=20261103-math-03"),"versioned math loader missing");
-assert(html.includes("styles.css?v=20261103-math-03"),"versioned math styles missing");
+assert(html.includes("app.js?v=20261103-math-depth-v1"),"versioned math loader missing");
+assert(html.includes("styles.css?v=20261103-math-depth-v1"),"versioned math styles missing");
+assert(app.includes("renderMathDeepSections")&&app.includes("math-deep-toc"),"mathematics subchapter reader missing");
 assert(sidebar.includes('["math","量化数学 Mathematics"]'),"math missing from navigation");
 console.log("Math validation PASS: "+c.disciplines.length+" disciplines, "+c.chapters.length+" chapters, "+c.nodes.length+" nodes, "+lessons.length+" complete lessons, all displayed LaTeX formulas parseable.");

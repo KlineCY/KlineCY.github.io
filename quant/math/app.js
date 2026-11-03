@@ -126,17 +126,69 @@ const next=nodes.find(n=>n.discipline_id===node.discipline_id&&nodes.indexOf(n)>
 if(next){const b=document.createElement("button");b.className="action primary";b.textContent="下一知识点 →";b.type="button";b.onclick=()=>selectNode(next.id);section.appendChild(b)}
 wrap.appendChild(section);
 }
+function renderMathDeepSections(node,lesson,container){
+ const sections=lesson.deep_sections;
+ if(!sections?.length)return;
+ const nav=makeSection("深入阅读路径：每一步回答一个数学问题");
+ const ol=document.createElement("ol");ol.className="math-deep-toc";
+ for(const [i,part] of sections.entries()){
+  const li=document.createElement("li"),button=document.createElement("button");
+  button.type="button";button.textContent=part.title;
+  button.addEventListener("click",()=>container.querySelector("#math-deep-"+node.id+"-"+i)?.scrollIntoView({behavior:"smooth",block:"start"}));
+  li.appendChild(button);ol.appendChild(li);
+ }
+ nav.appendChild(ol);container.appendChild(nav);
+ for(const [i,part] of sections.entries()){
+  const box=makeSection((i+1)+". "+part.title);
+  box.classList.add("math-deep-unit");box.id="math-deep-"+node.id+"-"+i;
+  paragraph(box,part.question,"math-deep-question");
+  for(const prose of part.paragraphs)paragraph(box,prose);
+  for(const formula of part.formulas)box.appendChild(equation(formula.tex,formula.label));
+  for(const [label,value] of [["推理与成立机制",part.proof],["逐项计算",part.worked],["不成立的情形",part.limitation]]){
+   const h=document.createElement("h4");h.textContent=label;box.appendChild(h);
+   paragraph(box,value,label==="不成立的情形"?"warn":undefined);
+  }
+  container.appendChild(box);
+ }
+ if(lesson.links?.length){
+  const part=makeSection("知识链：先修与延伸");const row=document.createElement("div");row.className="math-deep-related";
+  for(const ref of lesson.links){
+   const a=document.createElement("a");a.textContent=ref.label;
+   a.href=ref.kind==="ml"?"../ml/#lesson/"+encodeURIComponent(ref.id):"?topic="+encodeURIComponent(ref.id);
+   row.appendChild(a);
+  }
+  part.appendChild(row);container.appendChild(part);
+ }
+ if(lesson.sources?.length){
+  const part=makeSection("参考来源（原站阅读）");
+  for(const source of lesson.sources){
+   const a=document.createElement("a");a.textContent=source.title;a.href=source.url;
+   a.target="_blank";a.rel="noopener noreferrer";a.className="math-deep-source";
+   part.appendChild(a);
+  }
+  container.appendChild(part);
+ }
+}
 function lessonArticle(n,lesson,container){
-const lead=makeSection("一、概念与定义");
+if(n.prerequisites?.length){
+ const pre=makeSection("课程先修知识");const links=document.createElement("div");links.className="math-prerequisites";
+ for(const id of n.prerequisites){
+  const item=getNode(id);if(!item)continue;
+  const button=document.createElement("button");button.type="button";button.className="action";button.textContent=item.title;
+  button.addEventListener("click",()=>selectNode(id));links.appendChild(button);
+ }
+ pre.appendChild(links);container.appendChild(pre);
+}
+const lead=makeSection("一、研究对象与严格定义");
 paragraph(lead,lesson.definition);container.appendChild(lead);
-const assumptions=makeSection("二、成立条件 / 前提假设");paragraph(assumptions,lesson.assumptions);container.appendChild(assumptions);
-const property=makeSection("三、重要性质与定理");
+const assumptions=makeSection("二、前提条件与符号口径");paragraph(assumptions,lesson.assumptions);container.appendChild(assumptions);
+const property=makeSection("三、重要性质及其成立机制");
 const list=document.createElement("ol");list.className="property-list";
 for(const item of lesson.properties||[]){const li=document.createElement("li");li.textContent=item;list.appendChild(li);typeset(li)}property.appendChild(list);container.appendChild(property);
 if(lesson.formulas?.length){
-const sec=makeSection("四、数学公式");for(const f of lesson.formulas)sec.appendChild(equation(f.tex,f.label));
+const sec=makeSection("四、核心数学关系");for(const f of lesson.formulas)sec.appendChild(equation(f.tex,f.label));
 container.appendChild(sec);}
-const proof=makeSection("五、推导与证明");
+const proof=makeSection("五、逐步推导与证明");
 for(const [i,step] of (lesson.derivation||[]).entries()){
  const box=document.createElement("div");box.className="proof-step";
  const badge=document.createElement("span");badge.className="step-index";badge.textContent=i+1;
@@ -145,9 +197,11 @@ for(const [i,step] of (lesson.derivation||[]).entries()){
  const math=equation(step.tex);math.className="step-equation";box.appendChild(math);
  proof.appendChild(box)}
 container.appendChild(proof);
-const example=makeSection("六、例子与实际应用");paragraph(example,lesson.example);paragraph(example,"量化应用："+lesson.application);container.appendChild(example);
-const pitfall=makeSection("七、易错条件 / 适用范围");
+const example=makeSection("六、独立数值例题");paragraph(example,lesson.example);container.appendChild(example);
+const application=makeSection("七、量化研究与实际应用");paragraph(application,lesson.application);container.appendChild(application);
+const pitfall=makeSection("八、失效边界与易错口径");
 paragraph(pitfall,lesson.caveat,"warn");container.appendChild(pitfall);
+renderMathDeepSections(n,lesson,container);
 }
 function outlineArticle(n,container){
 const ch=getChap(n.chapter_id),dept=getDept(n.discipline_id);
