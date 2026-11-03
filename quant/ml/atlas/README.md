@@ -20,12 +20,12 @@
 ```bash
 python quant/ml/tools/verify_atlas.py
 node quant/ml/test_ml.mjs
-python -m unittest discover quant/ml -p 'test_examples.py' -v
+python -m unittest discover quant/ml -p 'test_*.py' -v
 ```
 
 其中 Node.js 脚本需要依赖 `katex@0.16.11`，可参照 `.github/workflows/test-quant-ml.yml` 安装。GitHub Actions 在 `quant/ml/**` 更新后运行数学/JavaScript 结构检查及 Python 示例测试。
 
-主要校验包括档案完整性、HTML 结构、720 段 Python 的语法、已内链目标、补充内容与真实讲义标题的对应关系、KaTeX 公式语法，以及所有已识别通用模板段落不再残留。自动测试 **不等于** 正文数学结论的形式化证明、全部示例在真实环境中执行成功、浏览器端所有交互验证或量化策略的实盘可交易性证明。
+主要校验包括档案完整性、HTML 结构、720 段 Python 的语法、已内链目标、补充内容与真实讲义标题的对应关系、KaTeX 公式语法，以及所有已识别通用模板段落不再残留。另有14项数值单元测试检查第三阶段的批次梯度、标签偏移、Adam二阶矩、平滑编码、成本阈值、核尺度、HDBSCAN、CNN感受野、LSTM遗忘门、HAR-RV及做市报价等示例计算。自动测试 **不等于** 正文数学结论的形式化证明、全部示例在真实环境中执行成功、浏览器端所有交互验证或量化策略的实盘可交易性证明。
 
 ## 编辑准则
 
