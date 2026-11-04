@@ -797,6 +797,161 @@
       "application": "识别金融变量的内生性与政策冲击。",
       "caveat": "只有相关性没有排除限制不是有效工具变量。",
       "checked_status": "独立编辑的重点讲义；按列出的条件理解公式与证明"
+    },
+    {
+      "id": "probability-n0118",
+      "node_id": "probability-n0118",
+      "title": "大数定律",
+      "definition": "大数定律研究样本平均如何接近总体期望，必须区分依概率收敛的弱大数定律与几乎处处收敛的强大数定律。在独立同分布条件下，有限绝对一阶矩已足以推出强大数定律；额外的有限方差或有界性使证明和收敛速度界更直观。对时间序列还必须区分独立样本、平稳遍历过程和包含共同潜在状态的非遍历过程。",
+      "assumptions": "弱大数定律的Chebyshev证明要求独立同分布且有限方差；一般独立同分布的强大数定律要求E|X_1|<∞，不必要求有限方差。Hoeffding界使用独立且几乎处处有界的随机变量；遍历定理则要求适当的测度保持、可积性与遍历性。不能用样本量替代这些概率假设。",
+      "properties": [
+        "弱大数定律只保证任意固定误差外的概率趋于0，强大数定律保证几乎所有样本路径最终收敛。",
+        "对独立同分布样本，有限绝对一阶矩足够得到强大数定律，有限方差只是常用且更强的充分条件。",
+        "对于平稳且遍历的可积时间序列，时间均值可以收敛到无条件期望；平稳本身并不等同于遍历。",
+        "大数定律保证估计的一致性而不直接给出标准误或收敛分布；后者通常需要CLT和依赖结构假设。"
+      ],
+      "formulas": [
+        {
+          "label": "弱大数定律的方差证明",
+          "tex": "\\Pr\\{|\\bar X_n-\\mu|\\ge\\varepsilon\\}\\le\\frac{\\sigma^2}{n\\varepsilon^2}\\longrightarrow0"
+        },
+        {
+          "label": "有界观测与强大数定律",
+          "tex": "\\Pr(|\\bar X_n-\\mu|\\ge\\varepsilon)\\le2e^{-2n\\varepsilon^2/(b-a)^2},\\qquad \\bar X_n\\xrightarrow{\\mathrm{a.s.}}\\mu"
+        },
+        {
+          "label": "有限一阶矩下的强律与厚尾反例",
+          "tex": "\\mathbb E|X_1|<\\infty\\quad\\Longrightarrow\\quad \\frac1n\\sum_{i=1}^nX_i\\xrightarrow{\\rm a.s.}\\mathbb E[X_1]"
+        },
+        {
+          "label": "平稳遍历序列、潜在状态与量化估计",
+          "tex": "\\frac1n\\sum_{t=1}^{n}X_t\\xrightarrow{\\rm a.s.}\\mathbb E[X_0\\mid\\mathcal I],\\qquad\\text{遍历时 }\\mathcal I\\text{ 平凡}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "独立性消掉不同观测之间的协方差，使Var(ΣX_i)=nσ²，故Var(X̄_n)=σ²/n。对Z=X̄_n−μ应用Markov不等式到非负变量Z²，得到所示概率上界，直接验证依概率收敛的定义。",
+          "tex": "\\Pr\\{|\\bar X_n-\\mu|\\ge\\varepsilon\\}\\le\\frac{\\sigma^2}{n\\varepsilon^2}\\longrightarrow0"
+        },
+        {
+          "explanation": "当所有X_i∈[a,b]且独立时，Hoeffding给出指数型概率界。对每个ε>0求和Σ_n 2exp(−2nε²/(b−a)²)<∞，由Borel–Cantelli得P(偏离事件无限次发生)=0，再对ε=1,1/2,…取可数交获得几乎处处收敛。",
+          "tex": "\\Pr(|\\bar X_n-\\mu|\\ge\\varepsilon)\\le2e^{-2n\\varepsilon^2/(b-a)^2},\\qquad \\bar X_n\\xrightarrow{\\mathrm{a.s.}}\\mu"
+        },
+        {
+          "explanation": "由E|X|=∫_0∞P(|X|>u)du<∞可得Σ_iP(|X|>i)<∞，所以大样本截断最终与原变量相同。利用Σ_i E[X²1{|X|≤i}]/i²<∞（对每个|X|按i的尾和估计并由E|X|控制），配合Kolmogorov收敛判据与Kronecker引理得到截断中心化和除以n趋于0；E[Y_i]→E[X]再由Cesàro平均完成证明。",
+          "tex": "\\mathbb E|X_1|<\\infty\\quad\\Longrightarrow\\quad \\frac1n\\sum_{i=1}^nX_i\\xrightarrow{\\rm a.s.}\\mathbb E[X_1]"
+        },
+        {
+          "explanation": "在保持概率测度的平稳移位系统上对可积函数应用Birkhoff定理，时间平均收敛到相对于移位不变事件构成的σ-代数I的条件期望。遍历性保证I中的事件仅有0或1概率，从而该条件期望等于E[X_0]几乎处处。",
+          "tex": "\\frac1n\\sum_{t=1}^{n}X_t\\xrightarrow{\\rm a.s.}\\mathbb E[X_0\\mid\\mathcal I],\\qquad\\text{遍历时 }\\mathcal I\\text{ 平凡}"
+        }
+      ],
+      "example": "独立Bernoulli(0.4)取n=100、ε=0.2时，Chebyshev界为0.24/(100×0.04)=0.06；Hoeffding界为2exp(−8)≈0.000670925。强律另允许形状参数1.5、均值3但无限方差的i.i.d. Pareto样本均值收敛至3；对于共同潜在状态X_t=Z，平稳并不足以推出时间平均等于总体均值0.5。",
+      "application": "可用于解释价格信号窗口均值、样本方差与滚动估计是否具有一致性，进一步连接依赖型CLT、HAC、时间验证和ETF的均值—风险组合建模。需要在数据可得时点冻结样本、明确资产池和生成机制，不把理论样本数增长简单理解成未来收益保证。",
+      "caveat": "独立性、有界性、有限一阶矩与遍历性对应不同定理，不能混用；强大数定律只给收敛而不直接给分布、收敛速率、标准误或策略收益。无条件收益在制度转换、结构突变及幸存者偏差下未必是目标预测对象。",
+      "deep_sections": [
+        {
+          "title": "弱大数定律的方差证明",
+          "question": "为什么独立样本均值的固定误差概率会随着n变大而趋于零？",
+          "paragraphs": [
+            "对独立同分布、均值μ与方差σ²有限的样本，均值的方差精确等于σ²/n。对任意固定误差阈值ε>0，Chebyshev不等式把偏离事件的概率用二阶矩上界控制，因此误差概率至多以1/n下降。",
+            "这里“弱”指收敛方式，不代表结论不重要。它只保证每个给定n的错误概率逐渐变小，尚未断言同一条无限样本路径上偏离事件只发生有限次；若想得到后者，需进一步使用更强工具。"
+          ],
+          "formulas": [
+            {
+              "label": "弱大数定律的方差证明",
+              "tex": "\\Pr\\{|\\bar X_n-\\mu|\\ge\\varepsilon\\}\\le\\frac{\\sigma^2}{n\\varepsilon^2}\\longrightarrow0"
+            }
+          ],
+          "proof": "独立性消掉不同观测之间的协方差，使Var(ΣX_i)=nσ²，故Var(X̄_n)=σ²/n。对Z=X̄_n−μ应用Markov不等式到非负变量Z²，得到所示概率上界，直接验证依概率收敛的定义。",
+          "worked": "若每日独立Bernoulli(0.4)，n=100且ε=0.2，则方差为0.4×0.6/100=0.0024，Chebyshev偏差概率上界为0.0024/0.04=0.06。这是严谨上界，不等于真实尾概率。",
+          "limitation": "若观测共享市场状态，样本均值方差未必为σ²/n；相关项可能使该上界无效。即使上界为0.06，也不能反向宣称偏离概率精确等于6%。"
+        },
+        {
+          "title": "有界观测与强大数定律",
+          "question": "哪些额外条件允许把高概率接近强化为几乎处处收敛？",
+          "paragraphs": [
+            "独立且有界的同分布变量可使用Hoeffding不等式：平均值偏差的概率按n呈指数下降。对于每个固定ε>0，这些概率可求和，因此Borel–Cantelli第一引理说明绝对偏差≥ε的事件仅有限次发生。",
+            "再令阈值遍历正有理数或ε=1/k，并对可数个概率为1的事件取交，便可从任意固定误差的最终消失严格推出X̄_n→μ几乎处处。这给出了有界i.i.d.情形的强大数定律证明。"
+          ],
+          "formulas": [
+            {
+              "label": "有界观测与强大数定律",
+              "tex": "\\Pr(|\\bar X_n-\\mu|\\ge\\varepsilon)\\le2e^{-2n\\varepsilon^2/(b-a)^2},\\qquad \\bar X_n\\xrightarrow{\\mathrm{a.s.}}\\mu"
+            }
+          ],
+          "proof": "当所有X_i∈[a,b]且独立时，Hoeffding给出指数型概率界。对每个ε>0求和Σ_n 2exp(−2nε²/(b−a)²)<∞，由Borel–Cantelli得P(偏离事件无限次发生)=0，再对ε=1,1/2,…取可数交获得几乎处处收敛。",
+          "worked": "Bernoulli(0.4)在[0,1]中，n=100且ε=0.2时，上界为2e^(−8)≈0.000670925；比Chebyshev的0.06更紧，但仍只是偏差概率上界。",
+          "limitation": "Hoeffding需要独立有界观测，不能拿它给无界厚尾收益或一般有自相关的日收益直接提供强大数定律。无限多ε不能未经可数化就在概率论证中逐个交换。"
+        },
+        {
+          "title": "有限一阶矩下的强律与厚尾反例",
+          "question": "为什么经典强大数定律甚至不要求收益具有有限方差？",
+          "paragraphs": [
+            "Kolmogorov强大数定律对i.i.d.变量只要求E|X|有限。证明的一个思路是按样本序号截断Y_i=X_i 1{|X_i|≤i}：可积性保证截断异常事件可求和，故原序列与截断序列只在有限多个指标上不同。",
+            "随后证明Σ Var(Y_i)/i²有限，利用独立随机级数收敛定理及Kronecker引理推出中心化截断均值收敛到零。最后用支配收敛和Cesàro引理证明截断期望的平均趋向E[X]，完成强律。"
+          ],
+          "formulas": [
+            {
+              "label": "有限一阶矩下的强律与厚尾反例",
+              "tex": "\\mathbb E|X_1|<\\infty\\quad\\Longrightarrow\\quad \\frac1n\\sum_{i=1}^nX_i\\xrightarrow{\\rm a.s.}\\mathbb E[X_1]"
+            }
+          ],
+          "proof": "由E|X|=∫_0∞P(|X|>u)du<∞可得Σ_iP(|X|>i)<∞，所以大样本截断最终与原变量相同。利用Σ_i E[X²1{|X|≤i}]/i²<∞（对每个|X|按i的尾和估计并由E|X|控制），配合Kolmogorov收敛判据与Kronecker引理得到截断中心化和除以n趋于0；E[Y_i]→E[X]再由Cesàro平均完成证明。",
+          "worked": "设X服从Pareto形状参数α=1.5且支持[1,∞)，其均值α/(α−1)=3而方差发散。尽管不存在经典的有限方差标准误，i.i.d.样本均值仍由强律几乎处处趋向3。",
+          "limitation": "当X为标准Cauchy时E|X|发散，i.i.d.样本均值在任何n下仍服从同一尺度的Cauchy分布，因而不收敛到固定总体均值。强律的有限一阶矩不能省略。"
+        },
+        {
+          "title": "平稳遍历序列、潜在状态与量化估计",
+          "question": "是否只要金融收益平稳，长期样本平均就一定识别总体期望？",
+          "paragraphs": [
+            "对平稳遍历且可积的时间序列，Birkhoff遍历定理给出时间平均几乎处处收敛到E[X_0]。如果只平稳但不遍历，极限一般是相对于不变σ-代数的条件期望，而非必须等于无条件均值。",
+            "金融资产可能存在持久状态、上市选择与随时间变化的生成机制。即使统计意义上的时间平均已稳定，也不能直接推出未来收益机制不变或组合策略可交易；需要区分估计一致性、预测校准、交易费用与样本外风险。"
+          ],
+          "formulas": [
+            {
+              "label": "平稳遍历序列、潜在状态与量化估计",
+              "tex": "\\frac1n\\sum_{t=1}^{n}X_t\\xrightarrow{\\rm a.s.}\\mathbb E[X_0\\mid\\mathcal I],\\qquad\\text{遍历时 }\\mathcal I\\text{ 平凡}"
+            }
+          ],
+          "proof": "在保持概率测度的平稳移位系统上对可积函数应用Birkhoff定理，时间平均收敛到相对于移位不变事件构成的σ-代数I的条件期望。遍历性保证I中的事件仅有0或1概率，从而该条件期望等于E[X_0]几乎处处。",
+          "worked": "令潜在状态Z~Bernoulli(0.5)在样本开始时抽一次，之后每期X_t=Z。该序列严格平稳且均值0.5，但每条路径的平均值始终是Z，即以各50%概率取0或1，并不收敛到0.5。",
+          "limitation": "非遍历例子不是一般真实ETF数据的断言。判断收益均值能否用于投资，还需要处理序列依赖、经济结构变更、信息集、资产可存续性及交易成本。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "probability-n0107",
+          "label": "先修：条件期望"
+        },
+        {
+          "kind": "math",
+          "id": "probability-n0119",
+          "label": "下一步：中心极限定理与长期方差"
+        },
+        {
+          "kind": "math",
+          "id": "timeseries-n0242",
+          "label": "延伸：金融收益时间依赖"
+        },
+        {
+          "kind": "ml",
+          "id": "m12-c07-p01",
+          "label": "应用：依赖数据的统计比较"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 18.175 Theory of Probability (LLN, Borel–Cantelli and Martingales)",
+          "url": "https://www.ocw.mit.edu/courses/18-175-theory-of-probability-spring-2014/pages/lecture-slides/"
+        },
+        {
+          "title": "Harvard STAT 110 Probability",
+          "url": "https://stat110.hsites.harvard.edu/"
+        }
+      ],
+      "checked_status": "完整精讲：定义、弱/强极限条件、逐步证明、可复核算例、失效边界与量化应用"
     }
   ]
 }

@@ -785,6 +785,321 @@
       "application": "Monte Carlo期权定价、随机波动率路径、金融状态仿真。",
       "caveat": "若真实SDE保正，普通Euler格式仍可能产生负值；时间步长需要做收敛分析。",
       "checked_status": "定义、条件、公式、推导及应用"
+    },
+    {
+      "id": "stochastic-n0290",
+      "node_id": "stochastic-n0290",
+      "title": "条件期望鞅",
+      "definition": "给定滤过F₀⊆F₁⊆⋯以及可积的终端变量X，过程M_t=E[X|F_t]是相对于该滤过的鞅。鞅的定义同时要求适应性、每期可积性和下一期给定当前信息时的条件期望等于当期值。通过这个构造，概率论的塔式性质直接变成动态预测的公平更新条件，且可进一步建立鞅差正交、平方能量分解及条件收敛。",
+      "assumptions": "在概率空间(Ω,F,P)上给定递增滤过(F_t)，X∈L¹(F)。对所有t取M_t=E[X|F_t]；讨论平方可积、增量正交和L²收敛时额外要求X∈L²。一般M_t为鞅不意味着每个价格过程都在真实概率测度P下具有鞅性，风险中性定价应说明所使用的测度与贴现口径。",
+      "properties": [
+        "给定固定终端可积X的条件期望过程是鞅，适应性与可积性由条件期望性质给出。",
+        "塔式性质证明E[M_{t+1}|F_t]=M_t，鞅差D_t=M_t−M_{t−1}具有条件均值零。",
+        "当X∈L²时，任意不同时点的鞅差在L²意义下正交，并满足平方能量的逐期递增分解。",
+        "固定终端X生成的条件期望鞅一致可积，随信息增加收敛至E[X|F_∞]；是否揭示完整X取决于终极信息。"
+      ],
+      "formulas": [
+        {
+          "label": "滤过与条件期望鞅的构造",
+          "tex": "M_t=\\mathbb E[X\\mid\\mathcal F_t],\\quad \\mathbb E[M_{t+1}\\mid\\mathcal F_t]=M_t"
+        },
+        {
+          "label": "鞅差与条件正交的严谨推导",
+          "tex": "\\mathbb E[D_t\\mid\\mathcal F_{t-1}]=0,\\qquad \\mathbb E[D_sD_t]=0\\ \\ (s<t)"
+        },
+        {
+          "label": "信息扩张与鞅的平方能量",
+          "tex": "\\mathbb E[(M_n-M_0)^2]=\\sum_{t=1}^{n}\\mathbb E[D_t^2],\\qquad \\mathbb E[(X-M_t)^2]=\\mathbb E[X^2]-\\mathbb E[M_t^2]"
+        },
+        {
+          "label": "一致可积、终极信息与金融概率测度",
+          "tex": "M_t\\xrightarrow{\\mathrm{a.s.},\\,L^1}\\mathbb E[X\\mid\\mathcal F_\\infty],\\quad\\mathcal F_\\infty=\\sigma\\!\\left(\\bigcup_t\\mathcal F_t\\right)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先由条件期望定义得到M_t为F_t可测；条件Jensen不等式给出E|M_t|≤E|X|<∞。由于F_t⊆F_(t+1)，再应用塔式性质，E[E[X|F_(t+1)]|F_t]=E[X|F_t]=M_t。",
+          "tex": "M_t=\\mathbb E[X\\mid\\mathcal F_t],\\quad \\mathbb E[M_{t+1}\\mid\\mathcal F_t]=M_t"
+        },
+        {
+          "explanation": "第一式来自E[M_t|F_(t−1)]−M_(t−1)=0。若X∈L²且s<t，则D_s为F_(t−1)可测，E[D_sD_t]=E[D_s E[D_t|F_(t−1)]]=0，乘积可积性由Cauchy–Schwarz保证。",
+          "tex": "\\mathbb E[D_t\\mid\\mathcal F_{t-1}]=0,\\qquad \\mathbb E[D_sD_t]=0\\ \\ (s<t)"
+        },
+        {
+          "explanation": "因为M_n−M₀=Σ_t D_t，展开平方后不同增量的交叉项全为零，得到第一式。由于X−M_t与F_t可测的M_t正交，展开X²=(X−M_t+M_t)²并取期望即可得到第二式。",
+          "tex": "\\mathbb E[(M_n-M_0)^2]=\\sum_{t=1}^{n}\\mathbb E[D_t^2],\\qquad \\mathbb E[(X-M_t)^2]=\\mathbb E[X^2]-\\mathbb E[M_t^2]"
+        },
+        {
+          "explanation": "对所有t，M_t属于固定可积X的条件期望族，该族一致可积。由鞅收敛定理和条件期望的积分定义，可将其极限识别为E[X|F_∞]；若X∈L²，还可利用正交投影闭包得到L²收敛。",
+          "tex": "M_t\\xrightarrow{\\mathrm{a.s.},\\,L^1}\\mathbb E[X\\mid\\mathcal F_\\infty],\\quad\\mathcal F_\\infty=\\sigma\\!\\left(\\bigcup_t\\mathcal F_t\\right)"
+        }
+      ],
+      "example": "两次公平硬币的终端奖金X=4×1_{HH}，M₀=1、M₁=2或0、M₂=4或0。直接计算E[M₀²]=1、E[M₁²]=2、E[M₂²]=4，所以逐期鞅差平方贡献为1和2，总预测更新平方能量3；M₀对终端X的均方误差为3。",
+      "application": "条件收益预测、公告信息更新、金融滤波、风险中性贴现现金流定价，以及检验预测残差能否被当期合法信息解释。可与ETF时间外回测中的标签成熟时间、系统风险状态及模型漂移检验衔接，但须明确所采用的真实或定价概率测度。",
+      "caveat": "不是每条资产收益或交易净值路径都是P测度下的鞅；条件均值零不意味着无波动或无下行风险。对非平方可积变量不能随意使用鞅差L²正交，面对无界停时还需验证一致可积等额外条件。",
+      "deep_sections": [
+        {
+          "title": "滤过与条件期望鞅的构造",
+          "question": "为什么动态预测需要适应性、可积性和一条明确的信息滤过？",
+          "paragraphs": [
+            "滤过F₀⊆F₁⊆⋯描述观察者在各时点已掌握的全部可用事件。给定可积终端结果X，M_t=E[X|F_t]是F_t可测的随机变量，表示在已知信息下对同一个未来结果的条件预测。",
+            "由于条件期望不会增加一阶绝对矩的期望，M_t每期可积；又因为更早的信息嵌于更晚的信息，可直接用塔式性质得到鞅等式。这是构造的严格逻辑，而不仅仅是直觉上的公平游戏。"
+          ],
+          "formulas": [
+            {
+              "label": "滤过与条件期望鞅的构造",
+              "tex": "M_t=\\mathbb E[X\\mid\\mathcal F_t],\\quad \\mathbb E[M_{t+1}\\mid\\mathcal F_t]=M_t"
+            }
+          ],
+          "proof": "先由条件期望定义得到M_t为F_t可测；条件Jensen不等式给出E|M_t|≤E|X|<∞。由于F_t⊆F_(t+1)，再应用塔式性质，E[E[X|F_(t+1)]|F_t]=E[X|F_t]=M_t。",
+          "worked": "掷两次独立公平硬币，令X=4×1_{两次均正面}。初始M₀=1；第一次正面时M₁=2、反面时M₁=0；第二次结束时M₂=4或0。第一次结束前(2+0)/2=1，验证条件公平更新。",
+          "limitation": "若把未来收益的事后修订信息加入F_t，就破坏了时间上的适应解释。构造期望过程只保证概率意义的鞅，不保证可持有、可融资或能在真实行情中以无成本实现。"
+        },
+        {
+          "title": "鞅差与条件正交的严谨推导",
+          "question": "如果每次信息更新没有条件均值，为什么仍能出现大幅短期波动？",
+          "paragraphs": [
+            "定义D_t=M_t−M_(t−1)，由鞅性质可得E[D_t|F_(t−1)]=0。这表示更新前无法预测增量的条件均值，而不是说增量等于零、方差等于零或价格不会跳跃。",
+            "在L²条件下，较早增量D_s对F_(t−1)可测（s<t），故D_s与D_t正交。这一性质允许把总平方误差分解为各期信息更新的平方贡献，并自然衔接时间序列预测误差的正交检验。"
+          ],
+          "formulas": [
+            {
+              "label": "鞅差与条件正交的严谨推导",
+              "tex": "\\mathbb E[D_t\\mid\\mathcal F_{t-1}]=0,\\qquad \\mathbb E[D_sD_t]=0\\ \\ (s<t)"
+            }
+          ],
+          "proof": "第一式来自E[M_t|F_(t−1)]−M_(t−1)=0。若X∈L²且s<t，则D_s为F_(t−1)可测，E[D_sD_t]=E[D_s E[D_t|F_(t−1)]]=0，乘积可积性由Cauchy–Schwarz保证。",
+          "worked": "前述两次硬币模型中，D₁等概率为+1或−1；第一次正面后D₂等概率为+2或−2，第一次反面后D₂=0。于是E[D₁D₂]=0，但D₂的无条件方差是2，明显不代表没有风险。",
+          "limitation": "零条件均值并不能消除条件异方差、跳跃损失、尾部相关或执行费用。若仅有L¹而无L²，乘积D_sD_t可能不可积，不能直接使用平方正交结论。"
+        },
+        {
+          "title": "信息扩张与鞅的平方能量",
+          "question": "为何信息增加能使预测值变得更波动，却能减少终端预测误差？",
+          "paragraphs": [
+            "在平方可积条件下，M_t是X投影到L²(F_t)的结果。随着信息集增大，投影空间扩张，预测M_t可以随新信息变化；它的二阶矩并不会必然下降，而剩余预测误差E[(X−M_t)²]则不增加。",
+            "鞅差在不同期正交，所以M_n−M₀的二阶矩恰等于各期增量二阶矩之和。这将动态不确定性分解成不同信息披露时点的贡献，可以用于解释风险预测更新，但不是关于资产风险无条件单调变化的结论。"
+          ],
+          "formulas": [
+            {
+              "label": "信息扩张与鞅的平方能量",
+              "tex": "\\mathbb E[(M_n-M_0)^2]=\\sum_{t=1}^{n}\\mathbb E[D_t^2],\\qquad \\mathbb E[(X-M_t)^2]=\\mathbb E[X^2]-\\mathbb E[M_t^2]"
+            }
+          ],
+          "proof": "因为M_n−M₀=Σ_t D_t，展开平方后不同增量的交叉项全为零，得到第一式。由于X−M_t与F_t可测的M_t正交，展开X²=(X−M_t+M_t)²并取期望即可得到第二式。",
+          "worked": "两次硬币模型中E[M₀²]=1、E[M₁²]=(4+0)/2=2、E[M₂²]=4；故E[D₁²]=1、E[D₂²]=2，总计3=4−1，且终端误差从E[X²]−1=3下降到0。",
+          "limitation": "不同信息时点的模型估计使用不同样本量、正则化或目标定义时，不再是同一固定X及嵌套信息空间的精确投影；不能由公式推出所有机器学习回测曲线单调改善。"
+        },
+        {
+          "title": "一致可积、终极信息与金融概率测度",
+          "question": "当信息逐渐揭晓时，条件期望鞅到底收敛到什么？",
+          "paragraphs": [
+            "由固定可积终端X构造的M_t=E[X|F_t]是一致可积的鞅。随t增加，Lévy向上定理保证M_t几乎处处且在L¹中收敛到E[X|F_∞]，其中F_∞由所有F_t生成。",
+            "如果F_∞足以识别X，则极限就是X；若最终信息仍留有不可观察的状态，则极限仍是条件期望。金融衍生品价格作为贴现后的风险中性条件期望时，必须另外给出等价测度、无套利及可交易假设。"
+          ],
+          "formulas": [
+            {
+              "label": "一致可积、终极信息与金融概率测度",
+              "tex": "M_t\\xrightarrow{\\mathrm{a.s.},\\,L^1}\\mathbb E[X\\mid\\mathcal F_\\infty],\\quad\\mathcal F_\\infty=\\sigma\\!\\left(\\bigcup_t\\mathcal F_t\\right)"
+            }
+          ],
+          "proof": "对所有t，M_t属于固定可积X的条件期望族，该族一致可积。由鞅收敛定理和条件期望的积分定义，可将其极限识别为E[X|F_∞]；若X∈L²，还可利用正交投影闭包得到L²收敛。",
+          "worked": "若两次硬币逐期揭晓且以后不增加信息，则t≥2时M_t=X；若投资者永远只看到第一枚硬币，那么F_∞=F₁，条件预测永远停留在2或0，并不能恢复最终4或0的随机结果。",
+          "limitation": "风险中性测度Q下的贴现价格满足鞅关系，并不自动推出实际概率P下的预期收益为零。统一比较必须写清概率测度、收益单位、时间戳与融资口径。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "probability-n0107",
+          "label": "先修：条件期望的定义"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0137",
+          "label": "几何解释：Hilbert正交投影"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0291",
+          "label": "后续：次鞅与上鞅"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0293",
+          "label": "后续：可选停止定理"
+        },
+        {
+          "kind": "ml",
+          "id": "m12-c07-p01",
+          "label": "金融ML：依赖误差统计验证"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 18.175 Theory of Probability (Lectures 25–29: Martingales)",
+          "url": "https://www.ocw.mit.edu/courses/18-175-theory-of-probability-spring-2014/pages/lecture-slides/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability (Martingales)",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/"
+        }
+      ],
+      "checked_status": "完整精讲：信息滤过、条件期望推导、数值样本路径、停时与交易条件"
+    },
+    {
+      "id": "stochastic-n0291",
+      "node_id": "stochastic-n0291",
+      "title": "次鞅与上鞅",
+      "definition": "在滤过(F_t)下，若可积适应过程X_t满足E[X_(t+1)|F_t]≥X_t，则称为次鞅；若不等号反向则为上鞅；两者均取等号时是鞅。次鞅可视为具有非负条件漂移的过程，但本身不意味着样本路径单调上升。条件Jensen、Doob分解与最大不等式构成理解动态风险约束的基础。",
+      "assumptions": "每期X_t可积且F_t可测，滤过递增。讨论Doob分解只需离散时间可积性；非负次鞅最大不等式还要求对应非负性。若使用平方或凸函数构造次鞅，必须保证凸变换后相应期望有限；无界停时的结论还需额外可积和停止条件。",
+      "properties": [
+        "条件次鞅不等式要求E[X_(t+1)|F_t]≥X_t，不代表每条样本路径每期增加。",
+        "若M_t为鞅，且φ为凸函数且φ(M_t)可积，则φ(M_t)由条件Jensen不等式构成次鞅。",
+        "任意离散时间可积次鞅可写成鞅与可预测、非递减补偿项的和，即Doob分解。",
+        "非负次鞅可通过最大不等式控制给定有限时域内上穿风险；适用对象和参数范围需要明确。"
+      ],
+      "formulas": [
+        {
+          "label": "条件漂移、分类与样本路径的区别",
+          "tex": "\\mathbb E[X_{t+1}\\mid\\mathcal F_t]\\ge X_t,\\quad\\text{次鞅};\\qquad \\mathbb E[X_{t+1}\\mid\\mathcal F_t]\\le X_t,\\quad\\text{上鞅}"
+        },
+        {
+          "label": "凸变换与条件Jensen机制",
+          "tex": "\\mathbb E[\\phi(M_{t+1})\\mid\\mathcal F_t]\\ge\\phi(\\mathbb E[M_{t+1}\\mid\\mathcal F_t])=\\phi(M_t)"
+        },
+        {
+          "label": "Doob分解与可预测补偿项",
+          "tex": "A_t=\\sum_{k=1}^t\\mathbb E[X_k-X_{k-1}\\mid\\mathcal F_{k-1}],\\quad M_t=X_t-A_t"
+        },
+        {
+          "label": "非负次鞅最大不等式与资金上穿风险",
+          "tex": "\\lambda\\,\\Pr\\!\\left\\{\\max_{0\\le k\\le N}X_k\\ge\\lambda\\right\\}\\le\\mathbb E[X_N]\\quad(X_k\\ge0)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对次鞅不等式取无条件期望并使用塔式性质，可得E[X_(t+1)]≥E[X_t]。然而无条件均值上升只给一个积分不等式，并不控制每个F_t事件上的条件增量，因此不能反过来证明次鞅。",
+          "tex": "\\mathbb E[X_{t+1}\\mid\\mathcal F_t]\\ge X_t,\\quad\\text{次鞅};\\qquad \\mathbb E[X_{t+1}\\mid\\mathcal F_t]\\le X_t,\\quad\\text{上鞅}"
+        },
+        {
+          "explanation": "对给定F_t应用条件Jensen，凸性使期望的凸变换不大于凸变换的条件期望。利用M_t的鞅性质替换条件均值，再利用φ(M_t)的F_t可测性得到次鞅不等式。",
+          "tex": "\\mathbb E[\\phi(M_{t+1})\\mid\\mathcal F_t]\\ge\\phi(\\mathbb E[M_{t+1}\\mid\\mathcal F_t])=\\phi(M_t)"
+        },
+        {
+          "explanation": "由a_k定义及次鞅不等式知a_k≥0且F_(k−1)可测。于是E[M_t−M_(t−1)|F_(t−1)]=E[ΔX_t|F_(t−1)]−a_t=0，M_t具有鞅性质。条件漂移给定时A_t由逐期求和唯一确定。",
+          "tex": "A_t=\\sum_{k=1}^t\\mathbb E[X_k-X_{k-1}\\mid\\mathcal F_{k-1}],\\quad M_t=X_t-A_t"
+        },
+        {
+          "explanation": "令T为首次达到λ的时刻并截断在N，对A={T≤N}分解首次命中时点。利用次鞅的条件关系，在每个已命中事件上E[X_N 1_A]≥E[X_T 1_A]≥λP(A)，再用X_N≥0推出E[X_N]≥E[X_N1_A]，得到不等式。",
+          "tex": "\\lambda\\,\\Pr\\!\\left\\{\\max_{0\\le k\\le N}X_k\\ge\\lambda\\right\\}\\le\\mathbb E[X_N]\\quad(X_k\\ge0)"
+        }
+      ],
+      "example": "对于公平步长±1，S_t为鞅、S_t²为次鞅，并且Doob分解为S_t²=(S_t²−t)+t。第二期S₂²取0或4（各1/2），因此期望2；阈值4时，路径最大值上穿概率为1/2，最大不等式给出4×1/2≤2且恰好取等号。",
+      "application": "解释波动率与凸损失、最优停止条件、资本占用上穿风险、动态杠杆和高频风险限制；用于金融策略时，需额外记录真实概率测度、信息可得时间、可预测持仓、交易冲击、融券成本与强平触发。 对于ETF策略，应把相应风险过程与时点可观察的权重和保证金规则明确区分。 ",
+      "caveat": "次鞅不代表每条路径递增，也不能由历史平均收益上升判定。凸函数变换需验证可积性；非负最大不等式不能对任意有符号过程不加改动地使用。零成本无套利结论还需要更完整的市场模型与可交易性条件。",
+      "deep_sections": [
+        {
+          "title": "条件漂移、分类与样本路径的区别",
+          "question": "一个过程期望随时间上升，就一定是次鞅吗？",
+          "paragraphs": [
+            "次鞅定义比较的是在现有信息F_t下，下一期条件均值与当前值，属于条件关系。它强于无条件均值不下降，却并不要求每条实际路径单调，也不能仅通过观察平均历史收益上升确认次鞅。",
+            "上鞅定义将条件不等号反转；鞅是两种关系同时成立的特例。若X_t满足次鞅条件，则以期望取平均得到E[X_(t+1)]≥E[X_t]，反向推断一般不成立。"
+          ],
+          "formulas": [
+            {
+              "label": "条件漂移、分类与样本路径的区别",
+              "tex": "\\mathbb E[X_{t+1}\\mid\\mathcal F_t]\\ge X_t,\\quad\\text{次鞅};\\qquad \\mathbb E[X_{t+1}\\mid\\mathcal F_t]\\le X_t,\\quad\\text{上鞅}"
+            }
+          ],
+          "proof": "对次鞅不等式取无条件期望并使用塔式性质，可得E[X_(t+1)]≥E[X_t]。然而无条件均值上升只给一个积分不等式，并不控制每个F_t事件上的条件增量，因此不能反过来证明次鞅。",
+          "worked": "令公平步长ε=±1，S_t=Σ_{i≤t}ε_i，则S_t²可以从1下降到0（第一次为+1、第二次为−1），却满足E[S_(t+1)²|F_t]=S_t²+1，因而是严格的次鞅。",
+          "limitation": "均值趋势、正收益历史或股票上涨路径都不足以识别真实概率测度下的次鞅；特别需要处理条件信息、跳跃分布和交易费用。 在真实世界概率与定价测度之间转换时，条件期望方向也可能改变，必须注明使用的测度。 "
+        },
+        {
+          "title": "凸变换与条件Jensen机制",
+          "question": "为什么公平随机游走的平方能够形成具有正条件漂移的过程？",
+          "paragraphs": [
+            "若M_t为鞅且φ凸，条件Jensen不等式保证E[φ(M_(t+1))|F_t]≥φ(E[M_(t+1)|F_t])=φ(M_t)。所以只要φ(M_t)可积，凸变换后的过程就是次鞅。",
+            "这揭示了鞅零均值更新与波动风险增加可以同时存在：价格的条件平均可以公平，但平方偏离、凸性损失和某些期权支付的条件期望演化并非简单保持不变。"
+          ],
+          "formulas": [
+            {
+              "label": "凸变换与条件Jensen机制",
+              "tex": "\\mathbb E[\\phi(M_{t+1})\\mid\\mathcal F_t]\\ge\\phi(\\mathbb E[M_{t+1}\\mid\\mathcal F_t])=\\phi(M_t)"
+            }
+          ],
+          "proof": "对给定F_t应用条件Jensen，凸性使期望的凸变换不大于凸变换的条件期望。利用M_t的鞅性质替换条件均值，再利用φ(M_t)的F_t可测性得到次鞅不等式。 这一结论无需过程的实际样本路径逐期上涨，只依赖凸性与条件可积性。 ",
+          "worked": "公平步长ε_{t+1}独立于F_t，E[ε]=0、E[ε²]=1。展开(S_t+ε)²并取条件期望，得到S_t²+1。第二期S₂²以1/2概率为0、1/2概率为4，因此E[S₂²]=2。",
+          "limitation": "选择φ(x)=x²时必须有E[M_t²]<∞；对含极厚尾的资产收益，平方期望可能不存在，不能直接使用这一风险解释。 此外，所用滤过必须确实包含定价时已经知道的历史信息。 "
+        },
+        {
+          "title": "Doob分解与可预测补偿项",
+          "question": "次鞅如何被拆解成无条件漂移与不可预测的公平更新？",
+          "paragraphs": [
+            "对离散时间可积次鞅X_t，定义每期可预测增量a_t=E[X_t−X_(t−1)|F_(t−1)]≥0，并累加为A_t。因为a_t只依赖上一期信息，A_t是可预测且非递减的过程。",
+            "令M_t=X_t−A_t，则每期增量的条件期望为零，所以M_t为鞅。Doob分解X_t=M_t+A_t在A₀=0的规范下几乎处处唯一，把条件均值漂移与剩余随机创新严格区分。"
+          ],
+          "formulas": [
+            {
+              "label": "Doob分解与可预测补偿项",
+              "tex": "A_t=\\sum_{k=1}^t\\mathbb E[X_k-X_{k-1}\\mid\\mathcal F_{k-1}],\\quad M_t=X_t-A_t"
+            }
+          ],
+          "proof": "由a_k定义及次鞅不等式知a_k≥0且F_(k−1)可测。于是E[M_t−M_(t−1)|F_(t−1)]=E[ΔX_t|F_(t−1)]−a_t=0，M_t具有鞅性质。条件漂移给定时A_t由逐期求和唯一确定。",
+          "worked": "对X_t=S_t²有条件漂移a_t=1，因此A_t=t、M_t=S_t²−t是鞅。t=2时S₂²取0或4且概率均为1/2，故M₂取−2或+2，均值0。",
+          "limitation": "Doob分解是既定概率测度与滤过下的分解，不等于可交易策略的风险溢价识别。实际数据中条件漂移未知，需要从有限样本估计并单独检验。"
+        },
+        {
+          "title": "非负次鞅最大不等式与资金上穿风险",
+          "question": "怎样控制一个有限时域内的最大值，而不只看期末均值？",
+          "paragraphs": [
+            "对非负次鞅X₀,…,X_N，最大不等式说明发生任意一次上穿阈值λ>0的概率至多为E[X_N]/λ。这比仅对期末X_N使用Markov不等式更有意义，因为前者评价整段路径的上穿事件。",
+            "证明要以首次上穿时刻构造有限停时，并在事件已上穿的路径上利用次鞅的条件期望关系。金融使用时还须确认评价对象非负，例如累计绝对波动或非负损失过程，不能直接把含符号的任意收益代入。"
+          ],
+          "formulas": [
+            {
+              "label": "非负次鞅最大不等式与资金上穿风险",
+              "tex": "\\lambda\\,\\Pr\\!\\left\\{\\max_{0\\le k\\le N}X_k\\ge\\lambda\\right\\}\\le\\mathbb E[X_N]\\quad(X_k\\ge0)"
+            }
+          ],
+          "proof": "令T为首次达到λ的时刻并截断在N，对A={T≤N}分解首次命中时点。利用次鞅的条件关系，在每个已命中事件上E[X_N 1_A]≥E[X_T 1_A]≥λP(A)，再用X_N≥0推出E[X_N]≥E[X_N1_A]，得到不等式。",
+          "worked": "对两步公平随机游走的X_t=S_t²，max_{0≤t≤2}X_t≥4当且仅当两步同向，概率1/2，因此左侧4×1/2=2；E[X₂]=2，数值上恰好取等号。",
+          "limitation": "该最大不等式约束的是抽象非负次鞅的上穿概率；实际杠杆资金的保证金触发、可成交价格和强平规则需要建立另一个明确的过程，不能套用期末正收益的分布。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "stochastic-n0290",
+          "label": "先修：条件期望鞅"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0293",
+          "label": "后续：可选停止定理"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0137",
+          "label": "基础：条件期望的几何观点"
+        },
+        {
+          "kind": "ml",
+          "id": "m23-c11-p01",
+          "label": "金融应用：联合尾部与资金约束"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 18.175 Theory of Probability (Lectures 25–29: Martingales)",
+          "url": "https://www.ocw.mit.edu/courses/18-175-theory-of-probability-spring-2014/pages/lecture-slides/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability (Martingales)",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/"
+        }
+      ],
+      "checked_status": "完整精讲：信息滤过、条件期望推导、数值样本路径、停时与交易条件"
     }
   ]
 }
