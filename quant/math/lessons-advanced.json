@@ -6235,6 +6235,2486 @@
         }
       ],
       "checked_status": "V13完整Stratonovich：四节积分约定、协变差修正、链式法则及SDE转换"
+    },
+    {
+      "id": "ito-n0313",
+      "node_id": "ito-n0313",
+      "title": "线性SDE",
+      "definition": "线性随机微分方程的漂移和扩散系数对状态呈线性或仿射形式，可借助确定性积分因子与随机指数求出显式解。最常用的加性噪声形式是dX=(aX+u(t))dt+σ(t)dW，乘法噪声则需要Itô修正的随机积分因子。解析解为数值算法、均值回复与动态风险模型提供核对基准，并不说明真实金融状态必然遵循线性扩散。",
+      "assumptions": "首先考虑确定性常数a及可积u和平方可积确定性σ，W为标准布朗运动，初值X_0平方可积且与未来增量独立。第二部分乘法噪声系数b固定，第三部分仿射方程使用常数a,b,f,g；使用Itô乘积法则而非普通微积分链式法则。更复杂随机系数需要适应性和可积性假设。",
+      "properties": [
+        "加性线性SDE有显式变常数解，均值由漂移积分决定。",
+        "乘法线性SDE含−b²/2的Itô指数修正，避免错误的算术指数。",
+        "仿射扩散线性方程的积分因子解含−bg的协变差修正。",
+        "解析可解并不等于收益正态：当噪声乘以状态时，解往往呈对数正态或相关的非Gaussian分布。"
+      ],
+      "formulas": [
+        {
+          "label": "加性噪声变常数公式",
+          "tex": "X_t=e^{at}X_0+\\int_0^te^{a(t-s)}u(s)\\,ds+\\int_0^te^{a(t-s)}\\sigma(s)\\,dW_s"
+        },
+        {
+          "label": "乘法噪声与随机指数",
+          "tex": "dX_t=aX_t\\,dt+bX_t\\,dW_t\\quad\\Longrightarrow\\quad X_t=X_0e^{(a-b^2/2)t+bW_t}"
+        },
+        {
+          "label": "仿射扩散中的协变差补偿",
+          "tex": "X_t=\\Phi_t\\left[X_0+\\int_0^t\\Phi_s^{-1}(f-bg)\\,ds+\\int_0^t\\Phi_s^{-1}g\\,dW_s\\right]"
+        },
+        {
+          "label": "矩与解析解的独立验证",
+          "tex": "\\mathbb EX_t=e^{at}x_0+\\int_0^te^{a(t-s)}u(s)\\,ds,\\quad\\operatorname{Var}(X_t)=\\int_0^te^{2a(t-s)}\\sigma(s)^2ds"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "令Y_t=e^{−at}X_t。Itô乘积法则给dY=e^{−at}dX−ae^{−at}Xdt，交叉项因e^{−at}有限变差为零。代入漂移后含X的项正好抵消，剩下u与随机积分；从0到t求和并乘e^{at}即得所示表达式。",
+          "tex": "X_t=e^{at}X_0+\\int_0^te^{a(t-s)}u(s)\\,ds+\\int_0^te^{a(t-s)}\\sigma(s)\\,dW_s"
+        },
+        {
+          "explanation": "令F(x)=log x，当X_0>0时Itô公式给dF(X)=X^{-1}dX−(1/2)X^{−2}d[X]。由于d[X]_t=b²X_t²dt，得到d log X=(a−b²/2)dt+b dW。积分并指数化获得显式解，且其严格正性保证变换自洽。",
+          "tex": "dX_t=aX_t\\,dt+bX_t\\,dW_t\\quad\\Longrightarrow\\quad X_t=X_0e^{(a-b^2/2)t+bW_t}"
+        },
+        {
+          "explanation": "将X=ΦY写入Itô乘积，dX=ΦdY+YdΦ+d[Φ,Y]。若dY=Φ^{-1}(f−bg)dt+Φ^{-1}g dW，而dΦ=aΦdt+bΦdW，则交叉项d[Φ,Y]=bgdt，合计漂移aX+f、扩散bX+g，验证原方程。",
+          "tex": "X_t=\\Phi_t\\left[X_0+\\int_0^t\\Phi_s^{-1}(f-bg)\\,ds+\\int_0^t\\Phi_s^{-1}g\\,dW_s\\right]"
+        },
+        {
+          "explanation": "显式解的随机项是确定性被积函数关于布朗运动的Itô积分，均值为0；对其平方应用Itô等距得到时间平方积分。初值确定且漂移确定，所以方差只由该随机积分贡献；若初值随机还应另加初值方差及可能协方差。",
+          "tex": "\\mathbb EX_t=e^{at}x_0+\\int_0^te^{a(t-s)}u(s)\\,ds,\\quad\\operatorname{Var}(X_t)=\\int_0^te^{2a(t-s)}\\sigma(s)^2ds"
+        }
+      ],
+      "deep_sections": [
+        {
+          "title": "加性噪声变常数公式",
+          "question": "如何把随机线性微分方程转成可直接积分的表达式？",
+          "paragraphs": [
+            "考虑dX_t=(aX_t+u(t))dt+σ(t)dW_t。与常微分方程相似，取确定性积分因子e^{−at}，但仍要明确Itô乘积公式中因子与W的二次协变差为零。",
+            "于是d(e^{−at}X_t)=e^{−at}u(t)dt+e^{−at}σ(t)dW_t；对时间积分再乘回e^{at}，得到显式解。其随机部分是Gaussian积分，但若初值随机，则整体未必无条件正态。"
+          ],
+          "formulas": [
+            {
+              "label": "加性噪声变常数公式",
+              "tex": "X_t=e^{at}X_0+\\int_0^te^{a(t-s)}u(s)\\,ds+\\int_0^te^{a(t-s)}\\sigma(s)\\,dW_s"
+            }
+          ],
+          "proof": "令Y_t=e^{−at}X_t。Itô乘积法则给dY=e^{−at}dX−ae^{−at}Xdt，交叉项因e^{−at}有限变差为零。代入漂移后含X的项正好抵消，剩下u与随机积分；从0到t求和并乘e^{at}即得所示表达式。",
+          "worked": "设a=−2、u=0、σ=1、X_0=3，则E X_1=3e^{−2}≈0.4060，随机部分方差∫_0^1e^{−4(1−s)}ds=(1−e^{−4})/4≈0.24542。",
+          "limitation": "当u或σ由未来路径决定时，确定性Gaussian结论失效；实际市场参数时变与交易冲击可能使模型不再线性。"
+        },
+        {
+          "title": "乘法噪声与随机指数",
+          "question": "为什么不能直接把bW_t放进普通微分方程的指数解？",
+          "paragraphs": [
+            "对dX_t=aX_tdt+bX_tdW_t，形式上的指数e^{at+bW_t}遗漏了二次变差修正。对正状态采用Itô公式计算log X，漂移应为a−b²/2。",
+            "正确解X_t=X_0exp[(a−b²/2)t+bW_t]。如果金融风险敞口本身随状态比例缩放，这个差异决定几何增长率与算术期望增长率的区别。"
+          ],
+          "formulas": [
+            {
+              "label": "乘法噪声与随机指数",
+              "tex": "dX_t=aX_t\\,dt+bX_t\\,dW_t\\quad\\Longrightarrow\\quad X_t=X_0e^{(a-b^2/2)t+bW_t}"
+            }
+          ],
+          "proof": "令F(x)=log x，当X_0>0时Itô公式给dF(X)=X^{-1}dX−(1/2)X^{−2}d[X]。由于d[X]_t=b²X_t²dt，得到d log X=(a−b²/2)dt+b dW。积分并指数化获得显式解，且其严格正性保证变换自洽。",
+          "worked": "a=0.08、b=0.2、t=1、X_0=100且W_1=0时X_1=100e^{0.06}≈106.1837，而错误直接指数法给100e^{0.08}≈108.3287。",
+          "limitation": "这一指数解只在固定系数模型中成立，不能由它推断任何股票或ETF价格路径绝不发生跳跃、停牌或交易中断。"
+        },
+        {
+          "title": "仿射扩散中的协变差补偿",
+          "question": "扩散项包含常数加项时，随机积分因子为何还多出一个修正？",
+          "paragraphs": [
+            "对dX=(aX+f)dt+(bX+g)dW取齐次正解Φ_t=exp[(a−b²/2)t+bW_t]，设X=ΦY。",
+            "乘积的二次协变差使dY的确定性漂移并非简单Φ^{-1}f，而是Φ^{-1}(f−bg)，因此必须保留−bg项。这个差别是线性随机微分方程与普通变常数公式最容易混淆的地方。"
+          ],
+          "formulas": [
+            {
+              "label": "仿射扩散中的协变差补偿",
+              "tex": "X_t=\\Phi_t\\left[X_0+\\int_0^t\\Phi_s^{-1}(f-bg)\\,ds+\\int_0^t\\Phi_s^{-1}g\\,dW_s\\right]"
+            }
+          ],
+          "proof": "将X=ΦY写入Itô乘积，dX=ΦdY+YdΦ+d[Φ,Y]。若dY=Φ^{-1}(f−bg)dt+Φ^{-1}g dW，而dΦ=aΦdt+bΦdW，则交叉项d[Φ,Y]=bgdt，合计漂移aX+f、扩散bX+g，验证原方程。",
+          "worked": "取a=b=0、f=2、g=3、X_0=1，则Φ≡1，解X_t=1+2t+3W_t，在t=1的均值3、方差9；公式立即退化为显然的线性加性解。",
+          "limitation": "若b,g为随机系数，仍可在适当适应和积分条件下使用随机积分因子，但不能把常数系数的公式不加检查地应用到未约束的过程。"
+        },
+        {
+          "title": "矩与解析解的独立验证",
+          "question": "怎样不用模拟就核验线性SDE的均值和方差？",
+          "paragraphs": [
+            "加性噪声且初值确定时，随机积分均值为0，其方差由Itô等距给出。期望因此满足确定性线性ODE，方差则是每期噪声加权平方的累计积分。",
+            "这些解析矩为检查Euler–Maruyama程序提供基准：如果模拟均值明显偏离、方差随时间单位转换异常，应先检查离散增量缩放与程序索引。"
+          ],
+          "formulas": [
+            {
+              "label": "矩与解析解的独立验证",
+              "tex": "\\mathbb EX_t=e^{at}x_0+\\int_0^te^{a(t-s)}u(s)\\,ds,\\quad\\operatorname{Var}(X_t)=\\int_0^te^{2a(t-s)}\\sigma(s)^2ds"
+            }
+          ],
+          "proof": "显式解的随机项是确定性被积函数关于布朗运动的Itô积分，均值为0；对其平方应用Itô等距得到时间平方积分。初值确定且漂移确定，所以方差只由该随机积分贡献；若初值随机还应另加初值方差及可能协方差。",
+          "worked": "a=−2、σ=1、u=0、初值3时，t→∞方差趋1/4，均值趋0；在t=1时理论方差(1−e^{−4})/4≈0.245421，均值约0.406006。",
+          "limitation": "该矩结果依赖固定模型及平方可积性；用模拟方差通过核验不能排除金融市场中的随机波动、厚尾及非平稳风险。"
+        }
+      ],
+      "example": "a=−2、u=0、σ=1、X_0=3时一年后均值3e^{−2}≈0.4060、方差(1−e^{−4})/4≈0.24542。乘法噪声a=.08,b=.2时log增长漂移为.06；仿射特例dX=2dt+3dW从1出发的一年均值3、方差9。",
+      "application": "用于价格对数增长、随机收益因子、均值回复状态及Euler算法对照；解析矩可以作为回测数值实现的独立单元测试。",
+      "caveat": "随机线性方程仍需区分Itô与Stratonovich、价格和对数价格、风险中性与历史测度。参数随未来信息变化或噪声分布变化时，显式公式不再直接成立。",
+      "links": [
+        {
+          "kind": "math",
+          "id": "ito-n0307",
+          "label": "先修：Itô积分构造"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0309",
+          "label": "先修：Itô公式"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0315",
+          "label": "后续：OU均值回复"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0318",
+          "label": "后续：Euler数值离散"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Aalto University Applied Stochastic Differential Equations：第2、5章SDE解与第8章数值方法",
+          "url": "https://users.aalto.fi/~asolin/sde-book/sde-book.pdf"
+        },
+        {
+          "title": "University of Chicago Greg Lawler Stochastic Calculus: An Introduction with Applications：布朗、Itô及SDE章节",
+          "url": "https://www.math.uchicago.edu/~lawler/finbook.pdf"
+        }
+      ],
+      "checked_status": "V14完整数学教材：四节严格条件、解析推导、可复算算例及金融边界"
+    },
+    {
+      "id": "ito-n0315",
+      "node_id": "ito-n0315",
+      "title": "Ornstein-Uhlenbeck过程",
+      "definition": "Ornstein–Uhlenbeck（OU）过程是具有线性均值回复漂移和加性Gaussian噪声的连续时间Markov扩散：dX=κ(θ−X)dt+σdW。κ控制偏离长期水平θ后的回复速度，σ控制瞬时扩散强度。常数参数下显式解、条件正态分布、平稳方差及自相关都能直接得到，是利差、因子与Vasicek利率的基础基准。",
+      "assumptions": "取κ>0、σ≥0、θ为常数，初值x为确定实数且布朗W为给定滤过下的标准运动。平稳分布结论需要κ>0、长期时间以及合适初始分布；过程不被约束为非负，所以将OU直接建模为可能为负的利率应说明经济含义与市场制度。",
+      "properties": [
+        "条件均值为θ+(x−θ)e^{−κt}，条件方差为σ²(1−e^{−2κt})/(2κ)。",
+        "平稳边际分布是N(θ,σ²/(2κ))，与初始水平不同。",
+        "平稳自相关Corr(X_s,X_(s+h))=e^{−κh}，与σ无关但依赖κ。",
+        "OU半衰期ln2/κ是条件均值偏差的减半时间，不是收益或风险敞口保证减半的时点。"
+      ],
+      "formulas": [
+        {
+          "label": "积分因子给出的精确路径",
+          "tex": "X_t=\\theta+(x-\\theta)e^{-\\kappa t}+\\sigma\\int_0^te^{-\\kappa(t-s)}\\,dW_s"
+        },
+        {
+          "label": "条件分布与方差核算",
+          "tex": "X_t\\mid X_0=x\\sim N\\!\\left(\\theta+(x-\\theta)e^{-\\kappa t},\\frac{\\sigma^2}{2\\kappa}(1-e^{-2\\kappa t})\\right)"
+        },
+        {
+          "label": "平稳协方差与半衰期",
+          "tex": "\\operatorname{Corr}(X_s,X_{s+h})=e^{-\\kappa h},\\qquad t_{1/2}=\\frac{\\log2}{\\kappa}"
+        },
+        {
+          "label": "OU与离散AR(1)的精确对应",
+          "tex": "\\phi=e^{-\\kappa\\Delta},\\qquad \\kappa=-\\frac{\\log\\phi}{\\Delta}\\quad(0<\\phi<1)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "令Y=X−θ，则dY=−κYdt+σdW。乘以e^{κt}有d(e^{κt}Y)=σe^{κt}dW；从0积分得Y_t=e^{−κt}Y_0+σe^{−κt}∫_0^te^{κs}dW_s，再整理为所示卷积表达。",
+          "tex": "X_t=\\theta+(x-\\theta)e^{-\\kappa t}+\\sigma\\int_0^te^{-\\kappa(t-s)}\\,dW_s"
+        },
+        {
+          "explanation": "Itô等距给随机部分的方差σ²∫_0^te^{−2κ(t−s)}ds=σ²(1−e^{−2κt})/(2κ)。由于被积函数确定，积分为Gaussian，独立于X_0确定值；加上确定性均值即得到正态条件分布。",
+          "tex": "X_t\\mid X_0=x\\sim N\\!\\left(\\theta+(x-\\theta)e^{-\\kappa t},\\frac{\\sigma^2}{2\\kappa}(1-e^{-2\\kappa t})\\right)"
+        },
+        {
+          "explanation": "由Markov转移表示X_{s+h}−θ=e^{−κh}(X_s−θ)+η_h，其中η_h与F_s独立、均值0。取协方差得到e^{−κh}Var(X_s)，在平稳状态Var(X_s)=σ²/(2κ)恒定，故相关系数为e^{−κh}。",
+          "tex": "\\operatorname{Corr}(X_s,X_{s+h})=e^{-\\kappa h},\\qquad t_{1/2}=\\frac{\\log2}{\\kappa}"
+        },
+        {
+          "explanation": "从条件精确路径表示在t=nΔ到(n+1)Δ的时间窗重新积分，得到AR(1)转移关系。未来窗口增量与过去F_(nΔ)独立，创新方差为OU核平方积分。由φ=e^{−κΔ}两边取对数并除以Δ得到κ。",
+          "tex": "\\phi=e^{-\\kappa\\Delta},\\qquad \\kappa=-\\frac{\\log\\phi}{\\Delta}\\quad(0<\\phi<1)"
+        }
+      ],
+      "deep_sections": [
+        {
+          "title": "积分因子给出的精确路径",
+          "question": "如何对OU扩散同时求得确定性均值回复与随机噪声部分？",
+          "paragraphs": [
+            "将漂移写成−κX+κθ，可直接用线性SDE变常数公式。定积分部分等于θ(1−e^{−κt})，因此给出指数衰减初值差和加权布朗随机积分。",
+            "这个路径表示说明OU状态是Gaussian，但正态性并不意味着任何实测市场利差具有恒定κ、σ，也不意味着所有套利价差均必然回复。"
+          ],
+          "formulas": [
+            {
+              "label": "积分因子给出的精确路径",
+              "tex": "X_t=\\theta+(x-\\theta)e^{-\\kappa t}+\\sigma\\int_0^te^{-\\kappa(t-s)}\\,dW_s"
+            }
+          ],
+          "proof": "令Y=X−θ，则dY=−κYdt+σdW。乘以e^{κt}有d(e^{κt}Y)=σe^{κt}dW；从0积分得Y_t=e^{−κt}Y_0+σe^{−κt}∫_0^te^{κs}dW_s，再整理为所示卷积表达。",
+          "worked": "取κ=2、θ=1、x=3、σ=0.4，在t=1时期望为1+2e^{−2}≈1.27067；σ只改变分布宽度，不改变这一条件均值。",
+          "limitation": "真实利差可能存在结构断裂、价格跳跃和均衡中枢变化，有限区间估计的负κ或非线性回复都应另行检验。"
+        },
+        {
+          "title": "条件分布与方差核算",
+          "question": "为什么OU未来状态在给定当前信息后仍是正态变量？",
+          "paragraphs": [
+            "显式解的未来随机项是确定性核e^{−κ(t−s)}对独立布朗增量的积分，因而属于均值0的Gaussian随机变量。",
+            "利用Itô等距得到条件方差，并与确定性回复均值组合，得精确转移分布；这允许直接写出离散观测的似然，而不必先使用Euler近似。"
+          ],
+          "formulas": [
+            {
+              "label": "条件分布与方差核算",
+              "tex": "X_t\\mid X_0=x\\sim N\\!\\left(\\theta+(x-\\theta)e^{-\\kappa t},\\frac{\\sigma^2}{2\\kappa}(1-e^{-2\\kappa t})\\right)"
+            }
+          ],
+          "proof": "Itô等距给随机部分的方差σ²∫_0^te^{−2κ(t−s)}ds=σ²(1−e^{−2κt})/(2κ)。由于被积函数确定，积分为Gaussian，独立于X_0确定值；加上确定性均值即得到正态条件分布。",
+          "worked": "取κ=2、σ=.4、t=1，条件方差为.16/4×(1−e^{−4})≈0.039267，条件标准差≈0.19816，接近但未达到平稳方差0.04。",
+          "limitation": "若观察样本按不等时间间隔采集，必须使用各自的t差计算转移方差，不可固定套同一日频拟合公式。"
+        },
+        {
+          "title": "平稳协方差与半衰期",
+          "question": "如何把OU回复强度κ转成可估计的时间序列自相关？",
+          "paragraphs": [
+            "在平稳起点下，X_s−θ与未来噪声卷积独立；从s到s+h的偏差是当前偏差乘e^{−κh}加独立Gaussian噪声。",
+            "因此Cov(X_s,X_(s+h))=Varπ(X)e^{−κh}，标准化后得到e^{−κh}。令相关衰减至一半即h=ln2/κ，但这只描述线性状态记忆。"
+          ],
+          "formulas": [
+            {
+              "label": "平稳协方差与半衰期",
+              "tex": "\\operatorname{Corr}(X_s,X_{s+h})=e^{-\\kappa h},\\qquad t_{1/2}=\\frac{\\log2}{\\kappa}"
+            }
+          ],
+          "proof": "由Markov转移表示X_{s+h}−θ=e^{−κh}(X_s−θ)+η_h，其中η_h与F_s独立、均值0。取协方差得到e^{−κh}Var(X_s)，在平稳状态Var(X_s)=σ²/(2κ)恒定，故相关系数为e^{−κh}。",
+          "worked": "κ=2每单位时间，半衰期ln2/2≈0.3466；如果相邻观测间隔0.5，理论自相关e^{−1}≈0.36788。",
+          "limitation": "均值回复半衰期并非策略交易后必定获利的周期；费用、跳空与状态漂移都可能导致长期持仓亏损。"
+        },
+        {
+          "title": "OU与离散AR(1)的精确对应",
+          "question": "为什么离散时间回归系数应与e^{−κΔ}相联系？",
+          "paragraphs": [
+            "固定采样间隔Δ，OU条件分布给X_(n+1)−θ=e^{−κΔ}(X_n−θ)+ε_n，且独立Gaussian创新方差为σ²(1−e^{−2κΔ})/(2κ)。",
+            "这恰是稳定AR(1)形式。若直接把离散回归系数φ当作连续κ，会发生尺度错误；应在0<φ<1时按κ=−lnφ/Δ转换。"
+          ],
+          "formulas": [
+            {
+              "label": "OU与离散AR(1)的精确对应",
+              "tex": "\\phi=e^{-\\kappa\\Delta},\\qquad \\kappa=-\\frac{\\log\\phi}{\\Delta}\\quad(0<\\phi<1)"
+            }
+          ],
+          "proof": "从条件精确路径表示在t=nΔ到(n+1)Δ的时间窗重新积分，得到AR(1)转移关系。未来窗口增量与过去F_(nΔ)独立，创新方差为OU核平方积分。由φ=e^{−κΔ}两边取对数并除以Δ得到κ。",
+          "worked": "若半年的采样间隔Δ=.5且回归估计φ=e^{−1}≈0.36788，则κ=−log(0.36788)/.5≈2每年；若误按Δ=1则估计会错误减半。",
+          "limitation": "实际回归有噪声、非同步采样和参数漂移；估得负φ时不可用实数对数公式硬将其解释为连续OU回复率。"
+        }
+      ],
+      "example": "OU设κ=2、θ=1、x=3、σ=.4，一年条件均值1+2e^{−2}≈1.27067、方差0.04(1−e^{−4})≈0.039267。平稳方差0.04，半衰期约0.3466；半年观测自相关e^{−1}≈0.36788。",
+      "application": "适用于利率短端、收益利差、因子残差和均值回复基准；精确转移分布能独立核验数值离散与模型参数单位。",
+      "caveat": "OU不保证状态非负，均值回复结构可能在政策和流动性冲击后失效；半衰期与实盘净利润没有直接等价关系。",
+      "links": [
+        {
+          "kind": "math",
+          "id": "ito-n0313",
+          "label": "先修：线性SDE"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0308",
+          "label": "先修：Itô等距"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0316",
+          "label": "下一步：CIR扩散"
+        },
+        {
+          "kind": "math",
+          "id": "finance-n0441",
+          "label": "金融：Vasicek模型"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Aalto University Applied Stochastic Differential Equations：第2、5章SDE解与第8章数值方法",
+          "url": "https://users.aalto.fi/~asolin/sde-book/sde-book.pdf"
+        },
+        {
+          "title": "University of Chicago Greg Lawler Stochastic Calculus: An Introduction with Applications：布朗、Itô及SDE章节",
+          "url": "https://www.math.uchicago.edu/~lawler/finbook.pdf"
+        }
+      ],
+      "checked_status": "V14完整数学教材：四节严格条件、解析推导、可复算算例及金融边界"
+    },
+    {
+      "id": "ito-n0316",
+      "node_id": "ito-n0316",
+      "title": "CIR平方根扩散",
+      "definition": "Cox–Ingersoll–Ross（CIR）平方根扩散把OU的常数Gaussian波动改为状态依赖的σ√X噪声：dX=κ(θ−X)dt+σ√X dW。这使状态接近零时波动自动缩小，并在适当参数下保持非负。它是短期利率、信用强度和随机波动因子建模的基础；Feller条件控制零边界是否可达，但不能简单等同于所有条件下的严格正性结论。",
+      "assumptions": "参数κ>0、θ>0、σ>0，初值x≥0；平方根系数不是全局Lipschitz，但该方程有适当非负的路径唯一强解。若2κθ≥σ²且x>0，则零边界不可达；若2κθ<σ²，零可达但不必为吸收状态。稳态Gamma分布及有限矩结论须假设所述时间齐次模型。",
+      "properties": [
+        "CIR非负，Feller条件2κθ≥σ²保证从严格正初值不触及零。",
+        "条件均值θ+(x−θ)e^{−κt}与OU相同，但条件方差依赖初始x。",
+        "平稳分布为Gamma(shape=2κθ/σ², scale=σ²/(2κ))。",
+        "Euler直接离散可能产生负模拟值，即使真实CIR解非负，因此数值算法需另选截断或正性保持方案。"
+      ],
+      "formulas": [
+        {
+          "label": "状态依赖扩散与零边界",
+          "tex": "dX_t=\\kappa(\\theta-X_t)\\,dt+\\sigma\\sqrt{X_t}\\,dW_t,\\quad 2\\kappa\\theta\\ge\\sigma^2"
+        },
+        {
+          "label": "期望与均值回复",
+          "tex": "\\mathbb E[X_t\\mid X_0=x]=\\theta+(x-\\theta)e^{-\\kappa t}"
+        },
+        {
+          "label": "二阶矩与条件方差",
+          "tex": "\\operatorname{Var}(X_t\\mid x)=\\frac{x\\sigma^2}{\\kappa}(e^{-\\kappa t}-e^{-2\\kappa t})+\\frac{\\theta\\sigma^2}{2\\kappa}(1-e^{-\\kappa t})^2"
+        },
+        {
+          "label": "Gamma稳态与Feller参数",
+          "tex": "X_\\infty\\sim\\operatorname{Gamma}\\!\\left(\\frac{2\\kappa\\theta}{\\sigma^2},\\,\\frac{\\sigma^2}{2\\kappa}\\right),\\quad\\mathbb EX_\\infty=\\theta"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "把CIR过程经适当时间和尺度变换联系到平方Bessel过程，其维度δ=4κθ/σ²。平方Bessel零边界分类给δ≥2时从正初值不触零，这与2κθ≥σ²等价；详细边界定理依靠一维扩散尺度函数，不可仅凭σ√0=0就得出结论。",
+          "tex": "dX_t=\\kappa(\\theta-X_t)\\,dt+\\sigma\\sqrt{X_t}\\,dW_t,\\quad 2\\kappa\\theta\\ge\\sigma^2"
+        },
+        {
+          "explanation": "将SDE写成积分方程并适当局部化保证随机积分可积，取期望得m(t)=x+∫_0^tκ(θ−m(s))ds。微分得m'=κ(θ−m)，乘积分因子e^{κt}求解可得均值公式。",
+          "tex": "\\mathbb E[X_t\\mid X_0=x]=\\theta+(x-\\theta)e^{-\\kappa t}"
+        },
+        {
+          "explanation": "由Itô公式得dX²=[2κθX−2κX²+σ²X]dt+2σX^{3/2}dW。故m_2'=−2κm_2+(2κθ+σ²)m_1；代入已知m_1并通过积分因子解m_2，减m_1²化简为公式。",
+          "tex": "\\operatorname{Var}(X_t\\mid x)=\\frac{x\\sigma^2}{\\kappa}(e^{-\\kappa t}-e^{-2\\kappa t})+\\frac{\\theta\\sigma^2}{2\\kappa}(1-e^{-\\kappa t})^2"
+        },
+        {
+          "explanation": "稳态密度可由扩散Fokker–Planck零概率流方程求得：设b(x)=κ(θ−x)、a(x)=σ²x，零流条件b p−(1/2)(a p)'=0，解得p(x)正比x^{(2κθ/σ²)−1}e^{−(2κ/σ²)x}，归一化是Gamma密度。",
+          "tex": "X_\\infty\\sim\\operatorname{Gamma}\\!\\left(\\frac{2\\kappa\\theta}{\\sigma^2},\\,\\frac{\\sigma^2}{2\\kappa}\\right),\\quad\\mathbb EX_\\infty=\\theta"
+        }
+      ],
+      "deep_sections": [
+        {
+          "title": "状态依赖扩散与零边界",
+          "question": "为什么把加性噪声改成平方根噪声会改变非负性？",
+          "paragraphs": [
+            "CIR扩散的布朗系数σ√X在X趋0时下降至0，漂移则在0处为κθ>0，向正区间推动状态。 这一变化既影响模型的条件方差，也决定零边界的分类，因此必须与OU加性噪声严格区分。",
+            "零边界的精确可达性由Feller维度4κθ/σ²控制：当2κθ≥σ²且从x>0出发时，零不可达；小于该阈值时可能触零，但并不意味着被永久吸收。"
+          ],
+          "formulas": [
+            {
+              "label": "状态依赖扩散与零边界",
+              "tex": "dX_t=\\kappa(\\theta-X_t)\\,dt+\\sigma\\sqrt{X_t}\\,dW_t,\\quad 2\\kappa\\theta\\ge\\sigma^2"
+            }
+          ],
+          "proof": "把CIR过程经适当时间和尺度变换联系到平方Bessel过程，其维度δ=4κθ/σ²。平方Bessel零边界分类给δ≥2时从正初值不触零，这与2κθ≥σ²等价；详细边界定理依靠一维扩散尺度函数，不可仅凭σ√0=0就得出结论。",
+          "worked": "κ=2、θ=.04、σ=.2时2κθ=.16、σ²=.04，满足Feller；维度δ=4×2×.04/.04=8≥2，从x>0出发理论上不触零。",
+          "limitation": "如果模拟网格上产生负值，不能据此说CIR真实过程可能为负；应检查数值离散而非误改数学模型边界。"
+        },
+        {
+          "title": "期望与均值回复",
+          "question": "CIR为什么仍具有与OU相同的指数回复均值？",
+          "paragraphs": [
+            "对两边取期望，Itô随机积分在适当可积条件下的均值为零，所以m(t)=E X_t满足m'=κ(θ−m)。 该推导需要先确认平方根项构成可积的局部鞅。",
+            "这是确定性一阶线性ODE，解m(t)=θ+(x−θ)e^{−κt}。均值与σ无关不代表分布、极端风险和零边界都与σ无关。"
+          ],
+          "formulas": [
+            {
+              "label": "期望与均值回复",
+              "tex": "\\mathbb E[X_t\\mid X_0=x]=\\theta+(x-\\theta)e^{-\\kappa t}"
+            }
+          ],
+          "proof": "将SDE写成积分方程并适当局部化保证随机积分可积，取期望得m(t)=x+∫_0^tκ(θ−m(s))ds。微分得m'=κ(θ−m)，乘积分因子e^{κt}求解可得均值公式。",
+          "worked": "κ=2、θ=.04、x=.09、t=1时均值为.04+.05e^{−2}≈.0467668；与σ=.2或σ=.1无关，条件方差则明显不同。",
+          "limitation": "信用强度或波动率因子的未来条件均值相同，并不说明两个不同σ的模型具有相同风险中性价格或尾部分布。"
+        },
+        {
+          "title": "二阶矩与条件方差",
+          "question": "平方根扩散为何使未来方差依赖今天的状态x？",
+          "paragraphs": [
+            "应用Itô公式到X²：d(X²)=2X dX+(dX)²，扩散二次变差为σ²Xdt，所以二阶矩受到当前均值的额外σ²E X项驱动。",
+            "解线性二阶矩ODE并扣除均值平方，得到含初值x的条件方差。相同κ、θ、σ的模型从不同x出发，短期波动并不相同。"
+          ],
+          "formulas": [
+            {
+              "label": "二阶矩与条件方差",
+              "tex": "\\operatorname{Var}(X_t\\mid x)=\\frac{x\\sigma^2}{\\kappa}(e^{-\\kappa t}-e^{-2\\kappa t})+\\frac{\\theta\\sigma^2}{2\\kappa}(1-e^{-\\kappa t})^2"
+            }
+          ],
+          "proof": "由Itô公式得dX²=[2κθX−2κX²+σ²X]dt+2σX^{3/2}dW。故m_2'=−2κm_2+(2κθ+σ²)m_1；代入已知m_1并通过积分因子解m_2，减m_1²化简为公式。",
+          "worked": "κ=2、θ=.04、σ=.2、初值x=θ、t趋∞时首项消失，方差趋θσ²/(2κ)=.04×.04/4=.0004。",
+          "limitation": "如果某个校准器使用OU的常数σ²(1−e^{−2κt})/(2κ)替代CIR方差，会忽略状态依赖且估错接近零时的风险。"
+        },
+        {
+          "title": "Gamma稳态与Feller参数",
+          "question": "如何从平稳矩和Gamma参数识别CIR的长期分布？",
+          "paragraphs": [
+            "对κ>0、θ>0、σ>0的CIR，长期边际收敛到Gamma分布，形状参数α=2κθ/σ²、尺度参数β=σ²/(2κ)。",
+            "该Gamma均值αβ=θ，方差αβ²=θσ²/(2κ)，恰与条件均值及方差的长期极限相符。验证矩一致只是独立核对，并不是Gamma分布存在性的完整证明。"
+          ],
+          "formulas": [
+            {
+              "label": "Gamma稳态与Feller参数",
+              "tex": "X_\\infty\\sim\\operatorname{Gamma}\\!\\left(\\frac{2\\kappa\\theta}{\\sigma^2},\\,\\frac{\\sigma^2}{2\\kappa}\\right),\\quad\\mathbb EX_\\infty=\\theta"
+            }
+          ],
+          "proof": "稳态密度可由扩散Fokker–Planck零概率流方程求得：设b(x)=κ(θ−x)、a(x)=σ²x，零流条件b p−(1/2)(a p)'=0，解得p(x)正比x^{(2κθ/σ²)−1}e^{−(2κ/σ²)x}，归一化是Gamma密度。",
+          "worked": "κ=2、θ=.04、σ=.2时形状α=4、尺度β=.01，长期均值4×.01=.04，方差4×.01²=.0004，均与矩方程相符。",
+          "limitation": "Gamma稳态只对应常参数CIR，不保证任意利率/强度数据都满足这一分布；利率政策制度变化可能带来截断和跳变。"
+        }
+      ],
+      "example": "取κ=2、θ=.04、σ=.2且x=.09，一年条件均值.04+.05e^{−2}≈.04677；Feller强条件.16≥.04成立，长期分布Gamma(形状4,尺度.01)，均值.04、方差.0004。",
+      "application": "用于短期利率、信用违约强度、波动率因子和带非负限制的流动性状态；应对边界与离散算法正性单独验收。",
+      "caveat": "平方根系数不满足全局Lipschitz，不宜直接引用仅适用于全局Lipschitz的数值强收敛结论；Feller不等式与非负性不能混为一谈。",
+      "links": [
+        {
+          "kind": "math",
+          "id": "ito-n0313",
+          "label": "先修：线性SDE"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0315",
+          "label": "比较：OU加性扩散"
+        },
+        {
+          "kind": "math",
+          "id": "finance-n0442",
+          "label": "金融：CIR利率"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0318",
+          "label": "后续：数值离散"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Aalto University Applied Stochastic Differential Equations：第2、5章SDE解与第8章数值方法",
+          "url": "https://users.aalto.fi/~asolin/sde-book/sde-book.pdf"
+        },
+        {
+          "title": "University of Chicago Greg Lawler Stochastic Calculus: An Introduction with Applications：布朗、Itô及SDE章节",
+          "url": "https://www.math.uchicago.edu/~lawler/finbook.pdf"
+        }
+      ],
+      "checked_status": "V14完整数学教材：四节严格条件、解析推导、可复算算例及金融边界"
+    },
+    {
+      "id": "ito-n0317",
+      "node_id": "ito-n0317",
+      "title": "强弱解",
+      "definition": "随机微分方程中的强解和弱解描述对概率空间及Brownian驱动的不同要求。强解在预先给定的滤过概率空间、Brownian运动与初始变量上构造适应解；弱解允许连同驱动Brownian一起选择新的概率空间，使过程联合分布满足SDE。强弱解与数值算法的强/弱收敛是两个不同概念：前者是解构造方式，后者是误差测度。",
+      "assumptions": "考虑Itô SDE dX_t=b(t,X_t)dt+σ(t,X_t)dW_t，初值为给定分布。强解要求相对于给定驱动Brownian的适应性，弱解只要求某个概率空间存在满足积分方程的(X,W)。全局Lipschitz和线性增长是方便的强解存在且路径唯一充分条件；更弱的非Lipschitz方程需要专门定理。",
+      "properties": [
+        "全局Lipschitz和线性增长保证有限时域强解存在唯一及合适矩界。",
+        "路径唯一性要求在相同Brownian驱动与初值下两个解几乎处处逐时刻相同。",
+        "弱解存在不代表给定Brownian驱动下已有强解；同分布唯一与路径唯一须分开验证。",
+        "数值强误差比较同一噪声路径，弱误差比较支付函数的期望，名称相近但不是解的强弱定义。"
+      ],
+      "formulas": [
+        {
+          "label": "积分方程与强解定义",
+          "tex": "X_t=X_0+\\int_0^tb(s,X_s)\\,ds+\\int_0^t\\sigma(s,X_s)\\,dW_s"
+        },
+        {
+          "label": "路径唯一与Gronwall估计",
+          "tex": "\\mathbb E\\sup_{u\\le t}|X_u-Y_u|^2\\le C\\int_0^t\\mathbb E\\sup_{v\\le s}|X_v-Y_v|^2\\,ds=0"
+        },
+        {
+          "label": "弱解与唯一分布的区分",
+          "tex": "\\text{路径唯一: }X_0=Y_0,\\ W^X=W^Y\\Longrightarrow\\Pr(X_t=Y_t,\\ \\forall t\\le T)=1"
+        },
+        {
+          "label": "强弱解与数值强弱误差",
+          "tex": "\\varepsilon_{\\rm strong}(h)=\\bigl(\\mathbb E|X_T-X_T^h|^2\\bigr)^{1/2},\\quad\\varepsilon_{\\rm weak}(h)=|\\mathbb E\\varphi(X_T)-\\mathbb E\\varphi(X_T^h)|"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义要求对所有t积分等式几乎处处成立，且X为连续适应过程。若b、σ具备全局Lipschitz与线性增长，可采用Picard迭代并借助Itô等距、Gronwall不等式在适当Banach空间上证明收敛，得到强解。",
+          "tex": "X_t=X_0+\\int_0^tb(s,X_s)\\,ds+\\int_0^t\\sigma(s,X_s)\\,dW_s"
+        },
+        {
+          "explanation": "先将D写成漂移积分和Brownian积分之和，平方后用(a+b)²≤2a²+2b²。漂移项以Cauchy–Schwarz控制，随机项以BDG和Itô等距类估计控制，并用Lipschitz将系数差约束在|D|上。对非负函数应用Gronwall得期望上确界为0。",
+          "tex": "\\mathbb E\\sup_{u\\le t}|X_u-Y_u|^2\\le C\\int_0^t\\mathbb E\\sup_{v\\le s}|X_v-Y_v|^2\\,ds=0"
+        },
+        {
+          "explanation": "路径唯一性是相同空间和同一噪声的比较。弱唯一性则表达任意两个合法弱解的X在路径空间有相同分布；由于未要求相同W，比较X−Y可能根本没有定义在同一概率空间。二者可在适当Yamada–Watanabe条件下联结，但不能凭术语相似直接混同。",
+          "tex": "\\text{路径唯一: }X_0=Y_0,\\ W^X=W^Y\\Longrightarrow\\Pr(X_t=Y_t,\\ \\forall t\\le T)=1"
+        },
+        {
+          "explanation": "强误差用耦合样本逐路径计算差并平方取期望，因此需要联合分布；弱误差分别求两个模型的支付期望，只依各自边际分布。强收敛若伴随统一矩界可对Lipschitz测试支付控制弱误差，但对一般不光滑支付和更高阶速率没有自动结论。",
+          "tex": "\\varepsilon_{\\rm strong}(h)=\\bigl(\\mathbb E|X_T-X_T^h|^2\\bigr)^{1/2},\\quad\\varepsilon_{\\rm weak}(h)=|\\mathbb E\\varphi(X_T)-\\mathbb E\\varphi(X_T^h)|"
+        }
+      ],
+      "deep_sections": [
+        {
+          "title": "积分方程与强解定义",
+          "question": "如何严格说明SDE的解必须适应交易时点信息？",
+          "paragraphs": [
+            "SDE的微分符号是积分方程的缩写：X_t=X_0+∫b(s,X_s)ds+∫σ(s,X_s)dW_s。随机积分要求系数过程可预测、适当可积。",
+            "强解必须在指定概率空间中使用给定W和原信息流构造X，并保持适应性。金融交易执行控制可以基于现有信息调节，但不能把未来布朗增量预装进今日状态。"
+          ],
+          "formulas": [
+            {
+              "label": "积分方程与强解定义",
+              "tex": "X_t=X_0+\\int_0^tb(s,X_s)\\,ds+\\int_0^t\\sigma(s,X_s)\\,dW_s"
+            }
+          ],
+          "proof": "定义要求对所有t积分等式几乎处处成立，且X为连续适应过程。若b、σ具备全局Lipschitz与线性增长，可采用Picard迭代并借助Itô等距、Gronwall不等式在适当Banach空间上证明收敛，得到强解。",
+          "worked": "常数SDE dX_t=2dt+3dW_t、X_0=1的强解是X_t=1+2t+3W_t，在t=1时均值3、方差9，对任何给定Brownian路径可直接计算。",
+          "limitation": "仅用某条模拟路径数值接近SDE并不构成数学意义下强解的证明；仍须核查积分方程与适应可测性。"
+        },
+        {
+          "title": "路径唯一与Gronwall估计",
+          "question": "两个解在同一随机噪声下为何会因系数Lipschitz而无法分离？",
+          "paragraphs": [
+            "设X、Y在同一空间、同一W和相同初值下满足SDE，定义差D=X−Y，其漂移差与扩散差分别受L|D|控制。 还要要求两个过程的初始状态一致，且适应相同滤过。",
+            "对sup_{u≤t}|D_u|²取期望，可结合Cauchy–Schwarz、BDG不等式和系数Lipschitz得到E sup|D|²≤C∫_0^t E sup_{v≤s}|D_v|²ds；Gronwall给差为零。"
+          ],
+          "formulas": [
+            {
+              "label": "路径唯一与Gronwall估计",
+              "tex": "\\mathbb E\\sup_{u\\le t}|X_u-Y_u|^2\\le C\\int_0^t\\mathbb E\\sup_{v\\le s}|X_v-Y_v|^2\\,ds=0"
+            }
+          ],
+          "proof": "先将D写成漂移积分和Brownian积分之和，平方后用(a+b)²≤2a²+2b²。漂移项以Cauchy–Schwarz控制，随机项以BDG和Itô等距类估计控制，并用Lipschitz将系数差约束在|D|上。对非负函数应用Gronwall得期望上确界为0。",
+          "worked": "对dX=−2Xdt+dW、X_0=3，如果两个解共用同一W，则差满足确定性ODE dD=−2Ddt、D_0=0，立即有D_t=0。",
+          "limitation": "上述全局Lipschitz充分条件不是所有有唯一解SDE的必要条件，CIR平方根扩散需专门路径唯一性理论。"
+        },
+        {
+          "title": "弱解与唯一分布的区分",
+          "question": "为什么只知道收益分布相同仍不能逐路径比较两套动态控制算法？",
+          "paragraphs": [
+            "弱解允许在某个概率空间和其Brownian驱动上构造过程，因此两个弱解可以位于不同空间。弱唯一只要求状态过程X的路径分布相同，不要求每条噪声路径上解相等。",
+            "金融回测若希望逐路径比较对冲误差，应使用同一随机驱动耦合的强误差；只有弱分布信息可比较期望支付，但无法天然计算同一路径误差。"
+          ],
+          "formulas": [
+            {
+              "label": "弱解与唯一分布的区分",
+              "tex": "\\text{路径唯一: }X_0=Y_0,\\ W^X=W^Y\\Longrightarrow\\Pr(X_t=Y_t,\\ \\forall t\\le T)=1"
+            }
+          ],
+          "proof": "路径唯一性是相同空间和同一噪声的比较。弱唯一性则表达任意两个合法弱解的X在路径空间有相同分布；由于未要求相同W，比较X−Y可能根本没有定义在同一概率空间。二者可在适当Yamada–Watanabe条件下联结，但不能凭术语相似直接混同。",
+          "worked": "在dX=dW、X_0=0中，任何解都与对应W逐路径相等；两个独立概率空间的Brownian解具有相同N(0,t)边际，但无法无条件把它们逐路径相减。",
+          "limitation": "用强误差比较模拟器需要共用同一随机增量；仅仅让随机数种子不同的两次路径生成结果均值相近不足以证明强收敛。"
+        },
+        {
+          "title": "强弱解与数值强弱误差",
+          "question": "模拟精度中‘强收敛’和‘弱收敛’具体在比较什么？",
+          "paragraphs": [
+            "数值强误差常为(E|X_T−X_T^h|²)^{1/2}，要求精确解与离散解使用同一Brownian驱动；数值弱误差为|Eφ(X_T)−Eφ(X_T^h)|，只比较选定测试支付的期望。",
+            "在全局Lipschitz及足够正则条件下Euler–Maruyama通常有强阶1/2；弱阶1还需要更高阶系数与测试函数光滑性及矩界，不能从强阶直接推出所有非光滑期权支付的弱阶。"
+          ],
+          "formulas": [
+            {
+              "label": "强弱解与数值强弱误差",
+              "tex": "\\varepsilon_{\\rm strong}(h)=\\bigl(\\mathbb E|X_T-X_T^h|^2\\bigr)^{1/2},\\quad\\varepsilon_{\\rm weak}(h)=|\\mathbb E\\varphi(X_T)-\\mathbb E\\varphi(X_T^h)|"
+            }
+          ],
+          "proof": "强误差用耦合样本逐路径计算差并平方取期望，因此需要联合分布；弱误差分别求两个模型的支付期望，只依各自边际分布。强收敛若伴随统一矩界可对Lipschitz测试支付控制弱误差，但对一般不光滑支付和更高阶速率没有自动结论。",
+          "worked": "若X_T~N(0,1)、模拟器X_T^h~N(0,1)但相互独立，则取φ(x)=x²时弱误差0；逐路径差方差为2，强RMSE=√2≈1.414。",
+          "limitation": "强/弱数值误差与强/弱SDE解是不同分类，不能将两个独立运行的样本差称作精确意义下的强误差。"
+        }
+      ],
+      "example": "常数SDE dX=2dt+3dW从1出发在t=1时均值3、方差9。两个N(0,1)结果即使边际完全相同，独立耦合时逐路径差RMSE仍为√2；这说明弱期望准确不保证强路径准确。 该比较的关键在于共同驱动噪声下的误差，而不是仅有相同的边际方差。",
+      "application": "用于金融SDE数值模拟、模型定价误差与同噪声路径风险对比，并为Euler–Maruyama、弱期权支付估计与CIR边界算法提供正确概念。",
+      "caveat": "路径唯一与唯一分布是不同定理；全局Lipschitz仅是方便的充分条件，数值强/弱误差也不能直接混同SDE强/弱解。",
+      "links": [
+        {
+          "kind": "math",
+          "id": "ito-n0307",
+          "label": "先修：可预测Itô积分"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0313",
+          "label": "先修：线性SDE"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0318",
+          "label": "后续：Euler离散"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0316",
+          "label": "对照：CIR非Lipschitz"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Aalto University Applied Stochastic Differential Equations：第2、5章SDE解与第8章数值方法",
+          "url": "https://users.aalto.fi/~asolin/sde-book/sde-book.pdf"
+        },
+        {
+          "title": "University of Chicago Greg Lawler Stochastic Calculus: An Introduction with Applications：布朗、Itô及SDE章节",
+          "url": "https://www.math.uchicago.edu/~lawler/finbook.pdf"
+        }
+      ],
+      "checked_status": "V14完整数学教材：四节严格条件、解析推导、可复算算例及金融边界"
+    },
+    {
+      "id": "ito-n0318",
+      "node_id": "ito-n0318",
+      "title": "Euler-Maruyama数值离散",
+      "definition": "Euler–Maruyama（EM）方法将Itô SDE按离散时间网格近似，每一步只用网格左端已经可见的状态计算漂移与扩散系数，并以N(0,Δt)生成布朗增量。它是连续时间随机模型的基础数值方法；强收敛比较同一噪声路径，弱收敛比较支付函数的期望，误差速度取决于系数光滑性、步长与边界结构。",
+      "assumptions": "设dX_t=b(X_t)dt+σ(X_t)dW_t，有限期T，h=T/N。使用同一Brownian路径的独立增量ΔW_k=√h Z_k，Z_k独立标准正态；全局Lipschitz与线性增长给典型强阶1/2的充分条件，弱阶1还需更强正则性及测试函数平滑。对CIR平方根系数不可无条件直接引用上述定理。",
+      "properties": [
+        "EM一步更新为X_(k+1)=X_k+b(X_k)h+σ(X_k)√h Z_k，具有左端可预测性。",
+        "在标准充分条件下强均方根误差通常为O(h^{1/2})；弱阶1要求附加光滑性。",
+        "OU的EM稳态方差与精确模型存在可计算的步长偏差。",
+        "平方根模型的普通EM可能产生负值，不保持CIR边界非负性。"
+      ],
+      "formulas": [
+        {
+          "label": "离散随机和与Brownian增量",
+          "tex": "X_{k+1}^h=X_k^h+b(X_k^h)h+\\sigma(X_k^h)\\sqrt h\\,Z_k,\\quad Z_k\\sim N(0,1)"
+        },
+        {
+          "label": "强误差与弱误差的不同阶",
+          "tex": "\\bigl(\\mathbb E|X_T-X_T^h|^2\\bigr)^{1/2}=O(h^{1/2}),\\qquad|\\mathbb E\\varphi(X_T)-\\mathbb E\\varphi(X_T^h)|=O(h)"
+        },
+        {
+          "label": "OU离散稳定性与方差偏差",
+          "tex": "\\operatorname{Var}_{\\rm EM}(X_\\infty)=\\frac{\\sigma^2h}{1-(1-\\kappa h)^2}=\\frac{\\sigma^2}{2\\kappa-\\kappa^2h}"
+        },
+        {
+          "label": "CIR非负性与离散修复",
+          "tex": "X_{k+1}^h=X_k^h+\\kappa(\\theta-X_k^h)h+\\sigma\\sqrt{X_k^h}\\,\\Delta W_k"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "SDE的精确增量为∫_{t_k}^{t_(k+1)}b(X_s)ds+∫σ(X_s)dW_s。左端冻结系数，将第一项近似为b(X_k)h，第二项近似为σ(X_k)ΔW_k；因Var ΔW=h，令ΔW=√h Z完成数值更新。",
+          "tex": "X_{k+1}^h=X_k^h+b(X_k^h)h+\\sigma(X_k^h)\\sqrt h\\,Z_k,\\quad Z_k\\sim N(0,1)"
+        },
+        {
+          "explanation": "强误差可用精确解与EM插值的差分积分式、Lipschitz条件、BDG不等式和Gronwall估计得到均方误差O(h)，再开方为O(h^{1/2})。弱阶证明则需对Kolmogorov方程解作Itô–Taylor展开，逐格误差累计为O(h)，不能仅由强阶推断。",
+          "tex": "\\bigl(\\mathbb E|X_T-X_T^h|^2\\bigr)^{1/2}=O(h^{1/2}),\\qquad|\\mathbb E\\varphi(X_T)-\\mathbb E\\varphi(X_T^h)|=O(h)"
+        },
+        {
+          "explanation": "将中心状态Y_k=X_k−θ写为AR(1) Y_(k+1)=φY_k+σ√hZ_k，φ=1−κh。若|φ|<1，平稳方差v满足v=φ²v+σ²h，解得v=σ²h/(1−φ²)=σ²/(2κ−κ²h)。精确OU稳态方差由连续积分等距给σ²/(2κ)。",
+          "tex": "\\operatorname{Var}_{\\rm EM}(X_\\infty)=\\frac{\\sigma^2h}{1-(1-\\kappa h)^2}=\\frac{\\sigma^2}{2\\kappa-\\kappa^2h}"
+        },
+        {
+          "explanation": "取X_k=θ=.04、κ=2、σ=.2、h=1，则漂移为0，扩散系数σ√X=.04。若样本路径的ΔW_k=−3，则更新X_(k+1)=.04−.12=−.08，违反非负性；标准Gaussian增量落在该附近虽概率小但非零。",
+          "tex": "X_{k+1}^h=X_k^h+\\kappa(\\theta-X_k^h)h+\\sigma\\sqrt{X_k^h}\\,\\Delta W_k"
+        }
+      ],
+      "deep_sections": [
+        {
+          "title": "离散随机和与Brownian增量",
+          "question": "为什么模拟增量必须随时间步长按平方根而不是线性缩放？",
+          "paragraphs": [
+            "Brownian增量在长度h的区间内服从N(0,h)，所以可以独立生成标准正态Z后乘√h。把它错误写成hZ，会令模拟方差变为h²，随着网格变细错误压低随机波动。",
+            "对积分方程在每格采用左端冻结b、σ，即得到Euler–Maruyama。左端性对应交易头寸的可预测要求，不能因使用未来价格改善样本内模拟误差而破坏信息合法性。"
+          ],
+          "formulas": [
+            {
+              "label": "离散随机和与Brownian增量",
+              "tex": "X_{k+1}^h=X_k^h+b(X_k^h)h+\\sigma(X_k^h)\\sqrt h\\,Z_k,\\quad Z_k\\sim N(0,1)"
+            }
+          ],
+          "proof": "SDE的精确增量为∫_{t_k}^{t_(k+1)}b(X_s)ds+∫σ(X_s)dW_s。左端冻结系数，将第一项近似为b(X_k)h，第二项近似为σ(X_k)ΔW_k；因Var ΔW=h，令ΔW=√h Z完成数值更新。",
+          "worked": "若扩散系数σ=.2，h=.25，则扩散随机增量标准差应为.2√.25=.1，方差.01；误写成σhZ则标准差.05、方差.0025。",
+          "limitation": "若市场状态有跳跃、时间不规则或多资产相关驱动，应生成匹配实际时间窗与协方差的噪声，而非复用同一h和独立正态。"
+        },
+        {
+          "title": "强误差与弱误差的不同阶",
+          "question": "为什么强阶1/2和弱阶1是两种不同命题？",
+          "paragraphs": [
+            "强误差比较给定同一Brownian驱动的数值路径与精确路径；弱误差只要求选定光滑支付φ的期望接近。 阶数的含义必须先说明误差所用范数与时间终点。",
+            "在全局Lipschitz及相应矩界下通常可得EM强阶1/2；当b、σ和φ具有足够高阶光滑性时，弱误差常可达一阶。数字收敛率必须针对特定模型和 payoff 验证，非光滑数字期权可能不满足标准弱阶条件。"
+          ],
+          "formulas": [
+            {
+              "label": "强误差与弱误差的不同阶",
+              "tex": "\\bigl(\\mathbb E|X_T-X_T^h|^2\\bigr)^{1/2}=O(h^{1/2}),\\qquad|\\mathbb E\\varphi(X_T)-\\mathbb E\\varphi(X_T^h)|=O(h)"
+            }
+          ],
+          "proof": "强误差可用精确解与EM插值的差分积分式、Lipschitz条件、BDG不等式和Gronwall估计得到均方误差O(h)，再开方为O(h^{1/2})。弱阶证明则需对Kolmogorov方程解作Itô–Taylor展开，逐格误差累计为O(h)，不能仅由强阶推断。",
+          "worked": "若h从.04降至.01，在典型强阶.5主导区间内误差可约减半；若满足弱阶1条件，相应弱误差可约减为原来的四分之一。",
+          "limitation": "不同算法使用不同随机种子直接算路径差不等于强误差；弱阶1也不能不检验条件直接推广至障碍事件或不光滑支付。"
+        },
+        {
+          "title": "OU离散稳定性与方差偏差",
+          "question": "OU的显式Euler为何可能随步长产生错误的稳态波动？",
+          "paragraphs": [
+            "对dX=κ(θ−X)dt+σdW，EM给X_(k+1)−θ=(1−κh)(X_k−θ)+σ√h Z_k。 这也允许利用精确OU模型对离散模拟偏差进行独立验算。",
+            "离散均值回复稳定需|1−κh|<1，即0<h<2/κ；在此条件下离散稳态方差是σ²h/[1−(1−κh)²]，不同于真实OU的σ²/(2κ)。"
+          ],
+          "formulas": [
+            {
+              "label": "OU离散稳定性与方差偏差",
+              "tex": "\\operatorname{Var}_{\\rm EM}(X_\\infty)=\\frac{\\sigma^2h}{1-(1-\\kappa h)^2}=\\frac{\\sigma^2}{2\\kappa-\\kappa^2h}"
+            }
+          ],
+          "proof": "将中心状态Y_k=X_k−θ写为AR(1) Y_(k+1)=φY_k+σ√hZ_k，φ=1−κh。若|φ|<1，平稳方差v满足v=φ²v+σ²h，解得v=σ²h/(1−φ²)=σ²/(2κ−κ²h)。精确OU稳态方差由连续积分等距给σ²/(2κ)。",
+          "worked": "κ=2、σ=.4、h=.2时EM方差=.16/(4−.8)=.05，精确OU方差=.16/4=.04，离散方法多出25%的稳态方差。",
+          "limitation": "接近边界h=2/κ时EM会产生数值振荡，不能把模拟爆炸误判为OU真实状态不存在均值回复。"
+        },
+        {
+          "title": "CIR非负性与离散修复",
+          "question": "为什么真实非负平方根扩散会被普通Euler模拟成负值？",
+          "paragraphs": [
+            "对CIR，EM使用σ√(X_k)ΔW；若随机增量足够负，下一步的加法更新可以落到负值，即使连续时间SDE的强解非负。",
+            "这属于离散算法破坏模型状态空间，不是CIR真实过程定理的反例。实际数值实现可采用全截断、精确转移采样或专门保正算法，但每一种都需独立论证偏差与收敛。"
+          ],
+          "formulas": [
+            {
+              "label": "CIR非负性与离散修复",
+              "tex": "X_{k+1}^h=X_k^h+\\kappa(\\theta-X_k^h)h+\\sigma\\sqrt{X_k^h}\\,\\Delta W_k"
+            }
+          ],
+          "proof": "取X_k=θ=.04、κ=2、σ=.2、h=1，则漂移为0，扩散系数σ√X=.04。若样本路径的ΔW_k=−3，则更新X_(k+1)=.04−.12=−.08，违反非负性；标准Gaussian增量落在该附近虽概率小但非零。",
+          "worked": "κ=2、θ=.04、σ=.2且初始x=.04，标准EM在h=1、ΔW≈−3的模拟中给负值−.08；真实CIR从正初值在Feller条件成立时不触零。",
+          "limitation": "直接在下一步对负值求平方根会得到非法数值；简单把负值强设0改变了数值模型，必须报告修复规则与误差分析。"
+        }
+      ],
+      "example": "EM中h=.25、σ=.2的Brownian扩散增量标准差为.1。OU取κ=2、σ=.4、h=.2，EM平稳方差.05高于精确.04；CIR取x=θ=.04、h=1、ΔW=−3会错误生成−.08。",
+      "application": "用于金融SDE模拟与计算实验、期权收益期望估计、OU/CIR状态校准及数值回测误差诊断，需说明模拟路径耦合方式。",
+      "caveat": "强阶.5及弱阶1仅在相应充分条件下成立，不能默认适用非Lipschitz平方根扩散或跳跃模型；保正及稳定性必须单独检查。",
+      "links": [
+        {
+          "kind": "math",
+          "id": "ito-n0317",
+          "label": "先修：强弱解"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0308",
+          "label": "先修：Itô等距"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0315",
+          "label": "OU模型数值核对"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0316",
+          "label": "CIR正性边界"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Aalto University Applied Stochastic Differential Equations：Euler–Maruyama强弱误差与数值算法",
+          "url": "https://users.aalto.fi/~asolin/sde-book/sde-book.pdf"
+        },
+        {
+          "title": "University of Strathclyde Des Higham：Numerical Simulation of Stochastic Differential Equations课堂讲义",
+          "url": "https://www.sfu.ca/~pft3/days/m3.pdf"
+        }
+      ],
+      "checked_status": "V14：四节定理证明、独立算例、异常边界和研究适用条件"
+    },
+    {
+      "id": "ito-n0320",
+      "node_id": "ito-n0320",
+      "title": "指数鞅",
+      "definition": "连续局部鞅M的Doléans–Dade随机指数定义为E(M)_t=exp(M_t−[M]_t/2)，是严格正的连续局部鞅；以M=−∫θdW为例得到概率测度变换所用的随机密度候选Z。正局部鞅至少为超鞅，但未必是真鞅；必须额外保证E Z_T=1才能把Z_T当作等价概率测度的Radon–Nikodym密度。",
+      "assumptions": "时间区间[0,T]上θ为可预测且∫_0^Tθ²ds<∞几乎处处，使布朗随机积分局部存在。若θ是有界确定性函数，则Z真鞅；一般随机θ仅保证正局部鞅，均值可能下降。要定义Q(A)=E_P[Z_T1_A]为概率测度，还需E_P Z_T=1。",
+      "properties": [
+        "Z_t=exp(−∫θdW−(1/2)∫θ²dt)>0且满足dZ=−θZ dW。",
+        "连续正局部鞅是超鞅，因此E Z_t≤1；真鞅需要额外可积性条件。",
+        "对固定θ，Gaussian指数矩给E Z_t=1及E Z_t²=e^{θ²t}。",
+        "密度随机变量严格为正且均值1才可在有限期限构造与P等价的Q；均值小于1会损失概率质量。"
+      ],
+      "formulas": [
+        {
+          "label": "随机指数与Itô补偿",
+          "tex": "Z_t=\\exp\\!\\left(-\\int_0^t\\theta_s\\,dW_s-\\frac12\\int_0^t\\theta_s^2\\,ds\\right),\\qquad dZ_t=-\\theta_tZ_t\\,dW_t"
+        },
+        {
+          "label": "常数风险价格的正态矩",
+          "tex": "\\mathbb EZ_t=1,\\quad\\mathbb EZ_t^2=e^{\\theta^2t},\\quad\\operatorname{Var}(Z_t)=e^{\\theta^2t}-1"
+        },
+        {
+          "label": "正局部鞅与真鞅边界",
+          "tex": "Z_t\\ge0,\\qquad\\mathbb EZ_t\\le\\liminf_{n\\to\\infty}\\mathbb EZ_{t\\wedge\\tau_n}=1"
+        },
+        {
+          "label": "密度与条件重加权",
+          "tex": "\\mathbb E_{\\mathbb Q}[X\\mid\\mathcal F_t]=\\frac{\\mathbb E_{\\mathbb P}[Z_TX\\mid\\mathcal F_t]}{Z_t}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将Y=M−[M]/2代入dZ=Z dY+(1/2)Z d[Y]。因为dY=−θdW−θ²dt/2且d[Y]=θ²dt，所以两个dt项完全抵消，只剩−θZ dW。局部化保证系数积分有意义。",
+          "tex": "Z_t=\\exp\\!\\left(-\\int_0^t\\theta_s\\,dW_s-\\frac12\\int_0^t\\theta_s^2\\,ds\\right),\\qquad dZ_t=-\\theta_tZ_t\\,dW_t"
+        },
+        {
+          "explanation": "利用W_t~N(0,t)，E e^{aW_t}=e^{a²t/2}。一阶矩E e^{−θW−θ²t/2}=1，二阶矩E e^{−2θW−θ²t}=e^{2θ²t−θ²t}=e^{θ²t}，扣除一阶矩平方得到方差。",
+          "tex": "\\mathbb EZ_t=1,\\quad\\mathbb EZ_t^2=e^{\\theta^2t},\\quad\\operatorname{Var}(Z_t)=e^{\\theta^2t}-1"
+        },
+        {
+          "explanation": "局部化的Z^{τ_n}为真鞅且从1出发，因此对每个n有E Z_{t∧τ_n}=1。几乎处处Z_{t∧τ_n}→Z_t，非负Fatou给E Z_t≤1；若期望极限严格下降，说明无法将极限与期望交换，常需一致可积来排除。",
+          "tex": "Z_t\\ge0,\\qquad\\mathbb EZ_t\\le\\liminf_{n\\to\\infty}\\mathbb EZ_{t\\wedge\\tau_n}=1"
+        },
+        {
+          "explanation": "对F_t中的事件B，由新测度定义E_Q[X1_B]=E_P[Z_TX1_B]。令右边候选Y=(1/Z_t)E_P[Z_TX|F_t]，利用Z_t=E_P[Z_T|F_t]和条件期望的性质，可验证E_Q[Y1_B]与前者相等，故得到条件版Bayes公式。",
+          "tex": "\\mathbb E_{\\mathbb Q}[X\\mid\\mathcal F_t]=\\frac{\\mathbb E_{\\mathbb P}[Z_TX\\mid\\mathcal F_t]}{Z_t}"
+        }
+      ],
+      "deep_sections": [
+        {
+          "title": "随机指数与Itô补偿",
+          "question": "为什么要在指数中减去一半二次变差？",
+          "paragraphs": [
+            "令M_t=−∫_0^tθ_sdW_s，它的二次变差是[M]_t=∫θ²ds。对Z=e^{M−[M]/2}使用Itô公式，二阶正项恰与人为补偿的负半二次变差抵消。",
+            "因此dZ=Z dM=−θZ dW，没有有限变差漂移。若遗漏补偿，指数过程一般会出现正漂移，不能直接当作测度密度。"
+          ],
+          "formulas": [
+            {
+              "label": "随机指数与Itô补偿",
+              "tex": "Z_t=\\exp\\!\\left(-\\int_0^t\\theta_s\\,dW_s-\\frac12\\int_0^t\\theta_s^2\\,ds\\right),\\qquad dZ_t=-\\theta_tZ_t\\,dW_t"
+            }
+          ],
+          "proof": "将Y=M−[M]/2代入dZ=Z dY+(1/2)Z d[Y]。因为dY=−θdW−θ²dt/2且d[Y]=θ²dt，所以两个dt项完全抵消，只剩−θZ dW。局部化保证系数积分有意义。",
+          "worked": "θ=.5、t=1且W_1=0时Z_1=e^{−.125}≈.88250；若不写补偿，样本值为1且其总体期望将高于1。",
+          "limitation": "消去随机微分漂移只能推出局部鞅，不能自动推出E Z_T=1；金融测度变换须另查真鞅条件。"
+        },
+        {
+          "title": "常数风险价格的正态矩",
+          "question": "固定市场价格风险参数时，密度过程的均值和方差如何精确得到？",
+          "paragraphs": [
+            "对固定θ，−θW_t服从N(0,θ²t)，因此Z_t为对数正态。指数补偿使一阶矩等于1，而二阶矩仍随θ²t指数增长。",
+            "高θ意味着密度权重的方差更大，重要性采样和风险中性回归可能受少数大权重样本主导，不能把理论均值1解释为统计方差小。"
+          ],
+          "formulas": [
+            {
+              "label": "常数风险价格的正态矩",
+              "tex": "\\mathbb EZ_t=1,\\quad\\mathbb EZ_t^2=e^{\\theta^2t},\\quad\\operatorname{Var}(Z_t)=e^{\\theta^2t}-1"
+            }
+          ],
+          "proof": "利用W_t~N(0,t)，E e^{aW_t}=e^{a²t/2}。一阶矩E e^{−θW−θ²t/2}=1，二阶矩E e^{−2θW−θ²t}=e^{2θ²t−θ²t}=e^{θ²t}，扣除一阶矩平方得到方差。",
+          "worked": "θ=.5、t=1时二阶矩e^{.25}≈1.28403，方差e^{.25}−1≈.28403；若θ=0则Z恒为1，方差0。",
+          "limitation": "随机或重尾θ未必有有限二阶密度矩；不应未经检查把常数θ的方差公式用于一般Girsanov权重。"
+        },
+        {
+          "title": "正局部鞅与真鞅边界",
+          "question": "为什么‘没有漂移’的正局部鞅仍可能丢失总概率质量？",
+          "paragraphs": [
+            "对非负局部鞅，选局部化停时τ_n使Z^{τ_n}为真鞅，E Z_{t∧τ_n}=1。令n→∞时只可由Fatou保证E Z_t≤liminf E Z_{t∧τ_n}=1。",
+            "如果不能证明停止族一致可积，极限期望可能严格小于1。此时Z_T只能作为亏损质量的次概率权重，不能直接定义Q概率测度。"
+          ],
+          "formulas": [
+            {
+              "label": "正局部鞅与真鞅边界",
+              "tex": "Z_t\\ge0,\\qquad\\mathbb EZ_t\\le\\liminf_{n\\to\\infty}\\mathbb EZ_{t\\wedge\\tau_n}=1"
+            }
+          ],
+          "proof": "局部化的Z^{τ_n}为真鞅且从1出发，因此对每个n有E Z_{t∧τ_n}=1。几乎处处Z_{t∧τ_n}→Z_t，非负Fatou给E Z_t≤1；若期望极限严格下降，说明无法将极限与期望交换，常需一致可积来排除。",
+          "worked": "若一组正密度候选在极限中的期望仅为.9，则按它重加权事件A的总概率Q(Ω)=.9，而非1，必须重新审视构造而非把它宣称等价概率测度。",
+          "limitation": "严格局部鞅例子通常涉及随机系数和路径爆炸/边界问题；常数θ下Z是真鞅，不能把两种情形混为一谈。"
+        },
+        {
+          "title": "密度与条件重加权",
+          "question": "真鞅密度如何用于新概率测度下的条件期望？",
+          "paragraphs": [
+            "当Z_t严格正且满足E Z_T=1时，对终端F_T定义Q(A)=E_P[Z_T1_A]，并有Z_t=E_P[Z_T|F_t]。",
+            "Bayes条件期望公式给E_Q[X|F_t]=(1/Z_t)E_P[Z_TX|F_t]，使测度改变与信息过滤兼容；这是后续风险中性定价而非任意数据加权的数学基础。"
+          ],
+          "formulas": [
+            {
+              "label": "密度与条件重加权",
+              "tex": "\\mathbb E_{\\mathbb Q}[X\\mid\\mathcal F_t]=\\frac{\\mathbb E_{\\mathbb P}[Z_TX\\mid\\mathcal F_t]}{Z_t}"
+            }
+          ],
+          "proof": "对F_t中的事件B，由新测度定义E_Q[X1_B]=E_P[Z_TX1_B]。令右边候选Y=(1/Z_t)E_P[Z_TX|F_t]，利用Z_t=E_P[Z_T|F_t]和条件期望的性质，可验证E_Q[Y1_B]与前者相等，故得到条件版Bayes公式。",
+          "worked": "若t=0且Z_0=1，则公式退化E_Q X=E_P[Z_TX]；取X=1时两边为1，正是密度权重整体归一化的必要检查。",
+          "limitation": "即便密度数学有效，风险中性测度也还要求贴现可交易资产为局部鞅，不能用任意真鞅密度都称为无套利定价测度。"
+        }
+      ],
+      "example": "θ=.5、T=1时Z_T=exp(−.5W_1−.125)，均值1、方差e^{.25}−1≈.28403。若在W_1=0的路径上Z≈.8825，不能用单条路径权重判断是否满足总体归一。",
+      "application": "为Girsanov换测度、风险价格、贴现鞅与重要性加权估计提供严格密度构造，强调概率归一与过滤信息条件。",
+      "caveat": "正局部鞅未必真鞅，θ随机时可能需Novikov等充分条件；密度合法性和贴现资产无套利鞅性是两个不同检查。",
+      "links": [
+        {
+          "kind": "math",
+          "id": "ito-n0304",
+          "label": "先修：Brownian鞅"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0307",
+          "label": "先修：Itô积分"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0321",
+          "label": "后续：Novikov条件"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0328",
+          "label": "局部鞅风险边界"
+        }
+      ],
+      "sources": [
+        {
+          "title": "University of Chicago Greg Lawler：Stochastic Calculus: An Introduction with Applications第5章Girsanov与概率测度变换",
+          "url": "https://www.math.uchicago.edu/~lawler/finbook.pdf"
+        },
+        {
+          "title": "Stanford Math 227 John Nolen：Girsanov transformation与Novikov条件课堂讲义",
+          "url": "https://math.stanford.edu/~ryzhik/STANFORD/STANF227-10/notes227-09.pdf"
+        }
+      ],
+      "checked_status": "V14：四节定理证明、独立算例、异常边界和研究适用条件"
+    },
+    {
+      "id": "ito-n0321",
+      "node_id": "ito-n0321",
+      "title": "Novikov条件",
+      "definition": "Novikov条件是确保布朗随机指数从正局部鞅升级为真鞅的重要充分条件。在固定有限期限T内，若E exp[(1/2)∫_0^Tθ_t²dt]<∞，则Z_t=exp[−∫θdW−(1/2)∫θ²dt]是真鞅且E Z_T=1。这为Girsanov测度变换提供可验证的归一化保障，但它不是必要条件，亦不能替代检查金融资产贴现后的局部鞅条件。",
+      "assumptions": "在概率空间的Brownian滤过下，θ为可预测且∫θ²dt几乎处处有限；取固定有限终止时间T，Novikov充分条件是E exp[(1/2)∫_0^Tθ²]<∞。只证明任意局部停止后的积分可定义并不足以推出全期限真鞅；无限期限与资产含跳跃时需不同条件。",
+      "properties": [
+        "Novikov是E exp(一半积分平方强度)<∞的充分真鞅条件。",
+        "对于有界|θ_t|≤K，Novikov由e^{K²T/2}的确定性上界直接满足。",
+        "条件不成立不能反推出Z不是鞅；充分性和必要性必须区分。",
+        "即使密度Z是真鞅，也不能保证市场完备、资产可复制或风险中性测度唯一。"
+      ],
+      "formulas": [
+        {
+          "label": "指数可积的精确定义",
+          "tex": "\\mathbb E_{\\mathbb P}\\exp\\!\\left(\\frac12\\int_0^T\\theta_t^2\\,dt\\right)<\\infty"
+        },
+        {
+          "label": "有界风险价格的立即验证",
+          "tex": "|\\theta_t|\\le K\\quad\\Longrightarrow\\quad\\mathbb E e^{\\frac12\\int_0^T\\theta_t^2dt}\\le e^{K^2T/2}<\\infty"
+        },
+        {
+          "label": "充分不必要与尾部误用",
+          "tex": "\\text{Novikov成立}\\Rightarrow\\mathbb E Z_T=1,\\qquad\\text{逆命题一般不成立}"
+        },
+        {
+          "label": "从真鞅到合法密度的剩余条件",
+          "tex": "Z_T>0,\\quad\\mathbb E_{\\mathbb P}Z_T=1\\quad\\Longrightarrow\\quad d\\mathbb Q=Z_T\\,d\\mathbb P"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "设θ为可预测，随机指数的局部化版本具有期望1。Novikov利用指数能量的可积性与适当变化测度/停止论证保证局部化族足够可积，使期望能安全穿过停止极限，得到E Z_T=1；完整证明涉及Holder类估计，不能仅由形式Itô公式得出。",
+          "tex": "\\mathbb E_{\\mathbb P}\\exp\\!\\left(\\frac12\\int_0^T\\theta_t^2\\,dt\\right)<\\infty"
+        },
+        {
+          "explanation": "从逐时点|θ_t|≤K得θ_t²≤K²，积分得V_T≤K²T。指数函数单调，于是e^{V_T/2}≤e^{K²T/2}，取期望后仍不超过右端。由Novikov定理得Z为真鞅且E Z_T=1。",
+          "tex": "|\\theta_t|\\le K\\quad\\Longrightarrow\\quad\\mathbb E e^{\\frac12\\int_0^T\\theta_t^2dt}\\le e^{K^2T/2}<\\infty"
+        },
+        {
+          "explanation": "充分条件的逻辑形式是A⇒B，不允许由非A推出非B；这就是典型的否定前件谬误。Novikov定理并未说明所有真鞅密度都必须满足A，故要证明不存在密度需额外研究所有候选测度及市场条件。",
+          "tex": "\\text{Novikov成立}\\Rightarrow\\mathbb E Z_T=1,\\qquad\\text{逆命题一般不成立}"
+        },
+        {
+          "explanation": "非负密度与期望1给Q(Ω)=1、可数可加；严格正密度确保P与Q有相同零测事件（在概率空间中）。随后必须对资产价格在Q下应用Itô或半鞅分解，确认贴现动态的漂移消除，才能将Q认定为相应资产市场的等价局部鞅测度。",
+          "tex": "Z_T>0,\\quad\\mathbb E_{\\mathbb P}Z_T=1\\quad\\Longrightarrow\\quad d\\mathbb Q=Z_T\\,d\\mathbb P"
+        }
+      ],
+      "deep_sections": [
+        {
+          "title": "指数可积的精确定义",
+          "question": "Novikov到底检查哪一个随机变量的指数矩？",
+          "paragraphs": [
+            "需要检查的是积分能量V_T=∫_0^Tθ_t²dt的指数矩，而不是θ的普通均值或E∫θ²dt。 其中指数平方积分的极端尾部表现往往决定该期望是否有限。",
+            "指数矩是更强的尾部要求，能控制在极端风险价格路径下随机指数的局部化族。即使平方积分期望有限，指数平方积分仍可能无穷。"
+          ],
+          "formulas": [
+            {
+              "label": "指数可积的精确定义",
+              "tex": "\\mathbb E_{\\mathbb P}\\exp\\!\\left(\\frac12\\int_0^T\\theta_t^2\\,dt\\right)<\\infty"
+            }
+          ],
+          "proof": "设θ为可预测，随机指数的局部化版本具有期望1。Novikov利用指数能量的可积性与适当变化测度/停止论证保证局部化族足够可积，使期望能安全穿过停止极限，得到E Z_T=1；完整证明涉及Holder类估计，不能仅由形式Itô公式得出。",
+          "worked": "若θ=.25常数、T=1，则积分能量=.0625，检查值e^{.03125}≈1.03174，有限，因此充分保证密度Z真鞅。",
+          "limitation": "不能把Novikov误写成E∫θ²dt<∞；后者只是随机积分平方可积的条件之一，并不直接保证指数真鞅。"
+        },
+        {
+          "title": "有界风险价格的立即验证",
+          "question": "当θ依赖市场状态但有统一上界时，为什么Novikov容易成立？",
+          "paragraphs": [
+            "若|θ_t|≤K在[0,T]几乎处处成立，则逐路径V_T=∫θ²≤K²T，从而exp(V_T/2)≤exp(K²T/2)。",
+            "右端是确定性有限常数，取期望立即得到Novikov条件。这是实务模型校准时非常方便的充分准则，但人为截断θ仍会改变原策略的风险价格动态。"
+          ],
+          "formulas": [
+            {
+              "label": "有界风险价格的立即验证",
+              "tex": "|\\theta_t|\\le K\\quad\\Longrightarrow\\quad\\mathbb E e^{\\frac12\\int_0^T\\theta_t^2dt}\\le e^{K^2T/2}<\\infty"
+            }
+          ],
+          "proof": "从逐时点|θ_t|≤K得θ_t²≤K²，积分得V_T≤K²T。指数函数单调，于是e^{V_T/2}≤e^{K²T/2}，取期望后仍不超过右端。由Novikov定理得Z为真鞅且E Z_T=1。",
+          "worked": "若K=.5、T=2，则任意符合该上界的状态依赖θ都满足检查值≤e^{.25}≈1.28403。 这个上界对路径随机变化的θ同样适用，只要绝对值逐路径不超过K。",
+          "limitation": "把未界θ直接截断可改善数学可积性，但截断后的定价测度未必是原模型所需的真实市场风险价格测度。"
+        },
+        {
+          "title": "充分不必要与尾部误用",
+          "question": "为什么Novikov失败不能被解释为已经证明不存在风险中性测度？",
+          "paragraphs": [
+            "Novikov只是一条方便的充分条件：积分能量的指数矩有限必能保证所构造密度的真鞅性质。 这种逻辑区别与市场能否找到其他等价鞅测度尤其相关。",
+            "当指数矩不有限时，仍可能存在其他真鞅判别条件（例如Kazamaki），或者其他密度过程可用于换测度。只能说当前充分性检查未通过，不能宣称没有任何等价测度。"
+          ],
+          "formulas": [
+            {
+              "label": "充分不必要与尾部误用",
+              "tex": "\\text{Novikov成立}\\Rightarrow\\mathbb E Z_T=1,\\qquad\\text{逆命题一般不成立}"
+            }
+          ],
+          "proof": "充分条件的逻辑形式是A⇒B，不允许由非A推出非B；这就是典型的否定前件谬误。Novikov定理并未说明所有真鞅密度都必须满足A，故要证明不存在密度需额外研究所有候选测度及市场条件。",
+          "worked": "若某状态模型的E exp(V_T/2)无法证实有限，只能在模型说明中标记“Novikov验收未完成”，并尝试其他真鞅检验或缩小有效时间区间。",
+          "limitation": "高波动样本上的经验平均指数有限不能证明总体Novikov成立；重尾分布可能使真实期望发散而样本均值始终有限。"
+        },
+        {
+          "title": "从真鞅到合法密度的剩余条件",
+          "question": "为什么Novikov通过以后还必须确认金融定价的其它假设？",
+          "paragraphs": [
+            "Novikov得到Z是真鞅且E Z_T=1，同时随机指数严格正，使Q(A)=E_P[Z_T1_A]在有限期限成为与P等价的概率测度。",
+            "但风险中性测度还要求贴现可交易资产在Q下为局部鞅，且可能不唯一；无套利、完备性与唯一性是独立的市场结构问题，不是Novikov的直接结论。"
+          ],
+          "formulas": [
+            {
+              "label": "从真鞅到合法密度的剩余条件",
+              "tex": "Z_T>0,\\quad\\mathbb E_{\\mathbb P}Z_T=1\\quad\\Longrightarrow\\quad d\\mathbb Q=Z_T\\,d\\mathbb P"
+            }
+          ],
+          "proof": "非负密度与期望1给Q(Ω)=1、可数可加；严格正密度确保P与Q有相同零测事件（在概率空间中）。随后必须对资产价格在Q下应用Itô或半鞅分解，确认贴现动态的漂移消除，才能将Q认定为相应资产市场的等价局部鞅测度。",
+          "worked": "若μ=.08、r=.03、σ=.2，常数风险价格θ=(μ−r)/σ=.25，T=1满足Novikov。进一步要计算Q下资产漂移μ−σθ=.03是否恰等于r。",
+          "limitation": "不完整市场可能同时存在多个符合贴现局部鞅约束的测度；任何一种Novikov构造都不自动证明风险中性测度唯一。"
+        }
+      ],
+      "example": "常数θ=.25、T=1时Novikov检查值e^{.03125}≈1.03174；统一有界|θ|≤.5且T=2时其检查值不超过e^{.25}≈1.28403，两者均保证对应随机指数是完整概率密度。",
+      "application": "用于资产风险价格函数的真鞅验证、Girsanov无套利测度构造及概率权重数值稳定性判断，必须独立于金融模型校准。",
+      "caveat": "Novikov是充分非必要条件；经验有限样本均值不能证明指数矩存在，Z真鞅也不保证市场完备或资产定价的其他条件。",
+      "links": [
+        {
+          "kind": "math",
+          "id": "ito-n0320",
+          "label": "先修：指数鞅"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0308",
+          "label": "先修：Itô等距"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0319",
+          "label": "后续：Girsanov"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0322",
+          "label": "后续：风险中性测度"
+        }
+      ],
+      "sources": [
+        {
+          "title": "University of Chicago Greg Lawler：Stochastic Calculus: An Introduction with Applications第5章Girsanov与概率测度变换",
+          "url": "https://www.math.uchicago.edu/~lawler/finbook.pdf"
+        },
+        {
+          "title": "Stanford Math 227 John Nolen：Girsanov transformation与Novikov条件课堂讲义",
+          "url": "https://math.stanford.edu/~ryzhik/STANFORD/STANF227-10/notes227-09.pdf"
+        }
+      ],
+      "checked_status": "V14：四节定理证明、独立算例、异常边界和研究适用条件"
+    },
+    {
+      "id": "ito-n0319",
+      "node_id": "ito-n0319",
+      "title": "Girsanov定理",
+      "definition": "Girsanov定理描述等价概率测度变换下Brownian漂移如何改变。给定可预测风险价格θ及合法真鞅密度Z_T=exp[−∫θdW^P−(1/2)∫θ²dt]，在新测度Q下W_t^Q=W_t^P+∫_0^tθ_sds成为Brownian运动。这一变化是金融风险中性定价的核心工具，却不改变样本路径的二次变差，也不保证任何资产自动满足无套利条件。",
+      "assumptions": "固定有限T，在通常滤过下W^P为Brownian；θ可预测且∫θ²dt有限，Z_t为严格正真鞅、E_P Z_T=1，可由Novikov等充分条件验证。定义dQ/dP=Z_T后Q与P等价。写出θ符号约定至关重要：此处Z带负号，所以W^Q=W^P+∫θdt。",
+      "properties": [
+        "Girsanov改变Brownian的概率漂移而不改变路径二次变差。",
+        "若dS/S=μdt+σdW^P，在Q下漂移变为μ−σθ。",
+        "θ=(μ−r)/σ且σ≠0时可令理想无股息折现价格的漂移归零。",
+        "单个Brownian驱动配多个风险资产可能缺少满足全部漂移约束的θ，必须核验市场风险溢价是否与扩散暴露相容。"
+      ],
+      "formulas": [
+        {
+          "label": "密度符号与新Brownian",
+          "tex": "\\frac{d\\mathbb Q}{d\\mathbb P}=Z_T,\\quad W_t^{\\mathbb Q}=W_t^{\\mathbb P}+\\int_0^t\\theta_sds"
+        },
+        {
+          "label": "扩散资产漂移的代数变换",
+          "tex": "\\frac{dS_t}{S_t}=(\\mu-\\sigma\\theta_t)dt+\\sigma\\,dW_t^{\\mathbb Q}"
+        },
+        {
+          "label": "Brownian二次变差的不变性",
+          "tex": "[W^{\\mathbb Q}]_t=[W^{\\mathbb P}]_t=t,\\qquad [S]_t=\\int_0^t\\sigma^2S_s^2\\,ds"
+        },
+        {
+          "label": "多资产风险价格的相容条件",
+          "tex": "\\mu_i-r=\\sigma_i\\theta\\quad\\text{对所有 }i,\\qquad\\text{即 }\\mu-r\\mathbf1\\in\\operatorname{Col}(\\Sigma)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定理可通过测试指数鞅和Levy的Brownian刻画证明：在Q下，平移后的W^Q为连续局部鞅，二次变差仍为t；验证有限时刻真鞅和初始0后，Levy刻画识别其为Q-Brownian。该步骤需要Z是真鞅而不仅是形式上的局部鞅。",
+          "tex": "\\frac{d\\mathbb Q}{d\\mathbb P}=Z_T,\\quad W_t^{\\mathbb Q}=W_t^{\\mathbb P}+\\int_0^t\\theta_sds"
+        },
+        {
+          "explanation": "将W^Q=W^P+∫θds写成微分dW^P=dW^Q−θdt，代入原扩散方程，整理dt项得到μ−σθ。若选择θ=(μ−r)/σ且σ≠0，则dt系数化为r；这一代数步骤仍依赖Q的合法性与资产交易条件。",
+          "tex": "\\frac{dS_t}{S_t}=(\\mu-\\sigma\\theta_t)dt+\\sigma\\,dW_t^{\\mathbb Q}"
+        },
+        {
+          "explanation": "平移项A_t=∫θ_sds具有有限变差，连续有限变差过程的二次变差和与Brownian的二次协变差均为0，故[W^P+A]=[W^P]=t。对dS=...+σS dW按Itô二次变差公式得到[S]_t=∫σ²S²ds。",
+          "tex": "[W^{\\mathbb Q}]_t=[W^{\\mathbb P}]_t=t,\\qquad [S]_t=\\int_0^t\\sigma^2S_s^2\\,ds"
+        },
+        {
+          "explanation": "Girsanov对每个资产的Brownian驱动应用同一θ变换，Q下超额漂移为μ_i−r−σ_iθ。要求所有资产的贴现漂移为0，就必须同时解线性方程Σθ=μ−r1。在线性代数中有解当且仅当右侧位于Σ列空间。",
+          "tex": "\\mu_i-r=\\sigma_i\\theta\\quad\\text{对所有 }i,\\qquad\\text{即 }\\mu-r\\mathbf1\\in\\operatorname{Col}(\\Sigma)"
+        }
+      ],
+      "deep_sections": [
+        {
+          "title": "密度符号与新Brownian",
+          "question": "带负号的指数密度如何决定Girsanov中的漂移方向？",
+          "paragraphs": [
+            "使用Z_T=exp[−∫θdW^P−(1/2)∫θ²ds]构造Q，Girsanov给W^Q=W^P+∫θds。",
+            "如果将密度符号反过来，Brownian平移也会反向。金融推导必须全篇保持约定一致，不能把W^Q=W^P−∫θds与本节密度公式直接混用。"
+          ],
+          "formulas": [
+            {
+              "label": "密度符号与新Brownian",
+              "tex": "\\frac{d\\mathbb Q}{d\\mathbb P}=Z_T,\\quad W_t^{\\mathbb Q}=W_t^{\\mathbb P}+\\int_0^t\\theta_sds"
+            }
+          ],
+          "proof": "定理可通过测试指数鞅和Levy的Brownian刻画证明：在Q下，平移后的W^Q为连续局部鞅，二次变差仍为t；验证有限时刻真鞅和初始0后，Levy刻画识别其为Q-Brownian。该步骤需要Z是真鞅而不仅是形式上的局部鞅。",
+          "worked": "θ=.25为常数时，W_1^Q=W_1^P+.25；若某路径W_1^P=0，则该路径的W_1^Q数值为.25，但不同测度下路径分布已经改变。",
+          "limitation": "路径变换关系不是说交易者在真实世界中可以给Brownian加确定性盈利漂移；Q只是为定价改变概率权重。"
+        },
+        {
+          "title": "扩散资产漂移的代数变换",
+          "question": "怎样从风险价格θ推导风险中性资产漂移？",
+          "paragraphs": [
+            "在P下dS_t/S_t=μdt+σdW_t^P。由Girsanov有dW^P=dW^Q−θdt，代入得到Q下dS/S=(μ−σθ)dt+σdW^Q。",
+            "若无股息且短利率r恒定，令μ−σθ=r使贴现资产无dt漂移。对多个风险因子应以向量矩阵形式检验风险溢价是否位于扩散系数的列空间。"
+          ],
+          "formulas": [
+            {
+              "label": "扩散资产漂移的代数变换",
+              "tex": "\\frac{dS_t}{S_t}=(\\mu-\\sigma\\theta_t)dt+\\sigma\\,dW_t^{\\mathbb Q}"
+            }
+          ],
+          "proof": "将W^Q=W^P+∫θds写成微分dW^P=dW^Q−θdt，代入原扩散方程，整理dt项得到μ−σθ。若选择θ=(μ−r)/σ且σ≠0，则dt系数化为r；这一代数步骤仍依赖Q的合法性与资产交易条件。",
+          "worked": "μ=.08、r=.03、σ=.2时θ=(.08−.03)/.2=.25，Q下漂移.08−.2×.25=.03，与r一致。",
+          "limitation": "现实有股息资产需使用总收益或扣除股息率的漂移，跨币种与融资约束也会改变正确贴现计价物。"
+        },
+        {
+          "title": "Brownian二次变差的不变性",
+          "question": "改变概率测度之后，为什么扩散波动率不能被任意改成另一数值？",
+          "paragraphs": [
+            "在有限区间等价测度下，P几乎处处成立的路径二次变差性质在Q下仍几乎处处成立。因W^Q与W^P相差有限变差积分过程，二者具有相同二次变差。",
+            "所以Brownian连续扩散项的瞬时σ在此简单Girsanov变换下不变，被改变的是drift，不是固定路径上的扩散二次变化。"
+          ],
+          "formulas": [
+            {
+              "label": "Brownian二次变差的不变性",
+              "tex": "[W^{\\mathbb Q}]_t=[W^{\\mathbb P}]_t=t,\\qquad [S]_t=\\int_0^t\\sigma^2S_s^2\\,ds"
+            }
+          ],
+          "proof": "平移项A_t=∫θ_sds具有有限变差，连续有限变差过程的二次变差和与Brownian的二次协变差均为0，故[W^P+A]=[W^P]=t。对dS=...+σS dW按Itô二次变差公式得到[S]_t=∫σ²S²ds。",
+          "worked": "θ=.25时W_1^Q=W_1^P+.25，但两者在[0,1]的二次变差仍为1；若σ=.2，则对数价格扩散二次变差一年为.04。",
+          "limitation": "若从有跳跃模型切换到纯Brownian模型，这不是简单等价Girsanov漂移调整；跳跃补偿与不同Lévy特征也须共同处理。"
+        },
+        {
+          "title": "多资产风险价格的相容条件",
+          "question": "为什么单个Brownian风险因子未必能够同时消去所有资产超额漂移？",
+          "paragraphs": [
+            "设多只资产相对于同一Brownian驱动的超额漂移向量μ−r1、扩散暴露向量σ，则要求存在同一θ满足μ_i−r=σ_iθ。",
+            "若两资产要求彼此矛盾的θ，就无法在本一因子模型下构造同时令全部贴现资产为局部鞅的Q。这可能反映模型错设或金融套利，而不是Girsanov定理自身失效。"
+          ],
+          "formulas": [
+            {
+              "label": "多资产风险价格的相容条件",
+              "tex": "\\mu_i-r=\\sigma_i\\theta\\quad\\text{对所有 }i,\\qquad\\text{即 }\\mu-r\\mathbf1\\in\\operatorname{Col}(\\Sigma)"
+            }
+          ],
+          "proof": "Girsanov对每个资产的Brownian驱动应用同一θ变换，Q下超额漂移为μ_i−r−σ_iθ。要求所有资产的贴现漂移为0，就必须同时解线性方程Σθ=μ−r1。在线性代数中有解当且仅当右侧位于Σ列空间。",
+          "worked": "若r=.02，两资产超额漂移分别.04与.06、暴露分别.2与.3，则同一θ=.2可满足。若第二资产超额漂移改为.09，则需要θ=.3，与第一资产要求冲突。",
+          "limitation": "资产若不可交易、存在股息或融资限制，风险价格相容方程要按实际计价物和可交易集合修改；不能据简单冲突直接断言真实市场存在可实施套利。"
+        }
+      ],
+      "example": "股票P下漂移μ=.08、短利率r=.03、扩散σ=.2，取θ=.25时Q下漂移.03且Brownian二次变差不变。两资产暴露(.2,.3)、超额漂移(.04,.06)可共享θ=.2；若第二资产超额漂移为.09则不相容。",
+      "application": "用于风险中性概率变换、贴现价格局部鞅验证、市场价格风险估计和多资产风险因子相容性测试。 在多资产模型中还需检查风险溢价向量是否落在扩散暴露矩阵的列空间，并明确股息处理。",
+      "caveat": "Girsanov要求合法真鞅密度；改变概率权重不创造无风险套利。必须严格一致地使用风险价格正负号、资产股息和贴现计价物。",
+      "links": [
+        {
+          "kind": "math",
+          "id": "ito-n0320",
+          "label": "先修：指数鞅"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0321",
+          "label": "先修：Novikov条件"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0322",
+          "label": "风险中性测度"
+        },
+        {
+          "kind": "math",
+          "id": "finance-n0431",
+          "label": "金融：等价鞅测度"
+        }
+      ],
+      "sources": [
+        {
+          "title": "University of Chicago Greg Lawler：Stochastic Calculus: An Introduction with Applications第5章Girsanov与概率测度变换",
+          "url": "https://www.math.uchicago.edu/~lawler/finbook.pdf"
+        },
+        {
+          "title": "Stanford Math 227 John Nolen：Girsanov transformation与Novikov条件课堂讲义",
+          "url": "https://math.stanford.edu/~ryzhik/STANFORD/STANF227-10/notes227-09.pdf"
+        }
+      ],
+      "checked_status": "V14：四节定理证明、独立算例、异常边界和研究适用条件"
+    },
+    {
+      "id": "ito-n0322",
+      "node_id": "ito-n0322",
+      "title": "风险中性测度",
+      "definition": "风险中性测度Q是一种在指定货币市场账户B作为计价物时，使无股息可交易资产贴现价格成为局部鞅的等价概率测度。它不是投资者真实相信的未来涨跌分布，而是将风险价格吸收进概率权重后的无套利定价工具。对于可复制并满足适当可积性的终端支付H，价格可用B_t E_Q[H/B_T|F_t]表达；不完整市场下等价鞅测度可能不唯一。",
+      "assumptions": "有限期限[0,T]，定义严格正可交易计价物B_t=exp(∫_0^tr_sds)，资产可交易且忽略或适当计入股息、交易成本与卖空限制。Q与实际P等价，并要求贴现自融资资产在Q下是相应局部鞅；使用条件期望定价时需要真鞅/可复制性及可积支付等条件。不能把任意正密度都自动叫风险中性。",
+      "properties": [
+        "无股息风险中性贴现资产D=S/B为局部鞅，真鞅定价还需可积性。",
+        "无套利可复制支付可按风险中性条件期望贴现，真实P下的μ不是该公式里的概率参数。",
+        "单期二叉树风险中性上涨概率q=(R−d)/(u−d)，需d<R<u确保等价测度。",
+        "含跳跃或多因子不完备市场可能存在多个Q，单一无套利价格未必对全部不可复制支付唯一。"
+      ],
+      "formulas": [
+        {
+          "label": "等价测度与风险中性含义",
+          "tex": "D_t=\\frac{S_t}{B_t},\\qquad \\mathbb E_{\\mathbb Q}[D_T\\mid\\mathcal F_t]=D_t\\ \\text{在真鞅条件下}"
+        },
+        {
+          "label": "二叉树概率的严格推导",
+          "tex": "q=\\frac{R-d}{u-d},\\quad 1-q=\\frac{u-R}{u-d},\\qquad d<R<u"
+        },
+        {
+          "label": "可复制终端支付与贴现期望",
+          "tex": "V_t=B_t\\,\\mathbb E_{\\mathbb Q}\\!\\left[\\frac{H}{B_T}\\,\\middle|\\,\\mathcal F_t\\right]"
+        },
+        {
+          "label": "完整市场与风险中性概率唯一性",
+          "tex": "\\text{完备市场}\\quad\\Longrightarrow\\quad\\mathbb Q\\text{在适当无套利设定下唯一}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "在理想无股息连续市场中，若Q下资产漂移为rS、计价物满足dB=rBdt，则Itô乘积给d(S/B)=σ(S/B)dW^Q，无dt漂移。若该随机积分是真鞅，则条件期望等于当前贴现价格；仅局部鞅时不能直接写所有期限的等号。",
+          "tex": "D_t=\\frac{S_t}{B_t},\\qquad \\mathbb E_{\\mathbb Q}[D_T\\mid\\mathcal F_t]=D_t\\ \\text{在真鞅条件下}"
+        },
+        {
+          "explanation": "贴现股票条件期望要求q uS_0+(1−q)dS_0=RS_0。约去S_0、展开并整理为q(u−d)=R−d。u>d时严格正的q及1−q恰要求d<R<u，得到等价于两事件正概率的Q。",
+          "tex": "q=\\frac{R-d}{u-d},\\quad 1-q=\\frac{u-R}{u-d},\\qquad d<R<u"
+        },
+        {
+          "explanation": "设自融资复制价值V，终端V_T=H。若贴现自融资财富V/B在Q下是真鞅，则V_t/B_t=E_Q[V_T/B_T|F_t]=E_Q[H/B_T|F_t]。两边乘B_t得定价公式。需要真鞅/积分条件，局部鞅形式不能无条件推广。",
+          "tex": "V_t=B_t\\,\\mathbb E_{\\mathbb Q}\\!\\left[\\frac{H}{B_T}\\,\\middle|\\,\\mathcal F_t\\right]"
+        },
+        {
+          "explanation": "若两种等价鞅测度Q_1、Q_2在所有可复制支付的价格上一致，而任意状态支付可复制，则它们对每个状态指标支付的期望也必须一致，故每个状态概率相同，Q唯一。反过来不完备市场通常允许多个Q；具体无套利定价条件仍依市场框架。",
+          "tex": "\\text{完备市场}\\quad\\Longrightarrow\\quad\\mathbb Q\\text{在适当无套利设定下唯一}"
+        }
+      ],
+      "deep_sections": [
+        {
+          "title": "等价测度与风险中性含义",
+          "question": "风险中性概率为什么不需要与历史上涨频率相同？",
+          "paragraphs": [
+            "Q在相同样本空间上给出不同权重，但与P拥有相同的零概率事件。选择Q的目标是使以货币市场账户B贴现的可交易收益满足鞅定价约束。",
+            "真实收益漂移包含风险溢价，风险中性漂移反映计价物的无套利条件。投资者仍然在真实P世界中承担风险，所以不能把Q下的盈利概率误当作历史胜率。"
+          ],
+          "formulas": [
+            {
+              "label": "等价测度与风险中性含义",
+              "tex": "D_t=\\frac{S_t}{B_t},\\qquad \\mathbb E_{\\mathbb Q}[D_T\\mid\\mathcal F_t]=D_t\\ \\text{在真鞅条件下}"
+            }
+          ],
+          "proof": "在理想无股息连续市场中，若Q下资产漂移为rS、计价物满足dB=rBdt，则Itô乘积给d(S/B)=σ(S/B)dW^Q，无dt漂移。若该随机积分是真鞅，则条件期望等于当前贴现价格；仅局部鞅时不能直接写所有期限的等号。",
+          "worked": "在GBM真实μ=.08、无风险r=.03、σ=.2时，风险价格θ=.25可使Q下漂移变成.03。Q下的上涨概率不需等于P测得的上涨频率。",
+          "limitation": "交易费用、股息与融资约束会改变收益定义及允许的交易策略，不能一概将标价S/B写成无条件真实鞅。"
+        },
+        {
+          "title": "二叉树概率的严格推导",
+          "question": "为什么一期二叉树需要d<R<u才有严格正的风险中性概率？",
+          "paragraphs": [
+            "设今天标价S_0，一期后以因子u或d变化，风险无关账户一周期增长R。要求Q下贴现股票满足E_Q[S_1]/R=S_0。",
+            "把上涨概率记q，整理q u+(1−q)d=R，得到q=(R−d)/(u−d)。0<q<1等价于d<R<u，若R落在两股票增长因子的区间外会出现简单套利。"
+          ],
+          "formulas": [
+            {
+              "label": "二叉树概率的严格推导",
+              "tex": "q=\\frac{R-d}{u-d},\\quad 1-q=\\frac{u-R}{u-d},\\qquad d<R<u"
+            }
+          ],
+          "proof": "贴现股票条件期望要求q uS_0+(1−q)dS_0=RS_0。约去S_0、展开并整理为q(u−d)=R−d。u>d时严格正的q及1−q恰要求d<R<u，得到等价于两事件正概率的Q。",
+          "worked": "S_0=100、u=1.1、d=.9、R=1.02时，q=(1.02−.9)/(.2)=.6；无论真实上涨概率多少，这个无套利定价权重都是.6。",
+          "limitation": "若股票分红或借贷利率不同，不能简单复用这一无股息、单一R的二叉树公式；不完整交易限制也可能改变套利判别。"
+        },
+        {
+          "title": "可复制终端支付与贴现期望",
+          "question": "风险中性价格公式需要哪些交易可复制或市场完备性条件？",
+          "paragraphs": [
+            "对能以自融资交易策略完全复制的终端支付H，最终财富等于H，且策略价值的贴现过程在Q下适当可积。 期末支付应按实际可复制组合的现金流定义。",
+            "因此今日或中间时刻的价值V_t满足V_t=B_t E_Q[H/B_T|F_t]。当市场不完备且H不可复制时，若存在多个Q，可得到不同的合法无套利价格区间，而不是唯一数值。"
+          ],
+          "formulas": [
+            {
+              "label": "可复制终端支付与贴现期望",
+              "tex": "V_t=B_t\\,\\mathbb E_{\\mathbb Q}\\!\\left[\\frac{H}{B_T}\\,\\middle|\\,\\mathcal F_t\\right]"
+            }
+          ],
+          "proof": "设自融资复制价值V，终端V_T=H。若贴现自融资财富V/B在Q下是真鞅，则V_t/B_t=E_Q[V_T/B_T|F_t]=E_Q[H/B_T|F_t]。两边乘B_t得定价公式。需要真鞅/积分条件，局部鞅形式不能无条件推广。",
+          "worked": "前例二叉树执行价100的看涨支付为上涨10、下跌0。无套利价格V_0=(.6×10+.4×0)/1.02≈5.88235294。",
+          "limitation": "对不可复制的极端跳跃损失或有交易限制的支付，选定某个Q给出的期望不代表市场必然存在唯一无套利报价。"
+        },
+        {
+          "title": "完整市场与风险中性概率唯一性",
+          "question": "为什么市场完备性影响无法复制支付的价格，而不是改变定义本身？",
+          "paragraphs": [
+            "在有限状态市场中，如果全部状态支付都能由现有可交易资产张成，则每个终端支付有唯一复制组合，定价泛函由可交易价格唯一确定。",
+            "当可交易收益张成空间低于状态空间维度时，可能有多组严格正状态概率满足已交易资产价格，因而对未上市或未对冲支付给出不同期望。"
+          ],
+          "formulas": [
+            {
+              "label": "完整市场与风险中性概率唯一性",
+              "tex": "\\text{完备市场}\\quad\\Longrightarrow\\quad\\mathbb Q\\text{在适当无套利设定下唯一}"
+            }
+          ],
+          "proof": "若两种等价鞅测度Q_1、Q_2在所有可复制支付的价格上一致，而任意状态支付可复制，则它们对每个状态指标支付的期望也必须一致，故每个状态概率相同，Q唯一。反过来不完备市场通常允许多个Q；具体无套利定价条件仍依市场框架。",
+          "worked": "在两状态股票加无风险债券的标准二叉树模型中，上涨与下跌两状态的支付空间可由两资产张成，因此q=.6唯一；增加未交易第三状态因子时一般不再唯一。",
+          "limitation": "不可以仅凭某个风险价格函数存在就认定市场完备，也不能从不唯一Q直接推断市场一定存在无风险套利。"
+        }
+      ],
+      "example": "无股息二叉树S0=100、u=1.1、d=.9、债券增长R=1.02，Q上涨概率q=.6，看涨执行价100的无套利复制价格10×.6/1.02≈5.88235；真实上涨频率不参与该权重计算。",
+      "application": "用于ETF衍生品、期权复制、风险中性资产估值和期限支付贴现。需先判断资产是否可交易、支付是否可复制及贴现过程是否真鞅。",
+      "caveat": "风险中性Q不是历史P；严格正密度并不足以保证资产无套利，且局部鞅定价需要注意严格局部鞅造成的期望缺口。",
+      "links": [
+        {
+          "kind": "math",
+          "id": "ito-n0319",
+          "label": "先修：Girsanov"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0321",
+          "label": "先修：Novikov"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0323",
+          "label": "无套利条件"
+        },
+        {
+          "kind": "math",
+          "id": "finance-n0433",
+          "label": "二叉树复制验证"
+        }
+      ],
+      "sources": [
+        {
+          "title": "University of Chicago Greg Lawler Stochastic Calculus: An Introduction with Applications：第5章Girsanov与第6章期权定价",
+          "url": "https://www.math.uchicago.edu/~lawler/finbook.pdf"
+        },
+        {
+          "title": "MIT 15.070J Advanced Stochastic Processes：Lecture 19 Ito applications to financial economics",
+          "url": "https://ocw.mit.edu/courses/15-070j-advanced-stochastic-processes-fall-2013/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V14定价链：完整边界、四节证明与数值再现"
+    },
+    {
+      "id": "ito-n0323",
+      "node_id": "ito-n0323",
+      "title": "无套利测度条件",
+      "definition": "无套利测度条件把允许交易策略的无风险收益约束与等价（局部）鞅测度的存在联系起来。在有限状态单期无摩擦市场中，无套利与存在严格正、满足全部贴现资产定价方程的状态概率向量等价；连续时间半鞅市场则要谨慎区分普通无套利与NFLVR、等价局部鞅测度及一般σ-鞅测度等不同版本。",
+      "assumptions": "首先考虑有限状态单期、所有价格可交易、同一无风险增长R>0且允许自融资线性组合的无摩擦市场，所有真实状态在P下概率严格正。连续时间扩展需另加价格局部有界和可容许策略的下界等假设；不能把有限状态结果机械推广为任意跳跃或无限状态市场的普通NA等价结论。",
+      "properties": [
+        "有限状态单期市场NA等价存在严格正状态权重q，使所有贴现资产定价方程成立。",
+        "若同一未来支付有两种不同现价，则可构造立即套利，违反一价定律。",
+        "在标准无股息二叉树里d<R<u是避免简单股票/债券套利的必要充分条件。",
+        "连续时间中典型的局部有界半鞅FTAP使用NFLVR与等价局部鞅测度，不能只写普通NA就推出。"
+      ],
+      "formulas": [
+        {
+          "label": "单期状态价格的线性方程",
+          "tex": "p_i=\\sum_{j=1}^n\\psi_jH_{ij},\\quad \\psi_j>0,\\quad q_j=R\\psi_j,\\quad\\sum_jq_j=1"
+        },
+        {
+          "label": "一价定律与零成本套利",
+          "tex": "H_A(\\omega_j)=H_B(\\omega_j)\\ \\forall j,\\quad p_A>p_B\\Longrightarrow \\text{卖A、买B套利}"
+        },
+        {
+          "label": "二叉树无套利区间",
+          "tex": "d<R<u\\quad\\Longleftrightarrow\\quad 0<q=\\frac{R-d}{u-d}<1"
+        },
+        {
+          "label": "连续时间NFLVR与局部鞅",
+          "tex": "\\mathrm{NFLVR}\\Longleftrightarrow\\exists\\,\\mathbb Q\\sim\\mathbb P:\\ S/B\\text{ 在 }\\mathbb Q\\text{ 下为局部鞅}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "若组合持仓h形成各状态非负且至少一个状态严格正的未来支付Hᵀh，则对应成本hᵀp=(Hᵀh)ᵀψ>0，不能从零或负成本获得该未来收益。反向从无套利推出严格正价格向量可利用有限维分离定理或Farkas引理。",
+          "tex": "p_i=\\sum_{j=1}^n\\psi_jH_{ij},\\quad \\psi_j>0,\\quad q_j=R\\psi_j,\\quad\\sum_jq_j=1"
+        },
+        {
+          "explanation": "在t=0卖空价格较高的A得到p_A，买B支付p_B，净现金p_A−p_B>0。未来状态j中，组合B−A的支付H_B(j)−H_A(j)=0，对所有状态均无风险，保留或投资初始现金就是套利。",
+          "tex": "H_A(\\omega_j)=H_B(\\omega_j)\\ \\forall j,\\quad p_A>p_B\\Longrightarrow \\text{卖A、买B套利}"
+        },
+        {
+          "explanation": "若R>u，卖一单位股票收S0，买入市值S0的无风险债券，未来现金差S0R−S0u>0或S0R−S0d>0。若R<d，买股票卖债券则所有状态严格赚钱。等号情形至少一个状态盈余为零、另一状态严格正，也违反严格NA。",
+          "tex": "d<R<u\\quad\\Longleftrightarrow\\quad 0<q=\\frac{R-d}{u-d}<1"
+        },
+        {
+          "explanation": "证明的方向借助半鞅随机积分的超鞅性质：若可容许财富下界受控，局部鞅收益不能产生具有消失损失风险的正收益极限。反方向使用凸分析与函数空间分离构造等价局部鞅测度；这超出了有限维Farkas证明的范围。",
+          "tex": "\\mathrm{NFLVR}\\Longleftrightarrow\\exists\\,\\mathbb Q\\sim\\mathbb P:\\ S/B\\text{ 在 }\\mathbb Q\\text{ 下为局部鞅}"
+        }
+      ],
+      "deep_sections": [
+        {
+          "title": "单期状态价格的线性方程",
+          "question": "怎样把不存在无风险套利转成对每个状态严格正的价格权重约束？",
+          "paragraphs": [
+            "记m个可交易资产在n个状态的未来支付矩阵H，今天价格向量p。若存在严格正状态价格向量ψ使p=Hψ，对任何未来状态支付非负的组合，其今日价格也非负。",
+            "若无风险资产支付R，则状态价格总和=1/R。将q_j=Rψ_j解释为等价概率分布，可重新写成贴现期望价格关系。"
+          ],
+          "formulas": [
+            {
+              "label": "单期状态价格的线性方程",
+              "tex": "p_i=\\sum_{j=1}^n\\psi_jH_{ij},\\quad \\psi_j>0,\\quad q_j=R\\psi_j,\\quad\\sum_jq_j=1"
+            }
+          ],
+          "proof": "若组合持仓h形成各状态非负且至少一个状态严格正的未来支付Hᵀh，则对应成本hᵀp=(Hᵀh)ᵀψ>0，不能从零或负成本获得该未来收益。反向从无套利推出严格正价格向量可利用有限维分离定理或Farkas引理。",
+          "worked": "两状态二叉树R=1.02、q=(.6,.4)，状态价格ψ=(.6/1.02,.4/1.02)≈(.588235,.392157)，和为1/1.02≈.980392。",
+          "limitation": "若部分状态在真实P下不可能发生，等价测度的严格正性应只对真实支持集要求，不能人为给P零概率状态正价格权重。"
+        },
+        {
+          "title": "一价定律与零成本套利",
+          "question": "为什么两种完全相同的终端现金流不能具有不同现价？",
+          "paragraphs": [
+            "若组合A与B在每个可能状态的未来支付完全相同，而今天A比B贵，则卖空A、买入B取得正初始现金且未来两者抵消。 这种复制差价在零交易费用和无约束卖空前提下才可视为可实施策略。",
+            "若现金可存入无风险账户，初始差额能滚存为未来严格正收益，构成无风险套利。因此同支付必须同现价，这是复制定价的必要基础。"
+          ],
+          "formulas": [
+            {
+              "label": "一价定律与零成本套利",
+              "tex": "H_A(\\omega_j)=H_B(\\omega_j)\\ \\forall j,\\quad p_A>p_B\\Longrightarrow \\text{卖A、买B套利}"
+            }
+          ],
+          "proof": "在t=0卖空价格较高的A得到p_A，买B支付p_B，净现金p_A−p_B>0。未来状态j中，组合B−A的支付H_B(j)−H_A(j)=0，对所有状态均无风险，保留或投资初始现金就是套利。",
+          "worked": "若两个证券均在一年后确定支付100，但现价分别98与96，则卖价格98的证券、买价格96的证券得到初始2，未来现金流完全抵消。",
+          "limitation": "真实卖空限制、券源、融资费和交易滑点可能阻止该零摩擦套利交易实际实施，模型必须说明策略可容许集合。"
+        },
+        {
+          "title": "二叉树无套利区间",
+          "question": "当债券收益率位于股票上下两种收益之外时会发生什么？",
+          "paragraphs": [
+            "股票增长因子上为u、下为d，无风险账户增长R。若R≥u，债券在所有状态不逊于股票且至少某状态严格优于股票；卖股票买债券可形成套利。",
+            "若R≤d，则股票在所有状态不逊于债券且至少某状态更优；反向仓位可套利。严格无套利要求d<R<u，对应风险中性q在(0,1)内。"
+          ],
+          "formulas": [
+            {
+              "label": "二叉树无套利区间",
+              "tex": "d<R<u\\quad\\Longleftrightarrow\\quad 0<q=\\frac{R-d}{u-d}<1"
+            }
+          ],
+          "proof": "若R>u，卖一单位股票收S0，买入市值S0的无风险债券，未来现金差S0R−S0u>0或S0R−S0d>0。若R<d，买股票卖债券则所有状态严格赚钱。等号情形至少一个状态盈余为零、另一状态严格正，也违反严格NA。",
+          "worked": "取u=1.1、d=.9，若R=1.15，则卖股票、买债券从100初始等额出发，上涨状态赚5、下跌状态赚25，均严格正。",
+          "limitation": "此判别只针对允许双向无摩擦交易的单期模型；不同借贷利率和交易限制可改变可实施套利边界。"
+        },
+        {
+          "title": "连续时间NFLVR与局部鞅",
+          "question": "为什么在连续交易下必须区分普通无套利和极限形式的套利？",
+          "paragraphs": [
+            "连续时间允许越来越复杂的高频策略。即便没有某一条单独交易策略实现即时零风险盈利，策略序列仍可能以越来越小下行风险逼近确定获利。",
+            "NFLVR（不存在具有消失风险的免费午餐）排除这种极限套利；在标准局部有界半鞅市场和适当可容许策略下，它对应等价局部鞅测度的存在。该定理依赖市场类别与策略下界，不能只用‘不存在套利’四字替代。"
+          ],
+          "formulas": [
+            {
+              "label": "连续时间NFLVR与局部鞅",
+              "tex": "\\mathrm{NFLVR}\\Longleftrightarrow\\exists\\,\\mathbb Q\\sim\\mathbb P:\\ S/B\\text{ 在 }\\mathbb Q\\text{ 下为局部鞅}"
+            }
+          ],
+          "proof": "证明的方向借助半鞅随机积分的超鞅性质：若可容许财富下界受控，局部鞅收益不能产生具有消失损失风险的正收益极限。反方向使用凸分析与函数空间分离构造等价局部鞅测度；这超出了有限维Farkas证明的范围。",
+          "worked": "在单期二叉树市场NFLVR与普通NA都可由q∈(0,1)检查；但在无界交易策略的连续时间模型中需要明确更强的策略序列条件。",
+          "limitation": "市场含非局部有界价格或交易费用时，相关资产定价基本定理的测度及可容许策略形式需要重新选定，不能无条件复用这里的等价局部鞅版本。"
+        }
+      ],
+      "example": "二状态二叉树q=(.6,.4)、R=1.02时，正状态价格为(.588235,.392157)，总和1/R≈.980392；若R=1.15>u=1.1，则卖股票买债券可在上涨/下跌状态分别赚5和25。",
+      "application": "用于资产一价律、二叉树复制、衍生品无套利定价以及连续时间模型中可容许交易和NFLVR条件的辨别。",
+      "caveat": "无套利结论依赖资产可交易性与融资规则；连续时间FTAP需要适当局部有界性和策略下界，不能将普通NA简单等同于ELMM存在。",
+      "links": [
+        {
+          "kind": "math",
+          "id": "ito-n0322",
+          "label": "先修：风险中性测度"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0324",
+          "label": "后续：贴现资产鞅"
+        },
+        {
+          "kind": "math",
+          "id": "finance-n0427",
+          "label": "一价定律"
+        },
+        {
+          "kind": "math",
+          "id": "finance-n0432",
+          "label": "市场完备性"
+        }
+      ],
+      "sources": [
+        {
+          "title": "University of Chicago Greg Lawler Stochastic Calculus: An Introduction with Applications：第5章Girsanov与第6章期权定价",
+          "url": "https://www.math.uchicago.edu/~lawler/finbook.pdf"
+        },
+        {
+          "title": "MIT 15.070J Advanced Stochastic Processes：Lecture 19 Ito applications to financial economics",
+          "url": "https://ocw.mit.edu/courses/15-070j-advanced-stochastic-processes-fall-2013/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V14定价链：完整边界、四节证明与数值再现"
+    },
+    {
+      "id": "ito-n0324",
+      "node_id": "ito-n0324",
+      "title": "贴现资产鞅",
+      "definition": "贴现资产鞅是把风险中性定价约束写成动态形式的核心对象。若货币市场账户B_t满足dB_t=r_tB_tdt，且风险中性测度Q下无股息可交易资产满足dS_t=r_tS_tdt+σ_tS_tdW_t^Q，则D_t=S_t/B_t为连续局部鞅。若扩散积分真鞅且支付可积，D具有条件期望守恒；股息必须在累计贴现总收益中另行计入。",
+      "assumptions": "有限期限内B_t>0，利率r_t适应且可积，资产价格为正且连续Itô扩散。无股息假设下dD应无dt漂移；如果有连续股息率q，则除息价格本身贴现后一般不是鞅，需加累计贴现股息。由局部鞅推出真鞅需要额外可积性或明确GBM等模型条件。",
+      "properties": [
+        "无股息、Q漂移r的资产贴现价格满足dD=(σS/B)dW^Q。",
+        "在几何布朗定价模型中固定σ、有限时域D是真鞅，E_Q[D_T|F_t]=D_t。",
+        "有股息现金流时应使用贴现累计收益而不是单纯除息价格D。",
+        "严格局部鞅可能满足零局部漂移但E D_T<D_0，不能未经核查把所有局部鞅当成风险中性条件期望。"
+      ],
+      "formulas": [
+        {
+          "label": "折现乘积的Itô证明",
+          "tex": "d(S_t/B_t)=\\frac{\\sigma_tS_t}{B_t}\\,dW_t^{\\mathbb Q}"
+        },
+        {
+          "label": "GBM贴现真鞅与条件期望",
+          "tex": "\\frac{S_t}{B_t}=S_0e^{\\sigma W_t^{\\mathbb Q}-\\frac12\\sigma^2t},\\quad \\mathbb E_{\\mathbb Q}[S_T/B_T\\mid\\mathcal F_t]=S_t/B_t"
+        },
+        {
+          "label": "股息与累计收益的正确折现",
+          "tex": "G_t=\\frac{S_t}{B_t}+\\int_0^t\\frac{q_sS_s}{B_s}\\,ds,\\qquad dG_t=\\frac{\\sigma_tS_t}{B_t}\\,dW_t^{\\mathbb Q}"
+        },
+        {
+          "label": "策略自融资与局部鞅风险",
+          "tex": "d(V_t/B_t)=\\sum_{i=1}^n\\phi_t^i\\,d(S_t^i/B_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "使用Itô乘积法则，d(B^{-1}S)=B^{-1}dS+Sd(B^{-1})+d[B^{-1},S]。B^{-1}有限变差使末项为零，且d(B^{-1})=−rB^{-1}dt。代入资产Q动态得到B^{-1}rSdt−rB^{-1}Sdt+σB^{-1}S dW，漂移严格相消。",
+          "tex": "d(S_t/B_t)=\\frac{\\sigma_tS_t}{B_t}\\,dW_t^{\\mathbb Q}"
+        },
+        {
+          "explanation": "从GBM解S_t=S0exp[(r−σ²/2)t+σW^Q_t]除以B_t=e^{rt}得随机指数。对未来独立增量，条件指数矩E[e^{σ(W_T−W_t)−σ²(T−t)/2}|F_t]=1，因此得到真鞅等式。",
+          "tex": "\\frac{S_t}{B_t}=S_0e^{\\sigma W_t^{\\mathbb Q}-\\frac12\\sigma^2t},\\quad \\mathbb E_{\\mathbb Q}[S_T/B_T\\mid\\mathcal F_t]=S_t/B_t"
+        },
+        {
+          "explanation": "对除息资产使用dS=(r−q)Sdt+σS dW。贴现后漂移为−qS/Bdt；累计贴现股息积分的微分恰为+qS/Bdt，与前项抵消。扩散项保留，故累计贴现收益G为局部鞅。",
+          "tex": "G_t=\\frac{S_t}{B_t}+\\int_0^t\\frac{q_sS_s}{B_s}\\,ds,\\qquad dG_t=\\frac{\\sigma_tS_t}{B_t}\\,dW_t^{\\mathbb Q}"
+        },
+        {
+          "explanation": "自融资定义意味着组合财富变化完全来自持有资产及现金账户的价格变化，不存在外部现金注入。折现后现金账户消去，其余变化写成可预测资产持仓对贴现价格的随机积分；对局部鞅价格，适当可积的策略积分仍为局部鞅。",
+          "tex": "d(V_t/B_t)=\\sum_{i=1}^n\\phi_t^i\\,d(S_t^i/B_t)"
+        }
+      ],
+      "deep_sections": [
+        {
+          "title": "折现乘积的Itô证明",
+          "question": "为什么价格在Q下增长r时，贴现值没有确定性漂移？",
+          "paragraphs": [
+            "令D=B^{-1}S。由于B^{-1}是有限变差过程，其与S的二次协变差为零，Itô乘积公式仅有S d(B^{-1})+B^{-1}dS。",
+            "将d(B^{-1})=−rB^{-1}dt和dS=rSdt+σS dW代入，两个r项抵消，仅留下扩散随机积分，因此是局部鞅。"
+          ],
+          "formulas": [
+            {
+              "label": "折现乘积的Itô证明",
+              "tex": "d(S_t/B_t)=\\frac{\\sigma_tS_t}{B_t}\\,dW_t^{\\mathbb Q}"
+            }
+          ],
+          "proof": "使用Itô乘积法则，d(B^{-1}S)=B^{-1}dS+Sd(B^{-1})+d[B^{-1},S]。B^{-1}有限变差使末项为零，且d(B^{-1})=−rB^{-1}dt。代入资产Q动态得到B^{-1}rSdt−rB^{-1}Sdt+σB^{-1}S dW，漂移严格相消。",
+          "worked": "S0=100、r=.03、σ=.2时Q下ES1=100e^{.03}≈103.04545，贴现均值e^{−.03}ES1=100；对数价格的平均漂移则是.03−.02=.01。",
+          "limitation": "局部鞅证明不自动给出真实交易价格：有股息、买卖价差及动态交易成本时，必须修改可交易净收益的定义。"
+        },
+        {
+          "title": "GBM贴现真鞅与条件期望",
+          "question": "什么情况下局部鞅可以明确加强成真鞅？",
+          "paragraphs": [
+            "在理想GBM中，D_t=S0exp[−σ²t/2+σW_t^Q]，这是固定σ的Brownian指数真鞅，正态指数矩给任何有限时域的均值恒为S0。",
+            "因此E_Q[D_T|F_t]=D_t，且未来的贴现终值可以用于条件期望定价。这个明确模型下的证明不能推广到任意状态依赖扩散或无界随机波动系数。"
+          ],
+          "formulas": [
+            {
+              "label": "GBM贴现真鞅与条件期望",
+              "tex": "\\frac{S_t}{B_t}=S_0e^{\\sigma W_t^{\\mathbb Q}-\\frac12\\sigma^2t},\\quad \\mathbb E_{\\mathbb Q}[S_T/B_T\\mid\\mathcal F_t]=S_t/B_t"
+            }
+          ],
+          "proof": "从GBM解S_t=S0exp[(r−σ²/2)t+σW^Q_t]除以B_t=e^{rt}得随机指数。对未来独立增量，条件指数矩E[e^{σ(W_T−W_t)−σ²(T−t)/2}|F_t]=1，因此得到真鞅等式。",
+          "worked": "若S0=100、σ=.2、r=.03、T=1，则E_Q[S1/B1]=100。风险中性对数收益的期望为r−σ²/2=.01，与资产价格均值增长r并不矛盾。",
+          "limitation": "严格局部鞅中贴现期望可能下降；不能仅检查形式漂移0就把E_Q[D_T]=D0当作无条件数学事实。"
+        },
+        {
+          "title": "股息与累计收益的正确折现",
+          "question": "有连续股息的股票为什么不能直接把除息价格贴现视为鞅？",
+          "paragraphs": [
+            "若资产持续支付现金股息率qSdt，风险中性下除息价格的漂移通常是(r−q)Sdt。 同时必须声明连续股息率相对于除息价格的现金支付定义。",
+            "因此d(S/B)包含−qS/B的负漂移；将已经支付的贴现现金股息∫qS/Bds累加，才能构成风险中性总收益局部鞅。"
+          ],
+          "formulas": [
+            {
+              "label": "股息与累计收益的正确折现",
+              "tex": "G_t=\\frac{S_t}{B_t}+\\int_0^t\\frac{q_sS_s}{B_s}\\,ds,\\qquad dG_t=\\frac{\\sigma_tS_t}{B_t}\\,dW_t^{\\mathbb Q}"
+            }
+          ],
+          "proof": "对除息资产使用dS=(r−q)Sdt+σS dW。贴现后漂移为−qS/Bdt；累计贴现股息积分的微分恰为+qS/Bdt，与前项抵消。扩散项保留，故累计贴现收益G为局部鞅。",
+          "worked": "若r=.03、连续股息率q=.01、风险中性除息漂移为.02，除息价格贴现后平均下降，但加回贴现股息后总收益鞅条件仍成立。",
+          "limitation": "ETF分红、债券票息与期货保证金现金流需要按实际支付时点建模，不能将不同资产的贴现收益定义混为一谈。"
+        },
+        {
+          "title": "策略自融资与局部鞅风险",
+          "question": "多资产组合能否直接继承贴现股票的局部鞅性质？",
+          "paragraphs": [
+            "理想无摩擦、自融资、可预测且可积的持仓策略，其贴现财富变化是各资产贴现价格增量的随机积分。 该条件还要求库存过程在交易发生之前确定。",
+            "在Q下若所有贴现可交易资产为局部鞅，合法的自融资财富贴现过程仍是局部鞅。但是否真鞅、是否排除低风险近似套利，还取决于可容许策略的财富下界与积分条件。"
+          ],
+          "formulas": [
+            {
+              "label": "策略自融资与局部鞅风险",
+              "tex": "d(V_t/B_t)=\\sum_{i=1}^n\\phi_t^i\\,d(S_t^i/B_t)"
+            }
+          ],
+          "proof": "自融资定义意味着组合财富变化完全来自持有资产及现金账户的价格变化，不存在外部现金注入。折现后现金账户消去，其余变化写成可预测资产持仓对贴现价格的随机积分；对局部鞅价格，适当可积的策略积分仍为局部鞅。",
+          "worked": "在单资产理想模型若持有一股、其余为零，组合贴现财富恰等于D=S/B；若持续再平衡，必须说明头寸φ_t是交易发生前可确定的可预测过程。",
+          "limitation": "若允许无限加倍下注和无下界财富，不能把局部鞅模型直接解释为所有策略都排除套利；实际交易还存在保证金和融资限制。"
+        }
+      ],
+      "example": "风险中性GBM设S0=100、r=.03、σ=.2，一年价格均值100e^{.03}≈103.045，贴现均值仍100；连续股息率q=.01时除息价格漂移为r−q=.02，须将累计贴现股息加入财富鞅。",
+      "application": "连接价格动态、衍生品贴现定价、多资产自融资策略和风险中性期望，便于检查分红现金流与执行时点。 尤其适合对含连续股息的股票、ETF总收益指数和不同时点交易现金流的折现处理进行检查。",
+      "caveat": "零贴现漂移一般只证明局部鞅；严格局部鞅、融资约束、股息和买卖价差都会影响真实价格期望表示。 若贴现局部鞅缺乏一致可积性，不能擅自把期望等式推广到所有无界期限。",
+      "links": [
+        {
+          "kind": "math",
+          "id": "ito-n0322",
+          "label": "先修：风险中性测度"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0323",
+          "label": "先修：无套利条件"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0328",
+          "label": "后续：严格局部鞅"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0326",
+          "label": "后向PDE"
+        }
+      ],
+      "sources": [
+        {
+          "title": "University of Chicago Greg Lawler Stochastic Calculus: An Introduction with Applications：第5章Girsanov与第6章期权定价",
+          "url": "https://www.math.uchicago.edu/~lawler/finbook.pdf"
+        },
+        {
+          "title": "MIT 15.070J Advanced Stochastic Processes：Lecture 19 Ito applications to financial economics",
+          "url": "https://ocw.mit.edu/courses/15-070j-advanced-stochastic-processes-fall-2013/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V14定价链：完整边界、四节证明与数值再现"
+    },
+    {
+      "id": "ito-n0326",
+      "node_id": "ito-n0326",
+      "title": "Kolmogorov后向PDE",
+      "definition": "Kolmogorov后向偏微分方程将Markov扩散的未来条件期望转换为终端值PDE。若dX=b(t,X)dt+σ(t,X)dW，定义u(t,x)=E[g(X_T)|X_t=x]，在足够正则和可积条件下满足u_t+Lu=0、u(T,x)=g(x)，其中L=b∂x+(1/2)σ²∂xx。加入贴现和风险中性漂移可得到经典欧式期权的Black–Scholes PDE。",
+      "assumptions": "考虑一维Markov Itô扩散，b、σ在研究区间有足够正则性，终端支付g满足可积与适当增长条件，使u可用经典C^{1,2}解表述。若g在执行价处不光滑，可使用弱/黏性解与适当扩散平滑论证，不能简单要求终端时刻也处处二阶可微；边界及无穷远增长条件应随模型另行规定。",
+      "properties": [
+        "Markov条件期望u(t,x)满足后向方程u_t+b u_x+(1/2)σ²u_xx=0。",
+        "Brownian纯扩散对应热方程u_t+(1/2)u_xx=0。",
+        "OU线性终端支付u(t,x)=θ+(x−θ)e^{−κ(T−t)}可直接代入PDE验证。",
+        "在风险中性GBM与固定r下，贴现定价PDE含−ru项；不是所有统计预测PDE都可称无套利定价方程。"
+      ],
+      "formulas": [
+        {
+          "label": "Markov生成算子与后向期望",
+          "tex": "u_t(t,x)+b(t,x)u_x(t,x)+\\tfrac12\\sigma(t,x)^2u_{xx}(t,x)=0,\\quad u(T,x)=g(x)"
+        },
+        {
+          "label": "OU条件均值的PDE核对",
+          "tex": "u(t,x)=\\theta+(x-\\theta)e^{-\\kappa(T-t)},\\qquad u_t+\\kappa(\\theta-x)u_x+\\tfrac12\\sigma^2u_{xx}=0"
+        },
+        {
+          "label": "贴现期望与Feynman–Kac项",
+          "tex": "u_t+\\mathcal L^{\\mathbb Q}u-ru=0,\\qquad u(T,x)=g(x)"
+        },
+        {
+          "label": "Black–Scholes PDE与非光滑支付",
+          "tex": "u_t+rsu_s+\\tfrac12\\sigma^2s^2u_{ss}-ru=0,\\quad u(T,s)=(s-K)^+"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由Itô公式du(t,X_t)=[u_t+b u_x+(1/2)σ²u_xx]dt+σu_x dW。若u(t,X_t)=E[g(X_T)|F_t]是真鞅且u足够光滑，则连续半鞅分解的有限变差漂移部分必须为零，从而得到PDE和终端条件。",
+          "tex": "u_t(t,x)+b(t,x)u_x(t,x)+\\tfrac12\\sigma(t,x)^2u_{xx}(t,x)=0,\\quad u(T,x)=g(x)"
+        },
+        {
+          "explanation": "令τ=T−t，u=θ+(x−θ)e^{−κτ}，对t求导是κ(x−θ)e^{−κτ}。空间一阶导数e^{−κτ}，二阶导数0，因此u_t+κ(θ−x)u_x=κ(x−θ)e^{−κτ}+κ(θ−x)e^{−κτ}=0。终端t=T时u=x。",
+          "tex": "u(t,x)=\\theta+(x-\\theta)e^{-\\kappa(T-t)},\\qquad u_t+\\kappa(\\theta-x)u_x+\\tfrac12\\sigma^2u_{xx}=0"
+        },
+        {
+          "explanation": "计算d[e^{−rt}u(t,X_t)]=e^{−rt}[(u_t+Lu−ru)dt+σu_xdW^Q]。若贴现条件价值是真鞅，其漂移部分应消失，于是得到含−ru的后向方程；反向从PDE用Itô及可积性也可得Feynman–Kac表示。",
+          "tex": "u_t+\\mathcal L^{\\mathbb Q}u-ru=0,\\qquad u(T,x)=g(x)"
+        },
+        {
+          "explanation": "风险中性定价条件给u(t,s)=E_Q[e^{−r(T−t)}(S_T−K)^+|S_t=s]。由GBM系数b=rs、a=σs代入折现后向PDE得到所示表达；内点平滑来自非退化对数正态转移密度，终端看涨支付的拐点不要求经典二阶可微。",
+          "tex": "u_t+rsu_s+\\tfrac12\\sigma^2s^2u_{ss}-ru=0,\\quad u(T,s)=(s-K)^+"
+        }
+      ],
+      "deep_sections": [
+        {
+          "title": "Markov生成算子与后向期望",
+          "question": "为什么条件未来支付满足二阶微分算子方程？",
+          "paragraphs": [
+            "对于扩散dX=b(t,X)dt+σ(t,X)dW，平滑测试函数f的Itô公式包含漂移f_t+b f_x+(1/2)σ² f_xx。",
+            "若u(t,X_t)表示同一固定终端支付g(X_T)的条件期望，它应是鞅，因此在合适局部化与正则条件下Its dt漂移为零，得到后向PDE。"
+          ],
+          "formulas": [
+            {
+              "label": "Markov生成算子与后向期望",
+              "tex": "u_t(t,x)+b(t,x)u_x(t,x)+\\tfrac12\\sigma(t,x)^2u_{xx}(t,x)=0,\\quad u(T,x)=g(x)"
+            }
+          ],
+          "proof": "由Itô公式du(t,X_t)=[u_t+b u_x+(1/2)σ²u_xx]dt+σu_x dW。若u(t,X_t)=E[g(X_T)|F_t]是真鞅且u足够光滑，则连续半鞅分解的有限变差漂移部分必须为零，从而得到PDE和终端条件。",
+          "worked": "对标准Brownian dX=dW、终端g(x)=x²，u(t,x)=x²+(T−t)，于是u_t=−1、u_xx=2，代入−1+(1/2)×2=0。",
+          "limitation": "若系数退化、支付不光滑或增长不可控，不能只凭形式Itô替代经典解存在唯一性的证明，可能需要弱/黏性解理论。"
+        },
+        {
+          "title": "OU条件均值的PDE核对",
+          "question": "OU的解析条件期望怎样验证后向PDE和随机路径计算一致？",
+          "paragraphs": [
+            "OU扩散有b(x)=κ(θ−x)、σ常数，取终端支付g(x)=x。已知条件期望是u(t,x)=θ+(x−θ)e^{−κ(T−t)}。",
+            "此函数在空间方向一阶导数为e^{−κ(T−t)}、二阶导数为0，时间导数为κ(x−θ)e^{−κ(T−t)}，与漂移项完全抵消。"
+          ],
+          "formulas": [
+            {
+              "label": "OU条件均值的PDE核对",
+              "tex": "u(t,x)=\\theta+(x-\\theta)e^{-\\kappa(T-t)},\\qquad u_t+\\kappa(\\theta-x)u_x+\\tfrac12\\sigma^2u_{xx}=0"
+            }
+          ],
+          "proof": "令τ=T−t，u=θ+(x−θ)e^{−κτ}，对t求导是κ(x−θ)e^{−κτ}。空间一阶导数e^{−κτ}，二阶导数0，因此u_t+κ(θ−x)u_x=κ(x−θ)e^{−κτ}+κ(θ−x)e^{−κτ}=0。终端t=T时u=x。",
+          "worked": "κ=2、θ=1、x=3、T−t=1，后向PDE给u=1+2e^{−2}≈1.27067，和OU显式解的条件均值完全一致。",
+          "limitation": "终端g=x仅验证第一条件矩；要检验完整转移分布仍需额外计算方差、特征函数或转移密度。"
+        },
+        {
+          "title": "贴现期望与Feynman–Kac项",
+          "question": "加入确定性短利率贴现后，为什么PDE出现−ru的零阶项？",
+          "paragraphs": [
+            "若u(t,x)=E_Q[e^{−r(T−t)}g(X_T)|X_t=x]，则过程e^{−rt}u(t,X_t)的适当终端价值得到鞅表示。",
+            "对e^{−rt}u应用Itô乘积公式，除了u_t+Lu还出现−ru，因此无套利折现条件要求u_t+Lu−ru=0。该关系依赖Q漂移和合适真鞅/增长条件。"
+          ],
+          "formulas": [
+            {
+              "label": "贴现期望与Feynman–Kac项",
+              "tex": "u_t+\\mathcal L^{\\mathbb Q}u-ru=0,\\qquad u(T,x)=g(x)"
+            }
+          ],
+          "proof": "计算d[e^{−rt}u(t,X_t)]=e^{−rt}[(u_t+Lu−ru)dt+σu_xdW^Q]。若贴现条件价值是真鞅，其漂移部分应消失，于是得到含−ru的后向方程；反向从PDE用Itô及可积性也可得Feynman–Kac表示。",
+          "worked": "如果无风险支付恒为g(x)=100、r=.03、剩余期限1年，则u=100e^{−.03}≈97.0446，代入无状态项的PDE u_t−ru=0成立。",
+          "limitation": "定价PDE的算子必须使用风险中性Q下的状态漂移，不能把真实P下的历史漂移直接代入而仍称其为Black–Scholes价格。"
+        },
+        {
+          "title": "Black–Scholes PDE与非光滑支付",
+          "question": "如何从风险中性几何布朗扩散得到欧式期权的价格方程？",
+          "paragraphs": [
+            "在Q下dS=rSdt+σS dW且无股息，生成算子是Ls=rs∂s+(1/2)σ²s²∂ss。 对非光滑到期现金流尤其应说明所采用的解概念。",
+            "对欧式支付g(s)=(s−K)^+，条件贴现期望满足Black–Scholes PDE和终端支付。由于g在K处不可微，经典光滑性通常在t<T内部成立，终端边界需要按适当连续/弱意义理解。"
+          ],
+          "formulas": [
+            {
+              "label": "Black–Scholes PDE与非光滑支付",
+              "tex": "u_t+rsu_s+\\tfrac12\\sigma^2s^2u_{ss}-ru=0,\\quad u(T,s)=(s-K)^+"
+            }
+          ],
+          "proof": "风险中性定价条件给u(t,s)=E_Q[e^{−r(T−t)}(S_T−K)^+|S_t=s]。由GBM系数b=rs、a=σs代入折现后向PDE得到所示表达；内点平滑来自非退化对数正态转移密度，终端看涨支付的拐点不要求经典二阶可微。",
+          "worked": "取r=.03、σ=.2、K=100，检查u(T,110)=10、u(T,90)=0，确保终端边界单位为货币金额，且贴现必须以剩余期限T−t计算。",
+          "limitation": "若有连续股息、交易费用或跳跃，PDE的漂移、现金流和算子均需相应修改；数学上的解不能自动保证市场完全可复制。"
+        }
+      ],
+      "example": "Brownian终端g(x)=x²时后向条件均值u=x²+T−t，代入热方程确为零。OUκ=2、θ=1、x=3、一年条件期望≈1.27067；恒定到期100的无风险支付一年现值100e^{−.03}≈97.0446。",
+      "application": "连接金融条件风险预测、期权无套利定价、Feynman–Kac概率表示与数值PDE方法，可将解析算例作为独立单元测试。",
+      "caveat": "经典PDE结论依赖平滑、增长及边界条件；风险中性定价须使用Q下生成元。终端非光滑期权支付不应被错误要求处处C²。",
+      "links": [
+        {
+          "kind": "math",
+          "id": "ito-n0310",
+          "label": "先修：多维Itô"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0324",
+          "label": "金融应用：贴现资产鞅"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0325",
+          "label": "后续：Feynman–Kac条件期望"
+        },
+        {
+          "kind": "math",
+          "id": "finance-n0434",
+          "label": "金融：Black–Scholes"
+        }
+      ],
+      "sources": [
+        {
+          "title": "University of Chicago Greg Lawler Stochastic Calculus: An Introduction with Applications：第5章Girsanov与第6章期权定价",
+          "url": "https://www.math.uchicago.edu/~lawler/finbook.pdf"
+        },
+        {
+          "title": "MIT 15.070J Advanced Stochastic Processes：Lecture 19 Ito applications to financial economics",
+          "url": "https://ocw.mit.edu/courses/15-070j-advanced-stochastic-processes-fall-2013/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V14定价链：完整边界、四节证明与数值再现"
+    },
+    {
+      "id": "ito-n0328",
+      "node_id": "ito-n0328",
+      "title": "局部鞅与严格局部鞅",
+      "definition": "局部鞅允许通过一列递增停时将随机过程截断为真鞅，但未要求原过程全时域可积或条件期望守恒。严格局部鞅是局部鞅但不是真鞅，经典例子为三维Bessel过程的倒数。它揭示金融数学中一个关键边界：即使贴现价格的Itô漂移为零、过程严格为正，也不能未经真鞅检验就宣称期望价格等于现价。",
+      "assumptions": "连续适应过程M在给定滤过下是局部鞅，如果存在τ_n↑∞几乎处处使M^{τ_n}为真鞅。正局部鞅在适当条件下是超鞅，但可能严格下降。三维Bessel倒数例子取R_0=x>0，R满足dR=dB+(1/R)dt，Z=x/R；精确期望公式要求从三维Brownian径向过程出发。",
+      "properties": [
+        "局部鞅是经停时截断后的真鞅，不可直接假设E M_t=E M_0。",
+        "非负局部鞅的期望非增，严格下降时就是严格局部鞅。",
+        "三维Bessel倒数Z=x/R满足零Itô漂移但E Z_t=2Φ(x/√t)−1<1。",
+        "金融资产贴现价若为严格局部鞅，风险中性条件期望可能低于当前价格，定价表示需额外处理泡沫和可复制性。"
+      ],
+      "formulas": [
+        {
+          "label": "停止局部化与真鞅区别",
+          "tex": "M^{\\tau_n}_t=M_{t\\wedge\\tau_n}\\text{ 为鞅},\\quad \\tau_n\\uparrow\\infty,\\quad\\mathbb EM_t\\ne\\mathbb EM_0\\text{ 可能}"
+        },
+        {
+          "label": "正局部鞅的超鞅性质",
+          "tex": "M_t\\ge0,\\quad \\mathbb E[M_t\\mid\\mathcal F_s]\\le M_s,\\quad \\mathbb EM_t\\le\\mathbb EM_0"
+        },
+        {
+          "label": "三维Bessel倒数的具体反例",
+          "tex": "Z_t=\\frac{x}{R_t},\\quad dZ_t=-\\frac{x}{R_t^2}\\,dB_t,\\quad \\mathbb EZ_t=2\\Phi(x/\\sqrt t)-1<1"
+        },
+        {
+          "label": "真鞅检验与金融价格泡沫",
+          "tex": "\\mathbb E_{\\mathbb Q}[D_T\\mid\\mathcal F_t]\\le D_t,\\qquad \\text{严格局部鞅可使不等号严格}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "局部鞅定义仅对每个固定停止版保证条件期望守恒。若想通过极限保留期望，需停止族一致可积或可用主导收敛等条件；纯粹的逐路径收敛没有这个性质，所以不能从全部停止等式直接得到原过程等式。",
+          "tex": "M^{\\tau_n}_t=M_{t\\wedge\\tau_n}\\text{ 为鞅},\\quad \\tau_n\\uparrow\\infty,\\quad\\mathbb EM_t\\ne\\mathbb EM_0\\text{ 可能}"
+        },
+        {
+          "explanation": "对M_{t∧τ_n}使用条件期望鞅等式E[M_{t∧τ_n}|F_s]=M_{s∧τ_n}。因被积量非负可使用条件Fatou得E[M_t|F_s]≤liminf M_{s∧τ_n}=M_s。再取期望得到均值非增，严格不等式说明非真鞅。",
+          "tex": "M_t\\ge0,\\quad \\mathbb E[M_t\\mid\\mathcal F_s]\\le M_s,\\quad \\mathbb EM_t\\le\\mathbb EM_0"
+        },
+        {
+          "explanation": "对f(r)=x/r，有f'=−x/r²、f''=2x/r³。代入dR=dB+r^{-1}dt与d[R]=dt，Itô漂移−x/r³+(1/2)(2x/r³)=0。期望可从三维Brownian径向转移密度对x/r积分得到2Φ(x/√t)−1，故严格局部性成立。",
+          "tex": "Z_t=\\frac{x}{R_t},\\quad dZ_t=-\\frac{x}{R_t^2}\\,dB_t,\\quad \\mathbb EZ_t=2\\Phi(x/\\sqrt t)-1<1"
+        },
+        {
+          "explanation": "非负局部鞅为超鞅，条件Fatou给未来条件均值不超过当前值。若存在T使两者在正概率事件上严格不等，则D不是真鞅；如果把真鞅条件期望公式当成定义强行套用，就会遗漏当前价格与终端期望的差额。",
+          "tex": "\\mathbb E_{\\mathbb Q}[D_T\\mid\\mathcal F_t]\\le D_t,\\qquad \\text{严格局部鞅可使不等号严格}"
+        }
+      ],
+      "deep_sections": [
+        {
+          "title": "停止局部化与真鞅区别",
+          "question": "为什么对所有停止版本成立的期望等式不能自动传递到原过程？",
+          "paragraphs": [
+            "设τ_n将可能无界的局部鞅停止为真鞅，故对每个n有E[M_{t∧τ_n}]=M_0。 在此处停时序列必须确实趋向无穷，并确保每个停止过程满足真鞅要求。",
+            "当n趋无穷，M_{t∧τ_n}逐路径趋M_t，但从几乎处处收敛不能推出期望可交换；缺少一致可积可能导致原期望不同。"
+          ],
+          "formulas": [
+            {
+              "label": "停止局部化与真鞅区别",
+              "tex": "M^{\\tau_n}_t=M_{t\\wedge\\tau_n}\\text{ 为鞅},\\quad \\tau_n\\uparrow\\infty,\\quad\\mathbb EM_t\\ne\\mathbb EM_0\\text{ 可能}"
+            }
+          ],
+          "proof": "局部鞅定义仅对每个固定停止版保证条件期望守恒。若想通过极限保留期望，需停止族一致可积或可用主导收敛等条件；纯粹的逐路径收敛没有这个性质，所以不能从全部停止等式直接得到原过程等式。",
+          "worked": "若正局部鞅初值1，停止版期望均1，而原过程某时刻E M_t=.9，则并不矛盾：期望缺口来自停止序列不满足所需的统一可积控制。",
+          "limitation": "数值模拟在任何有限样本上得到均值接近1，不证明无限尾部矩满足真鞅要求；罕见路径可能决定期望缺口。"
+        },
+        {
+          "title": "正局部鞅的超鞅性质",
+          "question": "为什么严格正性只能推出期望不增加，而非恰好守恒？",
+          "paragraphs": [
+            "对非负局部鞅，选局部化停时τ_n后利用条件Fatou，E[M_t|F_s]≤liminf E[M_{t∧τ_n}|F_s]=liminf M_{s∧τ_n}=M_s。",
+            "因此M为超鞅且E M_t≤E M_0。若某个t严格小于初值期望，则不能是鞅，尽管每个停止版本具有局部鞅性质。 必须通过局部化、非负Fatou引理及条件期望来严格证明。"
+          ],
+          "formulas": [
+            {
+              "label": "正局部鞅的超鞅性质",
+              "tex": "M_t\\ge0,\\quad \\mathbb E[M_t\\mid\\mathcal F_s]\\le M_s,\\quad \\mathbb EM_t\\le\\mathbb EM_0"
+            }
+          ],
+          "proof": "对M_{t∧τ_n}使用条件期望鞅等式E[M_{t∧τ_n}|F_s]=M_{s∧τ_n}。因被积量非负可使用条件Fatou得E[M_t|F_s]≤liminf M_{s∧τ_n}=M_s。再取期望得到均值非增，严格不等式说明非真鞅。",
+          "worked": "若模型中的正局部鞅初值100且某时点预期变为97，不能因为形式上dM=σM dW没有dt项就把97强制重算为100。",
+          "limitation": "该结论要求非负性或其它可积条件；一般带正负值的局部鞅未必有可定义的全局期望。 不能只凭正局部鞅在某些离散观测点上近似保持均值来认定全程是真鞅。"
+        },
+        {
+          "title": "三维Bessel倒数的具体反例",
+          "question": "能否构造一个严格正、零扩散漂移但期望确实下降的解析例子？",
+          "paragraphs": [
+            "取三维Brownian从距原点x>0的位置出发，其径向过程R为三维Bessel过程，满足dR=dB+(1/R)dt并保持严格正。",
+            "令Z=x/R，用Itô公式求得dZ=−(x/R²)dB，没有dt漂移；但利用三维径向Gaussian密度积分可以得到E Z_t=2Φ(x/√t)−1，任何t>0严格小于1。"
+          ],
+          "formulas": [
+            {
+              "label": "三维Bessel倒数的具体反例",
+              "tex": "Z_t=\\frac{x}{R_t},\\quad dZ_t=-\\frac{x}{R_t^2}\\,dB_t,\\quad \\mathbb EZ_t=2\\Phi(x/\\sqrt t)-1<1"
+            }
+          ],
+          "proof": "对f(r)=x/r，有f'=−x/r²、f''=2x/r³。代入dR=dB+r^{-1}dt与d[R]=dt，Itô漂移−x/r³+(1/2)(2x/r³)=0。期望可从三维Brownian径向转移密度对x/r积分得到2Φ(x/√t)−1，故严格局部性成立。",
+          "worked": "令x=1、t=1，则E Z_1=2Φ(1)−1≈0.682689；虽然Z_0=1且Z始终正、形式Itô漂移为0，期望已经显著下降。",
+          "limitation": "该例仅解释纯数学上的严格局部鞅现象，不表示真实股票价格自然服从Bessel倒数，也不说明存在可执行套利。"
+        },
+        {
+          "title": "真鞅检验与金融价格泡沫",
+          "question": "严格局部鞅为什么会影响贴现资产的期望定价公式？",
+          "paragraphs": [
+            "在风险中性Q下，若贴现资产D是非负局部鞅，则E_Q[D_T|F_t]≤D_t。严格局部鞅可以产生严格小于号。 在金融模型中这会直接影响理论定价期望与初始市场价格之间的关系。",
+            "因此从无dt漂移无法直接把当前价格D_t写成未来贴现价格的条件期望。对于可复制支付、终端值和金融泡沫解释，需要进一步研究允许的交易策略与定价边界。"
+          ],
+          "formulas": [
+            {
+              "label": "真鞅检验与金融价格泡沫",
+              "tex": "\\mathbb E_{\\mathbb Q}[D_T\\mid\\mathcal F_t]\\le D_t,\\qquad \\text{严格局部鞅可使不等号严格}"
+            }
+          ],
+          "proof": "非负局部鞅为超鞅，条件Fatou给未来条件均值不超过当前值。若存在T使两者在正概率事件上严格不等，则D不是真鞅；如果把真鞅条件期望公式当成定义强行套用，就会遗漏当前价格与终端期望的差额。",
+          "worked": "以三维Bessel倒数Z作折现价格D，初值1、T=1时E[D_1]≈.68269，与D_0=1相差约.31731；这属于模型内的数学期望缺口。",
+          "limitation": "严格局部鞅市场的无套利、定价与泡沫解释依赖完整市场模型，不能简单由期望缺口推出可以通过买卖现货稳赚差额。"
+        }
+      ],
+      "example": "取三维Bessel过程R_0=1，倒数Z=1/R满足dZ=−R^{-2}dB且始终正；一年期望2Φ(1)−1≈.682689<1。这个可复算反例直接推翻‘所有正局部鞅都有E Z_t=Z_0’的错误推广。",
+      "application": "用于评估资产贴现真鞅假设、风险中性定价边界、异常密度权重以及连续时间资产泡沫的数学模型。 研究金融泡沫定价争议时需要区别贴现价格的真鞅条件与仅有局部无漂移的形式推导。",
+      "caveat": "严格局部鞅并非违反无套利的充分证据；对一般局部鞅不能在无可积条件下交换停止与期望，也不能把模拟均值视为严格定理。",
+      "links": [
+        {
+          "kind": "math",
+          "id": "ito-n0308",
+          "label": "先修：Itô等距"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0294",
+          "label": "先修：鞅收敛"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0320",
+          "label": "指数局部鞅"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0324",
+          "label": "贴现资产鞅"
+        }
+      ],
+      "sources": [
+        {
+          "title": "University of Chicago Greg Lawler Stochastic Calculus: An Introduction with Applications：局部鞅、Girsanov和跳跃过程",
+          "url": "https://www.math.uchicago.edu/~lawler/finbook.pdf"
+        },
+        {
+          "title": "MIT 15.070J随机过程课程：Lecture 9–11关于鞅和停止时间",
+          "url": "https://ocw.mit.edu/courses/15-070j-advanced-stochastic-processes-fall-2013/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V14严格边界：四节定理、特征函数与可核算跳跃反例"
+    },
+    {
+      "id": "ito-n0329",
+      "node_id": "ito-n0329",
+      "title": "跳扩散模型",
+      "definition": "跳扩散模型将连续Brownian扩散与离散Poisson突发跳跃叠加，既可以描述市场平稳小波动，也允许新闻冲击或流动性事件使资产价格瞬间跳变。Merton型乘法跳扩散用正跳幅J_k>0、Poisson强度λ和Brownian波动σ刻画价格；将补偿项−λ(EJ−1)写入漂移，可使价格的期望增长率保持指定的μ。",
+      "assumptions": "固定有限T，N_t为强度λ≥0齐次Poisson过程，W与N独立，J_k>0独立同分布且与两者独立；假设E J<∞。采用Itô型跳跃方程dS_t/S_{t−}=(μ−λκ)dt+σdW_t+(J−1)dN_t，κ=E J−1；如果考虑方差还需E J²<∞。跳跃与扩散是否在风险中性Q下保留相同参数需要另外假设。",
+      "properties": [
+        "乘法跳扩散显式解为指数Brownian部分乘以到达的全部J_k。",
+        "补偿漂移μ−λκ使E S_T=S0 e^{μT}，但路径几何增长还含随机跳幅。",
+        "任一有限区间内无跳跃概率为e^{−λT}，存在跳跃时连续GBM公式不再完整。",
+        "若跳跃无法由连续资产复制，衍生品市场通常不完备，仅调整Brownian漂移不足以唯一确定风险中性跳幅分布。"
+      ],
+      "formulas": [
+        {
+          "label": "乘法跳跃与价格左极限",
+          "tex": "\\frac{dS_t}{S_{t-}}=(\\mu-\\lambda\\kappa)\\,dt+\\sigma\\,dW_t+(J-1)\\,dN_t,\\quad \\kappa=\\mathbb EJ-1"
+        },
+        {
+          "label": "指数乘积解与漂移补偿",
+          "tex": "S_T=S_0e^{(\\mu-\\lambda\\kappa-\\sigma^2/2)T+\\sigma W_T}\\prod_{k=1}^{N_T}J_k"
+        },
+        {
+          "label": "价格期望与随机计数的矩",
+          "tex": "\\mathbb E[S_T]=S_0e^{(\\mu-\\lambda\\kappa)T}\\mathbb E[(\\mathbb EJ)^{N_T}]=S_0e^{\\mu T}"
+        },
+        {
+          "label": "跳跃方差与不完备风险",
+          "tex": "\\operatorname{Var}(S_T)=S_0^2\\!\\left[e^{2(\\mu-\\lambda\\kappa)T+\\sigma^2T+\\lambda T(\\mathbb EJ^2-1)}-e^{2\\mu T}\\right]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "在不发生Poisson跳跃的短区间内，方程退化为GBM类连续扩散；在单次跳跃时连续积分项没有瞬时跳跃，只有S_{t−}(J−1)贡献不连续增量，因此S_t=S_{t−}+S_{t−}(J−1)=J S_{t−}。",
+          "tex": "\\frac{dS_t}{S_{t-}}=(\\mu-\\lambda\\kappa)\\,dt+\\sigma\\,dW_t+(J-1)\\,dN_t,\\quad \\kappa=\\mathbb EJ-1"
+        },
+        {
+          "explanation": "对任意不含跳跃的区间使用GBM显式解，随后在每个Poisson时刻应用乘数J。所有区间指数的时间长度和布朗增量相加为T和W_T；跳幅乘积独立合并，故得到表达式。补偿漂移确保期望不被平均跳幅系统性改变。",
+          "tex": "S_T=S_0e^{(\\mu-\\lambda\\kappa-\\sigma^2/2)T+\\sigma W_T}\\prod_{k=1}^{N_T}J_k"
+        },
+        {
+          "explanation": "利用W、N、J独立，先对Gaussian指数取期望，再条件于N=n求E∏J=(EJ)^n。Poisson概率母函数E z^{N_T}=e^{λT(z−1)}，取z=EJ=1+κ得到e^{λκT}，与连续漂移的−λκ相消。",
+          "tex": "\\mathbb E[S_T]=S_0e^{(\\mu-\\lambda\\kappa)T}\\mathbb E[(\\mathbb EJ)^{N_T}]=S_0e^{\\mu T}"
+        },
+        {
+          "explanation": "对S_T显式解平方后，Brownian指数矩给额外σ²T，Poisson乘积二阶矩给λT(EJ²−1)，得到E S²；减去(E S)²=S0²e^{2μT}得到方差。若J固定1.1，EJ²=1.21，可代入独立核算。",
+          "tex": "\\operatorname{Var}(S_T)=S_0^2\\!\\left[e^{2(\\mu-\\lambda\\kappa)T+\\sigma^2T+\\lambda T(\\mathbb EJ^2-1)}-e^{2\\mu T}\\right]"
+        }
+      ],
+      "deep_sections": [
+        {
+          "title": "乘法跳跃与价格左极限",
+          "question": "为什么跳扩散需要把价格的跳前值S_(t−)与跳后值区分？",
+          "paragraphs": [
+            "在跳跃时刻t，新价格等于跳前价格乘以正倍数J，所以ΔS_t=S_{t−}(J−1)。 因此随机积分中的跳幅只能使用跳跃前价格左极限，才能使模型不提前知道跳后价格。",
+            "若不区分跳前与跳后，就会把增量与更新后的价格混用，甚至在同一跳跃时刻重复计算收益。Brownian扩散部分路径连续，离散跳跃部分按Poisson时钟发生。"
+          ],
+          "formulas": [
+            {
+              "label": "乘法跳跃与价格左极限",
+              "tex": "\\frac{dS_t}{S_{t-}}=(\\mu-\\lambda\\kappa)\\,dt+\\sigma\\,dW_t+(J-1)\\,dN_t,\\quad \\kappa=\\mathbb EJ-1"
+            }
+          ],
+          "proof": "在不发生Poisson跳跃的短区间内，方程退化为GBM类连续扩散；在单次跳跃时连续积分项没有瞬时跳跃，只有S_{t−}(J−1)贡献不连续增量，因此S_t=S_{t−}+S_{t−}(J−1)=J S_{t−}。",
+          "worked": "若跳幅J=1.1，价格在事件前为100，则事件后为110、跳跃收益10%。若J=.8，价格瞬间从100变成80，不能用连续Brownian积分解释。",
+          "limitation": "真实市场涨跌停、停牌及报价缺口可能使观测跳幅受记录规则影响，跳跃模型应明确使用成交价还是可交易中间价。"
+        },
+        {
+          "title": "指数乘积解与漂移补偿",
+          "question": "跳跃到来之后，为什么连续部分的指数解还必须乘上每个跳幅？",
+          "paragraphs": [
+            "在跳跃时刻之间，S按漂移μ−λκ、波动σ的GBM演化；每遇到一笔事件将当前价格乘以J_k。 此处指数中的补偿漂移决定价格均值是否维持预先设定的增长率。",
+            "把连续演化和离散跳跃递归相乘得到显式解；其Brownian指数还要包含−σ²/2的Itô修正。这个解要求J_k严格为正才能保留正价格。"
+          ],
+          "formulas": [
+            {
+              "label": "指数乘积解与漂移补偿",
+              "tex": "S_T=S_0e^{(\\mu-\\lambda\\kappa-\\sigma^2/2)T+\\sigma W_T}\\prod_{k=1}^{N_T}J_k"
+            }
+          ],
+          "proof": "对任意不含跳跃的区间使用GBM显式解，随后在每个Poisson时刻应用乘数J。所有区间指数的时间长度和布朗增量相加为T和W_T；跳幅乘积独立合并，故得到表达式。补偿漂移确保期望不被平均跳幅系统性改变。",
+          "worked": "令λ=1、J≡1.1、κ=.1、μ=.08、σ=.2、T=1。若W_T=0且没有跳跃，S_T/S0=e^{−.04}≈.960789；恰有一次跳跃时该比率为1.1e^{−.04}≈1.056868。",
+          "limitation": "当J可能为零或负，正价格乘法模型不再适用；若跳跃与Brownian共享驱动或强度自激，独立乘积公式需要修订。"
+        },
+        {
+          "title": "价格期望与随机计数的矩",
+          "question": "为什么补偿后的模型保留期望增长μ而不是μ+λκ？",
+          "paragraphs": [
+            "显式解的Brownian部分指数期望为e^{(μ−λκ)T}。Poisson随机跳幅乘积的条件期望在N=n时为(EJ)^n，再对Poisson次数求和得到e^{λT(EJ−1)}=e^{λκT}。",
+            "两指数的λκ恰好抵消，故E S_T=S0 e^{μT}。如果不设置补偿项，价格期望的增长率会包含跳跃平均收益，不能继续解释μ为总算术增长率。"
+          ],
+          "formulas": [
+            {
+              "label": "价格期望与随机计数的矩",
+              "tex": "\\mathbb E[S_T]=S_0e^{(\\mu-\\lambda\\kappa)T}\\mathbb E[(\\mathbb EJ)^{N_T}]=S_0e^{\\mu T}"
+            }
+          ],
+          "proof": "利用W、N、J独立，先对Gaussian指数取期望，再条件于N=n求E∏J=(EJ)^n。Poisson概率母函数E z^{N_T}=e^{λT(z−1)}，取z=EJ=1+κ得到e^{λκT}，与连续漂移的−λκ相消。",
+          "worked": "上述λ=1、J=1.1、μ=.08、σ=.2、T=1的模型，尽管无跳跃路径下价格比率约.96079，全部路径的平均价格比率仍为e^{.08}≈1.083287。",
+          "limitation": "实际金融价格收益若跳跃与波动率相关，期望分解不能未经验证直接使用独立Poisson与标记假设。"
+        },
+        {
+          "title": "跳跃方差与不完备风险",
+          "question": "为什么小概率跳跃也会显著增加价格的二阶风险？",
+          "paragraphs": [
+            "在E J²有限时，计算S_T²的期望需要Poisson乘积二阶矩E[(∏J)²]=exp[λT(EJ²−1)]。",
+            "由显式解得Var(S_T)=S0²[e^{2(μ−λκ)T+σ²T+λT(EJ²−1)}−e^{2μT}]。连续复制策略不能在跳跃时刻预先对冲全部离散跳幅，因此风险中性跳跃定价可能不唯一。"
+          ],
+          "formulas": [
+            {
+              "label": "跳跃方差与不完备风险",
+              "tex": "\\operatorname{Var}(S_T)=S_0^2\\!\\left[e^{2(\\mu-\\lambda\\kappa)T+\\sigma^2T+\\lambda T(\\mathbb EJ^2-1)}-e^{2\\mu T}\\right]"
+            }
+          ],
+          "proof": "对S_T显式解平方后，Brownian指数矩给额外σ²T，Poisson乘积二阶矩给λT(EJ²−1)，得到E S²；减去(E S)²=S0²e^{2μT}得到方差。若J固定1.1，EJ²=1.21，可代入独立核算。",
+          "worked": "令S0=1、λ=1、J=1.1、μ=.08、σ=.2、T=1，二阶指数为.21，均值平方指数为.16，所以方差为e^{.21}−e^{.16}≈.06017。",
+          "limitation": "纯GBM方差忽略跳跃标记的二阶矩；真实跳幅若厚尾到EJ²不存在，不能使用有限方差模型评价尾部风险。"
+        }
+      ],
+      "example": "λ=1、J恒为1.1、μ=.08、σ=.2、T=1时，无跳跃且W_T=0路径的价格比率e^{−.04}≈.960789，一次跳跃的比率约1.056868；平均比率e^{.08}≈1.083287，方差比率e^{.21}−e^{.16}≈.06017。",
+      "application": "用于宏观公告跳价、跨资产尾部风险、期权波动率微笑及高频流动性冲击建模，强调跳幅、强度和可交易复制风险。",
+      "caveat": "单纯Brownian测度变换不能消去不可交易跳跃风险；含有重尾标记和状态依赖强度时，完整价格分布与方差可能显著不同。",
+      "links": [
+        {
+          "kind": "math",
+          "id": "stochastic-n0276",
+          "label": "先修：复合Poisson"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0306",
+          "label": "先修：GBM"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0330",
+          "label": "Lévy过程一般化"
+        },
+        {
+          "kind": "math",
+          "id": "finance-n0438",
+          "label": "波动率微笑"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Cont 与 Tankov《Financial Modelling with Jump Processes》：Lévy过程、跳扩散及金融定价专著（出版方）",
+          "url": "https://www.routledge.com/Financial-Modelling-with-Jump-Processes/Tankovah2-Contah2/p/book/9781584884132"
+        },
+        {
+          "title": "Peter Tankov《Financial Modeling with Lévy Processes》：Poisson随机测度、跳跃随机积分与指数Lévy模型讲义",
+          "url": "https://public.econ.duke.edu/~get/browse/courses/883/Spr15/COURSE-MATERIALS/Z_Papers/tankov.pdf"
+        }
+      ],
+      "checked_status": "V14严格边界：四节定理、特征函数与可核算跳跃反例"
+    },
+    {
+      "id": "ito-n0330",
+      "node_id": "ito-n0330",
+      "title": "Lévy过程",
+      "definition": "Lévy过程是具有独立平稳增量、从零出发、依概率连续且右连续有左极限（càdlàg）样本路径的随机过程。它统一包含带漂移布朗运动、Poisson计数、复合Poisson跳跃和部分无限活动纯跳过程。Lévy–Khintchine公式将其特征函数写为漂移、Gaussian扩散与Lévy跳跃测度的组合，是从有限跳跃扩展到一般厚尾金融价格模型的核心结构。",
+      "assumptions": "过程L_0=0、对互不交叠区间增量独立，增量分布仅依区间长度，并满足随机连续性及càdlàg路径。特征三元组(b,c,ν)中c≥0，ν为R\\{0}上的测度，满足∫(1∧x²)ν(dx)<∞；漂移b依赖截断函数约定，以下统一使用h(x)=x1_{|x|<1}。",
+      "properties": [
+        "Lévy–Khintchine特征指数由漂移、Gaussian方差和跳跃测度组成。",
+        "有限活动跳跃等价于ν(R\\{0})<∞；无限活动也可能具有有限总变差。",
+        "存在一阶或二阶矩要检查大跳部分∫_{|x|>1}|x|ν或∫_{|x|>1}x²ν是否有限。",
+        "风险中性金融Lévy模型不仅需独立增量，还要确保贴现指数价格是真鞅，并明确定价测度下的跳跃参数。"
+      ],
+      "formulas": [
+        {
+          "label": "独立平稳增量与路径右连续性",
+          "tex": "\\mathbb E[e^{iuL_t}]=e^{t\\psi(u)},\\quad L_{t+s}-L_t\\stackrel d=L_s,\\quad L_0=0"
+        },
+        {
+          "label": "Lévy–Khintchine分解",
+          "tex": "\\psi(u)=iub-\\tfrac12cu^2+\\int_{\\mathbb R\\setminus\\{0\\}}\\!\\bigl(e^{iux}-1-iux\\mathbf1_{\\{|x|<1\\}}\\bigr)\\nu(dx)"
+        },
+        {
+          "label": "有限活动与无限活动的区分",
+          "tex": "\\nu(\\mathbb R\\setminus\\{0\\})=\\infty,\\quad\\int_{|x|<1}|x|\\,\\nu(dx)<\\infty\\quad\\text{可以同时成立}"
+        },
+        {
+          "label": "二阶矩、复合Poisson与金融尾部",
+          "tex": "\\operatorname{Var}(L_t)=t\\!\\left(c+\\int_{\\mathbb R\\setminus\\{0\\}}x^2\\,\\nu(dx)\\right)\\quad\\text{当二阶矩有限}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "因为增量独立，特征函数满足φ_{t+s}(u)=φ_t(u)φ_s(u)。随机连续性保证关于t连续，结合φ_0=1可解该连续乘法半群函数为φ_t=e^{tψ(u)}，其中ψ为特征指数；Lévy–Khintchine定理刻画所有可能的ψ。",
+          "tex": "\\mathbb E[e^{iuL_t}]=e^{t\\psi(u)},\\quad L_{t+s}-L_t\\stackrel d=L_s,\\quad L_0=0"
+        },
+        {
+          "explanation": "在小x处展开e^{iux}=1+iux−u²x²/2+O(|x|³)，减去线性截断项后被积函数为O(x²)，因∫_{|x|<1}x²ν有限而可积。对|x|≥1，被积函数有界，因ν(|x|≥1)<∞而可积，故指数有良好定义。",
+          "tex": "\\psi(u)=iub-\\tfrac12cu^2+\\int_{\\mathbb R\\setminus\\{0\\}}\\!\\bigl(e^{iux}-1-iux\\mathbf1_{\\{|x|<1\\}}\\bigr)\\nu(dx)"
+        },
+        {
+          "explanation": "例如正跳Gamma型Lévy测度ν(dx)=e^{−x}x^{-1}1_{x>0}dx。在0附近∫_0^1ν≈∫_0^1dx/x发散，因此无限活动；但∫_0^1xν(dx)=∫_0^1e^{−x}dx=1−e^{-1}<∞，其小跳总变差可有限。",
+          "tex": "\\nu(\\mathbb R\\setminus\\{0\\})=\\infty,\\quad\\int_{|x|<1}|x|\\,\\nu(dx)<\\infty\\quad\\text{可以同时成立}"
+        },
+        {
+          "explanation": "当∫x²ν有限时，可对特征指数在u=0二次求导，Gaussian部分贡献c，跳跃部分贡献∫x²ν。由log特征函数tψ(u)的二阶累积量得到Var L_t=t(c+∫x²ν)。复合Poisson的ν=λF_Y给λt E Y²。",
+          "tex": "\\operatorname{Var}(L_t)=t\\!\\left(c+\\int_{\\mathbb R\\setminus\\{0\\}}x^2\\,\\nu(dx)\\right)\\quad\\text{当二阶矩有限}"
+        }
+      ],
+      "deep_sections": [
+        {
+          "title": "独立平稳增量与路径右连续性",
+          "question": "为什么Lévy过程比Brownian过程更一般？",
+          "paragraphs": [
+            "Brownian与Poisson都有不重叠增量独立且分布仅依长度的性质，但Poisson路径存在跳跃，Brownian路径连续。Lévy过程允许càdlàg跳跃路径，同时要求短时间增量依概率趋零。",
+            "这组条件保障随机过程具有特征指数与相应的独立增量半群，却不强制Gaussian或有限方差。金融厚尾收益在某些尺度上可用Lévy建模，但真实波动聚集通常违反其平稳独立增量假设。"
+          ],
+          "formulas": [
+            {
+              "label": "独立平稳增量与路径右连续性",
+              "tex": "\\mathbb E[e^{iuL_t}]=e^{t\\psi(u)},\\quad L_{t+s}-L_t\\stackrel d=L_s,\\quad L_0=0"
+            }
+          ],
+          "proof": "因为增量独立，特征函数满足φ_{t+s}(u)=φ_t(u)φ_s(u)。随机连续性保证关于t连续，结合φ_0=1可解该连续乘法半群函数为φ_t=e^{tψ(u)}，其中ψ为特征指数；Lévy–Khintchine定理刻画所有可能的ψ。",
+          "worked": "标准Brownian取ψ(u)=−u²/2；强度λ=2的Poisson计数取ψ(u)=2(e^{iu}−1)，二者均满足独立平稳增量但路径性质完全不同。",
+          "limitation": "价格变化若存在长期自相关或日内确定性季节性，常数参数Lévy过程的平稳增量假设不一定适用。"
+        },
+        {
+          "title": "Lévy–Khintchine分解",
+          "question": "为什么跳跃测度必须满足积分(1∧x²)可积？",
+          "paragraphs": [
+            "Lévy测度ν统计每单位时间不同跳幅的强度。小跳可能无穷多，但它们的平方可积条件保证补偿和能够在适当意义下定义；大跳总强度须有限以避免瞬间出现无穷多个大跳。",
+            "使用截断函数h(x)=x1_{|x|<1}时，特征指数包含iu b−c u²/2以及跳跃积分。改变截断规则会改变报告的漂移参数b，而不改变过程本身。"
+          ],
+          "formulas": [
+            {
+              "label": "Lévy–Khintchine分解",
+              "tex": "\\psi(u)=iub-\\tfrac12cu^2+\\int_{\\mathbb R\\setminus\\{0\\}}\\!\\bigl(e^{iux}-1-iux\\mathbf1_{\\{|x|<1\\}}\\bigr)\\nu(dx)"
+            }
+          ],
+          "proof": "在小x处展开e^{iux}=1+iux−u²x²/2+O(|x|³)，减去线性截断项后被积函数为O(x²)，因∫_{|x|<1}x²ν有限而可积。对|x|≥1，被积函数有界，因ν(|x|≥1)<∞而可积，故指数有良好定义。",
+          "worked": "若ν集中在跳幅+1处且强度2，跳幅位于截断边界|x|=1不减线性项，跳跃指数为2(e^{iu}−1)，即Poisson(2t)计数的指数。",
+          "limitation": "不同教材的三元组可采用不同截断约定，金融估值引用b时必须声明是否包含小跳补偿，避免漂移重复计入。"
+        },
+        {
+          "title": "有限活动与无限活动的区分",
+          "question": "无限多次小跳为什么不必导致无限总变化？",
+          "paragraphs": [
+            "有限活动要求ν在非零全空间的质量有限，此时可用复合Poisson表示。若ν在零附近有无限质量，任何有限时间窗仍可能有无限多个小跳。",
+            "然而当Gaussian系数c=0且∫_{|x|<1}|x|ν(dx)<∞时，纯跳Lévy过程可有有限变差。小跳次数无穷和小跳绝对总和有限是不同性质。"
+          ],
+          "formulas": [
+            {
+              "label": "有限活动与无限活动的区分",
+              "tex": "\\nu(\\mathbb R\\setminus\\{0\\})=\\infty,\\quad\\int_{|x|<1}|x|\\,\\nu(dx)<\\infty\\quad\\text{可以同时成立}"
+            }
+          ],
+          "proof": "例如正跳Gamma型Lévy测度ν(dx)=e^{−x}x^{-1}1_{x>0}dx。在0附近∫_0^1ν≈∫_0^1dx/x发散，因此无限活动；但∫_0^1xν(dx)=∫_0^1e^{−x}dx=1−e^{-1}<∞，其小跳总变差可有限。",
+          "worked": "对ν(dx)=e^{−x}dx/x（x>0），单位时间无限多个小跳，但小于1的绝对跳幅期望和为1−e^{-1}≈0.632121，并非无穷。",
+          "limitation": "若有Brownian成分c>0，则路径总变差仍可能无限；因此只检查跳跃部分小跳总变差不足以断言整个过程有限变差。"
+        },
+        {
+          "title": "二阶矩、复合Poisson与金融尾部",
+          "question": "如何从Lévy测度判断收益方差是否存在，而不仅观察有限历史样本？",
+          "paragraphs": [
+            "特征指数的跳跃部分二阶矩取决于∫x²ν(dx)。在大跳尾部无法积时，总体方差可能不存在，尽管任何有限样本都可计算样本方差。",
+            "对于强度λ的复合Poisson，ν=λF_Y，若E Y²有限则Var L_t=λt E Y²；这能独立核算之前复合Poisson课程的结果。"
+          ],
+          "formulas": [
+            {
+              "label": "二阶矩、复合Poisson与金融尾部",
+              "tex": "\\operatorname{Var}(L_t)=t\\!\\left(c+\\int_{\\mathbb R\\setminus\\{0\\}}x^2\\,\\nu(dx)\\right)\\quad\\text{当二阶矩有限}"
+            }
+          ],
+          "proof": "当∫x²ν有限时，可对特征指数在u=0二次求导，Gaussian部分贡献c，跳跃部分贡献∫x²ν。由log特征函数tψ(u)的二阶累积量得到Var L_t=t(c+∫x²ν)。复合Poisson的ν=λF_Y给λt E Y²。",
+          "worked": "取λ=2、跳幅Y独立地各以一半概率取+1与−1，t=1，则E Y=0、E Y²=1，复合Poisson累计均值0、方差2，特征指数ψ(u)=2(cos u−1)。",
+          "limitation": "在金融厚尾数据中若大跳二阶积分发散，均值方差优化与传统Sharpe的理论风险量可能不稳健，应改用适当尾部风险度量。"
+        }
+      ],
+      "example": "λ=2、Y=±1等概率的复合Poisson在t=1时均值0、方差2，特征指数2(cos u−1)。Gamma型ν=e^{−x}dx/x在单位时间内无限小跳活动，但∫_0^1xν=1−e^{−1}≈0.632121，说明无限活动不等于无限变差。",
+      "application": "用于跳跃型价格收益、对冲误差、有限或无限活动风险、期权波动率微笑及金融收益尾部矩存在性的判断。 在含大量细小跳跃的场景下，模拟应根据Lévy测度截断阈值控制误差。",
+      "caveat": "Lévy过程独立平稳增量不自动匹配市场波动聚集；特征三元组的漂移依赖截断，缺失二阶矩时不能使用有限方差公式。",
+      "links": [
+        {
+          "kind": "math",
+          "id": "stochastic-n0276",
+          "label": "先修：复合Poisson"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0302",
+          "label": "先修：独立平稳增量"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0329",
+          "label": "跳扩散例子"
+        },
+        {
+          "kind": "math",
+          "id": "finance-n0448",
+          "label": "金融：极值风险"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Cont 与 Tankov《Financial Modelling with Jump Processes》：Lévy过程、跳扩散及金融定价专著（出版方）",
+          "url": "https://www.routledge.com/Financial-Modelling-with-Jump-Processes/Tankovah2-Contah2/p/book/9781584884132"
+        },
+        {
+          "title": "Peter Tankov《Financial Modeling with Lévy Processes》：Poisson随机测度、跳跃随机积分与指数Lévy模型讲义",
+          "url": "https://public.econ.duke.edu/~get/browse/courses/883/Spr15/COURSE-MATERIALS/Z_Papers/tankov.pdf"
+        }
+      ],
+      "checked_status": "V14严格边界：四节定理、特征函数与可核算跳跃反例"
+    },
+    {
+      "id": "ito-n0327",
+      "node_id": "ito-n0327",
+      "title": "最优停止Snell包络",
+      "definition": "连续时间Snell包络把有限期最优停止的可测条件价值写成所有未来合法停时的条件期望上确界。对适应且满足class D等适当可积与路径正则条件的贴现支付过程G_t，包络Y_t是支配G_t的最小超鞅，首次接触停止区域的时刻在相应连续路径及可积条件下最优。若状态是Markov扩散，其价值函数对应最优停止障碍问题和美式期权提前执行条件。",
+      "assumptions": "固定有限期限T，满足通常条件的滤过；贴现后的支付G_t为连续适应且属于class D，以保证停止时的期望族一致可积。合法停时τ需满足τ≥t且{τ≤s}∈F_s。障碍PDE部分额外假设Markov扩散生成算子L、适当正则性与边界/增长条件。数值树例子是两期可提前执行的Bermudan近似，不声称是连续时间美式看跌的精确价格。",
+      "properties": [
+        "Snell包络Y_t=ess sup_{τ≥t}E[G_τ|F_t]支配G且为最小超鞅。",
+        "连续且class D等适当条件下，首次Y=G的合法停时可实现最优价值。",
+        "Markov扩散最优停止对应障碍变分不等式max{g−v, v_t+Lv−rv}=0。",
+        "二叉树/离散近似中提前执行的价值由每步立即收益与折现继续价值比较，不能仅靠终端European支付估计。"
+      ],
+      "formulas": [
+        {
+          "label": "条件本质上确界与合法停时",
+          "tex": "Y_t=\\operatorname*{ess\\,sup}_{\\tau\\in\\mathcal T_{t,T}}\\mathbb E[G_\\tau\\mid\\mathcal F_t],\\quad\\mathcal T_{t,T}=\\{\\tau:t\\le\\tau\\le T\\}"
+        },
+        {
+          "label": "最小超鞅与首次接触最优停时",
+          "tex": "\\tau^*=\\inf\\{t\\in[0,T]:Y_t=G_t\\},\\qquad Y_0=\\mathbb E[G_{\\tau^*}]"
+        },
+        {
+          "label": "Markov扩散的障碍变分不等式",
+          "tex": "\\max\\{g(s)-v(t,s),\\ \\partial_t v+\\mathcal Lv-rv\\}=0,\\qquad v(T,s)=g(s)"
+        },
+        {
+          "label": "两期Bermudan看跌的数值倒推",
+          "tex": "V_0=\\max\\!\\left\\{0,\\ \\frac{0.625(1.5/1.05)+0.375(20)}{1.05}\\right\\}\\approx7.99320"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "立即停止τ=t属于候选集合，故Y_t≥E[G_t|F_t]=G_t。任意未来停时策略可被定义在不使用未来信息的F_t条件下，因而取本质上确界给最优条件价值。要保证Y有适当右连续修改以及超鞅性质，通常使用class D与可测系统定理。",
+          "tex": "Y_t=\\operatorname*{ess\\,sup}_{\\tau\\in\\mathcal T_{t,T}}\\mathbb E[G_\\tau\\mid\\mathcal F_t],\\quad\\mathcal T_{t,T}=\\{\\tau:t\\le\\tau\\le T\\}"
+        },
+        {
+          "explanation": "由动态规划超鞅不等式可得Y_s≥E[Y_t|F_s]，且Y≥G。对任何支配G的class D超鞅Z，可选停止给Z_t≥E[Z_τ|F_t]≥E[G_τ|F_t]，对τ取本质上确界得Z≥Y。连续与class D条件允许使用首次接触最优停止定理。",
+          "tex": "\\tau^*=\\inf\\{t\\in[0,T]:Y_t=G_t\\},\\qquad Y_0=\\mathbb E[G_{\\tau^*}]"
+        },
+        {
+          "explanation": "停止策略立即获得g所以v≥g。若v>g，局部最优必须继续并在短时动态规划极限下满足后向定价PDE等式；若v=g，立即执行优于继续，意味着PDE算子≤0。合并为两项均≤0且至少一项为0的max形式，正是障碍条件。",
+          "tex": "\\max\\{g(s)-v(t,s),\\ \\partial_t v+\\mathcal Lv-rv\\}=0,\\qquad v(T,s)=g(s)"
+        },
+        {
+          "explanation": "终点支付如上；上涨节点V_u=max(0,1.5/1.05)=10/7≈1.428571，下跌节点V_d=max(20,16/1.05)=20。根节点折现期望为[(5/8)(10/7)+(3/8)20]/(21/20)=(5/8×10/7+7.5)/1.05≈7.99320，立即执行根支付0，所以根取继续。",
+          "tex": "V_0=\\max\\!\\left\\{0,\\ \\frac{0.625(1.5/1.05)+0.375(20)}{1.05}\\right\\}\\approx7.99320"
+        }
+      ],
+      "deep_sections": [
+        {
+          "title": "条件本质上确界与合法停时",
+          "question": "Snell包络为何不是选择整条未来路径上最高报价？",
+          "paragraphs": [
+            "定义Y_t为在t时刻可以依据当时信息安排、且未来自适应决定的所有停止策略条件收益之本质上确界。它禁止使用未来价格来反向选择之前的交易时点。",
+            "对任意允许的τ，G_τ的条件期望是一个合法候选；Y_t至少等于立即停止G_t。随着信息变化，这个上确界给每个时点的最优动态退出价值。"
+          ],
+          "formulas": [
+            {
+              "label": "条件本质上确界与合法停时",
+              "tex": "Y_t=\\operatorname*{ess\\,sup}_{\\tau\\in\\mathcal T_{t,T}}\\mathbb E[G_\\tau\\mid\\mathcal F_t],\\quad\\mathcal T_{t,T}=\\{\\tau:t\\le\\tau\\le T\\}"
+            }
+          ],
+          "proof": "立即停止τ=t属于候选集合，故Y_t≥E[G_t|F_t]=G_t。任意未来停时策略可被定义在不使用未来信息的F_t条件下，因而取本质上确界给最优条件价值。要保证Y有适当右连续修改以及超鞅性质，通常使用class D与可测系统定理。",
+          "worked": "若时刻t即可获得确定净收益5，所有未来合法停时的条件期望均不超过4.5，则Y_t=max(5,4.5)=5；不能改用未来某个路径上的最高数值9。",
+          "limitation": "本质上确界对条件概率模型和合法可观察信息定义；若执行中的成交价格不确定，必须在G中计入滑点、撤单及可成交性。"
+        },
+        {
+          "title": "最小超鞅与首次接触最优停时",
+          "question": "为什么等待价值可以看作对支付过程的最小超鞅上界？",
+          "paragraphs": [
+            "对s<t，时刻s能先等待到t，再采用时刻t的最优停止决策，因此Y_s≥E[Y_t|F_s]，即Y为超鞅。它也是所有支配G的class D超鞅中最小的一个。",
+            "当连续Snell包络和支付足够正则时，首次Y_t=G_t的时刻τ*是停时；在到达前等待区域包络的补偿递增部分不增加，停止后的Y成为鞅，因此E G_{τ*}=Y_0。"
+          ],
+          "formulas": [
+            {
+              "label": "最小超鞅与首次接触最优停时",
+              "tex": "\\tau^*=\\inf\\{t\\in[0,T]:Y_t=G_t\\},\\qquad Y_0=\\mathbb E[G_{\\tau^*}]"
+            }
+          ],
+          "proof": "由动态规划超鞅不等式可得Y_s≥E[Y_t|F_s]，且Y≥G。对任何支配G的class D超鞅Z，可选停止给Z_t≥E[Z_τ|F_t]≥E[G_τ|F_t]，对τ取本质上确界得Z≥Y。连续与class D条件允许使用首次接触最优停止定理。",
+          "worked": "一期支付今日5、明日支付0或9且各半时，等待期望4.5，首次接触立即发生；若明日支付0或14且各半，等待期望7，今日则不是停止区。",
+          "limitation": "若只有可选而非连续支付、无界期限或class D不满足，首次接触时刻未必直接最优；应另查上半连续性及一致可积条件。"
+        },
+        {
+          "title": "Markov扩散的障碍变分不等式",
+          "question": "为什么美式期权对应PDE与立即执行障碍的最大值条件？",
+          "paragraphs": [
+            "令不贴现支付g(s)为即时执行价值，最优价值v(t,s)在继续区严格高于g(s)，因此必须满足v_t+Lv−rv=0；停止区则有v=g并且继续漂移不能带来更高价值。",
+            "这两个条件可合并为max(g−v, v_t+Lv−rv)=0（以最大收益和所示符号为约定），末端条件v(T,s)=g(s)。若边界不光滑，解应以适当黏性或变分意义理解。"
+          ],
+          "formulas": [
+            {
+              "label": "Markov扩散的障碍变分不等式",
+              "tex": "\\max\\{g(s)-v(t,s),\\ \\partial_t v+\\mathcal Lv-rv\\}=0,\\qquad v(T,s)=g(s)"
+            }
+          ],
+          "proof": "停止策略立即获得g所以v≥g。若v>g，局部最优必须继续并在短时动态规划极限下满足后向定价PDE等式；若v=g，立即执行优于继续，意味着PDE算子≤0。合并为两项均≤0且至少一项为0的max形式，正是障碍条件。",
+          "worked": "若美式看跌行权价K=100，当股价s=80时立即支付g=(100−80)^+=20；此时若折现继续价值只有15，则障碍v=20触发停止区域。",
+          "limitation": "美式Call无股息且非负利率的经典Black–Scholes模型通常不提前执行，不能将Put低价行权结论机械推广给所有期权。"
+        },
+        {
+          "title": "两期Bermudan看跌的数值倒推",
+          "question": "如何用完全可复核的离散树说明提前执行比仅持有到期更有价值？",
+          "paragraphs": [
+            "设S_0=100，每期上涨因子u=1.2、下跌因子d=.8，无风险每期增长因子R=1.05。风险中性上升概率q=(R−d)/(u−d)=.625。行权价K=100，两期树的到期股价为144、96、64，对应看跌现金流0、4、36。",
+            "时刻1上涨节点股价120，立即执行价值0，折现继续价值(0.625×0+0.375×4)/1.05≈1.42857；下跌节点股价80，立即20，继续(0.625×4+0.375×36)/1.05≈15.23810，因此选择立即执行。再倒推至时刻0得美式离散价值约7.99320。"
+          ],
+          "formulas": [
+            {
+              "label": "两期Bermudan看跌的数值倒推",
+              "tex": "V_0=\\max\\!\\left\\{0,\\ \\frac{0.625(1.5/1.05)+0.375(20)}{1.05}\\right\\}\\approx7.99320"
+            }
+          ],
+          "proof": "终点支付如上；上涨节点V_u=max(0,1.5/1.05)=10/7≈1.428571，下跌节点V_d=max(20,16/1.05)=20。根节点折现期望为[(5/8)(10/7)+(3/8)20]/(21/20)=(5/8×10/7+7.5)/1.05≈7.99320，立即执行根支付0，所以根取继续。",
+          "worked": "欧洲同树看跌价值只根据终点支付：[(.625²×0)+2×.625×.375×4+.375²×36]/1.05²≈(1.875+5.0625)/1.1025≈6.29252，低于允许提前执行的约7.99320。",
+          "limitation": "二叉树是每期允许行权的Bermudan模型；若真实市场允许任意连续时点执行，需要额外数值极限、连续模型及实际股息与交易费条件。"
+        }
+      ],
+      "example": "两期树取S0=100、u=1.2、d=.8、R=1.05、K=100，风险中性概率q=.625。第一期上涨节点继续价值约1.42857、下跌节点立即行权价值20；根节点最优停止价值约7.99320，欧洲到期支付现值约6.29252。",
+      "application": "用于美式看跌、可提前赎回信用工具、库存清算时点与动态止损定价。连续扩散障碍PDE可与离散二叉树倒推和蒙特卡洛最优停止方法交叉验证。",
+      "caveat": "数学Snell最优性取决于合法停时、现金流可积性与状态动力学；二叉树的离散Bermudan价格不能直接等同真实连续时间美式价格，滑点会改变执行障碍。",
+      "links": [
+        {
+          "kind": "math",
+          "id": "stochastic-n0297",
+          "label": "先修：离散最优停止"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0325",
+          "label": "先修：Feynman–Kac"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0326",
+          "label": "先修：后向PDE"
+        },
+        {
+          "kind": "math",
+          "id": "diffeq-n0411",
+          "label": "金融PDE：美式期权自由边界"
+        }
+      ],
+      "sources": [
+        {
+          "title": "University of Chicago Greg Lawler：Stochastic Calculus: An Introduction with Applications中Feynman–Kac与Black–Scholes定价课程",
+          "url": "https://www.math.uchicago.edu/~lawler/finbook.pdf"
+        },
+        {
+          "title": "MIT 15.070J Advanced Stochastic Processes：Lecture 17与19 Itô公式及金融应用",
+          "url": "https://ocw.mit.edu/courses/15-070j-advanced-stochastic-processes-fall-2013/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V14完整精讲：四节假设、严格推理、可复算价格与边界反例"
     }
   ]
 }

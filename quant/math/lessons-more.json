@@ -626,40 +626,156 @@
       "id": "ito-n0325",
       "node_id": "ito-n0325",
       "title": "Feynman-Kac公式",
-      "definition": "将满足终端条件的某类抛物型PDE解表示为扩散过程终端支付的条件期望。",
-      "assumptions": "系数、边界和解满足所需光滑、增长与可积条件；扩散由相应SDE生成。",
+      "definition": "Feynman–Kac公式在适当正则性与可积条件下，将扩散过程的条件期望与线性抛物型偏微分方程联系起来。若状态满足Itô SDE且生成算子为L，则终端支付、折现率和中途现金流组成的期望价值满足含零阶贴现项的后向PDE。它既可以从Itô公式验证候选经典解，也可用于构造金融期权价格及检验Monte Carlo与PDE求解是否一致。",
+      "assumptions": "设X从(t,x)出发满足dX_s=b(s,X_s)ds+σ(s,X_s)dW_s，系数保证非爆炸与足够矩界；c(s,x)非负且有界，f与终端g连续且具有使期望存在的增长条件。若PDE具有C^{1,2}经典解u且可通过停止局部化或增长控制令相关局部鞅成为适当真鞅，可应用下面的验证论证；若支付不光滑，应区分弱解、黏性解及经典解。",
       "properties": [
-        "联系风险中性期权定价与PDE。",
-        "折现的价值过程在适当条件下为鞅。"
+        "生成算子Lf=b·∇f+(1/2)tr(σσᵀ Hess f)决定扩散的局部条件漂移。",
+        "折现终端收益和运行现金流的期望对应后向方程∂_t u+Lu−cu+f=0。",
+        "候选C^{1,2}解经折现Itô乘积计算后形成鞅，终端条件给期望表示；反向经典正则性需额外条件。",
+        "在风险中性概率下可从相同定理得到资产定价PDE，但真实概率下的条件预测并不自动具有无套利价格解释。"
       ],
       "formulas": [
         {
-          "label": "Feynman-Kac表达式",
-          "tex": "u(t,x)=\\mathbb E_{t,x}\\left[e^{-\\int_t^T r(X_s,s)\\,ds}g(X_T)\\right]"
+          "label": "生成算子与后向方程的局部漂移",
+          "tex": "\\mathcal L_su=b(s,x)^\\mathsf T\\nabla_xu+\\tfrac12\\operatorname{tr}\\!\\bigl(\\sigma\\sigma^\\mathsf T\\nabla_x^2u\\bigr)"
         },
         {
-          "label": "对应PDE",
-          "tex": "u_t+\\mathcal Lu-ru=0,\\quad u(T,x)=g(x)"
+          "label": "折现终端现金流与PDE",
+          "tex": "u(t,x)=\\mathbb E_{t,x}\\!\\left[e^{-\\int_t^Tc\\,ds}g(X_T)+\\int_t^T e^{-\\int_t^s c\\,dv}f(s,X_s)\\,ds\\right]"
+        },
+        {
+          "label": "无贴现Brownian平方支付的独立核算",
+          "tex": "u(t,x)=x^2+\\sigma^2(T-t),\\quad u_t+\\tfrac{\\sigma^2}{2}u_{xx}=-\\sigma^2+\\sigma^2=0"
+        },
+        {
+          "label": "GBM风险中性定价PDE",
+          "tex": "v_t+rs\\,v_s+\\tfrac12\\sigma^2s^2v_{ss}-rv=0,\\qquad v(T,s)=g(s)"
         }
       ],
       "derivation": [
         {
-          "explanation": "对扩散生成元 $\\mathcal L$ 写Itô公式",
-          "tex": "du(t,X_t)=(u_t+\\mathcal Lu)dt+u_x\\sigma\\,dW_t"
+          "explanation": "对u∈C^{1,2}逐项应用多维Itô公式：du=[u_s+b^T∇u+(1/2)tr(σσ^T Hess u)]ds+∇u^Tσ dW。若相应随机积分在局部停止后可积，条件期望使它的漂移为0，余下的括号恰是u_s+Lu。",
+          "tex": "\\mathcal L_su=b(s,x)^\\mathsf T\\nabla_xu+\\tfrac12\\operatorname{tr}\\!\\bigl(\\sigma\\sigma^\\mathsf T\\nabla_x^2u\\bigr)"
         },
         {
-          "explanation": "定义贴现过程 $M_s=e^{-\\int_t^s r du}u(s,X_s)$，应用乘积法则",
-          "tex": "dM_s=e^{-\\int_t^s r du}\\big[(u_t+\\mathcal Lu-ru)ds+u_x\\sigma\\,dW_s\\big]"
+          "explanation": "对D_su(s,X_s)用Itô乘积，因D有限变差，d(Du)=D(u_t+Lu−cu)ds+D∇u^TσdW。再把运行收益积分的微分Df ds加回，若PDE成立则dt项为0。将鞅从t积分到T，代入u(T,x)=g(x)，得期望等式。",
+          "tex": "u(t,x)=\\mathbb E_{t,x}\\!\\left[e^{-\\int_t^Tc\\,ds}g(X_T)+\\int_t^T e^{-\\int_t^s c\\,dv}f(s,X_s)\\,ds\\right]"
         },
         {
-          "explanation": "若PDE成立，漂移消失；在真鞅与可积条件下取期望",
-          "tex": "u(t,x)=E_{t,x}[e^{-\\int_t^Trds}g(X_T)]"
+          "explanation": "由高斯增量均值0，E[(x+σΔW)²]=x²+2xσEΔW+σ²E(ΔW)²=x²+σ²τ。对u直接求导，u_t=−σ²、u_x=2x、u_xx=2，带入生成算子得到−σ²+(σ²/2)×2=0，且终端u(T,x)=x²。",
+          "tex": "u(t,x)=x^2+\\sigma^2(T-t),\\quad u_t+\\tfrac{\\sigma^2}{2}u_{xx}=-\\sigma^2+\\sigma^2=0"
+        },
+        {
+          "explanation": "将c=r、f=0及风险中性GBM系数b(s)=rs、σ_X(s)=σs代入一般Feynman–Kac PDE。由于扩散二次变差为σ²s²dt，二阶项是(.5σ²s²)v_ss；折现项是−rv。若g(s)=s，候选v=s代入得rs−rs=0，正好再现贴现资产的Q鞅性质。",
+          "tex": "v_t+rs\\,v_s+\\tfrac12\\sigma^2s^2v_{ss}-rv=0,\\qquad v(T,s)=g(s)"
         }
       ],
-      "example": "Black–Scholes PDE的Call价格可表述为风险中性折现终端支付期望。",
-      "application": "风险中性衍生品估值、最优停止PDE。",
-      "caveat": "局部鞅不一定是真鞅；证明需要确保可积性与边界条件。",
-      "checked_status": "定义、适用条件、性质、公式、分步推导与应用"
+      "deep_sections": [
+        {
+          "title": "生成算子与后向方程的局部漂移",
+          "question": "为什么扩散生成算子会成为期望函数的时间演化项？",
+          "paragraphs": [
+            "对X的Itô扩散及光滑函数u(s,X_s)，Itô公式把变化拆成时间偏导、漂移方向梯度、二次协方差加权Hessian以及均值为零的随机积分。",
+            "将前三项汇总为∂_s u+Lu，可以从条件期望的瞬时变化识别后向方程。这个过程并不要求市场资产必然可交易，只依赖给定扩散的概率结构。"
+          ],
+          "formulas": [
+            {
+              "label": "生成算子与后向方程的局部漂移",
+              "tex": "\\mathcal L_su=b(s,x)^\\mathsf T\\nabla_xu+\\tfrac12\\operatorname{tr}\\!\\bigl(\\sigma\\sigma^\\mathsf T\\nabla_x^2u\\bigr)"
+            }
+          ],
+          "proof": "对u∈C^{1,2}逐项应用多维Itô公式：du=[u_s+b^T∇u+(1/2)tr(σσ^T Hess u)]ds+∇u^Tσ dW。若相应随机积分在局部停止后可积，条件期望使它的漂移为0，余下的括号恰是u_s+Lu。",
+          "worked": "若X_s=x+σ(W_s−W_t)、b=0，令u(x)=x²，则Lu=(1/2)σ²×2=σ²；当σ=.2时Lu=.04。",
+          "limitation": "生成算子依赖扩散系数与概率测度；若价格还有跳跃，生成算子包含非局部积分项，不能直接使用纯Brownian的二阶PDE。"
+        },
+        {
+          "title": "折现终端现金流与PDE",
+          "question": "为什么未来现金流的折现期望要对应PDE里的−cu+f？",
+          "paragraphs": [
+            "定义D_{t,s}=exp(−∫_t^s c(v,X_v)dv)，并考察D_{t,s}u(s,X_s)+∫_t^sD_{t,v}f(v,X_v)dv。",
+            "若u满足u_t+Lu−cu+f=0，则上述过程的有限变差漂移全部抵消，只剩Itô随机积分。经过适当可积性验证后可取条件期望并使用终端值，得到Feynman–Kac表示。"
+          ],
+          "formulas": [
+            {
+              "label": "折现终端现金流与PDE",
+              "tex": "u(t,x)=\\mathbb E_{t,x}\\!\\left[e^{-\\int_t^Tc\\,ds}g(X_T)+\\int_t^T e^{-\\int_t^s c\\,dv}f(s,X_s)\\,ds\\right]"
+            }
+          ],
+          "proof": "对D_su(s,X_s)用Itô乘积，因D有限变差，d(Du)=D(u_t+Lu−cu)ds+D∇u^TσdW。再把运行收益积分的微分Df ds加回，若PDE成立则dt项为0。将鞅从t积分到T，代入u(T,x)=g(x)，得期望等式。",
+          "worked": "若c=.03、f=0、g≡100、T−t=1且X任意，则价值u=100e^{−.03}≈97.04455，对应PDE u_t−.03u=0和终端u(T)=100。",
+          "limitation": "若终端支付或贴现因子不满足必要可积性，形式上漂移消去的局部鞅可能不能直接取期望；经典解唯一性也需要边界与增长条件。"
+        },
+        {
+          "title": "无贴现Brownian平方支付的独立核算",
+          "question": "如何用一个不依赖股价模型的例子同时检验期望和PDE？",
+          "paragraphs": [
+            "取一维dX_s=σdW_s，终端支付g(x)=x²，折现c=0、运行现金流f=0。从(t,x)出发，X_T=x+σ(W_T−W_t)，其未来高斯增量方差为σ²(T−t)。",
+            "因此条件终端二阶矩为u(t,x)=x²+σ²(T−t)。代入u_t+(.5σ²)u_xx=0可逐项检验，展示Feynman–Kac无需预先求解一般抛物型PDE也能核算价值。"
+          ],
+          "formulas": [
+            {
+              "label": "无贴现Brownian平方支付的独立核算",
+              "tex": "u(t,x)=x^2+\\sigma^2(T-t),\\quad u_t+\\tfrac{\\sigma^2}{2}u_{xx}=-\\sigma^2+\\sigma^2=0"
+            }
+          ],
+          "proof": "由高斯增量均值0，E[(x+σΔW)²]=x²+2xσEΔW+σ²E(ΔW)²=x²+σ²τ。对u直接求导，u_t=−σ²、u_x=2x、u_xx=2，带入生成算子得到−σ²+(σ²/2)×2=0，且终端u(T,x)=x²。",
+          "worked": "当x=100、σ=.2、T−t=1时u=10000+.04=10000.04；若把σ误当价格百分比波动而非加性扩散单位，会造成量纲和数值错误。",
+          "limitation": "支付x²无界，本例使用Gaussian矩存在与多项式增长的充分可积性，而不属于只允许有界终端支付的简化定理表述。"
+        },
+        {
+          "title": "GBM风险中性定价PDE",
+          "question": "为什么同一Feynman–Kac公式在风险中性模型下给出资产支付的现值？",
+          "paragraphs": [
+            "设无股息可交易资产在Q下满足dS=rSdt+σSdW^Q，且r、σ为常数。它的生成算子为Ls=rs∂_s+(.5σ²s²)∂_{ss}。",
+            "期末支付g(S_T)的折现期望v(t,s)=E^Q[e^{-r(T−t)}g(S_T)|S_t=s]满足v_t+rv_s s+(.5σ²s²)v_{ss}−rv=0。期望公式要成立还需Q合法、贴现资产可积与终端支付适当增长条件。"
+          ],
+          "formulas": [
+            {
+              "label": "GBM风险中性定价PDE",
+              "tex": "v_t+rs\\,v_s+\\tfrac12\\sigma^2s^2v_{ss}-rv=0,\\qquad v(T,s)=g(s)"
+            }
+          ],
+          "proof": "将c=r、f=0及风险中性GBM系数b(s)=rs、σ_X(s)=σs代入一般Feynman–Kac PDE。由于扩散二次变差为σ²s²dt，二阶项是(.5σ²s²)v_ss；折现项是−rv。若g(s)=s，候选v=s代入得rs−rs=0，正好再现贴现资产的Q鞅性质。",
+          "worked": "取g(s)=s²，r=.03、σ=.2、T−t=1、s=100时v=s²e^{(r+σ²)(T−t)}=10000e^{.07}≈10725.08，可由正态指数矩和PDE分别验证。",
+          "limitation": "风险中性价格不是历史真实概率下的未贴现均值；有股息、随机利率、市场不完备或交易约束时，需明确计价物和测度。"
+        }
+      ],
+      "example": "无贴现扩散dX=.2dW、g(x)=x²、x=100及期限1时条件价值10000.04；常数现金流100、折现r=.03的现值为100e^{−.03}≈97.04455。Q下GBM的平方支付s=100、r=.03、σ=.2时价值10000e^{.07}≈10725.08。 本课程原有例子（保留）：Black–Scholes欧式Call价格可写成风险中性测度下期末看涨支付的折现条件期望，但需另说明模型利率、波动和无套利可复制条件。",
+      "application": "用于期权定价、信用损失折现、随机收益因子条件期望，以及PDE和蒙特卡洛实现的交叉验算；必须先声明使用历史或风险中性测度。",
+      "caveat": "光滑经典解验证与一般不光滑支付的黏性解不是同一个定理；终端增长、局部鞅可积性、贴现和交易限制都可能影响价格表示。 本课程原有提醒（保留）：局部鞅不一定是真鞅；必须检查可积性与终端及边界条件，不能仅凭形式上dt漂移消失就交换期望。",
+      "links": [
+        {
+          "kind": "math",
+          "id": "ito-n0310",
+          "label": "先修：多维Itô公式"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0326",
+          "label": "先修：后向PDE"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0324",
+          "label": "先修：贴现资产鞅"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0327",
+          "label": "后续：最优停止障碍PDE"
+        }
+      ],
+      "sources": [
+        {
+          "title": "University of Chicago Greg Lawler：Stochastic Calculus: An Introduction with Applications中Feynman–Kac与Black–Scholes定价课程",
+          "url": "https://www.math.uchicago.edu/~lawler/finbook.pdf"
+        },
+        {
+          "title": "MIT 15.070J Advanced Stochastic Processes：Lecture 17与19 Itô公式及金融应用",
+          "url": "https://ocw.mit.edu/courses/15-070j-advanced-stochastic-processes-fall-2013/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V14深化原有Feynman–Kac讲义：保留Call贴现例子、两条原公式及提醒；补充四节完整证明和数值核验"
     },
     {
       "id": "information-n0481",
@@ -3927,6 +4043,471 @@
       "example": "两状态P=(0.25,0.75)、Q=(0.5,0.5)给RN密度Z=(2,2/3)，P下加权归一化0.25×2+0.75×2/3=1。收益g=(1,3)在Q下的均值2，亦等于E_P[Zg]=0.5+1.5=2；反向密度(1/2,3/2)在Q下同样归一化。",
       "application": "用于风险中性定价的概率权重、收益预测重加权、变更状态分布下的风险积分和动态似然比滤过；必须同时区分真实概率测度、风险中性测度、信息可得时点及交易可执行性。 在给定实际与定价测度之间比较风险敞口、定价核和状态概率权重时，先核对绝对连续、归一化及给定信息下的动态密度，再考虑套利和定价框架。",
       "caveat": "Q≪P与Q~P并不等价；RN密度可为零但若双向等价则必须严格为正。金融风险中性测度的存在、等价性和贴现鞅性质依赖额外市场条件，不能从形式上的Z≥0、E_PZ=1单独推出。 动态密度鞅作为数学构造并不保证交易策略能以所需价格成交；Girsanov测度变换、Novikov条件及无套利市场假设需要独立验证。"
+    },
+    {
+      "id": "measure-n0145",
+      "node_id": "measure-n0145",
+      "title": "绝对连续与奇异性",
+      "definition": "绝对连续和互相奇异是比较两个测度如何分配零测事件的基本关系。ν≪μ表示μ认为不可能的事件在ν下也不可能；ν⊥μ则表示ν的全部质量集中在μ零测集上。Lebesgue分解定理把有限测度唯一拆成相对于给定基准测度的绝对连续部分和奇异部分，为Radon–Nikodym密度与风险中性测度的合法构造提供前置条件。",
+      "assumptions": "固定可测空间(Ω,F)，μ为σ有限正测度，ν为有限正测度；分解存在性由Lebesgue分解定理保证。若讨论概率测度等价，二者总质量都为1；若讨论RN密度存在，需要明确相应σ有限条件。本节的μ零测集和ν零测集均相对于同一F定义，不能混用未完成化的σ代数。",
+      "properties": [
+        "绝对连续ν≪μ是单向零集包含关系，双向成立才是等价。",
+        "若ν有非负μ密度，则必然ν≪μ；存在性需要Radon–Nikodym条件。",
+        "互相奇异与绝对连续同时成立的有限正测度只能为零。",
+        "有限正测度相对于σ有限基准测度可唯一分解为绝对连续和奇异部分。"
+      ],
+      "formulas": [
+        {
+          "label": "测度绝对连续与零测集",
+          "tex": "\\nu\\ll\\mu\\iff[\\mu(A)=0\\Rightarrow\\nu(A)=0],\\qquad \\mu\\sim\\nu\\iff(\\mu\\ll\\nu\\ \\text{且}\\ \\nu\\ll\\mu)"
+        },
+        {
+          "label": "互相奇异与集中在不同集合",
+          "tex": "\\nu\\perp\\mu\\iff\\exists A\\in\\mathcal F:\\ \\mu(A)=0,\\ \\nu(A^c)=0"
+        },
+        {
+          "label": "Lebesgue分解与唯一性",
+          "tex": "\\nu=\\nu_{\\mathrm{ac}}+\\nu_{\\mathrm{s}},\\quad \\nu_{\\mathrm{ac}}\\ll\\mu,\\quad \\nu_{\\mathrm{s}}\\perp\\mu"
+        },
+        {
+          "label": "零集保存、等价性与金融事件",
+          "tex": "\\frac{d\\nu}{d\\mu}=f,\\qquad \\nu\\sim\\mu\\iff f>0\\quad\\mu\\text{-a.e.}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对于任何非负可测函数f，若ν(A)=∫_Af dμ，则μ(A)=0时右端必为0，所以ν≪μ。反过来，存在RN密度还要有σ有限等相应条件，不能仅靠一条零集命题在任意测度空间上直接构造密度。",
+          "tex": "\\nu\\ll\\mu\\iff[\\mu(A)=0\\Rightarrow\\nu(A)=0],\\qquad \\mu\\sim\\nu\\iff(\\mu\\ll\\nu\\ \\text{且}\\ \\nu\\ll\\mu)"
+        },
+        {
+          "explanation": "若μ为[0,1]的Lebesgue测度、ν=δ_0，选A={0}，则μ(A)=0而ν(A^c)=δ_0((0,1])=0，故ν⊥μ。若ν同时对μ绝对连续且与μ奇异，则按上式ν(Ω)=ν(A)+ν(A^c)=0，说明正测度ν只能是零测度。",
+          "tex": "\\nu\\perp\\mu\\iff\\exists A\\in\\mathcal F:\\ \\mu(A)=0,\\ \\nu(A^c)=0"
+        },
+        {
+          "explanation": "若有两种分解ν=a+s=a'+s'，则a−a'=s'−s。差的左侧相对于μ绝对连续，右侧集中在两个奇异部分支撑集的并集上，因而又是相对于μ奇异的有限有符号测度；只有零测度可同时满足这两类性质，所以a=a'、s=s'。",
+          "tex": "\\nu=\\nu_{\\mathrm{ac}}+\\nu_{\\mathrm{s}},\\quad \\nu_{\\mathrm{ac}}\\ll\\mu,\\quad \\nu_{\\mathrm{s}}\\perp\\mu"
+        },
+        {
+          "explanation": "若f>0 μ几乎处处，且ν(A)=∫_A f dμ=0，则非负积分为零意味着f=0在A上μ几乎处处，结合f严格正得到μ(A)=0，所以μ≪ν。反之若f=0的集合μ质量正，就有ν(A)=0却μ(A)>0，违反反向绝对连续。",
+          "tex": "\\frac{d\\nu}{d\\mu}=f,\\qquad \\nu\\sim\\mu\\iff f>0\\quad\\mu\\text{-a.e.}"
+        }
+      ],
+      "deep_sections": [
+        {
+          "title": "测度绝对连续与零测集",
+          "question": "为什么ν对μ绝对连续不等于二者拥有相同的密度函数？",
+          "paragraphs": [
+            "给定同一可测空间上的两个正测度μ和ν，ν≪μ只要求所有μ零测集也必须是ν零测集。这个定义是对零测事件的限制，不直接要求两个测度在每个事件上分配相同的概率。",
+            "它的方向很重要：ν≪μ不一定推出μ≪ν。若二者互相绝对连续，才称为等价测度，意味着它们有相同的零测事件集合。金融风险中性测度要求的等价性通常比单向绝对连续更强。"
+          ],
+          "formulas": [
+            {
+              "label": "测度绝对连续与零测集",
+              "tex": "\\nu\\ll\\mu\\iff[\\mu(A)=0\\Rightarrow\\nu(A)=0],\\qquad \\mu\\sim\\nu\\iff(\\mu\\ll\\nu\\ \\text{且}\\ \\nu\\ll\\mu)"
+            }
+          ],
+          "proof": "对于任何非负可测函数f，若ν(A)=∫_Af dμ，则μ(A)=0时右端必为0，所以ν≪μ。反过来，存在RN密度还要有σ有限等相应条件，不能仅靠一条零集命题在任意测度空间上直接构造密度。",
+          "worked": "若μ是[0,1]的均匀概率、ν的密度为2x，则μ({0})=ν({0})=0，而ν([0,.5])=∫_0^.5 2x dx=.25，与μ([0,.5])=.5不同。",
+          "limitation": "若用历史测度P和定价测度Q比较风险，零测集的方向必须写清楚；Q对P绝对连续不足以单独证明P与Q等价。"
+        },
+        {
+          "title": "互相奇异与集中在不同集合",
+          "question": "怎样区分没有重叠支撑的奇异部分和有密度的连续部分？",
+          "paragraphs": [
+            "若存在可测集A，使μ(A)=0且ν(A^c)=0，就记ν⊥μ，表示ν全部质量集中在μ的某个零测集合上。 这也说明原子概率与密度表示之间有根本区别。",
+            "与ν≪μ相反，奇异性不要求ν拥有相对于μ的普通函数密度。最典型的例子是Lebesgue测度与Dirac点质量；二者在单点上的质量发生根本分歧。"
+          ],
+          "formulas": [
+            {
+              "label": "互相奇异与集中在不同集合",
+              "tex": "\\nu\\perp\\mu\\iff\\exists A\\in\\mathcal F:\\ \\mu(A)=0,\\ \\nu(A^c)=0"
+            }
+          ],
+          "proof": "若μ为[0,1]的Lebesgue测度、ν=δ_0，选A={0}，则μ(A)=0而ν(A^c)=δ_0((0,1])=0，故ν⊥μ。若ν同时对μ绝对连续且与μ奇异，则按上式ν(Ω)=ν(A)+ν(A^c)=0，说明正测度ν只能是零测度。",
+          "worked": "取μ为[0,1]均匀概率、ν=δ_0，则μ({0})=0、ν({0})=1；不存在可积普通密度f使ν(A)=∫_A f dμ对所有事件成立。",
+          "limitation": "无原子并不意味着对Lebesgue测度绝对连续：Cantor分布是常见的奇异连续反例，不能只检查离散点质量。"
+        },
+        {
+          "title": "Lebesgue分解与唯一性",
+          "question": "一个兼有连续部分和离散跳点的概率分布如何严格拆分？",
+          "paragraphs": [
+            "对σ有限μ及有限正测度ν，Lebesgue分解定理给出唯一ν_ac与ν_s，使ν=ν_ac+ν_s，ν_ac≪μ而ν_s⊥μ。",
+            "这允许同时表示连续密度与点质量，避免把经验金融损失的零违约质量、离散清算状态和连续收益混成单一Lebesgue密度。定理保证分解存在；唯一性可由共同的绝对连续及奇异性质直接验证。"
+          ],
+          "formulas": [
+            {
+              "label": "Lebesgue分解与唯一性",
+              "tex": "\\nu=\\nu_{\\mathrm{ac}}+\\nu_{\\mathrm{s}},\\quad \\nu_{\\mathrm{ac}}\\ll\\mu,\\quad \\nu_{\\mathrm{s}}\\perp\\mu"
+            }
+          ],
+          "proof": "若有两种分解ν=a+s=a'+s'，则a−a'=s'−s。差的左侧相对于μ绝对连续，右侧集中在两个奇异部分支撑集的并集上，因而又是相对于μ奇异的有限有符号测度；只有零测度可同时满足这两类性质，所以a=a'、s=s'。",
+          "worked": "以μ=Uniform[0,1]为基准，ν=.7μ+.3δ_0，绝对连续部分总质量.7，奇异部分质量.3；事件{0}的ν质量为.3，而μ质量0。",
+          "limitation": "如果模型忽略奇异部分，使用连续密度积分估计违约或边界事件概率可能将真实正质量错误设为零。"
+        },
+        {
+          "title": "零集保存、等价性与金融事件",
+          "question": "为何改变资产定价测度时，通常要比仅有密度更进一步要求正密度？",
+          "paragraphs": [
+            "若ν≪μ，由RN定理可写密度f≥0。若f在某个μ正测度集合上为0，则该集合的ν概率为0但μ概率正，因而无法反向绝对连续。",
+            "在概率测度情形，两测度等价当且仅当ν=density×μ、密度f>0 μ几乎处处；这一结论确保两种概率权重改变不会把原来可能发生的事件完全删去。"
+          ],
+          "formulas": [
+            {
+              "label": "零集保存、等价性与金融事件",
+              "tex": "\\frac{d\\nu}{d\\mu}=f,\\qquad \\nu\\sim\\mu\\iff f>0\\quad\\mu\\text{-a.e.}"
+            }
+          ],
+          "proof": "若f>0 μ几乎处处，且ν(A)=∫_A f dμ=0，则非负积分为零意味着f=0在A上μ几乎处处，结合f严格正得到μ(A)=0，所以μ≪ν。反之若f=0的集合μ质量正，就有ν(A)=0却μ(A)>0，违反反向绝对连续。",
+          "worked": "取μ为两事件上各0.5，ν概率为(1,0)，则密度(2,0)且ν≪μ，但不是等价；换成ν=(.6,.4)时密度(1.2,.8)>0，二者等价。",
+          "limitation": "等价测度不意味着资产价格动态在两种测度下都无套利，亦不意味着可交易性与交易费用条件自动成立。"
+        }
+      ],
+      "example": "以μ=Uniform[0,1]为基准，ν=.7μ+.3δ_0的绝对连续质量为.7，奇异质量为.3；ν({0})=.3而μ({0})=0。另ν有密度2x时ν([0,.5])=.25而μ([0,.5])=.5，显示有密度与分配相同概率是不同命题。",
+      "application": "用于金融定价测度的零概率事件保留、离散违约与连续收益混合分布、尾部风险概率变换，以及检验概率权重是否真正等价。",
+      "caveat": "没有原子不等于具有Lebesgue密度；仅有ν≪μ也不代表互相等价。使用风险中性概率需要另查资产贴现鞅条件、可交易性和市场假设。",
+      "links": [
+        {
+          "kind": "math",
+          "id": "measure-n0124",
+          "label": "先修：零测集"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0136",
+          "label": "先修：RN导数概念"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0146",
+          "label": "下一步：RN定理"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0147",
+          "label": "下一步：概率测度变换"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 18.125 Measure and Integration：课程大纲包含Radon–Nikodym与测度分解主题",
+          "url": "https://ocw.mit.edu/courses/18-125-measure-and-integration-fall-2003/pages/syllabus/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：第10讲概率密度、绝对连续与Radon–Nikodym",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V14完整精讲：绝对连续、奇异性、Lebesgue分解和金融等价测度"
+    },
+    {
+      "id": "measure-n0146",
+      "node_id": "measure-n0146",
+      "title": "Radon-Nikodym定理",
+      "definition": "Radon–Nikodym定理刻画两个σ有限测度之间存在密度的充要条件：ν对μ绝对连续当且仅当有非负可测函数f使ν(A)=∫_Af dμ，f=dν/dμ在μ几乎处处意义下唯一。该定理将抽象的零测集关系连接到积分、概率分布变换与条件期望，为金融风险价格的随机密度过程建立测度论基础。",
+      "assumptions": "μ和ν为同一可测空间上的σ有限正测度，ν≪μ，RN存在性由标准定理给出；若使用概率测度则总质量为1。换元积分要求测试函数非负或ν绝对可积，链式法则要求中间测度满足相应绝对连续和σ有限条件；反向密度要求等价而不只是单向绝对连续。密度等式只在μ零集之外有唯一性。",
+      "properties": [
+        "σ有限条件下ν≪μ是RN密度存在的充要条件。",
+        "RN导数在基准测度的几乎处处意义下唯一，而非必须逐点一致。",
+        "对非负或可积h可写∫h dν=∫h(dν/dμ)dμ。",
+        "链式导数满足乘法法则，等价测度下反向密度为正密度的倒数。"
+      ],
+      "formulas": [
+        {
+          "label": "Radon–Nikodym存在定理",
+          "tex": "\\nu\\ll\\mu\\quad\\Longleftrightarrow\\quad\\exists f\\ge0:\\ \\nu(A)=\\int_Af\\,d\\mu\\quad(\\forall A\\in\\mathcal F)"
+        },
+        {
+          "label": "密度唯一性和零集判定",
+          "tex": "\\int_Af\\,d\\mu=\\int_Ag\\,d\\mu\\ \\forall A\\quad\\Longrightarrow\\quad f=g\\ \\mu\\text{-a.e.}"
+        },
+        {
+          "label": "换测度积分与期望",
+          "tex": "\\int h\\,d\\nu=\\int hf\\,d\\mu,\\qquad f=\\frac{d\\nu}{d\\mu}"
+        },
+        {
+          "label": "链式法则与互相等价测度",
+          "tex": "\\frac{d\\eta}{d\\mu}=\\frac{d\\eta}{d\\nu}\\frac{d\\nu}{d\\mu},\\qquad \\frac{d\\mu}{d\\nu}=\\left(\\frac{d\\nu}{d\\mu}\\right)^{-1}\\ (\\nu\\sim\\mu)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "正向存在性是Radon–Nikodym定理的非平凡部分，可先对有限测度构造有界线性泛函、借助Hilbert空间Riesz表示及截断逼近取得f，再用σ有限分块拼接。反向较直接：μ(A)=0时任意非负函数在A上的积分为零，故ν(A)=0。完整存在性属于测度论核心定理，不能仅靠形式商ν(A)/μ(A)证明。",
+          "tex": "\\nu\\ll\\mu\\quad\\Longleftrightarrow\\quad\\exists f\\ge0:\\ \\nu(A)=\\int_Af\\,d\\mu\\quad(\\forall A\\in\\mathcal F)"
+        },
+        {
+          "explanation": "对A_n={f≥g+1/n}，由积分等式0=∫_{A_n}(f−g)dμ≥μ(A_n)/n，因而μ(A_n)=0。集合{f>g}=∪_{n≥1}A_n（按实值和几乎处处有限版本）也是零测；互换f,g证反向零集，遂有μ({f≠g})=0。",
+          "tex": "\\int_Af\\,d\\mu=\\int_Ag\\,d\\mu\\ \\forall A\\quad\\Longrightarrow\\quad f=g\\ \\mu\\text{-a.e.}"
+        },
+        {
+          "explanation": "先在非负简单函数上由ν定义逐项核验两侧相等。令h_n↑h的简单函数列，单调收敛分别给∫h_n dν↑∫h dν和∫h_n f dμ↑∫hf dμ；取极限即得非负h公式。对两侧绝对可积的h应用正负分解。",
+          "tex": "\\int h\\,d\\nu=\\int hf\\,d\\mu,\\qquad f=\\frac{d\\nu}{d\\mu}"
+        },
+        {
+          "explanation": "链式法则通过对任意事件A写η(A)=∫_Ag dν=∫_Agf dμ，使用RN导数唯一性得到。等价情形f>0 μ几乎处处，对任意A有∫_A(1/f)dν=∫_A(1/f)f dμ=μ(A)，故反向导数为1/f。",
+          "tex": "\\frac{d\\eta}{d\\mu}=\\frac{d\\eta}{d\\nu}\\frac{d\\nu}{d\\mu},\\qquad \\frac{d\\mu}{d\\nu}=\\left(\\frac{d\\nu}{d\\mu}\\right)^{-1}\\ (\\nu\\sim\\mu)"
+        }
+      ],
+      "deep_sections": [
+        {
+          "title": "Radon–Nikodym存在定理",
+          "question": "何时能把一个测度相对于另一个测度写成函数密度？",
+          "paragraphs": [
+            "Radon–Nikodym定理说明：在同一可测空间中若μ和ν均σ有限且ν≪μ，则存在非负可测函数f，使每个事件A的ν质量等于∫_A f dμ。",
+            "该定理提供的是测度关系的精确刻画，不要求f处处连续或有界；此外所得f只在μ几乎处处意义下唯一。若ν含有μ零集上的正质量，密度不可能覆盖该奇异部分。"
+          ],
+          "formulas": [
+            {
+              "label": "Radon–Nikodym存在定理",
+              "tex": "\\nu\\ll\\mu\\quad\\Longleftrightarrow\\quad\\exists f\\ge0:\\ \\nu(A)=\\int_Af\\,d\\mu\\quad(\\forall A\\in\\mathcal F)"
+            }
+          ],
+          "proof": "正向存在性是Radon–Nikodym定理的非平凡部分，可先对有限测度构造有界线性泛函、借助Hilbert空间Riesz表示及截断逼近取得f，再用σ有限分块拼接。反向较直接：μ(A)=0时任意非负函数在A上的积分为零，故ν(A)=0。完整存在性属于测度论核心定理，不能仅靠形式商ν(A)/μ(A)证明。",
+          "worked": "若μ为[0,1]均匀概率，ν(A)=∫_A2x dx，则f(x)=2x是RN导数；ν([0,.5])=∫_0^.5 2x dx=.25。",
+          "limitation": "若ν=δ_0而μ为Lebesgue测度，则μ({0})=0但ν({0})=1，违背绝对连续；不存在普通非负Lebesgue密度表示ν。"
+        },
+        {
+          "title": "密度唯一性和零集判定",
+          "question": "为什么两种不同写法表示同一个测度时，它们至多在零测集上不同？",
+          "paragraphs": [
+            "假设非负可测f和g对每个事件A都有∫_A f dμ=∫_A g dμ。考虑可测集合A_n={f≥g+1/n}，在该集合上f−g至少为1/n。",
+            "因为其积分差应为零，故μ(A_n)=0；对n取并集得到μ({f>g})=0。交换f、g的角色得到μ({g>f})=0，因此f=g在μ几乎处处意义下成立。"
+          ],
+          "formulas": [
+            {
+              "label": "密度唯一性和零集判定",
+              "tex": "\\int_Af\\,d\\mu=\\int_Ag\\,d\\mu\\ \\forall A\\quad\\Longrightarrow\\quad f=g\\ \\mu\\text{-a.e.}"
+            }
+          ],
+          "proof": "对A_n={f≥g+1/n}，由积分等式0=∫_{A_n}(f−g)dμ≥μ(A_n)/n，因而μ(A_n)=0。集合{f>g}=∪_{n≥1}A_n（按实值和几乎处处有限版本）也是零测；互换f,g证反向零集，遂有μ({f≠g})=0。",
+          "worked": "如果密度f(x)=2x且把单点x=.5处的函数值从1改成100，由于μ({.5})=0，该密度表示的所有事件概率不变。",
+          "limitation": "密度唯一性不是逐点唯一，尤其在含有零概率价格状态的连续分布中，不应根据单个零测点的密度值声称概率模型改变。"
+        },
+        {
+          "title": "换测度积分与期望",
+          "question": "为什么已知RN密度后可以用原测度计算新测度下的期望？",
+          "paragraphs": [
+            "若ν(A)=∫_A f dμ，则对任意非负简单函数h=Σc_i1_{A_i}，有∫h dν=Σc_iν(A_i)=Σc_i∫_{A_i}f dμ。",
+            "对一般非负可测h用简单函数单调逼近并应用单调收敛定理，再对可积有符号h分正负部分得到换元积分恒等式。金融风险中性期望的密度加权正基于此。"
+          ],
+          "formulas": [
+            {
+              "label": "换测度积分与期望",
+              "tex": "\\int h\\,d\\nu=\\int hf\\,d\\mu,\\qquad f=\\frac{d\\nu}{d\\mu}"
+            }
+          ],
+          "proof": "先在非负简单函数上由ν定义逐项核验两侧相等。令h_n↑h的简单函数列，单调收敛分别给∫h_n dν↑∫h dν和∫h_n f dμ↑∫hf dμ；取极限即得非负h公式。对两侧绝对可积的h应用正负分解。",
+          "worked": "对μ=Uniform[0,1]、f=2x，ν下的X期望为∫_0^1x·2x dx=2/3；而μ下E X=1/2，说明不同测度可改变均值而保持相同状态空间。",
+          "limitation": "若h含正负且新测度下正负部分都无穷，则期望出现∞−∞不定式；不可把形式密度积分当作有限金融价格。"
+        },
+        {
+          "title": "链式法则与互相等价测度",
+          "question": "连续改变两次测度时，为什么密度可以相乘？",
+          "paragraphs": [
+            "在测度η≪ν≪μ且满足σ有限条件时，令g=dη/dν与f=dν/dμ。由换测度积分，η(A)=∫_A g dν=∫_A gf dμ。",
+            "因此dη/dμ=gf在μ几乎处处成立。若ν∼μ且f>0 μ几乎处处，则反向导数dμ/dν=1/f，允许在实际概率和风险中性概率之间一致地来回计算条件期望。"
+          ],
+          "formulas": [
+            {
+              "label": "链式法则与互相等价测度",
+              "tex": "\\frac{d\\eta}{d\\mu}=\\frac{d\\eta}{d\\nu}\\frac{d\\nu}{d\\mu},\\qquad \\frac{d\\mu}{d\\nu}=\\left(\\frac{d\\nu}{d\\mu}\\right)^{-1}\\ (\\nu\\sim\\mu)"
+            }
+          ],
+          "proof": "链式法则通过对任意事件A写η(A)=∫_Ag dν=∫_Agf dμ，使用RN导数唯一性得到。等价情形f>0 μ几乎处处，对任意A有∫_A(1/f)dν=∫_A(1/f)f dμ=μ(A)，故反向导数为1/f。",
+          "worked": "两状态μ=(.5,.5)、ν=(.6,.4)，f=(1.2,.8)；反向密度为(1/1.2,1/.8)=(5/6,1.25)，按ν加权总期望为.6×5/6+.4×1.25=1。",
+          "limitation": "只有在真正等价且密度正的状态上才能取倒数；零密度状态会使反向表达非法，不能通过除以零强行恢复旧测度。"
+        }
+      ],
+      "example": "Uniform[0,1]基准μ与密度f=2x的ν满足ν([0,.5])=.25，E_ν X=∫_0^1 2x²dx=2/3，而μ下E X=.5；对两个离散状态测度μ=(.5,.5)、ν=(.6,.4)，其正密度为(1.2,.8)，反向密度(5/6,1.25)满足归一化。",
+      "application": "用于条件期望、真实与风险中性分布之间的期望转换、似然比、重要性采样与金融概率定价，并为Girsanov指数密度提供合法性检查。",
+      "caveat": "RN存在性不是随意对测度值做点态除法；若有奇异质量则不能用纯普通密度替代。所有积分都需核对非负性或绝对可积性及密度方向。",
+      "links": [
+        {
+          "kind": "math",
+          "id": "measure-n0145",
+          "label": "先修：绝对连续与奇异性"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0136",
+          "label": "先修：RN导数"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0147",
+          "label": "后续：概率测度变换"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0319",
+          "label": "金融：Girsanov换测度"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 18.125 Measure and Integration：课程大纲含Radon–Nikodym定理及积分",
+          "url": "https://ocw.mit.edu/courses/18-125-measure-and-integration-fall-2003/pages/syllabus/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：Lecture 10连续变量的RN导数与σ有限定理",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V14完整精讲：RN存在、唯一、换元积分、链式及反向密度"
+    },
+    {
+      "id": "measure-n0147",
+      "node_id": "measure-n0147",
+      "title": "概率测度变换",
+      "definition": "概率测度变换通过Radon–Nikodym终端密度Z_T=dQ/dP把同一个随机空间上的事件重新赋予概率权重。非负密度必须满足E_P Z_T=1，新测度Q才是真正的概率；严格正密度使P与Q具有相同零概率事件。进一步把终端密度条件化得到动态密度鞅Z_t，并由Bayes公式严格转换不同信息时点的条件期望。",
+      "assumptions": "P与Q定义在相同F_T及滤过F_t上，Q≪P且Z_T≥0为F_T可测，E_PZ_T=1。若要P∼Q，应加Z_T>0在P几乎处处；使用条件Bayes公式需X在Q下可积，并在Z_t>0处定义。金融二叉树例子另要求d<R<u、股票和债券可交易、自融资且交易费用忽略，不能从数学密度归一直接推出无套利。",
+      "properties": [
+        "非负且P期望1的终端密度定义概率测度，严格正时与P等价。",
+        "密度过程Z_t=E_P[Z_T|F_t]是P下均值1的鞅。",
+        "Bayes公式以Z_T条件加权并除以Z_t给出Q下条件期望。",
+        "风险中性概率来自可交易资产贴现鞅约束，不必等于真实历史发生频率。"
+      ],
+      "formulas": [
+        {
+          "label": "终端密度构造概率测度",
+          "tex": "\\mathbb Q(A)=\\mathbb E_{\\mathbb P}[Z_T\\mathbf1_A],\\quad Z_T\\ge0,\\quad \\mathbb E_{\\mathbb P}Z_T=1"
+        },
+        {
+          "label": "密度过程与信息滤过",
+          "tex": "Z_t=\\mathbb E_{\\mathbb P}[Z_T\\mid\\mathcal F_t],\\quad \\mathbb E_{\\mathbb P}[Z_t\\mid\\mathcal F_s]=Z_s\\ (s\\le t)"
+        },
+        {
+          "label": "Bayes条件期望与测度转换",
+          "tex": "\\mathbb E_{\\mathbb Q}[X\\mid\\mathcal F_t]=\\frac{\\mathbb E_{\\mathbb P}[Z_TX\\mid\\mathcal F_t]}{Z_t}"
+        },
+        {
+          "label": "二叉树价格与零概率事件保存",
+          "tex": "q=\\frac{R-d}{u-d}=0.6,\\quad Z=(1.2,0.8),\\quad C_0=\\frac{\\mathbb E_{\\mathbb Q}(S_1-100)^+}{1.02}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对两两不交事件A_n，非负单调收敛给Q(∪A_n)=E_P[ZΣ1_{A_n}]=ΣE_P[Z1_{A_n}]=ΣQ(A_n)，因此可数可加。再令A=Ω，得Q(Ω)=E_P Z=1；若Z>0 P几乎处处，双方零测集相同，证明等价性。",
+          "tex": "\\mathbb Q(A)=\\mathbb E_{\\mathbb P}[Z_T\\mathbf1_A],\\quad Z_T\\ge0,\\quad \\mathbb E_{\\mathbb P}Z_T=1"
+        },
+        {
+          "explanation": "对A∈F_t有Q(A)=E_P[Z_T1_A]=E_P[E_P(Z_T|F_t)1_A]=E_P[Z_t1_A]。塔式条件期望给E_P[Z_t|F_s]=E_P[E_P(Z_T|F_t)|F_s]=E_P[Z_T|F_s]=Z_s；且E Z_t=E Z_T=1。",
+          "tex": "Z_t=\\mathbb E_{\\mathbb P}[Z_T\\mid\\mathcal F_t],\\quad \\mathbb E_{\\mathbb P}[Z_t\\mid\\mathcal F_s]=Z_s\\ (s\\le t)"
+        },
+        {
+          "explanation": "定义Y=(1/Z_t)E_P[Z_TX|F_t]，它F_t可测。对任意A∈F_t，E_Q[Y1_A]=E_P[Z_TY1_A]=E_P[Z_tY1_A]=E_P[E_P(Z_TX|F_t)1_A]=E_P[Z_TX1_A]=E_Q[X1_A]，由条件期望定义得到等式。",
+          "tex": "\\mathbb E_{\\mathbb Q}[X\\mid\\mathcal F_t]=\\frac{\\mathbb E_{\\mathbb P}[Z_TX\\mid\\mathcal F_t]}{Z_t}"
+        },
+        {
+          "explanation": "假设d<R<u保证0<q<1，将贴现股票鞅条件S_0=R^{-1}E_Q S_1写成1=R^{-1}[qu+(1−q)d]并解得q。由于P两状态各半，密度比例q/P(up)=1.2、(1−q)/P(down)=.8。看涨支付只在上涨时为10，折现期望得到5.88235。",
+          "tex": "q=\\frac{R-d}{u-d}=0.6,\\quad Z=(1.2,0.8),\\quad C_0=\\frac{\\mathbb E_{\\mathbb Q}(S_1-100)^+}{1.02}"
+        }
+      ],
+      "deep_sections": [
+        {
+          "title": "终端密度构造概率测度",
+          "question": "为什么一个正的随机变量只有归一化后才可以作为概率密度？",
+          "paragraphs": [
+            "取基准概率P和F_T可测非负随机变量Z_T，定义Q(A)=E_P[Z_T1_A]。这个集合函数由非负积分的可数可加性成为测度，其总质量正好等于E_P Z_T。",
+            "因此要得到真正的概率测度，必须要求E_P Z_T=1。若此外Z_T>0在P几乎处处，则Q与P等价；不满足正性时仍可能有Q≪P但失去逆向等价。"
+          ],
+          "formulas": [
+            {
+              "label": "终端密度构造概率测度",
+              "tex": "\\mathbb Q(A)=\\mathbb E_{\\mathbb P}[Z_T\\mathbf1_A],\\quad Z_T\\ge0,\\quad \\mathbb E_{\\mathbb P}Z_T=1"
+            }
+          ],
+          "proof": "对两两不交事件A_n，非负单调收敛给Q(∪A_n)=E_P[ZΣ1_{A_n}]=ΣE_P[Z1_{A_n}]=ΣQ(A_n)，因此可数可加。再令A=Ω，得Q(Ω)=E_P Z=1；若Z>0 P几乎处处，双方零测集相同，证明等价性。",
+          "worked": "在两状态P=(.5,.5)且Z=(1.2,.8)时，E_PZ=.5×1.2+.5×.8=1，故Q=(.6,.4)合法且与P等价。",
+          "limitation": "若某状态的密度为0，就不能把该状态在Q下的零概率解释成真实历史P下也不可能发生；测度等价性已经丧失。"
+        },
+        {
+          "title": "密度过程与信息滤过",
+          "question": "为什么终端密度必须通过条件期望转换成每个中间时刻的密度？",
+          "paragraphs": [
+            "当Q由F_T上的正终端密度Z_T定义，对于时刻t可见的事件A∈F_t，其Q概率应仍为E_P[Z_T1_A]。根据条件期望，这等于E_P[Z_t1_A]，其中Z_t=E_P[Z_T|F_t]。",
+            "因此(Z_t)是P下均值1的非负鞅，也是在各时点合法的信息集内可以计算的密度过程。金融交易中使用全样本未来状态直接设定Z_t会违反滤过时间要求。"
+          ],
+          "formulas": [
+            {
+              "label": "密度过程与信息滤过",
+              "tex": "Z_t=\\mathbb E_{\\mathbb P}[Z_T\\mid\\mathcal F_t],\\quad \\mathbb E_{\\mathbb P}[Z_t\\mid\\mathcal F_s]=Z_s\\ (s\\le t)"
+            }
+          ],
+          "proof": "对A∈F_t有Q(A)=E_P[Z_T1_A]=E_P[E_P(Z_T|F_t)1_A]=E_P[Z_t1_A]。塔式条件期望给E_P[Z_t|F_s]=E_P[E_P(Z_T|F_t)|F_s]=E_P[Z_T|F_s]=Z_s；且E Z_t=E Z_T=1。",
+          "worked": "在单期二状态模型里，F_0只有全体与空集，Z_0=E_P Z_1=1；到期揭晓上/下状态后，Z_1分别为1.2和.8。",
+          "limitation": "在一般无穷期限，密度鞅可能不一致可积；不能把有限T条件期望的结论无条件延伸到T趋无穷。"
+        },
+        {
+          "title": "Bayes条件期望与测度转换",
+          "question": "为什么新测度的未来支付期望需要除以当前密度过程？",
+          "paragraphs": [
+            "对Q可积随机变量X，希望在F_t上求Y=E_Q[X|F_t]。以Q(A)=E_P[Z_T1_A]为定义，对任意A∈F_t核对条件期望的测试事件恒等式。",
+            "结果是Y=E_P[Z_TX|F_t]/Z_t，分母只能在Z_t>0的状态上取倒数。这条公式是风险中性条件现金流、重要性采样以及Girsanov定价的核心测度论接口。"
+          ],
+          "formulas": [
+            {
+              "label": "Bayes条件期望与测度转换",
+              "tex": "\\mathbb E_{\\mathbb Q}[X\\mid\\mathcal F_t]=\\frac{\\mathbb E_{\\mathbb P}[Z_TX\\mid\\mathcal F_t]}{Z_t}"
+            }
+          ],
+          "proof": "定义Y=(1/Z_t)E_P[Z_TX|F_t]，它F_t可测。对任意A∈F_t，E_Q[Y1_A]=E_P[Z_TY1_A]=E_P[Z_tY1_A]=E_P[E_P(Z_TX|F_t)1_A]=E_P[Z_TX1_A]=E_Q[X1_A]，由条件期望定义得到等式。",
+          "worked": "在两状态P=(.5,.5)、Z=(1.2,.8)、终端X=(10,0)时，t=0有E_Q X=E_P[ZX]=.5×1.2×10=6，而真实P期望为5。",
+          "limitation": "测度改变的期望权重不是凭空增加交易盈利；若要算期权现值还需折现，且Q必须满足可交易资产的定价约束。"
+        },
+        {
+          "title": "二叉树价格与零概率事件保存",
+          "question": "风险中性概率q为什么不是用上涨频率直接估计出来的？",
+          "paragraphs": [
+            "设一期无股息股票S_0=100，上涨因子u=1.1、下跌因子d=.9，无风险债券增长因子R=1.02。复制定价要求Q下贴现股票为鞅，故q u+(1−q)d=R，解q=(R−d)/(u−d)=.6。",
+            "若真实两状态概率P=(.5,.5)，则RN密度是Z=(q/.5,(1−q)/.5)=(1.2,.8)，为正且均值1。一个执行价100的欧式看涨支付为(10,0)，其一期无套利价格是(0.6×10)/1.02≈5.88235，而非按P频率直接加权。"
+          ],
+          "formulas": [
+            {
+              "label": "二叉树价格与零概率事件保存",
+              "tex": "q=\\frac{R-d}{u-d}=0.6,\\quad Z=(1.2,0.8),\\quad C_0=\\frac{\\mathbb E_{\\mathbb Q}(S_1-100)^+}{1.02}"
+            }
+          ],
+          "proof": "假设d<R<u保证0<q<1，将贴现股票鞅条件S_0=R^{-1}E_Q S_1写成1=R^{-1}[qu+(1−q)d]并解得q。由于P两状态各半，密度比例q/P(up)=1.2、(1−q)/P(down)=.8。看涨支付只在上涨时为10，折现期望得到5.88235。",
+          "worked": "此例真实上涨概率0.5、定价上涨概率0.6；若错误使用真实概率定价则会得到10×0.5/1.02≈4.90196，比无套利复制价低约0.98039。",
+          "limitation": "若股票不可自由交易、股息或融资费用不同、没有两个状态都可复制的投资组合，简单二叉树风险中性概率不能直接代替实际市场价格。"
+        }
+      ],
+      "example": "在两状态P=(.5,.5)、Q=(.6,.4)下，RN密度Z=(1.2,.8)，P加权均值正好1；对支付(10,0)，真实P均值5、新Q均值6。一期二叉树S0=100、u=1.1、d=.9、R=1.02的无套利风险中性Call价格6/1.02≈5.88235。",
+      "application": "用于风险中性定价、概率密度比、条件状态分布转换、金融重要性采样和机器学习分布偏移校正；必须与Girsanov真鞅检查以及无套利条件衔接。",
+      "caveat": "新概率密度归一化不表示自动得到金融风险中性测度；同一事件在不同测度下概率会变化，但正等价密度不会改变零概率事件集合。金融数据中不得提前使用终端密度对应的未来信息。",
+      "links": [
+        {
+          "kind": "math",
+          "id": "measure-n0146",
+          "label": "先修：RN定理"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0145",
+          "label": "先修：绝对连续"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0320",
+          "label": "后续：指数密度鞅"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0322",
+          "label": "后续：风险中性测度"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：Lecture 10 RN密度及概率换测度",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        },
+        {
+          "title": "Greg Lawler《Stochastic Calculus: An Introduction with Applications》：概率测度变换与Girsanov定理",
+          "url": "https://www.math.uchicago.edu/~lawler/finbook.pdf"
+        }
+      ],
+      "checked_status": "V14完整精讲：概率密度归一、动态密度过程、Bayes和风险中性二叉树"
     }
   ]
 }
