@@ -10,7 +10,7 @@ const ext=manifest.modules.flatMap(m=>read(m.path).lessons);
 const all=[...core,...ext],byId=new Map(all.map(x=>[x.node_id,x]));
 const nodes=new Map(curr.nodes.map(n=>[n.id,n]));
 const ids=["stochastic-n0295","stochastic-n0296","stochastic-n0297","stochastic-n0298","stochastic-n0299","stochastic-n0300",
-"ito-n0301","ito-n0302","ito-n0304","ito-n0305","ito-n0306","ito-n0307","ito-n0308","ito-n0310","ito-n0311"];
+"ito-n0301","ito-n0302","ito-n0304","ito-n0305","ito-n0306","ito-n0307","ito-n0312","ito-n0310","ito-n0311"];
 const pre={
 "stochastic-n0295":["stochastic-n0278","stochastic-n0281"],
 "stochastic-n0296":["stochastic-n0295"],
@@ -156,6 +156,10 @@ near(.5**2*.5,.125);
 near((3-2+1)/4,.5);
 near(1/2,.5);
 near(2**2*3,12);
+// Stratonovich midpoint integral and Ito-to-Stratonovich GBM drift conversion.
+near((3-2+1)/4,.5);
+near(.08-.2**2/2,.06);
+near((1+.5)-1,.5);
 // Correlated Brownian, multivariate Ito generator, portfolio risk.
 near(.4*2,.8);
 near(2*3*2,12);
