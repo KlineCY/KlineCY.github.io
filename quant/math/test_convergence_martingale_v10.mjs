@@ -32,8 +32,8 @@ const prerequisites={
 assert.equal(c.disciplines.length,20);
 assert.equal(c.chapters.length,109);
 assert.equal(c.nodes.length,656);
-assert.equal(manifest.modules.length,41);
-assert.equal(manifest.expected_lessons,103);
+assert.equal(manifest.modules.length,42);
+assert.equal(manifest.expected_lessons,105);
 assert(core.length>=59,"V10 baseline requires at least 59 completed core mathematics lectures");
 assert(all.length>=162,"V10 baseline requires at least 162 completed mathematics lectures");
 assert.equal(byId.size,all.length,"duplicate lecture IDs");
