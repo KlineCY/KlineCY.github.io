@@ -363,6 +363,13 @@ async function start(){
    if(newIds.has(id))throw Error("新增专题ID重复："+id);
    newIds.add(id);
   }
+  // V2 curriculum: preserve stable IDs and load the proof-to-ETF route as a small independent bundle.
+  const regularization=await fetchAtlasJson("./atlas-linear-regularization-chapter.json",{cache:"no-cache"});
+  const regularizationIds=window.quantMlExpansion.install(data,regularization);
+  for(const id of regularizationIds){
+   if(newIds.has(id))throw Error("新增专题ID重复："+id);
+   newIds.add(id);
+  }
   const conceptBundle=await fetchAtlasJson("./atlas-concept-chapters.json",{cache:"no-cache"});
   if(!window.quantMlConcepts?.mount)throw Error("知识链分层渲染器未加载");
   state.conceptChapters=window.quantMlConcepts.mount(data,conceptBundle);
