@@ -377,6 +377,15 @@ async function start(){
    if(newIds.has(id))throw Error("新增专题ID重复："+id);
    newIds.add(id);
   }
+  // V2 statistical-learning and kernel/covariance chapters; keep course IDs stable and check collisions.
+  for(const path of ["./atlas-generalization-v2.json","./atlas-kernel-covariance-v2.json"]){
+   const extension=await fetchAtlasJson(path,{cache:"no-cache"});
+   const extensionIds=window.quantMlExpansion.install(data,extension);
+   for(const id of extensionIds){
+    if(newIds.has(id))throw Error("新增专题ID重复："+id);
+    newIds.add(id);
+   }
+  }
   const conceptBundle=await fetchAtlasJson("./atlas-concept-chapters.json",{cache:"no-cache"});
   if(!window.quantMlConcepts?.mount)throw Error("知识链分层渲染器未加载");
   state.conceptChapters=window.quantMlConcepts.mount(data,conceptBundle);
