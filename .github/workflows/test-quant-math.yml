@@ -6,6 +6,11 @@ on:
       - 'quant/math/**'
       - 'quant/sidebar-v2.js'
       - '.github/workflows/test-quant-math.yml'
+  pull_request:
+    paths:
+      - 'quant/math/**'
+      - 'quant/sidebar-v2.js'
+      - '.github/workflows/test-quant-math.yml'
   workflow_dispatch:
 permissions:
   contents: read
@@ -35,3 +40,5 @@ jobs:
         run: node quant/math/test_v4_tailrisk_calibration.mjs
       - name: Verify CRPS, PIT, proper log scoring and distribution shift with keyboard-accessible math
         run: node quant/math/test_v5_proper_scores_shift.mjs
+      - name: Verify Bayes, conditional expectation, total variance, and financial forecast prerequisites
+        run: node quant/math/test_probability_foundations_v7.mjs
