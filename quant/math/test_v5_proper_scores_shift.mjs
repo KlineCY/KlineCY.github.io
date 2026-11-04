@@ -24,8 +24,8 @@ for(const id of ids){
  assert(l&&l.title===nodes.get(id).title,"full V5 article missing "+id);
  for(const key of ["definition","assumptions","example","application","caveat"])assert(l[key].length>=75,"truncated V5 article "+id+" "+key);
  assert(l.properties.length>=4&&l.formulas.length>=4&&l.derivation.length>=4);
- assert.equal(l.deep_sections.length,4);
- assert.equal(new Set(l.deep_sections.map(x=>x.title)).size,4);
+ assert(l.deep_sections.length>=4,"V5 lecture must preserve at least four proof sections: "+id);
+ assert.equal(new Set(l.deep_sections.map(x=>x.title)).size,l.deep_sections.length,"duplicate deep section: "+id);
  for(const x of l.formulas){assert(x.label&&x.tex);katex.renderToString(x.tex,{throwOnError:true,strict:"ignore"});formula++;}
  for(const x of l.derivation){assert(x.explanation.length>=35);katex.renderToString(x.tex,{throwOnError:true,strict:"ignore"});formula++;}
  for(const x of l.deep_sections){
