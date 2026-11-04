@@ -64,7 +64,7 @@ close(1+2*.2,1.4);
 const html=fs.readFileSync(new URL("./index.html",dir),"utf8");
 const css=fs.readFileSync(new URL("./styles.css",dir),"utf8");
 for(const id of IDs)assert(html.includes("?topic="+id),"advanced math route missing "+id);
-assert(html.includes('styles.css?v=20261104-tailrisk-v5'),"old stylesheet cached");
+assert(html.includes('styles.css?v=20261104-probscore-v6'),"old stylesheet cached");
 assert(html.includes('aria-label="算法稳定性、可扩展核方法与稳健金融数学的贯通知识链"'),"advanced route not accessible");
 assert(css.includes("/* V3 CHAPTER READABILITY")&&css.includes("scrollbar-gutter:stable")&&css.includes("@media print"),"CJK formula/touch/print styles missing");
 console.log("PASS: V3 mathematics "+IDs.length+" complete lectures, "+deep+" proof sections, "+formula+" TeX formulas, "+provenance+" source records, exact numerical calculations, CJK/responsive/print design.");
