@@ -49,49 +49,155 @@
       "id": "riskmath-x004",
       "node_id": "riskmath-x004",
       "title": "上下尾依赖系数",
-      "definition": "尾依赖系数描述某个连续随机变量进入极端分位区域时另一个变量也处于同向极端分位区域的极限条件概率。它适用于资产联合崩跌或信用共同违约研究，却不能被Pearson相关系数代替。",
-      "assumptions": "假设X、Y边际分布连续，令U=F_X(X)、V=F_Y(Y)，二者均在(0,1)上均匀。用Copula C(u,v)=P(U≤u,V≤v)刻画相依结构。尾依赖系数是u趋于0或1的极限，需确认极限存在。",
+      "definition": "尾依赖系数衡量两个连续随机变量沿同一分位尾部共同发生极端事件时，条件联合尾部概率的极限；上尾λ_U与下尾λ_L分别由Copula对角线C(u,u)在u→1和u→0的收敛速度决定。对于以收益表示亏损的变量应研究下尾，而以正损失表示亏损时应研究上尾。尾依赖是渐近条件概率，不等于固定95%或99%分位的联合超越率，更不能被Pearson线性相关系数替代。",
+      "assumptions": "设X、Y的边际CDF连续，使U=F_X(X)、V=F_Y(Y)均服从Unif(0,1)，其联合CDF由Copula C描述；上、下尾依赖极限存在且取值于[0,1]。Gaussian Copula关于零尾依赖的结论要求相关系数−1<ρ<1且非退化；Student-t Copula有正上下尾依赖的表达要求有限自由度ν>0与−1<ρ<1。Clayton下尾公式适用于θ>0。金融有限样本依赖聚集需要另外处理。",
       "properties": [
-        "上尾依赖λ_U是当U>u且u趋近1时V>u的条件概率极限。",
-        "下尾依赖λ_L是当U≤u且u趋近0时V≤u的条件概率极限。",
-        "独立Copula的两种尾依赖系数均为零；完全正共单调的两种系数均为1。"
+        "λ_U=lim_{u↑1}P(V>u|U>u)，λ_L=lim_{u↓0}P(V≤u|U≤u)，两者分别对应正损失上尾及收益下尾的同向极端事件。",
+        "独立Copula C(u,v)=uv时λ_U=λ_L=0；完全正共单调C(u,v)=min(u,v)时两者均为1。",
+        "在非退化Gaussian Copula中，无论ρ多接近1（但严格小于1），渐近λ_U=λ_L=0；Student-t Copula在有限ν下有相同的正上、下尾依赖。",
+        "Clayton Copula参数θ>0时λ_L=2^{−1/θ}、λ_U=0；λ_L=0并不意味着有限阈值上没有共同极端风险。"
       ],
       "formulas": [
         {
-          "label": "上尾依赖",
+          "label": "上尾渐近依赖",
           "tex": "\\lambda_U=\\lim_{u\\uparrow1}\\frac{1-2u+C(u,u)}{1-u}"
         },
         {
-          "label": "下尾依赖",
-          "tex": "\\lambda_L=\\lim_{u\\downarrow0}\\frac{C(u,u)}u"
+          "label": "下尾渐近依赖",
+          "tex": "\\lambda_L=\\lim_{u\\downarrow0}\\frac{C(u,u)}{u}"
         },
         {
-          "label": "独立Copula",
-          "tex": "C(u,v)=uv\\Longrightarrow\\lambda_U=\\lambda_L=0"
+          "label": "Clayton下尾依赖",
+          "tex": "\\lambda_L^{\\rm Clayton}=2^{-1/\\theta},\\quad\\lambda_U^{\\rm Clayton}=0"
         },
         {
-          "label": "共单调Copula",
-          "tex": "C(u,v)=\\min(u,v)\\Longrightarrow\\lambda_U=\\lambda_L=1"
+          "label": "Student-t对称尾依赖",
+          "tex": "\\lambda_U^{t}=\\lambda_L^{t}=2t_{\\nu+1}\\!\\left(-\\sqrt{\\frac{(\\nu+1)(1-\\rho)}{1+\\rho}}\\right)"
         }
       ],
       "derivation": [
         {
-          "explanation": "上尾条件概率的分子按容斥原则展开，P(U>u,V>u)=1−2u+C(u,u)，分母则因为边际均匀为1−u。",
+          "explanation": "边际概率变量U、V均匀，因此P(U>u)=1−u；用容斥把两者同时超过u的概率改写为1−2u+C(u,u)，除以后取极限。",
           "tex": "P(V>u\\mid U>u)=\\frac{1-2u+C(u,u)}{1-u}"
         },
         {
-          "explanation": "下尾联合事件概率本身就是C(u,u)，除以P(U≤u)=u即可得到对应条件尾部概率。",
-          "tex": "P(V\\le u\\mid U\\le u)=C(u,u)/u"
+          "explanation": "同样由于P(U≤u)=u，下尾联合事件的概率为C(u,u)，故条件概率等于C(u,u)/u，再让u从正侧趋近零。",
+          "tex": "P(V\\le u\\mid U\\le u)=\\frac{C(u,u)}u"
         },
         {
-          "explanation": "在独立情形代入C(u,u)=u²，上尾比例等于1−u并趋于零；完全共单调情形C(u,u)=u，上下尾条件概率恒为1。",
-          "tex": "\\lambda_U^{\\rm ind}=\\lim_{u\\uparrow1}(1-u)=0,\\quad\\lambda_U^{\\rm co}=\\lim_{u\\uparrow1}1=1"
+          "explanation": "独立情形代入C(u,u)=u²，上尾条件概率为1−u、下尾为u；共单调代入C(u,u)=u，两个条件概率均恒为1。",
+          "tex": "\\lambda_U^{\\rm ind}=\\lambda_L^{\\rm ind}=0,\\qquad\\lambda_U^{\\rm co}=\\lambda_L^{\\rm co}=1"
+        },
+        {
+          "explanation": "对θ>0的Clayton Copula，C(u,u)=(2u^{−θ}−1)^{−1/θ}。当u↓0时分子主导项2u^{−θ}，故C(u,u)/u趋于2^{−1/θ}。",
+          "tex": "\\frac{C(u,u)}u=\\bigl(2-u^\\theta\\bigr)^{-1/\\theta}\\longrightarrow 2^{-1/\\theta}"
         }
       ],
-      "example": "在有限阈值u=0.95上，若U和V独立且均匀，则P(V>0.95|U>0.95)=P(V>0.95)=0.05；当u继续趋于1，这一比例趋于0，故λ_U=0。若U=V几乎处处，超过阈值U>0.95就必然同时有V>0.95，条件概率为1，λ_U=1。若原始收益用下尾表示极端亏损，而损失用上尾表示极端亏损，则必须先统一变量的风险方向，否则两种条件概率不能直接比较。",
-      "application": "可用于危机期间多资产ETF、行业信用和供应链企业的共同尾部风险估计，但应报告有限阈值和依赖模型，以及随置信水平改变的敏感度。",
-      "caveat": "高阈值下样本极少，有限样本条件频率不是渐近尾依赖系数；即使线性相关很高，也可能没有正的渐近尾依赖。估计还受尾部聚类和市场状态漂移影响。",
-      "checked_status": "完整讲义：数学条件、独立推导、可复算算例与风险边界"
+      "example": "当U、V独立且均匀时，在u=0.95条件下P(V>0.95|U>0.95)=0.05，阈值提高时该条件概率趋于0，因此λ_U=0。若U=V完全共单调，则同一事件条件概率始终为1。再看Clayton参数θ=1时，λ_L=2^(−1)=0.5、λ_U=0，说明相依可对下尾与上尾不对称；零渐近尾依赖并不意味着固定阈值条件风险为0。",
+      "application": "对37只ETF收益可先估计各资产条件边际CDF，映射到U变量，再在同一预测时点比较Gaussian、Student-t、Clayton等Copula在联合损失分位和尾部系数上的差异。应同时报告95%、99%有限阈值条件概率、尾部样本数量与危机日期，而非仅展示一个渐近λ值。",
+      "caveat": "有限样本的极端条件频率具有高方差，渐近尾依赖需要阈值趋于端点而现实数据不可能真正达到极限。Gaussian Copula的λ=0并不意味着高相关资产没有危机共同下跌；估计密度、ETF缺失、存续偏差和波动状态变化都可造成假象，且同一天跨资产观测不等于独立样本。",
+      "checked_status": "完整数学讲义：上下尾事件、极限依赖、Clayton证明、Gaussian与Student-t对比及有限样本风险",
+      "deep_sections": [
+        {
+          "title": "从Sklar定理到极端条件概率",
+          "question": "为什么两个边际风险已知仍不能确定组合共同亏损？",
+          "paragraphs": [
+            "Sklar分解可以将两资产的各自风险边际F_X、F_Y与联合依赖C分开估计。在相同边际下，独立与共单调的联合风险完全不同，因此需要Copula描述两个资产同时落入极端收益分位的结构。",
+            "采用概率积分变量U=F_X(X)、V=F_Y(Y)使边际都均匀，避免原始收益率单位和波动大小干扰尾部概率的定义。研究前须统一收益下尾和正损失上尾的风险方向。"
+          ],
+          "formulas": [
+            {
+              "label": "从Sklar定理到极端条件概率",
+              "tex": "C(u,v)=\\Pr(U\\le u,V\\le v)"
+            }
+          ],
+          "proof": "对连续边际，U和V均服从Unif(0,1)，但它们的联合CDF不一定是uv；一旦已知C，事件(U≤u,V≤v)的概率直接读作C(u,v)。",
+          "worked": "如果u=.05，独立下两个收益同时处于最低5%区域的概率=.05²=.0025，而共单调时为.05；二者边际分布仍完全相同。",
+          "limitation": "把不同交易日或未对齐的ETF收益直接配对会破坏同日联合结构，无法依据得到的伪观测推断尾依赖。"
+        },
+        {
+          "title": "上下尾依赖极限的两个推导",
+          "question": "为何上尾的分子要写作1−2u+C(u,u)？",
+          "paragraphs": [
+            "上尾条件事件是V>u给定U>u，联合超越概率由1−P(U≤u)−P(V≤u)+P(U≤u,V≤u)的容斥公式给出。均匀边际使前两项都等于u，得到1−2u+C(u,u)。",
+            "下尾则直接使用C(u,u)=P(U≤u,V≤u)，再除以P(U≤u)=u。两个公式都描述同向极端事件，但分子、分母与风险方向不同。"
+          ],
+          "formulas": [
+            {
+              "label": "上下尾依赖极限的两个推导",
+              "tex": "\\lambda_U=\\lim_{u\\uparrow1}\\frac{1-2u+C(u,u)}{1-u}"
+            }
+          ],
+          "proof": "由定义P(V>u|U>u)=P(U>u,V>u)/P(U>u)，用容斥与均匀边际得到公式；下尾则无需容斥，直接用C(u,u)/u。",
+          "worked": "当u=.95且C(u,u)=u²独立时，上尾比例=[1−1.9+.9025]/.05=.05；当C(u,u)=u共单调时比例=.05/.05=1。",
+          "limitation": "任何有限u的条件超越率都只是λ的近似候选，阈值选取与市场波动聚集会改变其抽样误差。"
+        },
+        {
+          "title": "Gaussian、Student-t与Clayton的尾部结构",
+          "question": "为什么相关系数相同仍可能导致不同的金融系统尾部风险？",
+          "paragraphs": [
+            "Gaussian Copula在任意非退化相关ρ<1时具有零渐近上下尾依赖；Student-t Copula有共同的随机尺度冲击，在有限自由度条件下通常拥有正的对称尾依赖。Clayton则倾向下尾依赖，θ>0时下尾系数为2^(−1/θ)，上尾系数为零。",
+            "这三类依赖的参数不仅包含通常的线性相关信息，还包含尾部厚度或上下不对称。实际研究应先确定边际模型，再估计联合Copula并利用外层市场危机验证，而非仅以样本Pearson相关选择。"
+          ],
+          "formulas": [
+            {
+              "label": "Gaussian、Student-t与Clayton的尾部结构",
+              "tex": "\\lambda_L^{\\rm Clayton}=2^{-1/\\theta},\\qquad\\lambda_U^{\\rm Clayton}=0"
+            }
+          ],
+          "proof": "将Clayton C(u,u)=(2u^{−θ}−1)^{−1/θ}代入下尾公式，因u→0时2u^{−θ}为主导项，故极限为2^{−1/θ}。",
+          "worked": "θ=1的Clayton有λ_L=.5、λ_U=0；对于风险资产收益，市场共同暴跌是下尾事件，若改用正损失则要对应变换到上尾。",
+          "limitation": "Student-t和Gaussian Copula的尾依赖比较要求相同依赖参数及合法边际；估计高自由度t模型时正尾依赖可能非常小。"
+        },
+        {
+          "title": "有限尾部样本、动态迁移与组合风控",
+          "question": "渐近λ的估计如何转成可以验证的ETF风险分析？",
+          "paragraphs": [
+            "真实市场有限长度的日频历史只能检验某些阈值u下的条件同跌比例。尤其α=.99时，训练期可能只有几个独立危机事件，多ETF在同一天的联动不应当作大量独立样本。",
+            "应报告不同u、不同市场状态下的尾部条件概率，以及Copula和边际的训练窗口、对应的联合VaR、ES与组合成交压力；金融制度转移可能让单一长期静态尾依赖失效。"
+          ],
+          "formulas": [
+            {
+              "label": "有限尾部样本、动态迁移与组合风控",
+              "tex": "\\widehat p_L(u)=\\frac{\\sum_t\\mathbf1\\{U_t\\le u,V_t\\le u\\}}{\\sum_t\\mathbf1\\{U_t\\le u\\}}"
+            }
+          ],
+          "proof": "若1000天中U≤.05发生50天，其中V也≤.05有15天，则有限阈值条件比例为15/50=.30；这不是u→0下的极限尾依赖λ_L。",
+          "worked": "高阈值下分母很小，结果易受重叠日期、制度转移和经验边际排名误差影响；不能把.30外推成无限远尾部风险系数。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "riskmath-x003",
+          "label": "先修：Sklar分解"
+        },
+        {
+          "kind": "math",
+          "id": "riskmath-n0574",
+          "label": "先修：极值理论"
+        },
+        {
+          "kind": "math",
+          "id": "riskmath-x005",
+          "label": "后续：系统性市场MES"
+        },
+        {
+          "kind": "ml",
+          "id": "m09-c10-p01",
+          "label": "机器学习：Copula联合情景"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Nelsen, An Introduction to Copulas (2nd edition)",
+          "url": "https://link.springer.com/book/10.1007/0-387-28678-0"
+        },
+        {
+          "title": "SDV Copulas, open-source multivariate modeling",
+          "url": "https://github.com/sdv-dev/Copulas"
+        }
+      ]
     }
   ]
 }
