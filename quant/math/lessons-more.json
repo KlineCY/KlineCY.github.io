@@ -1737,6 +1737,471 @@
         }
       ],
       "checked_status": "V10完整讲义：弱收敛与鞅差的定理证明、独立核算与风险边界"
+    },
+    {
+      "id": "measure-n0122",
+      "node_id": "measure-n0122",
+      "title": "Borel集合",
+      "definition": "Borel σ-代数B(R)是实数直线上的全部开集生成的最小σ-代数，包含开区间、闭区间、可数集合以及经过可数次补集和可数并交所得的集合。它将连续价格、收益、随机变量与概率分布的事件放到严格可测的集合体系中，并与更大的Lebesgue可测集类保持区分。",
+      "assumptions": "考虑R上的通常拓扑。B(R)=σ({开集})，也等于所有形如(−∞,x]或(a,b)的区间生成的σ-代数；σ-代数只要求可数运算封闭，不保证任意不可数并封闭。Lebesgue可测集类是对零测集完成后的更大集合体系。",
+      "properties": [
+        "所有开区间、闭区间、单点集和可数集都属于Borel σ-代数。",
+        "半无限区间(−∞,x]生成同一个Borel σ-代数，因此分布函数可以确定实随机变量分布。",
+        "连续函数对Borel集合的逆像仍是Borel集合，连接连续变换与可测性。",
+        "Borel可测集通常严格少于Lebesgue可测集；并非每个实数子集都自动为Borel。"
+      ],
+      "formulas": [
+        {
+          "label": "开集生成的最小σ-代数",
+          "tex": "\\mathcal B(\\mathbb R)=\\sigma\\bigl(\\{U\\subseteq\\mathbb R:U\\text{ 开}\\}\\bigr)"
+        },
+        {
+          "label": "半直线生成与分布函数",
+          "tex": "\\mathcal B(\\mathbb R)=\\sigma\\{(-\\infty,x]:x\\in\\mathbb R\\},\\qquad F_X(x)=\\Pr(X\\le x)"
+        },
+        {
+          "label": "Borel集合的构造和零点事件",
+          "tex": "\\{x\\}=\\bigcap_{n\\ge1}(x-1/n,x+1/n),\\qquad \\mathbb Q=\\bigcup_{q\\in\\mathbb Q}\\{q\\}\\in\\mathcal B(\\mathbb R)"
+        },
+        {
+          "label": "连续映射、逆像和金融可测性",
+          "tex": "g\\text{ 连续},\\ B\\in\\mathcal B(\\mathbb R)\\ \\Longrightarrow\\ g^{-1}(B)\\in\\mathcal B(\\mathbb R)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对全部包含开集的σ-代数取交，其结果仍是σ-代数且包含开集，因此存在包含开集的最小σ-代数B(R)。开集族本身不对补集封闭，故不能直接作为概率空间事件域。",
+          "tex": "\\mathcal B(\\mathbb R)=\\sigma\\bigl(\\{U\\subseteq\\mathbb R:U\\text{ 开}\\}\\bigr)"
+        },
+        {
+          "explanation": "先由半直线的补集与可数交构造开区间，再由可数有理端点区间的并表示任意开集，故半直线生成所有Borel集合。由π–λ定理，概率测度在生成π系统上一致便在整个Borel σ-代数上一致。",
+          "tex": "\\mathcal B(\\mathbb R)=\\sigma\\{(-\\infty,x]:x\\in\\mathbb R\\},\\qquad F_X(x)=\\Pr(X\\le x)"
+        },
+        {
+          "explanation": "开区间属于Borel族，交可数次仍为Borel集合，得到单点集合。Q可数，所以它是可数个单点集合的并，仍在B(R)中。任意可数实数集也使用同一构造。",
+          "tex": "\\{x\\}=\\bigcap_{n\\ge1}(x-1/n,x+1/n),\\qquad \\mathbb Q=\\bigcup_{q\\in\\mathbb Q}\\{q\\}\\in\\mathcal B(\\mathbb R)"
+        },
+        {
+          "explanation": "对于连续g，开集的逆像开；而所有使逆像为Borel的集合族对补集和可数并封闭，并包含全部开集，故包含整个Borel σ-代数。这完成Borel可测映射的构造性证明。",
+          "tex": "g\\text{ 连续},\\ B\\in\\mathcal B(\\mathbb R)\\ \\Longrightarrow\\ g^{-1}(B)\\in\\mathcal B(\\mathbb R)"
+        }
+      ],
+      "example": "在三点收益分布R∈{−1,0,1}、概率{1/4,1/2,1/4}下，Borel事件{R≤0}概率3/4，分布函数F_R(0)=0.75；事件{R=0}概率0.5恰为F_R在0处跳跃。",
+      "application": "为概率分布、分位数、连续价格映射、特征函数和金融风险阈值事件建立合法的集合语言。",
+      "caveat": "Borel σ-代数与Lebesgue可测集合不同；可数集合在连续测度下可为零，但在离散概率测度下可具有正质量。",
+      "deep_sections": [
+        {
+          "title": "开集生成的最小σ-代数",
+          "question": "为何连续状态空间需要超越有限集合的事件定义？",
+          "paragraphs": [
+            "离散样本空间可以直接枚举事件，而连续价格空间包含无穷多阈值与区间事件。B(R)作为包含所有开集的最小σ-代数，允许在可数次极限、交并及补集运算后继续保持事件可测。",
+            "开集不是σ-代数，因为开集的补集一般闭而不开放；对开集族施加生成σ-代数操作，才得到满足概率测度定义的事件集合体系。"
+          ],
+          "formulas": [
+            {
+              "label": "开集生成的最小σ-代数",
+              "tex": "\\mathcal B(\\mathbb R)=\\sigma\\bigl(\\{U\\subseteq\\mathbb R:U\\text{ 开}\\}\\bigr)"
+            }
+          ],
+          "proof": "对全部包含开集的σ-代数取交，其结果仍是σ-代数且包含开集，因此存在包含开集的最小σ-代数B(R)。开集族本身不对补集封闭，故不能直接作为概率空间事件域。",
+          "worked": "事件{R<0}是开区间(−∞,0)；事件{R≤0}是闭半直线(−∞,0]，两者均为Borel事件。如果R在−1、0、1三个状态各取概率1/4、1/2、1/4，则P(R≤0)=3/4。",
+          "limitation": "概率的测度依赖合法事件σ-代数；不能把不可测集合上的所谓概率当成已定义、可计算的统计量。"
+        },
+        {
+          "title": "半直线生成与分布函数",
+          "question": "为什么只知道P(X≤x)即可唯一确定实随机变量的概率分布？",
+          "paragraphs": [
+            "所有半直线(−∞,x]共同生成B(R)。如果两个概率测度在这些半直线上的取值一致，利用π–λ唯一性定理可推出它们在整个B(R)上一致。",
+            "因此分布函数F_X(x)=P(X≤x)足以描述实值随机变量的Borel分布。区分左开右闭区间与闭半直线尤为重要，分布函数的跳跃正是点质量。"
+          ],
+          "formulas": [
+            {
+              "label": "半直线生成与分布函数",
+              "tex": "\\mathcal B(\\mathbb R)=\\sigma\\{(-\\infty,x]:x\\in\\mathbb R\\},\\qquad F_X(x)=\\Pr(X\\le x)"
+            }
+          ],
+          "proof": "先由半直线的补集与可数交构造开区间，再由可数有理端点区间的并表示任意开集，故半直线生成所有Borel集合。由π–λ定理，概率测度在生成π系统上一致便在整个Borel σ-代数上一致。",
+          "worked": "在三点分布P(X=−1)=0.25、P(X=0)=0.5、P(X=1)=0.25中，F_X(−1)=0.25、F_X(0)=0.75，跳跃幅度0.5恰是P(X=0)。",
+          "limitation": "只有在同一测度空间且分布函数值一致时才可推出分布相同；边际分布函数不决定多资产的联合依赖。"
+        },
+        {
+          "title": "Borel集合的构造和零点事件",
+          "question": "一个闭区间或可数单点集合为什么属于Borel集合？",
+          "paragraphs": [
+            "开区间(a,b)属于生成族，因此其补集属于B(R)；闭区间[a,b]可以由开集的可数交构造，单点{x}亦可由长度趋零的闭区间交构造。",
+            "因为σ-代数对可数并封闭，任意可数集合都属于Borel集合。这一结论只说明可测性，不说明概率一定为零；在离散分布中单点事件可以具有正概率。"
+          ],
+          "formulas": [
+            {
+              "label": "Borel集合的构造和零点事件",
+              "tex": "\\{x\\}=\\bigcap_{n\\ge1}(x-1/n,x+1/n),\\qquad \\mathbb Q=\\bigcup_{q\\in\\mathbb Q}\\{q\\}\\in\\mathcal B(\\mathbb R)"
+            }
+          ],
+          "proof": "开区间属于Borel族，交可数次仍为Borel集合，得到单点集合。Q可数，所以它是可数个单点集合的并，仍在B(R)中。任意可数实数集也使用同一构造。",
+          "worked": "对于X~Uniform(0,1)，P(X∈Q)=0；若X恒等于有理数0，则P(X∈Q)=1。这两种概率分布都把Q视为合法Borel事件。",
+          "limitation": "Borel可测性不能被误读为连续分布下事件必然具有正概率或零概率，具体概率由测度决定。"
+        },
+        {
+          "title": "连续映射、逆像和金融可测性",
+          "question": "为什么连续的价格变换能够保留事件的数学可测性？",
+          "paragraphs": [
+            "如果g:R→R连续，对任何开集U，逆像g^{-1}(U)仍开放；定义包含所有使逆像属于B(R)的目标集合的σ-代数，可推出g对任意Borel事件的逆像仍为Borel事件。",
+            "因此当X为Borel可测随机变量时，g(X)也是随机变量，便可严格定义其尾部概率。不过实时金融研究还需要时间信息可得性；数学上的可测性不等于交易时已知。"
+          ],
+          "formulas": [
+            {
+              "label": "连续映射、逆像和金融可测性",
+              "tex": "g\\text{ 连续},\\ B\\in\\mathcal B(\\mathbb R)\\ \\Longrightarrow\\ g^{-1}(B)\\in\\mathcal B(\\mathbb R)"
+            }
+          ],
+          "proof": "对于连续g，开集的逆像开；而所有使逆像为Borel的集合族对补集和可数并封闭，并包含全部开集，故包含整个Borel σ-代数。这完成Borel可测映射的构造性证明。",
+          "worked": "若收益R取−2、0、2，各概率1/4、1/2、1/4，则平方损失L=R²取4的概率为1/2、取0的概率为1/2。事件{L≤1}的逆像为{R=0}，故P(L≤1)=1/2。",
+          "limitation": "即使平方收益与阈值事件均为Borel可测，也不意味着下一期收益可在本期信息滤过下观察，更不构成前视交易的许可。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "measure-n0121",
+          "label": "先修：σ-代数"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0123",
+          "label": "后续：测度与概率测度"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0126",
+          "label": "扩展：Lebesgue测度"
+        },
+        {
+          "kind": "math",
+          "id": "probability-n0117",
+          "label": "弱收敛的分布函数"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 18.125 Measure and Integration：Lecture 1–9，测度空间、可测集与积分",
+          "url": "https://ocw.mit.edu/courses/18-125-measure-and-integration-fall-2003/pages/lecture-notes/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：Lecture 7–9，抽象积分与乘积测度",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V11严密讲义：四节完整定义、证明、数值检验、失效边界"
+    },
+    {
+      "id": "measure-n0123",
+      "node_id": "measure-n0123",
+      "title": "测度与概率测度",
+      "definition": "测度μ是在可测空间(Ω,F)上对可测集合赋予非负扩展实值大小的函数，满足空集测度为0、可数可加性。若μ(Ω)=1便是概率测度。有限测度连续性、单调性和不可数运算的边界，使概率公理与Lebesgue积分可以放在同一数学体系里。",
+      "assumptions": "F为σ-代数，μ:F→[0,∞]可数可加且μ(∅)=0。有限性及从上连续性的前提是某个起始集合有有限测度；概率测度自动满足这一要求，而一般无限测度空间未必满足。",
+      "properties": [
+        "有限可加性、单调性和可数次次可加性由测度公理推出。",
+        "若A_n递增，则μ(∪A_n)=lim μ(A_n)，无需整体测度有限。",
+        "若A_n递减且μ(A_1)<∞，则μ(∩A_n)=lim μ(A_n)。",
+        "概率测度额外满足μ(Ω)=1，Lebesgue测度在R上则是无限测度，不能混淆。"
+      ],
+      "formulas": [
+        {
+          "label": "可测空间与可数可加性的公理",
+          "tex": "\\mu(\\varnothing)=0,\\quad \\mu\\!\\left(\\bigsqcup_{n=1}^{\\infty}A_n\\right)=\\sum_{n=1}^{\\infty}\\mu(A_n)"
+        },
+        {
+          "label": "单调性、有限可加与次可加",
+          "tex": "\\mu\\!\\left(\\bigcup_{n\\ge1}A_n\\right)\\le\\sum_{n\\ge1}\\mu(A_n),\\qquad A\\subseteq B\\Longrightarrow\\mu(A)\\le\\mu(B)"
+        },
+        {
+          "label": "从下连续与事件近似",
+          "tex": "A_n\\uparrow A\\quad\\Longrightarrow\\quad\\mu(A_n)\\uparrow\\mu(A)"
+        },
+        {
+          "label": "从上连续及无限测度反例",
+          "tex": "A_n\\downarrow A,\\ \\mu(A_1)<\\infty\\ \\Longrightarrow\\ \\mu(A_n)\\downarrow\\mu(A)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将两两不相交事件的并分解为可数项，直接应用测度的可数可加公理；当仅有有限个非空事件时，其余置空，立即得到有限可加性。对于非负集合测度，这些级数可取∞，不涉及∞−∞。",
+          "tex": "\\mu(\\varnothing)=0,\\quad \\mu\\!\\left(\\bigsqcup_{n=1}^{\\infty}A_n\\right)=\\sum_{n=1}^{\\infty}\\mu(A_n)"
+        },
+        {
+          "explanation": "令B_1=A_1，B_n=A_n\\setminus∪_{k<n}A_k，则B_n两两不交且∪B_n=∪A_n。由可数可加性与B_n⊆A_n的单调性，得到并事件测度不超过总测度。A⊆B的单调性则用互斥分解B=A⊔(B\\A)证明。",
+          "tex": "\\mu\\!\\left(\\bigcup_{n\\ge1}A_n\\right)\\le\\sum_{n\\ge1}\\mu(A_n),\\qquad A\\subseteq B\\Longrightarrow\\mu(A)\\le\\mu(B)"
+        },
+        {
+          "explanation": "令D_1=A_1，D_n=A_n\\setminus A_(n−1)（n≥2），则D_n两两不交且∪D_n=A。可数可加性给μ(A)=Σμ(D_n)，而μ(A_n)=Σ_{k≤n}μ(D_k)，有限前缀级数趋于总级数。",
+          "tex": "A_n\\uparrow A\\quad\\Longrightarrow\\quad\\mu(A_n)\\uparrow\\mu(A)"
+        },
+        {
+          "explanation": "设B_n=A_1\\setminus A_n递增到A_1\\setminus A。由从下连续μ(B_n)→μ(A_1\\setminus A)。因μ(A_1)<∞，可将μ(A_n)=μ(A_1)−μ(B_n)取极限得到μ(A)。",
+          "tex": "A_n\\downarrow A,\\ \\mu(A_1)<\\infty\\ \\Longrightarrow\\ \\mu(A_n)\\downarrow\\mu(A)"
+        }
+      ],
+      "example": "互斥市场状态概率0.3、0.5、0.2，总质量1。若P(A)=0.3、P(B)=0.4、P(A∩B)=0.1，则并事件概率0.6；用两个边际概率直接相加0.7只给保守上界。",
+      "application": "为金融状态空间、事件概率、联合风险上界、分布函数连续性及Lebesgue积分体系提供公理化基础。",
+      "caveat": "可数可加性不是由有限可加性自动得到；从上连续需要有限起始测度，概率与无限Lebesgue测度不能混淆。",
+      "deep_sections": [
+        {
+          "title": "可测空间与可数可加性的公理",
+          "question": "为什么概率论需要可数可加性而不能只要求有限可加性？",
+          "paragraphs": [
+            "定义测度时允许对可数个两两不相交事件求并，并要求并集的测度等于测度级数之和。这使事件能够在极限中保持一致的质量，支撑随机变量的分布与积分。",
+            "概率测度只是总质量归一化为1的特殊测度。对金融资产的状态事件使用概率，必须先指定样本空间、合法事件集合与所用概率测度。"
+          ],
+          "formulas": [
+            {
+              "label": "可测空间与可数可加性的公理",
+              "tex": "\\mu(\\varnothing)=0,\\quad \\mu\\!\\left(\\bigsqcup_{n=1}^{\\infty}A_n\\right)=\\sum_{n=1}^{\\infty}\\mu(A_n)"
+            }
+          ],
+          "proof": "将两两不相交事件的并分解为可数项，直接应用测度的可数可加公理；当仅有有限个非空事件时，其余置空，立即得到有限可加性。对于非负集合测度，这些级数可取∞，不涉及∞−∞。",
+          "worked": "在三种互斥市场状态Ω={牛市、震荡、熊市}上赋予概率0.3、0.5、0.2，三者并为整个样本空间，概率总和0.3+0.5+0.2=1。",
+          "limitation": "在无限测度空间中不能任意从∞减去∞；也不能只凭有限状态划分的频率就断言复杂市场过程的全部概率测度已唯一识别。"
+        },
+        {
+          "title": "单调性、有限可加与次可加",
+          "question": "为什么互不相交与一般重叠事件需要不同的计算方式？",
+          "paragraphs": [
+            "若A⊆B，则B可拆分为A和B\\A两个互斥事件，由可加性得μ(B)≥μ(A)。一般事件可以通过将后续事件剔除已覆盖区域而分割为互斥片段，从而推导可数次可加性。",
+            "金融事件的压力场景经常重叠，例如利率上升、通胀超预期及能源价格冲击；把它们的概率直接相加会重复计算，应使用容斥或并事件上界。"
+          ],
+          "formulas": [
+            {
+              "label": "单调性、有限可加与次可加",
+              "tex": "\\mu\\!\\left(\\bigcup_{n\\ge1}A_n\\right)\\le\\sum_{n\\ge1}\\mu(A_n),\\qquad A\\subseteq B\\Longrightarrow\\mu(A)\\le\\mu(B)"
+            }
+          ],
+          "proof": "令B_1=A_1，B_n=A_n\\setminus∪_{k<n}A_k，则B_n两两不交且∪B_n=∪A_n。由可数可加性与B_n⊆A_n的单调性，得到并事件测度不超过总测度。A⊆B的单调性则用互斥分解B=A⊔(B\\A)证明。",
+          "worked": "假设P(A)=0.3、P(B)=0.4、P(A∩B)=0.1，则P(A∪B)=0.3+0.4−0.1=0.6，低于并事件上界0.7。",
+          "limitation": "Boole上界是保守控制而非精确联合概率；不同极端资产事件之间的相关性不能由边际概率自动恢复。"
+        },
+        {
+          "title": "从下连续与事件近似",
+          "question": "为什么概率测度与递增的信息事件极限兼容？",
+          "paragraphs": [
+            "当A_1⊆A_2⊆⋯时，将第n层新增部分A_n\\A_(n−1)分成互不相交增量。可数可加性说明极限事件∪A_n的测度等于有限前缀测度的极限。",
+            "这一性质是用越来越细的离散近似估计事件概率、定义简单函数积分与证明单调收敛定理的集合基础。"
+          ],
+          "formulas": [
+            {
+              "label": "从下连续与事件近似",
+              "tex": "A_n\\uparrow A\\quad\\Longrightarrow\\quad\\mu(A_n)\\uparrow\\mu(A)"
+            }
+          ],
+          "proof": "令D_1=A_1，D_n=A_n\\setminus A_(n−1)（n≥2），则D_n两两不交且∪D_n=A。可数可加性给μ(A)=Σμ(D_n)，而μ(A_n)=Σ_{k≤n}μ(D_k)，有限前缀级数趋于总级数。",
+          "worked": "若A_n=(−n,n)且μ为标准正态概率测度，则μ(A_n)逐步增大并趋于μ(R)=1。选n=1的概率约0.6827，n=2约0.9545，作为数值直觉。",
+          "limitation": "从下连续的极限无需测度有限，但若改用从上连续则必须检查至少一个起始集合的有限测度。"
+        },
+        {
+          "title": "从上连续及无限测度反例",
+          "question": "为什么递减事件的概率能取极限，而无穷测度未必？",
+          "paragraphs": [
+            "当A_n递减且μ(A_1)<∞时，对A_1\\A_n构造递增集合并应用从下连续；再利用有限测度下的补集相减，得到交事件的测度等于测度序列的极限。",
+            "若μ是R上的Lebesgue测度，取A_n=[n,∞)，所有μ(A_n)=∞，但交集为空，测度0；这说明有限起始测度不能随意删除。"
+          ],
+          "formulas": [
+            {
+              "label": "从上连续及无限测度反例",
+              "tex": "A_n\\downarrow A,\\ \\mu(A_1)<\\infty\\ \\Longrightarrow\\ \\mu(A_n)\\downarrow\\mu(A)"
+            }
+          ],
+          "proof": "设B_n=A_1\\setminus A_n递增到A_1\\setminus A。由从下连续μ(B_n)→μ(A_1\\setminus A)。因μ(A_1)<∞，可将μ(A_n)=μ(A_1)−μ(B_n)取极限得到μ(A)。",
+          "worked": "在概率空间中取A_n={U≤1/n}且U~Uniform(0,1)，P(A_n)=1/n→0，交事件为{U=0}且概率0；在Lebesgue测度下取A_n=[n,∞)，测度始终∞而交集空。",
+          "limitation": "无限测度下禁止∞−∞，不能把概率空间的从上连续证明不加修改地搬到无限时长或全实数Lebesgue测度场景。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "measure-n0121",
+          "label": "先修：σ-代数"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0122",
+          "label": "Borel集合"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0129",
+          "label": "Lebesgue积分"
+        },
+        {
+          "kind": "math",
+          "id": "probability-n0096",
+          "label": "Bayes概率测度"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 18.125 Measure and Integration：Lecture 1–9，测度空间、可测集与积分",
+          "url": "https://ocw.mit.edu/courses/18-125-measure-and-integration-fall-2003/pages/lecture-notes/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：Lecture 7–9，抽象积分与乘积测度",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V11严密讲义：四节完整定义、证明、数值检验、失效边界"
+    },
+    {
+      "id": "measure-n0124",
+      "node_id": "measure-n0124",
+      "title": "零测集",
+      "definition": "零测集是相对于特定测度μ满足μ(N)=0的可测集合；性质“几乎处处”允许某个命题在这样一个集合上失败。零测集与空集不同，零测事件甚至可能包含无穷多个状态；相同集合在不同概率测度下是否为零也可能不同。正确使用几乎处处等价类是L^p、条件期望与鞅收敛的基础。",
+      "assumptions": "固定测度空间(Ω,F,μ)，N∈F且μ(N)=0。零测集的任意可测子集仍测度0；若测度空间完备，则零测集的每个子集都被纳入F。概率为1的结论不等于逻辑上无例外；两个函数几乎处处相等并不意味着逐点完全相等。",
+      "properties": [
+        "零测集的可数并仍是零测集；与概率为零事件相关的“几乎处处”概念为此提供封闭性。",
+        "在Lebesgue测度下，单点、可数集和Cantor集可为零测集，但不可据此推断所有不可数集均为零。",
+        "L^p范数只识别几乎处处等价类，因此只在零测集上不同的随机变量具有Lp距离0。",
+        "完备测度需将零测集的任意子集判为可测，Borel测度通常不完备。"
+      ],
+      "formulas": [
+        {
+          "label": "相对测度与零测事件",
+          "tex": "\\mu(N)=0,\\qquad\\mu\\!\\left(\\bigcup_{k=1}^{\\infty}N_k\\right)=0\\quad\\text{若各}\\ \\mu(N_k)=0"
+        },
+        {
+          "label": "可数与不可数零测集",
+          "tex": "\\lambda(C)\\le\\left(\\frac23\\right)^n\\ \\forall n\\quad\\Longrightarrow\\quad\\lambda(C)=0"
+        },
+        {
+          "label": "几乎处处等价与L²预测",
+          "tex": "X=Y\\ \\mu\\text{-a.e.}\\quad\\Longrightarrow\\quad\\int|X-Y|^p\\,d\\mu=0\\quad(p\\ge1)"
+        },
+        {
+          "label": "完备化及Borel与Lebesgue差异",
+          "tex": "\\overline{\\mathcal F}=\\{B\\cup N_0:B\\in\\mathcal F,\\ N_0\\subseteq N\\in\\mathcal F,\\ \\mu(N)=0\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "用可数次次可加性得到0≤μ(∪N_k)≤Σμ(N_k)=0，故并集测度0。单调性保证N的可测子集A⊆N也满足0≤μ(A)≤μ(N)=0；这就是处理可数多个几乎处处命题的基础。",
+          "tex": "\\mu(N)=0,\\qquad\\mu\\!\\left(\\bigcup_{k=1}^{\\infty}N_k\\right)=0\\quad\\text{若各}\\ \\mu(N_k)=0"
+        },
+        {
+          "explanation": "构造C_n为第n步剩余的2^n个区间之并，其总长度(2/3)^n。Cantor集C⊆C_n，因此0≤λ(C)≤λ(C_n)=(2/3)^n；令n趋于∞得λ(C)=0。不可数性由三进制0、2选择序列建立。",
+          "tex": "\\lambda(C)\\le\\left(\\frac23\\right)^n\\ \\forall n\\quad\\Longrightarrow\\quad\\lambda(C)=0"
+        },
+        {
+          "explanation": "因为存在N且μ(N)=0，使Ω\\N上X=Y；于是非负函数|X−Y|^p仅可能在N上非零。非负Lebesgue积分对零测支撑的值为0，因此范数距离为0；由此L^p被定义为几乎处处等价类。",
+          "tex": "X=Y\\ \\mu\\text{-a.e.}\\quad\\Longrightarrow\\quad\\int|X-Y|^p\\,d\\mu=0\\quad(p\\ge1)"
+        },
+        {
+          "explanation": "定义扩展集合为可测B与某个可测零测集子集N₀的并，对其赋值μ̄(B∪N₀)=μ(B)。验证表示方式不同也不会改变测度，再检查补集和可数并仍留在扩展域，可得到完备化。",
+          "tex": "\\overline{\\mathcal F}=\\{B\\cup N_0:B\\in\\mathcal F,\\ N_0\\subseteq N\\in\\mathcal F,\\ \\mu(N)=0\\}"
+        }
+      ],
+      "example": "Uniform(0,1)下单点{0.5}虽非空但概率0；函数X(ω)=ω与只在ω=0.5处取100的Y满足E|X−Y|²=0。Cantor集前三级覆盖总长度为2/3、4/9、8/27，趋向0。",
+      "application": "说明金融概率建模中零概率事件、a.s.收敛、L²最优预测和数据异常值修订的数学边界。",
+      "caveat": "零概率不等于不可能，小概率但非零的损失不能忽略；Borel可测与Lebesgue可测不是同一σ-代数，完备化也不会使所有集合可测。",
+      "deep_sections": [
+        {
+          "title": "相对测度与零测事件",
+          "question": "事件概率为零是否意味着这个集合必然为空？",
+          "paragraphs": [
+            "零测集依赖测度本身。均匀分布下{0.5}的概率为0，但若随机变量恒取0.5，则相同集合的概率为1。二者没有集合论矛盾，因为其概率测度不同。",
+            "当一项统计定理声称“几乎处处成立”，真正含义是失败事件属于零测集。它允许非空甚至不可数例外集合，而不是对所有可能ω的逐点保证。"
+          ],
+          "formulas": [
+            {
+              "label": "相对测度与零测事件",
+              "tex": "\\mu(N)=0,\\qquad\\mu\\!\\left(\\bigcup_{k=1}^{\\infty}N_k\\right)=0\\quad\\text{若各}\\ \\mu(N_k)=0"
+            }
+          ],
+          "proof": "用可数次次可加性得到0≤μ(∪N_k)≤Σμ(N_k)=0，故并集测度0。单调性保证N的可测子集A⊆N也满足0≤μ(A)≤μ(N)=0；这就是处理可数多个几乎处处命题的基础。",
+          "worked": "在Uniform(0,1)测度下P(X=0.5)=0；如果模型为P(X=0.5)=1的退化分布，则事件{X=0.5}的概率变成1。",
+          "limitation": "概率0不表示逻辑不可能，也不说明事件能在有限精度数据中直接检测；交易制度和价格离散度会改变建模测度。"
+        },
+        {
+          "title": "可数与不可数零测集",
+          "question": "为什么Cantor集能不可数却仍拥有Lebesgue测度零？",
+          "paragraphs": [
+            "单点的Lebesgue测度为0，可数个单点的并仍为零。Cantor三分集更强：它不可数，但在第n步仅保留2^n个长度3^(−n)的区间，总长度(2/3)^n→0。",
+            "用外测度的单调性与覆盖，Cantor集测度至多保留区间总长度的极限0。它揭示集合点的数量与Lebesgue测度不是同一概念。"
+          ],
+          "formulas": [
+            {
+              "label": "可数与不可数零测集",
+              "tex": "\\lambda(C)\\le\\left(\\frac23\\right)^n\\ \\forall n\\quad\\Longrightarrow\\quad\\lambda(C)=0"
+            }
+          ],
+          "proof": "构造C_n为第n步剩余的2^n个区间之并，其总长度(2/3)^n。Cantor集C⊆C_n，因此0≤λ(C)≤λ(C_n)=(2/3)^n；令n趋于∞得λ(C)=0。不可数性由三进制0、2选择序列建立。",
+          "worked": "三分Cantor集在第1步总长度2/3，第2步总长度4/9，第3步总长度8/27，均趋于0；但每个无限0或2数字序列仍对应集合中的一个点。",
+          "limitation": "不可数集合也可具有零测度，而某些不可测集合根本不能赋予Lebesgue测度，不能把二者混为一谈。"
+        },
+        {
+          "title": "几乎处处等价与L²预测",
+          "question": "为什么改变零概率路径不会改变积分型误差或条件期望？",
+          "paragraphs": [
+            "若X=Y在μ几乎处处成立，则|X−Y|^p=0几乎处处，因此其积分等于0。L^p空间按这种关系识别元素，而条件期望也只在几乎处处等价意义下唯一。",
+            "该机制确保理论风险范数不会受到零测集合上任意取值的影响；在程序中仍应对NaN、无穷值和缺失数据采取实际规则，不能把数据清洗问题视为零测例外。"
+          ],
+          "formulas": [
+            {
+              "label": "几乎处处等价与L²预测",
+              "tex": "X=Y\\ \\mu\\text{-a.e.}\\quad\\Longrightarrow\\quad\\int|X-Y|^p\\,d\\mu=0\\quad(p\\ge1)"
+            }
+          ],
+          "proof": "因为存在N且μ(N)=0，使Ω\\N上X=Y；于是非负函数|X−Y|^p仅可能在N上非零。非负Lebesgue积分对零测支撑的值为0，因此范数距离为0；由此L^p被定义为几乎处处等价类。",
+          "worked": "在Uniform(0,1)中令X(ω)=ω，Y(ω)=ω（ω≠0.5），Y(0.5)=100。则E|X−Y|²=0，尽管两个函数在ω=0.5处显然不同。",
+          "limitation": "实证上的极端事件如果具有微小但非零概率，就不能借“几乎处处等价”忽略；零测是精确定义而非近似小概率。"
+        },
+        {
+          "title": "完备化及Borel与Lebesgue差异",
+          "question": "为什么需要给零测集的任意子集也定义测度？",
+          "paragraphs": [
+            "给定测度空间，若N∈F且μ(N)=0，每个A⊆N都属于F，称其为完备测度空间。对于普通实数Borel σ-代数上的Lebesgue长度限制，某些Borel零测集的子集并不属于Borel σ-代数。",
+            "通过将所有零测子集补入σ-代数，可以构造测度的完备化。Lebesgue可测集及Lebesgue测度可视为Borel长度测度的适当完成，保证几乎处处修改后的可测性。"
+          ],
+          "formulas": [
+            {
+              "label": "完备化及Borel与Lebesgue差异",
+              "tex": "\\overline{\\mathcal F}=\\{B\\cup N_0:B\\in\\mathcal F,\\ N_0\\subseteq N\\in\\mathcal F,\\ \\mu(N)=0\\}"
+            }
+          ],
+          "proof": "定义扩展集合为可测B与某个可测零测集子集N₀的并，对其赋值μ̄(B∪N₀)=μ(B)。验证表示方式不同也不会改变测度，再检查补集和可数并仍留在扩展域，可得到完备化。",
+          "worked": "三分Cantor集C是Borel零测集。它有2^{continuum}个子集，而Borel集合仅有continuum个，因此存在C的非Borel子集；这些子集在Lebesgue完备化中可测且测度0。",
+          "limitation": "完备化需要先有一个定义良好的测度；不能据此断言所有实数子集都变为Lebesgue可测。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "measure-n0122",
+          "label": "Borel集合"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0123",
+          "label": "测度公理"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0126",
+          "label": "Lebesgue测度与完备化"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0139",
+          "label": "Lp等价类"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 18.125 Measure and Integration：Lecture 1–9，测度空间、可测集与积分",
+          "url": "https://ocw.mit.edu/courses/18-125-measure-and-integration-fall-2003/pages/lecture-notes/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：Lecture 7–9，抽象积分与乘积测度",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V11严密讲义：四节完整定义、证明、数值检验、失效边界"
     }
   ]
 }
