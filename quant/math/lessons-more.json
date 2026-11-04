@@ -937,6 +937,806 @@
         }
       ],
       "checked_status": "完整精讲：L²闭子空间、积分-正交等价、投影最优性、全方差与信息增量"
+    },
+    {
+      "id": "measure-n0139",
+      "node_id": "measure-n0139",
+      "title": "L^p空间",
+      "definition": "L^p空间把随机变量的可积程度刻画为一个由概率测度决定的函数空间。对于1≤p<∞，L^p包含满足E|X|^p<∞的几乎处处等价类，范数是(E|X|^p)^{1/p}；L^∞则以本质上确界定义范数。空间的完备性、Hölder与Minkowski不等式、概率空间上的范数嵌入及L²正交结构，是概率极限定理与定量风险界的重要工具。",
+      "assumptions": "在概率空间(Ω,F,P)且P(Ω)=1下，取1≤p≤∞。Hölder使用1/p+1/q=1的共轭指数，Minkowski需要p≥1；p<1一般没有范数三角不等式。L²内积与Hilbert投影另需二阶可积，不能把L¹上存在的条件期望误解为L²投影。",
+      "properties": [
+        "L^p对1≤p≤∞是完备赋范线性空间，其中L²进一步构成Hilbert空间。",
+        "概率测度有限时，1≤p<q≤∞蕴含L^q⊆L^p且||X||_p≤||X||_q。",
+        "Hölder不等式控制随机乘积期望，Minkowski不等式控制随机和的Lp范数。",
+        "Lp收敛蕴含依概率收敛；如果p>1时Lp范数在变量族上有统一上界，则该族一致可积。"
+      ],
+      "formulas": [
+        {
+          "label": "L^p定义、等价类与本质上确界",
+          "tex": "\\|X\\|_p=(\\mathbb E|X|^p)^{1/p},\\quad \\|X\\|_\\infty=\\operatorname{ess\\,sup}|X|"
+        },
+        {
+          "label": "Hölder、Minkowski与随机组合",
+          "tex": "|\\mathbb E[XY]|\\le\\|X\\|_p\\|Y\\|_q,\\qquad \\|X+Y\\|_p\\le\\|X\\|_p+\\|Y\\|_p"
+        },
+        {
+          "label": "完备性、L²几何与范数嵌入",
+          "tex": "1\\le p<q\\le\\infty\\quad\\Longrightarrow\\quad L^q\\subseteq L^p,\\qquad\\|X\\|_p\\le\\|X\\|_q"
+        },
+        {
+          "label": "L^p收敛、依概率收敛和统一风险界",
+          "tex": "\\Pr(|X_n-X|>\\varepsilon)\\le\\varepsilon^{-p}\\|X_n-X\\|_p^p"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先将可测函数按P(X≠Y)=0建立等价关系，利用积分只受几乎处处类影响的事实定义Lp范数。有限p时若||X||p=0，则E|X|^p=0推出X=0几乎处处；无穷范数同样成立。",
+          "tex": "\\|X\\|_p=(\\mathbb E|X|^p)^{1/p},\\quad \\|X\\|_\\infty=\\operatorname{ess\\,sup}|X|"
+        },
+        {
+          "explanation": "对p,q>1使用Young不等式|uv|≤|u|^p/p+|v|^q/q，把X和Y分别按范数归一化后积分，得到Hölder。再对|X+Y|^p≤|X+Y|^{p−1}(|X|+|Y|)应用Hölder并整理，即得Minkowski；p=1直接由绝对值三角不等式。",
+          "tex": "|\\mathbb E[XY]|\\le\\|X\\|_p\\|Y\\|_q,\\qquad \\|X+Y\\|_p\\le\\|X\\|_p+\\|Y\\|_p"
+        },
+        {
+          "explanation": "从Lp-Cauchy序列挑选子列Z_k，使||Z_(k+1)−Z_k||p<2^{−k}。令V=Σ|Z_(k+1)−Z_k|，由Minkowski及Fatou，V∈Lp，从而V<∞几乎处处；子列极限存在。用Cauchy性加Fatou证明原序列趋向该极限，完成性得证。",
+          "tex": "1\\le p<q\\le\\infty\\quad\\Longrightarrow\\quad L^q\\subseteq L^p,\\qquad\\|X\\|_p\\le\\|X\\|_q"
+        },
+        {
+          "explanation": "对非负变量|X_n−X|^p应用Markov不等式得到尾概率界。若右侧Lp范数趋零，则该界对每个ε>0趋零。另对p>1使用|X|1{|X|>K}≤|X|^p/K^{p−1}，得到高阶矩统一有界蕴含一致可积。",
+          "tex": "\\Pr(|X_n-X|>\\varepsilon)\\le\\varepsilon^{-p}\\|X_n-X\\|_p^p"
+        }
+      ],
+      "example": "等概率四状态X=(0,2,4,6)的||X||₁=3、||X||₂=√14≈3.741657、||X||∞=6。另取X=(1,2)、Y=(3,4)的两个等概率状态，E[XY]=5.5≤√31.25≈5.59017，分别核验Lp嵌入与Cauchy–Schwarz。",
+      "application": "用于分析收益矩存在性、预测均方误差、波动率估计、风险组合的矩不等式，以及将均方一致性连接到概率一致性。研究中需明确使用的真实概率分布和取样时点。",
+      "caveat": "p<1不满足普通范数三角不等式；概率测度上的嵌入不自动延伸到无限测度。Lp控制并不代表任意高阶矩存在，也不能替代交易执行和极端情形的流动性风险。",
+      "deep_sections": [
+        {
+          "title": "L^p定义、等价类与本质上确界",
+          "question": "为何L^p空间中的“两个相同随机变量”允许在零概率集合上不同？",
+          "paragraphs": [
+            "定义L^p范数之前，需要按几乎处处相等把函数归为等价类：若X与Y仅在零概率集合上不同，则两者的任何积分型Lp距离都为0。对有限p，范数是p阶绝对矩的p次方根；对p=∞，范数是使|X|几乎处处不超过它的最小常数。",
+            "这一处理将“范数等于零当且仅当元素为零”恢复为严格性质。金融收益即使在测度为零的异常路径上不同，其Lp等价类也无法识别；可交易规则仍可能需要额外逐路径的定义。"
+          ],
+          "formulas": [
+            {
+              "label": "L^p定义、等价类与本质上确界",
+              "tex": "\\|X\\|_p=(\\mathbb E|X|^p)^{1/p},\\quad \\|X\\|_\\infty=\\operatorname{ess\\,sup}|X|"
+            }
+          ],
+          "proof": "先将可测函数按P(X≠Y)=0建立等价关系，利用积分只受几乎处处类影响的事实定义Lp范数。有限p时若||X||p=0，则E|X|^p=0推出X=0几乎处处；无穷范数同样成立。",
+          "worked": "取四状态等概率收益X=(0,2,4,6)，则||X||₁=(0+2+4+6)/4=3，||X||₂=√[(0+4+16+36)/4]=√14≈3.741657，||X||∞=6。",
+          "limitation": "本质上确界不同于样本最大值；当取值无界时，样本最大值始终有限也不能说明总体X属于L∞。"
+        },
+        {
+          "title": "Hölder、Minkowski与随机组合",
+          "question": "如何在不知道联合分布的情况下仍控制随机变量乘积与和？",
+          "paragraphs": [
+            "若p、q为共轭指数，Hölder不等式给出|E[XY]|≤||X||p||Y||q，允许先控制两个变量各自的可积性而不必先假设它们独立。Minkowski不等式说明||X+Y||p≤||X||p+||Y||p，是p≥1时三角不等式的关键。",
+            "金融组合收益的尾部矩可以用这些不等式给出保守上界，但通常不能由它们给出精确联合分布。Hölder与Minkowski是普遍界，通常只有特殊共线关系才达到等号。"
+          ],
+          "formulas": [
+            {
+              "label": "Hölder、Minkowski与随机组合",
+              "tex": "|\\mathbb E[XY]|\\le\\|X\\|_p\\|Y\\|_q,\\qquad \\|X+Y\\|_p\\le\\|X\\|_p+\\|Y\\|_p"
+            }
+          ],
+          "proof": "对p,q>1使用Young不等式|uv|≤|u|^p/p+|v|^q/q，把X和Y分别按范数归一化后积分，得到Hölder。再对|X+Y|^p≤|X+Y|^{p−1}(|X|+|Y|)应用Hölder并整理，即得Minkowski；p=1直接由绝对值三角不等式。",
+          "worked": "在两个等概率状态下取X=(1,2)、Y=(3,4)，E[XY]=(3+8)/2=5.5；||X||₂=√2.5、||Y||₂=√12.5，其乘积√31.25≈5.59017，故5.5≤5.59017。",
+          "limitation": "没有二阶矩时Cauchy–Schwarz的右侧可能无穷，无法作为有效风险约束；不应把保守上界误写为组合真实风险。"
+        },
+        {
+          "title": "完备性、L²几何与范数嵌入",
+          "question": "为什么L^p中的Cauchy序列真的有可积的极限？",
+          "paragraphs": [
+            "Lp空间的完备性意味着每个Lp-Cauchy序列都有一个仍在Lp内的极限。证明可选择一个快速收敛子序列，使相邻差的Lp范数总和有限；用Minkowski控制这些差的绝对值之和，再利用单调收敛构造几乎处处收敛的极限。",
+            "由于概率测度总质量是1，高阶Lp界也给出低阶Lp界：对1≤p<q，Hölder证明||X||p≤||X||q。这说明一致的二阶矩界足以保证一阶可积，但反向无法保证。"
+          ],
+          "formulas": [
+            {
+              "label": "完备性、L²几何与范数嵌入",
+              "tex": "1\\le p<q\\le\\infty\\quad\\Longrightarrow\\quad L^q\\subseteq L^p,\\qquad\\|X\\|_p\\le\\|X\\|_q"
+            }
+          ],
+          "proof": "从Lp-Cauchy序列挑选子列Z_k，使||Z_(k+1)−Z_k||p<2^{−k}。令V=Σ|Z_(k+1)−Z_k|，由Minkowski及Fatou，V∈Lp，从而V<∞几乎处处；子列极限存在。用Cauchy性加Fatou证明原序列趋向该极限，完成性得证。",
+          "worked": "四状态例X=(0,2,4,6)的||X||₁=3≤√14=||X||₂≤6=||X||∞；这不是该样本的巧合，而是概率测度上通用的Lp范数单调关系。",
+          "limitation": "无限测度空间中高阶Lp并不必然嵌入低阶Lp；金融概率模型通常有总概率1，但不能将上述结论原样搬到Lebesgue无穷测度。"
+        },
+        {
+          "title": "L^p收敛、依概率收敛和统一风险界",
+          "question": "Lp误差为什么可以用于建立概率性精度界，却不保证实盘尾部安全？",
+          "paragraphs": [
+            "若||X_n−X||p→0，则E|X_n−X|^p→0。由Markov不等式可推出任意固定精度ε的偏差概率趋于0。因此Lp收敛可作为概率一致性的充分条件，L²误差最小化理论也依赖这一联系。",
+            "反向不成立；只有在更强的尾部控制下，概率收敛才可升级到L¹或L²。对于p>1，若sup_n E|X_n|^p有限，则统一可积成立，但单一大样本的有限矩估计不能直接证明总体统一有界。"
+          ],
+          "formulas": [
+            {
+              "label": "L^p收敛、依概率收敛和统一风险界",
+              "tex": "\\Pr(|X_n-X|>\\varepsilon)\\le\\varepsilon^{-p}\\|X_n-X\\|_p^p"
+            }
+          ],
+          "proof": "对非负变量|X_n−X|^p应用Markov不等式得到尾概率界。若右侧Lp范数趋零，则该界对每个ε>0趋零。另对p>1使用|X|1{|X|>K}≤|X|^p/K^{p−1}，得到高阶矩统一有界蕴含一致可积。",
+          "worked": "取确定性误差X_n−X=1/n，||X_n−X||₂=1/n。令ε=0.1、n=20，Markov界为(1/20)²/0.1²=0.25；实际误差只有0.05，超限概率为0，说明概率界可以很松。",
+          "limitation": "不能从Lp范数上界反推实际尾概率恰好达到上界；异常收益的估计不稳定时，基于历史数据计算出的Lp矩不一定代表未来分布。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "probability-n0115",
+          "label": "probability-n0115"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0137",
+          "label": "measure-n0137"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0140",
+          "label": "measure-n0140"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0294",
+          "label": "stochastic-n0294"
+        },
+        {
+          "kind": "ml",
+          "id": "m12-c07-p01",
+          "label": "m12-c07-p01"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 18.175 Theory of Probability：积分与概率收敛",
+          "url": "https://www.ocw.mit.edu/courses/18-175-theory-of-probability-spring-2014/pages/lecture-slides/"
+        },
+        {
+          "title": "MIT 18.125：Hölder、Minkowski、Lp空间与Riesz–Fischer讲义",
+          "url": "https://ocw.mit.edu/courses/18-125-measure-and-integration-fall-2003/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V10完整讲义：四节数学证明、数值核算、金融适用边界"
+    },
+    {
+      "id": "measure-n0140",
+      "node_id": "measure-n0140",
+      "title": "依概率收敛与一致可积",
+      "definition": "一致可积是从概率收敛升级为平均绝对误差收敛的关键尾部控制条件。对可积随机变量族{X_n}，定义sup_n E[|X_n|1{|X_n|>K}]随K→∞趋于0。Vitali收敛定理指出：若X_n依概率趋于X且该族一致可积，则X∈L¹且E|X_n−X|→0。它解决了“罕见但巨大损失”可以破坏期望收敛的问题。",
+      "assumptions": "概率空间总质量1，X_n各自可积，X_n→X依概率。Vitali结论还要求一致可积；使用p>1高阶矩界建立一致可积时，要求sup_n E|X_n|^p<∞。若要得到L²收敛，应对平方误差族的一致可积性作额外证明，不能仅由L¹一致可积推出。",
+      "properties": [
+        "一致可积要求对所有n使用同一个尾部阈值K控制平均大值贡献，逐个变量可积仍不足够。",
+        "在概率收敛前提下，随机变量族的一致可积与L¹收敛相联系；缺少尾部控制时均值可能不收敛。",
+        "如果存在p>1使sup_n E|X_n|^p有限，则{X_n}一致可积，但反过来不需要固定高阶矩存在。",
+        "L¹收敛蕴含均值差趋零，但不蕴含L²收敛或尾部分位数在全部概率点稳定。"
+      ],
+      "formulas": [
+        {
+          "label": "统一尾部截断的积分定义",
+          "tex": "\\lim_{K\\to\\infty}\\sup_n\\mathbb E\\big[|X_n|\\mathbf 1_{\\{|X_n|>K\\}}\\big]=0"
+        },
+        {
+          "label": "Vitali定理的截断证明",
+          "tex": "X_n\\xrightarrow{\\mathbb P}X,\\quad\\{X_n\\}\\ \\text{一致可积}\\quad\\Longrightarrow\\quad\\mathbb E|X_n-X|\\to0"
+        },
+        {
+          "label": "高阶矩界与de la Vallée-Poussin思想",
+          "tex": "\\sup_n\\mathbb E|X_n|^p\\le C,\\ p>1\\quad\\Longrightarrow\\quad \\sup_n\\mathbb E[|X_n|\\mathbf1_{\\{|X_n|>K\\}}]\\le\\frac C{K^{p-1}}"
+        },
+        {
+          "label": "厚尾反例与金融风险均值",
+          "tex": "X_n=n\\mathbf1_{A_n},\\ \\Pr(A_n)=1/n:\\quad X_n\\xrightarrow{\\mathbb P}0,\\quad\\mathbb E|X_n|=1"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对每个K定义尾部积分u(K)=sup_n E[|X_n|1{|X_n|>K}]，它随K非增。若u(K)→0，则可用同一个K使所有n的尾部贡献小于任意δ，这正是从逐点可积转为均匀可积的定量差别。",
+          "tex": "\\lim_{K\\to\\infty}\\sup_n\\mathbb E\\big[|X_n|\\mathbf 1_{\\{|X_n|>K\\}}\\big]=0"
+        },
+        {
+          "explanation": "按分解|X_n−X|≤|X_n−T_K(X_n)|+|T_K(X_n)−T_K(X)|+|T_K(X)−X|。中项有界且依概率趋零，故其期望趋零；两边项由一致可积与极限变量的尾部可积性控制。交换先后极限K、n即可。",
+          "tex": "X_n\\xrightarrow{\\mathbb P}X,\\quad\\{X_n\\}\\ \\text{一致可积}\\quad\\Longrightarrow\\quad\\mathbb E|X_n-X|\\to0"
+        },
+        {
+          "explanation": "在尾部事件上|X_n|>K，因p−1>0可得|X_n|≤|X_n|^p/K^{p−1}；取期望及n上的上确界，得到C/K^{p−1}。右侧随K增加趋零，严格验证一致可积定义。",
+          "tex": "\\sup_n\\mathbb E|X_n|^p\\le C,\\ p>1\\quad\\Longrightarrow\\quad \\sup_n\\mathbb E[|X_n|\\mathbf1_{\\{|X_n|>K\\}}]\\le\\frac C{K^{p-1}}"
+        },
+        {
+          "explanation": "对固定ε>0且n>ε，P(|X_n|>ε)=P(A_n)=1/n→0。另一方面E|X_n|=n×1/n=1；对任意K选择n>K，其尾部积分仍为1，因此不存在一致可积。Vitali定理不能应用且E|X_n|不趋零。",
+          "tex": "X_n=n\\mathbf1_{A_n},\\ \\Pr(A_n)=1/n:\\quad X_n\\xrightarrow{\\mathbb P}0,\\quad\\mathbb E|X_n|=1"
+        }
+      ],
+      "example": "X_n=n×1_{A_n}且P(A_n)=1/n时，P(|X_n|>ε)=1/n→0，而E|X_n|=1，缺乏一致可积。改为X_n=√n×1_{A_n}则E|X_n|=1/√n→0，且统一二阶矩为1，符合Vitali结论但并不L²收敛。",
+      "application": "用于解释为什么均值预测误差的概率收敛不一定控制平均资金损失、厚尾交易风险或样本外策略期望收益；连接风险预算与高阶矩假设的可检验边界。",
+      "caveat": "一致可积是总体尾部性质，不能只由观测中没有大跌识别。依概率收敛加一致可积只推得L¹结论；要控制均方误差需对平方误差作额外尾部分析。",
+      "deep_sections": [
+        {
+          "title": "统一尾部截断的积分定义",
+          "question": "每个X_n都有有限期望，为何还不够保证极限与期望交换？",
+          "paragraphs": [
+            "对单个可积随机变量，E|X|1{|X|>K}→0；一致可积进一步要求这一收敛对全部n一致成立。定义中的sup_n不能放在极限之外，因为随着n增大，罕见事件的损失幅度也可能不断抬高。",
+            "可用截断函数T_K(x)=max(−K,min(x,K))把变量分为有界主体和尾部误差。前者容易利用依概率收敛处理，后者则由一致可积控制。这一分工是Vitali定理的证明核心。"
+          ],
+          "formulas": [
+            {
+              "label": "统一尾部截断的积分定义",
+              "tex": "\\lim_{K\\to\\infty}\\sup_n\\mathbb E\\big[|X_n|\\mathbf 1_{\\{|X_n|>K\\}}\\big]=0"
+            }
+          ],
+          "proof": "对每个K定义尾部积分u(K)=sup_n E[|X_n|1{|X_n|>K}]，它随K非增。若u(K)→0，则可用同一个K使所有n的尾部贡献小于任意δ，这正是从逐点可积转为均匀可积的定量差别。",
+          "worked": "令X_n=n×1_{A_n}且P(A_n)=1/n，E|X_n|=1。任给K，总能取n>K；此时E[|X_n|1{|X_n|>K}]=1，因此u(K)=1不下降，族不一致可积。",
+          "limitation": "观察到某一资产的有限样本尾部平均损失很低，不等于控制了所有样本规模或未知分布状态的统一尾部积分。"
+        },
+        {
+          "title": "Vitali定理的截断证明",
+          "question": "概率收敛为什么必须再加上尾部条件才能得到L¹收敛？",
+          "paragraphs": [
+            "若X_n依概率收敛到X且{X_n}一致可积，则由Fatou型论证可得X可积及其尾部受到控制。对任意固定K，截断的T_K(X_n)与T_K(X)仍依概率收敛，且差的绝对值不超过2K，因此期望绝对差收敛到0。",
+            "把|X_n−X|分解为两端尾部截断误差与中间截断差。先固定K令n→∞，再令K→∞；一致可积恰好使这些尾部项同时消失，得到E|X_n−X|→0。"
+          ],
+          "formulas": [
+            {
+              "label": "Vitali定理的截断证明",
+              "tex": "X_n\\xrightarrow{\\mathbb P}X,\\quad\\{X_n\\}\\ \\text{一致可积}\\quad\\Longrightarrow\\quad\\mathbb E|X_n-X|\\to0"
+            }
+          ],
+          "proof": "按分解|X_n−X|≤|X_n−T_K(X_n)|+|T_K(X_n)−T_K(X)|+|T_K(X)−X|。中项有界且依概率趋零，故其期望趋零；两边项由一致可积与极限变量的尾部可积性控制。交换先后极限K、n即可。",
+          "worked": "令X_n=√n×1_{A_n}且P(A_n)=1/n，则X_n依概率趋于0，E|X_n|=1/√n→0，E[X_n²]=1。统一二阶矩界保证这一变量族一致可积，符合Vitali定理。",
+          "limitation": "不能用Vitali结论证明任意平方误差收敛；对于上述√n例子，E[X_n²]=1恒定，恰好没有L²收敛。"
+        },
+        {
+          "title": "高阶矩界与de la Vallée-Poussin思想",
+          "question": "哪类可检验的充分条件能够确保一致可积？",
+          "paragraphs": [
+            "若某个p>1满足sup_n E|X_n|^p≤C，则在|X_n|>K处有|X_n|≤|X_n|^p/K^{p−1}，因此sup_n E|X_n|1{|X_n|>K}≤C/K^{p−1}→0。",
+            "更一般的de la Vallée-Poussin准则允许选增长快于线性但不必是幂函数的凸函数Φ，使sup_n EΦ(|X_n|)<∞。这显示一致可积比固定二阶矩上界灵活，适合仅具轻度厚尾的统计问题。"
+          ],
+          "formulas": [
+            {
+              "label": "高阶矩界与de la Vallée-Poussin思想",
+              "tex": "\\sup_n\\mathbb E|X_n|^p\\le C,\\ p>1\\quad\\Longrightarrow\\quad \\sup_n\\mathbb E[|X_n|\\mathbf1_{\\{|X_n|>K\\}}]\\le\\frac C{K^{p-1}}"
+            }
+          ],
+          "proof": "在尾部事件上|X_n|>K，因p−1>0可得|X_n|≤|X_n|^p/K^{p−1}；取期望及n上的上确界，得到C/K^{p−1}。右侧随K增加趋零，严格验证一致可积定义。",
+          "worked": "对于X_n=√n且概率为1/n的例子，E|X_n|²=(n)(1/n)=1，因此取p=2、C=1得到尾部统一上界1/K，直接证明一致可积。",
+          "limitation": "de la Vallée-Poussin准则是一个对全族分布的积分条件，不代表实证上只算某个有限训练集的二阶矩就已经验证总体条件。"
+        },
+        {
+          "title": "厚尾反例与金融风险均值",
+          "question": "为什么风险发生概率不断下降也可能无法降低期望损失？",
+          "paragraphs": [
+            "让X_n以1/n概率损失n、其余为0，则对任意固定损失阈值，超过阈值的概率趋零；但期望损失始终是1。这说明概率一致性只约束偏差频率而不约束偏差幅度。",
+            "若把损失幅度改为n²且概率仍为1/n，则期望损失变为n并发散。金融市场的尾部损失、保证金与流动性跳跃尤其需要区分发生概率、条件损失幅度和有效尾部风险度量。"
+          ],
+          "formulas": [
+            {
+              "label": "厚尾反例与金融风险均值",
+              "tex": "X_n=n\\mathbf1_{A_n},\\ \\Pr(A_n)=1/n:\\quad X_n\\xrightarrow{\\mathbb P}0,\\quad\\mathbb E|X_n|=1"
+            }
+          ],
+          "proof": "对固定ε>0且n>ε，P(|X_n|>ε)=P(A_n)=1/n→0。另一方面E|X_n|=n×1/n=1；对任意K选择n>K，其尾部积分仍为1，因此不存在一致可积。Vitali定理不能应用且E|X_n|不趋零。",
+          "worked": "n=100时，损失100的概率为1/100=1%，期望损失100×1%=1；n=10000时损失10000的概率降至0.01%，期望损失仍是1。",
+          "limitation": "该构造是概率模型的反例，不代表真实ETF价格总随样本量而以这种方式变动；实证中应明确风险对象、收益单位和尾部估计不确定性。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "probability-n0115",
+          "label": "probability-n0115"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0139",
+          "label": "measure-n0139"
+        },
+        {
+          "kind": "math",
+          "id": "probability-n0117",
+          "label": "probability-n0117"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0144",
+          "label": "measure-n0144"
+        },
+        {
+          "kind": "ml",
+          "id": "m23-c11-p01",
+          "label": "m23-c11-p01"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 18.175 Theory of Probability：积分与概率收敛",
+          "url": "https://www.ocw.mit.edu/courses/18-175-theory-of-probability-spring-2014/pages/lecture-slides/"
+        },
+        {
+          "title": "MIT 6.436J：一致可积与级数收敛（第19讲）",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V10完整讲义：四节数学证明、数值核算、金融适用边界"
+    },
+    {
+      "id": "measure-n0141",
+      "node_id": "measure-n0141",
+      "title": "Borel-Cantelli引理",
+      "definition": "Borel–Cantelli引理把一列事件的概率总和与事件在同一条无限样本路径上发生的频率联系起来。第一引理不需要独立性：概率和有限则事件仅有限次发生。第二引理在相互独立且概率和发散时给出无穷多次发生的概率为1。这两条定理是强大数定律、几乎处处收敛和罕见事件长期行为的核心工具。",
+      "assumptions": "事件序列(A_n)都属于同一概率空间的σ-代数；第一引理仅要求ΣP(A_n)<∞。第二引理的基础版本需要事件彼此相互独立、ΣP(A_n)=∞，在非独立情况下须使用其他条件版本。事件“无限次发生”定义为⋂_{N≥1}⋃_{n≥N} A_n。",
+      "properties": [
+        "第一引理不要求独立性，有限总概率直接排除无限次发生事件。",
+        "第二引理需要独立等条件，概率和发散才强迫无穷多次发生。",
+        "两条引理判断的是长期单一路径频次，不是某个固定时点事件的独立概率。",
+        "偏差事件的概率求和可用于构造几乎处处收敛，进而证明有界i.i.d.样本的强大数定律。"
+      ],
+      "formulas": [
+        {
+          "label": "无限次发生事件的集合表达",
+          "tex": "\\{A_n\\ \\mathrm{i.o.}\\}=\\bigcap_{N=1}^{\\infty}\\ \\bigcup_{n=N}^{\\infty}A_n"
+        },
+        {
+          "label": "第一引理：有限总概率的尾部控制",
+          "tex": "\\sum_{n\\ge1}\\Pr(A_n)<\\infty\\quad\\Longrightarrow\\quad\\Pr(A_n\\ \\mathrm{i.o.})=0"
+        },
+        {
+          "label": "第二引理：独立和发散的反向结论",
+          "tex": "\\sum_{n\\ge1}\\Pr(A_n)=\\infty,\\quad(A_n)\\ \\text{相互独立}\\quad\\Longrightarrow\\quad\\Pr(A_n\\ \\mathrm{i.o.})=1"
+        },
+        {
+          "label": "嵌套反例和强收敛的连接",
+          "tex": "\\sum_n Ce^{-cn}<\\infty\\quad(c>0)\\ \\Longrightarrow\\ \\Pr(A_n(\\varepsilon)\\ \\mathrm{i.o.})=0"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对一个具体样本结果ω，若它属于所有N对应的并事件，则从任意N之后仍有命中，意味着命中指标集合无上界，即事件发生无穷多次。反之无穷多次发生显然保证每个N后的并事件都被ω命中，故上述两个集合相同。",
+          "tex": "\\{A_n\\ \\mathrm{i.o.}\\}=\\bigcap_{N=1}^{\\infty}\\ \\bigcup_{n=N}^{\\infty}A_n"
+        },
+        {
+          "explanation": "令B_N=⋃_{n≥N}A_n，B_N随N递减且其交为i.o.。由Boole不等式P(B_N)≤Σ_{n≥N}P(A_n)→0；概率从上连续性给出P(⋂_N B_N)=lim_NP(B_N)=0。",
+          "tex": "\\sum_{n\\ge1}\\Pr(A_n)<\\infty\\quad\\Longrightarrow\\quad\\Pr(A_n\\ \\mathrm{i.o.})=0"
+        },
+        {
+          "explanation": "独立性给出P(∩_{n=N}^m A_n^c)=∏(1−p_n)≤exp(−Σ_{n=N}^m p_n)。令m→∞，尾和发散使其趋0。事件“仅有限次发生”被包含在⋃_N∩_{n≥N}A_n^c中，由可数次零概率并集仍为零完成证明。",
+          "tex": "\\sum_{n\\ge1}\\Pr(A_n)=\\infty,\\quad(A_n)\\ \\text{相互独立}\\quad\\Longrightarrow\\quad\\Pr(A_n\\ \\mathrm{i.o.})=1"
+        },
+        {
+          "explanation": "对几何级数ΣCe^{−cn}使用公比e^{−c}<1得到有限和，第一引理保证各固定ε的偏差事件只有限次发生。取ε=1/k的可数族可将误差最终为任意小的路径事件合并，得到几乎处处收敛。",
+          "tex": "\\sum_n Ce^{-cn}<\\infty\\quad(c>0)\\ \\Longrightarrow\\ \\Pr(A_n(\\varepsilon)\\ \\mathrm{i.o.})=0"
+        }
+      ],
+      "example": "独立事件A_n、P(A_n)=1/n时，因概率和发散，P(A_n i.o.)=1；同一U下嵌套的A_n={U≤1/n}虽然有相同的逐期事件概率，却满足P(A_n i.o.)=0。若P(A_n)=1/n²则不论依赖结构如何都只有有限次发生。",
+      "application": "为强大数定律、随机算法收敛、金融极端阈值事件的理论分类提供路径概率工具；应把概率模型、独立性和实际市场的动态依赖明确分开。",
+      "caveat": "第一引理的逆命题一般不成立；第二引理不能在一般依赖事件中无条件使用；“几乎必然无穷命中”不等于任何有限投资期限都必然出现损失。",
+      "deep_sections": [
+        {
+          "title": "无限次发生事件的集合表达",
+          "question": "为什么“无限次发生”不是“发生了很多次”这样的有限样本陈述？",
+          "paragraphs": [
+            "记A_n i.o.表示对任意起点N，总能找到某个n≥N使A_n发生，因此定义为⋂_N⋃_{n≥N} A_n。这个事件要求沿同一条无限路径存在无穷多个命中时点，与固定前100期内命中几次完全不同。",
+            "将事件用可数交并写清楚后，才可利用概率的连续性与并事件上界做严格推导。尤其在时间序列或金融市场中，事件A_n的定义应保留相同的概率测度与实验机制。"
+          ],
+          "formulas": [
+            {
+              "label": "无限次发生事件的集合表达",
+              "tex": "\\{A_n\\ \\mathrm{i.o.}\\}=\\bigcap_{N=1}^{\\infty}\\ \\bigcup_{n=N}^{\\infty}A_n"
+            }
+          ],
+          "proof": "对一个具体样本结果ω，若它属于所有N对应的并事件，则从任意N之后仍有命中，意味着命中指标集合无上界，即事件发生无穷多次。反之无穷多次发生显然保证每个N后的并事件都被ω命中，故上述两个集合相同。",
+          "worked": "若A_n={U≤1/n}且U~Uniform(0,1)，对任意U>0，n>1/U之后所有A_n都不再发生，所以P(A_n i.o.)=0，尽管前几期可多次出现。",
+          "limitation": "单次极端亏损、累计损失次数和无穷次风险命中是不同统计对象；不能把有限回测的频率直接当成无限时域路径结论。"
+        },
+        {
+          "title": "第一引理：有限总概率的尾部控制",
+          "question": "为什么概率之和有限就能保证只有有限个偏差发生？",
+          "paragraphs": [
+            "由并事件上界，对任意N，P(⋃_{n≥N}A_n)≤Σ_{n≥N}P(A_n)。如果总概率和有限，那么尾和随N趋零，而i.o.事件被包含在每个尾并事件中。",
+            "因此P(A_n i.o.)必须为0。整个证明没有把事件概率相乘，也不需要假设事件独立；它是一种对长期偏差事件足够强的普适控制。"
+          ],
+          "formulas": [
+            {
+              "label": "第一引理：有限总概率的尾部控制",
+              "tex": "\\sum_{n\\ge1}\\Pr(A_n)<\\infty\\quad\\Longrightarrow\\quad\\Pr(A_n\\ \\mathrm{i.o.})=0"
+            }
+          ],
+          "proof": "令B_N=⋃_{n≥N}A_n，B_N随N递减且其交为i.o.。由Boole不等式P(B_N)≤Σ_{n≥N}P(A_n)→0；概率从上连续性给出P(⋂_N B_N)=lim_NP(B_N)=0。",
+          "worked": "设P(A_n)=1/n²，则Σ_{n≥1}P(A_n)=π²/6<∞。n=10时事件概率为1%，但结论仍是沿几乎全部无限路径只发生有限次。",
+          "limitation": "概率总和有限是充分条件而非必要条件。若相依事件嵌套，P(A_n)=1/n即使和发散，也可能只发生有限次。"
+        },
+        {
+          "title": "第二引理：独立和发散的反向结论",
+          "question": "为什么事件之间的独立性是从概率和发散推导无穷命中的关键？",
+          "paragraphs": [
+            "若A_n相互独立，则固定N到m的全部事件不发生的概率为∏_{n=N}^m(1−P(A_n))。使用1−x≤e^{−x}可用exp(−ΣP(A_n))控制这个乘积。",
+            "当概率和发散时，固定N后的“再也不发生任何事件”概率为0。对所有N取可数并，排除事件仅有限次发生的可能，从而得到无穷次发生概率为1。"
+          ],
+          "formulas": [
+            {
+              "label": "第二引理：独立和发散的反向结论",
+              "tex": "\\sum_{n\\ge1}\\Pr(A_n)=\\infty,\\quad(A_n)\\ \\text{相互独立}\\quad\\Longrightarrow\\quad\\Pr(A_n\\ \\mathrm{i.o.})=1"
+            }
+          ],
+          "proof": "独立性给出P(∩_{n=N}^m A_n^c)=∏(1−p_n)≤exp(−Σ_{n=N}^m p_n)。令m→∞，尾和发散使其趋0。事件“仅有限次发生”被包含在⋃_N∩_{n≥N}A_n^c中，由可数次零概率并集仍为零完成证明。",
+          "worked": "若从n=2开始取独立A_n且P(A_n)=1/n，则n=100的单次命中率仅1%，但Σ_{n=2}∞1/n发散，故几乎处处无限次命中。",
+          "limitation": "金融损失事件具有共同宏观状态或强相关时，独立性可能不成立；不能将第二引理作为真实极端亏损必然无限出现的直接论据。"
+        },
+        {
+          "title": "嵌套反例和强收敛的连接",
+          "question": "总概率发散是否就一定反复命中？第一引理如何用于构造强律？",
+          "paragraphs": [
+            "取U~Uniform(0,1)与A_n={U≤1/n}，则P(A_n)=1/n，概率和发散，但只要U>0，事件终究停止发生。这展示独立性对于基础第二引理的重要性，因为这些事件高度嵌套。",
+            "另一方面，若有偏差事件A_n(ε)的概率界Cexp(−cn)，则总和有限。对ε=1/k依次应用第一引理并取可数个概率1集合的交，便得到估计量几乎处处收敛。这是Hoeffding偏差界通往强律的标准证明路线。"
+          ],
+          "formulas": [
+            {
+              "label": "嵌套反例和强收敛的连接",
+              "tex": "\\sum_n Ce^{-cn}<\\infty\\quad(c>0)\\ \\Longrightarrow\\ \\Pr(A_n(\\varepsilon)\\ \\mathrm{i.o.})=0"
+            }
+          ],
+          "proof": "对几何级数ΣCe^{−cn}使用公比e^{−c}<1得到有限和，第一引理保证各固定ε的偏差事件只有限次发生。取ε=1/k的可数族可将误差最终为任意小的路径事件合并，得到几乎处处收敛。",
+          "worked": "对同一U构造A_n={U≤1/n}，P(A_n)=1/n、ΣP(A_n)=∞，但A_n i.o.={U=0}、概率为0；因此和发散却没有第二引理结论。",
+          "limitation": "即使数学模型允许证明极限路径性质，也不能跳过收益生成机制稳定性、横截面生存者偏差和历史回测对风险频率的有限观察约束。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "probability-n0116",
+          "label": "probability-n0116"
+        },
+        {
+          "kind": "math",
+          "id": "probability-n0118",
+          "label": "probability-n0118"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0140",
+          "label": "measure-n0140"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0294",
+          "label": "stochastic-n0294"
+        },
+        {
+          "kind": "ml",
+          "id": "m23-c11-p01",
+          "label": "m23-c11-p01"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 18.175 Theory of Probability：积分与概率收敛",
+          "url": "https://www.ocw.mit.edu/courses/18-175-theory-of-probability-spring-2014/pages/lecture-slides/"
+        },
+        {
+          "title": "MIT 6.436J：随机变量收敛与大数定律讲义",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V10完整讲义：四节数学证明、数值核算、金融适用边界"
+    },
+    {
+      "id": "measure-n0142",
+      "node_id": "measure-n0142",
+      "title": "弱收敛与特征函数",
+      "definition": "弱收敛是概率测度在有界连续测试函数下的积分收敛，而特征函数是该测度的复指数傅里叶变换。Lévy连续性定理建立两者的等价桥梁：概率分布弱收敛蕴含特征函数逐点收敛；若特征函数逐点趋于一个在原点连续的函数，则该函数必为某个概率分布的特征函数，原分布也弱收敛。",
+      "assumptions": "考虑实值概率测度序列μ_n及其特征函数φ_n(t)=∫e^{itx}μ_n(dx)。正向弱收敛的测试函数是有界连续函数；反向必须要求逐点极限在t=0连续以排除质量逃向无穷远。关于均值、方差和尾部损失的收敛仍需额外的一致可积或更强矩条件。",
+      "properties": [
+        "概率测度的弱收敛等价于所有有界连续测试函数的期望收敛。",
+        "特征函数对实t处处存在且绝对值不超过1，在原点连续的逐点极限能够唯一识别弱极限分布。",
+        "独立Bernoulli稀疏事件和可通过特征函数趋于Poisson分布，展示不需要直接求全部概率质量的渐近方法。",
+        "弱收敛不自动推出均值、方差、Expected Shortfall或其他无界函数的期望收敛。"
+      ],
+      "formulas": [
+        {
+          "label": "Portmanteau与概率测度视角",
+          "tex": "\\mu_n\\Rightarrow\\mu\\quad\\Longleftrightarrow\\quad\\int f\\,d\\mu_n\\to\\int f\\,d\\mu\\quad(f\\in C_b(\\mathbb R))"
+        },
+        {
+          "label": "Lévy连续性与紧性的证明机制",
+          "tex": "\\varphi_n(t)\\to\\varphi(t)\\ (\\forall t),\\ \\varphi\\ \\text{在}0\\text{连续}\\ \\Longrightarrow\\ \\mu_n\\Rightarrow\\mu"
+        },
+        {
+          "label": "稀疏事件到Poisson极限",
+          "tex": "\\left(1+\\frac{\\lambda}{n}(e^{it}-1)\\right)^n\\to\\exp\\!\\left(\\lambda(e^{it}-1)\\right)"
+        },
+        {
+          "label": "无界损失、矩不收敛与多维延伸",
+          "tex": "\\varphi_{X_n}(t)=1-\\frac1n+\\frac{e^{int}}n\\to1,\\qquad \\mathbb E[X_n]=1"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "在实数空间运用Portmanteau定理，分布函数的连续点收敛、概率测度对有界连续f的积分收敛、以及极限边界无质量的集合上的事件概率收敛相互等价。测试函数有界是交换极限所需的关键约束。",
+          "tex": "\\mu_n\\Rightarrow\\mu\\quad\\Longleftrightarrow\\quad\\int f\\,d\\mu_n\\to\\int f\\,d\\mu\\quad(f\\in C_b(\\mathbb R))"
+        },
+        {
+          "explanation": "考虑平均1−Reφ_n(t)在|t|≤a上的积分，它等于E[1−sin(aX_n)/(aX_n)]（将X_n=0按连续性定义）。当|X_n|≥2/a时，括号至少1/2，故P(|X_n|≥2/a)被上述平均量的两倍控制。利用极限φ在0连续并令a→0可建立紧性；再用子列和特征函数唯一性完成识别。",
+          "tex": "\\varphi_n(t)\\to\\varphi(t)\\ (\\forall t),\\ \\varphi\\ \\text{在}0\\text{连续}\\ \\Longrightarrow\\ \\mu_n\\Rightarrow\\mu"
+        },
+        {
+          "explanation": "Bernoulli变量的e^{itX}期望为1−λ/n+(λ/n)e^{it}。独立时n项相乘成为幂函数，对固定t使用复指数的标准极限，识别为Poisson分布的特征函数。极限在原点连续，故得到Z_n弱收敛至Poisson(λ)。",
+          "tex": "\\left(1+\\frac{\\lambda}{n}(e^{it}-1)\\right)^n\\to\\exp\\!\\left(\\lambda(e^{it}-1)\\right)"
+        },
+        {
+          "explanation": "上式对每个t都有|φ_n(t)−1|≤2/n，故根据Lévy定理X_n⇒0；然而E X_n=n×(1/n)=1，反证弱收敛足以控制均值的错误命题。多维结论依赖向量联合特征函数，而非将各维边际特征函数相乘。",
+          "tex": "\\varphi_{X_n}(t)=1-\\frac1n+\\frac{e^{int}}n\\to1,\\qquad \\mathbb E[X_n]=1"
+        }
+      ],
+      "example": "若Z_n~Binomial(100,0.02)，零次发生概率0.98^100≈0.13262，Poisson(2)对应e^(−2)≈0.13534；当n增加、p=2/n，特征函数给出严格Poisson极限。反例X_n=n×Bernoulli(1/n)弱收敛至0，但E X_n=1。",
+      "application": "连接概率统计极限、金融事件计数、渐近正态检验、傅里叶定价及多资产联合分布。真实依赖风险须通过联合特征函数、Copula或动态联合模型建模。",
+      "caveat": "弱收敛只保证有界连续函数的期望收敛；特征函数乘积要求独立性，联合分布不能由边际独自决定。使用对无界损失敏感的风险度量时需要另证尾部控制。",
+      "deep_sections": [
+        {
+          "title": "Portmanteau与概率测度视角",
+          "question": "弱收敛为什么不要求随机变量出现在同一个概率空间上？",
+          "paragraphs": [
+            "将随机变量X的分布写成概率测度μ_X，弱收敛定义为对每个有界连续函数f有∫f dμ_n→∫f dμ。只要比较相同状态空间上的分布，这个定义便不要求X_n和X具有共同的ω或同一条样本路径。",
+            "分布函数在极限连续点上收敛是实数情形的等价条件。两者都属于分布级别的极限，不直接说明单个时间序列的实际收益误差会逐路径缩小。"
+          ],
+          "formulas": [
+            {
+              "label": "Portmanteau与概率测度视角",
+              "tex": "\\mu_n\\Rightarrow\\mu\\quad\\Longleftrightarrow\\quad\\int f\\,d\\mu_n\\to\\int f\\,d\\mu\\quad(f\\in C_b(\\mathbb R))"
+            }
+          ],
+          "proof": "在实数空间运用Portmanteau定理，分布函数的连续点收敛、概率测度对有界连续f的积分收敛、以及极限边界无质量的集合上的事件概率收敛相互等价。测试函数有界是交换极限所需的关键约束。",
+          "worked": "若X_n~N(0,1/n)，分布逐步集中到0，取有界连续f(x)=x²/(1+x²)，由于0≤f(x)≤x²，所以0≤E f(X_n)≤E X_n²=1/n→0=f(0)。",
+          "limitation": "仅对某一个选定的测试函数验证收敛并不足以证明弱收敛；需要对全体有界连续函数或另一组充分的确定类成立。"
+        },
+        {
+          "title": "Lévy连续性与紧性的证明机制",
+          "question": "特征函数逐点极限为什么必须在原点连续？",
+          "paragraphs": [
+            "若μ_n弱收敛于μ，复指数e^{itx}对固定t有界连续，因此φ_n(t)→φ_μ(t)。反方向更深：极限φ在t=0连续能够控制μ_n在大范围外的概率质量，排除分布质量逃往无穷远，继而由紧性提取弱收敛子列。",
+            "对任一收敛子列，其特征函数极限必为φ；特征函数的唯一性保证所有子列只能有相同极限μ。结合相对紧性得到整个序列弱收敛。原点连续条件不能直接从逐点收敛省略。"
+          ],
+          "formulas": [
+            {
+              "label": "Lévy连续性与紧性的证明机制",
+              "tex": "\\varphi_n(t)\\to\\varphi(t)\\ (\\forall t),\\ \\varphi\\ \\text{在}0\\text{连续}\\ \\Longrightarrow\\ \\mu_n\\Rightarrow\\mu"
+            }
+          ],
+          "proof": "考虑平均1−Reφ_n(t)在|t|≤a上的积分，它等于E[1−sin(aX_n)/(aX_n)]（将X_n=0按连续性定义）。当|X_n|≥2/a时，括号至少1/2，故P(|X_n|≥2/a)被上述平均量的两倍控制。利用极限φ在0连续并令a→0可建立紧性；再用子列和特征函数唯一性完成识别。",
+          "worked": "令X_n~N(0,1/n)，φ_n(t)=exp(−t²/(2n))，对每个t趋于1。常数函数φ(t)=1在0连续，且是退化分布δ₀的特征函数，故X_n依分布趋于0。",
+          "limitation": "若X_n≡n为确定变量，则φ_n(t)=e^{int}通常没有逐点极限，且分布质量逃向无穷远；不能从每个φ_n本身连续错误推出极限函数在0连续。"
+        },
+        {
+          "title": "稀疏事件到Poisson极限",
+          "question": "特征函数如何直接推出稀疏事件计数的分布极限？",
+          "paragraphs": [
+            "设Z_n为n次独立Bernoulli(λ/n)之和，n≥λ。单次变量的特征函数是1+(λ/n)(e^{it}−1)，所以总和的特征函数是该表达式的n次方。",
+            "当n趋于无穷时，(1+a/n)^n→e^a，得到exp[λ(e^{it}−1)]，恰为Poisson(λ)的特征函数。Lévy定理因此将独立稀疏命中的总数与Poisson极限严格连接，而无须逐个求出所有计数概率。"
+          ],
+          "formulas": [
+            {
+              "label": "稀疏事件到Poisson极限",
+              "tex": "\\left(1+\\frac{\\lambda}{n}(e^{it}-1)\\right)^n\\to\\exp\\!\\left(\\lambda(e^{it}-1)\\right)"
+            }
+          ],
+          "proof": "Bernoulli变量的e^{itX}期望为1−λ/n+(λ/n)e^{it}。独立时n项相乘成为幂函数，对固定t使用复指数的标准极限，识别为Poisson分布的特征函数。极限在原点连续，故得到Z_n弱收敛至Poisson(λ)。",
+          "worked": "令λ=2，n=100，则成功概率p=0.02，100次全部不发生概率为0.98^100≈0.13262；Poisson(2)全部不发生概率e^(−2)≈0.13534，两者接近而并不相同。",
+          "limitation": "若极端事件由共同流动性状态驱动而非独立，简单Poisson计数近似可能低估事件聚集；需考虑依赖点过程或条件强度模型。"
+        },
+        {
+          "title": "无界损失、矩不收敛与多维延伸",
+          "question": "为什么特征函数已经收敛仍不能直接拿来判断组合期望损失？",
+          "paragraphs": [
+            "令X_n以概率1/n取n，其他时候为0。其特征函数等于1−1/n+(1/n)e^{int}，与1之差的模至多2/n，所以逐点趋于1。该极限表示X_n弱收敛至0，但E[X_n]=1始终不变。",
+            "对多资产收益向量，可用联合特征函数φ_X(u)=E[e^{iuᵀX}]以及Cramér–Wold装置判断多维弱收敛：所有固定线性组合的弱收敛决定向量分布的弱收敛。仅知道各资产边际特征函数仍不足以识别联合依赖。"
+          ],
+          "formulas": [
+            {
+              "label": "无界损失、矩不收敛与多维延伸",
+              "tex": "\\varphi_{X_n}(t)=1-\\frac1n+\\frac{e^{int}}n\\to1,\\qquad \\mathbb E[X_n]=1"
+            }
+          ],
+          "proof": "上式对每个t都有|φ_n(t)−1|≤2/n，故根据Lévy定理X_n⇒0；然而E X_n=n×(1/n)=1，反证弱收敛足以控制均值的错误命题。多维结论依赖向量联合特征函数，而非将各维边际特征函数相乘。",
+          "worked": "n=100时X_n=100的概率为0.01，均值依然是1；特征函数在每个固定t处与退化零分布φ≡1的差距不超过0.02，但并不限制极端损失幅度。",
+          "limitation": "特征函数限制的是分布收敛；要比较ES、现金损失或其他无界指标，须另证一致可积或相应尾部矩约束，且组合收益依赖不能从边际信息单独识别。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "probability-n0106",
+          "label": "probability-n0106"
+        },
+        {
+          "kind": "math",
+          "id": "probability-n0117",
+          "label": "probability-n0117"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0140",
+          "label": "measure-n0140"
+        },
+        {
+          "kind": "math",
+          "id": "probability-n0119",
+          "label": "probability-n0119"
+        },
+        {
+          "kind": "ml",
+          "id": "m12-c08-p01",
+          "label": "m12-c08-p01"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 18.175 Theory of Probability：弱收敛、特征函数与鞅",
+          "url": "https://www.ocw.mit.edu/courses/18-175-theory-of-probability-spring-2014/pages/lecture-slides/"
+        },
+        {
+          "title": "MIT 6.436J：特征函数与分布收敛（第15—16讲）",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V10完整讲义：弱收敛与鞅差的定理证明、独立核算与风险边界"
+    },
+    {
+      "id": "measure-n0144",
+      "node_id": "measure-n0144",
+      "title": "鞅差收敛",
+      "definition": "鞅差序列D_n满足D_n对F_n可测、可积且E[D_n|F_(n−1)]=0，描述给定过去信息无法预测其条件均值的创新。与独立同分布噪声不同，鞅差允许依赖、条件异方差和时变波动。若进一步有平方可积性，鞅差跨时点正交；平方矩可求和时，其部分和鞅收敛；对加权鞅差可利用Kronecker引理建立样本均值强律。",
+      "assumptions": "给定离散滤过F₀⊆F₁⊆…，每个D_n∈L¹(F_n)，E[D_n|F_(n−1)]=0。讨论L²正交与收敛需要D_n∈L²；∑E[D_n²]<∞是部分和收敛的充分条件；对样本均值强律可用∑E[D_n²]/n²<∞。鞅中心极限定理另需条件方差收敛与Lindeberg型条件。",
+      "properties": [
+        "鞅差是条件均值零，不等于独立，也不排除条件波动率随信息变化。",
+        "平方可积鞅差在不同时点正交：E[D_sD_t]=0（s<t）。",
+        "若∑E[D_n²]<∞，其部分和是L²有界鞅，从而几乎处处及L²收敛。",
+        "若∑E[D_n²]/n²<∞，则n^{-1}∑_{k≤n}D_k→0几乎处处；仅凭鞅差条件不能直接套用普通i.i.d. CLT。"
+      ],
+      "formulas": [
+        {
+          "label": "鞅差的定义与非独立性",
+          "tex": "\\mathbb E[D_n\\mid\\mathcal F_{n-1}]=0,\\quad D_n=\\sigma_n\\varepsilon_n,\\quad\\mathbb E[D_n^2\\mid\\mathcal F_{n-1}]=\\sigma_n^2"
+        },
+        {
+          "label": "L²正交与加权增量能量",
+          "tex": "\\mathbb E\\!\\left[\\left(\\sum_{k=1}^nD_k\\right)^2\\right]=\\sum_{k=1}^n\\mathbb E[D_k^2]"
+        },
+        {
+          "label": "鞅级数的L²与几乎处处收敛",
+          "tex": "\\sum_{n=1}^\\infty\\mathbb E[D_n^2]<\\infty\\quad\\Longrightarrow\\quad\\sum_{n=1}^\\infty D_n\\ \\text{在 }L^2\\text{ 与几乎处处收敛}"
+        },
+        {
+          "label": "鞅差样本均值强律与金融统计边界",
+          "tex": "\\sum_{n\\ge1}\\frac{\\mathbb E[D_n^2]}{n^2}<\\infty\\quad\\Longrightarrow\\quad\\frac1n\\sum_{k=1}^nD_k\\xrightarrow{\\rm a.s.}0"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "因为σ_n在F_(n−1)下可测，ε_n与过去独立且E ε_n=0，所以E[σ_n ε_n|F_(n−1)]=σ_n E ε_n=0。又E ε_n²=1，故E[D_n²|F_(n−1)]=σ_n²，说明零条件均值并不限制其时变性。",
+          "tex": "\\mathbb E[D_n\\mid\\mathcal F_{n-1}]=0,\\quad D_n=\\sigma_n\\varepsilon_n,\\quad\\mathbb E[D_n^2\\mid\\mathcal F_{n-1}]=\\sigma_n^2"
+        },
+        {
+          "explanation": "将总和平方展开，交叉项中E[D_sD_t]=E[D_sE[D_t|F_(t−1)]]=0。由于D_s,D_t∈L²，其乘积可积，条件期望展开合法，因此仅剩下各期方差项。",
+          "tex": "\\mathbb E\\!\\left[\\left(\\sum_{k=1}^nD_k\\right)^2\\right]=\\sum_{k=1}^n\\mathbb E[D_k^2]"
+        },
+        {
+          "explanation": "使用跨期正交性得到任意m>n时||M_m−M_n||₂²=Σ_{k=n+1}^m E[D_k²]。有限总和让此尾和趋零，故存在L²极限；因sup_n E M_n²有限，可由Doob鞅收敛定理获得几乎处处极限并以概率收敛唯一性对应。",
+          "tex": "\\sum_{n=1}^\\infty\\mathbb E[D_n^2]<\\infty\\quad\\Longrightarrow\\quad\\sum_{n=1}^\\infty D_n\\ \\text{在 }L^2\\text{ 与几乎处处收敛}"
+        },
+        {
+          "explanation": "由加权鞅差正交，Σ_{k≤N}D_k/k的二阶矩为Σ_{k≤N}E[D_k²]/k²，按假设有统一上界。应用L²有界鞅收敛定理得∑D_k/k几乎处处收敛；Kronecker引理给出(1/n)Σ_{k≤n}D_k→0。",
+          "tex": "\\sum_{n\\ge1}\\frac{\\mathbb E[D_n^2]}{n^2}<\\infty\\quad\\Longrightarrow\\quad\\frac1n\\sum_{k=1}^nD_k\\xrightarrow{\\rm a.s.}0"
+        }
+      ],
+      "example": "设D₁=ε₁、D₂=2ε₂、D₃=3ε₃，ε为独立公平±1，则M₃平方期望1+4+9=14。另取D_n=ε_n/n，∑E D_n²=π²/6<∞，前三项和的方差49/36≈1.361111；若D_n=ε_n则∑E D_n²/n²<∞，故样本均值几乎处处趋零。",
+      "application": "用于论证金融预测误差MDS假设、含条件异方差的序列均值一致性、稳健估计和风险模型误差分解。可与HAC、滚动回测及鞅中心极限定理的前提检查配合。",
+      "caveat": "零条件均值不是独立性；MDS均值强律不等于MDS中心极限定理，也不直接说明金融交易可以无成本复制鞅收益。必须明确滤过及是否使用未来数据。",
+      "deep_sections": [
+        {
+          "title": "鞅差的定义与非独立性",
+          "question": "不可预测的条件均值为何不能被误认为独立白噪声？",
+          "paragraphs": [
+            "鞅差条件是E[D_n|F_(n−1)]=0，它只表明根据现有信息预测下一期创新的条件均值为零。条件二阶矩E[D_n²|F_(n−1)]可以是过去信息的函数，因此过程可以具有明显的波动聚集。",
+            "例如D_n=σ_n ε_n，其中σ_n是F_(n−1)可测且平方可积的波动幅度，ε_n为与过去独立的公平±1冲击；则D_n条件均值为零，但D_n条件方差为σ_n²。"
+          ],
+          "formulas": [
+            {
+              "label": "鞅差的定义与非独立性",
+              "tex": "\\mathbb E[D_n\\mid\\mathcal F_{n-1}]=0,\\quad D_n=\\sigma_n\\varepsilon_n,\\quad\\mathbb E[D_n^2\\mid\\mathcal F_{n-1}]=\\sigma_n^2"
+            }
+          ],
+          "proof": "因为σ_n在F_(n−1)下可测，ε_n与过去独立且E ε_n=0，所以E[σ_n ε_n|F_(n−1)]=σ_n E ε_n=0。又E ε_n²=1，故E[D_n²|F_(n−1)]=σ_n²，说明零条件均值并不限制其时变性。",
+          "worked": "若σ₁=1、σ₂=2，且ε₁、ε₂独立公平±1，则D₁取±1、D₂取±2，E[D₁D₂]=0，而两期条件方差为1与4。",
+          "limitation": "仅凭历史收益的样本自相关接近零，并不能断言收益独立、条件方差恒定或更高阶联合尾部没有聚集。"
+        },
+        {
+          "title": "L²正交与加权增量能量",
+          "question": "为什么不同期鞅差正交，却不一定同分布？",
+          "paragraphs": [
+            "当D_n平方可积且s<t，早期D_s对F_(t−1)可测，故E[D_sD_t]=E[D_sE[D_t|F_(t−1)]]=0。这是条件期望的塔式性质和可测性共同造成的L²正交。",
+            "因此部分和M_n=Σ_{k=1}^nD_k满足E[M_n²]=Σ_{k=1}^nE[D_k²]。这一等式不需要独立同分布，却要求平方可积，能够用于构造鞅均值强律及检验线性预测误差。"
+          ],
+          "formulas": [
+            {
+              "label": "L²正交与加权增量能量",
+              "tex": "\\mathbb E\\!\\left[\\left(\\sum_{k=1}^nD_k\\right)^2\\right]=\\sum_{k=1}^n\\mathbb E[D_k^2]"
+            }
+          ],
+          "proof": "将总和平方展开，交叉项中E[D_sD_t]=E[D_sE[D_t|F_(t−1)]]=0。由于D_s,D_t∈L²，其乘积可积，条件期望展开合法，因此仅剩下各期方差项。",
+          "worked": "取D₁=ε₁、D₂=2ε₂、D₃=3ε₃，其中ε独立且取±1，则E[M₃²]=1²+2²+3²=14。若样本路径为(+1,−1,+1)，则M₃=1−2+3=2；样本路径值不等于平方期望。",
+          "limitation": "该等式是MDS相对于给定滤过的结果；若数据发生前视使用、残差模型错设或D_n不具二阶矩，便不能把此公式直接作为标准误估计依据。"
+        },
+        {
+          "title": "鞅级数的L²与几乎处处收敛",
+          "question": "每期创新方差可以相加，为何平方方差总和有限足以保证路径极限？",
+          "paragraphs": [
+            "若ΣE[D_n²]有限，则M_n=Σ_{k≤n}D_k是L²有界鞅。由L²增量正交，对m>n有E[(M_m−M_n)²]=Σ_{k=n+1}^mE[D_k²]，尾和趋零，因此M_n在L²中是Cauchy序列。",
+            "L²完备性给出M∞∈L²且M_n→M∞于L²；另一方面L²有界蕴含L¹有界，利用鞅收敛定理得到几乎处处极限。两种极限按概率收敛唯一性必然相同。"
+          ],
+          "formulas": [
+            {
+              "label": "鞅级数的L²与几乎处处收敛",
+              "tex": "\\sum_{n=1}^\\infty\\mathbb E[D_n^2]<\\infty\\quad\\Longrightarrow\\quad\\sum_{n=1}^\\infty D_n\\ \\text{在 }L^2\\text{ 与几乎处处收敛}"
+            }
+          ],
+          "proof": "使用跨期正交性得到任意m>n时||M_m−M_n||₂²=Σ_{k=n+1}^m E[D_k²]。有限总和让此尾和趋零，故存在L²极限；因sup_n E M_n²有限，可由Doob鞅收敛定理获得几乎处处极限并以概率收敛唯一性对应。",
+          "worked": "设D_n=ε_n/n且ε_n独立公平±1，ΣE[D_n²]=Σ1/n²=π²/6有限，故级数收敛。前三项和的方差为1+1/4+1/9=49/36≈1.361111。",
+          "limitation": "该收敛条件是充分条件，不是必要条件；不能把所有存在极限的鞅都强制归类为平方增量总和有限。"
+        },
+        {
+          "title": "鞅差样本均值强律与金融统计边界",
+          "question": "如何在并不独立的条件均值零误差下证明样本均值趋零？",
+          "paragraphs": [
+            "若ΣE[D_n²]/n²<∞，则加权增量D_n/n仍构成鞅差，部分和ΣD_n/n具有有界二阶矩，因此几乎处处收敛。再由Kronecker引理，将加权级数收敛转化为未加权样本均值n^{-1}ΣD_n→0几乎处处。",
+            "如果sup_n E[D_n²]≤C，则上述充分条件自动满足，因为ΣC/n²有限。但鞅差的样本均值强律不意味着标准化收益一定渐近正态；后者往往还需要条件方差稳定、较大创新不主导总量等专门条件。"
+          ],
+          "formulas": [
+            {
+              "label": "鞅差样本均值强律与金融统计边界",
+              "tex": "\\sum_{n\\ge1}\\frac{\\mathbb E[D_n^2]}{n^2}<\\infty\\quad\\Longrightarrow\\quad\\frac1n\\sum_{k=1}^nD_k\\xrightarrow{\\rm a.s.}0"
+            }
+          ],
+          "proof": "由加权鞅差正交，Σ_{k≤N}D_k/k的二阶矩为Σ_{k≤N}E[D_k²]/k²，按假设有统一上界。应用L²有界鞅收敛定理得∑D_k/k几乎处处收敛；Kronecker引理给出(1/n)Σ_{k≤n}D_k→0。",
+          "worked": "若D_n为独立Rademacher±1，方差统一为1且Σ1/n²有限，所以均值强律成立。取前四项(+1,−1,+1,+1)，样本平均为(1−1+1+1)/4=0.5，但单条短路径值不构成渐近定理的精确速率界。",
+          "limitation": "标准化鞅差的CLT通常还需要条件方差过程收敛与Lindeberg型限制；独立同分布的√n标准误不能未经检验套给波动聚集的金融收益。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "stochastic-n0289",
+          "label": "stochastic-n0289"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0290",
+          "label": "stochastic-n0290"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0294",
+          "label": "stochastic-n0294"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0139",
+          "label": "measure-n0139"
+        },
+        {
+          "kind": "ml",
+          "id": "m12-c07-p01",
+          "label": "m12-c07-p01"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 18.175 Theory of Probability：弱收敛、特征函数与鞅",
+          "url": "https://www.ocw.mit.edu/courses/18-175-theory-of-probability-spring-2014/pages/lecture-slides/"
+        },
+        {
+          "title": "MIT 6.436J：一致可积、级数收敛与鞅讲义",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V10完整讲义：弱收敛与鞅差的定理证明、独立核算与风险边界"
     }
   ]
 }

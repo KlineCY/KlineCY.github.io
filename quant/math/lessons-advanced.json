@@ -1100,6 +1100,486 @@
         }
       ],
       "checked_status": "完整精讲：信息滤过、条件期望推导、数值样本路径、停时与交易条件"
+    },
+    {
+      "id": "stochastic-n0289",
+      "node_id": "stochastic-n0289",
+      "title": "自然滤过",
+      "definition": "自然滤过是观察随机过程时逐期积累的最小信息结构。对于随机过程(X_t)，F_t^X=σ(X_0,...,X_t)包含截至t时所有已观察变量生成的事件。给定滤过之后，才能严格区分适应过程、可预测决策、停时和条件期望；金融回测中的时点可得数据与未来标签泄漏，本质上也涉及信息集是否被不合法扩大。",
+      "assumptions": "离散时间概率空间(Ω,F,P)，随机变量X_0,X_1,...定义于该空间，自然滤过为其历史生成的σ-代数；外部信息可以令滤过更大但必须仍递增。停时T允许取∞且要求{T≤t}∈F_t。讨论鞅时须在选定滤过下验证可积性与条件期望关系，不能只凭过程的边际分布判断。",
+      "properties": [
+        "自然滤过由观察到的历史生成，是使过程适应的最小滤过；包含额外外生数据的滤过可能更大。",
+        "适应性要求X_t为F_t可测；一阶可预测策略H_t必须在F_(t−1)下可测。",
+        "停时T的判定事件{T≤t}必须使用t时刻已知的信息，不能依赖事后完整路径。",
+        "鞅性质取决于所用滤过；把未来收益提前放入信息集通常会改变条件期望并破坏公平性。"
+      ],
+      "formulas": [
+        {
+          "label": "历史生成的σ-代数",
+          "tex": "\\mathcal F_t^X=\\sigma(X_0,\\ldots,X_t),\\quad\\mathcal F_t^X\\subseteq\\mathcal F_{t+1}^X"
+        },
+        {
+          "label": "适应过程与可预测交易",
+          "tex": "H_t\\in\\mathcal F_{t-1},\\qquad \\mathbb E[H_t\\Delta S_t\\mid\\mathcal F_{t-1}]=H_t\\mathbb E[\\Delta S_t\\mid\\mathcal F_{t-1}]"
+        },
+        {
+          "label": "停时与首达事件的可测性",
+          "tex": "T=\\inf\\{t\\ge1:X_t\\in B\\},\\qquad\\{T\\le t\\}=\\bigcup_{s=1}^t\\{X_s\\in B\\}\\in\\mathcal F_t"
+        },
+        {
+          "label": "扩大信息集与鞅性质破坏",
+          "tex": "\\mathbb E[S_1\\mid\\mathcal F_0]=0,\\qquad \\mathbb E[S_1\\mid\\sigma(\\varepsilon_1)]=\\varepsilon_1"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由σ-代数的生成性质，F_t^X包含全部{X_s∈B}（s≤t，B为Borel集合）；这些集合也属于F_(t+1)^X，因此得到嵌套。若X_s均在G_t可测，则最小生成σ-代数F_t^X也被G_t包含，证明最小性。",
+          "tex": "\\mathcal F_t^X=\\sigma(X_0,\\ldots,X_t),\\quad\\mathcal F_t^X\\subseteq\\mathcal F_{t+1}^X"
+        },
+        {
+          "explanation": "可预测H_t可由F_(t−1)信息确定，故在条件期望内可提出。若ΔS_t可积且其条件期望为0，并且乘积满足可积性（例如H_t有界），则持仓增量的条件期望为0，证明公平性依赖信息时点而非回测图形。",
+          "tex": "H_t\\in\\mathcal F_{t-1},\\qquad \\mathbb E[H_t\\Delta S_t\\mid\\mathcal F_{t-1}]=H_t\\mathbb E[\\Delta S_t\\mid\\mathcal F_{t-1}]"
+        },
+        {
+          "explanation": "当每个X_s在F_s可测且F_s⊆F_t（s≤t），则{X_s∈B}属于F_t；有限并仍属于F_t，所以{T≤t}可测，严格验证首达时刻的停时性质。若从未命中，则T=∞也符合定义。",
+          "tex": "T=\\inf\\{t\\ge1:X_t\\in B\\},\\qquad\\{T\\le t\\}=\\bigcup_{s=1}^t\\{X_s\\in B\\}\\in\\mathcal F_t"
+        },
+        {
+          "explanation": "自然滤过F₀平凡且ε₁独立公平，故E[S₁|F₀]=E[ε₁]=0。若G₀=σ(ε₁)，由于ε₁本身已在G₀可测，E[S₁|G₀]=ε₁。两种条件期望不同，说明鞅关系取决于信息集。",
+          "tex": "\\mathbb E[S_1\\mid\\mathcal F_0]=0,\\qquad \\mathbb E[S_1\\mid\\sigma(\\varepsilon_1)]=\\varepsilon_1"
+        }
+      ],
+      "example": "两次公平掷币的四条等概率路径下，F₀平凡、F₁含第一枚结果、F₂含两枚结果。首次正面时刻T的P(T=1)=0.5，P(T=2)=0.25，P(T>2)=0.25；若事前非法知道ε₁，则原本公平的E[S₁|F₀]=0变成±1。",
+      "application": "用于金融时间戳、交易信号可预测性、回测无前视设计、动态风险过滤和可选停止理论；使机器学习的训练—标签时点与数学滤过形成可核查的先修路径。",
+      "caveat": "数学上的自然滤过不是数据供应商真实可得的全部信息；非法将未来收益加入信息集会导致假性套利。可预测性、可交易性与资金约束必须同时验证。",
+      "deep_sections": [
+        {
+          "title": "历史生成的σ-代数",
+          "question": "自然滤过为什么是使随机过程适应的最小合法信息集？",
+          "paragraphs": [
+            "对于随机过程X_0,X_1,...，F_t^X=σ(X_0,...,X_t)包含历史观测所能判定的一切事件。因为历史只增不减，F_t^X自然构成递增滤过；而X_t对它可测，故X相对于其自然滤过自动适应。",
+            "任何让X适应的另一条滤过G_t都必须包含每个历史X_s在时点t所产生的σ-代数，因此F_t^X⊆G_t。自然滤过只刻画过程自身的观察，不排除研究者还知道公告、宏观信息或市场制度状态。"
+          ],
+          "formulas": [
+            {
+              "label": "历史生成的σ-代数",
+              "tex": "\\mathcal F_t^X=\\sigma(X_0,\\ldots,X_t),\\quad\\mathcal F_t^X\\subseteq\\mathcal F_{t+1}^X"
+            }
+          ],
+          "proof": "由σ-代数的生成性质，F_t^X包含全部{X_s∈B}（s≤t，B为Borel集合）；这些集合也属于F_(t+1)^X，因此得到嵌套。若X_s均在G_t可测，则最小生成σ-代数F_t^X也被G_t包含，证明最小性。",
+          "worked": "掷两枚独立公平硬币ε₁、ε₂，取F₀平凡，F₁=σ(ε₁)把四个等概率结果分为两组，F₂=σ(ε₁,ε₂)区分四个单独结果。相应信息原子数依次为1、2、4。",
+          "limitation": "自然滤过是数学上的信息生成，不代表历史数据必然可及时取得；资产收盘价、宏观修订值与跨市场数据的发布时间需单独审计。"
+        },
+        {
+          "title": "适应过程与可预测交易",
+          "question": "为什么当期已知持仓与事后收益不能放在同一个时点决定？",
+          "paragraphs": [
+            "过程Y_t适应表示Y_t在F_t中可测，观察完t时刻信息后即可计算；离散交易策略H_t若表示(t−1,t]持仓，则必须在F_(t−1)中可测，称为可预测。财富变动H_t(S_t−S_(t−1))因此不允许使用当期尚未实现的价格增量决定持仓。",
+            "对于公允增量鞅，若H_t有界且可预测，则条件期望E[H_tΔS_t|F_(t−1)]=H_t E[ΔS_t|F_(t−1)]=0。这是可预测交易策略不产生条件优势的基本代数，不自动覆盖融资、费用与允许策略类之外的策略。"
+          ],
+          "formulas": [
+            {
+              "label": "适应过程与可预测交易",
+              "tex": "H_t\\in\\mathcal F_{t-1},\\qquad \\mathbb E[H_t\\Delta S_t\\mid\\mathcal F_{t-1}]=H_t\\mathbb E[\\Delta S_t\\mid\\mathcal F_{t-1}]"
+            }
+          ],
+          "proof": "可预测H_t可由F_(t−1)信息确定，故在条件期望内可提出。若ΔS_t可积且其条件期望为0，并且乘积满足可积性（例如H_t有界），则持仓增量的条件期望为0，证明公平性依赖信息时点而非回测图形。",
+          "worked": "令ε₁为±1等概率且S₁−S₀=ε₁。合法的固定H₁=1有E[H₁ε₁]=0；若事后取H₁=sign(ε₁)，则H₁ε₁=1恒成立，但H₁不在F₀可测，属于直接前视。",
+          "limitation": "成交延迟、冲击、跳空和保证金限制会进一步改变财富公式；无前视只是一项必要条件，并非盈利或模型无偏的充分条件。"
+        },
+        {
+          "title": "停时与首达事件的可测性",
+          "question": "“达到阈值立即停止”为什么是合法停时，而“最后一次最大值”通常不是？",
+          "paragraphs": [
+            "随机时间T称为相对于F_t的停时，当且仅当事件{T≤t}在时点t已可判定。首次达到可观察阈值时停止是典型例子，因为到t为止的历史足以知道是否已发生过一次命中。",
+            "若声称在未来N期内最后一次历史最大价出现的时刻建仓，那么判断它是否“最后一次”通常依赖未来路径，除非特殊构造，否则并非可由当期信息判断的停时。停时与事后选择最优时点是不同研究对象。"
+          ],
+          "formulas": [
+            {
+              "label": "停时与首达事件的可测性",
+              "tex": "T=\\inf\\{t\\ge1:X_t\\in B\\},\\qquad\\{T\\le t\\}=\\bigcup_{s=1}^t\\{X_s\\in B\\}\\in\\mathcal F_t"
+            }
+          ],
+          "proof": "当每个X_s在F_s可测且F_s⊆F_t（s≤t），则{X_s∈B}属于F_t；有限并仍属于F_t，所以{T≤t}可测，严格验证首达时刻的停时性质。若从未命中，则T=∞也符合定义。",
+          "worked": "对独立公平硬币ε_t，令T为首次出现正面。P(T=1)=1/2，P(T=2)=1/4，P(T>2)=1/4；{T≤2}只由前两次硬币决定，是F₂事件。",
+          "limitation": "如果停止规则需要未来高点或尚未公布的因子，便不满足停时可测性；不能用可选停止定理为这种事后择时提供合法性。"
+        },
+        {
+          "title": "扩大信息集与鞅性质破坏",
+          "question": "同一个公平随机游走为何在不同信息结构下具有不同的条件均值？",
+          "paragraphs": [
+            "对独立公平步长ε_t，S_t=Σ_{k≤t}ε_k相对于其自然滤过是鞅，因为给定过去，下一步的条件均值为零。若把第一步结果ε₁在t=0就放入扩大滤过G₀，S₀虽仍是0，但E[S₁|G₀]=ε₁，未必等于S₀。",
+            "这不是过程的边际分布发生变化，而是条件期望所依赖的信息改变。金融研究应区分信息可得时点、标签成熟时间、数据修订日期及训练拟合时间，防止把未来已知答案误作当时可预测性。"
+          ],
+          "formulas": [
+            {
+              "label": "扩大信息集与鞅性质破坏",
+              "tex": "\\mathbb E[S_1\\mid\\mathcal F_0]=0,\\qquad \\mathbb E[S_1\\mid\\sigma(\\varepsilon_1)]=\\varepsilon_1"
+            }
+          ],
+          "proof": "自然滤过F₀平凡且ε₁独立公平，故E[S₁|F₀]=E[ε₁]=0。若G₀=σ(ε₁)，由于ε₁本身已在G₀可测，E[S₁|G₀]=ε₁。两种条件期望不同，说明鞅关系取决于信息集。",
+          "worked": "在四条两期硬币等概率路径中，第一期先验预测S₁=0；若事先知道第一枚结果，则条件预测变成+1或−1。预测改善来自不应提前获得的信息，而非策略发现了真实套利。",
+          "limitation": "在风险中性价格模型中还需明确贴现资产和概率测度；对现实P测度收益，甚至自然滤过下也不必满足鞅条件。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "measure-n0121",
+          "label": "measure-n0121"
+        },
+        {
+          "kind": "math",
+          "id": "probability-n0107",
+          "label": "probability-n0107"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0290",
+          "label": "stochastic-n0290"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0293",
+          "label": "stochastic-n0293"
+        },
+        {
+          "kind": "ml",
+          "id": "m12-c07-p01",
+          "label": "m12-c07-p01"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 18.175 Theory of Probability：随机游走、鞅与收敛",
+          "url": "https://www.ocw.mit.edu/courses/18-175-theory-of-probability-spring-2014/pages/lecture-slides/"
+        },
+        {
+          "title": "MIT 6.436J：随机过程基础与鞅讲义（20、25、26讲）",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V10完整精讲：滤过与停时、分解唯一性、收敛定理条件和可复核示例"
+    },
+    {
+      "id": "stochastic-n0292",
+      "node_id": "stochastic-n0292",
+      "title": "Doob分解",
+      "definition": "Doob分解在离散时间把可积适应的次鞅X_t唯一分解为鞅M_t与可预测非递减过程A_t之和。每期补偿增量a_t=E[X_t−X_(t−1)|F_(t−1)]≥0，是已知过去信息时对下一期变化的条件平均；剩余创新ΔM_t=ΔX_t−a_t具有零条件均值。该分解把漂移与不可预测更新严格分离。",
+      "assumptions": "给定离散时间滤过(F_t)及各期可积、适应的次鞅X_t。定义A₀=0、A_t=Σ_{k=1}^t(E[X_k|F_(k−1)]−X_(k−1))，每一增量F_(k−1)可测且非负。若过程仅可积适应而非次鞅，同一构造仍给鞅＋可预测有限变差分解，但A不必递增。连续时间Doob–Meyer分解需另一套条件。",
+      "properties": [
+        "次鞅的可预测补偿项由条件漂移累加构成且非递减。",
+        "扣除补偿项后的剩余过程是鞅；条件均值漂移与零均值创新不能混淆。",
+        "要求A₀=0及A可预测时，在离散时间下分解几乎处处唯一。",
+        "对公平随机游走S_t，其平方S_t²是次鞅，Doob分解给S_t²=(S_t²−t)+t。"
+      ],
+      "formulas": [
+        {
+          "label": "补偿项的逐期构造",
+          "tex": "a_t=\\mathbb E[X_t-X_{t-1}\\mid\\mathcal F_{t-1}]\\ge0,\\qquad A_t=\\sum_{k=1}^ta_k"
+        },
+        {
+          "label": "扣除漂移后为什么严格成为鞅",
+          "tex": "M_t=X_t-A_t,\\qquad\\mathbb E[M_t\\mid\\mathcal F_{t-1}]=M_{t-1}"
+        },
+        {
+          "label": "分解的唯一性与信息预测性",
+          "tex": "X_t=M_t+A_t=M'_t+A'_t,\\quad A_0=A'_0=0\\ \\Longrightarrow\\ A_t=A'_t,\\ M_t=M'_t\\ \\mathrm{a.s.}"
+        },
+        {
+          "label": "凸损失、风险漂移与连续时间边界",
+          "tex": "S_t^2=(S_t^2-t)+t,\\qquad \\mathbb E[S_t^2\\mid\\mathcal F_{t-1}]=S_{t-1}^2+1"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由次鞅条件E[X_t|F_(t−1)]≥X_(t−1)，扣除F_(t−1)可测的X_(t−1)即可得到a_t≥0。由于a_t在上一期已可计算，A_t是可预测的累积过程，且A_t−A_(t−1)=a_t≥0。",
+          "tex": "a_t=\\mathbb E[X_t-X_{t-1}\\mid\\mathcal F_{t-1}]\\ge0,\\qquad A_t=\\sum_{k=1}^ta_k"
+        },
+        {
+          "explanation": "代入A_t=A_(t−1)+a_t，取条件期望有E[M_t|F_(t−1)]=E[X_t|F_(t−1)]−A_(t−1)−a_t=X_(t−1)−A_(t−1)=M_(t−1)。前述变量可积性保证条件期望存在。",
+          "tex": "M_t=X_t-A_t,\\qquad\\mathbb E[M_t\\mid\\mathcal F_{t-1}]=M_{t-1}"
+        },
+        {
+          "explanation": "令B_t=A_t−A'_t，则B₀=0。B_t−B_(t−1)为F_(t−1)可测，而B又是两个鞅的差，故0=E[B_t−B_(t−1)|F_(t−1)]=B_t−B_(t−1)。归纳得B_t=0，并由分解等式得M_t=M'_t。",
+          "tex": "X_t=M_t+A_t=M'_t+A'_t,\\quad A_0=A'_0=0\\ \\Longrightarrow\\ A_t=A'_t,\\ M_t=M'_t\\ \\mathrm{a.s.}"
+        },
+        {
+          "explanation": "展开(S_(t−1)+ε_t)²=S_(t−1)²+2S_(t−1)ε_t+ε_t²，在ε_t条件均值0、平方等于1的前提下得到条件增加1。因此补偿是确定性t，剩余平方减时刻项有零条件漂移。",
+          "tex": "S_t^2=(S_t^2-t)+t,\\qquad \\mathbb E[S_t^2\\mid\\mathcal F_{t-1}]=S_{t-1}^2+1"
+        }
+      ],
+      "example": "公平±1随机游走S_t对应的次鞅X_t=S_t²具有可预测增量a_t=1、A_t=t、M_t=S_t²−t。t=2时M₂取2或−2（各概率1/2），E M₂=0；若错误选A'_t=2t，则剩余过程有条件漂移−1，不再是鞅。",
+      "application": "用于解释金融条件方差增长、风险补偿、条件漂移信号与残差创新的区别；与定价鞅、停时和模型风险估计相连时，需要明确真实概率测度和交易时点。",
+      "caveat": "Doob分解不是统计回归拟合后必然有效的因子解释，也不直接提供资产风险溢价；非次鞅的补偿项未必递增，连续时间过程需独立使用Doob–Meyer条件。",
+      "deep_sections": [
+        {
+          "title": "补偿项的逐期构造",
+          "question": "怎样从条件均值不等式精确定义可预测漂移？",
+          "paragraphs": [
+            "设X_t为可积次鞅，定义a_t=E[X_t−X_(t−1)|F_(t−1)]，则a_t是F_(t−1)可测且非负的随机变量。把这些增量相加成A_t，得到A₀=0、A_t随t非递减的可预测补偿过程。",
+            "次鞅的条件期望不等式被写成“公平创新＋已知条件漂移”，因而帮助解释对过去信息而言可预期的增量与仍未揭晓的随机扰动。对资产回报的经济解释则取决于所用概率测度和可交易资产定义。"
+          ],
+          "formulas": [
+            {
+              "label": "补偿项的逐期构造",
+              "tex": "a_t=\\mathbb E[X_t-X_{t-1}\\mid\\mathcal F_{t-1}]\\ge0,\\qquad A_t=\\sum_{k=1}^ta_k"
+            }
+          ],
+          "proof": "由次鞅条件E[X_t|F_(t−1)]≥X_(t−1)，扣除F_(t−1)可测的X_(t−1)即可得到a_t≥0。由于a_t在上一期已可计算，A_t是可预测的累积过程，且A_t−A_(t−1)=a_t≥0。",
+          "worked": "公平±1随机游走S_t的平方X_t=S_t²满足E[S_t²−S_(t−1)²|F_(t−1)]=1，因此a_t=1、A_t=t。两期的补偿确定为A₂=2。",
+          "limitation": "如果过程不是次鞅，则条件增量a_t可以是负值；此时A仍可预测，但不能称为非递减补偿过程。"
+        },
+        {
+          "title": "扣除漂移后为什么严格成为鞅",
+          "question": "剩余过程M_t=X_t−A_t需要满足哪些鞅条件？",
+          "paragraphs": [
+            "因为X_t与A_t均为F_t可测且可积，M_t也是适应且可积的随机过程。对下一期条件期望，补偿增量的定义恰好取消X_t的条件平均变化，因此E[M_t|F_(t−1)]=M_(t−1)。",
+            "这不是“去掉一条线性趋势”的经验拟合，而是按完整信息σ-代数定义的随机补偿。有限样本估计条件漂移会有残差，只有条件期望模型正确时才能把剩余过程认作真正鞅。"
+          ],
+          "formulas": [
+            {
+              "label": "扣除漂移后为什么严格成为鞅",
+              "tex": "M_t=X_t-A_t,\\qquad\\mathbb E[M_t\\mid\\mathcal F_{t-1}]=M_{t-1}"
+            }
+          ],
+          "proof": "代入A_t=A_(t−1)+a_t，取条件期望有E[M_t|F_(t−1)]=E[X_t|F_(t−1)]−A_(t−1)−a_t=X_(t−1)−A_(t−1)=M_(t−1)。前述变量可积性保证条件期望存在。",
+          "worked": "对公平随机游走有M_t=S_t²−t。t=2时S₂²在两步同向的概率1/2取4、反向的概率1/2取0，所以M₂分别为2或−2，E M₂=0。",
+          "limitation": "在市场中从历史收益拟合的漂移估计值不是数学上的真实条件期望；不能不做外推检验就断言模型残差为鞅差。"
+        },
+        {
+          "title": "分解的唯一性与信息预测性",
+          "question": "同一个次鞅是否可能有两套不同的公平创新和递增补偿？",
+          "paragraphs": [
+            "若有两套分解X=M+A=M'+A'，其中A、A'都可预测且从0开始，令B=A−A'=M'−M。这个差既是可预测过程，也因为两鞅相减而是鞅。",
+            "一个从0开始的可预测鞅，其每个下一期增量已被过去信息确定；但条件期望又必须为零，故所有增量为0。因此B恒为零，两套补偿与鞅部分仅在零概率集合上可能存在版本差异。"
+          ],
+          "formulas": [
+            {
+              "label": "分解的唯一性与信息预测性",
+              "tex": "X_t=M_t+A_t=M'_t+A'_t,\\quad A_0=A'_0=0\\ \\Longrightarrow\\ A_t=A'_t,\\ M_t=M'_t\\ \\mathrm{a.s.}"
+            }
+          ],
+          "proof": "令B_t=A_t−A'_t，则B₀=0。B_t−B_(t−1)为F_(t−1)可测，而B又是两个鞅的差，故0=E[B_t−B_(t−1)|F_(t−1)]=B_t−B_(t−1)。归纳得B_t=0，并由分解等式得M_t=M'_t。",
+          "worked": "对S_t²例，A_t=t是唯一从0开始的可预测补偿；若尝试改成A'_t=2t，则M'_t=S_t²−2t的条件漂移为−1，并不是鞅。",
+          "limitation": "唯一性以给定滤过、概率测度和A₀=0规范为前提；更换信息集或概率测度会改变条件漂移，故不保证两个研究模型得出相同补偿。"
+        },
+        {
+          "title": "凸损失、风险漂移与连续时间边界",
+          "question": "Doob分解怎样联系平方风险上升和动态风险预算？",
+          "paragraphs": [
+            "即使S_t是公平鞅，X_t=S_t²也是次鞅，因为条件平方波动带来正漂移。Doob分解把这个风险增长写成可预测补偿A_t=t与公平创新M_t=S_t²−t，两部分的含义与收益漂移并不相同。",
+            "对连续时间半鞅，Doob–Meyer定理的存在与唯一性还涉及右连续、可积性或类D等正则条件，不可将离散求和公式机械替换为连续积分。金融风险管理的真实保证金过程也需要明确定义。"
+          ],
+          "formulas": [
+            {
+              "label": "凸损失、风险漂移与连续时间边界",
+              "tex": "S_t^2=(S_t^2-t)+t,\\qquad \\mathbb E[S_t^2\\mid\\mathcal F_{t-1}]=S_{t-1}^2+1"
+            }
+          ],
+          "proof": "展开(S_(t−1)+ε_t)²=S_(t−1)²+2S_(t−1)ε_t+ε_t²，在ε_t条件均值0、平方等于1的前提下得到条件增加1。因此补偿是确定性t，剩余平方减时刻项有零条件漂移。",
+          "worked": "两期后E[S₂²]=2，补偿A₂=2；若同向步长使S₂=±2，则M₂=2，若反向回到0，则M₂=−2。两种结果各概率1/2，验证M₂条件均值与无条件均值为零。",
+          "limitation": "凸性造成的平方风险增加不代表交易策略存在正期望超额收益；连续时间Doob–Meyer和离散Doob分解是不同定理，需分别说明条件。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "stochastic-n0290",
+          "label": "stochastic-n0290"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0291",
+          "label": "stochastic-n0291"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0293",
+          "label": "stochastic-n0293"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0294",
+          "label": "stochastic-n0294"
+        },
+        {
+          "kind": "ml",
+          "id": "m23-c11-p01",
+          "label": "m23-c11-p01"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 18.175 Theory of Probability：随机游走、鞅与收敛",
+          "url": "https://www.ocw.mit.edu/courses/18-175-theory-of-probability-spring-2014/pages/lecture-slides/"
+        },
+        {
+          "title": "MIT 6.436J：鞅定义、停止与收敛讲义（25—26讲）",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V10完整精讲：滤过与停时、分解唯一性、收敛定理条件和可复核示例"
+    },
+    {
+      "id": "stochastic-n0294",
+      "node_id": "stochastic-n0294",
+      "title": "鞅收敛定理",
+      "definition": "鞅收敛定理区分“路径极限是否存在”和“能否在L¹/L²意义下收敛、期望能否传到极限”。离散时间中，L¹有界鞅有几乎处处有限极限；非负上鞅也几乎处处收敛。要进一步得到L¹收敛及期望保持，需要一致可积；若鞅在L²中统一有界，则可推出几乎处处与L²收敛。",
+      "assumptions": "给定递增滤过与离散时间可积适应鞅M_n。L¹有界条件是sup_n E|M_n|<∞，并不推出L¹收敛；一致可积可推出L¹收敛；sup_n E M_n²<∞可用正交增量证明L²收敛。非负上鞅几乎处处收敛的结论不要求其极限期望等于初值。停止与贴现价格定理还要检查停时、测度和可交易性。",
+      "properties": [
+        "统一L¹有界鞅存在几乎处处有限极限，但可能发生期望质量在极端尾部流失。",
+        "非负上鞅几乎处处收敛至有限非负随机变量，不自动L¹收敛。",
+        "一致可积鞅几乎处处且在L¹中收敛，并且可以交换极限与期望。",
+        "L²有界鞅在L²中是Cauchy序列，从而几乎处处与L²收敛，平方增量总和有限。"
+      ],
+      "formulas": [
+        {
+          "label": "Doob收敛定理与路径极限",
+          "tex": "\\sup_n\\mathbb E|M_n|<\\infty\\quad\\Longrightarrow\\quad M_n\\xrightarrow{\\mathrm{a.s.}}M_\\infty\\in L^1"
+        },
+        {
+          "label": "非负上鞅、尾部质量流失与反例",
+          "tex": "M_n=2^n\\mathbf1_{\\{H_1=\\cdots=H_n\\}},\\quad\\mathbb E[M_n]=1,\\quad M_n\\to0\\ {\\rm a.s.}"
+        },
+        {
+          "label": "一致可积如何补足L¹收敛",
+          "tex": "\\{M_n\\}\\ \\text{一致可积}\\quad\\Longrightarrow\\quad M_n\\xrightarrow{L^1}M_\\infty,\\quad\\mathbb E[M_\\infty]=\\mathbb E[M_0]"
+        },
+        {
+          "label": "L²有界鞅、正交增量和收敛速率",
+          "tex": "\\mathbb E[(M_m-M_n)^2]=\\mathbb E[M_m^2]-\\mathbb E[M_n^2]\\to0\\quad(m>n\\to\\infty)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "Doob上穿不等式控制每个[a,b]的上穿次数的期望，其右侧由sup E|M_n|和|a|等常数控制。因此无穷次上穿概率为0；对有理a<b取可数交，几乎每条路径存在扩展实数极限。用Fatou不等式E|M∞|≤liminf E|M_n|<∞排除无穷极限。",
+          "tex": "\\sup_n\\mathbb E|M_n|<\\infty\\quad\\Longrightarrow\\quad M_n\\xrightarrow{\\mathrm{a.s.}}M_\\infty\\in L^1"
+        },
+        {
+          "explanation": "对F_n条件化，若此前未全部正面则下一期M_(n+1)=0；若此前全正面，下一期以1/2概率取2^{n+1}、否则为0，期望2^n=M_n。全正面无限延续的概率lim 2^{−n}=0，因此几乎处处最终为0，但每期E M_n=2^n×2^{−n}=1。",
+          "tex": "M_n=2^n\\mathbf1_{\\{H_1=\\cdots=H_n\\}},\\quad\\mathbb E[M_n]=1,\\quad M_n\\to0\\ {\\rm a.s.}"
+        },
+        {
+          "explanation": "先使用一致可积蕴含统一L¹有界性，应用鞅收敛定理取得M_n→M∞几乎处处；再由Vitali收敛定理得到L¹收敛。由|E M_n−E M∞|≤E|M_n−M∞|推出期望极限；鞅每期均值相等，故E M∞=E M₀。",
+          "tex": "\\{M_n\\}\\ \\text{一致可积}\\quad\\Longrightarrow\\quad M_n\\xrightarrow{L^1}M_\\infty,\\quad\\mathbb E[M_\\infty]=\\mathbb E[M_0]"
+        },
+        {
+          "explanation": "若m>n，M_n对F_n可测，且E[M_m|F_n]=M_n，故E[M_mM_n]=E[M_n²]。平方展开得到差平方期望等于二阶矩之差；因为E M_n²单调不降且由假设有上界，尾差趋零。完备性给出L²极限，L²有界也保证几乎处处极限。",
+          "tex": "\\mathbb E[(M_m-M_n)^2]=\\mathbb E[M_m^2]-\\mathbb E[M_n^2]\\to0\\quad(m>n\\to\\infty)"
+        }
+      ],
+      "example": "非负鞅M_n=2^n1_{前n次掷币均正面}每期E M_n=1，n=3时以1/8概率取8，故几乎处处趋于0但不L¹收敛。另取M_n=Σ_{k=1}^nε_k/2^k，则E M₃²=21/64=0.328125、sup E M_n²≤1/3，所以L²和几乎处处收敛。",
+      "application": "用于价格贴现过程的可积性审计、期限扩展的动态风险、风险预算是否能传递到极限、对时间序列预测更新的均方控制和停止策略的数学前提检查。",
+      "caveat": "路径收敛不代表期望交换或实盘资本守恒。没有一致可积时，期望质量可以集中在越来越稀有的巨大值上；风险中性测度下结论不可直接转写成实际概率P下的预期收益。",
+      "deep_sections": [
+        {
+          "title": "Doob收敛定理与路径极限",
+          "question": "为什么对鞅控制平均绝对值就能获得几乎处处极限？",
+          "paragraphs": [
+            "设M_n是鞅且sup_n E|M_n|有限。鞅同时是次鞅，因此可对任意有理数a<b应用上穿不等式，控制路径在区间[a,b]间反复完成上穿的预期次数。有限L¹界排除了无穷次上穿的正概率。",
+            "对所有有理数区间取可数并，便可排除样本路径有限极限不存在的震荡情况；再借助Fatou引理与L¹界排除无限极限，得到几乎处处收敛到某个可积M∞。定理不保证E|M_n−M∞|趋零。"
+          ],
+          "formulas": [
+            {
+              "label": "Doob收敛定理与路径极限",
+              "tex": "\\sup_n\\mathbb E|M_n|<\\infty\\quad\\Longrightarrow\\quad M_n\\xrightarrow{\\mathrm{a.s.}}M_\\infty\\in L^1"
+            }
+          ],
+          "proof": "Doob上穿不等式控制每个[a,b]的上穿次数的期望，其右侧由sup E|M_n|和|a|等常数控制。因此无穷次上穿概率为0；对有理a<b取可数交，几乎每条路径存在扩展实数极限。用Fatou不等式E|M∞|≤liminf E|M_n|<∞排除无穷极限。",
+          "worked": "固定终端X∈L¹，M_n=E[X|F_n]满足E|M_n|≤E|X|，所以满足L¹有界条件。例如X为公平硬币的0或2奖金，初始预测1、揭晓后变成0或2，此后保持该值并逐路径收敛。",
+          "limitation": "路径收敛与均值可交换需要分开论证；不能仅凭sup E|M_n|<∞就把E M∞写成E M₀。"
+        },
+        {
+          "title": "非负上鞅、尾部质量流失与反例",
+          "question": "为什么每期平均值都等于1的非负鞅仍能几乎处处趋于0？",
+          "paragraphs": [
+            "以独立公平硬币为基础，令M_n=2^n乘以“前n次全为正面”的指标，且M₀=1。给定前n次全正面，下一步全正面的概率为1/2，因此条件期望为2^{n+1}×1/2=2^n=M_n；若此前已失败，则之后一直为0。",
+            "于是M_n是非负鞅、E M_n=1，但几乎每条路径最终都会出现一次反面，使M_n永久归零。极限M∞=0几乎处处，E M∞=0；在越来越少的极端路径上保留的全部期望质量无法通过L¹收敛传到极限。"
+          ],
+          "formulas": [
+            {
+              "label": "非负上鞅、尾部质量流失与反例",
+              "tex": "M_n=2^n\\mathbf1_{\\{H_1=\\cdots=H_n\\}},\\quad\\mathbb E[M_n]=1,\\quad M_n\\to0\\ {\\rm a.s.}"
+            }
+          ],
+          "proof": "对F_n条件化，若此前未全部正面则下一期M_(n+1)=0；若此前全正面，下一期以1/2概率取2^{n+1}、否则为0，期望2^n=M_n。全正面无限延续的概率lim 2^{−n}=0，因此几乎处处最终为0，但每期E M_n=2^n×2^{−n}=1。",
+          "worked": "n=3时M₃以1/8概率取8，其余7/8概率取0，因此E M₃=8×1/8=1；n→∞时几乎处处极限为0，且E|M_n−0|=1不下降。",
+          "limitation": "这个数学例子不能被解释为存在可实施的无风险交易策略；它仅说明非负鞅或L¹有界条件不够保证L¹收敛与期望守恒。"
+        },
+        {
+          "title": "一致可积如何补足L¹收敛",
+          "question": "一致可积为什么是保留极限期望的正确补充条件？",
+          "paragraphs": [
+            "对几乎处处收敛的可积随机变量序列，一致可积保证所有大值尾部的期望贡献能统一压小。对鞅M_n，这一条件和概率收敛一起使Vitali定理适用，从而E|M_n−M∞|→0，并允许E M_n→E M∞。",
+            "固定终端X∈L¹构造的M_n=E[X|F_n]是一致可积的条件期望族，因此满足更强的L¹极限结论。若F∞=σ(∪F_n)，极限是E[X|F∞]；当最终信息足够识别X时才等于X。"
+          ],
+          "formulas": [
+            {
+              "label": "一致可积如何补足L¹收敛",
+              "tex": "\\{M_n\\}\\ \\text{一致可积}\\quad\\Longrightarrow\\quad M_n\\xrightarrow{L^1}M_\\infty,\\quad\\mathbb E[M_\\infty]=\\mathbb E[M_0]"
+            }
+          ],
+          "proof": "先使用一致可积蕴含统一L¹有界性，应用鞅收敛定理取得M_n→M∞几乎处处；再由Vitali收敛定理得到L¹收敛。由|E M_n−E M∞|≤E|M_n−M∞|推出期望极限；鞅每期均值相等，故E M∞=E M₀。",
+          "worked": "令X以概率1/2取0或2，F₀平凡、F₁揭晓X，则M₀=1、M_n=X（n≥1）。显然|M_n|≤2，故一致可积；M∞=X且E M∞=1，与初始期望相同。",
+          "limitation": "一致可积是全路径概率分布的尾部条件，无法从有限回测期间净值曲线未出现高杠杆事件直接验证；必须使用额外矩界或结构性假设。"
+        },
+        {
+          "title": "L²有界鞅、正交增量和收敛速率",
+          "question": "何时可把鞅的平方误差压到零，而不仅仅证明路径极限存在？",
+          "paragraphs": [
+            "若sup_n E M_n²<∞，由鞅差跨时点正交得E[(M_m−M_n)²]=E[M_m²]−E[M_n²]。右侧由单调有界的二阶矩序列给出趋零的尾差，因此M_n在L²中是Cauchy。",
+            "L²完备性保证极限存在，并可将L²极限与几乎处处极限对应。对独立公平步长ε_k，令M_n=Σ_{k=1}^n2^{−k}ε_k，则E M_n²=Σ_{k=1}^n4^{−k}≤1/3，具有明确的L²极限。"
+          ],
+          "formulas": [
+            {
+              "label": "L²有界鞅、正交增量和收敛速率",
+              "tex": "\\mathbb E[(M_m-M_n)^2]=\\mathbb E[M_m^2]-\\mathbb E[M_n^2]\\to0\\quad(m>n\\to\\infty)"
+            }
+          ],
+          "proof": "若m>n，M_n对F_n可测，且E[M_m|F_n]=M_n，故E[M_mM_n]=E[M_n²]。平方展开得到差平方期望等于二阶矩之差；因为E M_n²单调不降且由假设有上界，尾差趋零。完备性给出L²极限，L²有界也保证几乎处处极限。",
+          "worked": "取M_n=Σ_{k=1}^nε_k/2^k，前三期方差为1/4+1/16+1/64=21/64=0.328125，极限总方差Σ_{k=1}∞4^{−k}=1/3≈0.333333。",
+          "limitation": "二阶矩的统一上界是强而可检查的充分条件；对于无限方差收益或条件异方差随时间爆炸的过程，不应未经检验使用L²收敛。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "stochastic-n0290",
+          "label": "stochastic-n0290"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0292",
+          "label": "stochastic-n0292"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0140",
+          "label": "measure-n0140"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0144",
+          "label": "measure-n0144"
+        },
+        {
+          "kind": "ml",
+          "id": "m23-c11-p01",
+          "label": "m23-c11-p01"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 18.175 Theory of Probability：随机游走、鞅与收敛",
+          "url": "https://www.ocw.mit.edu/courses/18-175-theory-of-probability-spring-2014/pages/lecture-slides/"
+        },
+        {
+          "title": "MIT 6.436J：鞅收敛定理（第26讲）",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V10完整精讲：滤过与停时、分解唯一性、收敛定理条件和可复核示例"
     }
   ]
 }
