@@ -1,0 +1,271 @@
+{
+  "schema": 1,
+  "version": "2026-11-04",
+  "chapters": [
+    {
+      "domain_id": "m12",
+      "chapter": "多变量概率预测：Energy Score、Variogram Score与条件PIT",
+      "lessons": [
+        {
+          "id": "m12-c11-p01",
+          "title": "多元严格适当评分：Energy Score、Variogram Score与依赖识别",
+          "goal": "从一维CRPS推广到多资产联合预测分布的Energy Score，推导有限情景下的蒙特卡洛计算方式；通过Variogram Score的资产对差分构造解释为什么对相关性错设可能更敏感，并用点质量反例证明Variogram不能唯一确定完整联合预测分布。最后建立37只ETF多元模型和净值风险的分层评价。",
+          "sections": [
+            {
+              "title": "单资产CRPS不能评价整个多资产依赖结构",
+              "question": "各只ETF的边际CRPS都好，联合组合风险是否就可靠？",
+              "paragraphs": [
+                "每只ETF的CRPS只涉及自身单变量CDF，不能识别资产之间是否在同一天共同亏损。假如两种联合预测给出完全一致的每只ETF边际，但一种假定独立、另一种具有共同市场冲击，边际CRPS完全相同而组合VaR与ES可能很不一样。",
+                "多变量评分将未来收益向量视为一次联合观测。评价对象是同一天p维收益的联合分布，不能把每只资产每天单独打分后简单声称已检查横截面Copula依赖。"
+              ],
+              "equations": [
+                {
+                  "label": "单资产CRPS不能评价整个多资产依赖结构",
+                  "tex": "Y_t=(r_{1,t},\\ldots,r_{d,t})^\\top,\\qquad F_t=\\mathcal L(Y_t\\mid\\mathcal F_{t-1})"
+                }
+              ],
+              "worked": "两只ETF边际波动都为1%、权重各0.5，独立时组合波动≈0.7071%，完美共单调时为1%；两种模型拥有相同边际，但正态97.5%VaR约1.386%与1.96%。",
+              "boundary": "在ETF成立时间不同的面板中应固定当期可交易资产与一致交易日，否则所谓多元评分甚至没有相同向量维度。"
+            },
+            {
+              "title": "Energy Score的多变量能量表示",
+              "question": "为什么两个独立预测情景的距离会出现在评分中？",
+              "paragraphs": [
+                "Energy Score将实际向量y到预测向量X的期望距离，减去预测分布中两个独立样本X与X'之间期望距离的一半。第一项评价实现结果和预测位置，第二项校正预测分布自身的不确定性宽度。",
+                "当维度d=1且距离幂次β=1时，它退化成CRPS的能量表示。对适当有限β阶矩的分布，0<β<2的能量型评分具有严格适当性；具体计算必须说明尺度标准化与资产波动量纲。"
+              ],
+              "equations": [
+                {
+                  "label": "Energy Score的多变量能量表示",
+                  "tex": "{\\rm ES}_\\beta(F,y)=E_F\\|X-y\\|^\\beta-\\tfrac12E_F\\|X-X'\\|^\\beta"
+                }
+              ],
+              "worked": "预测等权两情景x¹=(0,0)、x²=(2,0)，实现y=(0,0)，β=1。第一项(0+2)/2=1；成对距离均值(0+2+2+0)/4=1；Energy Score=1−0.5=0.5。",
+              "boundary": "多元Energy Score在某些依赖错设比较中可能区分力较弱，尤其维度较高和边际位置误差占主要分量时；应另加依赖敏感诊断。"
+            },
+            {
+              "title": "有限情景计算和蒙特卡洛偏差",
+              "question": "样本中有M条情景时为什么分母M²与M(M−1)不能随意交换？",
+              "paragraphs": [
+                "如果把预测分布本身定义成M个情景组成的离散经验分布，能量表示中的X与X'都从该经验分布独立抽取，于是成对距离采用M²项，包括i=j的零对角项。",
+                "若真实预测分布另有参数，而M个情景只是Monte Carlo估计，使用仅有i≠j的成对样本U统计量可以无偏估计E||X−X'||，并与全部M²经验分布评分区分。两种实现评价对象略不同，不应随意改分母后称为同一个数。"
+              ],
+              "equations": [
+                {
+                  "label": "有限情景计算和蒙特卡洛偏差",
+                  "tex": "\\widehat{\\rm ES}(F_M,y)=\\frac1M\\sum_m\\|x^{(m)}-y\\|-\\frac1{2M^2}\\sum_{m,n}\\|x^{(m)}-x^{(n)}\\|"
+                }
+              ],
+              "worked": "两条情景(0,0)与(2,0)的经验能量得分0.5；若用M(M−1)=2来估计理论分布的成对期望，则成对距离均值2，对应估计为1−1=0。这是不同统计目标，不是手算差错。",
+              "boundary": "若只保留两个情景，任何Monte Carlo数值都很不稳定；高维收益向量应增加情景量并检查随机种子及有限样本误差。"
+            },
+            {
+              "title": "Variogram Score对资产差分的敏感性",
+              "question": "为什么Variogram Score会更在意两只ETF的相对收益关系？",
+              "paragraphs": [
+                "Variogram Score比较实现向量的每对资产差值幂次|y_i−y_j|^p，与预测分布下对应差值期望之间的偏差平方，并按资产对权重求和。这一构造把注意力放在横截面的相对运动，因而可能比Energy Score更容易识别某些相关结构错设。",
+                "它是适当评分，但对一般联合分布并非严格适当：只要各对资产差分的对应期望相同，某些不同的联合分布也能取得相同评分，尤其不能从评分为零直接推出预测联合分布完全正确。"
+              ],
+              "equations": [
+                {
+                  "label": "Variogram Score对资产差分的敏感性",
+                  "tex": "{\\rm VS}_p(F,y)=\\sum_{i<j}w_{ij}\\left(|y_i-y_j|^p-E_F|X_i-X_j|^p\\right)^2"
+                }
+              ],
+              "worked": "预测退化在X=(1,3)，实际y=(0,2)，p=1且唯一资产对权重为1。两者资产差值绝对值均为2，因此Variogram Score=0，但预测水平整体平移了1；Energy Score等于√2>0。",
+              "boundary": "资产对权重须非负且事先固定；如果对某些资产对权重设0，相应依赖无法由该得分检查，且多重指标选择仍需要独立验证。"
+            },
+            {
+              "title": "概率评分与组合风险应怎样分层验证",
+              "question": "Energy Score和Variogram Score能否直接代替组合VaR回测？",
+              "paragraphs": [
+                "多元评分从完整预测分布的角度比较联合情景拟合；组合VaR、ES与资金流动性压力则关心特定持仓对这些情景的敏感性。前者改善不一定意味着风险预算更准确，后者又可能在资产权重变化后发生改变。",
+                "应在同一冻结未来ETF日期同时评价边际PIT、Energy Score、Variogram Score、固定阈值同跌事件，以及投资组合损失的VaR–ES与成本后净值。建模损失与实际可交易结果需严格区分。"
+              ],
+              "equations": [
+                {
+                  "label": "概率评分与组合风险应怎样分层验证",
+                  "tex": "L_t=-w_{t-1}^\\top Y_t,\\qquad {\\rm VaR}_\\alpha=F_L^{-1}(\\alpha)"
+                }
+              ],
+              "worked": "若两个模型的边际CDF一样但一个错误地忽视共同市场因子，单只ETF的PIT检验可能都正常，组合损失VaR仍可显著偏低；需要联合评分和真实组合超越同时诊断。",
+              "boundary": "高维复杂Copula并不自动包含盘口冲击、保证金和动态ETF再平衡；日频市场数据无法证明实盘成交可复现。"
+            }
+          ],
+          "protocol": [
+            "统一资产池、日期、收益单位、风险期限和预测发布日期，保存联合情景与同日真实收益向量。",
+            "复算经验Energy Score=0.5与Variogram平移反例VS=0、ES=√2。",
+            "明确Energy Score经验分布M²与理论模拟U统计量M(M−1)的不同目标。",
+            "分别报告Energy、Variogram、边际PIT、尾部共同超越、组合VaR–ES及现金账本。"
+          ],
+          "prerequisites": [
+            {
+              "kind": "math",
+              "id": "information-x001",
+              "label": "数学：CRPS与能量表示"
+            },
+            {
+              "kind": "math",
+              "id": "riskmath-x004",
+              "label": "数学：共同极端尾依赖"
+            },
+            {
+              "kind": "ml",
+              "id": "m09-c10-p01",
+              "label": "先修：Copula联合分布"
+            }
+          ],
+          "sources": [
+            {
+              "title": "Gneiting et al. (2008), Assessing Probabilistic Forecasts of Multivariate Quantities",
+              "url": "https://doi.org/10.1007/s11749-008-0114-x"
+            },
+            {
+              "title": "Scheuerer & Hamill (2015), Variogram-Based Proper Scoring Rules",
+              "url": "https://doi.org/10.1175/MWR-D-14-00269.1"
+            },
+            {
+              "title": "scoringRules R package",
+              "url": "https://cran.r-project.org/package=scoringRules"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "domain_id": "m23",
+      "chapter": "ETF多资产联合风险：Rosenblatt条件校准、尾依赖与资金压力",
+      "lessons": [
+        {
+          "id": "m23-c11-p01",
+          "title": "ETF联合风险审计：Rosenblatt变换、尾依赖、情景VaR和融资约束",
+          "goal": "将联合Copula预测转化成可以逐日验证的条件概率顺序变换，明确单资产PIT边际均匀不代表资产之间独立；用FGM Copula可复核条件CDF和尾部条件概率，再设计多ETF样本外联合校准、VaR–ES、相关性跃迁和现金融资压力测试，形成可追溯研究协议。",
+          "sections": [
+            {
+              "title": "边际PIT均匀为何不能保证联合密度校准",
+              "question": "所有ETF的PIT直方图都平坦后，还会漏掉什么？",
+              "paragraphs": [
+                "单个PIT的均匀性只检查对应资产的预测边际分布；如果ETF之间存在共同宏观冲击，每只资产PIT可以分别均匀，但这些数列之间仍会有强依赖。",
+                "联合风险审计还需要检查依赖Copula。正确的连续条件联合分布在选定顺序下可通过Rosenblatt变换得到独立均匀分量；该条件明显强于仅看每个资产的PIT直方图。"
+              ],
+              "equations": [
+                {
+                  "label": "边际PIT均匀为何不能保证联合密度校准",
+                  "tex": "U_1=F_1(Y_1),\\qquad U_2=F_{2\\mid1}(Y_2\\mid Y_1)"
+                }
+              ],
+              "worked": "若两只ETF完全共单调，两个边际PIT都是Unif(0,1)，却总是U1=U2；二者绝不相互独立，不能认为组合联合模型已通过校准。",
+              "boundary": "完全共单调是奇异Copula，不能直接使用需正条件密度的普通连续Rosenblatt公式；只用于说明边际均匀不充分。"
+            },
+            {
+              "title": "Rosenblatt变换的条件顺序",
+              "question": "为何第二个资产的PIT必须条件于第一个？",
+              "paragraphs": [
+                "对连续且条件密度合法的联合预测，按预设资产顺序先对第一个资产应用边际CDF，再对第二个资产应用给定第一资产时的条件CDF。更高维时继续给每个变量使用已观察前面所有变量后的条件分布。",
+                "如果联合模型正确，变换后分量应是独立U(0,1)，可用于检测遗漏的联合依赖。需要明确顺序与条件CDF的估计过程；不同资产排列可能影响有限样本的诊断功效。"
+              ],
+              "equations": [
+                {
+                  "label": "Rosenblatt变换的条件顺序",
+                  "tex": "U_i=F_{i\\mid1,\\ldots,i-1}(Y_i\\mid Y_1,\\ldots,Y_{i-1})"
+                }
+              ],
+              "worked": "对于真正独立的两个连续资产，条件CDF F2|1等于F2，因此Rosenblatt第二分量退化为普通边际PIT；这可作为实现中的简单单元测试。",
+              "boundary": "如果联合条件密度错设或边际校准失败，变换后的非均匀性来源需要分层诊断；不能仅凭一个检验拒绝就断言是哪只ETF导致。"
+            },
+            {
+              "title": "FGM Copula的条件CDF数值核验",
+              "question": "能否构造一个边际均匀但条件依赖非零的简单例子？",
+              "paragraphs": [
+                "Farlie–Gumbel–Morgenstern Copula的形式C(u,v)=uv[1+θ(1−u)(1−v)]，θ∈[−1,1]。两边际仍为均匀分布，但对u求偏导会给出V在U=u条件下的累积概率，而不必等于v。",
+                "它只能表达有限的依赖范围，适合作为计算与程序单元测试，而非默认具有足够灵活的ETF危机尾部建模能力。下列例子采用θ=.8、u=.25、v=.5。"
+              ],
+              "equations": [
+                {
+                  "label": "FGM Copula的条件CDF数值核验",
+                  "tex": "F_{V\\mid U=u}(v)=\\partial_u C(u,v)=v\\{1+\\theta(1-v)(1-2u)\\}"
+                }
+              ],
+              "worked": "代入θ=.8、u=.25、v=.5，条件CDF=.5[1+.8×.5×.5]=.6，而边际CDF仅.5。这说明边际PIT本身遗漏了条件结构。",
+              "boundary": "FGM家族上下尾渐近依赖均为零，且不能刻画强尾共振；它只用于Rosenblatt数值检验，不应代替金融危机Copula。"
+            },
+            {
+              "title": "有限尾依赖与组合风险如何结合",
+              "question": "统计尾依赖系数何时会误导VaR资本决策？",
+              "paragraphs": [
+                "尾依赖系数λ描述条件概率在u趋向0或1时的极限，而组合VaR通常以具体95%或99%阈值报告，因此需要直接计算有限阈值共同超越频率。Gaussian Copula即使λ=0，接近极端阈值时的共同亏损概率仍可能很高。",
+                "对于37只ETF，市场恐慌日期可能同时影响几十只资产，但它们属于同一个交易日事件，不应被当成几十条独立极端样本。应报告去重后的危机日期与点时可交易资产。"
+              ],
+              "equations": [
+                {
+                  "label": "有限尾依赖与组合风险如何结合",
+                  "tex": "p_L(u)=\\Pr(V\\le u\\mid U\\le u)=\\frac{C(u,u)}u"
+                }
+              ],
+              "worked": "若1000个合法同日交易日期里第一资产最低5%共有50日，其中第二资产也处于最低5%共15日，则有限条件同跌率15/50=.30，不能把.30直接称为u→0的尾依赖极限。",
+              "boundary": "不同波动制度、ETF退市与期货展期可能改变边际和Copula；固定阈值概率估计也会受到很少尾部日数和自相关影响。"
+            },
+            {
+              "title": "资金守恒、杠杆与联合尾部压力账本",
+              "question": "联合模型再精确也不能消除哪些投资执行风险？",
+              "paragraphs": [
+                "组合风险必须把模拟联合收益映射为冻结权重下的损失，再叠加真实融资成本、保证金、交易冲击、现金与被动降杠杆规则。尾部依赖正确但成本机制缺失，仍可能使资金缺口低估。",
+                "风险评价应在训练窗口冻结模型族、边际估计、Copula参数和极端阈值，然后在未来日期记录联合评分、Rosenblatt诊断、VaR/ES与真实资金账本。任何从最终结果反向选择模型的做法都破坏独立验证。"
+              ],
+              "equations": [
+                {
+                  "label": "资金守恒、杠杆与联合尾部压力账本",
+                  "tex": "W_t^+=W_t^--C_t,\\qquad C_t\\ge0"
+                }
+              ],
+              "worked": "如果交易前财富100万元、总成交费1万元、无现金流注入，则成交后财富为99万元；即使重新估计Copula使VaR下降，也不能忽略这1万元费用。",
+              "boundary": "仅有日频OHLCV无法证实实际盘口冲击、融券额度与强平触发价；应使用成本情景敏感性而非宣称真实交易结果确定。"
+            }
+          ],
+          "protocol": [
+            "固定37只ETF的点时存续、复权、同日交易、边际与Copula预测版本及资产顺序。",
+            "独立复算FGM条件CDF在θ=.8、u=.25、v=.5下为0.6与有限同跌比例15/50=.30。",
+            "并列诊断边际PIT、Rosenblatt分量是否均匀及独立、Energy/Variogram和危机尾部共振。",
+            "冻结目标持仓，核算组合VaR–ES、交易费用、保证金及流动性强平等情景，报告测试与模型搜索完整日志。"
+          ],
+          "prerequisites": [
+            {
+              "kind": "ml",
+              "id": "m09-c10-p01",
+              "label": "先修：Copula联合依赖"
+            },
+            {
+              "kind": "ml",
+              "id": "m12-c11-p01",
+              "label": "先修：多元适当评分"
+            },
+            {
+              "kind": "math",
+              "id": "riskmath-x004",
+              "label": "数学：上下尾依赖"
+            },
+            {
+              "kind": "math",
+              "id": "information-x002",
+              "label": "数学：PIT校准"
+            }
+          ],
+          "sources": [
+            {
+              "title": "Diebold, Gunther & Tay (1998), Evaluating Density Forecasts",
+              "url": "https://www.nber.org/papers/t0215"
+            },
+            {
+              "title": "Demarta & McNeil (2005), The t Copula and Related Copulas",
+              "url": "https://doi.org/10.1111/j.1751-5823.2005.tb00254.x"
+            },
+            {
+              "title": "Gneiting et al. (2008), Assessing Multivariate Probabilistic Forecasts",
+              "url": "https://doi.org/10.1007/s11749-008-0114-x"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
