@@ -952,6 +952,646 @@
         }
       ],
       "checked_status": "完整精讲：定义、弱/强极限条件、逐步证明、可复核算例、失效边界与量化应用"
+    },
+    {
+      "id": "probability-n0106",
+      "node_id": "probability-n0106",
+      "title": "矩母函数与特征函数",
+      "definition": "矩母函数与特征函数把随机变量的分布编码成一个关于实参数的变换。矩母函数M_X(t)=E[e^{tX}]可能仅在t=0存在；特征函数φ_X(t)=E[e^{itX}]则对所有实t存在。区分两者的存在条件、矩与导数的联系、独立和的变换及特征函数对弱收敛的刻画，才能正确使用CLT、厚尾建模和概率生成方法。",
+      "assumptions": "实值随机变量X及固定概率测度P；M_X(t)定义于E[e^{tX}]有限的t，使用邻域内可微和矩唯一性时需要M_X在0的某个开邻域有限。φ_X总存在，若E|X|^k有限，至多k阶导数可由支配收敛计算；独立和的乘法关系要求相互独立。",
+      "properties": [
+        "矩母函数存在于0邻域时，其导数识别普通矩且可在一定条件下唯一决定分布。",
+        "特征函数始终存在且唯一确定分布；φ_X(0)=1，绝对值不超过1，满足φ_X(−t)=共轭φ_X(t)。",
+        "独立随机变量和的特征函数等于各自特征函数的乘积，非独立时此乘法一般不成立。",
+        "特征函数在0附近的逐点极限若连续于0，可通过Lévy连续性定理识别弱收敛的极限分布。"
+      ],
+      "formulas": [
+        {
+          "label": "矩母函数的存在域与普通矩",
+          "tex": "M_X(t)=\\mathbb E[e^{tX}],\\quad \\mathbb E[X]=M'_X(0),\\quad \\operatorname{Var}(X)=M''_X(0)-M'_X(0)^2"
+        },
+        {
+          "label": "特征函数的有界性、对称性与矩",
+          "tex": "\\varphi_X(t)=\\mathbb E[e^{itX}],\\quad |\\varphi_X(t)|\\le1,\\quad \\varphi_X(-t)=\\overline{\\varphi_X(t)}"
+        },
+        {
+          "label": "独立和的乘积公式与常见分布",
+          "tex": "X\\perp Y\\ \\Longrightarrow\\ \\varphi_{X+Y}(t)=\\varphi_X(t)\\varphi_Y(t),\\qquad\\varphi_{N(\\mu,\\sigma^2)}(t)=e^{i\\mu t-\\sigma^2t^2/2}"
+        },
+        {
+          "label": "特征函数与渐近正态推断",
+          "tex": "\\left[\\varphi_{(X-\\mu)/\\sigma}\\!\\left(\\frac{t}{\\sqrt n}\\right)\\right]^n\\longrightarrow e^{-t^2/2}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "若M在|t|<δ上有限，则用e^{(t+h)X}的邻域指数界控制导数交换，得到M^(k)(0)=E[X^k]。对于标准Cauchy，密度1/[π(1+x²)]使正t时正尾指数积分发散，负t时负尾发散；因此不存在所需的邻域。",
+          "tex": "M_X(t)=\\mathbb E[e^{tX}],\\quad \\mathbb E[X]=M'_X(0),\\quad \\operatorname{Var}(X)=M''_X(0)-M'_X(0)^2"
+        },
+        {
+          "explanation": "因为|e^{itX}|=1，三角不等式给出|E[e^{itX}]|≤E|e^{itX}|=1；对实X有e^{−itX}为e^{itX}的复共轭，且共轭可穿过期望，故得到对称性。若E|X|^k有限，则可对e^{itX}求k次导数并受|X|^k支配。",
+          "tex": "\\varphi_X(t)=\\mathbb E[e^{itX}],\\quad |\\varphi_X(t)|\\le1,\\quad \\varphi_X(-t)=\\overline{\\varphi_X(t)}"
+        },
+        {
+          "explanation": "由独立性，E[f(X)g(Y)]=E[f(X)]E[g(Y)]，代入f(x)=e^{itx}与g(y)=e^{ity}即可。对于两个独立正态，特征函数相乘后的指数为i(μ₁+μ₂)t−(σ₁²+σ₂²)t²/2，根据特征函数唯一性得到和的分布。",
+          "tex": "X\\perp Y\\ \\Longrightarrow\\ \\varphi_{X+Y}(t)=\\varphi_X(t)\\varphi_Y(t),\\qquad\\varphi_{N(\\mu,\\sigma^2)}(t)=e^{i\\mu t-\\sigma^2t^2/2}"
+        },
+        {
+          "explanation": "对Z=(X−μ)/σ，有φ_Z(u)=1−u²/2+o(u²)，这来自E[Z]=0、E[Z²]=1及二阶可积性。代入u=t/√n，并用独立性乘积关系，得到φ_{ΣZ_i/√n}(t)→exp(−t²/2)；因极限在0连续，Lévy定理给出弱收敛。",
+          "tex": "\\left[\\varphi_{(X-\\mu)/\\sigma}\\!\\left(\\frac{t}{\\sqrt n}\\right)\\right]^n\\longrightarrow e^{-t^2/2}"
+        }
+      ],
+      "example": "单个Bernoulli(0.3)变量的均值为0.3、方差为0.21、φ(π)=0.4。两个独立复制求和，P(X+Y=2)=0.09，φ_{X+Y}(π)=0.16；n=100的均值标准差为√(0.21/100)≈0.0458258。",
+      "application": "解释金融收益分布的傅里叶表示、厚尾极限定理、独立资产和的分布与CLT统计推断；用于期权或风险因子时还需要区分真实测度与风险中性测度并验证各项独立性和指数矩条件。",
+      "caveat": "矩母函数在0存在不足以说明邻域存在，特征函数不能自动提供有限方差。单只资产的变换并不能只靠乘法重建存在依赖关系的组合分布；金融时间序列CLT需要额外依赖限制。",
+      "deep_sections": [
+        {
+          "title": "矩母函数的存在域与普通矩",
+          "question": "为什么M(t)的导数能够计算均值，却不是每个厚尾分布都存在M(t)？",
+          "paragraphs": [
+            "矩母函数采用实指数变换M_X(t)=E[e^{tX}]。当某个原点邻域中的指数矩有限时，可以在积分与求导之间交换次序；于是M'_X(0)=E[X]和M''_X(0)=E[X²]，从而由二阶导数恢复方差。这里的可微性来自邻域指数矩界，而非单凭零点处M(0)=1。",
+            "对Cauchy分布，正负任何非零t的指数矩都因一侧厚尾而发散，虽然φ(t)=e^{−|t|}仍是合法特征函数。若一个随机变量只有有限一阶矩或有限部分普通矩，不能直接把M_X当作全域可用的函数。"
+          ],
+          "formulas": [
+            {
+              "label": "矩母函数的存在域与普通矩",
+              "tex": "M_X(t)=\\mathbb E[e^{tX}],\\quad \\mathbb E[X]=M'_X(0),\\quad \\operatorname{Var}(X)=M''_X(0)-M'_X(0)^2"
+            }
+          ],
+          "proof": "若M在|t|<δ上有限，则用e^{(t+h)X}的邻域指数界控制导数交换，得到M^(k)(0)=E[X^k]。对于标准Cauchy，密度1/[π(1+x²)]使正t时正尾指数积分发散，负t时负尾发散；因此不存在所需的邻域。",
+          "worked": "若X~Bernoulli(0.3)，M(t)=0.7+0.3e^t，M'(0)=0.3，M''(0)=0.3；方差是0.3−0.3²=0.21。概率质量0.7与0.3也直接验证均值和方差。",
+          "limitation": "不能由部分有限矩自动推出0邻域的矩母函数存在；不能用样本矩母函数在某个有限t处数值有限推断总体指数矩存在。"
+        },
+        {
+          "title": "特征函数的有界性、对称性与矩",
+          "question": "为什么复指数变换能够覆盖无矩或无限方差的金融收益模型？",
+          "paragraphs": [
+            "特征函数采用复数单位i：φ_X(t)=E[e^{itX}]。因|e^{itX}|=1，期望总是存在且|φ_X(t)|≤1。共轭对称性保证φ_X(−t)=overline{φ_X(t)}；随机变量分布对称时，适当中心化的特征函数为实值偶函数。",
+            "特征函数在t=0处的高阶可微性可以由可积矩导出，但反方向需要额外条件。用特征函数表达概率分布时，推导应明确复数相位、傅里叶约定以及收益是否已中心化。"
+          ],
+          "formulas": [
+            {
+              "label": "特征函数的有界性、对称性与矩",
+              "tex": "\\varphi_X(t)=\\mathbb E[e^{itX}],\\quad |\\varphi_X(t)|\\le1,\\quad \\varphi_X(-t)=\\overline{\\varphi_X(t)}"
+            }
+          ],
+          "proof": "因为|e^{itX}|=1，三角不等式给出|E[e^{itX}]|≤E|e^{itX}|=1；对实X有e^{−itX}为e^{itX}的复共轭，且共轭可穿过期望，故得到对称性。若E|X|^k有限，则可对e^{itX}求k次导数并受|X|^k支配。",
+          "worked": "Bernoulli(0.3)的φ(t)=0.7+0.3e^{it}。在t=π时φ(π)=0.7−0.3=0.4，模长0.4，直接落在单位圆内；在t=0时φ(0)=1。",
+          "limitation": "数值傅里叶反演需要截断与离散化控制；特征函数存在不保证对应密度存在，也不保证可利用普通二阶矩估计参数。"
+        },
+        {
+          "title": "独立和的乘积公式与常见分布",
+          "question": "为什么独立收益和在变换域更容易计算，而相关性会破坏这种分解？",
+          "paragraphs": [
+            "对相互独立的X和Y，e^{it(X+Y)}=e^{itX}e^{itY}，两因子的期望可分解，因此φ_{X+Y}(t)=φ_X(t)φ_Y(t)。重复独立同分布求和时为φ_X(t)^n；相同思路适用于存在域相容的矩母函数。",
+            "以正态分布为例，φ(t)=exp(iμt−σ²t²/2)，独立正态和的均值与方差因指数的相加而相加。这是用卷积之外的办法理解正态分布在独立求和下稳定的原因。"
+          ],
+          "formulas": [
+            {
+              "label": "独立和的乘积公式与常见分布",
+              "tex": "X\\perp Y\\ \\Longrightarrow\\ \\varphi_{X+Y}(t)=\\varphi_X(t)\\varphi_Y(t),\\qquad\\varphi_{N(\\mu,\\sigma^2)}(t)=e^{i\\mu t-\\sigma^2t^2/2}"
+            }
+          ],
+          "proof": "由独立性，E[f(X)g(Y)]=E[f(X)]E[g(Y)]，代入f(x)=e^{itx}与g(y)=e^{ity}即可。对于两个独立正态，特征函数相乘后的指数为i(μ₁+μ₂)t−(σ₁²+σ₂²)t²/2，根据特征函数唯一性得到和的分布。",
+          "worked": "若独立X,Y均为Bernoulli(0.3)，其和等于2的概率为0.3²=0.09，φ_{X+Y}(π)=φ_X(π)²=0.4²=0.16；直接用和的分布(0.49,0.42,0.09)算φ(π)=0.49−0.42+0.09=0.16。",
+          "limitation": "相关资产收益的联合分布一般不能分解，特别是股票与ETF在系统风险期间表现出强关联时，单资产特征函数相乘会错误估计组合风险。"
+        },
+        {
+          "title": "特征函数与渐近正态推断",
+          "question": "Lévy连续性定理如何使CLT证明化为一个极限变换问题？",
+          "paragraphs": [
+            "当φ_n(t)对每个固定t趋于某个在零点连续的函数φ(t)时，Lévy连续性定理保证该函数是概率分布的特征函数，并且相应分布弱收敛。这让独立样本和的渐近性质从直接计算分布函数转化为分析变换的乘积和对数展开。",
+            "在均值μ、方差σ²有限且σ>0的i.i.d.场景，把标准化样本和对应的单期特征函数在0点展开到二阶，得到(1−t²/(2n)+o(1/n))^n→e^{−t²/2}，识别为标准正态极限。"
+          ],
+          "formulas": [
+            {
+              "label": "特征函数与渐近正态推断",
+              "tex": "\\left[\\varphi_{(X-\\mu)/\\sigma}\\!\\left(\\frac{t}{\\sqrt n}\\right)\\right]^n\\longrightarrow e^{-t^2/2}"
+            }
+          ],
+          "proof": "对Z=(X−μ)/σ，有φ_Z(u)=1−u²/2+o(u²)，这来自E[Z]=0、E[Z²]=1及二阶可积性。代入u=t/√n，并用独立性乘积关系，得到φ_{ΣZ_i/√n}(t)→exp(−t²/2)；因极限在0连续，Lévy定理给出弱收敛。",
+          "worked": "对于Bernoulli(0.3)，μ=0.3、σ²=0.21，n=100时样本均值的经典标准差是√(0.21/100)≈0.0458258，中心极限定理的标准化量为(样本均值−0.3)/0.0458258。",
+          "limitation": "特征函数展开给的是独立同分布有限方差情形；自相关、共同冲击、厚尾和时间变化的资产池会改变或破坏这个论证。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "probability-n0104",
+          "label": "probability-n0104"
+        },
+        {
+          "kind": "math",
+          "id": "probability-n0117",
+          "label": "probability-n0117"
+        },
+        {
+          "kind": "math",
+          "id": "probability-n0119",
+          "label": "probability-n0119"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0142",
+          "label": "measure-n0142"
+        },
+        {
+          "kind": "ml",
+          "id": "m12-c07-p01",
+          "label": "m12-c07-p01"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 18.175 Theory of Probability：渐近理论、特征函数与随机过程",
+          "url": "https://www.ocw.mit.edu/courses/18-175-theory-of-probability-spring-2014/pages/lecture-slides/"
+        },
+        {
+          "title": "MIT 18.175 Theory of Probability：授课安排与定理先修",
+          "url": "https://ocw.mit.edu/courses/18-175-theory-of-probability-spring-2014/pages/calendar/"
+        }
+      ],
+      "checked_status": "V10完整讲义：四节证明、独立示例、假设与风险边界"
+    },
+    {
+      "id": "probability-n0115",
+      "node_id": "probability-n0115",
+      "title": "依概率收敛",
+      "definition": "依概率收敛描述估计量与目标随机变量之间的偏差超过任意固定阈值的概率趋近零。它是在同一概率空间中比较随机变量的收敛方式，既可用于证明样本均值一致性，也用于将样本模型误差传递到连续函数和统计函数。需要同几乎处处、L¹/L²和依分布收敛严格区分。",
+      "assumptions": "随机变量X_n、X定义在同一概率空间；对于所有ε>0要求P(|X_n−X|>ε)→0。Markov推广到L^p时要求E|X_n−X|^p有限；从概率收敛提取几乎处处收敛子列不需要独立性，但不能由此推断整个序列逐路径收敛。",
+      "properties": [
+        "依概率收敛不依赖任何特定矩存在，其定义直接约束超出固定误差容忍度的概率。",
+        "若X_n→X于L^p(p>0)，则依概率收敛；反向不成立，需一致可积等补充条件。",
+        "依概率收敛在连续映射下保持，并蕴含依分布收敛。",
+        "从依概率收敛的任意序列可提取几乎处处收敛子列，但原序列可能没有几乎处处极限。"
+      ],
+      "formulas": [
+        {
+          "label": "定义与误差概率阈值",
+          "tex": "X_n\\xrightarrow{\\mathbb P}X\\quad\\Longleftrightarrow\\quad \\forall\\varepsilon>0:\\ \\Pr(|X_n-X|>\\varepsilon)\\to0"
+        },
+        {
+          "label": "矩收敛蕴含概率收敛及反例",
+          "tex": "\\Pr(|X_n-X|>\\varepsilon)\\le\\frac{\\mathbb E|X_n-X|^p}{\\varepsilon^p},\\qquad p>0"
+        },
+        {
+          "label": "连续映射、加减法与渐近代数",
+          "tex": "X_n\\xrightarrow{\\mathbb P}X,\\ g\\ \\text{连续}\\quad\\Longrightarrow\\quad g(X_n)\\xrightarrow{\\mathbb P}g(X)"
+        },
+        {
+          "label": "几乎处处收敛子列与路径极限",
+          "tex": "\\exists\\,n_k\\uparrow\\infty:\\quad X_{n_k}\\xrightarrow{\\mathrm{a.s.}}X\\qquad\\text{当 }X_n\\xrightarrow{\\mathbb P}X"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对每个ε>0，令p_n(ε)=P(|X_n−X|>ε)。如果p_n(ε)→0，则对任何δ>0可取N使所有n≥N有p_n(ε)<δ；反之把δ依次取为任意正数即还原数列极限。随机变量本身可以随n变动，而误差容忍度必须在极限之前固定。",
+          "tex": "X_n\\xrightarrow{\\mathbb P}X\\quad\\Longleftrightarrow\\quad \\forall\\varepsilon>0:\\ \\Pr(|X_n-X|>\\varepsilon)\\to0"
+        },
+        {
+          "explanation": "把非负变量Y=|X_n−X|^p代入Markov不等式即得。若期望收敛至零，右侧对固定ε也趋于0。反例取X_n=n²×1_{A_n}且P(A_n)=1/n，则X_n→0依概率，但E|X_n|=n、E[X_n²]=n³，二者均不趋于零。",
+          "tex": "\\Pr(|X_n-X|>\\varepsilon)\\le\\frac{\\mathbb E|X_n-X|^p}{\\varepsilon^p},\\qquad p>0"
+        },
+        {
+          "explanation": "对确定极限X=x，先由g在x处连续取得给定输出误差对应的输入误差，再利用尾概率收敛。对一般随机极限X，可用紧集或局部连续性控制，联合向量概率收敛则由并事件上界推出，再应用连续映射定理。",
+          "tex": "X_n\\xrightarrow{\\mathbb P}X,\\ g\\ \\text{连续}\\quad\\Longrightarrow\\quad g(X_n)\\xrightarrow{\\mathbb P}g(X)"
+        },
+        {
+          "explanation": "对k≥1使用依概率收敛定义选择n_k>n_(k−1)并使P(|X_(n_k)−X|>2^{−k})≤2^{−k}，再求和得到有限总概率。Borel–Cantelli说明几乎每条路径仅有限次违反精度2^{−k}，剩余误差随k趋零。",
+          "tex": "\\exists\\,n_k\\uparrow\\infty:\\quad X_{n_k}\\xrightarrow{\\mathrm{a.s.}}X\\qquad\\text{当 }X_n\\xrightarrow{\\mathbb P}X"
+        }
+      ],
+      "example": "令X_n=n²的概率为1/n、否则取0。对任意固定ε>0且n²>ε，P(|X_n|>ε)=1/n→0，但E|X_n|=n、E[X_n²]=n³。独立罕见事件P=1/n的例子还说明依概率收敛不蕴含几乎处处收敛。",
+      "application": "为估计量一致性、因子参数稳定性和滚动风险预测提供正确的收敛对象；配合连续映射、Slutsky、Bootstrap和HAC统计推断时，必须核验统计量与目标随机变量的定义。",
+      "caveat": "概率收敛不自动控制样本路径、L¹/L²误差、尾部资金风险或固定样本量置信界；金融研究中还需防止对同一数据反复选择策略造成的选择偏差。",
+      "deep_sections": [
+        {
+          "title": "定义与误差概率阈值",
+          "question": "统计一致性与有限样本置信程度如何严格区分？",
+          "paragraphs": [
+            "对任意固定ε>0，只有当P(|X_n−X|>ε)随n趋于0时，才称X_n依概率收敛于X。这里的概率是整个抽样机制下的概率，允许少量极端偏差仍在某些样本规模出现，不断增大的误差也可能只发生在概率越来越小的事件上。",
+            "把收敛定义写成“给定ε与δ，存在N，使n≥N时偏差概率小于δ”，能够清楚地区分渐近性质与现实数据量的具体保证。没有给出误差概率界时，不能据一致性声称某一固定样本量足够可靠。"
+          ],
+          "formulas": [
+            {
+              "label": "定义与误差概率阈值",
+              "tex": "X_n\\xrightarrow{\\mathbb P}X\\quad\\Longleftrightarrow\\quad \\forall\\varepsilon>0:\\ \\Pr(|X_n-X|>\\varepsilon)\\to0"
+            }
+          ],
+          "proof": "对每个ε>0，令p_n(ε)=P(|X_n−X|>ε)。如果p_n(ε)→0，则对任何δ>0可取N使所有n≥N有p_n(ε)<δ；反之把δ依次取为任意正数即还原数列极限。随机变量本身可以随n变动，而误差容忍度必须在极限之前固定。",
+          "worked": "令X_n=1_{A_n}，其中P(A_n)=1/n，X=0。取ε=0.5时偏差概率为1/n；n=100时为0.01，n=1000时为0.001，严格趋于0。",
+          "limitation": "概率收敛并不承诺路径逐项趋同；特别是依赖结构未知时，误差事件可以在单条无限路径上反复出现。"
+        },
+        {
+          "title": "矩收敛蕴含概率收敛及反例",
+          "question": "为什么均方误差趋零是充分条件，却不是依概率收敛的必要条件？",
+          "paragraphs": [
+            "若E|X_n−X|^p→0且p>0，广义Markov不等式使尾概率被上述期望除以ε^p控制。因此L²收敛、L¹收敛都蕴含依概率收敛，这也是MSE预测损失与统计一致性之间的一条严格连接。",
+            "反方向可以失败：让X_n以极小概率取极大的值。超出任意固定阈值的概率可以为1/n而趋于零，均方误差却可能随n发散。异常值概率与异常值幅度必须同时考虑。"
+          ],
+          "formulas": [
+            {
+              "label": "矩收敛蕴含概率收敛及反例",
+              "tex": "\\Pr(|X_n-X|>\\varepsilon)\\le\\frac{\\mathbb E|X_n-X|^p}{\\varepsilon^p},\\qquad p>0"
+            }
+          ],
+          "proof": "把非负变量Y=|X_n−X|^p代入Markov不等式即得。若期望收敛至零，右侧对固定ε也趋于0。反例取X_n=n²×1_{A_n}且P(A_n)=1/n，则X_n→0依概率，但E|X_n|=n、E[X_n²]=n³，二者均不趋于零。",
+          "worked": "上述反例中n=100时偏差事件概率为1/100=0.01，事件一旦发生便取10000，E|X_n|=100，均方误差E[X_n²]=1000000。",
+          "limitation": "大样本下偏差概率较小并不保证平均损失、最大损失、Expected Shortfall或资金需求下降，尤其应谨慎面对金融厚尾样本。"
+        },
+        {
+          "title": "连续映射、加减法与渐近代数",
+          "question": "概率收敛能否从参数传到风险模型的非线性函数？",
+          "paragraphs": [
+            "若X_n→X依概率，且g为连续函数，则g(X_n)→g(X)依概率。更一般地，若(X_n,Y_n)的各分量分别依概率收敛于(X,Y)，它们的联合向量也依概率收敛，从而连续函数如和、乘积都可得到一致性。",
+            "涉及除法时需要目标分母不为零（几乎处处）；涉及矩阵求逆时需极限矩阵可逆。对临界区域的非连续变换，例如硬阈值交易信号，必须单独控制阈值上的概率质量。"
+          ],
+          "formulas": [
+            {
+              "label": "连续映射、加减法与渐近代数",
+              "tex": "X_n\\xrightarrow{\\mathbb P}X,\\ g\\ \\text{连续}\\quad\\Longrightarrow\\quad g(X_n)\\xrightarrow{\\mathbb P}g(X)"
+            }
+          ],
+          "proof": "对确定极限X=x，先由g在x处连续取得给定输出误差对应的输入误差，再利用尾概率收敛。对一般随机极限X，可用紧集或局部连续性控制，联合向量概率收敛则由并事件上界推出，再应用连续映射定理。",
+          "worked": "如果估计方差V_n趋于0.04依概率，则标准差sqrt(V_n)趋于0.2依概率（在V_n非负时）；但若直接计算1/V_n，必须证明极限分母不为0。",
+          "limitation": "参数估计一致不代表由不连续仓位规则得到的实际交易次数或换手率一致；阈值附近的原子概率会使连续映射条件失效。"
+        },
+        {
+          "title": "几乎处处收敛子列与路径极限",
+          "question": "为什么概率收敛可以保证某个子序列逐路径收敛，却不能保证整个序列？",
+          "paragraphs": [
+            "若X_n→X依概率，可以递归挑选增长的n_k，使P(|X_{n_k}−X|>2^{−k})<2^{−k}。这些尾概率可求和，由Borel–Cantelli第一引理，可证明超出对应误差阈值的事件仅有限次发生，从而子列几乎处处收敛。",
+            "这个论证只控制精心选择的索引n_k；它没有控制被跳过的观察时点。反例可使整列的偏差概率逐渐变小，却在几乎每条路径上无限次达到固定误差幅度。"
+          ],
+          "formulas": [
+            {
+              "label": "几乎处处收敛子列与路径极限",
+              "tex": "\\exists\\,n_k\\uparrow\\infty:\\quad X_{n_k}\\xrightarrow{\\mathrm{a.s.}}X\\qquad\\text{当 }X_n\\xrightarrow{\\mathbb P}X"
+            }
+          ],
+          "proof": "对k≥1使用依概率收敛定义选择n_k>n_(k−1)并使P(|X_(n_k)−X|>2^{−k})≤2^{−k}，再求和得到有限总概率。Borel–Cantelli说明几乎每条路径仅有限次违反精度2^{−k}，剩余误差随k趋零。",
+          "worked": "若A_n相互独立且P(A_n)=1/n，X_n=1_{A_n}依概率趋于0；但ΣP(A_n)=∞，Borel–Cantelli第二引理保证X_n=1无限次出现，故整个序列不几乎处处趋于0。",
+          "limitation": "选择子列需要理论上允许跳过观察；实盘逐日风险敞口不能把不利时点删去以后仍声称整条资金路径收敛。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "probability-n0116",
+          "label": "probability-n0116"
+        },
+        {
+          "kind": "math",
+          "id": "probability-n0117",
+          "label": "probability-n0117"
+        },
+        {
+          "kind": "math",
+          "id": "probability-n0118",
+          "label": "probability-n0118"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0140",
+          "label": "measure-n0140"
+        },
+        {
+          "kind": "ml",
+          "id": "m12-c07-p01",
+          "label": "m12-c07-p01"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 18.175 Theory of Probability：渐近理论、特征函数与随机过程",
+          "url": "https://www.ocw.mit.edu/courses/18-175-theory-of-probability-spring-2014/pages/lecture-slides/"
+        },
+        {
+          "title": "MIT 18.175 Theory of Probability：授课安排与定理先修",
+          "url": "https://ocw.mit.edu/courses/18-175-theory-of-probability-spring-2014/pages/calendar/"
+        }
+      ],
+      "checked_status": "V10完整讲义：四节证明、独立示例、假设与风险边界"
+    },
+    {
+      "id": "probability-n0116",
+      "node_id": "probability-n0116",
+      "title": "几乎处处收敛",
+      "definition": "几乎处处收敛（几乎必然收敛）要求存在一个概率为1的样本路径集合，在这个集合中X_n(ω)按普通实数序列意义趋于X(ω)。它比依概率收敛强，但不会自然给出收敛速率、可积界或者期望的交换极限，理解Borel–Cantelli与路径反例是辨别两者的重要步骤。",
+      "assumptions": "同一概率空间的实随机变量序列X_n与X。若对每个固定ε>0，超出ε的偏差事件发生无穷多次的概率为0，则几乎处处收敛。使用Borel–Cantelli第一引理只需事件概率总和有限，不需要独立；用第二引理推导无穷多次发生则需独立或其他额外条件。",
+      "properties": [
+        "几乎处处收敛要求除一个零概率集合之外所有路径都收敛，比仅在概率上越来越可能接近更强。",
+        "几乎处处收敛必然蕴含依概率收敛，但无需事件之间独立。",
+        "若每个固定ε>0的偏差事件概率之和有限，则可用Borel–Cantelli第一引理得到几乎处处收敛。",
+        "依概率收敛可能不存在整列的几乎处处极限，极小概率事件可以在无限路径上无穷次出现。"
+      ],
+      "formulas": [
+        {
+          "label": "逐路径极限与零测集",
+          "tex": "\\Pr\\!\\left(\\left\\{\\omega:\\lim_{n\\to\\infty}X_n(\\omega)=X(\\omega)\\right\\}\\right)=1"
+        },
+        {
+          "label": "几乎处处收敛蕴含依概率收敛",
+          "tex": "X_n\\xrightarrow{\\rm a.s.}X\\quad\\Longrightarrow\\quad X_n\\xrightarrow{\\mathbb P}X"
+        },
+        {
+          "label": "Borel–Cantelli控制无穷多次偏离",
+          "tex": "\\sum_{n=1}^{\\infty}\\Pr(|X_n-X|>\\varepsilon)<\\infty\\quad(\\forall\\varepsilon>0)\\ \\Longrightarrow\\ X_n\\xrightarrow{\\rm a.s.}X"
+        },
+        {
+          "label": "强律、路径风险与非独立反例",
+          "tex": "\\sum_n\\Pr(A_n)=\\infty,\\quad(A_n)\\ \\text{相互独立}\\quad\\Longrightarrow\\quad\\Pr(A_n\\ \\mathrm{i.o.})=1"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对每个m∈N，事件“存在N使所有n≥N都满足|X_n−X|≤1/m”是并交可测事件。对m再取可数交得到几乎处处收敛的事件。反向同样依靠任意正误差可由1/m向下逼近。",
+          "tex": "\\Pr\\!\\left(\\left\\{\\omega:\\lim_{n\\to\\infty}X_n(\\omega)=X(\\omega)\\right\\}\\right)=1"
+        },
+        {
+          "explanation": "由于A_n在几乎处处收敛的路径上最终不发生，1_{A_n}→0几乎处处；又0≤1_{A_n}≤1，常数1可积。将支配收敛定理作用于事件指标，得到E[1_{A_n}]=P(A_n)→0。",
+          "tex": "X_n\\xrightarrow{\\rm a.s.}X\\quad\\Longrightarrow\\quad X_n\\xrightarrow{\\mathbb P}X"
+        },
+        {
+          "explanation": "对每个m∈N，第一引理消除A_n(1/m)无限次发生的概率；这些结论只涉及可数多个m，因此其概率为1的集合交仍有概率1。任意ε>0可选1/m<ε，从而证明最终误差小于ε。",
+          "tex": "\\sum_{n=1}^{\\infty}\\Pr(|X_n-X|>\\varepsilon)<\\infty\\quad(\\forall\\varepsilon>0)\\ \\Longrightarrow\\ X_n\\xrightarrow{\\rm a.s.}X"
+        },
+        {
+          "explanation": "由相互独立得P(从N以后再无A_n)=lim_{m→∞}∏_{n=N}^m(1−P(A_n))≤lim exp(−Σ_{n=N}^mP(A_n))=0。对所有N取可数并，即无穷次发生概率1，从而X_n整列没有几乎处处零极限。",
+          "tex": "\\sum_n\\Pr(A_n)=\\infty,\\quad(A_n)\\ \\text{相互独立}\\quad\\Longrightarrow\\quad\\Pr(A_n\\ \\mathrm{i.o.})=1"
+        }
+      ],
+      "example": "取U~Uniform(0,1)，X_n=1_{U≤1/n}几乎处处趋于0；另取独立事件A_n且P(A_n)=1/n，Y_n=1_{A_n}依概率趋于0，但因Σ1/n发散而几乎处处无限次取1。两序列在固定阈值下尾概率均趋零，路径结论完全不同。",
+      "application": "在长期风险估计、回测路径稳定性和强大数定律论证中区分样本均值收敛与逐时点损失事件；用收敛模式明确是否可以讨论几乎所有路径的最终行为。",
+      "caveat": "几乎处处收敛并不蕴含均值收敛或标准误消失；用Borel–Cantelli第二引理时必须核验独立性等条件，不能由尾概率不可求和直接推出例外无穷多次发生。",
+      "deep_sections": [
+        {
+          "title": "逐路径极限与零测集",
+          "question": "“几乎每条路径”究竟要求怎样的量词次序？",
+          "paragraphs": [
+            "几乎处处收敛首先存在同一个概率为1的集合Ω₀，使对其中每个ω，实数序列X_n(ω)趋于X(ω)。这里允许对不同路径选择不同的误差起始样本量N(ω,ε)，但例外集合不能随着n任意扩大。",
+            "为了严谨使用随机变量的收敛，可以把事件“最终一直不再超过ε”表达为可数次并交，确保其可测。若把依概率收敛的尾概率趋零误读为逐路径最终收敛，就错过了事件发生频次这个关键差异。"
+          ],
+          "formulas": [
+            {
+              "label": "逐路径极限与零测集",
+              "tex": "\\Pr\\!\\left(\\left\\{\\omega:\\lim_{n\\to\\infty}X_n(\\omega)=X(\\omega)\\right\\}\\right)=1"
+            }
+          ],
+          "proof": "对每个m∈N，事件“存在N使所有n≥N都满足|X_n−X|≤1/m”是并交可测事件。对m再取可数交得到几乎处处收敛的事件。反向同样依靠任意正误差可由1/m向下逼近。",
+          "worked": "取U~Uniform(0,1)，定义X_n=1_{U≤1/n}。对任意U>0，存在N>1/U使n≥N时X_n=0；只有U=0这一零概率点可能例外，故X_n→0几乎处处。",
+          "limitation": "路径例外是概率测度下的零集合，并不必然为空集；在统计报告中不应把“概率1”误写为“绝对不可能出现例外”。"
+        },
+        {
+          "title": "几乎处处收敛蕴含依概率收敛",
+          "question": "为何逐路径收敛自动保证固定精度的坏事件概率趋零？",
+          "paragraphs": [
+            "对固定ε>0，定义A_n={|X_n−X|>ε}。若X_n几乎处处收敛，则指标1_{A_n}逐路径趋于0，且在0与1之间有统一可积上界。由支配收敛定理，P(A_n)=E[1_{A_n}]→0。",
+            "这个证明不需要随机变量X_n本身具有有限均值，只需要偏差事件指标有界。强制要求L¹收敛则是另一回事，不能把对事件指标的支配收敛套到收益数值上。"
+          ],
+          "formulas": [
+            {
+              "label": "几乎处处收敛蕴含依概率收敛",
+              "tex": "X_n\\xrightarrow{\\rm a.s.}X\\quad\\Longrightarrow\\quad X_n\\xrightarrow{\\mathbb P}X"
+            }
+          ],
+          "proof": "由于A_n在几乎处处收敛的路径上最终不发生，1_{A_n}→0几乎处处；又0≤1_{A_n}≤1，常数1可积。将支配收敛定理作用于事件指标，得到E[1_{A_n}]=P(A_n)→0。",
+          "worked": "若X_n=1_{U≤1/n}，对0<ε<1有P(|X_n|>ε)=1/n，n=100时为0.01，n=1000时为0.001；它既逐路径收敛又依概率收敛。",
+          "limitation": "支配收敛对1_{A_n}成立不说明E|X_n−X|→0，随机变量可以在越来越少的事件上取越来越大的值。"
+        },
+        {
+          "title": "Borel–Cantelli控制无穷多次偏离",
+          "question": "总尾概率可求和为何是建立强收敛的有效充分条件？",
+          "paragraphs": [
+            "设A_n(ε)={|X_n−X|>ε}。若对每个ε>0均有Σ_n P(A_n(ε))<∞，则Borel–Cantelli第一引理给出P(A_n(ε)无限次发生)=0。再只需检查ε=1/m的可数序列，就能得到一个共同的概率1集合，使任意正精度最终均成立。",
+            "这一条件是充分而非必要条件。比如随同一个U缓慢缩小的嵌套事件，即使概率总和发散，也可能只在有限多个样本量上发生；不能把第一引理的逆命题当成普遍定理。"
+          ],
+          "formulas": [
+            {
+              "label": "Borel–Cantelli控制无穷多次偏离",
+              "tex": "\\sum_{n=1}^{\\infty}\\Pr(|X_n-X|>\\varepsilon)<\\infty\\quad(\\forall\\varepsilon>0)\\ \\Longrightarrow\\ X_n\\xrightarrow{\\rm a.s.}X"
+            }
+          ],
+          "proof": "对每个m∈N，第一引理消除A_n(1/m)无限次发生的概率；这些结论只涉及可数多个m，因此其概率为1的集合交仍有概率1。任意ε>0可选1/m<ε，从而证明最终误差小于ε。",
+          "worked": "令X_n=1_{A_n}且P(A_n)=1/n²，则Σ_n P(A_n)=π²/6<∞，不论这些事件是否独立，都有X_n→0几乎处处；n=10时发生概率为0.01。",
+          "limitation": "如果事件不独立且总概率发散，不能依第二引理直接断言无穷多次发生；第一引理的充分条件也不应被错误地表述为强大数定律的必要条件。"
+        },
+        {
+          "title": "强律、路径风险与非独立反例",
+          "question": "依概率趋零而不逐路径趋零的例子怎样构造？",
+          "paragraphs": [
+            "取相互独立的事件A_n且P(A_n)=1/n，令X_n=1_{A_n}。固定ε∈(0,1)时，偏差概率为1/n→0，所以依概率趋零；但事件概率总和为调和级数，第二Borel–Cantelli引理保证几乎处处无限次出现值1。",
+            "对时间序列，严格平稳和遍历性可使样本均值有几乎处处极限；但单个观测序列或风险阈值超限事件不必最终消失。强律关于均值收敛，不等于资产每日收益最终无风险。"
+          ],
+          "formulas": [
+            {
+              "label": "强律、路径风险与非独立反例",
+              "tex": "\\sum_n\\Pr(A_n)=\\infty,\\quad(A_n)\\ \\text{相互独立}\\quad\\Longrightarrow\\quad\\Pr(A_n\\ \\mathrm{i.o.})=1"
+            }
+          ],
+          "proof": "由相互独立得P(从N以后再无A_n)=lim_{m→∞}∏_{n=N}^m(1−P(A_n))≤lim exp(−Σ_{n=N}^mP(A_n))=0。对所有N取可数并，即无穷次发生概率1，从而X_n整列没有几乎处处零极限。",
+          "worked": "令P(A_n)=1/n（从n=2开始构造）。n=100时发生概率仅1%，但几乎每条无限路径仍会出现无穷多次值1，这精确体现“单期概率小”不代表“长期再也不发生”。",
+          "limitation": "在金融极端风险场景，路径最大损失与回撤需要另外的停时、极值或鞅不等式；不能直接用样本均值强律推断资本不会穿仓。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "probability-n0115",
+          "label": "probability-n0115"
+        },
+        {
+          "kind": "math",
+          "id": "probability-n0118",
+          "label": "probability-n0118"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0141",
+          "label": "measure-n0141"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0294",
+          "label": "stochastic-n0294"
+        },
+        {
+          "kind": "ml",
+          "id": "m12-c07-p01",
+          "label": "m12-c07-p01"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 18.175 Theory of Probability：渐近理论、特征函数与随机过程",
+          "url": "https://www.ocw.mit.edu/courses/18-175-theory-of-probability-spring-2014/pages/lecture-slides/"
+        },
+        {
+          "title": "MIT 18.175 Theory of Probability：授课安排与定理先修",
+          "url": "https://ocw.mit.edu/courses/18-175-theory-of-probability-spring-2014/pages/calendar/"
+        }
+      ],
+      "checked_status": "V10完整讲义：四节证明、独立示例、假设与风险边界"
+    },
+    {
+      "id": "probability-n0117",
+      "node_id": "probability-n0117",
+      "title": "依分布收敛",
+      "definition": "依分布收敛（弱收敛）指随机变量的分布函数在极限分布函数的全部连续点上收敛。它只比较分布，可以在不同概率空间中讨论，不要求随机变量逐项接近同一个样本结果。它是中心极限定理、渐近置信区间、统计量极限理论及特征函数方法的基本语言。",
+      "assumptions": "实随机变量X_n与目标分布X，F_n(x)=P(X_n≤x)，仅要求在F_X的连续点x有F_n(x)→F_X(x)；Portmanteau定理使用有界连续试验函数。持续映射定理要求映射在极限变量几乎处处落入的点连续；Slutsky对依概率趋于常数的附加项成立。",
+      "properties": [
+        "依分布收敛只限制概率分布，X_n和X不必构造在同一概率空间。",
+        "依概率收敛蕴含依分布收敛，反向一般不成立；若极限是常数，则二者等价。",
+        "Portmanteau定理可用有界连续函数的期望收敛表征弱收敛，不能直接取未控制的损失函数。",
+        "连续映射定理和Slutsky定理是将极限分布传到风险比率、归一化参数和检验统计量的基础。"
+      ],
+      "formulas": [
+        {
+          "label": "分布函数连续点与弱收敛定义",
+          "tex": "X_n\\xRightarrow[]{d}X\\quad\\Longleftrightarrow\\quad F_{X_n}(x)\\to F_X(x)\\ \\text{在 }F_X\\text{ 的连续点}"
+        },
+        {
+          "label": "Portmanteau与有界连续测试函数",
+          "tex": "X_n\\Rightarrow X\\quad\\Longleftrightarrow\\quad\\mathbb E[g(X_n)]\\to\\mathbb E[g(X)]\\quad\\forall g\\in C_b(\\mathbb R)"
+        },
+        {
+          "label": "收敛关系、常数极限与随机极限反例",
+          "tex": "X_n\\xrightarrow{\\mathbb P}X\\Longrightarrow X_n\\Rightarrow X,\\qquad X_n\\Rightarrow c\\Longrightarrow X_n\\xrightarrow{\\mathbb P}c"
+        },
+        {
+          "label": "连续映射与Slutsky在统计量中的作用",
+          "tex": "X_n\\Rightarrow X,\\quad Y_n\\xrightarrow{\\mathbb P}c\\ne0\\quad\\Longrightarrow\\quad\\frac{X_n}{Y_n}\\Rightarrow\\frac Xc"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "若X_n≡1/n为退化随机变量，X≡0，则对x<0最终F_n(x)=0，对x>0最终F_n(x)=1；这些点上恰好收敛。但在跳跃点x=0，F_n(0)=0而F_X(0)=1，说明不能要求所有实数点收敛。",
+          "tex": "X_n\\xRightarrow[]{d}X\\quad\\Longleftrightarrow\\quad F_{X_n}(x)\\to F_X(x)\\ \\text{在 }F_X\\text{ 的连续点}"
+        },
+        {
+          "explanation": "采用Portmanteau定理的有界连续函数表述，将概率分布弱收敛转化为对所有测试函数的积分收敛。若想从该等价条件扩展到无界g，需要单独证明相关变量族的尾部积分消失，不能省略。",
+          "tex": "X_n\\Rightarrow X\\quad\\Longleftrightarrow\\quad\\mathbb E[g(X_n)]\\to\\mathbb E[g(X)]\\quad\\forall g\\in C_b(\\mathbb R)"
+        },
+        {
+          "explanation": "第一结论是连续映射与Portmanteau框架的直接结果。对退化极限c，固定ε>0，P(|X_n−c|>ε)≤F_n(c−ε)+1−F_n(c+ε/2)，极限分布在两侧点连续，故右侧趋零。",
+          "tex": "X_n\\xrightarrow{\\mathbb P}X\\Longrightarrow X_n\\Rightarrow X,\\qquad X_n\\Rightarrow c\\Longrightarrow X_n\\xrightarrow{\\mathbb P}c"
+        },
+        {
+          "explanation": "联合收敛来自Slutsky定理，变换h(x,y)=x/y在y=c≠0处连续；应用连续映射定理即可得到比率的极限分布。若分母c=0，此函数不连续，推导便不成立。",
+          "tex": "X_n\\Rightarrow X,\\quad Y_n\\xrightarrow{\\mathbb P}c\\ne0\\quad\\Longrightarrow\\quad\\frac{X_n}{Y_n}\\Rightarrow\\frac Xc"
+        }
+      ],
+      "example": "退化变量X_n=1/n依分布趋于0，但F_{X_n}(0)=0且F_0(0)=1，说明定义为什么只要求连续点。另取独立公平Bernoulli变量X_n和X，二者每期同分布却有P(|X_n−X|>0.5)=0.5，证明弱收敛不蕴含依概率收敛。",
+      "application": "服务于中心极限定理、学生化检验、Bootstrap分布近似与风险因子推断，尤其强调渐近分布的统计对象、有效样本数与金融收益依赖性。",
+      "caveat": "弱收敛不蕴含一般均值、方差或ES收敛；极限分布的不连续点不受定义约束。使用Slutsky比率形式前必须检验极限分母非零且估计一致。",
+      "deep_sections": [
+        {
+          "title": "分布函数连续点与弱收敛定义",
+          "question": "为什么定义中只要求极限分布的连续点，而非每一个x？",
+          "paragraphs": [
+            "分布函数在原子点有跳跃；即使样本分布完美地逼近一个离散变量，分布函数在该跳跃点的值也可能无法收敛。弱收敛因此仅要求在极限分布函数连续的每个实数x点逐点收敛。",
+            "依分布收敛所比较的是法律意义下的分布，而非随机变量在同一个结果ω上的差值。因此用于渐近正态或Bootstrap近似时，必须明确所比较的统计量、标准化方式和极限分布。"
+          ],
+          "formulas": [
+            {
+              "label": "分布函数连续点与弱收敛定义",
+              "tex": "X_n\\xRightarrow[]{d}X\\quad\\Longleftrightarrow\\quad F_{X_n}(x)\\to F_X(x)\\ \\text{在 }F_X\\text{ 的连续点}"
+            }
+          ],
+          "proof": "若X_n≡1/n为退化随机变量，X≡0，则对x<0最终F_n(x)=0，对x>0最终F_n(x)=1；这些点上恰好收敛。但在跳跃点x=0，F_n(0)=0而F_X(0)=1，说明不能要求所有实数点收敛。",
+          "worked": "n=100时X_n=0.01且X=0，取x=0则F_n(0)=0、F_X(0)=1；取x=0.1，两者分布函数均为1，这完全符合依分布收敛。",
+          "limitation": "不应把分布函数跳跃点处不收敛误判为反例；对具有原子的风险分布，还需要独立检查尾部阈值是否为连续点。"
+        },
+        {
+          "title": "Portmanteau与有界连续测试函数",
+          "question": "怎样不显式计算分布函数而检验一个弱收敛关系？",
+          "paragraphs": [
+            "Portmanteau定理表明，X_n依分布收敛于X，当且仅当对每个有界连续实函数g，E[g(X_n)]→E[g(X)]。另一种等价表述是对极限分布边界概率为零的集合，事件概率收敛。",
+            "这里必须强调“有界”：普通均值、平方损失和VaR/ES相关的无界尾部函数通常不能仅凭弱收敛交换期望。要分析均值或尾部风险，还需一致可积或其他尾部控制条件。"
+          ],
+          "formulas": [
+            {
+              "label": "Portmanteau与有界连续测试函数",
+              "tex": "X_n\\Rightarrow X\\quad\\Longleftrightarrow\\quad\\mathbb E[g(X_n)]\\to\\mathbb E[g(X)]\\quad\\forall g\\in C_b(\\mathbb R)"
+            }
+          ],
+          "proof": "采用Portmanteau定理的有界连续函数表述，将概率分布弱收敛转化为对所有测试函数的积分收敛。若想从该等价条件扩展到无界g，需要单独证明相关变量族的尾部积分消失，不能省略。",
+          "worked": "令X_n=n²的概率为1/n、否则取0，则X_n依概率（因此依分布）趋向0。对g(x)=x这种无界函数，E[g(X_n)]=n却发散；对有界连续g(x)=x²/(1+x²)，其期望至多1/n→0。",
+          "limitation": "弱收敛本身不提供无界损失的期望收敛，不能仅凭预测误差统计量渐近正态就宣称极端分布尾部已被准确预测。"
+        },
+        {
+          "title": "收敛关系、常数极限与随机极限反例",
+          "question": "随机变量有相同的边际分布，为什么不一定在路径上接近？",
+          "paragraphs": [
+            "若X_n→X依概率，则对所有有界连续g可证明E[g(X_n)]→E[g(X)]，所以依分布收敛。反过来，取X_n与X独立且各服从Bernoulli(0.5)，它们每期的分布完全相同，但两者有50%的概率不相等。",
+            "极限退化为常数c时是特殊情形：依分布收敛到常数等价于依概率收敛到c。证明可从c的两侧连续点c±ε控制超出ε的概率，无需将随机极限的普遍反例错误套到常数目标。"
+          ],
+          "formulas": [
+            {
+              "label": "收敛关系、常数极限与随机极限反例",
+              "tex": "X_n\\xrightarrow{\\mathbb P}X\\Longrightarrow X_n\\Rightarrow X,\\qquad X_n\\Rightarrow c\\Longrightarrow X_n\\xrightarrow{\\mathbb P}c"
+            }
+          ],
+          "proof": "第一结论是连续映射与Portmanteau框架的直接结果。对退化极限c，固定ε>0，P(|X_n−c|>ε)≤F_n(c−ε)+1−F_n(c+ε/2)，极限分布在两侧点连续，故右侧趋零。",
+          "worked": "取X_n、X独立且都为公平Bernoulli变量，各n下F_{X_n}=F_X，因而依分布收敛立即成立；但P(|X_n−X|>0.5)=P(X_n≠X)=0.5，故不依概率收敛。",
+          "limitation": "相同收益直方图、相同预测边际分布并不证明逐期预测值一致或交易决策一致；需要联合分布和耦合信息。"
+        },
+        {
+          "title": "连续映射与Slutsky在统计量中的作用",
+          "question": "对样本均值做标准化或比率变换时需要哪些额外条件？",
+          "paragraphs": [
+            "若X_n⇒X，且函数g在X几乎处处取值处连续，则g(X_n)⇒g(X)。若Y_n依概率趋于确定常数c，则(X_n,Y_n)联合依分布趋于(X,c)；因此可得到和、乘积以及c非零时的比率的极限分布。",
+            "在资产定价实证中，标准误来自估计的长期方差，通常需要证明该估计量本身的一致性以及真实极限方差严格大于0。一个随机的、可能为0的分母不能直接采用最简单的Slutsky版本。"
+          ],
+          "formulas": [
+            {
+              "label": "连续映射与Slutsky在统计量中的作用",
+              "tex": "X_n\\Rightarrow X,\\quad Y_n\\xrightarrow{\\mathbb P}c\\ne0\\quad\\Longrightarrow\\quad\\frac{X_n}{Y_n}\\Rightarrow\\frac Xc"
+            }
+          ],
+          "proof": "联合收敛来自Slutsky定理，变换h(x,y)=x/y在y=c≠0处连续；应用连续映射定理即可得到比率的极限分布。若分母c=0，此函数不连续，推导便不成立。",
+          "worked": "设Z_n渐近服从N(0,1)，标准差估计s_n依概率趋于2，则Z_n/s_n⇒N(0,1/4)；对应方差是1/4、标准差是1/2，而不是用原样本量直接推算的新分布。",
+          "limitation": "极限定理结论是渐近分布而非固定样本精确分布；厚尾、结构突变、重叠标签及选择后推断会要求专门的方差估计或重新设计检验。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "probability-n0115",
+          "label": "probability-n0115"
+        },
+        {
+          "kind": "math",
+          "id": "probability-n0106",
+          "label": "probability-n0106"
+        },
+        {
+          "kind": "math",
+          "id": "probability-n0119",
+          "label": "probability-n0119"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0142",
+          "label": "measure-n0142"
+        },
+        {
+          "kind": "ml",
+          "id": "m12-c08-p01",
+          "label": "m12-c08-p01"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 18.175 Theory of Probability：渐近理论、特征函数与随机过程",
+          "url": "https://www.ocw.mit.edu/courses/18-175-theory-of-probability-spring-2014/pages/lecture-slides/"
+        },
+        {
+          "title": "MIT 18.175 Theory of Probability：授课安排与定理先修",
+          "url": "https://ocw.mit.edu/courses/18-175-theory-of-probability-spring-2014/pages/calendar/"
+        }
+      ],
+      "checked_status": "V10完整讲义：四节证明、独立示例、假设与风险边界"
     }
   ]
 }
