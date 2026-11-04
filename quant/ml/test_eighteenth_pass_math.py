@@ -19,7 +19,9 @@ class EighteenthPassMath(unittest.TestCase):
         for lid,chapter in CHAPTERS.items():
             with self.subTest(lid=lid):
                 self.assertEqual(chapter["source_title"],EXPECTED[lid])
-                self.assertEqual(len(chapter["equations"]),3)
+                self.assertGreaterEqual(len(chapter["equations"]),3)
+                self.assertEqual(len({e["label"] for e in chapter["equations"]}),len(chapter["equations"]))
+                self.assertTrue(all(e.get("tex", "").strip() for e in chapter["equations"]))
                 self.assertGreaterEqual(len(chapter["derivation"]),3)
                 self.assertGreaterEqual(len(chapter["protocol"]),3)
                 self.assertGreaterEqual(len(chapter["pitfalls"]),2)
