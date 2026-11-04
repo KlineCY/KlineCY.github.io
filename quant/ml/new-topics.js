@@ -23,7 +23,7 @@ function install(data,bundle){
      throw Error("新增课程内部小节不完整："+id+" "+i);
     const math=section.equations.map(f=>{
      if(!f.tex||!f.label)throw Error("新增课程数学关系不完整："+id);
-     return '<div class="atlas-depth-equation"><h4>'+esc(f.label)+'</h4><div class="ml-math-block"><span class="atlas-tex" data-tex="'+esc(f.tex)+'"></span></div></div>';
+     return '<div class="atlas-depth-equation"><h4>'+esc(f.label)+'</h4><div class="ml-math-block" tabindex="0" role="region" aria-label="可横向滚动的数学公式：'+esc(f.label)+'"><span class="atlas-tex" data-tex="'+esc(f.tex)+'"></span></div></div>';
     }).join("");
     return '<section class="atlas-concept-unit" id="atlas-new-'+id+'-'+i+'"><h3>'+(i+1)+'. '+esc(section.title)+'</h3>'+
      '<p class="atlas-concept-question">'+esc(section.question)+'</p>'+
