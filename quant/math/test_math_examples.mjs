@@ -92,14 +92,21 @@ const cases=[
 ["optimization-n0358",.95+.05,1,"(0.95,0.05)"],
 ["riskmath-n0585",((0-1)**2+(1-1)**2+(2-1)**2)/2,1,"=1"],
 ["riskmath-n0586",5-.5,4.5,"4.5"],
-["riskmath-n0587",(1+2+1+2)/4,1.5,"1.5"]
+["riskmath-n0587",(1+2+1+2)/4,1.5,"1.5"],
+["statistics-n0151",Math.sqrt(Math.log(40)/400),0.09603227913199208,"0.09603"],
+["riskmath-n0588",6.8/5,1.36,"1.36"],
+["riskmath-n0590",1.96*.02,.0392,"0.0392"],
+["riskmath-n0591",Math.ceil(5*.8),4,"第4个"],
+["riskmath-n0592",Math.sqrt(1000*.05*.95),6.892024376045111,"6.892"],
+["riskmath-n0593",(1+1+1+1-4)/5,0,"平均为"],
+["riskmath-n0599",1-.95**20,.6415140775914581,"0.641514"]
 ];
-assert.equal(chapters.size,89,"89 unique mathematics extension lesson IDs");
-assert.equal(cases.length,89);
+assert.equal(chapters.size,96,"96 unique mathematics extension lesson IDs");
+assert.equal(cases.length,96);
 for(const [id,actual,expect,token] of cases){
  const lesson=chapters.get(id);
  assert(lesson,"missing numerical lesson "+id);
  assert(Math.abs(actual-expect)<1e-9,"wrong independent computation "+id);
  assert(lesson.example.includes(token),"worked example must contain checked arithmetic "+id+": "+token);
 }
-console.log("PASS: 20 mathematical disciplines, 89 independent numeric/research example invariants.");
+console.log("PASS: 20 mathematical disciplines, 96 independent numeric/research example invariants.");
