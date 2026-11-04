@@ -1,0 +1,161 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "information-n0485",
+      "node_id": "information-n0485",
+      "title": "JS散度",
+      "definition": "Jensen–Shannon散度（JSD）把两个概率分布P和Q分别与它们的等权混合M=(P+Q)/2比较，再取两个KL散度的平均。它非负、对称、有限，采用自然对数时上界是ln2，且P与Q可以拥有互不重叠的支持。JSD本身不是一般意义下的度量距离，但平方根JSD满足距离公理；对金融分布迁移进行诊断时，需要区分数值漂移、统计不确定性、条件收益机制改变与真实交易风险。",
+      "assumptions": "P、Q是同一可测空间上的概率分布，M=(P+Q)/2，采用自然对数，约定0log0=0。P和Q都对M绝对连续，因为M给任何P或Q具有正质量的区域都分配至少其一半质量。因此KL(P||M)、KL(Q||M)不超过ln2。估计连续金融收益分布时仍需规定共同收益单位、密度近似、时间窗口与资产池。",
+      "properties": [
+        "JSD(P,Q)=0.5KL(P||M)+0.5KL(Q||M)，对P与Q完全对称。",
+        "JSD=H(M)−[H(P)+H(Q)]/2≥0，由Shannon熵的凹性给出非负性。",
+        "自然对数下0≤JSD≤ln2，P、Q支持相互不重叠时上界可取到。",
+        "平方根d_JS(P,Q)=sqrt[JSD(P,Q)]是度量；JSD自身应称为散度而非一般距离。",
+        "JSD可标示训练与目标市场分布变化，但不区分协变量迁移与条件标签机制迁移。"
+      ],
+      "formulas": [
+        {
+          "label": "等权混合与JS定义",
+          "tex": "M=\\tfrac12(P+Q),\\quad \\operatorname{JSD}(P,Q)=\\tfrac12D_{\\rm KL}(P\\Vert M)+\\tfrac12D_{\\rm KL}(Q\\Vert M)"
+        },
+        {
+          "label": "熵差恒等式",
+          "tex": "\\operatorname{JSD}(P,Q)=H(M)-\\tfrac12H(P)-\\tfrac12H(Q)"
+        },
+        {
+          "label": "有界性",
+          "tex": "0\\le\\operatorname{JSD}(P,Q)\\le\\log2"
+        },
+        {
+          "label": "平方根JS距离",
+          "tex": "d_{\\rm JS}(P,Q)=\\sqrt{\\operatorname{JSD}(P,Q)}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "分别展开两个KL项，P和Q各自贡献负熵；两个包含logM的交叉项按等权混合合并为H(M)，得到熵差恒等式。",
+          "tex": "\\frac12D(P\\Vert M)+\\frac12D(Q\\Vert M)=H(M)-\\frac{H(P)+H(Q)}2"
+        },
+        {
+          "explanation": "Shannon熵对概率分布是凹函数，故混合分布M的熵不小于P和Q熵的平均，直接推出JSD非负。",
+          "tex": "H\\!\\left(\\frac{P+Q}2\\right)\\ge\\frac{H(P)+H(Q)}2"
+        },
+        {
+          "explanation": "令来源Z以相同概率从P或Q采样，再观察生成值X，X的边际分布是M。由互信息的熵差定义，JSD恰是I(Z;X)。",
+          "tex": "\\operatorname{JSD}(P,Q)=I(Z;X)\\le H(Z)=\\log2"
+        },
+        {
+          "explanation": "当P=Q时观察X不能识别来源Z，互信息为0；若P与Q支持互不相交，观察X后来源完全可辨，得到JSD=ln2。",
+          "tex": "P\\perp_{\\rm supp}Q\\Longrightarrow\\operatorname{JSD}(P,Q)=\\log2"
+        }
+      ],
+      "example": "设P=(0.75,0.25)、Q=(0.25,0.75)，则M=(0.5,0.5)。两个KL(P||M)与KL(Q||M)都等于0.75ln1.5+0.25ln0.5≈0.130812，所以JSD≈0.130812 nat。若P=(1,0)、Q=(0,1)，M仍为(0.5,0.5)，JSD=ln2≈0.693147；与直接KL(P||Q)无穷大形成对照。",
+      "application": "可对ETF市场状态类别比例、收益分箱或经过规范化的预测密度比较训练窗口与目标窗口分布，作为数据漂移的统计线索。实际工作中应与时间外CRPS、PIT、条件VaR–ES及成本后策略账本联合判断，不能仅凭JSD升高自动判定必须清仓或重新训练。",
+      "caveat": "JSD不提供因果说明，也不能仅凭X边际变化证明P_T(Y|X)=P_S(Y|X)。稀疏尾部状态、动态ETF资产池、时间序列相关和高维密度估计会影响样本JSD的可靠性。任何漂移阈值、状态分箱和再训练触发规则都必须在合法训练或内层验证期事先确定。",
+      "deep_sections": [
+        {
+          "title": "混合分布为何解决KL的不对称和无穷问题",
+          "question": "为什么不是直接对P、Q互相计算KL？",
+          "paragraphs": [
+            "KL(P||Q)一般不对称，且Q在P可能事件上给零概率会导致发散。JSD使用共同混合分布M分别与P、Q比较，M在每个正概率位置都至少拥有P或Q的一半质量，因此两项KL均有定义且有限。",
+            "交换P和Q只会交换两个平均项而不会改变M，故JSD天然对称。它并不因此自动具有三角不等式，所以需要区分散度与其平方根所形成的度量距离。"
+          ],
+          "formulas": [
+            {
+              "label": "混合分布为何解决KL的不对称和无穷问题",
+              "tex": "\\operatorname{JSD}(P,Q)=\\tfrac12D_{\\rm KL}(P\\Vert M)+\\tfrac12D_{\\rm KL}(Q\\Vert M)"
+            }
+          ],
+          "proof": "对任意P正质量点，有M≥P/2，所以log(P/M)≤ln2；对P积分便知KL(P||M)≤ln2。Q同理，两个项的平均也至多ln2。",
+          "worked": "当P=(1,0)、Q=(0,1)，M=(.5,.5)，两个KL均为ln2、JSD=ln2；直接KL(P||Q)则无穷。",
+          "limitation": "真实收益为连续变量时必须统一两个日期区间的密度测度和数据单位；有限分箱会改变被评价的分布对象。"
+        },
+        {
+          "title": "熵差恒等式与非负性证明",
+          "question": "熵的凹性如何转成分布差异？",
+          "paragraphs": [
+            "JSD可以理解为不知道某条数据来自P还是Q时，混合后的不确定性相对已知来源时内部不确定性的增加。这个平均额外不确定性由H(M)减去两个原分布熵的平均给出。",
+            "依次展开两个KL里的log分子与log分母项，可得到熵差恒等式；Shannon熵的凹性保证等权混合不会减小平均熵，所以JSD一定非负。"
+          ],
+          "formulas": [
+            {
+              "label": "熵差恒等式与非负性证明",
+              "tex": "\\operatorname{JSD}(P,Q)=H(M)-\\tfrac12[H(P)+H(Q)]"
+            }
+          ],
+          "proof": "KL(P||M)=Σp logp−Σp logm，KL(Q||M)=Σq logq−Σq logm。取平均后第二部分为−Σm logm=H(M)，前两部分是负的各自熵平均。",
+          "worked": "对P=(.75,.25)、Q=(.25,.75)，混合熵ln2≈.693147，两个原分布熵都≈.562335，所以差≈0.130812。",
+          "limitation": "有限样本中的经验熵可能有偏，尤其极端类别样本太少时，不能把正的经验JSD直接视为显著制度变化。"
+        },
+        {
+          "title": "互信息表示与上界ln2",
+          "question": "为什么只需要一个二元来源变量就能证明统一上界？",
+          "paragraphs": [
+            "设Z公平地选择两个数据生成机制，Z=0时X从P抽样，Z=1时X从Q抽样。仅观察X时其边际分布为M，而知道Z时的平均条件熵是两个机制熵的平均。",
+            "由互信息I(Z;X)=H(X)−H(X|Z)，恰好得到JSD。来源Z只有一个二元标签，所以它的总熵至多ln2，观察X不可能提供超过来源本身的信息。"
+          ],
+          "formulas": [
+            {
+              "label": "互信息表示与上界ln2",
+              "tex": "\\operatorname{JSD}(P,Q)=I(Z;X)\\le\\log2"
+            }
+          ],
+          "proof": "由于Z公平，H(Z)=ln2，且I(Z;X)=H(Z)−H(Z|X)≤H(Z)。若支持完全不重叠则H(Z|X)=0；若P=Q则X与Z独立。",
+          "worked": "P=(1,0)、Q=(0,1)时观察X便能100%判断来源，因此JSD=ln2；P=Q时来源不可辨，JSD=0。",
+          "limitation": "这里使用自然对数单位nat；若统一改用log₂，最大值为1 bit。两种单位不能混在同一个资产漂移阈值中。"
+        },
+        {
+          "title": "ETF制度迁移诊断与模型选择边界",
+          "question": "为什么大的JSD不是直接重新训练或风险减仓的证据？",
+          "paragraphs": [
+            "JSD比较的是研究者选定变量上的源域和目标域分布。即使观察到市场状态比例变化，也无法知道下一期收益条件关系是否稳定，因而不能仅凭X分布JSD推出重要性加权的有效性。",
+            "研究应冻结状态定义、训练/测试时期和漂移阈值，再检查同一目标期的CRPS、PIT、VaR–ES以及策略实际成交成本。对于37只ETF，资产上市退市、同日相关与共同尾部日期也会改变漂移诊断。"
+          ],
+          "formulas": [
+            {
+              "label": "ETF制度迁移诊断与模型选择边界",
+              "tex": "\\operatorname{JSD}(P_S^X,P_T^X)\\not\\Rightarrow P_S(Y\\mid X)=P_T(Y\\mid X)"
+            }
+          ],
+          "proof": "该非蕴含关系可用两个机制具有同样X边际却不同Y|X的例子验证：JSD(X)=0，但标签机制仍可完全改变；反之，X边际不同而Y|X相同时仍符合协变量迁移。",
+          "worked": "如果市场高波动状态从20%变成50%，JSD会提示状态比例改变；但是否调整组合应由未来风险校准及经济执行证据判断。",
+          "limitation": "对高维收益只进行二维分箱可能遗漏关键Copula尾依赖；多资产压力测试不能仅依赖单个散度指标。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "information-n0483",
+          "label": "先修：KL散度"
+        },
+        {
+          "kind": "math",
+          "id": "information-n0484",
+          "label": "先修：互信息"
+        },
+        {
+          "kind": "math",
+          "id": "mlmath-x005",
+          "label": "分布迁移：重要性加权"
+        },
+        {
+          "kind": "ml",
+          "id": "m23-c10-p02",
+          "label": "机器学习：ETF分布迁移审计"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Lin (1991), Divergence Measures Based on Shannon Entropy",
+          "url": "https://doi.org/10.1109/18.61115"
+        },
+        {
+          "title": "Endres and Schindelin (2003), A New Metric for Probability Distributions",
+          "url": "https://doi.org/10.1109/TIT.2003.813506"
+        }
+      ],
+      "checked_status": "数学完整精讲：JS对称性、熵差非负、互信息上界与ETF迁移风险"
+    }
+  ]
+}
