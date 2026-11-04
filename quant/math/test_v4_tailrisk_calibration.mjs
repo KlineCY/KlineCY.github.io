@@ -48,7 +48,7 @@ near(.05/20,.0025);
 const html=fs.readFileSync(new URL("index.html",here),"utf8");
 const css=fs.readFileSync(new URL("styles.css",here),"utf8");
 for(const id of ids)assert(html.includes("?topic="+id),"V4 route missing "+id);
-assert(html.includes("styles.css?v=20261104-tailrisk-v5"));
+assert(html.includes("styles.css?v=20261104-probscore-v6"));
 assert(html.includes("第四条高级知识链"));
 assert(css.includes("V4 tail-risk chapters")&&css.includes("overscroll-behavior-x:contain")&&css.includes("@media print"));
 console.log("PASS: V4 seven quantile/VaR/ES math courses, "+sections+" proof units, "+formulas+" KaTeX formulas, "+refs+" academic sources, numeric examples and Chinese/mobile/print rules.");
