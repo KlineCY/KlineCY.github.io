@@ -8095,6 +8095,471 @@
         }
       ],
       "checked_status": "V14定价链：完整边界、四节证明与数值再现"
+    },
+    {
+      "id": "ito-n0328",
+      "node_id": "ito-n0328",
+      "title": "局部鞅与严格局部鞅",
+      "definition": "局部鞅允许通过一列递增停时将随机过程截断为真鞅，但未要求原过程全时域可积或条件期望守恒。严格局部鞅是局部鞅但不是真鞅，经典例子为三维Bessel过程的倒数。它揭示金融数学中一个关键边界：即使贴现价格的Itô漂移为零、过程严格为正，也不能未经真鞅检验就宣称期望价格等于现价。",
+      "assumptions": "连续适应过程M在给定滤过下是局部鞅，如果存在τ_n↑∞几乎处处使M^{τ_n}为真鞅。正局部鞅在适当条件下是超鞅，但可能严格下降。三维Bessel倒数例子取R_0=x>0，R满足dR=dB+(1/R)dt，Z=x/R；精确期望公式要求从三维Brownian径向过程出发。",
+      "properties": [
+        "局部鞅是经停时截断后的真鞅，不可直接假设E M_t=E M_0。",
+        "非负局部鞅的期望非增，严格下降时就是严格局部鞅。",
+        "三维Bessel倒数Z=x/R满足零Itô漂移但E Z_t=2Φ(x/√t)−1<1。",
+        "金融资产贴现价若为严格局部鞅，风险中性条件期望可能低于当前价格，定价表示需额外处理泡沫和可复制性。"
+      ],
+      "formulas": [
+        {
+          "label": "停止局部化与真鞅区别",
+          "tex": "M^{\\tau_n}_t=M_{t\\wedge\\tau_n}\\text{ 为鞅},\\quad \\tau_n\\uparrow\\infty,\\quad\\mathbb EM_t\\ne\\mathbb EM_0\\text{ 可能}"
+        },
+        {
+          "label": "正局部鞅的超鞅性质",
+          "tex": "M_t\\ge0,\\quad \\mathbb E[M_t\\mid\\mathcal F_s]\\le M_s,\\quad \\mathbb EM_t\\le\\mathbb EM_0"
+        },
+        {
+          "label": "三维Bessel倒数的具体反例",
+          "tex": "Z_t=\\frac{x}{R_t},\\quad dZ_t=-\\frac{x}{R_t^2}\\,dB_t,\\quad \\mathbb EZ_t=2\\Phi(x/\\sqrt t)-1<1"
+        },
+        {
+          "label": "真鞅检验与金融价格泡沫",
+          "tex": "\\mathbb E_{\\mathbb Q}[D_T\\mid\\mathcal F_t]\\le D_t,\\qquad \\text{严格局部鞅可使不等号严格}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "局部鞅定义仅对每个固定停止版保证条件期望守恒。若想通过极限保留期望，需停止族一致可积或可用主导收敛等条件；纯粹的逐路径收敛没有这个性质，所以不能从全部停止等式直接得到原过程等式。",
+          "tex": "M^{\\tau_n}_t=M_{t\\wedge\\tau_n}\\text{ 为鞅},\\quad \\tau_n\\uparrow\\infty,\\quad\\mathbb EM_t\\ne\\mathbb EM_0\\text{ 可能}"
+        },
+        {
+          "explanation": "对M_{t∧τ_n}使用条件期望鞅等式E[M_{t∧τ_n}|F_s]=M_{s∧τ_n}。因被积量非负可使用条件Fatou得E[M_t|F_s]≤liminf M_{s∧τ_n}=M_s。再取期望得到均值非增，严格不等式说明非真鞅。",
+          "tex": "M_t\\ge0,\\quad \\mathbb E[M_t\\mid\\mathcal F_s]\\le M_s,\\quad \\mathbb EM_t\\le\\mathbb EM_0"
+        },
+        {
+          "explanation": "对f(r)=x/r，有f'=−x/r²、f''=2x/r³。代入dR=dB+r^{-1}dt与d[R]=dt，Itô漂移−x/r³+(1/2)(2x/r³)=0。期望可从三维Brownian径向转移密度对x/r积分得到2Φ(x/√t)−1，故严格局部性成立。",
+          "tex": "Z_t=\\frac{x}{R_t},\\quad dZ_t=-\\frac{x}{R_t^2}\\,dB_t,\\quad \\mathbb EZ_t=2\\Phi(x/\\sqrt t)-1<1"
+        },
+        {
+          "explanation": "非负局部鞅为超鞅，条件Fatou给未来条件均值不超过当前值。若存在T使两者在正概率事件上严格不等，则D不是真鞅；如果把真鞅条件期望公式当成定义强行套用，就会遗漏当前价格与终端期望的差额。",
+          "tex": "\\mathbb E_{\\mathbb Q}[D_T\\mid\\mathcal F_t]\\le D_t,\\qquad \\text{严格局部鞅可使不等号严格}"
+        }
+      ],
+      "deep_sections": [
+        {
+          "title": "停止局部化与真鞅区别",
+          "question": "为什么对所有停止版本成立的期望等式不能自动传递到原过程？",
+          "paragraphs": [
+            "设τ_n将可能无界的局部鞅停止为真鞅，故对每个n有E[M_{t∧τ_n}]=M_0。",
+            "当n趋无穷，M_{t∧τ_n}逐路径趋M_t，但从几乎处处收敛不能推出期望可交换；缺少一致可积可能导致原期望不同。"
+          ],
+          "formulas": [
+            {
+              "label": "停止局部化与真鞅区别",
+              "tex": "M^{\\tau_n}_t=M_{t\\wedge\\tau_n}\\text{ 为鞅},\\quad \\tau_n\\uparrow\\infty,\\quad\\mathbb EM_t\\ne\\mathbb EM_0\\text{ 可能}"
+            }
+          ],
+          "proof": "局部鞅定义仅对每个固定停止版保证条件期望守恒。若想通过极限保留期望，需停止族一致可积或可用主导收敛等条件；纯粹的逐路径收敛没有这个性质，所以不能从全部停止等式直接得到原过程等式。",
+          "worked": "若正局部鞅初值1，停止版期望均1，而原过程某时刻E M_t=.9，则并不矛盾：期望缺口来自停止序列不满足所需的统一可积控制。",
+          "limitation": "数值模拟在任何有限样本上得到均值接近1，不证明无限尾部矩满足真鞅要求；罕见路径可能决定期望缺口。"
+        },
+        {
+          "title": "正局部鞅的超鞅性质",
+          "question": "为什么严格正性只能推出期望不增加，而非恰好守恒？",
+          "paragraphs": [
+            "对非负局部鞅，选局部化停时τ_n后利用条件Fatou，E[M_t|F_s]≤liminf E[M_{t∧τ_n}|F_s]=liminf M_{s∧τ_n}=M_s。",
+            "因此M为超鞅且E M_t≤E M_0。若某个t严格小于初值期望，则不能是鞅，尽管每个停止版本具有局部鞅性质。"
+          ],
+          "formulas": [
+            {
+              "label": "正局部鞅的超鞅性质",
+              "tex": "M_t\\ge0,\\quad \\mathbb E[M_t\\mid\\mathcal F_s]\\le M_s,\\quad \\mathbb EM_t\\le\\mathbb EM_0"
+            }
+          ],
+          "proof": "对M_{t∧τ_n}使用条件期望鞅等式E[M_{t∧τ_n}|F_s]=M_{s∧τ_n}。因被积量非负可使用条件Fatou得E[M_t|F_s]≤liminf M_{s∧τ_n}=M_s。再取期望得到均值非增，严格不等式说明非真鞅。",
+          "worked": "若模型中的正局部鞅初值100且某时点预期变为97，不能因为形式上dM=σM dW没有dt项就把97强制重算为100。",
+          "limitation": "该结论要求非负性或其它可积条件；一般带正负值的局部鞅未必有可定义的全局期望。"
+        },
+        {
+          "title": "三维Bessel倒数的具体反例",
+          "question": "能否构造一个严格正、零扩散漂移但期望确实下降的解析例子？",
+          "paragraphs": [
+            "取三维Brownian从距原点x>0的位置出发，其径向过程R为三维Bessel过程，满足dR=dB+(1/R)dt并保持严格正。",
+            "令Z=x/R，用Itô公式求得dZ=−(x/R²)dB，没有dt漂移；但利用三维径向Gaussian密度积分可以得到E Z_t=2Φ(x/√t)−1，任何t>0严格小于1。"
+          ],
+          "formulas": [
+            {
+              "label": "三维Bessel倒数的具体反例",
+              "tex": "Z_t=\\frac{x}{R_t},\\quad dZ_t=-\\frac{x}{R_t^2}\\,dB_t,\\quad \\mathbb EZ_t=2\\Phi(x/\\sqrt t)-1<1"
+            }
+          ],
+          "proof": "对f(r)=x/r，有f'=−x/r²、f''=2x/r³。代入dR=dB+r^{-1}dt与d[R]=dt，Itô漂移−x/r³+(1/2)(2x/r³)=0。期望可从三维Brownian径向转移密度对x/r积分得到2Φ(x/√t)−1，故严格局部性成立。",
+          "worked": "令x=1、t=1，则E Z_1=2Φ(1)−1≈0.682689；虽然Z_0=1且Z始终正、形式Itô漂移为0，期望已经显著下降。",
+          "limitation": "该例仅解释纯数学上的严格局部鞅现象，不表示真实股票价格自然服从Bessel倒数，也不说明存在可执行套利。"
+        },
+        {
+          "title": "真鞅检验与金融价格泡沫",
+          "question": "严格局部鞅为什么会影响贴现资产的期望定价公式？",
+          "paragraphs": [
+            "在风险中性Q下，若贴现资产D是非负局部鞅，则E_Q[D_T|F_t]≤D_t。严格局部鞅可以产生严格小于号。",
+            "因此从无dt漂移无法直接把当前价格D_t写成未来贴现价格的条件期望。对于可复制支付、终端值和金融泡沫解释，需要进一步研究允许的交易策略与定价边界。"
+          ],
+          "formulas": [
+            {
+              "label": "真鞅检验与金融价格泡沫",
+              "tex": "\\mathbb E_{\\mathbb Q}[D_T\\mid\\mathcal F_t]\\le D_t,\\qquad \\text{严格局部鞅可使不等号严格}"
+            }
+          ],
+          "proof": "非负局部鞅为超鞅，条件Fatou给未来条件均值不超过当前值。若存在T使两者在正概率事件上严格不等，则D不是真鞅；如果把真鞅条件期望公式当成定义强行套用，就会遗漏当前价格与终端期望的差额。",
+          "worked": "以三维Bessel倒数Z作折现价格D，初值1、T=1时E[D_1]≈.68269，与D_0=1相差约.31731；这属于模型内的数学期望缺口。",
+          "limitation": "严格局部鞅市场的无套利、定价与泡沫解释依赖完整市场模型，不能简单由期望缺口推出可以通过买卖现货稳赚差额。"
+        }
+      ],
+      "example": "取三维Bessel过程R_0=1，倒数Z=1/R满足dZ=−R^{-2}dB且始终正；一年期望2Φ(1)−1≈.682689<1。这个可复算反例直接推翻‘所有正局部鞅都有E Z_t=Z_0’的错误推广。",
+      "application": "用于评估资产贴现真鞅假设、风险中性定价边界、异常密度权重以及连续时间资产泡沫的数学模型。",
+      "caveat": "严格局部鞅并非违反无套利的充分证据；对一般局部鞅不能在无可积条件下交换停止与期望，也不能把模拟均值视为严格定理。",
+      "links": [
+        {
+          "kind": "math",
+          "id": "ito-n0308",
+          "label": "先修：Itô等距"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0294",
+          "label": "先修：鞅收敛"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0320",
+          "label": "指数局部鞅"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0324",
+          "label": "贴现资产鞅"
+        }
+      ],
+      "sources": [
+        {
+          "title": "University of Chicago Greg Lawler Stochastic Calculus and Finance：局部鞅、Girsanov和跳跃过程",
+          "url": "https://www.math.uchicago.edu/~lawler/finbook.pdf"
+        },
+        {
+          "title": "The University of Tokyo CARF Portfolio Choice with Jumps：附录A的Levy–Khintchine特征三元组与金融跳跃模型",
+          "url": "https://www.carf.e.u-tokyo.ac.jp/wp/wp-content/uploads/2021/12/tokyo-finance9.pdf"
+        }
+      ],
+      "checked_status": "V14严格边界：四节定理、特征函数与可核算跳跃反例"
+    },
+    {
+      "id": "ito-n0329",
+      "node_id": "ito-n0329",
+      "title": "跳扩散模型",
+      "definition": "跳扩散模型将连续Brownian扩散与离散Poisson突发跳跃叠加，既可以描述市场平稳小波动，也允许新闻冲击或流动性事件使资产价格瞬间跳变。Merton型乘法跳扩散用正跳幅J_k>0、Poisson强度λ和Brownian波动σ刻画价格；将补偿项−λ(EJ−1)写入漂移，可使价格的期望增长率保持指定的μ。",
+      "assumptions": "固定有限T，N_t为强度λ≥0齐次Poisson过程，W与N独立，J_k>0独立同分布且与两者独立；假设E J<∞。采用Itô型跳跃方程dS_t/S_{t−}=(μ−λκ)dt+σdW_t+(J−1)dN_t，κ=E J−1；如果考虑方差还需E J²<∞。跳跃与扩散是否在风险中性Q下保留相同参数需要另外假设。",
+      "properties": [
+        "乘法跳扩散显式解为指数Brownian部分乘以到达的全部J_k。",
+        "补偿漂移μ−λκ使E S_T=S0 e^{μT}，但路径几何增长还含随机跳幅。",
+        "任一有限区间内无跳跃概率为e^{−λT}，存在跳跃时连续GBM公式不再完整。",
+        "若跳跃无法由连续资产复制，衍生品市场通常不完备，仅调整Brownian漂移不足以唯一确定风险中性跳幅分布。"
+      ],
+      "formulas": [
+        {
+          "label": "乘法跳跃与价格左极限",
+          "tex": "\\frac{dS_t}{S_{t-}}=(\\mu-\\lambda\\kappa)\\,dt+\\sigma\\,dW_t+(J-1)\\,dN_t,\\quad \\kappa=\\mathbb EJ-1"
+        },
+        {
+          "label": "指数乘积解与漂移补偿",
+          "tex": "S_T=S_0e^{(\\mu-\\lambda\\kappa-\\sigma^2/2)T+\\sigma W_T}\\prod_{k=1}^{N_T}J_k"
+        },
+        {
+          "label": "价格期望与随机计数的矩",
+          "tex": "\\mathbb E[S_T]=S_0e^{(\\mu-\\lambda\\kappa)T}\\mathbb E[(\\mathbb EJ)^{N_T}]=S_0e^{\\mu T}"
+        },
+        {
+          "label": "跳跃方差与不完备风险",
+          "tex": "\\operatorname{Var}(S_T)=S_0^2\\!\\left[e^{2(\\mu-\\lambda\\kappa)T+\\sigma^2T+\\lambda T(\\mathbb EJ^2-1)}-e^{2\\mu T}\\right]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "在不发生Poisson跳跃的短区间内，方程退化为GBM类连续扩散；在单次跳跃时连续积分项没有瞬时跳跃，只有S_{t−}(J−1)贡献不连续增量，因此S_t=S_{t−}+S_{t−}(J−1)=J S_{t−}。",
+          "tex": "\\frac{dS_t}{S_{t-}}=(\\mu-\\lambda\\kappa)\\,dt+\\sigma\\,dW_t+(J-1)\\,dN_t,\\quad \\kappa=\\mathbb EJ-1"
+        },
+        {
+          "explanation": "对任意不含跳跃的区间使用GBM显式解，随后在每个Poisson时刻应用乘数J。所有区间指数的时间长度和布朗增量相加为T和W_T；跳幅乘积独立合并，故得到表达式。补偿漂移确保期望不被平均跳幅系统性改变。",
+          "tex": "S_T=S_0e^{(\\mu-\\lambda\\kappa-\\sigma^2/2)T+\\sigma W_T}\\prod_{k=1}^{N_T}J_k"
+        },
+        {
+          "explanation": "利用W、N、J独立，先对Gaussian指数取期望，再条件于N=n求E∏J=(EJ)^n。Poisson概率母函数E z^{N_T}=e^{λT(z−1)}，取z=EJ=1+κ得到e^{λκT}，与连续漂移的−λκ相消。",
+          "tex": "\\mathbb E[S_T]=S_0e^{(\\mu-\\lambda\\kappa)T}\\mathbb E[(\\mathbb EJ)^{N_T}]=S_0e^{\\mu T}"
+        },
+        {
+          "explanation": "对S_T显式解平方后，Brownian指数矩给额外σ²T，Poisson乘积二阶矩给λT(EJ²−1)，得到E S²；减去(E S)²=S0²e^{2μT}得到方差。若J固定1.1，EJ²=1.21，可代入独立核算。",
+          "tex": "\\operatorname{Var}(S_T)=S_0^2\\!\\left[e^{2(\\mu-\\lambda\\kappa)T+\\sigma^2T+\\lambda T(\\mathbb EJ^2-1)}-e^{2\\mu T}\\right]"
+        }
+      ],
+      "deep_sections": [
+        {
+          "title": "乘法跳跃与价格左极限",
+          "question": "为什么跳扩散需要把价格的跳前值S_(t−)与跳后值区分？",
+          "paragraphs": [
+            "在跳跃时刻t，新价格等于跳前价格乘以正倍数J，所以ΔS_t=S_{t−}(J−1)。",
+            "若不区分跳前与跳后，就会把增量与更新后的价格混用，甚至在同一跳跃时刻重复计算收益。Brownian扩散部分路径连续，离散跳跃部分按Poisson时钟发生。"
+          ],
+          "formulas": [
+            {
+              "label": "乘法跳跃与价格左极限",
+              "tex": "\\frac{dS_t}{S_{t-}}=(\\mu-\\lambda\\kappa)\\,dt+\\sigma\\,dW_t+(J-1)\\,dN_t,\\quad \\kappa=\\mathbb EJ-1"
+            }
+          ],
+          "proof": "在不发生Poisson跳跃的短区间内，方程退化为GBM类连续扩散；在单次跳跃时连续积分项没有瞬时跳跃，只有S_{t−}(J−1)贡献不连续增量，因此S_t=S_{t−}+S_{t−}(J−1)=J S_{t−}。",
+          "worked": "若跳幅J=1.1，价格在事件前为100，则事件后为110、跳跃收益10%。若J=.8，价格瞬间从100变成80，不能用连续Brownian积分解释。",
+          "limitation": "真实市场涨跌停、停牌及报价缺口可能使观测跳幅受记录规则影响，跳跃模型应明确使用成交价还是可交易中间价。"
+        },
+        {
+          "title": "指数乘积解与漂移补偿",
+          "question": "跳跃到来之后，为什么连续部分的指数解还必须乘上每个跳幅？",
+          "paragraphs": [
+            "在跳跃时刻之间，S按漂移μ−λκ、波动σ的GBM演化；每遇到一笔事件将当前价格乘以J_k。",
+            "把连续演化和离散跳跃递归相乘得到显式解；其Brownian指数还要包含−σ²/2的Itô修正。这个解要求J_k严格为正才能保留正价格。"
+          ],
+          "formulas": [
+            {
+              "label": "指数乘积解与漂移补偿",
+              "tex": "S_T=S_0e^{(\\mu-\\lambda\\kappa-\\sigma^2/2)T+\\sigma W_T}\\prod_{k=1}^{N_T}J_k"
+            }
+          ],
+          "proof": "对任意不含跳跃的区间使用GBM显式解，随后在每个Poisson时刻应用乘数J。所有区间指数的时间长度和布朗增量相加为T和W_T；跳幅乘积独立合并，故得到表达式。补偿漂移确保期望不被平均跳幅系统性改变。",
+          "worked": "令λ=1、J≡1.1、κ=.1、μ=.08、σ=.2、T=1。若W_T=0且没有跳跃，S_T/S0=e^{−.04}≈.960789；恰有一次跳跃时该比率为1.1e^{−.04}≈1.056868。",
+          "limitation": "当J可能为零或负，正价格乘法模型不再适用；若跳跃与Brownian共享驱动或强度自激，独立乘积公式需要修订。"
+        },
+        {
+          "title": "价格期望与随机计数的矩",
+          "question": "为什么补偿后的模型保留期望增长μ而不是μ+λκ？",
+          "paragraphs": [
+            "显式解的Brownian部分指数期望为e^{(μ−λκ)T}。Poisson随机跳幅乘积的条件期望在N=n时为(EJ)^n，再对Poisson次数求和得到e^{λT(EJ−1)}=e^{λκT}。",
+            "两指数的λκ恰好抵消，故E S_T=S0 e^{μT}。如果不设置补偿项，价格期望的增长率会包含跳跃平均收益，不能继续解释μ为总算术增长率。"
+          ],
+          "formulas": [
+            {
+              "label": "价格期望与随机计数的矩",
+              "tex": "\\mathbb E[S_T]=S_0e^{(\\mu-\\lambda\\kappa)T}\\mathbb E[(\\mathbb EJ)^{N_T}]=S_0e^{\\mu T}"
+            }
+          ],
+          "proof": "利用W、N、J独立，先对Gaussian指数取期望，再条件于N=n求E∏J=(EJ)^n。Poisson概率母函数E z^{N_T}=e^{λT(z−1)}，取z=EJ=1+κ得到e^{λκT}，与连续漂移的−λκ相消。",
+          "worked": "上述λ=1、J=1.1、μ=.08、σ=.2、T=1的模型，尽管无跳跃路径下价格比率约.96079，全部路径的平均价格比率仍为e^{.08}≈1.083287。",
+          "limitation": "实际金融价格收益若跳跃与波动率相关，期望分解不能未经验证直接使用独立Poisson与标记假设。"
+        },
+        {
+          "title": "跳跃方差与不完备风险",
+          "question": "为什么小概率跳跃也会显著增加价格的二阶风险？",
+          "paragraphs": [
+            "在E J²有限时，计算S_T²的期望需要Poisson乘积二阶矩E[(∏J)²]=exp[λT(EJ²−1)]。",
+            "由显式解得Var(S_T)=S0²[e^{2(μ−λκ)T+σ²T+λT(EJ²−1)}−e^{2μT}]。连续复制策略不能在跳跃时刻预先对冲全部离散跳幅，因此风险中性跳跃定价可能不唯一。"
+          ],
+          "formulas": [
+            {
+              "label": "跳跃方差与不完备风险",
+              "tex": "\\operatorname{Var}(S_T)=S_0^2\\!\\left[e^{2(\\mu-\\lambda\\kappa)T+\\sigma^2T+\\lambda T(\\mathbb EJ^2-1)}-e^{2\\mu T}\\right]"
+            }
+          ],
+          "proof": "对S_T显式解平方后，Brownian指数矩给额外σ²T，Poisson乘积二阶矩给λT(EJ²−1)，得到E S²；减去(E S)²=S0²e^{2μT}得到方差。若J固定1.1，EJ²=1.21，可代入独立核算。",
+          "worked": "令S0=1、λ=1、J=1.1、μ=.08、σ=.2、T=1，二阶指数为.21，均值平方指数为.16，所以方差为e^{.21}−e^{.16}≈.06017。",
+          "limitation": "纯GBM方差忽略跳跃标记的二阶矩；真实跳幅若厚尾到EJ²不存在，不能使用有限方差模型评价尾部风险。"
+        }
+      ],
+      "example": "λ=1、J恒为1.1、μ=.08、σ=.2、T=1时，无跳跃且W_T=0路径的价格比率e^{−.04}≈.960789，一次跳跃的比率约1.056868；平均比率e^{.08}≈1.083287，方差比率e^{.21}−e^{.16}≈.06017。",
+      "application": "用于宏观公告跳价、跨资产尾部风险、期权波动率微笑及高频流动性冲击建模，强调跳幅、强度和可交易复制风险。",
+      "caveat": "单纯Brownian测度变换不能消去不可交易跳跃风险；含有重尾标记和状态依赖强度时，完整价格分布与方差可能显著不同。",
+      "links": [
+        {
+          "kind": "math",
+          "id": "stochastic-n0276",
+          "label": "先修：复合Poisson"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0306",
+          "label": "先修：GBM"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0330",
+          "label": "Lévy过程一般化"
+        },
+        {
+          "kind": "math",
+          "id": "finance-n0438",
+          "label": "波动率微笑"
+        }
+      ],
+      "sources": [
+        {
+          "title": "University of Chicago Greg Lawler Stochastic Calculus and Finance：局部鞅、Girsanov和跳跃过程",
+          "url": "https://www.math.uchicago.edu/~lawler/finbook.pdf"
+        },
+        {
+          "title": "The University of Tokyo CARF Portfolio Choice with Jumps：附录A的Levy–Khintchine特征三元组与金融跳跃模型",
+          "url": "https://www.carf.e.u-tokyo.ac.jp/wp/wp-content/uploads/2021/12/tokyo-finance9.pdf"
+        }
+      ],
+      "checked_status": "V14严格边界：四节定理、特征函数与可核算跳跃反例"
+    },
+    {
+      "id": "ito-n0330",
+      "node_id": "ito-n0330",
+      "title": "Lévy过程",
+      "definition": "Lévy过程是具有独立平稳增量、从零出发、依概率连续且右连续有左极限（càdlàg）样本路径的随机过程。它统一包含带漂移布朗运动、Poisson计数、复合Poisson跳跃和部分无限活动纯跳过程。Lévy–Khintchine公式将其特征函数写为漂移、Gaussian扩散与Lévy跳跃测度的组合，是从有限跳跃扩展到一般厚尾金融价格模型的核心结构。",
+      "assumptions": "过程L_0=0、对互不交叠区间增量独立，增量分布仅依区间长度，并满足随机连续性及càdlàg路径。特征三元组(b,c,ν)中c≥0，ν为R\\{0}上的测度，满足∫(1∧x²)ν(dx)<∞；漂移b依赖截断函数约定，以下统一使用h(x)=x1_{|x|<1}。",
+      "properties": [
+        "Lévy–Khintchine特征指数由漂移、Gaussian方差和跳跃测度组成。",
+        "有限活动跳跃等价于ν(R\\{0})<∞；无限活动也可能具有有限总变差。",
+        "存在一阶或二阶矩要检查大跳部分∫_{|x|>1}|x|ν或∫_{|x|>1}x²ν是否有限。",
+        "风险中性金融Lévy模型不仅需独立增量，还要确保贴现指数价格是真鞅，并明确定价测度下的跳跃参数。"
+      ],
+      "formulas": [
+        {
+          "label": "独立平稳增量与路径右连续性",
+          "tex": "\\mathbb E[e^{iuL_t}]=e^{t\\psi(u)},\\quad L_{t+s}-L_t\\stackrel d=L_s,\\quad L_0=0"
+        },
+        {
+          "label": "Lévy–Khintchine分解",
+          "tex": "\\psi(u)=iub-\\tfrac12cu^2+\\int_{\\mathbb R\\setminus\\{0\\}}\\!\\bigl(e^{iux}-1-iux\\mathbf1_{\\{|x|<1\\}}\\bigr)\\nu(dx)"
+        },
+        {
+          "label": "有限活动与无限活动的区分",
+          "tex": "\\nu(\\mathbb R\\setminus\\{0\\})=\\infty,\\quad\\int_{|x|<1}|x|\\,\\nu(dx)<\\infty\\quad\\text{可以同时成立}"
+        },
+        {
+          "label": "二阶矩、复合Poisson与金融尾部",
+          "tex": "\\operatorname{Var}(L_t)=t\\!\\left(c+\\int_{\\mathbb R\\setminus\\{0\\}}x^2\\,\\nu(dx)\\right)\\quad\\text{当二阶矩有限}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "因为增量独立，特征函数满足φ_{t+s}(u)=φ_t(u)φ_s(u)。随机连续性保证关于t连续，结合φ_0=1可解该连续乘法半群函数为φ_t=e^{tψ(u)}，其中ψ为特征指数；Lévy–Khintchine定理刻画所有可能的ψ。",
+          "tex": "\\mathbb E[e^{iuL_t}]=e^{t\\psi(u)},\\quad L_{t+s}-L_t\\stackrel d=L_s,\\quad L_0=0"
+        },
+        {
+          "explanation": "在小x处展开e^{iux}=1+iux−u²x²/2+O(|x|³)，减去线性截断项后被积函数为O(x²)，因∫_{|x|<1}x²ν有限而可积。对|x|≥1，被积函数有界，因ν(|x|≥1)<∞而可积，故指数有良好定义。",
+          "tex": "\\psi(u)=iub-\\tfrac12cu^2+\\int_{\\mathbb R\\setminus\\{0\\}}\\!\\bigl(e^{iux}-1-iux\\mathbf1_{\\{|x|<1\\}}\\bigr)\\nu(dx)"
+        },
+        {
+          "explanation": "例如正跳Gamma型Lévy测度ν(dx)=e^{−x}x^{-1}1_{x>0}dx。在0附近∫_0^1ν≈∫_0^1dx/x发散，因此无限活动；但∫_0^1xν(dx)=∫_0^1e^{−x}dx=1−e^{-1}<∞，其小跳总变差可有限。",
+          "tex": "\\nu(\\mathbb R\\setminus\\{0\\})=\\infty,\\quad\\int_{|x|<1}|x|\\,\\nu(dx)<\\infty\\quad\\text{可以同时成立}"
+        },
+        {
+          "explanation": "当∫x²ν有限时，可对特征指数在u=0二次求导，Gaussian部分贡献c，跳跃部分贡献∫x²ν。由log特征函数tψ(u)的二阶累积量得到Var L_t=t(c+∫x²ν)。复合Poisson的ν=λF_Y给λt E Y²。",
+          "tex": "\\operatorname{Var}(L_t)=t\\!\\left(c+\\int_{\\mathbb R\\setminus\\{0\\}}x^2\\,\\nu(dx)\\right)\\quad\\text{当二阶矩有限}"
+        }
+      ],
+      "deep_sections": [
+        {
+          "title": "独立平稳增量与路径右连续性",
+          "question": "为什么Lévy过程比Brownian过程更一般？",
+          "paragraphs": [
+            "Brownian与Poisson都有不重叠增量独立且分布仅依长度的性质，但Poisson路径存在跳跃，Brownian路径连续。Lévy过程允许càdlàg跳跃路径，同时要求短时间增量依概率趋零。",
+            "这组条件保障随机过程具有特征指数与相应的独立增量半群，却不强制Gaussian或有限方差。金融厚尾收益在某些尺度上可用Lévy建模，但真实波动聚集通常违反其平稳独立增量假设。"
+          ],
+          "formulas": [
+            {
+              "label": "独立平稳增量与路径右连续性",
+              "tex": "\\mathbb E[e^{iuL_t}]=e^{t\\psi(u)},\\quad L_{t+s}-L_t\\stackrel d=L_s,\\quad L_0=0"
+            }
+          ],
+          "proof": "因为增量独立，特征函数满足φ_{t+s}(u)=φ_t(u)φ_s(u)。随机连续性保证关于t连续，结合φ_0=1可解该连续乘法半群函数为φ_t=e^{tψ(u)}，其中ψ为特征指数；Lévy–Khintchine定理刻画所有可能的ψ。",
+          "worked": "标准Brownian取ψ(u)=−u²/2；强度λ=2的Poisson计数取ψ(u)=2(e^{iu}−1)，二者均满足独立平稳增量但路径性质完全不同。",
+          "limitation": "价格变化若存在长期自相关或日内确定性季节性，常数参数Lévy过程的平稳增量假设不一定适用。"
+        },
+        {
+          "title": "Lévy–Khintchine分解",
+          "question": "为什么跳跃测度必须满足积分(1∧x²)可积？",
+          "paragraphs": [
+            "Lévy测度ν统计每单位时间不同跳幅的强度。小跳可能无穷多，但它们的平方可积条件保证补偿和能够在适当意义下定义；大跳总强度须有限以避免瞬间出现无穷多个大跳。",
+            "使用截断函数h(x)=x1_{|x|<1}时，特征指数包含iu b−c u²/2以及跳跃积分。改变截断规则会改变报告的漂移参数b，而不改变过程本身。"
+          ],
+          "formulas": [
+            {
+              "label": "Lévy–Khintchine分解",
+              "tex": "\\psi(u)=iub-\\tfrac12cu^2+\\int_{\\mathbb R\\setminus\\{0\\}}\\!\\bigl(e^{iux}-1-iux\\mathbf1_{\\{|x|<1\\}}\\bigr)\\nu(dx)"
+            }
+          ],
+          "proof": "在小x处展开e^{iux}=1+iux−u²x²/2+O(|x|³)，减去线性截断项后被积函数为O(x²)，因∫_{|x|<1}x²ν有限而可积。对|x|≥1，被积函数有界，因ν(|x|≥1)<∞而可积，故指数有良好定义。",
+          "worked": "若ν集中在跳幅+1处且强度2，跳幅位于截断边界|x|=1不减线性项，跳跃指数为2(e^{iu}−1)，即Poisson(2t)计数的指数。",
+          "limitation": "不同教材的三元组可采用不同截断约定，金融估值引用b时必须声明是否包含小跳补偿，避免漂移重复计入。"
+        },
+        {
+          "title": "有限活动与无限活动的区分",
+          "question": "无限多次小跳为什么不必导致无限总变化？",
+          "paragraphs": [
+            "有限活动要求ν在非零全空间的质量有限，此时可用复合Poisson表示。若ν在零附近有无限质量，任何有限时间窗仍可能有无限多个小跳。",
+            "然而当Gaussian系数c=0且∫_{|x|<1}|x|ν(dx)<∞时，纯跳Lévy过程可有有限变差。小跳次数无穷和小跳绝对总和有限是不同性质。"
+          ],
+          "formulas": [
+            {
+              "label": "有限活动与无限活动的区分",
+              "tex": "\\nu(\\mathbb R\\setminus\\{0\\})=\\infty,\\quad\\int_{|x|<1}|x|\\,\\nu(dx)<\\infty\\quad\\text{可以同时成立}"
+            }
+          ],
+          "proof": "例如正跳Gamma型Lévy测度ν(dx)=e^{−x}x^{-1}1_{x>0}dx。在0附近∫_0^1ν≈∫_0^1dx/x发散，因此无限活动；但∫_0^1xν(dx)=∫_0^1e^{−x}dx=1−e^{-1}<∞，其小跳总变差可有限。",
+          "worked": "对ν(dx)=e^{−x}dx/x（x>0），单位时间无限多个小跳，但小于1的绝对跳幅期望和为1−e^{-1}≈0.632121，并非无穷。",
+          "limitation": "若有Brownian成分c>0，则路径总变差仍可能无限；因此只检查跳跃部分小跳总变差不足以断言整个过程有限变差。"
+        },
+        {
+          "title": "二阶矩、复合Poisson与金融尾部",
+          "question": "如何从Lévy测度判断收益方差是否存在，而不仅观察有限历史样本？",
+          "paragraphs": [
+            "特征指数的跳跃部分二阶矩取决于∫x²ν(dx)。在大跳尾部无法积时，总体方差可能不存在，尽管任何有限样本都可计算样本方差。",
+            "对于强度λ的复合Poisson，ν=λF_Y，若E Y²有限则Var L_t=λt E Y²；这能独立核算之前复合Poisson课程的结果。"
+          ],
+          "formulas": [
+            {
+              "label": "二阶矩、复合Poisson与金融尾部",
+              "tex": "\\operatorname{Var}(L_t)=t\\!\\left(c+\\int_{\\mathbb R\\setminus\\{0\\}}x^2\\,\\nu(dx)\\right)\\quad\\text{当二阶矩有限}"
+            }
+          ],
+          "proof": "当∫x²ν有限时，可对特征指数在u=0二次求导，Gaussian部分贡献c，跳跃部分贡献∫x²ν。由log特征函数tψ(u)的二阶累积量得到Var L_t=t(c+∫x²ν)。复合Poisson的ν=λF_Y给λt E Y²。",
+          "worked": "取λ=2、跳幅Y独立地各以一半概率取+1与−1，t=1，则E Y=0、E Y²=1，复合Poisson累计均值0、方差2，特征指数ψ(u)=2(cos u−1)。",
+          "limitation": "在金融厚尾数据中若大跳二阶积分发散，均值方差优化与传统Sharpe的理论风险量可能不稳健，应改用适当尾部风险度量。"
+        }
+      ],
+      "example": "λ=2、Y=±1等概率的复合Poisson在t=1时均值0、方差2，特征指数2(cos u−1)。Gamma型ν=e^{−x}dx/x在单位时间内无限小跳活动，但∫_0^1xν=1−e^{−1}≈0.632121，说明无限活动不等于无限变差。",
+      "application": "用于跳跃型价格收益、对冲误差、有限或无限活动风险、期权波动率微笑及金融收益尾部矩存在性的判断。",
+      "caveat": "Lévy过程独立平稳增量不自动匹配市场波动聚集；特征三元组的漂移依赖截断，缺失二阶矩时不能使用有限方差公式。",
+      "links": [
+        {
+          "kind": "math",
+          "id": "stochastic-n0276",
+          "label": "先修：复合Poisson"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0302",
+          "label": "先修：独立平稳增量"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0329",
+          "label": "跳扩散例子"
+        },
+        {
+          "kind": "math",
+          "id": "finance-n0448",
+          "label": "金融：极值风险"
+        }
+      ],
+      "sources": [
+        {
+          "title": "University of Chicago Greg Lawler Stochastic Calculus and Finance：局部鞅、Girsanov和跳跃过程",
+          "url": "https://www.math.uchicago.edu/~lawler/finbook.pdf"
+        },
+        {
+          "title": "The University of Tokyo CARF Portfolio Choice with Jumps：附录A的Levy–Khintchine特征三元组与金融跳跃模型",
+          "url": "https://www.carf.e.u-tokyo.ac.jp/wp/wp-content/uploads/2021/12/tokyo-finance9.pdf"
+        }
+      ],
+      "checked_status": "V14严格边界：四节定理、特征函数与可核算跳跃反例"
     }
   ]
 }
