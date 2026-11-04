@@ -404,6 +404,15 @@ async function start(){
     newIds.add(id);
    }
   }
+  // V5 probability distribution scores, CQR and point-in-time ETF shift monitoring.
+  for(const path of ["./atlas-proper-scoring-conformal-v5.json","./atlas-density-pit-finance-v5.json"]){
+   const bundle=await fetchAtlasJson(path,{cache:"no-cache"});
+   const ids=window.quantMlExpansion.install(data,bundle);
+   for(const id of ids){
+    if(newIds.has(id))throw Error("新增专题ID重复："+id);
+    newIds.add(id);
+   }
+  }
   const conceptBundle=await fetchAtlasJson("./atlas-concept-chapters.json",{cache:"no-cache"});
   if(!window.quantMlConcepts?.mount)throw Error("知识链分层渲染器未加载");
   state.conceptChapters=window.quantMlConcepts.mount(data,conceptBundle);
