@@ -1,0 +1,320 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "regression-n0208",
+      "node_id": "regression-n0208",
+      "title": "偏差方差权衡",
+      "definition": "平方损失下的偏差—方差分解，把随机训练样本所产生的预测误差拆为平均预测与真实条件均值的偏离、训练集随机性带来的预测方差，以及测试观测自身的不可约噪声。在固定测试特征x和独立未来测试噪声的条件下，三项之和精确等于期望测试平方误差；这不是所有损失函数、所有时变金融市场都自动适用的定律。",
+      "assumptions": "设m(x)=E[Y|X=x]，Y=m(x)+ε，E[ε|X=x]=0，Var(ε|X=x)=σ²(x)<∞。训练集D随机，学习器f̂_D(x)依赖D；给定x时，未来测试噪声ε与训练集D相互独立或至少使交叉项条件期望为零。所有平方风险和训练分布下期望存在。讨论参数估计的MSE或跨市场迁移时需要另行定义目标。",
+      "properties": [
+        "固定x时总体预测风险=Bias²+Variance+σ²(x)，三项分别非负；分解中的偏差针对预测均值m(x)，不是交易信号的经济偏误。",
+        "增加模型灵活度经常降低近似偏差、可能增加估计方差，但不存在任意算法或样本大小下严格单调的普遍定理。",
+        "适度Ridge收缩可能在增加偏差的同时更大幅度降低方差，从而改善总MSE；最佳λ依赖未知真实系数与噪声结构。",
+        "分布迁移、测试与训练时点相关、样本选择和模型选择偏差会改变分解的解释；低MSE也不等于最优组合净收益。"
+      ],
+      "formulas": [
+        {
+          "label": "固定x的偏差—方差—噪声分解",
+          "tex": "E_{D,Y}[(Y-\\widehat f_D(x))^2\\mid x]=\\left(E_D[\\widehat f_D(x)]-m(x)\\right)^2+\\operatorname{Var}_D(\\widehat f_D(x))+\\sigma^2(x)"
+        },
+        {
+          "label": "预测偏差",
+          "tex": "\\operatorname{Bias}(x)=E_D[\\widehat f_D(x)]-m(x)"
+        },
+        {
+          "label": "预测方差",
+          "tex": "\\operatorname{Var}_D(\\widehat f_D(x))=E_D[(\\widehat f_D(x)-E_D\\widehat f_D(x))^2]"
+        },
+        {
+          "label": "Ridge固定设计的参数误差分解",
+          "tex": "E\\|\\widehat\\beta-\\beta^\\star\\|_2^2=\\|E\\widehat\\beta-\\beta^\\star\\|_2^2+\\operatorname{tr}(\\operatorname{Cov}(\\widehat\\beta))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "在Y−f̂_D(x)中加入并减去m(x)和平均学习器f̄(x)=E_D f̂_D(x)，得到噪声、偏差与模型波动三个分量。",
+          "tex": "Y-\\widehat f_D(x)=\\varepsilon+[m(x)-\\overline f(x)]+[\\overline f(x)-\\widehat f_D(x)]"
+        },
+        {
+          "explanation": "平方展开后，训练学习器偏离其平均值的期望为零，未来噪声的条件均值也为零；在指定独立性下噪声与训练误差交叉项的期望同样为零。",
+          "tex": "E_D[\\widehat f_D(x)-\\overline f(x)]=0,\\qquad E[\\varepsilon\\mid x,D]=0"
+        },
+        {
+          "explanation": "剩下的三项分别为测试条件噪声方差、平均预测偏差平方和训练随机性下预测方差，得到精确的平方风险分解。",
+          "tex": "\\operatorname{MSE}(x)=\\operatorname{Bias}(x)^2+\\operatorname{Var}_D(\\widehat f_D(x))+\\sigma^2(x)"
+        },
+        {
+          "explanation": "对向量参数同样把β̂−β*写成(β̂−Eβ̂)+(Eβ̂−β*)，利用协方差的迹表示平方欧氏随机波动。",
+          "tex": "E\\|\\widehat\\beta-\\beta^\\star\\|^2=\\|E\\widehat\\beta-\\beta^\\star\\|^2+\\operatorname{tr}[\\operatorname{Cov}(\\widehat\\beta)]"
+        }
+      ],
+      "example": "固定测试特征x，真实条件均值m(x)=3、不可约噪声方差σ²(x)=0.25。模型A在两种等概率训练样本下分别预测2与4，平均预测3，偏差平方0、预测方差1，测试MSE=1.25。模型B在相同两种情形分别预测2.4与3.2，平均预测2.8，偏差平方(−0.2)²=0.04，预测方差0.16，测试MSE=0.04+0.16+0.25=0.45。B有偏但测试平方风险更低。",
+      "application": "用于解释ETF信号中，OLS可能无偏却在高共线下不稳定，而Ridge通过缩小权重方差改善预测风险。分解帮助定义合理的模型复杂度与正则化搜索，但实际收益仍取决于风险模型、杠杆、换手、交易成本和市场状态。",
+      "caveat": "偏差—方差分解是特定预测目标和平方损失下的期望恒等式，不是‘越复杂越过拟合’的无条件证明。模型在多期行情中可能面对非同分布测试数据；测试噪声与训练数据有关时交叉项未必消失。",
+      "deep_sections": [
+        {
+          "title": "风险对象与三类随机性",
+          "question": "偏差是针对哪个真值，方差又对什么随机性求期望？",
+          "paragraphs": [
+            "固定一个测试特征x，m(x)是该特征下的真实条件均值。不同随机训练样本会拟合出不同预测器，因此预测f̂_D(x)本身是随机变量，其平均值与m(x)之间的差叫预测偏差。",
+            "未来测试观测Y仍围绕m(x)波动，即使我们恰好知道m(x)，平方预测误差通常不可能降为零。这个剩余部分是给定当前输入信息集的不可约噪声方差。"
+          ],
+          "formulas": [
+            {
+              "label": "条件均值与不可约噪声",
+              "tex": "m(x)=E[Y\\mid X=x],\\qquad\\sigma^2(x)=\\operatorname{Var}(Y\\mid X=x)"
+            }
+          ],
+          "proof": "先对未来Y条件于x求期望，获得m(x)。再对随机训练集D求学习器平均预测f̄(x)，两层期望明确区分训练随机性与未来收益噪声。",
+          "worked": "若某x下真实m=3、未来噪声方差0.25，即使所有训练样本都给出预测3，平均测试MSE仍为0.25。",
+          "limitation": "若真正目标是损失非对称的尾部风险或组合效用，最佳预测对象可能不再是条件均值。"
+        },
+        {
+          "title": "三项分解的证明与交叉项消失条件",
+          "question": "为什么把平方误差展开不会留下混合项？",
+          "paragraphs": [
+            "将Y−f̂写成未来噪声ε、固定偏差m−f̄和训练预测波动f̄−f̂。平方展开会产生三个交叉项，必须说明它们为什么在指定条件下为零，而不能仅凭名称写下公式。",
+            "偏差项是常数；预测波动对D均值为零。未来噪声给定x、D均值为零时，它与训练预测波动乘积的期望也为零，剩下就是三项平方的期望。"
+          ],
+          "formulas": [
+            {
+              "label": "拆分表达式",
+              "tex": "Y-\\widehat f=\\varepsilon+(m-\\overline f)+(\\overline f-\\widehat f)"
+            }
+          ],
+          "proof": "展开平方并分别对未来结果与训练样本取期望。Eε=0、E_D(f̄−f̂)=0、E[ε(f̄−f̂)]=0，交叉项都消失，从而得到Bias²+Var+σ²。",
+          "worked": "设A模型预测2或4各半，f̄=3、m=3，则偏差0、方差(1²+1²)/2=1；加噪声方差0.25得到MSE=1.25。",
+          "limitation": "若未来结果和训练误差存在未建模的相关性，最后一个交叉项不保证为零，应使用更一般的条件风险表达。"
+        },
+        {
+          "title": "为什么有偏的正则化可能更好",
+          "question": "收缩降低方差和增加偏差之间到底如何权衡？",
+          "paragraphs": [
+            "线性估计因样本噪声产生随机系数波动；病态方向上OLS可能把很小的观测扰动放大成很大的估计差异。Ridge通过连续谱收缩减少这部分方差，但同时使平均预测向零移动。",
+            "只有当方差减少超过偏差平方增加时，总预测平方风险才下降。不能仅根据参数是否有偏，或者是否有更小的条件数，断言样本外表现一定更好。"
+          ],
+          "formulas": [
+            {
+              "label": "风险差的方向",
+              "tex": "\\Delta\\operatorname{MSE}=\\Delta\\operatorname{Bias}^2+\\Delta\\operatorname{Variance}"
+            }
+          ],
+          "proof": "以A平均预测3、方差1，B平均预测2.8、方差0.16为例，B的偏差平方增加0.04，但方差下降0.84，总MSE由1.25降至0.45。",
+          "worked": "A的两次预测2与4，B的两次预测2.4与3.2，固定噪声方差0.25，逐项算得B的测试风险=0.04+0.16+0.25=0.45。",
+          "limitation": "正则强度过大时偏差平方可以主导风险；最佳λ需要独立验证，不能使用最终测试期来挑选。"
+        },
+        {
+          "title": "金融非平稳性、指标选择与真实风险",
+          "question": "偏差—方差分解能解释所有ETF策略亏损吗？",
+          "paragraphs": [
+            "金融市场中训练数据分布和未来条件分布可能变动，未来Y的生成关系并不一定与重复抽样假设相同。历史上估计方差很低的系数也可能在市场结构变化后系统失效。",
+            "预测MSE只是模型层指标，组合优化还依赖协方差矩阵、风险约束和交易成本；交易净收益的好坏不能由该分解一项推出。研究应明确预测损失与经济评价为不同结果变量。"
+          ],
+          "formulas": [
+            {
+              "label": "时间外预测风险",
+              "tex": "R_{\\mathrm{future}}(f)=E_{(X,Y)\\sim P_{\\mathrm{future}}}[(Y-f(X))^2]"
+            }
+          ],
+          "proof": "若训练与未来分布不同，训练期估计的E_D f̂和m_train(x)不能不加修改地代入未来m_future(x)；目标分布变化产生新的偏误。",
+          "worked": "某ETF模型在低波动状态预测误差小，危机期收益关系逆转时预测偏差可骤增；低训练方差也无法保证危机期稳定。",
+          "limitation": "对收益方向、尾部风险或交易效用使用不同损失时，需要重建相应的风险分解或评价标准。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "mlmath-n0453",
+          "label": "理论先修：偏差方差分解"
+        },
+        {
+          "kind": "math",
+          "id": "regression-n0205",
+          "label": "模型：Ridge收缩"
+        },
+        {
+          "kind": "math",
+          "id": "regression-n0209",
+          "label": "应用：交叉验证选λ"
+        },
+        {
+          "kind": "ml",
+          "id": "m07-c06-p03",
+          "label": "机器学习：Ridge泛化风险"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Stanford STATS 202, Bias–Variance Decomposition",
+          "url": "https://web.stanford.edu/class/stats202/notes/Course-introduction/Supervised.html"
+        },
+        {
+          "title": "University of Toronto CSC311, Bias–Variance Decomposition",
+          "url": "https://www.teach.cs.toronto.edu/~csc311notes/bias_variance_decomposition/bv.html"
+        }
+      ],
+      "checked_status": "完整数学精讲：条件风险、三项证明、正则偏差方差与分布迁移"
+    },
+    {
+      "id": "regression-n0209",
+      "node_id": "regression-n0209",
+      "title": "交叉验证选λ",
+      "definition": "交叉验证用于估计训练程序的外部预测风险并在候选正则强度λ之间进行选择。它不是在训练集上反复计算同一拟合误差，也不是把最终测试集拆成多块反复优化。对于有时间顺序、滚动标签与多资产共同冲击的金融数据，验证折必须符合点时信息可得性，并对目标区间重叠进行清除。",
+      "assumptions": "首先冻结预测目标Y_{t+h}、特征信息集F_t、损失函数与候选超参数集合Λ。每一内层训练折重新拟合缩尾、标准化、特征选择与回归器，验证折保持在其后的时间区间。若标签覆盖事件区间[t+1,t+h]，还要检查训练与验证事件是否重叠；固定行数gap仅在等间距且事件期限固定等特定情况下近似有效。",
+      "properties": [
+        "普通K折假定可交换或近似独立样本；金融收益的时间依赖和后验调参使随机打乱K折可能高估未来预测能力。",
+        "使用时间顺序的 expanding/rolling split 可以保留训练早于验证，但只设置时间顺序不自动清除重叠标签和宏观数据修订。",
+        "嵌套验证中内层用于模型与λ选择、外层用于评价选择过程；最后独立测试不应被重复用于选取最优配置。",
+        "验证损失均值小于竞争者不保证总体差异显著，特别是折数少、多次搜索或折之间共享训练样本时。"
+      ],
+      "formulas": [
+        {
+          "label": "内层验证风险",
+          "tex": "\\widehat R_{\\mathrm{CV}}(\\lambda)=\\frac{\\sum_{k=1}^K\\sum_{t\\in V_k}L(Y_t,\\widehat f_{\\lambda,T_k}(X_t))}{\\sum_{k=1}^K|V_k|}"
+        },
+        {
+          "label": "超参数选择",
+          "tex": "\\widehat\\lambda=\\operatorname*{arg\\,min}_{\\lambda\\in\\Lambda}\\widehat R_{\\mathrm{CV}}(\\lambda)"
+        },
+        {
+          "label": "时间先后条件",
+          "tex": "\\max T_k<\\min V_k\\quad\\text{（按信息可得与标签成熟时间解释）}"
+        },
+        {
+          "label": "事件标签重叠清除",
+          "tex": "I_i^{\\mathrm{label}}\\cap I_j^{\\mathrm{label}}=\\varnothing\\quad(i\\in T_k,\\ j\\in V_k)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "把候选λ视为训练算法的一部分，每个内层折由训练部分T_k拟合完整管道f̂_{λ,T_k}，再在未参与拟合的验证集V_k计算损失；按验证观测数汇总。",
+          "tex": "\\widehat R_k(\\lambda)=|V_k|^{-1}\\sum_{t\\in V_k}L(Y_t,\\widehat f_{\\lambda,T_k}(X_t))"
+        },
+        {
+          "explanation": "对固定候选集合Λ比较验证风险，选出最小者。随后在完整外层训练窗口重新拟合被选中的配置，最后只向未使用的外层测试数据生成预测。",
+          "tex": "\\widehat f_{\\mathrm{outer}}=\\operatorname{Fit}(D_{\\mathrm{train}};\\widehat\\lambda)"
+        },
+        {
+          "explanation": "当h日目标窗口发生重叠，相邻样本可能共享未来实现；即使特征来自历史，训练标签仍可能包含验证期的市场结果，需依据事件实际区间删除冲突样本。",
+          "tex": "I_t=[t+1,t+h],\\qquad I_t\\cap I_{t+1}\\ne\\varnothing\\quad(h>1)"
+        },
+        {
+          "explanation": "在内外两层反复搜索后，外层损失应评价完整训练与选择程序，而不是把所有外层结果重新选出唯一最佳λ再在相同外层上宣称无偏。",
+          "tex": "\\widehat R_{\\mathrm{outer}}=\\frac{\\sum_k\\sum_{t\\in O_k}L(Y_t,\\widehat f^{(k)}(X_t))}{\\sum_k|O_k|}"
+        }
+      ],
+      "example": "设两折时间验证的平均平方损失分别为：λ_A在两折上为0.20、0.40，λ_B为0.30、0.25。两折观测数相同时，λ_A平均损失(0.20+0.40)/2=0.30，λ_B为(0.30+0.25)/2=0.275，因此只在内层选λ_B。其后在尚未使用的外层测试进行重新训练与评价，不能把0.275当作最终独立测试MSE。",
+      "application": "用于滚动 ETF 收益预测、Elastic Net和Ridge正则强度选择、窗口长度与风险惩罚设定。需对多资产同日样本按时间分组，以免同日共同冲击分散到训练与验证；成交时点及特征在市场收盘后的可得性也应纳入折定义。",
+      "caveat": "scikit-learn TimeSeriesSplit 的gap仅是训练末端预留若干样本，不会根据不等长事件的开始结束自动完成purging。均值验证损失只是一种有限样本估计；后验筛选过多候选会产生赢家偏差，最终样本外评价应披露搜索范围。",
+      "deep_sections": [
+        {
+          "title": "为什么训练误差不能替代验证误差",
+          "question": "λ在拟合目标中出现后，为什么还需要另外选择它？",
+          "paragraphs": [
+            "正则化训练目标对给定λ寻找最优系数，但并不决定λ本身应取多大。若只在训练集比较RSS，较小λ通常有更好的训练拟合，却可能导致更大的参数估计方差。",
+            "交叉验证让每个候选配置在未参与其参数估计的折上接受检验。它评价的是整个管道的预测能力，而不只是某个优化器是否成功把目标函数降到最低。"
+          ],
+          "formulas": [
+            {
+              "label": "两层优化",
+              "tex": "\\widehat\\beta(\\lambda)=\\operatorname*{arg\\,min}_\\beta J_\\lambda(\\beta),\\quad \\widehat\\lambda=\\operatorname*{arg\\,min}_\\lambda\\widehat R_{\\mathrm{CV}}(\\lambda)"
+            }
+          ],
+          "proof": "内层给定λ训练β，外层在验证数据上比较f̂_λ的损失；二者的评价样本和优化变量都不同，不能把训练最小值直接代入验证目标。",
+          "worked": "例如λ_A训练RSS更低，但两折验证损失为0.20和0.40；λ_B虽然训练目标更高，验证均值却可达到0.275。",
+          "limitation": "若验证集也参与标准化、缺失填补或特征选择，就不再是独立于拟合程序的验证观测。"
+        },
+        {
+          "title": "时间切分、标签成熟和Purging",
+          "question": "有了TimeSeriesSplit是否就没有金融数据泄漏？",
+          "paragraphs": [
+            "时间序列切分要求训练在验证之前，能够避免最明显的未来样本训练。但若标签是未来5个交易日收益，训练末端的标签可能与验证开头的收益区间重叠。",
+            "应记录每个训练样本的特征可得时间、标签开始与结束时间，以及市场交易执行时间；对事件区间有交集的样本执行purging，并在必要时加入embargo以控制时间延续影响。"
+          ],
+          "formulas": [
+            {
+              "label": "五日标签",
+              "tex": "Y_t^{(5)}=\\sum_{j=1}^{5}r_{t+j},\\quad I_t=[t+1,t+5]"
+            }
+          ],
+          "proof": "起点为t的标签覆盖t+1到t+5，起点为t+1覆盖t+2到t+6，二者共享4日实际收益。若其中之一在验证区间，另一个在训练区间，应依据规则去除冲突训练样本。",
+          "worked": "gap=5在等间距固定期限下可以构造安全缓冲，但对缺假期、变长持有期或不同市场的标签不自动正确。",
+          "limitation": "若未来宏观修订或资产存续信息已经进入特征，单纯purge标签区间不能修复这类另一层信息泄漏。"
+        },
+        {
+          "title": "嵌套训练、超参数搜索与独立测试",
+          "question": "反复查看外层结果是否也算过拟合？",
+          "paragraphs": [
+            "内层验证选择模型家族、λ和可变的预处理；外层评价整个选择程序并提供逐日期预测。最终冻结的一段独立样本只应使用一次用于主结论。如果外层结果又被用于选定候选集合，就形成额外研究者自由度。",
+            "嵌套评估可降低选择乐观性，却不自动让市场未来状态不变，也不保证样本足够独立。应记录所有尝试过的模型、随机种子、资产集合与策略规则。"
+          ],
+          "formulas": [
+            {
+              "label": "外层完整训练算法",
+              "tex": "\\widehat f_k=\\mathcal A(D_{\\mathrm{train},k}),\\qquad \\widehat R_{\\mathrm{outer}}=\\operatorname{Loss}(\\widehat f_k,D_{\\mathrm{test},k})"
+            }
+          ],
+          "proof": "在两个等规模验证折中，λ_A平均0.30、λ_B平均0.275，只能说明内层当前选择λ_B；若外层测试损失为0.32，应单独报告0.32而不是用0.275冒充。",
+          "worked": "外层也被反复用于决定风险目标、交易阈值或数据清洗规则时，这些新决策同样消耗外层独立性。",
+          "limitation": "只有一个市场年度和大量候选模型时，时间验证本身也可能具有很大的不确定性，需要补充敏感性分析。"
+        },
+        {
+          "title": "从CV指标走向金融组合实证",
+          "question": "如何防止选择最小MSE却得到最差交易策略？",
+          "paragraphs": [
+            "收益预测MSE与成本后组合净收益是两个不同优化目标。过于波动的预测可能带来高换手，高杠杆组合又会放大协方差估计错误，因此需要分层报告模型质量和决策质量。",
+            "可以先按共同信息集选出若干统计模型，再用预先固定的风险与交易规则转化为仓位；若投资目标本身进入模型选择，必须将这一选择完整放入嵌套验证。"
+          ],
+          "formulas": [
+            {
+              "label": "预测层与组合层",
+              "tex": "\\widehat R_{\\mathrm{pred}}(\\lambda)\\ne\\widehat R_{\\mathrm{portfolio}}(\\lambda)"
+            }
+          ],
+          "proof": "即使模型B的CV MSE为0.275、A为0.30，若B的输出每天变化且造成双边交易费，不能直接断言B的成本后Sharpe更高。",
+          "worked": "若预测期重叠，损失差序列会相关；比较模型优劣还应考虑HAC或适当区块重抽样及多重策略选择。",
+          "limitation": "交易成本、价格执行与借券限制属于额外信息集和经济模型假设，不能由纯统计CV消除。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "regression-n0205",
+          "label": "先修：Ridge"
+        },
+        {
+          "kind": "math",
+          "id": "regression-n0206",
+          "label": "先修：LASSO"
+        },
+        {
+          "kind": "math",
+          "id": "regression-n0207",
+          "label": "模型：Elastic Net"
+        },
+        {
+          "kind": "math",
+          "id": "regression-n0208",
+          "label": "理论：偏差方差"
+        },
+        {
+          "kind": "ml",
+          "id": "m12-c06-p04",
+          "label": "机器学习：嵌套时间验证"
+        }
+      ],
+      "sources": [
+        {
+          "title": "scikit-learn TimeSeriesSplit official documentation",
+          "url": "https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.TimeSeriesSplit.html"
+        },
+        {
+          "title": "scikit-learn ElasticNetCV documentation",
+          "url": "https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.ElasticNetCV.html"
+        }
+      ],
+      "checked_status": "完整数学精讲：内外层选型、金融事件区间、标签成熟与经济评价"
+    }
+  ]
+}
