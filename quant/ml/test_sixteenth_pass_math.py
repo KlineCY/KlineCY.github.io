@@ -16,7 +16,9 @@ class SixteenthPassMath(unittest.TestCase):
         self.assertEqual({id[:3] for id in LESSONS},{f"m{i:02d}" for i in range(1,24)})
         for id,lesson in LESSONS.items():
             with self.subTest(id=id):
-                self.assertEqual(len(lesson["equations"]),3)
+                self.assertGreaterEqual(len(lesson["equations"]),3)
+                self.assertEqual(len({e["label"] for e in lesson["equations"]}),len(lesson["equations"]))
+                self.assertTrue(all(e.get("tex","").strip() for e in lesson["equations"]))
                 self.assertGreaterEqual(len(lesson["derivation"]),3)
                 self.assertGreaterEqual(len(lesson["protocol"]),3)
                 self.assertGreaterEqual(len(lesson["pitfalls"]),2)
