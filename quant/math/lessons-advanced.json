@@ -5772,161 +5772,6 @@
       "checked_status": "V13随机微积分完整精讲：条件、证明、可核算算例及应用边界"
     },
     {
-      "id": "ito-n0308",
-      "node_id": "ito-n0308",
-      "title": "Itô等距",
-      "definition": "Itô等距表明适当平方可积、可预测的被积过程H关于布朗运动的随机积分的二阶均值，精确等于其时间平方积分的期望。它不仅是一个方差公式，也是将分段简单随机和稳定延拓为一般Itô积分的数学保障，并将动态仓位的随机收益风险与时间积分的预测方差联系起来。",
-      "assumptions": "固定有限T，W是相对于滤过F_t的布朗运动；H为可预测过程且E∫_0^T H_t²dt<∞。此时Itô积分I_T=∫H dW平方可积、均值0，E I_T²=E∫H²dt。独立驱动的多维情形有相应的矩阵版本；若H是只局部平方可积过程，需要停止局部化，不能直接宣称全局二阶矩有限。",
-      "properties": [
-        "平方可积Itô积分均值0且方差等于期望积分能量E∫H²dt。",
-        "交叉等距可由极化得到E[(∫H dW)(∫K dW)]=E∫HKdt。",
-        "确定性H=t在[0,1]时积分方差为∫t²dt=1/3。",
-        "随机H=W时可用Itô引理验证I=(W_T²−T)/2，与等距给出的T²/2相符。"
-      ],
-      "formulas": [
-        {
-          "label": "等距的条件与精确风险意义",
-          "tex": "\\mathbb E\\!\\left[\\left(\\int_0^TH_t\\,dW_t\\right)^2\\right]=\\mathbb E\\int_0^TH_t^2\\,dt"
-        },
-        {
-          "label": "确定性时变持仓的独立核算",
-          "tex": "I=\\int_0^1t\\,dW_t\\sim N(0,1/3),\\qquad \\operatorname{Var}(I)=\\int_0^1t^2dt=\\frac13"
-        },
-        {
-          "label": "随机被积过程W_t的等距核对",
-          "tex": "\\int_0^T W_t\\,dW_t=\\tfrac12(W_T^2-T),\\quad \\mathbb E\\!\\left[\\left(\\int_0^T W_t\\,dW_t\\right)^2\\right]=\\tfrac{T^2}{2}"
-        },
-        {
-          "label": "交叉等距与数值稳定性",
-          "tex": "\\mathbb E\\!\\left[\\left(\\int_0^TH\\,dW\\right)\\left(\\int_0^TK\\,dW\\right)\\right]=\\mathbb E\\int_0^TH_tK_t\\,dt"
-        }
-      ],
-      "derivation": [
-        {
-          "explanation": "先对可预测简单H按随机和展开平方，跨区间交叉项由未来增量条件均值0消除，对角项由条件方差Δt计算。再用简单过程在可预测L²空间的稠密性和随机积分L²连续性，将等式扩展至所有E∫H²<∞的可预测H。",
-          "tex": "\\mathbb E\\!\\left[\\left(\\int_0^TH_t\\,dW_t\\right)^2\\right]=\\mathbb E\\int_0^TH_t^2\\,dt"
-        },
-        {
-          "explanation": "对确定性步函数逼近t，各段布朗增量独立且正态，因此有限加权和正态。其方差趋于∫t²dt=1/3，特征函数按L²极限趋于exp(−u²/6)，识别极限为N(0,1/3)。",
-          "tex": "I=\\int_0^1t\\,dW_t\\sim N(0,1/3),\\qquad \\operatorname{Var}(I)=\\int_0^1t^2dt=\\frac13"
-        },
-        {
-          "explanation": "对f(x)=x²使用Itô公式dW_t²=2W_tdW_t+dt，整理并积分得到I=(W_T²−T)/2。正态矩E W_T⁴=3T²、E W_T²=T，故E I²=(3T²−2T²+T²)/4=T²/2，等于E∫W_t²dt。",
-          "tex": "\\int_0^T W_t\\,dW_t=\\tfrac12(W_T^2-T),\\quad \\mathbb E\\!\\left[\\left(\\int_0^T W_t\\,dW_t\\right)^2\\right]=\\tfrac{T^2}{2}"
-        },
-        {
-          "explanation": "使用平方差恒等式2I(H)I(K)=I(H+K)²−I(H)²−I(K)²。取期望后由Itô等距右侧依次为E∫(H+K)²−E∫H²−E∫K²=2E∫HK，约去系数2。",
-          "tex": "\\mathbb E\\!\\left[\\left(\\int_0^TH\\,dW\\right)\\left(\\int_0^TK\\,dW\\right)\\right]=\\mathbb E\\int_0^TH_tK_t\\,dt"
-        }
-      ],
-      "example": "确定性H_t=t在[0,1]的Itô积分为N(0,1/3)；随机H_t=W_t时积分=(W_1²−1)/2，均值0、方差0.5，分布不是正态；H=1、K=t的交叉期望为0.5。",
-      "application": "用于连续交易策略的扩散风险预算、随机积分误差分析、Itô积分构造和高维风险驱动的定量校准。",
-      "caveat": "Itô等距需平方可积可预测条件，只给二阶矩而非全部分布；没有全球L²条件时应使用局部化，不能直接比较策略总净收益方差。",
-      "deep_sections": [
-        {
-          "title": "等距的条件与精确风险意义",
-          "question": "为什么积分波动不是简单把每个时点的仓位标准差相加？",
-          "paragraphs": [
-            "随机积分把持仓H_t乘以未来布朗增量。因为每段未来增量条件均值为零且不重叠增量正交，跨时段交叉项在期望中消失。",
-            "因此总平方风险等于E∫H_t²dt。它是噪声驱动部分的二阶矩，与包含漂移、交易费用和随机成交冲击的真实策略总收益方差不是同一统计对象。"
-          ],
-          "formulas": [
-            {
-              "label": "等距的条件与精确风险意义",
-              "tex": "\\mathbb E\\!\\left[\\left(\\int_0^TH_t\\,dW_t\\right)^2\\right]=\\mathbb E\\int_0^TH_t^2\\,dt"
-            }
-          ],
-          "proof": "先对可预测简单H按随机和展开平方，跨区间交叉项由未来增量条件均值0消除，对角项由条件方差Δt计算。再用简单过程在可预测L²空间的稠密性和随机积分L²连续性，将等式扩展至所有E∫H²<∞的可预测H。",
-          "worked": "若H_t≡2，T=3，则积分为2W_3，均值0、方差4×3=12；时间平方能量为∫_0^3 4dt=12，完全一致。",
-          "limitation": "市场资产收益的扩散系数可以随价格与波动率变化；用H=仓位时还需要把资产实际扩散系数乘进去才能计算损益方差。"
-        },
-        {
-          "title": "确定性时变持仓的独立核算",
-          "question": "持仓按确定性时间函数变化时，积分方差怎样直接求得？",
-          "paragraphs": [
-            "取H_t=t（0≤t≤1），它在时间开始前已完全已知，因此可预测并且∫_0^1t²dt=1/3有限。",
-            "Itô等距给∫t dW均值为0、方差为1/3。由于被积过程确定且平方可积，该随机积分是正态变量，标准差为1/√3。"
-          ],
-          "formulas": [
-            {
-              "label": "确定性时变持仓的独立核算",
-              "tex": "I=\\int_0^1t\\,dW_t\\sim N(0,1/3),\\qquad \\operatorname{Var}(I)=\\int_0^1t^2dt=\\frac13"
-            }
-          ],
-          "proof": "对确定性步函数逼近t，各段布朗增量独立且正态，因此有限加权和正态。其方差趋于∫t²dt=1/3，特征函数按L²极限趋于exp(−u²/6)，识别极限为N(0,1/3)。",
-          "worked": "把[0,1]分成两段，取H=0（0至0.5）与0.5（0.5至1），步函数积分方差为0²×0.5+0.5²×0.5=0.125，尚未达到连续极限1/3。",
-          "limitation": "离散近似误差由网格与函数正则性控制；不能只因方差是1/3就断言实际交易中按时间连续调整仓位无成本。"
-        },
-        {
-          "title": "随机被积过程W_t的等距核对",
-          "question": "积分中H_t本身也是Brownian，为什么等距仍能工作？",
-          "paragraphs": [
-            "取H_t=W_t，适应且连续所以可预测，且E∫_0^T W_t²dt=∫_0^T t dt=T²/2。",
-            "Itô公式给∫_0^T W_t dW_t=(W_T²−T)/2。这一随机变量均值为0，其方差可用正态四阶矩3T²独立核算为T²/2，与等距一致。"
-          ],
-          "formulas": [
-            {
-              "label": "随机被积过程W_t的等距核对",
-              "tex": "\\int_0^T W_t\\,dW_t=\\tfrac12(W_T^2-T),\\quad \\mathbb E\\!\\left[\\left(\\int_0^T W_t\\,dW_t\\right)^2\\right]=\\tfrac{T^2}{2}"
-            }
-          ],
-          "proof": "对f(x)=x²使用Itô公式dW_t²=2W_tdW_t+dt，整理并积分得到I=(W_T²−T)/2。正态矩E W_T⁴=3T²、E W_T²=T，故E I²=(3T²−2T²+T²)/4=T²/2，等于E∫W_t²dt。",
-          "worked": "T=1时，I=(W_1²−1)/2，均值0、方差(3−2+1)/4=0.5；不能把它当成高斯N(0,0.5)，因为它是中心化χ²变量。",
-          "limitation": "确定性被积时的高斯结论不适用于任意随机H；等距只固定二阶矩，不确定整个积分分布。"
-        },
-        {
-          "title": "交叉等距与数值稳定性",
-          "question": "如何把单个随机积分的二阶矩关系推广为两个策略扩散收益的协方差？",
-          "paragraphs": [
-            "对满足同样平方可积条件的H、K，I(H+K)=I(H)+I(K)。分别对H+K、H和K应用等距，并整理平方展开的交叉项。",
-            "得到E[I(H)I(K)]=E∫HKdt。这可以比较两个合法可预测策略在相同Brownian驱动下的协同波动，但不同驱动之间还需引入协变差。"
-          ],
-          "formulas": [
-            {
-              "label": "交叉等距与数值稳定性",
-              "tex": "\\mathbb E\\!\\left[\\left(\\int_0^TH\\,dW\\right)\\left(\\int_0^TK\\,dW\\right)\\right]=\\mathbb E\\int_0^TH_tK_t\\,dt"
-            }
-          ],
-          "proof": "使用平方差恒等式2I(H)I(K)=I(H+K)²−I(H)²−I(K)²。取期望后由Itô等距右侧依次为E∫(H+K)²−E∫H²−E∫K²=2E∫HK，约去系数2。",
-          "worked": "取T=1、H_t=1、K_t=t，则积分分别为W_1和∫_0^1t dW；交叉期望为∫_0^1t dt=0.5。",
-          "limitation": "相同驱动的交叉等距不等于任意两资产的收益协方差；多维因子需要估计Brownian驱动相关矩阵或真实风险协方差。"
-        }
-      ],
-      "links": [
-        {
-          "kind": "math",
-          "id": "ito-n0307",
-          "label": "先修：Itô积分构造"
-        },
-        {
-          "kind": "math",
-          "id": "ito-n0303",
-          "label": "先修：二次变差"
-        },
-        {
-          "kind": "math",
-          "id": "ito-n0311",
-          "label": "下一步：二次协变差"
-        },
-        {
-          "kind": "math",
-          "id": "ito-n0309",
-          "label": "一维Itô公式"
-        }
-      ],
-      "sources": [
-        {
-          "title": "MIT 15.070J Advanced Stochastic Processes：Lecture 14–17 Itô积分、等距与公式",
-          "url": "https://ocw.mit.edu/courses/15-070j-advanced-stochastic-processes-fall-2013/pages/lecture-notes/"
-        },
-        {
-          "title": "MIT 15.070J Advanced Stochastic Processes：Lecture 6–8布朗路径与二次变差",
-          "url": "https://www.ocw.mit.edu/courses/15-070j-advanced-stochastic-processes-fall-2013/resources/lecture-notes/"
-        }
-      ],
-      "checked_status": "V13随机微积分完整精讲：条件、证明、可核算算例及应用边界"
-    },
-    {
       "id": "ito-n0311",
       "node_id": "ito-n0311",
       "title": "二次协变差",
@@ -6235,6 +6080,161 @@
         }
       ],
       "checked_status": "V13随机微积分完整精讲：条件、证明、可核算算例及应用边界"
+    },
+    {
+      "id": "ito-n0312",
+      "node_id": "ito-n0312",
+      "title": "Stratonovich积分",
+      "definition": "Stratonovich积分采用对称型随机和定义，与使用左端点、强调可预测性和鞅性的Itô积分形成对照。对连续半鞅被积过程H，相对于布朗W的Stratonovich积分等于Itô积分加一半交叉二次协变差，因而在形式上具有普通链式法则。金融SDE使用哪一种积分约定必须和漂移系数一起声明。",
+      "assumptions": "W为标准布朗运动，H为连续半鞅，使相关Itô积分与协变差良好定义；对称网格的收敛需在连续半鞅框架下解释。用一维Stratonovich与Itô SDE转换时假设扩散系数b满足相应C¹正则条件和积分存在性；随机价格过程还需在给定概率测度及信息滤过下建模。任意可预测L²过程不自动符合该对称积分定义。",
+      "properties": [
+        "Stratonovich对称和式与Itô左端和式之差为二次协变差的一半。",
+        "对H=W，∫W∘dW=W_T²/2，而Itô积分是(W_T²−T)/2。",
+        "Stratonovich链式法则外观与普通微积分一致，但Brownian并未变成有界变差路径。",
+        "相同SDE若更换积分约定必须同时调整漂移，否则模型的分布和经济解释随之改变。"
+      ],
+      "formulas": [
+        {
+          "label": "中点和式与积分约定",
+          "tex": "\\int_0^TH_t\\circ dW_t=\\lim_{|\\Pi|\\to0}\\sum_i\\frac{H_{t_i}+H_{t_{i+1}}}{2}(W_{t_{i+1}}-W_{t_i})"
+        },
+        {
+          "label": "Itô与Stratonovich转换的协变差项",
+          "tex": "\\int_0^TH_t\\circ dW_t=\\int_0^TH_t\\,dW_t+\\tfrac12[H,W]_T"
+        },
+        {
+          "label": "普通链式法则与Itô二阶修正",
+          "tex": "df(X_t)=f'(X_t)\\circ dX_t=f'(X_t)\\,dX_t+\\tfrac12 f''(X_t)\\,d[X]_t"
+        },
+        {
+          "label": "SDE漂移转换和GBM示例",
+          "tex": "a_{\\mathrm{Ito}}(x)=a_{\\mathrm{Strat}}(x)+\\tfrac12b(x)b'(x),\\quad b(x)=\\sigma x"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将每项平均系数写为H_{t_i}+(H_{t_{i+1}}−H_{t_i})/2。因此对称和式=左端Itô和式+(1/2)ΣΔH_iΔW_i。对连续半鞅H，第一部分收敛到Itô积分，第二部分由协变差分割极限收敛到[H,W]_T/2，得到严格转换公式。",
+          "tex": "\\int_0^TH_t\\circ dW_t=\\lim_{|\\Pi|\\to0}\\sum_i\\frac{H_{t_i}+H_{t_{i+1}}}{2}(W_{t_{i+1}}-W_{t_i})"
+        },
+        {
+          "explanation": "沿相同网格，Stratonovich对称和与Itô左端和之差为(1/2)Σ(H_{i+1}−H_i)(W_{i+1}−W_i)。对连续半鞅应用二次协变差的概率收敛定义得到(1/2)[H,W]_T，从而得转换等式。",
+          "tex": "\\int_0^TH_t\\circ dW_t=\\int_0^TH_t\\,dW_t+\\tfrac12[H,W]_T"
+        },
+        {
+          "explanation": "先对光滑f与连续半鞅X应用Itô公式df=f'dX+(1/2)f''d[X]。另一方面转换公式∫f'(X)∘dX=∫f'(X)dX+(1/2)[f'(X),X]，按链式二次协变差得到d[f'(X),X]=f''(X)d[X]，两种形式一致。",
+          "tex": "df(X_t)=f'(X_t)\\circ dX_t=f'(X_t)\\,dX_t+\\tfrac12 f''(X_t)\\,d[X]_t"
+        },
+        {
+          "explanation": "用Stratonovich与Itô转换规则替换b(X)∘dW=b(X)dW+(1/2)d[b(X),W]。对C¹扩散b，协变差满足d[b(X),W]=b'(X)b(X)dt，因此Itô漂移应加上(1/2)bb'。在b(x)=σx时bb'=σ²x，得到GBM漂移换算。",
+          "tex": "a_{\\mathrm{Ito}}(x)=a_{\\mathrm{Strat}}(x)+\\tfrac12b(x)b'(x),\\quad b(x)=\\sigma x"
+        }
+      ],
+      "deep_sections": [
+        {
+          "title": "中点和式与积分约定",
+          "question": "为什么同一条Brownian路径使用中点和左端和式会产生不同的随机积分？",
+          "paragraphs": [
+            "Stratonovich积分常以对称或中点型随机和定义；对连续半鞅被积过程H，区间首尾取值的平均值乘以Brownian增量。相比之下，Itô积分严格使用左端已知的H值，二者的差来自交叉二次协变差。",
+            "当H足够规则且自身为连续半鞅时，对称和式收敛到Stratonovich积分；这个定义不能随意推广为任意可预测平方可积H都存在的Stratonovich积分，需明确积分结构和收敛方式。"
+          ],
+          "formulas": [
+            {
+              "label": "中点和式与积分约定",
+              "tex": "\\int_0^TH_t\\circ dW_t=\\lim_{|\\Pi|\\to0}\\sum_i\\frac{H_{t_i}+H_{t_{i+1}}}{2}(W_{t_{i+1}}-W_{t_i})"
+            }
+          ],
+          "proof": "将每项平均系数写为H_{t_i}+(H_{t_{i+1}}−H_{t_i})/2。因此对称和式=左端Itô和式+(1/2)ΣΔH_iΔW_i。对连续半鞅H，第一部分收敛到Itô积分，第二部分由协变差分割极限收敛到[H,W]_T/2，得到严格转换公式。",
+          "worked": "若H_t=W_t，T=1，则对称和式每项为(W_i+W_{i+1})ΔW_i/2=(W_{i+1}²−W_i²)/2，求和恰为W_1²/2。",
+          "limitation": "数学上的对称积分需要区分计算规则与真实交易可预测性；右端观测数据用于数值逼近并不意味着实盘头寸可以提前知道未来价格。"
+        },
+        {
+          "title": "Itô与Stratonovich转换的协变差项",
+          "question": "两个积分怎样在连续半鞅被积过程下精确换算？",
+          "paragraphs": [
+            "对连续半鞅H和Brownian W，Stratonovich积分等于Itô积分加二次协变差的一半。这个修正并非人为调整均值，而是来自高频对称和式和左端和式之间留下的非零二阶交叉增量。",
+            "若H是确定性光滑有限变差函数，则[H,W]=0，两个积分相同；如果H本身包含Brownian驱动，通常会有非零修正，不能把所有积分都换成普通微积分。"
+          ],
+          "formulas": [
+            {
+              "label": "Itô与Stratonovich转换的协变差项",
+              "tex": "\\int_0^TH_t\\circ dW_t=\\int_0^TH_t\\,dW_t+\\tfrac12[H,W]_T"
+            }
+          ],
+          "proof": "沿相同网格，Stratonovich对称和与Itô左端和之差为(1/2)Σ(H_{i+1}−H_i)(W_{i+1}−W_i)。对连续半鞅应用二次协变差的概率收敛定义得到(1/2)[H,W]_T，从而得转换等式。",
+          "worked": "H_t=W_t且T=1时[H,W]_1=1，Itô积分为(W_1²−1)/2，修正后为W_1²/2。若H_t=t，协变差为0，两个积分相同。",
+          "limitation": "对非连续跳跃半鞅，需要明确采用何种对称积分和跳跃修正约定；本课结论只对连续半鞅积分结构陈述。"
+        },
+        {
+          "title": "普通链式法则与Itô二阶修正",
+          "question": "为什么Stratonovich积分能够保留形式上类似普通微积分的链式法则？",
+          "paragraphs": [
+            "对光滑函数f及连续半鞅X，Stratonovich形式写作df(X_t)=f'(X_t)∘dX_t，没有单独出现二阶Itô修正；二阶影响已被隐藏在对称积分的定义中。",
+            "相同过程改用Itô形式时必须显式添加(1/2)f''(X_t)d[X]_t。两种写法描述同一个过程，没有一种比另一种天然包含更多可交易利润或预测信息。"
+          ],
+          "formulas": [
+            {
+              "label": "普通链式法则与Itô二阶修正",
+              "tex": "df(X_t)=f'(X_t)\\circ dX_t=f'(X_t)\\,dX_t+\\tfrac12 f''(X_t)\\,d[X]_t"
+            }
+          ],
+          "proof": "先对光滑f与连续半鞅X应用Itô公式df=f'dX+(1/2)f''d[X]。另一方面转换公式∫f'(X)∘dX=∫f'(X)dX+(1/2)[f'(X),X]，按链式二次协变差得到d[f'(X),X]=f''(X)d[X]，两种形式一致。",
+          "worked": "对f(x)=x²且X=W，Stratonovich形式d(W²)=2W∘dW；改写成Itô得到d(W²)=2W dW+dt，二者在t=1积分后均等于W_1²。",
+          "limitation": "形式上普通的链式法则不意味着Stratonovich积分是逐路径普通Riemann–Stieltjes积分；Brownian仍具有无穷变差。"
+        },
+        {
+          "title": "SDE漂移转换和GBM示例",
+          "question": "为什么更换随机积分约定后，必须同时更改模型漂移才能保持相同的价格过程？",
+          "paragraphs": [
+            "在一维光滑系数下，Stratonovich SDE dX=a_str(X)dt+b(X)∘dW与Itô SDE dX=[a_str(X)+(1/2)b(X)b'(X)]dt+b(X)dW描述同一个过程。",
+            "对GBM的b(x)=σx，附加修正为σ²x/2。因此若Itô模型真实漂移为μx，对应Stratonovich模型的漂移必须为(μ−σ²/2)x；仅改积分符号而不改漂移会生成不同的价格分布。"
+          ],
+          "formulas": [
+            {
+              "label": "SDE漂移转换和GBM示例",
+              "tex": "a_{\\mathrm{Ito}}(x)=a_{\\mathrm{Strat}}(x)+\\tfrac12b(x)b'(x),\\quad b(x)=\\sigma x"
+            }
+          ],
+          "proof": "用Stratonovich与Itô转换规则替换b(X)∘dW=b(X)dW+(1/2)d[b(X),W]。对C¹扩散b，协变差满足d[b(X),W]=b'(X)b(X)dt，因此Itô漂移应加上(1/2)bb'。在b(x)=σx时bb'=σ²x，得到GBM漂移换算。",
+          "worked": "若GBM Itô漂移μ_Ito=0.08、波动率σ=0.2，则对应Stratonovich漂移系数μ_Strat=0.08−0.2²/2=0.06；不应把两者都写成0.08。",
+          "limitation": "对于状态依赖且不光滑的扩散、多个相关Brownian驱动或跳跃过程，漂移修正形式须进一步核查，不能只套一维常数σ的GBM公式。"
+        }
+      ],
+      "example": "对标准布朗H=W、T=1，Itô积分为(W_1²−1)/2，Stratonovich积分为W_1²/2，两者相差1/2。GBM的Itô漂移μ=0.08、波动率σ=0.2，改写成相同过程的Stratonovich形式时漂移系数变成0.06。",
+      "application": "用于对照随机微分方程的Itô与Stratonovich建模、模拟积分约定、状态依赖扩散及金融连续时间价格动力学；尤其可用于核查数学模型转换时的额外漂移项。",
+      "caveat": "Stratonovich形式的普通链式法则不允许提前使用未来价格做真实交易决策。多维相关驱动、跳跃过程及非光滑系数需要特定转换公式，不能把一维GBM的漂移修正生搬硬套。",
+      "links": [
+        {
+          "kind": "math",
+          "id": "ito-n0307",
+          "label": "先修：Itô积分构造"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0308",
+          "label": "已有完整课：Itô等距"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0311",
+          "label": "先修：二次协变差"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0306",
+          "label": "对照：几何布朗运动"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 15.070J Advanced Stochastic Processes：Lecture 14–17积分约定及Itô微积分",
+          "url": "https://ocw.mit.edu/courses/15-070j-advanced-stochastic-processes-fall-2013/pages/lecture-notes/"
+        },
+        {
+          "title": "MIT 15.070J Advanced Stochastic Processes：Lecture 8二次变差与Lecture 19金融应用",
+          "url": "https://www.ocw.mit.edu/courses/15-070j-advanced-stochastic-processes-fall-2013/resources/lecture-notes/"
+        }
+      ],
+      "checked_status": "V13完整Stratonovich：四节积分约定、协变差修正、链式法则及SDE转换"
     }
   ]
 }
