@@ -1,0 +1,475 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "linear-n0076",
+      "node_id": "linear-n0076",
+      "title": "Gram-Schmidt",
+      "definition": "Gram–Schmidt 正交化把一组线性无关的有序列向量逐个转换为张成相同子空间的标准正交向量。它不是简单地把各向量长度归一化，而是先去除当前向量在先前正交基上的投影，再归一化剩余分量；由此构成 QR 分解，并解释最小二乘为什么能够不显式形成正规方程。",
+      "assumptions": "取实内积空间 Rⁿ 及欧氏内积，原始列向量 a₁,…,a_p 线性无关，且 p≤n。对于线性相关输入，某一步残差 u_j=0，经典算法无法归一化；数值数据中的近线性相关还需考虑舍入、重新正交化与秩揭示策略。",
+      "properties": [
+        "得到的 q_j 满足 q_iᵀq_j=δ_ij，前 j 个 q 与前 j 个 a 张成同一子空间。",
+        "向量分解系数 r_ij=q_iᵀa_j 构成上三角矩阵 R，其对角项 r_jj=||u_j||₂>0。",
+        "经典 Gram–Schmidt 和改进 Gram–Schmidt 在精确算术下等价，但浮点计算中对接近相关列的正交性保持存在差异。",
+        "当某一步 u_j=0 时代表新增列没有增加精确秩，应停止或采取秩揭示分解，而不是把除零结果作为新方向。"
+      ],
+      "formulas": [
+        {
+          "label": "去投影剩余",
+          "tex": "u_j=a_j-\\sum_{i=1}^{j-1}(q_i^\\top a_j)q_i"
+        },
+        {
+          "label": "正交基递推",
+          "tex": "q_j=\\frac{u_j}{\\|u_j\\|_2},\\qquad u_j\\ne0"
+        },
+        {
+          "label": "QR系数",
+          "tex": "r_{ij}=q_i^\\top a_j\\ (i<j),\\quad r_{jj}=\\|u_j\\|_2"
+        },
+        {
+          "label": "张成空间和正交条件",
+          "tex": "\\operatorname{span}(a_1,\\dots,a_j)=\\operatorname{span}(q_1,\\dots,q_j),\\quad Q^\\top Q=I"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从 a₁ 归一化得到 q₁。对第二列，减去 q₁ 方向的投影；对后续列，依次减去所有已构造 q_i 的投影。每一步只使用已存在的标准正交基。",
+          "tex": "q_i^\\top u_j=q_i^\\top a_j-\\sum_{k<j}(q_k^\\top a_j)\\delta_{ik}=0\\quad(i<j)"
+        },
+        {
+          "explanation": "由 u_j 与前 j−1 个方向正交且 a_j 不在先前张成空间，得 u_j≠0。归一化使 ||q_j||=1，并继承对前面向量的正交性。",
+          "tex": "\\|q_j\\|_2=1,\\qquad q_i^\\top q_j=0\\quad(i<j)"
+        },
+        {
+          "explanation": "每一个原始 a_j 都可由前 j 个 q_i 表出；将相应系数排列成上三角 R，得到 A=QR。对角线为去投影后的非零长度。",
+          "tex": "a_j=\\sum_{i<j}r_{ij}q_i+r_{jj}q_j,\\qquad A=QR"
+        },
+        {
+          "explanation": "采用改进 Gram–Schmidt 时，前一步投影被扣除后再用更新的残差计算下一项内积；精确运算结果与批量投影一致，但舍入传播路径不同。",
+          "tex": "v^{(i+1)}=v^{(i)}-(q_i^\\top v^{(i)})q_i"
+        }
+      ],
+      "example": "取 a₁=(1,1,0)ᵀ，a₂=(1,0,1)ᵀ。q₁=(1,1,0)/√2，r₁₂=q₁ᵀa₂=1/√2，u₂=a₂−r₁₂q₁=(1/2,−1/2,1)ᵀ，||u₂||₂=√(3/2)，q₂=(1,−1,2)/√6。于是 R=[[√2,1/√2],[0,√(3/2)]]，QᵀQ=I₂，并可逐列验证 QR=[a₁,a₂]。",
+      "application": "在高度相关的ETF因子矩阵中，正交化可用于理解条件数和QR最小二乘；实际数值计算更常用 Householder QR 或带列主元 QR 来改善稳定性和判断有效秩。因子正交化依赖列顺序，不能把算法产生的 q_i 直接解释为唯一的经济风险因子。",
+      "caveat": "标准 Gram–Schmidt 不会增加原始数据的统计信息，正交基的具体方向受列次序及符号选取影响。对于几乎相关的列，浮点舍入会造成 q_iᵀq_j 偏离零；训练集的正交化也不能直接用未来数据重新拟合。",
+      "deep_sections": [
+        {
+          "title": "投影之后为什么还要做 Gram–Schmidt",
+          "question": "现有的几组相关向量怎样改造成可直接求坐标的基？",
+          "paragraphs": [
+            "普通列向量虽然可能线性无关，但它们互相重叠，直接计算向量在其中的系数需要求解耦合方程。标准正交基的内积矩阵是 I，任何向量沿各方向的投影系数可以通过单独内积计算。",
+            "Gram–Schmidt 的关键是逐步减去当前列落在先前子空间上的部分，再把剩余方向归一化。它保持逐步扩展的张成空间不变，因而是一种换基而非删除信息的操作。"
+          ],
+          "formulas": [
+            {
+              "label": "标准正交条件",
+              "tex": "Q_j^\\top Q_j=I_j"
+            }
+          ],
+          "proof": "用归纳法：前 j−1 个向量已标准正交，新 u_j 对任意 q_i 的内积为 q_iᵀa_j−Σ_k(q_kᵀa_j)δ_ik=0；归一化后得到新的单位向量且保持正交。",
+          "worked": "a₁=(1,1,0)、a₂=(1,0,1) 时，直接内积 a₁ᵀa₂=1 不为零，扣去第一方向投影后 u₂=(0.5,−0.5,1)，恰好满足 a₁ᵀu₂=0。",
+          "limitation": "原始列依赖时 u_j=0，标准正交基数量应等于秩而非原始列数。"
+        },
+        {
+          "title": "上三角 R 与精确矩阵分解",
+          "question": "为什么去投影系数自然构成上三角阵？",
+          "paragraphs": [
+            "计算第 j 列时只允许使用 q₁,…,q_j，因此 a_j 的表示不含后续的 q_{j+1}。将 r_ij 按列整理，便形成 i>j 时为零的上三角阵 R。",
+            "若原始列满秩，r_jj=||u_j||>0，R 可逆。该结构使最小二乘可经 Qᵀy 和三角回代求解，并将几何正交与计算算法联系起来。"
+          ],
+          "formulas": [
+            {
+              "label": "QR分解",
+              "tex": "A=QR,\\quad Q^\\top Q=I_p,\\quad R\\text{ 上三角}"
+            }
+          ],
+          "proof": "将 a_j 表为 Σ_{i<j}(q_iᵀa_j)q_i+||u_j||q_j，对所有 j 拼接得到 QR；每个 r_jj>0，因为满秩保证 u_j≠0。",
+          "worked": "示例的 R=[[√2,1/√2],[0,√(3/2)]]；其第二列给出 q₁/√2+√(3/2)q₂=(1,0,1)，复原原始 a₂。",
+          "limitation": "列主元或其他 QR 算法可能改变列次序与 R 的符号约定，应保留置换矩阵解释。"
+        },
+        {
+          "title": "经典与改进算法的数值差别",
+          "question": "精确等价的投影公式为何有不同的浮点误差？",
+          "paragraphs": [
+            "经典 Gram–Schmidt 往往用原始 a_j 分别计算相对于既有 q_i 的投影，再统一相减。改进版本则每扣除一次投影，就基于更新的残差继续投影，通常改善接近相关时的正交性保持。",
+            "仍需注意改进算法并非无条件稳定。高度病态问题中可以重复正交化或采用 Householder 变换；数值试验应报告 ||QᵀQ−I||，而不是只验证 A≈QR。"
+          ],
+          "formulas": [
+            {
+              "label": "正交性诊断",
+              "tex": "\\delta_{\\mathrm{orth}}=\\|Q^\\top Q-I\\|_F"
+            }
+          ],
+          "proof": "精确算术中两个算法都实现对同一子空间的连续正交投影。浮点内积和相减有舍入误差，尤其当剩余向量长度接近机器精度时，前面方向上的残留分量会被归一化放大。",
+          "worked": "对完全相同的两列，第二次残差为0；若第二列只差10^{-12}量级，结果对数值精度非常敏感，不能将得到的微小方向自动视为独立经济因子。",
+          "limitation": "正交性诊断的尺度应结合机器精度、原矩阵条件数和算法实现评价。"
+        },
+        {
+          "title": "金融数据的正交化与特征泄漏",
+          "question": "正交基是否能直接当作经济上独立的风险因子？",
+          "paragraphs": [
+            "正交化只在给定训练样本的欧氏内积中消除了线性重叠，不会自动保证未来分布中的独立性或不相关性。变换系数随特征列顺序变化，也不能把所得 q_i 当作客观唯一的经济因素。",
+            "在滚动训练中，正交变换本身必须由训练期估计并在之后冻结。若每次用未来样本共同重新估计 Q，就改变了过去模型可用的信息集。"
+          ],
+          "formulas": [
+            {
+              "label": "训练期内积",
+              "tex": "Q_{\\mathrm{train}}^\\top Q_{\\mathrm{train}}=I"
+            }
+          ],
+          "proof": "若 Q 由 t 之前历史回报构成，式子只表达该历史窗口的线性正交。下一期数据通常不与相同方向完全正交，因此未来检验不能按训练恒等式替代。",
+          "worked": "先对宽基和行业ETF特征做训练期QR，再在下一滚动窗口检验预测稳定性；如果市场相关结构变化，原正交方向可以失去稳定性。",
+          "limitation": "不同采样日期、交易时点和标准化单位会改变 QR；不能把秩诊断独立于数据口径。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "linear-n0075",
+          "label": "先修：正交投影"
+        },
+        {
+          "kind": "math",
+          "id": "linear-n0077",
+          "label": "下一讲：QR分解"
+        },
+        {
+          "kind": "math",
+          "id": "linear-n0078",
+          "label": "应用：最小二乘几何"
+        },
+        {
+          "kind": "ml",
+          "id": "m07-c06-p02",
+          "label": "应用：谱诊断与求解稳定性"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 18.06SC Orthogonal Matrices and Gram–Schmidt",
+          "url": "https://ocw.mit.edu/courses/18-06sc-linear-algebra-fall-2011/pages/least-squares-determinants-and-eigenvalues/orthogonal-matrices-and-gram-schmidt/"
+        },
+        {
+          "title": "MIT 18.335J Week 4 QR and Gram–Schmidt Stability",
+          "url": "https://ocw.mit.edu/courses/18-335j-introduction-to-numerical-methods-spring-2019/pages/week-4/"
+        }
+      ],
+      "checked_status": "完整数学精讲：逐步正交化、上三角R、数值正交性、金融因子信息集"
+    },
+    {
+      "id": "linear-n0077",
+      "node_id": "linear-n0077",
+      "title": "QR分解",
+      "definition": "QR 分解将满列秩矩阵 X∈R^{n×p} 写成具有标准正交列的 Q 和可逆上三角 R 的乘积，直接分离列空间几何和系数坐标。利用 QᵀQ=I，最小二乘可化为 Rβ=Qᵀy 的三角求解，避免显式形成病态的 XᵀX；它与 Gram–Schmidt、Householder 变换和最小二乘数值稳定性形成完整链条。",
+      "assumptions": "讨论精简 QR：n≥p 且 rank(X)=p，Q∈R^{n×p}，R∈R^{p×p}。对于秩亏或 n<p 的系统，仍可构造更一般的分解，但最小二乘或最小范数解必须处理零对角元素、列主元或直接使用 SVD；QR 本身不保证解决统计内生性。",
+      "properties": [
+        "满列秩薄 QR 满足 QᵀQ=I_p 且 R 上三角可逆；若要求 R 对角为正，可在非退化情形固定符号歧义。",
+        "OLS 等价于求解 Rβ̂=Qᵀy，残差为 (I−QQᵀ)y，最小 RSS 等于 ||y||²−||Qᵀy||²。",
+        "显式计算 XᵀX 会产生 κ₂(X)² 的条件数，而 QR 方法不必先构造该矩阵；Householder QR 通常比经典 Gram–Schmidt 更适合作为通用数值实现。",
+        "经济解释依赖 X 的原始特征定义，Q 的列不一定是唯一或稳定的经济因子；满秩性不意味着预测误差是白噪声。"
+      ],
+      "formulas": [
+        {
+          "label": "薄QR",
+          "tex": "X=QR,\\quad Q^\\top Q=I_p,\\quad R\\in\\mathbb R^{p\\times p}\\text{ 上三角}"
+        },
+        {
+          "label": "QR最小二乘",
+          "tex": "\\widehat\\beta=R^{-1}Q^\\top y\\quad\\text{（实际通过回代求解）}"
+        },
+        {
+          "label": "残差与投影",
+          "tex": "\\widehat y=QQ^\\top y,\\quad e=(I-QQ^\\top)y"
+        },
+        {
+          "label": "RSS勾股分解",
+          "tex": "\\|y-X\\widehat\\beta\\|_2^2=\\|y\\|_2^2-\\|Q^\\top y\\|_2^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由于 X=QR 且 R 可逆，col(X)=col(Q)。任意拟合值 Xβ=Q(Rβ) 落在列空间内，故目标是投影 y 到 Q 的列空间。",
+          "tex": "\\min_\\beta\\|y-QR\\beta\\|_2^2=\\min_z\\|y-Qz\\|_2^2"
+        },
+        {
+          "explanation": "将 y 分为 QQᵀy 与 (I−QQᵀ)y，残差与 Q 列空间正交。对平方范数使用勾股分解，最优 z=Qᵀy，因此 Rβ̂=Qᵀy。",
+          "tex": "\\|y-QR\\beta\\|^2=\\|(I-QQ^\\top)y\\|^2+\\|Q^\\top y-R\\beta\\|^2"
+        },
+        {
+          "explanation": "满列秩保证 R 对角非零；通过反向代入求解上三角方程，无需显式求逆矩阵。数值实现时先用稳定的 Householder QR，再做三角系统求解。",
+          "tex": "R\\widehat\\beta=Q^\\top y,\\qquad r_{jj}\\ne0"
+        },
+        {
+          "explanation": "样本内残差 e 与 Q 列空间正交。P=QQᵀ是对称幂等投影，与 X(XᵀX)⁻¹Xᵀ等价，但 QR 避免构造正规方程的平方病态。",
+          "tex": "P_X=QQ^\\top=X(X^\\top X)^{-1}X^\\top"
+        }
+      ],
+      "example": "取 X=[[1,1],[1,−1],[0,0]]（3×2），Q=1/√2·[[1,1],[1,−1],[0,0]]，R=diag(√2,√2)。令 y=(2,0,3)ᵀ，则 Qᵀy=(√2,√2)ᵀ，回代 Rβ̂=Qᵀy 得 β̂=(1,1)ᵀ，拟合 ŷ=(2,0,0)ᵀ，残差 e=(0,0,3)ᵀ，RSS=9；||y||²=13、||Qᵀy||²=4，因此 13−4=9。",
+      "application": "对于 ETF 面板回归、因子中性化和大规模最小二乘，QR 是分析数值误差和设计矩阵秩的基本工具。对于稀疏、高维或病态样本，可对比带列主元的 QR、SVD 和带惩罚的求解器，并分别评价算法误差与统计预测误差。",
+      "caveat": "QR 可以改善求解中的浮点稳定性，却无法消除数据自身的高方差或未来市场变化。带列主元分解满足 XP=QR，必须记录置换；列亏时简单回代的满秩公式失效。",
+      "deep_sections": [
+        {
+          "title": "从正交基到最小二乘为何更简单",
+          "question": "使用QR为何不需要显式形成XᵀX？",
+          "paragraphs": [
+            "原始X的列可能互相相关，正规方程涉及整个Gram矩阵XᵀX。换成同列空间正交基Q后，QᵀQ=I，最佳拟合的列空间坐标直接是Qᵀy。",
+            "因X=QR，原始回归系数是把这些正交坐标通过R的三角系统转换回来。这样将几何投影与代数回代分开，计算方法更加明确。"
+          ],
+          "formulas": [
+            {
+              "label": "最小二乘三角方程",
+              "tex": "R\\widehat\\beta=Q^\\top y"
+            }
+          ],
+          "proof": "把y分解为QQᵀy与正交残差。||y−QRβ||²等于不受β影响的残差平方，加上||Qᵀy−Rβ||²；后者最小值在Rβ=Qᵀy取得。",
+          "worked": "在X=[[1,1],[1,−1],[0,0]]、y=(2,0,3)的算例，Qᵀy=(√2,√2)，回代得到β=(1,1)，可以直接验证Xβ=(2,0,0)。",
+          "limitation": "当R奇异时不存在满秩回代的唯一系数解，应改用秩揭示QR或SVD。"
+        },
+        {
+          "title": "残差与平方和分解如何统一",
+          "question": "QR在拟合值唯一性和RSS计算上提供什么信息？",
+          "paragraphs": [
+            "投影矩阵QQᵀ只取决于列空间，故无论Q选择哪个标准正交基，训练拟合值都相同。残差是y在正交补上的分量，与Q的每一列垂直。",
+            "由于投影与残差正交，||y||²分解为||Qᵀy||²与||e||²。即使X中包含很强相关的列，也可以在足够稳定的QR计算中利用这一关系验证数值结果。"
+          ],
+          "formulas": [
+            {
+              "label": "平方和与残差",
+              "tex": "\\|y\\|^2=\\|Q^\\top y\\|^2+\\|(I-QQ^\\top)y\\|^2"
+            }
+          ],
+          "proof": "QᵀQ=I且P=QQᵀ对称幂等，故||Py||²=yᵀQQᵀy=||Qᵀy||²；正交投影定理给出原始向量范数分解。",
+          "worked": "同一示例y=(2,0,3)，||y||²=13，投影平方范数为4，残差平方范数为9；三者满足13=4+9。",
+          "limitation": "无截距模型的RSS仍可通过投影计算，但传统以去均值TSS定义的R²分解需要单独核对。"
+        },
+        {
+          "title": "经典Gram–Schmidt、Householder和列主元",
+          "question": "为什么真正的QR求解器不必逐列照搬课堂算法？",
+          "paragraphs": [
+            "Gram–Schmidt 便于理解投影，但对几乎相关的列，经典形式在浮点条件下可能丢失正交性。Householder 反射通过正交变换逐步消去元素，在标准数值线性代数库中通常更稳定。",
+            "带列主元 QR 在分解过程中选择更适合的列顺序并记录置换矩阵，帮助识别有效秩；这属于数值秩判定，而不是经济上自动优选因子。"
+          ],
+          "formulas": [
+            {
+              "label": "带主元QR",
+              "tex": "XP=QR,\\quad P^\\top P=I"
+            }
+          ],
+          "proof": "Householder反射H=I−2vvᵀ/(vᵀv)满足HᵀH=I，因此连续反射保留欧氏范数，便于控制整体舍入误差传播。",
+          "worked": "若原始列a₂与a₁仅差10^{-10}，经典投影相减可能严重丢失有效数字；带列主元QR可报告小对角r_jj以提示秩风险。",
+          "limitation": "数值稳定依赖算法、实现与机器精度；稳定算法不会增加不存在的信息，也不等于正则化。"
+        },
+        {
+          "title": "金融回归与模型评估的最后边界",
+          "question": "使用QR成功求解之后，还需要检查哪些风险？",
+          "paragraphs": [
+            "QR解决的是给定X、y的数值最小二乘问题，并未规定y是否由合法预测信息集生成。若训练特征包含测试区均值或收益标签重叠，任何稳定分解都不能挽救统计前视错误。",
+            "应把QR残差检验、条件数诊断和时间外预测分别记录。一个算法的数值残差很小，只能支持求解器对当前目标的正确性，不说明回归产生可交易信号。"
+          ],
+          "formulas": [
+            {
+              "label": "数值相对残差",
+              "tex": "\\eta_{\\mathrm{LS}}=\\frac{\\|X^\\top(y-X\\widehat\\beta)\\|_2}{\\|X\\|_2\\|y\\|_2}"
+            }
+          ],
+          "proof": "最小二乘最优性条件要求Xᵀe=0。数值解在机器精度下可把该量作为诊断之一，但它受X与y尺度影响，必要时采用更稳健的归一化口径。",
+          "worked": "训练窗内QR解的Xᵀe≈0，不表示下一期收益预测误差仍与同期ETF特征正交；这需要额外样本外检验。",
+          "limitation": "如果X或y为零，展示的相对残差分母可能为零，应改用绝对残差或另定尺度。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "linear-n0076",
+          "label": "先修：Gram–Schmidt"
+        },
+        {
+          "kind": "math",
+          "id": "linear-n0078",
+          "label": "应用：最小二乘几何"
+        },
+        {
+          "kind": "math",
+          "id": "linear-n0085",
+          "label": "延伸：伪逆与秩亏"
+        },
+        {
+          "kind": "ml",
+          "id": "m07-c06-p02",
+          "label": "机器学习：数值病态与谱诊断"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 18.065 Lecture 9: Four Ways to Solve Least Squares",
+          "url": "https://ocw.mit.edu/courses/18-065-matrix-methods-in-data-analysis-signal-processing-and-machine-learning-spring-2018/resources/lecture-9-four-ways-to-solve-least-squares-problems/"
+        },
+        {
+          "title": "MIT 18.335J Week 4: QR and Conditioning",
+          "url": "https://ocw.mit.edu/courses/18-335j-introduction-to-numerical-methods-spring-2019/pages/week-4/"
+        }
+      ],
+      "checked_status": "完整数学精讲：QR最小二乘、残差分解、Householder与列主元、点时预测边界"
+    },
+    {
+      "id": "linear-n0085",
+      "node_id": "linear-n0085",
+      "title": "Moore-Penrose伪逆",
+      "definition": "Moore–Penrose 伪逆 A⁺是任意实矩阵 A 的规范化广义逆，由四个 Penrose 方程唯一刻画，并可通过 SVD 对正奇异值求倒数构造。它不仅扩展普通逆的计算，还严格区分秩亏最小二乘的唯一拟合向量与可能不唯一的系数，选出其中欧氏范数最小的一组系数。",
+      "assumptions": "设 A∈R^{m×n}、rank(A)=r，取紧 SVD A=U_rΣ_rV_rᵀ，Σ_r 的对角元素均严格正。零矩阵的伪逆定义为相应维度的零矩阵。最小范数结论使用欧氏二范数；若对参数增加非均匀权重或经济约束，则所选解可能不同。",
+      "properties": [
+        "唯一的A⁺满足AA⁺A=A、A⁺AA⁺=A⁺、(AA⁺)ᵀ=AA⁺、(A⁺A)ᵀ=A⁺A。",
+        "AA⁺=U_rU_rᵀ是到col(A)的正交投影；A⁺A=V_rV_rᵀ是到row(A)的正交投影。",
+        "A⁺y是最小二乘最优系数中欧氏范数最小者，拟合AA⁺y唯一，其他最优解加上任意零空间向量。",
+        "当 A 可逆时 A⁺=A⁻¹；小但非零奇异值的倒数会放大噪声，因此伪逆不是无条件数值稳定的万能修复。"
+      ],
+      "formulas": [
+        {
+          "label": "SVD构造伪逆",
+          "tex": "A=U_r\\Sigma_rV_r^\\top,\\qquad A^+=V_r\\Sigma_r^{-1}U_r^\\top"
+        },
+        {
+          "label": "四个Penrose条件",
+          "tex": "AA^+A=A,\\quad A^+AA^+=A^+,\\quad(AA^+)^\\top=AA^+,\\quad(A^+A)^\\top=A^+A"
+        },
+        {
+          "label": "列空间与行空间投影",
+          "tex": "AA^+=U_rU_r^\\top,\\qquad A^+A=V_rV_r^\\top"
+        },
+        {
+          "label": "全部最小二乘最优系数",
+          "tex": "\\widehat\\beta=A^+y+(I-A^+A)z,\\quad z\\in\\mathbb R^n"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "紧SVD把A映射限制在r个非零奇异方向，逐项对σ_i求倒数构造A⁺。非零方向被恢复，零空间方向不发生非法除零。",
+          "tex": "A^+=\\sum_{i=1}^{r}\\sigma_i^{-1}v_iu_i^\\top"
+        },
+        {
+          "explanation": "将SVD分别代入AA⁺和A⁺A，利用U_rᵀU_r=V_rᵀV_r=I_r得两个正交投影；投影对称幂等，进一步验证四个Penrose方程。",
+          "tex": "AA^+=U_rU_r^\\top,\\quad A^+A=V_rV_r^\\top"
+        },
+        {
+          "explanation": "最小二乘拟合必为Py=AA⁺y；任意其他达到同一拟合的β满足A(β−A⁺y)=0，故差属于ker(A)，写为(I−A⁺A)z。",
+          "tex": "A\\widehat\\beta=AA^+y\\iff\\widehat\\beta-A^+y\\in\\ker(A)"
+        },
+        {
+          "explanation": "A⁺y位于row(A)，而(I−A⁺A)z位于ker(A)，两者正交，故任意额外零空间分量只会增加参数范数，得到最小范数性质。",
+          "tex": "\\|\\widehat\\beta\\|_2^2=\\|A^+y\\|_2^2+\\|(I-A^+A)z\\|_2^2"
+        }
+      ],
+      "example": "取 A=[[1,1],[1,1]]，其秩为1。伪逆A⁺=(1/4)[[1,1],[1,1]]，因此AA⁺=(1/2)[[1,1],[1,1]]。对 y=(2,0)ᵀ，得到最小范数解 β̂=A⁺y=(0.5,0.5)ᵀ，拟合ŷ=(1,1)ᵀ，残差e=(1,−1)ᵀ，RSS=2。任意满足β₁+β₂=1的系数均产生同一拟合，但范数最小的正是(0.5,0.5)。",
+      "application": "在多资产因子高度相关、特征维度高于训练样本数、信号中性化或低秩回归场景中，伪逆帮助定义可识别投影和数值基线。使用它预测前应检查奇异值截断容忍度、训练数据尺度及时间外估计稳定性。",
+      "caveat": "软件的pinv通常会依容差把极小奇异值视为零，其输出由数值阈值决定，不一定等于无限精度下的精确伪逆。选择最小欧氏范数系数是一种数学规范，不代表所有金融风险约束下的最优组合。",
+      "deep_sections": [
+        {
+          "title": "为什么广义逆不止是把奇异矩阵强行求逆",
+          "question": "没有唯一系数时应如何定义可重复的解？",
+          "paragraphs": [
+            "秩亏系统在零空间方向上无法区分不同参数，普通逆不存在。伪逆首先确定可以从数据中识别的行空间方向，对其按非零奇异值恢复；无法识别的零空间方向则赋予零系数。",
+            "这种定义使最小二乘的拟合值和最小范数解可以规范化，但并非忽略了不可识别性。应同时报告输入矩阵的秩与相应近零奇异值，而不是只输出单个系数向量。"
+          ],
+          "formulas": [
+            {
+              "label": "紧SVD伪逆",
+              "tex": "A^+=V_r\\Sigma_r^{-1}U_r^\\top"
+            }
+          ],
+          "proof": "A=U_rΣ_rV_rᵀ只在正奇异值方向起作用。对于输入y，先求U_rᵀy，再除以σ_i，最后由V_r映回系数空间，得到最小范数参数。",
+          "worked": "对A为2×2全1矩阵，唯一非零奇异值为2，单位左右奇异向量均为(1,1)/√2，因此A⁺=vvᵀ/2=(1/4)全1矩阵。",
+          "limitation": "若某个σ_i仅是数值上接近零，是否截断应按测量误差、条件数与计算容差评估。"
+        },
+        {
+          "title": "四个Penrose方程与唯一性",
+          "question": "为什么AA⁺、A⁺A分别是两个不同空间的投影？",
+          "paragraphs": [
+            "AA⁺作用于观测空间R^m，保留列空间分量；A⁺A作用于系数空间R^n，保留行空间分量。矩形矩阵时二者甚至维度不同，不能把它们误认为同一个单位阵。",
+            "两个投影均为对称幂等矩阵，四个方程分别刻画恢复一致性、逆的一致性和两侧正交投影。这四项共同选定规范的Moore–Penrose逆。"
+          ],
+          "formulas": [
+            {
+              "label": "左右投影",
+              "tex": "P_{\\operatorname{col}(A)}=AA^+,\\quad P_{\\operatorname{row}(A)}=A^+A"
+            }
+          ],
+          "proof": "代入A=U_rΣ_rV_rᵀ，乘积AA⁺=U_rΣ_rV_rᵀV_rΣ_r^{-1}U_rᵀ=U_rU_rᵀ；另一侧同理为V_rV_rᵀ。两者显然对称且幂等。",
+          "worked": "对全1矩阵A，AA⁺=A⁺A=[[0.5,0.5],[0.5,0.5]]；在一般m≠n的矩形例子里，两个投影大小不同。",
+          "limitation": "此处是实矩阵的转置；复矩阵应使用共轭转置，不能机械复制实矩阵符号。"
+        },
+        {
+          "title": "最小二乘解集合与最小范数选择",
+          "question": "为什么拟合向量唯一而系数可以无限多组？",
+          "paragraphs": [
+            "给定观测y，最佳拟合向量是到列空间的投影AA⁺y。只要两个参数相差A的零空间向量，它们产生的拟合完全一致，因此在秩亏系统中会出现无限多组系数。",
+            "由于行空间与零空间正交，伪逆解位于行空间且不含零空间分量，恰好是所有最优解中欧氏范数最小的一个。经济上的仓位上限或成本限制则可能更偏好其他解。"
+          ],
+          "formulas": [
+            {
+              "label": "零空间解族",
+              "tex": "\\widehat\\beta=A^+y+(I-A^+A)z"
+            }
+          ],
+          "proof": "设β₀=A⁺y为最小范数解。任意满足Aβ=Aβ₀的β都有A(β−β₀)=0；用正交投影I−A⁺A表达零空间分量，再由勾股关系证明||β||²≥||β₀||²。",
+          "worked": "A全1、y=(2,0)时，(1,0)与(0.5,0.5)产生同一拟合(1,1)，但平方范数分别是1与0.5，因此后者是最小范数。",
+          "limitation": "如果参数有不同的经济单位，简单欧氏最小范数随重新缩放而改变，必须先确定合理尺度。"
+        },
+        {
+          "title": "伪逆与Ridge极限的联系",
+          "question": "为什么很小的λ和精确伪逆在实际计算中不一定一样稳定？",
+          "paragraphs": [
+            "对Ridge表达式(XᵀX+nλI)⁻¹Xᵀy，在固定矩阵和固定数据下令λ趋于0，非零奇异值方向的滤波器趋于1/σ_i，零奇异值方向始终为零，因此趋于A⁺y。",
+            "然而当最小非零奇异值非常小，逼近极限同时会放大响应噪声；数值容差和正则强度会改变有限精度实现中的结果。Ridge与pinv并非相同的优化策略。"
+          ],
+          "formulas": [
+            {
+              "label": "Ridge到伪逆的极限",
+              "tex": "\\lim_{\\lambda\\downarrow0}(A^\\top A+\\lambda I)^{-1}A^\\top y=A^+y"
+            }
+          ],
+          "proof": "把A写成UΣVᵀ，谱系数σ_i/(σ_i²+λ)对σ_i>0趋于1/σ_i；对于σ_i=0始终为0。因此有限维求和允许逐项取极限。",
+          "worked": "若σ_i=0.01、λ=0.0001，Ridge滤波为0.01/(0.0001+0.0001)=50，伪逆滤波为100；即使λ数值很小，参数仍可能相差明显。",
+          "limitation": "该极限不表示持有期外风险或真实经济约束已被优化；只刻画固定样本上的最小范数最小二乘。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "linear-n0083",
+          "label": "先修：SVD"
+        },
+        {
+          "kind": "math",
+          "id": "linear-n0078",
+          "label": "先修：OLS几何"
+        },
+        {
+          "kind": "math",
+          "id": "linear-n0086",
+          "label": "后续：条件数"
+        },
+        {
+          "kind": "math",
+          "id": "regression-n0205",
+          "label": "后续：Ridge谱滤波"
+        },
+        {
+          "kind": "ml",
+          "id": "m07-c06-p02",
+          "label": "金融ML：数值秩诊断"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 18.065 Lecture 9: Four Ways to Solve Least Squares",
+          "url": "https://ocw.mit.edu/courses/18-065-matrix-methods-in-data-analysis-signal-processing-and-machine-learning-spring-2018/resources/lecture-9-four-ways-to-solve-least-squares-problems/"
+        },
+        {
+          "title": "Advanced Linear Algebra for Data Science, Moore–Penrose Pseudoinverse",
+          "url": "https://math.arizona.edu/~klin/412/Hamm-notes.pdf"
+        }
+      ],
+      "checked_status": "完整数学精讲：四个Penrose方程、正交投影、最小范数解集、Ridge极限"
+    }
+  ]
+}
