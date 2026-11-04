@@ -2202,6 +2202,781 @@
         }
       ],
       "checked_status": "V11严密讲义：四节完整定义、证明、数值检验、失效边界"
+    },
+    {
+      "id": "measure-n0125",
+      "node_id": "measure-n0125",
+      "title": "外测度初步",
+      "definition": "外测度是定义在底层集合所有子集上的非负集合函数，要求空集外测度为零、单调与可数次可加性。它无需先指定可测集合σ-代数，因而是从区间长度出发构造Lebesgue测度的桥梁。Carathéodory可测性准则选择那些使任意集合的外测度能够无损分割的集合，最终恢复真正可数可加的测度。",
+      "assumptions": "给定非空底层空间Ω及外测度μ*：P(Ω)→[0,∞]，满足μ*(∅)=0、单调性和可数次次可加性。在R上可用覆盖集合的可数开区间长度和的下确界构造λ*；Carathéodory可测集合需对所有T⊆Ω满足μ*(T)=μ*(T∩A)+μ*(T\\A)。该准则不是仅对某个固定T检验即可。",
+      "properties": [
+        "外测度对所有子集都有定义，但通常不是对全部子集可数可加的测度。",
+        "可数覆盖的长度和取下确界给出Lebesgue外测度，可用同一覆盖估计稀疏集合的大小。",
+        "Carathéodory准则所选集合构成σ-代数，外测度在其中成为完全测度。",
+        "区间外测度等于其长度；外测度为零的集合自动满足Carathéodory可测性。"
+      ],
+      "formulas": [
+        {
+          "label": "覆盖长度与外测度构造",
+          "tex": "\\lambda^*(A)=\\inf_{A\\subseteq\\bigcup_{j=1}^{\\infty}I_j}\\ \\sum_{j=1}^{\\infty}|I_j|"
+        },
+        {
+          "label": "可数次次可加性的ε-覆盖证明",
+          "tex": "\\lambda^*\\!\\left(\\bigcup_{n\\ge1}A_n\\right)\\le\\sum_{n\\ge1}\\lambda^*(A_n)"
+        },
+        {
+          "label": "Carathéodory可测性判据",
+          "tex": "A\\text{ 可测}\\iff \\forall T\\subseteq\\Omega:\\ \\mu^*(T)=\\mu^*(T\\cap A)+\\mu^*(T\\setminus A)"
+        },
+        {
+          "label": "区间长度与Lebesgue测度的过渡",
+          "tex": "\\lambda^*([a,b])=b-a\\qquad(a\\le b)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "首先固定A并枚举全部允许的可数开区间覆盖；每个覆盖提供一个非负总长度。将其下确界定义为λ*(A)。空集可用空覆盖取得0；若A⊆B，B的每个覆盖亦覆盖A，故λ*(A)≤λ*(B)。",
+          "tex": "\\lambda^*(A)=\\inf_{A\\subseteq\\bigcup_{j=1}^{\\infty}I_j}\\ \\sum_{j=1}^{\\infty}|I_j|"
+        },
+        {
+          "explanation": "当右侧有限时，逐个n选取覆盖满足费用<λ*(A_n)+ε2^{-n}；所有覆盖的并仍为可数覆盖，且总费用≤Σλ*(A_n)+ε。按λ*定义并让ε↓0，即得不等式。若右侧∞则结论平凡。",
+          "tex": "\\lambda^*\\!\\left(\\bigcup_{n\\ge1}A_n\\right)\\le\\sum_{n\\ge1}\\lambda^*(A_n)"
+        },
+        {
+          "explanation": "对互补事件A^c，准则两项互换，因此A^c也可测。对两个可测集合重复使用准则可得到并集可测；对可数互不相交可测集依次分解有限部分，再由外测度次可加和单调性控制余项，得到σ-代数与可数可加性。",
+          "tex": "A\\text{ 可测}\\iff \\forall T\\subseteq\\Omega:\\ \\mu^*(T)=\\mu^*(T\\cap A)+\\mu^*(T\\setminus A)"
+        },
+        {
+          "explanation": "单开区间(a−ε/2,b+ε/2)覆盖闭区间，故外测度≤b−a+ε。任意开覆盖先取有限子覆盖，利用区间在R上的长度次可加与紧性可证明其总长度至少b−a。令ε下降得等号。",
+          "tex": "\\lambda^*([a,b])=b-a\\qquad(a\\le b)"
+        }
+      ],
+      "example": "对有限点集{0,1/2}，任意小覆盖总长度证明外测度为零；闭区间[1,3]的外测度为2，虽然开覆盖(0.99,3.01)给出费用2.02。Carathéodory准则区分一般外测度与真正可加的测度。",
+      "application": "理解连续收益、资产状态事件可测性及外测度构造中从简单覆盖延伸到复杂事件的理论基础。",
+      "caveat": "外测度对每个集合有定义并不使每个集合自动可测；零测、不可测与概率小是不同概念。外测度次可加也不能替代可数可加性。",
+      "deep_sections": [
+        {
+          "title": "覆盖长度与外测度构造",
+          "question": "为什么先对所有实数子集取覆盖费用，而不先要求每个集合可测？",
+          "paragraphs": [
+            "对任何A⊆R，用可数个开区间覆盖A，计算各区间长度总和，然后在所有覆盖方案上取下确界。即便某个集合后来被证明非Lebesgue可测，覆盖费用λ*(A)仍然是有定义的扩展非负数。",
+            "这是一种由简单几何对象向复杂集合扩展的构造方式。取下确界时覆盖区间可以重叠，其费用只是候选上界，不应被误认为所选覆盖的每个区间均是互不相交。"
+          ],
+          "formulas": [
+            {
+              "label": "覆盖长度与外测度构造",
+              "tex": "\\lambda^*(A)=\\inf_{A\\subseteq\\bigcup_{j=1}^{\\infty}I_j}\\ \\sum_{j=1}^{\\infty}|I_j|"
+            }
+          ],
+          "proof": "首先固定A并枚举全部允许的可数开区间覆盖；每个覆盖提供一个非负总长度。将其下确界定义为λ*(A)。空集可用空覆盖取得0；若A⊆B，B的每个覆盖亦覆盖A，故λ*(A)≤λ*(B)。",
+          "worked": "对A={0,1/2}，分别用长度ε/2的开区间覆盖两个点，覆盖总长度ε，因此λ*(A)≤ε对每个ε>0成立，得到λ*(A)=0。",
+          "limitation": "覆盖总长度对一般集合只给外测度，不保证全部子集满足可加性；尤其不能对不可测集合进行随意的精确分割。"
+        },
+        {
+          "title": "可数次次可加性的ε-覆盖证明",
+          "question": "为何可数个集合之并的外测度至多是其外测度之和？",
+          "paragraphs": [
+            "对集合A_n，分别选择一个近乎最优的开区间覆盖，使其总长度不超过λ*(A_n)+ε2^{-n}。把全部覆盖区间收集到一起，便覆盖了∪A_n；因此并集外测度不超过各费用总和。",
+            "对任意ε>0所得的不等式令ε→0，就得到外测度的可数次次可加性。若其中某个λ*(A_n)无穷大，不等式自动成立，无需再做有限覆盖选择。"
+          ],
+          "formulas": [
+            {
+              "label": "可数次次可加性的ε-覆盖证明",
+              "tex": "\\lambda^*\\!\\left(\\bigcup_{n\\ge1}A_n\\right)\\le\\sum_{n\\ge1}\\lambda^*(A_n)"
+            }
+          ],
+          "proof": "当右侧有限时，逐个n选取覆盖满足费用<λ*(A_n)+ε2^{-n}；所有覆盖的并仍为可数覆盖，且总费用≤Σλ*(A_n)+ε。按λ*定义并让ε↓0，即得不等式。若右侧∞则结论平凡。",
+          "worked": "若A={0}、B={1}，两者外测度均0，并集{0,1}外测度也0。取0.01长度区间分别覆盖，得到费用0.02的一个上界，再令长度趋零。",
+          "limitation": "外测度次可加不等于测度可加；集合不互斥时尤其不能把各外测度的和直接当作并集外测度。"
+        },
+        {
+          "title": "Carathéodory可测性判据",
+          "question": "什么条件能把对所有集合定义的外测度限制成真正的测度？",
+          "paragraphs": [
+            "外测度天然保证μ*(T)≤μ*(T∩A)+μ*(T\\A)。若A对所有T都使这个不等式取等，则它不会在任何测试集合T上引入额外的测度损失，称A满足Carathéodory准则。",
+            "满足准则的所有A构成σ-代数，且在其中外测度可数可加。其证明依靠对补集、有限并的封闭与对不相交无限并的有限部分近似，不能只拿一个特例T证明可测。"
+          ],
+          "formulas": [
+            {
+              "label": "Carathéodory可测性判据",
+              "tex": "A\\text{ 可测}\\iff \\forall T\\subseteq\\Omega:\\ \\mu^*(T)=\\mu^*(T\\cap A)+\\mu^*(T\\setminus A)"
+            }
+          ],
+          "proof": "对互补事件A^c，准则两项互换，因此A^c也可测。对两个可测集合重复使用准则可得到并集可测；对可数互不相交可测集依次分解有限部分，再由外测度次可加和单调性控制余项，得到σ-代数与可数可加性。",
+          "worked": "若A是零外测度集合，则对任意T，0≤μ*(T∩A)≤μ*(A)=0，且μ*(T\\A)≤μ*(T)。外测度次可加给反向界，所以μ*(T)=μ*(T\\A)+0，A可测。",
+          "limitation": "Carathéodory准则要检验全部T而非只检验T=Ω；否则不能保证新集合与其他事件的分割可加性。"
+        },
+        {
+          "title": "区间长度与Lebesgue测度的过渡",
+          "question": "从覆盖构造怎样保证普通区间的几何长度被保留下来？",
+          "paragraphs": [
+            "对有界闭区间[a,b]，任一开区间覆盖可从紧性提取有限子覆盖，且有限覆盖的长度和至少为b−a；另一方面用稍大的单个开区间覆盖可把费用压到b−a+ε。",
+            "上下界合并得到λ*([a,b])=b−a。随后可以证明Borel集合满足可测性准则，所获测度在区间上与普通长度一致，并将零测集子集纳入完备化。"
+          ],
+          "formulas": [
+            {
+              "label": "区间长度与Lebesgue测度的过渡",
+              "tex": "\\lambda^*([a,b])=b-a\\qquad(a\\le b)"
+            }
+          ],
+          "proof": "单开区间(a−ε/2,b+ε/2)覆盖闭区间，故外测度≤b−a+ε。任意开覆盖先取有限子覆盖，利用区间在R上的长度次可加与紧性可证明其总长度至少b−a。令ε下降得等号。",
+          "worked": "区间[1,3]的Lebesgue外测度是3−1=2；把它放入开区间(0.99,3.01)，总长度2.02仅为一个覆盖上界，不等于真正外测度。",
+          "limitation": "这种长度构造在R及R^d需要分别使用区间或矩形覆盖；不能直接把金融事件的概率度量当作Lebesgue几何长度。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "measure-n0122",
+          "label": "Borel事件"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0123",
+          "label": "测度公理"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0126",
+          "label": "Lebesgue测度"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0124",
+          "label": "零测集"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 18.125 Measure and Integration：第1–9讲，外测度、Lebesgue测度与积分",
+          "url": "https://ocw.mit.edu/courses/18-125-measure-and-integration-fall-2003/pages/lecture-notes/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：第7–9讲，抽象积分与乘积测度",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V11完整讲义：四节数学证明、可复核数值与测度边界"
+    },
+    {
+      "id": "measure-n0126",
+      "node_id": "measure-n0126",
+      "title": "Lebesgue测度",
+      "definition": "Lebesgue测度把实数直线与欧氏空间中的长度、面积和体积推广到复杂可测集合。它从区间覆盖外测度出发，经Carathéodory准则得到完备的可测σ-代数，保留区间长度、平移不变性和可数可加性。与概率测度不同，整个实数直线的Lebesgue测度是无穷大。",
+      "assumptions": "在R上以开区间覆盖外测度λ*定义Lebesgue可测集合，记其σ-代数L(R)；限制后的测度为λ。λ([a,b])=b−a，λ(R)=∞。平移和尺度变换的几何公式要求映射与相应Lebesgue测度空间一致，缩放系数c=0时需单独处理。",
+      "properties": [
+        "区间长度、可数可加、完备性和平移不变性共同确定Lebesgue测度的基本结构。",
+        "Lebesgue可测集合包含Borel集及全部Lebesgue零测集的子集，通常严格大于Borel σ-代数。",
+        "可数集Lebesgue测度为零，Cantor三分集虽不可数仍可零测度。",
+        "Lebesgue测度在整个R上无限，不能套用全部概率测度的归一化积分和有限空间论断。"
+      ],
+      "formulas": [
+        {
+          "label": "从区间长度到完备测度",
+          "tex": "\\lambda([a,b])=b-a,\\quad\\lambda(\\mathbb R)=\\infty,\\quad\\lambda(\\varnothing)=0"
+        },
+        {
+          "label": "平移不变和尺度变换",
+          "tex": "\\lambda(A+h)=\\lambda(A),\\qquad\\lambda(cA)=|c|\\,\\lambda(A)\\quad(c\\ne0)"
+        },
+        {
+          "label": "零测与完备化",
+          "tex": "\\lambda(C)\\le(2/3)^n\\to0,\\qquad\\mathcal B(\\mathbb R)\\subsetneq\\mathcal L(\\mathbb R)"
+        },
+        {
+          "label": "测度与概率密度之间的关系",
+          "tex": "P(A)=\\int_A f\\,d\\lambda,\\quad f\\ge0,\\quad\\int_{\\mathbb R}f\\,d\\lambda=1"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "单区间覆盖给λ*([a,b])≤b−a，紧性与区间覆盖长度的下界给相反不等式。Carathéodory定理使这些区间及其可测生成集合上λ*可数可加；R由无穷多个单位区间并起，故λ(R)=∞。",
+          "tex": "\\lambda([a,b])=b-a,\\quad\\lambda(\\mathbb R)=\\infty,\\quad\\lambda(\\varnothing)=0"
+        },
+        {
+          "explanation": "若A由区间I_j覆盖，则A+h由I_j+h覆盖，长度总和不变，于是λ*(A+h)≤λ*(A)。用−h平移得到反向不等式。缩放映射把所有覆盖长度乘以|c|，并可逆推出相反界。",
+          "tex": "\\lambda(A+h)=\\lambda(A),\\qquad\\lambda(cA)=|c|\\,\\lambda(A)\\quad(c\\ne0)"
+        },
+        {
+          "explanation": "每轮三分Cantor集C_n是2^n个长度3^{−n}闭区间之并，因此λ(C)≤λ(C_n)=(2/3)^n，令n趋∞得到0。由于Lebesgue测度完备，C的任意子集也可测；但其中存在非Borel集合，故包含关系严格。",
+          "tex": "\\lambda(C)\\le(2/3)^n\\to0,\\qquad\\mathcal B(\\mathbb R)\\subsetneq\\mathcal L(\\mathbb R)"
+        },
+        {
+          "explanation": "对非负可测f定义积分，P(∅)=0，且由积分的可数可加性得P对可测事件可数可加。归一化∫f dλ=1给P(R)=1，故P为概率测度。若分布在单点有正原子，则不能以对λ积分的普通密度产生该正质量。",
+          "tex": "P(A)=\\int_A f\\,d\\lambda,\\quad f\\ge0,\\quad\\int_{\\mathbb R}f\\,d\\lambda=1"
+        }
+      ],
+      "example": "区间[1,3]的Lebesgue测度2，平移后的[6,8]仍为2，缩放−2后为4。密度f=(1/2)1_{[0,2]}对应的概率测度满足P([0,1])=1/2，说明几何长度与概率须区分。",
+      "application": "支持连续资产收益密度、区间事件、变量变换、风险积分及随机微积分中的参考测度定义。",
+      "caveat": "Lebesgue测度在R上并不归一化；存在无密度的离散或混合概率分布。完备Lebesgue σ-代数也不是所有实数子集。",
+      "deep_sections": [
+        {
+          "title": "从区间长度到完备测度",
+          "question": "为什么Lebesgue测度不仅仅是测量区间的长度？",
+          "paragraphs": [
+            "对于一般A⊆R，先用区间覆盖得到λ*(A)，再选取满足Carathéodory准则的可测集。这个可测集族包含开集、闭集及其可数集合运算，还包括每个零测集的所有子集。",
+            "因此Lebesgue测度既与普通区间长度兼容，又能用于定义非常不规则的函数的积分。它不是概率分布，因为没有将R的总长度归一化为1。"
+          ],
+          "formulas": [
+            {
+              "label": "从区间长度到完备测度",
+              "tex": "\\lambda([a,b])=b-a,\\quad\\lambda(\\mathbb R)=\\infty,\\quad\\lambda(\\varnothing)=0"
+            }
+          ],
+          "proof": "单区间覆盖给λ*([a,b])≤b−a，紧性与区间覆盖长度的下界给相反不等式。Carathéodory定理使这些区间及其可测生成集合上λ*可数可加；R由无穷多个单位区间并起，故λ(R)=∞。",
+          "worked": "区间[2,5]的长度为3，区间[0,1]与[2,3]互不重叠，其并的Lebesgue测度为1+1=2；整个R的长度没有有限上限。",
+          "limitation": "不能把Lebesgue测度下某集合的长度直接称为概率；概率还需要分布密度或其他正规化测度。"
+        },
+        {
+          "title": "平移不变和尺度变换",
+          "question": "为什么价格变量整体平移不会改变几何长度？",
+          "paragraphs": [
+            "对平移A+h，任何覆盖A的开区间均可整体移动h，且总长度不变，因此外测度平移不变；由双向平移可得到等号。可测性也在该变换下保持。",
+            "当c≠0时，对A做线性缩放cA，各覆盖区间长度都按|c|变化，外测度与Lebesgue测度相应缩放。对多维线性映射则联系Jacobian行列式。"
+          ],
+          "formulas": [
+            {
+              "label": "平移不变和尺度变换",
+              "tex": "\\lambda(A+h)=\\lambda(A),\\qquad\\lambda(cA)=|c|\\,\\lambda(A)\\quad(c\\ne0)"
+            }
+          ],
+          "proof": "若A由区间I_j覆盖，则A+h由I_j+h覆盖，长度总和不变，于是λ*(A+h)≤λ*(A)。用−h平移得到反向不等式。缩放映射把所有覆盖长度乘以|c|，并可逆推出相反界。",
+          "worked": "若A=[1,3]，λ(A)=2；平移5得到[6,8]长度仍为2，缩放系数−2得到[−6,−2]长度4，等于|−2|×2。",
+          "limitation": "多维概率分布的密度变换还需要Jacobian与概率正规化，不应仅凭区间长度缩放公式计算收益概率。"
+        },
+        {
+          "title": "零测与完备化",
+          "question": "为何Lebesgue可测集合比Borel集合更加丰富？",
+          "paragraphs": [
+            "在Lebesgue测度下，单点与可数集测度为零。Cantor集由每轮覆盖总长度(2/3)^n逼近0，虽然不可数，但测度仍为零。",
+            "完备性要求所有可测零测集的子集也可测。由于存在Cantor集的非Borel子集，Lebesgue可测集合严格比Borel集合多；这不意味着所有实数子集都可测。"
+          ],
+          "formulas": [
+            {
+              "label": "零测与完备化",
+              "tex": "\\lambda(C)\\le(2/3)^n\\to0,\\qquad\\mathcal B(\\mathbb R)\\subsetneq\\mathcal L(\\mathbb R)"
+            }
+          ],
+          "proof": "每轮三分Cantor集C_n是2^n个长度3^{−n}闭区间之并，因此λ(C)≤λ(C_n)=(2/3)^n，令n趋∞得到0。由于Lebesgue测度完备，C的任意子集也可测；但其中存在非Borel集合，故包含关系严格。",
+          "worked": "取三分Cantor集第3层覆盖，8个长度1/27区间总长8/27≈0.296296；随着n增加总长趋零，但其点集仍不可数。",
+          "limitation": "零测集合可有复杂结构。即使Lebesgue测度已完备，仍存在非Lebesgue可测的实数集合，不能给其长度赋合法数值。"
+        },
+        {
+          "title": "测度与概率密度之间的关系",
+          "question": "怎样从几何长度构造连续收益的概率分布？",
+          "paragraphs": [
+            "若密度f≥0且对Lebesgue测度积分为1，可以定义P(A)=∫_A f(x)dλ(x)，得到一个概率测度；这将几何积分变成带权重的事件概率。",
+            "并非所有概率测度都有Lebesgue密度，例如具有原子质量的离散分布。风险中性或其他金融测度变换需要额外区分两种概率测度之间的绝对连续性，而不是简单几何变换。"
+          ],
+          "formulas": [
+            {
+              "label": "测度与概率密度之间的关系",
+              "tex": "P(A)=\\int_A f\\,d\\lambda,\\quad f\\ge0,\\quad\\int_{\\mathbb R}f\\,d\\lambda=1"
+            }
+          ],
+          "proof": "对非负可测f定义积分，P(∅)=0，且由积分的可数可加性得P对可测事件可数可加。归一化∫f dλ=1给P(R)=1，故P为概率测度。若分布在单点有正原子，则不能以对λ积分的普通密度产生该正质量。",
+          "worked": "若f(x)=1/2·1_{[0,2]}(x)，则P([0,1])=∫_0^1(1/2)dx=1/2，P([1,2])=1/2，R上的密度积分为1。",
+          "limitation": "用概率密度建模需要明确变量相对于哪个测度有密度；金融收益包含零值原子或跳跃混合成分时，不应假设总有Lebesgue密度。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "measure-n0125",
+          "label": "外测度构造"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0124",
+          "label": "零测与完备化"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0127",
+          "label": "可测随机变量"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0146",
+          "label": "Radon–Nikodym定理"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 18.125 Measure and Integration：第1–9讲，外测度、Lebesgue测度与积分",
+          "url": "https://ocw.mit.edu/courses/18-125-measure-and-integration-fall-2003/pages/lecture-notes/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：第7–9讲，抽象积分与乘积测度",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V11完整讲义：四节数学证明、可复核数值与测度边界"
+    },
+    {
+      "id": "measure-n0127",
+      "node_id": "measure-n0127",
+      "title": "可测函数",
+      "definition": "可测函数把源空间的合法可测事件映射为目标空间中的合法逆像。实值函数f:(Ω,F)→(R,B(R))可测，当且仅当每个实数阈值a的事件{f≤a}属于F。可测性是随机变量和Lebesgue积分存在的前提，必须与因子数据实际发布时间所形成的信息滤过区分。",
+      "assumptions": "源集合Ω配有σ-代数F，目标R配Borel σ-代数。对实值函数，阈值逆像是可测性的等价判据；对一般扩展实值函数同样可适当采用半直线逆像。连续函数的复合、点态极限以及非负简单函数逼近需在正确的σ-代数上完成。",
+      "properties": [
+        "实可测性可由半直线阈值事件的可测性刻画。",
+        "若f、g可测，则加法、乘法、有限极值与在定义域适当处理后的商仍可测。",
+        "可测函数序列的逐点limsup、liminf及存在的逐点极限仍可测。",
+        "任何非负可测函数可由递增简单函数从下逼近，为Lebesgue积分提供构造基础。"
+      ],
+      "formulas": [
+        {
+          "label": "阈值逆像与分布函数",
+          "tex": "f\\text{ 可测}\\iff \\{\\omega:f(\\omega)\\le a\\}\\in\\mathcal F\\quad\\forall a\\in\\mathbb R"
+        },
+        {
+          "label": "连续复合及算术封闭性",
+          "tex": "f,g\\text{ 可测},\\ h:\\mathbb R^2\\to\\mathbb R\\text{ 连续}\\ \\Longrightarrow\\ h(f,g)\\text{ 可测}"
+        },
+        {
+          "label": "点态极限与limsup/liminf",
+          "tex": "\\limsup_{n\\to\\infty}f_n=\\inf_{k\\ge1}\\sup_{n\\ge k}f_n,\\qquad \\liminf_{n\\to\\infty}f_n=\\sup_{k\\ge1}\\inf_{n\\ge k}f_n"
+        },
+        {
+          "label": "非负可测函数的简单函数逼近",
+          "tex": "s_n=2^{-n}\\bigl\\lfloor2^n(f\\wedge n)\\bigr\\rfloor,\\qquad 0\\le s_n\\uparrow f"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "设G={B⊆R:f^{-1}(B)∈F}。逆像与补集、可数并交换，因此G是σ-代数。如果所有半直线在G中，则因它们生成B(R)，G包含全部Borel集合，故f可测。必要性直接来自定义。",
+          "tex": "f\\text{ 可测}\\iff \\{\\omega:f(\\omega)\\le a\\}\\in\\mathcal F\\quad\\forall a\\in\\mathbb R"
+        },
+        {
+          "explanation": "矩形逆像{f∈A,g∈B}是F中两个事件的交，由矩形生成积Borel σ-代数得到(f,g)的联合可测性。连续h的Borel逆像仍为Borel，复合的逆像保持可测，故h(f,g)可测。",
+          "tex": "f,g\\text{ 可测},\\ h:\\mathbb R^2\\to\\mathbb R\\text{ 连续}\\ \\Longrightarrow\\ h(f,g)\\text{ 可测}"
+        },
+        {
+          "explanation": "每个sup_{n≥k}f_n的阈值严格大于a事件可写成∪_{n≥k}{f_n>a}，因此可测；下确界与上确界可借助取负值和可数并交得到可测。再对k作可数上下极限，limsup与liminf保持可测。",
+          "tex": "\\limsup_{n\\to\\infty}f_n=\\inf_{k\\ge1}\\sup_{n\\ge k}f_n,\\qquad \\liminf_{n\\to\\infty}f_n=\\sup_{k\\ge1}\\inf_{n\\ge k}f_n"
+        },
+        {
+          "explanation": "函数min(f,n)可测，离散化映射x↦2^{-n}floor(2^n x)可测，因此s_n仅取有限多个值。随着n增大，截断上界提高且网格细化，向下量化不会降低此前数值，故s_n逐点递增至f。",
+          "tex": "s_n=2^{-n}\\bigl\\lfloor2^n(f\\wedge n)\\bigr\\rfloor,\\qquad 0\\le s_n\\uparrow f"
+        }
+      ],
+      "example": "四个等概率状态上R=(−2,0,1,3)，平方损失R²=(4,0,1,9)，事件{R²≥4}概率1/2。对常数f=1.3，二进制简单函数逼近的前三步为1、1.25、1.25。",
+      "application": "为随机变量、条件损失与积分型风险计算提供数学合法性；同时区分“可测随机变量”与“合法时间戳下可预测信号”。",
+      "caveat": "可测不意味着二阶可积或可预测；商函数需检查分母为零，点态极限可测也不允许直接交换期望极限。",
+      "deep_sections": [
+        {
+          "title": "阈值逆像与分布函数",
+          "question": "为何只检验所有{f≤a}事件就能确定随机变量是否合法？",
+          "paragraphs": [
+            "由于半直线(−∞,a]生成实数的Borel σ-代数，只要这些半直线的逆像全部属于源σ-代数，则对由它们可数构造的所有Borel集合，其逆像仍属于源σ-代数。",
+            "这比逐一枚举全部Borel集合更容易检验，也使分布函数F_X(a)=P(X≤a)具有合法事件基础。只有在声明概率测度之后，才能进一步对这些事件赋予概率。"
+          ],
+          "formulas": [
+            {
+              "label": "阈值逆像与分布函数",
+              "tex": "f\\text{ 可测}\\iff \\{\\omega:f(\\omega)\\le a\\}\\in\\mathcal F\\quad\\forall a\\in\\mathbb R"
+            }
+          ],
+          "proof": "设G={B⊆R:f^{-1}(B)∈F}。逆像与补集、可数并交换，因此G是σ-代数。如果所有半直线在G中，则因它们生成B(R)，G包含全部Borel集合，故f可测。必要性直接来自定义。",
+          "worked": "Ω={1,2,3,4}配全集σ-代数，f=(−1,0,0,2)。事件{f≤0}={1,2,3}，可测且在四状态等概率测度下概率3/4。",
+          "limitation": "如果源σ-代数只包含某些粗分组，则任意给定数值的函数不必可测；不能默认所有信号在决策时刻都属于合法信息集。"
+        },
+        {
+          "title": "连续复合及算术封闭性",
+          "question": "为什么对已观测收益平方、求和仍然得到可测随机变量？",
+          "paragraphs": [
+            "若f,g均为实可测函数，则向量(f,g)对积Borel σ-代数可测。由于求和、乘法、平方与最大值等是连续函数，复合后仍然可测。",
+            "对商f/g，必须先明确g=0处如何处理；若定义的值涉及无穷或无定义，需使用扩展实数空间或者显式排除零分母事件。"
+          ],
+          "formulas": [
+            {
+              "label": "连续复合及算术封闭性",
+              "tex": "f,g\\text{ 可测},\\ h:\\mathbb R^2\\to\\mathbb R\\text{ 连续}\\ \\Longrightarrow\\ h(f,g)\\text{ 可测}"
+            }
+          ],
+          "proof": "矩形逆像{f∈A,g∈B}是F中两个事件的交，由矩形生成积Borel σ-代数得到(f,g)的联合可测性。连续h的Borel逆像仍为Borel，复合的逆像保持可测，故h(f,g)可测。",
+          "worked": "等概率收益R=(−2,0,1,3)的平方损失L=R²=(4,0,1,9)。事件{L≥4}对应第1和第4状态，其概率为2/4=0.5。",
+          "limitation": "可测性只是数学上的合法随机变量条件，不能因此推出估计得到的方差、标准化系数已经在交易时点可被观察。"
+        },
+        {
+          "title": "点态极限与limsup/liminf",
+          "question": "为什么用递增样本生成的随机变量极限仍是随机变量？",
+          "paragraphs": [
+            "对可测f_n，事件{sup_{n≥k}f_n>a}可由可数并的阈值事件表示，因此sup与inf的可测性可通过可数集合运算证明。limsup和liminf又是这些上确界与下确界的逐点极限。",
+            "若f_n逐点收敛到f，则limsup=liminf=f，因此f仍可测。这确保极限定理中要研究的随机变量是合法对象，但没有保证它们的积分也收敛。"
+          ],
+          "formulas": [
+            {
+              "label": "点态极限与limsup/liminf",
+              "tex": "\\limsup_{n\\to\\infty}f_n=\\inf_{k\\ge1}\\sup_{n\\ge k}f_n,\\qquad \\liminf_{n\\to\\infty}f_n=\\sup_{k\\ge1}\\inf_{n\\ge k}f_n"
+            }
+          ],
+          "proof": "每个sup_{n≥k}f_n的阈值严格大于a事件可写成∪_{n≥k}{f_n>a}，因此可测；下确界与上确界可借助取负值和可数并交得到可测。再对k作可数上下极限，limsup与liminf保持可测。",
+          "worked": "在[0,1]上令f_n(x)=x^n，x∈[0,1)。对0≤x<1，f_n→0；对x=1，极限1，因此f=1_{x=1}可测且Lebesgue积分0。",
+          "limitation": "点态极限可测不代表期望可以直接交换极限；仍需单调收敛、控制收敛或一致可积等不同前提。"
+        },
+        {
+          "title": "非负可测函数的简单函数逼近",
+          "question": "如何把一个连续取值的函数化成逐层可核算的简单函数？",
+          "paragraphs": [
+            "对非负可测f，可以在前n个整数范围内按二进制网格把函数值向下取整，并对超过n的部分截断。这给出有限个取值的简单函数s_n，且0≤s_n≤f。",
+            "通过适当细化网格并提高截断阈值，s_n逐点递增并收敛到f。这样积分可先在有限分割上定义，再对一般非负可测函数取上确界。"
+          ],
+          "formulas": [
+            {
+              "label": "非负可测函数的简单函数逼近",
+              "tex": "s_n=2^{-n}\\bigl\\lfloor2^n(f\\wedge n)\\bigr\\rfloor,\\qquad 0\\le s_n\\uparrow f"
+            }
+          ],
+          "proof": "函数min(f,n)可测，离散化映射x↦2^{-n}floor(2^n x)可测，因此s_n仅取有限多个值。随着n增大，截断上界提高且网格细化，向下量化不会降低此前数值，故s_n逐点递增至f。",
+          "worked": "取单点值f=1.3，n=1时s₁=floor(2×1.3)/2=1，n=2时s₂=floor(4×1.3)/4=1.25，n=3时s₃=floor(8×1.3)/8=1.25，逐步从下逼近。",
+          "limitation": "简单逼近是理论构造；真实浮点计算的舍入、溢出和离散交易最小报价单位还要另外定义误差界。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "measure-n0122",
+          "label": "Borel阈值事件"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0128",
+          "label": "简单函数积分"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0129",
+          "label": "Lebesgue积分"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0289",
+          "label": "合法信息滤过"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 18.125 Measure and Integration：第1–9讲，外测度、Lebesgue测度与积分",
+          "url": "https://ocw.mit.edu/courses/18-125-measure-and-integration-fall-2003/pages/lecture-notes/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：第7–9讲，抽象积分与乘积测度",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V11完整讲义：四节数学证明、可复核数值与测度边界"
+    },
+    {
+      "id": "measure-n0128",
+      "node_id": "measure-n0128",
+      "title": "简单函数积分",
+      "definition": "非负简单函数是只取有限个非负值的可测函数，能够写成有限个互不相交可测集合指标的线性组合。其Lebesgue积分定义为各取值乘对应集合测度的和，是一般非负可测函数积分的最初构件。积分值与采用哪种等价有限分割无关。",
+      "assumptions": "测度空间(Ω,F,μ)与非负简单可测函数s=Σ_{j=1}^m a_j1_{A_j}，要求A_j两两不交且a_j≥0，允许μ(A_j)=∞，约定0对应的积分贡献为0。对可积有符号简单函数可分别处理正负部分，禁止在∞−∞中定义积分。",
+      "properties": [
+        "非负简单函数积分是有限加权测度和，与等价可测分割的表示无关。",
+        "简单函数积分具有非负性、单调性及线性性（在有意义时）。",
+        "分割细化不会改变积分值，支持按状态组聚合随机损失。",
+        "一般非负可测函数的Lebesgue积分可定义为所有不超过它的非负简单函数积分的上确界。"
+      ],
+      "formulas": [
+        {
+          "label": "有限分割表示与积分定义",
+          "tex": "s=\\sum_{j=1}^m a_j\\mathbf1_{A_j}\\quad\\Longrightarrow\\quad\\int_\\Omega s\\,d\\mu=\\sum_{j=1}^m a_j\\mu(A_j)"
+        },
+        {
+          "label": "分割细化与表示无关",
+          "tex": "\\sum_i a_i\\mu(A_i)=\\sum_{i,j}a_i\\mu(A_i\\cap B_j)=\\sum_j b_j\\mu(B_j)"
+        },
+        {
+          "label": "单调性与线性性质",
+          "tex": "0\\le s\\le t\\quad\\Longrightarrow\\quad\\int s\\,d\\mu\\le\\int t\\,d\\mu"
+        },
+        {
+          "label": "向一般非负Lebesgue积分推广",
+          "tex": "\\int_\\Omega f\\,d\\mu=\\sup\\left\\{\\int_\\Omega s\\,d\\mu:\\ 0\\le s\\le f,\\ s\\text{ 非负简单可测}\\right\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先令A_j两两不交，以集合测度给各指标函数赋值∫1_{A_j}dμ=μ(A_j)。对非负系数采用加法与正比例伸缩定义简单函数积分，得到有限加权和。分割外的函数取零不增加积分。",
+          "tex": "s=\\sum_{j=1}^m a_j\\mathbf1_{A_j}\\quad\\Longrightarrow\\quad\\int_\\Omega s\\,d\\mu=\\sum_{j=1}^m a_j\\mu(A_j)"
+        },
+        {
+          "explanation": "设s=Σ_i a_i1_{A_i}=Σ_j b_j1_{B_j}且两组互斥分割均覆盖Ω。利用μ(A_i)=Σ_jμ(A_i∩B_j)展开左边；若A_i∩B_j非空且测度正，两种表示在该单元的值相同，因而a_i=b_j，重排得右边。",
+          "tex": "\\sum_i a_i\\mu(A_i)=\\sum_{i,j}a_i\\mu(A_i\\cap B_j)=\\sum_j b_j\\mu(B_j)"
+        },
+        {
+          "explanation": "将s与t各自的有限分割细化成共同分割C_k，在每个C_k上s取a_k、t取b_k且a_k≤b_k；于是∫t−∫s=Σ_k(b_k−a_k)μ(C_k)≥0。若积分无限则按扩展非负实数解释。",
+          "tex": "0\\le s\\le t\\quad\\Longrightarrow\\quad\\int s\\,d\\mu\\le\\int t\\,d\\mu"
+        },
+        {
+          "explanation": "先由单调性保证每个候选简单函数积分是合法下界，取其上确界得到非负扩展实值。使用二进制向下取整的简单近似s_n↑f，可证明∫s_n↑∫f；严格论证后一性质需利用积分定义与可测集合逼近。",
+          "tex": "\\int_\\Omega f\\,d\\mu=\\sup\\left\\{\\int_\\Omega s\\,d\\mu:\\ 0\\le s\\le f,\\ s\\text{ 非负简单可测}\\right\\}"
+        }
+      ],
+      "example": "三种市场状态概率0.2、0.5、0.3，损失(0,2,5)的简单积分为2.5；将概率0.5的状态细分为0.2和0.3不会改变该积分。压力损失(1,3,7)期望3.8。",
+      "application": "连接有限状态风险模型、条件期望、离散情景加权损失、L²积分及连续收益Lebesgue积分的构造。",
+      "caveat": "简单函数分割表示无关的前提是同一函数与同一测度；有符号积分的正负无限不能相减，非负积分可能为∞。",
+      "deep_sections": [
+        {
+          "title": "有限分割表示与积分定义",
+          "question": "为什么分割上的加权和是一般积分的合理起点？",
+          "paragraphs": [
+            "非负简单函数在有限个可测事件上取常数a_j。对每个事件按测度μ(A_j)加权并求和，直接得到整体积分；在概率测度下就是离散随机变量的期望。",
+            "当分割没有覆盖Ω时，可补一个系数为零的余集；当某项系数为零而事件测度无穷时，定义该积分项为零，不把形式上的0×∞作为不定式处理。"
+          ],
+          "formulas": [
+            {
+              "label": "有限分割表示与积分定义",
+              "tex": "s=\\sum_{j=1}^m a_j\\mathbf1_{A_j}\\quad\\Longrightarrow\\quad\\int_\\Omega s\\,d\\mu=\\sum_{j=1}^m a_j\\mu(A_j)"
+            }
+          ],
+          "proof": "先令A_j两两不交，以集合测度给各指标函数赋值∫1_{A_j}dμ=μ(A_j)。对非负系数采用加法与正比例伸缩定义简单函数积分，得到有限加权和。分割外的函数取零不增加积分。",
+          "worked": "三种互斥市场状态概率0.2、0.5、0.3，损失分别0、2、5，则简单函数期望=0×0.2+2×0.5+5×0.3=2.5。",
+          "limitation": "如果损失为负值或正负部分积分都无穷大，不能简单套用非负积分定义并从∞减∞。"
+        },
+        {
+          "title": "分割细化与表示无关",
+          "question": "同一函数若用不同状态划分表达，积分会不会改变？",
+          "paragraphs": [
+            "两个表示法可以用交集A_i∩B_j构造共同细分；在每个共同单元上，同一个简单函数的取值必须一致，因此细分前后的加权测度和相同。",
+            "这一步确保积分依赖函数本身而非研究者如何命名市场状态。金融收益的分桶可以影响估计误差，但对数学上完全相同的简单函数，恰当细分不能改变精确积分值。"
+          ],
+          "formulas": [
+            {
+              "label": "分割细化与表示无关",
+              "tex": "\\sum_i a_i\\mu(A_i)=\\sum_{i,j}a_i\\mu(A_i\\cap B_j)=\\sum_j b_j\\mu(B_j)"
+            }
+          ],
+          "proof": "设s=Σ_i a_i1_{A_i}=Σ_j b_j1_{B_j}且两组互斥分割均覆盖Ω。利用μ(A_i)=Σ_jμ(A_i∩B_j)展开左边；若A_i∩B_j非空且测度正，两种表示在该单元的值相同，因而a_i=b_j，重排得右边。",
+          "worked": "将概率0.5且损失2的事件拆成两个概率0.2、0.3的事件，原贡献2×0.5=1，细分后2×0.2+2×0.3=1，最终期望仍为2.5。",
+          "limitation": "样本频率重新估计导致数值变化并不是简单函数积分不唯一，而是输入的概率测度或分桶取值发生了改变。"
+        },
+        {
+          "title": "单调性与线性性质",
+          "question": "对非负损失按情景逐点放大为什么不会降低期望？",
+          "paragraphs": [
+            "若非负简单函数s≤t逐点成立，通过共同可测分割使两者在每个单元上分别取常数，逐项比较得∫s≤∫t。加法和非负数倍的积分同样由系数运算得到。",
+            "这一单调性是一般Lebesgue积分与单调收敛定理的核心来源，也能为金融压力情景的期望损失给出最低界，但不直接识别发生尾部损失的具体概率。"
+          ],
+          "formulas": [
+            {
+              "label": "单调性与线性性质",
+              "tex": "0\\le s\\le t\\quad\\Longrightarrow\\quad\\int s\\,d\\mu\\le\\int t\\,d\\mu"
+            }
+          ],
+          "proof": "将s与t各自的有限分割细化成共同分割C_k，在每个C_k上s取a_k、t取b_k且a_k≤b_k；于是∫t−∫s=Σ_k(b_k−a_k)μ(C_k)≥0。若积分无限则按扩展非负实数解释。",
+          "worked": "按概率0.2、0.5、0.3，原损失(0,2,5)期望2.5；增加压力情景后损失(1,3,7)期望0.2+1.5+2.1=3.8，严格不低于2.5。",
+          "limitation": "积分单调性只适用于同一测度下的逐点大小关系；风险分布或测度随时间改变时，不能跨不同模型直接套用。"
+        },
+        {
+          "title": "向一般非负Lebesgue积分推广",
+          "question": "为什么一般非负可测函数的积分可以定义为简单函数的上确界？",
+          "paragraphs": [
+            "对任何非负可测f，考虑所有0≤s≤f的非负简单函数s。定义∫f为它们积分的上确界，这允许f无界且积分取∞，无需先假定Riemann可积。",
+            "可测函数存在逐点递增简单函数逼近，因而取上确界与沿合适简单序列取积分极限一致。此定义为单调收敛定理提供自然框架。"
+          ],
+          "formulas": [
+            {
+              "label": "向一般非负Lebesgue积分推广",
+              "tex": "\\int_\\Omega f\\,d\\mu=\\sup\\left\\{\\int_\\Omega s\\,d\\mu:\\ 0\\le s\\le f,\\ s\\text{ 非负简单可测}\\right\\}"
+            }
+          ],
+          "proof": "先由单调性保证每个候选简单函数积分是合法下界，取其上确界得到非负扩展实值。使用二进制向下取整的简单近似s_n↑f，可证明∫s_n↑∫f；严格论证后一性质需利用积分定义与可测集合逼近。",
+          "worked": "在[0,1]均匀概率空间，f(x)=x。取网格n=2的简单下近似s(x)=0（x<0.5）、0.5（x≥0.5），积分为0.5×0.5=0.25，小于精确积分∫_0^1x dx=0.5。",
+          "limitation": "对非负函数允许积分为∞；若研究风险期望或样本外策略回报，需要额外证明其积分有限，不能把∞当成有限数据损失。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "measure-n0127",
+          "label": "非负可测函数"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0129",
+          "label": "Lebesgue积分"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0130",
+          "label": "单调收敛定理"
+        },
+        {
+          "kind": "math",
+          "id": "probability-n0107",
+          "label": "条件期望"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 18.125 Measure and Integration：第1–9讲，外测度、Lebesgue测度与积分",
+          "url": "https://ocw.mit.edu/courses/18-125-measure-and-integration-fall-2003/pages/lecture-notes/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：第7–9讲，抽象积分与乘积测度",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V11完整讲义：四节数学证明、可复核数值与测度边界"
+    },
+    {
+      "id": "measure-n0129",
+      "node_id": "measure-n0129",
+      "title": "Lebesgue积分",
+      "definition": "Lebesgue积分以测度与简单函数积分为基础，先对非负可测函数取下方简单函数积分的上确界，再对一般有符号函数分别积分正负部分。它把有可数跳跃、非常不规则或无界的可积函数纳入统一理论，并支持单调收敛、Fatou、控制收敛与Fubini等极限及交换次序定理。",
+      "assumptions": "固定测度空间(Ω,F,μ)，f为扩展实值可测函数。非负积分允许为∞；有符号f的积分需至少一个正负部分积分有限，若要求f∈L¹则∫|f|dμ<∞。交换极限与积分需各定理条件，不可仅由逐点收敛推断。",
+      "properties": [
+        "非负可测函数积分是简单函数下近似积分的上确界，允许结果为无穷大。",
+        "有符号积分用f^+−f^-定义，绝不允许∞−∞；绝对可积保证积分有限。",
+        "在Riemann可积函数上，两类积分一致；Lebesgue理论还可积分有界却处处不连续的狄利克雷函数。",
+        "积分的单调性、可数可加性及收敛定理为统计期望和金融风险量提供严格交换规则。"
+      ],
+      "formulas": [
+        {
+          "label": "非负积分与简单函数逼近",
+          "tex": "\\int f\\,d\\mu=\\sup_{0\\le s\\le f,\\ s\\ \\mathrm{simple}}\\int s\\,d\\mu"
+        },
+        {
+          "label": "正负部分、L¹可积和无穷减无穷",
+          "tex": "f=f^+-f^-,\\quad \\int|f|\\,d\\mu<\\infty\\iff f\\in L^1(\\mu)"
+        },
+        {
+          "label": "Riemann与Lebesgue积分的联系",
+          "tex": "\\int_0^1\\mathbf 1_{\\mathbb Q}(x)\\,d\\lambda(x)=\\lambda(\\mathbb Q\\cap[0,1])=0"
+        },
+        {
+          "label": "无界可积函数与尾部界",
+          "tex": "\\int_0^1x^{-1/2}\\,dx=2,\\qquad \\int_0^1x^{-1}\\,dx=\\infty"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对非负可测f构造向下取整且增大截断的s_n↑f。由简单函数积分单调性，∫s_n为递增序列且不超过任意上确界定义的∫f；利用可测分割和定积分构造可证明它逼近该上确界。",
+          "tex": "\\int f\\,d\\mu=\\sup_{0\\le s\\le f,\\ s\\ \\mathrm{simple}}\\int s\\,d\\mu"
+        },
+        {
+          "explanation": "由f^+,f^-非负且互不同时正，得到点态分解和|f|=f^++f^-。若∫|f|有限，则两部分均有限，∫f=∫f^+−∫f^-合法；当两部分都∞时该差没有定义，不能通过样本截断任意指定。",
+          "tex": "f=f^+-f^-,\\quad \\int|f|\\,d\\mu<\\infty\\iff f\\in L^1(\\mu)"
+        },
+        {
+          "explanation": "Q∩[0,1]可数，每个单点Lebesgue测度0，故并集测度0。指标函数的Lebesgue积分按简单函数定义等于其支持集测度0；另一方面每个区间同时包含有理数和无理数，上下Darboux和分别为1与0，故Riemann积分不存在。",
+          "tex": "\\int_0^1\\mathbf 1_{\\mathbb Q}(x)\\,d\\lambda(x)=\\lambda(\\mathbb Q\\cap[0,1])=0"
+        },
+        {
+          "explanation": "对ε>0，∫_ε^1x^{-1/2}dx=2(1−√ε)，令ε↓0得到2；而∫_ε^1dx/x=−log ε→∞。两者均为非负函数，可以通过递增截断与单调收敛严格解释极限。",
+          "tex": "\\int_0^1x^{-1/2}\\,dx=2,\\qquad \\int_0^1x^{-1}\\,dx=\\infty"
+        }
+      ],
+      "example": "在[0,1]上Dirichlet函数1_Q具有Lebesgue积分0而不Riemann可积。另有∫_0^1x^(−1/2)dx=2，与∫_0^1x^(−1)dx=∞形成对比；三点收益X取−2、1、3且概率1/4、1/2、1/4时E[X]=0.75、E|X|=1.75。",
+      "application": "为概率期望、金融尾部损失、Lp风险范数、测度下换元及极限定理建立积分的可检验前提。",
+      "caveat": "积分存在性、绝对可积与无界函数可积是不同问题；无穷减无穷没有期望值，不能将样本主值当作L¹期望。",
+      "deep_sections": [
+        {
+          "title": "非负积分与简单函数逼近",
+          "question": "怎样从有限状态的积分构造连续收益变量的期望？",
+          "paragraphs": [
+            "对f≥0可测，把所有被f逐点支配的非负简单函数纳入候选集合，取其积分上确界。由于简单函数逼近s_n↑f存在，这个定义既能处理连续数值，也能处理局部无界的函数。",
+            "在概率空间中，∫f dP就是非负随机变量的期望；若积分为∞，说明不存在有限均值，而不是概率测度本身失效。"
+          ],
+          "formulas": [
+            {
+              "label": "非负积分与简单函数逼近",
+              "tex": "\\int f\\,d\\mu=\\sup_{0\\le s\\le f,\\ s\\ \\mathrm{simple}}\\int s\\,d\\mu"
+            }
+          ],
+          "proof": "对非负可测f构造向下取整且增大截断的s_n↑f。由简单函数积分单调性，∫s_n为递增序列且不超过任意上确界定义的∫f；利用可测分割和定积分构造可证明它逼近该上确界。",
+          "worked": "对[0,1]均匀分布X，非负函数f(x)=x²积分∫_0^1x²dx=1/3；取两段下方简单函数0与0.25，可得到积分0.25×0.5=0.125≤1/3。",
+          "limitation": "非负积分存在不意味积分有限；收益或损失的数学期望是否有限，需要另外检查尾部。"
+        },
+        {
+          "title": "正负部分、L¹可积和无穷减无穷",
+          "question": "为什么负收益的积分不能把两个无穷大直接相减？",
+          "paragraphs": [
+            "定义f^+=max(f,0)、f^-=max(−f,0)，则f=f^+−f^-且|f|=f^++f^-。当二者积分都有限时，∫f是良好定义的有限实数，且∫|f|有限；若二者均∞，就不能赋予有限或扩展实数期望。",
+            "金融数据常同时存在正尾与负尾，截断样本得到的有限均值不能替代总体L¹存在性。对高杠杆或反复翻倍的抽象分布尤其要明确正负尾部矩条件。"
+          ],
+          "formulas": [
+            {
+              "label": "正负部分、L¹可积和无穷减无穷",
+              "tex": "f=f^+-f^-,\\quad \\int|f|\\,d\\mu<\\infty\\iff f\\in L^1(\\mu)"
+            }
+          ],
+          "proof": "由f^+,f^-非负且互不同时正，得到点态分解和|f|=f^++f^-。若∫|f|有限，则两部分均有限，∫f=∫f^+−∫f^-合法；当两部分都∞时该差没有定义，不能通过样本截断任意指定。",
+          "worked": "设X取−2、1、3的概率各为1/4、1/2、1/4，则E[X]=−2×0.25+1×0.5+3×0.25=0.75，E|X|=0.5+0.5+0.75=1.75，属于L¹。",
+          "limitation": "不同截断次序可能给不存在期望的厚尾变量造成不同有限估计；Cauchy主值不等于Lebesgue意义的绝对可积期望。"
+        },
+        {
+          "title": "Riemann与Lebesgue积分的联系",
+          "question": "为什么一个处处不连续函数仍然可能有Lebesgue积分？",
+          "paragraphs": [
+            "在[0,1]上定义Dirichlet函数f=1_Q：有理数处取1、无理数处取0。它在每一点都不连续，故不满足Riemann可积的判据；但Q可数，Lebesgue测度为0，所以其Lebesgue积分为0。",
+            "这表明Lebesgue积分以取值集合的测度组织积分，而不是简单加密横轴分割。对普通连续函数或Riemann可积函数，Lebesgue积分仍与经典积分一致。"
+          ],
+          "formulas": [
+            {
+              "label": "Riemann与Lebesgue积分的联系",
+              "tex": "\\int_0^1\\mathbf 1_{\\mathbb Q}(x)\\,d\\lambda(x)=\\lambda(\\mathbb Q\\cap[0,1])=0"
+            }
+          ],
+          "proof": "Q∩[0,1]可数，每个单点Lebesgue测度0，故并集测度0。指标函数的Lebesgue积分按简单函数定义等于其支持集测度0；另一方面每个区间同时包含有理数和无理数，上下Darboux和分别为1与0，故Riemann积分不存在。",
+          "worked": "对f=1_Q，所有Riemann下和都为0，上和都为1，不可能收敛到共同值；Lebesgue积分为0。若f(x)=x²，两种积分同为1/3。",
+          "limitation": "并不是所有可测函数都具有有限Lebesgue积分；可测性保证非负积分可定义，而有限期望还取决于尾部。"
+        },
+        {
+          "title": "无界可积函数与尾部界",
+          "question": "函数无界是否意味着其期望一定发散？",
+          "paragraphs": [
+            "在(0,1]上取f(x)=1/√x，函数靠近0时无界，但积分∫_0^1x^{-1/2}dx=2有限；反之g(x)=1/x的积分发散。这由局部幂指数决定，而不是由函数是否无界一个条件决定。",
+            "在金融尾部分析中，有限均值、有限方差和有限指数矩是不同的要求。只知道一个损失模型的Lebesgue积分有限，仍不能直接套用Chebyshev或Chernoff定理。"
+          ],
+          "formulas": [
+            {
+              "label": "无界可积函数与尾部界",
+              "tex": "\\int_0^1x^{-1/2}\\,dx=2,\\qquad \\int_0^1x^{-1}\\,dx=\\infty"
+            }
+          ],
+          "proof": "对ε>0，∫_ε^1x^{-1/2}dx=2(1−√ε)，令ε↓0得到2；而∫_ε^1dx/x=−log ε→∞。两者均为非负函数，可以通过递增截断与单调收敛严格解释极限。",
+          "worked": "在ε=0.01截断时，∫_0.01^1x^{-1/2}dx=2(1−0.1)=1.8，剩余靠近0的积分为0.2；对1/x同样截断得到−log 0.01≈4.60517并随阈值收缩发散。",
+          "limitation": "无界不等于不可积，但仅L¹存在不保证方差或指数矩存在；金融尾部风险与模型误差需要核验更高阶条件。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "measure-n0128",
+          "label": "简单函数积分"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0130",
+          "label": "单调收敛定理"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0131",
+          "label": "Fatou引理"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0132",
+          "label": "控制收敛定理"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 18.125 Measure and Integration：第1–9讲，外测度、Lebesgue测度与积分",
+          "url": "https://ocw.mit.edu/courses/18-125-measure-and-integration-fall-2003/pages/lecture-notes/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：第7–9讲，抽象积分与乘积测度",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V11完整讲义：四节数学证明、可复核数值与测度边界"
     }
   ]
 }
