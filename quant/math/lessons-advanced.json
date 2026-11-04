@@ -4840,6 +4840,781 @@
         }
       ],
       "checked_status": "V13数学精讲：四节条件、推导、逐项计算与金融边界"
+    },
+    {
+      "id": "ito-n0301",
+      "node_id": "ito-n0301",
+      "title": "标准布朗运动定义",
+      "definition": "标准布朗运动W_t是在连续时间上从0出发、具有独立平稳高斯增量和几乎处处连续样本路径的随机过程。对0≤s<t，有W_t−W_s服从均值0、方差t−s的正态分布；它既是连续鞅，也是随机微积分中时间积分与随机积分的基础驱动噪声。W_t有连续路径不代表可用普通有界变差路径的微积分处理。",
+      "assumptions": "固定满足通常条件的滤过概率空间(Ω,F,(F_t),P)，W_0=0几乎处处；W适应F_t，增量W_t−W_s独立于F_s且服从N(0,t−s)，样本路径几乎处处连续。若仅规定所有有限维高斯分布，不自动把路径连续性作为已经建立的结论；需证明存在连续修改。",
+      "properties": [
+        "E W_t=0，Var W_t=t，Cov(W_s,W_t)=min(s,t)。",
+        "对c>0，缩放过程c^{−1/2}W_{ct}仍为标准布朗运动。",
+        "标准布朗运动路径几乎处处连续，但任意正时间区间上无限总变差，需随机积分。",
+        "反射原理在独立连续高斯增量条件下给上确界尾概率的明确公式。"
+      ],
+      "formulas": [
+        {
+          "label": "四项定义与时间尺度",
+          "tex": "W_0=0,\\quad W_t-W_s\\sim N(0,t-s),\\quad W_t-W_s\\perp\\mathcal F_s"
+        },
+        {
+          "label": "协方差函数与独立增量",
+          "tex": "\\operatorname{Cov}(W_s,W_t)=\\min\\{s,t\\}"
+        },
+        {
+          "label": "布朗尺度不变性",
+          "tex": "B_t=c^{-1/2}W_{ct}\\ \\stackrel d=\\ W_t,\\qquad c>0"
+        },
+        {
+          "label": "反射原理与最大回撤之外的风险",
+          "tex": "\\Pr\\!\\left(\\sup_{0\\le u\\le t}W_u\\ge a\\right)=2\\left[1-\\Phi\\!\\left(\\frac a{\\sqrt t}\\right)\\right]\\quad(a>0)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将W_t写成W_s+(W_t−W_s)，利用增量独立与正态分布，得到E W_t=E W_s=0与Var W_t=Var W_s+(t−s)。从W_0=0出发递推给Var W_t=t，单独还必须要求样本路径连续。",
+          "tex": "W_0=0,\\quad W_t-W_s\\sim N(0,t-s),\\quad W_t-W_s\\perp\\mathcal F_s"
+        },
+        {
+          "explanation": "当s≤t，W_t=W_s+ΔW，且ΔW独立于F_s、EΔW=0，故Cov(W_s,ΔW)=0，Cov(W_s,W_t)=Var W_s=s。反向t<s由协方差对称性得min(s,t)。",
+          "tex": "\\operatorname{Cov}(W_s,W_t)=\\min\\{s,t\\}"
+        },
+        {
+          "explanation": "对任意s<t，B_t−B_s服从N(0,c(t−s)/c)=N(0,t−s)。各不交叠区间经线性时标变换仍不交叠，增量独立；乘以常数不破坏路径连续，因此B是标准布朗运动。",
+          "tex": "B_t=c^{-1/2}W_{ct}\\ \\stackrel d=\\ W_t,\\qquad c>0"
+        },
+        {
+          "explanation": "定义首次达到a的时刻τ_a，运用强Markov性质，对τ_a≤t的样本路径把其τ_a以后增量取反。反射后的终点对称，触及阈值但终点低于a的事件与终点高于a的事件有相同概率，从而得双倍尾概率公式。",
+          "tex": "\\Pr\\!\\left(\\sup_{0\\le u\\le t}W_u\\ge a\\right)=2\\left[1-\\Phi\\!\\left(\\frac a{\\sqrt t}\\right)\\right]\\quad(a>0)"
+        }
+      ],
+      "example": "标准布朗在t=0.25时方差0.25、标准差0.5；Cov(W_{0.25},W_1)=0.25，相关系数0.5。由反射原理，t=1时路径最高达到1的概率约0.317311，而终点超过1的概率约0.158655。",
+      "application": "为随机积分、风险期限缩放、停时边界、金融价格扩散和Ito微积分提供严格的噪声过程定义。",
+      "caveat": "连续路径不等于有界变差，布朗运动的价格与回报扩散是假设而非市场定理；独立增量不能等同于资产价格水平相互独立。",
+      "deep_sections": [
+        {
+          "title": "四项定义与时间尺度",
+          "question": "为什么均值为零还远远不足以定义布朗运动？",
+          "paragraphs": [
+            "布朗运动必须同时规定起点、增量分布、对过去信息的独立性以及路径连续性；仅有E W_t=0的过程可能包含跳跃、长期依赖或非高斯尾部。",
+            "增量方差与时间差成比例使时间单位固定。如果把t从年改成交易日，扩散系数也必须转换，否则波动参数与估计对象不再一致。"
+          ],
+          "formulas": [
+            {
+              "label": "四项定义与时间尺度",
+              "tex": "W_0=0,\\quad W_t-W_s\\sim N(0,t-s),\\quad W_t-W_s\\perp\\mathcal F_s"
+            }
+          ],
+          "proof": "将W_t写成W_s+(W_t−W_s)，利用增量独立与正态分布，得到E W_t=E W_s=0与Var W_t=Var W_s+(t−s)。从W_0=0出发递推给Var W_t=t，单独还必须要求样本路径连续。",
+          "worked": "在t=0.25年，标准布朗W_t服从N(0,0.25)，标准差0.5；t=1年标准差为1，并不是线性变成4倍。",
+          "limitation": "金融收益可能有价格跳空、盘中停牌或非高斯厚尾，不能因样本方差近似线性就宣称价格路径是布朗运动。"
+        },
+        {
+          "title": "协方差函数与独立增量",
+          "question": "两个时刻的布朗位置为何相关，而不交叠增量却独立？",
+          "paragraphs": [
+            "对s≤t，把W_t分解成W_s以及未来增量W_t−W_s。未来增量与过去信息独立，但W_t仍包含过去位置W_s，因此两个位置显然相关。",
+            "计算Cov(W_s,W_t)=E[W_s(W_s+W_t−W_s)]=Var W_s=s，这与不交叠增量相互独立没有矛盾。"
+          ],
+          "formulas": [
+            {
+              "label": "协方差函数与独立增量",
+              "tex": "\\operatorname{Cov}(W_s,W_t)=\\min\\{s,t\\}"
+            }
+          ],
+          "proof": "当s≤t，W_t=W_s+ΔW，且ΔW独立于F_s、EΔW=0，故Cov(W_s,ΔW)=0，Cov(W_s,W_t)=Var W_s=s。反向t<s由协方差对称性得min(s,t)。",
+          "worked": "当s=0.25、t=1时Cov(W_{0.25},W_1)=0.25，相关系数0.25/(√0.25×√1)=0.5。",
+          "limitation": "持仓累计收益和未来累计收益即使由独立增量构成，其价格水平也不独立；不能把时间点状态的相关性误认为增量依赖。"
+        },
+        {
+          "title": "布朗尺度不变性",
+          "question": "布朗运动为什么采用空间根号时间缩放？",
+          "paragraphs": [
+            "定义B_t=W_{ct}/√c，任意增量B_t−B_s来自长度c(t−s)的W增量，再除以√c，使方差恢复t−s。",
+            "缩放后的增量仍是正态、独立且路径连续，起点仍0，故B满足同样的布朗定义。该性质是扩散近似和收益年化平方根法则的理论来源，但要求模型本身成立。"
+          ],
+          "formulas": [
+            {
+              "label": "布朗尺度不变性",
+              "tex": "B_t=c^{-1/2}W_{ct}\\ \\stackrel d=\\ W_t,\\qquad c>0"
+            }
+          ],
+          "proof": "对任意s<t，B_t−B_s服从N(0,c(t−s)/c)=N(0,t−s)。各不交叠区间经线性时标变换仍不交叠，增量独立；乘以常数不破坏路径连续，因此B是标准布朗运动。",
+          "worked": "以c=4缩放时，B_1=W_4/2，方差为Var(W_4)/4=4/4=1，恢复标准一年方差。",
+          "limitation": "平方根时间缩放不适用于强波动聚集、长记忆或跳跃主导的收益，金融回测应对跨频率方差比例做独立诊断。"
+        },
+        {
+          "title": "反射原理与最大回撤之外的风险",
+          "question": "布朗路径越过某阈值的概率为何是终点单侧尾概率的两倍？",
+          "paragraphs": [
+            "设M_t=sup_{u≤t}W_u，第一次触及正阈值a之后的布朗增量具有对称性。将触及后的路径进行镜面反射，可把终点低于a但曾触及a的路径与终点高于a的路径一一对应。",
+            "因此P(M_t≥a)=2P(W_t≥a)。这是对标准布朗运动、a>0的精确公式，不等于真实资产价格在交易价格跳空下的最大回撤发生概率。"
+          ],
+          "formulas": [
+            {
+              "label": "反射原理与最大回撤之外的风险",
+              "tex": "\\Pr\\!\\left(\\sup_{0\\le u\\le t}W_u\\ge a\\right)=2\\left[1-\\Phi\\!\\left(\\frac a{\\sqrt t}\\right)\\right]\\quad(a>0)"
+            }
+          ],
+          "proof": "定义首次达到a的时刻τ_a，运用强Markov性质，对τ_a≤t的样本路径把其τ_a以后增量取反。反射后的终点对称，触及阈值但终点低于a的事件与终点高于a的事件有相同概率，从而得双倍尾概率公式。",
+          "worked": "t=1、a=1时，终点超过1的概率约0.158655，路径最大值至少1的概率约0.317311，是终点单侧概率的两倍。",
+          "limitation": "若价格模型含漂移或跳跃，反射公式必须相应更改；风险监控也应区分资产价格绝对涨幅和相对峰值的最大回撤。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "stochastic-n0272",
+          "label": "先修：随机游走扩散极限"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0302",
+          "label": "后续：独立平稳增量"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0303",
+          "label": "二次变差"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0304",
+          "label": "布朗运动鞅性"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 15.070J Advanced Stochastic Processes：Lecture 6–8布朗运动、反射原理与二次变差",
+          "url": "https://ocw.mit.edu/courses/15-070j-advanced-stochastic-processes-fall-2013/pages/lecture-notes/"
+        },
+        {
+          "title": "MIT 15.070J Advanced Stochastic Processes：Lecture 14–17 Itô积分构造和随机微积分",
+          "url": "https://www.ocw.mit.edu/courses/15-070j-advanced-stochastic-processes-fall-2013/resources/lecture-notes/"
+        }
+      ],
+      "checked_status": "V13完整证明：连续过程假设、独立数值算例与金融适用界限"
+    },
+    {
+      "id": "ito-n0302",
+      "node_id": "ito-n0302",
+      "title": "独立平稳增量",
+      "definition": "独立平稳增量是标准布朗运动的核心结构：互不交叠时间区间的增量独立，而给定区间长度h的增量分布与区间起点无关。它与连续路径、Gaussian增量一起确定Brownian结构；单独的独立平稳增量并不能排除Poisson跳跃等不同Lévy过程。",
+      "assumptions": "设W为标准布朗运动，0≤t_0<t_1<⋯<t_n，各增量Δ_iW=W_{t_i}−W_{t_{i−1}}独立且Δ_iW~N(0,t_i−t_{i−1})。独立是无条件及对自然滤过的增量性质，市场实际收益的‘无相关’并不自动推出独立。",
+      "properties": [
+        "不相交布朗增量独立且各自正态，合计增量仍正态。",
+        "任意长度相同的区间增量具有相同分布，即平稳增量，不意味着价格水平过程平稳。",
+        "独立增量给布朗鞅性质和随机积分交叉项的零条件期望。",
+        "Poisson计数也有独立平稳增量，但其路径有跳跃、增量非高斯，不能直接替代W。"
+      ],
+      "formulas": [
+        {
+          "label": "互不交叠增量的独立性",
+          "tex": "(W_{t_1}-W_{t_0},\\ldots,W_{t_n}-W_{t_{n-1}})\\sim\\bigotimes_{i=1}^nN(0,t_i-t_{i-1})"
+        },
+        {
+          "label": "增量分布平稳与时间尺度",
+          "tex": "W_{t+h}-W_t\\sim N(0,h),\\quad \\operatorname{Var}(W_t)=t"
+        },
+        {
+          "label": "多段增量的特征函数",
+          "tex": "\\prod_{i=1}^n\\mathbb E[e^{iu\\Delta_iW}]=\\exp\\!\\left(-\\frac{u^2}{2}\\sum_{i=1}^nh_i\\right)"
+        },
+        {
+          "label": "Poisson反例和Lévy边界",
+          "tex": "N_{t+h}-N_t\\sim\\operatorname{Poisson}(\\lambda h)\\quad\\text{而}\\quad W_{t+h}-W_t\\sim N(0,h)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "逐段增量独立意味着联合分布等于各增量正态边际分布的乘积。由此它们两两协方差为0，但反向一般不成立；对联合高斯向量才可由零协方差进一步推出独立。",
+          "tex": "(W_{t_1}-W_{t_0},\\ldots,W_{t_n}-W_{t_{n-1}})\\sim\\bigotimes_{i=1}^nN(0,t_i-t_{i-1})"
+        },
+        {
+          "explanation": "平稳增量直接由布朗增量分布只依赖t−s得出。弱平稳要求边际均值和方差不依时间变化且协方差只依时间差，然而Var W_t=t不恒定，因此W不是弱平稳过程。",
+          "tex": "W_{t+h}-W_t\\sim N(0,h),\\quad \\operatorname{Var}(W_t)=t"
+        },
+        {
+          "explanation": "独立性使乘积期望等于期望乘积。正态N(0,h_i)的特征函数e^{−u²h_i/2}逐项相乘，指数中的h_i相加为总时间长度t_n−t_0，利用特征函数唯一性得到累计增量服从N(0,t_n−t_0)。",
+          "tex": "\\prod_{i=1}^n\\mathbb E[e^{iu\\Delta_iW}]=\\exp\\!\\left(-\\frac{u^2}{2}\\sum_{i=1}^nh_i\\right)"
+        },
+        {
+          "explanation": "Poisson过程定义保证不交叠事件计数独立且计数分布只依区间长度；当λh>0时，增量具有非零整数原子概率而非连续高斯密度，并且路径存在大小为1的跳跃，因此不满足布朗定义。",
+          "tex": "N_{t+h}-N_t\\sim\\operatorname{Poisson}(\\lambda h)\\quad\\text{而}\\quad W_{t+h}-W_t\\sim N(0,h)"
+        }
+      ],
+      "example": "标准布朗长度0.25的任意区间增量分布均为N(0,0.25)；两个长度0.5的独立增量之和服从N(0,1)。Poisson(λ=2)过程长度0.5的增量均值1、零事件概率e^{−1}，却不是布朗增量。",
+      "application": "用于区分对数收益、价格水平、成交计数与隐含波动率模型中不同类型的时间依赖结构。",
+      "caveat": "零自相关不等于独立；平稳增量不等于过程平稳，独立平稳增量也不是布朗过程的充分定义。",
+      "deep_sections": [
+        {
+          "title": "互不交叠增量的独立性",
+          "question": "为何历史累计价格相关并不妨碍未来增量独立？",
+          "paragraphs": [
+            "标准布朗运动假设不同不交叠时间段的增量相互独立，因此给定历史路径不会改变下一独立区间增量的正态分布。",
+            "但W_t本身包含过去所有增量，故W_s与W_t之间通常有非零协方差。使用差分收益分析独立性不能混同于价格水平的时间相关。"
+          ],
+          "formulas": [
+            {
+              "label": "互不交叠增量的独立性",
+              "tex": "(W_{t_1}-W_{t_0},\\ldots,W_{t_n}-W_{t_{n-1}})\\sim\\bigotimes_{i=1}^nN(0,t_i-t_{i-1})"
+            }
+          ],
+          "proof": "逐段增量独立意味着联合分布等于各增量正态边际分布的乘积。由此它们两两协方差为0，但反向一般不成立；对联合高斯向量才可由零协方差进一步推出独立。",
+          "worked": "区间[0,1]和[1,3]的增量分别服从N(0,1)与N(0,2)，两增量独立，和W_3服从N(0,3)。",
+          "limitation": "市场收益缺少样本自相关只说明线性相关近似较弱，不能由此推断绝对收益、极端事件或波动率状态独立。"
+        },
+        {
+          "title": "增量分布平稳与时间尺度",
+          "question": "平稳增量和随机过程自身平稳有什么区别？",
+          "paragraphs": [
+            "对任意h>0，W_{t+h}−W_t~N(0,h)，不取决于t，因此具有平稳增量。与之相对，W_t~N(0,t)，位置的方差随t增加。",
+            "所以布朗运动自身不是弱平稳过程，也不具有固定的边际概率分布。金融时间序列常对收益做平稳性检验，而不是要求累计价格保持平稳。"
+          ],
+          "formulas": [
+            {
+              "label": "增量分布平稳与时间尺度",
+              "tex": "W_{t+h}-W_t\\sim N(0,h),\\quad \\operatorname{Var}(W_t)=t"
+            }
+          ],
+          "proof": "平稳增量直接由布朗增量分布只依赖t−s得出。弱平稳要求边际均值和方差不依时间变化且协方差只依时间差，然而Var W_t=t不恒定，因此W不是弱平稳过程。",
+          "worked": "两个区间[0,0.25]与[5,5.25]的标准布朗增量都服从N(0,0.25)，尽管W_{0.25}与W_{5.25}本身的方差分别为0.25与5.25。",
+          "limitation": "实盘收益若存在日内季节性、宏观公告与交易制度变化，连平稳增量假设都未必成立。"
+        },
+        {
+          "title": "多段增量的特征函数",
+          "question": "为什么独立高斯增量的合计分布能用指数特征函数精确证明？",
+          "paragraphs": [
+            "每段Δ_iW服从N(0,h_i)，特征函数为exp(−u²h_i/2)。由于不交叠增量独立，全部增量之和的特征函数等于逐段特征函数乘积。",
+            "指数的幂相加得到exp[−u²Σh_i/2]，对应N(0,Σh_i)。这说明大区间的高斯方差可由各时间段累加。"
+          ],
+          "formulas": [
+            {
+              "label": "多段增量的特征函数",
+              "tex": "\\prod_{i=1}^n\\mathbb E[e^{iu\\Delta_iW}]=\\exp\\!\\left(-\\frac{u^2}{2}\\sum_{i=1}^nh_i\\right)"
+            }
+          ],
+          "proof": "独立性使乘积期望等于期望乘积。正态N(0,h_i)的特征函数e^{−u²h_i/2}逐项相乘，指数中的h_i相加为总时间长度t_n−t_0，利用特征函数唯一性得到累计增量服从N(0,t_n−t_0)。",
+          "worked": "两个各长0.5的独立增量合计服从N(0,1)；取u=1时，单段特征函数e^{−0.25}，乘积为e^{−0.5}≈0.606531。",
+          "limitation": "若联合增量并非独立，则特征函数不能因各边际为正态就分解；随机波动与共同市场冲击会改变聚合分布。"
+        },
+        {
+          "title": "Poisson反例和Lévy边界",
+          "question": "为什么仅凭独立平稳增量无法判定一条过程是Brownian？",
+          "paragraphs": [
+            "齐次Poisson过程N_t同样有不重叠增量独立，且给定长度h时增量服从Poisson(λh)，但样本路径分段常数并在事件时跳跃。",
+            "因此独立平稳增量是更一般Lévy过程的基本性质之一。布朗运动还必须要求连续路径与高斯增量；实际高频价格的跳跃风险不能被这两项性质自动排除。"
+          ],
+          "formulas": [
+            {
+              "label": "Poisson反例和Lévy边界",
+              "tex": "N_{t+h}-N_t\\sim\\operatorname{Poisson}(\\lambda h)\\quad\\text{而}\\quad W_{t+h}-W_t\\sim N(0,h)"
+            }
+          ],
+          "proof": "Poisson过程定义保证不交叠事件计数独立且计数分布只依区间长度；当λh>0时，增量具有非零整数原子概率而非连续高斯密度，并且路径存在大小为1的跳跃，因此不满足布朗定义。",
+          "worked": "λ=2、h=0.5时Poisson增量均值1，发生零次事件概率e^{−1}≈0.367879；同长度标准布朗增量为N(0,0.5)，取0的单点概率为0。",
+          "limitation": "不可把符合独立增量的成交计数直接当作扩散价格噪声；从跳跃模型到扩散近似还需要合适的缩放与极限定理。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "ito-n0301",
+          "label": "先修：标准布朗运动"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0273",
+          "label": "比较：Poisson独立增量"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0304",
+          "label": "后续：布朗鞅性"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0330",
+          "label": "延伸：Lévy过程"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 15.070J Advanced Stochastic Processes：Lecture 6–8布朗运动、反射原理与二次变差",
+          "url": "https://ocw.mit.edu/courses/15-070j-advanced-stochastic-processes-fall-2013/pages/lecture-notes/"
+        },
+        {
+          "title": "MIT 15.070J Advanced Stochastic Processes：Lecture 14–17 Itô积分构造和随机微积分",
+          "url": "https://www.ocw.mit.edu/courses/15-070j-advanced-stochastic-processes-fall-2013/resources/lecture-notes/"
+        }
+      ],
+      "checked_status": "V13完整证明：连续过程假设、独立数值算例与金融适用界限"
+    },
+    {
+      "id": "ito-n0304",
+      "node_id": "ito-n0304",
+      "title": "布朗运动鞅性",
+      "definition": "标准布朗运动相对于其自然滤过是连续、平方可积的鞅。由于未来独立增量均值为零，E[W_t|F_s]=W_s；平方过程W_t²扣除时间t后也是鞅，指数过程exp(θW_t−θ²t/2)对固定θ是均值1的正鞅。它们分别解释公平创新、二次变差补偿和概率测度变换所用的密度结构。",
+      "assumptions": "W为相对于滤过F_t的标准布朗运动，即未来增量独立于F_s；研究平方鞅和指数鞅需相应二阶与指数矩存在。对固定有限θ及有限t，标准正态指数矩有限。不能将W相对于任意扩大后包含未来信息的滤过都称为鞅。",
+      "properties": [
+        "E[W_t|F_s]=W_s是布朗鞅的核心条件均值关系。",
+        "W_t²−t为鞅，因未来独立增量方差是t−s。",
+        "对任意固定实θ，Z_t=exp(θW_t−θ²t/2)为正鞅且E Z_t=1。",
+        "在有界停时条件下可使用可选停止；无界停止、局部鞅与价格风险溢价需要额外证明。"
+      ],
+      "formulas": [
+        {
+          "label": "未来独立增量与鞅性质",
+          "tex": "\\mathbb E[W_t\\mid\\mathcal F_s]=W_s,\\qquad s\\le t"
+        },
+        {
+          "label": "平方补偿与二次变差",
+          "tex": "M_t=W_t^2-t,\\qquad\\mathbb E[M_t\\mid\\mathcal F_s]=M_s"
+        },
+        {
+          "label": "指数鞅与高斯指数矩",
+          "tex": "Z_t=\\exp\\!\\left(\\theta W_t-\\tfrac12\\theta^2t\\right),\\qquad \\mathbb E[Z_t\\mid\\mathcal F_s]=Z_s"
+        },
+        {
+          "label": "停时与时间信息扩大反例",
+          "tex": "\\tau_a=\\inf\\{t\\ge0:W_t=a\\},\\quad\\Pr(\\tau_a<\\infty)=1,\\quad W_{\\tau_a}=a"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "W_s的F_s可测性允许提出条件期望。未来增量独立于F_s且均值为0，故E[W_t−W_s|F_s]=0。线性分解立即给E[W_t|F_s]=W_s。",
+          "tex": "\\mathbb E[W_t\\mid\\mathcal F_s]=W_s,\\qquad s\\le t"
+        },
+        {
+          "explanation": "展开W_t²=[W_s+(W_t−W_s)]²，取F_s条件期望。交叉项为零，独立增量平方期望为t−s，得到E[W_t²|F_s]=W_s²+(t−s)，再减去t便是W_s²−s。",
+          "tex": "M_t=W_t^2-t,\\qquad\\mathbb E[M_t\\mid\\mathcal F_s]=M_s"
+        },
+        {
+          "explanation": "将Z_t分解成Z_s乘exp[θ(W_t−W_s)−θ²(t−s)/2]。后因子独立于F_s且正态指数矩为exp[θ²(t−s)/2]乘补偿exp[−θ²(t−s)/2]，条件期望为1，因而得到鞅性。",
+          "tex": "Z_t=\\exp\\!\\left(\\theta W_t-\\tfrac12\\theta^2t\\right),\\qquad \\mathbb E[Z_t\\mid\\mathcal F_s]=Z_s"
+        },
+        {
+          "explanation": "对标准布朗的反射原理，P(τ_a≤T)=2[1−Φ(a/√T)]，令T→∞得1，故τ_a有限几乎处处。由连续样本路径首次触及a时W_τ=a，期望为a>0；因此不能将只适用于有界停时的鞅守恒等式扩展到τ_a。",
+          "tex": "\\tau_a=\\inf\\{t\\ge0:W_t=a\\},\\quad\\Pr(\\tau_a<\\infty)=1,\\quad W_{\\tau_a}=a"
+        }
+      ],
+      "example": "标准布朗在t=2时E W_2²=2，平方补偿鞅期望为0。对θ=1，E exp(W_1−1/2)=1；首次触及正水平1的停时几乎处处有限，却因无界而不能直接使用有界可选停止结论。",
+      "application": "为动态风险中性密度、价格噪声鞅性、随机积分条件期望和交易停时的数学限制奠定基础。",
+      "caveat": "鞅性与所用滤过和概率测度绑定；平方补偿并不控制路径最大回撤。无界停时不能直接使用E W_τ=E W_0。",
+      "deep_sections": [
+        {
+          "title": "未来独立增量与鞅性质",
+          "question": "布朗运动的‘公平’到底依赖哪个概率测度和信息集？",
+          "paragraphs": [
+            "对s≤t，W_t=W_s+(W_t−W_s)，过去位置W_s是F_s可测，未来增量独立于F_s且均值0。因此其条件期望仍等于当前W_s。",
+            "该结论以布朗定义使用的P测度和指定滤过为前提。如果扩大F_s提前泄漏W_t，条件期望会改变，不能仍视为对新信息集公平。"
+          ],
+          "formulas": [
+            {
+              "label": "未来独立增量与鞅性质",
+              "tex": "\\mathbb E[W_t\\mid\\mathcal F_s]=W_s,\\qquad s\\le t"
+            }
+          ],
+          "proof": "W_s的F_s可测性允许提出条件期望。未来增量独立于F_s且均值为0，故E[W_t−W_s|F_s]=0。线性分解立即给E[W_t|F_s]=W_s。",
+          "worked": "对标准布朗W_1已观察取0.4的路径，时刻1对W_2的条件预期仍是0.4；未来增量方差为1而不是0。",
+          "limitation": "对资产收益的价格水平使用真实测度与风险中性测度时，鞅性质不同；不能把交易信号不显著解释为所有策略收益必为鞅。"
+        },
+        {
+          "title": "平方补偿与二次变差",
+          "question": "为什么布朗路径平方在期望上增长，扣除时间后却成为鞅？",
+          "paragraphs": [
+            "独立增量平方的条件均值为t−s，而交叉项W_s(W_t−W_s)条件均值为0。因此平方位置的条件预期恰比当前平方增加t−s。",
+            "将确定性增长t从W_t²扣除，得到M_t=W_t²−t的条件期望守恒。此例展示随机过程二次变差与普通时间积分的联系，是Itô公式出现额外二阶项的直观先导。"
+          ],
+          "formulas": [
+            {
+              "label": "平方补偿与二次变差",
+              "tex": "M_t=W_t^2-t,\\qquad\\mathbb E[M_t\\mid\\mathcal F_s]=M_s"
+            }
+          ],
+          "proof": "展开W_t²=[W_s+(W_t−W_s)]²，取F_s条件期望。交叉项为零，独立增量平方期望为t−s，得到E[W_t²|F_s]=W_s²+(t−s)，再减去t便是W_s²−s。",
+          "worked": "标准布朗在t=2时E W_2²=2，因此E(W_2²−2)=0。若s=1、W_s=0.5，则E[W_2²|F_1]=0.25+1=1.25。",
+          "limitation": "平方鞅不说明单条路径的W_t²−t单调或有界；它只描述特定概率测度下条件均值。"
+        },
+        {
+          "title": "指数鞅与高斯指数矩",
+          "question": "如何构造每期都为正、条件均值不变的布朗密度过程？",
+          "paragraphs": [
+            "对固定θ令Z_t=exp(θW_t−θ²t/2)。由于未来增量独立且N(0,t−s)，其指数矩恰好是exp[θ²(t−s)/2]，抵消指数中的确定性补偿。",
+            "所以E[Z_t|F_s]=Z_s。这个结构可作为测度密度过程的示例，但构造无套利风险中性测度还要满足资产动态、真鞅与市场模型约束。"
+          ],
+          "formulas": [
+            {
+              "label": "指数鞅与高斯指数矩",
+              "tex": "Z_t=\\exp\\!\\left(\\theta W_t-\\tfrac12\\theta^2t\\right),\\qquad \\mathbb E[Z_t\\mid\\mathcal F_s]=Z_s"
+            }
+          ],
+          "proof": "将Z_t分解成Z_s乘exp[θ(W_t−W_s)−θ²(t−s)/2]。后因子独立于F_s且正态指数矩为exp[θ²(t−s)/2]乘补偿exp[−θ²(t−s)/2]，条件期望为1，因而得到鞅性。",
+          "worked": "θ=1、t=1时Z_1=e^{W_1−1/2}>0，E Z_1=e^{−1/2}×E e^{W_1}=e^{−1/2}e^{1/2}=1。",
+          "limitation": "对状态依赖随机θ_t的指数局部鞅，不能从此常数θ计算直接推出真鞅；常需Novikov等独立可积性条件。"
+        },
+        {
+          "title": "停时与时间信息扩大反例",
+          "question": "为什么随机决定退出时刻不代表可以无条件套用鞅的期望守恒？",
+          "paragraphs": [
+            "对有界停时τ≤T，W_{t∧τ}为鞅且E W_τ=0，可以由适当可选停止定理证明。若停时无界，则停后过程是否一致可积需要额外核验。",
+            "例如首次触及正水平a的布朗停时几乎必然有限，但W_τ=a，故E W_τ=a并不等于E W_0=0，正说明无界停时缺少必要条件。"
+          ],
+          "formulas": [
+            {
+              "label": "停时与时间信息扩大反例",
+              "tex": "\\tau_a=\\inf\\{t\\ge0:W_t=a\\},\\quad\\Pr(\\tau_a<\\infty)=1,\\quad W_{\\tau_a}=a"
+            }
+          ],
+          "proof": "对标准布朗的反射原理，P(τ_a≤T)=2[1−Φ(a/√T)]，令T→∞得1，故τ_a有限几乎处处。由连续样本路径首次触及a时W_τ=a，期望为a>0；因此不能将只适用于有界停时的鞅守恒等式扩展到τ_a。",
+          "worked": "取a=1，则τ_1几乎必然有限且W_{τ_1}=1，因此E W_{τ_1}=1，而初始E W_0=0，表面反例恰来自停时没有统一界。",
+          "limitation": "该例不意味着存在无风险盈利策略：持有期限分布有厚尾，且实际资金与交易风险并未在抽象布朗停时中计价。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "ito-n0301",
+          "label": "布朗运动定义"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0303",
+          "label": "二次变差"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0293",
+          "label": "可选停止"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0320",
+          "label": "后续：指数鞅"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 15.070J Advanced Stochastic Processes：Lecture 6–8布朗运动、反射原理与二次变差",
+          "url": "https://ocw.mit.edu/courses/15-070j-advanced-stochastic-processes-fall-2013/pages/lecture-notes/"
+        },
+        {
+          "title": "MIT 15.070J Advanced Stochastic Processes：Lecture 14–17 Itô积分构造和随机微积分",
+          "url": "https://www.ocw.mit.edu/courses/15-070j-advanced-stochastic-processes-fall-2013/resources/lecture-notes/"
+        }
+      ],
+      "checked_status": "V13完整证明：连续过程假设、独立数值算例与金融适用界限"
+    },
+    {
+      "id": "ito-n0305",
+      "node_id": "ito-n0305",
+      "title": "布朗桥",
+      "definition": "布朗桥是布朗路径在固定终端时刻被条件约束为某个终值的Gaussian过程；从标准布朗运动构造的零端点桥为B_t=W_t−(t/T)W_T（0≤t≤T）。其均值0、协方差min(s,t)−st/T，并且B_0=B_T=0。布朗桥用于分布拟合检验的经验过程极限，但它在T前的动态不同于无条件布朗鞅。",
+      "assumptions": "固定T>0及标准布朗W，构造B_t=W_t−(t/T)W_T。桥过程是联合Gaussian且有连续样本路径；基于未来W_T构造B_t不代表B_t能在原W自然滤过F_t中被实时计算。若研究条件分布W_t|W_T=b，应区分终端约束b=0和一般桥。",
+      "properties": [
+        "B_0=B_T=0几乎处处，Var(B_t)=t(1−t/T)。",
+        "Cov(B_s,B_t)=min(s,t)−st/T，是零端点Gaussian桥的完整协方差。",
+        "对固定0<t<T，桥不具有无条件布朗的独立平稳增量。",
+        "桥的条件分布与统计检验有关，但事后已知终点的信息不能用于模拟当期实时交易信号。"
+      ],
+      "formulas": [
+        {
+          "label": "终端条件与桥构造",
+          "tex": "B_t=W_t-\\frac tT W_T,\\qquad B_0=B_T=0"
+        },
+        {
+          "label": "桥协方差与中点波动",
+          "tex": "\\operatorname{Cov}(B_s,B_t)=\\min(s,t)-\\frac{st}{T},\\quad\\operatorname{Var}(B_t)=t\\!\\left(1-\\frac tT\\right)"
+        },
+        {
+          "label": "Gaussian条件分布与终端约束",
+          "tex": "W_t\\mid W_T=b\\sim N\\!\\left(\\frac tT b,\\ t-\\frac{t^2}{T}\\right)"
+        },
+        {
+          "label": "桥过程与分布检验的边界",
+          "tex": "\\sqrt n(F_n(x)-F(x))\\ \\Rightarrow\\ B(F(x))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "因为W_0=0且t=0，B_0=0；t=T时B_T=W_T−W_T=0。B各有限维向量是W各时间点的线性变换，因此仍联合高斯，且由W的连续路径和线性函数连续可知B路径连续。",
+          "tex": "B_t=W_t-\\frac tT W_T,\\qquad B_0=B_T=0"
+        },
+        {
+          "explanation": "将B_s=W_s−(s/T)W_T与B_t=W_t−(t/T)W_T做双线性协方差展开：min(s,t)−(t/T)s−(s/T)t+(st/T²)T=min(s,t)−st/T。令s=t得到方差公式。",
+          "tex": "\\operatorname{Cov}(B_s,B_t)=\\min(s,t)-\\frac{st}{T},\\quad\\operatorname{Var}(B_t)=t\\!\\left(1-\\frac tT\\right)"
+        },
+        {
+          "explanation": "二维Gaussian条件回归公式给E(W_t|W_T)=Cov(W_t,W_T)/Var(W_T)×W_T=(t/T)W_T。正态正交残差B_t与W_T协方差为t−(t/T)T=0，联合高斯下独立，残差方差按协方差公式得t−t²/T。",
+          "tex": "W_t\\mid W_T=b\\sim N\\!\\left(\\frac tT b,\\ t-\\frac{t^2}{T}\\right)"
+        },
+        {
+          "explanation": "每个固定阈值的指标样本均值满足CLT，联合阈值的协方差为F(min(x,y))−F(x)F(y)，与布朗桥协方差形式一致。要得到整个函数过程的弱收敛，还需经验过程的紧性与Donsker定理，而不是只比较有限维协方差。",
+          "tex": "\\sqrt n(F_n(x)-F(x))\\ \\Rightarrow\\ B(F(x))"
+        }
+      ],
+      "example": "T=1的零端点桥在t=0.5处方差0.25、标准差0.5；两个时点0.25与0.75的协方差0.0625。条件布朗终值W_1=2时中点W_{0.5}均值1、方差0.25。",
+      "application": "支持经验分布函数的极限检验、金融残差过程分析与终端条件路径建模；关键是区分条件路径和实时预测。",
+      "caveat": "桥构造使用未来终值W_T，不可作为时间T前的交易信号；桥不保留普通布朗的独立平稳增量。",
+      "deep_sections": [
+        {
+          "title": "终端条件与桥构造",
+          "question": "如何把自由布朗路径精确变成终端回到零的随机路径？",
+          "paragraphs": [
+            "定义B_t=W_t−(t/T)W_T。被扣除的是连接(0,0)与(T,W_T)的线性路径，因此t=T时恰好减去W_T，t=0时两项都为0。",
+            "这构造出零端点桥的Gaussian过程，它在分布意义上对应布朗路径条件于W_T=0的连续版本；不能把条件概率为零的事件当成普通频率事件处理。"
+          ],
+          "formulas": [
+            {
+              "label": "终端条件与桥构造",
+              "tex": "B_t=W_t-\\frac tT W_T,\\qquad B_0=B_T=0"
+            }
+          ],
+          "proof": "因为W_0=0且t=0，B_0=0；t=T时B_T=W_T−W_T=0。B各有限维向量是W各时间点的线性变换，因此仍联合高斯，且由W的连续路径和线性函数连续可知B路径连续。",
+          "worked": "T=1时，t=0.5有B_{0.5}=W_{0.5}−0.5W_1；如果某条路径W_{0.5}=0.6、W_1=0.8，则桥在t=0.5处取0.2。",
+          "limitation": "这里为了构造桥使用终值W_T，不能将这个数学变量当作T前的实际可交易可观测信息。"
+        },
+        {
+          "title": "桥协方差与中点波动",
+          "question": "为什么布朗桥在终点附近的波动会缩小到零？",
+          "paragraphs": [
+            "展开B_sB_t的协方差并使用Cov(W_s,W_t)=min(s,t)、Cov(W_s,W_T)=s等式。",
+            "消去线性端点项得到min(s,t)−st/T；令s=t得到Var(B_t)=t(1−t/T)，在t=0与t=T均为0，中间最大。"
+          ],
+          "formulas": [
+            {
+              "label": "桥协方差与中点波动",
+              "tex": "\\operatorname{Cov}(B_s,B_t)=\\min(s,t)-\\frac{st}{T},\\quad\\operatorname{Var}(B_t)=t\\!\\left(1-\\frac tT\\right)"
+            }
+          ],
+          "proof": "将B_s=W_s−(s/T)W_T与B_t=W_t−(t/T)W_T做双线性协方差展开：min(s,t)−(t/T)s−(s/T)t+(st/T²)T=min(s,t)−st/T。令s=t得到方差公式。",
+          "worked": "T=1时，中点t=0.5方差0.5×0.5=0.25，标准差0.5；s=0.25,t=0.75的协方差0.25−0.1875=0.0625。",
+          "limitation": "金融资产在已确定未来终值条件下的桥是事后条件分布，不表示真实价格路径会自动在到期前回归至一个预先已知目标。"
+        },
+        {
+          "title": "Gaussian条件分布与终端约束",
+          "question": "为什么线性修正恰好实现条件于W_T=0的Gaussian分布？",
+          "paragraphs": [
+            "联合向量(W_t,W_T)为二维正态，Cov(W_t,W_T)=t、Var W_T=T。按高斯条件分布公式，给定W_T=b时条件均值为(t/T)b，条件方差t−t²/T。",
+            "从W_t扣除其对W_T的线性回归(t/T)W_T后得到的残差正与W_T独立，并具有上述条件协方差；因此零端点桥的有限维分布对应条件于终点零的Brownian路径。"
+          ],
+          "formulas": [
+            {
+              "label": "Gaussian条件分布与终端约束",
+              "tex": "W_t\\mid W_T=b\\sim N\\!\\left(\\frac tT b,\\ t-\\frac{t^2}{T}\\right)"
+            }
+          ],
+          "proof": "二维Gaussian条件回归公式给E(W_t|W_T)=Cov(W_t,W_T)/Var(W_T)×W_T=(t/T)W_T。正态正交残差B_t与W_T协方差为t−(t/T)T=0，联合高斯下独立，残差方差按协方差公式得t−t²/T。",
+          "worked": "T=1、t=0.5、固定终值b=2时，条件均值为1、条件方差0.25。若b=0，均值为0且仍有标准差0.5。",
+          "limitation": "条件在连续变量单点W_T=0上需通过正则条件分布解释，不能套用基础离散事件Bayes分母概率为0的比式。"
+        },
+        {
+          "title": "桥过程与分布检验的边界",
+          "question": "为什么经验分布函数的极限会出现桥，而不是无限增长方差的自由布朗运动？",
+          "paragraphs": [
+            "经验分布函数F_n在每个阈值的涨落来自样本平均，但在分布的整个右端，F_n(∞)=F(∞)=1是固定约束，因此标准化误差在区间终点必须回到零。",
+            "在独立同分布样本与连续总体分布等适当条件下，√n(F_n(x)−F(x))经过概率积分变换的极限是Brownian bridge。这属于函数空间弱收敛，不能仅依单点CLT推断整体统计量的分布。"
+          ],
+          "formulas": [
+            {
+              "label": "桥过程与分布检验的边界",
+              "tex": "\\sqrt n(F_n(x)-F(x))\\ \\Rightarrow\\ B(F(x))"
+            }
+          ],
+          "proof": "每个固定阈值的指标样本均值满足CLT，联合阈值的协方差为F(min(x,y))−F(x)F(y)，与布朗桥协方差形式一致。要得到整个函数过程的弱收敛，还需经验过程的紧性与Donsker定理，而不是只比较有限维协方差。",
+          "worked": "Uniform(0,1)样本在分位点u=0.5时，极限桥方差u(1−u)=0.25；在u=1时方差0，符合经验CDF终点始终为1的约束。",
+          "limitation": "分布检验若参数由同一样本估计，Kolmogorov–Smirnov的标准桥极限可能改变；金融依赖样本还需处理相关性和异质性。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "ito-n0301",
+          "label": "布朗定义"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0302",
+          "label": "增量与Gaussian条件"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0142",
+          "label": "弱收敛"
+        },
+        {
+          "kind": "math",
+          "id": "statistics-n0169",
+          "label": "Bootstrap统计推断"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 15.070J Advanced Stochastic Processes：Lecture 6–8布朗运动、反射原理与二次变差",
+          "url": "https://ocw.mit.edu/courses/15-070j-advanced-stochastic-processes-fall-2013/pages/lecture-notes/"
+        },
+        {
+          "title": "MIT 15.070J Advanced Stochastic Processes：Lecture 14–17 Itô积分构造和随机微积分",
+          "url": "https://www.ocw.mit.edu/courses/15-070j-advanced-stochastic-processes-fall-2013/resources/lecture-notes/"
+        }
+      ],
+      "checked_status": "V13完整证明：连续过程假设、独立数值算例与金融适用界限"
+    },
+    {
+      "id": "ito-n0306",
+      "node_id": "ito-n0306",
+      "title": "几何布朗运动",
+      "definition": "几何布朗运动（GBM）是正价格的连续扩散模型，满足dS_t=μS_tdt+σS_tdW_t，正初值S_0>0、常数μ和σ时具有显式对数正态解。Itô公式说明对数增长率需要扣除σ²/2，而价格本身的期望增长率仍是μ。该模型为经典Black–Scholes框架提供基准，但不捕捉跳跃、随机波动或实际交易费用。",
+      "assumptions": "固定S_0>0、常数μ∈R、σ≥0及标准布朗W；将SDE解释为Itô随机积分方程，适用局部Lipschitz和线性增长条件以保证存在唯一强解。对数变换要求S_t>0，可由显式指数解验证。用真实测度下μ解释历史漂移时，不能不经无套利条件将它直接写成风险中性r。",
+      "properties": [
+        "显式解S_t=S_0exp[(μ−σ²/2)t+σW_t]严格为正。",
+        "对数收益服从N((μ−σ²/2)t,σ²t)，而E S_t=S_0e^{μt}。",
+        "GBM方差为S_0²e^{2μt}(e^{σ²t}−1)，说明价格水平波动随时间变化。",
+        "模拟和估计需区分真实测度P的μ与风险中性测度Q下的无套利漂移，不应将股票收益假设成精确对数正态。"
+      ],
+      "formulas": [
+        {
+          "label": "扩散SDE与价格正性",
+          "tex": "dS_t=\\mu S_t\\,dt+\\sigma S_t\\,dW_t,\\qquad S_t=S_0e^{(\\mu-\\sigma^2/2)t+\\sigma W_t}"
+        },
+        {
+          "label": "对数收益与期望价格的不同漂移",
+          "tex": "\\log(S_t/S_0)\\sim N((\\mu-\\tfrac12\\sigma^2)t,\\sigma^2t),\\quad\\mathbb ES_t=S_0e^{\\mu t}"
+        },
+        {
+          "label": "价格方差与时间聚合",
+          "tex": "\\operatorname{Var}(S_t)=S_0^2e^{2\\mu t}(e^{\\sigma^2t}-1)"
+        },
+        {
+          "label": "真实概率与风险中性漂移",
+          "tex": "dS_t=rS_t\\,dt+\\sigma S_t\\,dW_t^{\\mathbb Q}\\qquad\\text{在相应风险中性假设下}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对f(s)=ln s，f'=1/s、f''=−1/s²。Itô公式给d log S=(μ−σ²/2)dt+σdW；从0积分至t得到log S_t=log S_0+(μ−σ²/2)t+σW_t，再指数化得到严格正的解。",
+          "tex": "dS_t=\\mu S_t\\,dt+\\sigma S_t\\,dW_t,\\qquad S_t=S_0e^{(\\mu-\\sigma^2/2)t+\\sigma W_t}"
+        },
+        {
+          "explanation": "写S_t=S_0 e^{(μ−σ²/2)t}e^{σW_t}，由W_t~N(0,t)得E e^{σW_t}=e^{σ²t/2}，两指数乘积消去−σ²t/2，得到E S_t=S_0e^{μt}；对数分布则由线性正态变换直接确定。",
+          "tex": "\\log(S_t/S_0)\\sim N((\\mu-\\tfrac12\\sigma^2)t,\\sigma^2t),\\quad\\mathbb ES_t=S_0e^{\\mu t}"
+        },
+        {
+          "explanation": "由显式解E S²=S_0²exp[(2μ−σ²)t]exp[(2σ)²t/2]=S_0²e^{2μt+σ²t}。减去(E S)²=S_0²e^{2μt}，整理得方差公式，且σ=0时方差归零。",
+          "tex": "\\operatorname{Var}(S_t)=S_0^2e^{2\\mu t}(e^{\\sigma^2t}-1)"
+        },
+        {
+          "explanation": "令贴现价D_t=e^{-rt}S_t，在Q测度下用Itô乘积法则得到dD_t=e^{-rt}(μ_Q−r)S_tdt+e^{-rt}σS_tdW_t^Q。若要求局部鞅漂移项为零，就需μ_Q=r；真鞅及价格表示还要检查相应可积性。",
+          "tex": "dS_t=rS_t\\,dt+\\sigma S_t\\,dW_t^{\\mathbb Q}\\qquad\\text{在相应风险中性假设下}"
+        }
+      ],
+      "example": "S_0=100、μ=0.08、σ=0.2、一年时，对数价格中位增长率0.06，S_1中位数约106.184、均值约108.329。若μ=0，一年价格方差10000(e^{0.04}−1)≈408.108；理想风险中性模型下若r=0.03，漂移改为0.03。",
+      "application": "用于金融扩散基准、收益与对数收益年化、资产定价模型推导和模拟误差基准；适当条件下链接Black–Scholes和GBM精确离散。",
+      "caveat": "GBM排除随机波动、杠杆约束与跳跃风险；P下历史漂移不能直接用于Q下无套利期权定价，波动率与年化尺度也必须一致。",
+      "deep_sections": [
+        {
+          "title": "扩散SDE与价格正性",
+          "question": "为什么乘法型布朗噪声适合生成严格为正的基准价格？",
+          "paragraphs": [
+            "令dS_t=μS_tdt+σS_tdW_t，漂移和波动强度均与价格水平成比例。常数系数时可以对log S_t使用Itô引理，将乘法噪声转为加法高斯噪声。",
+            "对数解指数化后S_t始终正，不必依赖人为截断负价格。这是数学模型优势而非对真实股票价格永不归零或无交易停牌的保证。"
+          ],
+          "formulas": [
+            {
+              "label": "扩散SDE与价格正性",
+              "tex": "dS_t=\\mu S_t\\,dt+\\sigma S_t\\,dW_t,\\qquad S_t=S_0e^{(\\mu-\\sigma^2/2)t+\\sigma W_t}"
+            }
+          ],
+          "proof": "对f(s)=ln s，f'=1/s、f''=−1/s²。Itô公式给d log S=(μ−σ²/2)dt+σdW；从0积分至t得到log S_t=log S_0+(μ−σ²/2)t+σW_t，再指数化得到严格正的解。",
+          "worked": "取S_0=100、μ=0.08、σ=0.2、t=1且W_1=0时，S_1=100e^{0.06}≈106.18365，而不是100e^{0.08}。",
+          "limitation": "Ito指数解只在声明的常数扩散系数和连续交易价格模型内成立，跳空下跌与停牌导致的执行风险不在模型中。"
+        },
+        {
+          "title": "对数收益与期望价格的不同漂移",
+          "question": "为什么对数收益漂移是μ−σ²/2，而价格期望增长率却仍为μ？",
+          "paragraphs": [
+            "由显式解log(S_t/S_0)为均值(μ−σ²/2)t、方差σ²t的正态变量。指数取期望时需要计入正态指数矩，正好补回σ²t/2。",
+            "因此几何增长率或对数均值低于算术期望漂移；二者差异由波动率产生，不能简单把回测年化几何收益与GBM参数μ相等看待。"
+          ],
+          "formulas": [
+            {
+              "label": "对数收益与期望价格的不同漂移",
+              "tex": "\\log(S_t/S_0)\\sim N((\\mu-\\tfrac12\\sigma^2)t,\\sigma^2t),\\quad\\mathbb ES_t=S_0e^{\\mu t}"
+            }
+          ],
+          "proof": "写S_t=S_0 e^{(μ−σ²/2)t}e^{σW_t}，由W_t~N(0,t)得E e^{σW_t}=e^{σ²t/2}，两指数乘积消去−σ²t/2，得到E S_t=S_0e^{μt}；对数分布则由线性正态变换直接确定。",
+          "worked": "S_0=100、μ=0.08、σ=0.2、一年时，log价格中位增长0.06，价格中位数100e^{0.06}≈106.184，但价格均值100e^{0.08}≈108.329。",
+          "limitation": "GBM的平均价格和几何收益都依赖真实参数估计；高波动与存续偏差会使样本估计偏离理论均值。"
+        },
+        {
+          "title": "价格方差与时间聚合",
+          "question": "价格水平的方差怎样从正态二阶指数矩精确计算？",
+          "paragraphs": [
+            "先计算E S_t²=S_0²e^{2(μ−σ²/2)t}E e^{2σW_t}，正态指数矩给E e^{2σW_t}=e^{2σ²t}。",
+            "再减去(E S_t)²=S_0²e^{2μt}，得到S_0²e^{2μt}(e^{σ²t}−1)。时间t的线性方差适用于对数收益，不直接适用于价格水平。"
+          ],
+          "formulas": [
+            {
+              "label": "价格方差与时间聚合",
+              "tex": "\\operatorname{Var}(S_t)=S_0^2e^{2\\mu t}(e^{\\sigma^2t}-1)"
+            }
+          ],
+          "proof": "由显式解E S²=S_0²exp[(2μ−σ²)t]exp[(2σ)²t/2]=S_0²e^{2μt+σ²t}。减去(E S)²=S_0²e^{2μt}，整理得方差公式，且σ=0时方差归零。",
+          "worked": "S_0=100、μ=0、σ=0.2、t=1，则Var S_1=10000(e^{0.04}−1)≈408.108，标准差约20.202；对数收益方差则只是0.04。",
+          "limitation": "波动率的平方根时间法则适用于GBM的连续对数增量，不应直接用于价格水平或存在波动聚集的资产回报。"
+        },
+        {
+          "title": "真实概率与风险中性漂移",
+          "question": "为什么从真实样本估计的μ不能直接放进无套利期权定价？",
+          "paragraphs": [
+            "在真实概率P下GBM可能带有风险溢价μ−r；在满足完全市场、可交易、连续对冲和适当测度变换条件的理想Black–Scholes模型里，风险中性Q下贴现资产需要成为鞅。",
+            "如果无股息且风险中性短利率r恒定，相应Q下资产漂移写成r而不是历史μ。现实市场的交易成本、融资约束与跳跃等会打破理想复制条件。"
+          ],
+          "formulas": [
+            {
+              "label": "真实概率与风险中性漂移",
+              "tex": "dS_t=rS_t\\,dt+\\sigma S_t\\,dW_t^{\\mathbb Q}\\qquad\\text{在相应风险中性假设下}"
+            }
+          ],
+          "proof": "令贴现价D_t=e^{-rt}S_t，在Q测度下用Itô乘积法则得到dD_t=e^{-rt}(μ_Q−r)S_tdt+e^{-rt}σS_tdW_t^Q。若要求局部鞅漂移项为零，就需μ_Q=r；真鞅及价格表示还要检查相应可积性。",
+          "worked": "假设P下历史漂移μ=0.08、无风险利率r=0.03，理想Q下GBM漂移应为0.03，而非0.08；σ=0.2可在理想模型中保持相同扩散系数。",
+          "limitation": "风险中性漂移变换依赖无套利与等价测度假设，真实风险溢价也不由常数GBM自动决定。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "ito-n0301",
+          "label": "先修：布朗运动"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0309",
+          "label": "先修：一维Itô公式"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0314",
+          "label": "后续：GBM精确解"
+        },
+        {
+          "kind": "math",
+          "id": "finance-n0434",
+          "label": "Black–Scholes模型"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 15.070J Advanced Stochastic Processes：Lecture 6–8布朗运动、反射原理与二次变差",
+          "url": "https://ocw.mit.edu/courses/15-070j-advanced-stochastic-processes-fall-2013/pages/lecture-notes/"
+        },
+        {
+          "title": "MIT 15.070J Advanced Stochastic Processes：Lecture 14–17 Itô积分构造和随机微积分",
+          "url": "https://www.ocw.mit.edu/courses/15-070j-advanced-stochastic-processes-fall-2013/resources/lecture-notes/"
+        }
+      ],
+      "checked_status": "V13完整证明：连续过程假设、独立数值算例与金融适用界限"
     }
   ]
 }
