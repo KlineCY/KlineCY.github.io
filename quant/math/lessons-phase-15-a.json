@@ -1,0 +1,314 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "riskmath-x005",
+      "node_id": "riskmath-x005",
+      "title": "边际预期短缺MES",
+      "definition": "边际预期短缺（Marginal Expected Shortfall, MES）在指定系统性市场尾部事件已经发生的条件下，计算机构或资产i的平均损失。采用正损失约定时，市场损失L_m上尾置信水平α对应MES_i(α)=E[L_i|L_m>VaR_α(L_m)]，在连续市场损失且尾部概率等于1−α时成立。与机构自身ES_i=平均自身最坏1−α损失相比，MES强调系统市场极端状态下该资产的表现。在线性可微组合和适当连续性条件下，MES还可对应系统ES对该资产暴露权重的边际导数。",
+      "assumptions": "设机构损失L_i与系统损失L_m同一交易日对齐且具有有限一阶矩；市场上尾VaR定义为广义逆q_{m,α}。条件尾部事件需有正概率，采用L_m>q_{m,α}以便离散样例中精确定义条件事件；若市场损失连续，尾部概率等于1−α。系统ES风险贡献的微分公式还要求线性组合L_m(w)=∑w_iL_i、相应分布连续、权重变化时可交换微分和期望并满足合适积分条件。",
+      "properties": [
+        "市场尾部条件平均MES_i与机构自身上尾ES_i条件事件不同，通常不相等；机构自身ES不能替代系统事件条件下的资产风险。",
+        "对连续市场损失，MES_i=E[L_i1{L_m>q_m}]/(1−α)；在离散损失且阈值有原子时，分母必须使用真实尾部事件概率。",
+        "若系统损失为线性资产组合且ES可微，则∂ES_α(L_m(w))/∂w_i可由系统上尾条件中的L_i期望表示；它是风险函数的局部敏感度而非因果外部性。",
+        "MES取值依赖市场代理、尾部阈值、样本日期与机构暴露；ETF同日尾部观测稀少时方差很大，且不能把同日相关解释为因果系统性贡献。"
+      ],
+      "formulas": [
+        {
+          "label": "MES市场条件均值",
+          "tex": "\\operatorname{MES}_{i,\\alpha}=E[L_i\\mid L_m>q_{m,\\alpha}]"
+        },
+        {
+          "label": "市场连续时尾部表达",
+          "tex": "\\operatorname{MES}_{i,\\alpha}=\\frac{E[L_i\\mathbf1\\{L_m>q_{m,\\alpha}\\}]}{1-\\alpha}"
+        },
+        {
+          "label": "机构自身ES对照",
+          "tex": "\\operatorname{ES}_{i,\\alpha}=\\frac1{1-\\alpha}\\int_\\alpha^1F_{L_i}^{-1}(u)\\,du"
+        },
+        {
+          "label": "系统ES局部边际导数",
+          "tex": "\\frac{\\partial\\operatorname{ES}_{\\alpha}(L_m(w))}{\\partial w_i}=E[L_i\\mid L_m(w)>q_\\alpha]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "市场尾部事件A={L_m>q_m}对连续市场损失有P(A)=1−α，根据条件期望定义，机构损失对A的条件平均等于加权总损失期望除以尾部概率。",
+          "tex": "E[L_i\\mid A]=\\frac{E[L_i\\mathbf1_A]}{\\Pr(A)}"
+        },
+        {
+          "explanation": "机构自身ES取的是L_i自己的最坏概率尾部，而MES取的是市场L_m的尾部，两者条件事件在非共单调相依时不同。",
+          "tex": "\\{L_i>q_{i,\\alpha}\\}\\ne\\{L_m>q_{m,\\alpha}\\}"
+        },
+        {
+          "explanation": "对连续市场损失且线性系统组合，使用ES阈值最优化表达式，并对固定最优阈值下的权重求偏导，可利用包络原理得到尾部条件风险贡献。",
+          "tex": "\\operatorname{ES}_\\alpha(L_m)=\\min_v\\left[v+\\frac{E(L_m-v)_+}{1-\\alpha}\\right]"
+        },
+        {
+          "explanation": "当阈值处概率为零且允许交换导数与期望时，∂(L_m−v)_+/∂w_i=L_i1{L_m>v}，再除以1−α就得到MES导数式。",
+          "tex": "\\partial_{w_i}\\operatorname{ES}_\\alpha=\\frac{E[L_i\\mathbf1\\{L_m>q_\\alpha\\}]}{1-\\alpha}"
+        }
+      ],
+      "example": "考虑四个等概率、已对齐的损失情景：市场L_m=(0,1,2,3)，机构L_i=(1,7,3,4)。对市场α=0.75，最近秩VaR是排序第3个，即q_m=2。由于L_m>2仅在第四情景发生且概率0.25，所以MES_i=4。机构自身损失排序(1,3,4,7)的75% ES由最坏25%给出7，说明MES_i=4与自身ES_i=7不同。这里的数值用于区分条件事件，并非真实市场估计。",
+      "application": "在ETF市场共振分析中，先用完整市场代理指数定义系统性压力，再对各ETF在市场最坏5%或1%交易日计算条件亏损；与个别ETF自身ES、风险贡献和不同Copula联合情景对照。MES用于识别压力共振与资产配置脆弱性，需要进一步检查真实融资、相关性、冲击成本与风险的时间外稳定性。",
+      "caveat": "MES不应直接等同于企业对系统性风险的因果贡献，也不能仅凭其数值推断资本不足或违约概率。市场代理与压力阈值的选择会显著影响结果，事件窗口很短时估计不稳定。机构与市场损失存在共享成分还会产生机械关联；对离散VaR阈值，严格超越与大于等于阈值必须明确。",
+      "deep_sections": [
+        {
+          "title": "MES、机构ES和市场条件事件的三个对象",
+          "question": "为什么机构自己的最差日期可能不是整个市场最差的日期？",
+          "paragraphs": [
+            "机构自身ES聚焦该机构L_i分布的尾部损失，MES则以市场L_m是否发生极端亏损作为条件，观察该机构在系统危机时的平均表现。机构自身尾部可能由公司事件或单个行业崩跌驱动，因此它与整个市场崩跌日期不必相同。",
+            "实证时应固定市场代理、置信水平与损失为正的口径，并将收益的左尾转换成损失的右尾。若使用原始收益r_i，危机条件下平均收益通常为负，与本讲MES正损失约定符号不同。"
+          ],
+          "formulas": [
+            {
+              "label": "MES、机构ES和市场条件事件的三个对象",
+              "tex": "\\operatorname{MES}_{i,\\alpha}=E[L_i\\mid L_m>q_{m,\\alpha}]"
+            }
+          ],
+          "proof": "条件事件A由市场而非机构自身确定，因此只有在两个资产尾部高度一致的特殊结构下，市场尾部条件平均和个体上尾分位积分才可能相等。",
+          "worked": "四等概率情景市场损失(0,1,2,3)及机构损失(1,7,3,4)，市场75% VaR=2，只选第四日MES=4；机构自身75% ES=7。",
+          "limitation": "不要用机构收益排序的最差日替代市场损失最差日，否则估计对象从MES悄然变成机构自身ES。"
+        },
+        {
+          "title": "条件期望与经验尾部估计的公式",
+          "question": "为什么离散市场损失不能机械把分母写成1−α？",
+          "paragraphs": [
+            "MES的核心是条件期望E[L_i1_A]/P(A)，其中市场尾部事件A由选定阈值和不等号确定。若市场分布连续且q是正确α分位，P(L_m>q)=1−α；有原子时这个概率可能严格小于1−α。",
+            "历史情景估计通常以市场超越事件集合为样本，直接对这些日期的机构损失求均值；如果极端日很少，必须报告分母事件数与依赖性而不是只展示均值小数。"
+          ],
+          "formulas": [
+            {
+              "label": "条件期望与经验尾部估计的公式",
+              "tex": "\\widehat{\\operatorname{MES}}=\\frac{\\sum_t L_{i,t}\\mathbf1\\{L_{m,t}>\\widehat q_m\\}}{\\sum_t\\mathbf1\\{L_{m,t}>\\widehat q_m\\}}"
+            }
+          ],
+          "proof": "样本条件平均由超越事件中的机构损失之和除以事件次数得到。离散分布上条件事件概率P(A)可能与名义1−α不一致，因此通用表达必须保留真实分母。",
+          "worked": "四等概率市场情景q_m=2，只有L_m=3的对应机构损失L_i=4被选中，MES=4；若改用≥2，会选第三和第四天，均值(3+4)/2=3.5。",
+          "limitation": "若没有任何市场超越事件，分母为零，MES估计并不存在；不能用零或插值掩盖支持缺口。"
+        },
+        {
+          "title": "MES怎样成为系统ES对权重的导数",
+          "question": "边际预期短缺为何还会出现于风险预算的Euler分解？",
+          "paragraphs": [
+            "假设系统损失L_m(w)=∑w_iL_i，并且各资产收益分布在小幅权重变化中保持不变。对系统ES应用阈值最优化表示，在连续且可微条件下可交换对权重的导数和尾部期望。",
+            "由包络定理，最优阈值q对权重的变化在一阶最优条件下不产生额外项，导数就成为市场尾部事件中L_i的条件平均。这个风险贡献是局部敏感度，和交易费用、价格影响及因果系统性外部性不同。"
+          ],
+          "formulas": [
+            {
+              "label": "MES怎样成为系统ES对权重的导数",
+              "tex": "\\frac{\\partial\\operatorname{ES}_\\alpha(L_m(w))}{\\partial w_i}=E[L_i\\mid L_m(w)>q_\\alpha]"
+            }
+          ],
+          "proof": "写ES为min_v[v+E(L_m(w)−v)_+/(1−α)]，对w_i求导并使用∂L_m/∂w_i=L_i，就得到E[L_i1{L_m>q}]/(1−α)。",
+          "worked": "若连续市场尾部事件占5%，而机构在这些日子的平均亏损率是2%，则在上述固定分布线性假设下，系统ES对该机构权重的一阶导数为约0.02。",
+          "limitation": "如果权重变化改变市场价格分布或触发强制平仓，固定分布、可微线性条件不成立，不能把数学导数当作实际交易成本。"
+        },
+        {
+          "title": "如何评价金融MES的时间稳定性",
+          "question": "为什么一个看似显著的危机条件均值可能无法复现？",
+          "paragraphs": [
+            "真正市场危机日极少，而且ETF之间会在同一个日期共同受市场冲击，因此37只ETF乘几天并不能形成足够多的独立市场尾部事件。门槛选为5%还是1%、样本窗口与资产存续日期都会明显影响估计。",
+            "需要按市场日历对齐资产收益、使用点时可得的市场代理和风险阈值，结合区块Bootstrap或其他依赖稳健推断对MES不确定性进行敏感性分析。策略交易规则必须另行用资金账本验证。"
+          ],
+          "formulas": [
+            {
+              "label": "如何评价金融MES的时间稳定性",
+              "tex": "N_{\\rm tail}=\\sum_t\\mathbf1\\{L_{m,t}>\\widehat q_{m,\\alpha}\\}"
+            }
+          ],
+          "proof": "若1000个交易日取市场最坏5%，理论尾部规模约50日；若实际仅40个有效对齐日期，MES的实际估计样本量应报告40而不是37×40。",
+          "worked": "尾部阈值利用全测试期选择会产生未来泄漏；MES的平均值不能代表任一特定危机日的损失上界。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "riskmath-x002",
+          "label": "先修：ES分位积分"
+        },
+        {
+          "kind": "math",
+          "id": "riskmath-x004",
+          "label": "先修：Copula尾部依赖"
+        },
+        {
+          "kind": "math",
+          "id": "riskmath-x006",
+          "label": "后续：CoVaR与条件系统风险"
+        },
+        {
+          "kind": "ml",
+          "id": "m23-c11-p03",
+          "label": "ML：系统风险审计"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Acharya et al. (2017), Measuring Systemic Risk",
+          "url": "https://doi.org/10.1093/rfs/hhw088"
+        },
+        {
+          "title": "Federal Reserve Bank of Cleveland, Measuring Systemic Risk working paper",
+          "url": "https://www.clevelandfed.org/publications/working-paper/wp-1002-measuring-systemic-risk"
+        }
+      ],
+      "checked_status": "完整系统性风险数学讲义：市场条件MES、ES导数和非因果边界"
+    },
+    {
+      "id": "riskmath-x006",
+      "node_id": "riskmath-x006",
+      "title": "CoVaR与条件系统风险",
+      "definition": "CoVaR描述系统损失在某机构处于指定状态下的条件风险分位点。以正损失定义系统L_s与机构L_i时，可采用尾部事件版本CoVaR_{α|β}^{s|i}=VaR_α(L_s|L_i>VaR_β(L_i))；这与Adrian–Brunnermeier原始研究中条件于机构处于VaR状态的定义并不完全相同，必须清楚标注使用的是状态取值条件还是尾部事件条件。ΔCoVaR比较机构压力状态与其基准状态下的系统CoVaR，用于监测系统共振，不能仅凭条件相关性得到因果系统贡献。",
+      "assumptions": "系统和机构损失同时点对齐且联合条件分布有定义，损失为正，α、β明确。采用尾部事件版本时要求P(L_i>q_{i,β})>0；条件于连续变量L_i恰好取某值是零概率事件，需要借助正则条件分布、分位回归或条件密度模型定义，不能简单以有限样本同值事件估计。ΔCoVaR的基准应明确为机构中位状态的条件CoVaR，而不是未经说明使用系统无条件VaR。",
+      "properties": [
+        "系统CoVaR是L_s在机构特定条件下的广义逆α分位数，区别于机构自身VaR及系统无条件VaR。",
+        "尾部条件版使用事件L_i>q_{i,β}；机构VaR精确状态版使用条件分布在L_i=q_{i,β}的正则条件概率，二者一般不相同。",
+        "ΔCoVaR通常采用机构压力状态减机构正常或中位状态下的条件系统CoVaR。将压力CoVaR减去无条件系统VaR是另一个定义，需不同标识。",
+        "市场共同因子、机构与系统指数成分重叠、杠杆与市场状态都能造成条件CoVaR变化，因此它不能独立证明机构冲击造成系统损失。"
+      ],
+      "formulas": [
+        {
+          "label": "尾部事件版CoVaR",
+          "tex": "\\operatorname{CoVaR}^{s\\mid i}_{\\alpha\\mid\\beta}=\\operatorname{VaR}_\\alpha(L_s\\mid L_i>q_{i,\\beta})"
+        },
+        {
+          "label": "状态版条件分位",
+          "tex": "\\operatorname{CoVaR}^{s\\mid i}_{\\alpha}(x)=F^{-1}_{L_s\\mid L_i=x}(\\alpha)"
+        },
+        {
+          "label": "相对中位状态的增量",
+          "tex": "\\Delta\\operatorname{CoVaR}_{\\alpha\\mid\\beta}=\\operatorname{CoVaR}_{\\alpha}(\\mathrm{stress})-\\operatorname{CoVaR}_{\\alpha}(\\mathrm{median})"
+        },
+        {
+          "label": "经验条件CDF",
+          "tex": "\\widehat F_{s\\mid A}(z)=\\frac{\\sum_t\\mathbf1\\{L_{s,t}\\le z,\\ A_t\\}}{\\sum_t\\mathbf1\\{A_t\\}}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "把机构压力事件A={L_i>q_{i,β}}固定后，系统条件CDF由联合事件概率P(L_s≤z,A)除以P(A)得到。",
+          "tex": "F_{s\\mid A}(z)=\\frac{\\Pr(L_s\\le z,\\ A)}{\\Pr(A)}"
+        },
+        {
+          "explanation": "对条件CDF应用广义逆定义，取得在机构尾部事件A发生时系统损失α分位阈值；它不需要假设条件分布正态。",
+          "tex": "\\operatorname{CoVaR}_\\alpha^{s\\mid A}=\\inf\\{z:F_{s\\mid A}(z)\\ge\\alpha\\}"
+        },
+        {
+          "explanation": "将压力条件分位与中位状态条件分位相减，构造相对基准的系统风险增量。若改减系统无条件VaR，会得到不同统计量。",
+          "tex": "\\Delta\\operatorname{CoVaR}=\\operatorname{CoVaR}_{\\alpha}^{s\\mid\\mathrm{stress}}-\\operatorname{CoVaR}_{\\alpha}^{s\\mid\\mathrm{median}}"
+        },
+        {
+          "explanation": "当状态变量连续且恰好取某阈值的概率为0时，条件CDF可以通过正则条件分布或分位回归估计，而不能通过除以0概率事件的简单频数得到。",
+          "tex": "F_{L_s\\mid L_i=x}(z)=\\Pr(L_s\\le z\\mid L_i=x)"
+        }
+      ],
+      "example": "给出四个等概率日期，机构损失L_i=(0,1,2,3)，系统损失L_s=(0,1,2,5)。定义压力为机构L_i>VaR_{0.5}(L_i)=1，条件日为第三和第四日，系统损失为(2,5)，其75% CoVaR按最近秩为5。以机构中位状态L_i=1的系统损失1作为基准，ΔCoVaR=5−1=4。注意无条件系统75% VaR是2，若错误地将5−2=3称为同一基准ΔCoVaR，会改变指标定义；该离散教学例子不用于连续等值条件推断。",
+      "application": "在ETF行业联动、金融机构系统风险或投资组合对市场共振分析中，先明确系统指数与机构组合损失、条件压力事件和中位参照，再用滚动Copula或条件分位回归估计CoVaR。将其与MES、尾依赖系数及系统ES联系起来，同时控制资产重叠、行业共同因子和资金交易机制。",
+      "caveat": "尾部条件CoVaR和状态条件CoVaR不能被同名混用。条件样本极少、市场制度转移、机构与系统指数机械成分重叠会造成严重估计偏差。CoVaR是条件预测与共振指标，不能通过观察到的ΔCoVaR直接证明因果系统重要性或监管资本需求。",
+      "deep_sections": [
+        {
+          "title": "先区分系统VaR、机构VaR和CoVaR",
+          "question": "机构处于极端状态时的系统尾部风险为何是不同概率对象？",
+          "paragraphs": [
+            "系统VaR研究整个市场损失的无条件α分位点，机构VaR研究单个机构自身损失的分位点，而CoVaR在特定机构压力条件下重新研究系统损失分布。机构越大或共同因子暴露越高，条件分布可能与无条件分布相差更多。",
+            "应先选择正损失还是收益左尾、机构与系统代理、压力状态定义和风险期限。不能只因两个指标都称为VaR就直接比较它们的数值大小。"
+          ],
+          "formulas": [
+            {
+              "label": "先区分系统VaR、机构VaR和CoVaR",
+              "tex": "\\operatorname{CoVaR}^{s\\mid A}_\\alpha=F^{-1}_{L_s\\mid A}(\\alpha)"
+            }
+          ],
+          "proof": "条件CDF是P(L_s≤z,A)/P(A)，再对该条件CDF求广义逆。两步必须以同一压力事件A为条件，分母需要严格为正。",
+          "worked": "离散数据L_i=(0,1,2,3)、L_s=(0,1,2,5)，机构压力L_i>1保留两个系统损失(2,5)，其75%条件分位是5。",
+          "limitation": "如果条件集合中没有合法对齐样本，条件分位点估计不可识别；不得把缺失事件记成零风险。"
+        },
+        {
+          "title": "尾部事件条件与精确状态条件不是一回事",
+          "question": "为何原始CoVaR的机构VaR状态与机构超越VaR条件不能等同？",
+          "paragraphs": [
+            "Adrian–Brunnermeier研究的核心是系统在机构处于压力状态下的条件风险相对于中位状态的变化。一种实现方式使用条件于机构位于其VaR水平的条件分位回归；另一种使用超过阈值的一整段机构尾部事件。",
+            "对于连续机构损失，事件L_i=q的概率通常为0，点条件由正则条件分布和模型定义；尾部事件L_i>q有正概率，可按尾部样本直接估计。两者选择和条件分布未必相同。"
+          ],
+          "formulas": [
+            {
+              "label": "尾部事件条件与精确状态条件不是一回事",
+              "tex": "F_{L_s\\mid L_i=x}(z)\\ne F_{L_s\\mid L_i>q}(z)\\quad\\text{一般情形}"
+            }
+          ],
+          "proof": "将机构精确状态x与大于阈值q的事件视为两个不同条件信息：前者要求条件分布核，后者是对机构超越区间的概率加权混合。",
+          "worked": "离散机构L_i分别为1、2、3时，条件于L_i=1只抽取系统L_s=1的那一天；条件于L_i>1则抽取系统L_s=2和5，分布明显不同。",
+          "limitation": "时间序列回归或核估计可能混入训练后的未来市场状态，必须按点时信息集冻结模型与压力区间。"
+        },
+        {
+          "title": "ΔCoVaR为何需要固定中位状态基准",
+          "question": "为什么压力系统分位减无条件系统分位不能自动叫原始ΔCoVaR？",
+          "paragraphs": [
+            "ΔCoVaR度量压力状态相对一个基准状态的条件系统风险变化，原始研究基准是机构中位状态下的条件CoVaR。无条件系统VaR不属于同一条件族下的中位参照。",
+            "在经验实现中应同时报告压力CoVaR、基准CoVaR、增量及如何确定机构状态。若采用不同基准，应在指标名称中明确标注，不应偷偷替换。"
+          ],
+          "formulas": [
+            {
+              "label": "ΔCoVaR为何需要固定中位状态基准",
+              "tex": "\\Delta\\operatorname{CoVaR}=\\operatorname{CoVaR}_{\\alpha}(\\mathrm{stress})-\\operatorname{CoVaR}_{\\alpha}(\\mathrm{median})"
+            }
+          ],
+          "proof": "在四等概率示例中压力CoVaR=.75分位为5，中位状态L_i=1对应系统L_s=1，故增量4；系统无条件75% VaR=2，拿它作基准得到3是另一指标。",
+          "worked": "同一离散示例里5−1=4与5−2=3都可正确计算，但两者统计对象不同，不能作为相同定义的结果互换。",
+          "limitation": "在连续分布中，机构中位取值附近的系统条件分布需要估计，不能仅凭四个离散样本的匹配频率外推真实金融CoVaR。"
+        },
+        {
+          "title": "CoVaR与MES及因果系统风险的差距",
+          "question": "为什么CoVaR高不等于证明某ETF造成了市场危机？",
+          "paragraphs": [
+            "MES关注市场尾部发生时机构自身的平均损失，CoVaR则关注机构压力条件下系统损失的尾部分位。两者条件方向和输出泛函都不同，不能靠同一个简单排序替代。",
+            "它们均是观察性条件统计量，机构与系统可能受共同宏观冲击，也可能因为该机构是系统指数成分而有机械相关。要论证因果风险贡献还需独立的外生冲击或识别假设。"
+          ],
+          "formulas": [
+            {
+              "label": "CoVaR与MES及因果系统风险的差距",
+              "tex": "E[L_i\\mid L_m>q_m]\\ne\\operatorname{VaR}_\\alpha(L_m\\mid L_i>q_i)"
+            }
+          ],
+          "proof": "左边在给定市场风险尾部时求机构损失期望，右边给定机构尾部时求系统损失分位数；交换条件方向和由均值变成分位点，数学对象完全不同。",
+          "worked": "即使某ETF对市场指数权重很大，机构压力与市场压力高度同步，观察到的CoVaR升高也可能反映共同市场因子而非ETF造成系统危机。",
+          "limitation": "缺少严格因果设计时只能把指标解释为共振与条件尾部风险；实盘执行仍需现金、融资和交易冲击约束。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "riskmath-x001",
+          "label": "先修：VaR广义逆"
+        },
+        {
+          "kind": "math",
+          "id": "riskmath-x005",
+          "label": "先修：MES市场尾部"
+        },
+        {
+          "kind": "math",
+          "id": "riskmath-x003",
+          "label": "延伸：Copula联合分布"
+        },
+        {
+          "kind": "ml",
+          "id": "m23-c11-p03",
+          "label": "ML：CoVaR与MES系统风险"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Adrian and Brunnermeier (2016), CoVaR, American Economic Review",
+          "url": "https://doi.org/10.1257/aer.20120555"
+        },
+        {
+          "title": "Federal Reserve Bank of New York, CoVaR staff report",
+          "url": "https://www.newyorkfed.org/research/staff_reports/sr348.html"
+        }
+      ],
+      "checked_status": "完整系统性风险数学讲义：CoVaR条件概率、Δ基准、MES差异及因果警示"
+    }
+  ]
+}
