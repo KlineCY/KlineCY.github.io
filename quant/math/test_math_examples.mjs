@@ -65,14 +65,20 @@ const cases=[
 ["timeseries-n0242",.64/(1-.6**2),1,"γ(0)=0.64/(1−0.36)=1"],
 ["timeseries-n0243",(.36-.6**2)/(1-.6**2),0,"α(2)=0"],
 ["timeseries-n0247",.6**2*2,.72,"0.72"],
-["timeseries-n0268",.00001+.3*.0004+.2*.00016+.4*((.0004+21*.0001)/22),.00020745454545454545,"0.000207455"]
+["timeseries-n0268",.00001+.3*.0004+.2*.00016+.4*((.0004+21*.0001)/22),.00020745454545454545,"0.000207455"],
+["linear-n0075",2+2,4,"验证4=2+2"],
+["linear-n0078",1/36+1/9+1/36,1/6,"RSS=1/6"],
+["linear-n0083",3-2,1,"误差||X−X₁||_F²=1"],
+["linear-n0086",3/.1,30,"κ₂(X)=30"],
+["regression-n0205",3/(1+.5),2,"(2,−2/3)"],
+["regression-n0206",Math.max(3-1,0),2,"(2,0)"]
 ];
-assert.equal(chapters.size,62,"fifty-five unique mathematics lesson IDs");
-assert.equal(cases.length,62);
+assert.equal(chapters.size,68,"68 unique mathematics extension lesson IDs");
+assert.equal(cases.length,68);
 for(const [id,actual,expect,token] of cases){
  const lesson=chapters.get(id);
  assert(lesson,"missing numerical lesson "+id);
  assert(Math.abs(actual-expect)<1e-9,"wrong independent computation "+id);
  assert(lesson.example.includes(token),"worked example must contain checked arithmetic "+id+": "+token);
 }
-console.log("PASS: 20 mathematical disciplines, 62 independent numeric/research example invariants.");
+console.log("PASS: 20 mathematical disciplines, 68 independent numeric/research example invariants.");
