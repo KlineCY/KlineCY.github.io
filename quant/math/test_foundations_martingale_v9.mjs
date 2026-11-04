@@ -10,7 +10,7 @@ const nodes=new Map(curriculum.nodes.map(n=>[n.id,n]));
 assert.equal(curriculum.nodes.length,656);
 assert(rows.length>=150,"V9 baseline requires at least 150 full mathematics lessons");
 assert.equal(byId.size,rows.length,"duplicate mathematics lessons");
-assert.equal(manifest.expected_lessons,105,"historic extension coverage with two complete systemic-risk chapters");
+assert.equal(manifest.expected_lessons,117,"historic extension coverage with two complete systemic-risk chapters");
 const prerequisites={
  "probability-n0118":["probability-n0115","probability-n0116"],
  "measure-n0137":["probability-n0107","measure-n0136","linear-n0075"],
