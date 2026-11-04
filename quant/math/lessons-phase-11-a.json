@@ -1,0 +1,475 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "mlmath-n0452",
+      "node_id": "mlmath-n0452",
+      "title": "经验风险最小化ERM",
+      "definition": "经验风险最小化（Empirical Risk Minimization, ERM）在预先给定的假设类中，选择使训练样本平均损失最小的预测函数。它定义的是训练规则，不是对未来风险已经最优的证明。要把经验风险与总体风险联系起来，需要先定义抽样机制、损失范围、候选函数复杂度和选择过程，并证明统一偏差界。",
+      "assumptions": "设Z₁,…,Z_n独立同分布于未知分布P；损失ℓ(h,Z)∈[0,1]，预先固定有限假设类H，且不使用测试标签选择H。若H无限，则需进一步使用VC维、Rademacher复杂度或稳定性等工具；金融非平稳数据通常不满足这里的i.i.d.假设。",
+      "properties": [
+        "经验风险和总体风险分别是样本平均与分布期望。即使某函数训练损失为零，也不能直接断言其未来风险为零。",
+        "在有限H、有界独立样本条件下，Hoeffding不等式与并集界给出同时覆盖所有候选函数的统一集中不等式。",
+        "ERM的超额总体风险不超过统一偏差的两倍，因而学习保证依赖整个假设类而不是训练后才被选中的单一函数。",
+        "经验风险最小值可能不唯一；固定确定性的并列规则可以使算法可复现，但不会改善没有数据支持的因果或分布迁移结论。"
+      ],
+      "formulas": [
+        {
+          "label": "经验风险与总体风险",
+          "tex": "\\widehat R_n(h)=\\frac1n\\sum_{i=1}^n\\ell(h,Z_i),\\qquad R(h)=E_P[\\ell(h,Z)]"
+        },
+        {
+          "label": "ERM与总体最佳比较器",
+          "tex": "\\widehat h\\in\\arg\\min_{h\\in\\mathcal H}\\widehat R_n(h),\\qquad h^\\star\\in\\arg\\min_{h\\in\\mathcal H}R(h)"
+        },
+        {
+          "label": "有限假设类统一界",
+          "tex": "\\Pr\\!\\left(\\sup_{h\\in\\mathcal H}|R(h)-\\widehat R_n(h)|>\\epsilon\\right)\\le 2|\\mathcal H|e^{-2n\\epsilon^2}"
+        },
+        {
+          "label": "超额风险分解",
+          "tex": "R(\\widehat h)-R(h^\\star)\\le 2\\sup_{h\\in\\mathcal H}|R(h)-\\widehat R_n(h)|"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对预先固定的单个h，独立且取值在[0,1]的损失满足Hoeffding双边集中界；它只针对一个固定函数成立，不能直接套用在训练后选出来的随机函数上。",
+          "tex": "\\Pr(|\\widehat R_n(h)-R(h)|>\\epsilon)\\le 2e^{-2n\\epsilon^2}"
+        },
+        {
+          "explanation": "对有限H的每一个元素应用并集界，无须各个候选函数的损失相互独立，便得到所有候选同时成立的统一界。",
+          "tex": "\\Pr(\\exists h\\in\\mathcal H:|\\widehat R_n(h)-R(h)|>\\epsilon)\\le 2|\\mathcal H|e^{-2n\\epsilon^2}"
+        },
+        {
+          "explanation": "把R(ĥ)−R(h*)拆成两个总体—经验差与一个经验最优差；最后一个差不大于零，因此剩余两项各不超过统一偏差。",
+          "tex": "R(\\widehat h)-R(h^\\star)\\le [R(\\widehat h)-\\widehat R_n(\\widehat h)]+[\\widehat R_n(h^\\star)-R(h^\\star)]"
+        },
+        {
+          "explanation": "令统一界右侧等于δ并解出ε，得到以至少1−δ概率成立的有限候选ERM超额风险保证；这不是训练集上的真实风险估计值。",
+          "tex": "R(\\widehat h)-R(h^\\star)\\le 2\\sqrt{\\frac{\\log(2|\\mathcal H|/\\delta)}{2n}}"
+        }
+      ],
+      "example": "令候选模型数|H|=10，训练样本n=200、显著性参数δ=0.05。统一偏差上界为ε=√[ln(2×10/0.05)/(2×200)]=√[ln(400)/400]≈0.12239；于是ERM相对于H内总体最优函数的超额风险上界为2ε≈0.24478。这个界对小样本可能很宽，不能当作实际误差的点估计。",
+      "application": "金融收益模型训练通常可被写成经验风险最小化，但ETF逐月重训、时间依赖和候选模型后验搜索意味着i.i.d.有限H的结论不能原封不动作为策略统计显著性的证明。应把理论保证与真实滚动验证、资金成本和模型搜索记录结合使用。",
+      "caveat": "H的大小若随测试结果改变，先前的固定类并集界不再直接适用；对于无限H、无界平方损失、重尾或时间序列依赖，需要另外的复杂度、矩条件与混合假设。不能把训练目标越小等同于未来回报越高。",
+      "deep_sections": [
+        {
+          "title": "从数据拟合到统计学习问题",
+          "question": "为什么必须分别定义经验风险和总体风险？",
+          "paragraphs": [
+            "总体风险是未来随机观测的损失期望，目标由未知分布P决定；经验风险只是已观测训练数据上可计算的平均损失，二者的区别构成统计学习的核心问题。",
+            "算法通过选择ĥ最小化样本损失。要讨论其泛化，需要明确测试观测是否与训练来自同一分布、训练数据是否独立、候选假设类是否预先固定，以及损失是否满足集中不等式的范围条件。"
+          ],
+          "formulas": [
+            {
+              "label": "两个风险",
+              "tex": "\\widehat R_n(h)=n^{-1}\\sum_i\\ell(h,Z_i),\\quad R(h)=E[\\ell(h,Z)]"
+            }
+          ],
+          "proof": "在固定H内选择经验最小值，并不直接等于选择总体最小值；若有每个h的统一偏差上界，就可以控制两种最优值的距离。",
+          "worked": "两个分类器训练错误数分别为10/100与12/100，ERM选择前者，但没有总体分布信息就不能推断总体错误率之差必为2%。",
+          "limitation": "该结论讨论预测损失，不包含资产权重、因果解释或真实交易现金流。"
+        },
+        {
+          "title": "固定函数集中不等式与并集界",
+          "question": "训练后模型是随机函数，为什么单函数Hoeffding还不够？",
+          "paragraphs": [
+            "对一个预先固定的h，损失ℓ(h,Z_i)是独立有界随机变量，因此样本平均与其期望可由Hoeffding集中界控制。",
+            "但ERM的ĥ依赖训练数据，若先从训练结果挑选最幸运的一个h，再把单函数界当作对其成立的界，会忽略模型选择。并集界通过同时覆盖整个预先给定的假设类解决这一问题。"
+          ],
+          "formulas": [
+            {
+              "label": "统一偏差尾界",
+              "tex": "\\Pr(\\sup_h|\\widehat R_n(h)-R(h)|>\\epsilon)\\le2|\\mathcal H|e^{-2n\\epsilon^2}"
+            }
+          ],
+          "proof": "对任一h使用Hoeffding双尾概率，再对H中所有h的偏差超标事件求并集上界；事件间即使高度相关，该并集上界仍然有效。",
+          "worked": "n=200、|H|=10、δ=0.05时，ε≈0.12239，说明该保证远比某次观测到的训练误差更保守。",
+          "limitation": "模型类若通过测试标签决定，不能把它当作与数据选择无关的固定H。"
+        },
+        {
+          "title": "ERM超额风险两倍界",
+          "question": "为什么最终比较的不应是零风险而是H内最优风险？",
+          "paragraphs": [
+            "真实数据的条件噪声、模型表达能力和信息集限制决定了H内总体最优函数h*也可能有正风险。ERM可证明的是相对于该类中最优预测器的超额风险，而不是绝对零风险。",
+            "把R(ĥ)−R(h*)加入并减去两个经验风险后，ERM定义使中间项非正，左右两端均受统一偏差控制，于是出现因子2。"
+          ],
+          "formulas": [
+            {
+              "label": "超额风险比较",
+              "tex": "R(\\widehat h)-\\min_{h\\in\\mathcal H}R(h)\\le2\\sup_h|R(h)-\\widehat R_n(h)|"
+            }
+          ],
+          "proof": "分解成[R(ĥ)−Rhat(ĥ)]+[Rhat(ĥ)−Rhat(h*)]+[Rhat(h*)−R(h*)]；中项≤0，其余两项各被绝对偏差上界控制。",
+          "worked": "例子中的ε≈0.12239，故理论超额风险最多约0.24478；不能将0.24478当作ĥ真实的预测错误率。",
+          "limitation": "若经验目标仅近似优化到容差η，界还要增加训练优化误差η。"
+        },
+        {
+          "title": "从有限H走向复杂模型和金融回测",
+          "question": "为什么无限模型类必须采用复杂度或稳定性工具？",
+          "paragraphs": [
+            "线性模型若参数为连续实数，H通常是无限集，不能把|H|直接代入有限类并集界。要利用VC维、Rademacher复杂度、覆盖数、PAC-Bayes或算法稳定性等办法控制可选函数族的规模。",
+            "金融时序还可能存在强依赖、无界损失和结构变化，未来风险并非同一个固定P上的独立样本损失。必须把数学上成立的分布内理论与样本外金融评估明确区分。"
+          ],
+          "formulas": [
+            {
+              "label": "学习误差三项",
+              "tex": "R(\\widehat h)-R^\\star=[R(\\widehat h)-R(h^\\star)]+[R(h^\\star)-R^\\star]"
+            }
+          ],
+          "proof": "把超额风险分为估计误差和假设类逼近误差；即使无限样本消除估计误差，若H不含适合的预测函数，逼近误差仍可能保留。",
+          "worked": "如果H只有常数预测器，即使训练样本极大，无法表达某些非线性条件均值；扩大H可能减少逼近偏差也增加估计复杂度。",
+          "limitation": "统计上的i.i.d.保证不是回测盈利承诺；成本、仓位约束和数据时点另有独立审计。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "mlmath-x001",
+          "label": "先修：固定函数集中不等式"
+        },
+        {
+          "kind": "math",
+          "id": "mlmath-n0467",
+          "label": "延伸：VC与Rademacher"
+        },
+        {
+          "kind": "math",
+          "id": "regression-n0208",
+          "label": "联系：偏差方差权衡"
+        },
+        {
+          "kind": "ml",
+          "id": "m04-c06-p01",
+          "label": "机器学习：预测风险的定义"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Stanford CS229T Statistical Learning Theory",
+          "url": "https://web.stanford.edu/class/cs229t/2016/notes.pdf"
+        },
+        {
+          "title": "Illinois CS lecture notes, Rademacher Complexity",
+          "url": "https://mjt.cs.illinois.edu/dlt/index.html"
+        }
+      ],
+      "checked_status": "完整数学精讲：ERM风险定义、有限类并集界、超额风险与时间外条件"
+    },
+    {
+      "id": "mlmath-n0467",
+      "node_id": "mlmath-n0467",
+      "title": "VC维与Rademacher复杂度",
+      "definition": "VC维通过二分类函数族对有限点集实现全部标签组合的能力衡量分类复杂度；Rademacher复杂度通过函数族对独立随机符号的最大拟合相关衡量实值函数类容量。二者是控制泛化误差的不同工具，不是模型参数个数或神经网络训练成本的同义词。",
+      "assumptions": "VC维以二值函数类H⊂{0,1}^X定义；Rademacher复杂度取训练样本S=(z₁,…,z_n)及独立等概率±1随机符号σ_i，需考虑损失复合函数类。有限样本Rademacher复杂度依赖样本，常见界要求有界损失、适当Lipschitz条件与独立样本；不把金融非平稳数据直接视为i.i.d.。",
+      "properties": [
+        "如果H能在某d个点上实现全部2^d种二元标记，则称打散该点集；VC维是可打散点数的上确界。",
+        "实线上阈值类h_a(x)=1{x≥a}的VC维为1；单个区间分类器h_{a,b}(x)=1{a≤x≤b}在实线上VC维为2。",
+        "经验Rademacher复杂度等于 E_σ sup_f n⁻¹Σσ_i f(z_i)，既反映函数类又反映样本排列。",
+        "线性类||w||₂≤B、||x_i||₂≤R的经验复杂度上界为BR/√n；这个结论需要特征尺度、参数约束和独立Rademacher符号，不能仅从参数维度推出。"
+      ],
+      "formulas": [
+        {
+          "label": "VC维定义",
+          "tex": "\\operatorname{VCdim}(\\mathcal H)=\\sup\\{|S|:\\mathcal H\\text{ shatters }S\\}"
+        },
+        {
+          "label": "经验Rademacher复杂度",
+          "tex": "\\widehat{\\mathfrak R}_S(\\mathcal F)=E_\\sigma\\left[\\sup_{f\\in\\mathcal F}\\frac1n\\sum_{i=1}^n\\sigma_i f(z_i)\\right]"
+        },
+        {
+          "label": "线性类别复杂度界",
+          "tex": "\\widehat{\\mathfrak R}_S(\\mathcal F_B)\\le\\frac{B}{n}\\sqrt{\\sum_{i=1}^n\\|x_i\\|_2^2}\\le\\frac{BR}{\\sqrt n}"
+        },
+        {
+          "label": "有限类的Hoeffding界",
+          "tex": "\\sup_{h\\in\\mathcal H}|R(h)-\\widehat R(h)|\\le\\sqrt{\\frac{\\log(2|\\mathcal H|/\\delta)}{2n}}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "阈值类在任何单点上可通过改变阈值输出0或1，因此能打散一个点；但对于任意x₁<x₂不能输出(1,0)，故无法打散任意两点。",
+          "tex": "\\operatorname{VCdim}(\\{x\\mapsto\\mathbf1[x\\ge a]\\})=1"
+        },
+        {
+          "explanation": "区间类可在两个有序点上实现00、01、10和11，但在三个有序点上无法实现101，因为包含两端点的区间必包含中间点。",
+          "tex": "\\operatorname{VCdim}(\\{\\mathbf1[a\\le x\\le b]\\})=2"
+        },
+        {
+          "explanation": "对线性函数wᵀx，Rademacher上确界通过Cauchy–Schwarz为B||Σσ_i x_i||/n。对随机符号取期望并应用Jensen，交叉项的期望为零。",
+          "tex": "\\widehat{\\mathfrak R}_S\\le\\frac{B}{n}E_\\sigma\\|\\sum_i\\sigma_ix_i\\|_2\\le\\frac Bn\\sqrt{\\sum_i\\|x_i\\|_2^2}"
+        },
+        {
+          "explanation": "有限假设类的统一Hoeffding界来自逐函数集中加并集，反映对数候选规模；无限类需要替换此候选计数为更细的复杂度量或覆盖数。",
+          "tex": "\\Pr(\\sup_{h\\in\\mathcal H}|R-\\widehat R|>\\epsilon)\\le2|\\mathcal H|e^{-2n\\epsilon^2}"
+        }
+      ],
+      "example": "实数阈值h_a(x)=1{x≥a}可打散{1}，却不能对{1,2}实现标签(1,0)，因此VC维=1。若线性类的权重约束B=2，样本数n=100且全部特征满足||x_i||₂≤R=3，则经验Rademacher复杂度≤BR/√n=2×3/10=0.6。0.6是复杂度上界，不是实际预测错误率或VaR。",
+      "application": "在量化预测中，比较线性类、核方法与神经网络时，泛化复杂度依赖函数类及正则约束，而不仅是参数数量。对截面ETF模型，训练窗口、标准化、特征尺度和标签依赖会影响可用理论；不能把i.i.d.泛化界当作实际回测置信区间。",
+      "caveat": "VC维主要用于二分类容量，不能直接替代实值平方损失分析；Rademacher复杂度的经验版本可能为0或很小，但仍需损失有界、稳定抽样与相应泛化定理才能转化为风险保证。不同约定存在2倍缩放差异，应固定定义。",
+      "deep_sections": [
+        {
+          "title": "打散与VC维的组合定义",
+          "question": "为什么分类函数族复杂度不等于特征维度？",
+          "paragraphs": [
+            "VC维观察一个函数族是否足够灵活，以便对某个样本集合的全部2^d种二元标签都找到一个分类器。它衡量的是函数能制造的标签模式，而不是训练时有多少自由参数或需要多少浮点操作。",
+            "单阈值类包含一个连续实数参数，但任何两点无法实现全部四种标记，因此VC维只有1；区间分类器有两个端点，能打散两点却无法打散三点。"
+          ],
+          "formulas": [
+            {
+              "label": "打散条件",
+              "tex": "\\{\\left(h(x_1),\\dots,h(x_d)\\right):h\\in\\mathcal H\\}=\\{0,1\\}^d"
+            }
+          ],
+          "proof": "对两个有序点x₁<x₂，阈值类若预测1于x₁，则x₂必也预测1，所以模式(1,0)不可能出现；因此不能打散两个点。",
+          "worked": "对一个点x=1，可取a≤1输出1，a>1输出0；所以阈值类VC维正好为1。",
+          "limitation": "复杂的非线性类即使参数数量很少，也可能具有不寻常的容量；需用确切函数类定义判断。"
+        },
+        {
+          "title": "从VC维到可控的经验风险",
+          "question": "为什么可实现所有训练标签的模型未必能泛化？",
+          "paragraphs": [
+            "当函数族容量相对训练样本很高时，可以拟合随机噪声的不同标签，而训练误差会对真实风险产生乐观偏差。VC型工具通过可实现标签模式数控制二分类经验风险与总体风险之间的偏离。",
+            "常见界需要独立同分布数据、可测性和样本量条件，界的量级通常依赖VC维d与样本量n而非模型在训练集中的一次观测精度。"
+          ],
+          "formulas": [
+            {
+              "label": "VC界的典型量级",
+              "tex": "\\sup_{h\\in\\mathcal H}|R(h)-\\widehat R(h)|=O_P\\!\\left(\\sqrt{\\frac{d\\log(n/d)}n}\\right)"
+            }
+          ],
+          "proof": "用增长函数控制样本上可形成的标签模式数量，再对有限模式进行集中分析，可以得到依赖d的统一收敛率；这里陈述的是典型量级而非对所有n、d逐项可用的数值界。",
+          "worked": "同一训练误差为零的两个分类器，一个来自低VC类、一个来自能够任意记忆全部标签的高容量类，并不具有相同的泛化保证。",
+          "limitation": "当d≥n时不能机械将log(n/d)代入为负数；上式只作适用尺度下的渐近说明。"
+        },
+        {
+          "title": "Rademacher复杂度的随机符号视角",
+          "question": "怎样衡量实值预测函数对纯噪声的拟合能力？",
+          "paragraphs": [
+            "VC维针对二值模式，Rademacher复杂度则允许评价实值函数类。对已观测输入固定不变，重新随机生成正负符号，测量函数类能够与这些随机符号达到多大的平均相关。",
+            "如果函数类可以为各种随机符号自由调整输出，其复杂度较高；如果参数范数受到有效约束，最大相关会受限。实际泛化界通常应用于损失复合类ℓ∘F，而非只分析原始输出。"
+          ],
+          "formulas": [
+            {
+              "label": "随机符号定义",
+              "tex": "\\widehat{\\mathfrak R}_S(\\mathcal F)=\\frac1nE_\\sigma\\sup_{f\\in\\mathcal F}\\sum_i\\sigma_i f(z_i)"
+            }
+          ],
+          "proof": "在固定样本上对独立±1符号先取函数类上确界，再对符号取期望。上确界位于期望内部，正是允许函数自适应匹配随机标签的复杂性来源。",
+          "worked": "若只允许零函数f≡0，则无论随机符号如何，Σσ_i f(z_i)=0，经验Rademacher复杂度为0。",
+          "limitation": "必须先规定函数类和输出范围；若无限放大输出且无约束，复杂度可发散。"
+        },
+        {
+          "title": "线性范数约束的复杂度上界",
+          "question": "为什么L2约束和特征缩放可以影响理论容量？",
+          "paragraphs": [
+            "线性函数f_w(x)=wᵀx在||w||₂≤B下，对随机符号的最大线性相关可以由对偶范数表示为B||Σσ_i x_i||₂。",
+            "对随机符号应用Jensen不等式，将期望范数控制为平方范数期望的平方根。符号的零均值和相互独立让所有i≠j的交叉项消失，从而得到BR/√n。"
+          ],
+          "formulas": [
+            {
+              "label": "线性类上界",
+              "tex": "\\widehat{\\mathfrak R}_S\\le\\frac Bn\\sqrt{\\sum_i\\|x_i\\|_2^2}\\le BR/\\sqrt n"
+            }
+          ],
+          "proof": "先用Cauchy–Schwarz得到sup_{||w||≤B} wᵀΣσ_i x_i=B||Σσ_i x_i||。再用E||V||≤√E||V||²及Eσ_iσ_j=0(i≠j)证明平方根界。",
+          "worked": "B=2、R=3、n=100时上界2×3/10=0.6；若样本量提高到400且B、R不变，上界下降至0.3。",
+          "limitation": "该界仅保证这一受范数约束的函数类容量；如果训练中实际允许B随数据或测试效果任意增大，需重新核对。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "mlmath-n0452",
+          "label": "先修：ERM"
+        },
+        {
+          "kind": "math",
+          "id": "mlmath-x002",
+          "label": "扩展：一致收敛"
+        },
+        {
+          "kind": "math",
+          "id": "mlmath-x003",
+          "label": "扩展：覆盖数"
+        },
+        {
+          "kind": "ml",
+          "id": "m04-c06-p02",
+          "label": "机器学习：集中与泛化界"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Illinois lecture notes: Rademacher Complexity",
+          "url": "https://mjt.cs.illinois.edu/dlt/index.html"
+        },
+        {
+          "title": "Stanford CS229T Statistical Learning Theory",
+          "url": "https://web.stanford.edu/class/cs229t/2016/notes.pdf"
+        }
+      ],
+      "checked_status": "完整数学精讲：VC打散、经验复杂度、线性范数界与泛化条件"
+    },
+    {
+      "id": "mlmath-n0469",
+      "node_id": "mlmath-n0469",
+      "title": "Mercer核",
+      "definition": "对称函数k:X×X→R若对任意有限样本点集产生半正定Gram矩阵，则称为正定（positive-semidefinite）核，它可表示为某个Hilbert空间的特征内积。Mercer定理在连续核、紧致定义域与合适测度等额外条件下建立积分算子的非负谱展开。正定核的有限样本判据与Mercer谱展开具有联系，但不能在缺少条件时混为同一论断。",
+      "assumptions": "k对称且对任意有限{x_i}及系数c有Σ_{i,j}c_ic_j k(x_i,x_j)≥0。涉及积分特征函数展开时另外假定紧致空间、连续核和适当有限Borel测度，使对应积分算子具有所需紧性与自伴性；不声称任意非连续核都可按同样形式展开。",
+      "properties": [
+        "任意有效核的Gram矩阵K满足K=Kᵀ且K⪰0；这可以直接通过cᵀKc≥0检验有限数据上的必要条件。",
+        "显式特征映射φ存在时，k(x,z)=⟨φ(x),φ(z)⟩保证对称半正定；反之有效PSD核对应某个RKHS特征表示。",
+        "有效核的非负线性组合仍有效；某些逐点乘积也可通过Schur乘积定理证明有效，但任意函数变换并不自动保正定。",
+        "Mercer谱定理涉及积分算子和额外正则性，不能从某一个训练Gram矩阵PSD直接推出对所有未来样本都有效或具有统一积分展开。"
+      ],
+      "formulas": [
+        {
+          "label": "Gram矩阵半正定条件",
+          "tex": "K_{ij}=k(x_i,x_j),\\quad c^\\top Kc\\ge0\\quad\\forall c\\in\\mathbb R^n"
+        },
+        {
+          "label": "特征空间内积核",
+          "tex": "k(x,z)=\\langle\\phi(x),\\phi(z)\\rangle_{\\mathcal H}"
+        },
+        {
+          "label": "积分算子的核展开",
+          "tex": "(T_k f)(x)=\\int k(x,z)f(z)\\,d\\mu(z)"
+        },
+        {
+          "label": "Mercer特征函数表达",
+          "tex": "k(x,z)=\\sum_{j\\ge1}\\lambda_j e_j(x)e_j(z),\\qquad\\lambda_j\\ge0"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "若k(x,z)=⟨φ(x),φ(z)⟩，则任意系数向量c满足cᵀKc=||Σc_iφ(x_i)||²≥0，因而所有有限Gram矩阵都半正定。",
+          "tex": "c^\\top Kc=\\left\\|\\sum_i c_i\\phi(x_i)\\right\\|_{\\mathcal H}^2\\ge0"
+        },
+        {
+          "explanation": "对于线性核k(x,z)=xᵀz，特征映射为φ(x)=x；加入常数得到k(x,z)=1+xᵀz，其特征表示φ(x)=(1,x)。",
+          "tex": "1+x^\\top z=\\langle(1,x),(1,z)\\rangle"
+        },
+        {
+          "explanation": "在紧致性、连续性与合适测度条件下，积分算子T_k为自伴正紧算子，可借助谱理论展开成非负特征值和正交特征函数。",
+          "tex": "T_ke_j=\\lambda_j e_j,\\quad\\lambda_j\\ge0"
+        },
+        {
+          "explanation": "有限训练集只给出K的特征分解；当核函数在整个输入域上PSD且正则性满足时，才进一步讨论积分特征函数。把这两个层次区分可避免错误的泛化声称。",
+          "tex": "K=V\\,\\operatorname{diag}(\\mu_1,\\ldots,\\mu_n)V^\\top,\\qquad\\mu_j\\ge0"
+        }
+      ],
+      "example": "取一维核k(x,z)=1+xz，训练点x₁=0、x₂=1。Gram矩阵K=[[1,1],[1,2]]，行列式为1、迹为3，特征值为(3±√5)/2，分别约2.618和0.382，均为正。对任意c=(a,b)，cᵀKc=(a+b)²+b²≥0，显示这个核有效，且其显式特征映射为φ(x)=(1,x)。",
+      "application": "在金融信号中，核函数可以对ETF动量、收益分位数、波动率或市场状态特征构造非线性相似度，再用于核岭回归与核PCA。但kernel trick只改变表示空间，不自动解决点时数据泄漏、资产存续偏差或非平稳交易成本。",
+      "caveat": "只在某一个样本上观察K⪰0，并不能证明k在整个输入域上有效；RBF等核的超参数需要时间内验证。Mercer特征展开的归一化由测度决定，不能把有限K的特征向量直接称为全局Mercer本征函数。",
+      "deep_sections": [
+        {
+          "title": "有效核与有限Gram矩阵",
+          "question": "为什么K需要对所有有限点集PSD，而非只检查当前训练集？",
+          "paragraphs": [
+            "核算法的核心是以k(x,z)代替显式高维特征内积。为了保持内积的基本性质，每个可能输入集合对应的Gram矩阵都必须对称半正定；如果仅有某个有限样本满足该条件，函数本身仍可能在其他输入点失效。",
+            "真正的核有效性是关于整个定义域的函数性质，而不是训练后拟合的数值指标。矩阵特征值对单次数据只能起诊断作用，不能替代普遍证明。"
+          ],
+          "formulas": [
+            {
+              "label": "有限PSD判据",
+              "tex": "\\sum_{i,j=1}^n c_ic_j k(x_i,x_j)\\ge0"
+            }
+          ],
+          "proof": "对任意线性组合v=Σc_iφ(x_i)，有cᵀKc=⟨v,v⟩≥0；反向构造RKHS需要相应的正定核表示定理，不能只依赖某个K的分解。",
+          "worked": "例子K=[[1,1],[1,2]]，取c=(1,−1)，cᵀKc=1>0；取c=(1,0)，结果为1，均与PSD一致。",
+          "limitation": "数值PSD的零附近小负特征值可能来自舍入，应结合对称化和容差判断。"
+        },
+        {
+          "title": "特征映射与核函数的等价视角",
+          "question": "为什么看不见高维φ仍可以计算模型？",
+          "paragraphs": [
+            "如果某个核存在内积表示k(x,z)=⟨φ(x),φ(z)⟩，使用该核的算法能够直接计算样本间相似度，而无需生成特征空间中的每一个坐标。",
+            "这对于维度很高甚至无限维的表示尤其有用，但核矩阵需要n×n存储，规模随样本数平方增长；高维表示没有免费消除计算成本。"
+          ],
+          "formulas": [
+            {
+              "label": "仿射线性核的特征映射",
+              "tex": "k(x,z)=1+xz=\\langle(1,x),(1,z)\\rangle"
+            }
+          ],
+          "proof": "令φ(x)=(1,x)，其欧氏内积是1+xz，直接证明有效性；对于训练点0和1，特征矩阵Φ=[[1,0],[1,1]]，K=ΦΦᵀ。",
+          "worked": "ΦΦᵀ=[[1,1],[1,2]]，因此k的有限Gram矩阵PSD，无须对每个候选参数重新显式建高维特征。",
+          "limitation": "不同核对应不同归纳偏置；相似度大不等于金融资产未来收益的因果关系。"
+        },
+        {
+          "title": "Mercer定理的额外假设",
+          "question": "为什么不能把PSD矩阵分解当成Mercer函数展开？",
+          "paragraphs": [
+            "有限Gram矩阵的谱分解是n维矩阵线性代数，永远只涉及当前训练点。Mercer谱展开则讨论定义在整个输入域上的核积分算子，需要额外的连续性、紧致性和测度条件。",
+            "把二者混同可能导致错误地解释核PCA的样本特征向量为全局稳定的经济状态函数。每个核的实际特征函数还依赖测度及采样分布。"
+          ],
+          "formulas": [
+            {
+              "label": "积分核本征问题",
+              "tex": "\\int k(x,z)e_j(z)\\,d\\mu(z)=\\lambda_je_j(x)"
+            }
+          ],
+          "proof": "在适当条件下T_k自伴、正且紧，谱理论给出非负特征值和正交本征函数，结合核的连续性可以得到相应的Mercer展开。",
+          "worked": "二维K=[[1,1],[1,2]]有两个特征向量，但其分量只标记训练点，不等于无需规定测度就得到的全域积分特征函数。",
+          "limitation": "不满足Mercer假设并不自动意味着核无效；仍可能存在RKHS表示。"
+        },
+        {
+          "title": "核运算有效性与金融建模",
+          "question": "核参数选择与协方差核为什么不能混淆？",
+          "paragraphs": [
+            "核函数可以由已知PSD核通过非负加权和等操作构造。调节RBF带宽等参数改变输入之间的相似尺度；如果参数由未来验证表现选择，将污染本该独立的模型评价。",
+            "金融时间序列常同时涉及协方差核、机器学习的输入核和HAC核权重，它们都使用kernel一词，但数学对象和正定条件不同，课程必须分开解释。"
+          ],
+          "formulas": [
+            {
+              "label": "非负线性核组合",
+              "tex": "k(x,z)=a\\,k_1(x,z)+b\\,k_2(x,z),\\quad a,b\\ge0"
+            }
+          ],
+          "proof": "对任意有限点集，组合Gram矩阵为aK₁+bK₂；对任意c，cᵀ(aK₁+bK₂)c=a cᵀK₁c+b cᵀK₂c≥0。",
+          "worked": "取k₁=1、k₂=xz、a=b=1得到例子的k=1+xz，且K对称PSD。",
+          "limitation": "负系数或任意逐元素变换不保证核有效；交易模型的时间不变性需要独立检验。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "mlmath-n0468",
+          "label": "先修：核技巧"
+        },
+        {
+          "kind": "math",
+          "id": "linear-n0082",
+          "label": "先修：半正定矩阵"
+        },
+        {
+          "kind": "math",
+          "id": "mlmath-n0470",
+          "label": "下一讲：核岭回归"
+        },
+        {
+          "kind": "math",
+          "id": "mlmath-n0472",
+          "label": "后续：核PCA"
+        },
+        {
+          "kind": "ml",
+          "id": "m09-c07-p01",
+          "label": "机器学习：RKHS与有效核"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Stanford STATS305C RKHS and Mercer expansion",
+          "url": "https://web.stanford.edu/class/stats305c/lectures/RKHS.html"
+        },
+        {
+          "title": "Stanford CS229 lecture notes: Kernels",
+          "url": "https://cs229.stanford.edu/summer2022/cs229-notes3.pdf"
+        }
+      ],
+      "checked_status": "完整数学精讲：PSD判据、RKHS特征表示、Mercer条件、谱展开边界"
+    }
+  ]
+}
