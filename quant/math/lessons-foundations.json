@@ -111,85 +111,6 @@
       "checked_status": "独立编辑的重点讲义；按列出的条件理解公式与证明"
     },
     {
-      "id": "linear-n0075",
-      "node_id": "linear-n0075",
-      "title": "正交投影",
-      "definition": "向列空间投影得到距离原观测向量最短的向量；残差与该子空间正交。",
-      "assumptions": "$X\\in\\mathbb R^{n\\times p}$ 且列满秩。",
-      "properties": [
-        "投影矩阵对称：$P^\\top=P$。",
-        "幂等：$P^2=P$。",
-        "残差投影 $M=I-P$ 也对称幂等。"
-      ],
-      "formulas": [
-        {
-          "label": "正交投影矩阵",
-          "tex": "P_X=X(X^\\top X)^{-1}X^\\top"
-        },
-        {
-          "label": "残差正交性",
-          "tex": "X^\\top(y-P_Xy)=0"
-        }
-      ],
-      "derivation": [
-        {
-          "explanation": "定义最小二乘目标函数",
-          "tex": "L(\\beta)=\\|y-X\\beta\\|_2^2"
-        },
-        {
-          "explanation": "一阶条件产生正规方程",
-          "tex": "\\nabla_\\beta L=-2X^\\top(y-X\\beta)=0"
-        },
-        {
-          "explanation": "解出投影与残差",
-          "tex": "\\hat\\beta=(X^\\top X)^{-1}X^\\top y,\\quad \\hat y=P_Xy"
-        }
-      ],
-      "example": "将一组ETF收益对市场指数回归，残差不再与截距和样本内解释变量线性相关。",
-      "application": "OLS、因子中性化与几何投影。",
-      "caveat": "不满秩时必须改用伪逆或正则化，不能硬求逆。",
-      "checked_status": "独立编辑的重点讲义；按列出的条件理解公式与证明"
-    },
-    {
-      "id": "linear-n0083",
-      "node_id": "linear-n0083",
-      "title": "奇异值分解SVD",
-      "definition": "任意实矩阵可由左右正交基和非负奇异值分解；按大奇异值截断给出最佳低秩近似。",
-      "assumptions": "$A\\in\\mathbb R^{m\\times n}$，无需方阵或满秩。",
-      "properties": [
-        "奇异值是 $A^\\top A$ 非负特征值的平方根。",
-        "Frobenius范数下的最优秩 $k$ 近似由截断SVD给出。"
-      ],
-      "formulas": [
-        {
-          "label": "紧SVD",
-          "tex": "A=U\\Sigma V^\\top"
-        },
-        {
-          "label": "低秩最佳逼近",
-          "tex": "A_k=\\sum_{i=1}^k\\sigma_i u_iv_i^\\top,\\quad \\|A-A_k\\|_F^2=\\sum_{i>k}\\sigma_i^2"
-        }
-      ],
-      "derivation": [
-        {
-          "explanation": "从对称半正定矩阵出发进行谱分解",
-          "tex": "A^\\top A v_i=\\sigma_i^2v_i"
-        },
-        {
-          "explanation": "对非零奇异值定义左奇异向量",
-          "tex": "u_i=Av_i/\\sigma_i"
-        },
-        {
-          "explanation": "代回验证并将非零方向展开",
-          "tex": "Av_i=\\sigma_i u_i\\ \\Longrightarrow\\ A=\\sum_i\\sigma_i u_iv_i^\\top"
-        }
-      ],
-      "example": "对资产收益矩阵SVD可提取解释最大样本方差的主要方向。",
-      "application": "降维、PCA、协方差估计、去噪和风险模型。",
-      "caveat": "主成分的解释方差大小不直接代表投资可预测收益。",
-      "checked_status": "独立编辑的重点讲义；按列出的条件理解公式与证明"
-    },
-    {
       "id": "linear-n0082",
       "node_id": "linear-n0082",
       "title": "正定半正定矩阵",
@@ -491,45 +412,6 @@
       "example": "用SPY收益和VIX变化拟合某ETF的收益，检查残差暴露。",
       "application": "量化因子检验、Alpha估计、正交化。",
       "caveat": "时序收益回归残差通常不满足同方差独立误差。",
-      "checked_status": "独立编辑的重点讲义；按列出的条件理解公式与证明"
-    },
-    {
-      "id": "regression-n0205",
-      "node_id": "regression-n0205",
-      "title": "Ridge回归",
-      "definition": "用L2范数惩罚抑制系数过大、改善共线性下的估计稳定性。",
-      "assumptions": "通常对特征先标准化，不惩罚截距；$\\lambda\\ge0$。",
-      "properties": [
-        "对 $\\lambda>0$，$X^\\top X+\\lambda I$ 正定。",
-        "带来偏差以换取方差收缩。"
-      ],
-      "formulas": [
-        {
-          "label": "Ridge目标",
-          "tex": "\\min_\\beta\\ \\|y-X\\beta\\|_2^2+\\lambda\\|\\beta\\|_2^2"
-        },
-        {
-          "label": "封闭解",
-          "tex": "\\hat\\beta_\\lambda=(X^\\top X+\\lambda I)^{-1}X^\\top y"
-        }
-      ],
-      "derivation": [
-        {
-          "explanation": "展开目标并对 $\\beta$ 求梯度",
-          "tex": "\\nabla L=-2X^\\top(y-X\\beta)+2\\lambda\\beta"
-        },
-        {
-          "explanation": "设为零并整理",
-          "tex": "(X^\\top X+\\lambda I)\\beta=X^\\top y"
-        },
-        {
-          "explanation": "若 $\\lambda>0$，矩阵可逆，从而得到结果",
-          "tex": "\\hat\\beta_\\lambda=(X^\\top X+\\lambda I)^{-1}X^\\top y"
-        }
-      ],
-      "example": "37支ETF中高度相关收益列可使用Ridge收缩预测回归系数。",
-      "application": "高维因子预测、共线性处理、收缩组合模型。",
-      "caveat": "Ridge一般不产生稀疏系数；不要在全数据选择 $\\lambda$ 后宣称独立测试。",
       "checked_status": "独立编辑的重点讲义；按列出的条件理解公式与证明"
     },
     {
