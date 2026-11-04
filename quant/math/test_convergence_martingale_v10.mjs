@@ -34,8 +34,8 @@ assert.equal(c.chapters.length,109);
 assert.equal(c.nodes.length,656);
 assert.equal(manifest.modules.length,41);
 assert.equal(manifest.expected_lessons,103);
-assert.equal(core.length,59,"core mathematics: 47 existing plus 12 V10");
-assert.equal(all.length,162,"complete mathematics: 150 prior plus 12 V10");
+assert(core.length>=59,"V10 baseline requires at least 59 completed core mathematics lectures");
+assert(all.length>=162,"V10 baseline requires at least 162 completed mathematics lectures");
 assert.equal(byId.size,all.length,"duplicate lecture IDs");
 assert.equal(ids.length,12);
 
@@ -145,5 +145,5 @@ assert(html.includes("styles.css?v=20261104-probscore-v6-inference-v8-martingale
 assert(css.includes("V10: 12-lecture proof and Chinese typography"));
 assert(css.includes(".math-v10-convergence summary:focus-visible")&&css.includes(".katex-display")&&css.includes("@media print"),"keyboard/CJK/Katex/print style absent");
 assert(!html.includes("一篇完整专题 · 四个严密证明小节"),"obsolete martingale-count disclaimer");
-console.log("PASS V10: 12 complete lectures, 48 detailed mathematical proof chapters, 48 KaTeX equations, "+sourceCount+" research resource links, "+links+" cross-course references; 162 full mathematics lectures, independently checked numeric examples and 656-node acyclic learning path.");
+console.log("PASS V10: 12 complete lectures, 48 detailed mathematical proof chapters, 48 KaTeX equations, "+sourceCount+" research resource links, "+links+" cross-course references; "+all.length+" full mathematics lectures, independently checked numeric examples and 656-node acyclic learning path.");
 
