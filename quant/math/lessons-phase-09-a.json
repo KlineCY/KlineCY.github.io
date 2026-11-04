@@ -1,0 +1,637 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "timeseries-n0242",
+      "node_id": "timeseries-n0242",
+      "title": "自协方差函数",
+      "definition": "自协方差函数刻画一个弱平稳随机序列在相隔h个时点时的线性共同变化。它把“样本上看到的连续涨跌”转化为可以检验的二阶矩对象，是自相关、Yule–Walker方程、谱密度、时间序列均值标准误及有效样本量的共同起点。",
+      "assumptions": "设过程(X_t)具有有限二阶矩，并满足弱平稳性：E[X_t]=μ不随t改变，Cov(X_t,X_s)只依赖t−s。定义γ(h)=Cov(X_t,X_{t-h})，h为整数。讨论相关系数时另要求γ(0)>0；多资产协方差或非平稳序列需明确相应的时变协方差，不宜套用单序列γ(h)。",
+      "properties": [
+        "对实值弱平稳过程，γ(−h)=γ(h)，且γ(0)=Var(X_t)≥0。",
+        "Cauchy–Schwarz不等式保证|γ(h)|≤γ(0)；γ(h)本身带有X平方的单位，不是无量纲相关系数。",
+        "任意有限滞后构成的Toeplitz矩阵Γ_p=(γ(i−j))半正定，因为它是随机向量的协方差矩阵。",
+        "γ(h)=0只表达二阶线性不相关，不能据此断言独立；金融收益本身可能几乎不相关但平方收益存在明显相关。"
+      ],
+      "formulas": [
+        {
+          "label": "二阶矩定义",
+          "tex": "\\gamma(h)=E[(X_t-\\mu)(X_{t-h}-\\mu)]"
+        },
+        {
+          "label": "对称与有界",
+          "tex": "\\gamma(-h)=\\gamma(h),\\quad |\\gamma(h)|\\le\\gamma(0)"
+        },
+        {
+          "label": "正半定性",
+          "tex": "\\sum_{i,j=1}^p a_i a_j\\gamma(i-j)=\\operatorname{Var}\\!\\left(\\sum_{i=1}^p a_i X_i\\right)\\ge0"
+        },
+        {
+          "label": "AR(1)例子的自协方差",
+          "tex": "X_t=\\phi X_{t-1}+\\varepsilon_t,\\quad\\gamma(h)=\\frac{\\sigma_\\varepsilon^2\\phi^{|h|}}{1-\\phi^2},\\quad|\\phi|<1"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "弱平稳令均值常数，故把协方差写成两个去均值随机变量乘积的期望。交换两个时点后，协方差不变，因此γ(−h)=γ(h)。",
+          "tex": "\\operatorname{Cov}(X_t,X_{t-h})=\\operatorname{Cov}(X_{t-h},X_t)"
+        },
+        {
+          "explanation": "对U=X_t−μ和V=X_{t−h}−μ使用Cauchy–Schwarz。两者方差都为γ(0)，于是滞后自协方差的绝对值不能大于零滞后值。",
+          "tex": "|\\gamma(h)|\\le \\sqrt{E[U^2]E[V^2]}=\\gamma(0)"
+        },
+        {
+          "explanation": "任取系数向量a，把加权和的方差展开为双重求和，即得到由γ构成的Toeplitz矩阵正半定性。这是任意合法协方差序列应满足的全局限制。",
+          "tex": "a^\\top\\Gamma_pa=\\sum_{i,j}a_i a_j\\gamma(i-j)\\ge0"
+        },
+        {
+          "explanation": "对稳定AR(1)，将X_t=φX_{t−1}+ε_t与X_{t−h}取协方差。h≥1时噪声与过去独立，故γ(h)=φγ(h−1)；h=0时得到方差固定点。",
+          "tex": "\\gamma(h)=\\phi\\gamma(h-1),\\quad\\gamma(0)=\\phi^2\\gamma(0)+\\sigma_\\varepsilon^2"
+        }
+      ],
+      "example": "令AR(1)参数φ=0.6，创新方差σ²_ε=0.64，则无条件方差γ(0)=0.64/(1−0.36)=1；γ(1)=0.6，γ(2)=0.36。前三时点的协方差矩阵是[[1,0.6,0.36],[0.6,1,0.6],[0.36,0.6,1]]。若将收益单位从小数改成百分数，所有γ数值乘以10000，但自相关系数不变。",
+      "application": "以ETF日收益定义X_t时，可先用去均值自协方差诊断线性依赖，再判断时间序列CV是否必须保留连续区块，以及组合收益均值的HAC标准误是否需要修正；对高频收益要额外注意买卖报价反弹与非同步成交造成的负一阶相关。",
+      "caveat": "样本自协方差估计可采用分母n或n−h，二者有限样本性质不同；不能把理论平稳性直接由样本均值近似恒定来证明。滞后h太大时可用的样本对减少，估计波动明显增大；金融制度变化时整段样本的γ(h)可能没有统一的总体意义。",
+      "deep_sections": [
+        {
+          "title": "先界定平稳性与二阶对象",
+          "question": "为什么均值和方差在变动时不能直接套固定γ(h)？",
+          "paragraphs": [
+            "对于非平稳过程，不同时点之间的协方差一般是γ(t,s)，不能压缩成只随h=t−s变化的函数。弱平稳要求均值恒定、方差有限且二时点协方差只由滞后决定，并不等于强平稳。",
+            "金融价格水平通常含趋势或单位根，而适当变换后的收益可能更接近弱平稳；是否使用收益率、对数收益率或去趋势残差应由研究对象决定，不能为了得到漂亮的ACF曲线任意切换。"
+          ],
+          "formulas": [
+            {
+              "label": "弱平稳条件",
+              "tex": "E[X_t]=\\mu,\\quad\\operatorname{Cov}(X_t,X_s)=\\gamma(t-s)"
+            }
+          ],
+          "proof": "根据弱平稳定义，令s=t可见γ(0)为各期共有方差；以s=t−h可定义γ(h)。若X_t=t+ε_t，则E[X_t]=t，首先不满足恒定均值条件。",
+          "worked": "对φ=0.6的零均值AR(1)，γ(0)=1且所有期相同；若直接对随机游走价格求全样本相关会得到不稳定含义。",
+          "limitation": "均值稳定并不保证独立，更不代表所有非线性依赖已消失。"
+        },
+        {
+          "title": "从Cauchy–Schwarz到Toeplitz半正定",
+          "question": "为什么不能任意指定一串滞后协方差数字？",
+          "paragraphs": [
+            "协方差序列须来自某个合法随机过程。除了对称性与逐项有界性，它的每个有限维Toeplitz矩阵都必须半正定；这一条件约束所有滞后之间的联合结构。",
+            "对任何有限线性组合Y=Σa_iX_i，方差必须非负。将Y的方差按双线性性质展开，正好得到Toeplitz二次型；因此判断协方差模型合法性不能只检查每个γ(h)的绝对值。"
+          ],
+          "formulas": [
+            {
+              "label": "Toeplitz二次型",
+              "tex": "a^\\top\\Gamma_pa=\\operatorname{Var}\\!\\left(\\sum_{i=1}^{p}a_iX_i\\right)\\ge0"
+            }
+          ],
+          "proof": "方差非负且协方差双线性，E[(Σ a_i(X_i−μ))²]=Σ_iΣ_j a_i a_j Cov(X_i,X_j)；弱平稳将后者写成γ(i−j)。",
+          "worked": "γ(0)=1、γ(1)=0.6、γ(2)=0.36满足来自稳定AR(1)的合法结构。",
+          "limitation": "样本估计经过逐滞后不同缩放后不一定保持半正定，优化与谱估计时必须检查。"
+        },
+        {
+          "title": "稳定AR(1)的闭式自协方差",
+          "question": "自相关为什么几何衰减而不等于参数本身？",
+          "paragraphs": [
+            "AR(1)描述下一期对上期的线性依赖，稳定要求|φ|<1。将当前过程写成无限过去创新的线性组合可得到有限方差；参数符号决定相关随滞后的正负交替。",
+            "对滞后h≥1，将模型方程与历史变量取协方差，因当前创新不依赖历史，得γ(h)=φγ(h−1)。结合方差固定点即得到完整的滞后几何衰减。"
+          ],
+          "formulas": [
+            {
+              "label": "AR(1)理论自协方差",
+              "tex": "\\gamma(h)=\\frac{\\sigma_\\varepsilon^2}{1-\\phi^2}\\phi^{|h|}"
+            }
+          ],
+          "proof": "γ(0)=φ²γ(0)+σ²解得σ²/(1−φ²)，h≥1递推γ(h)=φ^hγ(0)，负滞后由对称性补出。",
+          "worked": "取φ=0.6、σ²=0.64，得到γ(0)=1、γ(1)=0.6、γ(2)=0.36，满足γ(2)=0.6γ(1)。",
+          "limitation": "若φ=1，以上稳态方差分母为零；不能拿随机游走的样本相关当作平稳AR1的理论ACF。"
+        },
+        {
+          "title": "金融诊断与估计误差",
+          "question": "看到自相关是不是就找到了可以赚钱的信号？",
+          "paragraphs": [
+            "协方差只描述线性二阶依赖，对可执行盈利还需考虑条件均值预测误差、买卖报价、流动性、执行延迟和参数漂移。高频收益中的微观结构噪声也可能产生显著负自相关，未必代表可交易的反转收益。",
+            "对持有期重叠的标签以及组合收益均值，协方差将直接影响样本均值方差；若简单使用独立样本方差除以n，会低估或高估标准误。"
+          ],
+          "formulas": [
+            {
+              "label": "样本均值方差",
+              "tex": "\\operatorname{Var}(\\overline X_n)=\\frac{1}{n}\\left[\\gamma(0)+2\\sum_{h=1}^{n-1}\\left(1-\\frac hn\\right)\\gamma(h)\\right]"
+            }
+          ],
+          "proof": "将n²Var(X̄_n)=Σ_tΣ_sCov(X_t,X_s)按滞后分组：零滞后有n项，正负h各有n−h项，除以n²即可得到公式。",
+          "worked": "如果每期收益方差为1且仅一阶自协方差为0.2，则n大时样本均值方差约为(1+0.4)/n，大于独立假设的1/n。",
+          "limitation": "实际相关可能在更高滞后持续且波动状态变动，HAC方法仍需要适当的滞后核和带宽。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "timeseries-n0241",
+          "label": "先修：强弱平稳"
+        },
+        {
+          "kind": "math",
+          "id": "timeseries-n0243",
+          "label": "下一讲：ACF与PACF"
+        },
+        {
+          "kind": "math",
+          "id": "statistics-x001",
+          "label": "相关：重叠收益与有效样本量"
+        },
+        {
+          "kind": "math",
+          "id": "timeseries-n0247",
+          "label": "继续：AR(p)"
+        }
+      ],
+      "sources": [
+        {
+          "title": "statsmodels: Yule–Walker and stationary autocovariance",
+          "url": "https://www.statsmodels.org/stable/generated/statsmodels.regression.linear_model.yule_walker.html"
+        },
+        {
+          "title": "statsmodels: Time Series Analysis",
+          "url": "https://www.statsmodels.org/stable/tsa.html"
+        },
+        {
+          "title": "Newey and West (1987), HAC covariance",
+          "url": "https://www.nber.org/papers/t0055"
+        }
+      ],
+      "checked_status": "完整数学精讲：二阶平稳、协方差合法性、AR(1)谱前置与均值方差推导"
+    },
+    {
+      "id": "timeseries-n0243",
+      "node_id": "timeseries-n0243",
+      "title": "ACF与PACF",
+      "definition": "自相关函数ACF把自协方差按零滞后方差标准化，量化不同时间间隔的线性相关。偏自相关函数PACF则把两个时点都对中间滞后变量作线性投影并取残差相关，从而区分“直接滞后关系”与经中间期传递的间接关系，是识别稳定AR结构的重要工具。",
+      "assumptions": "假设实值序列有有限且正的方差，至少满足弱平稳性。PACF的线性投影需对应滞后协方差矩阵可逆，退化或精确共线时要采用适当的广义处理。针对AR与MA的理论截尾特征还需要正确的模型类别、稳定/可逆参数条件及白噪声假设；有限样本经验ACF/PACF不会精确截断。",
+      "properties": [
+        "ACF为ρ(h)=γ(h)/γ(0)，无量纲且绝对值不大于1。",
+        "PACF在滞后k处表示剔除中间1,…,k−1期线性作用后的剩余关系；高斯时可用相应条件相关理解，但一般不等于完全条件独立。",
+        "稳定AR(p)的理论PACF在k>p处为0，而ACF一般拖尾；可逆MA(q)的理论ACF在k>q处为0，而PACF一般拖尾。",
+        "ACF与PACF识别只是候选模型诊断，不能替代残差检验、预测评价、季节性与结构断点审查。"
+      ],
+      "formulas": [
+        {
+          "label": "标准化自协方差",
+          "tex": "\\rho(h)=\\frac{\\gamma(h)}{\\gamma(0)},\\quad |\\rho(h)|\\le1"
+        },
+        {
+          "label": "PACF的线性投影定义",
+          "tex": "\\alpha(k)=\\operatorname{Corr}(u_t,u_{t-k}),\\quad u_t=X_t-\\Pi_{\\mathcal H_{k-1}}X_t"
+        },
+        {
+          "label": "Yule–Walker识别",
+          "tex": "\\begin{bmatrix}\\gamma(0)&\\cdots&\\gamma(p-1)\\\\\\vdots&\\ddots&\\vdots\\\\\\gamma(p-1)&\\cdots&\\gamma(0)\\end{bmatrix}\\!\\begin{bmatrix}\\phi_1\\\\\\vdots\\\\\\phi_p\\end{bmatrix}=\\begin{bmatrix}\\gamma(1)\\\\\\vdots\\\\\\gamma(p)\\end{bmatrix}"
+        },
+        {
+          "label": "AR(1)理论图形",
+          "tex": "\\rho(k)=\\phi^k,\\ k\\ge0;\\qquad\\alpha(1)=\\phi,\\quad\\alpha(k)=0\\ (k\\ge2)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由定义γ(0)=Var(X_t)正且有限，将γ(h)除以它得到标准化相关系数。自协方差的对称与界限传递为ρ(−h)=ρ(h)与|ρ(h)|≤1。",
+          "tex": "\\rho(h)=\\operatorname{Corr}(X_t,X_{t-h})=\\gamma(h)/\\gamma(0)"
+        },
+        {
+          "explanation": "将X_t与X_{t−k}分别在中间滞后变量所张成的线性空间上正交投影，取两者投影残差的相关。这样删除中间期可由线性关系解释的部分。",
+          "tex": "\\alpha(k)=\\operatorname{Corr}\\left(X_t-\\Pi_{\\mathcal H}X_t,\\ X_{t-k}-\\Pi_{\\mathcal H}X_{t-k}\\right)"
+        },
+        {
+          "explanation": "对AR(p)方程两边乘以过去X_{t−k}再取期望，白噪声创新与过去不相关，因此γ(k)=Σ_j φ_jγ(k−j)，k=1,…,p。这产生对称Toeplitz线性方程。",
+          "tex": "\\gamma(k)=\\sum_{j=1}^p\\phi_j\\gamma(k-j)\\quad(k=1,\\ldots,p)"
+        },
+        {
+          "explanation": "稳定AR(1)条件于X_{t−1}后，X_t与更远的X_{t−k}剩余线性关联只来自ε_t，而它与历史不相关；故k>1时理论PACF归零，尽管ACF以φ^k持续。",
+          "tex": "\\alpha(1)=\\phi,\\qquad \\alpha(2)=\\alpha(3)=\\cdots=0"
+        }
+      ],
+      "example": "稳定AR(1)取φ=0.6、创新方差0.64，理论ACF满足ρ(1)=0.6、ρ(2)=0.36、ρ(3)=0.216。PACF满足α(1)=0.6、α(2)=0、α(3)=0。若样本估计的二阶PACF为0.05而非恰好零，不代表理论定理失效；应使用其抽样误差及残差白噪声检验判断是否需要更高阶模型。",
+      "application": "对ETF与宏观变量的线性动态建立基线时，先诊断收益或波动序列是否弱平稳，再绘制ACF/PACF与残差图；若收益方向相关弱、收益平方相关强，应考虑条件异方差模型而非仅为收益均值增加AR阶数。",
+      "caveat": "在非平稳、季节性、结构断点或不规则采样下，经验ACF/PACF图可能具有误导性。大样本白噪声近似置信带±1.96/√n并非对任意相关序列或多重滞后检验都有效；不应把超过带宽的单根柱子自动解释为稳健交易规律。",
+      "deep_sections": [
+        {
+          "title": "ACF首先回答何种相关问题",
+          "question": "为什么把相关系数与协方差分开？",
+          "paragraphs": [
+            "协方差量纲随收益单位和资产波动大小改变，ACF用本序列方差归一化，突出滞后形状与方向。ACF衡量的只是线性相关，不是下一期条件分布的全部信息。",
+            "为避免把季节性或趋势误判为短期滞后结构，研究应在确定时间频率和变换方式后再进行估计；频率改变会改变相关结构。"
+          ],
+          "formulas": [
+            {
+              "label": "ACF",
+              "tex": "\\rho(h)=E[(X_t-\\mu)(X_{t-h}-\\mu)]/\\gamma(0)"
+            }
+          ],
+          "proof": "将定义式中的两个随机变量按各自标准差√γ(0)标准化，得到Pearson相关系数；由Cauchy–Schwarz知其绝对值不超过1。",
+          "worked": "AR1的ρ(2)=0.6²=0.36，虽小于ρ(1)，但并未归零。",
+          "limitation": "相关符号和衰减速度不一定稳定跨市场制度。"
+        },
+        {
+          "title": "PACF与中间滞后变量的剔除",
+          "question": "为什么“二阶相关”不等于“直接的第二滞后效应”？",
+          "paragraphs": [
+            "在AR1中，X_{t−2}对X_t有相关，是因为影响经X_{t−1}传递。要识别是否还存在额外二阶线性信息，需要先将两端各自在中间一期的最佳线性解释删除。",
+            "PACF等于由这些投影残差计算的相关，亦可通过最优阶数k的线性回归中第k个滞后系数获得。对于非高斯过程，线性残差不相关并不能说明完整条件独立。"
+          ],
+          "formulas": [
+            {
+              "label": "二阶PACF",
+              "tex": "\\alpha(2)=\\frac{\\rho(2)-\\rho(1)^2}{1-\\rho(1)^2}"
+            }
+          ],
+          "proof": "把X_t与X_{t−2}分别对X_{t−1}作线性回归，计算剩余残差协方差与残差方差，整理成二阶偏相关公式。",
+          "worked": "ρ1=0.6、ρ2=0.36时，α2=(0.36−0.36)/(1−0.36)=0，说明第二滞后不增加线性信息。",
+          "limitation": "若ρ1接近±1，分母很小，估计对噪声特别敏感。"
+        },
+        {
+          "title": "Yule–Walker与AR阶数识别",
+          "question": "为何不能只凭肉眼看图确定p？",
+          "paragraphs": [
+            "理论上AR(p)的PACF在p阶后截尾，这是因为更远滞后在已有p期条件下不提供额外线性预测贡献。但从有限样本估计的PACF会带随机误差，不会精准为零。",
+            "Yule–Walker由正交预测误差条件严格导出。把样本自协方差代入Toeplitz系统可估计AR参数，但矩阵接近奇异时会导致系数不稳定。"
+          ],
+          "formulas": [
+            {
+              "label": "二阶Yule–Walker",
+              "tex": "\\begin{bmatrix}1&\\rho_1\\\\\\rho_1&1\\end{bmatrix}\\begin{bmatrix}\\phi_1\\\\\\phi_2\\end{bmatrix}=\\begin{bmatrix}\\rho_1\\\\\\rho_2\\end{bmatrix}"
+            }
+          ],
+          "proof": "误差ε_t对X_{t−k}正交，得到γ(k)=Σ_j φ_jγ(k−j)；按k=1,…,p堆叠，即为Toeplitz方程。",
+          "worked": "φ1=0.5、φ2=0.2时ρ1=φ1/(1−φ2)=0.625，ρ2=φ1ρ1+φ2=0.5125；代入二阶方程可恢复参数。",
+          "limitation": "ARMA、状态切换与非线性动力学可能表现出类似图形，单一图形不提供唯一模型选择。"
+        },
+        {
+          "title": "从模型诊断走向预测评价",
+          "question": "ACF/PACF后下一步应该做什么？",
+          "paragraphs": [
+            "先用训练窗口的ACF/PACF限定合理候选模型，再进行根条件、创新诊断和时间外预测比较，避免先用测试区的图形调阶数。均值模型残差近似白噪声不等于平方残差也白噪声。",
+            "需要同时报告预测期限、时点可得性、误差度量及基线。把策略收益的自相关图当作交易信号时，还必须核实成交模型与微观结构噪声。"
+          ],
+          "formulas": [
+            {
+              "label": "预测创新",
+              "tex": "\\widehat\\varepsilon_t=X_t-\\widehat E[X_t\\mid\\mathcal F_{t-1}]"
+            }
+          ],
+          "proof": "若均值模型已捕捉可线性预测部分，残差不应保留系统的线性自相关；但方差条件变化时残差平方仍可能有结构。",
+          "worked": "上述AR1例子理论上原序列ρ2=0.36，但正确减去0.6X_{t−1}后，残差与过去两阶不相关。",
+          "limitation": "模型诊断须考虑多个滞后联合检验，单一显著柱不能代替全面残差评价。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "timeseries-n0242",
+          "label": "先修：自协方差"
+        },
+        {
+          "kind": "math",
+          "id": "timeseries-n0247",
+          "label": "下一讲：AR(p)"
+        },
+        {
+          "kind": "math",
+          "id": "timeseries-n0265",
+          "label": "扩展：条件方差"
+        }
+      ],
+      "sources": [
+        {
+          "title": "statsmodels ACF/PACF API",
+          "url": "https://www.statsmodels.org/stable/tsa.html"
+        },
+        {
+          "title": "statsmodels Yule–Walker estimator",
+          "url": "https://www.statsmodels.org/stable/generated/statsmodels.regression.linear_model.yule_walker.html"
+        }
+      ],
+      "checked_status": "完整数学精讲：标准化、正交线性投影、偏自相关截尾与Yule–Walker"
+    },
+    {
+      "id": "timeseries-n0247",
+      "node_id": "timeseries-n0247",
+      "title": "AR(p)",
+      "definition": "AR(p)自回归过程以过去p期序列值的线性组合描述下一期条件均值，是从协方差与偏自相关走向可计算预测的基础模型。其稳定性由滞后多项式的根决定，不能仅凭所有系数绝对值小于1来判断；AR(p)只建模条件均值，若创新方差随时间变化，应再引入GARCH或其他波动模型。",
+      "assumptions": "设X_t−μ=Σ_{j=1}^p φ_j(X_{t−j}−μ)+ε_t，ε_t为零均值、有限方差σ²、与过去不相关的创新。讨论因果稳定AR解时要求Φ(z)=1−Σ_j φ_j z^j的所有复根严格位于单位圆之外。若需把线性预测称为完整条件期望，须补充ε_t对过去信息条件均值为零，而不仅是不相关。",
+      "properties": [
+        "稳定因果AR(p)存在收敛的过去创新线性表示，二阶结构不依赖绝对时间。",
+        "Yule–Walker方程由创新与过去序列正交得到；根条件决定稳定性而非单一系数的大小。",
+        "AR(p)的理论PACF在p阶之后截尾，ACF一般并不截尾。",
+        "预测区间只有在创新分布、参数不确定性与预测方差正确处理后才有统计解释；正态区间不自动适用于厚尾金融收益。"
+      ],
+      "formulas": [
+        {
+          "label": "AR(p)条件均值",
+          "tex": "X_t-\\mu=\\sum_{j=1}^p\\phi_j(X_{t-j}-\\mu)+\\varepsilon_t"
+        },
+        {
+          "label": "稳定滞后多项式",
+          "tex": "\\Phi(z)=1-\\sum_{j=1}^p\\phi_jz^j,\\quad \\Phi(z)\\ne0\\ (|z|\\le1)"
+        },
+        {
+          "label": "Yule–Walker方程",
+          "tex": "\\gamma(k)=\\sum_{j=1}^p\\phi_j\\gamma(k-j)\\quad(k\\ge1)"
+        },
+        {
+          "label": "AR(1)多步条件均值",
+          "tex": "\\widehat X_{t+h\\mid t}=\\mu+\\phi^h(X_t-\\mu),\\quad h\\ge1"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "以去均值序列写AR(p)，确保截距与均值相对应。条件于过去信息，若创新的条件均值为零，即得到由已观测滞后构成的一步预测。",
+          "tex": "E[X_{t+1}\\mid\\mathcal F_t]=\\mu+\\sum_{j=1}^p\\phi_j(X_{t+1-j}-\\mu)"
+        },
+        {
+          "explanation": "将模型与过去X_{t−k}取协方差，创新与过去正交。由弱平稳令协方差只依赖滞后，形成包含模型参数和理论自协方差的线性方程。",
+          "tex": "\\gamma(k)=\\sum_{j=1}^p\\phi_j\\gamma(k-j)"
+        },
+        {
+          "explanation": "利用滞后算子B定义Φ(B)X_t=ε_t。根在单位圆外时1/Φ(z)在单位圆邻域可展开为幂级数，从而得到因果移动平均表示。",
+          "tex": "X_t-\\mu=\\Phi(B)^{-1}\\varepsilon_t=\\sum_{j=0}^\\infty\\psi_j\\varepsilon_{t-j}"
+        },
+        {
+          "explanation": "AR(1)下反复把未来条件均值代回当前可得信息，利用塔式期望推得h步预测随φ的h次幂收敛至长期均值。",
+          "tex": "\\widehat X_{t+h\\mid t}-\\mu=\\phi^h(X_t-\\mu)"
+        },
+        {
+          "explanation": "在创新条件同方差、独立的AR(1)下，h步预测误差是未来h个创新的加权和；由独立性叠加方差得到预测误差的有限期闭式。",
+          "tex": "\\operatorname{Var}(X_{t+h}-\\widehat X_{t+h\\mid t})=\\sigma_\\varepsilon^2\\sum_{j=0}^{h-1}\\phi^{2j}"
+        }
+      ],
+      "example": "设AR(1)过程均值μ=0、φ=0.6、创新方差σ²=0.64，已观察X_t=2。下一期预测为1.2，再下一期预测为0.6×1.2=0.72；h=2预测误差方差为0.64(1+0.36)=0.8704。这说明预测均值向0收敛，而预测不确定性扩大；若用当期测试集后验调φ，则这些预测并非真实样本外结果。",
+      "application": "AR(p)可作为ETF日收益、利差、宏观因子和实现方差预测的线性基线；比较ML模型前应固定训练窗口、特征时点、预测期和损失，避免把复杂模型在信息集不同的条件下与AR基线比较。",
+      "caveat": "单位根时价格过程通常不是平稳AR，需考虑差分或协整结构；结构变迁与非线性状态可能破坏固定φ的假设。创新仅不相关不足以证明正态或完全独立，也不能自动推出可交易套利。",
+      "deep_sections": [
+        {
+          "title": "从动态回归到条件均值",
+          "question": "AR(p)预测的到底是均值还是完整概率分布？",
+          "paragraphs": [
+            "模型方程将观察到的时序水平去均值后，对前p期进行线性回归。在创新相对过去信息为条件零均值时，右端的滞后项给出下一期条件均值；若仅要求创新与过去不相关，则可主张最优线性预测而非一般非线性条件均值。",
+            "应区分模型训练时估计的φ与当前已经观察的X_t；对金融回测而言，所有标准化、去均值和参数选择都必须仅使用训练窗口。"
+          ],
+          "formulas": [
+            {
+              "label": "一步预测",
+              "tex": "\\widehat X_{t+1\\mid t}=\\mu+\\sum_{j=1}^p\\phi_j(X_{t+1-j}-\\mu)"
+            }
+          ],
+          "proof": "由条件期望线性性，已知过去滞后项可从条件期望中提出，ε_{t+1}的条件期望为0，因此预测式成立。",
+          "worked": "AR1、μ=0、φ=0.6、X_t=2时，预测下一期值为1.2，不是2.6，也不是收益预测1.2%。",
+          "limitation": "若创新条件均值并非零，线性方程仍可拟合，但条件均值解释不再精确。"
+        },
+        {
+          "title": "根条件、因果表示与单位根",
+          "question": "为什么|φ_j|各自小于1仍不保证p阶稳定？",
+          "paragraphs": [
+            "高阶AR的稳定性取决于整体滞后多项式Φ(z)，而非逐项系数界。若其根全部落在单位圆之外，倒数1/Φ(z)可在包含单位圆的区域展开为绝对可和的冲击响应系数。",
+            "因果表示说明当前值由过去创新的加权和构成，给予模型可计算的自协方差和预测公式。单位圆上有根会使常规弱平稳解不存在，需另行处理。"
+          ],
+          "formulas": [
+            {
+              "label": "稳定条件",
+              "tex": "\\Phi(z)=1-\\phi_1z-\\cdots-\\phi_pz^p\\ne0,\\quad|z|\\le1"
+            }
+          ],
+          "proof": "令B为滞后算子，Φ(B)(X_t−μ)=ε_t。根位于单位圆外时，可按几何型幂级数展开1/Φ(B)，得到绝对可和ψ_j；若单位根存在则该展开不再绝对可和。",
+          "worked": "AR1中φ=0.6对应根z=1/0.6≈1.667>1，为稳定；φ=1对应根z=1，不满足稳定要求。",
+          "limitation": "因果稳定与可逆性是不同概念，后者主要涉及MA部分的冲击恢复。"
+        },
+        {
+          "title": "Yule–Walker与参数估计",
+          "question": "理论γ(h)如何转成可估计的模型参数？",
+          "paragraphs": [
+            "以AR方程和不同滞后变量构造正交条件，得到矩阵Γ_p φ=γ_{1:p}。Γ_p为对称Toeplitz阵，若其正定可直接解线性方程求φ；样本估计替代理论自协方差后形成Yule–Walker估计。",
+            "OLS、条件最大似然和Yule–Walker有不同有限样本性质；金融样本出现高相关、结构断点和厚尾时，更需要比较估计稳定性而非只看样本内拟合优度。"
+          ],
+          "formulas": [
+            {
+              "label": "正规方程",
+              "tex": "\\Gamma_p\\phi=(\\gamma(1),\\dots,\\gamma(p))^\\top"
+            }
+          ],
+          "proof": "对创新ε_t与X_{t−k}的协方差取零，并对k=1,…,p联立，得到Toeplitz线性系统。",
+          "worked": "AR1的γ(1)/γ(0)=0.6，所以Yule–Walker理论φ=0.6；若γ(0)≈0则数值估计不稳定。",
+          "limitation": "样本自协方差的分母约定影响有限样本估计；不能在不同估计口径下比较系数后声称相等。"
+        },
+        {
+          "title": "多步预测误差与模型检验",
+          "question": "为什么下一期拟合好不代表长持有期预测准确？",
+          "paragraphs": [
+            "AR1的h步均值预测靠当前偏离长期均值的项φ^h衰减，未来创新不断累积，使预测误差方差增长。由此可见不同预测期的MSE不能直接混成同一数字。",
+            "拟合后应检查残差自相关、参数稳定性和创新尾部；若平方残差有明显聚集，则需在均值方程之外建立波动方程，不必盲目提高AR阶数。"
+          ],
+          "formulas": [
+            {
+              "label": "AR1多步误差方差",
+              "tex": "\\sigma_h^2=\\sigma_\\varepsilon^2\\sum_{j=0}^{h-1}\\phi^{2j}"
+            }
+          ],
+          "proof": "向前迭代AR1并减去h步条件均值，误差为Σ_{j=0}^{h−1}φ^j ε_{t+h−j}；独立创新使交叉协方差为零，所以方差是各项平方系数之和。",
+          "worked": "X_t=2时，h=2预测为0.72，预测误差方差=0.64(1+0.6²)=0.8704，大于h=1的0.64。",
+          "limitation": "若创新存在条件异方差，预测误差方差应对未来条件方差求期望，不能简单套常数σ²公式。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "timeseries-n0242",
+          "label": "先修：自协方差"
+        },
+        {
+          "kind": "math",
+          "id": "timeseries-n0243",
+          "label": "先修：ACF与PACF"
+        },
+        {
+          "kind": "math",
+          "id": "timeseries-n0265",
+          "label": "后续：均值模型之外的GARCH"
+        },
+        {
+          "kind": "math",
+          "id": "timeseries-n0268",
+          "label": "应用：多尺度HAR-RV"
+        }
+      ],
+      "sources": [
+        {
+          "title": "statsmodels Yule–Walker",
+          "url": "https://www.statsmodels.org/stable/generated/statsmodels.regression.linear_model.yule_walker.html"
+        },
+        {
+          "title": "statsmodels Autoregressive Models",
+          "url": "https://www.statsmodels.org/stable/tsa.html"
+        }
+      ],
+      "checked_status": "完整数学精讲：根条件、因果表示、YW估计、多步误差与时间外评价"
+    },
+    {
+      "id": "timeseries-n0268",
+      "node_id": "timeseries-n0268",
+      "title": "HAR-RV",
+      "definition": "HAR-RV（异质自回归实现波动率）把日度、周度和月度的过去实现方差或实现波动率聚合到同一个线性预测方程，用少数系数刻画不同交易视野下的波动持久性。它是多时间尺度的自回归近似，并不需要假定数据具有严格的分数积分长记忆；应明确所建模的是方差、波动率还是对数变换版本，三者不可混用。",
+      "assumptions": "采用方差口径：日内对数收益平方和形成RV_t≥0，周/月特征定义为截至t为止5/22个交易日的日RV均值；预测目标为下一交易日的RV_{t+1}。所有输入在t日收盘后才可得，训练参数仅用截至训练终点的可得标签。基线OLS假设残差与模型信息集条件均值为零；采用重叠多日目标或标准误推断时须处理序列依赖，且线性预测值未必非负。",
+      "properties": [
+        "HAR用一条回归同时吸收日、周、月的不同持久尺度，既可作为简单基线，也适合对照ML的时序特征建模。",
+        "RV^{(5)}和RV^{(22)}是历史滚动均值，其信息集止于t；若使用包含t+1的窗口，就直接泄漏预测目标。",
+        "HAR有限维阶数并不能自动推出真实长记忆；观察到缓慢ACF衰减只支持在所选样本与频率下的经验特征。",
+        "平滑目标的重叠会使预测误差序列相关，检验系数或模型胜负应使用适合的HAC或依赖重抽样。"
+      ],
+      "formulas": [
+        {
+          "label": "日实现方差",
+          "tex": "RV_t=\\sum_{i=1}^{M_t}r_{t,i}^2"
+        },
+        {
+          "label": "日/周/月信息特征",
+          "tex": "RV_t^{(w)}=\\frac15\\sum_{j=0}^{4}RV_{t-j},\\quad RV_t^{(m)}=\\frac1{22}\\sum_{j=0}^{21}RV_{t-j}"
+        },
+        {
+          "label": "一步HAR-RV方差回归",
+          "tex": "RV_{t+1}=\\beta_0+\\beta_dRV_t+\\beta_wRV_t^{(w)}+\\beta_mRV_t^{(m)}+u_{t+1}"
+        },
+        {
+          "label": "预测方差的QLIKE口径",
+          "tex": "L_{\\mathrm{QLIKE}}(h_t,RV_{t+1})=\\log h_t+\\frac{RV_{t+1}}{h_t},\\quad h_t>0"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先把日内收益的平方求和作为潜在二次变差的实现代理，再按交易日把过去1、5、22天的已观察日方差归并为三个尺度。",
+          "tex": "x_t=(1,RV_t,RV_t^{(w)},RV_t^{(m)})^\\top"
+        },
+        {
+          "explanation": "设下一期实现方差的线性条件均值预测为βᵀx_t，训练阶段以已成熟的(RV_{t+1},x_t)对估计β。作为线性回归，这并不自动保证预测非负。",
+          "tex": "\\widehat\\beta=\\arg\\min_\\beta\\sum_{t\\in\\mathcal T_{\\rm train}}(RV_{t+1}-x_t^\\top\\beta)^2"
+        },
+        {
+          "explanation": "每期周/月特征的窗口均结束于t，而监督学习标签在t+1结束才成熟。若同时预测未来h天均值，标签窗口会在相邻训练点间重叠，需要在验证边界清除相互污染的事件。",
+          "tex": "x_t\\in\\mathcal F_t,\\quad RV_{t+1}\\in\\mathcal F_{t+1}"
+        },
+        {
+          "explanation": "QLIKE在正预测h下为log h + RV/h。对给定预测信息集求条件期望并对h求导，其最优点为E[RV|信息集]，显示为何该损失自然面向条件方差预测。",
+          "tex": "\\frac{\\partial}{\\partial h}E[L\\mid\\mathcal F_t]=\\frac1h-\\frac{E[RV_{t+1}\\mid\\mathcal F_t]}{h^2}"
+        }
+      ],
+      "example": "设t日实现方差RV_t=0.0004，此前21天均为0.0001。周均RV^{(w)}=(0.0004+4×0.0001)/5=0.00016；月均RV^{(m)}=(0.0004+21×0.0001)/22≈0.000113636。令β0=0.00001、βd=0.3、βw=0.2、βm=0.4，得下一日预测h=0.00001+0.3×0.0004+0.2×0.00016+0.4×0.000113636≈0.000207455。其日波动率约为1.440%，这是方差预测开平方得到的量，不能直接把0.000207455当作波动率。",
+      "application": "在高频或可获取实现方差数据的ETF/股票策略中，先建立HAR-RV作为低复杂度波动率基线，再以统一数据源、预测时点与样本外切分比较GARCH、XGBoost、Transformer等方法。若只有日频OHLCV，不能宣称有日内实现方差；可研究更粗糙的平方日收益代理，但必须改变模型测量与噪声假设。",
+      "caveat": "OHLCV没有日内价格路径，不能从日收益平方凭空构造精确实现方差。微观结构噪声使极高频采样的简单RV产生偏差；异步成交、跨市场休市及跳跃也会影响测量。若预测h≤0，QLIKE不可直接计算，应在建模阶段选择合理的正值参数化/链接函数，不能测试后任意截断而不记录。",
+      "deep_sections": [
+        {
+          "title": "测量对象：RV与未来条件方差不能混称",
+          "question": "HAR-RV预测的随机变量到底是什么？",
+          "paragraphs": [
+            "RV_t通常由同一交易日内的高频对数收益平方求和形成，是该日已经发生的二次变差的观测代理；模型希望用t时点可得的历史RV预测下一期随机RV。条件方差h_t则是事前分布的二阶矩，不能与事后实现值混写。",
+            "在合适连续半鞅和高频采样条件下，实现方差可逼近二次变差；带噪价格的无限加密采样反而可能放大测量噪声，因此采样频率并非越高越准确。"
+          ],
+          "formulas": [
+            {
+              "label": "实现方差",
+              "tex": "RV_t=\\sum_{i=1}^{M_t}(\\log P_{t,i}-\\log P_{t,i-1})^2"
+            }
+          ],
+          "proof": "对分割的一日区间把每个高频回报平方并求和。随分割网格趋零的极限是二次变差；对扩散模型其连续部分对应积分方差，跳跃会贡献平方跳跃。",
+          "worked": "某日有两段高频对数收益0.01和−0.02时，示例RV=0.0001+0.0004=0.0005；日收益−0.01的平方仅0.0001，不相等。",
+          "limitation": "交易价格噪声会使简单RV上偏，必须报告采样间隔与稳健测量方法。"
+        },
+        {
+          "title": "异质时间尺度与AR近似",
+          "question": "为什么同时保留日、周、月特征而不只用前一天？",
+          "paragraphs": [
+            "短期波动冲击、交易周内风险状态及更慢的月度背景可能共存。HAR以3个已观察时间尺度的滚动平均构造线性解释变量，允许不同持久程度同时影响下一期预测。",
+            "这些滚动窗口互相包含，因此解释变量相关性高，不宜把单个β解释为因果机制。HAR是方便的预测模型而非自动满足真实长记忆的结构性因果方程。"
+          ],
+          "formulas": [
+            {
+              "label": "多尺度HAR",
+              "tex": "\\widehat{RV}_{t+1\\mid t}=\\beta_0+\\beta_dRV_t+\\beta_wRV_t^{(w)}+\\beta_mRV_t^{(m)}"
+            }
+          ],
+          "proof": "将过去多个频率的风险度量写入同一条件均值近似。以OLS选择β需在训练期保证特征与标签对齐，并在验证前固定窗口定义。",
+          "worked": "给定日RV=0.0004、周均0.00016、月均0.000113636和示例系数，预测方差约0.000207455。",
+          "limitation": "原始HAR在方差空间的线性组合可能为负，要在模型设计时处理非负性。"
+        },
+        {
+          "title": "信息集、监督标签与多步预测",
+          "question": "如何防止滚动均值把未来目标读入特征？",
+          "paragraphs": [
+            "预测索引以决策时刻t为准。x_t中周/月的最后一期都应是t，预测目标是尚未发生的t+1期；验证时期也应按数据发布时间和交易时点确定。",
+            "若把未来5日平均RV作为标签，相邻样本标签区间互相重叠。即使特征只用历史，随机K折也会把相同未来事件的信息分散到训练和验证两侧；时间验证或按事件区间purge不可缺少。"
+          ],
+          "formulas": [
+            {
+              "label": "信息集与标签区间",
+              "tex": "x_t\\in\\mathcal F_t,\\quad Y_t^{(h)}=\\frac1h\\sum_{j=1}^hRV_{t+j}"
+            }
+          ],
+          "proof": "x_t只使用i≤t数据，Y_t^{(h)}包含t+1至t+h的未来波动。两个起点相差小于h的训练样本共享未来结果，因此观测损失序列会相关。",
+          "worked": "若h=5，t日标签取t+1…t+5，t+1日标签取t+2…t+6，重叠4天，不能当成完全独立的两条事件。",
+          "limitation": "清除规则应按真实标签区间，而不是只统一扣减固定一个自然日。"
+        },
+        {
+          "title": "损失函数、参数解释与代理偏差",
+          "question": "QLIKE为何适合比较条件方差预测？",
+          "paragraphs": [
+            "当目标是条件方差，单位必须一致：预测h是方差，目标代理RV也应是方差；若改用波动率σ，需要相应变换而不是直接代入同一损失。",
+            "在代理对预测信息集条件无偏、正预测及可积条件下，E[log h+RV/h]与真实方差下同类评分函数有相同的预测依赖部分，从而使候选模型的期望损失排名对这类代理噪声具有稳健性；如果代理存在系统偏差，就不能机械套用。"
+          ],
+          "formulas": [
+            {
+              "label": "QLIKE",
+              "tex": "L(h,RV)=\\log h+RV/h,\\quad h>0"
+            }
+          ],
+          "proof": "令m=E[RV|F_t]>0，条件期望为log h+m/h，其导数为(h−m)/h²；在h=m处导数为0且函数在正域取全局最小。",
+          "worked": "h=0.0002、RV=0.0003时，目标与预测单位均为日方差；不能用预测日波动率√0.0002直接作为h代入。",
+          "limitation": "比较损失对有噪声代理的稳健性质需要明确条件无偏与可积条件，不保证有限样本赢家正确。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "timeseries-x001",
+          "label": "先修：实现方差与二次变差"
+        },
+        {
+          "kind": "math",
+          "id": "timeseries-x002",
+          "label": "先修：市场微观结构噪声"
+        },
+        {
+          "kind": "math",
+          "id": "timeseries-n0247",
+          "label": "数学先修：AR(p)与预测"
+        },
+        {
+          "kind": "math",
+          "id": "timeseries-n0265",
+          "label": "模型对照：ARCH/GARCH"
+        },
+        {
+          "kind": "ml",
+          "id": "m22-c06-p02",
+          "label": "跨模块：HAR与GARCH模型比较"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Corsi (2009), A Simple Approximate Long-Memory Model of Realized Volatility",
+          "url": "https://doi.org/10.1093/jjfinec/nbp001"
+        },
+        {
+          "title": "Andersen et al. (2003), Modeling and Forecasting Realized Volatility",
+          "url": "https://doi.org/10.1111/1468-0262.00418"
+        },
+        {
+          "title": "Patton (2011), Volatility forecast comparison using imperfect volatility proxies",
+          "url": "https://doi.org/10.1016/j.jeconom.2010.03.034"
+        }
+      ],
+      "checked_status": "完整数学精讲：实现方差测量、异质尺度、训练时点、QLIKE及代理误差"
+    }
+  ]
+}
