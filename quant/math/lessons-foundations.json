@@ -1592,6 +1592,166 @@
         }
       ],
       "checked_status": "V10完整讲义：四节证明、独立示例、假设与风险边界"
+    },
+    {
+      "id": "probability-n0120",
+      "node_id": "probability-n0120",
+      "title": "Markov/Chebyshev/Chernoff界",
+      "definition": "概率集中不等式在未知分布全部细节时，用非负矩、二阶矩或指数矩控制尾部事件。Markov 不等式依赖非负性，Chebyshev 对中心化平方误差应用 Markov，Chernoff 界先使用指数变换，再对参数优化。三者的强弱来自不同的矩存在条件，不能把指数尾界套用于任意厚尾金融收益。",
+      "assumptions": "随机变量可在同一概率空间定义。Markov 要求Y≥0且E[Y]<∞；Chebyshev 要求E[X²]<∞；一般Chernoff上界要求选取t>0使E[e^{tX}]<∞。Hoeffding的分布无关次高斯形式还要求独立、有界观测。负收益下界需相应处理−X的指数矩。",
+      "properties": [
+        "Markov界适用于任意非负可积变量，而非仅正态变量。",
+        "Chebyshev界由二阶矩得到，以1/a²控制偏离均值的概率，不要求正态。",
+        "Chernoff界对指数矩做优化，若mgf不存在则不能得到有限指数界。",
+        "对独立有界Bernoulli样本均值，Hoeffding给指数型集中上界，但它不是厚尾回报的通用定理。"
+      ],
+      "formulas": [
+        {
+          "label": "Markov不等式与非负尾部控制",
+          "tex": "\\Pr(Y\\ge a)\\le\\frac{\\mathbb E[Y]}a,\\qquad Y\\ge0,\\ a>0"
+        },
+        {
+          "label": "Chebyshev界的二阶矩机制",
+          "tex": "\\Pr(|X-\\mu|\\ge a)\\le\\frac{\\operatorname{Var}(X)}{a^2}"
+        },
+        {
+          "label": "Chernoff指数变换与参数最优化",
+          "tex": "\\Pr(X\\ge a)\\le\\inf_{t>0:\\,M_X(t)<\\infty}\\exp\\!\\bigl(-ta+\\log M_X(t)\\bigr)"
+        },
+        {
+          "label": "Bernoulli集中与金融依赖失效",
+          "tex": "\\Pr(|\\bar X_n-\\mu|\\ge\\varepsilon)\\le2\\exp\\!\\left(-\\frac{2n\\varepsilon^2}{(b-a)^2}\\right)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由每条样本路径上的Y≥a1_{Y≥a}，对双方取期望并用积分的单调性得到E[Y]≥aP(Y≥a)。除以正数a完成证明；这一过程没有引入关于Y方差或分布函数光滑性的假设。",
+          "tex": "\\Pr(Y\\ge a)\\le\\frac{\\mathbb E[Y]}a,\\qquad Y\\ge0,\\ a>0"
+        },
+        {
+          "explanation": "因为{|X−μ|≥a}与{(X−μ)²≥a²}相同，对Y=(X−μ)²应用Markov不等式，得到P(Y≥a²)≤E[Y]/a²=Var(X)/a²。",
+          "tex": "\\Pr(|X-\\mu|\\ge a)\\le\\frac{\\operatorname{Var}(X)}{a^2}"
+        },
+        {
+          "explanation": "对t>0且M_X(t)有限，Markov应用于e^{tX}得到P(X≥a)≤e^{−ta}M_X(t)。由于任意合法t都给出上界，对这些t取下确界仍是有效上界；若K可微且内点极小，一阶条件为K'(t)=a。",
+          "tex": "\\Pr(X\\ge a)\\le\\inf_{t>0:\\,M_X(t)<\\infty}\\exp\\!\\bigl(-ta+\\log M_X(t)\\bigr)"
+        },
+        {
+          "explanation": "对独立且在[a,b]内的X_i，Hoeffding引理给E exp[t(X_i−E X_i)]≤exp(t²(b−a)²/8)。利用独立性相乘、对Σ(X_i−μ)应用Chernoff并优化t=4nε/(b−a)²，得单侧exp(−2nε²/(b−a)²)，再用并事件上界得到双侧。",
+          "tex": "\\Pr(|\\bar X_n-\\mu|\\ge\\varepsilon)\\le2\\exp\\!\\left(-\\frac{2n\\varepsilon^2}{(b-a)^2}\\right)"
+        }
+      ],
+      "example": "独立Bernoulli(0.4)的100期平均值偏离均值0.2以上，Chebyshev上界0.06，Hoeffding上界2e^(−8)≈0.000670925。标准正态X超过2的Chernoff上界e^(−2)≈0.135335，但不等于真实尾概率。",
+      "application": "在ETF因子预测、置信界、在线学习和统计检验中使用Markov与Chernoff的条件核查；对于依赖型日收益应另用时间序列方差、混合条件或区块重抽样。 对于多资产共同冲击，可先界定组合损失的真实分布与可观测上界，再决定是否需要依赖稳健集中界或尾部模拟；指数界不是交易收益的分位数预测。",
+      "caveat": "不等式保证概率上界而非等号；矩存在性、独立性和有界性不能互相替代。样本内集中不能自动解释模型选择后显著性、资金跳空和交易成本。 在回测中搜索过多个参数或策略后，原始单次集中不等式不能直接反映模型选择偏差，需明确统计检验的实际样本构造和时序依赖。",
+      "deep_sections": [
+        {
+          "title": "Markov不等式与非负尾部控制",
+          "question": "为什么期望值能够约束非负损失超过阈值的概率？",
+          "paragraphs": [
+            "对非负Y与阈值a>0，在事件Y≥a上必有Y≥a，因此点态不等式Y≥a·1{Y≥a}成立。取期望即可把概率尾部转化为一阶矩上界，不需要独立性或特定分布形状。",
+            "如果Y可能取负值，直接把E[Y]/a当作超限概率界便可能错误。金融场景应选择非负损失变量、绝对值或平方损失，并明确收益符号和资金单位。"
+          ],
+          "formulas": [
+            {
+              "label": "Markov不等式与非负尾部控制",
+              "tex": "\\Pr(Y\\ge a)\\le\\frac{\\mathbb E[Y]}a,\\qquad Y\\ge0,\\ a>0"
+            }
+          ],
+          "proof": "由每条样本路径上的Y≥a1_{Y≥a}，对双方取期望并用积分的单调性得到E[Y]≥aP(Y≥a)。除以正数a完成证明；这一过程没有引入关于Y方差或分布函数光滑性的假设。",
+          "worked": "某组合单日非负损失Y以概率0.2为5、概率0.8为0，则E[Y]=1。阈值a=4时Markov界为1/4=0.25，实际超限概率为0.2，符合上界。",
+          "limitation": "若直接使用可以为负的组合收益R，则E[R]可能为0或负值，不能代替非负Y进入Markov不等式。"
+        },
+        {
+          "title": "Chebyshev界的二阶矩机制",
+          "question": "为何均方波动能控制任意固定幅度的偏离？",
+          "paragraphs": [
+            "将Y设为(X−μ)²，非负性自然成立；当Var(X)=σ²有限时，Markov给出P(|X−μ|≥a)≤σ²/a²。这个推导只用二阶矩，既不依赖独立观测，也不依赖正态性。",
+            "若样本平均来自独立同分布观测，它的方差进一步缩小为σ²/n，因此与大数定律直接连接。对于具有自相关的金融序列，平均值的方差必须包含协方差项，不应沿用σ²/n。"
+          ],
+          "formulas": [
+            {
+              "label": "Chebyshev界的二阶矩机制",
+              "tex": "\\Pr(|X-\\mu|\\ge a)\\le\\frac{\\operatorname{Var}(X)}{a^2}"
+            }
+          ],
+          "proof": "因为{|X−μ|≥a}与{(X−μ)²≥a²}相同，对Y=(X−μ)²应用Markov不等式，得到P(Y≥a²)≤E[Y]/a²=Var(X)/a²。",
+          "worked": "公平±1收益变量X均值0、方差1。取a=2，Chebyshev上界为1/4=0.25；实际P(|X|≥2)=0，说明普适尾界可能远松于真实概率。",
+          "limitation": "若平方矩不存在，例如某些Pareto厚尾分布的形状参数不超过2，则Chebyshev右侧无有限方差可代入；不能用样本方差伪装成总体二阶矩已存在。"
+        },
+        {
+          "title": "Chernoff指数变换与参数最优化",
+          "question": "为什么取指数之后还需要对自由参数进行优化？",
+          "paragraphs": [
+            "对任意t>0，事件X≥a等价于e^{tX}≥e^{ta}。Markov给出P(X≥a)≤e^{−ta}E[e^{tX}]；选择t的不同值会形成一族上界，其中最小者才是标准Chernoff界。",
+            "若定义对数矩母函数K(t)=log E[e^{tX}]，则优化目标为K(t)−ta。形式一阶条件K'(t)=a仅在可微且最优点位于内部时成立，必须检查存在域边界。"
+          ],
+          "formulas": [
+            {
+              "label": "Chernoff指数变换与参数最优化",
+              "tex": "\\Pr(X\\ge a)\\le\\inf_{t>0:\\,M_X(t)<\\infty}\\exp\\!\\bigl(-ta+\\log M_X(t)\\bigr)"
+            }
+          ],
+          "proof": "对t>0且M_X(t)有限，Markov应用于e^{tX}得到P(X≥a)≤e^{−ta}M_X(t)。由于任意合法t都给出上界，对这些t取下确界仍是有效上界；若K可微且内点极小，一阶条件为K'(t)=a。",
+          "worked": "若X~N(0,1)，M_X(t)=e^{t²/2}，对a=2优化−2t+t²/2，在t=2取最小，得到P(X≥2)≤e^{−2}≈0.135335，而真实正态尾概率约0.02275。",
+          "limitation": "对Cauchy回报，任意t>0的正指数矩发散，Chernoff指数优化不提供有限界；负尾应对−X独立检查其指数矩存在性。"
+        },
+        {
+          "title": "Bernoulli集中与金融依赖失效",
+          "question": "有界独立样本为什么能得到指数衰减，而市场收益不一定？",
+          "paragraphs": [
+            "对于独立X_i∈[a_i,b_i]，Hoeffding引理控制每期中心化变量的指数矩，独立性允许指数矩相乘；再用Chernoff优化得到样本平均的指数尾界。对共同区间[a,b]，双侧偏离概率至多2exp(−2nε²/(b−a)²)。",
+            "该结论是分布无关的上界，不是精确发生概率。金融资产的杠杆收益、跳空损失、共同市场冲击及时间重叠标签可能破坏有界性或独立性，必须另外建模。"
+          ],
+          "formulas": [
+            {
+              "label": "Bernoulli集中与金融依赖失效",
+              "tex": "\\Pr(|\\bar X_n-\\mu|\\ge\\varepsilon)\\le2\\exp\\!\\left(-\\frac{2n\\varepsilon^2}{(b-a)^2}\\right)"
+            }
+          ],
+          "proof": "对独立且在[a,b]内的X_i，Hoeffding引理给E exp[t(X_i−E X_i)]≤exp(t²(b−a)²/8)。利用独立性相乘、对Σ(X_i−μ)应用Chernoff并优化t=4nε/(b−a)²，得单侧exp(−2nε²/(b−a)²)，再用并事件上界得到双侧。",
+          "worked": "若100次独立Bernoulli(0.4)试验，ε=0.2，a=0,b=1，则双侧界为2e^(−8)≈0.0006709253，而Chebyshev界为0.24/(100×0.04)=0.06。",
+          "limitation": "若100期资产收益受到同一个不可观察状态驱动，则独立性失效，不能仍然使用以上n指数衰减界或把误差概率当作实际尾部ES。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "probability-n0106",
+          "label": "矩母函数存在条件"
+        },
+        {
+          "kind": "math",
+          "id": "probability-n0118",
+          "label": "弱律与强律"
+        },
+        {
+          "kind": "math",
+          "id": "probability-n0119",
+          "label": "中心极限定理"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0141",
+          "label": "Borel–Cantelli引理"
+        },
+        {
+          "kind": "ml",
+          "id": "m12-c07-p01",
+          "label": "金融ML统计显著性"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：矩、极限定理与概率不等式",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        },
+        {
+          "title": "MIT 18.175 Theory of Probability：收敛、不等式与指数界",
+          "url": "https://ocw.mit.edu/courses/18-175-theory-of-probability-spring-2014/pages/lecture-slides/"
+        }
+      ],
+      "checked_status": "V11严密讲义：四节完整定义、证明、数值检验、失效边界"
     }
   ]
 }
