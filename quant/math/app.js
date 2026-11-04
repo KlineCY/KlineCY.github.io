@@ -31,7 +31,7 @@ function typeset(el){
  }
 }
 function equation(tex,label=""){
- const div=document.createElement("div");div.className="formula-block";
+ const div=document.createElement("div");div.className="formula-block";div.tabIndex=0;div.setAttribute("role","region");div.setAttribute("aria-label",label?"数学公式："+label:"数学公式");
  if(label){const h=document.createElement("strong");h.textContent=label;div.appendChild(h)}
  const math=document.createElement("div");math.className="math";div.appendChild(math);
  if(mathReady()){
