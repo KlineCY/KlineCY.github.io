@@ -61,14 +61,18 @@ const cases=[
 ["statistics-x006",Math.sqrt(4)*.5,1,"T_n=√4×0.5=1"],
 ["timeseries-n0263",1*1-0*1,1,"rank(O)=2"],
 ["timeseries-n0264",.29/.38,.7631578947368421,"0.76316"],
-["timeseries-n0265",.000002+.08*.000400+.90*.000100,.000124,"0.000124"]
+["timeseries-n0265",.000002+.08*.000400+.90*.000100,.000124,"0.000124"],
+["timeseries-n0242",.64/(1-.6**2),1,"γ(0)=0.64/(1−0.36)=1"],
+["timeseries-n0243",(.36-.6**2)/(1-.6**2),0,"α(2)=0"],
+["timeseries-n0247",.6**2*2,.72,"0.72"],
+["timeseries-n0268",.00001+.3*.0004+.2*.00016+.4*((.0004+21*.0001)/22),.00020745454545454545,"0.000207455"]
 ];
-assert.equal(chapters.size,58,"fifty-five unique mathematics lesson IDs");
-assert.equal(cases.length,58);
+assert.equal(chapters.size,62,"fifty-five unique mathematics lesson IDs");
+assert.equal(cases.length,62);
 for(const [id,actual,expect,token] of cases){
  const lesson=chapters.get(id);
  assert(lesson,"missing numerical lesson "+id);
  assert(Math.abs(actual-expect)<1e-9,"wrong independent computation "+id);
  assert(lesson.example.includes(token),"worked example must contain checked arithmetic "+id+": "+token);
 }
-console.log("PASS: 20 mathematical disciplines, 58 independent numeric/research example invariants.");
+console.log("PASS: 20 mathematical disciplines, 62 independent numeric/research example invariants.");
