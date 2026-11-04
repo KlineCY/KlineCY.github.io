@@ -1580,6 +1580,2336 @@
         }
       ],
       "checked_status": "V10完整精讲：滤过与停时、分解唯一性、收敛定理条件和可复核示例"
+    },
+    {
+      "id": "stochastic-n0271",
+      "node_id": "stochastic-n0271",
+      "title": "Bernoulli过程",
+      "definition": "Bernoulli过程是离散时间上的独立同分布0–1事件序列，成功概率固定为p。该过程将交易事件、订单到达指示与离散计数联系起来：前n期成功数服从二项分布，成功间隔服从几何分布，并且每次独立成功可以继续以额外概率进行稀疏化。它是Poisson过程的离散近似基础，但不能把离散时间概率p直接当成连续时间强度λ。",
+      "assumptions": "定义X_1,X_2,…为相互独立且P(X_k=1)=p、P(X_k=0)=1−p，0<p<1；设N_n=Σ_{k≤n}X_k。几何等待T=inf{k≥1:X_k=1}定义在{1,2,…}上。独立性与概率不随时变是关键假设；后续使用大数定律时需同一测度下的无限可延拓序列。",
+      "properties": [
+        "前n期计数为Binomial(n,p)，均值np、方差np(1−p)。",
+        "首次成功等待期数为Geometric(p)，满足离散无记忆性。",
+        "独立稀疏化保留成功的概率从p变为pq，各时间槽仍独立。",
+        "取每槽Δ、p≈λΔ且Δ→0，可获得Poisson计数的连续极限；固定p不适用该极限。"
+      ],
+      "formulas": [
+        {
+          "label": "事件指标与二项计数",
+          "tex": "\\Pr(N_n=k)=\\binom nk p^k(1-p)^{n-k},\\quad \\mathbb E N_n=np"
+        },
+        {
+          "label": "几何等待时间与无记忆性",
+          "tex": "\\Pr(T=k)=(1-p)^{k-1}p,\\quad\\Pr(T>m+n\\mid T>m)=(1-p)^n"
+        },
+        {
+          "label": "稀疏化与独立标记",
+          "tex": "Y_k=X_kB_k,\\quad \\Pr(Y_k=1)=pq,\\quad N_n^{\\rm thin}\\sim\\operatorname{Bin}(n,pq)"
+        },
+        {
+          "label": "从Bernoulli网格到Poisson极限",
+          "tex": "\\binom nk(\\lambda t/n)^k(1-\\lambda t/n)^{n-k}\\longrightarrow e^{-\\lambda t}\\frac{(\\lambda t)^k}{k!}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "选择成功索引集合共有组合数C(n,k)，各具体序列的独立乘积概率相同。对均值，由线性性E N_n=ΣE X_i=np；对方差，由跨槽独立得Cov(X_i,X_j)=0，故Var(N_n)=np(1−p)。",
+          "tex": "\\Pr(N_n=k)=\\binom nk p^k(1-p)^{n-k},\\quad \\mathbb E N_n=np"
+        },
+        {
+          "explanation": "利用独立性得P(T>m)=(1−p)^m；将条件概率写为P(T>m+n)/P(T>m)，得到(1−p)^n。由非负整数尾和公式E T=Σ_{m≥0}P(T>m)=Σ(1−p)^m=1/p。",
+          "tex": "\\Pr(T=k)=(1-p)^{k-1}p,\\quad\\Pr(T>m+n\\mid T>m)=(1-p)^n"
+        },
+        {
+          "explanation": "由条件概率P(X=1,B=1)=P(X=1)P(B=1)=pq；跨槽随机对独立确保Y_k独立，故重复计数为二项分布。原始未保留计数与保留计数一般并不独立。",
+          "tex": "Y_k=X_kB_k,\\quad \\Pr(Y_k=1)=pq,\\quad N_n^{\\rm thin}\\sim\\operatorname{Bin}(n,pq)"
+        },
+        {
+          "explanation": "固定k，二项组合和因子n^{-k}的乘积趋于1/k!，(1−λt/n)^n趋于e^{−λt}，余下的(1−λt/n)^{−k}趋于1，因此得到Poisson极限。每槽概率必须随n缩小而不能固定。",
+          "tex": "\\binom nk(\\lambda t/n)^k(1-\\lambda t/n)^{n-k}\\longrightarrow e^{-\\lambda t}\\frac{(\\lambda t)^k}{k!}"
+        }
+      ],
+      "example": "p=0.2时三槽内恰一次成功概率0.384，均值0.6、方差0.48；首次成功平均等待5槽。稀疏化q=0.5时保留概率0.1；p_n=2/100时百槽无事件概率0.98^100≈0.13262。",
+      "application": "用于金融订单事件离散计数、成交标记与连续事件强度的近似建模；需要先核验跨槽独立、时间尺度和市场状态的稳定性。",
+      "caveat": "成交事件常受交易时段、订单簿状态与自激冲击影响。Bernoulli模型不是任何高频事件过程的默认真模型，且不能将几何等待时长直接替换为指数分布。",
+      "deep_sections": [
+        {
+          "title": "事件指标与二项计数",
+          "question": "为何伯努利指示过程的计数服从二项分布？",
+          "paragraphs": [
+            "每个时间槽仅有成功和失败，X_k为成功的指示变量，N_n将前n个槽的成功次数求和。对指定的k个成功位置，独立性使该路径概率为p^k(1−p)^{n−k}。",
+            "具有k个成功位置的组合数为C(n,k)，不同位置事件彼此互斥，因此求和得计数的二项分布。价格涨跌方向未必独立，若存在波动聚集或条件概率变化，就不能直接采用该计数模型。"
+          ],
+          "formulas": [
+            {
+              "label": "事件指标与二项计数",
+              "tex": "\\Pr(N_n=k)=\\binom nk p^k(1-p)^{n-k},\\quad \\mathbb E N_n=np"
+            }
+          ],
+          "proof": "选择成功索引集合共有组合数C(n,k)，各具体序列的独立乘积概率相同。对均值，由线性性E N_n=ΣE X_i=np；对方差，由跨槽独立得Cov(X_i,X_j)=0，故Var(N_n)=np(1−p)。",
+          "worked": "在p=0.2、n=3时恰好一次成功的概率为3×0.2×0.8²=0.384；均值0.6，方差3×0.2×0.8=0.48。",
+          "limitation": "不能把同一交易日多个相互影响的订单事件当成独立时间槽；计数的二项方差在过度离散场景可能系统低估。"
+        },
+        {
+          "title": "几何等待时间与无记忆性",
+          "question": "为什么等待首次成交事件的离散期数具有无记忆性质？",
+          "paragraphs": [
+            "当首次成功时刻为T，事件T>m要求前m次均失败，故概率为(1−p)^m。已知前m次均失败，后续独立槽仍以原成功概率p重新尝试。",
+            "因此条件等待时间不依赖已经过去的失败次数。这是对独立固定概率模型的结论，并不表明真实限价单的排队位置或成交强度不会随时间变化。"
+          ],
+          "formulas": [
+            {
+              "label": "几何等待时间与无记忆性",
+              "tex": "\\Pr(T=k)=(1-p)^{k-1}p,\\quad\\Pr(T>m+n\\mid T>m)=(1-p)^n"
+            }
+          ],
+          "proof": "利用独立性得P(T>m)=(1−p)^m；将条件概率写为P(T>m+n)/P(T>m)，得到(1−p)^n。由非负整数尾和公式E T=Σ_{m≥0}P(T>m)=Σ(1−p)^m=1/p。",
+          "worked": "若p=0.2，首次成功平均等待5个槽；已失败3期后再等2期仍失败的条件概率为0.8²=0.64。",
+          "limitation": "事件持续时间若呈现自激性、日内季节性或订单队列变化，几何无记忆模型不再成立。"
+        },
+        {
+          "title": "稀疏化与独立标记",
+          "question": "怎样由高频事件流得到仅包含某类事件的稀疏事件流？",
+          "paragraphs": [
+            "每个原始成功独立附加一次保留标记，标记成功概率为q，令Y_k=X_kB_k，其中B_k独立于X及跨槽标记。则单槽被保留的概率等于pq。",
+            "由于每个时间槽所用的(X_k,B_k)对相互独立，稀疏后的Y_k仍为Bernoulli(pq)过程。若标记选择规则使用未来成交信息，独立标记假设和可预测交易解释都不成立。"
+          ],
+          "formulas": [
+            {
+              "label": "稀疏化与独立标记",
+              "tex": "Y_k=X_kB_k,\\quad \\Pr(Y_k=1)=pq,\\quad N_n^{\\rm thin}\\sim\\operatorname{Bin}(n,pq)"
+            }
+          ],
+          "proof": "由条件概率P(X=1,B=1)=P(X=1)P(B=1)=pq；跨槽随机对独立确保Y_k独立，故重复计数为二项分布。原始未保留计数与保留计数一般并不独立。",
+          "worked": "若p=0.2、q=0.5，每期留下事件的概率0.1；在10个独立时间槽内留下事件数的均值为10×0.1=1。",
+          "limitation": "不能把事件在观测后根据当期价格选择的留存率当成独立稀疏化，也不应据此认定留存与丢弃子计数独立。"
+        },
+        {
+          "title": "从Bernoulli网格到Poisson极限",
+          "question": "哪些缩放才能使离散事件流逼近连续时间Poisson过程？",
+          "paragraphs": [
+            "取时间槽宽度Δ=t/n，令每槽p_n=λt/n。固定长度t的事件数服从Binomial(n,λt/n)，当n趋于无穷时其概率质量函数收敛到Poisson(λt)。",
+            "这个极限保持固定有限时间窗内的期望事件数λt，并使单槽多事件概率在极限下消失。若真实订单有成簇到达、时段强度变化或共同冲击，简单齐次Poisson极限不一定适用。"
+          ],
+          "formulas": [
+            {
+              "label": "从Bernoulli网格到Poisson极限",
+              "tex": "\\binom nk(\\lambda t/n)^k(1-\\lambda t/n)^{n-k}\\longrightarrow e^{-\\lambda t}\\frac{(\\lambda t)^k}{k!}"
+            }
+          ],
+          "proof": "固定k，二项组合和因子n^{-k}的乘积趋于1/k!，(1−λt/n)^n趋于e^{−λt}，余下的(1−λt/n)^{−k}趋于1，因此得到Poisson极限。每槽概率必须随n缩小而不能固定。",
+          "worked": "令λt=2、n=100，则零事件概率0.98^100≈0.13262，极限Poisson(2)的零事件概率e^{-2}≈0.135335。",
+          "limitation": "单期Bernoulli p直接等于Poisson强度λ是量纲错误：p无量纲，λ的量纲为每单位时间的事件数。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "stochastic-n0273",
+          "label": "后续：Poisson过程"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0274",
+          "label": "后续：指数等待时间"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0275",
+          "label": "后续：一般更新过程"
+        },
+        {
+          "kind": "math",
+          "id": "probability-n0100",
+          "label": "基础：Bernoulli与Binomial分布"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 6.262 Discrete Stochastic Processes：Bernoulli、Poisson、Renewals及Random Walks章节",
+          "url": "https://ocw.mit.edu/courses/6-262-discrete-stochastic-processes-spring-2011/pages/course-notes/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：Stochastic Processes和Markov Chains官方讲义",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V12完整精讲：定义、前提、四节证明、核算算例、反例与金融应用"
+    },
+    {
+      "id": "stochastic-n0272",
+      "node_id": "stochastic-n0272",
+      "title": "随机游走",
+      "definition": "随机游走由逐期随机增量累加形成，是理解路径风险、首次到达与扩散极限的基础。简单一维随机游走每一步以概率p向上移动1、以概率1−p向下移动1；漂移取决于p，波动由步长方差决定。公平游走在自然滤过下是鞅，平方游走减去时刻是鞅，但样本路径可以出现较大回撤和停时风险。",
+      "assumptions": "定义独立同分布步长ξ_k∈{−1,+1}、P(ξ_k=1)=p，S_n=S_0+Σ_{k=1}^nξ_k。讨论公平鞅取p=1/2；有限区间首次吸收概率从内部i∈{1,…,N−1}出发，边界0和N吸收。使用可选停止时必须验证停止有界或符合所用定理的其他条件。",
+      "properties": [
+        "简单游走的均值为S_0+n(2p−1)，方差为4np(1−p)。",
+        "当p=1/2时S_n为鞅，S_n²−n也为鞅，平方风险均值随时间增加。",
+        "公平游走在0,N边界吸收时，从i先达到N的概率为i/N。",
+        "可选停止和首次通关不意味着可以通过加倍下注得到无风险盈利；无界停时与资金约束是核心边界。"
+      ],
+      "formulas": [
+        {
+          "label": "步长分布与均值方差",
+          "tex": "\\mathbb E S_n=S_0+n(2p-1),\\quad \\operatorname{Var}(S_n)=4np(1-p)"
+        },
+        {
+          "label": "公平鞅与平方风险",
+          "tex": "\\mathbb E[S_{n+1}\\mid\\mathcal F_n]=S_n,\\qquad \\mathbb E[S_{n+1}^2\\mid\\mathcal F_n]=S_n^2+1"
+        },
+        {
+          "label": "首次到达、吸收与赌徒破产",
+          "tex": "H_i=\\frac12H_{i-1}+\\frac12H_{i+1},\\quad H_0=0,\\ H_N=1\\quad\\Longrightarrow\\quad H_i=\\frac iN"
+        },
+        {
+          "label": "路径缩放、扩散极限与停时边界",
+          "tex": "W_n(t)=\\frac{S_{\\lfloor nt\\rfloor}}{\\sqrt n}\\ \\Rightarrow\\ W(t),\\qquad \\operatorname{Var}[W(t)]=t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由Eξ=p−(1−p)=2p−1，Var ξ=Eξ²−(Eξ)²=1−(2p−1)²。独立增量使EΣξ=ΣEξ，VarΣξ=ΣVarξ；将初值S_0视为常数即得到两式。",
+          "tex": "\\mathbb E S_n=S_0+n(2p-1),\\quad \\operatorname{Var}(S_n)=4np(1-p)"
+        },
+        {
+          "explanation": "展开(S_n+ξ)²=S_n²+2S_nξ+ξ²。由于S_n为F_n可测、E[ξ|F_n]=0、E[ξ²|F_n]=1，条件期望给出平方增加1；减去时刻n+1即得到M_n=S_n²−n的鞅性质。",
+          "tex": "\\mathbb E[S_{n+1}\\mid\\mathcal F_n]=S_n,\\qquad \\mathbb E[S_{n+1}^2\\mid\\mathcal F_n]=S_n^2+1"
+        },
+        {
+          "explanation": "将方程整理成H_{i+1}−H_i=H_i−H_{i−1}，得全部相邻差相同，H_i=a+bi；由H_0=0得a=0，由H_N=1得b=1/N。有限吸收链以概率1最终到边界，故此首达概率合法。",
+          "tex": "H_i=\\frac12H_{i-1}+\\frac12H_{i+1},\\quad H_0=0,\\ H_N=1\\quad\\Longrightarrow\\quad H_i=\\frac iN"
+        },
+        {
+          "explanation": "对固定t，独立增量中心极限定理给S_{⌊nt⌋}/√n⇒N(0,t)。对多个时点由不相交增量的独立性得到布朗运动的有限维分布；再需紧性证明才能升级为函数空间的弱收敛，不能只依有限维收敛作出结论。",
+          "tex": "W_n(t)=\\frac{S_{\\lfloor nt\\rfloor}}{\\sqrt n}\\ \\Rightarrow\\ W(t),\\qquad \\operatorname{Var}[W(t)]=t"
+        }
+      ],
+      "example": "p=0.6的十步简单游走均值2、方差9.6；公平游走两步的方差2；吸收区间[0,5]从2出发先达到5的概率2/5=0.4。时间缩放示例在两个不同n下均保持目标方差0.25。",
+      "application": "连接金融价格波动、首次触及止损/止盈阈值、路径回撤、动态风险与布朗运动的扩散近似；必须先核对收益测度和离散取样时标。",
+      "caveat": "公平游走未必可通过可选停止盈利；无界资金、未界定的停时或非独立收益会破坏推导。函数CLT也不是所有资产价格都服从几何布朗运动的证明。",
+      "deep_sections": [
+        {
+          "title": "步长分布与均值方差",
+          "question": "如何区分随机游走的漂移与其随机波动？",
+          "paragraphs": [
+            "将S_n写成初值和n个独立步长之和。每步均值Eξ=2p−1，二阶矩Eξ²=1，因此单步方差为1−(2p−1)²=4p(1−p)。",
+            "独立性让均值与方差按n相加；如果金融收益有时间自相关或变动波动，方差就包含跨期协方差项，不再简单等于n倍单期方差。"
+          ],
+          "formulas": [
+            {
+              "label": "步长分布与均值方差",
+              "tex": "\\mathbb E S_n=S_0+n(2p-1),\\quad \\operatorname{Var}(S_n)=4np(1-p)"
+            }
+          ],
+          "proof": "由Eξ=p−(1−p)=2p−1，Var ξ=Eξ²−(Eξ)²=1−(2p−1)²。独立增量使EΣξ=ΣEξ，VarΣξ=ΣVarξ；将初值S_0视为常数即得到两式。",
+          "worked": "若p=0.6、n=10、S_0=0，则E S_10=10×0.2=2，Var S_10=4×10×0.6×0.4=9.6，标准差√9.6≈3.098。",
+          "limitation": "真实价格收益通常不是固定单位的±1，也可能产生跳空、非平稳波动与交易费用，因此不能将该方差直接解读为资产风险。"
+        },
+        {
+          "title": "公平鞅与平方风险",
+          "question": "为什么公平随机游走没有条件漂移，却仍积累平方风险？",
+          "paragraphs": [
+            "当p=1/2，下一步ξ_{n+1}独立于过去且均值为零，故E[S_{n+1}|F_n]=S_n。平方展开可得E[S_{n+1}²|F_n]=S_n²+1。",
+            "所以S_n是鞅，而S_n²−n也是鞅，S_n²本身是次鞅。公平性控制条件均值，既不排除单条路径较大的下行损失，也不限制时点最大回撤。"
+          ],
+          "formulas": [
+            {
+              "label": "公平鞅与平方风险",
+              "tex": "\\mathbb E[S_{n+1}\\mid\\mathcal F_n]=S_n,\\qquad \\mathbb E[S_{n+1}^2\\mid\\mathcal F_n]=S_n^2+1"
+            }
+          ],
+          "proof": "展开(S_n+ξ)²=S_n²+2S_nξ+ξ²。由于S_n为F_n可测、E[ξ|F_n]=0、E[ξ²|F_n]=1，条件期望给出平方增加1；减去时刻n+1即得到M_n=S_n²−n的鞅性质。",
+          "worked": "从S_0=0出发走两步，S_2以1/4概率取−2、1/2概率取0、1/4概率取2，E S_2=0、E S_2²=2，与2期累积方差相符。",
+          "limitation": "鞅是对指定概率测度与滤过的条件均值性质；风险中性贴现价格与真实历史收益不能未经说明直接混用。"
+        },
+        {
+          "title": "首次到达、吸收与赌徒破产",
+          "question": "公平路径在上下边界之间，向上先到达的概率如何推导？",
+          "paragraphs": [
+            "设H_i为从i出发先到N而非0的概率，首步条件分解给H_i=(H_{i−1}+H_{i+1})/2，边界条件为H_0=0、H_N=1。",
+            "差分方程意味着H_i的相邻差为常数，因此H_i=i/N。该有限状态吸收模型也可由停止时的有界鞅得到，但要先确保停时终将发生，不能把无界状态游走的停止直接套用。"
+          ],
+          "formulas": [
+            {
+              "label": "首次到达、吸收与赌徒破产",
+              "tex": "H_i=\\frac12H_{i-1}+\\frac12H_{i+1},\\quad H_0=0,\\ H_N=1\\quad\\Longrightarrow\\quad H_i=\\frac iN"
+            }
+          ],
+          "proof": "将方程整理成H_{i+1}−H_i=H_i−H_{i−1}，得全部相邻差相同，H_i=a+bi；由H_0=0得a=0，由H_N=1得b=1/N。有限吸收链以概率1最终到边界，故此首达概率合法。",
+          "worked": "上下边界为0与5，从状态i=2出发，公平游走先碰5的概率为2/5=0.4；先碰0的概率为0.6。",
+          "limitation": "该模型忽略连续价格跨价位跳跃、保证金触发及执行时的滑点；首达概率不能直接作为交易策略可执行的胜率。"
+        },
+        {
+          "title": "路径缩放、扩散极限与停时边界",
+          "question": "离散随机游走与连续布朗运动之间需要哪些归一化？",
+          "paragraphs": [
+            "对公平独立±1步长，连续时间插值过程W_n(t)=n^{−1/2}S_{⌊nt⌋}通过函数中心极限定理在适当路径空间与拓扑下弱收敛到标准布朗运动。",
+            "缩放既要把时间加速n倍，也要把空间缩小√n倍，才能保持单位时间方差约为t。该极限是分布层次，不意味着每个离散路径在同一概率空间逐点等于布朗路径。"
+          ],
+          "formulas": [
+            {
+              "label": "路径缩放、扩散极限与停时边界",
+              "tex": "W_n(t)=\\frac{S_{\\lfloor nt\\rfloor}}{\\sqrt n}\\ \\Rightarrow\\ W(t),\\qquad \\operatorname{Var}[W(t)]=t"
+            }
+          ],
+          "proof": "对固定t，独立增量中心极限定理给S_{⌊nt⌋}/√n⇒N(0,t)。对多个时点由不相交增量的独立性得到布朗运动的有限维分布；再需紧性证明才能升级为函数空间的弱收敛，不能只依有限维收敛作出结论。",
+          "worked": "n=100、t=0.25时使用25个公平步长并除以10，方差25/100=0.25；n=400时100个步长除以20，方差也为100/400=0.25。",
+          "limitation": "对于有厚尾、长记忆或显著跳跃的金融价格，布朗扩散极限不一定适用；随机游走再缩放不能自动推出正确的连续价格模型。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "stochastic-n0282",
+          "label": "吸收概率"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0289",
+          "label": "自然滤过"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0293",
+          "label": "可选停止定理"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0301",
+          "label": "布朗运动定义"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 6.262 Discrete Stochastic Processes：Bernoulli、Poisson、Renewals及Random Walks章节",
+          "url": "https://ocw.mit.edu/courses/6-262-discrete-stochastic-processes-spring-2011/pages/course-notes/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：Stochastic Processes和Markov Chains官方讲义",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V12完整精讲：定义、前提、四节证明、核算算例、反例与金融应用"
+    },
+    {
+      "id": "stochastic-n0274",
+      "node_id": "stochastic-n0274",
+      "title": "指数等待时间",
+      "definition": "指数等待时间描述具有恒定连续时间事件强度λ的无记忆等待，其生存函数为e^{−λt}。齐次Poisson过程的相邻事件间隔是独立同分布的Exp(λ)，两个独立指数事件的竞争等待最小值仍为指数分布。指数模型对市场订单到达有用，但日内强度时变或自激性将改变等待分布。",
+      "assumptions": "参数λ>0且量纲为时间倒数；T连续非负并满足P(T>t)=e^{−λt}。若考虑多个事件的最小值，各等待时间需独立；Poisson模型要求独立、平稳增量。指数无记忆性是齐次强度模型性质，不能在时间变动强度下无条件沿用。",
+      "properties": [
+        "指数等待的密度f(t)=λe^{−λt}，均值1/λ、方差1/λ²。",
+        "连续无记忆性为P(T>s+t|T>s)=e^{−λt}。",
+        "两个独立指数等待最小值为Exp(λ_1+λ_2)，获胜来源概率与各强度成比例。",
+        "齐次Poisson过程首到达与相邻间隔是独立Exp等待，时变强度下需累计风险函数。"
+      ],
+      "formulas": [
+        {
+          "label": "生存函数、密度与矩",
+          "tex": "S(t)=e^{-\\lambda t},\\quad f(t)=\\lambda e^{-\\lambda t},\\quad \\mathbb ET=1/\\lambda"
+        },
+        {
+          "label": "无记忆性与条件残余时间",
+          "tex": "\\Pr(T>s+t\\mid T>s)=\\frac{e^{-\\lambda(s+t)}}{e^{-\\lambda s}}=e^{-\\lambda t}"
+        },
+        {
+          "label": "多个独立时钟的竞争",
+          "tex": "\\min(T_1,T_2)\\sim\\operatorname{Exp}(\\lambda_1+\\lambda_2),\\quad \\Pr(T_1<T_2)=\\frac{\\lambda_1}{\\lambda_1+\\lambda_2}"
+        },
+        {
+          "label": "Poisson对应与非齐次等待",
+          "tex": "\\Pr(T_1>t)=\\Pr(N(t)=0)=e^{-\\lambda t};\\quad S(t)=\\exp\\!\\left(-\\int_0^t\\lambda(u)\\,du\\right)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由S(t+h)=S(t)S(h)和S(h)=1−λh+o(h)，得微分方程S'=-λS，唯一连续解为e^{-λt}。非负变量尾积分E T=∫_0∞S(t)dt=1/λ，二阶矩E T²=2/λ²，故方差1/λ²。",
+          "tex": "S(t)=e^{-\\lambda t},\\quad f(t)=\\lambda e^{-\\lambda t},\\quad \\mathbb ET=1/\\lambda"
+        },
+        {
+          "explanation": "按条件概率定义，分子为S(s+t)，分母为S(s)>0；代入指数生存函数消去e^{-λs}得到e^{-λt}。同样说明未来剩余等待T−s在已存活T>s条件下的分布与原T相同。",
+          "tex": "\\Pr(T>s+t\\mid T>s)=\\frac{e^{-\\lambda(s+t)}}{e^{-\\lambda s}}=e^{-\\lambda t}"
+        },
+        {
+          "explanation": "独立性给P(min>t)=P(T_1>t)P(T_2>t)=e^{-(λ_1+λ_2)t}。首到来源概率为∫_0∞f_1(t)S_2(t)dt=∫_0∞λ_1e^{-(λ_1+λ_2)t}dt，结果为λ_1/(λ_1+λ_2)。",
+          "tex": "\\min(T_1,T_2)\\sim\\operatorname{Exp}(\\lambda_1+\\lambda_2),\\quad \\Pr(T_1<T_2)=\\frac{\\lambda_1}{\\lambda_1+\\lambda_2}"
+        },
+        {
+          "explanation": "齐次Poisson计数N(t)~Poisson(λt)，因此P(N(t)=0)=e^{-λt}。在非齐次Poisson假设下，N(t)~Poisson(Λ(t))、Λ(t)=∫_0^tλ(u)du，零事件概率变为e^{-Λ(t)}，只有常数λ才保留无记忆性。",
+          "tex": "\\Pr(T_1>t)=\\Pr(N(t)=0)=e^{-\\lambda t};\\quad S(t)=\\exp\\!\\left(-\\int_0^t\\lambda(u)\\,du\\right)"
+        }
+      ],
+      "example": "指数λ=2的平均等待0.5、超过1分钟概率e^{-2}。两个独立时钟λ_1=2、λ_2=3竞争时，最早等待均值0.2、第一类先到概率0.4。非齐次强度λ(t)=2t时前1分钟零事件概率e^{-1}。",
+      "application": "为金融订单簿的到达时间、成交/撤单竞争和时间尺度转换提供基准；应用时需核查日内季节性、共同风险状态和条件事件强度。",
+      "caveat": "固定指数等待仅适用于常强度模型。与真实执行队列交互时，等待可能被撤单、竞价制度、部分成交和时间戳延迟显著改变。",
+      "deep_sections": [
+        {
+          "title": "生存函数、密度与矩",
+          "question": "恒定到达强度如何决定等待时间的全部分布？",
+          "paragraphs": [
+            "若在每个足够短的时间间隔h内发生新事件的条件概率近似为λh，且无记忆，则等待尚未结束的概率满足S(t+h)≈S(t)(1−λh)。",
+            "令h趋0得到S'(t)=−λS(t)，以S(0)=1求解出指数生存函数；用导数得密度，使用尾积分公式求均值与方差。"
+          ],
+          "formulas": [
+            {
+              "label": "生存函数、密度与矩",
+              "tex": "S(t)=e^{-\\lambda t},\\quad f(t)=\\lambda e^{-\\lambda t},\\quad \\mathbb ET=1/\\lambda"
+            }
+          ],
+          "proof": "由S(t+h)=S(t)S(h)和S(h)=1−λh+o(h)，得微分方程S'=-λS，唯一连续解为e^{-λt}。非负变量尾积分E T=∫_0∞S(t)dt=1/λ，二阶矩E T²=2/λ²，故方差1/λ²。",
+          "worked": "若λ=2次/分钟，则平均等待0.5分钟；超过1分钟仍未到达的概率e^{-2}≈0.135335。",
+          "limitation": "如果λ取交易日内不同时段的动态函数，则固定指数分布不成立；单位转换错误会导致系统性低估等待时间。"
+        },
+        {
+          "title": "无记忆性与条件残余时间",
+          "question": "为何已经等过一段时间并不会改变指数模型预测的剩余时间？",
+          "paragraphs": [
+            "对s,t≥0，事件T>s+t包含于T>s，因此条件概率可直接写成两个生存概率的比值。指数形式使s项完全相消，剩余等待仍服从同一个指数分布。",
+            "这不是任何真实订单都具有的经验事实；限价订单的排队位置随成交与撤单变化，剩余等待分布可能明显依赖已经等待的时间。"
+          ],
+          "formulas": [
+            {
+              "label": "无记忆性与条件残余时间",
+              "tex": "\\Pr(T>s+t\\mid T>s)=\\frac{e^{-\\lambda(s+t)}}{e^{-\\lambda s}}=e^{-\\lambda t}"
+            }
+          ],
+          "proof": "按条件概率定义，分子为S(s+t)，分母为S(s)>0；代入指数生存函数消去e^{-λs}得到e^{-λt}。同样说明未来剩余等待T−s在已存活T>s条件下的分布与原T相同。",
+          "worked": "λ=2时，即使已经等待3分钟，再等待至少0.5分钟的条件概率仍为e^{-1}≈0.367879。",
+          "limitation": "若市场成交强度受行情变化或订单存活时间影响，条件剩余分布不再指数；不能将无记忆当作普遍微观结构定律。"
+        },
+        {
+          "title": "多个独立时钟的竞争",
+          "question": "两个订单或事件竞争，为什么先到时长仍服从指数分布？",
+          "paragraphs": [
+            "若T_1,T_2独立分别服从Exp(λ_1)、Exp(λ_2)，则min(T_1,T_2)>t当且仅当两个等待都超过t。",
+            "独立性让生存概率相乘并得到总强度λ_1+λ_2；通过积分计算第一时钟先响概率为λ_1/(λ_1+λ_2)。对应金融应用时必须确认订单事件并非被同一流动性状态强依赖。"
+          ],
+          "formulas": [
+            {
+              "label": "多个独立时钟的竞争",
+              "tex": "\\min(T_1,T_2)\\sim\\operatorname{Exp}(\\lambda_1+\\lambda_2),\\quad \\Pr(T_1<T_2)=\\frac{\\lambda_1}{\\lambda_1+\\lambda_2}"
+            }
+          ],
+          "proof": "独立性给P(min>t)=P(T_1>t)P(T_2>t)=e^{-(λ_1+λ_2)t}。首到来源概率为∫_0∞f_1(t)S_2(t)dt=∫_0∞λ_1e^{-(λ_1+λ_2)t}dt，结果为λ_1/(λ_1+λ_2)。",
+          "worked": "成交时钟强度2、撤单时钟强度3每分钟，则最先事件的等待均值1/5=0.2分钟，先成交概率2/5=0.4、先撤单概率3/5=0.6。",
+          "limitation": "若成交与撤单由共同冲击触发，独立竞争概率不成立；也不能把市场报价变动当作不受状态影响的指数时钟。"
+        },
+        {
+          "title": "Poisson对应与非齐次等待",
+          "question": "为什么计数Poisson过程的相邻到达等待为指数，而时间变强度要改公式？",
+          "paragraphs": [
+            "在齐次Poisson(λ)过程中，第一到达晚于t等价于[0,t]内没有事件。零计数概率e^{−λt}正好是指数等待生存函数；独立平稳增量将这一性质重复应用于后续间隔。",
+            "若确定性强度为λ(u)且采用非齐次Poisson模型，首次等待的生存函数为exp[−∫_0^tλ(u)du]。它通常不具无记忆性，时间变强度的尺度与实际日期必须明确。"
+          ],
+          "formulas": [
+            {
+              "label": "Poisson对应与非齐次等待",
+              "tex": "\\Pr(T_1>t)=\\Pr(N(t)=0)=e^{-\\lambda t};\\quad S(t)=\\exp\\!\\left(-\\int_0^t\\lambda(u)\\,du\\right)"
+            }
+          ],
+          "proof": "齐次Poisson计数N(t)~Poisson(λt)，因此P(N(t)=0)=e^{-λt}。在非齐次Poisson假设下，N(t)~Poisson(Λ(t))、Λ(t)=∫_0^tλ(u)du，零事件概率变为e^{-Λ(t)}，只有常数λ才保留无记忆性。",
+          "worked": "若λ(u)=2u（每分钟尺度），前1分钟累计强度Λ(1)=1，故无到达概率e^{-1}≈0.367879；这并非固定λ=2的e^{-2}。",
+          "limitation": "非齐次Poisson只允许确定性时变强度；若强度随机且由过去事件驱动，需使用条件强度或Cox/Hawkes过程。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "stochastic-n0273",
+          "label": "先修：Poisson过程"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0275",
+          "label": "后续：更新过程"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0288",
+          "label": "订单排队模型"
+        },
+        {
+          "kind": "math",
+          "id": "timeseries-x005",
+          "label": "Hawkes条件强度"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 6.262 Discrete Stochastic Processes：Bernoulli、Poisson、Renewals及Random Walks章节",
+          "url": "https://ocw.mit.edu/courses/6-262-discrete-stochastic-processes-spring-2011/pages/course-notes/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：Stochastic Processes和Markov Chains官方讲义",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V12完整精讲：定义、前提、四节证明、核算算例、反例与金融应用"
+    },
+    {
+      "id": "stochastic-n0275",
+      "node_id": "stochastic-n0275",
+      "title": "更新过程",
+      "definition": "更新过程以独立同分布的正等待时间T_k描述反复到达事件的时刻S_n=Σ_{k≤n}T_k及计数N(t)=max{n:S_n≤t}。它不要求等待为指数，因此一般没有Poisson过程的独立增量性质。通过大数定律可获得长期更新频率，结合每周期回报还可得到更新报酬定理，是排队论与金融成交间隔的基础。",
+      "assumptions": "等待T_k>0为i.i.d.，均值μ=E T_k∈(0,∞)；研究更新强律时只需该有限正均值，研究报酬率可设周期对(T_k,R_k)独立同分布且E|R_k|<∞。对于不同初始等待分布的延迟更新需另外定义首周期，不能默认各间隔都从0开始独立同分布。",
+      "properties": [
+        "N(t)=max{n:S_n≤t}是到t的累计更新数，S_n为第n个更新时刻。",
+        "若E T=μ∈(0,∞)，则N(t)/t→1/μ几乎处处。",
+        "更新报酬定理在适当i.i.d.周期及可积条件下给长期每单位时间报酬E R/E T。",
+        "只有指数等待的特殊情形给齐次Poisson过程，一般更新计数不具有独立增量。"
+      ],
+      "formulas": [
+        {
+          "label": "更新时间与计数的反函数关系",
+          "tex": "S_n=\\sum_{k=1}^nT_k,\\quad N(t)=\\max\\{n:S_n\\le t\\},\\quad S_{N(t)}\\le t<S_{N(t)+1}"
+        },
+        {
+          "label": "更新强律与长期事件频率",
+          "tex": "\\frac{S_n}{n}\\xrightarrow{\\rm a.s.}\\mu\\quad\\Longrightarrow\\quad\\frac{N(t)}t\\xrightarrow{\\rm a.s.}\\frac1\\mu"
+        },
+        {
+          "label": "更新报酬定理",
+          "tex": "\\frac{\\sum_{k=1}^{N(t)}R_k}{t}\\xrightarrow{\\rm a.s.}\\frac{\\mathbb ER_1}{\\mathbb ET_1}"
+        },
+        {
+          "label": "非指数等待与Poisson模型边界",
+          "tex": "T_k\\equiv2\\ \\Longrightarrow\\ N(t)=\\lfloor t/2\\rfloor,\\qquad \\lim_{t\\to\\infty}\\frac{N(t)}t=\\frac12"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "T_k>0使S_n严格递增；N(t)定义为截至t最后一个不超过t的索引，因而S_{N(t)}≤t，下一次尚未发生，所以t<S_{N(t)+1}。由正有限均值的强律S_n/n→μ>0可进一步推出S_n→∞，因此无有限时间爆炸。",
+          "tex": "S_n=\\sum_{k=1}^nT_k,\\quad N(t)=\\max\\{n:S_n\\le t\\},\\quad S_{N(t)}\\le t<S_{N(t)+1}"
+        },
+        {
+          "explanation": "大数定律给S_n/n→μ∈(0,∞)，于是S_n→∞且N(t)→∞。在样本路径上用S_{N(t)}/N(t)≤t/N(t)<(S_{N(t)+1}/(N(t)+1))((N(t)+1)/N(t)，两端趋μ，夹逼得t/N(t)→μ并取倒数。",
+          "tex": "\\frac{S_n}{n}\\xrightarrow{\\rm a.s.}\\mu\\quad\\Longrightarrow\\quad\\frac{N(t)}t\\xrightarrow{\\rm a.s.}\\frac1\\mu"
+        },
+        {
+          "explanation": "将报酬时间平均写为[(1/N(t))Σ_{k≤N(t)}R_k]×[N(t)/t]。周期对i.i.d.且E|R|<∞使第一因子几乎处处趋E R，正有限的E T使第二因子趋1/E T；两者乘积得到更新报酬率。",
+          "tex": "\\frac{\\sum_{k=1}^{N(t)}R_k}{t}\\xrightarrow{\\rm a.s.}\\frac{\\mathbb ER_1}{\\mathbb ET_1}"
+        },
+        {
+          "explanation": "确定性等待时S_n=2n，直接按N(t)定义得到N(t)=⌊t/2⌋，因而固定t的计数方差为0。而同样平均率λ=1/2的Poisson过程在t时计数方差λt>0，说明两模型不可能相同。",
+          "tex": "T_k\\equiv2\\ \\Longrightarrow\\ N(t)=\\lfloor t/2\\rfloor,\\qquad \\lim_{t\\to\\infty}\\frac{N(t)}t=\\frac12"
+        }
+      ],
+      "example": "确定性T_k=2分钟时，在t=5有N(t)=2，在100分钟有N=50，长期频率0.5。若周期净报酬均值0.3，长期每分钟报酬率0.15；同强度Poisson(2)四分钟计数恰好2次的概率2e^{-2}≈0.27067。",
+      "application": "用于订单到达、成交间隔、交易循环与奖励率估计，能衔接排队论与点过程数据分析；需要区分长期频率与短期到达分布。",
+      "caveat": "更新过程不等同Poisson：非指数等待一般失去独立增量。零等待、不可积周期、状态变化或尾周期收益可能破坏上述长期定理。",
+      "deep_sections": [
+        {
+          "title": "更新时间与计数的反函数关系",
+          "question": "为什么到达时刻序列与累计到达计数之间存在一对反函数式定义？",
+          "paragraphs": [
+            "每个周期等待时间T_k严格为正，第n个事件的时间S_n由前n个间隔相加得到。对于任意t，计数N(t)正是S_n不超过t的最大整数索引。",
+            "这意味着S_{N(t)}≤t<S_{N(t)+1}，该不等式是把等待时间的强律转化为事件计数长期频率的关键。对于存在瞬时无限次到达的异常模型，需要首先排除爆炸。"
+          ],
+          "formulas": [
+            {
+              "label": "更新时间与计数的反函数关系",
+              "tex": "S_n=\\sum_{k=1}^nT_k,\\quad N(t)=\\max\\{n:S_n\\le t\\},\\quad S_{N(t)}\\le t<S_{N(t)+1}"
+            }
+          ],
+          "proof": "T_k>0使S_n严格递增；N(t)定义为截至t最后一个不超过t的索引，因而S_{N(t)}≤t，下一次尚未发生，所以t<S_{N(t)+1}。由正有限均值的强律S_n/n→μ>0可进一步推出S_n→∞，因此无有限时间爆炸。",
+          "worked": "若确定性间隔T_k≡2分钟，则S_1=2、S_2=4、S_3=6；在t=5分钟时N(t)=2，满足S_2=4≤5<6=S_3。",
+          "limitation": "存在集簇的订单事件与同时戳交易时，需要定义是否允许零间隔和多个事件同刻；严格正等待是这里的模型假设。"
+        },
+        {
+          "title": "更新强律与长期事件频率",
+          "question": "怎样从等待时间均值推导单位时间内的事件数极限？",
+          "paragraphs": [
+            "由等待时间大数定律S_n/n→μ几乎处处。利用S_{N(t)}≤t<S_{N(t)+1}，分别除以N(t)或N(t)+1，再令t→∞。",
+            "由于N(t)也趋于无穷，左右比率都趋向μ，夹逼得到t/N(t)→μ，从而N(t)/t→1/μ。该定理描述长期平均到达频率，不给每个短期窗口的独立性或泊松概率。"
+          ],
+          "formulas": [
+            {
+              "label": "更新强律与长期事件频率",
+              "tex": "\\frac{S_n}{n}\\xrightarrow{\\rm a.s.}\\mu\\quad\\Longrightarrow\\quad\\frac{N(t)}t\\xrightarrow{\\rm a.s.}\\frac1\\mu"
+            }
+          ],
+          "proof": "大数定律给S_n/n→μ∈(0,∞)，于是S_n→∞且N(t)→∞。在样本路径上用S_{N(t)}/N(t)≤t/N(t)<(S_{N(t)+1}/(N(t)+1))((N(t)+1)/N(t)，两端趋μ，夹逼得t/N(t)→μ并取倒数。",
+          "worked": "确定性间隔T=2分钟时，N(t)=⌊t/2⌋，在t=100分钟时计数50，长期单位分钟频率为1/2，与μ=2的倒数一致。",
+          "limitation": "该结果不表明100分钟内事件数总是50；若等待随机，有限时间频率有波动，重尾等待也会影响近似的收敛速度。"
+        },
+        {
+          "title": "更新报酬定理",
+          "question": "如何同时计入每次事件获得的报酬和消耗的随机时间？",
+          "paragraphs": [
+            "若每周期附带可积报酬R_k，并且周期对(T_k,R_k)独立同分布，则完成的N(t)个周期累计报酬为Σ_{k=1}^{N(t)}R_k。报酬和的强律与更新计数强律相乘，得到单位时间长期平均报酬。",
+            "允许同周期R_k与T_k相关，所需的是各周期对之间独立同分布及报酬一阶可积。若报酬在周期内部持续产生，需额外控制未完成的尾周期贡献。"
+          ],
+          "formulas": [
+            {
+              "label": "更新报酬定理",
+              "tex": "\\frac{\\sum_{k=1}^{N(t)}R_k}{t}\\xrightarrow{\\rm a.s.}\\frac{\\mathbb ER_1}{\\mathbb ET_1}"
+            }
+          ],
+          "proof": "将报酬时间平均写为[(1/N(t))Σ_{k≤N(t)}R_k]×[N(t)/t]。周期对i.i.d.且E|R|<∞使第一因子几乎处处趋E R，正有限的E T使第二因子趋1/E T；两者乘积得到更新报酬率。",
+          "worked": "若每次完整交易平均净收益0.3单位、平均事件间隔2分钟，则长期平均净收益率0.3/2=0.15单位/分钟；此处不声称逐分钟交易收益总是0.15。",
+          "limitation": "报酬若与未完成周期的剩余库存有关，或交易费用随市场时段变化且周期不稳定，简单更新报酬公式可能不足。"
+        },
+        {
+          "title": "非指数等待与Poisson模型边界",
+          "question": "为什么更新过程比Poisson过程宽泛，而失去哪些好用的性质？",
+          "paragraphs": [
+            "若T_k为指数等待，则无记忆性质保证每次事件后以相同随机机制重新开始，所形成的计数是齐次Poisson过程。若等待为确定性2分钟，则计数是周期性的、几乎无随机性。",
+            "二者虽然可有同样长期平均到达率1/2，但短期到达方差和独立增量性质完全不同。因此仅根据平均成交间隔估计Poisson强度，不足以确认订单到达的真实分布。"
+          ],
+          "formulas": [
+            {
+              "label": "非指数等待与Poisson模型边界",
+              "tex": "T_k\\equiv2\\ \\Longrightarrow\\ N(t)=\\lfloor t/2\\rfloor,\\qquad \\lim_{t\\to\\infty}\\frac{N(t)}t=\\frac12"
+            }
+          ],
+          "proof": "确定性等待时S_n=2n，直接按N(t)定义得到N(t)=⌊t/2⌋，因而固定t的计数方差为0。而同样平均率λ=1/2的Poisson过程在t时计数方差λt>0，说明两模型不可能相同。",
+          "worked": "两种到达模型长期频率均0.5次/分钟。t=4分钟时确定性更新恰好发生2次，Poisson(2)计数的概率P(N=2)=2e^{-2}≈0.27067。",
+          "limitation": "真实订单簿事件常有时变强度及聚集效应；等待分布与事件之间依赖必须通过数据检验，不能只比较样本平均间隔。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "stochastic-n0274",
+          "label": "先修：指数等待时间"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0273",
+          "label": "比较：Poisson过程"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0288",
+          "label": "应用：执行排队模型"
+        },
+        {
+          "kind": "math",
+          "id": "timeseries-x005",
+          "label": "条件强度的扩展"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 6.262 Discrete Stochastic Processes：Bernoulli、Poisson、Renewals及Random Walks章节",
+          "url": "https://ocw.mit.edu/courses/6-262-discrete-stochastic-processes-spring-2011/pages/course-notes/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：Stochastic Processes和Markov Chains官方讲义",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V12完整精讲：定义、前提、四节证明、核算算例、反例与金融应用"
+    },
+    {
+      "id": "stochastic-n0276",
+      "node_id": "stochastic-n0276",
+      "title": "复合Poisson过程",
+      "definition": "复合Poisson过程把齐次Poisson计数与独立同分布的随机事件幅度结合：S(t)=Σ_{k=1}^{N(t)}Y_k。它不仅描述事件发生数量，还描述每次事件产生的损益、跳价或交易量。平均值依赖E Y，方差依赖E Y²；复指数变换使其分布特征函数具有明确的指数形式。",
+      "assumptions": "计数N(t)为强度λ>0的齐次Poisson过程，随机标记Y_k相互独立同分布且独立于N全过程。均值要求E|Y|<∞，方差要求E Y²<∞。用S(0)=0定义空和，若金融价格为跳变过程，还需说明价格本身还是对数价格使用该过程。",
+      "properties": [
+        "E S(t)=λt E Y；当E Y²有限时Var S(t)=λt E Y²。",
+        "特征函数为exp[λt(φ_Y(u)−1)]，来自对Poisson计数条件化。",
+        "不交叠时间区间上的复合增量在齐次独立标记假设下独立且平稳。",
+        "复合Poisson只描述有限活动跳跃，不能自动代表无限活动Lévy过程或所有金融重尾风险。"
+      ],
+      "formulas": [
+        {
+          "label": "随机事件数的随机和",
+          "tex": "S(t)=\\sum_{k=1}^{N(t)}Y_k,\\qquad N(t)\\sim\\operatorname{Poisson}(\\lambda t)"
+        },
+        {
+          "label": "全方差分解与跳跃风险",
+          "tex": "\\operatorname{Var}[S(t)]=\\lambda t\\,\\operatorname{Var}(Y)+\\lambda t(\\mathbb EY)^2=\\lambda t\\,\\mathbb E[Y^2]"
+        },
+        {
+          "label": "特征函数与随机和分布",
+          "tex": "\\varphi_{S(t)}(u)=\\exp\\{\\lambda t[\\varphi_Y(u)-1]\\}"
+        },
+        {
+          "label": "增量独立、跳跃频率和金融边界",
+          "tex": "\\Delta S_{(s,t]}=\\sum_{k=N(s)+1}^{N(t)}Y_k,\\qquad \\mathbb E N(t)=\\lambda t<\\infty"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "给定N(t)=n时，S(t)是n个独立标记之和。由全期望E[S|N=n]=nE Y，进而E S=E[N]E Y=λt E Y。该步骤使用标记与计数的独立性及一阶可积。",
+          "tex": "S(t)=\\sum_{k=1}^{N(t)}Y_k,\\qquad N(t)\\sim\\operatorname{Poisson}(\\lambda t)"
+        },
+        {
+          "explanation": "条件N=n时Var(S|N=n)=nVar(Y)，条件期望E(S|N)=N E Y。全方差公式给E[Var(S|N)]+Var(E[S|N])=λt Var(Y)+Var(N)(E Y)²；Poisson计数满足Var N=λt，故得到最终公式。",
+          "tex": "\\operatorname{Var}[S(t)]=\\lambda t\\,\\operatorname{Var}(Y)+\\lambda t(\\mathbb EY)^2=\\lambda t\\,\\mathbb E[Y^2]"
+        },
+        {
+          "explanation": "条件期望E[e^{iuS}|N=n]=φ_Y(u)^n。再求和Σ_{n≥0}e^{-λt}(λt)^nφ_Y(u)^n/n!=e^{-λt}exp(λtφ_Y(u))，整理为exp(λt(φ_Y(u)−1))。",
+          "tex": "\\varphi_{S(t)}(u)=\\exp\\{\\lambda t[\\varphi_Y(u)-1]\\}"
+        },
+        {
+          "explanation": "Poisson过程不交叠增量独立，标记集合也按时间顺序划分为独立子集；因此任意不交叠区间的复合增量独立且分布只依赖时长。由于N(t)为有限Poisson计数，有限时间的跳跃总数几乎必然有限。",
+          "tex": "\\Delta S_{(s,t]}=\\sum_{k=N(s)+1}^{N(t)}Y_k,\\qquad \\mathbb E N(t)=\\lambda t<\\infty"
+        }
+      ],
+      "example": "λt=2、标记Y以等概率取1与3时，累计期望4、方差10，明显不同于只计标记方差得到的错误值2。没有事件的概率e^{-2}≈0.135335；标记恒为1时退化为原Poisson计数。",
+      "application": "用于跳价、成交量累计、突发损失与有限跳跃风险建模；对金融交易需核对事件标记、概率测度、价格单位和实际成交约束。",
+      "caveat": "复合Poisson并非万能跳跃模型：同批事件关联、时间变化强度、厚尾标记和无穷活动跳跃会改变方差或独立增量性质。",
+      "deep_sections": [
+        {
+          "title": "随机事件数的随机和",
+          "question": "怎样把事件数和单次跳幅整合成一个损益过程？",
+          "paragraphs": [
+            "先按Poisson强度生成到时间t的事件数N(t)，再给每个到达事件附上独立标记Y_k，累计量S(t)就是前N(t)个标记的和。",
+            "当Y_k代表订单成交量或价格跳变时，S(t)属于纯跳累积过程。标记的独立性与分布稳定性需要验证：行情恶化时大额卖单往往更密集。"
+          ],
+          "formulas": [
+            {
+              "label": "随机事件数的随机和",
+              "tex": "S(t)=\\sum_{k=1}^{N(t)}Y_k,\\qquad N(t)\\sim\\operatorname{Poisson}(\\lambda t)"
+            }
+          ],
+          "proof": "给定N(t)=n时，S(t)是n个独立标记之和。由全期望E[S|N=n]=nE Y，进而E S=E[N]E Y=λt E Y。该步骤使用标记与计数的独立性及一阶可积。",
+          "worked": "若λ=2次/分钟，每次标记Y以1/2概率为1、1/2概率为3，则E Y=2，一分钟累计标记期望E S(1)=2×2=4。",
+          "limitation": "标记可能依赖到达强度和历史状态。若将未来价格变化作为已知标记选择规则，会违反过程定义与金融信息合法性。"
+        },
+        {
+          "title": "全方差分解与跳跃风险",
+          "question": "为什么复合Poisson的方差不是简单的λt Var(Y)？",
+          "paragraphs": [
+            "累计量的随机性来自两部分：固定次数下单次标记的波动，以及事件次数N(t)本身的随机性。利用全方差分解保留这两部分，得到λtVar(Y)+(λt)(E Y)²。",
+            "因Var(Y)+(E Y)²=E Y²，总方差化为λt E Y²。只用λtVar(Y)会遗漏计数波动；若标记均值非零，该遗漏通常不可忽略。"
+          ],
+          "formulas": [
+            {
+              "label": "全方差分解与跳跃风险",
+              "tex": "\\operatorname{Var}[S(t)]=\\lambda t\\,\\operatorname{Var}(Y)+\\lambda t(\\mathbb EY)^2=\\lambda t\\,\\mathbb E[Y^2]"
+            }
+          ],
+          "proof": "条件N=n时Var(S|N=n)=nVar(Y)，条件期望E(S|N)=N E Y。全方差公式给E[Var(S|N)]+Var(E[S|N])=λt Var(Y)+Var(N)(E Y)²；Poisson计数满足Var N=λt，故得到最终公式。",
+          "worked": "标记Y各半取1与3时E Y=2、Var Y=1、E Y²=5。λt=2时总方差应为2×5=10，而只乘标记方差会错误得到2。",
+          "limitation": "若E Y²发散，方差不存在；样本方差有限不能据此证明总体跳跃损失平方可积，也不能使用标准均值方差优化。"
+        },
+        {
+          "title": "特征函数与随机和分布",
+          "question": "如何不枚举所有事件次数就得到累计跳幅的特征函数？",
+          "paragraphs": [
+            "先固定N=n，独立标记和的特征函数为φ_Y(u)^n。再对N~Poisson(λt)求期望，得到Poisson概率母函数在φ_Y(u)处的取值。",
+            "该表达使跳跃分布的傅里叶计算直接化为指数形式，也说明复合Poisson属于有限活动Lévy过程。但投资风险中性定价还要声明所采用的概率测度。"
+          ],
+          "formulas": [
+            {
+              "label": "特征函数与随机和分布",
+              "tex": "\\varphi_{S(t)}(u)=\\exp\\{\\lambda t[\\varphi_Y(u)-1]\\}"
+            }
+          ],
+          "proof": "条件期望E[e^{iuS}|N=n]=φ_Y(u)^n。再求和Σ_{n≥0}e^{-λt}(λt)^nφ_Y(u)^n/n!=e^{-λt}exp(λtφ_Y(u))，整理为exp(λt(φ_Y(u)−1))。",
+          "worked": "若每个标记恒为1，则S(t)=N(t)，特征函数为exp[λt(e^{iu}−1)]，与Poisson分布的已知结果完全一致。",
+          "limitation": "仅有边际标记特征函数而缺少标记与计数独立性，不能使用以上指数形式；金融资产共同跳跃需联合标记模型。"
+        },
+        {
+          "title": "增量独立、跳跃频率和金融边界",
+          "question": "为什么这类过程能建模稀疏跳跃，却不能模拟所有流动性冲击？",
+          "paragraphs": [
+            "不交叠时间区间上的Poisson计数独立，且区间内使用的标记集合不重叠并彼此独立，因此复合Poisson增量也独立。平均事件数λt有限，任意有限区间内的跳跃次数几乎必然有限。",
+            "高频金融市场还可能出现无限活动小跳、跳跃自激、时间强度变化和跨资产共同冲击，需要更一般的Lévy、Hawkes或Cox模型。要将标记作为成交量还需明确是否允许为负和实际单位。"
+          ],
+          "formulas": [
+            {
+              "label": "增量独立、跳跃频率和金融边界",
+              "tex": "\\Delta S_{(s,t]}=\\sum_{k=N(s)+1}^{N(t)}Y_k,\\qquad \\mathbb E N(t)=\\lambda t<\\infty"
+            }
+          ],
+          "proof": "Poisson过程不交叠增量独立，标记集合也按时间顺序划分为独立子集；因此任意不交叠区间的复合增量独立且分布只依赖时长。由于N(t)为有限Poisson计数，有限时间的跳跃总数几乎必然有限。",
+          "worked": "在λ=2次/分钟的模型中，1分钟发生零次跳跃的概率e^{-2}≈0.135335；发生超过3次的概率1−e^{-2}(1+2+2²/2+2³/6)≈0.142877。",
+          "limitation": "真实交易事件可能同一时刻有多笔撮合，亦可能由共同信息冲击而聚集；有限活动与独立增量是需检验的模型条件。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "stochastic-n0273",
+          "label": "先修：Poisson过程"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0274",
+          "label": "事件等待时间"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0287",
+          "label": "后续：泊松化"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0329",
+          "label": "扩展：跳扩散模型"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 6.262 Discrete Stochastic Processes：Bernoulli、Poisson、Renewals及Random Walks章节",
+          "url": "https://ocw.mit.edu/courses/6-262-discrete-stochastic-processes-spring-2011/pages/course-notes/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：Stochastic Processes和Markov Chains官方讲义",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V12完整精讲：定义、前提、四节证明、核算算例、反例与金融应用"
+    },
+    {
+      "id": "stochastic-n0277",
+      "node_id": "stochastic-n0277",
+      "title": "马尔可夫性质",
+      "definition": "马尔可夫性质表示在给定当前状态X_n的条件下，下一期状态分布不再依赖更早的完整路径。它是关于条件分布与状态定义的假设，而非“市场真的没有记忆”。通过扩大状态向量，可以将某些具有有限滞后的过程写成马尔可夫过程，但隐变量、长期依赖和非平稳市场状态可能仍使简单的一阶链模型错设。",
+      "assumptions": "随机过程X_n在离散时间状态空间E上定义，给定自然滤过F_n=σ(X_0,…,X_n)。对每个可测目标集合A要求P(X_(n+1)∈A|F_n)=P(X_(n+1)∈A|X_n)几乎处处成立。时间齐次性是额外条件，指转移核不随n改变；马尔可夫性本身不要求独立的相邻状态。",
+      "properties": [
+        "未来给定当前状态后与更早过去条件独立，但相邻时刻通常高度相关。",
+        "有限状态齐次马尔可夫链可用同一个状态转移矩阵P描述全部一步条件概率。",
+        "带有两个时间滞后的一阶过程可以通过状态增广转成一阶马尔可夫状态向量。",
+        "在隐含市场状态下，观察变量未必具备马尔可夫性，不能将统计拟合视为已证实模型假设。"
+      ],
+      "formulas": [
+        {
+          "label": "条件分布与历史过滤",
+          "tex": "\\Pr(X_{n+1}\\in A\\mid\\mathcal F_n)=\\Pr(X_{n+1}\\in A\\mid X_n)"
+        },
+        {
+          "label": "齐次转移核及其区别",
+          "tex": "\\Pr(X_{n+1}=j\\mid X_n=i)=P_n(i,j),\\quad P_n=P\\ \\text{才是齐次}"
+        },
+        {
+          "label": "状态增广与有限记忆",
+          "tex": "Y_n=(X_n,X_{n-1})\\quad\\Longrightarrow\\quad Y_{n+1}=(X_{n+1},X_n)"
+        },
+        {
+          "label": "多步预测的条件独立",
+          "tex": "\\Pr(X_{n+1}=i_1,\\ldots,X_{n+m}=i_m\\mid X_n=i_0)=\\prod_{k=1}^mP(i_{k-1},i_k)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "当目标为有限状态j时，要求对所有历史状态序列和当前i有P(X_(n+1)=j|X_0,…,X_n)=P(X_(n+1)=j|X_n=i)，随后再对事件并集扩展。状态条件的概率由转移核决定，不涉及逐期无条件独立性。",
+          "tex": "\\Pr(X_{n+1}\\in A\\mid\\mathcal F_n)=\\Pr(X_{n+1}\\in A\\mid X_n)"
+        },
+        {
+          "explanation": "马尔可夫定义仅限制条件分布的自变量，不要求转移核关于n恒定。若不同n使用独立而分布不同的随机创新生成下一步，给定X_n与n后历史无关，仍是非齐次马尔可夫过程。",
+          "tex": "\\Pr(X_{n+1}=j\\mid X_n=i)=P_n(i,j),\\quad P_n=P\\ \\text{才是齐次}"
+        },
+        {
+          "explanation": "给定Y_n就知道(X_n,X_(n−1))，按二阶条件独立假设，这些变量足以决定X_(n+1)的分布；Y_(n+1)的第二分量又是确定的X_n，故整个向量的下一步条件分布只由Y_n决定。",
+          "tex": "Y_n=(X_n,X_{n-1})\\quad\\Longrightarrow\\quad Y_{n+1}=(X_{n+1},X_n)"
+        },
+        {
+          "explanation": "对条件联合事件递推使用P(A,B|C)=P(A|C)P(B|A,C)，马尔可夫性把每步条件从全部过去缩小为上一状态；齐次条件进一步使全部因子均为同一个转移矩阵P的元素。",
+          "tex": "\\Pr(X_{n+1}=i_1,\\ldots,X_{n+m}=i_m\\mid X_n=i_0)=\\prod_{k=1}^mP(i_{k-1},i_k)"
+        }
+      ],
+      "example": "二状态链P=[[0.8,0.2],[0.3,0.7]]给定当前0时，一步仍为0的概率0.8；路径0→1→0的两步联合概率0.06。把二阶状态增广为Y=(X_n,X_(n−1))可从2种状态扩为4种。",
+      "application": "用于ETF风险状态切换、马尔可夫奖励、信用评级迁移和订单簿状态建模；重点核验状态变量可观测性、跨期齐次性与时序数据泄漏。",
+      "caveat": "马尔可夫性质不等于独立性，齐次性又是另一个独立假设。由模型拟合出的P不能证明真实金融价格由有限状态马尔可夫链生成。",
+      "deep_sections": [
+        {
+          "title": "条件分布与历史过滤",
+          "question": "马尔可夫性质究竟删除了多少历史信息？",
+          "paragraphs": [
+            "完整过去的信息滤过F_n包含所有历史观测。马尔可夫性质只要求，对于预测紧接着的下一个状态，已知X_n后完整过去不会再改变条件概率。",
+            "这不是声称X_n与X_(n−1)独立，也不是说过去统计特征无预测价值；它们可以通过当前状态编码，或者在状态不完整时仍有额外解释力。"
+          ],
+          "formulas": [
+            {
+              "label": "条件分布与历史过滤",
+              "tex": "\\Pr(X_{n+1}\\in A\\mid\\mathcal F_n)=\\Pr(X_{n+1}\\in A\\mid X_n)"
+            }
+          ],
+          "proof": "当目标为有限状态j时，要求对所有历史状态序列和当前i有P(X_(n+1)=j|X_0,…,X_n)=P(X_(n+1)=j|X_n=i)，随后再对事件并集扩展。状态条件的概率由转移核决定，不涉及逐期无条件独立性。",
+          "worked": "设明天状态0或1，当前0时下一期0的概率0.8；即使此前更早历史不同，只要当前仍为0，该模型的下一期0预测均为0.8。",
+          "limitation": "无法观测到全部风险状态时，相同当前收益值可能对应不同隐藏波动状态，简单的一阶马尔可夫假设可能不成立。"
+        },
+        {
+          "title": "齐次转移核及其区别",
+          "question": "为什么一阶马尔可夫不等同于时间齐次？",
+          "paragraphs": [
+            "一般马尔可夫链可有随时间改变的转移概率P_n(i,j)，只要给定当前状态后不再依赖更早历史，就仍满足马尔可夫性质。",
+            "时间齐次额外假设P_n=P对所有n相同。这使长时间概率可以由同一个矩阵幂计算，但金融市场交易制度、波动状态和宏观周期可能让P随时间改变。"
+          ],
+          "formulas": [
+            {
+              "label": "齐次转移核及其区别",
+              "tex": "\\Pr(X_{n+1}=j\\mid X_n=i)=P_n(i,j),\\quad P_n=P\\ \\text{才是齐次}"
+            }
+          ],
+          "proof": "马尔可夫定义仅限制条件分布的自变量，不要求转移核关于n恒定。若不同n使用独立而分布不同的随机创新生成下一步，给定X_n与n后历史无关，仍是非齐次马尔可夫过程。",
+          "worked": "假设当前牛市状态，在正常交易日下一期仍牛市概率0.8、政策公布日为0.6；若转移仅随日历与当前状态变化，仍可具有非齐次马尔可夫性。",
+          "limitation": "把所有日历日汇总为固定P会掩盖机制变化；不能据历史平均矩阵稳定就推断未来齐次。"
+        },
+        {
+          "title": "状态增广与有限记忆",
+          "question": "具有二阶滞后的序列怎样变成一阶马尔可夫链？",
+          "paragraphs": [
+            "若X_(n+1)的条件分布取决于(X_n,X_(n−1))，但不依赖更早历史，可把两期状态组合成新的状态Y_n=(X_n,X_(n−1))。",
+            "此时Y_(n+1)=(X_(n+1),X_n)的条件分布仅依赖Y_n，所以增广后的过程是一阶马尔可夫链。状态增加可恢复形式上的马尔可夫性，却会扩大参数维度与估计难度。"
+          ],
+          "formulas": [
+            {
+              "label": "状态增广与有限记忆",
+              "tex": "Y_n=(X_n,X_{n-1})\\quad\\Longrightarrow\\quad Y_{n+1}=(X_{n+1},X_n)"
+            }
+          ],
+          "proof": "给定Y_n就知道(X_n,X_(n−1))，按二阶条件独立假设，这些变量足以决定X_(n+1)的分布；Y_(n+1)的第二分量又是确定的X_n，故整个向量的下一步条件分布只由Y_n决定。",
+          "worked": "若X_n∈{0,1}，增广状态有(0,0),(0,1),(1,0),(1,1)四种；相比原来的二状态一阶链，转移矩阵规模从2×2增为4×4。",
+          "limitation": "对于真正无限记忆或未观察的共同风险因子，有限增广不一定解决模型错设；状态过多还可能造成估计稀疏。"
+        },
+        {
+          "title": "多步预测的条件独立",
+          "question": "一阶条件性质如何扩展成整个未来路径的转移机制？",
+          "paragraphs": [
+            "利用条件概率的链式展开，可以把从n到n+m的状态路径概率写成各一步转移概率的乘积。将中间状态求和便得到多步转移核与Chapman–Kolmogorov公式。",
+            "该计算给出路径概率而非策略净收益；若交易决策本身改变市场状态或执行流动性，转移概率应把相应动作与状态变量纳入模型。"
+          ],
+          "formulas": [
+            {
+              "label": "多步预测的条件独立",
+              "tex": "\\Pr(X_{n+1}=i_1,\\ldots,X_{n+m}=i_m\\mid X_n=i_0)=\\prod_{k=1}^mP(i_{k-1},i_k)"
+            }
+          ],
+          "proof": "对条件联合事件递推使用P(A,B|C)=P(A|C)P(B|A,C)，马尔可夫性把每步条件从全部过去缩小为上一状态；齐次条件进一步使全部因子均为同一个转移矩阵P的元素。",
+          "worked": "若P(0,0)=0.8、P(0,1)=0.2、P(1,0)=0.3，路径0→1→0在给定起点0条件下的概率为0.2×0.3=0.06。",
+          "limitation": "状态若包含未来标签或事后定义的市场状态，所算路径概率未必对应可用于实盘决策的信息集。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "stochastic-n0278",
+          "label": "下一步：状态转移矩阵"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0279",
+          "label": "下一步：Chapman–Kolmogorov"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0280",
+          "label": "延伸：不变分布"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0298",
+          "label": "金融：马氏状态切换"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 6.262 Discrete Stochastic Processes：第3章有限状态Markov链和第5章可数状态链",
+          "url": "https://ocw.mit.edu/courses/6-262-discrete-stochastic-processes-spring-2011/pages/course-notes/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：第21–24讲Markov Chains I–III和连续时间链",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V12完整精讲：四节定理推导与独立数值算例"
+    },
+    {
+      "id": "stochastic-n0278",
+      "node_id": "stochastic-n0278",
+      "title": "状态转移矩阵",
+      "definition": "离散有限状态齐次马尔可夫链的转移矩阵P按行列出从当前状态i到下一期j的条件概率，每行非负并和为1。矩阵幂P^n给n步转移，初始行向量μ_0经过n期后为μ_n=μ_0P^n。不变分布π满足πP=π，但不应把不变分布与任意初始状态的有限期分布或稳态收敛混淆。",
+      "assumptions": "有限状态集合E={1,…,d}，齐次时间转移核P(i,j)=P(X_(n+1)=j|X_n=i)，各行总和1。矩阵幂预测要求链的马尔可夫性和齐次性，不能把由重叠交易数据估计的经验条件概率直接当作无误差P。",
+      "properties": [
+        "转移矩阵每项非负，行和为1，矩阵乘法保持概率向量归一化。",
+        "n步概率为P^n，初始分布μ_n=μ_0P^n。",
+        "二状态P=[[1−a,a],[b,1−b]]在a+b>0时不变分布为(b/(a+b),a/(a+b))。",
+        "估计状态转移概率需说明状态分箱、观测频率、参数不确定性及非平稳性的影响。"
+      ],
+      "formulas": [
+        {
+          "label": "行随机矩阵与概率守恒",
+          "tex": "P_{ij}\\ge0,\\quad\\sum_{j=1}^dP_{ij}=1,\\quad\\mu_{n+1}=\\mu_nP"
+        },
+        {
+          "label": "矩阵幂与多步路径求和",
+          "tex": "(P^2)_{ij}=\\sum_{k=1}^dP_{ik}P_{kj},\\qquad P^{n+m}=P^nP^m"
+        },
+        {
+          "label": "二状态稳态分布的解析解",
+          "tex": "\\pi P=\\pi,\\quad\\pi_0+\\pi_1=1\\quad\\Longrightarrow\\quad\\pi=\\left(\\frac b{a+b},\\frac a{a+b}\\right)"
+        },
+        {
+          "label": "估计转移矩阵及回测时间戳",
+          "tex": "\\widehat P_{ij}=\\frac{N_{ij}}{\\sum_kN_{ik}}\\quad\\text{当 }\\sum_kN_{ik}>0"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由状态事件{X_(n+1)=j}构成条件概率的互斥完备划分，得到Σ_jP_ij=1。若μ_n≥0且Σ_iμ_n,i=1，则(μ_nP)_j=Σ_iμ_n,iP_ij≥0，并且Σ_j(μ_nP)_j=Σ_iμ_n,iΣ_jP_ij=1。",
+          "tex": "P_{ij}\\ge0,\\quad\\sum_{j=1}^dP_{ij}=1,\\quad\\mu_{n+1}=\\mu_nP"
+        },
+        {
+          "explanation": "对中间事件{X_1=k}构造互斥划分，条件全概率给P(X_2=j|X_0=i)=Σ_kP(X_1=k|X_0=i)P(X_2=j|X_1=k,X_0=i)。由马尔可夫性与齐次性第二因子为P_kj，得到P²元素。",
+          "tex": "(P^2)_{ij}=\\sum_{k=1}^dP_{ik}P_{kj},\\qquad P^{n+m}=P^nP^m"
+        },
+        {
+          "explanation": "平衡方程的第一分量为π_0(1−a)+π_1b=π_0，整理得π_0a=π_1b。结合π_0+π_1=1及a+b>0，得唯一候选解；逐行验证πP=π。",
+          "tex": "\\pi P=\\pi,\\quad\\pi_0+\\pi_1=1\\quad\\Longrightarrow\\quad\\pi=\\left(\\frac b{a+b},\\frac a{a+b}\\right)"
+        },
+        {
+          "explanation": "给定当前状态i的全部转移计数N_ij，相关对数似然为Σ_jN_ij log P_ij，附约束Σ_jP_ij=1。拉格朗日一阶条件N_ij/P_ij=λ_i，并利用行和确定λ_i=Σ_jN_ij，得到频数估计；零访问行不能套此式。",
+          "tex": "\\widehat P_{ij}=\\frac{N_{ij}}{\\sum_kN_{ik}}\\quad\\text{当 }\\sum_kN_{ik}>0"
+        }
+      ],
+      "example": "二状态矩阵P=[[0.8,0.2],[0.3,0.7]]，从状态0出发两步后分布为(0.7,0.3)，不变分布为(0.6,0.4)。状态0的10个观测中8次留原状态，对应极大似然估计0.8。",
+      "application": "用于信用评级迁移、宏观市场状态及ETF风险状态转换；应核对同一数据采样间隔、真实可观察状态和样本外稳定性。",
+      "caveat": "行和为1是必要而非充分的实证合理性。状态划分前视、非齐次转移、未观察到的类别与不确定性会破坏固定P推断。",
+      "deep_sections": [
+        {
+          "title": "行随机矩阵与概率守恒",
+          "question": "为什么转移矩阵必须逐行归一化？",
+          "paragraphs": [
+            "P(i,j)是在当前状态i给定时转向下一状态j的条件概率。因为下一期必落入状态集合中的某个j，所有这些互斥事件的概率和必须为1。",
+            "这种逐行条件归一化保证从任意初始概率行向量μ_0出发，下一期μ_0P仍然是合法概率向量。若估计矩阵行和偏离1，则不能直接用于多期概率演化。"
+          ],
+          "formulas": [
+            {
+              "label": "行随机矩阵与概率守恒",
+              "tex": "P_{ij}\\ge0,\\quad\\sum_{j=1}^dP_{ij}=1,\\quad\\mu_{n+1}=\\mu_nP"
+            }
+          ],
+          "proof": "由状态事件{X_(n+1)=j}构成条件概率的互斥完备划分，得到Σ_jP_ij=1。若μ_n≥0且Σ_iμ_n,i=1，则(μ_nP)_j=Σ_iμ_n,iP_ij≥0，并且Σ_j(μ_nP)_j=Σ_iμ_n,iΣ_jP_ij=1。",
+          "worked": "取P=[[0.8,0.2],[0.3,0.7]]和μ_0=(1,0)，则μ_1=(0.8,0.2)，分量和1；再计算μ_2=(0.8×0.8+0.2×0.3,0.8×0.2+0.2×0.7)=(0.7,0.3)。",
+          "limitation": "按列随机与按行随机是不同约定；实现转移矩阵时必须保持向量乘法方向一致。"
+        },
+        {
+          "title": "矩阵幂与多步路径求和",
+          "question": "两步从状态i到j为何是所有中间状态概率乘积的和？",
+          "paragraphs": [
+            "两步到j可能经过任意中间状态k。按全概率公式，对每个中间状态把首步i→k与次步k→j的条件概率相乘，再对k求和。",
+            "这正是矩阵乘法(P²)_ij=Σ_kP_ikP_kj。更长时间递推为P^n；它是前向分布预测的基础，但无法免除状态估计和模型不确定性。"
+          ],
+          "formulas": [
+            {
+              "label": "矩阵幂与多步路径求和",
+              "tex": "(P^2)_{ij}=\\sum_{k=1}^dP_{ik}P_{kj},\\qquad P^{n+m}=P^nP^m"
+            }
+          ],
+          "proof": "对中间事件{X_1=k}构造互斥划分，条件全概率给P(X_2=j|X_0=i)=Σ_kP(X_1=k|X_0=i)P(X_2=j|X_1=k,X_0=i)。由马尔可夫性与齐次性第二因子为P_kj，得到P²元素。",
+          "worked": "P=[[0.8,0.2],[0.3,0.7]]时(P²)_{00}=0.8²+0.2×0.3=0.7；(P²)_{01}=0.8×0.2+0.2×0.7=0.3。",
+          "limitation": "多步矩阵幂假设每个时间步长度相同且转移不随日历变化；日内高频与隔夜观测不能无调整地混合。"
+        },
+        {
+          "title": "二状态稳态分布的解析解",
+          "question": "二状态转移矩阵的不变概率如何从线性方程得到？",
+          "paragraphs": [
+            "设P=[[1−a,a],[b,1−b]]，寻找行向量π满足πP=π且两分量和为1。这相当于稳态流从0流向1与从1流向0的概率流量相等。",
+            "若a+b>0，解得π_0=b/(a+b)、π_1=a/(a+b)。不变分布的存在不自动说明任意初始分布会收敛到π，周期性与不可约性要另外判断。"
+          ],
+          "formulas": [
+            {
+              "label": "二状态稳态分布的解析解",
+              "tex": "\\pi P=\\pi,\\quad\\pi_0+\\pi_1=1\\quad\\Longrightarrow\\quad\\pi=\\left(\\frac b{a+b},\\frac a{a+b}\\right)"
+            }
+          ],
+          "proof": "平衡方程的第一分量为π_0(1−a)+π_1b=π_0，整理得π_0a=π_1b。结合π_0+π_1=1及a+b>0，得唯一候选解；逐行验证πP=π。",
+          "worked": "当a=0.2、b=0.3时π=(0.3/0.5,0.2/0.5)=(0.6,0.4)，检验πP=(0.6×0.8+0.4×0.3,0.6×0.2+0.4×0.7)=(0.6,0.4)。",
+          "limitation": "若a=b=0则P=I，任意分布都不变，不可套用分母a+b公式；周期二链虽有稳态也不逐期收敛。"
+        },
+        {
+          "title": "估计转移矩阵及回测时间戳",
+          "question": "为什么样本转移计数的最大似然估计仍需要样本外验证？",
+          "paragraphs": [
+            "若已知状态划分且链齐次，一步转移计数N_ij在给定起点行的样本里形成条件多项分布，按行最大化似然可得估计量P̂_ij=N_ij/Σ_jN_ij。",
+            "但参数估计的方差、状态标签的前视划分和频率不一致仍会造成较大误差。若某行在训练样本中没有访问次数，其概率无法仅由频数估计，需明确先验或正则化。"
+          ],
+          "formulas": [
+            {
+              "label": "估计转移矩阵及回测时间戳",
+              "tex": "\\widehat P_{ij}=\\frac{N_{ij}}{\\sum_kN_{ik}}\\quad\\text{当 }\\sum_kN_{ik}>0"
+            }
+          ],
+          "proof": "给定当前状态i的全部转移计数N_ij，相关对数似然为Σ_jN_ij log P_ij，附约束Σ_jP_ij=1。拉格朗日一阶条件N_ij/P_ij=λ_i，并利用行和确定λ_i=Σ_jN_ij，得到频数估计；零访问行不能套此式。",
+          "worked": "若从状态0一共观察10次转移，其中8次到0、2次到1，则估计该行为(0.8,0.2)；若状态1有3次到0、7次到1，则估计另一行为(0.3,0.7)。",
+          "limitation": "样本内频数是统计估计，不代表真实状态转移永久不变；同一状态的未来定义不能使用事后价格峰谷标签。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "stochastic-n0277",
+          "label": "基础：马尔可夫性质"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0279",
+          "label": "后续：Chapman–Kolmogorov"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0280",
+          "label": "后续：不变分布"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0281",
+          "label": "后续：混合时间"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 6.262 Discrete Stochastic Processes：第3章有限状态Markov链和第5章可数状态链",
+          "url": "https://ocw.mit.edu/courses/6-262-discrete-stochastic-processes-spring-2011/pages/course-notes/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：第21–24讲Markov Chains I–III和连续时间链",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V12完整精讲：四节定理推导与独立数值算例"
+    },
+    {
+      "id": "stochastic-n0281",
+      "node_id": "stochastic-n0281",
+      "title": "遍历性与混合时间",
+      "definition": "有限马尔可夫链的遍历性涉及不可约、正再生与非周期性等条件。在有限状态、不可约且非周期的齐次链中，存在唯一不变分布π，并且任意初始分布的t期分布趋于π。混合时间使用全变差距离量化达到给定精度所需的时间，是判断金融状态模型何时忘记初始环境的重要理论工具。",
+      "assumptions": "有限状态、齐次转移矩阵P；若讨论全变差意义下的逐期收敛，需要不可约且非周期。对一般不可约周期链仍可能存在唯一不变分布，但P^t不逐期收敛。设t_mix(ε)=min{t:max_i||P^t(i,·)−π||_TV≤ε}；ε通常取(0,1)之间。",
+      "properties": [
+        "有限不可约非周期链存在唯一π，且P^t(i,·)收敛到π。",
+        "全变差距离为分布差的绝对值之和的一半，也等于事件概率偏差的上确界。",
+        "可逆链的谱隙可给混合速度估计，但周期性使绝对次大特征值可能等于1。",
+        "有限期混合速度与金融状态稳定性是不同概念；参数估计、长期漂移与状态定义都会影响真实预测。"
+      ],
+      "formulas": [
+        {
+          "label": "不可约、周期与平稳收敛",
+          "tex": "P=\\begin{pmatrix}0&1\\\\1&0\\end{pmatrix},\\quad\\pi=(1/2,1/2),\\quad P^{2n}=I,\\ P^{2n+1}=P"
+        },
+        {
+          "label": "全变差距离与混合时间定义",
+          "tex": "\\|\\mu-\\nu\\|_{\\rm TV}=\\frac12\\sum_j|\\mu_j-\\nu_j|,\\quad t_{\\rm mix}(\\varepsilon)=\\min\\{t:\\max_i\\|P^t(i,\\cdot)-\\pi\\|_{\\rm TV}\\le\\varepsilon\\}"
+        },
+        {
+          "label": "特征值、收敛速度与二状态解析式",
+          "tex": "P^n(0,0)=\\pi_0+(1-\\pi_0)(1-a-b)^n,\\qquad \\pi_0=\\frac b{a+b}"
+        },
+        {
+          "label": "最坏初态和实际预测的区分",
+          "tex": "\\max_i\\|P^n(i,\\cdot)-\\pi\\|_{\\rm TV}=0.6(0.5)^n,\\quad t_{\\rm mix}(0.1)=3"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对交替链P²=I，因此P^{2n}=I、P^{2n+1}=P。从状态0出发，时刻偶数仍确定在0，奇数确定在1，故没有逐期分布极限；但πP=π仍成立，展示不变性和混合性的区别。",
+          "tex": "P=\\begin{pmatrix}0&1\\\\1&0\\end{pmatrix},\\quad\\pi=(1/2,1/2),\\quad P^{2n}=I,\\ P^{2n+1}=P"
+        },
+        {
+          "explanation": "把事件A的概率差表示为Σ_{j∈A}(μ_j−ν_j)，选择所有μ_j>ν_j的坐标作为A，可达到正差之和；因总差为零，正差之和等于绝对差和的一半。进而取最坏初始行得到t_mix定义。",
+          "tex": "\\|\\mu-\\nu\\|_{\\rm TV}=\\frac12\\sum_j|\\mu_j-\\nu_j|,\\quad t_{\\rm mix}(\\varepsilon)=\\min\\{t:\\max_i\\|P^t(i,\\cdot)-\\pi\\|_{\\rm TV}\\le\\varepsilon\\}"
+        },
+        {
+          "explanation": "令u_n=P(X_n=0|X_0=0)，则u_{n+1}=u_n(1−a)+(1−u_n)b=b+(1−a−b)u_n。固定点u*=b/(a+b)，于是u_{n+1}−u*=(1−a−b)(u_n−u*)，结合u_0=1得到公式。",
+          "tex": "P^n(0,0)=\\pi_0+(1-\\pi_0)(1-a-b)^n,\\qquad \\pi_0=\\frac b{a+b}"
+        },
+        {
+          "explanation": "从两种初始状态的二状态概率递推分别得到与π_0的偏差(1−π_0)ρ^n与−π_0ρ^n。取绝对值的较大者为max(0.4,0.6)×0.5^n。代入n=2得到0.15，n=3得到0.075，故最小整数为3。",
+          "tex": "\\max_i\\|P^n(i,\\cdot)-\\pi\\|_{\\rm TV}=0.6(0.5)^n,\\quad t_{\\rm mix}(0.1)=3"
+        }
+      ],
+      "example": "二状态链P=[[0.8,0.2],[0.3,0.7]]不变分布(0.6,0.4)，非平凡特征值0.5。最坏初始状态的全变差距离为0.6×0.5^n，精度0.1的混合时间为3步；周期二链虽然π=(0.5,0.5)却始终不收敛。",
+      "application": "用于评估市场风险状态模型的记忆长度、信用迁移周期与ETF轮动状态的估计窗口选择；与实际收益均值回归时间不可直接等同。",
+      "caveat": "不可约+非周期是有限齐次链逐期混合的关键条件；估计误差、未观测状态和非齐次冲击会改变实际混合行为。",
+      "deep_sections": [
+        {
+          "title": "不可约、周期与平稳收敛",
+          "question": "为什么“存在不变分布”还不足以保证链从任何起点都收敛？",
+          "paragraphs": [
+            "不可约意味着任意状态经过有限步都有机会到达另一个状态；状态i的周期是所有正概率返回时刻的最大公约数。有限不可约链的所有状态具有同一周期。",
+            "若周期为1，则链非周期；配合不可约性可保证P^n(i,j)→π_j。若两个状态严格轮流切换，即使π=(1/2,1/2)不变，链从确定初始状态仍永远交替而不会逐期收敛。"
+          ],
+          "formulas": [
+            {
+              "label": "不可约、周期与平稳收敛",
+              "tex": "P=\\begin{pmatrix}0&1\\\\1&0\\end{pmatrix},\\quad\\pi=(1/2,1/2),\\quad P^{2n}=I,\\ P^{2n+1}=P"
+            }
+          ],
+          "proof": "对交替链P²=I，因此P^{2n}=I、P^{2n+1}=P。从状态0出发，时刻偶数仍确定在0，奇数确定在1，故没有逐期分布极限；但πP=π仍成立，展示不变性和混合性的区别。",
+          "worked": "从状态0出发的链在n=2时仍以概率1处于0，n=3时以概率1处于1；相对于π=(0.5,0.5)的全变差距离始终0.5。",
+          "limitation": "历史收益状态呈现日历周期、交割周期或策略仓位循环时，不能仅由计算出π就宣称状态分布已经混合。"
+        },
+        {
+          "title": "全变差距离与混合时间定义",
+          "question": "怎样给‘链已经忘记初始状态’一个可计算的误差标准？",
+          "paragraphs": [
+            "对于有限状态分布μ、ν，全变差距离为Σ_j|μ_j−ν_j|/2，等价于对所有事件A的概率差绝对值的最大值。",
+            "混合时间要求从任何初始状态出发都接近不变分布，而不是只在训练集最常见的状态上接近。该最坏情形定义可避免对稀有高风险状态过于乐观。"
+          ],
+          "formulas": [
+            {
+              "label": "全变差距离与混合时间定义",
+              "tex": "\\|\\mu-\\nu\\|_{\\rm TV}=\\frac12\\sum_j|\\mu_j-\\nu_j|,\\quad t_{\\rm mix}(\\varepsilon)=\\min\\{t:\\max_i\\|P^t(i,\\cdot)-\\pi\\|_{\\rm TV}\\le\\varepsilon\\}"
+            }
+          ],
+          "proof": "把事件A的概率差表示为Σ_{j∈A}(μ_j−ν_j)，选择所有μ_j>ν_j的坐标作为A，可达到正差之和；因总差为零，正差之和等于绝对差和的一半。进而取最坏初始行得到t_mix定义。",
+          "worked": "二状态P=[[0.8,0.2],[0.3,0.7]]的不变π=(0.6,0.4)。从状态0出发一次后分布(0.8,0.2)，TV距为|0.8−0.6|=0.2；再一步为(0.7,0.3)，TV距0.1。",
+          "limitation": "如果仅检查历史大盘处于常态状态的混合速度，而未覆盖极端流动性状态，不能声称整体市场风险状态已恢复稳态。"
+        },
+        {
+          "title": "特征值、收敛速度与二状态解析式",
+          "question": "非平凡特征值为什么决定一个二状态马尔可夫链的记忆衰减？",
+          "paragraphs": [
+            "二状态P=[[1−a,a],[b,1−b]]除特征值1以外，另有特征值ρ=1−a−b。只要0<a+b<2，且链不可约非周期，就有|ρ|<1，初始概率偏差按ρ^n缩小。",
+            "当ρ接近1时收敛慢，当ρ为负时偏差交替符号；可逆链的谱分析推广了这一现象，但高维非可逆链的单一特征值近似需谨慎。"
+          ],
+          "formulas": [
+            {
+              "label": "特征值、收敛速度与二状态解析式",
+              "tex": "P^n(0,0)=\\pi_0+(1-\\pi_0)(1-a-b)^n,\\qquad \\pi_0=\\frac b{a+b}"
+            }
+          ],
+          "proof": "令u_n=P(X_n=0|X_0=0)，则u_{n+1}=u_n(1−a)+(1−u_n)b=b+(1−a−b)u_n。固定点u*=b/(a+b)，于是u_{n+1}−u*=(1−a−b)(u_n−u*)，结合u_0=1得到公式。",
+          "worked": "取a=0.2、b=0.3，则ρ=0.5、π_0=0.6，从状态0的u_n=0.6+0.4(0.5)^n；n=1为0.8，n=2为0.7，n=3为0.65。",
+          "limitation": "金融转移矩阵由有限数据估计时，接近1的特征值高度不稳定；不能把样本特征值直接当成跨制度长期混合速度。"
+        },
+        {
+          "title": "最坏初态和实际预测的区分",
+          "question": "如何从二状态公式精确求给定误差阈值的混合时间？",
+          "paragraphs": [
+            "同一二状态链从状态0出发，TV偏差为0.4(0.5)^n；从状态1出发，偏差为0.6(0.5)^n。混合时间须控制较大的0.6系数。",
+            "若目标ε=0.1，则最坏偏差要求0.6(0.5)^n≤0.1；n=2时0.15仍超阈值，n=3时0.075已满足，因此t_mix(0.1)=3。"
+          ],
+          "formulas": [
+            {
+              "label": "最坏初态和实际预测的区分",
+              "tex": "\\max_i\\|P^n(i,\\cdot)-\\pi\\|_{\\rm TV}=0.6(0.5)^n,\\quad t_{\\rm mix}(0.1)=3"
+            }
+          ],
+          "proof": "从两种初始状态的二状态概率递推分别得到与π_0的偏差(1−π_0)ρ^n与−π_0ρ^n。取绝对值的较大者为max(0.4,0.6)×0.5^n。代入n=2得到0.15，n=3得到0.075，故最小整数为3。",
+          "worked": "在该链中从状态0起始时n=2已达到0.1，但从状态1起始仍有0.15，需n=3才达到全体初始状态的0.1标准。",
+          "limitation": "混合时间是固定P的理论性质，不保证市场状态转移在3个交易日后真实重归稳态；需检验采样间隔和时间齐次性。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "stochastic-n0278",
+          "label": "先修：转移矩阵"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0280",
+          "label": "先修：不变分布"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0279",
+          "label": "多步转移"
+        },
+        {
+          "kind": "math",
+          "id": "timeseries-n0270",
+          "label": "马尔可夫状态切换"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 6.262 Discrete Stochastic Processes：第3章有限状态Markov链和第5章可数状态链",
+          "url": "https://ocw.mit.edu/courses/6-262-discrete-stochastic-processes-spring-2011/pages/course-notes/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：第21–24讲Markov Chains I–III和连续时间链",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V12完整精讲：四节定理推导与独立数值算例"
+    },
+    {
+      "id": "stochastic-n0282",
+      "node_id": "stochastic-n0282",
+      "title": "吸收概率",
+      "definition": "吸收马尔可夫链具有进入后不能再离开的状态。将有限状态按暂态与吸收态重新排序后，转移矩阵具有分块形式P=[[Q,R],[0,I]]。如果所有暂态最终以概率1被吸收，基本矩阵N=(I−Q)^{-1}给出吸收前每个暂态的期望访问次数，B=NR给出最终落入各吸收态的概率。",
+      "assumptions": "有限齐次马尔可夫链，至少一个吸收态；所有Q对应的暂态应在概率1意义下最终离开（等价于Q^n→0，谱半径ρ(Q)<1），才可合法使用N=Σ_{n≥0}Q^n=(I−Q)^{-1}。若有永不吸收的闭类，基本矩阵可能不存在。",
+      "properties": [
+        "若Q^n→0，则N=(I−Q)^{-1}=ΣQ^n是各暂态的期望访问次数矩阵。",
+        "吸收概率B=NR，其每行和为1，前提是从所有暂态最终必然吸收。",
+        "期望吸收步数向量为t=N1，反映吸收前持有时间风险。",
+        "金融破产或触发强平只是模型定义的吸收状态，真实市场的回补、暂停和跳空可能改变模型边界。"
+      ],
+      "formulas": [
+        {
+          "label": "标准分块矩阵与吸收条件",
+          "tex": "P=\\begin{pmatrix}Q&R\\\\0&I\\end{pmatrix},\\quad Q^n\\to0\\quad\\Longrightarrow\\quad (I-Q)^{-1}=\\sum_{n=0}^\\infty Q^n"
+        },
+        {
+          "label": "基本矩阵与期望访问次数",
+          "tex": "N_{ij}=\\sum_{n=0}^{\\infty}(Q^n)_{ij},\\qquad t=N\\mathbf1"
+        },
+        {
+          "label": "吸收概率的矩阵公式",
+          "tex": "B=\\sum_{n=0}^{\\infty}Q^nR=(I-Q)^{-1}R"
+        },
+        {
+          "label": "从首次步分析到矩阵解",
+          "tex": "h=Qh+r,\\qquad h=(I-Q)^{-1}r"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按矩阵分块，暂态中经历n步仍处暂态的概率由Q^n给出。若Q的谱半径小于1，Neumann级数ΣQ^n收敛且(I−Q)Σ_{k=0}^nQ^k=I−Q^{n+1}→I，故逆矩阵存在并等于级数。",
+          "tex": "P=\\begin{pmatrix}Q&R\\\\0&I\\end{pmatrix},\\quad Q^n\\to0\\quad\\Longrightarrow\\quad (I-Q)^{-1}=\\sum_{n=0}^\\infty Q^n"
+        },
+        {
+          "explanation": "将访问计数V_j=Σ_{n≥0}1{X_n=j,尚未吸收}取期望，非负和可由Tonelli交换，得到E_i V_j=Σ_{n≥0}(Q^n)_ij。全部暂态访问的总次数恰为吸收前的转移步数，其均值为N1。",
+          "tex": "N_{ij}=\\sum_{n=0}^{\\infty}(Q^n)_{ij},\\qquad t=N\\mathbf1"
+        },
+        {
+          "explanation": "以首次进入吸收态的时刻按n分类，这些事件互斥，进入对应吸收态的概率为Q^nR。利用非负级数求和与基本矩阵定义，得到B=NR；最终吸收概率为1意味着各行相加为1。",
+          "tex": "B=\\sum_{n=0}^{\\infty}Q^nR=(I-Q)^{-1}R"
+        },
+        {
+          "explanation": "首步进入目标的概率为r_i；若首步仍在暂态j，则以后从j吸收至目标的概率为h_j，故h_i=r_i+Σ_jQ_ij h_j。整理得到(I−Q)h=r，由基本矩阵存在性得到唯一解。",
+          "tex": "h=Qh+r,\\qquad h=(I-Q)^{-1}r"
+        }
+      ],
+      "example": "Q=[[0.5,0.25],[0,0.5]]、R=[[0.25,0],[0.25,0.25]]的基本矩阵N=[[2,1],[0,2]]，平均吸收步数为(3,2)，好/坏吸收概率B=[[0.75,0.25],[0.5,0.5]]。",
+      "application": "用于金融风险边界、订单成交/撤销/超时状态、评级违约和策略资金破产事件的离散吸收模型；必须建立实际可观测状态和停止规则。",
+      "caveat": "公式要求暂态最终概率1吸收，状态必须完整、转移齐次、可执行条件明确；均值吸收时间不约束最极端回撤。",
+      "deep_sections": [
+        {
+          "title": "标准分块矩阵与吸收条件",
+          "question": "为什么要将暂态与吸收态分开处理？",
+          "paragraphs": [
+            "把链状态按先暂态后吸收态排列，Q表示暂态到暂态，R表示暂态到吸收，吸收态的行保持自身概率1，因此底部为(0,I)。",
+            "只有暂态以概率1最终离开时，Q的高次幂才趋零，这也是基本矩阵几何级数收敛的关键。若存在不吸收的闭类，就不能直接把(I−Q)^{-1}视为有限期望访问矩阵。"
+          ],
+          "formulas": [
+            {
+              "label": "标准分块矩阵与吸收条件",
+              "tex": "P=\\begin{pmatrix}Q&R\\\\0&I\\end{pmatrix},\\quad Q^n\\to0\\quad\\Longrightarrow\\quad (I-Q)^{-1}=\\sum_{n=0}^\\infty Q^n"
+            }
+          ],
+          "proof": "按矩阵分块，暂态中经历n步仍处暂态的概率由Q^n给出。若Q的谱半径小于1，Neumann级数ΣQ^n收敛且(I−Q)Σ_{k=0}^nQ^k=I−Q^{n+1}→I，故逆矩阵存在并等于级数。",
+          "worked": "设暂态0,1与吸收态好、坏，取Q=[[0.5,0.25],[0,0.5]]和R=[[0.25,0],[0.25,0.25]]，每行的Q与R概率相加均为1。",
+          "limitation": "若在真实止损规则中还有再次开户或恢复交易的可能，则该边界不是吸收态，不能直接使用本分块公式。"
+        },
+        {
+          "title": "基本矩阵与期望访问次数",
+          "question": "N=(I−Q)^{-1}的每个元素如何解释？",
+          "paragraphs": [
+            "从暂态i开始，在吸收前第n期仍处于暂态j的概率为(Q^n)_ij。将n从0一直求和，得到进入吸收态之前对状态j的期望访问次数。",
+            "将每个j的访问次数相加，便得到期望吸收步数。基本矩阵可以量化资金在危险中间状态停留多久，但需要明确每步实际时间长度。"
+          ],
+          "formulas": [
+            {
+              "label": "基本矩阵与期望访问次数",
+              "tex": "N_{ij}=\\sum_{n=0}^{\\infty}(Q^n)_{ij},\\qquad t=N\\mathbf1"
+            }
+          ],
+          "proof": "将访问计数V_j=Σ_{n≥0}1{X_n=j,尚未吸收}取期望，非负和可由Tonelli交换，得到E_i V_j=Σ_{n≥0}(Q^n)_ij。全部暂态访问的总次数恰为吸收前的转移步数，其均值为N1。",
+          "worked": "Q=[[0.5,0.25],[0,0.5]]时I−Q=[[0.5,−0.25],[0,0.5]]，逆矩阵N=[[2,1],[0,2]]，从状态0吸收前期望步数3，从状态1为2。",
+          "limitation": "期望访问次数不等于最大持有期；尾部路径可远长于期望，杠杆资金仍有穿仓与流动性风险。"
+        },
+        {
+          "title": "吸收概率的矩阵公式",
+          "question": "最终进入‘正常退出’还是‘强平失败’等状态的概率如何算？",
+          "paragraphs": [
+            "从暂态状态出发，先经过n次暂态转移后，再通过一次R进入某个吸收态，概率矩阵为Q^nR。对所有可能n求和，得到B=(ΣQ^n)R=NR。",
+            "这个公式假设每条路径最终进入某个吸收态，从而B每行和为1；如果有未建模的永久停滞状态，就应把它纳入状态空间而非人为归一化结果。"
+          ],
+          "formulas": [
+            {
+              "label": "吸收概率的矩阵公式",
+              "tex": "B=\\sum_{n=0}^{\\infty}Q^nR=(I-Q)^{-1}R"
+            }
+          ],
+          "proof": "以首次进入吸收态的时刻按n分类，这些事件互斥，进入对应吸收态的概率为Q^nR。利用非负级数求和与基本矩阵定义，得到B=NR；最终吸收概率为1意味着各行相加为1。",
+          "worked": "N=[[2,1],[0,2]]、R=[[0.25,0],[0.25,0.25]]给B=[[0.75,0.25],[0.5,0.5]]，从状态0最终好退出概率0.75、坏退出0.25。",
+          "limitation": "将‘坏退出’直接定义为真实ETF爆仓概率需要匹配保证金、逐笔成交、滑点和隔夜跳空规则，而非只凭抽象Markov状态划分。"
+        },
+        {
+          "title": "从首次步分析到矩阵解",
+          "question": "为什么吸收概率也可直接通过线性方程求出？",
+          "paragraphs": [
+            "对固定吸收目标，好结局概率h_i满足从状态i出发下一步的条件全概率方程h=Qh+r，其中r是一步直接进入目标吸收态的概率列。",
+            "这与B=(I−Q)^{-1}R是同一线性系统的矩阵写法；若矩阵不可逆或边界未正确设置，则数值解可能不唯一或不对应真实吸收事件。"
+          ],
+          "formulas": [
+            {
+              "label": "从首次步分析到矩阵解",
+              "tex": "h=Qh+r,\\qquad h=(I-Q)^{-1}r"
+            }
+          ],
+          "proof": "首步进入目标的概率为r_i；若首步仍在暂态j，则以后从j吸收至目标的概率为h_j，故h_i=r_i+Σ_jQ_ij h_j。整理得到(I−Q)h=r，由基本矩阵存在性得到唯一解。",
+          "worked": "上例r=(0.25,0.25)，方程为h_0=0.5h_0+0.25h_1+0.25、h_1=0.5h_1+0.25，解h_1=0.5、h_0=0.75。",
+          "limitation": "条件概率方程的解依赖状态无后效性与固定转移矩阵。波动聚集、执行冲击或风险限额变动会让这种静态吸收概率不可靠。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "stochastic-n0278",
+          "label": "转移矩阵"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0279",
+          "label": "Chapman–Kolmogorov"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0293",
+          "label": "可选停止理论"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0288",
+          "label": "订单排队应用"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 6.262 Discrete Stochastic Processes：第3章有限状态Markov链和第5章可数状态链",
+          "url": "https://ocw.mit.edu/courses/6-262-discrete-stochastic-processes-spring-2011/pages/course-notes/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：第21–24讲Markov Chains I–III和连续时间链",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V12完整精讲：四节定理推导与独立数值算例"
+    },
+    {
+      "id": "stochastic-n0283",
+      "node_id": "stochastic-n0283",
+      "title": "连续时间马尔可夫链CTMC",
+      "definition": "连续时间马尔可夫链（CTMC）把离散马尔可夫性质扩展为任意实时间t≥0的状态演化。有限状态、时间齐次的CTMC可由生成矩阵Q完全刻画：状态i的停留时间为指数分布，之后按离开率比例转移到下一个状态，转移半群满足P(t+s)=P(t)P(s)、P(t)=e^{tQ}。它适于信用迁移、订单到达状态与事件驱动的风险切换。",
+      "assumptions": "状态空间有限，过程右连续且为非爆炸、齐次CTMC；P_ij(t)=P(X(t)=j|X(0)=i)，P(0)=I。生成矩阵满足q_ij≥0（i≠j）、q_ii=−Σ_{j≠i}q_ij。有限状态下Q有界，矩阵指数定义清楚；在无限状态CTMC中爆炸与生成算子的定义需另外分析。",
+      "properties": [
+        "等待离开状态i的时间是Exp(q_i)，其中q_i=−q_ii>0，q_i=0表示吸收。",
+        "下一跳方向由q_ij/q_i确定，保持时间与下一跳方向在标准CTMC构造下独立。",
+        "转移矩阵半群满足P(t+s)=P(t)P(s)，有限状态时P(t)=exp(tQ)。",
+        "离散嵌入链可能周期性为2，但连续时间链仍能收敛到稳态，不能简单套用离散周期判别。"
+      ],
+      "formulas": [
+        {
+          "label": "连续时间Markov条件与转移半群",
+          "tex": "P(t+s)=P(t)P(s),\\qquad P(0)=I"
+        },
+        {
+          "label": "保持时间与下一跳方向",
+          "tex": "\\Pr(T_i>t)=e^{-q_it},\\qquad \\Pr(J=j\\mid i)=\\frac{q_{ij}}{q_i}\\quad(q_i>0)"
+        },
+        {
+          "label": "矩阵指数与二状态解析解",
+          "tex": "P_{00}(t)=\\frac b{a+b}+\\frac a{a+b}e^{-(a+b)t}"
+        },
+        {
+          "label": "离散嵌入链、连续时间稳定性与边界",
+          "tex": "\\lim_{t\\to\\infty}P(t)=\\begin{pmatrix}\\pi_0&\\pi_1\\\\\\pi_0&\\pi_1\\end{pmatrix},\\qquad \\pi Q=0"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对中间时刻t的状态k作条件全概率，P(X(t+s)=j|X(0)=i)=Σ_kP(X(t)=k|X(0)=i)P(X(t+s)=j|X(t)=k)。齐次性使后因子为P_kj(s)，得到半群乘法。",
+          "tex": "P(t+s)=P(t)P(s),\\qquad P(0)=I"
+        },
+        {
+          "explanation": "短时间离开概率为q_i h+o(h)，指数保持时间由连续无记忆性推出。对类别j的瞬时离开率为q_ij，占总离开率q_i的比例是q_ij/q_i；标准连续时间链构造使下一跳类别与保持时间独立。",
+          "tex": "\\Pr(T_i>t)=e^{-q_it},\\qquad \\Pr(J=j\\mid i)=\\frac{q_{ij}}{q_i}\\quad(q_i>0)"
+        },
+        {
+          "explanation": "从状态0出发，u(t)=P_00(t)满足u'=−a u+b(1−u)=b−(a+b)u，初值u(0)=1。解一阶线性微分方程得到u(t)=b/(a+b)+a/(a+b)e^{−(a+b)t}。",
+          "tex": "P_{00}(t)=\\frac b{a+b}+\\frac a{a+b}e^{-(a+b)t}"
+        },
+        {
+          "explanation": "二状态CTMC的P_00(t)由指数项趋零收敛到π_0，其他三项由归一化及状态对称推导出相应极限。此处Q的非零特征值为−(a+b)<0，保证指数衰减。",
+          "tex": "\\lim_{t\\to\\infty}P(t)=\\begin{pmatrix}\\pi_0&\\pi_1\\\\\\pi_0&\\pi_1\\end{pmatrix},\\qquad \\pi Q=0"
+        }
+      ],
+      "example": "速率矩阵Q=[[-2,2],[3,−3]]中状态0平均保持0.5时间单位、状态1平均保持1/3时间单位。不变分布为(0.6,0.4)，在t=(ln2)/5时P_00(t)=0.8。",
+      "application": "用于金融信用状态迁移、订单流风险事件与微观结构状态持续时间建模；需要验证保持时间、生成率估计和交易状态的可观测性。",
+      "caveat": "离散跳转链与连续时间链的周期性结论不同；无限状态可能爆炸，时间变化强度和非指数停留要求更一般模型。",
+      "deep_sections": [
+        {
+          "title": "连续时间Markov条件与转移半群",
+          "question": "为何CTMC不仅是把离散转移矩阵的指数改成连续时间？",
+          "paragraphs": [
+            "CTMC必须对所有s,t≥0满足给定当前状态后未来与过去条件独立，齐次性使转移仅依赖时间间隔。连续时间半群把任意间隔拆成两段并对中间状态求和。",
+            "有限状态下，右连续路径与生成矩阵Q决定转移半群。金融事件的时间戳可能不规则，但不规则采样本身不代表交易状态在连续时间内真是Markov的。"
+          ],
+          "formulas": [
+            {
+              "label": "连续时间Markov条件与转移半群",
+              "tex": "P(t+s)=P(t)P(s),\\qquad P(0)=I"
+            }
+          ],
+          "proof": "对中间时刻t的状态k作条件全概率，P(X(t+s)=j|X(0)=i)=Σ_kP(X(t)=k|X(0)=i)P(X(t+s)=j|X(t)=k)。齐次性使后因子为P_kj(s)，得到半群乘法。",
+          "worked": "对任何两状态CTMC，如果P(0.1)已知，则连续时间齐次性要求P(0.2)=P(0.1)²；不满足这一关系的估计矩阵不能共享同一固定Q。",
+          "limitation": "半群关系需要同一状态空间和齐次假设；在交易时段切换或政策节点附近，可能更适合使用时间变化的Q(t)。"
+        },
+        {
+          "title": "保持时间与下一跳方向",
+          "question": "从状态i离开需要多长时间，跳往哪一个新状态？",
+          "paragraphs": [
+            "令q_i=Σ_{j≠i}q_ij，当q_i>0时，状态i的保持时间服从Exp(q_i)，并以q_ij/q_i跳转至j。跳转后的过程重新按目标状态的速率演化。",
+            "这种构造将事件发生时钟与条件跳转类别分开，适合订单到达与撤单的竞争风险，但只有在给定当前状态已充分描述未来时才能使用。"
+          ],
+          "formulas": [
+            {
+              "label": "保持时间与下一跳方向",
+              "tex": "\\Pr(T_i>t)=e^{-q_it},\\qquad \\Pr(J=j\\mid i)=\\frac{q_{ij}}{q_i}\\quad(q_i>0)"
+            }
+          ],
+          "proof": "短时间离开概率为q_i h+o(h)，指数保持时间由连续无记忆性推出。对类别j的瞬时离开率为q_ij，占总离开率q_i的比例是q_ij/q_i；标准连续时间链构造使下一跳类别与保持时间独立。",
+          "worked": "若状态0转到状态1的速率为2、转到吸收状态2的速率为3，则总离开率5，每次停留均值0.2时间单位，下一次到1的概率2/5=0.4。",
+          "limitation": "如果真实价格变动具有长期持续时间效应，指数保持时间会失效，需要半Markov过程或显式计入持有时间的状态变量。"
+        },
+        {
+          "title": "矩阵指数与二状态解析解",
+          "question": "两个状态的连续时间转移概率可以直接算到何种程度？",
+          "paragraphs": [
+            "令Q=[[-a,a],[b,−b]]且a,b>0。解转移方程或利用特征值0和−(a+b)可以得到不变分布π=(b/(a+b),a/(a+b))，以及从状态0出发时P_00(t)=π_0+(1−π_0)e^{−(a+b)t}。",
+            "这说明连续时间状态过程通常按指数速率忘记初始状态，但实际金融风险状态转换可能具有时间变化速率和隐状态，不能仅凭拟合曲线断言已满足模型假设。"
+          ],
+          "formulas": [
+            {
+              "label": "矩阵指数与二状态解析解",
+              "tex": "P_{00}(t)=\\frac b{a+b}+\\frac a{a+b}e^{-(a+b)t}"
+            }
+          ],
+          "proof": "从状态0出发，u(t)=P_00(t)满足u'=−a u+b(1−u)=b−(a+b)u，初值u(0)=1。解一阶线性微分方程得到u(t)=b/(a+b)+a/(a+b)e^{−(a+b)t}。",
+          "worked": "当a=2、b=3时π=(0.6,0.4)，P_00(t)=0.6+0.4e^{−5t}。取t=(ln2)/5，指数项0.5，得到P_00=0.8、P_01=0.2。",
+          "limitation": "当状态强度在交易日内剧烈变化时不能直接采用固定Q矩阵指数；若含有无穷状态还需处理爆炸和算子域。"
+        },
+        {
+          "title": "离散嵌入链、连续时间稳定性与边界",
+          "question": "嵌入链周期性是否阻止CTMC收敛？",
+          "paragraphs": [
+            "两状态CTMC每次实际跳转都从0到1或1到0，因此只看跳转索引的离散嵌入链具有周期2。然而连续时间的停留次数随机，固定时间t内可发生不同数量的跳转。",
+            "对于a,b>0的两状态CTMC，P(t)→π行向量，无论嵌入链周期如何都能按指数趋于稳态。连续时间模型应依据生成矩阵的不可约性与稳态理论，而非逐字套用离散时间周期性条件。"
+          ],
+          "formulas": [
+            {
+              "label": "离散嵌入链、连续时间稳定性与边界",
+              "tex": "\\lim_{t\\to\\infty}P(t)=\\begin{pmatrix}\\pi_0&\\pi_1\\\\\\pi_0&\\pi_1\\end{pmatrix},\\qquad \\pi Q=0"
+            }
+          ],
+          "proof": "二状态CTMC的P_00(t)由指数项趋零收敛到π_0，其他三项由归一化及状态对称推导出相应极限。此处Q的非零特征值为−(a+b)<0，保证指数衰减。",
+          "worked": "a=2,b=3时连续时间极限π=(0.6,0.4)；虽然实际每次跳转都在两个状态间交替，但在连续时间t下P_00(t)逐渐从1趋向0.6。",
+          "limitation": "CTMC长期收敛不等于交易风险过程在实盘每个阶段稳定；数据生成分布变化会使固定速率假设失效。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "stochastic-n0277",
+          "label": "先修：Markov性质"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0284",
+          "label": "生成矩阵Q"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0285",
+          "label": "Kolmogorov前向方程"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0286",
+          "label": "Kolmogorov后向方程"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 6.262 Discrete Stochastic Processes：第6章可数状态连续时间Markov过程",
+          "url": "https://ocw.mit.edu/courses/6-262-discrete-stochastic-processes-spring-2011/pages/course-notes/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：第24讲连续时间Markov链",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V12完整精讲：连续时间状态过程、四节证明、可复核例子与风险边界"
+    },
+    {
+      "id": "stochastic-n0284",
+      "node_id": "stochastic-n0284",
+      "title": "生成矩阵Q",
+      "definition": "生成矩阵Q描述有限状态齐次CTMC在单位极短时间内的离开和到达速率。非对角元素q_ij≥0为从i到j的瞬时跳转率，每行和为0使对角元素q_ii为负离开率。Q不是概率转移矩阵：速率可以大于1，真正的时间t转移矩阵需通过e^{tQ}求得。",
+      "assumptions": "状态集合有限且时间齐次，转移半群P(t)在t=0右可微，Q=lim_{h↓0}(P(h)−I)/h。若研究无限状态生成算子则需额外的稳定性与非爆炸条件。速率单位是时间的倒数，不是一步事件概率。",
+      "properties": [
+        "Q_ij≥0（i≠j），Σ_jQ_ij=0；−Q_ii为状态i的总跳出率。",
+        "P(h)=I+hQ+o(h)仅是小h的渐近式，I+hQ不必在任意h下仍是合法随机矩阵。",
+        "有限状态齐次CTMC满足P(t)=exp(tQ)，而e^{tQ}每行是合法概率分布。",
+        "平稳分布π满足πQ=0、π1=1；该线性方程与离散链πP=π类似但不相同。"
+      ],
+      "formulas": [
+        {
+          "label": "从短时转移概率定义Q",
+          "tex": "q_{ij}=\\lim_{h\\downarrow0}\\frac{P_{ij}(h)-\\mathbf1_{\\{i=j\\}}}{h},\\qquad \\sum_jq_{ij}=0"
+        },
+        {
+          "label": "离开率、竞争事件与跳转核",
+          "tex": "r_i=-q_{ii}=\\sum_{j\\ne i}q_{ij},\\quad \\Pr(J=j\\mid i)=q_{ij}/r_i\\quad(r_i>0)"
+        },
+        {
+          "label": "矩阵指数与概率合法性",
+          "tex": "P(t)=e^{tQ}=\\sum_{n=0}^\\infty\\frac{t^nQ^n}{n!},\\quad P(t)\\mathbf1=\\mathbf1"
+        },
+        {
+          "label": "平稳概率与速率平衡",
+          "tex": "\\pi Q=0,\\qquad\\sum_i\\pi_i=1,\\qquad\\pi e^{tQ}=\\pi"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "各P(h)行为概率向量，Σ_jP_ij(h)=1。两边减去δ_ij的行和再除以h，得到Σ_jQ_ij=0。i≠j时P_ij(h)≥0，故极限q_ij≥0；对角自动为q_ii=−Σ_{j≠i}q_ij。",
+          "tex": "q_{ij}=\\lim_{h\\downarrow0}\\frac{P_{ij}(h)-\\mathbf1_{\\{i=j\\}}}{h},\\qquad \\sum_jq_{ij}=0"
+        },
+        {
+          "explanation": "在短时间h内向不同j离开的互斥事件具有概率q_ij h+o(h)，总离开概率r_i h+o(h)。条件于离开事件，其目标概率在h趋0时趋于q_ij/r_i。指数保持时间由恒定离开率和Markov无记忆性质得到。",
+          "tex": "r_i=-q_{ii}=\\sum_{j\\ne i}q_{ij},\\quad \\Pr(J=j\\mid i)=q_{ij}/r_i\\quad(r_i>0)"
+        },
+        {
+          "explanation": "由于Q1=0，对指数幂级数求和得到e^{tQ}1=1。为了严格保证元素非负，取Λ≥max_i(−q_ii)>0，R=I+Q/Λ是行随机矩阵，并用e^{tQ}=e^{−Λt}Σ_{n≥0}(Λt)^nR^n/n!，它是非负矩阵的概率加权和。",
+          "tex": "P(t)=e^{tQ}=\\sum_{n=0}^\\infty\\frac{t^nQ^n}{n!},\\quad P(t)\\mathbf1=\\mathbf1"
+        },
+        {
+          "explanation": "从πP(t)=π对t在0求导得到必要条件πQ=0；反向计算d[πe^{tQ}]/dt=πQe^{tQ}=0，故其值恒为t=0时的π。有限状态矩阵指数保证导数计算合法。",
+          "tex": "\\pi Q=0,\\qquad\\sum_i\\pi_i=1,\\qquad\\pi e^{tQ}=\\pi"
+        }
+      ],
+      "example": "对Q=[[-2,2],[3,−3]]，非对角速率为2与3、每行和0。选Λ=5得离散行随机矩阵R=[[0.6,0.4],[0.6,0.4]]；πQ=0得到稳态π=(0.6,0.4)。",
+      "application": "用于连续时间信用风险、订单簿离开率、流动性状态切换及风险中性生成率建模，务必明确速率的时间单位与概率测度。",
+      "caveat": "Q不是概率转移矩阵，不能直接取Q_ij作为一个时间单位内的概率；无限状态爆炸和时间变化的风险强度需另作分析。",
+      "deep_sections": [
+        {
+          "title": "从短时转移概率定义Q",
+          "question": "矩阵Q的非对角速率为何可以大于1却不违反概率公理？",
+          "paragraphs": [
+            "Q_ij是P_ij(h)/h在h趋0时的极限，因此具有每单位时间的速率量纲，而不是一个长度为1的时间窗口内的概率。对足够短的h，实际跳转概率才约为q_ij h。",
+            "与概率矩阵的行和1不同，Q行和0，且对角项严格表示状态离开率。直接把Q当成一天后的转移矩阵会产生负概率或大于1的元素。"
+          ],
+          "formulas": [
+            {
+              "label": "从短时转移概率定义Q",
+              "tex": "q_{ij}=\\lim_{h\\downarrow0}\\frac{P_{ij}(h)-\\mathbf1_{\\{i=j\\}}}{h},\\qquad \\sum_jq_{ij}=0"
+            }
+          ],
+          "proof": "各P(h)行为概率向量，Σ_jP_ij(h)=1。两边减去δ_ij的行和再除以h，得到Σ_jQ_ij=0。i≠j时P_ij(h)≥0，故极限q_ij≥0；对角自动为q_ii=−Σ_{j≠i}q_ij。",
+          "worked": "若q_01=2次/分钟，则h=0.01分钟内跳往1的概率约为0.02，不能把速率2误写成200%概率。",
+          "limitation": "若用h=1分钟直接取I+hQ，可能产生负对角概率；只有小步长极限或矩阵指数才能得到一致的连续时间转移。"
+        },
+        {
+          "title": "离开率、竞争事件与跳转核",
+          "question": "Q一行如何同时给出保持时间及下一跳目的地？",
+          "paragraphs": [
+            "每行非对角速率之和r_i为离开当前状态的总强度，负对角项q_ii=−r_i。保持时间为Exp(r_i)，下一跳到j的概率为q_ij/r_i。",
+            "若r_i=0表示该状态吸收，不应在分母为0时仍归一化跳转方向；实际订单可能有停牌或暂停执行，吸收假设需要明确。"
+          ],
+          "formulas": [
+            {
+              "label": "离开率、竞争事件与跳转核",
+              "tex": "r_i=-q_{ii}=\\sum_{j\\ne i}q_{ij},\\quad \\Pr(J=j\\mid i)=q_{ij}/r_i\\quad(r_i>0)"
+            }
+          ],
+          "proof": "在短时间h内向不同j离开的互斥事件具有概率q_ij h+o(h)，总离开概率r_i h+o(h)。条件于离开事件，其目标概率在h趋0时趋于q_ij/r_i。指数保持时间由恒定离开率和Markov无记忆性质得到。",
+          "worked": "状态0可向1速率2、向2速率3，则q_00=−5，平均保持1/5=0.2分钟，下一跳到状态1的概率2/5=0.4、到状态2概率3/5=0.6。",
+          "limitation": "订单到达类别的速率可能随价格和盘口深度而变化；固定生成矩阵不必能反映这类状态依赖强度。"
+        },
+        {
+          "title": "矩阵指数与概率合法性",
+          "question": "如何由Q得到任意正时间的转移矩阵？",
+          "paragraphs": [
+            "有限状态矩阵指数e^{tQ}=Σ_{n≥0}(tQ)^n/n!求和定义；它满足P'(t)=QP(t)=P(t)Q、P(0)=I。",
+            "虽然矩阵幂展开可能包含带负元素的中间项，整个矩阵指数却是合法的行随机矩阵。可以通过Poisson化R=I+Q/Λ证明其元素非负且每行和1。"
+          ],
+          "formulas": [
+            {
+              "label": "矩阵指数与概率合法性",
+              "tex": "P(t)=e^{tQ}=\\sum_{n=0}^\\infty\\frac{t^nQ^n}{n!},\\quad P(t)\\mathbf1=\\mathbf1"
+            }
+          ],
+          "proof": "由于Q1=0，对指数幂级数求和得到e^{tQ}1=1。为了严格保证元素非负，取Λ≥max_i(−q_ii)>0，R=I+Q/Λ是行随机矩阵，并用e^{tQ}=e^{−Λt}Σ_{n≥0}(Λt)^nR^n/n!，它是非负矩阵的概率加权和。",
+          "worked": "Q=[[-2,2],[3,−3]]时选Λ=5，R=I+Q/5=[[0.6,0.4],[0.6,0.4]]，是行随机矩阵；在t=(ln2)/5时P_00(t)=0.8。",
+          "limitation": "矩阵指数适用于有限有界生成矩阵；可数无穷状态若存在爆炸，需要明确最小半群与保守性，不能直接沿用有限矩阵证明。"
+        },
+        {
+          "title": "平稳概率与速率平衡",
+          "question": "为什么连续时间的稳态条件应写成πQ=0？",
+          "paragraphs": [
+            "若π在任何时间t后保持不变，则πP(t)=π，取t=0右导数得到πQ=0。反过来，在有限状态齐次CTMC中，若πQ=0，则πe^{tQ}=π。",
+            "此处的平衡是流入与流出速率在概率权重下的抵消，不等于每一条路径不发生状态切换。金融市场可持续高频跳转却保持总体状态占比近似稳定。"
+          ],
+          "formulas": [
+            {
+              "label": "平稳概率与速率平衡",
+              "tex": "\\pi Q=0,\\qquad\\sum_i\\pi_i=1,\\qquad\\pi e^{tQ}=\\pi"
+            }
+          ],
+          "proof": "从πP(t)=π对t在0求导得到必要条件πQ=0；反向计算d[πe^{tQ}]/dt=πQe^{tQ}=0，故其值恒为t=0时的π。有限状态矩阵指数保证导数计算合法。",
+          "worked": "Q=[[-2,2],[3,−3]]时平衡方程−2π_0+3π_1=0与归一化给π=(3/5,2/5)=(0.6,0.4)，检验πQ=(0,0)。",
+          "limitation": "稳定分布不是执行成交概率或资金无风险证明；如果生成率随新闻与市场冲击变化，常数π未必对应未来长期占比。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "stochastic-n0283",
+          "label": "连续时间Markov链"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0285",
+          "label": "前向演化"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0286",
+          "label": "后向演化"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0287",
+          "label": "泊松化与统一化"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 6.262 Discrete Stochastic Processes：第6章可数状态连续时间Markov过程",
+          "url": "https://ocw.mit.edu/courses/6-262-discrete-stochastic-processes-spring-2011/pages/course-notes/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：第24讲连续时间Markov链",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V12完整精讲：连续时间状态过程、四节证明、可复核例子与风险边界"
+    },
+    {
+      "id": "stochastic-n0285",
+      "node_id": "stochastic-n0285",
+      "title": "Kolmogorov前向方程",
+      "definition": "Kolmogorov前向方程描述连续时间马尔可夫链的概率分布如何随时间演化。采用行向量约定，若μ(t)为当前时刻状态分布，生成矩阵Q固定，则μ'(t)=μ(t)Q；转移矩阵满足P'(t)=P(t)Q。它把进入各状态的概率流量与离开流量相减，适合信用迁移、订单队列状态及风险情景分布的时间预测。",
+      "assumptions": "有限状态、时间齐次CTMC，Q为保守生成矩阵，μ(0)是和为1的行概率向量。前向方程要求按行约定使用μQ；若改用列向量，则是Q^T μ列，不应不声明约定而交换矩阵次序。非齐次Q(t)的方程仍需明确其时间次序。",
+      "properties": [
+        "前向方程μ'(t)=μ(t)Q追踪状态占比的流入与流出。",
+        "给定初始状态分布μ_0时唯一解为μ(t)=μ_0e^{tQ}，自动保持概率和为1。",
+        "两状态速率a,b下，状态0概率满足u'=−au+b(1−u)。",
+        "求稳定状态时令导数为零，得到πQ=0；未达稳态的有限时间概率一般不同于π。"
+      ],
+      "formulas": [
+        {
+          "label": "短时概率流与前向方程",
+          "tex": "\\mu_j'(t)=\\sum_i\\mu_i(t)q_{ij},\\qquad \\mu'(t)=\\mu(t)Q"
+        },
+        {
+          "label": "矩阵指数解及概率总和守恒",
+          "tex": "\\mu(t)=\\mu(0)e^{tQ},\\qquad\\frac d{dt}[\\mu(t)\\mathbf1]=\\mu(t)Q\\mathbf1=0"
+        },
+        {
+          "label": "二状态概率的显式解",
+          "tex": "u'(t)=3-5u(t),\\quad u(t)=0.6+[u(0)-0.6]e^{-5t}"
+        },
+        {
+          "label": "稳态概率、非齐次强度与金融应用",
+          "tex": "\\mu'(t)=\\mu(t)Q(t),\\qquad \\mu(t)\\neq\\mu(0)e^{t\\bar Q}\\ \\text{一般情形}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "在长度h内，条件转移矩阵P(h)=I+hQ+o(h)。由分布演化μ(t+h)=μ(t)P(h)，两边减去μ(t)、除以h，令h↓0得μ'(t)=μ(t)Q。有限状态允许逐坐标交换极限。",
+          "tex": "\\mu_j'(t)=\\sum_i\\mu_i(t)q_{ij},\\qquad \\mu'(t)=\\mu(t)Q"
+        },
+        {
+          "explanation": "矩阵指数的导数是e^{tQ}Q=Qe^{tQ}，故μ'(t)=μ(0)e^{tQ}Q=μ(t)Q且初值正确。利用Q1=0证明总概率守恒；Poisson化表示证明非负性。",
+          "tex": "\\mu(t)=\\mu(0)e^{tQ},\\qquad\\frac d{dt}[\\mu(t)\\mathbf1]=\\mu(t)Q\\mathbf1=0"
+        },
+        {
+          "explanation": "令v(t)=u(t)−3/5，则v'=−5v，解v(t)=v(0)e^{-5t}。恢复u并代回原方程验证，u始终在0与1之间。对任意合法初始概率，t→∞时u→0.6。",
+          "tex": "u'(t)=3-5u(t),\\quad u(t)=0.6+[u(0)-0.6]e^{-5t}"
+        },
+        {
+          "explanation": "对非齐次Q(t)按短时条件转移仍能推出μ'(t)=μ(t)Q(t)，但不同t的矩阵通常不交换，解不能简化为某个常数平均矩阵的指数。若Q(t)在不同区间恒定，则可依时间顺序相乘相应矩阵指数。",
+          "tex": "\\mu'(t)=\\mu(t)Q(t),\\qquad \\mu(t)\\neq\\mu(0)e^{t\\bar Q}\\ \\text{一般情形}"
+        }
+      ],
+      "example": "两状态Q=[[-2,2],[3,−3]]从(1,0)出发，μ'_0(0)=−2；t=ln2/5时μ=(0.8,0.2)；长期平稳分布π=(0.6,0.4)。",
+      "application": "用于金融信用状态、市场流动性状态及订单队列概率的连续时间预测；应与实际状态估计、数据时序和可交易性限制配合。",
+      "caveat": "前向方程只在所指定的CTMC模型中成立；状态依赖、时间变化生成率及概率测度切换不能用常数Q指数自动概括。",
+      "deep_sections": [
+        {
+          "title": "短时概率流与前向方程",
+          "question": "为什么概率流入项和流出项能写成μQ？",
+          "paragraphs": [
+            "在时刻t到t+h之间，当前状态i的人群中大约有μ_i(t)q_ij h比例转向j，同时状态j原有人群以总速率−q_jj离开。",
+            "对各来源i求和并减去当前状态概率，除以h取极限，得到每个坐标的概率流平衡方程。矩阵形式紧凑，但必须保持行向量和Q的乘法方向。"
+          ],
+          "formulas": [
+            {
+              "label": "短时概率流与前向方程",
+              "tex": "\\mu_j'(t)=\\sum_i\\mu_i(t)q_{ij},\\qquad \\mu'(t)=\\mu(t)Q"
+            }
+          ],
+          "proof": "在长度h内，条件转移矩阵P(h)=I+hQ+o(h)。由分布演化μ(t+h)=μ(t)P(h)，两边减去μ(t)、除以h，令h↓0得μ'(t)=μ(t)Q。有限状态允许逐坐标交换极限。",
+          "worked": "Q=[[-2,2],[3,−3]]且初始μ(0)=(1,0)，则μ'_0(0)=−2、μ'_1(0)=2，表示最初概率从0以速率2流向1。",
+          "limitation": "微分率可以是负数但状态概率本身必须非负；把瞬时导数μ'_j当作概率会出现量纲和符号错误。"
+        },
+        {
+          "title": "矩阵指数解及概率总和守恒",
+          "question": "前向方程为什么始终保留总概率为1？",
+          "paragraphs": [
+            "常数系数线性微分方程的唯一解是μ(t)=μ(0)e^{tQ}。由于Q1=0，求导可知总概率d[μ(t)1]/dt=μ(t)Q1=0。",
+            "非负性可由CTMC半群或Poisson化验证，所以解保持在概率单纯形内。若直接用大步长显式Euler更新μ(t+h)≈μ(t)(I+hQ)，可能出现负概率。"
+          ],
+          "formulas": [
+            {
+              "label": "矩阵指数解及概率总和守恒",
+              "tex": "\\mu(t)=\\mu(0)e^{tQ},\\qquad\\frac d{dt}[\\mu(t)\\mathbf1]=\\mu(t)Q\\mathbf1=0"
+            }
+          ],
+          "proof": "矩阵指数的导数是e^{tQ}Q=Qe^{tQ}，故μ'(t)=μ(0)e^{tQ}Q=μ(t)Q且初值正确。利用Q1=0证明总概率守恒；Poisson化表示证明非负性。",
+          "worked": "当Q=[[-2,2],[3,−3]]，μ(0)=(1,0)，取t=(ln2)/5可得μ(t)=(0.8,0.2)，总概率仍为1。",
+          "limitation": "Euler大步长不是概率保持方法；选择h=1且Q00=−2时I+hQ对角为−1，显然不能作为真实转移矩阵。"
+        },
+        {
+          "title": "二状态概率的显式解",
+          "question": "为什么二状态模型的前向分布有稳定水平和指数误差两部分？",
+          "paragraphs": [
+            "记u(t)=P(X(t)=0)，则状态0向1离开导致速率2u减少，状态1向0流入导致速率3(1−u)增加，因此u'=3−5u。",
+            "该一阶线性方程的稳态固定点是u*=3/5，偏差u−u*满足衰减方程e'=−5e，所以u(t)=0.6+(u(0)−0.6)e^{-5t}。"
+          ],
+          "formulas": [
+            {
+              "label": "二状态概率的显式解",
+              "tex": "u'(t)=3-5u(t),\\quad u(t)=0.6+[u(0)-0.6]e^{-5t}"
+            }
+          ],
+          "proof": "令v(t)=u(t)−3/5，则v'=−5v，解v(t)=v(0)e^{-5t}。恢复u并代回原方程验证，u始终在0与1之间。对任意合法初始概率，t→∞时u→0.6。",
+          "worked": "从状态0出发u(0)=1，在t=ln2/5时e^{-5t}=0.5，故u=0.6+0.4×0.5=0.8；从状态1出发u(0)=0，得到u=0.6−0.6×0.5=0.3。",
+          "limitation": "两种初始状态在同一时间下的概率不同；不变分布是渐近极限，不应替代短期止损或信用违约的条件风险估计。"
+        },
+        {
+          "title": "稳态概率、非齐次强度与金融应用",
+          "question": "如何把前向方程用于风险状态占比预测而不混淆真实概率与风险中性概率？",
+          "paragraphs": [
+            "若Q固定且不可约，通常可求πQ=0得到长期状态占比，再用μ(0)e^{tQ}得到短期状态概率。这两步分别回答长期与有限时域问题。",
+            "如果金融宏观信息改变风险状态切换率，生成矩阵就可能依赖时刻Q(t)，此时应求解μ'=μQ(t)，而不是把某个平均Q直接代入e^{tQ}。真实概率P与定价测度Q也必须分别说明。"
+          ],
+          "formulas": [
+            {
+              "label": "稳态概率、非齐次强度与金融应用",
+              "tex": "\\mu'(t)=\\mu(t)Q(t),\\qquad \\mu(t)\\neq\\mu(0)e^{t\\bar Q}\\ \\text{一般情形}"
+            }
+          ],
+          "proof": "对非齐次Q(t)按短时条件转移仍能推出μ'(t)=μ(t)Q(t)，但不同t的矩阵通常不交换，解不能简化为某个常数平均矩阵的指数。若Q(t)在不同区间恒定，则可依时间顺序相乘相应矩阵指数。",
+          "worked": "在前例Q固定时，π=(0.6,0.4)；若初始μ=(1,0)，t=ln2/5处实际μ=(0.8,0.2)，距离稳态仍有状态0概率差0.2。",
+          "limitation": "真实ETF风险状态转移率可能受到政策或市场波动冲击；仅凭平均参数的平滑走势不足以校准事件驱动的尾部风险。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "stochastic-n0284",
+          "label": "先修：生成矩阵Q"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0286",
+          "label": "对照：Kolmogorov后向"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0287",
+          "label": "稳定数值：Poisson化"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0288",
+          "label": "订单排队模型"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 6.262 Discrete Stochastic Processes：第6章可数状态连续时间Markov过程",
+          "url": "https://ocw.mit.edu/courses/6-262-discrete-stochastic-processes-spring-2011/pages/course-notes/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：第24讲连续时间Markov链",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V12完整精讲：连续时间状态过程、四节证明、可复核例子与风险边界"
+    },
+    {
+      "id": "stochastic-n0286",
+      "node_id": "stochastic-n0286",
+      "title": "Kolmogorov后向方程",
+      "definition": "Kolmogorov后向方程从初始状态而非终端分布的角度描述连续时间马尔可夫链的半群演化。有限状态、齐次CTMC的转移矩阵满足P'(t)=QP(t)，也可用于计算未来支付的期望u(t)=P(t)g，其微分形式为u'(t)=Qu(t)。对首次命中某些吸收边界的概率或期望等待，后向生成方程提供直接的线性方程。",
+      "assumptions": "有限状态、时间齐次保守生成矩阵Q，初始收益向量g有界（有限状态自动满足）。若求某一吸收集合B的命中概率，需要明确边界值及其余状态的可达性；若使用期望命中时间，需证明相应期望有限。非齐次过程应写明日历时间和终止时间两个变量，不能直接复用齐次公式。",
+      "properties": [
+        "P'(t)=QP(t)按起始状态施加生成算子；前向P'(t)=P(t)Q按终端状态聚合流量。",
+        "有限状态常数Q时两者等于同一矩阵指数导数，但证明机制与金融解释不同。",
+        "u(t)=P(t)g满足u'(t)=Qu(t)，初值u(0)=g。",
+        "有限状态吸收概率h在暂态上满足Qh=0并给定边界，有限期望吸收时间m满足Qm=−1及吸收边界m=0。"
+      ],
+      "formulas": [
+        {
+          "label": "条件首步分解与后向方程",
+          "tex": "\\frac d{dt}P(t)=QP(t),\\quad P(0)=I"
+        },
+        {
+          "label": "奖励向量的后向演化",
+          "tex": "u_i(t)=\\sum_jP_{ij}(t)g(j),\\quad u'(t)=Qu(t),\\quad u(0)=g"
+        },
+        {
+          "label": "吸收事件的后向调和方程",
+          "tex": "Q=\\begin{pmatrix}-5&2&3\\\\0&0&0\\\\0&0&0\\end{pmatrix},\\quad (Qh)_T=0,\\ h_G=1,\\ h_B=0\\ \\Longrightarrow\\ h_T=2/5"
+        },
+        {
+          "label": "期望首达时间与风险边界",
+          "tex": "(Qm)_i=-1\\quad(i\\ \\text{暂态}),\\qquad m_j=0\\quad(j\\ \\text{吸收})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从半群关系P(t+h)=P(h)P(t)出发，除以h得到[P(t+h)−P(t)]/h=[P(h)−I]P(t)/h。令h↓0，利用生成矩阵定义Q=lim_{h↓0}[P(h)−I]/h，得P'(t)=QP(t)。",
+          "tex": "\\frac d{dt}P(t)=QP(t),\\quad P(0)=I"
+        },
+        {
+          "explanation": "由有限状态条件期望u(t)=P(t)g成立，求导得u'(t)=P'(t)g=QP(t)g=Qu(t)。t=0时P(0)=I，故u(0)=g。该推导无需假设g关于时间连续，因为有限状态奖励为向量。",
+          "tex": "u_i(t)=\\sum_jP_{ij}(t)g(j),\\quad u'(t)=Qu(t),\\quad u(0)=g"
+        },
+        {
+          "explanation": "在暂态停留时的下一跳概率分别为2/5与3/5，条件于第一跳的吸收事件，得到h_T=(2/5)h_G+(3/5)h_B；乘以5并整理成为Qh=0。边界确定解唯一。",
+          "tex": "Q=\\begin{pmatrix}-5&2&3\\\\0&0&0\\\\0&0&0\\end{pmatrix},\\quad (Qh)_T=0,\\ h_G=1,\\ h_B=0\\ \\Longrightarrow\\ h_T=2/5"
+        },
+        {
+          "explanation": "对暂态i，首次保持时间T_i均值1/q_i且在标准CTMC构造中独立于下一跳J。按全期望m_i=1/q_i+Σ_{j≠i}(q_ij/q_i)m_j；乘以q_i并移项得Σ_jq_ijm_j=−1，其中q_ii=−q_i。",
+          "tex": "(Qm)_i=-1\\quad(i\\ \\text{暂态}),\\qquad m_j=0\\quad(j\\ \\text{吸收})"
+        }
+      ],
+      "example": "三状态暂态T以速率2进入好状态、3进入坏状态，后向调和方程给好吸收概率2/5=0.4，期望首次吸收时间1/5=0.2。两状态Q=[[-2,2],[3,−3]]的奖励g=(1,0)在t=ln2/5时从状态0出发期望0.8。",
+      "application": "适用于信用违约、金融订单取消/成交的吸收概率和期望执行等待，必要时加入贴现、事件累计收益及停止规则。",
+      "caveat": "后向方程依赖CTMC生成率与边界可达性；后向条件期望不是风险中性定价的充分依据，无穷状态可能存在解唯一性及爆炸问题。",
+      "deep_sections": [
+        {
+          "title": "条件首步分解与后向方程",
+          "question": "后向方程为什么把生成算子作用在起始状态索引上？",
+          "paragraphs": [
+            "从状态i出发，先观察极短的第一段时间h，然后从随机达到的中间状态继续演化t。马尔可夫性给P(t+h)=P(h)P(t)。",
+            "用P(h)=I+hQ+o(h)，将t的概率矩阵置于右侧并在h→0后得P'(t)=QP(t)。这是按初始状态进行首步条件化，而前向方程使用P(t+h)=P(t)P(h)的终步条件化。"
+          ],
+          "formulas": [
+            {
+              "label": "条件首步分解与后向方程",
+              "tex": "\\frac d{dt}P(t)=QP(t),\\quad P(0)=I"
+            }
+          ],
+          "proof": "从半群关系P(t+h)=P(h)P(t)出发，除以h得到[P(t+h)−P(t)]/h=[P(h)−I]P(t)/h。令h↓0，利用生成矩阵定义Q=lim_{h↓0}[P(h)−I]/h，得P'(t)=QP(t)。",
+          "worked": "对Q=[[-2,2],[3,−3]]，后向方程的t=0导数是P'(0)=Q，因此P'_{01}(0)=2、P'_{10}(0)=3，与瞬时跳转率吻合。",
+          "limitation": "若状态空间无限且生成算子无界，交换导数和求和需要额外条件；该有限状态证明不能直接替代一般半群理论。"
+        },
+        {
+          "title": "奖励向量的后向演化",
+          "question": "给定当下市场状态，怎样计算固定期限后的条件预期支付？",
+          "paragraphs": [
+            "设g(j)为到期状态j对应的收益，u_i(t)=E_i[g(X(t))]。按转移矩阵计算u(t)=P(t)g，因P'(t)=QP(t)得到u'(t)=Qu(t)。",
+            "该方程直接作用于当前状态i，适合信用状态支付及状态相关的模型奖励；如果支付依赖整条路径或执行费用，就需要扩展状态或引入额外累计奖励。"
+          ],
+          "formulas": [
+            {
+              "label": "奖励向量的后向演化",
+              "tex": "u_i(t)=\\sum_jP_{ij}(t)g(j),\\quad u'(t)=Qu(t),\\quad u(0)=g"
+            }
+          ],
+          "proof": "由有限状态条件期望u(t)=P(t)g成立，求导得u'(t)=P'(t)g=QP(t)g=Qu(t)。t=0时P(0)=I，故u(0)=g。该推导无需假设g关于时间连续，因为有限状态奖励为向量。",
+          "worked": "令两状态支付g=(1,0)，初始状态0，则u_0(t)=P_00(t)=0.6+0.4e^{-5t}，在t=ln2/5时等于0.8；初始状态1对应u_1(t)=0.6(1−e^{-5t})=0.3。",
+          "limitation": "这是指定概率测度下的条件期望，不等于已贴现、经无套利约束校准的金融衍生品市场价格。"
+        },
+        {
+          "title": "吸收事件的后向调和方程",
+          "question": "首次到达好结局的概率怎样用Qh=0直接计算？",
+          "paragraphs": [
+            "考虑一个暂态T，可以以速率2进入好吸收态G，以速率3进入坏吸收态B。令h_i=P_i(最终进入G)，边界h_G=1、h_B=0。",
+            "暂态的第一次跳转来源与等待时间分布相独立，首跳全概率式给h_T=2/5×1+3/5×0=2/5。将其写成生成算子方程则是−5h_T+2h_G+3h_B=0。"
+          ],
+          "formulas": [
+            {
+              "label": "吸收事件的后向调和方程",
+              "tex": "Q=\\begin{pmatrix}-5&2&3\\\\0&0&0\\\\0&0&0\\end{pmatrix},\\quad (Qh)_T=0,\\ h_G=1,\\ h_B=0\\ \\Longrightarrow\\ h_T=2/5"
+            }
+          ],
+          "proof": "在暂态停留时的下一跳概率分别为2/5与3/5，条件于第一跳的吸收事件，得到h_T=(2/5)h_G+(3/5)h_B；乘以5并整理成为Qh=0。边界确定解唯一。",
+          "worked": "此三状态生成矩阵中暂态到好状态的吸收概率为0.4，到坏状态为0.6；与两个独立指数时钟速率2和3竞争的结果相符。",
+          "limitation": "若暂态还有可能进入不吸收闭类，则简单边界条件未必保证唯一命中概率；应先说明最终吸收性质。"
+        },
+        {
+          "title": "期望首达时间与风险边界",
+          "question": "为什么期望吸收时间满足不同于命中概率的后向方程？",
+          "paragraphs": [
+            "设m_i=E_i[τ]为首次进入吸收集的期望时间，并在吸收状态上令m=0。对暂态i，先等待均值1/q_i的指数保持时间，再从下一跳状态j加上剩余期望时间。",
+            "于是m_i=1/q_i+Σ_{j≠i}(q_ij/q_i)m_j，整理为(Qm)_i=−1。数学期望时间不是最大可承受等待期；金融执行场景还需控制尾部分布与强平约束。"
+          ],
+          "formulas": [
+            {
+              "label": "期望首达时间与风险边界",
+              "tex": "(Qm)_i=-1\\quad(i\\ \\text{暂态}),\\qquad m_j=0\\quad(j\\ \\text{吸收})"
+            }
+          ],
+          "proof": "对暂态i，首次保持时间T_i均值1/q_i且在标准CTMC构造中独立于下一跳J。按全期望m_i=1/q_i+Σ_{j≠i}(q_ij/q_i)m_j；乘以q_i并移项得Σ_jq_ijm_j=−1，其中q_ii=−q_i。",
+          "worked": "在速率2到好、速率3到坏的三状态模型中，m_T=1/(2+3)=0.2时间单位。以好状态概率0.4与坏状态概率0.6加权不会改变保持时间均值。",
+          "limitation": "若所有吸收时间的期望无穷或市场停牌使退出机制发生变化，就不能用Qm=−1的有限解解释真实资金占用。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "stochastic-n0283",
+          "label": "先修：CTMC"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0284",
+          "label": "先修：Q生成矩阵"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0285",
+          "label": "对照：前向方程"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0282",
+          "label": "离散吸收链"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0288",
+          "label": "排队执行模型"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 6.262 Discrete Stochastic Processes：第6章Markov过程、第4章更新及排队模型",
+          "url": "https://ocw.mit.edu/courses/6-262-discrete-stochastic-processes-spring-2011/pages/course-notes/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：第24讲Continuous Time Markov Chains",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V12完整精讲：四节CTMC推导、独立数值算例和金融模型假设"
+    },
+    {
+      "id": "stochastic-n0287",
+      "node_id": "stochastic-n0287",
+      "title": "泊松化",
+      "definition": "泊松化（uniformization，又称随机化）将有限状态CTMC的连续时间演化表示为独立Poisson时钟推动的离散时间链。给定生成矩阵Q，取Λ≥max_i(−q_ii)>0，并令R=I+Q/Λ，则R为行随机矩阵；如果N(t)为独立Poisson(Λt)时钟，X(t)与R链在N(t)步后的状态具有相同分布。它为矩阵指数、概率保持数值计算和金融执行模拟提供非负系数展开。",
+      "assumptions": "有限状态、齐次保守CTMC，Q满足非对角非负、行和0；选择Λ≥最大离开率且Λ>0。泊松时钟独立于R链的状态更新；R的对角虚拟自环仅用于统一速率，不代表真实状态跳转。无限状态若出率无统一上界，不一定存在这样的全局Λ。",
+      "properties": [
+        "R=I+Q/Λ逐项非负、每行和1，合法作为离散链概率矩阵。",
+        "P(t)=Σ_{n≥0}e^{−Λt}(Λt)^nR^n/n!是Poisson加权概率矩阵和。",
+        "Poisson化保留全部有限时间状态分布，并允许使用概率截断误差界控制数值展开。",
+        "使用虚拟跳转会增加模拟事件计数，不能把每个Poisson时钟点都报告为真实成交或信用跃迁。"
+      ],
+      "formulas": [
+        {
+          "label": "统一时钟与离散链R",
+          "tex": "R=I+\\frac Q\\Lambda,\\qquad R_{ii}=1-\\frac{q_i}{\\Lambda},\\quad R_{ij}=\\frac{q_{ij}}{\\Lambda}"
+        },
+        {
+          "label": "Poisson混合的半群证明",
+          "tex": "e^{tQ}=e^{-\\Lambda t}\\sum_{n=0}^\\infty\\frac{(\\Lambda t)^n}{n!}R^n"
+        },
+        {
+          "label": "二状态解析与矩阵级数核验",
+          "tex": "R^2=R\\quad\\Longrightarrow\\quad P(t)=e^{-5t}I+(1-e^{-5t})R"
+        },
+        {
+          "label": "稳定计算与截断误差界",
+          "tex": "P_K(t)=e^{-\\Lambda t}\\sum_{n=0}^K\\frac{(\\Lambda t)^n}{n!}R^n,\\quad \\|P(t)-P_K(t)\\|_\\infty\\le\\Pr(N(t)>K)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由Λ≥q_i=−q_ii得到R_ii=1−q_i/Λ≥0，非对角R_ij=q_ij/Λ≥0。每行和Σ_jR_ij=1+(1/Λ)Σ_jQ_ij=1，所以R是行随机矩阵。",
+          "tex": "R=I+\\frac Q\\Lambda,\\qquad R_{ii}=1-\\frac{q_i}{\\Lambda},\\quad R_{ij}=\\frac{q_{ij}}{\\Lambda}"
+        },
+        {
+          "explanation": "由Q=Λ(R−I)可得e^{tQ}=e^{ΛtR−ΛtI}=e^{−Λt}e^{ΛtR}，这里两个矩阵可交换。将e^{ΛtR}按幂级数展开，得到Poisson权重的R^n之和；每个R^n行随机、权重非负且总和1。",
+          "tex": "e^{tQ}=e^{-\\Lambda t}\\sum_{n=0}^\\infty\\frac{(\\Lambda t)^n}{n!}R^n"
+        },
+        {
+          "explanation": "由于R每行等于稳态π，任何一行再乘R仍得到π，故R²=R并推广R^n=R（n≥1）。将泊松混合的n=0项I单独提取，其余权重和为1−e^{−5t}，得到精确表达式。",
+          "tex": "R^2=R\\quad\\Longrightarrow\\quad P(t)=e^{-5t}I+(1-e^{-5t})R"
+        },
+        {
+          "explanation": "每个R^n均非负且行和1，P−P_K是n>K的非负权重和。对任意一行，该差的元素和恰为Σ_{n>K}e^{−Λt}(Λt)^n/n!=P(N>K)，因此最大行总和范数等于该尾概率。",
+          "tex": "P_K(t)=e^{-\\Lambda t}\\sum_{n=0}^K\\frac{(\\Lambda t)^n}{n!}R^n,\\quad \\|P(t)-P_K(t)\\|_\\infty\\le\\Pr(N(t)>K)"
+        }
+      ],
+      "example": "Q=[[-2,2],[3,−3]]取Λ=5，R=[[0.6,0.4],[0.6,0.4]]且R²=R。于是t=ln2/5时P=0.5I+0.5R，得到P_00=0.8、P_01=0.2；Λt=2、截断K=3时舍弃Poisson尾概率约0.142877。",
+      "application": "用于连续时间金融风险状态、订单排队、信用评级迁移的稳定概率求解；可以在不产生负转移概率的前提下实施有误差界的数值截断。",
+      "caveat": "虚拟跳转并非真实成交；Λ需不小于最大出率，时间非齐次及无穷状态的无界出率情况需另行设计模型。",
+      "deep_sections": [
+        {
+          "title": "统一时钟与离散链R",
+          "question": "怎样把每个状态不同的跳出率嵌入同一个Poisson时钟？",
+          "paragraphs": [
+            "令Λ不小于所有状态的真实离开率q_i。新离散矩阵R=I+Q/Λ在非对角元处给出真实跳转概率q_ij/Λ，对角元则为1−q_i/Λ，代表时钟触发但状态不变的虚拟跳转。",
+            "由于Q行和0，R每行和1；选择足够大的Λ还保证各对角项非负。这样不同状态的跳转都可放在同一个强度Λ的时钟下。"
+          ],
+          "formulas": [
+            {
+              "label": "统一时钟与离散链R",
+              "tex": "R=I+\\frac Q\\Lambda,\\qquad R_{ii}=1-\\frac{q_i}{\\Lambda},\\quad R_{ij}=\\frac{q_{ij}}{\\Lambda}"
+            }
+          ],
+          "proof": "由Λ≥q_i=−q_ii得到R_ii=1−q_i/Λ≥0，非对角R_ij=q_ij/Λ≥0。每行和Σ_jR_ij=1+(1/Λ)Σ_jQ_ij=1，所以R是行随机矩阵。",
+          "worked": "对Q=[[-2,2],[3,−3]]选择Λ=5，R=[[0.6,0.4],[0.6,0.4]]。从状态0起，每个虚拟时钟点有0.6概率留在0、0.4概率转到1。",
+          "limitation": "若选Λ小于最大出率，R对角可能负值，不再是概率矩阵；不能为加速模拟随意减少统一时钟速率。"
+        },
+        {
+          "title": "Poisson混合的半群证明",
+          "question": "为什么对离散链步数取Poisson混合会恰好得到矩阵指数？",
+          "paragraphs": [
+            "设N(t)~Poisson(Λt)独立于嵌入的离散链，经过N(t)步的转移矩阵是R^{N(t)}。对随机步数求全期望，就得到以Poisson概率为权重的矩阵级数。",
+            "因为Q=Λ(R−I)，I与R交换，矩阵指数e^{tQ}=e^{−Λt}e^{ΛtR}，恰与该混合级数一致。这也直接展示矩阵指数元素非负、各行和1。"
+          ],
+          "formulas": [
+            {
+              "label": "Poisson混合的半群证明",
+              "tex": "e^{tQ}=e^{-\\Lambda t}\\sum_{n=0}^\\infty\\frac{(\\Lambda t)^n}{n!}R^n"
+            }
+          ],
+          "proof": "由Q=Λ(R−I)可得e^{tQ}=e^{ΛtR−ΛtI}=e^{−Λt}e^{ΛtR}，这里两个矩阵可交换。将e^{ΛtR}按幂级数展开，得到Poisson权重的R^n之和；每个R^n行随机、权重非负且总和1。",
+          "worked": "取Λt=2，混合中n=0权重e^{-2}≈0.135335、n=1权重2e^{-2}≈0.270671，n=2权重2e^{-2}≈0.270671。",
+          "limitation": "泊松化证明只使用固定Q；对时间变化Q(t)或自激强度，不能直接套同一个常数R和全时域Poisson权重。"
+        },
+        {
+          "title": "二状态解析与矩阵级数核验",
+          "question": "如何直接用Poisson化复现连续时间链的解析概率？",
+          "paragraphs": [
+            "对Q=[[-2,2],[3,−3]]与Λ=5，R=[[0.6,0.4],[0.6,0.4]]每行相同，因此R²=R。于是Poisson混合里n=0时保持I，所有n≥1时都等于R。",
+            "求和得P(t)=e^{−5t}I+(1−e^{−5t})R，这与解二状态Kolmogorov微分方程得到的显式解完全一致。"
+          ],
+          "formulas": [
+            {
+              "label": "二状态解析与矩阵级数核验",
+              "tex": "R^2=R\\quad\\Longrightarrow\\quad P(t)=e^{-5t}I+(1-e^{-5t})R"
+            }
+          ],
+          "proof": "由于R每行等于稳态π，任何一行再乘R仍得到π，故R²=R并推广R^n=R（n≥1）。将泊松混合的n=0项I单独提取，其余权重和为1−e^{−5t}，得到精确表达式。",
+          "worked": "取t=ln2/5，使e^{−5t}=0.5，则P(t)=0.5I+0.5R；P_00=0.5+0.5×0.6=0.8，P_01=0.5×0.4=0.2。",
+          "limitation": "Poisson化数值截断的误差应按被删去的Poisson概率尾部控制，而不是仅凭矩阵元素看起来足够接近来主观判断。"
+        },
+        {
+          "title": "稳定计算与截断误差界",
+          "question": "为什么泊松化适合概率保持数值求解，以及如何设定截断范围？",
+          "paragraphs": [
+            "截断至K次Poisson时钟点得到非负矩阵P_K(t)，但由于舍弃了尾部概率，其每行和通常小于1。截断误差可使用Poisson(Λt)超过K的尾概率统一控制。",
+            "如要求高精度，应选择K使尾概率满足容忍度，再决定是否将尾质量重新分配。直接重新归一化会改变原有限时间分布，因此必须记录数值误差控制方案。"
+          ],
+          "formulas": [
+            {
+              "label": "稳定计算与截断误差界",
+              "tex": "P_K(t)=e^{-\\Lambda t}\\sum_{n=0}^K\\frac{(\\Lambda t)^n}{n!}R^n,\\quad \\|P(t)-P_K(t)\\|_\\infty\\le\\Pr(N(t)>K)"
+            }
+          ],
+          "proof": "每个R^n均非负且行和1，P−P_K是n>K的非负权重和。对任意一行，该差的元素和恰为Σ_{n>K}e^{−Λt}(Λt)^n/n!=P(N>K)，因此最大行总和范数等于该尾概率。",
+          "worked": "当Λt=2且K=3，Poisson尾概率P(N>3)=1−e^{-2}(1+2+2+8/6)≈0.142877；说明只取到第三次事件在该时间尺度下精度仍不够。",
+          "limitation": "真实市场跳转事件与虚拟时钟点必须分开报告；无限状态出率不有界时可能无法使用统一Λ来构造此表示。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "stochastic-n0284",
+          "label": "先修：生成矩阵Q"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0285",
+          "label": "前向方程"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0286",
+          "label": "后向方程"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0288",
+          "label": "订单执行排队"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 6.262 Discrete Stochastic Processes：第6章Markov过程、第4章更新及排队模型",
+          "url": "https://ocw.mit.edu/courses/6-262-discrete-stochastic-processes-spring-2011/pages/course-notes/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：第24讲Continuous Time Markov Chains",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V12完整精讲：四节CTMC推导、独立数值算例和金融模型假设"
+    },
+    {
+      "id": "stochastic-n0288",
+      "node_id": "stochastic-n0288",
+      "title": "执行排队模型",
+      "definition": "执行排队模型用随机到达、等待与服务机制衡量订单积压、潜在成交延迟及流动性拥塞。最基础的M/M/1模型假设订单以Poisson强度λ到达，单服务通道服务时间为独立Exp(μ)，采用先到先服务且队列容量无限。在λ<μ时存在几何稳态，Little定律连接平均队列长度与平均逗留时间，是理解订单簿建模的基准而非完整现实撮合模型。",
+      "assumptions": "到达过程为强度λ>0齐次Poisson，服务时间i.i.d. Exp(μ)且与到达独立，单台服务器、FCFS、无限容量、无主动撤单、无优先级，系统稳定条件ρ=λ/μ<1。若λ≥μ，不能套用有限稳态平均队列长度与等待时间公式。真实限价订单队列有价格优先、取消和部分成交，通常不符合这些简化前提。",
+      "properties": [
+        "M/M/1队长状态n的到达率为λ，非空时服务离开率为μ，形成生灭CTMC。",
+        "ρ=λ/μ<1时平稳队长分布π_n=(1−ρ)ρ^n，平均系统在场数量L=ρ/(1−ρ)。",
+        "稳态平均系统逗留时间W=1/(μ−λ)，平均排队等待W_q=ρ/(μ−λ)。",
+        "Little定律L=λW在稳态流量守恒条件下成立，但不能将系统所有在场订单都等同于某张限价单前方的剩余队列。"
+      ],
+      "formulas": [
+        {
+          "label": "M/M/1生灭生成率",
+          "tex": "q_{n,n+1}=\\lambda,\\quad q_{n,n-1}=\\mu\\ (n\\ge1),\\quad q_{nn}=-(\\lambda+\\mu)\\ (n\\ge1)"
+        },
+        {
+          "label": "稳态分布与稳定条件",
+          "tex": "\\pi_{n+1}=\\rho\\pi_n,\\quad \\rho=\\lambda/\\mu<1,\\quad \\pi_n=(1-\\rho)\\rho^n"
+        },
+        {
+          "label": "Little定律与系统逗留时间",
+          "tex": "L=\\frac\\rho{1-\\rho},\\quad W=\\frac{L}{\\lambda}=\\frac1{\\mu-\\lambda},\\quad W_q=W-\\frac1\\mu=\\frac\\rho{\\mu-\\lambda}"
+        },
+        {
+          "label": "利用率、尾部拥塞与金融执行风险",
+          "tex": "\\frac{\\partial W}{\\partial\\lambda}=\\frac1{(\\mu-\\lambda)^2}>0,\\qquad W=\\frac1{\\mu-\\lambda}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对非空状态n，两个独立指数事件时钟竞争，发生新到达率λ、服务完成率μ，总离开率λ+μ，故q_nn=−(λ+μ)。对空状态0只有到达时钟λ，故q_00=−λ。",
+          "tex": "q_{n,n+1}=\\lambda,\\quad q_{n,n-1}=\\mu\\ (n\\ge1),\\quad q_{nn}=-(\\lambda+\\mu)\\ (n\\ge1)"
+        },
+        {
+          "explanation": "对生灭链写局部平衡π_nλ=π_{n+1}μ，递推π_n=π_0ρ^n。用Σ_{n≥0}π_n=π_0/(1−ρ)=1解出π_0=1−ρ，要求0≤ρ<1；其余状态依递推确定。",
+          "tex": "\\pi_{n+1}=\\rho\\pi_n,\\quad \\rho=\\lambda/\\mu<1,\\quad \\pi_n=(1-\\rho)\\rho^n"
+        },
+        {
+          "explanation": "几何分布求和给Σ_{n≥0}n(1−ρ)ρ^n=ρ/(1−ρ)。Little定律L=λW适用于长期稳定且无订单丢失的流量守恒系统，故W=L/λ=1/(μ−λ)；服务均值1/μ，减去得到W_q=λ/[μ(μ−λ)]=ρ/(μ−λ)。",
+          "tex": "L=\\frac\\rho{1-\\rho},\\quad W=\\frac{L}{\\lambda}=\\frac1{\\mu-\\lambda},\\quad W_q=W-\\frac1\\mu=\\frac\\rho{\\mu-\\lambda}"
+        },
+        {
+          "explanation": "在稳定区间λ<μ，W=(μ−λ)^{-1}，对λ求导得(μ−λ)^{-2}，说明到达率越高等待越长且对拥塞的敏感度非线性放大。ρ接近1时分母趋0，平均系统时间发散。",
+          "tex": "\\frac{\\partial W}{\\partial\\lambda}=\\frac1{(\\mu-\\lambda)^2}>0,\\qquad W=\\frac1{\\mu-\\lambda}"
+        }
+      ],
+      "example": "到达率2笔/分钟、服务率3笔/分钟给ρ=2/3，π_0=1/3，π_2=4/27，平均在场L=2，系统平均逗留W=1分钟，纯排队等待W_q=2/3分钟；当λ升至2.9、μ仍3时W上升至10分钟。",
+      "application": "用于订单簿积压、成交时延、流动性资金占用和执行冲击的基准推导；可与事件强度及队列优先级的实际模型比较。",
+      "caveat": "真实交易所通常不满足无限容量、FCFS、无撤单、单服务且指数服务时间假设；排队中的一笔订单被替换或部分成交时，简单稳态参数不适用。",
+      "deep_sections": [
+        {
+          "title": "M/M/1生灭生成率",
+          "question": "如何把连续订单到达与单通道完成服务写成状态转移率？",
+          "paragraphs": [
+            "以系统中订单数量n≥0为状态。新订单以强度λ使n增加1；若n≥1，当前订单服务完成以速率μ使n减少1。队列为空时不发生服务离开，因此q_{0,−1}=0。",
+            "这是一个可数状态连续时间生灭过程。若真实交易中多个订单可同时成交、服务率依队列深度变化或存在撤单，生成率就需要修改。"
+          ],
+          "formulas": [
+            {
+              "label": "M/M/1生灭生成率",
+              "tex": "q_{n,n+1}=\\lambda,\\quad q_{n,n-1}=\\mu\\ (n\\ge1),\\quad q_{nn}=-(\\lambda+\\mu)\\ (n\\ge1)"
+            }
+          ],
+          "proof": "对非空状态n，两个独立指数事件时钟竞争，发生新到达率λ、服务完成率μ，总离开率λ+μ，故q_nn=−(λ+μ)。对空状态0只有到达时钟λ，故q_00=−λ。",
+          "worked": "若λ=2笔/分钟、μ=3笔/分钟，队列非空时总下一事件强度5次/分钟，平均等待下一事件0.2分钟，下一事件是到达的概率2/5=0.4。",
+          "limitation": "真实撮合可有批量成交、部分成交和撤单竞争，M/M/1的单服务FCFS假设不应当作真实交易所规则。"
+        },
+        {
+          "title": "稳态分布与稳定条件",
+          "question": "为什么队长稳态具有几何尾部，并要求λ<μ？",
+          "paragraphs": [
+            "在稳态下，相邻队长状态的概率流满足π_nλ=π_{n+1}μ，因此π_{n+1}=ρπ_n。归一化得到π_n=(1−ρ)ρ^n，但只有ρ<1时几何级数可求和。",
+            "当ρ≥1时无法得到和为1的几何稳态，系统预期积压不具有限稳定均值。接近ρ=1时，平均等待急剧上升，这体现高利用率下执行延迟的非线性风险。"
+          ],
+          "formulas": [
+            {
+              "label": "稳态分布与稳定条件",
+              "tex": "\\pi_{n+1}=\\rho\\pi_n,\\quad \\rho=\\lambda/\\mu<1,\\quad \\pi_n=(1-\\rho)\\rho^n"
+            }
+          ],
+          "proof": "对生灭链写局部平衡π_nλ=π_{n+1}μ，递推π_n=π_0ρ^n。用Σ_{n≥0}π_n=π_0/(1−ρ)=1解出π_0=1−ρ，要求0≤ρ<1；其余状态依递推确定。",
+          "worked": "λ=2、μ=3时ρ=2/3，空队列概率π_0=1/3，恰有两笔在系统的稳态概率π_2=(1/3)(2/3)²=4/27≈0.148148。",
+          "limitation": "若到达率达到或超过服务率，不能把平稳几何分布和下面的有限等待公式外推，实际队列容量与撤单也可能改变稳态。"
+        },
+        {
+          "title": "Little定律与系统逗留时间",
+          "question": "为什么平均在场订单数和平均延迟之间有一个简单的流量关系？",
+          "paragraphs": [
+            "在稳定系统中，平均队长L=Σ_n nπ_n=ρ/(1−ρ)。Little定律在适当平稳、流量守恒条件下给L=λW，因而W=L/λ=1/(μ−λ)。",
+            "系统平均逗留时间W包含排队等待和服务时间，纯排队等待W_q=W−1/μ=ρ/(μ−λ)。这个区分对于成交延迟与撮合处理时间十分重要。"
+          ],
+          "formulas": [
+            {
+              "label": "Little定律与系统逗留时间",
+              "tex": "L=\\frac\\rho{1-\\rho},\\quad W=\\frac{L}{\\lambda}=\\frac1{\\mu-\\lambda},\\quad W_q=W-\\frac1\\mu=\\frac\\rho{\\mu-\\lambda}"
+            }
+          ],
+          "proof": "几何分布求和给Σ_{n≥0}n(1−ρ)ρ^n=ρ/(1−ρ)。Little定律L=λW适用于长期稳定且无订单丢失的流量守恒系统，故W=L/λ=1/(μ−λ)；服务均值1/μ，减去得到W_q=λ/[μ(μ−λ)]=ρ/(μ−λ)。",
+          "worked": "λ=2、μ=3时ρ=2/3，L=2笔，W=1分钟，平均服务时间1/3分钟，因此W_q=2/3分钟；平均排队人数L_q=λW_q=4/3笔。",
+          "limitation": "Little定律的系统L与某个价位前方实际排队数量不同，不能直接将W套到有撤单、价格优先和部分成交的限价单。"
+        },
+        {
+          "title": "利用率、尾部拥塞与金融执行风险",
+          "question": "为何高利用率下执行时间非线性上升，却不能只靠均值判断最差成交？",
+          "paragraphs": [
+            "当ρ趋1而μ固定时，W=1/[μ(1−ρ)]趋于无穷；高利用率使平均等待对服务速度或到达速率的微小变化很敏感。",
+            "平均等待并非95%或99%执行延迟。对真实流动性管理，还要处理订单簿价格优先、撤销、部分成交、状态条件到达率和市场冲击；抽象排队过程不保证最终按最优价格完成交易。"
+          ],
+          "formulas": [
+            {
+              "label": "利用率、尾部拥塞与金融执行风险",
+              "tex": "\\frac{\\partial W}{\\partial\\lambda}=\\frac1{(\\mu-\\lambda)^2}>0,\\qquad W=\\frac1{\\mu-\\lambda}"
+            }
+          ],
+          "proof": "在稳定区间λ<μ，W=(μ−λ)^{-1}，对λ求导得(μ−λ)^{-2}，说明到达率越高等待越长且对拥塞的敏感度非线性放大。ρ接近1时分母趋0，平均系统时间发散。",
+          "worked": "μ=3时，λ由2升到2.5，ρ由2/3升到5/6，W从1分钟升至2分钟；λ再升至2.9，W变为10分钟，而服务速率μ未变。",
+          "limitation": "均值延迟不能推导尾部延迟分布或真实成交概率；真实限价单撤单、排队跳位及市场波动使简单M/M/1关系不充分。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "stochastic-n0283",
+          "label": "基础：CTMC"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0284",
+          "label": "状态生成矩阵"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0287",
+          "label": "泊松化计算"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0275",
+          "label": "一般更新过程"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 6.262 Discrete Stochastic Processes：第6章Markov过程、第4章更新及排队模型",
+          "url": "https://ocw.mit.edu/courses/6-262-discrete-stochastic-processes-spring-2011/pages/course-notes/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：第24讲Continuous Time Markov Chains",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V12完整精讲：四节CTMC推导、独立数值算例和金融模型假设"
     }
   ]
 }

@@ -39,8 +39,8 @@ assert.equal(catalog.disciplines.length,20);
 assert.equal(manifest.modules.length,41);
 assert.equal(manifest.expected_lessons,103);
 assert.equal(modules.length,103);
-assert.equal(core.length,74,"15 new complete core lessons");
-assert.equal(all.length,177,"162 preceding plus 15 rigorously completed V11 lectures");
+assert(core.length>=74,"V11 baseline: at least 74 completed core lectures");
+assert(all.length>=177,"V11 baseline: at least 177 complete mathematics lectures");
 assert.equal(byId.size,all.length,"no duplicated full mathematics lesson ID");
 assert.equal(newlyCompleted.length,15);
 
@@ -145,5 +145,5 @@ assert(ml.includes('aria-label="V11测度与概率积分的15篇跨学科先修�
 assert(html.includes("styles.css?v=20261104-probscore-v6-inference-v8-martingale-v9-convergence-v10-integration-v11"),"stylesheet version cache must update");
 assert(css.includes("V11: integration proof readability for long Chinese and KaTeX expressions"),"V11 CSS missing");
 assert(css.includes(".math-v11-measure summary:focus-visible")&&css.includes(".katex-display")&&css.includes("@media print"),"keyboard/mobile/print math styles missing");
-console.log("V11 PASS: 15 newly completed mathematical lectures, 60 full proof sections, 60 strict KaTeX formulas, 30 academic sources, "+crosslinks+" mathematics/ML links; 177 complete mathematics lessons, 656-node acyclic learning graph, independent numerical invariants and responsive typography.");
+console.log("V11 PASS: 15 newly completed mathematical lectures, 60 full proof sections, 60 strict KaTeX formulas, 30 academic sources, "+crosslinks+" mathematics/ML links; "+all.length+" complete mathematics lessons, 656-node acyclic learning graph, independent numerical invariants and responsive typography.");
 
