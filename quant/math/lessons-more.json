@@ -3757,6 +3757,176 @@
         }
       ],
       "checked_status": "V11完整讲义：四节乘积测度、Tonelli/Fubini证明与反例"
+    },
+    {
+      "id": "measure-n0136",
+      "node_id": "measure-n0136",
+      "title": "Radon-Nikodym导数",
+      "definition": "Radon–Nikodym导数描述两个测度之间的密度关系。若有限测度ν对有限测度μ绝对连续，即所有μ零测事件也必为ν零测，则存在非负可测函数Z=dν/dμ，使ν(A)=∫_A Z dμ。该密度在μ几乎处处意义下唯一。它是似然比、测度变换、条件期望、动态密度过程和金融风险中性定价的共同数学语言。",
+      "assumptions": "在同一可测空间(Ω,F)上考虑有限正测度μ、ν（故自动σ-有限）。假设ν≪μ；在此条件下Radon–Nikodym定理保证Z≥0且ν(A)=∫_A Z dμ，对概率测度还满足E_μ[Z]=1。若要使用倒数密度或两向转换，需额外要求μ≪ν；对于无界有符号函数g，需验证∫|g|dν或等价的∫|g|Z dμ有限。",
+      "properties": [
+        "ν≪μ是密度存在的必要条件，有限测度下也是充分条件；Z在μ几乎处处唯一。",
+        "当μ、ν都是概率测度时，Z≥0且E_μZ=1，E_νg=E_μ[Zg]适用于非负或适当可积的g。",
+        "如果μ与ν等价，则Z>0 μ几乎处处，反向密度dμ/dν=1/Z在ν几乎处处成立。",
+        "链式法则dρ/dμ=(dρ/dν)(dν/dμ)需测度绝对连续关系ρ≪ν≪μ，并在正确的几乎处处意义下解释。"
+      ],
+      "formulas": [
+        {
+          "label": "绝对连续与密度存在",
+          "tex": "\\nu\\ll\\mu,\\quad Z=\\frac{d\\nu}{d\\mu}\\ge0:\\qquad \\nu(A)=\\int_A Z\\,d\\mu"
+        },
+        {
+          "label": "状态似然权重与期望换测度",
+          "tex": "\\mathbb E_Q[g]=\\mathbb E_P[Zg],\\qquad Z=\\frac{dQ}{dP},\\quad \\mathbb E_P[Z]=1"
+        },
+        {
+          "label": "链式法则与等价测度的倒数",
+          "tex": "\\frac{d\\rho}{d\\mu}=\\frac{d\\rho}{d\\nu}\\frac{d\\nu}{d\\mu},\\qquad \\mu\\sim\\nu\\Longrightarrow \\frac{d\\mu}{d\\nu}=\\left(\\frac{d\\nu}{d\\mu}\\right)^{-1}"
+        },
+        {
+          "label": "信息滤过下的动态密度过程",
+          "tex": "Z_t=\\mathbb E_P[Z\\mid\\mathcal F_t],\\quad \\mathbb E_P[Z_{t+1}\\mid\\mathcal F_t]=Z_t,\\quad Q(A)=\\mathbb E_P[Z_t\\mathbf1_A]\\ (A\\in\\mathcal F_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "密度表示的必要性直接来自积分对μ零测集为0。有限测度条件下的充分性由Radon–Nikodym定理给出；为验证唯一性，若Z和W均表示ν，则对{Z>W+1/k}积分比较会产生矛盾，逐k排除该事件的正μ测度，反向同理。",
+          "tex": "\\nu\\ll\\mu,\\quad Z=\\frac{d\\nu}{d\\mu}\\ge0:\\qquad \\nu(A)=\\int_A Z\\,d\\mu"
+        },
+        {
+          "explanation": "先对指标函数g=1_A使用Q(A)=∫_A Z dP，再通过非负简单函数线性性与单调收敛推广到一般非负g。对Q可积的有符号g，将正负部分分别处理并相减；取g=1立即得到E_PZ=Q(Ω)=1。",
+          "tex": "\\mathbb E_Q[g]=\\mathbb E_P[Zg],\\qquad Z=\\frac{dQ}{dP},\\quad \\mathbb E_P[Z]=1"
+        },
+        {
+          "explanation": "用两次积分换测度验证每个事件A的ρ测度与∫_A VZ dμ相同，密度的μ几乎处处唯一性给出乘积公式。等价时，Z的零集若有正μ测度将违反μ≪ν，故Z>0 μ-a.s.；把W=1/Z代回积分即可验证反向密度。",
+          "tex": "\\frac{d\\rho}{d\\mu}=\\frac{d\\rho}{d\\nu}\\frac{d\\nu}{d\\mu},\\qquad \\mu\\sim\\nu\\Longrightarrow \\frac{d\\mu}{d\\nu}=\\left(\\frac{d\\nu}{d\\mu}\\right)^{-1}"
+        },
+        {
+          "explanation": "因为Z≥0且E_PZ=1，条件期望保持非负与总均值。塔式性质给Z_t的鞅关系；若A∈F_t，条件期望定义得E_P[Z1_A]=E_P[E_P(Z|F_t)1_A]=E_P[Z_t1_A]，由RN唯一性识别限制测度的密度。",
+          "tex": "Z_t=\\mathbb E_P[Z\\mid\\mathcal F_t],\\quad \\mathbb E_P[Z_{t+1}\\mid\\mathcal F_t]=Z_t,\\quad Q(A)=\\mathbb E_P[Z_t\\mathbf1_A]\\ (A\\in\\mathcal F_t)"
+        }
+      ],
+      "deep_sections": [
+        {
+          "title": "绝对连续与密度存在",
+          "question": "为什么有些概率测度能够写成另一测度的加权积分，而原子概率却可能做不到？",
+          "paragraphs": [
+            "绝对连续ν≪μ意味着μ(A)=0必推出ν(A)=0。当μ、ν有限时，Radon–Nikodym定理保证存在非负μ可测Z，使任意事件A满足ν(A)=∫_A Z dμ；这个Z表示换测度时每个状态的局部权重。",
+            "如果μ是[0,1]上的连续均匀测度，而ν把全部质量放在单点0.5，则μ({0.5})=0而ν({0.5})=1，绝对连续性失败，所以不存在可相对于μ积分的普通密度。"
+          ],
+          "formulas": [
+            {
+              "label": "绝对连续与密度存在",
+              "tex": "\\nu\\ll\\mu,\\quad Z=\\frac{d\\nu}{d\\mu}\\ge0:\\qquad \\nu(A)=\\int_A Z\\,d\\mu"
+            }
+          ],
+          "proof": "密度表示的必要性直接来自积分对μ零测集为0。有限测度条件下的充分性由Radon–Nikodym定理给出；为验证唯一性，若Z和W均表示ν，则对{Z>W+1/k}积分比较会产生矛盾，逐k排除该事件的正μ测度，反向同理。",
+          "worked": "在两状态Ω={a,b}上令μ(a)=0.25、μ(b)=0.75，ν(a)=0.5、ν(b)=0.5，则Z(a)=0.5/0.25=2，Z(b)=0.5/0.75=2/3；μ加权总量0.25×2+0.75×(2/3)=1。",
+          "limitation": "密度存在是基于固定可测空间与绝对连续条件的定理，不可从有限样本计算出的似然比自动推断未来金融真实分布具有相同支撑。"
+        },
+        {
+          "title": "状态似然权重与期望换测度",
+          "question": "两个概率测度如何在不改变事件空间的情况下改变金融收益的期望？",
+          "paragraphs": [
+            "若P、Q是同一空间的概率测度且Q≪P，令Z=dQ/dP，则E_P[Z]=1，并且对非负或Q可积的收益变量g，有E_Q[g]=E_P[Zg]。这种转换改变事件权重，并不意味着投资者可观察到一个新的随机路径。",
+            "两个测度可以对同一市场状态赋不同概率，所以资产的均值、尾部损失和风险溢价会改变。风险中性测度若存在，还要满足市场可交易、贴现与无套利的专门条件。"
+          ],
+          "formulas": [
+            {
+              "label": "状态似然权重与期望换测度",
+              "tex": "\\mathbb E_Q[g]=\\mathbb E_P[Zg],\\qquad Z=\\frac{dQ}{dP},\\quad \\mathbb E_P[Z]=1"
+            }
+          ],
+          "proof": "先对指标函数g=1_A使用Q(A)=∫_A Z dP，再通过非负简单函数线性性与单调收敛推广到一般非负g。对Q可积的有符号g，将正负部分分别处理并相减；取g=1立即得到E_PZ=Q(Ω)=1。",
+          "worked": "两状态收益g(a)=1、g(b)=3，在P=(0.25,0.75)下均值为0.25+2.25=2.5；在Q=(0.5,0.5)下均值为2。用Z=(2,2/3)核算E_P[Zg]=0.25×2×1+0.75×(2/3)×3=2。",
+          "limitation": "测度变换不是增加金融收益的交易策略；不同测度下的期望并非都能直接与实际概率P下的历史收益均值比较。"
+        },
+        {
+          "title": "链式法则与等价测度的倒数",
+          "question": "多次改变概率测度时，如何避免似然比乘错顺序？",
+          "paragraphs": [
+            "若ρ≪ν≪μ，设V=dρ/dν和Z=dν/dμ，则对任意事件A有ρ(A)=∫_A V dν=∫_A VZ dμ。由密度唯一性，得到dρ/dμ=VZ，这是Radon–Nikodym链式法则。",
+            "如果只知道ν≪μ，Z可能在μ正测度区域取0，不能无条件倒置。只有两测度等价时，Z>0 μ几乎处处，倒数才给出反方向密度。"
+          ],
+          "formulas": [
+            {
+              "label": "链式法则与等价测度的倒数",
+              "tex": "\\frac{d\\rho}{d\\mu}=\\frac{d\\rho}{d\\nu}\\frac{d\\nu}{d\\mu},\\qquad \\mu\\sim\\nu\\Longrightarrow \\frac{d\\mu}{d\\nu}=\\left(\\frac{d\\nu}{d\\mu}\\right)^{-1}"
+            }
+          ],
+          "proof": "用两次积分换测度验证每个事件A的ρ测度与∫_A VZ dμ相同，密度的μ几乎处处唯一性给出乘积公式。等价时，Z的零集若有正μ测度将违反μ≪ν，故Z>0 μ-a.s.；把W=1/Z代回积分即可验证反向密度。",
+          "worked": "在两状态例中P=(0.25,0.75)、Q=(0.5,0.5)，Z=(2,2/3)。反向密度dP/dQ=(1/2,3/2)，核验Q加权值0.5×0.5+0.5×1.5=1。",
+          "limitation": "多个似然权重相乘需在相同的状态与测度版本下解释；当绝对连续关系中断时，反向密度和简单权重乘积可能不存在。"
+        },
+        {
+          "title": "信息滤过下的动态密度过程",
+          "question": "一次终端测度变换如何变成逐时刻可观察的合法密度更新？",
+          "paragraphs": [
+            "若Q≪P且终端密度Z=dQ/dP属于L¹(P)，对滤过F_t定义Z_t=E_P[Z|F_t]。Z_t非负、P条件期望守恒且均值为1，因此是P测度下的一致可积条件期望鞅。",
+            "对F_t可测事件A，Q(A)=E_P[Z1_A]=E_P[Z_t1_A]，所以Z_t正是Q在F_t上的限制相对于P的密度。对更一般的条件期望还可给出Bayes换测度公式，但需要在Z_t>0的Q几乎处处区域内解释。"
+          ],
+          "formulas": [
+            {
+              "label": "信息滤过下的动态密度过程",
+              "tex": "Z_t=\\mathbb E_P[Z\\mid\\mathcal F_t],\\quad \\mathbb E_P[Z_{t+1}\\mid\\mathcal F_t]=Z_t,\\quad Q(A)=\\mathbb E_P[Z_t\\mathbf1_A]\\ (A\\in\\mathcal F_t)"
+            }
+          ],
+          "proof": "因为Z≥0且E_PZ=1，条件期望保持非负与总均值。塔式性质给Z_t的鞅关系；若A∈F_t，条件期望定义得E_P[Z1_A]=E_P[E_P(Z|F_t)1_A]=E_P[Z_t1_A]，由RN唯一性识别限制测度的密度。",
+          "worked": "对两状态模型，若F₀平凡，则Z₀=E_PZ=1；若F₁已揭晓状态，则Z₁在a时为2、在b时为2/3。再算P加权E_PZ₁=0.25×2+0.75×2/3=1，动态更新不改变总质量。",
+          "limitation": "这一离散密度鞅构造并不自动推出连续时间Girsanov、Novikov或等价鞅测度条件；那些结果必须独立核验随机积分、真鞅性与市场可交易性。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "measure-n0123",
+          "label": "先修：测度与概率测度"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0124",
+          "label": "先修：零测与完备化"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0135",
+          "label": "先修：积分与换序"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0137",
+          "label": "联系：条件期望的正交投影"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0146",
+          "label": "后续：Radon–Nikodym定理的存在性"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0147",
+          "label": "后续：概率测度变换"
+        },
+        {
+          "kind": "ml",
+          "id": "m23-c11-p01",
+          "label": "金融应用：联合尾部风险"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 18.675 Probability Theory：Lecture 23，Martingale perspective on Radon–Nikodym derivatives",
+          "url": "https://math.mit.edu/~nsun/f19-18675-sch.pdf"
+        },
+        {
+          "title": "Stanford Probability, Random Processes and Ergodic Properties：Section 5.6 Radon–Nikodym theorem",
+          "url": "https://www-ee.stanford.edu/~gray/arp.pdf"
+        }
+      ],
+      "checked_status": "V11完整讲义：RN密度计算、可积性、链式法则和动态条件密度",
+      "example": "两状态P=(0.25,0.75)、Q=(0.5,0.5)给RN密度Z=(2,2/3)，P下加权归一化0.25×2+0.75×2/3=1。收益g=(1,3)在Q下的均值2，亦等于E_P[Zg]=0.5+1.5=2；反向密度(1/2,3/2)在Q下同样归一化。",
+      "application": "用于风险中性定价的概率权重、收益预测重加权、变更状态分布下的风险积分和动态似然比滤过；必须同时区分真实概率测度、风险中性测度、信息可得时点及交易可执行性。",
+      "caveat": "Q≪P与Q~P并不等价；RN密度可为零但若双向等价则必须严格为正。金融风险中性测度的存在、等价性和贴现鞅性质依赖额外市场条件，不能从形式上的Z≥0、E_PZ=1单独推出。"
     }
   ]
 }
