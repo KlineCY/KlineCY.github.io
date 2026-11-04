@@ -5,45 +5,156 @@
       "id": "ito-n0308",
       "node_id": "ito-n0308",
       "title": "Itô等距",
-      "definition": "Itô等距说明适应且平方可积的随机积分，其二阶矩恰等于被积过程平方的时间积分的期望。它不是普通积分中的变量代换，而是基于布朗增量的独立性与零条件均值建立的L²性质。",
-      "assumptions": "在满足通常条件的过滤概率空间中，W_t为相应过滤下的标准布朗运动。被积过程H_t必须逐步可测或可预测，并满足E∫₀ᵀH_t²dt<∞；否则标准L² Itô积分等距不适用。",
+      "definition": "Itô等距表明适当平方可积、可预测的被积过程H关于布朗运动的随机积分的二阶均值，精确等于其时间平方积分的期望。它不仅是一个方差公式，也是将分段简单随机和稳定延拓为一般Itô积分的数学保障，并将动态仓位的随机收益风险与时间积分的预测方差联系起来。",
+      "assumptions": "固定有限T，W是相对于滤过F_t的布朗运动；H为可预测过程且E∫_0^T H_t²dt<∞。此时Itô积分I_T=∫H dW平方可积、均值0，E I_T²=E∫H²dt。独立驱动的多维情形有相应的矩阵版本；若H是只局部平方可积过程，需要停止局部化，不能直接宣称全局二阶矩有限。",
       "properties": [
-        "平方可积Itô积分的期望为零，并且二阶矩由被积过程的L²范数控制。",
-        "不同互不重叠时间区间的简单适应过程积分交叉项期望为零。",
-        "Itô等距适用于构建一般平方可积被积过程的随机积分及误差估计。"
+        "平方可积Itô积分均值0且方差等于期望积分能量E∫H²dt。",
+        "交叉等距可由极化得到E[(∫H dW)(∫K dW)]=E∫HKdt。",
+        "确定性H=t在[0,1]时积分方差为∫t²dt=1/3。",
+        "随机H=W时可用Itô引理验证I=(W_T²−T)/2，与等距给出的T²/2相符。"
       ],
       "formulas": [
         {
-          "label": "Itô等距",
-          "tex": "E\\left[\\left(\\int_0^T H_t\\,dW_t\\right)^2\\right]=E\\left[\\int_0^T H_t^2\\,dt\\right]"
+          "label": "等距的条件与精确风险意义",
+          "tex": "\\mathbb E\\!\\left[\\left(\\int_0^TH_t\\,dW_t\\right)^2\\right]=\\mathbb E\\int_0^TH_t^2\\,dt"
         },
         {
-          "label": "平方可积条件",
-          "tex": "E\\int_0^T H_t^2\\,dt<\\infty"
+          "label": "确定性时变持仓的独立核算",
+          "tex": "I=\\int_0^1t\\,dW_t\\sim N(0,1/3),\\qquad \\operatorname{Var}(I)=\\int_0^1t^2dt=\\frac13"
         },
         {
-          "label": "简单过程积分",
-          "tex": "\\int_0^T H_t\\,dW_t=\\sum_{k=0}^{n-1}H_{t_k}(W_{t_{k+1}}-W_{t_k})"
+          "label": "随机被积过程W_t的等距核对",
+          "tex": "\\int_0^T W_t\\,dW_t=\\tfrac12(W_T^2-T),\\quad \\mathbb E\\!\\left[\\left(\\int_0^T W_t\\,dW_t\\right)^2\\right]=\\tfrac{T^2}{2}"
+        },
+        {
+          "label": "交叉等距与数值稳定性",
+          "tex": "\\mathbb E\\!\\left[\\left(\\int_0^TH\\,dW\\right)\\left(\\int_0^TK\\,dW\\right)\\right]=\\mathbb E\\int_0^TH_tK_t\\,dt"
         }
       ],
       "derivation": [
         {
-          "explanation": "对于仅依赖每个子区间左端可得信息的简单过程，把随机积分定义为各时间段系数乘布朗增量的和。",
-          "tex": "I(H)=\\sum_kH_{t_k}\\Delta W_k"
+          "explanation": "先对可预测简单H按随机和展开平方，跨区间交叉项由未来增量条件均值0消除，对角项由条件方差Δt计算。再用简单过程在可预测L²空间的稠密性和随机积分L²连续性，将等式扩展至所有E∫H²<∞的可预测H。",
+          "tex": "\\mathbb E\\!\\left[\\left(\\int_0^TH_t\\,dW_t\\right)^2\\right]=\\mathbb E\\int_0^TH_t^2\\,dt"
         },
         {
-          "explanation": "展开平方并取期望，交叉项因适应性和后续布朗增量的零条件期望而消失，每个对角项贡献E[H²]Δt。",
-          "tex": "E[I(H)^2]=\\sum_kE[H_{t_k}^2](t_{k+1}-t_k)"
+          "explanation": "对确定性步函数逼近t，各段布朗增量独立且正态，因此有限加权和正态。其方差趋于∫t²dt=1/3，特征函数按L²极限趋于exp(−u²/6)，识别极限为N(0,1/3)。",
+          "tex": "I=\\int_0^1t\\,dW_t\\sim N(0,1/3),\\qquad \\operatorname{Var}(I)=\\int_0^1t^2dt=\\frac13"
         },
         {
-          "explanation": "通过简单适应过程在L²空间的逼近，将该恒等式延拓到所有满足平方可积条件的合法随机被积过程。",
-          "tex": "E[I(H)^2]=E\\int_0^T H_t^2\\,dt"
+          "explanation": "对f(x)=x²使用Itô公式dW_t²=2W_tdW_t+dt，整理并积分得到I=(W_T²−T)/2。正态矩E W_T⁴=3T²、E W_T²=T，故E I²=(3T²−2T²+T²)/4=T²/2，等于E∫W_t²dt。",
+          "tex": "\\int_0^T W_t\\,dW_t=\\tfrac12(W_T^2-T),\\quad \\mathbb E\\!\\left[\\left(\\int_0^T W_t\\,dW_t\\right)^2\\right]=\\tfrac{T^2}{2}"
+        },
+        {
+          "explanation": "使用平方差恒等式2I(H)I(K)=I(H+K)²−I(H)²−I(K)²。取期望后由Itô等距右侧依次为E∫(H+K)²−E∫H²−E∫K²=2E∫HK，约去系数2。",
+          "tex": "\\mathbb E\\!\\left[\\left(\\int_0^TH\\,dW\\right)\\left(\\int_0^TK\\,dW\\right)\\right]=\\mathbb E\\int_0^TH_tK_t\\,dt"
         }
       ],
-      "example": "考虑确定性被积函数H_t=2t、0≤t≤1。它是适应且平方可积的，故随机积分I=∫₀¹2t dW_t的均值为0、方差为E[I²]=∫₀¹(2t)²dt=4∫₀¹t²dt=4/3≈1.3333，标准差为√(4/3)≈1.1547。不能把它当成普通积分∫₀¹2t dt=1，也不能认为积分结果为确定的1。",
-      "application": "在随机波动风险、期权定价与Euler型SDE模拟误差控制中，Itô等距用于把随机积分均方误差化为更容易估计的积分能量。",
-      "caveat": "如果被积过程预先依赖未来布朗运动就不再满足标准Itô可预测性，不能机械使用等距；重尾导致平方不可积时也应改用适当积分理论或截断条件。",
-      "checked_status": "正式完整讲义：数学条件、公式推导、独立算例、金融解释与失效边界"
+      "example": "确定性H_t=t在[0,1]的Itô积分为N(0,1/3)；随机H_t=W_t时积分=(W_1²−1)/2，均值0、方差0.5，分布不是正态；H=1、K=t的交叉期望为0.5。 原有讲义保留的另一独立算例：H_t=2t，0≤t≤1，则随机积分均值0、方差∫₀¹4t²dt=4/3≈1.3333，标准差√(4/3)≈1.1547；不能将其误写成普通确定性积分∫₀¹2t dt=1。",
+      "application": "用于连续交易策略的扩散风险预算、随机积分误差分析、Itô积分构造和高维风险驱动的定量校准。 在股票及ETF随机收益模型中，必须把仓位过程和价格扩散系数相乘后再求时间积分，才能对应真实资产的理论波动；对实际净收益则另需扣除交易成本。",
+      "caveat": "Itô等距需平方可积可预测条件，只给二阶矩而非全部分布；没有全球L²条件时应使用局部化，不能直接比较策略总净收益方差。 原版特别强调：事先依赖未来Brownian价格的权重不符合标准可预测性，平方矩不存在时也不能从有限样本方差直接套用等距公式。",
+      "deep_sections": [
+        {
+          "title": "等距的条件与精确风险意义",
+          "question": "为什么积分波动不是简单把每个时点的仓位标准差相加？",
+          "paragraphs": [
+            "随机积分把持仓H_t乘以未来布朗增量。因为每段未来增量条件均值为零且不重叠增量正交，跨时段交叉项在期望中消失。",
+            "因此总平方风险等于E∫H_t²dt。它是噪声驱动部分的二阶矩，与包含漂移、交易费用和随机成交冲击的真实策略总收益方差不是同一统计对象。"
+          ],
+          "formulas": [
+            {
+              "label": "等距的条件与精确风险意义",
+              "tex": "\\mathbb E\\!\\left[\\left(\\int_0^TH_t\\,dW_t\\right)^2\\right]=\\mathbb E\\int_0^TH_t^2\\,dt"
+            }
+          ],
+          "proof": "先对可预测简单H按随机和展开平方，跨区间交叉项由未来增量条件均值0消除，对角项由条件方差Δt计算。再用简单过程在可预测L²空间的稠密性和随机积分L²连续性，将等式扩展至所有E∫H²<∞的可预测H。",
+          "worked": "若H_t≡2，T=3，则积分为2W_3，均值0、方差4×3=12；时间平方能量为∫_0^3 4dt=12，完全一致。",
+          "limitation": "市场资产收益的扩散系数可以随价格与波动率变化；用H=仓位时还需要把资产实际扩散系数乘进去才能计算损益方差。"
+        },
+        {
+          "title": "确定性时变持仓的独立核算",
+          "question": "持仓按确定性时间函数变化时，积分方差怎样直接求得？",
+          "paragraphs": [
+            "取H_t=t（0≤t≤1），它在时间开始前已完全已知，因此可预测并且∫_0^1t²dt=1/3有限。",
+            "Itô等距给∫t dW均值为0、方差为1/3。由于被积过程确定且平方可积，该随机积分是正态变量，标准差为1/√3。"
+          ],
+          "formulas": [
+            {
+              "label": "确定性时变持仓的独立核算",
+              "tex": "I=\\int_0^1t\\,dW_t\\sim N(0,1/3),\\qquad \\operatorname{Var}(I)=\\int_0^1t^2dt=\\frac13"
+            }
+          ],
+          "proof": "对确定性步函数逼近t，各段布朗增量独立且正态，因此有限加权和正态。其方差趋于∫t²dt=1/3，特征函数按L²极限趋于exp(−u²/6)，识别极限为N(0,1/3)。",
+          "worked": "把[0,1]分成两段，取H=0（0至0.5）与0.5（0.5至1），步函数积分方差为0²×0.5+0.5²×0.5=0.125，尚未达到连续极限1/3。",
+          "limitation": "离散近似误差由网格与函数正则性控制；不能只因方差是1/3就断言实际交易中按时间连续调整仓位无成本。"
+        },
+        {
+          "title": "随机被积过程W_t的等距核对",
+          "question": "积分中H_t本身也是Brownian，为什么等距仍能工作？",
+          "paragraphs": [
+            "取H_t=W_t，适应且连续所以可预测，且E∫_0^T W_t²dt=∫_0^T t dt=T²/2。",
+            "Itô公式给∫_0^T W_t dW_t=(W_T²−T)/2。这一随机变量均值为0，其方差可用正态四阶矩3T²独立核算为T²/2，与等距一致。"
+          ],
+          "formulas": [
+            {
+              "label": "随机被积过程W_t的等距核对",
+              "tex": "\\int_0^T W_t\\,dW_t=\\tfrac12(W_T^2-T),\\quad \\mathbb E\\!\\left[\\left(\\int_0^T W_t\\,dW_t\\right)^2\\right]=\\tfrac{T^2}{2}"
+            }
+          ],
+          "proof": "对f(x)=x²使用Itô公式dW_t²=2W_tdW_t+dt，整理并积分得到I=(W_T²−T)/2。正态矩E W_T⁴=3T²、E W_T²=T，故E I²=(3T²−2T²+T²)/4=T²/2，等于E∫W_t²dt。",
+          "worked": "T=1时，I=(W_1²−1)/2，均值0、方差(3−2+1)/4=0.5；不能把它当成高斯N(0,0.5)，因为它是中心化χ²变量。",
+          "limitation": "确定性被积时的高斯结论不适用于任意随机H；等距只固定二阶矩，不确定整个积分分布。"
+        },
+        {
+          "title": "交叉等距与数值稳定性",
+          "question": "如何把单个随机积分的二阶矩关系推广为两个策略扩散收益的协方差？",
+          "paragraphs": [
+            "对满足同样平方可积条件的H、K，I(H+K)=I(H)+I(K)。分别对H+K、H和K应用等距，并整理平方展开的交叉项。",
+            "得到E[I(H)I(K)]=E∫HKdt。这可以比较两个合法可预测策略在相同Brownian驱动下的协同波动，但不同驱动之间还需引入协变差。"
+          ],
+          "formulas": [
+            {
+              "label": "交叉等距与数值稳定性",
+              "tex": "\\mathbb E\\!\\left[\\left(\\int_0^TH\\,dW\\right)\\left(\\int_0^TK\\,dW\\right)\\right]=\\mathbb E\\int_0^TH_tK_t\\,dt"
+            }
+          ],
+          "proof": "使用平方差恒等式2I(H)I(K)=I(H+K)²−I(H)²−I(K)²。取期望后由Itô等距右侧依次为E∫(H+K)²−E∫H²−E∫K²=2E∫HK，约去系数2。",
+          "worked": "取T=1、H_t=1、K_t=t，则积分分别为W_1和∫_0^1t dW；交叉期望为∫_0^1t dt=0.5。",
+          "limitation": "相同驱动的交叉等距不等于任意两资产的收益协方差；多维因子需要估计Brownian驱动相关矩阵或真实风险协方差。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "ito-n0307",
+          "label": "先修：Itô积分构造"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0303",
+          "label": "先修：二次变差"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0311",
+          "label": "下一步：二次协变差"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0309",
+          "label": "一维Itô公式"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 15.070J Advanced Stochastic Processes：Lecture 14–17 Itô积分、等距与公式",
+          "url": "https://ocw.mit.edu/courses/15-070j-advanced-stochastic-processes-fall-2013/pages/lecture-notes/"
+        },
+        {
+          "title": "MIT 15.070J Advanced Stochastic Processes：Lecture 6–8布朗路径与二次变差",
+          "url": "https://www.ocw.mit.edu/courses/15-070j-advanced-stochastic-processes-fall-2013/resources/lecture-notes/"
+        }
+      ],
+      "checked_status": "V13升级既有扩展课：保留原H=2t数值算例，四节严格证明、L²延拓和风险边界"
     },
     {
       "id": "optimization-n0340",

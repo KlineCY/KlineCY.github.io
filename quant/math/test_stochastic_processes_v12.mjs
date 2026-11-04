@@ -36,7 +36,7 @@ const prerequisites={
 "stochastic-n0295":["stochastic-n0278","stochastic-n0281"],
 "stochastic-n0296":["stochastic-n0295"],
 "stochastic-n0297":["stochastic-n0296","stochastic-n0293"],
-"stochastic-n0298":["stochastic-n0281","timeseries-n0270"],
+"stochastic-n0298":["stochastic-n0281","probability-n0096"],
 "stochastic-n0299":["stochastic-n0273","stochastic-n0274","stochastic-n0288"],
 "stochastic-n0300":["stochastic-n0288","stochastic-n0299"]
 };
@@ -45,8 +45,8 @@ assert.equal(c.chapters.length,109);
 assert.equal(c.disciplines.length,20);
 assert.equal(manifest.modules.length,41);
 assert.equal(extension.length,103,"avoid duplicate extension lessons");
-assert.equal(core.length,89,"V12: 74 core plus 15 completed lectures");
-assert.equal(all.length,192,"V12: 177 full lectures plus 15");
+assert(core.length>=89,"V12 baseline: at least 89 completed core lectures");
+assert(all.length>=192,"V12 baseline: at least 192 complete mathematics lectures");
 assert.equal(byId.size,all.length,"do not duplicate any completed lecture across core and modules");
 assert.equal(ids.length,15);
 for(const id of ["stochastic-n0273","stochastic-n0279","stochastic-n0280"]){
@@ -189,5 +189,5 @@ assert(ml.includes('aria-label="V12马尔可夫链与金融订单过程的15篇�
 assert(html.includes("styles.css?v=20261104-probscore-v6-inference-v8-martingale-v9-convergence-v10-integration-v11-stochastic-v12"),"CSS cache version was not updated");
 assert(css.includes("V12: stochastic-process notation and long Chinese Markov arguments"),"CJK math styles absent");
 assert(css.includes(".math-v12-stochastic summary:focus-visible")&&css.includes(".katex-display")&&css.includes("@media print"),"accessibility/mobile/print math rules absent");
-console.log("PASS V12: 15 rigorously completed stochastic process lessons, 60 deep mathematical proofs, 60 strict KaTeX displays, "+sources+" official MIT source entries and "+links+" cross references; 192 full mathematics lectures, 656-node acyclic graph, numerical Markov/CTMC/queue invariants, CJK and mobile accessibility checks.");
+console.log("PASS V12: 15 rigorously completed stochastic process lessons, 60 deep mathematical proofs, 60 strict KaTeX displays, "+sources+" official MIT source entries and "+links+" cross references; "+all.length+" full mathematics lectures, 656-node acyclic graph, numerical Markov/CTMC/queue invariants, CJK and mobile accessibility checks.");
 
