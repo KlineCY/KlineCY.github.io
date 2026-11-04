@@ -1,0 +1,315 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "information-x001",
+      "node_id": "information-x001",
+      "title": "CRPS连续秩概率评分",
+      "definition": "连续秩概率评分（Continuous Ranked Probability Score, CRPS）是针对实值结果和整个预测累积分布函数F的严格适当评分损失，定义为预测CDF与实现值对应阶跃函数之间的平方差积分。它既衡量分布位置，也评价预测不确定性，与只针对某个τ分位点的pinball以及强烈惩罚接近零概率密度的Log Score不同。有限一阶矩下CRPS可以写成能量距离形式或对所有分位点的pinball积分。",
+      "assumptions": "单变量实值结果Y，预测CDF F右连续、非降且满足分布函数边界，预测分布具有有限一阶绝对矩；真实CDF G亦有适当矩以保证期望有限。积分对整个实数轴，损失取越小越好。若用Monte Carlo近似CRPS，必须清楚区分分布预测误差与有限情景抽样误差。",
+      "properties": [
+        "CRPS(F,y)=∫(F(z)−1{y≤z})²dz，给定点预测退化CDF时等于绝对误差|a−y|。",
+        "有限一阶矩下可写为E|X−y|−0.5E|X−X'|，其中X、X'独立同分布于F。",
+        "同样等于2∫₀¹ρτ(y−F⁻¹(τ))dτ，故CRPS将整条分位曲线的评分统一为一个积分。",
+        "给定真实CDF G时，期望CRPS(F,Y)相对使用G的超额等于∫(F(z)−G(z))²dz，说明严格适当性。"
+      ],
+      "formulas": [
+        {
+          "label": "CDF型CRPS",
+          "tex": "\\operatorname{CRPS}(F,y)=\\int_{\\mathbb R}\\!\\left(F(z)-\\mathbf1\\{y\\le z\\}\\right)^2\\,dz"
+        },
+        {
+          "label": "能量表示",
+          "tex": "\\operatorname{CRPS}(F,y)=E|X-y|-\\tfrac12 E|X-X'|"
+        },
+        {
+          "label": "分位数积分表示",
+          "tex": "\\operatorname{CRPS}(F,y)=2\\int_0^1\\rho_\\tau(y-F^{-1}(\\tau))\\,d\\tau"
+        },
+        {
+          "label": "严格适当性后悔",
+          "tex": "E_G[\\operatorname{CRPS}(F,Y)]-E_G[\\operatorname{CRPS}(G,Y)]=\\int_{\\mathbb R}(F-G)^2\\,dz"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对任意z，指标1{Y≤z}在真实G下是参数G(z)的Bernoulli变量，其平方误差的期望可展开成预测偏差平方加Bernoulli方差。",
+          "tex": "E_G[(F(z)-\\mathbf1\\{Y\\le z\\})^2]=(F(z)-G(z))^2+G(z)(1-G(z))"
+        },
+        {
+          "explanation": "对z积分，第二项与预测F无关，因此相对于真实G的期望风险差恰为CDF间平方距离。",
+          "tex": "E_G[\\operatorname{CRPS}(F,Y)-\\operatorname{CRPS}(G,Y)]=\\int(F-G)^2"
+        },
+        {
+          "explanation": "使用独立X与X'服从F的积分展开，可以把CDF平方积分重写为绝对距离期望差，便于从模拟路径计算。",
+          "tex": "\\operatorname{CRPS}(F,y)=E|X-y|-\\frac12E|X-X'|"
+        },
+        {
+          "explanation": "用广义逆分位函数对每个概率水平τ的pinball积分，将单个分位点评分累加成完整CDF评分。",
+          "tex": "\\operatorname{CRPS}(F,y)=2\\int_0^1\\rho_\\tau(y-q_\\tau(F))\\,d\\tau"
+        }
+      ],
+      "example": "令预测Y为取值0和1的Bernoulli分布，预测P(Y=1)=p=0.7。预测CDF在0≤z<1上恒为1−p=0.3。若实际y=1，CDF阶跃1{1≤z}在该区间为0，故CRPS=(0.3)²×(1−0)=0.09；若实际y=0，阶跃在该区间为1，CRPS=(0.3−1)²=0.49。点预测a=0、实现y=1时，CRPS退化为|0−1|=1。",
+      "application": "对ETF日收益的正态、t分布、混合密度和模拟条件分布做统一时间外比较时，CRPS不需要评价单个实现点的密度数值，而是衡量整条预测CDF及其分位结构。应和Log Score、PIT、VaR高分位pinball及尾部ES分别报告，避免平均分掩盖危机阶段偏差。",
+      "caveat": "CRPS的严格适当性针对适当可积的预测CDF与真实分布，有限样本估计和模型选择并不自动拥有该最优性。单变量CRPS不能评价多资产联合Copula依赖结构；若用有限M个模拟情景代入能量公式，还需说明是否使用U-statistic修正二样本项的抽样偏差。",
+      "deep_sections": [
+        {
+          "title": "评分对象为何是整条CDF",
+          "question": "CRPS与只评价95%分位点的pinball有哪些不同？",
+          "paragraphs": [
+            "Pinball在给定τ下评价一个分位点，CRPS将所有阈值z上的概率预测F(z)与实际结果的阶跃CDF进行比较，给出一条完整预测分布的平均损失。",
+            "由于平方项对概率偏差敏感，CRPS会同时响应分布位置和不确定性的变化；但它不能仅凭单个汇总分值保证99%尾部风险正确，因此金融研究还需要专门尾部评分。"
+          ],
+          "formulas": [
+            {
+              "label": "评分对象为何是整条CDF",
+              "tex": "\\operatorname{CRPS}(F,y)=\\int(F(z)-\\mathbf1\\{y\\le z\\})^2dz"
+            }
+          ],
+          "proof": "对每一个阈值z计算预测事件概率F(z)与实际事件指示1{Y≤z}之间的平方差，再对所有实数阈值积分。这个结构解释其与连续Brier分数的关系。",
+          "worked": "预测Bernoulli(p=.7)而实现y=1时，只有区间[0,1)有非零误差，预测CDF为.3、目标阶跃为0，CRPS=.09。",
+          "limitation": "如果目标是仅有少数风险分位点的比较，整个CDF的CRPS并不能替代特定VaR超越检验。"
+        },
+        {
+          "title": "严格适当性的积分证明",
+          "question": "为什么如实报告整个分布可最小化期望CRPS？",
+          "paragraphs": [
+            "当真实未来变量服从CDF G时，对固定阈值z，事件1{Y≤z}服从均值为G(z)的伯努利分布。预测F(z)的平方损失期望可以分成(F(z)−G(z))²和真实事件自身的方差。",
+            "把阈值上的恒等式对z积分，真实方差项不依赖F，故使用F相对真实G的超额风险就是两条CDF的平方距离。分布可识别时，零后悔意味着两者相同。"
+          ],
+          "formulas": [
+            {
+              "label": "严格适当性的积分证明",
+              "tex": "E_G[\\operatorname{CRPS}(F,Y)-\\operatorname{CRPS}(G,Y)]=\\int(F-G)^2dz"
+            }
+          ],
+          "proof": "对Bernoulli事件的平方损失展开，得预测偏差平方加G(z)(1−G(z))；积分后减去真实G自身的损失，就只剩非负的CDF平方差。",
+          "worked": "若真实Bernoulli成功率为p=.7，而模型报告p=.5，其CDF在[0,1)相差.2，因此CRPS期望后悔为(.2)²=.04。",
+          "limitation": "严格适当性是总体期望结论，有限测试期得分更低的模型仍可能只是由抽样噪声造成。"
+        },
+        {
+          "title": "能量表示与分位积分",
+          "question": "CRPS如何从模拟收益分布或分位回归模型计算？",
+          "paragraphs": [
+            "对于有限一阶矩预测分布，可抽取两个独立预测变量X和X'，用E|X−y|减去一半E|X−X'|计算CRPS。",
+            "若模型给出完整分位函数，也可以按2∫ρτ(y−qτ)dτ数值积分。两种表示与CDF积分定义一致，但离散概率水平网格和有限模拟路径都会引入近似误差。"
+          ],
+          "formulas": [
+            {
+              "label": "能量表示与分位积分",
+              "tex": "\\operatorname{CRPS}(F,y)=2\\int_0^1\\rho_\\tau(y-q_\\tau)\\,d\\tau"
+            }
+          ],
+          "proof": "利用分位函数与绝对距离的积分恒等式，将能量表示中的成对差异与单点误差组合整理为所有τ的pinball评分积分；这里有明确的系数2。",
+          "worked": "当F退化成固定点a=0且y=1，所有τ的qτ都为0，得到2∫₀¹τdτ=1，与绝对误差|a−y|一致。",
+          "limitation": "如果只提供95%和99%两个分位点，不能用两项pinball简单相加便宣称已计算精确CRPS。"
+        },
+        {
+          "title": "金融预测评分与实际交易价值",
+          "question": "为什么时间外CRPS下降不自动改善ETF回撤？",
+          "paragraphs": [
+            "CRPS是概率预测分布的统计评价指标，模型可以在常规行情的分布中心更准确，同时在稀少危机日低估尾部；汇总平均得分仍可能下降。",
+            "因此评价须在冻结未来日期计算CRPS、Log Score、PIT和高分位pinball，再对实际组合资金、换手、相关性压力与强制平仓进行独立检查。"
+          ],
+          "formulas": [
+            {
+              "label": "金融预测评分与实际交易价值",
+              "tex": "\\Delta\\overline{\\operatorname{CRPS}}\\ne\\Delta\\operatorname{Sharpe}_{\\rm net}"
+            }
+          ],
+          "proof": "一个评分较低的分布模型可能对普通交易日的全部CDF拟合更好，但其99%损失分位仍可能失准；评分目标与净收益函数根本不同。",
+          "worked": "若两个模型在100天中有95个平稳日、5个危机日，模型A可能因平稳日CRPS更小而总体占优，危机尾部仍需单列检验。",
+          "limitation": "对同一外层测试进行大量候选模型筛选将导致后验选择偏差，统计得分改善需要依赖稳健的不确定性分析。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "statistics-n0151",
+          "label": "先修：经验CDF与分位逆"
+        },
+        {
+          "kind": "math",
+          "id": "riskmath-n0588",
+          "label": "先修：pinball损失"
+        },
+        {
+          "kind": "math",
+          "id": "information-n0483",
+          "label": "比较：Log Score和KL后悔"
+        },
+        {
+          "kind": "ml",
+          "id": "m04-c10-p01",
+          "label": "ML：CRPS与Log Score"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Gneiting and Raftery (2007), Strictly Proper Scoring Rules",
+          "url": "https://doi.org/10.1198/016214506000001437"
+        },
+        {
+          "title": "scoringRules R package CRPS documentation",
+          "url": "https://cran.r-project.org/package=scoringRules"
+        }
+      ],
+      "checked_status": "完整数学教材：CRPS积分、能量表示、分位积分与严格适当性"
+    },
+    {
+      "id": "information-x002",
+      "node_id": "information-x002",
+      "title": "概率积分变换与分布校准",
+      "definition": "概率积分变换（Probability Integral Transform, PIT）把实际连续响应Y代入对应预测分布函数F得到U=F(Y)。当F是Y的真实连续分布函数时，U服从均匀分布U(0,1)。若Y具有离散概率原子，需要用独立均匀随机变量在CDF跳跃中随机化，否则普通PIT不可能具有连续均匀分布。金融时序中PIT的边际均匀、条件校准及跨日期独立性是不同的可检验性质。",
+      "assumptions": "对于基本PIT，F为真实连续CDF，U=F(Y)；若需使用严格反函数证明，可假定F严格递增，广义逆可以推广。对离散Y，设V独立服从Unif(0,1)，定义随机化PIT U=F(Y^-)+V[F(Y)−F(Y^-)]。在预测环境下每期F_t必须由F_{t−1}可得信息形成；评估条件校准需用未来实际Y_t。",
+      "properties": [
+        "连续且模型正确时，P(F(Y)≤u)=u，u∈[0,1]，因此PIT直方图理应接近均匀分布。",
+        "含有概率原子的离散分布应使用跳跃区间随机化PIT；普通F(Y)会集中于有限个值，不能要求连续均匀。",
+        "PIT的边际均匀性并不保证给定市场状态后的条件预测分布正确，时序还应检测PIT的序列依赖。",
+        "U形PIT直方图常提示预测分布偏窄，拱形常提示偏宽，偏斜提示分布位置系统性偏差；这些仅是诊断线索，需要分组检验。"
+      ],
+      "formulas": [
+        {
+          "label": "连续PIT",
+          "tex": "U=F(Y),\\qquad U\\sim\\operatorname{Unif}(0,1)"
+        },
+        {
+          "label": "随机化离散PIT",
+          "tex": "U=F(Y^-)+V\\{F(Y)-F(Y^-)\\}"
+        },
+        {
+          "label": "广义逆概率变换",
+          "tex": "\\Pr(F(Y)\\le u)=u"
+        },
+        {
+          "label": "金融逐期PIT",
+          "tex": "U_t=\\widehat F_{t\\mid t-1}(Y_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "当F连续严格递增且是Y真实CDF，事件F(Y)≤u等价于Y≤F⁻¹(u)，因此其概率为F(F⁻¹(u))=u。",
+          "tex": "\\Pr(F(Y)\\le u)=F(F^{-1}(u))=u"
+        },
+        {
+          "explanation": "对于概率原子，Y=y时真实CDF从F(y^-)跳跃到F(y)，使用独立V在该段均匀随机化；各概率区间刚好按事件质量拼接。",
+          "tex": "U\\mid Y=y\\sim\\operatorname{Unif}(F(y^-),F(y))"
+        },
+        {
+          "explanation": "条件模型正确时，给定前期信息集的PIT应具有对应条件均匀结构；若观察到序列相关或状态依赖均匀偏差，意味着动态分布可能遗漏结构。",
+          "tex": "\\Pr(U_t\\le u\\mid\\mathcal F_{t-1})=u"
+        },
+        {
+          "explanation": "仅检查总体PIT直方图是对无条件边际分布的检验，不排除模型在不同风险状态下正负误差互相抵消。",
+          "tex": "E[\\mathbf1\\{U_t\\le u\\}]=u"
+        }
+      ],
+      "example": "Y∈{0,1}，真实P(Y=1)=0.7，P(Y=0)=0.3；CDF在0处从0跳至0.3，在1处从0.3跳至1。普通PIT F(Y)只取0.3与1，显然不均匀。采用随机化PIT：若Y=0，则U=0.3V均匀落在[0,0.3]；若Y=1，则U=0.3+0.7V均匀落在[0.3,1]。两种情形分别以0.3、0.7概率发生，拼接后总体U均匀落在[0,1]。",
+      "application": "对ETF收益完整分布预测、HAR/GARCH创新分布和VaR–ES密度模型，可逐日将已实现损失代入此前冻结的预测CDF构造PIT，再评价直方图形状、序列自相关、按波动状态分组的均匀性，以及与CRPS及Log Score之间的差异。",
+      "caveat": "直方图看起来均匀只是有限样本诊断，不证明模型条件分布完全正确。金融收益离散报价、数据修订和时间依赖要求独立验证；随机化PIT的V必须独立于Y及训练过程，使用随机种子与生成方式应可复现。对不同资产或月份求平均可能掩盖局部失准。",
+      "deep_sections": [
+        {
+          "title": "连续PIT为什么服从均匀分布",
+          "question": "一个任意形状的真实分布如何变成U(0,1)？",
+          "paragraphs": [
+            "如果F是未来Y的真实连续CDF，把观测Y经过F映射为累计概率U。低值映射到低累积概率，高值映射到高累积概率，结果在真实分布正确时应均匀覆盖0到1。",
+            "这一变化是对已实现Y与事先预测CDF的联合评价，不是保证任意拟合CDF都可把真实Y变均匀。推导中的F必须确为条件或总体真实分布。"
+          ],
+          "formulas": [
+            {
+              "label": "连续PIT为什么服从均匀分布",
+              "tex": "\\Pr(F(Y)\\le u)=F(F^{-1}(u))=u"
+            }
+          ],
+          "proof": "当F连续严格递增时，按单调性把事件F(Y)≤u改写为Y≤F⁻¹(u，再使用真实分布函数本身定义得到概率u。",
+          "worked": "当Y服从Unif(0,2)，F(y)=y/2（0≤y≤2），则Y=1.2时PIT=.6；在重复真实抽样下该变换整体为Unif(0,1)。",
+          "limitation": "实际金融预测中F由有限训练估计而非预先已知，不能把理论PIT结论当作自动成立的事实。"
+        },
+        {
+          "title": "为什么离散PIT必须随机化",
+          "question": "Bernoulli概率预测如何避免PIT只落在有限几个点？",
+          "paragraphs": [
+            "有离散概率原子时，CDF会跳跃，普通F(Y)只有有限个可能取值。因此即使预测完全正确，它也不能形成连续均匀直方图。",
+            "随机化PIT在每个观测概率质量对应的CDF区间内加入独立均匀V，将离散质量展开成均匀长度的概率区间；混合这些区间可恢复总体均匀性。"
+          ],
+          "formulas": [
+            {
+              "label": "为什么离散PIT必须随机化",
+              "tex": "U=F(Y^-)+V\\{F(Y)-F(Y^-)\\}"
+            }
+          ],
+          "proof": "对每个Y=y，条件分布U在长度等于P(Y=y)的区间均匀。每个区间被选中的概率又恰好等于其长度，故拼接后整个[0,1]上的密度为1。",
+          "worked": "P(Y=0)=.3时随机化PIT在[0,.3]均匀；P(Y=1)=.7时在[.3,1]均匀，两段按相应概率混合得到Unif(0,1)。",
+          "limitation": "随机化V必须独立产生且保留随机种子；不同抽样V可能改变有限样本直方图，但不改变正确模型下的总体性质。"
+        },
+        {
+          "title": "PIT均匀性、独立性和条件校准",
+          "question": "为什么汇总直方图平坦仍可能是错误的ETF风险预测？",
+          "paragraphs": [
+            "某预测模型可能在平稳行情中高估波动，在危机行情中低估波动，两类误差汇总后让整体PIT直方图接近均匀；但给定已知波动状态时，预测分布依然错设。",
+            "对动态分布预测，应结合PIT时间序列自相关、按预测时已知市场状态分组的直方图和条件覆盖检验。若使用状态分组和测试数据反复调参，最终检验也会受后验选择影响。"
+          ],
+          "formulas": [
+            {
+              "label": "PIT均匀性、独立性和条件校准",
+              "tex": "\\Pr(U_t\\le u\\mid\\mathcal F_{t-1})=u"
+            }
+          ],
+          "proof": "条件预测分布正确时，任意可观测旧信息集对应的未来PIT应均匀，因此条件概率等式比单独无条件E[1{U≤u}]=u更强。",
+          "worked": "即使100个PIT值在0到1之间各分箱数量接近相等，也可能有前50天全部偏低、后50天全部偏高的时序模式，需要独立性和状态诊断。",
+          "limitation": "极少危机日期下分组检验统计功效可能很低；边际均匀只是必要条件之一而非全面充分条件。"
+        },
+        {
+          "title": "预测CDF、CRPS与风险资本的关系",
+          "question": "同一个概率分布模型需要做哪些互补评价？",
+          "paragraphs": [
+            "CRPS衡量预测CDF与实际阶跃之间的距离，Log Score惩罚实现值的低密度，PIT检验概率等级分布，VaR–ES检验高尾部资本风险。四者各自回答不同问题。",
+            "ETF分布预测应在冻结时间段同时报告这些统计量与分状态风险，并把持仓调整、融资、成交成本和实际损失保留在另一套经济账本中。"
+          ],
+          "formulas": [
+            {
+              "label": "预测CDF、CRPS与风险资本的关系",
+              "tex": "\\widehat U_t=\\widehat F_{t\\mid t-1}(Y_t)"
+            }
+          ],
+          "proof": "对t−1可得信息估计Fhat_t，并在Y_t实现后计算Fhat_t(Y_t)，确保未使用未来标签更新预测分布；这是概率校准评价的点时顺序。",
+          "worked": "若模型对95%常规日的CDF拟合很好但危机日明显失准，平均CRPS可能仍下降，而PIT尾端堆积与99% VaR超越会揭示另一层风险。",
+          "limitation": "平均PIT均匀、平均CRPS低或平均对数评分优异，都不能单独证明未来保证金与资金流动性风险得到控制。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "information-x001",
+          "label": "先修：CRPS完整分布评分"
+        },
+        {
+          "kind": "math",
+          "id": "statistics-n0151",
+          "label": "先修：经验CDF"
+        },
+        {
+          "kind": "math",
+          "id": "riskmath-n0593",
+          "label": "应用：VaR–ES时间回测"
+        },
+        {
+          "kind": "ml",
+          "id": "m23-c10-p01",
+          "label": "ML：金融概率校准"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Gneiting, Balabdaoui and Raftery (2007), Probabilistic Forecasts, Calibration and Sharpness",
+          "url": "https://doi.org/10.1111/j.1467-9868.2007.00587.x"
+        },
+        {
+          "title": "Gneiting and Raftery (2007), Strictly Proper Scoring Rules",
+          "url": "https://doi.org/10.1198/016214506000001437"
+        }
+      ],
+      "checked_status": "完整数学教材：PIT均匀定理、离散随机化、条件动态校准"
+    }
+  ]
+}
