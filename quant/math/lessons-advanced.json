@@ -3910,6 +3910,936 @@
         }
       ],
       "checked_status": "V12完整精讲：四节CTMC推导、独立数值算例和金融模型假设"
+    },
+    {
+      "id": "stochastic-n0295",
+      "node_id": "stochastic-n0295",
+      "title": "Markov决策过程",
+      "definition": "Markov决策过程（MDP）由状态、动作、转移核、即时奖励与策略共同定义，区别于没有决策动作的Markov链。给定当前状态和动作，下一期条件分布不依赖更久远历史；策略通过改变动作分布影响后续状态与累计效用。金融资产配置的动作可解释为仓位，但必须同时把交易成本、资金约束和交易时点可观测信息纳入状态及奖励。",
+      "assumptions": "取有限状态集合S、有限可行动作集合A(s)，受控转移概率P(s'|s,a)，有界即时奖励r(s,a)，折现系数0≤γ<1。动作a_t必须对决策前信息可测；若使用有限期问题则还需期限T与终端支付。转移模型的Markov性是对完整控制状态的假设，不能由价格本身为单变量序列推出。",
+      "properties": [
+        "状态与动作必须区分，固定策略后受控过程才形成相应Markov链。",
+        "Bellman有限期倒推以下一期价值为条件期望，不要求未来市场状态已知。",
+        "有界奖励、有限状态动作且γ<1时，最优折现价值有限并存在确定性平稳最优策略。",
+        "真实交易中动作可能影响订单簿及价格，因此无冲击的转移核不一定在仓位改变后保持不变。"
+      ],
+      "formulas": [
+        {
+          "label": "五元结构与受控转移",
+          "tex": "P_\\pi(s,s')=\\sum_{a\\in A(s)}\\pi(a\\mid s)P(s'\\mid s,a),\\qquad\\sum_{s'}P(s'\\mid s,a)=1"
+        },
+        {
+          "label": "策略评价与折现回报",
+          "tex": "V^\\pi=r^\\pi+\\gamma P_\\pi V^\\pi=(I-\\gamma P_\\pi)^{-1}r^\\pi"
+        },
+        {
+          "label": "最优控制与合法策略类",
+          "tex": "V^*(s)=\\max_{a\\in A(s)}\\left\\{r(s,a)+\\gamma\\sum_{s'}P(s'\\mid s,a)V^*(s')\\right\\}"
+        },
+        {
+          "label": "状态充分性与数据泄漏",
+          "tex": "s_t=(z_t,w_{t-1},b_t),\\qquad a_t=w_t,\\quad r_t=R_{t+1}w_t-c|w_t-w_{t-1}|"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "因为给定s和a的下一期事件{s'=j}互斥且完备，转移概率之和为1。随机策略对动作作非负加权，计算Pπ后其每行和仍为1，因此固定平稳策略对应合法Markov转移矩阵。",
+          "tex": "P_\\pi(s,s')=\\sum_{a\\in A(s)}\\pi(a\\mid s)P(s'\\mid s,a),\\qquad\\sum_{s'}P(s'\\mid s,a)=1"
+        },
+        {
+          "explanation": "在总奖励绝对可积条件下将第0期r0和t≥1部分拆开。对下一状态条件化并使用策略平稳性，得到Vπ=rπ+γPπVπ。Pπ的谱半径≤1、γ<1，所以Neumann级数Σγ^kPπ^k收敛到(I−γPπ)^{-1}。",
+          "tex": "V^\\pi=r^\\pi+\\gamma P_\\pi V^\\pi=(I-\\gamma P_\\pi)^{-1}r^\\pi"
+        },
+        {
+          "explanation": "有限动作与有界奖励使Bellman算子将有界函数映为有界函数。每个状态选择使右侧达到最大值的动作，结合折现算子的不动点唯一性，可验证由这些动作组成的平稳确定性策略是最优策略。",
+          "tex": "V^*(s)=\\max_{a\\in A(s)}\\left\\{r(s,a)+\\gamma\\sum_{s'}P(s'\\mid s,a)V^*(s')\\right\\}"
+        },
+        {
+          "explanation": "如果即时奖励依赖上一期仓位w_{t−1}，把该仓位并入状态使奖励可写成r(s_t,a_t,R_{t+1})。若随机下一期收益的条件分布只依赖当前完整状态及动作，联合过程满足受控Markov条件，允许使用Bellman递推。",
+          "tex": "s_t=(z_t,w_{t-1},b_t),\\qquad a_t=w_t,\\quad r_t=R_{t+1}w_t-c|w_t-w_{t-1}|"
+        }
+      ],
+      "example": "一状态每期奖励2、折现0.8的策略价值为10。两动作持有/对冲分别令压力转移概率0.3/0.1，按各半随机策略得到压力概率0.2。仓位由0.5调整到0.8且单位成本0.01时换手成本为0.003。",
+      "application": "用于ETF仓位控制、库存约束、风险预算与交易成本优化；应按样本外时点核对转移核、奖励定义、可行动作与模型不确定性。",
+      "caveat": "MDP最优性是给定模型内的结论，不能由历史拟合推导出真实价格服从受控Markov过程。实盘还需核验状态可观测性与订单可执行性。",
+      "deep_sections": [
+        {
+          "title": "五元结构与受控转移",
+          "question": "为什么动态资产配置不是单纯的状态转移矩阵估计？",
+          "paragraphs": [
+            "普通马尔可夫链只给状态到状态的条件概率，MDP另外规定在当前状态可以选择哪些动作，以及不同动作如何改变奖励和下一期分布。受控转移核应按(s,a)逐行归一化。",
+            "定义策略π(a|s)后，才形成由动作平均得到的状态转移矩阵P_π；若策略使用未来收益筛选动作，就不再满足合法决策时刻的信息约束。"
+          ],
+          "formulas": [
+            {
+              "label": "五元结构与受控转移",
+              "tex": "P_\\pi(s,s')=\\sum_{a\\in A(s)}\\pi(a\\mid s)P(s'\\mid s,a),\\qquad\\sum_{s'}P(s'\\mid s,a)=1"
+            }
+          ],
+          "proof": "因为给定s和a的下一期事件{s'=j}互斥且完备，转移概率之和为1。随机策略对动作作非负加权，计算Pπ后其每行和仍为1，因此固定平稳策略对应合法Markov转移矩阵。",
+          "worked": "若平稳状态0可选持有与对冲，持有时下一期压力状态概率0.3、对冲时概率0.1，策略以0.5概率使用两动作，则压力状态总概率0.5×0.3+0.5×0.1=0.2。",
+          "limitation": "模型必须包括实际可交易仓位、交易费用、资金限制与策略对状态的潜在冲击，否则估计结果不能直接当作可执行控制策略。"
+        },
+        {
+          "title": "策略评价与折现回报",
+          "question": "固定执行策略后的终身价值如何从一步奖励转成线性方程？",
+          "paragraphs": [
+            "对固定平稳策略π定义Vπ(s)=Eπ[Σ_{t≥0}γ^t r(s_t,a_t)|s_0=s]。把第一期奖励单独提取，剩余期次从1开始的折现价值可以依据Markov性质写成下一状态的Vπ。",
+            "得到Vπ=rπ+γPπVπ。有界奖励和γ<1保证级数绝对收敛且矩阵I−γPπ可逆，给出唯一的策略价值；不折现且无吸收条件不能简单沿用。"
+          ],
+          "formulas": [
+            {
+              "label": "策略评价与折现回报",
+              "tex": "V^\\pi=r^\\pi+\\gamma P_\\pi V^\\pi=(I-\\gamma P_\\pi)^{-1}r^\\pi"
+            }
+          ],
+          "proof": "在总奖励绝对可积条件下将第0期r0和t≥1部分拆开。对下一状态条件化并使用策略平稳性，得到Vπ=rπ+γPπVπ。Pπ的谱半径≤1、γ<1，所以Neumann级数Σγ^kPπ^k收敛到(I−γPπ)^{-1}。",
+          "worked": "一状态且每期奖励为2、γ=0.8，Pπ=[1]，则V=2+0.8V，解V=10；显式级数2/(1−0.8)=10与线性方程一致。",
+          "limitation": "把实现收益作为奖励仍需计入成交价格与成本；未来不可观察的状态不能进入当期执行策略。"
+        },
+        {
+          "title": "最优控制与合法策略类",
+          "question": "为什么最优策略必须在可行动作集合内优化？",
+          "paragraphs": [
+            "最优价值V*(s)=sup_πVπ(s)需要在每一状态上权衡即时奖励和下一期价值。有限状态动作集合可将优化写成Bellman最大运算，在每个状态选择达到最大值的动作。",
+            "若持有仓位的动作超出杠杆限制，或对冲资产在当时不可交易，就不能仍将该动作纳入候选。数学上的最优性始终相对于既定转移核、奖励和可行动作集合。"
+          ],
+          "formulas": [
+            {
+              "label": "最优控制与合法策略类",
+              "tex": "V^*(s)=\\max_{a\\in A(s)}\\left\\{r(s,a)+\\gamma\\sum_{s'}P(s'\\mid s,a)V^*(s')\\right\\}"
+            }
+          ],
+          "proof": "有限动作与有界奖励使Bellman算子将有界函数映为有界函数。每个状态选择使右侧达到最大值的动作，结合折现算子的不动点唯一性，可验证由这些动作组成的平稳确定性策略是最优策略。",
+          "worked": "一状态两种动作：A每期奖励2、B每期奖励1，γ=0.8且状态保持不变。A的价值10，B的价值5，所以始终选A优于B。",
+          "limitation": "如果动作A改变了价格分布而模型却沿用无冲击的P，比较结果无法保证真实市场中的A仍然最优。"
+        },
+        {
+          "title": "状态充分性与数据泄漏",
+          "question": "为什么把过去持仓和已实现成本放入状态，可能比提高策略模型复杂度更重要？",
+          "paragraphs": [
+            "金融动态优化中，未来净收益常依赖当前价格状态、原有持仓、剩余保证金、交易成本和待执行订单。只用当期涨跌标签作状态，通常不满足所假设的Markov充分性。",
+            "将库存或必要历史变量增广到状态后，既可描述换手成本，也能使决策基于当时可得信息；但状态维度上升会导致估计和动态规划计算成本增加。"
+          ],
+          "formulas": [
+            {
+              "label": "状态充分性与数据泄漏",
+              "tex": "s_t=(z_t,w_{t-1},b_t),\\qquad a_t=w_t,\\quad r_t=R_{t+1}w_t-c|w_t-w_{t-1}|"
+            }
+          ],
+          "proof": "如果即时奖励依赖上一期仓位w_{t−1}，把该仓位并入状态使奖励可写成r(s_t,a_t,R_{t+1})。若随机下一期收益的条件分布只依赖当前完整状态及动作，联合过程满足受控Markov条件，允许使用Bellman递推。",
+          "worked": "原仓位0.5、改至0.8、单位交易成本系数c=0.01，则单期换手成本0.01×|0.8−0.5|=0.003；若忘记原仓位，无法算出这笔成本。",
+          "limitation": "收益R_{t+1}是下一期才实现的随机量，不能作为当期已知特征；真实交易冲击还可能让转移核依赖成交量和市场深度。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "stochastic-n0278",
+          "label": "先修：状态转移矩阵"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0296",
+          "label": "后续：Bellman方程"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0298",
+          "label": "关联：市场状态切换"
+        },
+        {
+          "kind": "ml",
+          "id": "m23-c11-p01",
+          "label": "金融应用：ETF尾部约束"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 6.231 Dynamic Programming and Stochastic Control：有限时域、Bellman递推及最优停止",
+          "url": "https://ocw.mit.edu/courses/6-231-dynamic-programming-and-stochastic-control-fall-2015/pages/lecture-notes/"
+        },
+        {
+          "title": "MIT 6.231 Dynamic Programming and Stochastic Control：Lecture 10折现无限期、价值迭代和策略评估",
+          "url": "https://ocw.mit.edu/courses/6-231-dynamic-programming-and-stochastic-control-fall-2015/resources/mit6_231f15_lec10/"
+        }
+      ],
+      "checked_status": "V13数学精讲：四节条件、推导、逐项计算与金融边界"
+    },
+    {
+      "id": "stochastic-n0296",
+      "node_id": "stochastic-n0296",
+      "title": "Bellman最优方程",
+      "definition": "Bellman最优方程将多期最优控制分解为当前动作决策及剩余问题的最优价值。有限期动态规划以终端价值为起点向前倒推；无限期折现问题由最优Bellman算子的不动点求解。价值迭代、策略迭代和误差界建立在有限状态、有限动作、有界奖励以及0≤γ<1等明确条件下。",
+      "assumptions": "状态与动作集合有限，受控转移核行和1，即时奖励有界。无限期使用折现γ∈[0,1)并按最大累计奖励约定；若使用成本最小化则max改min、r改g。有限期递推要给定V_T=g_T，不能直接把有限期策略与无限期平稳策略混为一谈。",
+      "properties": [
+        "有限期Bellman递推可从给定终端支付反向严格计算。",
+        "无限期折现Bellman算子在sup范数下为γ压缩，确保唯一有界不动点。",
+        "价值迭代满足||V_k−V*||∞≤γ^k||V_0−V*||∞，可给停止精度界。",
+        "策略评价与策略改进要求每次动作选择合法；若gamma=1则不能直接采用γ压缩结论。"
+      ],
+      "formulas": [
+        {
+          "label": "有限期倒推与最优性原理",
+          "tex": "V_t(s)=\\max_a\\left[r_t(s,a)+\\sum_{s'}P_t(s'\\mid s,a)V_{t+1}(s')\\right],\\quad V_T=g_T"
+        },
+        {
+          "label": "Bellman算子的压缩映射",
+          "tex": "\\|\\mathcal TU-\\mathcal TV\\|_\\infty\\le\\gamma\\|U-V\\|_\\infty,\\qquad 0\\le\\gamma<1"
+        },
+        {
+          "label": "残差、误差与停止条件",
+          "tex": "\\|V-V^*\\|_\\infty\\le\\frac{\\|\\mathcal TV-V\\|_\\infty}{1-\\gamma}"
+        },
+        {
+          "label": "策略改进及稳定策略",
+          "tex": "T_{\\pi'}V^\\pi\\ge T_\\pi V^\\pi=V^\\pi\\quad\\Longrightarrow\\quad V^{\\pi'}\\ge V^\\pi"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "在t=T−1处，条件期望只涉及终端支付，可直接对有限动作逐个求最大。假设V_{t+1}已描述剩余期限的最优值，则任意当前动作之后的最优剩余回报正是条件期望V_{t+1}，取最优动作完成逆向归纳证明。",
+          "tex": "V_t(s)=\\max_a\\left[r_t(s,a)+\\sum_{s'}P_t(s'\\mid s,a)V_{t+1}(s')\\right],\\quad V_T=g_T"
+        },
+        {
+          "explanation": "对每个s与任意a，条件奖励项相消，余下γ|ΣP(s'|s,a)(U−V)(s')|≤γ||U−V||∞；利用|max_a x_a−max_a y_a|≤max_a|x_a−y_a|并再对s取sup得到压缩不等式。",
+          "tex": "\\|\\mathcal TU-\\mathcal TV\\|_\\infty\\le\\gamma\\|U-V\\|_\\infty,\\qquad 0\\le\\gamma<1"
+        },
+        {
+          "explanation": "由三角不等式||V−V*||≤||V−TV||+||TV−TV*||，再用压缩性质控制第二项≤γ||V−V*||。移项并除以1−γ>0，得到残差上界。",
+          "tex": "\\|V-V^*\\|_\\infty\\le\\frac{\\|\\mathcal TV-V\\|_\\infty}{1-\\gamma}"
+        },
+        {
+          "explanation": "新策略逐状态选择最大化动作，故T_{π'}Vπ≥T_πVπ。运用T_{π'}的单调性得到迭代序列T_{π'}^kVπ非减；折现压缩保证极限为V^{π'}，从而新策略的价值不低于旧策略。",
+          "tex": "T_{\\pi'}V^\\pi\\ge T_\\pi V^\\pi=V^\\pi\\quad\\Longrightarrow\\quad V^{\\pi'}\\ge V^\\pi"
+        }
+      ],
+      "example": "一状态奖励2、折现0.8时真值10，价值迭代初值0得到2、3.6、4.88；若当前估计9，Bellman残差0.2推得最大误差上界1。切换即时奖励从1到2的策略，价值从5提高至10。",
+      "application": "应用于动态仓位最优化、执行策略价值迭代、风险状态反馈控制和模型误差审查；支持明确残差停止条件。",
+      "caveat": "价值唯一性依赖有界奖励和γ<1。Bellman数值收敛不等于状态转移模型正确，不能以算法最优性代替金融策略样本外有效性。",
+      "deep_sections": [
+        {
+          "title": "有限期倒推与最优性原理",
+          "question": "为什么多期优化可以递归为一步决策与下一期价值？",
+          "paragraphs": [
+            "设V_T(s)=g_T(s)为最后时点的终端支付。若时刻t处于状态s、执行动作a，第一期获得r_t(s,a)，下一期随机到达s'后应执行从t+1起的最优策略。",
+            "因此对下一状态条件化并在当前动作上取最大值可得V_t递推。这个分解依赖状态充分性和未来能够根据新信息调整反馈策略，不能用全程固定未来动作替代。"
+          ],
+          "formulas": [
+            {
+              "label": "有限期倒推与最优性原理",
+              "tex": "V_t(s)=\\max_a\\left[r_t(s,a)+\\sum_{s'}P_t(s'\\mid s,a)V_{t+1}(s')\\right],\\quad V_T=g_T"
+            }
+          ],
+          "proof": "在t=T−1处，条件期望只涉及终端支付，可直接对有限动作逐个求最大。假设V_{t+1}已描述剩余期限的最优值，则任意当前动作之后的最优剩余回报正是条件期望V_{t+1}，取最优动作完成逆向归纳证明。",
+          "worked": "终端V_2=0，一状态t=1两个动作奖励2或1，则V_1=2；若t=0即时奖励3或0且后续状态不变，则最优V_0=3+2=5。",
+          "limitation": "有限时域最优动作可能随剩余期限改变，不能只由无限期平稳策略推断临近到期的清仓动作。"
+        },
+        {
+          "title": "Bellman算子的压缩映射",
+          "question": "为什么折现无限期问题能保证唯一解？",
+          "paragraphs": [
+            "定义(TV)(s)=max_a{r(s,a)+γΣP(s'|s,a)V(s')}。两个候选函数U,V的下一期预期差受到sup范数||U−V||∞控制，取最大动作后也不会放大这一差距。",
+            "于是||TU−TV||∞≤γ||U−V||∞；γ<1使T为压缩映射，Banach不动点定理给唯一有界价值V*，从任意初始有界V_0做价值迭代都收敛。"
+          ],
+          "formulas": [
+            {
+              "label": "Bellman算子的压缩映射",
+              "tex": "\\|\\mathcal TU-\\mathcal TV\\|_\\infty\\le\\gamma\\|U-V\\|_\\infty,\\qquad 0\\le\\gamma<1"
+            }
+          ],
+          "proof": "对每个s与任意a，条件奖励项相消，余下γ|ΣP(s'|s,a)(U−V)(s')|≤γ||U−V||∞；利用|max_a x_a−max_a y_a|≤max_a|x_a−y_a|并再对s取sup得到压缩不等式。",
+          "worked": "一状态r=2、γ=0.8，初始化V_0=0，则价值迭代V_1=2、V_2=3.6、V_3=4.88，趋向V*=10。",
+          "limitation": "若没有折现（γ=1），压缩常数变1，唯一性和有限价值需要其他条件，例如随机最短路的适当终止性质。"
+        },
+        {
+          "title": "残差、误差与停止条件",
+          "question": "迭代尚未收敛时，如何给价值估计一个可审计的误差上界？",
+          "paragraphs": [
+            "利用V*=TV*和压缩性，||V−V*||∞≤||V−TV||∞+γ||V−V*||∞。移项得到Bellman残差误差界，能将数值停止阈值转成实际价值精度。",
+            "在γ非常接近1时，1/(1−γ)会放大残差，实际算法需要更严格的收敛要求。误差界只相对于指定模型与奖励，不包括估计P的统计不确定性。"
+          ],
+          "formulas": [
+            {
+              "label": "残差、误差与停止条件",
+              "tex": "\\|V-V^*\\|_\\infty\\le\\frac{\\|\\mathcal TV-V\\|_\\infty}{1-\\gamma}"
+            }
+          ],
+          "proof": "由三角不等式||V−V*||≤||V−TV||+||TV−TV*||，再用压缩性质控制第二项≤γ||V−V*||。移项并除以1−γ>0，得到残差上界。",
+          "worked": "γ=0.8的一状态奖励2，若当前V=9，则TV=2+0.8×9=9.2，残差0.2，误差界0.2/0.2=1，真实误差|9−10|=1。",
+          "limitation": "残差很小不意味着交易回测已充分样本外验证：奖励估计、状态划分、交易冲击和行动集合错设仍可能主导真实误差。"
+        },
+        {
+          "title": "策略改进及稳定策略",
+          "question": "为什么在每个状态上贪心选择当前价值更高的动作可以改善策略？",
+          "paragraphs": [
+            "给定策略π的价值Vπ，若新策略π'在每个状态最大化r(s,a)+γE[Vπ(s')|s,a]，则Bellman策略改进不等式T_{π'}Vπ≥Vπ成立。",
+            "由于T_{π'}单调且压缩，反复作用使它收敛到V^{π'}，由单调性得V^{π'}≥Vπ。有限状态折现模型可由此构成策略迭代算法。"
+          ],
+          "formulas": [
+            {
+              "label": "策略改进及稳定策略",
+              "tex": "T_{\\pi'}V^\\pi\\ge T_\\pi V^\\pi=V^\\pi\\quad\\Longrightarrow\\quad V^{\\pi'}\\ge V^\\pi"
+            }
+          ],
+          "proof": "新策略逐状态选择最大化动作，故T_{π'}Vπ≥T_πVπ。运用T_{π'}的单调性得到迭代序列T_{π'}^kVπ非减；折现压缩保证极限为V^{π'}，从而新策略的价值不低于旧策略。",
+          "worked": "一状态可选A即时奖励1、B奖励2，γ=0.8。旧策略总选A价值5，改为B后一周期动作价值2+0.8×5=6>5，最终新价值为10。",
+          "limitation": "策略迭代改进是模型内的价值排序，不保证带滑点和市场冲击的实际净回报同序；真实部署仍需在未参与策略选择的样本上检验。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "stochastic-n0295",
+          "label": "先修：MDP定义"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0297",
+          "label": "后续：最优停止"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0282",
+          "label": "吸收风险模型"
+        },
+        {
+          "kind": "ml",
+          "id": "m12-c07-p01",
+          "label": "金融ML：样本外验证"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 6.231 Dynamic Programming and Stochastic Control：有限时域、Bellman递推及最优停止",
+          "url": "https://ocw.mit.edu/courses/6-231-dynamic-programming-and-stochastic-control-fall-2015/pages/lecture-notes/"
+        },
+        {
+          "title": "MIT 6.231 Dynamic Programming and Stochastic Control：Lecture 10折现无限期、价值迭代和策略评估",
+          "url": "https://ocw.mit.edu/courses/6-231-dynamic-programming-and-stochastic-control-fall-2015/resources/mit6_231f15_lec10/"
+        }
+      ],
+      "checked_status": "V13数学精讲：四节条件、推导、逐项计算与金融边界"
+    },
+    {
+      "id": "stochastic-n0297",
+      "node_id": "stochastic-n0297",
+      "title": "最优停止",
+      "definition": "最优停止研究可根据当前及历史可见信息选择停止时刻，以最大化某项随机支付的条件期望。有限期限离散模型中，Snell包络通过“现在停止得到G_t”和“继续等待得到下一期包络的条件期望”递推，最终给最小占优超鞅。最早进入停止区域的时刻在适当有限期限条件下构成最优停时。",
+      "assumptions": "固定滤过F_t及有限期限T，支付过程G_t需F_t可测且可积；若含折现，应先将G_t换成在同一计价时点的贴现支付。候选停止时刻τ应为{τ≤t}∈F_t且0≤τ≤T，不得利用未揭晓的未来价格决定是否现在停止。",
+      "properties": [
+        "Snell包络满足Y_T=G_T、Y_t=max(G_t,E[Y_{t+1}|F_t])。",
+        "Y_t是占优G_t的最小可积超鞅，停止区域为G_t≥E[Y_{t+1}|F_t]。",
+        "第一次进入Y_t=G_t的停时在有限期限下最优，不能仅看预期价格上涨而忽略立即支付。",
+        "最优停止价值依赖概率测度、贴现和交易规则，不是任意提前卖出行为的盈利保证。"
+      ],
+      "formulas": [
+        {
+          "label": "停止规则与信息可得性",
+          "tex": "\\tau\\text{ 是停时}\\iff\\{\\tau\\le t\\}\\in\\mathcal F_t\\quad(0\\le t\\le T)"
+        },
+        {
+          "label": "Snell包络的递推",
+          "tex": "Y_T=G_T,\\qquad Y_t=\\max\\{G_t,\\mathbb E[Y_{t+1}\\mid\\mathcal F_t]\\}"
+        },
+        {
+          "label": "超鞅最小性与停止区域",
+          "tex": "Y_t\\ge G_t,\\quad Y_t\\ge\\mathbb E[Y_{t+1}\\mid\\mathcal F_t],\\quad \\tau^*=\\inf\\{t:Y_t=G_t\\}"
+        },
+        {
+          "label": "停止时刻最优性与交易摩擦",
+          "tex": "Y_{t\\wedge\\tau^*}\\text{ 为鞅},\\qquad Y_0=\\mathbb E[G_{\\tau^*}]=\\sup_{\\tau\\le T}\\mathbb E[G_\\tau]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "停时定义要求每个截至t已经停止的事件可在F_t中判断。若τ=首次价格越过阈值的时刻，则{τ≤t}是截至t所有阈值超越事件的并，属于F_t；若τ依赖t以后路径最大值，则事件不再一般属于F_t。",
+          "tex": "\\tau\\text{ 是停时}\\iff\\{\\tau\\le t\\}\\in\\mathcal F_t\\quad(0\\le t\\le T)"
+        },
+        {
+          "explanation": "用逆向归纳证明：在终端T只能取G_T。假设Y_{t+1}已是从t+1开始最优条件支付，那么时刻t的每个可行策略要么立即停止，要么至少等一期，其最优等待价值就是条件期望Y_{t+1}，故两者的最大值是t处的最优价值。",
+          "tex": "Y_T=G_T,\\qquad Y_t=\\max\\{G_t,\\mathbb E[Y_{t+1}\\mid\\mathcal F_t]\\}"
+        },
+        {
+          "explanation": "设Z_t≥G_t且E[Z_{t+1}|F_t]≤Z_t。终端Z_T≥Y_T，若Z_{t+1}≥Y_{t+1}，则Z_t≥max(G_t,E[Z_{t+1}|F_t])≥max(G_t,E[Y_{t+1}|F_t])=Y_t。由逆归纳得到最小性。",
+          "tex": "Y_t\\ge G_t,\\quad Y_t\\ge\\mathbb E[Y_{t+1}\\mid\\mathcal F_t],\\quad \\tau^*=\\inf\\{t:Y_t=G_t\\}"
+        },
+        {
+          "explanation": "在τ*未到之前，由停止区域定义G_t<Y_t，故Y_t=E[Y_{t+1}|F_t]；在已经停止后过程不再改变，因此停后Y满足鞅条件。终端时τ*≤T，有限期有界停止给E Y_{τ*}=Y_0，且Y_{τ*}=G_{τ*}，得到最优性。",
+          "tex": "Y_{t\\wedge\\tau^*}\\text{ 为鞅},\\qquad Y_0=\\mathbb E[G_{\\tau^*}]=\\sup_{\\tau\\le T}\\mathbb E[G_\\tau]"
+        }
+      ],
+      "example": "今日即时止盈5，未来一期贴现报酬以各半概率为0或9时等待期望4.5，Snell包络取5；若未来贴现报酬为0/14，则等待期望7，最优选择等待。另若下一期条件均值7、贴现系数0.9，则等待价值6.3。",
+      "application": "用于美式期权、动态止盈止损、仓位清算及投资退出时点设计。必须采用合法停时和一致计价的实际现金流。",
+      "caveat": "数学最优停时不能保证交易按报价成交；无界停时、不完整信息、滑点与尾部风险会改变模型的最优性和可实施性。",
+      "deep_sections": [
+        {
+          "title": "停止规则与信息可得性",
+          "question": "怎样证明根据未来最优价位倒推的停止规则属于非法前视？",
+          "paragraphs": [
+            "停止时刻τ必须满足对每个t，事件{τ≤t}仅由截至t的信息决定。这样执行者在时刻t就能判断自己是否已经停止，而不必查看未来。",
+            "例如把“未来七天最高价格当天卖出”作为τ，一般无法在价格尚未揭晓时判定当天是未来最高点，因此不满足自然价格滤过下的停时要求。"
+          ],
+          "formulas": [
+            {
+              "label": "停止规则与信息可得性",
+              "tex": "\\tau\\text{ 是停时}\\iff\\{\\tau\\le t\\}\\in\\mathcal F_t\\quad(0\\le t\\le T)"
+            }
+          ],
+          "proof": "停时定义要求每个截至t已经停止的事件可在F_t中判断。若τ=首次价格越过阈值的时刻，则{τ≤t}是截至t所有阈值超越事件的并，属于F_t；若τ依赖t以后路径最大值，则事件不再一般属于F_t。",
+          "worked": "两个交易日内首次价格达到110即出售的规则，在第1日已知价格120时可以立即决定停止；“等到未来两日最高价再售”的规则无法在第1日确认是否还会更高。",
+          "limitation": "必须明确报价揭晓与可成交之间的时延；满足数学停时条件也不自动保证限价单在该价格成交。"
+        },
+        {
+          "title": "Snell包络的递推",
+          "question": "为什么最优停止的即时卖出与等待选项必须取最大值？",
+          "paragraphs": [
+            "在时刻t已知状态下，决策只有立即停止获得G_t，或至少再等一时期，然后用时刻t+1起的最优策略获取随机Y_{t+1}。",
+            "对等待回报作条件期望后与G_t比较，便得到Y_t=max(G_t,E[Y_{t+1}|F_t])；期限末不能等待，所以终端Y_T=G_T。"
+          ],
+          "formulas": [
+            {
+              "label": "Snell包络的递推",
+              "tex": "Y_T=G_T,\\qquad Y_t=\\max\\{G_t,\\mathbb E[Y_{t+1}\\mid\\mathcal F_t]\\}"
+            }
+          ],
+          "proof": "用逆向归纳证明：在终端T只能取G_T。假设Y_{t+1}已是从t+1开始最优条件支付，那么时刻t的每个可行策略要么立即停止，要么至少等一期，其最优等待价值就是条件期望Y_{t+1}，故两者的最大值是t处的最优价值。",
+          "worked": "在某状态立即清仓收益G_0=5，下一期最优支付G_1的条件期望为7且贴现因子0.9时，今日等待价值6.3大于5，最优选择继续，今日包络Y_0=6.3。",
+          "limitation": "即时和未来支付必须处于同一计价时点；若一个已贴现一个未贴现，取最大值会导致系统性错误。"
+        },
+        {
+          "title": "超鞅最小性与停止区域",
+          "question": "为何最优停止价值构成最小的占优超鞅？",
+          "paragraphs": [
+            "因为Y_t≥E[Y_{t+1}|F_t]且Y_t≥G_t，Y是占优支付过程G的超鞅。对任何其他占优G的超鞅Z，从终端Z_T≥G_T=Y_T起逆推，得到Z_t≥Y_t。",
+            "因此Y不仅给出最大可实现条件支付，还具有最小超鞅上界的数学特征。最早进入Y=G的停止区域可定义一条合法候选策略。"
+          ],
+          "formulas": [
+            {
+              "label": "超鞅最小性与停止区域",
+              "tex": "Y_t\\ge G_t,\\quad Y_t\\ge\\mathbb E[Y_{t+1}\\mid\\mathcal F_t],\\quad \\tau^*=\\inf\\{t:Y_t=G_t\\}"
+            }
+          ],
+          "proof": "设Z_t≥G_t且E[Z_{t+1}|F_t]≤Z_t。终端Z_T≥Y_T，若Z_{t+1}≥Y_{t+1}，则Z_t≥max(G_t,E[Z_{t+1}|F_t])≥max(G_t,E[Y_{t+1}|F_t])=Y_t。由逆归纳得到最小性。",
+          "worked": "单期模型中今日即卖5，明日贴现回报随机为0或9，概率各半，等待期望4.5，因此Y_0=max(5,4.5)=5，立即行权达到包络。",
+          "limitation": "无限期限、无界支付或不可积收益下，最早触及停止区域是否最优需要额外条件；本节只声明有限期限可积版本。"
+        },
+        {
+          "title": "停止时刻最优性与交易摩擦",
+          "question": "为什么触及停止区域的最优性仍需核验真实执行条件？",
+          "paragraphs": [
+            "定义τ*为第一个Y_t=G_t的时刻。在τ*之前由递推有Y_t=E[Y_{t+1}|F_t]，所以停止后的过程Y_{t∧τ*}成为鞅；τ*时Y_{τ*}=G_{τ*}。",
+            "对有限T应用有界停止的条件期望性质得到Y_0=E[G_{τ*}]，实现最优值。在金融应用中若存在报价与成交偏差、冲击成本或保证金限制，应把这些变量写入实际支付G和状态。"
+          ],
+          "formulas": [
+            {
+              "label": "停止时刻最优性与交易摩擦",
+              "tex": "Y_{t\\wedge\\tau^*}\\text{ 为鞅},\\qquad Y_0=\\mathbb E[G_{\\tau^*}]=\\sup_{\\tau\\le T}\\mathbb E[G_\\tau]"
+            }
+          ],
+          "proof": "在τ*未到之前，由停止区域定义G_t<Y_t，故Y_t=E[Y_{t+1}|F_t]；在已经停止后过程不再改变，因此停后Y满足鞅条件。终端时τ*≤T，有限期有界停止给E Y_{τ*}=Y_0，且Y_{τ*}=G_{τ*}，得到最优性。",
+          "worked": "今日卖出5或等待到明日得到随机0/9（各概率0.5），等待期望4.5，最优τ*=0，价值5；若明日回报变成0/14，等待期望7，则最优应等待。",
+          "limitation": "包络最大化是相对于指定测度的期望，真实交易还会受到成交失败与风险厌恶的影响；不应从期望最优推出每条路径都获利。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "stochastic-n0296",
+          "label": "先修：Bellman倒推"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0293",
+          "label": "先修：可选停止定理"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0327",
+          "label": "后续：连续Snell包络"
+        },
+        {
+          "kind": "math",
+          "id": "finance-n0435",
+          "label": "期权：Put-Call平价"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 6.231 Dynamic Programming and Stochastic Control：有限时域、Bellman递推及最优停止",
+          "url": "https://ocw.mit.edu/courses/6-231-dynamic-programming-and-stochastic-control-fall-2015/pages/lecture-notes/"
+        },
+        {
+          "title": "MIT 6.231 Dynamic Programming and Stochastic Control：Lecture 10折现无限期、价值迭代和策略评估",
+          "url": "https://ocw.mit.edu/courses/6-231-dynamic-programming-and-stochastic-control-fall-2015/resources/mit6_231f15_lec10/"
+        }
+      ],
+      "checked_status": "V13数学精讲：四节条件、推导、逐项计算与金融边界"
+    },
+    {
+      "id": "stochastic-n0298",
+      "node_id": "stochastic-n0298",
+      "title": "马氏状态切换",
+      "definition": "马氏状态切换模型用不可直接观察或部分可观测的有限状态Markov链描述金融收益或波动机制的变化。与一条固定参数回归不同，它允许每个潜在状态具有不同的收益分布，并用转移矩阵控制状态持续性。实时估计依赖前向滤波；使用全部未来样本做出的平滑状态不应当成当时可交易信号。",
+      "assumptions": "潜在状态Z_t属于有限集合，转移矩阵P_ij=P(Z_t=j|Z_{t−1}=i)齐次、各行和1；观测收益R_t条件于Z_t具有密度f_j(r_t)，且在给定状态路径后满足所声明的条件独立结构。滤波概率α_t(j)=P(Z_t=j|R_1,…,R_t)；策略在时刻t之前决定仓位时只能用已发布的数据。",
+      "properties": [
+        "预测状态概率由上一时刻滤波后验乘以转移矩阵得到。",
+        "观测更新由Bayes公式按状态条件似然f_j(r_t)加权并归一化。",
+        "两个状态下持久率高会产生长期状态相关，即使给定状态的收益创新独立。",
+        "平滑后验利用未来信息，不能替代实时滤波；模型标签置换与状态个数选择影响解释。"
+      ],
+      "formulas": [
+        {
+          "label": "隐含状态与条件观测模型",
+          "tex": "R_t\\mid Z_t=j\\sim f_j,\\qquad \\Pr(Z_t=j\\mid R_{1:t})=\\alpha_t(j)"
+        },
+        {
+          "label": "Markov预测与前向状态概率",
+          "tex": "\\widetilde\\alpha_t(j)=\\sum_i\\alpha_{t-1}(i)P_{ij}"
+        },
+        {
+          "label": "Bayes滤波更新与边际似然",
+          "tex": "\\alpha_t(j)=\\frac{f_j(R_t)\\widetilde\\alpha_t(j)}{\\sum_k f_k(R_t)\\widetilde\\alpha_t(k)}"
+        },
+        {
+          "label": "稳态持续性与前视平滑边界",
+          "tex": "\\pi P=\\pi,\\quad \\pi=\\left(\\frac23,\\frac13\\right),\\qquad\\alpha_{t\\mid T}\\ne\\alpha_{t\\mid t}\\ (T>t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对任意观测r，边际密度由全概率公式f(r)=Σ_jP(Z_t=j)f_j(r)得到。各f_j分布重叠时，Bayes后验α_t(j)通常介于0与1之间，不可能从单次收益唯一识别真实状态。",
+          "tex": "R_t\\mid Z_t=j\\sim f_j,\\qquad \\Pr(Z_t=j\\mid R_{1:t})=\\alpha_t(j)"
+        },
+        {
+          "explanation": "按当前隐状态的全概率公式，P(Z_t=j|R_{1:t−1})=Σ_iP(Z_t=j|Z_{t−1}=i,R_{1:t−1})P(Z_{t−1}=i|R_{1:t−1})。由隐状态Markov性和条件结构，首因子化为P_ij，得到矩阵乘法。",
+          "tex": "\\widetilde\\alpha_t(j)=\\sum_i\\alpha_{t-1}(i)P_{ij}"
+        },
+        {
+          "explanation": "利用Bayes公式和全概率密度，P(Z_t=j|R_{1:t})与f_j(R_t)P(Z_t=j|R_{1:t−1})成比例。分母对全部状态求和归一化，确保后验和为1。在状态条件观测独立假设下，此递推等价HMM前向算法。",
+          "tex": "\\alpha_t(j)=\\frac{f_j(R_t)\\widetilde\\alpha_t(j)}{\\sum_k f_k(R_t)\\widetilde\\alpha_t(k)}"
+        },
+        {
+          "explanation": "稳态方程给π_0=0.9π_0+0.2π_1，整理成0.1π_0=0.2π_1，加归一化得π_0=2/3。滤波与平滑的条件σ-代数不同：F_t^R⊂F_T^R，因此条件期望一般不同，不能用平滑后验冒充实时条件分布。",
+          "tex": "\\pi P=\\pi,\\quad \\pi=\\left(\\frac23,\\frac13\\right),\\qquad\\alpha_{t\\mid T}\\ne\\alpha_{t\\mid t}\\ (T>t)"
+        }
+      ],
+      "example": "两状态转移矩阵P=[[0.9,0.1],[0.2,0.8]]与上一期后验(0.6,0.4)给预测(0.62,0.38)。信号似然(0.8,0.3)更新到状态0后验0.496/0.61≈0.8131。稳态为(2/3,1/3)，平均状态持续时间分别为10期与5期。",
+      "application": "用于多资产市场风险状态、波动机制、信用周期和ETF动态组合预测。策略只能采用真实决策时可得的滤波信息与训练期估计。",
+      "caveat": "隐状态是模型设定，不是直接观测真值；用全样本平滑概率作为过去交易依据属于典型前视偏差，状态标签可能交换并需稳定性检验。",
+      "deep_sections": [
+        {
+          "title": "隐含状态与条件观测模型",
+          "question": "为什么不能简单把某一天涨跌作为市场真实状态？",
+          "paragraphs": [
+            "模型把宏观机制、风险偏好或波动状态Z_t视为隐变量，并用条件分布f_j描述收益R_t。不同隐状态可以产生重叠的收益，因此观察到一笔收益并不唯一确定状态。",
+            "对未来风险的预测应该对所有可能状态进行概率加权，而不是在每期硬性指派看涨或看跌一个标签。用于ETF因子时，还需避免未来涨幅定义的事后状态。"
+          ],
+          "formulas": [
+            {
+              "label": "隐含状态与条件观测模型",
+              "tex": "R_t\\mid Z_t=j\\sim f_j,\\qquad \\Pr(Z_t=j\\mid R_{1:t})=\\alpha_t(j)"
+            }
+          ],
+          "proof": "对任意观测r，边际密度由全概率公式f(r)=Σ_jP(Z_t=j)f_j(r)得到。各f_j分布重叠时，Bayes后验α_t(j)通常介于0与1之间，不可能从单次收益唯一识别真实状态。",
+          "worked": "若两状态先验各0.5且好收益信号的状态条件概率分别0.8、0.3，则观测到信号后，状态0后验为0.8/(0.8+0.3)=8/11≈0.7273。",
+          "limitation": "状态标签由模型定义而非真实可见实体。直接用未来价格最高点、事后高波动时期标签会产生前视偏差。"
+        },
+        {
+          "title": "Markov预测与前向状态概率",
+          "question": "下一期状态概率如何从上一期后验无前视地推出？",
+          "paragraphs": [
+            "若上一时刻已经利用当时观测得到滤波分布α_{t−1}，则在看到R_t之前，当前状态预测分布是α_{t−1}P。",
+            "该一步预测只使用到t−1的信息，符合当时可交易的时间要求；即使后续模型使用更长历史进行估计，也不能把t期观测的信息提前放进预测分布。"
+          ],
+          "formulas": [
+            {
+              "label": "Markov预测与前向状态概率",
+              "tex": "\\widetilde\\alpha_t(j)=\\sum_i\\alpha_{t-1}(i)P_{ij}"
+            }
+          ],
+          "proof": "按当前隐状态的全概率公式，P(Z_t=j|R_{1:t−1})=Σ_iP(Z_t=j|Z_{t−1}=i,R_{1:t−1})P(Z_{t−1}=i|R_{1:t−1})。由隐状态Markov性和条件结构，首因子化为P_ij，得到矩阵乘法。",
+          "worked": "若α_{t−1}=(0.6,0.4)、P=[[0.9,0.1],[0.2,0.8]]，则预测状态0为0.6×0.9+0.4×0.2=0.62，状态1为0.38。",
+          "limitation": "模型参数P也应仅由训练期信息估计，若使用包含t以后样本的全样本P估计，仍可能泄漏信息。"
+        },
+        {
+          "title": "Bayes滤波更新与边际似然",
+          "question": "新收益到达以后如何更新潜在市场状态概率？",
+          "paragraphs": [
+            "在预测概率已知时，观测R_t=r的条件似然f_j(r)将各状态权重乘上不同系数，随后除以归一化总量。",
+            "计算所得的α_t是时刻t已经观察到当期收益后的后验，而不是用于在收益尚未公布前成交的信号；若需要在t开盘前交易，则应使用上一期滤波概率及预测状态分布。"
+          ],
+          "formulas": [
+            {
+              "label": "Bayes滤波更新与边际似然",
+              "tex": "\\alpha_t(j)=\\frac{f_j(R_t)\\widetilde\\alpha_t(j)}{\\sum_k f_k(R_t)\\widetilde\\alpha_t(k)}"
+            }
+          ],
+          "proof": "利用Bayes公式和全概率密度，P(Z_t=j|R_{1:t})与f_j(R_t)P(Z_t=j|R_{1:t−1})成比例。分母对全部状态求和归一化，确保后验和为1。在状态条件观测独立假设下，此递推等价HMM前向算法。",
+          "worked": "前一节预测α̃_t=(0.62,0.38)，当前信号在两状态的似然分别0.8和0.3，则状态0后验为0.496/(0.496+0.114)=0.496/0.61≈0.81311475。",
+          "limitation": "样本后验大于0.8不代表状态被确定观察到；交易前可得信号日期与收盘后更新必须区别标注。"
+        },
+        {
+          "title": "稳态持续性与前视平滑边界",
+          "question": "为什么实时滤波概率和全部历史重算的平滑概率不能混用？",
+          "paragraphs": [
+            "两状态矩阵P=[[0.9,0.1],[0.2,0.8]]的稳态满足π_0×0.1=π_1×0.2，得到π=(2/3,1/3)。持久性反映隐状态在相邻时期倾向留在原状态。",
+            "平滑概率P(Z_t=j|R_1,…,R_T)若T>t，包含未来观测的信息；它适于事后解释历史机制，但不是当时投资者拥有的状态概率。"
+          ],
+          "formulas": [
+            {
+              "label": "稳态持续性与前视平滑边界",
+              "tex": "\\pi P=\\pi,\\quad \\pi=\\left(\\frac23,\\frac13\\right),\\qquad\\alpha_{t\\mid T}\\ne\\alpha_{t\\mid t}\\ (T>t)"
+            }
+          ],
+          "proof": "稳态方程给π_0=0.9π_0+0.2π_1，整理成0.1π_0=0.2π_1，加归一化得π_0=2/3。滤波与平滑的条件σ-代数不同：F_t^R⊂F_T^R，因此条件期望一般不同，不能用平滑后验冒充实时条件分布。",
+          "worked": "该矩阵下状态0平均连续持续期数为1/(1−0.9)=10期，状态1平均持续期数为1/(1−0.8)=5期；持续时间仍存在随机波动。",
+          "limitation": "稳态和持续性属于固定P模型内的参数；若宏观制度转变，整个样本估计的P和状态标签都可能不稳定。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "stochastic-n0280",
+          "label": "先修：Markov稳态"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0281",
+          "label": "混合与持续性"
+        },
+        {
+          "kind": "math",
+          "id": "timeseries-n0270",
+          "label": "时间序列状态切换"
+        },
+        {
+          "kind": "ml",
+          "id": "m12-c07-p01",
+          "label": "金融ML时序样本外验证"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 6.262 Discrete Stochastic Processes：Markov、更新与Poisson金融事件基础",
+          "url": "https://ocw.mit.edu/courses/6-262-discrete-stochastic-processes-spring-2011/pages/course-notes/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：Markov Chains和连续时间事件课程讲义",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V13数学精讲：四节条件、推导、逐项计算与金融边界"
+    },
+    {
+      "id": "stochastic-n0299",
+      "node_id": "stochastic-n0299",
+      "title": "金融事件强度",
+      "definition": "事件强度以可预测的瞬时率描述在当前信息条件下订单成交、撤单、交易、违约等事件的出现频率。对计数过程N_t，强度λ_t≥0使小时间窗新增事件的条件期望约为λ_tΔt，并由补偿过程A_t=∫_0^t λ_sds刻画累积条件事件率。Poisson恒定强度、时变非齐次Poisson和自激Hawkes过程具有不同的依赖与风险解释。",
+      "assumptions": "计数过程N_t需适应历史信息滤过，λ_t非负、可预测且局部可积；补偿鞅结论需计数非爆炸及合适的可积性条件。Hawkes指数核λ_t=μ+Σ_{t_i<t}αe^{−β(t−t_i)}中μ>0、α≥0、β>0，平稳有限均值的经典充分条件为α/β<1。",
+      "properties": [
+        "给定历史的瞬时强度不是固定时间段出现事件的概率，两者需经条件生存函数连接。",
+        "如果N_t具有可积强度，则M_t=N_t−∫_0^tλ_sds在适当条件下为鞅。",
+        "Hawkes核积分α/β为分枝比，低于1时存在经典稳定平稳版本。",
+        "交易所开闭市、共同新闻、市场深度变化及记录时滞可能改变强度，不能只依赖恒定Poisson近似。"
+      ],
+      "formulas": [
+        {
+          "label": "条件强度的时间单位",
+          "tex": "\\mathbb E[dN_t\\mid\\mathcal F_{t-}]=\\lambda_t\\,dt,\\qquad\\lambda_t\\ge0"
+        },
+        {
+          "label": "补偿过程与条件鞅创新",
+          "tex": "A_t=\\int_0^t\\lambda_s\\,ds,\\qquad M_t=N_t-A_t,\\quad\\mathbb E[M_t\\mid\\mathcal F_s]=M_s"
+        },
+        {
+          "label": "Hawkes自激与稳定分枝比",
+          "tex": "\\lambda_t=\\mu+\\sum_{t_i<t}\\alpha e^{-\\beta(t-t_i)},\\quad\\bar\\lambda=\\frac{\\mu}{1-\\alpha/\\beta}\\quad(\\alpha/\\beta<1)"
+        },
+        {
+          "label": "下一事件等待与强度积分",
+          "tex": "\\Pr(T_{\\rm next}>h\\mid\\mathcal F_0)=\\exp\\!\\left[-\\mu h-\\frac\\alpha\\beta(1-e^{-\\beta h})\\right]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "计数过程的可预测强度由补偿器的密度定义。在没有同刻多重跳跃且局部条件正则的情形，P(N_{t+h}−N_t=1|F_{t−})=λ_th+o(h)；高阶跳跃概率与模型条件有关，不可将此极限误读成有限h的精确公式。",
+          "tex": "\\mathbb E[dN_t\\mid\\mathcal F_{t-}]=\\lambda_t\\,dt,\\qquad\\lambda_t\\ge0"
+        },
+        {
+          "explanation": "对可预测强度的定义，任意有界可预测测试过程H满足E∫H dN=E∫Hλdt。把区间(s,t]及F_s可测指标作为测试过程，即得到E[(N_t−N_s)−(A_t−A_s)|F_s]=0，进而得补偿鞅关系。",
+          "tex": "A_t=\\int_0^t\\lambda_s\\,ds,\\qquad M_t=N_t-A_t,\\quad\\mathbb E[M_t\\mid\\mathcal F_s]=M_s"
+        },
+        {
+          "explanation": "在平稳状态取期望，强度均值满足λ̄=μ+λ̄∫_0∞αe^{−βu}du，后者核积分为α/β。代数整理得到λ̄=μ/(1−α/β)，需要非负核及积分小于1以得到有限正解。",
+          "tex": "\\lambda_t=\\mu+\\sum_{t_i<t}\\alpha e^{-\\beta(t-t_i)},\\quad\\bar\\lambda=\\frac{\\mu}{1-\\alpha/\\beta}\\quad(\\alpha/\\beta<1)"
+        },
+        {
+          "explanation": "在下一事件尚未发生期间，风险率λ(u)为给定历史和无事件情形下的确定函数，生存函数满足S'(u)=−λ(u)S(u)、S(0)=1。积分∫_0^hλ=μh+(α/β)(1−e^{−βh})，解微分方程得到指数表达式。",
+          "tex": "\\Pr(T_{\\rm next}>h\\mid\\mathcal F_0)=\\exp\\!\\left[-\\mu h-\\frac\\alpha\\beta(1-e^{-\\beta h})\\right]"
+        }
+      ],
+      "example": "固定强度λ=2时，3分钟补偿器A=6，观测计数N=8的补偿残差为2。Hawkes μ=2、α=1、β=2满足分枝比0.5，平稳平均强度4；在单次历史事件后无新事件路径上的1分钟累计强度约2.432332。",
+      "application": "用于高频订单流、成交/撤单强度、信用违约和价格跳跃建模；需核对交易时间尺度、事件数据完整性及强度过程的可预测性。",
+      "caveat": "强度为事件率而非概率，补偿鞅并不意味着独立同分布。Hawkes均值公式要求核质量低于1，实际市场中制度变化和共同驱动可能破坏稳定条件。",
+      "deep_sections": [
+        {
+          "title": "条件强度的时间单位",
+          "question": "为什么一次/分钟的强度不能直接写成一分钟内发生事件的概率？",
+          "paragraphs": [
+            "在给定过去信息F_{t−}下，λ_t描述极短时间间隔的事件条件发生速率；在长度h足够小时，发生一次事件的概率才近似为λ_th。",
+            "λ_t可以大于1，因为它是每单位时间事件数而非概率。真实的一段时间是否有事件，取决于未来强度在该区间的积分或相应条件生存函数。"
+          ],
+          "formulas": [
+            {
+              "label": "条件强度的时间单位",
+              "tex": "\\mathbb E[dN_t\\mid\\mathcal F_{t-}]=\\lambda_t\\,dt,\\qquad\\lambda_t\\ge0"
+            }
+          ],
+          "proof": "计数过程的可预测强度由补偿器的密度定义。在没有同刻多重跳跃且局部条件正则的情形，P(N_{t+h}−N_t=1|F_{t−})=λ_th+o(h)；高阶跳跃概率与模型条件有关，不可将此极限误读成有限h的精确公式。",
+          "worked": "若稳定速率λ=3次/分钟，在h=0.01分钟内一次事件概率约0.03；它不是未来整一分钟中事件概率为300%。",
+          "limitation": "若使用分钟与秒混合，强度数值需要相差60倍；异步市场和停牌时长必须从可交易时间定义入手。"
+        },
+        {
+          "title": "补偿过程与条件鞅创新",
+          "question": "为什么要用实际计数减去强度积分，而非只减去固定均值？",
+          "paragraphs": [
+            "若强度随市场状态改变，一段时间的预期计数不再只是常数λt。补偿器A_t=∫_0^tλ_sds累计所有已预测到的条件事件率。",
+            "在适当非爆炸和可积性条件下，N_t−A_t是鞅，即扣除条件可预测部分后的事件创新不具有给定过去信息的系统漂移；但不能由此认定所有计数创新彼此独立。"
+          ],
+          "formulas": [
+            {
+              "label": "补偿过程与条件鞅创新",
+              "tex": "A_t=\\int_0^t\\lambda_s\\,ds,\\qquad M_t=N_t-A_t,\\quad\\mathbb E[M_t\\mid\\mathcal F_s]=M_s"
+            }
+          ],
+          "proof": "对可预测强度的定义，任意有界可预测测试过程H满足E∫H dN=E∫Hλdt。把区间(s,t]及F_s可测指标作为测试过程，即得到E[(N_t−N_s)−(A_t−A_s)|F_s]=0，进而得补偿鞅关系。",
+          "worked": "若固定Poisson强度λ=2次/分钟，t=3分钟累计补偿值A_3=6；观测到N_3=8时，补偿创新M_3=2。",
+          "limitation": "历史强度可以随事件反馈；补偿鞅不意味着M_t具有独立增量。过度离散与同时戳批量事件需要额外建模。"
+        },
+        {
+          "title": "Hawkes自激与稳定分枝比",
+          "question": "为何一笔交易发生后可能暂时提高下一笔交易出现的条件概率？",
+          "paragraphs": [
+            "指数核Hawkes过程假设每次事件都会在事件发生后给强度带来α的上跳，随后以速率β衰减，同时保留背景强度μ。历史事件越密集，条件强度通常越高。",
+            "核积分α/β表示单次事件在分枝解释下产生的平均后代数。小于1保证经典平稳版本的有限长期平均强度λ̄=μ/(1−α/β)；这一公式不能用于非平稳或超临界情形。"
+          ],
+          "formulas": [
+            {
+              "label": "Hawkes自激与稳定分枝比",
+              "tex": "\\lambda_t=\\mu+\\sum_{t_i<t}\\alpha e^{-\\beta(t-t_i)},\\quad\\bar\\lambda=\\frac{\\mu}{1-\\alpha/\\beta}\\quad(\\alpha/\\beta<1)"
+            }
+          ],
+          "proof": "在平稳状态取期望，强度均值满足λ̄=μ+λ̄∫_0∞αe^{−βu}du，后者核积分为α/β。代数整理得到λ̄=μ/(1−α/β)，需要非负核及积分小于1以得到有限正解。",
+          "worked": "取μ=2、α=1、β=2（单位为分钟尺度），分枝比1/2，平稳均值强度为2/(1−0.5)=4次/分钟。",
+          "limitation": "Hawkes条件强度可能不只由上一笔交易决定；新闻共振与交易制度改变会造成虚假的自激性，模型校准需独立检验。"
+        },
+        {
+          "title": "下一事件等待与强度积分",
+          "question": "已知最近一次事件后强度不断衰减，怎样计算下一笔事件在指定时间之前到来？",
+          "paragraphs": [
+            "若在t=0刚发生一次事件且之前无其他残余影响，直到下一个事件发生前条件强度沿无事件路径变为λ(u)=μ+αe^{−βu}。",
+            "下一次事件晚于h的条件生存概率是exp(−∫_0^hλ(u)du)，而不是把当前λ(0+)乘h后直接取1−λh作为精确概率。"
+          ],
+          "formulas": [
+            {
+              "label": "下一事件等待与强度积分",
+              "tex": "\\Pr(T_{\\rm next}>h\\mid\\mathcal F_0)=\\exp\\!\\left[-\\mu h-\\frac\\alpha\\beta(1-e^{-\\beta h})\\right]"
+            }
+          ],
+          "proof": "在下一事件尚未发生期间，风险率λ(u)为给定历史和无事件情形下的确定函数，生存函数满足S'(u)=−λ(u)S(u)、S(0)=1。积分∫_0^hλ=μh+(α/β)(1−e^{−βh})，解微分方程得到指数表达式。",
+          "worked": "取μ=2、α=1、β=2和h=1分钟，累计强度为2+(1−e^{-2})/2≈2.432332，生存概率约e^{-2.432332}≈0.08783。",
+          "limitation": "这一条件生存公式假设强度沿没有新事件的路径确定演化；如果还有随机外部状态或未记录的订单事件，必须进一步条件化或积分。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "stochastic-n0273",
+          "label": "先修：Poisson过程"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0288",
+          "label": "排队模型"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0300",
+          "label": "成交到达与删失"
+        },
+        {
+          "kind": "math",
+          "id": "probability-n0106",
+          "label": "矩母函数与尾部条件"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 6.262 Discrete Stochastic Processes：Markov、更新与Poisson金融事件基础",
+          "url": "https://ocw.mit.edu/courses/6-262-discrete-stochastic-processes-spring-2011/pages/course-notes/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：Markov Chains和连续时间事件课程讲义",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V13数学精讲：四节条件、推导、逐项计算与金融边界"
+    },
+    {
+      "id": "stochastic-n0300",
+      "node_id": "stochastic-n0300",
+      "title": "执行订单到达时间",
+      "definition": "订单执行到达时间问题研究从提交订单到首次成交、撤销、超时或部分成交等终止事件的随机历程。比只计算平均到达率更重要的是条件生存函数、竞争风险、删失机制及市场状态变化。Poisson和M/M/1只是基础参照，真实限价订单处于价格—时间优先、撤单与部分成交环境，其等待风险不能完全用单服务排队均值表示。",
+      "assumptions": "用T_F表示完全成交时间、T_C撤单时刻、T_H观察终止时刻，实际可观测为T_obs=min(T_F,T_C,T_H)，并记录事件原因；若讨论竞争风险，则成交和撤单的原因别强度应在同一历史信息集下定义。只有在明确独立指数时钟的玩具模型中，最先事件时间才是Exp(λ_F+λ_C)。回测成交率必须处理右删失。",
+      "properties": [
+        "竞争指数时钟最先事件强度为强度和，事件原因概率按强度比例分配。",
+        "生存函数S(t)=exp(−∫_0^tΣ_kλ_k(u)du)要求适当原因别强度条件。",
+        "时间截断造成的未成交订单是右删失，不应当成零等待或成交时间为观察期终点的真实成交。",
+        "填单概率受盘口位置、价格变化、撤单、排队跳位与部分成交影响，不能等同整个交易所到达率。"
+      ],
+      "formulas": [
+        {
+          "label": "首次成交与撤单的竞争时钟",
+          "tex": "T_{\\min}\\sim\\operatorname{Exp}(\\lambda_F+\\lambda_C),\\quad\\Pr(F\\text{先发生})=\\frac{\\lambda_F}{\\lambda_F+\\lambda_C}"
+        },
+        {
+          "label": "时间变化强度与生存函数",
+          "tex": "S(t)=\\exp\\!\\left[-\\int_0^t\\bigl(\\lambda_F(u)+\\lambda_C(u)\\bigr)\\,du\\right]"
+        },
+        {
+          "label": "右删失与成交率估计",
+          "tex": "T_{\\rm obs}=\\min(T_F,C),\\qquad \\delta=\\mathbf1_{\\{T_F\\le C\\}}"
+        },
+        {
+          "label": "排队位置与真实执行风险",
+          "tex": "Q_{t+1}=Q_t+A_t-D_t,\\qquad T_F=\\inf\\{t:\\text{目标订单剩余量为 }0\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "因为T_F、T_C独立，P(T_min>t)=P(T_F>t)P(T_C>t)=e^{−(λ_F+λ_C)t}。用∫f_F(t)S_C(t)dt计算成交先发生概率，得λ_F/(λ_F+λ_C)，撤单概率为剩余比例。",
+          "tex": "T_{\\min}\\sim\\operatorname{Exp}(\\lambda_F+\\lambda_C),\\quad\\Pr(F\\text{先发生})=\\frac{\\lambda_F}{\\lambda_F+\\lambda_C}"
+        },
+        {
+          "explanation": "若在无事件路径上风险率h(t)=λ_F(t)+λ_C(t)，从条件生存比S(t+dt)/S(t)=1−h(t)dt+o(dt)得S'(t)=−h(t)S(t)，解得到指数累计风险公式。原因别事件概率则对S(t)λ_k(t)积分。",
+          "tex": "S(t)=\\exp\\!\\left[-\\int_0^t\\bigl(\\lambda_F(u)+\\lambda_C(u)\\bigr)\\,du\\right]"
+        },
+        {
+          "explanation": "定义观测时刻T_obs及事件指示δ。若δ=1，则观测到真实成交时刻；若δ=0，只知道T_F>C。统计似然中前者贡献成交密度f(T_obs)，后者贡献生存概率S(C)，因此不能把δ=0的时长代入成交时间均值。",
+          "tex": "T_{\\rm obs}=\\min(T_F,C),\\qquad \\delta=\\mathbf1_{\\{T_F\\le C\\}}"
+        },
+        {
+          "explanation": "队列流量守恒使下一期在场数量等于当前数量加新到达减已离开；对于某张目标订单，实际剩余量还应区分在其前方的队列、订单自身的部分成交和在其后新增的订单。将剩余量首次为0且由成交消耗导致的时刻定义为完全成交时间。",
+          "tex": "Q_{t+1}=Q_t+A_t-D_t,\\qquad T_F=\\inf\\{t:\\text{目标订单剩余量为 }0\\}"
+        }
+      ],
+      "example": "独立指数成交/撤单时钟强度2与3次/分钟，最先事件平均等待0.2分钟，先成交概率0.4。若1分钟内总无事件率为2，仍无事件概率e^{-2}≈0.1353。10个订单中4个在观察结束时未成交，只能记录为右删失。",
+      "application": "用于限价订单成交概率、订单流条件事件率、撤单竞争与执行回测的时点建模，应区分全部成交、部分成交和观察期截断。",
+      "caveat": "真实执行不满足简单独立指数时钟；未成交样本不能当作成交或直接删除，订单优先级与交易冲击必须独立校准。",
+      "deep_sections": [
+        {
+          "title": "首次成交与撤单的竞争时钟",
+          "question": "为什么‘等待多久有事发生’与‘最终是否成交’是两个不同问题？",
+          "paragraphs": [
+            "若成交与撤单分别由独立指数时钟率λ_F、λ_C驱动，则下一事件等待时间取二者最小，强度为λ_F+λ_C，而事件类型由哪个时钟先响决定。",
+            "因此等待时间均值和首次成交概率必须分开报告。增大撤单强度会缩短首次事件时间，却可能降低成交占比，不能将更短等待解释为更好成交。"
+          ],
+          "formulas": [
+            {
+              "label": "首次成交与撤单的竞争时钟",
+              "tex": "T_{\\min}\\sim\\operatorname{Exp}(\\lambda_F+\\lambda_C),\\quad\\Pr(F\\text{先发生})=\\frac{\\lambda_F}{\\lambda_F+\\lambda_C}"
+            }
+          ],
+          "proof": "因为T_F、T_C独立，P(T_min>t)=P(T_F>t)P(T_C>t)=e^{−(λ_F+λ_C)t}。用∫f_F(t)S_C(t)dt计算成交先发生概率，得λ_F/(λ_F+λ_C)，撤单概率为剩余比例。",
+          "worked": "若成交率2次/分钟、撤单率3次/分钟，最先事件平均等待0.2分钟，但先成交概率仅2/5=0.4，先撤单概率0.6。",
+          "limitation": "真实撤单和成交并不独立，策略发出撤单指令后还有确认与排队时延；以上仅为简化的竞争风险基准。"
+        },
+        {
+          "title": "时间变化强度与生存函数",
+          "question": "条件成交率随时间变化时，为什么不能继续使用单一指数等待分布？",
+          "paragraphs": [
+            "令成交和撤单强度分别为λ_F(t)、λ_C(t)，下一事件在时间t前都未出现的条件生存函数由两种原因别瞬时率之和决定。",
+            "若强度在无事件路径上随盘口变化，则应先对该路径积分。只有总率恒定时，才退化成固定指数生存函数；如果强度随机需额外按所选滤过条件化。"
+          ],
+          "formulas": [
+            {
+              "label": "时间变化强度与生存函数",
+              "tex": "S(t)=\\exp\\!\\left[-\\int_0^t\\bigl(\\lambda_F(u)+\\lambda_C(u)\\bigr)\\,du\\right]"
+            }
+          ],
+          "proof": "若在无事件路径上风险率h(t)=λ_F(t)+λ_C(t)，从条件生存比S(t+dt)/S(t)=1−h(t)dt+o(dt)得S'(t)=−h(t)S(t)，解得到指数累计风险公式。原因别事件概率则对S(t)λ_k(t)积分。",
+          "worked": "若0≤t≤1分钟内λ_F=1、λ_C=1，则1分钟内没有任何事件概率e^{-2}≈0.135335；至少一种事件发生概率1−e^{-2}≈0.864665。",
+          "limitation": "如果交易信号在这一分钟内根据事件反馈不断更新，强度是随机可预测过程，不能把事后观察的完整强度路径当作前瞻确定函数。"
+        },
+        {
+          "title": "右删失与成交率估计",
+          "question": "为什么观察期结束时仍未成交的订单不是一次成交记录？",
+          "paragraphs": [
+            "当观察截至C时，实际只知道成交时间T_F是否小于C；若T_F>C，订单记录提供的是T_F>C这一条件信息，而非T_F=C。",
+            "在独立非信息性右删失假设下，可以用Kaplan–Meier估计生存函数或用风险集估计原因别强度。若撤单本身依赖未实现成交风险，则应采用竞争风险方法而非简单丢弃撤单样本。"
+          ],
+          "formulas": [
+            {
+              "label": "右删失与成交率估计",
+              "tex": "T_{\\rm obs}=\\min(T_F,C),\\qquad \\delta=\\mathbf1_{\\{T_F\\le C\\}}"
+            }
+          ],
+          "proof": "定义观测时刻T_obs及事件指示δ。若δ=1，则观测到真实成交时刻；若δ=0，只知道T_F>C。统计似然中前者贡献成交密度f(T_obs)，后者贡献生存概率S(C)，因此不能把δ=0的时长代入成交时间均值。",
+          "worked": "10张限价单在1分钟内仅6张成交，另4张仍在队列中；直接把4张当成1分钟成交会虚增成交次数并偏向低估真正的长等待尾部。",
+          "limitation": "无信息删失若不成立，如主动撤单由更差的成交前景触发，简单生存估计不再无偏；撤单还可能是另一种终止原因。"
+        },
+        {
+          "title": "排队位置与真实执行风险",
+          "question": "为何一张限价单的成交概率不能只由交易所每分钟总成交笔数决定？",
+          "paragraphs": [
+            "当订单位于某价位队列中，之前已有订单的成交、撤销、部分成交会改变其位置。盘口跨价位移动和交易所撮合规则又改变订单是否仍位于最优报价。",
+            "要模拟成交时间，需要至少在状态里加入相对队列位置、剩余数量、价位、盘口深度以及撤销与交易事件的条件分布，并按实际时点更新。"
+          ],
+          "formulas": [
+            {
+              "label": "排队位置与真实执行风险",
+              "tex": "Q_{t+1}=Q_t+A_t-D_t,\\qquad T_F=\\inf\\{t:\\text{目标订单剩余量为 }0\\}"
+            }
+          ],
+          "proof": "队列流量守恒使下一期在场数量等于当前数量加新到达减已离开；对于某张目标订单，实际剩余量还应区分在其前方的队列、订单自身的部分成交和在其后新增的订单。将剩余量首次为0且由成交消耗导致的时刻定义为完全成交时间。",
+          "worked": "若目标订单前有5手且当前被动卖单有连续3手对手成交，忽略其他更新时目标前方仍剩2手，目标订单尚未成交；并非累计成交笔数达到3即表示填单成功。",
+          "limitation": "M/M/1平均系统等待无法直接刻画具体价位的优先级成交。忽略撤销、排队跳位和未成交样本的策略回测可能显著高估可执行收益。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "stochastic-n0299",
+          "label": "先修：条件事件强度"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0288",
+          "label": "先修：排队模型"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0275",
+          "label": "先修：更新等待"
+        },
+        {
+          "kind": "ml",
+          "id": "m23-c11-p01",
+          "label": "资金风险与执行约束"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 6.262 Discrete Stochastic Processes：Markov、更新与Poisson金融事件基础",
+          "url": "https://ocw.mit.edu/courses/6-262-discrete-stochastic-processes-spring-2011/pages/course-notes/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：Markov Chains和连续时间事件课程讲义",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V13数学精讲：四节条件、推导、逐项计算与金融边界"
     }
   ]
 }
