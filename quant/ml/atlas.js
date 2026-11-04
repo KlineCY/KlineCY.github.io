@@ -356,6 +356,13 @@ async function start(){
   const added=await fetchAtlasJson("./atlas-new-lessons.json",{cache:"no-cache"});
   if(!window.quantMlExpansion?.install)throw Error("新增专题阅读器未加载");
   const newIds=window.quantMlExpansion.install(data,added);
+  // Load subsequent coherent chapters separately, keeping each transfer auditable.
+  const volatility=await fetchAtlasJson("./atlas-volatility-chapter.json",{cache:"no-cache"});
+  const volatilityIds=window.quantMlExpansion.install(data,volatility);
+  for(const id of volatilityIds){
+   if(newIds.has(id))throw Error("新增专题ID重复："+id);
+   newIds.add(id);
+  }
   const conceptBundle=await fetchAtlasJson("./atlas-concept-chapters.json",{cache:"no-cache"});
   if(!window.quantMlConcepts?.mount)throw Error("知识链分层渲染器未加载");
   state.conceptChapters=window.quantMlConcepts.mount(data,conceptBundle);
