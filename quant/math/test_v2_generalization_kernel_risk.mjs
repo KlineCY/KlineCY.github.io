@@ -7,7 +7,7 @@ const curriculum=read("./curriculum.json"),manifest=read("./lessons-manifest.jso
 const all=[...["./lessons-foundations.json","./lessons-advanced.json","./lessons-more.json"].flatMap(p=>read(p).lessons),...manifest.modules.flatMap(m=>read(m.path).lessons)];
 const map=new Map(all.map(l=>[l.node_id,l])),nodes=new Map(curriculum.nodes.map(n=>[n.id,n]));
 assert.equal(map.size,all.length,"duplicate mathematical article IDs");
-assert.equal(manifest.expected_lessons,89);
+assert.equal(manifest.expected_lessons,96);
 const ids=["mlmath-n0452","mlmath-n0467","mlmath-n0469","mlmath-n0470","optimization-n0359","riskmath-n0583"];
 const edges=[["mlmath-n0467","mlmath-n0452"],["mlmath-n0469","mlmath-n0468"],["mlmath-n0470","mlmath-n0469"],["optimization-n0359","regression-n0206"],["riskmath-n0583","linear-n0086"]];
 for(const [id,p] of edges)assert(nodes.get(id)?.prerequisites.includes(p),"missing proof prerequisite "+id+" -> "+p);
