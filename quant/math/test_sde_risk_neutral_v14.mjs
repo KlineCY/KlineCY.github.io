@@ -39,11 +39,11 @@ const pre={
 assert.equal(curr.nodes.length,656);
 assert.equal(curr.chapters.length,109);
 assert.equal(curr.disciplines.length,20);
-assert.equal(manifest.modules.length,41);
-assert.equal(ext.length,103,"103 extension course originals remain unchanged");
+assert.equal(manifest.modules.length,42);
+assert.equal(ext.length,105,"105 extensions: historic 103 plus two system-risk chapters");
 assert.equal(core.length,123,"V14: 104 existing core plus 19 genuinely new full lectures");
-assert.equal(all.length,226,"V14: 207 prior plus 19 unique new complete mathematics lectures");
-assert.equal(byId.size,226,"no duplicate core or extension lecture IDs");
+assert.equal(all.length,228,"226 at V14 plus 2 newly connected system-risk chapters");
+assert.equal(byId.size,228,"no duplicate core or extension lecture IDs");
 assert.equal(ids.length,19);
 const visiting=new Set(),done=new Set();
 function dfs(id){
@@ -187,5 +187,5 @@ assert(css.includes(".math-v14-sde-pricing summary:focus-visible")&&css.includes
 // Prevent a known stale mislink from American option pricing to extreme-value theory.
 assert(!byId.get("ito-n0327").links.some(l=>l.id==="finance-n0448"));
 assert(byId.get("ito-n0327").links.some(l=>l.id==="diffeq-n0411"));
-console.log("PASS V14: 19 newly complete measure, SDE, risk-neutral and jump-pricing lessons; 76 independent new proof sections plus one deepened Feynman-Kac lecture; 76 strict KaTeX displays; "+sources+" academic source links and "+links+" graph-checked connections; 226 unique complete maths lessons/656 canonical nodes; independently recomputed OU, CIR, Euler, Girsanov, Feynman-Kac, Bermudan, jump and Levy checks.");
+console.log("PASS V14: 19 newly complete measure, SDE, risk-neutral and jump-pricing lessons; 76 independent new proof sections plus one deepened Feynman-Kac lecture; 76 strict KaTeX displays; "+sources+" academic source links and "+links+" graph-checked connections; 228 unique complete maths lessons/656 canonical nodes; independently recomputed OU, CIR, Euler, Girsanov, Feynman-Kac, Bermudan, jump and Levy checks.");
 
