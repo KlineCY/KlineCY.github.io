@@ -1,0 +1,489 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "linear-n0075",
+      "node_id": "linear-n0075",
+      "title": "正交投影",
+      "definition": "正交投影把向量分解为子空间内的最接近分量与其正交残差。给定R^n的线性子空间S，对任意y存在唯一p∈S使得||y−p||₂最小，此时y−p与S的每个向量正交。投影既是几何命题，也是最小二乘、QR分解、线性估计和因子中性化的共同结构。",
+      "assumptions": "在有限维欧氏内积空间中取标准内积。若以矩阵A的列空间表示S，则A∈R^{n×p}，满列秩时AᵀA可逆；非满秩仍存在唯一投影向量，但系数坐标可不唯一，须使用正交基或Moore–Penrose伪逆，不能直接求普通逆。",
+      "properties": [
+        "投影p与残差r=y−p互相正交，故满足勾股分解||y||²=||p||²+||r||²。",
+        "正交投影算子P满足Pᵀ=P、P²=P；其特征值只能为0或1，算子范数为1（S既非零空间时）。",
+        "同一个列空间可由不同矩阵基生成，但其正交投影P相同；解释变量缩放不改变拟合向量，只改变系数坐标。",
+        "当列向量线性相关时投影结果仍唯一，系数一般不唯一。用正交基QQᵀ或伪逆AA⁺得到P更稳妥。"
+      ],
+      "formulas": [
+        {
+          "label": "最短距离投影",
+          "tex": "p=\\operatorname*{arg\\,min}_{z\\in S}\\|y-z\\|_2^2,\\qquad y-p\\perp S"
+        },
+        {
+          "label": "满列秩时投影矩阵",
+          "tex": "P_A=A(A^\\top A)^{-1}A^\\top,\\quad p=P_Ay"
+        },
+        {
+          "label": "正交性与幂等性",
+          "tex": "P_A^\\top=P_A,\\quad P_A^2=P_A,\\quad \\|y\\|_2^2=\\|P_Ay\\|_2^2+\\|(I-P_A)y\\|_2^2"
+        },
+        {
+          "label": "秩亏与正交基",
+          "tex": "P_A=AA^+=QQ^\\top,\\quad \\operatorname{col}(Q)=\\operatorname{col}(A),\\ Q^\\top Q=I"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "令p=Aβ。最小化||y−Aβ||²，求导得正规方程。满列秩使AᵀA正定，求出唯一坐标；残差正交于A所有列。",
+          "tex": "\\nabla_\\beta\\|y-A\\beta\\|_2^2=2A^\\top(A\\beta-y)=0"
+        },
+        {
+          "explanation": "定义P=A(AᵀA)^{-1}Aᵀ。由于AᵀA对称可逆，取转置得到Pᵀ=P；展开P²消去中间的AᵀA，得到P²=P。",
+          "tex": "P^2=A(A^\\top A)^{-1}(A^\\top A)(A^\\top A)^{-1}A^\\top=P"
+        },
+        {
+          "explanation": "取任意z∈S并写y−z=(y−p)+(p−z)。两项正交，因此距离平方等于残差平方与额外偏移平方之和，不可能小于投影残差。",
+          "tex": "\\|y-z\\|_2^2=\\|y-p\\|_2^2+\\|p-z\\|_2^2\\ge\\|y-p\\|_2^2"
+        },
+        {
+          "explanation": "秩亏时AᵀA不可逆，但列空间仍为闭子空间；对其取正交基Q，p=QQᵀy，唯一性来自正交分解。",
+          "tex": "p=QQ^\\top y,\\qquad Q^\\top(y-p)=0"
+        }
+      ],
+      "example": "取S=span{(1,1)ᵀ}，y=(2,0)ᵀ，单位基q=(1,1)ᵀ/√2，投影P=qqᵀ=[[0.5,0.5],[0.5,0.5]]，故p=(1,1)ᵀ，残差r=(1,−1)ᵀ。内积pᵀr=0，残差平方范数||r||²=2，原向量平方范数4，投影平方范数2，验证4=2+2。",
+      "application": "OLS拟合值是响应向解释变量列空间的正交投影，残差与训练设计矩阵正交。金融中用市场、行业、风格因子对原始信号做投影或残差化可控制指定线性暴露，但不等于信号在样本外保持中性，也不保证真实经济因果已被剔除。",
+      "caveat": "正交投影对指定内积成立；在加权最小二乘中正交的度量变成W加权内积。训练样本的残差正交是代数恒等式，不能当作预测有效性或因果效应证据。",
+      "deep_sections": [
+        {
+          "title": "投影问题与正交分解",
+          "question": "为什么最短距离等价于残差对整个子空间正交？",
+          "paragraphs": [
+            "任意y可分解为子空间S中的p与其正交补中的r。只要候选点z仍在S中，p−z也在S，因此它与r的内积为零。",
+            "这比单纯的求导表达更一般：即使列空间的基不唯一，几何上的最短点仍然唯一；在有限维欧氏空间，所有子空间都是闭的。"
+          ],
+          "formulas": [
+            {
+              "label": "投影定理的毕达哥拉斯式",
+              "tex": "\\|y-z\\|^2=\\|y-p\\|^2+\\|p-z\\|^2"
+            }
+          ],
+          "proof": "从y−z=r+(p−z)开始展开平方范数。因为r⊥S且p−z∈S，交叉项为零；若z≠p，第二项严格为正。",
+          "worked": "y=(2,0)、p=(1,1)、z=(0,0)时，||y−z||²=4，右边为||r||²+||p−z||²=2+2=4。",
+          "limitation": "该论证要求投影相对于一个确定的内积；把欧氏距离换成L1距离，一般不再是正交残差。"
+        },
+        {
+          "title": "投影矩阵与基本性质",
+          "question": "矩阵为何同时对称、幂等，并且不依赖选定的基？",
+          "paragraphs": [
+            "任意满列秩矩阵A可用作S的一组坐标。正规方程得到P=A(AᵀA)^{-1}Aᵀ；在数值计算时通常使用QR而不显式形成逆矩阵。",
+            "换用同一子空间的另一组基B=AR且R可逆，代入B(BᵀB)^{-1}Bᵀ可抵消R，得到同一P。几何对象是子空间而非某组系数。"
+          ],
+          "formulas": [
+            {
+              "label": "对称幂等",
+              "tex": "P=P^\\top=P^2"
+            },
+            {
+              "label": "换基不变性",
+              "tex": "P_{AR}=P_A,\\qquad \\det(R)\\ne0"
+            }
+          ],
+          "proof": "直接将B=AR代入B(BᵀB)^{-1}Bᵀ，利用(RᵀAᵀAR)^{-1}=R^{-1}(AᵀA)^{-1}R^{-ᵀ}，结果即P_A。",
+          "worked": "span{(1,1)}由(1,1)或(2,2)生成，两个基都给出P=[[0.5,0.5],[0.5,0.5]]。",
+          "limitation": "当R不可逆或换基后的列空间改变时，这一换基证明不适用。"
+        },
+        {
+          "title": "秩亏时的唯一性与伪逆",
+          "question": "设计矩阵列相关，为什么拟合值唯一而回归系数可能不唯一？",
+          "paragraphs": [
+            "若A的两列完全相同，则β=(1,0)与β=(0,1)可能产生同一个Aβ。系数识别需要满列秩，但最短距离投影只依赖列空间。",
+            "对A作SVD或QR正交化得到列空间正交基Q，投影QQᵀ唯一。Moore–Penrose伪逆A⁺从众多可行最小二乘解中挑选欧氏范数最小的一组系数。"
+          ],
+          "formulas": [
+            {
+              "label": "伪逆解与拟合值",
+              "tex": "\\widehat\\beta=A^+y,\\qquad \\widehat y=AA^+y"
+            }
+          ],
+          "proof": "将A=U_rΣ_rV_rᵀ代入A⁺=V_rΣ_r^{-1}U_rᵀ，得AA⁺=U_rU_rᵀ，是列空间的唯一正交投影。",
+          "worked": "A=[[1,1],[1,1]]，y=(2,0)时最优拟合p=(1,1)。满足β₁+β₂=1的系数均最优，最小范数解为(0.5,0.5)。",
+          "limitation": "有正则化时优化对象已变，拟合值未必等于未经惩罚的正交投影。"
+        },
+        {
+          "title": "因子残差化与时间外检验",
+          "question": "回归残差“与因子正交”究竟保证了什么？",
+          "paragraphs": [
+            "如果用训练样本因子矩阵A回归信号y，残差Aᵀr=0仅表达训练数据中被纳入的线性暴露为零。若因子是后验可修订数据，或回归样本包含未来日期，代数性质不能修复信息泄漏。",
+            "样本外应用时需冻结训练所得系数并在后续期计算残差，不能每次用测试期因子收益重新回归后宣称历史上已可获得该残差信号。"
+          ],
+          "formulas": [
+            {
+              "label": "训练残差正交",
+              "tex": "A_{\\mathrm{train}}^\\top r_{\\mathrm{train}}=0"
+            }
+          ],
+          "proof": "训练OLS目标的一阶条件正是此式；新数据矩阵A_test及误差r_test未参与该最优性条件，因此一般不满足A_testᵀr_test=0。",
+          "worked": "对两资产信号做市场因子残差化，样本内β_市场可以为0；下一段行情市场结构改变时，新残差仍可能与市场相关。",
+          "limitation": "线性不相关不等于统计独立，更不等于控制了未观测共同因子。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "linear-n0073",
+          "label": "先修：内积与正交"
+        },
+        {
+          "kind": "math",
+          "id": "linear-n0074",
+          "label": "先修：正交补"
+        },
+        {
+          "kind": "math",
+          "id": "linear-n0078",
+          "label": "下一讲：最小二乘几何"
+        },
+        {
+          "kind": "math",
+          "id": "linear-n0083",
+          "label": "后续：SVD与伪逆"
+        },
+        {
+          "kind": "ml",
+          "id": "m07-c06-p01",
+          "label": "应用：线性预测研究入口"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 18.06, Projections onto Subspaces",
+          "url": "https://ocw.mit.edu/courses/18-06sc-linear-algebra-fall-2011/pages/resource-index/"
+        },
+        {
+          "title": "MIT 18.06, Lecture Notes",
+          "url": "https://www-math.mit.edu/~gs/LectureNotes/"
+        }
+      ],
+      "checked_status": "教材级精讲：投影定理、正规方程、幂等与换基、秩亏伪逆和时间外应用"
+    },
+    {
+      "id": "linear-n0078",
+      "node_id": "linear-n0078",
+      "title": "最小二乘几何",
+      "definition": "最小二乘是把观测向量y投向设计矩阵X的列空间，使欧氏残差平方和最小。OLS系数是该投影的坐标表示；存在性总成立，拟合向量唯一，系数唯一还要求X满列秩。这一几何事实本身不需要高斯误差，统计上的无偏性和显著性推断则要额外假设。",
+      "assumptions": "设X∈R^{n×p}、y∈R^n，目标L(β)=||y−Xβ||²。若X满列秩，则XᵀX正定且系数解唯一；如含截距，应在X中显式包含常数列。讨论OLS统计性质时另定义y=Xβ*+ε及相应外生性、方差假设，不能把纯几何结论混同Gauss–Markov定理。",
+      "properties": [
+        "正规方程Xᵀ(y−Xβ̂)=0表达残差对所有回归列正交，是OLS几何最优性的必要且充分条件。",
+        "拟合值ŷ=P_Xy唯一；当X秩亏时所有最小化系数都得到同一个ŷ，但β̂不唯一。",
+        "当X包含截距，训练残差和为零；训练拟合均值等于观测均值，但只针对相同训练样本和未加权OLS。",
+        "OLS优化本身不需正态性；正态误差主要作用于精确有限样本分布推断，不能从最小RSS直接得到无偏、因果或可预测。"
+      ],
+      "formulas": [
+        {
+          "label": "OLS目标",
+          "tex": "\\widehat\\beta\\in\\arg\\min_{\\beta\\in\\mathbb R^p}\\|y-X\\beta\\|_2^2"
+        },
+        {
+          "label": "正规方程",
+          "tex": "X^\\top X\\widehat\\beta=X^\\top y,\\qquad X^\\top(y-X\\widehat\\beta)=0"
+        },
+        {
+          "label": "拟合与残差投影",
+          "tex": "\\widehat y=P_Xy,\\quad e=(I-P_X)y,\\quad \\widehat y^\\top e=0"
+        },
+        {
+          "label": "满列秩闭式解",
+          "tex": "\\widehat\\beta=(X^\\top X)^{-1}X^\\top y,\\qquad \\operatorname{rank}(X)=p"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "把RSS写成(y−Xβ)ᵀ(y−Xβ)，按β求导得到−2Xᵀ(y−Xβ)。最优点满足正规方程，因Hessian=2XᵀX半正定，此条件同时充分。",
+          "tex": "\\nabla_\\beta\\operatorname{RSS}=-2X^\\top(y-X\\beta),\\quad \\nabla^2_\\beta\\operatorname{RSS}=2X^\\top X\\succeq0"
+        },
+        {
+          "explanation": "设β̂满足正规方程，对任意β写残差y−Xβ=(y−Xβ̂)+X(β̂−β)。由于第一项正交于col(X)，平方和分解，故β̂是全局最优。",
+          "tex": "\\operatorname{RSS}(\\beta)=\\operatorname{RSS}(\\widehat\\beta)+\\|X(\\beta-\\widehat\\beta)\\|^2"
+        },
+        {
+          "explanation": "若X满列秩，XᵀX正定并可逆，由正规方程得唯一系数解；秩亏时用伪逆给出一个最小范数系数解。",
+          "tex": "\\widehat\\beta=X^+y\\quad\\text{为最小范数最小二乘解}"
+        },
+        {
+          "explanation": "设计矩阵含常数列1时，1ᵀe=0是正规方程的一个分量，于是平均残差为零。它不是未来预测误差的性质。",
+          "tex": "\\mathbf1^\\top e=0\\quad\\Longrightarrow\\quad\\overline y=\\overline{\\widehat y}"
+        }
+      ],
+      "example": "取x=(0,1,2)，y=(1,2,2)，X的每行是(1,x_i)。因x均值1、y均值5/3，斜率β̂₁=Σ(x_i−1)(y_i−5/3)/Σ(x_i−1)²=1/2，截距β̂₀=7/6。拟合ŷ=(7/6,5/3,13/6)，残差e=(−1/6,1/3,−1/6)，残差和0且Σx_ie_i=0，RSS=1/6。",
+      "application": "用于估计风险因子暴露、拟合ETF收益、构建基准预测器。金融研究需要把每次拟合限定于训练窗口，不能在全样本回归后把残差和0解释为未来模型有效，也不能将回归相关性视作因果效应。",
+      "caveat": "一般不建议数值求解时显式构造(XᵀX)^{-1}，因为正规方程可能平方放大条件数；QR/SVD更稳健。样本外性能和标准误可靠性需要独立检查。",
+      "deep_sections": [
+        {
+          "title": "从几何最短点到回归系数",
+          "question": "为什么最小化残差平方和等价于列空间投影？",
+          "paragraphs": [
+            "Xβ遍历col(X)，故OLS目标等于在该子空间寻找离y最近的点。投影向量唯一不代表坐标表示唯一，这一区别在强共线与高维模型中格外重要。",
+            "平方损失对应欧氏距离。若选择绝对损失、Huber损失或带权距离，拟合对象和最优性条件都会改变，不应把OLS正规方程照搬。"
+          ],
+          "formulas": [
+            {
+              "label": "几何目标",
+              "tex": "\\min_{\\beta}\\|y-X\\beta\\|_2^2=\\min_{z\\in\\operatorname{col}(X)}\\|y-z\\|_2^2"
+            }
+          ],
+          "proof": "正交投影定理保证唯一最佳z=P_Xy；当X满列秩，该z只有一组β坐标，否则存在零空间方向的等价系数。",
+          "worked": "x=(0,1,2)、y=(1,2,2)的拟合值为(7/6,5/3,13/6)，其残差与常数列、x列都正交。",
+          "limitation": "不能从几何最短距离证明随机误差与解释变量条件独立。"
+        },
+        {
+          "title": "正规方程与全局最优性",
+          "question": "为什么一阶条件在这里已经充分？",
+          "paragraphs": [
+            "RSS是关于β的凸二次函数，其Hessian=2XᵀX半正定。满足梯度为零的任何解均为全局最优。严格凸性还需列满秩。",
+            "利用残差的正交性，不经过求导也可证明任意其他系数的RSS不会更低；这条证明是线性投影与优化理论的自然连接。"
+          ],
+          "formulas": [
+            {
+              "label": "RSS平方和分解",
+              "tex": "\\|y-X\\beta\\|^2=\\|y-X\\widehat\\beta\\|^2+\\|X(\\beta-\\widehat\\beta)\\|^2"
+            }
+          ],
+          "proof": "利用eᵀX=0消去交叉项；第二项非负，等号当且仅当X(β−β̂)=0。列满秩时等号迫使β=β̂。",
+          "worked": "例子中β̂₀=7/6、β̂₁=1/2。若斜率改为1而截距不变，RSS将增加一个严格非负项。",
+          "limitation": "L1损失或非线性模型一般不具有相同的正规方程和全局二次形式。"
+        },
+        {
+          "title": "截距、残差与拟合优度",
+          "question": "为什么训练残差和为零不意味着预测误差为零？",
+          "paragraphs": [
+            "包含常数列意味着1ᵀe=0，残差平均为零。这完全由一阶最优条件确定，因而即便模型严重错设，在训练数据中仍可能成立。",
+            "拟合优度R²必须明确以含截距的均值基准定义。某些无截距回归软件采用不同R²定义；不能把各软件未经口径统一的R²直接比较。"
+          ],
+          "formulas": [
+            {
+              "label": "含截距时的平方和分解",
+              "tex": "\\operatorname{TSS}=\\operatorname{ESS}+\\operatorname{RSS},\\quad \\operatorname{TSS}=\\sum_i(y_i-\\overline y)^2"
+            }
+          ],
+          "proof": "y−ȳ1=(ŷ−ȳ1)+e，因ŷ−ȳ1处于设计矩阵列空间且e正交于该空间，平方和相加得TSS=ESS+RSS。",
+          "worked": "示例残差为(−1/6,1/3,−1/6)，和为0；RSS=1/36+1/9+1/36=1/6。",
+          "limitation": "时间外数据的误差通常不会和为零，亦不受训练样本平方和分解约束。"
+        },
+        {
+          "title": "从纯几何到统计推断",
+          "question": "哪些假设才允许解释估计量的偏差、方差和置信区间？",
+          "paragraphs": [
+            "确定性X下OLS拟合是一个代数优化问题。若引入统计模型y=Xβ*+ε且E[ε|X]=0，则满列秩OLS对β*条件无偏；再加入球形同方差条件得到经典协方差。",
+            "Gauss–Markov的BLUE结论与正态性不同；正态性可支持精确小样本t/F推断，但不应被当成OLS存在、最优或BLUE的必要条件。"
+          ],
+          "formulas": [
+            {
+              "label": "条件无偏与经典协方差",
+              "tex": "E[\\widehat\\beta\\mid X]=\\beta^*,\\quad\\operatorname{Var}(\\widehat\\beta\\mid X)=\\sigma^2(X^\\top X)^{-1}"
+            }
+          ],
+          "proof": "将β̂=(XᵀX)^{-1}Xᵀ(Xβ*+ε)=β*+(XᵀX)^{-1}Xᵀε，条件期望为β*；若Var(ε|X)=σ²I，取条件方差即得到公式。",
+          "worked": "若固定X，创新条件方差σ²=4，则系数协方差为4(XᵀX)^{-1}；实际置信区间还需估计σ²及自由度。",
+          "limitation": "内生性、遗漏变量、样本选择和时间相关可能破坏无偏或经典标准误，均不能靠更小RSS自动修复。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "linear-n0075",
+          "label": "先修：正交投影"
+        },
+        {
+          "kind": "math",
+          "id": "regression-n0182",
+          "label": "统计：多元OLS"
+        },
+        {
+          "kind": "math",
+          "id": "linear-n0083",
+          "label": "计算：SVD"
+        },
+        {
+          "kind": "math",
+          "id": "linear-n0086",
+          "label": "数值：条件数"
+        },
+        {
+          "kind": "ml",
+          "id": "m07-c06-p01",
+          "label": "机器学习：OLS与误差口径"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 18.06, Projection Matrices and Least Squares",
+          "url": "https://ocw.mit.edu/courses/18-06sc-linear-algebra-fall-2011/pages/resource-index/"
+        },
+        {
+          "title": "Stanford CS229, Machine Learning",
+          "url": "https://see.stanford.edu/Course/CS229/"
+        }
+      ],
+      "checked_status": "教材级精讲：投影几何、正规方程、RSS分解、截距性质与统计外生性边界"
+    },
+    {
+      "id": "linear-n0083",
+      "node_id": "linear-n0083",
+      "title": "奇异值分解SVD",
+      "definition": "任意实矩阵X∈R^{n×p}都存在奇异值分解X=UΣVᵀ，其中U、V列向量正交，Σ具有非负奇异值。SVD同时揭示输入空间方向、输出空间方向与线性映射的伸缩比例；它统一解释矩阵秩、低秩近似、伪逆、病态性、OLS和Ridge的谱收缩。",
+      "assumptions": "考虑实矩阵，取紧SVD X=U_rΣ_rV_rᵀ，r=rank(X)，σ_1≥⋯≥σ_r>0；若保留全U、V则扩展到正交方阵和包含零奇异值的矩形Σ。低秩最优性使用未加权Frobenius或谱范数；有约束、非欧氏度量或缺失数据时须重新检验。",
+      "properties": [
+        "非零奇异值的平方是XᵀX和XXᵀ的非零特征值，左右奇异向量分别处于输入和输出空间。",
+        "rank(X)等于严格正的奇异值个数；最小非零奇异值控制在可识别子空间上的逆问题稳定性。",
+        "截取前k个奇异三元组得到最优秩不超过k的Frobenius和谱范数近似，前提是未加权矩阵近似问题。",
+        "伪逆X⁺=V_rΣ_r^{-1}U_rᵀ，微小σ_i被倒数放大；Ridge将1/σ_i替换为更温和的滤波形式。"
+      ],
+      "formulas": [
+        {
+          "label": "紧SVD",
+          "tex": "X=U_r\\Sigma_rV_r^\\top,\\quad U_r^\\top U_r=V_r^\\top V_r=I_r"
+        },
+        {
+          "label": "谱与协方差",
+          "tex": "X^\\top X=V_r\\Sigma_r^2V_r^\\top,\\qquad XX^\\top=U_r\\Sigma_r^2U_r^\\top"
+        },
+        {
+          "label": "最佳低秩截断",
+          "tex": "X_k=\\sum_{j=1}^k\\sigma_j u_jv_j^\\top,\\quad \\min_{\\operatorname{rank}(B)\\le k}\\|X-B\\|_F^2=\\sum_{j>k}\\sigma_j^2"
+        },
+        {
+          "label": "伪逆",
+          "tex": "X^+=V_r\\Sigma_r^{-1}U_r^\\top"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "XᵀX为对称半正定阵，对其做正交特征分解，正特征值记为σ_i²，右特征向量为v_i。令u_i=Xv_i/σ_i，则u_i相互正交，得到紧SVD。",
+          "tex": "X^\\top Xv_i=\\sigma_i^2v_i,\\quad u_i=Xv_i/\\sigma_i"
+        },
+        {
+          "explanation": "将X=UΣVᵀ左右乘相应转置，利用UᵀU=VᵀV=I，立即得到XᵀX与XXᵀ的谱分解。",
+          "tex": "X^\\top X=V\\Sigma^\\top\\Sigma V^\\top"
+        },
+        {
+          "explanation": "在U、V给定的正交基下，Frobenius范数对正交变换不变。任意秩k矩阵不能同时保留所有剩余的非零正交方向，截去最小奇异值使损失平方和达到下界。",
+          "tex": "\\|X-X_k\\|_F^2=\\sum_{j=k+1}^{r}\\sigma_j^2"
+        },
+        {
+          "explanation": "伪逆只反转正奇异值，零奇异方向保持零。将y映射到U坐标后逐一求商，得到最小范数最小二乘解。",
+          "tex": "\\widehat\\beta=X^+y=\\sum_{j=1}^{r}v_j\\frac{u_j^\\top y}{\\sigma_j}"
+        }
+      ],
+      "example": "取X=[[3,0],[0,1],[0,0]]（3×2）。其奇异值为σ₁=3、σ₂=1，秩2；rank-1截断X₁=[[3,0],[0,0],[0,0]]，误差||X−X₁||_F²=1，||X−X₁||₂=1。伪逆X⁺=[[1/3,0,0],[0,1,0]]。若y=(3,2,0)ᵀ，则β̂=(1,2)ᵀ，Xβ̂=y。",
+      "application": "用于分析金融特征矩阵的数值秩、提取资产收益的主要共同变化方向、求解秩亏OLS，以及解释为何Ridge在较小奇异值方向上产生更强相对收缩。对PCA需要对训练数据中心化，不能将未经去均值的价格趋势方向直接解释为风险主成分。",
+      "caveat": "SVD向量的符号并不唯一，重复奇异值对应子空间内部可正交旋转；比较不同窗口的因子载荷应关注子空间投影而非逐列符号。截断秩k依赖拟合目标，低秩近似最优不意味着组合投资效果最优。",
+      "deep_sections": [
+        {
+          "title": "从对称谱定理构造SVD",
+          "question": "为什么非方阵也能谈“特征方向”？",
+          "paragraphs": [
+            "矩形X本身未必有特征值，但XᵀX始终是p×p的半正定对称矩阵，能用谱定理给出正交的右奇异方向。每个正奇异值对应一个输出方向u_i=Xv_i/σ_i。",
+            "这个构造显示输入方向v_i被X映射成输出方向u_i并放大σ_i倍；输入零空间对应未被映射到可观测结果的方向。"
+          ],
+          "formulas": [
+            {
+              "label": "奇异向量关系",
+              "tex": "Xv_i=\\sigma_i u_i,\\qquad X^\\top u_i=\\sigma_i v_i"
+            }
+          ],
+          "proof": "由XᵀXv_i=σ_i²v_i与u_i=Xv_i/σ_i，计算u_iᵀu_j=δ_ij；且Xᵀu_i=σ_iv_i，从而得到X=Σσ_i u_iv_iᵀ。",
+          "worked": "X=diag(3,1)是最直观例子：第一输入方向伸长3倍，第二方向不伸缩。",
+          "limitation": "σ=0不能用该商定义u_i；紧SVD仅保留严格正的奇异值。"
+        },
+        {
+          "title": "秩、伪逆与不可识别方向",
+          "question": "为什么最小二乘的系数可能极不稳定？",
+          "paragraphs": [
+            "当某个σ_i非常小，数据沿v_i方向的变化几乎被映射为零。为了重建来自y的微弱信号，伪逆需要除以σ_i，于是观察噪声可能被大幅放大。",
+            "SVD可区分数值秩与精确秩，但选择数值阈值必须相对数据尺度和机器精度说明，不能无依据地删除主成分。"
+          ],
+          "formulas": [
+            {
+              "label": "噪声放大",
+              "tex": "\\Delta\\widehat\\beta=X^+\\Delta y=\\sum_{i=1}^{r}v_i\\frac{u_i^\\top\\Delta y}{\\sigma_i}"
+            }
+          ],
+          "proof": "将y替换成y+Δy，最小范数解之差为X⁺Δy；投影到第i方向时噪声被1/σ_i放大，因此最小非零奇异值主导最坏情形。",
+          "worked": "若σ_min=0.01，沿对应u方向的响应扰动0.001可使估计系数沿v方向改变0.1。",
+          "limitation": "噪声如果恰好与小奇异值方向正交，实际放大可能远小于最坏界。"
+        },
+        {
+          "title": "Eckart–Young低秩近似",
+          "question": "为什么保留最大奇异值是一个可证明的最优选择？",
+          "paragraphs": [
+            "对于不带权且没有额外结构限制的矩阵，秩k近似需要决定保留哪些相互正交的谱方向。Frobenius误差平方等于丢弃奇异值平方之和。",
+            "保留前k个最大奇异值使剩余平方和最小，谱范数误差则为σ_{k+1}。这不是稀疏约束或交易成本约束下的最优资产组合定理。"
+          ],
+          "formulas": [
+            {
+              "label": "Frobenius与谱误差",
+              "tex": "\\|X-X_k\\|_F=\\sqrt{\\sum_{j>k}\\sigma_j^2},\\quad \\|X-X_k\\|_2=\\sigma_{k+1}"
+            }
+          ],
+          "proof": "通过正交不变性把问题化到对角奇异值矩阵，并应用秩约束的最佳逼近结论；保留最大的k个独立方向，剩余方向造成不可消除的误差。",
+          "worked": "3×2示例σ=(3,1)，截取k=1时最小Frobenius误差=1，误差平方=1。",
+          "limitation": "当输入存在缺失值、异方差权重或非负约束时，常规截断SVD不必最优。"
+        },
+        {
+          "title": "从SVD走到正则化与ETF特征",
+          "question": "Ridge如何修改每个奇异方向的拟合强度？",
+          "paragraphs": [
+            "OLS伪逆的谱系数是1/σ_i，尤其会放大小奇异值方向的观测噪声。采用J(β)=||y−Xβ||²/(2n)+λ||β||²/2可把逆因子改为σ_i/(σ_i²+nλ)。",
+            "因此正则化不是一刀切删除低方差方向，而是给每个方向连续的收缩幅度。金融资产共线的历史收益和基本面特征常适合先做谱诊断，但收缩效果仍须在未来窗口评价。"
+          ],
+          "formulas": [
+            {
+              "label": "Ridge SVD滤波器",
+              "tex": "\\widehat\\beta_\\lambda=\\sum_i\\frac{\\sigma_i}{\\sigma_i^2+n\\lambda}v_i(u_i^\\top y)"
+            }
+          ],
+          "proof": "把目标函数正规方程(XᵀX+nλI)β=Xᵀy带入SVD后，在第i个谱方向上解一维二次优化得到系数σ_i/(σ_i²+nλ)。",
+          "worked": "σ=1、nλ=1时，OLS的1/σ=1变为Ridge滤波系数1/2，小奇异值方向被收缩。",
+          "limitation": "该推导假定L2惩罚各方向等权；特征未标准化时不能把收缩解释成经济上相同强度的惩罚。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "linear-n0078",
+          "label": "先修：最小二乘"
+        },
+        {
+          "kind": "math",
+          "id": "linear-n0086",
+          "label": "下一讲：条件数"
+        },
+        {
+          "kind": "math",
+          "id": "regression-n0205",
+          "label": "连接：Ridge谱收缩"
+        },
+        {
+          "kind": "math",
+          "id": "linear-x002",
+          "label": "扩展：谱子空间稳定性"
+        },
+        {
+          "kind": "ml",
+          "id": "m07-c06-p02",
+          "label": "机器学习：SVD与正则化"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 18.06, Singular Value Decomposition",
+          "url": "https://www.mit.edu/~18.06/"
+        },
+        {
+          "title": "Gilbert Strang Linear Algebra Lecture Notes",
+          "url": "https://www-math.mit.edu/~gs/LectureNotes/"
+        }
+      ],
+      "checked_status": "教材级精讲：SVD构造、伪逆和噪声放大、Eckart–Young、Ridge谱滤波"
+    }
+  ]
+}
