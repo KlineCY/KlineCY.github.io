@@ -13,7 +13,7 @@ const names=["atlas-proper-scoring-conformal-v5.json","atlas-density-pit-finance
 const previous=new Set([...core.catalog.items.map(x=>x.id),...old.flatMap(d=>d.chapters.flatMap(ch=>ch.lessons.map(x=>x.id)))]);
 const rows=files.flatMap(d=>d.chapters.flatMap(ch=>ch.lessons));
 const expected=["m04-c10-p01","m12-c10-p01","m12-c10-p02","m09-c09-p01","m23-c10-p01","m23-c10-p02"];
-assert.deepEqual(rows.map(x=>x.id),expected,"five-step topical graph and lesson-order stability");
+assert.deepEqual(rows.map(x=>x.id),expected,"six-lesson topical graph and lesson-order stability");
 let sections=0,formula=0,sources=0;
 for(const file of files){assert.equal(file.schema,1);assert(file.chapters.length>=2);}
 for(const x of rows){
@@ -36,7 +36,7 @@ for(const x of rows){
    if(expected.includes(p.id))assert(expected.indexOf(p.id)<expected.indexOf(x.id),"forward-only prerequisite "+x.id+" to "+p.id);
   }
  }
- for(const x of x.sources){assert(x.title&&/^https:\/\//.test(x.url));sources++;}
+ for(const source of x.sources){assert(source.title&&/^https:\/\//.test(source.url));sources++;}
 }
 assert(!/\uFFFD/.test(JSON.stringify(rows)),"corrupted Chinese encoding");
 const scripts=["atlas.js","new-topics.js"].map(n=>fs.readFileSync(new URL(n,here),"utf8"));
