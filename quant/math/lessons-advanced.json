@@ -6235,6 +6235,626 @@
         }
       ],
       "checked_status": "V13完整Stratonovich：四节积分约定、协变差修正、链式法则及SDE转换"
+    },
+    {
+      "id": "ito-n0313",
+      "node_id": "ito-n0313",
+      "title": "线性SDE",
+      "definition": "线性随机微分方程的漂移和扩散系数对状态呈线性或仿射形式，可借助确定性积分因子与随机指数求出显式解。最常用的加性噪声形式是dX=(aX+u(t))dt+σ(t)dW，乘法噪声则需要Itô修正的随机积分因子。解析解为数值算法、均值回复与动态风险模型提供核对基准，并不说明真实金融状态必然遵循线性扩散。",
+      "assumptions": "首先考虑确定性常数a及可积u和平方可积确定性σ，W为标准布朗运动，初值X_0平方可积且与未来增量独立。第二部分乘法噪声系数b固定，第三部分仿射方程使用常数a,b,f,g；使用Itô乘积法则而非普通微积分链式法则。更复杂随机系数需要适应性和可积性假设。",
+      "properties": [
+        "加性线性SDE有显式变常数解，均值由漂移积分决定。",
+        "乘法线性SDE含−b²/2的Itô指数修正，避免错误的算术指数。",
+        "仿射扩散线性方程的积分因子解含−bg的协变差修正。",
+        "解析可解并不等于收益正态：当噪声乘以状态时，解往往呈对数正态或相关的非Gaussian分布。"
+      ],
+      "formulas": [
+        {
+          "label": "加性噪声变常数公式",
+          "tex": "X_t=e^{at}X_0+\\int_0^te^{a(t-s)}u(s)\\,ds+\\int_0^te^{a(t-s)}\\sigma(s)\\,dW_s"
+        },
+        {
+          "label": "乘法噪声与随机指数",
+          "tex": "dX_t=aX_t\\,dt+bX_t\\,dW_t\\quad\\Longrightarrow\\quad X_t=X_0e^{(a-b^2/2)t+bW_t}"
+        },
+        {
+          "label": "仿射扩散中的协变差补偿",
+          "tex": "X_t=\\Phi_t\\left[X_0+\\int_0^t\\Phi_s^{-1}(f-bg)\\,ds+\\int_0^t\\Phi_s^{-1}g\\,dW_s\\right]"
+        },
+        {
+          "label": "矩与解析解的独立验证",
+          "tex": "\\mathbb EX_t=e^{at}x_0+\\int_0^te^{a(t-s)}u(s)\\,ds,\\quad\\operatorname{Var}(X_t)=\\int_0^te^{2a(t-s)}\\sigma(s)^2ds"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "令Y_t=e^{−at}X_t。Itô乘积法则给dY=e^{−at}dX−ae^{−at}Xdt，交叉项因e^{−at}有限变差为零。代入漂移后含X的项正好抵消，剩下u与随机积分；从0到t求和并乘e^{at}即得所示表达式。",
+          "tex": "X_t=e^{at}X_0+\\int_0^te^{a(t-s)}u(s)\\,ds+\\int_0^te^{a(t-s)}\\sigma(s)\\,dW_s"
+        },
+        {
+          "explanation": "令F(x)=log x，当X_0>0时Itô公式给dF(X)=X^{-1}dX−(1/2)X^{−2}d[X]。由于d[X]_t=b²X_t²dt，得到d log X=(a−b²/2)dt+b dW。积分并指数化获得显式解，且其严格正性保证变换自洽。",
+          "tex": "dX_t=aX_t\\,dt+bX_t\\,dW_t\\quad\\Longrightarrow\\quad X_t=X_0e^{(a-b^2/2)t+bW_t}"
+        },
+        {
+          "explanation": "将X=ΦY写入Itô乘积，dX=ΦdY+YdΦ+d[Φ,Y]。若dY=Φ^{-1}(f−bg)dt+Φ^{-1}g dW，而dΦ=aΦdt+bΦdW，则交叉项d[Φ,Y]=bgdt，合计漂移aX+f、扩散bX+g，验证原方程。",
+          "tex": "X_t=\\Phi_t\\left[X_0+\\int_0^t\\Phi_s^{-1}(f-bg)\\,ds+\\int_0^t\\Phi_s^{-1}g\\,dW_s\\right]"
+        },
+        {
+          "explanation": "显式解的随机项是确定性被积函数关于布朗运动的Itô积分，均值为0；对其平方应用Itô等距得到时间平方积分。初值确定且漂移确定，所以方差只由该随机积分贡献；若初值随机还应另加初值方差及可能协方差。",
+          "tex": "\\mathbb EX_t=e^{at}x_0+\\int_0^te^{a(t-s)}u(s)\\,ds,\\quad\\operatorname{Var}(X_t)=\\int_0^te^{2a(t-s)}\\sigma(s)^2ds"
+        }
+      ],
+      "deep_sections": [
+        {
+          "title": "加性噪声变常数公式",
+          "question": "如何把随机线性微分方程转成可直接积分的表达式？",
+          "paragraphs": [
+            "考虑dX_t=(aX_t+u(t))dt+σ(t)dW_t。与常微分方程相似，取确定性积分因子e^{−at}，但仍要明确Itô乘积公式中因子与W的二次协变差为零。",
+            "于是d(e^{−at}X_t)=e^{−at}u(t)dt+e^{−at}σ(t)dW_t；对时间积分再乘回e^{at}，得到显式解。其随机部分是Gaussian积分，但若初值随机，则整体未必无条件正态。"
+          ],
+          "formulas": [
+            {
+              "label": "加性噪声变常数公式",
+              "tex": "X_t=e^{at}X_0+\\int_0^te^{a(t-s)}u(s)\\,ds+\\int_0^te^{a(t-s)}\\sigma(s)\\,dW_s"
+            }
+          ],
+          "proof": "令Y_t=e^{−at}X_t。Itô乘积法则给dY=e^{−at}dX−ae^{−at}Xdt，交叉项因e^{−at}有限变差为零。代入漂移后含X的项正好抵消，剩下u与随机积分；从0到t求和并乘e^{at}即得所示表达式。",
+          "worked": "设a=−2、u=0、σ=1、X_0=3，则E X_1=3e^{−2}≈0.4060，随机部分方差∫_0^1e^{−4(1−s)}ds=(1−e^{−4})/4≈0.24542。",
+          "limitation": "当u或σ由未来路径决定时，确定性Gaussian结论失效；实际市场参数时变与交易冲击可能使模型不再线性。"
+        },
+        {
+          "title": "乘法噪声与随机指数",
+          "question": "为什么不能直接把bW_t放进普通微分方程的指数解？",
+          "paragraphs": [
+            "对dX_t=aX_tdt+bX_tdW_t，形式上的指数e^{at+bW_t}遗漏了二次变差修正。对正状态采用Itô公式计算log X，漂移应为a−b²/2。",
+            "正确解X_t=X_0exp[(a−b²/2)t+bW_t]。如果金融风险敞口本身随状态比例缩放，这个差异决定几何增长率与算术期望增长率的区别。"
+          ],
+          "formulas": [
+            {
+              "label": "乘法噪声与随机指数",
+              "tex": "dX_t=aX_t\\,dt+bX_t\\,dW_t\\quad\\Longrightarrow\\quad X_t=X_0e^{(a-b^2/2)t+bW_t}"
+            }
+          ],
+          "proof": "令F(x)=log x，当X_0>0时Itô公式给dF(X)=X^{-1}dX−(1/2)X^{−2}d[X]。由于d[X]_t=b²X_t²dt，得到d log X=(a−b²/2)dt+b dW。积分并指数化获得显式解，且其严格正性保证变换自洽。",
+          "worked": "a=0.08、b=0.2、t=1、X_0=100且W_1=0时X_1=100e^{0.06}≈106.1837，而错误直接指数法给100e^{0.08}≈108.3287。",
+          "limitation": "这一指数解只在固定系数模型中成立，不能由它推断任何股票或ETF价格路径绝不发生跳跃、停牌或交易中断。"
+        },
+        {
+          "title": "仿射扩散中的协变差补偿",
+          "question": "扩散项包含常数加项时，随机积分因子为何还多出一个修正？",
+          "paragraphs": [
+            "对dX=(aX+f)dt+(bX+g)dW取齐次正解Φ_t=exp[(a−b²/2)t+bW_t]，设X=ΦY。",
+            "乘积的二次协变差使dY的确定性漂移并非简单Φ^{-1}f，而是Φ^{-1}(f−bg)，因此必须保留−bg项。这个差别是线性随机微分方程与普通变常数公式最容易混淆的地方。"
+          ],
+          "formulas": [
+            {
+              "label": "仿射扩散中的协变差补偿",
+              "tex": "X_t=\\Phi_t\\left[X_0+\\int_0^t\\Phi_s^{-1}(f-bg)\\,ds+\\int_0^t\\Phi_s^{-1}g\\,dW_s\\right]"
+            }
+          ],
+          "proof": "将X=ΦY写入Itô乘积，dX=ΦdY+YdΦ+d[Φ,Y]。若dY=Φ^{-1}(f−bg)dt+Φ^{-1}g dW，而dΦ=aΦdt+bΦdW，则交叉项d[Φ,Y]=bgdt，合计漂移aX+f、扩散bX+g，验证原方程。",
+          "worked": "取a=b=0、f=2、g=3、X_0=1，则Φ≡1，解X_t=1+2t+3W_t，在t=1的均值3、方差9；公式立即退化为显然的线性加性解。",
+          "limitation": "若b,g为随机系数，仍可在适当适应和积分条件下使用随机积分因子，但不能把常数系数的公式不加检查地应用到未约束的过程。"
+        },
+        {
+          "title": "矩与解析解的独立验证",
+          "question": "怎样不用模拟就核验线性SDE的均值和方差？",
+          "paragraphs": [
+            "加性噪声且初值确定时，随机积分均值为0，其方差由Itô等距给出。期望因此满足确定性线性ODE，方差则是每期噪声加权平方的累计积分。",
+            "这些解析矩为检查Euler–Maruyama程序提供基准：如果模拟均值明显偏离、方差随时间单位转换异常，应先检查离散增量缩放与程序索引。"
+          ],
+          "formulas": [
+            {
+              "label": "矩与解析解的独立验证",
+              "tex": "\\mathbb EX_t=e^{at}x_0+\\int_0^te^{a(t-s)}u(s)\\,ds,\\quad\\operatorname{Var}(X_t)=\\int_0^te^{2a(t-s)}\\sigma(s)^2ds"
+            }
+          ],
+          "proof": "显式解的随机项是确定性被积函数关于布朗运动的Itô积分，均值为0；对其平方应用Itô等距得到时间平方积分。初值确定且漂移确定，所以方差只由该随机积分贡献；若初值随机还应另加初值方差及可能协方差。",
+          "worked": "a=−2、σ=1、u=0、初值3时，t→∞方差趋1/4，均值趋0；在t=1时理论方差(1−e^{−4})/4≈0.245421，均值约0.406006。",
+          "limitation": "该矩结果依赖固定模型及平方可积性；用模拟方差通过核验不能排除金融市场中的随机波动、厚尾及非平稳风险。"
+        }
+      ],
+      "example": "a=−2、u=0、σ=1、X_0=3时一年后均值3e^{−2}≈0.4060、方差(1−e^{−4})/4≈0.24542。乘法噪声a=.08,b=.2时log增长漂移为.06；仿射特例dX=2dt+3dW从1出发的一年均值3、方差9。",
+      "application": "用于价格对数增长、随机收益因子、均值回复状态及Euler算法对照；解析矩可以作为回测数值实现的独立单元测试。",
+      "caveat": "随机线性方程仍需区分Itô与Stratonovich、价格和对数价格、风险中性与历史测度。参数随未来信息变化或噪声分布变化时，显式公式不再直接成立。",
+      "links": [
+        {
+          "kind": "math",
+          "id": "ito-n0307",
+          "label": "先修：Itô积分构造"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0309",
+          "label": "先修：Itô公式"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0315",
+          "label": "后续：OU均值回复"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0318",
+          "label": "后续：Euler数值离散"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Aalto University Applied Stochastic Differential Equations：第2、5章SDE解与第8章数值方法",
+          "url": "https://users.aalto.fi/~asolin/sde-book/sde-book.pdf"
+        },
+        {
+          "title": "University of Chicago Greg Lawler Stochastic Calculus and Finance：布朗、Itô及SDE章节",
+          "url": "https://www.math.uchicago.edu/~lawler/finbook.pdf"
+        }
+      ],
+      "checked_status": "V14完整数学教材：四节严格条件、解析推导、可复算算例及金融边界"
+    },
+    {
+      "id": "ito-n0315",
+      "node_id": "ito-n0315",
+      "title": "Ornstein-Uhlenbeck过程",
+      "definition": "Ornstein–Uhlenbeck（OU）过程是具有线性均值回复漂移和加性Gaussian噪声的连续时间Markov扩散：dX=κ(θ−X)dt+σdW。κ控制偏离长期水平θ后的回复速度，σ控制瞬时扩散强度。常数参数下显式解、条件正态分布、平稳方差及自相关都能直接得到，是利差、因子与Vasicek利率的基础基准。",
+      "assumptions": "取κ>0、σ≥0、θ为常数，初值x为确定实数且布朗W为给定滤过下的标准运动。平稳分布结论需要κ>0、长期时间以及合适初始分布；过程不被约束为非负，所以将OU直接建模为可能为负的利率应说明经济含义与市场制度。",
+      "properties": [
+        "条件均值为θ+(x−θ)e^{−κt}，条件方差为σ²(1−e^{−2κt})/(2κ)。",
+        "平稳边际分布是N(θ,σ²/(2κ))，与初始水平不同。",
+        "平稳自相关Corr(X_s,X_(s+h))=e^{−κh}，与σ无关但依赖κ。",
+        "OU半衰期ln2/κ是条件均值偏差的减半时间，不是收益或风险敞口保证减半的时点。"
+      ],
+      "formulas": [
+        {
+          "label": "积分因子给出的精确路径",
+          "tex": "X_t=\\theta+(x-\\theta)e^{-\\kappa t}+\\sigma\\int_0^te^{-\\kappa(t-s)}\\,dW_s"
+        },
+        {
+          "label": "条件分布与方差核算",
+          "tex": "X_t\\mid X_0=x\\sim N\\!\\left(\\theta+(x-\\theta)e^{-\\kappa t},\\frac{\\sigma^2}{2\\kappa}(1-e^{-2\\kappa t})\\right)"
+        },
+        {
+          "label": "平稳协方差与半衰期",
+          "tex": "\\operatorname{Corr}(X_s,X_{s+h})=e^{-\\kappa h},\\qquad t_{1/2}=\\frac{\\log2}{\\kappa}"
+        },
+        {
+          "label": "OU与离散AR(1)的精确对应",
+          "tex": "\\phi=e^{-\\kappa\\Delta},\\qquad \\kappa=-\\frac{\\log\\phi}{\\Delta}\\quad(0<\\phi<1)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "令Y=X−θ，则dY=−κYdt+σdW。乘以e^{κt}有d(e^{κt}Y)=σe^{κt}dW；从0积分得Y_t=e^{−κt}Y_0+σe^{−κt}∫_0^te^{κs}dW_s，再整理为所示卷积表达。",
+          "tex": "X_t=\\theta+(x-\\theta)e^{-\\kappa t}+\\sigma\\int_0^te^{-\\kappa(t-s)}\\,dW_s"
+        },
+        {
+          "explanation": "Itô等距给随机部分的方差σ²∫_0^te^{−2κ(t−s)}ds=σ²(1−e^{−2κt})/(2κ)。由于被积函数确定，积分为Gaussian，独立于X_0确定值；加上确定性均值即得到正态条件分布。",
+          "tex": "X_t\\mid X_0=x\\sim N\\!\\left(\\theta+(x-\\theta)e^{-\\kappa t},\\frac{\\sigma^2}{2\\kappa}(1-e^{-2\\kappa t})\\right)"
+        },
+        {
+          "explanation": "由Markov转移表示X_{s+h}−θ=e^{−κh}(X_s−θ)+η_h，其中η_h与F_s独立、均值0。取协方差得到e^{−κh}Var(X_s)，在平稳状态Var(X_s)=σ²/(2κ)恒定，故相关系数为e^{−κh}。",
+          "tex": "\\operatorname{Corr}(X_s,X_{s+h})=e^{-\\kappa h},\\qquad t_{1/2}=\\frac{\\log2}{\\kappa}"
+        },
+        {
+          "explanation": "从条件精确路径表示在t=nΔ到(n+1)Δ的时间窗重新积分，得到AR(1)转移关系。未来窗口增量与过去F_(nΔ)独立，创新方差为OU核平方积分。由φ=e^{−κΔ}两边取对数并除以Δ得到κ。",
+          "tex": "\\phi=e^{-\\kappa\\Delta},\\qquad \\kappa=-\\frac{\\log\\phi}{\\Delta}\\quad(0<\\phi<1)"
+        }
+      ],
+      "deep_sections": [
+        {
+          "title": "积分因子给出的精确路径",
+          "question": "如何对OU扩散同时求得确定性均值回复与随机噪声部分？",
+          "paragraphs": [
+            "将漂移写成−κX+κθ，可直接用线性SDE变常数公式。定积分部分等于θ(1−e^{−κt})，因此给出指数衰减初值差和加权布朗随机积分。",
+            "这个路径表示说明OU状态是Gaussian，但正态性并不意味着任何实测市场利差具有恒定κ、σ，也不意味着所有套利价差均必然回复。"
+          ],
+          "formulas": [
+            {
+              "label": "积分因子给出的精确路径",
+              "tex": "X_t=\\theta+(x-\\theta)e^{-\\kappa t}+\\sigma\\int_0^te^{-\\kappa(t-s)}\\,dW_s"
+            }
+          ],
+          "proof": "令Y=X−θ，则dY=−κYdt+σdW。乘以e^{κt}有d(e^{κt}Y)=σe^{κt}dW；从0积分得Y_t=e^{−κt}Y_0+σe^{−κt}∫_0^te^{κs}dW_s，再整理为所示卷积表达。",
+          "worked": "取κ=2、θ=1、x=3、σ=0.4，在t=1时期望为1+2e^{−2}≈1.27067；σ只改变分布宽度，不改变这一条件均值。",
+          "limitation": "真实利差可能存在结构断裂、价格跳跃和均衡中枢变化，有限区间估计的负κ或非线性回复都应另行检验。"
+        },
+        {
+          "title": "条件分布与方差核算",
+          "question": "为什么OU未来状态在给定当前信息后仍是正态变量？",
+          "paragraphs": [
+            "显式解的未来随机项是确定性核e^{−κ(t−s)}对独立布朗增量的积分，因而属于均值0的Gaussian随机变量。",
+            "利用Itô等距得到条件方差，并与确定性回复均值组合，得精确转移分布；这允许直接写出离散观测的似然，而不必先使用Euler近似。"
+          ],
+          "formulas": [
+            {
+              "label": "条件分布与方差核算",
+              "tex": "X_t\\mid X_0=x\\sim N\\!\\left(\\theta+(x-\\theta)e^{-\\kappa t},\\frac{\\sigma^2}{2\\kappa}(1-e^{-2\\kappa t})\\right)"
+            }
+          ],
+          "proof": "Itô等距给随机部分的方差σ²∫_0^te^{−2κ(t−s)}ds=σ²(1−e^{−2κt})/(2κ)。由于被积函数确定，积分为Gaussian，独立于X_0确定值；加上确定性均值即得到正态条件分布。",
+          "worked": "取κ=2、σ=.4、t=1，条件方差为.16/4×(1−e^{−4})≈0.039267，条件标准差≈0.19816，接近但未达到平稳方差0.04。",
+          "limitation": "若观察样本按不等时间间隔采集，必须使用各自的t差计算转移方差，不可固定套同一日频拟合公式。"
+        },
+        {
+          "title": "平稳协方差与半衰期",
+          "question": "如何把OU回复强度κ转成可估计的时间序列自相关？",
+          "paragraphs": [
+            "在平稳起点下，X_s−θ与未来噪声卷积独立；从s到s+h的偏差是当前偏差乘e^{−κh}加独立Gaussian噪声。",
+            "因此Cov(X_s,X_(s+h))=Varπ(X)e^{−κh}，标准化后得到e^{−κh}。令相关衰减至一半即h=ln2/κ，但这只描述线性状态记忆。"
+          ],
+          "formulas": [
+            {
+              "label": "平稳协方差与半衰期",
+              "tex": "\\operatorname{Corr}(X_s,X_{s+h})=e^{-\\kappa h},\\qquad t_{1/2}=\\frac{\\log2}{\\kappa}"
+            }
+          ],
+          "proof": "由Markov转移表示X_{s+h}−θ=e^{−κh}(X_s−θ)+η_h，其中η_h与F_s独立、均值0。取协方差得到e^{−κh}Var(X_s)，在平稳状态Var(X_s)=σ²/(2κ)恒定，故相关系数为e^{−κh}。",
+          "worked": "κ=2每单位时间，半衰期ln2/2≈0.3466；如果相邻观测间隔0.5，理论自相关e^{−1}≈0.36788。",
+          "limitation": "均值回复半衰期并非策略交易后必定获利的周期；费用、跳空与状态漂移都可能导致长期持仓亏损。"
+        },
+        {
+          "title": "OU与离散AR(1)的精确对应",
+          "question": "为什么离散时间回归系数应与e^{−κΔ}相联系？",
+          "paragraphs": [
+            "固定采样间隔Δ，OU条件分布给X_(n+1)−θ=e^{−κΔ}(X_n−θ)+ε_n，且独立Gaussian创新方差为σ²(1−e^{−2κΔ})/(2κ)。",
+            "这恰是稳定AR(1)形式。若直接把离散回归系数φ当作连续κ，会发生尺度错误；应在0<φ<1时按κ=−lnφ/Δ转换。"
+          ],
+          "formulas": [
+            {
+              "label": "OU与离散AR(1)的精确对应",
+              "tex": "\\phi=e^{-\\kappa\\Delta},\\qquad \\kappa=-\\frac{\\log\\phi}{\\Delta}\\quad(0<\\phi<1)"
+            }
+          ],
+          "proof": "从条件精确路径表示在t=nΔ到(n+1)Δ的时间窗重新积分，得到AR(1)转移关系。未来窗口增量与过去F_(nΔ)独立，创新方差为OU核平方积分。由φ=e^{−κΔ}两边取对数并除以Δ得到κ。",
+          "worked": "若半年的采样间隔Δ=.5且回归估计φ=e^{−1}≈0.36788，则κ=−log(0.36788)/.5≈2每年；若误按Δ=1则估计会错误减半。",
+          "limitation": "实际回归有噪声、非同步采样和参数漂移；估得负φ时不可用实数对数公式硬将其解释为连续OU回复率。"
+        }
+      ],
+      "example": "OU设κ=2、θ=1、x=3、σ=.4，一年条件均值1+2e^{−2}≈1.27067、方差0.04(1−e^{−4})≈0.039267。平稳方差0.04，半衰期约0.3466；半年观测自相关e^{−1}≈0.36788。",
+      "application": "适用于利率短端、收益利差、因子残差和均值回复基准；精确转移分布能独立核验数值离散与模型参数单位。",
+      "caveat": "OU不保证状态非负，均值回复结构可能在政策和流动性冲击后失效；半衰期与实盘净利润没有直接等价关系。",
+      "links": [
+        {
+          "kind": "math",
+          "id": "ito-n0313",
+          "label": "先修：线性SDE"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0308",
+          "label": "先修：Itô等距"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0316",
+          "label": "下一步：CIR扩散"
+        },
+        {
+          "kind": "math",
+          "id": "finance-n0441",
+          "label": "金融：Vasicek模型"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Aalto University Applied Stochastic Differential Equations：第2、5章SDE解与第8章数值方法",
+          "url": "https://users.aalto.fi/~asolin/sde-book/sde-book.pdf"
+        },
+        {
+          "title": "University of Chicago Greg Lawler Stochastic Calculus and Finance：布朗、Itô及SDE章节",
+          "url": "https://www.math.uchicago.edu/~lawler/finbook.pdf"
+        }
+      ],
+      "checked_status": "V14完整数学教材：四节严格条件、解析推导、可复算算例及金融边界"
+    },
+    {
+      "id": "ito-n0316",
+      "node_id": "ito-n0316",
+      "title": "CIR平方根扩散",
+      "definition": "Cox–Ingersoll–Ross（CIR）平方根扩散把OU的常数Gaussian波动改为状态依赖的σ√X噪声：dX=κ(θ−X)dt+σ√X dW。这使状态接近零时波动自动缩小，并在适当参数下保持非负。它是短期利率、信用强度和随机波动因子建模的基础；Feller条件控制零边界是否可达，但不能简单等同于所有条件下的严格正性结论。",
+      "assumptions": "参数κ>0、θ>0、σ>0，初值x≥0；平方根系数不是全局Lipschitz，但该方程有适当非负的路径唯一强解。若2κθ≥σ²且x>0，则零边界不可达；若2κθ<σ²，零可达但不必为吸收状态。稳态Gamma分布及有限矩结论须假设所述时间齐次模型。",
+      "properties": [
+        "CIR非负，Feller条件2κθ≥σ²保证从严格正初值不触及零。",
+        "条件均值θ+(x−θ)e^{−κt}与OU相同，但条件方差依赖初始x。",
+        "平稳分布为Gamma(shape=2κθ/σ², scale=σ²/(2κ))。",
+        "Euler直接离散可能产生负模拟值，即使真实CIR解非负，因此数值算法需另选截断或正性保持方案。"
+      ],
+      "formulas": [
+        {
+          "label": "状态依赖扩散与零边界",
+          "tex": "dX_t=\\kappa(\\theta-X_t)\\,dt+\\sigma\\sqrt{X_t}\\,dW_t,\\quad 2\\kappa\\theta\\ge\\sigma^2"
+        },
+        {
+          "label": "期望与均值回复",
+          "tex": "\\mathbb E[X_t\\mid X_0=x]=\\theta+(x-\\theta)e^{-\\kappa t}"
+        },
+        {
+          "label": "二阶矩与条件方差",
+          "tex": "\\operatorname{Var}(X_t\\mid x)=\\frac{x\\sigma^2}{\\kappa}(e^{-\\kappa t}-e^{-2\\kappa t})+\\frac{\\theta\\sigma^2}{2\\kappa}(1-e^{-\\kappa t})^2"
+        },
+        {
+          "label": "Gamma稳态与Feller参数",
+          "tex": "X_\\infty\\sim\\operatorname{Gamma}\\!\\left(\\frac{2\\kappa\\theta}{\\sigma^2},\\,\\frac{\\sigma^2}{2\\kappa}\\right),\\quad\\mathbb EX_\\infty=\\theta"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "把CIR过程经适当时间和尺度变换联系到平方Bessel过程，其维度δ=4κθ/σ²。平方Bessel零边界分类给δ≥2时从正初值不触零，这与2κθ≥σ²等价；详细边界定理依靠一维扩散尺度函数，不可仅凭σ√0=0就得出结论。",
+          "tex": "dX_t=\\kappa(\\theta-X_t)\\,dt+\\sigma\\sqrt{X_t}\\,dW_t,\\quad 2\\kappa\\theta\\ge\\sigma^2"
+        },
+        {
+          "explanation": "将SDE写成积分方程并适当局部化保证随机积分可积，取期望得m(t)=x+∫_0^tκ(θ−m(s))ds。微分得m'=κ(θ−m)，乘积分因子e^{κt}求解可得均值公式。",
+          "tex": "\\mathbb E[X_t\\mid X_0=x]=\\theta+(x-\\theta)e^{-\\kappa t}"
+        },
+        {
+          "explanation": "由Itô公式得dX²=[2κθX−2κX²+σ²X]dt+2σX^{3/2}dW。故m_2'=−2κm_2+(2κθ+σ²)m_1；代入已知m_1并通过积分因子解m_2，减m_1²化简为公式。",
+          "tex": "\\operatorname{Var}(X_t\\mid x)=\\frac{x\\sigma^2}{\\kappa}(e^{-\\kappa t}-e^{-2\\kappa t})+\\frac{\\theta\\sigma^2}{2\\kappa}(1-e^{-\\kappa t})^2"
+        },
+        {
+          "explanation": "稳态密度可由扩散Fokker–Planck零概率流方程求得：设b(x)=κ(θ−x)、a(x)=σ²x，零流条件b p−(1/2)(a p)'=0，解得p(x)正比x^{(2κθ/σ²)−1}e^{−(2κ/σ²)x}，归一化是Gamma密度。",
+          "tex": "X_\\infty\\sim\\operatorname{Gamma}\\!\\left(\\frac{2\\kappa\\theta}{\\sigma^2},\\,\\frac{\\sigma^2}{2\\kappa}\\right),\\quad\\mathbb EX_\\infty=\\theta"
+        }
+      ],
+      "deep_sections": [
+        {
+          "title": "状态依赖扩散与零边界",
+          "question": "为什么把加性噪声改成平方根噪声会改变非负性？",
+          "paragraphs": [
+            "CIR扩散的布朗系数σ√X在X趋0时下降至0，漂移则在0处为κθ>0，向正区间推动状态。",
+            "零边界的精确可达性由Feller维度4κθ/σ²控制：当2κθ≥σ²且从x>0出发时，零不可达；小于该阈值时可能触零，但并不意味着被永久吸收。"
+          ],
+          "formulas": [
+            {
+              "label": "状态依赖扩散与零边界",
+              "tex": "dX_t=\\kappa(\\theta-X_t)\\,dt+\\sigma\\sqrt{X_t}\\,dW_t,\\quad 2\\kappa\\theta\\ge\\sigma^2"
+            }
+          ],
+          "proof": "把CIR过程经适当时间和尺度变换联系到平方Bessel过程，其维度δ=4κθ/σ²。平方Bessel零边界分类给δ≥2时从正初值不触零，这与2κθ≥σ²等价；详细边界定理依靠一维扩散尺度函数，不可仅凭σ√0=0就得出结论。",
+          "worked": "κ=2、θ=.04、σ=.2时2κθ=.16、σ²=.04，满足Feller；维度δ=4×2×.04/.04=8≥2，从x>0出发理论上不触零。",
+          "limitation": "如果模拟网格上产生负值，不能据此说CIR真实过程可能为负；应检查数值离散而非误改数学模型边界。"
+        },
+        {
+          "title": "期望与均值回复",
+          "question": "CIR为什么仍具有与OU相同的指数回复均值？",
+          "paragraphs": [
+            "对两边取期望，Itô随机积分在适当可积条件下的均值为零，所以m(t)=E X_t满足m'=κ(θ−m)。",
+            "这是确定性一阶线性ODE，解m(t)=θ+(x−θ)e^{−κt}。均值与σ无关不代表分布、极端风险和零边界都与σ无关。"
+          ],
+          "formulas": [
+            {
+              "label": "期望与均值回复",
+              "tex": "\\mathbb E[X_t\\mid X_0=x]=\\theta+(x-\\theta)e^{-\\kappa t}"
+            }
+          ],
+          "proof": "将SDE写成积分方程并适当局部化保证随机积分可积，取期望得m(t)=x+∫_0^tκ(θ−m(s))ds。微分得m'=κ(θ−m)，乘积分因子e^{κt}求解可得均值公式。",
+          "worked": "κ=2、θ=.04、x=.09、t=1时均值为.04+.05e^{−2}≈.0467668；与σ=.2或σ=.1无关，条件方差则明显不同。",
+          "limitation": "信用强度或波动率因子的未来条件均值相同，并不说明两个不同σ的模型具有相同风险中性价格或尾部分布。"
+        },
+        {
+          "title": "二阶矩与条件方差",
+          "question": "平方根扩散为何使未来方差依赖今天的状态x？",
+          "paragraphs": [
+            "应用Itô公式到X²：d(X²)=2X dX+(dX)²，扩散二次变差为σ²Xdt，所以二阶矩受到当前均值的额外σ²E X项驱动。",
+            "解线性二阶矩ODE并扣除均值平方，得到含初值x的条件方差。相同κ、θ、σ的模型从不同x出发，短期波动并不相同。"
+          ],
+          "formulas": [
+            {
+              "label": "二阶矩与条件方差",
+              "tex": "\\operatorname{Var}(X_t\\mid x)=\\frac{x\\sigma^2}{\\kappa}(e^{-\\kappa t}-e^{-2\\kappa t})+\\frac{\\theta\\sigma^2}{2\\kappa}(1-e^{-\\kappa t})^2"
+            }
+          ],
+          "proof": "由Itô公式得dX²=[2κθX−2κX²+σ²X]dt+2σX^{3/2}dW。故m_2'=−2κm_2+(2κθ+σ²)m_1；代入已知m_1并通过积分因子解m_2，减m_1²化简为公式。",
+          "worked": "κ=2、θ=.04、σ=.2、初值x=θ、t趋∞时首项消失，方差趋θσ²/(2κ)=.04×.04/4=.0004。",
+          "limitation": "如果某个校准器使用OU的常数σ²(1−e^{−2κt})/(2κ)替代CIR方差，会忽略状态依赖且估错接近零时的风险。"
+        },
+        {
+          "title": "Gamma稳态与Feller参数",
+          "question": "如何从平稳矩和Gamma参数识别CIR的长期分布？",
+          "paragraphs": [
+            "对κ>0、θ>0、σ>0的CIR，长期边际收敛到Gamma分布，形状参数α=2κθ/σ²、尺度参数β=σ²/(2κ)。",
+            "该Gamma均值αβ=θ，方差αβ²=θσ²/(2κ)，恰与条件均值及方差的长期极限相符。验证矩一致只是独立核对，并不是Gamma分布存在性的完整证明。"
+          ],
+          "formulas": [
+            {
+              "label": "Gamma稳态与Feller参数",
+              "tex": "X_\\infty\\sim\\operatorname{Gamma}\\!\\left(\\frac{2\\kappa\\theta}{\\sigma^2},\\,\\frac{\\sigma^2}{2\\kappa}\\right),\\quad\\mathbb EX_\\infty=\\theta"
+            }
+          ],
+          "proof": "稳态密度可由扩散Fokker–Planck零概率流方程求得：设b(x)=κ(θ−x)、a(x)=σ²x，零流条件b p−(1/2)(a p)'=0，解得p(x)正比x^{(2κθ/σ²)−1}e^{−(2κ/σ²)x}，归一化是Gamma密度。",
+          "worked": "κ=2、θ=.04、σ=.2时形状α=4、尺度β=.01，长期均值4×.01=.04，方差4×.01²=.0004，均与矩方程相符。",
+          "limitation": "Gamma稳态只对应常参数CIR，不保证任意利率/强度数据都满足这一分布；利率政策制度变化可能带来截断和跳变。"
+        }
+      ],
+      "example": "取κ=2、θ=.04、σ=.2且x=.09，一年条件均值.04+.05e^{−2}≈.04677；Feller强条件.16≥.04成立，长期分布Gamma(形状4,尺度.01)，均值.04、方差.0004。",
+      "application": "用于短期利率、信用违约强度、波动率因子和带非负限制的流动性状态；应对边界与离散算法正性单独验收。",
+      "caveat": "平方根系数不满足全局Lipschitz，不宜直接引用仅适用于全局Lipschitz的数值强收敛结论；Feller不等式与非负性不能混为一谈。",
+      "links": [
+        {
+          "kind": "math",
+          "id": "ito-n0313",
+          "label": "先修：线性SDE"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0315",
+          "label": "比较：OU加性扩散"
+        },
+        {
+          "kind": "math",
+          "id": "finance-n0442",
+          "label": "金融：CIR利率"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0318",
+          "label": "后续：数值离散"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Aalto University Applied Stochastic Differential Equations：第2、5章SDE解与第8章数值方法",
+          "url": "https://users.aalto.fi/~asolin/sde-book/sde-book.pdf"
+        },
+        {
+          "title": "University of Chicago Greg Lawler Stochastic Calculus and Finance：布朗、Itô及SDE章节",
+          "url": "https://www.math.uchicago.edu/~lawler/finbook.pdf"
+        }
+      ],
+      "checked_status": "V14完整数学教材：四节严格条件、解析推导、可复算算例及金融边界"
+    },
+    {
+      "id": "ito-n0317",
+      "node_id": "ito-n0317",
+      "title": "强弱解",
+      "definition": "随机微分方程中的强解和弱解描述对概率空间及Brownian驱动的不同要求。强解在预先给定的滤过概率空间、Brownian运动与初始变量上构造适应解；弱解允许连同驱动Brownian一起选择新的概率空间，使过程联合分布满足SDE。强弱解与数值算法的强/弱收敛是两个不同概念：前者是解构造方式，后者是误差测度。",
+      "assumptions": "考虑Itô SDE dX_t=b(t,X_t)dt+σ(t,X_t)dW_t，初值为给定分布。强解要求相对于给定驱动Brownian的适应性，弱解只要求某个概率空间存在满足积分方程的(X,W)。全局Lipschitz和线性增长是方便的强解存在且路径唯一充分条件；更弱的非Lipschitz方程需要专门定理。",
+      "properties": [
+        "全局Lipschitz和线性增长保证有限时域强解存在唯一及合适矩界。",
+        "路径唯一性要求在相同Brownian驱动与初值下两个解几乎处处逐时刻相同。",
+        "弱解存在不代表给定Brownian驱动下已有强解；同分布唯一与路径唯一须分开验证。",
+        "数值强误差比较同一噪声路径，弱误差比较支付函数的期望，名称相近但不是解的强弱定义。"
+      ],
+      "formulas": [
+        {
+          "label": "积分方程与强解定义",
+          "tex": "X_t=X_0+\\int_0^tb(s,X_s)\\,ds+\\int_0^t\\sigma(s,X_s)\\,dW_s"
+        },
+        {
+          "label": "路径唯一与Gronwall估计",
+          "tex": "\\mathbb E\\sup_{u\\le t}|X_u-Y_u|^2\\le C\\int_0^t\\mathbb E\\sup_{v\\le s}|X_v-Y_v|^2\\,ds=0"
+        },
+        {
+          "label": "弱解与唯一分布的区分",
+          "tex": "\\text{路径唯一: }X_0=Y_0,\\ W^X=W^Y\\Longrightarrow\\Pr(X_t=Y_t,\\ \\forall t\\le T)=1"
+        },
+        {
+          "label": "强弱解与数值强弱误差",
+          "tex": "\\varepsilon_{\\rm strong}(h)=\\bigl(\\mathbb E|X_T-X_T^h|^2\\bigr)^{1/2},\\quad\\varepsilon_{\\rm weak}(h)=|\\mathbb E\\varphi(X_T)-\\mathbb E\\varphi(X_T^h)|"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义要求对所有t积分等式几乎处处成立，且X为连续适应过程。若b、σ具备全局Lipschitz与线性增长，可采用Picard迭代并借助Itô等距、Gronwall不等式在适当Banach空间上证明收敛，得到强解。",
+          "tex": "X_t=X_0+\\int_0^tb(s,X_s)\\,ds+\\int_0^t\\sigma(s,X_s)\\,dW_s"
+        },
+        {
+          "explanation": "先将D写成漂移积分和Brownian积分之和，平方后用(a+b)²≤2a²+2b²。漂移项以Cauchy–Schwarz控制，随机项以BDG和Itô等距类估计控制，并用Lipschitz将系数差约束在|D|上。对非负函数应用Gronwall得期望上确界为0。",
+          "tex": "\\mathbb E\\sup_{u\\le t}|X_u-Y_u|^2\\le C\\int_0^t\\mathbb E\\sup_{v\\le s}|X_v-Y_v|^2\\,ds=0"
+        },
+        {
+          "explanation": "路径唯一性是相同空间和同一噪声的比较。弱唯一性则表达任意两个合法弱解的X在路径空间有相同分布；由于未要求相同W，比较X−Y可能根本没有定义在同一概率空间。二者可在适当Yamada–Watanabe条件下联结，但不能凭术语相似直接混同。",
+          "tex": "\\text{路径唯一: }X_0=Y_0,\\ W^X=W^Y\\Longrightarrow\\Pr(X_t=Y_t,\\ \\forall t\\le T)=1"
+        },
+        {
+          "explanation": "强误差用耦合样本逐路径计算差并平方取期望，因此需要联合分布；弱误差分别求两个模型的支付期望，只依各自边际分布。强收敛若伴随统一矩界可对Lipschitz测试支付控制弱误差，但对一般不光滑支付和更高阶速率没有自动结论。",
+          "tex": "\\varepsilon_{\\rm strong}(h)=\\bigl(\\mathbb E|X_T-X_T^h|^2\\bigr)^{1/2},\\quad\\varepsilon_{\\rm weak}(h)=|\\mathbb E\\varphi(X_T)-\\mathbb E\\varphi(X_T^h)|"
+        }
+      ],
+      "deep_sections": [
+        {
+          "title": "积分方程与强解定义",
+          "question": "如何严格说明SDE的解必须适应交易时点信息？",
+          "paragraphs": [
+            "SDE的微分符号是积分方程的缩写：X_t=X_0+∫b(s,X_s)ds+∫σ(s,X_s)dW_s。随机积分要求系数过程可预测、适当可积。",
+            "强解必须在指定概率空间中使用给定W和原信息流构造X，并保持适应性。金融交易执行控制可以基于现有信息调节，但不能把未来布朗增量预装进今日状态。"
+          ],
+          "formulas": [
+            {
+              "label": "积分方程与强解定义",
+              "tex": "X_t=X_0+\\int_0^tb(s,X_s)\\,ds+\\int_0^t\\sigma(s,X_s)\\,dW_s"
+            }
+          ],
+          "proof": "定义要求对所有t积分等式几乎处处成立，且X为连续适应过程。若b、σ具备全局Lipschitz与线性增长，可采用Picard迭代并借助Itô等距、Gronwall不等式在适当Banach空间上证明收敛，得到强解。",
+          "worked": "常数SDE dX_t=2dt+3dW_t、X_0=1的强解是X_t=1+2t+3W_t，在t=1时均值3、方差9，对任何给定Brownian路径可直接计算。",
+          "limitation": "仅用某条模拟路径数值接近SDE并不构成数学意义下强解的证明；仍须核查积分方程与适应可测性。"
+        },
+        {
+          "title": "路径唯一与Gronwall估计",
+          "question": "两个解在同一随机噪声下为何会因系数Lipschitz而无法分离？",
+          "paragraphs": [
+            "设X、Y在同一空间、同一W和相同初值下满足SDE，定义差D=X−Y，其漂移差与扩散差分别受L|D|控制。",
+            "对sup_{u≤t}|D_u|²取期望，可结合Cauchy–Schwarz、BDG不等式和系数Lipschitz得到E sup|D|²≤C∫_0^t E sup_{v≤s}|D_v|²ds；Gronwall给差为零。"
+          ],
+          "formulas": [
+            {
+              "label": "路径唯一与Gronwall估计",
+              "tex": "\\mathbb E\\sup_{u\\le t}|X_u-Y_u|^2\\le C\\int_0^t\\mathbb E\\sup_{v\\le s}|X_v-Y_v|^2\\,ds=0"
+            }
+          ],
+          "proof": "先将D写成漂移积分和Brownian积分之和，平方后用(a+b)²≤2a²+2b²。漂移项以Cauchy–Schwarz控制，随机项以BDG和Itô等距类估计控制，并用Lipschitz将系数差约束在|D|上。对非负函数应用Gronwall得期望上确界为0。",
+          "worked": "对dX=−2Xdt+dW、X_0=3，如果两个解共用同一W，则差满足确定性ODE dD=−2Ddt、D_0=0，立即有D_t=0。",
+          "limitation": "上述全局Lipschitz充分条件不是所有有唯一解SDE的必要条件，CIR平方根扩散需专门路径唯一性理论。"
+        },
+        {
+          "title": "弱解与唯一分布的区分",
+          "question": "为什么只知道收益分布相同仍不能逐路径比较两套动态控制算法？",
+          "paragraphs": [
+            "弱解允许在某个概率空间和其Brownian驱动上构造过程，因此两个弱解可以位于不同空间。弱唯一只要求状态过程X的路径分布相同，不要求每条噪声路径上解相等。",
+            "金融回测若希望逐路径比较对冲误差，应使用同一随机驱动耦合的强误差；只有弱分布信息可比较期望支付，但无法天然计算同一路径误差。"
+          ],
+          "formulas": [
+            {
+              "label": "弱解与唯一分布的区分",
+              "tex": "\\text{路径唯一: }X_0=Y_0,\\ W^X=W^Y\\Longrightarrow\\Pr(X_t=Y_t,\\ \\forall t\\le T)=1"
+            }
+          ],
+          "proof": "路径唯一性是相同空间和同一噪声的比较。弱唯一性则表达任意两个合法弱解的X在路径空间有相同分布；由于未要求相同W，比较X−Y可能根本没有定义在同一概率空间。二者可在适当Yamada–Watanabe条件下联结，但不能凭术语相似直接混同。",
+          "worked": "在dX=dW、X_0=0中，任何解都与对应W逐路径相等；两个独立概率空间的Brownian解具有相同N(0,t)边际，但无法无条件把它们逐路径相减。",
+          "limitation": "用强误差比较模拟器需要共用同一随机增量；仅仅让随机数种子不同的两次路径生成结果均值相近不足以证明强收敛。"
+        },
+        {
+          "title": "强弱解与数值强弱误差",
+          "question": "模拟精度中‘强收敛’和‘弱收敛’具体在比较什么？",
+          "paragraphs": [
+            "数值强误差常为(E|X_T−X_T^h|²)^{1/2}，要求精确解与离散解使用同一Brownian驱动；数值弱误差为|Eφ(X_T)−Eφ(X_T^h)|，只比较选定测试支付的期望。",
+            "在全局Lipschitz及足够正则条件下Euler–Maruyama通常有强阶1/2；弱阶1还需要更高阶系数与测试函数光滑性及矩界，不能从强阶直接推出所有非光滑期权支付的弱阶。"
+          ],
+          "formulas": [
+            {
+              "label": "强弱解与数值强弱误差",
+              "tex": "\\varepsilon_{\\rm strong}(h)=\\bigl(\\mathbb E|X_T-X_T^h|^2\\bigr)^{1/2},\\quad\\varepsilon_{\\rm weak}(h)=|\\mathbb E\\varphi(X_T)-\\mathbb E\\varphi(X_T^h)|"
+            }
+          ],
+          "proof": "强误差用耦合样本逐路径计算差并平方取期望，因此需要联合分布；弱误差分别求两个模型的支付期望，只依各自边际分布。强收敛若伴随统一矩界可对Lipschitz测试支付控制弱误差，但对一般不光滑支付和更高阶速率没有自动结论。",
+          "worked": "若X_T~N(0,1)、模拟器X_T^h~N(0,1)但相互独立，则取φ(x)=x²时弱误差0；逐路径差方差为2，强RMSE=√2≈1.414。",
+          "limitation": "强/弱数值误差与强/弱SDE解是不同分类，不能将两个独立运行的样本差称作精确意义下的强误差。"
+        }
+      ],
+      "example": "常数SDE dX=2dt+3dW从1出发在t=1时均值3、方差9。两个N(0,1)结果即使边际完全相同，独立耦合时逐路径差RMSE仍为√2；这说明弱期望准确不保证强路径准确。",
+      "application": "用于金融SDE数值模拟、模型定价误差与同噪声路径风险对比，并为Euler–Maruyama、弱期权支付估计与CIR边界算法提供正确概念。",
+      "caveat": "路径唯一与唯一分布是不同定理；全局Lipschitz仅是方便的充分条件，数值强/弱误差也不能直接混同SDE强/弱解。",
+      "links": [
+        {
+          "kind": "math",
+          "id": "ito-n0307",
+          "label": "先修：可预测Itô积分"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0313",
+          "label": "先修：线性SDE"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0318",
+          "label": "后续：Euler离散"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0316",
+          "label": "对照：CIR非Lipschitz"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Aalto University Applied Stochastic Differential Equations：第2、5章SDE解与第8章数值方法",
+          "url": "https://users.aalto.fi/~asolin/sde-book/sde-book.pdf"
+        },
+        {
+          "title": "University of Chicago Greg Lawler Stochastic Calculus and Finance：布朗、Itô及SDE章节",
+          "url": "https://www.math.uchicago.edu/~lawler/finbook.pdf"
+        }
+      ],
+      "checked_status": "V14完整数学教材：四节严格条件、解析推导、可复算算例及金融边界"
     }
   ]
 }
