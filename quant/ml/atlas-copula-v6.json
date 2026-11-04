@@ -1,0 +1,265 @@
+{
+  "schema": 1,
+  "version": "2026-11-04",
+  "chapters": [
+    {
+      "domain_id": "m09",
+      "chapter": "联合概率建模：Sklar、Copula尾依赖与高维Vine结构",
+      "lessons": [
+        {
+          "id": "m09-c10-p01",
+          "title": "Copula联合概率模型：Sklar分解、Gaussian/t尾依赖与风险情景",
+          "goal": "从单资产预测CDF和概率积分变换出发，完整推导Sklar分解与二维Copula联合事件概率，区分Gaussian Copula的渐近零尾依赖与Student-t的有限自由度尾依赖，使用同一组ETF边际收益构造可复核的组合风险情景，特别核查伪观测、模型正则性与危机条件概率。",
+          "sections": [
+            {
+              "title": "已知各资产CDF为什么还不知道共同暴跌风险",
+              "question": "两只ETF各自5%的亏损尾部，是否能推断联合亏损概率？",
+              "paragraphs": [
+                "单资产边际CDF给出各只ETF遭遇极端收益的概率，却不包含它们同一天是否共同亏损的信息。即使两个单资产模型完全相同，独立依赖与完全正相关依赖可以产生明显不同的投资组合损失分布。",
+                "Copula把每个真实资产收益先映射到[0,1]概率分位，再用联合分布函数C描述相互依赖。在学习前应统一收益下尾与正损失上尾的风险方向，并把ETF上市日期、复权、共同交易时间和资产池锁定到预测时点。"
+              ],
+              "equations": [
+                {
+                  "label": "已知各资产CDF为什么还不知道共同暴跌风险",
+                  "tex": "F_{X,Y}(x,y)=C\\!\\left(F_X(x),F_Y(y)\\right)"
+                }
+              ],
+              "worked": "若两只ETF发生最低5%收益的事件各有5%概率，独立时联合概率仅为0.05²=0.0025；完全共单调时联合概率为0.05。边际完全相同，组合尾部却不同。",
+              "boundary": "连续边际下Copula唯一；对于离散或含价格零收益原子的边际，分解在边际取值网格之外不唯一，应说明采用的随机化或建模约定。"
+            },
+            {
+              "title": "Sklar分解与边际概率变换的精确含义",
+              "question": "为什么把收益转为U=F_X(X)不能自行消除跨资产依赖？",
+              "paragraphs": [
+                "如果边际CDF连续且正确，U=F_X(X)和V=F_Y(Y)分别均匀分布，但它们可能高度相关。Copula正是U和V的联合分布，因此保留依赖结构而不是进行独立化。",
+                "实际ETF研究通常只能得到估计的边际CDF，可以用排序秩构造伪观测u_i=rank(x_i)/(n+1)避免0和1。秩变换和依赖参数都应只使用过去合法日期，样本外要先按冻结的边际模型计算对应概率分位。"
+              ],
+              "equations": [
+                {
+                  "label": "Sklar分解与边际概率变换的精确含义",
+                  "tex": "U=F_X(X),\\quad V=F_Y(Y),\\quad C(u,v)=\\Pr(U\\le u,V\\le v)"
+                }
+              ],
+              "worked": "假定U和V为完全共单调U=V，二者各自仍然服从均匀分布，但C(u,v)=min(u,v)，与独立C(u,v)=uv完全不同。",
+              "boundary": "经验秩构造的伪观测只是训练期依赖估计工具；当边际预测随状态变化时，必须重新核查其时间外PIT是否校准，不能默认伪观测严格均匀。"
+            },
+            {
+              "title": "Gaussian Copula为何可能漏掉渐近尾依赖",
+              "question": "为什么相关系数很大不代表极端同跌的条件极限一定非零？",
+              "paragraphs": [
+                "Gaussian Copula由标准正态边际的潜在相关系数ρ构造。在非退化−1<ρ<1时，两端的渐近同向尾依赖系数都为0，即使ρ接近1，固定99%阈值下的联合跌幅仍可能很大。",
+                "Student-t Copula具有共同尺度冲击，在ν有限且参数有效时可出现正的上下尾依赖；同一个通常相关系数并不能确定尾部强度。分析时要同时报告固定u下的条件超越概率及渐近λ，两者不能混为一谈。"
+              ],
+              "equations": [
+                {
+                  "label": "Gaussian Copula为何可能漏掉渐近尾依赖",
+                  "tex": "\\lambda_U=\\lim_{u\\uparrow1}\\frac{1-2u+C(u,u)}{1-u}"
+                }
+              ],
+              "worked": "对独立Copula C(u,u)=u²，有限阈值u=.95时条件超越概率为[1−1.9+.9025]/.05=.05；u趋近1时条件比例趋零。共单调情况下比例恒为1。",
+              "boundary": "渐近零尾依赖不表示99%日常风险为零；有限样本无法直接观测极限，市场波动聚集、共同持仓暴露和相关性切换也可能使固定阈值风险很大。"
+            },
+            {
+              "title": "Student-t与非对称依赖如何影响资产尾部",
+              "question": "为什么应把极端同涨和极端同跌分别描述？",
+              "paragraphs": [
+                "对连续边际，Student-t Copula的上下尾依赖系数相等，表示对称的极端依赖；Clayton Copula在θ>0时具有正下尾依赖与零上尾依赖。对股价收益，共同大幅下跌属于下尾；若转换为正损失，上尾才是亏损风险。",
+                "尾部模型与单资产条件密度并不相互替代。先用训练期预测完整边际分布，之后估计同日Copula；如果只靠样本Pearson相关，模型可能掩盖尾部不对称。"
+              ],
+              "equations": [
+                {
+                  "label": "Student-t与非对称依赖如何影响资产尾部",
+                  "tex": "\\lambda_L^{\\rm Clayton}=2^{-1/\\theta}\\ (\\theta>0),\\qquad\\lambda_U^{\\rm Clayton}=0"
+                }
+              ],
+              "worked": "当Clayton θ=1时，下尾渐近依赖系数为2^(−1)=0.5，而上尾为0；在收益表示中这意味着极端共同跌幅与共同上涨可以呈现不同的极限结构。",
+              "boundary": "Copula家族的适用条件与是否能模拟真实危机制度均需要核验；即使边际对数评分良好，也无法由此证明联合风险已校准。"
+            },
+            {
+              "title": "从合法Copula情景到ETF VaR/ES",
+              "question": "怎样把独立与共同极端情景转化为可交易组合风险？",
+              "paragraphs": [
+                "在t时点冻结边际分布、Copula参数与资产权重，然后从联合U向量抽样，借各资产训练期条件CDF广义逆映射回未来收益，再按持仓资金规则计算组合损失。多期模拟还需建模跨日路径与调仓逻辑。",
+                "评价不应只看Copula的训练似然。应在同一外层实际资产收益向量上计算多变量评分、共同同跌频率、组合VaR与ES，并检查保证金、卖空和成交成本对真正损失的影响。"
+              ],
+              "equations": [
+                {
+                  "label": "从合法Copula情景到ETF VaR/ES",
+                  "tex": "r_i^{(m)}=\\widehat F_{i,t}^{-1}(U_i^{(m)}),\\quad L^{(m)}=-w_t^\\top r^{(m)}"
+                }
+              ],
+              "worked": "对于边际标准差都为1%、两只资产等权的正态线性组合，独立相关系数0时组合标准差约0.7071%；完全共单调时为1%。正态97.5%VaR分别约1.386%与1.96%。",
+              "boundary": "该数值只是固定正态边际和特殊依赖结构下的解析对照，不能直接代表真实37只ETF的风险；对估计Copula的外层测试必须包括实际危机日期。"
+            }
+          ],
+          "protocol": [
+            "冻结收益/损失符号、所有资产边际CDF、Copula估计窗口、上市时点与权重。",
+            "复算独立与共单调下最低5%联合概率0.0025和0.05及正态等权组合VaR差异。",
+            "比较Gaussian、Student-t与Clayton对固定95%/99%条件事件和渐近尾依赖的不同表达。",
+            "同一冻结外层测试对联合情景评分、组合VaR/ES、成本与杠杆风险进行互不替代的审计。"
+          ],
+          "prerequisites": [
+            {
+              "kind": "math",
+              "id": "riskmath-x003",
+              "label": "数学：Sklar分解"
+            },
+            {
+              "kind": "math",
+              "id": "riskmath-x004",
+              "label": "数学：上下尾依赖"
+            },
+            {
+              "kind": "math",
+              "id": "information-x002",
+              "label": "数学：概率积分变换"
+            },
+            {
+              "kind": "ml",
+              "id": "m23-c10-p01",
+              "label": "先修：PIT风险诊断"
+            }
+          ],
+          "sources": [
+            {
+              "title": "Demarta & McNeil (2005), The t Copula and Related Copulas",
+              "url": "https://doi.org/10.1111/j.1751-5823.2005.tb00254.x"
+            },
+            {
+              "title": "Aas et al. (2009), Pair-Copula Constructions of Multiple Dependence",
+              "url": "https://doi.org/10.1016/j.insmatheco.2007.02.001"
+            },
+            {
+              "title": "Open-source Copulas Python",
+              "url": "https://github.com/sdv-dev/Copulas"
+            }
+          ]
+        },
+        {
+          "id": "m09-c10-p02",
+          "title": "Vine Copula与高维联合分布：条件二元分解、复杂度和泛化审计",
+          "goal": "在低维Sklar分解之后，以三维D-vine的明确密度分解说明条件二元Copula如何构造高维联合分布，理解h-function条件CDF、树结构与候选家族的搜索复杂度；区分相关矩阵模型、一般Copula、Vine Copula和真实ETF多资产风险的样本外可验证性。",
+          "sections": [
+            {
+              "title": "为什么二维Copula不能直接解决37资产联合风险",
+              "question": "把37只ETF两两Copula相乘会自动得到合法联合分布吗？",
+              "paragraphs": [
+                "一般不能。任意两两依赖参数不保证彼此兼容为一个高维联合分布，更不能直接把全部二维Copula密度独立相乘当作合法37维密度。Vine Copula通过结构化条件密度分解来实现一致的高维构造。",
+                "实际应用前应先验证边际概率变换、统一交易日期与点时资产池，并决定是否允许时变参数。高维建模的目标不是任意增加家族数量，而是以有限样本支持可解释的联合尾部模拟。"
+              ],
+              "equations": [
+                {
+                  "label": "为什么二维Copula不能直接解决37资产联合风险",
+                  "tex": "f(x_1,\\ldots,x_d)=c(u_1,\\ldots,u_d)\\prod_{i=1}^df_i(x_i)"
+                }
+              ],
+              "worked": "若资产数d=4，完整Vine包含d(d−1)/2=6个二元Copula因子，但它们有不同的条件集合；不能把6个无条件两两Copula直接相乘。",
+              "boundary": "Vine结构搜索与家族选择可能形成严重多重模型搜索，且高维ETF历史共振样本远少于总资产×交易天数。"
+            },
+            {
+              "title": "三维D-vine条件分解",
+              "question": "第三条依赖为什么必须条件于第二个资产？",
+              "paragraphs": [
+                "对于三个连续变量，密度可以先分离资产1与2、资产2与3的普通二元依赖，再补充在已知资产2后的资产1与3的剩余条件依赖。第三个Copula因此是c_{13|2}，其输入是条件概率而不是原始u1与u3。",
+                "条件概率变换常由对应二元Copula的h-function计算。若错误地使用原始边际分位输入条件Copula，会破坏理论分解，构造出的联合密度也可能不正确。"
+              ],
+              "equations": [
+                {
+                  "label": "三维D-vine条件分解",
+                  "tex": "c_{123}=c_{12}(u_1,u_2)c_{23}(u_2,u_3)c_{13\\mid2}(u_{1\\mid2},u_{3\\mid2})"
+                }
+              ],
+              "worked": "在三个变量真正相互独立时，所有二元Copula密度都等于1，因此联合Copula密度也是1；该分解应退化为独立模型，作为实现层的单元测试。",
+              "boundary": "一般Vine条件Copula参数还可能依赖给定变量的数值；采用simplifying assumption时需另外声明和验证。"
+            },
+            {
+              "title": "h-function和条件概率积分变换",
+              "question": "如何从普通Copula构造下一层条件输入？",
+              "paragraphs": [
+                "对于二维连续Copula C_{12}，条件CDF U1|U2=u2可通过偏导∂C12(u1,u2)/∂u2获得；这称为相应方向的h-function。使用它可把条件依赖转换成合法的[0,1]概率输入。",
+                "条件分布变换必须来自正确方向的偏导，不能把∂u1和∂u2混淆。实际用伪观测拟合时，接近0或1会使某些参数族的对数密度数值不稳定，需保留浮点剪裁规则。"
+              ],
+              "equations": [
+                {
+                  "label": "h-function和条件概率积分变换",
+                  "tex": "u_{1\\mid2}=\\frac{\\partial C_{12}(u_1,u_2)}{\\partial u_2}"
+                }
+              ],
+              "worked": "当C12(u1,u2)=u1u2为独立Copula时，偏导∂C/∂u2=u1，因此条件输入退化成原来的u1；该结果可独立验证方向正确。",
+              "boundary": "对于离散或含零收益概率原子的边际，普通连续h-function可能不能直接按相同形式计算，需采用合法离散依赖处理方法。"
+            },
+            {
+              "title": "模型复杂度、截断Vine与训练泄漏",
+              "question": "为什么Vine的表达力提高也可能使时间外风险更差？",
+              "paragraphs": [
+                "完整Vine在d维具有d(d−1)/2个二元Copula因子，且每个因子可能带有不同的参数和候选家族。对于37只ETF，因子数是37×36/2=666，这不是666个独立风险事实，而是一套极高维的拟合结构。",
+                "截断Vine可在较高层采用条件独立近似减少复杂度，但会舍弃剩余高阶依赖。结构、家族和截断层数必须在内层时间验证选择，不能通过最终危机日期的风险改善后验决定。"
+              ],
+              "equations": [
+                {
+                  "label": "模型复杂度、截断Vine与训练泄漏",
+                  "tex": "N_{\\rm pair}=\\frac{d(d-1)}2,\\quad d=37\\Longrightarrow N_{\\rm pair}=666"
+                }
+              ],
+              "worked": "d=3时因子数是3；d=37时为666。若每个二元族都比较5种家族，即使不枚举所有组合，也会形成庞大的模型选择空间。",
+              "boundary": "不能把相同日期37资产的666个拟合因子当成666条独立危机证据；有效极端日期受市场共同冲击与时序依赖约束。"
+            },
+            {
+              "title": "从Vine抽样到组合压力测试",
+              "question": "怎样避免联合拟合分数掩盖无法融资的尾部情景？",
+              "paragraphs": [
+                "在训练窗口拟合边际和Vine结构后，应从模型产生完整的同日资产收益向量，检查边际PIT、联合相依、有限阈值同跌频率与组合VaR/ES。多变量评分应与实际尾部严重程度单独报告。",
+                "风险压力情景必须额外考虑市场跳跃、交易冲击、ETF折溢价与借券缺失。统计上更灵活的联合模型未必能覆盖历史没有发生过的流动性制度变化。"
+              ],
+              "equations": [
+                {
+                  "label": "从Vine抽样到组合压力测试",
+                  "tex": "L^{(m)}=-\\sum_{i=1}^dw_{i,t}\\widehat F_{i,t}^{-1}(U_i^{(m)})"
+                }
+              ],
+              "worked": "若某Vine模型保留了单资产边际，但模拟时将所有资产极端损失错误当作独立，其组合99%VaR可能低于具有明显尾依赖的模型；两者要在同一未来日期比对。",
+              "boundary": "低外层负对数似然不能直接证明组合期权Gamma、保证金和真实交易费用已经被充分描述。"
+            }
+          ],
+          "protocol": [
+            "先用完整点时训练数据拟合单资产边际与合法PIT，再选择Vine的树结构。",
+            "复算三维D-vine条件密度分解和独立Copula的h-function。",
+            "核对d=37对应666个可能二元依赖项，内层冻结家族与截断层数并保留搜索日志。",
+            "通过共同未来ETF收益向量检验多维评分、尾部同跌概率、组合VaR–ES与压力资金账本。"
+          ],
+          "prerequisites": [
+            {
+              "kind": "ml",
+              "id": "m09-c10-p01",
+              "label": "先修：Copula与Sklar联合建模"
+            },
+            {
+              "kind": "math",
+              "id": "riskmath-x004",
+              "label": "数学：渐近尾依赖"
+            },
+            {
+              "kind": "math",
+              "id": "mlmath-n0472",
+              "label": "数学：核方法与高维谱基础"
+            }
+          ],
+          "sources": [
+            {
+              "title": "Aas, Czado, Frigessi & Bakken (2009), Pair-Copula Constructions",
+              "url": "https://doi.org/10.1016/j.insmatheco.2007.02.001"
+            },
+            {
+              "title": "VineCopula, open-source vine copula modeling",
+              "url": "https://github.com/tnagler/VineCopula"
+            },
+            {
+              "title": "Copulas Python open-source library",
+              "url": "https://github.com/sdv-dev/Copulas"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
