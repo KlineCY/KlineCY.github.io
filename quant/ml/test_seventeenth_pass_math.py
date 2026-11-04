@@ -15,7 +15,9 @@ class SeventeenthPassMath(unittest.TestCase):
         self.assertEqual(len(LESSONS),17)
         self.assertEqual({uid[:3] for uid in LESSONS},{f"m{i:02d}" for i in range(3,20)})
         for uid,body in LESSONS.items():
-            self.assertEqual(len(body["equations"]),3)
+            self.assertGreaterEqual(len(body["equations"]),3)
+            self.assertEqual(len({e["label"] for e in body["equations"]}),len(body["equations"]))
+            self.assertTrue(all(e.get("tex", "").strip() for e in body["equations"]))
             self.assertGreaterEqual(len(body["derivation"]),3)
             self.assertGreaterEqual(len(body["protocol"]),3)
             self.assertGreaterEqual(len(body["pitfalls"]),2)
