@@ -395,6 +395,15 @@ async function start(){
     newIds.add(id);
    }
   }
+  // V4 distributional forecasting, calibration and risk backtests; load in prerequisite order.
+  for(const path of ["./atlas-quantile-calibration-v4.json","./atlas-tailrisk-models-v4.json"]){
+   const bundle=await fetchAtlasJson(path,{cache:"no-cache"});
+   const ids=window.quantMlExpansion.install(data,bundle);
+   for(const id of ids){
+    if(newIds.has(id))throw Error("新增专题ID重复："+id);
+    newIds.add(id);
+   }
+  }
   const conceptBundle=await fetchAtlasJson("./atlas-concept-chapters.json",{cache:"no-cache"});
   if(!window.quantMlConcepts?.mount)throw Error("知识链分层渲染器未加载");
   state.conceptChapters=window.quantMlConcepts.mount(data,conceptBundle);
