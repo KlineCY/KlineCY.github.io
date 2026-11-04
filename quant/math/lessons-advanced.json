@@ -7475,6 +7475,626 @@
         }
       ],
       "checked_status": "V14：四节定理证明、独立算例、异常边界和研究适用条件"
+    },
+    {
+      "id": "ito-n0322",
+      "node_id": "ito-n0322",
+      "title": "风险中性测度",
+      "definition": "风险中性测度Q是一种在指定货币市场账户B作为计价物时，使无股息可交易资产贴现价格成为局部鞅的等价概率测度。它不是投资者真实相信的未来涨跌分布，而是将风险价格吸收进概率权重后的无套利定价工具。对于可复制并满足适当可积性的终端支付H，价格可用B_t E_Q[H/B_T|F_t]表达；不完整市场下等价鞅测度可能不唯一。",
+      "assumptions": "有限期限[0,T]，定义严格正可交易计价物B_t=exp(∫_0^tr_sds)，资产可交易且忽略或适当计入股息、交易成本与卖空限制。Q与实际P等价，并要求贴现自融资资产在Q下是相应局部鞅；使用条件期望定价时需要真鞅/可复制性及可积支付等条件。不能把任意正密度都自动叫风险中性。",
+      "properties": [
+        "无股息风险中性贴现资产D=S/B为局部鞅，真鞅定价还需可积性。",
+        "无套利可复制支付可按风险中性条件期望贴现，真实P下的μ不是该公式里的概率参数。",
+        "单期二叉树风险中性上涨概率q=(R−d)/(u−d)，需d<R<u确保等价测度。",
+        "含跳跃或多因子不完备市场可能存在多个Q，单一无套利价格未必对全部不可复制支付唯一。"
+      ],
+      "formulas": [
+        {
+          "label": "等价测度与风险中性含义",
+          "tex": "D_t=\\frac{S_t}{B_t},\\qquad \\mathbb E_{\\mathbb Q}[D_T\\mid\\mathcal F_t]=D_t\\ \\text{在真鞅条件下}"
+        },
+        {
+          "label": "二叉树概率的严格推导",
+          "tex": "q=\\frac{R-d}{u-d},\\quad 1-q=\\frac{u-R}{u-d},\\qquad d<R<u"
+        },
+        {
+          "label": "可复制终端支付与贴现期望",
+          "tex": "V_t=B_t\\,\\mathbb E_{\\mathbb Q}\\!\\left[\\frac{H}{B_T}\\,\\middle|\\,\\mathcal F_t\\right]"
+        },
+        {
+          "label": "完整市场与风险中性概率唯一性",
+          "tex": "\\text{完备市场}\\quad\\Longrightarrow\\quad\\mathbb Q\\text{在适当无套利设定下唯一}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "在理想无股息连续市场中，若Q下资产漂移为rS、计价物满足dB=rBdt，则Itô乘积给d(S/B)=σ(S/B)dW^Q，无dt漂移。若该随机积分是真鞅，则条件期望等于当前贴现价格；仅局部鞅时不能直接写所有期限的等号。",
+          "tex": "D_t=\\frac{S_t}{B_t},\\qquad \\mathbb E_{\\mathbb Q}[D_T\\mid\\mathcal F_t]=D_t\\ \\text{在真鞅条件下}"
+        },
+        {
+          "explanation": "贴现股票条件期望要求q uS_0+(1−q)dS_0=RS_0。约去S_0、展开并整理为q(u−d)=R−d。u>d时严格正的q及1−q恰要求d<R<u，得到等价于两事件正概率的Q。",
+          "tex": "q=\\frac{R-d}{u-d},\\quad 1-q=\\frac{u-R}{u-d},\\qquad d<R<u"
+        },
+        {
+          "explanation": "设自融资复制价值V，终端V_T=H。若贴现自融资财富V/B在Q下是真鞅，则V_t/B_t=E_Q[V_T/B_T|F_t]=E_Q[H/B_T|F_t]。两边乘B_t得定价公式。需要真鞅/积分条件，局部鞅形式不能无条件推广。",
+          "tex": "V_t=B_t\\,\\mathbb E_{\\mathbb Q}\\!\\left[\\frac{H}{B_T}\\,\\middle|\\,\\mathcal F_t\\right]"
+        },
+        {
+          "explanation": "若两种等价鞅测度Q_1、Q_2在所有可复制支付的价格上一致，而任意状态支付可复制，则它们对每个状态指标支付的期望也必须一致，故每个状态概率相同，Q唯一。反过来不完备市场通常允许多个Q；具体无套利定价条件仍依市场框架。",
+          "tex": "\\text{完备市场}\\quad\\Longrightarrow\\quad\\mathbb Q\\text{在适当无套利设定下唯一}"
+        }
+      ],
+      "deep_sections": [
+        {
+          "title": "等价测度与风险中性含义",
+          "question": "风险中性概率为什么不需要与历史上涨频率相同？",
+          "paragraphs": [
+            "Q在相同样本空间上给出不同权重，但与P拥有相同的零概率事件。选择Q的目标是使以货币市场账户B贴现的可交易收益满足鞅定价约束。",
+            "真实收益漂移包含风险溢价，风险中性漂移反映计价物的无套利条件。投资者仍然在真实P世界中承担风险，所以不能把Q下的盈利概率误当作历史胜率。"
+          ],
+          "formulas": [
+            {
+              "label": "等价测度与风险中性含义",
+              "tex": "D_t=\\frac{S_t}{B_t},\\qquad \\mathbb E_{\\mathbb Q}[D_T\\mid\\mathcal F_t]=D_t\\ \\text{在真鞅条件下}"
+            }
+          ],
+          "proof": "在理想无股息连续市场中，若Q下资产漂移为rS、计价物满足dB=rBdt，则Itô乘积给d(S/B)=σ(S/B)dW^Q，无dt漂移。若该随机积分是真鞅，则条件期望等于当前贴现价格；仅局部鞅时不能直接写所有期限的等号。",
+          "worked": "在GBM真实μ=.08、无风险r=.03、σ=.2时，风险价格θ=.25可使Q下漂移变成.03。Q下的上涨概率不需等于P测得的上涨频率。",
+          "limitation": "交易费用、股息与融资约束会改变收益定义及允许的交易策略，不能一概将标价S/B写成无条件真实鞅。"
+        },
+        {
+          "title": "二叉树概率的严格推导",
+          "question": "为什么一期二叉树需要d<R<u才有严格正的风险中性概率？",
+          "paragraphs": [
+            "设今天标价S_0，一期后以因子u或d变化，风险无关账户一周期增长R。要求Q下贴现股票满足E_Q[S_1]/R=S_0。",
+            "把上涨概率记q，整理q u+(1−q)d=R，得到q=(R−d)/(u−d)。0<q<1等价于d<R<u，若R落在两股票增长因子的区间外会出现简单套利。"
+          ],
+          "formulas": [
+            {
+              "label": "二叉树概率的严格推导",
+              "tex": "q=\\frac{R-d}{u-d},\\quad 1-q=\\frac{u-R}{u-d},\\qquad d<R<u"
+            }
+          ],
+          "proof": "贴现股票条件期望要求q uS_0+(1−q)dS_0=RS_0。约去S_0、展开并整理为q(u−d)=R−d。u>d时严格正的q及1−q恰要求d<R<u，得到等价于两事件正概率的Q。",
+          "worked": "S_0=100、u=1.1、d=.9、R=1.02时，q=(1.02−.9)/(.2)=.6；无论真实上涨概率多少，这个无套利定价权重都是.6。",
+          "limitation": "若股票分红或借贷利率不同，不能简单复用这一无股息、单一R的二叉树公式；不完整交易限制也可能改变套利判别。"
+        },
+        {
+          "title": "可复制终端支付与贴现期望",
+          "question": "风险中性价格公式需要哪些交易可复制或市场完备性条件？",
+          "paragraphs": [
+            "对能以自融资交易策略完全复制的终端支付H，最终财富等于H，且策略价值的贴现过程在Q下适当可积。",
+            "因此今日或中间时刻的价值V_t满足V_t=B_t E_Q[H/B_T|F_t]。当市场不完备且H不可复制时，若存在多个Q，可得到不同的合法无套利价格区间，而不是唯一数值。"
+          ],
+          "formulas": [
+            {
+              "label": "可复制终端支付与贴现期望",
+              "tex": "V_t=B_t\\,\\mathbb E_{\\mathbb Q}\\!\\left[\\frac{H}{B_T}\\,\\middle|\\,\\mathcal F_t\\right]"
+            }
+          ],
+          "proof": "设自融资复制价值V，终端V_T=H。若贴现自融资财富V/B在Q下是真鞅，则V_t/B_t=E_Q[V_T/B_T|F_t]=E_Q[H/B_T|F_t]。两边乘B_t得定价公式。需要真鞅/积分条件，局部鞅形式不能无条件推广。",
+          "worked": "前例二叉树执行价100的看涨支付为上涨10、下跌0。无套利价格V_0=(.6×10+.4×0)/1.02≈5.88235294。",
+          "limitation": "对不可复制的极端跳跃损失或有交易限制的支付，选定某个Q给出的期望不代表市场必然存在唯一无套利报价。"
+        },
+        {
+          "title": "完整市场与风险中性概率唯一性",
+          "question": "为什么市场完备性影响无法复制支付的价格，而不是改变定义本身？",
+          "paragraphs": [
+            "在有限状态市场中，如果全部状态支付都能由现有可交易资产张成，则每个终端支付有唯一复制组合，定价泛函由可交易价格唯一确定。",
+            "当可交易收益张成空间低于状态空间维度时，可能有多组严格正状态概率满足已交易资产价格，因而对未上市或未对冲支付给出不同期望。"
+          ],
+          "formulas": [
+            {
+              "label": "完整市场与风险中性概率唯一性",
+              "tex": "\\text{完备市场}\\quad\\Longrightarrow\\quad\\mathbb Q\\text{在适当无套利设定下唯一}"
+            }
+          ],
+          "proof": "若两种等价鞅测度Q_1、Q_2在所有可复制支付的价格上一致，而任意状态支付可复制，则它们对每个状态指标支付的期望也必须一致，故每个状态概率相同，Q唯一。反过来不完备市场通常允许多个Q；具体无套利定价条件仍依市场框架。",
+          "worked": "在两状态股票加无风险债券的标准二叉树模型中，上涨与下跌两状态的支付空间可由两资产张成，因此q=.6唯一；增加未交易第三状态因子时一般不再唯一。",
+          "limitation": "不可以仅凭某个风险价格函数存在就认定市场完备，也不能从不唯一Q直接推断市场一定存在无风险套利。"
+        }
+      ],
+      "example": "无股息二叉树S0=100、u=1.1、d=.9、债券增长R=1.02，Q上涨概率q=.6，看涨执行价100的无套利复制价格10×.6/1.02≈5.88235；真实上涨频率不参与该权重计算。",
+      "application": "用于ETF衍生品、期权复制、风险中性资产估值和期限支付贴现。需先判断资产是否可交易、支付是否可复制及贴现过程是否真鞅。",
+      "caveat": "风险中性Q不是历史P；严格正密度并不足以保证资产无套利，且局部鞅定价需要注意严格局部鞅造成的期望缺口。",
+      "links": [
+        {
+          "kind": "math",
+          "id": "ito-n0319",
+          "label": "先修：Girsanov"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0321",
+          "label": "先修：Novikov"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0323",
+          "label": "无套利条件"
+        },
+        {
+          "kind": "math",
+          "id": "finance-n0433",
+          "label": "二叉树复制验证"
+        }
+      ],
+      "sources": [
+        {
+          "title": "University of Chicago Greg Lawler Stochastic Calculus and Finance：第5章Girsanov与第6章期权定价",
+          "url": "https://www.math.uchicago.edu/~lawler/finbook.pdf"
+        },
+        {
+          "title": "MIT 15.070J Advanced Stochastic Processes：Lecture 19 Ito applications to financial economics",
+          "url": "https://ocw.mit.edu/courses/15-070j-advanced-stochastic-processes-fall-2013/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V14定价链：完整边界、四节证明与数值再现"
+    },
+    {
+      "id": "ito-n0323",
+      "node_id": "ito-n0323",
+      "title": "无套利测度条件",
+      "definition": "无套利测度条件把允许交易策略的无风险收益约束与等价（局部）鞅测度的存在联系起来。在有限状态单期无摩擦市场中，无套利与存在严格正、满足全部贴现资产定价方程的状态概率向量等价；连续时间半鞅市场则要谨慎区分普通无套利与NFLVR、等价局部鞅测度及一般σ-鞅测度等不同版本。",
+      "assumptions": "首先考虑有限状态单期、所有价格可交易、同一无风险增长R>0且允许自融资线性组合的无摩擦市场，所有真实状态在P下概率严格正。连续时间扩展需另加价格局部有界和可容许策略的下界等假设；不能把有限状态结果机械推广为任意跳跃或无限状态市场的普通NA等价结论。",
+      "properties": [
+        "有限状态单期市场NA等价存在严格正状态权重q，使所有贴现资产定价方程成立。",
+        "若同一未来支付有两种不同现价，则可构造立即套利，违反一价定律。",
+        "在标准无股息二叉树里d<R<u是避免简单股票/债券套利的必要充分条件。",
+        "连续时间中典型的局部有界半鞅FTAP使用NFLVR与等价局部鞅测度，不能只写普通NA就推出。"
+      ],
+      "formulas": [
+        {
+          "label": "单期状态价格的线性方程",
+          "tex": "p_i=\\sum_{j=1}^n\\psi_jH_{ij},\\quad \\psi_j>0,\\quad q_j=R\\psi_j,\\quad\\sum_jq_j=1"
+        },
+        {
+          "label": "一价定律与零成本套利",
+          "tex": "H_A(\\omega_j)=H_B(\\omega_j)\\ \\forall j,\\quad p_A>p_B\\Longrightarrow \\text{卖A、买B套利}"
+        },
+        {
+          "label": "二叉树无套利区间",
+          "tex": "d<R<u\\quad\\Longleftrightarrow\\quad 0<q=\\frac{R-d}{u-d}<1"
+        },
+        {
+          "label": "连续时间NFLVR与局部鞅",
+          "tex": "\\mathrm{NFLVR}\\Longleftrightarrow\\exists\\,\\mathbb Q\\sim\\mathbb P:\\ S/B\\text{ 在 }\\mathbb Q\\text{ 下为局部鞅}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "若组合持仓h形成各状态非负且至少一个状态严格正的未来支付Hᵀh，则对应成本hᵀp=(Hᵀh)ᵀψ>0，不能从零或负成本获得该未来收益。反向从无套利推出严格正价格向量可利用有限维分离定理或Farkas引理。",
+          "tex": "p_i=\\sum_{j=1}^n\\psi_jH_{ij},\\quad \\psi_j>0,\\quad q_j=R\\psi_j,\\quad\\sum_jq_j=1"
+        },
+        {
+          "explanation": "在t=0卖空价格较高的A得到p_A，买B支付p_B，净现金p_A−p_B>0。未来状态j中，组合B−A的支付H_B(j)−H_A(j)=0，对所有状态均无风险，保留或投资初始现金就是套利。",
+          "tex": "H_A(\\omega_j)=H_B(\\omega_j)\\ \\forall j,\\quad p_A>p_B\\Longrightarrow \\text{卖A、买B套利}"
+        },
+        {
+          "explanation": "若R>u，卖一单位股票收S0，买入市值S0的无风险债券，未来现金差S0R−S0u>0或S0R−S0d>0。若R<d，买股票卖债券则所有状态严格赚钱。等号情形至少一个状态盈余为零、另一状态严格正，也违反严格NA。",
+          "tex": "d<R<u\\quad\\Longleftrightarrow\\quad 0<q=\\frac{R-d}{u-d}<1"
+        },
+        {
+          "explanation": "证明的方向借助半鞅随机积分的超鞅性质：若可容许财富下界受控，局部鞅收益不能产生具有消失损失风险的正收益极限。反方向使用凸分析与函数空间分离构造等价局部鞅测度；这超出了有限维Farkas证明的范围。",
+          "tex": "\\mathrm{NFLVR}\\Longleftrightarrow\\exists\\,\\mathbb Q\\sim\\mathbb P:\\ S/B\\text{ 在 }\\mathbb Q\\text{ 下为局部鞅}"
+        }
+      ],
+      "deep_sections": [
+        {
+          "title": "单期状态价格的线性方程",
+          "question": "怎样把不存在无风险套利转成对每个状态严格正的价格权重约束？",
+          "paragraphs": [
+            "记m个可交易资产在n个状态的未来支付矩阵H，今天价格向量p。若存在严格正状态价格向量ψ使p=Hψ，对任何未来状态支付非负的组合，其今日价格也非负。",
+            "若无风险资产支付R，则状态价格总和=1/R。将q_j=Rψ_j解释为等价概率分布，可重新写成贴现期望价格关系。"
+          ],
+          "formulas": [
+            {
+              "label": "单期状态价格的线性方程",
+              "tex": "p_i=\\sum_{j=1}^n\\psi_jH_{ij},\\quad \\psi_j>0,\\quad q_j=R\\psi_j,\\quad\\sum_jq_j=1"
+            }
+          ],
+          "proof": "若组合持仓h形成各状态非负且至少一个状态严格正的未来支付Hᵀh，则对应成本hᵀp=(Hᵀh)ᵀψ>0，不能从零或负成本获得该未来收益。反向从无套利推出严格正价格向量可利用有限维分离定理或Farkas引理。",
+          "worked": "两状态二叉树R=1.02、q=(.6,.4)，状态价格ψ=(.6/1.02,.4/1.02)≈(.588235,.392157)，和为1/1.02≈.980392。",
+          "limitation": "若部分状态在真实P下不可能发生，等价测度的严格正性应只对真实支持集要求，不能人为给P零概率状态正价格权重。"
+        },
+        {
+          "title": "一价定律与零成本套利",
+          "question": "为什么两种完全相同的终端现金流不能具有不同现价？",
+          "paragraphs": [
+            "若组合A与B在每个可能状态的未来支付完全相同，而今天A比B贵，则卖空A、买入B取得正初始现金且未来两者抵消。",
+            "若现金可存入无风险账户，初始差额能滚存为未来严格正收益，构成无风险套利。因此同支付必须同现价，这是复制定价的必要基础。"
+          ],
+          "formulas": [
+            {
+              "label": "一价定律与零成本套利",
+              "tex": "H_A(\\omega_j)=H_B(\\omega_j)\\ \\forall j,\\quad p_A>p_B\\Longrightarrow \\text{卖A、买B套利}"
+            }
+          ],
+          "proof": "在t=0卖空价格较高的A得到p_A，买B支付p_B，净现金p_A−p_B>0。未来状态j中，组合B−A的支付H_B(j)−H_A(j)=0，对所有状态均无风险，保留或投资初始现金就是套利。",
+          "worked": "若两个证券均在一年后确定支付100，但现价分别98与96，则卖价格98的证券、买价格96的证券得到初始2，未来现金流完全抵消。",
+          "limitation": "真实卖空限制、券源、融资费和交易滑点可能阻止该零摩擦套利交易实际实施，模型必须说明策略可容许集合。"
+        },
+        {
+          "title": "二叉树无套利区间",
+          "question": "当债券收益率位于股票上下两种收益之外时会发生什么？",
+          "paragraphs": [
+            "股票增长因子上为u、下为d，无风险账户增长R。若R≥u，债券在所有状态不逊于股票且至少某状态严格优于股票；卖股票买债券可形成套利。",
+            "若R≤d，则股票在所有状态不逊于债券且至少某状态更优；反向仓位可套利。严格无套利要求d<R<u，对应风险中性q在(0,1)内。"
+          ],
+          "formulas": [
+            {
+              "label": "二叉树无套利区间",
+              "tex": "d<R<u\\quad\\Longleftrightarrow\\quad 0<q=\\frac{R-d}{u-d}<1"
+            }
+          ],
+          "proof": "若R>u，卖一单位股票收S0，买入市值S0的无风险债券，未来现金差S0R−S0u>0或S0R−S0d>0。若R<d，买股票卖债券则所有状态严格赚钱。等号情形至少一个状态盈余为零、另一状态严格正，也违反严格NA。",
+          "worked": "取u=1.1、d=.9，若R=1.15，则卖股票、买债券从100初始等额出发，上涨状态赚5、下跌状态赚25，均严格正。",
+          "limitation": "此判别只针对允许双向无摩擦交易的单期模型；不同借贷利率和交易限制可改变可实施套利边界。"
+        },
+        {
+          "title": "连续时间NFLVR与局部鞅",
+          "question": "为什么在连续交易下必须区分普通无套利和极限形式的套利？",
+          "paragraphs": [
+            "连续时间允许越来越复杂的高频策略。即便没有某一条单独交易策略实现即时零风险盈利，策略序列仍可能以越来越小下行风险逼近确定获利。",
+            "NFLVR（不存在具有消失风险的免费午餐）排除这种极限套利；在标准局部有界半鞅市场和适当可容许策略下，它对应等价局部鞅测度的存在。该定理依赖市场类别与策略下界，不能只用‘不存在套利’四字替代。"
+          ],
+          "formulas": [
+            {
+              "label": "连续时间NFLVR与局部鞅",
+              "tex": "\\mathrm{NFLVR}\\Longleftrightarrow\\exists\\,\\mathbb Q\\sim\\mathbb P:\\ S/B\\text{ 在 }\\mathbb Q\\text{ 下为局部鞅}"
+            }
+          ],
+          "proof": "证明的方向借助半鞅随机积分的超鞅性质：若可容许财富下界受控，局部鞅收益不能产生具有消失损失风险的正收益极限。反方向使用凸分析与函数空间分离构造等价局部鞅测度；这超出了有限维Farkas证明的范围。",
+          "worked": "在单期二叉树市场NFLVR与普通NA都可由q∈(0,1)检查；但在无界交易策略的连续时间模型中需要明确更强的策略序列条件。",
+          "limitation": "市场含非局部有界价格或交易费用时，相关资产定价基本定理的测度及可容许策略形式需要重新选定，不能无条件复用这里的等价局部鞅版本。"
+        }
+      ],
+      "example": "二状态二叉树q=(.6,.4)、R=1.02时，正状态价格为(.588235,.392157)，总和1/R≈.980392；若R=1.15>u=1.1，则卖股票买债券可在上涨/下跌状态分别赚5和25。",
+      "application": "用于资产一价律、二叉树复制、衍生品无套利定价以及连续时间模型中可容许交易和NFLVR条件的辨别。",
+      "caveat": "无套利结论依赖资产可交易性与融资规则；连续时间FTAP需要适当局部有界性和策略下界，不能将普通NA简单等同于ELMM存在。",
+      "links": [
+        {
+          "kind": "math",
+          "id": "ito-n0322",
+          "label": "先修：风险中性测度"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0324",
+          "label": "后续：贴现资产鞅"
+        },
+        {
+          "kind": "math",
+          "id": "finance-n0427",
+          "label": "一价定律"
+        },
+        {
+          "kind": "math",
+          "id": "finance-n0432",
+          "label": "市场完备性"
+        }
+      ],
+      "sources": [
+        {
+          "title": "University of Chicago Greg Lawler Stochastic Calculus and Finance：第5章Girsanov与第6章期权定价",
+          "url": "https://www.math.uchicago.edu/~lawler/finbook.pdf"
+        },
+        {
+          "title": "MIT 15.070J Advanced Stochastic Processes：Lecture 19 Ito applications to financial economics",
+          "url": "https://ocw.mit.edu/courses/15-070j-advanced-stochastic-processes-fall-2013/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V14定价链：完整边界、四节证明与数值再现"
+    },
+    {
+      "id": "ito-n0324",
+      "node_id": "ito-n0324",
+      "title": "贴现资产鞅",
+      "definition": "贴现资产鞅是把风险中性定价约束写成动态形式的核心对象。若货币市场账户B_t满足dB_t=r_tB_tdt，且风险中性测度Q下无股息可交易资产满足dS_t=r_tS_tdt+σ_tS_tdW_t^Q，则D_t=S_t/B_t为连续局部鞅。若扩散积分真鞅且支付可积，D具有条件期望守恒；股息必须在累计贴现总收益中另行计入。",
+      "assumptions": "有限期限内B_t>0，利率r_t适应且可积，资产价格为正且连续Itô扩散。无股息假设下dD应无dt漂移；如果有连续股息率q，则除息价格本身贴现后一般不是鞅，需加累计贴现股息。由局部鞅推出真鞅需要额外可积性或明确GBM等模型条件。",
+      "properties": [
+        "无股息、Q漂移r的资产贴现价格满足dD=(σS/B)dW^Q。",
+        "在几何布朗定价模型中固定σ、有限时域D是真鞅，E_Q[D_T|F_t]=D_t。",
+        "有股息现金流时应使用贴现累计收益而不是单纯除息价格D。",
+        "严格局部鞅可能满足零局部漂移但E D_T<D_0，不能未经核查把所有局部鞅当成风险中性条件期望。"
+      ],
+      "formulas": [
+        {
+          "label": "折现乘积的Itô证明",
+          "tex": "d(S_t/B_t)=\\frac{\\sigma_tS_t}{B_t}\\,dW_t^{\\mathbb Q}"
+        },
+        {
+          "label": "GBM贴现真鞅与条件期望",
+          "tex": "\\frac{S_t}{B_t}=S_0e^{\\sigma W_t^{\\mathbb Q}-\\frac12\\sigma^2t},\\quad \\mathbb E_{\\mathbb Q}[S_T/B_T\\mid\\mathcal F_t]=S_t/B_t"
+        },
+        {
+          "label": "股息与累计收益的正确折现",
+          "tex": "G_t=\\frac{S_t}{B_t}+\\int_0^t\\frac{q_sS_s}{B_s}\\,ds,\\qquad dG_t=\\frac{\\sigma_tS_t}{B_t}\\,dW_t^{\\mathbb Q}"
+        },
+        {
+          "label": "策略自融资与局部鞅风险",
+          "tex": "d(V_t/B_t)=\\sum_{i=1}^n\\phi_t^i\\,d(S_t^i/B_t)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "使用Itô乘积法则，d(B^{-1}S)=B^{-1}dS+Sd(B^{-1})+d[B^{-1},S]。B^{-1}有限变差使末项为零，且d(B^{-1})=−rB^{-1}dt。代入资产Q动态得到B^{-1}rSdt−rB^{-1}Sdt+σB^{-1}S dW，漂移严格相消。",
+          "tex": "d(S_t/B_t)=\\frac{\\sigma_tS_t}{B_t}\\,dW_t^{\\mathbb Q}"
+        },
+        {
+          "explanation": "从GBM解S_t=S0exp[(r−σ²/2)t+σW^Q_t]除以B_t=e^{rt}得随机指数。对未来独立增量，条件指数矩E[e^{σ(W_T−W_t)−σ²(T−t)/2}|F_t]=1，因此得到真鞅等式。",
+          "tex": "\\frac{S_t}{B_t}=S_0e^{\\sigma W_t^{\\mathbb Q}-\\frac12\\sigma^2t},\\quad \\mathbb E_{\\mathbb Q}[S_T/B_T\\mid\\mathcal F_t]=S_t/B_t"
+        },
+        {
+          "explanation": "对除息资产使用dS=(r−q)Sdt+σS dW。贴现后漂移为−qS/Bdt；累计贴现股息积分的微分恰为+qS/Bdt，与前项抵消。扩散项保留，故累计贴现收益G为局部鞅。",
+          "tex": "G_t=\\frac{S_t}{B_t}+\\int_0^t\\frac{q_sS_s}{B_s}\\,ds,\\qquad dG_t=\\frac{\\sigma_tS_t}{B_t}\\,dW_t^{\\mathbb Q}"
+        },
+        {
+          "explanation": "自融资定义意味着组合财富变化完全来自持有资产及现金账户的价格变化，不存在外部现金注入。折现后现金账户消去，其余变化写成可预测资产持仓对贴现价格的随机积分；对局部鞅价格，适当可积的策略积分仍为局部鞅。",
+          "tex": "d(V_t/B_t)=\\sum_{i=1}^n\\phi_t^i\\,d(S_t^i/B_t)"
+        }
+      ],
+      "deep_sections": [
+        {
+          "title": "折现乘积的Itô证明",
+          "question": "为什么价格在Q下增长r时，贴现值没有确定性漂移？",
+          "paragraphs": [
+            "令D=B^{-1}S。由于B^{-1}是有限变差过程，其与S的二次协变差为零，Itô乘积公式仅有S d(B^{-1})+B^{-1}dS。",
+            "将d(B^{-1})=−rB^{-1}dt和dS=rSdt+σS dW代入，两个r项抵消，仅留下扩散随机积分，因此是局部鞅。"
+          ],
+          "formulas": [
+            {
+              "label": "折现乘积的Itô证明",
+              "tex": "d(S_t/B_t)=\\frac{\\sigma_tS_t}{B_t}\\,dW_t^{\\mathbb Q}"
+            }
+          ],
+          "proof": "使用Itô乘积法则，d(B^{-1}S)=B^{-1}dS+Sd(B^{-1})+d[B^{-1},S]。B^{-1}有限变差使末项为零，且d(B^{-1})=−rB^{-1}dt。代入资产Q动态得到B^{-1}rSdt−rB^{-1}Sdt+σB^{-1}S dW，漂移严格相消。",
+          "worked": "S0=100、r=.03、σ=.2时Q下ES1=100e^{.03}≈103.04545，贴现均值e^{−.03}ES1=100；对数价格的平均漂移则是.03−.02=.01。",
+          "limitation": "局部鞅证明不自动给出真实交易价格：有股息、买卖价差及动态交易成本时，必须修改可交易净收益的定义。"
+        },
+        {
+          "title": "GBM贴现真鞅与条件期望",
+          "question": "什么情况下局部鞅可以明确加强成真鞅？",
+          "paragraphs": [
+            "在理想GBM中，D_t=S0exp[−σ²t/2+σW_t^Q]，这是固定σ的Brownian指数真鞅，正态指数矩给任何有限时域的均值恒为S0。",
+            "因此E_Q[D_T|F_t]=D_t，且未来的贴现终值可以用于条件期望定价。这个明确模型下的证明不能推广到任意状态依赖扩散或无界随机波动系数。"
+          ],
+          "formulas": [
+            {
+              "label": "GBM贴现真鞅与条件期望",
+              "tex": "\\frac{S_t}{B_t}=S_0e^{\\sigma W_t^{\\mathbb Q}-\\frac12\\sigma^2t},\\quad \\mathbb E_{\\mathbb Q}[S_T/B_T\\mid\\mathcal F_t]=S_t/B_t"
+            }
+          ],
+          "proof": "从GBM解S_t=S0exp[(r−σ²/2)t+σW^Q_t]除以B_t=e^{rt}得随机指数。对未来独立增量，条件指数矩E[e^{σ(W_T−W_t)−σ²(T−t)/2}|F_t]=1，因此得到真鞅等式。",
+          "worked": "若S0=100、σ=.2、r=.03、T=1，则E_Q[S1/B1]=100。风险中性对数收益的期望为r−σ²/2=.01，与资产价格均值增长r并不矛盾。",
+          "limitation": "严格局部鞅中贴现期望可能下降；不能仅检查形式漂移0就把E_Q[D_T]=D0当作无条件数学事实。"
+        },
+        {
+          "title": "股息与累计收益的正确折现",
+          "question": "有连续股息的股票为什么不能直接把除息价格贴现视为鞅？",
+          "paragraphs": [
+            "若资产持续支付现金股息率qSdt，风险中性下除息价格的漂移通常是(r−q)Sdt。",
+            "因此d(S/B)包含−qS/B的负漂移；将已经支付的贴现现金股息∫qS/Bds累加，才能构成风险中性总收益局部鞅。"
+          ],
+          "formulas": [
+            {
+              "label": "股息与累计收益的正确折现",
+              "tex": "G_t=\\frac{S_t}{B_t}+\\int_0^t\\frac{q_sS_s}{B_s}\\,ds,\\qquad dG_t=\\frac{\\sigma_tS_t}{B_t}\\,dW_t^{\\mathbb Q}"
+            }
+          ],
+          "proof": "对除息资产使用dS=(r−q)Sdt+σS dW。贴现后漂移为−qS/Bdt；累计贴现股息积分的微分恰为+qS/Bdt，与前项抵消。扩散项保留，故累计贴现收益G为局部鞅。",
+          "worked": "若r=.03、连续股息率q=.01、风险中性除息漂移为.02，除息价格贴现后平均下降，但加回贴现股息后总收益鞅条件仍成立。",
+          "limitation": "ETF分红、债券票息与期货保证金现金流需要按实际支付时点建模，不能将不同资产的贴现收益定义混为一谈。"
+        },
+        {
+          "title": "策略自融资与局部鞅风险",
+          "question": "多资产组合能否直接继承贴现股票的局部鞅性质？",
+          "paragraphs": [
+            "理想无摩擦、自融资、可预测且可积的持仓策略，其贴现财富变化是各资产贴现价格增量的随机积分。",
+            "在Q下若所有贴现可交易资产为局部鞅，合法的自融资财富贴现过程仍是局部鞅。但是否真鞅、是否排除低风险近似套利，还取决于可容许策略的财富下界与积分条件。"
+          ],
+          "formulas": [
+            {
+              "label": "策略自融资与局部鞅风险",
+              "tex": "d(V_t/B_t)=\\sum_{i=1}^n\\phi_t^i\\,d(S_t^i/B_t)"
+            }
+          ],
+          "proof": "自融资定义意味着组合财富变化完全来自持有资产及现金账户的价格变化，不存在外部现金注入。折现后现金账户消去，其余变化写成可预测资产持仓对贴现价格的随机积分；对局部鞅价格，适当可积的策略积分仍为局部鞅。",
+          "worked": "在单资产理想模型若持有一股、其余为零，组合贴现财富恰等于D=S/B；若持续再平衡，必须说明头寸φ_t是交易发生前可确定的可预测过程。",
+          "limitation": "若允许无限加倍下注和无下界财富，不能把局部鞅模型直接解释为所有策略都排除套利；实际交易还存在保证金和融资限制。"
+        }
+      ],
+      "example": "风险中性GBM设S0=100、r=.03、σ=.2，一年价格均值100e^{.03}≈103.045，贴现均值仍100；连续股息率q=.01时除息价格漂移为r−q=.02，须将累计贴现股息加入财富鞅。",
+      "application": "连接价格动态、衍生品贴现定价、多资产自融资策略和风险中性期望，便于检查分红现金流与执行时点。",
+      "caveat": "零贴现漂移一般只证明局部鞅；严格局部鞅、融资约束、股息和买卖价差都会影响真实价格期望表示。",
+      "links": [
+        {
+          "kind": "math",
+          "id": "ito-n0322",
+          "label": "先修：风险中性测度"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0323",
+          "label": "先修：无套利条件"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0328",
+          "label": "后续：严格局部鞅"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0326",
+          "label": "后向PDE"
+        }
+      ],
+      "sources": [
+        {
+          "title": "University of Chicago Greg Lawler Stochastic Calculus and Finance：第5章Girsanov与第6章期权定价",
+          "url": "https://www.math.uchicago.edu/~lawler/finbook.pdf"
+        },
+        {
+          "title": "MIT 15.070J Advanced Stochastic Processes：Lecture 19 Ito applications to financial economics",
+          "url": "https://ocw.mit.edu/courses/15-070j-advanced-stochastic-processes-fall-2013/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V14定价链：完整边界、四节证明与数值再现"
+    },
+    {
+      "id": "ito-n0326",
+      "node_id": "ito-n0326",
+      "title": "Kolmogorov后向PDE",
+      "definition": "Kolmogorov后向偏微分方程将Markov扩散的未来条件期望转换为终端值PDE。若dX=b(t,X)dt+σ(t,X)dW，定义u(t,x)=E[g(X_T)|X_t=x]，在足够正则和可积条件下满足u_t+Lu=0、u(T,x)=g(x)，其中L=b∂x+(1/2)σ²∂xx。加入贴现和风险中性漂移可得到经典欧式期权的Black–Scholes PDE。",
+      "assumptions": "考虑一维Markov Itô扩散，b、σ在研究区间有足够正则性，终端支付g满足可积与适当增长条件，使u可用经典C^{1,2}解表述。若g在执行价处不光滑，可使用弱/黏性解与适当扩散平滑论证，不能简单要求终端时刻也处处二阶可微；边界及无穷远增长条件应随模型另行规定。",
+      "properties": [
+        "Markov条件期望u(t,x)满足后向方程u_t+b u_x+(1/2)σ²u_xx=0。",
+        "Brownian纯扩散对应热方程u_t+(1/2)u_xx=0。",
+        "OU线性终端支付u(t,x)=θ+(x−θ)e^{−κ(T−t)}可直接代入PDE验证。",
+        "在风险中性GBM与固定r下，贴现定价PDE含−ru项；不是所有统计预测PDE都可称无套利定价方程。"
+      ],
+      "formulas": [
+        {
+          "label": "Markov生成算子与后向期望",
+          "tex": "u_t(t,x)+b(t,x)u_x(t,x)+\\tfrac12\\sigma(t,x)^2u_{xx}(t,x)=0,\\quad u(T,x)=g(x)"
+        },
+        {
+          "label": "OU条件均值的PDE核对",
+          "tex": "u(t,x)=\\theta+(x-\\theta)e^{-\\kappa(T-t)},\\qquad u_t+\\kappa(\\theta-x)u_x+\\tfrac12\\sigma^2u_{xx}=0"
+        },
+        {
+          "label": "贴现期望与Feynman–Kac项",
+          "tex": "u_t+\\mathcal L^{\\mathbb Q}u-ru=0,\\qquad u(T,x)=g(x)"
+        },
+        {
+          "label": "Black–Scholes PDE与非光滑支付",
+          "tex": "u_t+rsu_s+\\tfrac12\\sigma^2s^2u_{ss}-ru=0,\\quad u(T,s)=(s-K)^+"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由Itô公式du(t,X_t)=[u_t+b u_x+(1/2)σ²u_xx]dt+σu_x dW。若u(t,X_t)=E[g(X_T)|F_t]是真鞅且u足够光滑，则连续半鞅分解的有限变差漂移部分必须为零，从而得到PDE和终端条件。",
+          "tex": "u_t(t,x)+b(t,x)u_x(t,x)+\\tfrac12\\sigma(t,x)^2u_{xx}(t,x)=0,\\quad u(T,x)=g(x)"
+        },
+        {
+          "explanation": "令τ=T−t，u=θ+(x−θ)e^{−κτ}，对t求导是κ(x−θ)e^{−κτ}。空间一阶导数e^{−κτ}，二阶导数0，因此u_t+κ(θ−x)u_x=κ(x−θ)e^{−κτ}+κ(θ−x)e^{−κτ}=0。终端t=T时u=x。",
+          "tex": "u(t,x)=\\theta+(x-\\theta)e^{-\\kappa(T-t)},\\qquad u_t+\\kappa(\\theta-x)u_x+\\tfrac12\\sigma^2u_{xx}=0"
+        },
+        {
+          "explanation": "计算d[e^{−rt}u(t,X_t)]=e^{−rt}[(u_t+Lu−ru)dt+σu_xdW^Q]。若贴现条件价值是真鞅，其漂移部分应消失，于是得到含−ru的后向方程；反向从PDE用Itô及可积性也可得Feynman–Kac表示。",
+          "tex": "u_t+\\mathcal L^{\\mathbb Q}u-ru=0,\\qquad u(T,x)=g(x)"
+        },
+        {
+          "explanation": "风险中性定价条件给u(t,s)=E_Q[e^{−r(T−t)}(S_T−K)^+|S_t=s]。由GBM系数b=rs、a=σs代入折现后向PDE得到所示表达；内点平滑来自非退化对数正态转移密度，终端看涨支付的拐点不要求经典二阶可微。",
+          "tex": "u_t+rsu_s+\\tfrac12\\sigma^2s^2u_{ss}-ru=0,\\quad u(T,s)=(s-K)^+"
+        }
+      ],
+      "deep_sections": [
+        {
+          "title": "Markov生成算子与后向期望",
+          "question": "为什么条件未来支付满足二阶微分算子方程？",
+          "paragraphs": [
+            "对于扩散dX=b(t,X)dt+σ(t,X)dW，平滑测试函数f的Itô公式包含漂移f_t+b f_x+(1/2)σ² f_xx。",
+            "若u(t,X_t)表示同一固定终端支付g(X_T)的条件期望，它应是鞅，因此在合适局部化与正则条件下Its dt漂移为零，得到后向PDE。"
+          ],
+          "formulas": [
+            {
+              "label": "Markov生成算子与后向期望",
+              "tex": "u_t(t,x)+b(t,x)u_x(t,x)+\\tfrac12\\sigma(t,x)^2u_{xx}(t,x)=0,\\quad u(T,x)=g(x)"
+            }
+          ],
+          "proof": "由Itô公式du(t,X_t)=[u_t+b u_x+(1/2)σ²u_xx]dt+σu_x dW。若u(t,X_t)=E[g(X_T)|F_t]是真鞅且u足够光滑，则连续半鞅分解的有限变差漂移部分必须为零，从而得到PDE和终端条件。",
+          "worked": "对标准Brownian dX=dW、终端g(x)=x²，u(t,x)=x²+(T−t)，于是u_t=−1、u_xx=2，代入−1+(1/2)×2=0。",
+          "limitation": "若系数退化、支付不光滑或增长不可控，不能只凭形式Itô替代经典解存在唯一性的证明，可能需要弱/黏性解理论。"
+        },
+        {
+          "title": "OU条件均值的PDE核对",
+          "question": "OU的解析条件期望怎样验证后向PDE和随机路径计算一致？",
+          "paragraphs": [
+            "OU扩散有b(x)=κ(θ−x)、σ常数，取终端支付g(x)=x。已知条件期望是u(t,x)=θ+(x−θ)e^{−κ(T−t)}。",
+            "此函数在空间方向一阶导数为e^{−κ(T−t)}、二阶导数为0，时间导数为κ(x−θ)e^{−κ(T−t)}，与漂移项完全抵消。"
+          ],
+          "formulas": [
+            {
+              "label": "OU条件均值的PDE核对",
+              "tex": "u(t,x)=\\theta+(x-\\theta)e^{-\\kappa(T-t)},\\qquad u_t+\\kappa(\\theta-x)u_x+\\tfrac12\\sigma^2u_{xx}=0"
+            }
+          ],
+          "proof": "令τ=T−t，u=θ+(x−θ)e^{−κτ}，对t求导是κ(x−θ)e^{−κτ}。空间一阶导数e^{−κτ}，二阶导数0，因此u_t+κ(θ−x)u_x=κ(x−θ)e^{−κτ}+κ(θ−x)e^{−κτ}=0。终端t=T时u=x。",
+          "worked": "κ=2、θ=1、x=3、T−t=1，后向PDE给u=1+2e^{−2}≈1.27067，和OU显式解的条件均值完全一致。",
+          "limitation": "终端g=x仅验证第一条件矩；要检验完整转移分布仍需额外计算方差、特征函数或转移密度。"
+        },
+        {
+          "title": "贴现期望与Feynman–Kac项",
+          "question": "加入确定性短利率贴现后，为什么PDE出现−ru的零阶项？",
+          "paragraphs": [
+            "若u(t,x)=E_Q[e^{−r(T−t)}g(X_T)|X_t=x]，则过程e^{−rt}u(t,X_t)的适当终端价值得到鞅表示。",
+            "对e^{−rt}u应用Itô乘积公式，除了u_t+Lu还出现−ru，因此无套利折现条件要求u_t+Lu−ru=0。该关系依赖Q漂移和合适真鞅/增长条件。"
+          ],
+          "formulas": [
+            {
+              "label": "贴现期望与Feynman–Kac项",
+              "tex": "u_t+\\mathcal L^{\\mathbb Q}u-ru=0,\\qquad u(T,x)=g(x)"
+            }
+          ],
+          "proof": "计算d[e^{−rt}u(t,X_t)]=e^{−rt}[(u_t+Lu−ru)dt+σu_xdW^Q]。若贴现条件价值是真鞅，其漂移部分应消失，于是得到含−ru的后向方程；反向从PDE用Itô及可积性也可得Feynman–Kac表示。",
+          "worked": "如果无风险支付恒为g(x)=100、r=.03、剩余期限1年，则u=100e^{−.03}≈97.0446，代入无状态项的PDE u_t−ru=0成立。",
+          "limitation": "定价PDE的算子必须使用风险中性Q下的状态漂移，不能把真实P下的历史漂移直接代入而仍称其为Black–Scholes价格。"
+        },
+        {
+          "title": "Black–Scholes PDE与非光滑支付",
+          "question": "如何从风险中性几何布朗扩散得到欧式期权的价格方程？",
+          "paragraphs": [
+            "在Q下dS=rSdt+σS dW且无股息，生成算子是Ls=rs∂s+(1/2)σ²s²∂ss。",
+            "对欧式支付g(s)=(s−K)^+，条件贴现期望满足Black–Scholes PDE和终端支付。由于g在K处不可微，经典光滑性通常在t<T内部成立，终端边界需要按适当连续/弱意义理解。"
+          ],
+          "formulas": [
+            {
+              "label": "Black–Scholes PDE与非光滑支付",
+              "tex": "u_t+rsu_s+\\tfrac12\\sigma^2s^2u_{ss}-ru=0,\\quad u(T,s)=(s-K)^+"
+            }
+          ],
+          "proof": "风险中性定价条件给u(t,s)=E_Q[e^{−r(T−t)}(S_T−K)^+|S_t=s]。由GBM系数b=rs、a=σs代入折现后向PDE得到所示表达；内点平滑来自非退化对数正态转移密度，终端看涨支付的拐点不要求经典二阶可微。",
+          "worked": "取r=.03、σ=.2、K=100，检查u(T,110)=10、u(T,90)=0，确保终端边界单位为货币金额，且贴现必须以剩余期限T−t计算。",
+          "limitation": "若有连续股息、交易费用或跳跃，PDE的漂移、现金流和算子均需相应修改；数学上的解不能自动保证市场完全可复制。"
+        }
+      ],
+      "example": "Brownian终端g(x)=x²时后向条件均值u=x²+T−t，代入热方程确为零。OUκ=2、θ=1、x=3、一年条件期望≈1.27067；恒定到期100的无风险支付一年现值100e^{−.03}≈97.0446。",
+      "application": "连接金融条件风险预测、期权无套利定价、Feynman–Kac概率表示与数值PDE方法，可将解析算例作为独立单元测试。",
+      "caveat": "经典PDE结论依赖平滑、增长及边界条件；风险中性定价须使用Q下生成元。终端非光滑期权支付不应被错误要求处处C²。",
+      "links": [
+        {
+          "kind": "math",
+          "id": "ito-n0310",
+          "label": "先修：多维Itô"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0324",
+          "label": "先修：贴现资产鞅"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0325",
+          "label": "已有讲义：Feynman–Kac"
+        },
+        {
+          "kind": "math",
+          "id": "finance-n0434",
+          "label": "金融：Black–Scholes"
+        }
+      ],
+      "sources": [
+        {
+          "title": "University of Chicago Greg Lawler Stochastic Calculus and Finance：第5章Girsanov与第6章期权定价",
+          "url": "https://www.math.uchicago.edu/~lawler/finbook.pdf"
+        },
+        {
+          "title": "MIT 15.070J Advanced Stochastic Processes：Lecture 19 Ito applications to financial economics",
+          "url": "https://ocw.mit.edu/courses/15-070j-advanced-stochastic-processes-fall-2013/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V14定价链：完整边界、四节证明与数值再现"
     }
   ]
 }
