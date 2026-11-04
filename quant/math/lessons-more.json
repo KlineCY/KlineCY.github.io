@@ -4353,6 +4353,161 @@
         }
       ],
       "checked_status": "V14完整精讲：RN存在、唯一、换元积分、链式及反向密度"
+    },
+    {
+      "id": "measure-n0147",
+      "node_id": "measure-n0147",
+      "title": "概率测度变换",
+      "definition": "概率测度变换通过Radon–Nikodym终端密度Z_T=dQ/dP把同一个随机空间上的事件重新赋予概率权重。非负密度必须满足E_P Z_T=1，新测度Q才是真正的概率；严格正密度使P与Q具有相同零概率事件。进一步把终端密度条件化得到动态密度鞅Z_t，并由Bayes公式严格转换不同信息时点的条件期望。",
+      "assumptions": "P与Q定义在相同F_T及滤过F_t上，Q≪P且Z_T≥0为F_T可测，E_PZ_T=1。若要P∼Q，应加Z_T>0在P几乎处处；使用条件Bayes公式需X在Q下可积，并在Z_t>0处定义。金融二叉树例子另要求d<R<u、股票和债券可交易、自融资且交易费用忽略，不能从数学密度归一直接推出无套利。",
+      "properties": [
+        "非负且P期望1的终端密度定义概率测度，严格正时与P等价。",
+        "密度过程Z_t=E_P[Z_T|F_t]是P下均值1的鞅。",
+        "Bayes公式以Z_T条件加权并除以Z_t给出Q下条件期望。",
+        "风险中性概率来自可交易资产贴现鞅约束，不必等于真实历史发生频率。"
+      ],
+      "formulas": [
+        {
+          "label": "终端密度构造概率测度",
+          "tex": "\\mathbb Q(A)=\\mathbb E_{\\mathbb P}[Z_T\\mathbf1_A],\\quad Z_T\\ge0,\\quad \\mathbb E_{\\mathbb P}Z_T=1"
+        },
+        {
+          "label": "密度过程与信息滤过",
+          "tex": "Z_t=\\mathbb E_{\\mathbb P}[Z_T\\mid\\mathcal F_t],\\quad \\mathbb E_{\\mathbb P}[Z_t\\mid\\mathcal F_s]=Z_s\\ (s\\le t)"
+        },
+        {
+          "label": "Bayes条件期望与测度转换",
+          "tex": "\\mathbb E_{\\mathbb Q}[X\\mid\\mathcal F_t]=\\frac{\\mathbb E_{\\mathbb P}[Z_TX\\mid\\mathcal F_t]}{Z_t}"
+        },
+        {
+          "label": "二叉树价格与零概率事件保存",
+          "tex": "q=\\frac{R-d}{u-d}=0.6,\\quad Z=(1.2,0.8),\\quad C_0=\\frac{\\mathbb E_{\\mathbb Q}(S_1-100)^+}{1.02}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对两两不交事件A_n，非负单调收敛给Q(∪A_n)=E_P[ZΣ1_{A_n}]=ΣE_P[Z1_{A_n}]=ΣQ(A_n)，因此可数可加。再令A=Ω，得Q(Ω)=E_P Z=1；若Z>0 P几乎处处，双方零测集相同，证明等价性。",
+          "tex": "\\mathbb Q(A)=\\mathbb E_{\\mathbb P}[Z_T\\mathbf1_A],\\quad Z_T\\ge0,\\quad \\mathbb E_{\\mathbb P}Z_T=1"
+        },
+        {
+          "explanation": "对A∈F_t有Q(A)=E_P[Z_T1_A]=E_P[E_P(Z_T|F_t)1_A]=E_P[Z_t1_A]。塔式条件期望给E_P[Z_t|F_s]=E_P[E_P(Z_T|F_t)|F_s]=E_P[Z_T|F_s]=Z_s；且E Z_t=E Z_T=1。",
+          "tex": "Z_t=\\mathbb E_{\\mathbb P}[Z_T\\mid\\mathcal F_t],\\quad \\mathbb E_{\\mathbb P}[Z_t\\mid\\mathcal F_s]=Z_s\\ (s\\le t)"
+        },
+        {
+          "explanation": "定义Y=(1/Z_t)E_P[Z_TX|F_t]，它F_t可测。对任意A∈F_t，E_Q[Y1_A]=E_P[Z_TY1_A]=E_P[Z_tY1_A]=E_P[E_P(Z_TX|F_t)1_A]=E_P[Z_TX1_A]=E_Q[X1_A]，由条件期望定义得到等式。",
+          "tex": "\\mathbb E_{\\mathbb Q}[X\\mid\\mathcal F_t]=\\frac{\\mathbb E_{\\mathbb P}[Z_TX\\mid\\mathcal F_t]}{Z_t}"
+        },
+        {
+          "explanation": "假设d<R<u保证0<q<1，将贴现股票鞅条件S_0=R^{-1}E_Q S_1写成1=R^{-1}[qu+(1−q)d]并解得q。由于P两状态各半，密度比例q/P(up)=1.2、(1−q)/P(down)=.8。看涨支付只在上涨时为10，折现期望得到5.88235。",
+          "tex": "q=\\frac{R-d}{u-d}=0.6,\\quad Z=(1.2,0.8),\\quad C_0=\\frac{\\mathbb E_{\\mathbb Q}(S_1-100)^+}{1.02}"
+        }
+      ],
+      "deep_sections": [
+        {
+          "title": "终端密度构造概率测度",
+          "question": "为什么一个正的随机变量只有归一化后才可以作为概率密度？",
+          "paragraphs": [
+            "取基准概率P和F_T可测非负随机变量Z_T，定义Q(A)=E_P[Z_T1_A]。这个集合函数由非负积分的可数可加性成为测度，其总质量正好等于E_P Z_T。",
+            "因此要得到真正的概率测度，必须要求E_P Z_T=1。若此外Z_T>0在P几乎处处，则Q与P等价；不满足正性时仍可能有Q≪P但失去逆向等价。"
+          ],
+          "formulas": [
+            {
+              "label": "终端密度构造概率测度",
+              "tex": "\\mathbb Q(A)=\\mathbb E_{\\mathbb P}[Z_T\\mathbf1_A],\\quad Z_T\\ge0,\\quad \\mathbb E_{\\mathbb P}Z_T=1"
+            }
+          ],
+          "proof": "对两两不交事件A_n，非负单调收敛给Q(∪A_n)=E_P[ZΣ1_{A_n}]=ΣE_P[Z1_{A_n}]=ΣQ(A_n)，因此可数可加。再令A=Ω，得Q(Ω)=E_P Z=1；若Z>0 P几乎处处，双方零测集相同，证明等价性。",
+          "worked": "在两状态P=(.5,.5)且Z=(1.2,.8)时，E_PZ=.5×1.2+.5×.8=1，故Q=(.6,.4)合法且与P等价。",
+          "limitation": "若某状态的密度为0，就不能把该状态在Q下的零概率解释成真实历史P下也不可能发生；测度等价性已经丧失。"
+        },
+        {
+          "title": "密度过程与信息滤过",
+          "question": "为什么终端密度必须通过条件期望转换成每个中间时刻的密度？",
+          "paragraphs": [
+            "当Q由F_T上的正终端密度Z_T定义，对于时刻t可见的事件A∈F_t，其Q概率应仍为E_P[Z_T1_A]。根据条件期望，这等于E_P[Z_t1_A]，其中Z_t=E_P[Z_T|F_t]。",
+            "因此(Z_t)是P下均值1的非负鞅，也是在各时点合法的信息集内可以计算的密度过程。金融交易中使用全样本未来状态直接设定Z_t会违反滤过时间要求。"
+          ],
+          "formulas": [
+            {
+              "label": "密度过程与信息滤过",
+              "tex": "Z_t=\\mathbb E_{\\mathbb P}[Z_T\\mid\\mathcal F_t],\\quad \\mathbb E_{\\mathbb P}[Z_t\\mid\\mathcal F_s]=Z_s\\ (s\\le t)"
+            }
+          ],
+          "proof": "对A∈F_t有Q(A)=E_P[Z_T1_A]=E_P[E_P(Z_T|F_t)1_A]=E_P[Z_t1_A]。塔式条件期望给E_P[Z_t|F_s]=E_P[E_P(Z_T|F_t)|F_s]=E_P[Z_T|F_s]=Z_s；且E Z_t=E Z_T=1。",
+          "worked": "在单期二状态模型里，F_0只有全体与空集，Z_0=E_P Z_1=1；到期揭晓上/下状态后，Z_1分别为1.2和.8。",
+          "limitation": "在一般无穷期限，密度鞅可能不一致可积；不能把有限T条件期望的结论无条件延伸到T趋无穷。"
+        },
+        {
+          "title": "Bayes条件期望与测度转换",
+          "question": "为什么新测度的未来支付期望需要除以当前密度过程？",
+          "paragraphs": [
+            "对Q可积随机变量X，希望在F_t上求Y=E_Q[X|F_t]。以Q(A)=E_P[Z_T1_A]为定义，对任意A∈F_t核对条件期望的测试事件恒等式。",
+            "结果是Y=E_P[Z_TX|F_t]/Z_t，分母只能在Z_t>0的状态上取倒数。这条公式是风险中性条件现金流、重要性采样以及Girsanov定价的核心测度论接口。"
+          ],
+          "formulas": [
+            {
+              "label": "Bayes条件期望与测度转换",
+              "tex": "\\mathbb E_{\\mathbb Q}[X\\mid\\mathcal F_t]=\\frac{\\mathbb E_{\\mathbb P}[Z_TX\\mid\\mathcal F_t]}{Z_t}"
+            }
+          ],
+          "proof": "定义Y=(1/Z_t)E_P[Z_TX|F_t]，它F_t可测。对任意A∈F_t，E_Q[Y1_A]=E_P[Z_TY1_A]=E_P[Z_tY1_A]=E_P[E_P(Z_TX|F_t)1_A]=E_P[Z_TX1_A]=E_Q[X1_A]，由条件期望定义得到等式。",
+          "worked": "在两状态P=(.5,.5)、Z=(1.2,.8)、终端X=(10,0)时，t=0有E_Q X=E_P[ZX]=.5×1.2×10=6，而真实P期望为5。",
+          "limitation": "测度改变的期望权重不是凭空增加交易盈利；若要算期权现值还需折现，且Q必须满足可交易资产的定价约束。"
+        },
+        {
+          "title": "二叉树价格与零概率事件保存",
+          "question": "风险中性概率q为什么不是用上涨频率直接估计出来的？",
+          "paragraphs": [
+            "设一期无股息股票S_0=100，上涨因子u=1.1、下跌因子d=.9，无风险债券增长因子R=1.02。复制定价要求Q下贴现股票为鞅，故q u+(1−q)d=R，解q=(R−d)/(u−d)=.6。",
+            "若真实两状态概率P=(.5,.5)，则RN密度是Z=(q/.5,(1−q)/.5)=(1.2,.8)，为正且均值1。一个执行价100的欧式看涨支付为(10,0)，其一期无套利价格是(0.6×10)/1.02≈5.88235，而非按P频率直接加权。"
+          ],
+          "formulas": [
+            {
+              "label": "二叉树价格与零概率事件保存",
+              "tex": "q=\\frac{R-d}{u-d}=0.6,\\quad Z=(1.2,0.8),\\quad C_0=\\frac{\\mathbb E_{\\mathbb Q}(S_1-100)^+}{1.02}"
+            }
+          ],
+          "proof": "假设d<R<u保证0<q<1，将贴现股票鞅条件S_0=R^{-1}E_Q S_1写成1=R^{-1}[qu+(1−q)d]并解得q。由于P两状态各半，密度比例q/P(up)=1.2、(1−q)/P(down)=.8。看涨支付只在上涨时为10，折现期望得到5.88235。",
+          "worked": "此例真实上涨概率0.5、定价上涨概率0.6；若错误使用真实概率定价则会得到10×0.5/1.02≈4.90196，比无套利复制价低约0.98039。",
+          "limitation": "若股票不可自由交易、股息或融资费用不同、没有两个状态都可复制的投资组合，简单二叉树风险中性概率不能直接代替实际市场价格。"
+        }
+      ],
+      "example": "在两状态P=(.5,.5)、Q=(.6,.4)下，RN密度Z=(1.2,.8)，P加权均值正好1；对支付(10,0)，真实P均值5、新Q均值6。一期二叉树S0=100、u=1.1、d=.9、R=1.02的无套利风险中性Call价格6/1.02≈5.88235。",
+      "application": "用于风险中性定价、概率密度比、条件状态分布转换、金融重要性采样和机器学习分布偏移校正；必须与Girsanov真鞅检查以及无套利条件衔接。",
+      "caveat": "新概率密度归一化不表示自动得到金融风险中性测度；同一事件在不同测度下概率会变化，但正等价密度不会改变零概率事件集合。金融数据中不得提前使用终端密度对应的未来信息。",
+      "links": [
+        {
+          "kind": "math",
+          "id": "measure-n0146",
+          "label": "先修：RN定理"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0145",
+          "label": "先修：绝对连续"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0320",
+          "label": "后续：指数密度鞅"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0322",
+          "label": "后续：风险中性测度"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：Lecture 10 RN密度及概率换测度",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        },
+        {
+          "title": "Greg Lawler《Stochastic Calculus and Finance》：概率测度变换与Girsanov定理",
+          "url": "https://www.math.uchicago.edu/~lawler/finbook.pdf"
+        }
+      ],
+      "checked_status": "V14完整精讲：概率密度归一、动态密度过程、Bayes和风险中性二叉树"
     }
   ]
 }
