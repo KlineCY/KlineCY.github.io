@@ -3287,6 +3287,476 @@
         }
       ],
       "checked_status": "V11四节数学证明：积分极限、数值检验与缺失假设反例"
+    },
+    {
+      "id": "measure-n0133",
+      "node_id": "measure-n0133",
+      "title": "乘积测度",
+      "definition": "乘积测度将两个测度空间的大小概念扩展到笛卡尔积空间。对于矩形A×B，先规定(μ⊗ν)(A×B)=μ(A)ν(B)，再在积σ-代数上延拓为测度。在σ-有限前提下可获得标准的存在与唯一性结论，为联合分布、条件积分、独立随机变量和Fubini定理提供公共语言。",
+      "assumptions": "考虑测度空间(S,A,μ)与(T,B,ν)，积σ-代数A⊗B由可测矩形A×B生成。应用标准的唯一性与分部积分结论时，通常要求两个测度σ-有限；概率测度自动满足。独立随机变量的联合分布是边际测度的乘积，但相关随机变量不满足此独立构造。",
+      "properties": [
+        "在可测矩形上乘积测度等于两边测度之积，定义延拓到积σ-代数。",
+        "σ-有限条件下，矩形值决定唯一的乘积测度。",
+        "独立随机变量的联合分布等于边际分布的乘积；相关性不能单独从边际恢复。",
+        "从矩形到一般非负函数的积分交换需再使用Tonelli，不能只拿矩形公式当作完整证明。"
+      ],
+      "formulas": [
+        {
+          "label": "可测矩形与积σ-代数",
+          "tex": "\\mathcal A\\otimes\\mathcal B=\\sigma\\{A\\times B:A\\in\\mathcal A,\\ B\\in\\mathcal B\\}"
+        },
+        {
+          "label": "矩形测度与延拓的条件",
+          "tex": "(\\mu\\otimes\\nu)(A\\times B)=\\mu(A)\\nu(B)"
+        },
+        {
+          "label": "独立联合分布与边际恢复",
+          "tex": "X\\perp Y\\ \\Longleftrightarrow\\ P_{(X,Y)}=P_X\\otimes P_Y"
+        },
+        {
+          "label": "矩形积分与Tonelli的准备",
+          "tex": "\\int_{S\\times T}\\mathbf1_{A\\times B}\\,d(\\mu\\otimes\\nu)=\\mu(A)\\nu(B)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "通过包含全部可测矩形的σ-代数取交构造最小积σ-代数。若X,Y为分别可测的实随机变量，则向量(X,Y)对积Borel σ-代数可测，因为矩形逆像为{X∈A}∩{Y∈B}。",
+          "tex": "\\mathcal A\\otimes\\mathcal B=\\sigma\\{A\\times B:A\\in\\mathcal A,\\ B\\in\\mathcal B\\}"
+        },
+        {
+          "explanation": "在两边σ-有限时，可将空间分割为可数个有限测度部分，在矩形半环上定义非负前测度，再使用Carathéodory延拓得到积σ-代数上的测度。借矩形生成族与σ-有限唯一性，确定该测度的矩形取值与整体一致。",
+          "tex": "(\\mu\\otimes\\nu)(A\\times B)=\\mu(A)\\nu(B)"
+        },
+        {
+          "explanation": "独立性的定义先保证所有可测矩形上的联合概率是边际乘积。两个概率测度在生成π系统矩形上一致，借π–λ定理扩展为整个联合空间上的相等。反向由联合测度等式在矩形上立即得到独立条件。",
+          "tex": "X\\perp Y\\ \\Longleftrightarrow\\ P_{(X,Y)}=P_X\\otimes P_Y"
+        },
+        {
+          "explanation": "对可测矩形使用乘积测度定义，直接得到其指标函数的积分值。按照非负简单函数有限加权和进行线性扩展，再利用单调简单逼近和MCT获得非负函数的Tonelli公式。",
+          "tex": "\\int_{S\\times T}\\mathbf1_{A\\times B}\\,d(\\mu\\otimes\\nu)=\\mu(A)\\nu(B)"
+        }
+      ],
+      "example": "两种二点概率分布(0.3,0.7)和(0.4,0.6)的独立联合概率为(0.12,0.18,0.28,0.42)，总和1，第一维A的概率0.30。对于两个Bernoulli(0.5)变量，独立联合与Y=X的联合同现概率分别为0.25和0.5。",
+      "application": "用于金融联合收益分布、独立基准风险情景、多资产Copula建模与迭代条件期望积分的理论基础。",
+      "caveat": "积σ-代数只刻画可测性；乘积测度对应独立的联合分布，不适用于任意相关资产。非σ-有限问题或有符号不可积问题需额外条件。",
+      "deep_sections": [
+        {
+          "title": "可测矩形与积σ-代数",
+          "question": "怎样把两个状态空间的事件合成一个联合事件？",
+          "paragraphs": [
+            "给定两个可测空间，最简单的联合事件是A×B，表示第一维发生A且第二维发生B。包含全部这类矩形的最小σ-代数记为A⊗B，它支持二维阈值事件与联合随机变量。",
+            "矩形只是生成族，不等于所有可测联合事件。例如对连续二维收益，事件{x+y≥0}通常需要通过矩形的可数组合近似，才能证明属于积Borel σ-代数。"
+          ],
+          "formulas": [
+            {
+              "label": "可测矩形与积σ-代数",
+              "tex": "\\mathcal A\\otimes\\mathcal B=\\sigma\\{A\\times B:A\\in\\mathcal A,\\ B\\in\\mathcal B\\}"
+            }
+          ],
+          "proof": "通过包含全部可测矩形的σ-代数取交构造最小积σ-代数。若X,Y为分别可测的实随机变量，则向量(X,Y)对积Borel σ-代数可测，因为矩形逆像为{X∈A}∩{Y∈B}。",
+          "worked": "取两状态Ω₁={A,B}、Ω₂={C,D}，联合空间有4个原子(A,C),(A,D),(B,C),(B,D)；事件{第一维=A}由两个矩形原子并构成。",
+          "limitation": "可测矩形的生成只说明联合事件合法，不指定其概率；没有独立性时无法把联合概率直接写成边际相乘。"
+        },
+        {
+          "title": "矩形测度与延拓的条件",
+          "question": "为什么定义矩形概率之后还需要延拓定理？",
+          "paragraphs": [
+            "对矩形设置ρ(A×B)=μ(A)ν(B)，它与独立抽样的直觉一致。要在所有积σ-代数事件上得到概率，还需要证明这一矩形规则可一致延拓为可数可加的测度。",
+            "当μ与ν为σ-有限测度时，标准乘积测度构造与唯一性成立。若其中任一测度可能无穷，应对0×∞的矩形约定和σ-有限分块做细致处理。"
+          ],
+          "formulas": [
+            {
+              "label": "矩形测度与延拓的条件",
+              "tex": "(\\mu\\otimes\\nu)(A\\times B)=\\mu(A)\\nu(B)"
+            }
+          ],
+          "proof": "在两边σ-有限时，可将空间分割为可数个有限测度部分，在矩形半环上定义非负前测度，再使用Carathéodory延拓得到积σ-代数上的测度。借矩形生成族与σ-有限唯一性，确定该测度的矩形取值与整体一致。",
+          "worked": "如果μ(A)=0.3、μ(B)=0.7，ν(C)=0.4、ν(D)=0.6，则(A,C)矩形概率为0.3×0.4=0.12，四个原子概率为0.12、0.18、0.28、0.42，总和1。",
+          "limitation": "对非σ-有限测度，某些唯一性论证失效；不能只从无限测度矩形公式推断所有联合积分操作都合法。"
+        },
+        {
+          "title": "独立联合分布与边际恢复",
+          "question": "为什么同样的边际分布不能确定股票和ETF的联合风险？",
+          "paragraphs": [
+            "当X与Y独立时，P(X∈A,Y∈B)=P_X(A)P_Y(B)，所以其联合分布是边际乘积测度。利用矩形生成族的唯一性，该规则延伸到积Borel σ-代数全部联合事件。",
+            "但如果Y=X，两个变量具有同样的边际分布，却在对角线集中全部概率质量。独立耦合和完全同向耦合的损失极端同现概率会显著不同。"
+          ],
+          "formulas": [
+            {
+              "label": "独立联合分布与边际恢复",
+              "tex": "X\\perp Y\\ \\Longleftrightarrow\\ P_{(X,Y)}=P_X\\otimes P_Y"
+            }
+          ],
+          "proof": "独立性的定义先保证所有可测矩形上的联合概率是边际乘积。两个概率测度在生成π系统矩形上一致，借π–λ定理扩展为整个联合空间上的相等。反向由联合测度等式在矩形上立即得到独立条件。",
+          "worked": "令X,Y都各以0.5概率取0或1。若独立，P(X=1,Y=1)=0.25；若Y=X，则联合同现概率为0.5，虽然两者边际均保持Bernoulli(0.5)。",
+          "limitation": "在系统冲击下ETF与行业股票常相关，乘积测度不是一般联合分布的默认模型；应明确相关、Copula或条件状态假设。"
+        },
+        {
+          "title": "矩形积分与Tonelli的准备",
+          "question": "怎样验证联合非负函数的积分规则从矩形出发是自洽的？",
+          "paragraphs": [
+            "对矩形指标函数1_{A×B}(x,y)=1_A(x)1_B(y)，两次迭代积分等于μ(A)ν(B)。对非负简单函数再由线性组合推广，随后使用非负单调收敛处理一般非负函数。",
+            "这正是Tonelli定理的证明骨架。若要进一步处理有符号联合损益，则必须检查绝对可积性才能使用Fubini而不发生∞−∞。"
+          ],
+          "formulas": [
+            {
+              "label": "矩形积分与Tonelli的准备",
+              "tex": "\\int_{S\\times T}\\mathbf1_{A\\times B}\\,d(\\mu\\otimes\\nu)=\\mu(A)\\nu(B)"
+            }
+          ],
+          "proof": "对可测矩形使用乘积测度定义，直接得到其指标函数的积分值。按照非负简单函数有限加权和进行线性扩展，再利用单调简单逼近和MCT获得非负函数的Tonelli公式。",
+          "worked": "独立两状态变量的四个联合概率0.12、0.18、0.28、0.42，可核验P(第一维=A)=0.12+0.18=0.30，恰与μ(A)=0.30一致。",
+          "limitation": "矩形上的计算只能证明最简单函数的积分，不能在没有非负性或绝对可积性时擅自交换无穷积分次序。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "measure-n0123",
+          "label": "测度公理"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0130",
+          "label": "单调收敛"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0134",
+          "label": "Tonelli定理"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0135",
+          "label": "Fubini定理"
+        },
+        {
+          "kind": "ml",
+          "id": "m23-c11-p01",
+          "label": "ETF联合尾部"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 18.125 Measure and Integration：第18–20讲，乘积测度及Fubini",
+          "url": "https://ocw.mit.edu/courses/18-125-measure-and-integration-fall-2003/pages/lecture-notes/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：第9讲，Product Measure and Fubini",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V11完整讲义：四节乘积测度、Tonelli/Fubini证明与反例"
+    },
+    {
+      "id": "measure-n0134",
+      "node_id": "measure-n0134",
+      "title": "Tonelli定理",
+      "definition": "Tonelli定理说明：在σ-有限乘积测度空间上，任何非负可测函数f(x,y)的联合积分等于先对任一维积分再对另一维积分的结果，两种次序允许共同取无穷大。它不要求f绝对可积，因为非负性排除了正负∞抵消。定理依靠矩形指标函数、简单函数与单调收敛三个阶段。",
+      "assumptions": "两个σ-有限测度空间(S,A,μ)与(T,B,ν)，f:S×T→[0,∞]对积σ-代数可测。使用迭代积分时按几乎处处意义处理截面与相应可测性。若f可正可负，不能以Tonelli直接交换迭代积分，应先验证∫|f|<∞或分别处理正负部分。",
+      "properties": [
+        "非负可测函数的联合积分等于两种次序的迭代积分，即使结果是∞也成立。",
+        "Tonelli与非负级数求和交换同源，均依赖单调收敛机制。",
+        "先在矩形指标函数上验证，再推广到简单函数与逐点递增的非负可测函数。",
+        "对于有符号且不绝对可积函数，Tonelli不适用，迭代积分结果可能依次序而变。"
+      ],
+      "formulas": [
+        {
+          "label": "非负联合积分的三重等式",
+          "tex": "\\int f\\,d(\\mu\\otimes\\nu)=\\int_S\\!\\left(\\int_T f(x,y)\\,d\\nu(y)\\right)d\\mu(x)=\\int_T\\!\\left(\\int_S f(x,y)\\,d\\mu(x)\\right)d\\nu(y)"
+        },
+        {
+          "label": "简单函数逼近的证明框架",
+          "tex": "s_n\\uparrow f,\\quad\\int s_n\\,d(\\mu\\otimes\\nu)=\\int_S\\int_T s_n\\,d\\nu\\,d\\mu\\ \\Longrightarrow\\ \\int f=\\int_S\\int_T f"
+        },
+        {
+          "label": "非负级数与积分次序",
+          "tex": "\\int_S\\sum_{n=1}^{\\infty}g_n(x)\\,d\\mu(x)=\\sum_{n=1}^{\\infty}\\int_Sg_n(x)\\,d\\mu(x),\\qquad g_n\\ge0"
+        },
+        {
+          "label": "积分无穷时依然成立",
+          "tex": "f(x,y)=\\frac1{xy}\\ (0<x,y<1):\\quad\\int_0^1\\int_0^1 f(x,y)\\,dx\\,dy=\\infty"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对矩形指标函数，两次迭代积分均等于μ(A)ν(B)。对非负简单函数由有限线性性推广；再取简单函数s_n↑f，由各边积分的单调收敛及截面可测性，传递等式至任意非负可测f。",
+          "tex": "\\int f\\,d(\\mu\\otimes\\nu)=\\int_S\\!\\left(\\int_T f(x,y)\\,d\\nu(y)\\right)d\\mu(x)=\\int_T\\!\\left(\\int_S f(x,y)\\,d\\mu(x)\\right)d\\nu(y)"
+        },
+        {
+          "explanation": "选择非负简单函数s_n↑f，对每个n，由矩形指标函数分解知联合积分等于任一迭代积分。因s_n(x,·)逐点递增，内层MCT给出内层积分上升到∫f(x,·)；外层再由MCT传递极限。可测性由简单函数序列的极限保证。",
+          "tex": "s_n\\uparrow f,\\quad\\int s_n\\,d(\\mu\\otimes\\nu)=\\int_S\\int_T s_n\\,d\\nu\\,d\\mu\\ \\Longrightarrow\\ \\int f=\\int_S\\int_T f"
+        },
+        {
+          "explanation": "将N配计数测度，f(x,n)=g_n(x)对积σ-代数非负可测。对它使用Tonelli，按n先积分得到Σ_n g_n(x)，按x先积分得到Σ_n∫g_n，故二者相等，也可由部分和MCT直接得到。",
+          "tex": "\\int_S\\sum_{n=1}^{\\infty}g_n(x)\\,d\\mu(x)=\\sum_{n=1}^{\\infty}\\int_Sg_n(x)\\,d\\mu(x),\\qquad g_n\\ge0"
+        },
+        {
+          "explanation": "函数f非负，对每个x∈(0,1)，∫_ε^1 1/(xy)dy=(−ln ε)/x，令ε↓0得到∞。由Tonelli可推联合积分为∞；由于对x、y对称，另一迭代次序也为∞。",
+          "tex": "f(x,y)=\\frac1{xy}\\ (0<x,y<1):\\quad\\int_0^1\\int_0^1 f(x,y)\\,dx\\,dy=\\infty"
+        }
+      ],
+      "example": "在单位正方形上f(x,y)=x+y，两种次序积分均为1；对三角形指标函数1_{x≤y}，两种次序均得1/2。非负无界函数1/(xy)则两种次序均为∞，说明Tonelli保证相等而不保证有限。",
+      "application": "支持多资产联合损失、非负事件计数、联合概率密度及积分—无限求和交换的严谨推理。",
+      "caveat": "Tonelli要求非负可测和适当积测度，不能直接处理有符号不可积的策略收益。联合积分取∞时不构成有限期望。",
+      "deep_sections": [
+        {
+          "title": "非负联合积分的三重等式",
+          "question": "为何非负性可以代替预先要求积分有限？",
+          "paragraphs": [
+            "对f≥0可测，Tonelli保证其整体积分与两种迭代积分相同，允许为∞。先积x还是先积y不会出现正负损失互相抵消的问题，因此无需先证明某个有限的绝对积分界。",
+            "对于联合收益密度的非负损失函数、联合指示事件及非负风险贡献，这条定理让积分次序有严格数学依据。但不应把它用于带符号的净交易收益。"
+          ],
+          "formulas": [
+            {
+              "label": "非负联合积分的三重等式",
+              "tex": "\\int f\\,d(\\mu\\otimes\\nu)=\\int_S\\!\\left(\\int_T f(x,y)\\,d\\nu(y)\\right)d\\mu(x)=\\int_T\\!\\left(\\int_S f(x,y)\\,d\\mu(x)\\right)d\\nu(y)"
+            }
+          ],
+          "proof": "对矩形指标函数，两次迭代积分均等于μ(A)ν(B)。对非负简单函数由有限线性性推广；再取简单函数s_n↑f，由各边积分的单调收敛及截面可测性，传递等式至任意非负可测f。",
+          "worked": "在单位正方形上f(x,y)=x+y，先积y得x+1/2，再积x得1；换次序先积x得1/2+y，再积y同样得1。",
+          "limitation": "如果f是净收益差并可取负值，上述等式不能绕过有符号积分可能未定义的∞−∞问题。"
+        },
+        {
+          "title": "简单函数逼近的证明框架",
+          "question": "为什么Tonelli既是积分定理也是可测性的定理？",
+          "paragraphs": [
+            "对矩形指标函数可直接算迭代积分。若是非负简单函数，利用有限求和给出相同结果；若f一般非负可测，则构造s_n↑f，重复使用单调收敛传递等式。",
+            "在推广中还需要说明各截面函数与迭代积分映射是可测的，这通常由矩形可测性、简单函数逼近和逐点极限可测性逐层得到，而不能直接省略。"
+          ],
+          "formulas": [
+            {
+              "label": "简单函数逼近的证明框架",
+              "tex": "s_n\\uparrow f,\\quad\\int s_n\\,d(\\mu\\otimes\\nu)=\\int_S\\int_T s_n\\,d\\nu\\,d\\mu\\ \\Longrightarrow\\ \\int f=\\int_S\\int_T f"
+            }
+          ],
+          "proof": "选择非负简单函数s_n↑f，对每个n，由矩形指标函数分解知联合积分等于任一迭代积分。因s_n(x,·)逐点递增，内层MCT给出内层积分上升到∫f(x,·)；外层再由MCT传递极限。可测性由简单函数序列的极限保证。",
+          "worked": "若f=1_{0≤x≤y≤1}，先积x得y，再对y从0到1积分得到1/2；先积y得1−x，再对x积分同样得到1/2。",
+          "limitation": "证明依赖积测度与非负可测性，若f只是形式上的两变量函数却不可测，其联合积分和迭代积分可能没有定义。"
+        },
+        {
+          "title": "非负级数与积分次序",
+          "question": "把求和视为计数测度积分会得到什么实用结论？",
+          "paragraphs": [
+            "在N上采用计数测度，则对非负可测函数g_n(x)，Tonelli将乘积空间上的积分写成Σ_n∫g_n，也等于∫Σ_n g_n。这是非负期望求和交换的测度论解释。",
+            "即使各期损失事件相互依赖，该交换式仍成立，因为它只要求非负和可测，而不要求独立；独立性属于联合分布的另一个问题。"
+          ],
+          "formulas": [
+            {
+              "label": "非负级数与积分次序",
+              "tex": "\\int_S\\sum_{n=1}^{\\infty}g_n(x)\\,d\\mu(x)=\\sum_{n=1}^{\\infty}\\int_Sg_n(x)\\,d\\mu(x),\\qquad g_n\\ge0"
+            }
+          ],
+          "proof": "将N配计数测度，f(x,n)=g_n(x)对积σ-代数非负可测。对它使用Tonelli，按n先积分得到Σ_n g_n(x)，按x先积分得到Σ_n∫g_n，故二者相等，也可由部分和MCT直接得到。",
+          "worked": "若第n期非负风险事件概率为2^{-n}，则期望总命中次数Σ2^{-n}=1；前四期的期望为1/2+1/4+1/8+1/16=0.9375。",
+          "limitation": "事件概率和有限仅给期望总次数有限，并不直接证明资产策略净值没有负尾或不存在融资成本。"
+        },
+        {
+          "title": "积分无穷时依然成立",
+          "question": "Tonelli为什么允许联合积分为无穷大，却不能替代风险模型的有限矩证明？",
+          "paragraphs": [
+            "在(0,1)²取f(x,y)=1/(xy)，它非负可测。对于任意固定x，内层∫_0^1dy/(xy)=∞，因此迭代积分为∞；交换次序仍得到∞，与联合非负积分一致。",
+            "这说明Tonelli回答的是数学上的次序合法性，不是积分一定有限。若要进行真实组合收益均值、融资需求或方差优化，仍必须确认模型对应的风险积分为有限值。"
+          ],
+          "formulas": [
+            {
+              "label": "积分无穷时依然成立",
+              "tex": "f(x,y)=\\frac1{xy}\\ (0<x,y<1):\\quad\\int_0^1\\int_0^1 f(x,y)\\,dx\\,dy=\\infty"
+            }
+          ],
+          "proof": "函数f非负，对每个x∈(0,1)，∫_ε^1 1/(xy)dy=(−ln ε)/x，令ε↓0得到∞。由Tonelli可推联合积分为∞；由于对x、y对称，另一迭代次序也为∞。",
+          "worked": "若内层限制x,y∈[0.1,1]，双重积分等于(ln10)²≈5.301898；随着靠近0的截断阈值下降，积分逐渐发散。",
+          "limitation": "非负函数允许无穷积分不意味着该风险模型具有有限期望。若f带符号且正负部分都无限，Tonelli不能为净期望提供意义。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "measure-n0133",
+          "label": "乘积测度"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0130",
+          "label": "单调收敛"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0135",
+          "label": "Fubini定理"
+        },
+        {
+          "kind": "math",
+          "id": "probability-n0107",
+          "label": "条件期望"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 18.125 Measure and Integration：第18–20讲，乘积测度及Fubini",
+          "url": "https://ocw.mit.edu/courses/18-125-measure-and-integration-fall-2003/pages/lecture-notes/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：第9讲，Product Measure and Fubini",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V11完整讲义：四节乘积测度、Tonelli/Fubini证明与反例"
+    },
+    {
+      "id": "measure-n0135",
+      "node_id": "measure-n0135",
+      "title": "Fubini定理",
+      "definition": "Fubini定理处理可正可负的联合函数：在σ-有限乘积测度空间上，若f绝对可积，则积分次序可以交换，两个迭代积分与联合积分相等，且相关截面几乎处处可积。与Tonelli不同，绝对可积性排除了正负无穷之间因积分顺序变化而产生的条件收敛陷阱。",
+      "assumptions": "两个σ-有限测度空间与积可测函数f:S×T→R；要求∫|f|d(μ⊗ν)<∞，才能保证Fubini的有限积分结论。非负函数可改用Tonelli而允许∞。仅有两个迭代积分各自存在，不足以保证它们相等或共同定义了合法的Lebesgue联合积分。",
+      "properties": [
+        "绝对可积使正部和负部积分均有限，从而可分别应用Tonelli后相减。",
+        "Fubini的交换结论对两种次序均成立，并保证相应截面几乎处处绝对可积。",
+        "仅具条件收敛的带符号函数，迭代积分可能依赖顺序，甚至得到相反结果。",
+        "金融联合收益、协方差和期望损失换序前需核验绝对矩条件，而非只检验逐个样本数值有限。"
+      ],
+      "formulas": [
+        {
+          "label": "绝对可积的Fubini结论",
+          "tex": "\\int_{S\\times T}|f|\\,d(\\mu\\otimes\\nu)<\\infty\\Longrightarrow\\int f\\,d(\\mu\\otimes\\nu)=\\int_S\\int_T f\\,d\\nu\\,d\\mu=\\int_T\\int_S f\\,d\\mu\\,d\\nu"
+        },
+        {
+          "label": "正负部分与截面几乎处处可积",
+          "tex": "\\int_S\\left[\\int_T|f(x,y)|\\,d\\nu(y)\\right]d\\mu(x)<\\infty\\Longrightarrow \\int_T|f(x,y)|\\,d\\nu(y)<\\infty\\quad\\mu\\text{-a.e.}"
+        },
+        {
+          "label": "条件收敛导致两种积分次序不同",
+          "tex": "\\int_0^1\\!\\left[\\int_0^1 f(x,y)\\,dy\\right]dx=\\frac\\pi4,\\qquad \\int_0^1\\!\\left[\\int_0^1 f(x,y)\\,dx\\right]dy=-\\frac\\pi4"
+        },
+        {
+          "label": "与独立性、期望乘积及金融风险的关系",
+          "tex": "\\mathbb E[|g(X,Y)|]<\\infty\\quad\\Longrightarrow\\quad\\int g\\,dP_{(X,Y)}\\text{ 的积分换序合法}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "因|f|=f^++f^-且∫|f|有限，可知∫f^+、∫f^-均有限。分别对f^+和f^-应用Tonelli得到两种非负迭代积分，且均有限；两式相减即可得到有符号f的Fubini等式。",
+          "tex": "\\int_{S\\times T}|f|\\,d(\\mu\\otimes\\nu)<\\infty\\Longrightarrow\\int f\\,d(\\mu\\otimes\\nu)=\\int_S\\int_T f\\,d\\nu\\,d\\mu=\\int_T\\int_S f\\,d\\mu\\,d\\nu"
+        },
+        {
+          "explanation": "令G(x)=∫_T|f(x,y)|dν(y)≥0。Tonelli给∫_S G dμ=∫_{S×T}|f|<∞。若μ({G=∞})>0，则∫_S G=∞，与有限性矛盾，故G<∞几乎处处；由此截面有符号积分合法。交换变量重复同样证明。",
+          "tex": "\\int_S\\left[\\int_T|f(x,y)|\\,d\\nu(y)\\right]d\\mu(x)<\\infty\\Longrightarrow \\int_T|f(x,y)|\\,d\\nu(y)<\\infty\\quad\\mu\\text{-a.e.}"
+        },
+        {
+          "explanation": "对固定x>0，∫_0^1 f(x,y)dy=[y/(x²+y²)]_0^1=1/(1+x²)，再对x积分π/4。对固定y>0，∫_0^1 f(x,y)dx=−[x/(x²+y²)]_0^1=−1/(1+y²)，再积分得−π/4。极坐标下|f|近0为|cos2θ|/r²，绝对积分因∫dr/r发散。",
+          "tex": "\\int_0^1\\!\\left[\\int_0^1 f(x,y)\\,dy\\right]dx=\\frac\\pi4,\\qquad \\int_0^1\\!\\left[\\int_0^1 f(x,y)\\,dx\\right]dy=-\\frac\\pi4"
+        },
+        {
+          "explanation": "在联合概率测度存在且g绝对可积时，可以应用相应联合分布的条件积分或通过合适分解进行迭代积分；若联合分布是乘积测度则直接使用Fubini。相关性影响测度本身，不是Fubini绝对可积条件的替代品。",
+          "tex": "\\mathbb E[|g(X,Y)|]<\\infty\\quad\\Longrightarrow\\quad\\int g\\,dP_{(X,Y)}\\text{ 的积分换序合法}"
+        }
+      ],
+      "example": "在单位正方形上，g(x,y)=xy的双重积分两种次序均为1/4；g=x−y的两种迭代积分均为0。非绝对可积反例f=(x²−y²)/(x²+y²)²的两种次序为+π/4与−π/4，明确验证缺少条件造成的换序失败。",
+      "application": "适用于联合资产收益、金融风险函数、条件期望、跨维度积分和连续价格密度，特别强调多资产相关性与可积性的区别。",
+      "caveat": "Fubini必须检查绝对可积和适当测度；两个有限的迭代积分未必相等，也未必存在合法的联合Lebesgue积分。独立性不能替代积分条件。",
+      "deep_sections": [
+        {
+          "title": "绝对可积的Fubini结论",
+          "question": "为什么带符号联合收益必须先检查绝对积分？",
+          "paragraphs": [
+            "当f可正可负时，写成f^+−f^-。如果∫|f|有限，则正负部分积分均有限，可分别用Tonelli交换次序，最后执行两个有限实数的减法。",
+            "这保证对两个资产或两个时间维度的联合统计量进行积分换序时，不会依赖任意截断顺序。若只是分别求得两个形式迭代积分，仍不能默认它们代表同一个联合期望。"
+          ],
+          "formulas": [
+            {
+              "label": "绝对可积的Fubini结论",
+              "tex": "\\int_{S\\times T}|f|\\,d(\\mu\\otimes\\nu)<\\infty\\Longrightarrow\\int f\\,d(\\mu\\otimes\\nu)=\\int_S\\int_T f\\,d\\nu\\,d\\mu=\\int_T\\int_S f\\,d\\mu\\,d\\nu"
+            }
+          ],
+          "proof": "因|f|=f^++f^-且∫|f|有限，可知∫f^+、∫f^-均有限。分别对f^+和f^-应用Tonelli得到两种非负迭代积分，且均有限；两式相减即可得到有符号f的Fubini等式。",
+          "worked": "在[0,1]²上取f(x,y)=xy，绝对积分∫_0^1x dx∫_0^1y dy=(1/2)²=1/4，两种积分次序均为0.25。",
+          "limitation": "如果f不绝对可积，单凭某个次序的形式积分有限不足以应用Fubini；需要更强的条件或单独论证。"
+        },
+        {
+          "title": "正负部分与截面几乎处处可积",
+          "question": "如何证明内层积分不是在大量状态下取无穷减无穷？",
+          "paragraphs": [
+            "先对|f|≥0使用Tonelli：∫_S[∫_T|f(x,y)|dν]dμ=∫|f|<∞。因此内层绝对积分在μ几乎处处的x上有限，允许对这些截面定义带符号内层积分。",
+            "另一积分次序同理，因此两个迭代积分几乎处处有良好定义，并在外层积分中等于联合有限积分。某些零测例外截面可任意赋值，不影响结果。"
+          ],
+          "formulas": [
+            {
+              "label": "正负部分与截面几乎处处可积",
+              "tex": "\\int_S\\left[\\int_T|f(x,y)|\\,d\\nu(y)\\right]d\\mu(x)<\\infty\\Longrightarrow \\int_T|f(x,y)|\\,d\\nu(y)<\\infty\\quad\\mu\\text{-a.e.}"
+            }
+          ],
+          "proof": "令G(x)=∫_T|f(x,y)|dν(y)≥0。Tonelli给∫_S G dμ=∫_{S×T}|f|<∞。若μ({G=∞})>0，则∫_S G=∞，与有限性矛盾，故G<∞几乎处处；由此截面有符号积分合法。交换变量重复同样证明。",
+          "worked": "在[0,1]²取f(x,y)=x−y，绝对积分有限且≤1。先积y得x−1/2，再对x积分0；换次序先积x得1/2−y，再对y积分也为0。",
+          "limitation": "截面性质是在几乎处处意义下成立；不能要求任意零测异常截面都有限或可直接用于软件中的逐点求值。"
+        },
+        {
+          "title": "条件收敛导致两种积分次序不同",
+          "question": "能否给出每个内层积分存在但换序结果相反的明确反例？",
+          "paragraphs": [
+            "在(0,1)²（原点除外）定义f(x,y)=(x²−y²)/(x²+y²)²。对固定x>0，f是关于y的导数∂[y/(x²+y²)]/∂y；对固定y>0，f又是−∂[x/(x²+y²)]/∂x。",
+            "所以先对y积分再对x积分得到π/4；先对x积分再对y得到−π/4。这并不违反Fubini，因为|f|在原点附近按1/r²量级发散，二维面积元r dr使其绝对积分对数发散。"
+          ],
+          "formulas": [
+            {
+              "label": "条件收敛导致两种积分次序不同",
+              "tex": "\\int_0^1\\!\\left[\\int_0^1 f(x,y)\\,dy\\right]dx=\\frac\\pi4,\\qquad \\int_0^1\\!\\left[\\int_0^1 f(x,y)\\,dx\\right]dy=-\\frac\\pi4"
+            }
+          ],
+          "proof": "对固定x>0，∫_0^1 f(x,y)dy=[y/(x²+y²)]_0^1=1/(1+x²)，再对x积分π/4。对固定y>0，∫_0^1 f(x,y)dx=−[x/(x²+y²)]_0^1=−1/(1+y²)，再积分得−π/4。极坐标下|f|近0为|cos2θ|/r²，绝对积分因∫dr/r发散。",
+          "worked": "两个次序结果分别约+0.785398和−0.785398，符号相反；原因是联合函数不绝对可积，而不是数值计算的舍入误差。",
+          "limitation": "该例不能作为随机收益具有两个真实期望的证据；它证明的是在没有绝对可积条件时，两个迭代积分不必定义同一个联合Lebesgue期望。"
+        },
+        {
+          "title": "与独立性、期望乘积及金融风险的关系",
+          "question": "Fubini换序与资产独立性是否是一回事？",
+          "paragraphs": [
+            "Fubini控制积分次序，独立性控制联合分布是否分解成边际乘积。这是两个不同条件：相关资产只要定义了适当联合概率测度且风险函数绝对可积，也可以换序积分；独立资产若风险绝对矩发散，Fubini条件仍可失败。",
+            "在金融研究中经常需要交换对市场状态、资产横截面和时间窗口的期望。应先确定联合概率测度、信息可得时间以及被积函数的绝对可积性，再讨论模型估计和交易执行。"
+          ],
+          "formulas": [
+            {
+              "label": "与独立性、期望乘积及金融风险的关系",
+              "tex": "\\mathbb E[|g(X,Y)|]<\\infty\\quad\\Longrightarrow\\quad\\int g\\,dP_{(X,Y)}\\text{ 的积分换序合法}"
+            }
+          ],
+          "proof": "在联合概率测度存在且g绝对可积时，可以应用相应联合分布的条件积分或通过合适分解进行迭代积分；若联合分布是乘积测度则直接使用Fubini。相关性影响测度本身，不是Fubini绝对可积条件的替代品。",
+          "worked": "若独立X,Y~Uniform(0,1)，g(X,Y)=X−Y，则期望E[X]−E[Y]=0；双重积分两种次序也都为0。若Y=X，边际仍Uniform但联合分布集中于对角线，期望仍0而并非由独立性推出。",
+          "limitation": "独立性不等于绝对可积，相关性也不自动否定Fubini；对联合概率测度之外的形式积分需检查条件概率核和可测性。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "measure-n0133",
+          "label": "乘积测度"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0134",
+          "label": "Tonelli定理"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0129",
+          "label": "Lebesgue积分"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0140",
+          "label": "一致可积"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 18.125 Measure and Integration：第18–20讲，乘积测度及Fubini",
+          "url": "https://ocw.mit.edu/courses/18-125-measure-and-integration-fall-2003/pages/lecture-notes/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：第9讲，Product Measure and Fubini",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V11完整讲义：四节乘积测度、Tonelli/Fubini证明与反例"
     }
   ]
 }
