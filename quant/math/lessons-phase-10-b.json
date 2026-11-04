@@ -1,0 +1,320 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "regression-n0184",
+      "node_id": "regression-n0184",
+      "title": "高斯-马尔可夫定理",
+      "definition": "Gauss–Markov 定理说明：在固定设计、线性均值正确设定、误差零均值且具有球形协方差的条件下，满列秩 OLS 是全部线性无偏估计量中协方差矩阵最小（Loewner 序意义）的估计量，即 BLUE。它不是所有估计量的最优性定理，也不意味着 OLS 在随机设计、内生性、异方差、模型错设或 Ridge 的有偏估计面前仍必然具有最小 MSE。",
+      "assumptions": "条件于固定或被视为已知的设计矩阵 X∈R^{n×p}，rank(X)=p，模型为 y=Xβ+ε，E[ε|X]=0，Cov(ε|X)=σ²I_n，σ²>0。独立性与正态性不是 BLUE 所需条件；随机设计可在条件于X并满足上述条件时应用结论。线性无偏指估计量 Ay 对所有β满足 E[Ay|X]=β。",
+      "properties": [
+        "OLS权重A₀=(XᵀX)⁻¹Xᵀ满足A₀X=I，因而在条件均值假设下无偏。",
+        "任何其他线性无偏权重A可写成A=A₀+D，其中DX=0；由于A₀Dᵀ=(XᵀX)⁻¹XᵀDᵀ=0，协方差差额为σ²DDᵀ半正定。",
+        "BLUE意味着任何线性组合cᵀβ的 OLS 估计方差不大于其他线性无偏估计的方差，不意味着其他估计不可能具有更小均方误差。",
+        "若 Cov(ε|X)=Ω 非球形且已知正定，则正确加权的 GLS 可能比 OLS 更有效；Gauss–Markov 原结论不包含任何回归系数的因果解释。"
+      ],
+      "formulas": [
+        {
+          "label": "OLS和线性无偏条件",
+          "tex": "A_0=(X^\\top X)^{-1}X^\\top,\\quad \\widehat\\beta_{\\mathrm{OLS}}=A_0y,\\quad AX=I_p"
+        },
+        {
+          "label": "估计量分解",
+          "tex": "A=A_0+D,\\quad DX=0"
+        },
+        {
+          "label": "方差差额正半定",
+          "tex": "\\operatorname{Cov}(Ay\\mid X)-\\operatorname{Cov}(A_0y\\mid X)=\\sigma^2DD^\\top\\succeq0"
+        },
+        {
+          "label": "线性组合BLUE界",
+          "tex": "\\operatorname{Var}(c^\\top Ay\\mid X)\\ge\\sigma^2c^\\top(X^\\top X)^{-1}c"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "固定X时 E[Ay|X]=AXβ，因此对所有β无偏当且仅当AX=I。OLS权重A₀显然满足此条件，所以任何线性无偏估计权重都能表示为A₀+D且DX=0。",
+          "tex": "E[Ay\\mid X]=AX\\beta,\\quad AX=I_p\\Longrightarrow DX=0"
+        },
+        {
+          "explanation": "由Cov(ε|X)=σ²I，任意线性无偏估计的协方差为σ²AAᵀ。展开A=A₀+D后会出现两项交叉项，因DX=0而消失。",
+          "tex": "A_0D^\\top=(X^\\top X)^{-1}X^\\top D^\\top=0"
+        },
+        {
+          "explanation": "剩余协方差差额是σ²DDᵀ，对任何c有cᵀDDᵀc=||Dᵀc||²≥0，所以在Loewner半正定序下OLS最优。",
+          "tex": "c^\\top[\\sigma^2DD^\\top]c=\\sigma^2\\|D^\\top c\\|_2^2\\ge0"
+        },
+        {
+          "explanation": "若误差协方差不是σ²I，展开中涉及A₀ΩDᵀ，通常不再等于零，因此OLS不必仍是最佳线性无偏；已知Ω时需研究GLS权重。",
+          "tex": "\\widehat\\beta_{\\mathrm{GLS}}=(X^\\top\\Omega^{-1}X)^{-1}X^\\top\\Omega^{-1}y"
+        }
+      ],
+      "example": "取 n=3，x=(0,1,2)ᵀ，X=[1,x]，误差协方差σ²I。因 XᵀX=[[3,3],[3,5]]，其逆为(1/6)[[5,−3],[−3,3]]，OLS斜率估计是(y₃−y₁)/2，方差σ²/2。另一个线性无偏斜率估计 y₂−y₁ 的方差为2σ²；相比OLS大了(3/2)σ²，直观展示了使用更多观测降低方差。",
+      "application": "在金融因子回归中，Gauss–Markov 定理帮助理解 OLS 的有效性条件；若资产收益具有条件异方差、同一时期横截面关联或时间序列相关，OLS仍可能是无偏线性估计但不再满足该定理的球形误差假设。预测评估、HAC、GLS和因果识别需要另行处理。",
+      "caveat": "不能把‘最佳线性无偏’简写成‘最优回归模型’。Gauss–Markov不需要高斯分布，不保证样本外预测优越，也不保证Ridge这类有偏估计的MSE更差。若E[ε|X]≠0，则连条件无偏结论都可能不成立。",
+      "deep_sections": [
+        {
+          "title": "从几何最优到统计最优",
+          "question": "为什么OLS正交投影还不足以证明BLUE？",
+          "paragraphs": [
+            "OLS最小化训练残差的欧氏长度，是任何固定设计和观测向量都成立的几何事实。BLUE则是比较随机误差下不同估计量的方差，首先需要定义何种估计量允许参与比较。",
+            "把比较范围限定为Ay这种对响应线性的估计，并要求对所有β条件无偏。若允许任意有偏估计或非线性估计，就不是Gauss–Markov定理声称的比较类别。"
+          ],
+          "formulas": [
+            {
+              "label": "条件无偏的线性估计",
+              "tex": "E[Ay\\mid X]=AX\\beta=\\beta\\quad\\forall\\beta"
+            }
+          ],
+          "proof": "X满列秩时，A₀=(XᵀX)⁻¹Xᵀ满足A₀X=I。任意其他满足AX=I的线性估计A可以写为A₀+D，差额满足DX=0，进入下一节的方差比较。",
+          "worked": "在三观测线性趋势的例子中，OLS斜率(y₃−y₁)/2与只取前两点的y₂−y₁都是线性无偏估计，但方差不同。",
+          "limitation": "若估计权重由同一数据的响应y非线性自适应选择，不能简单当成固定矩阵A的线性估计。"
+        },
+        {
+          "title": "协方差矩阵正半定差额的完整证明",
+          "question": "为什么其它线性无偏估计的方差不能更小？",
+          "paragraphs": [
+            "关键不是逐个参数暴力比较，而是把每个合法权重A分解成OLS权重A₀与一个对列空间无作用的D。后者无法改善对参数均值的表示，却增加了误差中的额外线性组合。",
+            "球形误差让OLS部分与额外D部分的协方差交叉项严格为零，于是增加的协方差恰为σ²DDᵀ。这一矩阵的任意二次型都非负，形成Loewner序意义的最优性。"
+          ],
+          "formulas": [
+            {
+              "label": "矩阵差额",
+              "tex": "\\operatorname{Cov}(\\widetilde\\beta\\mid X)-\\operatorname{Cov}(\\widehat\\beta_{\\mathrm{OLS}}\\mid X)=\\sigma^2DD^\\top"
+            }
+          ],
+          "proof": "写A=A₀+D并展开AAᵀ=A₀A₀ᵀ+A₀Dᵀ+DA₀ᵀ+DDᵀ。因DX=0，XᵀDᵀ=0，因此两交叉项消失，留下DDᵀ。",
+          "worked": "对斜率单个方向c=(0,1)ᵀ，任意附加D产生的方差差额为σ²||Dᵀc||²≥0。",
+          "limitation": "需要Cov(ε|X)=σ²I。若某些观测误差波动更大，等权投影不一定仍是统计上最有效。"
+        },
+        {
+          "title": "数值例子与可识别估计",
+          "question": "为什么多使用一个观测会降低这个算例的斜率方差？",
+          "paragraphs": [
+            "三点x=(0,1,2)时，OLS斜率估计为(y₃−y₁)/2；它利用对称端点的距离2获取斜率信息。前两点差y₂−y₁也无偏，但单位差的误差波动更高。",
+            "比较这两个估计时不能只看表达式，必须写出误差系数、条件方差并核对同方差互不相关条件；这样才能看出改进来自样本几何而不是正态性。"
+          ],
+          "formulas": [
+            {
+              "label": "两个斜率估计的方差",
+              "tex": "\\operatorname{Var}[(y_3-y_1)/2\\mid X]=\\sigma^2/2,\\quad\\operatorname{Var}(y_2-y_1\\mid X)=2\\sigma^2"
+            }
+          ],
+          "proof": "在Cov(ε_i,ε_j|X)=0、Var(ε_i|X)=σ²条件下，两端点差的方差为(σ²+σ²)/4=σ²/2；相邻差的方差为σ²+σ²=2σ²。",
+          "worked": "若σ²=1，OLS斜率方差0.5，而另一线性无偏估计方差2，差额1.5；两者都不需要假设误差服从正态分布。",
+          "limitation": "这一例子不说明任意添加样本都按固定幅度降低方差；结果还取决于新增观测的设计点位置。"
+        },
+        {
+          "title": "异方差、因果与样本外预测",
+          "question": "定理哪些结论不能带进真实ETF预测？",
+          "paragraphs": [
+            "ETF收益经常存在时间与横截面依赖、条件波动、价格修订及制度变迁。即使OLS在某段样本中满足正规方程，也不能从几何残差正交推出这些随机误差的条件同方差。",
+            "当协方差Ω已知或可以可靠估计时，GLS与稳健标准误各有不同任务：GLS改变估计权重，HAC等估计方法改变推断协方差；两者不可混同。预测有效性还需干净的时间外评价。"
+          ],
+          "formulas": [
+            {
+              "label": "非球形误差下的加权投影",
+              "tex": "\\widehat\\beta_{\\mathrm{GLS}}=(X^\\top\\Omega^{-1}X)^{-1}X^\\top\\Omega^{-1}y"
+            }
+          ],
+          "proof": "对已知正定Ω，令y*=Ω^{-1/2}y、X*=Ω^{-1/2}X，变换后误差协方差为I，在变换空间进行OLS等价于GLS。",
+          "worked": "如果早期ETF收益测量噪声较低、后期波动剧烈，简单等权OLS可能低效；但对未知Ω的估计误差也必须计入。",
+          "limitation": "外生性不足时GLS仍可能有偏；估计效率不是因果识别或未来交易收益的保证。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "regression-n0182",
+          "label": "先修：多元OLS"
+        },
+        {
+          "kind": "math",
+          "id": "linear-n0078",
+          "label": "数学：投影与最小二乘"
+        },
+        {
+          "kind": "math",
+          "id": "regression-n0194",
+          "label": "后续：GLS"
+        },
+        {
+          "kind": "math",
+          "id": "regression-n0196",
+          "label": "后续：稳健标准误"
+        },
+        {
+          "kind": "ml",
+          "id": "m07-c06-p01",
+          "label": "机器学习：OLS预测与验证"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Freedman (2006), Yet Another Proof of the Gauss–Markov Theorem",
+          "url": "https://www.stat.berkeley.edu/~freedman/GaussMr2.pdf"
+        },
+        {
+          "title": "statsmodels, Linear Regression",
+          "url": "https://www.statsmodels.org/stable/regression.html"
+        }
+      ],
+      "checked_status": "完整数学精讲：BLUE协方差证明、三点斜率对比、GLS边界"
+    },
+    {
+      "id": "regression-n0207",
+      "node_id": "regression-n0207",
+      "title": "Elastic Net",
+      "definition": "Elastic Net 将L1稀疏惩罚与L2平滑收缩合并到同一个凸优化目标，在允许系数精确为零的同时，通过正L2曲率缓和高度相关特征下的不唯一性与部分支持集不稳定。它并不是‘更强的LASSO’，而是提供可连续调节的稀疏性、收缩和数值稳定性；真实预测改善依赖数据生成机制和干净验证。",
+      "assumptions": "采用J(β)=||y−Xβ||²/(2n)+λ₁||β||₁+(λ₂/2)||β||₂²，λ₁≥0、λ₂>0；默认截距不被惩罚，特征的中心化与标准化只由训练数据拟合。正交设计下XᵀX/n=I才有逐坐标闭式，相关设计需要用坐标下降或近端优化算法计算。",
+      "properties": [
+        "当λ₂>0时平方损失加L2惩罚形成严格凸目标，因此系数最优解唯一，即使X秩亏。",
+        "正交设计下每个坐标的解是S_{λ₁}(z_j)/(1+λ₂)，既可精确为零又可对非零系数连续缩放。",
+        "当两列完全相同且对二者采用相同惩罚时，λ₂>0保证唯一解并使二者系数相等；近似相关时不保证任何固定的分组选择。",
+        "scikit-learn 的 alpha 与 l1_ratio 应按 λ₁=alpha·l1_ratio、λ₂=alpha·(1−l1_ratio) 换算，不可将 alpha 当作与Ridge完全一致的规范化参数。"
+      ],
+      "formulas": [
+        {
+          "label": "Elastic Net统一目标",
+          "tex": "J(\\beta)=\\frac{\\|y-X\\beta\\|^2}{2n}+\\lambda_1\\|\\beta\\|_1+\\frac{\\lambda_2}{2}\\|\\beta\\|_2^2"
+        },
+        {
+          "label": "KKT次梯度条件",
+          "tex": "0\\in\\frac{X^\\top(X\\widehat\\beta-y)}n+\\lambda_2\\widehat\\beta+\\lambda_1\\partial\\|\\widehat\\beta\\|_1"
+        },
+        {
+          "label": "正交设计精确解",
+          "tex": "\\widehat\\beta_j=\\frac{S_{\\lambda_1}(z_j)}{1+\\lambda_2},\\qquad z=X^\\top y/n"
+        },
+        {
+          "label": "scikit-learn参数对应",
+          "tex": "\\lambda_1=\\alpha\\rho,\\qquad\\lambda_2=\\alpha(1-\\rho),\\quad\\rho=\\mathrm{l1\\_ratio}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "平方损失的Hessian为XᵀX/n，L2惩罚增加λ₂I。当λ₂>0时，光滑部分严格凸；再加凸的L1惩罚，整体仍严格凸，因此最优系数唯一。",
+          "tex": "\\nabla^2\\!\\left(\\|y-X\\beta\\|^2/(2n)+\\lambda_2\\|\\beta\\|^2/2\\right)=X^\\top X/n+\\lambda_2I\\succ0"
+        },
+        {
+          "explanation": "在正交设计下，令z=Xᵀy/n，展开平方损失，得到互相分离的一维目标0.5(β_j−z_j)²+λ₁|β_j|+λ₂β_j²/2。",
+          "tex": "J_j(\\beta_j)=\\frac{1+\\lambda_2}{2}\\beta_j^2-z_j\\beta_j+\\lambda_1|\\beta_j|+\\mathrm{const}"
+        },
+        {
+          "explanation": "分β_j>0、β_j<0和β_j=0的次梯度条件求解：超过阈值后把z_j向零移动λ₁，再除以1+λ₂；阈值内直接为零。",
+          "tex": "\\widehat\\beta_j=S_{\\lambda_1}(z_j)/(1+\\lambda_2)"
+        },
+        {
+          "explanation": "在一般设计下固定其他坐标，把第j列部分残差r_(j)写入一维目标，二次项系数是||X_j||²/n+λ₂，线性项由X_jᵀr_(j)/n决定。",
+          "tex": "\\beta_j\\leftarrow\\frac{S_{\\lambda_1}(X_j^\\top r_{(j)}/n)}{\\|X_j\\|^2/n+\\lambda_2}"
+        }
+      ],
+      "example": "取XᵀX/n=I₂、z=Xᵀy/n=(3,−1)，λ₁=0.8、λ₂=0.5。Soft Thresholding后得(2.2,−0.2)，再除以1.5，Elastic Net解β̂=(22/15,−2/15)≈(1.4667,−0.1333)。对应scikit-learn参数alpha=λ₁+λ₂=1.3、l1_ratio=λ₁/1.3≈0.61538。对照相同z，LASSO只施加λ₁=0.8得到(2.2,−0.2)。",
+      "application": "当多只ETF的趋势、动量或行业特征高度相关时，Elastic Net可在稀疏选择和稳定收缩之间提供折中。应记录不同滚动窗口的系数、非零支持集、预测损失、IC、换手和成本后的组合表现，而不是仅根据一次训练的非零变量数量决定模型有效。",
+      "caveat": "正L2惩罚带来的唯一系数解不意味着在未知市场制度下稳定，也不保证识别真实经济机制；零系数与显著性不能等同。不同软件对目标的n和1/2因子定义不同，跨模型比较必须统一参数口径。",
+      "deep_sections": [
+        {
+          "title": "从Ridge与LASSO到两个独立的正则参数",
+          "question": "为什么混合惩罚不是两个模型结果的简单平均？",
+          "paragraphs": [
+            "Ridge通过平滑L2项增加曲率和连续收缩，LASSO通过L1次梯度在零点形成阈值。Elastic Net把这两种惩罚放在同一个目标中联合优化，其解不是分别训练Ridge与LASSO再平均。",
+            "理解参数的关键是把λ₁和λ₂视为不同机制的权重。前者直接改变稀疏阈值，后者改变非零系数的缩放及优化问题的强凸性。"
+          ],
+          "formulas": [
+            {
+              "label": "分离惩罚",
+              "tex": "J=J_{\\mathrm{RSS}}+\\lambda_1\\|\\beta\\|_1+\\tfrac12\\lambda_2\\|\\beta\\|_2^2"
+            }
+          ],
+          "proof": "对目标写出整体次梯度条件。两类惩罚同时作用于同一β，因此不能通过加权平均两个分别优化过的估计量得到一般解。",
+          "worked": "λ₁=0.8、λ₂=0.5时z=(3,−1)的解为(1.4667,−0.1333)，既不是LASSO的(2.2,−0.2)，也不是Ridge只用λ₂时的(2,−2/3)。",
+          "limitation": "调节λ₁与λ₂应在训练内部进行模型选择，不能看最终测试收益后回头改变稀疏阈值。"
+        },
+        {
+          "title": "正交设计公式与数值验算",
+          "question": "软阈值为何还需要除以1+λ₂？",
+          "paragraphs": [
+            "将正交设计下的平方损失化为Σ(β_j−z_j)²/2，再叠加L1和L2惩罚，单坐标目标中的二次曲率由1提高到1+λ₂。",
+            "非零坐标的一阶条件因此是(1+λ₂)β_j−z_j+λ₁sign(β_j)=0。阈值内仍取0，阈值外先平移再按曲率缩放。"
+          ],
+          "formulas": [
+            {
+              "label": "正交设计解析解",
+              "tex": "\\widehat\\beta_j=\\frac{\\operatorname{sgn}(z_j)(|z_j|-\\lambda_1)_+}{1+\\lambda_2}"
+            }
+          ],
+          "proof": "逐坐标分类：当z_j>λ₁时β_j=(z_j−λ₁)/(1+λ₂)；当z_j<−λ₁时β_j=(z_j+λ₁)/(1+λ₂)；否则β_j=0。",
+          "worked": "z=(3,−1)、λ₁=0.8、λ₂=0.5时，第一坐标=2.2/1.5=22/15，第二坐标=−0.2/1.5=−2/15，符合闭式解。",
+          "limitation": "真实金融设计矩阵往往不正交，若直接把Xᵀy/n逐坐标软阈值当作完整求解会出现错误。"
+        },
+        {
+          "title": "严格凸性、组效应与稳定性",
+          "question": "为什么加入正L2项能让完全重复的列采用同样系数？",
+          "paragraphs": [
+            "当λ₂>0，目标的光滑部分Hessian正定，因此系数解唯一。若x_j和x_k完全相同且惩罚对二者对称，交换两个系数不改变目标；唯一最优解在交换下必须保持不变，从而β_j=β_k。",
+            "这个结论适用于完全重复且同等惩罚的特殊情况；只是近似相关时，模型可能仍只选择部分变量，且组内系数差别受响应结构及标准化影响。"
+          ],
+          "formulas": [
+            {
+              "label": "L2曲率",
+              "tex": "\\lambda_{\\min}(X^\\top X/n+\\lambda_2I)\\ge\\lambda_2>0"
+            }
+          ],
+          "proof": "设T为交换第j和k坐标的置换。完全相同列保证X(Tβ)=Xβ，L1/L2范数在置换下不变。因此Tβ̂也是最优解；严格凸性保证最优解唯一，故Tβ̂=β̂。",
+          "worked": "如两列完全相同，在λ₂>0且其他条件固定时，最优系数在两列之间等分，而不是像无L2的LASSO那样允许多个等价分配。",
+          "limitation": "不能把这种对称性结果推广为‘高相关的所有变量必然被整体选中’，也不构成因果识别证明。"
+        },
+        {
+          "title": "软件参数、滚动模型选择与支持集稳定性",
+          "question": "如何跨软件复现同一个Elastic Net？",
+          "paragraphs": [
+            "许多库采用alpha与l1_ratio而不是分别输入λ₁、λ₂。要先确认库的平方损失是否除以n、L2是否含1/2，再把参数转换到统一数学形式。",
+            "金融滚动研究应在每个训练窗口重新估计中心化与标准化，并只用内部验证选择alpha和l1_ratio。除预测损失外，记录支持集大小和变化、系数符号及组合层换手。"
+          ],
+          "formulas": [
+            {
+              "label": "比例参数化",
+              "tex": "\\alpha=\\lambda_1+\\lambda_2,\\quad\\rho=\\lambda_1/(\\lambda_1+\\lambda_2)"
+            }
+          ],
+          "proof": "把alpha·rho设为L1权重，alpha·(1−rho)设为L2权重，即可复原本讲的两项惩罚规范。",
+          "worked": "λ₁=0.8、λ₂=0.5对应alpha=1.3、rho=8/13≈0.61538；这只是在相同平方损失归一化下的等价变换。",
+          "limitation": "当alpha=0时rho没有唯一含义；应明确选择无惩罚OLS及求解器的相关约定。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "regression-n0205",
+          "label": "先修：Ridge"
+        },
+        {
+          "kind": "math",
+          "id": "regression-n0206",
+          "label": "先修：LASSO"
+        },
+        {
+          "kind": "math",
+          "id": "regression-n0209",
+          "label": "后续：验证选λ"
+        },
+        {
+          "kind": "ml",
+          "id": "m07-c06-p04",
+          "label": "机器学习：Elastic Net与KKT"
+        }
+      ],
+      "sources": [
+        {
+          "title": "scikit-learn ElasticNetCV objective and alpha/l1_ratio conventions",
+          "url": "https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.ElasticNetCV.html"
+        },
+        {
+          "title": "scikit-learn Linear Models",
+          "url": "https://scikit-learn.org/stable/modules/linear_model.html"
+        }
+      ],
+      "checked_status": "完整数学精讲：混合目标、正交闭式、严格凸与组效应、软件参数换算"
+    }
+  ]
+}
