@@ -78,7 +78,7 @@ near(.01**2+(-.02)**2,.0005);
 near(Math.log(1.02)**2/(4*Math.log(2)),.0001414385,1e-7);
 near(.00001+.3*.0004+.2*.00016+.4*((.0004+21*.0001)/22),.0002074545454545,1e-12);
 near(.000002+.08*.0004+.9*.0001,.000124);
-near(.25*.01**2+.25*.02**2+2*.25*.25*.25*.01*.02,.00015,1e-12);
+near(.25*.01**2+.25*.02**2+2*.25*.25*.01*.02,.00015,1e-12);
 near(.01/Math.sqrt(.00015),.816496580927726,1e-12);
 const landing=fs.readFileSync(new URL("./index.html",root),"utf8");
 for(const id of ids)assert(landing.includes("#lesson/"+id),"missing learning-route link "+id);
