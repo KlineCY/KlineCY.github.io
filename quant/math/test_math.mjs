@@ -8,9 +8,9 @@ const c=read("./curriculum.json");
 const sources=["./lessons-foundations.json","./lessons-advanced.json","./lessons-more.json"].map(read);
 const manifest=read("./lessons-manifest.json");
 assert.equal(manifest.version,1);
-assert.equal(manifest.expected_lessons,96);
-assert.equal(manifest.modules.length,37);
-assert.equal(new Set(manifest.modules.map(x=>x.path)).size,37);
+assert.equal(manifest.expected_lessons,102);
+assert.equal(manifest.modules.length,40);
+assert.equal(new Set(manifest.modules.map(x=>x.path)).size,40);
 assert.equal(manifest.modules.reduce((s,x)=>s+x.lessons,0),manifest.expected_lessons);
 const extras=manifest.modules.flatMap(mod=>{
  assert(/^\.\/lessons-phase-\d\d-[a-z]\.json$/.test(mod.path),"invalid module path "+mod.path);
@@ -41,7 +41,7 @@ const lessons=[...sources.flatMap(f=>f.lessons),...extras];
 const ids=new Set(),chIds=new Set(),deptIds=new Set(),nodeMap=new Map();
 assert.equal(c.disciplines.length,20,"discipline coverage count");
 assert.equal(c.chapters.length,109,"chapter coverage count");
-assert.equal(c.nodes.length,654,"expected expanded topic catalog");
+assert.equal(c.nodes.length,656,"expected expanded topic catalog");
 for(let i=0;i<c.disciplines.length;i++){
  const d=c.disciplines[i];
  assert(!deptIds.has(d.id),"duplicate discipline "+d.id);
