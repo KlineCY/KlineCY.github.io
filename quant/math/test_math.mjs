@@ -121,7 +121,7 @@ assert(app.includes("appendLearningSequence(node,article)")&&app.includes("math-
  for(const name of ["curriculum.json","lessons-foundations.json","lessons-advanced.json","lessons-more.json"])
   assert(app.includes('fetch("./'+name+'",{cache:"no-cache"})'),"core math resource must revalidate cache "+name);
 assert(html.includes("app.js?v=20261103-math-depth-v1"),"versioned math loader missing");
-assert(html.includes("styles.css?v=20261104-proofpath-v3"),"versioned math styles missing");
+assert(html.includes("styles.css?v=20261104-stability-v4"),"versioned math styles missing");
 for(const id of ["linear-x001","linear-x002","linear-x003","linear-x004","linear-x005","linear-x006"])
  assert(html.includes("?topic="+id),"missing mathematical spectral path entry "+id);
 assert(html.includes("../ml/#lesson/m11-c06-p01"),"missing linked machine learning spectral path");
