@@ -2975,6 +2975,471 @@
         }
       ],
       "checked_status": "V12完整精讲：四节定理推导与独立数值算例"
+    },
+    {
+      "id": "stochastic-n0283",
+      "node_id": "stochastic-n0283",
+      "title": "连续时间马尔可夫链CTMC",
+      "definition": "连续时间马尔可夫链（CTMC）把离散马尔可夫性质扩展为任意实时间t≥0的状态演化。有限状态、时间齐次的CTMC可由生成矩阵Q完全刻画：状态i的停留时间为指数分布，之后按离开率比例转移到下一个状态，转移半群满足P(t+s)=P(t)P(s)、P(t)=e^{tQ}。它适于信用迁移、订单到达状态与事件驱动的风险切换。",
+      "assumptions": "状态空间有限，过程右连续且为非爆炸、齐次CTMC；P_ij(t)=P(X(t)=j|X(0)=i)，P(0)=I。生成矩阵满足q_ij≥0（i≠j）、q_ii=−Σ_{j≠i}q_ij。有限状态下Q有界，矩阵指数定义清楚；在无限状态CTMC中爆炸与生成算子的定义需另外分析。",
+      "properties": [
+        "等待离开状态i的时间是Exp(q_i)，其中q_i=−q_ii>0，q_i=0表示吸收。",
+        "下一跳方向由q_ij/q_i确定，保持时间与下一跳方向在标准CTMC构造下独立。",
+        "转移矩阵半群满足P(t+s)=P(t)P(s)，有限状态时P(t)=exp(tQ)。",
+        "离散嵌入链可能周期性为2，但连续时间链仍能收敛到稳态，不能简单套用离散周期判别。"
+      ],
+      "formulas": [
+        {
+          "label": "连续时间Markov条件与转移半群",
+          "tex": "P(t+s)=P(t)P(s),\\qquad P(0)=I"
+        },
+        {
+          "label": "保持时间与下一跳方向",
+          "tex": "\\Pr(T_i>t)=e^{-q_it},\\qquad \\Pr(J=j\\mid i)=\\frac{q_{ij}}{q_i}\\quad(q_i>0)"
+        },
+        {
+          "label": "矩阵指数与二状态解析解",
+          "tex": "P_{00}(t)=\\frac b{a+b}+\\frac a{a+b}e^{-(a+b)t}"
+        },
+        {
+          "label": "离散嵌入链、连续时间稳定性与边界",
+          "tex": "\\lim_{t\\to\\infty}P(t)=\\begin{pmatrix}\\pi_0&\\pi_1\\\\\\pi_0&\\pi_1\\end{pmatrix},\\qquad \\pi Q=0"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对中间时刻t的状态k作条件全概率，P(X(t+s)=j|X(0)=i)=Σ_kP(X(t)=k|X(0)=i)P(X(t+s)=j|X(t)=k)。齐次性使后因子为P_kj(s)，得到半群乘法。",
+          "tex": "P(t+s)=P(t)P(s),\\qquad P(0)=I"
+        },
+        {
+          "explanation": "短时间离开概率为q_i h+o(h)，指数保持时间由连续无记忆性推出。对类别j的瞬时离开率为q_ij，占总离开率q_i的比例是q_ij/q_i；标准连续时间链构造使下一跳类别与保持时间独立。",
+          "tex": "\\Pr(T_i>t)=e^{-q_it},\\qquad \\Pr(J=j\\mid i)=\\frac{q_{ij}}{q_i}\\quad(q_i>0)"
+        },
+        {
+          "explanation": "从状态0出发，u(t)=P_00(t)满足u'=−a u+b(1−u)=b−(a+b)u，初值u(0)=1。解一阶线性微分方程得到u(t)=b/(a+b)+a/(a+b)e^{−(a+b)t}。",
+          "tex": "P_{00}(t)=\\frac b{a+b}+\\frac a{a+b}e^{-(a+b)t}"
+        },
+        {
+          "explanation": "二状态CTMC的P_00(t)由指数项趋零收敛到π_0，其他三项由归一化及状态对称推导出相应极限。此处Q的非零特征值为−(a+b)<0，保证指数衰减。",
+          "tex": "\\lim_{t\\to\\infty}P(t)=\\begin{pmatrix}\\pi_0&\\pi_1\\\\\\pi_0&\\pi_1\\end{pmatrix},\\qquad \\pi Q=0"
+        }
+      ],
+      "example": "速率矩阵Q=[[-2,2],[3,−3]]中状态0平均保持0.5时间单位、状态1平均保持1/3时间单位。不变分布为(0.6,0.4)，在t=(ln2)/5时P_00(t)=0.8。",
+      "application": "用于金融信用状态迁移、订单流风险事件与微观结构状态持续时间建模；需要验证保持时间、生成率估计和交易状态的可观测性。",
+      "caveat": "离散跳转链与连续时间链的周期性结论不同；无限状态可能爆炸，时间变化强度和非指数停留要求更一般模型。",
+      "deep_sections": [
+        {
+          "title": "连续时间Markov条件与转移半群",
+          "question": "为何CTMC不仅是把离散转移矩阵的指数改成连续时间？",
+          "paragraphs": [
+            "CTMC必须对所有s,t≥0满足给定当前状态后未来与过去条件独立，齐次性使转移仅依赖时间间隔。连续时间半群把任意间隔拆成两段并对中间状态求和。",
+            "有限状态下，右连续路径与生成矩阵Q决定转移半群。金融事件的时间戳可能不规则，但不规则采样本身不代表交易状态在连续时间内真是Markov的。"
+          ],
+          "formulas": [
+            {
+              "label": "连续时间Markov条件与转移半群",
+              "tex": "P(t+s)=P(t)P(s),\\qquad P(0)=I"
+            }
+          ],
+          "proof": "对中间时刻t的状态k作条件全概率，P(X(t+s)=j|X(0)=i)=Σ_kP(X(t)=k|X(0)=i)P(X(t+s)=j|X(t)=k)。齐次性使后因子为P_kj(s)，得到半群乘法。",
+          "worked": "对任何两状态CTMC，如果P(0.1)已知，则连续时间齐次性要求P(0.2)=P(0.1)²；不满足这一关系的估计矩阵不能共享同一固定Q。",
+          "limitation": "半群关系需要同一状态空间和齐次假设；在交易时段切换或政策节点附近，可能更适合使用时间变化的Q(t)。"
+        },
+        {
+          "title": "保持时间与下一跳方向",
+          "question": "从状态i离开需要多长时间，跳往哪一个新状态？",
+          "paragraphs": [
+            "令q_i=Σ_{j≠i}q_ij，当q_i>0时，状态i的保持时间服从Exp(q_i)，并以q_ij/q_i跳转至j。跳转后的过程重新按目标状态的速率演化。",
+            "这种构造将事件发生时钟与条件跳转类别分开，适合订单到达与撤单的竞争风险，但只有在给定当前状态已充分描述未来时才能使用。"
+          ],
+          "formulas": [
+            {
+              "label": "保持时间与下一跳方向",
+              "tex": "\\Pr(T_i>t)=e^{-q_it},\\qquad \\Pr(J=j\\mid i)=\\frac{q_{ij}}{q_i}\\quad(q_i>0)"
+            }
+          ],
+          "proof": "短时间离开概率为q_i h+o(h)，指数保持时间由连续无记忆性推出。对类别j的瞬时离开率为q_ij，占总离开率q_i的比例是q_ij/q_i；标准连续时间链构造使下一跳类别与保持时间独立。",
+          "worked": "若状态0转到状态1的速率为2、转到吸收状态2的速率为3，则总离开率5，每次停留均值0.2时间单位，下一次到1的概率2/5=0.4。",
+          "limitation": "如果真实价格变动具有长期持续时间效应，指数保持时间会失效，需要半Markov过程或显式计入持有时间的状态变量。"
+        },
+        {
+          "title": "矩阵指数与二状态解析解",
+          "question": "两个状态的连续时间转移概率可以直接算到何种程度？",
+          "paragraphs": [
+            "令Q=[[-a,a],[b,−b]]且a,b>0。解转移方程或利用特征值0和−(a+b)可以得到不变分布π=(b/(a+b),a/(a+b))，以及从状态0出发时P_00(t)=π_0+(1−π_0)e^{−(a+b)t}。",
+            "这说明连续时间状态过程通常按指数速率忘记初始状态，但实际金融风险状态转换可能具有时间变化速率和隐状态，不能仅凭拟合曲线断言已满足模型假设。"
+          ],
+          "formulas": [
+            {
+              "label": "矩阵指数与二状态解析解",
+              "tex": "P_{00}(t)=\\frac b{a+b}+\\frac a{a+b}e^{-(a+b)t}"
+            }
+          ],
+          "proof": "从状态0出发，u(t)=P_00(t)满足u'=−a u+b(1−u)=b−(a+b)u，初值u(0)=1。解一阶线性微分方程得到u(t)=b/(a+b)+a/(a+b)e^{−(a+b)t}。",
+          "worked": "当a=2、b=3时π=(0.6,0.4)，P_00(t)=0.6+0.4e^{−5t}。取t=(ln2)/5，指数项0.5，得到P_00=0.8、P_01=0.2。",
+          "limitation": "当状态强度在交易日内剧烈变化时不能直接采用固定Q矩阵指数；若含有无穷状态还需处理爆炸和算子域。"
+        },
+        {
+          "title": "离散嵌入链、连续时间稳定性与边界",
+          "question": "嵌入链周期性是否阻止CTMC收敛？",
+          "paragraphs": [
+            "两状态CTMC每次实际跳转都从0到1或1到0，因此只看跳转索引的离散嵌入链具有周期2。然而连续时间的停留次数随机，固定时间t内可发生不同数量的跳转。",
+            "对于a,b>0的两状态CTMC，P(t)→π行向量，无论嵌入链周期如何都能按指数趋于稳态。连续时间模型应依据生成矩阵的不可约性与稳态理论，而非逐字套用离散时间周期性条件。"
+          ],
+          "formulas": [
+            {
+              "label": "离散嵌入链、连续时间稳定性与边界",
+              "tex": "\\lim_{t\\to\\infty}P(t)=\\begin{pmatrix}\\pi_0&\\pi_1\\\\\\pi_0&\\pi_1\\end{pmatrix},\\qquad \\pi Q=0"
+            }
+          ],
+          "proof": "二状态CTMC的P_00(t)由指数项趋零收敛到π_0，其他三项由归一化及状态对称推导出相应极限。此处Q的非零特征值为−(a+b)<0，保证指数衰减。",
+          "worked": "a=2,b=3时连续时间极限π=(0.6,0.4)；虽然实际每次跳转都在两个状态间交替，但在连续时间t下P_00(t)逐渐从1趋向0.6。",
+          "limitation": "CTMC长期收敛不等于交易风险过程在实盘每个阶段稳定；数据生成分布变化会使固定速率假设失效。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "stochastic-n0277",
+          "label": "先修：Markov性质"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0284",
+          "label": "生成矩阵Q"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0285",
+          "label": "Kolmogorov前向方程"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0286",
+          "label": "Kolmogorov后向方程"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 6.262 Discrete Stochastic Processes：第6章可数状态连续时间Markov过程",
+          "url": "https://ocw.mit.edu/courses/6-262-discrete-stochastic-processes-spring-2011/pages/course-notes/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：第24讲连续时间Markov链",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V12完整精讲：连续时间状态过程、四节证明、可复核例子与风险边界"
+    },
+    {
+      "id": "stochastic-n0284",
+      "node_id": "stochastic-n0284",
+      "title": "生成矩阵Q",
+      "definition": "生成矩阵Q描述有限状态齐次CTMC在单位极短时间内的离开和到达速率。非对角元素q_ij≥0为从i到j的瞬时跳转率，每行和为0使对角元素q_ii为负离开率。Q不是概率转移矩阵：速率可以大于1，真正的时间t转移矩阵需通过e^{tQ}求得。",
+      "assumptions": "状态集合有限且时间齐次，转移半群P(t)在t=0右可微，Q=lim_{h↓0}(P(h)−I)/h。若研究无限状态生成算子则需额外的稳定性与非爆炸条件。速率单位是时间的倒数，不是一步事件概率。",
+      "properties": [
+        "Q_ij≥0（i≠j），Σ_jQ_ij=0；−Q_ii为状态i的总跳出率。",
+        "P(h)=I+hQ+o(h)仅是小h的渐近式，I+hQ不必在任意h下仍是合法随机矩阵。",
+        "有限状态齐次CTMC满足P(t)=exp(tQ)，而e^{tQ}每行是合法概率分布。",
+        "平稳分布π满足πQ=0、π1=1；该线性方程与离散链πP=π类似但不相同。"
+      ],
+      "formulas": [
+        {
+          "label": "从短时转移概率定义Q",
+          "tex": "q_{ij}=\\lim_{h\\downarrow0}\\frac{P_{ij}(h)-\\mathbf1_{\\{i=j\\}}}{h},\\qquad \\sum_jq_{ij}=0"
+        },
+        {
+          "label": "离开率、竞争事件与跳转核",
+          "tex": "r_i=-q_{ii}=\\sum_{j\\ne i}q_{ij},\\quad \\Pr(J=j\\mid i)=q_{ij}/r_i\\quad(r_i>0)"
+        },
+        {
+          "label": "矩阵指数与概率合法性",
+          "tex": "P(t)=e^{tQ}=\\sum_{n=0}^\\infty\\frac{t^nQ^n}{n!},\\quad P(t)\\mathbf1=\\mathbf1"
+        },
+        {
+          "label": "平稳概率与速率平衡",
+          "tex": "\\pi Q=0,\\qquad\\sum_i\\pi_i=1,\\qquad\\pi e^{tQ}=\\pi"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "各P(h)行为概率向量，Σ_jP_ij(h)=1。两边减去δ_ij的行和再除以h，得到Σ_jQ_ij=0。i≠j时P_ij(h)≥0，故极限q_ij≥0；对角自动为q_ii=−Σ_{j≠i}q_ij。",
+          "tex": "q_{ij}=\\lim_{h\\downarrow0}\\frac{P_{ij}(h)-\\mathbf1_{\\{i=j\\}}}{h},\\qquad \\sum_jq_{ij}=0"
+        },
+        {
+          "explanation": "在短时间h内向不同j离开的互斥事件具有概率q_ij h+o(h)，总离开概率r_i h+o(h)。条件于离开事件，其目标概率在h趋0时趋于q_ij/r_i。指数保持时间由恒定离开率和Markov无记忆性质得到。",
+          "tex": "r_i=-q_{ii}=\\sum_{j\\ne i}q_{ij},\\quad \\Pr(J=j\\mid i)=q_{ij}/r_i\\quad(r_i>0)"
+        },
+        {
+          "explanation": "由于Q1=0，对指数幂级数求和得到e^{tQ}1=1。为了严格保证元素非负，取Λ≥max_i(−q_ii)>0，R=I+Q/Λ是行随机矩阵，并用e^{tQ}=e^{−Λt}Σ_{n≥0}(Λt)^nR^n/n!，它是非负矩阵的概率加权和。",
+          "tex": "P(t)=e^{tQ}=\\sum_{n=0}^\\infty\\frac{t^nQ^n}{n!},\\quad P(t)\\mathbf1=\\mathbf1"
+        },
+        {
+          "explanation": "从πP(t)=π对t在0求导得到必要条件πQ=0；反向计算d[πe^{tQ}]/dt=πQe^{tQ}=0，故其值恒为t=0时的π。有限状态矩阵指数保证导数计算合法。",
+          "tex": "\\pi Q=0,\\qquad\\sum_i\\pi_i=1,\\qquad\\pi e^{tQ}=\\pi"
+        }
+      ],
+      "example": "对Q=[[-2,2],[3,−3]]，非对角速率为2与3、每行和0。选Λ=5得离散行随机矩阵R=[[0.6,0.4],[0.6,0.4]]；πQ=0得到稳态π=(0.6,0.4)。",
+      "application": "用于连续时间信用风险、订单簿离开率、流动性状态切换及风险中性生成率建模，务必明确速率的时间单位与概率测度。",
+      "caveat": "Q不是概率转移矩阵，不能直接取Q_ij作为一个时间单位内的概率；无限状态爆炸和时间变化的风险强度需另作分析。",
+      "deep_sections": [
+        {
+          "title": "从短时转移概率定义Q",
+          "question": "矩阵Q的非对角速率为何可以大于1却不违反概率公理？",
+          "paragraphs": [
+            "Q_ij是P_ij(h)/h在h趋0时的极限，因此具有每单位时间的速率量纲，而不是一个长度为1的时间窗口内的概率。对足够短的h，实际跳转概率才约为q_ij h。",
+            "与概率矩阵的行和1不同，Q行和0，且对角项严格表示状态离开率。直接把Q当成一天后的转移矩阵会产生负概率或大于1的元素。"
+          ],
+          "formulas": [
+            {
+              "label": "从短时转移概率定义Q",
+              "tex": "q_{ij}=\\lim_{h\\downarrow0}\\frac{P_{ij}(h)-\\mathbf1_{\\{i=j\\}}}{h},\\qquad \\sum_jq_{ij}=0"
+            }
+          ],
+          "proof": "各P(h)行为概率向量，Σ_jP_ij(h)=1。两边减去δ_ij的行和再除以h，得到Σ_jQ_ij=0。i≠j时P_ij(h)≥0，故极限q_ij≥0；对角自动为q_ii=−Σ_{j≠i}q_ij。",
+          "worked": "若q_01=2次/分钟，则h=0.01分钟内跳往1的概率约为0.02，不能把速率2误写成200%概率。",
+          "limitation": "若用h=1分钟直接取I+hQ，可能产生负对角概率；只有小步长极限或矩阵指数才能得到一致的连续时间转移。"
+        },
+        {
+          "title": "离开率、竞争事件与跳转核",
+          "question": "Q一行如何同时给出保持时间及下一跳目的地？",
+          "paragraphs": [
+            "每行非对角速率之和r_i为离开当前状态的总强度，负对角项q_ii=−r_i。保持时间为Exp(r_i)，下一跳到j的概率为q_ij/r_i。",
+            "若r_i=0表示该状态吸收，不应在分母为0时仍归一化跳转方向；实际订单可能有停牌或暂停执行，吸收假设需要明确。"
+          ],
+          "formulas": [
+            {
+              "label": "离开率、竞争事件与跳转核",
+              "tex": "r_i=-q_{ii}=\\sum_{j\\ne i}q_{ij},\\quad \\Pr(J=j\\mid i)=q_{ij}/r_i\\quad(r_i>0)"
+            }
+          ],
+          "proof": "在短时间h内向不同j离开的互斥事件具有概率q_ij h+o(h)，总离开概率r_i h+o(h)。条件于离开事件，其目标概率在h趋0时趋于q_ij/r_i。指数保持时间由恒定离开率和Markov无记忆性质得到。",
+          "worked": "状态0可向1速率2、向2速率3，则q_00=−5，平均保持1/5=0.2分钟，下一跳到状态1的概率2/5=0.4、到状态2概率3/5=0.6。",
+          "limitation": "订单到达类别的速率可能随价格和盘口深度而变化；固定生成矩阵不必能反映这类状态依赖强度。"
+        },
+        {
+          "title": "矩阵指数与概率合法性",
+          "question": "如何由Q得到任意正时间的转移矩阵？",
+          "paragraphs": [
+            "有限状态矩阵指数e^{tQ}=Σ_{n≥0}(tQ)^n/n!求和定义；它满足P'(t)=QP(t)=P(t)Q、P(0)=I。",
+            "虽然矩阵幂展开可能包含带负元素的中间项，整个矩阵指数却是合法的行随机矩阵。可以通过Poisson化R=I+Q/Λ证明其元素非负且每行和1。"
+          ],
+          "formulas": [
+            {
+              "label": "矩阵指数与概率合法性",
+              "tex": "P(t)=e^{tQ}=\\sum_{n=0}^\\infty\\frac{t^nQ^n}{n!},\\quad P(t)\\mathbf1=\\mathbf1"
+            }
+          ],
+          "proof": "由于Q1=0，对指数幂级数求和得到e^{tQ}1=1。为了严格保证元素非负，取Λ≥max_i(−q_ii)>0，R=I+Q/Λ是行随机矩阵，并用e^{tQ}=e^{−Λt}Σ_{n≥0}(Λt)^nR^n/n!，它是非负矩阵的概率加权和。",
+          "worked": "Q=[[-2,2],[3,−3]]时选Λ=5，R=I+Q/5=[[0.6,0.4],[0.6,0.4]]，是行随机矩阵；在t=(ln2)/5时P_00(t)=0.8。",
+          "limitation": "矩阵指数适用于有限有界生成矩阵；可数无穷状态若存在爆炸，需要明确最小半群与保守性，不能直接沿用有限矩阵证明。"
+        },
+        {
+          "title": "平稳概率与速率平衡",
+          "question": "为什么连续时间的稳态条件应写成πQ=0？",
+          "paragraphs": [
+            "若π在任何时间t后保持不变，则πP(t)=π，取t=0右导数得到πQ=0。反过来，在有限状态齐次CTMC中，若πQ=0，则πe^{tQ}=π。",
+            "此处的平衡是流入与流出速率在概率权重下的抵消，不等于每一条路径不发生状态切换。金融市场可持续高频跳转却保持总体状态占比近似稳定。"
+          ],
+          "formulas": [
+            {
+              "label": "平稳概率与速率平衡",
+              "tex": "\\pi Q=0,\\qquad\\sum_i\\pi_i=1,\\qquad\\pi e^{tQ}=\\pi"
+            }
+          ],
+          "proof": "从πP(t)=π对t在0求导得到必要条件πQ=0；反向计算d[πe^{tQ}]/dt=πQe^{tQ}=0，故其值恒为t=0时的π。有限状态矩阵指数保证导数计算合法。",
+          "worked": "Q=[[-2,2],[3,−3]]时平衡方程−2π_0+3π_1=0与归一化给π=(3/5,2/5)=(0.6,0.4)，检验πQ=(0,0)。",
+          "limitation": "稳定分布不是执行成交概率或资金无风险证明；如果生成率随新闻与市场冲击变化，常数π未必对应未来长期占比。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "stochastic-n0283",
+          "label": "连续时间Markov链"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0285",
+          "label": "前向演化"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0286",
+          "label": "后向演化"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0287",
+          "label": "泊松化与统一化"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 6.262 Discrete Stochastic Processes：第6章可数状态连续时间Markov过程",
+          "url": "https://ocw.mit.edu/courses/6-262-discrete-stochastic-processes-spring-2011/pages/course-notes/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：第24讲连续时间Markov链",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V12完整精讲：连续时间状态过程、四节证明、可复核例子与风险边界"
+    },
+    {
+      "id": "stochastic-n0285",
+      "node_id": "stochastic-n0285",
+      "title": "Kolmogorov前向方程",
+      "definition": "Kolmogorov前向方程描述连续时间马尔可夫链的概率分布如何随时间演化。采用行向量约定，若μ(t)为当前时刻状态分布，生成矩阵Q固定，则μ'(t)=μ(t)Q；转移矩阵满足P'(t)=P(t)Q。它把进入各状态的概率流量与离开流量相减，适合信用迁移、订单队列状态及风险情景分布的时间预测。",
+      "assumptions": "有限状态、时间齐次CTMC，Q为保守生成矩阵，μ(0)是和为1的行概率向量。前向方程要求按行约定使用μQ；若改用列向量，则是Q^T μ列，不应不声明约定而交换矩阵次序。非齐次Q(t)的方程仍需明确其时间次序。",
+      "properties": [
+        "前向方程μ'(t)=μ(t)Q追踪状态占比的流入与流出。",
+        "给定初始状态分布μ_0时唯一解为μ(t)=μ_0e^{tQ}，自动保持概率和为1。",
+        "两状态速率a,b下，状态0概率满足u'=−au+b(1−u)。",
+        "求稳定状态时令导数为零，得到πQ=0；未达稳态的有限时间概率一般不同于π。"
+      ],
+      "formulas": [
+        {
+          "label": "短时概率流与前向方程",
+          "tex": "\\mu_j'(t)=\\sum_i\\mu_i(t)q_{ij},\\qquad \\mu'(t)=\\mu(t)Q"
+        },
+        {
+          "label": "矩阵指数解及概率总和守恒",
+          "tex": "\\mu(t)=\\mu(0)e^{tQ},\\qquad\\frac d{dt}[\\mu(t)\\mathbf1]=\\mu(t)Q\\mathbf1=0"
+        },
+        {
+          "label": "二状态概率的显式解",
+          "tex": "u'(t)=3-5u(t),\\quad u(t)=0.6+[u(0)-0.6]e^{-5t}"
+        },
+        {
+          "label": "稳态概率、非齐次强度与金融应用",
+          "tex": "\\mu'(t)=\\mu(t)Q(t),\\qquad \\mu(t)\\neq\\mu(0)e^{t\\bar Q}\\ \\text{一般情形}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "在长度h内，条件转移矩阵P(h)=I+hQ+o(h)。由分布演化μ(t+h)=μ(t)P(h)，两边减去μ(t)、除以h，令h↓0得μ'(t)=μ(t)Q。有限状态允许逐坐标交换极限。",
+          "tex": "\\mu_j'(t)=\\sum_i\\mu_i(t)q_{ij},\\qquad \\mu'(t)=\\mu(t)Q"
+        },
+        {
+          "explanation": "矩阵指数的导数是e^{tQ}Q=Qe^{tQ}，故μ'(t)=μ(0)e^{tQ}Q=μ(t)Q且初值正确。利用Q1=0证明总概率守恒；Poisson化表示证明非负性。",
+          "tex": "\\mu(t)=\\mu(0)e^{tQ},\\qquad\\frac d{dt}[\\mu(t)\\mathbf1]=\\mu(t)Q\\mathbf1=0"
+        },
+        {
+          "explanation": "令v(t)=u(t)−3/5，则v'=−5v，解v(t)=v(0)e^{-5t}。恢复u并代回原方程验证，u始终在0与1之间。对任意合法初始概率，t→∞时u→0.6。",
+          "tex": "u'(t)=3-5u(t),\\quad u(t)=0.6+[u(0)-0.6]e^{-5t}"
+        },
+        {
+          "explanation": "对非齐次Q(t)按短时条件转移仍能推出μ'(t)=μ(t)Q(t)，但不同t的矩阵通常不交换，解不能简化为某个常数平均矩阵的指数。若Q(t)在不同区间恒定，则可依时间顺序相乘相应矩阵指数。",
+          "tex": "\\mu'(t)=\\mu(t)Q(t),\\qquad \\mu(t)\\neq\\mu(0)e^{t\\bar Q}\\ \\text{一般情形}"
+        }
+      ],
+      "example": "两状态Q=[[-2,2],[3,−3]]从(1,0)出发，μ'_0(0)=−2；t=ln2/5时μ=(0.8,0.2)；长期平稳分布π=(0.6,0.4)。",
+      "application": "用于金融信用状态、市场流动性状态及订单队列概率的连续时间预测；应与实际状态估计、数据时序和可交易性限制配合。",
+      "caveat": "前向方程只在所指定的CTMC模型中成立；状态依赖、时间变化生成率及概率测度切换不能用常数Q指数自动概括。",
+      "deep_sections": [
+        {
+          "title": "短时概率流与前向方程",
+          "question": "为什么概率流入项和流出项能写成μQ？",
+          "paragraphs": [
+            "在时刻t到t+h之间，当前状态i的人群中大约有μ_i(t)q_ij h比例转向j，同时状态j原有人群以总速率−q_jj离开。",
+            "对各来源i求和并减去当前状态概率，除以h取极限，得到每个坐标的概率流平衡方程。矩阵形式紧凑，但必须保持行向量和Q的乘法方向。"
+          ],
+          "formulas": [
+            {
+              "label": "短时概率流与前向方程",
+              "tex": "\\mu_j'(t)=\\sum_i\\mu_i(t)q_{ij},\\qquad \\mu'(t)=\\mu(t)Q"
+            }
+          ],
+          "proof": "在长度h内，条件转移矩阵P(h)=I+hQ+o(h)。由分布演化μ(t+h)=μ(t)P(h)，两边减去μ(t)、除以h，令h↓0得μ'(t)=μ(t)Q。有限状态允许逐坐标交换极限。",
+          "worked": "Q=[[-2,2],[3,−3]]且初始μ(0)=(1,0)，则μ'_0(0)=−2、μ'_1(0)=2，表示最初概率从0以速率2流向1。",
+          "limitation": "微分率可以是负数但状态概率本身必须非负；把瞬时导数μ'_j当作概率会出现量纲和符号错误。"
+        },
+        {
+          "title": "矩阵指数解及概率总和守恒",
+          "question": "前向方程为什么始终保留总概率为1？",
+          "paragraphs": [
+            "常数系数线性微分方程的唯一解是μ(t)=μ(0)e^{tQ}。由于Q1=0，求导可知总概率d[μ(t)1]/dt=μ(t)Q1=0。",
+            "非负性可由CTMC半群或Poisson化验证，所以解保持在概率单纯形内。若直接用大步长显式Euler更新μ(t+h)≈μ(t)(I+hQ)，可能出现负概率。"
+          ],
+          "formulas": [
+            {
+              "label": "矩阵指数解及概率总和守恒",
+              "tex": "\\mu(t)=\\mu(0)e^{tQ},\\qquad\\frac d{dt}[\\mu(t)\\mathbf1]=\\mu(t)Q\\mathbf1=0"
+            }
+          ],
+          "proof": "矩阵指数的导数是e^{tQ}Q=Qe^{tQ}，故μ'(t)=μ(0)e^{tQ}Q=μ(t)Q且初值正确。利用Q1=0证明总概率守恒；Poisson化表示证明非负性。",
+          "worked": "当Q=[[-2,2],[3,−3]]，μ(0)=(1,0)，取t=(ln2)/5可得μ(t)=(0.8,0.2)，总概率仍为1。",
+          "limitation": "Euler大步长不是概率保持方法；选择h=1且Q00=−2时I+hQ对角为−1，显然不能作为真实转移矩阵。"
+        },
+        {
+          "title": "二状态概率的显式解",
+          "question": "为什么二状态模型的前向分布有稳定水平和指数误差两部分？",
+          "paragraphs": [
+            "记u(t)=P(X(t)=0)，则状态0向1离开导致速率2u减少，状态1向0流入导致速率3(1−u)增加，因此u'=3−5u。",
+            "该一阶线性方程的稳态固定点是u*=3/5，偏差u−u*满足衰减方程e'=−5e，所以u(t)=0.6+(u(0)−0.6)e^{-5t}。"
+          ],
+          "formulas": [
+            {
+              "label": "二状态概率的显式解",
+              "tex": "u'(t)=3-5u(t),\\quad u(t)=0.6+[u(0)-0.6]e^{-5t}"
+            }
+          ],
+          "proof": "令v(t)=u(t)−3/5，则v'=−5v，解v(t)=v(0)e^{-5t}。恢复u并代回原方程验证，u始终在0与1之间。对任意合法初始概率，t→∞时u→0.6。",
+          "worked": "从状态0出发u(0)=1，在t=ln2/5时e^{-5t}=0.5，故u=0.6+0.4×0.5=0.8；从状态1出发u(0)=0，得到u=0.6−0.6×0.5=0.3。",
+          "limitation": "两种初始状态在同一时间下的概率不同；不变分布是渐近极限，不应替代短期止损或信用违约的条件风险估计。"
+        },
+        {
+          "title": "稳态概率、非齐次强度与金融应用",
+          "question": "如何把前向方程用于风险状态占比预测而不混淆真实概率与风险中性概率？",
+          "paragraphs": [
+            "若Q固定且不可约，通常可求πQ=0得到长期状态占比，再用μ(0)e^{tQ}得到短期状态概率。这两步分别回答长期与有限时域问题。",
+            "如果金融宏观信息改变风险状态切换率，生成矩阵就可能依赖时刻Q(t)，此时应求解μ'=μQ(t)，而不是把某个平均Q直接代入e^{tQ}。真实概率P与定价测度Q也必须分别说明。"
+          ],
+          "formulas": [
+            {
+              "label": "稳态概率、非齐次强度与金融应用",
+              "tex": "\\mu'(t)=\\mu(t)Q(t),\\qquad \\mu(t)\\neq\\mu(0)e^{t\\bar Q}\\ \\text{一般情形}"
+            }
+          ],
+          "proof": "对非齐次Q(t)按短时条件转移仍能推出μ'(t)=μ(t)Q(t)，但不同t的矩阵通常不交换，解不能简化为某个常数平均矩阵的指数。若Q(t)在不同区间恒定，则可依时间顺序相乘相应矩阵指数。",
+          "worked": "在前例Q固定时，π=(0.6,0.4)；若初始μ=(1,0)，t=ln2/5处实际μ=(0.8,0.2)，距离稳态仍有状态0概率差0.2。",
+          "limitation": "真实ETF风险状态转移率可能受到政策或市场波动冲击；仅凭平均参数的平滑走势不足以校准事件驱动的尾部风险。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "stochastic-n0284",
+          "label": "先修：生成矩阵Q"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0286",
+          "label": "对照：Kolmogorov后向"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0287",
+          "label": "稳定数值：Poisson化"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0288",
+          "label": "订单排队模型"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 6.262 Discrete Stochastic Processes：第6章可数状态连续时间Markov过程",
+          "url": "https://ocw.mit.edu/courses/6-262-discrete-stochastic-processes-spring-2011/pages/course-notes/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：第24讲连续时间Markov链",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V12完整精讲：连续时间状态过程、四节证明、可复核例子与风险边界"
     }
   ]
 }
