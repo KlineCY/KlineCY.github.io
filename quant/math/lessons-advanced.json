@@ -8560,6 +8560,316 @@
         }
       ],
       "checked_status": "V14严格边界：四节定理、特征函数与可核算跳跃反例"
+    },
+    {
+      "id": "ito-n0325",
+      "node_id": "ito-n0325",
+      "title": "Feynman-Kac公式",
+      "definition": "Feynman–Kac公式在适当正则性与可积条件下，将扩散过程的条件期望与线性抛物型偏微分方程联系起来。若状态满足Itô SDE且生成算子为L，则终端支付、折现率和中途现金流组成的期望价值满足含零阶贴现项的后向PDE。它既可以从Itô公式验证候选经典解，也可用于构造金融期权价格及检验Monte Carlo与PDE求解是否一致。",
+      "assumptions": "设X从(t,x)出发满足dX_s=b(s,X_s)ds+σ(s,X_s)dW_s，系数保证非爆炸与足够矩界；c(s,x)非负且有界，f与终端g连续且具有使期望存在的增长条件。若PDE具有C^{1,2}经典解u且可通过停止局部化或增长控制令相关局部鞅成为适当真鞅，可应用下面的验证论证；若支付不光滑，应区分弱解、黏性解及经典解。",
+      "properties": [
+        "生成算子Lf=b·∇f+(1/2)tr(σσᵀ Hess f)决定扩散的局部条件漂移。",
+        "折现终端收益和运行现金流的期望对应后向方程∂_t u+Lu−cu+f=0。",
+        "候选C^{1,2}解经折现Itô乘积计算后形成鞅，终端条件给期望表示；反向经典正则性需额外条件。",
+        "在风险中性概率下可从相同定理得到资产定价PDE，但真实概率下的条件预测并不自动具有无套利价格解释。"
+      ],
+      "formulas": [
+        {
+          "label": "生成算子与后向方程的局部漂移",
+          "tex": "\\mathcal L_su=b(s,x)^\\mathsf T\\nabla_xu+\\tfrac12\\operatorname{tr}\\!\\bigl(\\sigma\\sigma^\\mathsf T\\nabla_x^2u\\bigr)"
+        },
+        {
+          "label": "折现终端现金流与PDE",
+          "tex": "u(t,x)=\\mathbb E_{t,x}\\!\\left[e^{-\\int_t^Tc\\,ds}g(X_T)+\\int_t^T e^{-\\int_t^s c\\,dv}f(s,X_s)\\,ds\\right]"
+        },
+        {
+          "label": "无贴现Brownian平方支付的独立核算",
+          "tex": "u(t,x)=x^2+\\sigma^2(T-t),\\quad u_t+\\tfrac{\\sigma^2}{2}u_{xx}=-\\sigma^2+\\sigma^2=0"
+        },
+        {
+          "label": "GBM风险中性定价PDE",
+          "tex": "v_t+rs\\,v_s+\\tfrac12\\sigma^2s^2v_{ss}-rv=0,\\qquad v(T,s)=g(s)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对u∈C^{1,2}逐项应用多维Itô公式：du=[u_s+b^T∇u+(1/2)tr(σσ^T Hess u)]ds+∇u^Tσ dW。若相应随机积分在局部停止后可积，条件期望使它的漂移为0，余下的括号恰是u_s+Lu。",
+          "tex": "\\mathcal L_su=b(s,x)^\\mathsf T\\nabla_xu+\\tfrac12\\operatorname{tr}\\!\\bigl(\\sigma\\sigma^\\mathsf T\\nabla_x^2u\\bigr)"
+        },
+        {
+          "explanation": "对D_su(s,X_s)用Itô乘积，因D有限变差，d(Du)=D(u_t+Lu−cu)ds+D∇u^TσdW。再把运行收益积分的微分Df ds加回，若PDE成立则dt项为0。将鞅从t积分到T，代入u(T,x)=g(x)，得期望等式。",
+          "tex": "u(t,x)=\\mathbb E_{t,x}\\!\\left[e^{-\\int_t^Tc\\,ds}g(X_T)+\\int_t^T e^{-\\int_t^s c\\,dv}f(s,X_s)\\,ds\\right]"
+        },
+        {
+          "explanation": "由高斯增量均值0，E[(x+σΔW)²]=x²+2xσEΔW+σ²E(ΔW)²=x²+σ²τ。对u直接求导，u_t=−σ²、u_x=2x、u_xx=2，带入生成算子得到−σ²+(σ²/2)×2=0，且终端u(T,x)=x²。",
+          "tex": "u(t,x)=x^2+\\sigma^2(T-t),\\quad u_t+\\tfrac{\\sigma^2}{2}u_{xx}=-\\sigma^2+\\sigma^2=0"
+        },
+        {
+          "explanation": "将c=r、f=0及风险中性GBM系数b(s)=rs、σ_X(s)=σs代入一般Feynman–Kac PDE。由于扩散二次变差为σ²s²dt，二阶项是(.5σ²s²)v_ss；折现项是−rv。若g(s)=s，候选v=s代入得rs−rs=0，正好再现贴现资产的Q鞅性质。",
+          "tex": "v_t+rs\\,v_s+\\tfrac12\\sigma^2s^2v_{ss}-rv=0,\\qquad v(T,s)=g(s)"
+        }
+      ],
+      "deep_sections": [
+        {
+          "title": "生成算子与后向方程的局部漂移",
+          "question": "为什么扩散生成算子会成为期望函数的时间演化项？",
+          "paragraphs": [
+            "对X的Itô扩散及光滑函数u(s,X_s)，Itô公式把变化拆成时间偏导、漂移方向梯度、二次协方差加权Hessian以及均值为零的随机积分。",
+            "将前三项汇总为∂_s u+Lu，可以从条件期望的瞬时变化识别后向方程。这个过程并不要求市场资产必然可交易，只依赖给定扩散的概率结构。"
+          ],
+          "formulas": [
+            {
+              "label": "生成算子与后向方程的局部漂移",
+              "tex": "\\mathcal L_su=b(s,x)^\\mathsf T\\nabla_xu+\\tfrac12\\operatorname{tr}\\!\\bigl(\\sigma\\sigma^\\mathsf T\\nabla_x^2u\\bigr)"
+            }
+          ],
+          "proof": "对u∈C^{1,2}逐项应用多维Itô公式：du=[u_s+b^T∇u+(1/2)tr(σσ^T Hess u)]ds+∇u^Tσ dW。若相应随机积分在局部停止后可积，条件期望使它的漂移为0，余下的括号恰是u_s+Lu。",
+          "worked": "若X_s=x+σ(W_s−W_t)、b=0，令u(x)=x²，则Lu=(1/2)σ²×2=σ²；当σ=.2时Lu=.04。",
+          "limitation": "生成算子依赖扩散系数与概率测度；若价格还有跳跃，生成算子包含非局部积分项，不能直接使用纯Brownian的二阶PDE。"
+        },
+        {
+          "title": "折现终端现金流与PDE",
+          "question": "为什么未来现金流的折现期望要对应PDE里的−cu+f？",
+          "paragraphs": [
+            "定义D_{t,s}=exp(−∫_t^s c(v,X_v)dv)，并考察D_{t,s}u(s,X_s)+∫_t^sD_{t,v}f(v,X_v)dv。",
+            "若u满足u_t+Lu−cu+f=0，则上述过程的有限变差漂移全部抵消，只剩Itô随机积分。经过适当可积性验证后可取条件期望并使用终端值，得到Feynman–Kac表示。"
+          ],
+          "formulas": [
+            {
+              "label": "折现终端现金流与PDE",
+              "tex": "u(t,x)=\\mathbb E_{t,x}\\!\\left[e^{-\\int_t^Tc\\,ds}g(X_T)+\\int_t^T e^{-\\int_t^s c\\,dv}f(s,X_s)\\,ds\\right]"
+            }
+          ],
+          "proof": "对D_su(s,X_s)用Itô乘积，因D有限变差，d(Du)=D(u_t+Lu−cu)ds+D∇u^TσdW。再把运行收益积分的微分Df ds加回，若PDE成立则dt项为0。将鞅从t积分到T，代入u(T,x)=g(x)，得期望等式。",
+          "worked": "若c=.03、f=0、g≡100、T−t=1且X任意，则价值u=100e^{−.03}≈97.04455，对应PDE u_t−.03u=0和终端u(T)=100。",
+          "limitation": "若终端支付或贴现因子不满足必要可积性，形式上漂移消去的局部鞅可能不能直接取期望；经典解唯一性也需要边界与增长条件。"
+        },
+        {
+          "title": "无贴现Brownian平方支付的独立核算",
+          "question": "如何用一个不依赖股价模型的例子同时检验期望和PDE？",
+          "paragraphs": [
+            "取一维dX_s=σdW_s，终端支付g(x)=x²，折现c=0、运行现金流f=0。从(t,x)出发，X_T=x+σ(W_T−W_t)，其未来高斯增量方差为σ²(T−t)。",
+            "因此条件终端二阶矩为u(t,x)=x²+σ²(T−t)。代入u_t+(.5σ²)u_xx=0可逐项检验，展示Feynman–Kac无需预先求解一般抛物型PDE也能核算价值。"
+          ],
+          "formulas": [
+            {
+              "label": "无贴现Brownian平方支付的独立核算",
+              "tex": "u(t,x)=x^2+\\sigma^2(T-t),\\quad u_t+\\tfrac{\\sigma^2}{2}u_{xx}=-\\sigma^2+\\sigma^2=0"
+            }
+          ],
+          "proof": "由高斯增量均值0，E[(x+σΔW)²]=x²+2xσEΔW+σ²E(ΔW)²=x²+σ²τ。对u直接求导，u_t=−σ²、u_x=2x、u_xx=2，带入生成算子得到−σ²+(σ²/2)×2=0，且终端u(T,x)=x²。",
+          "worked": "当x=100、σ=.2、T−t=1时u=10000+.04=10000.04；若把σ误当价格百分比波动而非加性扩散单位，会造成量纲和数值错误。",
+          "limitation": "支付x²无界，本例使用Gaussian矩存在与多项式增长的充分可积性，而不属于只允许有界终端支付的简化定理表述。"
+        },
+        {
+          "title": "GBM风险中性定价PDE",
+          "question": "为什么同一Feynman–Kac公式在风险中性模型下给出资产支付的现值？",
+          "paragraphs": [
+            "设无股息可交易资产在Q下满足dS=rSdt+σSdW^Q，且r、σ为常数。它的生成算子为Ls=rs∂_s+(.5σ²s²)∂_{ss}。",
+            "期末支付g(S_T)的折现期望v(t,s)=E^Q[e^{-r(T−t)}g(S_T)|S_t=s]满足v_t+rv_s s+(.5σ²s²)v_{ss}−rv=0。期望公式要成立还需Q合法、贴现资产可积与终端支付适当增长条件。"
+          ],
+          "formulas": [
+            {
+              "label": "GBM风险中性定价PDE",
+              "tex": "v_t+rs\\,v_s+\\tfrac12\\sigma^2s^2v_{ss}-rv=0,\\qquad v(T,s)=g(s)"
+            }
+          ],
+          "proof": "将c=r、f=0及风险中性GBM系数b(s)=rs、σ_X(s)=σs代入一般Feynman–Kac PDE。由于扩散二次变差为σ²s²dt，二阶项是(.5σ²s²)v_ss；折现项是−rv。若g(s)=s，候选v=s代入得rs−rs=0，正好再现贴现资产的Q鞅性质。",
+          "worked": "取g(s)=s²，r=.03、σ=.2、T−t=1、s=100时v=s²e^{(r+σ²)(T−t)}=10000e^{.07}≈10725.08，可由正态指数矩和PDE分别验证。",
+          "limitation": "风险中性价格不是历史真实概率下的未贴现均值；有股息、随机利率、市场不完备或交易约束时，需明确计价物和测度。"
+        }
+      ],
+      "example": "无贴现扩散dX=.2dW、g(x)=x²、x=100及期限1时条件价值10000.04；常数现金流100、折现r=.03的现值为100e^{−.03}≈97.04455。Q下GBM的平方支付s=100、r=.03、σ=.2时价值10000e^{.07}≈10725.08。",
+      "application": "用于期权定价、信用损失折现、随机收益因子条件期望，以及PDE和蒙特卡洛实现的交叉验算；必须先声明使用历史或风险中性测度。",
+      "caveat": "光滑经典解验证与一般不光滑支付的黏性解不是同一个定理；终端增长、局部鞅可积性、贴现和交易限制都可能影响价格表示。",
+      "links": [
+        {
+          "kind": "math",
+          "id": "ito-n0310",
+          "label": "先修：多维Itô公式"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0326",
+          "label": "先修：后向PDE"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0324",
+          "label": "先修：贴现资产鞅"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0327",
+          "label": "后续：最优停止障碍PDE"
+        }
+      ],
+      "sources": [
+        {
+          "title": "University of Chicago Greg Lawler：Stochastic Calculus and Finance中Feynman–Kac与Black–Scholes定价课程",
+          "url": "https://www.math.uchicago.edu/~lawler/finbook.pdf"
+        },
+        {
+          "title": "MIT 15.070J Advanced Stochastic Processes：Lecture 17与19 Itô公式及金融应用",
+          "url": "https://ocw.mit.edu/courses/15-070j-advanced-stochastic-processes-fall-2013/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V14完整精讲：四节假设、严格推理、可复算价格与边界反例"
+    },
+    {
+      "id": "ito-n0327",
+      "node_id": "ito-n0327",
+      "title": "最优停止Snell包络",
+      "definition": "连续时间Snell包络把有限期最优停止的可测条件价值写成所有未来合法停时的条件期望上确界。对适应且满足class D等适当可积与路径正则条件的贴现支付过程G_t，包络Y_t是支配G_t的最小超鞅，首次接触停止区域的时刻在相应连续路径及可积条件下最优。若状态是Markov扩散，其价值函数对应最优停止障碍问题和美式期权提前执行条件。",
+      "assumptions": "固定有限期限T，满足通常条件的滤过；贴现后的支付G_t为连续适应且属于class D，以保证停止时的期望族一致可积。合法停时τ需满足τ≥t且{τ≤s}∈F_s。障碍PDE部分额外假设Markov扩散生成算子L、适当正则性与边界/增长条件。数值树例子是两期可提前执行的Bermudan近似，不声称是连续时间美式看跌的精确价格。",
+      "properties": [
+        "Snell包络Y_t=ess sup_{τ≥t}E[G_τ|F_t]支配G且为最小超鞅。",
+        "连续且class D等适当条件下，首次Y=G的合法停时可实现最优价值。",
+        "Markov扩散最优停止对应障碍变分不等式max{g−v, v_t+Lv−rv}=0。",
+        "二叉树/离散近似中提前执行的价值由每步立即收益与折现继续价值比较，不能仅靠终端European支付估计。"
+      ],
+      "formulas": [
+        {
+          "label": "条件本质上确界与合法停时",
+          "tex": "Y_t=\\operatorname*{ess\\,sup}_{\\tau\\in\\mathcal T_{t,T}}\\mathbb E[G_\\tau\\mid\\mathcal F_t],\\quad\\mathcal T_{t,T}=\\{\\tau:t\\le\\tau\\le T\\}"
+        },
+        {
+          "label": "最小超鞅与首次接触最优停时",
+          "tex": "\\tau^*=\\inf\\{t\\in[0,T]:Y_t=G_t\\},\\qquad Y_0=\\mathbb E[G_{\\tau^*}]"
+        },
+        {
+          "label": "Markov扩散的障碍变分不等式",
+          "tex": "\\max\\{g(s)-v(t,s),\\ \\partial_t v+\\mathcal Lv-rv\\}=0,\\qquad v(T,s)=g(s)"
+        },
+        {
+          "label": "两期Bermudan看跌的数值倒推",
+          "tex": "V_0=\\max\\!\\left\\{0,\\ \\frac{0.625(1.5/1.05)+0.375(20)}{1.05}\\right\\}\\approx7.99320"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "立即停止τ=t属于候选集合，故Y_t≥E[G_t|F_t]=G_t。任意未来停时策略可被定义在不使用未来信息的F_t条件下，因而取本质上确界给最优条件价值。要保证Y有适当右连续修改以及超鞅性质，通常使用class D与可测系统定理。",
+          "tex": "Y_t=\\operatorname*{ess\\,sup}_{\\tau\\in\\mathcal T_{t,T}}\\mathbb E[G_\\tau\\mid\\mathcal F_t],\\quad\\mathcal T_{t,T}=\\{\\tau:t\\le\\tau\\le T\\}"
+        },
+        {
+          "explanation": "由动态规划超鞅不等式可得Y_s≥E[Y_t|F_s]，且Y≥G。对任何支配G的class D超鞅Z，可选停止给Z_t≥E[Z_τ|F_t]≥E[G_τ|F_t]，对τ取本质上确界得Z≥Y。连续与class D条件允许使用首次接触最优停止定理。",
+          "tex": "\\tau^*=\\inf\\{t\\in[0,T]:Y_t=G_t\\},\\qquad Y_0=\\mathbb E[G_{\\tau^*}]"
+        },
+        {
+          "explanation": "停止策略立即获得g所以v≥g。若v>g，局部最优必须继续并在短时动态规划极限下满足后向定价PDE等式；若v=g，立即执行优于继续，意味着PDE算子≤0。合并为两项均≤0且至少一项为0的max形式，正是障碍条件。",
+          "tex": "\\max\\{g(s)-v(t,s),\\ \\partial_t v+\\mathcal Lv-rv\\}=0,\\qquad v(T,s)=g(s)"
+        },
+        {
+          "explanation": "终点支付如上；上涨节点V_u=max(0,1.5/1.05)=10/7≈1.428571，下跌节点V_d=max(20,16/1.05)=20。根节点折现期望为[(5/8)(10/7)+(3/8)20]/(21/20)=(5/8×10/7+7.5)/1.05≈7.99320，立即执行根支付0，所以根取继续。",
+          "tex": "V_0=\\max\\!\\left\\{0,\\ \\frac{0.625(1.5/1.05)+0.375(20)}{1.05}\\right\\}\\approx7.99320"
+        }
+      ],
+      "deep_sections": [
+        {
+          "title": "条件本质上确界与合法停时",
+          "question": "Snell包络为何不是选择整条未来路径上最高报价？",
+          "paragraphs": [
+            "定义Y_t为在t时刻可以依据当时信息安排、且未来自适应决定的所有停止策略条件收益之本质上确界。它禁止使用未来价格来反向选择之前的交易时点。",
+            "对任意允许的τ，G_τ的条件期望是一个合法候选；Y_t至少等于立即停止G_t。随着信息变化，这个上确界给每个时点的最优动态退出价值。"
+          ],
+          "formulas": [
+            {
+              "label": "条件本质上确界与合法停时",
+              "tex": "Y_t=\\operatorname*{ess\\,sup}_{\\tau\\in\\mathcal T_{t,T}}\\mathbb E[G_\\tau\\mid\\mathcal F_t],\\quad\\mathcal T_{t,T}=\\{\\tau:t\\le\\tau\\le T\\}"
+            }
+          ],
+          "proof": "立即停止τ=t属于候选集合，故Y_t≥E[G_t|F_t]=G_t。任意未来停时策略可被定义在不使用未来信息的F_t条件下，因而取本质上确界给最优条件价值。要保证Y有适当右连续修改以及超鞅性质，通常使用class D与可测系统定理。",
+          "worked": "若时刻t即可获得确定净收益5，所有未来合法停时的条件期望均不超过4.5，则Y_t=max(5,4.5)=5；不能改用未来某个路径上的最高数值9。",
+          "limitation": "本质上确界对条件概率模型和合法可观察信息定义；若执行中的成交价格不确定，必须在G中计入滑点、撤单及可成交性。"
+        },
+        {
+          "title": "最小超鞅与首次接触最优停时",
+          "question": "为什么等待价值可以看作对支付过程的最小超鞅上界？",
+          "paragraphs": [
+            "对s<t，时刻s能先等待到t，再采用时刻t的最优停止决策，因此Y_s≥E[Y_t|F_s]，即Y为超鞅。它也是所有支配G的class D超鞅中最小的一个。",
+            "当连续Snell包络和支付足够正则时，首次Y_t=G_t的时刻τ*是停时；在到达前等待区域包络的补偿递增部分不增加，停止后的Y成为鞅，因此E G_{τ*}=Y_0。"
+          ],
+          "formulas": [
+            {
+              "label": "最小超鞅与首次接触最优停时",
+              "tex": "\\tau^*=\\inf\\{t\\in[0,T]:Y_t=G_t\\},\\qquad Y_0=\\mathbb E[G_{\\tau^*}]"
+            }
+          ],
+          "proof": "由动态规划超鞅不等式可得Y_s≥E[Y_t|F_s]，且Y≥G。对任何支配G的class D超鞅Z，可选停止给Z_t≥E[Z_τ|F_t]≥E[G_τ|F_t]，对τ取本质上确界得Z≥Y。连续与class D条件允许使用首次接触最优停止定理。",
+          "worked": "一期支付今日5、明日支付0或9且各半时，等待期望4.5，首次接触立即发生；若明日支付0或14且各半，等待期望7，今日则不是停止区。",
+          "limitation": "若只有可选而非连续支付、无界期限或class D不满足，首次接触时刻未必直接最优；应另查上半连续性及一致可积条件。"
+        },
+        {
+          "title": "Markov扩散的障碍变分不等式",
+          "question": "为什么美式期权对应PDE与立即执行障碍的最大值条件？",
+          "paragraphs": [
+            "令不贴现支付g(s)为即时执行价值，最优价值v(t,s)在继续区严格高于g(s)，因此必须满足v_t+Lv−rv=0；停止区则有v=g并且继续漂移不能带来更高价值。",
+            "这两个条件可合并为max(g−v, v_t+Lv−rv)=0（以最大收益和所示符号为约定），末端条件v(T,s)=g(s)。若边界不光滑，解应以适当黏性或变分意义理解。"
+          ],
+          "formulas": [
+            {
+              "label": "Markov扩散的障碍变分不等式",
+              "tex": "\\max\\{g(s)-v(t,s),\\ \\partial_t v+\\mathcal Lv-rv\\}=0,\\qquad v(T,s)=g(s)"
+            }
+          ],
+          "proof": "停止策略立即获得g所以v≥g。若v>g，局部最优必须继续并在短时动态规划极限下满足后向定价PDE等式；若v=g，立即执行优于继续，意味着PDE算子≤0。合并为两项均≤0且至少一项为0的max形式，正是障碍条件。",
+          "worked": "若美式看跌行权价K=100，当股价s=80时立即支付g=(100−80)^+=20；此时若折现继续价值只有15，则障碍v=20触发停止区域。",
+          "limitation": "美式Call无股息且非负利率的经典Black–Scholes模型通常不提前执行，不能将Put低价行权结论机械推广给所有期权。"
+        },
+        {
+          "title": "两期Bermudan看跌的数值倒推",
+          "question": "如何用完全可复核的离散树说明提前执行比仅持有到期更有价值？",
+          "paragraphs": [
+            "设S_0=100，每期上涨因子u=1.2、下跌因子d=.8，无风险每期增长因子R=1.05。风险中性上升概率q=(R−d)/(u−d)=.625。行权价K=100，两期树的到期股价为144、96、64，对应看跌现金流0、4、36。",
+            "时刻1上涨节点股价120，立即执行价值0，折现继续价值(0.625×0+0.375×4)/1.05≈1.42857；下跌节点股价80，立即20，继续(0.625×4+0.375×36)/1.05≈15.23810，因此选择立即执行。再倒推至时刻0得美式离散价值约7.99320。"
+          ],
+          "formulas": [
+            {
+              "label": "两期Bermudan看跌的数值倒推",
+              "tex": "V_0=\\max\\!\\left\\{0,\\ \\frac{0.625(1.5/1.05)+0.375(20)}{1.05}\\right\\}\\approx7.99320"
+            }
+          ],
+          "proof": "终点支付如上；上涨节点V_u=max(0,1.5/1.05)=10/7≈1.428571，下跌节点V_d=max(20,16/1.05)=20。根节点折现期望为[(5/8)(10/7)+(3/8)20]/(21/20)=(5/8×10/7+7.5)/1.05≈7.99320，立即执行根支付0，所以根取继续。",
+          "worked": "欧洲同树看跌价值只根据终点支付：[(.625²×0)+2×.625×.375×4+.375²×36]/1.05²≈(1.875+5.0625)/1.1025≈6.29252，低于允许提前执行的约7.99320。",
+          "limitation": "二叉树是每期允许行权的Bermudan模型；若真实市场允许任意连续时点执行，需要额外数值极限、连续模型及实际股息与交易费条件。"
+        }
+      ],
+      "example": "两期树取S0=100、u=1.2、d=.8、R=1.05、K=100，风险中性概率q=.625。第一期上涨节点继续价值约1.42857、下跌节点立即行权价值20；根节点最优停止价值约7.99320，欧洲到期支付现值约6.29252。",
+      "application": "用于美式看跌、可提前赎回信用工具、库存清算时点与动态止损定价。连续扩散障碍PDE可与离散二叉树倒推和蒙特卡洛最优停止方法交叉验证。",
+      "caveat": "数学Snell最优性取决于合法停时、现金流可积性与状态动力学；二叉树的离散Bermudan价格不能直接等同真实连续时间美式价格，滑点会改变执行障碍。",
+      "links": [
+        {
+          "kind": "math",
+          "id": "stochastic-n0297",
+          "label": "先修：离散最优停止"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0325",
+          "label": "先修：Feynman–Kac"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0326",
+          "label": "先修：后向PDE"
+        },
+        {
+          "kind": "math",
+          "id": "finance-n0448",
+          "label": "金融：美式期权定价"
+        }
+      ],
+      "sources": [
+        {
+          "title": "University of Chicago Greg Lawler：Stochastic Calculus and Finance中Feynman–Kac与Black–Scholes定价课程",
+          "url": "https://www.math.uchicago.edu/~lawler/finbook.pdf"
+        },
+        {
+          "title": "MIT 15.070J Advanced Stochastic Processes：Lecture 17与19 Itô公式及金融应用",
+          "url": "https://ocw.mit.edu/courses/15-070j-advanced-stochastic-processes-fall-2013/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V14完整精讲：四节假设、严格推理、可复算价格与边界反例"
     }
   ]
 }
