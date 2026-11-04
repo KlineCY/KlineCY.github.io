@@ -386,6 +386,15 @@ async function start(){
     newIds.add(id);
    }
   }
+  // V3 curriculum: advance from regularization stability to scalable kernels and robust portfolio audit.
+  for(const path of ["./atlas-stability-kernel-v3.json","./atlas-robust-validation-v3.json"]){
+   const bundle=await fetchAtlasJson(path,{cache:"no-cache"});
+   const ids=window.quantMlExpansion.install(data,bundle);
+   for(const id of ids){
+    if(newIds.has(id))throw Error("新增专题ID重复："+id);
+    newIds.add(id);
+   }
+  }
   const conceptBundle=await fetchAtlasJson("./atlas-concept-chapters.json",{cache:"no-cache"});
   if(!window.quantMlConcepts?.mount)throw Error("知识链分层渲染器未加载");
   state.conceptChapters=window.quantMlConcepts.mount(data,conceptBundle);
