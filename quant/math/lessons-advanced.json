@@ -1580,6 +1580,781 @@
         }
       ],
       "checked_status": "V10完整精讲：滤过与停时、分解唯一性、收敛定理条件和可复核示例"
+    },
+    {
+      "id": "stochastic-n0271",
+      "node_id": "stochastic-n0271",
+      "title": "Bernoulli过程",
+      "definition": "Bernoulli过程是离散时间上的独立同分布0–1事件序列，成功概率固定为p。该过程将交易事件、订单到达指示与离散计数联系起来：前n期成功数服从二项分布，成功间隔服从几何分布，并且每次独立成功可以继续以额外概率进行稀疏化。它是Poisson过程的离散近似基础，但不能把离散时间概率p直接当成连续时间强度λ。",
+      "assumptions": "定义X_1,X_2,…为相互独立且P(X_k=1)=p、P(X_k=0)=1−p，0<p<1；设N_n=Σ_{k≤n}X_k。几何等待T=inf{k≥1:X_k=1}定义在{1,2,…}上。独立性与概率不随时变是关键假设；后续使用大数定律时需同一测度下的无限可延拓序列。",
+      "properties": [
+        "前n期计数为Binomial(n,p)，均值np、方差np(1−p)。",
+        "首次成功等待期数为Geometric(p)，满足离散无记忆性。",
+        "独立稀疏化保留成功的概率从p变为pq，各时间槽仍独立。",
+        "取每槽Δ、p≈λΔ且Δ→0，可获得Poisson计数的连续极限；固定p不适用该极限。"
+      ],
+      "formulas": [
+        {
+          "label": "事件指标与二项计数",
+          "tex": "\\Pr(N_n=k)=\\binom nk p^k(1-p)^{n-k},\\quad \\mathbb E N_n=np"
+        },
+        {
+          "label": "几何等待时间与无记忆性",
+          "tex": "\\Pr(T=k)=(1-p)^{k-1}p,\\quad\\Pr(T>m+n\\mid T>m)=(1-p)^n"
+        },
+        {
+          "label": "稀疏化与独立标记",
+          "tex": "Y_k=X_kB_k,\\quad \\Pr(Y_k=1)=pq,\\quad N_n^{\\rm thin}\\sim\\operatorname{Bin}(n,pq)"
+        },
+        {
+          "label": "从Bernoulli网格到Poisson极限",
+          "tex": "\\binom nk(\\lambda t/n)^k(1-\\lambda t/n)^{n-k}\\longrightarrow e^{-\\lambda t}\\frac{(\\lambda t)^k}{k!}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "选择成功索引集合共有组合数C(n,k)，各具体序列的独立乘积概率相同。对均值，由线性性E N_n=ΣE X_i=np；对方差，由跨槽独立得Cov(X_i,X_j)=0，故Var(N_n)=np(1−p)。",
+          "tex": "\\Pr(N_n=k)=\\binom nk p^k(1-p)^{n-k},\\quad \\mathbb E N_n=np"
+        },
+        {
+          "explanation": "利用独立性得P(T>m)=(1−p)^m；将条件概率写为P(T>m+n)/P(T>m)，得到(1−p)^n。由非负整数尾和公式E T=Σ_{m≥0}P(T>m)=Σ(1−p)^m=1/p。",
+          "tex": "\\Pr(T=k)=(1-p)^{k-1}p,\\quad\\Pr(T>m+n\\mid T>m)=(1-p)^n"
+        },
+        {
+          "explanation": "由条件概率P(X=1,B=1)=P(X=1)P(B=1)=pq；跨槽随机对独立确保Y_k独立，故重复计数为二项分布。原始未保留计数与保留计数一般并不独立。",
+          "tex": "Y_k=X_kB_k,\\quad \\Pr(Y_k=1)=pq,\\quad N_n^{\\rm thin}\\sim\\operatorname{Bin}(n,pq)"
+        },
+        {
+          "explanation": "固定k，二项组合和因子n^{-k}的乘积趋于1/k!，(1−λt/n)^n趋于e^{−λt}，余下的(1−λt/n)^{−k}趋于1，因此得到Poisson极限。每槽概率必须随n缩小而不能固定。",
+          "tex": "\\binom nk(\\lambda t/n)^k(1-\\lambda t/n)^{n-k}\\longrightarrow e^{-\\lambda t}\\frac{(\\lambda t)^k}{k!}"
+        }
+      ],
+      "example": "p=0.2时三槽内恰一次成功概率0.384，均值0.6、方差0.48；首次成功平均等待5槽。稀疏化q=0.5时保留概率0.1；p_n=2/100时百槽无事件概率0.98^100≈0.13262。",
+      "application": "用于金融订单事件离散计数、成交标记与连续事件强度的近似建模；需要先核验跨槽独立、时间尺度和市场状态的稳定性。",
+      "caveat": "成交事件常受交易时段、订单簿状态与自激冲击影响。Bernoulli模型不是任何高频事件过程的默认真模型，且不能将几何等待时长直接替换为指数分布。",
+      "deep_sections": [
+        {
+          "title": "事件指标与二项计数",
+          "question": "为何伯努利指示过程的计数服从二项分布？",
+          "paragraphs": [
+            "每个时间槽仅有成功和失败，X_k为成功的指示变量，N_n将前n个槽的成功次数求和。对指定的k个成功位置，独立性使该路径概率为p^k(1−p)^{n−k}。",
+            "具有k个成功位置的组合数为C(n,k)，不同位置事件彼此互斥，因此求和得计数的二项分布。价格涨跌方向未必独立，若存在波动聚集或条件概率变化，就不能直接采用该计数模型。"
+          ],
+          "formulas": [
+            {
+              "label": "事件指标与二项计数",
+              "tex": "\\Pr(N_n=k)=\\binom nk p^k(1-p)^{n-k},\\quad \\mathbb E N_n=np"
+            }
+          ],
+          "proof": "选择成功索引集合共有组合数C(n,k)，各具体序列的独立乘积概率相同。对均值，由线性性E N_n=ΣE X_i=np；对方差，由跨槽独立得Cov(X_i,X_j)=0，故Var(N_n)=np(1−p)。",
+          "worked": "在p=0.2、n=3时恰好一次成功的概率为3×0.2×0.8²=0.384；均值0.6，方差3×0.2×0.8=0.48。",
+          "limitation": "不能把同一交易日多个相互影响的订单事件当成独立时间槽；计数的二项方差在过度离散场景可能系统低估。"
+        },
+        {
+          "title": "几何等待时间与无记忆性",
+          "question": "为什么等待首次成交事件的离散期数具有无记忆性质？",
+          "paragraphs": [
+            "当首次成功时刻为T，事件T>m要求前m次均失败，故概率为(1−p)^m。已知前m次均失败，后续独立槽仍以原成功概率p重新尝试。",
+            "因此条件等待时间不依赖已经过去的失败次数。这是对独立固定概率模型的结论，并不表明真实限价单的排队位置或成交强度不会随时间变化。"
+          ],
+          "formulas": [
+            {
+              "label": "几何等待时间与无记忆性",
+              "tex": "\\Pr(T=k)=(1-p)^{k-1}p,\\quad\\Pr(T>m+n\\mid T>m)=(1-p)^n"
+            }
+          ],
+          "proof": "利用独立性得P(T>m)=(1−p)^m；将条件概率写为P(T>m+n)/P(T>m)，得到(1−p)^n。由非负整数尾和公式E T=Σ_{m≥0}P(T>m)=Σ(1−p)^m=1/p。",
+          "worked": "若p=0.2，首次成功平均等待5个槽；已失败3期后再等2期仍失败的条件概率为0.8²=0.64。",
+          "limitation": "事件持续时间若呈现自激性、日内季节性或订单队列变化，几何无记忆模型不再成立。"
+        },
+        {
+          "title": "稀疏化与独立标记",
+          "question": "怎样由高频事件流得到仅包含某类事件的稀疏事件流？",
+          "paragraphs": [
+            "每个原始成功独立附加一次保留标记，标记成功概率为q，令Y_k=X_kB_k，其中B_k独立于X及跨槽标记。则单槽被保留的概率等于pq。",
+            "由于每个时间槽所用的(X_k,B_k)对相互独立，稀疏后的Y_k仍为Bernoulli(pq)过程。若标记选择规则使用未来成交信息，独立标记假设和可预测交易解释都不成立。"
+          ],
+          "formulas": [
+            {
+              "label": "稀疏化与独立标记",
+              "tex": "Y_k=X_kB_k,\\quad \\Pr(Y_k=1)=pq,\\quad N_n^{\\rm thin}\\sim\\operatorname{Bin}(n,pq)"
+            }
+          ],
+          "proof": "由条件概率P(X=1,B=1)=P(X=1)P(B=1)=pq；跨槽随机对独立确保Y_k独立，故重复计数为二项分布。原始未保留计数与保留计数一般并不独立。",
+          "worked": "若p=0.2、q=0.5，每期留下事件的概率0.1；在10个独立时间槽内留下事件数的均值为10×0.1=1。",
+          "limitation": "不能把事件在观测后根据当期价格选择的留存率当成独立稀疏化，也不应据此认定留存与丢弃子计数独立。"
+        },
+        {
+          "title": "从Bernoulli网格到Poisson极限",
+          "question": "哪些缩放才能使离散事件流逼近连续时间Poisson过程？",
+          "paragraphs": [
+            "取时间槽宽度Δ=t/n，令每槽p_n=λt/n。固定长度t的事件数服从Binomial(n,λt/n)，当n趋于无穷时其概率质量函数收敛到Poisson(λt)。",
+            "这个极限保持固定有限时间窗内的期望事件数λt，并使单槽多事件概率在极限下消失。若真实订单有成簇到达、时段强度变化或共同冲击，简单齐次Poisson极限不一定适用。"
+          ],
+          "formulas": [
+            {
+              "label": "从Bernoulli网格到Poisson极限",
+              "tex": "\\binom nk(\\lambda t/n)^k(1-\\lambda t/n)^{n-k}\\longrightarrow e^{-\\lambda t}\\frac{(\\lambda t)^k}{k!}"
+            }
+          ],
+          "proof": "固定k，二项组合和因子n^{-k}的乘积趋于1/k!，(1−λt/n)^n趋于e^{−λt}，余下的(1−λt/n)^{−k}趋于1，因此得到Poisson极限。每槽概率必须随n缩小而不能固定。",
+          "worked": "令λt=2、n=100，则零事件概率0.98^100≈0.13262，极限Poisson(2)的零事件概率e^{-2}≈0.135335。",
+          "limitation": "单期Bernoulli p直接等于Poisson强度λ是量纲错误：p无量纲，λ的量纲为每单位时间的事件数。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "stochastic-n0273",
+          "label": "后续：Poisson过程"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0274",
+          "label": "后续：指数等待时间"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0275",
+          "label": "后续：一般更新过程"
+        },
+        {
+          "kind": "math",
+          "id": "probability-n0100",
+          "label": "基础：Bernoulli与Binomial分布"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 6.262 Discrete Stochastic Processes：Bernoulli、Poisson、Renewals及Random Walks章节",
+          "url": "https://ocw.mit.edu/courses/6-262-discrete-stochastic-processes-spring-2011/pages/course-notes/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：Stochastic Processes和Markov Chains官方讲义",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V12完整精讲：定义、前提、四节证明、核算算例、反例与金融应用"
+    },
+    {
+      "id": "stochastic-n0272",
+      "node_id": "stochastic-n0272",
+      "title": "随机游走",
+      "definition": "随机游走由逐期随机增量累加形成，是理解路径风险、首次到达与扩散极限的基础。简单一维随机游走每一步以概率p向上移动1、以概率1−p向下移动1；漂移取决于p，波动由步长方差决定。公平游走在自然滤过下是鞅，平方游走减去时刻是鞅，但样本路径可以出现较大回撤和停时风险。",
+      "assumptions": "定义独立同分布步长ξ_k∈{−1,+1}、P(ξ_k=1)=p，S_n=S_0+Σ_{k=1}^nξ_k。讨论公平鞅取p=1/2；有限区间首次吸收概率从内部i∈{1,…,N−1}出发，边界0和N吸收。使用可选停止时必须验证停止有界或符合所用定理的其他条件。",
+      "properties": [
+        "简单游走的均值为S_0+n(2p−1)，方差为4np(1−p)。",
+        "当p=1/2时S_n为鞅，S_n²−n也为鞅，平方风险均值随时间增加。",
+        "公平游走在0,N边界吸收时，从i先达到N的概率为i/N。",
+        "可选停止和首次通关不意味着可以通过加倍下注得到无风险盈利；无界停时与资金约束是核心边界。"
+      ],
+      "formulas": [
+        {
+          "label": "步长分布与均值方差",
+          "tex": "\\mathbb E S_n=S_0+n(2p-1),\\quad \\operatorname{Var}(S_n)=4np(1-p)"
+        },
+        {
+          "label": "公平鞅与平方风险",
+          "tex": "\\mathbb E[S_{n+1}\\mid\\mathcal F_n]=S_n,\\qquad \\mathbb E[S_{n+1}^2\\mid\\mathcal F_n]=S_n^2+1"
+        },
+        {
+          "label": "首次到达、吸收与赌徒破产",
+          "tex": "H_i=\\frac12H_{i-1}+\\frac12H_{i+1},\\quad H_0=0,\\ H_N=1\\quad\\Longrightarrow\\quad H_i=\\frac iN"
+        },
+        {
+          "label": "路径缩放、扩散极限与停时边界",
+          "tex": "W_n(t)=\\frac{S_{\\lfloor nt\\rfloor}}{\\sqrt n}\\ \\Rightarrow\\ W(t),\\qquad \\operatorname{Var}[W(t)]=t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由Eξ=p−(1−p)=2p−1，Var ξ=Eξ²−(Eξ)²=1−(2p−1)²。独立增量使EΣξ=ΣEξ，VarΣξ=ΣVarξ；将初值S_0视为常数即得到两式。",
+          "tex": "\\mathbb E S_n=S_0+n(2p-1),\\quad \\operatorname{Var}(S_n)=4np(1-p)"
+        },
+        {
+          "explanation": "展开(S_n+ξ)²=S_n²+2S_nξ+ξ²。由于S_n为F_n可测、E[ξ|F_n]=0、E[ξ²|F_n]=1，条件期望给出平方增加1；减去时刻n+1即得到M_n=S_n²−n的鞅性质。",
+          "tex": "\\mathbb E[S_{n+1}\\mid\\mathcal F_n]=S_n,\\qquad \\mathbb E[S_{n+1}^2\\mid\\mathcal F_n]=S_n^2+1"
+        },
+        {
+          "explanation": "将方程整理成H_{i+1}−H_i=H_i−H_{i−1}，得全部相邻差相同，H_i=a+bi；由H_0=0得a=0，由H_N=1得b=1/N。有限吸收链以概率1最终到边界，故此首达概率合法。",
+          "tex": "H_i=\\frac12H_{i-1}+\\frac12H_{i+1},\\quad H_0=0,\\ H_N=1\\quad\\Longrightarrow\\quad H_i=\\frac iN"
+        },
+        {
+          "explanation": "对固定t，独立增量中心极限定理给S_{⌊nt⌋}/√n⇒N(0,t)。对多个时点由不相交增量的独立性得到布朗运动的有限维分布；再需紧性证明才能升级为函数空间的弱收敛，不能只依有限维收敛作出结论。",
+          "tex": "W_n(t)=\\frac{S_{\\lfloor nt\\rfloor}}{\\sqrt n}\\ \\Rightarrow\\ W(t),\\qquad \\operatorname{Var}[W(t)]=t"
+        }
+      ],
+      "example": "p=0.6的十步简单游走均值2、方差9.6；公平游走两步的方差2；吸收区间[0,5]从2出发先达到5的概率2/5=0.4。时间缩放示例在两个不同n下均保持目标方差0.25。",
+      "application": "连接金融价格波动、首次触及止损/止盈阈值、路径回撤、动态风险与布朗运动的扩散近似；必须先核对收益测度和离散取样时标。",
+      "caveat": "公平游走未必可通过可选停止盈利；无界资金、未界定的停时或非独立收益会破坏推导。函数CLT也不是所有资产价格都服从几何布朗运动的证明。",
+      "deep_sections": [
+        {
+          "title": "步长分布与均值方差",
+          "question": "如何区分随机游走的漂移与其随机波动？",
+          "paragraphs": [
+            "将S_n写成初值和n个独立步长之和。每步均值Eξ=2p−1，二阶矩Eξ²=1，因此单步方差为1−(2p−1)²=4p(1−p)。",
+            "独立性让均值与方差按n相加；如果金融收益有时间自相关或变动波动，方差就包含跨期协方差项，不再简单等于n倍单期方差。"
+          ],
+          "formulas": [
+            {
+              "label": "步长分布与均值方差",
+              "tex": "\\mathbb E S_n=S_0+n(2p-1),\\quad \\operatorname{Var}(S_n)=4np(1-p)"
+            }
+          ],
+          "proof": "由Eξ=p−(1−p)=2p−1，Var ξ=Eξ²−(Eξ)²=1−(2p−1)²。独立增量使EΣξ=ΣEξ，VarΣξ=ΣVarξ；将初值S_0视为常数即得到两式。",
+          "worked": "若p=0.6、n=10、S_0=0，则E S_10=10×0.2=2，Var S_10=4×10×0.6×0.4=9.6，标准差√9.6≈3.098。",
+          "limitation": "真实价格收益通常不是固定单位的±1，也可能产生跳空、非平稳波动与交易费用，因此不能将该方差直接解读为资产风险。"
+        },
+        {
+          "title": "公平鞅与平方风险",
+          "question": "为什么公平随机游走没有条件漂移，却仍积累平方风险？",
+          "paragraphs": [
+            "当p=1/2，下一步ξ_{n+1}独立于过去且均值为零，故E[S_{n+1}|F_n]=S_n。平方展开可得E[S_{n+1}²|F_n]=S_n²+1。",
+            "所以S_n是鞅，而S_n²−n也是鞅，S_n²本身是次鞅。公平性控制条件均值，既不排除单条路径较大的下行损失，也不限制时点最大回撤。"
+          ],
+          "formulas": [
+            {
+              "label": "公平鞅与平方风险",
+              "tex": "\\mathbb E[S_{n+1}\\mid\\mathcal F_n]=S_n,\\qquad \\mathbb E[S_{n+1}^2\\mid\\mathcal F_n]=S_n^2+1"
+            }
+          ],
+          "proof": "展开(S_n+ξ)²=S_n²+2S_nξ+ξ²。由于S_n为F_n可测、E[ξ|F_n]=0、E[ξ²|F_n]=1，条件期望给出平方增加1；减去时刻n+1即得到M_n=S_n²−n的鞅性质。",
+          "worked": "从S_0=0出发走两步，S_2以1/4概率取−2、1/2概率取0、1/4概率取2，E S_2=0、E S_2²=2，与2期累积方差相符。",
+          "limitation": "鞅是对指定概率测度与滤过的条件均值性质；风险中性贴现价格与真实历史收益不能未经说明直接混用。"
+        },
+        {
+          "title": "首次到达、吸收与赌徒破产",
+          "question": "公平路径在上下边界之间，向上先到达的概率如何推导？",
+          "paragraphs": [
+            "设H_i为从i出发先到N而非0的概率，首步条件分解给H_i=(H_{i−1}+H_{i+1})/2，边界条件为H_0=0、H_N=1。",
+            "差分方程意味着H_i的相邻差为常数，因此H_i=i/N。该有限状态吸收模型也可由停止时的有界鞅得到，但要先确保停时终将发生，不能把无界状态游走的停止直接套用。"
+          ],
+          "formulas": [
+            {
+              "label": "首次到达、吸收与赌徒破产",
+              "tex": "H_i=\\frac12H_{i-1}+\\frac12H_{i+1},\\quad H_0=0,\\ H_N=1\\quad\\Longrightarrow\\quad H_i=\\frac iN"
+            }
+          ],
+          "proof": "将方程整理成H_{i+1}−H_i=H_i−H_{i−1}，得全部相邻差相同，H_i=a+bi；由H_0=0得a=0，由H_N=1得b=1/N。有限吸收链以概率1最终到边界，故此首达概率合法。",
+          "worked": "上下边界为0与5，从状态i=2出发，公平游走先碰5的概率为2/5=0.4；先碰0的概率为0.6。",
+          "limitation": "该模型忽略连续价格跨价位跳跃、保证金触发及执行时的滑点；首达概率不能直接作为交易策略可执行的胜率。"
+        },
+        {
+          "title": "路径缩放、扩散极限与停时边界",
+          "question": "离散随机游走与连续布朗运动之间需要哪些归一化？",
+          "paragraphs": [
+            "对公平独立±1步长，连续时间插值过程W_n(t)=n^{−1/2}S_{⌊nt⌋}通过函数中心极限定理在适当路径空间与拓扑下弱收敛到标准布朗运动。",
+            "缩放既要把时间加速n倍，也要把空间缩小√n倍，才能保持单位时间方差约为t。该极限是分布层次，不意味着每个离散路径在同一概率空间逐点等于布朗路径。"
+          ],
+          "formulas": [
+            {
+              "label": "路径缩放、扩散极限与停时边界",
+              "tex": "W_n(t)=\\frac{S_{\\lfloor nt\\rfloor}}{\\sqrt n}\\ \\Rightarrow\\ W(t),\\qquad \\operatorname{Var}[W(t)]=t"
+            }
+          ],
+          "proof": "对固定t，独立增量中心极限定理给S_{⌊nt⌋}/√n⇒N(0,t)。对多个时点由不相交增量的独立性得到布朗运动的有限维分布；再需紧性证明才能升级为函数空间的弱收敛，不能只依有限维收敛作出结论。",
+          "worked": "n=100、t=0.25时使用25个公平步长并除以10，方差25/100=0.25；n=400时100个步长除以20，方差也为100/400=0.25。",
+          "limitation": "对于有厚尾、长记忆或显著跳跃的金融价格，布朗扩散极限不一定适用；随机游走再缩放不能自动推出正确的连续价格模型。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "stochastic-n0282",
+          "label": "吸收概率"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0289",
+          "label": "自然滤过"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0293",
+          "label": "可选停止定理"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0301",
+          "label": "布朗运动定义"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 6.262 Discrete Stochastic Processes：Bernoulli、Poisson、Renewals及Random Walks章节",
+          "url": "https://ocw.mit.edu/courses/6-262-discrete-stochastic-processes-spring-2011/pages/course-notes/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：Stochastic Processes和Markov Chains官方讲义",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V12完整精讲：定义、前提、四节证明、核算算例、反例与金融应用"
+    },
+    {
+      "id": "stochastic-n0274",
+      "node_id": "stochastic-n0274",
+      "title": "指数等待时间",
+      "definition": "指数等待时间描述具有恒定连续时间事件强度λ的无记忆等待，其生存函数为e^{−λt}。齐次Poisson过程的相邻事件间隔是独立同分布的Exp(λ)，两个独立指数事件的竞争等待最小值仍为指数分布。指数模型对市场订单到达有用，但日内强度时变或自激性将改变等待分布。",
+      "assumptions": "参数λ>0且量纲为时间倒数；T连续非负并满足P(T>t)=e^{−λt}。若考虑多个事件的最小值，各等待时间需独立；Poisson模型要求独立、平稳增量。指数无记忆性是齐次强度模型性质，不能在时间变动强度下无条件沿用。",
+      "properties": [
+        "指数等待的密度f(t)=λe^{−λt}，均值1/λ、方差1/λ²。",
+        "连续无记忆性为P(T>s+t|T>s)=e^{−λt}。",
+        "两个独立指数等待最小值为Exp(λ_1+λ_2)，获胜来源概率与各强度成比例。",
+        "齐次Poisson过程首到达与相邻间隔是独立Exp等待，时变强度下需累计风险函数。"
+      ],
+      "formulas": [
+        {
+          "label": "生存函数、密度与矩",
+          "tex": "S(t)=e^{-\\lambda t},\\quad f(t)=\\lambda e^{-\\lambda t},\\quad \\mathbb ET=1/\\lambda"
+        },
+        {
+          "label": "无记忆性与条件残余时间",
+          "tex": "\\Pr(T>s+t\\mid T>s)=\\frac{e^{-\\lambda(s+t)}}{e^{-\\lambda s}}=e^{-\\lambda t}"
+        },
+        {
+          "label": "多个独立时钟的竞争",
+          "tex": "\\min(T_1,T_2)\\sim\\operatorname{Exp}(\\lambda_1+\\lambda_2),\\quad \\Pr(T_1<T_2)=\\frac{\\lambda_1}{\\lambda_1+\\lambda_2}"
+        },
+        {
+          "label": "Poisson对应与非齐次等待",
+          "tex": "\\Pr(T_1>t)=\\Pr(N(t)=0)=e^{-\\lambda t};\\quad S(t)=\\exp\\!\\left(-\\int_0^t\\lambda(u)\\,du\\right)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由S(t+h)=S(t)S(h)和S(h)=1−λh+o(h)，得微分方程S'=-λS，唯一连续解为e^{-λt}。非负变量尾积分E T=∫_0∞S(t)dt=1/λ，二阶矩E T²=2/λ²，故方差1/λ²。",
+          "tex": "S(t)=e^{-\\lambda t},\\quad f(t)=\\lambda e^{-\\lambda t},\\quad \\mathbb ET=1/\\lambda"
+        },
+        {
+          "explanation": "按条件概率定义，分子为S(s+t)，分母为S(s)>0；代入指数生存函数消去e^{-λs}得到e^{-λt}。同样说明未来剩余等待T−s在已存活T>s条件下的分布与原T相同。",
+          "tex": "\\Pr(T>s+t\\mid T>s)=\\frac{e^{-\\lambda(s+t)}}{e^{-\\lambda s}}=e^{-\\lambda t}"
+        },
+        {
+          "explanation": "独立性给P(min>t)=P(T_1>t)P(T_2>t)=e^{-(λ_1+λ_2)t}。首到来源概率为∫_0∞f_1(t)S_2(t)dt=∫_0∞λ_1e^{-(λ_1+λ_2)t}dt，结果为λ_1/(λ_1+λ_2)。",
+          "tex": "\\min(T_1,T_2)\\sim\\operatorname{Exp}(\\lambda_1+\\lambda_2),\\quad \\Pr(T_1<T_2)=\\frac{\\lambda_1}{\\lambda_1+\\lambda_2}"
+        },
+        {
+          "explanation": "齐次Poisson计数N(t)~Poisson(λt)，因此P(N(t)=0)=e^{-λt}。在非齐次Poisson假设下，N(t)~Poisson(Λ(t))、Λ(t)=∫_0^tλ(u)du，零事件概率变为e^{-Λ(t)}，只有常数λ才保留无记忆性。",
+          "tex": "\\Pr(T_1>t)=\\Pr(N(t)=0)=e^{-\\lambda t};\\quad S(t)=\\exp\\!\\left(-\\int_0^t\\lambda(u)\\,du\\right)"
+        }
+      ],
+      "example": "指数λ=2的平均等待0.5、超过1分钟概率e^{-2}。两个独立时钟λ_1=2、λ_2=3竞争时，最早等待均值0.2、第一类先到概率0.4。非齐次强度λ(t)=2t时前1分钟零事件概率e^{-1}。",
+      "application": "为金融订单簿的到达时间、成交/撤单竞争和时间尺度转换提供基准；应用时需核查日内季节性、共同风险状态和条件事件强度。",
+      "caveat": "固定指数等待仅适用于常强度模型。与真实执行队列交互时，等待可能被撤单、竞价制度、部分成交和时间戳延迟显著改变。",
+      "deep_sections": [
+        {
+          "title": "生存函数、密度与矩",
+          "question": "恒定到达强度如何决定等待时间的全部分布？",
+          "paragraphs": [
+            "若在每个足够短的时间间隔h内发生新事件的条件概率近似为λh，且无记忆，则等待尚未结束的概率满足S(t+h)≈S(t)(1−λh)。",
+            "令h趋0得到S'(t)=−λS(t)，以S(0)=1求解出指数生存函数；用导数得密度，使用尾积分公式求均值与方差。"
+          ],
+          "formulas": [
+            {
+              "label": "生存函数、密度与矩",
+              "tex": "S(t)=e^{-\\lambda t},\\quad f(t)=\\lambda e^{-\\lambda t},\\quad \\mathbb ET=1/\\lambda"
+            }
+          ],
+          "proof": "由S(t+h)=S(t)S(h)和S(h)=1−λh+o(h)，得微分方程S'=-λS，唯一连续解为e^{-λt}。非负变量尾积分E T=∫_0∞S(t)dt=1/λ，二阶矩E T²=2/λ²，故方差1/λ²。",
+          "worked": "若λ=2次/分钟，则平均等待0.5分钟；超过1分钟仍未到达的概率e^{-2}≈0.135335。",
+          "limitation": "如果λ取交易日内不同时段的动态函数，则固定指数分布不成立；单位转换错误会导致系统性低估等待时间。"
+        },
+        {
+          "title": "无记忆性与条件残余时间",
+          "question": "为何已经等过一段时间并不会改变指数模型预测的剩余时间？",
+          "paragraphs": [
+            "对s,t≥0，事件T>s+t包含于T>s，因此条件概率可直接写成两个生存概率的比值。指数形式使s项完全相消，剩余等待仍服从同一个指数分布。",
+            "这不是任何真实订单都具有的经验事实；限价订单的排队位置随成交与撤单变化，剩余等待分布可能明显依赖已经等待的时间。"
+          ],
+          "formulas": [
+            {
+              "label": "无记忆性与条件残余时间",
+              "tex": "\\Pr(T>s+t\\mid T>s)=\\frac{e^{-\\lambda(s+t)}}{e^{-\\lambda s}}=e^{-\\lambda t}"
+            }
+          ],
+          "proof": "按条件概率定义，分子为S(s+t)，分母为S(s)>0；代入指数生存函数消去e^{-λs}得到e^{-λt}。同样说明未来剩余等待T−s在已存活T>s条件下的分布与原T相同。",
+          "worked": "λ=2时，即使已经等待3分钟，再等待至少0.5分钟的条件概率仍为e^{-1}≈0.367879。",
+          "limitation": "若市场成交强度受行情变化或订单存活时间影响，条件剩余分布不再指数；不能将无记忆当作普遍微观结构定律。"
+        },
+        {
+          "title": "多个独立时钟的竞争",
+          "question": "两个订单或事件竞争，为什么先到时长仍服从指数分布？",
+          "paragraphs": [
+            "若T_1,T_2独立分别服从Exp(λ_1)、Exp(λ_2)，则min(T_1,T_2)>t当且仅当两个等待都超过t。",
+            "独立性让生存概率相乘并得到总强度λ_1+λ_2；通过积分计算第一时钟先响概率为λ_1/(λ_1+λ_2)。对应金融应用时必须确认订单事件并非被同一流动性状态强依赖。"
+          ],
+          "formulas": [
+            {
+              "label": "多个独立时钟的竞争",
+              "tex": "\\min(T_1,T_2)\\sim\\operatorname{Exp}(\\lambda_1+\\lambda_2),\\quad \\Pr(T_1<T_2)=\\frac{\\lambda_1}{\\lambda_1+\\lambda_2}"
+            }
+          ],
+          "proof": "独立性给P(min>t)=P(T_1>t)P(T_2>t)=e^{-(λ_1+λ_2)t}。首到来源概率为∫_0∞f_1(t)S_2(t)dt=∫_0∞λ_1e^{-(λ_1+λ_2)t}dt，结果为λ_1/(λ_1+λ_2)。",
+          "worked": "成交时钟强度2、撤单时钟强度3每分钟，则最先事件的等待均值1/5=0.2分钟，先成交概率2/5=0.4、先撤单概率3/5=0.6。",
+          "limitation": "若成交与撤单由共同冲击触发，独立竞争概率不成立；也不能把市场报价变动当作不受状态影响的指数时钟。"
+        },
+        {
+          "title": "Poisson对应与非齐次等待",
+          "question": "为什么计数Poisson过程的相邻到达等待为指数，而时间变强度要改公式？",
+          "paragraphs": [
+            "在齐次Poisson(λ)过程中，第一到达晚于t等价于[0,t]内没有事件。零计数概率e^{−λt}正好是指数等待生存函数；独立平稳增量将这一性质重复应用于后续间隔。",
+            "若确定性强度为λ(u)且采用非齐次Poisson模型，首次等待的生存函数为exp[−∫_0^tλ(u)du]。它通常不具无记忆性，时间变强度的尺度与实际日期必须明确。"
+          ],
+          "formulas": [
+            {
+              "label": "Poisson对应与非齐次等待",
+              "tex": "\\Pr(T_1>t)=\\Pr(N(t)=0)=e^{-\\lambda t};\\quad S(t)=\\exp\\!\\left(-\\int_0^t\\lambda(u)\\,du\\right)"
+            }
+          ],
+          "proof": "齐次Poisson计数N(t)~Poisson(λt)，因此P(N(t)=0)=e^{-λt}。在非齐次Poisson假设下，N(t)~Poisson(Λ(t))、Λ(t)=∫_0^tλ(u)du，零事件概率变为e^{-Λ(t)}，只有常数λ才保留无记忆性。",
+          "worked": "若λ(u)=2u（每分钟尺度），前1分钟累计强度Λ(1)=1，故无到达概率e^{-1}≈0.367879；这并非固定λ=2的e^{-2}。",
+          "limitation": "非齐次Poisson只允许确定性时变强度；若强度随机且由过去事件驱动，需使用条件强度或Cox/Hawkes过程。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "stochastic-n0273",
+          "label": "先修：Poisson过程"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0275",
+          "label": "后续：更新过程"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0288",
+          "label": "订单排队模型"
+        },
+        {
+          "kind": "math",
+          "id": "timeseries-x005",
+          "label": "Hawkes条件强度"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 6.262 Discrete Stochastic Processes：Bernoulli、Poisson、Renewals及Random Walks章节",
+          "url": "https://ocw.mit.edu/courses/6-262-discrete-stochastic-processes-spring-2011/pages/course-notes/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：Stochastic Processes和Markov Chains官方讲义",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V12完整精讲：定义、前提、四节证明、核算算例、反例与金融应用"
+    },
+    {
+      "id": "stochastic-n0275",
+      "node_id": "stochastic-n0275",
+      "title": "更新过程",
+      "definition": "更新过程以独立同分布的正等待时间T_k描述反复到达事件的时刻S_n=Σ_{k≤n}T_k及计数N(t)=max{n:S_n≤t}。它不要求等待为指数，因此一般没有Poisson过程的独立增量性质。通过大数定律可获得长期更新频率，结合每周期回报还可得到更新报酬定理，是排队论与金融成交间隔的基础。",
+      "assumptions": "等待T_k>0为i.i.d.，均值μ=E T_k∈(0,∞)；研究更新强律时只需该有限正均值，研究报酬率可设周期对(T_k,R_k)独立同分布且E|R_k|<∞。对于不同初始等待分布的延迟更新需另外定义首周期，不能默认各间隔都从0开始独立同分布。",
+      "properties": [
+        "N(t)=max{n:S_n≤t}是到t的累计更新数，S_n为第n个更新时刻。",
+        "若E T=μ∈(0,∞)，则N(t)/t→1/μ几乎处处。",
+        "更新报酬定理在适当i.i.d.周期及可积条件下给长期每单位时间报酬E R/E T。",
+        "只有指数等待的特殊情形给齐次Poisson过程，一般更新计数不具有独立增量。"
+      ],
+      "formulas": [
+        {
+          "label": "更新时间与计数的反函数关系",
+          "tex": "S_n=\\sum_{k=1}^nT_k,\\quad N(t)=\\max\\{n:S_n\\le t\\},\\quad S_{N(t)}\\le t<S_{N(t)+1}"
+        },
+        {
+          "label": "更新强律与长期事件频率",
+          "tex": "\\frac{S_n}{n}\\xrightarrow{\\rm a.s.}\\mu\\quad\\Longrightarrow\\quad\\frac{N(t)}t\\xrightarrow{\\rm a.s.}\\frac1\\mu"
+        },
+        {
+          "label": "更新报酬定理",
+          "tex": "\\frac{\\sum_{k=1}^{N(t)}R_k}{t}\\xrightarrow{\\rm a.s.}\\frac{\\mathbb ER_1}{\\mathbb ET_1}"
+        },
+        {
+          "label": "非指数等待与Poisson模型边界",
+          "tex": "T_k\\equiv2\\ \\Longrightarrow\\ N(t)=\\lfloor t/2\\rfloor,\\qquad \\lim_{t\\to\\infty}\\frac{N(t)}t=\\frac12"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "T_k>0使S_n严格递增；N(t)定义为截至t最后一个不超过t的索引，因而S_{N(t)}≤t，下一次尚未发生，所以t<S_{N(t)+1}。由正有限均值的强律S_n/n→μ>0可进一步推出S_n→∞，因此无有限时间爆炸。",
+          "tex": "S_n=\\sum_{k=1}^nT_k,\\quad N(t)=\\max\\{n:S_n\\le t\\},\\quad S_{N(t)}\\le t<S_{N(t)+1}"
+        },
+        {
+          "explanation": "大数定律给S_n/n→μ∈(0,∞)，于是S_n→∞且N(t)→∞。在样本路径上用S_{N(t)}/N(t)≤t/N(t)<(S_{N(t)+1}/(N(t)+1))((N(t)+1)/N(t)，两端趋μ，夹逼得t/N(t)→μ并取倒数。",
+          "tex": "\\frac{S_n}{n}\\xrightarrow{\\rm a.s.}\\mu\\quad\\Longrightarrow\\quad\\frac{N(t)}t\\xrightarrow{\\rm a.s.}\\frac1\\mu"
+        },
+        {
+          "explanation": "将报酬时间平均写为[(1/N(t))Σ_{k≤N(t)}R_k]×[N(t)/t]。周期对i.i.d.且E|R|<∞使第一因子几乎处处趋E R，正有限的E T使第二因子趋1/E T；两者乘积得到更新报酬率。",
+          "tex": "\\frac{\\sum_{k=1}^{N(t)}R_k}{t}\\xrightarrow{\\rm a.s.}\\frac{\\mathbb ER_1}{\\mathbb ET_1}"
+        },
+        {
+          "explanation": "确定性等待时S_n=2n，直接按N(t)定义得到N(t)=⌊t/2⌋，因而固定t的计数方差为0。而同样平均率λ=1/2的Poisson过程在t时计数方差λt>0，说明两模型不可能相同。",
+          "tex": "T_k\\equiv2\\ \\Longrightarrow\\ N(t)=\\lfloor t/2\\rfloor,\\qquad \\lim_{t\\to\\infty}\\frac{N(t)}t=\\frac12"
+        }
+      ],
+      "example": "确定性T_k=2分钟时，在t=5有N(t)=2，在100分钟有N=50，长期频率0.5。若周期净报酬均值0.3，长期每分钟报酬率0.15；同强度Poisson(2)四分钟计数恰好2次的概率2e^{-2}≈0.27067。",
+      "application": "用于订单到达、成交间隔、交易循环与奖励率估计，能衔接排队论与点过程数据分析；需要区分长期频率与短期到达分布。",
+      "caveat": "更新过程不等同Poisson：非指数等待一般失去独立增量。零等待、不可积周期、状态变化或尾周期收益可能破坏上述长期定理。",
+      "deep_sections": [
+        {
+          "title": "更新时间与计数的反函数关系",
+          "question": "为什么到达时刻序列与累计到达计数之间存在一对反函数式定义？",
+          "paragraphs": [
+            "每个周期等待时间T_k严格为正，第n个事件的时间S_n由前n个间隔相加得到。对于任意t，计数N(t)正是S_n不超过t的最大整数索引。",
+            "这意味着S_{N(t)}≤t<S_{N(t)+1}，该不等式是把等待时间的强律转化为事件计数长期频率的关键。对于存在瞬时无限次到达的异常模型，需要首先排除爆炸。"
+          ],
+          "formulas": [
+            {
+              "label": "更新时间与计数的反函数关系",
+              "tex": "S_n=\\sum_{k=1}^nT_k,\\quad N(t)=\\max\\{n:S_n\\le t\\},\\quad S_{N(t)}\\le t<S_{N(t)+1}"
+            }
+          ],
+          "proof": "T_k>0使S_n严格递增；N(t)定义为截至t最后一个不超过t的索引，因而S_{N(t)}≤t，下一次尚未发生，所以t<S_{N(t)+1}。由正有限均值的强律S_n/n→μ>0可进一步推出S_n→∞，因此无有限时间爆炸。",
+          "worked": "若确定性间隔T_k≡2分钟，则S_1=2、S_2=4、S_3=6；在t=5分钟时N(t)=2，满足S_2=4≤5<6=S_3。",
+          "limitation": "存在集簇的订单事件与同时戳交易时，需要定义是否允许零间隔和多个事件同刻；严格正等待是这里的模型假设。"
+        },
+        {
+          "title": "更新强律与长期事件频率",
+          "question": "怎样从等待时间均值推导单位时间内的事件数极限？",
+          "paragraphs": [
+            "由等待时间大数定律S_n/n→μ几乎处处。利用S_{N(t)}≤t<S_{N(t)+1}，分别除以N(t)或N(t)+1，再令t→∞。",
+            "由于N(t)也趋于无穷，左右比率都趋向μ，夹逼得到t/N(t)→μ，从而N(t)/t→1/μ。该定理描述长期平均到达频率，不给每个短期窗口的独立性或泊松概率。"
+          ],
+          "formulas": [
+            {
+              "label": "更新强律与长期事件频率",
+              "tex": "\\frac{S_n}{n}\\xrightarrow{\\rm a.s.}\\mu\\quad\\Longrightarrow\\quad\\frac{N(t)}t\\xrightarrow{\\rm a.s.}\\frac1\\mu"
+            }
+          ],
+          "proof": "大数定律给S_n/n→μ∈(0,∞)，于是S_n→∞且N(t)→∞。在样本路径上用S_{N(t)}/N(t)≤t/N(t)<(S_{N(t)+1}/(N(t)+1))((N(t)+1)/N(t)，两端趋μ，夹逼得t/N(t)→μ并取倒数。",
+          "worked": "确定性间隔T=2分钟时，N(t)=⌊t/2⌋，在t=100分钟时计数50，长期单位分钟频率为1/2，与μ=2的倒数一致。",
+          "limitation": "该结果不表明100分钟内事件数总是50；若等待随机，有限时间频率有波动，重尾等待也会影响近似的收敛速度。"
+        },
+        {
+          "title": "更新报酬定理",
+          "question": "如何同时计入每次事件获得的报酬和消耗的随机时间？",
+          "paragraphs": [
+            "若每周期附带可积报酬R_k，并且周期对(T_k,R_k)独立同分布，则完成的N(t)个周期累计报酬为Σ_{k=1}^{N(t)}R_k。报酬和的强律与更新计数强律相乘，得到单位时间长期平均报酬。",
+            "允许同周期R_k与T_k相关，所需的是各周期对之间独立同分布及报酬一阶可积。若报酬在周期内部持续产生，需额外控制未完成的尾周期贡献。"
+          ],
+          "formulas": [
+            {
+              "label": "更新报酬定理",
+              "tex": "\\frac{\\sum_{k=1}^{N(t)}R_k}{t}\\xrightarrow{\\rm a.s.}\\frac{\\mathbb ER_1}{\\mathbb ET_1}"
+            }
+          ],
+          "proof": "将报酬时间平均写为[(1/N(t))Σ_{k≤N(t)}R_k]×[N(t)/t]。周期对i.i.d.且E|R|<∞使第一因子几乎处处趋E R，正有限的E T使第二因子趋1/E T；两者乘积得到更新报酬率。",
+          "worked": "若每次完整交易平均净收益0.3单位、平均事件间隔2分钟，则长期平均净收益率0.3/2=0.15单位/分钟；此处不声称逐分钟交易收益总是0.15。",
+          "limitation": "报酬若与未完成周期的剩余库存有关，或交易费用随市场时段变化且周期不稳定，简单更新报酬公式可能不足。"
+        },
+        {
+          "title": "非指数等待与Poisson模型边界",
+          "question": "为什么更新过程比Poisson过程宽泛，而失去哪些好用的性质？",
+          "paragraphs": [
+            "若T_k为指数等待，则无记忆性质保证每次事件后以相同随机机制重新开始，所形成的计数是齐次Poisson过程。若等待为确定性2分钟，则计数是周期性的、几乎无随机性。",
+            "二者虽然可有同样长期平均到达率1/2，但短期到达方差和独立增量性质完全不同。因此仅根据平均成交间隔估计Poisson强度，不足以确认订单到达的真实分布。"
+          ],
+          "formulas": [
+            {
+              "label": "非指数等待与Poisson模型边界",
+              "tex": "T_k\\equiv2\\ \\Longrightarrow\\ N(t)=\\lfloor t/2\\rfloor,\\qquad \\lim_{t\\to\\infty}\\frac{N(t)}t=\\frac12"
+            }
+          ],
+          "proof": "确定性等待时S_n=2n，直接按N(t)定义得到N(t)=⌊t/2⌋，因而固定t的计数方差为0。而同样平均率λ=1/2的Poisson过程在t时计数方差λt>0，说明两模型不可能相同。",
+          "worked": "两种到达模型长期频率均0.5次/分钟。t=4分钟时确定性更新恰好发生2次，Poisson(2)计数的概率P(N=2)=2e^{-2}≈0.27067。",
+          "limitation": "真实订单簿事件常有时变强度及聚集效应；等待分布与事件之间依赖必须通过数据检验，不能只比较样本平均间隔。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "stochastic-n0274",
+          "label": "先修：指数等待时间"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0273",
+          "label": "比较：Poisson过程"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0288",
+          "label": "应用：执行排队模型"
+        },
+        {
+          "kind": "math",
+          "id": "timeseries-x005",
+          "label": "条件强度的扩展"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 6.262 Discrete Stochastic Processes：Bernoulli、Poisson、Renewals及Random Walks章节",
+          "url": "https://ocw.mit.edu/courses/6-262-discrete-stochastic-processes-spring-2011/pages/course-notes/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：Stochastic Processes和Markov Chains官方讲义",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V12完整精讲：定义、前提、四节证明、核算算例、反例与金融应用"
+    },
+    {
+      "id": "stochastic-n0276",
+      "node_id": "stochastic-n0276",
+      "title": "复合Poisson过程",
+      "definition": "复合Poisson过程把齐次Poisson计数与独立同分布的随机事件幅度结合：S(t)=Σ_{k=1}^{N(t)}Y_k。它不仅描述事件发生数量，还描述每次事件产生的损益、跳价或交易量。平均值依赖E Y，方差依赖E Y²；复指数变换使其分布特征函数具有明确的指数形式。",
+      "assumptions": "计数N(t)为强度λ>0的齐次Poisson过程，随机标记Y_k相互独立同分布且独立于N全过程。均值要求E|Y|<∞，方差要求E Y²<∞。用S(0)=0定义空和，若金融价格为跳变过程，还需说明价格本身还是对数价格使用该过程。",
+      "properties": [
+        "E S(t)=λt E Y；当E Y²有限时Var S(t)=λt E Y²。",
+        "特征函数为exp[λt(φ_Y(u)−1)]，来自对Poisson计数条件化。",
+        "不交叠时间区间上的复合增量在齐次独立标记假设下独立且平稳。",
+        "复合Poisson只描述有限活动跳跃，不能自动代表无限活动Lévy过程或所有金融重尾风险。"
+      ],
+      "formulas": [
+        {
+          "label": "随机事件数的随机和",
+          "tex": "S(t)=\\sum_{k=1}^{N(t)}Y_k,\\qquad N(t)\\sim\\operatorname{Poisson}(\\lambda t)"
+        },
+        {
+          "label": "全方差分解与跳跃风险",
+          "tex": "\\operatorname{Var}[S(t)]=\\lambda t\\,\\operatorname{Var}(Y)+\\lambda t(\\mathbb EY)^2=\\lambda t\\,\\mathbb E[Y^2]"
+        },
+        {
+          "label": "特征函数与随机和分布",
+          "tex": "\\varphi_{S(t)}(u)=\\exp\\{\\lambda t[\\varphi_Y(u)-1]\\}"
+        },
+        {
+          "label": "增量独立、跳跃频率和金融边界",
+          "tex": "\\Delta S_{(s,t]}=\\sum_{k=N(s)+1}^{N(t)}Y_k,\\qquad \\mathbb E N(t)=\\lambda t<\\infty"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "给定N(t)=n时，S(t)是n个独立标记之和。由全期望E[S|N=n]=nE Y，进而E S=E[N]E Y=λt E Y。该步骤使用标记与计数的独立性及一阶可积。",
+          "tex": "S(t)=\\sum_{k=1}^{N(t)}Y_k,\\qquad N(t)\\sim\\operatorname{Poisson}(\\lambda t)"
+        },
+        {
+          "explanation": "条件N=n时Var(S|N=n)=nVar(Y)，条件期望E(S|N)=N E Y。全方差公式给E[Var(S|N)]+Var(E[S|N])=λt Var(Y)+Var(N)(E Y)²；Poisson计数满足Var N=λt，故得到最终公式。",
+          "tex": "\\operatorname{Var}[S(t)]=\\lambda t\\,\\operatorname{Var}(Y)+\\lambda t(\\mathbb EY)^2=\\lambda t\\,\\mathbb E[Y^2]"
+        },
+        {
+          "explanation": "条件期望E[e^{iuS}|N=n]=φ_Y(u)^n。再求和Σ_{n≥0}e^{-λt}(λt)^nφ_Y(u)^n/n!=e^{-λt}exp(λtφ_Y(u))，整理为exp(λt(φ_Y(u)−1))。",
+          "tex": "\\varphi_{S(t)}(u)=\\exp\\{\\lambda t[\\varphi_Y(u)-1]\\}"
+        },
+        {
+          "explanation": "Poisson过程不交叠增量独立，标记集合也按时间顺序划分为独立子集；因此任意不交叠区间的复合增量独立且分布只依赖时长。由于N(t)为有限Poisson计数，有限时间的跳跃总数几乎必然有限。",
+          "tex": "\\Delta S_{(s,t]}=\\sum_{k=N(s)+1}^{N(t)}Y_k,\\qquad \\mathbb E N(t)=\\lambda t<\\infty"
+        }
+      ],
+      "example": "λt=2、标记Y以等概率取1与3时，累计期望4、方差10，明显不同于只计标记方差得到的错误值2。没有事件的概率e^{-2}≈0.135335；标记恒为1时退化为原Poisson计数。",
+      "application": "用于跳价、成交量累计、突发损失与有限跳跃风险建模；对金融交易需核对事件标记、概率测度、价格单位和实际成交约束。",
+      "caveat": "复合Poisson并非万能跳跃模型：同批事件关联、时间变化强度、厚尾标记和无穷活动跳跃会改变方差或独立增量性质。",
+      "deep_sections": [
+        {
+          "title": "随机事件数的随机和",
+          "question": "怎样把事件数和单次跳幅整合成一个损益过程？",
+          "paragraphs": [
+            "先按Poisson强度生成到时间t的事件数N(t)，再给每个到达事件附上独立标记Y_k，累计量S(t)就是前N(t)个标记的和。",
+            "当Y_k代表订单成交量或价格跳变时，S(t)属于纯跳累积过程。标记的独立性与分布稳定性需要验证：行情恶化时大额卖单往往更密集。"
+          ],
+          "formulas": [
+            {
+              "label": "随机事件数的随机和",
+              "tex": "S(t)=\\sum_{k=1}^{N(t)}Y_k,\\qquad N(t)\\sim\\operatorname{Poisson}(\\lambda t)"
+            }
+          ],
+          "proof": "给定N(t)=n时，S(t)是n个独立标记之和。由全期望E[S|N=n]=nE Y，进而E S=E[N]E Y=λt E Y。该步骤使用标记与计数的独立性及一阶可积。",
+          "worked": "若λ=2次/分钟，每次标记Y以1/2概率为1、1/2概率为3，则E Y=2，一分钟累计标记期望E S(1)=2×2=4。",
+          "limitation": "标记可能依赖到达强度和历史状态。若将未来价格变化作为已知标记选择规则，会违反过程定义与金融信息合法性。"
+        },
+        {
+          "title": "全方差分解与跳跃风险",
+          "question": "为什么复合Poisson的方差不是简单的λt Var(Y)？",
+          "paragraphs": [
+            "累计量的随机性来自两部分：固定次数下单次标记的波动，以及事件次数N(t)本身的随机性。利用全方差分解保留这两部分，得到λtVar(Y)+(λt)(E Y)²。",
+            "因Var(Y)+(E Y)²=E Y²，总方差化为λt E Y²。只用λtVar(Y)会遗漏计数波动；若标记均值非零，该遗漏通常不可忽略。"
+          ],
+          "formulas": [
+            {
+              "label": "全方差分解与跳跃风险",
+              "tex": "\\operatorname{Var}[S(t)]=\\lambda t\\,\\operatorname{Var}(Y)+\\lambda t(\\mathbb EY)^2=\\lambda t\\,\\mathbb E[Y^2]"
+            }
+          ],
+          "proof": "条件N=n时Var(S|N=n)=nVar(Y)，条件期望E(S|N)=N E Y。全方差公式给E[Var(S|N)]+Var(E[S|N])=λt Var(Y)+Var(N)(E Y)²；Poisson计数满足Var N=λt，故得到最终公式。",
+          "worked": "标记Y各半取1与3时E Y=2、Var Y=1、E Y²=5。λt=2时总方差应为2×5=10，而只乘标记方差会错误得到2。",
+          "limitation": "若E Y²发散，方差不存在；样本方差有限不能据此证明总体跳跃损失平方可积，也不能使用标准均值方差优化。"
+        },
+        {
+          "title": "特征函数与随机和分布",
+          "question": "如何不枚举所有事件次数就得到累计跳幅的特征函数？",
+          "paragraphs": [
+            "先固定N=n，独立标记和的特征函数为φ_Y(u)^n。再对N~Poisson(λt)求期望，得到Poisson概率母函数在φ_Y(u)处的取值。",
+            "该表达使跳跃分布的傅里叶计算直接化为指数形式，也说明复合Poisson属于有限活动Lévy过程。但投资风险中性定价还要声明所采用的概率测度。"
+          ],
+          "formulas": [
+            {
+              "label": "特征函数与随机和分布",
+              "tex": "\\varphi_{S(t)}(u)=\\exp\\{\\lambda t[\\varphi_Y(u)-1]\\}"
+            }
+          ],
+          "proof": "条件期望E[e^{iuS}|N=n]=φ_Y(u)^n。再求和Σ_{n≥0}e^{-λt}(λt)^nφ_Y(u)^n/n!=e^{-λt}exp(λtφ_Y(u))，整理为exp(λt(φ_Y(u)−1))。",
+          "worked": "若每个标记恒为1，则S(t)=N(t)，特征函数为exp[λt(e^{iu}−1)]，与Poisson分布的已知结果完全一致。",
+          "limitation": "仅有边际标记特征函数而缺少标记与计数独立性，不能使用以上指数形式；金融资产共同跳跃需联合标记模型。"
+        },
+        {
+          "title": "增量独立、跳跃频率和金融边界",
+          "question": "为什么这类过程能建模稀疏跳跃，却不能模拟所有流动性冲击？",
+          "paragraphs": [
+            "不交叠时间区间上的Poisson计数独立，且区间内使用的标记集合不重叠并彼此独立，因此复合Poisson增量也独立。平均事件数λt有限，任意有限区间内的跳跃次数几乎必然有限。",
+            "高频金融市场还可能出现无限活动小跳、跳跃自激、时间强度变化和跨资产共同冲击，需要更一般的Lévy、Hawkes或Cox模型。要将标记作为成交量还需明确是否允许为负和实际单位。"
+          ],
+          "formulas": [
+            {
+              "label": "增量独立、跳跃频率和金融边界",
+              "tex": "\\Delta S_{(s,t]}=\\sum_{k=N(s)+1}^{N(t)}Y_k,\\qquad \\mathbb E N(t)=\\lambda t<\\infty"
+            }
+          ],
+          "proof": "Poisson过程不交叠增量独立，标记集合也按时间顺序划分为独立子集；因此任意不交叠区间的复合增量独立且分布只依赖时长。由于N(t)为有限Poisson计数，有限时间的跳跃总数几乎必然有限。",
+          "worked": "在λ=2次/分钟的模型中，1分钟发生零次跳跃的概率e^{-2}≈0.135335；发生超过3次的概率1−e^{-2}(1+2+2²/2+2³/6)≈0.142877。",
+          "limitation": "真实交易事件可能同一时刻有多笔撮合，亦可能由共同信息冲击而聚集；有限活动与独立增量是需检验的模型条件。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "stochastic-n0273",
+          "label": "先修：Poisson过程"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0274",
+          "label": "事件等待时间"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0287",
+          "label": "后续：泊松化"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0329",
+          "label": "扩展：跳扩散模型"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 6.262 Discrete Stochastic Processes：Bernoulli、Poisson、Renewals及Random Walks章节",
+          "url": "https://ocw.mit.edu/courses/6-262-discrete-stochastic-processes-spring-2011/pages/course-notes/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：Stochastic Processes和Markov Chains官方讲义",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V12完整精讲：定义、前提、四节证明、核算算例、反例与金融应用"
     }
   ]
 }
