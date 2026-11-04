@@ -36,7 +36,7 @@ const prerequisites={
 "stochastic-n0295":["stochastic-n0278","stochastic-n0281"],
 "stochastic-n0296":["stochastic-n0295"],
 "stochastic-n0297":["stochastic-n0296","stochastic-n0293"],
-"stochastic-n0298":["stochastic-n0281","timeseries-n0270"],
+"stochastic-n0298":["stochastic-n0281","probability-n0096"],
 "stochastic-n0299":["stochastic-n0273","stochastic-n0274","stochastic-n0288"],
 "stochastic-n0300":["stochastic-n0288","stochastic-n0299"]
 };
