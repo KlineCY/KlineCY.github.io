@@ -36,7 +36,7 @@ class DeepeningRegression(unittest.TestCase):
         self.assertAlmostEqual(normalized[1], 2 / 3)
         lesson = L17["m16-c01-p06"]
         self.assertIn("1/3", lesson["worked_example"])
-        self.assertIn(r"\\mathcal V_i", next(e["tex"] for e in lesson["equations"] if e["label"] == "注意力概率"))
+        self.assertIn(r"\mathcal V_i", next(e["tex"] for e in lesson["equations"] if e["label"] == "注意力概率"))
 
     def test_sft_token_weighting(self):
         self.assertAlmostEqual(3 * math.log(2) / 4, 0.5198603854199589)
