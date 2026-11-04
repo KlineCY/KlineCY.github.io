@@ -468,7 +468,7 @@
 - 增加 `quant/math/test_sde_risk_neutral_v14.mjs`，对19篇新增正文、76个新深入小节、76条严格KaTeX公式、至少38项学术来源、另外1篇既有Feynman–Kac的4节深化、跨数学/ML链接、21项先修关系与656节点无环进行检验。独立数值核验包括OU转移方差、CIR边界与Gamma、Euler偏差、Novikov、Girsanov、无套利二叉树、Feynman–Kac、两期美式看跌、复合Poisson及Lévy。
 - V13历史专项测试只保留此前**207篇完整教材**的最低质量覆盖要求，V14测试另对当前实际总数**226篇**作精确检查，防止旧版本数字阻碍正常内容扩展。
 
-理论参考包含Lawler《Stochastic Calculus and Finance》、MIT 15.070J《Advanced Stochastic Processes》官方讲义、Särkkä–Solin《Applied Stochastic Differential Equations》、Cont–Tankov《Financial Modelling with Jump Processes》及Tankov关于Lévy过程的专门讲义。资料链接按相关主题核对，不把某一个无关PDF冒充跳跃教材。全站内容独立组织为中文数学证明和原创算例，既不搬运整段教材，也不以未经证实的资产预测替代模型成立条件。
+理论参考包含Lawler《Stochastic Calculus: An Introduction with Applications》、MIT 15.070J《Advanced Stochastic Processes》官方讲义、Särkkä–Solin《Applied Stochastic Differential Equations》、Cont–Tankov《Financial Modelling with Jump Processes》及Tankov关于Lévy过程的专门讲义。资料链接按相关主题核对，不把某一个无关PDF冒充跳跃教材。全站内容独立组织为中文数学证明和原创算例，既不搬运整段教材，也不以未经证实的资产预测替代模型成立条件。
 
 **验收范围边界：** GitHub CI能检查文本结构、公式解析、数值、课程链接、静态CSS标记与依赖图，不相当于在真实手机、浏览器和打印设备上完成视觉回归，也不等于实时核验GitHub Pages部署状态。
 
