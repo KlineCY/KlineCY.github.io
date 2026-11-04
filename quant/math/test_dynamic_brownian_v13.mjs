@@ -103,6 +103,15 @@ for(const id of ids){
 assert.equal(sections,60);
 assert.equal(formulas,60);
 assert.equal(sources,30);
+const deepened=byId.get("ito-n0308");
+assert(deepened&&deepened.deep_sections?.length===4,"existing extension Ito isometry must now be a complete four-section mathematical lecture");
+assert(deepened.example.includes("4/3")&&deepened.example.includes("H_t=2t"),"preserve original H=2t variance example");
+assert(deepened.definition.length>=100&&deepened.assumptions.length>=90,"deepened isometry theorem conditions");
+for(const [i,sec] of deepened.deep_sections.entries()){
+ assert(sec.paragraphs.length===2&&sec.proof.length>=75&&sec.worked.length>=50&&sec.limitation.length>=40,"expanded Ito isometry derivation incomplete "+i);
+ for(const eq of sec.formulas)katex.renderToString(eq.tex,{throwOnError:true,strict:"ignore"});
+}
+
 const near=(a,b,tol=1e-10)=>assert(Number.isFinite(a)&&Math.abs(a-b)<=tol,"independent numeric failure "+a+" vs "+b);
 // MDP, Bellman values and policy improvement.
 near((.3+.1)/2,.2);
@@ -160,6 +169,7 @@ near(2**2*3,12);
 near((3-2+1)/4,.5);
 near(.08-.2**2/2,.06);
 near((1+.5)-1,.5);
+near(4/3,1.3333333333333333);
 // Correlated Brownian, multivariate Ito generator, portfolio risk.
 near(.4*2,.8);
 near(2*3*2,12);
@@ -179,5 +189,5 @@ assert(ml.includes('aria-label="V13十五篇动态决策与布朗Ito数学先修
 assert(math.includes("styles.css?v=20261104-probscore-v6-inference-v8-martingale-v9-convergence-v10-integration-v11-stochastic-v12-brownian-v13"),"stylesheet cache not invalidated");
 assert(css.includes("V13: Bellman, Brownian and multidimensional Ito formula layout"));
 assert(css.includes(".math-v13-control-ito summary:focus-visible")&&css.includes(".katex-display")&&css.includes("@media print"),"mobile/CJK/keyboard/print styles not enforced");
-console.log("PASS V13: 15 complete dynamic-control and Brownian/Ito lectures, 60 proof sections, 60 strict KaTeX equations, "+sources+" official academic refs, "+links+" verified maths/ML crosslinks, 207 unique full mathematics lectures and 656-node acyclic prerequisite graph, independently reproduced numeric results.");
+console.log("PASS V13: 15 new complete dynamic-control and Brownian/Ito lectures, 60 new proof sections plus one older 4-section Ito isometry lecture deeply revised, 60 strict KaTeX equations, "+sources+" official academic refs, "+links+" verified maths/ML crosslinks, 207 unique full mathematics lectures and 656-node acyclic prerequisite graph, independently reproduced numeric results.");
 
