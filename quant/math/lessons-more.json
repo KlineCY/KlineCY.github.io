@@ -4198,6 +4198,161 @@
         }
       ],
       "checked_status": "V14完整精讲：绝对连续、奇异性、Lebesgue分解和金融等价测度"
+    },
+    {
+      "id": "measure-n0146",
+      "node_id": "measure-n0146",
+      "title": "Radon-Nikodym定理",
+      "definition": "Radon–Nikodym定理刻画两个σ有限测度之间存在密度的充要条件：ν对μ绝对连续当且仅当有非负可测函数f使ν(A)=∫_Af dμ，f=dν/dμ在μ几乎处处意义下唯一。该定理将抽象的零测集关系连接到积分、概率分布变换与条件期望，为金融风险价格的随机密度过程建立测度论基础。",
+      "assumptions": "μ和ν为同一可测空间上的σ有限正测度，ν≪μ，RN存在性由标准定理给出；若使用概率测度则总质量为1。换元积分要求测试函数非负或ν绝对可积，链式法则要求中间测度满足相应绝对连续和σ有限条件；反向密度要求等价而不只是单向绝对连续。密度等式只在μ零集之外有唯一性。",
+      "properties": [
+        "σ有限条件下ν≪μ是RN密度存在的充要条件。",
+        "RN导数在基准测度的几乎处处意义下唯一，而非必须逐点一致。",
+        "对非负或可积h可写∫h dν=∫h(dν/dμ)dμ。",
+        "链式导数满足乘法法则，等价测度下反向密度为正密度的倒数。"
+      ],
+      "formulas": [
+        {
+          "label": "Radon–Nikodym存在定理",
+          "tex": "\\nu\\ll\\mu\\quad\\Longleftrightarrow\\quad\\exists f\\ge0:\\ \\nu(A)=\\int_Af\\,d\\mu\\quad(\\forall A\\in\\mathcal F)"
+        },
+        {
+          "label": "密度唯一性和零集判定",
+          "tex": "\\int_Af\\,d\\mu=\\int_Ag\\,d\\mu\\ \\forall A\\quad\\Longrightarrow\\quad f=g\\ \\mu\\text{-a.e.}"
+        },
+        {
+          "label": "换测度积分与期望",
+          "tex": "\\int h\\,d\\nu=\\int hf\\,d\\mu,\\qquad f=\\frac{d\\nu}{d\\mu}"
+        },
+        {
+          "label": "链式法则与互相等价测度",
+          "tex": "\\frac{d\\eta}{d\\mu}=\\frac{d\\eta}{d\\nu}\\frac{d\\nu}{d\\mu},\\qquad \\frac{d\\mu}{d\\nu}=\\left(\\frac{d\\nu}{d\\mu}\\right)^{-1}\\ (\\nu\\sim\\mu)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "正向存在性是Radon–Nikodym定理的非平凡部分，可先对有限测度构造有界线性泛函、借助Hilbert空间Riesz表示及截断逼近取得f，再用σ有限分块拼接。反向较直接：μ(A)=0时任意非负函数在A上的积分为零，故ν(A)=0。完整存在性属于测度论核心定理，不能仅靠形式商ν(A)/μ(A)证明。",
+          "tex": "\\nu\\ll\\mu\\quad\\Longleftrightarrow\\quad\\exists f\\ge0:\\ \\nu(A)=\\int_Af\\,d\\mu\\quad(\\forall A\\in\\mathcal F)"
+        },
+        {
+          "explanation": "对A_n={f≥g+1/n}，由积分等式0=∫_{A_n}(f−g)dμ≥μ(A_n)/n，因而μ(A_n)=0。集合{f>g}=∪_{n≥1}A_n（按实值和几乎处处有限版本）也是零测；互换f,g证反向零集，遂有μ({f≠g})=0。",
+          "tex": "\\int_Af\\,d\\mu=\\int_Ag\\,d\\mu\\ \\forall A\\quad\\Longrightarrow\\quad f=g\\ \\mu\\text{-a.e.}"
+        },
+        {
+          "explanation": "先在非负简单函数上由ν定义逐项核验两侧相等。令h_n↑h的简单函数列，单调收敛分别给∫h_n dν↑∫h dν和∫h_n f dμ↑∫hf dμ；取极限即得非负h公式。对两侧绝对可积的h应用正负分解。",
+          "tex": "\\int h\\,d\\nu=\\int hf\\,d\\mu,\\qquad f=\\frac{d\\nu}{d\\mu}"
+        },
+        {
+          "explanation": "链式法则通过对任意事件A写η(A)=∫_Ag dν=∫_Agf dμ，使用RN导数唯一性得到。等价情形f>0 μ几乎处处，对任意A有∫_A(1/f)dν=∫_A(1/f)f dμ=μ(A)，故反向导数为1/f。",
+          "tex": "\\frac{d\\eta}{d\\mu}=\\frac{d\\eta}{d\\nu}\\frac{d\\nu}{d\\mu},\\qquad \\frac{d\\mu}{d\\nu}=\\left(\\frac{d\\nu}{d\\mu}\\right)^{-1}\\ (\\nu\\sim\\mu)"
+        }
+      ],
+      "deep_sections": [
+        {
+          "title": "Radon–Nikodym存在定理",
+          "question": "何时能把一个测度相对于另一个测度写成函数密度？",
+          "paragraphs": [
+            "Radon–Nikodym定理说明：在同一可测空间中若μ和ν均σ有限且ν≪μ，则存在非负可测函数f，使每个事件A的ν质量等于∫_A f dμ。",
+            "该定理提供的是测度关系的精确刻画，不要求f处处连续或有界；此外所得f只在μ几乎处处意义下唯一。若ν含有μ零集上的正质量，密度不可能覆盖该奇异部分。"
+          ],
+          "formulas": [
+            {
+              "label": "Radon–Nikodym存在定理",
+              "tex": "\\nu\\ll\\mu\\quad\\Longleftrightarrow\\quad\\exists f\\ge0:\\ \\nu(A)=\\int_Af\\,d\\mu\\quad(\\forall A\\in\\mathcal F)"
+            }
+          ],
+          "proof": "正向存在性是Radon–Nikodym定理的非平凡部分，可先对有限测度构造有界线性泛函、借助Hilbert空间Riesz表示及截断逼近取得f，再用σ有限分块拼接。反向较直接：μ(A)=0时任意非负函数在A上的积分为零，故ν(A)=0。完整存在性属于测度论核心定理，不能仅靠形式商ν(A)/μ(A)证明。",
+          "worked": "若μ为[0,1]均匀概率，ν(A)=∫_A2x dx，则f(x)=2x是RN导数；ν([0,.5])=∫_0^.5 2x dx=.25。",
+          "limitation": "若ν=δ_0而μ为Lebesgue测度，则μ({0})=0但ν({0})=1，违背绝对连续；不存在普通非负Lebesgue密度表示ν。"
+        },
+        {
+          "title": "密度唯一性和零集判定",
+          "question": "为什么两种不同写法表示同一个测度时，它们至多在零测集上不同？",
+          "paragraphs": [
+            "假设非负可测f和g对每个事件A都有∫_A f dμ=∫_A g dμ。考虑可测集合A_n={f≥g+1/n}，在该集合上f−g至少为1/n。",
+            "因为其积分差应为零，故μ(A_n)=0；对n取并集得到μ({f>g})=0。交换f、g的角色得到μ({g>f})=0，因此f=g在μ几乎处处意义下成立。"
+          ],
+          "formulas": [
+            {
+              "label": "密度唯一性和零集判定",
+              "tex": "\\int_Af\\,d\\mu=\\int_Ag\\,d\\mu\\ \\forall A\\quad\\Longrightarrow\\quad f=g\\ \\mu\\text{-a.e.}"
+            }
+          ],
+          "proof": "对A_n={f≥g+1/n}，由积分等式0=∫_{A_n}(f−g)dμ≥μ(A_n)/n，因而μ(A_n)=0。集合{f>g}=∪_{n≥1}A_n（按实值和几乎处处有限版本）也是零测；互换f,g证反向零集，遂有μ({f≠g})=0。",
+          "worked": "如果密度f(x)=2x且把单点x=.5处的函数值从1改成100，由于μ({.5})=0，该密度表示的所有事件概率不变。",
+          "limitation": "密度唯一性不是逐点唯一，尤其在含有零概率价格状态的连续分布中，不应根据单个零测点的密度值声称概率模型改变。"
+        },
+        {
+          "title": "换测度积分与期望",
+          "question": "为什么已知RN密度后可以用原测度计算新测度下的期望？",
+          "paragraphs": [
+            "若ν(A)=∫_A f dμ，则对任意非负简单函数h=Σc_i1_{A_i}，有∫h dν=Σc_iν(A_i)=Σc_i∫_{A_i}f dμ。",
+            "对一般非负可测h用简单函数单调逼近并应用单调收敛定理，再对可积有符号h分正负部分得到换元积分恒等式。金融风险中性期望的密度加权正基于此。"
+          ],
+          "formulas": [
+            {
+              "label": "换测度积分与期望",
+              "tex": "\\int h\\,d\\nu=\\int hf\\,d\\mu,\\qquad f=\\frac{d\\nu}{d\\mu}"
+            }
+          ],
+          "proof": "先在非负简单函数上由ν定义逐项核验两侧相等。令h_n↑h的简单函数列，单调收敛分别给∫h_n dν↑∫h dν和∫h_n f dμ↑∫hf dμ；取极限即得非负h公式。对两侧绝对可积的h应用正负分解。",
+          "worked": "对μ=Uniform[0,1]、f=2x，ν下的X期望为∫_0^1x·2x dx=2/3；而μ下E X=1/2，说明不同测度可改变均值而保持相同状态空间。",
+          "limitation": "若h含正负且新测度下正负部分都无穷，则期望出现∞−∞不定式；不可把形式密度积分当作有限金融价格。"
+        },
+        {
+          "title": "链式法则与互相等价测度",
+          "question": "连续改变两次测度时，为什么密度可以相乘？",
+          "paragraphs": [
+            "在测度η≪ν≪μ且满足σ有限条件时，令g=dη/dν与f=dν/dμ。由换测度积分，η(A)=∫_A g dν=∫_A gf dμ。",
+            "因此dη/dμ=gf在μ几乎处处成立。若ν∼μ且f>0 μ几乎处处，则反向导数dμ/dν=1/f，允许在实际概率和风险中性概率之间一致地来回计算条件期望。"
+          ],
+          "formulas": [
+            {
+              "label": "链式法则与互相等价测度",
+              "tex": "\\frac{d\\eta}{d\\mu}=\\frac{d\\eta}{d\\nu}\\frac{d\\nu}{d\\mu},\\qquad \\frac{d\\mu}{d\\nu}=\\left(\\frac{d\\nu}{d\\mu}\\right)^{-1}\\ (\\nu\\sim\\mu)"
+            }
+          ],
+          "proof": "链式法则通过对任意事件A写η(A)=∫_Ag dν=∫_Agf dμ，使用RN导数唯一性得到。等价情形f>0 μ几乎处处，对任意A有∫_A(1/f)dν=∫_A(1/f)f dμ=μ(A)，故反向导数为1/f。",
+          "worked": "两状态μ=(.5,.5)、ν=(.6,.4)，f=(1.2,.8)；反向密度为(1/1.2,1/.8)=(5/6,1.25)，按ν加权总期望为.6×5/6+.4×1.25=1。",
+          "limitation": "只有在真正等价且密度正的状态上才能取倒数；零密度状态会使反向表达非法，不能通过除以零强行恢复旧测度。"
+        }
+      ],
+      "example": "Uniform[0,1]基准μ与密度f=2x的ν满足ν([0,.5])=.25，E_ν X=∫_0^1 2x²dx=2/3，而μ下E X=.5；对两个离散状态测度μ=(.5,.5)、ν=(.6,.4)，其正密度为(1.2,.8)，反向密度(5/6,1.25)满足归一化。",
+      "application": "用于条件期望、真实与风险中性分布之间的期望转换、似然比、重要性采样与金融概率定价，并为Girsanov指数密度提供合法性检查。",
+      "caveat": "RN存在性不是随意对测度值做点态除法；若有奇异质量则不能用纯普通密度替代。所有积分都需核对非负性或绝对可积性及密度方向。",
+      "links": [
+        {
+          "kind": "math",
+          "id": "measure-n0145",
+          "label": "先修：绝对连续与奇异性"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0136",
+          "label": "先修：RN导数"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0147",
+          "label": "后续：概率测度变换"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0319",
+          "label": "金融：Girsanov换测度"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 18.125 Measure and Integration：课程大纲含Radon–Nikodym定理及积分",
+          "url": "https://ocw.mit.edu/courses/18-125-measure-and-integration-fall-2003/pages/syllabus/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：Lecture 10连续变量的RN导数与σ有限定理",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V14完整精讲：RN存在、唯一、换元积分、链式及反向密度"
     }
   ]
 }
