@@ -370,6 +370,13 @@ async function start(){
    if(newIds.has(id))throw Error("新增专题ID重复："+id);
    newIds.add(id);
   }
+  // Model evaluation beyond time-split mechanics: three independent evidence tutorials.
+  const evidenceBundle=await fetchAtlasJson("./atlas-evaluation-evidence-chapter.json",{cache:"no-cache"});
+  const evidenceIds=window.quantMlExpansion.install(data,evidenceBundle);
+  for(const id of evidenceIds){
+   if(newIds.has(id))throw Error("新增专题ID重复："+id);
+   newIds.add(id);
+  }
   const conceptBundle=await fetchAtlasJson("./atlas-concept-chapters.json",{cache:"no-cache"});
   if(!window.quantMlConcepts?.mount)throw Error("知识链分层渲染器未加载");
   state.conceptChapters=window.quantMlConcepts.mount(data,conceptBundle);
