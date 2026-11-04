@@ -2977,6 +2977,316 @@
         }
       ],
       "checked_status": "V11完整讲义：四节数学证明、可复核数值与测度边界"
+    },
+    {
+      "id": "measure-n0130",
+      "node_id": "measure-n0130",
+      "title": "单调收敛定理",
+      "definition": "单调收敛定理（Beppo Levi）指出：对任意非负可测函数序列f_n，如果它逐点递增并趋于f，则各期积分的极限等于极限函数积分。积分可取无穷大，不需要预先给出统一可积上界。它是非负Lebesgue积分的核心极限定理，也是交换非负求和与积分的基本依据。",
+      "assumptions": "测度空间(Ω,F,μ)不必有限，f_n均非负可测、f_n≤f_(n+1)逐点且f_n↑f。定理可以在几乎处处意义下陈述，需在适当完备化/版本条件下保证极限函数可测。若函数有符号或序列不单调，不能直接套用本定理。",
+      "properties": [
+        "非负单调递增函数积分极限可与函数极限交换，结果允许为∞。",
+        "单调收敛不要求f_n存在共同的有限可积控制函数。",
+        "单调收敛可以证明非负函数列积分的可数可加性和非负级数求和交换。",
+        "去掉单调性或非负性可能导致极限积分与积分极限不同甚至表达式不存在。"
+      ],
+      "formulas": [
+        {
+          "label": "单调收敛定理的准确量词",
+          "tex": "0\\le f_n\\uparrow f\\quad\\Longrightarrow\\quad\\lim_{n\\to\\infty}\\int f_n\\,d\\mu=\\int f\\,d\\mu"
+        },
+        {
+          "label": "基于简单函数的完整下界证明",
+          "tex": "\\int f_n\\,d\\mu\\ge c\\int s\\mathbf1_{\\{f_n\\ge cs\\}}\\,d\\mu\\longrightarrow c\\int s\\,d\\mu"
+        },
+        {
+          "label": "非负级数与期望求和交换",
+          "tex": "\\mathbb E\\!\\left[\\sum_{k=1}^{\\infty}Y_k\\right]=\\sum_{k=1}^{\\infty}\\mathbb E[Y_k]\\qquad(Y_k\\ge0)"
+        },
+        {
+          "label": "缺少单调性的集中反例",
+          "tex": "f_n(x)=n\\mathbf1_{(0,1/n]}(x)\\to0,\\quad\\int_0^1f_n(x)\\,dx=1"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "因为f_n≤f，积分单调性给lim_n∫f_n≤∫f。反向需对任意简单函数0≤s≤f构造近似低界，再让n→∞证明∫f_n至少接近∫s，最终对所有s取上确界。",
+          "tex": "0\\le f_n\\uparrow f\\quad\\Longrightarrow\\quad\\lim_{n\\to\\infty}\\int f_n\\,d\\mu=\\int f\\,d\\mu"
+        },
+        {
+          "explanation": "先取0≤s≤f和0<c<1。因f_n↑f，每个s(ω)>0的点最终满足f_n(ω)≥cs(ω)，故A_n在s的正支撑上递增覆盖。积分下界∫f_n≥c∫s1_{A_n}成立；对有限简单函数应用集合测度从下连续性，最后令c→1并对s取上确界，得到∫f≤lim∫f_n。",
+          "tex": "\\int f_n\\,d\\mu\\ge c\\int s\\mathbf1_{\\{f_n\\ge cs\\}}\\,d\\mu\\longrightarrow c\\int s\\,d\\mu"
+        },
+        {
+          "explanation": "定义S_n=Σ_{k≤n}Y_k，有限求和的积分线性给E[S_n]=Σ_{k≤n}E[Y_k]。由于S_n↑S，MCT给E[S]=lim_nE[S_n]=Σ_{k≥1}E[Y_k]，即便总期望为∞也成立。",
+          "tex": "\\mathbb E\\!\\left[\\sum_{k=1}^{\\infty}Y_k\\right]=\\sum_{k=1}^{\\infty}\\mathbb E[Y_k]\\qquad(Y_k\\ge0)"
+        },
+        {
+          "explanation": "对固定x>0，只要n>1/x即有x>1/n，故f_n(x)=0；同时由区间长度积分得∫f_n=n×1/n=1。若存在g∈L¹支配所有f_n，则控制收敛应推出积分趋0，与计算矛盾，所以不存在此类g。",
+          "tex": "f_n(x)=n\\mathbf1_{(0,1/n]}(x)\\to0,\\quad\\int_0^1f_n(x)\\,dx=1"
+        }
+      ],
+      "example": "f_n(x)=min(nx,1)在[0,1]逐点上升至1（除x=0），其积分1−1/(2n)→1。反例g_n=n1_(0,1/n]逐点趋0却积分恒为1，证明单调条件的实质作用。",
+      "application": "支持无限期非负风险贡献、事件计数期望、模型损失逐步累加及积分定理的严格推导。",
+      "caveat": "MCT要求非负和单调递增，不能仅凭逐点收敛使用；对有符号净收益需分别处理正负积分的存在性。",
+      "deep_sections": [
+        {
+          "title": "单调收敛定理的准确量词",
+          "question": "非负且单调递增为什么比普通逐点收敛强？",
+          "paragraphs": [
+            "如果每条路径上0≤f_1≤f_2≤⋯，则f_n在每一点都有扩展非负实数极限f，且积分序列单调不降。积分可能无限大，但不存在正负无限抵消造成的未定义差。",
+            "结论是∫f_n↑∫f，不需要统一L¹界。在金融累计损失中若使用非负增长的部分和，可以把期望和无限求和交换；但持仓净收益通常有符号，必须先拆正负部分。"
+          ],
+          "formulas": [
+            {
+              "label": "单调收敛定理的准确量词",
+              "tex": "0\\le f_n\\uparrow f\\quad\\Longrightarrow\\quad\\lim_{n\\to\\infty}\\int f_n\\,d\\mu=\\int f\\,d\\mu"
+            }
+          ],
+          "proof": "因为f_n≤f，积分单调性给lim_n∫f_n≤∫f。反向需对任意简单函数0≤s≤f构造近似低界，再让n→∞证明∫f_n至少接近∫s，最终对所有s取上确界。",
+          "worked": "在[0,1]上取f_n(x)=min(n x,1)，它逐点递增至1（x>0），∫f_n dx=1−1/(2n)，从n=1时0.5逐渐趋近1。",
+          "limitation": "若每期净收益有正有负，不能未经正负部分可积性检查就使用非负单调收敛定理。"
+        },
+        {
+          "title": "基于简单函数的完整下界证明",
+          "question": "如何从非负简单函数积分定义真正证明MCT？",
+          "paragraphs": [
+            "固定任意非负简单函数s≤f与常数0<c<1。令A_n={f_n≥cs}，当s>0时，f_n逐点上升至f≥s，因此最终f_n≥cs；而s=0时无论是否进入A_n都不影响积分。",
+            "对A_n上有f_n≥cs，得到∫f_n≥c∫s1_{A_n}。集合A_n递增并在s的正支撑上最终覆盖，简单函数积分的从下连续性给极限下界c∫s，再令c↑1并对s取上确界即可。"
+          ],
+          "formulas": [
+            {
+              "label": "基于简单函数的完整下界证明",
+              "tex": "\\int f_n\\,d\\mu\\ge c\\int s\\mathbf1_{\\{f_n\\ge cs\\}}\\,d\\mu\\longrightarrow c\\int s\\,d\\mu"
+            }
+          ],
+          "proof": "先取0≤s≤f和0<c<1。因f_n↑f，每个s(ω)>0的点最终满足f_n(ω)≥cs(ω)，故A_n在s的正支撑上递增覆盖。积分下界∫f_n≥c∫s1_{A_n}成立；对有限简单函数应用集合测度从下连续性，最后令c→1并对s取上确界，得到∫f≤lim∫f_n。",
+          "worked": "取f(x)=x在[0,1]上，s=0.5·1_{x≥0.5}≤f，积分∫s=0.25。无论怎样选取符合前提的f_n↑f，最终积分下界至少能逼近c×0.25，再由所有简单s的上确界逼近∫f=0.5。",
+          "limitation": "证明依赖非负简单积分的上确界定义；不能把定理本身作为简单函数下界步骤的理由而导致循环论证。"
+        },
+        {
+          "title": "非负级数与期望求和交换",
+          "question": "为什么无限多项非负风险贡献可以先求和再取期望？",
+          "paragraphs": [
+            "若g_k≥0可测，部分和S_n=Σ_{k≤n}g_k逐点单调递增。MCT立即给∫Σ_{k≥1}g_k=Σ_{k≥1}∫g_k，这是非负积分的可数线性性。",
+            "在随机风险事件计数中，可把g_k选为指标函数1_{A_k}，得到期望总命中次数等于各期命中概率之和，允许结果∞。这不要求A_k独立，但不直接决定事件是否无穷次发生。"
+          ],
+          "formulas": [
+            {
+              "label": "非负级数与期望求和交换",
+              "tex": "\\mathbb E\\!\\left[\\sum_{k=1}^{\\infty}Y_k\\right]=\\sum_{k=1}^{\\infty}\\mathbb E[Y_k]\\qquad(Y_k\\ge0)"
+            }
+          ],
+          "proof": "定义S_n=Σ_{k≤n}Y_k，有限求和的积分线性给E[S_n]=Σ_{k≤n}E[Y_k]。由于S_n↑S，MCT给E[S]=lim_nE[S_n]=Σ_{k≥1}E[Y_k]，即便总期望为∞也成立。",
+          "worked": "若独立与否均可的事件满足P(A_k)=2^{−k}，则E[Σ_{k≥1}1_{A_k}]=Σ2^{−k}=1。对前3期，期望命中数为1/2+1/4+1/8=0.875。",
+          "limitation": "总期望命中数有限并不代表每次事件独立，也不说明单期收益可复制；长期发生频次要结合Borel–Cantelli等不同结论。"
+        },
+        {
+          "title": "缺少单调性的集中反例",
+          "question": "普通逐点收敛为何不能让积分极限自由交换？",
+          "paragraphs": [
+            "在(0,1]上取f_n(x)=n·1_{(0,1/n]}(x)。对每个固定x>0，足够大的n使x>1/n，因此f_n(x)最终0；但积分始终n×(1/n)=1。",
+            "该序列虽非负，却既不是逐点递增，也没有一个统一可积控制函数；因此MCT和普通控制收敛都不能应用。这个反例正是金融稀有大损失与均值不收敛的数学结构。"
+          ],
+          "formulas": [
+            {
+              "label": "缺少单调性的集中反例",
+              "tex": "f_n(x)=n\\mathbf1_{(0,1/n]}(x)\\to0,\\quad\\int_0^1f_n(x)\\,dx=1"
+            }
+          ],
+          "proof": "对固定x>0，只要n>1/x即有x>1/n，故f_n(x)=0；同时由区间长度积分得∫f_n=n×1/n=1。若存在g∈L¹支配所有f_n，则控制收敛应推出积分趋0，与计算矛盾，所以不存在此类g。",
+          "worked": "n=100时函数在(0,0.01]取100，其余处为0，积分1；n=10000时只在(0,0.0001]取10000，积分仍为1，尽管固定点值最终趋0。",
+          "limitation": "不能因观察区间越来越窄就把其期望贡献忽略；尾部幅度同时增长时，需要单调、控制或一致可积等额外条件。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "measure-n0128",
+          "label": "简单函数积分"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0129",
+          "label": "Lebesgue积分"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0131",
+          "label": "Fatou引理"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0132",
+          "label": "控制收敛定理"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 18.125 Measure and Integration：第4–5讲，单调收敛、Fatou与控制收敛",
+          "url": "https://ocw.mit.edu/courses/18-125-measure-and-integration-fall-2003/pages/lecture-notes/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：第7–8讲，抽象积分及极限",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V11四节数学证明：积分极限、数值检验与缺失假设反例"
+    },
+    {
+      "id": "measure-n0131",
+      "node_id": "measure-n0131",
+      "title": "Fatou引理",
+      "definition": "Fatou引理是非负可测函数列的下半连续结论：极限下确界的积分不超过积分序列的下极限。它不要求函数列单调，也不要求存在共同的有限控制函数，因而可以处理期望在极限中发生非负质量流失的情形。Fatou引理是控制收敛、鞅收敛和风险估计中使用liminf的基础。",
+      "assumptions": "固定任意测度空间(Ω,F,μ)，f_n均为非负可测函数；liminf f_n为扩展非负可测函数。Fatou允许两侧为∞。如果函数可为负，则需已知一个共同可积的下界或其他条件，不能不加限制地对原函数应用。",
+      "properties": [
+        "Fatou引理的方向是积分的liminf≤积分的liminf，不意味着积分必然收敛。",
+        "对g_n=inf_{k≥n}f_k使用单调收敛即可推导Fatou引理，因g_n↑liminf f_n。",
+        "非负质量可以在极限中逃向越来越小的区域，产生严格不等式。",
+        "若全部函数被同一个可积下界支配，则可以把Fatou应用于f_n−下界，得到扩展版本。"
+      ],
+      "formulas": [
+        {
+          "label": "Fatou不等式与liminf定义",
+          "tex": "\\int\\liminf_{n\\to\\infty}f_n\\,d\\mu\\le\\liminf_{n\\to\\infty}\\int f_n\\,d\\mu"
+        },
+        {
+          "label": "尾部逃逸与严格不等式",
+          "tex": "\\int_0^1\\liminf_nf_n\\,dx=0<1=\\liminf_n\\int_0^1f_n\\,dx"
+        },
+        {
+          "label": "统一可积下界下的Fatou推广",
+          "tex": "f_n\\ge h,\\ h\\in L^1\\quad\\Longrightarrow\\quad\\int\\liminf_nf_n\\,d\\mu\\le\\liminf_n\\int f_n\\,d\\mu"
+        },
+        {
+          "label": "负值反例与控制收敛的条件",
+          "tex": "f_n(x)=-n\\mathbf1_{(0,1/n]}(x):\\quad\\int\\liminf_nf_n\\,dx=0>-1=\\liminf_n\\int f_n\\,dx"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对于每个m，令g_m=inf_{n≥m}f_n，便有0≤g_m↑liminf f_n。单调收敛给∫liminf f_n=lim_m∫g_m。又g_m≤f_n对所有n≥m成立，故∫g_m≤inf_{n≥m}∫f_n；取m极限即得Fatou。",
+          "tex": "\\int\\liminf_{n\\to\\infty}f_n\\,d\\mu\\le\\liminf_{n\\to\\infty}\\int f_n\\,d\\mu"
+        },
+        {
+          "explanation": "对固定x>0，存在N>1/x，使n≥N时f_n(x)=0，故liminf f_n(x)=0；由于单点{0}为零测集，即使修改其值也不改变积分。另一方面∫f_n=n×λ((0,1/n])=1，因而严格小于成立。",
+          "tex": "\\int_0^1\\liminf_nf_n\\,dx=0<1=\\liminf_n\\int_0^1f_n\\,dx"
+        },
+        {
+          "explanation": "令g_n=f_n−h≥0。原始Fatou给∫liminf g_n≤liminf∫g_n。因为h不随n变化且可积，liminf(g_n)=liminf f_n−h，并可将有限积分∫h在线性表达式中加回，得到有下界版Fatou。",
+          "tex": "f_n\\ge h,\\ h\\in L^1\\quad\\Longrightarrow\\quad\\int\\liminf_nf_n\\,d\\mu\\le\\liminf_n\\int f_n\\,d\\mu"
+        },
+        {
+          "explanation": "对固定x>0，f_n最终0，所以其下极限0；积分是−n×(1/n)=−1。假若原始Fatou对任意负函数都成立，就错误要求0≤−1。不存在统一可积下界也与该反例吻合。",
+          "tex": "f_n(x)=-n\\mathbf1_{(0,1/n]}(x):\\quad\\int\\liminf_nf_n\\,dx=0>-1=\\liminf_n\\int f_n\\,dx"
+        }
+      ],
+      "example": "对f_n=n1_(0,1/n]，积分恒1但几乎处处极限0，Fatou给0≤1且严格；换成−f_n则积分恒−1、极限0，直接说明非负性的重要性。对f_n=x−1+1/n使用共同可积下界，可取得等号−1/2。",
+      "application": "为金融风险估计、厚尾下界、随机过程极限和控制收敛定理提供必要的极限积分条件。",
+      "caveat": "Fatou只给不等式，不能凭它推出期望收敛；非负或共同可积下界是核心条件，有符号高杠杆收益不能省略。",
+      "deep_sections": [
+        {
+          "title": "Fatou不等式与liminf定义",
+          "question": "为什么不要求单调，也能得到期望的单侧极限控制？",
+          "paragraphs": [
+            "对每个位置ω，liminf_n f_n(ω)=sup_m inf_{k≥m} f_k(ω)。它忽略有限个前期异常，保留后续值的下方包络，因此在非负情况下天然适合使用单调收敛。",
+            "Fatou的结论是一个单侧不等式，不应写成两个期望相等。它保证非负风险的路径下极限不能在期望上超过各期积分下极限，却允许少数极端值造成严格差距。"
+          ],
+          "formulas": [
+            {
+              "label": "Fatou不等式与liminf定义",
+              "tex": "\\int\\liminf_{n\\to\\infty}f_n\\,d\\mu\\le\\liminf_{n\\to\\infty}\\int f_n\\,d\\mu"
+            }
+          ],
+          "proof": "对于每个m，令g_m=inf_{n≥m}f_n，便有0≤g_m↑liminf f_n。单调收敛给∫liminf f_n=lim_m∫g_m。又g_m≤f_n对所有n≥m成立，故∫g_m≤inf_{n≥m}∫f_n；取m极限即得Fatou。",
+          "worked": "若f_n(x)=x+1/n在[0,1]上，liminf f_n=x；积分为1/2+1/n，故两侧均为1/2，出现Fatou等号，但该例不代表总能取等。",
+          "limitation": "Fatou不能直接保证E[f_n]收敛，也不能对有符号且无统一可积下界的收益序列盲目使用。"
+        },
+        {
+          "title": "尾部逃逸与严格不等式",
+          "question": "怎样构造每期积分固定，但极限函数积分较小的例子？",
+          "paragraphs": [
+            "令f_n(x)=n·1_{(0,1/n]}(x)。每个x>0最终落在支撑之外，故f_n→0逐点；但每期积分为1。Fatou得到0≤1并且严格。",
+            "这一构造反映概率越来越小但损失幅度越来越大的事件可以保留固定期望。它不仅是证明技巧，也是识别金融尾部风险假设不足的常见反例结构。"
+          ],
+          "formulas": [
+            {
+              "label": "尾部逃逸与严格不等式",
+              "tex": "\\int_0^1\\liminf_nf_n\\,dx=0<1=\\liminf_n\\int_0^1f_n\\,dx"
+            }
+          ],
+          "proof": "对固定x>0，存在N>1/x，使n≥N时f_n(x)=0，故liminf f_n(x)=0；由于单点{0}为零测集，即使修改其值也不改变积分。另一方面∫f_n=n×λ((0,1/n])=1，因而严格小于成立。",
+          "worked": "n=10时超限区域长度0.1、损失高度10、积分1；n=1000时区域长度0.001、高度1000、积分仍1，但极限函数几乎处处为0。",
+          "limitation": "不能把在有限回测中没有出现的罕见事件视为总体零风险；概率趋零与风险期望趋零并非同一性质。"
+        },
+        {
+          "title": "统一可积下界下的Fatou推广",
+          "question": "若函数可负，什么条件能让Fatou仍然合法？",
+          "paragraphs": [
+            "如果存在可积函数h使f_n≥h，则g_n=f_n−h≥0，可对g_n应用原始Fatou。通过可积h的积分线性与极限性质，得到∫liminf f_n≤liminf∫f_n。",
+            "这提供了分析有符号损益的一条充分条件，但要求所有n共享同一个真正可积的下界。若只是每期各自存在不同下界，则不能保证此版本成立。"
+          ],
+          "formulas": [
+            {
+              "label": "统一可积下界下的Fatou推广",
+              "tex": "f_n\\ge h,\\ h\\in L^1\\quad\\Longrightarrow\\quad\\int\\liminf_nf_n\\,d\\mu\\le\\liminf_n\\int f_n\\,d\\mu"
+            }
+          ],
+          "proof": "令g_n=f_n−h≥0。原始Fatou给∫liminf g_n≤liminf∫g_n。因为h不随n变化且可积，liminf(g_n)=liminf f_n−h，并可将有限积分∫h在线性表达式中加回，得到有下界版Fatou。",
+          "worked": "在[0,1]上令f_n(x)=x−1+1/n，则h(x)=x−1≥−1可积；∫f_n=−1/2+1/n，极限−1/2，与∫liminf f_n=−1/2相等。",
+          "limitation": "若没有共同可积下界，负值可在收缩区间内放大，导致liminf积分小于极限积分并使Fatou方向失效。"
+        },
+        {
+          "title": "负值反例与控制收敛的条件",
+          "question": "为什么一般有符号函数既要检查下界，也要检查正负尾部？",
+          "paragraphs": [
+            "取f_n=−n·1_{(0,1/n]}，函数逐点趋于0，但每期积分为−1。若错误地直接使用非负Fatou，会得出0≤−1的矛盾，明确显示非负假设不能删去。",
+            "若f_n几乎处处收敛且被某个可积g在绝对值意义下统一控制，控制收敛定理才给出积分等式；这比Fatou的单侧下界更强，也需要更强条件。"
+          ],
+          "formulas": [
+            {
+              "label": "负值反例与控制收敛的条件",
+              "tex": "f_n(x)=-n\\mathbf1_{(0,1/n]}(x):\\quad\\int\\liminf_nf_n\\,dx=0>-1=\\liminf_n\\int f_n\\,dx"
+            }
+          ],
+          "proof": "对固定x>0，f_n最终0，所以其下极限0；积分是−n×(1/n)=−1。假若原始Fatou对任意负函数都成立，就错误要求0≤−1。不存在统一可积下界也与该反例吻合。",
+          "worked": "n=100时f_n在长度0.01的区间上取−100、其余0，积分−1；n=10000时仍积分−1，虽然极限函数几乎处处为0。",
+          "limitation": "Fatou是非负下半连续结论，不应直接推导有符号策略收益的长期期望保持；需检查统一可积下界或绝对控制。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "measure-n0130",
+          "label": "单调收敛定理"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0132",
+          "label": "控制收敛定理"
+        },
+        {
+          "kind": "math",
+          "id": "measure-n0140",
+          "label": "一致可积"
+        },
+        {
+          "kind": "math",
+          "id": "stochastic-n0294",
+          "label": "鞅收敛"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 18.125 Measure and Integration：第4–5讲，单调收敛、Fatou与控制收敛",
+          "url": "https://ocw.mit.edu/courses/18-125-measure-and-integration-fall-2003/pages/lecture-notes/"
+        },
+        {
+          "title": "MIT 6.436J Fundamentals of Probability：第7–8讲，抽象积分及极限",
+          "url": "https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/pages/lecture-notes/"
+        }
+      ],
+      "checked_status": "V11四节数学证明：积分极限、数值检验与缺失假设反例"
     }
   ]
 }
