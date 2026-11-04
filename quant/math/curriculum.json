@@ -702,7 +702,8 @@
         "linear-n0076",
         "linear-n0077",
         "linear-n0078"
-      ]
+      ],
+      "summary": "内积与正交补 → 正交投影 → Gram–Schmidt → QR → 最小二乘几何；通过子空间解释拟合和数值求解。"
     },
     {
       "id": "linear-c4",
@@ -732,7 +733,8 @@
         "linear-n0088",
         "linear-n0089",
         "linear-n0090"
-      ]
+      ],
+      "summary": "伪逆 → 矩阵范数与条件数 → 稳定矩阵分解 → 矩阵微分与高维风险矩阵估计。"
     },
     {
       "id": "probability-c1",
@@ -972,7 +974,8 @@
         "regression-n0184",
         "regression-n0185",
         "regression-n0186"
-      ]
+      ],
+      "summary": "多元OLS → 正规方程 → Gauss–Markov最优性与残差投影 → 统计置信区间。"
     },
     {
       "id": "regression-c2",
@@ -1032,7 +1035,8 @@
         "regression-n0208",
         "regression-n0209",
         "regression-n0210"
-      ]
+      ],
+      "summary": "Ridge谱收缩 → LASSO次梯度 → Elastic Net混合正则化 → 偏差方差 → 时间序列交叉验证与高维推断。"
     },
     {
       "id": "econometrics-c1",
@@ -3270,7 +3274,7 @@
         "linear-notes",
         "linear-video"
       ],
-      "summary": "用正交投影逐步构造Gram–Schmidt正交基，分析QR分解与数值不稳定问题。"
+      "summary": "从正交投影逐步扣除已有子空间的分量，构造Gram–Schmidt标准正交基和上三角系数，区分经典/改进算法的数值稳定性。"
     },
     {
       "id": "linear-n0077",
@@ -3289,7 +3293,7 @@
         "linear-notes",
         "linear-video"
       ],
-      "summary": "由正交基构造QR并以更稳定的数值方式求解最小二乘，不显式求XᵀX的逆。"
+      "summary": "从Gram–Schmidt引出薄QR，证明最小二乘可化为Rβ=Qᵀy，分析Householder、列主元、条件数与金融样本内正交的边界。"
     },
     {
       "id": "linear-n0078",
@@ -3442,7 +3446,7 @@
         "linear-notes",
         "linear-video"
       ],
-      "summary": "用非零奇异值构造Moore–Penrose伪逆，解释秩亏OLS的唯一拟合与最小范数系数。"
+      "summary": "由SVD构造Moore–Penrose伪逆，验证四个Penrose方程，区分最小二乘拟合唯一性、系数不唯一性及最小范数选择。"
     },
     {
       "id": "linear-n0086",
@@ -4928,13 +4932,14 @@
       "level": "基础",
       "state": "outline",
       "prerequisites": [
-        "regression-n0182"
+        "regression-n0182",
+        "linear-n0078"
       ],
       "lesson_id": null,
       "resources": [
         "regression-course"
       ],
-      "summary": "区别投影最优和统计最优：在经典外生性、球形同方差条件下证明OLS是BLUE。"
+      "summary": "在固定设计、满列秩、条件零均值和球形误差协方差下，证明OLS为BLUE，并解释其与正态性、因果识别、GLS的不同。"
     },
     {
       "id": "regression-n0185",
@@ -5270,13 +5275,14 @@
       "level": "高级",
       "state": "outline",
       "prerequisites": [
+        "regression-n0205",
         "regression-n0206"
       ],
       "lesson_id": null,
       "resources": [
         "regression-course"
       ],
-      "summary": "将L1稀疏与L2收缩组合为Elastic Net，讨论共线性、组效应和交叉验证。"
+      "summary": "联合L1稀疏与L2曲率，推导Elastic Net的正交设计闭式解、唯一性、完全共线时的组效应及alpha/l1_ratio换算。"
     },
     {
       "id": "regression-n0208",
@@ -5287,14 +5293,14 @@
       "level": "高级",
       "state": "outline",
       "prerequisites": [
-        "regression-n0205",
-        "mlmath-n0453"
+        "mlmath-n0453",
+        "regression-n0205"
       ],
       "lesson_id": null,
       "resources": [
         "regression-course"
       ],
-      "summary": "分解预测方差、偏差和不可约噪声，明确参数MSE、预测风险和组合收益并不等价。"
+      "summary": "固定预测特征下严格展开平方风险的预测偏差、训练方差和不可约噪声，解释适度Ridge收缩与金融分布迁移的适用边界。"
     },
     {
       "id": "regression-n0209",
@@ -5306,13 +5312,15 @@
       "state": "outline",
       "prerequisites": [
         "regression-n0205",
-        "regression-n0206"
+        "regression-n0206",
+        "regression-n0207",
+        "regression-n0208"
       ],
       "lesson_id": null,
       "resources": [
         "regression-course"
       ],
-      "summary": "区分训练、验证和测试风险，解释正则强度选择、嵌套验证及时间序列信息泄漏。"
+      "summary": "明确λ选择的内外层目标与时间信息集，结合交叉验证、标签成熟、事件区间purge及最终冻结测试避免金融回测泄漏。"
     },
     {
       "id": "regression-n0210",
