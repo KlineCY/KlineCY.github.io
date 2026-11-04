@@ -1,0 +1,475 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "mlmath-n0470",
+      "node_id": "mlmath-n0470",
+      "title": "核岭回归",
+      "definition": "核岭回归（Kernel Ridge Regression, KRR）把Ridge的L2正则化从有限维系数向量推广到再生核Hilbert空间（RKHS）中函数的范数。表示定理保证存在仅由训练核截面线性组合表示的最优解，从而把原本可能无限维的优化转化为n×n Gram矩阵线性系统；核的选择决定非线性表示，正则强度决定谱方向的连续收缩。",
+      "assumptions": "给定对称PSD核k、相应RKHS H，n个训练输入x_i和响应y_i，λ>0。明确采用J(f)=||y−f(X)||²/(2n)+(λ/2)||f||²_H；在未额外估计截距的形式下α=(K+nλI)⁻¹y。若设置无惩罚截距，需要对核及响应中心化或联立求解，不能照搬当前α公式。",
+      "properties": [
+        "在λ>0时RKHS正则目标严格凸，存在唯一最优函数；取规范系数α=(K+nλI)⁻¹y时矩阵始终正定可逆。",
+        "表示定理使最优函数位于span{k(x_i,·)}，正交补只增加惩罚而不改善训练拟合。",
+        "训练预测帽矩阵H=K(K+nλI)⁻¹，其谱收缩系数μ_i/(μ_i+nλ)，有效自由度tr(H)介于0与rank(K)之间。",
+        "KRR不等同于非线性因果模型；Gram矩阵占用O(n²)空间，直接求解通常涉及O(n³)计算，样本量过大时需要近似或迭代。"
+      ],
+      "formulas": [
+        {
+          "label": "RKHS中的正则目标",
+          "tex": "\\min_{f\\in\\mathcal H}\\ \\frac1{2n}\\sum_{i=1}^n(y_i-f(x_i))^2+\\frac\\lambda2\\|f\\|_{\\mathcal H}^2"
+        },
+        {
+          "label": "表示定理表达",
+          "tex": "\\widehat f(x)=\\sum_{i=1}^n\\alpha_i k(x_i,x)"
+        },
+        {
+          "label": "核系数的规范解",
+          "tex": "\\widehat\\alpha=(K+n\\lambda I_n)^{-1}y,\\quad K_{ij}=k(x_i,x_j)"
+        },
+        {
+          "label": "核谱收缩与有效自由度",
+          "tex": "H_\\lambda=K(K+n\\lambda I)^{-1},\\quad \\mathrm{df}=\\sum_{i=1}^{n}\\frac{\\mu_i}{\\mu_i+n\\lambda}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "任意f分解为训练核截面张成子空间中的f_parallel和正交补f_perp。再生性质使f_perp(x_i)=⟨f_perp,k(x_i,·)⟩=0，所以它不改变训练拟合。",
+          "tex": "f=f_\\parallel+f_\\perp,\\quad f_\\perp(x_i)=0"
+        },
+        {
+          "explanation": "RKHS范数具有勾股分解，λ>0时加入f_perp只会增加惩罚，因此最优函数必在有限维核截面span中，得到表示定理。",
+          "tex": "\\|f\\|_{\\mathcal H}^2=\\|f_\\parallel\\|_{\\mathcal H}^2+\\|f_\\perp\\|_{\\mathcal H}^2"
+        },
+        {
+          "explanation": "令f=Σα_i k(x_i,·)，则训练拟合向量Kα、函数范数αᵀKα。选取α=(K+nλI)⁻¹y可满足一阶最优性；即使K秩亏，此系数仍是有效规范表示。",
+          "tex": "J(\\alpha)=\\frac1{2n}\\|y-K\\alpha\\|^2+\\frac\\lambda2\\alpha^\\top K\\alpha"
+        },
+        {
+          "explanation": "对K做PSD特征分解K=Vdiag(μ_i)Vᵀ，预测帽矩阵为Vdiag[μ_i/(μ_i+nλ)]Vᵀ，迹即有效自由度，零特征值方向完全不产生训练拟合。",
+          "tex": "K=V\\operatorname{diag}(\\mu_i)V^\\top,\\quad H_\\lambda=V\\operatorname{diag}\\!\\left(\\frac{\\mu_i}{\\mu_i+n\\lambda}\\right)V^\\top"
+        }
+      ],
+      "example": "取训练Gram矩阵K=diag(1,2)，y=(2,3)ᵀ，n=2且λ=0.5，则nλ=1，K+nλI=diag(2,3)。规范核系数α=(1,1)ᵀ，训练拟合Kα=(1,2)ᵀ，残差(1,1)ᵀ。两核谱方向收缩分别1/2和2/3，有效自由度df=1/2+2/3=7/6≈1.166667。此例的核Gram矩阵对称正定。",
+      "application": "若ETF的动量、趋势及波动因子与未来收益存在非线性关系，KRR可作为线性Ridge的可复核非线性基线。训练窗口内选择核带宽、正则λ及输入尺度，用逐月时间外指标比较Ridge、KRR和树模型；不能从核矩阵PSD推导未来收益有效。",
+      "caveat": "当K秩亏时最优函数仍唯一，但系数表示本身可能不唯一；选择α=(K+nλI)⁻¹y是一个规范解。无惩罚截距、样本权重和不同软件的alpha尺度会改变方程，必须单独推导。",
+      "deep_sections": [
+        {
+          "title": "从线性Ridge到函数范数惩罚",
+          "question": "核化回归为何不是先拟合线性模型再换一组相似度？",
+          "paragraphs": [
+            "线性Ridge惩罚的是有限维参数向量范数。核岭回归将预测器视为RKHS函数，惩罚||f||²_H，因此模型可在隐式高维甚至无限维特征空间学习非线性关系。",
+            "这一改动改变了归纳偏置与可表达函数族，而不仅是实现层面的矩阵替换。核函数需要PSD，有效正则系数需要与平方损失归一化匹配，否则无法与普通Ridge直接比较。"
+          ],
+          "formulas": [
+            {
+              "label": "函数目标",
+              "tex": "J(f)=\\frac1{2n}\\|y-f(X)\\|_2^2+\\frac\\lambda2\\|f\\|_{\\mathcal H}^2"
+            }
+          ],
+          "proof": "对所有训练输入的函数值定义经验损失，给整个RKHS函数施加平方范数惩罚。由于λ>0且范数平方严格凸，目标对函数具有唯一最小值。",
+          "worked": "假设两个训练点的Gram矩阵为diag(1,2)，核空间对两个点的拟合强度可不同于线性特征内积；λ=0.5时谱收缩为1/2与2/3。",
+          "limitation": "函数空间的存在和再生性质需先由有效核保证；不能把任意非对称相似度矩阵视为RKHS核。"
+        },
+        {
+          "title": "表示定理：无限维问题为什么变成有限维",
+          "question": "为什么最优函数没有必要包含训练核截面之外的方向？",
+          "paragraphs": [
+            "将任意RKHS函数正交分解为训练核截面子空间分量和平行正交补。再生性质显示正交补在每个训练样本点取值为0，因此它对数据拟合项没有任何改善。",
+            "然而RKHS范数的勾股分解显示正交补会增加正则成本，所以存在最优解位于核截面张成空间中。这是从正交投影到核表示定理的直接逻辑桥梁。"
+          ],
+          "formulas": [
+            {
+              "label": "训练核截面的张成",
+              "tex": "\\widehat f=\\sum_{i=1}^n\\alpha_i k(x_i,\\cdot)"
+            }
+          ],
+          "proof": "对任意f=f_parallel+f_perp，因f_perp⊥k(x_i,·)可得f_perp(x_i)=0。平方损失仅取决于f_parallel；λ>0时最优必须取f_perp=0。",
+          "worked": "即使原RKHS具有无限维，两个训练样本生成的核截面张成空间最多二维；由这两项核函数便可表示最优解。",
+          "limitation": "核截面若线性相关，系数α可非唯一，函数最优解依然由正则目标唯一确定。"
+        },
+        {
+          "title": "有限核矩阵方程与谱收缩",
+          "question": "KRR的α公式为何含nλ而不是λ？",
+          "paragraphs": [
+            "将f写成核截面线性组合，拟合向量是Kα，RKHS平方范数是αᵀKα。因为这里平方损失除以2n而惩罚项含λ/2，一阶条件对应K+nλI的矩阵方程。",
+            "当K半正定且λ>0时，K+nλI正定，得到规范系数α=(K+nλI)⁻¹y。训练拟合通过核矩阵特征值连续收缩，而不是硬删除所有小特征值。"
+          ],
+          "formulas": [
+            {
+              "label": "核帽矩阵",
+              "tex": "H_\\lambda=K(K+n\\lambda I)^{-1}"
+            }
+          ],
+          "proof": "沿K的特征方向分别解一维方程，α_i=y_i/(μ_i+nλ)。把Kα的第i方向写成μ_i/(μ_i+nλ)·y_i，迹便是谱收缩之和。",
+          "worked": "K=diag(1,2)、nλ=1时α=(2/2,3/3)=(1,1)，拟合=(1,2)；df=1/2+2/3=7/6。",
+          "limitation": "若额外引入不惩罚截距，响应与核需按相同训练中心化约定处理，否则不能直接使用此简式。"
+        },
+        {
+          "title": "核学习的数值、规模与金融检验",
+          "question": "为何非线性表示更丰富，不代表成本后收益更高？",
+          "paragraphs": [
+            "样本量n增长时，完整KRR需存储n×n核矩阵，直接矩阵分解的时间与内存可能成为瓶颈。Nyström、随机特征或预条件迭代可以近似大样本KRR，但这些近似引入附加误差和超参数。",
+            "对ETF预测，核带宽、正则强度与特征缩放必须全部在每个滚动训练折中估计；若标签具有重叠持有期，仍需按信息事件区间设计验证。"
+          ],
+          "formulas": [
+            {
+              "label": "预测函数值",
+              "tex": "\\widehat f(x_{\\mathrm{new}})=k_X(x_{\\mathrm{new}})^\\top\\widehat\\alpha"
+            }
+          ],
+          "proof": "新特征x_new的核向量包含其与每个训练点的相似度。只与训练输入比较，不使用未来测试标签；冻结α和训练缩放器后，才能产生下一时点预测。",
+          "worked": "若训练样本n=10000，完整Gram矩阵包含10^8个元素，float64单纯存储约0.8 GB，尚不计分解中间量和其他数据。",
+          "limitation": "完整KRR核参数与真实市场非平稳性之间没有无条件稳定保证；预测层和组合风险层必须分开验证。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "mlmath-n0469",
+          "label": "先修：有效核与Mercer"
+        },
+        {
+          "kind": "math",
+          "id": "regression-n0205",
+          "label": "先修：Ridge"
+        },
+        {
+          "kind": "math",
+          "id": "linear-n0075",
+          "label": "证明：Hilbert投影思想"
+        },
+        {
+          "kind": "ml",
+          "id": "m09-c07-p02",
+          "label": "机器学习：核岭回归训练"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Stanford STATS305C: RKHS and Representer theorem",
+          "url": "https://web.stanford.edu/class/stats305c/lectures/RKHS.html"
+        },
+        {
+          "title": "scikit-learn KernelRidge official documentation",
+          "url": "https://scikit-learn.org/stable/modules/generated/sklearn.kernel_ridge.KernelRidge.html"
+        }
+      ],
+      "checked_status": "完整数学精讲：表示定理、核方程、谱收缩、成本与训练假设"
+    },
+    {
+      "id": "optimization-n0359",
+      "node_id": "optimization-n0359",
+      "title": "近端算子与ADMM",
+      "definition": "近端算子把不可微惩罚或约束的优化封装为一个局部凸子问题，是LASSO软阈值、集合投影、近端梯度与ADMM的共同语言。近端梯度用于光滑损失加非光滑正则的复合目标；ADMM则通过变量分裂及增广Lagrange框架交替求解。二者有共同的prox工具，但算法步骤和收敛前提不能互换。",
+      "assumptions": "设g为闭、适当、凸函数，τ>0；prox_{τg}(v)=argmin_z g(z)+||z−v||²/(2τ)。对近端梯度，f为凸、可微且∇f为L-Lipschitz，取0<τ≤1/L可获得标准下降性质。对ADMM，需有可解的凸分裂问题及适当鞍点/可行性条件；不声称非凸神经网络训练具有相同保证。",
+      "properties": [
+        "prox_{τλ||·||₁}(v)逐坐标等于软阈值S_{τλ}(v)；指示函数I_C的prox就是到闭凸集C的欧氏投影。",
+        "复合目标f+g的近端梯度迭代为β⁺=prox_{τg}(β−τ∇f(β))，可同时处理光滑下降与稀疏正则。",
+        "当f凸且L光滑、g闭适当凸时，τ≤1/L提供基于二次上界的目标非增性质，且在常见条件下达到O(1/k)目标收敛率。",
+        "ADMM将min f(x)+g(z) s.t. Ax+Bz=c通过增广Lagrangian分裂，需监控原始残差与对偶残差；不能仅以某一步变量变化很小判定已收敛。"
+      ],
+      "formulas": [
+        {
+          "label": "近端算子定义",
+          "tex": "\\operatorname{prox}_{\\tau g}(v)=\\arg\\min_z\\left\\{g(z)+\\frac{\\|z-v\\|_2^2}{2\\tau}\\right\\}"
+        },
+        {
+          "label": "L1近端软阈值",
+          "tex": "\\operatorname{prox}_{\\tau\\lambda\\|\\cdot\\|_1}(v)=S_{\\tau\\lambda}(v)"
+        },
+        {
+          "label": "近端梯度（ISTA）",
+          "tex": "\\beta^{k+1}=\\operatorname{prox}_{\\tau g}\\!\\left(\\beta^k-\\tau\\nabla f(\\beta^k)\\right)"
+        },
+        {
+          "label": "一致性分裂的ADMM",
+          "tex": "x^{k+1}=\\arg\\min_x\\{f(x)+\\tfrac\\rho2\\|x-z^k+u^k\\|^2\\},\\ \\ z^{k+1}=\\operatorname{prox}_{g/\\rho}(x^{k+1}+u^k)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "prox把g与以v为中心的强凸二次项一起最小化，严格凸部分保证近端结果唯一。若g为闭凸约束集合的指示函数，只有集合内点的目标为有限值，故等价于欧氏投影。",
+          "tex": "\\operatorname{prox}_{\\tau I_C}(v)=P_C(v)"
+        },
+        {
+          "explanation": "当g(z)=λ|z|时，分z>0、z<0与z=0求次梯度，得到z=sign(v)max(|v|−τλ,0)，并推广到逐坐标L1向量惩罚。",
+          "tex": "0\\in\\lambda\\,\\partial|z|+\\frac{z-v}{\\tau}"
+        },
+        {
+          "explanation": "对光滑f利用L-Lipschitz梯度构造二次上界：f(z)≤f(x)+∇f(x)ᵀ(z−x)+(L/2)||z−x||²。对上界再加入g求最小得到近端梯度步。",
+          "tex": "f(z)\\le f(x)+\\nabla f(x)^\\top(z-x)+\\frac L2\\|z-x\\|^2"
+        },
+        {
+          "explanation": "对分裂变量x=z建立约束并加入二次惩罚增广项，交替最小化x、z，之后更新缩放对偶变量u；对偶更新推动一致性残差向0收敛。",
+          "tex": "u^{k+1}=u^k+x^{k+1}-z^{k+1}"
+        }
+      ],
+      "example": "对L1近端取v=(3,−0.5)、τλ=1，则prox_{τλ||·||₁}(v)=(2,0)，第二坐标精确变零。再看简单最小化f(β)=0.5(β−3)²、g(β)=|β|，从β⁰=0取τ=1、f的L=1，则近端梯度先算v=0−(0−3)=3，再软阈值为2，正好达到全局解。",
+      "application": "在高维ETF因子LASSO中，ISTA与近端加速算法可利用稀疏性；投资组合需要满足杠杆与单资产权重约束时，指示函数prox可实现投影。复杂可分离组合问题可考虑ADMM，但还需检查交易成本非光滑性、约束可行性和数值残差。",
+      "caveat": "近端算子对闭适当凸g具有良好单值性质，但非凸g可能多值；选择τ不当可能破坏ISTA的标准下降保证。ADMM与ISTA的停止条件不同，不能把一次软阈值运算当作已经完成整体受限优化。",
+      "deep_sections": [
+        {
+          "title": "为什么不可微函数需要近端算子",
+          "question": "如何把LASSO的次梯度条件变成一个可计算步骤？",
+          "paragraphs": [
+            "普通梯度下降需要处处可微的目标。LASSO的绝对值在零点不可微，近端算子把非光滑惩罚同一个强凸二次距离项合并，得到可数值求解的小规模局部优化。",
+            "对于L1惩罚，这个局部子问题恰有软阈值闭式解，使非零系数连续向零收缩，也让部分分量精确变零。"
+          ],
+          "formulas": [
+            {
+              "label": "prox与次梯度",
+              "tex": "z=\\operatorname{prox}_{\\tau g}(v)\\iff0\\in\\partial g(z)+(z-v)/\\tau"
+            }
+          ],
+          "proof": "目标g(z)+||z−v||²/(2τ)的一阶最优性包含次梯度0；因二次项强凸，凸情形下最优解唯一。L1逐坐标应用这一条件得软阈值。",
+          "worked": "v=(3,−0.5)、阈值1时，第一维3−1=2，第二维因|−0.5|≤1变成0，结果(2,0)。",
+          "limitation": "如果以大于0的容差把微小结果强行归零，得到的是实现上的近似稀疏，不等于精确KKT。"
+        },
+        {
+          "title": "从光滑上界推导近端梯度",
+          "question": "为何ISTA在光滑损失之后再做软阈值？",
+          "paragraphs": [
+            "考虑F(β)=f(β)+g(β)，其中f光滑、g可能非光滑。先用当前β的梯度和Lipschitz常数构造f的二次上界，然后精确最小化该上界与g之和。",
+            "把上界平方配方，得到β^{k+1}=prox_{τg}(β^k−τ∇f(β^k))，其中τ≤1/L。方法不是先完整拟合OLS再单独做一次后处理，而是每轮迭代都联合优化。"
+          ],
+          "formulas": [
+            {
+              "label": "ISTA更新",
+              "tex": "\\beta^{k+1}=S_{\\tau\\lambda}\\!\\left(\\beta^k-\\tau\\nabla f(\\beta^k)\\right)"
+            }
+          ],
+          "proof": "由下降引理f(z)≤f(β)+∇f(β)ᵀ(z−β)+(L/2)||z−β||²，选择τ≤1/L并加g，最小化二次上界得到近端步；若当前点可行，则目标不增加。",
+          "worked": "最小化0.5(β−3)²+|β|，从0出发取τ=1，梯度−3使v=3，软阈值后β=2；代入次梯度β−3+1=0满足最优。",
+          "limitation": "若f非凸或梯度不是全局L-Lipschitz，不可简单引用凸ISTA的统一收敛率。"
+        },
+        {
+          "title": "投影与prox的共同结构",
+          "question": "为什么组合约束可以被视为一个非光滑正则项？",
+          "paragraphs": [
+            "闭凸可行集C的指示函数I_C在C内为0，在C外为+∞。对其应用prox时，所有不在C中的候选点都有无限成本，剩余目标正是寻找距离v最近的可行点。",
+            "因此投影梯度法可以视为近端梯度的一种特殊情况；但投影到复杂组合约束集本身仍可能需要求解二次规划，并非一定具有简单闭式。"
+          ],
+          "formulas": [
+            {
+              "label": "指示函数prox",
+              "tex": "\\operatorname{prox}_{\\tau I_C}(v)=\\arg\\min_{z\\in C}\\|z-v\\|^2=P_C(v)"
+            }
+          ],
+          "proof": "将I_C代入近端定义，约束外不可取，只需在C内最小化二次距离。闭凸集保证唯一欧氏最小投影。",
+          "worked": "若C=[−1,1]且v=3，则投影P_C(3)=1；若v=−0.5，则投影保持−0.5。",
+          "limitation": "单个权重限制、净敞口、毛杠杆和卖空条件组合可能使可行集或投影计算复杂，且非凸整数约束需另行处理。"
+        },
+        {
+          "title": "ADMM变量分裂和双重残差",
+          "question": "为什么ADMM与ISTA不能当成同一算法？",
+          "paragraphs": [
+            "ADMM从变量分裂开始，将一个可分解目标转换成带线性等式约束的问题，通过增广Lagrangian交替更新原始变量和缩放对偶变量。它可调用prox作为子步骤，但比单次近端梯度多了约束一致性机制。",
+            "数值实现需要记录原始残差r^k=Ax^k+Bz^k−c与对偶残差，对一致性问题x=z可使用r^k=x^k−z^k、s^k=ρ(z^k−z^{k−1})。收敛需明确闭凸、可行和适当鞍点等条件。"
+          ],
+          "formulas": [
+            {
+              "label": "一致性ADMM残差",
+              "tex": "r^k=x^k-z^k,\\qquad s^k=\\rho(z^k-z^{k-1})"
+            }
+          ],
+          "proof": "对于min f(x)+g(z)且x=z，引入缩放u。逐步最小化f(x)+(ρ/2)||x−z+u||²、g(z)+(ρ/2)||x−z+u||²，再更新u←u+x−z。",
+          "worked": "若x^k=0.5、z^k=0.4、z^{k−1}=0.3、ρ=2，则原始残差0.1、对偶残差0.2；二者均需要与容差比较。",
+          "limitation": "常见凸ADMM收敛理论不能无条件扩展到非凸交易冲击或带整数头寸限制的模型。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "regression-n0206",
+          "label": "先修：LASSO次梯度"
+        },
+        {
+          "kind": "math",
+          "id": "optimization-n0355",
+          "label": "先修：梯度下降"
+        },
+        {
+          "kind": "math",
+          "id": "optimization-x011",
+          "label": "下一讲：ISTA收敛"
+        },
+        {
+          "kind": "ml",
+          "id": "m09-c07-p03",
+          "label": "机器学习：核求解与近端优化"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Parikh and Boyd, Proximal Algorithms (2014)",
+          "url": "https://stanford.edu/~boyd/papers/prox_algs.html"
+        },
+        {
+          "title": "Boyd et al., ADMM (2011)",
+          "url": "https://web.stanford.edu/~boyd/admm.html"
+        }
+      ],
+      "checked_status": "完整数学精讲：prox定义、软阈值、ISTA下降与ADMM残差"
+    },
+    {
+      "id": "riskmath-n0583",
+      "node_id": "riskmath-n0583",
+      "title": "样本协方差病态性",
+      "definition": "样本协方差矩阵的病态性指有限样本估计出的资产协方差在某些方向的特征值极小或为零，使矩阵反演、最小方差权重和风险贡献对数据扰动高度敏感。若n个观测经过样本均值中心化，则p维样本协方差的秩至多min(p,n−1)，p≥n时必然奇异。收缩估计通过牺牲一部分无偏性换取更稳定的谱和组合风险输入，但不能消除未来制度变化。",
+      "assumptions": "令X∈R^{n×p}为n期、p资产的历史收益，按训练窗口均值中心化X_c，S=X_cᵀX_c/(n−1)，n≥2。讨论样本协方差谱秩无需正态分布；解释统计精度和随机矩阵极限时要另外说明独立性、矩条件、样本维度比例。收缩目标为μI时μ=tr(S)/p、δ∈[0,1]，这是示例性的球形目标，δ的实际估计需特定方法。",
+      "properties": [
+        "由于中心化X_c的行向量满足总和为零，rank(S)≤min(p,n−1)，故资产数不小于样本数时经验协方差不可逆。",
+        "即使S可逆，小特征值会在S⁻¹中被放大，使无约束均值方差权重与风险预测不稳定。",
+        "使用Σ̂=(1−δ)S+δμI且δ>0、μ>0时，所有特征值满足λ_i(Σ̂)=(1−δ)λ_i(S)+δμ>0，因此改善数值可逆性。",
+        "Ledoit–Wolf方法估计收缩强度以降低协方差矩阵估计的平方误差，但并不意味着对任何实际约束组合都保证更高Sharpe或更低尾部回撤。"
+      ],
+      "formulas": [
+        {
+          "label": "样本协方差及其秩界",
+          "tex": "S=\\frac1{n-1}X_c^\\top X_c,\\quad \\operatorname{rank}(S)\\le\\min(p,n-1)"
+        },
+        {
+          "label": "谱逆问题",
+          "tex": "\\kappa_2(S)=\\lambda_{\\max}(S)/\\lambda_{\\min}(S)\\quad\\text{（若可逆）}"
+        },
+        {
+          "label": "球形收缩目标",
+          "tex": "\\widehat\\Sigma_\\delta=(1-\\delta)S+\\delta\\mu I_p,\\qquad\\mu=\\operatorname{tr}(S)/p"
+        },
+        {
+          "label": "收缩后的谱",
+          "tex": "\\lambda_i(\\widehat\\Sigma_\\delta)=(1-\\delta)\\lambda_i(S)+\\delta\\mu"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "样本中心化将X的每一列减去列均值，所以各行向量之和为零，行空间维数至多n−1。矩阵X_cᵀX_c的秩等于X_c的秩，得到样本协方差的秩界。",
+          "tex": "\\mathbf1_n^\\top X_c=0,\\qquad \\operatorname{rank}(X_c^\\top X_c)=\\operatorname{rank}(X_c)"
+        },
+        {
+          "explanation": "若S的某个特征值很小，求逆会将该方向放大为其倒数。无约束GMV组合w∝S⁻¹1因此可能对样本协方差的微小变化非常敏感。",
+          "tex": "w_{\\mathrm{GMV}}=\\frac{S^{-1}\\mathbf1}{\\mathbf1^\\top S^{-1}\\mathbf1}\\quad\\text{当 }S\\succ0"
+        },
+        {
+          "explanation": "球形目标μI与任何矩阵可交换，S的特征向量仍为Σ̂_δ的特征向量，每个特征值变为(1−δ)λ_i(S)+δμ。δ>0、μ>0保证新矩阵正定。",
+          "tex": "\\widehat\\Sigma_\\delta=V\\operatorname{diag}((1-\\delta)\\lambda_i(S)+\\delta\\mu)V^\\top"
+        },
+        {
+          "explanation": "若S的两个资产完全共线，经验矩阵可能秩1。适度收缩将零特征方向提升到δμ，在不改变资产原始收益的情况下提供更稳定的逆矩阵输入。",
+          "tex": "\\lambda_{\\min}(\\widehat\\Sigma_\\delta)\\ge\\delta\\mu>0"
+        }
+      ],
+      "example": "设两个资产的样本协方差S=[[0.04,0.04],[0.04,0.04]]，对应特征值0.08和0，因此S奇异。取示例收缩δ=0.5，μ=tr(S)/2=0.04，则Σ̂=0.5S+0.5×0.04I=[[0.04,0.02],[0.02,0.04]]。其特征值为0.06和0.02，条件数κ₂=0.06/0.02=3，正定可逆。δ=0.5仅用于教学，不是从样本估算出的Ledoit–Wolf最优收缩系数。",
+      "application": "ETF宽基与行业基金往往持有重叠标的，风险因子高度相关，资产维度相对窗口长度增加时协方差估计可能更不稳。可先对训练期S做谱诊断，再比较球形收缩、因子协方差、稳健估计和组合约束；所有风险输入均应在决策前合法估计。",
+      "caveat": "协方差PSD或可逆并不保证风险估计准确。收缩目标选择和δ必须有统计或验证依据；一旦市场波动或相关结构变动，历史Σ̂即使条件数很好也可能低估真实危机协方差。样本共线性并不等同于经济资产完全可替代。",
+      "deep_sections": [
+        {
+          "title": "中心化使样本协方差的秩受到限制",
+          "question": "为什么p≥n时样本协方差必然不可逆？",
+          "paragraphs": [
+            "每个资产回报列在训练窗口内减去自身样本均值后，得到n行、p列的中心化矩阵X_c。由于其所有行向量相加为零，这n个行向量至少存在一个线性关系，因此秩最多n−1。",
+            "经验协方差S=X_cᵀX_c/(n−1)的秩与X_c相同，所以不超过min(p,n−1)。当p≥n时秩必小于p，不依赖收益是否高斯。"
+          ],
+          "formulas": [
+            {
+              "label": "精确秩限制",
+              "tex": "\\operatorname{rank}(S)\\le\\min(p,n-1)"
+            }
+          ],
+          "proof": "中心化保证1ᵀX_c=0，故X_c的行秩≤n−1；又rank(AᵀA)=rank(A)且S只是其正常数倍，故样本协方差秩界成立。",
+          "worked": "如果只有n=3天收益、p=3只ETF，则中心化S的秩最多2，一定至少有一个零特征值；普通矩阵逆不可用。",
+          "limitation": "使用未去均值二阶矩或不同缺失样本配对估计时，秩论证的矩阵结构会改变。"
+        },
+        {
+          "title": "小特征值为何影响组合优化",
+          "question": "即使资产数小于样本数，为什么可能仍然出现不稳定的权重？",
+          "paragraphs": [
+            "如果资产回报高度相关，某些线性组合在历史中几乎不波动，S就具有很小的特征值。用S⁻¹求解无约束最小方差组合时，这些方向的倒数被放大，导致权重对微小估计噪声极为敏感。",
+            "真实组合还有权重边界和交易成本，可缓解极端权重；但这些约束并不证明协方差估计已准确。必须把算法可逆性、风险预测质量和经济可交易性分开。"
+          ],
+          "formulas": [
+            {
+              "label": "最小方差逆问题",
+              "tex": "w_{\\mathrm{GMV}}=\\frac{S^{-1}\\mathbf1}{\\mathbf1^\\top S^{-1}\\mathbf1}"
+            }
+          ],
+          "proof": "对正定S，通过Lagrange最小化wᵀSw且1ᵀw=1，得到2Sw−ν1=0，再用总权重约束确定归一化系数。",
+          "worked": "若某方向历史样本方差特征值为0.0001，其逆方向系数为10000；同一方向样本方差若估计为0.0002，逆系数立刻变成5000。",
+          "limitation": "这仅说明对该方向敏感，不意味着真实经济风险一定小；还需检查未来协方差变化。"
+        },
+        {
+          "title": "球形收缩怎样改善谱条件数",
+          "question": "为什么给协方差矩阵加一部分μI可以消除奇异性？",
+          "paragraphs": [
+            "收缩把原始经验协方差S与球形矩阵μI线性组合。由于I与任何矩阵共享特征向量，原始谱方向保持不变，每个特征值都向共同的μ移动。",
+            "对于δ>0且μ>0，最小特征值至少为δμ，从而建立严格正定性。参数δ更大时谱更接近共同值，但会改变真实风险结构的估计偏差。"
+          ],
+          "formulas": [
+            {
+              "label": "收缩谱公式",
+              "tex": "\\lambda_i(\\widehat\\Sigma_\\delta)=(1-\\delta)\\lambda_i(S)+\\delta\\mu"
+            }
+          ],
+          "proof": "将S=Vdiag(λ_i)Vᵀ代入(1−δ)S+δμI，用VᵀV=I合并即可得到新特征值。每个λ_i(S)≥0，故最小值至少δμ。",
+          "worked": "S=[[.04,.04],[.04,.04]]、δ=.5时Σ̂=[[.04,.02],[.02,.04]]，特征值(.06,.02)，条件数3。",
+          "limitation": "μ=0意味着所有样本资产回报几乎无变化，添加δμI仍是零矩阵；改善保证要求μ>0。"
+        },
+        {
+          "title": "Ledoit–Wolf估计和时间外风险质量",
+          "question": "收缩系数为何不能只选使条件数最小的值？",
+          "paragraphs": [
+            "把δ设置为1会得到μI，若μ>0其条件数恒为1，但这并不表示资产之间真的没有相关性。合理的协方差估计需要在估计偏差与抽样方差之间取得平衡；Ledoit–Wolf使用特定统计目标选择收缩系数。",
+            "风险模型的应用应将训练期协方差预测与未来实现风险代理比较，并在统一杠杆、资产池和交易成本约束下检查组合。不同风险目标下的最优δ可能不同。"
+          ],
+          "formulas": [
+            {
+              "label": "协方差估计损失",
+              "tex": "L(\\widehat\\Sigma,\\Sigma^\\star)=\\|\\widehat\\Sigma-\\Sigma^\\star\\|_F^2"
+            }
+          ],
+          "proof": "Ledoit–Wolf的经典推导关注矩阵估计均方误差，其选择的δ不是最小化同一测试期组合Sharpe。即使经验S病态，δ=1将所有特征值设成μ，也可能严重忽略实际相关风险。",
+          "worked": "本例δ=.5使条件数为3；若δ=1则条件数变成1，但原始两资产高度同步的信息被完全抹去。",
+          "limitation": "高维随机矩阵理论可解释样本谱噪声的量级，但必须额外规定样本分布和维度增长率；不能只引用p/n作为万能校正。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "linear-n0086",
+          "label": "先修：矩阵条件数"
+        },
+        {
+          "kind": "math",
+          "id": "riskmath-n0582",
+          "label": "先修：经验协方差"
+        },
+        {
+          "kind": "math",
+          "id": "riskmath-n0584",
+          "label": "下一讲：Ledoit–Wolf"
+        },
+        {
+          "kind": "math",
+          "id": "optimization-n0349",
+          "label": "应用：MVO风险约束"
+        },
+        {
+          "kind": "ml",
+          "id": "m23-c07-p01",
+          "label": "机器学习：ETF风险矩阵诊断"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Ledoit and Wolf, A Well-Conditioned Estimator for Large-Dimensional Covariance Matrices",
+          "url": "https://doi.org/10.1016/S0047-259X(03)00096-4"
+        },
+        {
+          "title": "scikit-learn covariance estimation and Ledoit-Wolf",
+          "url": "https://scikit-learn.org/stable/modules/covariance.html"
+        }
+      ],
+      "checked_status": "完整数学精讲：秩缺陷、GMV放大、谱收缩、风险模型边界"
+    }
+  ]
+}
