@@ -30,8 +30,8 @@ const prerequisites={
  "measure-n0134":["measure-n0133","measure-n0130"],
  "measure-n0135":["measure-n0134","measure-n0129"],
  "measure-n0136":["measure-n0135","measure-n0124"],
- "measure-n0146":["measure-n0136","measure-n0124"],
- "measure-n0147":["measure-n0146","measure-n0136"]
+ "measure-n0146":["measure-n0145","measure-n0136"],
+ "measure-n0147":["measure-n0146","probability-n0096"]
 };
 assert.equal(catalog.nodes.length,656);
 assert.equal(catalog.chapters.length,109);
