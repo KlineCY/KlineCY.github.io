@@ -1,0 +1,587 @@
+{
+  "version": 1,
+  "revision": "2026-11-04",
+  "focus": "计量经济学识别基础：外生性、测量误差、模型识别与工具变量",
+  "lessons": [
+    {
+      "id": "econometrics-n0211",
+      "node_id": "econometrics-n0211",
+      "title": "外生性与内生性",
+      "definition": "对含截距的结构回归 y=α+βx+u，外生性是误差项相对于解释变量或信息集的条件矩限制，不是对变量来源的日常描述。零条件均值E[u|x]=0比线性OLS需要的Cov(x,u)=0更强；内生性则通常破坏结构系数的识别，即使样本最小二乘仍有唯一数值。",
+      "assumptions": "假设二阶矩存在、Var(x)>0且样本矩满足大数定律。结构参数β是否具有因果意义还依赖反事实干预或其他识别假设；样本残差与解释变量正交只是最小二乘法方程，不是总体外生性的检验结果。",
+      "properties": [
+        "条件均值为零蕴含特定正交矩，反向通常不成立。",
+        "OLS总体投影即使一致也未必收敛到结构因果系数。",
+        "共同市场因素、反馈和选择进入是金融数据中的主要内生风险。"
+      ],
+      "formulas": [
+        {
+          "label": "OLS概率极限与结构偏差",
+          "tex": "b^*=\\beta+\\frac{\\operatorname{Cov}(x,u)}{\\operatorname{Var}(x)}"
+        },
+        {
+          "label": "零条件均值与一条正交矩",
+          "tex": "E[h(x)u]=E[h(x)E(u\\mid x)]"
+        },
+        {
+          "label": "预测目标与干预目标",
+          "tex": "E[Y\\mid X=x]\\ \\text{与}\\ E[Y\\mid\\operatorname{do}(X=x)]"
+        },
+        {
+          "label": "时间信息集与内生性审计",
+          "tex": "X_t\\in\\mathcal F_t,\\quad Y_{t+h}\\notin\\mathcal F_t\\ (h>0)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将结构方程与x取协方差，得到总体最小二乘斜率与结构斜率之差正好是误差协方差除以解释变量方差。",
+          "tex": "\\operatorname{Cov}(x,y)=\\beta\\operatorname{Var}(x)+\\operatorname{Cov}(x,u)"
+        },
+        {
+          "explanation": "用塔式期望E[xu]=E[xE(u|x)]证明条件外生性蕴含OLS正交；只验证一个无条件矩不能排除非线性条件均值。",
+          "tex": "E[u\\mid x]=0\\Longrightarrow E[xu]=0"
+        },
+        {
+          "explanation": "回测盈利和因果效应属于不同目标，观察条件均值E[Y|X]与改变策略X的干预结果通常不相同。",
+          "tex": "E[Y\\mid X=x]\\ne E[Y\\mid\\operatorname{do}(X=x)]\\quad\\text{(一般情形)"
+        }
+      ],
+      "example": "真实β=2、Var(x)=4、Cov(x,u)=1时，总体OLS斜率为2+1/4=2.25；当抽样矩一致收敛，样本量再大也不会使斜率回到结构值2。",
+      "application": "在多ETF因子预测中，应分别记录信息截止时点、公共市场冲击、资产池生存者选择和真实可成交条件。相关系数和Sharpe比率只能先支持可预测性陈述；因果解释仍需外生冲击设计。",
+      "caveat": "不得把OLS残差正交、显著p值或样本外盈利当作外生性充分证据。金融时序的严格外生性还涉及未来解释变量与当前误差的关系，不能与同期正交混用。",
+      "deep_sections": [
+        {
+          "title": "OLS概率极限与结构偏差",
+          "question": "为什么样本无限增大也可能留下固定偏差？",
+          "paragraphs": [
+            "OLS在总体上最小化平方损失，斜率满足b*=Cov(x,y)/Var(x)。将结构方程代入可拆成真实效应β和未观测误差共同变化项。",
+            "只要Cov(x,u)不是零，样本估计即使收敛也会趋向错误的结构值。识别偏差属于估计目标问题，而非简单的浮点误差或随机噪声问题。"
+          ],
+          "formulas": [
+            {
+              "label": "OLS概率极限与结构偏差",
+              "tex": "b^*=\\beta+\\frac{\\operatorname{Cov}(x,u)}{\\operatorname{Var}(x)}"
+            }
+          ],
+          "proof": "由Cov(x,α+βx+u)=βVar(x)+Cov(x,u)，除以正的Var(x)即得。上述论证只要求二阶矩存在，并未证明结构β来自随机化。",
+          "worked": "取β=2、Var(x)=4、Cov(x,u)=1，b*=2.25；若Cov(x,u)=−1则b*=1.75，偏差方向依赖共同变化方向。",
+          "limitation": "没有样本矩的收敛假设时，不能直接从总体公式断言样本OLS概率极限。"
+        },
+        {
+          "title": "零条件均值与一条正交矩",
+          "question": "E[xu]=0能否证明E[u|x]=0？",
+          "paragraphs": [
+            "条件均值为零使所有可积的x的函数与u正交，因而也使OLS依赖的单个内积为零。只检查单个函数对应的矩无法恢复全部条件期望信息。",
+            "金融残差检验需要明确使用哪些历史可见变量构造工具函数，且对非线性遗漏关系保持谨慎；训练残差和设计矩阵正交并不保证真实条件均值正确。"
+          ],
+          "formulas": [
+            {
+              "label": "零条件均值与一条正交矩",
+              "tex": "E[h(x)u]=E[h(x)E(u\\mid x)]"
+            }
+          ],
+          "proof": "取条件期望并把可测h(x)提出条件算子，即得右侧。若E(u|x)=0，任意满足积可积的h都令矩为零，反向不成立。",
+          "worked": "设x在−1、0、1上等概率，u=x²−2/3，则E[u]=E[xu]=0，但E[u|x]=x²−2/3并非0。",
+          "limitation": "无条件矩的检验有抽样误差，未拒绝零矩也不能证明所有未测工具矩成立。"
+        },
+        {
+          "title": "预测目标与干预目标",
+          "question": "为什么高精度金融预测不等于识别交易冲击？",
+          "paragraphs": [
+            "监督学习的预测对象由联合分布决定，结构性干预则需说明改变下单、资金流或政策工具之后其他机制如何反应。即使二者同时相关，也没有必然相同的因果参数。",
+            "量化组合的市场冲击、排队和流动性随订单变化，静态历史回放无法提供每一种新仓位的反事实价格路径。因此应把预测和执行建模分成独立证据链。"
+          ],
+          "formulas": [
+            {
+              "label": "预测目标与干预目标",
+              "tex": "E[Y\\mid X=x]\\ \\text{与}\\ E[Y\\mid\\operatorname{do}(X=x)]"
+            }
+          ],
+          "proof": "前者在观察条件X=x的子总体上求均值，后者改变结构机制并保留对其他变量的定义；除非额外满足可忽略性，否则二者没有相等的逻辑保证。",
+          "worked": "市场风险厌恶升高时交易量和波动同步增加，交易量可以预测波动，但不能据此推断人为增加成交量会产生同样幅度的波动上升。",
+          "limitation": "干预符号属于因果模型的记法，不能单凭观察相关或回归系数直接计算。"
+        },
+        {
+          "title": "时间信息集与内生性审计",
+          "question": "怎样为因子研究构建可检验的信息边界？",
+          "paragraphs": [
+            "对每一个历史预测原点冻结可观察行情、真实财报发布时间、交易所时区和资产入池规则。若使用事后复权或后知的指数成分重建训练集，就可能在特征形成时加入未来信息。",
+            "此类数据泄漏与传统回归结构内生性并非完全同义，但会共同使预测与因果陈述失真。审查应分别报告特征可得性、结构误差识别和实际成交可行性。"
+          ],
+          "formulas": [
+            {
+              "label": "时间信息集与内生性审计",
+              "tex": "X_t\\in\\mathcal F_t,\\quad Y_{t+h}\\notin\\mathcal F_t\\ (h>0)"
+            }
+          ],
+          "proof": "预测输入若在t时刻合法，应当由F_t可测变量构成；被预测的未来标签必须在之后成熟，否则时间外评价不再是有效的未来预测实验。",
+          "worked": "同一ETF财报若在下一交易日才公布，不能仅按财报所属季度把其数值回填为前一交易日已经知道的特征。",
+          "limitation": "合法时点核查仍不代表经济因果外生性已经成立。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "econometrics-n0212",
+          "label": "进阶：遗漏变量偏差"
+        },
+        {
+          "kind": "math",
+          "id": "econometrics-n0213",
+          "label": "下一步：测量误差"
+        },
+        {
+          "kind": "ml",
+          "id": "m01-c04-p03",
+          "label": "机器学习：配对预测评价"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Angrist and Pischke (2009), Mostly Harmless Econometrics, Princeton University Press",
+          "url": "https://press.princeton.edu/books/paperback/9780691120355/mostly-harmless-econometrics"
+        },
+        {
+          "title": "Angrist and Pischke, Mostly Harmless Econometrics, Chapter 4: Instrumental Variables",
+          "url": "https://www.degruyterbrill.com/document/doi/10.1515/9781400829828-009/html"
+        }
+      ],
+      "checked_status": "V17：识别条件、数学推导、数值反例及金融时间外验证均完整"
+    },
+    {
+      "id": "econometrics-n0213",
+      "node_id": "econometrics-n0213",
+      "title": "测量误差",
+      "definition": "经典解释变量测量误差模型令观测特征w=x*+v，其中x*为真实经济变量，v为与真值和结构误差不相关的观测噪声。对含截距的一元回归y=α+βx*+u，用w替代x*会使总体斜率朝零收缩；但这不是所有测量误差情形都满足的通用定理。",
+      "assumptions": "假设Var(x*)>0、Var(v)≥0、Cov(x*,v)=Cov(v,u)=Cov(x*,u)=0且样本矩收敛。因变量独立测量误差与解释变量误差的后果不同；多变量、系统性报价延迟及相关修订错误会破坏经典公式。",
+      "properties": [
+        "经典可靠性比率控制一元OLS衰减幅度，位于0与1之间。",
+        "独立标签错误主要增加回归噪声，而非必然衰减特征斜率。",
+        "重复测量若共用数据源，不可把相互关联的误差错当作独立证据。"
+      ],
+      "formulas": [
+        {
+          "label": "衰减偏差的协方差推导",
+          "tex": "\\beta_w=\\beta\\frac{\\sigma_{x^*}^2}{\\sigma_{x^*}^2+\\sigma_v^2}"
+        },
+        {
+          "label": "因变量误差与解释变量误差",
+          "tex": "\\frac{\\operatorname{Cov}(x,y^*+e)}{\\operatorname{Var}(x)}=\\beta\\quad(\\operatorname{Cov}(x,e)=0)"
+        },
+        {
+          "label": "重复测量的识别假设",
+          "tex": "\\operatorname{Cov}(w_1,w_2)=\\operatorname{Var}(x^*)+\\operatorname{Cov}(v_1,v_2)"
+        },
+        {
+          "label": "金融异步报价与非经典噪声",
+          "tex": "v_{i,t}=w_{i,t}-x^*_{i,t}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "展开观测特征与真实标签的协方差，经典正交条件消掉所有涉及v与u的交叉项，使分子只保留真实特征方差乘β。",
+          "tex": "\\operatorname{Cov}(w,y)=\\beta\\operatorname{Var}(x^*)"
+        },
+        {
+          "explanation": "观测特征方差增加独立噪声方差，除以该分母即得可靠性比率，斜率向零收缩。",
+          "tex": "\\operatorname{Var}(w)=\\operatorname{Var}(x^*)+\\operatorname{Var}(v)"
+        },
+        {
+          "explanation": "如果另一个测量w₂=x*+v₂与w₁误差互不相关，两次测量的协方差等于Var(x*)；共同误差会破坏这一识别关系。",
+          "tex": "\\operatorname{Cov}(w_1,w_2)=\\operatorname{Var}(x^*)+\\operatorname{Cov}(v_1,v_2)"
+        }
+      ],
+      "example": "设β=2、Var(x*)=9、Var(v)=3，则可靠性比率为9/(9+3)=0.75，观测特征回归斜率为1.5。若噪声方差升至9，则系数变成1；增加样本量不能消除该总体收缩。",
+      "application": "ETF行情中非同步收盘、低流动性报价、复权修订和不同市场开市时间会使特征观测带误差。应保存点时原始数据，与真实成交价和第三方源交叉核对，再实施时间外系数敏感性分析。",
+      "caveat": "如果测量误差依赖波动状态或真实收益，可能产生朝远离零方向的偏差；把系统性历史回填统称为独立噪声会遗漏前视风险。",
+      "deep_sections": [
+        {
+          "title": "衰减偏差的协方差推导",
+          "question": "为什么有噪声的特征会改变目标回归斜率？",
+          "paragraphs": [
+            "真实回归通过x*产生对y的关联，而观测特征w附带的v只增加了回归分母所衡量的特征变化。经典独立假设保证这部分变化不增加有效预测协方差。",
+            "因而即使所有统计量在大样本下估计得非常精确，错误特征的总体投影系数仍不会等于真实结构系数。"
+          ],
+          "formulas": [
+            {
+              "label": "衰减偏差的协方差推导",
+              "tex": "\\beta_w=\\beta\\frac{\\sigma_{x^*}^2}{\\sigma_{x^*}^2+\\sigma_v^2}"
+            }
+          ],
+          "proof": "由β_w=Cov(w,y)/Var(w)展开w=x*+v与y=α+βx*+u，利用全部指定零协方差消去交叉项后直接化简。",
+          "worked": "β=2、真实方差9、测量方差3时β_w=1.5；令v方差为0时恢复到2，符合极限边界。",
+          "limitation": "上述结论针对加性经典误差和一元含截距模型，多因子共线时偏差符号未必如此。"
+        },
+        {
+          "title": "因变量误差与解释变量误差",
+          "question": "记录错误发生在收益标签时会怎样？",
+          "paragraphs": [
+            "若观测标签为y=y*+e，且e与解释变量及真实结构误差不相关，则因变量测量误差增加残差方差，但不会改变总体OLS斜率。这个区别源于错误项出现在协方差分子还是方差分母。",
+            "对于未来收益，停牌补零、复权错误和选取的高低价规则可能与目标市场状态相关，往往不能保证e与特征零协方差，因此实际偏差还需逐项检查。"
+          ],
+          "formulas": [
+            {
+              "label": "因变量误差与解释变量误差",
+              "tex": "\\frac{\\operatorname{Cov}(x,y^*+e)}{\\operatorname{Var}(x)}=\\beta\\quad(\\operatorname{Cov}(x,e)=0)"
+            }
+          ],
+          "proof": "利用协方差线性性展开分子，在结构外生和标签误差与x零协方差条件下只剩βVar(x)，从而识别同一总体斜率。",
+          "worked": "若β=2、Var(x)=4且Cov(x,e)=0，则不论Var(e)=1或9，斜率仍为2；若Cov(x,e)=2，斜率改为2.5。",
+          "limitation": "标签变化若来自样本选择或迟到的真实交易信息，不能自动归为独立测量误差。"
+        },
+        {
+          "title": "重复测量的识别假设",
+          "question": "为什么两个数据商的行情一致不等于它们都无误差？",
+          "paragraphs": [
+            "令w₁和w₂测量同一真实x*。若两误差相互不相关且分别与真值不相关，则两种测量的协方差能揭示真值方差，并有助于评价其中一个观测的可靠性。",
+            "但两家供应商可能共享底层交易所报价、相同公司行动处理或历史回补程序。共同误差协方差不为零时，两个观测之间的相似性会高估真值方差。"
+          ],
+          "formulas": [
+            {
+              "label": "重复测量的识别假设",
+              "tex": "\\operatorname{Cov}(w_1,w_2)=\\operatorname{Var}(x^*)+\\operatorname{Cov}(v_1,v_2)"
+            }
+          ],
+          "proof": "把两个加性测量式取协方差，并使用与x*的零交叉协方差条件；余项中保留误差之间的协方差，只有它为零才能直接识别。",
+          "worked": "真实方差为9、两源共同误差协方差为1时，观测协方差是10而非9；错误忽略共同来源会导致可靠性估计偏高。",
+          "limitation": "即使能够识别误差方差，也仍需评估结构误差与真实特征之间的外生关系。"
+        },
+        {
+          "title": "金融异步报价与非经典噪声",
+          "question": "如何在跨市场ETF数据中识别测量机制？",
+          "paragraphs": [
+            "对每一条OHLCV记录保留交易所时区、实际成交时间、复权因子版本及停牌策略。不能把后来更正的价格直接当作历史当时可执行价格使用。",
+            "在跨资产横截面预测中，同一日的美国、亚洲和欧洲市场可能属于不同信息截止点；错位产生的误差不仅是独立白噪声，还可能与全球市场冲击系统相关。"
+          ],
+          "formulas": [
+            {
+              "label": "金融异步报价与非经典噪声",
+              "tex": "v_{i,t}=w_{i,t}-x^*_{i,t}"
+            }
+          ],
+          "proof": "定义每一观察与在指定时点可实施的理想特征的差异，并按波动状态和资产流动性检验其相关结构；仅写成加性差异不意味着满足经典独立假设。",
+          "worked": "若亚洲市场收盘早于美国宏观公告，则把同一日期美国收盘收益配入亚洲特征可能形成未来公告后的信息错位。",
+          "limitation": "若缺乏可信真值代理，应明确无法识别偏差修正量，而不是给出虚假的无误差估计。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "econometrics-n0211",
+          "label": "先修：内生性"
+        },
+        {
+          "kind": "math",
+          "id": "econometrics-n0215",
+          "label": "后续：工具变量"
+        },
+        {
+          "kind": "ml",
+          "id": "m06-c02-p01",
+          "label": "金融ML：冻结标准化参数"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Angrist and Pischke (2009), Mostly Harmless Econometrics, Princeton University Press",
+          "url": "https://press.princeton.edu/books/paperback/9780691120355/mostly-harmless-econometrics"
+        },
+        {
+          "title": "Angrist and Pischke, Mostly Harmless Econometrics, Chapter 4: Instrumental Variables",
+          "url": "https://www.degruyterbrill.com/document/doi/10.1515/9781400829828-009/html"
+        }
+      ],
+      "checked_status": "V17：识别条件、数学推导、数值反例及金融时间外验证均完整"
+    },
+    {
+      "id": "econometrics-n0214",
+      "node_id": "econometrics-n0214",
+      "title": "模型识别",
+      "definition": "统计识别指在给定可观察总体分布或总体矩限制下，参数是否唯一确定。在线性矩E[Z(Y−Xβ)]=0中，相关矩阵E[ZXᵀ]列满秩时，若矩确有解，则解唯一；若列秩不足，不同参数可能生成相同矩。数值收敛、正则化后的唯一解与总体识别须严格区分。",
+      "assumptions": "假定相关二阶矩存在，参数β为k维、工具为r维，矩映射正确指定。全列秩是线性矩识别的充分条件；非线性矩的Jacobian满秩通常只给局部结构，不能直接宣称全球唯一性。",
+      "properties": [
+        "识别取决于总体映射的单射性，而非仅仅样本数大或软件输出唯一数值。",
+        "r≥k只是线性矩满列秩的必要维数条件，工具数量多并不保证独立信息。",
+        "奇异值很小对应弱识别风险，强制岭惩罚可改善数值稳定却不创造识别信息。"
+      ],
+      "formulas": [
+        {
+          "label": "总体矩的单射性",
+          "tex": "g(\\beta)=E[ZY]-E[ZX^\\top]\\beta"
+        },
+        {
+          "label": "欠识别、恰好识别、过度识别",
+          "tex": "\\operatorname{rank}(E[ZX^\\top])=k\\le r"
+        },
+        {
+          "label": "局部识别和弱识别",
+          "tex": "\\|D^+\\|_2=1/\\sigma_{\\min}(D)\\quad(\\operatorname{rank}(D)=k)"
+        },
+        {
+          "label": "数值唯一性与结构意义",
+          "tex": "X^\\top X+\\lambda I\\succ0\\quad(\\lambda>0)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "如果β₁和β₂均满足矩条件，则相减得到E[ZXᵀ](β₁−β₂)=0。满列秩使唯一零向量成立，所以两组参数必须相同。",
+          "tex": "E[ZX^\\top](\\beta_1-\\beta_2)=0"
+        },
+        {
+          "explanation": "当E[ZXᵀ]存在非零零空间向量h时，β与β+th的总体矩完全相同，说明数据限制无法区分这一方向。",
+          "tex": "E[ZX^\\top]h=0\\Longrightarrow g(\\beta+th)=g(\\beta)"
+        },
+        {
+          "explanation": "岭惩罚使XᵀX+λI正定并返回唯一系数，但那是额外惩罚下的选择，并不等同于无惩罚结构参数被识别。",
+          "tex": "\\widehat\\beta_\\lambda=(X^\\top X+\\lambda I)^{-1}X^\\top y"
+        }
+      ],
+      "example": "取中心化的一元矩E[ZX]=2、E[ZY]=5，则唯一矩解β=5/2=2.5。若E[ZX]=0且E[ZY]=0，任意β都符合这一条矩；若分母为零但E[ZY]非零，则不是任意识别而是该矩模型无精确解。",
+      "application": "量化横截面因子高度相关时，模型可能产生几乎相同收益预测却完全不同的单因子载荷。应区分预测稳定性、系数经济解释、工具有效性以及跨市场结构外推。",
+      "caveat": "局部Jacobian满秩不能保证非线性模型的全球识别；样本核矩阵条件数很小也不能替代工具排除限制与经济识别证据。",
+      "deep_sections": [
+        {
+          "title": "总体矩的单射性",
+          "question": "什么时候两组参数可以被数据区分？",
+          "paragraphs": [
+            "设g(β)=E[Z(Y−Xβ)]，若两个β都使矩为零，它们之间的差只经工具—解释变量交叉矩阵作用。是否有非零向量被映成零决定唯一性。",
+            "相比优化器报告成功，应该优先检查统计模型中的参数映射与矩条件；唯一数值解也可能只是程序对奇异方程引入了默认正则或伪逆。"
+          ],
+          "formulas": [
+            {
+              "label": "总体矩的单射性",
+              "tex": "g(\\beta)=E[ZY]-E[ZX^\\top]\\beta"
+            }
+          ],
+          "proof": "将g(β₁)=g(β₂)=0相减，若E[ZXᵀ]列满秩则β₁−β₂=0；反之零空间中的方向不被这些矩限制识别。",
+          "worked": "E[ZX]=2且E[ZY]=5时β=2.5；若两者都为零，则所有β产生相同的零矩。",
+          "limitation": "若矩系统错设到无解，即使列满秩也不能宣称存在正确的结构参数。"
+        },
+        {
+          "title": "欠识别、恰好识别、过度识别",
+          "question": "工具数量和独立信息维度有什么不同？",
+          "paragraphs": [
+            "r条工具矩与k个参数的关系可以为欠识别、恰好识别或过度识别，但真正关键是矩Jacobian的秩，而不是单纯计数。多个高度相关的工具可能没有增加可辨识方向。",
+            "过度识别意味着总体矩多于参数，给检验部分模型限制提供可能，但过度识别本身既不保证工具有效，也不保证第一阶段强。"
+          ],
+          "formulas": [
+            {
+              "label": "欠识别、恰好识别、过度识别",
+              "tex": "\\operatorname{rank}(E[ZX^\\top])=k\\le r"
+            }
+          ],
+          "proof": "矩阵列秩不超过行数，因此r≥k为必要条件；若工具行之间线性相关，实际秩仍可能不足。",
+          "worked": "两个参数、两个工具的矩阵[[1,1],[2,2]]秩为1，即使工具数量和参数数量同为2也欠识别。",
+          "limitation": "金融宏观工具高度共线时，名义工具数量会高估有效独立信息。"
+        },
+        {
+          "title": "局部识别和弱识别",
+          "question": "为什么一个很小但非零的奇异值仍值得警惕？",
+          "paragraphs": [
+            "线性矩阵满列秩可给出唯一性，但其逆算子的范数由最小奇异值控制。如果奇异值接近零，少量抽样噪声就可能造成系数大幅变化。",
+            "非线性模型还需考虑Jacobian随参数变化，局部满秩仅在附近排除相同值；远端可能存在其他满足所有矩的根。"
+          ],
+          "formulas": [
+            {
+              "label": "局部识别和弱识别",
+              "tex": "\\|D^+\\|_2=1/\\sigma_{\\min}(D)\\quad(\\operatorname{rank}(D)=k)"
+            }
+          ],
+          "proof": "对满列秩矩阵D，伪逆最大奇异值是最小正奇异值的倒数。该值大说明工具矩的抽样扰动会被强烈放大。",
+          "worked": "若一元E[ZX]=0.01，E[ZY]变化0.01可使比率斜率变化1；若分母为1，同样变化只改变0.01。",
+          "limitation": "这只是局部敏感性示例，不能直接替代弱工具稳健置信区间。"
+        },
+        {
+          "title": "数值唯一性与结构意义",
+          "question": "岭回归得到唯一系数就能证明因果机制吗？",
+          "paragraphs": [
+            "预测目标加λ||β||²可使其Hessian更加正定，进而通常返回唯一的优化解；这个解依赖选定的惩罚强度，因此属于统计程序定义的预测对象。",
+            "若原始设计矩阵列完全共线，数据仍不能单独确定两个特征的结构效应。惩罚只是选择一个解并稳定预测，不能把共同变化自动分解为因果贡献。"
+          ],
+          "formulas": [
+            {
+              "label": "数值唯一性与结构意义",
+              "tex": "X^\\top X+\\lambda I\\succ0\\quad(\\lambda>0)"
+            }
+          ],
+          "proof": "当XᵀX半正定时，加入λI令所有特征值至少为λ，因此数值优化有唯一点；但原始X的列秩并未改变。",
+          "worked": "两个完全相同的ETF因子都进入回归时，岭惩罚可给出对称系数，不能证明两个因子的独立经济作用相同。",
+          "limitation": "若目标是结构政策效应，还需外部识别假设，而不是简单提高预测交叉验证得分。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "econometrics-n0211",
+          "label": "先修：内生性"
+        },
+        {
+          "kind": "math",
+          "id": "econometrics-n0215",
+          "label": "下一步：工具变量有效性"
+        },
+        {
+          "kind": "math",
+          "id": "econometrics-n0218",
+          "label": "下一步：IV投影"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Angrist and Pischke, Mostly Harmless Econometrics, Chapter 4: Instrumental Variables",
+          "url": "https://www.degruyterbrill.com/document/doi/10.1515/9781400829828-009/html"
+        },
+        {
+          "title": "Hansen (1982), Large Sample Properties of Generalized Method of Moments Estimators",
+          "url": "https://larspeterhansen.org/lph_research/large-sample-properties-of-generalized-method-of-moments-estimators/"
+        }
+      ],
+      "checked_status": "V17：识别条件、数学推导、数值反例及金融时间外验证均完整"
+    },
+    {
+      "id": "econometrics-n0215",
+      "node_id": "econometrics-n0215",
+      "title": "工具变量有效性",
+      "definition": "工具变量通过与内生解释变量相关但与结构误差正交的外生变化识别结构斜率。在含截距的一元模型中，相关性要求Cov(z,x)≠0，外生性要求Cov(z,u)=0；若作因果解释，还须说明工具不经被研究处理变量以外的其他路径直接改变结果。",
+      "assumptions": "假设包含截距且各变量中心化后的二阶矩有限，目标结构方程线性，样本矩可一致估计。涉及异质潜在处理效应时，IV可能识别服从者LATE而非全体ATE，须另外引入独立性、排除、单调性和非零第一阶段等条件。",
+      "properties": [
+        "第一阶段显著不能单独证明排除限制。",
+        "违反工具外生矩会产生与结构误差协方差成正比的IV偏差。",
+        "多工具的J检验未拒绝也不等于所有工具具有因果有效性。"
+      ],
+      "formulas": [
+        {
+          "label": "相关性、外生性与排除限制",
+          "tex": "\\operatorname{Cov}(z,x)\\ne0,\\quad\\operatorname{Cov}(z,u)=0"
+        },
+        {
+          "label": "IV比率和污染偏差",
+          "tex": "\\beta_{\\rm IV}=\\beta+\\frac{\\operatorname{Cov}(z,u)}{\\operatorname{Cov}(z,x)}"
+        },
+        {
+          "label": "异质效应与LATE",
+          "tex": "\\operatorname{LATE}=\\frac{E[Y\\mid Z=1]-E[Y\\mid Z=0]}{E[D\\mid Z=1]-E[D\\mid Z=0]}"
+        },
+        {
+          "label": "金融政策意外工具的研究设计",
+          "tex": "E[z_t(y_{t+h}-\\beta x_t-\\gamma^\\top c_t)]=0"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对结构方程取与z的协方差，得到工具—结果关联等于结构系数乘工具—处理关联，再加上工具与遗漏误差的关联。",
+          "tex": "\\operatorname{Cov}(z,y)=\\beta\\operatorname{Cov}(z,x)+\\operatorname{Cov}(z,u)"
+        },
+        {
+          "explanation": "在工具相关分母非零且结构误差正交时，唯一结构斜率可写成两种协方差之比。",
+          "tex": "\\beta=\\frac{\\operatorname{Cov}(z,y)}{\\operatorname{Cov}(z,x)}"
+        },
+        {
+          "explanation": "若工具对y另有直接效应δz，即使z与剩余误差不相关也会产生δVar(z)/Cov(z,x)污染。",
+          "tex": "\\beta_{\\rm IV}-\\beta=\\delta\\frac{\\operatorname{Var}(z)}{\\operatorname{Cov}(z,x)}"
+        }
+      ],
+      "example": "真实β=3、Cov(z,x)=2且Cov(z,u)=0时Cov(z,y)=6，IV=3；若Cov(z,u)=1而第一阶段不变，则IV=(6+1)/2=3.5，表明相关性再强也不能修复外生性违背。",
+      "application": "研究政策公告意外成分对债券ETF或股票行业收益的影响时，需要核对工具制作时点、公告同期经济预测以及是否存在直接风险溢价通道。结果应与事件窗口、成交成本和可迁移性审计分开报告。",
+      "caveat": "在二元工具和处理的异质效应框架下，工具通常识别局部服从者效应，而不自动提供总体处理效应；统计过度识别检验不能逻辑证明排除限制。",
+      "deep_sections": [
+        {
+          "title": "相关性、外生性与排除限制",
+          "question": "为什么强第一阶段不能单独构成有效IV证据？",
+          "paragraphs": [
+            "相关性使工具能够解释处理变量的一部分变化，但排除限制关乎工具是否会通过其他机制改变结果；两者是不同的经济学假设。",
+            "第一阶段相关可由样本统计描述，外生性和排除限制往往需要政策制度细节、前趋势、安慰剂分析或其他可辩护的研究设计。"
+          ],
+          "formulas": [
+            {
+              "label": "相关性、外生性与排除限制",
+              "tex": "\\operatorname{Cov}(z,x)\\ne0,\\quad\\operatorname{Cov}(z,u)=0"
+            }
+          ],
+          "proof": "工具相关性确保总体比率分母非零；误差正交确保工具与结果关联中除经x传递外没有剩余项。两个条件都不可省略。",
+          "worked": "Cov(z,x)=2、Cov(z,y)=6时IV=3，但这本身只说明比率数值；若结构误差共变非零则不能推断β真为3。",
+          "limitation": "协方差零不能凭观察数据直接证明工具不存在未测因果通道。"
+        },
+        {
+          "title": "IV比率和污染偏差",
+          "question": "当工具违反排除限制时估计朝哪个方向偏？",
+          "paragraphs": [
+            "将y=βx+u与z取协方差后，IV总体斜率分解为真实β和Cov(z,u)/Cov(z,x)。分子和分母的符号共同决定偏差方向，不能先验断定只向零偏。",
+            "当工具很弱时，分母变小可把轻微排除限制污染严重放大。此时弱工具与无效工具共同构成因果推断危险，需要分别处理。"
+          ],
+          "formulas": [
+            {
+              "label": "IV比率和污染偏差",
+              "tex": "\\beta_{\\rm IV}=\\beta+\\frac{\\operatorname{Cov}(z,u)}{\\operatorname{Cov}(z,x)}"
+            }
+          ],
+          "proof": "由协方差分解式除以非零Cov(z,x)，得到污染项。若分母极小，有限样本估计的常规正态近似还可能失效。",
+          "worked": "β=3、Cov(z,x)=2、Cov(z,u)=1时IV=3.5；把分母改为0.1，污染偏差变为10。",
+          "limitation": "后一数值仅为总体污染项敏感性分析，并不代表强工具诊断完成。"
+        },
+        {
+          "title": "异质效应与LATE",
+          "question": "有效工具为什么不一定识别总体平均效应？",
+          "paragraphs": [
+            "在二元工具、二元处理和符合单调性的潜在结果模型中，只有因工具变化而切换处理决定的人贡献Wald比率中的处理率差。",
+            "如果服从者和始终处理者的效应异质，Wald比率对应服从者局部均值，不是整个投资者群体或证券市场的平均干预效应。"
+          ],
+          "formulas": [
+            {
+              "label": "异质效应与LATE",
+              "tex": "\\operatorname{LATE}=\\frac{E[Y\\mid Z=1]-E[Y\\mid Z=0]}{E[D\\mid Z=1]-E[D\\mid Z=0]}"
+            }
+          ],
+          "proof": "在工具独立性、排除限制、单调性与稳定潜在结果条件下，分子等于服从者比例乘其平均效应，分母等于服从者比例，二者相除得到LATE。",
+          "worked": "若工具让20%对象改变处理，服从者平均效应为5，则结果均值差为1、处理概率差为0.2，LATE=5。",
+          "limitation": "金融市场存在干扰和网络效应时，标准不干扰条件可能需要修订。"
+        },
+        {
+          "title": "金融政策意外工具的研究设计",
+          "question": "如何防止把同一公告的其他内容当作被排除的通道？",
+          "paragraphs": [
+            "货币政策公告可能同时传达利率决定、未来经济预测和政策路径信息。若目标是估计利率冲击对股票回报的效应，工具不能在未经控制的情况下直接承载增长前景信号。",
+            "市场预期测度需要在公告前冻结，高频价格窗口与其他市场交易时区必须准确对齐。研究报告应将工具来源、第一阶段和排除限制讨论并列呈现。"
+          ],
+          "formulas": [
+            {
+              "label": "金融政策意外工具的研究设计",
+              "tex": "E[z_t(y_{t+h}-\\beta x_t-\\gamma^\\top c_t)]=0"
+            }
+          ],
+          "proof": "当工具在给定控制和研究信息集下对结构误差正交时，矩条件成立；如果政策公告存在遗漏的直接收益通道，这个矩通常不再为零。",
+          "worked": "公告同时发布新的通胀前景时，即便利率工具强烈改变国债收益率，也不能自动宣称其对股指收益无直接信息效应。",
+          "limitation": "工具法无法由回归显著性本身确认全部经济因果识别假设。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "econometrics-n0214",
+          "label": "先修：模型识别"
+        },
+        {
+          "kind": "math",
+          "id": "econometrics-n0216",
+          "label": "下一步：弱工具变量"
+        },
+        {
+          "kind": "math",
+          "id": "econometrics-n0218",
+          "label": "下一步：投影与2SLS"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Angrist and Pischke, Mostly Harmless Econometrics, Chapter 4: Instrumental Variables",
+          "url": "https://www.degruyterbrill.com/document/doi/10.1515/9781400829828-009/html"
+        },
+        {
+          "title": "Stock and Yogo (2002), Testing for Weak Instruments, NBER",
+          "url": "https://www.nber.org/papers/t0284"
+        }
+      ],
+      "checked_status": "V17：识别条件、数学推导、数值反例及金融时间外验证均完整"
+    }
+  ]
+}
