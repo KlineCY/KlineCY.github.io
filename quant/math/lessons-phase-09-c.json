@@ -1,0 +1,489 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "linear-n0086",
+      "node_id": "linear-n0086",
+      "title": "矩阵范数与条件数",
+      "definition": "矩阵算子范数衡量线性映射可能放大的最大输入幅度；条件数度量解线性系统或逆问题对相对扰动的最坏敏感程度。二范数下矩阵条件数由最大、最小奇异值之比决定。它连接SVD、数值线性代数、回归多重共线性与正则化，却不是单纯的拟合误差指标。",
+      "assumptions": "取兼容欧氏范数的诱导算子2-范数。方阵X可逆时κ₂(X)=||X||₂||X^{-1}||₂；矩形满列秩X在可识别的输入子空间可用正奇异值比σ_max/σ_min衡量，秩亏时整体逆问题不可识别。关于正规方程条件数平方的结论指二范数下满列秩XᵀX，需明确浮点误差及扰动类型。",
+      "properties": [
+        "算子2-范数||X||₂=σ_max(X)，满列秩且σ_min>0时κ₂(X)=σ_max/σ_min。",
+        "若X满列秩，XᵀX的条件数为κ₂(X)²，因此显式形成正规方程可显著放大舍入和扰动敏感性。",
+        "条件数描述最坏情形，与具体观测噪声方向无关；实际误差可能很小，也可能在小奇异方向严重放大。",
+        "Ridge Hessian XᵀX/n+λI在λ>0时正定，原始无惩罚问题的病态性可以改善，但这不保证统计风险必下降。"
+      ],
+      "formulas": [
+        {
+          "label": "诱导算子二范数",
+          "tex": "\\|X\\|_2=\\sup_{v\\ne0}\\frac{\\|Xv\\|_2}{\\|v\\|_2}=\\sigma_{\\max}(X)"
+        },
+        {
+          "label": "二范数条件数",
+          "tex": "\\kappa_2(X)=\\frac{\\sigma_{\\max}(X)}{\\sigma_{\\min}(X)},\\qquad \\sigma_{\\min}>0"
+        },
+        {
+          "label": "正规方程放大",
+          "tex": "\\kappa_2(X^\\top X)=\\kappa_2(X)^2"
+        },
+        {
+          "label": "Ridge Hessian条件数",
+          "tex": "\\kappa_2(H_\\lambda)=\\frac{\\sigma_{\\max}^2/n+\\lambda}{\\sigma_{\\min}^2/n+\\lambda},\\quad H_\\lambda=\\frac{X^\\top X}{n}+\\lambda I"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据SVD X=UΣVᵀ，正交变换不改变欧氏范数。最大比值由奇异值最大的右奇异向量取得，因此||X||₂=σ_max。",
+          "tex": "\\|Xv\\|_2^2=\\sum_i\\sigma_i^2(v_i^\\top v)^2\\le\\sigma_{\\max}^2\\|v\\|_2^2"
+        },
+        {
+          "explanation": "对于可逆X，X^{-1}=VΣ^{-1}Uᵀ，所以其算子范数为1/σ_min。两者相乘给出条件数。",
+          "tex": "\\|X^{-1}\\|_2=1/\\sigma_{\\min}(X)"
+        },
+        {
+          "explanation": "XᵀX的特征值是σ_i²，最大与最小特征值之比正好是(σ_max/σ_min)²，故平方放大。",
+          "tex": "\\kappa_2(X^\\top X)=\\frac{\\sigma_{\\max}^2}{\\sigma_{\\min}^2}"
+        },
+        {
+          "explanation": "Ridge目标J=||y−Xβ||²/(2n)+λ||β||²/2的Hessian为XᵀX/n+λI。每个特征值同时加λ，最小方向的相对提升更大，改善二范数条件数。",
+          "tex": "\\lambda_i(H_\\lambda)=\\sigma_i^2/n+\\lambda"
+        }
+      ],
+      "example": "取X=diag(3,0.1)，其奇异值为3与0.1，条件数κ₂(X)=30，而XᵀX=diag(9,0.01)的条件数为900。若y沿第二坐标扰动Δy=(0,0.01)，最小二乘系数扰动Δβ=X^{-1}Δy=(0,0.1)，响应小扰动在小奇异方向放大十倍。若n=2、λ=0.5，则Hλ=diag(5,0.505)，条件数≈9.90099。",
+      "application": "量化多资产因子X高度相关时，通常先检查训练期谱与有效秩，再选择SVD/QR求解或者正则化。不同资产因子的单位和缩放影响条件数及惩罚结构，应仅在训练期确定缩放参数。",
+      "caveat": "条件数不是样本外收益指标，也不是统计显著性指标。正则化引入偏差，不能仅因Hessian更易求解就断言预测将改善；矩形秩亏时须明确所分析的可识别子空间。",
+      "deep_sections": [
+        {
+          "title": "算子范数与奇异值的关系",
+          "question": "为什么最大奇异值就是最大的长度放大比例？",
+          "paragraphs": [
+            "欧氏范数对正交旋转不变，SVD把任意线性映射分解为旋转、按奇异值缩放和再次旋转。最大长度伸缩发生在第一个右奇异方向。",
+            "这条结论可用于建立数值误差界，也可理解金融特征矩阵把系数变化放大成预测变化的最坏幅度。但它不能指明具体市场情景是否达到该最坏方向。"
+          ],
+          "formulas": [
+            {
+              "label": "谱范数",
+              "tex": "\\|X\\|_2=\\sqrt{\\lambda_{\\max}(X^\\top X)}"
+            }
+          ],
+          "proof": "对||v||=1展开v的右奇异基系数，||Xv||²≤σ_max²；令v为对应最大奇异向量取等号。",
+          "worked": "X=diag(3,0.1)，单位向量(1,0)被伸长到(3,0)，实现最大放大3。",
+          "limitation": "如果使用行和范数或Frobenius范数，表达式及对应条件数不同。"
+        },
+        {
+          "title": "条件数、最坏扰动和正规方程",
+          "question": "为什么高相关输入会让系数大幅变化？",
+          "paragraphs": [
+            "逆问题要求从输出y恢复输入系数β。最小奇异值方向上的输出很小，反演时要除以该奇异值；因此噪声沿该方向可能显著改变系数。",
+            "矩形最小二乘在满列秩下也存在该敏感性，若算法进一步显式计算XᵀX，则小奇异值被平方，数值问题更加严重。"
+          ],
+          "formulas": [
+            {
+              "label": "逆问题绝对误差界",
+              "tex": "\\|\\Delta\\beta\\|_2\\le\\frac{\\|\\Delta y\\|_2}{\\sigma_{\\min}(X)}"
+            }
+          ],
+          "proof": "固定X、β=X⁺y时，Δβ=X⁺Δy。诱导范数满足||X⁺||₂=1/σ_min，因此得到误差上界。",
+          "worked": "σ_min=0.1、Δy在对应方向为0.01，系数变化0.1，恰好达到上界。",
+          "limitation": "这只是固定X扰动y的简单界；同时扰动X的相对误差分析需要更完整的条件。"
+        },
+        {
+          "title": "Ridge如何改善Hessian条件数",
+          "question": "加λI为什么能避免原始的零特征值？",
+          "paragraphs": [
+            "Ridge的L2惩罚给每个参数方向施加正曲率，即使X的某些列高度相关甚至严格共线，只要λ>0，总Hessian仍正定，解唯一。",
+            "条件数改善反映优化与数值计算层面，λ选择还应兼顾预测偏差和方差；对未经标准化的特征，惩罚并不具有可比的经济含义。"
+          ],
+          "formulas": [
+            {
+              "label": "条件数改善",
+              "tex": "\\kappa_2(H_\\lambda)=\\frac{\\sigma_{\\max}^2/n+\\lambda}{\\sigma_{\\min}^2/n+\\lambda}"
+            }
+          ],
+          "proof": "利用XᵀX/n的正交特征分解，所有特征值均加λ。最大/最小之比随λ增加趋向1（当非平凡谱差存在）。",
+          "worked": "X=diag(3,0.1)、n=2、λ=0.5，Hλ=diag(5,0.505)，条件数约9.90099，而未惩罚H0的条件数900。",
+          "limitation": "条件数接近1不代表预测准确，例如λ非常大时系数可能几乎全部收缩到0。"
+        },
+        {
+          "title": "金融模型中的谱稳定性与样本外评价",
+          "question": "为什么某次窗口中估计的因子系数不能直接外推？",
+          "paragraphs": [
+            "历史收益矩阵的条件数可能因资产池、频率、缺失日期和缩放而变化。训练期计算的谱稳定性是对当前设计矩阵的诊断，不能保证下一市场制度下因子关系不变。",
+            "研究过程应固定训练期标准化、设定诊断阈值、记录奇异值谱与正则强度，再在独立时间外数据上评价预测和持仓表现。"
+          ],
+          "formulas": [
+            {
+              "label": "特征条件数",
+              "tex": "\\kappa_2(X_{\\mathrm{train}})=\\sigma_{\\max}(X_{\\mathrm{train}})/\\sigma_{\\min}(X_{\\mathrm{train}})"
+            }
+          ],
+          "proof": "如果使用全样本标准化均值与标准差构造X_train，未来信息已经进入设计矩阵，因而并非合法的训练期谱诊断。",
+          "worked": "ETF行业与宽基存在重叠风险，特征列相关性高时σ_min可能下降；选择训练窗口与资产池会改变谱。",
+          "limitation": "相关性高不代表所有系数均无用，删除变量或收缩仍需考虑研究目标与经济约束。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "linear-n0083",
+          "label": "先修：SVD"
+        },
+        {
+          "kind": "math",
+          "id": "linear-n0078",
+          "label": "先修：OLS"
+        },
+        {
+          "kind": "math",
+          "id": "regression-n0205",
+          "label": "下一讲：Ridge"
+        },
+        {
+          "kind": "math",
+          "id": "optimization-x009",
+          "label": "深化：Hessian条件数"
+        },
+        {
+          "kind": "ml",
+          "id": "m07-c06-p02",
+          "label": "应用：谱诊断与收缩"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MIT 18.06 Linear Algebra",
+          "url": "https://www.mit.edu/~18.06/"
+        },
+        {
+          "title": "Stanford CS229T Statistical Learning Theory",
+          "url": "https://web.stanford.edu/class/cs229t/2016/notes.pdf"
+        }
+      ],
+      "checked_status": "教材级精讲：矩阵范数、逆问题敏感度、正规方程与正则Hessian"
+    },
+    {
+      "id": "regression-n0205",
+      "node_id": "regression-n0205",
+      "title": "Ridge回归",
+      "definition": "Ridge回归在平方损失上加L2系数惩罚，通过对所有方向连续收缩降低不稳定估计的方差，并使正则化目标严格凸。与OLS相比，它通常引入参数估计偏差；只有在信噪比、设计矩阵谱和正则强度等条件合适时，预测或参数MSE才可能更小。",
+      "assumptions": "明确使用J(β)=||y−Xβ||²/(2n)+λ||β||²/2，λ≥0，X为训练期标准化后的设计矩阵，截距另行估计且不受惩罚。下列闭式公式针对无惩罚截距已通过训练均值中心化移除的特征和响应。λ>0时Hessian正定，OLS可能因秩亏而不唯一。",
+      "properties": [
+        "Ridge闭式解为(XᵀX+nλI)^{-1}Xᵀy（λ>0），不需要X满列秩。",
+        "在SVD方向上，拟合响应方向的收缩系数为σ_i²/(σ_i²+nλ)，小奇异值方向被相对更强地压缩。",
+        "在固定X、同方差线性模型下，Ridge参数估计的偏差与方差可显式写出；大λ降低方差同时增加收缩偏差。",
+        "Ridge一般不使某个系数精确变为零；它不能像LASSO那样自然提供稀疏筛选，也不能自动修复分布迁移或未来数据泄漏。"
+      ],
+      "formulas": [
+        {
+          "label": "含样本数标准化的Ridge目标",
+          "tex": "J_\\lambda(\\beta)=\\frac{\\|y-X\\beta\\|_2^2}{2n}+\\frac{\\lambda}{2}\\|\\beta\\|_2^2"
+        },
+        {
+          "label": "闭式解",
+          "tex": "\\widehat\\beta_\\lambda=(X^\\top X+n\\lambda I)^{-1}X^\\top y,\\quad\\lambda>0"
+        },
+        {
+          "label": "谱收缩的帽矩阵",
+          "tex": "H_\\lambda=X(X^\\top X+n\\lambda I)^{-1}X^\\top=U\\,\\operatorname{diag}\\!\\left(\\frac{\\sigma_i^2}{\\sigma_i^2+n\\lambda}\\right)U^\\top"
+        },
+        {
+          "label": "有效自由度",
+          "tex": "\\operatorname{df}(\\lambda)=\\operatorname{tr}(H_\\lambda)=\\sum_i\\frac{\\sigma_i^2}{\\sigma_i^2+n\\lambda}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对J求导得到(XᵀX/n+λI)β=Xᵀy/n。λ>0时Hessian正定并可逆，解唯一。",
+          "tex": "\\nabla J_\\lambda=\\left(\\frac{X^\\top X}{n}+\\lambda I\\right)\\beta-\\frac{X^\\top y}{n}"
+        },
+        {
+          "explanation": "把X=UΣVᵀ代入闭式解，所有谱方向分离成独立一维问题；系数的收缩因子是σ_i/(σ_i²+nλ)。",
+          "tex": "\\widehat\\beta_\\lambda=\\sum_{i=1}^r\\frac{\\sigma_i}{\\sigma_i^2+n\\lambda}v_i(u_i^\\top y)"
+        },
+        {
+          "explanation": "拟合值ŷ=Xβ̂，对应帽矩阵Hλ。其谱特征值在(0,1)之间（对正奇异值而言），因此Ridge不再是幂等的正交投影。",
+          "tex": "H_\\lambda^2\\ne H_\\lambda\\quad\\text{通常成立}"
+        },
+        {
+          "explanation": "在固定设计y=Xβ*+ε、Eε=0、Var ε=σ²I下，取期望得到偏差−nλ(XᵀX+nλI)^{-1}β*，方差则由线性变换协方差计算。",
+          "tex": "\\operatorname{Bias}(\\widehat\\beta_\\lambda)=-n\\lambda(X^\\top X+n\\lambda I)^{-1}\\beta^*"
+        }
+      ],
+      "example": "取训练期中心化设计满足XᵀX/n=I₂，并设z=Xᵀy/n=(3,−1)ᵀ，λ=0.5。Ridge解β̂=(I+0.5I)^{-1}z=(2,−2/3)≈(2,−0.6667)。OLS对应z=(3,−1)。如果λ=1，Ridge解为(1.5,−0.5)。收缩是连续的，不产生严格零系数。",
+      "application": "ETF跨资产预测中可对相关动量、趋势、波动等特征实施Ridge收缩，尤其在样本较短、特征相关且滚动估计波动大的情况下可作为稳健基线。但最优λ必须仅在训练内部验证，组合后续表现需在未参与模型选择的时间外窗口检验。",
+      "caveat": "不同软件目标函数可能把n、1/2或惩罚参数定义不同；比较scikit-learn Ridge与LASSO时必须先统一参数尺度。λ改善条件数并不必然改善真实样本外收益；特征标准化必须在每个训练折内部独立拟合。",
+      "deep_sections": [
+        {
+          "title": "目标函数、归一化与唯一性",
+          "question": "为何同一个λ在不同软件或论文中不等价？",
+          "paragraphs": [
+            "平方损失可以定义为RSS/2、RSS/(2n)等多种尺度。Ridge惩罚也可能写成λ||β||²或λ||β||²/2，改变任何系数都会改变相同λ的实际收缩强度。",
+            "这里固定J=RSS/(2n)+λ||β||²/2，并让截距不参与惩罚。实务上还应训练折内标准化特征，否则尺度大的因子受到不同的有效惩罚。"
+          ],
+          "formulas": [
+            {
+              "label": "最优性条件",
+              "tex": "\\left(X^\\top X/n+\\lambda I\\right)\\widehat\\beta=X^\\top y/n"
+            }
+          ],
+          "proof": "先求梯度并设为0；Hessian=XᵀX/n+λI，当λ>0时其特征值均大于0，因此无论X是否满列秩，系数解唯一。",
+          "worked": "若XᵀX/n=I、z=(3,−1)、λ=0.5，方程1.5β=z，解β=(2,−2/3)。",
+          "limitation": "若含截距却惩罚截距，改变响应均值会非必要地影响缩放，不能混用不同约定。"
+        },
+        {
+          "title": "SVD分解下的谱滤波与有效自由度",
+          "question": "Ridge究竟对哪个方向收缩得更强？",
+          "paragraphs": [
+            "SVD把回归映射转换成独立谱方向。OLS在σ_i很小时需要用1/σ_i放大响应噪声；Ridge用σ_i/(σ_i²+nλ)代替，从而减少该方向的拟合灵敏度。",
+            "模型复杂度可以用帽矩阵迹tr(Hλ)描述，它一般是小于等于秩的非整数。有效自由度是线性平滑的一个度量，不等于参数数量实际被删除。"
+          ],
+          "formulas": [
+            {
+              "label": "谱收缩与自由度",
+              "tex": "s_i=\\frac{\\sigma_i^2}{\\sigma_i^2+n\\lambda},\\qquad \\operatorname{df}=\\sum_i s_i"
+            }
+          ],
+          "proof": "由Hλ=U diag(s_i)Uᵀ，迹对正交变换不变，因此df=Σs_i；当λ→0且X非零时df趋向秩r，λ→∞时df趋向0。",
+          "worked": "如果σ_i²=n、λ=0.5，则对应响应方向的收缩比例s_i=1/(1+0.5)=2/3。",
+          "limitation": "帽矩阵不再幂等，因此训练残差不再必然与每个特征列正交。"
+        },
+        {
+          "title": "参数估计的偏差、方差与预测风险",
+          "question": "为什么有偏估计有时反而更准确？",
+          "paragraphs": [
+            "在固定设计高斯或仅二阶同方差线性模型下，OLS无偏但可能因为小奇异值而方差巨大。Ridge故意向零收缩，增加偏差但压低估计方差，是否改善均方误差取决于真实系数在谱方向上的大小。",
+            "样本外预测风险还要乘以未来特征分布与真实噪声水平，不能把训练参数估计方差更小当作未来Sharpe必然更高。"
+          ],
+          "formulas": [
+            {
+              "label": "偏差与协方差",
+              "tex": "E[\\widehat\\beta_\\lambda]-\\beta^*=-n\\lambda A_\\lambda^{-1}\\beta^*,\\quad \\operatorname{Var}(\\widehat\\beta_\\lambda)=\\sigma^2A_\\lambda^{-1}X^\\top XA_\\lambda^{-1}"
+            }
+          ],
+          "proof": "记Aλ=XᵀX+nλI，将y=Xβ*+ε代入β̂=Aλ^{-1}Xᵀy。条件期望等于Aλ^{-1}XᵀXβ*，减β*得偏差；误差线性映射给出方差。",
+          "worked": "若某一谱方向真实β*很小、噪声方差较大，适度λ使估计波动明显下降，可能降低该方向参数MSE。",
+          "limitation": "真实β*未知，选择λ不能依赖测试期后验估计的真实系数；厚尾与异方差时经典方差表达需修订。"
+        },
+        {
+          "title": "ETF研究中的训练处理与模型比较",
+          "question": "怎样评价收缩是否真的带来金融研究价值？",
+          "paragraphs": [
+            "滚动研究中，中心化、缩尾、标准化与λ选择全部属于训练程序，应每个训练折独立完成。下一期目标收益的标签必须先成熟；跨ETF横截面标准化也要保证仅使用当时可得的资产池。",
+            "最终分开报告预测误差、IC或Rank IC、权重波动与换手、成本后净收益、风险暴露；若Ridge预测更稳却无法改善组合层表现，结论应如实记录。"
+          ],
+          "formulas": [
+            {
+              "label": "点时信息预测",
+              "tex": "\\widehat\\mu_{i,t+1\\mid t}=\\widehat\\beta_t^\\top x_{i,t},\\quad \\widehat\\beta_t=\\mathcal A(D_{\\mathrm{train},t})"
+            }
+          ],
+          "proof": "在每月重训的时间序列管道中，将标准化器和超参数搜索纳入训练流程，冻结后才计算下一月预测。样本外收益不反向更新同一预测版本。",
+          "worked": "37只ETF的跨资产回归可能拥有多个高度相关趋势特征；Ridge是合理的基线，但不能从37这个资产数量自动推导任何收益提升。",
+          "limitation": "若将全部样本进行标准化再划分训练期，已经将未来分布的信息传入模型，不能称为干净样本外实验。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "linear-n0086",
+          "label": "先修：条件数"
+        },
+        {
+          "kind": "math",
+          "id": "linear-n0083",
+          "label": "先修：SVD"
+        },
+        {
+          "kind": "math",
+          "id": "regression-n0206",
+          "label": "下一讲：LASSO"
+        },
+        {
+          "kind": "math",
+          "id": "optimization-x009",
+          "label": "拓展：Ridge Hessian强凸性"
+        },
+        {
+          "kind": "ml",
+          "id": "m07-c06-p03",
+          "label": "机器学习：收缩与偏差方差"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Stanford CS229T Statistical Learning Theory",
+          "url": "https://web.stanford.edu/class/cs229t/2016/notes.pdf"
+        },
+        {
+          "title": "scikit-learn, Linear Models",
+          "url": "https://scikit-learn.org/stable/modules/linear_model.html"
+        }
+      ],
+      "checked_status": "教材级精讲：闭式解、谱收缩、偏差方差、参数尺度与滚动金融预测"
+    },
+    {
+      "id": "regression-n0206",
+      "node_id": "regression-n0206",
+      "title": "LASSO回归",
+      "definition": "LASSO在最小二乘损失上加入L1范数惩罚，利用绝对值函数在零点的非光滑次梯度，使部分系数能够恰好等于零。因此它不仅是一种收缩估计，也是一个稀疏化机制；但选择到的变量并不必然具有因果含义，强相关特征的选择可能不稳定。",
+      "assumptions": "采用J(β)=||y−Xβ||²/(2n)+λ||β||₁，λ≥0，并假设截距不惩罚且仅用训练期数据中心化与标准化特征。目标凸但未必严格凸，因此秩亏或特征共线时系数最优解可能不唯一；拟合值的唯一性需要单独讨论。",
+      "properties": [
+        "LASSO最优性由次梯度KKT确定。对于非零β_j，残差相关等于λ sign(β_j)；对于β_j=0，相关绝对值不大于λ。",
+        "在标准正交设计XᵀX/n=I下，LASSO逐坐标等于Soft Thresholding，零阈值可产生精确稀疏解。",
+        "LASSO一般不像Ridge那样给出简单矩阵逆闭式解；坐标下降与近端梯度通过软阈值求解。",
+        "L1惩罚不等于自动因果选择；高相关特征、模型错设和时间序列依赖会破坏选中特征的稳定性，统计推断应考虑选择后偏差。"
+      ],
+      "formulas": [
+        {
+          "label": "LASSO目标",
+          "tex": "J_\\lambda(\\beta)=\\frac{\\|y-X\\beta\\|_2^2}{2n}+\\lambda\\|\\beta\\|_1"
+        },
+        {
+          "label": "次梯度最优性",
+          "tex": "0\\in \\frac{X^\\top(X\\widehat\\beta-y)}{n}+\\lambda\\,\\partial\\|\\widehat\\beta\\|_1"
+        },
+        {
+          "label": "零系数KKT条件",
+          "tex": "\\widehat\\beta_j=0\\ \\Longrightarrow\\ |X_j^\\top(y-X\\widehat\\beta)/n|\\le\\lambda"
+        },
+        {
+          "label": "正交设计软阈值",
+          "tex": "\\widehat\\beta_j=S_\\lambda(z_j)=\\operatorname{sgn}(z_j)\\max(|z_j|-\\lambda,0),\\quad z=X^\\top y/n"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "平方损失可导且凸，L1范数凸但在0点不可导。Fermat次梯度准则是0属于两部分次梯度之和。",
+          "tex": "0\\in \\nabla\\!\\left(\\|y-X\\beta\\|^2/(2n)\\right)+\\lambda\\,\\partial\\|\\beta\\|_1"
+        },
+        {
+          "explanation": "L1的单坐标次梯度在β_j≠0处为sign(β_j)，在0处为区间[−1,1]，因此能容纳零系数的驻点。",
+          "tex": "\\partial|\\beta_j|=\\begin{cases}\\{1\\},&\\beta_j>0\\\\[-1,1],&\\beta_j=0\\\\\\{-1\\},&\\beta_j<0\\end{cases}"
+        },
+        {
+          "explanation": "当XᵀX/n=I时，平方损失除常数外为Σ(β_j−z_j)²/2，目标逐坐标分离。按正、负、零三种情况解一维次梯度条件即得软阈值。",
+          "tex": "\\widehat\\beta_j=S_\\lambda(z_j)"
+        },
+        {
+          "explanation": "一般设计下，固定其余系数、把当前坐标更新前的残差加回第j列，得到坐标一维二次目标，其解是缩放后的Soft Thresholding。",
+          "tex": "\\beta_j\\leftarrow\\frac{S_\\lambda(X_j^\\top r_{(j)}/n)}{X_j^\\top X_j/n}"
+        }
+      ],
+      "example": "设训练设计经标准化满足XᵀX/n=I₂，z=Xᵀy/n=(3,−1)，λ=1。LASSO软阈值给出β̂=(S₁(3),S₁(−1))=(2,0)，其中第二系数因|z₂|=λ被压到严格零。相同z且同一符号尺度下，Ridge目标J=RSS/(2n)+λ||β||²/2取λ=1时给出β̂=(1.5,−0.5)，不会产生零系数。",
+      "application": "从大量候选趋势、动量和风险因子中进行稀疏线性预测时，LASSO提供一个可解释的筛选基线。金融因子共线时可与Elastic Net比较，并用滚动重拟合记录支持集变化，而不是仅报告一次被选中的因子名单。",
+      "caveat": "λ与不同库中的alpha规范可能不同；特征标准化应仅由训练窗口决定。非零系数并不自动具有统计显著性或因果效应；若特征严重共线，选中特征对微小数据变化会敏感。",
+      "deep_sections": [
+        {
+          "title": "L1为什么能够产生精确零系数",
+          "question": "非光滑绝对值和普通二次正则化的数学区别是什么？",
+          "paragraphs": [
+            "Ridge的L2惩罚在所有系数位置连续可导，其一阶条件通常给出连续非零收缩。LASSO惩罚的绝对值在零点形成尖角，次梯度可取[−1,1]中任意值，因而能平衡一定范围的损失梯度。",
+            "几何上，L1范数球的尖角更容易与椭圆型平方损失等高线接触；这是一种理解机制的图像，但严格解仍需通过KKT验证。"
+          ],
+          "formulas": [
+            {
+              "label": "零点次梯度",
+              "tex": "\\partial|0|=[-1,1]"
+            }
+          ],
+          "proof": "单坐标目标0.5(β−z)²+λ|β|在β=0处的次梯度为−z+λ[−1,1]；包含0当且仅当|z|≤λ，所以零系数成为最优。",
+          "worked": "z₂=−1、λ=1，0属于1+[−1,1]，故第二系数可以精确为0。",
+          "limitation": "对于一般相关设计，单坐标阈值涉及其他系数留下的部分残差，并非直接对原始Xᵀy逐坐标阈值化。"
+        },
+        {
+          "title": "正交设计的软阈值推导",
+          "question": "一维LASSO解如何同时覆盖正、负和零？",
+          "paragraphs": [
+            "若z>λ，最优β正且满足β−z+λ=0，因此β=z−λ；若z<−λ，最优β负且满足β−z−λ=0，因此β=z+λ。",
+            "若|z|≤λ，β=0满足次梯度条件。三种情况合并得到Soft Thresholding，它同时解释系数收缩与精确稀疏化。"
+          ],
+          "formulas": [
+            {
+              "label": "软阈值分段式",
+              "tex": "S_\\lambda(z)=\\begin{cases}z-\\lambda,&z>\\lambda\\\\0,&|z|\\le\\lambda\\\\z+\\lambda,&z<-\\lambda\\end{cases}"
+            }
+          ],
+          "proof": "对β>0、β<0分别求导，得到候选解；对β=0检查次梯度包含0。目标凸，因此每个可行候选满足次梯度0即为全局最优。",
+          "worked": "z=(3,−1)、λ=1，第一系数3−1=2；第二系数达到阈值故取0。",
+          "limitation": "该简洁闭式依赖标准正交设计；一般XᵀX有非对角项时坐标相互影响。"
+        },
+        {
+          "title": "KKT、坐标下降与求解诊断",
+          "question": "有相关特征时怎样计算而不是只写目标函数？",
+          "paragraphs": [
+            "固定其他系数时，LASSO对第j个变量变成单坐标二次加绝对值惩罚。通过部分残差r_(j)=y−Σ_{k≠j}X_kβ_k获得该列的有效相关，再软阈值并除以该列二次系数。",
+            "全局停止条件不能只看系数更新很小，还应检查次梯度/KKT残差和优化目标。共线性可导致不同最优系数组合，求解器与初值选择也会影响得到的支持集。"
+          ],
+          "formulas": [
+            {
+              "label": "坐标更新",
+              "tex": "\\widehat\\beta_j\\leftarrow\\frac{S_\\lambda(X_j^\\top r_{(j)}/n)}{X_j^\\top X_j/n}"
+            }
+          ],
+          "proof": "将J中与β_j有关部分写成a_jβ_j²/2−c_jβ_j+λ|β_j|，其中a_j=X_jᵀX_j/n、c_j=X_jᵀr_(j)/n；令次梯度包含0得到软阈值解c_j/a_j。",
+          "worked": "若列已标准化使a_j=1且部分相关c_j=0.8、λ=1，则该次更新β_j=0。",
+          "limitation": "a_j=0表示特征列全零，需要显式剔除或单独处理，不能除以0。"
+        },
+        {
+          "title": "金融特征筛选与选择偏差",
+          "question": "为什么一个被选中的因子不代表已被统计验证？",
+          "paragraphs": [
+            "如果从数百个金融因子中依据同一训练窗口用LASSO做稀疏选择，选中集合会随样本与参数变化。特别是强相关的动量、趋势指标之间，模型可能任取其中一个代表而不提供因果排序。",
+            "滚动时间外评价应把特征标准化、超参数选择和筛选作为同一个训练程序。若再对选中因子做传统显著性检验，需要考虑模型选择后的条件推断，否则P值往往乐观。"
+          ],
+          "formulas": [
+            {
+              "label": "支持集随时间变化",
+              "tex": "\\widehat S_t=\\{j:\\widehat\\beta_{j,t}\\ne0\\}"
+            }
+          ],
+          "proof": "比较相邻训练窗口的支持集交并比可诊断筛选稳定性，但稳定性本身不代表预测收益；需要同时检查预测损失、交易成本和因子风险暴露。",
+          "worked": "在37支ETF的因子回归中，若动量指标间相关接近1，LASSO可能在相邻月份换选特征，应记录支持集和换手而非仅一次模型系数。",
+          "limitation": "若未来收益标签重叠，普通随机K折会泄漏时间结构；必须按时间和标签成熟区间处理验证。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "regression-n0205",
+          "label": "先修：Ridge对照"
+        },
+        {
+          "kind": "math",
+          "id": "optimization-x010",
+          "label": "证明：LASSO次梯度"
+        },
+        {
+          "kind": "math",
+          "id": "regression-n0207",
+          "label": "下一讲：Elastic Net"
+        },
+        {
+          "kind": "math",
+          "id": "regression-n0209",
+          "label": "超参数：交叉验证"
+        },
+        {
+          "kind": "ml",
+          "id": "m07-c06-p04",
+          "label": "机器学习：稀疏预测与回测"
+        }
+      ],
+      "sources": [
+        {
+          "title": "scikit-learn User Guide, Lasso and Elastic Net",
+          "url": "https://scikit-learn.org/stable/modules/linear_model.html"
+        },
+        {
+          "title": "Tibshirani (1996), Regression Shrinkage and Selection via the Lasso",
+          "url": "https://doi.org/10.1111/j.2517-6161.1996.tb02080.x"
+        },
+        {
+          "title": "Stanford CS229 Statistical Learning",
+          "url": "https://see.stanford.edu/Course/CS229/"
+        }
+      ],
+      "checked_status": "教材级精讲：次梯度、软阈值、KKT坐标下降、正交设计与特征稳定性"
+    }
+  ]
+}
