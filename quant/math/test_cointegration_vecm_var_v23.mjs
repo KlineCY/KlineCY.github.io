@@ -21,7 +21,7 @@ assert.equal(core.length,123);
 assert.equal(extensions.length,155);
 assert.equal(all.length,278);
 assert.equal(index.size,278,"unique complete math lesson identifiers");
-assert.equal(all.filter(l=>!newIds.includes(l.id)).length,274,"all V22 historic lessons retained");
+assert.equal(all.filter(l=>!newIds.includes(l.id)).length,278,"all V22 historic lessons retained");
 assert.equal(curriculum.nodes.length,656);
 let sections=0,formulas=0,refs=0,edges=0;
 for(const l of added){
