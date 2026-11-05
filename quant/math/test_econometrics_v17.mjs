@@ -4,6 +4,7 @@ import katex from "katex";
 
 const root=new URL("./",import.meta.url);
 const read=p=>JSON.parse(fs.readFileSync(new URL(p,root),"utf8"));
+const v24Ids=new Set(["statistics-x003","statistics-x004","mlmath-x003","mlmath-x004"]);
 const c=read("curriculum.json"),m=read("lessons-manifest.json");
 const allModules=m.modules.flatMap(x=>read(x.path).lessons);
 const core=["lessons-foundations.json","lessons-advanced.json","lessons-more.json"].flatMap(readable=>read(readable).lessons);
@@ -24,7 +25,7 @@ const v20Ids=new Set(["econometrics-x003","econometrics-x005","econometrics-x006
 const v21Ids=new Set(["mlmath-n0455","mlmath-n0466","mlmath-n0463","mlmath-n0464","mlmath-n0460","mlmath-n0461","mlmath-n0462","mlmath-n0465"]);
 const v22Ids=new Set(["timeseries-n0244","timeseries-n0245","timeseries-n0248","timeseries-n0249","timeseries-n0250","timeseries-n0251","timeseries-n0254","timeseries-n0255"]);
 const v23Ids=new Set(["timeseries-n0256","timeseries-n0257","timeseries-n0258","timeseries-n0259"]);
-assert.equal(active.filter(l=>!v18Ids.has(l.node_id)&&!v19Ids.has(l.node_id)&&!v20Ids.has(l.node_id)&&!v21Ids.has(l.node_id)&&!v22Ids.has(l.node_id)&&!v23Ids.has(l.node_id)).length,240,"historical V17 240 complete lectures lost");
+assert.equal(active.filter(l=>!v18Ids.has(l.node_id)&&!v19Ids.has(l.node_id)&&!v20Ids.has(l.node_id)&&!v21Ids.has(l.node_id)&&!v22Ids.has(l.node_id)&&!v23Ids.has(l.node_id)&&!v24Ids.has(l.node_id)).length,240,"historical V17 240 complete lectures lost");
 assert.deepEqual(additions.map(x=>x.id),ids,"stage V17 learning order changed");
 assert.equal(c.nodes.length,656);
 const nodes=new Map(c.nodes.map(x=>[x.id,x]));
