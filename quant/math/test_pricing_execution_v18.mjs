@@ -10,6 +10,7 @@ const v26Ids=new Set(["timeseries-n0260","timeseries-n0261","timeseries-n0262","
 const v27Ids=new Set(["statistics-n0171","statistics-n0170","statistics-n0172","statistics-n0173","statistics-n0174","statistics-n0175","statistics-n0176","riskmath-n0589","riskmath-n0594","riskmath-n0595"]);
 const v28Ids=new Set(["statistics-n0177","statistics-n0178","statistics-n0179","statistics-n0180","finance-n0434","finance-n0436","finance-n0437","finance-n0438"]);
 const v29Ids=new Set(["information-n0508","information-n0507","information-n0505","information-n0509","information-n0506","information-n0510"]);
+const v30Ids=new Set(["finance-n0431","finance-n0432","finance-n0439","finance-n0440","finance-n0441","finance-n0442"]);
 const curriculum=read("curriculum.json"), manifest=read("lessons-manifest.json");
 const core=["lessons-foundations.json","lessons-advanced.json","lessons-more.json"].flatMap(p=>read(p).lessons);
 const extended=manifest.modules.flatMap(m=>{const rows=read(m.path).lessons;assert.equal(rows.length,m.lessons,"manifest module mismatch "+m.path);return rows});
@@ -23,18 +24,18 @@ const netNew="bcd".split("").flatMap(s=>read("lessons-phase-18-"+s+".json").less
 assert.deepEqual(netNew.map(x=>x.node_id),newIds,"six net-new phase18 records only");
 assert.deepEqual(added.map(x=>x.node_id),ids);
 assert.equal(curriculum.nodes.length,656);
-assert.equal(manifest.modules.length,75);
-assert.equal(manifest.expected_lessons,195);
-assert.equal(extended.length,195);
+assert.equal(manifest.modules.length,77);
+assert.equal(manifest.expected_lessons,201);
+assert.equal(extended.length,201);
 assert.equal(core.length,123);
-assert.equal(all.length,318);
-assert.equal(completeIds.size,318,"duplicates among all live full mathematical lectures");
+assert.equal(all.length,324);
+assert.equal(completeIds.size,324,"duplicates among all live full mathematical lectures");
 const v19Ids=["econometrics-n0232","econometrics-n0233","econometrics-n0234","econometrics-n0236","econometrics-n0237","econometrics-n0238","econometrics-n0239"];
 const v20Ids=["econometrics-x003","econometrics-x005","econometrics-x006","optimization-x011","optimization-x012"];
 const v21Ids=["mlmath-n0455","mlmath-n0466","mlmath-n0463","mlmath-n0464","mlmath-n0460","mlmath-n0461","mlmath-n0462","mlmath-n0465"];
 const v22Ids=["timeseries-n0244","timeseries-n0245","timeseries-n0248","timeseries-n0249","timeseries-n0250","timeseries-n0251","timeseries-n0254","timeseries-n0255"];
 const v23Ids=["timeseries-n0256","timeseries-n0257","timeseries-n0258","timeseries-n0259"];
-assert.equal(all.filter(x=>!newIds.includes(x.node_id)&&!v19Ids.includes(x.node_id)&&!v20Ids.includes(x.node_id)&&!v21Ids.includes(x.node_id)&&!v22Ids.includes(x.node_id)&&!v23Ids.includes(x.node_id)&&!v24Ids.has(x.node_id)&&!v25Ids.has(x.node_id)&&!v26Ids.has(x.node_id)&&!v27Ids.has(x.node_id)&&!v28Ids.has(x.node_id)&&!v29Ids.has(x.node_id)).length,240,"historical V17 240 lectures must remain intact");
+assert.equal(all.filter(x=>!newIds.includes(x.node_id)&&!v19Ids.includes(x.node_id)&&!v20Ids.includes(x.node_id)&&!v21Ids.includes(x.node_id)&&!v22Ids.includes(x.node_id)&&!v23Ids.includes(x.node_id)&&!v24Ids.has(x.node_id)&&!v25Ids.has(x.node_id)&&!v26Ids.has(x.node_id)&&!v27Ids.has(x.node_id)&&!v28Ids.has(x.node_id)&&!v29Ids.has(x.node_id)&&!v30Ids.has(x.node_id)).length,240,"historical V17 240 lectures must remain intact");
 const nodes=new Map(curriculum.nodes.map(n=>[n.id,n]));
 let formulas=0,sections=0,sources=0,links=0;
 for(const l of added){
