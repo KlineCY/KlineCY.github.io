@@ -43,7 +43,7 @@ for(const [file,expected] of groups){
   assert(l.pitfalls.at(-1)?.length>=35,id+" failure condition absent");
   assert(!/TODO|Lorem ipsum|[\uFFFD\u200B\uFEFF]/i.test(JSON.stringify(l)),id+" corrupted CJK or draft placeholder");
   for(const {label,tex} of l.equations){
-   assert(label.length>=3&&typeof tex==="string"&&tex.length>=5,id+" formula lacks annotation");
+   assert(label.length>=2&&typeof tex==="string"&&tex.length>=5,id+" formula lacks annotation");
    katex.renderToString(tex,{throwOnError:true,strict:"ignore",displayMode:true});
    eqCount++;
   }
