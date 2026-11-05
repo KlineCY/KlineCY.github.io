@@ -13,12 +13,12 @@ const additions=["a","b","c"].flatMap(x=>read("lessons-phase-17-"+x+".json").les
 const ids=["econometrics-n0211","econometrics-n0213","econometrics-n0214","econometrics-n0215",
 "econometrics-n0216","econometrics-n0218","econometrics-n0219","econometrics-n0220",
 "econometrics-n0221","econometrics-n0222","econometrics-n0228","econometrics-n0231"];
-assert.equal(m.modules.length,65);
-assert.equal(m.expected_lessons,159);
-assert.equal(allModules.length,159);
+assert.equal(m.modules.length,66);
+assert.equal(m.expected_lessons,164);
+assert.equal(allModules.length,164);
 assert.equal(core.length,123);
-assert.equal(active.length,282);
-assert.equal(unique.size,282,"duplicate complete lesson IDs");
+assert.equal(active.length,287);
+assert.equal(unique.size,287,"duplicate complete lesson IDs");
 const v18Ids=new Set(["finance-x004","finance-x005","finance-x006","optimization-x003","optimization-x004","optimization-x006"]);
 const v19Ids=new Set(["econometrics-n0232","econometrics-n0233","econometrics-n0234","econometrics-n0236","econometrics-n0237","econometrics-n0238","econometrics-n0239"]);
 const v20Ids=new Set(["econometrics-x003","econometrics-x005","econometrics-x006","optimization-x011","optimization-x012"]);

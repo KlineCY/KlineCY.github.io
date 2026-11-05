@@ -19,12 +19,12 @@ const deepenedIds=["econometrics-x001","econometrics-x002","econometrics-x004",
  "optimization-x007","optimization-x008","optimization-x009","optimization-x010"];
 const targetIds=[...newIds,...deepenedIds];
 assert.equal(curriculum.nodes.length,656);
-assert.equal(manifest.modules.length,65);
-assert.equal(manifest.expected_lessons,159);
+assert.equal(manifest.modules.length,66);
+assert.equal(manifest.expected_lessons,164);
 assert.equal(core.length,123);
-assert.equal(extended.length,159);
-assert.equal(all.length,282);
-assert.equal(byId.size,282,"duplicate ID introduced into mathematics manifest");
+assert.equal(extended.length,164);
+assert.equal(all.length,287);
+assert.equal(byId.size,287,"duplicate ID introduced into mathematics manifest");
 const v21Ids=["mlmath-n0455","mlmath-n0466","mlmath-n0463","mlmath-n0464","mlmath-n0460","mlmath-n0461","mlmath-n0462","mlmath-n0465"];
 const v22Ids=["timeseries-n0244","timeseries-n0245","timeseries-n0248","timeseries-n0249","timeseries-n0250","timeseries-n0251","timeseries-n0254","timeseries-n0255"];
 const v23Ids=["timeseries-n0256","timeseries-n0257","timeseries-n0258","timeseries-n0259"];

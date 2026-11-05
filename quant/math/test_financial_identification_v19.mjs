@@ -12,13 +12,13 @@ const extensions=manifest.modules.flatMap(m=>{
 });
 const all=[...core,...extensions];
 assert.equal(curriculum.nodes.length,656);
-assert.equal(manifest.modules.length,65);
-assert.equal(manifest.expected_lessons,159);
+assert.equal(manifest.modules.length,66);
+assert.equal(manifest.expected_lessons,164);
 assert.equal(core.length,123);
-assert.equal(extensions.length,159);
-assert.equal(all.length,282);
+assert.equal(extensions.length,164);
+assert.equal(all.length,287);
 const ids=new Set(all.map(l=>l.node_id));
-assert.equal(ids.size,282,"duplicate complete lessons");
+assert.equal(ids.size,287,"duplicate complete lessons");
 const introduced="abc".split("").flatMap(x=>read("lessons-phase-19-"+x+".json").lessons);
 const newIds=["econometrics-n0232","econometrics-n0233","econometrics-n0234",
  "econometrics-n0236","econometrics-n0237","econometrics-n0238","econometrics-n0239"];
