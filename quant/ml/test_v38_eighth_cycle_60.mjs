@@ -19,16 +19,16 @@ for(const [idx,path] of files.entries()){
  assert.equal(doc.schema,1,"schema "+path);
  assert.equal(Object.keys(doc.lessons).length,10,"ten canonical lessons per module");
  const isV38=idx<6;
- if(isV38)assert.equal(doc.revision,"2026-11-06",path+" stale");
+ assert.equal(doc.revision,"2026-11-06",path+" stale");
  for(const [id,lesson] of Object.entries(doc.lessons)){
   assert(!allIds.has(id),"duplicate lesson "+id);
   allIds.add(id);
   domains.set(id.slice(0,3),(domains.get(id.slice(0,3))||0)+1);
-  const goal=isV38?5:3;
+  const goal=5;
   assert.equal(lesson.equations.length,goal,id+" mathematical depth");
   assert.equal(lesson.derivation.length,goal,id+" proof depth");
   assert.equal(lesson.protocol.length,goal,id+" empirical audit depth");
-  assert.equal(lesson.pitfalls.length,isV38?3:2,id+" explicit limitations");
+  assert.equal(lesson.pitfalls.length,3,id+" explicit limitations");
   assert(lesson.source_title?.length>=2&&lesson.title?.length>=8,id+" original identity lost");
   assert(lesson.overview?.length>=60,id+" original overview lost");
   assert(lesson.worked_example?.length>=60,id+" original example deleted");
@@ -47,15 +47,15 @@ for(const [idx,path] of files.entries()){
    assert(lesson.pitfalls.at(-1)?.length>=30,id+" invalidity boundary too short");
    assert(lesson.worked_example.length>=100,id+" example not enhanced");
    newChars+=lesson.derivation.slice(3).join("").length+lesson.protocol.slice(3).join("").length+lesson.pitfalls.at(-1).length;
-  }else{retained++;originalEquations+=lesson.equations.length;}
+  }else{retained++;originalEquations+=lesson.equations.length;assert(lesson.revision_note?.startsWith("V39"),id+" V39 provenance");}
  }
 }
 assert.equal(allIds.size,120);
 assert.equal(enhanced,60);
 assert.equal(retained,60);
 assert.equal(v38Ids.size,60);
-assert.equal(allEquations,480,"300 equations in V38 modules plus 180 retained");
-assert.equal(originalEquations,180);
+assert.equal(allEquations,600,"300 equations V38 plus 300 equations V39");
+assert.equal(originalEquations,300);
 assert.equal(domains.size,24);
 for(const n of domains.values())assert.equal(n,5,"exactly five eighth-stage lessons per ML domain");
 assert(newChars>21000,"V38 must add over 21k substantive Chinese reasoning/protocol chars");
@@ -116,4 +116,4 @@ near(2*3/5*4,4.8,"Ward WCSS merge");
 near((16-10)-(11-8),3,"DiD effect");
 near(1/.1,10,"IPW high weight");
 near((1+.5)**2/((1)**2+(.5)**2),1.8,"causal weight ESS");
-console.log("PASS V38: 60 enhanced eighth-cycle canonical lectures and 60 unchanged counterparts; 120 eighth-cycle lessons/24 domains, 480 strict KaTeX equations (120 newly authored), substantive derivations/protocols, 60 route links, original numeric examples and responsive Chinese/formula layout.");
+console.log("PASS V38+V39: 60 V38 and 60 V39 enhanced eighth-cycle canonical lectures; 120 lessons/24 domains, 600 strict KaTeX equations (240 added across V38+V39), substantive derivations/protocols, 60 route links, original numeric examples and responsive Chinese/formula layout.");
