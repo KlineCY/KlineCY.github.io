@@ -7,6 +7,7 @@ const v24Ids=new Set(["statistics-x003","statistics-x004","mlmath-x003","mlmath-
 const v25Ids=new Set(["timeseries-x003","timeseries-x004","timeseries-x006","mlmath-x006","riskmath-x001"]);
 const v26Ids=new Set(["timeseries-n0260","timeseries-n0261","timeseries-n0262","timeseries-n0266","timeseries-n0267","timeseries-n0269","timeseries-n0270"]);
 const v27Ids=new Set(["statistics-n0171","statistics-n0170","statistics-n0172","statistics-n0173","statistics-n0174","statistics-n0175","statistics-n0176","riskmath-n0589","riskmath-n0594","riskmath-n0595"]);
+const v28Ids=new Set(["statistics-n0177","statistics-n0178","statistics-n0179","statistics-n0180","finance-n0434","finance-n0436","finance-n0437","finance-n0438"]);
 const curriculum=read("curriculum.json"),manifest=read("lessons-manifest.json");
 const core=["lessons-foundations.json","lessons-advanced.json","lessons-more.json"].flatMap(p=>read(p).lessons);
 const extensions=manifest.modules.flatMap(m=>{
@@ -21,14 +22,14 @@ const ids=["timeseries-n0244","timeseries-n0245","timeseries-n0248","timeseries-
 const added="abcd".split("").flatMap(s=>read("lessons-phase-22-"+s+".json").lessons);
 assert.deepEqual(added.map(l=>l.id),ids,"V22 lecture order must remain intact");
 assert.equal(curriculum.nodes.length,656);
-assert.equal(manifest.modules.length,71);
-assert.equal(manifest.expected_lessons,181);
+assert.equal(manifest.modules.length,73);
+assert.equal(manifest.expected_lessons,189);
 assert.equal(core.length,123);
-assert.equal(extensions.length,181);
-assert.equal(all.length,304);
-assert.equal(new Set(all.map(l=>l.id)).size,304,"unique complete mathematics IDs");
+assert.equal(extensions.length,189);
+assert.equal(all.length,312);
+assert.equal(new Set(all.map(l=>l.id)).size,312,"unique complete mathematics IDs");
 const v23Ids=["timeseries-n0256","timeseries-n0257","timeseries-n0258","timeseries-n0259"];
-assert.equal(all.filter(l=>!ids.includes(l.id)&&!v23Ids.includes(l.id)&&!v24Ids.has(l.id)&&!v25Ids.has(l.id)&&!v26Ids.has(l.id)&&!v27Ids.has(l.id)).length,266,"all original V21 complete lessons retained");
+assert.equal(all.filter(l=>!ids.includes(l.id)&&!v23Ids.includes(l.id)&&!v24Ids.has(l.id)&&!v25Ids.has(l.id)&&!v26Ids.has(l.id)&&!v27Ids.has(l.id)&&!v28Ids.has(l.id)).length,266,"all original V21 complete lessons retained");
 let sections=0,parsed=0,sources=0,links=0;
 for(const l of added){
  assert(l.id===l.node_id&&nodeMap.get(l.id)?.title===l.title,"curriculum/lecture mapping "+l.id);
