@@ -18,13 +18,14 @@ const deepenedIds=["econometrics-x001","econometrics-x002","econometrics-x004",
  "optimization-x007","optimization-x008","optimization-x009","optimization-x010"];
 const targetIds=[...newIds,...deepenedIds];
 assert.equal(curriculum.nodes.length,656);
-assert.equal(manifest.modules.length,54);
-assert.equal(manifest.expected_lessons,135);
+assert.equal(manifest.modules.length,58);
+assert.equal(manifest.expected_lessons,143);
 assert.equal(core.length,123);
-assert.equal(extended.length,135);
-assert.equal(all.length,258);
-assert.equal(byId.size,258,"duplicate ID introduced into mathematics manifest");
-assert.equal(all.filter(l=>!newIds.includes(l.id)).length,253,"previous 253 lectures must remain intact");
+assert.equal(extended.length,143);
+assert.equal(all.length,266);
+assert.equal(byId.size,266,"duplicate ID introduced into mathematics manifest");
+const v21Ids=["mlmath-n0455","mlmath-n0466","mlmath-n0463","mlmath-n0464","mlmath-n0460","mlmath-n0461","mlmath-n0462","mlmath-n0465"];
+assert.equal(all.filter(l=>!newIds.includes(l.id)&&!v21Ids.includes(l.id)).length,253,"previous 253 lectures must remain intact");
 const introduced="abc".split("").flatMap(x=>read("lessons-phase-20-"+x+".json").lessons);
 assert.deepEqual(introduced.map(l=>l.id),newIds,"V20 contains only genuinely new original curriculum IDs");
 const nodes=new Map(curriculum.nodes.map(n=>[n.id,n]));
@@ -105,4 +106,4 @@ for(const p of ["styles.css","../ml/atlas.css"]){
  const css=fs.readFileSync(new URL(p,root),"utf8");
  for(const rule of ["overflow-x:auto","line-break:strict",":focus-visible","@media print"])assert(css.includes(rule),"CJK/formula/print safeguard missing "+rule+" in "+p);
 }
-console.log("PASS V20: 5 newly completed lectures, 7 original lectures deepened, 38 new proof sections, "+parsed+" strict KaTeX checks, "+sources+" citations, "+links+" links, 12 independent numeric cases, 258 unique full math courses, 656-node acyclic curriculum.");
+console.log("PASS V20: 5 newly completed lectures, 7 original lectures deepened, 38 new proof sections, "+parsed+" strict KaTeX checks, "+sources+" citations, "+links+" links, 12 independent numeric cases, 266 unique full math courses, 656-node acyclic curriculum.");
