@@ -1,0 +1,478 @@
+{
+  "version": 1,
+  "revision": "2026-11-05",
+  "focus": "V27-A：Jackknife、BCa偏差加速区间与合法置换推断",
+  "lessons": [
+    {
+      "id": "statistics-n0171",
+      "node_id": "statistics-n0171",
+      "title": "Jackknife",
+      "definition": "Jackknife（逐一删除重抽样）以原始样本为基础，每次恰好删除一个观察，重新计算目标统计量，借助删除前后的变化构造偏差估计、标准误与影响诊断。对于样本均值等平滑统计量，其方差可通过删除统计量的离散程度近似；Jackknife 还是 BCa Bootstrap 加速度系数的常用估计方法。它不是对任意统计量、任意时间相关数据都自动有效的无假设程序。",
+      "assumptions": "设 X_1,…,X_n 为独立同分布观察且目标估计量 T_n=t(X_1,…,X_n) 的删除一步近似足够平滑；定义 θ̂_{(-i)} 为删除第 i 条观察之后按相同规则重估的统计量。通常需要 n≥3、估计量在扰动下存在，标准误公式对相应可微或渐近线性统计量才有典型的近似有效性。时间序列、按账户聚类和有重叠未来收益标签的样本必须使用相应区块或整组删减，而非逐日当作独立观察。",
+      "properties": [
+        "Jackknife 生成 n 个确定性的留一估计，没有普通随机 Bootstrap 的蒙特卡罗随机误差。",
+        "Jackknife 标准误的平方是 (n−1)/n 倍的留一估计围绕其均值的平方离差和。",
+        "对样本均值，Jackknife 标准误与经典 s/√n 恰好相同；对样本中位数、最大值等非平滑统计量，普通留一估计可能失效。",
+        "伪值可以构造某些平滑统计量的偏差校正估计，但不能把每个伪值视作新增的独立观测。"
+      ],
+      "formulas": [
+        {
+          "label": "留一估计均值",
+          "tex": "\\widehat\\theta_{(\\cdot)}=\\frac1n\\sum_{i=1}^{n}\\widehat\\theta_{(-i)}"
+        },
+        {
+          "label": "Jackknife方差估计",
+          "tex": "\\widehat{\\operatorname{Var}}_{\\mathrm J}(\\widehat\\theta)=\\frac{n-1}{n}\\sum_{i=1}^{n}(\\widehat\\theta_{(-i)}-\\widehat\\theta_{(\\cdot)})^2"
+        },
+        {
+          "label": "一阶偏差估计",
+          "tex": "\\widehat{\\operatorname{bias}}_{\\mathrm J}=(n-1)(\\widehat\\theta_{(\\cdot)}-\\widehat\\theta)"
+        },
+        {
+          "label": "伪值与偏差校正",
+          "tex": "p_i=n\\widehat\\theta-(n-1)\\widehat\\theta_{(-i)},\\quad\\widehat\\theta_{\\mathrm{J,bc}}=\\frac1n\\sum_i p_i"
+        },
+        {
+          "label": "样本均值的等价标准误",
+          "tex": "\\widehat{\\mathrm{se}}_{\\mathrm J}(\\bar X)=\\frac{s}{\\sqrt n},\\quad s^2=\\frac1{n-1}\\sum_i(X_i-\\bar X)^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对每个观察 i 重新计算一次估计量，形成 n 个留一估计；若估计量足够光滑，某一个观察对整体估计的局部影响可由留一变化近似。",
+          "tex": "\\widehat\\theta_{(-i)}=t(X_1,\\ldots,X_{i-1},X_{i+1},\\ldots,X_n)"
+        },
+        {
+          "explanation": "设删除估计的平均值为 θ̂_(·)，对 n 个删减统计量取中心化平方和，并乘上 (n−1)/n 校正删除操作的尺度，得到标准的 Jackknife 方差形式。",
+          "tex": "\\widehat{\\mathrm{se}}_{\\mathrm J}^2=\\frac{n-1}{n}\\sum_i(\\widehat\\theta_{(-i)}-\\widehat\\theta_{(\\cdot)})^2"
+        },
+        {
+          "explanation": "对样本均值，θ̂_{(-i)}=(n X̄−X_i)/(n−1)，其平均仍为 X̄，中心差等于 (X̄−X_i)/(n−1)。代回 Jackknife 方差，可严格化简为 s²/n。",
+          "tex": "\\frac{n-1}{n}\\sum_i\\frac{(X_i-\\bar X)^2}{(n-1)^2}=\\frac{s^2}{n}"
+        },
+        {
+          "explanation": "用原估计和留一估计形成伪值后，对伪值求均值得 nθ̂−(n−1)θ̂_(·)，等于原估计减去 Jackknife 偏差估计。",
+          "tex": "\\frac1n\\sum_i p_i=\\widehat\\theta-(n-1)(\\widehat\\theta_{(\\cdot)}-\\widehat\\theta)"
+        }
+      ],
+      "example": "样本 X=(1,2,4,5)，n=4、均值 θ̂=3。留一均值依次为 (11/3,10/3,8/3,7/3)，其均值 θ̂_(·)=3；平方离差和为 10/9，Jackknife 方差为 (3/4)×(10/9)=5/6≈0.833333，因此 Jackknife 标准误 √(5/6)≈0.912871。原样本 s²=10/3，所以 s²/n=5/6，完全一致。伪值 p_i=4×3−3θ̂_{(-i)}=(1,2,4,5)，均值仍为 3；这是均值估计的精确性质，不是对所有非线性统计量的承诺。",
+      "application": "用 Jackknife 诊断独立研究横截面中个别 ETF 或某个样本对统计量的影响，或为独立样本的 BCa 区间提供加速度估计。若目标是日频持仓收益、重叠标签的时间序列或同一交易日多个资产，单日留一方法会打破依赖；应考虑按时间区块或交易日整组重抽样并验证相应统计理论。",
+      "caveat": "在 n 较小、估计量不连续、样本中有极端权重、存在聚类/时间依赖时，留一标准误可能严重误导。单次删除造成的估计变动只测量局部影响，不能自动捕捉模型选择和超参数网格搜索造成的不确定性。不要把 n 个伪值当作可提升样本量的真实数据。",
+      "deep_sections": [
+        {
+          "title": "留一统计量与影响概念",
+          "question": "删除一个样本为何能近似影响函数？",
+          "paragraphs": [
+            "每个观察对统计量的贡献通常是 O(1/n)，删除这一条数据后重新估计所产生的差额可以近似度量该观察在样本中的局部影响。",
+            "在非线性优化问题中必须每次重新求解，不能把样本权重简单改为零后继续使用旧系数；若解不唯一，还需关注数值稳定性。"
+          ],
+          "formulas": [
+            {
+              "label": "留一映射",
+              "tex": "\\widehat\\theta_{(-i)}=t(X_{-i})"
+            }
+          ],
+          "proof": "把样本均值和删后样本量写成 (nX̄−X_i)/(n−1)，可精确看出某一观察对留一估计的影响方向。",
+          "worked": "对 (1,2,4,5) 删除 5 时，平均值从 3 降为 7/3，说明大观测对原均值有正向影响。",
+          "limitation": "对最大值，删除非最大观测可能完全不改变统计量，常规 Jackknife 方差容易低估其真实抽样不确定性。"
+        },
+        {
+          "title": "Jackknife方差与样本均值恒等式",
+          "question": "为什么方差乘上(n−1)/n？",
+          "paragraphs": [
+            "留一统计量之间并非独立观察，各值共享 n−2 个原始样本，所以不能直接用它们的通常样本方差估计原统计量方差。",
+            "Jackknife 构造特定的缩放系数，使平滑统计量的一阶扰动尺度匹配原统计量的抽样尺度。对均值，该缩放恰好给出经典标准误。"
+          ],
+          "formulas": [
+            {
+              "label": "均值留一偏差",
+              "tex": "\\widehat\\theta_{(-i)}-\\bar X=\\frac{\\bar X-X_i}{n-1}"
+            }
+          ],
+          "proof": "将留一公式代入 (n−1)/n 的平方离差和，获得 Σ(X_i−X̄)²/[n(n−1)]，其值即 s²/n。",
+          "worked": "Σ平方偏差为 10，因此 s²=10/3、方差估计为 5/6、标准误约 0.912871。",
+          "limitation": "这一等价关系针对 iid 样本均值及通常方差估计，不应套到自相关策略收益。"
+        },
+        {
+          "title": "伪值、偏差与BCa联系",
+          "question": "伪值到底代表什么？",
+          "paragraphs": [
+            "伪值把删除某个观察对估计的影响重新缩放到与单个观察同级的数值，在均值例子中伪值恰好等于原观察。",
+            "对一般平滑统计量，伪值均值提供一阶偏差校正，也可为更复杂的重抽样区间提供影响信息，但不必然形成真实抽样分布。"
+          ],
+          "formulas": [
+            {
+              "label": "Jackknife偏差校正",
+              "tex": "\\widehat\\theta_{\\mathrm{J,bc}}=n\\widehat\\theta-(n-1)\\widehat\\theta_{(\\cdot)}"
+            }
+          ],
+          "proof": "展开伪值定义并平均，得到 nθ̂−(n−1)θ̂_(·)，即扣除 Jackknife 偏差估计后的结果。",
+          "worked": "均值示范里 θ̂_(·)=θ̂=3，因此校正不改变数值，伪值仍为 (1,2,4,5)。",
+          "limitation": "伪值彼此高度依赖，不能用于未经调整的 iid t 检验以虚增自由度。"
+        },
+        {
+          "title": "依赖数据与量化研究",
+          "question": "什么时候必须改用区块删除？",
+          "paragraphs": [
+            "ETF 日收益常具有异方差和一定程度的时间依赖，而多个资产在同一天受共同宏观信息冲击。逐个数据点独立删除可能不保留真实相关结构。",
+            "对于逐月滚动模型和有重叠持有期收益的策略，建议先明确统计量的时间粒度、训练期与测试期，再选择适当的区块删除或区块 Bootstrap。"
+          ],
+          "formulas": [
+            {
+              "label": "依赖样本均值方差",
+              "tex": "\\operatorname{Var}(\\bar X_n)=\\frac1{n}\\left[\\gamma(0)+2\\sum_{h=1}^{n-1}\\left(1-\\frac hn\\right)\\gamma(h)\\right]"
+            }
+          ],
+          "proof": "时间序列样本均值方差不仅包含当期方差，还包含各滞后协方差；普通 iid 留一估计没有直接修正这些额外项。",
+          "worked": "若相邻策略收益有正自相关，传统 iid 标准误可能偏小，从而夸大策略检验的显著性。",
+          "limitation": "高维资产横截面相关与时间依赖同时存在时，必须在重抽样里保持交易日的整体向量结构。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "statistics-n0169",
+          "label": "先修：Bootstrap百分位区间"
+        },
+        {
+          "kind": "math",
+          "id": "statistics-n0170",
+          "label": "后续：BCa加速度"
+        },
+        {
+          "kind": "math",
+          "id": "statistics-x002",
+          "label": "扩展：移动区块Bootstrap"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Efron & Tibshirani (1993), An Introduction to the Bootstrap",
+          "url": "https://doi.org/10.1007/978-1-4899-4541-9"
+        },
+        {
+          "title": "Efron (1987), Better Bootstrap Confidence Intervals",
+          "url": "https://doi.org/10.1080/01621459.1987.10478410"
+        }
+      ],
+      "checked_status": "V27严格精讲：留一估计、标准误恒等式、伪值与金融依赖数据限制"
+    },
+    {
+      "id": "statistics-n0170",
+      "node_id": "statistics-n0170",
+      "title": "Bootstrap BCa",
+      "definition": "BCa（bias-corrected and accelerated）Bootstrap 区间在基本百分位区间上引入偏差校正参数 z₀ 和加速度参数 a，把名义置信水平映射为经过修正的 Bootstrap 分位数。偏差参数反映原估计处于 Bootstrap 分布中的相对位置，加速度参数近似刻画统计量标准误对参数变化的局部敏感性，并常由 Jackknife 留一统计量估计。BCa 在适当光滑与抽样条件下可有高阶覆盖改进，但并非普适的抗偏差或时间序列稳健方法。",
+      "assumptions": "观察为合适的独立同分布样本，目标是单一标量且足够光滑的统计泛函；取得 B 个非参数 Bootstrap 复制 θ̂_b* 与 n 个 Jackknife 留一估计 θ̂_{(-i)}。定义 z₀=Φ^{-1}(#{θ̂_b*<θ̂}/B)，边界处需进行数值保护或报告退化。加速度参数的分母不能为零，校正概率应在 (0,1) 内。若存在时间依赖、严重离散、非正则参数或强模型选择，需使用专门重抽样或推断方法。",
+      "properties": [
+        "z₀=0、a=0 时 BCa 区间退化为相同显著性水平的标准百分位区间；非零参数会改变两个端点的分位数位置。",
+        "常用加速度估计 a=Σ(θ̄_J−θ̂_{(-i)})³/[6{Σ(θ̄_J−θ̂_{(-i)})²}^{3/2}]，是删除后统计量的偏斜度量。",
+        "BCa 的精度优点具有特定的平滑/正则性假设，不应宣称对任意有偏模型或不规则统计量都有二阶正确性。",
+        "直接对重叠 ETF 策略收益作 iid Bootstrap 会破坏序列结构，即使之后加上 BCa 分位校正，也不能补救重抽样方案的错误。"
+      ],
+      "formulas": [
+        {
+          "label": "偏差修正因子",
+          "tex": "\\widehat z_0=\\Phi^{-1}\\!\\left(\\frac{\\#\\{\\widehat\\theta_b^*<\\widehat\\theta\\}}B\\right)"
+        },
+        {
+          "label": "Jackknife加速度",
+          "tex": "\\widehat a=\\frac{\\sum_i(\\widehat\\theta_{(\\cdot)}-\\widehat\\theta_{(-i)})^3}{6[\\sum_i(\\widehat\\theta_{(\\cdot)}-\\widehat\\theta_{(-i)})^2]^{3/2}}"
+        },
+        {
+          "label": "校正后尾部概率",
+          "tex": "\\alpha^*=\\Phi\\!\\left(\\widehat z_0+\\frac{\\widehat z_0+z_\\alpha}{1-\\widehat a(\\widehat z_0+z_\\alpha)}\\right),\\quad z_\\alpha=\\Phi^{-1}(\\alpha)"
+        },
+        {
+          "label": "BCa区间端点",
+          "tex": "\\mathrm{CI}_{\\mathrm{BCa}}=\\left[\\widehat G^{-1}(\\alpha^*_{\\ell}),\\widehat G^{-1}(\\alpha^*_{u})\\right]"
+        },
+        {
+          "label": "特殊情形回到百分位区间",
+          "tex": "\\widehat z_0=\\widehat a=0\\ \\Longrightarrow\\ \\alpha^*=\\alpha"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "普通百分位区间直接读取 Bootstrap 分布的 α/2 与 1−α/2 分位点，但若 θ̂ 在复制分布中偏离中位位置，则上下尾概率未必反映原统计量的偏差。",
+          "tex": "\\widehat G(x)=B^{-1}\\sum_{b=1}^{B}\\mathbf1_{\\{\\widehat\\theta_b^*\\le x\\}}"
+        },
+        {
+          "explanation": "通过原估计下方的复制比例求 z₀，可以将相对分位位置转成标准正态标度；这只是校正量，不意味着 Bootstrap 复制值本身是正态分布。",
+          "tex": "\\widehat z_0=\\Phi^{-1}(\\widehat G(\\widehat\\theta^-))"
+        },
+        {
+          "explanation": "对每个样本执行 Jackknife，计算留一估计与其平均的中心差，再取规范化三次矩得到 a；若这些差值关于零对称，则分子可能为零。",
+          "tex": "\\widehat a=\\frac{\\sum_i d_i^3}{6(\\sum_i d_i^2)^{3/2}},\\quad d_i=\\widehat\\theta_{(\\cdot)}-\\widehat\\theta_{(-i)}"
+        },
+        {
+          "explanation": "把 nominal zα 与两个校正量带入分式变换得到 α*，最后从实际 Bootstrap 经验分布读取 α*_l 与 α*_u 分位；在 z₀=a=0 时每个变换恰好给回 α。",
+          "tex": "\\Phi\\!\\left(0+\\frac{0+\\Phi^{-1}(\\alpha)}{1-0}\\right)=\\alpha"
+        }
+      ],
+      "example": "取原估计 θ̂=3，独立样本 x=(1,2,4,5) 的 Jackknife 留一均值相对于 3 的中心差为 (−2/3,−1/3,1/3,2/3)，三次和为 0，因此加速度 â=0。为说明偏差校正，假设同一统计量在 B=10 次示意 Bootstrap 复制中有 6 次严格小于 θ̂，则 ẑ₀=Φ^{-1}(0.6)≈0.253347。名义中位点 α=0.5 时，校正后的概率 α*=Φ(2×0.253347)≈0.6938，而非 0.5。B=10 只用于展示映射计算，远不足以稳定估计 95% 区间端点；这里没有凭十次复制捏造可靠置信区间。",
+      "application": "对独立横截面因子收益差、平滑风险统计量等，可以同时报告 Bootstrap 百分位区间与 BCa 区间，并记录 B、样本大小、随机种子、Jackknife 定义及经验分位插值方法。对于逐月滚动 ETF 策略的 Sharpe 或平均收益，应先处理序列相关、估计窗口重叠和选择后显著性；BCa 的偏差修正不能把不正确的 iid 重抽样变成严谨的时间序列推断。",
+      "caveat": "若复制值大量与原估计相等、全部位于同一侧、Jackknife 影响全部为零或分母 1−a(z₀+zα) 接近零，BCa 可能数值不稳定。BCa 改善渐近覆盖率的条件不涵盖任意参数边界、非光滑最大值与重复挑选赢家的程序；应报告区间估计失败而非强行裁剪端点并声称精确。",
+      "deep_sections": [
+        {
+          "title": "BCa与百分位区间的差异",
+          "question": "为什么两个端点要使用不同的校正分位？",
+          "paragraphs": [
+            "普通百分位 Bootstrap 固定采用 α/2 与 1−α/2，这种对称的尾部安排没有直接纳入统计量偏差和标准误变化带来的分布不对称。",
+            "BCa 在正态分位标度上使用 z₀ 与 a 转换每个尾概率，形成通常不对称的两端点，而不是直接把估计值加减固定倍数的标准误。"
+          ],
+          "formulas": [
+            {
+              "label": "BCa分位端点",
+              "tex": "\\widehat G^{-1}\\{\\Phi(\\widehat z_0+(\\widehat z_0+z_\\alpha)/(1-\\widehat a(\\widehat z_0+z_\\alpha)))\\}"
+            }
+          ],
+          "proof": "BCa 把名义尾部概率 α 首先映射到标准正态分位 zα，再加入偏差和加速度调整，最终返回经验 Bootstrap 分布取调整后的分位数。",
+          "worked": "当 z₀=0、a=0，变换逐项消去调整，说明 BCa 包含普通百分位法作为特殊情形。",
+          "limitation": "如果估计量不具备所需光滑性，高阶近似保证可能失效，区间端点可以变得极不稳定。"
+        },
+        {
+          "title": "偏差校正z₀与复制分布",
+          "question": "z₀为何来自小于原估计的比例？",
+          "paragraphs": [
+            "BCa 的偏差项描述原估计在重抽样分布中偏向左侧或右侧的位置。严格小于原估计的复制比例越远离 1/2，其标准正态分位 z₀ 的绝对值越大。",
+            "z₀ 不是把原估计与 Bootstrap 均值相减后简单除以标准差，也不能把其符号解释为任何情况下估计偏差的精确方向。"
+          ],
+          "formulas": [
+            {
+              "label": "Bootstrap位置校正",
+              "tex": "\\widehat z_0=\\Phi^{-1}\\!\\left(B^{-1}\\sum_b\\mathbf1_{\\{\\widehat\\theta_b^*<\\widehat\\theta\\}}\\right)"
+            }
+          ],
+          "proof": "令统计量在复制分布中的相对经验百分位为 q，映射 Φ^-1(q) 到标准正态尺度；若 q=1/2，则 z₀=0，基本不存在位置校正。",
+          "worked": "10 次复制中有 6 次小于 θ̂，故 q=0.6、z₀≈0.253347。",
+          "limitation": "B 较小或出现大量 ties 时 q 的离散化很严重，极值 q=0 或 1 还会产生无穷分位。"
+        },
+        {
+          "title": "Jackknife加速度的几何意义",
+          "question": "为什么使用三次中心矩而不是二次矩？",
+          "paragraphs": [
+            "Jackknife 的二次中心和刻画一阶扰动的总体规模，三次中心和反映正负影响的非对称性。用三次矩除以二次和的 3/2 次幂得到无量纲的加速度近似。",
+            "如果留一影响关于零对称，三次矩抵消，加速度为零；这只意味着该样本的 Jackknife 加速度估计为零，不表示统计量的实际分布绝对对称。"
+          ],
+          "formulas": [
+            {
+              "label": "加速度形状",
+              "tex": "\\widehat a=\\frac{\\sum_i d_i^3}{6(\\sum_i d_i^2)^{3/2}}"
+            }
+          ],
+          "proof": "对 d_i=θ̂_Javg−θ̂_(-i) 的立方取和，分子对符号敏感；分母确保尺度不变，并由常数六固定该近似公式的规范化。",
+          "worked": "样本均值 (1,2,4,5) 的 d 依次为 −2/3、−1/3、1/3、2/3，立方和 0，因此 â=0。",
+          "limitation": "若所有 d_i=0，分子分母同时为零，算法应报告退化而不是将其无条件解释为 a=0。"
+        },
+        {
+          "title": "量化策略区间的有效样本定义",
+          "question": "BCa能否修正重叠收益带来的虚假置信度？",
+          "paragraphs": [
+            "日频 ETF 持仓收益按持有期重叠构造时，观测之间共享价格信息，独立抽日的 Bootstrap 会破坏原有时间依赖。BCa 是端点调整方法，不是改变数据依赖结构的抽样机制。",
+            "应根据实际研究设计使用有效的时间序列重抽样、滚动样本外评价与多策略筛选校正；若缺乏满足 BCa 理论前提的依赖数据版本，应清楚报告限制。"
+          ],
+          "formulas": [
+            {
+              "label": "时间序列均值方差",
+              "tex": "\\operatorname{Var}(\\bar r_n)\\neq\\frac{\\gamma(0)}n\\quad\\text{if }\\sum_{h\\ge1}\\gamma(h)\\ne0"
+            }
+          ],
+          "proof": "存在滞后相关时，均值估计方差包含协方差加权和，iid Bootstrap 默认只复制单期经验分布，不能自动复现这些滞后项。",
+          "worked": "即使 BCa 计算出不同于百分位法的上下界，若 Bootstrap 基本实验不保留自相关，则这些上下界依然不能作为可信区间。",
+          "limitation": "任意时间依赖 Bootstrap 与 BCa 的组合都必须验证其渐近条件，不能默认替换即可获得 Efron iid 情形的二阶保证。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "statistics-n0171",
+          "label": "先修：Jackknife加速度与影响"
+        },
+        {
+          "kind": "math",
+          "id": "statistics-n0169",
+          "label": "先修：Bootstrap百分位区间"
+        },
+        {
+          "kind": "math",
+          "id": "statistics-x002",
+          "label": "相关：时间区块重抽样"
+        },
+        {
+          "kind": "math",
+          "id": "statistics-x003",
+          "label": "相关：平稳Bootstrap"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Efron (1987), Better Bootstrap Confidence Intervals",
+          "url": "https://doi.org/10.1080/01621459.1987.10478410"
+        },
+        {
+          "title": "DiCiccio and Efron (1996), Bootstrap Confidence Intervals",
+          "url": "https://doi.org/10.1214/ss/1032280214"
+        },
+        {
+          "title": "The automatic construction of bootstrap confidence intervals (2020)",
+          "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7958418/"
+        }
+      ],
+      "checked_status": "V27严格精讲：BCa偏差与加速度、退化情形、Jackknife数值和依赖样本边界"
+    },
+    {
+      "id": "statistics-n0172",
+      "node_id": "statistics-n0172",
+      "title": "置换检验",
+      "definition": "置换检验在原假设所允许的可交换性或随机分配机制下，通过重新分配样本标签构造检验统计量的零假设参考分布。若可枚举全部有效分配，能计算有限样本精确置换 p 值；随机抽取置换时则使用蒙特卡罗近似。检验有效性依赖‘为什么标签能置换’这一设计条件，而不是因为对所有观察随机打乱就天然没有分布假设。",
+      "assumptions": "对两组无配对独立随机分组，若原假设使联合观察分布在组标签交换下不变，才允许任意满足固定组大小的标签置换。对配对差分，合法操作通常是交换每对内部标签或符号翻转而非自由跨对置换。对时间序列、分层样本、跨资产同日收益，置换群必须保持实际依赖或处理分组机制；经典均值差的弱零假设不保证任意异方差两组的标签可交换。",
+      "properties": [
+        "有限全置换在有效可交换性假设下可对所选统计量给出精确的离散零分布，不要求该统计量服从正态。",
+        "单侧与双侧 p 值由不同的极端性集合定义，不能把单侧 p 值简单乘二而忽略不对称零分布。",
+        "随机仅抽取 B 个置换时常用 (b+1)/(B+1) 避免零 p 值，需明确原样本是否包含在抽样方案及重复计数规则中。",
+        "若数据有时间依赖或处理分配受到分层限制，随意全局打乱标签可能破坏原假设下的不变性并导致无效显著性。"
+      ],
+      "formulas": [
+        {
+          "label": "置换统计量",
+          "tex": "T_g=T(g\\cdot X),\\quad g\\in\\mathcal G"
+        },
+        {
+          "label": "全置换单侧p值",
+          "tex": "p_+=\\frac{\\#\\{g\\in\\mathcal G:T_g\\ge T_{\\mathrm{obs}}\\}}{|\\mathcal G|}"
+        },
+        {
+          "label": "双侧绝对值检验",
+          "tex": "p_2=\\frac{\\#\\{g\\in\\mathcal G:|T_g|\\ge|T_{\\mathrm{obs}}|\\}}{|\\mathcal G|}"
+        },
+        {
+          "label": "固定两组样本量的置换数",
+          "tex": "|\\mathcal G|=\\binom{n_1+n_2}{n_1}"
+        },
+        {
+          "label": "蒙特卡罗修正p值",
+          "tex": "\\widehat p=\\frac{b+1}{B+1}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "根据随机分配或联合分布可交换性，在零假设下不同合法标签排列不改变数据的分布规律；把原样本看成该排列轨道中的一个结果，其统计量在整个轨道的排名便可用于检验。",
+          "tex": "\\{T(g\\cdot X):g\\in\\mathcal G\\}"
+        },
+        {
+          "explanation": "固定两组的样本量 n₁、n₂，只需从合并数据中选择哪 n₁ 个成为 A 组，因此独立分配数是组合数 C(n₁+n₂,n₁)，而非所有 (n₁+n₂)! 条标签排列。",
+          "tex": "\\binom{n_1+n_2}{n_1}=\\frac{(n_1+n_2)!}{n_1!n_2!}"
+        },
+        {
+          "explanation": "设 T 定义为 B 组均值减 A 组均值；全置换单侧 p 值是所有合法分配里统计量不低于观测值的比例，双侧按绝对值更极端定义。",
+          "tex": "T=\\bar X_B-\\bar X_A,\\quad p_2=P_{\\mathcal G}(|T_g|\\ge|T_{\\rm obs}|)"
+        },
+        {
+          "explanation": "仅随机模拟 B 次时，观测样本和抽出的置换值在有效随机化条件下应被对称处理；用含观测的 (b+1)/(B+1) 可以形成一种常用保守蒙特卡罗检验规则。",
+          "tex": "\\widehat p=(1+\\sum_{b=1}^{B}\\mathbf1_{\\{T_b\\ge T_{\\mathrm{obs}}\\}})/(B+1)"
+        }
+      ],
+      "example": "四个观测值为 (1,2,3,4)，观测分配 A=(1,2)、B=(3,4)，检验统计量 T=mean(B)−mean(A)=3.5−1.5=2。固定每组两人，一共有 C(4,2)=6 个分配；对应 T 的集合为 (2,1,0,0,−1,−2)。因此单侧极端计数为 1，精确 p_+=1/6≈0.166667；双侧绝对值至少为 2 的共有 2 个，p₂=2/6=1/3≈0.333333。该结果只在有效随机分配或可交换零假设下成立，不能把这个概率当作真实 ETF 策略的统计显著性。",
+      "application": "在严格随机分配的金融实验或经合理匹配与固定分组的独立横截面上，置换检验可以比较策略特征处理组与对照组。在真实历史 ETF 时间序列上通常应优先考虑适当区块置换、条件随机化或时间依赖重抽样，并核对信号是否具有前视信息。若研究者只在看到结果后挑出最好分组，单项精确置换 p 值仍不能覆盖选择偏差。",
+      "caveat": "零均值差不等于总体分布可交换，特别在两组样本方差明显不同时简单标签置换可能失效；可讨论学生化置换的相应大样本条件。配对、集群和滚动持仓要采用设计允许的置换群；不能把随机打乱日收益当作‘不需要任何假设’的统计学替代。",
+      "deep_sections": [
+        {
+          "title": "随机分配与可交换性",
+          "question": "置换合法性的根本来源是什么？",
+          "paragraphs": [
+            "置换检验的逻辑不是假装所有数据都可以随机重排，而是原假设下交换合法标签不应改变联合分布，或实验确有已知随机分配机制。",
+            "在观察性研究中，两组即使样本均值相等，也可能有不同方差、协变量结构或选择机制，这些因素会破坏全体可交换的前提。"
+          ],
+          "formulas": [
+            {
+              "label": "随机化轨道",
+              "tex": "\\mathcal O(X)=\\{g\\cdot X:g\\in\\mathcal G\\}"
+            }
+          ],
+          "proof": "构造合法变换群后，在每种分配下重新计算 T；原样本统计量位于零假设允许轨道中的何种极端位置，决定精确检验尾概率。",
+          "worked": "四个数固定组大小 2+2，只有六种分配，而不是 4!=24 种互不相同的组标签方案。",
+          "limitation": "非随机的资金流入组与股票池基准可能存在严重混杂，不能因为样本量相同就自由互换。"
+        },
+        {
+          "title": "有限样本精确p值与方向",
+          "question": "为什么单侧与双侧结果差一倍？",
+          "paragraphs": [
+            "统计量 T= B均值−A均值指向 B 是否更大；单侧只把较大的数视为与备择相容，而双侧关心差异的绝对幅度。",
+            "全置换列举所有可能性并按同一个极端性规则计数，得到离散的、可以独立复算的 p 值；统计量离散时 p 也不连续。"
+          ],
+          "formulas": [
+            {
+              "label": "双侧绝对极端计数",
+              "tex": "p_2=|\\mathcal G|^{-1}\\sum_{g\\in\\mathcal G}\\mathbf1_{\\{|T_g|\\ge|T_{\\rm obs}|\\}}"
+            }
+          ],
+          "proof": "六个分配的 T 值依次为 ±2、±1、0、0；绝对值至少为 2 的有两个，单侧 T≥2 的只有一个。",
+          "worked": "观测 T=2，故双侧 p=2/6=1/3、单侧 p=1/6。",
+          "limitation": "在不对称分布或非绝对值式双侧检验中，p₂不一定等于 2p_+，应明确检验的极端性排序。"
+        },
+        {
+          "title": "随机置换与蒙特卡罗离散性",
+          "question": "大样本无法枚举时怎么处理p值为零？",
+          "paragraphs": [
+            "当 n 很大，C(n,n₁) 会迅速超出可枚举范围，只能随机抽取部分合法分配作为零分布近似。",
+            "有限 B 次模拟中偶尔没有一个置换结果超过观测 T，并不代表真正的零概率；常见的加一修正把观测本身纳入排序。"
+          ],
+          "formulas": [
+            {
+              "label": "蒙特卡罗保守校正",
+              "tex": "\\widehat p=(b+1)/(B+1)"
+            }
+          ],
+          "proof": "若 B 次独立模拟中有 b 次统计量达到或超过观测值，则包含观测的校正排序提供非零概率估计，避免声称 p=0 的虚假精度。",
+          "worked": "B=99、b=0 时应报告近似 p=1/100=0.01，而不是零；显著性精度仍受 B 限制。",
+          "limitation": "不同随机抽样、重复置换与精确随机化程序的 p 值修正约定可能不同，应在报告中固定算法和随机种子。"
+        },
+        {
+          "title": "时间依赖、配对与金融回测",
+          "question": "为什么不能直接把日频收益打散？",
+          "paragraphs": [
+            "相邻 ETF 收益可能存在相关、波动聚集或重叠持仓收益；随机置换所有交易日期会破坏这种依赖，并改变原假设下统计量的真实波动。",
+            "一个配对 A/B 实验的合法变换通常是配对内部交换或符号翻转；在时间序列中则要证明时间移位、区块或其他变换下所需的不变性。"
+          ],
+          "formulas": [
+            {
+              "label": "配对符号翻转",
+              "tex": "T_{\\boldsymbol s}=n^{-1}\\sum_{i=1}^{n}s_iD_i,\\quad s_i\\in\\{-1,1\\}"
+            }
+          ],
+          "proof": "对配对差分 D_i，随机交换每对两种处理标签会把差分符号翻转；若处理分配对每对独立公平，就得到相应的合法随机化集合。",
+          "worked": "若四个独立配对的差分都为正，符号翻转有 2⁴=16 种，但这个排列数不能用于具有连贯时间序列关系的收益数据。",
+          "limitation": "跨市场同日期的资产收益不应被拆散成为各资产分别随机的日序列，应保留联合时间结构。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "statistics-n0171",
+          "label": "先修：重抽样与依赖结构"
+        },
+        {
+          "kind": "math",
+          "id": "statistics-x002",
+          "label": "相关：区块Bootstrap"
+        },
+        {
+          "kind": "math",
+          "id": "statistics-n0175",
+          "label": "后续：多重假设校正"
+        }
+      ],
+      "sources": [
+        {
+          "title": "SciPy: scipy.stats.permutation_test and exchangeability of observations",
+          "url": "https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.permutation_test.html"
+        },
+        {
+          "title": "Good (2005), Permutation, Parametric and Bootstrap Tests of Hypotheses",
+          "url": "https://doi.org/10.1007/b138696"
+        }
+      ],
+      "checked_status": "V27严格精讲：置换群、有限全枚举、单双侧概率、相关数据边界"
+    }
+  ]
+}
