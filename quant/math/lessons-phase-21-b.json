@@ -1,0 +1,307 @@
+{
+  "version": 1,
+  "revision": "2026-11-05",
+  "focus": "统一损失和正则化：Ridge、LASSO、Elastic Net，ETF时间外特征选择",
+  "lessons": [
+    {
+      "id": "mlmath-n0463",
+      "node_id": "mlmath-n0463",
+      "title": "Ridge与LASSO",
+      "definition": "Ridge与LASSO同属正则化线性模型，二者通过惩罚预测系数减少高维特征的估计方差，但几何机制不同。Ridge使用平方L2惩罚，正λ通常将非零系数连续收缩而不产生精确零；LASSO使用L1惩罚，其零点次梯度导致软阈值及稀疏解。在ETF动量、波动率、趋势因子高度相关时，二者的参数唯一性与特征选择稳定性不能混同。",
+      "assumptions": "令X为在对应训练窗口中心化和标准化的设计矩阵、y已中心化；截距单独估计不加正则化。共同使用损失(1/2n)||y−Xβ||²，λ≥0。在给出逐坐标闭式时另假设XᵀX/n=I；若X列高度共线，必须改用全局KKT或正确的数值求解器。",
+      "properties": [
+        "Ridge的L2惩罚在λ>0时使Hessian正定，系数最优解唯一。",
+        "LASSO可以产生精确零系数，但在强共线特征中支持集合可能不稳定。",
+        "任何模型的正则化强度和特征标准化都只能依据训练与验证信息决定。"
+      ],
+      "formulas": [
+        {
+          "label": "Ridge训练目标",
+          "tex": "F_{\\rm R}(\\beta)=\\frac{\\|y-X\\beta\\|_2^2}{2n}+\\frac\\lambda2\\|\\beta\\|_2^2"
+        },
+        {
+          "label": "LASSO训练目标",
+          "tex": "F_{\\rm L}(\\beta)=\\frac{\\|y-X\\beta\\|_2^2}{2n}+\\lambda\\|\\beta\\|_1"
+        },
+        {
+          "label": "Ridge正交闭式",
+          "tex": "\\widehat\\beta_{{\\rm R},j}=z_j/(1+\\lambda),\\quad z=X^\\top y/n"
+        },
+        {
+          "label": "LASSO正交闭式",
+          "tex": "\\widehat\\beta_{{\\rm L},j}=S_\\lambda(z_j)=\\operatorname{sign}(z_j)(|z_j|-\\lambda)_+"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "XᵀX/n=I时平方损失的β相关项可写成Σ_j(β_j−z_j)²/2。对Ridge目标求导得到(1+λ)β_j−z_j=0，因此得到连续比例收缩。",
+          "tex": "\\nabla_jF_{\\rm R}=(1+\\lambda)\\beta_j-z_j"
+        },
+        {
+          "explanation": "LASSO在β_j=0不可微，需使用0∈β_j−z_j+λ∂|β_j|。分别检验β>0、β<0和β=0，得到正、负与零三个软阈值区间。",
+          "tex": "0\\in\\beta_j-z_j+\\lambda\\partial|\\beta_j|"
+        },
+        {
+          "explanation": "对任意非零v，vᵀ(XᵀX/n+λI)v=||Xv||²/n+λ||v||²>0，所以λ>0时Ridge严格凸；LASSO未添加同样的正二次曲率。",
+          "tex": "\\nabla^2F_{\\rm R}=X^\\top X/n+\\lambda I\\succ0"
+        }
+      ],
+      "example": "设正交设计z=(3,0.5,−2)，统一λ=1，Ridge逐坐标除以2，得到β_R=(1.5,0.25,−1)；LASSO对每个z做单位软阈值，得到β_L=(2,0,−1)。第二个坐标被LASSO准确置零，Ridge则保留0.25；没有验证数据不能由这一算例判断未来ETF收益模型优劣。",
+      "application": "37只ETF中的动量与趋势可能高度相关。应在同样训练窗口、特征标准化、预测目标和合法时间交叉验证下选择Ridge或LASSO，并对比信号稳定性、资产敞口、换手和扣费后组合收益。",
+      "caveat": "严格凸性保证的是给定有限训练目标的唯一参数解，而非未来风险溢价可识别；LASSO的非零支持亦不等于因子具有因果作用。不同软件的损失归一化与截距是否惩罚会改变λ含义。",
+      "deep_sections": [
+        {
+          "title": "同一损失尺度与正则化的比较基础",
+          "question": "为什么Ridge和LASSO不能只比较λ数值大小？",
+          "paragraphs": [
+            "正规化惩罚相对于预测损失的权重，决定了系数收缩幅度。若不同实现的平方损失分别用1/(2n)和1/2缩放，相同数值λ对应完全不同的惩罚强度。",
+            "公平比较需要统一训练损失、截距与标准化口径，再独立通过验证期确定各自参数，而不是在最终测试收益最高时回头选择实现。"
+          ],
+          "formulas": [
+            {
+              "label": "同一损失尺度与正则化的比较基础",
+              "tex": "F_\\lambda=\\frac1{2n}\\|y-X\\beta\\|^2+\\lambda\\Omega(\\beta)"
+            }
+          ],
+          "proof": "定义共同数据拟合项为1/(2n)平方残差，λ乘不同惩罚Ω。只有明确这一相对尺度，Ridge和LASSO系数才可在可复算示例下比较。",
+          "worked": "n=100时某实现的未归一化损失罚项λ=10与归一化损失罚项λ=0.1具有对应的相对强度，不能因数字大小认定前者更强。",
+          "limitation": "截距若被惩罚会改变回归基准，必须事先声明且在训练窗口中保持一致。"
+        },
+        {
+          "title": "Ridge正交收缩与条件数",
+          "question": "Ridge为何改善共线设计但仍引入估计偏差？",
+          "paragraphs": [
+            "正交设计下每个Ridge坐标由未惩罚最小二乘统计量z_j除以1+λ，除非z_j恰好为零，否则有限λ通常只发生连续收缩。",
+            "在列共线的设计中，λI提升Hessian最小特征值并改善条件数，但这种数值稳定性伴随统计偏差，不等价于识别真实因子风险价格。"
+          ],
+          "formulas": [
+            {
+              "label": "Ridge正交收缩与条件数",
+              "tex": "\\widehat\\beta_{{\\rm R},j}=z_j/(1+\\lambda)"
+            }
+          ],
+          "proof": "对单坐标目标(β_j−z_j)²/2+λβ_j²/2求导，得到β_j−z_j+λβ_j=0，因而闭式为z_j/(1+λ)。",
+          "worked": "z=(3,0.5,−2)、λ=1时，Ridge给出(1.5,0.25,−1)，三项均保留非零值。",
+          "limitation": "对于严重非平稳或特征定义发生变化的ETF，条件数变好不能保证样本外预测误差下降。"
+        },
+        {
+          "title": "LASSO精确零系数的次梯度机制",
+          "question": "为什么L1能够消除弱信号坐标？",
+          "paragraphs": [
+            "L1在零处的次梯度是区间[−1,1]，因此当z_j的绝对值不超过λ时，β_j=0可满足最优性条件；非零坐标则由z_j减去同号阈值。",
+            "精确稀疏是优化几何的结果，不是把拟合后很小的浮点数人工删除。ETF强相关因子可能在不同训练窗口中被替代选择，需检验支持稳定性。"
+          ],
+          "formulas": [
+            {
+              "label": "LASSO精确零系数的次梯度机制",
+              "tex": "\\widehat\\beta_{{\\rm L},j}=S_\\lambda(z_j)"
+            }
+          ],
+          "proof": "最优性条件0∈β_j−z_j+λ∂|β_j|分别在正、负与零区间求解，零解存在当且仅当|z_j|≤λ。",
+          "worked": "z=(3,0.5,−2)、λ=1时，输出(2,0,−1)；第二个特征由于|0.5|≤1被精确置零。",
+          "limitation": "列不正交时不能直接对全部z独立做软阈值，那只是某类坐标更新的局部形式。"
+        },
+        {
+          "title": "ETF滚动训练的模型选择与实盘目标",
+          "question": "哪一种正则化方法才应进入量化策略？",
+          "paragraphs": [
+            "模型选择需先比较合法时间外预测损失和特征稳定性，再考虑信号转换成仓位后的风险与交易费用。Ridge通常较稳定的系数不意味着净收益一定更高。",
+            "资产池可能包含流动性差异很大的ETF，LASSO稀疏特征导致的换手变化也必须在风险约束及执行费用模型中单独检验。"
+          ],
+          "formulas": [
+            {
+              "label": "ETF滚动训练的模型选择与实盘目标",
+              "tex": "\\widehat\\lambda=\\arg\\min_\\lambda\\widehat R_{\\rm validation}(\\widehat\\beta_\\lambda)"
+            }
+          ],
+          "proof": "每组λ在训练数据拟合系数，验证损失决定选择，测试期只有一个冻结模型用于评价；不能将最终收益作为重新挑模型的依据。",
+          "worked": "同一z在λ=1下得到不同β，说明选择会影响信号，但没有市场真实收益和成本时无法推断最终Sharpe。",
+          "limitation": "如果使用全部历史样本来标准化或者让未来ETF上市名单回填，正则化再严格也不能消除前视偏差。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "optimization-x009",
+          "label": "证明：Ridge条件数"
+        },
+        {
+          "kind": "math",
+          "id": "optimization-x010",
+          "label": "证明：LASSO软阈值"
+        },
+        {
+          "kind": "math",
+          "id": "mlmath-n0464",
+          "label": "延伸：Elastic Net"
+        },
+        {
+          "kind": "ml",
+          "id": "m23-c04-p02",
+          "label": "ML：量化组合与交易账本"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Hoerl and Kennard (1970), Ridge Regression: Biased Estimation for Nonorthogonal Problems",
+          "url": "https://doi.org/10.2307/1267351"
+        },
+        {
+          "title": "Tibshirani (1996), Regression Shrinkage and Selection via the Lasso",
+          "url": "https://doi.org/10.1111/j.2517-6161.1996.tb02080.x"
+        }
+      ],
+      "checked_status": "V21完整数学讲义：Ridge/LASSO/Elastic Net统一尺度、唯一性、稀疏性与滚动ETF边界"
+    },
+    {
+      "id": "mlmath-n0464",
+      "node_id": "mlmath-n0464",
+      "title": "Elastic Net",
+      "definition": "Elastic Net在同一个目标函数中组合L1与L2惩罚，前者产生稀疏系数，后者为高度相关的解释变量提供额外的二次曲率。总惩罚参数λ与混合比例α是不同超参数，α=0退化为Ridge，α=1退化为LASSO。对于正交设计，可以精确证明Elastic Net等于先做阈值为λα的软阈值，再除以1+λ(1−α)。",
+      "assumptions": "采用平方损失(1/(2n))||y−Xβ||²，λ>0、α∈[0,1]，截距不正则化，特征缩放只由训练样本决定。正交设计下XᵀX/n=I才有简单分坐标闭式；若λ(1−α)>0，光滑部分Hessian正定，严格凸性使完整目标解唯一。",
+      "properties": [
+        "Elastic Net不是把Ridge系数与LASSO系数取算术平均。",
+        "纯L1部分决定阈值区域，L2部分决定非零系数的额外比例收缩。",
+        "混合比例和总惩罚需要在真实合法验证期联合确定，不能根据测试Sharpe选择。"
+      ],
+      "formulas": [
+        {
+          "label": "Elastic Net统一目标",
+          "tex": "F(\\beta)=\\frac{\\|y-X\\beta\\|^2}{2n}+\\lambda\\alpha\\|\\beta\\|_1+\\frac{\\lambda(1-\\alpha)}2\\|\\beta\\|_2^2"
+        },
+        {
+          "label": "正交设计的闭式",
+          "tex": "\\widehat\\beta_j=\\frac{S_{\\lambda\\alpha}(z_j)}{1+\\lambda(1-\\alpha)},\\quad z=X^\\top y/n"
+        },
+        {
+          "label": "严格凸的充分条件",
+          "tex": "\\lambda(1-\\alpha)>0\\Longrightarrow X^\\top X/n+\\lambda(1-\\alpha)I\\succ0"
+        },
+        {
+          "label": "边界模型",
+          "tex": "\\alpha=0:\\ {\\rm Ridge},\\quad \\alpha=1:\\ {\\rm LASSO}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "正交设计下把平方损失分解为(β_j−z_j)²/2，单坐标次梯度条件含有二次惩罚项λ(1−α)β与L1项λα∂|β|。",
+          "tex": "0\\in[1+\\lambda(1-\\alpha)]\\beta_j-z_j+\\lambda\\alpha\\partial|\\beta_j|"
+        },
+        {
+          "explanation": "当|z_j|≤λα时零解满足最优性；超过阈值时根据z_j符号求出分子z_j−λαsign(z_j)，再除以正的二次系数。",
+          "tex": "\\widehat\\beta_j=S_{\\lambda\\alpha}(z_j)/[1+\\lambda(1-\\alpha)]"
+        },
+        {
+          "explanation": "对非零v检查Hessian的二次型，||Xv||²/n+λ(1−α)||v||²在λ(1−α)>0时严格大于零，因此训练目标整体严格凸。",
+          "tex": "v^\\top Hv=\\|Xv\\|^2/n+\\lambda(1-\\alpha)\\|v\\|^2>0"
+        }
+      ],
+      "example": "令正交充分统计量z=(3,0.5,−2)、λ=1、α=0.5，则阈值λα=0.5，软阈值结果为(2.5,0,−1.5)，再除以1.5，得到Elastic Net系数(5/3,0,−1)。同样λ下Ridge系数是(1.5,0.25,−1)、LASSO是(2,0,−1)，三者的收缩结构不同。",
+      "application": "多资产ETF动量、波动率和趋势指标经常存在共线性。Elastic Net可以通过L2提高唯一性、通过L1压缩弱特征；实际是否优于Ridge应采用滚动时间验证比较预测误差、系数稳定性与交易换手。",
+      "caveat": "严格凸性只保证训练目标最优系数唯一，不能保证其非零因子是唯一的经济机制；若未来资产池与行情分布改变，模型仍可能样本外退化。α、λ的定义也应和所用软件真实目标一致。",
+      "deep_sections": [
+        {
+          "title": "混合惩罚与两种边界模型",
+          "question": "Elastic Net等于两组回归系数求平均吗？",
+          "paragraphs": [
+            "Elastic Net是在一个优化目标里同时放入L1与L2惩罚，两个罚项一起参与最优性条件；它并不等于先独立拟合Ridge和LASSO、再把两个系数向量平均。",
+            "α设为0或1可退化到单罚模型，但中间值的最优解由新KKT方程定义，通常不能从两端系数作线性插值得到。"
+          ],
+          "formulas": [
+            {
+              "label": "混合惩罚与两种边界模型",
+              "tex": "\\lambda[\\alpha\\|\\beta\\|_1+(1-\\alpha)\\|\\beta\\|^2/2]"
+            }
+          ],
+          "proof": "令α=0时L1项消失成为Ridge，令α=1时平方L2项消失成为LASSO；中间α则保留两种不同形式的惩罚。",
+          "worked": "示例Elastic Net的首系数5/3，而Ridge与LASSO首系数平均为1.75，二者不同。",
+          "limitation": "软件中alpha和l1_ratio等字段可能对应不同数学量，须对照实现目标而不是只看参数名字。"
+        },
+        {
+          "title": "正交设计中的先软阈值后缩放",
+          "question": "为什么一个模型既能置零又能连续收缩？",
+          "paragraphs": [
+            "L1在零处给出可以吸收弱坐标的次梯度区间，产生零系数；L2则对所有非零坐标增加与系数成比例的惩罚梯度。",
+            "这两部分叠加的解先用λα决定坐标是否进入模型，再按1+λ(1−α)缩小留下的信号，属于可严格推导的数学结构。"
+          ],
+          "formulas": [
+            {
+              "label": "正交设计中的先软阈值后缩放",
+              "tex": "\\widehat\\beta_j=S_{\\lambda\\alpha}(z_j)/(1+\\lambda(1-\\alpha))"
+            }
+          ],
+          "proof": "由0∈(1+λ(1−α))β−z+λα∂|β|，分为z>λα、z<−λα、|z|≤λα三类并整理，得到阈值分子和正的收缩分母。",
+          "worked": "z=(3,0.5,−2)、λ=1、α=0.5时，先变为(2.5,0,−1.5)，再除以1.5，输出(5/3,0,−1)。",
+          "limitation": "只有XᵀX/n=I时上述完整模型可以坐标分离；一般设计需要迭代求解。"
+        },
+        {
+          "title": "L2曲率与共线因子的唯一解",
+          "question": "为什么Elastic Net能够比某些LASSO问题更稳定？",
+          "paragraphs": [
+            "当两列特征完全重复时，LASSO可能把同一信号贡献任意分到两个系数上，训练预测相同但稀疏支持不同。正的L2部分为全部系数方向提供额外二次曲率。",
+            "数学上只要λ(1−α)>0，任何非零方向都有严格正的Hessian二次型，目标因此严格凸，最优系数在有限维中至多一组。"
+          ],
+          "formulas": [
+            {
+              "label": "L2曲率与共线因子的唯一解",
+              "tex": "X^\\top X/n+\\lambda(1-\\alpha)I\\succ0"
+            }
+          ],
+          "proof": "对任意v≠0，vᵀHv=||Xv||²/n+λ(1−α)||v||²>0，证明H正定。叠加凸L1项后目标仍严格凸。",
+          "worked": "λ=1、α=0.5时H至少有0.5的最小曲率，即使X出现零奇异值也不会有完全平坦的参数方向。",
+          "limitation": "系数唯一不说明未来收益过程唯一或风险价格识别正确，还必须处理金融数据漂移和交易容量。"
+        },
+        {
+          "title": "双超参数的时间外联合选择",
+          "question": "为什么Elastic Net不应该直接选测试期最优Sharpe？",
+          "paragraphs": [
+            "Elastic Net同时搜索λ和α，模型选择自由度多于只搜索单一λ。若把最终测试净值作为调参目标，会在大量候选策略中选择偶然赢家，产生数据窥探偏差。",
+            "各滚动窗口应冻结合法训练、验证、测试划分，并在验证期完成参数选择；测试阶段保留独立估计，成本与仓位约束也不能在看到测试结果后重新设计。"
+          ],
+          "formulas": [
+            {
+              "label": "双超参数的时间外联合选择",
+              "tex": "(\\widehat\\lambda,\\widehat\\alpha)=\\arg\\min_{\\lambda,\\alpha}\\widehat R_{\\rm val}(\\widehat\\beta_{\\lambda,\\alpha})"
+            }
+          ],
+          "proof": "每个候选(λ,α)在训练窗口生成β，验证集计算指定目标，再选定组合；测试数据不进入argmin，保证评估对象为冻结的调参程序。",
+          "worked": "λ=1、α=0.5的教学示例给出(5/3,0,−1)，但仅凭它不能推断真实ETF收益的Sharpe一定高于Ridge。",
+          "limitation": "真实流动性、借券限制和非平稳风险可能使预测上的最优参数并非交易净收益最优。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "mlmath-n0463",
+          "label": "先修：Ridge与LASSO"
+        },
+        {
+          "kind": "math",
+          "id": "optimization-x011",
+          "label": "计算：近端梯度"
+        },
+        {
+          "kind": "math",
+          "id": "mlmath-n0465",
+          "label": "延伸：稀疏选择"
+        },
+        {
+          "kind": "ml",
+          "id": "m23-c04-p02",
+          "label": "ML：量化组合账本"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Zou and Hastie (2005), Regularization and Variable Selection via the Elastic Net",
+          "url": "https://doi.org/10.1111/j.1467-9868.2005.00503.x"
+        },
+        {
+          "title": "Scikit-learn documentation, Linear Models: Lasso, Ridge and Elastic-Net",
+          "url": "https://scikit-learn.org/stable/modules/linear_model.html"
+        }
+      ],
+      "checked_status": "V21完整数学讲义：Ridge/LASSO/Elastic Net统一尺度、唯一性、稀疏性与滚动ETF边界"
+    }
+  ]
+}
