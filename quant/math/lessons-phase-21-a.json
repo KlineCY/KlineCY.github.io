@@ -1,0 +1,307 @@
+{
+  "version": 1,
+  "revision": "2026-11-05",
+  "focus": "时间序列训练、验证、测试和无前视交叉验证",
+  "lessons": [
+    {
+      "id": "mlmath-n0455",
+      "node_id": "mlmath-n0455",
+      "title": "训练验证测试",
+      "definition": "训练、验证和测试具有不同决策职能。训练数据确定模型参数和全部预处理统计量，验证数据用于选择超参数与特征，测试数据只在研究方案冻结后作独立最终评估。金融预测的时间隔离不仅涉及样本行日期，还必须核对收益标签到期时间、新闻真实发布时间和历史资产池。",
+      "assumptions": "设每个样本i有特征可得时点a_i和结果标签成熟时点e_i；在决策时点t只使用已经形成特征、标签实际成熟的训练观察。缺失值处理、缩尾、归一化和特征筛选均仅在各训练折拟合，后续窗口使用被冻结的变换。验证与测试不得充当未来训练时点之前可用信息。",
+      "properties": [
+        "模型选择必须发生在验证数据中，不能根据最终测试Sharpe重新选择回归模型。",
+        "训练期标准化并沿用到后续数据，能避免未来市场波动状态泄漏到早期特征。",
+        "按样本形成日排序仍不足以阻止重叠持有期的标签穿越。"
+      ],
+      "formulas": [
+        {
+          "label": "训练经验风险",
+          "tex": "\\widehat R_{\\rm tr}(\\theta)=|\\mathcal T|^{-1}\\sum_{i\\in\\mathcal T}\\ell(y_i,f_\\theta(x_i))"
+        },
+        {
+          "label": "只用训练统计量标准化",
+          "tex": "z_{\\rm val}=(x_{\\rm val}-\\widehat\\mu_{\\rm tr})/\\widehat\\sigma_{\\rm tr}"
+        },
+        {
+          "label": "合法标签截止",
+          "tex": "\\mathcal T(t)=\\{i:a_i\\le t,\\ e_i<t\\}"
+        },
+        {
+          "label": "最终测试风险",
+          "tex": "\\widehat R_{\\rm te}=|\\mathcal H|^{-1}\\sum_{i\\in\\mathcal H}\\ell(y_i,f_{\\widehat\\theta_{\\rm frozen}}(x_i))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "通过训练数据最小化经验风险得到每组候选超参数对应的参数，再只在验证数据上选择最优候选，测试集合不进入两个极小化步骤。",
+          "tex": "\\widehat\\theta_\\lambda=\\arg\\min_\\theta\\widehat R_{\\rm tr}(\\theta;\\lambda),\\quad\\widehat\\lambda=\\arg\\min_\\lambda\\widehat R_{\\rm val}(\\widehat\\theta_\\lambda)"
+        },
+        {
+          "explanation": "预处理统计量同样属于拟合参数。令训练均值及标准差为μ̂_tr、σ̂_tr，验证和测试只能代入同一映射，不得重新使用全样本均值。",
+          "tex": "T_{\\rm train}(x)=(x-\\widehat\\mu_{\\rm tr})/\\widehat\\sigma_{\\rm tr}"
+        },
+        {
+          "explanation": "若形成时间s_i加上持有期h才得到可用收益标签，则s_i<t不保证e_i=s_i+h<t，需要检查标签真正实现的时间。",
+          "tex": "s_i<t\\not\\Rightarrow e_i=s_i+h<t"
+        }
+      ],
+      "example": "设训练特征为(1,2,3,4)，训练均值2.5、按n归一化方差1.25。验证特征5的合法标准化为(5−2.5)/√1.25≈2.236。若在第10日开盘做预测，第8日形成且第10日收盘才成熟的两日收益标签不可进入训练，即便形成日早于预测日。",
+      "application": "多资产ETF模型应按月份滚动冻结特征统计量、Ridge或Elastic Net惩罚、风险协方差与执行成本参数。在独立测试期间保存数据版本和真实上市资产池，分别报告预测损失、组合净值和成交容量。",
+      "caveat": "每次测试后改选参数会把测试期变为隐含验证集。正确划分也不能保证市场分布稳定或有足够的独立宏观冲击；测试结果仍是某一时期的统计估计。",
+      "deep_sections": [
+        {
+          "title": "三个数据集合的统计职能",
+          "question": "为什么最终测试不能拿来选择模型？",
+          "paragraphs": [
+            "训练集拟合参数，验证集挑选正则化强度或模型，测试集评价已经冻结的选择程序。这三项角色一旦混合，性能估计就会带有研究者筛选带来的乐观偏差。",
+            "尤其对量化策略反复查看最高Sharpe，可能等价于从噪声中选择赢家；需要真实未使用过的未来数据作最终检验。"
+          ],
+          "formulas": [
+            {
+              "label": "三个数据集合的统计职能",
+              "tex": "\\widehat\\lambda=\\arg\\min_\\lambda\\widehat R_{\\rm val}(\\widehat\\theta_\\lambda)"
+            }
+          ],
+          "proof": "每个λ的模型仅由训练数据拟合，验证损失决定λ帽；测试数据没有出现在拟合或调参目标中，才能保持独立评估的定义。",
+          "worked": "若λ=0.1的验证MSE是0.12而λ=1是0.10，应在测试前选λ=1；不能因前者测试期盈利较高而再改选。",
+          "limitation": "若研究者仍用测试结果挑选因子池或交易成本假设，需要重新获取独立评估数据。"
+        },
+        {
+          "title": "训练期标准化为何不是无害的数据清洗",
+          "question": "为什么特征变换也可能造成未来信息泄漏？",
+          "paragraphs": [
+            "波动率、成交量与动量特征常随经济周期变化。若用测试期的分布计算全样本均值和标准差，早期模型会预先了解尚未发生的市场结构。",
+            "所有拟合型预处理，包括缺失填补、缩尾阈值及主成分变换，都应只在当前训练窗口估计，再以相同参数作用于验证与测试。"
+          ],
+          "formulas": [
+            {
+              "label": "训练期标准化为何不是无害的数据清洗",
+              "tex": "z=(x-\\widehat\\mu_{\\rm tr})/\\widehat\\sigma_{\\rm tr}"
+            }
+          ],
+          "proof": "在训练折估计μ和σ，固定映射T_train后对未来样本变换。验证数据只参与计算损失而不能参与确定该变换的统计量。",
+          "worked": "训练(1,2,3,4)的μ=2.5、方差=1.25，验证5对应z≈2.236，并非使用五个观测重新标准化。",
+          "limitation": "训练方差为零时必须在训练阶段确定删除或固定值方案，不能到测试期才根据未来数据选择。"
+        },
+        {
+          "title": "收益标签成熟时间与未来窗口重叠",
+          "question": "较早形成的行为什么可能仍不能进训练？",
+          "paragraphs": [
+            "未来h日收益需要到持有期结束才能观察，形成日期和标签成熟日期因此不同。一个形成于验证之前的训练标签仍可能使用验证期的市场价格。",
+            "合法折分需按结果实际成熟时间隔离训练，必要时剔除与验证事件窗口重叠的训练样本；交易所时区和盘后公告也应纳入时间戳。"
+          ],
+          "formulas": [
+            {
+              "label": "收益标签成熟时间与未来窗口重叠",
+              "tex": "\\mathcal T(t)=\\{i:e_i<t\\}"
+            }
+          ],
+          "proof": "当标签由形成日s至s+h的市场收益定义时，只有e=s+h早于决策时点t的行能用于监督训练；仅检查s<t不够。",
+          "worked": "第10日开盘决策时，第8日形成并在第10日收盘结束的标签尚不可用；第7日形成并在第9日成熟的样本才可能合法。",
+          "limitation": "信息发布时间与数据库修订时间可能不同，实际标签可得日须根据真实业务流程确认。"
+        },
+        {
+          "title": "ETF滚动训练和经济绩效的分离",
+          "question": "为什么低验证误差不等于扣费后净Alpha？",
+          "paragraphs": [
+            "预测模型输出的是收益或排序信号，策略净值还需要经过风险约束、融资、借券、换手与真实成交价格映射。验证MSE改善不意味着最终组合Sharpe必然改善。",
+            "应该冻结验证期选出的模型和执行规则，再独立报告测试期预测损失与扣费绩效；风险归因和容量估计必须使用同一可交易时间轴。"
+          ],
+          "formulas": [
+            {
+              "label": "ETF滚动训练和经济绩效的分离",
+              "tex": "\\Pi_{\\rm net}=\\Pi_{\\rm gross}-C_{\\rm fee}-C_{\\rm impact}-C_{\\rm funding}"
+            }
+          ],
+          "proof": "若预测产生仓位权重，实际净利润还须减去手续费、成交冲击和融资费用，不能把预测误差下降直接代入收益率公式。",
+          "worked": "某模型验证MSE由0.12降至0.10，但显著增加换手，若新增交易成本超过毛收益改善，净收益仍可能下降。",
+          "limitation": "市场非平稳和测试期有效独立日期数不足不会因流程合法而自动消失，须报告估计不确定性。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "econometrics-x002",
+          "label": "关联：收益标签成熟与交叉拟合"
+        },
+        {
+          "kind": "math",
+          "id": "mlmath-n0466",
+          "label": "后续：时序交叉验证"
+        },
+        {
+          "kind": "math",
+          "id": "mlmath-n0463",
+          "label": "后续：正则化模型选择"
+        },
+        {
+          "kind": "ml",
+          "id": "m01-c04-p03",
+          "label": "ML：样本外评价"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Scikit-learn User Guide: Cross-validation and model selection",
+          "url": "https://scikit-learn.org/stable/modules/cross_validation.html"
+        },
+        {
+          "title": "Scikit-learn TimeSeriesSplit: chronological folds and gap",
+          "url": "https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.TimeSeriesSplit.html"
+        }
+      ],
+      "checked_status": "V21完整精讲：训练信息截止、严格公式、四节推导、金融数值案例及实证局限"
+    },
+    {
+      "id": "mlmath-n0466",
+      "node_id": "mlmath-n0466",
+      "title": "交叉验证",
+      "definition": "交叉验证在训练开发数据内多次使用不同拟合与评估折来比较模型，但其可靠性依赖划分机制与未来使用条件相符。普通随机K折适合某些交换性样本，日频金融收益通常具有时间依赖、市场状态变化与重叠持有期，因而应使用真正向前滚动或扩张窗口的时间验证，并对跨折标签进行成熟时间和事件重叠检查。",
+      "assumptions": "按预测发出时间排列样本，为每个样本记录特征可见时刻a_i及收益标签成熟时刻e_i。训练折只包含验证决策前已成熟且未与评估期发生不允许的信息重叠的样本。所有数据清洗与正则化模型须在每折训练区间重新拟合；内层折负责调参，外层折评价整个调参过程。",
+      "properties": [
+        "随机K折可能把未来市场信息放入训练，不能自动用于可交易时序预测。",
+        "标签在测试日之后才成熟的早期观测仍可能构成信息穿越，gap参数不等于所有purge需求。",
+        "多折得分具有市场时间依赖，不能简单视K折为K个独立经济实验。"
+      ],
+      "formulas": [
+        {
+          "label": "K折验证风险",
+          "tex": "\\widehat R_{\\rm CV}(\\lambda)=K^{-1}\\sum_{k=1}^K|\\mathcal V_k|^{-1}\\sum_{i\\in\\mathcal V_k}\\ell(y_i,f_{\\widehat\\theta_{\\lambda,k}}(x_i))"
+        },
+        {
+          "label": "合法训练时间约束",
+          "tex": "\\max_{i\\in\\mathcal T_k}e_i<\\min_{j\\in\\mathcal V_k}a_j"
+        },
+        {
+          "label": "内层调参",
+          "tex": "\\widehat\\lambda_k=\\arg\\min_\\lambda\\widehat R_{{\\rm inner},k}(\\lambda)"
+        },
+        {
+          "label": "外层验证",
+          "tex": "\\widehat R_{\\rm outer}=K^{-1}\\sum_k\\widehat R_{\\mathcal V_k}(\\widehat\\theta_{\\widehat\\lambda_k})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "每个折只在训练区间拟合θ，然后对未参与当折训练的验证区间计算损失。折损失平均是特定折分下的泛化风险代理，不自动得到未来任意经济状态下的无偏估计。",
+          "tex": "\\widehat\\theta_{\\lambda,k}=\\arg\\min_\\theta \\widehat R_{\\mathcal T_k}(\\theta;\\lambda)"
+        },
+        {
+          "explanation": "对预测形成日s_i和收益到期日e_i分别建档。只有标签在折评估开始前成熟的观察能成为合法训练数据，重叠持有期还需要相应的样本隔离。",
+          "tex": "e_i<\\min_{j\\in\\mathcal V_k}a_j\\quad(i\\in\\mathcal T_k)"
+        },
+        {
+          "explanation": "嵌套时序CV对每个外层训练窗口在内部选超参数，外层只计算其完整建模程序的预测误差，不再用外层窗口挑选当次参数。",
+          "tex": "\\widehat\\lambda_k=\\arg\\min_\\lambda\\widehat R_{{\\rm inner},k}(\\lambda)"
+        }
+      ],
+      "example": "第一折使用1—6日已成熟的标签训练，验证第9—10日；第二折仅用第13日开始前已成熟的数据训练，验证第13—14日。标签持有期为两天时，第7日形成并到第9日收盘才成熟的标签不能用于第9日开盘前训练。若候选λ=0.1与1的验证MSE分别为0.12与0.10，应在独立测试前选λ=1。",
+      "application": "对37只ETF逐月滚动训练，需在每个折内拟合标准化与模型选择，并保存真实历史资产池、预测截止时间及换手成本。统计训练折合法并不自动确保风险模型和交易模拟没有未来信息。",
+      "caveat": "交叉验证不是无条件的显著性检验：当多个ETF在同一日期受共同宏观消息影响时，折分数相关，简单当作独立样本会低估不确定性。重复从外层结果中选择更好模型还会重新引入数据窥探。",
+      "deep_sections": [
+        {
+          "title": "随机K折与向前滚动验证的区别",
+          "question": "为什么随机折分可以高估金融预测能力？",
+          "paragraphs": [
+            "随机K折允许未来行情进入较早日期的模型拟合，而真实交易只能在每个日期使用此前已实现的信息。市场的波动率和风险溢价具有结构变化时，这种反向信息尤其可能提高表面准确率。",
+            "时序验证应让每个评估日期都具有只在过去训练的模型版本，并分别报告不同市场环境下的稳定性，而不是仅追求更低平均损失。"
+          ],
+          "formulas": [
+            {
+              "label": "随机K折与向前滚动验证的区别",
+              "tex": "\\widehat R_{\\rm CV}=K^{-1}\\sum_k\\widehat R_{\\mathcal V_k}"
+            }
+          ],
+          "proof": "将每折预测损失求平均只能聚合折分结果，不决定各折合法性；如果训练折含评估期之后观察，则该平均仍不是时间外预测指标。",
+          "worked": "第9—10日验证前只用此前成熟的收益标签训练，不应该把第13日的实现收益随机放回第1折训练。",
+          "limitation": "在高频数据中训练样本特征还可能包括同一天晚于决策的报价，必须用真实时间戳进一步审计。"
+        },
+        {
+          "title": "标签purge与验证前的信息集",
+          "question": "为什么简单添加两天gap仍未必无泄漏？",
+          "paragraphs": [
+            "持有期收益标签可能在跨多个市场时区的交易时间结束，形成时刻和实际可用时刻之间存在非固定延迟。固定间隔只是一种近似隔离，正确边界需要逐条检查标签成熟和事件重叠。",
+            "同一宏观公告可能同时影响多个ETF标签，时间上没有重合也不能保证统计误差独立，应把信息隔离与相关误差处理分成不同问题。"
+          ],
+          "formulas": [
+            {
+              "label": "标签purge与验证前的信息集",
+              "tex": "\\mathcal T_k=\\{i:e_i<\\inf_{j\\in\\mathcal V_k}a_j\\}"
+            }
+          ],
+          "proof": "由合法监督学习信息集定义，结果标签e_i必须先于验证预测时刻。否则即使s_i很早，训练参数仍可能含未来市场回报。",
+          "worked": "第7日形成的两日标签到第9日收盘才成熟，因此不能供第9日开盘验证；第6日形成、到第8日结束的标签则可能使用。",
+          "limitation": "当收益标签窗口高度重叠时，单纯检查成熟时间可能不足以形成统计独立样本，还需要额外的依赖稳健推断。"
+        },
+        {
+          "title": "嵌套模型选择与独立外层估计",
+          "question": "为什么超参数选择和模型评价应分成两个循环？",
+          "paragraphs": [
+            "如果用同一组验证损失比较大量模型，同时又把最小损失当作该模型的独立性能指标，最终报告会因选择过程而偏乐观。",
+            "嵌套验证让内层训练折决定λ、模型族和特征，外层新时期只对完整选择程序打分，最终尚可保留一次完全独立的测试集。"
+          ],
+          "formulas": [
+            {
+              "label": "嵌套模型选择与独立外层估计",
+              "tex": "\\widehat\\lambda_k=\\arg\\min_\\lambda\\widehat R_{{\\rm inner},k}(\\lambda)"
+            }
+          ],
+          "proof": "每个外层折内部运行完整调参流程，得到的λ_hat和模型只用外层之前数据决定，再用外层窗口的未见收益计算损失。",
+          "worked": "候选λ=0.1与1的内层误差为0.12和0.10时选1；外层只评价λ=1的已选模型，不再用该外层数据修改λ。",
+          "limitation": "若研究者随后又跨多个模型家族比较外层结果，仍可能产生更高层级的数据窥探偏差。"
+        },
+        {
+          "title": "交叉验证与实际多空ETF收益的分离",
+          "question": "为什么CV的MSE改善不必带来更高Sharpe？",
+          "paragraphs": [
+            "预测误差只衡量统计任务中的收益预测质量，投资者还需要通过仓位约束、成交滑点与融资成本把信号转化为实际利润。",
+            "交叉验证应当只使用合法历史资产和市场数据；在独立测试前固定风险协方差估计和净收益计算规则，不能用测试净值修正模型选择。"
+          ],
+          "formulas": [
+            {
+              "label": "交叉验证与实际多空ETF收益的分离",
+              "tex": "\\Pi_{\\rm net}=\\Pi_{\\rm gross}-C_{\\rm trading}-C_{\\rm funding}"
+            }
+          ],
+          "proof": "即使平均验证预测误差下降，也无法从该统计量推导出具体净利润；净利润还依赖信号如何转换为持仓和真实订单。",
+          "worked": "模型B的验证MSE为0.10优于模型A的0.12，但若B频繁换仓，其额外冲击成本可使净Sharpe反而更低。",
+          "limitation": "宏观共同冲击与重叠收益使相邻验证分数相关，需要另行报告统计不确定性而非把K折当独立样本。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "mlmath-n0455",
+          "label": "先修：数据划分与冻结"
+        },
+        {
+          "kind": "math",
+          "id": "econometrics-x002",
+          "label": "先修：时间合法交叉拟合"
+        },
+        {
+          "kind": "math",
+          "id": "statistics-x005",
+          "label": "数据窥探与模型搜索"
+        },
+        {
+          "kind": "ml",
+          "id": "m01-c04-p03",
+          "label": "ML：时间外检验"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Scikit-learn User Guide: Cross-validation and model selection",
+          "url": "https://scikit-learn.org/stable/modules/cross_validation.html"
+        },
+        {
+          "title": "Scikit-learn TimeSeriesSplit: chronological folds and gap",
+          "url": "https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.TimeSeriesSplit.html"
+        }
+      ],
+      "checked_status": "V21完整精讲：训练信息截止、严格公式、四节推导、金融数值案例及实证局限"
+    }
+  ]
+}
