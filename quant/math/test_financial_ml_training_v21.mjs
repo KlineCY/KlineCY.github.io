@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import katex from "katex";
 const root=new URL("./",import.meta.url);
 const read=p=>JSON.parse(fs.readFileSync(new URL(p,root),"utf8"));
+const v24Ids=new Set(["statistics-x003","statistics-x004","mlmath-x003","mlmath-x004"]);
 const manifest=read("lessons-manifest.json"),curriculum=read("curriculum.json");
 const core=["lessons-foundations.json","lessons-advanced.json","lessons-more.json"].flatMap(p=>read(p).lessons);
 const modules=manifest.modules.flatMap(m=>{
@@ -16,15 +17,15 @@ const newIds=["mlmath-n0455","mlmath-n0466","mlmath-n0463","mlmath-n0464",
  "mlmath-n0460","mlmath-n0461","mlmath-n0462","mlmath-n0465"];
 const added="abcd".split("").flatMap(tag=>read("lessons-phase-21-"+tag+".json").lessons);
 assert.deepEqual(added.map(l=>l.node_id),newIds,"V21 chapter order and identity");
-assert.equal(manifest.modules.length,64);
-assert.equal(manifest.expected_lessons,155);
+assert.equal(manifest.modules.length,65);
+assert.equal(manifest.expected_lessons,159);
 assert.equal(core.length,123);
-assert.equal(modules.length,155);
-assert.equal(all.length,278);
-assert.equal(actualIds.size,278,"no duplicate completed math ID");
+assert.equal(modules.length,159);
+assert.equal(all.length,282);
+assert.equal(actualIds.size,282,"no duplicate completed math ID");
 const v22Ids=["timeseries-n0244","timeseries-n0245","timeseries-n0248","timeseries-n0249","timeseries-n0250","timeseries-n0251","timeseries-n0254","timeseries-n0255"];
 const v23Ids=["timeseries-n0256","timeseries-n0257","timeseries-n0258","timeseries-n0259"];
-assert.equal(all.filter(l=>!newIds.includes(l.node_id)&&!v22Ids.includes(l.node_id)&&!v23Ids.includes(l.node_id)).length,258,"all 258 original complete math lectures retained");
+assert.equal(all.filter(l=>!newIds.includes(l.node_id)&&!v22Ids.includes(l.node_id)&&!v23Ids.includes(l.node_id)&&!v24Ids.has(l.node_id)).length,258,"all 258 original complete math lectures retained");
 assert.equal(curriculum.nodes.length,656);
 let sections=0,formulas=0,sourceCount=0,linkCount=0;
 for(const l of added){

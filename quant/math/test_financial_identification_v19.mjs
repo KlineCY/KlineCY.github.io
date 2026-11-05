@@ -4,6 +4,7 @@ import katex from "katex";
 
 const root=new URL("./",import.meta.url);
 const read=p=>JSON.parse(fs.readFileSync(new URL(p,root),"utf8"));
+const v24Ids=new Set(["statistics-x003","statistics-x004","mlmath-x003","mlmath-x004"]);
 const curriculum=read("curriculum.json"),manifest=read("lessons-manifest.json");
 const core=["lessons-foundations.json","lessons-advanced.json","lessons-more.json"].flatMap(p=>read(p).lessons);
 const extensions=manifest.modules.flatMap(m=>{
@@ -11,13 +12,13 @@ const extensions=manifest.modules.flatMap(m=>{
 });
 const all=[...core,...extensions];
 assert.equal(curriculum.nodes.length,656);
-assert.equal(manifest.modules.length,64);
-assert.equal(manifest.expected_lessons,155);
+assert.equal(manifest.modules.length,65);
+assert.equal(manifest.expected_lessons,159);
 assert.equal(core.length,123);
-assert.equal(extensions.length,155);
-assert.equal(all.length,278);
+assert.equal(extensions.length,159);
+assert.equal(all.length,282);
 const ids=new Set(all.map(l=>l.node_id));
-assert.equal(ids.size,278,"duplicate complete lessons");
+assert.equal(ids.size,282,"duplicate complete lessons");
 const introduced="abc".split("").flatMap(x=>read("lessons-phase-19-"+x+".json").lessons);
 const newIds=["econometrics-n0232","econometrics-n0233","econometrics-n0234",
  "econometrics-n0236","econometrics-n0237","econometrics-n0238","econometrics-n0239"];
@@ -26,7 +27,7 @@ const v20Ids=["econometrics-x003","econometrics-x005","econometrics-x006","optim
 const v21Ids=["mlmath-n0455","mlmath-n0466","mlmath-n0463","mlmath-n0464","mlmath-n0460","mlmath-n0461","mlmath-n0462","mlmath-n0465"];
 const v22Ids=["timeseries-n0244","timeseries-n0245","timeseries-n0248","timeseries-n0249","timeseries-n0250","timeseries-n0251","timeseries-n0254","timeseries-n0255"];
 const v23Ids=["timeseries-n0256","timeseries-n0257","timeseries-n0258","timeseries-n0259"];
-assert.equal(all.filter(l=>!newIds.includes(l.id)&&!v20Ids.includes(l.id)&&!v21Ids.includes(l.id)&&!v22Ids.includes(l.id)&&!v23Ids.includes(l.id)).length,246,"all pre-V19 complete lessons retained");
+assert.equal(all.filter(l=>!newIds.includes(l.id)&&!v20Ids.includes(l.id)&&!v21Ids.includes(l.id)&&!v22Ids.includes(l.id)&&!v23Ids.includes(l.id)&&!v24Ids.has(l.id)).length,246,"all pre-V19 complete lessons retained");
 const fm=core.find(l=>l.id==="econometrics-n0235");
 assert(fm&&fm.deep_sections.length>=8&&fm.formulas.length>=6&&fm.derivation.length>=7,"existing Fama–MacBeth was not fully deepened");
 assert(fm.deep_sections.some(s=>s.title==="生成的Beta误差与两阶段截面推断"));
