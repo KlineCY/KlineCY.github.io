@@ -1,0 +1,664 @@
+{
+  "version": 1,
+  "revision": "2026-11-05",
+  "focus": "V28-B：BSM自融资复制、Greeks、隐含波动率与静态无套利曲面",
+  "lessons": [
+    {
+      "id": "finance-n0434",
+      "node_id": "finance-n0434",
+      "title": "Black-Scholes公式",
+      "definition": "Black–Scholes–Merton（BSM）模型以连续交易、无摩擦复制和标的几何布朗运动为出发点，利用 Delta 对冲消去期权与标的组合的瞬时随机项，得到无套利偏微分方程，再以到期收益和风险中性定价推导欧式看涨、看跌期权的闭式价格。无分红、连续复利利率 r、常数波动率 σ 的基准公式具有清晰的可检验假设；实际市场中的离散分红、跳跃、随机波动和交易成本会使公式成为基准而非价格保证。",
+      "assumptions": "当前时点 0，标的价格 S₀>0、行权价 K>0、剩余期限 T>0，连续复利无风险利率 r 为确定常数。无连续现金分红；标的满足 dS_t=μS_tdt+σS_tdW_t 且 σ>0 为常数。市场允许连续无成本交易、无限分割和自融资复制，借贷利率相同且不存在套利；欧式合约只能到期执行。经典 PDE 推导假定 V(t,S) 足够光滑，风险中性测度存在且贴现标的为鞅。",
+      "properties": [
+        "欧式看涨价 C=S₀N(d₁)−Ke^{−rT}N(d₂)，看跌价 P=Ke^{−rT}N(−d₂)−S₀N(−d₁)。",
+        "d₁−d₂=σ√T，并且在本模型中看涨期权价格对波动率的偏导为正。",
+        "在无分红情况下，C−P=S₀−Ke^{−rT}，与欧式看涨看跌平价一致。",
+        "风险中性漂移 r 用于复制定价，而非真实世界 μ 的预测；BSM 的隐含波动率也不等于实际未来波动率的无偏预测。"
+      ],
+      "formulas": [
+        {
+          "label": "标的几何布朗运动",
+          "tex": "dS_t=\\mu S_t\\,dt+\\sigma S_t\\,dW_t"
+        },
+        {
+          "label": "Delta对冲得到的PDE",
+          "tex": "V_t+\\frac12\\sigma^2 S^2V_{SS}+rSV_S-rV=0"
+        },
+        {
+          "label": "看涨与看跌闭式",
+          "tex": "C=S_0\\Phi(d_1)-Ke^{-rT}\\Phi(d_2),\\qquad P=Ke^{-rT}\\Phi(-d_2)-S_0\\Phi(-d_1)"
+        },
+        {
+          "label": "d1和d2",
+          "tex": "d_1=\\frac{\\ln(S_0/K)+(r+\\sigma^2/2)T}{\\sigma\\sqrt{T}},\\qquad d_2=d_1-\\sigma\\sqrt{T}"
+        },
+        {
+          "label": "风险中性定价",
+          "tex": "C=e^{-rT}E^{\\mathbb Q}[(S_T-K)^+\\mid\\mathcal F_0]"
+        },
+        {
+          "label": "欧式Put–Call平价",
+          "tex": "C-P=S_0-Ke^{-rT}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "使用 Itô 公式展开 V(t,S_t)，期权的扩散项为 V_S σS dW；取一份期权与 −V_S 份标的构成局部 Delta 中性组合，可以使瞬时布朗冲击项抵消。",
+          "tex": "dV=(V_t+\\mu SV_S+\\tfrac12\\sigma^2S^2V_{SS})dt+\\sigma SV_SdW"
+        },
+        {
+          "explanation": "无套利要求这个瞬时无风险复制组合只能按利率 r 获得收益；将消去随机项后的现金流与持仓价值以自融资方式核对，即得到 BSM 定价 PDE。",
+          "tex": "V_t+\\frac12\\sigma^2S^2V_{SS}+rSV_S=rV"
+        },
+        {
+          "explanation": "在风险中性测度 Q 下，漂移由 μ 变为 r，解出到期对数收益的正态分布；计算折现期望的正收益部分，通过正态分布分位点 d₁,d₂ 得到闭式看涨。",
+          "tex": "\\log(S_T/S_0)\\sim_{\\mathbb Q}N((r-\\sigma^2/2)T,\\sigma^2T)"
+        },
+        {
+          "explanation": "看跌公式可直接对看跌到期支付 (K−S_T)^+ 重复求期望，也可由 C−P=S₀−Ke^{−rT} 求得；两个方法必须在同一无分红、欧式、同到期且同执行价前提下保持一致。",
+          "tex": "P=C-S_0+Ke^{-rT}"
+        }
+      ],
+      "example": "取 S₀=K=100、r=0、T=1 年、σ=0.20、无分红，则 d₁=(0+0.5×0.20²)/0.20=0.1，d₂=−0.1。标准正态分布函数 Φ(0.1)≈0.539827837、Φ(−0.1)≈0.460172163，故欧式看涨 C=100×(0.539827837−0.460172163)≈7.965567。Put–Call 平价给 P=C−100+100≈7.965567，且与直接看跌公式相符。此价格是上述理想化模型的公平复制价格，不是市场实际最新报价。",
+      "application": "在 ETF 期权定价与波动率研究中，先核对合约是否美式、标的是否分红、对应远期和贴现因子，再使用 BSM 欧式公式构建基准价与敏感度。对于 SPY 等有分红 ETF 及大量美式上市期权，直接套无分红欧式 BSM 将产生系统性误差；需采用相容的分红、提前行权与期限结构模型。将闭式用于日度风险监控时，还要明确波动率输入来自历史估计还是市场隐含。",
+      "caveat": "BSM 连续对冲不等于现实交易可无成本对冲，跳跃、交易暂停、波动率曲面变化都会产生剩余风险。一个单独的 σ 对一条期权价格可能拟合很好，但不保证同时解释全部执行价和期限。风险中性价格与真实分布下的未来收益预测具有不同概率测度，不能混为一谈。",
+      "deep_sections": [
+        {
+          "title": "Itô微分与Delta消除扩散项",
+          "question": "为什么复制策略能够推出与真实漂移μ无关的定价方程？",
+          "paragraphs": [
+            "标的价格的瞬时随机性由 dW 驱动；对依赖 S 的光滑期权价值使用 Itô 公式后，期权同样受到这一布朗随机项影响。通过标的头寸 −V_S 抵消该项，可以在理想连续模型中构造瞬时无风险价值变化。",
+            "自融资组合不能无套利地产生不同于确定利率 r 的瞬时无风险收益，否则可通过做多高回报组合并做空低回报组合套利。这个论证将风险补偿与真实漂移 μ 从定价 PDE 中消去。"
+          ],
+          "formulas": [
+            {
+              "label": "核心关系",
+              "tex": "V_t+\\frac12\\sigma^2S^2V_{SS}+rSV_S-rV=0"
+            }
+          ],
+          "proof": "令 Π=V−V_SS，注意 V_S 是动态头寸，必须用自融资增量 dΠ=dV−V_SdS 而不是对 Π=V−V_SS 直接全微分后错误忽略再平衡现金流。匹配 dΠ=r(V−V_SS)dt 即得 PDE。",
+          "worked": "示例 S=K=100、r=0、σ=0.2 下，闭式计算 C≈7.965567，与不包含 μ 的定价表达一致。",
+          "limitation": "当交易不连续、有跳跃或套保执行成本显著时，扩散项抵消不再足以消除所有风险。"
+        },
+        {
+          "title": "风险中性测度和终值对数正态",
+          "question": "为什么定价漂移是r，而不是由历史估出的μ？",
+          "paragraphs": [
+            "无套利复制价格等于在合适风险中性测度下的贴现到期支付期望。风险中性测度的漂移不是对市场未来真实收益的估计，而是让贴现可交易资产成为鞅的定价变换。",
+            "在常数波动率几何布朗运动下，风险中性对数终值为正态，因此看涨正部期望可以化为两项正态分布函数，而不是依靠数值蒙特卡洛才能计算。"
+          ],
+          "formulas": [
+            {
+              "label": "核心关系",
+              "tex": "\\log S_T\\sim_{\\mathbb Q}N(\\log S_0+(r-\\sigma^2/2)T,\\sigma^2T)"
+            }
+          ],
+          "proof": "对 dS/S=r dt+σ dW^Q 应用 Itô 公式得到 d logS=(r−σ²/2)dt+σdW^Q，再积分至 T。由正态变量积分和到期支付的分拆得到闭式。",
+          "worked": "示例 σ√T=0.2，r=0，S=K，故 d₁=0.1、d₂=−0.1。",
+          "limitation": "风险中性分布和真实收益分布不同，不可把 Φ(d₂) 直接当作实际交易获利概率。"
+        },
+        {
+          "title": "闭式定价与平价一致性",
+          "question": "为什么欧式看涨和看跌不应独立定出矛盾的价格？",
+          "paragraphs": [
+            "相同行权价和到期日的欧式看涨与看跌支付之差在任何终值 S_T 下恒等于 S_T−K。折现复制这笔终值差得到 S₀−Ke^{−rT}，与基础合约定价一致。",
+            "当合约满足提前行权或实物分红、借贷利率差、卖空限制时，必须先检查对应平价条件；不能把示范中完全对称的看涨看跌价格当作一般规律。"
+          ],
+          "formulas": [
+            {
+              "label": "核心关系",
+              "tex": "(S_T-K)^+-(K-S_T)^+=S_T-K"
+            }
+          ],
+          "proof": "对 S_T≥K 和 S_T<K 两个区间分别展开正部函数，二者差都等于 S_T−K；在无分红风险中性定价下取贴现期望，得 C−P=S₀−Ke^{−rT}。",
+          "worked": "本讲 S₀=Ke^{-rT}=100，所以 C=P≈7.965567；这种相等依赖特定远期平值条件。",
+          "limitation": "期权实际买卖价差及执行方式可能使可交易套利边界弱于理论等式，应从可执行报价验证。"
+        },
+        {
+          "title": "模型假设和ETF期权限制",
+          "question": "如何从一条闭式公式走到严谨的金融应用？",
+          "paragraphs": [
+            "研究时应记录利率贴现、远期、分红、行权类型、到期时间计算口径和实际市场报价时间。尤其 ETF 分红及美式提前执行，会直接改变风险中性分布或执行边界。",
+            "用 BSM 作为比较基准较为合适：先使价格与 Greeks 在该模型内一致，再检查残差随执行价、到期日和市场状态的系统性变化，最后评估更复杂模型是否在样本外改善风险对冲。"
+          ],
+          "formulas": [
+            {
+              "label": "核心关系",
+              "tex": "V_{\\mathrm{model}}(S,K,T,r,\\sigma)\\neq V_{\\mathrm{market}}\\quad\\text{(一般情况下)}"
+            }
+          ],
+          "proof": "复制推导成立需要假设；一旦市场机制偏离这些条件，模型值与可交易市场价未必相等。应分别检验模型内部无套利和真实报价可执行性。",
+          "worked": "对无分红欧式示例，7.965567 作为风险定价和后续隐含波动率反解的共同数值基准。",
+          "limitation": "不能把有分红美式 SPY 期权简单当作无分红欧式合约来判断是否出现无风险套利。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "finance-n0433",
+          "label": "先修：二叉树复制定价"
+        },
+        {
+          "kind": "math",
+          "id": "finance-n0435",
+          "label": "关联：欧式Put–Call平价"
+        },
+        {
+          "kind": "math",
+          "id": "finance-n0436",
+          "label": "后续：Greeks对冲敏感度"
+        },
+        {
+          "kind": "math",
+          "id": "finance-n0437",
+          "label": "后续：隐含波动率反解"
+        },
+        {
+          "kind": "math",
+          "id": "ito-n0326",
+          "label": "先修：Itô公式"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Black and Scholes (1973), The Pricing of Options and Corporate Liabilities",
+          "url": "https://doi.org/10.1086/260062"
+        },
+        {
+          "title": "Northwestern Kellogg: Black-Scholes Option Pricing Formula and Greeks",
+          "url": "https://www.kellogg.northwestern.edu/faculty/hagerty/ftp/d65/lecture/Fall2004/Black_Scholes_revisedFall2004.pdf"
+        }
+      ],
+      "checked_status": "V28严格精讲：自融资Delta对冲、PDE、Q测度、闭式与定价假设"
+    },
+    {
+      "id": "finance-n0436",
+      "node_id": "finance-n0436",
+      "title": "Greeks敏感度",
+      "definition": "期权 Greeks 是在固定其他模型变量与明确计量口径时，期权理论价格对标的价格、波动率、时间和利率等输入的偏导数。Delta 衡量对 S 的一阶敏感度，Gamma 衡量 Delta 随 S 的变化，Vega 衡量价格对 σ 的敏感度，Theta 衡量日历时间流逝的敏感度，Rho 衡量利率敏感度。它们用于局部对冲和风险解释，不是未来损益的无条件准确预测。",
+      "assumptions": "以无分红欧式看涨 BSM 为闭式例子，S>0、K>0、剩余期限 τ>0、σ>0，连续复利 r 固定，记 φ 与 Φ 分别为标准正态密度、CDF。所有偏导数都需明确其他输入固定，所谓 Vega 是每单位小数波动率的价格敏感度；若报价单位是波动率百分点 1%（0.01），应乘以 0.01。Theta 取日历时间 t 增大、剩余期限 τ=T−t 减小的方向，避免将其与对 τ 的偏导混淆。",
+      "properties": [
+        "无分红 BSM 看涨 Delta 为 Φ(d₁)，看跌 Delta 为 Φ(d₁)−1；Gamma 对看涨看跌相同并在本模型下为正。",
+        "Vega 对看涨看跌相同且在 τ>0 时为正，但它对 1.0 的绝对 σ 变动计价，不是默认每 1 个波动率百分点。",
+        "Theta 的负号取决于将时间作为日历时间还是剩余期限；对于无分红看涨且 r≥0，经典时间衰减 Theta 通常为负，但不应作为所有合约的无条件定理。",
+        "Delta–Gamma–Vega 二阶局部近似忽略更高阶项、曲面联动与离散对冲误差，不能视作极端跳跃时的准确损益函数。"
+      ],
+      "formulas": [
+        {
+          "label": "BSM看涨Delta",
+          "tex": "\\Delta_C=\\frac{\\partial C}{\\partial S}=\\Phi(d_1)"
+        },
+        {
+          "label": "看跌Delta和Gamma",
+          "tex": "\\Delta_P=\\Phi(d_1)-1,\\quad\\Gamma=\\frac{\\phi(d_1)}{S\\sigma\\sqrt\\tau}"
+        },
+        {
+          "label": "Vega和单位换算",
+          "tex": "\\mathcal V=\\frac{\\partial V}{\\partial\\sigma}=S\\phi(d_1)\\sqrt\\tau,\\quad\\mathcal V_{\\mathrm{1volpt}}=0.01\\mathcal V"
+        },
+        {
+          "label": "日历时间Theta",
+          "tex": "\\Theta_C=-\\frac{S\\phi(d_1)\\sigma}{2\\sqrt\\tau}-rKe^{-r\\tau}\\Phi(d_2)"
+        },
+        {
+          "label": "利率Rho",
+          "tex": "\\rho_C=\\frac{\\partial C}{\\partial r}=K\\tau e^{-r\\tau}\\Phi(d_2)"
+        },
+        {
+          "label": "二阶局部价格变动",
+          "tex": "\\Delta V\\approx\\Delta\\,\\Delta S+\\tfrac12\\Gamma(\\Delta S)^2+\\mathcal V\\,\\Delta\\sigma+\\Theta\\,\\Delta t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将 BSM 闭式对 S 求偏导。虽然 d₁、d₂ 均依赖 S，但标准正态密度具有恒等式 Sφ(d₁)=Ke^{−rτ}φ(d₂)，使两项的链式求导部分抵消，剩下 Φ(d₁)。",
+          "tex": "S\\phi(d_1)=Ke^{-r\\tau}\\phi(d_2)"
+        },
+        {
+          "explanation": "再对 Delta 求 S 偏导，利用 ∂d₁/∂S=1/(Sσ√τ)，得 Gamma=φ(d₁)/(Sσ√τ)；看跌 Delta 与看涨只相差一个常数，故 Gamma 相同。",
+          "tex": "\\Gamma=\\phi(d_1)\\frac{\\partial d_1}{\\partial S}=\\frac{\\phi(d_1)}{S\\sigma\\sqrt\\tau}"
+        },
+        {
+          "explanation": "对 σ 求导时也利用正态密度等式抵消附加项，得到 Vega=Sφ(d₁)√τ。这个导数定义的输入变化是 σ 增加 1.0，而 1 个报价百分点代表 Δσ=0.01。",
+          "tex": "\\frac{\\partial C}{\\partial\\sigma}=S\\phi(d_1)\\sqrt\\tau"
+        },
+        {
+          "explanation": "对日历时间求导时 τ 减少，得到 Theta；对连续复利利率 r 求导则得到 Rho。泰勒展开近似组合损益时，应同时记录剩余期限、利率曲线和波动率曲面如何变化。",
+          "tex": "dV\\approx V_SdS+V_\\sigma d\\sigma+V_tdt+\\tfrac12V_{SS}(dS)^2"
+        }
+      ],
+      "example": "沿用 S=K=100、r=0、τ=1、σ=0.20，d₁=0.1；Φ(0.1)=0.539827837，φ(0.1)=e^{−0.005}/√(2π)≈0.396952547。看涨 Delta≈0.539828；Gamma≈0.396952547/(100×0.2)=0.019847627；Vega≈100×0.396952547=39.695255（σ 变化 1.0），所以每增加 1 个波动率百分点的线性价格变化约为 0.396953，而非 39.695255。若 S 上涨 1 元且 σ 与时间暂不变，Delta–Gamma 局部近似 ΔC≈0.539828+0.5×0.019847627≈0.549752。看涨 Theta 在 r=0 时为 −100×0.396952547×0.2/2≈−3.969525 每年，按 365 天粗略折算约 −0.010875 每天（并非精确日价格差）。",
+      "application": "对 ETF 期权和跨期限组合，可以将总头寸按合约乘数汇总 Delta、Gamma 和 Vega，再检查标的波动与波动率曲面变化的联合冲击。若分析时间外 Delta 中性策略，应按实际成交与离散再平衡计入手续费、买卖价差和融资成本；对于美式 ETF 期权和离散分红，需使用相应定价引擎计算风险敏感度，不能把无分红欧式 Greeks 当作可靠真实头寸。",
+      "caveat": "Greeks 是模型局部导数，不含由于合约流动性不足、跳跃或隐含波动率曲面扭曲造成的非局部损益。Rho 若按利率百分点表示需重新缩放；Theta 的日历年和交易日单位也必须明确。特定波动率模型变化和临近到期奇异尺度会降低二阶近似准确性。",
+      "deep_sections": [
+        {
+          "title": "对冲Delta和Gamma的链式推导",
+          "question": "为什么BSM Delta结果比直接求导看起来简洁？",
+          "paragraphs": [
+            "对 C=SΦ(d₁)−Ke^{−rτ}Φ(d₂) 求导会产生四项，其中两项涉及 φ(d)∂d/∂S。因为正态密度和 d₁、d₂ 有特殊恒等关系，这两项恰好抵消。",
+            "剩余的 Φ(d₁) 表示价格对标的的一阶局部斜率。对其再求导得到正的 Gamma，因此 Delta 会随标的价格变化，不可能在大幅行情中始终用固定比例完全对冲。"
+          ],
+          "formulas": [
+            {
+              "label": "核心关系",
+              "tex": "\\Delta_C=\\Phi(d_1),\\quad\\Gamma=\\phi(d_1)/(S\\sigma\\sqrt\\tau)"
+            }
+          ],
+          "proof": "用密度比 φ(d₁)/φ(d₂)=exp(−(d₁²−d₂²)/2)，代入 d₁−d₂=σ√τ 可得 Sφ(d₁)=Ke^{−rτ}φ(d₂)，链式项抵消，二阶求导得到 Gamma。",
+          "worked": "基准例 Delta=0.539827837，Gamma≈0.019847627，说明标的上升1元会改变 Delta 的局部数值。",
+          "limitation": "对冲过程中如果动态头寸在交易间隔内不更新，会保留 Gamma 暴露，实际损益还包含高阶风险。"
+        },
+        {
+          "title": "Vega与风险单位换算",
+          "question": "为什么期权Vega往往写成39.7，但波动率涨1%只变化0.397？",
+          "paragraphs": [
+            "Vega 的数学导数以波动率小数为变量：σ 从0.20到1.20 代表变化1.0，而从0.20到0.21 只变化0.01。不同报价界面的‘1 vol point’和‘100%绝对波动率变化’不能混为一谈。",
+            "对于期权组合，要先将每份合约敏感度乘以头寸数量与合约乘数，再统一波动率输入计量口径；跨资产 Vega 的名义金额在不同标的价格与货币单位下也不可直接比较。"
+          ],
+          "formulas": [
+            {
+              "label": "核心关系",
+              "tex": "\\Delta V_{\\mathrm{vega}}\\approx\\mathcal V\\Delta\\sigma"
+            }
+          ],
+          "proof": "由定义 ∂V/∂σ 乘以实际小数波动率变化 Δσ。若报价以百分比点记录，1个百分点就是0.01，所以单位敏感度为 0.01Vega。",
+          "worked": "基准例 Vega≈39.695255，波动率从20%上升至21%时，Vega一阶近似价格增加约0.396953。",
+          "limitation": "真实期权不同执行价的隐含波动率往往同时变化，不能简单设整条曲面统一平移1个百分点。"
+        },
+        {
+          "title": "Theta、Rho和时间尺度",
+          "question": "为什么时间流逝的偏导存在符号和单位争议？",
+          "paragraphs": [
+            "Theta 通常定义为日历时间 t 增加时、剩余期限 τ 减少的价值变化；但有些公式与软件返回对 τ 的偏导，因此数值符号正好相反。",
+            "Rho 的导数是对连续复利年利率的小数变化敏感度，而市场利率可能按百分点或基点报价。不同口径的结果要明确缩放并标记。"
+          ],
+          "formulas": [
+            {
+              "label": "核心关系",
+              "tex": "\\Theta=\\partial V/\\partial t=-\\partial V/\\partial\\tau"
+            }
+          ],
+          "proof": "固定合约到期日 T，使 τ=T−t，因此 dτ/dt=−1；使用链式求导得到日历时间与剩余期限偏导的符号关系。",
+          "worked": "r=0 的看涨年化 Theta≈−3.969525，按365天线性折算约−0.010875；实际一天变化不严格等于常数线性外推。",
+          "limitation": "如果模型假设不是固定 r、σ，沿真实市场路径随时间变化的总导数会包含曲面变化，不再只是 Theta。"
+        },
+        {
+          "title": "二阶风险展开与离散套保",
+          "question": "Delta中性就等于没有市场风险吗？",
+          "paragraphs": [
+            "Delta 中性只把当前时点对小幅标的价格变化的一阶项移除；如果标的波动幅度大，Gamma 的二阶项与 Vega、Theta 仍能对损益产生显著影响。",
+            "交易费用和买卖价差会使频繁 Delta 再平衡本身成本较高，在金融研究中应比较理想连续复制与可执行离散再平衡两种回测结果。"
+          ],
+          "formulas": [
+            {
+              "label": "核心关系",
+              "tex": "\\Delta V\\approx\\Delta\\Delta S+\\tfrac12\\Gamma(\\Delta S)^2+\\mathcal V\\Delta\\sigma+\\Theta\\Delta t"
+            }
+          ],
+          "proof": "对 V(S,σ,t) 在当前状态附近作多元泰勒展开，保留 S 的二阶项及其他输入的一阶项。由于有限步长会出现高阶与混合偏导项，这只是局部近似。",
+          "worked": "本讲仅对标的 +1 元变动，Delta项约0.539828，Gamma修正约0.009924，合计约0.549752。",
+          "limitation": "临近到期和严重虚值/实值时，希腊值尺度及非线性可能显著变化；不能用远离变化点的旧 Greeks 估算。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "finance-n0434",
+          "label": "先修：BSM闭式定价"
+        },
+        {
+          "kind": "math",
+          "id": "finance-n0437",
+          "label": "关联：隐含波动率反解与Vega"
+        },
+        {
+          "kind": "math",
+          "id": "finance-n0438",
+          "label": "后续：波动率微笑"
+        },
+        {
+          "kind": "math",
+          "id": "optimization-x004",
+          "label": "应用：交易费用与最优执行"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Northwestern Kellogg, Black-Scholes Formula and Greeks with Numerical Example",
+          "url": "https://www.kellogg.northwestern.edu/faculty/hagerty/ftp/d65/lecture/Fall2004/Black_Scholes_revisedFall2004.pdf"
+        },
+        {
+          "title": "Black and Scholes (1973), Pricing of Options and Corporate Liabilities",
+          "url": "https://doi.org/10.1086/260062"
+        }
+      ],
+      "checked_status": "V28严格精讲：Delta/Gamma/Vega微分、vol point单位、Theta符号与二阶对冲"
+    },
+    {
+      "id": "finance-n0437",
+      "node_id": "finance-n0437",
+      "title": "隐含波动率",
+      "definition": "隐含波动率（implied volatility，IV）是在选定期权定价模型、标的价格、贴现因子、远期/分红约定、行权方式和到期日后，使模型期权价格等于观察到的市场期权报价的波动率参数。对无分红欧式 BSM 看涨期权，给定符合无套利区间的价格且剩余期限严格为正时，可利用价格对 σ 的严格正 Vega 在合适区间唯一反解 σ。IV 是报价的非线性变换，不必等于未来实现波动率，更不是可无条件比较的风险中性价格概率。",
+      "assumptions": "以无分红欧式看涨为基准，S>0、K>0、T>0，r 有界且贴现因子 e^{−rT}>0。市场使用可执行或合理中间价 C_mkt，且满足静态无套利价格范围 max(S−Ke^{−rT},0)<C_mkt<S（严格内部时正的有限 σ 解存在）。σ>0 且 BSM Vega=Sφ(d₁)√T>0。到期日、无风险曲线和分红模型必须与所反解的定价公式一致；美式期权不能未经调整直接使用欧式反解。",
+      "properties": [
+        "隐含波动率通过解 C_BS(σ)=C_mkt 得到，数值算法包括有界二分和在 Vega 不太小时的 Newton 更新。",
+        "在 σ>0、T>0 的无分红欧式看涨模型内部，Vega>0 导致严格单调性；当报价落到上下界之外时不存在合法有限正隐含波动率。",
+        "深实值/虚值、期限很短时 Vega 可能极小，报价微小误差就会引起 IV 的很大变化，因此反解应返回数值诊断与容差。",
+        "不同的执行价和到期日会有不同的 IV；不应把截面上一个常数 IV 等同于随机波动率过程或已实现波动率路径。"
+      ],
+      "formulas": [
+        {
+          "label": "隐含波动率反解",
+          "tex": "\\widehat\\sigma_{\\mathrm{IV}}=\\{\\sigma>0:C_{\\mathrm{BS}}(S,K,T,r,\\sigma)=C_{\\mathrm{mkt}}\\}"
+        },
+        {
+          "label": "欧式看涨无套利价格界",
+          "tex": "\\max(S-Ke^{-rT},0)\\le C_{\\mathrm{mkt}}\\le S"
+        },
+        {
+          "label": "BSM看涨Vega",
+          "tex": "\\frac{\\partial C_{\\mathrm{BS}}}{\\partial\\sigma}=S\\phi(d_1)\\sqrt T>0"
+        },
+        {
+          "label": "Newton迭代",
+          "tex": "\\sigma_{n+1}=\\sigma_n-\\frac{C_{\\mathrm{BS}}(\\sigma_n)-C_{\\mathrm{mkt}}}{S\\phi(d_1(\\sigma_n))\\sqrt T}"
+        },
+        {
+          "label": "二分迭代界",
+          "tex": "C(\\sigma_L)\\le C_{\\mathrm{mkt}}\\le C(\\sigma_U)\\implies\\sigma_{\\mathrm{IV}}\\in[\\sigma_L,\\sigma_U]"
+        },
+        {
+          "label": "IV报价误差传播",
+          "tex": "\\delta\\sigma_{\\mathrm{IV}}\\approx\\frac{\\delta C}{\\mathrm{Vega}}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "固定除 σ 外的期权合约条件，把报价反解问题写为根函数 f(σ)=C_BS(σ)−C_mkt。由于正态密度 φ(d₁)>0 且 S√T>0，f 的一阶导数严格为正。",
+          "tex": "f'(\\sigma)=S\\phi(d_1)\\sqrt T>0"
+        },
+        {
+          "explanation": "σ→0⁺ 的定价极限为无套利内在现值下界 max(S−Ke^{−rT},0)；σ→∞ 的无分红欧式看涨价格趋于 S，因此当市场价严格处于两个界之间时，连续性与单调性保证唯一正根。",
+          "tex": "\\lim_{\\sigma\\to0^+}C_{\\rm BS}=\\max(S-Ke^{-rT},0),\\quad\\lim_{\\sigma\\to\\infty}C_{\\rm BS}=S"
+        },
+        {
+          "explanation": "Newton 法用局部切线根近似更新 σ，收敛速度在好初值和非零 Vega 附近通常较快；若 Vega 太小、迭代越界或不收敛，应回退到能维持上下界的二分法。",
+          "tex": "f(\\sigma_n)+f'(\\sigma_n)(\\sigma_{n+1}-\\sigma_n)\\approx0"
+        },
+        {
+          "explanation": "对定价恒等式 C(σ_IV)=C_mkt 微分可得 Vega·dσ_IV=dC_mkt，从而解释报价噪声对 IV 的局部影响：Vega 越小，反解的不稳定性越强。",
+          "tex": "d\\sigma_{\\rm IV}\\approx dC_{\\rm mkt}/\\mathcal V"
+        }
+      ],
+      "example": "使用无分红欧式基准 S=K=100、r=0、T=1，假设市场中间报价恰为 C_mkt=7.965567（小数保留六位）。σ=0.20 时，d₁=0.1、d₂=−0.1，BSM 看涨价格为 7.965567，因此 IV≈20.00%。二分法可先选 σ_L=0.10、σ_U=0.30：对应模型价格分别约为 3.987761 与 11.923538，故 C(0.10)<7.965567<C(0.30)，根位于区间内，中心点 σ_M=0.20 即在报价精度内满足方程。若同一标的报价上调 0.10 而其他条件保持不变，使用 Vega≈39.695255 得一阶估计 Δσ≈0.10/39.695255≈0.002519，即约 0.252 个波动率百分点；实际数值应重新解非线性方程。",
+      "application": "研究 ETF 期权市场的风险溢价与曲面结构时，应先对每条合约核对分红、行权方式、合约调整和到期日，使 IV 在同一正确定价引擎下可比。对低流动性或接近到期的报价，应过滤无效 bid/ask、Vega 太小和明显违反价格界的合约。校验 IV 反解是否能把价格在容差内重新定回，之后再构建跨执行价与期限的波动率曲面。",
+      "caveat": "即使能反解有限 IV，也不保证报价相对于其他合约满足跨执行价或期限的静态无套利约束。IV 是模型依赖的单位转换，高分红 ETF 的美式看跌行权溢价若被误当作欧式波动率会造成系统偏差。Newton 在低 Vega 区域可能产生负波动率或溢出，必须设边界和失败返回机制。",
+      "deep_sections": [
+        {
+          "title": "单调性与存在唯一性",
+          "question": "为什么一条合法欧式看涨报价通常只对应一个BSM波动率？",
+          "paragraphs": [
+            "把其他条件固定后，BSM 看涨是 σ 的连续函数。其导数 Vega= Sφ(d₁)√T，只要 S、T、σ 均在标准内部条件下，正态密度严格正，因此价格随波动率严格增加。",
+            "在 σ→0 和 σ→∞ 的极限，欧式看涨价格分别达到现值内在界和标的价格上界。合法严格内部报价会与单调连续函数恰好相交一次。"
+          ],
+          "formulas": [
+            {
+              "label": "核心关系",
+              "tex": "\\frac{\\partial C_{\\rm BS}}{\\partial\\sigma}=S\\phi(d_1)\\sqrt T>0"
+            }
+          ],
+          "proof": "根据闭式求 Vega，并分别求波动率趋零与趋无穷时的正态 CDF 极限；由介值定理给存在性，由严格单调性给唯一性。",
+          "worked": "S=K=100、r=0、T=1、C=7.965567 对应唯一正根约0.20。",
+          "limitation": "如果合约价格位于模型价上下界外部，不能通过输出一个虚构 IV 来掩盖报价、分红或行权模型错误。"
+        },
+        {
+          "title": "二分法与Newton迭代",
+          "question": "为何要给Newton设置波动率上下界？",
+          "paragraphs": [
+            "二分法只需要模型价格在区间两端包围市场价，且单调连续，因此每次中点分割都维持有解的闭区间；代价是线性收敛速度。",
+            "Newton 用导数作局部切线，Vega 正常时常有快速收敛；但若很深虚值且临近到期，Vega 很小会使更新步长爆炸，甚至产生负 σ，故应采用区间保护与回退机制。"
+          ],
+          "formulas": [
+            {
+              "label": "核心关系",
+              "tex": "\\sigma_{n+1}=\\sigma_n-\\frac{C(\\sigma_n)-C_{\\rm mkt}}{\\mathcal V(\\sigma_n)}"
+            }
+          ],
+          "proof": "用 f(σ)=0 的一阶泰勒式 f(σ_n)+f'(σ_n)(σ_{n+1}−σ_n)≈0 求解得到 Newton 更新。二分法则始终选择与价格正负误差保持异号的一半区间。",
+          "worked": "σ∈[0.1,0.3] 的看涨价区间约为[3.987761,11.923538]，中心点 0.2 正好给出目标价。",
+          "limitation": "报价价格、折现因子或精度口径稍变，根的位置也会改变，不能把二分法例子当作一项实时市场 IV 记录。"
+        },
+        {
+          "title": "Vega与反解误差传播",
+          "question": "为什么一些期权的隐含波动率异常跳动？",
+          "paragraphs": [
+            "即使市场报价只发生几分钱的跳动，若该合约 Vega 非常小，反演出的 σ 就可能发生很大变化。因此 IV 图表的‘尖刺’有时源自报价噪声与反解病态，而非未来实际波动率剧烈变化。",
+            "应根据报价 spread、最小价格跳动和 Vega 设定反解容差，并在曲面拟合前剔除无效或无法稳定反解的记录。"
+          ],
+          "formulas": [
+            {
+              "label": "核心关系",
+              "tex": "\\Delta\\sigma_{\\rm IV}\\approx\\Delta C/\\mathcal V"
+            }
+          ],
+          "proof": "对隐含波动率定义方程 C(σ_IV)=C_mkt 作局部微分，得到 dC/dσ·dσ=dC_mkt，移项得到报价误差与 IV 误差的一阶关系。",
+          "worked": "Vega=39.695255、价格多0.10 时，IV一阶增加约0.002519，即约0.252个百分点。",
+          "limitation": "深度虚值合约 Vega 很小，线性误差关系只在极小报价变动内有意义，且实际盘口可能存在零买价。"
+        },
+        {
+          "title": "从IV单点到可交易曲面",
+          "question": "为什么不能用IV反解结果直接寻找套利？",
+          "paragraphs": [
+            "各合约 IV 只是对其市场价格的非线性重新标度。即使每条合约都各自能求出 σ，也不能保证看涨价格随行权价单调、凸，或跨期限满足恰当的无套利条件。",
+            "分析真正的可执行套利还需使用同一时点、同一标的、同一货币、可交易 bid/ask 和允许的执行方式；曲面光滑性只是数值稳定要求，并非静态无套利的充分条件。"
+          ],
+          "formulas": [
+            {
+              "label": "核心关系",
+              "tex": "C(K,T)=C_{\\rm BS}(S,K,T,r,\\sigma_{\\rm IV}(K,T))"
+            }
+          ],
+          "proof": "将每条合约报价反解为 IV 再代回 BSM，应回到其原始价格；由于模型 σ 会随 K、T 改变，价格的执行价导数也包含 σ_IV 的间接变化。",
+          "worked": "K=100、T=1 的单点 σ_IV≈20% 无法单独告诉研究者 K=90 或 K=110 的期权报价是否符合凸性。",
+          "limitation": "忽略离散分红与美式提前行权，会让可交易期权的 IV 曲面比较产生虚假的‘套利’信号。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "finance-n0434",
+          "label": "先修：BSM欧式定价"
+        },
+        {
+          "kind": "math",
+          "id": "finance-n0436",
+          "label": "先修：Vega与Newton求根"
+        },
+        {
+          "kind": "math",
+          "id": "finance-n0438",
+          "label": "后续：波动率微笑与无套利"
+        },
+        {
+          "kind": "math",
+          "id": "numerical-n0386",
+          "label": "相关：数值根求解"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Black and Scholes (1973), Pricing of Options and Corporate Liabilities",
+          "url": "https://doi.org/10.1086/260062"
+        },
+        {
+          "title": "Northwestern Kellogg, Black-Scholes Formula: Price, Vega and implied parameters",
+          "url": "https://www.kellogg.northwestern.edu/faculty/hagerty/ftp/d65/lecture/Fall2004/Black_Scholes_revisedFall2004.pdf"
+        }
+      ],
+      "checked_status": "V28严格精讲：IV单调反解、静态价格界、Newton/bisection、Vega条件数"
+    },
+    {
+      "id": "finance-n0438",
+      "node_id": "finance-n0438",
+      "title": "波动率微笑",
+      "definition": "波动率微笑（volatility smile）或偏斜（skew）指从同一时点、同一模型、不同执行价 K 和到期日 T 的市场期权价格反解得到的隐含波动率 σ_IV(K,T) 不为常数。它反映期权报价相对常数波动率 BSM 基准的系统性差异，可能关联收益厚尾、下行风险与风险溢价，但不能把图形本身直接等同于某一唯一物理概率分布或套利机会。真正有约束意义的是由期权价格构成的静态无套利条件。",
+      "assumptions": "为清晰推导，同一到期 T>0，选择相同行权方式、同一可交易标的、无分红或明确的远期/贴现结构，所有比较价格均是同一时点可交易的欧式看涨期权报价；市场需允许相应组合交易并考虑报价买卖差。在 K 连续且足够光滑的理想化情形，跨执行价无套利要求 C(K,T) 非增且凸，且在适当连续风险中性分布条件下 ∂²C/∂K² 与风险中性终值密度相关。跨到期的日历价差无套利需要相容的远期、分红和执行价/远期定义，不能在任意利率、现金分红条件下直接比较未调整的名义看涨价格。",
+      "properties": [
+        "σ_IV 随执行价变化不一定是对称U型微笑；权益市场常有一侧偏斜，必须对标报价方式（K、log-moneyness 或 Delta）后比较。",
+        "同一到期的欧式看涨价格必须随 K 非增且凸，等间距相邻执行价组成的蝶式组合的到期支付非负。",
+        "在连续模型下，二阶执行价导数为折现风险中性密度，凸性反映无负概率质量。该结论需要足够光滑且不存在相关分布原子等附加条件。",
+        "用 IV 曲面拟合前应先检查价格无套利；任意光滑插值的波动率并不自动产生无套利价格曲面。"
+      ],
+      "formulas": [
+        {
+          "label": "隐含波动率曲面",
+          "tex": "C_{\\rm mkt}(K,T)=C_{\\rm BS}(S,K,T,r,\\sigma_{\\rm IV}(K,T))"
+        },
+        {
+          "label": "同到期价格单调性",
+          "tex": "\\frac{\\partial C}{\\partial K}\\le0"
+        },
+        {
+          "label": "同到期价格凸性",
+          "tex": "\\frac{\\partial^2 C}{\\partial K^2}\\ge0"
+        },
+        {
+          "label": "等间距蝶式价格约束",
+          "tex": "C(K-h,T)-2C(K,T)+C(K+h,T)\\ge0"
+        },
+        {
+          "label": "Breeden–Litzenberger关系",
+          "tex": "\\frac{\\partial^2 C(K,T)}{\\partial K^2}=e^{-rT} f_{\\mathbb Q}(K)\\quad\\text{(连续终值密度)}"
+        },
+        {
+          "label": "风险中性看涨价",
+          "tex": "C(K,T)=e^{-rT}E^{\\mathbb Q}[(S_T-K)^+]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对欧式看涨到期支付 (S_T−K)^+，任意固定 S_T 时，增大 K 只会减小或维持支付，因此在相同贴现因子与风险中性测度下，其定价函数对 K 非增。",
+          "tex": "K_1<K_2\\implies(S_T-K_1)^+\\ge(S_T-K_2)^+"
+        },
+        {
+          "explanation": "正部函数对 K 为凸函数，期望与正贴现保持凸性；当 K−h、K、K+h 等距时，离散二阶差分不得为负，对应一份多头两翼、两份空头中间的蝶式组合到期支付非负。",
+          "tex": "(S_T-(K-h))^+-2(S_T-K)^++(S_T-(K+h))^+\\ge0"
+        },
+        {
+          "explanation": "在无原子且具有光滑风险中性密度的条件下，对看涨定价积分按执行价一次微分得到负的贴现右尾概率，再求一次导数得到正的贴现密度。",
+          "tex": "-\\partial_K C=e^{-rT}\\mathbb Q(S_T>K),\\quad\\partial_{KK}C=e^{-rT}f_{\\mathbb Q}(K)"
+        },
+        {
+          "explanation": "将各执行价 BSM 反解的 σ_IV(K,T) 代回价格可能恢复市场报价，但并不意味着用随意光滑函数拟合 IV 后仍自动满足单调性和凸性，因此应在价格空间检验并加入必要约束。",
+          "tex": "C(K,T)=C_{\\rm BS}(\\sigma_{\\rm IV}(K,T))\\quad\\Longrightarrow\\quad\\partial_KC\\ \\text{含 }\\partial_K\\sigma_{\\rm IV}"
+        }
+      ],
+      "example": "同一时点、同一欧式到期日、相同折现与标的，设三条等间距执行价 K∈{95,100,105} 的看涨价格依次为 C(95)=12、C(100)=9、C(105)=5。这些报价虽然满足随行权价递增时价格下降（12>9>5），但蝶式价差 C(95)−2C(100)+C(105)=12−18+5=−1<0，违反凸性：一份多头 K=95 看涨、两份空头 K=100 看涨、一份多头 K=105 看涨在任意终值的净到期支付非负，组合初始权利金为 −1，即理想化零摩擦市场中收取 1 的初始现金。因此同一组报价不能由有效无套利风险中性分布定价。作为对照，若 C(105)=7，蝶式价格变为 12−18+7=1≥0，仅通过此局部凸性检查，仍不能证明整个执行价和期限曲面无套利。",
+      "application": "对 ETF 期权的隐含波动率曲面，首先筛选同一时间戳、行权类型、分红口径与有效 bid/ask，再将合约价转换为 BSM 等价 IV；对每个到期日检验价格单调与蝶式凸性，随后采用满足约束的参数化或无套利插值并检查跨期限一致性。交易策略研究还应区分风险中性尾部、真实历史尾部和波动率风险溢价，并在独立样本外验证对冲误差与交易成本。",
+      "caveat": "蝶式价差为负的数学套利依赖同一时点同一市场且合约可以按这些价格执行；现实买卖价差、流动性和空头约束可能消除可执行套利。跨到期日的简单看涨价单调性不能在所有利率与分红机制下无条件成立。波动率曲面极端点的IV变化可能只是低Vega报价病态，不能机械解释成风险中性尾部真实变动。",
+      "deep_sections": [
+        {
+          "title": "微笑、偏斜和报价维度",
+          "question": "为什么常数σ模型无法拟合所有执行价？",
+          "paragraphs": [
+            "BSM 基准对固定到期日假设一个常数波动率。真实市场中将各执行价价格分别反解为 σ_IV 后，往往随 K 改变；这说明市场报价相对于该基准并不满足同一个常数波动率假设。",
+            "图形形状与横轴定义相关：K、log(K/F) 或 Delta 的刻画不同，不能把看涨Delta偏斜的数值与执行价坐标混在一张图上作无说明比较。"
+          ],
+          "formulas": [
+            {
+              "label": "核心关系",
+              "tex": "\\sigma_{\\rm IV}=\\sigma_{\\rm IV}(K,T)"
+            }
+          ],
+          "proof": "每一条合约定价方程独立反解 σ，当所得根随着 K 或 T 变化时得到波动率曲面；若所有根相同才退化为常数波动率。",
+          "worked": "本讲后续报价 K={95,100,105} 仅用于无套利凸性检查，不提供足够模型输入来虚构具体隐含波动率数值。",
+          "limitation": "不同到期的美元报价、远期价格和利率期限结构不可未经统一便直接比较隐含曲线。"
+        },
+        {
+          "title": "看涨价格的单调与凸性",
+          "question": "为什么市场不允许价格随执行价变高反而上涨？",
+          "paragraphs": [
+            "对任何固定终值 S_T，低行权价看涨支付不低于高行权价看涨；因此在同一风险中性定价与贴现条件下，低 K 期权不应比高 K 期权更便宜。",
+            "同理，正部函数对行权价为凸，折现期望保留凸性。这些约束比‘隐含波动率曲线必须U型’更基础且独立于特定波动率模型。"
+          ],
+          "formulas": [
+            {
+              "label": "核心关系",
+              "tex": "C(K-h)-2C(K)+C(K+h)\\ge0"
+            }
+          ],
+          "proof": "令 g(K)=(S_T−K)^+；凸性保证 g(K)≤[g(K−h)+g(K+h)]/2，对两侧乘2移项，取正贴现期望得看涨价的离散凸性。",
+          "worked": "C(95)=12、C(100)=9、C(105)=5 时，蝶式组合初始价格 −1，明显违反无套利凸性。",
+          "limitation": "三点局部凸性通过不能证明所有执行价价格都满足完整边界、单调和凸性条件。"
+        },
+        {
+          "title": "风险中性密度与蝶式近似",
+          "question": "为什么看涨价格的二阶行权价导数像概率密度？",
+          "paragraphs": [
+            "看涨价格作为终值正部函数的风险中性期望，对行权价一次求导得到折现右尾概率的负值；再求一次导数便得到风险中性终值密度。",
+            "所以在足够光滑的连续执行价理想化市场中，非负的风险中性密度对应看涨价格对 K 的凸性。离散合约只能通过有限差分近似，而不能凭有限几个报价精确恢复连续密度。"
+          ],
+          "formulas": [
+            {
+              "label": "核心关系",
+              "tex": "\\partial_{KK}C=e^{-rT}f_{\\mathbb Q}(K)"
+            }
+          ],
+          "proof": "将 C=e^{-rT}∫_K^∞(s−K)f_Q(s)ds 按 Leibniz 积分求导，得到 C_K=−e^{-rT}∫_K^∞f_Q(s)ds，再求导得到 e^{-rT}f_Q(K)。",
+          "worked": "如果三点蝶式价格为负，有限差分对应的风险中性密度估计出现负值，代表这些理想化报价不相容。",
+          "limitation": "若终值分布有原子，应使用分布或测度意义的二阶导数，不能机械套连续概率密度函数。"
+        },
+        {
+          "title": "静态无套利与交易可执行性",
+          "question": "看到负蝶式价差就能实际无风险套利吗？",
+          "paragraphs": [
+            "数学证明假设能够同一时点、同一合约条款按给定价格同步买卖。真实市场存在 bid/ask、不同盘口深度、保证金、隔夜风险和可执行数量限制，原始中间价的负价差不代表可以成交。",
+            "研究时应先在价格空间修复或剔除违反约束的报价，再把价格转为隐含波动率，以免平滑插值制造新的负蝶式价格；跨期限检查还需统一远期、分红和利率。"
+          ],
+          "formulas": [
+            {
+              "label": "核心关系",
+              "tex": "\\operatorname{Cost}_{\\rm butterfly}=C(K-h)-2C(K)+C(K+h)"
+            }
+          ],
+          "proof": "蝶式组合到期支付在任意标的终值均非负，若初始实际可执行成本为负且不存在其他限制，持有组合同时收到初始现金，构成静态套利；实际成本必须用长腿 ask 与空腿 bid 计算。",
+          "worked": "理想中间价 12、9、5 给出 −1，若买入两翼价格增加、卖出中间收入下降，实际可执行成本可能不再为负。",
+          "limitation": "不能把美式期权行权差异、错配期限或不同分红口径下的中间价直接套入欧式蝶式无套利公式。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "finance-n0434",
+          "label": "先修：BSM模型和风险中性定价"
+        },
+        {
+          "kind": "math",
+          "id": "finance-n0436",
+          "label": "先修：Greeks局部风险"
+        },
+        {
+          "kind": "math",
+          "id": "finance-n0437",
+          "label": "先修：隐含波动率反解"
+        },
+        {
+          "kind": "math",
+          "id": "finance-n0435",
+          "label": "关联：跨期权无套利平价"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Breeden and Litzenberger (1978), Prices of State-Contingent Claims Implicit in Option Prices",
+          "url": "https://doi.org/10.1086/260062"
+        },
+        {
+          "title": "Gatheral (2006), The Volatility Surface: A Practitioner's Guide",
+          "url": "https://onlinelibrary.wiley.com/doi/book/10.1002/9781119202073"
+        }
+      ],
+      "checked_status": "V28严格精讲：执行价凸性、蝶式无套利、风险中性密度和真实盘口限制"
+    }
+  ]
+}
