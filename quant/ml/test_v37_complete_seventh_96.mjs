@@ -48,6 +48,12 @@ for(const file of groups){
 assert.equal(checked,96);
 assert.equal(formulas,480);
 assert.equal(newIds.size,72);
+// Chronos original paper §3.1 uses m=0 and s=mean(abs(context));
+// do not quietly replace the published tokenizer with centered standardization.
+const chronos=read("atlas-depth-07-k.json").lessons["m22-c05-p05"];
+assert(chronos.equations[3].tex.includes(String.raw`\\sum_{j=1}^{C}|x_j|`),"Chronos original mean-absolute scaling missing");
+assert(chronos.worked_example.includes("s_C=(2+4+0)/3=2"),"Chronos scale example missing");
+
 assert.deepEqual(Object.keys(domainCounts).length,24);
 for(const n of Object.values(domainCounts))assert.equal(n,4,"exactly four seventh-stage lessons per domain");
 assert(deepWords>27000,"V37 substantial Chinese derivation and audit text");
@@ -93,6 +99,7 @@ near(.5*2+.5*1,1.5,"Actor-Critic value");
 near(.8+.2/4,.85,"epsilon greedy");
 near(-Math.log(.75),.2876820724517809,"tanh log Jacobian");
 near(.8**2,.64,"VAR-like stability");
+near((Math.abs(2)+Math.abs(-4)+Math.abs(0))/3,2,"Chronos paper mean-absolute scale");
 near(1-88/110,.2,"maximum drawdown");
 near(1/Math.sqrt(8),.3535533905932738,"sample RMS");
 near(2*.02*.5*.1,.002,"impact structure demonstration");
