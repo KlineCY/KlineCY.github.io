@@ -1,4 +1,4 @@
-"""Numerical and structural verification of the sixth wave of ML lessons.
+"""Numerical and structural verification of the V36-enhanced sixth wave of ML lessons.
 
 Checks are intentionally small, independently calculable quantities that
 should remain in sync with the actual explanatory examples.
@@ -30,11 +30,12 @@ class SixthPassWorkedExamples(unittest.TestCase):
         self.assertEqual({k[:3] for k in LESSONS}, {f"m{i:02d}" for i in range(1, 25)})
         for identity, lesson in LESSONS.items():
             with self.subTest(id=identity):
-                self.assertEqual(len(lesson["equations"]), 3)
+                self.assertEqual(len(lesson["equations"]), 5)
+                self.assertTrue(lesson.get("revision_note", "").startswith("V36"))
                 self.assertGreaterEqual(len(lesson["worked_example"]), 60)
-                self.assertEqual(len(lesson["derivation"]), 3)
-                self.assertEqual(len(lesson["protocol"]), 3)
-                self.assertEqual(len(lesson["pitfalls"]), 2)
+                self.assertEqual(len(lesson["derivation"]), 5)
+                self.assertEqual(len(lesson["protocol"]), 5)
+                self.assertEqual(len(lesson["pitfalls"]), 3)
 
     def test_one_arithmetic_case_per_topic(self):
         checks = [
