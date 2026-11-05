@@ -4,6 +4,7 @@ import katex from "katex";
 const root=new URL("./",import.meta.url);
 const read=p=>JSON.parse(fs.readFileSync(new URL(p,root),"utf8"));
 const v24Ids=new Set(["statistics-x003","statistics-x004","mlmath-x003","mlmath-x004"]);
+const v25Ids=new Set(["timeseries-x003","timeseries-x004","timeseries-x006","mlmath-x006","riskmath-x001"]);
 const curriculum=read("curriculum.json"),manifest=read("lessons-manifest.json");
 const core=["lessons-foundations.json","lessons-advanced.json","lessons-more.json"].flatMap(p=>read(p).lessons);
 const extensions=manifest.modules.flatMap(m=>{
@@ -25,7 +26,7 @@ assert.equal(extensions.length,164);
 assert.equal(all.length,287);
 assert.equal(new Set(all.map(l=>l.id)).size,287,"unique complete mathematics IDs");
 const v23Ids=["timeseries-n0256","timeseries-n0257","timeseries-n0258","timeseries-n0259"];
-assert.equal(all.filter(l=>!ids.includes(l.id)&&!v23Ids.includes(l.id)&&!v24Ids.has(l.id)).length,266,"all original V21 complete lessons retained");
+assert.equal(all.filter(l=>!ids.includes(l.id)&&!v23Ids.includes(l.id)&&!v24Ids.has(l.id)&&!v25Ids.has(l.id)).length,266,"all original V21 complete lessons retained");
 let sections=0,parsed=0,sources=0,links=0;
 for(const l of added){
  assert(l.id===l.node_id&&nodeMap.get(l.id)?.title===l.title,"curriculum/lecture mapping "+l.id);
