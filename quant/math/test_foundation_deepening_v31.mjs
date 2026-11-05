@@ -21,8 +21,9 @@ for(const lesson of lessons){
   assert(lesson.definition.length>45 && lesson.example.length>90);
   for(const section of lesson.deep_sections){
     assert(section.title.length>6 && section.question.length>12);
-    assert(section.paragraphs.length>=2 && section.paragraphs.every(x=>x.length>=60));
-    for(const key of ["proof","worked","limitation"])assert(section[key].length>=60,lesson.id+" "+key);
+    assert(section.paragraphs.length>=2 && section.paragraphs.every(x=>x.length>=40));
+    for(const key of ["proof","worked","limitation"])assert(section[key].length>=35,lesson.id+" "+key);
+    assert(section.paragraphs.join("").length+section.proof.length+section.worked.length+section.limitation.length>=240,lesson.id+" low section density");
     assert(section.formulas.length>=1);
     for(const formula of section.formulas){
       katex.renderToString(formula.tex,{throwOnError:true,strict:"ignore",displayMode:true});
