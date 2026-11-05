@@ -15,12 +15,12 @@ const all=[...old,...extras],ids=new Set(all.map(x=>x.node_id)),nodeMap=new Map(
 const targets=["timeseries-n0260","timeseries-n0261","timeseries-n0262","timeseries-n0266","timeseries-n0267","timeseries-n0269","timeseries-n0270"];
 assert.deepEqual(added.map(x=>x.node_id),targets);
 assert.equal(manifest.version,1);
-assert.equal(manifest.expected_lessons,171);
-assert.equal(manifest.modules.length,68);
-assert.equal(extras.length,171);
+assert.equal(manifest.expected_lessons,181);
+assert.equal(manifest.modules.length,71);
+assert.equal(extras.length,181);
 assert.equal(old.length,123);
-assert.equal(all.length,294);
-assert.equal(ids.size,294,"all complete courses must have unique IDs");
+assert.equal(all.length,304);
+assert.equal(ids.size,304,"all complete courses must have unique IDs");
 assert.equal(catalog.nodes.length,656);
 assert.equal(catalog.chapters.length,109);
 let chapters=0,formulas=0,sources=0,links=0;
@@ -106,4 +106,4 @@ for(const token of ["overflow-x:auto","line-break:strict","@media print",":focus
  assert(css.includes(token),"quant math responsive/print/CJK styling missing "+token);
 assert(cssMl.includes("overflow-x:auto"),"ML mathematics overflow rule absent");
 console.log("PASS V26: 7 complete lectures, 28 proof mini-chapters, 92 strict KaTeX expressions, "+
- sources+" verified academic source formats, "+links+" canonical topic links, 20 independent mathematical invariants, 294 unique full lectures / 656-node catalog.");
+ sources+" verified academic source formats, "+links+" canonical topic links, 20 independent mathematical invariants, 304 unique full lectures / 656-node catalog.");
