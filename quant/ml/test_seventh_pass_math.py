@@ -1,6 +1,6 @@
 """Seventh-stage mathematical audit: 96 chapters, 48 independent calculations.
 
-V36 deepened domains 01–06; V37 deepens domains 13–24, preserving all original numeric cases and domains 07–12.\nOne check per lesson is not a formal proof, but prevents illustrative
+V36 deepened domains 01–06; V37 completes domains 07–24. All 96 original lessons and 48 independent numeric cases remain.\nOne check per lesson is not a formal proof, but prevents illustrative
 arithmetic from silently drifting away from the published explanations.
 """
 import json
@@ -27,18 +27,17 @@ class SeventhPassMath(unittest.TestCase):
         for key, chapter in LESSONS.items():
             domain_counts[key[:3]] = domain_counts.get(key[:3], 0) + 1
             domain = int(key[1:3])
-            enhanced = domain <= 6 or domain >= 13
-            expected_equations = 5 if enhanced else 3
-            expected_pitfalls = 3 if enhanced else 2
+            enhanced = True
+            expected_equations = 5
+            expected_pitfalls = 3
             self.assertEqual(len(chapter["equations"]), expected_equations, key)
             self.assertGreaterEqual(len(chapter["worked_example"]), 60, key)
             self.assertGreaterEqual(len(chapter["overview"]), 60, key)
             self.assertEqual(len(chapter["derivation"]), expected_equations, key)
             self.assertEqual(len(chapter["protocol"]), expected_equations, key)
             self.assertEqual(len(chapter["pitfalls"]), expected_pitfalls, key)
-            if enhanced:
-                expected_revision = "V36" if domain <= 6 else "V37"
-                self.assertTrue(chapter.get("revision_note", "").startswith(expected_revision), key)
+            expected_revision = "V36" if domain <= 6 else "V37"
+            self.assertTrue(chapter.get("revision_note", "").startswith(expected_revision), key)
             self.assertTrue(chapter["source_title"], key)
         self.assertEqual(domain_counts, {f"m{i:02d}": 4 for i in range(1, 25)})
 
