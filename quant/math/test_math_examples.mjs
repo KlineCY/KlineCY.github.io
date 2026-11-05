@@ -184,14 +184,22 @@ const cases=[
 ["statistics-n0176",3*.05/5,.03,"0.030"],
 ["riskmath-n0589",.0168+.0168+.0036+.0064,.0436,"0.0436"],
 ["riskmath-n0594",.5*(-.12)+.3*.03-.2*.2,-.091,"−0.091"],
-["riskmath-n0595",(1.5-.5)/1.5,2/3,"2/3"]
+["riskmath-n0595",(1.5-.5)/1.5,2/3,"2/3"],
+["statistics-n0177",(.2*.6)/(.2*.6+.8*.1),.6,"=0.6"],
+["statistics-n0178",10/(10+4),5/7,"10/14=5/7"],
+["statistics-n0179",2.7-1.96*Math.sqrt(.9),.8405807351402319,"0.840581"],
+["statistics-n0180",10*11/(14*15),11/21,"11/21"],
+["finance-n0434",100*(.539827837277029-.460172162722971),7.965567455405801,"7.965567"],
+["finance-n0436",Math.exp(-.5*.1**2)/Math.sqrt(2*Math.PI)/(100*.2),.01984762737385059,"0.019847627"],
+["finance-n0437",.1/(100*Math.exp(-.5*.1**2)/Math.sqrt(2*Math.PI)),.002519192968461693,"0.002519"],
+["finance-n0438",12-2*9+5,-1,"12−18+5=−1"]
 ];
-assert.equal(chapters.size,181,"181 unique mathematics extension lesson IDs");
-assert.equal(cases.length,181);
+assert.equal(chapters.size,189,"189 unique mathematics extension lesson IDs");
+assert.equal(cases.length,189);
 for(const [id,actual,expect,token] of cases){
  const lesson=chapters.get(id);
  assert(lesson,"missing numerical lesson "+id);
  assert(Math.abs(actual-expect)<1e-9,"wrong independent computation "+id);
  assert(lesson.example.includes(token),"worked example must contain checked arithmetic "+id+": "+token);
 }
-console.log("PASS: 20 mathematical disciplines, 181 independent numeric/research example invariants.");
+console.log("PASS: 20 mathematical disciplines, 189 independent numeric/research example invariants.");
