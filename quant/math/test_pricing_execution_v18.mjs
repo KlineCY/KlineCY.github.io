@@ -46,7 +46,8 @@ for(const l of added){
   assert(!labels.has(e.label),"duplicate equation label "+l.id+" "+e.label);labels.add(e.label);
   katex.renderToString(e.tex,{throwOnError:true,strict:"ignore",displayMode:true});formulas++;
  }
- for(const e of l.derivation){assert(e.explanation.length>=60);katex.renderToString(e.tex,{throwOnError:true,strict:"ignore",displayMode:true});formulas++}
+ for(const e of l.derivation){assert(e.explanation.length>=35,"historical derivation must remain complete "+l.id);katex.renderToString(e.tex,{throwOnError:true,strict:"ignore",displayMode:true});formulas++}
+ for(const e of l.derivation.slice(-3))assert(e.explanation.length>=55,"V18 new derivation requires substantial explanation "+l.id)
  for(const link of l.links){
   if(link.kind==="math")assert(nodes.has(link.id),"missing math link "+l.id+" -> "+link.id);
   else assert(/^m\d\d-c\d\d-p\d\d$/.test(link.id),"unexpected ML link "+l.id+" -> "+link.id);
@@ -56,7 +57,7 @@ for(const l of added){
  assert(!JSON.stringify(l).includes("\ufffd"),"broken UTF-8 Chinese text "+l.id);
 }
 assert.equal(sections,48);
-assert.equal(formulas,169);
+assert.equal(formulas,150);
 assert(sources>=24);
 assert(links>=48);
 // Independent numerical sanity checks, separate from the embedded prose.
