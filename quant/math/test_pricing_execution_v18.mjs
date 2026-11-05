@@ -17,16 +17,17 @@ const netNew="bcd".split("").flatMap(s=>read("lessons-phase-18-"+s+".json").less
 assert.deepEqual(netNew.map(x=>x.node_id),newIds,"six net-new phase18 records only");
 assert.deepEqual(added.map(x=>x.node_id),ids);
 assert.equal(curriculum.nodes.length,656);
-assert.equal(manifest.modules.length,58);
-assert.equal(manifest.expected_lessons,143);
-assert.equal(extended.length,143);
+assert.equal(manifest.modules.length,62);
+assert.equal(manifest.expected_lessons,151);
+assert.equal(extended.length,151);
 assert.equal(core.length,123);
-assert.equal(all.length,266);
-assert.equal(completeIds.size,266,"duplicates among all live full mathematical lectures");
+assert.equal(all.length,274);
+assert.equal(completeIds.size,274,"duplicates among all live full mathematical lectures");
 const v19Ids=["econometrics-n0232","econometrics-n0233","econometrics-n0234","econometrics-n0236","econometrics-n0237","econometrics-n0238","econometrics-n0239"];
 const v20Ids=["econometrics-x003","econometrics-x005","econometrics-x006","optimization-x011","optimization-x012"];
 const v21Ids=["mlmath-n0455","mlmath-n0466","mlmath-n0463","mlmath-n0464","mlmath-n0460","mlmath-n0461","mlmath-n0462","mlmath-n0465"];
-assert.equal(all.filter(x=>!newIds.includes(x.node_id)&&!v19Ids.includes(x.node_id)&&!v20Ids.includes(x.node_id)&&!v21Ids.includes(x.node_id)).length,240,"historical V17 240 lectures must remain intact");
+const v22Ids=["timeseries-n0244","timeseries-n0245","timeseries-n0248","timeseries-n0249","timeseries-n0250","timeseries-n0251","timeseries-n0254","timeseries-n0255"];
+assert.equal(all.filter(x=>!newIds.includes(x.node_id)&&!v19Ids.includes(x.node_id)&&!v20Ids.includes(x.node_id)&&!v21Ids.includes(x.node_id)&&!v22Ids.includes(x.node_id)).length,240,"historical V17 240 lectures must remain intact");
 const nodes=new Map(curriculum.nodes.map(n=>[n.id,n]));
 let formulas=0,sections=0,sources=0,links=0;
 for(const l of added){
@@ -100,4 +101,4 @@ for(const [name,style] of [["math",css],["ml",mlCss]]){
  assert(style.includes(":focus-visible"),"keyboard focus missing "+name);
  assert(style.includes("@media print"),"print layout safeguards missing "+name);
 }
-console.log("PASS V18: six new and six in-place deepened SDF/pricing/portfolio-execution lectures, 48 deep proof sections, 169 strict KaTeX formula parses, 24 source references, 48 prerequisite/cross links, 12 independently computed numeric examples, 266 unique full math courses and 656 acyclic knowledge nodes.");
+console.log("PASS V18: six new and six in-place deepened SDF/pricing/portfolio-execution lectures, 48 deep proof sections, 169 strict KaTeX formula parses, 24 source references, 48 prerequisite/cross links, 12 independently computed numeric examples, 274 unique full math courses and 656 acyclic knowledge nodes.");
