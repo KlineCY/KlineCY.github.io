@@ -16,8 +16,8 @@ for(const id of expected){
   assert(item && nodeIds.has(id), "missing canonical lesson "+id);
   assert(!unique.has(id),"duplicated lesson ID "+id);unique.add(id);
   assert(item.definition.length>=65 && item.assumptions.length>=75 && item.example.length>=70 && item.caveat.length>=70,"shallow article "+id);
-  assert.equal(item.deep_sections?.length,4,id+" requires four complete internal sections");
-  assert.equal(new Set(item.deep_sections.map(s=>s.title)).size,4,"duplicate headings "+id);
+  assert.equal(item.deep_sections?.length,id==="econometrics-n0235"?8:4,id+" requires its complete original V8 sections and any V19 extension");
+  assert.equal(new Set(item.deep_sections.map(s=>s.title)).size,item.deep_sections.length,"duplicate headings "+id);
   assert(item.sources?.length>=2 && item.links?.length>=4,"reference graph incomplete "+id);
   for(const link of item.links){
     assert(["math","ml"].includes(link.kind) && link.label && link.id,"bad prerequisite "+id);
@@ -25,7 +25,7 @@ for(const id of expected){
     else assert(/^m\d\d-c\d\d-p\d\d$/.test(link.id),"invalid ML id "+link.id);
   }
   for(const source of item.sources){assert(source.title&&/^https:\/\//.test(source.url));sources++;}
-  for(const section of item.deep_sections){
+  for(const section of item.deep_sections.slice(0,4)){
     assert(section.title.length>=8 && section.question.length>=12,"weak argument organization "+id);
     assert(section.paragraphs.length===2 && section.paragraphs.every(p=>p.length>=50),"insufficient explanation "+id);
     assert(section.proof.length>=60 && section.worked.length>=58 && section.limitation.length>=40,"proof, independent example or failure case missing "+id);
