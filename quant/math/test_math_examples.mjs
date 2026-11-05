@@ -167,14 +167,21 @@ const cases=[
 ["timeseries-x004",.8*.01*.01,.00008,"0.00008"],
 ["timeseries-x006",1-Math.exp(-(.2+.3*(1-Math.exp(-2)))),.36833710114762475,"0.3683"],
 ["mlmath-x006",36/18,2,"36/18=2"],
-["riskmath-x001",(.02*100+.03*10)/.05,46,"=46"]
+["riskmath-x001",(.02*100+.03*10)/.05,46,"=46"],
+["timeseries-n0260",.5*.2+.2*.3,.16,"0.16"],
+["timeseries-n0261",1.25/1.29,.9689922480620154,"0.968992"],
+["timeseries-n0262",((120-80)/2)/(80/40),10,"F=((120−80)/2)/(80/40)=10"],
+["timeseries-n0266",.000002+.05*.0004+.10*.0004+.85*.0001,.000147,"0.000147"],
+["timeseries-n0267",.02*.03*(-.05),-.00003,"−0.00003"],
+["timeseries-n0269",.3*1.3*2.3/6,.1495,"0.1495"],
+["timeseries-n0270",.4375*.9+.5625*.2,.50625,"0.50625"]
 ];
-assert.equal(chapters.size,164,"164 unique mathematics extension lesson IDs");
-assert.equal(cases.length,164);
+assert.equal(chapters.size,171,"171 unique mathematics extension lesson IDs");
+assert.equal(cases.length,171);
 for(const [id,actual,expect,token] of cases){
  const lesson=chapters.get(id);
  assert(lesson,"missing numerical lesson "+id);
  assert(Math.abs(actual-expect)<1e-9,"wrong independent computation "+id);
  assert(lesson.example.includes(token),"worked example must contain checked arithmetic "+id+": "+token);
 }
-console.log("PASS: 20 mathematical disciplines, 164 independent numeric/research example invariants.");
+console.log("PASS: 20 mathematical disciplines, 171 independent numeric/research example invariants.");

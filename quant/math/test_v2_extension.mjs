@@ -7,7 +7,7 @@ const c=read("./curriculum.json"),manifest=read("./lessons-manifest.json");
 const all=[...["./lessons-foundations.json","./lessons-advanced.json","./lessons-more.json"].flatMap(p=>read(p).lessons),...manifest.modules.flatMap(m=>read(m.path).lessons)];
 const map=new Map(all.map(l=>[l.node_id,l])),nodes=new Map(c.nodes.map(n=>[n.id,n]));
 assert.equal(map.size,all.length,"duplicate mathematics lesson");
-assert.equal(manifest.expected_lessons,164);
+assert.equal(manifest.expected_lessons,171);
 const chain=["linear-n0076","linear-n0077","linear-n0085","regression-n0184","regression-n0207","regression-n0208","regression-n0209"];
 const edges=[["linear-n0076","linear-n0075"],["linear-n0077","linear-n0076"],["linear-n0085","linear-n0083"],["regression-n0184","regression-n0182"],["regression-n0207","regression-n0206"],["regression-n0208","mlmath-n0453"],["regression-n0209","regression-n0208"]];
 for(const [id,p] of edges)assert(nodes.get(id)?.prerequisites.includes(p),"dependency "+id+" -> "+p);
