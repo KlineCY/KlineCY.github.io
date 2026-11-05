@@ -146,14 +146,22 @@ const cases=[
 ["mlmath-n0460",1/2,.5,"梯度方差为0.5"],
 ["mlmath-n0461",.004/(1-.999),4,"v̂₁=4"],
 ["mlmath-n0462",3*2/5,1.2,"g_clip=(1.2,1.6)"],
-["mlmath-n0465",4/5,.8,"4/5=0.8"]
+["mlmath-n0465",4/5,.8,"4/5=0.8"],
+["timeseries-n0244",10200*(.04/99+.01/98),5.162,"5.162"],
+["timeseries-n0245",.75/(1-.5**2),1,"0.75×4/3=1"],
+["timeseries-n0248",2/5,.4,"2/5=0.4"],
+["timeseries-n0249",1.125/1.75,9/14,"0.642857"],
+["timeseries-n0250",2*4,8,"2×4=8"],
+["timeseries-n0251",250+3*Math.log(100),263.8155105579643,"263.8155"],
+["timeseries-n0254",.8*100+2,82,"X_t=82"],
+["timeseries-n0255",2/(4**2*1),.125,"0.125"]
 ];
-assert.equal(chapters.size,143,"143 unique mathematics extension lesson IDs");
-assert.equal(cases.length,143);
+assert.equal(chapters.size,151,"151 unique mathematics extension lesson IDs");
+assert.equal(cases.length,151);
 for(const [id,actual,expect,token] of cases){
  const lesson=chapters.get(id);
  assert(lesson,"missing numerical lesson "+id);
  assert(Math.abs(actual-expect)<1e-9,"wrong independent computation "+id);
  assert(lesson.example.includes(token),"worked example must contain checked arithmetic "+id+": "+token);
 }
-console.log("PASS: 20 mathematical disciplines, 143 independent numeric/research example invariants.");
+console.log("PASS: 20 mathematical disciplines, 151 independent numeric/research example invariants.");
