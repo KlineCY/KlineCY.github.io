@@ -14,9 +14,9 @@ const ids=["econometrics-n0211","econometrics-n0213","econometrics-n0214","econo
 "econometrics-n0221","econometrics-n0222","econometrics-n0228","econometrics-n0231"];
 assert.equal(m.modules.length,58);
 assert.equal(m.expected_lessons,143);
-assert.equal(allModules.length,135);
+assert.equal(allModules.length,143);
 assert.equal(core.length,123);
-assert.equal(active.length,258);
+assert.equal(active.length,266);
 assert.equal(unique.size,266,"duplicate complete lesson IDs");
 const v18Ids=new Set(["finance-x004","finance-x005","finance-x006","optimization-x003","optimization-x004","optimization-x006"]);
 const v19Ids=new Set(["econometrics-n0232","econometrics-n0233","econometrics-n0234","econometrics-n0236","econometrics-n0237","econometrics-n0238","econometrics-n0239"]);
