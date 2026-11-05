@@ -15,7 +15,7 @@ assert.equal(manifest.modules.length,75);
 assert.equal(manifest.expected_lessons,195);
 assert.equal(core.length,123);
 assert.equal(ext.length,195);
-assert.equal(new Set([...core,...ext].map(l=>l.node_id)).size,312);
+assert.equal(new Set([...core,...ext].map(l=>l.node_id)).size,318);
 assert.equal(catalog.nodes.length,656);
 assert.equal(catalog.chapters.length,109);
 let deep=0,math=0,refs=0,links=0;
