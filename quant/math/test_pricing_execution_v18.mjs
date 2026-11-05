@@ -34,7 +34,7 @@ for(const l of added){
  assert(l.properties.length>=3&&l.derivation.length>=3&&l.formulas.length>=4);
  assert(l.deep_sections.length>=4);
  const titles=l.deep_sections.map(s=>s.title);
- assert.equal(new Set(titles).size,4,"repeated section titles "+l.id);
+ assert.equal(new Set(titles).size,l.deep_sections.length,"repeated section titles "+l.id);
  for(const s of l.deep_sections.slice(-4)){
   assert(s.question.length>=12&&s.paragraphs.length>=2&&s.paragraphs.every(p=>p.length>=55),"CJK narrative too thin "+l.id+" "+s.title);
   assert(s.proof.length>=50&&s.worked.length>=40&&s.limitation.length>=30,"worked proof or boundary incomplete "+l.id+" "+s.title);
