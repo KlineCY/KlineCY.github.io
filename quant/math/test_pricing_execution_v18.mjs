@@ -17,12 +17,12 @@ const netNew="bcd".split("").flatMap(s=>read("lessons-phase-18-"+s+".json").less
 assert.deepEqual(netNew.map(x=>x.node_id),newIds,"six net-new phase18 records only");
 assert.deepEqual(added.map(x=>x.node_id),ids);
 assert.equal(curriculum.nodes.length,656);
-assert.equal(manifest.modules.length,64);
-assert.equal(manifest.expected_lessons,155);
-assert.equal(extended.length,155);
+assert.equal(manifest.modules.length,65);
+assert.equal(manifest.expected_lessons,159);
+assert.equal(extended.length,159);
 assert.equal(core.length,123);
-assert.equal(all.length,278);
-assert.equal(completeIds.size,278,"duplicates among all live full mathematical lectures");
+assert.equal(all.length,282);
+assert.equal(completeIds.size,282,"duplicates among all live full mathematical lectures");
 const v19Ids=["econometrics-n0232","econometrics-n0233","econometrics-n0234","econometrics-n0236","econometrics-n0237","econometrics-n0238","econometrics-n0239"];
 const v20Ids=["econometrics-x003","econometrics-x005","econometrics-x006","optimization-x011","optimization-x012"];
 const v21Ids=["mlmath-n0455","mlmath-n0466","mlmath-n0463","mlmath-n0464","mlmath-n0460","mlmath-n0461","mlmath-n0462","mlmath-n0465"];
