@@ -52,8 +52,8 @@ const pre={
 assert.equal(curr.nodes.length,656);
 assert.equal(curr.chapters.length,109);
 assert.equal(curr.disciplines.length,20);
-assert.equal(manifest.modules.length,51);
-assert.equal(ext.length,130,"historic extension inventory plus two newly connected system-risk chapters");
+assert.equal(manifest.modules.length,54);
+assert.equal(ext.length,135,"historic extension inventory plus two newly connected system-risk chapters");
 assert(core.length>=104,"V13 historical baseline: at least 104 completed core lectures");
 assert(all.length>=207,"V13 historical baseline: at least 207 full mathematics lectures");
 assert.equal(byId.size,all.length,"no duplicate existing or extension lecture");
