@@ -1,6 +1,6 @@
 """Independently check 24 representative fifth-pass numerical illustrations.
 
-All 48 new topics are structurally checked by the Atlas validators.
+All 48 canonical lessons are checked after V35 deepening without removing their original illustrations.
 These 24 computations provide an additional one-per-domain arithmetic gate.
 """
 import json
@@ -33,11 +33,12 @@ class FifthPassWorkedExamples(unittest.TestCase):
         distribution = {}
         for identifier, chapter in LESSONS.items():
             distribution[identifier[:3]] = distribution.get(identifier[:3], 0) + 1
-            self.assertEqual(len(chapter["equations"]), 3, identifier)
-            self.assertGreaterEqual(len(chapter["worked_example"]), 60, identifier)
-            self.assertEqual(len(chapter["derivation"]), 3, identifier)
-            self.assertEqual(len(chapter["protocol"]), 3, identifier)
-            self.assertEqual(len(chapter["pitfalls"]), 2, identifier)
+            self.assertEqual(len(chapter["equations"]), 5, identifier)
+            self.assertTrue(chapter.get("revision_note", "").startswith("V35"), identifier)
+            self.assertGreaterEqual(len(chapter["worked_example"]), 120, identifier)
+            self.assertEqual(len(chapter["derivation"]), 5, identifier)
+            self.assertEqual(len(chapter["protocol"]), 5, identifier)
+            self.assertEqual(len(chapter["pitfalls"]), 3, identifier)
         self.assertEqual(distribution, {f"m{i:02d}": 2 for i in range(1, 25)})
 
     def test_one_recalculated_example_per_topic(self):
