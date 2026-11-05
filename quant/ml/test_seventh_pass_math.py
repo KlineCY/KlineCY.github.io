@@ -1,6 +1,6 @@
 """Seventh-stage mathematical audit: 96 chapters, 48 independent calculations.
 
-One check per lesson is not a formal proof, but prevents illustrative
+V36 deepens domains 01–06 while retaining all original numeric cases.\nOne check per lesson is not a formal proof, but prevents illustrative
 arithmetic from silently drifting away from the published explanations.
 """
 import json
@@ -26,12 +26,17 @@ class SeventhPassMath(unittest.TestCase):
         domain_counts = {}
         for key, chapter in LESSONS.items():
             domain_counts[key[:3]] = domain_counts.get(key[:3], 0) + 1
-            self.assertEqual(len(chapter["equations"]), 3, key)
+            enhanced = key[:3] in {f"m{i:02d}" for i in range(1, 7)}
+            expected_equations = 5 if enhanced else 3
+            expected_pitfalls = 3 if enhanced else 2
+            self.assertEqual(len(chapter["equations"]), expected_equations, key)
             self.assertGreaterEqual(len(chapter["worked_example"]), 60, key)
             self.assertGreaterEqual(len(chapter["overview"]), 60, key)
-            self.assertEqual(len(chapter["derivation"]), 3, key)
-            self.assertEqual(len(chapter["protocol"]), 3, key)
-            self.assertEqual(len(chapter["pitfalls"]), 2, key)
+            self.assertEqual(len(chapter["derivation"]), expected_equations, key)
+            self.assertEqual(len(chapter["protocol"]), expected_equations, key)
+            self.assertEqual(len(chapter["pitfalls"]), expected_pitfalls, key)
+            if enhanced:
+                self.assertTrue(chapter.get("revision_note", "").startswith("V36"), key)
             self.assertTrue(chapter["source_title"], key)
         self.assertEqual(domain_counts, {f"m{i:02d}": 4 for i in range(1, 25)})
 
