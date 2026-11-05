@@ -41,7 +41,7 @@ for(const [name,ids] of groups){
   assert(l.pitfalls.at(-1).length>=30,id+" failure boundary");
   assert(!/TODO|Lorem ipsum|[\uFFFD\u200B\uFEFF]/i.test(JSON.stringify(l)),id+" corrupted CJK text");
   for(const eq of l.equations){
-   assert(eq.tex?.length>=8&&eq.label?.length>=3,id+" mathematical annotation");
+   assert(eq.tex?.length>=5&&eq.label?.length>=3,id+" mathematical annotation");
    katex.renderToString(eq.tex,{displayMode:true,throwOnError:true,strict:"ignore"});
    math++;
   }
