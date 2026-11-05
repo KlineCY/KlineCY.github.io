@@ -5,6 +5,7 @@ import katex from "katex";
 const root=new URL("./",import.meta.url);
 const read=p=>JSON.parse(fs.readFileSync(new URL(p,root),"utf8"));
 const v24Ids=new Set(["statistics-x003","statistics-x004","mlmath-x003","mlmath-x004"]);
+const v25Ids=new Set(["timeseries-x003","timeseries-x004","timeseries-x006","mlmath-x006","riskmath-x001"]);
 const c=read("curriculum.json"),m=read("lessons-manifest.json");
 const allModules=m.modules.flatMap(x=>read(x.path).lessons);
 const core=["lessons-foundations.json","lessons-advanced.json","lessons-more.json"].flatMap(readable=>read(readable).lessons);
@@ -13,19 +14,19 @@ const additions=["a","b","c"].flatMap(x=>read("lessons-phase-17-"+x+".json").les
 const ids=["econometrics-n0211","econometrics-n0213","econometrics-n0214","econometrics-n0215",
 "econometrics-n0216","econometrics-n0218","econometrics-n0219","econometrics-n0220",
 "econometrics-n0221","econometrics-n0222","econometrics-n0228","econometrics-n0231"];
-assert.equal(m.modules.length,65);
-assert.equal(m.expected_lessons,159);
-assert.equal(allModules.length,159);
+assert.equal(m.modules.length,66);
+assert.equal(m.expected_lessons,164);
+assert.equal(allModules.length,164);
 assert.equal(core.length,123);
-assert.equal(active.length,282);
-assert.equal(unique.size,282,"duplicate complete lesson IDs");
+assert.equal(active.length,287);
+assert.equal(unique.size,287,"duplicate complete lesson IDs");
 const v18Ids=new Set(["finance-x004","finance-x005","finance-x006","optimization-x003","optimization-x004","optimization-x006"]);
 const v19Ids=new Set(["econometrics-n0232","econometrics-n0233","econometrics-n0234","econometrics-n0236","econometrics-n0237","econometrics-n0238","econometrics-n0239"]);
 const v20Ids=new Set(["econometrics-x003","econometrics-x005","econometrics-x006","optimization-x011","optimization-x012"]);
 const v21Ids=new Set(["mlmath-n0455","mlmath-n0466","mlmath-n0463","mlmath-n0464","mlmath-n0460","mlmath-n0461","mlmath-n0462","mlmath-n0465"]);
 const v22Ids=new Set(["timeseries-n0244","timeseries-n0245","timeseries-n0248","timeseries-n0249","timeseries-n0250","timeseries-n0251","timeseries-n0254","timeseries-n0255"]);
 const v23Ids=new Set(["timeseries-n0256","timeseries-n0257","timeseries-n0258","timeseries-n0259"]);
-assert.equal(active.filter(l=>!v18Ids.has(l.node_id)&&!v19Ids.has(l.node_id)&&!v20Ids.has(l.node_id)&&!v21Ids.has(l.node_id)&&!v22Ids.has(l.node_id)&&!v23Ids.has(l.node_id)&&!v24Ids.has(l.node_id)).length,240,"historical V17 240 complete lectures lost");
+assert.equal(active.filter(l=>!v18Ids.has(l.node_id)&&!v19Ids.has(l.node_id)&&!v20Ids.has(l.node_id)&&!v21Ids.has(l.node_id)&&!v22Ids.has(l.node_id)&&!v23Ids.has(l.node_id)&&!v24Ids.has(l.node_id)&&!v25Ids.has(l.node_id)).length,240,"historical V17 240 complete lectures lost");
 assert.deepEqual(additions.map(x=>x.id),ids,"stage V17 learning order changed");
 assert.equal(c.nodes.length,656);
 const nodes=new Map(c.nodes.map(x=>[x.id,x]));
