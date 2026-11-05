@@ -17,13 +17,14 @@ const ids=["timeseries-n0244","timeseries-n0245","timeseries-n0248","timeseries-
 const added="abcd".split("").flatMap(s=>read("lessons-phase-22-"+s+".json").lessons);
 assert.deepEqual(added.map(l=>l.id),ids,"V22 lecture order must remain intact");
 assert.equal(curriculum.nodes.length,656);
-assert.equal(manifest.modules.length,62);
-assert.equal(manifest.expected_lessons,151);
+assert.equal(manifest.modules.length,64);
+assert.equal(manifest.expected_lessons,155);
 assert.equal(core.length,123);
-assert.equal(extensions.length,151);
-assert.equal(all.length,274);
-assert.equal(new Set(all.map(l=>l.id)).size,274,"unique complete mathematics IDs");
-assert.equal(all.filter(l=>!ids.includes(l.id)).length,266,"all original V21 complete lessons retained");
+assert.equal(extensions.length,155);
+assert.equal(all.length,278);
+assert.equal(new Set(all.map(l=>l.id)).size,278,"unique complete mathematics IDs");
+const v23Ids=["timeseries-n0256","timeseries-n0257","timeseries-n0258","timeseries-n0259"];
+assert.equal(all.filter(l=>!ids.includes(l.id)&&!v23Ids.includes(l.id)).length,266,"all original V21 complete lessons retained");
 let sections=0,parsed=0,sources=0,links=0;
 for(const l of added){
  assert(l.id===l.node_id&&nodeMap.get(l.id)?.title===l.title,"curriculum/lecture mapping "+l.id);
@@ -98,4 +99,4 @@ for(const p of ["styles.css","../ml/atlas.css"]){
  for(const term of ["overflow-x:auto","line-break:strict",":focus-visible","@media print"])assert(css.includes(term),"CJK/KaTeX/print safeguard missing "+term+" in "+p);
 }
 console.log("PASS V22: 8 new mathematically complete time-series lectures, 32 proof sections, "+parsed+
- " strict KaTeX formulas, "+sources+" sourced references, "+links+" crosslinks, 8 independently recomputed examples, 274 unique complete courses, and 656-node acyclic prerequisites.");
+ " strict KaTeX formulas, "+sources+" sourced references, "+links+" crosslinks, 8 independently recomputed examples, 278 unique complete courses, and 656-node acyclic prerequisites.");
