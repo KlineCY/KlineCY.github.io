@@ -1,6 +1,6 @@
 """Independent numerical audit for eighth-pass Atlas supplements.
 
-This checks all 120 new chapters structurally and recomputes 72
+This checks all 120 existing chapters structurally, including 60 V38 deepened chapters, and recomputes 72
 representative worked examples (three per original ML domain).
 """
 import json
@@ -32,11 +32,15 @@ class EighthWaveMath(unittest.TestCase):
                 self.assertGreaterEqual(len(lesson["title"]), 8)
                 self.assertGreaterEqual(len(lesson["overview"]), 60)
                 self.assertGreaterEqual(len(lesson["worked_example"]), 60)
-                self.assertEqual(len(lesson["equations"]), 3)
-                self.assertEqual(len(lesson["derivation"]), 3)
-                self.assertEqual(len(lesson["protocol"]), 3)
-                self.assertEqual(len(lesson["pitfalls"]), 2)
-                self.assertEqual(len(set(lesson["protocol"])), 3)
+                enhanced = int(uid[1:3]) <= 12
+                expected = 5 if enhanced else 3
+                self.assertEqual(len(lesson["equations"]), expected)
+                self.assertEqual(len(lesson["derivation"]), expected)
+                self.assertEqual(len(lesson["protocol"]), expected)
+                self.assertEqual(len(lesson["pitfalls"]), 3 if enhanced else 2)
+                self.assertEqual(len(set(lesson["protocol"])), expected)
+                if enhanced:
+                    self.assertTrue(lesson.get("revision_note", "").startswith("V38"))
                 for item in lesson["equations"]:
                     self.assertTrue(item["label"] and item["tex"])
         self.assertEqual(per_domain, {f"m{i:02d}": 5 for i in range(1,25)})
