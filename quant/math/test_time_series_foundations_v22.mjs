@@ -17,12 +17,12 @@ const ids=["timeseries-n0244","timeseries-n0245","timeseries-n0248","timeseries-
 const added="abcd".split("").flatMap(s=>read("lessons-phase-22-"+s+".json").lessons);
 assert.deepEqual(added.map(l=>l.id),ids,"V22 lecture order must remain intact");
 assert.equal(curriculum.nodes.length,656);
-assert.equal(manifest.modules.length,64);
-assert.equal(manifest.expected_lessons,155);
+assert.equal(manifest.modules.length,65);
+assert.equal(manifest.expected_lessons,159);
 assert.equal(core.length,123);
-assert.equal(extensions.length,155);
-assert.equal(all.length,278);
-assert.equal(new Set(all.map(l=>l.id)).size,278,"unique complete mathematics IDs");
+assert.equal(extensions.length,159);
+assert.equal(all.length,282);
+assert.equal(new Set(all.map(l=>l.id)).size,282,"unique complete mathematics IDs");
 const v23Ids=["timeseries-n0256","timeseries-n0257","timeseries-n0258","timeseries-n0259"];
 assert.equal(all.filter(l=>!ids.includes(l.id)&&!v23Ids.includes(l.id)).length,266,"all original V21 complete lessons retained");
 let sections=0,parsed=0,sources=0,links=0;
