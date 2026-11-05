@@ -57,7 +57,7 @@ for(const l of added){
  assert(!JSON.stringify(l).includes("\ufffd"),"broken UTF-8 Chinese text "+l.id);
 }
 assert.equal(sections,48);
-assert.equal(formulas,150);
+assert.equal(formulas,169);
 assert(sources>=24);
 assert(links>=48);
 // Independent numerical sanity checks, separate from the embedded prose.
