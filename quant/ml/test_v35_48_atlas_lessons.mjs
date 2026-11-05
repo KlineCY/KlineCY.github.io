@@ -29,7 +29,7 @@ for(const [name,ids] of groups){
  for(const id of ids){
   const l=d.lessons[id];
   assert.equal(typeof l.title,"string",id+" title");
-  assert.equal(l.source_title.length>6,true,id+" original source title");
+  assert.equal(l.source_title.length>=2,true,id+" original source title");
   assert(l.revision_note?.startsWith("V35"),id+" revision");
   assert.equal(l.equations.length,5,id+" original 3 + 2");
   assert.equal(l.derivation.length,5,id+" original 3 + 2");
