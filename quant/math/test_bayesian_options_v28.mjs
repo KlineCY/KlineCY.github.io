@@ -15,9 +15,9 @@ const complete=[...core,...extra],nodeMap=new Map(curriculum.nodes.map(n=>[n.id,
 assert.deepEqual(newly.map(x=>x.id),newIds);
 assert.equal(curriculum.nodes.length,656);assert.equal(curriculum.chapters.length,109);
 assert.equal(core.length,123);
-assert.equal(manifest.expected_lessons,195);assert.equal(manifest.modules.length,75);
-assert.equal(extra.length,195);assert.equal(complete.length,318);
-assert.equal(new Set(complete.map(x=>x.node_id)).size,318,"duplicate canonical mathematics courses");
+assert.equal(manifest.expected_lessons,201);assert.equal(manifest.modules.length,77);
+assert.equal(extra.length,201);assert.equal(complete.length,324);
+assert.equal(new Set(complete.map(x=>x.node_id)).size,324,"duplicate canonical mathematics courses");
 let sections=0,mathematics=0,links=0,references=0;
 for(const l of newly){
  assert(l.node_id===l.id&&nodeMap.get(l.id)?.title===l.title,"canonical title or ID "+l.id);

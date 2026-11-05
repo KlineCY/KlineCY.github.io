@@ -198,14 +198,20 @@ const cases=[
 ["information-n0505",.14/.32,.4375,"0.4375"],
 ["information-n0509",2**2+1,5,"真实预测均值是 E[X²]=Var(X)+(E[X])²=1+4=5"],
 ["information-n0506",1/((4/6)**2+(1/6)**2+(1/6)**2),2,"ESS=1/0.5=2"],
-["information-n0510",1-94.5/110,.14090909090909087,"0.140909"]
+["information-n0510",1-94.5/110,.14090909090909087,"0.140909"],
+["finance-n0431",(105-90)/(120-90),.5,"q_u=(105−90)/(120−90)=15/30=0.5"],
+["finance-n0432",(-60/1.05)+100*(2/3),9.523809523809526,"9.523810"],
+["finance-n0439",Math.log(.97/.93),.04211148535012685,"0.042111"],
+["finance-n0440",5*.97+105*.93,102.5,"102.50"],
+["finance-n0441",1-Math.exp(-1),.6321205588285577,"0.632121"],
+["finance-n0442",Math.sqrt(1+2*.2**2),1.0392304845413265,"1.039230"]
 ];
-assert.equal(chapters.size,195,"195 unique mathematics extension lesson IDs");
-assert.equal(cases.length,195);
+assert.equal(chapters.size,201,"201 unique mathematics extension lesson IDs");
+assert.equal(cases.length,201);
 for(const [id,actual,expect,token] of cases){
  const lesson=chapters.get(id);
  assert(lesson,"missing numerical lesson "+id);
  assert(Math.abs(actual-expect)<1e-9,"wrong independent computation "+id);
  assert(lesson.example.includes(token),"worked example must contain checked arithmetic "+id+": "+token);
 }
-console.log("PASS: 20 mathematical disciplines, 195 independent numeric/research example invariants.");
+console.log("PASS: 20 mathematical disciplines, 201 independent numeric/research example invariants.");

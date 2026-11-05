@@ -39,11 +39,11 @@ const pre={
 assert.equal(curr.nodes.length,656);
 assert.equal(curr.chapters.length,109);
 assert.equal(curr.disciplines.length,20);
-assert.equal(manifest.modules.length,75);
-assert.equal(ext.length,195,"155 active extensions: historical 151 plus four new V23 cointegration/VAR lectures");
+assert.equal(manifest.modules.length,77);
+assert.equal(ext.length,201,"155 active extensions: historical 151 plus four new V23 cointegration/VAR lectures");
 assert.equal(core.length,123,"V14: 104 existing core plus 19 genuinely new full lectures");
-assert.equal(all.length,318,"historical V22 274 plus four net-new V23 cointegration/VAR lectures");
-assert.equal(byId.size,318,"no duplicate core or extension lecture IDs");
+assert.equal(all.length,324,"historical V22 274 plus four net-new V23 cointegration/VAR lectures");
+assert.equal(byId.size,324,"no duplicate core or extension lecture IDs");
 assert.equal(ids.length,19);
 const visiting=new Set(),done=new Set();
 function dfs(id){
