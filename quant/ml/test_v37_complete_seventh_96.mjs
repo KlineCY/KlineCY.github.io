@@ -51,7 +51,7 @@ assert.equal(newIds.size,72);
 // Chronos original paper §3.1 uses m=0 and s=mean(abs(context));
 // do not quietly replace the published tokenizer with centered standardization.
 const chronos=read("atlas-depth-07-k.json").lessons["m22-c05-p05"];
-assert(chronos.equations[3].tex.includes(String.raw`\\sum_{j=1}^{C}|x_j|`),"Chronos original mean-absolute scaling missing");
+assert(chronos.equations[3].tex.includes("sum_{j=1}^{C}|x_j|"),"Chronos original mean-absolute scaling missing");
 assert(chronos.worked_example.includes("s_C=(2+4+0)/3=2"),"Chronos scale example missing");
 
 assert.deepEqual(Object.keys(domainCounts).length,24);
