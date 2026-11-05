@@ -15,11 +15,11 @@ const all=[...core,...extras],ids=new Set(all.map(l=>l.node_id));
 const nodeMap=new Map(c.nodes.map(n=>[n.id,n]));
 const targets=["statistics-x003","statistics-x004","mlmath-x003","mlmath-x004"];
 assert.deepEqual(additions.map(l=>l.node_id),targets,"V24 canonical IDs and teaching order");
-assert.equal(m.expected_lessons,181);
-assert.equal(m.modules.length,71);
-assert.equal(extras.length,181);
-assert.equal(all.length,304);
-assert.equal(ids.size,304,"new lectures do not collide with previous chapters");
+assert.equal(m.expected_lessons,189);
+assert.equal(m.modules.length,73);
+assert.equal(extras.length,189);
+assert.equal(all.length,312);
+assert.equal(ids.size,312,"new lectures do not collide with previous chapters");
 assert.equal(c.nodes.length,656,"no curriculum ID churn");
 let sections=0,formulaCount=0,links=0,sourceCount=0;
 for(const l of additions){
