@@ -1,0 +1,307 @@
+{
+  "version": 1,
+  "revision": "2026-11-05",
+  "focus": "ADF单位根与KPSS平稳性：零假设、长期方差和统计解释",
+  "lessons": [
+    {
+      "id": "timeseries-n0254",
+      "node_id": "timeseries-n0254",
+      "title": "ADF单位根检验",
+      "definition": "Augmented Dickey–Fuller（ADF）检验将原序列的一阶差分回归于滞后水平和若干滞后差分，用于检验单位根原假设。核心检验系数δ=φ−1；单位根下δ=0，平稳替代通常意味着AR根位于单位圆之外。ADF统计量在单位根原假设下具有非标准Dickey–Fuller型分布，其临界值依赖是否包含截距、线性趋势与样本设置，不能使用普通t分布临界值。",
+      "assumptions": "以X_t=c+φX_{t−1}+u_t为基础，允许添加确定性趋势和p阶滞后差分以处理误差动态。必须事先决定不含截距、含截距或含趋势的规格，并按合法规则选择滞后p使回归误差的动态适宜；滞后观测与残差方差须满足对应单位根检验渐近理论。零假设H0:δ=0而不是H0:平稳。",
+      "properties": [
+        "ADF拒绝单位根H0支持所设确定性成分下的平稳替代，但不是永远充分的结构平稳证明。",
+        "ADF不拒绝不能证明单位根真实存在，可能来自短样本或接近一的高持续性平稳过程。",
+        "普通OLS t统计量的公式可计算ADF检验统计值，但参考分布与临界值不是通常Student t。"
+      ],
+      "formulas": [
+        {
+          "label": "ADF回归式",
+          "tex": "\\Delta X_t=\\alpha+\\beta t+\\delta X_{t-1}+\\sum_{j=1}^p\\gamma_j\\Delta X_{t-j}+u_t"
+        },
+        {
+          "label": "单位根原假设",
+          "tex": "H_0:\\delta=0\\quad(\\phi=1),\\qquad H_1:\\delta<0"
+        },
+        {
+          "label": "ADF检验统计量",
+          "tex": "\\tau_{\\rm ADF}=\\widehat\\delta/\\widehat{\\operatorname{SE}}(\\widehat\\delta)"
+        },
+        {
+          "label": "简单AR(1)的平稳性",
+          "tex": "|\\phi|<1\\iff |1+\\delta|<1"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "在简单AR(1) X_t=φX_{t−1}+u_t两边减去X_{t−1}，可得到∆X_t=(φ−1)X_{t−1}+u_t，因此δ=φ−1，φ=1对应δ=0。",
+          "tex": "\\Delta X_t=(\\phi-1)X_{t-1}+u_t"
+        },
+        {
+          "explanation": "为处理误差的短期自相关，在差分回归中添加p个滞后差分项。δ的t比值能由OLS计算，但单位根零假设下X_{t−1}非平稳，普通中心极限定理对应的t临界值不适用。",
+          "tex": "\\tau_{\\rm ADF}=\\widehat\\delta/\\widehat{\\operatorname{SE}}(\\widehat\\delta)"
+        },
+        {
+          "explanation": "在没有其他动态项的AR(1)例中，φ=0.8得到δ=−0.2；若上一期水平100、当期创新2，则X_t=0.8×100+2=82，∆X_t=−18。单个观察不足以决定ADF显著性。",
+          "tex": "\\phi=0.8\\Rightarrow\\delta=-0.2"
+        }
+      ],
+      "example": "取简单AR(1)模型X_t=0.8X_{t−1}+u_t，若X_{t−1}=100、u_t=2，则X_t=82，一期变化∆X_t=−18。回归中的水平项系数应为δ=0.8−1=−0.2，预测变化−0.2×100+2=−18。若φ=1而创新同为2，则X_t=102、∆X_t=2。两种情形可用于解释统计假设，但不能从这一期数字计算ADF检验p值。",
+      "application": "对ETF价格或对数价格进行单位根诊断时，须考虑总收益复权与确定性趋势规格；对已经定义的日收益率不应机械套用价格层面的单位根判断。模型选择要在训练窗口内完成，不能因样本外表现差而倒改差分阶数。",
+      "caveat": "短样本或结构突变会降低ADF对近单位根过程的判别力，滞后阶数过小可能残留误差自相关。若检验残差是用回归估出的协整组合，需要使用Engle–Granger适当临界值，而不是普通ADF临界值。",
+      "deep_sections": [
+        {
+          "title": "差分回归与单位根参数的联系",
+          "question": "为什么ADF检验的是δ=0而不是AR系数φ=0？",
+          "paragraphs": [
+            "AR(1)水平模型的单位根发生在φ=1，因为冲击对水平的影响不会随时间衰减。差分后原水平的回归系数自然变成φ−1，因此单位根对应δ=0。",
+            "若φ=0，则原水平为白噪声型，反而不是单位根过程。理解这一变换可以防止把检验对象和普通AR显著性混为一谈。"
+          ],
+          "formulas": [
+            {
+              "label": "差分回归与单位根参数的联系",
+              "tex": "\\Delta X_t=(\\phi-1)X_{t-1}+u_t"
+            }
+          ],
+          "proof": "由X_t=φX_{t−1}+u_t减去X_{t−1}，整理得∆X_t=(φ−1)X_{t−1}+u_t，定义δ=φ−1。φ=1的单位根零假设等同于δ=0。",
+          "worked": "φ=0.8时δ=−0.2；上一期100且创新2时变化−20+2=−18，水平落到82。",
+          "limitation": "对一般高阶AR模型，还要检查其他根；δ显著小于零不自动充分排除其他不稳定根。"
+        },
+        {
+          "title": "滞后差分与检验残差相关",
+          "question": "为什么ADF要在简单DF回归中额外加入滞后项？",
+          "paragraphs": [
+            "真实经济时间序列可能有复杂的短期ARMA误差。若差分回归遗漏这些动态，检验统计量的有效渐近近似可能遭到剩余自相关破坏。",
+            "加入适当滞后差分可吸收部分短期动态，但过多滞后会耗费样本并降低功效。选择规则应在训练数据内确定。"
+          ],
+          "formulas": [
+            {
+              "label": "滞后差分与检验残差相关",
+              "tex": "\\sum_{j=1}^p\\gamma_j\\Delta X_{t-j}"
+            }
+          ],
+          "proof": "ADF用p阶滞后差分扩展DF回归，使当期误差在适当原假设下接近所需的创新过程，从而支持对应单位根统计理论。",
+          "worked": "当p=0时回到基本DF形式；如果实际短期变化需要额外一个滞后，p=1的回归会多包含γ₁∆X_{t−1}。",
+          "limitation": "非线性波动、厚尾和市场突变不能只靠添加滞后差分完全解决。"
+        },
+        {
+          "title": "非标准临界值与确定性项",
+          "question": "为什么ADF的t比值不能查普通t表？",
+          "paragraphs": [
+            "单位根零假设下滞后水平X_{t−1}自身具有随机趋势，使回归系数的归一化极限不再是普通平稳解释变量下的t分布。",
+            "是否包含截距或时间趋势会改变相应Brownian运动函数型和临界值，必须按经济数据的确定性项选择对应表。"
+          ],
+          "formulas": [
+            {
+              "label": "非标准临界值与确定性项",
+              "tex": "\\tau_{\\rm ADF}=\\widehat\\delta/\\widehat{\\operatorname{SE}}(\\widehat\\delta)"
+            }
+          ],
+          "proof": "统计量可由OLS系数除标准误得到，但在H0:φ=1下解释变量随时间累积创新，极限分布为非标准单位根分布。",
+          "worked": "如果计算得到τ_ADF=−3，其是否足够负以拒绝H0取决于确定性项规格及相应临界值，不能仅凭−3就宣布结论。",
+          "limitation": "短样本内模型错设和滞后阶数选择可能改变检验大小与功效，需要稳健报告。"
+        },
+        {
+          "title": "ETF价格单位根与交易策略对象",
+          "question": "ETF价格序列拒绝或不拒绝单位根，是否能直接指导交易？",
+          "paragraphs": [
+            "单位根检验讨论水平序列的时间统计结构，不是未来收益可交易性的充分条件。即使价格接近随机游走，波动率和资产间风险状态仍可能可预测。",
+            "合理流程是在合法训练期诊断价格或收益模型的平稳性，再选择差分方式、预测目标与时间外评价，避免利用测试回报重新筛选单位根假设。"
+          ],
+          "formulas": [
+            {
+              "label": "ETF价格单位根与交易策略对象",
+              "tex": "r_t^{\\log}=(1-B)\\log P_t"
+            }
+          ],
+          "proof": "对数收益是对数价格的一阶差分，故对数价格单位根与对数收益的平稳性问题有结构联系，但并不等同于金融市场有效性判断。",
+          "worked": "若ETF价格100涨至102，则对数收益log(102/100)约0.01980，不是价格差分2。",
+          "limitation": "资产复权口径、跨市场时区和制度断点可能改变检验序列，需要在解释前统一数据。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "timeseries-n0250",
+          "label": "先修：差分与ARIMA"
+        },
+        {
+          "kind": "math",
+          "id": "timeseries-n0241",
+          "label": "先修：弱平稳定义"
+        },
+        {
+          "kind": "math",
+          "id": "timeseries-n0255",
+          "label": "后续：KPSS对照"
+        },
+        {
+          "kind": "ml",
+          "id": "m01-c04-p03",
+          "label": "ML：严格时间外验证"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Statsmodels ADF Test: unit-root regression and nonstandard critical values",
+          "url": "https://www.statsmodels.org/stable/generated/statsmodels.tsa.stattools.adfuller.html"
+        },
+        {
+          "title": "Hyndman and Athanasopoulos, Forecasting Principles and Practice: Non-stationarity",
+          "url": "https://otexts.com/fpp3/stationarity.html"
+        }
+      ],
+      "checked_status": "V22完整计量数学：单位根原假设、趋势选择、长期方差、数值复算与推断边界"
+    },
+    {
+      "id": "timeseries-n0255",
+      "node_id": "timeseries-n0255",
+      "title": "KPSS检验",
+      "definition": "KPSS检验的原假设是观测过程围绕常数水平或确定性趋势平稳，与ADF以单位根为原假设的方向相反。KPSS先对指定常数或趋势回归得到残差u_t，对残差求逐期累计和S_t，再使用长期方差估计量ŝ²_LRV构造统计量η=ΣS_t²/(T² ŝ²_LRV)。统计量越大通常越不支持相应的平稳性原假设，但其参考分布不是普通卡方或t。",
+      "assumptions": "选择水平平稳或趋势平稳规格，并明确样本长度T和用来估计长期方差的带宽、核权重与截断规则；假设平稳原假设下误差过程满足对应弱依赖与正的有限长期方差。若误差中有显著异方差、结构断点或很长记忆，通常实现的临界值与长期方差估计可能不稳健。",
+      "properties": [
+        "KPSS的原假设是围绕指定常数或线性趋势的平稳，而不是单位根。",
+        "累积残差平方和对低频随机漂移敏感，但统计量需用长期方差标准化。",
+        "ADF和KPSS原假设相反，联合使用可帮助分析不确定性，但任何一种不拒绝都不等于证明其原假设正确。"
+      ],
+      "formulas": [
+        {
+          "label": "KPSS残差累计和",
+          "tex": "S_t=\\sum_{i=1}^t\\widehat u_i"
+        },
+        {
+          "label": "KPSS统计量",
+          "tex": "\\eta_{\\rm KPSS}=\\frac{\\sum_{t=1}^T S_t^2}{T^2\\widehat\\sigma_{\\rm LRV}^2}"
+        },
+        {
+          "label": "长期方差HAC估计",
+          "tex": "\\widehat\\sigma_{\\rm LRV}^2=\\widehat\\gamma(0)+2\\sum_{h=1}^{L}w_h\\widehat\\gamma(h)"
+        },
+        {
+          "label": "KPSS原假设",
+          "tex": "H_0:\\text{水平或趋势平稳}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "在KPSS设定中先以指定常数项或趋势项拟合观测过程，将残差累积成S_t。若存在未消除的随机趋势，这些累计和通常比平稳扰动下增长更快。",
+          "tex": "S_t=\\widehat u_1+\\cdots+\\widehat u_t"
+        },
+        {
+          "explanation": "将逐期残差累计和平方后求和，并以T²及残差长期方差标准化，得到η统计量。长期方差通常包含当期方差与正负滞后自协方差之和。",
+          "tex": "\\eta=\\sum_{t=1}^T S_t^2/(T^2\\widehat\\sigma_{\\rm LRV}^2)"
+        },
+        {
+          "explanation": "KPSS拒绝平稳性原假设和ADF拒绝单位根原假设代表不同证据。若两者都拒绝，可能存在结构断点、复杂趋势或模型规格问题；若两者都不拒绝，也可能是检验功效不足。",
+          "tex": "H_0^{\\rm ADF}:\\text{单位根},\\quad H_0^{\\rm KPSS}:\\text{平稳}"
+        }
+      ],
+      "example": "考虑T=4、均值已经剔除的残差(1,−1,1,−1)。累计残差S=(1,0,1,0)，平方和为1+0+1+0=2。若仅用于示范计算的长期方差估计为ŝ²_LRV=1，则η_KPSS=2/(4²×1)=0.125。该数值不是自动的p值，真正推断仍需要对应规格的临界值和可靠长期方差估计。",
+      "application": "研究ETF价格、对数价格和收益的平稳性时，可将ADF与KPSS作为互补诊断，在统一样本与确定性趋势规格下报告检验结果，再决定ARMA/ARIMA差分阶数及样本外验证。模型残差若出现波动状态改变，长期方差估计需格外谨慎。",
+      "caveat": "KPSS不拒绝平稳不意味着市场分布永远稳定；强自相关可能导致HAC带宽敏感，结构变化可能令ADF和KPSS同时拒绝。不可用是否显著作为事后选择回测获利最大的差分阶数依据。",
+      "deep_sections": [
+        {
+          "title": "KPSS与ADF的原假设方向",
+          "question": "为何两个检验都不显著也不能证明序列平稳？",
+          "paragraphs": [
+            "ADF以单位根为零假设，而KPSS以某种平稳为零假设。一个检验未拒绝，只表示该样本和规格下缺少足够拒绝的统计证据。",
+            "当样本很短、序列持续性很强或存在制度断点，两者都可能具有功效不足。合理报告应保留原假设、统计值、带宽和临界值，而非只写显著与否。"
+          ],
+          "formulas": [
+            {
+              "label": "KPSS与ADF的原假设方向",
+              "tex": "H_0^{\\rm ADF}:\\text{单位根};\\quad H_0^{\\rm KPSS}:\\text{平稳}"
+            }
+          ],
+          "proof": "两个检验的假设空间方向不同，因此其拒绝与不拒绝不构成简单互补的逻辑证明，需要结合经济机制解释。",
+          "worked": "ADF不拒绝而KPSS拒绝与单位根解释一致，但并不从数学上证明必然存在单位根。",
+          "limitation": "若两个检验都拒绝，可能是模型规格错设、结构断点或长期依赖，不应直接选有利于模型的一个结果。"
+        },
+        {
+          "title": "残差累计平方和与长期方差",
+          "question": "为什么要对残差进行时间累计？",
+          "paragraphs": [
+            "如果残差只围绕稳定水平短期波动，其累计路径在适当平稳条件下具有可控的归一化极限；随机趋势则可能造成更大的持续累计偏离。",
+            "KPSS按整个样本残差累计和的平方度量低频变化，再用长期方差估计抵消单纯误差尺度的影响。"
+          ],
+          "formulas": [
+            {
+              "label": "残差累计平方和与长期方差",
+              "tex": "S_t=\\sum_{i=1}^t\\widehat u_i,\\quad\\eta=\\frac{\\sum_tS_t^2}{T^2\\widehat\\sigma_{\\rm LRV}^2}"
+            }
+          ],
+          "proof": "对指定常数或线性趋势回归取得u_hat，再逐期累加S_t。平方后求和并除以T²和长期方差，即是KPSS统计量定义。",
+          "worked": "残差(1,−1,1,−1)的累计和为(1,0,1,0)，平方和2，在T=4和长期方差1的示范下η=0.125。",
+          "limitation": "该示范性长期方差1是外部指定值，不代表四个观测能可靠估计真实的HAC长期方差。"
+        },
+        {
+          "title": "HAC长期方差与带宽敏感性",
+          "question": "为什么不同KPSS软件选项可能给出不同统计值？",
+          "paragraphs": [
+            "长期方差由当前残差方差及不同滞后协方差组成，截断阶数L和权重核w_h会影响估计量。长持续性、波动聚集和短样本可能使其对带宽选择敏感。",
+            "研究需报告是否使用自动带宽、核类型和有效观测数，而不是直接比较两个不知道设置的KPSS p值。"
+          ],
+          "formulas": [
+            {
+              "label": "HAC长期方差与带宽敏感性",
+              "tex": "\\widehat\\sigma_{\\rm LRV}^2=\\widehat\\gamma(0)+2\\sum_{h=1}^L w_h\\widehat\\gamma(h)"
+            }
+          ],
+          "proof": "长期方差是序列自协方差在全部整数滞后上的和，实际估计采用有限L及权重近似，因此截断方案会影响分母。",
+          "worked": "同一累计残差平方和2、T=4时，若指定长期方差从1增为2，η就从0.125变为0.0625。",
+          "limitation": "长期方差估计若不稳定或趋近零，统计量可能对微小数据变化极为敏感，不能机械解读显著性。"
+        },
+        {
+          "title": "金融时序的相互补充诊断",
+          "question": "ADF拒绝、KPSS也拒绝时应做什么？",
+          "paragraphs": [
+            "先回到具体序列经济定义，检查价格复权、季节性、趋势规格以及宏观制度断点；两项检验互相冲突时可能意味着简单单一平稳或单位根假设不充分。",
+            "在研究ETF收益与风险时，可在训练窗口内检查不同规格并审视自相关和波动聚集，随后仅在真正未来窗口衡量预测与交易效果。"
+          ],
+          "formulas": [
+            {
+              "label": "金融时序的相互补充诊断",
+              "tex": "\\Delta\\log P_t=\\log P_t-\\log P_{t-1}"
+            }
+          ],
+          "proof": "对数价格与对数收益通过差分相连，但检验某个变换是否平稳仍应按对应的经济变量及确定性趋势规格单独进行。",
+          "worked": "如果对数价格ADF不拒绝单位根且KPSS拒绝水平平稳，下一步可以检验收益率或合理差分后的模型残差。",
+          "limitation": "样本外极端市场可能突破训练期平稳假设；统计检验通过不是未来风险稳定的承诺。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "timeseries-n0254",
+          "label": "先修：ADF"
+        },
+        {
+          "kind": "math",
+          "id": "timeseries-n0241",
+          "label": "先修：弱平稳定义"
+        },
+        {
+          "kind": "math",
+          "id": "timeseries-n0250",
+          "label": "相关：ARIMA差分"
+        },
+        {
+          "kind": "ml",
+          "id": "m01-c04-p03",
+          "label": "ML：时间序列模型评估"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Statsmodels KPSS Test: level/trend-stationarity null",
+          "url": "https://www.statsmodels.org/stable/generated/statsmodels.tsa.stattools.kpss.html"
+        },
+        {
+          "title": "Kwiatkowski et al. (1992), Testing Stationarity Against Unit-Root Alternatives",
+          "url": "https://doi.org/10.1016/0304-4076(92)90104-Y"
+        }
+      ],
+      "checked_status": "V22完整计量数学：单位根原假设、趋势选择、长期方差、数值复算与推断边界"
+    }
+  ]
+}
