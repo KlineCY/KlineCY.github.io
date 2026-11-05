@@ -10,11 +10,11 @@ const core=["lessons-foundations.json","lessons-advanced.json","lessons-more.jso
 const extensions=manifest.modules.flatMap(x=>{const a=read(x.path).lessons;assert.equal(a.length,x.lessons,x.path);return a;});
 const full=[...core,...extensions],nodeIds=new Map(catalog.nodes.map(x=>[x.id,x]));
 assert.deepEqual(added.map(x=>x.id),targets);
-assert.equal(manifest.expected_lessons,195);
-assert.equal(manifest.modules.length,75);
-assert.equal(core.length,123);assert.equal(extensions.length,195);
-assert.equal(full.length,318);
-assert.equal(new Set(full.map(x=>x.node_id)).size,318);
+assert.equal(manifest.expected_lessons,201);
+assert.equal(manifest.modules.length,77);
+assert.equal(core.length,123);assert.equal(extensions.length,201);
+assert.equal(full.length,324);
+assert.equal(new Set(full.map(x=>x.node_id)).size,324);
 assert.equal(catalog.nodes.length,656);assert.equal(catalog.chapters.length,109);
 let sections=0,formulas=0,refs=0,links=0;
 for(const l of added){
