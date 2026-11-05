@@ -16,14 +16,15 @@ const newIds=["mlmath-n0455","mlmath-n0466","mlmath-n0463","mlmath-n0464",
  "mlmath-n0460","mlmath-n0461","mlmath-n0462","mlmath-n0465"];
 const added="abcd".split("").flatMap(tag=>read("lessons-phase-21-"+tag+".json").lessons);
 assert.deepEqual(added.map(l=>l.node_id),newIds,"V21 chapter order and identity");
-assert.equal(manifest.modules.length,62);
-assert.equal(manifest.expected_lessons,151);
+assert.equal(manifest.modules.length,64);
+assert.equal(manifest.expected_lessons,155);
 assert.equal(core.length,123);
-assert.equal(modules.length,151);
-assert.equal(all.length,274);
-assert.equal(actualIds.size,274,"no duplicate completed math ID");
+assert.equal(modules.length,155);
+assert.equal(all.length,278);
+assert.equal(actualIds.size,278,"no duplicate completed math ID");
 const v22Ids=["timeseries-n0244","timeseries-n0245","timeseries-n0248","timeseries-n0249","timeseries-n0250","timeseries-n0251","timeseries-n0254","timeseries-n0255"];
-assert.equal(all.filter(l=>!newIds.includes(l.node_id)&&!v22Ids.includes(l.node_id)).length,258,"all 258 original complete math lectures retained");
+const v23Ids=["timeseries-n0256","timeseries-n0257","timeseries-n0258","timeseries-n0259"];
+assert.equal(all.filter(l=>!newIds.includes(l.node_id)&&!v22Ids.includes(l.node_id)&&!v23Ids.includes(l.node_id)).length,258,"all 258 original complete math lectures retained");
 assert.equal(curriculum.nodes.length,656);
 let sections=0,formulas=0,sourceCount=0,linkCount=0;
 for(const l of added){
@@ -99,4 +100,4 @@ for(const p of ["styles.css","../ml/atlas.css"]){
  }
 }
 console.log("PASS V21: 8 genuinely new lectures, 32 fully worked sections, "+
- formulas+" strict KaTeX parses, 16 references, 32 links, 8 independent numeric cases, 274 unique complete math courses and 656-node acyclic curriculum.");
+ formulas+" strict KaTeX parses, 16 references, 32 links, 8 independent numeric cases, 278 unique complete math courses and 656-node acyclic curriculum.");
