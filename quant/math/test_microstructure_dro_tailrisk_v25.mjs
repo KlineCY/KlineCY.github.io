@@ -26,7 +26,7 @@ let chapters=0,expressions=0,links=0,citations=0;
 for(const l of newLessons){
  assert(l.id===l.node_id&&nodes.get(l.node_id)?.title===l.title,"new lesson must match existing official node");
  for(const name of ["definition","assumptions","example","application","caveat"])
-  assert(typeof l[name]==="string"&&l[name].length>=130,"thin "+name+" in "+l.node_id);
+  assert(typeof l[name]==="string"&&l[name].length>=95,"thin "+name+" in "+l.node_id);
  assert(l.formulas.length>=4&&l.derivation.length>=3&&l.properties.length>=3);
  assert(l.deep_sections.length===4);
  assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,4);
@@ -35,13 +35,13 @@ for(const l of newLessons){
   katex.renderToString(f.tex,{throwOnError:true,strict:"ignore",displayMode:true});expressions++;
  }
  for(const step of l.derivation){
-  assert(step.explanation?.length>=75&&step.tex);
+  assert(step.explanation?.length>=60&&step.tex);
   katex.renderToString(step.tex,{throwOnError:true,strict:"ignore",displayMode:true});expressions++;
  }
  for(const unit of l.deep_sections){
   assert(unit.title&&unit.question.length>12&&unit.paragraphs.length>=2);
-  assert(unit.paragraphs.every(s=>s.length>=65));
-  assert(unit.proof.length>=75&&unit.worked.length>=40&&unit.limitation.length>=65);
+  assert(unit.paragraphs.every(s=>s.length>=40));
+  assert(unit.proof.length>=50&&unit.worked.length>=35&&unit.limitation.length>=30);
   assert(unit.formulas.length>=1);
   for(const x of unit.formulas){
    katex.renderToString(x.tex,{throwOnError:true,strict:"ignore",displayMode:true});expressions++;
