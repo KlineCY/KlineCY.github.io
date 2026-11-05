@@ -21,7 +21,7 @@ for(let index=0;index<files.length;index++){
  const doc=read(file);
  assert.equal(doc.schema,1,"original schema "+file);
  assert.equal(Object.keys(doc.lessons).length,expected,"original ninth-wave chapter count "+file);
- if(v40)assert.equal(doc.revision,"2026-11-06","V40 update missing "+file);
+ assert.equal(doc.revision,"2026-11-06","V40/V41 completion missing "+file);
  for(const [id,lesson] of Object.entries(doc.lessons)){
   assert(!ids.has(id),"duplicated canonical Atlas lesson "+id);
   ids.add(id);total++;
@@ -30,11 +30,11 @@ for(let index=0;index<files.length;index++){
   assert(lesson.title?.length>=8,id+" original title lost");
   assert(lesson.overview?.length>=60,id+" original overview lost");
   assert(lesson.worked_example?.length>=60,id+" original arithmetic example lost");
-  assert.equal(lesson.equations.length,v40?5:3,id+" original plus V40 equations");
-  assert.equal(lesson.derivation.length,v40?5:3,id+" original plus V40 mathematical reasoning");
-  assert.equal(lesson.protocol.length,v40?5:3,id+" original plus V40 empirical checks");
-  assert.equal(lesson.pitfalls.length,v40?3:2,id+" failure boundaries");
-  assert.equal(new Set(lesson.protocol).size,v40?5:3,id+" duplicated empirical protocols");
+  assert.equal(lesson.equations.length,5,id+" V40/V41 enriched formulas");
+  assert.equal(lesson.derivation.length,5,id+" V40/V41 full derivation");
+  assert.equal(lesson.protocol.length,5,id+" V40/V41 empirical checks");
+  assert.equal(lesson.pitfalls.length,3,id+" failure boundaries");
+  assert.equal(new Set(lesson.protocol).size,5,id+" duplicated empirical protocols");
   assert(!/TODO|Lorem ipsum|[\uFFFD\u200B\uFEFF]/i.test(JSON.stringify(lesson)),id+" broken CJK or draft placeholder");
   if(v40){
    enhancedIds.add(id);
@@ -44,6 +44,9 @@ for(let index=0;index<files.length;index++){
    assert(lesson.protocol.slice(3).every(x=>x.length>=25),id+" insufficient independent validation");
    assert(lesson.pitfalls.at(-1)?.length>=30,id+" insufficient boundary");
    v40Chars+=lesson.derivation.slice(3).join("").length+lesson.protocol.slice(3).join("").length+lesson.pitfalls.at(-1).length;
+  }else{
+   assert(lesson.revision_note?.startsWith("V41"),id+" missing later revision");
+   assert(lesson.worked_example.length>=110,id+" old worked arithmetic example lost");
   }
   for(const item of lesson.equations){
    assert(item.label?.length>=1,id+" missing equation label");
@@ -56,7 +59,7 @@ for(let index=0;index<files.length;index++){
 assert.equal(total,122);
 assert.equal(ids.size,122);
 assert.equal(enhancedIds.size,62);
-assert.equal(formulas,490,"62x5 + 60x3 equations (V40 124 new)");
+assert.equal(formulas,610,"122x5 equations (V40 124 new and V41 120 new)");
 assert.equal(domainCount.size,24);
 for(const [id,n] of domainCount){
  const dom=Number(id.slice(1));
@@ -136,4 +139,4 @@ near(.05/100,.0005,"Bonferroni 100 financial factors");
 near(Math.ceil(100/5),20,"block bootstrap count");
 near(.8-.5,.3,"calibration failure gap");
 
-console.log("PASS V40: 62 deeply revised original ninth-cycle lessons of 122; 490 strict KaTeX equations (124 V40 additions); six-stage 62-link navigation, mathematical invariant checks, CJK/mobile/print style, unchanged original 48 numeric examples and 720-core manifest.");
+console.log("PASS V40/V41: 122 deeply revised original ninth-cycle lessons; 610 strict KaTeX equations (244 V40+V41 additions); six-stage 62-link navigation, mathematical invariant checks, CJK/mobile/print style, unchanged original 48 numeric examples and 720-core manifest.");
