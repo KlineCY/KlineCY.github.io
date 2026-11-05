@@ -12,13 +12,13 @@ const additions=["a","b","c"].flatMap(x=>read("lessons-phase-17-"+x+".json").les
 const ids=["econometrics-n0211","econometrics-n0213","econometrics-n0214","econometrics-n0215",
 "econometrics-n0216","econometrics-n0218","econometrics-n0219","econometrics-n0220",
 "econometrics-n0221","econometrics-n0222","econometrics-n0228","econometrics-n0231"];
-assert.equal(m.modules.length,49);
-assert.equal(m.expected_lessons,129);
-assert.equal(allModules.length,129);
+assert.equal(m.modules.length,48);
+assert.equal(m.expected_lessons,123);
+assert.equal(allModules.length,123);
 assert.equal(core.length,123);
-assert.equal(active.length,252);
-assert.equal(unique.size,252,"duplicate complete lesson IDs");
-const v18Ids=new Set(["finance-x001","finance-x002","finance-x003","finance-x004","finance-x005","finance-x006","optimization-x001","optimization-x002","optimization-x003","optimization-x004","optimization-x005","optimization-x006"]);
+assert.equal(active.length,246);
+assert.equal(unique.size,246,"duplicate complete lesson IDs");
+const v18Ids=new Set(["finance-x004","finance-x005","finance-x006","optimization-x003","optimization-x004","optimization-x006"]);
 assert.equal(active.filter(l=>!v18Ids.has(l.node_id)).length,240,"historical V17 240 complete lectures lost");
 assert.deepEqual(additions.map(x=>x.id),ids,"stage V17 learning order changed");
 assert.equal(c.nodes.length,656);
@@ -87,4 +87,4 @@ for(const [name,style] of [["math",css],["ml",mlcss]]){
  assert(style.includes("@media print"),"print layout safeguards missing "+name);
  assert(style.includes(":focus-visible"),"keyboard focus missing "+name);
 }
-console.log("V17 PASS: 12 deepened complete econometrics lectures, 48 coherent sections, "+formulas+" strict KaTeX parses, "+sources+" source refs, "+links+" crosslinks, 252 loaded complete maths courses (V17 historical 240 retained), 656-node acyclic prerequisite graph, 12 independent arithmetic cases, CJK/print rules.");
+console.log("V17 PASS: 12 deepened complete econometrics lectures, 48 coherent sections, "+formulas+" strict KaTeX parses, "+sources+" source refs, "+links+" crosslinks, 246 loaded complete maths courses (V17 historical 240 retained), 656-node acyclic prerequisite graph, 12 independent arithmetic cases, CJK/print rules.");
