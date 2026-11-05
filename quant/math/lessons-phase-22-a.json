@@ -1,0 +1,307 @@
+{
+  "version": 1,
+  "revision": "2026-11-05",
+  "focus": "弱白噪声、非线性依赖与Wold线性创新表示",
+  "lessons": [
+    {
+      "id": "timeseries-n0244",
+      "node_id": "timeseries-n0244",
+      "title": "白噪声",
+      "definition": "弱白噪声要求序列均值为零、方差在时间上恒定且有限、任何非零滞后的协方差都为零。强白噪声还要求独立同分布，因而强白噪声包含弱白噪声的性质，而零自相关无法反推出独立。金融收益残差可能在均值上没有线性自相关，却在平方残差中保留显著的波动率聚集。",
+      "assumptions": "设ε_t均值0、Var(ε_t)=σ²∈(0,∞)，Cov(ε_t,ε_s)=0对t≠s成立。讨论样本Ljung–Box检验时还须有相应弱依赖与矩条件，并明确残差是否来自已拟合的ARMA模型；不同情形所使用的参考自由度不能机械混同。",
+      "properties": [
+        "强白噪声在二阶矩存在时必为弱白噪声，反向命题不成立。",
+        "零线性自相关允许非线性依赖和非恒定条件方差同时存在。",
+        "对收益残差与平方残差分别诊断可以区分线性均值依赖和部分波动依赖。"
+      ],
+      "formulas": [
+        {
+          "label": "弱白噪声定义",
+          "tex": "E[\\varepsilon_t]=0,\\quad\\gamma(h)=\\begin{cases}\\sigma^2&h=0\\\\0&h\\ne0\\end{cases}"
+        },
+        {
+          "label": "Ljung–Box",
+          "tex": "Q=n(n+2)\\sum_{h=1}^{m}\\frac{\\widehat\\rho(h)^2}{n-h}"
+        },
+        {
+          "label": "非线性依赖的可能性",
+          "tex": "\\operatorname{Cov}(\\varepsilon_t,\\varepsilon_{t-1})=0,\\quad\\operatorname{Cov}(\\varepsilon_t^2,\\varepsilon_{t-1}^2)\\ne0"
+        },
+        {
+          "label": "独立与不相关",
+          "tex": "\\varepsilon_t\\perp\\varepsilon_s\\Rightarrow\\operatorname{Cov}(\\varepsilon_t,\\varepsilon_s)=0"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对独立、均值为零的两期变量，其乘积期望等于各自均值乘积零，因此协方差为零；同分布确保方差不依赖日期。",
+          "tex": "E[\\varepsilon_t\\varepsilon_s]=E[\\varepsilon_t]E[\\varepsilon_s]=0\\quad(s\\ne t)"
+        },
+        {
+          "explanation": "用独立标准正态Z_t构造ε_t=Z_tZ_{t−1}，其不同期协方差为零，但相邻平方乘积期望等于标准正态四阶矩3，形成非线性依赖。",
+          "tex": "\\operatorname{Cov}(\\varepsilon_t^2,\\varepsilon_{t-1}^2)=E[Z^4]-1=2"
+        },
+        {
+          "explanation": "将样本前m个滞后自相关平方加总形成联合残差诊断Q，其渐近显著性依赖所用样本、模型估计和白噪声假设。",
+          "tex": "Q=n(n+2)\\sum_{h=1}^{m}\\widehat\\rho(h)^2/(n-h)"
+        }
+      ],
+      "example": "取独立标准正态Z_t，令ε_t=Z_tZ_{t−1}，则E[ε_t]=0、Var(ε_t)=1且所有非零滞后协方差为0；相邻平方的协方差却为3−1=2。另n=100、ρ̂₁=0.2、ρ̂₂=−0.1时，Ljung–Box Q=10200×(0.04/99+0.01/98)≈5.162。",
+      "application": "ETF收益均值模型拟合后可检查残差自相关，再检查残差平方及波动模型的预测质量。即使平均收益没有可利用的线性模式，条件方差仍可能随市场状态改变。",
+      "caveat": "样本检验不拒绝零自相关不能证明完全独立或没有风险状态；同时受政策消息影响的多ETF观测还存在跨资产依赖，应采用与实际经济数据结构匹配的推断。",
+      "deep_sections": [
+        {
+          "title": "弱白噪声与独立性",
+          "question": "为什么零线性相关不等于时间独立？",
+          "paragraphs": [
+            "弱白噪声只限制各滞后协方差，独立则限制任意可测事件的联合分布。二阶矩相同不意味着全部高阶混合矩也相同。",
+            "金融收益能表现出平均回报无明显自相关，同时存在可预测的波动，这需要区别一阶收益模型与条件风险模型。"
+          ],
+          "formulas": [
+            {
+              "label": "弱白噪声与独立性",
+              "tex": "\\text{独立}\\Rightarrow\\text{不相关，但逆命题一般不成立}"
+            }
+          ],
+          "proof": "独立变量乘积的期望分解，使得零均值时的协方差为零；反向缺乏高阶联合分布约束，不能从二阶矩推出。",
+          "worked": "构造ε=Z_tZ_{t−1}使线性相关为零，平方相关却不为零，因而不是独立白噪声。",
+          "limitation": "对收益残差只做线性相关检验不能取代其条件波动与尾部风险检验。"
+        },
+        {
+          "title": "平方残差与非线性依赖反例",
+          "question": "如何在理论上证明白噪声仍可存在波动聚集？",
+          "paragraphs": [
+            "独立标准正态乘积序列在相邻两期共享一个随机因子，因此平方之后共享该因子的二次幂。",
+            "平方的相邻联合期望因标准正态四阶矩为3而偏离独立乘积期望1，这展示了均值与波动依赖的不同来源。"
+          ],
+          "formulas": [
+            {
+              "label": "平方残差与非线性依赖反例",
+              "tex": "\\operatorname{Cov}(\\varepsilon_t^2,\\varepsilon_{t-1}^2)=3-1=2"
+            }
+          ],
+          "proof": "因为E[Z_t²Z_{t−1}⁴Z_{t−2}²]=1×3×1=3，而E[ε_t²]E[ε_{t−1}²]=1，二者之差为2。",
+          "worked": "ε_t=Z_tZ_{t−1}方差为1，虽然收益各期线性不相关，但相邻平方协方差为2。",
+          "limitation": "本例依赖有限四阶矩与特定构造，真实市场的极端尾部可能需要更谨慎的统计估计。"
+        },
+        {
+          "title": "联合自相关诊断的统计目标",
+          "question": "为何不宜只挑一个显著的滞后系数？",
+          "paragraphs": [
+            "当研究者同时查看多个滞后系数时，逐个判断可能造成多重比较问题。Ljung–Box通过前m阶自相关平方构造联合检验统计量。",
+            "检验统计量的数值和其零假设参考分布是不同事项；已经估计过ARMA参数或数据存在强依赖时，需要相应自由度和模型修正。"
+          ],
+          "formulas": [
+            {
+              "label": "联合自相关诊断的统计目标",
+              "tex": "Q=n(n+2)\\sum_{h=1}^m\\widehat\\rho(h)^2/(n-h)"
+            }
+          ],
+          "proof": "每个滞后残差相关度平方按n(n+2)/(n−h)加权，再求和得到Q；零假设分布要另外利用相应概率极限定理。",
+          "worked": "n=100、ρ̂₁=0.2、ρ̂₂=−0.1时，Q≈5.162，可复核两个滞后贡献均为非负。",
+          "limitation": "即使联合检验未拒绝，也不能断言全部未来滞后自相关严格为零。"
+        },
+        {
+          "title": "ETF均值预测与风险预测分离",
+          "question": "白噪声是否意味着金融策略不需要波动率模型？",
+          "paragraphs": [
+            "弱白噪声不限制条件方差的变化，收益线性预测失败并不能推出风险状态不可预测。",
+            "多资产ETF风险管理应将残差均值诊断与平方残差、尾部风险、极端事件共同冲击分开评估，不能由一个Q值宣称完整模型可信。"
+          ],
+          "formulas": [
+            {
+              "label": "ETF均值预测与风险预测分离",
+              "tex": "\\gamma_\\varepsilon(h)=0\\ \\not\\Rightarrow\\ \\gamma_{\\varepsilon^2}(h)=0"
+            }
+          ],
+          "proof": "弱白噪声定义仅对ε的二阶联合矩作约束，ε²的自协方差属于原始ε的四阶联合矩，逻辑上不受前者控制。",
+          "worked": "构造正态乘积白噪声时收益相关为0但相邻平方协方差为2，说明风险预测仍可能有结构。",
+          "limitation": "实际收益可受制度变化和流动性冲击影响，有限历史下的检验结论应报告稳健性。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "timeseries-n0241",
+          "label": "先修：平稳性"
+        },
+        {
+          "kind": "math",
+          "id": "timeseries-n0245",
+          "label": "后续：Wold分解"
+        },
+        {
+          "kind": "math",
+          "id": "timeseries-n0248",
+          "label": "后续：MA过程"
+        },
+        {
+          "kind": "ml",
+          "id": "m01-c04-p03",
+          "label": "ML：时间外残差诊断"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Statsmodels Ljung-Box residual autocorrelation diagnostic",
+          "url": "https://www.statsmodels.org/stable/generated/statsmodels.stats.diagnostic.acorr_ljungbox.html"
+        },
+        {
+          "title": "Penn State STAT 510: MA Models and White Noise",
+          "url": "https://online.stat.psu.edu/stat510/Lesson02"
+        }
+      ],
+      "checked_status": "V22严格精讲：随机过程假设、四段证明、数值复算、经济应用与失效边界"
+    },
+    {
+      "id": "timeseries-n0245",
+      "node_id": "timeseries-n0245",
+      "title": "Wold分解",
+      "definition": "Wold分解将零均值协方差平稳过程拆分为完全可由过去线性预测的确定部分与由正交创新驱动的纯非确定部分。对于纯非确定过程，可写成当前及无限过去创新的线性组合X_t=Σψ_jε_{t−j}，其中ψ₀=1且Σψ_j²有限。创新是最佳一步线性预测误差，并不自动等于独立或正态的宏观经济冲击。",
+      "assumptions": "设X_t二阶协方差平稳、均值零、方差有限，过去观测在L²中形成闭线性空间。若过程纯非确定，完全可预测部分D_t消失；创新ε_t相对于过去空间正交，有时间恒定且正的方差，系数平方可和以保证均方收敛。",
+      "properties": [
+        "Wold分解讨论线性投影创新，不要求真实经济结构冲击相互独立。",
+        "一般平稳过程可能保留完全可预测部分，纯非确定条件不能省略。",
+        "创新正交性可把过程方差和自协方差写成Wold系数的平方和与卷积。"
+      ],
+      "formulas": [
+        {
+          "label": "Wold完整形式",
+          "tex": "X_t=D_t+\\sum_{j=0}^\\infty\\psi_j\\varepsilon_{t-j},\\quad\\psi_0=1"
+        },
+        {
+          "label": "纯非确定与平方可和",
+          "tex": "D_t=0,\\quad\\sum_{j=0}^\\infty\\psi_j^2<\\infty"
+        },
+        {
+          "label": "创新的正交投影",
+          "tex": "\\varepsilon_t=X_t-\\operatorname{Proj}_{\\mathcal H_{t-1}}X_t"
+        },
+        {
+          "label": "Wold自协方差",
+          "tex": "\\gamma(h)=\\sigma_\\varepsilon^2\\sum_{j\\ge0}\\psi_j\\psi_{j+|h|}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "最佳线性预测等于对过去观测闭线性空间的正交投影，投影残差与该空间中所有变量的内积为零，包括过去创新。",
+          "tex": "E[\\varepsilon_t Z]=0,\\quad Z\\in\\mathcal H_{t-1}"
+        },
+        {
+          "explanation": "将平方可和创新表示截断为M项，利用创新两两不相关，方差为σ²Σ_{j=0}^Mψ_j²，极限有限使均方表示成立。",
+          "tex": "\\operatorname{Var}(X_t)=\\sigma_\\varepsilon^2\\sum_{j\\ge0}\\psi_j^2"
+        },
+        {
+          "explanation": "两个不同时点的Wold展开式只在共同创新时间点保留非零协方差，配对系数相乘累加便得γ(h)。",
+          "tex": "\\gamma(h)=\\sigma_\\varepsilon^2\\sum_{j=0}^\\infty\\psi_j\\psi_{j+|h|}"
+        }
+      ],
+      "example": "以X_t=0.5X_{t−1}+ε_t为例，设创新方差σ²=0.75且平稳初始条件成立，则ψ_j=0.5^j，Σψ_j²=1/(1−0.25)=4/3，过程方差0.75×4/3=1，自协方差γ(1)=0.5；若当前X_t=2，两期后的最优线性预测是(0.5)²×2=0.5。",
+      "application": "在ETF模型中可通过ARMA残差理解线性创新与预测误差的关系，但交易时点不能使用尚未实现的当前创新作为预测特征。残差白噪声与平方残差波动依赖还需分别检查。",
+      "caveat": "Wold表示是二阶平稳和线性预测结果；它本身不确保金融收益独立、非线性条件预测最优或经济因果可识别。带单位根的原始价格序列应先审查平稳性。",
+      "deep_sections": [
+        {
+          "title": "一步最优线性投影与创新",
+          "question": "为何模型残差不自动等于理论创新？",
+          "paragraphs": [
+            "Wold创新由对无限过去线性信息的最佳投影定义，而实际ARMA残差依赖估计系数、有限窗口和初始条件。",
+            "投影残差同过去空间正交，给出创新不相关的理论基础；这种正交性仍不能排除更高阶非线性联系。"
+          ],
+          "formulas": [
+            {
+              "label": "一步最优线性投影与创新",
+              "tex": "\\varepsilon_t=X_t-\\operatorname{Proj}_{\\mathcal H_{t-1}}X_t"
+            }
+          ],
+          "proof": "Hilbert空间投影定理保证X减去其投影与整个过去线性空间正交，因此创新与过去任一线性组合内积为零。",
+          "worked": "若AR(1)真系数为0.5，则ε_t=X_t−0.5X_{t−1}，正是该模型的一步预测误差。",
+          "limitation": "有限样本估计残差含参数误差，不能无条件推断它与全部过去观测严格不相关。"
+        },
+        {
+          "title": "纯非确定性与确定成分",
+          "question": "为什么并非所有平稳过程都只有无限MA部分？",
+          "paragraphs": [
+            "一般协方差平稳过程仍可能含完全可从无限过去预测的成分。Wold将其记为D_t，随机创新滤波部分与该成分正交。",
+            "当进一步假定过程纯非确定时D_t才为零，并可直接采用无确定成分的无限MA表示；遗漏该条件会误陈述定理。"
+          ],
+          "formulas": [
+            {
+              "label": "纯非确定性与确定成分",
+              "tex": "X_t=D_t+\\sum_{j\\ge0}\\psi_j\\varepsilon_{t-j}"
+            }
+          ],
+          "proof": "把二阶平稳过程的过去线性可预测闭子空间与纯非确定正交补分解，可获得确定部分D_t及平方可和的创新滤波部分。",
+          "worked": "对于|φ|<1的平稳AR(1)，ψ_j=φ^j且Σψ_j²=1/(1−φ²)有限，因此属于纯非确定例子。",
+          "limitation": "如果序列有完全周期成分或单位根，无条件抛弃D_t并套用该例的公式不正确。"
+        },
+        {
+          "title": "平方可和系数与自协方差",
+          "question": "如何从创新表示得到过程方差？",
+          "paragraphs": [
+            "创新之间不相关，使无限MA线性组合的方差只保留每个系数平方乘以创新方差。跨期协方差保留两期展开中共有冲击的系数乘积。",
+            "这两个公式是连接Wold理论、有限MA和ARMA自协方差结构的直接桥梁，并为线性冲击响应提供可计算的表示。"
+          ],
+          "formulas": [
+            {
+              "label": "平方可和系数与自协方差",
+              "tex": "\\gamma(h)=\\sigma_\\varepsilon^2\\sum_{j\\ge0}\\psi_j\\psi_{j+|h|}"
+            }
+          ],
+          "proof": "展开X_t与X_{t-h}并利用正交创新的协方差仅在索引相同非零，整理后得到平方和及跨期卷积公式。",
+          "worked": "φ=0.5、σ²=0.75时γ(0)=0.75/(1−0.25)=1，γ(1)=0.75×0.5/(1−0.25)=0.5。",
+          "limitation": "平方可和和二阶平稳是此处换序与极限论证的基本前提，不可套用到随机游走价格。"
+        },
+        {
+          "title": "金融模型的创新与真实可交易信号",
+          "question": "为何不能把当前残差直接用来预测当前回报？",
+          "paragraphs": [
+            "当前创新只有当期观测结果实现后才能从过程减去预测值得到。若把它用作同一时点交易前的输入，策略已经使用了未来信息。",
+            "可用于回测的是过去已经实现的创新或滚动估计的风险状态，而不是一次全样本拟合后反向回填的当前残差。"
+          ],
+          "formulas": [
+            {
+              "label": "金融模型的创新与真实可交易信号",
+              "tex": "E[\\varepsilon_tZ]=0,\\quad Z\\in\\mathcal H_{t-1}"
+            }
+          ],
+          "proof": "一步创新对过去线性组合正交，说明当期创新不能由这些组合提前精确获知；它成为已知观察必须等到X_t实现。",
+          "worked": "当前X_t=2时两期线性预测为0.5，但下一期随机创新仍未知，不应直接当作Alpha。",
+          "limitation": "结构宏观冲击往往需要额外识别约束，Wold创新本身并不天然具有因果含义。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "timeseries-n0241",
+          "label": "先修：平稳性"
+        },
+        {
+          "kind": "math",
+          "id": "timeseries-n0244",
+          "label": "先修：白噪声"
+        },
+        {
+          "kind": "math",
+          "id": "timeseries-n0248",
+          "label": "后续：MA过程"
+        },
+        {
+          "kind": "math",
+          "id": "timeseries-n0249",
+          "label": "后续：ARMA过程"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Hansen Econometrics, Chapter 14: Wold Decomposition and Prediction",
+          "url": "https://www.huhuaping.com/projects/hansenEM/chapters_eng/chpt14-time-series.html"
+        },
+        {
+          "title": "Imperial College: Wold Decomposition Theory",
+          "url": "https://www.ma.imperial.ac.uk/~bin06/SMF/2015/2012/smfd10.pdf"
+        }
+      ],
+      "checked_status": "V22严格精讲：随机过程假设、四段证明、数值复算、经济应用与失效边界"
+    }
+  ]
+}
