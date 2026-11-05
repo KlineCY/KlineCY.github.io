@@ -12,18 +12,19 @@ const additions=["a","b","c"].flatMap(x=>read("lessons-phase-17-"+x+".json").les
 const ids=["econometrics-n0211","econometrics-n0213","econometrics-n0214","econometrics-n0215",
 "econometrics-n0216","econometrics-n0218","econometrics-n0219","econometrics-n0220",
 "econometrics-n0221","econometrics-n0222","econometrics-n0228","econometrics-n0231"];
-assert.equal(m.modules.length,62);
-assert.equal(m.expected_lessons,151);
-assert.equal(allModules.length,151);
+assert.equal(m.modules.length,64);
+assert.equal(m.expected_lessons,155);
+assert.equal(allModules.length,155);
 assert.equal(core.length,123);
-assert.equal(active.length,274);
-assert.equal(unique.size,274,"duplicate complete lesson IDs");
+assert.equal(active.length,278);
+assert.equal(unique.size,278,"duplicate complete lesson IDs");
 const v18Ids=new Set(["finance-x004","finance-x005","finance-x006","optimization-x003","optimization-x004","optimization-x006"]);
 const v19Ids=new Set(["econometrics-n0232","econometrics-n0233","econometrics-n0234","econometrics-n0236","econometrics-n0237","econometrics-n0238","econometrics-n0239"]);
 const v20Ids=new Set(["econometrics-x003","econometrics-x005","econometrics-x006","optimization-x011","optimization-x012"]);
 const v21Ids=new Set(["mlmath-n0455","mlmath-n0466","mlmath-n0463","mlmath-n0464","mlmath-n0460","mlmath-n0461","mlmath-n0462","mlmath-n0465"]);
 const v22Ids=new Set(["timeseries-n0244","timeseries-n0245","timeseries-n0248","timeseries-n0249","timeseries-n0250","timeseries-n0251","timeseries-n0254","timeseries-n0255"]);
-assert.equal(active.filter(l=>!v18Ids.has(l.node_id)&&!v19Ids.has(l.node_id)&&!v20Ids.has(l.node_id)&&!v21Ids.has(l.node_id)&&!v22Ids.has(l.node_id)).length,240,"historical V17 240 complete lectures lost");
+const v23Ids=new Set(["timeseries-n0256","timeseries-n0257","timeseries-n0258","timeseries-n0259"]);
+assert.equal(active.filter(l=>!v18Ids.has(l.node_id)&&!v19Ids.has(l.node_id)&&!v20Ids.has(l.node_id)&&!v21Ids.has(l.node_id)&&!v22Ids.has(l.node_id)&&!v23Ids.has(l.node_id)).length,240,"historical V17 240 complete lectures lost");
 assert.deepEqual(additions.map(x=>x.id),ids,"stage V17 learning order changed");
 assert.equal(c.nodes.length,656);
 const nodes=new Map(c.nodes.map(x=>[x.id,x]));
@@ -91,4 +92,4 @@ for(const [name,style] of [["math",css],["ml",mlcss]]){
  assert(style.includes("@media print"),"print layout safeguards missing "+name);
  assert(style.includes(":focus-visible"),"keyboard focus missing "+name);
 }
-console.log("V17 PASS: 12 deepened complete econometrics lectures, 48 coherent sections, "+formulas+" strict KaTeX parses, "+sources+" source refs, "+links+" crosslinks, 274 loaded complete maths courses (V17 historical 240 retained), 656-node acyclic prerequisite graph, 12 independent arithmetic cases, CJK/print rules.");
+console.log("V17 PASS: 12 deepened complete econometrics lectures, 48 coherent sections, "+formulas+" strict KaTeX parses, "+sources+" source refs, "+links+" crosslinks, 278 loaded complete maths courses (V17 historical 240 retained), 656-node acyclic prerequisite graph, 12 independent arithmetic cases, CJK/print rules.");
