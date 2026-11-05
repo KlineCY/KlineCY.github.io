@@ -1,0 +1,101 @@
+import fs from "node:fs";
+import assert from "node:assert/strict";
+import katex from "katex";
+const root=new URL("./",import.meta.url);
+const read=p=>JSON.parse(fs.readFileSync(new URL(p,root),"utf8"));
+const curriculum=read("curriculum.json"),manifest=read("lessons-manifest.json");
+const core=["lessons-foundations.json","lessons-advanced.json","lessons-more.json"].flatMap(p=>read(p).lessons);
+const extensions=manifest.modules.flatMap(m=>{
+ const lessons=read(m.path).lessons;
+ assert.equal(lessons.length,m.lessons,"module file count "+m.path);
+ return lessons;
+});
+const all=[...core,...extensions];
+const nodeMap=new Map(curriculum.nodes.map(n=>[n.id,n]));
+const ids=["timeseries-n0244","timeseries-n0245","timeseries-n0248","timeseries-n0249",
+ "timeseries-n0250","timeseries-n0251","timeseries-n0254","timeseries-n0255"];
+const added="abcd".split("").flatMap(s=>read("lessons-phase-22-"+s+".json").lessons);
+assert.deepEqual(added.map(l=>l.id),ids,"V22 lecture order must remain intact");
+assert.equal(curriculum.nodes.length,656);
+assert.equal(manifest.modules.length,62);
+assert.equal(manifest.expected_lessons,151);
+assert.equal(core.length,123);
+assert.equal(extensions.length,151);
+assert.equal(all.length,274);
+assert.equal(new Set(all.map(l=>l.id)).size,274,"unique complete mathematics IDs");
+assert.equal(all.filter(l=>!ids.includes(l.id)).length,266,"all original V21 complete lessons retained");
+let sections=0,parsed=0,sources=0,links=0;
+for(const l of added){
+ assert(l.id===l.node_id&&nodeMap.get(l.id)?.title===l.title,"curriculum/lecture mapping "+l.id);
+ assert(l.definition.length>=115&&l.assumptions.length>=95&&l.example.length>=125,"incomplete substantive lecture "+l.id);
+ assert(l.application.length>=65&&l.caveat.length>=65,"missing financial context and limitations "+l.id);
+ assert(l.properties.length>=3&&l.formulas.length===4&&l.derivation.length===3&&l.deep_sections.length===4,"full lecture structure "+l.id);
+ assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,4,"duplicate internal title "+l.id);
+ for(const d of l.derivation){
+  assert(d.explanation.length>=45,"underexplained derivation "+l.id);
+  katex.renderToString(d.tex,{throwOnError:true,strict:"ignore",displayMode:true});parsed++;
+ }
+ for(const f of l.formulas){katex.renderToString(f.tex,{throwOnError:true,strict:"ignore",displayMode:true});parsed++;}
+ for(const sec of l.deep_sections){
+  assert(sec.question.length>=10&&sec.paragraphs.length===2&&sec.paragraphs.every(p=>p.length>=35),"Chinese narrative too thin "+l.id+sec.title);
+  assert(sec.proof.length>=42&&sec.worked.length>=35&&sec.limitation.length>=25,"proof, worked calculation or failure mode insufficient "+l.id+sec.title);
+  for(const f of sec.formulas){katex.renderToString(f.tex,{throwOnError:true,strict:"ignore",displayMode:true});parsed++;}
+  sections++;
+ }
+ for(const e of l.links||[]){
+  if(e.kind==="math")assert(nodeMap.has(e.id),"broken mathematics prerequisite "+l.id+" -> "+e.id);
+  else assert(/^m\d\d-c\d\d-p\d\d$/.test(e.id),"malformed ML link "+l.id+" -> "+e.id);
+  links++;
+ }
+ for(const s of l.sources||[]){assert(s.title.length>=20&&/^https:\/\//.test(s.url));sources++;}
+ assert(!/[\uFFFD\u200B\uFEFF]/.test(JSON.stringify(l)),"corrupted Chinese or zero-width character "+l.id);
+}
+assert.equal(sections,32);
+assert.equal(parsed,88);
+assert.equal(sources,16);
+assert.equal(links,32);
+const active=new Set(),done=new Set();
+function walk(id){
+ assert(nodeMap.has(id),"unknown prerequisite "+id);
+ if(active.has(id))throw Error("cycle "+id);
+ if(done.has(id))return;
+ active.add(id);
+ for(const p of nodeMap.get(id).prerequisites||[])walk(p);
+ active.delete(id);done.add(id);
+}
+for(const n of curriculum.nodes)walk(n.id);
+assert.equal(done.size,656,"all curriculum prerequisites must be acyclic");
+const near=(x,y,label)=>assert(Math.abs(x-y)<1e-8,"incorrect numeric example "+label+" "+x+" vs "+y);
+const cases=[
+ ["timeseries-n0244",10200*(.04/99+.01/98),5.162,"5.162"],
+ ["timeseries-n0245",.75/(1-.5**2),1,"0.75×4/3=1"],
+ ["timeseries-n0248",2/5,.4,"2/5=0.4"],
+ ["timeseries-n0249",1.125/1.75,9/14,"0.642857"],
+ ["timeseries-n0250",2*4,8,"2×4=8"],
+ ["timeseries-n0251",250+3*Math.log(100),263.8155105579643,"263.8155"],
+ ["timeseries-n0254",.8*100+2,82,"X_t=82"],
+ ["timeseries-n0255",2/(4**2),.125,"0.125"]
+];
+assert.equal(cases.length,8);
+for(const [id,actual,expected,token] of cases){
+ near(actual,expected,id);
+ assert(added.find(l=>l.id===id).example.includes(token),"example not present "+id);
+}
+near(3-1,2,"fourth moment nonlinear-dependence counterexample");
+near(.75+.5*.75**2/.75,1.125,"ARMA lag-one covariance");
+near(244+5*Math.log(100),267.0258509299405,"BIC penalty");
+near((1+1)/(2+2),.5,"MA overlap correlation");
+const math=fs.readFileSync(new URL("index.html",root),"utf8");
+const ml=fs.readFileSync(new URL("../ml/index.html",root),"utf8");
+assert(math.includes('aria-label="V22时间序列创新与平稳性八课深度学习链"'));
+assert(ml.includes('aria-label="V22金融时序创新与单位根数学交叉链"'));
+for(const id of ids){
+ assert(math.includes("?topic="+id),"missing math navigation "+id);
+ assert(ml.includes("../math/?topic="+id),"missing ML navigation "+id);
+}
+for(const p of ["styles.css","../ml/atlas.css"]){
+ const css=fs.readFileSync(new URL(p,root),"utf8");
+ for(const term of ["overflow-x:auto","line-break:strict",":focus-visible","@media print"])assert(css.includes(term),"CJK/KaTeX/print safeguard missing "+term+" in "+p);
+}
+console.log("PASS V22: 8 new mathematically complete time-series lectures, 32 proof sections, "+parsed+
+ " strict KaTeX formulas, "+sources+" sourced references, "+links+" crosslinks, 8 independently recomputed examples, 274 unique complete courses, and 656-node acyclic prerequisites.");
