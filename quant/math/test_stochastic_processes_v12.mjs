@@ -43,8 +43,8 @@ const prerequisites={
 assert.equal(c.nodes.length,656,"existing stable math node IDs unchanged");
 assert.equal(c.chapters.length,109);
 assert.equal(c.disciplines.length,20);
-assert.equal(manifest.modules.length,49);
-assert.equal(extension.length,129,"unique original and newly connected systemic risk lessons");
+assert.equal(manifest.modules.length,48);
+assert.equal(extension.length,123,"unique original and newly connected systemic risk lessons");
 assert(core.length>=89,"V12 baseline: at least 89 completed core lectures");
 assert(all.length>=192,"V12 baseline: at least 192 complete mathematics lectures");
 assert.equal(byId.size,all.length,"do not duplicate any completed lecture across core and modules");
