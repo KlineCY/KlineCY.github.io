@@ -1,0 +1,457 @@
+{
+  "version": 1,
+  "revision": "2026-11-05",
+  "focus": "金融实证：AR/CAR事件研究、Beta风险价格、交易信号内生性",
+  "lessons": [
+    {
+      "id": "econometrics-n0234",
+      "node_id": "econometrics-n0234",
+      "title": "事件研究",
+      "definition": "金融事件研究（Event Study）在事件前的正常收益估计窗口拟合预期收益模型，再从事件期实际收益中减去正常收益形成异常收益AR，并在事先指定窗口内加总为CAR。金融公告的异常收益不是未经假设的因果效应，必须区分正常收益模型错设、事件提前预期、同期冲击和可执行交易时点。金融价格事件研究与多期DiD中的动态政策事件研究并非同一统计对象。",
+      "assumptions": "事件公告日期及具体交易时点可追溯，估计窗口与事件影响窗口相隔离；市场模型的参数在事件窗口前确定且可用于构造正常收益。需要对同日多个事件的共同误差、事件选择、市场风险状态突变、复权与交易费用单独审计。CAR是简单异常收益的算术和，BHAR则按实际与正常路径分别复利。",
+      "properties": [
+        "AR与CAR反映实际收益相对于指定正常收益模型的偏离，而非自动具有因果解释。",
+        "跨资产同日公告使异常收益存在横截面相关，不能把每条ETF记录当作独立新闻。",
+        "长窗口CAR和BHAR含义不同，不能直接将CAR解释为真实买入持有复利净收益。"
+      ],
+      "formulas": [
+        {
+          "label": "市场模型正常收益",
+          "tex": "\\widehat R^0_{i,t}=\\widehat\\alpha_i+\\widehat\\beta_iR_{m,t}"
+        },
+        {
+          "label": "异常收益与CAR",
+          "tex": "\\operatorname{AR}_{i,t}=R_{i,t}-\\widehat R^0_{i,t},\\quad\\operatorname{CAR}_i=\\sum_{t=t_1}^{t_2}\\operatorname{AR}_{i,t}"
+        },
+        {
+          "label": "买入持有异常收益",
+          "tex": "\\operatorname{BHAR}_i=\\prod_{t=t_1}^{t_2}(1+R_{i,t})-\\prod_{t=t_1}^{t_2}(1+\\widehat R^0_{i,t})"
+        },
+        {
+          "label": "同日事件平均方差",
+          "tex": "\\operatorname{Var}(\\overline{\\operatorname{AR}})=N^{-2}\\sum_{i,j}\\operatorname{Cov}(\\operatorname{AR}_i,\\operatorname{AR}_j)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先用事件发生前的历史期估计市场模型α与β，再将事件期间市场收益代入固定模型获得无事件的正常收益预测。事件窗口不能用目标实际收益重新拟合β，否则会吸收部分目标冲击。",
+          "tex": "\\widehat{\\operatorname{AR}}_{i,t}=R_{i,t}-(\\widehat\\alpha_i+\\widehat\\beta_iR_{m,t})"
+        },
+        {
+          "explanation": "CAR将每天的异常简单收益算术相加；BHAR通过复利比较两条财富路径，含异常收益与正常收益的交叉项，因此一般与CAR不同。",
+          "tex": "\\sum_t(R_t-R^0_t)\\ne\\prod_t(1+R_t)-\\prod_t(1+R_t^0)"
+        },
+        {
+          "explanation": "若多个ETF同日受共同新闻冲击，平均异常收益方差包含所有资产间协方差。忽略非零交叉项会使平均异常收益的标准误出现系统性错误。",
+          "tex": "\\operatorname{Var}(N^{-1}\\sum_iA_i)=N^{-2}\\big(\\sum_i\\operatorname{Var}(A_i)+2\\sum_{i<j}\\operatorname{Cov}(A_i,A_j)\\big)"
+        }
+      ],
+      "example": "估计窗口得到α=0.002、β=1.1。公告第一日市场收益0.02、资产收益0.04，则正常收益0.024、AR=0.016；第二日市场收益0.01、资产收益0.008，则正常收益0.013、AR=−0.005。两日CAR=0.011（1.1个百分点）；相同收益路径的BHAR=1.04×1.008−1.024×1.013=0.011008，与CAR不完全相同。",
+      "application": "研究ETF费率、指数纳入或货币政策公告时，需将时间戳对齐到实际可交易时刻，事先定义估计窗口和事件窗口，并按事件日处理共同冲击。统计上显著的事件AR应与可成交价格、价差、融资及可能提前反应分开判断。",
+      "caveat": "事后按股价涨幅挑选事件会产生选择偏差，公告同期存在其他新闻会造成归因错误。多窗口、多资产搜索需控制多重比较；CAR的存在不能证明投资者能在公告公布前获得同样收益。",
+      "deep_sections": [
+        {
+          "title": "正常收益基线的构造及信息截止",
+          "question": "如何避免把事件结果反向用于正常收益模型？",
+          "paragraphs": [
+            "正常收益模型应在公告前的单独训练窗口拟合，事件期间只带入已经确定的系数和市场收益。这样观察收益与正常收益的差才代表在指定模型下不能由市场共振解释的部分。",
+            "公告可能在盘后发布，下一交易日才开始充分价格反应；应按交易所时区和公告分钟级时间决定事件0日，而不是机械采用公告日历日期。"
+          ],
+          "formulas": [
+            {
+              "label": "正常收益基线的构造及信息截止",
+              "tex": "\\widehat R^0_t=\\widehat\\alpha+\\widehat\\beta R_{m,t}"
+            }
+          ],
+          "proof": "从事件前估计样本得到参数后，将事件日R_m输入并固定系数计算正常收益，再从实际R中减去该值；使用事件日R反向拟合系数会形成模型泄漏。",
+          "worked": "α=0.002、β=1.1、R_m=0.02、实际R=0.04时，正常收益0.024，AR=0.016，即1.6个百分点。",
+          "limitation": "若事件期间Beta因市场危机发生结构突变，正常收益基线本身可能失准，异常收益并非全部由公告引起。"
+        },
+        {
+          "title": "CAR与复利BHAR的数值差别",
+          "question": "两日CAR等于同一期间可执行持仓收益吗？",
+          "paragraphs": [
+            "CAR按每个事件日的简单异常收益相加，是价格反应的一种统计摘要。BHAR则比较实际收益复利与反事实基准收益复利，两者存在交叉项，窗口拉长后差距可能明显。",
+            "回测执行还有买卖价差、冲击与借券费用，故即使BHAR正确计算，也不能不核对交易信号形成时点而称为可实现净收益。"
+          ],
+          "formulas": [
+            {
+              "label": "CAR与复利BHAR的数值差别",
+              "tex": "\\operatorname{CAR}=\\sum_t(R_t-R_t^0),\\quad\\operatorname{BHAR}=\\prod_t(1+R_t)-\\prod_t(1+R_t^0)"
+            }
+          ],
+          "proof": "两期展开BHAR为R_1+R_2+R_1R_2−(R_1^0+R_2^0+R_1^0R_2^0)，与CAR相差两条路径的复利交叉项。",
+          "worked": "两日实际收益0.04、0.008，正常收益0.024、0.013；CAR=0.016−0.005=0.011，BHAR=1.04832−1.037312=0.011008。",
+          "limitation": "若使用对数收益，简单相加具有另一种精确复利含义；不得混合对数收益CAR与简单收益BHAR。"
+        },
+        {
+          "title": "同日ETF事件的横截面依赖",
+          "question": "三十只ETF同时异动是否意味着三十个独立证据？",
+          "paragraphs": [
+            "同一项美联储政策新闻可以同时影响宽基、行业、债券与商品ETF，资产之间的AR显然相关。平均异常收益的统计方差因此含横截面协方差，不能直接把资产数当作独立公告数。",
+            "研究应按真正独立的公告事件、日期或共同市场冲击进行相应聚类和重抽样。若只有几个重大政策公告，常规大簇数近似本身也会不可靠。"
+          ],
+          "formulas": [
+            {
+              "label": "同日ETF事件的横截面依赖",
+              "tex": "\\operatorname{Var}(\\bar A)=N^{-2}\\{\\sum_i\\operatorname{Var}(A_i)+2\\sum_{i<j}\\operatorname{Cov}(A_i,A_j)\\}"
+            }
+          ],
+          "proof": "由于Var(ΣA_i)按协方差双线性展开，除以N²后得到均值方差；若Cov(A_i,A_j)>0，忽略交叉项会低估不确定性。",
+          "worked": "两项AR方差均0.0004、协方差0.0003时，平均AR方差=(0.0004+0.0004+2×0.0003)/4=0.00035，高于独立假设的0.0002。",
+          "limitation": "聚类只能处理所建模的误差依赖，不能纠正同期其他公告造成的事件归因偏差。"
+        },
+        {
+          "title": "金融CAR事件图与DiD动态效应的区分",
+          "question": "为什么画出相对事件日横轴不等于进行了同一类因果研究？",
+          "paragraphs": [
+            "金融市场事件研究通常构建资产收益相对于正常收益模型的偏离；分批处理DiD的动态事件图比较不同处理队列在相对处理日的潜在结果差。虽然二者都使用事件时间，但它们的反事实与识别条件不同。",
+            "若采用传统TWFE处理错开的政策日期且效应异质，某个提前系数可能混入其他处理后效应。不能把这种回归图的系数直接称为AR或把CAR称为政策ATT。"
+          ],
+          "formulas": [
+            {
+              "label": "金融CAR事件图与DiD动态效应的区分",
+              "tex": "\\operatorname{CAR}[a,b]=\\sum_{t=a}^b\\operatorname{AR}_t,\\quad \\operatorname{ATT}(g,t)=E[Y_t(1)-Y_t(0)\\mid G=g]"
+            }
+          ],
+          "proof": "CAR基于预期收益模型，而ATT基于潜在结果与合法对照组。两者作用于不同随机对象，不存在没有额外假设的恒等转换关系。",
+          "worked": "两日ETF公告CAR=1.1个百分点，不等于对所有ETF持有人长期交易成本改善1.1个百分点的政策ATT。",
+          "limitation": "未检验提前泄露和分批处理异质性就将金融事件回报解释为政策平均因果效应，会混淆两种估计框架。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "econometrics-n0232",
+          "label": "先修：DiD政策动态"
+        },
+        {
+          "kind": "math",
+          "id": "econometrics-n0238",
+          "label": "推断：异方差与共同冲击"
+        },
+        {
+          "kind": "math",
+          "id": "econometrics-n0235",
+          "label": "后续：Fama–MacBeth横截面"
+        },
+        {
+          "kind": "ml",
+          "id": "m01-c04-p03",
+          "label": "ML：时间外配对损失评价"
+        }
+      ],
+      "sources": [
+        {
+          "title": "MacKinlay (1997), Event Studies in Economics and Finance",
+          "url": "https://ideas.repec.org/a/aea/jeclit/v35y1997i1p13-39.html"
+        },
+        {
+          "title": "Sun and Abraham (2021), Dynamic Treatment Effects in Event Studies",
+          "url": "https://doi.org/10.1016/j.jeconom.2020.09.006"
+        }
+      ],
+      "checked_status": "V19完整讲义：严格定义、条件、四节数学论证、反例、执行与样本外检查"
+    },
+    {
+      "id": "econometrics-n0236",
+      "node_id": "econometrics-n0236",
+      "title": "因子收益风险溢价估计",
+      "definition": "因子风险溢价估计旨在区分资产的因子暴露β与每单位暴露的截面风险价格λ。在单因子线性资产定价限制成立时，E[R_i^e]=β_iλ；若因子本身是可交易超额收益且被模型正确定价，λ可与因子均值联系起来。统计回归中的预测斜率、因子交易回报和资产定价意义上的风险价格不必相同。",
+      "assumptions": "资产收益和因子按同一交易期间、币种和超额收益口径定义，风险暴露需要可辨识且协方差矩阵满足相应秩条件。单因子关系要求指定SDF模型正确，多因子需相应矩阵结构；第一阶段Beta的估计误差、异步交易、时变载荷、横截面依赖与样本选择应在推断中处理。",
+      "properties": [
+        "Beta是资产对因子收益的线性暴露，λ是共同截面风险价格，两者单位与经济含义不同。",
+        "仅在因子自身可交易且模型定价正确时，λ=E[f]才是相关额外限制。",
+        "估计资产Beta时误差较大，第二阶段将估计Beta当真值会导致生成回归量推断与偏差问题。"
+      ],
+      "formulas": [
+        {
+          "label": "Beta的总体定义",
+          "tex": "\\beta_i=\\frac{\\operatorname{Cov}(R_i^e,f)}{\\operatorname{Var}(f)}"
+        },
+        {
+          "label": "线性SDF与风险价格",
+          "tex": "m=E[m]-b(f-E[f]),\\quad\\lambda=\\frac{b\\,\\operatorname{Var}(f)}{E[m]}"
+        },
+        {
+          "label": "单因子截面限制",
+          "tex": "E[R_i^e]=\\beta_i\\lambda"
+        },
+        {
+          "label": "定价误差",
+          "tex": "\\alpha_i=E[R_i^e]-\\beta_i\\lambda"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "由资产定价Euler零矩E[mR_i^e]=0，展开为E[m]E[R_i^e]+Cov(m,R_i^e)=0。把m设为线性SDF后，Cov(m,R_i^e)=−bCov(f,R_i^e)。",
+          "tex": "E[R_i^e]=\\frac{b}{E[m]}\\operatorname{Cov}(R_i^e,f)"
+        },
+        {
+          "explanation": "将因子协方差分解为β_iVar(f)，并把共同系数定义为λ，得到E[R_i^e]=β_iλ。这一结论依赖模型定价正确，而不是任意因子预测回归的统计恒等式。",
+          "tex": "E[R_i^e]=\\beta_i b\\,\\operatorname{Var}(f)/E[m]"
+        },
+        {
+          "explanation": "若f自己是可交易超额收益，代入β_f=Var(f)/Var(f)=1及相同定价限制，可以得到λ=E[f]。若f是非交易的情绪或政策指标，则无法作此自应用。",
+          "tex": "\\beta_f=1\\ \\Longrightarrow\\ \\lambda=E[f]\\quad\\text{(可交易因子条件下)}"
+        }
+      ],
+      "example": "设交易因子在两状态下的超额收益为−0.06与0.14，各占50%，均值为0.04、方差为0.01。取线性SDF m=1−4(f−0.04)，两状态分别为1.4与0.6，且E[mf]=0；风险价格λ=4×0.01=0.04。若两只ETF的Beta为1.2与0.5，模型约束预期超额收益分别为0.048与0.020。",
+      "application": "可在37只ETF样本中用滚动时间序列估计Beta，再通过横截面或GMM估计风险价格与定价残差。需要把市场ETF收益、行业因子、非交易宏观状态与交易成本清楚分开；真实时间外定价能力和可执行Alpha必须另外验证。",
+      "caveat": "因子如果是根据全样本收益筛选出来，价格回归的显著性会受到数据窥探影响。第一阶段Beta的抽样误差、时变风险价格、非交易因子与市场流动性约束都可能使简单λ估计偏差明显。",
+      "deep_sections": [
+        {
+          "title": "单因子定价中Beta与λ的代数来源",
+          "question": "为什么风险溢价与协方差有关，而不是只与波动率有关？",
+          "paragraphs": [
+            "如果资产在SDF高的坏状态下收益较低，SDF与其超额收益的负协方差需要通过正的平均超额收益补偿。线性SDF把协方差集中到特定因子f上，得到与因子共同波动成比例的定价限制。",
+            "资产独有的、与因子正交的噪声会增加自身总波动，却不进入该单因子模型的截面价格，故风险价格估计不能直接退化成波动率排序。"
+          ],
+          "formulas": [
+            {
+              "label": "单因子定价中Beta与λ的代数来源",
+              "tex": "E[R_i^e]=\\frac{b}{E[m]}\\operatorname{Cov}(R_i^e,f)=\\beta_i\\lambda"
+            }
+          ],
+          "proof": "由0=E[mR_i^e]=E[m]E[R_i^e]−bCov(f,R_i^e)，再利用β_i=Cov(R_i^e,f)/Var(f)，定义λ=bVar(f)/E[m]完成推导。",
+          "worked": "取b=4、E[m]=1、Var(f)=0.01，则λ=0.04；ETF Beta=1.2的模型期望超额收益为0.048。",
+          "limitation": "因子SDF模型若不能同时定价其他资产，得到的βλ只是候选关系，不是已被证明的风险溢价定理。"
+        },
+        {
+          "title": "交易因子与宏观非交易因子的识别",
+          "question": "为什么文本情绪的平均值通常不是市场风险价格？",
+          "paragraphs": [
+            "如果f是真正可以交易的零成本超额收益，它也必须满足同一Euler资产定价方程，而且其对自身的Beta严格为1。因此正确模型可以推出λ=E[f]。",
+            "若f是通胀状态、新闻分数或政策不确定性指数，它本身并不是可复制的资产支付，缺少对自身应用收益Euler式的步骤；风险价格应通过资产矩约束单独估计。"
+          ],
+          "formulas": [
+            {
+              "label": "交易因子与宏观非交易因子的识别",
+              "tex": "\\beta_f=1,\\quad \\lambda=E[f]\\ \\text{(若f是被同一SDF定价的交易收益)}"
+            }
+          ],
+          "proof": "因为β_f=Cov(f,f)/Var(f)=1，截面限制对可交易因子本身写成E[f]=β_fλ，故λ=E[f]。对于不可交易状态变量不能使用这一步。",
+          "worked": "交易因子均值0.04、单因子SDF匹配该收益，则模型要求λ=0.04；新闻情绪均值恰好0.04并不意味着风险溢价也是4%。",
+          "limitation": "交易因子若包含不可融资的理论多空头寸、借券受限或未扣成本，其实际可交易风险价格解释还要另行审核。"
+        },
+        {
+          "title": "第一阶段Beta误差与横截面估计",
+          "question": "为什么先估Beta再估λ时应考虑两次抽样不确定性？",
+          "paragraphs": [
+            "时间序列Beta通常依赖有限观察，估计误差会进入后续横截面定价方程。把估计Beta作为无误差自变量进行第二阶段回归，可能产生测量误差偏差和不正确的置信区间。",
+            "横截面资产还受到共同市场日冲击，因此推断样本有效信息不等于资产数乘以日期数。可采用Fama–MacBeth逐期风险价格、适当HAC或合适的生成回归量修正。"
+          ],
+          "formulas": [
+            {
+              "label": "第一阶段Beta误差与横截面估计",
+              "tex": "\\overline R_i^e=\\widehat\\beta_i\\widehat\\lambda+\\widehat\\alpha_i"
+            }
+          ],
+          "proof": "真实关系E[R_i^e]=β_iλ。如果把β_i替换为β_i+e_i，估计的横截面斜率不再对应真实Beta回归；e_i与实际收益共同来源时还可能相关。",
+          "worked": "真实Beta为1.2、λ=0.04时预测超额收益为0.048；若误估Beta=1.0，仅按模型就会制造0.008的表面定价残差。",
+          "limitation": "没有可靠的因子估计误差模型时，单一截面OLS的标准误不能自动宣称识别了结构风险溢价。"
+        },
+        {
+          "title": "滚动ETF因子研究与样本外风险价格",
+          "question": "横截面定价很好是否能直接转成多空CTA超额利润？",
+          "paragraphs": [
+            "资产定价关系描述给定风险模型下的预期超额收益与风险暴露，并不自动证明买高Beta卖低Beta能产生净Alpha。风险溢价可能只是对系统性损失的正常补偿。",
+            "对ETF多资产数据，应按时间切分滚动估计因子、Beta和λ，区分训练资产池和独立评估资产池；策略收益另外扣除交易冲击、借券和融资费用。"
+          ],
+          "formulas": [
+            {
+              "label": "滚动ETF因子研究与样本外风险价格",
+              "tex": "E_t[R_{i,t+1}^e]=\\beta_{i,t}\\lambda_t\\quad\\text{(附加条件单因子假设)}"
+            }
+          ],
+          "proof": "条件定价式要求每个信息时点都存在有效的条件线性SDF和相应Euler矩限制。一个全样本静态截面拟合很好并不推出逐期风险价格稳定。",
+          "worked": "当λ由0.04降为0.01时，Beta分别1.2和0.5的条件超额收益由0.048和0.020变为0.012和0.005，组合风险补偿随市场状态改变。",
+          "limitation": "条件关系若在经济制度切换时失效，应报告预测区间和定价残差，而不是用未来状态重估后重新解释为独立样本外。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "finance-x005",
+          "label": "先修：Beta截面风险价格"
+        },
+        {
+          "kind": "math",
+          "id": "econometrics-n0235",
+          "label": "方法：Fama–MacBeth横截面回归"
+        },
+        {
+          "kind": "math",
+          "id": "econometrics-n0213",
+          "label": "识别：测量误差"
+        },
+        {
+          "kind": "ml",
+          "id": "m23-c03-p06",
+          "label": "应用：权重约束和组合估计"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Fama and MacBeth (1973), Risk, Return and Equilibrium: Empirical Tests",
+          "url": "https://doi.org/10.1086/260061"
+        },
+        {
+          "title": "Cochrane, Asset Pricing: Stochastic Discount Factors and Factor Models",
+          "url": "https://www.johnhcochrane.com/asset-pricing"
+        }
+      ],
+      "checked_status": "V19完整讲义：严格定义、条件、四节数学论证、反例、执行与样本外检查"
+    },
+    {
+      "id": "econometrics-n0237",
+      "node_id": "econometrics-n0237",
+      "title": "内生交易信号识别",
+      "definition": "交易信号内生性指用于解释收益或价格冲击的信号变量与结构误差相关，或信号本身受到当前价格、订单流或未观察共同冲击的反馈影响。此时观察回归的斜率仍可用于某种预测投影，却不能自动解释为交易信号导致价格变化的结构因果系数。需要区分交易前信息可得性、同步反馈和执行影响。",
+      "assumptions": "结构分析以r_t=βs_t+u_t为例，β为固定目标响应，允许交易信号s_t由其他信息和u_t共同决定；要求Var(s_t)>0。识别因果β需要额外外生冲击、随机化或有效工具变量条件；如果目标仅是预测未来收益，则应改用决策时可见的𝔽_t并时间外评价，而不是将因果与预测合并。",
+      "properties": [
+        "交易信号与同期收益误差相关时，总体OLS斜率不等于结构价格冲击系数。",
+        "算法依据实时价格调整仓位会产生反馈，历史静态回放未必符合新交易规则下的价格形成过程。",
+        "工具变量第一阶段相关性与排除限制须分别论证，不能用较高预测R²代替因果识别。"
+      ],
+      "formulas": [
+        {
+          "label": "结构收益方程",
+          "tex": "r_t=\\beta s_t+u_t"
+        },
+        {
+          "label": "观察回归内生偏差",
+          "tex": "b_{\\rm OLS}=\\beta+\\frac{\\operatorname{Cov}(s_t,u_t)}{\\operatorname{Var}(s_t)}"
+        },
+        {
+          "label": "内生信号形成过程",
+          "tex": "s_t=a u_t+v_t,\\quad \\operatorname{Cov}(u_t,v_t)=0"
+        },
+        {
+          "label": "工具变量识别比率",
+          "tex": "\\beta_{\\rm IV}=\\frac{\\operatorname{Cov}(z_t,r_t)}{\\operatorname{Cov}(z_t,s_t)},\\quad\\operatorname{Cov}(z_t,u_t)=0"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对结构关系r=βs+u与s取协方差得Cov(s,r)=βVar(s)+Cov(s,u)，除以Var(s)得到观察投影与结构效应之间的偏差。",
+          "tex": "\\frac{\\operatorname{Cov}(s,r)}{\\operatorname{Var}(s)}=\\beta+\\frac{\\operatorname{Cov}(s,u)}{\\operatorname{Var}(s)}"
+        },
+        {
+          "explanation": "令s=au+v，且u与v不相关，便有Cov(s,u)=aVar(u)、Var(s)=a²Var(u)+Var(v)。观察斜率是否偏高或偏低取决于a及结构噪声方差。",
+          "tex": "b_{\\rm OLS}-\\beta=\\frac{a\\operatorname{Var}(u)}{a^2\\operatorname{Var}(u)+\\operatorname{Var}(v)}"
+        },
+        {
+          "explanation": "如果找到交易信号外生变动z，且它对收益仅经s发挥影响并与结构误差正交，就可按工具矩识别β。然而若z直接影响流动性或交易对手行为，工具也会失效。",
+          "tex": "\\operatorname{Cov}(z,r)=\\beta\\operatorname{Cov}(z,s)+\\operatorname{Cov}(z,u)"
+        }
+      ],
+      "example": "设真实结构效应β=1，信号s=0.5u+v，其中Var(u)=4、Var(v)=1且两者不相关。则Cov(s,u)=0.5×4=2，Var(s)=0.5²×4+1=2，总体OLS斜率b=1+2/2=2。观察上信号回归系数为2，却高于实际结构因果响应1，样本更多也无法消除这种误判。",
+      "application": "在ETF CTA交易系统中，应区分由前一日价格构成的合法预测信号、当期未实现价格冲击和自身订单生成的市场反馈。对策略Alpha使用真实可见信号与严格时间外回测；对交易价格冲击的因果评估则使用可辩护的外生订单变动或随机化实验。",
+      "caveat": "高频金融数据存在同时性和报价选择，常规工具可能直接影响价差、波动或风险偏好。市场反馈使新策略改变其他参与者的行为，历史预测回归和静态滑点模型不能无条件外推到新的执行规模。",
+      "deep_sections": [
+        {
+          "title": "同期反馈产生的观察斜率偏差",
+          "question": "为什么大额订单与价格变化相关却不意味着全由订单引起？",
+          "paragraphs": [
+            "同一时点宏观订单流和信息冲击可以共同影响交易信号与成交价格。若信号s包含当前无法观察的价格创新u，则回归r对s的斜率既有结构影响β，也包含同一冲击造成的协方差项。",
+            "这种偏差是总体识别问题，不是抽样误差。即使数据量很大并得到极窄的标准误，也可能精确估计了错误的结构参数。"
+          ],
+          "formulas": [
+            {
+              "label": "同期反馈产生的观察斜率偏差",
+              "tex": "b_{\\rm OLS}=\\beta+\\operatorname{Cov}(s,u)/\\operatorname{Var}(s)"
+            }
+          ],
+          "proof": "从r=βs+u取Cov(s,r)，展开为βVar(s)+Cov(s,u)，除以正的Var(s)得观察投影斜率。结构与观察斜率相等需要额外零协方差条件。",
+          "worked": "β=1、Var(s)=2、Cov(s,u)=2时，观察系数为2，与结构效应相差1。",
+          "limitation": "信号由当前价格变化反向构造时，不具备独立的交易前时间戳，不能把回归解释为可实施的先行预测。"
+        },
+        {
+          "title": "信号形成模型的解析偏差",
+          "question": "如何用一个生成机制独立复算内生性大小？",
+          "paragraphs": [
+            "让信号由共同冲击u的a倍和与u不相关的独立成分v组成，便能直接计算信号方差和信号与结构误差的协方差。",
+            "这清楚表明内生性强度不仅取决于共同冲击系数a，还与两种冲击的相对方差相关。增加无关噪声可能使偏差数值变小，却不会赋予信号因果解释。"
+          ],
+          "formulas": [
+            {
+              "label": "信号形成模型的解析偏差",
+              "tex": "b_{\\rm OLS}-\\beta=\\frac{a\\sigma_u^2}{a^2\\sigma_u^2+\\sigma_v^2}"
+            }
+          ],
+          "proof": "由s=au+v得Cov(s,u)=aVar(u)+Cov(v,u)=aσ_u²，Var(s)=a²σ_u²+σ_v²；代入总体OLS偏差式即可得到闭式。",
+          "worked": "a=0.5、Var(u)=4、Var(v)=1时，Cov(s,u)=2、Var(s)=2，偏差为1，β=1对应观察回归系数2。",
+          "limitation": "如果v也与u相关，则上述简化不再成立，必须保留所有交叉协方差，不能误用独立噪声公式。"
+        },
+        {
+          "title": "外生订单工具与排除限制",
+          "question": "为什么强相关的政策工具仍可能不能识别价格冲击？",
+          "paragraphs": [
+            "有效工具z需要能够影响交易信号s，但不通过其他路径直接改变目标收益中的结构误差u。例如某公告可能同时改变订单流和风险溢价，所以即使第一阶段很强也可能违反排除限制。",
+            "若确实有随机分配的订单实验或外生交易规则，可从工具与收益、信号的协方差比率识别局部响应。统计第一阶段显著只检验相关性，不能检验所有未观察直接通道。"
+          ],
+          "formulas": [
+            {
+              "label": "外生订单工具与排除限制",
+              "tex": "\\beta_{\\rm IV}=\\operatorname{Cov}(z,r)/\\operatorname{Cov}(z,s)"
+            }
+          ],
+          "proof": "取Cov(z,r)=βCov(z,s)+Cov(z,u)，若Cov(z,u)=0且Cov(z,s)≠0，移项并除以分母得到结构β。",
+          "worked": "假设有效工具带来Cov(z,s)=2且Cov(z,r)=2，IV估计为1，与原例结构β吻合，尽管观察OLS斜率是2。",
+          "limitation": "市场真实执行还可能改变其他资产价格和交易对手行为，研究需确认不存在不允许的跨资产干扰。"
+        },
+        {
+          "title": "预测信号与因果冲击的不同验证目标",
+          "question": "为什么时间外Sharpe好也不证明交易导致价格变化？",
+          "paragraphs": [
+            "预测研究只需研究时点t可得的𝔽_t信号对未来收益的条件关联，并扣除成交和借贷费用验证净收益；结构因果问题关注人为改变s或下单时未来价格如何变化。",
+            "同一机器学习策略可能具备有价值的预测信息，但并不识别交易本身的价格冲击。应为这两类研究分设训练/验证、交易订单与外生设计证据链。"
+          ],
+          "formulas": [
+            {
+              "label": "预测信号与因果冲击的不同验证目标",
+              "tex": "s_t\\in\\mathcal F_t,\\qquad R_{t+h}\\notin\\mathcal F_t\\quad(h>0)"
+            }
+          ],
+          "proof": "决策前可得信号属于信息集𝔽_t，未来收益在预测时尚未实现；这能避免前视错误，却不能自动保证改变信号或下单的因果效应被识别。",
+          "worked": "上一日ETF动量可以预测下一周收益，但其正斜率不代表额外买入ETF会按相同预测幅度推高未来价格。",
+          "limitation": "在高交易参与率、拥挤信号和市场机制变化下，历史可预测性和实盘市场冲击均可能同时改变。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "econometrics-n0211",
+          "label": "先修：外生性与OLS偏差"
+        },
+        {
+          "kind": "math",
+          "id": "econometrics-n0215",
+          "label": "方法：有效工具"
+        },
+        {
+          "kind": "math",
+          "id": "optimization-x003",
+          "label": "金融应用：临时价格冲击"
+        },
+        {
+          "kind": "ml",
+          "id": "m23-c04-p02",
+          "label": "ML：真实交易现金账本"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Angrist and Pischke, Mostly Harmless Econometrics: Instrumental Variables",
+          "url": "https://press.princeton.edu/books/paperback/9780691120355/mostly-harmless-econometrics"
+        },
+        {
+          "title": "Hansen (1982), Generalized Method of Moments and Structural Identification",
+          "url": "https://larspeterhansen.org/lph_research/large-sample-properties-of-generalized-method-of-moments-estimators/"
+        }
+      ],
+      "checked_status": "V19完整讲义：严格定义、条件、四节数学论证、反例、执行与样本外检查"
+    }
+  ]
+}
