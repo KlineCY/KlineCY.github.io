@@ -5,6 +5,7 @@ const root=new URL("./",import.meta.url);
 const read=p=>JSON.parse(fs.readFileSync(new URL(p,root),"utf8"));
 const v24Ids=new Set(["statistics-x003","statistics-x004","mlmath-x003","mlmath-x004"]);
 const v25Ids=new Set(["timeseries-x003","timeseries-x004","timeseries-x006","mlmath-x006","riskmath-x001"]);
+const v26Ids=new Set(["timeseries-n0260","timeseries-n0261","timeseries-n0262","timeseries-n0266","timeseries-n0267","timeseries-n0269","timeseries-n0270"]);
 const curriculum=read("curriculum.json"),manifest=read("lessons-manifest.json");
 const core=["lessons-foundations.json","lessons-advanced.json","lessons-more.json"].flatMap(p=>read(p).lessons);
 const extensions=manifest.modules.flatMap(m=>{
@@ -19,14 +20,14 @@ const ids=["timeseries-n0244","timeseries-n0245","timeseries-n0248","timeseries-
 const added="abcd".split("").flatMap(s=>read("lessons-phase-22-"+s+".json").lessons);
 assert.deepEqual(added.map(l=>l.id),ids,"V22 lecture order must remain intact");
 assert.equal(curriculum.nodes.length,656);
-assert.equal(manifest.modules.length,66);
-assert.equal(manifest.expected_lessons,164);
+assert.equal(manifest.modules.length,68);
+assert.equal(manifest.expected_lessons,171);
 assert.equal(core.length,123);
-assert.equal(extensions.length,164);
-assert.equal(all.length,287);
-assert.equal(new Set(all.map(l=>l.id)).size,287,"unique complete mathematics IDs");
+assert.equal(extensions.length,171);
+assert.equal(all.length,294);
+assert.equal(new Set(all.map(l=>l.id)).size,294,"unique complete mathematics IDs");
 const v23Ids=["timeseries-n0256","timeseries-n0257","timeseries-n0258","timeseries-n0259"];
-assert.equal(all.filter(l=>!ids.includes(l.id)&&!v23Ids.includes(l.id)&&!v24Ids.has(l.id)&&!v25Ids.has(l.id)).length,266,"all original V21 complete lessons retained");
+assert.equal(all.filter(l=>!ids.includes(l.id)&&!v23Ids.includes(l.id)&&!v24Ids.has(l.id)&&!v25Ids.has(l.id)&&!v26Ids.has(l.id)).length,266,"all original V21 complete lessons retained");
 let sections=0,parsed=0,sources=0,links=0;
 for(const l of added){
  assert(l.id===l.node_id&&nodeMap.get(l.id)?.title===l.title,"curriculum/lecture mapping "+l.id);
