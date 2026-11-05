@@ -15,12 +15,12 @@ const all=[...core,...ext],unique=new Set(all.map(lesson=>lesson.node_id));
 const nodes=new Map(curriculum.nodes.map(node=>[node.id,node]));
 const ids=["timeseries-x003","timeseries-x004","timeseries-x006","mlmath-x006","riskmath-x001"];
 assert.deepEqual(newLessons.map(l=>l.node_id),ids,"five courses follow canonical node IDs");
-assert.equal(manifest.expected_lessons,189);
-assert.equal(manifest.modules.length,73);
-assert.equal(ext.length,189);
+assert.equal(manifest.expected_lessons,195);
+assert.equal(manifest.modules.length,75);
+assert.equal(ext.length,195);
 assert.equal(core.length,123);
-assert.equal(all.length,312);
-assert.equal(unique.size,312);
+assert.equal(all.length,318);
+assert.equal(unique.size,318);
 assert.equal(curriculum.nodes.length,656);
 let chapters=0,expressions=0,links=0,citations=0;
 for(const l of newLessons){
