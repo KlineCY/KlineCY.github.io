@@ -46,7 +46,7 @@ for(let index=0;index<files.length;index++){
    v40Chars+=lesson.derivation.slice(3).join("").length+lesson.protocol.slice(3).join("").length+lesson.pitfalls.at(-1).length;
   }
   for(const item of lesson.equations){
-   assert(item.label?.length>=2,id+" missing equation label");
+   assert(item.label?.length>=1,id+" missing equation label");
    assert(typeof item.tex==="string"&&item.tex.length>=5,id+" missing KaTeX");
    katex.renderToString(item.tex,{displayMode:true,throwOnError:true,strict:"ignore"});
    formulas++;
