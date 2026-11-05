@@ -23,7 +23,8 @@ const v20=new Set(["econometrics-x003","econometrics-x005","econometrics-x006","
 const v21=new Set(["mlmath-n0455","mlmath-n0466","mlmath-n0463","mlmath-n0464","mlmath-n0460","mlmath-n0461","mlmath-n0462","mlmath-n0465"]);
 const v22Ids=new Set(["timeseries-n0244","timeseries-n0245","timeseries-n0248","timeseries-n0249","timeseries-n0250","timeseries-n0251","timeseries-n0254","timeseries-n0255"]);
 const v23Ids=new Set(["timeseries-n0256","timeseries-n0257","timeseries-n0258","timeseries-n0259"]);
-const historicalV15=all.filter(x=>!newIds.has(x.node_id)&&!v18.has(x.node_id)&&!v19.has(x.node_id)&&!v20.has(x.node_id)&&!v21.has(x.node_id)&&!v22Ids.has(x.node_id)&&!v23Ids.has(x.node_id));
+const v24Ids=new Set(["statistics-x003","statistics-x004","mlmath-x003","mlmath-x004"]);
+const historicalV15=all.filter(x=>!newIds.has(x.node_id)&&!v18.has(x.node_id)&&!v19.has(x.node_id)&&!v20.has(x.node_id)&&!v21.has(x.node_id)&&!v22Ids.has(x.node_id)&&!v23Ids.has(x.node_id)&&!v24Ids.has(x.node_id));
 assert.equal(historicalV15.length,228,"prior V15 complete lesson inventory must remain unchanged");
 const legacy=historicalV15.filter(x=>!["riskmath-x005","riskmath-x006"].includes(x.node_id));
 assert.equal(legacy.length,226,"previous V14 courses must remain intact");
