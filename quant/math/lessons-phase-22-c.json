@@ -1,0 +1,307 @@
+{
+  "version": 1,
+  "revision": "2026-11-05",
+  "focus": "差分与ARIMA价格动态、AIC/BIC时序模型识别",
+  "lessons": [
+    {
+      "id": "timeseries-n0250",
+      "node_id": "timeseries-n0250",
+      "title": "差分与ARIMA",
+      "definition": "ARIMA(p,d,q)模型先将可能具有单位根的时间序列做d次差分，再假定差分序列满足因果平稳ARMA(p,q)结构。ARIMA的d并非越大越好，过度差分可能人为引入强负自相关和非可逆MA结构。随机游走是ARIMA(0,1,0)典型例子：其水平值不是弱平稳，但一阶差分可以是白噪声；零漂移情况下未来h步水平预测误差方差随h线性增长。",
+      "assumptions": "令滞后算子B满足BX_t=X_{t−1}，差分算子Δ=1−B，d为非负整数。要求Y_t=Δ^dX_t能由稳定且可逆的适当ARMA过程描述，创新均值零、方差有限。随机游走例假设ε_t为独立同分布、均值0、方差σ²>0，且未来创新与历史可得信息独立。",
+      "properties": [
+        "一阶差分可以去掉某些随机趋势，但不是任何趋势或结构突变都能用固定d消除。",
+        "ARIMA(0,1,0)零漂移随机游走的h步条件均值预测是当前水平，误差方差为hσ²。",
+        "对白噪声重复差分得到MA(1)参数−1，过度差分可能制造非可逆边界。"
+      ],
+      "formulas": [
+        {
+          "label": "ARIMA滞后算子",
+          "tex": "\\phi(B)(1-B)^dX_t=\\theta(B)\\varepsilon_t"
+        },
+        {
+          "label": "一阶差分",
+          "tex": "\\Delta X_t=X_t-X_{t-1}"
+        },
+        {
+          "label": "随机游走预测误差",
+          "tex": "X_{t+h}-E_t[X_{t+h}]=\\sum_{j=1}^h\\varepsilon_{t+j}"
+        },
+        {
+          "label": "误差方差随期限增长",
+          "tex": "\\operatorname{Var}_t(X_{t+h}-E_t[X_{t+h}])=h\\sigma^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从随机游走X_t=X_{t−1}+ε_t两边减去X_{t−1}可得ΔX_t=ε_t。水平值方差随着t增长而变化，因此通常不是弱平稳。",
+          "tex": "\\Delta X_t=(1-B)X_t=\\varepsilon_t"
+        },
+        {
+          "explanation": "把随机游走递推h期，得到X_{t+h}=X_t+Σ未来ε；因零均值独立创新，条件期望为X_t、条件方差为hσ²。",
+          "tex": "E_t[X_{t+h}]=X_t,\\quad\\operatorname{Var}_t(X_{t+h}-X_t)=h\\sigma^2"
+        },
+        {
+          "explanation": "若原序列本身就是白噪声ε_t，对其再差分得到ε_t−ε_{t−1}，这是θ=−1的MA(1)，其一阶自相关为−1/(1+1)=−1/2，触及非可逆边界。",
+          "tex": "\\Delta\\varepsilon_t=\\varepsilon_t-\\varepsilon_{t-1},\\quad \\rho(1)=-1/2"
+        }
+      ],
+      "example": "设随机游走初值X₀=100，后续三期创新为(2,−1,3)，则X₁=102、X₂=101、X₃=104，一阶差分序列为(2,−1,3)。在第3期观察到X₃=104后，若未来创新零均值且方差σ²=4，则两期后预测为104，预测误差方差为2×4=8。反例：对白噪声多做一次差分可得到ρ(1)=−0.5，而不是改善预测。",
+      "application": "ETF对数价格可能含趋势或随机游走成分，模型前应区分价格、对数价格和收益率。对收益标签建模一般不需要因为价格可能I(1)而机械再差分。样本外评估应按真实特征时间与可交易价格进行。",
+      "caveat": "单位根检验有限样本功效可能不足，差分阶数选择还应检查经济意义与模型残差。过差分、结构突变、资产复权修订和持有期重叠会导致错误的动态解释。",
+      "deep_sections": [
+        {
+          "title": "差分算子与ARIMA的定义",
+          "question": "ARIMA中的I(d)究竟意味着什么？",
+          "paragraphs": [
+            "ARIMA利用(1−B)^d对原序列差分，要求变换后的序列满足指定平稳ARMA结构。整数d描述实现这一表示所需的差分阶数，而不是预测窗口长度。",
+            "不同数据的平稳性需要从价格形成、制度环境和实际残差结构判断，不能预设每个ETF收益序列都必须用d=1。"
+          ],
+          "formulas": [
+            {
+              "label": "差分算子与ARIMA的定义",
+              "tex": "\\phi(B)(1-B)^dX_t=\\theta(B)\\varepsilon_t"
+            }
+          ],
+          "proof": "由B定义BX_t=X_{t−1}，因此(1−B)X_t=X_t−X_{t−1}；连续应用d次差分后，可用平稳ARMA模型刻画变化过程。",
+          "worked": "零漂移随机游走X_t=X_{t−1}+ε_t是一阶差分为白噪声的ARIMA(0,1,0)例子。",
+          "limitation": "如果存在制度断点或确定趋势，固定阶数差分可能不足以恢复有效平稳结构。"
+        },
+        {
+          "title": "随机游走的多步预测与误差传播",
+          "question": "为什么越远期的价格预测区间通常越宽？",
+          "paragraphs": [
+            "随机游走每一步都加入新的零均值创新，未来h期误差由h个尚未知的冲击加总。由于这些冲击独立，误差的条件方差等于各期方差之和。",
+            "因此点预测在零漂移假设下保持为当前价格，但不确定性随预测期限增长，这与“所有未来价格都等于当前价格”完全不同。"
+          ],
+          "formulas": [
+            {
+              "label": "随机游走的多步预测与误差传播",
+              "tex": "\\operatorname{Var}_t(X_{t+h}-X_t)=h\\sigma^2"
+            }
+          ],
+          "proof": "递推h次得到X_{t+h}=X_t+Σ_{j=1}^hε_{t+j}，对t期信息条件化，期望的创新和为零，独立冲击方差求和为hσ²。",
+          "worked": "第3期价格104、创新方差4时，未来两期的点预测是104，预测误差方差为8，标准差为√8。",
+          "limitation": "若存在漂移、条件异方差或跳跃冲击，需要修改期望与预测方差公式。"
+        },
+        {
+          "title": "过度差分为何制造负自相关",
+          "question": "对白噪声差分为何不算更平稳？",
+          "paragraphs": [
+            "白噪声本来已经具有平稳二阶结构，额外差分使相邻观测共享一个带负号的创新。该机械共享会导致−0.5的一阶相关，反而使简单模型阶数变复杂。",
+            "MA(1)的θ=−1位于可逆区域边界，说明不恰当的差分不仅改变样本自相关，还可能引发模型识别与数值估计问题。"
+          ],
+          "formulas": [
+            {
+              "label": "过度差分为何制造负自相关",
+              "tex": "\\Delta\\varepsilon_t=\\varepsilon_t-\\varepsilon_{t-1},\\qquad \\rho(1)=-1/2"
+            }
+          ],
+          "proof": "差分后的方差为2σ²，一阶协方差来自共享ε_{t−1}的系数乘积−σ²，所以ρ(1)=−σ²/(2σ²)=−0.5。",
+          "worked": "独立白噪声(2,−1,3)本身不需要差分；过差分后相邻结果会出现机械负相关。",
+          "limitation": "有限样本中观察到接近−0.5的相关也不直接证明过差分，还需要检查真实模型与创新假设。"
+        },
+        {
+          "title": "价格和收益的不同经济层级",
+          "question": "ETF均值回归为何不能直接把价格模型迁移到收益？",
+          "paragraphs": [
+            "价格水平可能包含随机趋势，但简单收益、对数收益及累计持有期收益使用不同的统计尺度。对非平稳价格差分后得到近似价格变动，不一定等于对数收益。",
+            "研究必须明确交易信号形成时的复权价格和收益标签定义。信号与风险模型可使用不同变换，禁止用整个未来价格路径筛选差分阶数后反向回测。"
+          ],
+          "formulas": [
+            {
+              "label": "价格和收益的不同经济层级",
+              "tex": "r_t^{\\log}=\\log P_t-\\log P_{t-1}"
+            }
+          ],
+          "proof": "对数价格的一阶差分恰为对数收益，而原始价格的一阶差分是货币单位价格变动，两者不能无条件当作同一随机过程。",
+          "worked": "若P_{t−1}=100、P_t=102，价格差分为2，而对数收益log(102/100)≈0.01980。",
+          "limitation": "复权调整、非交易日和市场跳跃会影响收益定义与模型平稳性，需要在样本外研究中统一处理。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "timeseries-n0249",
+          "label": "先修：ARMA"
+        },
+        {
+          "kind": "math",
+          "id": "timeseries-n0241",
+          "label": "先修：平稳性"
+        },
+        {
+          "kind": "math",
+          "id": "timeseries-n0251",
+          "label": "后续：AIC/BIC模型选择"
+        },
+        {
+          "kind": "ml",
+          "id": "m01-c04-p03",
+          "label": "金融ML：预测与样本外评估"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Hyndman and Athanasopoulos, Forecasting: Principles and Practice, ARIMA Models",
+          "url": "https://otexts.com/fpp3/arima.html"
+        },
+        {
+          "title": "Statsmodels, ARIMA documentation and differencing",
+          "url": "https://www.statsmodels.org/stable/generated/statsmodels.tsa.arima.model.ARIMA.html"
+        }
+      ],
+      "checked_status": "V22深入课程：差分与信息准则推导、独立数值验证、金融制度变动风险"
+    },
+    {
+      "id": "timeseries-n0251",
+      "node_id": "timeseries-n0251",
+      "title": "模型识别与AIC/BIC",
+      "definition": "AIC与BIC利用最大化后的对数似然及模型参数数构造信息准则，用于对相同观测样本、相容似然口径下的候选时序模型进行复杂度惩罚。AIC=−2ℓ_hat+2k，BIC=−2ℓ_hat+klog n。二者对更复杂模型的惩罚不同，可能给出不同模型顺序；它们不是自动的金融时间外损失，也不能替代残差检查与真正独立验证。",
+      "assumptions": "设候选模型使用相同有效观测样本、同一响应变量的可比较似然，最大对数似然为ℓ_hat，估计自由参数数k明确包含实际估计的均值、方差和动态参数，样本量为n。关于AIC期望KL风险与BIC模型选择一致性的标准论证另需适当正则性、模型类和数据生成条件，不能把它们当作所有非平稳金融数据的有限样本定理。",
+      "properties": [
+        "AIC与BIC对参数数分别使用2k和k log n惩罚，因此模型选择可能不同。",
+        "不同模型必须使用相容的样本和似然定义；不同差分阶数导致样本和条件似然口径变化时需特别谨慎。",
+        "信息准则是拟合与复杂度折衷，不等于可执行ETF策略在未来市场的净收益评估。"
+      ],
+      "formulas": [
+        {
+          "label": "AIC定义",
+          "tex": "\\operatorname{AIC}=-2\\widehat\\ell+2k"
+        },
+        {
+          "label": "BIC定义",
+          "tex": "\\operatorname{BIC}=-2\\widehat\\ell+k\\log n"
+        },
+        {
+          "label": "模型A与B的惩罚差",
+          "tex": "\\Delta\\operatorname{BIC}=-2\\Delta\\widehat\\ell+\\Delta k\\log n"
+        },
+        {
+          "label": "AIC与BIC的决策目标",
+          "tex": "\\widehat m=\\arg\\min_{m\\in\\mathcal M}\\operatorname{IC}(m)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "最大对数似然越大，−2ℓ_hat越小，但增加参数通常能提高样本内似然，因此需要加入随k增大的惩罚，抑制无条件提高模型阶数的行为。",
+          "tex": "\\operatorname{AIC}=-2\\widehat\\ell+2k,\\quad\\operatorname{BIC}=-2\\widehat\\ell+k\\log n"
+        },
+        {
+          "explanation": "比较两个模型A和B时，准则差等于拟合质量差−2(ℓ_B−ℓ_A)加复杂度差；BIC在n较大时对额外参数的惩罚比AIC更大。",
+          "tex": "\\operatorname{BIC}_B-\\operatorname{BIC}_A=-2(\\widehat\\ell_B-\\widehat\\ell_A)+(k_B-k_A)\\log n"
+        },
+        {
+          "explanation": "若n=100、模型A有k=3且ℓ_hat=−125，模型B有k=5且ℓ_hat=−122，AIC分别256和254，BIC分别250+3log100和244+5log100，因此会出现相反偏好。",
+          "tex": "\\operatorname{AIC}_A=256,\\quad\\operatorname{AIC}_B=254"
+        }
+      ],
+      "example": "模型A取n=100、k=3、最大对数似然−125；模型B同样n=100、k=5、最大对数似然−122。则AIC_A=250+6=256，AIC_B=244+10=254，AIC偏好B；BIC_A=250+3log100≈263.8155，BIC_B=244+5log100≈267.0259，BIC偏好A。选择不同并非算错，而是不同复杂度惩罚。",
+      "application": "ETF模型选择中可对不同ARMA阶数使用AIC/BIC作为训练期间的候选筛查，再使用严格向前时间交叉验证、残差白噪声和交易成本后净策略评价判定最终模型。不能在最终测试期看到最高Sharpe后倒改模型阶数。",
+      "caveat": "跨不同样本、不同差分后响应及不同似然常数的AIC/BIC可能没有可比性。厚尾金融收益、制度切换和候选模型全部错误时，普通信息准则的标准渐近解释可能不成立。",
+      "deep_sections": [
+        {
+          "title": "似然收益与模型复杂度的权衡",
+          "question": "增加ARMA阶数为什么不能只看样本内似然？",
+          "paragraphs": [
+            "增加参数通常允许模型更贴合已观察数据，最大似然不会因为扩大嵌套参数空间而必然下降，但更高拟合自由度可能捕捉噪声。",
+            "AIC和BIC都增加一个随参数数量增长的惩罚，研究者必须明确自由参数k的计算口径以及模型使用的有效观测数量。"
+          ],
+          "formulas": [
+            {
+              "label": "似然收益与模型复杂度的权衡",
+              "tex": "\\operatorname{AIC}=-2\\widehat\\ell+2k"
+            }
+          ],
+          "proof": "样本最大似然项代表拟合程度，增加2k惩罚使新参数只有带来足够似然改善时才降低AIC。",
+          "worked": "模型A对数似然−125、k=3，AIC=250+6=256；模型B−122、k=5，AIC=244+10=254。",
+          "limitation": "若两模型处理不同的响应变量或不同时间窗口，似然值的绝对尺度未必可直接比较。"
+        },
+        {
+          "title": "为什么AIC与BIC可能排序相反",
+          "question": "BIC的额外参数惩罚为何随样本长度改变？",
+          "paragraphs": [
+            "AIC每增加一个自由参数惩罚2，BIC则惩罚log n。因此n较大时BIC更偏好参数少的模型，而AIC可能更重视提高样本拟合的预测信息。",
+            "两者具有不同的渐近选择动机，不能把一个比另一个更保守简单解释为对所有金融预测都更正确。"
+          ],
+          "formulas": [
+            {
+              "label": "为什么AIC与BIC可能排序相反",
+              "tex": "\\operatorname{BIC}=-2\\widehat\\ell+k\\log n"
+            }
+          ],
+          "proof": "对固定n的两个模型计算BIC差，可以写成似然改善的−2倍加新增参数数乘log n。不同参数差与不同拟合改善会改变符号。",
+          "worked": "n=100时log100≈4.6052，A的BIC≈263.8155，B≈267.0259，因此BIC选A，与AIC选B不同。",
+          "limitation": "如果候选模型并不包含真实数据生成过程，所谓BIC选中正确模型的一致性直觉可能失效。"
+        },
+        {
+          "title": "样本一致与ARIMA差分阶数",
+          "question": "为什么不同d的ARIMA信息准则可能不可直接比较？",
+          "paragraphs": [
+            "信息准则依赖模型的似然定义。若一个模型对原始水平序列计算完整似然，另一个只对差分后的较短序列计算条件似然，数值常数和有效样本可能不同。",
+            "研究必须先统一目标响应、样本长度、初始条件和估计方法，再比较AIC/BIC；不同d之间的对比尤其需要核查软件实现。"
+          ],
+          "formulas": [
+            {
+              "label": "样本一致与ARIMA差分阶数",
+              "tex": "\\operatorname{IC}(m)=-2\\widehat\\ell_m+\\operatorname{penalty}(k_m,n_m)"
+            }
+          ],
+          "proof": "同一观察数据上的似然比才有共同的测度基准。改变差分导致的变换样本和丢弃初始值可能改变似然构造，使准则差不再仅反映模型优劣。",
+          "worked": "模型A与B都用n=100的同一收益序列才能照搬AIC 256与254的可比解释。",
+          "limitation": "如果创新分布或缺失值处理不同，信息准则可能衡量的是不同统计任务。"
+        },
+        {
+          "title": "从训练期模型筛选到ETF样本外损失",
+          "question": "AIC较低为什么仍不能保证更高的净Sharpe？",
+          "paragraphs": [
+            "信息准则基于训练样本概率模型的拟合与复杂度，投资策略收益还受到实际可成交价格、仓位规则和市场风险状态变化影响。",
+            "因此应将信息准则作为候选基准，再由合法时间外验证与冻结测试评估净收益，独立报告残差结构、预测区间和交易执行成本。"
+          ],
+          "formulas": [
+            {
+              "label": "从训练期模型筛选到ETF样本外损失",
+              "tex": "\\widehat m_{\\rm train}=\\arg\\min_m\\operatorname{AIC}(m)"
+            }
+          ],
+          "proof": "在训练期计算每个模型的AIC并选最小者，只确定训练模型，不涉及之后未知市场收益；最终交易绩效需要新的评价函数。",
+          "worked": "模型B AIC 254优于A的256，不表示B的交易费用后收益一定更高，额外模型复杂度可能增加换手。",
+          "limitation": "同一最终测试期不能被反复用于调ARMA阶数，否则统计意义上的独立测试会转成模型选择数据。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "timeseries-n0249",
+          "label": "先修：ARMA"
+        },
+        {
+          "kind": "math",
+          "id": "timeseries-n0250",
+          "label": "先修：ARIMA"
+        },
+        {
+          "kind": "math",
+          "id": "timeseries-n0254",
+          "label": "后续：ADF单位根检验"
+        },
+        {
+          "kind": "ml",
+          "id": "m01-c04-p03",
+          "label": "ML：时间外模型评价"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Forecasting: Principles and Practice, ARIMA estimation and AICc",
+          "url": "https://otexts.com/fpp3/arima-estimation.html"
+        },
+        {
+          "title": "Penn State STAT 510, Time Series Models and AIC/BIC",
+          "url": "https://online.stat.psu.edu/stat510/Lesson04"
+        }
+      ],
+      "checked_status": "V22深入课程：差分与信息准则推导、独立数值验证、金融制度变动风险"
+    }
+  ]
+}
