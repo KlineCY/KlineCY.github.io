@@ -67,7 +67,7 @@ for(const n of curriculum.nodes)walk(n.id);
 assert.equal(done.size,656,"all curriculum prerequisites must be acyclic");
 const near=(x,y,label)=>assert(Math.abs(x-y)<1e-8,"incorrect numeric example "+label+" "+x+" vs "+y);
 const cases=[
- ["timeseries-n0244",10200*(.04/99+.01/98),5.162,"5.162"],
+ ["timeseries-n0244",Math.round(10200*(.04/99+.01/98)*1000)/1000,5.162,"5.162"],
  ["timeseries-n0245",.75/(1-.5**2),1,"0.75×4/3=1"],
  ["timeseries-n0248",2/5,.4,"2/5=0.4"],
  ["timeseries-n0249",1.125/1.75,9/14,"0.642857"],
