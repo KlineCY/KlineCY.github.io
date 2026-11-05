@@ -15,12 +15,12 @@ const all=[...old,...extras],ids=new Set(all.map(x=>x.node_id)),nodeMap=new Map(
 const targets=["timeseries-n0260","timeseries-n0261","timeseries-n0262","timeseries-n0266","timeseries-n0267","timeseries-n0269","timeseries-n0270"];
 assert.deepEqual(added.map(x=>x.node_id),targets);
 assert.equal(manifest.version,1);
-assert.equal(manifest.expected_lessons,189);
-assert.equal(manifest.modules.length,73);
-assert.equal(extras.length,189);
+assert.equal(manifest.expected_lessons,195);
+assert.equal(manifest.modules.length,75);
+assert.equal(extras.length,195);
 assert.equal(old.length,123);
-assert.equal(all.length,312);
-assert.equal(ids.size,312,"all complete courses must have unique IDs");
+assert.equal(all.length,318);
+assert.equal(ids.size,318,"all complete courses must have unique IDs");
 assert.equal(catalog.nodes.length,656);
 assert.equal(catalog.chapters.length,109);
 let chapters=0,formulas=0,sources=0,links=0;

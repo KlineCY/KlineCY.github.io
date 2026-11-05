@@ -9,6 +9,7 @@ const v25Ids=new Set(["timeseries-x003","timeseries-x004","timeseries-x006","mlm
 const v26Ids=new Set(["timeseries-n0260","timeseries-n0261","timeseries-n0262","timeseries-n0266","timeseries-n0267","timeseries-n0269","timeseries-n0270"]);
 const v27Ids=new Set(["statistics-n0171","statistics-n0170","statistics-n0172","statistics-n0173","statistics-n0174","statistics-n0175","statistics-n0176","riskmath-n0589","riskmath-n0594","riskmath-n0595"]);
 const v28Ids=new Set(["statistics-n0177","statistics-n0178","statistics-n0179","statistics-n0180","finance-n0434","finance-n0436","finance-n0437","finance-n0438"]);
+const v29Ids=new Set(["information-n0508","information-n0507","information-n0505","information-n0509","information-n0506","information-n0510"]);
 const c=read("curriculum.json"),m=read("lessons-manifest.json");
 const allModules=m.modules.flatMap(x=>read(x.path).lessons);
 const core=["lessons-foundations.json","lessons-advanced.json","lessons-more.json"].flatMap(readable=>read(readable).lessons);
@@ -17,19 +18,19 @@ const additions=["a","b","c"].flatMap(x=>read("lessons-phase-17-"+x+".json").les
 const ids=["econometrics-n0211","econometrics-n0213","econometrics-n0214","econometrics-n0215",
 "econometrics-n0216","econometrics-n0218","econometrics-n0219","econometrics-n0220",
 "econometrics-n0221","econometrics-n0222","econometrics-n0228","econometrics-n0231"];
-assert.equal(m.modules.length,73);
-assert.equal(m.expected_lessons,189);
-assert.equal(allModules.length,189);
+assert.equal(m.modules.length,75);
+assert.equal(m.expected_lessons,195);
+assert.equal(allModules.length,195);
 assert.equal(core.length,123);
-assert.equal(active.length,312);
-assert.equal(unique.size,312,"duplicate complete lesson IDs");
+assert.equal(active.length,318);
+assert.equal(unique.size,318,"duplicate complete lesson IDs");
 const v18Ids=new Set(["finance-x004","finance-x005","finance-x006","optimization-x003","optimization-x004","optimization-x006"]);
 const v19Ids=new Set(["econometrics-n0232","econometrics-n0233","econometrics-n0234","econometrics-n0236","econometrics-n0237","econometrics-n0238","econometrics-n0239"]);
 const v20Ids=new Set(["econometrics-x003","econometrics-x005","econometrics-x006","optimization-x011","optimization-x012"]);
 const v21Ids=new Set(["mlmath-n0455","mlmath-n0466","mlmath-n0463","mlmath-n0464","mlmath-n0460","mlmath-n0461","mlmath-n0462","mlmath-n0465"]);
 const v22Ids=new Set(["timeseries-n0244","timeseries-n0245","timeseries-n0248","timeseries-n0249","timeseries-n0250","timeseries-n0251","timeseries-n0254","timeseries-n0255"]);
 const v23Ids=new Set(["timeseries-n0256","timeseries-n0257","timeseries-n0258","timeseries-n0259"]);
-assert.equal(active.filter(l=>!v18Ids.has(l.node_id)&&!v19Ids.has(l.node_id)&&!v20Ids.has(l.node_id)&&!v21Ids.has(l.node_id)&&!v22Ids.has(l.node_id)&&!v23Ids.has(l.node_id)&&!v24Ids.has(l.node_id)&&!v25Ids.has(l.node_id)&&!v26Ids.has(l.node_id)&&!v27Ids.has(l.node_id)&&!v28Ids.has(l.node_id)).length,240,"historical V17 240 complete lectures lost");
+assert.equal(active.filter(l=>!v18Ids.has(l.node_id)&&!v19Ids.has(l.node_id)&&!v20Ids.has(l.node_id)&&!v21Ids.has(l.node_id)&&!v22Ids.has(l.node_id)&&!v23Ids.has(l.node_id)&&!v24Ids.has(l.node_id)&&!v25Ids.has(l.node_id)&&!v26Ids.has(l.node_id)&&!v27Ids.has(l.node_id)&&!v28Ids.has(l.node_id)&&!v29Ids.has(l.node_id)).length,240,"historical V17 240 complete lectures lost");
 assert.deepEqual(additions.map(x=>x.id),ids,"stage V17 learning order changed");
 assert.equal(c.nodes.length,656);
 const nodes=new Map(c.nodes.map(x=>[x.id,x]));

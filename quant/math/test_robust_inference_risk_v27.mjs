@@ -11,11 +11,11 @@ const core=["lessons-foundations.json","lessons-advanced.json","lessons-more.jso
 const ext=manifest.modules.flatMap(m=>{const rows=load(m.path).lessons;assert.equal(rows.length,m.lessons,"manifest row count "+m.path);return rows;});
 const nodes=new Map(catalog.nodes.map(n=>[n.id,n]));
 assert.deepEqual(added.map(l=>l.id),targets,"V27 canonical lecture order");
-assert.equal(manifest.modules.length,73);
-assert.equal(manifest.expected_lessons,189);
+assert.equal(manifest.modules.length,75);
+assert.equal(manifest.expected_lessons,195);
 assert.equal(core.length,123);
-assert.equal(ext.length,189);
-assert.equal(new Set([...core,...ext].map(l=>l.node_id)).size,312);
+assert.equal(ext.length,195);
+assert.equal(new Set([...core,...ext].map(l=>l.node_id)).size,318);
 assert.equal(catalog.nodes.length,656);
 assert.equal(catalog.chapters.length,109);
 let deep=0,math=0,refs=0,links=0;
