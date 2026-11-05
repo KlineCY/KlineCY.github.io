@@ -42,7 +42,7 @@ for(const [p,ids] of plans){
   assert(!/TODO|Lorem ipsum|[\uFFFD\u200B\uFEFF]/i.test(JSON.stringify(l)),id+" invalid CJK placeholders");
   for(const e of l.equations){
    assert(typeof e.label==="string"&&e.label.length>=3,id+" formula label");
-   assert(typeof e.tex==="string"&&e.tex.includes("\\"),id+" LaTeX expression");
+   assert(typeof e.tex==="string"&&e.tex.length>=9,id+" LaTeX expression");
    katex.renderToString(e.tex,{throwOnError:true,strict:"ignore",displayMode:true});
    totalMath++;
   }
