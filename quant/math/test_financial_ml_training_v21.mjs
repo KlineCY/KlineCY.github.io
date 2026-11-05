@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import katex from "katex";
 const root=new URL("./",import.meta.url);
 const read=p=>JSON.parse(fs.readFileSync(new URL(p,root),"utf8"));
+const v24Ids=new Set(["statistics-x003","statistics-x004","mlmath-x003","mlmath-x004"]);
 const manifest=read("lessons-manifest.json"),curriculum=read("curriculum.json");
 const core=["lessons-foundations.json","lessons-advanced.json","lessons-more.json"].flatMap(p=>read(p).lessons);
 const modules=manifest.modules.flatMap(m=>{
@@ -24,7 +25,7 @@ assert.equal(all.length,282);
 assert.equal(actualIds.size,282,"no duplicate completed math ID");
 const v22Ids=["timeseries-n0244","timeseries-n0245","timeseries-n0248","timeseries-n0249","timeseries-n0250","timeseries-n0251","timeseries-n0254","timeseries-n0255"];
 const v23Ids=["timeseries-n0256","timeseries-n0257","timeseries-n0258","timeseries-n0259"];
-assert.equal(all.filter(l=>!newIds.includes(l.node_id)&&!v22Ids.includes(l.node_id)&&!v23Ids.includes(l.node_id)).length,258,"all 258 original complete math lectures retained");
+assert.equal(all.filter(l=>!newIds.includes(l.node_id)&&!v22Ids.includes(l.node_id)&&!v23Ids.includes(l.node_id)&&!v24Ids.has(l.node_id)).length,258,"all 258 original complete math lectures retained");
 assert.equal(curriculum.nodes.length,656);
 let sections=0,formulas=0,sourceCount=0,linkCount=0;
 for(const l of added){
