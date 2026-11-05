@@ -1,0 +1,307 @@
+{
+  "version": 1,
+  "revision": "2026-11-05",
+  "focus": "多变量协整：Engle–Granger残差检验与Johansen矩阵秩识别",
+  "lessons": [
+    {
+      "id": "timeseries-n0256",
+      "node_id": "timeseries-n0256",
+      "title": "协整与Engle-Granger",
+      "definition": "协整指多个各自通常为一阶单整I(1)的非平稳序列，存在一个非零线性组合却为平稳I(0)。若两个资产的对数价格x_t与y_t均为I(1)，但e_t=y_t−c−βx_t平稳，则(1,−β)是协整向量（其非零比例倍数表示同一方向）。Engle–Granger两步法先用水平关系估计β和截距，再检验估计残差是否存在单位根。第二步由于使用了估计生成的残差，必须采用适当协整检验临界值，不能直接照搬普通ADF。",
+      "assumptions": "两个序列须先检验各自单整阶数，一般在I(1)的设定下讨论同阶协整；协整关系的截距、确定性趋势以及协变量个数必须事先指定。若两步法的长期关系确实存在，还需适当弱依赖与参数稳定性支持；协整本身不意味着交易成本后存在均值回归套利。回归残差检验在不存在协整时的分布不是普通ADF分布。",
+      "properties": [
+        "共同随机趋势可能在特定线性组合中相消，从而使价差平稳，即使个别价格序列不平稳。",
+        "Engle–Granger两步法的残差检验临界值与原假设单位根下的普通ADF不同。",
+        "在样本内选出高度相关的两只ETF不能替代价格协整诊断；高相关收益本身不是协整的定义。"
+      ],
+      "formulas": [
+        {
+          "label": "I(1)两变量的长期关系",
+          "tex": "e_t=y_t-c-\\beta x_t\\sim I(0),\\quad x_t,y_t\\sim I(1)"
+        },
+        {
+          "label": "协整向量",
+          "tex": "z_t=(y_t,x_t)^\\top,\\qquad b=(1,-\\beta)^\\top,\\qquad b^\\top z_t-c=e_t"
+        },
+        {
+          "label": "EG残差单位根回归",
+          "tex": "\\Delta\\widehat e_t=\\delta\\widehat e_{t-1}+\\sum_{j=1}^p\\gamma_j\\Delta\\widehat e_{t-j}+u_t"
+        },
+        {
+          "label": "长期共同趋势抵消示例",
+          "tex": "y_t=2x_t+u_t,\\quad u_t=\\tfrac12u_{t-1}+\\xi_t"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "若x_t为随机游走而y_t=2x_t+u_t，且u_t是|0.5|<1的平稳AR(1)，则y_t继承共同随机趋势，但y_t−2x_t=u_t为I(0)。",
+          "tex": "y_t-2x_t=u_t,\\qquad u_t=0.5u_{t-1}+\\xi_t"
+        },
+        {
+          "explanation": "第一步以水平回归构造残差e_hat=y−c_hat−β_hat x；第二步对估计残差进行单位根型回归。因为β_hat也来自同一随机样本，残差的零假设统计分布与事先给定e的ADF不同。",
+          "tex": "\\widehat e_t=y_t-\\widehat c-\\widehat\\beta x_t"
+        },
+        {
+          "explanation": "若平稳偏差u_t遵循AR(1)系数0.5，则在零均值新冲击下E_t[u_{t+h}]=0.5^h u_t，描述的是已定义协整误差的条件均值回归而非资产收益无风险套利。",
+          "tex": "E_t[u_{t+h}]=0.5^h u_t"
+        }
+      ],
+      "example": "令共同I(1)趋势x_t在连续两期分别为100和101，y_t=2x_t+u_t，协整误差u_t依次为3和1，则y_t分别为203和203；两期价差y−2x分别为3和1，后者低于前者。若新冲击为0、u_t按0.5衰减，则从u=3出发两期后的条件均值是3×0.5²=0.75；这些数值只体现统计协整与误差回复，不代表可锁定交易利润。",
+      "application": "研究同类指数ETF或指数与期货的相对定价关系时，可以在历史训练窗口检验对数价格协整并估计滚动对冲比率。必须按每个ETF真实上市日期、成交能力、分红与费用口径建立可交易价差，并在独立的时间外阶段评价协整关系是否持续。",
+      "caveat": "Engle–Granger对归一化、方向与多个协整关系较敏感；两序列若本来I(0)则不应把其相关性称作I(1)协整。历史协整可因跟踪标的、基金费率、结构变化或交易容量而失效，统计均值回复不是无成本的套利。",
+      "deep_sections": [
+        {
+          "title": "I(1)水平变量如何共享随机趋势",
+          "question": "两个非平稳资产价格为什么可能形成平稳线性组合？",
+          "paragraphs": [
+            "若两个资产都受同一随机趋势驱动，其水平值通常不存在稳定方差。然而只要两者暴露于共同趋势的比例恰好匹配，适当的线性组合就能把不平稳部分消去。",
+            "协整检验关注的是这一线性组合是否I(0)，而不是两个资产各自收益率相关有多高。收益率高度相关仍可能对应随时间漂移的价格差。"
+          ],
+          "formulas": [
+            {
+              "label": "I(1)水平变量如何共享随机趋势",
+              "tex": "y_t=2x_t+u_t,\\quad y_t-2x_t=u_t\\sim I(0)"
+            }
+          ],
+          "proof": "对x_t随机游走和|φ|<1的平稳u_t令y_t=2x_t+u_t，任意固定t的水平包含共同I(1)趋势，差分的线性组合会消去它，仅剩平稳扰动。",
+          "worked": "x依次100、101，协整误差3、1时y为203、203，长期对冲组合y−2x为3与1。",
+          "limitation": "协整向量只确定到比例倍数；资产实际对冲数量还需要单位、价格、乘数与融资条件换算。"
+        },
+        {
+          "title": "Engle–Granger两步与特殊临界值",
+          "question": "为什么残差ADF不能直接使用单变量ADF阈值？",
+          "paragraphs": [
+            "两步法用同一批非平稳观察先估计长期关系，再对估计残差进行单位根回归。残差经过水平回归，受到回归设计施加的正交约束。",
+            "因此在没有协整的原假设下，残差ADF统计量不服从对一条预先给定原序列进行ADF时的同一个极限分布，需选择EG或MacKinnon协整检验临界值。"
+          ],
+          "formulas": [
+            {
+              "label": "Engle–Granger两步与特殊临界值",
+              "tex": "\\widehat e_t=y_t-\\widehat c-\\widehat\\beta x_t"
+            }
+          ],
+          "proof": "残差是估计β、c后的随机函数，其随机性与原I(1)回归量相关；残差单位根统计量的极限分布要计入这一估计步骤，不能引用固定观测序列的普通ADF临界值。",
+          "worked": "β=2、c=0时，以(100,203)和(101,203)计算残差分别3和1，残差是否I(0)仍需要远多于两期的时序检验。",
+          "limitation": "两个资产几乎完全共线时统计计算可能数值不稳定，选择错误的趋势规格会改变检验所用临界值。"
+        },
+        {
+          "title": "平稳协整误差与误差修正速度",
+          "question": "价差向零返回可以用什么数学量描述？",
+          "paragraphs": [
+            "协整关系只说明长期误差平稳，不直接指定每期如何回到均衡。如果进一步设定误差服从稳定AR(1)，其条件均值会以系数φ的幂次衰减。",
+            "衰减速度是统计模型参数而不是无风险交易机会，未来创新和流动性成本仍可主导真实可实现盈亏。"
+          ],
+          "formulas": [
+            {
+              "label": "平稳协整误差与误差修正速度",
+              "tex": "E_t[e_{t+h}]=\\phi^h e_t\\quad(|\\phi|<1)"
+            }
+          ],
+          "proof": "AR(1)误差递推e_{t+1}=φe_t+ξ_{t+1}，在未来创新对当期信息零均值时，逐步取条件期望得到φ^h e_t。",
+          "worked": "如果当前偏差3、φ=0.5，则两期后条件期望为3×0.25=0.75，尚不等于已实现结果。",
+          "limitation": "α、β关系若随市场制度变化，固定半衰期和稳定协整假设可能不再成立。"
+        },
+        {
+          "title": "ETF配对与时间外协整有效性",
+          "question": "为什么训练期协整不意味着ETF配对交易无风险？",
+          "paragraphs": [
+            "ETF复制不同指数时，即使历史对数价格接近一个稳定长期关系，资产跟踪费、股息调整、跟踪误差及基金上市存续都会造成偏离。",
+            "策略还必须估计可以执行的两腿头寸、借券和成交价差，检验未来协整稳定性，并对多组合筛选的样本外数据窥探进行控制。"
+          ],
+          "formulas": [
+            {
+              "label": "ETF配对与时间外协整有效性",
+              "tex": "P_t^{\\rm spread}=y_t-\\widehat\\beta_{\\rm train}x_t"
+            }
+          ],
+          "proof": "历史训练窗口估计对冲比率并在测试期冻结。价差只是模型定义的线性组合，其收益映射取决于交易的价格、单位和资金账户。",
+          "worked": "训练期e=3向1下降2单位，不等于按ETF价格执行两腿交易必能盈利2货币单位，因为仓位、融资和滑点未计入。",
+          "limitation": "若样本外ETF股息复权版本或成份标的发生变化，历史对冲比率可能失效，需如实记录版本与停止条件。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "timeseries-n0250",
+          "label": "先修：差分与ARIMA"
+        },
+        {
+          "kind": "math",
+          "id": "timeseries-n0254",
+          "label": "先修：ADF单位根与临界值"
+        },
+        {
+          "kind": "math",
+          "id": "timeseries-n0257",
+          "label": "扩展：Johansen秩检验"
+        },
+        {
+          "kind": "math",
+          "id": "timeseries-n0258",
+          "label": "后续：ECM动态调整"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Engle and Granger (1987), Co-Integration and Error Correction: Representation, Estimation, and Testing",
+          "url": "https://doi.org/10.2307/1913236"
+        },
+        {
+          "title": "Statsmodels coint, augmented Engle-Granger two-step cointegration test and MacKinnon critical values",
+          "url": "https://www.statsmodels.org/stable/generated/statsmodels.tsa.stattools.coint.html"
+        }
+      ],
+      "checked_status": "V23完整精讲：多变量I(1)假设、向量秩识别、四层证明、独立算例与时间外交易约束"
+    },
+    {
+      "id": "timeseries-n0257",
+      "node_id": "timeseries-n0257",
+      "title": "Johansen检验",
+      "definition": "Johansen协整检验基于多变量向量误差修正模型（VECM）的长期调整矩阵Π，使用其矩阵秩判断多个I(1)序列中独立平稳线性组合的数量。若含k个I(1)序列，0<rank(Π)=r<k表示存在r条独立协整关系，Π可写成αβᵀ，其中β列张成协整空间、α描述调整系数。迹统计量和最大特征根统计量依赖经过适当处理的特征根，并使用与确定性项、变量维度对应的非标准临界值。",
+      "assumptions": "向量z_t包含k个可合理视为I(1)的序列，VECM的滞后阶数、常数或确定性趋势的位置事先说明，残差满足可使用Johansen秩检验渐近理论的条件。设排序特征根1>λ̂₁≥⋯≥λ̂_k≥0；教学计算只演示统计量数值，不未经检验假定真实金融样本对应的临界值。",
+      "properties": [
+        "Johansen能够一次检验多变量系统的协整秩，不仅是对某一给定配对归一化做单一残差检验。",
+        "协整秩0表示该I(1)系统缺少协整方向，秩介于0与k之间表示独立长期均衡数；满秩通常提示水平系统已平稳，与全变量I(1)前提不符。",
+        "迹检验与最大特征根检验考察不同零假设序列，可能在接近临界值时给出不同秩。"
+      ],
+      "formulas": [
+        {
+          "label": "VECM分解",
+          "tex": "\\Delta z_t=\\Pi z_{t-1}+\\sum_{j=1}^{p-1}\\Gamma_j\\Delta z_{t-j}+u_t,\\quad\\Pi=\\alpha\\beta^\\top"
+        },
+        {
+          "label": "协整秩",
+          "tex": "r=\\operatorname{rank}(\\Pi),\\quad 0\\le r\\le k"
+        },
+        {
+          "label": "Johansen迹统计量",
+          "tex": "J_{\\rm trace}(r)=-T\\sum_{i=r+1}^{k}\\log(1-\\widehat\\lambda_i)"
+        },
+        {
+          "label": "最大特征根统计量",
+          "tex": "J_{\\rm max}(r,r+1)=-T\\log(1-\\widehat\\lambda_{r+1})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对于Π秩r，可以把Π分解为k×r矩阵α与β的乘积αβᵀ。向量βᵀz描述r个长期平稳关系，α将这些偏离映射为每个资产的短期调整。",
+          "tex": "\\Pi z_{t-1}=\\alpha(\\beta^\\top z_{t-1})"
+        },
+        {
+          "explanation": "迹统计量对第r+1至第k个小特征根的log(1−λ̂)求和并乘−T，而最大特征根统计量仅取第r+1个。两种统计量都需要各自临界值。",
+          "tex": "J_{\\rm trace}(r)=\\sum_{i=r}^{k-1}J_{\\rm max}(i,i+1)"
+        },
+        {
+          "explanation": "当k=2、T=100、λ̂₁=0.20、λ̂₂=0.02时，迹检验r≤0统计量−100[log0.8+log0.98]，而r≤1统计量−100log0.98；该代数不能给出显著性结论。",
+          "tex": "J_{\\rm trace}(0)=-100(\\log0.8+\\log0.98)"
+        }
+      ],
+      "example": "设两个变量、有效样本量T=100，Johansen排序后的示范特征根为λ̂=(0.20,0.02)。则max-eigen r=0统计量−100log0.8≈22.3144，r=1统计量−100log0.98≈2.0203；trace r=0统计量为22.3144+2.0203≈24.3347，trace r=1≈2.0203。必须将它们与正确确定性项及滞后规格的临界值比较，不能直接使用普通χ²临界值。",
+      "application": "研究三个或更多跨市场ETF、利率期限序列和相近标的的长期联动，可先验证I(1)和序列经济含义，再使用Johansen识别协整秩及β空间。应用时还需要处理交易时间不一致、汇率、基金费用、价差与时间外稳定性。",
+      "caveat": "协整向量β的符号、尺度和基底并不唯一；显著性依赖确定性项的放置、滞后阶数和残差性质。市场中的近共线数值不稳定与结构断点可能导致伪秩，协整秩不能自动转化为套利收益。",
+      "deep_sections": [
+        {
+          "title": "协整秩与αβᵀ分解",
+          "question": "多个I(1)时间序列为什么可能不止一条长期关系？",
+          "paragraphs": [
+            "在k维系统中可以存在多个线性独立的协整方向。长期矩阵Π的秩等于这些方向数，而β张成对应空间，α记录每个变量对长期误差的动态反应。",
+            "β本身的系数不是唯一经济解释：对任意可逆r×r矩阵H，αH和β(H⁻¹)ᵀ给出同样Π。分析应重视空间、归一化和经济约束。"
+          ],
+          "formulas": [
+            {
+              "label": "协整秩与αβᵀ分解",
+              "tex": "\\Pi=\\alpha\\beta^\\top,\\quad r=\\operatorname{rank}(\\Pi)"
+            }
+          ],
+          "proof": "当rankΠ=r，可选择满列秩α、β使矩阵Π分解成乘积。若变换α'=αH、β'=β(H⁻¹)ᵀ，则α'β'ᵀ仍等于Π。",
+          "worked": "取β=(1,−2)ᵀ、α=(−0.2,0.1)ᵀ，Π=[[-0.2,0.4],[0.1,−0.2]]，两行成比例，秩为1。",
+          "limitation": "资产价格并不天然具有共同I(1)假设，若有I(0)变量混入，直接把检测秩解释成协整数可能失真。"
+        },
+        {
+          "title": "迹统计量与最大特征根的差异",
+          "question": "为什么Johansen有两种检验统计量？",
+          "paragraphs": [
+            "迹统计量累加当前秩假设之外的全部剩余特征根的信息，用于检验rankΠ≤r；最大特征根只检验从r增加到r+1时的主要边际贡献。",
+            "两者的统计数值不能与同一个普通t或卡方阈值比较，系统的趋势或常数处理不同会改变参考分布。"
+          ],
+          "formulas": [
+            {
+              "label": "迹统计量与最大特征根的差异",
+              "tex": "J_{\\rm trace}(r)=\\sum_{i=r}^{k-1}J_{\\rm max}(i,i+1)"
+            }
+          ],
+          "proof": "把第i个最大特征根统计量−Tlog(1−λ̂_{i+1})从i=r加到k−1，正好得到迹统计量的求和式。",
+          "worked": "两个特征根0.20和0.02、T=100时，最大统计量22.3144与2.0203相加得到迹统计量约24.3347。",
+          "limitation": "统计量接近临界值时两个检验可能对秩给出不同判断，需要透明报告而非反复挑选有利方法。"
+        },
+        {
+          "title": "逐步检验秩与确定性项",
+          "question": "如何避免把全部I(1)系统判成错误的秩？",
+          "paragraphs": [
+            "Johansen秩选择通常从r=0起做序贯检验，在首次不拒绝的假设处停止。具体是否含常数、常数在协整关系内外、趋势处理和短期滞后阶数均会影响特征根及临界值。",
+            "如果系统原变量并非同阶I(1)，或者确定性趋势实际规格被误设，则所谓选择出来的秩不一定有合理的共同趋势含义。"
+          ],
+          "formulas": [
+            {
+              "label": "逐步检验秩与确定性项",
+              "tex": "H_0:\\operatorname{rank}(\\Pi)\\le r,\\qquad r=0,1,\\ldots,k-1"
+            }
+          ],
+          "proof": "秩为r意味着Π只有r个非零独立方向，其余k−r个方向对应共同随机趋势。序贯检验从零秩开始，利用迹或最大特征根统计量决定是否增加秩。",
+          "worked": "示范特征根给出r≤0迹统计量24.3347，但没有所选趋势规格的临界值，无法从这个数字独立判定rankΠ。",
+          "limitation": "若将同一个数据集以不同趋势规格重复检验直到得到希望的协整秩，会形成模型选择偏差。"
+        },
+        {
+          "title": "ETF长期联动与多变量对冲空间",
+          "question": "协整秩为一是不是等于发现稳定的交易配对？",
+          "paragraphs": [
+            "协整检验只在所估计样本和假设下确认长期线性组合的统计结构。交易策略还需解决协整基底的经济归一化、资产报价单位、再平衡时点与实际融资需求。",
+            "对于多个ETF的共同趋势分析，β的数量和载荷可能随指数调整与监管变化漂移，需要把估计和验证按时间严格分开，并保留已退市基金。"
+          ],
+          "formulas": [
+            {
+              "label": "ETF长期联动与多变量对冲空间",
+              "tex": "e_t=\\beta^\\top z_t,\\qquad \\Delta z_t\\supset\\alpha e_{t-1}"
+            }
+          ],
+          "proof": "β把多变量水平投影到长期误差方向，α则在VECM中量化该误差对各变量的短期反应。统计关系并不规定具体可执行仓位规模。",
+          "worked": "β=(1,−2)时，对水平(203,100)的长期偏离为3；真实ETF交易需要另外换算两腿数量与成本。",
+          "limitation": "协整秩和对冲载荷不会自动免除汇率、费率、交易冲击或波动相关的市场风险。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "timeseries-n0256",
+          "label": "先修：Engle–Granger协整"
+        },
+        {
+          "kind": "math",
+          "id": "timeseries-n0255",
+          "label": "先修：KPSS与ADF对照"
+        },
+        {
+          "kind": "math",
+          "id": "timeseries-n0258",
+          "label": "后续：误差修正ECM"
+        },
+        {
+          "kind": "math",
+          "id": "timeseries-n0259",
+          "label": "后续：向量VAR"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Statsmodels coint_johansen: trace and maximum-eigenvalue cointegration rank tests",
+          "url": "https://www.statsmodels.org/stable/generated/statsmodels.tsa.vector_ar.vecm.coint_johansen.html"
+        },
+        {
+          "title": "Statsmodels VECM: cointegration rank and deterministic-term specification",
+          "url": "https://www.statsmodels.org/stable/generated/statsmodels.tsa.vector_ar.vecm.VECM.html"
+        }
+      ],
+      "checked_status": "V23完整精讲：多变量I(1)假设、向量秩识别、四层证明、独立算例与时间外交易约束"
+    }
+  ]
+}
