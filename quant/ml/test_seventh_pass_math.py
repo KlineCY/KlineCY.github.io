@@ -28,7 +28,7 @@ class SeventhPassMath(unittest.TestCase):
             domain_counts[key[:3]] = domain_counts.get(key[:3], 0) + 1
             domain = int(key[1:3])
             enhanced = True
-            expected_equations = 6 if domain <= 8 else 5
+            expected_equations = 6 if domain <= 16 else 5
             expected_pitfalls = 3
             self.assertEqual(len(chapter["equations"]), expected_equations, key)
             self.assertGreaterEqual(len(chapter["worked_example"]), 60, key)
@@ -36,7 +36,7 @@ class SeventhPassMath(unittest.TestCase):
             self.assertEqual(len(chapter["derivation"]), expected_equations, key)
             self.assertEqual(len(chapter["protocol"]), expected_equations, key)
             self.assertEqual(len(chapter["pitfalls"]), expected_pitfalls, key)
-            expected_revision = "V56" if domain <= 8 else "V37"
+            expected_revision = "V56" if domain <= 8 else ("V57" if domain <= 16 else "V37")
             self.assertTrue(chapter.get("revision_note", "").startswith(expected_revision), key)
             self.assertTrue(chapter["source_title"], key)
         self.assertEqual(domain_counts, {f"m{i:02d}": 4 for i in range(1, 25)})
