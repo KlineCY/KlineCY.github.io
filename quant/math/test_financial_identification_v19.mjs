@@ -49,7 +49,7 @@ for(const l of [...introduced,fm]){
  assert(l.application.length>75&&l.caveat.length>70,"financial boundaries too short "+l.id);
  assert(l.properties.length>=3&&l.derivation.length>=3&&l.formulas.length>=4);
  const deep=l===fm?l.deep_sections.slice(-4):l.deep_sections;
- assert.equal(deep.length,4);
+ assert.equal(deep.length,l===fm?4:5);
  assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,l.deep_sections.length);
  for(const s of deep){
   assert(s.question.length>=12&&s.paragraphs.length===2&&s.paragraphs.every(p=>p.length>=45),"thin CJK explanation "+l.id+":"+s.title);
@@ -71,8 +71,8 @@ for(const l of [...introduced,fm]){
  for(const src of l.sources||[]){assert(src.title.length>=25&&/^https:\/\//.test(src.url));sources++}
  assert(!JSON.stringify(l).includes("\ufffd"),"UTF-8 replacement symbol in "+l.id);
 }
-assert.equal(sections,32);
-assert(formulas>=90&&sources>=16&&links>=32,"minimum formulas, source and cross-link coverage");
+assert.equal(sections,39);
+assert(formulas>=111&&sources>=16&&links>=32,"minimum formulas, source and cross-link coverage");
 const near=(a,b,id)=>assert(Math.abs(a-b)<1e-9,"numeric invariant "+id+": "+a+" versus "+b);
 const cases=[
  ["econometrics-n0232",(16-10)-(11-8),3,"DiD=6−3=3"],
@@ -89,6 +89,18 @@ near((.02+.04+.06)/3,.04,"Fama-MacBeth beta premium mean");
 near((((.02-.04)**2)+((.04-.04)**2)+((.06-.04)**2))/2,.0004,"Fama-MacBeth unbiased time variance");
 near(Math.sqrt(.0004/3),.011547005383792516,"Fama-MacBeth date-level standard error");
 assert(fm.example.includes("0.011547"));
+
+near(3-2,1,"V54 DiD exact untreated trend selection bias");
+near(Math.pow(1/4000,1/5),.1903653938715871,"V54 RDD MSE-optimal boundary bandwidth");
+near(Math.pow(32,-1/5),.5,"V54 RDD sample scaling n32");
+near(2*.0004+2*.0001,.001,"V54 two-day CAR autocovariance variance");
+near(Math.sqrt(.001),.03162277660168379,"V54 CAR two-day risk");
+near(.05-1.2*.04,.002,"V54 first ETF single factor alpha");
+near(.01-.5*.04,-.01,"V54 second ETF single factor alpha");
+near(.021/.01-.02/.01,.1,"V54 weak IV reduced form sensitivity");
+near(.0004+.0009/100,.000409,"V54 common date risk cannot diversify");
+near((.0004+.0009)/100,.000013,"V54 false independence baseline");
+near(.5*.10+.5*(-.30),-.10,"V54 survivor IPW population reweighting");
 near(.625/(.75**2),1.1111111111111112,"HC3 leverage correction");
 const mathHtml=fs.readFileSync(new URL("index.html",root),"utf8");
 const mlHtml=fs.readFileSync(new URL("../ml/index.html",root),"utf8");
@@ -102,4 +114,4 @@ for(const name of ["styles.css","../ml/atlas.css"]){
  const style=fs.readFileSync(new URL(name,root),"utf8");
  assert(style.includes("overflow-x:auto")&&style.includes("line-break:strict")&&style.includes("@media print")&&style.includes(":focus-visible"),"CJK/TeX mobile, keyboard and print safeguards missing "+name);
 }
-console.log("PASS V19: 7 genuinely new + 1 preserved/deepened lecture, 32 complete sections, "+formulas+" KaTeX renders, "+sources+" academic references, "+links+" crosslinks, 278 unique lectures, 656-node DAG and 7 independent numeric tests.");
+console.log("PASS V19: 7 original V19 lessons deepened in V54 plus 1 preserved lecture, 39 complete sections, "+formulas+" KaTeX renders, "+sources+" academic references, "+links+" crosslinks, 278 unique lectures, 656-node DAG and 7 independent numeric tests.");
