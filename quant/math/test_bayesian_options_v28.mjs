@@ -51,7 +51,7 @@ near(1/(4*(2*2+1)),.05,"V45 Beta prior variance");
 near(1/(4*(2*20+1)),1/164,"V45 concentrated Beta prior");
 near(10*11/(14*15)-(10/14)**2,40/(14**2*15),"V45 posterior predictive dependence");
 near(Math.exp(-1.96),.140858420921045,"V45 transformed ET lower");
-near(100*Math.exp(-.01)-100*Math.exp(-.03),1.96046213002139,"V45 prepaid dividend-adjusted parity",1e-8);
+near(100*Math.exp(-.01)-100*Math.exp(-.03),1.960430020065985,"V45 prepaid dividend-adjusted parity",1e-8);
 near(.5*.02*2**2,.04,"V45 local Gamma hedge residual");
 near(.20/40,.005,"V45 IV bid ask spread");
 near((11-15)/10,-.4,"V45 irregular put butterfly first slope");
