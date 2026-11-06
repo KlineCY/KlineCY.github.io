@@ -38,14 +38,14 @@ for(let index=0;index<files.length;index++){
   assert(!/TODO|Lorem ipsum|[\uFFFD\u200B\uFEFF]/i.test(JSON.stringify(lesson)),id+" broken CJK or draft placeholder");
   if(v40){
    enhancedIds.add(id);
-   assert(lesson.revision_note?.startsWith("V40"),id+" chapter provenance");
+   assert(index===4 ? lesson.revision_note?.startsWith("V48") : lesson.revision_note?.startsWith("V40"),id+" original V40 provenance or V48 verified enhancement");
    assert(lesson.worked_example.length>=110,id+" original worked example not expanded");
    assert(lesson.derivation.slice(3).every(x=>x.length>=65),id+" insufficient new proof");
    assert(lesson.protocol.slice(3).every(x=>x.length>=25),id+" insufficient independent validation");
    assert(lesson.pitfalls.at(-1)?.length>=30,id+" insufficient boundary");
    v40Chars+=lesson.derivation.slice(3).join("").length+lesson.protocol.slice(3).join("").length+lesson.pitfalls.at(-1).length;
   }else{
-   assert(/^V4[1-7]/.test(lesson.revision_note||""),id+" missing later revision");
+   assert(/^V4[1-8]/.test(lesson.revision_note||""),id+" missing later revision");
    assert(lesson.worked_example.length>=110,id+" old worked arithmetic example lost");
   }
   for(const item of lesson.equations){
@@ -59,7 +59,7 @@ for(let index=0;index<files.length;index++){
 assert.equal(total,122);
 assert.equal(ids.size,122);
 assert.equal(enhancedIds.size,62);
-assert.equal(formulas,665,"122 ninth-stage lectures must retain all 665 V47 formulas");
+assert.equal(formulas,675,"V48 must retain 122 original lessons with 675 strict mathematical expressions");
 assert.equal(domainCount.size,24);
 for(const [id,n] of domainCount){
  const dom=Number(id.slice(1));
@@ -139,4 +139,4 @@ near(.05/100,.0005,"Bonferroni 100 financial factors");
 near(Math.ceil(100/5),20,"block bootstrap count");
 near(.8-.5,.3,"calibration failure gap");
 
-console.log("PASS V40/V41: 122 deeply revised original ninth-cycle lessons; 665 strict KaTeX equations (244 V40+V41 additions); six-stage 62-link navigation, mathematical invariant checks, CJK/mobile/print style, unchanged original 48 numeric examples and 720-core manifest.");
+console.log("PASS V40/V41: 122 deeply revised original ninth-cycle lessons; 675 strict KaTeX equations (244 V40+V41 additions); six-stage 62-link navigation, mathematical invariant checks, CJK/mobile/print style, unchanged original 48 numeric examples and 720-core manifest.");
