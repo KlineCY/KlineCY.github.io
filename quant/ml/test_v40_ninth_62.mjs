@@ -30,11 +30,11 @@ for(let index=0;index<files.length;index++){
   assert(lesson.title?.length>=8,id+" original title lost");
   assert(lesson.overview?.length>=60,id+" original overview lost");
   assert(lesson.worked_example?.length>=60,id+" original arithmetic example lost");
-  assert.equal(lesson.equations.length,5,id+" V40/V41 enriched formulas");
-  assert.equal(lesson.derivation.length,5,id+" V40/V41 full derivation");
-  assert.equal(lesson.protocol.length,5,id+" V40/V41 empirical checks");
-  assert.equal(lesson.pitfalls.length,3,id+" failure boundaries");
-  assert.equal(new Set(lesson.protocol).size,5,id+" duplicated empirical protocols");
+  assert(lesson.equations.length>=5,id+" V40/V44 enriched formulas");
+  assert(lesson.derivation.length>=5,id+" V40/V44 full derivation");
+  assert(lesson.protocol.length>=5,id+" V40/V44 empirical checks");
+  assert(lesson.pitfalls.length>=3,id+" failure boundaries");
+  assert.equal(new Set(lesson.protocol).size,lesson.protocol.length,id+" duplicated empirical protocols");
   assert(!/TODO|Lorem ipsum|[\uFFFD\u200B\uFEFF]/i.test(JSON.stringify(lesson)),id+" broken CJK or draft placeholder");
   if(v40){
    enhancedIds.add(id);
@@ -45,7 +45,7 @@ for(let index=0;index<files.length;index++){
    assert(lesson.pitfalls.at(-1)?.length>=30,id+" insufficient boundary");
    v40Chars+=lesson.derivation.slice(3).join("").length+lesson.protocol.slice(3).join("").length+lesson.pitfalls.at(-1).length;
   }else{
-   assert(lesson.revision_note?.startsWith("V41"),id+" missing later revision");
+   assert(/^V4[1-4]/.test(lesson.revision_note||""),id+" missing later revision");
    assert(lesson.worked_example.length>=110,id+" old worked arithmetic example lost");
   }
   for(const item of lesson.equations){
@@ -59,7 +59,7 @@ for(let index=0;index<files.length;index++){
 assert.equal(total,122);
 assert.equal(ids.size,122);
 assert.equal(enhancedIds.size,62);
-assert.equal(formulas,610,"122x5 equations (V40 124 new and V41 120 new)");
+assert.equal(formulas,635,"122 core ninth-stage lectures must retain all 635 V44 formulas");
 assert.equal(domainCount.size,24);
 for(const [id,n] of domainCount){
  const dom=Number(id.slice(1));
@@ -139,4 +139,4 @@ near(.05/100,.0005,"Bonferroni 100 financial factors");
 near(Math.ceil(100/5),20,"block bootstrap count");
 near(.8-.5,.3,"calibration failure gap");
 
-console.log("PASS V40/V41: 122 deeply revised original ninth-cycle lessons; 610 strict KaTeX equations (244 V40+V41 additions); six-stage 62-link navigation, mathematical invariant checks, CJK/mobile/print style, unchanged original 48 numeric examples and 720-core manifest.");
+console.log("PASS V40/V41: 122 deeply revised original ninth-cycle lessons; 635 strict KaTeX equations (244 V40+V41 additions); six-stage 62-link navigation, mathematical invariant checks, CJK/mobile/print style, unchanged original 48 numeric examples and 720-core manifest.");
