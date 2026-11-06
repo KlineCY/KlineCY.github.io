@@ -24,7 +24,7 @@ for(const [idx,path] of files.entries()){
   assert(!allIds.has(id),"duplicate lesson "+id);
   allIds.add(id);
   domains.set(id.slice(0,3),(domains.get(id.slice(0,3))||0)+1);
-  const goal=idx<=2?6:5;
+  const goal=idx<=3||idx===5?6:5;
   assert.equal(lesson.equations.length,goal,id+" mathematical depth");
   assert.equal(lesson.derivation.length,goal,id+" proof depth");
   assert.equal(lesson.protocol.length,goal,id+" empirical audit depth");
@@ -41,7 +41,7 @@ for(const [idx,path] of files.entries()){
   }
   if(isV38){
    v38Ids.add(id);enhanced++;
-   assert(lesson.revision_note?.startsWith(idx===0?"V51":idx<=2?"V52":"V38"),id+" V38 or V51/V52 canonical provenance");
+   assert(lesson.revision_note?.startsWith(idx===0?"V51":idx<=2?"V52":idx===3||idx===5?"V53":"V38"),id+" V38 or V51/V52 canonical provenance");
    assert(lesson.derivation.slice(3).every(s=>s.length>=65),id+" missing extended reasoning");
    assert(lesson.protocol.slice(3).every(s=>s.length>=25),id+" missing reproduction steps");
    assert(lesson.pitfalls.at(-1)?.length>=30,id+" invalidity boundary too short");
@@ -54,7 +54,7 @@ assert.equal(allIds.size,120);
 assert.equal(enhanced,60);
 assert.equal(retained,60);
 assert.equal(v38Ids.size,60);
-assert.equal(allEquations,630,"V52 retains all 600 V38/V39 eighth-cycle formulas and adds thirty rigorous formulas");
+assert.equal(allEquations,650,"V53 retains all 600 eighth-cycle formulas and adds 50 audited mathematical extensions");
 assert.equal(originalEquations,300);
 assert.equal(domains.size,24);
 for(const n of domains.values())assert.equal(n,5,"exactly five eighth-stage lessons per ML domain");
@@ -213,4 +213,4 @@ assert.deepEqual(restoredWeights,originalWeights,"V52 asset ID order must invert
 near((0+3*.2)/(1+3),.15,"V52 leave-one-out target encoding");
 near((1+0+3*.2)/(2+3),.32,"V52 full class target encoding leakage");
 
-console.log("PASS V52/V38+V39: 60 V38 and 60 V39 enhanced eighth-cycle canonical lectures; 120 lessons/24 domains, 630 strict KaTeX equations (240 added across V38+V39), substantive derivations/protocols, 60 route links, original numeric examples and responsive Chinese/formula layout.");
+console.log("PASS V52/V38+V39: 60 V38 and 60 V39 enhanced eighth-cycle canonical lectures; 120 lessons/24 domains, 650 strict KaTeX equations (240 added across V38+V39), substantive derivations/protocols, 60 route links, original numeric examples and responsive Chinese/formula layout.");
