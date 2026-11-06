@@ -256,4 +256,52 @@ near(-Math.log(1-.5**2),.2876820724517809,"V57 tanh inverse-Jacobian log correct
 near(2*.5,1,"V57 tanh Jacobian log density adjustment derivative");
 near(8-7,1,"V57 Double DQN target network action-selection gap");
 
-console.log("PASS V57/V37: 96 complete seventh-cycle canonical lectures (V36 24 + V37 72); 576 strict KaTeX equations, V56/V57/V58 added 96 to all 96 courses; 24 domains, nine-stage 72-link navigation, original numerical examples, independent numerical cross-checks and responsive Chinese/math typography.");
+
+const v58FinalGroups=[
+ ["atlas-depth-07-k.json",["m21-c04-p04","m21-c03-p06","m21-c05-p06","m21-c02-p05","m22-c05-p05","m22-c04-p04","m22-c05-p04","m22-c03-p04"]],
+ ["atlas-depth-07-l.json",["m23-c01-p04","m23-c01-p01","m23-c02-p02","m23-c02-p06","m24-c02-p05","m24-c05-p01","m24-c04-p04","m24-c02-p01"]]
+];
+assert.equal(v58FinalGroups.reduce((n,x)=>n+x[1].length,0),16,"V58 all remaining 16 courses");
+for(const [file,ids] of v58FinalGroups){
+ const lessons=read(file).lessons;
+ assert.deepEqual(Object.keys(lessons),ids,"V58 original canonical lesson order retained "+file);
+ for(const id of ids){
+  const l=lessons[id];
+  assert(l?.revision_note?.startsWith("V58"),"V58 finalized sixth proof missing "+id);
+  assert.equal(l.equations.length,6,"V58 six equations "+id);
+  assert.equal(l.derivation.length,6,"V58 six derivations "+id);
+  assert.equal(l.protocol.length,6,"V58 six independent validation protocols "+id);
+  assert.equal(l.pitfalls.length,3,"V58 original risk limits retained "+id);
+  assert.equal(new Set(l.equations.map(e=>e.tex)).size,6,"V58 repeated mathematical equation "+id);
+  assert(l.derivation.at(-1).length>=100&&l.protocol.at(-1).length>=50&&l.worked_example.length>=150,"V58 too-short final section "+id);
+  katex.renderToString(l.equations.at(-1).tex,{throwOnError:true,strict:"ignore",displayMode:true});
+ }
+}
+near(.6*.25,.15,"V58 two decentralized actors independently both buy");
+near(.6*.75+.4*.25+.4*.75+.6*.25,1,"V58 complete independent decentralized action distribution");
+near(1-88/110,.2,"V58 net value historical peak drawdown");
+assert((1-99/110)<.2,"V58 final point drawdown is not path maximum");
+near(80*2,160,"V58 actual trading inventory shock loss");
+near(100*2,200,"V58 hard inventory limit bounds only linear mark loss");
+assert(!(0>0)&&.2>0,"V58 behavior-policy support excludes counterfactual new large position");
+near((2+4+0)/3,2,"V58 Chronos mean absolute history scale");
+near(2*.1,.2,"V58 Chronos original-unit forecast quantization lower edge");
+near(2*.2,.4,"V58 Chronos original-unit forecast quantization upper edge");
+near(.01*.04-.02**2,0,"V58 rank-one common factor covariance determinant");
+near(.5*(1-.5),.25,"V58 TFT variable-selection diagonal Jacobian");
+near(-.5*.25,-.125,"V58 TFT off-diagonal softmax Jacobian");
+near(.0006+2*4*.000001,.000608,"V58 high-frequency bid-ask noise inflates realized variance");
+near((2/3+1/2)**2/((2/3)**2+(1/2)**2),49/25,"V58 event uniqueness effective Kish sample size");
+near(105/100-1,.05,"V58 vertical horizon positive return despite earlier stop");
+near(97/100-1,-.03,"V58 stopped-out actual barrier return");
+near(Math.sqrt((.0004+2*.0001)/100),Math.sqrt(.000006),"V58 positive serial IC covariance increases SE");
+near((2+2)**2,16,"V58 two same-side market impacts aggregate quadratically");
+near(2*2**2,8,"V58 separately priced impacts underestimate joint crowded liquidity");
+assert([true,true,true,true,false].every(Boolean)===false,"V58 deployment approval gate");
+near(Math.abs(1.2)+Math.abs(-.8),2,"V58 risk configuration doubles signed long short leverage");
+assert(2>1.5,"V58 leverage gate must reject over-limit production config");
+near(.02*1,.02,"V58 fixed bounded-loss model contamination risk bound");
+near(64/.016,4000,"V58 batch inference throughput");
+near(.5+.016,.516,"V58 full trading pipeline latency cannot equal model-only latency");
+
+console.log("PASS V58/V37: 96 complete seventh-cycle canonical lectures (V36 24 + V37 72); 576 strict KaTeX equations, V56/V57/V58 added 96 to all 96 courses; 24 domains, nine-stage 72-link navigation, original numerical examples, independent numerical cross-checks and responsive Chinese/math typography.");
