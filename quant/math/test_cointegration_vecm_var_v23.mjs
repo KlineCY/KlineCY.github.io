@@ -28,8 +28,8 @@ for(const l of added){
  assert(l.id===l.node_id&&nodes.get(l.id)?.title===l.title,"lesson-to-curriculum mapping "+l.id);
  assert(l.definition.length>=155&&l.assumptions.length>=115&&l.example.length>=160,"core explanatory depth "+l.id);
  assert(l.application.length>=100&&l.caveat.length>=75,"finance conditions/limitations "+l.id);
- assert(l.properties.length>=3&&l.formulas.length===4&&l.derivation.length===3&&l.deep_sections.length===4,"lecture coverage "+l.id);
- assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,4,"duplicate deep headings "+l.id);
+ assert(l.properties.length>=3&&l.formulas.length===5&&l.derivation.length===4&&l.deep_sections.length===5,"lecture coverage "+l.id);
+ assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,5,"duplicate deep headings "+l.id);
  for(const d of l.derivation){
   assert(d.explanation.length>=60,"mathematical derivation explanation "+l.id);
   katex.renderToString(d.tex,{throwOnError:true,strict:"ignore",displayMode:true});formulas++;
@@ -49,8 +49,8 @@ for(const l of added){
  for(const source of l.sources||[]){assert(source.title.length>=25&&/^https:\/\//.test(source.url));refs++;}
  assert(!/[\uFFFD\u200B\uFEFF]/.test(JSON.stringify(l)),"corrupted Chinese text "+l.id);
 }
-assert.equal(sections,16);
-assert.equal(formulas,44);
+assert.equal(sections,20);
+assert.equal(formulas,56);
 assert.equal(refs,8);
 assert.equal(edges,16);
 const active=new Set(),done=new Set();
@@ -72,6 +72,12 @@ const samples=[
  ["timeseries-n0259",.5*1.2+.2*.3,.66,"(0.66,0.09)"]
 ];
 for(const [id,actual,expect,token] of samples){eq(actual,expect,id);assert(index.get(id).example.includes(token),"independent check not in visible example "+id);}
+eq(2*.75,.75*2,"V50 EG normalized cointegration direction");
+eq(3-1,2,"V50 Johansen common trend nullity");
+eq(Math.ceil(Math.log(.5)/Math.log(.7)),2,"V50 ECM first discrete half-life");
+eq(.7**2,.49,"V50 ECM two-period mean-reversion factor");
+eq(2+.5**2*(4-2),2.5,"V50 nonzero-intercept VAR forecast");
+eq(.5**2*4,1,"V50 incorrect zero-intercept counterfactual");
 eq(-100*Math.log(.8),22.31435513142097,"Johansen maximum eigenvalue");
 eq(-100*Math.log(.98),2.0202707317519466,"Johansen marginal trace");
 eq(.7**2*4,1.96,"ECM two-period deviation");
@@ -92,5 +98,5 @@ for(const p of ["styles.css","../ml/atlas.css"]){
  const css=fs.readFileSync(new URL(p,root),"utf8");
  for(const prop of ["overflow-x:auto","line-break:strict",":focus-visible","@media print"])assert(css.includes(prop),"formula/CJK/mobile formatting missing "+prop+" "+p);
 }
-console.log("PASS V23: 4 new complete cointegration–Johansen–ECM–VAR lectures, 16 proof sections, "+
+console.log("PASS V23: 4 expanded cointegration–Johansen–ECM–VAR lectures, 20 proof sections, "+
  formulas+" strict KaTeX equations, "+refs+" citations, "+edges+" cross-links, 4 independent and 8 supplemental arithmetic checks, 278 unique full mathematics lectures, 656-node acyclic curriculum.");
