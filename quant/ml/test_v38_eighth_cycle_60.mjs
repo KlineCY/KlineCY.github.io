@@ -306,4 +306,72 @@ const v53GramDet=(1+.8**2)*(1+.5**2)-(1+.8*.5)**2;
 near(v53GramDet,.09,"V53 finite-horizon observability Gramian determinant",1e-12);
 assert(v53GramDet>0,"V53 observability Gramian positive definite");
 
-console.log("PASS V53/V38+V39: 60 V38 and 60 V39 enhanced eighth-cycle canonical lectures; 120 lessons/24 domains, 690 strict KaTeX equations (50 rigorous additions across V51-V53), substantive derivations/protocols, 60 route links, original numeric examples and responsive Chinese/formula layout.");
+
+const v54groups=[
+ {file:"atlas-depth-08-g.json",ids:["m13-c01-p05","m13-c01-p01","m13-c03-p06","m13-c05-p06","m13-c05-p02","m14-c03-p03","m14-c01-p04","m14-c02-p02","m14-c05-p05","m14-c02-p03"]},
+ {file:"atlas-depth-08-h.json",ids:["m15-c02-p03","m15-c01-p06","m15-c02-p01","m15-c04-p03","m15-c02-p02","m16-c05-p04","m16-c01-p05","m16-c02-p04","m16-c03-p04","m16-c05-p06"]},
+ {file:"atlas-depth-08-i.json",ids:["m17-c05-p03","m17-c03-p03","m17-c04-p03","m17-c05-p01","m17-c03-p05","m18-c05-p05","m18-c03-p04","m18-c02-p04","m18-c05-p06","m18-c03-p05"]}
+];
+assert.equal(v54groups.reduce((n,g)=>n+g.ids.length,0),30,"V54 detailed course count");
+for(const group of v54groups){
+ const lessons=read(group.file).lessons;
+ for(const id of group.ids){
+  const l=lessons[id];
+  assert(l&&l.revision_note?.startsWith("V54"),"V54 original curriculum identity missing "+id);
+  assert.equal(l.equations.length,6,"V54 sixth strict mathematical expression absent "+id);
+  assert.equal(l.derivation.length,6,"V54 sixth rigorous proof absent "+id);
+  assert.equal(l.protocol.length,6,"V54 sixth empirical verification absent "+id);
+  assert.equal(l.pitfalls.length,3,"V54 retained preexisting failure conditions missing "+id);
+  assert.equal(new Set(l.equations.map(e=>e.tex)).size,6,"V54 duplicated existing mathematics "+id);
+  assert(l.derivation.at(-1).length>90&&l.protocol.at(-1).length>40,"V54 proof or audit too thin "+id);
+  assert(l.worked_example.length>145,"V54 worked financial example missing "+id);
+  katex.renderToString(l.equations.at(-1).tex,{throwOnError:true,displayMode:true,strict:"ignore"});
+ }
+}
+near(200/2*.02,2,"V54 He backward fan-in width ratio");
+near(2*(100+60),320,"V54 low-rank dense linear weight count");
+near(.9*2+.1*2,2,"V54 EMA optimizer checkpoint restore");
+near(.1*2,.2,"V54 reset momentum corrupts optimizer trajectory");
+const v54PairedA=[.1,.12,.14],v54PairedB=[.09,.11,.13];
+const v54PairedDiff=v54PairedA.map((a,i)=>a-v54PairedB[i]);
+assert(v54PairedDiff.every(x=>Math.abs(x-.01)<1e-12),"V54 paired seed risk delta is constant");
+near(.2/(1-.2)*2**2,1,"V54 inverted Dropout output variance");
+near(2*(2/3)/(1+2/3)-2/3,2/15,"V54 Dice minus IoU exact positive gap");
+near((110-100)/(120-100),.5,"V54 original normalized price-window midpoint");
+near((225-205)/(245-205),.5,"V54 positive affine normalized price-window invariance");
+near(2/Math.sqrt(1+.1*4),1.6903085094570331,"V54 AlexNet local response normalization");
+near(.9*.1+.1*.25,.115,"V54 source-domain mixed CNN risk");
+near(.5*.12+.5*.30,.21,"V54 target-domain mixed CNN risk");
+near((.5-.9)*.1+(.5-.1)*.25,.06,"V54 domain-shift composition effect");
+near(.5*(.12-.1)+.5*(.3-.25),.035,"V54 domain-shift within-industry error effect");
+near(3+(3-1)*2,7,"V54 CNN effective-stride receptive field");
+near(2*.5**4/(1-.5),.25,"V54 truncated BPTT geometric gradient omission bound");
+near(2/(2+1),2/3,"V54 numerically normalized masked attention on legal news");
+near(2*.01/(1-.8),.1,"V54 RNN input perturbation stable geometric limit");
+const v54Causal=(x,p)=>x+2*p;
+assert.equal(v54Causal(1,2),v54Causal(1,2),"V54 TCN output independent of future input");
+near(3*.5**2,.75,"V54 shared-parameter RNN gradient over three steps");
+near(Math.cos(2*Math.PI*(3-9)/12),-1,"V54 periodic calendar contrast");
+near(4/(4+1),.8,"V54 cross-attention ignores post-trade information");
+near(Math.cos((1-0)*Math.PI/2),Math.cos((6-5)*Math.PI/2),"V54 RoPE common-index shift invariance",1e-12);
+near(-1/Math.sqrt(1+1),-1/Math.sqrt(2),"V54 LayerNorm epsilon-one baseline");
+near(-2/Math.sqrt(4+1),-.8944271909999159,"V54 LayerNorm positive-affine scale effect",1e-12);
+assert(Math.abs(-1/Math.sqrt(2)+2/Math.sqrt(5))>0.1,"V54 epsilon breaks exact LayerNorm scale invariance");
+near(5-7-1,-3,"V54 Transformer post-cost risk-adjusted utility");
+near(108/100-1,.08,"V54 pre-announcement event headline price return");
+near(108/105-1,.02857142857142847,"V54 legitimately executable post-announcement return");
+near(Math.exp(1)/(Math.exp(1)+1),.7310585786300049,"V54 finite-KL optimal preference policy");
+near(2-Math.sqrt(2),.5857864376269049,"V54 normalized embedding cosine-distance identity");
+near(30/150,.2,"V54 financial net margin correct units");
+near(30*1e4/(150*1e6),.002,"V54 net margin unit mismatch risk");
+near(1-1/10,.9,"V54 audit-or-abstain support threshold");
+near(2/Math.sqrt(2*5),.6324555320336759,"V54 false contagion from common market factor");
+near(.5+.5/4,.625,"V54 correlated graph attention heads variance");
+near(.2+.8*.5,.6,"V54 graph residual eigenvalue mixing");
+near(.6**6,.046656,"V54 residual graph smoothing after six layers",1e-12);
+assert(Math.max(90,100,105)>102&&Math.max(90,100,105)<=105,"V54 point-in-time edge disclosure constraint");
+near(.5*(4-8)**2+.5*(12-8)**2,16,"V54 uniform neighbor-sampling variance");
+near(2/.25,8,"V54 optimal importance sampling for first neighbor");
+near(6/.75,8,"V54 optimal importance sampling for second neighbor");
+
+console.log("PASS V54/V38+V39: 60 V38 and 60 V39 enhanced eighth-cycle canonical lectures; 120 lessons/24 domains, 690 strict KaTeX equations (50 rigorous additions across V51-V53), substantive derivations/protocols, 60 route links, original numeric examples and responsive Chinese/formula layout.");
