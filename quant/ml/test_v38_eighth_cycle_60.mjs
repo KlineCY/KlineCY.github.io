@@ -267,4 +267,43 @@ near(v53WeightedControl,1.75,"V53 propensity odds-weighted missing counterfactua
 near(v53TreatedMean-v53WeightedControl,3.5,"V53 ATT under conditional selection and overlap");
 near(1+2*3,7,"V53 causal direct-plus-mediated total effect");
 
+
+const v53extra=read("atlas-depth-08-e.json").lessons;
+const v53extraIds=["m09-c01-p05","m09-c02-p01","m09-c05-p04","m09-c04-p01","m09-c01-p06","m10-c02-p04","m10-c05-p04","m10-c05-p06","m10-c02-p01","m10-c05-p01"];
+assert.equal(v53extraIds.length,10,"V53 kernel/graph/filter lesson count");
+for(const id of v53extraIds){
+ const l=v53extra[id];
+ assert(l&&l.revision_note?.startsWith("V53"),"V53 kernel/graph canonical lesson missing "+id);
+ assert.equal(l.equations.length,6,"V53 new kernel/graph equation absent "+id);
+ assert.equal(l.derivation.length,6,"V53 complete derivation absent "+id);
+ assert.equal(l.protocol.length,6,"V53 numerical contract absent "+id);
+ assert.equal(l.pitfalls.length,3,"V53 original error boundaries lost "+id);
+ assert.equal(new Set(l.equations.map(e=>e.tex)).size,6,"V53 duplicate kernel/graph equation "+id);
+ assert(l.derivation.at(-1).length>100&&l.protocol.at(-1).length>40,"V53 kernel/graph proof too thin "+id);
+ assert(l.worked_example.length>150,"V53 kernel/graph worked example too short "+id);
+ katex.renderToString(l.equations.at(-1).tex,{throwOnError:true,strict:"ignore",displayMode:true});
+}
+assert(.3>0&&.3<1,"V53 soft-margin SVM internal support-vector KKT case");
+near(Math.max(0,1-.4),.6,"V53 hinge positive margin slack");
+near(Math.max(0,1-1.5),0,"V53 correctly classified outside margin");
+near(100*.005*.1,.05,"V53 anomaly threshold false-negative savings");
+near((1-.005)*.01,.00995,"V53 anomaly false-positive extra cost");
+near(.05-.00995,.04005,"V53 net threshold decision saving");
+near((2-1)/(1-.5),2,"V53 KRR leave-one-out first example");
+near((4-2)/(1-.5),4,"V53 KRR leave-one-out second example");
+near(Math.exp(-.5*2),.36787944117144233,"V53 unscaled RBF similarity",1e-12);
+near(Math.exp(-.5*5),.0820849986238988,"V53 anisotropic scaled RBF similarity",1e-12);
+const v53IsingJ=Math.log(2)/2;
+near(4*Math.cosh(v53IsingJ),4.242640687119286,"V53 Ising partition function",1e-11);
+near(1/(1+Math.exp(-2*v53IsingJ)),2/3,"V53 Ising same-sign probability");
+near(1-.3**4+3*(1-.9**4),2.0236,"V53 expected distinct ancestors after weighted resampling");
+near(1/(.7**2+3*.1**2),1/.52,"V53 precursor particle ESS");
+near((.2/(1-.2))*16,4,"V53 filtering-to-smoothing odds update");
+near(4/(1+4),.8,"V53 hindsight smoothing probability");
+near(.5*.8*.9,.36,"V53 chain joint observational probability");
+near(.5*(.8*.5/.5)*.9,.36,"V53 fork joint observational probability");
+const v53GramDet=(1+.8**2)*(1+.5**2)-(1+.8*.5)**2;
+near(v53GramDet,.09,"V53 finite-horizon observability Gramian determinant",1e-12);
+assert(v53GramDet>0,"V53 observability Gramian positive definite");
+
 console.log("PASS V53/V38+V39: 60 V38 and 60 V39 enhanced eighth-cycle canonical lectures; 120 lessons/24 domains, 660 strict KaTeX equations (50 rigorous additions across V51-V53), substantive derivations/protocols, 60 route links, original numeric examples and responsive Chinese/formula layout.");
