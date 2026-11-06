@@ -29,7 +29,7 @@ for(let index=0;index<files.length;index++){
   assert(l.source_title?.length>=2&&l.title?.length>=8,id+" old identity lost");
   assert(l.overview?.length>=60,id+" original overview missing");
   assert(l.worked_example?.length>=110,id+" original plus expanded worked example missing");
-  assert(v41 ? /^V4[1-4]/.test(l.revision_note||"") : l.revision_note?.startsWith("V40"),id+" mismatch expansion batch");
+  assert(v41 ? /^V4[1-5]/.test(l.revision_note||"") : l.revision_note?.startsWith("V40"),id+" mismatch expansion batch");
   assert(l.equations.length>=5,id+" must preserve at least five mathematical formulas");
   assert(l.derivation.length>=5,id+" must preserve five original proof steps");
   assert(l.protocol.length>=5,id+" must preserve five original validation steps");
@@ -53,7 +53,7 @@ for(let index=0;index<files.length;index++){
 assert.equal(ids.size,122,"entire ninth-cycle catalog preserved");
 assert.equal(first.size,62,"V40 first half preserved");
 assert.equal(second.size,60,"V41 second half expanded");
-assert.equal(eq,635,"V44 must preserve original 610 formulas plus 25 later mathematical enhancements");
+assert.equal(eq,645,"V45 must preserve original 610 formulas and 35 later mathematical enhancements");
 assert.equal(domains.size,24,"24 ninth-cycle subjects preserved");
 for(const [domain,n] of domains)assert.equal(n,Number(domain.slice(1))<=2?6:5,domain+" unexpected lesson count");
 assert(substance>23000,"at least 23k new Chinese proof, validation and boundary chars");
@@ -150,4 +150,4 @@ near((.5-.6)*Math.log(.5/.6)+(.5-.4)*Math.log(.5/.4),.0405465108108164,"two-bin 
 near(1-.95**20,.6415140775914577,"cumulative multiple drift false alarms",1e-9);
 near(.05/20,.0025,"conservative daily alpha budget");
 
-console.log("PASS V41: 122 canonical ninth-cycle lessons fully deepened (62 V40 + 60 V41), 635 strict KaTeX formulas, 244 V40/V41 newly authored formulas, 12 stages, 122 canonical route links, Chinese math and print responsive checks and 23k+ new V41 mathematical/research chars.");
+console.log("PASS V41: 122 canonical ninth-cycle lessons fully deepened (62 V40 + 60 V41), 645 strict KaTeX formulas, 244 V40/V41 newly authored formulas, 12 stages, 122 canonical route links, Chinese math and print responsive checks and 23k+ new V41 mathematical/research chars.");
