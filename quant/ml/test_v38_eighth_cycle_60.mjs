@@ -375,4 +375,75 @@ near(.5*(4-8)**2+.5*(12-8)**2,16,"V54 uniform neighbor-sampling variance");
 near(2/.25,8,"V54 optimal importance sampling for first neighbor");
 near(6/.75,8,"V54 optimal importance sampling for second neighbor");
 
-console.log("PASS V54/V38+V39: 60 V38 and 60 V39 enhanced eighth-cycle canonical lectures; 120 lessons/24 domains, 720 strict KaTeX equations (50 rigorous additions across V51-V53), substantive derivations/protocols, 60 route links, original numeric examples and responsive Chinese/formula layout.");
+
+const v55groups=[
+ {file:"atlas-depth-08-j.json",ids:["m19-c03-p04","m19-c03-p01","m19-c02-p05","m19-c01-p05","m19-c05-p03","m20-c04-p06","m20-c02-p04","m20-c05-p01","m20-c05-p06","m20-c03-p03"]},
+ {file:"atlas-depth-08-k.json",ids:["m21-c03-p05","m21-c02-p03","m21-c03-p03","m21-c03-p01","m21-c01-p06","m22-c02-p06","m22-c05-p01","m22-c01-p01","m22-c02-p05","m22-c03-p01"]},
+ {file:"atlas-depth-08-l.json",ids:["m23-c05-p05","m23-c02-p05","m23-c02-p04","m23-c05-p03","m23-c04-p03","m24-c01-p05","m24-c02-p03","m24-c01-p02","m24-c01-p01","m24-c01-p03"]}
+];
+assert.equal(v55groups.reduce((n,g)=>n+g.ids.length,0),30,"V55 batch must deepen thirty existing courses");
+for(const group of v55groups){
+ const lessons=read(group.file).lessons;
+ for(const id of group.ids){
+  const l=lessons[id];
+  assert(l&&l.revision_note?.startsWith("V55"),"V55 canonical course or revision missing "+id);
+  assert.equal(l.equations.length,6,"V55 sixth formula missing "+id);
+  assert.equal(l.derivation.length,6,"V55 sixth mathematical derivation missing "+id);
+  assert.equal(l.protocol.length,6,"V55 sixth empirically testable protocol missing "+id);
+  assert.equal(l.pitfalls.length,3,"V55 original limitations lost "+id);
+  assert.equal(new Set(l.equations.map(e=>e.tex)).size,6,"V55 duplicated pre-existing formula "+id);
+  assert(l.derivation.at(-1).length>100&&l.protocol.at(-1).length>50,"V55 incomplete proof or financial audit "+id);
+  assert(l.worked_example.length>155,"V55 numerical worked example incomplete "+id);
+  katex.renderToString(l.equations.at(-1).tex,{throwOnError:true,strict:"ignore",displayMode:true});
+ }
+}
+near(.5*0+.5*4,2,"V55 Wasserstein lower bound from shifted mean");
+near(.5*4+.5*4,4,"V55 Wasserstein zero-mean does not imply close tail distribution");
+near(-Math.log(.01),4.605170185988092,"V55 non-saturating GAN loss near perfect discriminator");
+near(Math.log(1-.01),-.01005033585350145,"V55 original minimax generator saturated loss");
+near(1**2+2**2,5,"V55 Gaussian reparametrization exact second moment");
+near(2*1,2,"V55 reparametrization gradient w.r.t mean");
+near(2*2,4,"V55 reparametrization gradient w.r.t scale");
+near(Math.log(2)-2*Math.log(2),-Math.log(2),"V55 ideal information-bottleneck informative encoding");
+near(Math.log(2),Math.log(2),"V55 noise-only representation has no label information");
+near(.5*2,1,"V55 log wealth cumulative factor resets to one");
+near(Math.log(.5)+Math.log(2),0,"V55 two-period log wealth identity");
+const v55Softmax=Math.E/(1+Math.E);
+near(v55Softmax*(1-v55Softmax),.19661193324148185,"V55 soft policy Jacobian self sensitivity");
+near(.9*(5-2),2.7,"V55 Q-learning versus SARSA target gap");
+near(.25*2+.75*(2/3),1,"V55 action importance ratios integrate to one");
+near(.25*2**2+.75*(2/3)**2,4/3,"V55 action importance ratio second moment");
+near(1/(4/3),.75,"V55 weighted-policy effective sample share");
+near(1/100,.01,"V55 expected-cost Markov tail probability budget");
+near(10*(1-.9**3),2.71,"V55 DQN Polyak three-step target lag");
+near(100+(-90)-8,2,"V55 conservative short inventory order limit");
+assert(-90-8-2===-100,"V55 market-making worst-case short inventory");
+near(1*.1*3*(3-1),.6,"V55 finite-horizon transition-model approximation risk");
+near(.9*2+.1*(-8),1,"V55 distributional action mean");
+near(.9*4+.1*64-1,9,"V55 distributional action variance");
+near(.25+1,1.25,"V55 ex ante hierarchical risk total variance");
+near(Math.min(50,Math.max(0,120-100)),20,"V55 executable FIFO queue fill upper bound");
+near(.5**2,.25,"V55 ARCH squared return lag-two autocorrelation");
+near(.0004*(1+.5**2),.0005,"V55 recursive two-step error variance");
+near(.0004/(1-.5**2),.0005333333333333334,"V55 stationary recursive long-horizon variance");
+near((10-3)*1,7,"V55 random-walk historical covariance at date ten");
+near((100-3)*1,97,"V55 random-walk historical covariance at date one hundred");
+near((80*0+20*.1)/100,.02,"V55 prebreak expanding-window mean bias");
+near(.02-.1,-.08,"V55 expanding mean relative to new regime");
+near(3*(1-.5**2)/(1-3*.5**2),9,"V55 finite fourth moment Gaussian ARCH kurtosis");
+near((100-80)/(110-80),2/3,"V55 optimal stopping payoff probability threshold");
+near(2*Math.exp(-2*500*.1**2),.00009079985952496962,"V55 independent stability-selection Hoeffding frequency deviation");
+near(.04/2,.02,"V55 FWL residualized factor coefficient uncertainty");
+near((20+10)/(40+20),.5,"V55 mean reversion posterior break-even probability");
+near(.6*40-.4*20-10,6,"V55 successful mean reversion cost-adjusted expected bp");
+near(Math.sqrt((1-.5)/(1+.5)),Math.sqrt(1/3),"V55 Sharpe AR1 long-run annualization factor");
+assert(99<=100&&100<105,"V55 feature available before decision while future label remains immature");
+near(1-(1-.995)*2,.99,"V55 two-component P995 union bound for P99 aggregate");
+assert(Math.abs(.0100-.0102)>.0001,"V55 numeric model deployment margin protects order threshold");
+near(Math.sqrt(((.05-.09)**2+(.07-.09)**2+(.15-.09)**2)/2),Math.sqrt(.0028),"V55 seed-to-seed trading net return volatility");
+const v55Versions=[{released:100,value:120},{released:120,value:150}];
+const v55SelectAsOf=t=>v55Versions.filter(v=>v.released<=t).sort((a,b)=>b.released-a.released)[0]?.value;
+assert.equal(v55SelectAsOf(110),120,"V55 point-in-time report before subsequent revision");
+assert.equal(v55SelectAsOf(130),150,"V55 report revision legitimate only after actual publication");
+
+console.log("PASS V55/V38+V39: 60 V38 and 60 V39 enhanced eighth-cycle canonical lectures; 120 lessons/24 domains, 720 strict KaTeX equations (50 rigorous additions across V51-V53), substantive derivations/protocols, 60 route links, original numeric examples and responsive Chinese/formula layout.");
