@@ -50,7 +50,7 @@ close(2*.5,1);
 close(.3+.7,1);
 
 assert.equal(sections,42,"V58 six proper-scoring chapters must preserve six sections and gain seventh");
-assert.equal(formula,102,"V58 six courses require five top formulas, five derivation formulas and seven section formulas");
+assert.equal(formula,103,"V58 six courses preserve one pre-existing multi-formula deep section: 30 main + 30 derivation + 43 section formulas");
 for(const id of ids){
  const l=lesson.get(id);
  assert(l.checked_status?.startsWith("V58"),"V58 log score course revision missing "+id);
