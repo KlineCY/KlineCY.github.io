@@ -116,4 +116,35 @@ near(2*3/5*4,4.8,"Ward WCSS merge");
 near((16-10)-(11-8),3,"DiD effect");
 near(1/.1,10,"IPW high weight");
 near((1+.5)**2/((1)**2+(.5)**2),1.8,"causal weight ESS");
-console.log("PASS V38+V39: 60 V38 and 60 V39 enhanced eighth-cycle canonical lectures; 120 lessons/24 domains, 610 strict KaTeX equations (240 added across V38+V39), substantive derivations/protocols, 60 route links, original numeric examples and responsive Chinese/formula layout.");
+
+const v51=read("atlas-depth-08-a.json").lessons;
+const v51Ids=["m01-c03-p04","m01-c02-p04","m01-c05-p06","m01-c04-p02","m01-c03-p06","m02-c05-p02","m02-c05-p05","m02-c03-p04","m02-c03-p06","m02-c03-p03"];
+assert.equal(v51Ids.length,10);
+for(const id of v51Ids){
+ const l=v51[id];
+ assert(l&&l.revision_note?.startsWith("V51"),"V51 lesson did not overwrite canonical V38 content "+id);
+ assert.equal(l.equations.length,6,"V51 sixth mathematical expression missing "+id);
+ assert.equal(l.derivation.length,6,"V51 sixth substantial proof missing "+id);
+ assert.equal(l.protocol.length,6,"V51 sixth empirical test missing "+id);
+ assert.equal(new Set(l.equations.map(e=>e.tex)).size,6,"V51 duplicate mathematical formula "+id);
+ assert(l.derivation.at(-1).length>=110&&l.protocol.at(-1).length>=65,"V51 proof/test too thin "+id);
+ assert(l.worked_example.length>=160,"V51 numerical finance example absent "+id);
+ katex.renderToString(l.equations.at(-1).tex,{throwOnError:true,displayMode:true,strict:"ignore"});
+}
+near(.2*0+.8*.75,.6,"V51 target total risk");
+near((.2-.5)*0+(.8-.5)*1,.3,"V51 covariate drift risk");
+near(.8*(.75-1),-.2,"V51 label mechanism drift risk");
+near(6*.05/Math.PI**2,.03039635509270133,"V51 confidence budget first model family",1e-12);
+near(6*.05/(4*Math.PI**2),.0075990887731753325,"V51 confidence budget second family",1e-12);
+near(.02-.1*.2,0,"V51 no-trade band marginal cost");
+assert(.04-.1*.2>.005,"V51 one-sided cost must allow trade");
+assert(94+5<100&&!(95+5<100),"V51 five-day purged label information boundary");
+near(.2*(1-0),.2,"V51 unsupported target domain non-identifiability width");
+near(2/(2+2),.5,"V51 repeated PCA eigenvalue fraction");
+near(Math.abs(1.1-1),.1,"V51 SVD Weyl spectral perturbation");
+near(1*0+2*6+4*1,16,"V51 Jacobian JVP left adjoint inner");
+near(2*7+(-1)*(-2),16,"V51 Jacobian VJP right adjoint inner");
+near(((2+.01)**3-(2-.01)**3)/(.02)-12,.0001,"V51 centered derivative cubic truncation",1e-9);
+near(-.2-1,-1.2,"V51 damped Newton strict descent");
+
+console.log("PASS V51/V38+V39: 60 V38 and 60 V39 enhanced eighth-cycle canonical lectures; 120 lessons/24 domains, 610 strict KaTeX equations (240 added across V38+V39), substantive derivations/protocols, 60 route links, original numeric examples and responsive Chinese/formula layout.");
