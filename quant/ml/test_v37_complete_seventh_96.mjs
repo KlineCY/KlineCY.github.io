@@ -152,4 +152,78 @@ near(-(-6)/(4+2),1,"V56 XGBoost regularized leaf optimum");
 near(-6*1+.5*(4+2)*1, -3,"V56 XGBoost optimized quadratic objective");
 near(.2+.1*.5,.25,"V56 Boosting fixed learning-rate one-step output");
 
-console.log("PASS V56/V37: 96 complete seventh-cycle canonical lectures (V36 24 + V37 72); 544 strict KaTeX equations, V56/V57 added 64 to first 64 courses; 24 domains, nine-stage 72-link navigation, original numerical examples, independent numerical cross-checks and responsive Chinese/math typography.");
+
+const v57AuditGroups=[
+ ["atlas-depth-07-e.json",["m09-c05-p03","m09-c05-p02","m09-c04-p05","m09-c05-p06","m10-c04-p06","m10-c05-p03","m10-c03-p03","m10-c04-p02"]],
+ ["atlas-depth-07-f.json",["m11-c01-p06","m11-c02-p02","m11-c03-p04","m11-c02-p03","m12-c02-p02","m12-c02-p01","m12-c02-p06","m12-c04-p04"]],
+ ["atlas-depth-07-g.json",["m13-c04-p03","m13-c01-p02","m13-c04-p01","m13-c03-p04","m14-c03-p05","m14-c04-p06","m14-c02-p04","m14-c03-p06"]],
+ ["atlas-depth-07-h.json",["m15-c03-p04","m15-c04-p06","m15-c01-p04","m15-c03-p01","m16-c02-p01","m16-c01-p02","m16-c04-p05","m16-c03-p03"]]
+];
+assert.equal(v57AuditGroups.reduce((n,group)=>n+group[1].length,0),32,"V57 audited course total");
+for(const [file,expectedIds] of v57AuditGroups){
+ const lessons=read(file).lessons;
+ assert.deepEqual(Object.keys(lessons),expectedIds,"V57 canonical order must not be modified "+file);
+ for(const id of expectedIds){
+  const l=lessons[id];
+  assert(l.revision_note?.startsWith("V57"),"V57 substantive revision missing "+id);
+  assert.equal(l.equations.length,6,"V57 sixth rigorous equation missing "+id);
+  assert.equal(l.derivation.length,6,"V57 sixth complete mathematical proof missing "+id);
+  assert.equal(l.protocol.length,6,"V57 sixth empirical verification missing "+id);
+  assert.equal(l.pitfalls.length,3,"V57 original financial caveat deleted "+id);
+  assert.equal(new Set(l.equations.map(e=>e.tex)).size,6,"V57 duplicate formula in lesson "+id);
+  assert(l.derivation.at(-1).length>=90&&l.protocol.at(-1).length>=48,"V57 proof or numerical protocol too shallow "+id);
+  assert(l.worked_example.length>=145,"V57 original financial example missing "+id);
+  assert(!/[\uFFFD\u200B\uFEFF]|TODO|Lorem ipsum/.test(JSON.stringify(l)),"V57 corrupted Chinese "+id);
+  katex.renderToString(l.equations.at(-1).tex,{throwOnError:true,strict:"ignore",displayMode:true});
+ }
+}
+near(Math.pow(1/(4*1000),1/5),.1903653938715871,"V57 KDE optimal bandwidth",1e-9);
+near(1/(.2*10),.5,"V57 one-class SVM dual upper bound");
+near(2/(1+1),1,"V57 single-point Gaussian process posterior mean");
+near(1-1/(1+1),.5,"V57 Gaussian process latent function posterior variance");
+near(.5+1,1.5,"V57 Gaussian process future observation variance");
+near(100*.005*.1-.995*.01,.04005,"V57 low-base-rate anomaly threshold cost benefit");
+near(4*1.25-1,4,"V57 correlated Cholesky posterior determinant");
+near(2*(Math.log(2)+Math.log(1)),Math.log(4),"V57 Cholesky stable log determinant");
+near(4.24/(4.24+1),.8091603053435115,"V57 Kalman scalar Joseph posterior variance");
+near(.4-0,.4,"V57 VAE average posterior mutual information decomposition");
+near(1000*(1-.8)/(1+.8),1000/9,"V57 Gibbs correlated effective draw count");
+near((2*2)/6,2/3,"V57 ARI chance-corrected expected agreeing pairs");
+near(Math.min(10,9),9,"V57 single linkage cluster separation");
+near(Math.max(10,9),10,"V57 complete linkage cluster separation");
+near(1/Math.sqrt(.01+.03),5,"V57 regularized ZCA whitening max noise gain");
+const v57Dbscan=[0,.1,.2,5];
+assert.equal(v57Dbscan.filter(x=>Math.abs(x-.1)<=.15).length,3,"V57 core neighborhood includes three samples");
+assert.equal(v57Dbscan.filter(x=>Math.abs(x-0)<=.15).length,2,"V57 DBSCAN border sample is not core");
+assert(100>=98,"V57 training label end overlaps forward validation start and requires purging");
+near(.5*.1+.5*.4,.25,"V57 randomly mixed historic regime risk");
+assert(.4>.25,"V57 future bear-only market risk exceeds mixed validation risk");
+const v57ReportVersions=[{t:100,x:120},{t:120,x:150}];
+const v57AsOf=t=>v57ReportVersions.filter(row=>row.t<=t).sort((a,b)=>b.t-a.t)[0]?.x;
+assert.equal(v57AsOf(110),120,"V57 point-in-time pre-revision financial reporting");
+assert.equal(v57AsOf(130),150,"V57 point-in-time post-revision financial reporting");
+near(1/.1,10,"V57 strict propensity overlap limits weights");
+near(1/.01,100,"V57 low propensity causes weight explosion");
+near(Math.min(.08,.12),.08,"V57 early-stopping validation selection winner");
+near(2/Math.sqrt(2*Math.PI),.7978845608028654,"V57 GELU curvature at zero");
+near(-2*Math.exp(-2)/Math.sqrt(2*Math.PI),-.10798193302637613,"V57 GELU negative high-activation curvature");
+near(2*(1-.1*.05),1.99,"V57 decoupled AdamW pure weight decay");
+near(2*(1-.1*2*.05),1.98,"V57 coupled L2 preconditioner scales regularization");
+near(Math.sqrt(12)/6,Math.sqrt(1/3),"V57 inverted dropout relative stochastic variation");
+near(Math.log(110/100)+Math.log(100/110),0,"V57 price image time reversal flips log return sign");
+near(200/(1+9*.8),24.390243902439025,"V57 independent-patient cluster design effective sample size");
+near(1-.2,.8,"V57 residual projection Jacobian lower singular value bound");
+near(.9*.01/(.9*.01+.05*.99),.15384615384615385,"V57 PPV at one-percent incident rate");
+near(.9*.02/(.9*.02+.05*.98),.26865671641791045,"V57 PPV at two-percent incident rate");
+near(.75**5,.2373046875,"V57 GRU direct five-step memory gradient path");
+near(5-1,4,"V57 adjacent five-day overlapping financial labels");
+near(.0004*(1+.5**2),.0005,"V57 independent recursive two-period error variance");
+near(.75*(1-.75)*(6-2),.75,"V57 sigmoid gated-fusion derivative");
+near((6-2)/4,1,"V57 gated-fusion derivative maximum");
+near(8*64,16*32,"V57 equal-width multihead query-key multiplication across heads");
+near(Math.exp(-1)/(Math.exp(-1)+1),.2689414213699951,"V57 overflow-free shifted softmax");
+near((1*2+2*6)/(1+2),14/3,"V57 positive-kernel linear-attention normalized convex combination");
+near(1+.1*.5,1.05,"V57 Pre-LN identity gradient path local toy direction");
+near(.5*(1+.1),.55,"V57 Post-LN local toy gradient direction");
+
+console.log("PASS V57/V37: 96 complete seventh-cycle canonical lectures (V36 24 + V37 72); 544 strict KaTeX equations, V56/V57 added 64 to the first 64 courses; 24 domains, nine-stage 72-link navigation, original numerical examples, independent numerical cross-checks and responsive Chinese/math typography.");
