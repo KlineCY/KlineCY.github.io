@@ -28,8 +28,8 @@ for(const l of additions){
  assert(l.definition.length>100&&l.assumptions.length>100&&l.example.length>130,"core assumptions and worked example "+l.id);
  assert(l.application.length>100&&l.caveat.length>90,"finance implementation and failure modes "+l.id);
  assert(l.formulas.length>=4&&l.derivation.length>=3&&l.properties.length>=3);
- assert.equal(l.deep_sections.length,4,"four reasoned proof sections "+l.id);
- assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,4);
+ assert.equal(l.deep_sections.length,5,"V49 five reasoned proof sections "+l.id);
+ assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,5);
  for(const f of l.formulas){katex.renderToString(f.tex,{throwOnError:true,strict:"ignore",displayMode:true});formulaCount++}
  for(const d of l.derivation){assert(d.explanation.length>65);katex.renderToString(d.tex,{throwOnError:true,strict:"ignore",displayMode:true});formulaCount++}
  for(const s of l.deep_sections){
@@ -43,11 +43,19 @@ for(const l of additions){
  for(const source of l.sources){assert(/^https:\/\//.test(source.url)&&source.title.length>25);sourceCount++}
  assert(!/[\uFFFD\u200B\uFEFF]/.test(JSON.stringify(l)),"Unicode corruption");
 }
-assert.equal(sections,16);
-assert.equal(formulaCount,53);
+assert.equal(sections,20);
+assert.equal(formulaCount,65);
 assert.equal(links,12);
 assert.equal(sourceCount,5);
 const near=(a,b,tol=1e-10)=>assert(Math.abs(a-b)<tol,a+" != "+b);
+near(1+7*.25,2.75);
+near(7*.25*.75,1.3125);
+near(Math.sqrt(1.5/250),.07745966692414834);
+near(1/Math.sqrt(250),.06324555320336758);
+near(1*2/Math.sqrt(100),.2);
+near(1*2/Math.sqrt(400),.1);
+near(2/(.5*100),.04);
+near(Math.sqrt((.5001-.4999)**2),.0002);
 near(Math.pow(.75,4),.31640625);
 near(.02/Math.sqrt(250),.0012649110640673518);
 near(Math.sqrt(1.5),1.224744871391589);
@@ -73,4 +81,4 @@ const css=fs.readFileSync(new URL("styles.css",root),"utf8");
 const html=fs.readFileSync(new URL("index.html",root),"utf8");
 for(const token of ["math-deep-unit","math-deep-toc","overflow-x:auto","@media print"])assert(css.includes(token),"responsive proof layout "+token);
 for(const id of targets)assert(html.includes("?topic="+id),"V24 chapter jump absent in public navigation "+id);
-console.log("PASS V24: 4 connected lectures, 16 proof units, 53 strict KaTeX expressions, "+sourceCount+" academic references, 12 graph edges, independent numeric invariants and 282 unique full mathematics lectures.");
+console.log("PASS V49/V24: 4 connected lectures, 20 proof units, 65 strict KaTeX expressions, "+sourceCount+" academic references, 12 graph edges, independent numeric invariants and 282 unique full mathematics lectures.");
