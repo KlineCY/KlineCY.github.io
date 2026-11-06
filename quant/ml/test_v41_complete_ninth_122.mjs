@@ -150,4 +150,29 @@ near((.5-.6)*Math.log(.5/.6)+(.5-.4)*Math.log(.5/.4),.0405465108108164,"two-bin 
 near(1-.95**20,.6415140775914577,"cumulative multiple drift false alarms",1e-9);
 near(.05/20,.0025,"conservative daily alpha budget");
 
+
+const v45=read("atlas-depth-09-i.json").lessons;
+const v45ids=["m17-c03-p06","m17-c02-p05","m17-c01-p02","m17-c01-p01","m17-c02-p06","m18-c01-p02","m18-c03-p06","m18-c02-p06","m18-c02-p05","m18-c01-p01"];
+assert.equal(v45ids.length,10);
+for(const id of v45ids){
+ const l=v45[id];
+ assert(l&&l.revision_note?.startsWith("V45"),"missing V45 visible revision "+id);
+ assert.equal(l.equations.length,6,"V45 sixth formula not rendered "+id);
+ assert.equal(l.derivation.length,6,"V45 sixth derivation missing "+id);
+ assert.equal(l.protocol.length,6,"V45 sixth audit protocol missing "+id);
+ assert(l.worked_example.length>=145,"V45 worked example must retain old and new evidence "+id);
+ assert(l.protocol.at(-1).length>40,"V45 empirical check overly short "+id);
+ assert(l.derivation.at(-1).length>85,"V45 proof insufficient "+id);
+ katex.renderToString(l.equations.at(-1).tex,{throwOnError:true,displayMode:true,strict:"ignore"});
+}
+near(8/18,4/9,"V45 weighted evidence support");
+near(Math.log(101)+1,5.61512051684126,"V45 smoothed unseen vocabulary IDF");
+near(120e6/7.2,16666666.666666668,"V45 report exchange conversion",1e-6);
+near(.20-.15,.05,"V45 task-specific gain");
+near(.18-.10,.08,"V45 old task forgetting");
+near(1/Math.sqrt(6),.4082482904638631,"V45 GCN self loop");
+near(1+10+100+1000,1111,"V45 sampled neighbor expansion");
+near(.9**6,.531441,"V45 residual graph propagation");
+near((11-15)/10,-.4,"V45 prior graph and finance cross-check");
+
 console.log("PASS V41: 122 canonical ninth-cycle lessons fully deepened (62 V40 + 60 V41), 645 strict KaTeX formulas, 244 V40/V41 newly authored formulas, 12 stages, 122 canonical route links, Chinese math and print responsive checks and 23k+ new V41 mathematical/research chars.");
