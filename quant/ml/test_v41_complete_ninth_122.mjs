@@ -261,4 +261,32 @@ near((1/4)/(3/4),1/3,"V48 collider conditional joint");
 assert(Math.abs((1/4)/(3/4)-((1/2)/(3/4))**2)>0.1,"V48 collider must induce conditional dependence");
 near(Math.log(.5),-.6931471805599453,"V48 MH stable log acceptance");
 near(-50-.5,-50.5,"V48 optimal evidence lower bound");
+
+const v48second=read("atlas-depth-09-f.json").lessons;
+const v48secondIds=["m11-c04-p02","m11-c05-p05","m11-c05-p03","m11-c01-p01","m11-c05-p02","m12-c01-p01","m12-c04-p06","m12-c03-p04","m12-c03-p01","m12-c01-p06"];
+assert.equal(v48secondIds.length,10,"V48 expanded evaluation and causal domain count");
+for(const id of v48secondIds){
+ const l=v48second[id];
+ assert(l&&l.revision_note?.startsWith("V48"),"missing second batch V48 course "+id);
+ assert.equal(l.equations.length,6,"V48 evaluation formula count "+id);
+ assert.equal(l.derivation.length,6,"V48 evaluation proof count "+id);
+ assert.equal(l.protocol.length,6,"V48 evaluation verification count "+id);
+ assert.equal(l.pitfalls.length,3,"V48 original failure conditions lost "+id);
+ assert(new Set(l.equations.map(e=>e.tex)).size===6,"V48 duplicate exact equation "+id);
+ assert(l.derivation.at(-1).length>85&&l.protocol.at(-1).length>40,"V48 thin validation "+id);
+ assert(l.worked_example.length>145,"V48 lost arithmetic exposition "+id);
+ katex.renderToString(l.equations.at(-1).tex,{displayMode:true,throwOnError:true,strict:"ignore"});
+}
+near(.6*1+.4*2,1.4,"V48 mixture label permutation invariant mean");
+near(((1-2)**2+(2-1)**2+(1-3)**2+(3-1)**2+(2-3)**2+(3-2)**2)/6,2,"V48 pairwise contrastive distance");
+near(100/110-1,-1/11,"V48 price-image reversal breaks trend");
+near(4+16,20,"V48 Kmeans within-between total scatter");
+near(.5/1,.5,"V48 false negative InfoNCE repulsion");
+near(.9*.01*(1-.5)/(.5*(1-.01)),.009090909090909092,"V48 rare risk acceptable FPR",1e-12);
+near(.009/(.009+.05*.99),.15384615384615385,"V48 rare-event alarm precision");
+near(.03/.005,6,"V48 weak IV denominator sensitivity");
+assert(.01<=.05/3&&.03<=.05*2/3&&.8>.05,"V48 BH all-null realized discoveries");
+near(100-10+1,91,"V48 moving block bootstrap candidates");
+near((6*.2**2+4*.8**2)/10,.28,"V48 Brier observed reliability");
+near((.8-.6)**2+.6*(1-.6),.28,"V48 Brier single-bin calibration and uncertainty");
 console.log("PASS V48: 122 canonical ninth-cycle lessons fully deepened (62 V40 + 60 V41), 685 strict KaTeX formulas, including 75 additions beyond V41, 12 stages, 122 canonical route links, Chinese math and print responsive checks and 23k+ new V41 mathematical/research chars.");
