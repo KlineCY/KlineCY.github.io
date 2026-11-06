@@ -23,8 +23,8 @@ for(const l of added){
  assert(l.id===l.node_id&&nodes.get(l.id)?.title===l.title,"canonical id and title "+l.id);
  for(const key of ["definition","assumptions","example","application","caveat"])assert(typeof l[key]==="string"&&l[key].length>=90,"substantive prose "+l.id+" "+key);
  assert(l.properties.length>=3&&l.formulas.length>=4&&l.derivation.length>=4);
- assert(l.deep_sections.length===4);
- assert(new Set(l.deep_sections.map(s=>s.title)).size===4);
+ assert(l.deep_sections.length===5);
+ assert(new Set(l.deep_sections.map(s=>s.title)).size===5);
  for(const f of l.formulas){assert(f.tex&&f.label);katex.renderToString(f.tex,{displayMode:true,throwOnError:true,strict:"ignore"});math++;}
  for(const s of l.derivation){assert(s.tex&&s.explanation.length>=55);katex.renderToString(s.tex,{displayMode:true,throwOnError:true,strict:"ignore"});math++;}
  for(const s of l.deep_sections){
@@ -39,11 +39,20 @@ for(const l of added){
  assert(!/[\uFFFD\u200B\uFEFF]/.test(JSON.stringify(l)),"invisible CJK corruption "+l.id);
  assert(!/Lorem ipsum|TODO|待填充|待补充|仅列提纲/.test(JSON.stringify(l)),"unfinished content "+l.id);
 }
-assert.equal(deep,40);
-assert.equal(math,132);
+assert.equal(deep,50);
+assert.equal(math,162);
 assert.equal(refs,21);
 assert.equal(links,34);
 const near=(a,b,label,tol=1e-9)=>assert(Math.abs(a-b)<tol,label+" "+a+" != "+b);
+near((3-1)/3,2/3,"V46 Jackknife leave one effect");
+near(1/6,1/6,"V46 finite permutation resolution");
+near(3/5,.6,"V46 odd median finite breakdown");
+near(1.5/.8,1.875,"V46 Huber influence upper bound");
+near(.01+.02+.02,.05,"V46 weighted Bonferroni budget");
+near(Math.min(5*.003,5*.012/2,5*.03/3,5*.2/4,5*.7/5),.015,"V46 first BH adjusted p");
+near(5*.03/3,.05,"V46 third BH adjusted p");
+near(.36*.01/(2*Math.sqrt(.0436)),.008620436,"V46 factor covariance delta",1e-6);
+near(.5*(-.10*.5/.38)+.3*(-.10*.3/.38)-.2*(-.10*(-.2)/.38),-.10,"V46 reverse stress min norm");
 near((3/4)*(10/9),5/6,"Jackknife variance");
 near(Math.sqrt(5/6),.9128709291752769,"Jackknife se");
 near(((-2/3)**3+(-1/3)**3+(1/3)**3+(2/3)**3),0,"BCa jackknife cubic score");
@@ -89,5 +98,5 @@ const css=fs.readFileSync(new URL("styles.css",base),"utf8");
 const cssML=fs.readFileSync(new URL("../ml/atlas.css",base),"utf8");
 for(const token of ["overflow-x:auto","line-break:strict","@media print",":focus-visible"])assert(css.includes(token),"math CJK/KaTeX responsive rule "+token);
 assert(cssML.includes("overflow-x:auto"));
-console.log("PASS V27: 10 complete lecture chapters, 40 deep sections, 132 strict KaTeX formulae, "+
+console.log("PASS V46/V27: 10 complete lecture chapters, 50 deep sections, 162 strict KaTeX formulae, "+
  refs+" sources, "+links+" real canonical links, 30 independent arithmetic invariants; 304 unique full lectures.");
