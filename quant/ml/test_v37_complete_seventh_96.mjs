@@ -22,15 +22,15 @@ for(const file of groups){
  for(const [id,l] of Object.entries(d.lessons)){
   assert(!fullIds.has(id),"duplicate ML identity "+id);
   fullIds.add(id);checked++;
-  const domain=Number(id.slice(1,3)),revision=domain<=8?"V56":domain<=16?"V57":"V37";
+  const domain=Number(id.slice(1,3)),revision=domain<=8?"V56":domain<=20?"V57":"V37";
   domainCounts[domain]=(domainCounts[domain]||0)+1;
   assert(l.revision_note?.startsWith(revision),id+" deepening revision");
   if(domain>6)newIds.add(id);
   assert(typeof l.source_title==="string"&&l.source_title.length>=2,id+" source title lost");
   assert(typeof l.overview==="string"&&l.overview.length>=60,id+" overview lost");
-  assert.equal(l.equations.length,domain<=16?6:5,id+" enhanced seventh-stage equations");
-  assert.equal(l.derivation.length,domain<=16?6:5,id+" enhanced seventh-stage proofs");
-  assert.equal(l.protocol.length,domain<=16?6:5,id+" enhanced seventh-stage protocols");
+  assert.equal(l.equations.length,domain<=20?6:5,id+" enhanced seventh-stage equations");
+  assert.equal(l.derivation.length,domain<=20?6:5,id+" enhanced seventh-stage proofs");
+  assert.equal(l.protocol.length,domain<=20?6:5,id+" enhanced seventh-stage protocols");
   assert.equal(l.pitfalls.length,3,id+" original plus failure boundary");
   assert(l.worked_example.length>=100,id+" worked arithmetic lost");
   assert(l.derivation.slice(3).every(s=>s.length>=65),id+" derivation too shallow");
@@ -46,7 +46,7 @@ for(const file of groups){
  }
 }
 assert.equal(checked,96);
-assert.equal(formulas,544);
+assert.equal(formulas,560);
 assert.equal(newIds.size,72);
 // Chronos original paper §3.1 uses m=0 and s=mean(abs(context));
 // do not quietly replace the published tokenizer with centered standardization.
@@ -159,7 +159,7 @@ const v57AuditGroups=[
  ["atlas-depth-07-g.json",["m13-c04-p03","m13-c01-p02","m13-c04-p01","m13-c03-p04","m14-c03-p05","m14-c04-p06","m14-c02-p04","m14-c03-p06"]],
  ["atlas-depth-07-h.json",["m15-c03-p04","m15-c04-p06","m15-c01-p04","m15-c03-p01","m16-c02-p01","m16-c01-p02","m16-c04-p05","m16-c03-p03"]]
 ];
-assert.equal(v57AuditGroups.reduce((n,group)=>n+group[1].length,0),32,"V57 audited course total");
+assert.equal(v57AuditGroups.reduce((n,group)=>n+group[1].length,0),48,"V57 audited course total");
 for(const [file,expectedIds] of v57AuditGroups){
  const lessons=read(file).lessons;
  assert.deepEqual(Object.keys(lessons),expectedIds,"V57 canonical order must not be modified "+file);
@@ -226,4 +226,4 @@ near((1*2+2*6)/(1+2),14/3,"V57 positive-kernel linear-attention normalized conve
 near(1+.1*.5,1.05,"V57 Pre-LN identity gradient path local toy direction");
 near(.5*(1+.1),.55,"V57 Post-LN local toy gradient direction");
 
-console.log("PASS V57/V37: 96 complete seventh-cycle canonical lectures (V36 24 + V37 72); 544 strict KaTeX equations, V56/V57 added 64 to the first 64 courses; 24 domains, nine-stage 72-link navigation, original numerical examples, independent numerical cross-checks and responsive Chinese/math typography.");
+console.log("PASS V57/V37: 96 complete seventh-cycle canonical lectures (V36 24 + V37 72); 560 strict KaTeX equations, V56/V57 added 80 to the first 80 courses; 24 domains, nine-stage 72-link navigation, original numerical examples, independent numerical cross-checks and responsive Chinese/math typography.");
