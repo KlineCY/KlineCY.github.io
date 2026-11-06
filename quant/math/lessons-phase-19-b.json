@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "revision": "2026-11-05",
+  "revision": "2026-11-06",
   "focus": "金融实证：AR/CAR事件研究、Beta风险价格、交易信号内生性",
   "lessons": [
     {
@@ -30,6 +30,10 @@
         {
           "label": "同日事件平均方差",
           "tex": "\\operatorname{Var}(\\overline{\\operatorname{AR}})=N^{-2}\\sum_{i,j}\\operatorname{Cov}(\\operatorname{AR}_i,\\operatorname{AR}_j)"
+        },
+        {
+          "label": "事件期CAR的自相关与横截面依赖风险",
+          "tex": "\\operatorname{Var}\\!\\left(\\sum_{t=1}^{H}AR_t\\right)=H\\gamma(0)+2\\sum_{h=1}^{H-1}(H-h)\\gamma(h)\\quad(\\text{二阶平稳})"
         }
       ],
       "derivation": [
@@ -44,6 +48,10 @@
         {
           "explanation": "若多个ETF同日受共同新闻冲击，平均异常收益方差包含所有资产间协方差。忽略非零交叉项会使平均异常收益的标准误出现系统性错误。",
           "tex": "\\operatorname{Var}(N^{-1}\\sum_iA_i)=N^{-2}\\big(\\sum_i\\operatorname{Var}(A_i)+2\\sum_{i<j}\\operatorname{Cov}(A_i,A_j)\\big)"
+        },
+        {
+          "explanation": "设CAR=Σ_{t=1}^H AR_t，则Var(CAR)=Σ_tΣ_sCov(AR_t,AR_s)。二阶平稳给出Cov(AR_t,AR_s)=γ(|t−s|)。主对角线有H项γ(0)，每个正滞后h有H−h对(t,s)，另有对称项，故方差为Hγ(0)+2Σ_{h=1}^{H−1}(H−h)γ(h)。",
+          "tex": "\\sum_{t=1}^{H}\\sum_{s=1}^{H}\\operatorname{Cov}(AR_t,AR_s)=H\\gamma(0)+2\\sum_{h=1}^{H-1}(H-h)\\gamma(h)"
         }
       ],
       "example": "估计窗口得到α=0.002、β=1.1。公告第一日市场收益0.02、资产收益0.04，则正常收益0.024、AR=0.016；第二日市场收益0.01、资产收益0.008，则正常收益0.013、AR=−0.005。两日CAR=0.011（1.1个百分点）；相同收益路径的BHAR=1.04×1.008−1.024×1.013=0.011008，与CAR不完全相同。",
@@ -117,6 +125,23 @@
           "proof": "CAR基于预期收益模型，而ATT基于潜在结果与合法对照组。两者作用于不同随机对象，不存在没有额外假设的恒等转换关系。",
           "worked": "两日ETF公告CAR=1.1个百分点，不等于对所有ETF持有人长期交易成本改善1.1个百分点的政策ATT。",
           "limitation": "未检验提前泄露和分批处理异质性就将金融事件回报解释为政策平均因果效应，会混淆两种估计框架。"
+        },
+        {
+          "title": "事件累计异常收益的长期协方差与窗口依赖",
+          "question": "连续多日的异常收益存在自相关时，为什么CAR的标准误不能使用单日标准差乘√H？",
+          "paragraphs": [
+            "事件研究CAR将多个交易日的异常收益简单相加，但其方差需要保留不同日期的协方差。当异常收益序列二阶平稳且窗口长度H固定时，对所有日期两两组合，间隔h的非对角项出现2(H−h)次，于是得到显式长期协方差式。",
+            "市场冲击、事件消息分批传播及ETF成分重叠会同时引起时序相关和跨证券相关。计算单只证券CAR方差时需要考虑时序协方差，计算事件平均CAR时还需考虑不同资产的共同冲击，不能把证券数和天数直接视为完全独立样本。"
+          ],
+          "formulas": [
+            {
+              "label": "事件期CAR的自相关与横截面依赖风险",
+              "tex": "\\operatorname{Var}\\!\\left(\\sum_{t=1}^{H}AR_t\\right)=H\\gamma(0)+2\\sum_{h=1}^{H-1}(H-h)\\gamma(h)\\quad(\\text{二阶平稳})"
+            }
+          ],
+          "proof": "设CAR=Σ_{t=1}^H AR_t，则Var(CAR)=Σ_tΣ_sCov(AR_t,AR_s)。二阶平稳给出Cov(AR_t,AR_s)=γ(|t−s|)。主对角线有H项γ(0)，每个正滞后h有H−h对(t,s)，另有对称项，故方差为Hγ(0)+2Σ_{h=1}^{H−1}(H−h)γ(h)。",
+          "worked": "若两日异常收益的单日期方差γ(0)=0.0004、一日自协方差γ(1)=0.0001，则两日CAR方差为2×0.0004+2×0.0001=0.001，标准差约3.162%；错误假定独立会得到√0.0008≈2.828%。",
+          "limitation": "二阶平稳只是便于按滞后组织协方差的条件；事件发生期间的波动跃升、估计窗口参数误差与日期聚类会改变实际推断，使用CAR加法亦不等于BHAR复利。"
         }
       ],
       "links": [
@@ -151,7 +176,7 @@
           "url": "https://doi.org/10.1016/j.jeconom.2020.09.006"
         }
       ],
-      "checked_status": "V19完整讲义：严格定义、条件、四节数学论证、反例、执行与样本外检查"
+      "checked_status": "V54严格精讲：事件累计异常收益的长期协方差与窗口依赖"
     },
     {
       "id": "econometrics-n0236",
@@ -180,6 +205,10 @@
         {
           "label": "定价误差",
           "tex": "\\alpha_i=E[R_i^e]-\\beta_i\\lambda"
+        },
+        {
+          "label": "因子定价模型的可检验横截面alpha",
+          "tex": "\\alpha_i=E[R_i^e]-\\beta_i^\\top\\lambda,\\qquad\\boldsymbol\\alpha=\\boldsymbol\\mu^e-B\\boldsymbol\\lambda"
         }
       ],
       "derivation": [
@@ -194,6 +223,10 @@
         {
           "explanation": "若f自己是可交易超额收益，代入β_f=Var(f)/Var(f)=1及相同定价限制，可以得到λ=E[f]。若f是非交易的情绪或政策指标，则无法作此自应用。",
           "tex": "\\beta_f=1\\ \\Longrightarrow\\ \\lambda=E[f]\\quad\\text{(可交易因子条件下)}"
+        },
+        {
+          "explanation": "定义N×K因子暴露矩阵B、K维风险价格λ和N维超额收益总体均值µ^e。多因子线性定价模型要求µ^e=Bλ，故定义alpha为两者之差，模型成立的必要条件是alpha=0。对于有过多资产且指定因子数小于N的系统，可用跨资产限制检验因子解释能力。",
+          "tex": "\\boldsymbol\\mu^e=B\\boldsymbol\\lambda+\\boldsymbol\\alpha\\quad\\Longrightarrow\\quad \\boldsymbol\\alpha=0\\ \\text{为模型联合定价约束}"
         }
       ],
       "example": "设交易因子在两状态下的超额收益为−0.06与0.14，各占50%，均值为0.04、方差为0.01。取线性SDF m=1−4(f−0.04)，两状态分别为1.4与0.6，且E[mf]=0；风险价格λ=4×0.01=0.04。若两只ETF的Beta为1.2与0.5，模型约束预期超额收益分别为0.048与0.020。",
@@ -267,6 +300,23 @@
           "proof": "条件定价式要求每个信息时点都存在有效的条件线性SDF和相应Euler矩限制。一个全样本静态截面拟合很好并不推出逐期风险价格稳定。",
           "worked": "当λ由0.04降为0.01时，Beta分别1.2和0.5的条件超额收益由0.048和0.020变为0.012和0.005，组合风险补偿随市场状态改变。",
           "limitation": "条件关系若在经济制度切换时失效，应报告预测区间和定价残差，而不是用未来状态重估后重新解释为独立样本外。"
+        },
+        {
+          "title": "多ETF风险溢价限制与定价误差的区分",
+          "question": "因子Beta稳定且统计显著，是否足以说明因子模型准确解释了ETF平均收益？",
+          "paragraphs": [
+            "因子模型的Beta刻画收益对已选风险因子的暴露，而横截面风险价格λ把因子暴露映射到模型要求的平均超额收益。真正的定价检验是观察超额收益均值与Bλ的差额，即alpha向量，而不是仅检验每个Beta是否不为零。",
+            "在37只ETF等相互重叠资产上，同一股票市场或久期风险会让定价误差跨资产相关。样本内估计的Beta和λ都带抽样误差，必须在两阶段估计及时间外测试中处理生成回归变量误差、交易因子是否可实现及重叠数据中的共同冲击。"
+          ],
+          "formulas": [
+            {
+              "label": "因子定价模型的可检验横截面alpha",
+              "tex": "\\alpha_i=E[R_i^e]-\\beta_i^\\top\\lambda,\\qquad\\boldsymbol\\alpha=\\boldsymbol\\mu^e-B\\boldsymbol\\lambda"
+            }
+          ],
+          "proof": "定义N×K因子暴露矩阵B、K维风险价格λ和N维超额收益总体均值µ^e。多因子线性定价模型要求µ^e=Bλ，故定义alpha为两者之差，模型成立的必要条件是alpha=0。对于有过多资产且指定因子数小于N的系统，可用跨资产限制检验因子解释能力。",
+          "worked": "两只ETF的单因子Beta分别1.2和0.5，因子价格λ=4%，定价模型预测超额收益为4.8%和2%。若实际总体均值分别为5%和1%，则alpha分别为+0.2和−1个百分点；Beta不变并不消除定价误差。",
+          "limitation": "alpha估计随定价模型、样本区间、无风险收益口径和测试资产选择而变化；模型的统计拒绝不代表交易成本后一定有可利用套利机会。"
         }
       ],
       "links": [
@@ -301,7 +351,7 @@
           "url": "https://www.johnhcochrane.com/asset-pricing"
         }
       ],
-      "checked_status": "V19完整讲义：严格定义、条件、四节数学论证、反例、执行与样本外检查"
+      "checked_status": "V54严格精讲：多ETF风险溢价限制与定价误差的区分"
     },
     {
       "id": "econometrics-n0237",
@@ -330,6 +380,10 @@
         {
           "label": "工具变量识别比率",
           "tex": "\\beta_{\\rm IV}=\\frac{\\operatorname{Cov}(z_t,r_t)}{\\operatorname{Cov}(z_t,s_t)},\\quad\\operatorname{Cov}(z_t,u_t)=0"
+        },
+        {
+          "label": "弱工具变量下IV估计对分母扰动的敏感性",
+          "tex": "\\beta_{\\rm IV}=\\frac{\\gamma}{\\pi},\\quad\\gamma=\\operatorname{Cov}(z,r),\\ \\pi=\\operatorname{Cov}(z,s)\\ne0,\\quad \\frac{\\partial\\beta_{\\rm IV}}{\\partial\\gamma}=\\frac1\\pi"
         }
       ],
       "derivation": [
@@ -344,6 +398,10 @@
         {
           "explanation": "如果找到交易信号外生变动z，且它对收益仅经s发挥影响并与结构误差正交，就可按工具矩识别β。然而若z直接影响流动性或交易对手行为，工具也会失效。",
           "tex": "\\operatorname{Cov}(z,r)=\\beta\\operatorname{Cov}(z,s)+\\operatorname{Cov}(z,u)"
+        },
+        {
+          "explanation": "定义π=Cov(z,s)、γ=Cov(z,r)且π≠0，则β=γ/π。分别求偏导得到对分子变化的响应1/π，对分母变化的响应−γ/π²。π趋近0时两个响应均可能发散，说明小样本协方差估计误差能严重扭曲比率。这个代数敏感性不同于完整弱IV极限分布理论。",
+          "tex": "d(\\gamma/\\pi)=\\pi^{-1}d\\gamma-\\gamma\\pi^{-2}d\\pi"
         }
       ],
       "example": "设真实结构效应β=1，信号s=0.5u+v，其中Var(u)=4、Var(v)=1且两者不相关。则Cov(s,u)=0.5×4=2，Var(s)=0.5²×4+1=2，总体OLS斜率b=1+2/2=2。观察上信号回归系数为2，却高于实际结构因果响应1，样本更多也无法消除这种误判。",
@@ -417,6 +475,23 @@
           "proof": "决策前可得信号属于信息集𝔽_t，未来收益在预测时尚未实现；这能避免前视错误，却不能自动保证改变信号或下单的因果效应被识别。",
           "worked": "上一日ETF动量可以预测下一周收益，但其正斜率不代表额外买入ETF会按相同预测幅度推高未来价格。",
           "limitation": "在高交易参与率、拥挤信号和市场机制变化下，历史可预测性和实盘市场冲击均可能同时改变。"
+        },
+        {
+          "title": "工具变量相关性很弱时的估计不稳定",
+          "question": "工具变量满足排除限制，为什么仍不能确保得到稳定的因果效应估计？",
+          "paragraphs": [
+            "工具变量要有助于识别，除了与结构误差不相关，还必须显著改变内生交易信号。简单IV总体系数是约化式协方差与第一阶段协方差之比，当第一阶段接近零，约化式即使只有微小的估计误差也会被放大。",
+            "金融数据中公告发布时间、交易规则或随机信号可能同时影响市场流动性与收益，排除限制通常很强。即使相关性非零，也应报告第一阶段强度和适用于弱工具的推断方法；把某个统计上显著但极弱的市场工具直接用于高频因果解释会造成虚假的精度。"
+          ],
+          "formulas": [
+            {
+              "label": "弱工具变量下IV估计对分母扰动的敏感性",
+              "tex": "\\beta_{\\rm IV}=\\frac{\\gamma}{\\pi},\\quad\\gamma=\\operatorname{Cov}(z,r),\\ \\pi=\\operatorname{Cov}(z,s)\\ne0,\\quad \\frac{\\partial\\beta_{\\rm IV}}{\\partial\\gamma}=\\frac1\\pi"
+            }
+          ],
+          "proof": "定义π=Cov(z,s)、γ=Cov(z,r)且π≠0，则β=γ/π。分别求偏导得到对分子变化的响应1/π，对分母变化的响应−γ/π²。π趋近0时两个响应均可能发散，说明小样本协方差估计误差能严重扭曲比率。这个代数敏感性不同于完整弱IV极限分布理论。",
+          "worked": "若真实π=0.01、γ=0.02，则IV系数为2；仅把样本约化式协方差误估为0.021而第一阶段不变，系数就变成2.1，分子误差0.001导致估计差0.1。若π变为0.001，相同误差导致系数差1。",
+          "limitation": "这里是简单比率的局部敏感性，不提供工具有效性检验；排除限制违背、弱工具偏差、异方差、自相关及使用多个工具时均需更严格的识别与置信区间。"
         }
       ],
       "links": [
@@ -451,7 +526,7 @@
           "url": "https://larspeterhansen.org/lph_research/large-sample-properties-of-generalized-method-of-moments-estimators/"
         }
       ],
-      "checked_status": "V19完整讲义：严格定义、条件、四节数学论证、反例、执行与样本外检查"
+      "checked_status": "V54严格精讲：工具变量相关性很弱时的估计不稳定"
     }
   ]
 }
