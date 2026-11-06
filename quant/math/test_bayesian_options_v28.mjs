@@ -24,8 +24,8 @@ for(const l of newly){
  for(const k of ["definition","assumptions","example","application","caveat"])
   assert(l[k].length>=110,"shallow "+k+" "+l.id);
  assert(l.properties.length>=4&&l.derivation.length>=4&&l.formulas.length>=4);
- assert.equal(l.deep_sections.length,4);
- assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,4);
+ assert.equal(l.deep_sections.length,5);
+ assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,5);
  for(const f of l.formulas){assert(f.label&&f.tex);katex.renderToString(f.tex,{throwOnError:true,strict:"ignore",displayMode:true});mathematics++;}
  for(const d of l.derivation){assert(d.explanation.length>=55);katex.renderToString(d.tex,{throwOnError:true,strict:"ignore",displayMode:true});mathematics++;}
  for(const s of l.deep_sections){
@@ -41,11 +41,21 @@ for(const l of newly){
  assert(!/[\uFFFD\u200B\uFEFF]/.test(JSON.stringify(l)),"corrupted CJK "+l.id);
  assert(!/Lorem ipsum|TODO|占位|待填/.test(JSON.stringify(l)),"placeholder "+l.id);
 }
-assert.equal(sections,32);
-assert.equal(mathematics,109);
+assert.equal(sections,40);
+assert.equal(mathematics,133);
 assert.equal(links,32);
 assert.equal(references,16);
 const near=(got,want,label,tol=1e-9)=>assert(Math.abs(got-want)<=tol,"independent arithmetic "+label+": "+got+" vs "+want);
+near(2*.4/.5,1.6,"V45 sequential Bayes factor");
+near(1/(4*(2*2+1)),.05,"V45 Beta prior variance");
+near(1/(4*(2*20+1)),1/164,"V45 concentrated Beta prior");
+near(10*11/(14*15)-(10/14)**2,40/(14**2*15),"V45 posterior predictive dependence");
+near(Math.exp(-1.96),.140858420921045,"V45 transformed ET lower");
+near(100*Math.exp(-.01)-100*Math.exp(-.03),1.96046213002139,"V45 prepaid dividend-adjusted parity",1e-8);
+near(.5*.02*2**2,.04,"V45 local Gamma hedge residual");
+near(.20/40,.005,"V45 IV bid ask spread");
+near((11-15)/10,-.4,"V45 irregular put butterfly first slope");
+near((1-11)/20,-.5,"V45 irregular put butterfly second slope");
 near(.2*.6/(.2*.6+.8*.1),.6,"Bayes posterior odds");
 near(.6/.1,6,"Bayes factor");
 near(10/14,5/7,"Beta posterior mean");
@@ -89,4 +99,4 @@ for(const id of newIds){
 for(const c of ["overflow-x:auto","line-break:strict","@media print",":focus-visible"])
  assert(styles.includes(c),"math KaTeX/CJK/responsive style "+c);
 assert(mlStyles.includes("overflow-x:auto"),"ML KaTeX scroll absent");
-console.log("PASS V28: 8 substantive lectures, 32 deep sections, 109 strict KaTeX expressions, 16 source links, 32 canonical crosslinks, 23 independent numeric checks, 312 unique full lectures / 656 math nodes.");
+console.log("PASS V45/V28: 8 substantive lectures, 40 deep sections, 133 strict KaTeX expressions, 16 source links, 32 canonical crosslinks, 23 independent numeric checks, 312 unique full lectures / 656 math nodes.");
