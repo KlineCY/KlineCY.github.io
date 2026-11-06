@@ -38,8 +38,8 @@ for(const l of added){
  assert(l.node_id===l.id&&nodeMap.get(l.id)?.title===l.title,"curriculum mismatch "+l.id);
  assert(l.definition.length>=110&&l.assumptions.length>=100&&l.example.length>=115,"substantive narrative missing "+l.id);
  assert(l.application.length>=80&&l.caveat.length>=60,"financial caveats incomplete "+l.id);
- assert(l.properties.length>=3&&l.formulas.length>=4&&l.derivation.length>=3&&l.deep_sections.length===4,"math coverage incomplete "+l.id);
- assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,4,"duplicate chapter headers "+l.id);
+ assert(l.properties.length>=3&&l.formulas.length>=4&&l.derivation.length>=3&&l.deep_sections.length===5,"math coverage incomplete "+l.id);
+ assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,5,"duplicate chapter headers "+l.id);
  for(const p of l.derivation){
   assert(p.explanation.length>=50,"derivation step lacks proof "+l.id);
   katex.renderToString(p.tex,{throwOnError:true,strict:"ignore",displayMode:true});formulas++;
@@ -61,8 +61,8 @@ for(const l of added){
  for(const ref of l.sources||[]){assert(ref.title.length>=20&&/^https:\/\//.test(ref.url));sourceCount++}
  assert(!JSON.stringify(l).includes("\ufffd"),"Unicode replacement character "+l.id);
 }
-assert.equal(sections,32);
-assert.equal(formulas,88);
+assert.equal(sections,40);
+assert.equal(formulas,112);
 assert.equal(sourceCount,16);
 assert.equal(linkCount,32);
 const visiting=new Set(),visited=new Set();
@@ -91,6 +91,20 @@ for(const [id,actual,expected,token] of cases){
  assert(Math.abs(actual-expected)<1e-9,"failed independent numeric invariant "+id);
  assert(added.find(l=>l.id===id).example.includes(token),"arithmetic not present in visible lecture "+id);
 }
+
+const v52near=(value,expected,name,tol=1e-8)=>assert(Number.isFinite(value)&&Math.abs(value-expected)<tol,"V52 "+name+" value="+value);
+v52near(Math.sqrt(Math.log(2*10/.05)/(2*500)),.0774045512046429,"holdout Hoeffding search cost",1e-9);
+v52near((10*.1+30*.3)/(10+30),.25,"pooled unequal validation folds");
+v52near((.1+.3)/2,.2,"equal-weight unequal validation folds");
+v52near(4/(4+1)+1/(1+1),1.3,"Ridge effective degrees of freedom");
+v52near(.5*(3-2*1)**2+1+.5,2,"Elastic Net duplicate-column symmetric optimum");
+v52near((4-2)/(2*(4-1))*5,5/3,"finite population batch without replacement");
+v52near(5/2,2.5,"batch with replacement");
+v52near(-.1*2/(2+.01),-.09950248756218906,"Adam first step epsilon sensitivity");
+v52near(-.1*.02/(.02+.01),-1/15,"Adam small gradient update");
+v52near(Math.sqrt((1.2-1.6)**2+(1.6-1.2)**2),Math.sqrt(.32),"gradient-ball nonexpansive mapping");
+v52near(Math.max(0,.8-1),0,"lasso zero KKT for weak factor");
+v52near(Math.max(0,1.2-1),.2,"lasso active KKT for strong factor");
 assert(Math.abs((2+2*1.5)/2-2.5)<1e-9,"control numeric check");
 const math=fs.readFileSync(new URL("index.html",root),"utf8");
 const ml=fs.readFileSync(new URL("../ml/index.html",root),"utf8");
@@ -106,5 +120,5 @@ for(const p of ["styles.css","../ml/atlas.css"]){
   assert(css.includes(term),"CJK/formula/print formatting safeguard missing "+term+" in "+p);
  }
 }
-console.log("PASS V21: 8 genuinely new lectures, 32 fully worked sections, "+
+console.log("PASS V21: 8 extended rigorous lectures, 40 fully worked sections, "+
  formulas+" strict KaTeX parses, 16 references, 32 links, 8 independent numeric cases, 278 unique complete math courses and 656-node acyclic curriculum.");
