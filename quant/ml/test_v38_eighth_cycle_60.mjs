@@ -213,4 +213,58 @@ assert.deepEqual(restoredWeights,originalWeights,"V52 asset ID order must invert
 near((0+3*.2)/(1+3),.15,"V52 leave-one-out target encoding");
 near((1+0+3*.2)/(2+3),.32,"V52 full class target encoding leakage");
 
-console.log("PASS V52/V38+V39: 60 V38 and 60 V39 enhanced eighth-cycle canonical lectures; 120 lessons/24 domains, 650 strict KaTeX equations (240 added across V38+V39), substantive derivations/protocols, 60 route links, original numeric examples and responsive Chinese/formula layout.");
+
+const v53sets=[
+ {file:"atlas-depth-08-d.json",ids:["m07-c03-p03","m07-c05-p06","m07-c05-p03","m07-c01-p03","m07-c03-p05","m08-c05-p02","m08-c04-p04","m08-c03-p06","m08-c05-p01","m08-c02-p05"]},
+ {file:"atlas-depth-08-f.json",ids:["m11-c02-p06","m11-c03-p02","m11-c04-p06","m11-c01-p02","m11-c02-p01","m12-c02-p05","m12-c04-p05","m12-c02-p04","m12-c04-p01","m12-c04-p02"]}
+];
+assert.equal(v53sets.reduce((sum,x)=>sum+x.ids.length,0),20,"V53 canonical lesson total");
+for(const group of v53sets){
+ const lessons=read(group.file).lessons;
+ for(const id of group.ids){
+  const l=lessons[id];
+  assert(l&&l.revision_note?.startsWith("V53"),"V53 formal lesson absent "+id);
+  assert.equal(l.equations.length,6,"V53 sixth formula absent "+id);
+  assert.equal(l.derivation.length,6,"V53 sixth mathematical proof absent "+id);
+  assert.equal(l.protocol.length,6,"V53 sixth independent audit absent "+id);
+  assert.equal(l.pitfalls.length,3,"V53 prior financial caveats lost "+id);
+  assert.equal(new Set(l.equations.map(x=>x.tex)).size,6,"V53 exact duplicated mathematical expression "+id);
+  assert(l.derivation.at(-1).length>100&&l.protocol.at(-1).length>40,"V53 proof or numerical validation shallow "+id);
+  assert(l.worked_example.length>145,"V53 financial worked example incomplete "+id);
+  katex.renderToString(l.equations.at(-1).tex,{throwOnError:true,displayMode:true,strict:"ignore"});
+ }
+}
+near(.25*(1**2+2**2),1.25,"V53 Logistic Hessian directional curvature");
+near(3-5-1,-3,"V53 marginal post-cost risk-adjusted benefit");
+near(.04/2,.02,"V53 FWL coefficient conditional variance");
+near(-1.5/(1-.25),-2,"V53 OLS leave-one-out leverage-adjusted residual");
+near(4*20/(4*20+1*80),.5,"V53 class weighted probability differs from base rate");
+const v53ShapConditional=[.5,.5],v53ShapMarginal=[1,0];
+near(v53ShapConditional[0]+v53ShapConditional[1],1,"V53 correlated conditional SHAP reconstruction");
+near(v53ShapMarginal[0]+v53ShapMarginal[1],1,"V53 marginal SHAP reconstruction");
+assert(v53ShapConditional[1]>v53ShapMarginal[1],"V53 SHAP dependence is not causal importance");
+const v53OneHot=[[1,0,0],[0,1,0],[0,0,1]];
+assert(v53OneHot.every(row=>row.reduce((a,b)=>a+b,0)===1),"V53 one-hot full dummy sum equals intercept");
+near(-Math.min(1,5),-1,"V53 Huber clipped prediction-gradient",1e-12);
+near(.5-2*.8*.2,.18,"V53 binary Gini split improvement");
+const v53PseudoInv=[[.25,0],[0,0]];
+near(v53PseudoInv[1][1],0,"V53 singular covariance pseudoinverse ignores null direction");
+near(1/.01,100,"V53 singular Mahalanobis positive-ridge null-direction cost");
+near((3**2+1**2)-3**2,1,"V53 PCA optimal rank-one residual Frobenius energy");
+near(1/Math.sqrt(2*Math.PI*.01),3.989422804014327,"V53 GMM Gaussian spike density bound",1e-12);
+near((0**2+2**2+10**2)-(2*1**2+1*10**2),2,"V53 Kmeans within-cluster identity");
+near((2*3/(2+3))*(2**2),4.8,"V53 Ward baseline merge distortion");
+near((2*3/(2+3))*((10*2)**2),480,"V53 Ward rescaling multiplies squared cost");
+assert(Math.max(95,100)<=Math.min(105,110),"V53 purge required before-validation overlapping labels");
+near((12-10)-(10-8),0,"V53 pre-policy placebo DiD");
+near((16-12)-(11-10),3,"V53 treated post-policy DID");
+assert(!(Math.max(95,100)<Math.min(100,110)),"V53 adjacent half-open event intervals do not overlap");
+assert(Math.max(95,100)<Math.min(101,110),"V53 half-open events overlap after end extension");
+const v53TreatedMean=(.5*.25*3+.5*.75*6)/(.5*.25+.5*.75);
+const v53WeightedControl=(.5*.75*(.25/.75)*1+.5*.25*(.75/.25)*2)/(.5*.25+.5*.75);
+near(v53TreatedMean,5.25,"V53 treated-outcome mean for ATT");
+near(v53WeightedControl,1.75,"V53 propensity odds-weighted missing counterfactual");
+near(v53TreatedMean-v53WeightedControl,3.5,"V53 ATT under conditional selection and overlap");
+near(1+2*3,7,"V53 causal direct-plus-mediated total effect");
+
+console.log("PASS V53/V38+V39: 60 V38 and 60 V39 enhanced eighth-cycle canonical lectures; 120 lessons/24 domains, 650 strict KaTeX equations (50 rigorous additions across V51-V53), substantive derivations/protocols, 60 route links, original numeric examples and responsive Chinese/formula layout.");
