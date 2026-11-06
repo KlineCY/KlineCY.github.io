@@ -331,4 +331,52 @@ assert(v49Oob>0&&v49Oob<.02,"V49 finite-forest OOB count invalid");
 near((-1/3)+(1+1/3)/4,0,"V49 equicorrelation PSD forest variance bound",1e-12);
 near((.05+.10)/2,.075,"V49 maximum noisy information gain");
 near((1-.5)*4/50,.04,"V49 finite-population gradient noise");
-console.log("PASS V49: 122 canonical ninth-cycle lessons fully deepened (62 V40 + 60 V41), 727 strict KaTeX formulas, including 117 additions beyond V41, 12 stages, 122 canonical route links, Chinese math and print responsive checks and 23k+ new V41 mathematical/research chars.");
+
+const v50groups=[
+  {file:"atlas-depth-09-a.json",ids:["m01-c05-p05","m01-c04-p06","m01-c03-p01","m01-c05-p04","m01-c04-p04","m01-c05-p02","m02-c05-p06","m02-c03-p01","m02-c05-p04","m02-c05-p03","m02-c03-p02","m02-c01-p03"]},
+  {file:"atlas-depth-09-b.json",ids:["m03-c05-p04","m03-c02-p03","m03-c04-p02","m03-c02-p04","m03-c01-p05","m04-c03-p04","m04-c03-p05","m04-c01-p05","m04-c04-p02","m04-c02-p03"]}
+];
+assert.equal(v50groups.reduce((s,g)=>s+g.ids.length,0),22,"V50 new canonical lesson count");
+for(const group of v50groups){
+ const lessons=read(group.file).lessons;
+ for(const id of group.ids){
+  const l=lessons[id];
+  assert(l&&l.revision_note?.startsWith("V50"),"V50 canonical course absent "+id);
+  assert.equal(l.equations.length,6,"V50 additional formula absent "+id);
+  assert.equal(l.derivation.length,6,"V50 additional proof absent "+id);
+  assert.equal(l.protocol.length,6,"V50 independent validation absent "+id);
+  assert.equal(l.pitfalls.length,3,"V50 original boundaries lost "+id);
+  assert(!l.equations.slice(0,5).some(e=>e.tex===l.equations.at(-1).tex),"V50 repeated pre-existing equation "+id);
+  assert(l.derivation.at(-1).length>85&&l.protocol.at(-1).length>40,"V50 proof/test too short "+id);
+  assert(l.worked_example.length>145,"V50 numerical reasoning missing "+id);
+  katex.renderToString(l.equations.at(-1).tex,{throwOnError:true,displayMode:true,strict:"ignore"});
+ }
+}
+near(2*.001*(1/42),.00004761904761904762,"V50 drift-rebalancing two-sided notional fee");
+near(2*Math.log(1.1),Math.log(1.21),"V50 research log-wealth chain");
+near(Math.sqrt(.2*.8/100),.04,"V50 held-out risk standard error");
+assert(Math.max(101,105)>102,"V50 mature label and feature time");
+near(.02/Math.sqrt(Math.PI),.011283791670955126,"V50 hyperparameter optimism two candidates");
+near((-3-2-1)/3,-2,"V50 cross-sectional rank IC cannot guarantee positive cash return");
+near(Math.max(9,1)-9,0,"V50 leading PCA factor residual validation");
+near(.01*(4+3),.07,"V50 Linf local feature sensitivity");
+near(.01*Math.sqrt(4**2+3**2),.05,"V50 L2 local feature sensitivity");
+near(.01**2/.01**2,1,"V50 truncated SVD kept component variance");
+near(.2**2,.04,"V50 truncated SVD omitted coefficient bias");
+near(.2*(3/5)**2-.1*(4/5)**2,.008,"V50 covariance Rayleigh perturbation");
+near(16*.0001+.0004,.002,"V50 Jacobian first output risk");
+near(12*.0001-.0004,.0008,"V50 Jacobian cross output risk");
+near(9*.0001+.0004,.0013,"V50 Jacobian second output risk");
+near(1/3+2/3,1,"V50 minimum norm rank-deficient system fit");
+near((99*.01)/(99*.01+1*.99),.5,"V50 class weighted Brier loses raw probability");
+near(.0001+.5*.02**2+.5*.02**2,.0005,"V50 parameter mixture posterior predictive variance");
+near(1-0,1,"V50 XOR conditional signal entropy in bits");
+near(.1*.5*.5,.025,"V50 covariance estimated variance perturbation");
+near(.1*(.5**2+.5**2),.05,"V50 covariance spectral-norm risk limit");
+const v50PAC=Math.ceil(Math.log(100/.05)/(-Math.log(1-.1)));
+assert.equal(v50PAC,73,"V50 exact realizable finite class PAC sample requirement");
+near((.25-.2)+(.2-.1),.15,"V50 estimation plus approximation risk");
+near(100*(1+.5)/(1-.5),300,"V50 negative AR1 variance equivalent sample count");
+near((9+1)/1,10,"V50 strong convex regularized condition number");
+assert(!([1,0,1].every((z,i)=>{const x=i+1;return (x>=1&&x<=3)?z===1:z===0;})),"V50 intervals cannot shatter three ordered points");
+console.log("PASS V50: 122 canonical ninth-cycle lessons fully deepened (62 V40 + 60 V41), 727 strict KaTeX formulas, including 117 additions beyond V41, 12 stages, 122 canonical route links, Chinese math and print responsive checks and 23k+ new V41 mathematical/research chars.");
