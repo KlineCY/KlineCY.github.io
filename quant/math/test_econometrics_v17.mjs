@@ -40,8 +40,8 @@ for(const l of additions){
  assert(l.id===l.node_id&&nodes.get(l.id)?.title===l.title,"curriculum mapping changed "+l.id);
  assert(l.definition.length>=95&&l.assumptions.length>=75&&l.example.length>=95,"thin core lecture "+l.id);
  assert(l.properties.length>=3&&l.derivation.length>=3&&l.formulas.length>=4);
- assert.equal(l.deep_sections.length,4);
- assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,4);
+ assert.equal(l.deep_sections.length,5);
+ assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,5);
  assert(l.application.length>=80&&l.caveat.length>=55,"missing financial application or boundary "+l.id);
  for(const s of l.deep_sections){
   assert(s.question.length>=12&&s.paragraphs.length>=2&&s.paragraphs.every(p=>p.length>=44),"incomplete CJK explanation "+l.id+" "+s.title);
@@ -58,8 +58,24 @@ for(const l of additions){
  for(const src of l.sources){assert(src.title.length>18&&/^https:\/\//.test(src.url));sources++;}
  assert(!JSON.stringify(l).includes("\ufffd"),"corrupted Chinese characters "+l.id);
 }
-assert.equal(sections,48);
-assert.equal(formulas,132);
+assert.equal(sections,60);
+assert.equal(formulas,168);
+
+const nearV56=(a,b,name,tol=1e-9)=>assert(Number.isFinite(a)&&Math.abs(a-b)<tol,"V56 "+name+": "+a+" vs "+b);
+nearV56(1+2*1/4,1.5,"omitted variable bias in asset factor estimation");
+nearV56((2*9)/9,2,"independent repeat measurements recover latent slope");
+nearV56(.02/.01,2,"minimum singular value moment-to-parameter sensitivity");
+nearV56(2+.002/.01,2.2,"exclusion restriction misspecification amplified by weak IV");
+nearV56(.02/.001,20,"weak-IV ratio when first-stage nearly vanishes");
+nearV56((1*2+2*4)/(1*1+2*2),2,"2SLS projected-regressor normal equation");
+nearV56(100*(.02**2/.01+.04**2/.04),8,"Hansen J baseline units");
+nearV56(100*((.02*100)**2/100+.04**2/.04),8,"Hansen J invariant to units");
+nearV56(1+2*.2,1.4,"financial moment long-run variance");
+nearV56(1/(1+4/4),.5,"GMM optimal information inverse variance");
+nearV56(5-2,3,"overidentified moment null-space dimensionality");
+nearV56(.0004+.0009/100,.000409,"asset cross-sectional dependence common shock");
+nearV56(.5*.2/.2,.5,"IPW treatment-group state share");
+nearV56(.5*.8/.8,.5,"IPW untreated state share");
 const visiting=new Set(),done=new Set();
 function visit(id){assert(nodes.has(id));if(visiting.has(id))throw Error("prerequisite cycle "+id);if(done.has(id))return;visiting.add(id);for(const p of nodes.get(id).prerequisites||[])visit(p);visiting.delete(id);done.add(id)}
 for(const n of c.nodes)visit(n.id);
@@ -99,4 +115,4 @@ for(const [name,style] of [["math",css],["ml",mlcss]]){
  assert(style.includes("@media print"),"print layout safeguards missing "+name);
  assert(style.includes(":focus-visible"),"keyboard focus missing "+name);
 }
-console.log("V17 PASS: 12 deepened complete econometrics lectures, 48 coherent sections, "+formulas+" strict KaTeX parses, "+sources+" source refs, "+links+" crosslinks, 278 loaded complete maths courses (V17 historical 240 retained), 656-node acyclic prerequisite graph, 12 independent arithmetic cases, CJK/print rules.");
+console.log("V17 PASS: 12 extended econometrics lectures, 60 coherent sections, "+formulas+" strict KaTeX parses, "+sources+" source refs, "+links+" crosslinks, 278 loaded complete maths courses (V17 historical 240 retained), 656-node acyclic prerequisite graph, 12 independent arithmetic cases, CJK/print rules.");
