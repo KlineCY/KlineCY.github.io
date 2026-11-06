@@ -175,4 +175,31 @@ near(1+10+100+1000,1111,"V45 sampled neighbor expansion");
 near(.9**6,.531441,"V45 residual graph propagation");
 near((11-15)/10,-.4,"V45 prior graph and finance cross-check");
 
-console.log("PASS V41: 122 canonical ninth-cycle lessons fully deepened (62 V40 + 60 V41), 655 strict KaTeX formulas, 244 V40/V41 newly authored formulas, 12 stages, 122 canonical route links, Chinese math and print responsive checks and 23k+ new V41 mathematical/research chars.");
+
+const v46=read("atlas-depth-09-h.json").lessons;
+const v46ids=["m15-c03-p02","m15-c01-p03","m15-c05-p03","m15-c02-p04","m15-c04-p01","m16-c05-p02","m16-c03-p05","m16-c03-p06","m16-c01-p03","m16-c02-p03"];
+assert.equal(v46ids.length,10);
+for(const id of v46ids){
+ const l=v46[id];
+ assert(l&&l.revision_note?.startsWith("V46"),"missing V46 canonical lesson "+id);
+ assert.equal(l.equations.length,6,"V46 sixth formula not loaded "+id);
+ assert.equal(l.derivation.length,6,"V46 sixth proof absent "+id);
+ assert.equal(l.protocol.length,6,"V46 sixth audit absent "+id);
+ assert.equal(l.pitfalls.length,3,"V46 original limitations changed "+id);
+ assert(l.worked_example.length>=145,"V46 numerical demonstration too short "+id);
+ assert(l.derivation.at(-1).length>85&&l.protocol.at(-1).length>40,"V46 weak proof or validation "+id);
+ assert.equal(new Set(l.equations.map(f=>f.tex)).size,6,"V46 duplicate mathematical expression "+id);
+ katex.renderToString(l.equations.at(-1).tex,{throwOnError:true,displayMode:true,strict:"ignore"});
+}
+near(2*.8**5,.65536,"V46 LSTM five-step retention");
+near(.01*(1+.8+.8**2),.0244,"V46 teacher forcing three-step bound");
+near(.5**3/(1-.5),.25,"V46 SSM truncated memory tail");
+near(2*10*.8,16,"V46 nonnormal transient growth");
+near(1+(3-1)*1+(3-1)*2,7,"V46 stacked causal convolution receptive field");
+near(1/(.2**2+.8**2),25/17,"V46 attention effective neighbors");
+near(3*512*2048+2*2048+512,3150336,"V46 SwiGLU biased FFN parameters");
+near(3*512*2048+2*2048+512-(2*512*2048+2048+512),1050624,"V46 FFN additional parameters");
+const v46soft=1/(1+Math.exp(-1));
+near(v46soft*(v46soft*2+(1-v46soft)*1-2),-.196611933,"V46 softmax temperature sensitivity",1e-6);
+near(Math.cos(Math.PI*2),1,"V46 calendar positional phase");
+console.log("PASS V46: 122 canonical ninth-cycle lessons fully deepened (62 V40 + 60 V41), 655 strict KaTeX formulas, including 45 additions beyond V41, 12 stages, 122 canonical route links, Chinese math and print responsive checks and 23k+ new V41 mathematical/research chars.");
