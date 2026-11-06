@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "revision": "2026-11-04",
+  "revision": "2026-11-06",
   "focus": "IV投影、弱识别、过度识别与总体矩条件",
   "lessons": [
     {
@@ -30,6 +30,10 @@
         {
           "label": "多工具与实际金融研究审计",
           "tex": "\\operatorname{rank}(E[ZX^\\top])\\le\\min(\\dim Z,\\dim X)"
+        },
+        {
+          "label": "弱工具中分母接近零对估计比率的有限扰动",
+          "tex": "\\widehat\\beta=\\frac{\\gamma+\\Delta_\\gamma}{\\pi+\\Delta_\\pi},\\quad\\widehat\\beta-\\frac{\\gamma}{\\pi}=\\frac{\\pi\\Delta_\\gamma-\\gamma\\Delta_\\pi}{\\pi(\\pi+\\Delta_\\pi)}"
         }
       ],
       "derivation": [
@@ -44,6 +48,10 @@
         {
           "explanation": "设候选参数β₀，若工具有效且β₀为真，应满足E[Z(Y−β₀X)]=0；基于该限制的检验不必先对小分母求逆。",
           "tex": "H_0:E[Z(Y-\\beta_0X)]=0"
+        },
+        {
+          "explanation": "通分计算(γ+Δγ)/(π+Δπ)−γ/π=[π(γ+Δγ)−γ(π+Δπ)]/[π(π+Δπ)]。分子相同的πγ项抵消，剩余πΔγ−γΔπ。要求π和π+Δπ均非零，否则比率不存在。",
+          "tex": "\\frac{\\gamma+\\Delta_\\gamma}{\\pi+\\Delta_\\pi}-\\frac{\\gamma}{\\pi}=\\frac{\\pi\\Delta_\\gamma-\\gamma\\Delta_\\pi}{\\pi(\\pi+\\Delta_\\pi)}"
         }
       ],
       "example": "令n=100、第一阶段R²=0.01，则传统单工具F=98×0.01/0.99≈0.9899，说明第一阶段非常弱。若Cov(Z,X)=0.1、Cov(Z,Y)=0.2，比率为2；仅把后者变为0.25，估计立刻跳到2.5。",
@@ -117,6 +125,23 @@
           "proof": "相关矩阵的秩受维数约束，工具名义数量增加并不强制独立信息增加，也不确保排除限制成立。",
           "worked": "十个几乎相同的政策意外序列对单一利率因子的识别，可能不比一个强且可信的序列提供更多结构信息。",
           "limitation": "统计诊断结论必须声明同方差、聚类、工具选择与有限样本条件。"
+        },
+        {
+          "title": "弱第一阶段下IV比率的精确扰动分解",
+          "question": "为什么弱工具的有限样本IV系数会出现非常大的数值波动？",
+          "paragraphs": [
+            "弱工具变量问题并不只是标准误较大，还包括约化式和第一阶段的随机比率，尤其当估计第一阶段协方差接近零时，分母可能跨过零并产生厚尾估计分布。该有限扰动等式不依赖把误差设为无限小，直接揭示了两个估计误差的相互作用。",
+            "对ETF收益与政策冲击的IV研究，不能只展示IV点估计和传统正态置信区间；应同步报告第一阶段检验以及对弱工具仍有效的Anderson–Rubin置信集，并检查工具信息是否在当日决策前已经发布。"
+          ],
+          "formulas": [
+            {
+              "label": "弱工具中分母接近零对估计比率的有限扰动",
+              "tex": "\\widehat\\beta=\\frac{\\gamma+\\Delta_\\gamma}{\\pi+\\Delta_\\pi},\\quad\\widehat\\beta-\\frac{\\gamma}{\\pi}=\\frac{\\pi\\Delta_\\gamma-\\gamma\\Delta_\\pi}{\\pi(\\pi+\\Delta_\\pi)}"
+            }
+          ],
+          "proof": "通分计算(γ+Δγ)/(π+Δπ)−γ/π=[π(γ+Δγ)−γ(π+Δπ)]/[π(π+Δπ)]。分子相同的πγ项抵消，剩余πΔγ−γΔπ。要求π和π+Δπ均非零，否则比率不存在。",
+          "worked": "真实约化式γ=0.02、第一阶段π=0.01，对应β=2。若估计误差Δγ=0、Δπ=−0.009，估计IV比率变为0.02/0.001=20，偏差达到18；即使约化式没有估计误差也会发生严重不稳定。",
+          "limitation": "代数比率不等于弱IV的抽样分布理论；多工具、异方差、序列相关和非线性效应需相应强度诊断及弱识别稳健推断。"
         }
       ],
       "links": [
@@ -146,7 +171,7 @@
           "url": "https://www.degruyterbrill.com/document/doi/10.1515/9781400829828-009/html"
         }
       ],
-      "checked_status": "V17：四节完整识别、代数证明、数值复算与金融应用"
+      "checked_status": "V56严格精讲：弱第一阶段下IV比率的精确扰动分解"
     },
     {
       "id": "econometrics-n0218",
@@ -175,6 +200,10 @@
         {
           "label": "金融应用中的执行时序",
           "tex": "E[Z_t(Y_{t+h}-X_t^\\top\\beta)]=0"
+        },
+        {
+          "label": "二阶段最小二乘的残差化工具回归解释",
+          "tex": "P_Z=Z(Z^\\top Z)^{-1}Z^\\top,\\quad\\widehat X=P_ZX\\ \\Longrightarrow\\widehat\\beta=(\\widehat X^\\top\\widehat X)^{-1}\\widehat X^\\top Y"
         }
       ],
       "derivation": [
@@ -189,6 +218,10 @@
         {
           "explanation": "仅一列工具和一列解释变量时，投影代数把2SLS简化为ZᵀY/ZᵀX，直接对应一元IV比率。",
           "tex": "\\widehat\\beta=\\frac{Z^\\top Y}{Z^\\top X}\\quad\\text{(无截距单列示例)}"
+        },
+        {
+          "explanation": "令Xhat=P_ZX。因P_Zᵀ=P_Z、P_Z²=P_Z，XhatᵀXhat=XᵀP_ZX，而XhatᵀY=XᵀP_ZY。把二者代入OLS正规方程即得βhat=(XᵀP_ZX)⁻¹XᵀP_ZY。",
+          "tex": "\\widehat X^\\top\\widehat X=X^\\top P_Z^\\top P_ZX=X^\\top P_ZX,\\quad\\widehat X^\\top Y=X^\\top P_ZY"
         }
       ],
       "example": "无截距玩具数据z=(−1,0,1)、x=(1,2,4)、y=(2,4,8)。有zᵀz=2、zᵀx=3、zᵀy=6，故P_Zx=(−1.5,0,1.5)、P_Zy=(−3,0,3)，2SLS=(xᵀP_Zy)/(xᵀP_Zx)=9/4.5=2。",
@@ -262,6 +295,23 @@
           "proof": "在工具相对于结构误差正交、标签成熟与时间对齐正确时，工具矩提供结构估计的基础；未来行情不得进入Z或第一阶段特征。",
           "worked": "若利率公告在美股交易后发布，则不能把当天收盘已实现收益与公告信息配成同日预测的有效工具。",
           "limitation": "标准2SLS假定工具对结构误差有效，不能仅依靠回归诊断证明外部事件足够外生。"
+        },
+        {
+          "title": "2SLS为何可以写成投影后拟合的OLS",
+          "question": "工具空间的一阶段预测与二阶段系数公式为什么代数等价？",
+          "paragraphs": [
+            "在工具矩阵Z满列秩且工具投影后的解释变量Xhat=P_Z X仍然满列秩时，二阶段可以对Xhat与原始Y进行普通最小二乘。其系数表达与2SLS的矩阵公式一致，因为正交投影矩阵P_Z具有对称和幂等性质。",
+            "这一代数等价不允许把第一阶段残差忽略后直接使用二阶段OLS的常规方差公式；两阶段使用了同一批数据，正确标准误必须反映IV估计的矩条件与依赖结构。资产收益与利率冲击的时间序列还需针对相关误差进行HAC。"
+          ],
+          "formulas": [
+            {
+              "label": "二阶段最小二乘的残差化工具回归解释",
+              "tex": "P_Z=Z(Z^\\top Z)^{-1}Z^\\top,\\quad\\widehat X=P_ZX\\ \\Longrightarrow\\widehat\\beta=(\\widehat X^\\top\\widehat X)^{-1}\\widehat X^\\top Y"
+            }
+          ],
+          "proof": "令Xhat=P_ZX。因P_Zᵀ=P_Z、P_Z²=P_Z，XhatᵀXhat=XᵀP_ZX，而XhatᵀY=XᵀP_ZY。把二者代入OLS正规方程即得βhat=(XᵀP_ZX)⁻¹XᵀP_ZY。",
+          "worked": "假设工具投影后的一列解释变量为Xhat=(1,2)，结果Y=(2,4)，则OLS二阶段系数为(1×2+2×4)/(1²+2²)=10/5=2；代回2SLS投影矩阵表示得到同一个系数。",
+          "limitation": "条件包括Z满秩、XᵀP_ZX可逆及工具有效性；投影等式证明只说明算法系数相同，不保证排除限制成立或二阶段朴素标准误有效。"
         }
       ],
       "links": [
@@ -296,7 +346,7 @@
           "url": "https://www.nber.org/papers/t0284"
         }
       ],
-      "checked_status": "V17：四节完整识别、代数证明、数值复算与金融应用"
+      "checked_status": "V56严格精讲：2SLS为何可以写成投影后拟合的OLS"
     },
     {
       "id": "econometrics-n0219",
@@ -325,6 +375,10 @@
         {
           "label": "金融研究中的工具筛选偏差",
           "tex": "\\widehat S=\\widehat{\\operatorname{LRV}}(g_t)"
+        },
+        {
+          "label": "过识别J统计量对残余矩单位的敏感性",
+          "tex": "J=n\\bar g^\\top S^{-1}\\bar g,\\quad\\bar g^\\prime=A\\bar g,\\ S^\\prime=ASA^\\top\\ \\Longrightarrow J^\\prime=J\\quad(A\\text{ 可逆})"
         }
       ],
       "derivation": [
@@ -339,6 +393,10 @@
         {
           "explanation": "若全部工具共同违反排除限制但错设方向刚好落在可拟合矩空间中，J仍可能不大；因此未拒绝不能替代排除限制的经济论证。",
           "tex": "H_0:E[g_t(\\beta_0)]=0"
+        },
+        {
+          "explanation": "对g'=Ag，长期协方差S'=ASAᵀ，逆为A⁻ᵀS⁻¹A⁻¹。代入J'=n(Ag)ᵀA⁻ᵀS⁻¹A⁻¹(Ag)，A的逆在两侧相消，得到J'=n gᵀS⁻¹g=J。",
+          "tex": "(ASA^\\top)^{-1}=A^{-\\top}S^{-1}A^{-1}"
         }
       ],
       "example": "构造两个矩g₁(β)=β−1、g₂(β)=2β−1，参数数目k=1，矩数r=2。以W=I最小化(β−1)²+(2β−1)²，一阶条件给β̂=0.6，残余矩为(−0.4,0.2)、平方和0.2；若样本量n=10，统计形式J=2。",
@@ -412,6 +470,23 @@
           "proof": "总体矩的长期协方差包含零滞后与各滞后自协方差之和；随时间依赖变化，最优权重和J统计量的有效分布也会改变。",
           "worked": "如果30只ETF在同一公告日同步响应，这一日的工具事件仍只有一个独立日期维度，不能把资产行数当作30个独立外生事件。",
           "limitation": "聚类与样本分组规则的选择需由误差相关结构决定，不存在固定万能形式。"
+        },
+        {
+          "title": "过识别检验对合法矩条件重标度的不变性",
+          "question": "把某一个资产定价矩从元改为千元，为什么有效加权后的检验结果不能随意改变？",
+          "paragraphs": [
+            "资产定价的矩向量可能混合不同收益单位、价格层级或模型残差。若同时用可逆矩阵A变换矩向量及其长期协方差，正确标准化的GMM距离在代数上应当保持不变。这体现了GMM采用协方差逆矩阵而非单位矩阵的一项重要理由。",
+            "历史样本中若更换矩条件单位后J统计量剧烈变化，应检查长期协方差矩阵的估计方式、正则化及是否错误地保留旧权重。严格不变性要求协方差与矩作一致变换且可逆，数值估计中的舍入可能有微小偏差。"
+          ],
+          "formulas": [
+            {
+              "label": "过识别J统计量对残余矩单位的敏感性",
+              "tex": "J=n\\bar g^\\top S^{-1}\\bar g,\\quad\\bar g^\\prime=A\\bar g,\\ S^\\prime=ASA^\\top\\ \\Longrightarrow J^\\prime=J\\quad(A\\text{ 可逆})"
+            }
+          ],
+          "proof": "对g'=Ag，长期协方差S'=ASAᵀ，逆为A⁻ᵀS⁻¹A⁻¹。代入J'=n(Ag)ᵀA⁻ᵀS⁻¹A⁻¹(Ag)，A的逆在两侧相消，得到J'=n gᵀS⁻¹g=J。",
+          "worked": "两维残余矩g=(0.02,0.04)、S=diag(0.01,0.04)、样本数n=100，则J=100(0.02²/0.01+0.04²/0.04)=8。把第一矩与其标准差同时乘100，使用S'=diag(100,0.04)，新的J仍是8。",
+          "limitation": "矩阵S须正定、A须可逆；若单位变换只修改矩而不修改权重，或按不兼容方式重新正则化，数值J不必保持不变。"
         }
       ],
       "links": [
@@ -441,7 +516,7 @@
           "url": "https://larspeterhansen.org/lph_research/large-sample-properties-of-generalized-method-of-moments-estimators/"
         }
       ],
-      "checked_status": "V17：四节完整识别、代数证明、数值复算与金融应用"
+      "checked_status": "V56严格精讲：过识别检验对合法矩条件重标度的不变性"
     },
     {
       "id": "econometrics-n0220",
@@ -470,6 +545,10 @@
         {
           "label": "资产定价Euler矩和金融数据时点",
           "tex": "E[m_{t+1}R^e_{i,t+1}\\mid\\mathcal F_t]=0"
+        },
+        {
+          "label": "矩条件样本均值的长期方差不是单期方差",
+          "tex": "\\sqrt n\\,\\bar g_n\\Rightarrow N(0,S),\\quad S=\\sum_{h=-\\infty}^{\\infty}\\operatorname{Cov}(g_t,g_{t-h})"
         }
       ],
       "derivation": [
@@ -484,6 +563,10 @@
         {
           "explanation": "对模型做参数微扰，Jacobian G=E[∂g/∂θᵀ]的列秩刻画这些矩对各参数方向的区分能力。",
           "tex": "G=E\\left[\\frac{\\partial g(W,\\theta_0)}{\\partial\\theta^\\top}\\right]"
+        },
+        {
+          "explanation": "矩均值为n⁻¹Σg_t，因此Var(√n gbar)=n⁻¹Σ_tΣ_sCov(g_t,g_s)。若过程二阶平稳，按间隔h重新分组，得到Σ_{h=−(n−1)}^{n−1}(1−|h|/n)γ(h)；在协方差绝对可和等条件下，随n增大趋向Σ_{h∈Z}γ(h)=S。",
+          "tex": "\\operatorname{Var}(\\sqrt n\\,\\bar g_n)=\\frac1n\\sum_{t=1}^n\\sum_{s=1}^n\\operatorname{Cov}(g_t,g_s)\\ \\longrightarrow S"
         }
       ],
       "example": "令Z在−1与1间各占一半，X=Z，Y=3Z+U，且E[ZU]=0。矩E[Z(Y−βX)]等于3−β，因此唯一零点β=3。若Z与X完全不相关，则该矩对β不会变化，无法单独识别系数。 这里以中心化且有限矩的变量构造理论总体关系，不能把单个样本中恰好为零的矩直接当作模型无偏性的证明。",
@@ -557,6 +640,23 @@
           "proof": "当资产以相同名义交易价格满足条件无套利Euler限制时，对F_t可测工具h_t乘上该零条件均值并取期望，得到无条件矩E[h_tmR^e]=0。",
           "worked": "若某资产每期超额收益经现值权重调整后样本均值显著偏离零，需分别检查模型错设、数据时间对齐和估计不确定性。",
           "limitation": "超额收益风险溢价模型通常需额外说明资产可交易性和代表性SDF存在性，不能仅由样本矩接近零证明。"
+        },
+        {
+          "title": "时间依赖矩与金融GMM的长期协方差",
+          "question": "为什么一段盈利事件连续出现时，GMM矩的标准误不能直接使用样本方差除以样本量？",
+          "paragraphs": [
+            "对证券收益或预测误差形成的矩g_t，连续日期常因持仓期重叠、制度状态与流动性共振产生自相关。矩平均的渐近方差应是所有滞后协方差的总和S，而不是单期Cov(g_t)；忽略相关性将误读不同交易日提供的独立统计信息量。",
+            "采用HAC或时间块重采样估计S还要求适当的二阶平稳、混合性与矩条件。实际检验应在训练选择外的固定检验窗口执行，并核对事件标签成熟时点，不能把同一未来收益同时用于模型拟合和独立矩检验。"
+          ],
+          "formulas": [
+            {
+              "label": "矩条件样本均值的长期方差不是单期方差",
+              "tex": "\\sqrt n\\,\\bar g_n\\Rightarrow N(0,S),\\quad S=\\sum_{h=-\\infty}^{\\infty}\\operatorname{Cov}(g_t,g_{t-h})"
+            }
+          ],
+          "proof": "矩均值为n⁻¹Σg_t，因此Var(√n gbar)=n⁻¹Σ_tΣ_sCov(g_t,g_s)。若过程二阶平稳，按间隔h重新分组，得到Σ_{h=−(n−1)}^{n−1}(1−|h|/n)γ(h)；在协方差绝对可和等条件下，随n增大趋向Σ_{h∈Z}γ(h)=S。",
+          "worked": "一维矩的单期方差γ0=1、仅一阶前后自协方差γ1=γ−1=0.2、其他滞后为0，则长期方差S=1+2×0.2=1.4。若n=100，正确渐近矩均值标准误约√(1.4/100)=0.1183，高于独立样本公式0.1。",
+          "limitation": "绝对可和与中心极限定理是必要的正则条件之一；长期记忆、结构突变或无限方差收益会破坏标准HAC与正态近似。"
         }
       ],
       "links": [
@@ -586,7 +686,7 @@
           "url": "https://ealdrich.github.io/Teaching/Econ211C/LectureNotes/Unit6-GMM/restrict.html"
         }
       ],
-      "checked_status": "V17：四节完整识别、代数证明、数值复算与金融应用"
+      "checked_status": "V56严格精讲：时间依赖矩与金融GMM的长期协方差"
     }
   ]
 }
