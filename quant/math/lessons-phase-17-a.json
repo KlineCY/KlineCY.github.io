@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "revision": "2026-11-04",
+  "revision": "2026-11-06",
   "focus": "计量经济学识别基础：外生性、测量误差、模型识别与工具变量",
   "lessons": [
     {
@@ -30,6 +30,10 @@
         {
           "label": "时间信息集与内生性审计",
           "tex": "X_t\\in\\mathcal F_t,\\quad Y_{t+h}\\notin\\mathcal F_t\\ (h>0)"
+        },
+        {
+          "label": "遗漏因子的总体偏差与控制变量的可检验条件",
+          "tex": "Y=\\beta X+\\gamma Z+\\varepsilon,\\quad \\operatorname{Cov}(X,\\varepsilon)=0\\Longrightarrow\\operatorname{plim}\\widehat\\beta_{\\rm short}=\\beta+\\gamma\\frac{\\operatorname{Cov}(X,Z)}{\\operatorname{Var}(X)}"
         }
       ],
       "derivation": [
@@ -44,6 +48,10 @@
         {
           "explanation": "回测盈利和因果效应属于不同目标，观察条件均值E[Y|X]与改变策略X的干预结果通常不相同。",
           "tex": "E[Y\\mid X=x]\\ne E[Y\\mid\\operatorname{do}(X=x)]\\quad\\text{(一般情形)}"
+        },
+        {
+          "explanation": "从Y=βX+γZ+ε出发，取与X的协方差并使用Cov(X,ε)=0，得到Cov(X,Y)=βVar(X)+γCov(X,Z)。带截距短回归的总体斜率为Cov(X,Y)/Var(X)，除以Var(X)>0并整理即得到公式。",
+          "tex": "\\operatorname{Cov}(X,Y)=\\beta\\operatorname{Var}(X)+\\gamma\\operatorname{Cov}(X,Z)"
         }
       ],
       "example": "真实β=2、Var(x)=4、Cov(x,u)=1时，总体OLS斜率为2+1/4=2.25；当抽样矩一致收敛，样本量再大也不会使斜率回到结构值2。 这一差值0.25不是一次随机抽样误差，而是总体结构误差与解释变量共同变化所产生的系统偏差；单纯扩大样本量无法消除。",
@@ -117,6 +125,23 @@
           "proof": "预测输入若在t时刻合法，应当由F_t可测变量构成；被预测的未来标签必须在之后成熟，否则时间外评价不再是有效的未来预测实验。",
           "worked": "同一ETF财报若在下一交易日才公布，不能仅按财报所属季度把其数值回填为前一交易日已经知道的特征。",
           "limitation": "合法时点核查仍不代表经济因果外生性已经成立。"
+        },
+        {
+          "title": "遗漏市场因子对ETF回归系数的偏差",
+          "question": "为什么单因子预测回归表现显著，却未必估计出该因子的独立经济作用？",
+          "paragraphs": [
+            "若目标收益同时由研究因子X和一个遗漏市场风险因子Z决定，忽略Z的回归斜率会同时吸收X对目标的线性作用及X与Z相关所带来的间接协动。即使结构扰动ε与X不相关，回归系数仍可能偏离β，这属于遗漏变量偏差而非数值优化误差。",
+            "ETF的动量与风格暴露常受同一市场趋势驱动，报告X的回归斜率时必须核对已知宏观与行业控制变量。把截面预测能力解释为交易规则因果效应需要独立设计，而不是通过增加显著性星号实现。"
+          ],
+          "formulas": [
+            {
+              "label": "遗漏因子的总体偏差与控制变量的可检验条件",
+              "tex": "Y=\\beta X+\\gamma Z+\\varepsilon,\\quad \\operatorname{Cov}(X,\\varepsilon)=0\\Longrightarrow\\operatorname{plim}\\widehat\\beta_{\\rm short}=\\beta+\\gamma\\frac{\\operatorname{Cov}(X,Z)}{\\operatorname{Var}(X)}"
+            }
+          ],
+          "proof": "从Y=βX+γZ+ε出发，取与X的协方差并使用Cov(X,ε)=0，得到Cov(X,Y)=βVar(X)+γCov(X,Z)。带截距短回归的总体斜率为Cov(X,Y)/Var(X)，除以Var(X)>0并整理即得到公式。",
+          "worked": "设真实β=1、遗漏因子效应γ=2、Var(X)=4、Cov(X,Z)=1，则短回归系数极限为1+2×1/4=1.5。增加合法事前市场因子控制后，若满足外生性，可避免将0.5的共同波动错记为X自身影响。",
+          "limitation": "遗漏变量推导要求总体二阶矩有限，且Cov(X,ε)=0。无法观测的混杂、非线性、处理后变量与样本选择问题不能由这个线性公式自动消除。"
         }
       ],
       "links": [
@@ -146,7 +171,7 @@
           "url": "https://www.degruyterbrill.com/document/doi/10.1515/9781400829828-009/html"
         }
       ],
-      "checked_status": "V17：识别条件、数学推导、数值反例及金融时间外验证均完整"
+      "checked_status": "V56严格精讲：遗漏市场因子对ETF回归系数的偏差"
     },
     {
       "id": "econometrics-n0213",
@@ -175,6 +200,10 @@
         {
           "label": "金融异步报价与非经典噪声",
           "tex": "v_{i,t}=w_{i,t}-x^*_{i,t}"
+        },
+        {
+          "label": "二次独立测量提供潜在信号的工具矩",
+          "tex": "w_1=x^\\star+v_1,\\ w_2=x^\\star+v_2,\\ y=\\beta x^\\star+u\\ \\Longrightarrow\\frac{\\operatorname{Cov}(w_2,y)}{\\operatorname{Cov}(w_2,w_1)}=\\beta"
         }
       ],
       "derivation": [
@@ -189,6 +218,10 @@
         {
           "explanation": "如果另一个测量w₂=x*+v₂与w₁误差互不相关，两次测量的协方差等于Var(x*)；共同误差会破坏这一识别关系。",
           "tex": "\\operatorname{Cov}(w_1,w_2)=\\operatorname{Var}(x^*)+\\operatorname{Cov}(v_1,v_2)"
+        },
+        {
+          "explanation": "展开Cov(w2,w1)=Cov(x*+v2,x*+v1)，在所有交叉协方差均为0时等于Var(x*)；同理Cov(w2,y)=Cov(x*+v2,βx*+u)=βVar(x*)。只要Var(x*)>0，两式作比即得β。",
+          "tex": "\\operatorname{Cov}(w_2,w_1)=\\operatorname{Var}(x^\\star),\\quad\\operatorname{Cov}(w_2,y)=\\beta\\operatorname{Var}(x^\\star)"
         }
       ],
       "example": "设β=2、Var(x*)=9、Var(v)=3，则可靠性比率为9/(9+3)=0.75，观测特征回归斜率为1.5。若噪声方差升至9，则系数变成1；增加样本量不能消除该总体收缩。 这也说明，在真实信号强度固定的条件下，观测误差越大，估计到的斜率越容易被误解为经济关系弱化。",
@@ -262,6 +295,23 @@
           "proof": "定义每一观察与在指定时点可实施的理想特征的差异，并按波动状态和资产流动性检验其相关结构；仅写成加性差异不意味着满足经典独立假设。",
           "worked": "若亚洲市场收盘早于美国宏观公告，则把同一日期美国收盘收益配入亚洲特征可能形成未来公告后的信息错位。",
           "limitation": "若缺乏可信真值代理，应明确无法识别偏差修正量，而不是给出虚假的无误差估计。"
+        },
+        {
+          "title": "独立重复测量的误差修正与资产报价数据",
+          "question": "当同一潜在预测变量被两个独立报价系统测量时，如何避免经典误差导致的OLS衰减？",
+          "paragraphs": [
+            "在经典加性测量误差模型下，第一次观测w1包含真实信号x*与噪声v1，第二次观测w2包含同一信号和另一份噪声v2。如果两份噪声与真实信号、收益扰动及彼此不相关，那么第二份测量可以作为第一份的工具，分母只保留真实信号方差。",
+            "不同交易平台价格可能受到共同延迟、撮合规则或行情供应商修订影响，所以独立误差假设不应想当然。若两个报价系统共享同一错误价格源，所谓重复测量的工具不再有效，ETF策略仍可能被虚假信号带偏。"
+          ],
+          "formulas": [
+            {
+              "label": "二次独立测量提供潜在信号的工具矩",
+              "tex": "w_1=x^\\star+v_1,\\ w_2=x^\\star+v_2,\\ y=\\beta x^\\star+u\\ \\Longrightarrow\\frac{\\operatorname{Cov}(w_2,y)}{\\operatorname{Cov}(w_2,w_1)}=\\beta"
+            }
+          ],
+          "proof": "展开Cov(w2,w1)=Cov(x*+v2,x*+v1)，在所有交叉协方差均为0时等于Var(x*)；同理Cov(w2,y)=Cov(x*+v2,βx*+u)=βVar(x*)。只要Var(x*)>0，两式作比即得β。",
+          "worked": "设真实Var(x*)=9、测量误差方差均为3、β=2，观察w1的OLS斜率为2×9/(9+3)=1.5；若独立重复测量w2可用，则协方差比为18/9=2，恢复理论系数。",
+          "limitation": "需要严格的独立重复误差与工具排除限制。真实行情时间戳不同、异常价格共享或历史修订可能使Cov(v1,v2)不为0。"
         }
       ],
       "links": [
@@ -291,7 +341,7 @@
           "url": "https://www.degruyterbrill.com/document/doi/10.1515/9781400829828-009/html"
         }
       ],
-      "checked_status": "V17：识别条件、数学推导、数值反例及金融时间外验证均完整"
+      "checked_status": "V56严格精讲：独立重复测量的误差修正与资产报价数据"
     },
     {
       "id": "econometrics-n0214",
@@ -320,6 +370,10 @@
         {
           "label": "数值唯一性与结构意义",
           "tex": "X^\\top X+\\lambda I\\succ0\\quad(\\lambda>0)"
+        },
+        {
+          "label": "最小奇异值给出局部矩识别误差界",
+          "tex": "g(\\theta)=D(\\theta-\\theta^\\star),\\ \\sigma_{\\min}(D)>0\\ \\Longrightarrow\\ \\|\\theta-\\theta^\\star\\|_2\\le\\frac{\\|g(\\theta)\\|_2}{\\sigma_{\\min}(D)}"
         }
       ],
       "derivation": [
@@ -334,6 +388,10 @@
         {
           "explanation": "岭惩罚使XᵀX+λI正定并返回唯一系数，但那是额外惩罚下的选择，并不等同于无惩罚结构参数被识别。",
           "tex": "\\widehat\\beta_\\lambda=(X^\\top X+\\lambda I)^{-1}X^\\top y"
+        },
+        {
+          "explanation": "设Δ=θ−θ*且g(θ)=DΔ。由奇异值分解，任意Δ满足||DΔ||₂≥σ_min(D)||Δ||₂。因σ_min(D)>0，两侧除以σ_min(D)即可得到参数误差上界。",
+          "tex": "\\|D\\Delta\\|_2\\ge\\sigma_{\\min}(D)\\|\\Delta\\|_2,\\quad\\Delta=\\theta-\\theta^\\star"
         }
       ],
       "example": "取中心化的一元矩E[ZX]=2、E[ZY]=5，则唯一矩解β=5/2=2.5。若E[ZX]=0且E[ZY]=0，任意β都符合这一条矩；若分母为零但E[ZY]非零，则不是任意识别而是该矩模型无精确解。",
@@ -407,6 +465,23 @@
           "proof": "当XᵀX半正定时，加入λI令所有特征值至少为λ，因此数值优化有唯一点；但原始X的列秩并未改变。",
           "worked": "两个完全相同的ETF因子都进入回归时，岭惩罚可给出对称系数，不能证明两个因子的独立经济作用相同。",
           "limitation": "若目标是结构政策效应，还需外部识别假设，而不是简单提高预测交叉验证得分。"
+        },
+        {
+          "title": "矩识别中的最小奇异值与参数稳健性",
+          "question": "矩条件的残差很小，是否足以证明因子风险价格估计接近真实参数？",
+          "paragraphs": [
+            "过度识别或恰好识别的矩系统可写成总体函数g(θ)，局部线性化由Jacobian D支配。即使D满列秩，如果最小奇异值极小，同样大小的矩误差也可能对应很大的参数偏差；这就是弱识别在数值尺度上的表现。",
+            "在高度相关ETF风险暴露和多个近似重复工具变量下，应报告Jacobian的有效秩、奇异值谱与置信集而不只报告优化损失。小的样本GMM目标无法单独证明经济系数精确，更不能替代弱工具稳健检验。"
+          ],
+          "formulas": [
+            {
+              "label": "最小奇异值给出局部矩识别误差界",
+              "tex": "g(\\theta)=D(\\theta-\\theta^\\star),\\ \\sigma_{\\min}(D)>0\\ \\Longrightarrow\\ \\|\\theta-\\theta^\\star\\|_2\\le\\frac{\\|g(\\theta)\\|_2}{\\sigma_{\\min}(D)}"
+            }
+          ],
+          "proof": "设Δ=θ−θ*且g(θ)=DΔ。由奇异值分解，任意Δ满足||DΔ||₂≥σ_min(D)||Δ||₂。因σ_min(D)>0，两侧除以σ_min(D)即可得到参数误差上界。",
+          "worked": "取D=diag(1,0.01)，估计参数相对真值偏移Δ=(0,2)。矩偏差为(0,0.02)，范数仅0.02，但参数范数为2；因为σ_min=0.01，上界恰为0.02/0.01=2。",
+          "limitation": "不等式是局部线性或精确线性矩映射下的代数结论。非线性系统需要控制高阶余项，且样本矩存在随机误差时还须附加统计置信推断。"
         }
       ],
       "links": [
@@ -436,7 +511,7 @@
           "url": "https://larspeterhansen.org/lph_research/large-sample-properties-of-generalized-method-of-moments-estimators/"
         }
       ],
-      "checked_status": "V17：识别条件、数学推导、数值反例及金融时间外验证均完整"
+      "checked_status": "V56严格精讲：矩识别中的最小奇异值与参数稳健性"
     },
     {
       "id": "econometrics-n0215",
@@ -465,6 +540,10 @@
         {
           "label": "金融政策意外工具的研究设计",
           "tex": "E[z_t(y_{t+h}-\\beta x_t-\\gamma^\\top c_t)]=0"
+        },
+        {
+          "label": "工具排除限制的小偏差放大公式",
+          "tex": "\\operatorname{Cov}(Z,U)=\\delta,\\ \\operatorname{Cov}(Z,X)=\\pi\\ne0\\ \\Longrightarrow\\ \\beta_{\\rm IV}-\\beta=\\delta/\\pi"
         }
       ],
       "derivation": [
@@ -479,6 +558,10 @@
         {
           "explanation": "若工具对y另有直接效应δz，即使z与剩余误差不相关也会产生δVar(z)/Cov(z,x)污染。",
           "tex": "\\beta_{\\rm IV}-\\beta=\\delta\\frac{\\operatorname{Var}(z)}{\\operatorname{Cov}(z,x)}"
+        },
+        {
+          "explanation": "由Y=βX+U，取工具Z的协方差，得到Cov(Z,Y)=βCov(Z,X)+Cov(Z,U)。用π=Cov(Z,X)、δ=Cov(Z,U)表示，IV总体比率Cov(Z,Y)/π=β+δ/π，故偏差为δ/π。",
+          "tex": "\\operatorname{Cov}(Z,Y)=\\beta\\operatorname{Cov}(Z,X)+\\operatorname{Cov}(Z,U)"
         }
       ],
       "example": "真实β=3、Cov(z,x)=2且Cov(z,u)=0时Cov(z,y)=6，IV=3；若Cov(z,u)=1而第一阶段不变，则IV=(6+1)/2=3.5，表明相关性再强也不能修复外生性违背。",
@@ -552,6 +635,23 @@
           "proof": "当工具在给定控制和研究信息集下对结构误差正交时，矩条件成立；如果政策公告存在遗漏的直接收益通道，这个矩通常不再为零。",
           "worked": "公告同时发布新的通胀前景时，即便利率工具强烈改变国债收益率，也不能自动宣称其对股指收益无直接信息效应。",
           "limitation": "工具法无法由回归显著性本身确认全部经济因果识别假设。"
+        },
+        {
+          "title": "排除限制误差在弱工具下的倍数放大",
+          "question": "即便工具与结构误差只存在很小关联，为什么也可能严重扭曲政策效应估计？",
+          "paragraphs": [
+            "有效IV要求工具与结构扰动正交，同时具有足够强的第一阶段关联。对单内生解释变量与单工具的简单线性系统，即便排除限制只偏离δ，IV估计相对真实β的差也等于δ除以第一阶段协方差π。",
+            "宏观政策意外可能通过风险偏好、波动率或交易所执行规则同时影响ETF回报，造成直接路径。若第一阶段较弱，不能把微小且不可检验的排除限制偏离视为可以忽略的误差，需结合制度背景作敏感性分析。"
+          ],
+          "formulas": [
+            {
+              "label": "工具排除限制的小偏差放大公式",
+              "tex": "\\operatorname{Cov}(Z,U)=\\delta,\\ \\operatorname{Cov}(Z,X)=\\pi\\ne0\\ \\Longrightarrow\\ \\beta_{\\rm IV}-\\beta=\\delta/\\pi"
+            }
+          ],
+          "proof": "由Y=βX+U，取工具Z的协方差，得到Cov(Z,Y)=βCov(Z,X)+Cov(Z,U)。用π=Cov(Z,X)、δ=Cov(Z,U)表示，IV总体比率Cov(Z,Y)/π=β+δ/π，故偏差为δ/π。",
+          "worked": "若真正β=2、工具第一阶段协方差π=0.01、直接扰动相关δ=0.002，则IV估计的极限变为2+0.002/0.01=2.2，排除限制偏差被放大成0.2。",
+          "limitation": "只有当工具与处理之间的协方差非零时才可定义比率。LATE异质性、弱IV抽样分布和多工具选择需要另行处理，不能将此公式等同于正式置信区间。"
         }
       ],
       "links": [
@@ -581,7 +681,7 @@
           "url": "https://www.nber.org/papers/t0284"
         }
       ],
-      "checked_status": "V17：识别条件、数学推导、数值反例及金融时间外验证均完整"
+      "checked_status": "V56严格精讲：排除限制误差在弱工具下的倍数放大"
     }
   ]
 }
