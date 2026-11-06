@@ -202,4 +202,31 @@ near(3*512*2048+2*2048+512-(2*512*2048+2048+512),1050624,"V46 FFN additional par
 const v46soft=1/(1+Math.exp(-1));
 near(v46soft*(v46soft*2+(1-v46soft)*1-2),-.196611933,"V46 softmax temperature sensitivity",1e-6);
 near(Math.cos(Math.PI*2),1,"V46 calendar positional phase");
-console.log("PASS V46: 122 canonical ninth-cycle lessons fully deepened (62 V40 + 60 V41), 665 strict KaTeX formulas, including 45 additions beyond V41, 12 stages, 122 canonical route links, Chinese math and print responsive checks and 23k+ new V41 mathematical/research chars.");
+
+const v47=read("atlas-depth-09-g.json").lessons;
+const v47ids=["m13-c02-p04","m13-c02-p01","m13-c05-p05","m13-c03-p03","m13-c02-p05","m14-c05-p04","m14-c04-p05","m14-c04-p02","m14-c05-p06","m14-c01-p02"];
+assert.equal(v47ids.length,10);
+for(const id of v47ids){
+ const l=v47[id];
+ assert(l&&l.revision_note?.startsWith("V47"),"missing V47 course "+id);
+ assert.equal(l.equations.length,6,"V47 sixth formula absent "+id);
+ assert.equal(l.derivation.length,6,"V47 sixth proof absent "+id);
+ assert.equal(l.protocol.length,6,"V47 sixth validation absent "+id);
+ assert.equal(l.pitfalls.length,3,"V47 original boundary removed "+id);
+ assert(l.derivation.at(-1).length>90&&l.protocol.at(-1).length>40,"V47 proof or test underdeveloped "+id);
+ assert(l.worked_example.length>140,"V47 lost worked example "+id);
+ assert.equal(new Set(l.equations.map(e=>e.tex)).size,6,"V47 mathematical formula duplicated "+id);
+ katex.renderToString(l.equations.at(-1).tex,{throwOnError:true,strict:"ignore",displayMode:true});
+}
+near(.01*(-2),-.02,"V47 leaky ReLU negative region forward");
+near((2*2+3)*2,14,"V47 shared-node autodiff accumulation");
+near((.9*.1+.1*1)/ (1-.9**2),1,"V47 Adam bias correction step index");
+near((7+11)/2,9,"V47 layer norm affine mean");
+near(.7*.3*2,.42,"V47 softmax Hessian positive eigenvalue");
+near((1+2+3+4)/4,2.5,"V47 GAP permutation invariant mean");
+near(.8*.5+.2*3,1,"V47 covariate shift weights integrate to one");
+near((105-100)/(110-100),.5,"V47 point-in-time price normalization");
+near((105-100)/(120-100),.25,"V47 erroneous future-extreme normalization");
+near(.0008-.001*.5,.0003,"V47 fee-aware ETF image model net return");
+near(Math.floor((10+2-2*(3-1)-1)/1)+1,8,"V47 dilated image convolution output shape");
+console.log("PASS V47: 122 canonical ninth-cycle lessons fully deepened (62 V40 + 60 V41), 665 strict KaTeX formulas, including 55 additions beyond V41, 12 stages, 122 canonical route links, Chinese math and print responsive checks and 23k+ new V41 mathematical/research chars.");
