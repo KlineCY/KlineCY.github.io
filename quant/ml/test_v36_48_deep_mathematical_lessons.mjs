@@ -30,12 +30,12 @@ for(const [file,expected] of groups){
   ids.add(id);
   domains.add(id.slice(0,3));
   total++;
-  assert(l.revision_note?.startsWith("V36"),"no V36 marker "+id);
+  assert(l.revision_note?.startsWith(file.startsWith("atlas-depth-07-")?"V56":"V36"),"no V36/V56 marker "+id);
   assert(l.title?.length>=5&&l.source_title?.length>=2,id+" source identity");
   assert(l.overview?.length>=60,id+" original overview lost");
-  assert.equal(l.equations.length,5,id+" original 3 + 2 equations");
-  assert.equal(l.derivation.length,5,id+" original 3 + 2 derivations");
-  assert.equal(l.protocol.length,5,id+" original 3 + 2 reproducible protocols");
+  assert.equal(l.equations.length,file.startsWith("atlas-depth-07-")?6:5,id+" V56 retained mathematical equations");
+  assert.equal(l.derivation.length,file.startsWith("atlas-depth-07-")?6:5,id+" V56 retained derivations");
+  assert.equal(l.protocol.length,file.startsWith("atlas-depth-07-")?6:5,id+" V56 retained protocols");
   assert.equal(l.pitfalls.length,3,id+" original 2 + 1 limitation");
   assert(l.worked_example?.length>=130,id+" numerical example not expanded");
   assert(l.derivation.slice(-2).every(s=>s.length>=75),id+" shallow proof");
@@ -53,7 +53,7 @@ for(const [file,expected] of groups){
 assert.equal(total,48);
 assert.equal(ids.size,48);
 assert.equal(domains.size,24,"V36 must cover all 24 ML domains");
-assert.equal(eqCount,240,"144 original and 96 added equations must parse");
+assert.equal(eqCount,264,"V56 increases the first 24 seventh-cycle lectures to six equations");
 assert(addedProse>18000,"need >18k Chinese explanation/protocol characters");
 
 const html=raw("index.html"),reader=raw("atlas.js"),css=raw("atlas.css");
@@ -103,4 +103,4 @@ near(1/Math.sqrt(8),.3535533905932738,"AdaGrad step scale");
 near((16-12)/2,2,"training-only standardization");
 near(10-.5,9.5,"Huber large residual loss");
 near(.05/20,.0025,"BH smallest p threshold");
-console.log("PASS V36: 48 canonical lessons across 24 ML domains, 96 new strict-KaTeX equations (240 validated), 18k+ rigorous explanation/protocol characters, original examples retained, independent numerical checks, 48 direct links and responsive Chinese/math layout. Atlas manifest unchanged.");
+console.log("PASS V36: 48 canonical lessons across 24 ML domains, 120 added strict-KaTeX equations (264 validated), 18k+ rigorous explanation/protocol characters, original examples retained, independent numerical checks, 48 direct links and responsive Chinese/math layout. Atlas manifest unchanged.");
