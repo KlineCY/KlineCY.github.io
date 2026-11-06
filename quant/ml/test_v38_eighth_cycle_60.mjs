@@ -147,4 +147,35 @@ near(2*7+(-1)*(-2),16,"V51 Jacobian VJP right adjoint inner");
 near(((2+.01)**3-(2-.01)**3)/(.02)-12,.0001,"V51 centered derivative cubic truncation",1e-9);
 near(-.2-1,-1.2,"V51 damped Newton strict descent");
 
-console.log("PASS V51/V38+V39: 60 V38 and 60 V39 enhanced eighth-cycle canonical lectures; 120 lessons/24 domains, 620 strict KaTeX equations (240 added across V38+V39), substantive derivations/protocols, 60 route links, original numeric examples and responsive Chinese/formula layout.");
+
+const v52=read("atlas-depth-08-b.json").lessons;
+const v52ids=["m03-c03-p03","m03-c01-p03","m03-c03-p02","m03-c04-p03","m03-c04-p06","m04-c05-p01","m04-c02-p05","m04-c02-p01","m04-c04-p04","m04-c03-p02"];
+assert.equal(v52ids.length,10);
+for(const id of v52ids){
+ const l=v52[id];
+ assert(l&&l.revision_note?.startsWith("V52"),"V52 canonical ML lesson absent "+id);
+ assert.equal(l.equations.length,6,"V52 sixth equation missing "+id);
+ assert.equal(l.derivation.length,6,"V52 sixth proof missing "+id);
+ assert.equal(l.protocol.length,6,"V52 sixth empirical audit missing "+id);
+ assert.equal(l.pitfalls.length,3,"V52 original limitations modified "+id);
+ assert.equal(new Set(l.equations.map(x=>x.tex)).size,6,"V52 repeated mathematical expression "+id);
+ assert(l.derivation.at(-1).length>90&&l.protocol.at(-1).length>40,"V52 proof/validation too short "+id);
+ assert(l.worked_example.length>140,"V52 numerical example too short "+id);
+ katex.renderToString(l.equations.at(-1).tex,{throwOnError:true,displayMode:true,strict:"ignore"});
+}
+near(.2*1+.3*0+.5*1-(.2*1+.3*0+.5*(-1))**2,.61,"V52 multinomial Softmax Hessian curvature",1e-12);
+near((6/99)/(1+6/99),6/105,"V52 independent evidence posterior risk");
+near(.5/1*2,1,"V52 Gaussian conditional mean");
+near(4-.5**2/1,3.75,"V52 Gaussian conditional covariance Schur");
+near(-.5*Math.log(1-.6**2),.2231435513142097,"V52 Gaussian mutual information",1e-12);
+near(.5*Math.log(.8)+.5*Math.log(.2),Math.log(.4),"V52 ELBO reconstruction",1e-12);
+near(Math.log(.5)-Math.log(.4),.2231435513142097,"V52 ELBO true posterior gap",1e-12);
+near(.8*.5+.2*3,1,"V52 covariate shift density ratio unit mean");
+near(.8*.5**2+.2*3**2,2,"V52 density ratio quadratic moment");
+near(1/2,.5,"V52 asymptotic Kish ESS ratio");
+near(2*.05,.1,"V52 ERM two-sided uniform deviation penalty");
+near(Math.sqrt(.01**2/.0001+.02**2/.0004),Math.sqrt(2),"V52 optimal unconstrained signal risk ratio");
+near(Math.sqrt(.0004/100*(1+.5)/(1-.5)),Math.sqrt(.000012),"V52 paired loss AR1 HAC standard error");
+near(.9**30,.0423911582752162,"V52 fixed classifier zero observed error probability");
+
+console.log("PASS V52/V38+V39: 60 V38 and 60 V39 enhanced eighth-cycle canonical lectures; 120 lessons/24 domains, 620 strict KaTeX equations (240 added across V38+V39), substantive derivations/protocols, 60 route links, original numeric examples and responsive Chinese/formula layout.");
