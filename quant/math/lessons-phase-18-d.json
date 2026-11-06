@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "revision": "2026-11-05",
+  "revision": "2026-11-06",
   "focus": "Almgren–Chriss变分最优执行、椭球鲁棒均值配置与交易容量（仅存净新增知识点；已有课程内容原位深化，防止ID重复）",
   "lessons": [
     {
@@ -30,6 +30,10 @@
         {
           "label": "风险中性极限",
           "tex": "\\lim_{\\kappa\\to0}x^*(t)=X\\left(1-\\frac tT\\right)"
+        },
+        {
+          "label": "Almgren–Chriss最优路径的起始成交速率",
+          "tex": "x^\\star(t)=X\\frac{\\sinh(\\kappa(T-t))}{\\sinh(\\kappa T)}\\ \\Longrightarrow\\ v^\\star(0)=-\\dot x^\\star(0)=\\kappa X\\coth(\\kappa T)"
         }
       ],
       "derivation": [
@@ -44,6 +48,10 @@
         {
           "explanation": "二阶常系数方程的通解由e^{κt}、e^{−κt}组成，施加x(0)=X和x(T)=0得到双曲正弦形式。令κ趋0，并使用sinh z∼z得到TWAP极限。",
           "tex": "x(t)=X\\frac{\\sinh(\\kappa(T-t))}{\\sinh(\\kappa T)}"
+        },
+        {
+          "explanation": "对x*(t)=X sinh(κ(T−t))/sinh(κT)求时间导数得−κX cosh(κ(T−t))/sinh(κT)，卖出速率v=−xdot。在t=0，v*(0)=κXcoth(κT)。由于对z>0有zcosh z>sinh z，即z coth z>1，因此v*(0)>X/T。",
+          "tex": "\\dot x^\\star(t)=-\\kappa X\\frac{\\cosh(\\kappa(T-t))}{\\sinh(\\kappa T)}"
         }
       ],
       "example": "设起始库存X=10、期限T=1、η=1并取λσ²=2，则κ=√(2/2)=1，解析路径x(t)=10sinh(1−t)/sinh(1)。在t=0.5时x≈4.434，早于等速路径的x=5；到t=1时严格归零。若λ=0，κ→0后恢复x(t)=10(1−t)，中点库存为5。",
@@ -117,6 +125,23 @@
           "proof": "参与率约束限定每个时段的最大可执行股数；若ΣpV_k<X，则强制在该期限卖完的可行集为空，任何解析路径都不能转化为合法订单。",
           "worked": "若两时段各有成交量20股、允许参与率10%，可执行总量最多2+2=4股，强制卖出10股在两时段内根本不可行。",
           "limitation": "实际成交率还受限价位置和队列优先级约束，成交量上限只是必要容量检查，不是成交保证。"
+        },
+        {
+          "title": "风险厌恶如何提高最优执行的初始成交速度",
+          "question": "对同样数量的ETF卖单，为何风险厌恶的执行计划在起始时段更激进？",
+          "paragraphs": [
+            "Almgren–Chriss在二次冲击与库存风险权衡下得到双曲正弦形的库存路径。其负导数就是需要卖出的成交速率，起始速率为κXcoth(κT)。对于κT>0，κT coth(κT)>1，因此这一速率超过等速TWAP的X/T，表现为风险厌恶下更快降低初始库存暴露。",
+            "数学路径假设市场冲击系数、风险权重和波动水平在执行期稳定，且没有每段成交容量和随机跳空。若初始速率超出真实盘口可提供的流动性，最优连续路径不能直接执行，需要加入参与率和价格限制。"
+          ],
+          "formulas": [
+            {
+              "label": "Almgren–Chriss最优路径的起始成交速率",
+              "tex": "x^\\star(t)=X\\frac{\\sinh(\\kappa(T-t))}{\\sinh(\\kappa T)}\\ \\Longrightarrow\\ v^\\star(0)=-\\dot x^\\star(0)=\\kappa X\\coth(\\kappa T)"
+            }
+          ],
+          "proof": "对x*(t)=X sinh(κ(T−t))/sinh(κT)求时间导数得−κX cosh(κ(T−t))/sinh(κT)，卖出速率v=−xdot。在t=0，v*(0)=κXcoth(κT)。由于对z>0有zcosh z>sinh z，即z coth z>1，因此v*(0)>X/T。",
+          "worked": "设X=10、T=1、κ=1，起始卖速v*(0)=10 coth(1)≈13.13035股/单位时间，高于TWAP等速10。相同模型中点库存约4.434而非5，说明其早卖倾向。",
+          "limitation": "这里只给连续时间无容量约束下的风险成本最优路径，成交速率与实际订单笔数不能直接等同。永久冲击、离散报价、可成交量及价格跳跃可能改变可执行性。"
         }
       ],
       "links": [
@@ -151,7 +176,7 @@
           "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=53501"
         }
       ],
-      "checked_status": "V18严格精讲：执行成本—风险—鲁棒约束、四节推导、可复算金融案例"
+      "checked_status": "V55严格精讲：风险厌恶如何提高最优执行的初始成交速度"
     },
     {
       "id": "optimization-x006",
@@ -180,6 +205,10 @@
         {
           "label": "含执行成本的净收益",
           "tex": "\\Pi_{\\rm net}(K)=K\\alpha_{\\rm gross}-C_{\\rm fee}(K)-C_{\\rm impact}(K)"
+        },
+        {
+          "label": "流动性预测下界带来的保守容量约束",
+          "tex": "V_k\\ge\\underline V_k\\ge0,\\quad |q_k|\\le p\\,\\underline V_k\\ \\Longrightarrow\\ \\sum_k|q_k|\\le p\\sum_k\\underline V_k"
         }
       ],
       "derivation": [
@@ -194,6 +223,10 @@
         {
           "explanation": "设策略资金规模K、毛期望收益率α_gross，则期望毛利润近似Kα_gross。比例费用通常随K线性增加，而二次临时冲击在固定执行时段和流动性参数下可随订单规模平方增加，形成非线性规模上限。",
           "tex": "C_{\\rm impact}(K)\\propto K^2\\quad\\text{(固定流动性与执行窗口的线性速度冲击模型)}"
+        },
+        {
+          "explanation": "若计划要求每段成交|q_k|≤pV_under,k，而真实市场成交量满足V_k≥V_under,k，则计划数量一定不违反基于真实成交量的参与率上限pV_k。各段上限相加给出保守容量总额pΣV_under。若目标Q超过这一总额，则该保守方案无法按原期限完成全部数量。",
+          "tex": "\\underline V_k=(\\widehat V_k-\\Delta_k)_+,\\quad Q\\le p\\sum_k\\underline V_k\\quad\\text{作为保守设计门槛}"
         }
       ],
       "example": "每个执行时段市场成交量预测为V=20000股，事先设定最大参与率p=0.10，则单时段容量上限为2000股。若需要买入5000股且三个时段流动性条件相同，至少ceil(5000/2000)=3个时段才有可能满足数量约束；两时段最大4000股，期限内根本不可行。即使三个时段上限合计6000股，也不能保证真实成交5000股。",
@@ -267,6 +300,23 @@
           "proof": "净敞口是带符号仓位和，而绝对成交额是各项绝对值求和；三角不等式保证绝对总和不小于净和的绝对值，故净和很小无法限制毛成交量。",
           "worked": "买入A资产100万元、卖空B资产100万元，净敞口近零，但两边总成交名义金额200万元，仍需要各自的流动性与借券额度。",
           "limitation": "低成交量资产可能在压力行情中无法按模型设定的时限交易，需把强制降杠杆情景作为独立风险测试。"
+        },
+        {
+          "title": "流动性不确定时执行容量的保守可行性判断",
+          "question": "预测成交量总共足够时，为何真实市场中仍可能无法完成目标订单？",
+          "paragraphs": [
+            "参与率约束的最大可成交量依赖每段真正发生的市场成交量，而不是研究者事后观察的完整成交量。执行前只能基于当时可得的预测和不确定性界进行保守规划。若对每时段给定市场成交量的可信下界V_under，则按参与率p规划的时段订单不可超过pV_under，合计保守计划容量至多pΣV_under。",
+            "这不是对真实成交完全可得的保证：队列优先级、限价、停牌和冲击都可能令实际成交进一步减少。ETF多空策略需要记录缺口处理规则、延长期限与未成交风险，以免在回测中将预测容量误当成已实现成交。"
+          ],
+          "formulas": [
+            {
+              "label": "流动性预测下界带来的保守容量约束",
+              "tex": "V_k\\ge\\underline V_k\\ge0,\\quad |q_k|\\le p\\,\\underline V_k\\ \\Longrightarrow\\ \\sum_k|q_k|\\le p\\sum_k\\underline V_k"
+            }
+          ],
+          "proof": "若计划要求每段成交|q_k|≤pV_under,k，而真实市场成交量满足V_k≥V_under,k，则计划数量一定不违反基于真实成交量的参与率上限pV_k。各段上限相加给出保守容量总额pΣV_under。若目标Q超过这一总额，则该保守方案无法按原期限完成全部数量。",
+          "worked": "三个交易时段预测成交量各20000股，预测误差下界为各时段至少15000股，参与率上限10%。预测口径的三段总容量6000股，但保守容量为3×1500=4500股；需要买5000股时，预测容量看似足够，保守计划却无法保证数量限制。",
+          "limitation": "真实成交量下界若只在概率意义成立，容量结论也只是相应置信水平下的保证。满足参与率上限并不证明能以给定限价成交，且买入与卖空可用流动性不同。"
         }
       ],
       "links": [
@@ -301,7 +351,7 @@
           "url": "https://www.cfainstitute.org/insights/professional-learning/refresher-readings/2026/analysis-active-portfolio-management"
         }
       ],
-      "checked_status": "V18严格精讲：执行成本—风险—鲁棒约束、四节推导、可复算金融案例"
+      "checked_status": "V55严格精讲：流动性不确定时执行容量的保守可行性判断"
     }
   ]
 }
