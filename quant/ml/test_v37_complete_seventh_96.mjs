@@ -22,15 +22,15 @@ for(const file of groups){
  for(const [id,l] of Object.entries(d.lessons)){
   assert(!fullIds.has(id),"duplicate ML identity "+id);
   fullIds.add(id);checked++;
-  const domain=Number(id.slice(1,3)),revision=domain<=6?"V56":"V37";
+  const domain=Number(id.slice(1,3)),revision=domain<=8?"V56":"V37";
   domainCounts[domain]=(domainCounts[domain]||0)+1;
   assert(l.revision_note?.startsWith(revision),id+" deepening revision");
-  if(revision==="V37")newIds.add(id);
+  if(domain>6)newIds.add(id);
   assert(typeof l.source_title==="string"&&l.source_title.length>=2,id+" source title lost");
   assert(typeof l.overview==="string"&&l.overview.length>=60,id+" overview lost");
-  assert.equal(l.equations.length,domain<=6?6:5,id+" enhanced seventh-stage equations");
-  assert.equal(l.derivation.length,domain<=6?6:5,id+" enhanced seventh-stage proofs");
-  assert.equal(l.protocol.length,domain<=6?6:5,id+" enhanced seventh-stage protocols");
+  assert.equal(l.equations.length,domain<=8?6:5,id+" enhanced seventh-stage equations");
+  assert.equal(l.derivation.length,domain<=8?6:5,id+" enhanced seventh-stage proofs");
+  assert.equal(l.protocol.length,domain<=8?6:5,id+" enhanced seventh-stage protocols");
   assert.equal(l.pitfalls.length,3,id+" original plus failure boundary");
   assert(l.worked_example.length>=100,id+" worked arithmetic lost");
   assert(l.derivation.slice(3).every(s=>s.length>=65),id+" derivation too shallow");
@@ -42,11 +42,11 @@ for(const file of groups){
    katex.renderToString(e.tex,{throwOnError:true,strict:"ignore",displayMode:true});
    formulas++;
   }
-  if(revision==="V37")deepWords+=l.derivation.slice(3).join("").length+l.protocol.slice(3).join("").length+l.pitfalls.at(-1).length;
+  if(domain>6)deepWords+=l.derivation.slice(3).join("").length+l.protocol.slice(3).join("").length+l.pitfalls.at(-1).length;
  }
 }
 assert.equal(checked,96);
-assert.equal(formulas,504);
+assert.equal(formulas,512);
 assert.equal(newIds.size,72);
 // Chronos original paper §3.1 uses m=0 and s=mean(abs(context));
 // do not quietly replace the published tokenizer with centered standardization.
@@ -127,4 +127,4 @@ near(Math.sqrt(.01),.1,"whitening small direction");
 near(1/Math.sqrt(.01+.03),5,"ridge-whitening small direction");
 near(95+5,100,"purging label maturity");
 near(1/.1,10,"IPW small propensity");
-console.log("PASS V37: 96 complete seventh-cycle canonical lectures (V36 24 + V37 72); 504 strict KaTeX equations, V56 added 24 to first 24 classes; 24 domains, nine-stage 72-link navigation, original numerical examples, independent numerical cross-checks and responsive Chinese/math typography.");
+console.log("PASS V37: 96 complete seventh-cycle canonical lectures (V36 24 + V37 72); 512 strict KaTeX equations, V56 added 32 to first 32 classes; 24 domains, nine-stage 72-link navigation, original numerical examples, independent numerical cross-checks and responsive Chinese/math typography.");
