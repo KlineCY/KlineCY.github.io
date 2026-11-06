@@ -30,8 +30,8 @@ for(const l of added){
   assert(typeof l[name]==="string"&&l[name].length>=90,"missing substantive "+name+" "+l.id);
  }
  assert(l.properties.length>=3&&l.formulas.length>=4&&l.derivation.length>=3);
- assert.equal(l.deep_sections.length,4,"each full lecture requires four linked mini-chapters");
- assert.equal(new Set(l.deep_sections.map(x=>x.title)).size,4);
+ assert.equal(l.deep_sections.length,5,"V47 seven full lectures must have five rigorous mini-chapters");
+ assert.equal(new Set(l.deep_sections.map(x=>x.title)).size,5);
  for(const part of l.formulas){
   assert(part.label&&part.tex);
   katex.renderToString(part.tex,{throwOnError:true,strict:"ignore",displayMode:true});formulas++;
@@ -62,11 +62,20 @@ for(const l of added){
  assert(!/[\uFFFD\u200B\uFEFF]/.test(JSON.stringify(l)),"CJK corruption "+l.id);
  assert(!/Lorem ipsum|TODO|占位|待填|余弦\?/.test(JSON.stringify(l)),"placeholder "+l.id);
 }
-assert.equal(chapters,28);
-assert.equal(formulas,92);
+assert.equal(chapters,35);
+assert.equal(formulas,113);
 assert.equal(links,25);
 assert.equal(sources,16);
 const near=(v,expect,label,tol=1e-9)=>assert(Math.abs(v-expect)<tol,"independent arithmetic mismatch "+label+" "+v+" vs "+expect);
+near(.6/Math.sqrt(1),.6,"V47 generalized IRF immediate shared shock");
+near(1+.6**2,1.36,"V47 generalized FEVD overlapping total");
+near(1/1.36+.36/1.36,1,"V47 normalized generalized FEVD");
+near(2-1,1,"V47 Granger population prediction gain");
+near(.05+.85+.10*.40,.94,"V47 GJR skewed persistence");
+near(.000002/(1-.94),.000033333333333333335,"V47 GJR skewed long-run variance");
+near(1-.05,.95,"V47 DCC minimum eigenvalue");
+near(.1495/.195,2.3/3,"V47 ARFIMA adjacent kernel ratio");
+near(.5*.0001+.5*.0009+.25*(.02)**2,.0006,"V47 Markov mixture predictive variance");
 near(.5*.2+.2*.3,.16,"IRF horizon two");
 near(1.25/1.29,.9689922480620154,"FEVD shock1");
 near(.04/1.29,.031007751937984496,"FEVD shock2");
@@ -105,5 +114,5 @@ for(const id of targets){
 for(const token of ["overflow-x:auto","line-break:strict","@media print",":focus-visible"])
  assert(css.includes(token),"quant math responsive/print/CJK styling missing "+token);
 assert(cssMl.includes("overflow-x:auto"),"ML mathematics overflow rule absent");
-console.log("PASS V26: 7 complete lectures, 28 proof mini-chapters, 92 strict KaTeX expressions, "+
+console.log("PASS V47/V26: 7 complete lectures, 35 proof mini-chapters, 113 strict KaTeX expressions, "+
  sources+" verified academic source formats, "+links+" canonical topic links, 20 independent mathematical invariants, 304 unique full lectures / 656-node catalog.");
