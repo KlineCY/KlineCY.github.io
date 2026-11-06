@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "revision": "2026-11-05",
+  "revision": "2026-11-06",
   "focus": "条件定价、Beta截面价格与资产定价GMM",
   "lessons": [
     {
@@ -30,6 +30,10 @@
         {
           "label": "条件贴现因子归一化",
           "tex": "E_t[m_{t+1}]=R_{f,t}^{-1}"
+        },
+        {
+          "label": "条件零价格矩对合法状态组合的线性稳定性",
+          "tex": "E_t[mR_i^e]=0,\\quad z_t=\\sum_{k=1}^{K}a_k\\mathbf1\\{S_t=k\\}\\ \\Longrightarrow\\ E[z_tmR_i^e]=\\sum_ka_kE[\\mathbf1\\{S_t=k\\}mR_i^e]=0"
         }
       ],
       "derivation": [
@@ -44,6 +48,10 @@
         {
           "explanation": "若在所有有界𝔽_t可测工具上零矩均成立，条件期望的刻画保证E[mR^e|𝔽_t]=0几乎处处。有限个因子和技术指标构成的工具库通常不能支撑这一逆推。",
           "tex": "E[zU]=0\\ \\forall z\\in L^\\infty(\\mathcal F_t)\\Longrightarrow E[U\\mid\\mathcal F_t]=0"
+        },
+        {
+          "explanation": "因为z_t对F_t可测且有适当可积性，E[z_t m R_i^e]=E[z_t E(mR_i^e|F_t)]。若条件定价矩为0，乘积期望为0。状态工具z_t=Σ a_k1{S_t=k}代入并按期望线性性展开，就得到全部状态矩线性组合仍为零。",
+          "tex": "E[z_tmR_i^e]=E[z_tE(mR_i^e\\mid\\mathcal F_t)]=0"
         }
       ],
       "example": "市场状态A和B各占50%，假设m=1，资产超额收益在A中恒为+0.10、在B中恒为−0.10。无条件矩E[mR^e]=0.5×0.10+0.5×(−0.10)=0，看似符合定价；但取合法工具z=1{A}，得E[zmR^e]=0.5×0.10=0.05≠0，直接识别条件错设。",
@@ -117,6 +125,23 @@
           "proof": "决策时可知变量对𝔽_t可测，而未来超额收益在未实现前通常不可测。以不合法未来字段构造工具，会使条件零矩所用的信息集不再对应交易者的信息约束。",
           "worked": "若季度财报在t+1日开盘前才公告，则t日收盘的条件SDF检验不得把这份报告作为当时可用z_t。",
           "limitation": "确有提前泄露的信息或非同步市场的特殊情况时，必须明确真实信息流而不是机械套日期标签。"
+        },
+        {
+          "title": "条件定价矩与合法状态工具的组合检验",
+          "question": "为什么多个时点已知的状态工具加权后，仍必须满足资产定价Euler矩？",
+          "paragraphs": [
+            "在条件SDF假设成立时，交易时点可观测信息集中的每个有界工具变量都能乘到定价误差前面，利用塔式期望得到无条件零矩。将有限互斥状态指示函数作线性组合，可以构造风险状态、成交量与宏观环境相关的多项可检验矩条件，而不必为每个状态独立定义贴现核。",
+            "无条件一个矩为零并不保证所有工具矩都成立；若投资者在市场状态A可知的条件下系统性获取异常收益，而在状态B损失抵消，简单全样本均值可能掩盖条件错设。工具必须在信号形成时已经发布且可交易，不能把事后市场状态或未来政策信息变成合法工具。"
+          ],
+          "formulas": [
+            {
+              "label": "条件零价格矩对合法状态组合的线性稳定性",
+              "tex": "E_t[mR_i^e]=0,\\quad z_t=\\sum_{k=1}^{K}a_k\\mathbf1\\{S_t=k\\}\\ \\Longrightarrow\\ E[z_tmR_i^e]=\\sum_ka_kE[\\mathbf1\\{S_t=k\\}mR_i^e]=0"
+            }
+          ],
+          "proof": "因为z_t对F_t可测且有适当可积性，E[z_t m R_i^e]=E[z_t E(mR_i^e|F_t)]。若条件定价矩为0，乘积期望为0。状态工具z_t=Σ a_k1{S_t=k}代入并按期望线性性展开，就得到全部状态矩线性组合仍为零。",
+          "worked": "A/B状态各占50%，m=1、资产超额收益分别+10%和−10%，无条件定价矩抵消为0。令z=1{A}−1{B}，则E[z m R^e]=0.5×0.1−0.5×(−0.1)=0.1，不满足零矩；这揭示状态条件下的定价失败。",
+          "limitation": "需要z_t在交易时点可测、贴现核与收益满足可积性。工具数量过多会引入弱辨识、样本内筛选与协方差矩阵病态问题，不能将已筛选显著性直接视为外部检验证据。"
         }
       ],
       "links": [
@@ -151,7 +176,7 @@
           "url": "https://press.princeton.edu/books/hardcover/9780691121376/asset-pricing"
         }
       ],
-      "checked_status": "V18完整精讲：条件矩与截面定价、风险假设、四步证明及ETF数值核验"
+      "checked_status": "V55严格精讲：条件定价矩与合法状态工具的组合检验"
     },
     {
       "id": "finance-x005",
@@ -180,6 +205,10 @@
         {
           "label": "截面预期收益限制",
           "tex": "E[R_i^e]=\\beta_i\\lambda"
+        },
+        {
+          "label": "多因子线性SDF对应的风险价格向量",
+          "tex": "m=a-b^\\top(f-E[f]),\\quad \\Sigma_f=\\operatorname{Cov}(f)\\succ0\\ \\Longrightarrow\\ \\lambda=\\frac{\\Sigma_fb}{E[m]},\\quad E[R_i^e]=\\beta_i^\\top\\lambda"
         }
       ],
       "derivation": [
@@ -194,6 +223,10 @@
         {
           "explanation": "若f是可交易超额收益，则它自己有Beta=1。对该因子应用同一个截面限制，E[f]=λ；但这种额外约束不适用于不可交易政策指数或文本情绪分数。",
           "tex": "\\beta_f=1\\Longrightarrow \\lambda=E[f]\\quad\\text{(若f本身可交易且被正确定价)}"
+        },
+        {
+          "explanation": "由0=E[mR_i^e]=E[m]E[R_i^e]−bᵀCov(f,R_i^e)，得到E[R_i^e]=Cov(f,R_i^e)ᵀb/E[m]。定义Beta=Σ_f⁻¹Cov(f,R_i^e)，因Σ_f对称正定，代回得E[R_i^e]=BetaᵀΣ_fb/E[m]，所以λ=Σ_fb/E[m]。",
+          "tex": "\\operatorname{Cov}(R_i^e,f)^\\top b=E[m]E[R_i^e],\\quad\\beta_i=\\Sigma_f^{-1}\\operatorname{Cov}(f,R_i^e)"
         }
       ],
       "example": "取可交易因子超额收益f在两个等概率状态下分别为−0.06和0.14，则E[f]=0.04、Var(f)=0.01。取m=1−4(f−0.04)，其两状态值为1.4和0.6，E[m]=1、E[mf]=0，所以b=4且λ=4×0.01/1=0.04。两资产若Beta为1.2和0.5，预测超额收益分别为0.048和0.020。",
@@ -267,6 +300,23 @@
           "proof": "只有在每一期条件SDF同样满足单因子形式和条件Euler约束时，该条件截面等式才能成立。静态样本平均估计结果并不推出逐期关系。",
           "worked": "若两资产的Beta为1.2与0.5、λ_t从0.04降到0.01，则条件超额收益分别从0.048、0.020降到0.012、0.005。",
           "limitation": "参数状态依赖是附加模型假设，不能用前视市场状态定义方式制造表面准确的条件关系。"
+        },
+        {
+          "title": "多因子SDF与ETF截面风险价格的矩阵推广",
+          "question": "单因子风险价格公式怎样严格推广到相关的股票、利率与商品风险因子？",
+          "paragraphs": [
+            "对多因子向量f，线性SDF中系数b用于价格化因子风险，因子协方差矩阵Σ_f则刻画不同市场风险之间的相关结构。由超额收益Euler矩可得E[R_i^e]=Cov(R_i^e,f)b/E[m]。若Σ_f正定，可以把资产因子协方差写成Beta向量与Σ_f的乘积，于是共同风险价格λ=Σ_fb/E[m]。",
+            "ETF风险因子之间通常明显相关，例如久期与成长风格可能共同响应利率冲击。使用多个未经尺度统一的因子时，要检查向量方向、矩阵维度、无风险利率以及交易因子和宏观非交易因子的区别；把Beta统计上显著误读为投资组合未来净收益具有可实现性。"
+          ],
+          "formulas": [
+            {
+              "label": "多因子线性SDF对应的风险价格向量",
+              "tex": "m=a-b^\\top(f-E[f]),\\quad \\Sigma_f=\\operatorname{Cov}(f)\\succ0\\ \\Longrightarrow\\ \\lambda=\\frac{\\Sigma_fb}{E[m]},\\quad E[R_i^e]=\\beta_i^\\top\\lambda"
+            }
+          ],
+          "proof": "由0=E[mR_i^e]=E[m]E[R_i^e]−bᵀCov(f,R_i^e)，得到E[R_i^e]=Cov(f,R_i^e)ᵀb/E[m]。定义Beta=Σ_f⁻¹Cov(f,R_i^e)，因Σ_f对称正定，代回得E[R_i^e]=BetaᵀΣ_fb/E[m]，所以λ=Σ_fb/E[m]。",
+          "worked": "取两因子不相关、协方差矩阵diag(0.01,0.04)、b=(4,1)、E[m]=1，则λ=(0.04,0.04)。某ETF的Beta=(1.2,0.5)，模型要求超额收益1.2×4%+0.5×4%=6.8%；单因子模型只保留第一项会低估风险价格贡献。",
+          "limitation": "正定因子协方差、SDF模型形式及条件Euler矩是公式前提。样本协方差误差、因子冗余、市场非平稳或无法交易的因子可能使统计估计与交易解释发生分离。"
         }
       ],
       "links": [
@@ -301,7 +351,7 @@
           "url": "https://press.princeton.edu/books/hardcover/9780691121376/asset-pricing"
         }
       ],
-      "checked_status": "V18完整精讲：条件矩与截面定价、风险假设、四步证明及ETF数值核验"
+      "checked_status": "V55严格精讲：多因子SDF与ETF截面风险价格的矩阵推广"
     },
     {
       "id": "finance-x006",
@@ -330,6 +380,10 @@
         {
           "label": "J检验自由度",
           "tex": "J_n=Q_n(\\widehat\\theta)\\ \\Rightarrow\\ \\chi^2_{r-k}\\quad(r>k)"
+        },
+        {
+          "label": "线性GMM的加权投影与最小剩余矩",
+          "tex": "g(\\theta)=a-b\\theta,\\quad \\widehat\\theta=\\frac{b^\\top Wa}{b^\\top Wb},\\quad\\min_\\theta g(\\theta)^\\top Wg(\\theta)=a^\\top Wa-\\frac{(b^\\top Wa)^2}{b^\\top Wb}"
         }
       ],
       "derivation": [
@@ -344,6 +398,10 @@
         {
           "explanation": "如果矩数r>参数数k且识别成立，最优权重下最小矩距离在零假设中近似服从χ²_{r−k}；任何历史数据窥探、弱工具和共同事件依赖都可能破坏这一检验。",
           "tex": "J_n=n\\bar g_n(\\widehat\\theta)^\\top\\widehat S^{-1}\\bar g_n(\\widehat\\theta)"
+        },
+        {
+          "explanation": "将(a−bθ)ᵀW(a−bθ)展开为aᵀWa−2θbᵀWa+θ²bᵀWb，若W正定、b≠0，则二阶导数2bᵀWb>0，唯一最小值θhat=(bᵀWa)/(bᵀWb)。回代整理得最小值aᵀWa−(bᵀWa)²/(bᵀWb)。",
+          "tex": "\\partial_\\theta[(a-b\\theta)^\\top W(a-b\\theta)]=-2b^\\top Wa+2\\theta b^\\top Wb=0"
         }
       ],
       "example": "设两个资产的样本SDF矩为g_1(θ)=0.02−θ、g_2(θ)=0.06−2θ，使用W=I。目标平方为(0.02−θ)²+(0.06−2θ)²，微分求得θ̂=0.028。残余矩为(−0.008,0.004)，平方和0.00008；若n=100且已假定有效S=I，形式上J=0.008，不能把这个教学数值解释为一般样本中的有效p值。",
@@ -417,6 +475,23 @@
           "proof": "时间外矩用在测试前固定的θ̂_train计算，避免用测试收益重新调整SDF。若测试期平均矩远离零，可作为模型失效证据；接近零仍需考虑统计功效。",
           "worked": "假设训练得到θ̂=0.028，将其冻结到新的ETF测试窗口；即使新窗口残余变成0.02，也不能回头重估θ后再称同一窗口为独立样本外。",
           "limitation": "未来市场发生结构突变时，不拒绝零矩不等于模型能稳定预测下一期净交易收益。"
+        },
+        {
+          "title": "线性GMM的正交投影解释与加权识别",
+          "question": "为什么更换权重矩阵会改变估计参数和剩余定价矩，而不仅改变J统计量大小？",
+          "paragraphs": [
+            "当过度识别的矩向量在未知参数θ上呈线性形式g(θ)=a−bθ，GMM在正定矩阵W赋予的几何距离中，将观察矩a投影到由b张成的一维子空间。最优θ由bᵀWa与bᵀWb的比率确定，剩余的加权平方距离来自与b正交的W内积部分。",
+            "不同风险状态或ETF的矩条件可能具有不同估计精度，权重矩阵会改变统计上最受重视的定价误差。有效GMM权重还应使用矩序列的长期协方差逆；任意设置W=I并不能确保Hansen J具有通用的卡方标度与经济含义。"
+          ],
+          "formulas": [
+            {
+              "label": "线性GMM的加权投影与最小剩余矩",
+              "tex": "g(\\theta)=a-b\\theta,\\quad \\widehat\\theta=\\frac{b^\\top Wa}{b^\\top Wb},\\quad\\min_\\theta g(\\theta)^\\top Wg(\\theta)=a^\\top Wa-\\frac{(b^\\top Wa)^2}{b^\\top Wb}"
+            }
+          ],
+          "proof": "将(a−bθ)ᵀW(a−bθ)展开为aᵀWa−2θbᵀWa+θ²bᵀWb，若W正定、b≠0，则二阶导数2bᵀWb>0，唯一最小值θhat=(bᵀWa)/(bᵀWb)。回代整理得最小值aᵀWa−(bᵀWa)²/(bᵀWb)。",
+          "worked": "取a=(0.02,0.06)、b=(1,2)。W=I时θhat=0.028，残差平方和0.00008；若W=diag(1,4)，θhat=(0.02+8×0.06)/(1+16)=0.5/17≈0.029412，表明矩权重确实改变估计结果。",
+          "limitation": "此式假设固定对称正定W与线性单参数矩。有效权重依赖估计的长期协方差，并可能受估计误差、弱识别或时间依赖影响；J的自由度还取决于真实独立矩的有效秩。"
         }
       ],
       "links": [
@@ -451,7 +526,7 @@
           "url": "https://www.johnhcochrane.com/asset-pricing"
         }
       ],
-      "checked_status": "V18完整精讲：条件矩与截面定价、风险假设、四步证明及ETF数值核验"
+      "checked_status": "V55严格精讲：线性GMM的正交投影解释与加权识别"
     }
   ]
 }
