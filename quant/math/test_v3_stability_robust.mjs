@@ -30,8 +30,8 @@ for(const id of IDs){
  assert(l&&n,"unpublished full mathematical tutorial "+id);
  assert.equal(l.title,n.title);
  assert(l.definition.length>=95&&l.assumptions.length>=90&&l.example.length>=120&&l.application.length>=80&&l.caveat.length>=90,"insufficient premises and applications "+id);
- assert(l.properties.length>=4&&l.formulas.length>=4&&l.derivation.length>=4&&l.deep_sections.length===4);
- assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,4,"repeated conceptual subsection "+id);
+ assert(l.properties.length>=4&&l.formulas.length===5&&l.derivation.length===5&&l.deep_sections.length===5,"V58 course six-section loss or count mismatch "+id);
+ assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,5,"repeated conceptual subsection "+id);
  for(const f of l.formulas){katex.renderToString(f.tex,{throwOnError:true,strict:"ignore"});formula++;}
  for(const d of l.derivation){assert(d.explanation.length>=45);katex.renderToString(d.tex,{throwOnError:true,strict:"ignore"});formula++;}
  for(const s of l.deep_sections){
@@ -61,10 +61,35 @@ close(5**2/2,12.5);
 close((1+2+1+2)/4,1.5);
 close((3+4+3+4)/4,3.5);
 close(1+2*.2,1.4);
+
+assert.equal(deep,40,"V58 eight robust lessons must have five complete proofs each");
+assert.equal(formula,120,"V58 eight robust courses require 5 top, 5 derivation and 5 section formulas");
+for(const id of IDs){
+ const l=lectures.get(id);
+ assert(l.checked_status?.startsWith("V58"),"V58 robust mathematical revision missing "+id);
+ assert.equal(new Set(l.formulas.map(f=>f.tex)).size,5,"V58 duplicate robust main equation "+id);
+ const sec=l.deep_sections.at(-1);
+ assert(sec.paragraphs.every(p=>p.length>=65)&&sec.proof.length>=55&&sec.worked.length>=55&&sec.limitation.length>=40,
+  "V58 final robust financial subsection incomplete "+id);
+ assert(!/[\uFFFD\u200B\uFEFF]|TODO|Lorem ipsum/.test(JSON.stringify(l)),"V58 broken Chinese or placeholder "+id);
+}
+close(Math.sqrt(2*.5/.25),2);
+const v58K=[[1.5,-1.5],[-1.5,1.5]];
+close(v58K[0][0]+v58K[0][1],0);
+close(v58K[0][0]+v58K[1][1],3);
+close(2*Math.exp(-800*.4**2/8),2*Math.exp(-16));
+close(.1*4/2,.2);
+close(Math.sqrt((1.2-.7)**2+(-.2-.3)**2),Math.sqrt(.5));
+close(Math.sqrt((1-.7)**2+(0-.3)**2),Math.sqrt(.18));
+assert(Math.sqrt(.18)<Math.sqrt(.5),"V58 projection must be nonexpansive");
+close(Math.min(1,10)-Math.min(1,11),0);
+close(2**2/4,6**2/36);
+close((5-1)/5,.8);
+close((5-4)/5,.2);
 const html=fs.readFileSync(new URL("./index.html",dir),"utf8");
 const css=fs.readFileSync(new URL("./styles.css",dir),"utf8");
 for(const id of IDs)assert(html.includes("?topic="+id),"advanced math route missing "+id);
 assert(html.includes('styles.css?v=20261104-probscore-v6'),"old stylesheet cached");
 assert(html.includes('aria-label="算法稳定性、可扩展核方法与稳健金融数学的贯通知识链"'),"advanced route not accessible");
 assert(css.includes("/* V3 CHAPTER READABILITY")&&css.includes("scrollbar-gutter:stable")&&css.includes("@media print"),"CJK formula/touch/print styles missing");
-console.log("PASS: V3 mathematics "+IDs.length+" complete lectures, "+deep+" proof sections, "+formula+" TeX formulas, "+provenance+" source records, exact numerical calculations, CJK/responsive/print design.");
+console.log("PASS V58/V3: mathematics "+IDs.length+" complete lectures, "+deep+" proof sections, "+formula+" TeX formulas, "+provenance+" source records, exact numerical calculations, CJK/responsive/print design.");
