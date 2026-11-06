@@ -378,5 +378,13 @@ assert.equal(v50PAC,73,"V50 exact realizable finite class PAC sample requirement
 near((.25-.2)+(.2-.1),.15,"V50 estimation plus approximation risk");
 near(100*(1+.5)/(1-.5),300,"V50 negative AR1 variance equivalent sample count");
 near((9+1)/1,10,"V50 strong convex regularized condition number");
-assert(!([1,0,1].every((z,i)=>{const x=i+1;return (x>=1&&x<=3)?z===1:z===0;})),"V50 intervals cannot shatter three ordered points");
+const v50endpoints=[-1,1,1.5,2,2.5,3,4];
+const v50patterns3=new Set(),v50patterns2=new Set();
+for(const left of v50endpoints)for(const right of v50endpoints){
+ if(left>right)continue;
+ v50patterns3.add([1,2,3].map(x=>Number(left<=x&&x<=right)).join(""));
+ v50patterns2.add([1,3].map(x=>Number(left<=x&&x<=right)).join(""));
+}
+assert.equal(v50patterns2.size,4,"V50 intervals must shatter any two distinct ordered points");
+assert(!v50patterns3.has("101"),"V50 a single interval cannot shatter three increasing points");
 console.log("PASS V50: 122 canonical ninth-cycle lessons fully deepened (62 V40 + 60 V41), 727 strict KaTeX formulas, including 117 additions beyond V41, 12 stages, 122 canonical route links, Chinese math and print responsive checks and 23k+ new V41 mathematical/research chars.");
