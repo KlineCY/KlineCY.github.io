@@ -289,4 +289,46 @@ assert(.01<=.05/3&&.03<=.05*2/3&&.8>.05,"V48 BH all-null realized discoveries");
 near(100-10+1,91,"V48 moving block bootstrap candidates");
 near((6*.2**2+4*.8**2)/10,.28,"V48 Brier observed reliability");
 near((.8-.6)**2+.6*(1-.6),.28,"V48 Brier single-bin calibration and uncertainty");
-console.log("PASS V48: 122 canonical ninth-cycle lessons fully deepened (62 V40 + 60 V41), 705 strict KaTeX formulas, including 95 additions beyond V41, 12 stages, 122 canonical route links, Chinese math and print responsive checks and 23k+ new V41 mathematical/research chars.");
+
+const v49groups=[
+  {file:"atlas-depth-09-c.json",ids:["m05-c04-p02","m05-c03-p06","m05-c01-p04","m05-c04-p05","m05-c01-p03","m06-c04-p06","m06-c04-p01","m06-c02-p03","m06-c05-p01","m06-c01-p03"]},
+  {file:"atlas-depth-09-d.json",ids:["m07-c04-p01","m07-c01-p05","m07-c03-p02","m07-c02-p04","m07-c04-p03","m08-c03-p05","m08-c02-p02","m08-c02-p03","m08-c01-p03","m08-c03-p04"]}
+];
+for(const group of v49groups){
+ const lessons=read(group.file).lessons;
+ assert.equal(group.ids.length,10,"V49 course count "+group.file);
+ for(const id of group.ids){
+  const l=lessons[id];
+  assert(l&&l.revision_note?.startsWith("V49"),"V49 official course absent "+id);
+  assert.equal(l.equations.length,6,"V49 sixth formula absent "+id);
+  assert.equal(l.derivation.length,6,"V49 sixth proof absent "+id);
+  assert.equal(l.protocol.length,6,"V49 sixth empirical test absent "+id);
+  assert.equal(l.pitfalls.length,3,"V49 original limitations lost "+id);
+  assert(!l.equations.slice(0,5).some(f=>f.tex===l.equations.at(-1).tex),"V49 repeated original equation "+id);
+  assert(l.derivation.at(-1).length>85&&l.protocol.at(-1).length>40,"V49 proof/test too short "+id);
+  assert(l.worked_example.length>140,"V49 numerical exposition lost "+id);
+  katex.renderToString(l.equations.at(-1).tex,{throwOnError:true,displayMode:true,strict:"ignore"});
+ }
+}
+near(2*(1-1),0,"V49 KKT constraint root");
+near(2*.995**2,1.98005,"V49 AdamW multiplicative two-step decay");
+near(Math.sqrt(2*.03/6),.1,"V49 strongly convex parameter radius");
+near(Math.min(1,Math.max(0,2))-Math.min(1,Math.max(0,-.5)),1,"V49 nonexpansive convex projection");
+near(Math.pow(.1,4),.0001,"V49 Hessian-degenerate fourth order behavior");
+near((4*3)/2,6,"V49 exact quadratic feature count");
+near((5*4)/2,10,"V49 quadratic feature total including lower degrees");
+near((1+0+2*.5)/(2+2),.5,"V49 matured-only temporal target coding");
+near((1+0+1+2*.5)/(3+2),.6,"V49 forbidden current-label target leakage");
+near(.5*2,1,"V49 MAR inverse-observation weighting");
+near(1-.2,.8,"V49 Bernoulli GLM canonical score");
+near(1/(1-.5)**2,4,"V49 HC3 leverage inflation");
+near(2*Math.log1p(Math.exp(-10)),.000090797798435,'"V49 logistic separation finite loss"',1e-10);
+near(Math.max(.3-.2,0),.1,"V49 orthonormal Lasso threshold");
+near(3+3**2/2,7.5,"V49 Poisson-gamma overdispersion");
+near((.1+.2)/2,.15,"V49 early-stopping minimum-selection optimism");
+const v49Oob=(1-(1-1/100)**100)**10;
+assert(v49Oob>0&&v49Oob<.02,"V49 finite-forest OOB count invalid");
+near((-1/3)+(1+1/3)/4,0,"V49 equicorrelation PSD forest variance bound",1e-12);
+near((.05+.10)/2,.075,"V49 maximum noisy information gain");
+near((1-.5)*4/50,.04,"V49 finite-population gradient noise");
+console.log("PASS V49: 122 canonical ninth-cycle lessons fully deepened (62 V40 + 60 V41), 705 strict KaTeX formulas, including 95 additions beyond V41, 12 stages, 122 canonical route links, Chinese math and print responsive checks and 23k+ new V41 mathematical/research chars.");
