@@ -37,8 +37,8 @@ for(const l of added){
  assert(l.id===l.node_id&&nodeMap.get(l.id)?.title===l.title,"curriculum/lecture mapping "+l.id);
  assert(l.definition.length>=115&&l.assumptions.length>=95&&l.example.length>=125,"incomplete substantive lecture "+l.id);
  assert(l.application.length>=65&&l.caveat.length>=65,"missing financial context and limitations "+l.id);
- assert(l.properties.length>=3&&l.formulas.length===4&&l.derivation.length===3&&l.deep_sections.length===4,"full lecture structure "+l.id);
- assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,4,"duplicate internal title "+l.id);
+ assert(l.properties.length>=3&&l.formulas.length===5&&l.derivation.length===4&&l.deep_sections.length===5,"full lecture structure "+l.id);
+ assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,5,"duplicate internal title "+l.id);
  for(const d of l.derivation){
   assert(d.explanation.length>=45,"underexplained derivation "+l.id);
   katex.renderToString(d.tex,{throwOnError:true,strict:"ignore",displayMode:true});parsed++;
@@ -58,8 +58,8 @@ for(const l of added){
  for(const s of l.sources||[]){assert(s.title.length>=20&&/^https:\/\//.test(s.url));sources++;}
  assert(!/[\uFFFD\u200B\uFEFF]/.test(JSON.stringify(l)),"corrupted Chinese or zero-width character "+l.id);
 }
-assert.equal(sections,32);
-assert.equal(parsed,88);
+assert.equal(sections,40);
+assert.equal(parsed,112);
 assert.equal(sources,16);
 assert.equal(links,32);
 const active=new Set(),done=new Set();
@@ -89,6 +89,19 @@ for(const [id,actual,expected,token] of cases){
  near(actual,expected,id);
  assert(added.find(l=>l.id===id).example.includes(token),"example not present "+id);
 }
+near(.75*(1+.5**2),.9375,"V51 Wold two-step orthogonal innovation variance");
+near(.75/(1-.5**2),1,"V51 Wold infinite-horizon variance limit");
+near(2*2**2,8,"V51 Gaussian MA1 squared lag-one covariance");
+near(8/(2*5**2),.16,"V51 Gaussian MA1 squared first ACF");
+near(.5*1.125,.5625,"V51 ARMA second autocovariance");
+near(.5625/1.75,9/28,"V51 ARMA lag-two autocorrelation");
+near(1.96*Math.sqrt(2*4),5.543717164502532,"V51 RW conditional Gaussian 95 percent radius",1e-7);
+near(3-2,1,"V51 AIC extra-likelihood margin");
+near(Math.log(100)-3,Math.log(100)-3,"V51 BIC extra-likelihood threshold margin");
+assert(3<Math.log(100)&&3>2,"V51 AIC versus BIC model preference difference");
+near(-2+3,1,"V51 AR1 ADF negative delta not sufficient stationarity");
+near(1+(-.75),.25,"V51 KPSS Bartlett L1 LRV");
+near(2/(4**2*.25),.5,"V51 KPSS bandwidth-one example");
 near(3-1,2,"fourth moment nonlinear-dependence counterexample");
 near(.75+.5*.75**2/.75,1.125,"ARMA lag-one covariance");
 near(244+5*Math.log(100),267.0258509299405,"BIC penalty");
@@ -105,5 +118,5 @@ for(const p of ["styles.css","../ml/atlas.css"]){
  const css=fs.readFileSync(new URL(p,root),"utf8");
  for(const term of ["overflow-x:auto","line-break:strict",":focus-visible","@media print"])assert(css.includes(term),"CJK/KaTeX/print safeguard missing "+term+" in "+p);
 }
-console.log("PASS V22: 8 new mathematically complete time-series lectures, 32 proof sections, "+parsed+
+console.log("PASS V22: 8 extended mathematically complete time-series lectures, 40 proof sections, "+parsed+
  " strict KaTeX formulas, "+sources+" sourced references, "+links+" crosslinks, 8 independently recomputed examples, 278 unique complete courses, and 656-node acyclic prerequisites.");
