@@ -18,8 +18,8 @@ for(const id of ids){
  assert(l&&n&&l.title===n.title,"full lesson not registered "+id);
  for(const key of ["definition","assumptions","example","application","caveat"])assert(l[key]?.length>=75,"missing argument "+id+"."+key);
  assert(l.formulas.length>=4&&l.derivation.length>=4&&l.properties.length>=4);
- assert.equal(l.deep_sections.length,4);
- assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,4,"repeated title "+id);
+ assert.equal(l.deep_sections.length,5);
+ assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,5,"repeated title "+id);
  for(const f of l.formulas){assert(f.label);katex.renderToString(f.tex,{throwOnError:true,strict:"ignore"});formulas++;}
  for(const d of l.derivation){assert(d.explanation.length>=35);katex.renderToString(d.tex,{throwOnError:true,strict:"ignore"});formulas++;}
  for(const s of l.deep_sections){
@@ -45,10 +45,23 @@ near(Math.sqrt(1000*.05*.95),Math.sqrt(47.5));
 near((1+1+1+1-4)/5,0);
 near(1-.95**20,.6415140775914581);
 near(.05/20,.0025);
+assert.equal(sections,35,"V57 requires 7 x 5 complete and retained tail-risk proof chapters");
+assert.equal(formulas,105,"V57 seven courses must contain five top formulas, five derivations and five deep-section formulas");
+const nearV57=(a,b,label,tol=1e-9)=>assert(Number.isFinite(a)&&Math.abs(a-b)<tol,"V57 "+label+": "+a+" vs "+b);
+nearV57(Math.sqrt(Math.log(40)/(2*1000)),.04294694083467376,"DKW n1000 95% bound",1e-8);
+assert(.08-Math.sqrt(Math.log(40)/(2*1000))>0,"V57 empirical tail rate confidence lower bound");
+nearV57(.4+.6,1,"V57 discrete quantile mass sums to one");
+nearV57(Math.sqrt(.6**2*.2**2+.4**2*.1**2),Math.sqrt(.016),"V57 2-ETF Delta-normal portfolio sigma");
+nearV57(1.645*.4*.01/Math.sqrt(.016),.052019622834349,"V57 95% second ETF marginal VaR",1e-6);
+nearV57(Math.ceil(4*.75),3,"V57 nearest rank scenario VaR");
+nearV57(Math.sqrt(Math.log(40)/(2*10000)),.013581015157406197,"V57 Monte Carlo exceedance rate bound",1e-8);
+nearV57(1+(3-1)/4/(1-.5),2,"V57 discrete ES quantile atom correction");
+nearV57(20*.05,1,"V57 expected number of false strategy discoveries");
+nearV57(1-.95**20,.6415140775914581,"V57 chance at least one independent false discovery");
 const html=fs.readFileSync(new URL("index.html",here),"utf8");
 const css=fs.readFileSync(new URL("styles.css",here),"utf8");
 for(const id of ids)assert(html.includes("?topic="+id),"V4 route missing "+id);
 assert(html.includes("styles.css?v=20261104-probscore-v6"));
 assert(html.includes("第四条高级知识链"));
 assert(css.includes("V4 tail-risk chapters")&&css.includes("overscroll-behavior-x:contain")&&css.includes("@media print"));
-console.log("PASS: V4 seven quantile/VaR/ES math courses, "+sections+" proof units, "+formulas+" KaTeX formulas, "+refs+" academic sources, numeric examples and Chinese/mobile/print rules.");
+console.log("PASS V57/V4: seven quantile/VaR/ES math courses, "+sections+" proof units, "+formulas+" KaTeX formulas, "+refs+" academic sources, numeric examples and Chinese/mobile/print rules.");
