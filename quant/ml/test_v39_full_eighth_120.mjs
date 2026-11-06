@@ -39,7 +39,7 @@ for(let index=0;index<files.length;index++){
   assert.equal(lesson.derivation.length,index===0?6:5,id+" original and V51 mathematical proofs");
   assert.equal(lesson.protocol.length,index===0?6:5,id+" original and V51 empirical checks");
   assert.equal(lesson.pitfalls.length,3,id+" original two plus one new failure condition");
-  assert.equal(new Set(lesson.protocol).size,5,id+" duplicated study protocol");
+  assert.equal(new Set(lesson.protocol).size,index===0?6:5,id+" duplicated study protocol");
   assert(lesson.derivation.slice(3).every(s=>s.length>=65),id+" weak mathematical argument");
   assert(lesson.protocol.slice(3).every(s=>s.length>=25),id+" weak reproducibility instructions");
   assert(lesson.pitfalls.at(-1)?.length>=30,id+" weak financial boundary");
@@ -139,4 +139,4 @@ near(Math.log(.5)/Math.log(.5),1,"AR mean reversion half life");
 near(20+30+10+15,75,"complete inference order delay");
 near((5+7+15)/3,9,"training seed average percent");
 
-console.log("PASS V39: 120 eighth-cycle canonical lessons across 24 domains, all 610 KaTeX equations parsed (240 V38+V39 additions), V39 60 strengthened lessons and 23k+ substantive Chinese chars, 12-stage navigation (60+60 links), numerical regression, responsive typography and original Atlas unchanged.");
+console.log("PASS V39: 120 eighth-cycle canonical lessons across 24 domains, all 610 KaTeX equations parsed (250 V38+V39+V51 additions), V39 60 strengthened lessons and 23k+ substantive Chinese chars, 12-stage navigation (60+60 links), numerical regression, responsive typography and original Atlas unchanged.");
