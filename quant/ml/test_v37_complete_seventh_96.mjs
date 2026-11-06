@@ -22,15 +22,15 @@ for(const file of groups){
  for(const [id,l] of Object.entries(d.lessons)){
   assert(!fullIds.has(id),"duplicate ML identity "+id);
   fullIds.add(id);checked++;
-  const domain=Number(id.slice(1,3)),revision=domain<=8?"V56":domain<=20?"V57":"V37";
+  const domain=Number(id.slice(1,3)),revision=domain<=8?"V56":domain<=20?"V57":"V58";
   domainCounts[domain]=(domainCounts[domain]||0)+1;
   assert(l.revision_note?.startsWith(revision),id+" deepening revision");
   if(domain>6)newIds.add(id);
   assert(typeof l.source_title==="string"&&l.source_title.length>=2,id+" source title lost");
   assert(typeof l.overview==="string"&&l.overview.length>=60,id+" overview lost");
-  assert.equal(l.equations.length,domain<=20?6:5,id+" enhanced seventh-stage equations");
-  assert.equal(l.derivation.length,domain<=20?6:5,id+" enhanced seventh-stage proofs");
-  assert.equal(l.protocol.length,domain<=20?6:5,id+" enhanced seventh-stage protocols");
+  assert.equal(l.equations.length,6,id+" enhanced seventh-stage equations");
+  assert.equal(l.derivation.length,6,id+" enhanced seventh-stage proofs");
+  assert.equal(l.protocol.length,6,id+" enhanced seventh-stage protocols");
   assert.equal(l.pitfalls.length,3,id+" original plus failure boundary");
   assert(l.worked_example.length>=100,id+" worked arithmetic lost");
   assert(l.derivation.slice(3).every(s=>s.length>=65),id+" derivation too shallow");
@@ -46,7 +46,7 @@ for(const file of groups){
  }
 }
 assert.equal(checked,96);
-assert.equal(formulas,560);
+assert.equal(formulas,576);
 assert.equal(newIds.size,72);
 // Chronos original paper §3.1 uses m=0 and s=mean(abs(context));
 // do not quietly replace the published tokenizer with centered standardization.
@@ -256,4 +256,4 @@ near(-Math.log(1-.5**2),.2876820724517809,"V57 tanh inverse-Jacobian log correct
 near(2*.5,1,"V57 tanh Jacobian log density adjustment derivative");
 near(8-7,1,"V57 Double DQN target network action-selection gap");
 
-console.log("PASS V57/V37: 96 complete seventh-cycle canonical lectures (V36 24 + V37 72); 560 strict KaTeX equations, V56/V57 added 80 to the first 80 courses; 24 domains, nine-stage 72-link navigation, original numerical examples, independent numerical cross-checks and responsive Chinese/math typography.");
+console.log("PASS V57/V37: 96 complete seventh-cycle canonical lectures (V36 24 + V37 72); 576 strict KaTeX equations, V56/V57/V58 added 96 to all 96 courses; 24 domains, nine-stage 72-link navigation, original numerical examples, independent numerical cross-checks and responsive Chinese/math typography.");
