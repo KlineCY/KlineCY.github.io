@@ -36,7 +36,7 @@ class NinthPassMath(unittest.TestCase):
                 self.assertGreaterEqual(len(chapter["protocol"]),5)
                 self.assertGreaterEqual(len(chapter["pitfalls"]),3)
                 expected_revision="V40" if domain<=12 else "V41"
-                self.assertTrue(chapter.get("revision_note","").startswith("V48") if domain in (9,10) else (chapter.get("revision_note","").startswith(expected_revision) if domain<=12 else chapter.get("revision_note","").startswith(("V41","V42","V43","V44","V45","V46","V47","V48"))))
+                self.assertTrue(chapter.get("revision_note","").startswith("V48") if domain in (9,10,11,12) else (chapter.get("revision_note","").startswith(expected_revision) if domain<=12 else chapter.get("revision_note","").startswith(("V41","V42","V43","V44","V45","V46","V47","V48"))))
                 for q in chapter["equations"]:
                     self.assertTrue(q["label"] and q["tex"])
                 for key in ("derivation","protocol","pitfalls"):
