@@ -103,4 +103,52 @@ near(1/Math.sqrt(8),.3535533905932738,"AdaGrad step scale");
 near((16-12)/2,2,"training-only standardization");
 near(10-.5,9.5,"Huber large residual loss");
 near(.05/20,.0025,"BH smallest p threshold");
-console.log("PASS V36: 48 canonical lessons across 24 ML domains, 120 added strict-KaTeX equations (264 validated), 18k+ rigorous explanation/protocol characters, original examples retained, independent numerical checks, 48 direct links and responsive Chinese/math layout. Atlas manifest unchanged.");
+
+const v56Foundations=[
+ ["atlas-depth-07-a.json",["m01-c02-p02","m01-c02-p06","m01-c04-p05","m01-c03-p05","m02-c02-p01","m02-c02-p06","m02-c04-p03","m02-c02-p04"]],
+ ["atlas-depth-07-b.json",["m03-c01-p04","m03-c02-p06","m03-c05-p01","m03-c03-p06","m04-c02-p06","m04-c04-p01","m04-c05-p06","m04-c03-p01"]],
+ ["atlas-depth-07-c.json",["m05-c02-p04","m05-c04-p04","m05-c03-p01","m05-c04-p01","m06-c05-p02","m06-c05-p05","m06-c01-p04","m06-c03-p01"]]
+];
+assert.equal(v56Foundations.reduce((n,[f,ids])=>n+ids.length,0),24);
+for(const [file,ids] of v56Foundations){
+ const lessons=read(file).lessons;
+ for(const id of ids){
+  const l=lessons[id];
+  assert(l&&l.revision_note?.startsWith("V56"),"V56 canonical lesson was not updated "+id);
+  assert.equal(l.equations.length,6,"V56 exact sixth math formula "+id);
+  assert.equal(l.derivation.length,6,"V56 sixth mathematical proof "+id);
+  assert.equal(l.protocol.length,6,"V56 sixth independent test protocol "+id);
+  assert.equal(l.pitfalls.length,3,"V56 old limitations still required "+id);
+  assert.equal(new Set(l.equations.map(e=>e.tex)).size,6,"V56 identical mathematical expression repeats "+id);
+  assert(l.derivation.at(-1).length>100&&l.protocol.at(-1).length>50,"V56 insufficient mathematical argument "+id);
+  assert(l.worked_example.length>160,"V56 not enough numerical exposition "+id);
+  katex.renderToString(l.equations.at(-1).tex,{throwOnError:true,strict:"ignore",displayMode:true});
+ }
+}
+near(2*.03,.06,"V56 ERM selection uniform deviation factor");
+near(1000*(1-.6)/(1+.6),250,"V56 autocorrelated effective sample size");
+near(.05/20,.0025,"V56 Bonferroni multiple validation experiments");
+near((100*10)/(100*10),1,"V56 duplicated training rows do not change average");
+near(2+100,102,"V56 null-space shift first identical linear-regression coefficient");
+near(.01**2/(.01**2+.01),.009900990099009901,"V56 Ridge spectral coefficient shrink ratio");
+near(.6*.1+(-.2)*(-.1),.08,"V56 asset-ID sorted long-short portfolio");
+near(.6*(-.1)+(-.2)*.1,-.08,"V56 unsynchronized return asset-ID incorrect portfolio");
+near((10**2+1)/(0.1**2+1),100,"V56 Ridge spectral conditioning");
+near((.7/.3)*(.6/.2),7,"V56 Bayesian market regime odds shift");
+near(Math.sqrt(1.4/100),Math.sqrt(.014),"V56 long-run covariance standard error");
+near(.2*.8/100,.0016,"V56 rare financial event Bernoulli MLE variance");
+near(.8*.1/(.8*.1+.2*.4),.5,"V56 GMM first-state posterior responsibility");
+near(12-1,11,"V56 trade net revenue benchmark after one fee");
+near(.01,.01,"V56 stable learned risk average gap bound");
+near(.8*.5+.2*3,1,"V56 covariate density importance ratio");
+near(Math.ceil(Math.log(2*10/.05)/(2*.05**2)),1199,"V56 PAC independent data size for smaller halfwidth");
+near((.01+.001)/2,.0055,"V56 cosine schedule middle");
+near(1-.99**2,.0199,"V56 economic shadow price for constraint relaxation");
+near(1/Math.sqrt(8),.3535533905932738,"V56 AdaGrad monotonic effective step");
+near(2*2,4,"V56 active convex KKT multiplier");
+near((17-16)/2,.5,"V56 locked training-only standardizer sensitivity");
+near((100-1)*.5*.02,.99,"V56 live feature percent-vs-decimal prediction corruption");
+near(-.08-(-.30),.22,"V56 winsorized tail risk distortion");
+near(1000*.05,50,"V56 expected invalid financial factor discoveries");
+
+console.log("PASS V56/V36: 48 canonical lessons across 24 ML domains, 120 added strict-KaTeX equations (264 validated), 18k+ rigorous explanation/protocol characters, original examples retained, independent numerical checks, 48 direct links and responsive Chinese/math layout. Atlas manifest unchanged.");
