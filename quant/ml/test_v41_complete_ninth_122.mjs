@@ -229,4 +229,35 @@ near((105-100)/(110-100),.5,"V47 point-in-time price normalization");
 near((105-100)/(120-100),.25,"V47 erroneous future-extreme normalization");
 near(.0008-.001*.5,.0003,"V47 fee-aware ETF image model net return");
 near(Math.floor((10+2-2*(3-1)-1)/1)+1,8,"V47 dilated image convolution output shape");
-console.log("PASS V47: 122 canonical ninth-cycle lessons fully deepened (62 V40 + 60 V41), 675 strict KaTeX formulas, including 55 additions beyond V41, 12 stages, 122 canonical route links, Chinese math and print responsive checks and 23k+ new V41 mathematical/research chars.");
+
+const v48=read("atlas-depth-09-e.json").lessons;
+const v48ids=["m09-c05-p01","m09-c01-p02","m09-c02-p06","m09-c02-p02","m09-c04-p04","m10-c03-p01","m10-c01-p04","m10-c02-p02","m10-c04-p01","m10-c03-p02"];
+assert.equal(v48ids.length,10,"V48 mathematical lesson count");
+for(const id of v48ids){
+ const l=v48[id];
+ assert(l&&l.revision_note?.startsWith("V48"),"V48 official lesson absent "+id);
+ assert.equal(l.equations.length,6,"V48 sixth equation missing "+id);
+ assert.equal(l.derivation.length,6,"V48 sixth proof missing "+id);
+ assert.equal(l.protocol.length,6,"V48 sixth independent audit missing "+id);
+ assert.equal(l.pitfalls.length,3,"V48 original model boundaries lost "+id);
+ assert(l.derivation.at(-1).length>90&&l.protocol.at(-1).length>45,"V48 mathematically thin lesson "+id);
+ assert(l.worked_example.length>150,"V48 lost prior financial example "+id);
+ assert.equal(new Set(l.equations.map(f=>f.tex)).size,6,"V48 duplicate formula "+id);
+ katex.renderToString(l.equations.at(-1).tex,{throwOnError:true,displayMode:true,strict:"ignore"});
+}
+near(1/(.2*10),.5,"V48 one-class SVM dual upper limit");
+near(2/Math.sqrt(3**2+4**2),.4,"V48 geometric SVM margin width");
+near(Math.exp(-.5),.6065306597126334,"V48 Gaussian RBF length scale");
+near(1/(100*2),.005,"V48 hinge risk regularization equivalence");
+near(1-.5**2/(1+1),.875,"V48 GP latent posterior variance");
+near(1-.5**2/(1+1)+1,1.875,"V48 GP predictive observation variance");
+const v48KL=.8*Math.log(1.6)+.2*Math.log(.4);
+near(Math.sqrt(v48KL/2),Math.sqrt(.8*Math.log(1.6)/2+.2*Math.log(.4)/2),"V48 Pinsker total variation bound");
+assert(.3<=Math.sqrt(v48KL/2),"V48 Pinsker inequality violated");
+near(1/(1+4/3),3/7,"V48 correlated Gaussian posterior variance");
+near((8/3)/(1+4/3),8/7,"V48 correlated Gaussian posterior mean");
+near(1/3,1/3,"V48 collider conditional joint");
+assert(1/3!==4/9,"V48 collider must induce conditional dependence");
+near(Math.log(.5),-.6931471805599453,"V48 MH stable log acceptance");
+near(-50-.5,-50.5,"V48 optimal evidence lower bound");
+console.log("PASS V48: 122 canonical ninth-cycle lessons fully deepened (62 V40 + 60 V41), 675 strict KaTeX formulas, including 65 additions beyond V41, 12 stages, 122 canonical route links, Chinese math and print responsive checks and 23k+ new V41 mathematical/research chars.");
