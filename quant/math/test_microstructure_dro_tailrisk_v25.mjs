@@ -28,8 +28,8 @@ for(const l of newLessons){
  for(const name of ["definition","assumptions","example","application","caveat"])
   assert(typeof l[name]==="string"&&l[name].length>=95,"thin "+name+" in "+l.node_id);
  assert(l.formulas.length>=4&&l.derivation.length>=3&&l.properties.length>=3);
- assert(l.deep_sections.length===4);
- assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,4);
+ assert(l.deep_sections.length===5);
+ assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,5);
  for(const f of l.formulas){
   assert(f.label&&f.tex);
   katex.renderToString(f.tex,{throwOnError:true,strict:"ignore",displayMode:true});expressions++;
@@ -59,11 +59,18 @@ for(const l of newLessons){
  assert(!/[\uFFFD\u200B\uFEFF]/.test(JSON.stringify(l)),"garbled CJK "+l.node_id);
  assert(!/余弦\?|Lorem ipsum|TODO|占位|待填/.test(JSON.stringify(l)),"unreviewed editorial placeholder "+l.node_id);
 }
-assert.equal(chapters,20);
-assert.equal(expressions,62);
+assert.equal(chapters,25);
+assert.equal(expressions,77);
 assert.equal(links,15);
 assert.equal(citations,9);
 const near=(actual,expected,what,tol=1e-10)=>assert(Math.abs(actual-expected)<tol,what+": "+actual+" vs "+expected);
+near(2*1000*(1e-8-.25e-8),.000015,"V48 correlated microstructure noise");
+near(2*1000*1e-8-.000015,.000005,"V48 iid-noise bias overestimate");
+near(100+(104-100)*(.5),102,"V48 forbidden future trade interpolation contrast");
+near(Math.log(.2)-.2*5,-2.6094379124341005,"V48 point process censored-window log likelihood");
+near((1+1+2*.5)/4,.75,"V48 dependent equally weighted mean");
+near(1/.75,4/3,"V48 correlation-adjusted effective sample");
+near((.02*100+(.05-.02)*10)/.05,46,"V48 discrete quantile atom split");
 near((.000402-.1*.00042)/.9,.0004,"TSRV bias corrected");
 near(.8*.01*.01,.00008,"overlap Brownian covariance");
 near(.00008/.0002,.4,"Epps asynchronous attenuation");
@@ -87,5 +94,5 @@ for(const id of ids){
 }
 for(const token of ["overflow-x:auto","line-break:strict","@media print",":focus-visible"])
  assert(css.includes(token),"missing maths / Chinese responsive layout "+token);
-console.log("PASS V25: 5 high-frequency/risk mathematics lectures, 20 detailed chapters, 62 strict KaTeX proofs, "+
+console.log("PASS V48/V25: 5 high-frequency/risk mathematics lectures, 25 detailed chapters, 77 strict KaTeX proofs, "+
  citations+" verified-format references, "+links+" learning links, 8 independent numeric invariants, 287 unique complete mathematics lessons.");
