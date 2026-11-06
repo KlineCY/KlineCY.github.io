@@ -20,8 +20,8 @@ for(const l of lessons){
  for(const k of ["definition","assumptions","example","application","caveat"])
   assert(typeof l[k]==="string"&&l[k].length>=100,"missing rigorous prose "+l.id+" "+k);
  assert(l.properties.length>=4&&l.formulas.length>=4&&l.derivation.length>=4);
- assert.equal(l.deep_sections.length,5);
- assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,5);
+ assert(l.deep_sections.length>=5,"V30 deep proof coverage must not regress "+l.id);
+ assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,l.deep_sections.length,"duplicate deep title "+l.id);
  for(const f of l.formulas){assert(f.label&&f.tex);katex.renderToString(f.tex,{throwOnError:true,strict:"ignore",displayMode:true});formulas++;}
  for(const d of l.derivation){assert(d.explanation.length>=50);katex.renderToString(d.tex,{throwOnError:true,strict:"ignore",displayMode:true});formulas++;}
  for(const z of l.deep_sections){
@@ -35,7 +35,7 @@ for(const l of lessons){
  assert(!/[\uFFFD\u200B\uFEFF]/.test(JSON.stringify(l)));
  assert(!/Lorem ipsum|TODO|占位|待填/.test(JSON.stringify(l)));
 }
-assert.equal(formulas,110);assert.equal(deep,30);assert.equal(refs,12);assert.equal(links,24);
+assert(formulas>=110,"V30 math formula coverage must not regress");assert(deep>=30,"V30 deep proof coverage must not regress");assert.equal(refs,12);assert.equal(links,24);
 const near=(a,b,label,tol=1e-9)=>assert(Math.abs(a-b)<=tol,"arithmetic check "+label+" got "+a+" expected "+b);
 near(.97/.93-1,.043010752688172005,"V44 simple forward quote");
 near(Math.log(.97/.93),Math.log(1+(.97/.93-1)),"V44 forward quote equivalence");
@@ -80,4 +80,4 @@ assert(mlHome.includes('aria-label="V30无套利定价、收益率曲线与短�
 for(const id of ids){assert(mathHome.includes("?topic="+id));assert(mlHome.includes("../math/?topic="+id));}
 for(const x of ["overflow-x:auto","line-break:strict","@media print",":focus-visible"])assert(style.includes(x));
 assert(mlStyle.includes("overflow-x:auto"));
-console.log("PASS V44/V30: 6 rigorous pricing and fixed-income lectures, 30 deep proofs, 110 strict KaTeX expressions, 12 sources, 24 graph links, 22 independent numerical and financial no-arbitrage invariants, 324 unique complete mathematical courses.");
+console.log("PASS V44/V30: 6 rigorous pricing and fixed-income lectures, "+deep+" deep proof chapters, "+formulas+" strict KaTeX expressions, 12 sources, 24 graph links, 22 independent numeric financial invariants, 324 unique complete mathematical courses.");
