@@ -178,4 +178,39 @@ near(Math.sqrt(.01**2/.0001+.02**2/.0004),Math.sqrt(2),"V52 optimal unconstraine
 near(Math.sqrt(.0004/100*(1+.5)/(1-.5)),Math.sqrt(.000012),"V52 paired loss AR1 HAC standard error");
 near(.9**30,.0423911582752162,"V52 fixed classifier zero observed error probability");
 
+
+const v52optimization=read("atlas-depth-08-c.json").lessons;
+const v52optIds=["m05-c05-p02","m05-c03-p02","m05-c01-p05","m05-c02-p06","m05-c01-p02","m06-c01-p05","m06-c02-p02","m06-c03-p05","m06-c05-p04","m06-c02-p04"];
+assert.equal(v52optIds.length,10);
+for(const id of v52optIds){
+ const l=v52optimization[id];
+ assert(l&&l.revision_note?.startsWith("V52"),"V52 optimization/data contract missing "+id);
+ assert.equal(l.equations.length,6,"V52 sixth formula missing "+id);
+ assert.equal(l.derivation.length,6,"V52 sixth proof missing "+id);
+ assert.equal(l.protocol.length,6,"V52 sixth verification protocol missing "+id);
+ assert.equal(l.pitfalls.length,3,"V52 preexisting limitations lost "+id);
+ assert.equal(new Set(l.equations.map(e=>e.tex)).size,6,"V52 duplicate optimization formula "+id);
+ assert(l.derivation.at(-1).length>=100&&l.protocol.at(-1).length>=40,"V52 reasoning too shallow "+id);
+ assert(l.worked_example.length>=150,"V52 financial data example lost "+id);
+ katex.renderToString(l.equations.at(-1).tex,{throwOnError:true,displayMode:true,strict:"ignore"});
+}
+near(1000+Math.log1p(Math.exp(-1)),1000.3132616875182,"V52 stable LogSumExp",1e-10);
+assert(1000+Math.log1p(Math.exp(-1))<=1000+Math.log(2),"V52 LogSumExp upper bound");
+near(.9*.4+.1*4,.76,"V52 RMSProp second square moment");
+near(.76/(1-.9**2),4,"V52 RMSProp optional initialization correction");
+near((.75**2+4*0**2)/2,.28125,"V52 strong-convex one-step true objective");
+assert(.28125<=(1-1/4)*2.5,"V52 strong-convex linear-rate bound");
+const earlyLoss=[.20,.17,.16,.165,.18];
+assert.equal(earlyLoss.indexOf(Math.min(...earlyLoss))+1,3,"V52 restore best checkpoint");
+near(Math.min(1,1-.1*(-2)),1,"V52 projected convex fixed point");
+near((100*10+110*90)/(10+90),109,"V52 intrabar VWAP distinct from OHLC mean");
+near(.0005/(.002-.001),.5,"V52 MinMax frozen range sensitivity");
+near(1/Math.sqrt(1-.9),Math.sqrt(10),"V52 VIF standard error not variance multiplier");
+const assetPermutation=[1,0],originalWeights=[.6,-.2];
+const permutedWeights=assetPermutation.map(i=>originalWeights[i]);
+const restoredWeights=assetPermutation.map(i=>permutedWeights[i]);
+assert.deepEqual(restoredWeights,originalWeights,"V52 asset ID order must invert correctly");
+near((0+3*.2)/(1+3),.15,"V52 leave-one-out target encoding");
+near((1+0+3*.2)/(2+3),.32,"V52 full class target encoding leakage");
+
 console.log("PASS V52/V38+V39: 60 V38 and 60 V39 enhanced eighth-cycle canonical lectures; 120 lessons/24 domains, 630 strict KaTeX equations (240 added across V38+V39), substantive derivations/protocols, 60 route links, original numeric examples and responsive Chinese/formula layout.");
