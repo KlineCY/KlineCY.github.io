@@ -29,7 +29,7 @@ for(let index=0;index<files.length;index++){
   assert(l.source_title?.length>=2&&l.title?.length>=8,id+" old identity lost");
   assert(l.overview?.length>=60,id+" original overview missing");
   assert(l.worked_example?.length>=110,id+" original plus expanded worked example missing");
-  assert(v41 ? /^V4[1-8]/.test(l.revision_note||"") : (index===4 ? l.revision_note?.startsWith("V48") : l.revision_note?.startsWith("V40")),id+" mismatch expansion batch");
+  assert(v41 ? /^V4[1-8]/.test(l.revision_note||"") : ((index===4||index===5) ? l.revision_note?.startsWith("V48") : l.revision_note?.startsWith("V40")),id+" mismatch expansion batch");
   assert(l.equations.length>=5,id+" must preserve at least five mathematical formulas");
   assert(l.derivation.length>=5,id+" must preserve five original proof steps");
   assert(l.protocol.length>=5,id+" must preserve five original validation steps");
@@ -53,7 +53,7 @@ for(let index=0;index<files.length;index++){
 assert.equal(ids.size,122,"entire ninth-cycle catalog preserved");
 assert.equal(first.size,62,"V40 first half preserved");
 assert.equal(second.size,60,"V41 second half expanded");
-assert.equal(eq,675,"V48 must preserve 610 original formulas and 65 substantive later enhancements");
+assert.equal(eq,685,"V48 must preserve 610 original formula records and 75 substantive later enhancements");
 assert.equal(domains.size,24,"24 ninth-cycle subjects preserved");
 for(const [domain,n] of domains)assert.equal(n,Number(domain.slice(1))<=2?6:5,domain+" unexpected lesson count");
 assert(substance>23000,"at least 23k new Chinese proof, validation and boundary chars");
@@ -261,4 +261,4 @@ near((1/4)/(3/4),1/3,"V48 collider conditional joint");
 assert(Math.abs((1/4)/(3/4)-((1/2)/(3/4))**2)>0.1,"V48 collider must induce conditional dependence");
 near(Math.log(.5),-.6931471805599453,"V48 MH stable log acceptance");
 near(-50-.5,-50.5,"V48 optimal evidence lower bound");
-console.log("PASS V48: 122 canonical ninth-cycle lessons fully deepened (62 V40 + 60 V41), 675 strict KaTeX formulas, including 65 additions beyond V41, 12 stages, 122 canonical route links, Chinese math and print responsive checks and 23k+ new V41 mathematical/research chars.");
+console.log("PASS V48: 122 canonical ninth-cycle lessons fully deepened (62 V40 + 60 V41), 685 strict KaTeX formulas, including 75 additions beyond V41, 12 stages, 122 canonical route links, Chinese math and print responsive checks and 23k+ new V41 mathematical/research chars.");
