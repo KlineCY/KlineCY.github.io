@@ -127,4 +127,29 @@ near(Math.sqrt(.01),.1,"whitening small direction");
 near(1/Math.sqrt(.01+.03),5,"ridge-whitening small direction");
 near(95+5,100,"purging label maturity");
 near(1/.1,10,"IPW small propensity");
-console.log("PASS V37: 96 complete seventh-cycle canonical lectures (V36 24 + V37 72); 512 strict KaTeX equations, V56 added 32 to first 32 classes; 24 domains, nine-stage 72-link navigation, original numerical examples, independent numerical cross-checks and responsive Chinese/math typography.");
+
+const v56Applied=read("atlas-depth-07-d.json").lessons;
+const v56AppliedIds=["m07-c05-p05","m07-c05-p04","m07-c04-p04","m07-c05-p01","m08-c05-p05","m08-c04-p01","m08-c04-p02","m08-c03-p03"];
+for(const id of v56AppliedIds){
+ const l=v56Applied[id];
+ assert(l?.revision_note?.startsWith("V56"),"V56 classical financial ML lesson missing "+id);
+ assert.equal(l.equations.length,6,"V56 sixth exact formula missing "+id);
+ assert.equal(l.derivation.length,6,"V56 sixth proof missing "+id);
+ assert.equal(l.protocol.length,6,"V56 sixth reproducible check missing "+id);
+ assert.equal(new Set(l.equations.map(e=>e.tex)).size,6,"V56 original exact duplicate formula was not resolved "+id);
+ assert(l.derivation.at(-1).length>100&&l.protocol.at(-1).length>50,"V56 finance GLM and Boosting argument incomplete "+id);
+ katex.renderToString(l.equations.at(-1).tex,{throwOnError:true,strict:"ignore",displayMode:true});
+}
+near(1+2*.2,1.4,"V56 HAC population true long-run variance");
+near(1+2*.5*.2,1.2,"V56 HAC Bartlett finite-band variance");
+near(1.4-1.2,.2,"V56 HAC Bartlett bias relative to one-lag truth");
+near(.001/.02,.05,"V56 rolling beta sensitivity to factor covariance");
+near(Math.sqrt(.25)*6,3,"V56 Gamma model absolute risk scales with mean");
+near((.04+.04+2*.02)/4,.03,"V56 Fama MacBeth cross-month dependent error");
+near(.5,.5,"V56 duplicated signals group permutation squared loss");
+near((1-.8)/(.8*(1-.8)),1.25,"V56 Logistic Newton jump for positive label");
+near(-(-6)/(4+2),1,"V56 XGBoost regularized leaf optimum");
+near(-6*1+.5*(4+2)*1, -3,"V56 XGBoost optimized quadratic objective");
+near(.2+.1*.5,.25,"V56 Boosting fixed learning-rate one-step output");
+
+console.log("PASS V56/V37: 96 complete seventh-cycle canonical lectures (V36 24 + V37 72); 512 strict KaTeX equations, V56 added 32 to first 32 classes; 24 domains, nine-stage 72-link navigation, original numerical examples, independent numerical cross-checks and responsive Chinese/math typography.");
