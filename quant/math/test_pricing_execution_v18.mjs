@@ -47,7 +47,7 @@ for(const l of added){
  assert(l.deep_sections.length>=4);
  const titles=l.deep_sections.map(s=>s.title);
  assert.equal(new Set(titles).size,l.deep_sections.length,"repeated section titles "+l.id);
- for(const s of l.deep_sections.slice(-4)){
+ for(const s of l.deep_sections.slice(newIds.includes(l.id)?-5:-4)){
   assert(s.question.length>=12&&s.paragraphs.length>=2&&s.paragraphs.every(p=>p.length>=55),"CJK narrative too thin "+l.id+" "+s.title);
   assert(s.proof.length>=50&&s.worked.length>=40&&s.limitation.length>=30,"worked proof or boundary incomplete "+l.id+" "+s.title);
   for(const e of s.formulas){katex.renderToString(e.tex,{throwOnError:true,strict:"ignore",displayMode:true});formulas++}
@@ -68,8 +68,8 @@ for(const l of added){
  for(const src of l.sources){assert(src.title.length>20&&/^https:\/\//.test(src.url));sources++}
  assert(!JSON.stringify(l).includes("\ufffd"),"broken UTF-8 Chinese text "+l.id);
 }
-assert.equal(sections,48);
-assert.equal(formulas,169);
+assert.equal(sections,54);
+assert.equal(formulas,187);
 assert(sources>=24);
 assert(links>=48);
 // Independent numerical sanity checks, separate from the embedded prose.
@@ -92,6 +92,15 @@ assert.equal(nums.length,12);
 for(const [id,actual,want,token] of nums){
  near(actual,want,id);assert(added.find(l=>l.id===id).example.includes(token),"example missing checked arithmetic "+id);
 }
+
+near(.5*.1-.5*(-.1),.1,"V55 valid signed state instrument reveals conditional SDF failure");
+near(1.2*.04+.5*.04,.068,"V55 multifactor SDF implied ETF excess return");
+near((.02+4*2*.06)/(1+4*2**2),.5/17,"V55 GMM reweighting changes theta estimator");
+near(1*8**2+4*2**2,80,"V55 heterogeneous temporary impact optimal allocation");
+near(1*5**2+4*5**2,125,"V55 TWAP inferior when impact differs across buckets");
+near(10*Math.cosh(1)/Math.sinh(1),13.13035285499331,"V55 Almgren Chriss initial liquidation speed",1e-8);
+near(3*.1*15000,4500,"V55 robust participation-rate three-period capacity");
+assert(5000>4500&&5000<6000,"V55 predicted liquidity sufficient but conservative capacity insufficient");
 const visiting=new Set(),visited=new Set();
 function dfs(id){assert(nodes.has(id),"missing prerequisite "+id);if(visiting.has(id))throw Error("cycle "+id);if(visited.has(id))return;visiting.add(id);for(const p of nodes.get(id).prerequisites||[])dfs(p);visiting.delete(id);visited.add(id)}
 for(const n of curriculum.nodes)dfs(n.id);
@@ -109,4 +118,4 @@ for(const [name,style] of [["math",css],["ml",mlCss]]){
  assert(style.includes(":focus-visible"),"keyboard focus missing "+name);
  assert(style.includes("@media print"),"print layout safeguards missing "+name);
 }
-console.log("PASS V18: six new and six in-place deepened SDF/pricing/portfolio-execution lectures, 48 deep proof sections, 169 strict KaTeX formula parses, 24 source references, 48 prerequisite/cross links, 12 independently computed numeric examples, 278 unique full math courses and 656 acyclic knowledge nodes.");
+console.log("PASS V18: six new and six in-place deepened SDF/pricing/portfolio-execution lectures, 54 deep proof sections, 187 strict KaTeX formula parses, 24 source references, 48 prerequisite/cross links, 12 independently computed numeric examples, 278 unique full math courses and 656 acyclic knowledge nodes.");
