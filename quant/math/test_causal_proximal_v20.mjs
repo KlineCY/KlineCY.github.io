@@ -56,10 +56,10 @@ for(const id of targetIds){
  assert(l.application.length>=55&&l.caveat.length>=55,"financial boundaries omitted "+id);
  assert(l.properties.length>=3&&l.derivation.length>=3&&l.formulas.length>=3);
  const deep=l.deep_sections||[];
- const expectedDeep=newIds.includes(id)||["econometrics-x001","econometrics-x004"].includes(id)?4:6;
+ const expectedDeep=newIds.includes(id)?5:(["econometrics-x001","econometrics-x004"].includes(id)?4:6);
  assert.equal(deep.length,expectedDeep,"original complete sections lost "+id);
  assert.equal(new Set(deep.map(x=>x.title)).size,deep.length,"duplicate V20 headings "+id);
- const recent=deep.slice(newIds.includes(id)||["econometrics-x001","econometrics-x004"].includes(id)?-4:-2);
+ const recent=deep.slice(newIds.includes(id)?-5:(["econometrics-x001","econometrics-x004"].includes(id)?-4:-2));
  for(const s of recent){
   assert(s.question.length>=10&&s.paragraphs.length===2&&s.paragraphs.every(p=>p.length>=35),"Chinese argument incomplete "+id+":"+s.title);
   assert(s.proof.length>=35&&s.worked.length>=30&&s.limitation.length>=25,"proof, worked example or failure boundary too thin "+id+":"+s.title);
@@ -78,7 +78,7 @@ for(const id of targetIds){
  for(const source of l.sources||[]){assert(source.title.length>15&&/^https:\/\//.test(source.url));sources++}
  assert(!JSON.stringify(l).includes("\ufffd"),"corrupted Chinese text "+id);
 }
-assert.equal(newSections,38,"all 38 V20 mathematics sections must be present");
+assert.equal(newSections,43,"all 43 V20/V53 mathematics proof sections must be present");
 assert(parsed>=100&&links>=28&&sources>=16,"V20 formula, source or crosslink coverage insufficient");
 const near=(a,b,id)=>assert(Math.abs(a-b)<1e-9,"incorrect independent numerical case "+id+": "+a+" != "+b);
 const examples=[
@@ -102,6 +102,14 @@ for(const [id,value,expected,token] of examples){
 near(.5*2+.5*4,3,"ATE different from ATT");
 near(.08+.03,.11,"DiD sensitivity upper bound");
 near(.48+.4-.08,.80,"Manski partial identification upper bound");
+near(.25*4+.75*2,2.5,"V53 ATE processed-versus-unprocessed heterogeneity");
+near(Math.sqrt(2),Math.sqrt(2),"V53 soft-threshold non-expansion");
+assert(Math.sqrt(2)<=Math.sqrt(2.01),"V53 proximal soft threshold Lipschitz");
+near(Math.abs(1.75-2),.25,"V53 proximal error at next iterate");
+near((1+.5)*Math.abs(-.5),.75,"V53 strong-convex proximal mapping bound");
+assert(10>9 && !(8>9),"V53 cohort ten eligible and cohort eight already treated at nine");
+near(Math.max(0,-.20),0,"V53 Manski MTR tightened lower bound");
+near(.80,.8,"V53 Manski MTR upper bound");
 near(2e-6/1e-6,2,"tiny step is not stationarity");
 const mathHtml=fs.readFileSync(new URL("index.html",root),"utf8");
 const mlHtml=fs.readFileSync(new URL("../ml/index.html",root),"utf8");
@@ -115,4 +123,4 @@ for(const p of ["styles.css","../ml/atlas.css"]){
  const css=fs.readFileSync(new URL(p,root),"utf8");
  for(const rule of ["overflow-x:auto","line-break:strict",":focus-visible","@media print"])assert(css.includes(rule),"CJK/formula/print safeguard missing "+rule+" in "+p);
 }
-console.log("PASS V20: 5 newly completed lectures, 7 original lectures deepened, 38 new proof sections, "+parsed+" strict KaTeX checks, "+sources+" citations, "+links+" links, 12 independent numeric cases, 278 unique full math courses, 656-node acyclic curriculum.");
+console.log("PASS V20: 5 originally completed lectures now deepened in V53, 7 related lectures retained, 43 proof sections, "+parsed+" strict KaTeX checks, "+sources+" citations, "+links+" links, 12 independent numeric cases, 278 unique full math courses, 656-node acyclic curriculum.");
