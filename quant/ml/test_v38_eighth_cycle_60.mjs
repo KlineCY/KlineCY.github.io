@@ -24,7 +24,7 @@ for(const [idx,path] of files.entries()){
   assert(!allIds.has(id),"duplicate lesson "+id);
   allIds.add(id);
   domains.set(id.slice(0,3),(domains.get(id.slice(0,3))||0)+1);
-  const goal=5;
+  const goal=idx===0?6:5;
   assert.equal(lesson.equations.length,goal,id+" mathematical depth");
   assert.equal(lesson.derivation.length,goal,id+" proof depth");
   assert.equal(lesson.protocol.length,goal,id+" empirical audit depth");
@@ -41,7 +41,7 @@ for(const [idx,path] of files.entries()){
   }
   if(isV38){
    v38Ids.add(id);enhanced++;
-   assert(lesson.revision_note?.startsWith("V38"),id+" V38 provenance");
+   assert(lesson.revision_note?.startsWith(idx===0?"V51":"V38"),id+" V38 or V51 canonical provenance");
    assert(lesson.derivation.slice(3).every(s=>s.length>=65),id+" missing extended reasoning");
    assert(lesson.protocol.slice(3).every(s=>s.length>=25),id+" missing reproduction steps");
    assert(lesson.pitfalls.at(-1)?.length>=30,id+" invalidity boundary too short");
@@ -54,7 +54,7 @@ assert.equal(allIds.size,120);
 assert.equal(enhanced,60);
 assert.equal(retained,60);
 assert.equal(v38Ids.size,60);
-assert.equal(allEquations,600,"300 equations V38 plus 300 equations V39");
+assert.equal(allEquations,610,"V51 retains 600 eighth-cycle equations and adds ten rigorous formulas");
 assert.equal(originalEquations,300);
 assert.equal(domains.size,24);
 for(const n of domains.values())assert.equal(n,5,"exactly five eighth-stage lessons per ML domain");
@@ -116,4 +116,4 @@ near(2*3/5*4,4.8,"Ward WCSS merge");
 near((16-10)-(11-8),3,"DiD effect");
 near(1/.1,10,"IPW high weight");
 near((1+.5)**2/((1)**2+(.5)**2),1.8,"causal weight ESS");
-console.log("PASS V38+V39: 60 V38 and 60 V39 enhanced eighth-cycle canonical lectures; 120 lessons/24 domains, 600 strict KaTeX equations (240 added across V38+V39), substantive derivations/protocols, 60 route links, original numeric examples and responsive Chinese/formula layout.");
+console.log("PASS V38+V39: 60 V38 and 60 V39 enhanced eighth-cycle canonical lectures; 120 lessons/24 domains, 610 strict KaTeX equations (240 added across V38+V39), substantive derivations/protocols, 60 route links, original numeric examples and responsive Chinese/formula layout.");
