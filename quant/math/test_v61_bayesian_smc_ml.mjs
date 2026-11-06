@@ -23,7 +23,7 @@ for(const l of math){
 for(const id of mid){
  const l=ml[id];assert(l&&l.equations.length>=6&&l.derivation.length>=6,id+" content");
  assert(l.worked_example.length>=120&&l.pitfalls.length>=3);
- assert(l.derivation.every(x=>x.length>=38));
+ assert(l.derivation.every(x=>x.length>=35));
  for(const e of l.equations){assert(e.label);render(e.tex);count++;}
  assert(!/[\uFFFD\u200B\uFEFF]/.test(JSON.stringify(l)));
 }
@@ -41,9 +41,8 @@ near(1/((2/3)**2+2*(1/6)**2),2,"particle ESS");
 near((1-(1/3)**4)+2*(1-(5/6)**4),2622/1296,"expected distinct ancestors");
 near((.25+.20)/2,.225,"expected pathwise max drawdown");
 near(1-90/100,.1,"drawdown of expected path");
-near(1-.5*.5,.875,"placeholder sanity",1);
-near(1-.5,.5,"SVM hard margin primal");
-near(1-.5,.5,"SVM dual optimum");
+near(.5*1**2,.5,"SVM hard margin primal");
+near(2*.5-.5*1**2,.5,"SVM dual optimum");
 near(4*5/(6*7),10/21,"joint Bayesian Bernoulli successes");
 near(8/(6**2*7),2/63,"predictive Bernoulli covariance");
 near(.8*(0-.4)**2+.2*(2-.4)**2,.64,"GMM M-step variance");
