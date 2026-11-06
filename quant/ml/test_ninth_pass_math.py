@@ -1,4 +1,4 @@
-"""Mathematical sanity checks for all 122 ninth-wave lessons, all 122 rigorously deepened across V40 and V41.
+"""Mathematical sanity checks for 122 ninth-wave lessons, including V44 expansions.
 
 The 48 cases independently recompute two published numerical examples
 per domain. They do not replace complete academic proof review.
@@ -31,12 +31,12 @@ class NinthPassMath(unittest.TestCase):
                 self.assertGreaterEqual(len(chapter["overview"]),60)
                 self.assertGreaterEqual(len(chapter["worked_example"]),60)
                 domain=int(uid[1:3])
-                self.assertEqual(len(chapter["equations"]),5)
-                self.assertEqual(len(chapter["derivation"]),5)
-                self.assertEqual(len(chapter["protocol"]),5)
-                self.assertEqual(len(chapter["pitfalls"]),3)
+                self.assertGreaterEqual(len(chapter["equations"]),5)
+                self.assertGreaterEqual(len(chapter["derivation"]),5)
+                self.assertGreaterEqual(len(chapter["protocol"]),5)
+                self.assertGreaterEqual(len(chapter["pitfalls"]),3)
                 expected_revision="V40" if domain<=12 else "V41"
-                self.assertTrue(chapter.get("revision_note","").startswith(expected_revision))
+                self.assertTrue(chapter.get("revision_note","").startswith(expected_revision) if domain<=12 else chapter.get("revision_note","").startswith(("V41","V42","V43","V44")))
                 for q in chapter["equations"]:
                     self.assertTrue(q["label"] and q["tex"])
                 for key in ("derivation","protocol","pitfalls"):
