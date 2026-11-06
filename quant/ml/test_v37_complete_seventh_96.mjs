@@ -157,7 +157,9 @@ const v57AuditGroups=[
  ["atlas-depth-07-e.json",["m09-c05-p03","m09-c05-p02","m09-c04-p05","m09-c05-p06","m10-c04-p06","m10-c05-p03","m10-c03-p03","m10-c04-p02"]],
  ["atlas-depth-07-f.json",["m11-c01-p06","m11-c02-p02","m11-c03-p04","m11-c02-p03","m12-c02-p02","m12-c02-p01","m12-c02-p06","m12-c04-p04"]],
  ["atlas-depth-07-g.json",["m13-c04-p03","m13-c01-p02","m13-c04-p01","m13-c03-p04","m14-c03-p05","m14-c04-p06","m14-c02-p04","m14-c03-p06"]],
- ["atlas-depth-07-h.json",["m15-c03-p04","m15-c04-p06","m15-c01-p04","m15-c03-p01","m16-c02-p01","m16-c01-p02","m16-c04-p05","m16-c03-p03"]]
+ ["atlas-depth-07-h.json",["m15-c03-p04","m15-c04-p06","m15-c01-p04","m15-c03-p01","m16-c02-p01","m16-c01-p02","m16-c04-p05","m16-c03-p03"]],
+ ["atlas-depth-07-i.json",["m17-c01-p03","m17-c04-p04","m17-c04-p06","m17-c04-p01","m18-c04-p01","m18-c04-p02","m18-c05-p04","m18-c05-p02"]],
+ ["atlas-depth-07-j.json",["m19-c03-p05","m19-c03-p03","m19-c01-p03","m19-c05-p04","m20-c04-p05","m20-c02-p06","m20-c05-p05","m20-c03-p05"]]
 ];
 assert.equal(v57AuditGroups.reduce((n,group)=>n+group[1].length,0),48,"V57 audited course total");
 for(const [file,expectedIds] of v57AuditGroups){
@@ -225,5 +227,33 @@ near(Math.exp(-1)/(Math.exp(-1)+1),.2689414213699951,"V57 overflow-free shifted 
 near((1*2+2*6)/(1+2),14/3,"V57 positive-kernel linear-attention normalized convex combination");
 near(1+.1*.5,1.05,"V57 Pre-LN identity gradient path local toy direction");
 near(.5*(1+.1),.55,"V57 Post-LN local toy gradient direction");
+
+
+near(9-3,6,"V57 BPE repeated ETF merge decreases sequence length");
+const v57Gains={A:2**1-1,B:2**3-1};
+const v57DcgBefore=v57Gains.A+v57Gains.B/Math.log2(3);
+const v57DcgAfter=v57Gains.B+v57Gains.A/Math.log2(3);
+near(v57DcgAfter-v57DcgBefore,6*(1-1/Math.log2(3)),"V57 RAG reranking DCG change");
+near(2*.6*.75/(.6+.75),2/3,"V57 retrieval F1 versus citation factual support");
+near(250/(250-50),1.25,"V57 overlapped RAG chunk compute inflation");
+near(Math.max(1,20),20,"V57 graph legal edge start limited by publication");
+assert(10<Math.max(1,20),"V57 graph relationship unavailable at historical date ten");
+const v57DelayedEdge=(t,created,available,lambda)=>t<Math.max(created,available)?0:Math.exp(-lambda*(t-created));
+near(v57DelayedEdge(2,0,3,.5),0,"V57 old-but-undisclosed graph edge must not be visible");
+near(v57DelayedEdge(3,0,3,.5),Math.exp(-1.5),"V57 newly disclosed historical graph edge decay");
+near(.10-.09,.01,"V57 GNN incremental information after controlling industry");
+near(1/Math.sqrt(103-3),.1,"V57 Fisher transformed correlation standard error");
+assert(2<=2*1,"V57 critic bounded gradient restricts endpoint difference");
+near(Math.log(2),.6931471805599453,"V57 JS divergence saturates for disjoint point masses");
+near((3**2+1**2)/(3**2+1**2+.2**2),10/10.04,"V57 reconstruction PCA energy share");
+near(.02/(2*.005),2,"V57 order impact optimal unconstrained inventory");
+near(2*.02-.005*2**2,.02,"V57 order flow net profit after quadratic impact");
+near(8*.02-.005*8**2,-.16,"V57 increasing size beyond impact optimum loses money");
+near(.5*(.5*2)+.5*(-.5*2),0,"V57 state baseline contributes zero expected actor score");
+near(.2*(0+2+2+2)/4,.3,"V57 epsilon greedy expected exploration execution cost");
+near(.2*(1-1/4),.15,"V57 epsilon greedy actual non-greedy action frequency");
+near(-Math.log(1-.5**2),.2876820724517809,"V57 tanh inverse-Jacobian log correction");
+near(2*.5,1,"V57 tanh Jacobian log density adjustment derivative");
+near(8-7,1,"V57 Double DQN target network action-selection gap");
 
 console.log("PASS V57/V37: 96 complete seventh-cycle canonical lectures (V36 24 + V37 72); 560 strict KaTeX equations, V56/V57 added 80 to the first 80 courses; 24 domains, nine-stage 72-link navigation, original numerical examples, independent numerical cross-checks and responsive Chinese/math typography.");
