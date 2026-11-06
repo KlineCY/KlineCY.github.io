@@ -22,7 +22,7 @@ for(let index=0;index<files.length;index++){
  assert.equal(data.schema,1);
  assert.equal(data.revision,"2026-11-06","V38/V39 revision "+path);
  assert.equal(Object.keys(data.lessons).length,10);
- const revision=index<6?"V38":"V39";
+ const revision=index===0?"V51":index<6?"V38":"V39";
  for(const [id,lesson] of Object.entries(data.lessons)){
   assert(!ids.has(id),"duplicate canonical lesson "+id);
   ids.add(id);
@@ -35,9 +35,9 @@ for(let index=0;index<files.length;index++){
   assert(lesson.overview?.length>=60,id+" introduction damaged");
   assert(lesson.worked_example?.length>=110,id+" expanded original worked calculation missing");
   assert(lesson.revision_note?.startsWith(revision),id+" wrong chapter revision");
-  assert.equal(lesson.equations.length,5,id+" original three plus two new math equations");
-  assert.equal(lesson.derivation.length,5,id+" original three plus two new derivations");
-  assert.equal(lesson.protocol.length,5,id+" original three plus two new protocols");
+  assert.equal(lesson.equations.length,index===0?6:5,id+" original and V51 mathematical equations");
+  assert.equal(lesson.derivation.length,index===0?6:5,id+" original and V51 mathematical proofs");
+  assert.equal(lesson.protocol.length,index===0?6:5,id+" original and V51 empirical checks");
   assert.equal(lesson.pitfalls.length,3,id+" original two plus one new failure condition");
   assert.equal(new Set(lesson.protocol).size,5,id+" duplicated study protocol");
   assert(lesson.derivation.slice(3).every(s=>s.length>=65),id+" weak mathematical argument");
@@ -58,7 +58,7 @@ for(let index=0;index<files.length;index++){
 assert.equal(ids.size,120);
 assert.equal(v38.size,60);
 assert.equal(v39.size,60);
-assert.equal(equations,600,"360 original equations plus V38/V39 240 additional equations");
+assert.equal(equations,610,"360 original equations and 250 audited V38/V39/V51 enhancements");
 assert.equal(perDomain.size,24);
 for(const [domain,n] of perDomain)assert.equal(n,5,domain+" eighth-cycle domain balance");
 assert(addedProse>23000,"V39 needs substantial additional Chinese derivations and audit protocols");
@@ -139,4 +139,4 @@ near(Math.log(.5)/Math.log(.5),1,"AR mean reversion half life");
 near(20+30+10+15,75,"complete inference order delay");
 near((5+7+15)/3,9,"training seed average percent");
 
-console.log("PASS V39: 120 eighth-cycle canonical lessons across 24 domains, all 600 KaTeX equations parsed (240 V38+V39 additions), V39 60 strengthened lessons and 23k+ substantive Chinese chars, 12-stage navigation (60+60 links), numerical regression, responsive typography and original Atlas unchanged.");
+console.log("PASS V39: 120 eighth-cycle canonical lessons across 24 domains, all 610 KaTeX equations parsed (240 V38+V39 additions), V39 60 strengthened lessons and 23k+ substantive Chinese chars, 12-stage navigation (60+60 links), numerical regression, responsive typography and original Atlas unchanged.");
