@@ -21,8 +21,8 @@ for(const l of added){
  assert(l.id===l.node_id&&nodeIds.get(l.id)?.title===l.title,"canonical lecture and curriculum "+l.id);
  for(const k of ["definition","assumptions","example","application","caveat"])assert(l[k].length>=105,"substantive Chinese body "+l.id+" "+k);
  assert(l.properties.length>=4&&l.formulas.length>=4&&l.derivation.length>=4);
- assert.equal(l.deep_sections.length,4);
- assert.equal(new Set(l.deep_sections.map(x=>x.title)).size,4);
+ assert.equal(l.deep_sections.length,5);
+ assert.equal(new Set(l.deep_sections.map(x=>x.title)).size,5);
  for(const f of l.formulas){assert(f.label&&f.tex);katex.renderToString(f.tex,{throwOnError:true,strict:"ignore",displayMode:true});formulas++;}
  for(const d of l.derivation){assert(d.explanation.length>=55&&d.tex,"proof narrative "+l.id);katex.renderToString(d.tex,{throwOnError:true,strict:"ignore",displayMode:true});formulas++;}
  for(const s of l.deep_sections){
@@ -38,8 +38,11 @@ for(const l of added){
  assert(!/[\uFFFD\u200B\uFEFF]/.test(JSON.stringify(l)));
  assert(!/Lorem ipsum|TODO|占位|待填/.test(JSON.stringify(l)));
 }
-assert.equal(sections,24);assert.equal(formulas,78);assert.equal(links,28);assert.equal(refs,12);
+assert.equal(sections,30);assert.equal(formulas,108);assert.equal(links,28);assert.equal(refs,12);
 const near=(a,b,k,tol=1e-9)=>assert(Math.abs(a-b)<=tol,"V29 checked computation "+k+": "+a+" != "+b);
+near(9/(36*7),1/28,"V44 posterior parameter variance");
+near(.4375*.74/(.4375*.74+.5625*.32),.6426799007444169,"V44 HMM smoothing",1e-9);
+near(.5/Math.sqrt(1.25),.4472135954999579,"V44 innovation zscore");
 near(.8*2,1.6,"state prediction mean");
 near(.8**2+.36,1,"state prediction variance");
 near(1/(1+.25),.8,"Kalman gain");
@@ -75,4 +78,4 @@ const css=fs.readFileSync(new URL("styles.css",root),"utf8");
 const mlcss=fs.readFileSync(new URL("../ml/atlas.css",root),"utf8");
 for(const marker of ["overflow-x:auto","line-break:strict","@media print",":focus-visible"])assert(css.includes(marker),"CJK/KaTeX/layout rule "+marker);
 assert(mlcss.includes("overflow-x:auto"));
-console.log("PASS V29: 6 live lessons, 24 deep proof units, 78 strict KaTeX expressions, 12 source references, 28 canonical lesson crosslinks, 18 independent numeric assertions, 318 unique complete courses.");
+console.log("PASS V44/V29: 6 live lessons, 30 deep proof units, 108 strict KaTeX expressions, 12 source references, 28 canonical lesson crosslinks, 18 independent numeric assertions, 318 unique complete courses.");
