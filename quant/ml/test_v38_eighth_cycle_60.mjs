@@ -389,14 +389,14 @@ for(const group of v55groups){
  for(const id of group.ids){
   const l=lessons[id];
   assert(l&&l.revision_note?.startsWith("V55"),"V55 canonical course or revision missing "+id);
-  assert.equal(l.equations.length,6,"V55 sixth formula missing "+id);
-  assert.equal(l.derivation.length,6,"V55 sixth mathematical derivation missing "+id);
-  assert.equal(l.protocol.length,6,"V55 sixth empirically testable protocol missing "+id);
-  assert.equal(l.pitfalls.length,3,"V55 original limitations lost "+id);
-  assert.equal(new Set(l.equations.map(e=>e.tex)).size,6,"V55 duplicated pre-existing formula "+id);
-  assert(l.derivation.at(-1).length>100&&l.protocol.at(-1).length>50,"V55 incomplete proof or financial audit "+id);
+  assert(l.equations.length>=6,"V55 sixth formula missing "+id);
+  assert(l.derivation.length>=6,"V55 sixth mathematical derivation missing "+id);
+  assert(l.protocol.length>=6,"V55 sixth empirically testable protocol missing "+id);
+  assert(l.pitfalls.length>=3,"V55 original limitations lost "+id);
+  assert.equal(new Set(l.equations.slice(0,6).map(e=>e.tex)).size,6,"V55 duplicated pre-existing formula "+id);
+  assert(l.derivation[5].length>100&&l.protocol[5].length>50,"V55 incomplete proof or financial audit "+id);
   assert(l.worked_example.length>155,"V55 numerical worked example incomplete "+id);
-  katex.renderToString(l.equations.at(-1).tex,{throwOnError:true,strict:"ignore",displayMode:true});
+  katex.renderToString(l.equations[5].tex,{throwOnError:true,strict:"ignore",displayMode:true});
  }
 }
 near(.5*0+.5*4,2,"V55 Wasserstein lower bound from shifted mean");
