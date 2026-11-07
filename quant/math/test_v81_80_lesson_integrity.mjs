@@ -81,7 +81,7 @@ near("Gaussian reparam draw",2+3*(-1),-1);
 near("Gaussian reparam variance",3**2,9);
 near("information bottleneck independent predictive MI",0,0);
 near("information bottleneck retained input H",ln2,ln2);
-near("compounded two-day wealth",1.1*.9-.9999999999999999,-.01,1e-9);
+near("compounded two-day wealth multiplier",1.1*.9,.99);
 near("compounded two-day return",1.1*.9-1,-.01);
 near("entropy policy tau1 high",sig(1),.7310585786300049);
 near("entropy policy tauhalf high",sig(2),.8807970779778823);
