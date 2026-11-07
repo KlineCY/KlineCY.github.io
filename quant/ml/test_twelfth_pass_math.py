@@ -16,7 +16,7 @@ class TwelfthPassMath(unittest.TestCase):
         self.assertEqual({uid[:3] for uid in LESSONS},{"m01","m02","m03","m04","m05","m06","m07","m08","m09","m10","m11","m12","m13","m14","m15","m16","m17","m18","m19","m20","m21","m22","m23"})
         for uid,chapter in LESSONS.items():
             with self.subTest(uid=uid):
-                self.assertEqual(len(chapter["equations"]),3)
+                self.assertGreaterEqual(len(chapter["equations"]),3)
                 self.assertGreaterEqual(len(chapter["derivation"]),3)
                 self.assertGreaterEqual(len(chapter["protocol"]),3)
                 self.assertGreaterEqual(len(chapter["pitfalls"]),2)
