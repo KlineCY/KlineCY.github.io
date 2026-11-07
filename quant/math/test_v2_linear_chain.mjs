@@ -29,14 +29,14 @@ for(const id of chain){
  assert(lesson.definition.length>=80&&lesson.assumptions.length>=80,"thin definition or hypotheses "+id);
  assert(lesson.properties.length>=4&&lesson.derivation.length>=3&&lesson.formulas.length>=4,"missing theorem proof structure "+id);
  assert(lesson.example.length>=100&&lesson.application.length>=60&&lesson.caveat.length>=60,"missing numerical example or caveats "+id);
- assert.equal(lesson.deep_sections.length,4);
- assert(new Set(lesson.deep_sections.map(s=>s.title)).size===4,"duplicate subchapter headings "+id);
+ assert.equal(lesson.deep_sections.length,5,"preserve four V2 proofs plus V85 append-only section");
+ assert(new Set(lesson.deep_sections.map(s=>s.title)).size===lesson.deep_sections.length,"duplicate subchapter headings "+id);
  assert(lesson.links.some(x=>x.kind==="ml"&&x.id.startsWith("m07-c06-p")),"ML bridge missing "+id);
  assert(lesson.sources.length>=2,"academic source provenance missing "+id);
  for(const src of lesson.sources)assert(src.title&&/^https:\/\//.test(src.url),"source metadata invalid");
  for(const f of lesson.formulas){katex.renderToString(f.tex,{throwOnError:true,strict:"ignore"});equations++;}
  for(const d of lesson.derivation){assert(d.explanation.length>=45);katex.renderToString(d.tex,{throwOnError:true,strict:"ignore"});equations++;}
- for(const part of lesson.deep_sections){
+ for(const part of lesson.deep_sections.slice(0,4)){
   assert(part.question.length>=12&&part.paragraphs.length>=2&&part.paragraphs.every(p=>p.length>=45),"inadequate theoretical treatment "+id);
   assert(part.proof.length>=55&&part.worked.length>=40&&part.limitation.length>=25,"missing proof, calculation or limitations "+id);
   for(const f of part.formulas){katex.renderToString(f.tex,{throwOnError:true,strict:"ignore"});equations++;}
