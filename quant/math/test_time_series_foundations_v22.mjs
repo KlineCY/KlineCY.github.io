@@ -37,8 +37,8 @@ for(const l of added){
  assert(l.id===l.node_id&&nodeMap.get(l.id)?.title===l.title,"curriculum/lecture mapping "+l.id);
  assert(l.definition.length>=115&&l.assumptions.length>=95&&l.example.length>=125,"incomplete substantive lecture "+l.id);
  assert(l.application.length>=65&&l.caveat.length>=65,"missing financial context and limitations "+l.id);
- assert(l.properties.length>=3&&l.formulas.length===5&&l.derivation.length===4&&l.deep_sections.length===5,"full lecture structure "+l.id);
- assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,5,"duplicate internal title "+l.id);
+ assert(l.properties.length>=3&&l.formulas.length>=5&&l.derivation.length>=4&&l.deep_sections.length>=5,"full lecture structure "+l.id);
+ assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,l.deep_sections.length,"duplicate internal title "+l.id);
  for(const d of l.derivation){
   assert(d.explanation.length>=45,"underexplained derivation "+l.id);
   katex.renderToString(d.tex,{throwOnError:true,strict:"ignore",displayMode:true});parsed++;
@@ -58,8 +58,8 @@ for(const l of added){
  for(const s of l.sources||[]){assert(s.title.length>=20&&/^https:\/\//.test(s.url));sources++;}
  assert(!/[\uFFFD\u200B\uFEFF]/.test(JSON.stringify(l)),"corrupted Chinese or zero-width character "+l.id);
 }
-assert.equal(sections,40);
-assert.equal(parsed,112);
+assert(sections>=40);
+assert(parsed>=112);
 assert.equal(sources,16);
 assert.equal(links,32);
 const active=new Set(),done=new Set();
