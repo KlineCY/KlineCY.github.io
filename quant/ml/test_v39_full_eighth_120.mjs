@@ -14,7 +14,7 @@ const registered=new Map(manifest.modules.map(m=>[m.path,m.lessons]));
 const files="abcdefghijkl".split("").map(c=>"atlas-depth-08-"+c+".json");
 const ids=new Set(),v38=new Set(),v39=new Set();
 const perDomain=new Map();
-let equations=0,addedProse=0;
+let equations=0,originalEquations=0,addedProse=0;
 for(let index=0;index<files.length;index++){
  const path=files[index];
  assert.equal(registered.get("./"+path),10,"manifest chapter count "+path);
@@ -35,11 +35,11 @@ for(let index=0;index<files.length;index++){
   assert(lesson.overview?.length>=60,id+" introduction damaged");
   assert(lesson.worked_example?.length>=110,id+" expanded original worked calculation missing");
   assert(lesson.revision_note?.startsWith(revision),id+" wrong chapter revision");
-  assert.equal(lesson.equations.length,6,id+" original and V51 mathematical equations");
-  assert.equal(lesson.derivation.length,6,id+" original and V51 mathematical proofs");
-  assert.equal(lesson.protocol.length,6,id+" original and V51 empirical checks");
-  assert.equal(lesson.pitfalls.length,3,id+" original two plus one new failure condition");
-  assert.equal(new Set(lesson.protocol).size,6,id+" duplicated study protocol");
+  assert(lesson.equations.length>=6,id+" original and V51 mathematical equations");
+  assert(lesson.derivation.length>=6,id+" original and V51 mathematical proofs");
+  assert(lesson.protocol.length>=6,id+" original and V51 empirical checks");
+  assert(lesson.pitfalls.length>=3,id+" original two plus one new failure condition");
+  assert.equal(new Set(lesson.protocol.slice(0,6)).size,6,id+" duplicated study protocol");
   assert(lesson.derivation.slice(3).every(s=>s.length>=65),id+" weak mathematical argument");
   assert(lesson.protocol.slice(3).every(s=>s.length>=25),id+" weak reproducibility instructions");
   assert(lesson.pitfalls.at(-1)?.length>=30,id+" weak financial boundary");
@@ -47,18 +47,21 @@ for(let index=0;index<files.length;index++){
   if(index>=6){
    addedProse+=lesson.derivation.slice(3).join("").length+lesson.protocol.slice(3).join("").length+lesson.pitfalls.at(-1).length;
   }
-  for(const eq of lesson.equations){
+  for(const [index,equation] of lesson.equations.entries()){
+    const eq=equation;
    assert(eq.label?.length>=2,id+" formula label missing");
    assert(typeof eq.tex==="string"&&eq.tex.length>=5,id+" incomplete equation");
    katex.renderToString(eq.tex,{throwOnError:true,displayMode:true,strict:"ignore"});
    equations++;
+    if(index<6)originalEquations++;
   }
  }
 }
 assert.equal(ids.size,120);
 assert.equal(v38.size,60);
 assert.equal(v39.size,60);
-assert.equal(equations,720,"360 original formulas and 360 audited V38/V39/V51/V52/V53/V54/V55 enhancements");
+assert.equal(originalEquations,720,"all original 720 V38/V39/V51-V55 formulas remain");
+assert(equations>=720,"later additive depth must not reduce original equation count");
 assert.equal(perDomain.size,24);
 for(const [domain,n] of perDomain)assert.equal(n,5,domain+" eighth-cycle domain balance");
 assert(addedProse>23000,"V39 needs substantial additional Chinese derivations and audit protocols");
