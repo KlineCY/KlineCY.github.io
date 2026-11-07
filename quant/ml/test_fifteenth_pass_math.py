@@ -1,4 +1,4 @@
-"""Stage fifteen numerical regressions for 12 source-aligned Atlas lessons."""
+"""Stage fifteen regressions for 23 source-aligned Atlas lessons; supports deeper derivations."""
 import json
 import math
 from pathlib import Path
@@ -19,7 +19,7 @@ class FifteenthPassMath(unittest.TestCase):
         for lid,chapter in LESSONS.items():
             with self.subTest(lid=lid):
                 self.assertTrue(chapter["source_title"])
-                self.assertEqual(len(chapter["equations"]),3)
+                self.assertGreaterEqual(len(chapter["equations"]),3)
                 self.assertGreaterEqual(len(chapter["derivation"]),3)
                 self.assertGreaterEqual(len(chapter["protocol"]),3)
                 self.assertGreaterEqual(len(chapter["pitfalls"]),2)

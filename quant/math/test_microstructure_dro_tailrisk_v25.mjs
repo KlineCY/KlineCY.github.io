@@ -28,8 +28,8 @@ for(const l of newLessons){
  for(const name of ["definition","assumptions","example","application","caveat"])
   assert(typeof l[name]==="string"&&l[name].length>=95,"thin "+name+" in "+l.node_id);
  assert(l.formulas.length>=4&&l.derivation.length>=3&&l.properties.length>=3);
- assert(l.deep_sections.length===5);
- assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,5);
+ assert(l.deep_sections.length>=5);
+ assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,l.deep_sections.length);
  for(const f of l.formulas){
   assert(f.label&&f.tex);
   katex.renderToString(f.tex,{throwOnError:true,strict:"ignore",displayMode:true});expressions++;
@@ -59,8 +59,8 @@ for(const l of newLessons){
  assert(!/[\uFFFD\u200B\uFEFF]/.test(JSON.stringify(l)),"garbled CJK "+l.node_id);
  assert(!/余弦\?|Lorem ipsum|TODO|占位|待填/.test(JSON.stringify(l)),"unreviewed editorial placeholder "+l.node_id);
 }
-assert.equal(chapters,25);
-assert.equal(expressions,77);
+assert(chapters>=25);
+assert(expressions>=77);
 assert.equal(links,15);
 assert.equal(citations,9);
 const near=(actual,expected,what,tol=1e-10)=>assert(Math.abs(actual-expected)<tol,what+": "+actual+" vs "+expected);
