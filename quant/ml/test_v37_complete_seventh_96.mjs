@@ -11,7 +11,7 @@ assert.equal(manifest.expected_lessons,720);
 assert.equal(manifest.expected_domains,24);
 assert.equal(manifest.modules.reduce((n,m)=>n+m.lessons,0),720);
 const modules=new Map(manifest.modules.map(m=>[m.path,m.lessons]));
-let checked=0,formulas=0,deepWords=0;
+let checked=0,formulas=0,originalFormulas=0,deepWords=0;
 const fullIds=new Set(),newIds=new Set(),domainCounts={};
 for(const file of groups){
  assert.equal(modules.get("./"+file),8,"missing canonical module "+file);
@@ -28,25 +28,26 @@ for(const file of groups){
   if(domain>6)newIds.add(id);
   assert(typeof l.source_title==="string"&&l.source_title.length>=2,id+" source title lost");
   assert(typeof l.overview==="string"&&l.overview.length>=60,id+" overview lost");
-  assert.equal(l.equations.length,6,id+" enhanced seventh-stage equations");
-  assert.equal(l.derivation.length,6,id+" enhanced seventh-stage proofs");
-  assert.equal(l.protocol.length,6,id+" enhanced seventh-stage protocols");
-  assert.equal(l.pitfalls.length,3,id+" original plus failure boundary");
+  assert(l.equations.length>=6,id+" six original seventh-stage equations must remain");
+  assert(l.derivation.length>=6,id+" six original seventh-stage proofs must remain");
+  assert(l.protocol.length>=6,id+" six original seventh-stage protocols must remain");
+  assert(l.pitfalls.length>=3,id+" original three failure boundaries must remain");
   assert(l.worked_example.length>=100,id+" worked arithmetic lost");
-  assert(l.derivation.slice(3).every(s=>s.length>=65),id+" derivation too shallow");
-  assert(l.protocol.slice(3).every(s=>s.length>=25),id+" research verification too shallow");
-  assert(l.pitfalls.at(-1)?.length>=25,id+" risk boundary missing");
+  assert(l.derivation.slice(3,6).every(s=>s.length>=65),id+" original V37 derivation too shallow");
+  assert(l.protocol.slice(3,6).every(s=>s.length>=25),id+" original V37 verification too shallow");
+  assert(l.pitfalls[2]?.length>=25,id+" original V37 risk boundary missing");
   assert(!/TODO|Lorem ipsum|[\uFFFD\u200B\uFEFF]/i.test(JSON.stringify(l)),id+" malformed Chinese");
-  for(const e of l.equations){
+  for(const [index,e] of l.equations.entries()){
    assert(typeof e.label==="string"&&e.label.length>=2&&typeof e.tex==="string"&&e.tex.length>=5,id+" malformed equation");
    katex.renderToString(e.tex,{throwOnError:true,strict:"ignore",displayMode:true});
-   formulas++;
+   formulas++;if(index<6)originalFormulas++;
   }
-  if(domain>6)deepWords+=l.derivation.slice(3).join("").length+l.protocol.slice(3).join("").length+l.pitfalls.at(-1).length;
+  if(domain>6)deepWords+=l.derivation.slice(3,6).join("").length+l.protocol.slice(3,6).join("").length+l.pitfalls[2].length;
  }
 }
 assert.equal(checked,96);
-assert.equal(formulas,576);
+assert.equal(originalFormulas,576,"all original 576 V37 formulas remain");
+assert(formulas>=576,"later deepening must not reduce equation coverage");
 assert.equal(newIds.size,72);
 // Chronos original paper §3.1 uses m=0 and s=mean(abs(context));
 // do not quietly replace the published tokenizer with centered standardization.
