@@ -1,7 +1,7 @@
 {
   "version": 1,
   "revision": "2026-11-06",
-  "focus": "IV投影、弱识别、过度识别与总体矩条件",
+  "focus": "IV投影、弱识别、过度识别与总体矩条件；V70弱工具推断、工具空间、过识别加权和HAC",
   "lessons": [
     {
       "id": "econometrics-n0216",
@@ -34,6 +34,14 @@
         {
           "label": "弱工具中分母接近零对估计比率的有限扰动",
           "tex": "\\widehat\\beta=\\frac{\\gamma+\\Delta_\\gamma}{\\pi+\\Delta_\\pi},\\quad\\widehat\\beta-\\frac{\\gamma}{\\pi}=\\frac{\\pi\\Delta_\\gamma-\\gamma\\Delta_\\pi}{\\pi(\\pi+\\Delta_\\pi)}"
+        },
+        {
+          "label": "单工具AR零假设检验矩",
+          "tex": "\\overline g_n(\\beta_0)=n^{-1}\\sum_{t=1}^n Z_t(Y_t-\\beta_0X_t)"
+        },
+        {
+          "label": "单工具学生化AR统计量",
+          "tex": "AR(\\beta_0)=\\frac{n\\,\\overline g_n(\\beta_0)^2}{\\widehat S(\\beta_0)}\\ \\Rightarrow\\ \\chi_1^2\\quad\\text{under regular null assumptions}"
         }
       ],
       "derivation": [
@@ -52,6 +60,10 @@
         {
           "explanation": "通分计算(γ+Δγ)/(π+Δπ)−γ/π=[π(γ+Δγ)−γ(π+Δπ)]/[π(π+Δπ)]。分子相同的πγ项抵消，剩余πΔγ−γΔπ。要求π和π+Δπ均非零，否则比率不存在。",
           "tex": "\\frac{\\gamma+\\Delta_\\gamma}{\\pi+\\Delta_\\pi}-\\frac{\\gamma}{\\pi}=\\frac{\\pi\\Delta_\\gamma-\\gamma\\Delta_\\pi}{\\pi(\\pi+\\Delta_\\pi)}"
+        },
+        {
+          "explanation": "在H₀:β=β₀与有效工具E[ZU]=0下，Y−β₀X等于结构误差U，因此总体矩E[Z(Y−β₀X)]=0。若相应样本矩满足中心极限定理，且长期方差S>0被一致估计，则√n ḡ/√Ŝ渐近服从标准正态，其平方渐近为χ²₁。整个检验未把样本矩除以Cov(Z,X)，即使相关性趋弱也不会因比率分母趋零而发生同类数值放大。",
+          "tex": "\\overline g_n(\\beta_0)=n^{-1}\\sum_{t=1}^n Z_t(Y_t-\\beta_0X_t)"
         }
       ],
       "example": "令n=100、第一阶段R²=0.01，则传统单工具F=98×0.01/0.99≈0.9899，说明第一阶段非常弱。若Cov(Z,X)=0.1、Cov(Z,Y)=0.2，比率为2；仅把后者变为0.25，估计立刻跳到2.5。",
@@ -142,6 +154,27 @@
           "proof": "通分计算(γ+Δγ)/(π+Δπ)−γ/π=[π(γ+Δγ)−γ(π+Δπ)]/[π(π+Δπ)]。分子相同的πγ项抵消，剩余πΔγ−γΔπ。要求π和π+Δπ均非零，否则比率不存在。",
           "worked": "真实约化式γ=0.02、第一阶段π=0.01，对应β=2。若估计误差Δγ=0、Δπ=−0.009，估计IV比率变为0.02/0.001=20，偏差达到18；即使约化式没有估计误差也会发生严重不稳定。",
           "limitation": "代数比率不等于弱IV的抽样分布理论；多工具、异方差、序列相关和非线性效应需相应强度诊断及弱识别稳健推断。"
+        },
+        {
+          "title": "弱工具下的Anderson–Rubin检验：为何不需要除以第一阶段",
+          "question": "当第一阶段非常接近零时，如何仍然检验一个指定的结构系数？",
+          "paragraphs": [
+            "传统IV点估计是两个随机协方差的比率；弱相关使分母接近零并导致估计分布厚尾。Anderson–Rubin检验在原假设β=β₀下直接构造工具与Y−β₀X的矩，并用该矩的标准误检验是否偏离零，因此检验统计量不需要除以估计出来的第一阶段相关系数。",
+            "对于政策冲击类金融工具变量，AR检验可以作为弱识别稳健的推断路径之一。然而其有效性仍依赖工具外生性与所用协方差估计合适，不是弱工具、内生工具或时间序列强依赖均可自动解决。"
+          ],
+          "formulas": [
+            {
+              "label": "单工具AR零假设检验矩",
+              "tex": "\\overline g_n(\\beta_0)=n^{-1}\\sum_{t=1}^n Z_t(Y_t-\\beta_0X_t)"
+            },
+            {
+              "label": "单工具学生化AR统计量",
+              "tex": "AR(\\beta_0)=\\frac{n\\,\\overline g_n(\\beta_0)^2}{\\widehat S(\\beta_0)}\\ \\Rightarrow\\ \\chi_1^2\\quad\\text{under regular null assumptions}"
+            }
+          ],
+          "proof": "在H₀:β=β₀与有效工具E[ZU]=0下，Y−β₀X等于结构误差U，因此总体矩E[Z(Y−β₀X)]=0。若相应样本矩满足中心极限定理，且长期方差S>0被一致估计，则√n ḡ/√Ŝ渐近服从标准正态，其平方渐近为χ²₁。整个检验未把样本矩除以Cov(Z,X)，即使相关性趋弱也不会因比率分母趋零而发生同类数值放大。",
+          "worked": "假设n=100，某候选β₀对应样本正交矩ḡ=0.02，长期方差估计Ŝ=0.04，则AR=100×0.02²/0.04=1，低于χ²₁的常用5%临界值3.841。这里不能拒绝β₀并不证明其为真实系数；若工具本身不外生，AR检验仍可能给出无效结论。",
+          "limitation": "简化统计量针对单一工具矩和正确的稳健长期方差；带控制变量、多工具、异方差或聚类的AR实施需使用对应的联合矩与有限样本推断方案。"
         }
       ],
       "links": [
@@ -171,7 +204,7 @@
           "url": "https://www.degruyterbrill.com/document/doi/10.1515/9781400829828-009/html"
         }
       ],
-      "checked_status": "V56严格精讲：弱第一阶段下IV比率的精确扰动分解"
+      "checked_status": "V70：弱工具下的Anderson–Rubin检验：为何不需要除以第一阶段及推断假设审查"
     },
     {
       "id": "econometrics-n0218",
@@ -204,6 +237,14 @@
         {
           "label": "二阶段最小二乘的残差化工具回归解释",
           "tex": "P_Z=Z(Z^\\top Z)^{-1}Z^\\top,\\quad\\widehat X=P_ZX\\ \\Longrightarrow\\widehat\\beta=(\\widehat X^\\top\\widehat X)^{-1}\\widehat X^\\top Y"
+        },
+        {
+          "label": "可逆工具换基下投影不变",
+          "tex": "Z^\\star=ZA,\\quad A\\text{ 可逆}\\quad\\Longrightarrow\\quad P_{Z^\\star}=P_Z"
+        },
+        {
+          "label": "2SLS对工具可逆重标度不变",
+          "tex": "\\widehat\\beta_{2SLS}(ZA)=\\bigl(X^\\top P_ZX\\bigr)^{-1}X^\\top P_ZY=\\widehat\\beta_{2SLS}(Z)"
         }
       ],
       "derivation": [
@@ -222,6 +263,10 @@
         {
           "explanation": "令Xhat=P_ZX。因P_Zᵀ=P_Z、P_Z²=P_Z，XhatᵀXhat=XᵀP_ZX，而XhatᵀY=XᵀP_ZY。把二者代入OLS正规方程即得βhat=(XᵀP_ZX)⁻¹XᵀP_ZY。",
           "tex": "\\widehat X^\\top\\widehat X=X^\\top P_Z^\\top P_ZX=X^\\top P_ZX,\\quad\\widehat X^\\top Y=X^\\top P_ZY"
+        },
+        {
+          "explanation": "假设Z列满秩。P_(ZA)=ZA(AᵀZᵀZA)^−1AᵀZᵀ。对可逆A，(AᵀZᵀZA)^−1=A^−1(ZᵀZ)^−1(Aᵀ)^−1，代回后左右两个A和逆矩阵约去，得到Z(ZᵀZ)^−1Zᵀ=P_Z。2SLS只通过P_Z进入正规方程，所以其估计也相同。",
+          "tex": "Z^\\star=ZA,\\quad A\\text{ 可逆}\\quad\\Longrightarrow\\quad P_{Z^\\star}=P_Z"
         }
       ],
       "example": "无截距玩具数据z=(−1,0,1)、x=(1,2,4)、y=(2,4,8)。有zᵀz=2、zᵀx=3、zᵀy=6，故P_Zx=(−1.5,0,1.5)、P_Zy=(−3,0,3)，2SLS=(xᵀP_Zy)/(xᵀP_Zx)=9/4.5=2。",
@@ -312,6 +357,27 @@
           "proof": "令Xhat=P_ZX。因P_Zᵀ=P_Z、P_Z²=P_Z，XhatᵀXhat=XᵀP_ZX，而XhatᵀY=XᵀP_ZY。把二者代入OLS正规方程即得βhat=(XᵀP_ZX)⁻¹XᵀP_ZY。",
           "worked": "假设工具投影后的一列解释变量为Xhat=(1,2)，结果Y=(2,4)，则OLS二阶段系数为(1×2+2×4)/(1²+2²)=10/5=2；代回2SLS投影矩阵表示得到同一个系数。",
           "limitation": "条件包括Z满秩、XᵀP_ZX可逆及工具有效性；投影等式证明只说明算法系数相同，不保证排除限制成立或二阶段朴素标准误有效。"
+        },
+        {
+          "title": "工具的可逆线性重标度不改变2SLS投影结果",
+          "question": "把工具变量从百分数改成基点，为什么不应改变已正确实现的2SLS系数？",
+          "paragraphs": [
+            "两阶段最小二乘使用的是工具变量矩阵张成的列空间，而不是工具的单独数值单位。若将工具矩阵Z右乘一个可逆矩阵A，只是对同一个工具空间换基，正交投影矩阵P_Z应当保持不变。因此符合相同控制变量和截距处理口径的2SLS结果也不应该变化。",
+            "量化政策研究中，政策意外可以按百分数、基点或正规化因子表示。修改工具计量单位若导致2SLS系数显著变动，常意味着第一阶段回归、截距或控制变量处理不一致，或者数值正则化改变了估计目标。"
+          ],
+          "formulas": [
+            {
+              "label": "可逆工具换基下投影不变",
+              "tex": "Z^\\star=ZA,\\quad A\\text{ 可逆}\\quad\\Longrightarrow\\quad P_{Z^\\star}=P_Z"
+            },
+            {
+              "label": "2SLS对工具可逆重标度不变",
+              "tex": "\\widehat\\beta_{2SLS}(ZA)=\\bigl(X^\\top P_ZX\\bigr)^{-1}X^\\top P_ZY=\\widehat\\beta_{2SLS}(Z)"
+            }
+          ],
+          "proof": "假设Z列满秩。P_(ZA)=ZA(AᵀZᵀZA)^−1AᵀZᵀ。对可逆A，(AᵀZᵀZA)^−1=A^−1(ZᵀZ)^−1(Aᵀ)^−1，代回后左右两个A和逆矩阵约去，得到Z(ZᵀZ)^−1Zᵀ=P_Z。2SLS只通过P_Z进入正规方程，所以其估计也相同。",
+          "worked": "无截距样本Z=(−1,0,1)ᵀ、X=(1,2,4)ᵀ、Y=(2,4,8)ᵀ，原投影X̂=(−1.5,0,1.5)，得到2SLS=(X̂ᵀY)/(X̂ᵀX)=9/4.5=2。若把工具乘100表示为基点，P_(100Z)与P_Z完全相同，系数依旧为2。",
+          "limitation": "可逆换基不改变工具空间但可能改变有限精度计算条件数；若人为减少工具、改变控制变量或加入与单位有关的惩罚，所得估计不再属于相同的2SLS问题。"
         }
       ],
       "links": [
@@ -346,7 +412,7 @@
           "url": "https://www.nber.org/papers/t0284"
         }
       ],
-      "checked_status": "V56严格精讲：2SLS为何可以写成投影后拟合的OLS"
+      "checked_status": "V70：工具的可逆线性重标度不改变2SLS投影结果及推断假设审查"
     },
     {
       "id": "econometrics-n0219",
@@ -379,6 +445,14 @@
         {
           "label": "过识别J统计量对残余矩单位的敏感性",
           "tex": "J=n\\bar g^\\top S^{-1}\\bar g,\\quad\\bar g^\\prime=A\\bar g,\\ S^\\prime=ASA^\\top\\ \\Longrightarrow J^\\prime=J\\quad(A\\text{ 可逆})"
+        },
+        {
+          "label": "不相容两个矩的加权最小化",
+          "tex": "Q_w(\\beta)=(\\beta-1)^2+w(2\\beta-1)^2,\\quad w>0"
+        },
+        {
+          "label": "加权最优系数与最小矩距离",
+          "tex": "\\widehat\\beta_w=\\frac{1+2w}{1+4w},\\qquad Q_w(\\widehat\\beta_w)=\\frac{w}{1+4w}"
         }
       ],
       "derivation": [
@@ -397,6 +471,10 @@
         {
           "explanation": "对g'=Ag，长期协方差S'=ASAᵀ，逆为A⁻ᵀS⁻¹A⁻¹。代入J'=n(Ag)ᵀA⁻ᵀS⁻¹A⁻¹(Ag)，A的逆在两侧相消，得到J'=n gᵀS⁻¹g=J。",
           "tex": "(ASA^\\top)^{-1}=A^{-\\top}S^{-1}A^{-1}"
+        },
+        {
+          "explanation": "对Q_w求导得到2(β−1)+4w(2β−1)=0，即(1+4w)β=1+2w，所以β̂=(1+2w)/(1+4w)。代入第一残差β−1=−2w/(1+4w)、第二残差2β−1=1/(1+4w)；平方加权之和为(4w²+w)/(1+4w)²=w/(1+4w)。权重w变动时最优参数及最小距离都改变。",
+          "tex": "Q_w(\\beta)=(\\beta-1)^2+w(2\\beta-1)^2,\\quad w>0"
         }
       ],
       "example": "构造两个矩g₁(β)=β−1、g₂(β)=2β−1，参数数目k=1，矩数r=2。以W=I最小化(β−1)²+(2β−1)²，一阶条件给β̂=0.6，残余矩为(−0.4,0.2)、平方和0.2；若样本量n=10，统计形式J=2。",
@@ -487,6 +565,27 @@
           "proof": "对g'=Ag，长期协方差S'=ASAᵀ，逆为A⁻ᵀS⁻¹A⁻¹。代入J'=n(Ag)ᵀA⁻ᵀS⁻¹A⁻¹(Ag)，A的逆在两侧相消，得到J'=n gᵀS⁻¹g=J。",
           "worked": "两维残余矩g=(0.02,0.04)、S=diag(0.01,0.04)、样本数n=100，则J=100(0.02²/0.01+0.04²/0.04)=8。把第一矩与其标准差同时乘100，使用S'=diag(100,0.04)，新的J仍是8。",
           "limitation": "矩阵S须正定、A须可逆；若单位变换只修改矩而不修改权重，或按不兼容方式重新正则化，数值J不必保持不变。"
+        },
+        {
+          "title": "改变矩条件权重如何改变有限样本J最小残差",
+          "question": "为什么同一组矩条件使用两套权重可以得到不同的参数与不同的J统计量？",
+          "paragraphs": [
+            "过度识别模型通常没有参数能把所有样本矩同时精确设为零。因此，GMM最小化哪一种矩距离，取决于所选权重矩阵。权重改变会改变不同矩残差之间的相对重要性，使参数最优点和最小目标值变化；只有在正确的有效权重及相应渐近条件下，J统计量的卡方近似才具有标准解释。",
+            "在ETF风险定价中，某个资产的Euler残差可能方差很大，另一个资产残差较小。仅使用单位权重会给予二者相同平方罚项，但不能把单位权重的最小值机械当作有效Hansen J检验的p值。"
+          ],
+          "formulas": [
+            {
+              "label": "不相容两个矩的加权最小化",
+              "tex": "Q_w(\\beta)=(\\beta-1)^2+w(2\\beta-1)^2,\\quad w>0"
+            },
+            {
+              "label": "加权最优系数与最小矩距离",
+              "tex": "\\widehat\\beta_w=\\frac{1+2w}{1+4w},\\qquad Q_w(\\widehat\\beta_w)=\\frac{w}{1+4w}"
+            }
+          ],
+          "proof": "对Q_w求导得到2(β−1)+4w(2β−1)=0，即(1+4w)β=1+2w，所以β̂=(1+2w)/(1+4w)。代入第一残差β−1=−2w/(1+4w)、第二残差2β−1=1/(1+4w)；平方加权之和为(4w²+w)/(1+4w)²=w/(1+4w)。权重w变动时最优参数及最小距离都改变。",
+          "worked": "当w=1时，β̂=3/5=0.6，残差为(−0.4,0.2)，Q_min=0.2；当w=4时，β̂=9/17≈0.52941，残差为(−8/17,1/17)，Q_min=4/17≈0.23529。n=10时相应nQ为2与约2.35294，但若权重并非一致估计的S^-1，不能将二者都当作有效J统计量进行卡方检验。",
+          "limitation": "这里的W是教学权重，不是从数据估计的有效长期协方差逆；真实J自由度及分布还需要识别秩、正确矩设定和稳健协方差。"
         }
       ],
       "links": [
@@ -516,7 +615,7 @@
           "url": "https://larspeterhansen.org/lph_research/large-sample-properties-of-generalized-method-of-moments-estimators/"
         }
       ],
-      "checked_status": "V56严格精讲：过识别检验对合法矩条件重标度的不变性"
+      "checked_status": "V70：改变矩条件权重如何改变有限样本J最小残差及推断假设审查"
     },
     {
       "id": "econometrics-n0220",
@@ -549,6 +648,14 @@
         {
           "label": "矩条件样本均值的长期方差不是单期方差",
           "tex": "\\sqrt n\\,\\bar g_n\\Rightarrow N(0,S),\\quad S=\\sum_{h=-\\infty}^{\\infty}\\operatorname{Cov}(g_t,g_{t-h})"
+        },
+        {
+          "label": "自相关几何衰减下的长期方差",
+          "tex": "\\gamma(h)=\\sigma_g^2\\rho^{|h|},\\quad|\\rho|<1\\ \\Longrightarrow\\ S=\\sigma_g^2\\frac{1+\\rho}{1-\\rho}"
+        },
+        {
+          "label": "样本均值标准误的长期方差近似",
+          "tex": "\\operatorname{se}(\\overline g_n)\\approx\\sqrt{S/n},\\qquad\\frac{n_{\\rm eff}}n=\\frac{\\sigma_g^2}{S}=\\frac{1-\\rho}{1+\\rho}"
         }
       ],
       "derivation": [
@@ -567,6 +674,10 @@
         {
           "explanation": "矩均值为n⁻¹Σg_t，因此Var(√n gbar)=n⁻¹Σ_tΣ_sCov(g_t,g_s)。若过程二阶平稳，按间隔h重新分组，得到Σ_{h=−(n−1)}^{n−1}(1−|h|/n)γ(h)；在协方差绝对可和等条件下，随n增大趋向Σ_{h∈Z}γ(h)=S。",
           "tex": "\\operatorname{Var}(\\sqrt n\\,\\bar g_n)=\\frac1n\\sum_{t=1}^n\\sum_{s=1}^n\\operatorname{Cov}(g_t,g_s)\\ \\longrightarrow S"
+        },
+        {
+          "explanation": "由长期方差S=Σ_(h=−∞)^∞γ(h)，代入γ(h)=σ_g²ρ^{|h|}，得到S=σ_g²[1+2Σ_(h=1)^∞ρ^h]。对|ρ|<1应用几何级数Σ_(h≥1)ρ^h=ρ/(1−ρ)，整理为σ_g²(1+ρ)/(1−ρ)。如果ρ>0，S大于σ_g²，样本均值方差近似S/n，因此由独立同方差方差σ_g²/n推导的标准误会偏小。",
+          "tex": "\\gamma(h)=\\sigma_g^2\\rho^{|h|},\\quad|\\rho|<1\\ \\Longrightarrow\\ S=\\sigma_g^2\\frac{1+\\rho}{1-\\rho}"
         }
       ],
       "example": "令Z在−1与1间各占一半，X=Z，Y=3Z+U，且E[ZU]=0。矩E[Z(Y−βX)]等于3−β，因此唯一零点β=3。若Z与X完全不相关，则该矩对β不会变化，无法单独识别系数。 这里以中心化且有限矩的变量构造理论总体关系，不能把单个样本中恰好为零的矩直接当作模型无偏性的证明。",
@@ -657,6 +768,27 @@
           "proof": "矩均值为n⁻¹Σg_t，因此Var(√n gbar)=n⁻¹Σ_tΣ_sCov(g_t,g_s)。若过程二阶平稳，按间隔h重新分组，得到Σ_{h=−(n−1)}^{n−1}(1−|h|/n)γ(h)；在协方差绝对可和等条件下，随n增大趋向Σ_{h∈Z}γ(h)=S。",
           "worked": "一维矩的单期方差γ0=1、仅一阶前后自协方差γ1=γ−1=0.2、其他滞后为0，则长期方差S=1+2×0.2=1.4。若n=100，正确渐近矩均值标准误约√(1.4/100)=0.1183，高于独立样本公式0.1。",
           "limitation": "绝对可和与中心极限定理是必要的正则条件之一；长期记忆、结构突变或无限方差收益会破坏标准HAC与正态近似。"
+        },
+        {
+          "title": "时间依赖矩的长期方差：正自相关如何缩小有效样本",
+          "question": "相同矩条件样本数下，为什么忽视时间依赖会显著低估金融GMM推断不确定性？",
+          "paragraphs": [
+            "对按交易日排列的矩条件，样本均值的方差不只取决于单日矩方差，还取决于不同滞后之间的自协方差。若矩序列表现出正的持久性，长期方差通常大于单期方差，使有效样本量低于简单的交易日数量。",
+            "金融收益创新、重叠持有期标签和波动聚集都会产生时间依赖。HAC权重或适当的区块重抽样需要基于实际依赖结构设定，不能在模型残差存在长记忆时仍直接采用独立样本标准误。"
+          ],
+          "formulas": [
+            {
+              "label": "自相关几何衰减下的长期方差",
+              "tex": "\\gamma(h)=\\sigma_g^2\\rho^{|h|},\\quad|\\rho|<1\\ \\Longrightarrow\\ S=\\sigma_g^2\\frac{1+\\rho}{1-\\rho}"
+            },
+            {
+              "label": "样本均值标准误的长期方差近似",
+              "tex": "\\operatorname{se}(\\overline g_n)\\approx\\sqrt{S/n},\\qquad\\frac{n_{\\rm eff}}n=\\frac{\\sigma_g^2}{S}=\\frac{1-\\rho}{1+\\rho}"
+            }
+          ],
+          "proof": "由长期方差S=Σ_(h=−∞)^∞γ(h)，代入γ(h)=σ_g²ρ^{|h|}，得到S=σ_g²[1+2Σ_(h=1)^∞ρ^h]。对|ρ|<1应用几何级数Σ_(h≥1)ρ^h=ρ/(1−ρ)，整理为σ_g²(1+ρ)/(1−ρ)。如果ρ>0，S大于σ_g²，样本均值方差近似S/n，因此由独立同方差方差σ_g²/n推导的标准误会偏小。",
+          "worked": "设单期矩方差σ_g²=1、序列相关ρ=0.5、n=100。长期方差S=(1+0.5)/(1−0.5)=3；正确的大样本标准误近似√(3/100)=0.17321，而误按独立样本计算仅0.10，隐含有效样本量约100/3≈33.33，而非100。",
+          "limitation": "几何相关模型用于展示计算逻辑；HAC一致性依赖自协方差可和及合适带宽，真实金融重尾、结构变化或非平稳性可能不满足这里的渐近条件。"
         }
       ],
       "links": [
@@ -686,7 +818,8 @@
           "url": "https://ealdrich.github.io/Teaching/Econ211C/LectureNotes/Unit6-GMM/restrict.html"
         }
       ],
-      "checked_status": "V56严格精讲：时间依赖矩与金融GMM的长期协方差"
+      "checked_status": "V70：时间依赖矩的长期方差：正自相关如何缩小有效样本及推断假设审查"
     }
-  ]
+  ],
+  "v70_revision": "2026-11-07"
 }
