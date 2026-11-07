@@ -1,4 +1,4 @@
-"""Stage fourteen: audited example arithmetic for six initial lessons."""
+"""Stage fourteen: preserve original numerical tests while allowing deeper equations."""
 import json
 import math
 from pathlib import Path
@@ -15,7 +15,7 @@ class FourteenthPassMath(unittest.TestCase):
         self.assertEqual(len(LESSONS),23)
         self.assertEqual({uid[:3] for uid in LESSONS},{f"m{i:02d}" for i in range(1,24)})
         for uid,body in LESSONS.items():
-            self.assertEqual(len(body["equations"]),3)
+            self.assertGreaterEqual(len(body["equations"]),3)
             self.assertGreaterEqual(len(body["derivation"]),3)
             self.assertGreaterEqual(len(body["protocol"]),3)
             self.assertGreaterEqual(len(body["pitfalls"]),2)
