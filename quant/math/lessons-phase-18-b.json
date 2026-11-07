@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "revision": "2026-11-06",
-  "focus": "条件定价、Beta截面价格与资产定价GMM",
+  "revision": "2026-11-07",
+  "focus": "条件定价、Beta截面价格与资产定价GMM；V69 条件SDF状态矩、截面Beta秩识别和GMM样本量敏感性",
   "lessons": [
     {
       "id": "finance-x004",
@@ -34,6 +34,14 @@
         {
           "label": "条件零价格矩对合法状态组合的线性稳定性",
           "tex": "E_t[mR_i^e]=0,\\quad z_t=\\sum_{k=1}^{K}a_k\\mathbf1\\{S_t=k\\}\\ \\Longrightarrow\\ E[z_tmR_i^e]=\\sum_ka_kE[\\mathbf1\\{S_t=k\\}mR_i^e]=0"
+        },
+        {
+          "label": "状态工具的定价矩分解",
+          "tex": "E[\\mathbf 1_{\\{S_t=k\\}}m_{t+1}R^e_{t+1}]=P(S_t=k)\\,E[m_{t+1}R^e_{t+1}\\mid S_t=k]"
+        },
+        {
+          "label": "所有正概率状态限制成立时的无条件限制",
+          "tex": "\\left(\\forall k,\\ E[mR^e\\mid S_t=k]=0\\right)\\Longrightarrow E[mR^e]=0"
         }
       ],
       "derivation": [
@@ -52,6 +60,10 @@
         {
           "explanation": "因为z_t对F_t可测且有适当可积性，E[z_t m R_i^e]=E[z_t E(mR_i^e|F_t)]。若条件定价矩为0，乘积期望为0。状态工具z_t=Σ a_k1{S_t=k}代入并按期望线性性展开，就得到全部状态矩线性组合仍为零。",
           "tex": "E[z_tmR_i^e]=E[z_tE(mR_i^e\\mid\\mathcal F_t)]=0"
+        },
+        {
+          "explanation": "由于状态指示量仅在S_t=k时取1，全期望定理给出E[1{S_t=k}Y]=P(S_t=k)E[Y|S_t=k]，其中Y=m_(t+1)R^e_(t+1)。若每个正概率状态的条件矩为零，求和得到整体E[Y]=Σ_kP(S=k)E[Y|S=k]=0。反向不成立，因为状态条件矩可能异号且加权抵消。",
+          "tex": "E[\\mathbf 1_{\\{S_t=k\\}}m_{t+1}R^e_{t+1}]=P(S_t=k)\\,E[m_{t+1}R^e_{t+1}\\mid S_t=k]"
         }
       ],
       "example": "市场状态A和B各占50%，假设m=1，资产超额收益在A中恒为+0.10、在B中恒为−0.10。无条件矩E[mR^e]=0.5×0.10+0.5×(−0.10)=0，看似符合定价；但取合法工具z=1{A}，得E[zmR^e]=0.5×0.10=0.05≠0，直接识别条件错设。",
@@ -142,6 +154,27 @@
           "proof": "因为z_t对F_t可测且有适当可积性，E[z_t m R_i^e]=E[z_t E(mR_i^e|F_t)]。若条件定价矩为0，乘积期望为0。状态工具z_t=Σ a_k1{S_t=k}代入并按期望线性性展开，就得到全部状态矩线性组合仍为零。",
           "worked": "A/B状态各占50%，m=1、资产超额收益分别+10%和−10%，无条件定价矩抵消为0。令z=1{A}−1{B}，则E[z m R^e]=0.5×0.1−0.5×(−0.1)=0.1，不满足零矩；这揭示状态条件下的定价失败。",
           "limitation": "需要z_t在交易时点可测、贴现核与收益满足可积性。工具数量过多会引入弱辨识、样本内筛选与协方差矩阵病态问题，不能将已筛选显著性直接视为外部检验证据。"
+        },
+        {
+          "title": "条件SDF的有限状态工具：为何零无条件误差仍可能严重错价",
+          "question": "如何用事前已知状态把无条件Euler矩分解为可诊断的条件错价？",
+          "paragraphs": [
+            "资产定价中的条件矩要求在当期可用的信息集下，下一期贴现超额收益的条件期望为零。若只检验总体平均，正负市场状态的定价残差可能彼此抵消；用当时已经可观察的状态指示函数作工具，可把一个整体定价限制拆成各状态限制。",
+            "状态工具必须在收益实现前已知。若以回测完成后才定义的牛熊市标签或未来实现波动率分组，则工具不属于当时信息集，所谓条件定价检验不再有事前经济解释。"
+          ],
+          "formulas": [
+            {
+              "label": "状态工具的定价矩分解",
+              "tex": "E[\\mathbf 1_{\\{S_t=k\\}}m_{t+1}R^e_{t+1}]=P(S_t=k)\\,E[m_{t+1}R^e_{t+1}\\mid S_t=k]"
+            },
+            {
+              "label": "所有正概率状态限制成立时的无条件限制",
+              "tex": "\\left(\\forall k,\\ E[mR^e\\mid S_t=k]=0\\right)\\Longrightarrow E[mR^e]=0"
+            }
+          ],
+          "proof": "由于状态指示量仅在S_t=k时取1，全期望定理给出E[1{S_t=k}Y]=P(S_t=k)E[Y|S_t=k]，其中Y=m_(t+1)R^e_(t+1)。若每个正概率状态的条件矩为零，求和得到整体E[Y]=Σ_kP(S=k)E[Y|S=k]=0。反向不成立，因为状态条件矩可能异号且加权抵消。",
+          "worked": "两个等概率状态下，令m=1、超额收益条件均值分别+0.10和−0.10，总体Euler矩为0。取状态A的事前指示工具，E[1{A}mR^e]=0.5×0.10=0.05；状态B对应−0.05。两个非零状态矩表明无条件零值不能证明条件资产定价有效。",
+          "limitation": "状态指示矩为零仅检验所选有限工具集合，不等于检验所有信息集条件下的完整限制；跨期相关须采用适宜的HAC或聚类协方差。"
         }
       ],
       "links": [
@@ -176,7 +209,7 @@
           "url": "https://press.princeton.edu/books/hardcover/9780691121376/asset-pricing"
         }
       ],
-      "checked_status": "V55严格精讲：条件定价矩与合法状态工具的组合检验"
+      "checked_status": "V69：条件SDF的有限状态工具：为何零无条件误差仍可能严重错价，含识别假设和数值复核"
     },
     {
       "id": "finance-x005",
@@ -209,6 +242,14 @@
         {
           "label": "多因子线性SDF对应的风险价格向量",
           "tex": "m=a-b^\\top(f-E[f]),\\quad \\Sigma_f=\\operatorname{Cov}(f)\\succ0\\ \\Longrightarrow\\ \\lambda=\\frac{\\Sigma_fb}{E[m]},\\quad E[R_i^e]=\\beta_i^\\top\\lambda"
+        },
+        {
+          "label": "给定Beta的加权截面风险价格估计",
+          "tex": "\\widehat{\\lambda}=(B^\\top WB)^{-1}B^\\top W\\widehat\\mu^e,\\qquad B^\\top WB\\succ0"
+        },
+        {
+          "label": "截面Beta列秩不足时的识别失效",
+          "tex": "\\operatorname{rank}(B)<K\\quad\\Longrightarrow\\quad\\exists v\\ne0:Bv=0,\\ \\ B(\\lambda+v)=B\\lambda"
         }
       ],
       "derivation": [
@@ -227,6 +268,10 @@
         {
           "explanation": "由0=E[mR_i^e]=E[m]E[R_i^e]−bᵀCov(f,R_i^e)，得到E[R_i^e]=Cov(f,R_i^e)ᵀb/E[m]。定义Beta=Σ_f⁻¹Cov(f,R_i^e)，因Σ_f对称正定，代回得E[R_i^e]=BetaᵀΣ_fb/E[m]，所以λ=Σ_fb/E[m]。",
           "tex": "\\operatorname{Cov}(R_i^e,f)^\\top b=E[m]E[R_i^e],\\quad\\beta_i=\\Sigma_f^{-1}\\operatorname{Cov}(f,R_i^e)"
+        },
+        {
+          "explanation": "对固定Beta和正定权重W，最小化(μ−Bλ)ᵀW(μ−Bλ)，一阶条件为BᵀWBλ=BᵀWμ。当B列满秩时矩阵BᵀWB严格正定，可唯一求解。若rank(B)<K，则存在非零零空间向量v，使Bv=0，λ与λ+v产生完全相同的预测截面收益，故无法由这些资产辨识风险价格的所有分量。",
+          "tex": "\\widehat{\\lambda}=(B^\\top WB)^{-1}B^\\top W\\widehat\\mu^e,\\qquad B^\\top WB\\succ0"
         }
       ],
       "example": "取可交易因子超额收益f在两个等概率状态下分别为−0.06和0.14，则E[f]=0.04、Var(f)=0.01。取m=1−4(f−0.04)，其两状态值为1.4和0.6，E[m]=1、E[mf]=0，所以b=4且λ=4×0.01/1=0.04。两资产若Beta为1.2和0.5，预测超额收益分别为0.048和0.020。",
@@ -317,6 +362,27 @@
           "proof": "由0=E[mR_i^e]=E[m]E[R_i^e]−bᵀCov(f,R_i^e)，得到E[R_i^e]=Cov(f,R_i^e)ᵀb/E[m]。定义Beta=Σ_f⁻¹Cov(f,R_i^e)，因Σ_f对称正定，代回得E[R_i^e]=BetaᵀΣ_fb/E[m]，所以λ=Σ_fb/E[m]。",
           "worked": "取两因子不相关、协方差矩阵diag(0.01,0.04)、b=(4,1)、E[m]=1，则λ=(0.04,0.04)。某ETF的Beta=(1.2,0.5)，模型要求超额收益1.2×4%+0.5×4%=6.8%；单因子模型只保留第一项会低估风险价格贡献。",
           "limitation": "正定因子协方差、SDF模型形式及条件Euler矩是公式前提。样本协方差误差、因子冗余、市场非平稳或无法交易的因子可能使统计估计与交易解释发生分离。"
+        },
+        {
+          "title": "横截面风险价格的识别：零Beta和近共线性情形",
+          "question": "为什么即使每只ETF的Beta已经估计，风险价格向量仍可能无法唯一识别？",
+          "paragraphs": [
+            "多因子截面定价将预期超额收益写成Beta暴露矩阵与共同风险价格的乘积。只有当截面Beta矩阵具有足够列秩，相关风险价格才可能由这一组资产的平均收益唯一识别。高度相关的行业因子、几乎重复的ETF以及少量截面资产，可能使Beta方向病态或完全不可识别。",
+            "需要区分因子本身的时间序列协方差正定，与ETF截面Beta矩阵列满秩这两个不同条件。即使Σ_f可逆，从第一阶段正确计算了Beta，第二阶段若所有资产Beta向量几乎同方向，也无法可靠估计各风险价格。"
+          ],
+          "formulas": [
+            {
+              "label": "给定Beta的加权截面风险价格估计",
+              "tex": "\\widehat{\\lambda}=(B^\\top WB)^{-1}B^\\top W\\widehat\\mu^e,\\qquad B^\\top WB\\succ0"
+            },
+            {
+              "label": "截面Beta列秩不足时的识别失效",
+              "tex": "\\operatorname{rank}(B)<K\\quad\\Longrightarrow\\quad\\exists v\\ne0:Bv=0,\\ \\ B(\\lambda+v)=B\\lambda"
+            }
+          ],
+          "proof": "对固定Beta和正定权重W，最小化(μ−Bλ)ᵀW(μ−Bλ)，一阶条件为BᵀWBλ=BᵀWμ。当B列满秩时矩阵BᵀWB严格正定，可唯一求解。若rank(B)<K，则存在非零零空间向量v，使Bv=0，λ与λ+v产生完全相同的预测截面收益，故无法由这些资产辨识风险价格的所有分量。",
+          "worked": "两只ETF对两个因子的Beta分别是(1,2)和(2,4)，则B=[[1,2],[2,4]]的第二列是第一列两倍。若观察到目标超额收益(0.03,0.06)，无穷多组风险价格都满足λ₁+2λ₂=0.03，例如(0.03,0)与(0.01,0.01)；增加回归精度不能解决这一精确秩缺陷。",
+          "limitation": "示例把第一阶段Beta作为已知并忽略估计误差；Fama–MacBeth或GMM实际推断还需考虑Beta生成回归量、异方差及跨资产相关性。"
         }
       ],
       "links": [
@@ -351,7 +417,7 @@
           "url": "https://press.princeton.edu/books/hardcover/9780691121376/asset-pricing"
         }
       ],
-      "checked_status": "V55严格精讲：多因子SDF与ETF截面风险价格的矩阵推广"
+      "checked_status": "V69：横截面风险价格的识别：零Beta和近共线性情形，含识别假设和数值复核"
     },
     {
       "id": "finance-x006",
@@ -384,6 +450,14 @@
         {
           "label": "线性GMM的加权投影与最小剩余矩",
           "tex": "g(\\theta)=a-b\\theta,\\quad \\widehat\\theta=\\frac{b^\\top Wa}{b^\\top Wb},\\quad\\min_\\theta g(\\theta)^\\top Wg(\\theta)=a^\\top Wa-\\frac{(b^\\top Wa)^2}{b^\\top Wb}"
+        },
+        {
+          "label": "两矩单参数过识别的样本量缩放",
+          "tex": "J_n=n\\,\\overline g(\\widehat\\theta)^\\top\\widehat S^{-1}\\overline g(\\widehat\\theta)"
+        },
+        {
+          "label": "固定残余矩下样本量与J比例关系",
+          "tex": "J_{cn}=cJ_n\\quad\\text{when }\\overline g\\text{ and }\\widehat S\\text{ are held fixed}"
         }
       ],
       "derivation": [
@@ -402,6 +476,10 @@
         {
           "explanation": "将(a−bθ)ᵀW(a−bθ)展开为aᵀWa−2θbᵀWa+θ²bᵀWb，若W正定、b≠0，则二阶导数2bᵀWb>0，唯一最小值θhat=(bᵀWa)/(bᵀWb)。回代整理得最小值aᵀWa−(bᵀWa)²/(bᵀWb)。",
           "tex": "\\partial_\\theta[(a-b\\theta)^\\top W(a-b\\theta)]=-2b^\\top Wa+2\\theta b^\\top Wb=0"
+        },
+        {
+          "explanation": "当矩条件向量维度r大于参数维度k，最小GMM目标在有效长期协方差权重下被n倍放大，从而构造J_n。若把残余平均矩ḡ及权重S^-1固定，直接代入cn与n的定义，得到J_(cn)=cJ_n。现实新增样本会改变ḡ与S，所以这仅是一项尺度比较恒等式，不是抽样分布预言。",
+          "tex": "J_n=n\\,\\overline g(\\widehat\\theta)^\\top\\widehat S^{-1}\\overline g(\\widehat\\theta)"
         }
       ],
       "example": "设两个资产的样本SDF矩为g_1(θ)=0.02−θ、g_2(θ)=0.06−2θ，使用W=I。目标平方为(0.02−θ)²+(0.06−2θ)²，微分求得θ̂=0.028。残余矩为(−0.008,0.004)，平方和0.00008；若n=100且已假定有效S=I，形式上J=0.008，不能把这个教学数值解释为一般样本中的有效p值。",
@@ -492,6 +570,27 @@
           "proof": "将(a−bθ)ᵀW(a−bθ)展开为aᵀWa−2θbᵀWa+θ²bᵀWb，若W正定、b≠0，则二阶导数2bᵀWb>0，唯一最小值θhat=(bᵀWa)/(bᵀWb)。回代整理得最小值aᵀWa−(bᵀWa)²/(bᵀWb)。",
           "worked": "取a=(0.02,0.06)、b=(1,2)。W=I时θhat=0.028，残差平方和0.00008；若W=diag(1,4)，θhat=(0.02+8×0.06)/(1+16)=0.5/17≈0.029412，表明矩权重确实改变估计结果。",
           "limitation": "此式假设固定对称正定W与线性单参数矩。有效权重依赖估计的长期协方差，并可能受估计误差、弱识别或时间依赖影响；J的自由度还取决于真实独立矩的有效秩。"
+        },
+        {
+          "title": "GMM过度识别统计量与经济错价规模必须区分",
+          "question": "为什么资产定价矩残差很小，J统计量仍可能很大？",
+          "paragraphs": [
+            "GMM的J检验在有效秩、正确设定与足够大样本条件下，将样本平均矩偏离零的程度乘以样本量，并用长期协方差的逆矩阵标准化。相同的经济单位定价残差，若长期波动更小、样本更大，便可能得到更强统计拒绝证据。",
+            "J检验拒绝的是被共同施加的矩限制，不等于某个ETF的年化可交易alpha；矩残差需要与交易费用、融资约束、流动性和政策状态结合解释。若工具数量多或权重矩阵近奇异，传统卡方近似可能不稳健。"
+          ],
+          "formulas": [
+            {
+              "label": "两矩单参数过识别的样本量缩放",
+              "tex": "J_n=n\\,\\overline g(\\widehat\\theta)^\\top\\widehat S^{-1}\\overline g(\\widehat\\theta)"
+            },
+            {
+              "label": "固定残余矩下样本量与J比例关系",
+              "tex": "J_{cn}=cJ_n\\quad\\text{when }\\overline g\\text{ and }\\widehat S\\text{ are held fixed}"
+            }
+          ],
+          "proof": "当矩条件向量维度r大于参数维度k，最小GMM目标在有效长期协方差权重下被n倍放大，从而构造J_n。若把残余平均矩ḡ及权重S^-1固定，直接代入cn与n的定义，得到J_(cn)=cJ_n。现实新增样本会改变ḡ与S，所以这仅是一项尺度比较恒等式，不是抽样分布预言。",
+          "worked": "原例两个矩残差为(−0.008,0.004)，若S=I，平方和为0.00008。n=100时J=0.008；若纯粹演示保持残差与S不变而将n增至10000，则J=0.8。同样的残差对应不同统计量，但绝对数值不能在未核实有效权重、识别条件和自由度时直接解释为真实p值。",
+          "limitation": "J~χ²_(r−k)需要正确矩约束、识别、有效权重和标准正则条件；在弱识别、估计权重奇异或高度持久市场数据中不可机械套用。"
         }
       ],
       "links": [
@@ -526,7 +625,7 @@
           "url": "https://www.johnhcochrane.com/asset-pricing"
         }
       ],
-      "checked_status": "V55严格精讲：线性GMM的正交投影解释与加权识别"
+      "checked_status": "V69：GMM过度识别统计量与经济错价规模必须区分，含识别假设和数值复核"
     }
   ]
 }
