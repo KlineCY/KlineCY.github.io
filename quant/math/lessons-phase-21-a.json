@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "revision": "2026-11-06",
-  "focus": "时间序列训练、验证、测试和无前视交叉验证",
+  "revision": "2026-11-07",
+  "focus": "时间序列训练、验证、测试和无前视交叉验证；V67自适应验证集复用和折间风险依赖",
   "lessons": [
     {
       "id": "mlmath-n0455",
@@ -34,6 +34,14 @@
         {
           "label": "固定有限候选类的同时Hoeffding误差半径",
           "tex": "\\Pr\\!\\left(\\max_{1\\le j\\le M}|\\widehat R_j-R_j|>\\epsilon\\right)\\le 2M e^{-2m\\epsilon^2}\\quad(0\\le\\ell\\le1,\\ {\\rm IID})"
+        },
+        {
+          "label": "固定候选集合同时置信半径",
+          "tex": "\\epsilon_{M,\\delta}=\\sqrt{\\frac{\\log(2M/\\delta)}{2n}},\\qquad P\\!\\left(\\max_{m\\le M}|\\widehat R_m-R_m|\\le\\epsilon_{M,\\delta}\\right)\\ge1-\\delta"
+        },
+        {
+          "label": "重复独立检验的家族误报概率",
+          "tex": "P(\\text{at least one false positive})=1-(1-\\alpha)^M\\quad\\text{(independent null tests)}"
         }
       ],
       "derivation": [
@@ -52,6 +60,10 @@
         {
           "explanation": "对事先固定的M个候选预测器以及与它们的训练选择过程独立的m条IID测试样本，假设每条损失均在0与1之间，Hoeffding不等式分别控制每个候选的经验风险偏差。再对M个候选使用并集界，可以得到它们同时成立的误差半径。随着候选数增加，该半径按log M增大。这个界不许可研究者无限次自适应修改模型后继续把已经看过的封存测试称为独立测试。",
           "tex": "\\epsilon_{M,\\delta}=\\sqrt{\\frac{\\log(2M/\\delta)}{2m}}"
+        },
+        {
+          "explanation": "对预先确定的每个模型，其有界独立损失均值的双尾Hoeffding概率上界为2exp(−2nε²)。对M项用并集界，要求2Mexp(−2nε²)≤δ，解得给出的同时半径。若M次假设检验相互独立且都在真零假设下，各次不误报概率为1−α，全部不误报概率为(1−α)^M，故至少一次误报为其补集。",
+          "tex": "\\epsilon_{M,\\delta}=\\sqrt{\\frac{\\log(2M/\\delta)}{2n}},\\qquad P\\!\\left(\\max_{m\\le M}|\\widehat R_m-R_m|\\le\\epsilon_{M,\\delta}\\right)\\ge1-\\delta"
         }
       ],
       "example": "设训练特征为(1,2,3,4)，训练均值2.5、按n归一化方差1.25。验证特征5的合法标准化为(5−2.5)/√1.25≈2.236。若在第10日开盘做预测，第8日形成且第10日收盘才成熟的两日收益标签不可进入训练，即便形成日早于预测日。",
@@ -142,6 +154,27 @@
           "proof": "对每个固定候选j，Hoeffding给出P(|Rhat_j−R_j|>ε)≤2e^(−2mε²)。对j从1到M求并集概率，得到不超过2Me^(−2mε²)。令右侧等于δ并整理，得到ε=sqrt(log(2M/δ)/(2m))。",
           "worked": "若事先固定M=10个模型、测试样本m=500且损失在[0,1]，取δ=0.05，统一风险偏差半径为√[ln(400)/(1000)]≈0.0774。即使从这10个模型里选择最低测试损失，其解释也必须包含搜索代价。",
           "limitation": "适用范围是独立于测试集预先固定的有限候选、IID观测及有界损失；重叠金融收益、厚尾损失、自适应研究过程和测试集多次重用不满足这些简化前提。"
+        },
+        {
+          "title": "重复查看验证集与封存测试：适应性选择偏差",
+          "question": "即使从未使用测试标签训练参数，多次依据测试结果改策略为什么仍可能使最终报告乐观？",
+          "paragraphs": [
+            "训练集用于参数估计，验证集用于模型、超参数和特征选择，最终测试集承担一次性独立评价的职责。研究者如果查看封存测试指标后继续修改特征或再平衡规则，下一版模型便间接依赖测试样本，原测试集不再代表完全未见过的未来市场。",
+            "对于预先固定、数量为M的候选模型，且每个测试损失独立、取值在[0,1]，可用Hoeffding不等式与并集界控制全部候选测试风险偏差。然而真实反复交互中候选规则往往是根据先前测试反馈适应性产生的，不能仅把最后提交的模型数视为M而机械援引该界。"
+          ],
+          "formulas": [
+            {
+              "label": "固定候选集合同时置信半径",
+              "tex": "\\epsilon_{M,\\delta}=\\sqrt{\\frac{\\log(2M/\\delta)}{2n}},\\qquad P\\!\\left(\\max_{m\\le M}|\\widehat R_m-R_m|\\le\\epsilon_{M,\\delta}\\right)\\ge1-\\delta"
+            },
+            {
+              "label": "重复独立检验的家族误报概率",
+              "tex": "P(\\text{at least one false positive})=1-(1-\\alpha)^M\\quad\\text{(independent null tests)}"
+            }
+          ],
+          "proof": "对预先确定的每个模型，其有界独立损失均值的双尾Hoeffding概率上界为2exp(−2nε²)。对M项用并集界，要求2Mexp(−2nε²)≤δ，解得给出的同时半径。若M次假设检验相互独立且都在真零假设下，各次不误报概率为1−α，全部不误报概率为(1−α)^M，故至少一次误报为其补集。",
+          "worked": "取n=500、δ=0.05，M=1时半径sqrt(log40/1000)≈0.06074；M=20时为sqrt(log800/1000)≈0.08176。若20次独立零假设检验各取α=0.05，至少一次误报概率1−0.95²⁰≈0.64151，远大于0.05。",
+          "limitation": "并集界对固定候选及其独立有界损失成立；相关金融持有期、适应性研究搜索和多次看测试集需要单独的选择偏差分析，不能把这些公式当作严格的样本外保障。"
         }
       ],
       "links": [
@@ -176,7 +209,7 @@
           "url": "https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.TimeSeriesSplit.html"
         }
       ],
-      "checked_status": "V52严格精讲：封存测试的有限候选搜索与置信代价"
+      "checked_status": "V67：重复查看验证集与封存测试：适应性选择偏差及独立数值验算"
     },
     {
       "id": "mlmath-n0466",
@@ -209,6 +242,14 @@
         {
           "label": "验证样本数加权的交叉验证风险",
           "tex": "\\widehat R_{\\rm pooled}=\\frac{\\sum_{k=1}^{K}n_k\\widehat R_k}{\\sum_{k=1}^{K}n_k},\\qquad \\widehat R_{\\rm fold}=\\frac1K\\sum_{k=1}^{K}\\widehat R_k"
+        },
+        {
+          "label": "K折风险均值的完整方差",
+          "tex": "\\operatorname{Var}\\!\\left(\\frac1K\\sum_{k=1}^K\\widehat R_k\\right)=\\frac1{K^2}\\sum_{j=1}^K\\sum_{k=1}^K\\operatorname{Cov}(\\widehat R_j,\\widehat R_k)"
+        },
+        {
+          "label": "等方差等相关折的方差",
+          "tex": "\\operatorname{Var}(\\overline R)=\\frac{\\sigma_R^2}{K}\\bigl[1+(K-1)\\rho\\bigr]"
         }
       ],
       "derivation": [
@@ -227,6 +268,10 @@
         {
           "explanation": "把所有外层验证观测的损失放在一起平均时，每一折的权重应与该折观测数n_k成正比；把每个验证折的损失均值再等权平均时，每一折只贡献1/K。这两个目标分别对应等权观测与等权市场时段，若折大小不一致一般不会相等。时间滚动金融回测可能有不同交易日数和市场制度，因此需要在评估前固定两种聚合口径中的一种。",
           "tex": "\\widehat R_{\\rm pooled}-\\widehat R_{\\rm fold}=\\sum_{k=1}^{K}\\left(\\frac{n_k}{\\sum_j n_j}-\\frac1K\\right)\\widehat R_k"
+        },
+        {
+          "explanation": "方差的双线性性质给Var(ΣR_k)=Σ_jΣ_kCov(R_j,R_k)，除以K²即得第一式。若每折风险方差为σ_R²、不同折协方差为ρσ_R²，双和含K个方差项和K(K−1)个协方差项，整理得到第二式。折共享训练数据或市场状态时ρ可能为正，使独立折标准误偏小。",
+          "tex": "\\operatorname{Var}\\!\\left(\\frac1K\\sum_{k=1}^K\\widehat R_k\\right)=\\frac1{K^2}\\sum_{j=1}^K\\sum_{k=1}^K\\operatorname{Cov}(\\widehat R_j,\\widehat R_k)"
         }
       ],
       "example": "第一折使用1—6日已成熟的标签训练，验证第9—10日；第二折仅用第13日开始前已成熟的数据训练，验证第13—14日。标签持有期为两天时，第7日形成并到第9日收盘才成熟的标签不能用于第9日开盘前训练。若候选λ=0.1与1的验证MSE分别为0.12与0.10，应在独立测试前选λ=1。",
@@ -317,6 +362,27 @@
           "proof": "定义第k折平均损失Rhat_k=(1/n_k)Σ_{i∈V_k}ℓ_i。把所有验证样本拼接后的损失均值为[Σ_kn_kRhat_k]/Σ_kn_k。减去等折平均(1/K)Σ_kRhat_k得到所示差值，只有折规模相同或误差均值满足特定抵消时两者相等。",
           "worked": "设两次滚动验证分别有10日和30日，折内平均损失分别为0.1和0.3。逐折等权得到(0.1+0.3)/2=0.2；逐交易日等权得到(10×0.1+30×0.3)/40=0.25。两个数字都可复算，但回答的是不同的评估问题。",
           "limitation": "公式假设验证记录的损失口径相同且每条被计数一次；时间相关、重叠事件、资产权重差异及最终交易净值复利不等同于简单逐观察损失平均。"
+        },
+        {
+          "title": "交叉验证折间相关与预测误差的不确定性",
+          "question": "为什么计算K个验证折的平均损失，并不代表这K个估计是独立观察？",
+          "paragraphs": [
+            "前滚动交叉验证的训练区间通常重叠，邻近验证区间也可能共享宏观市场状态或重叠收益标签。即使各折在时间上按规则隔离，折风险估计量也未必独立；计算折风险均值的标准误时必须包含折间协方差，而不能自动使用样本标准差除以sqrt(K)。",
+            "研究多空ETF策略时，应把折均值的估计目标与真实合并回测净值分开：等权折均值刻画每段市场状态的相同权重表现，按样本数加权则对应观察级平均损失。经济收益需要按实际资金路径、换手与可交易性计算，不能简单将多个Sharpe作算术平均。"
+          ],
+          "formulas": [
+            {
+              "label": "K折风险均值的完整方差",
+              "tex": "\\operatorname{Var}\\!\\left(\\frac1K\\sum_{k=1}^K\\widehat R_k\\right)=\\frac1{K^2}\\sum_{j=1}^K\\sum_{k=1}^K\\operatorname{Cov}(\\widehat R_j,\\widehat R_k)"
+            },
+            {
+              "label": "等方差等相关折的方差",
+              "tex": "\\operatorname{Var}(\\overline R)=\\frac{\\sigma_R^2}{K}\\bigl[1+(K-1)\\rho\\bigr]"
+            }
+          ],
+          "proof": "方差的双线性性质给Var(ΣR_k)=Σ_jΣ_kCov(R_j,R_k)，除以K²即得第一式。若每折风险方差为σ_R²、不同折协方差为ρσ_R²，双和含K个方差项和K(K−1)个协方差项，整理得到第二式。折共享训练数据或市场状态时ρ可能为正，使独立折标准误偏小。",
+          "worked": "若四折风险估计各方差0.04，折间等相关系数为0.5，则其均值方差为0.04/4×(1+3×0.5)=0.025，标准误约0.15811；若错误假定折独立，仅得到方差0.01、标准误0.10。有效独立信息少于四折。",
+          "limitation": "等相关例子用于解释相关性的影响，不表示所有时序验证折都服从同一ρ；实际需要合理的依赖结构估计、区块方法或重采样验证，且嵌套选择产生的额外方差不能忽略。"
         }
       ],
       "links": [
@@ -351,7 +417,7 @@
           "url": "https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.TimeSeriesSplit.html"
         }
       ],
-      "checked_status": "V52严格精讲：不等长验证折的平均风险口径"
+      "checked_status": "V67：交叉验证折间相关与预测误差的不确定性及独立数值验算"
     }
   ]
 }
