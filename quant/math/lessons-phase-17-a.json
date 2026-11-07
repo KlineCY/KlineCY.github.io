@@ -1,7 +1,7 @@
 {
   "version": 1,
   "revision": "2026-11-06",
-  "focus": "计量经济学识别基础：外生性、测量误差、模型识别与工具变量",
+  "focus": "计量经济学识别基础：外生性、测量误差、模型识别与工具变量；V70外生性与识别稳健性",
   "lessons": [
     {
       "id": "econometrics-n0211",
@@ -34,6 +34,14 @@
         {
           "label": "遗漏因子的总体偏差与控制变量的可检验条件",
           "tex": "Y=\\beta X+\\gamma Z+\\varepsilon,\\quad \\operatorname{Cov}(X,\\varepsilon)=0\\Longrightarrow\\operatorname{plim}\\widehat\\beta_{\\rm short}=\\beta+\\gamma\\frac{\\operatorname{Cov}(X,Z)}{\\operatorname{Var}(X)}"
+        },
+        {
+          "label": "条件零均值蕴含所有合法函数正交",
+          "tex": "E[U\\mid X]=0\\quad\\Longrightarrow\\quad E[h(X)U]=0"
+        },
+        {
+          "label": "离散非线性零协方差反例",
+          "tex": "P(X=-1)=P(X=0)=P(X=1)=\\tfrac13,\\quad U=X^2-\\tfrac23,\\quad E[XU]=0,\\quad E[U\\mid X]\\ne0"
         }
       ],
       "derivation": [
@@ -52,6 +60,10 @@
         {
           "explanation": "从Y=βX+γZ+ε出发，取与X的协方差并使用Cov(X,ε)=0，得到Cov(X,Y)=βVar(X)+γCov(X,Z)。带截距短回归的总体斜率为Cov(X,Y)/Var(X)，除以Var(X)>0并整理即得到公式。",
           "tex": "\\operatorname{Cov}(X,Y)=\\beta\\operatorname{Var}(X)+\\gamma\\operatorname{Cov}(X,Z)"
+        },
+        {
+          "explanation": "利用塔式性质E[h(X)U]=E[h(X)E(U|X)]，条件零均值足以使所有相关矩为零。反过来令X等概率取−1、0、1，U=X²−2/3。因为E[X]=0、E[X²]=2/3及E[X³]=0，所以E[U]=0、E[XU]=E[X³]−(2/3)E[X]=0；但U是X的确定函数，条件均值在X=±1时为1/3、在X=0时为−2/3，显然不恒为零。",
+          "tex": "E[U\\mid X]=0\\quad\\Longrightarrow\\quad E[h(X)U]=0"
         }
       ],
       "example": "真实β=2、Var(x)=4、Cov(x,u)=1时，总体OLS斜率为2+1/4=2.25；当抽样矩一致收敛，样本量再大也不会使斜率回到结构值2。 这一差值0.25不是一次随机抽样误差，而是总体结构误差与解释变量共同变化所产生的系统偏差；单纯扩大样本量无法消除。",
@@ -142,6 +154,27 @@
           "proof": "从Y=βX+γZ+ε出发，取与X的协方差并使用Cov(X,ε)=0，得到Cov(X,Y)=βVar(X)+γCov(X,Z)。带截距短回归的总体斜率为Cov(X,Y)/Var(X)，除以Var(X)>0并整理即得到公式。",
           "worked": "设真实β=1、遗漏因子效应γ=2、Var(X)=4、Cov(X,Z)=1，则短回归系数极限为1+2×1/4=1.5。增加合法事前市场因子控制后，若满足外生性，可避免将0.5的共同波动错记为X自身影响。",
           "limitation": "遗漏变量推导要求总体二阶矩有限，且Cov(X,ε)=0。无法观测的混杂、非线性、处理后变量与样本选择问题不能由这个线性公式自动消除。"
+        },
+        {
+          "title": "总体零相关并不推出条件外生性：非线性反例",
+          "question": "即使解释变量与回归误差的协方差严格为零，为什么仍不能认定误差条件均值为零？",
+          "paragraphs": [
+            "最小二乘正交性常写作E[XU]=0；更强的条件外生性要求E[U|X]=0。后者保证对任意适当可积的X函数h(X)都有E[h(X)U]=0，而单一线性正交条件只限制h(X)=X的一个方向。金融收益在正负极端行情下呈对称但非线性变化时，线性相关可能恰好抵消。",
+            "因此，使用ETF收益因子评估线性预测模型时，应区分线性投影残差与真实条件均值残差。检验残差是否与因子平方、分段行情指示和其他事前可见非线性变换相关，可以发现线性零相关无法揭示的模型错设，但仍不能单凭这些统计检验建立因果外生性。"
+          ],
+          "formulas": [
+            {
+              "label": "条件零均值蕴含所有合法函数正交",
+              "tex": "E[U\\mid X]=0\\quad\\Longrightarrow\\quad E[h(X)U]=0"
+            },
+            {
+              "label": "离散非线性零协方差反例",
+              "tex": "P(X=-1)=P(X=0)=P(X=1)=\\tfrac13,\\quad U=X^2-\\tfrac23,\\quad E[XU]=0,\\quad E[U\\mid X]\\ne0"
+            }
+          ],
+          "proof": "利用塔式性质E[h(X)U]=E[h(X)E(U|X)]，条件零均值足以使所有相关矩为零。反过来令X等概率取−1、0、1，U=X²−2/3。因为E[X]=0、E[X²]=2/3及E[X³]=0，所以E[U]=0、E[XU]=E[X³]−(2/3)E[X]=0；但U是X的确定函数，条件均值在X=±1时为1/3、在X=0时为−2/3，显然不恒为零。",
+          "worked": "对三种等概率状态，U依次取(1/3,−2/3,1/3)，XU依次取(−1/3,0,1/3)，其平均为0；然而E[X²U]=E[X⁴]−(2/3)E[X²]=2/3−4/9=2/9>0。线性因子检验会漏掉这个非线性依赖。",
+          "limitation": "本反例只是总体正交与条件零均值之间的逻辑区别，并不自动证明某个具体ETF因子内生；因果解释还需处理干预时序、遗漏变量和选择机制。"
         }
       ],
       "links": [
@@ -171,7 +204,7 @@
           "url": "https://www.degruyterbrill.com/document/doi/10.1515/9781400829828-009/html"
         }
       ],
-      "checked_status": "V56严格精讲：遗漏市场因子对ETF回归系数的偏差"
+      "checked_status": "V70：总体零相关并不推出条件外生性：非线性反例及反例核验"
     },
     {
       "id": "econometrics-n0213",
@@ -204,6 +237,14 @@
         {
           "label": "二次独立测量提供潜在信号的工具矩",
           "tex": "w_1=x^\\star+v_1,\\ w_2=x^\\star+v_2,\\ y=\\beta x^\\star+u\\ \\Longrightarrow\\frac{\\operatorname{Cov}(w_2,y)}{\\operatorname{Cov}(w_2,w_1)}=\\beta"
+        },
+        {
+          "label": "重复测量误差相关下的工具估计量",
+          "tex": "\\beta_{\\rm IV}=\\frac{\\operatorname{Cov}(w_2,Y)}{\\operatorname{Cov}(w_2,w_1)}=\\beta\\frac{\\sigma_{x^*}^2}{\\sigma_{x^*}^2+\\operatorname{Cov}(v_1,v_2)}"
+        },
+        {
+          "label": "独立误差才恢复结构斜率",
+          "tex": "\\operatorname{Cov}(v_1,v_2)=0\\quad\\Longrightarrow\\quad\\beta_{\\rm IV}=\\beta\\quad(\\sigma_{x^*}^2>0)"
         }
       ],
       "derivation": [
@@ -222,6 +263,10 @@
         {
           "explanation": "展开Cov(w2,w1)=Cov(x*+v2,x*+v1)，在所有交叉协方差均为0时等于Var(x*)；同理Cov(w2,y)=Cov(x*+v2,βx*+u)=βVar(x*)。只要Var(x*)>0，两式作比即得β。",
           "tex": "\\operatorname{Cov}(w_2,w_1)=\\operatorname{Var}(x^\\star),\\quad\\operatorname{Cov}(w_2,y)=\\beta\\operatorname{Var}(x^\\star)"
+        },
+        {
+          "explanation": "设w₁=x*+v₁、w₂=x*+v₂，Y=βx*+u。假定潜在x*与两种测量误差正交、u与w₂正交，则Cov(w₂,Y)=βVar(x*)。同时Cov(w₂,w₁)=Var(x*)+Cov(v₂,v₁)。用w₂作为w₁的工具取总体协方差比率，得到给定式子。若两噪声有正协方差，即使第二测量高度相关，估计仍可能向零收缩。",
+          "tex": "\\beta_{\\rm IV}=\\frac{\\operatorname{Cov}(w_2,Y)}{\\operatorname{Cov}(w_2,w_1)}=\\beta\\frac{\\sigma_{x^*}^2}{\\sigma_{x^*}^2+\\operatorname{Cov}(v_1,v_2)}"
         }
       ],
       "example": "设β=2、Var(x*)=9、Var(v)=3，则可靠性比率为9/(9+3)=0.75，观测特征回归斜率为1.5。若噪声方差升至9，则系数变成1；增加样本量不能消除该总体收缩。 这也说明，在真实信号强度固定的条件下，观测误差越大，估计到的斜率越容易被误解为经济关系弱化。",
@@ -312,6 +357,27 @@
           "proof": "展开Cov(w2,w1)=Cov(x*+v2,x*+v1)，在所有交叉协方差均为0时等于Var(x*)；同理Cov(w2,y)=Cov(x*+v2,βx*+u)=βVar(x*)。只要Var(x*)>0，两式作比即得β。",
           "worked": "设真实Var(x*)=9、测量误差方差均为3、β=2，观察w1的OLS斜率为2×9/(9+3)=1.5；若独立重复测量w2可用，则协方差比为18/9=2，恢复理论系数。",
           "limitation": "需要严格的独立重复误差与工具排除限制。真实行情时间戳不同、异常价格共享或历史修订可能使Cov(v1,v2)不为0。"
+        },
+        {
+          "title": "重复测量误差相关时，第二次报价不再是有效修正工具",
+          "question": "为什么重复测量法仍可能出现经典衰减偏差，即使有两份独立来源的表面报价？",
+          "paragraphs": [
+            "使用第二次测量w₂给第一次有误差测量w₁作工具变量，需要第二次误差与第一次误差不相关，并且两种误差与潜在真实特征及结构误差满足相应正交条件。如果两家数据供应商共用底层撮合记录、同时受报价延迟影响，其测量噪声可能同向波动；这时第二份报价对真实信号相关，但同时与第一份测量误差相关。",
+            "量化数据处理中，重复数据源是检测问题的线索，而不是自动获得有效工具变量。应记录原始时间戳、场所、价格计算方式及供应商上游来源，必要时对比滞后结构，避免把高度相关的重复误差解释为真实因子信息。"
+          ],
+          "formulas": [
+            {
+              "label": "重复测量误差相关下的工具估计量",
+              "tex": "\\beta_{\\rm IV}=\\frac{\\operatorname{Cov}(w_2,Y)}{\\operatorname{Cov}(w_2,w_1)}=\\beta\\frac{\\sigma_{x^*}^2}{\\sigma_{x^*}^2+\\operatorname{Cov}(v_1,v_2)}"
+            },
+            {
+              "label": "独立误差才恢复结构斜率",
+              "tex": "\\operatorname{Cov}(v_1,v_2)=0\\quad\\Longrightarrow\\quad\\beta_{\\rm IV}=\\beta\\quad(\\sigma_{x^*}^2>0)"
+            }
+          ],
+          "proof": "设w₁=x*+v₁、w₂=x*+v₂，Y=βx*+u。假定潜在x*与两种测量误差正交、u与w₂正交，则Cov(w₂,Y)=βVar(x*)。同时Cov(w₂,w₁)=Var(x*)+Cov(v₂,v₁)。用w₂作为w₁的工具取总体协方差比率，得到给定式子。若两噪声有正协方差，即使第二测量高度相关，估计仍可能向零收缩。",
+          "worked": "真实结构β=2、潜在信号方差9，两份价格误差方差各为4而误差协方差为3。则Cov(w₂,Y)=18，Cov(w₂,w₁)=12，工具比率为1.5而非2；若两误差协方差为零，分母恢复9，估计恰为2。",
+          "limitation": "该公式还需排除测量误差与真实信号或结构误差的相关性；若误差以非加性、截断或异步时序方式发生，单个协方差修正式不足以识别真实系数。"
         }
       ],
       "links": [
@@ -341,7 +407,7 @@
           "url": "https://www.degruyterbrill.com/document/doi/10.1515/9781400829828-009/html"
         }
       ],
-      "checked_status": "V56严格精讲：独立重复测量的误差修正与资产报价数据"
+      "checked_status": "V70：重复测量误差相关时，第二次报价不再是有效修正工具及反例核验"
     },
     {
       "id": "econometrics-n0214",
@@ -374,6 +440,14 @@
         {
           "label": "最小奇异值给出局部矩识别误差界",
           "tex": "g(\\theta)=D(\\theta-\\theta^\\star),\\ \\sigma_{\\min}(D)>0\\ \\Longrightarrow\\ \\|\\theta-\\theta^\\star\\|_2\\le\\frac{\\|g(\\theta)\\|_2}{\\sigma_{\\min}(D)}"
+        },
+        {
+          "label": "线性矩误差向参数误差的映射",
+          "tex": "\\widehat g=D(\\widehat\\theta-\\theta^*),\\quad\\widehat\\theta-\\theta^*=D^{-1}\\widehat g\\quad(D\\text{ 可逆})"
+        },
+        {
+          "label": "最小奇异值方向的放大倍数",
+          "tex": "D=\\operatorname{diag}(1,\\varepsilon),\\quad\\widehat g=(0,\\delta)^\\top\\ \\Longrightarrow\\ \\|\\widehat\\theta-\\theta^*\\|_2=|\\delta/\\varepsilon|"
         }
       ],
       "derivation": [
@@ -392,6 +466,10 @@
         {
           "explanation": "设Δ=θ−θ*且g(θ)=DΔ。由奇异值分解，任意Δ满足||DΔ||₂≥σ_min(D)||Δ||₂。因σ_min(D)>0，两侧除以σ_min(D)即可得到参数误差上界。",
           "tex": "\\|D\\Delta\\|_2\\ge\\sigma_{\\min}(D)\\|\\Delta\\|_2,\\quad\\Delta=\\theta-\\theta^\\star"
+        },
+        {
+          "explanation": "线性化的矩映射可写成D(θ−θ*)。若D方阵可逆，则样本矩误差经D^-1传至参数误差。对D=diag(1,ε)，只要ε非零便满秩；若矩偏差仅在第二坐标上为δ，则对应参数偏差恰为δ/ε。故将ε缩小十倍而维持同一矩误差，会把估计参数的第二坐标误差扩大十倍，秩仍不变。",
+          "tex": "\\widehat g=D(\\widehat\\theta-\\theta^*),\\quad\\widehat\\theta-\\theta^*=D^{-1}\\widehat g\\quad(D\\text{ 可逆})"
         }
       ],
       "example": "取中心化的一元矩E[ZX]=2、E[ZY]=5，则唯一矩解β=5/2=2.5。若E[ZX]=0且E[ZY]=0，任意β都符合这一条矩；若分母为零但E[ZY]非零，则不是任意识别而是该矩模型无精确解。",
@@ -482,6 +560,27 @@
           "proof": "设Δ=θ−θ*且g(θ)=DΔ。由奇异值分解，任意Δ满足||DΔ||₂≥σ_min(D)||Δ||₂。因σ_min(D)>0，两侧除以σ_min(D)即可得到参数误差上界。",
           "worked": "取D=diag(1,0.01)，估计参数相对真值偏移Δ=(0,2)。矩偏差为(0,0.02)，范数仅0.02，但参数范数为2；因为σ_min=0.01，上界恰为0.02/0.01=2。",
           "limitation": "不等式是局部线性或精确线性矩映射下的代数结论。非线性系统需要控制高阶余项，且样本矩存在随机误差时还须附加统计置信推断。"
+        },
+        {
+          "title": "满秩但病态识别：微小样本矩误差为何放大成巨大参数变化",
+          "question": "秩条件已经满足时，为什么最小奇异值仍决定估计是否稳定？",
+          "paragraphs": [
+            "秩满列只说明总体矩方程在理想无噪声条件下有唯一解，不保证有限样本误差不会被逆算子大幅放大。最小奇异值刻画被数据最难辨认的参数方向；当其非常接近零，有限的矩估计误差可以对应很大的参数估计变化。",
+            "金融多因子模型中两只资产的风险暴露几乎相同、两个工具变量传递几乎同一政策冲击，都会使有效Jacobian病态。研究报告应该同时提供识别秩与奇异值尺度，不能只报告求解器成功、正规方程可逆或残差很小。"
+          ],
+          "formulas": [
+            {
+              "label": "线性矩误差向参数误差的映射",
+              "tex": "\\widehat g=D(\\widehat\\theta-\\theta^*),\\quad\\widehat\\theta-\\theta^*=D^{-1}\\widehat g\\quad(D\\text{ 可逆})"
+            },
+            {
+              "label": "最小奇异值方向的放大倍数",
+              "tex": "D=\\operatorname{diag}(1,\\varepsilon),\\quad\\widehat g=(0,\\delta)^\\top\\ \\Longrightarrow\\ \\|\\widehat\\theta-\\theta^*\\|_2=|\\delta/\\varepsilon|"
+            }
+          ],
+          "proof": "线性化的矩映射可写成D(θ−θ*)。若D方阵可逆，则样本矩误差经D^-1传至参数误差。对D=diag(1,ε)，只要ε非零便满秩；若矩偏差仅在第二坐标上为δ，则对应参数偏差恰为δ/ε。故将ε缩小十倍而维持同一矩误差，会把估计参数的第二坐标误差扩大十倍，秩仍不变。",
+          "worked": "令D=diag(1,0.001)、样本矩误差为(0,0.01)。即使观测矩偏差范数只有0.01，反解参数误差却是(0,10)，范数10；若第二奇异值改为0.1，同样矩误差的参数偏移只有0.1。两种矩阵都严格满秩，但识别精度相差100倍。",
+          "limitation": "此例把矩估计误差作为给定向量，用于说明局部线性敏感性；实际置信区间还需矩协方差、样本量和弱识别稳健推断，不能单凭条件数给出统计显著性。"
         }
       ],
       "links": [
@@ -511,7 +610,7 @@
           "url": "https://larspeterhansen.org/lph_research/large-sample-properties-of-generalized-method-of-moments-estimators/"
         }
       ],
-      "checked_status": "V56严格精讲：矩识别中的最小奇异值与参数稳健性"
+      "checked_status": "V70：满秩但病态识别：微小样本矩误差为何放大成巨大参数变化及反例核验"
     },
     {
       "id": "econometrics-n0215",
@@ -544,6 +643,14 @@
         {
           "label": "工具排除限制的小偏差放大公式",
           "tex": "\\operatorname{Cov}(Z,U)=\\delta,\\ \\operatorname{Cov}(Z,X)=\\pi\\ne0\\ \\Longrightarrow\\ \\beta_{\\rm IV}-\\beta=\\delta/\\pi"
+        },
+        {
+          "label": "允许小幅排除限制违背的总体IV方程",
+          "tex": "\\beta_{\\rm IV}=\\beta+\\delta/\\pi,\\qquad\\pi=\\operatorname{Cov}(Z,X)\\ne0"
+        },
+        {
+          "label": "固定第一阶段与误差上界的识别区间",
+          "tex": "|\\delta|\\le d\\quad\\Longrightarrow\\quad\\beta\\in[\\beta_{\\rm IV}-d/|\\pi|,\\ \\beta_{\\rm IV}+d/|\\pi|]"
         }
       ],
       "derivation": [
@@ -562,6 +669,10 @@
         {
           "explanation": "由Y=βX+U，取工具Z的协方差，得到Cov(Z,Y)=βCov(Z,X)+Cov(Z,U)。用π=Cov(Z,X)、δ=Cov(Z,U)表示，IV总体比率Cov(Z,Y)/π=β+δ/π，故偏差为δ/π。",
           "tex": "\\operatorname{Cov}(Z,Y)=\\beta\\operatorname{Cov}(Z,X)+\\operatorname{Cov}(Z,U)"
+        },
+        {
+          "explanation": "在Y=βX+U模型中，Cov(Z,Y)=βCov(Z,X)+Cov(Z,U)=βπ+δ。将两侧除以非零π，得到IV总体比率β_IV=β+δ/π，故结构参数β=β_IV−δ/π。当δ只知道处在[−d,d]时，δ/π的绝对值不超过d/|π|，于是β必须落在给定对称区间。",
+          "tex": "\\beta_{\\rm IV}=\\beta+\\delta/\\pi,\\qquad\\pi=\\operatorname{Cov}(Z,X)\\ne0"
         }
       ],
       "example": "真实β=3、Cov(z,x)=2且Cov(z,u)=0时Cov(z,y)=6，IV=3；若Cov(z,u)=1而第一阶段不变，则IV=(6+1)/2=3.5，表明相关性再强也不能修复外生性违背。",
@@ -652,6 +763,27 @@
           "proof": "由Y=βX+U，取工具Z的协方差，得到Cov(Z,Y)=βCov(Z,X)+Cov(Z,U)。用π=Cov(Z,X)、δ=Cov(Z,U)表示，IV总体比率Cov(Z,Y)/π=β+δ/π，故偏差为δ/π。",
           "worked": "若真正β=2、工具第一阶段协方差π=0.01、直接扰动相关δ=0.002，则IV估计的极限变为2+0.002/0.01=2.2，排除限制偏差被放大成0.2。",
           "limitation": "只有当工具与处理之间的协方差非零时才可定义比率。LATE异质性、弱IV抽样分布和多工具选择需要另行处理，不能将此公式等同于正式置信区间。"
+        },
+        {
+          "title": "排除限制无法直接检验时的IV敏感性区间",
+          "question": "若工具可能对结果有少量直接影响，如何把这种担忧转化为透明的参数区间？",
+          "paragraphs": [
+            "工具变量需要相关性与排除限制。设工具与结构误差的协方差不确定为δ，若有领域知识支持它的绝对值不超过d，便可以在已知总体第一阶段协方差π非零的条件下，对潜在结构系数给出一个敏感性范围。这比直接宣称工具完全外生更透明，也可以展示第一阶段变弱时识别区间为何迅速扩大。",
+            "例如政策意外可能同时影响ETF风险溢价和融资成本，若它不仅通过研究设定中的交易约束起作用，则排除限制值得质疑。敏感性界应由制度背景或外部证据说明，不能事后调节d直到研究结论显著。"
+          ],
+          "formulas": [
+            {
+              "label": "允许小幅排除限制违背的总体IV方程",
+              "tex": "\\beta_{\\rm IV}=\\beta+\\delta/\\pi,\\qquad\\pi=\\operatorname{Cov}(Z,X)\\ne0"
+            },
+            {
+              "label": "固定第一阶段与误差上界的识别区间",
+              "tex": "|\\delta|\\le d\\quad\\Longrightarrow\\quad\\beta\\in[\\beta_{\\rm IV}-d/|\\pi|,\\ \\beta_{\\rm IV}+d/|\\pi|]"
+            }
+          ],
+          "proof": "在Y=βX+U模型中，Cov(Z,Y)=βCov(Z,X)+Cov(Z,U)=βπ+δ。将两侧除以非零π，得到IV总体比率β_IV=β+δ/π，故结构参数β=β_IV−δ/π。当δ只知道处在[−d,d]时，δ/π的绝对值不超过d/|π|，于是β必须落在给定对称区间。",
+          "worked": "某ETF政策工具的观察总体IV比率为3.5、第一阶段Cov(Z,X)=2。若允许直接效应协方差δ∈[−1,1]，则真实β可能位于[3,4]；若第一阶段降到0.2而允许同样规模的δ，半宽将从0.5放大到5，敏感性明显增强。",
+          "limitation": "这里暂把总体π与β_IV当作已知，不包含抽样误差；估计型置信集合应同时考虑第一阶段不确定性，弱工具时不宜采用普通正态近似区间。"
         }
       ],
       "links": [
@@ -681,7 +813,8 @@
           "url": "https://www.nber.org/papers/t0284"
         }
       ],
-      "checked_status": "V56严格精讲：排除限制误差在弱工具下的倍数放大"
+      "checked_status": "V70：排除限制无法直接检验时的IV敏感性区间及反例核验"
     }
-  ]
+  ],
+  "v70_revision": "2026-11-07"
 }
