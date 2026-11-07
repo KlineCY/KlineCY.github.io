@@ -82,7 +82,9 @@ class DeepeningRegression(unittest.TestCase):
         self.assertAlmostEqual(js, 0.0201355135506888)
         self.assertEqual(JSD["id"], "information-n0485")
         self.assertGreaterEqual(len(JSD["deep_sections"]), 7)
-        self.assertIn("0.02014", JSD["deep_sections"][-1]["worked"])
+        empirical = [s for s in JSD["deep_sections"] if s["title"] == "经验JSD偏差、检验方案与ETF样本依赖"]
+        self.assertEqual(len(empirical), 1)
+        self.assertIn("0.02014", empirical[0]["worked"])
 
 
 if __name__ == "__main__":
