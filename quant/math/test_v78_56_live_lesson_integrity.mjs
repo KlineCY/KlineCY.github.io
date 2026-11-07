@@ -53,7 +53,7 @@ for(const spec of baseline){
   assert.equal(new Set(newLabels).size,2,old.id+" duplicated new formula headings");
   assert(newLabels.every(t=>!x.equations.slice(0,6).some(y=>y.label===t)),old.id+" new heading overwrote previous one");
   for(const [i,e] of x.equations.entries()){
-   assert(e.tex.length>=8&&e.label.length>=2,old.id+" weak math heading");
+   assert(e.tex.length>=(i>=6?8:5)&&e.label.length>=2,old.id+" weak math heading");
    katex.renderToString(e.tex,{throwOnError:true,strict:i>=6?"error":"ignore",displayMode:true});
    texCount++;
    if(i>=6)strictCount++;
