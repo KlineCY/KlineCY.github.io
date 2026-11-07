@@ -129,7 +129,7 @@ near("FamaMacBeth t statistic",.005/.015,1/3);
 near("single feature permutation variance",2*1,2);
 near("joint feature permutation variance",8*1,8);
 near("tree optimal second-order weight",-2/(1+1),-1);
-near("tree optimal leaf improvement",-2**2/(2*(1+1)),-1);
+near("tree optimal leaf improvement",-(2**2)/(2*(1+1)),-1);
 near("XGBoost negative gain",.5*(4/3+4/3-16/4)-.1,-23/30);
 near("boost first iteration",2*.2,.4);
 near("boost second iteration",.4+.2*(2-.4),.72);
