@@ -40,19 +40,19 @@ for(const spec of baseline){
   const x=doc.lessons[old.id];count++;
   assert.equal(hash(legacy(x,old.len)),old.hash,old.id+" original V36/V37 content changed");
   assert(x.v78_note.startsWith("V78"),old.id+" V78 marker missing");
-  assert.equal(x.equations.length,8,old.id+" must preserve original six and add two equations");
-  assert.equal(x.derivation.length,8,old.id+" must preserve six derivations and add two");
-  assert.equal(x.protocol.length,7,old.id+" must preserve six protocols and add one");
-  assert.equal(x.pitfalls.length,4,old.id+" must preserve three pitfalls and add one");
-  assert(x.derivation.slice(-2).every(v=>v.length>=100),old.id+" thin new proof");
+  assert.equal(x.equations.length,spec.path==="../ml/atlas-depth-07-b.json"?10:8,old.id+" V78 original eight plus optional V84 append");
+  assert.equal(x.derivation.length,spec.path==="../ml/atlas-depth-07-b.json"?10:8,old.id+" V78 original eight derivations plus optional V84 append");
+  assert.equal(x.protocol.length,spec.path==="../ml/atlas-depth-07-b.json"?8:7,old.id+" V78 original protocol plus optional V84 append");
+  assert.equal(x.pitfalls.length,spec.path==="../ml/atlas-depth-07-b.json"?5:4,old.id+" V78 original pitfalls plus optional V84 append");
+  assert(x.derivation.slice(6,8).every(v=>v.length>=100),old.id+" original V78 new proof missing");
   assert(x.worked_example.length-old.len>=80,old.id+" thin new worked case");
-  assert(x.protocol.at(-1).length>=30&&x.pitfalls.at(-1).length>=30,old.id+" thin validation or limitations");
-  assert(/[\u3400-\u9FFF]/u.test(x.derivation.at(-1)),old.id+" CJK explanation missing");
+  assert(x.protocol.at(6).length>=30&&x.pitfalls.at(3).length>=30,old.id+" original V78 validation or limitations missing");
+  assert(/[\u3400-\u9FFF]/u.test(x.derivation.at(7)),old.id+" original V78 CJK explanation missing");
   assert(!/[\uFFFD\u200B\u200C\u200D\uFEFF]/u.test(JSON.stringify(x)),old.id+" damaged Unicode/hidden chars");
-  const newLabels=x.equations.slice(-2).map(z=>z.label);
+  const newLabels=x.equations.slice(6,8).map(z=>z.label);
   assert.equal(new Set(newLabels).size,2,old.id+" duplicated new formula headings");
   assert(newLabels.every(t=>!x.equations.slice(0,6).some(y=>y.label===t)),old.id+" new heading overwrote previous one");
-  for(const [i,e] of x.equations.entries()){
+  for(const [i,e] of x.equations.slice(0,8).entries()){
    assert(e.tex.length>=(i>=6?8:5)&&e.label.length>=2,old.id+" weak math heading");
    katex.renderToString(e.tex,{throwOnError:true,strict:i>=6?"error":"ignore",displayMode:true});
    texCount++;
