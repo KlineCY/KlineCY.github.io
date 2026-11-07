@@ -74,7 +74,7 @@ near(.2*Math.sqrt(2*Math.log(100)),.6069708517540585,"DSR effective model search
 near(3*2**2+.1**2,12.01,"cubic gradient central-difference error");
 near(3*2**2+.01**2,12.0001,"cubic gradient smaller step");
 near(785**2,616225,"ViT small patch attention pairs");
-near(616225/38809,15.878017985518821,"ViT smaller-patch quadratic ratio",1e-6);
+near(616225/38809,15.878404493802984,"ViT smaller-patch quadratic ratio",1e-6);
 near(.8*.6+.2*.2,.52,"joint path marginal probability");
 near(.48/.52,12/13,"joint path backward conditional probability");
 near(1/(1+2+1),.25,"masked Encoder first key probability");
