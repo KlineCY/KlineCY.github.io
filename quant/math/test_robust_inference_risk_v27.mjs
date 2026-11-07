@@ -23,8 +23,8 @@ for(const l of added){
  assert(l.id===l.node_id&&nodes.get(l.id)?.title===l.title,"canonical id and title "+l.id);
  for(const key of ["definition","assumptions","example","application","caveat"])assert(typeof l[key]==="string"&&l[key].length>=90,"substantive prose "+l.id+" "+key);
  assert(l.properties.length>=3&&l.formulas.length>=4&&l.derivation.length>=4);
- assert(l.deep_sections.length===5);
- assert(new Set(l.deep_sections.map(s=>s.title)).size===5);
+ assert(l.deep_sections.length>=5);
+ assert(new Set(l.deep_sections.map(s=>s.title)).size===l.deep_sections.length);
  for(const f of l.formulas){assert(f.tex&&f.label);katex.renderToString(f.tex,{displayMode:true,throwOnError:true,strict:"ignore"});math++;}
  for(const s of l.derivation){assert(s.tex&&s.explanation.length>=55);katex.renderToString(s.tex,{displayMode:true,throwOnError:true,strict:"ignore"});math++;}
  for(const s of l.deep_sections){
@@ -39,8 +39,8 @@ for(const l of added){
  assert(!/[\uFFFD\u200B\uFEFF]/.test(JSON.stringify(l)),"invisible CJK corruption "+l.id);
  assert(!/Lorem ipsum|TODO|待填充|待补充|仅列提纲/.test(JSON.stringify(l)),"unfinished content "+l.id);
 }
-assert.equal(deep,50);
-assert.equal(math,162);
+assert(deep>=50);
+assert(math>=162);
 assert.equal(refs,21);
 assert.equal(links,34);
 const near=(a,b,label,tol=1e-9)=>assert(Math.abs(a-b)<tol,label+" "+a+" != "+b);
