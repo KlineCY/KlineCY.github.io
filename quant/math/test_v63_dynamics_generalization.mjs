@@ -1,0 +1,74 @@
+import fs from "node:fs";
+import assert from "node:assert/strict";
+import katex from "katex";
+
+const root = new URL("./", import.meta.url);
+const read = (p) => JSON.parse(fs.readFileSync(new URL(p, root), "utf8"));
+const math = [...read("./lessons-phase-26-a.json").lessons, ...read("./lessons-phase-26-b.json").lessons];
+const ml = {...read("../ml/atlas-depth-16-c.json").lessons, ...read("../ml/atlas-depth-16-d.json").lessons};
+const mathIds = ["timeseries-n0260","timeseries-n0261","timeseries-n0262","timeseries-n0266","timeseries-n0267","timeseries-n0269","timeseries-n0270"];
+const mlIds = ["m13-c05-p01","m14-c04-p03","m15-c05-p01","m16-c01-p01","m17-c02-p01","m18-c02-p03","m19-c02-p03","m20-c01-p05","m21-c05-p05","m22-c05-p06","m23-c03-p06"];
+assert.deepEqual(math.map(x=>x.id),mathIds);
+let mathExpressions = 0;
+const render = (tex) => {
+ assert(typeof tex === "string" && tex.trim().length > 0, "missing mathematical expression");
+ katex.renderToString(tex,{throwOnError:true,strict:"ignore",displayMode:true});
+ mathExpressions++;
+};
+for(const l of math){
+ assert(l.node_id===l.id&&l.deep_sections.length>=6,l.id+" complete deep sections");
+ assert(l.formulas.length>=8&&l.derivation.length>=6,l.id+" formula and proof count");
+ assert.equal(new Set(l.deep_sections.map(x=>x.title)).size,l.deep_sections.length,l.id+" duplicated deep sections");
+ const d=l.deep_sections.at(-1);
+ assert(d.paragraphs.length===2&&d.paragraphs.every(p=>p.length>=40),l.id+" substantive Chinese paragraphs");
+ assert(d.proof.length>=85&&d.worked.length>=85&&d.limitation.length>=40,l.id+" complete proof/example/caveat");
+ assert(d.formulas.length===2,l.id+" two added derivation formulas");
+ for(const f of [...l.formulas,...l.derivation,...l.deep_sections.flatMap(x=>x.formulas)])render(f.tex);
+ assert(!/[\uFFFD\u200B\uFEFF]/.test(JSON.stringify(l)),l.id+" Chinese encoding");
+}
+for(const id of mlIds){
+ const l=ml[id];
+ assert(l,id+" ML lesson missing");
+ assert(l.equations.length>=8&&l.derivation.length>=8,id+" math and derivation extension");
+ assert(l.worked_example.length>=140&&l.pitfalls.length>=3&&l.protocol.length>=3,id+" worked example and guardrails");
+ assert(l.derivation.slice(-2).every(x=>x.length>=70),id+" detailed added reasoning");
+ for(const f of l.equations)render(f.tex);
+ assert(!/[\uFFFD\u200B\uFEFF]/.test(JSON.stringify(l)),id+" encoding");
+}
+const near=(actual,expected,label,tol=1e-9)=>assert(Math.abs(actual-expected)<=tol,label+": "+actual+" != "+expected);
+near(.8**2+.6**2,1,"Cholesky second-row unit variance");
+near(1+.6**2,1.36,"generalized FEVD overlap");
+near(1/1.36+.36/1.36,1,"normalized generalized FEVD");
+near((.2/.1)**2,4,"Granger robust Wald");
+near(.10*.02**2,.00004,"GJR sign effect");
+near((.05+.85+.10/2)*.00004,.000038,"GJR persistence of negative shock");
+near(.1*1+.1*4+.8*1,1.3,"DCC Q diagonal");
+near(.1*.2+.1*2+.8*.2,.38,"DCC Q cross");
+near(.38/Math.sqrt(1.3),.3332820473366711,"DCC normalized rho",1e-8);
+near(.2*.3*.38/Math.sqrt(1.3),.01999692284020027,"DCC conditional covariance",1e-8);
+near(.1495*3.3/4,.1233375,"fractional impulse k4");
+near(.5*.0001+.5*.0009+.25*.02**2,.0006,"Markov mixture variance");
+near((4*1+2*4)/6,2,"weighted mini batch gradient");
+near(4*5/2*2,20,"causal multi-head valid attention pairs");
+near(2*4**2,32,"dense attention scores");
+near(10**2+.5**2,100.25,"non-normal SSM transient norm squared");
+near(.75*(1-.75),.1875,"softmax diagonal Jacobian");
+near(.9**2,.81,"MLM pseudo-likelihood");
+near((2+4)/2,3,"GCN residual node1");
+near((6+4)/2,5,"GCN residual node2");
+near(Math.log(1/.9),.10536051565782628,"forward KL missing minority");
+near(.5*Math.log(.5/.9)+.5*Math.log(.5/.1),.5108256237659907,"diverse approximate posterior KL");
+near((.5)/(1-.5),1,"Bellman residual error bound");
+near(.5*.2*4+.5*.8*(-1),0,"limit fill selection expected profit");
+near(.5*4+.5*(-1),1.5,"naive full fill simulation bias");
+near(.8/.2,4,"conditional drift error ratio");
+near(2*(.61-.8)**2,.0722,"KKT perturbed constrained objective");
+near(.08-.0722,.0078,"KKT actual constraint relaxation gain");
+near(4*(.8-.6),.8,"KKT shadow price");
+const css=fs.readFileSync(new URL("./styles.css",root),"utf8");
+const mlcss=fs.readFileSync(new URL("../ml/atlas.css",root),"utf8");
+for(const k of ["overflow-x:auto","line-break:strict","@media print",":focus-visible"])assert(css.includes(k),"math CJK/print/katex style "+k);
+for(const k of ["overflow-x:auto","line-break:strict","@media print",":focus-visible"])assert(mlcss.includes(k),"ML CJK/print/katex style "+k);
+const mathHome=fs.readFileSync(new URL("./index.html",root),"utf8");
+for(const id of mathIds)assert(mathHome.includes("?topic="+id),"canonical math path missing "+id);
+console.log("PASS V63: 7 dynamic-risk math courses + 11 ML courses; "+mathExpressions+" strict KaTeX formulas; 29 numerical identities; CJK and print layout safeguards");

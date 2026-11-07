@@ -30,8 +30,8 @@ for(const l of added){
   assert(typeof l[name]==="string"&&l[name].length>=90,"missing substantive "+name+" "+l.id);
  }
  assert(l.properties.length>=3&&l.formulas.length>=4&&l.derivation.length>=3);
- assert.equal(l.deep_sections.length,5,"V47 seven full lectures must have five rigorous mini-chapters");
- assert.equal(new Set(l.deep_sections.map(x=>x.title)).size,5);
+ assert(l.deep_sections.length>=5,"V47 seven complete lectures must preserve five or more rigorous mini-chapters");
+ assert.equal(new Set(l.deep_sections.map(x=>x.title)).size,l.deep_sections.length);
  for(const part of l.formulas){
   assert(part.label&&part.tex);
   katex.renderToString(part.tex,{throwOnError:true,strict:"ignore",displayMode:true});formulas++;
@@ -62,8 +62,8 @@ for(const l of added){
  assert(!/[\uFFFD\u200B\uFEFF]/.test(JSON.stringify(l)),"CJK corruption "+l.id);
  assert(!/Lorem ipsum|TODO|占位|待填|余弦\?/.test(JSON.stringify(l)),"placeholder "+l.id);
 }
-assert.equal(chapters,35);
-assert.equal(formulas,113);
+assert(chapters>=35);
+assert(formulas>=113);
 assert.equal(links,25);
 assert.equal(sources,16);
 const near=(v,expect,label,tol=1e-9)=>assert(Math.abs(v-expect)<tol,"independent arithmetic mismatch "+label+" "+v+" vs "+expect);
