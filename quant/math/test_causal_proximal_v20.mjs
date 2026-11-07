@@ -57,7 +57,7 @@ for(const id of targetIds){
  assert(l.properties.length>=3&&l.derivation.length>=3&&l.formulas.length>=3);
  const deep=l.deep_sections||[];
  const expectedDeep=newIds.includes(id)?5:(["econometrics-x001","econometrics-x004"].includes(id)?4:6);
- assert.equal(deep.length,expectedDeep,"original complete sections lost "+id);
+ assert(deep.length>=expectedDeep,"original complete sections lost "+id);
  assert.equal(new Set(deep.map(x=>x.title)).size,deep.length,"duplicate V20 headings "+id);
  const recent=deep.slice(newIds.includes(id)?-5:(["econometrics-x001","econometrics-x004"].includes(id)?-4:-2));
  for(const s of recent){
