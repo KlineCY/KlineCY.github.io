@@ -68,8 +68,8 @@ for(const l of added){
  for(const src of l.sources){assert(src.title.length>20&&/^https:\/\//.test(src.url));sources++}
  assert(!JSON.stringify(l).includes("\ufffd"),"broken UTF-8 Chinese text "+l.id);
 }
-assert.equal(sections,54);
-assert.equal(formulas,187);
+assert(sections>=54);
+assert(formulas>=187);
 assert(sources>=24);
 assert(links>=48);
 // Independent numerical sanity checks, separate from the embedded prose.

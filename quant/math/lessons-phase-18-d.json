@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "revision": "2026-11-06",
-  "focus": "Almgren–Chriss变分最优执行、椭球鲁棒均值配置与交易容量（仅存净新增知识点；已有课程内容原位深化，防止ID重复）",
+  "revision": "2026-11-07",
+  "focus": "Almgren–Chriss变分最优执行、椭球鲁棒均值配置与交易容量（仅存净新增知识点；已有课程内容原位深化，防止ID重复）；V69 AC速度形状及参与率鲁棒容量",
   "lessons": [
     {
       "id": "optimization-x004",
@@ -34,6 +34,14 @@
         {
           "label": "Almgren–Chriss最优路径的起始成交速率",
           "tex": "x^\\star(t)=X\\frac{\\sinh(\\kappa(T-t))}{\\sinh(\\kappa T)}\\ \\Longrightarrow\\ v^\\star(0)=-\\dot x^\\star(0)=\\kappa X\\coth(\\kappa T)"
+        },
+        {
+          "label": "解析最优路径的全过程交易速度",
+          "tex": "v^\\star(t)=-\\dot x^\\star(t)=\\frac{\\kappa X\\cosh(\\kappa(T-t))}{\\sinh(\\kappa T)}"
+        },
+        {
+          "label": "起点与终点速度比及风险中性极限",
+          "tex": "\\frac{v^\\star(0)}{v^\\star(T)}=\\cosh(\\kappa T)\\ge1,\\qquad\\lim_{\\kappa\\to0}v^\\star(t)=\\frac XT"
         }
       ],
       "derivation": [
@@ -52,6 +60,10 @@
         {
           "explanation": "对x*(t)=X sinh(κ(T−t))/sinh(κT)求时间导数得−κX cosh(κ(T−t))/sinh(κT)，卖出速率v=−xdot。在t=0，v*(0)=κXcoth(κT)。由于对z>0有zcosh z>sinh z，即z coth z>1，因此v*(0)>X/T。",
           "tex": "\\dot x^\\star(t)=-\\kappa X\\frac{\\cosh(\\kappa(T-t))}{\\sinh(\\kappa T)}"
+        },
+        {
+          "explanation": "对x*(t)=X sinh(κ(T−t))/sinh(κT)求导，链式法则带来−κ，因此v*(t)=κXcosh(κ(T−t))/sinh(κT)。将t=0和T代入，速度比为cosh(κT)。当κ趋近0时，sinh(κT)~κT、cosh(κ(T−t))~1，所以各固定t的成交速度趋于X/T。风险厌恶变大使κ增大，在给定T下起点相对末尾速度提高。",
+          "tex": "v^\\star(t)=-\\dot x^\\star(t)=\\frac{\\kappa X\\cosh(\\kappa(T-t))}{\\sinh(\\kappa T)}"
         }
       ],
       "example": "设起始库存X=10、期限T=1、η=1并取λσ²=2，则κ=√(2/2)=1，解析路径x(t)=10sinh(1−t)/sinh(1)。在t=0.5时x≈4.434，早于等速路径的x=5；到t=1时严格归零。若λ=0，κ→0后恢复x(t)=10(1−t)，中点库存为5。",
@@ -142,6 +154,27 @@
           "proof": "对x*(t)=X sinh(κ(T−t))/sinh(κT)求时间导数得−κX cosh(κ(T−t))/sinh(κT)，卖出速率v=−xdot。在t=0，v*(0)=κXcoth(κT)。由于对z>0有zcosh z>sinh z，即z coth z>1，因此v*(0)>X/T。",
           "worked": "设X=10、T=1、κ=1，起始卖速v*(0)=10 coth(1)≈13.13035股/单位时间，高于TWAP等速10。相同模型中点库存约4.434而非5，说明其早卖倾向。",
           "limitation": "这里只给连续时间无容量约束下的风险成本最优路径，成交速率与实际订单笔数不能直接等同。永久冲击、离散报价、可成交量及价格跳跃可能改变可执行性。"
+        },
+        {
+          "title": "Almgren–Chriss执行速度的期初与期末形状",
+          "question": "为什么风险厌恶越高，前期成交越快，但风险中性极限会回到匀速路径？",
+          "paragraphs": [
+            "连续时间Almgren–Chriss模型以交易冲击二次成本和剩余库存的价格方差惩罚为目标；起始库存X>0、终点库存0时，其解析剩余库存呈双曲正弦路径。对路径求时间导数可以直接观察成交速度随剩余时间的变化，也可以把风险中性的匀速极限从双曲函数的局部展开推导出来。",
+            "模型中临时冲击系数、库存风险厌恶和资产收益波动率都有明确单位。实盘ETF执行还存在参与率限制、停牌风险及订单不可立即成交，因此连续解析路径是基准而非自动可实现的订单清单。"
+          ],
+          "formulas": [
+            {
+              "label": "解析最优路径的全过程交易速度",
+              "tex": "v^\\star(t)=-\\dot x^\\star(t)=\\frac{\\kappa X\\cosh(\\kappa(T-t))}{\\sinh(\\kappa T)}"
+            },
+            {
+              "label": "起点与终点速度比及风险中性极限",
+              "tex": "\\frac{v^\\star(0)}{v^\\star(T)}=\\cosh(\\kappa T)\\ge1,\\qquad\\lim_{\\kappa\\to0}v^\\star(t)=\\frac XT"
+            }
+          ],
+          "proof": "对x*(t)=X sinh(κ(T−t))/sinh(κT)求导，链式法则带来−κ，因此v*(t)=κXcosh(κ(T−t))/sinh(κT)。将t=0和T代入，速度比为cosh(κT)。当κ趋近0时，sinh(κT)~κT、cosh(κ(T−t))~1，所以各固定t的成交速度趋于X/T。风险厌恶变大使κ增大，在给定T下起点相对末尾速度提高。",
+          "worked": "取X=10、T=1、κ=1，则v*(0)=10coth(1)≈13.13035、v*(1)=10/sinh(1)≈8.50918；两者之比cosh(1)≈1.54308。风险中性极限κ→0时各时点成交速度都接近10；解析路径在T结束时完整执行。",
+          "limitation": "该速度轨迹允许连续可分的交易数量、没有逐时容量限制，且波动率与冲击参数固定；期初先成交不意味着允许无限速冲击或真实流动性成本不变。"
         }
       ],
       "links": [
@@ -176,7 +209,7 @@
           "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=53501"
         }
       ],
-      "checked_status": "V55严格精讲：风险厌恶如何提高最优执行的初始成交速度"
+      "checked_status": "V69：Almgren–Chriss执行速度的期初与期末形状，含严格应用边界"
     },
     {
       "id": "optimization-x006",
@@ -209,6 +242,14 @@
         {
           "label": "流动性预测下界带来的保守容量约束",
           "tex": "V_k\\ge\\underline V_k\\ge0,\\quad |q_k|\\le p\\,\\underline V_k\\ \\Longrightarrow\\ \\sum_k|q_k|\\le p\\sum_k\\underline V_k"
+        },
+        {
+          "label": "保守流动性下的总执行上界",
+          "tex": "\\sum_{k=1}^N |q_k|\\le p\\sum_{k=1}^N\\underline V_k\\quad\\text{when }|q_k|\\le p\\underline V_k"
+        },
+        {
+          "label": "指定全部完成数量的鲁棒必要条件",
+          "tex": "|Q|\\le p\\sum_{k=1}^N\\underline V_k\\quad\\text{necessary if }\\sum_kq_k=Q"
         }
       ],
       "derivation": [
@@ -227,6 +268,10 @@
         {
           "explanation": "若计划要求每段成交|q_k|≤pV_under,k，而真实市场成交量满足V_k≥V_under,k，则计划数量一定不违反基于真实成交量的参与率上限pV_k。各段上限相加给出保守容量总额pΣV_under。若目标Q超过这一总额，则该保守方案无法按原期限完成全部数量。",
           "tex": "\\underline V_k=(\\widehat V_k-\\Delta_k)_+,\\quad Q\\le p\\sum_k\\underline V_k\\quad\\text{作为保守设计门槛}"
+        },
+        {
+          "explanation": "逐时段成交量约束|q_k|≤pV_lower,k，对k求和便得到总绝对成交量不超过pΣV_lower,k。由三角不等式|Σq_k|≤Σ|q_k|，并使用Σq_k=Q，就得到|Q|≤pΣV_lower,k的必要条件。即使满足该式，仍可能因离散手数、具体时段买卖方向或未成交订单而不能按原计划完成。",
+          "tex": "\\sum_{k=1}^N |q_k|\\le p\\sum_{k=1}^N\\underline V_k\\quad\\text{when }|q_k|\\le p\\underline V_k"
         }
       ],
       "example": "每个执行时段市场成交量预测为V=20000股，事先设定最大参与率p=0.10，则单时段容量上限为2000股。若需要买入5000股且三个时段流动性条件相同，至少ceil(5000/2000)=3个时段才有可能满足数量约束；两时段最大4000股，期限内根本不可行。即使三个时段上限合计6000股，也不能保证真实成交5000股。",
@@ -317,6 +362,27 @@
           "proof": "若计划要求每段成交|q_k|≤pV_under,k，而真实市场成交量满足V_k≥V_under,k，则计划数量一定不违反基于真实成交量的参与率上限pV_k。各段上限相加给出保守容量总额pΣV_under。若目标Q超过这一总额，则该保守方案无法按原期限完成全部数量。",
           "worked": "三个交易时段预测成交量各20000股，预测误差下界为各时段至少15000股，参与率上限10%。预测口径的三段总容量6000股，但保守容量为3×1500=4500股；需要买5000股时，预测容量看似足够，保守计划却无法保证数量限制。",
           "limitation": "真实成交量下界若只在概率意义成立，容量结论也只是相应置信水平下的保证。满足参与率上限并不证明能以给定限价成交，且买入与卖空可用流动性不同。"
+        },
+        {
+          "title": "保守参与率容量与不确定成交量的鲁棒可行性",
+          "question": "预测成交量足够并不代表交易计划在较差流动性情景下仍可执行，如何构建必要的安全裕度？",
+          "paragraphs": [
+            "容量约束一般用实际成交量的固定比例作为策略允许的最大交易规模，但决定订单时未来期间总成交量并不知道。可用截至决策时点的保守预测下界V_lower而不是事后完整成交量，形成事前可实现的鲁棒上限。即使目标总量低于总容量，这也只是在忽略委托成交失败及价格冲击后的必要可行性检验。",
+            "对多空ETF策略，应同时检查多头与空头腿、借券容量、资金占用和净敞口约束。特定ETF的日均成交额并不等于在任意价格、任意时点都可以按同一参与率成交，预测误差会影响实际滑点与价格冲击。"
+          ],
+          "formulas": [
+            {
+              "label": "保守流动性下的总执行上界",
+              "tex": "\\sum_{k=1}^N |q_k|\\le p\\sum_{k=1}^N\\underline V_k\\quad\\text{when }|q_k|\\le p\\underline V_k"
+            },
+            {
+              "label": "指定全部完成数量的鲁棒必要条件",
+              "tex": "|Q|\\le p\\sum_{k=1}^N\\underline V_k\\quad\\text{necessary if }\\sum_kq_k=Q"
+            }
+          ],
+          "proof": "逐时段成交量约束|q_k|≤pV_lower,k，对k求和便得到总绝对成交量不超过pΣV_lower,k。由三角不等式|Σq_k|≤Σ|q_k|，并使用Σq_k=Q，就得到|Q|≤pΣV_lower,k的必要条件。即使满足该式，仍可能因离散手数、具体时段买卖方向或未成交订单而不能按原计划完成。",
+          "worked": "三个时段预测市场成交量均为20000股、参与率上限10%，按点预测每段最多2000股、合计6000股，购买5000股看似可行。若每段保守成交量下界只有15000股，每段最大1500股、合计4500股，便无法在三段时间内完成5000股，需延长时间或降低交易规模。",
+          "limitation": "保守预测下界不是必然成立的确定边界，其置信程度、模型更新频率和异常流动性跳变需要报告；真实成交仍受订单簿、冲击和交易对手影响。"
         }
       ],
       "links": [
@@ -351,7 +417,7 @@
           "url": "https://www.cfainstitute.org/insights/professional-learning/refresher-readings/2026/analysis-active-portfolio-management"
         }
       ],
-      "checked_status": "V55严格精讲：流动性不确定时执行容量的保守可行性判断"
+      "checked_status": "V69：保守参与率容量与不确定成交量的鲁棒可行性，含严格应用边界"
     }
   ]
 }

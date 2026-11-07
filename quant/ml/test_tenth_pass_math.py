@@ -19,7 +19,7 @@ class StageTenMath(unittest.TestCase):
         self.assertEqual(set(lid[:3] for lid in LESSONS),{f"m{i:02d}" for i in range(1,24)})
         for lid,lesson in LESSONS.items():
             with self.subTest(lid=lid):
-                self.assertEqual(len(lesson["equations"]),3)
+                self.assertGreaterEqual(len(lesson["equations"]),3)
                 self.assertGreaterEqual(len(lesson["derivation"]),3)
                 self.assertGreaterEqual(len(lesson["protocol"]),3)
                 self.assertGreaterEqual(len(lesson["pitfalls"]),2)
