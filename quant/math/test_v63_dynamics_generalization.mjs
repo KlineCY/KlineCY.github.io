@@ -71,4 +71,4 @@ for(const k of ["overflow-x:auto","line-break:strict","@media print",":focus-vis
 for(const k of ["overflow-x:auto","line-break:strict","@media print",":focus-visible"])assert(mlcss.includes(k),"ML CJK/print/katex style "+k);
 const mathHome=fs.readFileSync(new URL("./index.html",root),"utf8");
 for(const id of mathIds)assert(mathHome.includes("?topic="+id),"canonical math path missing "+id);
-console.log("PASS V63: 7 dynamic-risk math courses + 11 ML courses; "+mathExpressions+" strict KaTeX formulas; 27 numerical identities; CJK and print layout safeguards");
+console.log("PASS V63: 7 dynamic-risk math courses + 11 ML courses; "+mathExpressions+" strict KaTeX formulas; 29 numerical identities; CJK and print layout safeguards");
