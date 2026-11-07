@@ -24,7 +24,7 @@ assert.equal(core.length+manifest.modules.reduce((n,m)=>n+m.lessons,0),324);
 const lessons=groups.flatMap(([p,ids])=>{
  const data=read(p);
  assert.equal(data.version,1);
- assert.equal(data.revision,"2026-11-05");
+ assert.equal(data.revision,p==="lessons-phase-01-c.json"?"2026-11-07":"2026-11-05");
  const selected=data.lessons.filter(x=>ids.includes(x.id));
  assert.deepEqual(selected.map(x=>x.id),ids,"original canonical ordering "+p);
  return selected;
@@ -35,9 +35,9 @@ for(const l of lessons){
  assert.equal(nodes.get(l.id)?.title,l.title,l.id+" canonical title");
  assert(l.checked_status.startsWith("V32系统深化"));
  for(const k of ["definition","assumptions","example","application","caveat"])assert(l[k]?.length>=45,l.id+" "+k);
- assert.equal(l.deep_sections?.length,4,l.id+" deep section count");
- assert.equal(new Set(l.deep_sections.map(x=>x.title)).size,4,l.id+" distinct proof sections");
- for(const s of l.deep_sections){
+ assert(l.deep_sections?.length>=4,l.id+" original deep section count");
+ assert.equal(new Set(l.deep_sections.slice(0,4).map(x=>x.title)).size,4,l.id+" original distinct proof sections");
+ for(const s of l.deep_sections.slice(0,4)){
   assert(s.question.length>=6 && s.title.length>=6,l.id+" question");
   assert.equal(s.paragraphs.length,2,l.id+" prose structure");
   assert(s.paragraphs.every(x=>x.length>=45),l.id+" detailed paragraphs");
