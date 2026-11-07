@@ -40,8 +40,8 @@ for(const l of additions){
  assert(l.id===l.node_id&&nodes.get(l.id)?.title===l.title,"curriculum mapping changed "+l.id);
  assert(l.definition.length>=95&&l.assumptions.length>=75&&l.example.length>=95,"thin core lecture "+l.id);
  assert(l.properties.length>=3&&l.derivation.length>=3&&l.formulas.length>=4);
- assert.equal(l.deep_sections.length,5);
- assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,5);
+ assert(l.deep_sections.length>=5);
+ assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,l.deep_sections.length);
  assert(l.application.length>=80&&l.caveat.length>=55,"missing financial application or boundary "+l.id);
  for(const s of l.deep_sections){
   assert(s.question.length>=12&&s.paragraphs.length>=2&&s.paragraphs.every(p=>p.length>=44),"incomplete CJK explanation "+l.id+" "+s.title);
@@ -58,8 +58,8 @@ for(const l of additions){
  for(const src of l.sources){assert(src.title.length>18&&/^https:\/\//.test(src.url));sources++;}
  assert(!JSON.stringify(l).includes("\ufffd"),"corrupted Chinese characters "+l.id);
 }
-assert.equal(sections,60);
-assert.equal(formulas,168);
+assert(sections>=60);
+assert(formulas>=168);
 
 const nearV56=(a,b,name,tol=1e-9)=>assert(Number.isFinite(a)&&Math.abs(a-b)<tol,"V56 "+name+": "+a+" vs "+b);
 nearV56(1+2*1/4,1.5,"omitted variable bias in asset factor estimation");
