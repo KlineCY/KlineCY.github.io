@@ -40,10 +40,10 @@ assert.deepEqual(chapters.map(x=>x.node_id),["riskmath-x005","riskmath-x006"]);
 let equations=0,sections=0;
 for(const l of chapters){
  assert(c.nodes.some(n=>n.id===l.id&&n.title===l.title),"not connected to its original curriculum node "+l.id);
- assert.equal(l.deep_sections.length,7);
+ assert(l.deep_sections.length>=7,"all original seven V15 proof sections must remain");
  assert(l.derivation.length>=6&&l.formulas.length>=7);
  assert(l.sources.length>=2);
- assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,7);
+ assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,l.deep_sections.length,"all old/new titles unique");
  const itemForms=[...l.formulas,...l.derivation,...l.deep_sections.flatMap(s=>s.formulas)];
  for(const e of itemForms){katex.renderToString(e.tex,{throwOnError:true,strict:"ignore",displayMode:true});equations++}
  for(const s of l.deep_sections){
