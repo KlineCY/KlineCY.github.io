@@ -82,7 +82,7 @@ near("logistic unidentifiable likelihood",-3*Math.log(2),-2.0794415416798357);
 near("mixture Gaussian second moment",(.5*1+.5*9),5);
 near("mixture Gaussian fourth moment",.5*3*1**2+.5*3*9**2,123);
 near("mixture kurtosis",123/5**2,4.92);
-near("uniform convergence risk radius",Math.sqrt(Math.log(4000)/2000),.0643978756021457,1e-8);
+near("uniform convergence risk radius",Math.sqrt(Math.log(4000)/2000),.06439739761862287,1e-8);
 near("mean replacement n100",1/100,.01);
 near("mean replacement n200",1/200,.005);
 near("OOD nonoverlap test error",.5*1+.5*0,.5);
