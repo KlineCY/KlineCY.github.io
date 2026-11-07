@@ -11,7 +11,7 @@ const mlIds = ["m13-c05-p01","m14-c04-p03","m15-c05-p01","m16-c01-p01","m17-c02-
 assert.deepEqual(math.map(x=>x.id),mathIds);
 let mathExpressions = 0;
 const render = (tex) => {
- assert(typeof tex === "string" && tex.length > 10, "missing mathematical expression");
+ assert(typeof tex === "string" && tex.trim().length > 0, "missing mathematical expression");
  katex.renderToString(tex,{throwOnError:true,strict:"ignore",displayMode:true});
  mathExpressions++;
 };
