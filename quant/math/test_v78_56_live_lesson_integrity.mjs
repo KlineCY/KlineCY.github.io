@@ -40,10 +40,10 @@ for(const spec of baseline){
   const x=doc.lessons[old.id];count++;
   assert.equal(hash(legacy(x,old.len)),old.hash,old.id+" original V36/V37 content changed");
   assert(x.v78_note.startsWith("V78"),old.id+" V78 marker missing");
-  assert.equal(x.equations.length,spec.path==="../ml/atlas-depth-07-b.json"?10:8,old.id+" V78 original eight plus optional V84 append");
-  assert.equal(x.derivation.length,spec.path==="../ml/atlas-depth-07-b.json"?10:8,old.id+" V78 original eight derivations plus optional V84 append");
-  assert.equal(x.protocol.length,spec.path==="../ml/atlas-depth-07-b.json"?8:7,old.id+" V78 original protocol plus optional V84 append");
-  assert.equal(x.pitfalls.length,spec.path==="../ml/atlas-depth-07-b.json"?5:4,old.id+" V78 original pitfalls plus optional V84 append");
+  assert.equal(x.equations.length,["../ml/atlas-depth-07-b.json","../ml/atlas-depth-07-c.json"].includes(spec.path)?10:8,old.id+" V78 original eight plus optional V84 append");
+  assert.equal(x.derivation.length,["../ml/atlas-depth-07-b.json","../ml/atlas-depth-07-c.json"].includes(spec.path)?10:8,old.id+" V78 original eight derivations plus optional V84 append");
+  assert.equal(x.protocol.length,["../ml/atlas-depth-07-b.json","../ml/atlas-depth-07-c.json"].includes(spec.path)?8:7,old.id+" V78 original protocol plus optional V84 append");
+  assert.equal(x.pitfalls.length,["../ml/atlas-depth-07-b.json","../ml/atlas-depth-07-c.json"].includes(spec.path)?5:4,old.id+" V78 original pitfalls plus optional V84 append");
   assert(x.derivation.slice(6,8).every(v=>v.length>=100),old.id+" original V78 new proof missing");
   assert(x.worked_example.length-old.len>=80,old.id+" thin new worked case");
   assert(x.protocol.at(6).length>=30&&x.pitfalls.at(3).length>=30,old.id+" original V78 validation or limitations missing");

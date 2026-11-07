@@ -1,0 +1,134 @@
+import fs from "node:fs";
+import assert from "node:assert/strict";
+import katex from "katex";
+const root=new URL("./",import.meta.url);
+const mathSpec=[{"file":"lessons-phase-07-c.json","id":"linear-x005","hash":"f96b82ad","sections":4},{"file":"lessons-phase-07-d.json","id":"linear-x006","hash":"b17d72de","sections":4},{"file":"lessons-phase-08-a.json","id":"optimization-x008","hash":"68f0d84a","sections":6},{"file":"lessons-phase-08-a.json","id":"optimization-x009","hash":"f9d91f3c","sections":6},{"file":"lessons-phase-08-b.json","id":"optimization-x010","hash":"d178b69a","sections":6},{"file":"lessons-phase-08-c.json","id":"statistics-x006","hash":"a2cf7604","sections":4},{"file":"lessons-phase-08-d.json","id":"timeseries-n0263","hash":"ccf5a3e4","sections":4},{"file":"lessons-phase-08-d.json","id":"timeseries-n0264","hash":"1e9ecef0","sections":4},{"file":"lessons-phase-08-d.json","id":"timeseries-n0265","hash":"d4eb63df","sections":4},{"file":"lessons-phase-09-a.json","id":"timeseries-n0242","hash":"33f14823","sections":4},{"file":"lessons-phase-09-a.json","id":"timeseries-n0243","hash":"27ff11cf","sections":4},{"file":"lessons-phase-09-a.json","id":"timeseries-n0247","hash":"f2911704","sections":4},{"file":"lessons-phase-09-a.json","id":"timeseries-n0268","hash":"29b2bc77","sections":4},{"file":"lessons-phase-09-b.json","id":"linear-n0075","hash":"46f6fc25","sections":4},{"file":"lessons-phase-09-b.json","id":"linear-n0078","hash":"bd037c19","sections":4},{"file":"lessons-phase-09-b.json","id":"linear-n0083","hash":"fe387a0f","sections":4},{"file":"lessons-phase-09-c.json","id":"linear-n0086","hash":"de3ae272","sections":4},{"file":"lessons-phase-09-c.json","id":"regression-n0205","hash":"175bb439","sections":4},{"file":"lessons-phase-09-c.json","id":"regression-n0206","hash":"4c7f8e5b","sections":4}];
+const mlSpec=[{"id":"m05-c02-p04","hash":"dfdd315b","equations":8,"derivation":8,"protocol":7,"pitfalls":4,"workedLength":377},{"id":"m05-c04-p04","hash":"f1ddc41a","equations":8,"derivation":8,"protocol":7,"pitfalls":4,"workedLength":344},{"id":"m05-c03-p01","hash":"cff34cb4","equations":8,"derivation":8,"protocol":7,"pitfalls":4,"workedLength":373},{"id":"m05-c04-p01","hash":"26ba42d8","equations":8,"derivation":8,"protocol":7,"pitfalls":4,"workedLength":332},{"id":"m06-c05-p02","hash":"ca49b381","equations":8,"derivation":8,"protocol":7,"pitfalls":4,"workedLength":360},{"id":"m06-c05-p05","hash":"781f0506","equations":8,"derivation":8,"protocol":7,"pitfalls":4,"workedLength":331},{"id":"m06-c01-p04","hash":"056793c3","equations":8,"derivation":8,"protocol":7,"pitfalls":4,"workedLength":339},{"id":"m06-c03-p01","hash":"7ac71afe","equations":8,"derivation":8,"protocol":7,"pitfalls":4,"workedLength":376}];
+const read=p=>fs.readFileSync(new URL(p,root),"utf8");
+const json=p=>JSON.parse(read(p));
+function hash(o){let h=2166136261>>>0;for(const c of JSON.stringify(o))h=Math.imul(h^c.charCodeAt(0),16777619)>>>0;return h.toString(16).padStart(8,"0")}
+function cjk(x,id){const s=JSON.stringify(x);assert(!/[\uFFFD\u200B\u200C\u200D\uFEFF]/u.test(s),id+" damaged Unicode");assert(!/TODO|FIXME|Lorem ipsum/i.test(s),id+" unfinished placeholder");assert(/[\u3400-\u9FFF]/u.test(s),id+" missing Chinese exposition");}
+let mathCount=0,mlCount=0,texCount=0;
+const mathCache=new Map();
+for(const spec of mathSpec){
+ const d=mathCache.get(spec.file)??json(spec.file);mathCache.set(spec.file,d);
+ assert(d.v85_revision?.ids.includes(spec.id),spec.id+" V85 registration missing");
+ const lesson=d.lessons.find(x=>x.id===spec.id);
+ assert(lesson&&lesson.node_id===spec.id,"canonical node/lesson missing "+spec.id);
+ assert.equal(hash({...lesson,deep_sections:lesson.deep_sections.slice(0,spec.sections)}),spec.hash,spec.id+" original content changed");
+ assert.equal(lesson.deep_sections.length,spec.sections+1,spec.id+" one new full proof section expected");
+ const s=lesson.deep_sections.at(-1);
+ assert(s.title.length>=12&&s.question.length>=12,spec.id+" heading insufficient");
+ assert.equal(s.paragraphs.length,2);
+ assert(s.paragraphs.every(p=>p.length>=90),spec.id+" explanatory paragraphs too brief");
+ assert(s.proof.length>=145&&s.worked.length>=100&&s.limitation.length>=60,spec.id+" missing theorem, calculation or limitation");
+ assert.equal(s.formulas.length,2);
+ assert.equal(new Set(lesson.deep_sections.map(x=>x.title)).size,lesson.deep_sections.length,spec.id+" duplicate section heading");
+ for(const e of s.formulas){assert(e.label.length>=4&&e.tex.length>=15);katex.renderToString(e.tex,{throwOnError:true,displayMode:true,strict:"error"});texCount++;}
+ cjk(s,spec.id);mathCount++;
+}
+const atlas=json("../ml/atlas-depth-07-c.json"),manifest=json("../ml/atlas-depth-manifest.json");
+assert.equal(atlas.revision,"2026-11-06");
+assert(manifest.modules.some(x=>x.path==="./atlas-depth-07-c.json"&&x.lessons===8),"live Atlas module unregistered");
+assert.deepEqual(Object.keys(atlas.lessons),mlSpec.map(x=>x.id));
+assert.deepEqual(atlas.v85_revision.ids,mlSpec.map(x=>x.id));
+for(const spec of mlSpec){
+ const x=atlas.lessons[spec.id];assert(x&&x.v85_note?.startsWith("V85"),spec.id+" not deepened");
+ const old={...x,equations:x.equations.slice(0,spec.equations),derivation:x.derivation.slice(0,spec.derivation),protocol:x.protocol.slice(0,spec.protocol),pitfalls:x.pitfalls.slice(0,spec.pitfalls),worked_example:x.worked_example.slice(0,spec.workedLength)};
+ delete old.v85_note;
+ assert.equal(hash(old),spec.hash,spec.id+" V78 original text changed");
+ assert.equal(x.equations.length,spec.equations+2);
+ assert.equal(x.derivation.length,spec.derivation+2);
+ assert.equal(x.protocol.length,spec.protocol+1);
+ assert.equal(x.pitfalls.length,spec.pitfalls+1);
+ assert(x.derivation.slice(-2).every(q=>q.length>=100),spec.id+" proof too brief");
+ assert(x.worked_example.length-spec.workedLength>=110,spec.id+" worked example too brief");
+ assert(x.protocol.at(-1).length>=60&&x.pitfalls.at(-1).length>=60,spec.id+" weak application/limitation");
+ assert.equal(new Set(x.equations.map(z=>z.label)).size,x.equations.length);
+ for(const e of x.equations.slice(-2)){assert(e.label.length>=4&&e.tex.length>=15);katex.renderToString(e.tex,{throwOnError:true,strict:"error",displayMode:true});texCount++;}
+ cjk(x,spec.id);mlCount++;
+}
+assert.equal(mathCount,19);
+assert.equal(mlCount,8);
+assert.equal(texCount,54);
+let numbers=0;
+function near(label,a,b,tol=1e-8){assert(Number.isFinite(a)&&Math.abs(a-b)<=tol,label+": "+a+" vs "+b);numbers++;}
+function truth(label,ok){near(label,ok?1:0,1);}
+near("Davis Kahan theta",.5*Math.atan(.2),.09869777992494039);
+near("Davis actual sin",Math.sin(.5*Math.atan(.2)),.09853761796664216,1e-8);
+near("Davis perturbation bound",.1/(1-.1),1/9);
+near("effective rank",6/4,1.5);
+near("covariance rank deficiency",37-(20-1),18);
+near("PL initial objective",3*3,9);
+near("PL gradient half squared",.5*(2*3)**2,18);
+near("PL one update",3-.5*6,0);
+near("Ridge MAP lambda",.04/.01,4);
+near("Ridge high information",9/(9+4),9/13);
+near("Ridge low information",1/(1+4),.2);
+near("LASSO null threshold",Math.max(.4,.1,.05),.4);
+truth("LASSO null possible",.5>=.4);
+truth("LASSO null violates KKT",.3<.4);
+near("Bonferroni one trial lower",.02-1.645*.01,.00355);
+near("Bonferroni twenty lower",.02-2.807*.01,-.00807);
+near("observability determinant",1*.6-1*.8,-.2);
+near("Kalman gain",4/(4+1),.8);
+near("Joseph covariance",(1-.8)**2*4+.8**2*1,.8);
+near("GARCH second condition",.35+.55,.9);
+near("GARCH fourth coefficient",3*.35**2+2*.35*.55+.55**2,1.055);
+near("ACF noise attenuated",.8/(1+1),.4);
+near("PACF two AR1",(.36-.6**2)/(1-.6**2),0);
+near("PACF measured extra",(.5-.6**2)/(1-.6**2),.21875);
+near("AR2 first root",(-.5+Math.sqrt(1.05))/.4,1.3117376914898997);
+near("AR2 second root",(-.5-Math.sqrt(1.05))/.4,-3.8117376914898997);
+near("HAR log back median",Math.exp(-5),.006737946999085467);
+near("HAR log mean",Math.exp(-4.875),.007635094218859962,1e-7);
+near("HAR mean ratio",Math.exp(.125),1.1331484530668263);
+near("GLS weighted intercept",40/5,8);
+near("GLS weighted residual",-8+4*2,0);
+near("FWL residual x first",1-2/3,1/3);
+near("FWL residual y first",1-4/3+1,-1+2/3+1,1e-8);
+near("FWL coefficient residual",2*(1/3)/(1/3),2);
+near("Weyl singular gap",5-1-2*.2,3.6);
+near("Weyl lowest sigma one",5-.2,4.8);
+near("Weyl highest sigma two",1+.2,1.2);
+near("regularized inverse weak lambda",.001/.1**2,.1);
+near("regularized inverse strong lambda",.001/1**2,.001);
+near("Ridge fixed mean coeff one",1/(1+1)*2,1);
+near("Ridge fixed mean coeff two",9/(9+1)*2,1.8);
+near("Ridge fixed coefficient variance one",1/(1+1)**2,.25);
+near("Ridge fixed coefficient variance two",9/(9+1)**2,.09);
+near("LASSO first soft threshold",Math.max(.8-.3,0),.5);
+near("warmup step20",.01*20/100,.002);
+near("warmup t100",.01*100/100,.01);
+near("cosine midpoint",.001+(.01-.001)/2*(1+Math.cos(Math.PI/2)),.0055);
+near("cosine endpoint",.001+(.01-.001)/2*(1+Math.cos(Math.PI)),.001);
+near("dual optimum at lambda2",2-2**2/4,1);
+near("primal dual gap",(.8-2)**2-1,.44);
+near("Ada accumulated squared",10**2+100*.1**2,101);
+near("Ada effective learning rate",1/Math.sqrt(101),.09950371902099892);
+near("Ada actual move",.1/Math.sqrt(101),.009950371902099891);
+near("constraint lambda scaled",2/100,.02);
+near("constraint shadow recovered",100*.02,2);
+near("preprocess frozen mean",(10+14)/2,12);
+truth("one missing indicator",1===1);
+truth("point-in-time 10am invalid",10.5>10);
+truth("point-in-time 1031 valid",10+30/60<10+31/60);
+near("MOM ordinary mean",(9+100)/10,10.9);
+near("MOM outlier block",(1+100)/2,50.5);
+near("BH first threshold",1*.1/5,.02);
+near("BH second threshold",2*.1/5,.04);
+near("BY harmonic five",1+1/2+1/3+1/4+1/5,2.283333333333333);
+near("BY first threshold",.1/(5*(1+1/2+1/3+1/4+1/5)),.008759124087591242,1e-8);
+near("BY second threshold",2*.1/(5*(1+1/2+1/3+1/4+1/5)),.017518248175182483,1e-8);
+const mathHTML=read("index.html"),mlHTML=read("../ml/index.html"),mathCSS=read("styles.css"),mlCSS=read("../ml/atlas.css");
+assert(mathHTML.includes('aria-label="V85量化数学与机器学习二十七篇正式讲义深化"'));
+for(const s of mathSpec)assert(mathHTML.includes('href="?topic='+s.id+'"'),s.id+" math navigation missing");
+for(const s of mlSpec){
+ assert(mathHTML.includes('href="../ml/#lesson/'+s.id+'"'),s.id+" math→ML navigation missing");
+ assert(mlHTML.includes('href="#lesson/'+s.id+'"'),s.id+" ML atlas navigation missing");
+}
+for(const [name,css] of [["math",mathCSS],["ml",mlCSS]])for(const token of ["overflow-x:auto","line-break:strict",":focus-visible","@media print","@media(max-width:700px)"])assert(css.includes(token),name+" mobile or CJK formula style missing "+token);
+const reader=read("app.js"),atlasReader=read("../ml/atlas.js");
+for(const token of ["renderMathDeepSections","part.paragraphs","part.proof","part.worked","part.limitation"])assert(reader.includes(token),"math reader lost "+token);
+for(const token of ["s.equations.map","s.derivation","s.protocol","s.pitfalls","s.worked_example"])assert(atlasReader.includes(token),"Atlas reader lost "+token);
+console.log("V85 PASS: "+mathCount+" mathematics and "+mlCount+" Atlas lessons; "+texCount+" new strict KaTeX equations; "+numbers+" numerical checks; original snapshots, Chinese/mobile styles and all 27 links.");
