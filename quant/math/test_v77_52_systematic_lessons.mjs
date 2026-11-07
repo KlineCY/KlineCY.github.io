@@ -48,15 +48,15 @@ for(let i=0;i<docs.length;i++){
  for(const id of ids){
   const x=d.lessons[id];
   assert(x.v77_note.startsWith("V77"),id+" no new content marker");
-  assert.equal(x.equations.length,8,id+" expected six preserved plus two new formulas");
-  assert.equal(x.derivation.length,8,id+" expected six preserved plus two new derivations");
-  assert(x.derivation.slice(-2).every(p=>p.length>=80),id+" new derivation too brief");
+  assert(x.equations.length>=(i===4?10:8),id+" expected V77 original six plus two formulas, plus optional V83 append");
+  assert(x.derivation.length>=(i===4?10:8),id+" expected V77 original six plus two derivations, plus optional V83 append");
+  assert(x.derivation.slice(6,8).every(p=>p.length>=80),id+" original V77 derivation too brief");
   assert(x.protocol.length>=5&&x.pitfalls.length>=4,id+" missing implementation protocol or boundary");
   assert(x.worked_example.length>=170,id+" missing worked calculation");
   assert.equal(new Set(x.equations.map(f=>f.label)).size,x.equations.length,id+" duplicate formula label");
   assert.equal(new Set(x.protocol).size,x.protocol.length,id+" duplicated validation protocol");
   for(const e of x.equations)formula(e.tex);
-  for(const e of x.equations.slice(-2))formula(e.tex,true);
+  for(const e of x.equations.slice(6,8))formula(e.tex,true);
   cleanChinese(x,id);
  }
 }

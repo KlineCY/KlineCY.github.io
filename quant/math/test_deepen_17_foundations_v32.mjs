@@ -24,7 +24,7 @@ assert.equal(core.length+manifest.modules.reduce((n,m)=>n+m.lessons,0),324);
 const lessons=groups.flatMap(([p,ids])=>{
  const data=read(p);
  assert.equal(data.version,1);
- assert.equal(data.revision,p==="lessons-phase-01-c.json"?"2026-11-07":"2026-11-05");
+ assert.equal(data.revision,["lessons-phase-01-c.json","lessons-phase-01-d.json","lessons-phase-01-e.json","lessons-phase-01-f.json","lessons-phase-02-a.json"].includes(p)?"2026-11-07":"2026-11-05");
  const selected=data.lessons.filter(x=>ids.includes(x.id));
  assert.deepEqual(selected.map(x=>x.id),ids,"original canonical ordering "+p);
  return selected;
