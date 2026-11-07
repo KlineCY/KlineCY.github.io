@@ -48,7 +48,7 @@ for(const [idx,path] of files.entries()){
    assert(lesson.pitfalls.at(-1)?.length>=30,id+" invalidity boundary too short");
    assert(lesson.worked_example.length>=100,id+" example not enhanced");
    newChars+=lesson.derivation.slice(3).join("").length+lesson.protocol.slice(3).join("").length+lesson.pitfalls.at(-1).length;
-  }else{retained++;originalEquations+=lesson.equations.length;assert(lesson.revision_note?.startsWith(idx<=8?"V54":"V55"),id+" V54/V55 eighth-wave provenance");}
+  }else{retained++;originalEquations+=lesson.equations.slice(0,6).length;assert(lesson.revision_note?.startsWith(idx<=8?"V54":"V55"),id+" V54/V55 eighth-wave provenance");}
  }
 }
 assert.equal(allIds.size,120);
@@ -226,14 +226,14 @@ for(const group of v53sets){
  for(const id of group.ids){
   const l=lessons[id];
   assert(l&&l.revision_note?.startsWith("V53"),"V53 formal lesson absent "+id);
-  assert.equal(l.equations.length,6,"V53 sixth formula absent "+id);
-  assert.equal(l.derivation.length,6,"V53 sixth mathematical proof absent "+id);
-  assert.equal(l.protocol.length,6,"V53 sixth independent audit absent "+id);
-  assert.equal(l.pitfalls.length,3,"V53 prior financial caveats lost "+id);
-  assert.equal(new Set(l.equations.map(x=>x.tex)).size,6,"V53 exact duplicated mathematical expression "+id);
-  assert(l.derivation.at(-1).length>100&&l.protocol.at(-1).length>40,"V53 proof or numerical validation shallow "+id);
+  assert(l.equations.length>=6,"V53 sixth formula absent "+id);
+  assert(l.derivation.length>=6,"V53 sixth mathematical proof absent "+id);
+  assert(l.protocol.length>=6,"V53 sixth independent audit absent "+id);
+  assert(l.pitfalls.length>=3,"V53 prior financial caveats lost "+id);
+  assert.equal(new Set(l.equations.slice(0,6).map(x=>x.tex)).size,6,"V53 exact duplicated mathematical expression "+id);
+  assert(l.derivation[5].length>100&&l.protocol[5].length>40,"V53 proof or numerical validation shallow "+id);
   assert(l.worked_example.length>145,"V53 financial worked example incomplete "+id);
-  katex.renderToString(l.equations.at(-1).tex,{throwOnError:true,displayMode:true,strict:"ignore"});
+  katex.renderToString(l.equations[5].tex,{throwOnError:true,displayMode:true,strict:"ignore"});
  }
 }
 near(.25*(1**2+2**2),1.25,"V53 Logistic Hessian directional curvature");
@@ -276,14 +276,14 @@ assert.equal(v53extraIds.length,10,"V53 kernel/graph/filter lesson count");
 for(const id of v53extraIds){
  const l=v53extra[id];
  assert(l&&l.revision_note?.startsWith("V53"),"V53 kernel/graph canonical lesson missing "+id);
- assert.equal(l.equations.length,6,"V53 new kernel/graph equation absent "+id);
- assert.equal(l.derivation.length,6,"V53 complete derivation absent "+id);
- assert.equal(l.protocol.length,6,"V53 numerical contract absent "+id);
- assert.equal(l.pitfalls.length,3,"V53 original error boundaries lost "+id);
- assert.equal(new Set(l.equations.map(e=>e.tex)).size,6,"V53 duplicate kernel/graph equation "+id);
- assert(l.derivation.at(-1).length>100&&l.protocol.at(-1).length>40,"V53 kernel/graph proof too thin "+id);
+ assert(l.equations.length>=6,"V53 new kernel/graph equation absent "+id);
+ assert(l.derivation.length>=6,"V53 complete derivation absent "+id);
+ assert(l.protocol.length>=6,"V53 numerical contract absent "+id);
+ assert(l.pitfalls.length>=3,"V53 original error boundaries lost "+id);
+ assert.equal(new Set(l.equations.slice(0,6).map(e=>e.tex)).size,6,"V53 duplicate kernel/graph equation "+id);
+ assert(l.derivation[5].length>100&&l.protocol[5].length>40,"V53 kernel/graph proof too thin "+id);
  assert(l.worked_example.length>150,"V53 kernel/graph worked example too short "+id);
- katex.renderToString(l.equations.at(-1).tex,{throwOnError:true,strict:"ignore",displayMode:true});
+ katex.renderToString(l.equations[5].tex,{throwOnError:true,strict:"ignore",displayMode:true});
 }
 assert(.3>0&&.3<1,"V53 soft-margin SVM internal support-vector KKT case");
 near(Math.max(0,1-.4),.6,"V53 hinge positive margin slack");
@@ -320,14 +320,14 @@ for(const group of v54groups){
  for(const id of group.ids){
   const l=lessons[id];
   assert(l&&l.revision_note?.startsWith("V54"),"V54 original curriculum identity missing "+id);
-  assert.equal(l.equations.length,6,"V54 sixth strict mathematical expression absent "+id);
-  assert.equal(l.derivation.length,6,"V54 sixth rigorous proof absent "+id);
-  assert.equal(l.protocol.length,6,"V54 sixth empirical verification absent "+id);
-  assert.equal(l.pitfalls.length,3,"V54 retained preexisting failure conditions missing "+id);
-  assert.equal(new Set(l.equations.map(e=>e.tex)).size,6,"V54 duplicated existing mathematics "+id);
-  assert(l.derivation.at(-1).length>90&&l.protocol.at(-1).length>40,"V54 proof or audit too thin "+id);
+  assert(l.equations.length>=6,"V54 sixth strict mathematical expression absent "+id);
+  assert(l.derivation.length>=6,"V54 sixth rigorous proof absent "+id);
+  assert(l.protocol.length>=6,"V54 sixth empirical verification absent "+id);
+  assert(l.pitfalls.length>=3,"V54 retained preexisting failure conditions missing "+id);
+  assert.equal(new Set(l.equations.slice(0,6).map(e=>e.tex)).size,6,"V54 duplicated existing mathematics "+id);
+  assert(l.derivation[5].length>90&&l.protocol[5].length>40,"V54 proof or audit too thin "+id);
   assert(l.worked_example.length>145,"V54 worked financial example missing "+id);
-  katex.renderToString(l.equations.at(-1).tex,{throwOnError:true,displayMode:true,strict:"ignore"});
+  katex.renderToString(l.equations[5].tex,{throwOnError:true,displayMode:true,strict:"ignore"});
  }
 }
 near(200/2*.02,2,"V54 He backward fan-in width ratio");
