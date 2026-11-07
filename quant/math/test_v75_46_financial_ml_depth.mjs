@@ -56,8 +56,8 @@ for(let f=0;f<files.length;f++){
 const vintage=load("../ml/atlas-depth-14-a.json").lessons["m06-c01-p06"];
 assert(vintage.v75_correction.startsWith("V75"),"late-old-revision correction missing");
 assert(vintage.worked_example.includes("10:11"),"out-of-order revision counterexample missing");
-assert(vintage.equations.at(-2).tex.includes("t_{\rm receive}"),"must enforce receipt cutoff");
-assert(vintage.equations.at(-2).tex.includes("t_{\rm publish}"),"must enforce publication cutoff");
+assert(vintage.equations.at(-2).tex.includes("receive"),"must enforce receipt cutoff");
+assert(vintage.equations.at(-2).tex.includes("publish"),"must enforce publication cutoff");
 assert(vintage.equations.at(-2).tex.includes("rev"),"must sort by source version not receipt time");
 for(const f of vintage.equations.slice(-2))tex(f.tex,true);
 assert.equal(strictCount,94,"46 x2 new formulas and two corrected strict formulas");
