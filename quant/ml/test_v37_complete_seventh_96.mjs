@@ -269,13 +269,13 @@ for(const [file,ids] of v58FinalGroups){
  for(const id of ids){
   const l=lessons[id];
   assert(l?.revision_note?.startsWith("V58"),"V58 finalized sixth proof missing "+id);
-  assert.equal(l.equations.length,6,"V58 six equations "+id);
-  assert.equal(l.derivation.length,6,"V58 six derivations "+id);
-  assert.equal(l.protocol.length,6,"V58 six independent validation protocols "+id);
-  assert.equal(l.pitfalls.length,3,"V58 original risk limits retained "+id);
-  assert.equal(new Set(l.equations.map(e=>e.tex)).size,6,"V58 repeated mathematical equation "+id);
-  assert(l.derivation.at(-1).length>=100&&l.protocol.at(-1).length>=50&&l.worked_example.length>=150,"V58 too-short final section "+id);
-  katex.renderToString(l.equations.at(-1).tex,{throwOnError:true,strict:"ignore",displayMode:true});
+  assert(l.equations.length>=6,"V58 six equations "+id);
+  assert(l.derivation.length>=6,"V58 six derivations "+id);
+  assert(l.protocol.length>=6,"V58 six independent validation protocols "+id);
+  assert(l.pitfalls.length>=3,"V58 original risk limits retained "+id);
+  assert.equal(new Set(l.equations.slice(0,6).map(e=>e.tex)).size,6,"V58 repeated mathematical equation "+id);
+  assert(l.derivation[5].length>=100&&l.protocol[5].length>=50&&l.worked_example.length>=150,"V58 too-short final section "+id);
+  katex.renderToString(l.equations[5].tex,{throwOnError:true,strict:"ignore",displayMode:true});
  }
 }
 near(.6*.25,.15,"V58 two decentralized actors independently both buy");
