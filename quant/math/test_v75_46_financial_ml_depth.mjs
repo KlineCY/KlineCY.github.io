@@ -144,7 +144,7 @@ near("GAN disjoint objective",-Math.log(4)+2*Math.log(2),0);
 near("uniform replay variance",.5*(0**2+4**2)-2**2,4);
 near("priority replay variance",.25*(8**2)-2**2,12);
 near("offpolicy missing beta denominator",0,0);
-near("GARCH second moment",".0001"/(.05),.002);
+near("GARCH second moment",.0001/.05,.002);
 near("GARCH fourth-moment condition",3*.3**2+2*.3*.65+.65**2,1.0825);
 yes("GARCH fourth moment violates condition",1.0825>1);
 near("dollar-neutral net",.5-.5,0);
