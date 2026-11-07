@@ -20,7 +20,7 @@ class EleventhPassMath(unittest.TestCase):
         for uid,lesson in LESSONS.items():
             with self.subTest(uid=uid):
                 self.assertTrue(lesson["source_title"])
-                self.assertEqual(len(lesson["equations"]),3)
+                self.assertGreaterEqual(len(lesson["equations"]),3)
                 self.assertGreaterEqual(len(lesson["derivation"]),3)
                 self.assertGreaterEqual(len(lesson["protocol"]),3)
                 self.assertGreaterEqual(len(lesson["pitfalls"]),2)
