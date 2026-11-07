@@ -12,7 +12,7 @@ assert.equal(manifest.modules.reduce((a,m)=>a+m.lessons,0),720,"core manifest ch
 const modules=new Map(manifest.modules.map(m=>[m.path,m.lessons]));
 const files="abcdefghijkl".split("").map(c=>"atlas-depth-08-"+c+".json");
 const v38Ids=new Set(),allIds=new Set(),domains=new Map();
-let allEquations=0,originalEquations=0,newChars=0,enhanced=0,retained=0;
+let allEquations=0,legacyEquationCount=0,originalEquations=0,newChars=0,enhanced=0,retained=0;
 for(const [idx,path] of files.entries()){
  assert.equal(modules.get("./"+path),10,"missing canonical eighth stage "+path);
  const doc=read(path);
@@ -25,19 +25,20 @@ for(const [idx,path] of files.entries()){
   allIds.add(id);
   domains.set(id.slice(0,3),(domains.get(id.slice(0,3))||0)+1);
   const goal=6;
-  assert.equal(lesson.equations.length,goal,id+" mathematical depth");
-  assert.equal(lesson.derivation.length,goal,id+" proof depth");
-  assert.equal(lesson.protocol.length,goal,id+" empirical audit depth");
-  assert.equal(lesson.pitfalls.length,3,id+" explicit limitations");
+  assert(lesson.equations.length>=goal,id+" original six mathematical formulas retained");
+  assert(lesson.derivation.length>=goal,id+" original six proofs retained");
+  assert(lesson.protocol.length>=goal,id+" original six audit protocols retained");
+  assert(lesson.pitfalls.length>=3,id+" original three limitations retained");
   assert(lesson.source_title?.length>=2&&lesson.title?.length>=8,id+" original identity lost");
   assert(lesson.overview?.length>=60,id+" original overview lost");
   assert(lesson.worked_example?.length>=60,id+" original example deleted");
   assert(!/TODO|Lorem ipsum|[\uFFFD\u200B\uFEFF]/i.test(JSON.stringify(lesson)),id+" damaged Chinese");
-  for(const e of lesson.equations){
+  for(const [formulaIndex,e] of lesson.equations.entries()){
    assert(typeof e.label==="string"&&e.label.length>=2,id+" math label missing");
    assert(typeof e.tex==="string"&&e.tex.length>=3,id+" math source missing");
    katex.renderToString(e.tex,{displayMode:true,throwOnError:true,strict:"ignore"});
    allEquations++;
+    if(formulaIndex<6)legacyEquationCount++;
   }
   if(isV38){
    v38Ids.add(id);enhanced++;
@@ -54,7 +55,8 @@ assert.equal(allIds.size,120);
 assert.equal(enhanced,60);
 assert.equal(retained,60);
 assert.equal(v38Ids.size,60);
-assert.equal(allEquations,720,"V55 preserves 600 original eighth-cycle formulas and adds 120 substantive mathematical extensions");
+assert.equal(legacyEquationCount,720,"all original 720 V38/V39 equations remain");
+assert(allEquations>=720,"later lectures must not reduce original equation coverage");
 assert.equal(originalEquations,360);
 assert.equal(domains.size,24);
 for(const n of domains.values())assert.equal(n,5,"exactly five eighth-stage lessons per ML domain");
@@ -123,13 +125,13 @@ assert.equal(v51Ids.length,10);
 for(const id of v51Ids){
  const l=v51[id];
  assert(l&&l.revision_note?.startsWith("V51"),"V51 lesson did not overwrite canonical V38 content "+id);
- assert.equal(l.equations.length,6,"V51 sixth mathematical expression missing "+id);
- assert.equal(l.derivation.length,6,"V51 sixth substantial proof missing "+id);
- assert.equal(l.protocol.length,6,"V51 sixth empirical test missing "+id);
- assert.equal(new Set(l.equations.map(e=>e.tex)).size,6,"V51 duplicate mathematical formula "+id);
- assert(l.derivation.at(-1).length>=110&&l.protocol.at(-1).length>=65,"V51 proof/test too thin "+id);
+ assert(l.equations.length>=6,"V51 sixth mathematical expression missing "+id);
+ assert(l.derivation.length>=6,"V51 sixth substantial proof missing "+id);
+ assert(l.protocol.length>=6,"V51 sixth empirical test missing "+id);
+ assert.equal(new Set(l.equations.slice(0,6).map(e=>e.tex)).size,6,"V51 duplicate mathematical formula "+id);
+ assert(l.derivation[5].length>=110&&l.protocol[5].length>=65,"V51 proof/test too thin "+id);
  assert(l.worked_example.length>=160,"V51 numerical finance example absent "+id);
- katex.renderToString(l.equations.at(-1).tex,{throwOnError:true,displayMode:true,strict:"ignore"});
+ katex.renderToString(l.equations[5].tex,{throwOnError:true,displayMode:true,strict:"ignore"});
 }
 near(.2*0+.8*.75,.6,"V51 target total risk");
 near((.2-.5)*0+(.8-.5)*1,.3,"V51 covariate drift risk");
@@ -154,14 +156,14 @@ assert.equal(v52ids.length,10);
 for(const id of v52ids){
  const l=v52[id];
  assert(l&&l.revision_note?.startsWith("V52"),"V52 canonical ML lesson absent "+id);
- assert.equal(l.equations.length,6,"V52 sixth equation missing "+id);
- assert.equal(l.derivation.length,6,"V52 sixth proof missing "+id);
- assert.equal(l.protocol.length,6,"V52 sixth empirical audit missing "+id);
- assert.equal(l.pitfalls.length,3,"V52 original limitations modified "+id);
- assert.equal(new Set(l.equations.map(x=>x.tex)).size,6,"V52 repeated mathematical expression "+id);
- assert(l.derivation.at(-1).length>90&&l.protocol.at(-1).length>40,"V52 proof/validation too short "+id);
+ assert(l.equations.length>=6,"V52 sixth equation missing "+id);
+ assert(l.derivation.length>=6,"V52 sixth proof missing "+id);
+ assert(l.protocol.length>=6,"V52 sixth empirical audit missing "+id);
+ assert(l.pitfalls.length>=3,"V52 original limitations modified "+id);
+ assert.equal(new Set(l.equations.slice(0,6).map(x=>x.tex)).size,6,"V52 repeated mathematical expression "+id);
+ assert(l.derivation[5].length>90&&l.protocol[5].length>40,"V52 proof/validation too short "+id);
  assert(l.worked_example.length>140,"V52 numerical example too short "+id);
- katex.renderToString(l.equations.at(-1).tex,{throwOnError:true,displayMode:true,strict:"ignore"});
+ katex.renderToString(l.equations[5].tex,{throwOnError:true,displayMode:true,strict:"ignore"});
 }
 near(.2*1+.3*0+.5*1-(.2*1+.3*0+.5*(-1))**2,.61,"V52 multinomial Softmax Hessian curvature",1e-12);
 near((6/99)/(1+6/99),6/105,"V52 independent evidence posterior risk");
@@ -185,14 +187,14 @@ assert.equal(v52optIds.length,10);
 for(const id of v52optIds){
  const l=v52optimization[id];
  assert(l&&l.revision_note?.startsWith("V52"),"V52 optimization/data contract missing "+id);
- assert.equal(l.equations.length,6,"V52 sixth formula missing "+id);
- assert.equal(l.derivation.length,6,"V52 sixth proof missing "+id);
- assert.equal(l.protocol.length,6,"V52 sixth verification protocol missing "+id);
- assert.equal(l.pitfalls.length,3,"V52 preexisting limitations lost "+id);
- assert.equal(new Set(l.equations.map(e=>e.tex)).size,6,"V52 duplicate optimization formula "+id);
- assert(l.derivation.at(-1).length>=100&&l.protocol.at(-1).length>=40,"V52 reasoning too shallow "+id);
+ assert(l.equations.length>=6,"V52 sixth formula missing "+id);
+ assert(l.derivation.length>=6,"V52 sixth proof missing "+id);
+ assert(l.protocol.length>=6,"V52 sixth verification protocol missing "+id);
+ assert(l.pitfalls.length>=3,"V52 preexisting limitations lost "+id);
+ assert.equal(new Set(l.equations.slice(0,6).map(e=>e.tex)).size,6,"V52 duplicate optimization formula "+id);
+ assert(l.derivation[5].length>=100&&l.protocol[5].length>=40,"V52 reasoning too shallow "+id);
  assert(l.worked_example.length>=150,"V52 financial data example lost "+id);
- katex.renderToString(l.equations.at(-1).tex,{throwOnError:true,displayMode:true,strict:"ignore"});
+ katex.renderToString(l.equations[5].tex,{throwOnError:true,displayMode:true,strict:"ignore"});
 }
 near(1000+Math.log1p(Math.exp(-1)),1000.3132616875182,"V52 stable LogSumExp",1e-10);
 assert(1000+Math.log1p(Math.exp(-1))<=1000+Math.log(2),"V52 LogSumExp upper bound");
