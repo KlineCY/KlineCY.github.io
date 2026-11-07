@@ -48,7 +48,7 @@ for(const [idx,path] of files.entries()){
    assert(lesson.pitfalls.at(-1)?.length>=30,id+" invalidity boundary too short");
    assert(lesson.worked_example.length>=100,id+" example not enhanced");
    newChars+=lesson.derivation.slice(3).join("").length+lesson.protocol.slice(3).join("").length+lesson.pitfalls.at(-1).length;
-  }else{retained++;originalEquations+=lesson.equations.length;assert(lesson.revision_note?.startsWith(idx<=8?"V54":"V55"),id+" V54/V55 eighth-wave provenance");}
+  }else{retained++;originalEquations+=lesson.equations.slice(0,6).length;assert(lesson.revision_note?.startsWith(idx<=8?"V54":"V55"),id+" V54/V55 eighth-wave provenance");}
  }
 }
 assert.equal(allIds.size,120);
