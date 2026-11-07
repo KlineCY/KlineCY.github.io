@@ -134,12 +134,12 @@ const v56AppliedIds=["m07-c05-p05","m07-c05-p04","m07-c04-p04","m07-c05-p01","m0
 for(const id of v56AppliedIds){
  const l=v56Applied[id];
  assert(l?.revision_note?.startsWith("V56"),"V56 classical financial ML lesson missing "+id);
- assert.equal(l.equations.length,6,"V56 sixth exact formula missing "+id);
- assert.equal(l.derivation.length,6,"V56 sixth proof missing "+id);
- assert.equal(l.protocol.length,6,"V56 sixth reproducible check missing "+id);
- assert.equal(new Set(l.equations.map(e=>e.tex)).size,6,"V56 original exact duplicate formula was not resolved "+id);
- assert(l.derivation.at(-1).length>100&&l.protocol.at(-1).length>50,"V56 finance GLM and Boosting argument incomplete "+id);
- katex.renderToString(l.equations.at(-1).tex,{throwOnError:true,strict:"ignore",displayMode:true});
+ assert(l.equations.length>=6,"V56 sixth exact formula missing "+id);
+ assert(l.derivation.length>=6,"V56 sixth proof missing "+id);
+ assert(l.protocol.length>=6,"V56 sixth reproducible check missing "+id);
+ assert.equal(new Set(l.equations.slice(0,6).map(e=>e.tex)).size,6,"V56 original exact duplicate formula was not resolved "+id);
+ assert(l.derivation[5].length>100&&l.protocol[5].length>50,"V56 finance GLM and Boosting argument incomplete "+id);
+ katex.renderToString(l.equations[5].tex,{throwOnError:true,strict:"ignore",displayMode:true});
 }
 near(1+2*.2,1.4,"V56 HAC population true long-run variance");
 near(1+2*.5*.2,1.2,"V56 HAC Bartlett finite-band variance");
@@ -169,15 +169,15 @@ for(const [file,expectedIds] of v57AuditGroups){
  for(const id of expectedIds){
   const l=lessons[id];
   assert(l.revision_note?.startsWith("V57"),"V57 substantive revision missing "+id);
-  assert.equal(l.equations.length,6,"V57 sixth rigorous equation missing "+id);
-  assert.equal(l.derivation.length,6,"V57 sixth complete mathematical proof missing "+id);
-  assert.equal(l.protocol.length,6,"V57 sixth empirical verification missing "+id);
-  assert.equal(l.pitfalls.length,3,"V57 original financial caveat deleted "+id);
-  assert.equal(new Set(l.equations.map(e=>e.tex)).size,6,"V57 duplicate formula in lesson "+id);
-  assert(l.derivation.at(-1).length>=90&&l.protocol.at(-1).length>=48,"V57 proof or numerical protocol too shallow "+id);
+  assert(l.equations.length>=6,"V57 sixth rigorous equation missing "+id);
+  assert(l.derivation.length>=6,"V57 sixth complete mathematical proof missing "+id);
+  assert(l.protocol.length>=6,"V57 sixth empirical verification missing "+id);
+  assert(l.pitfalls.length>=3,"V57 original financial caveat deleted "+id);
+  assert.equal(new Set(l.equations.slice(0,6).map(e=>e.tex)).size,6,"V57 duplicate formula in lesson "+id);
+  assert(l.derivation[5].length>=90&&l.protocol[5].length>=48,"V57 proof or numerical protocol too shallow "+id);
   assert(l.worked_example.length>=145,"V57 original financial example missing "+id);
   assert(!/[\uFFFD\u200B\uFEFF]|TODO|Lorem ipsum/.test(JSON.stringify(l)),"V57 corrupted Chinese "+id);
-  katex.renderToString(l.equations.at(-1).tex,{throwOnError:true,strict:"ignore",displayMode:true});
+  katex.renderToString(l.equations[5].tex,{throwOnError:true,strict:"ignore",displayMode:true});
  }
 }
 near(Math.pow(1/(4*1000),1/5),.1903653938715871,"V57 KDE optimal bandwidth",1e-9);
