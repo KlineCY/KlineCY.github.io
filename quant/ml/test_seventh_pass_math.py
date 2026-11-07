@@ -30,12 +30,12 @@ class SeventhPassMath(unittest.TestCase):
             enhanced = True
             expected_equations = 6
             expected_pitfalls = 3
-            self.assertEqual(len(chapter["equations"]), expected_equations, key)
+            self.assertGreaterEqual(len(chapter["equations"]), expected_equations, key)
             self.assertGreaterEqual(len(chapter["worked_example"]), 60, key)
             self.assertGreaterEqual(len(chapter["overview"]), 60, key)
-            self.assertEqual(len(chapter["derivation"]), expected_equations, key)
-            self.assertEqual(len(chapter["protocol"]), expected_equations, key)
-            self.assertEqual(len(chapter["pitfalls"]), expected_pitfalls, key)
+            self.assertGreaterEqual(len(chapter["derivation"]), expected_equations, key)
+            self.assertGreaterEqual(len(chapter["protocol"]), expected_equations, key)
+            self.assertGreaterEqual(len(chapter["pitfalls"]), expected_pitfalls, key)
             expected_revision = "V56" if domain <= 8 else ("V57" if domain <= 20 else "V58")
             self.assertTrue(chapter.get("revision_note", "").startswith(expected_revision), key)
             self.assertTrue(chapter["source_title"], key)

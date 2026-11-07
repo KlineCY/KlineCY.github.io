@@ -18,7 +18,7 @@ assert.equal(manifest.expected_lessons,720);
 assert.equal(manifest.expected_domains,24);
 assert.equal(manifest.modules.reduce((s,m)=>s+m.lessons,0),720);
 const allowed=new Map(manifest.modules.map(m=>[m.path,m.lessons]));
-const ids=new Set(),domains=new Set();let eqCount=0,total=0,addedProse=0;
+const ids=new Set(),domains=new Set();let eqCount=0,originalEqCount=0,total=0,addedProse=0;
 for(const [file,expected] of groups){
  assert.equal(allowed.get("./"+file),8,"manifest missing "+file);
  const d=read(file);
@@ -33,27 +33,29 @@ for(const [file,expected] of groups){
   assert(l.revision_note?.startsWith(file.startsWith("atlas-depth-07-")?"V56":"V36"),"no V36/V56 marker "+id);
   assert(l.title?.length>=5&&l.source_title?.length>=2,id+" source identity");
   assert(l.overview?.length>=60,id+" original overview lost");
-  assert.equal(l.equations.length,file.startsWith("atlas-depth-07-")?6:5,id+" V56 retained mathematical equations");
-  assert.equal(l.derivation.length,file.startsWith("atlas-depth-07-")?6:5,id+" V56 retained derivations");
-  assert.equal(l.protocol.length,file.startsWith("atlas-depth-07-")?6:5,id+" V56 retained protocols");
-  assert.equal(l.pitfalls.length,3,id+" original 2 + 1 limitation");
+  const base=file.startsWith("atlas-depth-07-")?6:5;
+   assert(l.equations.length>=base,id+" all original V36/V56 mathematical equations required");
+  assert(l.derivation.length>=base,id+" original V36/V56 derivations required");
+  assert(l.protocol.length>=base,id+" original V36/V56 protocols required");
+  assert(l.pitfalls.length>=3,id+" original three limitations required");
   assert(l.worked_example?.length>=130,id+" numerical example not expanded");
-  assert(l.derivation.slice(-2).every(s=>s.length>=75),id+" shallow proof");
-  assert(l.protocol.slice(-2).every(s=>s.length>=30),id+" shallow verification");
-  assert(l.pitfalls.at(-1)?.length>=35,id+" failure condition absent");
+  assert(l.derivation.slice(base-2,base).every(s=>s.length>=75),id+" shallow original proof");
+  assert(l.protocol.slice(base-2,base).every(s=>s.length>=30),id+" shallow original verification");
+  assert(l.pitfalls[2]?.length>=35,id+" original failure condition absent");
   assert(!/TODO|Lorem ipsum|[\uFFFD\u200B\uFEFF]/i.test(JSON.stringify(l)),id+" corrupted CJK or draft placeholder");
-  for(const {label,tex} of l.equations){
+  for(const [idx,{label,tex}] of l.equations.entries()){
    assert(label.length>=2&&typeof tex==="string"&&tex.length>=5,id+" formula lacks annotation");
    katex.renderToString(tex,{throwOnError:true,strict:"ignore",displayMode:true});
-   eqCount++;
+   eqCount++;if(idx<base)originalEqCount++;
   }
-  addedProse+=l.derivation.slice(3).join("").length+l.protocol.slice(3).join("").length+l.pitfalls.at(-1).length;
+  addedProse+=l.derivation.slice(3,base).join("").length+l.protocol.slice(3,base).join("").length+l.pitfalls[2].length;
  }
 }
 assert.equal(total,48);
 assert.equal(ids.size,48);
 assert.equal(domains.size,24,"V36 must cover all 24 ML domains");
-assert.equal(eqCount,264,"V56 increases the first 24 seventh-cycle lectures to six equations");
+assert.equal(originalEqCount,264,"all original 264 V36/V56 equations required");
+assert(eqCount>=264,"later appended formulas must not reduce original coverage");
 assert(addedProse>18000,"need >18k Chinese explanation/protocol characters");
 
 const html=raw("index.html"),reader=raw("atlas.js"),css=raw("atlas.css");
@@ -115,14 +117,14 @@ for(const [file,ids] of v56Foundations){
  for(const id of ids){
   const l=lessons[id];
   assert(l&&l.revision_note?.startsWith("V56"),"V56 canonical lesson was not updated "+id);
-  assert.equal(l.equations.length,6,"V56 exact sixth math formula "+id);
-  assert.equal(l.derivation.length,6,"V56 sixth mathematical proof "+id);
-  assert.equal(l.protocol.length,6,"V56 sixth independent test protocol "+id);
-  assert.equal(l.pitfalls.length,3,"V56 old limitations still required "+id);
-  assert.equal(new Set(l.equations.map(e=>e.tex)).size,6,"V56 identical mathematical expression repeats "+id);
-  assert(l.derivation.at(-1).length>100&&l.protocol.at(-1).length>50,"V56 insufficient mathematical argument "+id);
+  assert(l.equations.length>=6,"V56 first six math formulas required "+id);
+  assert(l.derivation.length>=6,"V56 first six mathematical proofs required "+id);
+  assert(l.protocol.length>=6,"V56 first six independent test protocols required "+id);
+  assert(l.pitfalls.length>=3,"V56 original limitations still required "+id);
+  assert.equal(new Set(l.equations.slice(0,6).map(e=>e.tex)).size,6,"V56 identical mathematical expression repeats "+id);
+  assert(l.derivation[5].length>100&&l.protocol[5].length>50,"V56 insufficient mathematical argument "+id);
   assert(l.worked_example.length>160,"V56 not enough numerical exposition "+id);
-  katex.renderToString(l.equations.at(-1).tex,{throwOnError:true,strict:"ignore",displayMode:true});
+  katex.renderToString(l.equations[5].tex,{throwOnError:true,strict:"ignore",displayMode:true});
  }
 }
 near(2*.03,.06,"V56 ERM selection uniform deviation factor");

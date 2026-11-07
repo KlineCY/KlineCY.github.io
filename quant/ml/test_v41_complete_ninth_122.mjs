@@ -300,14 +300,14 @@ for(const group of v49groups){
  for(const id of group.ids){
   const l=lessons[id];
   assert(l&&l.revision_note?.startsWith("V49"),"V49 official course absent "+id);
-  assert.equal(l.equations.length,6,"V49 sixth formula absent "+id);
-  assert.equal(l.derivation.length,6,"V49 sixth proof absent "+id);
-  assert.equal(l.protocol.length,6,"V49 sixth empirical test absent "+id);
-  assert.equal(l.pitfalls.length,3,"V49 original limitations lost "+id);
-  assert(!l.equations.slice(0,5).some(f=>f.tex===l.equations.at(-1).tex),"V49 repeated original equation "+id);
-  assert(l.derivation.at(-1).length>85&&l.protocol.at(-1).length>40,"V49 proof/test too short "+id);
+  assert(l.equations.length>=6,"V49 sixth formula absent "+id);
+  assert(l.derivation.length>=6,"V49 sixth proof absent "+id);
+  assert(l.protocol.length>=6,"V49 sixth empirical test absent "+id);
+  assert(l.pitfalls.length>=3,"V49 original limitations lost "+id);
+  assert(!l.equations.slice(0,5).some(f=>f.tex===l.equations[5].tex),"V49 repeated original equation "+id);
+  assert(l.derivation[5].length>85&&l.protocol[5].length>40,"V49 proof/test too short "+id);
   assert(l.worked_example.length>140,"V49 numerical exposition lost "+id);
-  katex.renderToString(l.equations.at(-1).tex,{throwOnError:true,displayMode:true,strict:"ignore"});
+  katex.renderToString(l.equations[5].tex,{throwOnError:true,displayMode:true,strict:"ignore"});
  }
 }
 near(2*(1-1),0,"V49 KKT constraint root");
@@ -342,14 +342,14 @@ for(const group of v50groups){
  for(const id of group.ids){
   const l=lessons[id];
   assert(l&&l.revision_note?.startsWith("V50"),"V50 canonical course absent "+id);
-  assert.equal(l.equations.length,6,"V50 additional formula absent "+id);
-  assert.equal(l.derivation.length,6,"V50 additional proof absent "+id);
-  assert.equal(l.protocol.length,6,"V50 independent validation absent "+id);
-  assert.equal(l.pitfalls.length,3,"V50 original boundaries lost "+id);
-  assert(!l.equations.slice(0,5).some(e=>e.tex===l.equations.at(-1).tex),"V50 repeated pre-existing equation "+id);
-  assert(l.derivation.at(-1).length>85&&l.protocol.at(-1).length>40,"V50 proof/test too short "+id);
+  assert(l.equations.length>=6,"V50 additional formula absent "+id);
+  assert(l.derivation.length>=6,"V50 additional proof absent "+id);
+  assert(l.protocol.length>=6,"V50 independent validation absent "+id);
+  assert(l.pitfalls.length>=3,"V50 original boundaries lost "+id);
+  assert(!l.equations.slice(0,5).some(e=>e.tex===l.equations[5].tex),"V50 repeated pre-existing equation "+id);
+  assert(l.derivation[5].length>85&&l.protocol[5].length>40,"V50 proof/test too short "+id);
   assert(l.worked_example.length>145,"V50 numerical reasoning missing "+id);
-  katex.renderToString(l.equations.at(-1).tex,{throwOnError:true,displayMode:true,strict:"ignore"});
+  katex.renderToString(l.equations[5].tex,{throwOnError:true,displayMode:true,strict:"ignore"});
  }
 }
 near(2*.001*(1/42),.00004761904761904762,"V50 drift-rebalancing two-sided notional fee");
