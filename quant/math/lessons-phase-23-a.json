@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "revision": "2026-11-06",
-  "focus": "多变量协整：Engle–Granger残差检验与Johansen矩阵秩识别",
+  "revision": "2026-11-07",
+  "focus": "多变量协整：Engle–Granger残差检验与Johansen矩阵秩识别；V65协整残差生成的检验分布、协整空间基变换及真实持仓换算",
   "lessons": [
     {
       "id": "timeseries-n0256",
@@ -34,6 +34,14 @@
         {
           "label": "协整向量规范化与同一线性空间",
           "tex": "b=(1,-\\beta)^\\top,\\quad \\widetilde b=cb\\ (c\\ne0)\\ \\Longrightarrow\\ \\widetilde b^\\top z_t=cb^\\top z_t\\sim I(0)"
+        },
+        {
+          "label": "两步法生成残差与条件单位根检验",
+          "tex": "\\widehat e_t=y_t-\\widehat c-\\widehat\\beta x_t,\\qquad \\Delta\\widehat e_t=\\delta\\widehat e_{t-1}+\\cdots+u_t"
+        },
+        {
+          "label": "对数价格价差的局部美元中性约束",
+          "tex": "d(y-\\beta x)=\\frac{dP_y}{P_y}-\\beta\\frac{dP_x}{P_x},\\quad q_yP_y=\\beta q_xP_x"
         }
       ],
       "derivation": [
@@ -52,6 +60,10 @@
         {
           "explanation": "协整关系的核心是存在非零线性组合消除共同I(1)趋势，而不是回归系数本身具有唯一尺度。若bᵀz_t平稳，对任意非零常数c，(cb)ᵀz_t也平稳，故协整向量只识别到非零比例因子；把首项标准化为1只是一项报告约定。用ETF报价直接解释这一线性组合为自融资组合收益还需考虑持仓单位、分红和融资费用。",
           "tex": "b^\\top z_t\\sim I(0)\\ \\Longrightarrow\\ (cb)^\\top z_t=c(b^\\top z_t)\\sim I(0),\\quad c\\ne0"
+        },
+        {
+          "explanation": "在给定样本上以最小二乘估计c和β，会对所有观察施加残差与回归常数、x水平序列的样本正交约束。因此检验统计量不能被视为对一个完全未估计残差序列做普通ADF；应使用与协整检验确定性项相匹配的Engle–Granger非标准临界值。第二式来自对数微分与股票头寸的美元Delta中性条件：两腿局部美元价值变动相抵时，价格变动百分比的权重按β匹配。",
+          "tex": "\\widehat e_t=y_t-\\widehat c-\\widehat\\beta x_t,\\qquad \\Delta\\widehat e_t=\\delta\\widehat e_{t-1}+\\cdots+u_t"
         }
       ],
       "example": "令共同I(1)趋势x_t在连续两期分别为100和101，y_t=2x_t+u_t，协整误差u_t依次为3和1，则y_t分别为203和203；两期价差y−2x分别为3和1，后者低于前者。若新冲击为0、u_t按0.5衰减，则从u=3出发两期后的条件均值是3×0.5²=0.75；这些数值只体现统计协整与误差回复，不代表可锁定交易利润。",
@@ -142,6 +154,27 @@
           "proof": "假定bᵀz_t是协方差平稳的I(0)过程，常数倍c(bᵀz_t)仍是I(0)。所以cb与b指向相同协整方向。在两变量的秩1协整空间中，需要额外规范化（例如固定第一分量为1）才能用唯一数值表述该方向。",
           "worked": "若y_t−2x_t=u_t是平稳序列，则2y_t−4x_t=2u_t也平稳；b=(1,−2)与b'=(2,−4)描述同一协整方向。数值仓位(1,−2)不能在未说明计价单位和收益定义时直接当作两只ETF的财富权重。",
           "limitation": "常数倍结论不说明不同估计时点的协整系数必然不变；结构突变、变量不为I(1)、额外共同趋势或价格分红误差可能破坏协整。"
+        },
+        {
+          "title": "协整检验的残差生成误差与滚动对冲比率",
+          "question": "为什么残差来自估计的长期关系，会改变单位根检验的参考分布？",
+          "paragraphs": [
+            "Engle–Granger方法先在价格水平上估计长期斜率，再对估计残差进行单位根检验。残差并不是事先观察到的、已知截距和斜率下的独立时间序列：同一批样本已经用于寻找最平稳的线性组合。若将普通ADF临界值不加调整地用在这种生成残差上，会混淆两步估计的搜索效应与原假设的统计分布。",
+            "交易层面还必须区分长期对数价格关系和可执行份额。对数价格的斜率β并不等于自动可交易的固定股数对冲比率，因为对数变动近似表示百分比变化，换成实际美元Delta时需要当前价格和组合名义本金；滚动更新β又可能带来额外的换手与选择偏差。"
+          ],
+          "formulas": [
+            {
+              "label": "两步法生成残差与条件单位根检验",
+              "tex": "\\widehat e_t=y_t-\\widehat c-\\widehat\\beta x_t,\\qquad \\Delta\\widehat e_t=\\delta\\widehat e_{t-1}+\\cdots+u_t"
+            },
+            {
+              "label": "对数价格价差的局部美元中性约束",
+              "tex": "d(y-\\beta x)=\\frac{dP_y}{P_y}-\\beta\\frac{dP_x}{P_x},\\quad q_yP_y=\\beta q_xP_x"
+            }
+          ],
+          "proof": "在给定样本上以最小二乘估计c和β，会对所有观察施加残差与回归常数、x水平序列的样本正交约束。因此检验统计量不能被视为对一个完全未估计残差序列做普通ADF；应使用与协整检验确定性项相匹配的Engle–Granger非标准临界值。第二式来自对数微分与股票头寸的美元Delta中性条件：两腿局部美元价值变动相抵时，价格变动百分比的权重按β匹配。",
+          "worked": "假设两只ETF当前价格分别P_y=100、P_x=50，长期对数价差系数β=2，计划做多1股y并做空x。按局部价差中性需q_x=q_yP_y/(βP_x)=1股x；若直接将β=2当作必须做空2股x，会得到错误的美元Delta比例。此结论只对应局部百分比对冲，不保证价差均值回归盈利。",
+          "limitation": "这里的q_x表示空头股数的绝对值，价格对数必须来自合理的正价格序列；股息、拆股、融资、交易费、动态β估计与结构断裂都可能使理论组合的实现收益偏离简单对数价差。"
         }
       ],
       "links": [
@@ -176,7 +209,7 @@
           "url": "https://www.statsmodels.org/stable/generated/statsmodels.tsa.stattools.coint.html"
         }
       ],
-      "checked_status": "V50严格精讲：协整向量的尺度不辨识与真实仓位单位"
+      "checked_status": "V65：新增协整检验的残差生成误差与滚动对冲比率及完整数值复核"
     },
     {
       "id": "timeseries-n0257",
@@ -209,6 +242,14 @@
         {
           "label": "Johansen协整秩与共同随机趋势维数",
           "tex": "\\operatorname{rank}(\\Pi)=r\\quad\\Longrightarrow\\quad \\dim\\ker(\\Pi)=k-r"
+        },
+        {
+          "label": "可逆基变换与相同长期矩阵",
+          "tex": "\\beta^*=\\beta H,\\qquad\\alpha^*=\\alpha H^{-\\top},\\qquad\\alpha^*(\\beta^*)^\\top=\\alpha\\beta^\\top"
+        },
+        {
+          "label": "不同规范化下的协整空间不变",
+          "tex": "\\operatorname{col}(\\beta H)=\\operatorname{col}(\\beta),\\quad\\operatorname{rank}(H)=r"
         }
       ],
       "derivation": [
@@ -227,6 +268,10 @@
         {
           "explanation": "Johansen表示Δz_t=Πz_{t−1}+⋯时，Π=αβᵀ在协整秩r介于0和k之间具有秩r。由秩—零化度定理，Π的零空间维数是k−r；在标准I(1) Johansen框架及相应正则条件下，这也对应k−r条共同随机趋势。仅由矩阵秩等式本身不能无条件推出真实序列必为I(1)，尤其当模型含I(2)过程、单位根的其他退化结构或确定性趋势误设时。",
           "tex": "\\operatorname{rank}(\\Pi)+\\operatorname{nullity}(\\Pi)=k,\\qquad\\Pi\\in\\mathbb R^{k\\times k}"
+        },
+        {
+          "explanation": "对任意可逆H，转置关系(βH)ᵀ=Hᵀβᵀ，因此αH^{-ᵀ}Hᵀβᵀ=αβᵀ，证明长期调整矩阵Π未变。可逆H只是在同一r维列空间内换一组基向量，不改变协整空间或k−r维的共同趋势计数。",
+          "tex": "\\beta^*=\\beta H,\\qquad\\alpha^*=\\alpha H^{-\\top},\\qquad\\alpha^*(\\beta^*)^\\top=\\alpha\\beta^\\top"
         }
       ],
       "example": "设两个变量、有效样本量T=100，Johansen排序后的示范特征根为λ̂=(0.20,0.02)。则max-eigen r=0统计量−100log0.8≈22.3144，r=1统计量−100log0.98≈2.0203；trace r=0统计量为22.3144+2.0203≈24.3346，trace r=1≈2.0203。必须将它们与正确确定性项及滞后规格的临界值比较，不能直接使用普通χ²临界值。",
@@ -317,6 +362,27 @@
           "proof": "对任意k×k矩阵Π，秩—零化度定理给出rank(Π)+dim ker(Π)=k。若Π=αβᵀ且α、β均列满秩r，则rank(Π)=r。在额外Johansen I(1)表示假设成立时，长期共同趋势的独立维数是k−r。",
           "worked": "三个I(1)资产序列若Johansen估计并接受r=1，则有一条独立协整关系，以及k−r=2个共同随机趋势方向；如果接受r=2，则共同趋势数降为1。不能把‘r=1’错误理解成只剩一个趋势。",
           "limitation": "k−r共同趋势解释要求适当的I(1)、稳定性和确定性项条件。Johansen统计量的临界值随截距、趋势规格变化，不等于普遍的χ²检验。"
+        },
+        {
+          "title": "Johansen因子化的坐标不唯一与检验秩的边界",
+          "question": "为什么协整向量的数值本身可能变化，但长期共同趋势的维数不变？",
+          "paragraphs": [
+            "若长期系数矩阵Π可写为αβᵀ且秩为r，β的列构成一个r维协整空间，但具体选择哪r根向量作为基底并不唯一。任取可逆r×r矩阵H，都可重新定义协整向量及调整系数，使其乘积Π不变。因此模型报告需要明确β的规范化约束、符号方向及其可识别的经济含义。",
+            "Johansen的秩选择还涉及确定性趋势、样本容量、滞后阶数及是否存在结构突变；统计上估计出r条平稳组合，并不等于在真实交易费用与时间外环境下能够同时锁定r条盈利策略。"
+          ],
+          "formulas": [
+            {
+              "label": "可逆基变换与相同长期矩阵",
+              "tex": "\\beta^*=\\beta H,\\qquad\\alpha^*=\\alpha H^{-\\top},\\qquad\\alpha^*(\\beta^*)^\\top=\\alpha\\beta^\\top"
+            },
+            {
+              "label": "不同规范化下的协整空间不变",
+              "tex": "\\operatorname{col}(\\beta H)=\\operatorname{col}(\\beta),\\quad\\operatorname{rank}(H)=r"
+            }
+          ],
+          "proof": "对任意可逆H，转置关系(βH)ᵀ=Hᵀβᵀ，因此αH^{-ᵀ}Hᵀβᵀ=αβᵀ，证明长期调整矩阵Π未变。可逆H只是在同一r维列空间内换一组基向量，不改变协整空间或k−r维的共同趋势计数。",
+          "worked": "令k=2、r=1、β=(1,−2)ᵀ、α=(−0.2,0.1)ᵀ。选择H=2后，β*=(2,−4)ᵀ、α*=(−0.1,0.05)ᵀ；两种表示都得到Π=[[-0.2,0.4],[0.1,−0.2]]，其秩仍为1，经济上的长期平稳线性方向并未改变。",
+          "limitation": "基变换说明参数化不唯一，不意味着协整秩的统计判定永远可靠；非I(1)变量混入、局部趋势及检验规格错误仍可能造成虚假的协整空间。"
         }
       ],
       "links": [
@@ -351,7 +417,7 @@
           "url": "https://www.statsmodels.org/stable/generated/statsmodels.tsa.vector_ar.vecm.VECM.html"
         }
       ],
-      "checked_status": "V50严格精讲：协整秩、共同趋势数量与模型阶数辨识"
+      "checked_status": "V65：新增Johansen因子化的坐标不唯一与检验秩的边界及完整数值复核"
     }
   ]
 }
