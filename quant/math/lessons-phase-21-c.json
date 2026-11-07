@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "revision": "2026-11-06",
-  "focus": "随机优化：Mini-batch SGD、Adam、偏差修正与解耦衰减",
+  "revision": "2026-11-07",
+  "focus": "随机优化：Mini-batch SGD、Adam、偏差修正与解耦衰减；V67变长批梯度与AdamW解耦正则",
   "lessons": [
     {
       "id": "mlmath-n0460",
@@ -34,6 +34,14 @@
         {
           "label": "无放回Mini-batch均值梯度的有限总体修正",
           "tex": "\\operatorname{Cov}(g_B)=\\frac{n-B}{B(n-1)}\\Sigma_{\\rm pop},\\qquad\\Sigma_{\\rm pop}=\\frac1n\\sum_{i=1}^n(g_i-\\bar g)(g_i-\\bar g)^\\top"
+        },
+        {
+          "label": "不等长批次的总体样本平均梯度",
+          "tex": "\\nabla F=\\frac{\\sum_{b=1}^B n_b\\,g_b}{\\sum_{b=1}^B n_b},\\qquad g_b=\\frac1{n_b}\\sum_{i\\in b}\\nabla\\ell_i"
+        },
+        {
+          "label": "批次等权平均通常不等于样本等权",
+          "tex": "\\frac1B\\sum_{b=1}^Bg_b\\ne\\frac{\\sum_bn_bg_b}{\\sum_bn_b}\\quad\\text{if batch sizes vary}"
         }
       ],
       "derivation": [
@@ -52,6 +60,10 @@
         {
           "explanation": "如果Mini-batch从固定n个样本中均匀地不放回抽取B个索引，批均值梯度仍无偏于有限样本全梯度，但其协方差不是独立有放回抽样下的Σ_pop/B。两次不同抽样指示量负相关，使总体方差乘上有限总体修正因子(n−B)/(n−1)，B=n时无放回梯度恰等于全梯度、采样方差为零。",
           "tex": "\\operatorname{Var}(g_B)=\\frac{1-B/n}{B}\\cdot\\frac1{n-1}\\sum_{i=1}^n(g_i-\\bar g)^2"
+        },
+        {
+          "explanation": "总经验风险梯度等于(Σ_i∇ℓ_i)/(Σ_bn_b)。对样本按不重叠批次重排有限求和，每个批次梯度总和是n_bg_b，故得到第一个恒等式。若所有n_b相等，两种平均相同；当n_b不同且g_b也不同，一般不再相同，短批次的平均梯度若等权参与会对单个样本形成更大的相对权重。",
+          "tex": "\\nabla F=\\frac{\\sum_{b=1}^B n_b\\,g_b}{\\sum_{b=1}^B n_b},\\qquad g_b=\\frac1{n_b}\\sum_{i\\in b}\\nabla\\ell_i"
         }
       ],
       "example": "设两条样本损失分别为ℓ₁(θ)=0.5(θ−1)²、ℓ₂(θ)=0.5(θ−3)²。θ₀=0时梯度分别为−1与−3，完整梯度−2。若mini-batch只抽到第1条且η=0.1，则下一步θ₁=0.1；完整批次更新θ₁=0.2。随机单条梯度的均值−2、方差为[1²+(−1)²]/2=1，B=2有放回抽样的梯度方差为0.5。",
@@ -142,6 +154,27 @@
           "proof": "设样本梯度有限总体均值为gbar，采用大小B的不放回简单随机抽样，批均值的标准抽样方差是(1−B/n)S²/B，其中S²=(n−1)⁻¹Σ(g_i−gbar)²。写成以n为分母的总体方差Σ_pop，即为(n−B)Σ_pop/[B(n−1)]；矩阵协方差按各坐标二次型同理。",
           "worked": "取四个固定标量梯度(−3,−1,1,3)，总体均值0、以n归一的方差5。无放回抽B=2条，批均值的可能值为(−2,−1,0,0,1,2)，方差(4+1+0+0+1+4)/6=5/3。若有放回抽样，批均值方差为5/2。",
           "limitation": "要求固定数据上等概率简单随机无放回抽样；按难例加权、时间块抽样或中途更新参数会改变计算条件。该方差不代表金融总体独立样本的方差。"
+        },
+        {
+          "title": "不等长Mini-batch梯度累积与真实目标的匹配",
+          "question": "当最后一个批次不足额时，为什么平均各批次梯度会偏离按观察等权的经验风险梯度？",
+          "paragraphs": [
+            "经验风险通常为全部训练样本损失的平均。若将观测拆成长度不同的批次，每批的平均梯度不能再简单等权平均，否则短批次中的每条记录实际获得更大权重。正确的梯度累积需要按批次有效观察数加权，或先将各批损失求和再统一除以总有效样本数。",
+            "对价格序列与NLP训练，损失归一的最小单位还可能是交易事件、文本token或有权重的资产样本。有效标签数、padding掩码、drop_last设置和分布式设备数量必须统一口径；即使梯度计算正确，相关金融持有期仍不具备独立观察的统计解释。"
+          ],
+          "formulas": [
+            {
+              "label": "不等长批次的总体样本平均梯度",
+              "tex": "\\nabla F=\\frac{\\sum_{b=1}^B n_b\\,g_b}{\\sum_{b=1}^B n_b},\\qquad g_b=\\frac1{n_b}\\sum_{i\\in b}\\nabla\\ell_i"
+            },
+            {
+              "label": "批次等权平均通常不等于样本等权",
+              "tex": "\\frac1B\\sum_{b=1}^Bg_b\\ne\\frac{\\sum_bn_bg_b}{\\sum_bn_b}\\quad\\text{if batch sizes vary}"
+            }
+          ],
+          "proof": "总经验风险梯度等于(Σ_i∇ℓ_i)/(Σ_bn_b)。对样本按不重叠批次重排有限求和，每个批次梯度总和是n_bg_b，故得到第一个恒等式。若所有n_b相等，两种平均相同；当n_b不同且g_b也不同，一般不再相同，短批次的平均梯度若等权参与会对单个样本形成更大的相对权重。",
+          "worked": "两个批次分别有4和1条样本，批次梯度均值依次为2和−3。真实五样本等权梯度为(4×2+1×(−3))/5=1；直接取两批均值平均得到(2−3)/2=−0.5，甚至使更新方向反转。梯度累积应使用总有效样本数5。",
+          "limitation": "若研究目标原本就给每批次相同经济权重，等权批均值可能是有意的估计量；必须先定义优化目标，不能无条件称其错误。"
         }
       ],
       "links": [
@@ -176,7 +209,7 @@
           "url": "https://doi.org/10.1137/16M1080173"
         }
       ],
-      "checked_status": "V52严格精讲：有放回与无放回SGD梯度噪声为何不同"
+      "checked_status": "V67：不等长Mini-batch梯度累积与真实目标的匹配及精确数值案例"
     },
     {
       "id": "mlmath-n0461",
@@ -209,6 +242,14 @@
         {
           "label": "Adam首次更新中epsilon对梯度尺度的作用",
           "tex": "m_0=v_0=0,\\ g_1\\ne0\\ \\Longrightarrow\\ \\Delta\\theta_1=-\\eta\\frac{g_1}{|g_1|+\\epsilon}\\quad(\\text{完整偏差修正})"
+        },
+        {
+          "label": "AdamW的简化分离更新",
+          "tex": "\\theta_t=(1-\\eta\\lambda)\\theta_{t-1}-\\eta\\frac{\\widehat m_t^{\\rm data}}{\\sqrt{\\widehat v_t^{\\rm data}}+\\varepsilon}"
+        },
+        {
+          "label": "Adam在目标加入L2的自适应梯度",
+          "tex": "g_t^{\\rm coupled}=\\nabla\\ell_t(\\theta_{t-1})+\\lambda\\theta_{t-1}\\quad\\longrightarrow\\quad(m_t,v_t)"
         }
       ],
       "derivation": [
@@ -227,6 +268,10 @@
         {
           "explanation": "Adam在第一步使用零初始化的一阶和二阶矩时，无论β1、β2位于合法区间内的具体数值，经过正确偏差修正都有mhat1=g1、vhat1=g1²。若epsilon为零，单坐标且g1非零时首次更新方向是符号梯度、步幅等于η；epsilon为正时梯度绝对值接近epsilon会明显缩小更新幅度，因此该更新不再严格具有对梯度尺度的独立性。",
           "tex": "\\widehat m_1=g_1,\\quad\\widehat v_1=g_1^2\\ \\Longrightarrow\\ \\frac{\\widehat m_1}{\\sqrt{\\widehat v_1}+\\epsilon}=\\frac{g_1}{|g_1|+\\epsilon}"
+        },
+        {
+          "explanation": "在标量首步、偏差修正且ε趋近零时，Adam的更新方向由耦合梯度g_data+λθ的符号决定，而独立权重衰减不会进入数据梯度的二阶矩。因而两种方法只有在特殊情形下重合，不能由SGD中简单的代数等价推导出Adam的一般等价性。",
+          "tex": "\\theta_t=(1-\\eta\\lambda)\\theta_{t-1}-\\eta\\frac{\\widehat m_t^{\\rm data}}{\\sqrt{\\widehat v_t^{\\rm data}}+\\varepsilon}"
         }
       ],
       "example": "设单坐标第一步g₁=2，β₁=0.9、β₂=0.999、η=0.1、ε=10^−8。可算出m₁=0.2、v₁=0.004，修正后m̂₁=2、v̂₁=4，所以第一步更新Δθ₁=−0.1×2/(2+10^−8)≈−0.1。未经修正时直接取0.2/√0.004≈3.162，会给出明显不同的步幅。",
@@ -317,6 +362,27 @@
           "proof": "从m1=(1−β1)g1、v1=(1−β2)g1²出发，除以对应的1−β1及1−β2得到mhat1=g1、vhat1=g1²。代入标准Adam参数更新后即得公式。",
           "worked": "令η=0.1、epsilon=0.01、g1=2，第一次更新为−0.1×2/(2+0.01)≈−0.09950；若仅把同向梯度缩小到0.02，更新为−0.1×0.02/(0.02+0.01)=−0.06667，epsilon因此影响实际步幅。",
           "limitation": "这里针对单坐标第一步、正确偏差修正且无额外权重衰减。AdamW、AMSGrad、非零初始动量或不同epsilon位置会改变细节。"
+        },
+        {
+          "title": "Adam与AdamW的L2正则化及解耦权重衰减",
+          "question": "在自适应优化器中，为什么把L2惩罚加到梯度，与直接按比例缩小权重并不等价？",
+          "paragraphs": [
+            "对普通SGD，如果不考虑动量和其他细节，L2梯度λθ加入数据梯度后进行一步更新，可以写为先对权重乘(1−ηλ)，再减去η倍数据梯度。Adam的梯度进入一阶和二阶动量统计，其自适应分母也由含惩罚的梯度影响，因此直接对目标加L2与对参数做显式解耦衰减一般不能交换。",
+            "AdamW把权重衰减作为与数据梯度的自适应更新分开的项，使不同坐标共享直接的比例收缩，而不是使惩罚梯度也被按历史二阶矩缩放。在金融机器学习中还需明确哪些参数参与权重衰减，如偏置、归一化参数及Embedding，不可把AdamW与Ridge的统计收缩意义完全等同。"
+          ],
+          "formulas": [
+            {
+              "label": "AdamW的简化分离更新",
+              "tex": "\\theta_t=(1-\\eta\\lambda)\\theta_{t-1}-\\eta\\frac{\\widehat m_t^{\\rm data}}{\\sqrt{\\widehat v_t^{\\rm data}}+\\varepsilon}"
+            },
+            {
+              "label": "Adam在目标加入L2的自适应梯度",
+              "tex": "g_t^{\\rm coupled}=\\nabla\\ell_t(\\theta_{t-1})+\\lambda\\theta_{t-1}\\quad\\longrightarrow\\quad(m_t,v_t)"
+            }
+          ],
+          "proof": "在标量首步、偏差修正且ε趋近零时，Adam的更新方向由耦合梯度g_data+λθ的符号决定，而独立权重衰减不会进入数据梯度的二阶矩。因而两种方法只有在特殊情形下重合，不能由SGD中简单的代数等价推导出Adam的一般等价性。",
+          "worked": "设θ₀=2、数据梯度g_data=1、λ=0.1、η=0.1、首步Adam偏差修正、ε可忽略。耦合L2给g=1.2，首步Adam更新约为−0.1，得到θ≈1.9；AdamW的数据自适应更新约−0.1，另有权重衰减−ηλθ=−0.02，得到θ≈1.88。两者不同。",
+          "limitation": "示例采用简化的同一步长解耦更新；实际实现的学习率调度、ε取值、动量历史及参数组设置还可能产生差异。"
         }
       ],
       "links": [
@@ -351,7 +417,7 @@
           "url": "https://arxiv.org/abs/1711.05101"
         }
       ],
-      "checked_status": "V52严格精讲：Adam首次更新的尺度不变性及epsilon边界"
+      "checked_status": "V67：Adam与AdamW的L2正则化及解耦权重衰减及精确数值案例"
     }
   ]
 }

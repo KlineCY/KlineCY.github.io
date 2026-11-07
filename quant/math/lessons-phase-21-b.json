@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "revision": "2026-11-06",
-  "focus": "统一损失和正则化：Ridge、LASSO、Elastic Net，ETF时间外特征选择",
+  "revision": "2026-11-07",
+  "focus": "统一损失和正则化：Ridge、LASSO、Elastic Net，ETF时间外特征选择；V67特征单位影响与Elastic Net近重复列分组界",
   "lessons": [
     {
       "id": "mlmath-n0463",
@@ -34,6 +34,14 @@
         {
           "label": "Ridge平滑矩阵的有效自由度",
           "tex": "\\operatorname{df}_{\\rm Ridge}(\\lambda)=\\operatorname{tr}\\!\\bigl[X(X^\\top X+n\\lambda I)^{-1}X^\\top\\bigr]=\\sum_{j=1}^{r}\\frac{s_j^2}{s_j^2+n\\lambda}"
+        },
+        {
+          "label": "线性拟合不变的特征尺度与系数映射",
+          "tex": "x_j^*=cx_j,\\qquad\\beta_j^*=\\beta_j/c,\\qquad x_j^*\\beta_j^*=x_j\\beta_j"
+        },
+        {
+          "label": "相同拟合值下的惩罚不变性破坏",
+          "tex": "\\lambda|\\beta_j^*|=\\frac{\\lambda}{|c|}|\\beta_j|,\\qquad\\frac\\lambda2(\\beta_j^*)^2=\\frac\\lambda{2c^2}\\beta_j^2"
         }
       ],
       "derivation": [
@@ -52,6 +60,10 @@
         {
           "explanation": "以损失||y−Xβ||²/(2n)+λ||β||²/2定义Ridge，预测向量等于平滑矩阵H_λy。通过X的奇异值分解，H_λ在各非零奇异方向的特征值为s_j²/(s_j²+nλ)，其迹即有效自由度。λ增大时各特征值收缩，模型有效复杂度下降；这是一种线性平滑器容量度量，并不直接等于被选择的非零特征个数。",
           "tex": "X=U\\operatorname{diag}(s_j)V^\\top\\Longrightarrow H_\\lambda=U\\operatorname{diag}\\!\\left(\\frac{s_j^2}{s_j^2+n\\lambda}\\right)U^\\top"
+        },
+        {
+          "explanation": "预测内积中该坐标项由cx_j乘β_j/c，因此拟合值严格不变。LASSO罚项对系数绝对值线性齐次，替换后变成原罚项的1/|c|；Ridge二次罚项变成原罚项的1/c²。数据拟合项不变但惩罚项改变，所以不同的特征计量单位可产生不同最优解和因子筛选结果。",
+          "tex": "x_j^*=cx_j,\\qquad\\beta_j^*=\\beta_j/c,\\qquad x_j^*\\beta_j^*=x_j\\beta_j"
         }
       ],
       "example": "设正交设计z=(3,0.5,−2)，统一λ=1，Ridge逐坐标除以2，得到β_R=(1.5,0.25,−1)；LASSO对每个z做单位软阈值，得到β_L=(2,0,−1)。第二个坐标被LASSO准确置零，Ridge则保留0.25；没有验证数据不能由这一算例判断未来ETF收益模型优劣。",
@@ -142,6 +154,27 @@
           "proof": "一阶条件给出βhat=(XᵀX+nλI)⁻¹Xᵀy。把SVD代入H=X(XᵀX+nλI)⁻¹Xᵀ，可得在每个非零奇异向量上的收缩因子s_j²/(s_j²+nλ)。迹等于特征值之和，故得公式。",
           "worked": "若设计矩阵两个非零奇异值为2和1、n=4、λ=0.25，则nλ=1，有效自由度为4/(4+1)+1/(1+1)=0.8+0.5=1.3；尽管输入含两个有效方向，自由度并不固定为2。",
           "limitation": "有效自由度表达假设λ固定、无未惩罚截距及固定设计矩阵。若超参数经同一数据选择、截距另行处理或惩罚矩阵非单位阵，公式需要相应调整。"
+        },
+        {
+          "title": "标准化尺度如何改变Ridge和LASSO的实际惩罚",
+          "question": "为什么同一原始预测模型，仅仅改变因子单位也可能改变正则化解？",
+          "paragraphs": [
+            "有惩罚线性回归的损失针对拟合值，但惩罚作用在系数本身。将某个原始特征x_j替换为尺度放大c倍的cx_j时，为产生相同拟合值需要把其系数除以c。因此若仍对各列使用相同L1或L2系数惩罚，经济上等价的预测方向将承担不同惩罚成本。",
+            "量化多因子研究必须先明确动量、波动率、成交量及宏观变量的标准化口径。标准化均值、方差或分位数估计应仅来自相应训练窗口，验证和测试期间沿用已冻结参数；否则即使算法优化本身完全正确，预测信息集也可能被未来行情污染。"
+          ],
+          "formulas": [
+            {
+              "label": "线性拟合不变的特征尺度与系数映射",
+              "tex": "x_j^*=cx_j,\\qquad\\beta_j^*=\\beta_j/c,\\qquad x_j^*\\beta_j^*=x_j\\beta_j"
+            },
+            {
+              "label": "相同拟合值下的惩罚不变性破坏",
+              "tex": "\\lambda|\\beta_j^*|=\\frac{\\lambda}{|c|}|\\beta_j|,\\qquad\\frac\\lambda2(\\beta_j^*)^2=\\frac\\lambda{2c^2}\\beta_j^2"
+            }
+          ],
+          "proof": "预测内积中该坐标项由cx_j乘β_j/c，因此拟合值严格不变。LASSO罚项对系数绝对值线性齐次，替换后变成原罚项的1/|c|；Ridge二次罚项变成原罚项的1/c²。数据拟合项不变但惩罚项改变，所以不同的特征计量单位可产生不同最优解和因子筛选结果。",
+          "worked": "某原始因子x以百分数形式计量，其系数为β=2。若把特征值乘100、系数改为0.02，预测贡献不变。λ=1时LASSO单坐标惩罚由2降为0.02；Ridge罚项由2降为0.0002。若没有统一缩放，超参数相同并不意味着公平比较。",
+          "limitation": "对截距通常不进行正则化，标准化与正则化的具体组合因算法而异；重参数化并非改变真实因果关系，也不能解决强相关因子的样本外非稳健性。"
         }
       ],
       "links": [
@@ -176,7 +209,7 @@
           "url": "https://doi.org/10.1111/j.2517-6161.1996.tb02080.x"
         }
       ],
-      "checked_status": "V52严格精讲：Ridge有效自由度、奇异值谱与模型复杂度"
+      "checked_status": "V67：标准化尺度如何改变Ridge和LASSO的实际惩罚及推导核验"
     },
     {
       "id": "mlmath-n0464",
@@ -209,6 +242,14 @@
         {
           "label": "相同预测列的Elastic Net系数分组性质",
           "tex": "X_{\\cdot j}=X_{\\cdot k},\\quad\\lambda(1-\\alpha)>0\\Longrightarrow\\widehat\\beta_j=\\widehat\\beta_k\\quad(\\text{同等惩罚})"
+        },
+        {
+          "label": "两个非零同号Elastic Net系数的差值",
+          "tex": "\\lambda_2(\\widehat\\beta_j-\\widehat\\beta_k)=\\frac{(x_j-x_k)^\\top\\widehat r}{n},\\quad\\lambda_2=\\lambda(1-\\alpha)>0"
+        },
+        {
+          "label": "系数分组差异的柯西上界",
+          "tex": "|\\widehat\\beta_j-\\widehat\\beta_k|\\le\\frac{\\|x_j-x_k\\|_2\\,\\|\\widehat r\\|_2}{n\\lambda_2}"
         }
       ],
       "derivation": [
@@ -227,6 +268,10 @@
         {
           "explanation": "若两个预测特征列完全相同且受到相同L1与正L2惩罚，那么交换两列的系数不会改变任何拟合残差、L1罚项及L2罚项。由于正L2项使全部系数的目标函数严格凸，最小值只有唯一系数解；该解必须在交换后保持不变，因此两个系数相等。这是Elastic Net的确切分组性质特例，并不意味着任意高相关但不完全相同的特征系数必然一样。",
           "tex": "F(\\beta)=F(P_{jk}\\beta),\\quad F\\text{严格凸}\\ \\Longrightarrow\\widehat\\beta=P_{jk}\\widehat\\beta"
+        },
+        {
+          "explanation": "令r̂=y−Xβ̂。对两条均非零且同号的坐标，L1次梯度均为相同符号s。最优性方程为−x_jᵀr̂/n+λαs+λ₂β̂_j=0，k坐标类似；相减后共同的L1项抵消，得到等式。再对内积应用柯西–施瓦茨不等式，就得到上界。若任一系数为零或符号不同，该等式须保留不同次梯度项。",
+          "tex": "\\lambda_2(\\widehat\\beta_j-\\widehat\\beta_k)=\\frac{(x_j-x_k)^\\top\\widehat r}{n},\\quad\\lambda_2=\\lambda(1-\\alpha)>0"
         }
       ],
       "example": "令正交充分统计量z=(3,0.5,−2)、λ=1、α=0.5，则阈值λα=0.5，软阈值结果为(2.5,0,−1.5)，再除以1.5，得到Elastic Net系数(5/3,0,−1)。同样λ下Ridge系数是(1.5,0.25,−1)、LASSO是(2,0,−1)，三者的收缩结构不同。",
@@ -317,6 +362,27 @@
           "proof": "定义P_jk为交换第j和k个系数的置换。因两列设计完全相同，XP_jkβ=Xβ；L1与L2范数也在置换下不变，所以F(P_jkβ)=F(β)。严格凸性保证唯一极小点βhat，故P_jkβhat=βhat，即两坐标相等。",
           "worked": "设只有一条训练记录y=3、两条完全相同的设计列x₁=x₂=1，并令λ=1、α=0.5。对称解β₁=β₂=b≥0，目标变为0.5(3−2b)²+b+0.5b²，驻点满足5b−5=0，因此b=1；对应模型预测2。",
           "limitation": "要求两列完全重复、全部系数采用相同惩罚系数、λ(1−α)>0且无不对称约束。分组等价不意味着经济因子因果可解释或单独贡献可辨识。"
+        },
+        {
+          "title": "高度相关特征的Elastic Net分组误差上界",
+          "question": "完全重复特征会得到相同系数，那么略有差异时系数接近程度能否定量约束？",
+          "paragraphs": [
+            "Elastic Net的L2项使凸目标在权重方向上具备严格曲率；如果两个标准化因子的样本列接近，其最优系数也常呈现分组效应。这个结论可以通过两坐标KKT方程相减得到形式明确的差值约束，而不只是凭相似图形推测。",
+            "将该结论用于跨资产因子挖掘时，必须同时检查因子差异的训练样本范数和拟合残差规模。若两个高度相关因子的微小差异恰好编码了未来泄漏或市场结构突变，系数分组在统计上稳定也不代表信息合法或者经济含义相同。"
+          ],
+          "formulas": [
+            {
+              "label": "两个非零同号Elastic Net系数的差值",
+              "tex": "\\lambda_2(\\widehat\\beta_j-\\widehat\\beta_k)=\\frac{(x_j-x_k)^\\top\\widehat r}{n},\\quad\\lambda_2=\\lambda(1-\\alpha)>0"
+            },
+            {
+              "label": "系数分组差异的柯西上界",
+              "tex": "|\\widehat\\beta_j-\\widehat\\beta_k|\\le\\frac{\\|x_j-x_k\\|_2\\,\\|\\widehat r\\|_2}{n\\lambda_2}"
+            }
+          ],
+          "proof": "令r̂=y−Xβ̂。对两条均非零且同号的坐标，L1次梯度均为相同符号s。最优性方程为−x_jᵀr̂/n+λαs+λ₂β̂_j=0，k坐标类似；相减后共同的L1项抵消，得到等式。再对内积应用柯西–施瓦茨不等式，就得到上界。若任一系数为零或符号不同，该等式须保留不同次梯度项。",
+          "worked": "若n=100、λ₂=0.2、拟合残差范数||r̂||₂=5，而两因子列差范数||x_j−x_k||₂=0.1，则在两系数同号且非零的条件下，差的绝对值不超过0.1×5/(100×0.2)=0.025。两列完全相同时上界变为0，与严格凸下的精确分组一致。",
+          "limitation": "这个差值界只针对同号非零坐标，L1次梯度在零点和跨符号时不同；因子的尺度、相关性及样本外状态变化都影响实际分组。"
         }
       ],
       "links": [
@@ -351,7 +417,7 @@
           "url": "https://scikit-learn.org/stable/modules/linear_model.html"
         }
       ],
-      "checked_status": "V52严格精讲：Elastic Net对完全重复因子的精确分组证明"
+      "checked_status": "V67：高度相关特征的Elastic Net分组误差上界及推导核验"
     }
   ]
 }

@@ -38,8 +38,8 @@ for(const l of added){
  assert(l.node_id===l.id&&nodeMap.get(l.id)?.title===l.title,"curriculum mismatch "+l.id);
  assert(l.definition.length>=110&&l.assumptions.length>=100&&l.example.length>=115,"substantive narrative missing "+l.id);
  assert(l.application.length>=80&&l.caveat.length>=60,"financial caveats incomplete "+l.id);
- assert(l.properties.length>=3&&l.formulas.length>=4&&l.derivation.length>=3&&l.deep_sections.length===5,"math coverage incomplete "+l.id);
- assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,5,"duplicate chapter headers "+l.id);
+ assert(l.properties.length>=3&&l.formulas.length>=4&&l.derivation.length>=3&&l.deep_sections.length>=5,"math coverage incomplete "+l.id);
+ assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,l.deep_sections.length,"duplicate chapter headers "+l.id);
  for(const p of l.derivation){
   assert(p.explanation.length>=50,"derivation step lacks proof "+l.id);
   katex.renderToString(p.tex,{throwOnError:true,strict:"ignore",displayMode:true});formulas++;
@@ -61,8 +61,8 @@ for(const l of added){
  for(const ref of l.sources||[]){assert(ref.title.length>=20&&/^https:\/\//.test(ref.url));sourceCount++}
  assert(!JSON.stringify(l).includes("\ufffd"),"Unicode replacement character "+l.id);
 }
-assert.equal(sections,40);
-assert.equal(formulas,112);
+assert(sections>=40);
+assert(formulas>=112);
 assert.equal(sourceCount,16);
 assert.equal(linkCount,32);
 const visiting=new Set(),visited=new Set();
