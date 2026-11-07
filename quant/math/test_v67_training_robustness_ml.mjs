@@ -41,7 +41,7 @@ const near=(actual,expected,label,tol=1e-8)=>{
  assert(Math.abs(actual-expected)<=tol,label+": "+actual+" != "+expected);
  checked++;
 };
-near(Math.sqrt(Math.log(40)/1000),.0607359573,"single-model test uniform bound",1e-7);
+near(Math.sqrt(Math.log(40)/1000),.060736146190830516,"single-model test uniform bound",1e-7);
 near(Math.sqrt(Math.log(800)/1000),.08175947,"20-model test uniform bound",1e-6);
 near(1-.95**20,.6415140775914577,"20 false discoveries from repeated independent checks");
 near(.04/4*(1+3*.5),.025,"CV fold dependence variance");
