@@ -344,7 +344,7 @@ async function loadV89Foundations(){
 }
 async function loadV90LinearFoundations(){
  const doc=await fetchMathJson("./lessons-linear-v90.json");
- if(doc.version!==1||doc.revision!=="V90"||!Array.isArray(doc.lessons)||doc.lessons.length!==4||
+ if(doc.version!==1||doc.revision!=="V90"||!Array.isArray(doc.lessons)||doc.lessons.length!==8||
     new Set(doc.lessons.map(l=>l.node_id)).size!==4||
     doc.lessons.some(l=>!Array.isArray(l.deep_sections)||l.deep_sections.length<3||
        !Array.isArray(l.formulas)||l.formulas.length<3||
