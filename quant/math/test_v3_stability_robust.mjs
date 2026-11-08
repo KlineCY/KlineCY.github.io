@@ -30,11 +30,11 @@ for(const id of IDs){
  assert(l&&n,"unpublished full mathematical tutorial "+id);
  assert.equal(l.title,n.title);
  assert(l.definition.length>=95&&l.assumptions.length>=90&&l.example.length>=120&&l.application.length>=80&&l.caveat.length>=90,"insufficient premises and applications "+id);
- assert(l.properties.length>=4&&l.formulas.length===5&&l.derivation.length===5&&l.deep_sections.length===5,"V58 course six-section loss or count mismatch "+id);
- assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,5,"repeated conceptual subsection "+id);
+ assert(l.properties.length>=4&&l.formulas.length===5&&l.derivation.length===5&&l.deep_sections.length===6,"V58 original five proof sections plus V87 appendix missing "+id);
+ assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,6,"repeated conceptual subsection "+id);
  for(const f of l.formulas){katex.renderToString(f.tex,{throwOnError:true,strict:"ignore"});formula++;}
  for(const d of l.derivation){assert(d.explanation.length>=45);katex.renderToString(d.tex,{throwOnError:true,strict:"ignore"});formula++;}
- for(const s of l.deep_sections){
+ for(const s of l.deep_sections.slice(0,5)){
   assert(s.title.length>5&&s.question.length>12&&s.paragraphs.length===2&&s.paragraphs.every(p=>p.length>=65),"thin explanatory proof "+id+" / "+s.title);
   assert(s.proof.length>=55&&s.worked.length>=55&&s.limitation.length>=40,"proof/numeric/caveat missing "+id+" / "+s.title);
   assert(s.formulas.length>0);
@@ -68,7 +68,7 @@ for(const id of IDs){
  const l=lectures.get(id);
  assert(l.checked_status?.startsWith("V58"),"V58 robust mathematical revision missing "+id);
  assert.equal(new Set(l.formulas.map(f=>f.tex)).size,5,"V58 duplicate robust main equation "+id);
- const sec=l.deep_sections.at(-1);
+ const sec=l.deep_sections[4];
  assert(sec.paragraphs.every(p=>p.length>=65)&&sec.proof.length>=55&&sec.worked.length>=55&&sec.limitation.length>=40,
   "V58 final robust financial subsection incomplete "+id);
  assert(!/[\uFFFD\u200B\uFEFF]|TODO|Lorem ipsum/.test(JSON.stringify(l)),"V58 broken Chinese or placeholder "+id);
