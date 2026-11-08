@@ -18,11 +18,11 @@ for(const id of chain){
  assert.equal(l.title,node.title);
  assert(l.definition.length>75&&l.assumptions.length>65&&l.example.length>110&&l.application.length>65&&l.caveat.length>60,"incomplete theorem scope "+id);
  assert(l.properties.length>=4&&l.formulas.length>=4&&l.derivation.length>=4);
- assert.equal(l.deep_sections.length,4,"missing long-form subchapters "+id);
- assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,4);
+ assert.equal(l.deep_sections.length,5,"four historical proof sections plus one V86 section "+id);
+ assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,l.deep_sections.length);
  for(const step of l.derivation){assert(step.explanation.length>=40);katex.renderToString(step.tex,{throwOnError:true,strict:"ignore"});equations++;}
  for(const eq of l.formulas){katex.renderToString(eq.tex,{throwOnError:true,strict:"ignore"});equations++;}
- for(const s of l.deep_sections){
+ for(const s of l.deep_sections.slice(0,4)){
   assert(s.question.length>12&&s.paragraphs.length>=2&&s.paragraphs.every(p=>p.length>=45),"thin prose "+id);
   assert(s.proof.length>=50&&s.worked.length>=35&&s.limitation.length>=25,"proof/example/boundary missing "+id);
   for(const eq of s.formulas){katex.renderToString(eq.tex,{throwOnError:true,strict:"ignore"});equations++;}
