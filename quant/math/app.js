@@ -342,15 +342,26 @@ async function loadV89Foundations(){
   throw Error("V89基础数学完整讲义数量、版本或唯一ID异常");
  return doc.lessons;
 }
+async function loadV90LinearFoundations(){
+ const doc=await fetchMathJson("./lessons-linear-v90.json");
+ if(doc.version!==1||doc.revision!=="V90"||!Array.isArray(doc.lessons)||doc.lessons.length!==4||
+    new Set(doc.lessons.map(l=>l.node_id)).size!==4||
+    doc.lessons.some(l=>!Array.isArray(l.deep_sections)||l.deep_sections.length<3||
+       !Array.isArray(l.formulas)||l.formulas.length<3||
+       !Array.isArray(l.derivation)||l.derivation.length<3))
+  throw Error("V90线性代数讲义缺页、重复或证明内容不完整");
+ return doc.lessons;
+}
 Promise.all([
  fetch("./curriculum.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw Error("知识树加载失败 "+r.status);return r.json()}),
  fetch("./lessons-foundations.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw Error("基础讲义加载失败 "+r.status);return r.json()}),
  fetch("./lessons-advanced.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw Error("进阶讲义加载失败 "+r.status);return r.json()}),
  fetch("./lessons-more.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw Error("专题讲义加载失败 "+r.status);return r.json()}),
  loadMathAdditions(),
- loadV89Foundations()
-]).then(([c,l1,l2,l3,extra,v89])=>{
-curriculum=c;depts=c.disciplines;chapters=c.chapters;nodes=c.nodes;lessons=[...l1.lessons,...l2.lessons,...l3.lessons,...extra,...v89];
+ loadV89Foundations(),
+ loadV90LinearFoundations()
+]).then(([c,l1,l2,l3,extra,v89,v90])=>{
+curriculum=c;depts=c.disciplines;chapters=c.chapters;nodes=c.nodes;lessons=[...l1.lessons,...l2.lessons,...l3.lessons,...extra,...v89,...v90];
 nodeMap=new Map(nodes.map(n=>[n.id,n]));chapMap=new Map(chapters.map(c=>[c.id,c]));deptMap=new Map(depts.map(d=>[d.id,d]));lessonMap=new Map(lessons.map(l=>[l.node_id,l]));
 if(lessonMap.size!==lessons.length||lessons.some(l=>!nodeMap.has(l.node_id)||nodeMap.get(l.node_id).title!==l.title))
  throw Error("数学讲义ID重复、目标缺失或标题不匹配");
