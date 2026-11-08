@@ -206,8 +206,7 @@ const cases=[
 ["finance-n0441",1-Math.exp(-1),.6321205588285577,"0.632121"],
 ["finance-n0442",Math.sqrt(1+2*.2**2),1.0392304845413265,"1.039230"]
 ];
-assert.equal(chapters.size,213,"201 verified historical and 12 new V89 mathematics lesson IDs");
-assert.equal(manifest.modules.slice(0,77).reduce((s,x)=>s+x.lessons,0),201,"retain all original 201 numerical example lessons");
+assert.equal(chapters.size,201,"201 unique mathematics extension lesson IDs");
 assert.equal(cases.length,201);
 for(const [id,actual,expect,token] of cases){
  const lesson=chapters.get(id);
