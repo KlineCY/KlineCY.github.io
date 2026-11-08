@@ -179,7 +179,7 @@ near("FFT proxy operations ratio",1024**2/(1024*Math.log2(1024)),102.4);
 near("PSD white noise",.0004,.0004);
 near("PSD full spectral area",(2*Math.PI)*.0004/(2*Math.PI),.0004);
 near("PSD half spectral band",Math.PI*.0004/(2*Math.PI),.0002);
-near("PSD other half",".0002"*1,.0002);
+near("PSD remaining spectral band",(2*Math.PI-Math.PI)*.0004/(2*Math.PI),.0002);
 near("PSD lower stationary spectral value",1-.5,.5);
 const energyTime=sum(x.map(v=>v*v));
 const energyFreq=sum(X.map(mod2));
