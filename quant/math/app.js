@@ -352,6 +352,19 @@ async function loadV90LinearFoundations(){
   throw Error("V90线性代数讲义缺页、重复或证明内容不完整");
  return doc.lessons;
 }
+async function loadV92LinearFoundations(){
+ const doc=await fetchMathJson("./lessons-linear-v92.json");
+ if(doc.version!==1||doc.revision!=="V92"||!Array.isArray(doc.lessons)||
+    doc.lessons.length!==8||new Set(doc.lessons.map(l=>l.node_id)).size!==8||
+    doc.lessons.some(l=>l.id!==l.node_id||!l.definition||!l.assumptions||
+      !Array.isArray(l.properties)||l.properties.length<4||
+      !Array.isArray(l.formulas)||l.formulas.length<3||
+      !Array.isArray(l.derivation)||l.derivation.length<3||
+      !Array.isArray(l.deep_sections)||l.deep_sections.length<3||
+      !l.example||!l.application||!l.caveat))
+  throw Error("V92八篇矩阵分析课程数据损坏");
+ return doc.lessons;
+}
 Promise.all([
  fetch("./curriculum.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw Error("知识树加载失败 "+r.status);return r.json()}),
  fetch("./lessons-foundations.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw Error("基础讲义加载失败 "+r.status);return r.json()}),
@@ -359,9 +372,10 @@ Promise.all([
  fetch("./lessons-more.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw Error("专题讲义加载失败 "+r.status);return r.json()}),
  loadMathAdditions(),
  loadV89Foundations(),
- loadV90LinearFoundations()
-]).then(([c,l1,l2,l3,extra,v89,v90])=>{
-curriculum=c;depts=c.disciplines;chapters=c.chapters;nodes=c.nodes;lessons=[...l1.lessons,...l2.lessons,...l3.lessons,...extra,...v89,...v90];
+ loadV90LinearFoundations(),
+ loadV92LinearFoundations()
+]).then(([c,l1,l2,l3,extra,v89,v90,v92])=>{
+curriculum=c;depts=c.disciplines;chapters=c.chapters;nodes=c.nodes;lessons=[...l1.lessons,...l2.lessons,...l3.lessons,...extra,...v89,...v90,...v92];
 nodeMap=new Map(nodes.map(n=>[n.id,n]));chapMap=new Map(chapters.map(c=>[c.id,c]));deptMap=new Map(depts.map(d=>[d.id,d]));lessonMap=new Map(lessons.map(l=>[l.node_id,l]));
 if(lessonMap.size!==lessons.length||lessons.some(l=>!nodeMap.has(l.node_id)||nodeMap.get(l.node_id).title!==l.title))
  throw Error("数学讲义ID重复、目标缺失或标题不匹配");
