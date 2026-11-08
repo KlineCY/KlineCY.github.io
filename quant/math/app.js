@@ -336,14 +336,21 @@ async function loadMathAdditions(){
   throw Error("数学讲义模块出现重复或缺页");
  return added;
 }
+async function loadV89Foundations(){
+ const doc=await fetchMathJson("./lessons-foundations-v89.json");
+ if(doc.version!==1||!Array.isArray(doc.lessons)||doc.lessons.length!==12||new Set(doc.lessons.map(l=>l.node_id)).size!==12)
+  throw Error("V89基础数学完整讲义数量、版本或唯一ID异常");
+ return doc.lessons;
+}
 Promise.all([
  fetch("./curriculum.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw Error("知识树加载失败 "+r.status);return r.json()}),
  fetch("./lessons-foundations.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw Error("基础讲义加载失败 "+r.status);return r.json()}),
  fetch("./lessons-advanced.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw Error("进阶讲义加载失败 "+r.status);return r.json()}),
  fetch("./lessons-more.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw Error("专题讲义加载失败 "+r.status);return r.json()}),
- loadMathAdditions()
-]).then(([c,l1,l2,l3,extra])=>{
-curriculum=c;depts=c.disciplines;chapters=c.chapters;nodes=c.nodes;lessons=[...l1.lessons,...l2.lessons,...l3.lessons,...extra];
+ loadMathAdditions(),
+ loadV89Foundations()
+]).then(([c,l1,l2,l3,extra,v89])=>{
+curriculum=c;depts=c.disciplines;chapters=c.chapters;nodes=c.nodes;lessons=[...l1.lessons,...l2.lessons,...l3.lessons,...extra,...v89];
 nodeMap=new Map(nodes.map(n=>[n.id,n]));chapMap=new Map(chapters.map(c=>[c.id,c]));deptMap=new Map(depts.map(d=>[d.id,d]));lessonMap=new Map(lessons.map(l=>[l.node_id,l]));
 if(lessonMap.size!==lessons.length||lessons.some(l=>!nodeMap.has(l.node_id)||nodeMap.get(l.node_id).title!==l.title))
  throw Error("数学讲义ID重复、目标缺失或标题不匹配");
