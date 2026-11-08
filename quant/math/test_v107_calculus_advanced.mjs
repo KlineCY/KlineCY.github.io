@@ -10,8 +10,8 @@ assert.equal(tree.nodes.length,656,"Original mathematics syllabus must remain 65
 const nodeMap=new Map(tree.nodes.map(n=>[n.id,n]));
 assert.equal(nodeMap.size,656,"Duplicate syllabus IDs");
 
-const paths=["lessons-calculus-v107a.json","lessons-calculus-v107b.json","lessons-calculus-v107c.json","lessons-calculus-v107d.json"];
-const counts=[3,2,3,3];
+const paths=["lessons-calculus-v107a.json","lessons-calculus-v107b.json","lessons-calculus-v107c.json","lessons-calculus-v107d.json","lessons-calculus-v107e.json","lessons-calculus-v107f.json"];
+const counts=[3,2,3,3,3,2];
 const docs=paths.map(json);
 docs.forEach((doc,i)=>{
  assert.equal(doc.version,1,"V107 schema revision changed");
@@ -19,7 +19,7 @@ docs.forEach((doc,i)=>{
  assert.equal(doc.lessons?.length,counts[i],"V107 chapter bundle count changed");
 });
 const added=docs.flatMap(doc=>doc.lessons);
-const target=[43,44,45,47,48,49,50,51,52,53,54].map(n=>"calculus-n"+String(n).padStart(4,"0"));
+const target=[43,44,45,47,48,49,50,51,52,53,54,55,57,58,59,60].map(n=>"calculus-n"+String(n).padStart(4,"0"));
 assert.deepEqual(added.map(l=>l.node_id),target,"New chapters must use the original curriculum's missing nodes");
 const historical=fs.readdirSync(root)
  .filter(n=>/^lessons-.*\.json$/.test(n)&&!paths.includes(n))
@@ -28,8 +28,8 @@ assert.equal(historical.length,570,"Prior 570 lessons unexpectedly changed");
 assert.equal(new Set(historical.map(l=>l.node_id)).size,570,"Historical lesson IDs duplicated");
 assert(target.every(id=>!historical.some(l=>l.node_id===id)),"V107 would overwrite historical contents");
 const all=[...historical,...added];
-assert.equal(all.length,581,"Target coverage 581/656");
-assert.equal(new Set(all.map(l=>l.node_id)).size,581,"Canonical total includes duplicate node");
+assert.equal(all.length,586,"Target coverage 586/656");
+assert.equal(new Set(all.map(l=>l.node_id)).size,586,"Canonical total includes duplicate node");
 assert(all.every(l=>nodeMap.get(l.node_id)?.title===l.title),"Lesson/syllabus titles inconsistent");
 assert(all.every(l=>nodeMap.has(l.node_id)),"Unknown curriculum node");
 const calculus=tree.nodes.filter(n=>n.discipline_id==="calculus");
@@ -76,10 +76,10 @@ for(const lesson of added){
  assert.equal(lesson.links?.length,3,id+" missing learning graph");
  for(const l of lesson.links){assert.equal(l.kind,"math");assert(nodeMap.has(l.id),id+" broken topic link "+l.id);links++;}
 }
-assert.equal(formulas,99,"Nine strictly parsed formulas per lesson");
-assert.equal(chapters,33,"Three substantive deep units per lesson");
-assert(proofChars>=11000,"V107 proofs and worked examples shortened");
-assert.equal(links,33,"All prerequisite and cross-discipline links");
+assert.equal(formulas,144,"Nine strictly parsed formulas per lesson");
+assert.equal(chapters,48,"Three substantive deep units per lesson");
+assert(proofChars>=16000,"V107 proofs and worked examples shortened");
+assert.equal(links,48,"All prerequisite and cross-discipline links");
 
 const app=read("app.js"),html=read("index.html"),css=read("styles.css"),workflow=read("../../.github/workflows/test-quant-math.yml");
 for(const [i,p] of paths.entries())
@@ -158,4 +158,38 @@ near("SOSC reduced Hessian",2*1**2+8*(-1)**2,10);
 near("SOSC constrained saddle",.1**2-0**2,.01);
 near("quartic flat but minimum",.1**4,.0001);
 yes("quartic strict min positive",(-.1)**4>0);
-console.log("V107: 581/656 total lessons, calculus 30/30, "+formulas+" strict TeX, "+chapters+" deep sections, "+proofChars+" reasoning chars, "+links+" links, "+numerics+" verified numerics");
+near("matrix loss value",3**2+(-2)**2,13);
+near("matrix gradient 11",2*3*2,12);
+near("matrix gradient 12",2*3*1,6);
+near("matrix gradient 21",2*(-2)*2,-8);
+near("matrix gradient 22",2*(-2)*1,-4);
+near("matrix perturbation exact",3.02**2-3**2,.1204);
+near("Frobenius directional centered",((3.02**2-2.98**2)/.02),12);
+near("trace quadratic objective",2*1**2+3*2**2,14);
+near("trace symmetric gradient 11",2*2*1,4);
+near("trace symmetric gradient 22",2*3*2,12);
+near("trace quadratic exact perturbation",3*(2.01**2-2**2),.1203);
+near("non symmetric quadratic value",1*2*1,2);
+near("portfolio gradient first",2*.8,1.6);
+near("portfolio gradient second",8*.2,1.6);
+near("inverse first component tangent",-.1/(2**2),-.025);
+near("inverse second component tangent",.2/(4**2),.0125);
+near("inverse first exact",1/2.1-1/2,-.023809523809523836);
+near("inverse second exact",1/3.8-1/4,.01315789473684209);
+near("linear sensitivity to db",.2/2,.1);
+near("linear sensitivity to dA",-.1*1/2,-.05);
+near("inverse upper bound",100**2*.001,10);
+near("log-det original",Math.log(2*3),Math.log(6));
+near("log-det first variation",.1/2-.1/3,1/60);
+near("log-det exact perturbation",Math.log(2.1*2.9/(2*3)),Math.log(1.015));
+near("log-det second curvature",-(1/4+1/9),-13/36);
+near("gaussian variance stationary",.5*(1/4-4/4**2),0);
+near("reverse-mode forward residual",2*3+1-4,3);
+near("reverse-mode squared loss",.5*3**2,4.5);
+near("reverse-mode w gradient",3*3,9);
+near("reverse-mode x gradient",3*2,6);
+near("reverse-mode b gradient",3,3);
+near("reverse-mode centered w gradient",(.5*3.03**2-.5*2.97**2)/.02,9);
+near("reverse-mode branched gradient",2*3+1,7);
+near("reverse-mode branched numerical",((3.01**2+3.01)-(2.99**2+2.99))/.02,7);
+console.log("V107: 586/656 total lessons, calculus 30/30, "+formulas+" strict TeX, "+chapters+" deep sections, "+proofChars+" reasoning chars, "+links+" links, "+numerics+" verified numerics");
