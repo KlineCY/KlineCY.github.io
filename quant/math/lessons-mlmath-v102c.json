@@ -1,0 +1,463 @@
+{
+  "version": 1,
+  "revision": "V102",
+  "kind": "Scaled causal attention, positional encodings, unbiased policy gradient and PPO clipped surrogate",
+  "lessons": [
+    {
+      "id": "mlmath-n0476",
+      "node_id": "mlmath-n0476",
+      "title": "注意力矩阵",
+      "definition": "缩放点积注意力（scaled dot-product attention）使用查询矩阵 Q 与键矩阵 K 的内积表示候选关联，将其除以√d_k后按每行 softmax 归一化，再对值矩阵 V 加权求和。它的核心是可微的、数据依赖的权重矩阵；允许关注哪些位置由掩码和位置表示共同决定。",
+      "assumptions": "设 Q∈R^{n_q×d_k}、K∈R^{n_k×d_k}、V∈R^{n_k×d_v}。mask M 的合法条目为0，非法条目为负无穷大；每行至少一个合法键以保证 softmax 定义。缩放√d_k 的方差动机依赖Q、K坐标近似独立、单位方差等简化条件，不能认为始终严格保证方差稳定。",
+      "properties": [
+        "注意力矩阵 A=softmax(QKᵀ/√d_k+M) 每行非负且行和为1，因此每个输出行是值向量的凸组合。",
+        "若没有位置编码或非对称掩码，且对输入行应用相同置换，自注意力对 token 排列呈置换等变性，而不是天然理解时间顺序。",
+        "因果掩码在训练时把所有未来键位置设为不可见，避免序列模型从后续价格或未来标签直接读入信息。",
+        "Softmax 权重不等同于因果影响或金融贡献率；高权重并不足以证明某个资产特征驱动预测。"
+      ],
+      "formulas": [
+        {
+          "label": "缩放点积注意力",
+          "tex": "\\operatorname{Attention}(Q,K,V)=\\operatorname{softmax}\\!\\left(\\frac{QK^{\\mathsf T}}{\\sqrt{d_k}}+M\\right)V"
+        },
+        {
+          "label": "行 softmax 归一化",
+          "tex": "A_{ij}=\\frac{\\exp(S_{ij})}{\\sum_{k\\in\\mathcal A_i}\\exp(S_{ik})},\\quad j\\in\\mathcal A_i"
+        },
+        {
+          "label": "因果注意力掩码",
+          "tex": "M_{ij}=\\begin{cases}0,&j\\le i\\\\-\\infty,&j>i\\end{cases}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "通过 QKᵀ 形成所有查询与键的两两内积分数，矩阵维度为n_q×n_k。",
+          "tex": "S=\\frac{QK^{\\mathsf T}}{\\sqrt{d_k}}\\in\\mathbb R^{n_q\\times n_k}"
+        },
+        {
+          "explanation": "给每行加入非法位置掩码后执行 softmax，所有可见键得到非负且总和为1的权重。",
+          "tex": "\\sum_{j\\in\\mathcal A_i}A_{ij}=1,\\qquad A_{ij}\\ge0"
+        },
+        {
+          "explanation": "将每行权重乘值矩阵，得到与查询数对应的输出特征，且输出特征维度d_v。",
+          "tex": "O=AV\\in\\mathbb R^{n_q\\times d_v}"
+        }
+      ],
+      "example": "两 token 的 Q=K=I₂、d_k=2，未掩码的分数矩阵对角元素1/√2≈0.7071、非对角为0。每行自身权重p=e^{0.7071}/(e^{0.7071}+1)≈0.66976，另一位置权重≈0.33024。若 V 的两行是(2,0)、(0,4)，第一输出≈(1.3395,1.32096)；加入因果掩码后，第一个 token 只能看到自身，第一输出成为(2,0)。",
+      "application": "量化时序 Transformer 可以在价格、成交量和跨资产因子之间动态建立关联，但必须明确每个 token 的交易时点，确保所有未来 token 都被掩码，数据标准化和资产成分变动也不能在历史时点读取未来信息。",
+      "caveat": "注意力计算通常需要 O(n_q n_k) 分数矩阵，长窗口可能受显存限制。若一行全部被掩码，则 softmax 的−∞归一化无定义；实现中需保留有效键，并检查数值稳定的减最大值操作。",
+      "deep_sections": [
+        {
+          "title": "缩放系数为何通常使用根号键维度",
+          "question": "高维点积为什么会使 softmax 过早饱和？",
+          "paragraphs": [
+            "如果查询与键各坐标是独立、零均值、方差1的简化随机变量，那么点积是 d_k 个乘积的和，方差随 d_k 成比例增长。",
+            "用√d_k缩放分数使方差保持约1的量级，降低大维度导致的softmax过度尖锐和梯度衰减风险。"
+          ],
+          "formulas": [
+            {
+              "label": "推导与核验公式",
+              "tex": "\\operatorname{Var}\\!\\left(\\frac{q^{\\mathsf T}k}{\\sqrt{d_k}}\\right)=1\\quad\\text{(独立标准化坐标)}"
+            }
+          ],
+          "proof": "逐坐标乘积q_jk_j在独立零均值、单位方差条件下均值0、方差1；各项相互独立时总和方差d_k，再除以d_k得到1。",
+          "worked": "若d_k=64、每个坐标乘积方差1，未缩放点积标准差8，除以√64=8后标准差回到1。这种尺度控制只针对简化随机模型，不是实际模型的确定保证。",
+          "limitation": "真实模型Q/K往往有相关结构、学习到不同尺度，理论缩放不能替代LayerNorm及模型训练的数值稳定检查。"
+        },
+        {
+          "title": "注意力矩阵是行随机矩阵还是因果影响矩阵",
+          "question": "每一行加权和等于1有何数学含义？",
+          "paragraphs": [
+            "Softmax 把同一查询的所有合法键分数转成非负权重并归一化，总权重必为1。",
+            "因此输出O_i是值向量V_j的凸组合，但A_ij只表示这一层的权重机制，并不能推导输入变量对最终预测的因果效应。"
+          ],
+          "formulas": [
+            {
+              "label": "推导与核验公式",
+              "tex": "O_i=\\sum_{j\\in\\mathcal A_i}A_{ij}V_j,\\qquad\\sum_{j\\in\\mathcal A_i}A_{ij}=1"
+            }
+          ],
+          "proof": "由A_ij=exp(S_ij)/Σ_k exp(S_ik)可得A_ij≥0且行和1，矩阵乘法AV逐行展开即是凸组合。",
+          "worked": "两键注意力权重(.7,.3)、值分别2与4时，输出为.7×2+.3×4=2.6，介于两个值之间。该归一化是逐行计算的，不能跨不同查询行混算。",
+          "limitation": "若存在输出投影、残差、负值通道或后续非线性变换，最终分类logit不再必须落在初始值向量范围内。"
+        },
+        {
+          "title": "因果掩码如何建立金融交易的时间信息边界",
+          "question": "全序列训练时模型会不会偷偷看到未来 token？",
+          "paragraphs": [
+            "即使输出目标只在t时刻，完整Transformer若使用未掩码自注意力，t位置仍可能对后续价格token赋予非零权重。",
+            "将所有j>i的注意力分数设为负无穷，使softmax权重严格为0，逐层复合才能保证因果可得性。"
+          ],
+          "formulas": [
+            {
+              "label": "推导与核验公式",
+              "tex": "j>i\\Longrightarrow\\exp(M_{ij})=0\\Longrightarrow A_{ij}=0"
+            }
+          ],
+          "proof": "对每个查询位置i，对所有j>i加−∞，softmax后这些键的指数权重为0，其余可见键重新归一化，因此O_i不依赖后续V_j。",
+          "worked": "两token序列中，第一个token只能读取键1；第二个可以读取键1与2，若把第二个token作为未来交易日数据，则第一个预测不会泄漏。",
+          "limitation": "若输入embedding或批归一化在掩码前已经混入未来信息，后续注意力掩码不能修复；必须审计完整数据流水线。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "mlmath-n0459",
+          "label": "矩阵反向传播"
+        },
+        {
+          "kind": "math",
+          "id": "mlmath-n0477",
+          "label": "Transformer位置编码"
+        },
+        {
+          "kind": "math",
+          "id": "mlmath-n0474",
+          "label": "表示学习几何"
+        }
+      ]
+    },
+    {
+      "id": "mlmath-n0477",
+      "node_id": "mlmath-n0477",
+      "title": "Transformer位置编码",
+      "definition": "Transformer位置编码为自注意力模型提供 token 的时间顺序或相对距离信息。没有位置信号且没有结构掩码时，纯自注意力对序列置换等变，不能天然区分同一组token的排列；经典正弦位置编码用不同频率的sin/cos对构造确定性向量，并将其与token嵌入相加。",
+      "assumptions": "取偶数嵌入维度 d_model=2m，整数或连续位置pos，在每对维度使用频率 ω_i=10000^{-2i/d_model}。绝对位置编码、相对位置偏置和旋转位置编码（RoPE）在数学上不是同一算法；不规则金融时间间隔也不应未经处理就当作统一整数步。",
+      "properties": [
+        "正弦位置编码为每对特征提供同一频率的正交sin/cos分量，使两位置的内积仅由位置差决定。",
+        "纯自注意力在不加位置编码且无位置相关mask时对输入置换等变，位置编码破除这一对称限制。",
+        "位置编码本身不保证模型能外推未见过的任意长度；高频周期性与训练分布外长度都可能产生混淆。",
+        "金融序列的实际交易日、分钟间隔和资产停牌引起的不规则时间距离，需要显式考虑时间戳或相对日历距离。"
+      ],
+      "formulas": [
+        {
+          "label": "经典正弦位置编码",
+          "tex": "PE_{pos,2i}=\\sin\\!\\left(\\frac{pos}{10000^{2i/d}}\\right),\\quad PE_{pos,2i+1}=\\cos\\!\\left(\\frac{pos}{10000^{2i/d}}\\right)"
+        },
+        {
+          "label": "频率定义",
+          "tex": "\\omega_i=10000^{-2i/d},\\qquad i=0,\\ldots,\\frac d2-1"
+        },
+        {
+          "label": "同频率位置内积",
+          "tex": "\\sin(\\omega_i p)\\sin(\\omega_i q)+\\cos(\\omega_i p)\\cos(\\omega_i q)=\\cos(\\omega_i(p-q))"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先给每对嵌入维度分配频率，再在不同位置取sin和cos形成固定不需要学习的编码。",
+          "tex": "PE(pos)=(\\sin(\\omega_0pos),\\cos(\\omega_0pos),\\ldots,\\sin(\\omega_{m-1}pos),\\cos(\\omega_{m-1}pos))"
+        },
+        {
+          "explanation": "利用三角恒等式，把一对频率的两位置内积写成位置距离的余弦函数。",
+          "tex": "\\sin a\\sin b+\\cos a\\cos b=\\cos(a-b)"
+        },
+        {
+          "explanation": "将各维频率对的内积累加，得到绝对位置向量之间与相对位移有关的相似度表达。",
+          "tex": "\\langle PE(p),PE(q)\\rangle=\\sum_{i=0}^{m-1}\\cos(\\omega_i(p-q))"
+        }
+      ],
+      "example": "在d=4时频率ω₀=1、ω₁=1/100，位置pos=0的编码为(0,1,0,1)。pos=π/2时首对编码(1,0)，第二对为(sin(π/200),cos(π/200))≈(0.0157073,0.9998766)。两个位置编码的点积≈0.9998766，因为第一对点积0、第二对近1。",
+      "application": "量化价格图像ViT、金融文本和跨资产时间Transformer应区分token顺序、日历缺口和实际交易日期；跨节假日的两个相邻交易日并不意味着风险时间间隔恒定，若任务需要可添加交易日/自然日差和时间特征。",
+      "caveat": "正弦编码相加可能与内容嵌入的尺度相互影响；采用相对位置或RoPE时需要分别检查相位、掩码和缓存。模型在较长窗口上的预测提升需要真实样本外评估，不能仅由编码解析公式推出。",
+      "deep_sections": [
+        {
+          "title": "为什么没有位置编码的注意力难以识别顺序",
+          "question": "交换两个相同内容集的时间顺序会怎样？",
+          "paragraphs": [
+            "当自注意力只有共享Q/K/V线性投影及逐行softmax时，对输入行作任意同样置换，会使输出行按相同置换变化。",
+            "这种置换等变说明它可以处理token集合，却不能天然知道谁在昨天、谁在今天；显式位置表示提供额外顺序线索。"
+          ],
+          "formulas": [
+            {
+              "label": "推导与核验公式",
+              "tex": "\\operatorname{Attention}(PX)=P\\,\\operatorname{Attention}(X)\\quad\\text{(无位置结构)}"
+            }
+          ],
+          "proof": "置换矩阵P满足PPᵀ=I。对Q,K,V同时左乘P，分数矩阵变P(QKᵀ)Pᵀ；按行softmax保持置换结构，再乘PV得PAV。",
+          "worked": "仅含价格上涨token与下跌token的序列，上涨后下跌与下跌后上涨作为token集合相同，但其动量经济含义明显不同；需让模型识别时间顺序。",
+          "limitation": "因果mask本身包含位置顺序信息，因此严格的置换等变结论要求没有位置相关mask和其他位置依赖运算。"
+        },
+        {
+          "title": "正弦频率对为何能表示相对距离",
+          "question": "绝对位置编码怎么产生位置差的几何相似度？",
+          "paragraphs": [
+            "每对正弦与余弦特征位于单位圆上，两个位置的内积由其相位差决定，而不是分别依赖两个绝对角度。",
+            "多种频率并行提供不同尺度的位置距离信息，使短距和长距结构都可通过下游线性变换组合表示。"
+          ],
+          "formulas": [
+            {
+              "label": "推导与核验公式",
+              "tex": "\\langle PE(p),PE(q)\\rangle=\\sum_i\\cos(\\omega_i(p-q))"
+            }
+          ],
+          "proof": "对每个频率应用sin a sin b+cos a cos b=cos(a−b)，再把所有频率对的内积相加即可。",
+          "worked": "d=4、p=0、q=π/2时两频率为1和.01，内积为cos(π/2)+cos(π/200)≈0+.9998766。",
+          "limitation": "所有频率都具有周期性，有限精度和特定长跨度可能造成相似位置表示；不应直接声称任意长度位置都可唯一可逆。"
+        },
+        {
+          "title": "交易日索引与真实日历距离的区别",
+          "question": "周五到周一是否与周一到周二具有同一风险跨度？",
+          "paragraphs": [
+            "若只使用连续交易日整数位置，两个间隔都增加1，但一个可能跨越三天新闻和闭市风险，另一个只有一个自然日。",
+            "不同任务对交易时间和自然时间的依赖不同，应把节假日间隔、交易时段和信号发布时间作为额外可得特征，而非只依赖固定编码。"
+          ],
+          "formulas": [
+            {
+              "label": "推导与核验公式",
+              "tex": "\\Delta t_i=t_i-t_{i-1}\\quad\\text{(以真实时间戳计量)}"
+            }
+          ],
+          "proof": "令相邻交易位置索引相差1，真实时间戳差仍可能不同；位置整数序列不能从索引差唯一恢复实际间隔，因此如需时间尺度必须额外输入Δt。",
+          "worked": "周五收盘到周一收盘经过三天，而周一收盘到周二收盘仅一天，两者在token索引中均相差1。但对应的新闻信息集与实际交易时点仍然有所不同。",
+          "limitation": "自然日特征必须在真实预测时已经可知；不能把后验新闻落地时点或未来停牌恢复日期作为当时可用输入。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "mlmath-n0476",
+          "label": "注意力矩阵"
+        },
+        {
+          "kind": "math",
+          "id": "mlmath-n0475",
+          "label": "卷积运算"
+        },
+        {
+          "kind": "math",
+          "id": "mlmath-n0474",
+          "label": "表示学习几何"
+        }
+      ]
+    },
+    {
+      "id": "mlmath-n0479",
+      "node_id": "mlmath-n0479",
+      "title": "策略梯度定理",
+      "definition": "策略梯度方法直接对随机策略π_θ(a|s)的期望折现回报J(θ)求梯度。利用轨迹对数似然求导技巧，可将未知环境转移概率从梯度中消去；在合适可积性与策略可微条件下，REINFORCE 估计器使用采样动作的 logπ 梯度与折现回报构造无偏随机梯度。动作无关的状态基线可减少方差而不改变期望。",
+      "assumptions": "假设有限回合长度T、环境初始分布和转移核不直接依赖θ，策略在可行动作上可微且有适当正概率支持，奖励可积；J=E[Σ_{t=0}^{T−1}γ^t r_t]。实现回报到达时点t后的折现尾收益G_t=Σ_{k=t}^{T−1}γ^{k−t}r_k，梯度估计应含 γ^t 系数以与J的定义一致。",
+      "properties": [
+        "score-function identity 允许对不知导数的环境分布求随机策略梯度，只需策略的对数概率梯度和采样回报。",
+        "无偏基线b(s_t)不能依赖被抽中的动作，否则score零均值性质通常失效或须做修正。",
+        "REINFORCE 的梯度估计方差可能很高，奖励尺度、长回合以及重要性权重会显著影响优化稳定性。",
+        "离策略样本一般需要重要性加权或其他有偏修正；直接把过去不同策略产生的轨迹当成当前策略轨迹会改变梯度对象。"
+      ],
+      "formulas": [
+        {
+          "label": "折现策略目标",
+          "tex": "J(\\theta)=E_{\\tau\\sim\\pi_\\theta}\\left[\\sum_{t=0}^{T-1}\\gamma^t r_t\\right]"
+        },
+        {
+          "label": "基于回报的策略梯度",
+          "tex": "\\nabla_\\theta J=E\\left[\\sum_{t=0}^{T-1}\\gamma^t\\nabla_\\theta\\log\\pi_\\theta(a_t\\mid s_t)\\,G_t\\right]"
+        },
+        {
+          "label": "状态基线零均值",
+          "tex": "E_{a\\sim\\pi_\\theta(\\cdot\\mid s)}[\\nabla_\\theta\\log\\pi_\\theta(a\\mid s)b(s)]=0"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "轨迹概率的对数导数只包含策略中所有实际动作的 log 概率之和，环境转移项对θ的导数为零。",
+          "tex": "\\nabla_\\theta\\log p_\\theta(\\tau)=\\sum_t\\nabla_\\theta\\log\\pi_\\theta(a_t\\mid s_t)"
+        },
+        {
+          "explanation": "用∇p=p∇logp把J梯度换成轨迹回报与score的期望，再用因果性移除动作以前的奖励。",
+          "tex": "\\nabla_\\theta J=E\\left[\\sum_t\\nabla_\\theta\\log\\pi_\\theta(a_t\\mid s_t)\\sum_{k=t}^{T-1}\\gamma^k r_k\\right]"
+        },
+        {
+          "explanation": "对任一状态基线b(s)应用概率归一化恒等式，证明基线项期望为0且不引入偏差。",
+          "tex": "\\sum_a\\pi_\\theta(a\\mid s)\\nabla_\\theta\\log\\pi_\\theta(a\\mid s)=\\nabla_\\theta\\sum_a\\pi_\\theta(a\\mid s)=0"
+        }
+      ],
+      "example": "单状态单步决策，选择动作1的概率p=σ(θ)，奖励r(1)=2、r(0)=0。J=2p，梯度dJ/dθ=2p(1−p)。当p=0.5时真实梯度0.5。REINFORCE 采样：动作1时score(1)=0.5乘奖励2得到1，概率0.5；动作0时梯度样本0，故均值0.5。若用常数基线b=1，则两种动作样本均为0.5，示例中方差降为0。",
+      "application": "强化学习可用于库存控制、执行分单和带交易费用的动态再平衡，但奖励必须与真实交易收益、风险和动作限制一致，状态仅能包含决策时可得信息；仿真市场和历史价格回放的策略梯度不自动代表真实市场中的因果反事实收益。",
+      "caveat": "折现目标的不同定义可能采用折现状态访问分布并吸收γ^t权重，公式需与所选约定一致。连续动作若使用高斯政策还需保证策略密度和支持合法；真实金融环境通常不满足独立策略行动不影响市场转移的简化假设。",
+      "deep_sections": [
+        {
+          "title": "log-derivative trick 为什么不要求环境转移梯度",
+          "question": "市场执行环境不可微时还能训练随机策略吗？",
+          "paragraphs": [
+            "对轨迹概率pθ(τ)求导可利用∇p=p∇logp，把目标梯度转化为轨迹采样下的期望。",
+            "如果环境转移概率不直接含θ，轨迹log概率对θ的导数只来自策略动作概率，避免显式微分环境的复杂状态转换。"
+          ],
+          "formulas": [
+            {
+              "label": "推导与核验公式",
+              "tex": "\\nabla_\\theta E_{p_\\theta}[R]=E_{p_\\theta}[R\\nabla_\\theta\\log p_\\theta]"
+            }
+          ],
+          "proof": "将E[R]=∫R(τ)pθ(τ)dτ对θ微分，并在可交换微分积分条件下写∇pθ=pθ∇logpθ，即得到score恒等式。",
+          "worked": "单步Bernoulli策略p=.5、奖励2或0时，score估计期望为 .5×(2×.5)+.5×(0×−.5)=.5，与解析导数一致。",
+          "limitation": "环境若直接依赖策略参数θ（例如策略影响市场结构而转移核随θ变化），只保留策略score会遗漏环境导数，需建立正确建模口径。"
+        },
+        {
+          "title": "状态基线为什么能降低方差却不改期望",
+          "question": "给所有动作回报同时减去一个数字会影响梯度方向吗？",
+          "paragraphs": [
+            "固定状态s时策略分布归一化为1，所有动作概率的梯度总和为0，因此任何与抽中动作无关的状态基线在score加权期望中抵消。",
+            "基线可降低回报随机波动对梯度的影响，但应使用只依赖状态而不非法读取未来或动作的估计。"
+          ],
+          "formulas": [
+            {
+              "label": "推导与核验公式",
+              "tex": "E[\\nabla_\\theta\\log\\pi_\\theta(a\\mid s)(G-b(s))]=E[\\nabla_\\theta\\log\\pi_\\theta(a\\mid s)G]"
+            }
+          ],
+          "proof": "把左侧展开成E[score×G]−b(s)Σ_aπθ(a|s)score(a)，第二项为−b(s)∇Σ_aπθ(a|s)=0。",
+          "worked": "在p=.5、奖励2或0的例子中，未减基线时梯度样本为1或0；减b=1后两种样本都变成.5，方差由.25降为0。",
+          "limitation": "这是极简单步示例，不能保证任意状态基线都降低实际方差；估计误差、状态依赖和训练噪声需要单独检验。"
+        },
+        {
+          "title": "折现回报的时间系数不能丢失",
+          "question": "多步策略梯度使用G_t时为何还要保留γ^t？",
+          "paragraphs": [
+            "若总目标定义为从初始时刻起的折现和Σγ^t r_t，奖励在时点k的折现权重是γ^k。",
+            "行动t的score只影响其之后的奖励，把γ^k写成γ^tγ^{k−t}，因此对相对尾回报G_t必须额外乘γ^t。"
+          ],
+          "formulas": [
+            {
+              "label": "推导与核验公式",
+              "tex": "\\sum_{k=t}^{T-1}\\gamma^k r_k=\\gamma^tG_t"
+            }
+          ],
+          "proof": "从log似然梯度的回报和出发，因行动t不能影响过去已发生奖励，对t以前奖励的score期望为零，保留k≥t项并提取γ^t。",
+          "worked": "T=2、γ=.9且奖励只在t=1为10，t=1的score应乘.9×10=9；若直接乘定义为10的相对尾回报会误放大晚期奖励。",
+          "limitation": "不同RL教科书常使用正规化折现占用测度或无限期稳态目标，表面公式可以不同，但目标与权重必须保持一致。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "mlmath-n0478",
+          "label": "Bellman方程"
+        },
+        {
+          "kind": "math",
+          "id": "mlmath-n0480",
+          "label": "Actor-Critic/PPO"
+        },
+        {
+          "kind": "math",
+          "id": "diffeq-n0415",
+          "label": "动态规划原理"
+        }
+      ]
+    },
+    {
+      "id": "mlmath-n0480",
+      "node_id": "mlmath-n0480",
+      "title": "Actor-Critic/PPO",
+      "definition": "Actor–Critic 结构用策略网络（actor）决定动作、价值函数网络（critic）估计未来回报，并以优势函数A(s,a)=Q(s,a)−V(s)衡量动作相对状态基准的增益。PPO（Proximal Policy Optimization）的典型 clipped surrogate 用新旧策略概率比限制局部目标对大幅改变动作概率的奖励，并结合价值拟合、熵奖励和小批次迭代训练。",
+      "assumptions": "设旧策略π_old为数据采样政策，在其数据支持上计算r_t(θ)=π_θ(a_t|s_t)/π_old(a_t|s_t)，clip阈值ε∈(0,1)，优势估计Â_t由旧策略轨迹与固定价值目标生成。PPO截断目标是启发式近似，不等于严格KL信赖域约束或单调性能改进定理。",
+      "properties": [
+        "优势函数A=Q−V的符号决定是否提高采样动作概率：正优势鼓励、负优势抑制，但改变大小仍受clip结构限制。",
+        "广义优势估计GAE对时间差分残差δ_t做(γλ)^l几何加权，λ控制方差–偏差权衡。",
+        "PPO clipped surrogate 在正优势时限制过大的概率上调，在负优势时限制过大的概率下调；不能错误认为所有比值都被硬投影到区间内。",
+        "critic 的价值估计会改变优势方差及优化方向，真实资产交易中的交易成本、非平稳性和市场影响无法通过PPO clip自动解决。"
+      ],
+      "formulas": [
+        {
+          "label": "PPO 裁剪目标",
+          "tex": "L^{\\mathrm{CLIP}}(\\theta)=E_t[\\min(r_t(\\theta)\\widehat A_t,\\operatorname{clip}(r_t(\\theta),1-\\varepsilon,1+\\varepsilon)\\widehat A_t)]"
+        },
+        {
+          "label": "时间差分优势残差",
+          "tex": "\\delta_t=r_t^{\\mathrm{reward}}+\\gamma V_\\phi(s_{t+1})-V_\\phi(s_t)"
+        },
+        {
+          "label": "广义优势估计",
+          "tex": "\\widehat A_t^{\\mathrm{GAE}(\\gamma,\\lambda)}=\\sum_{l=0}^{T-t-1}(\\gamma\\lambda)^l\\delta_{t+l}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "固定旧策略收集轨迹，用 critic 估计 Q 与 V 的差并形成采样动作的优势估计。",
+          "tex": "\\widehat A_t=\\widehat Q_t-\\widehat V_t"
+        },
+        {
+          "explanation": "计算新旧策略在实际采样动作上的概率比值，以clip限定目标中的激励强度而非直接改变新策略本身。",
+          "tex": "r_t(\\theta)=\\frac{\\pi_\\theta(a_t\\mid s_t)}{\\pi_{\\mathrm{old}}(a_t\\mid s_t)}"
+        },
+        {
+          "explanation": "对正负优势分别比较未裁剪和裁剪的候选目标，取更保守的一侧得到PPO代理目标。",
+          "tex": "\\ell_t^{\\mathrm{clip}}=\\min(r_t\\widehat A_t,\\operatorname{clip}(r_t,1-\\varepsilon,1+\\varepsilon)\\widehat A_t)"
+        }
+      ],
+      "example": "令PPO ε=0.2。若正优势Â=2、概率比r=1.3，则未裁剪奖励2.6、裁剪奖励1.2×2=2.4，最终取2.4；若负优势Â=−2、概率比r=.7，则未裁剪目标−1.4、裁剪目标.8×(−2)=−1.6，最终取−1.6。对GAE，δ₀=.4、δ₁=.2、γ=.9、λ=.8，则Â₀=.4+.72×.2=.544。",
+      "application": "在ETF仓位控制、库存管理与多期交易执行中，可使用Actor–Critic估计风险调整后的长期回报，但必须设计可执行仓位动作、成交成本、保证金与市场容量约束。与静态回归或简单趋势策略进行严格样本外比较，不应以仿真奖励直接替代真实业绩。",
+      "caveat": "PPO clip 不保证实际策略概率比始终落在区间，也不保证每次更新单调提高真实环境回报；critic 偏差、off-policy 数据和回放市场反事实缺失可导致过拟合。超参数与奖励定义必须独立验证。",
+      "deep_sections": [
+        {
+          "title": "优势函数如何降低梯度噪声",
+          "question": "为什么比较动作回报与状态基准比使用总回报更合理？",
+          "paragraphs": [
+            "同一状态下所有动作共享一个状态价值基准，直接使用总回报会把与动作选择无关的状态难度或市场环境波动带入策略梯度。",
+            "以Q(s,a)减去V(s)得到优势后，可突出动作相对该状态平均选择的边际好坏，通常降低随机梯度方差。"
+          ],
+          "formulas": [
+            {
+              "label": "推导与核验公式",
+              "tex": "A^\\pi(s,a)=Q^\\pi(s,a)-V^\\pi(s)"
+            }
+          ],
+          "proof": "策略梯度的score对状态基线的条件期望为0，因此替换Q为Q−V不改变理论期望梯度；critic通过近似V来构造这个基线。",
+          "worked": "某状态平均未来回报5，动作A预期回报7、动作B为4，则对应优势分别+2、−1，策略应倾向A而非简单因所有回报为正就同时增加概率。",
+          "limitation": "学习到的critic不是精确真实V，优势估计可能有偏差；基线理论无偏与有限样本的近似目标偏差必须区分。"
+        },
+        {
+          "title": "PPO 的 clip 是代理目标保守化不是硬动作限制",
+          "question": "为什么概率比1.3仍可能出现在更新后的策略里？",
+          "paragraphs": [
+            "clip只是对训练目标中的奖励项施加饱和限制，当某个正优势动作概率提升超过1+ε时，继续增加该动作概率不会再提高该项代理目标。",
+            "它并没有显式约束参数空间或所有状态上的KL散度，所以实际优化后仍可能出现概率比超界。"
+          ],
+          "formulas": [
+            {
+              "label": "推导与核验公式",
+              "tex": "\\widehat A>0,\\ r>1+\\varepsilon\\Longrightarrow\\ell^{\\mathrm{clip}}=(1+\\varepsilon)\\widehat A"
+            }
+          ],
+          "proof": "当A>0且r>1+ε时，rA>(1+ε)A，min取后者；当A<0且r<1−ε时，rA>(1−ε)A，min取更负的裁剪项。",
+          "worked": "ε=.2、A=2、r=1.3时，目标由2.6压到2.4；A=−2、r=.7时，目标由−1.4压到−1.6。",
+          "limitation": "多个训练轮次的联合优化可能通过别的样本梯度继续改变被裁剪样本的动作概率，因此需要监控真实KL及收益而非只看clip损失。"
+        },
+        {
+          "title": "GAE 如何将时间差分信号组合成优势",
+          "question": "优势估计如何平衡远期回报噪声与critic偏差？",
+          "paragraphs": [
+            "单步TD残差只利用一步奖励和下一状态critic价值，方差相对较小但容易受价值函数误差影响。",
+            "GAE按γλ对后续TD残差做加权，λ越接近1通常纳入更多远期信息，降低某些短期bootstrap偏差但增加采样方差。"
+          ],
+          "formulas": [
+            {
+              "label": "推导与核验公式",
+              "tex": "\\widehat A_t^{\\mathrm{GAE}}=\\delta_t+\\gamma\\lambda\\delta_{t+1}+(\\gamma\\lambda)^2\\delta_{t+2}+\\cdots"
+            }
+          ],
+          "proof": "定义δ_t=r_t+γV(s_{t+1})−V(s_t)，将多步TD残差按γλ展开，得到有限回合的GAE几何加权和。",
+          "worked": "当δ₀=.4、δ₁=.2、γ=.9、λ=.8时，γλ=.72，故两步GAE=.4+.72×.2=.544。",
+          "limitation": "λ对偏差–方差的具体影响还依赖critic误差、环境转移与回合截断；不能声称λ=1在所有任务中完全无偏或最优。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "mlmath-n0479",
+          "label": "策略梯度定理"
+        },
+        {
+          "kind": "math",
+          "id": "mlmath-n0478",
+          "label": "Bellman方程"
+        },
+        {
+          "kind": "math",
+          "id": "diffeq-n0416",
+          "label": "HJB方程"
+        }
+      ]
+    }
+  ]
+}
