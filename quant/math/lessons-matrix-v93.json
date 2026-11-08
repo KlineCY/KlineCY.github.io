@@ -1,0 +1,301 @@
+{
+  "version": 1,
+  "revision": "V93",
+  "kind": "Matrix calculus Kronecker and covariance shrinkage mathematics",
+  "lessons": [
+    {
+      "id": "linear-n0088",
+      "node_id": "linear-n0088",
+      "title": "矩阵微分",
+      "definition": "矩阵微分研究标量函数 f(X) 或矩阵值映射 F(X) 对矩阵输入的局部变化。对 X∈R^{m×n} 与同型扰动 H，若 f(X+H)=f(X)+⟨G,H⟩_F+o(||H||_F)，则 G=∇_X f 称为相对于 Frobenius 内积的矩阵梯度。Fréchet 导数是从扰动 H 到一阶变化的线性映射，不应与简单逐元素求导混淆。",
+      "assumptions": "本节取有限维实矩阵，梯度使用 Frobenius 内积 tr(GᵀH)，并明确列向量化顺序。非对称矩阵变量允许各元素独立变化；若 X 受对称、正定或低秩约束，必须把无约束导数限制到相应切空间。",
+      "properties": [
+        "对常矩阵 A，d tr(AᵀX)=tr(AᵀdX)，因此梯度为 A。",
+        "对实向量 x，f(x)=xᵀAx 的梯度为 (A+Aᵀ)x；当 A 对称时简化为 2Ax。",
+        "矩阵逆的微分 d(X^{-1})=−X^{-1}(dX)X^{-1}，要求 X 在可逆矩阵的开集中变化。",
+        "对可逆 X，d log|det X|=tr(X^{-1}dX)；若使用 log det X 作为实值函数，通常限定 X 为正定矩阵。"
+      ],
+      "formulas": [
+        {
+          "label": "梯度的内积定义",
+          "tex": "\\mathrm df(X)[H]=\\langle\\nabla_Xf,H\\rangle_F=\\operatorname{tr}((\\nabla_Xf)^\\top H)"
+        },
+        {
+          "label": "二次型梯度",
+          "tex": "\\nabla_x(x^\\top Ax)=(A+A^\\top)x"
+        },
+        {
+          "label": "逆矩阵与对数行列式微分",
+          "tex": "\\mathrm d(X^{-1})=-X^{-1}(\\mathrm dX)X^{-1},\\quad\\mathrm d\\log\\det X=\\operatorname{tr}(X^{-1}\\mathrm dX)\\ (X\\succ0)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按方向 H 置换 x→x+tH，将二次型展开到 t 的一阶项，即得到两个带 A 的交叉项。",
+          "tex": "(x+th)^\\top A(x+th)=x^\\top Ax+t\\,h^\\top(A+A^\\top)x+t^2h^\\top Ah"
+        },
+        {
+          "explanation": "从恒等式 XX^{-1}=I 出发取微分，用乘积法则后两边左乘 X^{-1} 即可得到逆矩阵导数。",
+          "tex": "(\\mathrm dX)X^{-1}+X\\,\\mathrm d(X^{-1})=0"
+        },
+        {
+          "explanation": "Jacobi 行列式微分公式在可逆点给出 det 的相对变化率，随后对自然对数应用链式法则。",
+          "tex": "\\mathrm d\\det X=\\det X\\operatorname{tr}(X^{-1}\\mathrm dX)"
+        }
+      ],
+      "example": "令 A=[[2,1],[1,3]]、x=(1,2)ᵀ，则 Ax=(4,7)ᵀ，f=xᵀAx=18，∇f=2Ax=(8,14)ᵀ。沿 h=(1,0)ᵀ 取 t=0.01，精确增量为 0.08+0.0002=0.0802；一阶微分给出 0.08，二阶余项为 0.0002。",
+      "application": "均值—方差组合优化的梯度、最大似然估计与 Fisher 信息推导、自动微分框架的反向传播、协方差估计以及矩阵方程的参数敏感性分析，都依赖矩阵微分。研究中必须注明参数向量化顺序及约束，以避免错误的梯度维度。",
+      "caveat": "不能把标量导数公式未经形状检查直接应用于矩阵乘积；非交换性使矩阵微分必须保持乘法顺序。对样本协方差的 log-det 计算若矩阵不正定，实数对数及逆可能不存在。",
+      "checked_status": "V93：方向导数、迹技巧、逆矩阵与 log-det、数值有限差分",
+      "deep_sections": [
+        {
+          "title": "Frobenius 梯度的唯一性",
+          "question": "为什么必须指定内积才能谈矩阵梯度？",
+          "paragraphs": [
+            "微分本质上是关于扰动 H 的线性泛函，使用 Frobenius 内积后才能由 Riesz 表示写成某个同型矩阵 G 的内积。",
+            "通过逐项系数比较，可以证明该 G 在标准内积下唯一；如果改变内积，表示同一微分的梯度坐标也会变化。"
+          ],
+          "formulas": [
+            {
+              "label": "严格数学关系",
+              "tex": "\\mathrm df(X)[H]=\\sum_{i,j}\\frac{\\partial f}{\\partial X_{ij}}H_{ij}=\\operatorname{tr}(G^\\top H)"
+            }
+          ],
+          "proof": "取仅在第 (i,j) 项为 1、其他为 0 的基矩阵 H=E_ij，则内积为 G_ij，必须等于对应偏导。由于 E_ij 构成扰动空间的基，所有条目唯一确定。",
+          "worked": "若 f(X)=2X₁₁−3X₁₂，则对 H=[[1,2],[0,0]] 的一阶变化为 2×1−3×2=−4，梯度相应为 [[2,−3],[0,0]]。",
+          "limitation": "在带有正定或对称约束的矩阵流形中，真实可行扰动未必包含所有 E_ij，需区别欧氏梯度与约束投影梯度。"
+        },
+        {
+          "title": "二次型的方向导数与对称部分",
+          "question": "为什么非对称矩阵的二次型梯度不等于 2Ax？",
+          "paragraphs": [
+            "标量 xᵀAx 等于其自身的转置 xᵀAᵀx，因而只有 A 的对称部分影响函数值。",
+            "将 x 替换为 x+th 展开，可见一阶项 hᵀAx+xᵀAh=hᵀ(A+Aᵀ)x；斜对称部分自动抵消。"
+          ],
+          "formulas": [
+            {
+              "label": "严格数学关系",
+              "tex": "x^\\top Ax=x^\\top\\frac{A+A^\\top}{2}x,\\quad\\nabla f=(A+A^\\top)x"
+            }
+          ],
+          "proof": "因为实标量 xᵀAx 等于 xᵀAᵀx，取平均得对称部分形式。展开后任意 h 的一阶系数是 hᵀ(A+Aᵀ)x，所以梯度即该向量。",
+          "worked": "A=[[0,2],[0,0]]、x=(1,1) 时，f=2，梯度 (2,2)，而 2Ax=(4,0)，错误公式可以直接被数值检验否定。",
+          "limitation": "该推导假设实变量。复向量的二次型和 Wirtinger 导数需要另外明确共轭约定。"
+        },
+        {
+          "title": "逆与 log-det 的敏感性",
+          "question": "矩阵快接近奇异时，为什么 log-det 梯度容易变大？",
+          "paragraphs": [
+            "可逆矩阵变化时 X^{-1} 的微分包含左右两次 X^{-1}，因此最小奇异值越小，导数可能越大。",
+            "对正定 X，log det 的方向微分等于 tr(X^{-1}H)，其梯度是 X^{-T}；当 X 接近零特征值时也会变得敏感。"
+          ],
+          "formulas": [
+            {
+              "label": "严格数学关系",
+              "tex": "\\nabla_X\\log\\det X=X^{-\\top}\\quad(X\\succ0)"
+            }
+          ],
+          "proof": "由 d log det X=tr(X^{-1}dX)，将其改写为 tr((X^{-T})ᵀdX)，与 Frobenius 内积定义逐项匹配便得到梯度。",
+          "worked": "X=diag(1,0.01)，则 ∇log det X=diag(1,100)。若只沿第二对角方向增加 0.001，一阶预测 log-det 增量为 0.1，精确值 log(1.1)≈0.09531。",
+          "limitation": "一阶近似误差随扰动相对于最小特征值的比例增加而增大；对非正定矩阵不能无条件取实数 log det。"
+        }
+      ]
+    },
+    {
+      "id": "linear-n0089",
+      "node_id": "linear-n0089",
+      "title": "Kronecker积",
+      "definition": "对 A∈R^{m×n}、B∈R^{p×q}，Kronecker 积 A⊗B 是尺寸 mp×nq 的分块矩阵，其第 (i,j) 块为 a_ijB。它将两个线性映射在张量积空间上的作用组合起来，可用于表示矩阵方程、协方差结构与多维离散系统。",
+      "assumptions": "使用列主序向量化 vec(X)，即按第一列到最后一列依次堆叠。不同软件对 row-major/column-major 的默认习惯不同，直接移植公式必须验证向量化与张量因子的排列。",
+      "properties": [
+        "(A⊗B)(C⊗D)=AC⊗BD，条件是两个对应矩阵乘积均有定义。",
+        "(A⊗B)ᵀ=Aᵀ⊗Bᵀ；若 A、B 可逆，则 (A⊗B)^{-1}=A^{-1}⊗B^{-1}。",
+        "列主序下 vec(AXB)=(Bᵀ⊗A)vec(X)，这一反序是矩阵回归和 Sylvester 方程的关键。",
+        "若 A、B 为实对称正定矩阵，则 A⊗B 仍正定，特征值为两者特征值的全部乘积。"
+      ],
+      "formulas": [
+        {
+          "label": "Kronecker 积分块定义",
+          "tex": "A\\otimes B=\\begin{bmatrix}a_{11}B&\\cdots&a_{1n}B\\\\\\vdots&\\ddots&\\vdots\\\\a_{m1}B&\\cdots&a_{mn}B\\end{bmatrix}"
+        },
+        {
+          "label": "列向量化恒等式",
+          "tex": "\\operatorname{vec}(AXB)=(B^\\top\\otimes A)\\operatorname{vec}(X)"
+        },
+        {
+          "label": "秩和特征值",
+          "tex": "\\operatorname{rank}(A\\otimes B)=\\operatorname{rank}(A)\\operatorname{rank}(B),\\quad\\sigma(A\\otimes B)=\\{\\lambda_i\\mu_j\\}_{i,j}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对 X 的第 (i,j) 元素用左右矩阵元素展开，重排列主序索引，系数恰为 Bᵀ⊗A 对应位置。",
+          "tex": "(AXB)_{ij}=\\sum_{k,\\ell}A_{ik}X_{k\\ell}B_{\\ell j}"
+        },
+        {
+          "explanation": "利用矩阵乘法的分块形式逐块检查，两两内积因子可分别组合。",
+          "tex": "(A\\otimes B)(C\\otimes D)=(AC)\\otimes(BD)"
+        },
+        {
+          "explanation": "若 A u_i=λ_i u_i、B v_j=μ_j v_j，则 Kronecker 作用保持张量积向量方向并放大 λ_iμ_j 倍。",
+          "tex": "(A\\otimes B)(u_i\\otimes v_j)=\\lambda_i\\mu_j(u_i\\otimes v_j)"
+        }
+      ],
+      "example": "取 A=diag(2,3)、B=[[1,2],[0,1]]，则 A⊗B=[[2,4,0,0],[0,2,0,0],[0,0,3,6],[0,0,0,3]]。取 X=[[1,2],[3,4]]，vec(X)=(1,3,2,4)ᵀ。若左乘 A、右乘 I，则 AX=[[2,4],[9,12]]，vec(AX)=(2,9,4,12)ᵀ，等于 (I⊗A)vec(X)。",
+      "application": "多资产×多期协方差分离结构 Σ_time⊗Σ_asset、矩阵正态模型、线性状态空间模型与贝叶斯矩阵回归可以利用 Kronecker 分解显著降低存储成本。其可用性依赖数据是否具有近似可分的时间与截面结构。",
+      "caveat": "矩阵 vec 与行主序混用会导致公式维数看似正确但排列完全错误；可分协方差是假设，不应把任意真实金融协方差都强行写成单个 Kronecker 积。",
+      "checked_status": "V93：向量化证明、张量谱与矩阵方程、维度和顺序检查",
+      "deep_sections": [
+        {
+          "title": "向量化恒等式的逐元素来源",
+          "question": "为什么 AXB 向量化后 B 要转置并排在左侧？",
+          "paragraphs": [
+            "在列主序下，X 的第 (k,l) 元素位于向量索引 k+(l−1)m；AXB 的第 (i,j) 元素对 X_kl 的系数为 A_ik B_lj。",
+            "矩阵 Bᵀ⊗A 的对应分块系数正好为 (Bᵀ)_jl A_ik=B_lj A_ik，因此两种展开逐项相等。"
+          ],
+          "formulas": [
+            {
+              "label": "严格数学关系",
+              "tex": "\\operatorname{vec}(AXB)=(B^\\top\\otimes A)\\operatorname{vec}(X)"
+            }
+          ],
+          "proof": "左侧第 (i+(j−1)m) 项等于 Σ_k Σ_l A_ik X_kl B_lj；右侧按 Kronecker 行列定义展开也为同一双重求和，所以向量相等。",
+          "worked": "X=[[1,2],[3,4]]，A=diag(2,3)、B=I 时，vec(AX)=(2,9,4,12)，等于 (I⊗A)(1,3,2,4)。",
+          "limitation": "如果用行主序向量化，右侧矩阵排列不再是这里的 Bᵀ⊗A；必须重新推导而非照抄。"
+        },
+        {
+          "title": "Kronecker 积的谱结构与正定性",
+          "question": "两个正定矩阵为什么给出更大维度的正定矩阵？",
+          "paragraphs": [
+            "设 A=QΛQᵀ、B=RΜRᵀ，其中 Q、R 正交，Λ、Μ 对角且特征值全正。",
+            "利用混合乘积规则，A⊗B=(Q⊗R)(Λ⊗Μ)(Q⊗R)ᵀ，而中间矩阵的对角元为全部 λ_iμ_j，故也全正。"
+          ],
+          "formulas": [
+            {
+              "label": "严格数学关系",
+              "tex": "\\lambda_{\\min}(A\\otimes B)=\\lambda_{\\min}(A)\\lambda_{\\min}(B)\\quad(A,B\\succ0)"
+            }
+          ],
+          "proof": "由于两个谱分解的张量基正交，Λ⊗Μ 的对角元等于 λ_iμ_j。正特征值的所有乘积严格为正，最小值由两个最小正特征值相乘取得。",
+          "worked": "A=diag(2,3)、B=diag(4,5) 时，A⊗B 的四个特征值为 8、10、12、15，最小值为 8。",
+          "limitation": "若其中一个矩阵不正定，上述正定结论可能失效；对于不定矩阵，最小特征值不能简单由各自最小值相乘得到。"
+        },
+        {
+          "title": "矩阵方程如何化为线性系统",
+          "question": "为什么 Kronecker 形式适合求解 Sylvester 方程？",
+          "paragraphs": [
+            "Sylvester 方程 AX+XB=C 对未知矩阵 X 是线性的，但左右各乘一个已知矩阵，不能直接合并为 (A+B)X。",
+            "对两项分别向量化，可得到普通线性系统；解的唯一性要求该系统矩阵可逆，例如 A 的特征值与 −B 的特征值互不相同。"
+          ],
+          "formulas": [
+            {
+              "label": "严格数学关系",
+              "tex": "AX+XB=C\\iff(I\\otimes A+B^\\top\\otimes I)\\operatorname{vec}(X)=\\operatorname{vec}(C)"
+            }
+          ],
+          "proof": "对 AX 用 vec(AX)=(I⊗A)vec(X)，对 XB 用 vec(XB)=(Bᵀ⊗I)vec(X)，线性相加即可；若相应系数矩阵可逆，解唯一。",
+          "worked": "标量情形 A=[2]、B=[3]、C=[10]，方程 2x+3x=10 的解为 x=2；Kronecker 系数恰为 2+3=5。",
+          "limitation": "高维稠密系统不一定应显式构造巨大 Kronecker 矩阵，专用 Sylvester 算法往往更省内存。"
+        }
+      ]
+    },
+    {
+      "id": "linear-n0090",
+      "node_id": "linear-n0090",
+      "title": "协方差矩阵与收缩估计",
+      "definition": "对有限二阶矩随机向量 R∈R^p，协方差矩阵 Σ=E[(R−μ)(R−μ)ᵀ] 是对称半正定矩阵。样本协方差 S 在高维或短历史窗口下噪声较大，收缩估计将 S 与结构化目标 F 加权组合，典型形式为 Σ̂=(1−δ)S+δF，其中 δ∈[0,1]。",
+      "assumptions": "本节样本协方差以 n−1 为分母，数据假设为 n 个独立同分布、有限二阶矩的 p 维观察；金融时序常有自相关、异方差和非平稳性，因此实际收缩强度估计必须考虑所用模型的依赖结构。若 F 是按训练数据估计的，也存在估计误差。",
+      "properties": [
+        "任何有效协方差矩阵均对称半正定；对任意固定组合 w，其方差为 wᵀΣw≥0。",
+        "若 S 与 F 均半正定、0≤δ≤1，则收缩估计仍半正定；若 F 正定且 δ>0，则收缩估计正定。",
+        "向单位矩阵目标 μI 收缩可抬高小样本矩阵过小的特征值，降低逆矩阵的不稳定性，但引入结构性偏差。",
+        "Ledoit–Wolf 类型方法通过最小化 Frobenius 风险的理论或数据驱动估计选择收缩强度；δ 并非所有样本都应取相同常数。"
+      ],
+      "formulas": [
+        {
+          "label": "样本协方差",
+          "tex": "S=\\frac{1}{n-1}\\sum_{t=1}^{n}(r_t-\\bar r)(r_t-\\bar r)^\\top"
+        },
+        {
+          "label": "线性收缩",
+          "tex": "\\widehat\\Sigma_\\delta=(1-\\delta)S+\\delta F,\\qquad0\\le\\delta\\le1"
+        },
+        {
+          "label": "单位阵目标与谱",
+          "tex": "F=\\mu I,\\quad\\mu=\\frac{\\operatorname{tr}S}{p},\\quad\\lambda_i(\\widehat\\Sigma_\\delta)=(1-\\delta)\\lambda_i(S)+\\delta\\mu"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对任意 w，二次型 wᵀSw 是中心化组合收益的样本平方和除以 n−1，因此非负。",
+          "tex": "w^\\top Sw=\\frac{1}{n-1}\\sum_t\\bigl(w^\\top(r_t-\\bar r)\\bigr)^2\\ge0"
+        },
+        {
+          "explanation": "半正定矩阵的非负凸组合保持二次型非负，因此收缩估计是合法的协方差形状。",
+          "tex": "w^\\top\\widehat\\Sigma_\\delta w=(1-\\delta)w^\\top Sw+\\delta w^\\top Fw\\ge0"
+        },
+        {
+          "explanation": "当目标 F=μI 时，它与 S 共享特征向量，所以每个特征值按同一线性规则移动。",
+          "tex": "S=Q\\Lambda Q^\\top\\Rightarrow\\widehat\\Sigma_\\delta=Q\\bigl((1-\\delta)\\Lambda+\\delta\\mu I\\bigr)Q^\\top"
+        }
+      ],
+      "example": "取 S=[[0.04,0.01],[0.01,0.01]]，μ=tr(S)/2=0.025。设 δ=0.4，则 Σ̂=0.6S+0.4×0.025I=[[0.034,0.006],[0.006,0.016]]。迹为 0.05，与原迹相同；行列式为 0.034×0.016−0.006²=0.000508>0，符合正定性。",
+      "application": "均值方差优化、风险预算、跨资产分散化、因子模型和预测信号风险归一化常需要协方差逆或谱分解。收缩估计在 p 接近甚至大于训练样本长度 n 时尤其有用，但应通过样本外风险与换手评估。",
+      "caveat": "收缩不能消除模型错误、前视偏差、幸存者偏差或非平稳性；当目标 μI 的量纲依赖资产收益缩放时，标准化与逆变换必须一致。股票时序相关性违反 iid 时，不能直接套用 iid 推导的收缩强度方差估计。",
+      "checked_status": "V93：半正定证明、谱收缩、风险最优化和时序偏差边界",
+      "deep_sections": [
+        {
+          "title": "样本协方差为何必为半正定",
+          "question": "短样本时协方差不可逆，是否意味着计算公式错误？",
+          "paragraphs": [
+            "设中心化数据矩阵 Z 的每一行为 r_t−r̄，则 S=ZᵀZ/(n−1)，本质上是 Gram 矩阵，必半正定。",
+            "由于中心化后的 n 行和为零，rank(Z)≤n−1；因此若 p≥n，则 S 必奇异，即使原随机总体协方差是正定的。"
+          ],
+          "formulas": [
+            {
+              "label": "严格数学关系",
+              "tex": "S=\\frac{Z^\\top Z}{n-1},\\qquad\\operatorname{rank}(S)\\le\\min(p,n-1)"
+            }
+          ],
+          "proof": "对任意 w，有 wᵀSw=||Zw||²/(n−1)≥0。矩阵 Z 的行满足一条线性依赖（总和为零），因此其秩不大于 n−1；S 与 Z 的秩相同。",
+          "worked": "只有 3 期观察、4 只 ETF 时，中心化矩阵秩至多 2，4×4 样本协方差必含至少两个零特征值。",
+          "limitation": "样本协方差奇异不代表市场真实存在无风险套利，尤其在样本短、资产相关性不稳定时。"
+        },
+        {
+          "title": "收缩特征值与组合方差的算例",
+          "question": "向均方差目标收缩怎样影响弱特征方向？",
+          "paragraphs": [
+            "当 F=μI 时，对 S 的正交特征方向 q_i，收缩后的二次型是 (1−δ)λ_i+δμ。",
+            "只要 μ>0 且 δ>0，原本为零的特征值被抬升到 δμ，同时过大的特征值向 μ 回落；这会改变最优化权重。"
+          ],
+          "formulas": [
+            {
+              "label": "严格数学关系",
+              "tex": "q_i^\\top\\widehat\\Sigma_\\delta q_i=(1-\\delta)\\lambda_i+\\delta\\mu"
+            }
+          ],
+          "proof": "因为 Sq_i=λ_iq_i、Iq_i=q_i，直接计算 Σ̂q_i=[(1−δ)λ_i+δμ]q_i。若 μ>0 且 δ>0，该值严格正，Σ̂ 成为正定。",
+          "worked": "S=diag(0.04,0)，p=2，μ=0.02、δ=0.5，收缩后 diag(0.03,0.01)，零特征值上升到 0.01。",
+          "limitation": "目标 μI 不保留任意资产的原方差，收缩程度和目标结构应该结合经济资产类别与数据量评估。"
+        },
+        {
+          "title": "均方误差最优收缩强度的基本推导",
+          "question": "为什么 δ 不是越大越稳就越好？",
+          "paragraphs": [
+            "把 S 视为随机样本估计，固定目标 F，定义 Frobenius 均方损失 E||((1−δ)S+δF)−Σ||_F²。",
+            "展开得到关于 δ 的凸二次式，其无约束最优值是噪声协方差与目标偏差的权衡，再投影到 [0,1]；实际 Ledoit–Wolf 估计还要处理未知 Σ 和样本依赖。"
+          ],
+          "formulas": [
+            {
+              "label": "严格数学关系",
+              "tex": "\\delta^*=\\Pi_{[0,1]}\\frac{\\mathbb E\\langle S-\\Sigma,S-F\\rangle_F}{\\mathbb E\\|S-F\\|_F^2}"
+            }
+          ],
+          "proof": "写 Σ̂_δ−Σ=(S−Σ)−δ(S−F)，平方后取期望，导数等于 −2E⟨S−Σ,S−F⟩+2δE||S−F||²，令其为零并截断；当分母为零时任何 δ 给同一估计。",
+          "worked": "如果某个理想化模型中噪声贡献为 0.6、总调整尺度为 2，理论截断值为 δ*=0.3；若分子为 −1，则区间约束最优 δ=0。",
+          "limitation": "该式把 F 视为固定目标；若 F 由同一数据估计，需要将其随机性和相关性纳入期望，不能直接用简化公式求数值。"
+        }
+      ]
+    }
+  ]
+}
