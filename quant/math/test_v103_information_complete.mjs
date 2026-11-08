@@ -103,7 +103,7 @@ assert(deepChars>=14000,"Depth reduced from reviewed version");
 assert.equal(linkCount,54,"Cross-lesson link count changed");
 const html=read("index.html"),css=read("styles.css"),app=read("app.js");
 const workflow=read("../../.github/workflows/test-quant-math.yml");
-assert(html.includes('app.js?v=20261108-v104-discrete-graphs-complete'),"Reader must bust V102 cache");
+assert(html.includes('app.js?v=20261108-v105-control-game-market-making-complete'),"Reader must bust V102 cache");
 assert(html.includes("V103 · 信息论与信号处理"),"V103 CJK curriculum absent");
 for(const id of ids)assert(html.includes("?topic="+id+'"'),"Study route missing "+id);
 for(const needle of [

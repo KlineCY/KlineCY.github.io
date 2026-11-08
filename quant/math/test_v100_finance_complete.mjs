@@ -110,7 +110,7 @@ for(const phrase of [
  'new Set(lessons.map(l=>l.node_id)).size!==lessons.length',
  'new Set(doc.lessons.map(l=>l.node_id)).size!==8'
 ])assert(app.includes(phrase),"Missing historical or V100 reader integration: "+phrase);
-assert(html.includes('app.js?v=20261108-v104-discrete-graphs-complete'),"App script cache not refreshed");
+assert(html.includes('app.js?v=20261108-v105-control-game-market-making-complete'),"App script cache not refreshed");
 assert(html.includes("V100 · 金融数学与资产定价"),"Finance navigator missing");
 for(const l of newest)assert(html.includes("?topic="+l.node_id+'"'),"Navigator missing "+l.node_id);
 for(const link of ["finance-n0431","finance-n0433","finance-n0434","finance-x001","finance-x006"])
