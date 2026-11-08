@@ -22,7 +22,7 @@ const added=docs.flatMap(doc=>doc.lessons);
 const target=[43,44,45,47,48,49,50,51,52,53,54,55,57,58,59,60].map(n=>"calculus-n"+String(n).padStart(4,"0"));
 assert.deepEqual(added.map(l=>l.node_id),target,"New chapters must use the original curriculum's missing nodes");
 const historical=fs.readdirSync(root)
- .filter(n=>/^lessons-.*\.json$/.test(n)&&!paths.includes(n))
+ .filter(n=>/^lessons-.*\.json$/.test(n)&&!paths.includes(n)&&!/^lessons-(foundation|measure)-v108[a-c]\.json$/.test(n))
  .flatMap(n=>{const d=json(n);return Array.isArray(d.lessons)?d.lessons:[];});
 assert.equal(historical.length,570,"Prior 570 lessons unexpectedly changed");
 assert.equal(new Set(historical.map(l=>l.node_id)).size,570,"Historical lesson IDs duplicated");
