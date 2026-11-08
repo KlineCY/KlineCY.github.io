@@ -54,7 +54,8 @@ function formula(tex,id){
  assert.equal(typeof tex,"string");
  assert(tex.length>=10,id+" short expression");
  assert(!/[\uFFFD\u200B\u200C\u200D\uFEFF]/u.test(tex),id+" bad Unicode");
- katex.renderToString(tex,{displayMode:true,throwOnError:true,strict:"error"});
+ try{katex.renderToString(tex,{displayMode:true,throwOnError:true,strict:"error"});}
+ catch(e){throw Error(id+" invalid strict KaTeX: "+tex+" / "+e.message)}
  formulaCount++;
 }
 for(const lesson of newLessons){
