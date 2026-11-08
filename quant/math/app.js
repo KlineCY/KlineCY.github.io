@@ -540,6 +540,22 @@ async function loadV99DynamicsPDE(path,expected){
   throw Error("V99矩阵动力学、PDE与随机控制讲义数量或结构损坏："+path);
  return doc.lessons;
 }
+async function loadV100Finance(path,expected){
+ const doc=await fetchMathJson(path);
+ if(doc.version!==1||doc.revision!=="V100"||!Array.isArray(doc.lessons)||doc.lessons.length!==expected||
+   new Set(doc.lessons.map(l=>l.node_id)).size!==expected||
+   doc.lessons.some(l=>l.id!==l.node_id||!l.title||!l.definition||!l.assumptions||
+     !Array.isArray(l.properties)||l.properties.length<4||
+     !Array.isArray(l.formulas)||l.formulas.length!==3||
+     !Array.isArray(l.derivation)||l.derivation.length!==3||
+     !Array.isArray(l.deep_sections)||l.deep_sections.length!==3||
+     l.deep_sections.some(x=>!x.title||!x.question||!x.proof||!x.worked||!x.limitation||
+       !Array.isArray(x.paragraphs)||x.paragraphs.length!==2||
+       !Array.isArray(x.formulas)||x.formulas.length!==1)||
+     !l.example||!l.application||!l.caveat))
+  throw Error("V100金融数学完整讲义校验失败："+path);
+ return doc.lessons;
+}
 Promise.all([
  fetch("./curriculum.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw Error("知识树加载失败 "+r.status);return r.json()}),
  fetch("./lessons-foundations.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw Error("基础讲义加载失败 "+r.status);return r.json()}),
@@ -568,10 +584,14 @@ Promise.all([
  loadV99DynamicsPDE("./lessons-dynamics-v99a.json",5),
  loadV99DynamicsPDE("./lessons-pde-v99b.json",6),
  loadV99DynamicsPDE("./lessons-pricing-pde-v99c.json",5),
- loadV99DynamicsPDE("./lessons-control-v99d.json",6)
-]).then(([c,l1,l2,l3,extra,v89,v91,v90,v92,v93matrix,v93probability,v94a,v94b,v94c,v94deep,v95a,v95b,v96a,v96b,v97portfolio,v97algorithms,v97numerical,v98a,v98b,v99a,v99b,v99c,v99d])=>{
+ loadV99DynamicsPDE("./lessons-control-v99d.json",6),
+ loadV100Finance("./lessons-finance-v100a.json",6),
+ loadV100Finance("./lessons-finance-v100b.json",3),
+ loadV100Finance("./lessons-finance-v100c.json",2),
+ loadV100Finance("./lessons-finance-v100d.json",6)
+]).then(([c,l1,l2,l3,extra,v89,v91,v90,v92,v93matrix,v93probability,v94a,v94b,v94c,v94deep,v95a,v95b,v96a,v96b,v97portfolio,v97algorithms,v97numerical,v98a,v98b,v99a,v99b,v99c,v99d,v100a,v100b,v100c,v100d])=>{
 applyV91FoundationDeepening(v89,v91);
-curriculum=c;depts=c.disciplines;chapters=c.chapters;nodes=c.nodes;lessons=[...l1.lessons,...l2.lessons,...l3.lessons,...extra,...v89,...v90,...v92,...v93matrix,...v93probability,...v94a,...v94b,...v94c,...v95a,...v95b,...v96a,...v96b,...v97portfolio,...v97algorithms,...v97numerical,...v98a,...v98b,...v99a,...v99b,...v99c,...v99d];
+curriculum=c;depts=c.disciplines;chapters=c.chapters;nodes=c.nodes;lessons=[...l1.lessons,...l2.lessons,...l3.lessons,...extra,...v89,...v90,...v92,...v93matrix,...v93probability,...v94a,...v94b,...v94c,...v95a,...v95b,...v96a,...v96b,...v97portfolio,...v97algorithms,...v97numerical,...v98a,...v98b,...v99a,...v99b,...v99c,...v99d,...v100a,...v100b,...v100c,...v100d];
 applyV94HistoricalProbabilityDeepening(lessons,v94deep);
 if(new Set(lessons.map(l=>l.node_id)).size!==lessons.length)throw Error("数学讲义节点ID重复");
 nodeMap=new Map(nodes.map(n=>[n.id,n]));chapMap=new Map(chapters.map(c=>[c.id,c]));deptMap=new Map(depts.map(d=>[d.id,d]));lessonMap=new Map(lessons.map(l=>[l.node_id,l]));
