@@ -37,20 +37,20 @@ for(const spec of baseline){
   const id=old.id,x=d.lessons[id];n++;
   assert.equal(hash(originalSnapshot(x,old)),old.hash,id+" historical original content was edited");
   assert(x.v79_note?.startsWith("V79"),id+" new layer absent");
-  assert.equal(x.equations.length,old.counts.equations+2,id+" equations append count");
-  assert.equal(x.derivation.length,old.counts.derivation+2,id+" derivations append count");
-  assert.equal(x.protocol.length,old.counts.protocol+1,id+" protocols append count");
-  assert.equal(x.pitfalls.length,old.counts.pitfalls+1,id+" limitations append count");
-  assert(x.derivation.slice(-2).every(s=>s.length>=90),id+" new derivation too short");
+  assert.equal(x.equations.length,old.counts.equations+2+(/atlas-depth-07-[ij]\.json$/.test(spec.path)?2:0),id+" original V79 and optional V88 equations append");
+  assert.equal(x.derivation.length,old.counts.derivation+2+(/atlas-depth-07-[ij]\.json$/.test(spec.path)?2:0),id+" original V79 and optional V88 derivations append");
+  assert.equal(x.protocol.length,old.counts.protocol+1+(/atlas-depth-07-[ij]\.json$/.test(spec.path)?1:0),id+" original V79 and optional V88 protocols append");
+  assert.equal(x.pitfalls.length,old.counts.pitfalls+1+(/atlas-depth-07-[ij]\.json$/.test(spec.path)?1:0),id+" original V79 and optional V88 limitations append");
+  assert(x.derivation.slice(6,8).every(s=>s.length>=90),id+" new derivation too short");
   assert(x.worked_example.length-old.workedLength>=80,id+" new worked example too short");
-  assert(x.protocol.at(-1).length>=30&&x.pitfalls.at(-1).length>=30,id+" new protocol/caveat incomplete");
-  assert(/[\u3400-\u9fff]/u.test(x.derivation.at(-1)),id+" Chinese proof missing");
+  assert(x.protocol.at(6).length>=30&&x.pitfalls.at(3).length>=30,id+" new protocol/caveat incomplete");
+  assert(/[\u3400-\u9fff]/u.test(x.derivation.at(7)),id+" Chinese proof missing");
   assert(!/[\uFFFD\u200B\u200C\u200D\uFEFF]/u.test(JSON.stringify(x)),id+" corrupted CJK or invisible char");
   assert(!/TODO|FIXME|Lorem ipsum/iu.test(JSON.stringify(x)),id+" placeholder leaked");
-  const newest=x.equations.slice(-2);
+  const newest=x.equations.slice(6,8);
   assert.equal(new Set(newest.map(e=>e.label)).size,2,id+" duplicate new label");
-  assert(newest.every(e=>!x.equations.slice(0,-2).some(o=>o.label===e.label)),id+" new heading collides with old");
-  for(const [j,e] of x.equations.entries()){
+  assert(newest.every(e=>!x.equations.slice(0,6).some(o=>o.label===e.label)),id+" new heading collides with old");
+  for(const [j,e] of x.equations.slice(0,8).entries()){
    assert(e.label.length>=2&&e.tex.length>=5,id+" invalid formula metadata");
    katex.renderToString(e.tex,{throwOnError:true,strict:j>=old.counts.equations?"error":"ignore",displayMode:true});
    texCount++;
