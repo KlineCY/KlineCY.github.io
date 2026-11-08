@@ -492,6 +492,22 @@ async function loadV96OptimizationLectures(path,expected){
   throw Error("V96凸优化讲义加载数量或证明结构损坏："+path);
  return doc.lessons;
 }
+async function loadV97PortfolioNumericalLectures(path,expected){
+ const doc=await fetchMathJson(path);
+ if(doc.version!==1||doc.revision!=="V97"||!Array.isArray(doc.lessons)||doc.lessons.length!==expected||
+   new Set(doc.lessons.map(l=>l.node_id)).size!==expected||
+   doc.lessons.some(l=>l.id!==l.node_id||!l.title||!l.definition||!l.assumptions||
+     !Array.isArray(l.properties)||l.properties.length<4||
+     !Array.isArray(l.formulas)||l.formulas.length!==3||
+     !Array.isArray(l.derivation)||l.derivation.length!==3||
+     !Array.isArray(l.deep_sections)||l.deep_sections.length!==3||
+     l.deep_sections.some(s=>!s.title||!s.question||!s.proof||!s.worked||!s.limitation||
+       !Array.isArray(s.paragraphs)||s.paragraphs.length!==2||
+       !Array.isArray(s.formulas)||s.formulas.length!==1)||
+     !l.example||!l.application||!l.caveat))
+  throw Error("V97组合优化与数值算法完整讲义损坏："+path);
+ return doc.lessons;
+}
 Promise.all([
  fetch("./curriculum.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw Error("知识树加载失败 "+r.status);return r.json()}),
  fetch("./lessons-foundations.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw Error("基础讲义加载失败 "+r.status);return r.json()}),
@@ -511,10 +527,13 @@ Promise.all([
  loadV95StatisticsLectures("./lessons-statistics-v95a.json",7),
  loadV95StatisticsLectures("./lessons-statistics-v95b.json",7),
  loadV96OptimizationLectures("./lessons-optimization-v96a.json",7),
- loadV96OptimizationLectures("./lessons-optimization-v96b.json",7)
-]).then(([c,l1,l2,l3,extra,v89,v91,v90,v92,v93matrix,v93probability,v94a,v94b,v94c,v94deep,v95a,v95b,v96a,v96b])=>{
+ loadV96OptimizationLectures("./lessons-optimization-v96b.json",7),
+ loadV97PortfolioNumericalLectures("./lessons-portfolio-v97.json",5),
+ loadV97PortfolioNumericalLectures("./lessons-algorithms-v97.json",4),
+ loadV97PortfolioNumericalLectures("./lessons-numerical-v97.json",5)
+]).then(([c,l1,l2,l3,extra,v89,v91,v90,v92,v93matrix,v93probability,v94a,v94b,v94c,v94deep,v95a,v95b,v96a,v96b,v97portfolio,v97algorithms,v97numerical])=>{
 applyV91FoundationDeepening(v89,v91);
-curriculum=c;depts=c.disciplines;chapters=c.chapters;nodes=c.nodes;lessons=[...l1.lessons,...l2.lessons,...l3.lessons,...extra,...v89,...v90,...v92,...v93matrix,...v93probability,...v94a,...v94b,...v94c,...v95a,...v95b,...v96a,...v96b];
+curriculum=c;depts=c.disciplines;chapters=c.chapters;nodes=c.nodes;lessons=[...l1.lessons,...l2.lessons,...l3.lessons,...extra,...v89,...v90,...v92,...v93matrix,...v93probability,...v94a,...v94b,...v94c,...v95a,...v95b,...v96a,...v96b,...v97portfolio,...v97algorithms,...v97numerical];
 applyV94HistoricalProbabilityDeepening(lessons,v94deep);
 if(new Set(lessons.map(l=>l.node_id)).size!==lessons.length)throw Error("数学讲义节点ID重复");
 nodeMap=new Map(nodes.map(n=>[n.id,n]));chapMap=new Map(chapters.map(c=>[c.id,c]));deptMap=new Map(depts.map(d=>[d.id,d]));lessonMap=new Map(lessons.map(l=>[l.node_id,l]));
