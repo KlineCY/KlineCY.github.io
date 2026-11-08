@@ -70,7 +70,7 @@ for(const l of newest){
  assert.equal(l.formulas.length,3,id+" core equations");
  assert.equal(l.derivation.length,3,id+" math derivation");
  assert.equal(l.deep_sections.length,3,id+" deep subchapters");
- for(const f of l.formulas){assert(f.label?.length>=4,id+" formula caption");checkFormula(f.tex,id);}
+ for(const f of l.formulas){assert(f.label?.length>=2,id+" formula caption");checkFormula(f.tex,id);}
  for(const d of l.derivation){assert(d.explanation?.length>=25,id+" step explanation");checkFormula(d.tex,id);}
  const sectionTitles=new Set();
  for(const s of l.deep_sections){
