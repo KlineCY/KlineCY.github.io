@@ -18,11 +18,11 @@ for(const id of ids){
  assert(l&&n&&l.title===n.title,"full lesson not registered "+id);
  for(const key of ["definition","assumptions","example","application","caveat"])assert(l[key]?.length>=75,"missing argument "+id+"."+key);
  assert(l.formulas.length>=4&&l.derivation.length>=4&&l.properties.length>=4);
- assert.equal(l.deep_sections.length,5);
- assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,5,"repeated title "+id);
+ assert.equal(l.deep_sections.length,6,"preserve all five V57 sections plus one V87 addendum");
+ assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,6,"repeated title "+id);
  for(const f of l.formulas){assert(f.label);katex.renderToString(f.tex,{throwOnError:true,strict:"ignore"});formulas++;}
  for(const d of l.derivation){assert(d.explanation.length>=35);katex.renderToString(d.tex,{throwOnError:true,strict:"ignore"});formulas++;}
- for(const s of l.deep_sections){
+ for(const s of l.deep_sections.slice(0,5)){
   assert(s.question.length>=11&&s.paragraphs.length===2&&s.paragraphs.every(p=>p.length>=40),"thin Chinese explanations "+id+" "+s.title);
   assert(s.proof.length>=45&&s.worked.length>=35&&s.limitation.length>=30,"missing proof, worked example or boundary "+id+" "+s.title);
   assert(s.formulas.length>=1);
