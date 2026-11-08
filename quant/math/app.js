@@ -651,6 +651,21 @@ async function loadV106Calculus(path,expected){
    throw Error("V106微积分讲义内容或结构校验失败："+path);
  return doc.lessons;
 }
+async function loadV107IntegralOptimization(path,expected){
+ const doc=await fetchMathJson(path);
+ if(doc.version!==1||doc.revision!=="V107"||!Array.isArray(doc.lessons)||doc.lessons.length!==expected||
+   new Set(doc.lessons.map(l=>l.node_id)).size!==expected||
+   doc.lessons.some(l=>l.id!==l.node_id||!l.title||!l.definition||!l.assumptions||
+     !Array.isArray(l.properties)||l.properties.length<4||
+     !Array.isArray(l.formulas)||l.formulas.length!==3||
+     !Array.isArray(l.derivation)||l.derivation.length!==3||
+     !Array.isArray(l.deep_sections)||l.deep_sections.length!==3||
+     l.deep_sections.some(x=>!x.title||!x.question||!Array.isArray(x.paragraphs)||x.paragraphs.length!==2||
+       !Array.isArray(x.formulas)||x.formulas.length!==1||!x.proof||!x.worked||!x.limitation)||
+     !Array.isArray(l.links)||l.links.length!==3||!l.example||!l.application||!l.caveat))
+   throw Error("V107多重积分、隐函数与约束优化讲义不完整："+path);
+ return doc.lessons;
+}
 Promise.all([
  fetch("./curriculum.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw Error("知识树加载失败 "+r.status);return r.json()}),
  fetch("./lessons-foundations.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw Error("基础讲义加载失败 "+r.status);return r.json()}),
@@ -703,10 +718,16 @@ Promise.all([
  loadV105ControlGame("./lessons-control-v105c.json",7),
  loadV105ControlGame("./lessons-control-v105d.json",7),
  loadV106Calculus("./lessons-calculus-v106a.json",4),
- loadV106Calculus("./lessons-calculus-v106b.json",4)
-]).then(([c,l1,l2,l3,extra,v89,v91,v90,v92,v93matrix,v93probability,v94a,v94b,v94c,v94deep,v95a,v95b,v96a,v96b,v97portfolio,v97algorithms,v97numerical,v98a,v98b,v99a,v99b,v99c,v99d,v100a,v100b,v100c,v100d,v101time,v101tail,v101axioms,v101governance,v102a,v102b,v102c,v103a,v103b,v103c,v104a,v104b,v104c,v104d,v105a,v105b,v105c,v105d,v106a,v106b])=>{
+ loadV106Calculus("./lessons-calculus-v106b.json",4),
+ loadV107IntegralOptimization("./lessons-calculus-v107a.json",3),
+ loadV107IntegralOptimization("./lessons-calculus-v107b.json",2),
+ loadV107IntegralOptimization("./lessons-calculus-v107c.json",3),
+ loadV107IntegralOptimization("./lessons-calculus-v107d.json",3),
+ loadV107IntegralOptimization("./lessons-calculus-v107e.json",3),
+ loadV107IntegralOptimization("./lessons-calculus-v107f.json",2)
+]).then(([c,l1,l2,l3,extra,v89,v91,v90,v92,v93matrix,v93probability,v94a,v94b,v94c,v94deep,v95a,v95b,v96a,v96b,v97portfolio,v97algorithms,v97numerical,v98a,v98b,v99a,v99b,v99c,v99d,v100a,v100b,v100c,v100d,v101time,v101tail,v101axioms,v101governance,v102a,v102b,v102c,v103a,v103b,v103c,v104a,v104b,v104c,v104d,v105a,v105b,v105c,v105d,v106a,v106b,v107a,v107b,v107c,v107d,v107e,v107f])=>{
 applyV91FoundationDeepening(v89,v91);
-curriculum=c;depts=c.disciplines;chapters=c.chapters;nodes=c.nodes;lessons=[...l1.lessons,...l2.lessons,...l3.lessons,...extra,...v89,...v90,...v92,...v93matrix,...v93probability,...v94a,...v94b,...v94c,...v95a,...v95b,...v96a,...v96b,...v97portfolio,...v97algorithms,...v97numerical,...v98a,...v98b,...v99a,...v99b,...v99c,...v99d,...v100a,...v100b,...v100c,...v100d,...v101time,...v101tail,...v101axioms,...v101governance,...v102a,...v102b,...v102c,...v103a,...v103b,...v103c,...v104a,...v104b,...v104c,...v104d,...v105a,...v105b,...v105c,...v105d,...v106a,...v106b];
+curriculum=c;depts=c.disciplines;chapters=c.chapters;nodes=c.nodes;lessons=[...l1.lessons,...l2.lessons,...l3.lessons,...extra,...v89,...v90,...v92,...v93matrix,...v93probability,...v94a,...v94b,...v94c,...v95a,...v95b,...v96a,...v96b,...v97portfolio,...v97algorithms,...v97numerical,...v98a,...v98b,...v99a,...v99b,...v99c,...v99d,...v100a,...v100b,...v100c,...v100d,...v101time,...v101tail,...v101axioms,...v101governance,...v102a,...v102b,...v102c,...v103a,...v103b,...v103c,...v104a,...v104b,...v104c,...v104d,...v105a,...v105b,...v105c,...v105d,...v106a,...v106b,...v107a,...v107b,...v107c,...v107d,...v107e,...v107f];
 applyV94HistoricalProbabilityDeepening(lessons,v94deep);
 if(new Set(lessons.map(l=>l.node_id)).size!==lessons.length)throw Error("数学讲义节点ID重复");
 nodeMap=new Map(nodes.map(n=>[n.id,n]));chapMap=new Map(chapters.map(c=>[c.id,c]));deptMap=new Map(depts.map(d=>[d.id,d]));lessonMap=new Map(lessons.map(l=>[l.node_id,l]));
