@@ -402,6 +402,20 @@ async function loadV92LinearFoundations(){
   throw Error("V92八篇矩阵分析课程数据损坏");
  return doc.lessons;
 }
+async function loadV93CompletedLessons(path,expected){
+ const doc=await fetchMathJson(path);
+ if(doc.version!==1||doc.revision!=="V93"||!Array.isArray(doc.lessons)||doc.lessons.length!==expected||
+    new Set(doc.lessons.map(l=>l.node_id)).size!==expected||
+    doc.lessons.some(l=>l.id!==l.node_id||!l.title||!l.definition||!l.assumptions||
+      !Array.isArray(l.properties)||l.properties.length<4||
+      !Array.isArray(l.formulas)||l.formulas.length<3||
+      !Array.isArray(l.derivation)||l.derivation.length<3||
+      !Array.isArray(l.deep_sections)||l.deep_sections.length<3||
+      l.deep_sections.some(s=>!s.title||!s.proof||!s.worked||!s.limitation||!Array.isArray(s.formulas)||!s.formulas.length)||
+      !l.example||!l.application||!l.caveat))
+  throw Error("V93数学讲义模块数量或内容完整性错误："+path);
+ return doc.lessons;
+}
 Promise.all([
  fetch("./curriculum.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw Error("知识树加载失败 "+r.status);return r.json()}),
  fetch("./lessons-foundations.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw Error("基础讲义加载失败 "+r.status);return r.json()}),
@@ -411,10 +425,12 @@ Promise.all([
  loadV89Foundations(),
  loadV91FoundationDeepening(),
  loadV90LinearFoundations(),
- loadV92LinearFoundations()
-]).then(([c,l1,l2,l3,extra,v89,v91,v90,v92])=>{
+ loadV92LinearFoundations(),
+ loadV93CompletedLessons("./lessons-matrix-v93.json",3),
+ loadV93CompletedLessons("./lessons-probability-v93.json",9)
+]).then(([c,l1,l2,l3,extra,v89,v91,v90,v92,v93matrix,v93probability])=>{
 applyV91FoundationDeepening(v89,v91);
-curriculum=c;depts=c.disciplines;chapters=c.chapters;nodes=c.nodes;lessons=[...l1.lessons,...l2.lessons,...l3.lessons,...extra,...v89,...v90,...v92];
+curriculum=c;depts=c.disciplines;chapters=c.chapters;nodes=c.nodes;lessons=[...l1.lessons,...l2.lessons,...l3.lessons,...extra,...v89,...v90,...v92,...v93matrix,...v93probability];
 nodeMap=new Map(nodes.map(n=>[n.id,n]));chapMap=new Map(chapters.map(c=>[c.id,c]));deptMap=new Map(depts.map(d=>[d.id,d]));lessonMap=new Map(lessons.map(l=>[l.node_id,l]));
 if(lessonMap.size!==lessons.length||lessons.some(l=>!nodeMap.has(l.node_id)||nodeMap.get(l.node_id).title!==l.title))
  throw Error("数学讲义ID重复、目标缺失或标题不匹配");
