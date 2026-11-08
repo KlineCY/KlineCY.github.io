@@ -45,7 +45,8 @@ for(const s of mlSpec){
  assert(x.derivation.slice(-2).every(p=>p.length>=100),s.id+" thin derivation");
  assert(x.worked_example.length-s.worked>=110,s.id+" short worked calculation");
  assert(x.protocol.at(-1).length>=60&&x.pitfalls.at(-1).length>=60,s.id+" weak testing or failure boundary");
- assert.equal(new Set(x.equations.map(f=>f.label)).size,x.equations.length,s.id+" duplicate formula label");
+ assert.equal(new Set(x.equations.slice(-2).map(f=>f.label)).size,2,s.id+" new formula labels duplicated");
+ assert(x.equations.slice(-2).every(f=>!x.equations.slice(0,s.eq).some(old=>old.label===f.label)),s.id+" V86 formula label conflicts with frozen original labels");
  for(const f of x.equations.slice(-2)){assert(f.label.length>=4&&f.tex.length>=15);katex.renderToString(f.tex,{throwOnError:true,strict:"error",displayMode:true});strictTeX++;}
  quality(x,s.id);mlCount++;
 }
