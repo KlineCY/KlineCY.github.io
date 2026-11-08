@@ -8,10 +8,9 @@ const c=read("./curriculum.json");
 const sources=["./lessons-foundations.json","./lessons-advanced.json","./lessons-more.json"].map(read);
 const manifest=read("./lessons-manifest.json");
 assert.equal(manifest.version,1);
-assert.equal(manifest.expected_lessons,213);
-assert.equal(manifest.modules.slice(0,77).reduce((s,x)=>s+x.lessons,0),201,"preserve 201 original extension lessons");
-assert.equal(manifest.modules.length,80);
-assert.equal(new Set(manifest.modules.map(x=>x.path)).size,80);
+assert.equal(manifest.expected_lessons,201);
+assert.equal(manifest.modules.length,77);
+assert.equal(new Set(manifest.modules.map(x=>x.path)).size,77);
 assert.equal(manifest.modules.reduce((s,x)=>s+x.lessons,0),manifest.expected_lessons);
 const extras=manifest.modules.flatMap(mod=>{
  assert(/^\.\/lessons-phase-\d\d-[a-z]\.json$/.test(mod.path),"invalid module path "+mod.path);
