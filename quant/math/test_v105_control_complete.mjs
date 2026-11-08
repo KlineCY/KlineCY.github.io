@@ -198,7 +198,7 @@ near("Stochastic risky utility",-.5*Math.exp(-4)-.5,-.5091578194443671);
 yes("Stochastic CARA prefers safe", -Math.exp(-1)>-.5*Math.exp(-4)-.5);
 near("HJB diffusion term",.5*.2**2*(-2),-.04);
 near("HJB optimal action",.5,.5);
-near("HJB optimum Hamilton",-(.5)**2+.5-.04,.21);
+near("HJB optimum Hamilton",-((.5)**2)+.5-.04,.21);
 near("HJB H at +1",-1+1-.04,-.04);
 near("HJB H at -1",-1-1-.04,-2.04);
 near("LQG control optimal",-(2)/2,-1);
