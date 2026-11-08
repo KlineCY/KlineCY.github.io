@@ -342,14 +342,53 @@ async function loadV89Foundations(){
   throw Error("V89基础数学完整讲义数量、版本或唯一ID异常");
  return doc.lessons;
 }
+async function loadV91FoundationDeepening(){
+ const doc=await fetchMathJson("./lessons-foundations-v91.json");
+ if(doc.version!==1||doc.revision!=="V91"||!Array.isArray(doc.extensions)||doc.extensions.length!==12||
+    !Array.isArray(doc.patches)||doc.patches.length!==2||
+    new Set(doc.extensions.map(x=>x.node_id)).size!==12||
+    doc.extensions.some(x=>!Array.isArray(x.deep_sections)||x.deep_sections.length!==2||
+       x.deep_sections.some(s=>!s.title||!s.proof||!s.worked||!s.limitation||
+          !Array.isArray(s.formulas)||s.formulas.length<1||!Array.isArray(s.paragraphs)||s.paragraphs.length<2)))
+  throw Error("V91深化讲义结构损坏或缺失");
+ return doc;
+}
+function applyV91FoundationDeepening(v89,v91){
+ const byId=new Map(v89.map(l=>[l.node_id,l]));
+ if(byId.size!==12||v91.extensions.some(x=>!byId.has(x.node_id)||byId.get(x.node_id).title!==x.title))
+  throw Error("V91扩展与V89正式课程ID/标题不一致");
+ for(const ext of v91.extensions){
+  const lesson=byId.get(ext.node_id);
+  if(lesson.deep_sections.length!==4||
+     ext.deep_sections.some(s=>lesson.deep_sections.some(original=>original.title===s.title)))
+   throw Error("V91扩展基线或章节标题不一致："+ext.node_id);
+  lesson.deep_sections.push(...ext.deep_sections);
+ }
+ const seenPatches=new Set();
+ for(const patch of v91.patches){
+  const lesson=byId.get(patch.node_id);
+  if(!lesson||seenPatches.has(patch.node_id))throw Error("V91修订目标重复或缺失");
+  seenPatches.add(patch.node_id);
+  if(patch.kind==="formula"&&patch.node_id==="foundation-n0003"&&patch.index===3&&
+     lesson.formulas[patch.index]?.label===patch.expected_label&&patch.formula?.tex){
+    lesson.formulas[patch.index]=patch.formula;
+  }else if(patch.kind==="deep_section"&&patch.node_id==="foundation-n0015"&&patch.index===1&&
+     lesson.deep_sections[patch.index]?.title===patch.expected_title&&patch.section?.formulas?.length){
+    lesson.deep_sections[patch.index]=patch.section;
+  }else throw Error("V91补丁位置与历史讲义不符："+patch.node_id);
+ }
+ if([...byId.values()].some(l=>l.deep_sections.length!==6))throw Error("V91章节数量不一致");
+}
 Promise.all([
  fetch("./curriculum.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw Error("知识树加载失败 "+r.status);return r.json()}),
  fetch("./lessons-foundations.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw Error("基础讲义加载失败 "+r.status);return r.json()}),
  fetch("./lessons-advanced.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw Error("进阶讲义加载失败 "+r.status);return r.json()}),
  fetch("./lessons-more.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw Error("专题讲义加载失败 "+r.status);return r.json()}),
  loadMathAdditions(),
- loadV89Foundations()
-]).then(([c,l1,l2,l3,extra,v89])=>{
+ loadV89Foundations(),
+ loadV91FoundationDeepening()
+]).then(([c,l1,l2,l3,extra,v89,v91])=>{
+applyV91FoundationDeepening(v89,v91);
 curriculum=c;depts=c.disciplines;chapters=c.chapters;nodes=c.nodes;lessons=[...l1.lessons,...l2.lessons,...l3.lessons,...extra,...v89];
 nodeMap=new Map(nodes.map(n=>[n.id,n]));chapMap=new Map(chapters.map(c=>[c.id,c]));deptMap=new Map(depts.map(d=>[d.id,d]));lessonMap=new Map(lessons.map(l=>[l.node_id,l]));
 if(lessonMap.size!==lessons.length||lessons.some(l=>!nodeMap.has(l.node_id)||nodeMap.get(l.node_id).title!==l.title))
