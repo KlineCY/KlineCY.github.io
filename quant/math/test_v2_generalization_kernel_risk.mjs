@@ -18,11 +18,11 @@ for(const id of ids){
  assert.equal(l.title,node.title);
  for(const key of ["definition","assumptions","example","application","caveat"])assert(l[key]?.length>=80,"missing complete "+key+" "+id);
  assert(l.properties.length>=4&&l.formulas.length>=4&&l.derivation.length>=4,"missing theorem structure "+id);
- assert.equal(l.deep_sections.length,4,"must contain four full proof sections "+id);
- assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,4);
+ assert.equal(l.deep_sections.length,5,"preserve four V2 proof sections and one V86 deepening "+id);
+ assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,l.deep_sections.length);
  for(const f of l.formulas){katex.renderToString(f.tex,{throwOnError:true,strict:"ignore"});formulaCount++;}
  for(const step of l.derivation){assert(step.explanation.length>=40);katex.renderToString(step.tex,{throwOnError:true,strict:"ignore"});formulaCount++;}
- for(const s of l.deep_sections){
+ for(const s of l.deep_sections.slice(0,4)){
   assert(s.title&&s.question.length>=12);
   assert(s.paragraphs.length>=2&&s.paragraphs.every(p=>p.length>=45),"short explanation "+id);
   assert(s.proof.length>=50&&s.worked.length>=40&&s.limitation.length>=30,"missing proof/example/caveat "+id);
