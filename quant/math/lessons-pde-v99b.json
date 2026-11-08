@@ -1,0 +1,691 @@
+{
+  "version": 1,
+  "revision": "V99",
+  "kind": "PDE core: characteristics, diffusion, waves, harmonic functions, boundaries and eigenfunctions",
+  "lessons": [
+    {
+      "id": "diffeq-n0403",
+      "node_id": "diffeq-n0403",
+      "title": "一阶输运方程",
+      "definition": "一阶线性输运方程 u_t+c u_x=0 描述标量场沿固定速度 c 的无形变传播。它的核心解法是特征线：沿 x(t)=x₀+ct 的轨迹，场的值保持不变，因此整条初值曲线被平移而不改变形状。",
+      "assumptions": "在全实线的 C¹ 初始函数 u₀ 下得到经典解。若初始条件存在跳跃，只能在适当的弱解意义下理解平移，不能在跳跃点假设经典偏导数存在；有限区间还需给定入流边界，速度符号决定入流位置。",
+      "properties": [
+        "常速度输运的经典解为 u(x,t)=u₀(x−ct)，其振幅和空间图形在平移下不变。",
+        "沿特征线满足 d u(x(t),t)/dt=0，这是一阶链式法则的直接应用。",
+        "当 c>0 且空间区间 [0,L] 时，入流边界在 x=0；当 c<0 时，在 x=L。",
+        "一般变速度或非线性输运可使特征线汇聚或交叉，常速度平移公式不能直接照搬。"
+      ],
+      "formulas": [
+        {
+          "label": "输运方程与特征曲线",
+          "tex": "u_t+c u_x=0,\\quad x(t)=x_0+ct"
+        },
+        {
+          "label": "全实线初值问题的解",
+          "tex": "u(x,t)=u_0(x-ct)"
+        },
+        {
+          "label": "沿特征线守恒",
+          "tex": "\\frac{\\mathrm d}{\\mathrm dt}u(x(t),t)=u_t+c u_x=0"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将 x(t) 的速度设为 c，沿该路径对复合函数应用链式法则。",
+          "tex": "\\frac{\\mathrm d}{\\mathrm dt}u(x(t),t)=u_t+\\dot x(t)u_x"
+        },
+        {
+          "explanation": "用 PDE 消去导数，得沿任意特征线 u 的取值不变。",
+          "tex": "u(x_0+ct,t)=u_0(x_0)"
+        },
+        {
+          "explanation": "对给定的终点 (x,t) 反求 x₀=x−ct，得到整体平移显式公式。",
+          "tex": "x_0=x-ct\\Longrightarrow u(x,t)=u_0(x-ct)"
+        }
+      ],
+      "example": "令 u₀(x)=sin x、c=2，全实线的解是 u(x,t)=sin(x−2t)。在 x=π、t=π/4 时，u=sin(π/2)=1；直接求导得到 u_t=−2cos(x−2t)、u_x=cos(x−2t)，两项之和确为零。",
+      "application": "订单流密度或库存信息传播可用输运方程作为简化机制模型，但现实金融冲击包含扩散、反身性与非线性反馈，纯平移的形状守恒不宜被解释为实际价格冲击规律。",
+      "caveat": "切勿对有限区间同时在入流与出流边界任意指定独立数据，否则可能与 PDE 不相容。若 u₀ 不连续，应注明弱解与数值通量条件；用中心差分离散对流也可能产生非物理振荡。",
+      "deep_sections": [
+        {
+          "title": "特征线法为何不是形式上的变量替换",
+          "question": "PDE 的二维自变量怎样变成常微分方程？",
+          "paragraphs": [
+            "沿着选定路径 x(t)，原来同时依赖 x、t 的场值变成单参数函数 u(x(t),t)。",
+            "让路径速度与 PDE 的对流速度一致，便使沿线导数等于零，解的构造不再需要逐点求偏导。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与计算",
+              "tex": "\\dot x=c,\\quad\\frac{\\mathrm d}{\\mathrm dt}u(x(t),t)=0"
+            }
+          ],
+          "proof": "依链式法则 d u/dt=u_t+x' u_x；取 x'=c，利用 u_t+c u_x=0 得 d u/dt=0。积分得到 u(x₀+ct,t)=u₀(x₀)。",
+          "worked": "初值为 sin x 时，x₀=π/2 的值是 1，经过时间 π/4、速度 c=2，特征线抵达 x=π，该点的值仍是 1。",
+          "limitation": "对于 x 依赖的速度 c(x,t)，特征满足 x'=c(x,t)；只有能确定不相交的合适特征流时才可使用类似论证。"
+        },
+        {
+          "title": "入流边界的方向与信息传播",
+          "question": "为何只允许在特定边界注入外部数据？",
+          "paragraphs": [
+            "常速度 c>0 时，特征线从左向右穿过计算区间，左边界输入会进入区域内部。",
+            "右边界是出流面，解在该处应由内部初始数据与上游边界决定，不应再任意指定第二条相互矛盾的独立数据。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与计算",
+              "tex": "c>0:\\ u(0,t)=g(t)\\quad\\text{为入流条件}"
+            }
+          ],
+          "proof": "对 (x,t) 反向追溯特征线，若 x−ct≥0 则来自初值 u₀(x−ct)；若 x−ct<0 则先碰到左边界，得到 g(t−x/c)。",
+          "worked": "取 c=2、左边界 g(t)=t、初值零，点 x=1,t=1 的特征从左边界时间 1/2 出发，所以 u(1,1)=g(1/2)=1/2。",
+          "limitation": "初边界连接处的兼容条件也重要，若 g(0)≠u₀(0)，可能出现沿特征传播的跳跃，需要按弱解理解。"
+        },
+        {
+          "title": "输运方程与质量守恒的关系",
+          "question": "平移不变是否必然意味着积分量守恒？",
+          "paragraphs": [
+            "如果 u 是可积密度，且空间为整条实线，平移不会改变积分总量。",
+            "但在有限区间，总量可以从边界流出或流入，不能机械宣称所有空间区域的质量都保持恒定。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与计算",
+              "tex": "\\frac{\\mathrm d}{\\mathrm dt}\\int_a^b u(x,t)\\,\\mathrm dx=-c\\,[u(b,t)-u(a,t)]"
+            }
+          ],
+          "proof": "在足够光滑条件下对积分求导，再用 u_t=−c u_x，依微积分基本定理得到边界通量差。全实线若端点衰减，净通量为零。",
+          "worked": "若 c=2，u(a,t)=1、u(b,t)=0，则区间质量变化率为 +2；这反映左端进入的流量大于右端流出。",
+          "limitation": "对于非线性守恒律，特征可能形成激波，需 Rankine–Hugoniot 条件及熵条件选择物理解，单纯积分恒等式不足以定义唯一解。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "diffeq-n0396",
+          "label": "相图与特征路径"
+        },
+        {
+          "kind": "math",
+          "id": "diffeq-n0404",
+          "label": "热方程"
+        },
+        {
+          "kind": "math",
+          "id": "diffeq-n0414",
+          "label": "稳定性 CFL 条件"
+        }
+      ]
+    },
+    {
+      "id": "diffeq-n0404",
+      "node_id": "diffeq-n0404",
+      "title": "热方程",
+      "definition": "热方程 u_t=κu_{xx} 描述扩散或平滑：局部变化率由空间曲率驱动。对 κ>0 的一维有限区间、零 Dirichlet 边界条件，空间正弦特征模态按频率平方的速率指数衰减；它是 Black–Scholes 定价 PDE 变量变换的数学基础之一。",
+      "assumptions": "取 κ>0、空间区间 (0,L)、零边界 u(0,t)=u(L,t)=0、初始分布 u₀ 满足恰当正则性和边界兼容性；经典逐项求导通常要求更多光滑性。不同边界类型的特征函数和守恒量会改变。",
+      "properties": [
+        "高频正弦模态以 e^{-κ(nπ/L)²t} 衰减，高频衰减快于低频，解释扩散的平滑效应。",
+        "零边界热方程的 L² 能量非增，满足 d/dt∫u²=−2κ∫u_x²。",
+        "合适的最大值原理使解的极值受初始与边界值约束，不会凭空产生超出数据范围的新内部极值。",
+        "反向求初值是典型病态问题：高频模态必须乘以巨大的指数因子，微小观测噪声会被剧烈放大。"
+      ],
+      "formulas": [
+        {
+          "label": "一维扩散 PDE",
+          "tex": "u_t=\\kappa u_{xx},\\quad\\kappa>0"
+        },
+        {
+          "label": "正弦模态解",
+          "tex": "u_n(x,t)=e^{-\\kappa(n\\pi/L)^2t}\\sin\\frac{n\\pi x}{L}"
+        },
+        {
+          "label": "零边界 L² 耗散",
+          "tex": "\\frac{\\mathrm d}{\\mathrm dt}\\int_0^L u^2\\,\\mathrm dx=-2\\kappa\\int_0^L u_x^2\\,\\mathrm dx"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "分离变量 u=X(x)T(t)，令空间与时间两侧等于同一常数。",
+          "tex": "\\frac{T'}{\\kappa T}=\\frac{X''}{X}=-\\lambda"
+        },
+        {
+          "explanation": "零 Dirichlet 边界产生离散空间谱与正弦基函数。",
+          "tex": "\\lambda_n=(n\\pi/L)^2,\\quad X_n(x)=\\sin(n\\pi x/L)"
+        },
+        {
+          "explanation": "用分部积分消去 u u_{xx}，零边界令边界项为零。",
+          "tex": "2\\int_0^Luu_t\\,\\mathrm dx=-2\\kappa\\int_0^Lu_x^2\\,\\mathrm dx"
+        }
+      ],
+      "example": "取 L=π、κ=1、u₀(x)=sin x，唯一解为 u=e^{−t}sin x。令 t=ln2、x=π/2，场值从 1 降为 1/2。若改为 sin(2x) 初值，在同样时刻的模态振幅仅剩 e^{-4ln2}=1/16。",
+      "application": "时间连续的价格密度扩散、波动率状态平滑及期权定价 PDE 都会用到热方程工具，但扩散系数与真实价格噪声之间需建模映射，不能将概率密度演化与单资产样本路径混同。",
+      "caveat": "负时间反推热扩散通常不稳定，不能把向前耗散的稳定性转用于无正则化反问题。若边界不为零，能量公式需保留边界通量；高维情形将二阶导数换为 Laplacian。",
+      "deep_sections": [
+        {
+          "title": "扩散为何优先消除高频成分",
+          "question": "空间频率为什么以平方进入衰减率？",
+          "paragraphs": [
+            "对正弦函数求两次空间导数，恰好产生负的频率平方因子；这把 PDE 化成一个指数衰减的时间方程。",
+            "频率越高，时间衰减越快，因此初始的剧烈起伏比平滑的大尺度形状先被消除。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与计算",
+              "tex": "\\partial_{xx}\\sin(kx)=-k^2\\sin(kx)"
+            }
+          ],
+          "proof": "取 u(x,t)=a(t)sin(kx) 代回 u_t=κu_xx，得 a'=−κk²a，故 a(t)=a(0)e^{-κk²t}。",
+          "worked": "若 L=π、κ=1，n=1 模态在 t=ln2 剩 1/2，n=2 模态剩 1/16，后者的幅度衰减是前者的八分之一。",
+          "limitation": "这种频率分解要求指定边界并使用相应特征基；不规则区域不能直接采用等间隔正弦模式。"
+        },
+        {
+          "title": "热方程能量耗散的分部积分证明",
+          "question": "为什么整体 L² 范数不能自发上升？",
+          "paragraphs": [
+            "局部热量由高温向低温扩散，零边界并不提供额外正反馈，整体平方能量因空间梯度而减少。",
+            "严格证明是对 ∫u² 求时间导数，用 PDE 与分部积分得到负的梯度平方积分。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与计算",
+              "tex": "\\frac12\\frac{\\mathrm d}{\\mathrm dt}\\|u(t)\\|_{L^2}^2=-\\kappa\\|u_x(t)\\|_{L^2}^2"
+            }
+          ],
+          "proof": "利用 u_t=κu_xx，可得 d/dt (1/2∫u²)=κ∫u u_xx=κ[u u_x]_0^L−κ∫u_x²。零边界消去端点项。",
+          "worked": "u=e^{-t}sin x、L=π 时，∫u²dx=(π/2)e^{-2t}，其导数是 −πe^{-2t}；右侧 −2∫u_x²也是 −πe^{-2t}。",
+          "limitation": "非零边界可能向系统输入能量，端点项不可舍弃；金融控制问题中存在源项时也需要在能量不等式中体现外部供给。"
+        },
+        {
+          "title": "向前平滑与向后识别为何难度不对称",
+          "question": "给定终点观测，能否稳定恢复初始状态？",
+          "paragraphs": [
+            "正弦展开显示向前演化将第 n 模态乘以 e^{-κλ_n t}，越高频越接近零。",
+            "逆向恢复必须除以这个因子，等同于乘以 e^{κλ_n t}，因此任意小的高频观测误差都可能主导初值重建。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与计算",
+              "tex": "|a_n(0)|=e^{\\kappa(n\\pi/L)^2T}|a_n(T)|"
+            }
+          ],
+          "proof": "从 a_n(T)=a_n(0)e^{-κλ_nT} 直接代数求逆。随着 n→∞，增长因子指数无界，故终点映射的逆在常见无限维范数下不连续。",
+          "worked": "取 L=π、κ=1、T=1、n=10，恢复因子为 e^{100}，哪怕终点系数受到 10^{-8} 的测量误差，也会被放大到不可接受的量级。",
+          "limitation": "通过正则化、截断频率或先验平滑可以构造可控近似，但这些方法引入偏差，不能恢复数据中本不存在的精度。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "diffeq-n0408",
+          "label": "分离变量法"
+        },
+        {
+          "kind": "math",
+          "id": "diffeq-n0412",
+          "label": "显式有限差分格式"
+        },
+        {
+          "kind": "math",
+          "id": "diffeq-n0409",
+          "label": "Black–Scholes PDE"
+        }
+      ]
+    },
+    {
+      "id": "diffeq-n0405",
+      "node_id": "diffeq-n0405",
+      "title": "波动方程",
+      "definition": "一维波动方程 u_{tt}=c²u_{xx} 描述在无阻尼、均匀介质中的双向传播。它需要初始位移 f(x)=u(x,0) 和初始速度 g(x)=u_t(x,0) 两组数据；全实线上的 d'Alembert 公式将解分解为左右传播与初始速度的积分贡献。",
+      "assumptions": "令 c>0 为固定传播速度，f 至少二次可微、g 至少一次可微以便讨论经典解；全实线无边界。有限区间需要额外边界条件，非零阻尼、驱动和空间变系数不再服从最简单的 d'Alembert 公式。",
+      "properties": [
+        "波动方程是时间二阶问题，只有一条初始位移曲线不足以唯一确定演化。",
+        "初始速度为零时，形状以半幅沿左右两方向传播；传播具有有限速度 c。",
+        "全实线且足够快衰减的解，其动能和梯度势能之和守恒。",
+        "热方程高频模态随时间衰减，理想无阻尼波动方程的高频模态通常继续振荡而非消失。"
+      ],
+      "formulas": [
+        {
+          "label": "波动方程与初始数据",
+          "tex": "u_{tt}=c^2u_{xx},\\quad u(x,0)=f(x),\\quad u_t(x,0)=g(x)"
+        },
+        {
+          "label": "d'Alembert 公式",
+          "tex": "u(x,t)=\\frac{f(x-ct)+f(x+ct)}2+\\frac1{2c}\\int_{x-ct}^{x+ct}g(s)\\,\\mathrm ds"
+        },
+        {
+          "label": "理想波动能量",
+          "tex": "E(t)=\\frac12\\int_{\\mathbb R}\\left(u_t^2+c^2u_x^2\\right)\\,\\mathrm dx"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "引入左右传播坐标 ξ=x−ct、η=x+ct，波动算子化为混合偏导。",
+          "tex": "\\partial_{tt}-c^2\\partial_{xx}=-4c^2\\partial_{\\xi\\eta}"
+        },
+        {
+          "explanation": "双向通解 u=F(x−ct)+G(x+ct)，用位移和速度初值确定两个函数。",
+          "tex": "F(x)+G(x)=f(x),\\quad-cF'(x)+cG'(x)=g(x)"
+        },
+        {
+          "explanation": "乘 PDE 两侧以 u_t，积分并分部积分，得到能量导数为边界通量。",
+          "tex": "\\frac{\\mathrm dE}{\\mathrm dt}=c^2[u_tu_x]_{-\\infty}^{+\\infty}=0"
+        }
+      ],
+      "example": "取 c=2、f(x)=cos x、g=0，解为 u(x,t)=cos x cos(2t)。当 x=0、t=π/6 时 u=cos(π/3)=1/2，且 u_t(x,0)=0。由恒等式 cos(x−2t)+cos(x+2t)=2cos x cos2t 可直接核对。",
+      "application": "波动方程可作为流动性冲击双向传播或信号群体响应的定性类比，但金融市场存在耗散、跳跃、战略反馈与非均匀网络连边，实际市场并非无阻尼均匀介质，不宜直接引入物理守恒结论。",
+      "caveat": "无衰减波动不保证某一点的值永远有限振幅之外可控：需要约束初始函数的范数及边界输入。全实线能量守恒公式还要求能量积分有限，像 cos x 这样的无限域周期解不具有有限总能量，应在周期单元上计算。",
+      "deep_sections": [
+        {
+          "title": "左右行波如何满足同一个二阶 PDE",
+          "question": "为什么两个相反方向的波都自动是解？",
+          "paragraphs": [
+            "函数 F(x−ct) 的时间二阶导数为 c²F''，空间二阶导数为 F''；函数 G(x+ct) 同理。",
+            "线性叠加使左右行波的和仍是波动方程的解，这也是 d'Alembert 公式的主要结构。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与计算",
+              "tex": "u=F(x-ct)+G(x+ct)"
+            }
+          ],
+          "proof": "对 F(x−ct)，u_t=−cF'、u_tt=c²F''、u_xx=F''；对 G 同样得 u_tt=c²u_xx。用两条初始数据反解 F 与 G 即得积分形式。",
+          "worked": "取 f(x)=cos x、g=0，则 F=G=cos(x)/2，得到 u=[cos(x−ct)+cos(x+ct)]/2=cos x cos ct。",
+          "limitation": "如果外部源项不为零，除齐次行波外还需 Duhamel 积分；空间边界反射也会改变传播路径。"
+        },
+        {
+          "title": "初始速度项为何是一个区间积分",
+          "question": "为什么 g 的影响不是简单乘以 t？",
+          "paragraphs": [
+            "初始速度会向左右两侧传播，每个点在时刻 t 的状态接收初始位置 x−ct 到 x+ct 之间的累积影响。",
+            "这正是 d'Alembert 公式中的积分项，它把有限传播速度反映成有限影响域。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与计算",
+              "tex": "\\frac1{2c}\\int_{x-ct}^{x+ct}g(s)\\,\\mathrm ds"
+            }
+          ],
+          "proof": "对初始条件 u_t(x,0)=g(x)，先由 F'+G'=f' 和 −cF'+cG'=g 解出 F'、G'，再积分并合并端点项。",
+          "worked": "若 f=0、g(x)=1、c=2，则积分区间长度为 4t，积分贡献是 (1/4)·4t=t；得到 u=t，满足 u_tt=0、u_xx=0。",
+          "limitation": "当 g 常数时全实线总能量发散，因此该例只用于局部初值公式核对，不用于有限能量守恒论证。"
+        },
+        {
+          "title": "波动能量守恒与热扩散耗散的对比",
+          "question": "为什么波动能量可以不衰减？",
+          "paragraphs": [
+            "理想波动把动能与势能相互交换，导数中的两项在分部积分后抵消。",
+            "相反，热扩散是时间一阶的耗散方程，其梯度平方直接以负号进入能量导数。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与计算",
+              "tex": "\\frac{\\mathrm d}{\\mathrm dt}\\frac12\\int(u_t^2+c^2u_x^2)\\,\\mathrm dx=0"
+            }
+          ],
+          "proof": "乘 u_tt=c²u_xx 以 u_t，得 ∫u_tu_tt=c²∫u_tu_xx=−c²∫u_{tx}u_x（边界通量为零），恰好是动能与势能的时间导数之和为零。",
+          "worked": "在周期区间 [0,2π] 上取 u=cos x cos2t、c=2，E=(π/2)[4sin²2t+4cos²2t]=2π，与 t 无关。",
+          "limitation": "若有阻尼 u_tt+γu_t=c²u_xx，则能量导数额外出现 −γ∫u_t²，守恒结论随模型改变。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "diffeq-n0404",
+          "label": "扩散型热方程"
+        },
+        {
+          "kind": "math",
+          "id": "diffeq-n0408",
+          "label": "分离变量与正交模态"
+        },
+        {
+          "kind": "math",
+          "id": "diffeq-n0407",
+          "label": "边界和终端条件"
+        }
+      ]
+    },
+    {
+      "id": "diffeq-n0406",
+      "node_id": "diffeq-n0406",
+      "title": "Laplace方程",
+      "definition": "Laplace 方程 Δu=0 是典型椭圆型 PDE，其解称调和函数。二维情况下 Δu=u_{xx}+u_{yy}，在合适连通区域内，调和函数具有平均值性质、最大值原理和很强的内部光滑性；它常把边界值映射为区域内部的平衡场。",
+      "assumptions": "设空间区域 Ω 有界且连通，并在经典讨论中 u∈C²(Ω)∩C(Ω̄)。Dirichlet 问题给定整个边界上的 u；Neumann 条件给定法向导数时，需要兼容性并通常只能确定到加法常数。",
+      "properties": [
+        "线性性：若 Δu=Δv=0，则任何常数线性组合 au+bv 也调和。",
+        "调和函数在内部球上的平均值等于球面平均，故内部严格局部极大或极小无法独立于边界出现。",
+        "有界连通区域的 Dirichlet 边值问题在适当正则性下至多有一个连续到边界的经典解。",
+        "Neumann 零通量问题的解不唯一到常数：若 u 是解，u+C 也是解，需要归一化条件。"
+      ],
+      "formulas": [
+        {
+          "label": "二维 Laplace 方程",
+          "tex": "\\Delta u=u_{xx}+u_{yy}=0"
+        },
+        {
+          "label": "圆周平均值性质",
+          "tex": "u(x_0)=\\frac1{2\\pi}\\int_0^{2\\pi}u(x_0+r\\omega_\\theta)\\,\\mathrm d\\theta"
+        },
+        {
+          "label": "调和能量恒等式",
+          "tex": "\\int_\\Omega|\\nabla w|^2\\,\\mathrm dx=\\int_{\\partial\\Omega}w\\,\\partial_nw\\,\\mathrm dS"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对两个满足相同 Dirichlet 边界值的解取差，差函数满足零边界齐次 Laplace 方程。",
+          "tex": "\\Delta w=0\\ \\text{于 }\\Omega,\\quad w=0\\ \\text{于 }\\partial\\Omega"
+        },
+        {
+          "explanation": "用第一类 Green 恒等式得到梯度平方积分与边界通量项相等。",
+          "tex": "\\int_\\Omega|\\nabla w|^2=\\int_{\\partial\\Omega}w\\partial_nw-\\int_\\Omega w\\Delta w"
+        },
+        {
+          "explanation": "由于 w 的边界和 Laplace 都为零，梯度平方积分为零，连通性迫使差为常数且边界又迫使常数为零。",
+          "tex": "\\int_\\Omega|\\nabla w|^2=0\\Longrightarrow w\\equiv0"
+        }
+      ],
+      "example": "二维函数 u(x,y)=x²−y² 有 u_{xx}=2、u_{yy}=−2，因此 Δu=0。单位圆边界 x=cosθ、y=sinθ 时 u=cos2θ，圆周平均为 0，恰等于 u(0,0)=0；这是平均值性质的直接检验。",
+      "application": "Laplace 算子出现在跨资产网络正则化、图信号平滑和无套利椭圆型边界值计算中，但连续空间 Laplace 算子与有限图的 Laplacian 矩阵在定义域、边界和谱上不同，须注明离散化或图建模关系。",
+      "caveat": "平均值性质是针对球面完全包含在域内的调和解，不能把任意不规则边界平均简单等同于中心函数值。零 Neumann 问题没有额外归一化时存在常数不唯一；非齐次 Poisson 方程则不再满足调和平均公式。",
+      "deep_sections": [
+        {
+          "title": "Green 恒等式如何证明 Dirichlet 唯一性",
+          "question": "两个相同边值的调和函数能否在内部不同？",
+          "paragraphs": [
+            "设 u 与 v 都满足 Δ=0 且边界值相同，则 w=u−v 满足零边值与零 Laplace。",
+            "如果能证明其梯度在整个区域上为零，那么连通性说明 w 为常数，而零边界进一步说明常数是零。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与计算",
+              "tex": "\\int_\\Omega|\\nabla w|^2\\,\\mathrm dx=0"
+            }
+          ],
+          "proof": "第一类 Green 恒等式给 ∫|∇w|²=∫∂Ωw∂nw−∫ΩwΔw，两个右端均为零。非负连续函数积分为零，故 ∇w=0，连通区域上 w 常数。",
+          "worked": "单位圆内边界值 cos2θ 的一个解是 x²−y²。若另一光滑调和函数具有相同边值，它与此多项式的差满足零边值，因此只能恒为零。",
+          "limitation": "推理依赖区域和解的正则性使边界积分有效；复杂区域也可用弱解框架但需另行说明 Sobolev 空间。"
+        },
+        {
+          "title": "平均值性质与最大值原理为何相容",
+          "question": "为什么调和函数无法在内部孤立形成尖锐极大值？",
+          "paragraphs": [
+            "在内部圆盘中，中心值等于圆周平均，因此若中心已是局部最大值，圆周所有点也必须达到相同值。",
+            "不断缩小或移动圆盘并利用连通性，可推得非恒定调和函数不会在内部达到绝对最大或最小值。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与计算",
+              "tex": "u(x_0)=\\fint_{\\partial B_r(x_0)}u\\,\\mathrm dS"
+            }
+          ],
+          "proof": "对二维球面平均值由 Laplace 方程和散度定理可证明圆周平均关于半径的导数为零，于是取 r→0 得平均等于中心值。",
+          "worked": "取 u=x²−y²，在原点的圆周值是 r²cos2θ，正负对称，平均为零；原点不是严格极大或极小。",
+          "limitation": "该性质不适用于一般非调和函数，甚至具有 Δu>0 的次调和函数在内部行为也需要另一套最大值不等式。"
+        },
+        {
+          "title": "Neumann 边界为何存在常数不可识别",
+          "question": "若只知道法向梯度，为什么无法确定绝对水平？",
+          "paragraphs": [
+            "将函数整体加一个常数，不会改变任意方向导数，因此法向通量和 Laplace 方程都完全相同。",
+            "为了让 Neumann 问题唯一，需要补上均值为零等归一化条件，并确保非齐次边界通量与内部源项兼容。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与计算",
+              "tex": "\\Delta(u+C)=\\Delta u,\\quad\\partial_n(u+C)=\\partial_nu"
+            }
+          ],
+          "proof": "梯度不受加常数影响；对 Δu=f 积分并用散度定理得到 ∫Ωf=∫∂Ω∂nu，是 Neumann 数据必须满足的整体兼容条件。",
+          "worked": "在区间 [0,1] 上考虑一维 u''=0、u'(0)=u'(1)=0，任意常数都是解；再要求 ∫₀¹u=0 才唯一选出 u=0。",
+          "limitation": "若区域不连通，常数可在不同连通分支分别变化；唯一性与归一化还需在每个分支处理。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "diffeq-n0404",
+          "label": "热方程"
+        },
+        {
+          "kind": "math",
+          "id": "discrete-n0523",
+          "label": "图 Laplacian"
+        },
+        {
+          "kind": "math",
+          "id": "diffeq-n0408",
+          "label": "分离变量法"
+        }
+      ]
+    },
+    {
+      "id": "diffeq-n0407",
+      "node_id": "diffeq-n0407",
+      "title": "边界与终端条件",
+      "definition": "偏微分方程只有算子关系还不足以确定唯一解，必须根据 PDE 类型和时间方向配置相容的初始、边界或终端条件。抛物型热方程通常向前给初值；无套利期权定价方程从到期支付 g(S) 向先前时刻反向求价值，因此需要终端支付以及适当的空间边界处理。",
+      "assumptions": "讨论均匀一维 PDE 时假设空间区间 [a,b]、时间 [0,T]，条件与系数满足相应解理论；不同类型的 PDE 所需条件数量不同。Black–Scholes 边界案例假设常利率 r、常波动率、无分红、S≥0，并非通用所有金融资产。",
+      "properties": [
+        "Dirichlet 条件规定函数值，Neumann 条件规定法向导数，Robin 条件规定函数值与法向导数的线性组合。",
+        "波动方程对时间二阶，通常需要初始位移和速度两条数据；扩散方程对时间一阶，通常只需一条初始分布。",
+        "欧式期权终端条件由支付函数确定，如欧式看涨 V(S,T)=max(S−K,0)，这是合约定义而不是数值任意边界。",
+        "有限截断资产价格域 S∈[0,Smax] 需要人为远端边界近似，误差依赖截断规模与模型，不能将近似条件当作无穷远精确值。"
+      ],
+      "formulas": [
+        {
+          "label": "常见空间边界条件",
+          "tex": "u|_{\\partial\\Omega}=g,\\qquad\\partial_nu|_{\\partial\\Omega}=h"
+        },
+        {
+          "label": "欧式看涨期权终端支付",
+          "tex": "V(S,T)=(S-K)^+"
+        },
+        {
+          "label": "无分红 Black–Scholes 极限边界",
+          "tex": "V_{\\rm call}(0,t)=0,\\quad V_{\\rm put}(0,t)=Ke^{-r(T-t)}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对于热方程，给定初时刻分布并向未来推进，是正向耗散初值问题。",
+          "tex": "u_t=\\kappa u_{xx},\\qquad u(x,0)=u_0(x)"
+        },
+        {
+          "explanation": "在欧式定价问题中，终值为已知支付；用剩余到期时间 τ=T−t 转换时间方向。",
+          "tex": "\\tau=T-t\\Longrightarrow\\partial_tV=-\\partial_\\tau V"
+        },
+        {
+          "explanation": "无分红 GBM 从 S=0 出发保持 S=0，因此欧式看涨到期总支付为零，欧式看跌到期支付 K，折现得到相应边界。",
+          "tex": "V_{\\rm put}(0,t)=e^{-r(T-t)}K"
+        }
+      ],
+      "example": "无分红、常利率 r=0.05、执行价 K=100、一年后到期的欧式看跌，S=0 时终端支付始终为 100，因此价值 V(0,0)=100e^{−0.05}≈95.1229；欧式看涨 V(0,0)=0。此边界同时说明欧式与可提前行权的美式看跌不能混用。",
+      "application": "有限差分定价、HJB 控制方程及连续时间风险预算必须选择正确时间端点和可实现边界。收益标签或终端损失函数反向传播属于数学求解，并不授权交易策略使用未来实际数据。",
+      "caveat": "无限域边界只能通过模型给出渐近增长条件，数值上截断需收敛测试。美式看跌在 S=0 时可能立即执行获得 K，而非欧式折现值；含股息、负利率等机制时边界公式要相应调整。",
+      "deep_sections": [
+        {
+          "title": "初值与终值为什么不是同一个时点的概念",
+          "question": "到期已知支付怎样成为反向定价 PDE 的条件？",
+          "paragraphs": [
+            "热扩散描述给定当前温度如何发展到未来；衍生品定价则是给定到期现金流、估计此前的无套利价值。",
+            "把 τ=T−t 定义为剩余到期时间，原本向过去的定价 PDE 可变成 τ 从 0 开始的正向数值演化。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与计算",
+              "tex": "\\frac{\\partial}{\\partial t}=-\\frac{\\partial}{\\partial\\tau},\\qquad V(S,\\tau=0)=g(S)"
+            }
+          ],
+          "proof": "对复合函数 V(S,t)=W(S,T−t) 用链式法则得 V_t=−W_τ。终端 t=T 对应 W(S,0)=g(S)，故数值步进可沿 τ 正向进行。",
+          "worked": "欧式看涨 K=100 时，τ=0 的支付曲线在 S=90 处为零，在 S=120 处为 20；尚未求解 PDE 便已知道完整终端数组。",
+          "limitation": "若终端收益函数不连续或边界不相容，数值方案的初期局部误差与振荡可能显著，需要专门的网格和时间步处理。"
+        },
+        {
+          "title": "边界条件如何来自经济契约而非任意选择",
+          "question": "为什么零股价处的看涨与看跌价值不同？",
+          "paragraphs": [
+            "若标的严格遵从无分红几何布朗运动且当前股价为零，那么未来股价几乎必然保持零，这是吸收边界。",
+            "看涨合约到期没有正支付，而看跌合约必然支付执行价 K；两类边界来自同一风险中性折现原理。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与计算",
+              "tex": "V_{\\rm call}(0,t)=0,\\quad V_{\\rm put}(0,t)=Ke^{-r\\tau}"
+            }
+          ],
+          "proof": "在风险中性测度下 S=0 的未来状态恒为零。于是 E[(S_T−K)^+]=0，E[(K−S_T)^+]=K，折现因子 e^{-rτ} 给边界价值。",
+          "worked": "取 K=100、r=.05、τ=1，欧式看跌价值为约 95.1229；如果是可立即行权的美式看跌，S=0 时至少能拿到 K=100。",
+          "limitation": "真实标的发生违约、价格跳跃、股息支付或者负价格时，几何布朗运动的吸收边界假设需要重新评估。"
+        },
+        {
+          "title": "空间截断与边界误差如何传入内部",
+          "question": "数值计算为什么不能随意选取 Smax？",
+          "paragraphs": [
+            "期权 PDE 理论上定义在非负无限价格域，有限计算机只能在一个截断区间上网格化。",
+            "若远端假设不够远，错误的边界值会通过差分迭代传至内部，造成与模型误差无关的数值偏差。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与计算",
+              "tex": "V_{\\rm call}(S,t)\\sim S-Ke^{-r\\tau}\\quad(S\\to\\infty)"
+            }
+          ],
+          "proof": "对于无分红欧式看涨，S 很大时到期处于实值状态的概率趋近 1，因此 V≈S−Ke^{-rτ}；用这一渐近式作为远端近似，并增加 Smax 做网格收敛测试。",
+          "worked": "取 K=100、r=.05、τ=1、Smax=400，则远端近似价值是 400−95.1229=304.8771；同一步网格加倍 Smax 后应核对关注点价格是否稳定。",
+          "limitation": "以上是模型渐近关系，不表示有限 Smax 等号必成立；对波动率较大或长久期合约，可能需要更大的截断范围。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "diffeq-n0409",
+          "label": "Black–Scholes PDE"
+        },
+        {
+          "kind": "math",
+          "id": "diffeq-n0410",
+          "label": "Feynman–Kac 联系"
+        },
+        {
+          "kind": "math",
+          "id": "diffeq-n0411",
+          "label": "美式期权自由边界"
+        }
+      ]
+    },
+    {
+      "id": "diffeq-n0408",
+      "node_id": "diffeq-n0408",
+      "title": "分离变量法",
+      "definition": "分离变量法为满足合适边界条件的线性 PDE 寻找形如 u(x,t)=X(x)T(t) 的乘积解，将多变量问题分解为空间 Sturm–Liouville 特征值问题和时间常微分方程。利用特征函数正交性，可按 Fourier 系数叠加构造一般初值的解。",
+      "assumptions": "以 κ>0 的一维热方程和 x∈(0,L)、零 Dirichlet 边界为标准模型，初值位于 L²(0,L) 时可用级数意义构造弱/温和解；逐项经典求导需更多正则性。非线性 PDE 通常不满足分离后的线性叠加。",
+      "properties": [
+        "零 Dirichlet 条件规定空间正弦模态 X_n(x)=sin(nπx/L)，对应 λ_n=(nπ/L)²。",
+        "正弦模态在 L²(0,L) 中正交，系数由内积投影 b_n=(2/L)∫u₀sin(nπx/L)dx 求得。",
+        "每个空间频率独立按 e^{−κλ_n t} 衰减，线性叠加满足原热方程与边界条件。",
+        "当初始函数不够光滑时，Fourier 级数可能只在 L² 或几乎处处意义收敛，而非每点均匀收敛。"
+      ],
+      "formulas": [
+        {
+          "label": "空间 Sturm–Liouville 谱",
+          "tex": "X''+\\lambda X=0,\\quad X(0)=X(L)=0"
+        },
+        {
+          "label": "初值 Fourier 正弦系数",
+          "tex": "b_n=\\frac2L\\int_0^Lu_0(x)\\sin\\frac{n\\pi x}{L}\\,\\mathrm dx"
+        },
+        {
+          "label": "热方程正弦级数解",
+          "tex": "u(x,t)=\\sum_{n=1}^{\\infty}b_ne^{-\\kappa(n\\pi/L)^2t}\\sin\\frac{n\\pi x}{L}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "代入乘积形式，移项后因为左右分别只依赖一个变量，二者都等于分离常数。",
+          "tex": "\\frac{T'}{\\kappa T}=\\frac{X''}{X}=-\\lambda"
+        },
+        {
+          "explanation": "零边界非零解要求空间波数为 nπ/L，得到严格的正特征值序列。",
+          "tex": "\\lambda_n=(n\\pi/L)^2,\\quad n=1,2,\\ldots"
+        },
+        {
+          "explanation": "用正弦正交性将初始分布投影到各模态，并分别乘上时间衰减因子。",
+          "tex": "u_0=\\sum_{n\\ge1}b_nX_n\\Longrightarrow u(t)=\\sum_{n\\ge1}b_ne^{-\\kappa\\lambda_nt}X_n"
+        }
+      ],
+      "example": "取 L=π、κ=1，初值 u₀(x)=3sin x+sin(2x)，只有 b₁=3、b₂=1 两个非零系数，故 u(x,t)=3e^{-t}sin x+e^{-4t}sin2x。在 t=ln2 时变为 (3/2)sin x+(1/16)sin2x，代回 PDE 可逐项核对。",
+      "application": "分离变量法提供 PDE 谱分析、风险曲面平滑与数值离散求解器收敛性诊断的基准；对金融 PDE 的状态依赖系数和障碍边界，往往只能先变换或采用近似方法，不能直接套用单一热方程正弦基。",
+      "caveat": "存在非零 Dirichlet 边界或混合边界时，需要先提取满足边界的特解或重新求谱；无限区间的 Fourier 变换与有限区间正弦级数也不是同一组谱工具。",
+      "deep_sections": [
+        {
+          "title": "PDE 如何分解为两个常微分方程",
+          "question": "为何分离常数与边界谱连接？",
+          "paragraphs": [
+            "令 u=X(x)T(t)，代入热方程后两侧只有不同的独立变量，因此都只能取共同常数。",
+            "边界条件不是最后附加的装饰：它决定哪些空间频率允许非零解，是离散谱形成的原因。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与计算",
+              "tex": "X''+\\lambda X=0,\\qquad T'+\\kappa\\lambda T=0"
+            }
+          ],
+          "proof": "由 X T'=κ X'' T，除以非零乘积 XT 得 T'/(κT)=X''/X=−λ。分别解空间特征方程与时间一阶 ODE。",
+          "worked": "零边界要求 X(0)=X(L)=0，非零正弦模式只有 k=nπ/L；时间因子是 exp(−κk²t)。",
+          "limitation": "如果 X 或 T 在某点为零，形式除法应在非零子域先进行，再用解的连续性延拓；完整谱理论可避免这种局部形式困扰。"
+        },
+        {
+          "title": "正交投影系数为何有 2/L",
+          "question": "如何把任意初值拆解成独立模态？",
+          "paragraphs": [
+            "不同正弦函数的内积为零，且每个正弦函数在区间上的平方积分等于 L/2。",
+            "将初值级数两边乘以某个模态并积分，所有其他模态因正交消失，得到对应的 Fourier 系数。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与计算",
+              "tex": "\\int_0^L\\sin\\frac{m\\pi x}{L}\\sin\\frac{n\\pi x}{L}\\,\\mathrm dx=\\frac L2\\,\\delta_{mn}"
+            }
+          ],
+          "proof": "正交性来自三角积化和差；将 u₀=Σ b_nX_n 与 X_m 做内积得 ∫u₀X_m=b_m L/2，从而 b_m=(2/L)∫u₀X_m。",
+          "worked": "若 L=π，u₀=3sin x+sin2x，则 b₁=(2/π)(3π/2)=3，b₂=(2/π)(π/2)=1，其余系数为零。",
+          "limitation": "对于一般非正交基或非自伴边界算子，投影不能简单使用 2/L 因子，需双正交或 Gram 矩阵处理。"
+        },
+        {
+          "title": "级数解的收敛意义与数值截断",
+          "question": "保留有限模态会损失多少信息？",
+          "paragraphs": [
+            "有限 N 项近似只保留前 N 个空间频率，对于热方程，舍弃的高频模态会因时间推进进一步衰减。",
+            "在初值仅具有 L² 正则性时，可先用 Parseval 不等式控制初值投影误差，再乘上时间衰减因子得到 t>0 的误差界。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与计算",
+              "tex": "\\|u(t)-u_N(t)\\|_{L^2}^2=\\frac L2\\sum_{n>N}|b_n|^2e^{-2\\kappa\\lambda_nt}"
+            }
+          ],
+          "proof": "正弦基正交消去交叉项，尾部 L² 能量等于保留模态之外的平方系数之和；时间乘子至多为 1，从而误差不会随 t 增长。",
+          "worked": "对 u₀=3sin x+sin2x，若只保留 N=1，t=ln2 时误差平方为 (π/2)(1/16)²=π/512，误差范数约 0.07833。",
+          "limitation": "对逆向热方程，时间因子反过来放大尾部频率，不再有这个稳定误差界；截断参数需根据噪声和正则化重新选择。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "diffeq-n0404",
+          "label": "热方程"
+        },
+        {
+          "kind": "math",
+          "id": "diffeq-n0405",
+          "label": "波动方程"
+        },
+        {
+          "kind": "math",
+          "id": "diffeq-n0406",
+          "label": "Laplace 方程"
+        }
+      ]
+    }
+  ]
+}
