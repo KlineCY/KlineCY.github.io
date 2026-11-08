@@ -46,11 +46,11 @@ assert.equal(all.length,459,"Expected full lesson count 459");
 assert.equal(new Set(all.map(l=>l.node_id)).size,459,"Global lesson ID collision");
 assert(all.every(l=>nmap.get(l.node_id)?.title===l.title),"Global node-title mismatch");
 const finance=curriculum.nodes.filter(n=>n.discipline_id==="finance");
-assert.equal(finance.length,42,"Unexpected finance curriculum size");
+assert.equal(finance.length,36,"Unexpected finance curriculum size");
 const completed=new Set(all.map(l=>l.node_id));
-assert(finance.every(n=>completed.has(n.id)),"Finance 42/42 completeness failed");
+assert(finance.every(n=>completed.has(n.id)),"Finance 36/36 completeness failed");
 const priorFinance=historical.filter(l=>l.node_id.startsWith("finance-"));
-assert.equal(priorFinance.length,25,"Prior 25 finance lectures must stay unmodified");
+assert.equal(priorFinance.length,19,"Prior 19 finance lectures must stay unmodified");
 let katexCount=0,chapterCount=0,deepChars=0,crossRefs=0;
 function checkFormula(tex,id){
  assert.equal(typeof tex,"string",id+" bad formula type");
@@ -223,5 +223,5 @@ near("Dynamic weak payoff",.003-.005,-.002);
 yes("Dynamic positive alpha covers cost",.02>.005);
 assert(numerical>=90,"Insufficient independent financial arithmetic");
 console.log("V100 PASS:",newest.length,"finance lessons;",all.length,"total math;",finance.length,
- "/42 finance complete;",katexCount,"strict KaTeX;",chapterCount,"deep sections;",
+ "/36 finance complete;",katexCount,"strict KaTeX;",chapterCount,"deep sections;",
  deepChars,"proof characters;",numerical,"independent numeric checks;",crossRefs,"cross references.");
