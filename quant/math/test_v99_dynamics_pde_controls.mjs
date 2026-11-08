@@ -102,6 +102,10 @@ assert.equal(formulaCount,198);
 assert(deepChars>=18000,"Proof depth unexpectedly reduced");
 assert(linkCount>=55);
 const app=read("app.js"),css=read("styles.css"),workflow=read("../../.github/workflows/test-quant-math.yml");
+const html=read("index.html");
+assert(html.includes("20261108-v99-dynamics-pde-complete"),"V99 app cache-busting version missing");
+for(const l of newLessons) assert(html.includes('?topic='+l.node_id+'"'),"Canonical study path missing "+l.node_id);
+
 for(const needle of [
  'loadV98DifferentialEquations("./lessons-diffeq-v98b.json",3)',
  'loadV99DynamicsPDE("./lessons-dynamics-v99a.json",5)',
@@ -129,7 +133,7 @@ near("Hurwitz first mode at 2 ln2",Math.exp(-4*Math.log(2)),1/16);
 near("Hurwitz second mode at 2 ln2",2*Math.exp(-Math.log(2)),1);
 near("Hurwitz Lyapunov first element",-2*.25*2,-1);
 near("Hurwitz Lyapunov second element",2*(-.5)*1,-1);
-near("Hurwitz nonnormal norm",Math.sqrt(101)/Math.E,3.6965052768,1e-6);
+near("Hurwitz nonnormal norm",Math.sqrt(101)/Math.E,3.697142627340455,1e-10);
 near("Discrete first state step",.6*2,1.2);
 near("Discrete second state step",-.5*1,-.5);
 near("Discrete first state step2",.6**2*2,.72);
