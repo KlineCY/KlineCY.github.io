@@ -590,6 +590,300 @@
           "limitation": "样本联合频数表中的小概率单元格容易出现估计误差；零计数不必代表零真实概率。"
         }
       ]
+    },
+    {
+      "id": "probability-n0099",
+      "node_id": "probability-n0099",
+      "title": "连续密度PDF",
+      "definition": "若实随机变量 X 的分布对 Lebesgue 测度绝对连续，则存在非负可积函数 f_X，使 P(X∈A)=∫_A f_X(x)dx 对任意 Borel 集合 A 成立。f_X 是概率密度函数（PDF），它的值本身并非单点概率；CDF 可由密度积分恢复，且在几乎处处成立的意义下 F'_X=f_X。",
+      "assumptions": "本节所说的连续密度要求分布绝对连续，不能仅以 CDF 连续作充分条件；密度可在零测集上任意修改而不改变分布。以下一维变量变换公式要求适当分段单调且可微、逆导数存在。",
+      "properties": [
+        "密度必须满足 f_X(x)≥0（几乎处处）和 ∫_{−∞}^{∞}f_X(x)dx=1。",
+        "对 a<b，P(a<X≤b)=∫_a^b f_X(x)dx；绝对连续分布的任意单点概率为零。",
+        "若 E|g(X)|<∞，则 E[g(X)]=∫g(x)f_X(x)dx。",
+        "严格单调、可微且逆导数非零的变量变换 Y=g(X)，密度满足 f_Y(y)=f_X(g^{-1}(y))|d g^{-1}(y)/dy|。"
+      ],
+      "formulas": [
+        {
+          "label": "PDF 与 CDF",
+          "tex": "F_X(x)=\\int_{-\\infty}^{x}f_X(t)\\,\\mathrm dt"
+        },
+        {
+          "label": "密度归一化与区间概率",
+          "tex": "\\int_{-\\infty}^{\\infty}f_X(t)\\,\\mathrm dt=1,\\quad P(a<X\\le b)=\\int_a^bf_X(t)\\,\\mathrm dt"
+        },
+        {
+          "label": "一维变量变换",
+          "tex": "f_Y(y)=f_X(g^{-1}(y))\\left|\\frac{\\mathrm d}{\\mathrm dy}g^{-1}(y)\\right|"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "若 X 有密度，区间概率由测度积分给出；把积分上限选为 x，即得 CDF 的积分形式。",
+          "tex": "P(X\\le x)=\\int_{-\\infty}^{x}f_X(t)\\,\\mathrm dt"
+        },
+        {
+          "explanation": "在适当可微条件下对 CDF 使用微积分基本定理，可在几乎处处的意义下恢复原密度。",
+          "tex": "F_X'(x)=f_X(x)\\quad\\text{几乎处处}"
+        },
+        {
+          "explanation": "对单调可逆变换，把 Y 落在微小区间的概率转回 X 的原像，再通过换元得到密度 Jacobian 因子。",
+          "tex": "f_Y(y)\\,\\mathrm dy=f_X(x)\\,|\\mathrm dx|"
+        }
+      ],
+      "example": "若 X~Uniform(0,2)，密度 f(x)=1/2（0<x<2），则 P(0.5<X<1.5)=∫_{0.5}^{1.5}(1/2)dx=0.5；单点 P(X=1)=0。令 Y=2X+1，则 Y~Uniform(1,5)，密度为 1/4，因逆导数 dx/dy=1/2。",
+      "application": "概率密度是连续收益似然、极端损失尾部积分、核密度估计、概率密度预测与蒙特卡洛重要性采样的基础。对价格变化的连续密度建模，应保留价格跳跃、零交易量或停牌可能引入离散质量的情况。",
+      "caveat": "“CDF 没有跳跃”不意味着必有 PDF，例如 Cantor 分布有连续但不绝对连续的 CDF。密度可大于 1，如 Uniform(0,0.1) 的密度为 10，并不违反概率公理。",
+      "checked_status": "V93：绝对连续、密度换元、期望积分与混合分布边界",
+      "deep_sections": [
+        {
+          "title": "密度的高度为什么可以大于一",
+          "question": "PDF 的值超过 1 是否意味着概率模型非法？",
+          "paragraphs": [
+            "密度值带有“每单位横轴长度的概率”含义，单点的密度高度不是概率质量。",
+            "判断合法性的条件是全域积分为 1 和几乎处处非负，而非每个密度值都不超过 1。"
+          ],
+          "formulas": [
+            {
+              "label": "数学推导",
+              "tex": "X\\sim U(0,a):\\quad f_X(x)=\\frac1a\\,\\mathbf1_{(0,a)}(x)"
+            }
+          ],
+          "proof": "当 a>0 时，∫_0^a 1/a dx=1，满足归一化；若 a<1，密度 1/a>1，仍是合法密度。",
+          "worked": "取 a=0.1，密度在 (0,0.1) 上为 10，而 P(0.02<X<0.03)=10×0.01=0.1，并没有超过 1。",
+          "limitation": "“概率密度大”还可能仅由计量单位很小导致，跨不同单位比较 PDF 数值必须变换 Jacobian。"
+        },
+        {
+          "title": "非线性变换的 Jacobian 因子",
+          "question": "为什么 Y=X² 的密度不能简单写成 f_X(√y)？",
+          "paragraphs": [
+            "非单射变换需要枚举所有能映到同一 y 的原像。对 X²，正负两个分支都可能贡献概率质量。",
+            "对于 y>0，反函数分支为 ±√y，各自导数绝对值均为 1/(2√y)；两支概率密度相加。"
+          ],
+          "formulas": [
+            {
+              "label": "数学推导",
+              "tex": "f_{X^2}(y)=\\frac{f_X(\\sqrt y)+f_X(-\\sqrt y)}{2\\sqrt y},\\qquad y>0"
+            }
+          ],
+          "proof": "把 y>0 的微小变化对应到 x≈√y 和 x≈−√y 附近的两个区间，分别对概率积分换元，再将两项合并得到公式。",
+          "worked": "若 X~Uniform(−1,1)，则对 0<y<1 有 f_{X²}(y)=1/(2√y)，积分 ∫_0^1 1/(2√y)dy=1。",
+          "limitation": "y=0 处导数奇异但可积，不意味着有原子概率。变换含多个分支时一般须逐个相加，不能只保留一个反函数。"
+        },
+        {
+          "title": "绝对连续与零概率点事件",
+          "question": "为什么单点概率为零不意味着 PDF 在该点必为零？",
+          "paragraphs": [
+            "对绝对连续分布，单点集合的 Lebesgue 测度为零，其概率积分也为零。",
+            "但密度函数在零测集上的取值可任意重定义，因此 f_X(x) 的单点值并不由分布唯一决定。"
+          ],
+          "formulas": [
+            {
+              "label": "数学推导",
+              "tex": "P(X=x_0)=\\int_{\\{x_0\\}}f_X(t)\\,\\mathrm dt=0"
+            }
+          ],
+          "proof": "单点集合长度为零，Lebesgue 积分对零测集给出零；改变一个点处的密度值不会改变任何集合的概率。",
+          "worked": "Uniform(0,1) 可以选择在 x=0.5 处把密度定义为 10，其他点仍为 1；它与标准密度表达同一概率分布。",
+          "limitation": "不能由 P(X=x)=0 推出 x 从未发生；对于连续变量，每个实际实现的数值在数学上也具有零单点概率。"
+        }
+      ]
+    },
+    {
+      "id": "probability-n0101",
+      "node_id": "probability-n0101",
+      "title": "Poisson",
+      "definition": "Poisson 分布参数 λ>0，取值 k=0,1,2,… 的 PMF 为 P(X=k)=e^{−λ}λ^k/k!。它刻画固定暴露量下独立稀有事件的计数极限，并以同一参数控制均值和方差。Poisson 过程进一步要求独立且平稳的增量，这比某单期计数服从 Poisson 更强。",
+      "assumptions": "λ>0 表示观察区间内的预期事件次数；事件是否独立、发生率是否恒定须由数据检查。违约、交易订单到达和跳跃事件常呈聚集性或非平稳性，未必满足 Poisson 假设。",
+      "properties": [
+        "PMF 非负且归一化：Σ_{k≥0}e^{−λ}λ^k/k!=1。",
+        "若 X~Pois(λ)，则 E[X]=λ、Var(X)=λ，且 P(X=0)=e^{−λ}。",
+        "相互独立的 Poisson 计数 X~Pois(λ)、Y~Pois(μ) 之和服从 Pois(λ+μ)。",
+        "若 X~Pois(λ)，每个事件独立以概率 p 保留，则保留计数服从 Pois(pλ)，删除计数服从 Pois((1−p)λ)，两者独立。"
+      ],
+      "formulas": [
+        {
+          "label": "Poisson 概率质量",
+          "tex": "P(X=k)=e^{-\\lambda}\\frac{\\lambda^k}{k!},\\quad k=0,1,\\ldots"
+        },
+        {
+          "label": "均值方差",
+          "tex": "\\mathbb E[X]=\\operatorname{Var}(X)=\\lambda"
+        },
+        {
+          "label": "指数型概率母函数",
+          "tex": "G_X(s)=\\mathbb E[s^X]=e^{\\lambda(s-1)}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "利用指数函数的幂级数 Σ_k λ^k/k!=e^λ，可直接证明 PMF 求和为一。",
+          "tex": "\\sum_{k=0}^{\\infty}e^{-\\lambda}\\frac{\\lambda^k}{k!}=e^{-\\lambda}e^\\lambda=1"
+        },
+        {
+          "explanation": "期望中把 k λ^k/k! 化为 λ·λ^{k−1}/(k−1)!，再使用归一化级数得到 E[X]=λ。",
+          "tex": "\\mathbb E[X]=\\lambda e^{-\\lambda}\\sum_{j=0}^\\infty\\frac{\\lambda^j}{j!}=\\lambda"
+        },
+        {
+          "explanation": "对 X(X−1) 做同样的阶乘位移，得到二阶阶乘矩为 λ²，从而方差等于 λ。",
+          "tex": "\\mathbb E[X(X-1)]=\\lambda^2,\\quad\\operatorname{Var}(X)=\\lambda^2+\\lambda-\\lambda^2"
+        }
+      ],
+      "example": "若某低频异常事件一天平均发生 2 次，X~Pois(2)，则 P(X=0)=e^{−2}≈0.1353、P(X=1)=2e^{−2}≈0.2707、P(X≥2)=1−3e^{−2}≈0.5940。若两个独立渠道到达率为 2 和 3，合并计数均值为 5。",
+      "application": "限价单到达、订单成交、网络故障、稀有跳跃与低频违约次数都可使用 Poisson 作基准模型。真实高频金融数据常表现出簇集效应，适合进一步学习非齐次 Poisson、Hawkes 自激过程和负二项过度离散模型。",
+      "caveat": "仅样本均值接近方差不能证明 Poisson 模型成立。若观察窗口长短不同，λ 应按暴露时间调整；当事件聚集导致 Var(X)>E[X]，简单 Poisson 往往低估尾部。",
+      "checked_status": "V93：归一化、阶乘矩、稀有事件极限与到达率诊断",
+      "deep_sections": [
+        {
+          "title": "从 Binomial 的稀有事件极限到 Poisson",
+          "question": "为什么大量独立小概率试验会形成 Poisson 分布？",
+          "paragraphs": [
+            "设 X_n~Binomial(n,λ/n)，每项试验成功概率逐渐减小，但总期望保持在 λ。",
+            "对固定非负整数 k，把二项分布 PMF 中的组合数与幂次分离，再分别取 n→∞ 极限，得到 Poisson 的 PMF。"
+          ],
+          "formulas": [
+            {
+              "label": "数学推导",
+              "tex": "\\lim_{n\\to\\infty}\\binom nk\\left(\\frac{\\lambda}{n}\\right)^k\\left(1-\\frac{\\lambda}{n}\\right)^{n-k}=e^{-\\lambda}\\frac{\\lambda^k}{k!}"
+            }
+          ],
+          "proof": "组合项与 (λ/n)^k 的乘积为 (λ^k/k!)∏_{j=0}^{k−1}(1−j/n)→λ^k/k!；剩余因子 (1−λ/n)^{n−k}→e^{−λ}，两项相乘得到结论。",
+          "worked": "固定 λ=2、k=0，n=100 时 Binomial 的零事件概率 (0.98)^100≈0.1326，逐渐接近 Poisson 值 e^{−2}≈0.1353。",
+          "limitation": "这一极限假设 n 次独立且同概率的 Bernoulli 试验；金融事件的自激、传染和动态强度可能破坏近似。"
+        },
+        {
+          "title": "二阶阶乘矩为何给出等均值方差",
+          "question": "Poisson 模型的方差为何不能任意调节？",
+          "paragraphs": [
+            "对 PMF 计算 E[X(X−1)]，因 k(k−1)/k!=1/(k−2)!，可换成相同归一化指数级数。",
+            "再利用 X²=X(X−1)+X，即可由二阶矩与均值关系直接推出 Var(X)=λ。"
+          ],
+          "formulas": [
+            {
+              "label": "数学推导",
+              "tex": "\\mathbb E[X(X-1)]=\\lambda^2\\Rightarrow\\operatorname{Var}(X)=\\lambda"
+            }
+          ],
+          "proof": "把 k 从 2 开始求和：Σ_{k≥2}k(k−1)e^{−λ}λ^k/k!=λ²e^{−λ}Σ_{j≥0}λ^j/j!=λ²。因 E[X]=λ，可算 E[X²]=λ²+λ，故方差等于 λ。",
+          "worked": "λ=3 时，E[X²]=9+3=12，Var(X)=12−3²=3，等于 E[X]。",
+          "limitation": "严重过度离散（样本方差远大于均值）通常意味着需要替代分布或时变强度，不能仅调整 λ 同时匹配两项。"
+        },
+        {
+          "title": "独立 Poisson 合并与稀释",
+          "question": "两个独立事件流相加后为什么仍是 Poisson？",
+          "paragraphs": [
+            "Poisson 概率母函数为 G_X(s)=exp(λ(s−1))。独立随机变量和的母函数是各母函数乘积。",
+            "把两个指数相乘就得到参数 λ+μ 的 Poisson 母函数；稀释可视为把每一事件随机分配到两个类别。"
+          ],
+          "formulas": [
+            {
+              "label": "数学推导",
+              "tex": "G_{X+Y}(s)=e^{\\lambda(s-1)}e^{\\mu(s-1)}=e^{(\\lambda+\\mu)(s-1)}"
+            }
+          ],
+          "proof": "独立性保证 E[s^{X+Y}]=E[s^X]E[s^Y]，乘积整理即得。由于概率母函数确定非负整数值随机变量的分布，和服从 Pois(λ+μ)。",
+          "worked": "两个独立渠道每小时事件数分别 Pois(2) 与 Pois(3)，总数服从 Pois(5)，无事件概率为 e^{−5}≈0.00674。",
+          "limitation": "若渠道存在共同冲击或订单相互激发，则合并后的计数即使边际近似 Poisson，也未必具有参数简单相加的独立结构。"
+        }
+      ]
+    },
+    {
+      "id": "probability-n0102",
+      "node_id": "probability-n0102",
+      "title": "正态与对数正态",
+      "definition": "正态随机变量 X~N(μ,σ²) 具有钟形密度，σ>0，所有线性变换仍为正态；若 Y=e^X，则 Y 服从对数正态分布，严格为正，log Y~N(μ,σ²)。正态与对数正态是风险、收益和资产价格建模的基础，但其尾部假设与现实金融数据常有偏离。",
+      "assumptions": "σ>0；当讨论多元联合正态时，零相关才推出独立，普通任意分布不具有此性质。对数正态价格模型必须区分对数收益率和简单收益率，并明确价格路径的随机过程假设。",
+      "properties": [
+        "若 X~N(μ,σ²)，则 Z=(X−μ)/σ~N(0,1)，且 E[X]=μ、Var(X)=σ²。",
+        "若 Y=e^X，E[Y]=e^{μ+σ²/2}、Var(Y)=(e^{σ²}−1)e^{2μ+σ²}；中位数为 e^μ。",
+        "独立正态变量的任意线性组合仍为正态；若相关但联合正态，也具有相同线性组合正态性质。",
+        "对于几何布朗运动 dS_t/S_t=μdt+σdW_t，log(S_T/S_0)~N((μ−σ²/2)T,σ²T)，但该模型排除了真实市场中的跳跃与厚尾。"
+      ],
+      "formulas": [
+        {
+          "label": "正态密度",
+          "tex": "f_X(x)=\\frac{1}{\\sigma\\sqrt{2\\pi}}\\exp\\!\\left[-\\frac{(x-\\mu)^2}{2\\sigma^2}\\right]"
+        },
+        {
+          "label": "对数正态均值与方差",
+          "tex": "\\mathbb E[Y]=e^{\\mu+\\sigma^2/2},\\qquad\\operatorname{Var}(Y)=(e^{\\sigma^2}-1)e^{2\\mu+\\sigma^2}"
+        },
+        {
+          "label": "GBM 对数收益",
+          "tex": "\\log\\frac{S_T}{S_0}=\\left(\\mu-\\frac{\\sigma^2}{2}\\right)T+\\sigma W_T"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对正态变量按 z=(x−μ)/σ 标准化并对密度换元，得到标准正态密度 φ(z)。",
+          "tex": "f_Z(z)=\\frac{1}{\\sqrt{2\\pi}}e^{-z^2/2}"
+        },
+        {
+          "explanation": "利用正态矩母函数 E[e^{tX}]=exp(μt+σ²t²/2)，分别取 t=1、t=2 计算对数正态一二阶矩。",
+          "tex": "\\mathbb E[Y^k]=\\mathbb E[e^{kX}]=\\exp\\!\\left(k\\mu+\\frac{k^2\\sigma^2}{2}\\right)"
+        },
+        {
+          "explanation": "由 Itô 公式对 f(S)=log S 求微分，二阶项贡献 −σ²/2，再对时间积分得到 GBM 对数收益表达。",
+          "tex": "\\mathrm d\\log S_t=\\left(\\mu-\\frac{\\sigma^2}{2}\\right)\\mathrm dt+\\sigma\\,\\mathrm dW_t"
+        }
+      ],
+      "example": "设 X~N(0,log 2)，Y=e^X。则 E[Y]=e^{log2/2}=√2，E[Y²]=e^{2log2}=4，Var(Y)=4−2=2；中位数 e^0=1。若日对数收益近似 N(0,0.01²)，一天简单收益的期望约为 e^{0.00005}−1≈0.00005000125，而不等于零。",
+      "application": "风险模型中正态回报适合初步估计 VaR，GBM 与对数正态终端价格构成 Black–Scholes 基础；对数正态右偏也说明资产价格的算术期望高于中位数。需结合样本外尾部校准和波动聚集检查。",
+      "caveat": "正态假设通常低估极端市场风险且无法表示波动率聚集；对数正态分布虽严格正，却不能描述价格归零事件。把对数收益均值直接当简单收益均值会遗漏 Jensen 修正。",
+      "checked_status": "V93：标准化、矩母函数、Itô 修正与资产收益口径",
+      "deep_sections": [
+        {
+          "title": "对数正态的期望为何高于中位数",
+          "question": "指数变换为何引入 Jensen 修正？",
+          "paragraphs": [
+            "若 X~N(μ,σ²)，Y=e^X，则 log Y=X，故 P(Y≤e^μ)=P(X≤μ)=1/2，中位数为 e^μ。",
+            "指数函数凸，E[e^X]=exp(μ+σ²/2)>e^μ（σ>0）；这就是价格均值高于中位数的精确正态例子。"
+          ],
+          "formulas": [
+            {
+              "label": "数学推导",
+              "tex": "\\operatorname{Median}(Y)=e^\\mu,\\quad\\mathbb E[Y]=e^{\\mu+\\sigma^2/2}>e^\\mu"
+            }
+          ],
+          "proof": "使用正态矩母函数计算 E[e^X]，得到 exp(μ+σ²/2)。正态分布对称性保证 μ 为 X 的中位数，而指数函数严格递增，故 Y 的中位数为 exp μ。",
+          "worked": "取 μ=0、σ²=log 2，则对数正态的中位数为 1，均值为 √2≈1.4142，严格大于中位数。",
+          "limitation": "如果 σ²=0，分布退化为常数，均值等于中位数；若 X 非正态，须重新计算 E[e^X]。"
+        },
+        {
+          "title": "GBM 中的 Itô 半方差修正",
+          "question": "为什么价格漂移 μ 不等于对数价格漂移 μ？",
+          "paragraphs": [
+            "设 dS_t=μS_tdt+σS_tdW_t。对 f(s)=log s 应用 Itô 公式，需要 f'(s)=1/s 和 f''(s)=−1/s²。",
+            "由二次变差 (dW_t)²=dt 产生 −σ²dt/2 的修正项，因此对数收益的均值漂移较价格比例漂移低。"
+          ],
+          "formulas": [
+            {
+              "label": "数学推导",
+              "tex": "\\mathrm d\\log S_t=\\frac{\\mathrm dS_t}{S_t}-\\frac12\\frac{(\\mathrm dS_t)^2}{S_t^2}=\\left(\\mu-\\frac{\\sigma^2}{2}\\right)\\mathrm dt+\\sigma\\,\\mathrm dW_t"
+            }
+          ],
+          "proof": "将 f'(S_t)dS_t+0.5 f''(S_t)(σ²S_t²dt) 代入 Itô 公式，第一项为 μdt+σdW_t，第二项为 −σ²dt/2，求和得到结论。",
+          "worked": "若年化 μ=0.08、σ=0.20，则对数价格年均漂移为 0.08−0.5×0.04=0.06，而非 0.08。",
+          "limitation": "该推导依赖连续 GBM 的扩散过程假设；跳跃扩散、时变波动率及交易时钟不连续时需要额外项。"
+        },
+        {
+          "title": "正态分布的尾部概率与 VaR",
+          "question": "为何标准化能将不同尺度损失统一比较？",
+          "paragraphs": [
+            "若损失 L~N(μ_L,σ_L²)，其 α 分位数为 μ_L+σ_LΦ^{-1}(α)，其中 Φ 是标准正态 CDF。",
+            "这是正态 VaR 的基础公式，但只是一维损失分布的分位数，不代表预期短缺 ES 或极端亏损上界。"
+          ],
+          "formulas": [
+            {
+              "label": "数学推导",
+              "tex": "\\operatorname{VaR}_\\alpha(L)=\\mu_L+\\sigma_L\\Phi^{-1}(\\alpha)"
+            }
+          ],
+          "proof": "事件 L≤l 转换为标准正态事件 (L−μ_L)/σ_L≤(l−μ_L)/σ_L。对 CDF 取 α 分位反函数得到 l=μ_L+σ_LΦ^{-1}(α)。",
+          "worked": "若 μ_L=0、σ_L=0.02，取 α≈0.975 的分位 z≈1.96，则 VaR≈0.0392，即 3.92% 的损失阈值。",
+          "limitation": "正态尾部分布常无法描述金融危机时期的厚尾；VaR 非最坏损失，实际风险管理需回测超越率和 ES。"
+        }
+      ]
     }
   ]
 }
