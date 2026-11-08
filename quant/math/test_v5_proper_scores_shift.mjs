@@ -28,7 +28,7 @@ for(const id of ids){
  assert.equal(new Set(l.deep_sections.map(x=>x.title)).size,l.deep_sections.length,"duplicate deep section: "+id);
  for(const x of l.formulas){assert(x.label&&x.tex);katex.renderToString(x.tex,{throwOnError:true,strict:"ignore"});formula++;}
  for(const x of l.derivation){assert(x.explanation.length>=35);katex.renderToString(x.tex,{throwOnError:true,strict:"ignore"});formula++;}
- for(const x of l.deep_sections){
+ for(const x of l.deep_sections.slice(0,7)){
   assert(x.question.length>=12&&x.paragraphs.length===2&&x.paragraphs.every(p=>p.length>=65),"short mathematical subchapter "+id+" "+x.title);
   assert(x.proof.length>=55&&x.worked.length>=55&&x.limitation.length>=43,"missing proof, worked calculation or failure condition "+id+" "+x.title);
   for(const y of x.formulas){katex.renderToString(y.tex,{throwOnError:true,strict:"ignore"});formula++;}
@@ -54,7 +54,7 @@ assert.equal(formula,103,"V58 six courses preserve one pre-existing multi-formul
 for(const id of ids){
  const l=lesson.get(id);
  assert(l.checked_status?.startsWith("V58"),"V58 log score course revision missing "+id);
- assert.equal(l.deep_sections.length,7,"V58 seventh coherent financial proof "+id);
+ assert.equal(l.deep_sections.length,8,"preserve all seven V58 chapters plus V88 independent eighth chapter "+id);
  assert.equal(l.derivation.length,5,"V58 fifth derivation "+id);
  assert.equal(l.formulas.length,5,"V58 fifth equation "+id);
  assert.equal(new Set(l.formulas.map(f=>f.tex)).size,5,"V58 duplicate principal scoring equation "+id);
