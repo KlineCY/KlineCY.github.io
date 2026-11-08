@@ -382,7 +382,7 @@ function applyV91FoundationDeepening(v89,v91){
 async function loadV90LinearFoundations(){
  const doc=await fetchMathJson("./lessons-linear-v90.json");
  if(doc.version!==1||doc.revision!=="V90"||!Array.isArray(doc.lessons)||doc.lessons.length!==8||
-    new Set(doc.lessons.map(l=>l.node_id)).size!==4||
+    new Set(doc.lessons.map(l=>l.node_id)).size!==8||
     doc.lessons.some(l=>!Array.isArray(l.deep_sections)||l.deep_sections.length<3||
        !Array.isArray(l.formulas)||l.formulas.length<3||
        !Array.isArray(l.derivation)||l.derivation.length<3))
@@ -508,6 +508,22 @@ async function loadV97PortfolioNumericalLectures(path,expected){
   throw Error("V97组合优化与数值算法完整讲义损坏："+path);
  return doc.lessons;
 }
+async function loadV98DifferentialEquations(path,expected){
+ const doc=await fetchMathJson(path);
+ if(doc.version!==1||doc.revision!=="V98"||!Array.isArray(doc.lessons)||doc.lessons.length!==expected||
+   new Set(doc.lessons.map(l=>l.node_id)).size!==expected||
+   doc.lessons.some(l=>l.id!==l.node_id||!l.title||!l.definition||!l.assumptions||
+     !Array.isArray(l.properties)||l.properties.length<4||
+     !Array.isArray(l.formulas)||l.formulas.length!==3||
+     !Array.isArray(l.derivation)||l.derivation.length!==3||
+     !Array.isArray(l.deep_sections)||l.deep_sections.length!==3||
+     l.deep_sections.some(p=>!p.title||!p.question||!p.proof||!p.worked||!p.limitation||
+       !Array.isArray(p.paragraphs)||p.paragraphs.length!==2||
+       !Array.isArray(p.formulas)||p.formulas.length!==1)||
+     !l.example||!l.application||!l.caveat))
+  throw Error("V98常微分方程完整讲义校验失败："+path);
+ return doc.lessons;
+}
 Promise.all([
  fetch("./curriculum.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw Error("知识树加载失败 "+r.status);return r.json()}),
  fetch("./lessons-foundations.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw Error("基础讲义加载失败 "+r.status);return r.json()}),
@@ -530,10 +546,12 @@ Promise.all([
  loadV96OptimizationLectures("./lessons-optimization-v96b.json",7),
  loadV97PortfolioNumericalLectures("./lessons-portfolio-v97.json",5),
  loadV97PortfolioNumericalLectures("./lessons-algorithms-v97.json",4),
- loadV97PortfolioNumericalLectures("./lessons-numerical-v97.json",5)
-]).then(([c,l1,l2,l3,extra,v89,v91,v90,v92,v93matrix,v93probability,v94a,v94b,v94c,v94deep,v95a,v95b,v96a,v96b,v97portfolio,v97algorithms,v97numerical])=>{
+ loadV97PortfolioNumericalLectures("./lessons-numerical-v97.json",5),
+ loadV98DifferentialEquations("./lessons-diffeq-v98a.json",3),
+ loadV98DifferentialEquations("./lessons-diffeq-v98b.json",3)
+]).then(([c,l1,l2,l3,extra,v89,v91,v90,v92,v93matrix,v93probability,v94a,v94b,v94c,v94deep,v95a,v95b,v96a,v96b,v97portfolio,v97algorithms,v97numerical,v98a,v98b])=>{
 applyV91FoundationDeepening(v89,v91);
-curriculum=c;depts=c.disciplines;chapters=c.chapters;nodes=c.nodes;lessons=[...l1.lessons,...l2.lessons,...l3.lessons,...extra,...v89,...v90,...v92,...v93matrix,...v93probability,...v94a,...v94b,...v94c,...v95a,...v95b,...v96a,...v96b,...v97portfolio,...v97algorithms,...v97numerical];
+curriculum=c;depts=c.disciplines;chapters=c.chapters;nodes=c.nodes;lessons=[...l1.lessons,...l2.lessons,...l3.lessons,...extra,...v89,...v90,...v92,...v93matrix,...v93probability,...v94a,...v94b,...v94c,...v95a,...v95b,...v96a,...v96b,...v97portfolio,...v97algorithms,...v97numerical,...v98a,...v98b];
 applyV94HistoricalProbabilityDeepening(lessons,v94deep);
 if(new Set(lessons.map(l=>l.node_id)).size!==lessons.length)throw Error("数学讲义节点ID重复");
 nodeMap=new Map(nodes.map(n=>[n.id,n]));chapMap=new Map(chapters.map(c=>[c.id,c]));deptMap=new Map(depts.map(d=>[d.id,d]));lessonMap=new Map(lessons.map(l=>[l.node_id,l]));
