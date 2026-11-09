@@ -22,7 +22,7 @@ const wanted=["calculus-n0031","calculus-n0033","calculus-n0034","calculus-n0035
  "calculus-n0036","calculus-n0037","calculus-n0038","calculus-n0039"];
 assert.deepEqual(latest.map(l=>l.node_id),wanted,"V106 must fill the canonical calculus gaps in learning order");
 
-const existing=fs.readdirSync(here).filter(n=>/^lessons-.*\.json$/.test(n)&&!files.includes(n)&&!/^lessons-calculus-v107[a-f]\.json$/.test(n)&&!/^lessons-(foundation|measure)-v108[a-c]\.json$/.test(n))
+const existing=fs.readdirSync(here).filter(n=>/^lessons-.*\.json$/.test(n)&&!files.includes(n)&&!/^lessons-calculus-v107[a-f]\.json$/.test(n)&&!/^lessons-(foundation|measure)-v108[a-c]\.json$/.test(n)&&!/^lessons-(regression|econometrics)-v109[a-z]\.json$/.test(n))
  .flatMap(n=>{const d=json(n);return Array.isArray(d.lessons)?d.lessons:[];});
 assert.equal(existing.length,562,"Historical 562 complete lessons were unexpectedly modified or removed");
 const oldIds=new Set(existing.map(l=>l.node_id));
