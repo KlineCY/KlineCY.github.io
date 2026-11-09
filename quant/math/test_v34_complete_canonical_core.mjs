@@ -81,7 +81,7 @@ assert(proseCount>=40000,"V34 40k+ substantive Chinese explanation");
 const home=raw("index.html"),mlHome=raw("../ml/index.html"),css=raw("styles.css");
 const mlCss=raw("../ml/atlas.css"),reader=raw("app.js"),mlReader=raw("../ml/atlas.js");
 assert(home.includes('aria-label="基础数学专题：实数结构、概率方法与线性代数"'));
-assert(mlHome.includes('aria-label="机器学习数学先修完整版：微积分、概率、数值与动态决策"'));
+assert(mlHome.includes('aria-label="机器学习数学基础：微积分、概率、数值方法与动态决策"'));
 for(const l of added)assert(home.includes('href="?topic='+l.id+'"'),"homepage missing canonical "+l.id);
 const mlRoutes=[
  "calculus-n0032","calculus-n0042","calculus-n0056","linear-n0082","linear-n0084",
