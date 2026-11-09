@@ -16,7 +16,7 @@ function checkReader(html,id,old){
  assert.equal(html.split('id="'+id+'"').length,2,id+" missing or duplicated");
 }
 checkReader(mlHtml,"atlas-reader-section",'aria-label="系统学习路径"');
-checkReader(mathHtml,"math-reader-section",'aria-label="V110 数值分析与蒙特卡洛全30篇课程和656节点全学科覆盖"');
+checkReader(mathHtml,"math-reader-section",'aria-label="数学知识路线"');
 for(const html of [mlHtml,mathHtml]){
  assert.equal(html.split('id="course-site-nav-toggle"').length,2,"Missing mobile site navigation toggle");
  expect(html,'aria-controls="quantSidebar" aria-expanded="false"',"Mobile global menu disclosure a11y");
@@ -66,9 +66,9 @@ const sample=[
  {id:"m02-c01-p01",domain_id:"m02",domain:"线性代数",chapter:"矩阵基础",title:"线性变换"}
 ];
 const toc={innerHTML:"",scrollTop:27};
-const state={index:sample,activeId:"m01-c01-p02",term:"",chapterOpen:new Map(),domainOpen:new Map(),read:new Set(["m01-c01-p01"]),conceptChapters:new Set(["m01-c02-p01"])};
+const state={index:sample,activeId:"m01-c01-p02",term:"",chapterOpen:new Map(),domainOpen:new Map(),conceptChapters:new Set(["m01-c02-p01"])};
 const ctx={state,toc,esc:s=>String(s).replaceAll("&","&amp;").replaceAll('"',"&quot;")};
-const prelude="const $=id=>toc; const visibleLessons=()=>state.index;const showStatus=()=>{};const updateReadStats=()=>{};\n";
+const prelude="const $=id=>toc; const visibleLessons=()=>state.index;const showStatus=()=>{};\n";
 vm.runInNewContext(prelude+directory+"\nrenderDirectory();",ctx,{timeout:1500});
 let rendered=toc.innerHTML;
 assert.equal((rendered.match(/class="atlas-domain"/g)||[]).length,2,"Two subjects");
@@ -92,7 +92,7 @@ for(const [name,css]of [["ML",mlCss],["math",mathCss]]){
  expect(css,"overflow-x:auto",name+" KaTeX overflow");
  expect(css,":focus-visible",name+" keyboard focus");
 }
-assert.equal(JSON.parse(read("curriculum.json")).nodes.length,720,"ML 720 syllabus changed");
+assert.equal(JSON.parse(read("atlas-depth-manifest.json")).expected_lessons,720,"Atlas canonical curriculum size changed");
 assert.equal(JSON.parse(read("../math/curriculum.json")).nodes.length,656,"Math 656 syllabus changed");
 const marker="node quant/ml/test_v115_reader_navigation.mjs";
 expect(read("../../.github/workflows/test-quant-ml.yml"),marker,"ML CI integration");
