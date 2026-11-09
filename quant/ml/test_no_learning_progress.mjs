@@ -43,4 +43,17 @@ assert(html.includes("atlas.css?v=20261109-v115-reader-layout-v117-no-learning-p
 assert(!js.includes("state.read"),"Runtime must not keep per-lesson read status");
 assert(!js.includes("group.read")&&!js.includes("const done=c.rows.filter"),
  "Directory must not calculate or display completion counts");
+const legacyHtml=read("legacy.html"),legacyJs=read("app.js"),legacyCss=read("styles.css");
+new vm.Script(legacyJs);
+assert(!/localStorage|saveProgress|studied|progressKey|标记我已学会|已标记学会/.test(legacyJs),
+ "Legacy ML reader must not store or display learner completion");
+assert(!/id="mastered"|已标记学会|学习进度/.test(legacyHtml),
+ "Legacy ML page must not show a mastery counter or progress description");
+assert(!legacyCss.includes(".article .action.done"),
+ "Legacy learned-button CSS must also be removed");
+assert(legacyHtml.includes("app.js?v=20261109-v117-no-learning-progress")&&
+ legacyHtml.includes("styles.css?v=20261109-v117-no-learning-progress"),
+ "Legacy reader resource cache must be invalidated");
+assert(legacyJs.includes("复制本节链接")&&legacyJs.includes("下一知识点"),
+ "Legacy link sharing and reading navigation must remain");
 console.log("PASS: no learner tracking, local storage, completion controls or progress ratios; core reading navigation retained");
