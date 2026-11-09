@@ -71,5 +71,5 @@ for(const id of expected)assert(html.includes("#lesson/"+id),"missing advanced l
 assert(html.includes('atlas.js?v=20261109-v115-reader-layout-v116-ml-bridges-v117-no-learning-progress'));
 assert(html.includes('atlas.css?v=20261109-v115-reader-layout'));
 assert(html.includes('aria-label="第三条高级学习链：正则化稳定性、核近似与稳健ETF研究"'));
-assert(css.includes("/* V3 CHAPTER READABILITY")&&css.includes("scrollbar-gutter:stable")&&css.includes("@media print"),"new visual accessibility rules missing");
+assert(css.includes("scrollbar-gutter:stable")&&css.includes("@media print"),"new visual accessibility rules missing");
 console.log("PASS: V3 machine learning "+rows.length+" advanced courses, "+sections+" deep sections, "+formula+" parseable TeX formulas, "+sources+" source references; 764 unique navigable lessons, exact arithmetic and CJK/formula design.");

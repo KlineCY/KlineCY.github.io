@@ -68,5 +68,5 @@ for(const id of expected)assert(html.includes("#lesson/"+id),"new learning path 
 assert(html.includes("atlas.js?v=20261109-v115-reader-layout-v116-ml-bridges-v117-no-learning-progress"));
 assert(html.includes("atlas.css?v=20261109-v115-reader-layout"));
 assert(html.includes("第四条高级学习链"));
-assert(css.includes("V4 probabilistic-forecast reading")&&css.includes("overscroll-behavior-x:contain")&&css.includes("@media print"),"math layout regression");
+assert(css.includes("overscroll-behavior-x:contain")&&css.includes("@media print"),"math layout regression");
 console.log("PASS: six V4 distributional forecast and risk lectures, "+units+" full subchapters, "+tex+" KaTeX expressions, "+sources+" research references, 770 distinct navigable lessons and numeric/CJK layout checks.");

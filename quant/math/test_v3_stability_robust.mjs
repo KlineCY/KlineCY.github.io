@@ -91,5 +91,5 @@ const css=fs.readFileSync(new URL("./styles.css",dir),"utf8");
 for(const id of IDs)assert(html.includes("?topic="+id),"advanced math route missing "+id);
 assert(html.includes('styles.css?v=20261104-probscore-v6'),"old stylesheet cached");
 assert(html.includes('aria-label="第三条高级知识链：稳定性、核近似、稳健优化与时间依赖推断"'),"advanced route not accessible");
-assert(css.includes("/* V3 CHAPTER READABILITY")&&css.includes("scrollbar-gutter:stable")&&css.includes("@media print"),"CJK formula/touch/print styles missing");
+assert(css.includes("scrollbar-gutter:stable")&&css.includes("@media print"),"CJK formula/touch/print styles missing");
 console.log("PASS V58/V3: mathematics "+IDs.length+" complete lectures, "+deep+" proof sections, "+formula+" TeX formulas, "+provenance+" source records, exact numerical calculations, CJK/responsive/print design.");

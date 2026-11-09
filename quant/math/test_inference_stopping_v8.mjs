@@ -67,7 +67,7 @@ for(const id of expected)assert(html.includes("?topic="+id),"math lecture missin
 assert(html.includes("从中心极限定理到金融显著性：长期方差、HAC、Bootstrap与Fama–MacBeth"));
 assert(html.includes("从条件期望到可选停止：滤过、停时、鞅与交易边界"));
 const css=fs.readFileSync(new URL("styles.css",dir),"utf8");
-assert(css.includes("V8 long-form Chinese quantitative inference"));
+assert(css.includes("overscroll-behavior-x:contain"));
 assert(css.includes("break-inside:auto!important"));
 assert(css.includes(".math-deep-unit .formula-block:focus-visible") ||
        css.includes(".formula-block:focus-visible"),"keyboard focus missing");

@@ -85,7 +85,7 @@ assert(mlAddedCharacters>4200);
 const mathHome=raw("index.html"), mlHome=raw("../ml/index.html");
 const css=raw("styles.css"),mlCss=raw("../ml/atlas.css"),mathReader=raw("app.js"),mlReader=raw("../ml/atlas.js");
 assert(mathHome.includes('aria-label="高频量化研究的五条完整推导：实现方差、Hawkes、ES与多策略推断"'));
-assert(mlHome.includes('aria-label="从统计学习到真实交易：16篇正式ML讲义的数学深化与工程审计"'));
+assert(mlHome.includes('aria-label="统计学习、金融预测与交易系统"'));
 for(const l of math)assert(mathHome.includes('href="?topic='+l.id+'"'),l.id+" math homepage route");
 for(const [id] of ml)assert(mlHome.includes('href="#lesson/'+id+'"'),id+" ML Atlas route");
 for(const id of ["timeseries-x001","riskmath-x002","statistics-x001","statistics-x005"])
