@@ -1,0 +1,350 @@
+{
+  "version": 1,
+  "revision": "V109",
+  "integrated_by": "quant/math/app.js",
+  "subject": "WLS, GLS and feasible GLS",
+  "lessons": [
+    {
+      "id": "regression-n0193",
+      "node_id": "regression-n0193",
+      "title": "加权最小二乘WLS",
+      "definition": "加权最小二乘WLS以正权重最小化回归残差平方和。当误差条件独立且方差不等时，采用与逆方差成比例的权重可对白化数据做OLS并改善指定模型中的估计效率。",
+      "assumptions": "设计矩阵在正权重样本上满列秩、权重正且误差均值零。若要声称最优线性无偏效率，需权重与真实误差逆方差成比例；随机估计权重还需额外处理。",
+      "properties": [
+        "WLS的正规方程为XᵀWXβ=XᵀWy。",
+        "共同乘同一正数缩放所有权重，不会改变系数估计。",
+        "逆方差加权降低高噪声观测对共同参数的贡献。",
+        "WLS不自动修复遗漏变量，也不解决未知跨期相关的全部问题。"
+      ],
+      "formulas": [
+        {
+          "label": "核心定义",
+          "tex": "Q(\\beta)=\\sum_iw_i(y_i-x_i^\\top\\beta)^2"
+        },
+        {
+          "label": "估计表达",
+          "tex": "\\widehat\\beta=(X^\\top WX)^{-1}X^\\top Wy"
+        },
+        {
+          "label": "方差条件",
+          "tex": "W=\\operatorname{diag}(\\sigma_1^{-2},\\ldots,\\sigma_n^{-2})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "把样本y和X同时乘以权重平方根进行尺度变换。",
+          "tex": "y^\\ast=W^{1/2}y,\\quad X^\\ast=W^{1/2}X"
+        },
+        {
+          "explanation": "对白化数据建立OLS正规方程。",
+          "tex": "X^{\\ast\\top}X^\\ast\\widehat\\beta=X^{\\ast\\top}y^\\ast"
+        },
+        {
+          "explanation": "代回原变量后得到WLS的系数闭式解。",
+          "tex": "X^\\top WX\\widehat\\beta=X^\\top Wy"
+        }
+      ],
+      "example": "两项观测y=(1,3)用于估计一个均值，已知误差方差(1,4)。逆方差权重(1,1/4)给出WLS估计(1+.75)/1.25=1.4、方差1/1.25=0.8；等权均值2的方差为1.25。",
+      "application": "用于不同交易时段或不同资产的噪声方差明显不同时估计共同因子关系，但权重必须只使用训练窗口当时可知的信息。",
+      "caveat": "若权重基于未来实际波动率，回测会发生前瞻泄漏；高波动市场日还可能是尾部风险的重要样本，不应因被降权就删除压力测试。",
+      "deep_sections": [
+        {
+          "title": "白化为什么得到加权目标",
+          "question": "逆方差加权的数学动机是什么？",
+          "paragraphs": [
+            "若不同观测噪声尺度不同，原始平方和对各观测一视同仁未必最有效。",
+            "用条件标准差倒数缩放每一行后，误差具有统一尺度，可沿用OLS的几何推导。"
+          ],
+          "formulas": [
+            {
+              "label": "论证与计算",
+              "tex": "\\min_\\beta(y-X\\beta)^\\top W(y-X\\beta)"
+            }
+          ],
+          "proof": "对加权目标求梯度为−2XᵀW(y−Xβ)，令其为零得到正规方程；W=Ω逆时白化后噪声方差为单位阵。",
+          "worked": "最简单的均值估计目标为(1−θ)²+(3−θ)²/4，导数为2(θ−1)+.5(θ−3)=0，解得θ=1.4。",
+          "limitation": "若部分权重为零，变换后设计矩阵可能不满秩，唯一参数的证明失效。"
+        },
+        {
+          "title": "权重与外生性是两件事",
+          "question": "WLS能否通过降权消除内生性？",
+          "paragraphs": [
+            "权重调整的是误差方差贡献而非条件均值结构，如果解释变量仍与遗漏冲击相关，WLS也会偏离目标系数。",
+            "在ETF因子回归中，高波动时期的遗漏风险偏好变量可能同时影响解释变量和收益，不能只依赖权重修复。"
+          ],
+          "formulas": [
+            {
+              "label": "论证与计算",
+              "tex": "\\mathbb E[\\widehat\\beta-\\beta\\mid X]=(X^\\top WX)^{-1}X^\\top W\\mathbb E[u\\mid X]"
+            }
+          ],
+          "proof": "由系数误差β̂−β=(XᵀWX)^−1XᵀWu对设计矩阵条件取期望，只有误差均值零时右侧才为零。",
+          "worked": "若两项误差的条件均值均为0.5，任何正权重归一化平均都会使共同均值估计向上偏差0.5。",
+          "limitation": "如果估计权重来自同一响应残差，条件于X的简单固定权重论证还不足够。"
+        },
+        {
+          "title": "错误权重与夹心方差",
+          "question": "当逆方差权重估计错误时怎么办？",
+          "paragraphs": [
+            "加权模型依然可以求解，但不再具有理想GLS的有限样本效率保证；计算标准误须保留真实误差协方差。",
+            "实际量化系统可以利用滚动训练验证权重模型的泛化，并比较加权与未加权预测损失。"
+          ],
+          "formulas": [
+            {
+              "label": "论证与计算",
+              "tex": "\\operatorname{Var}(\\widehat\\beta\\mid X)=(X^\\top WX)^{-1}X^\\top W\\Omega WX(X^\\top WX)^{-1}"
+            }
+          ],
+          "proof": "令A=(XᵀWX)^−1XᵀW，系数误差为Au；方差传播法则Var(Au)=AΩAᵀ得到完整公式。",
+          "worked": "两观测真实误差方差都为1却误用权重(1,100)，实际加权均值方差为10001/10201≈0.9804，高于等权0.5。",
+          "limitation": "权重错设不一定导致条件偏差，但能损害效率；更复杂模型的样本内SSE下降不等于外推改善。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "regression-n0194",
+          "label": "广义最小二乘GLS"
+        },
+        {
+          "kind": "math",
+          "id": "regression-n0195",
+          "label": "可行GLS"
+        },
+        {
+          "kind": "math",
+          "id": "regression-n0196",
+          "label": "异方差稳健标准误"
+        }
+      ]
+    },
+    {
+      "id": "regression-n0194",
+      "node_id": "regression-n0194",
+      "title": "广义最小二乘GLS",
+      "definition": "广义最小二乘GLS把加权二次型扩展到一般正定误差协方差矩阵Ω，以同时处理异方差与跨期相关。若Ω已知且解释变量条件外生，GLS等价于白化后OLS，并满足相应最佳线性无偏性质。",
+      "assumptions": "模型y=Xβ+u，E[u|X]=0，条件协方差Ω已知、正定，设计矩阵X满列秩。若Ω未知且由残差估计，则属于FGLS，不能套用已知Ω的全部精确结论。",
+      "properties": [
+        "GLS以Ω的逆作为二次型权重，WLS是Ω对角时的特例。",
+        "正定矩阵Ω可取逆平方根构造白化变量。",
+        "正确Ω与外生性下GLS在相应线性无偏估计类中有效。",
+        "协方差结构接近奇异时，数值逆运算与系数方差可能不稳定。"
+      ],
+      "formulas": [
+        {
+          "label": "核心定义",
+          "tex": "Q(\\beta)=(y-X\\beta)^\\top\\Omega^{-1}(y-X\\beta)"
+        },
+        {
+          "label": "估计表达",
+          "tex": "\\widehat\\beta_{\\rm GLS}=(X^\\top\\Omega^{-1}X)^{-1}X^\\top\\Omega^{-1}y"
+        },
+        {
+          "label": "方差条件",
+          "tex": "\\operatorname{Var}(\\widehat\\beta_{\\rm GLS}\\mid X)=(X^\\top\\Omega^{-1}X)^{-1}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "使用正定矩阵逆平方根使变换后误差协方差成为单位阵。",
+          "tex": "C=\\Omega^{-1/2},\\qquad C\\Omega C^\\top=I"
+        },
+        {
+          "explanation": "在白化样本上求OLS一阶条件。",
+          "tex": "X^\\top C^\\top C X\\widehat\\beta=X^\\top C^\\top C y"
+        },
+        {
+          "explanation": "替换CᵀC为Ω的逆并推导条件方差。",
+          "tex": "\\widehat\\beta=(X^\\top\\Omega^{-1}X)^{-1}X^\\top\\Omega^{-1}y"
+        }
+      ],
+      "example": "估计共同均值，y=(1,3)，真实误差协方差Ω=[[1,0.5],[0.5,4]]。GLS归一化权重为(0.875,0.125)，均值估计1.25，方差0.9375；普通平均数2的真实方差为1.5。",
+      "application": "适合收益率曲线节点、重叠收益或金融面板的相关误差建模，但训练样本中的Ω估计需要避免使用事后修订数据。",
+      "caveat": "真实协方差通常未知，错误的相关结构可能使GLS比OLS更差。改善模型内效率不意味着更强因果解释或更稳健的实盘投资表现。",
+      "deep_sections": [
+        {
+          "title": "协方差白化的构造",
+          "question": "为什么GLS可以归约为一次普通OLS？",
+          "paragraphs": [
+            "正定协方差允许使用谱分解或Cholesky因子取逆平方根，使误差的二阶尺度统一。",
+            "白化同时变换因变量与设计矩阵，不能只对残差方差单独做不对应的调整。"
+          ],
+          "formulas": [
+            {
+              "label": "论证与计算",
+              "tex": "\\operatorname{Var}(Cu\\mid X)=C\\Omega C^\\top=I"
+            }
+          ],
+          "proof": "对C=Ω^(-1/2)，变换后OLS目标为‖C(y−Xβ)‖²，微分得到GLS正规方程。",
+          "worked": "当Ω=diag(1,4)，C=diag(1,1/2)，该构造恰好退化为上一节的WLS。",
+          "limitation": "当Ω是估计矩阵而非真实矩阵时，误差白化一般不可能恰好得到单位协方差。"
+        },
+        {
+          "title": "相关误差的有效权重",
+          "question": "均值估计中为什么还必须考虑协方差？",
+          "paragraphs": [
+            "不同观测可能含有共同市场冲击，即使两者方差各不相同，单看单点标准差也无法刻画重复的信息量。",
+            "GLS按整体Ω分配权重，利用非对角信息降低对共同噪声的重复计量。"
+          ],
+          "formulas": [
+            {
+              "label": "论证与计算",
+              "tex": "w^\\ast=\\frac{\\Omega^{-1}\\mathbf1}{\\mathbf1^\\top\\Omega^{-1}\\mathbf1}"
+            }
+          ],
+          "proof": "对wᵀΩw约束1ᵀw=1写Lagrangian，得2Ωw=λ1，归一化后得到逆协方差权重。",
+          "worked": "Ω=[[1,.5],[.5,4]]时Ω逆与全一向量相乘正比(3.5,.5)，所以权重(.875,.125)，方差.9375。",
+          "limitation": "在不允许负权重等额外限制下，公式可能不满足可行域，需使用约束优化而非闭式解。"
+        },
+        {
+          "title": "估计Ω带来的双层风险",
+          "question": "当协方差需要估计时，已知Ω的效率结论还能用吗？",
+          "paragraphs": [
+            "Ω̂本身是随机估计，误差通过求逆传递到第二阶段系数和标准误。",
+            "即使同一数据给出的加权SSE更低，模型中的方差权重也可能不稳定，需在滚动训练里验证。"
+          ],
+          "formulas": [
+            {
+              "label": "论证与计算",
+              "tex": "\\widehat\\beta_{\\rm FGLS}=(X^\\top\\widehat\\Omega^{-1}X)^{-1}X^\\top\\widehat\\Omega^{-1}y"
+            }
+          ],
+          "proof": "将Ω换为Ω̂得到FGLS，此时估计结果是随机矩阵的函数，必须另证其渐近稳定性及协方差结构的一致性。",
+          "worked": "若真实两项误差同方差1，误用权重(1,100)会把均值方差从等权的0.5推高至约0.9804。",
+          "limitation": "估计误差可能造成逆矩阵病态，并非更精细的协方差模型总优于稳健OLS。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "regression-n0193",
+          "label": "加权最小二乘WLS"
+        },
+        {
+          "kind": "math",
+          "id": "regression-n0195",
+          "label": "可行GLS"
+        },
+        {
+          "kind": "math",
+          "id": "regression-n0197",
+          "label": "HAC/Newey-West"
+        }
+      ]
+    },
+    {
+      "id": "regression-n0195",
+      "node_id": "regression-n0195",
+      "title": "可行GLS",
+      "definition": "可行广义最小二乘FGLS先从训练残差估计协方差矩阵Ω的结构参数，再将Ω̂代入GLS求解。它让理论GLS成为可执行步骤，但估计方差模型本身引入新的统计误差和误设风险。",
+      "assumptions": "通常预设低维、可识别的协方差结构Ω(θ)，初始回归与第二阶段识别成立，Ω̂正定且在适当矩阵范数下足够接近Ω。有限样本不能默认Ω̂等于真实协方差。",
+      "properties": [
+        "FGLS至少包括初始拟合和协方差估计两个步骤。",
+        "第二阶段使用估计的Ω̂逆矩阵对白化回归重新加权。",
+        "方差模型正确且一致时可得到相应渐近效率结论。",
+        "估计的权重错设可能使FGLS在有限样本中比OLS更差。"
+      ],
+      "formulas": [
+        {
+          "label": "核心定义",
+          "tex": "\\widehat\\Omega=\\Omega(\\widehat\\theta)"
+        },
+        {
+          "label": "估计表达",
+          "tex": "\\widehat\\beta_{\\rm FGLS}=(X^\\top\\widehat\\Omega^{-1}X)^{-1}X^\\top\\widehat\\Omega^{-1}y"
+        },
+        {
+          "label": "方差条件",
+          "tex": "\\widehat u^{(0)}=y-X\\widehat\\beta_{\\rm OLS}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先用OLS得到初始系数与残差向量。",
+          "tex": "\\widehat u^{(0)}=y-X\\widehat\\beta^{(0)}"
+        },
+        {
+          "explanation": "由指定AR或异方差模型估计Ω̂。",
+          "tex": "\\widehat\\Omega=\\Omega(\\widehat\\theta;\\widehat u^{(0)})"
+        },
+        {
+          "explanation": "用估计协方差进行第二阶段广义最小二乘。",
+          "tex": "X^\\top\\widehat\\Omega^{-1}(y-X\\widehat\\beta)=0"
+        }
+      ],
+      "example": "估计共同均值y=(1,3)，理想噪声方差(1,4)给均值1.4。若第一阶段误估为(1,9)，则权重(1,1/9)给第二阶段均值(1+3/9)/(1+1/9)=1.2，说明小样本权重误差可以直接改变系数。",
+      "application": "可用训练期残差估计AR相关、期限结构误差相关或条件异方差，再在滚动窗口中重新估计系数和稳定性指标。",
+      "caveat": "FGLS不是自动稳健标准误；权重来自未来完整样本会造成前瞻泄漏。若只关注推断有效性，OLS搭配稳健标准误可能更透明。",
+      "deep_sections": [
+        {
+          "title": "两阶段估计的不确定性",
+          "question": "为什么第一阶段方差估计不能视作已知常数？",
+          "paragraphs": [
+            "第二阶段回归系数是随机估计矩阵Ω̂的函数，因此方差模型误差会传递到回归系数和区间覆盖。",
+            "需要区分已知Ω GLS的精确性质与估计Ω̂ FGLS的渐近性质，并明确正定性和一致性条件。"
+          ],
+          "formulas": [
+            {
+              "label": "论证与计算",
+              "tex": "\\widehat\\beta_{\\rm FGLS}=\\widehat\\beta_{\\rm GLS}(\\widehat\\Omega)"
+            }
+          ],
+          "proof": "若Ω̂在适当矩阵范数下收敛到正定Ω，矩阵求逆连续且识别矩阵可逆，可利用连续映射论证第二阶段一致性。",
+          "worked": "两点例中真实方差(1,4)得到1.4，估计方差(1,9)得到1.2，仅方差估计变化就造成0.2的差。",
+          "limitation": "高维情况下逐元素一致不必然保证谱范数一致，尤其小特征值容易造成不稳定。"
+        },
+        {
+          "title": "协方差错设损害效率",
+          "question": "错误的FGLS权重可能比等权OLS更差吗？",
+          "paragraphs": [
+            "如果权重对高方差观测反而赋予过大影响，所谓加权最小二乘便会放大噪声而非降低噪声。",
+            "应使用滚动验证选择协方差结构，避免仅按样本内拟合误差挑选复杂方差模型。"
+          ],
+          "formulas": [
+            {
+              "label": "论证与计算",
+              "tex": "\\operatorname{Var}(\\widehat\\beta_{\\rm FGLS}\\mid X)=A\\Omega A^\\top,\\quad A=(X^\\top\\widehat\\Omega^{-1}X)^{-1}X^\\top\\widehat\\Omega^{-1}"
+            }
+          ],
+          "proof": "真实方差通过AΩAᵀ计算，不能把Ω替换为Ω̂便声称得到准确误差。模型错设时二者不同。",
+          "worked": "真实方差均为1而误用权重(1,100)时，均值实际方差约0.9804，而OLS等权只有0.5。",
+          "limitation": "如果Ω̂依赖同一样本误差，A本身随机，严格方差表达还须处理条件化和估计权重的随机性。"
+        },
+        {
+          "title": "FGLS和HAC的不同目标",
+          "question": "效率与推断稳健是否必须同时更换点估计？",
+          "paragraphs": [
+            "FGLS试图改变拟合权重并提高模型内效率；HAC通常保持OLS点估计、只修正相关与异方差下的协方差。",
+            "哪一种更适合金融数据取决于误差结构能否可信建模和实证任务对预测或解释的重视程度。"
+          ],
+          "formulas": [
+            {
+              "label": "论证与计算",
+              "tex": "\\widehat\\beta_{\\rm OLS}=(X^\\top X)^{-1}X^\\top y"
+            }
+          ],
+          "proof": "无论给OLS系数计算多少种稳健协方差，其点估计仍由原始X和y决定；FGLS会重新加权目标并可能得到不同点估计。",
+          "worked": "若同一OLS斜率为0.8，HC与HAC可得不同标准误，却仍报告0.8；使用FGLS可能得到其他斜率。",
+          "limitation": "HAC也需要短记忆与带宽等正则条件，不能把稳健一词理解为无限制的有限样本保证。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "regression-n0194",
+          "label": "广义最小二乘GLS"
+        },
+        {
+          "kind": "math",
+          "id": "regression-n0196",
+          "label": "异方差稳健标准误"
+        },
+        {
+          "kind": "math",
+          "id": "regression-n0197",
+          "label": "HAC/Newey-West"
+        }
+      ]
+    }
+  ]
+}
