@@ -17,7 +17,7 @@ assert.equal(Object.keys(doc.lessons).length,4);
 let totalSections=0,totalEquations=0;
 for(const [id,unit] of Object.entries(doc.lessons)){
  assert.equal(archive.domains[id.slice(0,3)]?.[id]?.title,unit.source_title,"source title mismatch "+id);
- assert(unit.sections.length===4&&unit.goal&&unit.links.length>=2,"incomplete conceptual roadmap "+id);
+ assert(unit.sections.length>=4&&unit.goal&&unit.links.length>=2,"incomplete conceptual roadmap "+id);
  for(const link of unit.links){
   if(link.kind==="math")assert(mathIds.has(link.id),"unresolved math reference "+link.id);
   else assert(archive.domains[link.id.slice(0,3)]?.[link.id],"unresolved ML reference "+link.id);
@@ -34,7 +34,7 @@ for(const [id,unit] of Object.entries(doc.lessons)){
   assert(/^https:\/\//.test(ref.url),"external sources must use HTTPS");
  }
 }
-assert.equal(totalSections,16);
+assert(totalSections>=16,"Concept sections may be deepened but never reduced");
 const code=fs.readFileSync(new URL("./concept-render.js",root),"utf8");
 new vm.Script(code,{filename:"quant/ml/concept-render.js"});
 const context={window:{},encodeURIComponent};
@@ -44,13 +44,16 @@ assert.equal(ids.size,4,"all four learning chains must be mounted");
 for(const id of ids){
  const html=archive.domains[id.slice(0,3)][id].html;
  assert(html.includes("atlas-concept-toc")&&html.includes("atlas-concept-related"),"missing navigation "+id);
- assert.equal((html.match(/class="atlas-concept-unit"/g)||[]).length,4,"missing structured subchapters "+id);
+ assert.equal((html.match(/class="atlas-concept-unit"/g)||[]).length,doc.lessons[id].sections.length,"missing structured subchapters "+id);
 }
 const cases=[
  [0.5*(4+4)+0.5*((1-2)**2+(3-2)**2),5],
  [1-.95**20,.6415140775914581],
  [0+.9*2-1,.8],
- [.5+.2*2+.3*2+.1*(27/22),1.622727272727273]
+ [.5+.2*2+.3*2+.1*(27/22),1.622727272727273],
+ [2*100*.001**2,.0002],
+ [Math.log(4)+2/4,1.8862943611198906],
+ [2*(1.5-1),1]
 ];
 for(const [actual,expect] of cases)assert(Math.abs(actual-expect)<1e-10,"numerical case check failed");
 console.log("PASS: "+ids.size+" advanced lesson chains, "+totalSections+" sections, "+totalEquations+" KaTeX formulas, cross-subject links and case arithmetic");
