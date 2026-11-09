@@ -32,7 +32,7 @@ assert(js.includes("function visibleLessons(){")&&js.includes("function renderDi
 assert(js.includes("const prev=state.index[position-1],next=state.index[position+1]")&&
  js.includes("atlas-copy-link")&&js.includes("atlas-jump-depth"),
  "Previous/next, link copy or advanced derivations were lost");
-assert(js.includes('c.rows.length+\' 篇\'')&&js.includes('group.count+\' 篇\''),
+assert(js.includes("c.rows.length+' 篇</span>")&&js.includes("group.count+' 篇</span>"),
  "Directory must show curriculum size, not completed/total ratios");
 assert(html.indexOf('id="atlas-reader-section"')<html.indexOf('aria-label="系统学习路径"'),
  "The V115 reader-first layout must be preserved");
