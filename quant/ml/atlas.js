@@ -470,6 +470,19 @@ async function start(){
    if(ids.size!==4)throw Error("V113正式教材挂载数错误："+path);
    for(const id of ids)state.conceptChapters.add(id);
   }
+  // V114: point-in-time features, penalized regression, distributional validation and financial time series.
+  // Validate complete source bundles and all lesson identities before any canonical mount.
+  for(const path of ["./atlas-concept-bridge-v114a.json","./atlas-concept-bridge-v114b.json","./atlas-concept-bridge-v114c.json",
+                    "./atlas-concept-bridge-v114d.json","./atlas-concept-bridge-v114e.json"]){
+   const extension=await fetchAtlasJson(path,{cache:"no-cache"});
+   const entries=Object.keys(extension.lessons||{});
+   if(extension.schema!==1||extension.revision!=="V114"||entries.length!==4||
+      entries.some(id=>state.conceptChapters.has(id)||newIds.has(id)))
+    throw Error("V114课程正文包不完整或课程编号重复："+path);
+   const ids=window.quantMlConcepts.mount(data,extension);
+   if(ids.size!==4)throw Error("V114深入讲义实际挂载不完整："+path);
+   for(const id of ids)state.conceptChapters.add(id);
+  }
   for(const newId of newIds)state.conceptChapters.add(newId);
   state.index=data.catalog.items;state.byId=new Map(state.index.map(x=>[x.id,x]));state.domains=data.domains;
   const total=$("atlas-total-lessons");if(total)total.textContent=state.index.length+" 篇系统讲义（含新增专题）";
