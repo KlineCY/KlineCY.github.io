@@ -88,7 +88,7 @@ assert(app.includes("...v106a,...v106b,...v107a,...v107b,...v107c,...v107d"),"Ol
 assert(app.includes("new Set(lessons.map(l=>l.node_id)).size!==lessons.length"),"Runtime duplicate lesson protection removed");
 assert(html.includes("多元积分、矩阵微分与约束优化"),"Chinese detailed course roadmap missing");
 for(const id of target)assert(html.includes('?topic='+id+'"'),"V107 direct lesson link missing "+id);
-assert(html.includes("app.js?v=20261108-v105-control-game-market-making-complete-v106-calculus-core-v107-integral-implicit-kkt"),"Reader cache invalidation omitted");
+assert(html.includes("app.js?v=20261109"),"Reader cache invalidation omitted");
 for(const token of ["overflow-x:auto","line-break:strict","@media(max-width:700px)","@media print",":focus-visible"])
  assert(css.includes(token),"Existing Chinese/LaTeX responsive accessibility broken: "+token);
 assert(workflow.includes("node quant/math/test_v106_calculus_core.mjs"),"Historical regression job removed");
