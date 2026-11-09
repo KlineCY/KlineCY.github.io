@@ -1,4 +1,3 @@
-/* Quant Mathematics — an incremental, inspectable proof-oriented curriculum. */
 (()=>{
 "use strict";
 const $=id=>document.getElementById(id);
