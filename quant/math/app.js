@@ -696,6 +696,21 @@ async function loadV109RegressionEconometrics(path,expected,discipline){
    throw Error("V109回归推断与因果计量讲义结构缺失："+path);
  return doc.lessons;
 }
+async function loadV110NumericalMonteCarlo(path,expected){
+ const doc=await fetchMathJson(path);
+ if(doc.version!==1||doc.revision!=="V110"||!Array.isArray(doc.lessons)||doc.lessons.length!==expected||
+   new Set(doc.lessons.map(l=>l.node_id)).size!==expected||
+   doc.lessons.some(l=>l.id!==l.node_id||!l.node_id.startsWith("numerical-")||!l.title||
+     !l.definition||!l.assumptions||!Array.isArray(l.properties)||l.properties.length!==4||
+     !Array.isArray(l.formulas)||l.formulas.length!==3||
+     !Array.isArray(l.derivation)||l.derivation.length!==3||
+     !Array.isArray(l.deep_sections)||l.deep_sections.length!==3||
+     l.deep_sections.some(d=>!d.title||!d.question||!Array.isArray(d.paragraphs)||d.paragraphs.length!==2||
+       !Array.isArray(d.formulas)||d.formulas.length!==1||!d.proof||!d.worked||!d.limitation)||
+     !Array.isArray(l.links)||l.links.length!==3||!l.example||!l.application||!l.caveat))
+   throw Error("V110数值分析与蒙特卡洛讲义内容不完整："+path);
+ return doc.lessons;
+}
 Promise.all([
  fetch("./curriculum.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw Error("知识树加载失败 "+r.status);return r.json()}),
  fetch("./lessons-foundations.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw Error("基础讲义加载失败 "+r.status);return r.json()}),
@@ -767,10 +782,15 @@ Promise.all([
  loadV109RegressionEconometrics("./lessons-regression-v109e.json",3,"regression"),
  loadV109RegressionEconometrics("./lessons-regression-v109f.json",3,"regression"),
  loadV109RegressionEconometrics("./lessons-econometrics-v109a.json",4,"econometrics"),
- loadV109RegressionEconometrics("./lessons-econometrics-v109b.json",3,"econometrics")
-]).then(([c,l1,l2,l3,extra,v89,v91,v90,v92,v93matrix,v93probability,v94a,v94b,v94c,v94deep,v95a,v95b,v96a,v96b,v97portfolio,v97algorithms,v97numerical,v98a,v98b,v99a,v99b,v99c,v99d,v100a,v100b,v100c,v100d,v101time,v101tail,v101axioms,v101governance,v102a,v102b,v102c,v103a,v103b,v103c,v104a,v104b,v104c,v104d,v105a,v105b,v105c,v105d,v106a,v106b,v107a,v107b,v107c,v107d,v107e,v107f,v108fa,v108fb,v108fc,v108ma,v108mb,v109ra,v109rb,v109rc,v109rd,v109re,v109rf,v109ea,v109eb])=>{
+ loadV109RegressionEconometrics("./lessons-econometrics-v109b.json",3,"econometrics"),
+ loadV110NumericalMonteCarlo("./lessons-numerical-v110a.json",4),
+ loadV110NumericalMonteCarlo("./lessons-numerical-v110b.json",5),
+ loadV110NumericalMonteCarlo("./lessons-numerical-v110c.json",5),
+ loadV110NumericalMonteCarlo("./lessons-numerical-v110d.json",4),
+ loadV110NumericalMonteCarlo("./lessons-numerical-v110e.json",4)
+]).then(([c,l1,l2,l3,extra,v89,v91,v90,v92,v93matrix,v93probability,v94a,v94b,v94c,v94deep,v95a,v95b,v96a,v96b,v97portfolio,v97algorithms,v97numerical,v98a,v98b,v99a,v99b,v99c,v99d,v100a,v100b,v100c,v100d,v101time,v101tail,v101axioms,v101governance,v102a,v102b,v102c,v103a,v103b,v103c,v104a,v104b,v104c,v104d,v105a,v105b,v105c,v105d,v106a,v106b,v107a,v107b,v107c,v107d,v107e,v107f,v108fa,v108fb,v108fc,v108ma,v108mb,v109ra,v109rb,v109rc,v109rd,v109re,v109rf,v109ea,v109eb,v110a,v110b,v110c,v110d,v110e])=>{
 applyV91FoundationDeepening(v89,v91);
-curriculum=c;depts=c.disciplines;chapters=c.chapters;nodes=c.nodes;lessons=[...l1.lessons,...l2.lessons,...l3.lessons,...extra,...v89,...v90,...v92,...v93matrix,...v93probability,...v94a,...v94b,...v94c,...v95a,...v95b,...v96a,...v96b,...v97portfolio,...v97algorithms,...v97numerical,...v98a,...v98b,...v99a,...v99b,...v99c,...v99d,...v100a,...v100b,...v100c,...v100d,...v101time,...v101tail,...v101axioms,...v101governance,...v102a,...v102b,...v102c,...v103a,...v103b,...v103c,...v104a,...v104b,...v104c,...v104d,...v105a,...v105b,...v105c,...v105d,...v106a,...v106b,...v107a,...v107b,...v107c,...v107d,...v107e,...v107f,...v108fa,...v108fb,...v108fc,...v108ma,...v108mb,...v109ra,...v109rb,...v109rc,...v109rd,...v109re,...v109rf,...v109ea,...v109eb];
+curriculum=c;depts=c.disciplines;chapters=c.chapters;nodes=c.nodes;lessons=[...l1.lessons,...l2.lessons,...l3.lessons,...extra,...v89,...v90,...v92,...v93matrix,...v93probability,...v94a,...v94b,...v94c,...v95a,...v95b,...v96a,...v96b,...v97portfolio,...v97algorithms,...v97numerical,...v98a,...v98b,...v99a,...v99b,...v99c,...v99d,...v100a,...v100b,...v100c,...v100d,...v101time,...v101tail,...v101axioms,...v101governance,...v102a,...v102b,...v102c,...v103a,...v103b,...v103c,...v104a,...v104b,...v104c,...v104d,...v105a,...v105b,...v105c,...v105d,...v106a,...v106b,...v107a,...v107b,...v107c,...v107d,...v107e,...v107f,...v108fa,...v108fb,...v108fc,...v108ma,...v108mb,...v109ra,...v109rb,...v109rc,...v109rd,...v109re,...v109rf,...v109ea,...v109eb,...v110a,...v110b,...v110c,...v110d,...v110e];
 applyV94HistoricalProbabilityDeepening(lessons,v94deep);
 if(new Set(lessons.map(l=>l.node_id)).size!==lessons.length)throw Error("数学讲义节点ID重复");
 nodeMap=new Map(nodes.map(n=>[n.id,n]));chapMap=new Map(chapters.map(c=>[c.id,c]));deptMap=new Map(depts.map(d=>[d.id,d]));lessonMap=new Map(lessons.map(l=>[l.node_id,l]));
