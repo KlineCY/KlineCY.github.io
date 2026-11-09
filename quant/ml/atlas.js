@@ -190,10 +190,12 @@ function updateReadStats(){
  if(b&&state.activeId){const done=state.read.has(state.activeId);b.setAttribute("aria-pressed",String(done));b.textContent=done?"已学 · 点击取消":"标记已学";}
 }
 function chapterShouldOpen(key,active){
- return state.term.length>0||active||state.chapterOpen.get(key)===true;
+ const preference=state.chapterOpen.get(key);
+ return state.term.length>0||(preference===undefined?active:preference);
 }
 function domainShouldOpen(id,active){
- return state.term.length>0||active||state.domainOpen.get(id)===true;
+ const preference=state.domainOpen.get(id);
+ return state.term.length>0||(preference===undefined?active:preference);
 }
 function setCatalogOpen(open){
  const section=$("atlas-reader-section"),button=$("atlas-toggle-catalog");
@@ -291,6 +293,10 @@ function display(){
  if(!meta){root.innerHTML='<p class="atlas-error">找不到该讲义：'+esc(id)+'</p>';return}
  const data=state.domains[meta.domain_id]?.[id];
  if(!data){root.innerHTML='<p class="atlas-error">讲义正文缺失：'+esc(id)+'</p>';return}
+ if(state.activeId!==id){
+  state.chapterOpen.delete(meta.domain_id+"_"+meta.chapter);
+  state.domainOpen.delete(meta.domain_id);
+ }
  state.activeId=id;
  if(state.learnedOnly&&!state.read.has(id)){state.learnedOnly=false;$("atlas-learned-only").checked=false}
   if(state.unreadOnly&&state.read.has(id)){state.unreadOnly=false;$("atlas-unread-only").checked=false}
