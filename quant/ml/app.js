@@ -7,10 +7,6 @@ const alpha=(a,b)=>String(a).localeCompare(String(b),"en",{sensitivity:"base"});
 const link=(u,label)=>/^https:\/\//.test(u||"")?'<a href="'+esc(u)+'" target="_blank" rel="noopener noreferrer">'+esc(label)+'</a>':"";
 let curriculum=null,depts=[],chapters=[],nodes=[],lessons=[],lessonMap=new Map(),noteMap=new Map(),draftLessonIds=new Set(),coreLessonIds=new Set();
 let nodeMap=new Map(),chapMap=new Map(),deptMap=new Map(),activeId="",filterDept="",filterLevel="",filterStatus="",query="";
-const progressKey="kline-quant-ml-progress-v1";
-let studied=new Set();
-try{const saved=JSON.parse(localStorage.getItem(progressKey)||"[]");if(Array.isArray(saved))studied=new Set(saved)}catch(_){}
-const saveProgress=()=>{try{localStorage.setItem(progressKey,JSON.stringify([...studied]))}catch(_){}};
 const getDept=id=>deptMap.get(id),getChap=id=>chapMap.get(id),getNode=id=>nodeMap.get(id);
 const humanStatus=node=>coreLessonIds.has(node.id)?"独立算法讲义":draftLessonIds.has(node.id)?"专属代码讲义初稿 · 待审校":noteMap.has(node.id)?"专题扩展笔记 · 待补全":"课程目录";
 const isComplete=node=>coreLessonIds.has(node.id);
@@ -72,7 +68,7 @@ function isMatch(n){
 }
 function nodeButton(n){
 const b=document.createElement("button");b.className="node"+(n.id===activeId?" active":"");b.type="button";b.dataset.node=n.id;
-const ok=isComplete(n);b.innerHTML='<span class="complete-mark" aria-hidden="true">'+(studied.has(n.id)?"✓":ok?"●":"·")+'</span><span class="node-name">'+esc(n.title)+'</span><span class="node-label'+(ok?" complete":"")+'">'+(ok?"详解":isDraft(n)?"独立稿":noteMap.has(n.id)?"笔记":"目录")+'</span>';
+const ok=isComplete(n);b.innerHTML='<span class="complete-mark" aria-hidden="true">'+(ok?"●":"·")+'</span><span class="node-name">'+esc(n.title)+'</span><span class="node-label'+(ok?" complete":"")+'">'+(ok?"详解":isDraft(n)?"独立稿":noteMap.has(n.id)?"笔记":"目录")+'</span>';
 b.addEventListener("click",()=>selectNode(n.id,true,true));
 return b;
 }
@@ -112,19 +108,10 @@ for(const d of depts){
 }
 $("status").textContent="显示 "+visibleCount+" / "+nodes.length+" 个知识点 · "+departmentCount+" 个学科 · "+totalComplete+" 篇原有独立讲义 · "+draftLessonIds.size+" 篇代码初稿 · "+noteMap.size+" 篇扩展笔记";
 if(!visibleCount){const p=document.createElement("p");p.className="notice";p.textContent="当前条件无匹配知识点。请清除搜索或筛选。";container.appendChild(p)}
-$("mastered").textContent=studied.size;
 document.querySelectorAll(".roadmap-chip").forEach(b=>b.classList.toggle("active",b.dataset.dept===filterDept));
 }
 function makeControls(node,wrap){
 const section=document.createElement("div");section.className="tool-actions";
-const done=document.createElement("button");done.className="action"+(studied.has(node.id)?" done":"");done.type="button";
-done.textContent=studied.has(node.id)?"✓ 已标记学会 · 点击取消":"标记我已学会";
-done.onclick=()=>{
- if(studied.has(node.id))studied.delete(node.id);else studied.add(node.id);
- saveProgress();done.classList.toggle("done",studied.has(node.id));
- done.textContent=studied.has(node.id)?"✓ 已标记学会 · 点击取消":"标记我已学会";
- renderTree();
-};section.appendChild(done);
 const copy=document.createElement("button");copy.className="action";copy.textContent="复制本节链接";copy.type="button";
 copy.onclick=async()=>{const url=new URL(location.href);url.searchParams.set("topic",node.id);try{await navigator.clipboard.writeText(url.href);copy.textContent="链接已复制"}catch(e){copy.textContent="请复制浏览器地址"}};section.appendChild(copy);
 const next=nodes.find(n=>n.discipline_id===node.discipline_id&&nodes.indexOf(n)>nodes.indexOf(node));
