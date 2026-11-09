@@ -25,7 +25,7 @@ const expected=[
  "m06-c02-p04","m06-c02-p05","m06-c04-p03","m06-c04-p06",
  "m07-c02-p04","m07-c02-p05","m07-c02-p06","m07-c01-p04",
  "m08-c02-p02","m11-c03-p01","m12-c01-p06","m12-c03-p06",
- "m10-c02-p03","m12-c04-p03","m23-c02-p05","m12-c03-p05",
+ "m10-c02-p03","m12-c04-p03","m23-c02-p05","m12-c03-p02",
  "m22-c01-p06","m22-c03-p02","m23-c03-p01","m23-c05-p02"
 ];
 const entries=docs.flatMap(d=>Object.entries(d.lessons));
@@ -268,10 +268,12 @@ near("Causal collider before selection",.5,.5);
 near("Causal collider conditional same input",1,1);
 near("Intervention blocked by hidden confounder",.5,.5);
 near("Backdoor average",.5*2+.5*4,3);
-near("White reality candidate mean zero",(1+0-1)/3,0);
-near("White reality candidate best mean",(1+1+1)/3,1);
-near("White reality max statistic",Math.sqrt(3),Math.sqrt(3));
-near("White block bootstrap plus-one",(48+1)/(1000+1),.04895104895104895);
+near("Block Bootstrap moving blocks n10 l3",10-3+1,8);
+near("Block Bootstrap ceil blocks",Math.ceil(10/3),4);
+near("Stationary bootstrap mean block size",1/.25,4);
+near("Stationary bootstrap probability of length3",.25*.75**2,.140625);
+near("AR1 long run variance factor",(1+.5)/(1-.5),3);
+near("AR1 mean variance at T100",3/100,.03);
 near("Structural break pooled SSE",5*(0-1)**2+5*(2-1)**2,10);
 near("Known Chow toy F",((24-16)/2)/(16/(20-4)),4);
 near("Sequential CUSUM three increments",3*(.8-.5),.9);
