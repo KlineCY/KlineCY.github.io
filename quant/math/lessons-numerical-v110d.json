@@ -1,0 +1,464 @@
+{
+  "version": 1,
+  "revision": "V110",
+  "integrated_by": "quant/math/app.js",
+  "subject": "Importance sampling, antithetics, randomized QMC and stochastic time-grid bias",
+  "lessons": [
+    {
+      "id": "numerical-n0381",
+      "node_id": "numerical-n0381",
+      "title": "重要性采样",
+      "definition": "重要性采样通过从易于抽样的建议分布q生成随机数，并用似然比p/q修正，使目标分布p下的期望转化为q下的加权期望。方法可提高稀有损失事件的计算效率，但若建议分布尾部覆盖不足，权重可能方差极大甚至不存在。",
+      "assumptions": "目标期望I=E_p[h(X)]存在且p、q对共同支配测度有密度。必须在h(x)p(x)非零的区域具有q(x)>0；为保证经典中心极限定理还需E_q[(h p/q)²]<∞。自归一化重要性采样的有限样本估计一般有偏。",
+      "properties": [
+        "非自归一化重要性采样在可积条件下无偏，估计方差随加权函数的q分布决定。",
+        "建议分布越接近|h|p的形状，通常越能降低相关目标估计的方差。",
+        "严重权重集中会使有效样本数低，标准误与尾部估计不稳定。",
+        "q支撑集覆盖目标非零贡献是有效性的必要条件，而不只是效率建议。"
+      ],
+      "formulas": [
+        {
+          "label": "估计量或模型",
+          "tex": "I=\\int h(x)p(x)\\,\\mathrm dx=\\mathbb E_q\\!\\left[h(X)\\frac{p(X)}{q(X)}\\right]"
+        },
+        {
+          "label": "误差与方差",
+          "tex": "\\widehat I_N=\\frac1N\\sum_{i=1}^N h(X_i)\\frac{p(X_i)}{q(X_i)},\\quad X_i\\sim q"
+        },
+        {
+          "label": "成立条件",
+          "tex": "\\operatorname{Var}(\\widehat I_N)=\\frac1N\\left(\\mathbb E_q\\left[\\left(h\\frac pq\\right)^2\\right]-I^2\\right)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "明确目标密度p和积分函数h，并选择覆盖全部贡献区域的建议密度q。",
+          "tex": "h(x)p(x)\\ne0\\Longrightarrow q(x)>0"
+        },
+        {
+          "explanation": "将积分密度乘除以q，得到建议分布下的似然比表达式。",
+          "tex": "h(x)p(x)=h(x)\\frac{p(x)}{q(x)}q(x)"
+        },
+        {
+          "explanation": "从q抽样并按p/q修正每个样本贡献，再估计方差和尾部有效样本数。",
+          "tex": "\\widehat I_N=N^{-1}\\sum_i w(X_i)h(X_i)"
+        }
+      ],
+      "example": "目标p为[0,1]上均匀，h(x)=x²，真实I=1/3。取建议密度q(x)=2x（x∈(0,1]），则权重h·p/q=x/2，E_q[x/2]=1/3；单个加权贡献方差为1/72≈0.01389，比直接均匀采样x²的方差4/45≈0.08889显著更低。",
+      "application": "用于极端市场损失概率、深度虚值期权估值、违约联合事件等罕见事件。设计q时应向目标高贡献区域倾斜，同时检查尾部似然比和估计方差。",
+      "caveat": "不能以样本中没有极端事件就认定尾部风险很低；q尾部过轻可能产生无限方差。若建议分布参数依据同一评估样本调优，需要独立验证或适当自适应推断。",
+      "deep_sections": [
+        {
+          "title": "换测度的无偏性证明",
+          "question": "为什么从q抽样仍然能正确估计p下期望？",
+          "paragraphs": [
+            "目标期望是对h(x)p(x)积分。只要q覆盖所有非零贡献区域，可以把原 integrand 乘除以q，转化为q下某个新的随机变量的期望。",
+            "重要性采样不直接改变目标数学值，变化的是随机变量分布及其方差，因此效率增益应通过二阶矩判断。"
+          ],
+          "formulas": [
+            {
+              "label": "数学推导与验证",
+              "tex": "\\mathbb E_q[h(X)p(X)/q(X)]=\\int h(x)p(x)\\,\\mathrm dx"
+            }
+          ],
+          "proof": "把q下期望写成∫h(x)p(x)/q(x)·q(x)dx，在q>0的目标贡献区间消去q，得到原始积分。对独立样本取均值再由期望线性性得无偏。",
+          "worked": "p=1、h=x²、q=2x时加权值为x/2。q下E[X]=2/3，因此E_q[X/2]=1/3。",
+          "limitation": "对自归一化比值估计量，分子和分母同时随机，有限样本一般不再严格无偏。"
+        },
+        {
+          "title": "二阶矩与方差比较",
+          "question": "为什么把q选为2x会降低x²积分的蒙特卡洛方差？",
+          "paragraphs": [
+            "目标函数h=x²对大x贡献更强，建议密度q=2x使抽样更常落在接近1的位置，但每个样本再乘逆概率权重。",
+            "这种重新分配让修正后的单次贡献x/2相比原始x²波动更小；可通过精确矩计算而不是仅凭模拟直觉验证。"
+          ],
+          "formulas": [
+            {
+              "label": "数学推导与验证",
+              "tex": "\\operatorname{Var}_q(X/2)=1/72,\\quad\\operatorname{Var}_p(X^2)=4/45"
+            }
+          ],
+          "proof": "对q=2x，E_q[X]=2/3、E_q[X²]=1/2，所以Var_q(X/2)=(1/4)(1/2−4/9)=1/72。均匀p下E[X⁴]=1/5，Var_p(X²)=1/5−1/9=4/45。",
+          "worked": "若N=100，两种样本均值方差分别1/7200≈0.000139和4/4500≈0.000889，方差比约0.15625。",
+          "limitation": "本例仅针对h=x²的特定积分；换成稀有负尾部事件时q=2x可能反而遗漏低端风险。"
+        },
+        {
+          "title": "尾部权重和有效样本量",
+          "question": "为什么平均权重接近1仍可能隐藏估计不可靠？",
+          "paragraphs": [
+            "少量极大权重样本可能支配全部估计，这时名义样本数量很大但有效信息很少。",
+            "常用诊断是自归一化权重的ESS近似(Σw)²/Σw²，同时观察尾部权重和多次独立重复估计的稳定性。"
+          ],
+          "formulas": [
+            {
+              "label": "数学推导与验证",
+              "tex": "\\widehat{\\operatorname{ESS}}=\\frac{\\left(\\sum_iw_i\\right)^2}{\\sum_iw_i^2}"
+            }
+          ],
+          "proof": "设标准化权重α_i=w_i/Σw_i，则Σα_i=1，权重平方和越大说明权重越集中，定义ESS=1/Σα_i²即得公式。",
+          "worked": "若四条样本权重为(1,1,1,7)，ESS=(10)²/(1+1+1+49)=100/52≈1.923，远低于名义4条。",
+          "limitation": "ESS是启发式二阶权重诊断，不能代替特定收益payoff的真实估计方差，也不保证尾部CLT成立。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "numerical-n0380",
+          "label": "拒绝采样"
+        },
+        {
+          "kind": "math",
+          "id": "numerical-n0383",
+          "label": "对偶变量法"
+        },
+        {
+          "kind": "math",
+          "id": "numerical-n0384",
+          "label": "准Monte Carlo"
+        }
+      ]
+    },
+    {
+      "id": "numerical-n0383",
+      "node_id": "numerical-n0383",
+      "title": "对偶变量法",
+      "definition": "对偶变量法（Antithetic Variates）利用成对负相关的随机输入，例如U和1−U，在每对样本上共同计算函数值并平均，以减少Monte Carlo估计方差。它保留目标边际分布，方差下降来自两个配对函数值的负协方差，而不是简单把样本条数翻倍。",
+      "assumptions": "U为[0,1]理想均匀变量，U和1−U具有相同Uniform边际。被积函数在相应分布下平方可积。对单调函数常能产生负协方差，但对非单调函数或复杂路径payoff不必然减方差。",
+      "properties": [
+        "每对U与1−U的边际分布相同，因此配对均值保持无偏。",
+        "负协方差使配对估计方差小于两条独立样本平均的方差。",
+        "对某些关于1/2对称或非单调的函数，协方差可能为正或减方差有限。",
+        "金融路径模拟可使用Z和−Z配对，但须保持资产联合相关结构及同一时间步。"
+      ],
+      "formulas": [
+        {
+          "label": "估计量或模型",
+          "tex": "\\widehat I_{\\rm anti}=\\frac1N\\sum_{i=1}^N\\frac{f(U_i)+f(1-U_i)}2"
+        },
+        {
+          "label": "误差与方差",
+          "tex": "\\operatorname{Var}\\left(\\frac{A+B}2\\right)=\\frac{\\operatorname{Var}(A)+\\operatorname{Var}(B)+2\\operatorname{Cov}(A,B)}4"
+        },
+        {
+          "label": "成立条件",
+          "tex": "U\\sim\\operatorname{Unif}(0,1)\\Longrightarrow 1-U\\sim\\operatorname{Unif}(0,1)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "生成N条独立基础随机数U_i，并构造它们的确定性对偶1−U_i。",
+          "tex": "(U_i,\\ 1-U_i)"
+        },
+        {
+          "explanation": "对每对变量求原函数值与对偶函数值的平均。",
+          "tex": "A_i=\\frac{f(U_i)+f(1-U_i)}2"
+        },
+        {
+          "explanation": "用N个独立配对均值估计目标，并使用配对层面方差计算标准误。",
+          "tex": "\\widehat I=N^{-1}\\sum_i A_i"
+        }
+      ],
+      "example": "令f(u)=u²且U=.25，对偶为.75，对应函数值.0625与.5625，配对均值.3125。理论目标E[U²]=1/3；在U均匀时单对对偶均值方差为1/180≈.00556，而两条独立U²均值的方差为2/45≈.04444，方差缩小8倍。",
+      "application": "在多资产期权路径估值中可将高斯随机数Z和−Z对应两条相关路径，再计算配对贴现收益平均。对单调性强的看涨payoff常可降低模拟误差，应报告配对独立单位数量。",
+      "caveat": "两个对偶样本不是相互独立的，不能把2N个函数值直接当作2N条IID记录计算标准误。对含复杂触碰门槛与不连续触发的路径payoff，方差缩减可能变弱或失效。",
+      "deep_sections": [
+        {
+          "title": "配对方差恒等式",
+          "question": "为什么使用负相关样本能降低估计方差？",
+          "paragraphs": [
+            "对偶变量的目标是让两个边际正确的函数值发生负协方差。",
+            "样本均值的方差包含协方差项，如果它为负，两个函数值的波动就会在同一对内相互抵消，从而优于独立配对。"
+          ],
+          "formulas": [
+            {
+              "label": "数学推导与验证",
+              "tex": "\\operatorname{Var}((A+B)/2)=\\frac12\\operatorname{Var}(A)+\\frac12\\operatorname{Cov}(A,B)\\quad\\text{同分布时}"
+            }
+          ],
+          "proof": "对任意A、B展开Var(A+B)得到VarA+VarB+2Cov(A,B)。同分布时VarA=VarB，除以4得到所示公式。",
+          "worked": "当Var(A)=1且Cov(A,B)=−0.8时，对偶配对均值方差=0.1；两条独立样本的均值方差为0.5。",
+          "limitation": "若协方差为正，配对甚至可能比独立样本更差，所以必须通过模拟或理论检验目标payoff的协方差。"
+        },
+        {
+          "title": "x²案例的完整解析方差",
+          "question": "为什么对偶x²的方差刚好是1/180？",
+          "paragraphs": [
+            "配对函数g(U)=[U²+(1−U)²]/2可化为U²−U+1/2，即(U−1/2)²+1/4。",
+            "均匀变量中心化二次矩和四次矩均有简单解析式，因而无需依靠有限随机模拟就能求出精确方差。"
+          ],
+          "formulas": [
+            {
+              "label": "数学推导与验证",
+              "tex": "\\operatorname{Var}\\!\\left(\\frac{U^2+(1-U)^2}{2}\\right)=\\frac1{80}-\\frac1{144}=\\frac1{180}"
+            }
+          ],
+          "proof": "令V=U−1/2，E[V²]=1/12、E[V⁴]=1/80，则Var(V²)=1/80−(1/12)²=1/180。",
+          "worked": "直接U²的方差为E[U⁴]−E[U²]²=1/5−1/9=4/45；两次独立平均方差2/45，对偶1/180，比例正好1/8。",
+          "limitation": "此精确比值只对所选Uniform分布及f(u)=u²成立，不能直接推广为期权估值统一八倍增益。"
+        },
+        {
+          "title": "高斯路径的对偶构造",
+          "question": "在Black–Scholes模拟中为什么常用Z与−Z？",
+          "paragraphs": [
+            "标准正态Z与−Z具有相同边际，且两条路径在随机冲击方向上相反，可自然构成对偶。",
+            "对单调payoff与正相关的驱动结构，贴现结果可能呈负相关，从而降低路径平均估计误差。"
+          ],
+          "formulas": [
+            {
+              "label": "数学推导与验证",
+              "tex": "Z\\sim N(0,1)\\Longrightarrow -Z\\sim N(0,1)"
+            }
+          ],
+          "proof": "正态密度关于零对称，因此Z与−Z边际一致；把高斯增量的每个分量同时取负得到有效的第二条Brownian驱动路径。",
+          "worked": "一步GBM下S=S₀exp[(r−q−σ²/2)h+σ√h Z]，取Z=1和Z=−1形成高低两条合法价格路径，分别计算payoff后平均。",
+          "limitation": "若多维资产存在相关矩阵，应对同一基础独立高斯向量整体取负并用相同相关变换，不能打乱跨资产协方差。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "numerical-n0381",
+          "label": "重要性采样"
+        },
+        {
+          "kind": "math",
+          "id": "numerical-n0384",
+          "label": "准Monte Carlo"
+        },
+        {
+          "kind": "math",
+          "id": "numerical-n0390",
+          "label": "路径依赖期权仿真"
+        }
+      ]
+    },
+    {
+      "id": "numerical-n0384",
+      "node_id": "numerical-n0384",
+      "title": "准Monte Carlo",
+      "definition": "准Monte Carlo（QMC）以低差异确定性点列替代IID均匀随机数，用更均匀覆盖积分域的方式估计多维积分。Koksma–Hlawka不等式用点集星差异与被积函数Hardy–Krause变差控制误差；随机化QMC可在保留低差异结构的同时恢复无偏性和可重复方差估计。",
+      "assumptions": "目标积分经变换可写成单位立方体[0,1]^d上的积分。确定性误差界要求被积函数具有有限Hardy–Krause变差；金融含触碰门槛和复杂不连续payoff可能不满足。随机化与置信区间需要独立随机扰乱重复。",
+      "properties": [
+        "低差异点列强调均匀覆盖而非各点相互独立。",
+        "在固定维度和有限变差条件下，误差受V_HK(f)乘星差异D*_N控制。",
+        "QMC对高名义维度问题的收益与有效维度、变量排序及路径构造有关。",
+        "固定QMC点列不能直接用IID样本方差公式计算统计标准误。"
+      ],
+      "formulas": [
+        {
+          "label": "估计量或模型",
+          "tex": "\\widehat I_N^{\\rm QMC}=\\frac1N\\sum_{i=1}^Nf(u_i),\\quad u_i\\in[0,1]^d"
+        },
+        {
+          "label": "误差与方差",
+          "tex": "|\\widehat I_N-I|\\le V_{\\rm HK}(f)\\,D_N^\\ast"
+        },
+        {
+          "label": "成立条件",
+          "tex": "D_N^\\ast=O((\\log N)^d/N)\\quad\\text{对适当低差异构造}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "把目标分布下期望转换为单位立方体上的均匀积分，保留所有变量的依赖结构。",
+          "tex": "I=\\int_{[0,1]^d}f(u)\\,\\mathrm du"
+        },
+        {
+          "explanation": "生成Sobol、Halton或van der Corput低差异点列，按既定变量顺序评价模型。",
+          "tex": "\\widehat I=N^{-1}\\sum_i f(u_i)"
+        },
+        {
+          "explanation": "通过独立随机化扰乱的重复批次估计误差，而不把固定点列视为IID。",
+          "tex": "\\widehat I^{(r)}=\\frac1N\\sum_i f(U_i^{(r)})"
+        }
+      ],
+      "example": "一维van der Corput二进制反转序列从n=0开始前四点是(0,0.5,0.25,0.75)。对f(u)=u，四点平均为(0+0.5+0.25+0.75)/4=0.375，真实积分为0.5，误差−0.125。这说明低差异点列并非每个有限样本都优于其他求积方法。",
+      "application": "在欧式或路径依赖期权定价中可结合Brownian bridge或PCA路径构造降低有效维度；评估时应对不同随机扰乱做重复以获得可信误差估计。",
+      "caveat": "Koksma–Hlawka是确定性最坏误差界，且变差常难计算。高维奇异payoff、低精度分位数变换及相关矩阵不稳定可能抵消QMC优点。",
+      "deep_sections": [
+        {
+          "title": "星差异与积分误差的联系",
+          "question": "低差异具体比普通蒙特卡洛多控制了什么？",
+          "paragraphs": [
+            "星差异衡量点集在各个从原点开始的轴对齐盒子里的占比与理论盒子体积之间的最大偏差。",
+            "如果被积函数具有有限Hardy–Krause变差，Koksma–Hlawka把这种几何覆盖差异转化为积分误差界。"
+          ],
+          "formulas": [
+            {
+              "label": "数学推导与验证",
+              "tex": "D_N^\\ast=\\sup_{a\\in[0,1]^d}\\left|\\frac1N\\sum_{i=1}^N\\mathbf1_{\\{u_i\\in[0,a)\\}}-\\prod_{j=1}^d a_j\\right|"
+            }
+          ],
+          "proof": "定义点集在每个[0,a)盒子中的经验质量与理论均匀体积之差，再取全体盒子的最大绝对值。有限变差函数的积分误差受该几何偏差乘函数变差控制。",
+          "worked": "前四van der Corput点(0,.5,.25,.75)对u的均值为.375，真实积分.5，虽是低差异前缀，仍有非零有限样本偏差。",
+          "limitation": "点集差异低不一定对某个不连续收益函数误差也低；函数变差与维度效应必须同时考虑。"
+        },
+        {
+          "title": "随机化QMC怎样提供误差条",
+          "question": "为什么确定性QMC不能用普通样本标准差衡量不确定性？",
+          "paragraphs": [
+            "固定点列不是独立同分布随机样本，函数值之间有确定性结构，套用IID标准误公式缺少统计依据。",
+            "随机化QMC在保留均匀覆盖性质下进行独立数字扰乱或随机平移，对多次随机化后的整体估计值使用跨批次方差才有清晰解释。"
+          ],
+          "formulas": [
+            {
+              "label": "数学推导与验证",
+              "tex": "\\widehat{\\operatorname{se}}_{\\rm RQMC}=\\sqrt{\\frac1{R(R-1)}\\sum_{r=1}^R(\\widehat I^{(r)}-\\overline I)^2}"
+            }
+          ],
+          "proof": "若R个随机扰乱彼此独立且每个扰乱估计无偏，则整体均值的样本方差估计为跨批次样本方差除以R，代数化简得公式。",
+          "worked": "假设三次独立扰乱结果分别0.48、0.50、0.52，均值0.50，标准误为√[(.0004+.0004)/(3×2)]≈.01155。",
+          "limitation": "独立批次数R很小时误差估计也不稳定；没有合法随机化时不能把多个固定截断前缀当独立批次。"
+        },
+        {
+          "title": "金融高维路径的有效维度",
+          "question": "为什么对Brownian路径变换变量顺序会影响QMC结果？",
+          "paragraphs": [
+            "在多日期GBM路径中，不同高斯随机变量对最终payoff的重要性往往差异很大。",
+            "Brownian bridge或PCA把较重要的全局路径变化映射到低差异序列的早期坐标，可降低有效维度并改善估值表现。"
+          ],
+          "formulas": [
+            {
+              "label": "数学推导与验证",
+              "tex": "Z_j=\\Phi^{-1}(U_j),\\qquad U_j\\in(0,1)"
+            }
+          ],
+          "proof": "先用低差异点的各坐标经标准正态逆CDF得到高斯输入，再经路径构造线性变换产生协方差正确的Brownian增量。不同坐标排序不改变理想分布但改变有限点集的覆盖。",
+          "worked": "同样模拟32个监控时点，直接逐步Brownian增量把长时段总体水平分布在许多坐标；Bridge先生成终点再生成中点，使低序号坐标控制主要路径特征。",
+          "limitation": "如果payoff对极短期限局部障碍非常敏感，常规Bridge排序未必最优，仍须对独立扰乱做经验误差比较。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "numerical-n0379",
+          "label": "逆变换抽样"
+        },
+        {
+          "kind": "math",
+          "id": "numerical-n0383",
+          "label": "对偶变量法"
+        },
+        {
+          "kind": "math",
+          "id": "numerical-n0390",
+          "label": "路径依赖期权仿真"
+        }
+      ]
+    },
+    {
+      "id": "numerical-n0385",
+      "node_id": "numerical-n0385",
+      "title": "时间离散偏差",
+      "definition": "时间离散偏差是在连续时间动力系统或随机微分方程中，用有限步长h近似过程并计算目标期望时产生的系统误差。它应与随机抽样误差区分：增加模拟路径数量N可降低蒙特卡洛随机误差，却不能消除固定时间步长的离散偏差。",
+      "assumptions": "连续过程与离散算法满足相应光滑性、矩与稳定性条件，弱收敛阶对应测试函数φ的可微和增长条件。实际金融障碍payoff非光滑时弱误差阶可能比平滑payoff更差。",
+      "properties": [
+        "估计均方误差包含模拟方差项与离散偏差平方项，二者须分别控制。",
+        "Euler类方法对某些平滑期望具有弱一阶精度，但不表示任意路径功能量都达到该阶。",
+        "增加路径数量不改变h固定时离散模拟分布与真实连续模型之间的差异。",
+        "Richardson外推可在已知误差展开和相互耦合条件下减少离散偏差。"
+      ],
+      "formulas": [
+        {
+          "label": "估计量或模型",
+          "tex": "\\operatorname{Bias}_h=\\mathbb E[\\varphi(\\widehat X_T^h)]-\\mathbb E[\\varphi(X_T)]"
+        },
+        {
+          "label": "误差与方差",
+          "tex": "\\operatorname{MSE}(\\widehat I_{N,h})=\\frac{\\operatorname{Var}(\\varphi(\\widehat X_T^h))}{N}+\\operatorname{Bias}_h^2"
+        },
+        {
+          "label": "成立条件",
+          "tex": "\\mathbb E[\\widehat S_T^{\\rm EM}]=S_0(1+\\mu h)^{T/h}\\quad\\text{对GBM的Euler离散}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先固定时间步长h模拟离散过程，得到相应payoff的有限步期望。",
+          "tex": "I_h=\\mathbb E[\\varphi(\\widehat X_T^h)]"
+        },
+        {
+          "explanation": "区分离散模型期望I_h与连续真模型期望I，再将随机路径平均围绕I_h分解。",
+          "tex": "\\widehat I_{N,h}-I=(\\widehat I_{N,h}-I_h)+(I_h-I)"
+        },
+        {
+          "explanation": "对独立路径使用零均值模拟误差，推导MSE的方差加偏差平方结构。",
+          "tex": "\\operatorname{MSE}=\\operatorname{Var}(\\varphi(\\widehat X_T^h))/N+(I_h-I)^2"
+        }
+      ],
+      "example": "GBM dS=μSdt+σSdW中取S0=100、μ=0.1、T=1，真实期望100e^{0.1}≈110.51709。Euler–Maruyama步长h=0.5、Nsteps=2，离散期望100(1+0.05)²=110.25，存在−0.26709的系统低估。即使模拟无限多条路径，该偏差仍不消失。",
+      "application": "用于连续障碍期权、Asian期权路径和模型校准中的时间网格收敛审查。应对每个步长报告价格均值、Monte Carlo标准误与网格加密趋势，而不只给最终路径数量。",
+      "caveat": "若模拟使用GBM精确指数转移，网格上价格分布可精确，但连续监控障碍仍会存在离散监测偏差。时间步长、payoff光滑性和过程模型必须同时说明。",
+      "deep_sections": [
+        {
+          "title": "MSE为什么分成两个部分",
+          "question": "为什么十倍模拟路径也不能自动消除离散偏差？",
+          "paragraphs": [
+            "有限步长h定义了一个与连续过程不同的近似模型，路径平均随着模拟数量增加只会趋向该近似模型的期望I_h。",
+            "若I_h≠I，更多路径只会更精确地逼近错误的离散目标，最终误差存在系统下界。"
+          ],
+          "formulas": [
+            {
+              "label": "数学推导与验证",
+              "tex": "\\mathbb E[(\\widehat I-I)^2]=\\operatorname{Var}(\\widehat I)+(\\mathbb E\\widehat I-I)^2"
+            }
+          ],
+          "proof": "把估计误差拆成(估计值−其期望)+(其期望−真值)，平方取期望时交叉项为零，得到方差与偏差平方相加。",
+          "worked": "GBM期望算例的离散均值110.25、连续真值110.51709，N→∞时随机方差趋0，但偏差仍为−0.26709。",
+          "limitation": "若多条路径相关或使用QMC，方差缩放不一定是1/N；偏差分解仍成立但方差项需按相应抽样机制计算。"
+        },
+        {
+          "title": "Euler均值的显式误差",
+          "question": "为什么Euler离散的GBM均值一般不等于指数增长均值？",
+          "paragraphs": [
+            "Euler一步的乘法因子是1+μh+σΔW，其期望为1+μh，而精确GBM一步的期望因子为e^{μh}。",
+            "连续重复乘N次会累积这一差异，表现为固定h时系统性弱偏差。"
+          ],
+          "formulas": [
+            {
+              "label": "数学推导与验证",
+              "tex": "(1+\\mu h)^{T/h}\\ne e^{\\mu T}\\quad\\text{一般成立}"
+            }
+          ],
+          "proof": "利用Euler更新S_{k+1}=S_k(1+μh+σΔW_k)，Brownian增量独立且均值零，递推条件期望得E S_N=S0(1+μh)^N。连续模型期望由GBM解给出S0 e^{μT}。",
+          "worked": "μ=.1、h=.5、T=1时Euler因子1.05²=1.1025，精确因子e^.1≈1.105170，单位S0偏差约−.002670。",
+          "limitation": "本例只针对终值线性payoff的期望；障碍或非光滑期权价格偏差可能有不同误差阶。"
+        },
+        {
+          "title": "步长与抽样预算的联合选择",
+          "question": "计算预算固定时，应该先把h缩小还是先增加路径数？",
+          "paragraphs": [
+            "缩小h提高每条路径的时间更新成本，却降低离散偏差；增加路径数降低随机误差，却不改变近似模型。",
+            "如果弱偏差约C h^p、每条路径成本O(T/h)，可借MSE≈V/N+C²h^{2p}做近似预算分配。"
+          ],
+          "formulas": [
+            {
+              "label": "数学推导与验证",
+              "tex": "\\operatorname{MSE}\\approx V/N+C^2h^{2p}"
+            }
+          ],
+          "proof": "令弱偏差主项为C h^p并假定独立路径模拟方差约V/N，将二者代入偏差方差分解即得。",
+          "worked": "若h减半、弱一阶成立，则偏差近似减半，偏差平方降到四分之一；路径数量翻四倍则随机方差约降到四分之一。",
+          "limitation": "实际常数V、C未知，需要网格试验和重复模拟估计；不能把局部误差阶直接当作实盘计算成本保证。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "numerical-n0386",
+          "label": "Euler-Maruyama"
+        },
+        {
+          "kind": "math",
+          "id": "numerical-n0387",
+          "label": "Milstein方法"
+        },
+        {
+          "kind": "math",
+          "id": "numerical-n0388",
+          "label": "弱强收敛"
+        }
+      ]
+    }
+  ]
+}
