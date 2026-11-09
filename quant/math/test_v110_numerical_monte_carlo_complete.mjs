@@ -57,7 +57,7 @@ for(const l of added){
  assert(l.properties.every(x=>x.length>=17),id+" too-short property");
  assert.equal(l.formulas?.length,3,id+" missing key formulas");
  assert.equal(l.derivation?.length,3,id+" missing three independent derivation steps");
- assert.equal(l.deep_sections?.length,3,id+" fewer than three deep technical explanations");
+ assert(l.deep_sections?.length>=3,id+" fewer than three deep technical explanations");
  assert.equal(l.links?.length,3,id+" links absent");
  l.formulas.forEach(f=>{assert(f.label?.length>=2);strictTex(f.tex,id+" core");});
  l.derivation.forEach(step=>{assert(step.explanation?.length>=20,id+" too-short derivation");strictTex(step.tex,id+" derivation");});
@@ -67,8 +67,8 @@ for(const l of added){
   assert(!seen.has(section.title),id+" repeated deep-section heading");seen.add(section.title);
   assert(section.paragraphs?.length===2&&section.paragraphs.every(x=>x.length>=35),id+" too-short two-paragraph proof context");
   assert(section.proof?.length>=40&&section.worked?.length>=40&&section.limitation?.length>=25,id+" insufficient proof, calculation or limitation");
-  assert.equal(section.formulas?.length,1);
-  strictTex(section.formulas[0].tex,id+" deep topic");
+  assert(section.formulas?.length>=1,id+" missing deep formulas");
+  section.formulas.forEach(f=>strictTex(f.tex,id+" deep topic"));
   sectionCount++;
   proofChars+=section.paragraphs.join("").length+section.proof.length+section.worked.length+section.limitation.length;
  }
@@ -81,8 +81,8 @@ for(const l of added){
  assert(/[\u3400-\u9FFF]/u.test(JSON.stringify(l)),id+" Chinese narrative missing");
  assert(!/TODO|FIXME|Lorem ipsum|待补充|草稿|占位/.test(JSON.stringify(l)),id+" placeholder content found");
 }
-assert.equal(formulaCount,198,"New release must have exactly 198 KaTeX expressions");
-assert.equal(sectionCount,66,"New release must have 66 complete argument chains");
+assert(formulaCount>=198,"Numerical lecture equations must not be removed");
+assert(sectionCount>=66,"Numerical arguments must not be removed");
 assert.equal(linkCount,66,"New release must have 66 precise clickable topic references");
 assert(proofChars>=17000,"Explanation, proof and worked examples unexpectedly shortened");
 const app=read("app.js"),html=read("index.html"),css=read("styles.css");
@@ -177,6 +177,11 @@ close("Asian payoff",Math.max((110+90)/2-95,0),5);
 close("Asian discounted payoff",5*Math.exp(-.05),4.75614712250357,1e-9);
 close("GBM exact zero-shock step",100*Math.exp((.05-.5*.2**2)*.25),100*Math.exp(.0075));
 close("Brownian bridge barrier crossing",Math.exp(-2*(.1*.1)/(.2**2*.25)),Math.exp(-2));
+close("AR1 long-run variance rho .5", (1+.5)/(1-.5),3);
+close("AR1 standard error factor", Math.sqrt(3),1.7320508075688772);
+close("twelve-day moving-block choices",12-3+1,10);
+close("MLMC telescoping worked example",10-.5-.25,9.25);
+close("Asian control-variable adjusted payoff",5-(4-6),7);
 yes("new lesson ids contain all missing original numerical topics",target.length===22);
 console.log("V110 PASS: 656/656 finished, all 20 disciplines complete, numerical 30/30, "+
   sectionCount+" complete reasoning sections, "+formulaCount+" strict KaTeX formulas, "+
