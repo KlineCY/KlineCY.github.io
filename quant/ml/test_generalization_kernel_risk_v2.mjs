@@ -61,7 +61,7 @@ near(.06/.02,3);
 near(.5*.08+.5*.04,.06);
 const html=fs.readFileSync(new URL("./index.html",root),"utf8"),css=fs.readFileSync(new URL("./atlas.css",root),"utf8");
 for(const id of ids)assert(html.includes("#lesson/"+id),"not linked in advanced learning route "+id);
-assert(html.includes("atlas.js?v=20261109-v113-quality-finance-math"));
+assert(html.includes("atlas.js?v=20261109-v114-pit-regression-causal"));
 assert(html.includes("atlas.css?v=20261104-copula-v7"));
 assert(html.includes('class="atlas-spectral-path atlas-v2-advanced"'));
 assert(css.includes(".atlas-v2-advanced>summary")&&css.includes("@media print")&&css.includes("overflow-x:auto"));
