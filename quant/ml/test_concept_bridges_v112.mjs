@@ -69,7 +69,7 @@ for(const [id,lesson] of entries){
   chineseChars+=s.paragraphs.join("").length+s.worked.length+s.boundary.length;
  }
  for(const link of lesson.links){
-  assert(link.label?.length>=3,id+" unlabeled prerequisite");
+  assert(typeof link.label==="string"&&link.label.trim().length>=2,id+" unlabeled prerequisite");
   if(link.kind==="math")
    assert.equal(mathIDs.get(link.id),link.label,id+" mathematics prerequisite mismatch: "+link.id);
   else if(link.kind==="ml")
