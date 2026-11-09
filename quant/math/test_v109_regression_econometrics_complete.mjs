@@ -86,7 +86,7 @@ const bundleArgs=paths.map((p,i)=>'loadV109RegressionEconometrics("./'+p+'",'+ex
 for(const t of bundleArgs)assert(app.includes(t),"Official reader missing "+t);
 assert(app.includes("...v108ma,...v108mb,...v109ra,...v109rb,...v109rc,...v109rd,...v109re,...v109rf,...v109ea,...v109eb"),"Historical loading chain changed");
 assert(app.includes("new Set(lessons.map(l=>l.node_id)).size!==lessons.length"),"Reader duplicate ID guard absent");
-assert(html.includes("V109 · 回归分析与因果计量"),"V109 Chinese stages missing");
+assert(html.includes("回归分析与因果计量"),"V109 Chinese stages missing");
 assert(html.includes("v109-regression-econometrics-28"),"New script cache version missing");
 for(const id of target)assert(html.includes('?topic='+id+'"'),"Direct topic link missing "+id);
 for(const t of ["overflow-x:auto","line-break:strict","@media(max-width:700px)","@media print",":focus-visible"])

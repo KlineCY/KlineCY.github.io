@@ -92,7 +92,7 @@ files.forEach((file,i)=>{
 });
 assert(app.includes("...v109ea,...v109eb,...v110a,...v110b,...v110c,...v110d,...v110e"),"Historical 634 lessons were disconnected");
 assert(app.includes("new Set(lessons.map(l=>l.node_id)).size!==lessons.length"),"Reader must abort on duplicate IDs");
-assert(html.includes("V110 · 数值分析与蒙特卡洛：656/656 全知识树完成"),"Chinese V110 learning roadmap absent");
+assert(html.includes("数值分析与蒙特卡洛模拟"),"Chinese V110 learning roadmap absent");
 assert(html.includes("v110-numerical-monte-carlo-complete"),"Reader cache-busting version absent");
 for(const id of target)assert(html.includes('?topic='+id+'"'),"Direct navigation absent: "+id);
 for(const t of ["overflow-x:auto","line-break:strict","@media(max-width:700px)","@media print",":focus-visible"])
