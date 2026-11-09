@@ -95,7 +95,7 @@ assert.equal(mounted.size,12);
 assert.equal(atlas.catalog.items.length,720,"Mount must not append duplicate independent articles");
 for(const id of targets)assert(html.includes('href="#lesson/'+id+'"'),"Missing direct Chinese study path "+id);
 assert(html.includes("V111 · 机器学习 × 量化数学"),"Chinese V111 roadmap missing");
-assert(html.includes("atlas.js?v=20261109-v112-20-math-ml-lessons"),"Atlas new source asset cache missing");
+assert(html.includes("atlas.js?v=20261109-v113-quality-finance-math"),"Atlas new source asset cache missing");
 for(const term of ["line-break:strict","overflow-x:auto","@media(max-width:700px)",".atlas-concept-jump:focus-visible",".atlas-concept-chain"])
  assert(css.includes(term),"CJK, KaTeX, mobile, focus or typography CSS regressed: "+term);
 const ci=read("../../.github/workflows/test-quant-ml.yml");
