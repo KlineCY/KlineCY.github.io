@@ -40,7 +40,7 @@ assert(html.includes("atlas.js?v=20261109-v115-reader-layout-v116-ml-bridges-v11
  "JS cache must be refreshed after removing retired controls");
 assert(html.includes("atlas.css?v=20261109-v115-reader-layout-v117-no-learning-progress"),
  "CSS cache must be refreshed after removing retired controls");
-assert(!/\\bstate\\.read\\b/.test(js),"Runtime must not keep per-lesson read status");
-assert(!/group\\.read|const done=c\\.rows\\.filter/.test(js),
+assert(!js.includes("state.read"),"Runtime must not keep per-lesson read status");
+assert(!js.includes("group.read")&&!js.includes("const done=c.rows.filter"),
  "Directory must not calculate or display completion counts");
 console.log("PASS: no learner tracking, local storage, completion controls or progress ratios; core reading navigation retained");
