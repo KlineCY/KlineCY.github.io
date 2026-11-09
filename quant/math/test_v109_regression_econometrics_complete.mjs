@@ -25,7 +25,7 @@ const target=[
 ];
 assert.deepEqual(added.map(x=>x.id),target,"V109 chapters must use the precise untouched missing IDs");
 const old=fs.readdirSync(root)
- .filter(f=>/^lessons-.*\.json$/.test(f)&&!paths.includes(f))
+ .filter(f=>/^lessons-.*\.json$/.test(f)&&!paths.includes(f)&&!/^lessons-numerical-v110[a-e]\.json$/.test(f))
  .flatMap(f=>{const d=json(f);return Array.isArray(d.lessons)?d.lessons:[];});
 assert.equal(old.length,606,"Historical 606 full lessons must remain in the repository");
 assert.equal(new Set(old.map(x=>x.node_id)).size,606,"Previous lesson identity must remain unique");
