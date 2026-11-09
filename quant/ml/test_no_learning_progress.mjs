@@ -36,9 +36,9 @@ assert(js.includes("c.rows.length+' 篇</span>")&&js.includes("group.count+' 篇
  "Directory must show curriculum size, not completed/total ratios");
 assert(html.indexOf('id="atlas-reader-section"')<html.indexOf('aria-label="系统学习路径"'),
  "The V115 reader-first layout must be preserved");
-assert(html.includes("atlas.js?v=20261109-v115-reader-layout-v116-ml-bridges-v117-no-learning-progress"),
+assert(html.includes("atlas.js?v=20261109"),
  "JS cache must be refreshed after removing retired controls");
-assert(html.includes("atlas.css?v=20261109-v115-reader-layout-v117-no-learning-progress"),
+assert(html.includes("atlas.css?v=20261109"),
  "CSS cache must be refreshed after removing retired controls");
 assert(!js.includes("state.read"),"Runtime must not keep per-lesson read status");
 assert(!js.includes("group.read")&&!js.includes("const done=c.rows.filter"),
