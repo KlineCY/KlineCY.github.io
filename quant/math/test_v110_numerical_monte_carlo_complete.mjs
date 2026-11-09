@@ -1,0 +1,184 @@
+import fs from "node:fs";
+import assert from "node:assert/strict";
+import katex from "katex";
+const root=new URL("./",import.meta.url);
+const read=name=>fs.readFileSync(new URL(name,root),"utf8");
+const json=name=>JSON.parse(read(name));
+const syllabus=json("curriculum.json");
+const nodes=syllabus.nodes;
+const registry=new Map(nodes.map(node=>[node.id,node]));
+assert.equal(nodes.length,656,"Original mathematics syllabus must remain 656 nodes");
+assert.equal(registry.size,656,"Duplicate curriculum IDs");
+assert.equal(syllabus.disciplines.length,20,"Original twenty mathematical disciplines must remain intact");
+const files=["lessons-numerical-v110a.json","lessons-numerical-v110b.json","lessons-numerical-v110c.json","lessons-numerical-v110d.json","lessons-numerical-v110e.json"];
+const counts=[4,5,5,4,4];
+const newDocs=files.map(json);
+newDocs.forEach((d,i)=>{
+ assert.equal(d.version,1,"Wrong lesson schema");
+ assert.equal(d.revision,"V110","Wrong revision on "+files[i]);
+ assert.equal(d.lessons?.length,counts[i],"Wrong number of lectures on "+files[i]);
+});
+const added=newDocs.flatMap(d=>d.lessons);
+const target=[364,365,366,368,371,372,373,374,375,376,377,378,379,380,381,383,384,385,387,388,389,390]
+ .map(n=>"numerical-n"+String(n).padStart(4,"0"));
+assert.deepEqual(added.map(x=>x.id),target,"V110 must preserve every missing original numerical syllabus ID");
+const historical=fs.readdirSync(root)
+ .filter(n=>/^lessons-.*\.json$/.test(n)&&!files.includes(n))
+ .flatMap(n=>{const d=json(n);return Array.isArray(d.lessons)?d.lessons:[];});
+assert.equal(historical.length,634,"Never overwrite or delete earlier 634 complete lectures");
+assert.equal(new Set(historical.map(l=>l.node_id)).size,634,"Historical IDs must remain unique");
+const all=[...historical,...added];
+assert.equal(all.length,656,"All 656 knowledge nodes must have full lecture content");
+assert.equal(new Set(all.map(l=>l.node_id)).size,656,"A course was overwritten or duplicated");
+assert(all.every(l=>registry.get(l.node_id)?.title===l.title),"Syllabus title mismatches must be rejected");
+const authored=new Set(all.map(l=>l.node_id));
+assert(nodes.every(n=>authored.has(n.id)),"Every syllabus node must have a complete lesson");
+for(const dept of syllabus.disciplines){
+ const dnodes=nodes.filter(n=>n.discipline_id===dept.id);
+ const written=all.filter(l=>l.node_id.startsWith(dept.id+"-"));
+ assert.equal(written.length,dnodes.length,dept.title+" incomplete");
+}
+assert.equal(all.filter(l=>l.node_id.startsWith("numerical-")).length,30,"Numerical and Monte Carlo must be 30/30");
+let formulaCount=0,sectionCount=0,linkCount=0,proofChars=0;
+function strictTex(s,where){
+ assert(typeof s==="string"&&s.length>=8,where+" empty formula");
+ assert(!/[\uFFFD\u200B\u200C\u200D\uFEFF]/u.test(s),where+" contains hidden/invalid Unicode");
+ try{katex.renderToString(s,{displayMode:true,throwOnError:true,strict:"error"});}
+ catch(e){throw Error(where+" strict KaTeX failed: "+s+" | "+e.message);}
+ formulaCount++;
+}
+for(const l of added){
+ const id=l.node_id;
+ assert.equal(l.id,id);
+ assert.equal(registry.get(id)?.title,l.title);
+ for(const field of ["definition","assumptions","example","application","caveat"])
+  assert(l[field]?.length>=50,id+" insufficient "+field);
+ assert.equal(l.properties?.length,4,id+" missing four propositions");
+ assert(l.properties.every(x=>x.length>=17),id+" too-short property");
+ assert.equal(l.formulas?.length,3,id+" missing key formulas");
+ assert.equal(l.derivation?.length,3,id+" missing three independent derivation steps");
+ assert.equal(l.deep_sections?.length,3,id+" fewer than three deep technical explanations");
+ assert.equal(l.links?.length,3,id+" links absent");
+ l.formulas.forEach(f=>{assert(f.label?.length>=2);strictTex(f.tex,id+" core");});
+ l.derivation.forEach(step=>{assert(step.explanation?.length>=20,id+" too-short derivation");strictTex(step.tex,id+" derivation");});
+ const seen=new Set();
+ for(const section of l.deep_sections){
+  assert(section.title?.length>=7&&section.question?.length>=10,id+" underdeveloped section");
+  assert(!seen.has(section.title),id+" repeated deep-section heading");seen.add(section.title);
+  assert(section.paragraphs?.length===2&&section.paragraphs.every(x=>x.length>=35),id+" too-short two-paragraph proof context");
+  assert(section.proof?.length>=40&&section.worked?.length>=40&&section.limitation?.length>=25,id+" insufficient proof, calculation or limitation");
+  assert.equal(section.formulas?.length,1);
+  strictTex(section.formulas[0].tex,id+" deep topic");
+  sectionCount++;
+  proofChars+=section.paragraphs.join("").length+section.proof.length+section.worked.length+section.limitation.length;
+ }
+ for(const link of l.links){
+  assert.equal(link.kind,"math");
+  assert(registry.has(link.id),id+" broken internal reference: "+link.id);
+  assert.equal(link.label,registry.get(link.id).title,id+" incorrect reference title: "+link.id);
+  linkCount++;
+ }
+ assert(/[\u3400-\u9FFF]/u.test(JSON.stringify(l)),id+" Chinese narrative missing");
+ assert(!/TODO|FIXME|Lorem ipsum|待补充|草稿|占位/.test(JSON.stringify(l)),id+" placeholder content found");
+}
+assert.equal(formulaCount,198,"New release must have exactly 198 KaTeX expressions");
+assert.equal(sectionCount,66,"New release must have 66 complete argument chains");
+assert.equal(linkCount,66,"New release must have 66 precise clickable topic references");
+assert(proofChars>=17000,"Explanation, proof and worked examples unexpectedly shortened");
+const app=read("app.js"),html=read("index.html"),css=read("styles.css");
+const ci=read("../../.github/workflows/test-quant-math.yml");
+files.forEach((file,i)=>{
+ assert(app.includes('loadV110NumericalMonteCarlo("./'+file+'",'+counts[i]+')'),"Reader not loading "+file);
+});
+assert(app.includes("...v109ea,...v109eb,...v110a,...v110b,...v110c,...v110d,...v110e"),"Historical 634 lessons were disconnected");
+assert(app.includes("new Set(lessons.map(l=>l.node_id)).size!==lessons.length"),"Reader must abort on duplicate IDs");
+assert(html.includes("V110 · 数值分析与蒙特卡洛：656/656 全知识树完成"),"Chinese V110 learning roadmap absent");
+assert(html.includes("v110-numerical-monte-carlo-complete"),"Reader cache-busting version absent");
+for(const id of target)assert(html.includes('?topic='+id+'"'),"Direct navigation absent: "+id);
+for(const t of ["overflow-x:auto","line-break:strict","@media(max-width:700px)","@media print",":focus-visible"])
+ assert(css.includes(t),"Responsive formulas, Chinese line breaks or accessible styles regressed: "+t);
+assert(ci.includes("node quant/math/test_v110_numerical_monte_carlo_complete.mjs"),"V110 strict QA not wired to CI");
+for(const test of ["test_v106_calculus_core.mjs","test_v107_calculus_advanced.mjs",
+                   "test_v108_foundation_measure_complete.mjs","test_v109_regression_econometrics_complete.mjs"])
+ assert(read(test).includes("lessons-numerical-v110[a-e]"),"Old fixed-regression baseline not insulated: "+test);
+let numericChecks=0;
+function close(label,x,y,tol=1e-8){
+ assert(Number.isFinite(x),label+" nonfinite: "+x);
+ assert(Math.abs(x-y)<=tol,label+" failed "+x+" != "+y);
+ numericChecks++;
+}
+function yes(label,cond){assert(cond,label);numericChecks++;}
+close("rounding gamma 100",100e-6/(1-100e-6),.0001000100010001,1e-12);
+close("rounding cancellation",1.234-1.233,.001,1e-12);
+close("interpolation polynomial at 1.5",1.5**2,2.25);
+close("forward difference x²",((1.1)**2-1)/.1,2.1);
+close("central difference x²",((1.1)**2-(.9)**2)/.2,2);
+close("second central difference x²",((1.1)**2-2+(.9)**2)/.01,2);
+close("SVD truncated error",Math.sqrt(0**2+1**2),1);
+close("SVD pseudoinverse",3*(1/3),1);
+close("power method initial Rayleigh",(.5*3+.5*1),2);
+close("power method 1 Rayleigh",(3*9+1)/10,2.8);
+close("power method ratio at n3",1/(3**3),1/27);
+close("sparse A1 row",2*1-1*1,1);
+close("sparse A2 row",-1+2-1,0);
+close("sparse A3 row",-1+2,1);
+close("sparse storage nnz",2+3+2,7);
+close("bisection f midpoint",1.5**2-2,.25);
+close("bisection second midpoint",1.25**2-2,-.4375);
+close("bisection nine-step bound",1/(2**10),.0009765625);
+let n1=(1.5+2/1.5)/2, n2=(n1+2/n1)/2;
+close("Newton first",n1,17/12);
+close("Newton second",n2,577/408);
+close("secant first",2-2*(2-1)/(2-(-1)),4/3);
+let s3=4/3-((4/3)**2-2)*((4/3)-2)/(((4/3)**2-2)-(2**2-2));
+close("secant second",s3,7/5);
+const f=x=>x**4;
+const simp=(a,b)=>(b-a)/6*(f(a)+4*f((a+b)/2)+f(b));
+const s1=simp(0,1), s2=simp(0,.5)+simp(.5,1);
+close("Simpson single",s1,5/24);
+close("Simpson split",s2,77/384);
+close("Simpson refined error",s2-s1,-1/128);
+close("Richardson Simpson correction",s2+(s2-s1)/15,.2);
+close("Gauss x2",2*(1/Math.sqrt(3))**2,2/3);
+close("Gauss x4",2*(1/Math.sqrt(3))**4,2/9);
+close("Gauss x4 true integral",2/5,.4);
+close("forward x3 derivative",((1.1)**3-1)/.1,3.31);
+close("central x3 derivative",((1.1)**3-(.9)**3)/.2,3.01);
+close("exp inverse sample",-Math.log(1-.75)/2,Math.log(4)/2);
+close("exp inverse CDF",1-Math.exp(-2*(Math.log(4)/2)),.75);
+close("rejection envelope acceptance",1/2,.5);
+yes("rejection point .8 accepted",.5<=.8);
+yes("rejection point .2 rejected",.5>.2);
+close("importance target E x²",1/3,.3333333333333333);
+close("importance q E x",2/3,.6666666666666666);
+close("importance weighted variance",(.5-(2/3)**2)/4,1/72);
+close("importance direct variance",1/5-1/9,4/45);
+close("antithetic sample",(.25**2+.75**2)/2,.3125);
+close("antithetic pair variance",1/80-1/144,1/180);
+close("independent pair variance",(4/45)/2,2/45);
+close("antithetic variance improvement",(1/180)/(2/45),1/8);
+close("van der Corput 4 prefix",(0+.5+.25+.75)/4,.375);
+close("randomized QMC illustrative SE",Math.sqrt((.02**2+.02**2)/(3*2)),Math.sqrt(.0008/6));
+const emMean=100*(1+.1*.5)**2, trueMean=100*Math.exp(.1);
+close("Euler GBM mean",emMean,110.25);
+close("continuous GBM mean",trueMean,110.51709180756477,1e-7);
+close("Euler mean discretization bias",emMean-trueMean,-.26709180756477,1e-7);
+close("Milstein Euler one step",100+20*.1,102);
+close("Milstein correction",.5*20*.2*(.1**2-.25),-.48);
+close("Milstein terminal 1 step",102-.48,101.52);
+close("Euler deterministic h.5",(1+.5)**2,2.25);
+close("Euler deterministic h.25",(1+.25)**4,2.44140625);
+close("Euler deterministic weak error",Math.E-2.25,.468281828459045);
+close("bootstrap mean", (1+2+3)/3,2);
+close("bootstrap conditional mean variance",((1-2)**2+(2-2)**2+(3-2)**2)/9,2/9);
+close("bootstrap empirical SD",Math.sqrt(2/9),Math.sqrt(2)/3);
+close("Asian average",(110+90)/2,100);
+close("Asian payoff",Math.max((110+90)/2-95,0),5);
+close("Asian discounted payoff",5*Math.exp(-.05),4.75614712250357,1e-9);
+close("GBM exact zero-shock step",100*Math.exp((.05-.5*.2**2)*.25),100*Math.exp(.0075));
+close("Brownian bridge barrier crossing",Math.exp(-2*(.1*.1)/(.2**2*.25)),Math.exp(-2));
+yes("new lesson ids contain all missing original numerical topics",target.length===22);
+console.log("V110 PASS: 656/656 finished, all 20 disciplines complete, numerical 30/30, "+
+  sectionCount+" complete reasoning sections, "+formulaCount+" strict KaTeX formulas, "+
+  linkCount+" exact curriculum links, "+proofChars+" Chinese proof characters, "+
+  numericChecks+" independent arithmetic checks, CJK/mobile/print/legacy gates");
