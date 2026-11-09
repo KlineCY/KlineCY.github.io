@@ -11,7 +11,7 @@ let studied=new Set();
 try{const saved=JSON.parse(localStorage.getItem(progressKey)||"[]");if(Array.isArray(saved))studied=new Set(saved)}catch(_){}
 const saveProgress=()=>{try{localStorage.setItem(progressKey,JSON.stringify([...studied]))}catch(_){}};
 const getDept=id=>deptMap.get(id),getChap=id=>chapMap.get(id),getNode=id=>nodeMap.get(id);
-const humanStatus=node=>lessonMap.has(node.id)?"完整讲义":"知识目录";
+const humanStatus=node=>lessonMap.has(node.id)?"完整讲义":"正文暂不可用";
 const isComplete=node=>lessonMap.has(node.id);
 function setURL(updates){
  const url=new URL(location.href);
@@ -70,7 +70,7 @@ const b=document.createElement("button");b.className="node"+(n.id===activeId?" a
 const ok=isComplete(n);
 b.title=n.title;
 if(n.id===activeId)b.setAttribute("aria-current","page");
-b.innerHTML='<span class="complete-mark" aria-hidden="true">'+(studied.has(n.id)?"✓":ok?"●":"·")+'</span><span class="node-index">'+String(n.order).padStart(2,"0")+'</span><span class="node-name">'+esc(n.title)+'</span><span class="node-label'+(ok?" complete":"")+'">'+(ok?"讲义":"目录")+"</span>";
+b.innerHTML='<span class="complete-mark" aria-hidden="true">'+(studied.has(n.id)?"✓":ok?"●":"·")+'</span><span class="node-index">'+String(n.order).padStart(2,"0")+'</span><span class="node-name">'+esc(n.title)+'</span><span class="node-label'+(ok?" complete":"")+'">'+(ok?"讲义":"暂不可用")+"</span>";
 b.addEventListener("click",()=>selectNode(n.id));
 return b;
 }
@@ -214,8 +214,8 @@ renderMathDeepSections(n,lesson,container);
 }
 function outlineArticle(n,container){
 const ch=getChap(n.chapter_id),dept=getDept(n.discipline_id);
-const section=makeSection("本知识点的学习位置");
-const c=document.createElement("p");c.textContent="此知识点位于「"+dept.title+" → "+ch.title+"」第 "+n.order+" 节，难度为 "+n.level+"。当前已纳入完整学习目录，但尚未编写独立的定义—性质—证明—例题讲义。";section.appendChild(c);
+const section=makeSection("讲义加载提示");
+const c=document.createElement("p");c.textContent="未能找到「"+dept.title+" → "+ch.title+"」第 "+n.order+" 节的讲义正文。可刷新页面重试，或通过章节目录打开其他知识点。";section.appendChild(c);
 if(n.summary){
  const intro=makeSection("研究范围与学习目标");paragraph(intro,n.summary);container.appendChild(intro);
  const pre=makeSection("先修知识");const links=document.createElement("div");links.className="math-prerequisites";
@@ -225,7 +225,7 @@ if(n.summary){
  pre.appendChild(links);container.appendChild(pre);
 }
 const guide=document.createElement("div");guide.className="outline-note";
-guide.textContent="当前状态：知识目录（未标记为完整讲义）。建议按本章节列示的顺序学习，先掌握前置章节，再阅读以下官方课件与教材。后续可以逐节增加严格定义、条件、LaTeX公式和完整推导。";
+guide.textContent="讲义正文暂不可用。章节导航和相关参考资料仍可使用；请重新加载页面后再尝试打开该知识点。";
 section.appendChild(guide);
 const list=document.createElement("ol");list.className="outline-list";
 const chapterNodes=ch.node_ids.map(getNode).filter(Boolean);
@@ -249,7 +249,7 @@ function appendLearningSequence(node,container){
  function add(target,label){
   const point=getNode(target);if(!point)return;
   const button=document.createElement("button");button.type="button";button.className="action";
-  button.textContent=label+" · "+point.title+(lessonMap.has(target)?"":"（待扩写）");
+  button.textContent=label+" · "+point.title+(lessonMap.has(target)?"":"（正文暂不可用）");
   button.addEventListener("click",()=>selectNode(target));row.appendChild(button);
  }
  if(prevId)add(prevId,"上一节");
