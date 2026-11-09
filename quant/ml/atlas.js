@@ -3,28 +3,7 @@
 const $=id=>document.getElementById(id);
 const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const LESSON=/^#(?:lesson|ml)\/(m\d\d-c\d\d-p\d\d)$/;
-const KEY="kline-quant-atlas-read-v1";
-const state={index:[],byId:new Map(),domains:{},searchText:new Map(),term:"",topic:"",activeId:"",read:new Set(),enhanced:new Set(),conceptChapters:new Set(),chapterOpen:new Map(),domainOpen:new Map(),learnedOnly:false,unreadOnly:false};
-try {const saved=JSON.parse(localStorage.getItem(KEY)||"[]");if(Array.isArray(saved))state.read=new Set(saved.filter(v=>typeof v==="string"))}catch(_){}
-function saveRead(){try{localStorage.setItem(KEY,JSON.stringify([...state.read]))}catch(_){}}
-function serializeReadProgress(read,knownIds){
- const ids=[...new Set(read)].filter(id=>knownIds.has(id)).sort();
- return JSON.stringify({format:"kline-quant-ml-progress",version:1,read_ids:ids},null,2);
-}
-function parseReadProgress(source,knownIds){
- if(typeof source!=="string"||source.length>65536)throw Error("文件过大或类型不正确");
- const payload=JSON.parse(source);
- if(!payload||payload.format!=="kline-quant-ml-progress"||payload.version!==1||
-  !Array.isArray(payload.read_ids)||payload.read_ids.length>knownIds.size)
-  throw Error("学习进度格式或版本不受支持");
- const result=new Set();
- for(const id of payload.read_ids){
-  if(typeof id!=="string"||!knownIds.has(id)||result.has(id))
-   throw Error("学习进度包含重复、非法或不属于当前课程的知识点");
-  result.add(id);
- }
- return result;
-}
+const state={index:[],byId:new Map(),domains:{},searchText:new Map(),term:"",topic:"",activeId:"",enhanced:new Set(),conceptChapters:new Set(),chapterOpen:new Map(),domainOpen:new Map()};
 function showStatus(message,error=false){const el=$("atlas-status");el.textContent=message;el.classList.toggle("atlas-error",error)}
 function parseID(){return (location.hash.match(LESSON)||[])[1]||""}
 function setTopic(v,updateUrl=true){
@@ -169,25 +148,10 @@ async function loadArchive(){
  }
  return parsed;
 }
-function setProgressFilter(kind,checked){
- if(kind==="learned"){state.learnedOnly=checked;if(checked)state.unreadOnly=false}
- else if(kind==="unread"){state.unreadOnly=checked;if(checked)state.learnedOnly=false}
- else throw Error("未知学习进度筛选");
- $("atlas-learned-only").checked=state.learnedOnly;
- $("atlas-unread-only").checked=state.unreadOnly;
- renderDirectory();
-}
 function visibleLessons(){
  const words=state.term.split(/\s+/).filter(Boolean);
- return state.index.filter(x=>(!state.topic||x.domain_id===state.topic)&&(!state.learnedOnly||state.read.has(x.id))&&(!state.unreadOnly||!state.read.has(x.id))&&
- (words.length===0||words.every(word=>state.searchText.get(x.id)?.includes(word))));
-}
-function updateReadStats(){
- const n=state.index.filter(x=>state.read.has(x.id)).length;
- const el=$("atlas-read-count");if(el)el.textContent=n+" / "+state.index.length+" 篇已标记";
- const count=$("atlas-learned-count");if(count)count.textContent=n;
- const b=$("atlas-read-toggle");
- if(b&&state.activeId){const done=state.read.has(state.activeId);b.setAttribute("aria-pressed",String(done));b.textContent=done?"已学 · 点击取消":"标记已学";}
+ return state.index.filter(x=>(!state.topic||x.domain_id===state.topic)&&
+  (words.length===0||words.every(word=>state.searchText.get(x.id)?.includes(word))));
 }
 function chapterShouldOpen(key,active){
  const preference=state.chapterOpen.get(key);
@@ -206,14 +170,13 @@ function setCatalogOpen(open){
 }
 function renderDirectory(){
  const matches=visibleLessons();
- showStatus("显示 "+matches.length+" / "+state.index.length+" 篇讲义 · "+matches.filter(x=>state.read.has(x.id)).length+" 篇已学");
+ showStatus("显示 "+matches.length+" / "+state.index.length+" 篇讲义");
  const domains=new Map();
  for(const x of matches){
   if(!domains.has(x.domain_id))
-   domains.set(x.domain_id,{id:x.domain_id,title:x.domain,chapters:new Map(),count:0,read:0});
+   domains.set(x.domain_id,{id:x.domain_id,title:x.domain,chapters:new Map(),count:0});
   const group=domains.get(x.domain_id);
   group.count++;
-  if(state.read.has(x.id))group.read++;
   const key=x.domain_id+"_"+x.chapter;
   if(!group.chapters.has(key))group.chapters.set(key,{key,title:x.chapter,number:(x.id.match(/-c(\d+)-/)||[])[1]||"",rows:[]});
   group.chapters.get(key).rows.push(x);
@@ -223,29 +186,27 @@ function renderDirectory(){
   const domainLabel=(group.id.match(/\d+/)||[])[0]||"";
   const chapters=[...group.chapters.values()].map(c=>{
    const open=chapterShouldOpen(c.key,c.rows.some(x=>x.id===state.activeId));
-   const done=c.rows.filter(x=>state.read.has(x.id)).length;
    const links=c.rows.map(x=>{
     const index=(x.id.match(/-p(\d+)$/)||[])[1]||"";
     return '<a href="#lesson/'+esc(x.id)+'" data-id="'+esc(x.id)+'" title="'+esc(x.title)+'"'+
      (x.id===state.activeId?' class="active" aria-current="page"':'')+'>'+
      '<span class="atlas-topic-index">'+esc(index)+'</span><span class="atlas-topic-label">'+
-     (state.read.has(x.id)?'<span class="atlas-done-mark" aria-label="已学">✓ </span>':'')+esc(x.title)+
+     esc(x.title)+
      (state.conceptChapters.has(x.id)?'<small class="atlas-concept-small"> · 精讲</small>':'')+'</span></a>';
    }).join("");
    return '<details class="atlas-section" data-key="'+esc(c.key)+'"'+(open?' open':'')+'>'+
     '<summary><span class="atlas-chapter-title"><span class="atlas-chapter-index">'+esc(c.number)+'</span>'+esc(c.title)+'</span>'+
-    '<span class="atlas-chapter-count">'+done+'/'+c.rows.length+'</span></summary>'+
+    '<span class="atlas-chapter-count">'+c.rows.length+' 篇</span></summary>'+
     '<div class="atlas-chapter-items">'+links+'</div></details>';
   }).join("");
   return '<details class="atlas-domain" data-domain="'+esc(group.id)+'"'+(domainShouldOpen(group.id,active)?' open':'')+'>'+
     '<summary><span class="atlas-domain-heading"><span class="atlas-domain-index">'+esc(domainLabel)+'</span><strong>'+esc(group.title)+'</strong></span>'+
-    '<span class="atlas-domain-count">'+group.read+'/'+group.count+'</span></summary>'+
+    '<span class="atlas-domain-count">'+group.count+' 篇</span></summary>'+
     '<div class="atlas-domain-chapters">'+chapters+'</div></details>';
  }).join("");
  const toc=$("atlas-toc"),previousScroll=toc.scrollTop;
  toc.innerHTML=html||'<p class="atlas-empty-directory">当前筛选没有匹配的知识点，请调整搜索关键词。</p>';
  toc.scrollTop=previousScroll;
- updateReadStats();
 }
 function fixInlineMarkdown(root){
  const nodes=[];
@@ -276,16 +237,6 @@ function renderMath(root){
  });
 }
 function jump(id){if(state.byId.has(id))location.hash="lesson/"+id}
-function continueUnread(){
- const total=state.index.length;
- if(!total)return;
- const current=state.index.findIndex(x=>x.id===state.activeId);
- for(let offset=1;offset<=total;offset++){
-  const row=state.index[(current+offset+total)%total];
-  if(!state.read.has(row.id)){jump(row.id);return}
- }
- showStatus("全部 "+total+" 篇讲义均已标记为已学。");
-}
 function display(){
  const id=parseID()||state.index[0]?.id;
  if(!id)return;
@@ -298,8 +249,6 @@ function display(){
   state.domainOpen.delete(meta.domain_id);
  }
  state.activeId=id;
- if(state.learnedOnly&&!state.read.has(id)){state.learnedOnly=false;$("atlas-learned-only").checked=false}
-  if(state.unreadOnly&&state.read.has(id)){state.unreadOnly=false;$("atlas-unread-only").checked=false}
  // Keep the directory and URL filters synchronized when a cross-topic link is opened.
  if(state.topic&&state.topic!==meta.domain_id){
   state.topic=meta.domain_id;$("atlas-topic").value=state.topic;
@@ -315,8 +264,7 @@ function display(){
   '<button id="atlas-prev" type="button"'+(!prev?' disabled':'')+'>上一篇</button>'+
   '<button id="atlas-next" type="button"'+(!next?' disabled':'')+'>下一篇</button>'+
   '<button id="atlas-copy-link" type="button">复制本文链接</button>'+ 
-   (state.enhanced.has(id)?'<button id="atlas-jump-depth" type="button">跳至进阶推导</button>':'')+
-  '<button id="atlas-read-toggle" type="button" aria-pressed="false">标记已学</button></div>';
+   (state.enhanced.has(id)?'<button id="atlas-jump-depth" type="button">跳至进阶推导</button>':'')+'</div>';
  root.innerHTML='<div class="atlas-crumb">'+esc(meta.domain)+" / "+esc(meta.chapter)+" / 第"+esc((id.match(/-p(\d+)$/)||[])[1]||"")+"节"+
   '</div><h1>'+esc(data.title)+'</h1>'+actions+
   '<div class="article">'+data.html+'</div><p class="atlas-note">系统教材 · 公式、证明和代码请按对应条件使用；示例不构成投资建议。</p>';
@@ -326,12 +274,6 @@ function display(){
  $("atlas-copy-link").addEventListener("click",async()=>{
   const url=new URL(location.href);url.hash="lesson/"+id;
   await copyText(url.href,$("atlas-copy-link"),"已复制链接");
- });
- $("atlas-read-toggle").addEventListener("click",()=>{
-  if(state.read.has(id))state.read.delete(id);else state.read.add(id);
-  if(state.learnedOnly&&!state.read.has(id)){state.learnedOnly=false;$("atlas-learned-only").checked=false}
-  if(state.unreadOnly&&state.read.has(id)){state.unreadOnly=false;$("atlas-unread-only").checked=false}
-  saveRead();renderDirectory();
  });
  root.querySelectorAll(".atlas-concept-jump").forEach(button=>button.addEventListener("click",()=>{
   root.querySelector("#"+button.dataset.target)?.scrollIntoView({block:"start",behavior:"smooth"});
@@ -521,7 +463,6 @@ async function start(){
   for(const newId of newIds)state.conceptChapters.add(newId);
   state.index=data.catalog.items;state.byId=new Map(state.index.map(x=>[x.id,x]));state.domains=data.domains;
   const total=$("atlas-total-lessons");if(total)total.textContent=state.index.length+" 篇系统讲义（含新增专题）";
-  state.read=new Set([...state.read].filter(id=>state.byId.has(id)));
   // Index visible article text as well as titles, chapters and code symbols.
   // This is computed once so subsequent searches do not repeatedly parse all 720 lessons.
   for(const x of state.index){
@@ -549,34 +490,7 @@ async function start(){
     state.chapterOpen.set(details.dataset.key,!details.open);
   });
   $("atlas-toggle-catalog")?.addEventListener("click",()=>setCatalogOpen(!$("atlas-reader-section").classList.contains("catalog-open")));
-  $("atlas-learned-only").addEventListener("change",e=>setProgressFilter("learned",e.target.checked));
-  $("atlas-unread-only").addEventListener("change",e=>setProgressFilter("unread",e.target.checked));
-  $("atlas-resume").addEventListener("click",continueUnread);
-  $("atlas-export").addEventListener("click",()=>{
-   try{
-    const payload=serializeReadProgress(state.read,state.byId);
-    const href=URL.createObjectURL(new Blob([payload],{type:"application/json;charset=utf-8"}));
-    const anchor=document.createElement("a");
-    anchor.href=href;anchor.download="kline-ml-progress.json";
-    document.body.appendChild(anchor);anchor.click();anchor.remove();
-    setTimeout(()=>URL.revokeObjectURL(href),1000);
-    showStatus("已生成学习进度JSON文件："+state.read.size+"篇已学。可保存后在另一设备导入。");
-   }catch(error){showStatus("导出失败："+error.message,true)}
-  });
-  $("atlas-import").addEventListener("click",()=>$("atlas-import-file").click());
-  $("atlas-import-file").addEventListener("change",async event=>{
-   const input=event.currentTarget,file=input.files?.[0];input.value="";
-   if(!file)return;
-   try{
-    if(file.size>65536)throw Error("进度文件超出64KB限制");
-    const imported=parseReadProgress(await file.text(),state.byId);
-    const before=state.read.size;
-    for(const id of imported)state.read.add(id);
-    saveRead();renderDirectory();
-    showStatus("进度合并完成，新增"+(state.read.size-before)+"篇已学记录；总计"+state.read.size+"篇。原有记录未清除。");
-   }catch(error){showStatus("导入未执行："+error.message,true)}
-  });
-  $("atlas-clear").addEventListener("click",()=>{state.term="";$("atlas-search").value="";state.learnedOnly=false;$("atlas-learned-only").checked=false;state.unreadOnly=false;$("atlas-unread-only").checked=false;setTopic("");});
+  $("atlas-clear").addEventListener("click",()=>{state.term="";$("atlas-search").value="";setTopic("");});
   $("atlas-lesson").addEventListener("click",e=>{
    const button=e.target.closest("[data-ml-copy-point-code]");
    if(!button)return;

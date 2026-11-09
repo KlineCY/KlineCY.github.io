@@ -68,6 +68,6 @@ near(Math.sqrt(.5)*1.96,1.385929291125633);
 const html=fs.readFileSync(new URL("index.html",root),"utf8"),css=fs.readFileSync(new URL("atlas.css",root),"utf8");
 for(const id of expected)assert(html.includes("#lesson/"+id),"sixth learning route missing "+id);
 assert(html.includes("780篇可导航课程")&&html.includes("第六条高级学习链"));
-assert(html.includes("atlas.js?v=20261109-v115-reader-layout-v116-ml-bridges")&&html.includes("atlas.css?v=20261109-v115-reader-layout"));
+assert(html.includes("atlas.js?v=20261109-v115-reader-layout-v116-ml-bridges-v117-no-learning-progress")&&html.includes("atlas.css?v=20261109-v115-reader-layout"));
 assert(css.includes("V6 multivariate risk:")&&css.includes("overflow-x:auto")&&css.includes("@media print"),"CJK/formula accessibility missing");
 console.log("PASS: V6 "+rows.length+" full Copula/multivariate risk lectures, "+units+" deep sections, "+equations+" parseable KaTeX formulas, "+sources+" cited resources; 780 unique navigable courses, conditional dependence arithmetic and keyboard/CJK/print regression checks.");
