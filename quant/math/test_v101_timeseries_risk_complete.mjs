@@ -111,7 +111,7 @@ assert(deepChars>=13900,"Depth reduced from reviewed version");
 assert.equal(linkCount,51,"Cross-lesson link count changed");
 const html=read("index.html"),css=read("styles.css"),app=read("app.js");
 const workflow=read("../../.github/workflows/test-quant-math.yml");
-assert(html.includes('app.js?v=20261108-v105-control-game-market-making-complete'),"Reader must bust V100 cache");
+assert(html.includes('app.js?v=20261109'),"Reader must bust V100 cache");
 assert(html.includes("时间序列与风险数学"),"V101 CJK curriculum absent");
 for(const id of ids)assert(html.includes("?topic="+id+'"'),"Study route missing "+id);
 for(const needle of [
