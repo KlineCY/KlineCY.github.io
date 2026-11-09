@@ -64,7 +64,7 @@ near(.5*(.1+.1),.1);
 near(100-1,99);
 const html=fs.readFileSync(new URL("./index.html",base),"utf8"),css=fs.readFileSync(new URL("./atlas.css",base),"utf8");
 for(const id of added)assert(html.includes("#lesson/"+id),"entry route missing "+id);
-assert(html.includes("atlas.js?v=20261109-v113-quality-finance-math"));
+assert(html.includes("atlas.js?v=20261109-v114-pit-regression-causal"));
 assert(html.includes("atlas.css?v=20261104-copula-v7"));
 assert(css.includes("/* V2 READABILITY")&&css.includes("overscroll-behavior-x:contain"));
 console.log("PASS: 3 research evidence lessons, "+sections+" deep sections, "+equations+" math formulas, "+sourceCount+" academic references, 753 distinct ML lessons and stable CJK/formula layout");
