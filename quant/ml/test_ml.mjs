@@ -13,7 +13,7 @@ new vm.Script(nav);
 for(const id of ["quantSidebar","atlas-search","atlas-topic","atlas-clear","atlas-toc",
                  "atlas-lesson","atlas-status","atlas-reader-section"])
  assert(html.includes('id="'+id+'"'),"Published reader control missing "+id);
-assert(html.includes('src="./atlas.js?v=20261109-v115-reader-layout-v116-ml-bridges-v117-no-learning-progress"'),
+assert.match(html,/src="\.\/atlas\.js\?v=[0-9]{8}"/,
  "Published Atlas script resource missing");
 assert(nav.includes('["ml","机器学习 Machine Learning"]'),"Global site curriculum navigation missing");
 assert(atlas.includes("loadArchive")&&atlas.includes("renderMath")&&atlas.includes("copyText"),

@@ -181,7 +181,7 @@ for(const id of ids){
 }
 assert(math.includes('aria-label="连续时间金融数学：SDE → 风险中性测度 → 定价PDE与Lévy跳跃"'));
 assert(ml.includes('aria-label="金融机器学习先修：随机微分方程、风险中性定价与跳跃风险"'));
-assert(math.includes("styles.css?v=20261104-probscore-v6-inference-v8-martingale-v9-convergence-v10-integration-v11-stochastic-v12-brownian-v13-sde-v14"),"math stylesheet cache not updated");
+assert(math.includes("styles.css?v=20261109"),"math stylesheet cache not updated");
 assert(css.includes(".math-v14-sde-pricing summary:focus-visible")&&css.includes(".katex-display")&&css.includes("@media print"),"missing explicit mobile/keyboard/printing safeguards");
 // Prevent a known stale mislink from American option pricing to extreme-value theory.
 assert(!byId.get("ito-n0327").links.some(l=>l.id==="finance-n0448"));

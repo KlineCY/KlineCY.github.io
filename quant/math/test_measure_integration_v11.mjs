@@ -142,7 +142,7 @@ for(const id of newlyCompleted){
 }
 assert(html.includes('aria-label="测度论与概率积分的完整建构：从可测事件到Fubini及测度变换"'));
 assert(ml.includes('aria-label="概率与测度论基础：从事件、积分到金融风险测度变换"'));
-assert(html.includes("styles.css?v=20261104-probscore-v6-inference-v8-martingale-v9-convergence-v10-integration-v11"),"stylesheet version cache must update");
+assert(html.includes("styles.css?v=20261109"),"stylesheet version cache must update");
 assert(css.includes(".math-v11-measure summary:focus-visible")&&css.includes(".katex-display")&&css.includes("@media print"),"keyboard/mobile/print math styles missing");
 console.log("V11 PASS: 15 newly completed mathematical lectures, 60 full proof sections, 60 strict KaTeX formulas, 30 academic sources, "+crosslinks+" mathematics/ML links; "+all.length+" complete mathematics lessons, 656-node acyclic learning graph, independent numerical invariants and responsive typography.");
 

@@ -141,7 +141,7 @@ for(const id of ids){
 }
 assert(html.includes('aria-label="完整证明链：随机变量收敛、函数空间、尾部控制与鞅极限"'));
 assert(ml.includes('aria-label="数学先修：概率收敛、尾部积分与金融鞅极限"'));
-assert(html.includes("styles.css?v=20261104-probscore-v6-inference-v8-martingale-v9-convergence-v10"),"CSS version cache stale");
+assert(html.includes("styles.css?v=20261109"),"CSS version cache stale");
 assert(css.includes(".math-v10-convergence summary:focus-visible")&&css.includes(".katex-display")&&css.includes("@media print"),"keyboard/CJK/Katex/print style absent");
 assert(!html.includes("一篇完整专题 · 四个严密证明小节"),"obsolete martingale-count disclaimer");
 console.log("PASS V10: 12 complete lectures, 48 detailed mathematical proof chapters, 48 KaTeX equations, "+sourceCount+" research resource links, "+links+" cross-course references; "+all.length+" full mathematics lectures, independently checked numeric examples and 656-node acyclic learning path.");

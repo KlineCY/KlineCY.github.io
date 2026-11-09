@@ -79,7 +79,7 @@ const html=fs.readFileSync(new URL("index.html",dir),"utf8");
 const css=fs.readFileSync(new URL("styles.css",dir),"utf8");
 const js=fs.readFileSync(new URL("app.js",dir),"utf8");
 for(const id of ids)assert(html.includes("?topic="+id),"unlinked fifth math learning route "+id);
-assert(html.includes("styles.css?v=20261104-probscore-v6"));
+assert(html.includes("styles.css?v=20261109"));
 assert(html.includes("第五条高级知识链"));
 assert(css.includes("overflow-x:auto")&&css.includes("@media print"),"CJK formula accessibility regression");
 assert(js.includes('div.tabIndex=0')&&js.includes('div.setAttribute("role","region")'),"long math keyboard access missing");

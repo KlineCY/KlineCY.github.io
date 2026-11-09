@@ -81,7 +81,7 @@ for(const id of Object.keys(expected)){
  assert(ml.includes("../math/?topic="+id),"ML-to-math route missing "+id);
 }
 assert(html.includes("概率到动态金融的严密先修链：大数定律、正交投影、鞅与次鞅"));
-assert(html.includes("styles.css?v=20261104-probscore-v6-inference-v8-martingale-v9"),"cache bust required");
+assert(html.includes("styles.css?v=20261109"),"cache bust required");
 assert(!html.includes("关于“条件期望鞅”和“次鞅/上鞅”的目录节点仍需继续补写"),"stale outline disclaimer");
 assert(css.includes("@media print"),"formula/CJK/print styles missing");
 assert(css.includes(".formula-block:focus-visible"),"keyboard formula focus missing");
