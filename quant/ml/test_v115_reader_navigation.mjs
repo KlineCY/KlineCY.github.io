@@ -71,7 +71,7 @@ expect(rendered,'href="#lesson/m01-c01-p02"',"Deep link preserved");
 expect(rendered,'aria-current="page"',"Selected knowledge point marked");
 assert.equal(toc.scrollTop,27,"Independent navigation scroll was reset");
 ctx.state.activeId="m02-c01-p01";ctx.state.domainOpen.set("m01",false);
-vm.runInNewContext(prelude+directory+"\nrenderDirectory();",ctx,{timeout:1500});
+vm.runInNewContext("renderDirectory();",ctx,{timeout:1500});
 expect(toc.innerHTML,'data-domain="m02" open',"External selected subject must expand");
 for(const [label,css,parts] of [
  ["ML",mlCss,[".atlas-layout{grid-template-columns:minmax(250px,315px) minmax(0,1fr)","overscroll-behavior:contain",".atlas-domain>summary","line-break:strict",".atlas-reader-section.catalog-open .atlas-toc{display:block}","@media(max-width:900px)","@media print"]],
