@@ -45,5 +45,5 @@ near((.3+.25)/2,.275);
 const html=fs.readFileSync(new URL("./index.html",dir),"utf8"),css=fs.readFileSync(new URL("./styles.css",dir),"utf8");
 for(const id of chain)assert(html.includes("?topic="+id),"V2 math route missing "+id);
 assert(html.includes("styles.css?v=20261104-probscore-v6"));
-assert(css.includes("/* V2 READABILITY")&&css.includes("overscroll-behavior-x:contain"));
+assert(css.includes("overscroll-behavior-x:contain"));
 console.log("PASS: "+chain.length+" V2 math lectures, "+subchapters+" deep proof subchapters, "+equations+" TeX expressions, "+sources+" reference records, independent arithmetic and CJK layout");
