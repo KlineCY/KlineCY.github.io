@@ -65,7 +65,7 @@ close((1+1+1+1-4)/5,0);
 close(1-.95**20,.6415140775914581);
 const html=fs.readFileSync(new URL("index.html",dir),"utf8"),css=fs.readFileSync(new URL("atlas.css",dir),"utf8");
 for(const id of expected)assert(html.includes("#lesson/"+id),"new learning path missing "+id);
-assert(html.includes("atlas.js?v=20261109-v113-quality-finance-math"));
+assert(html.includes("atlas.js?v=20261109-v114-pit-regression-causal"));
 assert(html.includes("atlas.css?v=20261104-copula-v7"));
 assert(html.includes("第四条高级学习链"));
 assert(css.includes("V4 probabilistic-forecast reading")&&css.includes("overscroll-behavior-x:contain")&&css.includes("@media print"),"math layout regression");
