@@ -106,7 +106,7 @@ assert.equal(loaded.size,20);
 assert.equal(archive.catalog.items.length,720,"Deepening must preserve all core 720 Atlas IDs");
 for(const id of expected)assert(html.includes('href="#lesson/'+id+'"'),"Missing direct route to original lesson "+id);
 assert(html.includes("V112 · 数理机器学习与量化金融：20篇正式教材系统深化"),"V112 title or Chinese course map absent");
-assert(html.includes('atlas.js?v=20261109-v113-quality-finance-math'),"V112 runtime cache version missing");
+assert(html.includes('atlas.js?v=20261109-v115-reader-layout'),"V112 runtime cache version missing");
 for(const selector of ["line-break:strict","overflow-x:auto","@media(max-width:700px)",".atlas-concept-jump:focus-visible",".atlas-concept-chain","@media print"])
  assert(css.includes(selector),"Responsive CJK, KaTeX scroll, keyboard or print style missing "+selector);
 const workflow=read("../../.github/workflows/test-quant-ml.yml");

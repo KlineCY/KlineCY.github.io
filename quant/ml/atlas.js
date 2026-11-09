@@ -4,7 +4,7 @@ const $=id=>document.getElementById(id);
 const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const LESSON=/^#(?:lesson|ml)\/(m\d\d-c\d\d-p\d\d)$/;
 const KEY="kline-quant-atlas-read-v1";
-const state={index:[],byId:new Map(),domains:{},searchText:new Map(),term:"",topic:"",activeId:"",read:new Set(),enhanced:new Set(),conceptChapters:new Set(),chapterOpen:new Map(),learnedOnly:false,unreadOnly:false};
+const state={index:[],byId:new Map(),domains:{},searchText:new Map(),term:"",topic:"",activeId:"",read:new Set(),enhanced:new Set(),conceptChapters:new Set(),chapterOpen:new Map(),domainOpen:new Map(),learnedOnly:false,unreadOnly:false};
 try {const saved=JSON.parse(localStorage.getItem(KEY)||"[]");if(Array.isArray(saved))state.read=new Set(saved.filter(v=>typeof v==="string"))}catch(_){}
 function saveRead(){try{localStorage.setItem(KEY,JSON.stringify([...state.read]))}catch(_){}}
 function serializeReadProgress(read,knownIds){
@@ -193,27 +193,57 @@ function chapterShouldOpen(key,active){
  const preference=state.chapterOpen.get(key);
  return state.term.length>0||(preference===undefined?active:preference);
 }
+function domainShouldOpen(id,active){
+ const preference=state.domainOpen.get(id);
+ return state.term.length>0||(preference===undefined?active:preference);
+}
+function setCatalogOpen(open){
+ const section=$("atlas-reader-section"),button=$("atlas-toggle-catalog");
+ if(!section||!button)return;
+ section.classList.toggle("catalog-open",open);
+ button.setAttribute("aria-expanded",String(open));
+ button.textContent=open?"收起课程目录":"展开课程目录";
+}
 function renderDirectory(){
  const matches=visibleLessons();
  showStatus("显示 "+matches.length+" / "+state.index.length+" 篇讲义 · "+matches.filter(x=>state.read.has(x.id)).length+" 篇已学");
- const grouped=new Map();
+ const domains=new Map();
  for(const x of matches){
+  if(!domains.has(x.domain_id))
+   domains.set(x.domain_id,{id:x.domain_id,title:x.domain,chapters:new Map(),count:0,read:0});
+  const group=domains.get(x.domain_id);
+  group.count++;
+  if(state.read.has(x.id))group.read++;
   const key=x.domain_id+"_"+x.chapter;
-  if(!grouped.has(key))grouped.set(key,[]);
-  grouped.get(key).push(x);
+  if(!group.chapters.has(key))group.chapters.set(key,{key,title:x.chapter,number:(x.id.match(/-c(\d+)-/)||[])[1]||"",rows:[]});
+  group.chapters.get(key).rows.push(x);
  }
- const html=[...grouped.entries()].map(([key,rows])=>{
-  const active=rows.some(x=>x.id===state.activeId);
-  const open=chapterShouldOpen(key,active);
-  const count=rows.filter(x=>state.read.has(x.id)).length;
-  return '<details class="atlas-section" data-key="'+esc(key)+'"'+(open?' open':'')+'><summary>'+esc(rows[0].domain)+" / "+esc(rows[0].chapter)+
-   '<span class="atlas-chapter-count">'+count+"/"+rows.length+'</span></summary><div class="atlas-chapter-items">'+
-   rows.map(x=>'<a href="#lesson/'+x.id+'" data-id="'+x.id+'"'+(x.id===state.activeId?' class="active" aria-current="page"':'')+'>'+
-    (state.read.has(x.id)?'<span class="atlas-done-mark" aria-label="已学">✓ </span>':'')+esc(x.title)+(state.conceptChapters.has(x.id)?'<span class="atlas-concept-small"> · 分层精讲</span>':'')+'</a>').join("")+
-   "</div></details>";
+ const html=[...domains.values()].map(group=>{
+  const active=[...group.chapters.values()].some(c=>c.rows.some(x=>x.id===state.activeId));
+  const domainLabel=(group.id.match(/\d+/)||[])[0]||"";
+  const chapters=[...group.chapters.values()].map(c=>{
+   const open=chapterShouldOpen(c.key,c.rows.some(x=>x.id===state.activeId));
+   const done=c.rows.filter(x=>state.read.has(x.id)).length;
+   const links=c.rows.map(x=>{
+    const index=(x.id.match(/-p(\d+)$/)||[])[1]||"";
+    return '<a href="#lesson/'+esc(x.id)+'" data-id="'+esc(x.id)+'" title="'+esc(x.title)+'"'+
+     (x.id===state.activeId?' class="active" aria-current="page"':'')+'>'+
+     '<span class="atlas-topic-index">'+esc(index)+'</span><span class="atlas-topic-label">'+
+     (state.read.has(x.id)?'<span class="atlas-done-mark" aria-label="已学">✓ </span>':'')+esc(x.title)+
+     (state.conceptChapters.has(x.id)?'<small class="atlas-concept-small"> · 精讲</small>':'')+'</span></a>';
+   }).join("");
+   return '<details class="atlas-section" data-key="'+esc(c.key)+'"'+(open?' open':'')+'>'+
+    '<summary><span class="atlas-chapter-title"><span class="atlas-chapter-index">'+esc(c.number)+'</span>'+esc(c.title)+'</span>'+
+    '<span class="atlas-chapter-count">'+done+'/'+c.rows.length+'</span></summary>'+
+    '<div class="atlas-chapter-items">'+links+'</div></details>';
+  }).join("");
+  return '<details class="atlas-domain" data-domain="'+esc(group.id)+'"'+(domainShouldOpen(group.id,active)?' open':'')+'>'+
+    '<summary><span class="atlas-domain-heading"><span class="atlas-domain-index">'+esc(domainLabel)+'</span><strong>'+esc(group.title)+'</strong></span>'+
+    '<span class="atlas-domain-count">'+group.read+'/'+group.count+'</span></summary>'+
+    '<div class="atlas-domain-chapters">'+chapters+'</div></details>';
  }).join("");
  const toc=$("atlas-toc"),previousScroll=toc.scrollTop;
- toc.innerHTML=html||"<p>未找到匹配的讲义。可尝试其他关键词。</p>";
+ toc.innerHTML=html||'<p class="atlas-empty-directory">当前筛选没有匹配的知识点，请调整搜索关键词。</p>';
  toc.scrollTop=previousScroll;
  updateReadStats();
 }
@@ -263,6 +293,10 @@ function display(){
  if(!meta){root.innerHTML='<p class="atlas-error">找不到该讲义：'+esc(id)+'</p>';return}
  const data=state.domains[meta.domain_id]?.[id];
  if(!data){root.innerHTML='<p class="atlas-error">讲义正文缺失：'+esc(id)+'</p>';return}
+ if(state.activeId!==id){
+  state.chapterOpen.delete(meta.domain_id+"_"+meta.chapter);
+  state.domainOpen.delete(meta.domain_id);
+ }
  state.activeId=id;
  if(state.learnedOnly&&!state.read.has(id)){state.learnedOnly=false;$("atlas-learned-only").checked=false}
   if(state.unreadOnly&&state.read.has(id)){state.unreadOnly=false;$("atlas-unread-only").checked=false}
@@ -283,7 +317,7 @@ function display(){
   '<button id="atlas-copy-link" type="button">复制本文链接</button>'+ 
    (state.enhanced.has(id)?'<button id="atlas-jump-depth" type="button">跳至进阶推导</button>':'')+
   '<button id="atlas-read-toggle" type="button" aria-pressed="false">标记已学</button></div>';
- root.innerHTML='<div class="atlas-crumb">'+esc(meta.domain)+" / "+esc(meta.chapter)+" / "+esc(id)+
+ root.innerHTML='<div class="atlas-crumb">'+esc(meta.domain)+" / "+esc(meta.chapter)+" / 第"+esc((id.match(/-p(\d+)$/)||[])[1]||"")+"节"+
   '</div><h1>'+esc(data.title)+'</h1>'+actions+
   '<div class="article">'+data.html+'</div><p class="atlas-note">系统教材 · 公式、证明和代码请按对应条件使用；示例不构成投资建议。</p>';
  $("atlas-prev").addEventListener("click",()=>prev&&jump(prev.id));
@@ -309,10 +343,12 @@ function display(){
  const toc=$("atlas-toc"),selected=toc.querySelector("a[aria-current='page']");
  if(selected){
   const outer=toc.getBoundingClientRect(),inner=selected.getBoundingClientRect();
-  if(inner.top<outer.top||inner.bottom>outer.bottom)
-   selected.scrollIntoView({block:"nearest",behavior:"auto"});
+  if(inner.top<outer.top)toc.scrollTop+=inner.top-outer.top-14;
+  else if(inner.bottom>outer.bottom)toc.scrollTop+=inner.bottom-outer.bottom+14;
  }
- if(location.hash)root.scrollIntoView({block:"start",behavior:"auto"});
+ root.scrollTop=0;
+ setCatalogOpen(false);
+ if(location.hash)$("atlas-reader-section")?.scrollIntoView({block:"start",behavior:"auto"});
 }
 async function copyText(value,button,label){
  const old=button.textContent;
@@ -495,9 +531,12 @@ async function start(){
   $("atlas-toc").addEventListener("click",e=>{
    const summary=e.target.closest("summary");
    const details=summary?.parentElement;
-   if(details?.matches(".atlas-section")&&details.dataset.key)
+   if(details?.matches(".atlas-domain")&&details.dataset.domain)
+    state.domainOpen.set(details.dataset.domain,!details.open);
+   else if(details?.matches(".atlas-section")&&details.dataset.key)
     state.chapterOpen.set(details.dataset.key,!details.open);
   });
+  $("atlas-toggle-catalog")?.addEventListener("click",()=>setCatalogOpen(!$("atlas-reader-section").classList.contains("catalog-open")));
   $("atlas-learned-only").addEventListener("change",e=>setProgressFilter("learned",e.target.checked));
   $("atlas-unread-only").addEventListener("change",e=>setProgressFilter("unread",e.target.checked));
   $("atlas-resume").addEventListener("click",continueUnread);
