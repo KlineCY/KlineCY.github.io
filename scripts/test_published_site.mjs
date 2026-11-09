@@ -38,4 +38,15 @@ assert((math.match(/<details class="math-spectral-path/g)||[]).length===50);
 assert(ml.indexOf('id="atlas-reader-section"')<ml.indexOf('aria-label="系统学习路径"'));
 assert(math.indexOf('id="math-reader-section"')<math.indexOf('class="math-study-library"'));
 assert(!fs.existsSync(new URL("quant/ml/test_examples.py",repo)));
+const depthManifest=JSON.parse(read("quant/ml/atlas-depth-manifest.json"));
+assert.equal(depthManifest.expected_lessons,720,"ML canonical depth must cover all lessons");
+for(const module of depthManifest.modules){
+ const name="quant/ml/"+module.path.replace(/^\.\//,"");
+ const data=JSON.parse(read(name));
+ assert.equal(Object.keys(data.lessons).length,module.lessons,"Incomplete ML lesson bundle: "+name);
+ for(const [id,lesson] of Object.entries(data.lessons)){
+  assert(!("revision_note" in lesson),"Internal editorial notes included in "+name+" / "+id);
+  assert(!Object.keys(lesson).some(k=>/^v\d+_note$/.test(k)),"Historical release notes included in "+name+" / "+id);
+ }
+}
 console.log("PASS: published routes are topical, maintenance records and legacy readers are absent, runtime assets resolve");
