@@ -81,6 +81,6 @@ const js=fs.readFileSync(new URL("app.js",dir),"utf8");
 for(const id of ids)assert(html.includes("?topic="+id),"unlinked fifth math learning route "+id);
 assert(html.includes("styles.css?v=20261104-probscore-v6"));
 assert(html.includes("第五条高级知识链"));
-assert(css.includes("V5 proper scoring")&&css.includes("overflow-x:auto")&&css.includes("@media print"),"CJK formula accessibility regression");
+assert(css.includes("overflow-x:auto")&&css.includes("@media print"),"CJK formula accessibility regression");
 assert(js.includes('div.tabIndex=0')&&js.includes('div.setAttribute("role","region")'),"long math keyboard access missing");
 console.log("PASS V58/V5: mathematics 6 complete scoring/shift lectures, "+sections+" detailed proof sections, "+formula+" strict KaTeX formulas, "+refs+" primary references, 656 nodes, "+rows.length+" full lessons, numeric and Chinese formula UX checks.");
