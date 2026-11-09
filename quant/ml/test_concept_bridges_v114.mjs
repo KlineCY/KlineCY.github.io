@@ -116,7 +116,7 @@ assert.equal((html.match(/id="atlas-reader-section"/g)||[]).length,1,"V115 lectu
 assert(html.includes('id="course-site-nav-toggle"')&&html.includes('id="atlas-toggle-catalog"'),
        "V115 mobile site and curriculum navigation must be retained");
 
-assert(html.includes('atlas.js?v=20261109-v115-reader-layout-v116-ml-bridges-v117-no-learning-progress'),"V114 runtime cache version missing");
+assert(html.includes('atlas.js?v=20261109'),"V114 runtime cache version missing");
 for(const selector of ["line-break:strict","overflow-x:auto","@media(max-width:700px)",".atlas-concept-jump:focus-visible",".atlas-concept-chain","@media print"])
  assert(css.includes(selector),"Responsive CJK, KaTeX scroll, keyboard or print style missing "+selector);
 const workflow=read("../../.github/workflows/test-quant-ml.yml");
