@@ -79,7 +79,7 @@ assert(app.includes('loadV106Calculus("./lessons-calculus-v106b.json",4)'),"V106
 assert(app.includes("...v105a,...v105b,...v105c,...v105d,...v106a,...v106b"),"Historic reader composition not preserved");
 assert(app.includes("new Set(lessons.map(l=>l.node_id)).size!==lessons.length"),"Duplicate-lesson reader guard removed");
 assert(html.includes("微积分与风险敏感度"),"Readable V106 roadmap missing");
-assert(html.includes("app.js?v=20261108-v105-control-game-market-making-complete-v106-calculus-core"),"Script cache-busting missing");
+assert(html.includes("app.js?v=20261109"),"Script cache-busting missing");
 for(const id of wanted)assert(html.includes('?topic='+id+'"'),"Direct CJK study link missing "+id);
 for(const token of ["overflow-x:auto","line-break:strict","@media(max-width:700px)","@media print",":focus-visible"])
  assert(css.includes(token),"CJK/responsive accessibility regression "+token);
