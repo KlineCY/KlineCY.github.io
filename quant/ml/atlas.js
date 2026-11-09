@@ -249,7 +249,6 @@ function display(){
   state.domainOpen.delete(meta.domain_id);
  }
  state.activeId=id;
- // Keep the directory and URL filters synchronized when a cross-topic link is opened.
  if(state.topic&&state.topic!==meta.domain_id){
   state.topic=meta.domain_id;$("atlas-topic").value=state.topic;
   const u=new URL(location.href);u.searchParams.set("discipline",state.topic);
@@ -323,7 +322,6 @@ async function start(){
    throw Error("深化讲义目录包含非法路径或数量");
   if(manifest.modules.reduce((sum,m)=>sum+m.lessons,0)!==manifest.expected_lessons)
    throw Error("深化讲义目录数量不一致");
-  // Keep parallel downloads bounded; failures retry individually without restarting all modules.
   const editorial=await fetchAtlasJson("./atlas-editorial.json",{cache:"no-cache"});
   const depthPatches=await fetchAtlasModulesBounded(depthFiles,6,(done,total)=>{
    if(done===total||done%8===0)showStatus("正在传输进阶正文 "+done+" / "+total+" 个模块…");
@@ -334,28 +332,24 @@ async function start(){
   const added=await fetchAtlasJson("./atlas-new-lessons.json",{cache:"no-cache"});
   if(!window.quantMlExpansion?.install)throw Error("新增专题阅读器未加载");
   const newIds=window.quantMlExpansion.install(data,added);
-  // Load subsequent coherent chapters separately, keeping each transfer auditable.
   const volatility=await fetchAtlasJson("./atlas-volatility-chapter.json",{cache:"no-cache"});
   const volatilityIds=window.quantMlExpansion.install(data,volatility);
   for(const id of volatilityIds){
    if(newIds.has(id))throw Error("新增专题ID重复："+id);
    newIds.add(id);
   }
-  // V2 curriculum: preserve stable IDs and load the proof-to-ETF route as a small independent bundle.
   const regularization=await fetchAtlasJson("./atlas-linear-regularization-chapter.json",{cache:"no-cache"});
   const regularizationIds=window.quantMlExpansion.install(data,regularization);
   for(const id of regularizationIds){
    if(newIds.has(id))throw Error("新增专题ID重复："+id);
    newIds.add(id);
   }
-  // Model evaluation beyond time-split mechanics: three independent evidence tutorials.
   const evidenceBundle=await fetchAtlasJson("./atlas-evaluation-evidence-chapter.json",{cache:"no-cache"});
   const evidenceIds=window.quantMlExpansion.install(data,evidenceBundle);
   for(const id of evidenceIds){
    if(newIds.has(id))throw Error("新增专题ID重复："+id);
    newIds.add(id);
   }
-  // V2 statistical-learning and kernel/covariance chapters; keep course IDs stable and check collisions.
   for(const path of ["./atlas-generalization-v2.json","./atlas-kernel-covariance-v2.json"]){
    const extension=await fetchAtlasJson(path,{cache:"no-cache"});
    const extensionIds=window.quantMlExpansion.install(data,extension);
@@ -364,7 +358,6 @@ async function start(){
     newIds.add(id);
    }
   }
-  // V3 curriculum: advance from regularization stability to scalable kernels and robust portfolio audit.
   for(const path of ["./atlas-stability-kernel-v3.json","./atlas-robust-validation-v3.json"]){
    const bundle=await fetchAtlasJson(path,{cache:"no-cache"});
    const ids=window.quantMlExpansion.install(data,bundle);
@@ -373,7 +366,6 @@ async function start(){
     newIds.add(id);
    }
   }
-  // V4 distributional forecasting, calibration and risk backtests; load in prerequisite order.
   for(const path of ["./atlas-quantile-calibration-v4.json","./atlas-tailrisk-models-v4.json"]){
    const bundle=await fetchAtlasJson(path,{cache:"no-cache"});
    const ids=window.quantMlExpansion.install(data,bundle);
@@ -382,7 +374,6 @@ async function start(){
     newIds.add(id);
    }
   }
-  // V5 probability distribution scores, CQR and point-in-time ETF shift monitoring.
   for(const path of ["./atlas-proper-scoring-conformal-v5.json","./atlas-density-pit-finance-v5.json"]){
    const bundle=await fetchAtlasJson(path,{cache:"no-cache"});
    const ids=window.quantMlExpansion.install(data,bundle);
@@ -391,7 +382,6 @@ async function start(){
     newIds.add(id);
    }
   }
-  // V6: portfolio-wide probabilistic dependence, multivariate scoring and risk auditing.
   for(const path of ["./atlas-copula-v6.json","./atlas-multivariate-risk-v6.json"]){
    const bundle=await fetchAtlasJson(path,{cache:"no-cache"});
    const ids=window.quantMlExpansion.install(data,bundle);
@@ -408,8 +398,6 @@ async function start(){
    if(state.conceptChapters.has(id))throw Error("知识链ID重复："+id);
    state.conceptChapters.add(id);
   }
-  // V111: math-to-ML prerequisite bridges append to canonical Atlas articles only.
-  // Mount after earlier concept chains so a failing or repeated lesson ID aborts initialization.
   for(const path of ["./atlas-concept-bridge-v111a.json","./atlas-concept-bridge-v111b.json","./atlas-concept-bridge-v111c.json"]){
    const extension=await fetchAtlasJson(path,{cache:"no-cache"});
    if(extension.schema!==1||extension.revision!=="V111"||
@@ -422,8 +410,6 @@ async function start(){
     state.conceptChapters.add(id);
    }
   }
-  // V112: append validated deep-technical chapters to 20 original Atlas articles.
-  // Reject collisions before writing any HTML; preserve existing lessons and historical crosslinks.
   for(const path of ["./atlas-concept-bridge-v112a.json","./atlas-concept-bridge-v112b.json","./atlas-concept-bridge-v112c.json",
                     "./atlas-concept-bridge-v112d.json","./atlas-concept-bridge-v112e.json"]){
    const extension=await fetchAtlasJson(path,{cache:"no-cache"});
@@ -435,8 +421,6 @@ async function start(){
    if(ids.size!==entries.length)throw Error("V112正式课程实际挂载不完整："+path);
    for(const id of ids)state.conceptChapters.add(id);
   }
-  // V113: mathematical quality audit and deep explanatory chains in canonical pages.
-  // All ids are checked before mounting to prevent overwriting V111/V112 or historical lessons.
   for(const path of ["./atlas-concept-bridge-v113a.json","./atlas-concept-bridge-v113b.json","./atlas-concept-bridge-v113c.json",
                     "./atlas-concept-bridge-v113d.json","./atlas-concept-bridge-v113e.json"]){
    const extension=await fetchAtlasJson(path,{cache:"no-cache"});
@@ -448,7 +432,6 @@ async function start(){
    if(ids.size!==4)throw Error("V113正式教材挂载数错误："+path);
    for(const id of ids)state.conceptChapters.add(id);
   }
-  // V116: restore V114 canonical courses without altering source IDs or original HTML.
   for(const path of ["./atlas-concept-bridge-v114a.json","./atlas-concept-bridge-v114b.json","./atlas-concept-bridge-v114c.json",
                     "./atlas-concept-bridge-v114d.json","./atlas-concept-bridge-v114e.json"]){
    const extension=await fetchAtlasJson(path,{cache:"no-cache"});
@@ -463,8 +446,6 @@ async function start(){
   for(const newId of newIds)state.conceptChapters.add(newId);
   state.index=data.catalog.items;state.byId=new Map(state.index.map(x=>[x.id,x]));state.domains=data.domains;
   const total=$("atlas-total-lessons");if(total)total.textContent=state.index.length+" 篇系统讲义（含新增专题）";
-  // Index visible article text as well as titles, chapters and code symbols.
-  // This is computed once so subsequent searches do not repeatedly parse all 720 lessons.
   for(const x of state.index){
    const page=data.domains[x.domain_id][x.id].html;
    const plain=page.replace(/<[^>]*>/g," ").replace(/&(lt|gt|amp|quot|nbsp);/g,(_,entity)=>({lt:"<",gt:">",amp:"&",quot:"\"",nbsp:" "}[entity]));
