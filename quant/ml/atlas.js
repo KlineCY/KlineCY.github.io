@@ -444,6 +444,19 @@ async function start(){
     state.conceptChapters.add(id);
    }
   }
+  // V112: append validated deep-technical chapters to 20 original Atlas articles.
+  // Reject collisions before writing any HTML; preserve existing lessons and historical crosslinks.
+  for(const path of ["./atlas-concept-bridge-v112a.json","./atlas-concept-bridge-v112b.json","./atlas-concept-bridge-v112c.json",
+                    "./atlas-concept-bridge-v112d.json","./atlas-concept-bridge-v112e.json"]){
+   const extension=await fetchAtlasJson(path,{cache:"no-cache"});
+   const entries=Object.keys(extension.lessons||{});
+   if(extension.schema!==1||extension.revision!=="V112"||entries.length!==4||
+      entries.some(id=>state.conceptChapters.has(id)||newIds.has(id)))
+    throw Error("V112正式机器学习教材重复或内容不完整："+path);
+   const ids=window.quantMlConcepts.mount(data,extension);
+   if(ids.size!==entries.length)throw Error("V112正式课程实际挂载不完整："+path);
+   for(const id of ids)state.conceptChapters.add(id);
+  }
   for(const newId of newIds)state.conceptChapters.add(newId);
   state.index=data.catalog.items;state.byId=new Map(state.index.map(x=>[x.id,x]));state.domains=data.domains;
   const total=$("atlas-total-lessons");if(total)total.textContent=state.index.length+" 篇系统讲义（含新增专题）";
