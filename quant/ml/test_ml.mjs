@@ -86,8 +86,8 @@ const nav=fs.readFileSync(new URL("../sidebar-v2.js",here),"utf8");
 new vm.Script(app);
 new vm.Script(atlas);
 new vm.Script(nav);
-for(const marker of ['id="quantSidebar"','id="atlas-search"','id="atlas-topic"','id="atlas-toc"','id="atlas-lesson"','id="atlas-status"','id="atlas-learned-only"','id="atlas-learned-count"','id="atlas-unread-only"','id="atlas-resume"','id="atlas-export"','id="atlas-import"','id="atlas-import-file"'])assert(html.includes(marker),"published Atlas marker absent: "+marker);
-assert(html.includes('src="./atlas.js?v=20261109-v115-reader-layout-v116-ml-bridges"'),"published page must load versioned Atlas reader");
+for(const marker of ['id="quantSidebar"','id="atlas-search"','id="atlas-topic"','id="atlas-clear"','id="atlas-toc"','id="atlas-lesson"','id="atlas-status"','id="atlas-reader-section"'])assert(html.includes(marker),"published Atlas marker absent: "+marker);
+assert(html.includes('src="./atlas.js?v=20261109-v115-reader-layout-v116-ml-bridges-v117-no-learning-progress"'),"published page must load versioned Atlas reader");
 assert(nav.includes('["ml","机器学习 Machine Learning"]'));
 assert(atlas.includes("loadArchive")&&atlas.includes("renderMath")&&atlas.includes("copyText"),"Atlas reader features missing");
 assert(atlas.includes("applyDepth")&&atlas.includes('fetchAtlasJson("./atlas-depth-manifest.json"'),"published Atlas must load manifest with bounded retries");
@@ -152,7 +152,7 @@ for(const id of seen){
  const mod=depthById.get(id);
  if(mod.worked_example)assert(article.includes("数值或研究示例"),"runtime worked example missing: "+id);
 }
-assert( atlas.includes("learnedOnly")&&atlas.includes("setProgressFilter")&&atlas.includes("atlas-learned-count")&&atlas.includes("chapterOpen")&&atlas.includes("data-key"),"advanced lesson filter and directory labels missing");
-assert(atlas.includes("unreadOnly")&&atlas.includes("continueUnread")&&atlas.includes("atlas-jump-depth"),"published reader must support unread filtering, resuming and in-lesson advanced navigation");
+assert(atlas.includes("visibleLessons")&&atlas.includes("chapterOpen")&&atlas.includes("domainOpen")&&atlas.includes("data-key"),"searchable hierarchical lesson directory missing");
+assert(atlas.includes("atlas-jump-depth")&&atlas.includes("setCatalogOpen")&&atlas.includes("copyText"),"published reader must retain advanced navigation and link copying");
 assert(app.includes("manifest.lesson_files"),"legacy lesson reader unexpectedly removed");
 console.log("PASS: 720 rigorous advanced lessons across 24 domains; legacy curriculum 24 disciplines / 120 chapters / 720 nodes; published Atlas navigation and JS parse; "+lessons.length+" legacy tutorials, "+activeNotes.length+" active notes; all legacy LaTeX syntax valid.");
