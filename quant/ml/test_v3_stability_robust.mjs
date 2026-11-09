@@ -68,7 +68,7 @@ close(((0-1)**2+(1-1)**2+(2-1)**2)/2,1);
 close(1+2*.2,1.4);
 const html=fs.readFileSync(new URL("./index.html",dir),"utf8"),css=fs.readFileSync(new URL("./atlas.css",dir),"utf8");
 for(const id of expected)assert(html.includes("#lesson/"+id),"missing advanced learning route "+id);
-assert(html.includes('atlas.js?v=20261109-v111-math-bridges'));
+assert(html.includes('atlas.js?v=20261109-v112-20-math-ml-lessons'));
 assert(html.includes('atlas.css?v=20261104-copula-v7'));
 assert(html.includes('aria-label="算法稳定性、可扩展核学习与稳健金融建模的贯通课程"'));
 assert(css.includes("/* V3 CHAPTER READABILITY")&&css.includes("scrollbar-gutter:stable")&&css.includes("@media print"),"new visual accessibility rules missing");
