@@ -68,7 +68,10 @@ function isMatch(n){
 }
 function nodeButton(n){
 const b=document.createElement("button");b.className="node"+(n.id===activeId?" active":"");b.type="button";b.dataset.node=n.id;
-const ok=isComplete(n);b.innerHTML='<span class="complete-mark" aria-hidden="true">'+(studied.has(n.id)?"✓":ok?"●":"·")+'</span><span class="node-name">'+esc(n.title)+'</span><span class="node-label'+(ok?" complete":"")+'">'+(ok?"讲义":"目录")+'</span>';
+const ok=isComplete(n);
+b.title=n.title;
+if(n.id===activeId)b.setAttribute("aria-current","page");
+b.innerHTML='<span class="complete-mark" aria-hidden="true">'+(studied.has(n.id)?"✓":ok?"●":"·")+'</span><span class="node-index">'+String(n.order).padStart(2,"0")+'</span><span class="node-name">'+esc(n.title)+'</span><span class="node-label'+(ok?" complete":"")+'">'+(ok?"讲义":"目录")+"</span>";
 b.addEventListener("click",()=>selectNode(n.id));
 return b;
 }
@@ -79,7 +82,7 @@ summary.innerHTML='<span class="chapter-label">'+String(c.order).padStart(2,"0")
 const ul=document.createElement("div");ul.className="nodes";for(const n of visible)ul.appendChild(nodeButton(n));out.appendChild(ul);return out;
 }
 function renderTree(){
-const container=$("tree");container.replaceChildren();
+const container=$("tree"),previousScroll=container.scrollTop;container.replaceChildren();
 let visibleCount=0,departmentCount=0;const totalComplete=nodes.filter(isComplete).length;
 for(const d of depts){
  const groups=[];
@@ -109,6 +112,13 @@ $("status").textContent="显示 "+visibleCount+" / "+nodes.length+" 个知识点
 if(!visibleCount){const p=document.createElement("p");p.className="notice";p.textContent="当前条件无匹配知识点。请清除搜索或筛选。";container.appendChild(p)}
 $("mastered").textContent=studied.size;
 document.querySelectorAll(".roadmap-chip").forEach(b=>b.classList.toggle("active",b.dataset.dept===filterDept));
+container.scrollTop=previousScroll;
+const selected=container.querySelector(".node.active");
+if(selected&&container.clientHeight){
+ const box=container.getBoundingClientRect(),item=selected.getBoundingClientRect();
+ if(item.top<box.top)container.scrollTop+=item.top-box.top-12;
+ else if(item.bottom>box.bottom)container.scrollTop+=item.bottom-box.bottom+12;
+}
 }
 function makeControls(node,wrap){
 const section=document.createElement("div");section.className="tool-actions";
@@ -249,6 +259,13 @@ function appendLearningSequence(node,container){
  if(!row.childElementCount)return;
  navigation.appendChild(row);container.appendChild(navigation);
 }
+function setMathCatalogOpen(open){
+ const section=$("math-reader-section"),button=$("math-toggle-catalog");
+ if(!section||!button)return;
+ section.classList.toggle("catalog-open",open);
+ button.setAttribute("aria-expanded",String(open));
+ button.textContent=open?"收起数学目录":"展开数学目录";
+}
 function selectNode(id,update=true){
  const node=getNode(id);if(!node)return;
  activeId=id;
@@ -269,8 +286,12 @@ function selectNode(id,update=true){
  typeset(article);
  renderTree();
  if(update)setURL({topic:node.id});
- // No automatic window.scrollIntoView to avoid sidebar interaction bounce.
+ // Keep desktop sidebar and article independently scrollable; on mobile close the catalog.
  $("articlePane").scrollTop=0;
+ if(update&&window.matchMedia("(max-width:900px)").matches){
+  setMathCatalogOpen(false);
+  $("math-reader-section")?.scrollIntoView({block:"start",behavior:"auto"});
+ }
 }
 window.mathSelectDiscipline=(id)=>{
  filterDept=deptMap.has(id)?id:"";
@@ -285,6 +306,7 @@ window.mathSelectDiscipline=(id)=>{
  setURL({discipline:filterDept,topic:target?.id||null});
 };
 window.mathSelectTopic=(id)=>selectNode(id);
+$("math-toggle-catalog")?.addEventListener("click",()=>setMathCatalogOpen(!$("math-reader-section").classList.contains("catalog-open")));
 $("search").addEventListener("input",e=>{query=e.target.value;renderTree()});
 $("disciplineFilter").addEventListener("change",e=>{window.mathSelectDiscipline(e.target.value)});
 $("levelFilter").addEventListener("change",e=>{filterLevel=e.target.value;renderTree()});
