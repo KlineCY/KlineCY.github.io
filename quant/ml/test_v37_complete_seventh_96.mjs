@@ -60,7 +60,7 @@ for(const n of Object.values(domainCounts))assert.equal(n,4,"exactly four sevent
 assert(deepWords>27000,"V37 substantial Chinese derivation and audit text");
 
 const home=raw("index.html"),reader=raw("atlas.js"),css=raw("atlas.css");
-const start=home.indexOf('aria-label="V37第七批九十六篇正式讲义全覆盖深化"');
+const start=home.indexOf('aria-label="统计优化、金融预测与生产部署"');
 assert(start>=0,"V37 nine-stage navigation missing");
 const end=home.indexOf("</details>",start);
 assert(end>start,"V37 navigation not closed");
@@ -69,7 +69,7 @@ assert.equal((v37.match(/href="#lesson\//g)||[]).length,72,"72 new deep links re
 for(const id of newIds)assert(v37.includes('href="#lesson/'+id+'"'),"V37 link not reachable "+id);
 for(const title of ["阶段一","阶段二","阶段三","阶段四","阶段五","阶段六","阶段七","阶段八","阶段九"])
  assert(v37.includes(title),"incomplete nine-stage curricular flow "+title);
-assert(home.includes('aria-label="V36四十八篇机器学习数学和量化深入课程"'),"previous roadmap lost");
+assert(home.includes('aria-label="统计推断、优化算法与金融人工智能"'),"previous roadmap lost");
 for(const m of ["linear-n0065","statistics-x001","riskmath-x002"])
  assert(v37.includes('href="../math/?topic='+m+'"'),"missing quantitative math bridge "+m);
 for(const key of ["s.equations.map","s.derivation","s.protocol","s.pitfalls","s.worked_example","katex.render"])

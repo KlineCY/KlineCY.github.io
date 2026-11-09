@@ -110,8 +110,8 @@ near(244+5*Math.log(100),267.0258509299405,"BIC penalty");
 near((1+1)/(2+2),.5,"MA overlap correlation");
 const math=fs.readFileSync(new URL("index.html",root),"utf8");
 const ml=fs.readFileSync(new URL("../ml/index.html",root),"utf8");
-assert(math.includes('aria-label="V22时间序列创新与平稳性八课深度学习链"'));
-assert(ml.includes('aria-label="V22金融时序创新与单位根数学交叉链"'));
+assert(math.includes('aria-label="量化时间序列：白噪声 → Wold → MA/ARMA → ARIMA → ADF/KPSS"'));
+assert(ml.includes('aria-label="金融时间序列理论：创新、ARMA与单位根诊断"'));
 for(const id of ids){
  assert(math.includes("?topic="+id),"missing math navigation "+id);
  assert(ml.includes("../math/?topic="+id),"missing ML navigation "+id);

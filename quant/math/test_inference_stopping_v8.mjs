@@ -64,15 +64,15 @@ assert.equal(means[Math.ceil(.025*means.length)-1],1.5);
 assert.equal(means[Math.ceil(.975*means.length)-1],3.5);
 const html=fs.readFileSync(new URL("index.html",dir),"utf8");
 for(const id of expected)assert(html.includes("?topic="+id),"math lecture missing from path "+id);
-assert(html.includes("统计推断、序列依赖和Fama–MacBeth的证明链"));
-assert(html.includes("条件期望与可选停止的鞅理论路径"));
+assert(html.includes("从中心极限定理到金融显著性：长期方差、HAC、Bootstrap与Fama–MacBeth"));
+assert(html.includes("从条件期望到可选停止：滤过、停时、鞅与交易边界"));
 const css=fs.readFileSync(new URL("styles.css",dir),"utf8");
 assert(css.includes("V8 long-form Chinese quantitative inference"));
 assert(css.includes("break-inside:auto!important"));
 assert(css.includes(".math-deep-unit .formula-block:focus-visible") ||
        css.includes(".formula-block:focus-visible"),"keyboard focus missing");
 const machine=fs.readFileSync(new URL("../ml/index.html",dir),"utf8");
-assert(machine.includes("从数学CLT到金融模型可靠性验证的贯通课程"));
+assert(machine.includes("预测与策略显著性的数学证据链：CLT、HAC、Bootstrap与Fama–MacBeth"));
 for(const id of expected)assert(machine.includes("../math/?topic="+id),"missing ML-to-math cross-link "+id);
 console.log("PASS: V8 4 upgraded canonical articles, 16 deep reasoning sections, 16 parseable KaTeX equations, "+sources+" academic sources and reproducible financial/statistical calculations.");
 

@@ -88,8 +88,8 @@ eq(.2*.3,.06,"VAR forecast covariance off-diagonal");
 eq(.3**2,.09,"VAR forecast covariance AA' second diagonal");
 const math=fs.readFileSync(new URL("index.html",root),"utf8");
 const ml=fs.readFileSync(new URL("../ml/index.html",root),"utf8");
-assert(math.includes('aria-label="V23协整误差修正与向量VAR四课"'));
-assert(ml.includes('aria-label="V23多资产协整ECM与VAR跨模块路径"'));
+assert(math.includes('aria-label="多资产协整与动态均衡：Engle–Granger → Johansen → ECM → VAR"'));
+assert(ml.includes('aria-label="多资产量化建模：协整、Johansen、ECM与VAR"'));
 for(const id of newIds){
  assert(math.includes("?topic="+id),"math nav absent "+id);
  assert(ml.includes("../math/?topic="+id),"ML nav absent "+id);

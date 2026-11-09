@@ -68,7 +68,7 @@ for(const [id,n] of domainCount){
 assert(v40Chars>22500,"V40 substantive Chinese proofs, reproducibility & boundaries");
 
 const homepage=raw("index.html"),reader=raw("atlas.js"),css=raw("atlas.css");
-const start=homepage.indexOf('aria-label="V40第九批前六十二篇机器学习完整数学深化"');
+const start=homepage.indexOf('aria-label="数理统计、优化与因果金融"');
 assert(start>=0,"V40 six-stage navigation not visible");
 const end=homepage.indexOf("</details>",start);
 assert(end>start,"V40 navigation missing closing tag");
@@ -79,7 +79,7 @@ for(const stage of ["阶段一","阶段二","阶段三","阶段四","阶段五",
  assert(v40Nav.includes(stage),"missing coherent V40 six-stage curriculum "+stage);
 for(const topic of ["linear-n0065","statistics-x001","riskmath-x002"])
  assert(v40Nav.includes('href="../math/?topic='+topic+'"'),"quant math cross-link missing "+topic);
-assert(homepage.includes('aria-label="V39第八批后六十篇机器学习正式课程全域深化"'),"V39 previous curriculum accidentally lost");
+assert(homepage.includes('aria-label="神经网络、金融人工智能与风险管理"'),"V39 previous curriculum accidentally lost");
 for(const marker of ["s.equations.map","s.derivation","s.protocol","s.pitfalls","s.worked_example","katex.render"])
  assert(reader.includes(marker),"original lesson reader lost "+marker);
 for(const marker of [".atlas-spectral-path",".atlas-spectral-stage",".atlas-spectral-links",".ml-math-block","overflow-x:auto","line-break:strict","@media print"])

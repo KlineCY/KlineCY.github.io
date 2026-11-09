@@ -59,7 +59,7 @@ assert(eqCount>=264,"later appended formulas must not reduce original coverage")
 assert(addedProse>18000,"need >18k Chinese explanation/protocol characters");
 
 const html=raw("index.html"),reader=raw("atlas.js"),css=raw("atlas.css");
-assert(html.includes('aria-label="V36四十八篇机器学习数学和量化深入课程"'));
+assert(html.includes('aria-label="统计推断、优化算法与金融人工智能"'));
 for(const id of ids)assert(html.includes('href="#lesson/'+id+'"'),"not reachable "+id);
 for(const mathId of ["linear-n0065","calculus-n0041","statistics-x001","riskmath-x002"])
  assert(html.includes('href="../math/?topic='+mathId+'"'),"math prerequisite broken "+mathId);

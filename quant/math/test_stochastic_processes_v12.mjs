@@ -184,8 +184,8 @@ for(const id of ids){
  assert(html.includes("?topic="+id),"missing V12 math nav "+id);
  assert(ml.includes("../math/?topic="+id),"missing V12 ML-to-math nav "+id);
 }
-assert(html.includes('aria-label="V12十五篇随机过程、马尔可夫链及执行队列完整教材"'));
-assert(ml.includes('aria-label="V12马尔可夫链与金融订单过程的15篇数学先修"'));
+assert(html.includes('aria-label="随机过程与交易事件建模：Bernoulli → 更新理论 → 马尔可夫链 → CTMC → 执行队列"'));
+assert(ml.includes('aria-label="机器学习与量化微观结构的数学先修：事件计数、Markov、CTMC与执行队列"'));
 assert(html.includes("styles.css?v=20261104-probscore-v6-inference-v8-martingale-v9-convergence-v10-integration-v11-stochastic-v12"),"CSS cache version was not updated");
 assert(css.includes("V12: stochastic-process notation and long Chinese Markov arguments"),"CJK math styles absent");
 assert(css.includes(".math-v12-stochastic summary:focus-visible")&&css.includes(".katex-display")&&css.includes("@media print"),"accessibility/mobile/print math rules absent");

@@ -104,8 +104,8 @@ near(.5*.10+.5*(-.30),-.10,"V54 survivor IPW population reweighting");
 near(.625/(.75**2),1.1111111111111112,"HC3 leverage correction");
 const mathHtml=fs.readFileSync(new URL("index.html",root),"utf8");
 const mlHtml=fs.readFileSync(new URL("../ml/index.html",root),"utf8");
-assert(mathHtml.includes('aria-label="V19因果识别与金融实证八篇精讲路径"'));
-assert(mlHtml.includes('aria-label="V19金融因果识别与量化实证数学交叉路径"'));
+assert(mathHtml.includes('aria-label="金融实证研究链：DiD与RDD → 事件研究 → 因子溢价 → 稳健推断"'));
+assert(mlHtml.includes('aria-label="金融实证与机器学习：因果识别、横截面风险价格及数据偏差"'));
 for(const id of [...newIds,"econometrics-n0235"]){
  assert(mathHtml.includes("?topic="+id),"math navigation missing "+id);
  assert(mlHtml.includes("../math/?topic="+id),"ML navigation missing "+id);

@@ -16,7 +16,7 @@ function checkReader(html,id,old){
  assert.equal(html.split('id="'+id+'"').length,2,id+" missing or duplicated");
 }
 checkReader(mlHtml,"atlas-reader-section",'aria-label="系统学习路径"');
-checkReader(mathHtml,"math-reader-section",'aria-label="V110 数值分析与蒙特卡洛全30篇课程和656节点全学科覆盖"');
+checkReader(mathHtml,"math-reader-section",'aria-label="数值分析与蒙特卡洛模拟"');
 for(const html of [mlHtml,mathHtml]){
  assert.equal(html.split('id="course-site-nav-toggle"').length,2,"Missing mobile site navigation toggle");
  expect(html,'aria-controls="quantSidebar" aria-expanded="false"',"Mobile global menu disclosure a11y");
@@ -92,7 +92,10 @@ for(const [name,css]of [["ML",mlCss],["math",mathCss]]){
  expect(css,"overflow-x:auto",name+" KaTeX overflow");
  expect(css,":focus-visible",name+" keyboard focus");
 }
-assert.equal(JSON.parse(read("curriculum.json")).nodes.length,720,"ML 720 syllabus changed");
+const {gunzipSync}=await import("node:zlib");
+const originalAtlas=JSON.parse(gunzipSync(Buffer.concat([1,2,3,4].map(i=>fs.readFileSync(new URL("atlas/data.part"+i,base))))).toString("utf8"));
+assert.equal(originalAtlas.catalog.items.length,720,"ML canonical Atlas index changed");
+assert.equal(Object.keys(originalAtlas.domains).length,24,"ML Atlas domain count changed");
 assert.equal(JSON.parse(read("../math/curriculum.json")).nodes.length,656,"Math 656 syllabus changed");
 const marker="node quant/ml/test_v115_reader_navigation.mjs";
 expect(read("../../.github/workflows/test-quant-ml.yml"),marker,"ML CI integration");

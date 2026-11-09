@@ -80,8 +80,8 @@ assert.equal(linkCount,105);
 assert(proseCount>=40000,"V34 40k+ substantive Chinese explanation");
 const home=raw("index.html"),mlHome=raw("../ml/index.html"),css=raw("styles.css");
 const mlCss=raw("../ml/atlas.css"),reader=raw("app.js"),mlReader=raw("../ml/atlas.js");
-assert(home.includes('aria-label="V34核心数学123篇全部具备系统分节证明"'));
-assert(mlHome.includes('aria-label="V34数学核心先修全面补全"'));
+assert(home.includes('aria-label="核心教材缺口清零：35篇基础讲义补全为系统课程"'));
+assert(mlHome.includes('aria-label="机器学习数学先修完整版：微积分、概率、数值与动态决策"'));
 for(const l of added)assert(home.includes('href="?topic='+l.id+'"'),"homepage missing canonical "+l.id);
 const mlRoutes=[
  "calculus-n0032","calculus-n0042","calculus-n0056","linear-n0082","linear-n0084",

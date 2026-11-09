@@ -121,7 +121,7 @@ near("BY harmonic five",1+1/2+1/3+1/4+1/5,2.283333333333333);
 near("BY first threshold",.1/(5*(1+1/2+1/3+1/4+1/5)),.008759124087591242,1e-8);
 near("BY second threshold",2*.1/(5*(1+1/2+1/3+1/4+1/5)),.017518248175182483,1e-8);
 const mathHTML=read("index.html"),mlHTML=read("../ml/index.html"),mathCSS=read("styles.css"),mlCSS=read("../ml/atlas.css");
-assert(mathHTML.includes('aria-label="V85量化数学与机器学习二十七篇正式讲义深化"'));
+assert(mathHTML.includes('aria-label="谱稳定、随机波动与实证分析"'));
 for(const s of mathSpec)assert(mathHTML.includes('href="?topic='+s.id+'"'),s.id+" math navigation missing");
 for(const s of mlSpec){
  assert(mathHTML.includes('href="../ml/#lesson/'+s.id+'"'),s.id+" math→ML navigation missing");

@@ -75,7 +75,7 @@ assert(covar.deep_sections[5].worked.includes("CoVaR为5"));
 const html=fs.readFileSync(new URL("index.html",root),"utf8");
 const ml=fs.readFileSync(new URL("../ml/index.html",root),"utf8");
 const css=fs.readFileSync(new URL("styles.css",root),"utf8");
-assert(html.includes('aria-label="系统尾部风险从VaR与ES到MES、CoVaR的数学证明链"'));
+assert(html.includes('aria-label="系统尾部风险学习链：VaR与ES → MES → CoVaR"'));
 for(const id of chapters.map(x=>x.id))assert(html.includes("?topic="+id),"missing topic in system-risk learning path "+id);
 assert(ml.includes("../math/?topic=riskmath-x005"),"ML math cross-link missing");
 assert(css.includes("overflow-x:auto")&&css.includes("line-break:strict")&&css.includes("@media print"),"CJK/mobile/formula print constraints missing");

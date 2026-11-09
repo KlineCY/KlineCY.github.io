@@ -213,7 +213,7 @@ near("PostLN normalized first",(1-2)/1,-1);
 near("PostLN normalized second",(3-2)/1,1);
 
 const html=read("../ml/index.html"),reader=read("../ml/atlas.js"),css=read("../ml/atlas.css");
-assert(html.includes('aria-label="V37第七批九十六篇正式讲义全覆盖深化"'),"ML V37 navigation missing");
+assert(html.includes('aria-label="统计优化、金融预测与生产部署"'),"ML V37 navigation missing");
 for(const spec of baseline)for(const old of spec.entries)assert(html.includes('href="#lesson/'+old.id+'"'),old.id+" missing from ML navigation");
 for(const marker of ["s.equations.map","s.derivation","s.protocol","s.pitfalls","katex.render"])assert(reader.includes(marker),"renderer missing "+marker);
 for(const marker of ["overflow-x:auto","line-break:strict","katex-display",":focus-visible","@media print","@media(max-width:700px)"])assert(css.includes(marker),"CJK/mobile/formula style missing "+marker);

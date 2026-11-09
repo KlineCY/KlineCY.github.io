@@ -103,8 +103,8 @@ const index=fs.readFileSync(new URL("index.html",root),"utf8");
 const ml=fs.readFileSync(new URL("../ml/index.html",root),"utf8");
 const css=fs.readFileSync(new URL("styles.css",root),"utf8");
 const mlcss=fs.readFileSync(new URL("../ml/atlas.css",root),"utf8");
-assert(index.includes('aria-label="V17十二篇计量识别、工具变量与GMM深入学习路线"'));
-assert(ml.includes('aria-label="V17计量经济学与金融机器学习识别先修"'));
+assert(index.includes('aria-label="计量经济学研究链：外生性 → 工具变量 → GMM → 稳健因果推断"'));
+assert(ml.includes('aria-label="计量识别与金融机器学习：外生性 → IV → GMM → 因果评估"'));
 for(const id of ids){
  assert(index.includes("?topic="+id),"mathematics index missing "+id);
  assert(ml.includes("../math/?topic="+id),"ML-to-mathematics link missing "+id);

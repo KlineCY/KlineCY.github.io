@@ -75,8 +75,8 @@ const mathHome=fs.readFileSync(new URL("index.html",root),"utf8");
 const mlHome=fs.readFileSync(new URL("../ml/index.html",root),"utf8");
 const style=fs.readFileSync(new URL("styles.css",root),"utf8");
 const mlStyle=fs.readFileSync(new URL("../ml/atlas.css",root),"utf8");
-assert(mathHome.includes('aria-label="V30无套利定价与短率收益率曲线六课"'));
-assert(mlHome.includes('aria-label="V30无套利定价、收益率曲线与短率模型跨模块路径"'));
+assert(mathHome.includes('aria-label="资产定价与债券数学：等价鞅测度 → 完备市场 → 零息远期 → 收益率曲线 → Vasicek → CIR"'));
+assert(mlHome.includes('aria-label="金融机器学习的定价数学：鞅测度、市场完备性、远期、期限曲线与随机短率"'));
 for(const id of ids){assert(mathHome.includes("?topic="+id));assert(mlHome.includes("../math/?topic="+id));}
 for(const x of ["overflow-x:auto","line-break:strict","@media print",":focus-visible"])assert(style.includes(x));
 assert(mlStyle.includes("overflow-x:auto"));

@@ -74,8 +74,8 @@ const nav=(tag)=>{
  assert(end>start,"missing closing details "+tag);
  return home.slice(start,end);
 };
-const first=nav("V38第八批六十篇正式课程数学与量化深化");
-const second=nav("V39第八批后六十篇机器学习正式课程全域深化");
+const first=nav("泛化理论、核方法与因果推断");
+const second=nav("神经网络、金融人工智能与风险管理");
 assert.equal((first.match(/href="#lesson\//g)||[]).length,60,"V38 first half links");
 assert.equal((second.match(/href="#lesson\//g)||[]).length,60,"V39 second half links");
 for(const id of v38)assert(first.includes('href="#lesson/'+id+'"'),"V38 lesson not reachable "+id);

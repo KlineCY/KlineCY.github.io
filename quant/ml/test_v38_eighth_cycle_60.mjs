@@ -63,7 +63,7 @@ for(const n of domains.values())assert.equal(n,5,"exactly five eighth-stage less
 assert(newChars>21000,"V38 must add over 21k substantive Chinese reasoning/protocol chars");
 
 const home=raw("index.html"),css=raw("atlas.css"),viewer=raw("atlas.js");
-const start=home.indexOf('aria-label="V38第八批六十篇正式课程数学与量化深化"');
+const start=home.indexOf('aria-label="泛化理论、核方法与因果推断"');
 assert(start>=0,"missing V38 curriculum");
 const end=home.indexOf("</details>",start);
 assert(end>start,"missing navigation details close");

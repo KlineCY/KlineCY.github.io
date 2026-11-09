@@ -140,8 +140,8 @@ for(const id of newlyCompleted){
  assert(html.includes("?topic="+id),"V11 mathematics index missing "+id);
  assert(ml.includes("../math/?topic="+id),"V11 ML pathway missing "+id);
 }
-assert(html.includes('aria-label="V11十五篇测度积分与金融概率数学证明链"'));
-assert(ml.includes('aria-label="V11测度与概率积分的15篇跨学科先修课"'));
+assert(html.includes('aria-label="测度论与概率积分的完整建构：从可测事件到Fubini及测度变换"'));
+assert(ml.includes('aria-label="概率与测度论基础：从事件、积分到金融风险测度变换"'));
 assert(html.includes("styles.css?v=20261104-probscore-v6-inference-v8-martingale-v9-convergence-v10-integration-v11"),"stylesheet version cache must update");
 assert(css.includes("V11: integration proof readability for long Chinese and KaTeX expressions"),"V11 CSS missing");
 assert(css.includes(".math-v11-measure summary:focus-visible")&&css.includes(".katex-display")&&css.includes("@media print"),"keyboard/mobile/print math styles missing");

@@ -68,8 +68,8 @@ for(const [id,token] of [
  ["information-n0510","0.140909"]
 ])assert(added.find(l=>l.id===id).example.includes(token),"example evidence missing "+id);
 const mathHome=fs.readFileSync(new URL("index.html",root),"utf8"),mlHome=fs.readFileSync(new URL("../ml/index.html",root),"utf8");
-assert(mathHome.includes('aria-label="V29状态空间与序贯滤波六课"'));
-assert(mlHome.includes('aria-label="V29状态估计与序贯概率学习交叉路径"'));
+assert(mathHome.includes('aria-label="实时隐状态推断：状态空间 → 序贯Bayes → HMM → 非线性滤波 → 粒子滤波 → 路径依赖风险"'));
+assert(mlHome.includes('aria-label="金融机器学习与序列潜变量：Bayes在线学习、HMM、EKF、粒子滤波和路径风险"'));
 for(const id of targets){
  assert(mathHome.includes("?topic="+id),"no math path "+id);
  assert(mlHome.includes("../math/?topic="+id),"no ML crosslink "+id);

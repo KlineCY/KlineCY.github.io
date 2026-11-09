@@ -139,8 +139,8 @@ for(const id of ids){
  assert(html.includes("?topic="+id),"math V10 route missing "+id);
  assert(ml.includes("../math/?topic="+id),"ML crosslink missing "+id);
 }
-assert(html.includes('aria-label="十二篇V10极限定理与鞅收敛系统课程"'));
-assert(ml.includes('aria-label="十二篇概率收敛与鞅极限的数学先修课程"'));
+assert(html.includes('aria-label="完整证明链：随机变量收敛、函数空间、尾部控制与鞅极限"'));
+assert(ml.includes('aria-label="数学先修：概率收敛、尾部积分与金融鞅极限"'));
 assert(html.includes("styles.css?v=20261104-probscore-v6-inference-v8-martingale-v9-convergence-v10"),"CSS version cache stale");
 assert(css.includes("V10: 12-lecture proof and Chinese typography"));
 assert(css.includes(".math-v10-convergence summary:focus-visible")&&css.includes(".katex-display")&&css.includes("@media print"),"keyboard/CJK/Katex/print style absent");

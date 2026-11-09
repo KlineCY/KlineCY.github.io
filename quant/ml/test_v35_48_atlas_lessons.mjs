@@ -54,7 +54,7 @@ assert.equal(math,240,"96 new and 144 retained strict KaTeX equations");
 assert(chars>17500,"at least 17.5k chars of proof, protocol, failure reasoning");
 
 const home=raw("index.html"),js=raw("atlas.js"),css=raw("atlas.css");
-assert(home.includes('aria-label="V35四十八篇机器学习正式课程完整深化"'));
+assert(home.includes('aria-label="机器学习基础与量化交易"'));
 for(const [,ids] of groups)for(const id of ids)
  assert(home.includes('href="#lesson/'+id+'"'),id+" missing homepage route");
 for(const id of ["linear-n0065","calculus-n0041","statistics-x001","finance-n0430","riskmath-x002"])

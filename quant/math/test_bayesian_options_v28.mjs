@@ -90,8 +90,8 @@ const mathHome=fs.readFileSync(new URL("index.html",root),"utf8");
 const mlHome=fs.readFileSync(new URL("../ml/index.html",root),"utf8");
 const styles=fs.readFileSync(new URL("styles.css",root),"utf8");
 const mlStyles=fs.readFileSync(new URL("../ml/atlas.css",root),"utf8");
-assert(mathHome.includes('aria-label="V28贝叶斯推断与期权定价八课"'));
-assert(mlHome.includes('aria-label="V28贝叶斯概率学习与期权风险跨模块路径"'));
+assert(mathHome.includes('aria-label="从统计不确定性到期权定价：Bayes更新 → 共轭 → 可信区间 → 预测 → BSM → Greeks → IV → 波动率微笑"'));
+assert(mlHome.includes('aria-label="机器学习与量化金融：贝叶斯预测不确定性 → 欧式复制定价 → Greeks → 波动率曲面"'));
 for(const id of newIds){
  assert(mathHome.includes("?topic="+id),"math homepage lesson link "+id);
  assert(mlHome.includes("../math/?topic="+id),"ML crosslink "+id);
