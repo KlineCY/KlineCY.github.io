@@ -45,7 +45,7 @@ close(.06/.02,3);
 close(.5*.08+.5*.04,.06);
 const html=fs.readFileSync(new URL("./index.html",root),"utf8"),css=fs.readFileSync(new URL("./styles.css",root),"utf8");
 for(const id of ids)assert(html.includes("?topic="+id),"missing second path math navigation "+id);
-assert(html.includes("styles.css?v=20261104-probscore-v6"));
+assert(html.includes("styles.css?v=20261109"));
 assert(html.includes('class="math-spectral-path math-v2-advanced"'));
 assert(css.includes(".math-v2-advanced>summary")&&css.includes("@media print")&&css.includes("overscroll-behavior-x:contain"));
 console.log("PASS: six V2 math foundations, "+sections+" proof sections, "+formulaCount+" valid TeX formulas, "+sourceCount+" academic sources, exact numeric invariants and responsive/print typography.");
