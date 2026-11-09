@@ -1,0 +1,464 @@
+{
+  "version": 1,
+  "revision": "V110",
+  "integrated_by": "quant/math/app.js",
+  "subject": "Scalar Milstein, weak and strong convergence, bootstrap uncertainty and path-dependent option simulation",
+  "lessons": [
+    {
+      "id": "numerical-n0387",
+      "node_id": "numerical-n0387",
+      "title": "Milstein方法",
+      "definition": "Milstein方法在Euler–Maruyama一阶随机增量基础上，加入扩散系数导数产生的二次Brownian增量修正。对标量Itô随机微分方程dX=a(X)dt+b(X)dW，在充分正则条件下通常达到强一阶收敛，相比Euler–Maruyama典型强1/2阶更适合路径精度要求高的模拟。",
+      "assumptions": "采用标量Itô SDE且a、b具有足够光滑性、Lipschitz和矩控制，Brownian增量独立正态N(0,h)。多维非交换噪声一般需要迭代Itô积分或Lévy面积，不能把标量修正直接套用到任意多维系统。",
+      "properties": [
+        "Milstein在Euler更新上额外加0.5 b(X)b'(X)[(ΔW)²−h]。",
+        "修正项的期望为零，因为E[(ΔW)²]=h。",
+        "在适当正则条件下标量Milstein典型强收敛阶为1。",
+        "若扩散系数b不依赖X，则b'=0，标量Milstein退化为Euler–Maruyama。"
+      ],
+      "formulas": [
+        {
+          "label": "模型与估计",
+          "tex": "X_{n+1}=X_n+a(X_n)h+b(X_n)\\Delta W_n+\\frac12 b(X_n)b'(X_n)\\bigl[(\\Delta W_n)^2-h\\bigr]"
+        },
+        {
+          "label": "误差与收敛",
+          "tex": "\\Delta W_n\\sim N(0,h),\\quad\\mathbb E[(\\Delta W_n)^2-h]=0"
+        },
+        {
+          "label": "关键计算",
+          "tex": "b(x)=\\sigma x\\Longrightarrow \\frac12 b(x)b'(x)=\\frac12\\sigma^2x"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对标量Itô SDE在一步时间区间内作Itô–Taylor展开。",
+          "tex": "\\mathrm dX_t=a(X_t)\\,\\mathrm dt+b(X_t)\\,\\mathrm dW_t"
+        },
+        {
+          "explanation": "保留Euler项以及扩散对自身状态变化产生的二阶随机积分。",
+          "tex": "\\int_{t_n}^{t_{n+1}}\\!\\int_{t_n}^{s}\\mathrm dW_u\\,\\mathrm dW_s=\\frac12\\bigl[(\\Delta W_n)^2-h\\bigr]"
+        },
+        {
+          "explanation": "代入b b'系数得到Milstein一步更新，并根据同路径耦合比较强误差。",
+          "tex": "\\widehat X_{n+1}^{\\rm Mil}=\\widehat X_{n+1}^{\\rm EM}+\\frac12 bb'[(\\Delta W)^2-h]"
+        }
+      ],
+      "example": "取GBM S0=100、漂移μ=0、σ=0.2、h=0.25、一条Brownian增量ΔW=0.1。Euler给S1=100+20×0.1=102；Milstein修正为0.5×(20)×(0.2)×(0.01−0.25)=−0.48，故S1=101.52。",
+      "application": "用于对路径强收敛敏感的衍生品对冲、路径导数和耦合仿真。标量局部波动模型在b(x)可微且数值稳定时可从Milstein获得更精确的路径。",
+      "caveat": "强一阶是充分正则条件下的渐近结果，不适用于任意非光滑系数或多维非交换噪声。即使路径误差更小，对触碰障碍的离散监控仍可能存在单独偏差。",
+      "deep_sections": [
+        {
+          "title": "Itô二阶修正从哪里来",
+          "question": "为什么Milstein的补偿项是(ΔW)²−h而不是简单(ΔW)²？",
+          "paragraphs": [
+            "随机微分方程中的Brownian增量平方具有平均大小h，Itô积分的二次变差导致与普通Taylor积分不同的校正。",
+            "减去h使修正项的期望为零，避免在一阶扩散修正里无意加入额外的条件漂移。"
+          ],
+          "formulas": [
+            {
+              "label": "定理与数值校验",
+              "tex": "\\int_{t}^{t+h}\\int_t^{s}\\mathrm dW_u\\,\\mathrm dW_s=\\frac12((W_{t+h}-W_t)^2-h)"
+            }
+          ],
+          "proof": "对(W_s−W_t)²应用Itô公式，d[(W_s−W_t)²]=2(W_s−W_t)dW_s+ds。两边从t积分到t+h，再整理得到所示二重随机积分恒等式。",
+          "worked": "若h=.25、ΔW=.1，二阶随机积分为(.01−.25)/2=−.12；b b'=20×.2=4，乘起来得到−.48。",
+          "limitation": "普通路径Taylor展开不自动包含Itô二次变差；使用Stratonovich方程时漂移与校正口径不同。"
+        },
+        {
+          "title": "GBM的一步算例与均值检查",
+          "question": "为什么Milstein的单步修正不会改变条件均值？",
+          "paragraphs": [
+            "对Brownian增量ΔW~N(0,h)，平方的期望等于h，故额外修正的条件期望为零。",
+            "这说明Milstein主要通过改善随机路径局部结构提高强收敛，而不是简单对GBM每一步添加平均漂移。"
+          ],
+          "formulas": [
+            {
+              "label": "定理与数值校验",
+              "tex": "\\mathbb E[\\widehat X_{n+1}\\mid X_n]=X_n+a(X_n)h"
+            }
+          ],
+          "proof": "在已知X_n下，E[ΔW]=0、E[(ΔW)²−h]=0，把Milstein所有项条件取期望只留下X_n+a(X_n)h。",
+          "worked": "示例μ=0，所以对很多独立高斯步重复取平均，Milstein单步期望仍应为100；单条ΔW=.1时得到101.52不违反这一条件均值。",
+          "limitation": "若a和b随时间或状态变化，条件均值关系只针对单步冻结系数，不代表终值分布精确。"
+        },
+        {
+          "title": "多维噪声为何需要额外迭代积分",
+          "question": "为什么不能把标量Milstein公式直接套到所有多资产系统？",
+          "paragraphs": [
+            "多个Brownian驱动之间会出现不同顺序的二重Itô积分，若扩散向量场不交换，需要模拟Lévy面积等随机对象。",
+            "在相关资产和随机波动率模型里，忽略这些项可能丢失声称的强一阶精度，必须核对噪声交换条件或采用对应高阶算法。"
+          ],
+          "formulas": [
+            {
+              "label": "定理与数值校验",
+              "tex": "I_{ij}=\\int_{t}^{t+h}\\!\\int_t^s\\mathrm dW_u^{(i)}\\,\\mathrm dW_s^{(j)}"
+            }
+          ],
+          "proof": "多维Itô–Taylor展开出现按驱动坐标i,j组织的二重随机积分。当i=j时可化为0.5[(ΔW_i)²−h]；当i≠j时一般不能仅由增量乘积唯一恢复每项积分。",
+          "worked": "两只独立Brownian资产组成的系统在i≠j时也有迭代积分项；只有特殊交换结构才可以简化为仅增量驱动。",
+          "limitation": "不能将忽略Lévy面积的简化版本无条件称为强一阶Milstein，必须明确模型和算法类别。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "numerical-n0386",
+          "label": "Euler-Maruyama"
+        },
+        {
+          "kind": "math",
+          "id": "numerical-n0388",
+          "label": "弱强收敛"
+        },
+        {
+          "kind": "math",
+          "id": "numerical-n0390",
+          "label": "路径依赖期权仿真"
+        }
+      ]
+    },
+    {
+      "id": "numerical-n0388",
+      "node_id": "numerical-n0388",
+      "title": "弱强收敛",
+      "definition": "随机数值方法的强收敛衡量在同一Brownian驱动耦合下，数值路径与精确过程的距离；弱收敛衡量给定测试函数φ的期望差。对足够光滑的标量Itô SDE，Euler–Maruyama典型强阶1/2、平滑测试函数弱阶1，Milstein可达到强阶1；这些阶数需要正则性且依目标payoff而改变。",
+      "assumptions": "强误差必须定义在数值过程和精确过程共享同一个随机驱动的耦合空间中；弱误差针对特定测试函数类。标准阶数证明通常要求系数全局Lipschitz、足够可微、矩有界等条件；障碍与数字期权payoff不光滑可能导致阶数下降。",
+      "properties": [
+        "强收敛直接控制路径误差，适合路径近似、耦合和一些风险敏感任务。",
+        "弱收敛控制期望，不必保证单条数值路径紧贴精确路径。",
+        "强L¹误差界可推出Lipschitz payoff的弱误差上界，但反向一般不成立。",
+        "只比较独立模拟的两组路径差不能准确估计强误差，需要共同Brownian驱动耦合。"
+      ],
+      "formulas": [
+        {
+          "label": "模型与估计",
+          "tex": "\\bigl(\\mathbb E|\\widehat X_T^h-X_T|^p\\bigr)^{1/p}=O(h^\\alpha)"
+        },
+        {
+          "label": "误差与收敛",
+          "tex": "|\\mathbb E[\\varphi(\\widehat X_T^h)]-\\mathbb E[\\varphi(X_T)]|=O(h^\\beta)"
+        },
+        {
+          "label": "关键计算",
+          "tex": "|\\mathbb E[\\varphi(\\widehat X)-\\varphi(X)]|\\le L_\\varphi\\,\\mathbb E|\\widehat X-X|"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "在同一概率空间上以相同Brownian增量构造精确解与数值解。",
+          "tex": "e_h=\\widehat X_T^h-X_T"
+        },
+        {
+          "explanation": "对单条路径误差取L^p均值范数，定义强收敛阶。",
+          "tex": "\\|e_h\\|_{L^p}=(\\mathbb E|e_h|^p)^{1/p}"
+        },
+        {
+          "explanation": "针对payoff φ分别比较两个模型下的期望，定义弱收敛阶。",
+          "tex": "\\epsilon_{\\rm weak}=|\\mathbb E\\varphi(\\widehat X_T^h)-\\mathbb E\\varphi(X_T)|"
+        }
+      ],
+      "example": "考虑无扩散项的dX=Xdt，X0=1，T=1，精确解X_T=e≈2.718282。Euler步长h=.5（两步）给(1+.5)²=2.25，绝对误差≈0.468282；h=.25（四步）给(1.25)^4≈2.441406，误差≈0.276875。对φ(x)=x，模型确定性使强L¹误差与弱误差数值相同。",
+      "application": "在期权定价中主要关注价格期望可优先使用弱收敛；在触碰路径、敞口模拟、路径wise Greeks和多层Monte Carlo耦合中，还需关注强收敛。",
+      "caveat": "弱收敛阶取决于payoff光滑性和离散监控；给某个线性payoff得到低偏差不意味着数字或障碍payoff具有同样精度。必须报告共同随机驱动和网格加密方法。",
+      "deep_sections": [
+        {
+          "title": "强弱收敛定义的目标差异",
+          "question": "为什么路径精度与价格期望精度不能混为一谈？",
+          "paragraphs": [
+            "强收敛要求每条与精确过程耦合的路径尽可能接近，考虑了路径之间的对应关系。",
+            "弱收敛只要求指定函数的期望正确，可以允许单条样本之间有较大差异，这在很多风险中性定价任务中已足够。"
+          ],
+          "formulas": [
+            {
+              "label": "定理与数值校验",
+              "tex": "\\|\\widehat X-X\\|_{L^1}\\to0\\Longrightarrow|\\mathbb E\\varphi(\\widehat X)-\\mathbb E\\varphi(X)|\\to0\\quad(\\varphi\\text{ Lipschitz})"
+            }
+          ],
+          "proof": "利用期望三角不等式|E[φ(Xhat)−φ(X)]|≤E|φ(Xhat)−φ(X)|≤Lφ E|Xhat−X|，因此强L¹收敛蕴含此类payoff弱收敛。",
+          "worked": "对φ(x)=x的确定性Euler算例，步长.5时强误差和弱误差都为e−2.25≈0.468282。",
+          "limitation": "若φ有跳跃，Lipschitz不等式不成立，数字期权和路径障碍弱误差需单独分析。"
+        },
+        {
+          "title": "误差阶的数值验证",
+          "question": "怎样用网格加密判断观察到的收敛阶？",
+          "paragraphs": [
+            "若误差近似C h^p，两个相邻步长h与h/2的误差比应趋于2^p。",
+            "实际计算要防止Monte Carlo噪声淹没离散误差；路径强误差还需要共同驱动，不应拿两组独立路径直接相减。"
+          ],
+          "formulas": [
+            {
+              "label": "定理与数值校验",
+              "tex": "\\widehat p=\\log_2\\!\\left(\\frac{E(h)}{E(h/2)}\\right)"
+            }
+          ],
+          "proof": "从E(h)≈Ch^p、E(h/2)≈C(h/2)^p得E(h)/E(h/2)≈2^p，再取以2为底对数。",
+          "worked": "若某算法误差在h=.1时约.01、在h=.05时约.0025，则估计p=log₂(4)=2；这只是观察到的局部阶数。",
+          "limitation": "若参考解本身数值不精确或误差接近机器舍入下限，推导的阶数估计会失真。"
+        },
+        {
+          "title": "Euler与Milstein精度的假设",
+          "question": "为什么不能只记住Euler半阶、Milstein一阶？",
+          "paragraphs": [
+            "这些是指定平滑性、矩条件与标量噪声结构下的典型强阶结果；对于某些可精确离散过程或特殊payoff，实际阶数可能更高。",
+            "更一般的多维非交换噪声、非Lipschitz扩散和吸收边界都可能改变误差结构，需检查理论是否适用于具体金融模型。"
+          ],
+          "formulas": [
+            {
+              "label": "定理与数值校验",
+              "tex": "\\alpha_{\\rm EM}=1/2,\\qquad\\alpha_{\\rm Mil}=1\\quad\\text{典型标量强阶}"
+            }
+          ],
+          "proof": "Euler保留Itô–Taylor展开的一阶漂移及Brownian增量，遗漏部分二重随机积分；Milstein补上标量二重项，在足够正则条件下提升路径强阶。",
+          "worked": "对dX=dW且X0=0，Euler在任何包含终点T的网格上累加精确Brownian增量得到W_T，所以强误差为0，明显不是只能半阶。",
+          "limitation": "该反例说明阶数是一般方法上界，不是每个特殊模型的必然精确速度。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "numerical-n0385",
+          "label": "时间离散偏差"
+        },
+        {
+          "kind": "math",
+          "id": "numerical-n0386",
+          "label": "Euler-Maruyama"
+        },
+        {
+          "kind": "math",
+          "id": "numerical-n0387",
+          "label": "Milstein方法"
+        }
+      ]
+    },
+    {
+      "id": "numerical-n0389",
+      "node_id": "numerical-n0389",
+      "title": "Bootstrap模拟",
+      "definition": "Bootstrap重抽样从已观察经验分布中有放回地抽取与原样本等规模的数据，重复计算统计量，近似其抽样分布、标准误和某些置信区间。经典IID Bootstrap适用于独立同分布样本和足够规则的统计函数；金融时间序列须考虑块Bootstrap等维持依赖结构的方法。",
+      "assumptions": "简单非参数Bootstrap假设样本X1,…,Xn来自独立同分布总体，经验分布可合理近似目标分布。样本均值等光滑统计量通常较适用，但极端分位数、非正则边界及厚尾无限方差可能需要专门方法。块Bootstrap需适当弱依赖和块长度。",
+      "properties": [
+        "有放回抽样使每个原观测在一轮Bootstrap内可以出现零次、多次。",
+        "Bootstrap标准误是B个重抽统计量的样本标准差，而不是对单次重抽样本做原样本IID假设。",
+        "百分位区间利用Bootstrap统计量的经验分位数，但不是所有统计量都能达到标称覆盖。",
+        "时间序列逐点IID重抽会破坏自相关，宜按研究设计选择移动块或固定块方案。"
+      ],
+      "formulas": [
+        {
+          "label": "模型与估计",
+          "tex": "X_1^\\ast,\\ldots,X_n^\\ast\\overset{\\rm iid}{\\sim}\\widehat F_n"
+        },
+        {
+          "label": "误差与收敛",
+          "tex": "\\widehat{\\operatorname{se}}_{\\rm boot}=\\sqrt{\\frac1{B-1}\\sum_{b=1}^B(\\widehat\\theta^{\\ast(b)}-\\overline{\\theta^\\ast})^2}"
+        },
+        {
+          "label": "关键计算",
+          "tex": "\\operatorname{CI}_{\\rm percentile}=[Q^\\ast_{\\alpha/2},Q^\\ast_{1-\\alpha/2}]"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "固定原样本，构造对每个观测赋质量1/n的经验分布。",
+          "tex": "\\widehat F_n=n^{-1}\\sum_{i=1}^n\\delta_{X_i}"
+        },
+        {
+          "explanation": "从经验分布有放回抽样n次并重新估计统计量，重复B轮。",
+          "tex": "\\widehat\\theta^{\\ast(b)}=T(X_1^{\\ast(b)},\\ldots,X_n^{\\ast(b)})"
+        },
+        {
+          "explanation": "使用B个独立重抽统计量的分布估计标准误或合适的置信区间。",
+          "tex": "\\widehat{\\operatorname{se}}_{\\rm boot}^2=(B-1)^{-1}\\sum_b(\\widehat\\theta^{\\ast(b)}-\\overline{\\theta^\\ast})^2"
+        }
+      ],
+      "example": "原样本x=(1,2,3)均值2。从经验分布有放回抽3次，可得到(1,1,3)均值5/3，也可得到(2,3,3)均值8/3。条件于该样本，单次Bootstrap均值方差为[(1−2)²+(2−2)²+(3−2)²]/(3×3)=2/9，标准差√2/3≈0.4714。",
+      "application": "用于量化策略收益均值、回归因子估计或Sharpe的有限样本不确定性与敏感性分析。含自相关的收益、重叠标签及共同冲击应使用匹配依赖结构的块或簇Bootstrap。",
+      "caveat": "Bootstrap不会创造尚未观察的极端危机收益；若历史样本没有厚尾事件，经验分布重抽也不可能生成新极值。时间序列IID重抽可能显著低估依赖风险。",
+      "deep_sections": [
+        {
+          "title": "经验分布和条件重抽样",
+          "question": "为什么Bootstrap的随机性是条件于原样本定义的？",
+          "paragraphs": [
+            "观察数据固定以后，经验分布把每个样本点视为具有1/n概率的候选结果；重抽的变化只来自有放回抽样索引。",
+            "这一机制使原统计量周围的重抽分布成为抽样分布的可计算替代，但其可靠性依赖经验分布是否接近真实总体。"
+          ],
+          "formulas": [
+            {
+              "label": "定理与数值校验",
+              "tex": "\\mathbb P^\\ast(X^\\ast=X_i)=1/n"
+            }
+          ],
+          "proof": "在经验分布下每次独立抽取索引j∈{1,…,n}，选中X_j。于是任一原观测都可能重复出现，n次抽取构成一轮Bootstrap数据。",
+          "worked": "原样本(1,2,3)，重抽(1,1,3)是合法的，因为Bootstrap允许1出现两次、2完全缺失。",
+          "limitation": "如果原始样本不是IID或采样存在选择偏差，经验分布重抽可能复制并放大错误抽样机制。"
+        },
+        {
+          "title": "均值Bootstrap方差的精确计算",
+          "question": "为什么该例Bootstrap均值条件方差为2/9？",
+          "paragraphs": [
+            "经验分布下单次重抽X*的方差按n分母计算，而一轮Bootstrap均值是n个独立经验分布抽样的平均。",
+            "因此均值条件方差是经验分布单次方差再除以n，与使用n−1分母的常规原样本无偏方差估计略有差异。"
+          ],
+          "formulas": [
+            {
+              "label": "定理与数值校验",
+              "tex": "\\operatorname{Var}^\\ast(\\overline X^\\ast)=\\frac1{n^2}\\sum_{i=1}^n(X_i-\\bar X)^2"
+            }
+          ],
+          "proof": "经验分布的方差为(1/n)Σ(X_i−x̄)²，重抽n次独立均值的方差为该值/n，故得到Σ偏差平方/n²。",
+          "worked": "对(1,2,3)，偏差平方和2，n²=9，所以Var*(mean*)=2/9，标准差√2/3≈.4714。",
+          "limitation": "简单Bootstrap方差采用经验分布plug-in性质；在特别小的n下可能与目标有限样本无偏估计存在差异。"
+        },
+        {
+          "title": "金融时间序列需要保留依赖",
+          "question": "为什么直接重抽日收益可能让Sharpe区间过窄？",
+          "paragraphs": [
+            "日收益常有波动聚集、持仓重叠和时序相关，独立重抽单日观测会打乱原来具有风险意义的连续损失段。",
+            "块Bootstrap将相邻多日作为整体重抽，可部分保留短期依赖结构，但块长选择与非平稳行情变化影响最终推断。"
+          ],
+          "formulas": [
+            {
+              "label": "定理与数值校验",
+              "tex": "B_j=(r_j,r_{j+1},\\ldots,r_{j+\\ell-1})"
+            }
+          ],
+          "proof": "定义长度ℓ的连续时间块，每轮从可用块集合有放回选择多个块并拼接到目标样本长度；这样块内部的局部相关得到保留。",
+          "worked": "若连续三天收益为(−5%,−3%,−4%)构成一次危机段，日度IID重抽可能打散成孤立亏损，而以长度3为块重抽能保留该段连续冲击。",
+          "limitation": "块Bootstrap仍不自动处理长程依赖、制度突变或严重的跨资产共同风险，需要根据目标统计量调整方法。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "numerical-n0381",
+          "label": "重要性采样"
+        },
+        {
+          "kind": "math",
+          "id": "numerical-n0385",
+          "label": "时间离散偏差"
+        },
+        {
+          "kind": "math",
+          "id": "numerical-n0390",
+          "label": "路径依赖期权仿真"
+        }
+      ]
+    },
+    {
+      "id": "numerical-n0390",
+      "node_id": "numerical-n0390",
+      "title": "路径依赖期权仿真",
+      "definition": "路径依赖期权的支付依赖标的价格的整个观察路径而非仅终值，如算术平均Asian期权、连续或离散监测障碍期权及回望期权。Monte Carlo通过模拟风险中性价格路径、计算每条路径支付并折现取平均估值；须同时控制路径时间离散偏差、模拟标准误和风险中性模型误设。",
+      "assumptions": "在示例GBM模型中风险中性动力学dS/S=(r−q)dt+σdW^Q，r、q、σ常数且σ>0；风险中性概率Q存在并适用于可复制定价假设。离散监测支付必须明确采样日期和是否包含初始价格，连续障碍监控需要Brownian bridge或相应穿越修正。",
+      "properties": [
+        "算术平均Asian期权通常无直接使用简单终值公式的闭式价格，适合路径模拟。",
+        "GBM在网格时点可以用精确对数正态转移，避免Euler终值分布偏差。",
+        "离散观察的障碍价格与连续监控的障碍价格可能不同，即使每个网格点的价格模拟精确。",
+        "Monte Carlo置信误差与离散网格偏差应分别报告，不能把路径数量增加等同于定价精度全面提高。"
+      ],
+      "formulas": [
+        {
+          "label": "模型与估计",
+          "tex": "S_{t+h}=S_t\\exp\\!\\left[(r-q-\\tfrac12\\sigma^2)h+\\sigma\\sqrt h\\,Z\\right],\\quad Z\\sim N(0,1)"
+        },
+        {
+          "label": "误差与收敛",
+          "tex": "H_{\\rm Asian}=\\max\\!\\left(\\frac1m\\sum_{j=1}^mS_{t_j}-K,0\\right)"
+        },
+        {
+          "label": "关键计算",
+          "tex": "\\widehat V_0=e^{-rT}\\frac1N\\sum_{i=1}^N H^{(i)},\\quad\\widehat{\\operatorname{se}}=\\frac{e^{-rT}s_H}{\\sqrt N}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "在风险中性测度下用独立或正确相关的高斯增量生成每条完整价格路径。",
+          "tex": "S_{t_{j+1}}=S_{t_j}e^{(r-q-\\sigma^2/2)h+\\sigma\\sqrt h Z_j}"
+        },
+        {
+          "explanation": "按合约精确监控时点计算算术平均、极值或障碍触碰事件与到期支付。",
+          "tex": "H=\\Phi_{\\rm contract}(S_{t_1},\\ldots,S_{t_m})"
+        },
+        {
+          "explanation": "对N条路径贴现支付求平均并使用路径层面样本方差给出Monte Carlo标准误。",
+          "tex": "\\widehat V_0=e^{-rT}\\overline H_N"
+        }
+      ],
+      "example": "考虑仅在t1、t2两次取平均的算术Asian看涨，K=95。一条模拟路径在这两个时点的价格分别为110和90，路径平均100，到期支付max(100−95,0)=5。若无风险连续复利r=5%、T=1，该路径的贴现支付为5e^{−0.05}≈4.75615；单条支付不等于期权的模型期望价格。",
+      "application": "用于Asian、障碍、回望、提前触碰累计触发和结构性产品的风险中性估值；可配合对偶变量、控制变量、重要性采样与随机化QMC降低模拟成本。",
+      "caveat": "模拟用的是风险中性Q下分布，不等于真实市场损失概率P。连续监控障碍漏检、分红处理、合约日历、交易费用和模型校准误差均可能大于蒙特卡洛统计标准误。",
+      "deep_sections": [
+        {
+          "title": "GBM精确离散与风险中性漂移",
+          "question": "为什么路径模拟常优先使用指数转移而非Euler更新？",
+          "paragraphs": [
+            "GBM的对数价格服从带常数漂移与Brownian扩散的正态增量，所以可精确采样每个网格时点的价格分布。",
+            "Euler更新可能在大负向冲击下产生负价格，而指数转移保持价格严格为正；但路径之间未观察的连续穿越仍需另行处理。"
+          ],
+          "formulas": [
+            {
+              "label": "定理与数值校验",
+              "tex": "\\log(S_{t+h}/S_t)=(r-q-\\sigma^2/2)h+\\sigma\\sqrt h\\,Z"
+            }
+          ],
+          "proof": "对dS/S=(r−q)dt+σdW应用Itô公式得dlog S=(r−q−σ²/2)dt+σdW，积分一步并利用Brownian增量为√h Z得到指数精确转移。",
+          "worked": "S0=100、r=.05、q=0、σ=.2、h=.25、Z=0时S1=100exp[(.05−.02)×.25]≈100.75282，保持正价格。",
+          "limitation": "GBM精确转移只对所假定常系数模型成立；真实跳跃、随机波动率和资产间依赖需要更丰富的模型。"
+        },
+        {
+          "title": "Asian支付和折现估计",
+          "question": "为什么一条模拟路径的利润不等于期权理论价格？",
+          "paragraphs": [
+            "单条路径提供一个可能的到期现金流，风险中性价格是全部可能路径支付的期望再贴现。",
+            "Monte Carlo通过独立重复或受控相关路径平均逼近这个期望，并使用路径支付分布衡量统计不确定性。"
+          ],
+          "formulas": [
+            {
+              "label": "定理与数值校验",
+              "tex": "V_0=e^{-rT}\\mathbb E_{\\mathbb Q}[H_{\\rm Asian}]"
+            }
+          ],
+          "proof": "无套利风险中性定价把可复制支付的期望按无风险利率折现。以N条独立模拟路径代替期望，得到蒙特卡洛价格估计。",
+          "worked": "路径价格(110,90)平均100，执行价95给支付5；连续复利r=.05、T=1，贴现支付为5e^{−.05}≈4.75615。",
+          "limitation": "支付平均的监控期数m必须和合约一致，是否包含S0会改变产品价格，不可凭实现方便更换。"
+        },
+        {
+          "title": "连续障碍的漏检偏差",
+          "question": "为什么网格点模拟完全准确也可能高估敲出期权价格？",
+          "paragraphs": [
+            "如果障碍只在离散网格点检查，标的可能在两个网格点之间穿越障碍又返回，数值算法却错误地判断未触碰。",
+            "对连续监控的敲出看涨期权，漏检会让一些本应失效的支付保留下来，通常造成上偏；可以使用Brownian bridge条件穿越概率修正。"
+          ],
+          "formulas": [
+            {
+              "label": "定理与数值校验",
+              "tex": "\\mathbb P\\!\\left(\\min_{0\\le s\\le h}X_s<L\\mid X_0=x,X_h=y\\right)=\\exp\\!\\left(-\\frac{2(x-L)(y-L)}{\\sigma^2h}\\right)"
+            }
+          ],
+          "proof": "对常数扩散dX=μdt+σdW且两端点x,y均高于下障碍L，Brownian bridge的反射原理给出条件跨障概率；该式可对log GBM下障碍使用。",
+          "worked": "若log价格两端点距log障碍均为0.1、σ=.2、h=.25，穿越概率exp[−2×.01/(.04×.25)]=e^{−2}≈0.1353，即使两个观测点均安全。",
+          "limitation": "该桥公式适用于常数波动的对数Brownian桥条件，不可直接用于随机波动率或跳跃价格过程。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "numerical-n0385",
+          "label": "时间离散偏差"
+        },
+        {
+          "kind": "math",
+          "id": "numerical-n0383",
+          "label": "对偶变量法"
+        },
+        {
+          "kind": "math",
+          "id": "numerical-n0384",
+          "label": "准Monte Carlo"
+        }
+      ]
+    }
+  ]
+}
