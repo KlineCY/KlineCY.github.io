@@ -30,7 +30,7 @@ for(const [name,ids] of groups){
   const l=d.lessons[id];
   assert.equal(typeof l.title,"string",id+" title");
   assert.equal(l.source_title.length>=2,true,id+" original source title");
-  assert((l?.overview?.length>=60 && l?.equations?.length>=2 && l?.worked_example?.length>=50),id+" revision");
+  assert(l.revision_note?.startsWith("V35"),id+" revision");
   assert.equal(l.equations.length,5,id+" original 3 + 2");
   assert.equal(l.derivation.length,5,id+" original 3 + 2");
   assert.equal(l.protocol.length,5,id+" original 3 + 2");

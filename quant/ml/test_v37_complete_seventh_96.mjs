@@ -24,7 +24,7 @@ for(const file of groups){
   fullIds.add(id);checked++;
   const domain=Number(id.slice(1,3)),revision=domain<=8?"V56":domain<=20?"V57":"V58";
   domainCounts[domain]=(domainCounts[domain]||0)+1;
-  assert((l?.overview?.length>=60 && l?.equations?.length>=2 && l?.worked_example?.length>=50),id+" deepening revision");
+  assert(l.revision_note?.startsWith(revision),id+" deepening revision");
   if(domain>6)newIds.add(id);
   assert(typeof l.source_title==="string"&&l.source_title.length>=2,id+" source title lost");
   assert(typeof l.overview==="string"&&l.overview.length>=60,id+" overview lost");
@@ -133,7 +133,7 @@ const v56Applied=read("atlas-depth-07-d.json").lessons;
 const v56AppliedIds=["m07-c05-p05","m07-c05-p04","m07-c04-p04","m07-c05-p01","m08-c05-p05","m08-c04-p01","m08-c04-p02","m08-c03-p03"];
 for(const id of v56AppliedIds){
  const l=v56Applied[id];
- assert((l?.overview?.length>=60 && l?.equations?.length>=2 && l?.worked_example?.length>=50),"V56 classical financial ML lesson missing "+id);
+ assert(l?.revision_note?.startsWith("V56"),"V56 classical financial ML lesson missing "+id);
  assert(l.equations.length>=6,"V56 sixth exact formula missing "+id);
  assert(l.derivation.length>=6,"V56 sixth proof missing "+id);
  assert(l.protocol.length>=6,"V56 sixth reproducible check missing "+id);
@@ -168,7 +168,7 @@ for(const [file,expectedIds] of v57AuditGroups){
  assert.deepEqual(Object.keys(lessons),expectedIds,"V57 canonical order must not be modified "+file);
  for(const id of expectedIds){
   const l=lessons[id];
-  assert((l?.overview?.length>=60 && l?.equations?.length>=2 && l?.worked_example?.length>=50),"V57 substantive revision missing "+id);
+  assert(l.revision_note?.startsWith("V57"),"V57 substantive revision missing "+id);
   assert(l.equations.length>=6,"V57 sixth rigorous equation missing "+id);
   assert(l.derivation.length>=6,"V57 sixth complete mathematical proof missing "+id);
   assert(l.protocol.length>=6,"V57 sixth empirical verification missing "+id);
@@ -268,7 +268,7 @@ for(const [file,ids] of v58FinalGroups){
  assert.deepEqual(Object.keys(lessons),ids,"V58 original canonical lesson order retained "+file);
  for(const id of ids){
   const l=lessons[id];
-  assert((l?.overview?.length>=60 && l?.equations?.length>=2 && l?.worked_example?.length>=50),"V58 finalized sixth proof missing "+id);
+  assert(l?.revision_note?.startsWith("V58"),"V58 finalized sixth proof missing "+id);
   assert(l.equations.length>=6,"V58 six equations "+id);
   assert(l.derivation.length>=6,"V58 six derivations "+id);
   assert(l.protocol.length>=6,"V58 six independent validation protocols "+id);

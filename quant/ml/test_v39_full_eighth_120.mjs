@@ -34,7 +34,7 @@ for(let index=0;index<files.length;index++){
   assert(lesson.title?.length>=8,id+" descriptive title missing");
   assert(lesson.overview?.length>=60,id+" introduction damaged");
   assert(lesson.worked_example?.length>=110,id+" expanded original worked calculation missing");
-  assert((lesson?.overview?.length>=60 && lesson?.equations?.length>=2 && lesson?.worked_example?.length>=50),id+" wrong chapter revision");
+  assert(lesson.revision_note?.startsWith(revision),id+" wrong chapter revision");
   assert(lesson.equations.length>=6,id+" original and V51 mathematical equations");
   assert(lesson.derivation.length>=6,id+" original and V51 mathematical proofs");
   assert(lesson.protocol.length>=6,id+" original and V51 empirical checks");

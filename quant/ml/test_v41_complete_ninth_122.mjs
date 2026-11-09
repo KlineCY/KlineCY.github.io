@@ -29,7 +29,7 @@ for(let index=0;index<files.length;index++){
   assert(l.source_title?.length>=2&&l.title?.length>=8,id+" old identity lost");
   assert(l.overview?.length>=60,id+" original overview missing");
   assert(l.worked_example?.length>=110,id+" original plus expanded worked example missing");
-  assert(v41 ? (l?.overview?.length>=60 && l?.equations?.length>=2 && l?.worked_example?.length>=50) : (index<=1 ? (l?.overview?.length>=60 && l?.equations?.length>=2 && l?.worked_example?.length>=50) : (index<=3 ? (l?.overview?.length>=60 && l?.equations?.length>=2 && l?.worked_example?.length>=50) : (l?.overview?.length>=60 && l?.equations?.length>=2 && l?.worked_example?.length>=50))),id+" mismatch expansion batch");
+  assert(v41 ? /^V4[1-9]/.test(l.revision_note||"") : (index<=1 ? l.revision_note?.startsWith("V50") : (index<=3 ? l.revision_note?.startsWith("V49") : l.revision_note?.startsWith("V48"))),id+" mismatch expansion batch");
   assert(l.equations.length>=5,id+" must preserve at least five mathematical formulas");
   assert(l.derivation.length>=5,id+" must preserve five original proof steps");
   assert(l.protocol.length>=5,id+" must preserve five original validation steps");
@@ -156,7 +156,7 @@ const v45ids=["m17-c03-p06","m17-c02-p05","m17-c01-p02","m17-c01-p01","m17-c02-p
 assert.equal(v45ids.length,10);
 for(const id of v45ids){
  const l=v45[id];
- assert(l&&(l?.overview?.length>=60 && l?.equations?.length>=2 && l?.worked_example?.length>=50),"missing V45 visible revision "+id);
+ assert(l&&l.revision_note?.startsWith("V45"),"missing V45 visible revision "+id);
  assert.equal(l.equations.length,6,"V45 sixth formula not rendered "+id);
  assert.equal(l.derivation.length,6,"V45 sixth derivation missing "+id);
  assert.equal(l.protocol.length,6,"V45 sixth audit protocol missing "+id);
@@ -181,7 +181,7 @@ const v46ids=["m15-c03-p02","m15-c01-p03","m15-c05-p03","m15-c02-p04","m15-c04-p
 assert.equal(v46ids.length,10);
 for(const id of v46ids){
  const l=v46[id];
- assert(l&&(l?.overview?.length>=60 && l?.equations?.length>=2 && l?.worked_example?.length>=50),"missing V46 canonical lesson "+id);
+ assert(l&&l.revision_note?.startsWith("V46"),"missing V46 canonical lesson "+id);
  assert.equal(l.equations.length,6,"V46 sixth formula not loaded "+id);
  assert.equal(l.derivation.length,6,"V46 sixth proof absent "+id);
  assert.equal(l.protocol.length,6,"V46 sixth audit absent "+id);
@@ -208,7 +208,7 @@ const v47ids=["m13-c02-p04","m13-c02-p01","m13-c05-p05","m13-c03-p03","m13-c02-p
 assert.equal(v47ids.length,10);
 for(const id of v47ids){
  const l=v47[id];
- assert(l&&(l?.overview?.length>=60 && l?.equations?.length>=2 && l?.worked_example?.length>=50),"missing V47 course "+id);
+ assert(l&&l.revision_note?.startsWith("V47"),"missing V47 course "+id);
  assert.equal(l.equations.length,6,"V47 sixth formula absent "+id);
  assert.equal(l.derivation.length,6,"V47 sixth proof absent "+id);
  assert.equal(l.protocol.length,6,"V47 sixth validation absent "+id);
@@ -235,7 +235,7 @@ const v48ids=["m09-c05-p01","m09-c01-p02","m09-c02-p06","m09-c02-p02","m09-c04-p
 assert.equal(v48ids.length,10,"V48 mathematical lesson count");
 for(const id of v48ids){
  const l=v48[id];
- assert(l&&(l?.overview?.length>=60 && l?.equations?.length>=2 && l?.worked_example?.length>=50),"V48 official lesson absent "+id);
+ assert(l&&l.revision_note?.startsWith("V48"),"V48 official lesson absent "+id);
  assert.equal(l.equations.length,6,"V48 sixth equation missing "+id);
  assert.equal(l.derivation.length,6,"V48 sixth proof missing "+id);
  assert.equal(l.protocol.length,6,"V48 sixth independent audit missing "+id);
@@ -267,7 +267,7 @@ const v48secondIds=["m11-c04-p02","m11-c05-p05","m11-c05-p03","m11-c01-p01","m11
 assert.equal(v48secondIds.length,10,"V48 expanded evaluation and causal domain count");
 for(const id of v48secondIds){
  const l=v48second[id];
- assert(l&&(l?.overview?.length>=60 && l?.equations?.length>=2 && l?.worked_example?.length>=50),"missing second batch V48 course "+id);
+ assert(l&&l.revision_note?.startsWith("V48"),"missing second batch V48 course "+id);
  assert.equal(l.equations.length,6,"V48 evaluation formula count "+id);
  assert.equal(l.derivation.length,6,"V48 evaluation proof count "+id);
  assert.equal(l.protocol.length,6,"V48 evaluation verification count "+id);
@@ -299,7 +299,7 @@ for(const group of v49groups){
  assert.equal(group.ids.length,10,"V49 course count "+group.file);
  for(const id of group.ids){
   const l=lessons[id];
-  assert(l&&(l?.overview?.length>=60 && l?.equations?.length>=2 && l?.worked_example?.length>=50),"V49 official course absent "+id);
+  assert(l&&l.revision_note?.startsWith("V49"),"V49 official course absent "+id);
   assert(l.equations.length>=6,"V49 sixth formula absent "+id);
   assert(l.derivation.length>=6,"V49 sixth proof absent "+id);
   assert(l.protocol.length>=6,"V49 sixth empirical test absent "+id);
@@ -341,7 +341,7 @@ for(const group of v50groups){
  const lessons=read(group.file).lessons;
  for(const id of group.ids){
   const l=lessons[id];
-  assert(l&&(l?.overview?.length>=60 && l?.equations?.length>=2 && l?.worked_example?.length>=50),"V50 canonical course absent "+id);
+  assert(l&&l.revision_note?.startsWith("V50"),"V50 canonical course absent "+id);
   assert(l.equations.length>=6,"V50 additional formula absent "+id);
   assert(l.derivation.length>=6,"V50 additional proof absent "+id);
   assert(l.protocol.length>=6,"V50 independent validation absent "+id);

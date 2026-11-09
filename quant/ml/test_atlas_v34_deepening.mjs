@@ -28,7 +28,7 @@ for(const [p,ids] of plans){
  assert.deepEqual(Object.keys(data.lessons),ids,"canonical lesson IDs and ordering "+p);
  for(const id of ids){
   const l=data.lessons[id];
-  assert((l?.overview?.length>=60 && l?.equations?.length>=2 && l?.worked_example?.length>=50),id+" lesson structure");
+  assert(l.revision_note?.startsWith("V34数学强化"),id+" revision marker");
   assert(typeof l.source_title==="string"&&typeof l.title==="string"&&l.title.length>8,id+" canonical title");
   assert(l.overview?.length>=45,id+" existing overview retained");
   assert.equal(l.equations.length,5,id+" 3 original + 2 additional equations");
