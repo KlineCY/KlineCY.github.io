@@ -1,0 +1,350 @@
+{
+  "version": 1,
+  "revision": "V109",
+  "integrated_by": "quant/math/app.js",
+  "subject": "Probit, Poisson and exponential-family GLMs",
+  "lessons": [
+    {
+      "id": "regression-n0200",
+      "node_id": "regression-n0200",
+      "title": "Probit模型",
+      "definition": "Probit回归对二元结果Y建模，令P(Y=1|X=x)=Φ(xᵀβ)，其中Φ为标准正态累积分布函数。它可以由潜在高斯变量是否超过零阈值得到，与Logit一样估计条件事件概率，但潜变量误差尺度需归一化才可识别。",
+      "assumptions": "Y∈{0,1}且样本条件独立或依赖结构被正确处理，解释变量与潜在误差条件独立，潜在高斯误差方差归一为1。MLE存在性、满秩与避免完全分离等条件需另外核查。",
+      "properties": [
+        "Φ输出在(0,1)内，条件概率随着线性指数单调变化。",
+        "β_j不是概率的恒定边际效应，导数包含标准正态密度。",
+        "潜在误差方差与系数的共同尺度无法由二元观察单独识别。",
+        "Probit与Logit的系数大小不能不经尺度转换直接比较。"
+      ],
+      "formulas": [
+        {
+          "label": "模型",
+          "tex": "p(x)=\\mathbb P(Y=1\\mid X=x)=\\Phi(x^\\top\\beta)"
+        },
+        {
+          "label": "概率或目标",
+          "tex": "\\ell(\\beta)=\\sum_i\\left[y_i\\log\\Phi(\\eta_i)+(1-y_i)\\log(1-\\Phi(\\eta_i))\\right]"
+        },
+        {
+          "label": "梯度与约束",
+          "tex": "\\frac{\\partial p(x)}{\\partial x_j}=\\phi(x^\\top\\beta)\\beta_j"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "构造潜在连续变量并用零阈值定义可观察事件。",
+          "tex": "Y=\\mathbf1_{\\{x^\\top\\beta+\\varepsilon>0\\}},\\quad\\varepsilon\\sim N(0,1)"
+        },
+        {
+          "explanation": "用正态分布对称性计算条件概率。",
+          "tex": "\\mathbb P(Y=1\\mid x)=\\mathbb P(\\varepsilon>-x^\\top\\beta)=\\Phi(x^\\top\\beta)"
+        },
+        {
+          "explanation": "运用链式法则求特征的条件边际效应。",
+          "tex": "\\partial_{x_j}\\Phi(x^\\top\\beta)=\\phi(x^\\top\\beta)\\beta_j"
+        }
+      ],
+      "example": "若只有一个连续解释变量且β0=0、β1=1，当x=0时事件概率Φ(0)=0.5；当x=1时约0.841345，局部边际效应φ(1)≈0.241971。概率变化0.341345不是边际导数0.241971。",
+      "application": "可用于预测信用违约、价格跳涨或流动性事件的条件概率；金融数据常有时间相关和类别不平衡，需要按时间滚动校准概率与Brier分数。",
+      "caveat": "二元关联模型不自动提供因果效应或可交易的超额收益。潜变量误差高斯是假设而非从二元结果直接验证，少数类和完全分离可能造成估计不稳定。",
+      "deep_sections": [
+        {
+          "title": "潜在变量和尺度识别",
+          "question": "为什么Probit必须规范化潜在误差方差？",
+          "paragraphs": [
+            "观察到的只是潜在变量的符号，而不是其幅度；把全部潜在系数和误差同时乘同一正数不会改变二元结果。",
+            "因此若允许自由估计潜在误差标准差，β与σ无法分别识别，只能识别比率β/σ。"
+          ],
+          "formulas": [
+            {
+              "label": "推导与验证",
+              "tex": "\\mathbb P(Y=1\\mid x)=\\Phi(x^\\top\\beta/\\sigma)"
+            }
+          ],
+          "proof": "若潜在误差ε∼N(0,σ²)，则事件概率为Φ(xᵀβ/σ)。把β和σ同时乘c>0，概率保持不变，因此选σ=1固定尺度。",
+          "worked": "当β=2、σ=2与β=1、σ=1时，对x=1均给出Φ(1)≈0.8413，观察二元结果无法区分。",
+          "limitation": "潜变量尺度识别问题与误差独立、正态性均不同，不能仅根据拟合概率较好就声称潜在结构被识别。"
+        },
+        {
+          "title": "局部边际效应和概率差值",
+          "question": "为什么β_j不是增加一个单位x时的概率变化？",
+          "paragraphs": [
+            "Probit是非线性概率链接，导数会随着基准线性指数变化，即使β固定，概率边际响应也会改变。",
+            "金融风险因子比较应报告特定基准状态的边际效应或平均边际效应，而不是将β直接说成百分点变化。"
+          ],
+          "formulas": [
+            {
+              "label": "推导与验证",
+              "tex": "\\partial_{x_j}p=\\phi(\\eta)\\beta_j,\\quad\\eta=x^\\top\\beta"
+            }
+          ],
+          "proof": "利用标准正态累计分布函数导数Φ'=φ，并对η=xᵀβ应用链式法则得所示导数。",
+          "worked": "β1=1时x=0处导数φ(0)≈0.39894，x=1处导数φ(1)≈0.24197，显然不是常数。",
+          "limitation": "对离散解释变量应计算两个状态的预测概率之差，不能机械使用连续导数。"
+        },
+        {
+          "title": "概率校准与实际风控",
+          "question": "高分类准确率是否意味着事件概率可信？",
+          "paragraphs": [
+            "极少发生的违约或流动性风险可以产生很高的多数类分类准确率，但事件概率仍可能系统偏低。",
+            "应在滚动测试中用概率校准曲线、Brier损失和成本敏感阈值检查模型，不能把训练拟合与未来事件的概率覆盖混为一谈。"
+          ],
+          "formulas": [
+            {
+              "label": "推导与验证",
+              "tex": "\\operatorname{Brier}=\\frac1n\\sum_i(\\widehat p_i-y_i)^2"
+            }
+          ],
+          "proof": "Brier损失直接量度每个预测概率与实现的0/1结果平方差。概率模型在给定适当信息和真实条件事件率时，期望Brier损失最小。",
+          "worked": "若实际y=1，预测p=.8时平方损失.04，而p=.2时平方损失.64；概率输出质量影响即使分类标签相同。",
+          "limitation": "Brier低也不自动说明尾部资本损失小，经济损失函数和交易执行约束需独立评估。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "regression-n0199",
+          "label": "逻辑回归Logit"
+        },
+        {
+          "kind": "math",
+          "id": "regression-n0202",
+          "label": "广义线性模型指数族"
+        },
+        {
+          "kind": "math",
+          "id": "statistics-n0158",
+          "label": "极大似然估计MLE"
+        }
+      ]
+    },
+    {
+      "id": "regression-n0201",
+      "node_id": "regression-n0201",
+      "title": "Poisson回归",
+      "definition": "Poisson回归针对非负整数计数Y设条件分布为Poisson(λ)，并用对数链接log λ=xᵀβ确保条件均值非负。它的标准模型假设条件均值等于条件方差；即使存在过度离散，正确的条件均值与稳健方差可在适当条件下支持准最大似然估计。",
+      "assumptions": "观测计数Y_i∈{0,1,2,...}、条件均值λ_i>0。严格Poisson MLE假设条件分布Poisson且观察之间依赖结构处理正确；PPML一致性则重点依赖条件均值指定正确和适当矩条件。",
+      "properties": [
+        "对数链接使所有预测计数均值严格大于零。",
+        "标准Poisson条件下方差等于均值，而真实金融计数常有过度离散。",
+        "系数变化对应条件均值的乘法变化，exp β_j是单位x变化的均值比。",
+        "PPML可用于某些非负连续响应的条件均值估计，但不能误称其响应仍服从Poisson。"
+      ],
+      "formulas": [
+        {
+          "label": "模型",
+          "tex": "Y_i\\mid X_i\\sim\\operatorname{Poisson}(\\lambda_i),\\quad\\lambda_i=e^{x_i^\\top\\beta}"
+        },
+        {
+          "label": "概率或目标",
+          "tex": "\\ell(\\beta)=\\sum_i[y_i x_i^\\top\\beta-e^{x_i^\\top\\beta}-\\log(y_i!)]"
+        },
+        {
+          "label": "梯度与约束",
+          "tex": "\\nabla_\\beta\\ell(\\beta)=\\sum_i x_i(y_i-\\lambda_i)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "从Poisson质量函数得到单项对数似然。",
+          "tex": "\\log p(y_i\\mid x_i)=y_i\\log\\lambda_i-\\lambda_i-\\log(y_i!)"
+        },
+        {
+          "explanation": "用log λ_i=x_iᵀβ代换并对系数求梯度。",
+          "tex": "\\partial_\\beta\\lambda_i=\\lambda_i x_i"
+        },
+        {
+          "explanation": "得到得分方程并以数值优化求解。",
+          "tex": "\\sum_i x_i(y_i-e^{x_i^\\top\\widehat\\beta})=0"
+        }
+      ],
+      "example": "仅估计截距时，四个交易窗口的订单到达计数为(0,1,2,1)，样本均值为1，Poisson均值MLE λ̂=1，故截距β̂0=log1=0。该模型的预测零计数概率为e^{-1}≈0.367879。",
+      "application": "可用于每分钟订单到达次数、成交笔数或违约事件计数。高频数据存在聚集、时段季节性及交易系统限流，需要分别检查条件均值和过度离散。",
+      "caveat": "实际数据中的自激簇集会破坏简单条件独立Poisson假设；Poisson标准误在过度离散时可能偏小，应选择适配的稳健推断或负二项等模型。",
+      "deep_sections": [
+        {
+          "title": "对数链接和乘法解释",
+          "question": "增加一个单位特征为何改变的是均值比？",
+          "paragraphs": [
+            "由于λ=exp(xᵀβ)，线性指数变化一个β_j后，条件计数均值被exp β_j乘上一个固定比例。",
+            "这与OLS加法边际效应不同，解释系数时需明确是计数比例变化而非绝对交易笔数变化。"
+          ],
+          "formulas": [
+            {
+              "label": "推导与验证",
+              "tex": "\\lambda(x_j+1)/\\lambda(x_j)=e^{\\beta_j}"
+            }
+          ],
+          "proof": "保持其他解释变量不变，线性指数增加β_j，故新均值与旧均值之比为e^{β_j}。",
+          "worked": "若β_j=log2，某状态预测订单均值为3笔，则特征增加一单位后预测均值为6笔，而不是多log2笔。",
+          "limitation": "当特征是百分比单位或标准化值时，增加一单位的经济幅度需要重新解释。"
+        },
+        {
+          "title": "得分方程与均值匹配",
+          "question": "为什么仅有截距时Poisson MLE就是样本均值？",
+          "paragraphs": [
+            "对数似然对截距的导数是总计数减去总预测均值。令其为零，模型必须把预测的总次数与实际总次数匹配。",
+            "这个结论不要求观测计数在经济上独立同分布的现实解释，但严格MLE推断仍需检验抽样机制。"
+          ],
+          "formulas": [
+            {
+              "label": "推导与验证",
+              "tex": "\\widehat\\lambda=\\frac1n\\sum_i y_i,\\quad\\widehat\\beta_0=\\log\\widehat\\lambda"
+            }
+          ],
+          "proof": "只有截距时λ=e^{β0}对所有观测相同，一阶条件Σ(y_i−λ)=0推出λ=样本均值。若总计数为零则MLE位于β0→−∞边界。",
+          "worked": "计数(0,1,2,1)的总和4、n=4，得λ̂=1、β̂0=0，P(Y=0)=e^{-1}≈0.3679。",
+          "limitation": "全部计数为零时不存在有限截距MLE，不能直接把log0当成合法估计。"
+        },
+        {
+          "title": "条件方差与过度离散",
+          "question": "如何区分均值模型与完整的Poisson分布假设？",
+          "paragraphs": [
+            "标准Poisson限制E[Y|X]=Var(Y|X)=λ，但真实订单流可能在市场冲击期间成簇，方差显著大于均值。",
+            "PPML主要利用条件均值形式，采用稳健方差时在适当条件下仍可能估计均值参数，但严格Poisson概率预测不再可靠。"
+          ],
+          "formulas": [
+            {
+              "label": "推导与验证",
+              "tex": "\\operatorname{Var}(Y\\mid X)=\\lambda\\quad\\text{是严格Poisson的附加限制}"
+            }
+          ],
+          "proof": "Poisson的矩母函数为exp(λ(e^t−1))，一阶二阶累积量均等于λ，因此均值和方差相等；过度离散违背这项限制。",
+          "worked": "若某分钟订单到达均值为5、样本条件方差约20，则方差是均值四倍，标准Poisson预测尾部事件会可能过于保守或乐观。",
+          "limitation": "只凭总样本方差与均值之比不能完全识别时段混合或内生强度，应检验条件化后的残差。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "regression-n0202",
+          "label": "广义线性模型指数族"
+        },
+        {
+          "kind": "math",
+          "id": "regression-n0203",
+          "label": "IRLS"
+        },
+        {
+          "kind": "math",
+          "id": "information-n0481",
+          "label": "Shannon熵"
+        }
+      ]
+    },
+    {
+      "id": "regression-n0202",
+      "node_id": "regression-n0202",
+      "title": "广义线性模型指数族",
+      "definition": "广义线性模型GLM把指数族条件分布、线性预测子η=xᵀβ与连接均值的链接函数g(μ)=η结合。指数族规范形式用规范参数θ、对数分配函数b(θ)和离散参数φ刻画均值与方差；Logit和Poisson是常见规范链接例子。",
+      "assumptions": "指定的条件分布属于适用的指数族、连接函数在参数域内合法、设计可识别且条件均值模型正确。若仅做准似然推断，应清楚区分分布假设与均值方差函数假设。",
+      "properties": [
+        "指数族中均值由b的一阶导数给出，方差由二阶导数与离散函数给出。",
+        "规范链接满足η=θ，但一般GLM可以选择非规范链接。",
+        "不同响应分布拥有不同的均值方差结构，不应沿用OLS同方差假设。",
+        "链接函数保证均值处于合法定义域，但不自动解决遗漏变量或数据依赖。"
+      ],
+      "formulas": [
+        {
+          "label": "模型",
+          "tex": "p(y\\mid\\theta,\\phi)=\\exp\\!\\left(\\frac{y\\theta-b(\\theta)}{a(\\phi)}+c(y,\\phi)\\right)"
+        },
+        {
+          "label": "概率或目标",
+          "tex": "\\mu=b'(\\theta),\\qquad\\operatorname{Var}(Y)=a(\\phi)b''(\\theta)"
+        },
+        {
+          "label": "梯度与约束",
+          "tex": "g(\\mu)=\\eta=x^\\top\\beta"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对指数族密度规范化恒等式关于θ求导。",
+          "tex": "\\int_{\\mathcal Y}p(y\\mid\\theta,\\phi)\\,\\nu(\\mathrm dy)=1"
+        },
+        {
+          "explanation": "在合法求导交换条件下利用得分期望为零得到均值。",
+          "tex": "\\mathbb E[Y]=b'(\\theta)"
+        },
+        {
+          "explanation": "对得分再次求导或利用Fisher信息恒等式得到方差。",
+          "tex": "\\operatorname{Var}(Y)=a(\\phi)b''(\\theta)"
+        }
+      ],
+      "example": "Poisson规范参数θ=logλ、b(θ)=e^θ，故均值与方差均为e^θ。取θ=log3，预测均值及方差都为3，零计数概率e^{-3}≈0.049787。Bernoulli的b(θ)=log(1+e^θ)，均值为logistic(θ)。",
+      "application": "统一违约概率、成交计数和连续收益条件均值模型，帮助选择正确的损失函数、概率链接与推断方差，而不是把全部金融响应都当作同方差正态。",
+      "caveat": "指数族规范形式不意味着实际数据一定属于选定分布。金融市场存在过度离散、零膨胀和尾部依赖，需要独立做概率校准与模型诊断。",
+      "deep_sections": [
+        {
+          "title": "分配函数如何确定均值与方差",
+          "question": "为什么b的一阶与二阶导数有统计含义？",
+          "paragraphs": [
+            "指数族概率密度的积分必须为1。对规范参数求导时，归一化条件给出一阶得分期望为零和二阶得分方差关系。",
+            "这一推导依赖对积分与求导交换的正则条件，而不是只做形式微分就能覆盖所有不规则分布。"
+          ],
+          "formulas": [
+            {
+              "label": "推导与验证",
+              "tex": "\\mathbb E[Y]=b'(\\theta),\\quad\\operatorname{Var}(Y)=a(\\phi)b''(\\theta)"
+            }
+          ],
+          "proof": "得分为(Y−b'(θ))/a(φ)，其期望为零得到μ=b'。对得分再求导并利用Fisher信息恒等式得到Var(Y)=a(φ)b''。",
+          "worked": "Poisson b=e^θ，b'=b''=e^θ；取θ=log3，得均值和方差均为3。",
+          "limitation": "若支持集随参数变化或微分积分交换失败，标准指数族正则推导必须重新审查。"
+        },
+        {
+          "title": "规范链接和非规范链接",
+          "question": "为什么GLM不要求所有链接都等于规范参数？",
+          "paragraphs": [
+            "规范链接使θ等于η=xᵀβ，可简化得分方程；非规范链接仍可在合法范围内建模，但算法权重和数值性质会变化。",
+            "在信用概率、订单强度等应用中链接选择需匹配理论目标与校准表现，而不是只因计算方便就固定某个规范链接。"
+          ],
+          "formulas": [
+            {
+              "label": "推导与验证",
+              "tex": "\\theta=\\eta\\quad\\text{对应规范链接}"
+            }
+          ],
+          "proof": "当g(μ)=b'^{-1}(μ)时，由μ=b'(θ)推出g(μ)=θ，设g(μ)=η得θ=η。",
+          "worked": "Bernoulli规范链接是logit(μ)=log[μ/(1−μ)]；Poisson规范链接是logμ，后者保证μ>0。",
+          "limitation": "Probit不是Bernoulli指数族的规范链接，但依然是合法的二项响应GLM链接。"
+        },
+        {
+          "title": "从分布到均值方差建模",
+          "question": "为什么正确均值结构不等于正确完整条件分布？",
+          "paragraphs": [
+            "一个GLM可能合理描述E[Y|X]，但数据的条件方差、尾厚和时间依赖与所选指数族分布不匹配。",
+            "在大样本适当条件下可用准似然和稳健协方差处理某些方差错设，但事件尾部概率预测仍需完整分布模型。"
+          ],
+          "formulas": [
+            {
+              "label": "推导与验证",
+              "tex": "\\mathbb E[Y\\mid X]=g^{-1}(X\\beta)"
+            }
+          ],
+          "proof": "GLM均值由链接函数决定，规范概率似然同时施加方差限制。采用均值方程的准估计并不等于已经验证完整分布。",
+          "worked": "如果订单均值λ=5而条件方差20，log链接仍可能描述均值，但严格Poisson假设Var=5已被数据诊断否定。",
+          "limitation": "分布错设下稳健系数推断依赖适当外生性、独立或依赖条件与大样本正则性。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "regression-n0199",
+          "label": "逻辑回归Logit"
+        },
+        {
+          "kind": "math",
+          "id": "regression-n0201",
+          "label": "Poisson回归"
+        },
+        {
+          "kind": "math",
+          "id": "regression-n0203",
+          "label": "IRLS"
+        }
+      ]
+    }
+  ]
+}

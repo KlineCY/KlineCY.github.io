@@ -15,7 +15,7 @@ const added=docs.flatMap(d=>d.lessons),wanted=[
  ...[138,143,148,149,150].map(i=>"measure-n"+String(i).padStart(4,"0"))];
 assert.equal(added.length,20);
 assert.deepEqual(added.map(x=>x.node_id),wanted,"V108 files must follow real prerequisite order");
-const historical=fs.readdirSync(dir).filter(f=>/^lessons-.*\.json$/.test(f)&&!files.includes(f))
+const historical=fs.readdirSync(dir).filter(f=>/^lessons-.*\.json$/.test(f)&&!files.includes(f)&&!/^lessons-(regression|econometrics)-v109[a-z]\.json$/.test(f))
  .flatMap(f=>{const d=json(f);return Array.isArray(d.lessons)?d.lessons:[]});
 assert.equal(historical.length,586,"Historical V107 completed courses altered");
 assert.equal(new Set(historical.map(x=>x.node_id)).size,586,"Historical courses contain repeated IDs");

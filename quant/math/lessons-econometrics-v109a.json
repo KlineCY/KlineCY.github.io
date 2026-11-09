@@ -1,0 +1,464 @@
+{
+  "version": 1,
+  "revision": "V109",
+  "integrated_by": "quant/math/app.js",
+  "subject": "Random effects, TWFE, within and Arellano-Bond panel identification",
+  "lessons": [
+    {
+      "id": "econometrics-n0224",
+      "node_id": "econometrics-n0224",
+      "title": "随机效应RE",
+      "definition": "面板随机效应RE模型把个体不随时间变化的异质性a_i视为随机项，并在其与解释变量严格不相关的条件下利用组内及组间变化估计共同斜率。标准RE的效率优势来自其结构化的误差协方差，而不是因为它不需要识别假设。",
+      "assumptions": "平衡面板中u_it=a_i+ε_it，a_i与整个个体解释变量路径X_i不相关，ε_it对X_i严格外生，个体间独立或按适当依赖模型处理；标准方差分量σa²、σε²非负且估计有效。若a_i与X_i相关，RE通常不一致。",
+      "properties": [
+        "RE组合组内和组间信息，固定效应FE只依赖组内变动识别时间变化系数。",
+        "标准RE依赖个体随机效应与解释变量的零相关条件。",
+        "平衡面板RE可通过准去均值变换作为GLS计算。",
+        "Hausman等比较检验依赖相应模型与方差条件，不能单凭检验不拒绝确认RE真实。"
+      ],
+      "formulas": [
+        {
+          "label": "模型与识别",
+          "tex": "y_{it}=x_{it}^\\top\\beta+a_i+\\varepsilon_{it}"
+        },
+        {
+          "label": "变换与估计",
+          "tex": "y_{it}-\\vartheta\\bar y_i=(x_{it}-\\vartheta\\bar x_i)^\\top\\beta+(1-\\vartheta)a_i+\\varepsilon_{it}-\\vartheta\\bar\\varepsilon_i"
+        },
+        {
+          "label": "条件与检验",
+          "tex": "\\vartheta=1-\\sqrt{\\frac{\\sigma_\\varepsilon^2}{\\sigma_\\varepsilon^2+T\\sigma_a^2}}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "把复合误差分解为共同个体效应与每期独立扰动。",
+          "tex": "u_i=a_i\\mathbf1_T+\\varepsilon_i"
+        },
+        {
+          "explanation": "其协方差由个体恒定项产生组内相关。",
+          "tex": "\\Omega_i=\\sigma_\\varepsilon^2I_T+\\sigma_a^2\\mathbf1_T\\mathbf1_T^\\top"
+        },
+        {
+          "explanation": "用准去均值系数ϑ把误差结构对角化，再实施GLS。",
+          "tex": "\\widetilde y_{it}=y_{it}-\\vartheta\\bar y_i"
+        }
+      ],
+      "example": "设平衡面板T=3，个体效应方差σa²=1，逐期误差方差σε²=1。准去均值系数ϑ=1−√[1/(1+3)]=0.5，故对每个个体从每期y减去该个体均值的一半；ϑ=1才是完整Within去均值。",
+      "application": "可用于企业、基金或资产面板中对持久个体差异进行协方差建模，但随机效应假设应与策略特征、规模、风险偏好是否相关的经济机制对照。",
+      "caveat": "个体特质往往和风险因子、企业规模等解释变量相关，RE零相关假设可能不可信。采用RE并不会自动解决反向因果、选择偏差或时序前瞻问题。",
+      "deep_sections": [
+        {
+          "title": "复合误差的协方差结构",
+          "question": "RE为什么会出现同个体不同时期误差相关？",
+          "paragraphs": [
+            "同一企业的固定经营能力或同一基金的持续风格a_i会进入其所有时期误差。",
+            "因此即使逐期冲击ε_it独立，同一主体不同日期的复合误差仍共享一项共同随机分量。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与复算",
+              "tex": "\\operatorname{Cov}(u_{it},u_{is})=\\sigma_a^2\\quad(t\\ne s)"
+            }
+          ],
+          "proof": "令u_it=a_i+ε_it，假定a_i与各ε独立、ε不同时期不相关，则跨期协方差等于Var(a_i)=σa²。",
+          "worked": "若σa²=1、σε²=1，则同个体任两期误差方差为2、协方差为1、相关系数为1/2。",
+          "limitation": "跨个体还可能存在共同宏观冲击，这超出最简单随机截距模型，需要额外聚类或共同因子结构。"
+        },
+        {
+          "title": "准去均值和FE的关系",
+          "question": "为什么RE变换不等于完全去掉个体均值？",
+          "paragraphs": [
+            "RE既利用组内变动也保留一部分组间差异，准去均值系数通常介于0与1之间。",
+            "FE的完整去均值会消去所有常数个体效应，因此二者对恒定不变变量和识别假设的处理不同。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与复算",
+              "tex": "\\widetilde x_{it}=x_{it}-\\vartheta\\bar x_i,\\quad0\\le\\vartheta<1\\ \\text{在有限正方差下}"
+            }
+          ],
+          "proof": "标准RE误差协方差具有组内全一方向与正交方向两类特征值。对全一方向作相应归一化得到准去均值系数1−σε/√(σε²+Tσa²)。",
+          "worked": "T=3且两个方差分量均为1，系数ϑ=.5；某个个体变量x=(1,2,3)，均值2，RE变换为(0,1,2)，FE变换为(−1,0,1)。",
+          "limitation": "方差分量为零或边界时要用合适极限解释，不能要求所有情形严格0<ϑ<1。"
+        },
+        {
+          "title": "RE外生性与相关随机效应",
+          "question": "用Mundlak构造能否识别个体效应和特征相关？",
+          "paragraphs": [
+            "一种诊断是把解释变量的个体时间均值加入随机效应模型，允许个体效应的条件均值与长期特征水平线性相关。",
+            "这可帮助比较RE与FE，并对时间不变变量提供模型化解释，但依赖具体相关结构和严格外生假设。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与复算",
+              "tex": "a_i=\\bar x_i^\\top\\pi+c_i,\\qquad\\mathbb E[c_i\\mid X_i]=0"
+            }
+          ],
+          "proof": "将个体效应写成个体均值的线性投影及残差c_i，代回原模型产生长期均值变量的系数π。若π非零，简单RE零相关假设不成立。",
+          "worked": "若高风险基金的长期杠杆均值越大，未观测的激进管理风格也越强，则a_i与杠杆相关，普通RE估计斜率可能偏离目标。",
+          "limitation": "加入个体均值并不能自动消除所有形式的非线性相关、时间变化内生性或样本选择偏差。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "econometrics-n0223",
+          "label": "固定效应FE"
+        },
+        {
+          "kind": "math",
+          "id": "econometrics-n0226",
+          "label": "Within变换"
+        },
+        {
+          "kind": "math",
+          "id": "regression-n0194",
+          "label": "广义最小二乘GLS"
+        }
+      ]
+    },
+    {
+      "id": "econometrics-n0225",
+      "node_id": "econometrics-n0225",
+      "title": "双向固定效应",
+      "definition": "双向固定效应TWFE在面板回归中同时控制个体固定效应α_i与所有个体共同的时间固定效应λ_t。在简单两组两期DiD设计中，处理系数等于差分中的差分；对于错位处理时点与异质动态效应，传统TWFE单一系数可能带有难解释甚至负权重。",
+      "assumptions": "指定面板观测与固定效应范围，解释变量有足够剩余组内和组间时间变动。若将处理系数解释为因果效应，还需要适当平行趋势、无预期反应、稳定处理与溢出条件；错位处理与异质效应需采用合适替代估计。",
+      "properties": [
+        "个体固定效应吸收不随时间变化的主体差异。",
+        "时间固定效应吸收所有主体共同的加性时间冲击。",
+        "简单两组两期且平行趋势时，TWFE处理系数对应标准DiD差值。",
+        "多期错位处理的效应异质性可能令TWFE隐含比较不符合目标ATT。"
+      ],
+      "formulas": [
+        {
+          "label": "模型与识别",
+          "tex": "Y_{it}=\\alpha_i+\\lambda_t+\\tau D_{it}+u_{it}"
+        },
+        {
+          "label": "变换与估计",
+          "tex": "\\widetilde Y_{it}=Y_{it}-\\bar Y_{i\\cdot}-\\bar Y_{\\cdot t}+\\bar Y_{\\cdot\\cdot}"
+        },
+        {
+          "label": "条件与检验",
+          "tex": "\\widehat\\tau_{\\rm DiD}=(\\bar Y_{T,1}-\\bar Y_{T,0})-(\\bar Y_{C,1}-\\bar Y_{C,0})"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先控制个体稳定差异和每个日历期共同冲击。",
+          "tex": "Y_{it}=\\alpha_i+\\lambda_t+\\tau D_{it}+u_{it}"
+        },
+        {
+          "explanation": "在平衡面板中对个体及时间分别去均值并加总均值。",
+          "tex": "\\ddot Y_{it}=Y_{it}-\\bar Y_{i\\cdot}-\\bar Y_{\\cdot t}+\\bar Y_{\\cdot\\cdot}"
+        },
+        {
+          "explanation": "在残差化的处理变量上回归残差化结果，计算处理系数。",
+          "tex": "\\widehat\\tau=\\frac{\\sum_{it}\\ddot D_{it}\\ddot Y_{it}}{\\sum_{it}\\ddot D_{it}^2}"
+        }
+      ],
+      "example": "处理组政策前收益指标为2、政策后为6，未处理对照组前为1、后为3。处理组变化+4、对照组变化+2，DiD估计为2；在这个两组两期且处理组仅政策后D=1的模型中，TWFE处理系数亦为2。",
+      "application": "用于地区政策、交易规则或行业制度变化的准实验评价。错位实施时应构造组别—事件时间效应并核查先验趋势，而不是只报告普通TWFE的单个系数。",
+      "caveat": "固定效应只消除加性不变差异和共同期冲击，不能解决处理时间选择、个体特定趋势、预期效应或溢出。资产回报共享行业冲击还需要合适聚类推断。",
+      "deep_sections": [
+        {
+          "title": "双向去均值消除什么",
+          "question": "为什么从Y中减个体均值和时间均值后还要加总体均值？",
+          "paragraphs": [
+            "若直接减去两个均值，整体平均被扣除两次，因而需要加回总体均值恢复正确中心化。",
+            "在平衡面板中该变换同时使每个个体和每个时间截面的变换值之和为零，对应FWL残差化。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与复算",
+              "tex": "\\ddot Y_{it}=Y_{it}-\\bar Y_{i\\cdot}-\\bar Y_{\\cdot t}+\\bar Y_{\\cdot\\cdot}"
+            }
+          ],
+          "proof": "代入Y=α_i+λ_t+τD+u，个体效应和时间效应经双向去均值后各自消去，剩余处理与残差的双向去均值部分。",
+          "worked": "两组两期Y矩阵[[2,6],[1,3]]，总均值3，处理组均值4、对照组2、前期1.5、后期4.5，处理组后期双向去均值为6−4−4.5+3=.5。",
+          "limitation": "不平衡面板简单双向算术去均值一般不等同于完整虚拟变量投影，应使用正确的加权投影或固定效应算法。"
+        },
+        {
+          "title": "两期DiD对应的反事实",
+          "question": "为什么差分中的差分需要平行趋势？",
+          "paragraphs": [
+            "对照组的前后变化用于替代处理组如果没有处理时会经历的变化。",
+            "平行趋势要求在缺乏处理时两组潜在结果的平均变化相同；这不能由处理后的数据直接证明。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与复算",
+              "tex": "\\mathbb E[Y_{T,1}(0)-Y_{T,0}(0)]=\\mathbb E[Y_{C,1}(0)-Y_{C,0}(0)]"
+            }
+          ],
+          "proof": "将处理组已观察变化分解成其未处理趋势与处理效应。若两组未处理趋势相同，相减就消去共同趋势，留下处理效应。",
+          "worked": "本例处理组变化4、对照组变化2，DiD为2；若处理组本来趋势应为3，真实处理效应就只有1而不是2。",
+          "limitation": "处理预期、样本构成变化、溢出效应或不同的宏观冲击都可能破坏平行趋势。"
+        },
+        {
+          "title": "错位实施中的异质处理效应",
+          "question": "为什么多期TWFE系数不能自动当作平均处理效应？",
+          "paragraphs": [
+            "当不同组在不同时期接受处理，常规TWFE可能把已经处理过的单位当作较晚处理单位的比较对象。",
+            "异质或动态效应下隐含线性权重可以为负，导致单系数难以对应清晰的组别时间ATT。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与复算",
+              "tex": "\\operatorname{ATT}(g,t)=\\mathbb E[Y_t(1)-Y_t(0)\\mid G=g]"
+            }
+          ],
+          "proof": "以首次处理期g定义处理组，在每个t与尚未处理或从未处理的合适对照比较，可构造具有明确目标的ATT(g,t)，再按非负经济权重聚合。",
+          "worked": "如果早处理组效应从1逐渐升至5，晚处理组刚开始效应为1，把早处理组当作晚组的对照可能抵消并扭曲单一TWFE系数。",
+          "limitation": "事件时间估计仍需具体平行趋势与无预期条件，不是改用新方法就自动具有因果解释。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "econometrics-n0226",
+          "label": "Within变换"
+        },
+        {
+          "kind": "math",
+          "id": "econometrics-n0232",
+          "label": "双重差分DiD"
+        },
+        {
+          "kind": "math",
+          "id": "econometrics-x005",
+          "label": "事件时间平行趋势诊断"
+        }
+      ]
+    },
+    {
+      "id": "econometrics-n0226",
+      "node_id": "econometrics-n0226",
+      "title": "Within变换",
+      "definition": "Within变换对面板数据中的每一个个体减去该个体时间均值，以消除不随时间变化的个体固定效应α_i。对变换后的因变量和解释变量做OLS得到固定效应斜率估计，利用的是同一个体内部的时间变化，而不是不同主体间的永久差异。",
+      "assumptions": "面板模型Y_it=α_i+x_itᵀβ+u_it满足适当严格外生条件E[u_it|X_i,α_i]=0，解释变量在个体内部存在足够变异。若有动态滞后因变量且T较短，普通Within估计可能有Nickell偏差。",
+      "properties": [
+        "Within严格消去对同个体所有时期相同的加性效应。",
+        "时间不变的个体解释变量也被去掉，无法同时估计其独立系数。",
+        "剩余系数只由同一个体内部解释变量变化识别。",
+        "组内异方差或时间相关需要在推断中使用适当簇稳健方法。"
+      ],
+      "formulas": [
+        {
+          "label": "模型与识别",
+          "tex": "\\widetilde y_{it}=y_{it}-\\bar y_i,\\quad\\widetilde x_{it}=x_{it}-\\bar x_i"
+        },
+        {
+          "label": "变换与估计",
+          "tex": "\\widehat\\beta_{\\rm FE}=\\left(\\sum_{it}\\widetilde x_{it}\\widetilde x_{it}^\\top\\right)^{-1}\\sum_{it}\\widetilde x_{it}\\widetilde y_{it}"
+        },
+        {
+          "label": "条件与检验",
+          "tex": "\\sum_t(\\alpha_i-\\bar\\alpha_i)=0"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对每个个体计算因变量和解释变量的时间均值。",
+          "tex": "\\bar y_i=T_i^{-1}\\sum_t y_{it},\\quad\\bar x_i=T_i^{-1}\\sum_t x_{it}"
+        },
+        {
+          "explanation": "原始模型减去自身均值，个体固定效应恰好消去。",
+          "tex": "y_{it}-\\bar y_i=(x_{it}-\\bar x_i)^\\top\\beta+(u_{it}-\\bar u_i)"
+        },
+        {
+          "explanation": "在组内变换后数据上使用最小二乘估计共同斜率。",
+          "tex": "\\sum_{it}\\widetilde x_{it}(\\widetilde y_{it}-\\widetilde x_{it}^\\top\\widehat\\beta)=0"
+        }
+      ],
+      "example": "两个个体各两期，个体A的x=(1,2)、y=(2,5)，个体B的x=(3,4)、y=(10,13)。各个体x去均值均为(−.5,.5)，y去均值均为(−1.5,1.5)。组内协方差求和为3，组内x平方和为1，故Within估计β=3。",
+      "application": "用于基金、企业及资产面板剔除不随时间变化的个体规模、经理风格或制度差异；应明确是否还需要时间固定效应捕捉共同市场冲击。",
+      "caveat": "Within无法消除与特征相关的时间变化遗漏变量、反向因果或内生动态；同时对时间不变特征不提供单独斜率估计，不能把它们被吸收解释为经济效应为零。",
+      "deep_sections": [
+        {
+          "title": "固定效应为何完全消失",
+          "question": "Within是怎样逐项消去不可观测a_i的？",
+          "paragraphs": [
+            "如果a_i不随时间变化，它在该个体每一期都相同，也等于其自身时间平均。",
+            "从每一期模型减去个体平均后，常数个体效应被消去，剩下组内变化提供斜率信息。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与复算",
+              "tex": "(a_i+x_{it}^\\top\\beta+u_{it})-(a_i+\\bar x_i^\\top\\beta+\\bar u_i)=\\widetilde x_{it}^\\top\\beta+\\widetilde u_{it}"
+            }
+          ],
+          "proof": "对原始方程按个体求时间均值，再逐期相减，a_i−a_i=0；斜率β不变，形成去均值数据上的线性模型。",
+          "worked": "A组x均值1.5、y均值3.5，去均值分别(−.5,.5)与(−1.5,1.5)，符合斜率3。",
+          "limitation": "若个体效应随时间变化为a_it，减去均值后一般不会消失，需要进一步设定时间变化结构。"
+        },
+        {
+          "title": "组内识别与组间识别",
+          "question": "为什么不随时间变化的变量无法被Within估计？",
+          "paragraphs": [
+            "一旦某变量z_i在个体的所有观测期都相同，z_it−z̄_i始终等于零，它不再出现在变换后的设计矩阵中。",
+            "这种限制不是数值算法错误，而是固定效应识别结构的结果；解释时间不变特征需要其他额外假设或研究设计。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与复算",
+              "tex": "z_{it}=z_i\\Longrightarrow z_{it}-\\bar z_i=0"
+            }
+          ],
+          "proof": "若z_i固定，则其个体时间均值恰等于z_i，减去后每个观测都为零。其回归系数与α_i在模型中完全共线，无法分别识别。",
+          "worked": "若某基金的注册地区在所有样本年不变，基金固定效应会吸收该地区哑变量，无法单独报告地区的固定效应回归系数。",
+          "limitation": "地区乘时间交互等变量可能仍有变化可识别，但其经济解释和识别条件与纯时间不变地区项不同。"
+        },
+        {
+          "title": "严格外生与动态面板偏差",
+          "question": "为什么有滞后因变量时Within可能出现偏差？",
+          "paragraphs": [
+            "去均值使每期误差减去自身平均，平均中含有过去及未来误差。滞后因变量与过去误差相关，因而其去均值版本可能与变换误差相关。",
+            "当T固定而个体数N增长时，传统动态Within估计可能存在Nickell偏差；需要使用适当动态面板识别方法。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与复算",
+              "tex": "\\widetilde u_{it}=u_{it}-\\bar u_i"
+            }
+          ],
+          "proof": "假设y_it包含ρy_i,t−1，滞后结果受u_i,t−1影响，而变换误差包含−u_i,t−1/T等成分，从而造成相关性。",
+          "worked": "即使原始u_it彼此独立，T=2的Within误差各项仍包含同一组两期误差；滞后结果不再与它们自动独立。",
+          "limitation": "Arellano–Bond等工具变量方法也需无二阶差分误差相关和有效工具假设，不能视作无条件解决方案。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "econometrics-n0223",
+          "label": "固定效应FE"
+        },
+        {
+          "kind": "math",
+          "id": "econometrics-n0227",
+          "label": "动态面板Arellano-Bond"
+        },
+        {
+          "kind": "math",
+          "id": "econometrics-n0225",
+          "label": "双向固定效应"
+        }
+      ]
+    },
+    {
+      "id": "econometrics-n0227",
+      "node_id": "econometrics-n0227",
+      "title": "动态面板Arellano-Bond",
+      "definition": "Arellano–Bond差分GMM针对包含滞后因变量的短面板动态模型，先差分消去个体固定效应，再使用更早时期的变量水平作为内生滞后差分项的工具。它解决普通动态Within的部分偏差问题，但需要原始误差序列相关和工具有效性等关键识别条件。",
+      "assumptions": "考虑N较大、T较小的面板，y_it=ρy_i,t−1+x_itᵀβ+a_i+ε_it。常用基础情形要求ε_it无序列相关以及适当的初始条件与协变量预定性/严格外生条件，所用工具满足有效正交矩限制。",
+      "properties": [
+        "差分消除不随时间变化的个体效应，却产生误差MA(1)结构。",
+        "Δy_i,t−1与Δε_it相关，必须用有效滞后水平工具估计。",
+        "一阶差分残差的AR(1)相关通常预期存在，但不应出现相应AR(2)相关。",
+        "工具变量过多可能过度拟合内生变量并削弱Hansen J检验，需限制工具维度。"
+      ],
+      "formulas": [
+        {
+          "label": "模型与识别",
+          "tex": "\\Delta y_{it}=\\rho\\Delta y_{i,t-1}+\\Delta x_{it}^\\top\\beta+\\Delta\\varepsilon_{it}"
+        },
+        {
+          "label": "变换与估计",
+          "tex": "\\mathbb E[y_{i,t-s}\\Delta\\varepsilon_{it}]=0,\\quad s\\ge2"
+        },
+        {
+          "label": "条件与检验",
+          "tex": "\\mathbb E[\\Delta\\varepsilon_{it}\\Delta\\varepsilon_{i,t-1}]=-\\sigma_\\varepsilon^2\\quad\\text{当原始误差独立同方差}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "对动态面板原式作一次差分，消去个体不变效应。",
+          "tex": "\\Delta a_i=0"
+        },
+        {
+          "explanation": "识别滞后差分解释变量含有上期误差，普通OLS内生。",
+          "tex": "\\Delta y_{i,t-1}=y_{i,t-1}-y_{i,t-2}"
+        },
+        {
+          "explanation": "用更早的水平值与差分误差构建有效矩条件，实施GMM。",
+          "tex": "\\mathbb E[Z_i^\\top\\Delta\\varepsilon_i]=0"
+        }
+      ],
+      "example": "若原始误差ε_t独立同方差且方差为1，差分误差Δε_t=ε_t−ε_{t−1}。其方差为2，和上一期差分误差的协方差为−1，因此差分误差一阶相关系数−1/2；二阶差分误差协方差为0。这解释了AB检验为何主要关注AR(2)而不是要求差分误差完全无AR(1)。",
+      "application": "用于企业杠杆、基金资产配置惯性和投资绩效动态面板。应同时报告工具变量数量、AR(2)检验、Hansen/Sargan检验及面板的N/T规模。",
+      "caveat": "Arellano–Bond方法不是万能滞后回归修复工具。高度持久序列可能使水平工具较弱，工具膨胀和异方差也会影响有限样本表现。",
+      "deep_sections": [
+        {
+          "title": "差分产生的误差相关",
+          "question": "为什么原始误差独立，差分误差仍然相关？",
+          "paragraphs": [
+            "相邻的差分误差都含同一中间时期原始误差项，只是符号相反。",
+            "由此差分误差具有机械的一阶负相关，不能将其简单视作原始模型违反无序列相关。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与复算",
+              "tex": "\\operatorname{Cov}(\\Delta\\varepsilon_t,\\Delta\\varepsilon_{t-1})=-\\sigma_\\varepsilon^2"
+            }
+          ],
+          "proof": "展开Cov(ε_t−ε_{t−1},ε_{t−1}−ε_{t−2})，原始时期互不相关时，唯一非零的交叉项是−Var(ε_{t−1})。",
+          "worked": "原始误差方差1时，差分误差方差2、相邻协方差−1，所以相关系数−1/2；隔两期则不共享误差项。",
+          "limitation": "如果原始误差本身有序列相关，则差分AR(2)零相关结论可能不成立，工具有效性也会受影响。"
+        },
+        {
+          "title": "为什么要用两期前的水平作为工具",
+          "question": "滞后差分因变量内生的直接原因是什么？",
+          "paragraphs": [
+            "Δy_i,t−1包含y_i,t−1，而它受到ε_i,t−1影响；差分误差Δε_it又含有−ε_i,t−1，两者机械相关。",
+            "在原始误差不自相关并满足预定性条件时，更早的y_i,t−2可以与当前差分误差正交，提供识别工具。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与复算",
+              "tex": "\\mathbb E[y_{i,t-2}(\\varepsilon_{it}-\\varepsilon_{i,t-1})]=0"
+            }
+          ],
+          "proof": "若y_i,t−2由t−2及更早信息决定、后续ε_it和ε_i,t−1对这些早期变量条件均值零，则两个相关项的期望都为零，得到矩条件。",
+          "worked": "用t−1水平y_i,t−1直接作为工具通常不合法，因为它包含ε_i,t−1，与Δε_it中的−ε_i,t−1相关。",
+          "limitation": "弱工具或原始误差时间相关会让矩条件无法提供可信识别，须检查数据过程。"
+        },
+        {
+          "title": "工具数量与Hansen检验",
+          "question": "为何工具越多不一定越可信？",
+          "paragraphs": [
+            "短面板GMM可为每个时间期构造多个历史工具，工具数量会快速增长。",
+            "当工具数接近或超过主体数时，工具可能过拟合内生变量，并使过度识别检验缺乏识别模型错设的能力。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与复算",
+              "tex": "\\operatorname{rank}(Z)\\ \\text{与}\\ N\\ \\text{的比例需合理控制}"
+            }
+          ],
+          "proof": "每新增一个有效滞后水平就扩展工具矩阵列数。GMM的样本矩向量维度随之增长，有限样本权重矩阵估计与检验自由度都会受到影响。",
+          "worked": "如果只有N=50家企业却构造100个工具列，即使Hansen检验p值较大，也不能据此宣称全部工具外生。",
+          "limitation": "不存在适用于所有面板的统一工具数量阈值，应报告滞后范围、合并工具与稳健性设计。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "econometrics-n0226",
+          "label": "Within变换"
+        },
+        {
+          "kind": "math",
+          "id": "econometrics-n0217",
+          "label": "两阶段最小二乘2SLS"
+        },
+        {
+          "kind": "math",
+          "id": "econometrics-n0222",
+          "label": "Hansen J检验"
+        }
+      ]
+    }
+  ]
+}

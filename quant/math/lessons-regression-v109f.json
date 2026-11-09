@@ -1,0 +1,350 @@
+{
+  "version": 1,
+  "revision": "V109",
+  "integrated_by": "quant/math/app.js",
+  "subject": "IRLS, nonlinear regression and orthogonal cross-fitting",
+  "lessons": [
+    {
+      "id": "regression-n0203",
+      "node_id": "regression-n0203",
+      "title": "IRLS",
+      "definition": "迭代重加权最小二乘IRLS通过局部二次近似求解广义线性模型的极大似然或准似然估计。每轮根据当前条件均值、链接导数和方差函数构造工作响应z与权重W，再求一个加权最小二乘步；在规范链接下它与Fisher scoring紧密对应。",
+      "assumptions": "GLM链接和方差函数可微、当前预测均值处于合法内部、设计矩阵在迭代权重下具有适当秩，最优解存在且目标局部曲率合理。完全分离或零计数边界可能让有限参数MLE不存在。",
+      "properties": [
+        "IRLS每轮解一次加权最小二乘子问题，但权重依赖当前拟合。",
+        "工作响应z是利用局部导数构造的伪响应，不是真实观察变量。",
+        "规范GLM的Fisher scoring可写成IRLS，并依赖条件方差与链接导数。",
+        "分离、病态设计或过大Newton步可能造成系数发散，需使用线搜索或正则化。"
+      ],
+      "formulas": [
+        {
+          "label": "模型与目标",
+          "tex": "z_i=\\eta_i+\\frac{y_i-\\mu_i}{\\mathrm d\\mu_i/\\mathrm d\\eta_i}"
+        },
+        {
+          "label": "算法表达",
+          "tex": "w_i=\\frac{(\\mathrm d\\mu_i/\\mathrm d\\eta_i)^2}{\\operatorname{Var}(Y_i\\mid x_i)}"
+        },
+        {
+          "label": "估计条件",
+          "tex": "\\beta^{(k+1)}=(X^\\top W^{(k)}X)^{-1}X^\\top W^{(k)}z^{(k)}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "在当前β下计算η、条件均值μ与均值对η的导数。",
+          "tex": "\\eta=X\\beta,\\qquad\\mu=g^{-1}(\\eta)"
+        },
+        {
+          "explanation": "用当前方差和链接导数构造工作响应z、权重W。",
+          "tex": "z=\\eta+(y-\\mu)\\oslash\\mu_\\eta"
+        },
+        {
+          "explanation": "对白化工作响应求WLS，更新参数并检验目标改善。",
+          "tex": "X^\\top W X\\beta_{\\rm new}=X^\\top W z"
+        }
+      ],
+      "example": "截距-only逻辑回归有4个二元观察y=(1,1,1,0)。起点β0=0，μ=0.5、权重w=μ(1−μ)=.25，工作响应z=(2,2,2,−2)。新截距为z均值1，对应新概率sigmoid(1)≈0.73106；精确MLE应为log3≈1.09861，后续迭代继续逼近。",
+      "application": "用于信用事件Logit、Poisson订单到达和其他可微GLM拟合；量化训练应检查特征标准化、权重下的数值条件数与时间序列训练折。",
+      "caveat": "IRLS只是优化算法，不负责检验GLM分布假设；事件完全分离可能让系数趋向无穷，必须报告收敛、数值容忍度和样本外概率校准。",
+      "deep_sections": [
+        {
+          "title": "工作响应的局部线性化",
+          "question": "为什么IRLS把非线性均值函数变成加权回归？",
+          "paragraphs": [
+            "GLM的均值是线性指数η经过逆链接映射的非线性函数。",
+            "在当前η附近使用一阶Taylor展开，可以把均值误差转成等效的线性指数误差，形成工作响应。"
+          ],
+          "formulas": [
+            {
+              "label": "推导与检验",
+              "tex": "y-\\mu\\approx\\mu_\\eta(\\eta_{\\rm target}-\\eta)"
+            }
+          ],
+          "proof": "由μ(η+δη)≈μ(η)+μη δη，令目标逼近y，得δη≈(y−μ)/μη。故z=η+(y−μ)/μη。",
+          "worked": "Logit初始η=0、μ=.5、μη=.25时，y=1对应z=2，y=0对应z=−2，符合例子。",
+          "limitation": "当μη接近零时，伪响应可非常大，尤其概率靠近0或1时需要数值保护。"
+        },
+        {
+          "title": "Fisher权重从何而来",
+          "question": "为何权重包含链接导数平方除以条件方差？",
+          "paragraphs": [
+            "局部均值对η敏感度越高，同样的指数变化引起越明显的响应差异；噪声方差越高则相应观察的有效信息越少。",
+            "权重把这两种效应合成到局部二次目标中，使算法步与Fisher信息结构一致。"
+          ],
+          "formulas": [
+            {
+              "label": "推导与检验",
+              "tex": "W_{ii}=\\frac{\\mu_{\\eta,i}^2}{V(\\mu_i)}"
+            }
+          ],
+          "proof": "局部负对数似然的期望曲率可写成Σx_ix_iᵀ μη,i²/V(μ_i)，它对应XᵀWX；在规范GLM正则条件下得到Fisher scoring方向。",
+          "worked": "对Logit μ=.5，μη=μ(1−μ)=.25、Var(Y)=.25，所以W=.25，与示例一致。",
+          "limitation": "若实际方差函数错设，Fisher权重不一定反映真实噪声，应考虑稳健方差与准似然。"
+        },
+        {
+          "title": "迭代收敛和完全分离",
+          "question": "为什么IRLS数值步长变小不必然有有限MLE？",
+          "paragraphs": [
+            "在二元回归完全分离时，沿某些系数方向能不断把预测概率推向0或1，提高似然而没有有限最大值。",
+            "即使每轮都能求解加权最小二乘，也需要检查分离与无限参数路径，不能把小相对更新直接解释为良好统计估计。"
+          ],
+          "formulas": [
+            {
+              "label": "推导与检验",
+              "tex": "\\ell(\\beta)=\\sum_i[y_i\\log p_i+(1-y_i)\\log(1-p_i)]"
+            }
+          ],
+          "proof": "若存在方向v使所有正样本x_iᵀv>0而负样本x_iᵀv<0，则沿cv、c→∞时每项对数似然趋向0且没有有限极大点。",
+          "worked": "若两个观测(x,y)分别为(1,1)、(−1,0)且无截距，β不断增大令两点预测趋于1和0，极大似然没有有限解。",
+          "limitation": "正则化或贝叶斯先验可能产生有限解，但会改变估计目标，必须说明惩罚与区间推断的口径。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "regression-n0199",
+          "label": "逻辑回归Logit"
+        },
+        {
+          "kind": "math",
+          "id": "regression-n0202",
+          "label": "广义线性模型指数族"
+        },
+        {
+          "kind": "math",
+          "id": "regression-n0204",
+          "label": "非线性最小二乘"
+        }
+      ]
+    },
+    {
+      "id": "regression-n0204",
+      "node_id": "regression-n0204",
+      "title": "非线性最小二乘",
+      "definition": "非线性最小二乘NLS最小化非线性条件均值f(x_i,θ)与观测y_i的平方残差。其一阶条件是Jacobian对残差的转置乘积为零；Gauss–Newton在当前参数附近线性化预测函数，解一个近似线性最小二乘步。",
+      "assumptions": "f对参数在邻域内至少连续可微，目标解存在且Jacobian具有足够局部识别性。Gauss–Newton不自动保证全局收敛，曲率大或残差较大时需线搜索、信赖域或Levenberg–Marquardt稳定化。",
+      "properties": [
+        "非线性回归的一阶条件为Jᵀr=0，其中J是预测对参数的Jacobian。",
+        "Gauss–Newton忽略残差加权的预测二阶导，采用JᵀJ近似Hessian。",
+        "初始值和局部最优问题可能严重影响估计结果。",
+        "参数识别与可交易预测是不同问题，非线性模型需要独立时间样本验证。"
+      ],
+      "formulas": [
+        {
+          "label": "模型与目标",
+          "tex": "Q(\\theta)=\\sum_i[y_i-f(x_i,\\theta)]^2"
+        },
+        {
+          "label": "算法表达",
+          "tex": "J_{ij}(\\theta)=\\partial_{\\theta_j}f(x_i,\\theta)"
+        },
+        {
+          "label": "估计条件",
+          "tex": "(J^\\top J)\\,\\Delta\\theta=J^\\top r,\\quad r=y-f(\\theta)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "在当前参数θ处构造预测残差r和Jacobian J。",
+          "tex": "r(\\theta)=y-f(\\theta)"
+        },
+        {
+          "explanation": "把下一步预测一阶线性化，得到关于参数增量的平方损失。",
+          "tex": "f(\\theta+\\Delta)\\approx f(\\theta)+J\\Delta"
+        },
+        {
+          "explanation": "解正规方程求增量，并用原始非线性目标核查步长。",
+          "tex": "\\Delta=(J^\\top J)^{-1}J^\\top r"
+        }
+      ],
+      "example": "令模型f(x,θ)=θ²x，x=(1,2)、y=(2,4)，初始θ=1。残差r=(1,2)、Jacobian J=(2,4)ᵀ，Jᵀr=10、JᵀJ=20，所以Gauss–Newton一步Δ=.5，θ更新至1.5。新预测(2.25,4.5)，SSE从5降为.3125；最优正根为√2≈1.4142。",
+      "application": "用于非线性波动率曲面、期限结构函数与流动性影响模型拟合。应报告初值、约束、停机条件及估计窗口，防止将未来价格曲面用于过去参数校准。",
+      "caveat": "Gauss–Newton求解的局部驻点不保证全局最小。高度非线性定价映射可能缺乏参数可识别性，低残差不等于期权曲面外推合理。",
+      "deep_sections": [
+        {
+          "title": "Jacobian线性化的意义",
+          "question": "为什么非线性回归仍能使用正规方程形式？",
+          "paragraphs": [
+            "目标对参数非线性，但在给定当前点的足够小邻域，预测变化由Jacobian的一阶线性近似主导。",
+            "在这个近似问题中，未知量变成参数增量Δ，残差目标重新具有线性最小二乘结构。"
+          ],
+          "formulas": [
+            {
+              "label": "推导与检验",
+              "tex": "r(\\theta+\\Delta)\\approx r(\\theta)-J\\Delta"
+            }
+          ],
+          "proof": "把f(θ+Δ)≈f(θ)+JΔ代入残差定义，得到r_new≈r−JΔ。最小化其平方和，一阶条件JᵀJΔ=Jᵀr。",
+          "worked": "初始θ=1时J=(2,4)、r=(1,2)，解Δ=(2+8)/(4+16)=0.5，正是示例更新。",
+          "limitation": "当增量不小，线性近似误差可能显著，需要使用阻尼和原目标重新评价每一步。"
+        },
+        {
+          "title": "Hessian近似遗漏什么",
+          "question": "什么时候Gauss–Newton近似会不准？",
+          "paragraphs": [
+            "精确Hessian不仅包含JᵀJ，还包含残差乘以每个预测分量的二阶导数。",
+            "残差较大或预测函数曲率很强时，忽略的项不能视为小量，可能使算法方向或收敛速度变差。"
+          ],
+          "formulas": [
+            {
+              "label": "推导与检验",
+              "tex": "\\nabla^2Q(\\theta)=2J^\\top J-2\\sum_i r_i\\nabla^2f_i(\\theta)"
+            }
+          ],
+          "proof": "对Q=Σr_i²求梯度−2Jᵀr，再求导得到2JᵀJ−2Σr_i∇²f_i。Gauss–Newton保留第一项作为半正定近似。",
+          "worked": "模型f=θ²x在θ=1时每项二阶导为2x，忽略项−2Σr_i(2x_i)=−2(2+8)=−20；精确Hessian为2×20−20=20。",
+          "limitation": "若JᵀJ奇异则更新不唯一，应使用QR/SVD或阻尼而非直接求逆。"
+        },
+        {
+          "title": "局部识别与多重参数解",
+          "question": "拟合误差达到零是否保证参数唯一？",
+          "paragraphs": [
+            "非线性函数可能由不同参数给出完全相同预测值。例如平方参数模型对θ和−θ不加区分。",
+            "估计报告需说明经济参数范围约束及反演分支，数值零残差不能作为全局可识别性证据。"
+          ],
+          "formulas": [
+            {
+              "label": "推导与检验",
+              "tex": "f(x,\\theta)=\\theta^2x=f(x,-\\theta)"
+            }
+          ],
+          "proof": "由于θ²=(−θ)²，所有设计点上的预测相同，任何仅基于这组均值观察的最小二乘无法区分两个相反参数。",
+          "worked": "例中y=2x，θ=√2与θ=−√2都取得SSE=0；若规定θ>0，则只保留正根。",
+          "limitation": "限制参数符号可提高识别，却须有金融经济含义，不能为挑选回测较好的结果随意加约束。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "regression-n0203",
+          "label": "IRLS"
+        },
+        {
+          "kind": "math",
+          "id": "calculus-n0049",
+          "label": "隐函数定理"
+        },
+        {
+          "kind": "math",
+          "id": "numerical-n0374",
+          "label": "Newton-Raphson"
+        }
+      ]
+    },
+    {
+      "id": "regression-n0210",
+      "node_id": "regression-n0210",
+      "title": "双重机器学习预备",
+      "definition": "双重机器学习DML针对目标低维参数与高维干扰函数并存的问题，通过Neyman正交矩条件和样本交叉拟合降低干扰估计误差对目标参数一阶推断的影响。经典部分线性模型先对处理变量D和结果Y做条件均值残差化，再估计残差之间的目标系数。",
+      "assumptions": "部分线性模型Y=θ₀D+g₀(X)+ε且E[ε|D,X]=0，处理残差v=D−E[D|X]具有非零二阶矩。正交估计需适当的L²干扰收敛率、交叉拟合独立结构和有限矩；金融时间序列须采用时间合法折叠而非随机未来泄漏。",
+      "properties": [
+        "正交得分对干扰函数的小扰动在真值处一阶不敏感。",
+        "交叉拟合让每个评价折的干扰预测由该折以外训练数据产生。",
+        "部分线性DML的目标系数是处理变量残差与结果残差的相关比。",
+        "DML不自动解决处理内生性；识别假设和时间样本独立性必须另行验证。"
+      ],
+      "formulas": [
+        {
+          "label": "模型与目标",
+          "tex": "Y=\\theta_0D+g_0(X)+\\varepsilon"
+        },
+        {
+          "label": "算法表达",
+          "tex": "\\psi(W;\\theta,\\eta)=(D-m(X))[Y-\\ell(X)-\\theta(D-m(X))]"
+        },
+        {
+          "label": "估计条件",
+          "tex": "\\widehat\\theta=\\frac{\\sum_i\\widehat v_i\\widehat r_i}{\\sum_i\\widehat v_i^2},\\quad\\widehat v=D-\\widehat m(X),\\quad\\widehat r=Y-\\widehat\\ell(X)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "在合法训练折估计m(X)=E[D|X]与ℓ(X)=E[Y|X]。",
+          "tex": "\\widehat m^{-k},\\widehat\\ell^{-k}\\ \\text{由折 }k\\text{ 外训练}"
+        },
+        {
+          "explanation": "对评价折生成没有使用自身标签训练的处理和结果残差。",
+          "tex": "\\widehat v_i=D_i-\\widehat m^{-k}(X_i),\\quad\\widehat r_i=Y_i-\\widehat\\ell^{-k}(X_i)"
+        },
+        {
+          "explanation": "求解残差化的正交矩条件并构造相应稳健标准误。",
+          "tex": "\\sum_i\\widehat v_i(\\widehat r_i-\\widehat\\theta\\widehat v_i)=0"
+        }
+      ],
+      "example": "假设交叉拟合得到两个处理残差v=(−1,1)、结果残差r=(−2,2)。正交矩条件给θ̂=(2+2)/(1+1)=2，残差化回归误差r−2v=(0,0)，样本得分和为零。该代数例子不代表现实观测已满足因果外生性。",
+      "application": "可研究政策、交易限制或经济事件的低维处理效应，允许高维市场状态控制。但回测中同时期标签、数据发布时间与处理分配机制必须预先审查。",
+      "caveat": "交叉拟合和机器学习算法不能凭空提供识别。若D与结构误差仍相关，DML可能精确估计错误对象；时间滚动折还需清除重叠标签和未来特征。",
+      "deep_sections": [
+        {
+          "title": "正交矩条件消除什么误差",
+          "question": "为什么干扰函数有估计误差时仍可能推断θ？",
+          "paragraphs": [
+            "普通代入矩条件对机器学习干扰误差可能具有一阶敏感性，使模型复杂度影响目标估计的收敛率。",
+            "Neyman正交性让得分在真干扰值处对小扰动的一阶导数为零，使主要偏差变成干扰误差的乘积型高阶项。"
+          ],
+          "formulas": [
+            {
+              "label": "推导与检验",
+              "tex": "\\left.\\partial_t\\mathbb E[\\psi(W;\\theta_0,\\eta_0+t h)]\\right|_{t=0}=0"
+            }
+          ],
+          "proof": "记v=D−m₀(X)、r=Y−ℓ₀(X)，E[v|X]=0且在真θ下E[r−θv|X]=0。分别对m、ℓ的方向扰动求导，其每项条件期望均为零。",
+          "worked": "若两个干扰估计误差在L²范数下各约为0.01，正交二阶乘积量级约0.0001，可能小于普通一阶误差。",
+          "limitation": "该量级仅说明局部展开的直觉；严格根号n推断仍需矩条件、样本划分与误差率要求。"
+        },
+        {
+          "title": "交叉拟合和时间泄漏",
+          "question": "为什么金融时间序列不能照搬随机交叉拟合？",
+          "paragraphs": [
+            "独立数据上的K折交叉拟合可让评价样本的干扰估计与其自身拟合噪声分开。",
+            "金融数据有时间依赖与标签重叠，随机折可能让未来市场状态进入过去的评价结果，产生不可交易的因果推断与预测。"
+          ],
+          "formulas": [
+            {
+              "label": "推导与检验",
+              "tex": "\\widehat\\eta^{-k}=\\operatorname{Train}(\\{W_j:j\\notin I_k\\})"
+            }
+          ],
+          "proof": "经典交叉拟合在独立样本下为折k使用其余样本训练。对时序任务，应改为前推训练或具有信息隔离的分块折，保证评价时点不见未来。",
+          "worked": "若评价2025年1月的政策效果，却用2025年6月数据训练其干扰模型，会违反实时研究约束；按截止2024年12月训练更合理。",
+          "limitation": "仅按时间切分还需对重叠收益标签、延迟公告及修订数据设置足够清洗期。"
+        },
+        {
+          "title": "因果识别和统计正交的区别",
+          "question": "DML是否能自动把相关处理转成因果效应？",
+          "paragraphs": [
+            "正交得分解决的是在给定识别模型内，干扰估计误差如何影响目标参数推断。",
+            "因果识别仍需处理变量在控制X后相对于结构误差外生或采用其他有效识别设计，无法由正交性代替。"
+          ],
+          "formulas": [
+            {
+              "label": "推导与检验",
+              "tex": "\\mathbb E[\\varepsilon\\mid D,X]=0\\quad\\text{是额外识别要求}"
+            }
+          ],
+          "proof": "在部分线性模型下取条件均值并残差化，识别θ依赖处理残差与结构误差正交。若E[vε]不为零，则正交矩条件的零点偏离目标θ。",
+          "worked": "令v=(−1,1)且结构误差ε=v，则残差化Y=2v+ε=3v，算法会估计θ=3而非结构真值2，无论干扰预测多准确。",
+          "limitation": "遗漏的市场冲击、政策内生实施和逆向因果不能仅靠交叉拟合消除。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "econometrics-x001",
+          "label": "Neyman正交矩条件"
+        },
+        {
+          "kind": "math",
+          "id": "econometrics-x002",
+          "label": "时间交叉拟合与合法训练折"
+        },
+        {
+          "kind": "math",
+          "id": "econometrics-n0229",
+          "label": "潜在结果框架"
+        }
+      ]
+    }
+  ]
+}

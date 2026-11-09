@@ -1,0 +1,464 @@
+{
+  "version": 1,
+  "revision": "V109",
+  "integrated_by": "quant/math/app.js",
+  "subject": "Regression dependence, collinearity, influence and misspecification",
+  "lessons": [
+    {
+      "id": "regression-n0189",
+      "node_id": "regression-n0189",
+      "title": "序列相关",
+      "definition": "序列相关指不同交易日的回归误差存在非零跨期协方差。即使解释变量严格外生，传统独立同方差OLS标准误也可能不正确；若模型包含滞后因变量，相关误差还可能带来内生性。",
+      "assumptions": "日度序列必须按真实事件时点排序。平稳AR(1)过程u_t=ρu_{t-1}+ε_t要求|ρ|<1，创新白噪声具有有限方差；传统无偏OLS结论还须有适当外生性。",
+      "properties": [
+        "跨期相关与单期异方差是不同假设，可同时存在。",
+        "严格外生条件下估计系数可无偏，但传统协方差公式通常失效。",
+        "平稳AR(1)正相关增加均值估计的长期方差。",
+        "含滞后因变量时更换标准误不必然修复系数偏差。"
+      ],
+      "formulas": [
+        {
+          "label": "模型",
+          "tex": "u_t=\\rho u_{t-1}+\\varepsilon_t,\\quad|\\rho|<1"
+        },
+        {
+          "label": "估计或方差",
+          "tex": "\\gamma(k)=\\frac{\\sigma_\\varepsilon^2}{1-\\rho^2}\\rho^{|k|}"
+        },
+        {
+          "label": "诊断恒等式",
+          "tex": "\\operatorname{Var}(\\widehat\\beta\\mid X)=(X^\\top X)^{-1}X^\\top\\Omega X(X^\\top X)^{-1}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "条件误差协方差矩阵允许跨期非零元素。",
+          "tex": "\\Omega_{ts}=\\operatorname{Cov}(u_t,u_s\\mid X)"
+        },
+        {
+          "explanation": "OLS系数误差是原始误差向量的线性映射。",
+          "tex": "\\widehat\\beta-\\beta=(X^\\top X)^{-1}X^\\top u"
+        },
+        {
+          "explanation": "利用线性变换的协方差关系保留所有跨期项。",
+          "tex": "\\operatorname{Var}(Au\\mid X)=A\\Omega A^\\top"
+        }
+      ],
+      "example": "以教学残差e=(1,1,−1,−1)为例，平方和为4、相邻差平方和为4，故DW=1。滞后乘积和为1，按平方和归一化的相关量为0.25，不能机械将短样本DW等同于2(1−0.25)。",
+      "application": "适用于重叠收益、日度alpha、非同步交易及高频因子检验。HAC能够在一定弱依赖与带宽条件下改善推断，但不保证消除内生性。",
+      "caveat": "相关检验的适用性依赖模型结构和样本长度，长记忆、结构断裂及滞后被解释变量可能使常用渐近推断不成立。 还应核对残差的采样频率和市场日历是否一致。",
+      "deep_sections": [
+        {
+          "title": "AR(1)的长期方差",
+          "question": "正自相关为何使有效样本量下降？",
+          "paragraphs": [
+            "相邻观测在同一方向持续偏离时，多条数据所含独立信息会少于样本总数。",
+            "长期方差需累计全部自协方差，不能仅用单期方差估计均值的不确定性。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与计算",
+              "tex": "\\sum_{k=-\\infty}^{\\infty}\\gamma(k)=\\gamma(0)\\frac{1+\\rho}{1-\\rho}"
+            }
+          ],
+          "proof": "将γ(k)=γ(0)ρ^{|k|}按正负滞后相加，使用几何级数得γ(0)[1+2ρ/(1−ρ)]，化简即得到公式。",
+          "worked": "ρ=1/2且创新方差1时γ(0)=4/3，长期方差为4，恰为单期方差的三倍。",
+          "limitation": "该结论使用平稳短记忆AR(1)，对非平稳过程和长记忆数据不能无条件引用。"
+        },
+        {
+          "title": "OLS协方差夹心形式",
+          "question": "经典标准误在哪一步漏掉了时间相关？",
+          "paragraphs": [
+            "系数估计的随机误差由所有样本误差组合形成，跨期协方差会沿设计矩阵传播到每个系数。",
+            "只在Ω=σ²I时才能把广义夹心公式缩减为常用的σ²(XᵀX)逆矩阵。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与计算",
+              "tex": "\\Omega=\\sigma^2I\\Longrightarrow\\operatorname{Var}(\\widehat\\beta\\mid X)=\\sigma^2(X^\\top X)^{-1}"
+            }
+          ],
+          "proof": "由β̂−β=Au与Var(Au)=AΩAᵀ直接推导；在Ω为σ²I时，A Aᵀ=(XᵀX)^{-1}。",
+          "worked": "两次等方差观测相关系数0.5时，均值方差是0.75σ²；按独立计算仅0.5σ²。",
+          "limitation": "稳健标准误修复方差估计而非条件均值零假设，不应据此宣称具有因果识别。"
+        },
+        {
+          "title": "DW与短样本边界项",
+          "question": "为什么DW不严格等于2乘以一减样本相关？",
+          "paragraphs": [
+            "残差一阶差分平方展开后首尾各出现一次，内部平方出现两次，故存在端点修正。",
+            "DW可以用作初步筛查，但检验临界值和滞后因变量处理取决于设计矩阵。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与计算",
+              "tex": "DW=2-\\frac{e_1^2+e_n^2}{\\sum_t e_t^2}-2\\frac{\\sum_{t=2}^n e_te_{t-1}}{\\sum_t e_t^2}"
+            }
+          ],
+          "proof": "逐项展开Σ(e_t−e_{t−1})²=2Σe_t²−e₁²−e_n²−2Σe_te_{t−1}，再除以残差平方和。",
+          "worked": "例中平方和4、端点平方和2、相邻乘积和1，因此DW=2−0.5−0.5=1。",
+          "limitation": "短样本端点影响不可忽略；样本排序错误会使整个统计量失去时间意义。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "regression-n0197",
+          "label": "HAC/Newey-West"
+        },
+        {
+          "kind": "math",
+          "id": "regression-n0187",
+          "label": "残差检验"
+        },
+        {
+          "kind": "math",
+          "id": "timeseries-n0241",
+          "label": "强平稳与弱平稳"
+        }
+      ]
+    },
+    {
+      "id": "regression-n0190",
+      "node_id": "regression-n0190",
+      "title": "VIF共线性诊断",
+      "definition": "方差膨胀因子VIF衡量某解释变量可由其余解释变量线性预测的程度。经典含截距辅助回归得到R_j²时，VIF_j=1/(1−R_j²)，反映该变量系数的条件方差相对于正交解释变量的放大倍率。",
+      "assumptions": "使用带截距、满列秩的OLS设计，解释变量样本中心化平方和为正。传统方差解释需要固定设计、条件同方差与外生性；异方差情况下VIF不能代替稳健协方差。",
+      "properties": [
+        "VIF至少为1，数值越大说明独立变动越少。",
+        "若R_j²接近1，单独系数估计会不稳定。",
+        "高VIF不等于模型预测无效，联合特征预测与单列归因不同。",
+        "简单标准化一般不改变含截距的辅助回归R²。"
+      ],
+      "formulas": [
+        {
+          "label": "模型",
+          "tex": "\\operatorname{VIF}_j=\\frac1{1-R_j^2}"
+        },
+        {
+          "label": "估计或方差",
+          "tex": "\\operatorname{Var}(\\widehat\\beta_j\\mid X)=\\frac{\\sigma^2}{S_{jj}(1-R_j^2)}"
+        },
+        {
+          "label": "诊断恒等式",
+          "tex": "S_{jj}=\\sum_i(x_{ij}-\\bar x_j)^2"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将目标特征对其余特征回归并取辅助残差。",
+          "tex": "z_j=M_{X_{-j}}x_j"
+        },
+        {
+          "explanation": "FWL定理表示目标系数来自残差化特征的回归。",
+          "tex": "\\widehat\\beta_j=\\frac{z_j^\\top y}{z_j^\\top z_j}"
+        },
+        {
+          "explanation": "残差平方和占总平方和的比例为1−R²。",
+          "tex": "z_j^\\top z_j=S_{jj}(1-R_j^2)"
+        }
+      ],
+      "example": "若动量特征由其他特征辅助回归得到R²=0.9，则VIF=10。固定噪声方差与该特征离差时，系数方差比正交情形大10倍，标准误放大√10≈3.162。",
+      "application": "适合检查ETF动量、均线与趋势特征的冗余性。若目标是预测，可以比较Ridge与样本外表现，而不是仅因VIF高就删除变量。",
+      "caveat": "VIF没有普适的机械删除阈值；模型可能由于数据过少、时间泄漏或结构变化失效，这些问题不能仅靠VIF识别。",
+      "deep_sections": [
+        {
+          "title": "FWL给出方差放大原因",
+          "question": "辅助回归R²为什么影响目标系数精度？",
+          "paragraphs": [
+            "其他因子已解释的x_j部分不再帮助识别x_j独立系数，剩余信号越弱，估计方差越大。",
+            "这说明单个因子经济归因和整个预测模型的稳定性属于不同判断维度。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与计算",
+              "tex": "\\operatorname{Var}(\\widehat\\beta_j)=\\frac{\\sigma^2}{z_j^\\top z_j}"
+            }
+          ],
+          "proof": "由β̂_j−β_j=z_jᵀu/(z_jᵀz_j)，在Var(u|X)=σ²I条件下求方差，再代入z_j平方和即可。",
+          "worked": "Sjj=20、σ²=1、R²=.9时方差为0.5；R²=0时方差0.05，确实相差十倍。",
+          "limitation": "如果误差异方差或时间相关，应另算稳健系数协方差，而不是用VIF乘以普通方差。"
+        },
+        {
+          "title": "预测和归因的分离",
+          "question": "VIF高是否意味着整套信号没有预测能力？",
+          "paragraphs": [
+            "高度相关的因子可能刻画同一个预测方向，单独系数可大幅波动，但组合预测仍可能相对稳定。",
+            "Ridge或因子主成分有助于数值稳定，却不创造额外的因果识别。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与计算",
+              "tex": "X\\widehat\\beta\\ \\text{可稳定而}\\ \\widehat\\beta_j\\ \\text{不稳定}"
+            }
+          ],
+          "proof": "如果两列相同，则保持系数和不变可产生同样的预测值；数据只识别共同方向而不识别两个独立权重。",
+          "worked": "令x₂=x₁，系数(1,0)、(0,1)、(.5,.5)在训练特征下给出完全一样的预测。",
+          "limitation": "训练期完全共线关系可能在新行情中变化，样本外预测稳定性仍需另行检验。"
+        },
+        {
+          "title": "变量缩放并不能修复共线性",
+          "question": "为什么中心化标准化之后VIF可能毫无改变？",
+          "paragraphs": [
+            "辅助回归中的因变量线性缩放，会让其残差平方和和总离差平方和同时按同一比例变化。",
+            "这适用于含截距的标准辅助回归，也说明数值尺度与实际信息冗余是两回事。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与计算",
+              "tex": "R_j^2(a+bx_j\\mid X_{-j})=R_j^2(x_j\\mid X_{-j}),\\quad b\\ne0"
+            }
+          ],
+          "proof": "辅助回归的目标变量变为a+bx_j后，截距吸收a、斜率吸收b，SSE与SST都乘b²，R²=1−SSE/SST保持不变。",
+          "worked": "若原辅助R²=.9，先将因子乘100并减均值后VIF依然为10，不会因为尺度调整而变成1。",
+          "limitation": "不带截距或在标准化时变更缺失样本集合，R²定义可能改变，需要统一样本口径。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "regression-n0183",
+          "label": "正规方程"
+        },
+        {
+          "kind": "math",
+          "id": "regression-n0205",
+          "label": "Ridge回归"
+        },
+        {
+          "kind": "math",
+          "id": "linear-n0083",
+          "label": "奇异值分解SVD"
+        }
+      ]
+    },
+    {
+      "id": "regression-n0191",
+      "node_id": "regression-n0191",
+      "title": "高杠杆点与Cook距离",
+      "definition": "杠杆h_ii描述第i行特征在设计矩阵中的突出程度；Cook距离度量删除该样本后整个拟合向量的变化，综合了残差与杠杆。高杠杆不代表错误数据，也不必然高影响。",
+      "assumptions": "设X含截距、满列秩且n>p，OLS残差方差s²=SSE/(n−p)>0；使用全样本s²定义Cook距离。删除行后设计矩阵须仍有足够秩，h_ii接近1时公式高度敏感。",
+      "properties": [
+        "杠杆位于0到1，所有杠杆之和等于回归参数数p。",
+        "极端特征点即使自身残差不大也可能显著改变拟合。",
+        "Cook距离反映删除样本后的拟合影响，而不是市场异常事件发生概率。",
+        "时间序列中逐行删除可能破坏真实时序，应结合整段删除和滚动稳定性。"
+      ],
+      "formulas": [
+        {
+          "label": "模型",
+          "tex": "h_{ii}=x_i^\\top(X^\\top X)^{-1}x_i"
+        },
+        {
+          "label": "估计或方差",
+          "tex": "D_i=\\frac{e_i^2}{p\\,s^2}\\frac{h_{ii}}{(1-h_{ii})^2}"
+        },
+        {
+          "label": "诊断恒等式",
+          "tex": "\\widehat\\beta_{(-i)}=\\widehat\\beta-\\frac{(X^\\top X)^{-1}x_ie_i}{1-h_{ii}}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "建立帽子矩阵并从对角元提取杠杆。",
+          "tex": "H=X(X^\\top X)^{-1}X^\\top"
+        },
+        {
+          "explanation": "删去一条观测对应Gram矩阵的秩一修改。",
+          "tex": "X_{(-i)}^\\top X_{(-i)}=X^\\top X-x_ix_i^\\top"
+        },
+        {
+          "explanation": "使用留一系数公式得到全体拟合值的变化量。",
+          "tex": "D_i=\\frac{\\|\\widehat y-\\widehat y_{(-i)}\\|^2}{p\\,s^2}"
+        }
+      ],
+      "example": "含截距一元回归x=(−1,0,1)，h=(5/6,1/3,5/6)。取与两列正交的残差e=(.2,−.4,.2)，SSE=.24且s²=.24，则两端Cook距离各2.5，中间点为0.25，体现杠杆放大的作用。",
+      "application": "用于审查危机交易日对历史beta、因子收益和组合权重的影响，应同时比较全样本、事前清洗与块删样本结果。",
+      "caveat": "Cook经验阈值仅供筛查；极端收益日可能是最重要的真实尾部数据，不能为了美化回测收益任意剔除。 必须区分价格数据错误和真实发生的极端市场损失。",
+      "deep_sections": [
+        {
+          "title": "一元回归杠杆的几何分解",
+          "question": "为什么样本两端点通常杠杆更大？",
+          "paragraphs": [
+            "带截距OLS把观测向量投影到常数列与中心化x列，它们彼此正交。",
+            "偏离均值更远的解释变量因此在帽子矩阵对角元上得到更大贡献。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与计算",
+              "tex": "h_{ii}=\\frac1n+\\frac{(x_i-\\bar x)^2}{\\sum_j(x_j-\\bar x)^2}"
+            }
+          ],
+          "proof": "将帽子矩阵拆成常数投影11ᵀ/n和去中心x方向的秩一投影，取其第i个对角元素便得到公式。",
+          "worked": "x=(−1,0,1)有Sxx=2，因此端点h=1/3+1/2=5/6，中间点1/3，总和2。",
+          "limitation": "多元回归或异方差WLS需要相应的投影结构，不应照搬一元公式。"
+        },
+        {
+          "title": "Cook公式的高杠杆放大",
+          "question": "为什么一个小残差也可以构成高影响？",
+          "paragraphs": [
+            "Cook距离的杠杆因子h/(1−h)²在h接近1时快速增长，能够放大本来不大的残差。",
+            "它用全局拟合变化而非单点预测误差评价影响，应结合删除后系数稳定性查看。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与计算",
+              "tex": "\\|\\widehat y-\\widehat y_{(-i)}\\|^2=\\frac{e_i^2h_{ii}}{(1-h_{ii})^2}"
+            }
+          ],
+          "proof": "由留一系数差和投影定义，拟合差向量为X(XᵀX)^{-1}x_i e_i/(1−h_i)，平方范数化简为e_i²h_i/(1−h_i)²。",
+          "worked": "端点e=.2、h=5/6、p=2、s²=.24得到2.5；中间e=−.4、h=1/3得到0.25。",
+          "limitation": "若h_i=1，留一设计可能不满秩，分母为零，普通Cook表达不适用。"
+        },
+        {
+          "title": "危机观察的保留标准",
+          "question": "高影响市场事件是否应自动从训练集合里删除？",
+          "paragraphs": [
+            "危机期收益真实存在且对风控至关重要，删去它们可能提升样本内拟合却削弱极端风险覆盖。",
+            "应把数据质量错误、真实行情尾部和交易制度改变分别识别，保留可审计的样本排除规则。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与计算",
+              "tex": "\\Delta_i=\\widehat\\beta-\\widehat\\beta_{(-i)}"
+            }
+          ],
+          "proof": "对被标记样本计算全样本与留一估计差，并将差异映射到下一期风险权重；这一敏感性可在不同时间窗口独立重复。",
+          "worked": "若全样本beta=1.2、去掉大跌日后beta=.8，变化0.4提示结果依赖该时期，却不能证明删去大跌日更正确。",
+          "limitation": "连续时间数据有依赖与状态聚集时，单条留一分析还应配合整段或整簇敏感性。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "regression-n0185",
+          "label": "残差与投影矩阵"
+        },
+        {
+          "kind": "math",
+          "id": "regression-n0187",
+          "label": "残差检验"
+        },
+        {
+          "kind": "math",
+          "id": "regression-n0196",
+          "label": "异方差稳健标准误"
+        }
+      ]
+    },
+    {
+      "id": "regression-n0192",
+      "node_id": "regression-n0192",
+      "title": "模型设定误差",
+      "definition": "回归模型设定误差包括遗漏变量、错误函数形式、错误滞后、错误误差依赖假设及样本选择机制。它可能使OLS只识别一个近似线性投影，而不是原本希望估计的结构参数；必须区分偏差与标准误失效。",
+      "assumptions": "遗漏变量偏差推导假设真实条件均值线性且原始误差与候选解释变量外生。函数形式检验需要预先规定比较范围，非拒绝不等于证明模型正确。",
+      "properties": [
+        "相关遗漏变量同时影响因变量时，已用变量斜率通常发生偏差。",
+        "遗漏项与已用x相关程度、遗漏项自身系数共同决定偏差方向。",
+        "一次项相关为零不代表不存在非线性可预测关系。",
+        "复杂模型训练误差更低不保证未来外推风险更小。"
+      ],
+      "formulas": [
+        {
+          "label": "模型",
+          "tex": "y=\\beta_0+\\beta_1x+\\gamma z+u"
+        },
+        {
+          "label": "估计或方差",
+          "tex": "\\operatorname{plim}\\widehat b_1=\\beta_1+\\gamma\\frac{\\operatorname{Cov}(x,z)}{\\operatorname{Var}(x)}"
+        },
+        {
+          "label": "诊断恒等式",
+          "tex": "\\mathbb E[y\\mid x]\\ne\\beta_0+\\beta_1x\\quad\\text{可能构成设定误差}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "将真实y与已纳入x的协方差按各项分解。",
+          "tex": "\\operatorname{Cov}(x,y)=\\beta_1\\operatorname{Var}(x)+\\gamma\\operatorname{Cov}(x,z)+\\operatorname{Cov}(x,u)"
+        },
+        {
+          "explanation": "假定原始误差对x正交并利用样本矩收敛。",
+          "tex": "\\operatorname{plim}\\widehat b_1=\\operatorname{Cov}(x,y)/\\operatorname{Var}(x)"
+        },
+        {
+          "explanation": "代入并分离真正斜率与遗漏项偏差。",
+          "tex": "\\operatorname{plim}\\widehat b_1-\\beta_1=\\gamma\\operatorname{Cov}(x,z)/\\operatorname{Var}(x)"
+        }
+      ],
+      "example": "若真实β1=1、遗漏z的γ=2且Cov(x,z)/Var(x)=.5，则只回归x时斜率概率极限为2，较目标效应偏高1。即使样本不断扩大，该结构偏差也不会自动消失。",
+      "application": "量化市场回归中行业暴露、流动性与风险偏好可能同时影响因子与收益，需要在先验经济机制和信息时点下设定控制变量。",
+      "caveat": "RESET等诊断只能发现部分函数形式异常。根据同一测试时段反复增删控制变量、最终只报告最优模型，会产生数据挖掘偏差。",
+      "deep_sections": [
+        {
+          "title": "遗漏变量偏差方向",
+          "question": "为什么遗漏项必须同时相关且具有结果效应？",
+          "paragraphs": [
+            "如果遗漏z与x不相关，或它本身对y没有系数，简单线性偏差项就为零。",
+            "这一结论在真实线性结构和原始误差外生条件下成立，不能仅靠相关系数推断因果方向。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与计算",
+              "tex": "\\gamma\\operatorname{Cov}(x,z)=0\\Longrightarrow\\operatorname{Bias}_{\\rm asym}=0"
+            }
+          ],
+          "proof": "对真实方程两侧取Cov(x,·)并除以Var(x)>0，原始误差正交项消失后只留下β1和遗漏项贡献。",
+          "worked": "当γ=2、Cov/Var=.5时偏差+1；若Cov/Var=−.5则偏差−1，两个方向都可能发生。",
+          "limitation": "偏差项为零不等于模型对所有预测任务正确，遗漏变量还可能提高不可解释噪声。"
+        },
+        {
+          "title": "遗漏非线性结构",
+          "question": "为什么x与y样本相关为零仍可能存在可预测规律？",
+          "paragraphs": [
+            "对零中心的对称x分布，x和x²可以不相关，单纯斜率被估成零。",
+            "若真实条件均值含平方项，线性预测则漏掉重要的U形规律；金融波动反馈常有类似结构。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与计算",
+              "tex": "X\\sim\\mathrm{Unif}[-1,1],\\ Y=X^2\\Longrightarrow\\operatorname{Cov}(X,Y)=0"
+            }
+          ],
+          "proof": "由于X分布对称，E[X]=E[X³]=0，故Cov(X,X²)=E[X³]−E[X]E[X²]=0，线性总体斜率为零。",
+          "worked": "取x=(−1,0,1)、y=(1,0,1)，仅一次项OLS斜率为0、截距2/3；加入x²可准确拟合三个点。",
+          "limitation": "引入高阶项会增加模型复杂度，必须使用独立滚动样本评价而非只报告训练拟合。"
+        },
+        {
+          "title": "样本外检验的独立性",
+          "question": "为什么依据测试误差修改函数形式会破坏检验？",
+          "paragraphs": [
+            "测试区间应在模型训练与选择全部结束后评价外推；一旦根据测试结果反复选择变量和阶数，测试信息进入了训练决策。",
+            "应在训练内部进行时间交叉验证、冻结模型规则，再对独立留出时间段报告误差和稳定性。"
+          ],
+          "formulas": [
+            {
+              "label": "证明与计算",
+              "tex": "\\widehat L_{\\rm test}=\\frac1m\\sum_{t\\in\\mathrm{test}}\\ell(y_t,\\widehat f(x_t))"
+            }
+          ],
+          "proof": "预先定义模型集合并在训练期选择f，测试误差只是最终一次评估。如果测试结果影响下次选择，它不再是独立的模型检验。",
+          "worked": "模型A训练MSE=.5、测试=.6；模型B训练=.3、测试=.9，B虽然训练较好却外推更差。",
+          "limitation": "独立测试也不能排除制度变化，应关注样本内外切换与数据公告时间口径。"
+        }
+      ],
+      "links": [
+        {
+          "kind": "math",
+          "id": "econometrics-n0212",
+          "label": "遗漏变量偏差"
+        },
+        {
+          "kind": "math",
+          "id": "regression-n0204",
+          "label": "非线性最小二乘"
+        },
+        {
+          "kind": "math",
+          "id": "regression-n0209",
+          "label": "交叉验证选λ"
+        }
+      ]
+    }
+  ]
+}
