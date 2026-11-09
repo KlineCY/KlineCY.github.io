@@ -108,6 +108,14 @@ assert.equal(loaded.size,20);
 assert.equal(archive.catalog.items.length,720,"Deepening must preserve all core 720 Atlas IDs");
 for(const id of expected)assert(html.includes('href="#lesson/'+id+'"'),"Missing direct route to original lesson "+id);
 assert(html.includes("V114 · 机器学习方法与量化研究：20篇正式教材深化"),"V114 title or Chinese course map absent");
+
+assert(html.indexOf('id="atlas-reader-section"')>html.indexOf("</header>")&&
+       html.indexOf('id="atlas-reader-section"')<html.indexOf('aria-label="系统学习路径"'),
+       "V115 top-of-page reader must remain above V114 and earlier learning paths");
+assert.equal((html.match(/id="atlas-reader-section"/g)||[]).length,1,"V115 lecture reader duplicated");
+assert(html.includes('id="course-site-nav-toggle"')&&html.includes('id="atlas-toggle-catalog"'),
+       "V115 mobile site and curriculum navigation must be retained");
+
 assert(html.includes('atlas.js?v=20261109-v115-reader-layout-v116-ml-bridges'),"V114 runtime cache version missing");
 for(const selector of ["line-break:strict","overflow-x:auto","@media(max-width:700px)",".atlas-concept-jump:focus-visible",".atlas-concept-chain","@media print"])
  assert(css.includes(selector),"Responsive CJK, KaTeX scroll, keyboard or print style missing "+selector);
