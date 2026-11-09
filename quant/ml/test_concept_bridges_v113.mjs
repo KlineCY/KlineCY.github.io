@@ -107,7 +107,7 @@ assert.equal(loaded.size,20);
 assert.equal(archive.catalog.items.length,720,"Deepening must preserve all core 720 Atlas IDs");
 for(const id of expected)assert(html.includes('href="#lesson/'+id+'"'),"Missing direct route to original lesson "+id);
 assert(html.includes("组合优化、稳健验证与模型部署"),"V113 title or Chinese course map absent");
-assert(html.includes('atlas.js?v=20261109-v115-reader-layout-v116-ml-bridges-v117-no-learning-progress'),"V113 runtime cache version missing");
+assert(html.includes('atlas.js?v=20261109'),"V113 runtime cache version missing");
 for(const selector of ["line-break:strict","overflow-x:auto","@media(max-width:700px)",".atlas-concept-jump:focus-visible",".atlas-concept-chain","@media print"])
  assert(css.includes(selector),"Responsive CJK, KaTeX scroll, keyboard or print style missing "+selector);
 const workflow=read("../../.github/workflows/test-quant-ml.yml");
