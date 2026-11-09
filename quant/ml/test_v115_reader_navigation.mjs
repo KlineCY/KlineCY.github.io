@@ -17,6 +17,16 @@ function checkReader(html,id,old){
 }
 checkReader(mlHtml,"atlas-reader-section",'aria-label="系统学习路径"');
 checkReader(mathHtml,"math-reader-section",'aria-label="V110 数值分析与蒙特卡洛全30篇课程和656节点全学科覆盖"');
+for(const html of [mlHtml,mathHtml]){
+ assert.equal(html.split('id="course-site-nav-toggle"').length,2,"Missing mobile site navigation toggle");
+ expect(html,'aria-controls="quantSidebar" aria-expanded="false"',"Mobile global menu disclosure a11y");
+ expect(html,'../reader-site-nav-v115.js',"Shared mobile navigation behavior");
+}
+new vm.Script(read("../reader-site-nav-v115.js"),{filename:"reader-site-nav-v115.js"});
+for(const css of [mlCss,mathCss]){
+ expect(css,'#quantSidebar{display:none!important}',"Mobile reader must not be buried under the site menu");
+ expect(css,'body.course-site-nav-open #quantSidebar{display:block!important',"Mobile global navigation must remain accessible");
+}
 for(const id of ["atlas-search","atlas-topic","atlas-toc","atlas-lesson","atlas-total-lessons","atlas-toggle-catalog"])
  assert.equal(mlHtml.split('id="'+id+'"').length,2,"ML reader element missing/duplicated "+id);
 for(const id of ["tree","article","articlePane","roadmap","search","disciplineFilter","math-toggle-catalog"])
