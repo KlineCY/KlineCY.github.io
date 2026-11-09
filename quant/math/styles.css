@@ -426,3 +426,42 @@ details[open]>summary>.chev{transform:rotate(90deg)}
  .article .math-deep-unit .formula-block .math{font-size:10.8px!important}
  .article .math-deep-unit p{orphans:3;widows:3}
 }
+
+
+
+/* V115 · 数学知识阅读区前置，学科 / 章节 / 知识点独立目录，正文右侧阅读 */
+.math-main{max-width:none}
+.hero{padding:24px 0 10px}
+.math-reader-section{margin:12px 0 38px;scroll-margin-top:8px}
+.math-reader-heading{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:8px 0 12px}
+.math-reader-heading h2{margin:0;font:700 clamp(19px,2.1vw,26px)/1.4 "Noto Serif SC","PingFang SC",serif;color:#183c55}
+.math-reader-heading p{margin:5px 0 0;color:#63798b;font-size:12px;line-height:1.7}
+.math-catalog-toggle{display:none;border:1px solid #9bbbd0;border-radius:9px;padding:10px 12px;font:650 12.5px "PingFang SC",sans-serif;background:#edf5fb;color:#195e86}
+.math-grid{grid-template-columns:minmax(255px,335px) minmax(0,1fr);gap:16px;max-width:none}
+.knowledge-tree{min-width:0;position:sticky;top:12px;height:calc(100vh - 28px);height:calc(100dvh - 28px);max-height:calc(100dvh - 28px);overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;padding-right:6px}
+.article-pane{top:12px;height:calc(100vh - 28px);height:calc(100dvh - 28px);min-height:0;max-height:calc(100dvh - 28px);overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
+.article h2{line-height:1.45;letter-spacing:0;line-break:strict;overflow-wrap:anywhere}
+.node{min-width:0;line-height:1.55;padding:9px 7px;gap:6px}
+.node .node-index{color:#8096a6;font:600 10px Consolas,monospace;flex:none}
+.node .node-name{line-break:strict;overflow-wrap:anywhere;min-width:0}
+.department>summary,.chapter>summary{line-break:strict}
+.department .dept-label,.chapter .chapter-label{overflow-wrap:anywhere}
+.math-catalog-toggle:focus-visible,.knowledge-tree :focus-visible{outline:3px solid #e8a14b;outline-offset:2px}
+.article .formula-block,.article .katex-display{max-width:100%;overflow-x:auto;overscroll-behavior-x:contain}
+@media(max-width:1150px) and (min-width:901px){.math-grid{grid-template-columns:minmax(230px,280px) minmax(0,1fr)}.math-main{padding:0 18px}.article{padding:24px}}
+@media(max-width:900px){
+ .math-reader-heading{align-items:flex-start;flex-wrap:wrap;gap:10px}
+ .math-catalog-toggle{display:inline-flex;cursor:pointer}
+ .math-grid{display:block}
+ .knowledge-tree{display:none;position:static;height:auto;max-height:min(45vh,450px);overflow:auto;padding:0 4px 0 0;margin:0 0 12px}
+ .math-reader-section.catalog-open .knowledge-tree{display:block}
+ .article-pane{position:static;height:auto;max-height:none;min-height:300px;overflow:visible;margin-top:0}
+ .article{padding:20px}
+}
+@media(max-width:540px){.math-reader-heading h2{font-size:19px}.math-reader-heading p{font-size:11.5px}.article{padding:15px}.article h2{font-size:25px}}
+@media print{
+ .knowledge-tree,.math-catalog-toggle,.math-reader-heading,.controls{display:none!important}
+ .math-grid{display:block!important}
+ .article-pane{position:static!important;height:auto!important;max-height:none!important;overflow:visible!important}
+ .article .formula-block,.article .katex-display{overflow:visible!important}
+}
