@@ -430,6 +430,20 @@ async function start(){
    if(state.conceptChapters.has(id))throw Error("知识链ID重复："+id);
    state.conceptChapters.add(id);
   }
+  // V111: math-to-ML prerequisite bridges append to canonical Atlas articles only.
+  // Mount after earlier concept chains so a failing or repeated lesson ID aborts initialization.
+  for(const path of ["./atlas-concept-bridge-v111a.json","./atlas-concept-bridge-v111b.json","./atlas-concept-bridge-v111c.json"]){
+   const extension=await fetchAtlasJson(path,{cache:"no-cache"});
+   if(extension.schema!==1||extension.revision!=="V111"||
+      Object.keys(extension.lessons||{}).length!==4)
+    throw Error("V111数学与机器学习衔接文件不完整："+path);
+   const ids=window.quantMlConcepts.mount(data,extension);
+   if(ids.size!==4)throw Error("V111数学知识链实际挂载不足："+path);
+   for(const id of ids){
+    if(state.conceptChapters.has(id))throw Error("V111知识链重复覆盖已完成讲义："+id);
+    state.conceptChapters.add(id);
+   }
+  }
   for(const newId of newIds)state.conceptChapters.add(newId);
   state.index=data.catalog.items;state.byId=new Map(state.index.map(x=>[x.id,x]));state.domains=data.domains;
   const total=$("atlas-total-lessons");if(total)total.textContent=state.index.length+" 篇系统讲义（含新增专题）";
