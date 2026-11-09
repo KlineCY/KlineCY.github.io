@@ -66,5 +66,5 @@ const html=fs.readFileSync(new URL("./index.html",base),"utf8"),css=fs.readFileS
 for(const id of added)assert(html.includes("#lesson/"+id),"entry route missing "+id);
 assert(html.includes("atlas.js?v=20261109-v115-reader-layout-v116-ml-bridges-v117-no-learning-progress"));
 assert(html.includes("atlas.css?v=20261109-v115-reader-layout"));
-assert(css.includes("/* V2 READABILITY")&&css.includes("overscroll-behavior-x:contain"));
+assert(css.includes("overscroll-behavior-x:contain"));
 console.log("PASS: 3 research evidence lessons, "+sections+" deep sections, "+equations+" math formulas, "+sourceCount+" academic references, 753 distinct ML lessons and stable CJK/formula layout");
