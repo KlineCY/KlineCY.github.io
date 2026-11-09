@@ -133,7 +133,7 @@ near("ELBO closer",-2-.1,-2.1);
 near("Gibbs conditional mean",.8*1,.8);
 near("Gibbs conditional variance",1-.8**2,.36);
 const html=read("index.html"),mlHTML=read("../ml/index.html"),mathCSS=read("styles.css"),mlCSS=read("../ml/atlas.css");
-assert(html.includes('aria-label="V86数理金融及机器学习二十九篇正式讲义体系深化"'));
+assert(html.includes('aria-label="数值方法、统计学习和贝叶斯推断"'));
 for(const s of mathSpec)assert(html.includes('href="?topic='+s.id+'"'),s.id+" math route not visible");
 for(const s of mlSpec){
  assert(html.includes('href="../ml/#lesson/'+s.id+'"'),s.id+" Math–ML route absent");

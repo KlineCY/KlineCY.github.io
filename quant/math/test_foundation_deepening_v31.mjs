@@ -45,8 +45,8 @@ near(Math.sqrt(8*8+3*3),Math.sqrt(73));
 near(Math.pow(.96,2),.9216);
 const html=fs.readFileSync(new URL("index.html",base),"utf8");
 const ml=fs.readFileSync(new URL("../ml/index.html",base),"utf8");
-assert(html.includes('aria-label="V31基础数学六课深度修订"'));
-assert(ml.includes('aria-label="V31基础数学跨模块精讲"'));
+assert(html.includes('aria-label="基础数学严谨精讲：极限 → Jacobian → 秩 → 全概率 → 信息集 → Delta方法"'));
+assert(ml.includes('aria-label="机器学习数学先修复核：收敛、微分、线性可识别、概率信息与渐近推断"'));
 for(const id of ids){
  assert(html.includes("?topic="+id));
  assert(ml.includes("../math/?topic="+id));

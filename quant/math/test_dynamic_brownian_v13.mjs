@@ -190,8 +190,8 @@ for(const id of ids){
  assert(math.includes("?topic="+id),"V13 math navigation missing "+id);
  assert(ml.includes("../math/?topic="+id),"V13 ML navigation missing "+id);
 }
-assert(math.includes('aria-label="V13动态控制、布朗与Ito微积分十五篇完整讲义"'));
-assert(ml.includes('aria-label="V13十五篇动态决策与布朗Ito数学先修课"'));
+assert(math.includes('aria-label="动态最优决策与连续随机微积分：MDP → 最优停止 → Brownian → Itô"'));
+assert(ml.includes('aria-label="动态资产配置与连续金融模型：MDP、最优停止、事件强度和Itô微积分"'));
 assert(math.includes("styles.css?v=20261104-probscore-v6-inference-v8-martingale-v9-convergence-v10-integration-v11-stochastic-v12-brownian-v13"),"stylesheet cache not invalidated");
 assert(css.includes("V13: Bellman, Brownian and multidimensional Ito formula layout"));
 assert(css.includes(".math-v13-control-ito summary:focus-visible")&&css.includes(".katex-display")&&css.includes("@media print"),"mobile/CJK/keyboard/print styles not enforced");

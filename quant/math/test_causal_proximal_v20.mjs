@@ -113,8 +113,8 @@ near(.80,.8,"V53 Manski MTR upper bound");
 near(2e-6/1e-6,2,"tiny step is not stationarity");
 const mathHtml=fs.readFileSync(new URL("index.html",root),"utf8");
 const mlHtml=fs.readFileSync(new URL("../ml/index.html",root),"utf8");
-assert(mathHtml.includes('aria-label="V20双重机器学习与近端优化十二课贯通"'));
-assert(mlHtml.includes('aria-label="V20金融机器学习因果与凸优化十二课"'));
+assert(mathHtml.includes('aria-label="因果机器学习与凸优化：正交估计 → 识别稳健性 → Ridge/LASSO → ISTA"'));
+assert(mlHtml.includes('aria-label="金融机器学习的两条数学主线：DML因果效应与LASSO稳定优化"'));
 for(const id of targetIds){
  assert(mathHtml.includes("?topic="+id),"math route missing "+id);
  assert(mlHtml.includes("../math/?topic="+id),"cross-course ML route missing "+id);

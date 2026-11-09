@@ -139,7 +139,7 @@ near("cost-negative p02",9*.2,1.8);
 near("cost-positive p005",1*(1-.05),.95);
 near("cost-negative p005",9*.05,.45);
 const mathHTML=read("index.html"),mlHTML=read("../ml/index.html"),mathCSS=read("styles.css"),mlCSS=read("../ml/atlas.css");
-assert(mathHTML.includes('aria-label="V87量化风险与机器学习三十一篇正式讲义深化"'));
+assert(mathHTML.includes('aria-label="稳健风险、金融预测与统计学习"'));
 for(const s of mathSpec)assert(mathHTML.includes('href="?topic='+s.id+'"'),s.id+" math nav missing");
 for(const s of mlSpec){assert(mathHTML.includes('href="../ml/#lesson/'+s.id+'"'),s.id+" math-to-ML bridge missing");assert(mlHTML.includes('href="#lesson/'+s.id+'"'),s.id+" Atlas entry missing");}
 for(const [name,css] of [["math",mathCSS],["Atlas",mlCSS]])for(const token of ["overflow-x:auto","line-break:strict",":focus-visible","@media print","@media(max-width:700px)"])assert(css.includes(token),name+" CJK/mobile/print style absent "+token);

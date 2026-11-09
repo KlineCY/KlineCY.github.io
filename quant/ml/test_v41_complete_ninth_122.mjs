@@ -66,15 +66,15 @@ const section=(tag)=>{
  assert(finish>begin,"unclosed learning path "+tag);
  return home.slice(begin,finish);
 };
-const v40nav=section("V40第九批前六十二篇机器学习完整数学深化");
-const v41nav=section("V41第九批后六十篇机器学习正式课程全面深化");
+const v40nav=section("数理统计、优化与因果金融");
+const v41nav=section("模型基础与金融实证专题");
 assert.equal((v40nav.match(/href="#lesson\//g)||[]).length,62);
 assert.equal((v41nav.match(/href="#lesson\//g)||[]).length,60);
 for(const id of first)assert(v40nav.includes('href="#lesson/'+id+'"'),"broken first-half navigation "+id);
 for(const id of second)assert(v41nav.includes('href="#lesson/'+id+'"'),"broken final-half navigation "+id);
 for(const stage of ["阶段七","阶段八","阶段九","阶段十","阶段十一","阶段十二"])
  assert(v41nav.includes(stage),"missing V41 learning stage "+stage);
-assert(home.indexOf('aria-label="V41第九批后六十篇机器学习正式课程全面深化"')<home.indexOf('aria-label="V40第九批前六十二篇机器学习完整数学深化"'),"V41 route must be visible near top");
+assert(home.indexOf('aria-label="模型基础与金融实证专题"')<home.indexOf('aria-label="数理统计、优化与因果金融"'),"V41 route must be visible near top");
 for(const label of ["linear-n0065","statistics-x001","riskmath-x002"]){
  assert(v41nav.includes('href="../math/?topic='+label+'"'),"math-topic link missing "+label);
  const math=read("../math/curriculum.json");
@@ -84,7 +84,7 @@ for(const marker of ["s.equations.map","s.derivation","s.protocol","s.pitfalls",
  assert(viewer.includes(marker),"original reader lost structured mathematical section "+marker);
 for(const marker of [".atlas-spectral-path",".atlas-spectral-stage",".atlas-spectral-links",".ml-math-block","overflow-x:auto","line-break:strict","@media print"])
  assert(css.includes(marker),"CJK typography, narrow-screen formula scroll or print CSS missing "+marker);
-for(const tag of ["V39第八批后六十篇机器学习正式课程全域深化","V38第八批六十篇正式课程数学与量化深化"])
+for(const tag of ["神经网络、金融人工智能与风险管理","泛化理论、核方法与因果推断"])
  assert(home.includes('aria-label="'+tag+'"'),"previous completed Atlas routes lost");
 
 const near=(val,expected,name,tol=1e-9)=>

@@ -179,8 +179,8 @@ for(const id of ids){
  assert(math.includes("?topic="+id),"V14 mathematics stage missing link "+id);
  assert(ml.includes("../math/?topic="+id),"V14 ML-to-maths stage missing link "+id);
 }
-assert(math.includes('aria-label="V14十九篇SDE测度与风险中性定价系统教材"'));
-assert(ml.includes('aria-label="V14十九篇SDE与概率测度变换数学先修"'));
+assert(math.includes('aria-label="连续时间金融数学：SDE → 风险中性测度 → 定价PDE与Lévy跳跃"'));
+assert(ml.includes('aria-label="金融机器学习先修：随机微分方程、风险中性定价与跳跃风险"'));
 assert(math.includes("styles.css?v=20261104-probscore-v6-inference-v8-martingale-v9-convergence-v10-integration-v11-stochastic-v12-brownian-v13-sde-v14"),"math stylesheet cache not updated");
 assert(css.includes("V14: SDE and risk-neutral pricing CJK and KaTeX layout"));
 assert(css.includes(".math-v14-sde-pricing summary:focus-visible")&&css.includes(".katex-display")&&css.includes("@media print"),"missing explicit mobile/keyboard/printing safeguards");

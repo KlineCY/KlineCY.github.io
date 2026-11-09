@@ -83,7 +83,7 @@ for(const [file,n,discipline] of [["lessons-foundation-v108a.json",5,"foundation
  assert(app.includes('loadV108FoundationsMeasure("./'+file+'",'+n+',"'+discipline+'")'),"Missing live reader for "+file);
 assert(app.includes("...v107e,...v107f,...v108fa,...v108fb,...v108fc,...v108ma,...v108mb"),"Historical course registration changed");
 assert(app.includes("new Set(lessons.map(l=>l.node_id)).size!==lessons.length"),"Duplicate-ID safeguard missing");
-assert(html.includes("V108 · 严格数学与测度理论"),"Chinese staged route absent");
+assert(html.includes("严格数学基础与测度理论"),"Chinese staged route absent");
 assert(html.includes("v108-real-analysis-measure-20"),"Cache busting token absent");
 for(const id of wanted)assert(html.includes('?topic='+id+'"'),"Navigable V108 lesson absent: "+id);
 for(const token of ["overflow-x:auto","line-break:strict","@media(max-width:700px)","@media print",":focus-visible"])

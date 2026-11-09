@@ -108,8 +108,8 @@ v52near(Math.max(0,1.2-1),.2,"lasso active KKT for strong factor");
 assert(Math.abs((2+2*1.5)/2-2.5)<1e-9,"control numeric check");
 const math=fs.readFileSync(new URL("index.html",root),"utf8");
 const ml=fs.readFileSync(new URL("../ml/index.html",root),"utf8");
-assert(math.includes('aria-label="V21金融机器学习八课训练与正则化全链"'));
-assert(ml.includes('aria-label="V21金融机器学习训练与正则化八课互链"'));
+assert(math.includes('aria-label="金融机器学习实证主线：合法训练 → 滚动交叉验证 → 正则化 → 随机优化"'));
+assert(ml.includes('aria-label="系统学习金融机器学习：时间外验证、Ridge/LASSO、SGD/Adam"'));
 for(const id of newIds){
  assert(math.includes("?topic="+id),"math navigation missing "+id);
  assert(ml.includes("../math/?topic="+id),"ML crosslink missing "+id);

@@ -107,7 +107,7 @@ for(const d of docs){
 assert.equal(loaded.size,20);
 assert.equal(archive.catalog.items.length,720,"Deepening must preserve all core 720 Atlas IDs");
 for(const id of expected)assert(html.includes('href="#lesson/'+id+'"'),"Missing direct route to original lesson "+id);
-assert(html.includes("V114 · 机器学习方法与量化研究：20篇正式教材深化"),"V114 title or Chinese course map absent");
+assert(html.includes("数据时点、稀疏回归与金融预测"),"V114 title or Chinese course map absent");
 
 assert(html.indexOf('id="atlas-reader-section"')>html.indexOf("</header>")&&
        html.indexOf('id="atlas-reader-section"')<html.indexOf('aria-label="系统学习路径"'),

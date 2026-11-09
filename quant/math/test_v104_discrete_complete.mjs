@@ -106,7 +106,7 @@ assert.equal(linkCount,84,"Cross-lesson link count changed");
 const html=read("index.html"),css=read("styles.css"),app=read("app.js");
 const workflow=read("../../.github/workflows/test-quant-math.yml");
 assert(html.includes('app.js?v=20261108-v105-control-game-market-making-complete'),"Reader must bust V103 cache");
-assert(html.includes("V104 · 离散数学与金融网络"),"V104 CJK curriculum absent");
+assert(html.includes("离散数学、金融网络与动态规划"),"V104 CJK curriculum absent");
 for(const id of ids)assert(html.includes("?topic="+id+'"'),"Study route missing "+id);
 for(const needle of [
  'loadV103InformationSignals("./lessons-information-v103c.json",6)',

@@ -57,7 +57,7 @@ assert.equal(totalMath,160);
 assert(derivationProse>12000,"insufficient explanatory depth");
 
 const home=raw("index.html"),js=raw("atlas.js"),css=raw("atlas.css");
-assert(home.includes('aria-label="V34三十二篇机器学习理论与量化工程深化"'));
+assert(home.includes('aria-label="数学原理、量化实证与工程实现"'));
 for(const id of lessonIds)assert(home.includes('href="#lesson/'+id+'"'),"missing Atlas navigation "+id);
 for(const id of ["calculus-n0041","numerical-n0362","statistics-x001","riskmath-n0584"])
  assert(home.includes('href="../math/?topic='+id+'"'),"broken mathematics prerequisite "+id);

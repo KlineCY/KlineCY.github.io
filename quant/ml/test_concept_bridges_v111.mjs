@@ -94,7 +94,7 @@ for(const doc of docs){
 assert.equal(mounted.size,12);
 assert.equal(atlas.catalog.items.length,720,"Mount must not append duplicate independent articles");
 for(const id of targets)assert(html.includes('href="#lesson/'+id+'"'),"Missing direct Chinese study path "+id);
-assert(html.includes("V111 · 机器学习 × 量化数学"),"Chinese V111 roadmap missing");
+assert(html.includes("机器学习与量化数学衔接"),"Chinese V111 roadmap missing");
 assert(html.includes("atlas.js?v=20261109-v115-reader-layout-v116-ml-bridges-v117-no-learning-progress"),"Atlas new source asset cache missing");
 for(const term of ["line-break:strict","overflow-x:auto","@media(max-width:700px)",".atlas-concept-jump:focus-visible",".atlas-concept-chain"])
  assert(css.includes(term),"CJK, KaTeX, mobile, focus or typography CSS regressed: "+term);

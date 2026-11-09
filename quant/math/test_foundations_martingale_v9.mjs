@@ -80,11 +80,11 @@ for(const id of Object.keys(expected)){
  assert(html.includes("?topic="+id),"V9 math navigation omits "+id);
  assert(ml.includes("../math/?topic="+id),"ML-to-math route missing "+id);
 }
-assert(html.includes("大数定律、Hilbert条件期望、鞅与次鞅四篇完整证明链"));
+assert(html.includes("概率到动态金融的严密先修链：大数定律、正交投影、鞅与次鞅"));
 assert(html.includes("styles.css?v=20261104-probscore-v6-inference-v8-martingale-v9"),"cache bust required");
 assert(!html.includes("关于“条件期望鞅”和“次鞅/上鞅”的目录节点仍需继续补写"),"stale outline disclaimer");
 assert(css.includes("V9: mathematical proof accessibility")&&css.includes("@media print"),"formula/CJK/print styles missing");
 assert(css.includes(".formula-block:focus-visible"),"keyboard formula focus missing");
-assert(ml.includes("概率大数定律到金融鞅与风险统计的数学先修"));
+assert(ml.includes("概率极限、信息投影与动态金融风险的数学基础"));
 console.log("PASS: V9 baseline retained; current "+rows.length+" full mathematics lectures; 4 newly completed prerequisite nodes, 16 deep chapters, 16 strict KaTeX equations, "+sources+" academic sources, "+links+" crosslinks, dependency DAG, independent numbers and CJK layout.");
 

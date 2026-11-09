@@ -92,8 +92,8 @@ const mlHome=fs.readFileSync(new URL("../ml/index.html",root),"utf8");
 const mathCss=fs.readFileSync(new URL("styles.css",root),"utf8");
 const mlCss=fs.readFileSync(new URL("../ml/atlas.css",root),"utf8");
 const reader=fs.readFileSync(new URL("app.js",root),"utf8");
-assert(mathHome.includes('aria-label="V32十七篇基础数学与量化方法深化"'));
-assert(mlHome.includes('aria-label="V32机器学习与量化数学先修衔接"'));
+assert(mathHome.includes('aria-label="从严格基础到可执行量化：代数、统计推断、随机过程、资产定价与ML"'));
+assert(mlHome.includes('aria-label="机器学习与量化数学的严格先修：依赖、数值、泛化、时序与风险"'));
 for(const id of expected)assert(mathHome.includes('href="?topic='+id+'"'),"math homepage missing "+id);
 for(const id of ["calculus-n0041","numerical-n0362","mlmath-n0453","information-n0484","timeseries-n0241","econometrics-n0212","control-n0545","riskmath-n0584"])
  assert(mlHome.includes('href="../math/?topic='+id+'"'),"Atlas link missing "+id);

@@ -112,7 +112,7 @@ close("rational square lower",1.41**2,1.9881);
 close("rational square upper",1.42**2,2.0164);
 assert(checks>=40,"need at least forty independently recomputed examples");
 const html=read("index.html"),css=read("styles.css"),app=read("app.js");
-assert(html.includes('aria-label="V89十二篇新增完整数学基础讲义"'),"V89 new full-course entry missing");
+assert(html.includes('aria-label="逻辑、集合与实数完备性"'),"V89 new full-course entry missing");
 for(const id of ids)assert(html.includes('href="?topic='+id+'"'),id+" not discoverable by user");
 assert(app.includes('fetch("./lessons-foundations.json",{cache:"no-cache"})'),"historical mathematics foundation data not loaded");
 assert(app.includes('fetchMathJson("./lessons-foundations-v89.json")')&&app.includes("...extra,...v89"),"newly completed foundations not in live mathematics reader");

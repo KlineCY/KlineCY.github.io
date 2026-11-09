@@ -49,7 +49,7 @@ assert.equal(sectionCount,12);
 assert(formulaCount >= 12);
 const html = fs.readFileSync(new URL("index.html",dir),"utf8");
 for (const id of ids) assert(html.includes("?topic="+id), "new cross-subject pathway not connected: "+id);
-assert(html.includes("Bayes、条件期望与全方差的先修证明链"));
+assert(html.includes("概率与金融预测基础：Bayes更新 → 条件期望 → 全方差分解"));
 const close=(a,b,t=1e-11)=>assert(Math.abs(a-b)<t, String(a)+" != "+String(b));
 close(.009/(.009+.0495),2/13);
 const x=[.04,-.03,.01,-.01], y=[.04,-.01,-.01,-.01];

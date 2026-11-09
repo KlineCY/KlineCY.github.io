@@ -109,8 +109,8 @@ const html=fs.readFileSync(new URL("index.html",root),"utf8");
 const ml=fs.readFileSync(new URL("../ml/index.html",root),"utf8");
 const css=fs.readFileSync(new URL("styles.css",root),"utf8");
 const mlCss=fs.readFileSync(new URL("../ml/atlas.css",root),"utf8");
-assert(html.includes('aria-label="V18 SDF与交易执行完整十二篇数学课程路线"'));
-assert(ml.includes('aria-label="V18资产定价与量化交易执行交叉学习链"'));
+assert(html.includes('aria-label="资产定价与量化执行：SDF → Beta定价 → 自融资 → 最优执行"'));
+assert(ml.includes('aria-label="量化金融贯通课程：SDF资产定价 → ETF组合 → 最优执行"'));
 for(const id of ids){assert(html.includes("?topic="+id),"math navigation missing "+id);assert(ml.includes("../math/?topic="+id),"ML cross-navigation missing "+id)}
 for(const [name,style] of [["math",css],["ml",mlCss]]){
  assert(style.includes("overflow-x:auto"),"formula horizontal scrolling missing "+name);

@@ -86,8 +86,8 @@ for(const [id,value] of [["timeseries-x003","0.0004"],["timeseries-x004","0.0000
 const html=fs.readFileSync(new URL("index.html",root),"utf8");
 const ml=fs.readFileSync(new URL("../ml/index.html",root),"utf8");
 const css=fs.readFileSync(new URL("styles.css",root),"utf8");
-assert(html.includes('aria-label="V25高频计量和鲁棒尾部风险五课"'));
-assert(ml.includes('aria-label="V25高频风险与分布鲁棒数学交叉学习链"'));
+assert(html.includes('aria-label="高频收益与尾部风险：双尺度波动 → 异步协方差 → Hawkes诊断 → KL稳健优化 → 离散VaR"'));
+assert(ml.includes('aria-label="金融机器学习研究扩展：高频风险估计、事件模型校准与分布鲁棒风险"'));
 for(const id of ids){
  assert(html.includes("?topic="+id),"unlinked quant math lecture "+id);
  assert(ml.includes("../math/?topic="+id),"unlinked ML-math bridge "+id);

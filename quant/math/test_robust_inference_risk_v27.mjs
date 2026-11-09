@@ -91,8 +91,8 @@ for(const [id,token] of [
 ])assert(added.find(l=>l.id===id).example.includes(token),"example numeric evidence "+id);
 const mathHome=fs.readFileSync(new URL("index.html",base),"utf8");
 const mlHome=fs.readFileSync(new URL("../ml/index.html",base),"utf8");
-assert(mathHome.includes('aria-label="V27重抽样稳健统计与因子风险十课"'));
-assert(mlHome.includes('aria-label="V27统计学习稳健验证与组合风险交叉路径"'));
+assert(mathHome.includes('aria-label="稳健统计与金融风控：Jackknife → BCa → 置换检验 → Huber → FWER/FDR → 因子风险 → 压力与样本外诊断"'));
+assert(mlHome.includes('aria-label="金融机器学习的可信评估：重抽样、稳健回归、FDR控制、因子风险与回测退化"'));
 for(const id of targets){assert(mathHome.includes("?topic="+id),"math navigation missing "+id);assert(mlHome.includes("../math/?topic="+id),"ml crosslink missing "+id);}
 const css=fs.readFileSync(new URL("styles.css",base),"utf8");
 const cssML=fs.readFileSync(new URL("../ml/atlas.css",base),"utf8");

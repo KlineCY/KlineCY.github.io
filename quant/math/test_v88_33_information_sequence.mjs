@@ -158,7 +158,7 @@ near("Double DQN target",.9*3,2.7);
 truth("Double DQN separated evaluation",5>4&&3<6);
 assert(count>=85,"coverage less than 85 independent numerical invariants");
 const html=read("index.html"),mlHTML=read("../ml/index.html"),mathCSS=read("styles.css"),mlCSS=read("../ml/atlas.css");
-assert(html.includes('aria-label="V88信息论与序列智能三十三篇正式讲义深化"'));
+assert(html.includes('aria-label="概率校准、序列智能与生成模型"'));
 for(const s of mathSpec)assert(html.includes('href="?topic='+s.id+'"'),s.id+" math link missing");
 for(const s of mlSpec){
  assert(html.includes('href="../ml/#lesson/'+s.id+'"'),s.id+" bridge missing");

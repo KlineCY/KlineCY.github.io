@@ -109,7 +109,7 @@ assert.equal(linkCount,84,"Cross-lesson link count changed");
 const html=read("index.html"),css=read("styles.css"),app=read("app.js");
 const workflow=read("../../.github/workflows/test-quant-math.yml");
 assert(html.includes('app.js?v=20261108-v105-control-game-market-making-complete'),"Reader must bust V104 cache");
-assert(html.includes("V105 · 控制理论、博弈论与做市"),"V105 CJK curriculum absent");
+assert(html.includes("控制理论、动态博弈与做市"),"V105 CJK curriculum absent");
 for(const id of ids)assert(html.includes("?topic="+id+'"'),"Study route missing "+id);
 for(const needle of [
  'loadV104DiscreteGraphs("./lessons-discrete-v104d.json",6)',

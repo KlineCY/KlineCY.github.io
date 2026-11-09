@@ -105,8 +105,8 @@ const math=fs.readFileSync(new URL("index.html",root),"utf8");
 const ml=fs.readFileSync(new URL("../ml/index.html",root),"utf8");
 const css=fs.readFileSync(new URL("styles.css",root),"utf8");
 const cssMl=fs.readFileSync(new URL("../ml/atlas.css",root),"utf8");
-assert(math.includes('aria-label="V26多元动态预测、波动与状态切换七课"'));
-assert(ml.includes('aria-label="V26多资产冲击波动与状态预测跨模块学习链"'));
+assert(math.includes('aria-label="金融动态建模完整主线：VAR冲击 → FEVD → Granger → GARCH不对称 → DCC → ARFIMA → 状态切换"'));
+assert(ml.includes('aria-label="金融机器学习与时间序列：预测冲击、动态相关、长记忆和实时状态"'));
 for(const id of targets){
  assert(math.includes("?topic="+id),"no mathematics study-path link "+id);
  assert(ml.includes("../math/?topic="+id),"no machine-learning study-path link "+id);

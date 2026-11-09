@@ -86,7 +86,7 @@ for(const [i,p] of paths.entries())
  assert(app.includes('loadV107IntegralOptimization("./'+p+'",'+counts[i]+')'),p+" loader missing");
 assert(app.includes("...v106a,...v106b,...v107a,...v107b,...v107c,...v107d"),"Old reader contents not preserved");
 assert(app.includes("new Set(lessons.map(l=>l.node_id)).size!==lessons.length"),"Runtime duplicate lesson protection removed");
-assert(html.includes("V107 · 微积分进阶"),"Chinese detailed course roadmap missing");
+assert(html.includes("多元积分、矩阵微分与约束优化"),"Chinese detailed course roadmap missing");
 for(const id of target)assert(html.includes('?topic='+id+'"'),"V107 direct lesson link missing "+id);
 assert(html.includes("app.js?v=20261108-v105-control-game-market-making-complete-v106-calculus-core-v107-integral-implicit-kkt"),"Reader cache invalidation omitted");
 for(const token of ["overflow-x:auto","line-break:strict","@media(max-width:700px)","@media print",":focus-visible"])
