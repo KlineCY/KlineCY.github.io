@@ -457,6 +457,19 @@ async function start(){
    if(ids.size!==entries.length)throw Error("V112正式课程实际挂载不完整："+path);
    for(const id of ids)state.conceptChapters.add(id);
   }
+  // V113: mathematical quality audit and deep explanatory chains in canonical pages.
+  // All ids are checked before mounting to prevent overwriting V111/V112 or historical lessons.
+  for(const path of ["./atlas-concept-bridge-v113a.json","./atlas-concept-bridge-v113b.json","./atlas-concept-bridge-v113c.json",
+                    "./atlas-concept-bridge-v113d.json","./atlas-concept-bridge-v113e.json"]){
+   const extension=await fetchAtlasJson(path,{cache:"no-cache"});
+   const entries=Object.keys(extension.lessons||{});
+   if(extension.schema!==1||extension.revision!=="V113"||entries.length!==4||
+      entries.some(id=>state.conceptChapters.has(id)||newIds.has(id)))
+    throw Error("V113知识链内容不完整或与已有课程重复："+path);
+   const ids=window.quantMlConcepts.mount(data,extension);
+   if(ids.size!==4)throw Error("V113正式教材挂载数错误："+path);
+   for(const id of ids)state.conceptChapters.add(id);
+  }
   for(const newId of newIds)state.conceptChapters.add(newId);
   state.index=data.catalog.items;state.byId=new Map(state.index.map(x=>[x.id,x]));state.domains=data.domains;
   const total=$("atlas-total-lessons");if(total)total.textContent=state.index.length+" 篇系统讲义（含新增专题）";
