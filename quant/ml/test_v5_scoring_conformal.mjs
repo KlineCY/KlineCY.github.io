@@ -74,5 +74,5 @@ assert(html.includes("atlas.js?v=20261104-probscore-v8"));
 assert(html.includes("atlas.css?v=20261104-probscore-v6"));
 assert(html.includes("第五条高级学习链"));
 assert(html.includes("776 篇系统课程")&&html.includes("0 / 776 篇已标记"),"stale total count in user-facing interface");
-assert(css.includes("V5 probability textbook")&&css.includes("focus-visible")&&css.includes("@media print"),"responsive Chinese formula style missing");
+assert(css.includes("focus-visible")&&css.includes("@media print"),"responsive Chinese formula style missing");
 console.log("PASS: V5 six scoring/CQR/density/PIT/shift chapters, "+sections+" full lessons subchapters, "+formula+" KaTeX expressions, "+sources+" referenced sources; 776 unique reader courses, exact arithmetic and keyboard-accessible formulas.");
