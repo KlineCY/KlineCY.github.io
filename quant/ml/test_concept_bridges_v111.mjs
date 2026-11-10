@@ -144,6 +144,14 @@ near("Gross trade fraction",Math.abs(.5-.55)+Math.abs(.5-.45),.1);
 near("Gross fee 10bp on turnover",.001*.1,.0001);
 near("Final NAV after fee",100*(1-.0001),99.99);
 yes("Old lesson descriptions maintained after mount",atlas.domains["m02"]["m02-c05-p01"].title==="协方差矩阵：二阶统计量的线性代数结构");
+for(const lesson of Object.values(json("atlas-concept-bridge-v111c.json").lessons))
+ for(const section of lesson.sections){
+  assert(section.paragraphs.every(p=>!p.includes("\n")),"Duplicated policy / risk explanation");
+  if(section.title==="策略改进定理的必要比较对象"){
+   assert(section.paragraphs[1].includes("之后用旧策略价值评价"),"One-step policy improvement must evaluate continuation under the old value function");
+   assert(!section.paragraphs[1].includes("之后沿新策略产生"),"Incorrect Bellman continuation interpretation");
+  }
+ }
 console.log("V111 PASS: canonical 720 Atlas + 60 active expansions preserved; 12 improved lessons, 48 deep CJK sections, "+
  nTeX+" strict KaTeX, "+nRefs+" exact prerequisite links, "+proofChars+" reasoning characters, "+checks+
  " independent arithmetic checks, math crosslinks, readable responsive layout and no overwritten articles");
