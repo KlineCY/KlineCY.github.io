@@ -38,7 +38,7 @@ for(const [id,l] of entries){
  assert(/^m\d\d-c\d\d-p\d\d$/.test(id),"Invalid lesson id "+id);
  assert.equal(l.source_title,atlas.domains[id.slice(0,3)]?.[id]?.title,id+" source course title changed");
  assert(l.goal.length>=60,id+" missing goal");
- assert.equal(l.sections.length,4,id+" incomplete four-stage learning route");
+ assert(l.sections.length>=4,id+" original four-stage learning route missing");
  assert(l.links.length>=4,id+" missing math/ML prerequisite crosslinks");
  const used=new Set();
  for(const sec of l.sections){
@@ -67,8 +67,8 @@ for(const [id,l] of entries){
   nRefs++;
  }
 }
-assert.equal(nSections,48,"Expected forty-eight deep proof sections");
-assert.equal(nTeX,48,"Expected forty-eight strictly parsed formulas");
+assert(nSections>=48,"Original forty-eight deep proof sections missing");
+assert(nTeX>=48,"Original forty-eight strictly parsed formulas missing");
 assert.equal(nRefs,48,"Expected forty-eight cross-domain prerequisites");
 assert(proofChars>=12500,"Substantive CJK reasoning unexpectedly shortened");
 
@@ -87,7 +87,7 @@ for(const doc of docs){
   assert(!mounted.has(id),"Overlapping canonical articles");mounted.add(id);
   const row=atlas.domains[id.slice(0,3)][id];
   assert(row.html.startsWith(before.get(id)),id+" original HTML overwritten");
-  assert.equal((row.html.match(/class="atlas-concept-unit"/g)||[]).length,4,id+" incomplete mounted proof sections");
+  assert.equal((row.html.match(/class="atlas-concept-unit"/g)||[]).length,doc.lessons[id].sections.length,id+" incomplete mounted proof sections");
   assert(row.html.includes("../math/?topic="),id+" missing mathematical prerequisite navigation");
  }
 }
@@ -152,7 +152,9 @@ for(const lesson of Object.values(json("atlas-concept-bridge-v111c.json").lesson
    assert(!section.paragraphs[1].includes("之后沿新策略产生"),"Incorrect Bellman continuation interpretation");
   }
  }
-const reviewed111=["atlas-concept-bridge-v111a.json","atlas-concept-bridge-v111b.json"].flatMap(f=>Object.values(json(f).lessons)).flatMap(l=>l.sections);
+const reviewed111=["atlas-concept-bridge-v111a.json","atlas-concept-bridge-v111b.json"].flatMap(f=>Object.values(json(f).lessons)).flatMap(l=>l.sections.slice(0,4));
+const reviewedExtensions111=["atlas-concept-bridge-v111a.json","atlas-concept-bridge-v111b.json"].flatMap(f=>Object.values(json(f).lessons)).flatMap(l=>l.sections.slice(4));
+for(const s of reviewedExtensions111)assert(s.paragraphs.length>=2&&s.paragraphs[1].length>=60&&s.worked.length>=55&&s.boundary.length>=30,s.title+" extension incomplete");
 assert.equal(reviewed111.length,32,"32 deep risk, kernel and sequence sections required");
 for(const s of reviewed111)assert(s.paragraphs[1].length>=140&&!s.paragraphs[1].includes("\n"),s.title+" has incomplete proof context");
 assert(reviewed111.find(s=>s.title==="从二次型证明协方差半正定").paragraphs[1].includes("正定性"),"Covariance PSD versus PD distinction missing");

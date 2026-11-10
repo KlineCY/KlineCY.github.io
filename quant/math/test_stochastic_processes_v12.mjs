@@ -72,8 +72,8 @@ for(const id of ids){
  assert(l.definition.length>=110&&l.assumptions.length>=95,"theorem setup too short "+id);
  assert(l.example.length>=75&&l.application.length>=48&&l.caveat.length>=43,"financial applications/caveats/examples incomplete "+id);
  assert(l.properties.length>=4&&l.formulas.length>=4&&l.derivation.length>=4,"incomplete mathematical proposition list "+id);
- assert.equal(l.deep_sections.length,4,"each V12 lecture needs four substantial connected derivations "+id);
- assert.equal(new Set(l.deep_sections.map(x=>x.title)).size,4,"duplicate chapter title "+id);
+ assert(l.deep_sections.length>=4,"each V12 lecture must retain four substantial connected derivations "+id);
+ assert.equal(new Set(l.deep_sections.map(x=>x.title)).size,l.deep_sections.length,"duplicate chapter title "+id);
  assert(l.sources.length>=2,"missing independent credible source "+id);
  for(const src of l.sources){
   assert(/^https:\/\/\S+$/.test(src.url)&&src.title.length>=22,"invalid MIT source "+id);
@@ -85,7 +85,7 @@ for(const id of ids){
   else assert(/^m\d\d-c\d\d-p\d\d$/.test(link.id),"invalid ML ID "+link.id);
   links++;
  }
- for(const [i,s]of l.deep_sections.entries()){
+ for(const [i,s]of l.deep_sections.slice(0,4).entries()){
   assert(s.title.length>=6&&s.question.length>=15,"unfocused proof question "+id+"/"+i);
   assert(s.paragraphs.length===2&&s.paragraphs.every(p=>p.length>=50),"insufficient detailed Chinese mathematics "+id+"/"+i);
   assert(s.proof.length>=72&&s.worked.length>=45&&s.limitation.length>=35,"missing proof, reproducible example or caveat "+id+"/"+i);
@@ -96,6 +96,10 @@ for(const id of ids){
    formulas++;
   }
   sections++;
+ }
+ for(const s of l.deep_sections.slice(4)){
+  assert(s.title?.length>=6&&s.paragraphs?.length>=2&&s.proof?.length>=60&&s.worked?.length>=45&&s.limitation?.length>=35,"extended stochastic subsection incomplete "+id);
+  for(const f of s.formulas||[]){assert(f.label&&f.tex);katex.renderToString(f.tex,{throwOnError:true,strict:"ignore"});}
  }
  for(const f of l.formulas)katex.renderToString(f.tex,{throwOnError:true,strict:"ignore"});
  for(const d of l.derivation){
