@@ -100,7 +100,7 @@ assert(Math.abs((.9**10)-0.3486784401)<1e-9);
 const kktSection=findSection("L1绝对值为何需要次梯度");
 assert(kktSection.paragraphs.join("").includes("非零系数")&&kktSection.paragraphs.join("").includes("全局最优"),"Lasso KKT must cover zero and nonzero coordinates");
 const dateSection=findSection("金融时间外预测的历史编码器");
-assert(dateSection.paragraphs.join("").includes("未知类别")&&dateSection.paragraphs.join("").includes("标签"),"Target encoding must handle unseen categories and mature labels");
+assert(/(未知类别|未出现过的类别)/.test(dateSection.paragraphs.join(""))&&dateSection.paragraphs.join("").includes("标签"),"Target encoding must handle unseen categories and mature labels");
 const causalSection=findSection("观测条件化与do干预为何不同");
 assert(causalSection.paragraphs.join("").includes("结构方程")&&causalSection.paragraphs.join("").includes("识别条件"),"Causal identification and intervention assumptions missing");
 
