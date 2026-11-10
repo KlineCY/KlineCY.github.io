@@ -47,7 +47,7 @@ for(const [id,lesson] of entries){
  assert(canonical,"Deep lesson must map to real archive course "+id);
  assert.equal(lesson.source_title,canonical.title,id+" original source title mismatch");
  assert(lesson.goal?.length>=60,id+" missing research goal and assumptions");
- assert.equal(lesson.sections?.length,4,id+" requires four logical subsections");
+ assert(lesson.sections?.length>=4,id+" original four logical subsections missing");
  assert.equal(lesson.links?.length,4,id+" requires four math/ML prerequisites");
  const headings=new Set();
  for(const s of lesson.sections){
@@ -78,8 +78,8 @@ for(const [id,lesson] of entries){
   crossLinks++;
  }
 }
-assert.equal(sections,80,"V112 requires 80 full proof sections");
-assert.equal(strictFormulas,80,"V112 requires 80 strict KaTeX equations");
+assert(sections>=80,"V112 requires at least 80 full proof sections");
+assert(strictFormulas>=80,"V112 requires at least 80 strict KaTeX equations");
 assert.equal(crossLinks,80,"V112 requires 80 valid deep prerequisite links");
 assert(chineseChars>=21000,"Explanation content was shortened too much");
 
@@ -97,7 +97,7 @@ for(const d of docs){
   assert(!loaded.has(id),"Duplicate V112 installed course");loaded.add(id);
   const rendered=archive.domains[id.slice(0,3)][id].html;
   assert(rendered.startsWith(original.get(id)),id+" overwrote original HTML instead of appending");
-  assert.equal((rendered.match(/class="atlas-concept-unit"/g)||[]).length,4,id+" four-section mount missing");
+  assert.equal((rendered.match(/class="atlas-concept-unit"/g)||[]).length,d.lessons[id].sections.length,id+" mounted sections differ from source");
   assert(rendered.includes("../math/?topic="),id+" maths deep links not installed");
   assert(rendered.includes("本节学习顺序"),id+" four-stage Chinese learning route missing");
  }

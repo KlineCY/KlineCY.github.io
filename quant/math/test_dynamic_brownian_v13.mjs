@@ -84,8 +84,8 @@ for(const id of ids){
  assert(l.definition?.length>=108&&l.assumptions?.length>=95,"missing theorem assumptions "+id);
  assert(l.example?.length>=90&&l.application?.length>=48&&l.caveat?.length>=48,"insufficient mathematical example/application/boundary "+id);
  assert(l.properties?.length>=4&&l.formulas?.length>=4&&l.derivation?.length>=4,"missing theorem derivations "+id);
- assert(l.deep_sections?.length===4,"expected four full sections "+id);
- assert(new Set(l.deep_sections.map(s=>s.title)).size===4,"duplicate section titles "+id);
+ assert(l.deep_sections?.length>=4,"original four full sections must be retained "+id);
+ assert(new Set(l.deep_sections.map(s=>s.title)).size===l.deep_sections.length,"duplicate section titles "+id);
  assert(l.sources.length>=2,"missing credible academic references "+id);
  for(const src of l.sources){assert(src.title?.length>=22&&/^https:\/\/\S+/.test(src.url),"invalid source "+id);sources++;}
  for(const link of l.links||[]){
@@ -94,13 +94,19 @@ for(const id of ids){
    else assert(/^m\d\d-c\d\d-p\d\d$/.test(link.id),"invalid ML link "+link.id);
    links++;
  }
- for(const [i,s]of l.deep_sections.entries()){
+ for(const [i,s]of l.deep_sections.slice(0,4).entries()){
    assert(s.title?.length>=6&&s.question?.length>=17,"unclear problem "+id+"/"+i);
    assert(s.paragraphs.length===2&&s.paragraphs.every(p=>p.length>=55),"insufficient explanation "+id+"/"+i);
    assert(s.proof?.length>=75&&s.worked?.length>=50&&s.limitation?.length>=40,"missing complete proof, numerical example or caveat "+id+"/"+i);
    assert(s.formulas.length>=1,"missing displayed math "+id+"/"+i);
    for(const f of s.formulas){assert(f.label&&f.tex);katex.renderToString(f.tex,{throwOnError:true,strict:"ignore"});formulas++;}
    sections++;
+ }
+ for(const s of l.deep_sections.slice(4)){
+  assert(s.title?.length>=6&&s.question?.length>=12&&s.paragraphs?.length>=2,"extension section incomplete "+id);
+  assert(s.proof?.length>=65&&s.worked?.length>=50&&s.limitation?.length>=35,"extension proof/example/boundary incomplete "+id);
+  assert(s.formulas?.length>=1,"extension formula missing "+id);
+  for(const f of s.formulas){assert(f.label&&f.tex);katex.renderToString(f.tex,{throwOnError:true,strict:"ignore"});}
  }
  for(const f of l.formulas)katex.renderToString(f.tex,{throwOnError:true,strict:"ignore"});
  for(const d of l.derivation){assert(d.explanation?.length>=75);katex.renderToString(d.tex,{throwOnError:true,strict:"ignore"});}
@@ -110,10 +116,10 @@ assert.equal(sections,60);
 assert.equal(formulas,60);
 assert.equal(sources,30);
 const deepened=byId.get("ito-n0308");
-assert(deepened&&deepened.deep_sections?.length===4,"existing extension Ito isometry must now be a complete four-section mathematical lecture");
+assert(deepened&&deepened.deep_sections?.length>=4,"Ito isometry must preserve original four complete sections");
 assert(deepened.example.includes("4/3")&&deepened.example.includes("H_t=2t"),"preserve original H=2t variance example");
 assert(deepened.definition.length>=100&&deepened.assumptions.length>=90,"deepened isometry theorem conditions");
-for(const [i,sec] of deepened.deep_sections.entries()){
+for(const [i,sec] of deepened.deep_sections.slice(0,4).entries()){
  assert(sec.paragraphs.length===2&&sec.proof.length>=75&&sec.worked.length>=50&&sec.limitation.length>=40,"expanded Ito isometry derivation incomplete "+i);
  for(const eq of sec.formulas)katex.renderToString(eq.tex,{throwOnError:true,strict:"ignore"});
 }
