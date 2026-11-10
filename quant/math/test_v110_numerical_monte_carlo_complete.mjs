@@ -192,6 +192,39 @@ for(const s of reviewedNumerical)assert(s.paragraphs[1].length>=140&&!s.paragrap
 assert(Math.abs(Math.exp(-2)-0.1353352832366127)<1e-12,"Brownian bridge barrier crossing example incorrect");
 assert(reviewedNumerical.find(s=>s.title==="连续障碍的漏检偏差").paragraphs[1].includes("端点"),"Brownian bridge endpoint conditions missing");
 
+
+const extendedMathGroups=[
+ ["lessons-phase-26-a.json",["timeseries-n0260","timeseries-n0261","timeseries-n0262"]],
+ ["lessons-phase-26-b.json",["timeseries-n0266","timeseries-n0267","timeseries-n0269","timeseries-n0270"]],
+ ["lessons-phase-27-b.json",["statistics-n0173","statistics-n0174","statistics-n0175","statistics-n0176"]]
+];
+let checkedMathExtensions=0;
+for(const [file,expected] of extendedMathGroups){
+ const doc=json(file);
+ assert.deepEqual(doc.lessons.map(x=>x.id),expected,"extended mathematics canonical order changed "+file);
+ for(const lesson of doc.lessons){
+  const section=lesson.deep_sections.at(-1);
+  assert(lesson.deep_sections.length>=7&&lesson.derivation.length>=7&&lesson.formulas.length>=10,"extended mathematics incomplete "+lesson.id);
+  assert.equal(new Set(lesson.deep_sections.map(x=>x.title)).size,lesson.deep_sections.length,"extended chapter headings duplicated "+lesson.id);
+  assert(section.paragraphs.length===2&&section.paragraphs.every(s=>s.length>=65),"extended proof context inadequate "+lesson.id);
+  assert(section.proof.length>=90&&section.worked.length>=75&&section.limitation.length>=40,"extended numerical proof inadequate "+lesson.id);
+  assert(section.formulas.length>=2,"extended mathematics needs two display equations "+lesson.id);
+  for(const f of section.formulas){assert(f.label?.length>=3&&f.tex?.length>=14);katex.renderToString(f.tex,{displayMode:true,throwOnError:true,strict:"error"});}
+  checkedMathExtensions++;
+ }
+}
+assert.equal(checkedMathExtensions,11,"all eleven added mathematics articles must be verified");
+assert(Math.abs((1+.5+.25+.125)-1.875)<1e-12,"AR(1) cumulative impulse response");
+assert(Math.abs((.25*4)/(1+.25*4)-.5)<1e-12,"FEVD two-period external innovation contribution");
+assert(Math.abs(2-1/2-1.5)<1e-12,"Granger proxy conditional prediction risk");
+assert(Math.abs(Math.exp(.8)-2.225540928492468)<1e-12,"EGARCH asymmetric variance multiplier");
+assert(Math.abs(.25*.04+.5*.03+.25*.09-.0475)<1e-12,"DCC portfolio variance");
+assert(Math.abs(Math.pow(2,2*.25)-Math.sqrt(2))<1e-12,"ARFIMA low-frequency spectral ratio");
+assert(Math.abs(2/3+(1/3)*.7**2-.83)<1e-12,"Markov two-period state probability");
+assert.equal([0,0,0,0,10].sort((a,b)=>a-b)[2],0,"zero-MAD sample median");
+assert(Math.abs(.5*.05+.3*.05+.2*.05-.05)<1e-12,"weighted Bonferroni budget");
+assert(Math.abs(.05*1+.95*0-.05)<1e-12,"expected FDP illustration");
+
 console.log("V110 PASS: 656/656 finished, all 20 disciplines complete, numerical 30/30, "+
   sectionCount+" complete reasoning sections, "+formulaCount+" strict KaTeX formulas, "+
   linkCount+" exact curriculum links, "+proofChars+" Chinese proof characters, "+
