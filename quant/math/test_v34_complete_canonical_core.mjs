@@ -43,9 +43,9 @@ for(const [p,ids] of targets){
  for(const l of edited){
   assert.equal(l.node_id,l.id,"node identifier "+l.id);
   assert.equal(l.title,nodes.get(l.id)?.title,"canonical title "+l.id);
-  assert.equal(l.deep_sections.length,4,"4 deep chapters "+l.id);
-  assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,4,l.id+" unique subchapters");
-  for(const s of l.deep_sections){
+  assert(l.deep_sections.length>=4,"original four deep chapters missing "+l.id);
+  assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,l.deep_sections.length,l.id+" unique subchapters");
+  for(const s of l.deep_sections.slice(0,4)){
    assert(s.title.length>=5&&s.question.length>=8,l.id+" descriptive title");
    assert.equal(s.paragraphs.length,2,l.id+" two instructional paragraphs");
    assert(s.paragraphs.every(v=>v.length>=45),l.id+" detailed contextual narrative");
@@ -59,6 +59,11 @@ for(const [p,ids] of targets){
     katex.renderToString(e.tex,{throwOnError:true,strict:"ignore",displayMode:true});
     formulaCount++;
    }
+  }
+  for(const s of l.deep_sections.slice(4)){
+   assert(s.title?.length>=5&&s.question?.length>=8&&s.paragraphs?.length>=2,"extended chapter context missing "+l.id);
+   assert(s.paragraphs.every(p=>p.length>=60)&&s.proof?.length>=60&&s.worked?.length>=55&&s.limitation?.length>=40,"extended chapter proof/example/boundary missing "+l.id);
+   for(const f of s.formulas||[]){assert(f.label&&f.tex);katex.renderToString(f.tex,{throwOnError:true,strict:"ignore",displayMode:true});}
   }
   assert.equal(l.links.length,3,l.id+" canonical cross-references");
   for(const link of l.links){
@@ -74,7 +79,7 @@ assert.equal(added.length,35);
 assert.equal(reused,88);
 assert.equal(core.length,123);
 assert.equal(core.filter(l=>l.deep_sections?.length>=4).length,123);
-assert.equal(added.reduce((n,l)=>n+l.deep_sections.length,0),140);
+assert.equal(added.reduce((n,l)=>n+Math.min(4,l.deep_sections.length),0),140);
 assert.equal(formulaCount,140);
 assert.equal(linkCount,105);
 assert(proseCount>=40000,"V34 40k+ substantive Chinese explanation");
