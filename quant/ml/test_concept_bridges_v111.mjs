@@ -152,6 +152,12 @@ for(const lesson of Object.values(json("atlas-concept-bridge-v111c.json").lesson
    assert(!section.paragraphs[1].includes("之后沿新策略产生"),"Incorrect Bellman continuation interpretation");
   }
  }
+const reviewed111=["atlas-concept-bridge-v111a.json","atlas-concept-bridge-v111b.json"].flatMap(f=>Object.values(json(f).lessons)).flatMap(l=>l.sections);
+assert.equal(reviewed111.length,32,"32 deep risk, kernel and sequence sections required");
+for(const s of reviewed111)assert(s.paragraphs[1].length>=140&&!s.paragraphs[1].includes("\n"),s.title+" has incomplete proof context");
+assert(reviewed111.find(s=>s.title==="从二次型证明协方差半正定").paragraphs[1].includes("正定性"),"Covariance PSD versus PD distinction missing");
+assert(reviewed111.find(s=>s.title==="因果mask与滚动训练的双重信息约束").paragraphs[1].includes("训练"),"Mask alone cannot prevent training-time leakage");
+
 console.log("V111 PASS: canonical 720 Atlas + 60 active expansions preserved; 12 improved lessons, 48 deep CJK sections, "+
  nTeX+" strict KaTeX, "+nRefs+" exact prerequisite links, "+proofChars+" reasoning characters, "+checks+
  " independent arithmetic checks, math crosslinks, readable responsive layout and no overwritten articles");
