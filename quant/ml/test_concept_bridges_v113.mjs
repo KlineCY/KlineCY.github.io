@@ -28,6 +28,7 @@ const expected=[
  "m20-c04-p03","m21-c05-p04","m18-c02-p03","m17-c02-p01"
 ];
 const entries=docs.flatMap(d=>Object.entries(d.lessons));
+const consolidatedIDs=new Set([...Object.keys(docs[0].lessons),...Object.keys(docs[1].lessons)]);
 assert.equal(manifest.expected_lessons,720,"Original ML core must stay 720");
 assert.equal(manifest.expected_domains,24,"Original ML domains must stay 24");
 assert.equal(archive.catalog.items.length,720,"Original archive course count changed");
@@ -56,6 +57,7 @@ for(const [id,lesson] of entries){
   assert(!headings.has(s.title),id+" repeated argument heading");
   headings.add(s.title);
   assert(s.paragraphs?.length===2&&s.paragraphs.every(p=>p.length>=40),id+" missing two rigorous paragraphs");
+  if(consolidatedIDs.has(id))assert(s.paragraphs.every(p=>!p.includes("\n")),id+" contains merged duplicate prose");
   assert(s.worked?.length>=55,id+" requires an independently replicable worked example");
   assert(s.boundary?.length>=30,id+" missing method failure boundary");
   assert.equal(s.equations?.length,1,id+" must explain each equation rather than list formulas");

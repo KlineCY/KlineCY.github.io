@@ -5,7 +5,7 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,x=>({"&":"&amp;","<":"&lt;",">":"&
 const alpha=(a,b)=>String(a).localeCompare(String(b),"en",{sensitivity:"base"});
 const link=(u,label)=>/^https:\/\//.test(u||"")?'<a href="'+esc(u)+'" target="_blank" rel="noopener noreferrer">'+esc(label)+'</a>':"";
 let curriculum=null,depts=[],chapters=[],nodes=[],lessons=[],lessonMap=new Map();
-let nodeMap=new Map(),chapMap=new Map(),deptMap=new Map(),activeId="",filterDept="",filterLevel="",filterStatus="",query="";
+let nodeMap=new Map(),chapMap=new Map(),deptMap=new Map(),activeId="",filterDept="",filterLevel="",query="";
 const progressKey="kline-quant-math-progress-v1";
 let studied=new Set();
 try{const saved=JSON.parse(localStorage.getItem(progressKey)||"[]");if(Array.isArray(saved))studied=new Set(saved)}catch(_){}
@@ -60,7 +60,6 @@ return section;
 function isMatch(n){
  if(filterDept&&n.discipline_id!==filterDept)return false;
  if(filterLevel&&n.level!==filterLevel)return false;
- if(filterStatus&&(filterStatus==="complete")!==isComplete(n))return false;
  if(!query.trim())return true;
  const dept=getDept(n.discipline_id),chap=getChap(n.chapter_id);
  return [n.title,dept?.title,dept?.english,chap?.title].join(" ").toLocaleLowerCase().includes(query.trim().toLocaleLowerCase());
@@ -243,7 +242,7 @@ function appendLearningSequence(node,container){
  const navigation=makeSection("学习衔接：从本节走向下一结论");
  navigation.classList.add("math-learning-sequence");
  const explain=document.createElement("p");
- explain.textContent="先掌握本节的定义与条件，再沿所在章节顺序继续；其他直接依赖本节的专题可作为延伸阅读。未完成的知识点会明确保留目录状态。";
+ explain.textContent="先掌握本节的定义与成立条件，再沿本章顺序学习相邻知识点；下方同时列出直接关联的延伸专题。";
  navigation.appendChild(explain);
  const row=document.createElement("div");row.className="math-learning-sequence-links";
  function add(target,label){
@@ -285,7 +284,6 @@ function selectNode(id,update=true){
  typeset(article);
  renderTree();
  if(update)setURL({topic:node.id});
- // Keep desktop sidebar and article independently scrollable; on mobile close the catalog.
  $("articlePane").scrollTop=0;
  if(update&&window.matchMedia("(max-width:900px)").matches){
   setMathCatalogOpen(false);
@@ -309,10 +307,9 @@ $("math-toggle-catalog")?.addEventListener("click",()=>setMathCatalogOpen(!$("ma
 $("search").addEventListener("input",e=>{query=e.target.value;renderTree()});
 $("disciplineFilter").addEventListener("change",e=>{window.mathSelectDiscipline(e.target.value)});
 $("levelFilter").addEventListener("change",e=>{filterLevel=e.target.value;renderTree()});
-$("coverageFilter").addEventListener("change",e=>{filterStatus=e.target.value;renderTree()});
 $("resetFilters").onclick=()=>{
-filterDept=filterLevel=filterStatus=query="";
-$("disciplineFilter").value=$("levelFilter").value=$("coverageFilter").value=$("search").value="";
+filterDept=filterLevel=query="";
+$("disciplineFilter").value=$("levelFilter").value=$("search").value="";
 renderTree();setURL({discipline:null})
 };
 $("expandAll").onclick=()=>document.querySelectorAll("#tree details").forEach(d=>d.open=true);
@@ -823,9 +820,8 @@ for(const d of depts){
  const chip=document.createElement("button");chip.type="button";chip.className="roadmap-chip";chip.dataset.dept=d.id;chip.textContent=d.order+" · "+d.title;chip.onclick=()=>window.mathSelectDiscipline(filterDept===d.id?"":d.id);$("roadmap").appendChild(chip);
 }
 const params=new URLSearchParams(location.search);
-const d=params.get("discipline"),requested=params.get("topic"),status=params.get("status");
+const d=params.get("discipline"),requested=params.get("topic");
 if(d&&deptMap.has(d)){filterDept=d;$("disciplineFilter").value=d}
-if(["complete","outline"].includes(status)){filterStatus=status;$("coverageFilter").value=status}
 const defaultNode=nodes.find(n=>n.discipline_id==="calculus"&&n.title==="链式法则")||nodes.find(n=>lessonMap.has(n.id))||nodes[0];
 const initial=(nodeMap.has(requested)?getNode(requested):null) ||
   (filterDept?nodes.find(n=>n.discipline_id===filterDept&&lessonMap.has(n.id))||nodes.find(n=>n.discipline_id===filterDept):null) ||

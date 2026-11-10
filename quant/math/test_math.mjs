@@ -126,5 +126,7 @@ for(const id of ["linear-x001","linear-x002","linear-x003","linear-x004","linear
  assert(html.includes("?topic="+id),"missing mathematical spectral path entry "+id);
 assert(html.includes("../ml/#lesson/m11-c06-p01"),"missing linked machine learning spectral path");
 assert(app.includes("renderMathDeepSections")&&app.includes("math-deep-toc"),"mathematics subchapter reader missing");
+assert(!html.includes('id="coverageFilter"')&&!app.includes("filterStatus"),"obsolete coverage selector returned to a complete curriculum");
+assert(!html.includes("真实浏览器视觉表现仍需单独核对")&&!app.includes("未完成的知识点会明确保留目录状态"),"editorial status notes must not appear in published course");
 assert(sidebar.includes('["math","量化数学 Mathematics"]'),"math missing from navigation");
 console.log("Math validation PASS: "+c.disciplines.length+" disciplines, "+c.chapters.length+" chapters, "+c.nodes.length+" nodes, "+lessons.length+" complete lessons, all displayed LaTeX formulas parseable.");
