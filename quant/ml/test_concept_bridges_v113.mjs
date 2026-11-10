@@ -225,6 +225,14 @@ near("MLM two-position average with low confidence",(-Math.log(.9)-Math.log(.1))
 for(const lesson of Object.values(json("atlas-concept-bridge-v113e.json").lessons))
  for(const section of lesson.sections)
   assert(section.paragraphs.every(p=>!p.includes("\n")),"Repeated reinforcement learning or trading explanation");
+const reviewed113=["atlas-concept-bridge-v113c.json","atlas-concept-bridge-v113d.json"].flatMap(f=>Object.values(json(f).lessons)).flatMap(l=>l.sections);
+assert.equal(reviewed113.length,32,"32 distribution-monitoring and latent-model subsections required");
+for(const s of reviewed113)assert(s.paragraphs[1].length>=100&&!s.paragraphs[1].includes("\n"),s.title+" incomplete or merged argument");
+const psiSection=reviewed113.find(s=>s.title==="PSI与双向KL散度的关系");
+assert(psiSection.paragraphs.join("").includes("三角不等式"),"PSI is a divergence, not a metric");
+assert(Math.abs(0.25*Math.log(3)-0.27465307216702745)<1e-12,"PSI example arithmetic incorrect");
+assert(reviewed113.find(s=>s.title==="ELBO和后验KL的精确恒等式").paragraphs[1].includes("边际证据"),"ELBO posterior-gap qualification missing");
+
 console.log("V113 PASS: "+loaded.size+" canonical improved articles, "+sections+
  " substantial reasoning sections, "+strictFormulas+" KaTeX strict formulas, "+crossLinks+
  " exact curriculum links, "+chineseChars+" validated Chinese explanatory characters, "+

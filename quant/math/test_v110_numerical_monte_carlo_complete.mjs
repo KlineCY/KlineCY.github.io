@@ -186,6 +186,12 @@ yes("new lesson ids contain all missing original numerical topics",target.length
 for(const lecture of json("lessons-numerical-v110d.json").lessons)
  for(const section of lecture.deep_sections)
   assert(section.paragraphs.every(p=>!p.includes("\n")),lecture.node_id+" still contains repeated paragraphs");
+const reviewedNumerical=json("lessons-numerical-v110e.json").lessons.flatMap(l=>l.deep_sections);
+assert.equal(reviewedNumerical.length,16,"All 16 numerical subchapters required");
+for(const s of reviewedNumerical)assert(s.paragraphs[1].length>=140&&!s.paragraphs[1].includes("\n"),s.title+" incomplete numerical assumptions");
+assert(Math.abs(Math.exp(-2)-0.1353352832366127)<1e-12,"Brownian bridge barrier crossing example incorrect");
+assert(reviewedNumerical.find(s=>s.title==="连续障碍的漏检偏差").paragraphs[1].includes("端点"),"Brownian bridge endpoint conditions missing");
+
 console.log("V110 PASS: 656/656 finished, all 20 disciplines complete, numerical 30/30, "+
   sectionCount+" complete reasoning sections, "+formulaCount+" strict KaTeX formulas, "+
   linkCount+" exact curriculum links, "+proofChars+" Chinese proof characters, "+

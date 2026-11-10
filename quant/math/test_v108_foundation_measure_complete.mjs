@@ -134,6 +134,12 @@ near("hedge cash",-(2/3)*90/1.05,-60/1.05);
 near("hedge replication",(2/3)*100-60/1.05,10/1.05);
 near("real risk premium",111-105,6);
 yes("equivalent P and Q positive",.7>0&&.3>0&&.5>0&&.5<1);
+const reviewedMeasure=["lessons-measure-v108a.json","lessons-measure-v108b.json"].flatMap(f=>json(f).lessons).flatMap(l=>l.deep_sections);
+assert.equal(reviewedMeasure.length,15,"Fifteen conditional-probability and measure-change sections required");
+for(const s of reviewedMeasure)assert(s.paragraphs[1].length>=145&&!s.paragraphs[1].includes("\n"),s.title+" requires coherent substantive assumptions");
+assert(Math.abs(0.08-0.2*0.25-0.03)<1e-12,"Risk-neutral drift arithmetic incorrect");
+assert(reviewedMeasure.find(s=>s.title==="密度过程为什么必须是真鞅").paragraphs[1].includes("足够条件"),"Novikov sufficiency qualification missing");
+
 console.log("V108 PASS: "+combined.length+"/"+nodes.length+" authored, foundation 30/30, measure 30/30, "+
   depth+" proof sections, "+formulas.length+" strict KaTeX expressions, "+prose+" Chinese proof characters, "+
   links.length+" verified links, "+checks+" independent numerical checks, full CI/typography guards");
