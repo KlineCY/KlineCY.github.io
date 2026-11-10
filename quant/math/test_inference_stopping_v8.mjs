@@ -16,7 +16,7 @@ for(const id of expected){
   assert(item && nodeIds.has(id), "missing canonical lesson "+id);
   assert(!unique.has(id),"duplicated lesson ID "+id);unique.add(id);
   assert(item.definition.length>=65 && item.assumptions.length>=75 && item.example.length>=70 && item.caveat.length>=70,"shallow article "+id);
-  assert.equal(item.deep_sections?.length,id==="econometrics-n0235"?8:4,id+" requires its complete original V8 sections and any V19 extension");
+  assert(item.deep_sections?.length >= (id==="econometrics-n0235"?8:4),id+" must retain the original sections and may have further complete extensions");
   assert.equal(new Set(item.deep_sections.map(s=>s.title)).size,item.deep_sections.length,"duplicate headings "+id);
   assert(item.sources?.length>=2 && item.links?.length>=4,"reference graph incomplete "+id);
   for(const link of item.links){
