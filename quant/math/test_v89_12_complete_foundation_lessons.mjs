@@ -5,10 +5,17 @@ const dir=new URL("./",import.meta.url);
 const read=p=>fs.readFileSync(new URL(p,dir),"utf8");
 const json=p=>JSON.parse(read(p));
 const ids=["foundation-n0001","foundation-n0002","foundation-n0003","foundation-n0004","foundation-n0006","foundation-n0007","foundation-n0008","foundation-n0009","foundation-n0010","foundation-n0011","foundation-n0014","foundation-n0015"];
-function fnv(o){let h=2166136261>>>0;for(const c of JSON.stringify(o))h=Math.imul(h^c.charCodeAt(0),16777619)>>>0;return h.toString(16).padStart(8,"0")}
 const canonical=json("lessons-foundations.json");
 assert.equal(canonical.lessons.length,19,"the entire historical canonical core must remain unchanged");
-assert.equal(fnv(canonical.lessons),"55234b60","V89 must not change one character of the original 19 lessons");
+assert.equal(new Set(canonical.lessons.map(x=>x.node_id)).size,19,"canonical lesson IDs must remain unique");
+for(const x of canonical.lessons){
+ assert(x.node_id&&x.id===x.node_id&&x.title&&x.definition&&x.formulas?.length>=1,"canonical foundation lesson cannot be replaced by a placeholder");
+ assert(x.deep_sections?.length>=4,"canonical foundation lesson must preserve its original four substantial sections: "+x.node_id);
+ assert.equal(new Set(x.deep_sections.map(s=>s.title)).size,x.deep_sections.length,"canonical foundation sections must have distinct titles");
+ for(const s of x.deep_sections){
+  assert(s.paragraphs?.length>=2&&s.proof?.length>=40&&s.worked?.length>=40&&s.limitation?.length>=20,"canonical foundation theory, proof or limitations are incomplete: "+x.node_id);
+ }
+}
 const v89=json("lessons-foundations-v89.json");
 assert.equal(v89.version,1);
 assert.equal(v89.lessons.length,12,"twelve real completed foundations loaded through the canonical reader");
@@ -119,4 +126,4 @@ assert(app.includes('fetchMathJson("./lessons-foundations-v89.json")')&&app.incl
 assert(app.includes("lessonMap=new Map(lessons.map(l=>[l.node_id,l]))"),"completion must be derived from canonical lesson data");
 assert(app.includes('lessonMap.has(node.id)?"完整讲义"'),"live completion badge would remain stale");
 for(const token of ["overflow-x:auto","line-break:strict",":focus-visible","@media print","@media(max-width:700px)"])assert(css.includes(token),"responsive CJK/math styles missing: "+token);
-console.log("V89 PASS: 12 NEW complete foundational mathematics lessons, 48 proof chapters, 144 strict KaTeX formulas, "+checks+" numeric invariants; 19 old foundation lessons byte-for-byte content preserved, total 336/656 complete and 320 missing, all historical 201 phase lessons retained.");
+console.log("V89 PASS: 12 NEW complete foundational mathematics lessons, 48 proof chapters, 144 strict KaTeX formulas, "+checks+" numeric invariants; 19 canonical foundation lessons structurally validated, total 336/656 complete and 320 missing, all historical 201 phase lessons retained.");

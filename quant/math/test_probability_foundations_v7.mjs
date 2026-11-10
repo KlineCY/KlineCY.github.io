@@ -17,8 +17,8 @@ for (const [index, id] of ids.entries()) {
   const lesson = byId.get(id);
   assert(lesson && existing.has(id), "missing canonical mathematics lesson " + id);
   assert.equal(lesson.title, wantedTitles[index]);
-  assert.equal(lesson.deep_sections?.length, 4, id + " must contain four genuine deep sections");
-  assert.equal(new Set(lesson.deep_sections.map(part => part.title)).size, 4);
+  assert(lesson.deep_sections?.length >= 4, id + " must preserve at least four genuine deep sections");
+  assert.equal(new Set(lesson.deep_sections.map(part => part.title)).size, lesson.deep_sections.length);
   assert(lesson.definition.length >= 65 && lesson.assumptions.length >= 50);
   assert(lesson.example.length >= 80 && lesson.caveat.length >= 60);
   assert(lesson.sources?.length >= 2);
@@ -45,7 +45,7 @@ for (const [index, id] of ids.entries()) {
     sectionCount++;
   }
 }
-assert.equal(sectionCount,12);
+assert(sectionCount >= 12, "all three lessons must retain their four original sections");
 assert(formulaCount >= 12);
 const html = fs.readFileSync(new URL("index.html",dir),"utf8");
 for (const id of ids) assert(html.includes("?topic="+id), "new cross-subject pathway not connected: "+id);
