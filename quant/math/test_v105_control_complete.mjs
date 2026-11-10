@@ -46,6 +46,7 @@ docs.forEach((d,i)=>{
  assert.equal(d.lessons.length,[7,7,7,7][i],"V105 file size mismatch");
 });
 const newest=docs.flatMap(d=>d.lessons);
+const consolidatedIDs=new Set(docs[0].lessons.map(l=>l.node_id));
 const ids=Array.from({length:29},(_,i)=>i+542).filter(i=>i!==545).map(i=>"control-n"+String(i).padStart(4,"0"));
 assert.deepEqual(newest.map(l=>l.node_id),ids,"V105 control lectures changed order or incomplete");
 const all=[...history,...newest];
@@ -86,6 +87,7 @@ for(const l of newest){
   assert(!headings.has(s.title),id+" repeated subchapter");
   headings.add(s.title);
   assert(s.paragraphs?.length===2 && s.paragraphs.every(p=>p.length>=30),id+" deep explanatory text");
+   if(consolidatedIDs.has(id))assert(s.paragraphs.every(p=>!p.includes("\n")),id+" contains merged duplicate prose");
   for(const [key,min] of [["proof",50],["worked",50],["limitation",25]])
    assert(s[key]?.length>=min,id+" short "+key);
   assert.equal(s.formulas?.length,1,id+" deep math");
