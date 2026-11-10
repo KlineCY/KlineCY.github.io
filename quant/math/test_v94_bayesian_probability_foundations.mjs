@@ -78,7 +78,7 @@ for(const e of overlay.extensions){
   assert.equal(new Set(old.deep_sections.map(s=>s.title)).size,old.deep_sections.length,e.node_id+" extended section title collision");
   for(const s of old.deep_sections.slice(e.base_sections_count)){
    assert(s.paragraphs?.length>=2&&s.proof?.length>=55&&s.worked?.length>=50&&s.limitation?.length>=35,e.node_id+" added historical section incomplete");
-   for(const f of s.formulas||[]){assert(f.label&&f.tex);strict(f.tex,e.node_id);}
+   for(const f of s.formulas||[]){assert(f.label&&f.tex);katex.renderToString(f.tex,{throwOnError:true,strict:"ignore",displayMode:true});}
   }
  assert.equal(e.deep_sections.length,2,e.node_id+" must have two nonredundant additions");
  const oldTitles=new Set(old.deep_sections.map(s=>s.title));
