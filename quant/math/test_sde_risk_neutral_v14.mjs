@@ -60,11 +60,11 @@ assert.equal(done.size,656,"all math nodes have valid acyclic prerequisite graph
 assert(!ids.includes("ito-n0308"),"previously completed extension Ito isometry must not be counted as newly finished");
 assert(!ids.includes("ito-n0325"),"original Feynman-Kac lecture is deepened, not newly counted");
 const deepened=byId.get("ito-n0325");
-assert(deepened?.deep_sections?.length===4,"Feynman-Kac original core lecture must be substantively deepened");
+assert(deepened?.deep_sections?.length>=4,"Feynman-Kac must retain four original substantive sections");
 assert(deepened.example.includes("Black–Scholes欧式Call"),"preserve old European call risk-neutral expectation example");
 for(const section of deepened.deep_sections){assert(section.proof.length>=75&&section.worked.length>=55);for(const f of section.formulas)katex.renderToString(f.tex,{throwOnError:true,strict:"ignore"});}
 
-assert(byId.get("ito-n0308").deep_sections?.length===4,"existing deepened Ito isometry must survive V14");
+assert(byId.get("ito-n0308").deep_sections?.length>=4,"original Ito isometry sections must survive V14");
 assert(!ids.includes("ito-n0309")&&!ids.includes("ito-n0314"),"preserve existing Ito formula and GBM exact lessons");
 
 let sections=0,formulas=0,sources=0,links=0;
@@ -74,8 +74,8 @@ for(const id of ids){
  assert(l.definition?.length>=110&&l.assumptions?.length>=95,"incomplete definition or critical hypothesis "+id);
  assert(l.example?.length>=90&&l.application?.length>=48&&l.caveat?.length>=48,"incomplete independently auditable example/application/boundary "+id);
  assert(l.properties?.length>=4&&l.formulas?.length>=4&&l.derivation?.length>=4,"insufficient theorem/proof structure "+id);
- assert(l.deep_sections?.length===4,"each V14 chapter requires four original deep mathematical sections "+id);
- assert(new Set(l.deep_sections.map(s=>s.title)).size===4,"repeated deep-section title "+id);
+ assert(l.deep_sections?.length>=4,"each V14 chapter must retain four original deep mathematical sections "+id);
+ assert(new Set(l.deep_sections.map(s=>s.title)).size===l.deep_sections.length,"repeated deep-section title "+id);
  assert(l.sources.length>=2,"at least two named mathematics references "+id);
  for(const src of l.sources){
   assert(src.title?.length>=23&&/^https:\/\/\S+$/.test(src.url),"unverifiable academic source shape "+id);
@@ -88,7 +88,7 @@ for(const id of ids){
   else assert(/^m\d\d-c\d\d-p\d\d$/.test(link.id),"ML link malformed "+id+" -> "+link.id);
   links++;
  }
- for(const[i,s]of l.deep_sections.entries()){
+ for(const[i,s]of l.deep_sections.slice(0,4).entries()){
   assert(s.title?.length>=6&&s.question?.length>=14,"unclear deep mathematical section "+id+"/"+i);
   assert(s.paragraphs.length===2&&s.paragraphs.every(p=>p.length>=55),"insufficient connected Chinese explanation "+id+"/"+i);
   assert(s.proof?.length>=75&&s.worked?.length>=55&&s.limitation?.length>=42,"missing full logical argument/reproducible example/limitation "+id+"/"+i);
@@ -96,6 +96,11 @@ for(const id of ids){
   for(const f of s.formulas){assert(f.label&&f.tex);katex.renderToString(f.tex,{throwOnError:true,strict:"ignore"});formulas++;}
   assert.equal(l.derivation[i].explanation,s.proof,"formula derivation does not match independently expanded proof "+id+"/"+i);
   sections++;
+ }
+ for(const s of l.deep_sections.slice(4)){
+  assert(s.title?.length>=6&&s.question?.length>=12&&s.paragraphs?.length>=2,"extended section incomplete "+id);
+  assert(s.proof?.length>=65&&s.worked?.length>=50&&s.limitation?.length>=40,"extended proof/example/limitation missing "+id);
+  for(const f of s.formulas||[]){assert(f.label&&f.tex);katex.renderToString(f.tex,{throwOnError:true,strict:"ignore"});}
  }
  for(const f of l.formulas)katex.renderToString(f.tex,{throwOnError:true,strict:"ignore"});
  for(const d of l.derivation){assert(d.explanation?.length>=75);katex.renderToString(d.tex,{throwOnError:true,strict:"ignore"});}

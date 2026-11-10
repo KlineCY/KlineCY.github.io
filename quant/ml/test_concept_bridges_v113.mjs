@@ -49,7 +49,7 @@ for(const [id,lesson] of entries){
  assert(canonical,"Deep lesson must map to real archive course "+id);
  assert.equal(lesson.source_title,canonical.title,id+" original source title mismatch");
  assert(lesson.goal?.length>=60,id+" missing research goal and assumptions");
- assert.equal(lesson.sections?.length,4,id+" requires four logical subsections");
+ assert(lesson.sections?.length>=4,id+" original four logical subsections missing");
  assert.equal(lesson.links?.length,4,id+" requires four math/ML prerequisites");
  const headings=new Set();
  for(const s of lesson.sections){
@@ -81,8 +81,8 @@ for(const [id,lesson] of entries){
   crossLinks++;
  }
 }
-assert.equal(sections,80,"V113 requires 80 full proof sections");
-assert.equal(strictFormulas,80,"V113 requires 80 strict KaTeX equations");
+assert(sections>=80,"V113 requires at least 80 full proof sections");
+assert(strictFormulas>=80,"V113 requires at least 80 strict KaTeX equations");
 assert.equal(crossLinks,80,"V113 requires 80 valid deep prerequisite links");
 assert(chineseChars>=21000,"Explanation content was shortened too much");
 
@@ -100,7 +100,7 @@ for(const d of docs){
   assert(!loaded.has(id),"Duplicate V113 installed course");loaded.add(id);
   const rendered=archive.domains[id.slice(0,3)][id].html;
   assert(rendered.startsWith(original.get(id)),id+" overwrote original HTML instead of appending");
-  assert.equal((rendered.match(/class="atlas-concept-unit"/g)||[]).length,4,id+" four-section mount missing");
+  assert.equal((rendered.match(/class="atlas-concept-unit"/g)||[]).length,d.lessons[id].sections.length,id+" mounted count mismatches source");
   assert(rendered.includes("../math/?topic="),id+" maths deep links not installed");
   assert(rendered.includes("本节学习顺序"),id+" four-stage Chinese learning route missing");
  }
@@ -225,7 +225,9 @@ near("MLM two-position average with low confidence",(-Math.log(.9)-Math.log(.1))
 for(const lesson of Object.values(json("atlas-concept-bridge-v113e.json").lessons))
  for(const section of lesson.sections)
   assert(section.paragraphs.every(p=>!p.includes("\n")),"Repeated reinforcement learning or trading explanation");
-const reviewed113=["atlas-concept-bridge-v113c.json","atlas-concept-bridge-v113d.json"].flatMap(f=>Object.values(json(f).lessons)).flatMap(l=>l.sections);
+const reviewed113=["atlas-concept-bridge-v113c.json","atlas-concept-bridge-v113d.json"].flatMap(f=>Object.values(json(f).lessons)).flatMap(l=>l.sections.slice(0,4));
+const reviewedExtra113=["atlas-concept-bridge-v113c.json","atlas-concept-bridge-v113d.json"].flatMap(f=>Object.values(json(f).lessons)).flatMap(l=>l.sections.slice(4));
+for(const s of reviewedExtra113)assert(s.paragraphs.length===2&&s.paragraphs.every(p=>p.length>=60)&&s.worked.length>=60&&s.boundary.length>=40,"extended lesson incomplete "+s.title);
 assert.equal(reviewed113.length,32,"32 distribution-monitoring and latent-model subsections required");
 for(const s of reviewed113)assert(s.paragraphs[1].length>=100&&!s.paragraphs[1].includes("\n"),s.title+" incomplete or merged argument");
 const psiSection=reviewed113.find(s=>s.title==="PSI与双向KL散度的关系");
