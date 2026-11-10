@@ -85,7 +85,7 @@ assert.equal(strictFormulas,80,"V114 requires 80 strict KaTeX equations");
 assert.equal(crossLinks,80,"V114 requires 80 valid deep prerequisite links");
 assert(chineseChars>=21000,"Explanation content was shortened too much");
 for(const [id,lesson] of entries)for(const s of lesson.sections){
- assert(s.paragraphs.every(p=>!p.includes("\\n")),id+" has duplicate explanatory paragraphs joined by a newline");
+ assert(s.paragraphs.every(p=>!p.includes("\n")),id+" has duplicate explanatory paragraphs joined by a newline");
  assert(s.paragraphs[1].length>=90,id+" second paragraph must explain proof conditions or practical boundary");
 }
 const allSections=entries.flatMap(([id,lesson])=>lesson.sections.map(s=>({id,...s})));
