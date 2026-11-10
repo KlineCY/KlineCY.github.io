@@ -183,6 +183,9 @@ close("twelve-day moving-block choices",12-3+1,10);
 close("MLMC telescoping worked example",10-.5-.25,9.25);
 close("Asian control-variable adjusted payoff",5-(4-6),7);
 yes("new lesson ids contain all missing original numerical topics",target.length===22);
+for(const lecture of json("lessons-numerical-v110d.json").lessons)
+ for(const section of lecture.deep_sections)
+  assert(section.paragraphs.every(p=>!p.includes("\n")),lecture.node_id+" still contains repeated paragraphs");
 console.log("V110 PASS: 656/656 finished, all 20 disciplines complete, numerical 30/30, "+
   sectionCount+" complete reasoning sections, "+formulaCount+" strict KaTeX formulas, "+
   linkCount+" exact curriculum links, "+proofChars+" Chinese proof characters, "+
