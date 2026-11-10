@@ -20,7 +20,7 @@ const checkTex=tex=>{
 for(const l of math){
  assert(l.node_id===l.id&&l.deep_sections.length>=6&&l.formulas.length>=7&&l.derivation.length>=5,l.id+" full lesson");
  assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,l.deep_sections.length,l.id+" duplicate section");
- const s=l.deep_sections.at(-1);
+ const s=l.deep_sections[5];
  assert(s.paragraphs.length===2&&s.paragraphs.every(p=>p.length>=75),l.id+" Chinese prose");
  assert(s.proof.length>=90&&s.worked.length>=120&&s.limitation.length>=60,l.id+" real derivation/example/limitations");
  assert(s.formulas.length===2);
