@@ -64,8 +64,8 @@ for(const id of newlyCompleted){
  assert(l.definition?.length>=100&&l.assumptions?.length>=75,"weak foundations "+id);
  assert(l.example?.length>=80&&l.application?.length>=85&&l.caveat?.length>=80,"incomplete research example or boundary "+id);
  assert(l.properties?.length>=4&&l.formulas?.length>=4&&l.derivation?.length>=4,"incomplete theorem properties "+id);
- assert.equal(l.deep_sections?.length,4,"missing deep proof sections "+id);
- assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,4,"duplicate mini-chapter "+id);
+ assert(l.deep_sections?.length>=4,"original four deep proof sections missing "+id);
+ assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,l.deep_sections.length,"duplicate mini-chapter "+id);
  assert(l.sources?.length>=2,"academic reference missing "+id);
  for(const src of l.sources){assert(src.title?.length>=20&&/^https:\/\/\S+$/.test(src.url));sources++;}
  for(const link of l.links||[]){
@@ -74,13 +74,19 @@ for(const id of newlyCompleted){
   else assert(/^m\d\d-c\d\d-p\d\d$/.test(link.id),"invalid ML lesson ID "+link.id);
   crosslinks++;
  }
- for(const [i,s]of l.deep_sections.entries()){
+ for(const [i,s]of l.deep_sections.slice(0,4).entries()){
   assert(s.title?.length>=6&&s.question?.length>=17,"weak research question "+id+"/"+i);
   assert(s.paragraphs?.length===2&&s.paragraphs.every(p=>p.length>=45),"missing explanatory paragraphs "+id+"/"+i);
   assert(s.proof?.length>=72&&s.worked?.length>=55&&s.limitation?.length>=40,"missing proof/calculation/limitation "+id+"/"+i);
   assert(s.formulas?.length>=1,"missing readable displayed formula "+id+"/"+i);
   for(const f of s.formulas){assert(f.label&&f.tex);katex.renderToString(f.tex,{throwOnError:true,strict:"ignore"});displayFormulas++;}
   sections++;
+ }
+ for(const [index,s] of l.deep_sections.slice(4).entries()){
+  assert(s.title?.length>=6&&s.question?.length>=12&&s.paragraphs?.length>=2,"incomplete extended subsection "+id+"/"+index);
+  assert(s.proof?.length>=60&&s.worked?.length>=55&&s.limitation?.length>=40,"extended proof or numerical case too shallow "+id+"/"+index);
+  assert(s.formulas?.length>=1,"missing extended displayed formula "+id+"/"+index);
+  for(const f of s.formulas){assert(f.label&&f.tex);katex.renderToString(f.tex,{throwOnError:true,strict:"ignore"});}
  }
  for(const f of l.formulas)katex.renderToString(f.tex,{throwOnError:true,strict:"ignore"});
  for(const d of l.derivation){assert(d.explanation?.length>=72);katex.renderToString(d.tex,{throwOnError:true,strict:"ignore"});}

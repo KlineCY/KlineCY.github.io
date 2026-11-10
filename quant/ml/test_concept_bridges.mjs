@@ -5,7 +5,7 @@ const archive=JSON.parse(gunzipSync(Buffer.concat([1,2,3,4].map(i=>fs.readFileSy
 const prev=read("atlas-concept-chapters.json");assert.equal(Object.keys(bundle.lessons).length,3);
 let sections=0;for(const [id,l] of Object.entries(bundle.lessons)){
  assert(!(id in prev.lessons));assert.equal(l.source_title,archive.domains[id.slice(0,3)][id].title);
- assert.equal(l.sections.length,4);assert(l.links.length>=3);
+ assert(l.sections.length>=4);assert(l.links.length>=3);
  for(const ref of l.links)assert(ref.kind==="math"?mathIds.has(ref.id):Boolean(archive.domains[ref.id.slice(0,3)]?.[ref.id]));
  for(const s of l.sections){assert(s.paragraphs.length===2&&s.worked.length>50&&s.boundary.length>20);for(const f of s.equations)katex.renderToString(f.tex,{throwOnError:true,strict:"ignore"});sections++}
 }
@@ -14,7 +14,7 @@ new vm.Script(source);new vm.Script(reader);
 assert(reader.includes('fetchAtlasJson("./atlas-concept-bridge-01.json"'));
 const ctx={window:{},encodeURIComponent};vm.runInNewContext(source,ctx);
 const done=ctx.window.quantMlConcepts.mount(archive,bundle);assert.equal(done.size,3);
-for(const id of done)assert.equal((archive.domains[id.slice(0,3)][id].html.match(/class="atlas-concept-unit"/g)||[]).length,4);
+for(const id of done)assert.equal((archive.domains[id.slice(0,3)][id].html.match(/class="atlas-concept-unit"/g)||[]).length,bundle.lessons[id].sections.length);
 assert(Math.abs(Math.sqrt(Math.log(800)/1000)-0.08175947)<.00001);
 assert.equal(2/3+2/3,4/3);
 assert(Math.abs(1-.95**20-.6415140775914581)<1e-12);
