@@ -245,6 +245,13 @@ let cdf=0;for(let k=0;k<=3;k++)cdf+=comb(100,k)*.01**k*.99**(100-k);
 near("Binomial P(K>=4)",1-cdf,.018374036444650528,1e-10);
 yes("Observed exceptions above target",.04>.01);
 assert(checks>=95,"Numerical tests unexpectedly incomplete");
+for(const name of ["lessons-timeseries-v101.json","lessons-risk-tail-v101.json"]){
+ for(const lecture of json(name).lessons)for(const section of lecture.deep_sections){
+  assert(section.paragraphs.every(p=>!p.includes("\n")),lecture.node_id+" still contains repeated paragraphs");
+  for(const para of section.paragraphs)for(const match of para.matchAll(/\$([^$]+)\$/g))
+   katex.renderToString(match[1],{throwOnError:true,strict:"error"});
+ }
+}
 console.log("V101 PASS",newest.length,"new lessons;",all.length,"total;",mathCount,
  "strict KaTeX;",deepCount,"deep proof chapters;",deepChars,"deep prose chars;",
  checks,"independent computations;",linkCount,"internal references; time series and risk each 36/36.");
