@@ -6,10 +6,6 @@ const alpha=(a,b)=>String(a).localeCompare(String(b),"en",{sensitivity:"base"});
 const link=(u,label)=>/^https:\/\//.test(u||"")?'<a href="'+esc(u)+'" target="_blank" rel="noopener noreferrer">'+esc(label)+'</a>':"";
 let curriculum=null,depts=[],chapters=[],nodes=[],lessons=[],lessonMap=new Map();
 let nodeMap=new Map(),chapMap=new Map(),deptMap=new Map(),activeId="",filterDept="",filterLevel="",query="";
-const progressKey="kline-quant-math-progress-v1";
-let studied=new Set();
-try{const saved=JSON.parse(localStorage.getItem(progressKey)||"[]");if(Array.isArray(saved))studied=new Set(saved)}catch(_){}
-const saveProgress=()=>{try{localStorage.setItem(progressKey,JSON.stringify([...studied]))}catch(_){}};
 const getDept=id=>deptMap.get(id),getChap=id=>chapMap.get(id),getNode=id=>nodeMap.get(id);
 const humanStatus=node=>lessonMap.has(node.id)?"完整讲义":"正文暂不可用";
 const isComplete=node=>lessonMap.has(node.id);
@@ -69,7 +65,7 @@ const b=document.createElement("button");b.className="node"+(n.id===activeId?" a
 const ok=isComplete(n);
 b.title=n.title;
 if(n.id===activeId)b.setAttribute("aria-current","page");
-b.innerHTML='<span class="complete-mark" aria-hidden="true">'+(studied.has(n.id)?"✓":ok?"●":"·")+'</span><span class="node-index">'+String(n.order).padStart(2,"0")+'</span><span class="node-name">'+esc(n.title)+'</span><span class="node-label'+(ok?" complete":"")+'">'+(ok?"讲义":"暂不可用")+"</span>";
+b.innerHTML='<span class="complete-mark" aria-hidden="true">'+(ok?"●":"·")+'</span><span class="node-index">'+String(n.order).padStart(2,"0")+'</span><span class="node-name">'+esc(n.title)+'</span><span class="node-label'+(ok?" complete":"")+'">'+(ok?"讲义":"暂不可用")+"</span>";
 b.addEventListener("click",()=>selectNode(n.id));
 return b;
 }
@@ -108,7 +104,6 @@ for(const d of depts){
 }
 $("status").textContent="显示 "+visibleCount+" / "+nodes.length+" 个知识点 · "+departmentCount+" 个学科 · "+totalComplete+" 个完整讲义";
 if(!visibleCount){const p=document.createElement("p");p.className="notice";p.textContent="当前条件无匹配知识点。请清除搜索或筛选。";container.appendChild(p)}
-$("mastered").textContent=studied.size;
 document.querySelectorAll(".roadmap-chip").forEach(b=>b.classList.toggle("active",b.dataset.dept===filterDept));
 container.scrollTop=previousScroll;
 const selected=container.querySelector(".node.active");
@@ -120,14 +115,6 @@ if(selected&&container.clientHeight){
 }
 function makeControls(node,wrap){
 const section=document.createElement("div");section.className="tool-actions";
-const done=document.createElement("button");done.className="action"+(studied.has(node.id)?" done":"");done.type="button";
-done.textContent=studied.has(node.id)?"✓ 已标记学会 · 点击取消":"标记我已学会";
-done.onclick=()=>{
- if(studied.has(node.id))studied.delete(node.id);else studied.add(node.id);
- saveProgress();done.classList.toggle("done",studied.has(node.id));
- done.textContent=studied.has(node.id)?"✓ 已标记学会 · 点击取消":"标记我已学会";
- renderTree();
-};section.appendChild(done);
 const copy=document.createElement("button");copy.className="action";copy.textContent="复制本节链接";copy.type="button";
 copy.onclick=async()=>{const url=new URL(location.href);url.searchParams.set("topic",node.id);try{await navigator.clipboard.writeText(url.href);copy.textContent="链接已复制"}catch(e){copy.textContent="请复制浏览器地址"}};section.appendChild(copy);
 const next=nodes.find(n=>n.discipline_id===node.discipline_id&&nodes.indexOf(n)>nodes.indexOf(node));
