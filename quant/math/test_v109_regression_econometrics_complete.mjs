@@ -167,6 +167,13 @@ yes("GLS positive definite covariance",1*4-.5**2>0);
 for(const name of ["lessons-econometrics-v109a.json","lessons-regression-v109c.json","lessons-regression-v109d.json"])
  for(const lecture of json(name).lessons)for(const section of lecture.deep_sections)
   assert(section.paragraphs.every(p=>!p.includes("\n")),lecture.node_id+" still contains repeated paragraphs");
+const reviewed109=["lessons-econometrics-v109b.json","lessons-regression-v109e.json","lessons-regression-v109f.json"].flatMap(f=>json(f).lessons).flatMap(l=>l.deep_sections);
+assert.equal(reviewed109.length,27,"All 27 econometrics and generalized-linear-model subchapters required");
+for(const s of reviewed109)assert(s.paragraphs[1].length>=135&&!s.paragraphs[1].includes("\n"),s.title+" missing rigorous assumptions");
+for(const title of ["IPW的可识别条件","分配效应与实际治疗效应","因果识别和统计正交的区别"]){
+ const section=reviewed109.find(s=>s.title===title);assert(section&&section.paragraphs[1].length>=140,title+" identification requirements missing");
+}
+
 console.log("V109 PASS: "+all.length+"/"+nodes.length+" full lessons, regression 30/30, econometrics 36/36; "+
  sectionCount+" detailed proof sections, "+texCount+" strict KaTeX expressions, "+linkCount+
  " exact prerequisite links, "+proofChars+" Chinese proof characters, "+checked+" arithmetic checks, legacy/CJK CI guards");
