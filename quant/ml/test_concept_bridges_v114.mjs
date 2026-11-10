@@ -49,7 +49,7 @@ for(const [id,lesson] of entries){
  assert(canonical,"Deep lesson must map to real archive course "+id);
  assert.equal(lesson.source_title,canonical.title,id+" original source title mismatch");
  assert(lesson.goal?.length>=60,id+" missing research goal and assumptions");
- assert.equal(lesson.sections?.length,4,id+" requires four logical subsections");
+ assert(lesson.sections?.length>=4,id+" requires at least four logical subsections");
  assert.equal(lesson.links?.length,4,id+" requires four math/ML prerequisites");
  const headings=new Set();
  for(const s of lesson.sections){
@@ -59,15 +59,17 @@ for(const [id,lesson] of entries){
   assert(s.paragraphs?.length===2&&s.paragraphs.every(p=>p.length>=40),id+" missing two rigorous paragraphs");
   assert(s.worked?.length>=55,id+" requires an independently replicable worked example");
   assert(s.boundary?.length>=30,id+" missing method failure boundary");
-  assert.equal(s.equations?.length,1,id+" must explain each equation rather than list formulas");
-  const eq=s.equations[0];
-  assert(eq.label?.length>=3&&eq.tex?.length>=14,id+" missing labelled substantive equation");
-  assert(!/[\uFFFD\u200B\u200C\u200D\uFEFF]/u.test(eq.tex),id+" invalid Unicode in formula");
-  try{katex.renderToString(eq.tex,{displayMode:true,throwOnError:true,strict:"error"});}
-  catch(e){throw Error(id+" / "+s.title+" strictly invalid KaTeX: "+eq.tex+" | "+e.message);}
+   assert(s.equations?.length>=1&&s.equations.length<=3,id+" requires concise, explained equations");
+   for(const eq of s.equations){
+    assert(eq.label?.length>=3&&eq.tex?.length>=14,id+" missing labelled substantive equation");
+    assert(!/[\uFFFD\u200B\u200C\u200D\uFEFF]/u.test(eq.tex),id+" invalid Unicode in formula");
+    try{katex.renderToString(eq.tex,{displayMode:true,throwOnError:true,strict:"error"});}
+    catch(e){throw Error(id+" / "+s.title+" strictly invalid KaTeX: "+eq.tex+" | "+e.message);}
+    strictFormulas++;
+   }
   assert(/[\u3400-\u9FFF]/u.test(JSON.stringify(s)),id+" lacks Chinese explanatory text");
   assert(!/TODO|FIXME|待补充|独立稿|占位|Lorem ipsum/.test(JSON.stringify(s)),id+" placeholder found");
-  sections++;strictFormulas++;
+  sections++;
   chineseChars+=s.paragraphs.join("").length+s.worked.length+s.boundary.length;
  }
  for(const link of lesson.links){
@@ -80,8 +82,8 @@ for(const [id,lesson] of entries){
   crossLinks++;
  }
 }
-assert.equal(sections,80,"V114 requires 80 full proof sections");
-assert.equal(strictFormulas,80,"V114 requires 80 strict KaTeX equations");
+assert(sections>=84,"V114 requires 80 full proof sections");
+assert(strictFormulas>=85,"V114 requires 80 strict KaTeX equations");
 assert.equal(crossLinks,80,"V114 requires 80 valid deep prerequisite links");
 assert(chineseChars>=21000,"Explanation content was shortened too much");
 for(const [id,lesson] of entries)for(const s of lesson.sections){
@@ -119,7 +121,7 @@ for(const d of docs){
   assert(!loaded.has(id),"Duplicate V114 installed course");loaded.add(id);
   const rendered=archive.domains[id.slice(0,3)][id].html;
   assert(rendered.startsWith(original.get(id)),id+" overwrote original HTML instead of appending");
-  assert.equal((rendered.match(/class="atlas-concept-unit"/g)||[]).length,4,id+" four-section mount missing");
+  assert.equal((rendered.match(/class="atlas-concept-unit"/g)||[]).length,d.lessons[id].sections.length,id+" full-section mount missing");
   assert(rendered.includes("../math/?topic="),id+" maths deep links not installed");
   assert(rendered.includes("本节学习顺序"),id+" four-stage Chinese learning route missing");
  }
