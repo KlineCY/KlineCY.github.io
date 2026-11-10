@@ -104,7 +104,7 @@ assert(deepChars>=18000,"Proof depth unexpectedly reduced");
 assert(linkCount>=55);
 const app=read("app.js"),css=read("styles.css"),workflow=read("../../.github/workflows/test-quant-math.yml");
 const html=read("index.html");
-assert(html.includes("app.js?v=20261109"),"Current app cache-busting version missing");
+assert(/app\.js\?v=\d{8}/.test(html),"Versioned mathematics application script missing");
 for(const l of newLessons) assert(html.includes('?topic='+l.node_id+'"'),"Canonical study path missing "+l.node_id);
 
 for(const needle of [

@@ -204,6 +204,10 @@
             {
               "label": "样本选择后的条件事件概率",
               "tex": "\\Pr(Y=1\\mid R=1,\\theta)=\\frac{p(\\theta)s_1}{p(\\theta)s_1+(1-p(\\theta))s_0}"
+            },
+            {
+              "label": "样本选择与总体赔率的关系",
+              "tex": "\\frac{p_{\\rm obs}}{1-p_{\\rm obs}}=\\frac{s_1}{s_0}\\frac{p}{1-p}\\quad(s_0,s_1>0)"
             }
           ],
           "proof": "由条件概率，Pr(Y=1|R=1)=Pr(R=1|Y=1)Pr(Y=1)/Pr(R=1)。再将分母按Y=1与Y=0分解为ps₁+(1−p)s₀，就得到了选择后参数。如果s₀=s₁>0，则公共因子相消，收录比例等于总体比例；若二者不相等，则会产生系统性选择偏差。",
@@ -445,6 +449,10 @@
             {
               "label": "固定Beta先验下的群体收缩",
               "tex": "E[\\theta_j\\mid D_j]=\\frac{\\alpha+y_j}{\\alpha+\\beta+n_j}=\\frac{n_j}{n_j+\\alpha+\\beta}\\frac{y_j}{n_j}+\\frac{\\alpha+\\beta}{n_j+\\alpha+\\beta}\\frac{\\alpha}{\\alpha+\\beta}"
+            },
+            {
+              "label": "按有效试验数量决定的收缩权重",
+              "tex": "w_j=\\frac{n_j}{n_j+\\alpha+\\beta},\\qquad1-w_j=\\frac{\\alpha+\\beta}{n_j+\\alpha+\\beta}"
             }
           ],
           "proof": "Beta先验密度核为θ^{α−1}(1−θ)^{β−1}，给定θ的Bernoulli组内似然核为θ^y(1−θ)^{n−y}。相乘后的密度核对应Beta(α+y,β+n−y)，后验均值为(α+y)/(α+β+n)；代数拆分便得到数据均值与先验均值的凸组合，其中n>0。",
@@ -687,6 +695,10 @@
             {
               "label": "联合可信概率的并集下界",
               "tex": "\\Pr(\\theta_1\\in C_1,\\theta_2\\in C_2\\mid D)\\ge1-\\Pr(\\theta_1\\notin C_1\\mid D)-\\Pr(\\theta_2\\notin C_2\\mid D)"
+            },
+            {
+              "label": "后验条件独立时的联合可信概率",
+              "tex": "\\Pr(A_1\\cap A_2\\mid D)=\\Pr(A_1\\mid D)\\Pr(A_2\\mid D)\\quad(\\text{后验独立})"
             }
           ],
           "proof": "令A_j表示第j个参数落在边际区间的事件，则Pr(A₁∩A₂|D)=1−Pr(A₁ᶜ∪A₂ᶜ|D)。并集上界保证此概率至少为1−Pr(A₁ᶜ|D)−Pr(A₂ᶜ|D)。如果两事件在后验下独立且各自概率为0.95，则联合概率为0.95×0.95=0.9025。",
@@ -929,6 +941,10 @@
             {
               "label": "留一后验预测密度",
               "tex": "p(y_i\\mid y_{-i})=\\int p(y_i\\mid\\theta)\\,\\pi(\\theta\\mid y_{-i})\\,d\\theta"
+            },
+            {
+              "label": "时点合法的预序列后验预测",
+              "tex": "p(y_{t+1}\\mid y_{1:t})=\\int p(y_{t+1}\\mid\\theta,y_{1:t})\\,\\pi(\\theta\\mid y_{1:t})\\,d\\theta"
             }
           ],
           "proof": "将观测集合分为y_i与y_-i，并假设给定参数θ时观测条件独立，则由全概率和Bayes公式有p(y_i|y_-i)=∫p(y_i|θ)π(θ|y_-i)dθ。若把y_i也放入后验π(θ|y_i,y_-i)，该结果便同时被用于拟合与评价，无法再代表留一预测。",
