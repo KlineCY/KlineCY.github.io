@@ -84,6 +84,26 @@ assert.equal(sections,80,"V114 requires 80 full proof sections");
 assert.equal(strictFormulas,80,"V114 requires 80 strict KaTeX equations");
 assert.equal(crossLinks,80,"V114 requires 80 valid deep prerequisite links");
 assert(chineseChars>=21000,"Explanation content was shortened too much");
+for(const [id,lesson] of entries)for(const s of lesson.sections){
+ assert(s.paragraphs.every(p=>!p.includes("\\n")),id+" has duplicate explanatory paragraphs joined by a newline");
+ assert(s.paragraphs[1].length>=90,id+" second paragraph must explain proof conditions or practical boundary");
+}
+const allSections=entries.flatMap(([id,lesson])=>lesson.sections.map(s=>({id,...s})));
+const findSection=title=>{const section=allSections.find(s=>s.title===title);assert(section,"Missing reviewed section: "+title);return section};
+const breakSection=findSection("均值结构突变与单一历史样本");
+assert(breakSection.worked.includes("9个可能的相邻期分割点"),"Ten observations have nine interior split locations");
+assert(!breakSection.worked.includes("20个可能断点"),"Incorrect candidate breakpoint count");
+assert.equal([0,0,0,0,0,2,2,2,2,2].reduce((a,x)=>a+(x-1)**2,0),10);
+const oobSection=findSection("一条记录在一棵树中被排除的概率");
+assert(oobSection.worked.includes("0.34868"),"OOB finite-sample calculation changed");
+assert(Math.abs((.9**10)-0.3486784401)<1e-9);
+const kktSection=findSection("L1绝对值为何需要次梯度");
+assert(kktSection.paragraphs.join("").includes("非零系数")&&kktSection.paragraphs.join("").includes("全局最优"),"Lasso KKT must cover zero and nonzero coordinates");
+const dateSection=findSection("金融时间外预测的历史编码器");
+assert(dateSection.paragraphs.join("").includes("未知类别")&&dateSection.paragraphs.join("").includes("标签"),"Target encoding must handle unseen categories and mature labels");
+const causalSection=findSection("观测条件化与do干预为何不同");
+assert(causalSection.paragraphs.join("").includes("结构方程")&&causalSection.paragraphs.join("").includes("识别条件"),"Causal identification and intervention assumptions missing");
+
 
 const source=read("concept-render.js"),reader=read("atlas.js"),html=read("index.html"),css=read("atlas.css");
 new vm.Script(source);new vm.Script(reader);
