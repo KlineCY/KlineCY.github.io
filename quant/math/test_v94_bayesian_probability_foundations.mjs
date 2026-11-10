@@ -74,7 +74,12 @@ assert.equal(overlay.extensions.length,6);
 for(const e of overlay.extensions){
  const old=byId.get(e.node_id);
  assert(old&&old.title===e.title,e.node_id+" overlay is not a historical lesson");
- assert.equal(old.deep_sections.length,e.base_sections_count,e.node_id+" historical baseline drift");
+ assert(old.deep_sections.length>=e.base_sections_count,e.node_id+" original baseline sections missing");
+  assert.equal(new Set(old.deep_sections.map(s=>s.title)).size,old.deep_sections.length,e.node_id+" extended section title collision");
+  for(const s of old.deep_sections.slice(e.base_sections_count)){
+   assert(s.paragraphs?.length>=2&&s.proof?.length>=55&&s.worked?.length>=50&&s.limitation?.length>=35,e.node_id+" added historical section incomplete");
+   for(const f of s.formulas||[]){assert(f.label&&f.tex);strict(f.tex,e.node_id);}
+  }
  assert.equal(e.deep_sections.length,2,e.node_id+" must have two nonredundant additions");
  const oldTitles=new Set(old.deep_sections.map(s=>s.title));
  for(const s of e.deep_sections){
