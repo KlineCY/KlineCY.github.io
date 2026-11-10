@@ -198,6 +198,9 @@ near("Constrained gross leverage",.8+.8+.3,1.9);
 near("Drift false alarm 20",1-.95**20,.6415140775914581,1e-8);
 near("Challenger vs champion error",.025-.020,.005);
 yes("MLOps gate rejects excess leverage",2>1.5);
+for(const lesson of Object.values(json("atlas-concept-bridge-v112b.json").lessons))
+ for(const section of lesson.sections)
+  assert(section.paragraphs.every(p=>!p.includes("\n")),"Repeated machine learning training explanation");
 console.log("V112 PASS: "+loaded.size+" canonical advanced lectures, "+sections+" coherent proof sections, "+strictFormulas+
  " strictly parsed KaTeX expressions, "+crossLinks+" exact math/ML prerequisite links, "+chineseChars+
  " source CJK explanation characters, "+numerics+" independently computed arithmetic invariants, unchanged original 720 pages, responsive formulas and historical V111 coverage");
