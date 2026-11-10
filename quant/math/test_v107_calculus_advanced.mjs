@@ -192,4 +192,13 @@ near("reverse-mode b gradient",3,3);
 near("reverse-mode centered w gradient",(.5*3.03**2-.5*2.97**2)/.02,9);
 near("reverse-mode branched gradient",2*3+1,7);
 near("reverse-mode branched numerical",((3.01**2+3.01)-(2.99**2+2.99))/.02,7);
+const reviewed107=paths.flatMap(f=>json(f).lessons).flatMap(l=>l.deep_sections);
+assert.equal(reviewed107.length,48,"All 48 advanced-calculus sections must remain");
+for(const s of reviewed107){
+ assert(s.paragraphs.length===2&&s.paragraphs[1].length>=130,s.title+" incomplete advanced mathematical context");
+ assert(!s.paragraphs[1].includes("\n"),s.title+" contains an unstructured merged paragraph");
+}
+assert(reviewed107.find(s=>s.title==="Fubini与Tonelli为何是两种不同定理").paragraphs[1].includes("绝对可积"),"Fubini's integrability condition missing");
+assert(reviewed107.find(s=>s.title==="为什么log-det在SPD锥上是凹函数").paragraphs[1].includes("正定可行域"),"SPD requirement missing");
+
 console.log("V107: 586/656 total lessons, calculus 30/30, "+formulas+" strict TeX, "+chapters+" deep sections, "+proofChars+" reasoning chars, "+links+" links, "+numerics+" verified numerics");
