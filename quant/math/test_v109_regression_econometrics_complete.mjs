@@ -164,6 +164,9 @@ near("selected sample return",(20*.1)/40,.05);
 near("selected IPW recovered return",(20*.1)/(20+20*4),.02);
 yes("HAC score time order maintained",true);
 yes("GLS positive definite covariance",1*4-.5**2>0);
+for(const name of ["lessons-econometrics-v109a.json","lessons-regression-v109c.json","lessons-regression-v109d.json"])
+ for(const lecture of json(name).lessons)for(const section of lecture.deep_sections)
+  assert(section.paragraphs.every(p=>!p.includes("\n")),lecture.node_id+" still contains repeated paragraphs");
 console.log("V109 PASS: "+all.length+"/"+nodes.length+" full lessons, regression 30/30, econometrics 36/36; "+
  sectionCount+" detailed proof sections, "+texCount+" strict KaTeX expressions, "+linkCount+
  " exact prerequisite links, "+proofChars+" Chinese proof characters, "+checked+" arithmetic checks, legacy/CJK CI guards");

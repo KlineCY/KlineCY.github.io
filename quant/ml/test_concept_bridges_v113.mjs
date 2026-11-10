@@ -222,6 +222,9 @@ near("MLM expected ten percent random",10000*.15*.1,150);
 near("MLM two-position total NLL",-Math.log(.8)-Math.log(.5),.916290731874155);
 near("MLM two-position average NLL",(-Math.log(.8)-Math.log(.5))/2,.4581453659370775);
 near("MLM two-position average with low confidence",(-Math.log(.9)-Math.log(.1))/2,1.203972804325936);
+for(const lesson of Object.values(json("atlas-concept-bridge-v113e.json").lessons))
+ for(const section of lesson.sections)
+  assert(section.paragraphs.every(p=>!p.includes("\n")),"Repeated reinforcement learning or trading explanation");
 console.log("V113 PASS: "+loaded.size+" canonical improved articles, "+sections+
  " substantial reasoning sections, "+strictFormulas+" KaTeX strict formulas, "+crossLinks+
  " exact curriculum links, "+chineseChars+" validated Chinese explanatory characters, "+
