@@ -19,7 +19,7 @@ function formula(tex){
 for(const l of math){
  assert(l.id===l.node_id&&l.deep_sections.length>=6&&l.derivation.length>=5&&l.formulas.length>=7,l.id+" full chapter coverage");
  assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,l.deep_sections.length,l.id+" duplicate title");
- const extra=l.deep_sections.at(-1);
+ const extra=l.deep_sections[5];
  assert(extra.question.length>=12&&extra.paragraphs.length===2&&extra.paragraphs.every(p=>p.length>=50),l.id+" substantive Chinese text");
  assert(extra.proof.length>=95&&extra.worked.length>=75&&extra.limitation.length>=38&&extra.formulas.length===2,l.id+" derivation/example/caveat");
  assert(l.links.length>=4&&l.sources.length>=2,l.id+" cross-links/references");
