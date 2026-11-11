@@ -56,10 +56,14 @@ for(let f=0;f<files.length;f++){
 const vintage=load("../ml/atlas-depth-14-a.json").lessons["m06-c01-p06"];
 assert(vintage.v75_correction.startsWith("V75"),"late-old-revision correction missing");
 assert(vintage.worked_example.includes("10:11"),"out-of-order revision counterexample missing");
-assert(vintage.equations.at(-2).tex.includes("receive"),"must enforce receipt cutoff");
-assert(vintage.equations.at(-2).tex.includes("publish"),"must enforce publication cutoff");
-assert(vintage.equations.at(-2).tex.includes("rev"),"must sort by source version not receipt time");
-for(const f of vintage.equations.slice(-2))tex(f.tex,true);
+const sourceVintageRule=vintage.equations.find(e=>e.label==="同一业务时点多版本的点时记录规则");
+assert(sourceVintageRule,"point-in-time revision equation missing");
+assert(sourceVintageRule.tex.includes("receive"),"must enforce receipt cutoff");
+assert(sourceVintageRule.tex.includes("publish"),"must enforce publication cutoff");
+assert(sourceVintageRule.tex.includes("rev"),"must sort by source version not receipt time");
+const sourceVintageChoice=vintage.equations.find(e=>e.label==="允许进入决策特征的修订版本");
+assert(sourceVintageChoice,"valid historical revision selection missing");
+for(const f of [sourceVintageRule,sourceVintageChoice])tex(f.tex,true);
 assert.equal(strictCount,94,"46 x2 new formulas and two corrected strict formulas");
 function near(name,x,y,tol=1e-9){
  assert(Number.isFinite(x)&&Number.isFinite(y)&&Math.abs(x-y)<=tol,name+" "+x+" != "+y);
