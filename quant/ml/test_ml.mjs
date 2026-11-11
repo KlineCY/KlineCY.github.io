@@ -155,4 +155,52 @@ nearExt((1/(1+Math.exp(-2)))*(1-1/(1+Math.exp(-2))),.10499358540350662);
 nearExt(Math.log(2),.6931471805599453);
 nearExt((.5*1+.5*(-1)),0);
 
+
+const nextMLGroups=[
+ ["atlas-depth-15-c.json",9,["m13-c03-p02","m14-c04-p01","m15-c01-p02","m16-c03-p02","m17-c02-p03","m18-c03-p02"]],
+ ["atlas-depth-15-d.json",10,["m19-c01-p01","m20-c04-p03","m21-c05-p04","m22-c04-p05","m23-c05-p06"]],
+ ["atlas-depth-16-d.json",12,["m19-c02-p03","m20-c01-p05","m21-c05-p05","m22-c05-p06","m23-c03-p06"]],
+ ["atlas-depth-14-a.json",10,["m01-c02-p03","m02-c01-p02","m03-c01-p02","m04-c01-p01","m05-c05-p05","m06-c01-p06"]]
+];
+let validatedNewML=0;
+for(const [file,minEquations,ids] of nextMLGroups){
+ const doc=read(file);
+ assert.deepEqual(Object.keys(doc.lessons),ids,"further-deepened ML canonical identities changed "+file);
+ for(const [id,l] of Object.entries(doc.lessons)){
+  assert(l.equations.length>=minEquations&&l.derivation.length>=10,"new deepened equations/derivations missing "+id);
+  assert(l.derivation.slice(-2).every(s=>s.length>=88),"new proof paragraphs underdeveloped "+id);
+  assert(l.worked_example.length>=435,"new worked numerical example missing "+id);
+  assert(l.protocol.length>=6&&l.pitfalls.length>=5,"new validation protocol or limitation missing "+id);
+  assert.equal(new Set(l.equations.map(e=>e.label)).size,l.equations.length,"duplicate ML formula titles "+id);
+  for(const f of l.equations.slice(-2)){
+   assert(f.tex.length>=18&&f.label.length>=4,"formula too short "+id);
+   katex.renderToString(f.tex,{displayMode:true,throwOnError:true,strict:"error"});
+  }
+  validatedNewML++;
+ }
+}
+assert.equal(validatedNewML,22,"all twenty-two newly deepened ML lectures required");
+nearExt((3*(4-2)/2)-1,2);
+nearExt(Math.floor((30-8)/8)+1,3);
+nearExt(.9*.9,.81);
+nearExt(4*5/2,10);
+nearExt((2+0+0+0)/4,.5);
+nearExt((2+4)/2,(2+4+2+4)/4);
+nearExt(.8*3*.2**2/(.8*.2**2+.2*.8**2),.6);
+nearExt(1.05*.001*(2*.023809523809523808),.00005);
+nearExt(.1*10/.2,5);
+nearExt((110/100)*(220/210)-1,.15238095238095228);
+nearExt(-2-.3,-2.3);
+nearExt(1/(1-.9),10);
+nearExt(.9*.01+.1*(-.02),.007);
+nearExt(.1*(-.02),-.002);
+nearExt(.8*.25*0+.2*4*1,.8);
+nearExt(.4-.4**2/2,.32);
+nearExt(9/10+1/2,1.4);
+nearExt(.01*Math.hypot(.6,.4),.007211102550927978);
+nearExt(.009/(.009+.099),1/12);
+nearExt(6*.05/Math.PI**2,.030396355092701333);
+nearExt(1024*1e-8,.00001024);
+nearExt(21-7,14);
+
 console.log("PASS: canonical 720-course Atlas, complete depth overlays, 24 domains, valid equations, runtime navigation and 656 mathematics prerequisites");
