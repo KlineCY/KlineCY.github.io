@@ -350,6 +350,49 @@ nearNew(.8*1+.2*(-4),0,"unclipped random gradient");
 nearNew(.8*1+.2*(-1),.6,"clipped gradient bias");
 nearNew(.95,1-.05,"scaled LASSO effective penalty");
 
+
+const expandedV20MathGroups=[
+ ["lessons-phase-20-a.json",["econometrics-x003"]],
+ ["lessons-phase-20-b.json",["optimization-x011","optimization-x012"]],
+ ["lessons-phase-20-c.json",["econometrics-x005","econometrics-x006"]],
+ ["lessons-phase-23-a.json",["timeseries-n0256","timeseries-n0257"]],
+ ["lessons-phase-23-b.json",["timeseries-n0258","timeseries-n0259"]]
+];
+let verifiedV20Math=0;
+for(const [filename,ids] of expandedV20MathGroups){
+ const doc=json(filename);
+ assert.deepEqual(doc.lessons.map(l=>l.id),ids,"expanded mathematics canonical IDs changed "+filename);
+ for(const l of doc.lessons){
+  assert(l.formulas.length>=9&&l.derivation.length>=6&&l.deep_sections.length>=7,"expanded maths missing details "+l.id);
+  const sec=l.deep_sections.at(-1);
+  assert(sec.paragraphs.length===2&&sec.paragraphs.every(s=>s.length>=115),"new maths must explain both theory and usage "+l.id);
+  assert(sec.proof.length>=130&&sec.worked.length>=125&&sec.limitation.length>=55,"new maths proof, worked calculation or limitation missing "+l.id);
+  assert.equal(sec.formulas.length,2,"new maths needs two independent LaTeX formulas "+l.id);
+  assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,l.deep_sections.length,"math section title duplication "+l.id);
+  for(const eq of sec.formulas){
+   assert(eq.label.length>=4&&eq.tex.length>=16,"extended maths equation short "+l.id);
+   katex.renderToString(eq.tex,{displayMode:true,throwOnError:true,strict:"error"});
+  }
+  verifiedV20Math++;
+ }
+}
+assert.equal(verifiedV20Math,9,"all 9 newly deepened mathematics courses required");
+nearMath(.8*.25*0+.2*4*2,1.6,"transported ATE target weighting");
+nearMath(Math.max(8,12),12,"purged overlap left endpoint");
+nearMath(Math.min(13,14),13,"purged overlap right endpoint");
+nearMath(1+.5,1.5,"FISTA second prox iterate");
+nearMath(.5*(2-1)**2+1,1.5,"LASSO primal optimum");
+nearMath(2*1-.5,1.5,"LASSO dual feasible value");
+nearMath((12-10)-(10-10),2,"anticipation pre-period observed gap");
+nearMath(.7-.4-.1,.2,"ATT lower sensitivity limit");
+nearMath(.7-.4+.1,.4,"ATT upper sensitivity limit");
+nearMath(Math.log(110/100),Math.log(220/200),"cointegrated log price ratio");
+nearMath(-100*(Math.log(.7)+Math.log(.9)),46.20354595965587,"Johansen trace rank zero");
+nearMath(-100*Math.log(.7),35.66749439387324,"Johansen max root");
+nearMath(.04/(1-.8**2),1/9,"stationary ECM spread variance");
+nearMath(.8**5,.32768,"conditional mean ECM horizon five");
+nearMath(.011/(1-.99),1.1,"VAR near-unit-root long-run mean");
+
 console.log("V110 PASS: 656/656 finished, all 20 disciplines complete, numerical 30/30, "+
   sectionCount+" complete reasoning sections, "+formulaCount+" strict KaTeX formulas, "+
   linkCount+" exact curriculum links, "+proofChars+" Chinese proof characters, "+
