@@ -393,6 +393,43 @@ nearMath(.04/(1-.8**2),1/9,"stationary ECM spread variance");
 nearMath(.8**5,.32768,"conditional mean ECM horizon five");
 nearMath(.011/(1-.99),1.1,"VAR near-unit-root long-run mean");
 
+
+const v28DeepGroups=[
+ ["lessons-phase-28-a.json",["statistics-n0177","statistics-n0178","statistics-n0179","statistics-n0180"],8,8,11],
+ ["lessons-phase-28-b.json",["finance-n0434","finance-n0436","finance-n0437","finance-n0438"],7,7,10]
+];
+let v28Verified=0;
+for(const [file,ids,minSections,minDeriv,minFormulas] of v28DeepGroups){
+ const doc=json(file);
+ assert.deepEqual(doc.lessons.map(l=>l.id),ids,"V28 mathematics canonical IDs changed "+file);
+ for(const l of doc.lessons){
+  assert(l.deep_sections.length>=minSections&&l.derivation.length>=minDeriv&&l.formulas.length>=minFormulas,"V28 mathematical coverage missing "+l.id);
+  const sec=l.deep_sections.at(-1);
+  assert(sec.paragraphs.length===2&&sec.paragraphs.every(p=>p.length>=85),"V28 two complete explanatory paragraphs required "+l.id);
+  assert(sec.proof.length>=115&&sec.worked.length>=125&&sec.limitation.length>=65,"V28 derivation, calculation or caveat too short "+l.id);
+  assert.equal(sec.formulas.length,2,"V28 two strict mathematical equations required "+l.id);
+  assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,l.deep_sections.length,"V28 repeated section heading "+l.id);
+  for(const eq of sec.formulas){
+   assert(eq.label.length>=4&&eq.tex.length>=18,"V28 formula incomplete "+l.id);
+   katex.renderToString(eq.tex,{displayMode:true,throwOnError:true,strict:"error"});
+  }
+  v28Verified++;
+ }
+}
+assert.equal(v28Verified,8,"all eight Bayesian/derivatives mathematics chapters required");
+nearMath(.9/.1,9,"single Bayesian warning likelihood ratio");
+nearMath(9*(1/9)/(1+9*(1/9)),.5,"correlated duplicate warning posterior");
+nearMath(2*3/(4*5),.3,"Beta posterior two future risk events");
+nearMath(1-.3-.3,.4,"Beta-binomial one future risk event");
+nearMath(.01/(.01+.09),.1,"Cantelli posterior upper bound");
+nearMath(-.7*Math.log(.7)-.3*Math.log(.3),.6108643020548935,"Bernoulli entropy proper score");
+nearMath(Math.log(2)-(-.7*Math.log(.7)-.3*Math.log(.3)),.08228287850505178,"improper prediction KL");
+nearMath(100*(.539827837277029-.460172162722971),7.965567455405802,"BSM at-the-money call");
+nearMath(.5*.02*10000*(.3**2-.2**2)/252,.01984126984126984,"Delta hedged long-gamma PnL");
+nearMath(.2/5,.04,"inverse Vega quote sensitivity");
+nearMath(100/(2*20),2.5,"uniform risk-neutral terminal-price call");
+nearMath(-10/20,-.5,"strike slope equals discounted tail probability");
+
 console.log("V110 PASS: 656/656 finished, all 20 disciplines complete, numerical 30/30, "+
   sectionCount+" complete reasoning sections, "+formulaCount+" strict KaTeX formulas, "+
   linkCount+" exact curriculum links, "+proofChars+" Chinese proof characters, "+
