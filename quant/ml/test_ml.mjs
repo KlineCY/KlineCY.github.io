@@ -102,7 +102,9 @@ assert(atlas.includes("atlas-jump-depth")&&atlas.includes("setCatalogOpen"),
 const extendedMLGroups=[
  ["atlas-depth-15-a.json",["m01-c05-p01","m02-c01-p04","m03-c02-p01","m04-c02-p04","m05-c02-p01","m06-c01-p01"]],
  ["atlas-depth-15-b.json",["m07-c01-p01","m08-c01-p01","m09-c02-p03","m10-c04-p03","m11-c04-p05","m12-c04-p03"]],
- ["atlas-depth-16-b.json",["m07-c01-p02","m08-c01-p05","m09-c04-p03","m10-c01-p02","m11-c04-p03","m12-c01-p04"]]
+ ["atlas-depth-16-b.json",["m07-c01-p02","m08-c01-p05","m09-c04-p03","m10-c01-p02","m11-c04-p03","m12-c01-p04"]],
+ ["atlas-depth-16-a.json",["m01-c04-p03","m02-c01-p01","m03-c01-p01","m04-c01-p03","m05-c01-p01","m06-c02-p01"]],
+ ["atlas-depth-16-c.json",["m13-c05-p01","m14-c04-p03","m15-c05-p01","m16-c01-p01","m17-c02-p01","m18-c02-p03"]]
 ];
 let validatedMLExpansions=0;
 for(const [file,expected] of extendedMLGroups){
@@ -120,7 +122,7 @@ for(const [file,expected] of extendedMLGroups){
   validatedMLExpansions++;
  }
 }
-assert.equal(validatedMLExpansions,18,"eighteen enriched ML subjects required");
+assert.equal(validatedMLExpansions,30,"thirty enriched ML subjects required");
 const nearExt=(v,ref)=>assert(Math.abs(v-ref)<1e-7,"extended numerical invariant failed: "+v+" vs "+ref);
 nearExt((100.4-100.1)/100.1,.002997002997002997);
 nearExt(100**2,10000);
@@ -140,5 +142,17 @@ nearExt(2/3,.6666666666666666);
 nearExt(3/5,.6);
 nearExt(1/(1+Math.exp(-4.5)),.9890130573694068);
 nearExt(1/20,.05);
+nearExt((3+5+0-5)/4,.75);
+nearExt(20/Math.sqrt(406),.9925833339709303);
+nearExt((.8-.5),.3);
+nearExt(.5*.05+.3*.05+.2*.05,.05);
+nearExt(1.1-1,.1);
+nearExt(-2/Math.sqrt(8/3),-1.224744871391589);
+nearExt((.75/(.75+.5+.75)),.375);
+nearExt(2*3-1*3,3);
+nearExt(.8-.5,.3);
+nearExt((1/(1+Math.exp(-2)))*(1-1/(1+Math.exp(-2))),.10499358540350662);
+nearExt(Math.log(2),.6931471805599453);
+nearExt((.5*1+.5*(-1)),0);
 
 console.log("PASS: canonical 720-course Atlas, complete depth overlays, 24 domains, valid equations, runtime navigation and 656 mathematics prerequisites");
