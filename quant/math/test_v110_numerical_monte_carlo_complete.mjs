@@ -235,6 +235,45 @@ assert(Math.abs(1-Math.exp(-1)-.6321205588285577)<1e-12,"point process exponenti
 assert(Math.abs(1/(.16+.09+.04+.01)-10/3)<1e-12,"importance weight ESS");
 assert(Math.abs(.1*10/.2-5)<1e-12,"discrete expected shortfall with VaR atom");
 
+
+const nextMathGroups=[
+ ["lessons-phase-24-a.json",["statistics-x003","statistics-x004","mlmath-x003","mlmath-x004"]],
+ ["lessons-phase-27-c.json",["riskmath-n0589","riskmath-n0594","riskmath-n0595"]],
+ ["lessons-phase-30-a.json",["finance-n0431","finance-n0432","finance-n0439"]]
+];
+let checkedNewMath=0;
+for(const [file,ids] of nextMathGroups){
+ const doc=json(file);
+ assert.deepEqual(doc.lessons.map(l=>l.id),ids,"advanced mathematics curriculum identity changed "+file);
+ for(const l of doc.lessons){
+  assert(l.deep_sections.length>=7&&l.derivation.length>=7&&l.formulas.length>=10,"advanced proof chapters missing "+l.id);
+  const last=l.deep_sections.at(-1);
+  assert(last.paragraphs.length===2&&last.paragraphs.every(p=>p.length>=70),"advanced math explanation short "+l.id);
+  assert(last.proof.length>=95&&last.worked.length>=80&&last.limitation.length>=50,"advanced math proof or example missing "+l.id);
+  assert(last.formulas.length===2,"advanced topic requires two focused equations "+l.id);
+  assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,l.deep_sections.length,"duplicate chapter headings "+l.id);
+  for(const eq of last.formulas){
+   assert(eq.tex.length>=16&&eq.label.length>=4,"math formula incomplete "+l.id);
+   katex.renderToString(eq.tex,{displayMode:true,throwOnError:true,strict:"error"});
+  }
+  checkedNewMath++;
+ }
+}
+assert.equal(checkedNewMath,10,"ten additional deepened quant-mathematics articles required");
+const nearMath=(a,b,name)=>assert(Math.abs(a-b)<1e-9,name+" mismatch "+a+" vs "+b);
+nearMath((1-.25)**2,.5625,"stationary bootstrap block survival");
+nearMath(.01*.0004/(2*.02**3),.25,"Sharpe influence at mean");
+nearMath(2*3/Math.sqrt(100),.6,"Rademacher linear-ball bound");
+nearMath(2*2**2/(1*100),.08,"regularized stability upper bound");
+nearMath(.04+2*(1)*(-3)*.016+9*.01,.034,"factor covariance quadratic");
+nearMath(.04-.048,-.008,"negative Euler factor numerator");
+nearMath(.1*.04/.13+.1*.09/.13,.1,"reverse stress optimum target loss");
+nearMath(.02/Math.sqrt(Math.PI),.011283791670955126,"selection winner bias");
+nearMath(.2*1.25*.8+.5*1+.3*(5/6)*1.2,1,"physical pricing-kernel identity");
+nearMath(-1-1+2,0,"redundant portfolio zero initial cost");
+nearMath((.25*.8+.5*1+.25*1.2),1,"risk neutral discounted martingale");
+nearMath(-Math.log(1.05/1.02),-.0289875368732523,"negative forward rate");
+
 console.log("V110 PASS: 656/656 finished, all 20 disciplines complete, numerical 30/30, "+
   sectionCount+" complete reasoning sections, "+formulaCount+" strict KaTeX formulas, "+
   linkCount+" exact curriculum links, "+proofChars+" Chinese proof characters, "+
