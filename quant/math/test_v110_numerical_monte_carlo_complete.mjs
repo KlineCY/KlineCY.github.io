@@ -274,6 +274,45 @@ nearMath(-1-1+2,0,"redundant portfolio zero initial cost");
 nearMath((.25*.8+.5*1+.25*1.2),1,"risk neutral discounted martingale");
 nearMath(-Math.log(1.05/1.02),-.0289875368732523,"negative forward rate");
 
+
+const cycleTimeSeriesGroups=[
+ ["lessons-phase-22-a.json",["timeseries-n0244","timeseries-n0245"]],
+ ["lessons-phase-22-b.json",["timeseries-n0248","timeseries-n0249"]],
+ ["lessons-phase-22-c.json",["timeseries-n0250","timeseries-n0251"]],
+ ["lessons-phase-22-d.json",["timeseries-n0254","timeseries-n0255"]]
+];
+let checkedTimeSeries=0;
+for(const [file,ids] of cycleTimeSeriesGroups){
+ const doc=json(file);
+ assert.deepEqual(doc.lessons.map(l=>l.id),ids,"original time-series lesson IDs changed "+file);
+ for(const l of doc.lessons){
+  assert(l.formulas.length>=9&&l.derivation.length>=6&&l.deep_sections.length>=7,"time-series deepening incomplete "+l.id);
+  const section=l.deep_sections.at(-1);
+  assert(section.paragraphs.length===2&&section.paragraphs.every(s=>s.length>=65),"time-series prose too brief "+l.id);
+  assert(section.proof.length>=95&&section.worked.length>=80&&section.limitation.length>=45,"time-series derivation, example or limitation missing "+l.id);
+  assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,l.deep_sections.length,"duplicate time-series headings "+l.id);
+  assert(section.formulas.length===2,"two independent display formulas required "+l.id);
+  for(const e of section.formulas){
+   assert(e.label.length>=4&&e.tex.length>=14,"time-series equation short "+l.id);
+   katex.renderToString(e.tex,{displayMode:true,throwOnError:true,strict:"error"});
+  }
+  checkedTimeSeries++;
+ }
+}
+assert.equal(checkedTimeSeries,8,"all eight time-series course deepening records required");
+nearMath(1/100,.01,"white-noise mean variance");
+nearMath(3-1,2,"nonlinear dependent squared white-noise covariance");
+nearMath(4*(1+.5**2),5,"Wold MA horizon two error variance");
+nearMath((1+2**2)*1,(1+.5**2)*4,"noninvertible MA covariance equivalence");
+nearMath(2*1,.5*4,"MA lag-one covariance equivalence");
+nearMath(.8-.8,0,"ARMA polynomial cancellation");
+nearMath(-.0004/.0008,-.5,"overdifferenced iid lag-one correlation");
+nearMath(240+2*2,234+2*5,"AIC tied rival models");
+nearMath(244+60/94,244.63829787234042,"small-sample AICc model B");
+nearMath(Math.log(.5)/Math.log(.98),34.309618491520645,"ADF local-root half-life n100");
+nearMath(Math.log(.5)/Math.log(.996),172.93999003737392,"ADF local-root half-life n500");
+nearMath(2/(3**2*2),1/9,"KPSS cumulative residual statistic");
+
 console.log("V110 PASS: 656/656 finished, all 20 disciplines complete, numerical 30/30, "+
   sectionCount+" complete reasoning sections, "+formulaCount+" strict KaTeX formulas, "+
   linkCount+" exact curriculum links, "+proofChars+" Chinese proof characters, "+
