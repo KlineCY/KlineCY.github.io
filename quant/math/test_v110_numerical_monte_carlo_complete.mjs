@@ -345,7 +345,7 @@ assert(Math.max(8,12)<=Math.min(13,14),"purging must detect overlapping future l
 nearNew((5/6)/(1-1/6),1,"Ridge fixed-lambda LOOCV residual");
 nearNew(2/3,0.6666666666666666,"elastic net duplicate coefficients");
 nearNew(4/1.75,2.2857142857142856,"autocorrelated mini-batch effective size");
-nearNew(.01*(.09/(1-.9**2))/Math.sqrt(.0099/(1-.99**2)),.006716,"Adam zero current gradient still updates");
+nearNew(.01*(.09/(1-.9**2))/Math.sqrt(.0099/(1-.99**2)),.006715801472893548,"Adam zero current gradient still updates");
 nearNew(.8*1+.2*(-4),0,"unclipped random gradient");
 nearNew(.8*1+.2*(-1),.6,"clipped gradient bias");
 nearNew(.95,1-.05,"scaled LASSO effective penalty");
