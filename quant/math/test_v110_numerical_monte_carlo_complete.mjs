@@ -196,7 +196,9 @@ assert(reviewedNumerical.find(s=>s.title==="连续障碍的漏检偏差").paragr
 const extendedMathGroups=[
  ["lessons-phase-26-a.json",["timeseries-n0260","timeseries-n0261","timeseries-n0262"]],
  ["lessons-phase-26-b.json",["timeseries-n0266","timeseries-n0267","timeseries-n0269","timeseries-n0270"]],
- ["lessons-phase-27-b.json",["statistics-n0173","statistics-n0174","statistics-n0175","statistics-n0176"]]
+ ["lessons-phase-27-b.json",["statistics-n0173","statistics-n0174","statistics-n0175","statistics-n0176"]],
+ ["lessons-phase-27-a.json",["statistics-n0171","statistics-n0170","statistics-n0172"]],
+ ["lessons-phase-25-a.json",["timeseries-x003","timeseries-x004","timeseries-x006","mlmath-x006","riskmath-x001"]]
 ];
 let checkedMathExtensions=0;
 for(const [file,expected] of extendedMathGroups){
@@ -213,7 +215,7 @@ for(const [file,expected] of extendedMathGroups){
   checkedMathExtensions++;
  }
 }
-assert.equal(checkedMathExtensions,11,"all eleven added mathematics articles must be verified");
+assert.equal(checkedMathExtensions,19,"all nineteen enriched mathematics articles must be verified");
 assert(Math.abs((1+.5+.25+.125)-1.875)<1e-12,"AR(1) cumulative impulse response");
 assert(Math.abs((.25*4)/(1+.25*4)-.5)<1e-12,"FEVD two-period external innovation contribution");
 assert(Math.abs(2-1/2-1.5)<1e-12,"Granger proxy conditional prediction risk");
@@ -224,6 +226,14 @@ assert(Math.abs(2/3+(1/3)*.7**2-.83)<1e-12,"Markov two-period state probability"
 assert.equal([0,0,0,0,10].sort((a,b)=>a-b)[2],0,"zero-MAD sample median");
 assert(Math.abs(.5*.05+.3*.05+.2*.05-.05)<1e-12,"weighted Bonferroni budget");
 assert(Math.abs(.05*1+.95*0-.05)<1e-12,"expected FDP illustration");
+assert(Math.abs(4*2.5-3*(20/9)-10/3)<1e-12,"Jackknife variance bias correction");
+assert(Math.abs(Math.sqrt(6)/36-.06804138174397717)<1e-12,"BCa acceleration on three observations");
+assert.equal(2/8,.25,"two sided three-pair sign flip probability");
+assert(Math.abs((.00004-.2*.00012)/.8-.00002)<1e-12,"correlated quote noise leaves two-scale bias");
+assert(Math.abs(.8*.5-.4)<1e-12,"asynchronous one-half overlap lowers return covariance");
+assert(Math.abs(1-Math.exp(-1)-.6321205588285577)<1e-12,"point process exponential PIT");
+assert(Math.abs(1/(.16+.09+.04+.01)-10/3)<1e-12,"importance weight ESS");
+assert(Math.abs(.1*10/.2-5)<1e-12,"discrete expected shortfall with VaR atom");
 
 console.log("V110 PASS: 656/656 finished, all 20 disciplines complete, numerical 30/30, "+
   sectionCount+" complete reasoning sections, "+formulaCount+" strict KaTeX formulas, "+
