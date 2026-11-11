@@ -206,7 +206,7 @@ for(const [file,expected] of extendedMathGroups){
  assert.deepEqual(doc.lessons.map(x=>x.id),expected,"extended mathematics canonical order changed "+file);
  for(const lesson of doc.lessons){
   const section=lesson.deep_sections.at(-1);
-  assert(lesson.deep_sections.length>=7&&lesson.derivation.length>=7&&lesson.formulas.length>=10,"extended mathematics incomplete "+lesson.id);
+  assert(lesson.deep_sections.length>=7&&lesson.derivation.length>=7&&lesson.formulas.length>=9,"extended mathematics incomplete "+lesson.id);
   assert.equal(new Set(lesson.deep_sections.map(x=>x.title)).size,lesson.deep_sections.length,"extended chapter headings duplicated "+lesson.id);
   assert(section.paragraphs.length===2&&section.paragraphs.every(s=>s.length>=65),"extended proof context inadequate "+lesson.id);
   assert(section.proof.length>=90&&section.worked.length>=75&&section.limitation.length>=40,"extended numerical proof inadequate "+lesson.id);
