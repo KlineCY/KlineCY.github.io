@@ -313,6 +313,43 @@ nearMath(Math.log(.5)/Math.log(.98),34.309618491520645,"ADF local-root half-life
 nearMath(Math.log(.5)/Math.log(.996),172.93999003737392,"ADF local-root half-life n500");
 nearMath(2/(3**2*2),1/9,"KPSS cumulative residual statistic");
 
+
+const newLearningMathematicsGroups=[
+ ["lessons-phase-21-a.json",["mlmath-n0455","mlmath-n0466"]],
+ ["lessons-phase-21-b.json",["mlmath-n0463","mlmath-n0464"]],
+ ["lessons-phase-21-c.json",["mlmath-n0460","mlmath-n0461"]],
+ ["lessons-phase-21-d.json",["mlmath-n0462","mlmath-n0465"]]
+];
+let deepLearningMathCount=0;
+for(const [filename,expected] of newLearningMathematicsGroups){
+ const doc=json(filename);
+ assert.deepEqual(doc.lessons.map(l=>l.id),expected,"learn-math canonical order changed "+filename);
+ for(const l of doc.lessons){
+  assert(l.formulas.length>=9&&l.derivation.length>=6&&l.deep_sections.length>=7,"extended math chapter incomplete "+l.id);
+  assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,l.deep_sections.length,"duplicate mathematical chapter heading "+l.id);
+  const last=l.deep_sections.at(-1);
+  assert(last.paragraphs.length===2&&last.paragraphs.every(s=>s.length>=85),"mathematical exposition too brief "+l.id);
+  assert(last.proof.length>=95&&last.worked.length>=95&&last.limitation.length>=65,"mathematical proof, numeric worked example or caveat missing "+l.id);
+  assert.equal(last.formulas.length,2,"two mathematical display equations are required "+l.id);
+  for(const eq of last.formulas){
+   assert(eq.label.length>=4&&eq.tex.length>=18,"mathematical formula missing "+l.id);
+   katex.renderToString(eq.tex,{displayMode:true,throwOnError:true,strict:"error"});
+  }
+  deepLearningMathCount++;
+ }
+}
+assert.equal(deepLearningMathCount,8,"eight new machine-learning mathematics chapters required");
+const nearNew=(x,y,msg)=>assert(Math.abs(x-y)<1e-9,msg+" "+x+" "+y);
+nearNew(1-2**(1-4),.875,"test re-use maximum");
+assert(Math.max(8,12)<=Math.min(13,14),"purging must detect overlapping future labels");
+nearNew((5/6)/(1-1/6),1,"Ridge fixed-lambda LOOCV residual");
+nearNew(2/3,0.6666666666666666,"elastic net duplicate coefficients");
+nearNew(4/1.75,2.2857142857142856,"autocorrelated mini-batch effective size");
+nearNew(.01*(.09/(1-.9**2))/Math.sqrt(.0099/(1-.99**2)),.006716,"Adam zero current gradient still updates");
+nearNew(.8*1+.2*(-4),0,"unclipped random gradient");
+nearNew(.8*1+.2*(-1),.6,"clipped gradient bias");
+nearNew(.95,1-.05,"scaled LASSO effective penalty");
+
 console.log("V110 PASS: 656/656 finished, all 20 disciplines complete, numerical 30/30, "+
   sectionCount+" complete reasoning sections, "+formulaCount+" strict KaTeX formulas, "+
   linkCount+" exact curriculum links, "+proofChars+" Chinese proof characters, "+
