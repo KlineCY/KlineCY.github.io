@@ -262,4 +262,44 @@ nearExt(Math.hypot(3*2/5,4*2/5),2);
 nearExt(.5*.5,.25);
 nearExt(.5*.5+.5,.75);
 
+
+const newlyDeepenedMLGroups=[
+ ["atlas-depth-13-b.json",["m07-c01-p04","m08-c01-p06","m09-c03-p02","m10-c04-p04","m11-c05-p04","m12-c03-p06"]],
+ ["atlas-depth-13-c.json",["m13-c02-p06","m14-c04-p04","m15-c01-p01","m16-c03-p01","m17-c02-p02","m18-c03-p01"]],
+ ["atlas-depth-13-d.json",["m19-c02-p04","m20-c02-p02","m21-c02-p02","m22-c01-p06","m23-c04-p05"]]
+];
+let deepMLCount=0;
+for(const [filename,expected] of newlyDeepenedMLGroups){
+ const doc=read(filename);
+ assert.deepEqual(Object.keys(doc.lessons),expected,"new systematic ML lecture IDs changed "+filename);
+ for(const [id,lesson] of Object.entries(doc.lessons)){
+  assert(lesson.equations.length>=10&&lesson.derivation.length>=10,"new ML mathematical coverage too short "+id);
+  assert(lesson.protocol.length>=6&&lesson.pitfalls.length>=5,"new ML financial validation and caveats missing "+id);
+  assert(lesson.worked_example.length>=430&&lesson.derivation.slice(-2).every(s=>s.length>=95),"new ML numerical proof too short "+id);
+  assert.equal(new Set(lesson.equations.map(e=>e.label)).size,lesson.equations.length,"ML equation labels duplicated "+id);
+  for(const eq of lesson.equations.slice(-2)){
+   assert(eq.label.length>=4&&eq.tex.length>=18,"new ML formula missing "+id);
+   katex.renderToString(eq.tex,{displayMode:true,throwOnError:true,strict:"error"});
+  }
+  deepMLCount++;
+ }
+}
+assert.equal(deepMLCount,17,"all seventeen new systematic ML lectures required");
+nearExt(.75**2+.25**2,.625);
+nearExt(4+9/4,6.25);
+nearExt(.8*1+.2*(-4),0);
+nearExt(1-.9**20,.8784233454094307);
+nearExt(1-.95**2,.0975);
+nearExt(12+.1**2,12.01);
+nearExt(65**2/17**2,4225/289);
+nearExt(.8*.2+.2*.7,.30);
+nearExt(.2*.7,.14);
+nearExt(.8*.9,.72);
+nearExt(.75*(4/3)+.25*8,3);
+nearExt((1+4-1-Math.log(4))/2,1.3068528194400546);
+nearExt(2/(1-.9),20);
+nearExt(10*.01,.1);
+nearExt(.05/100,.0005);
+nearExt(1.1*(1/11)*.001,.0001);
+
 console.log("PASS: canonical 720-course Atlas, complete depth overlays, 24 domains, valid equations, runtime navigation and 656 mathematics prerequisites");
