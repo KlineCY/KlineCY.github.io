@@ -203,4 +203,13 @@ nearExt(6*.05/Math.PI**2,.030396355092701333);
 nearExt(1024*1e-8,.00001024);
 nearExt(21-7,14);
 
+
+const asOfLecture=read("atlas-depth-14-a.json").lessons["m06-c01-p06"];
+const revisionRule=asOfLecture.equations.find(f=>f.label==="同一业务时点多版本的点时记录规则");
+const utcRule=asOfLecture.equations.find(f=>f.label==="跨市场绝对时间的发布合法性");
+assert(revisionRule&&revisionRule.tex.includes("rev")&&revisionRule.tex.includes("publish")&&revisionRule.tex.includes("receive"),"historical source-vintage and receipt rule lost");
+assert(utcRule&&utcRule.tex.includes("UTC")&&utcRule.tex.includes("published")&&utcRule.tex.includes("received"),"cross-market UTC rule lost");
+katex.renderToString(revisionRule.tex,{throwOnError:true,strict:"error"});
+katex.renderToString(utcRule.tex,{throwOnError:true,strict:"error"});
+
 console.log("PASS: canonical 720-course Atlas, complete depth overlays, 24 domains, valid equations, runtime navigation and 656 mathematics prerequisites");
