@@ -152,7 +152,7 @@ for(const file of files){
 }
 near("Bond exact five-year yield shock",Math.exp(-.05)-1,-.048770575499285984);
 near("Bond Delta-Gamma approximation",-.05+.5*.05**2,-.04875);
-near("Exponential Taylor actual remainder",Math.exp(.1)-1-.1-.1**2/2,.000170185988091841);
+near("Exponential Taylor actual remainder",Math.exp(.1)-1-.1-.1**2/2,.00017091807564770592);
 near("Exponential Taylor bound",Math.exp(.1)*.1**3/6,.00018419515310348058);
 near("Positive definite risk Hessian determinant",2*6-2*2,8);
 near("Perpetuity growth discounted cash",100/(.05-.02),3333.3333333333335);
