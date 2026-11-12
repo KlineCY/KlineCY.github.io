@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import assert from "node:assert/strict";
+import vm from "node:vm";
 import katex from "katex";
 const root=new URL("./",import.meta.url);
 const read=n=>fs.readFileSync(new URL(n,root),"utf8");
@@ -77,8 +78,8 @@ for(const l of added){
   linkCount++;
  }
 }
-assert(texCount>=252,"All historical and expanded expressions must strictly parse");
-assert(sectionCount>=84,"All original deep explanations retained");
+assert(texCount>=308,"All original 252 and new 56 strict equations required");
+assert(sectionCount>=112,"All original 84 and new 28 deep explanations required");
 assert.equal(linkCount,84,"V109 must preserve 84 exact internal links");
 assert(proofChars>=20000,"V109 proof and numerical explanation text unexpectedly truncated");
 const app=read("app.js"),html=read("index.html"),css=read("styles.css"),workflow=read("../../.github/workflows/test-quant-math.yml");
@@ -168,12 +169,60 @@ for(const name of ["lessons-econometrics-v109a.json","lessons-regression-v109c.j
  for(const lecture of json(name).lessons)for(const section of lecture.deep_sections)
   assert(section.paragraphs.every(p=>!p.includes("\n")),lecture.node_id+" still contains repeated paragraphs");
 const reviewed109=["lessons-econometrics-v109b.json","lessons-regression-v109e.json","lessons-regression-v109f.json"].flatMap(f=>json(f).lessons).flatMap(l=>l.deep_sections);
-assert.equal(reviewed109.length,27,"All 27 econometrics and generalized-linear-model subchapters required");
+assert(reviewed109.length>=36,"All original and expanded 36 econometrics and GLM subchapters required");
 for(const s of reviewed109)assert(s.paragraphs[1].length>=135&&!s.paragraphs[1].includes("\n"),s.title+" missing rigorous assumptions");
 for(const title of ["IPW的可识别条件","分配效应与实际治疗效应","因果识别和统计正交的区别"]){
  const section=reviewed109.find(s=>s.title===title);assert(section&&section.paragraphs[1].length>=140,title+" identification requirements missing");
 }
 
+
+for(const lecture of added){
+ const s=lecture.deep_sections.at(-1);
+ assert(lecture.deep_sections.length>=4,lecture.id+" new rigorous inference chapter missing");
+ assert(s.formulas.length===2,lecture.id+" independent new mathematical relations missing");
+ assert(s.paragraphs.length>=2&&s.paragraphs.every(p=>p.length>=95),lecture.id+" explanatory mechanism insufficient");
+ assert(s.proof.length>=100&&s.worked.length>=85&&s.limitation.length>=60,lecture.id+" rigorous proof or independent calculation incomplete");
+}
+const loaderStart=app.indexOf("async function loadV109RegressionEconometrics(");
+const loaderEnd=app.indexOf("async function loadV110NumericalMonteCarlo(",loaderStart);
+assert(loaderStart>=0&&loaderEnd>loaderStart,"production econometrics reader loader not found");
+const loadEconometrics=vm.runInNewContext(app.slice(loaderStart,loaderEnd)+"\nloadV109RegressionEconometrics",{
+ fetchMathJson:async name=>json(name.replace(/^\.\//,""))
+});
+for(const [i,path] of paths.entries()){
+ const discipline=path.includes("regression")?"regression":"econometrics";
+ const expanded=await loadEconometrics("./"+path,expectedCounts[i],discipline);
+ assert.equal(expanded.length,expectedCounts[i],"browser rejected expanded regression/econometrics module "+path);
+ assert(expanded.every(l=>l.deep_sections.length>=4),"reader lost a full regression/econometrics proof chapter");
+}
+near("OLS slope conditional variance",4/2,2);
+near("Moore Penrose symmetric coefficient squared norm",1**2+1**2,2);
+near("Leave-one-out residual levered",2/(1-.5),4);
+near("Bonferroni single confidence miss rate",.05/10,.005);
+near("Ljung Box one-lag statistic",10*12*.2**2/9,.5333333333333333);
+near("AR1 effective sample size",100*(1-.5)/(1+.5),100/3);
+near("VIF standard error multiplier",1/Math.sqrt(1-.96),5);
+near("Cook distance high leverage",(.1**2/(2*.5**2))*(.8/(1-.8)**2),.4);
+near("Nonlinear specification residual risk",1/5-1/9,4/45);
+near("Kish weighted sample size",1.25**2/(1+.25**2),1.4705882352941178);
+near("Correlated observation GLS variance",3.75/4,.9375);
+near("Wrong FGLS covariance weighting",.9**2+4*.1**2,.85);
+near("HC3 relative to HC2 at leverage one-half",1/(1-.5),2);
+near("HAC two day overlap longrun",2+2*1,4);
+near("Date cluster variance one-hundred days",1/100,.01);
+near("Probit standard normal density at zero",1/Math.sqrt(2*Math.PI),.3989422804014327);
+near("Poisson deviance count three expected two",2*(3*Math.log(3/2)-1),.4327906486489863);
+near("Canonical logistic Fisher four events",4*.5*(1-.5),1);
+near("Logistic complete separation large coefficient",2*Math.log(1/(1+Math.exp(-10))),-.000090797798435,1e-8);
+near("Nonlinear least squares Gauss Newton delta",(4-1)/2,1.5);
+near("DML second order nuisance product",.05*.05,.0025);
+near("RE intraclass correlation",3/(3+1),.75);
+near("DiD effect including differential trend",(8-2)-(4-1),3);
+near("Within dynamic lag covariance",-4/4,-1);
+near("Uncollapsed difference GMM lag instruments",19*18/2,171);
+near("Network spillover distorted comparison",6-4,2);
+near("Complier local average treatment effect",.06/.2,.3);
+near("Clipped IPW selected mean",.01/.1,.1);
 console.log("V109 PASS: "+all.length+"/"+nodes.length+" full lessons, regression 30/30, econometrics 36/36; "+
  sectionCount+" detailed proof sections, "+texCount+" strict KaTeX expressions, "+linkCount+
  " exact prerequisite links, "+proofChars+" Chinese proof characters, "+checked+" arithmetic checks, legacy/CJK CI guards");
