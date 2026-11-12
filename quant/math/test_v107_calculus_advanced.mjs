@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import assert from "node:assert/strict";
+import vm from "node:vm";
 import katex from "katex";
 
 const root=new URL("./",import.meta.url);
@@ -53,7 +54,7 @@ for(const lesson of added){
  assert(lesson.properties.length>=4&&lesson.properties.every(x=>x.length>=20),id+" missing mathematical properties");
  assert.equal(lesson.formulas.length,3,id+" core formula count");
  assert.equal(lesson.derivation.length,3,id+" step-by-step derivation count");
- assert.equal(lesson.deep_sections.length,3,id+" deep reasoning section count");
+ assert.equal(lesson.deep_sections.length,4,id+" original three sections and expanded fourth chapter required");
  for(const f of lesson.formulas){assert(f.label?.length>2);strictTex(f.tex,id);}
  for(const d of lesson.derivation){assert(d.explanation?.length>=18);strictTex(d.tex,id);}
  const titles=new Set();
@@ -65,9 +66,8 @@ for(const lesson of added){
   assert(part.proof?.length>=55,id+" proof missing");
   assert(part.worked?.length>=55,id+" worked example missing");
   assert(part.limitation?.length>=35,id+" failure conditions missing");
-  assert.equal(part.formulas.length,1,id+" deep formula");
-  assert(part.formulas[0].label?.length>=2);
-  strictTex(part.formulas[0].tex,id);
+  assert(part.formulas.length>=1,id+" deep formula missing");
+  for(const f of part.formulas){assert(f.label?.length>=2);strictTex(f.tex,id);}
   chapters++;
   proofChars+=part.paragraphs.join("").length+part.proof.length+part.worked.length+part.limitation.length;
  }
@@ -76,8 +76,8 @@ for(const lesson of added){
  assert.equal(lesson.links?.length,3,id+" missing learning graph");
  for(const l of lesson.links){assert.equal(l.kind,"math");assert(nodeMap.has(l.id),id+" broken topic link "+l.id);links++;}
 }
-assert.equal(formulas,144,"Nine strictly parsed formulas per lesson");
-assert.equal(chapters,48,"Three substantive deep units per lesson");
+assert.equal(formulas,176,"All 144 original equations and 32 new equations must strictly parse");
+assert.equal(chapters,64,"All 48 original and 16 new deep units must remain");
 assert(proofChars>=16000,"V107 proofs and worked examples shortened");
 assert.equal(links,48,"All prerequisite and cross-discipline links");
 
@@ -193,7 +193,7 @@ near("reverse-mode centered w gradient",(.5*3.03**2-.5*2.97**2)/.02,9);
 near("reverse-mode branched gradient",2*3+1,7);
 near("reverse-mode branched numerical",((3.01**2+3.01)-(2.99**2+2.99))/.02,7);
 const reviewed107=paths.flatMap(f=>json(f).lessons).flatMap(l=>l.deep_sections);
-assert.equal(reviewed107.length,48,"All 48 advanced-calculus sections must remain");
+assert.equal(reviewed107.length,64,"All 48 historical and 16 new advanced-calculus sections required");
 for(const s of reviewed107){
  assert(s.paragraphs.length===2&&s.paragraphs[1].length>=130,s.title+" incomplete advanced mathematical context");
  assert(!s.paragraphs[1].includes("\n"),s.title+" contains an unstructured merged paragraph");
@@ -201,4 +201,39 @@ for(const s of reviewed107){
 assert(reviewed107.find(s=>s.title==="Fubini与Tonelli为何是两种不同定理").paragraphs[1].includes("绝对可积"),"Fubini's integrability condition missing");
 assert(reviewed107.find(s=>s.title==="为什么log-det在SPD锥上是凹函数").paragraphs[1].includes("正定可行域"),"SPD requirement missing");
 
+
+for(const lecture of added){
+ const last=lecture.deep_sections.at(-1);
+ assert(last.formulas.length===2,lecture.id+" two independent additional equations required");
+ assert(last.paragraphs.length===2&&last.paragraphs[1].length>=130,lecture.id+" full mathematical context required");
+ assert(last.proof.length>=90&&last.worked.length>=80&&last.limitation.length>=55,lecture.id+" proof/calculation/limitations incomplete");
+}
+const loaderStart=app.indexOf("async function loadV107IntegralOptimization(");
+const loaderEnd=app.indexOf("async function loadV108FoundationsMeasure(",loaderStart);
+assert(loaderStart>=0&&loaderEnd>loaderStart,"production V107 browser loader not found");
+const loadAdvanced=vm.runInNewContext(app.slice(loaderStart,loaderEnd)+"\nloadV107IntegralOptimization",{
+ fetchMathJson:async name=>json(name.replace(/^\.\//,""))
+});
+for(const [i,file] of paths.entries()){
+ const lessons=await loadAdvanced("./"+file,counts[i]);
+ assert.equal(lessons.length,counts[i],"V107 production browser rejects full chapter "+file);
+ assert(lessons.every(l=>l.deep_sections.length===4),"V107 extended chapter not visible in browser");
+}
+near("Independent normal joint negative sign",.5*.5,.25);
+near("Dirichlet simplex volume",1/6,1/6);
+near("Dirichlet uniform one weight mean",6/24,.25);
+near("Fubini failed changing order",Math.PI/4,-(-Math.PI/4));
+near("Tail integration positive loss",10/2,5);
+near("Threshold digital payoff sensitivity",1/Math.sqrt(2*Math.PI),.3989422804014327);
+near("Inverse Jacobian polar determinant",Math.exp(0),1);
+near("Lagrange budget multiplier",(4+2-2*1)/2,2);
+near("Two asset minimum variance first weight",1/(1+.25),.8);
+near("Two asset minimum variance objective",.8**2+4*.2**2,.8);
+near("KKT convex constrained optimum",(1-2)**2,1);
+near("Hessian tangent valid curvature",2*1**2,2);
+near("Frobenius gradient first component",-1,-1);
+near("Trace multiplication noncyclic",2-1,1);
+near("Inverse perturbation derivative",-100**2*.001,-10);
+near("Precision likelihood one dimension",1/4,.25);
+near("Reverse mode shared gradient",2*2+3,7);
 console.log("V107: 586/656 total lessons, calculus 30/30, "+formulas+" strict TeX, "+chapters+" deep sections, "+proofChars+" reasoning chars, "+links+" links, "+numerics+" verified numerics");
