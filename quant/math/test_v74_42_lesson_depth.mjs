@@ -272,7 +272,7 @@ near("Infinity bounded adversarial input",.1*(2+1),.3);
 near("Rare event Bayes positive predictive value",.9*.01/(.9*.01+.05*.99),.15384615384615385);
 near("False positive versus false negative decision threshold",1/(1+10),1/11);
 near("Bernstein concentration epsilon",2*Math.exp(-100*.2**2/(2*.25+(2/3)*.2)),.003617,1e-5);
-yes("FP16 256 square overflows",256**2>65504);
+truth("FP16 256 square overflows",256**2>65504);
 near("Past cross section centered ETF feature",2-2,0);
 near("Survivor-only cross section standardized ETF feature",(2-2.5)/.5,-1);
 near("Ridge effective df at lambda one",100/101+1/2,1.49009900990099);
