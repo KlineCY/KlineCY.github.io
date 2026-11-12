@@ -67,9 +67,9 @@ for(const l of newest){
  for(const key of ["definition","assumptions","example","application","caveat"])
   assert(l[key]?.length>=70,id+" thin "+key);
  assert(l.properties?.length>=4 && l.properties.every(p=>p.length>=20),id+" properties incomplete");
- assert.equal(l.formulas.length,3,id+" core equations");
- assert.equal(l.derivation.length,3,id+" math derivation");
- assert.equal(l.deep_sections.length,3,id+" deep subchapters");
+ assert(l.formulas.length>=3,id+" core equations preserved");
+ assert(l.derivation.length>=3,id+" mathematical derivations preserved");
+ assert(l.deep_sections.length>=3,id+" deep subchapters preserved");
  for(const f of l.formulas){assert(f.label?.length>=2,id+" formula caption");checkFormula(f.tex,id);}
  for(const d of l.derivation){assert(d.explanation?.length>=25,id+" step explanation");checkFormula(d.tex,id);}
  const sectionTitles=new Set();
@@ -77,12 +77,11 @@ for(const l of newest){
   assert(s.title?.length>=8&&s.question?.length>=10,id+" deep metadata");
   assert(!sectionTitles.has(s.title),id+" repeated deep section");
   sectionTitles.add(s.title);
-  assert(s.paragraphs?.length===2&&s.paragraphs.every(p=>p.length>=30),id+" thin subchapter paragraphs");
+  assert(s.paragraphs?.length>=2&&s.paragraphs.every(p=>p.length>=30),id+" thin subchapter paragraphs");
   for(const [key,min] of [["proof",50],["worked",50],["limitation",25]])
    assert(s[key]?.length>=min,id+" thin "+key);
-  assert.equal(s.formulas?.length,1,id+" deep mathematics");
-  assert(s.formulas[0].label?.length>=4);
-  checkFormula(s.formulas[0].tex,id);
+  assert(s.formulas?.length>=1,id+" deep mathematics missing");
+  for(const f of s.formulas){assert(f.label?.length>=4);checkFormula(f.tex,id);}
   chapterCount++;
   deepChars+=s.paragraphs.join("").length+s.proof.length+s.worked.length+s.limitation.length;
  }
@@ -94,8 +93,8 @@ for(const l of newest){
  assert(/[\u3400-\u9FFF]/u.test(JSON.stringify(l)),id+" no Chinese body");
  assert(!/TODO|FIXME|Lorem ipsum|待补充/i.test(JSON.stringify(l)),id+" placeholder");
 }
-assert.equal(chapterCount,51);
-assert.equal(katexCount,153);
+assert(chapterCount>=68,"Original 51 deep chapters and 17 extended chapters missing");
+assert(katexCount>=187,"Original 153 KaTeX expressions and new derivations missing");
 assert(deepChars>=13500);
 assert(crossRefs>=48);
 const html=read("index.html"),app=read("app.js"),css=read("styles.css");
@@ -222,6 +221,19 @@ near("Dynamic trade payoff",.02-.005,.015);
 near("Dynamic weak payoff",.003-.005,-.002);
 yes("Dynamic positive alpha covers cost",.02>.005);
 assert(numerical>=90,"Insufficient independent financial arithmetic");
+
+for(const lesson of newest){
+ const advanced=lesson.deep_sections.at(-1);
+ assert(lesson.deep_sections.length>=4,lesson.id+" expanded financial analysis missing");
+ assert(advanced.paragraphs.length>=2&&advanced.paragraphs.every(x=>x.length>=60),lesson.id+" insufficient financial reasoning");
+ assert(advanced.proof.length>=80&&advanced.worked.length>=65&&advanced.limitation.length>=45,lesson.id+" incomplete derivation, example or assumptions");
+ assert(advanced.formulas.length>=2,lesson.id+" needs independent mathematical expressions");
+}
+assert(Math.abs((1.03**4-1)-0.12550881)<1e-10,"nominal/effective compounding");
+assert(Math.abs(-100+230/1.1-132/1.21)<1e-10,"first IRR root");
+assert(Math.abs(-100+230/1.2-132/1.44)<1e-10,"second IRR root");
+assert(Math.abs(.0125+.005-.0175)<1e-10,"correlation stress");
+assert(Math.abs(5+10*(10**.2-1)-10.848931924611136)<1e-9,"POT tail extrapolation");
 console.log("V100 PASS:",newest.length,"finance lessons;",all.length,"total math;",finance.length,
  "/36 finance complete;",katexCount,"strict KaTeX;",chapterCount,"deep sections;",
  deepChars,"proof characters;",numerical,"independent numeric checks;",crossRefs,"cross references.");

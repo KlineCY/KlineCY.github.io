@@ -78,9 +78,9 @@ for(const l of newest){
  for(const field of ["definition","assumptions","example","application","caveat"])
   assert(l[field]?.length>=70,id+" incomplete "+field);
  assert(l.properties?.length>=4 && l.properties.every(p=>p.length>=20),id+" shallow properties");
- assert.equal(l.formulas.length,3,id+" core formulas");
- assert.equal(l.derivation.length,3,id+" derivations");
- assert.equal(l.deep_sections.length,3,id+" detailed chapters");
+ assert(l.formulas.length>=3,id+" original core formulas preserved");
+ assert(l.derivation.length>=3,id+" original derivations preserved");
+ assert(l.deep_sections.length>=3,id+" original detailed chapters preserved");
  for(const x of l.formulas){assert(x.label?.length>=2,id+" mathematical label");formula(x.tex,id);}
  for(const x of l.derivation){assert(x.explanation?.length>=25,id+" derivation prose");formula(x.tex,id);}
  const headings=new Set();
@@ -88,12 +88,11 @@ for(const l of newest){
   assert(s.title?.length>=8 && s.question?.length>=10,id+" deep section title/question");
   assert(!headings.has(s.title),id+" repeated subchapter");
   headings.add(s.title);
-  assert(s.paragraphs?.length===2 && s.paragraphs.every(p=>p.length>=30),id+" deep explanatory text");
+  assert(s.paragraphs?.length>=2 && s.paragraphs.every(p=>p.length>=30),id+" deep explanatory text");
   for(const [key,min] of [["proof",50],["worked",50],["limitation",25]])
    assert(s[key]?.length>=min,id+" short "+key);
-  assert.equal(s.formulas?.length,1,id+" deep math");
-  assert(s.formulas[0].label?.length>=2,id+" deep formula caption");
-  formula(s.formulas[0].tex,id);
+  assert(s.formulas?.length>=1,id+" deep mathematics missing");
+  for(const f of s.formulas){assert(f.label?.length>=2,id+" deep formula caption");formula(f.tex,id);}
   deepCount++;
   deepChars+=s.paragraphs.join("").length+s.proof.length+s.worked.length+s.limitation.length;
  }
@@ -105,8 +104,8 @@ for(const l of newest){
   linkCount++;
  }
 }
-assert.equal(mathCount,153,"New formula count changed");
-assert.equal(deepCount,51,"Deep chapter count changed");
+assert(mathCount>=184,"Original 153 and expanded formulas missing");
+assert(deepCount>=68,"Original 51 and expanded 17 chapters missing");
 assert(deepChars>=13900,"Depth reduced from reviewed version");
 assert.equal(linkCount,51,"Cross-lesson link count changed");
 const html=read("index.html"),css=read("styles.css"),app=read("app.js");
@@ -252,6 +251,19 @@ for(const name of ["lessons-timeseries-v101.json","lessons-risk-tail-v101.json"]
    katex.renderToString(match[1],{throwOnError:true,strict:"error"});
  }
 }
+
+for(const lesson of newest){
+ const advanced=lesson.deep_sections.at(-1);
+ assert(lesson.deep_sections.length>=4,lesson.id+" advanced time-series/risk subchapter missing");
+ assert(advanced.paragraphs.length>=2&&advanced.paragraphs.every(x=>x.length>=60),lesson.id+" explanation incomplete");
+ assert(advanced.proof.length>=80&&advanced.worked.length>=65&&advanced.limitation.length>=45,lesson.id+" unverified mathematical detail");
+ assert(advanced.formulas.length>=1,lesson.id+" missing new equation");
+}
+assert(Math.abs(3/(2.25**1.5)-8/9)<1e-12,"discrete skewness example");
+assert(Math.abs(11.0625/(2.25**2)-2.185185185185185)<1e-12,"discrete kurtosis example");
+assert(.96>=.95&&.92<.95,"VaR violates subadditivity example");
+assert(Math.abs(.8*.9+.2*.3-.78)<1e-12,"Markov state filter");
+assert(Math.abs(250*.01*.99-2.475)<1e-12,"VaR exceedance variance");
 console.log("V101 PASS",newest.length,"new lessons;",all.length,"total;",mathCount,
  "strict KaTeX;",deepCount,"deep proof chapters;",deepChars,"deep prose chars;",
  checks,"independent computations;",linkCount,"internal references; time series and risk each 36/36.");
