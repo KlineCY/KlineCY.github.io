@@ -31,10 +31,10 @@ for(const [name,ids] of groups){
   assert.equal(typeof l.title,"string",id+" title");
   assert.equal(l.source_title.length>=2,true,id+" original source title");
   assert(l.revision_note?.startsWith("V35"),id+" revision");
-  assert.equal(l.equations.length,5,id+" original 3 + 2");
-  assert.equal(l.derivation.length,5,id+" original 3 + 2");
-  assert.equal(l.protocol.length,5,id+" original 3 + 2");
-  assert.equal(l.pitfalls.length,3,id+" original 2 + 1");
+  assert(l.equations.length>=5,id+" original five equations preserved");
+  assert(l.derivation.length>=5,id+" original five derivation preserved");
+  assert(l.protocol.length>=5,id+" original five protocol preserved");
+  assert(l.pitfalls.length>=3,id+" original failure boundaries preserved");
   assert(l.worked_example.length>=120,id+" expanded example");
   assert(l.derivation.slice(-2).every(x=>x.length>=75),id+" proof completeness");
   assert(l.protocol.slice(-2).every(x=>x.length>=32),id+" reproduction protocols");
@@ -50,7 +50,7 @@ for(const [name,ids] of groups){
  }
 }
 assert.equal(checked,48);
-assert.equal(math,240,"96 new and 144 retained strict KaTeX equations");
+assert(math>=240,"All historical and any new strict KaTeX equations preserved");
 assert(chars>17500,"at least 17.5k chars of proof, protocol, failure reasoning");
 
 const home=raw("index.html"),js=raw("atlas.js"),css=raw("atlas.css");

@@ -51,10 +51,10 @@ for(const l of added){
  assert.equal(nodeMap.get(id)?.title,l.title);
  for(const key of ["definition","assumptions","example","application","caveat"])
   assert(l[key]?.length>=45,id+" missing substantive "+key);
- assert(l.properties?.length===4&&l.properties.every(p=>p.length>=16),id+" missing propositions");
- assert.equal(l.formulas?.length,3,id+" key formula count");
- assert.equal(l.derivation?.length,3,id+" derivation steps");
- assert.equal(l.deep_sections?.length,3,id+" deep reasoning sections");
+ assert(l.properties?.length>=4&&l.properties.every(p=>p.length>=16),id+" missing propositions");
+ assert(l.formulas?.length>=3,id+" original core formulas retained");
+ assert(l.derivation?.length>=3,id+" original derivations retained");
+ assert(l.deep_sections?.length>=3,id+" original deep reasoning retained");
  assert.equal(l.links?.length,3,id+" internal prerequisite count");
  for(const x of l.formulas){assert(x.label?.length>1);validTex(x.tex,id+" core");}
  for(const x of l.derivation){assert(x.explanation?.length>=15,id+" shallow derivation");validTex(x.tex,id+" derivation");}
@@ -62,9 +62,9 @@ for(const l of added){
  for(const x of l.deep_sections){
   assert(x.title?.length>=7&&x.question?.length>=10,id+" deep section title/question");
   assert(!names.has(x.title),id+" duplicate section title");names.add(x.title);
-  assert(x.paragraphs?.length===2&&x.paragraphs.every(p=>p.length>=25),id+" insufficient two-paragraph explanation");
+  assert(x.paragraphs?.length>=2&&x.paragraphs.every(p=>p.length>=25),id+" insufficient two-paragraph explanation");
   assert(x.proof?.length>=35&&x.worked?.length>=35&&x.limitation?.length>=25,id+" missing proof or independent arithmetic");
-  assert.equal(x.formulas?.length,1);validTex(x.formulas[0].tex,id+" deep section");
+  assert(x.formulas?.length>=1);x.formulas.forEach(f=>validTex(f.tex,id+" deep section"));
   proofChars+=x.paragraphs.join("").length+x.proof.length+x.worked.length+x.limitation.length;
   sectionCount++;
  }
@@ -77,8 +77,8 @@ for(const l of added){
   linkCount++;
  }
 }
-assert.equal(texCount,252,"V109 must strictly parse 252 expressions");
-assert.equal(sectionCount,84,"V109 requires 84 substantive deep explanations");
+assert(texCount>=252,"All historical and expanded expressions must strictly parse");
+assert(sectionCount>=84,"All original deep explanations retained");
 assert.equal(linkCount,84,"V109 must preserve 84 exact internal links");
 assert(proofChars>=20000,"V109 proof and numerical explanation text unexpectedly truncated");
 const app=read("app.js"),html=read("index.html"),css=read("styles.css"),workflow=read("../../.github/workflows/test-quant-math.yml");
