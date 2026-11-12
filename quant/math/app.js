@@ -427,12 +427,12 @@ async function loadV94ProbabilityLectures(path,expected){
    new Set(doc.lessons.map(l=>l.node_id)).size!==expected||
    doc.lessons.some(l=>l.id!==l.node_id||!l.title||!l.definition||!l.assumptions||
      !Array.isArray(l.properties)||l.properties.length<4||
-     !Array.isArray(l.formulas)||l.formulas.length!==3||
-     !Array.isArray(l.derivation)||l.derivation.length!==3||
-     !Array.isArray(l.deep_sections)||l.deep_sections.length!==3||
+     !Array.isArray(l.formulas)||l.formulas.length<3||
+     !Array.isArray(l.derivation)||l.derivation.length<3||
+     !Array.isArray(l.deep_sections)||l.deep_sections.length<3||
      l.deep_sections.some(s=>!s.title||!s.question||!s.proof||!s.worked||!s.limitation||
-       !Array.isArray(s.paragraphs)||s.paragraphs.length!==2||
-       !Array.isArray(s.formulas)||s.formulas.length!==1)||
+       !Array.isArray(s.paragraphs)||s.paragraphs.length<2||
+       !Array.isArray(s.formulas)||s.formulas.length<1)||
      !l.example||!l.application||!l.caveat))
   throw Error("V94概率论完整讲义的数量或证明结构不符合标准："+path);
  return doc.lessons;
@@ -442,10 +442,10 @@ async function loadV94HistoricalProbabilityDeepening(){
  if(doc.version!==1||doc.revision!=="V94"||!Array.isArray(doc.extensions)||doc.extensions.length!==6||
     new Set(doc.extensions.map(x=>x.node_id)).size!==6||
     doc.extensions.some(x=>!x.title||!Number.isInteger(x.base_sections_count)||x.base_sections_count<4||
-      !Array.isArray(x.deep_sections)||x.deep_sections.length!==2||
+      !Array.isArray(x.deep_sections)||x.deep_sections.length<2||
       x.deep_sections.some(s=>!s.title||!s.question||!s.proof||!s.worked||!s.limitation||
-        !Array.isArray(s.paragraphs)||s.paragraphs.length!==2||
-        !Array.isArray(s.formulas)||s.formulas.length!==1)))
+        !Array.isArray(s.paragraphs)||s.paragraphs.length<2||
+        !Array.isArray(s.formulas)||s.formulas.length<1)))
   throw Error("V94历史讲义深化模块损坏");
  return doc;
 }
@@ -471,12 +471,12 @@ async function loadV95StatisticsLectures(path,expected){
    new Set(doc.lessons.map(l=>l.node_id)).size!==expected||
    doc.lessons.some(l=>l.id!==l.node_id||!l.title||!l.definition||!l.assumptions||
      !Array.isArray(l.properties)||l.properties.length<4||
-     !Array.isArray(l.formulas)||l.formulas.length!==3||
-     !Array.isArray(l.derivation)||l.derivation.length!==3||
-     !Array.isArray(l.deep_sections)||l.deep_sections.length!==3||
+     !Array.isArray(l.formulas)||l.formulas.length<3||
+     !Array.isArray(l.derivation)||l.derivation.length<3||
+     !Array.isArray(l.deep_sections)||l.deep_sections.length<3||
      l.deep_sections.some(s=>!s.title||!s.question||!s.proof||!s.worked||!s.limitation||
-       !Array.isArray(s.paragraphs)||s.paragraphs.length!==2||
-       !Array.isArray(s.formulas)||s.formulas.length!==1)||
+       !Array.isArray(s.paragraphs)||s.paragraphs.length<2||
+       !Array.isArray(s.formulas)||s.formulas.length<1)||
      !l.example||!l.application||!l.caveat))
   throw Error("V95统计推断讲义损坏或不完整："+path);
  return doc.lessons;
@@ -487,12 +487,12 @@ async function loadV96OptimizationLectures(path,expected){
    new Set(doc.lessons.map(l=>l.node_id)).size!==expected||
    doc.lessons.some(l=>l.id!==l.node_id||!l.title||!l.definition||!l.assumptions||
      !Array.isArray(l.properties)||l.properties.length<4||
-     !Array.isArray(l.formulas)||l.formulas.length!==3||
-     !Array.isArray(l.derivation)||l.derivation.length!==3||
-     !Array.isArray(l.deep_sections)||l.deep_sections.length!==3||
+     !Array.isArray(l.formulas)||l.formulas.length<3||
+     !Array.isArray(l.derivation)||l.derivation.length<3||
+     !Array.isArray(l.deep_sections)||l.deep_sections.length<3||
      l.deep_sections.some(s=>!s.title||!s.question||!s.proof||!s.worked||!s.limitation||
-       !Array.isArray(s.paragraphs)||s.paragraphs.length!==2||
-       !Array.isArray(s.formulas)||s.formulas.length!==1)||
+       !Array.isArray(s.paragraphs)||s.paragraphs.length<2||
+       !Array.isArray(s.formulas)||s.formulas.length<1)||
      !l.example||!l.application||!l.caveat))
   throw Error("V96凸优化讲义加载数量或证明结构损坏："+path);
  return doc.lessons;
@@ -503,12 +503,12 @@ async function loadV97PortfolioNumericalLectures(path,expected){
    new Set(doc.lessons.map(l=>l.node_id)).size!==expected||
    doc.lessons.some(l=>l.id!==l.node_id||!l.title||!l.definition||!l.assumptions||
      !Array.isArray(l.properties)||l.properties.length<4||
-     !Array.isArray(l.formulas)||l.formulas.length!==3||
-     !Array.isArray(l.derivation)||l.derivation.length!==3||
-     !Array.isArray(l.deep_sections)||l.deep_sections.length!==3||
+     !Array.isArray(l.formulas)||l.formulas.length<3||
+     !Array.isArray(l.derivation)||l.derivation.length<3||
+     !Array.isArray(l.deep_sections)||l.deep_sections.length<3||
      l.deep_sections.some(s=>!s.title||!s.question||!s.proof||!s.worked||!s.limitation||
-       !Array.isArray(s.paragraphs)||s.paragraphs.length!==2||
-       !Array.isArray(s.formulas)||s.formulas.length!==1)||
+       !Array.isArray(s.paragraphs)||s.paragraphs.length<2||
+       !Array.isArray(s.formulas)||s.formulas.length<1)||
      !l.example||!l.application||!l.caveat))
   throw Error("V97组合优化与数值算法完整讲义损坏："+path);
  return doc.lessons;
@@ -519,12 +519,12 @@ async function loadV98DifferentialEquations(path,expected){
    new Set(doc.lessons.map(l=>l.node_id)).size!==expected||
    doc.lessons.some(l=>l.id!==l.node_id||!l.title||!l.definition||!l.assumptions||
      !Array.isArray(l.properties)||l.properties.length<4||
-     !Array.isArray(l.formulas)||l.formulas.length!==3||
-     !Array.isArray(l.derivation)||l.derivation.length!==3||
-     !Array.isArray(l.deep_sections)||l.deep_sections.length!==3||
+     !Array.isArray(l.formulas)||l.formulas.length<3||
+     !Array.isArray(l.derivation)||l.derivation.length<3||
+     !Array.isArray(l.deep_sections)||l.deep_sections.length<3||
      l.deep_sections.some(p=>!p.title||!p.question||!p.proof||!p.worked||!p.limitation||
-       !Array.isArray(p.paragraphs)||p.paragraphs.length!==2||
-       !Array.isArray(p.formulas)||p.formulas.length!==1)||
+       !Array.isArray(p.paragraphs)||p.paragraphs.length<2||
+       !Array.isArray(p.formulas)||p.formulas.length<1)||
      !l.example||!l.application||!l.caveat))
   throw Error("V98常微分方程完整讲义校验失败："+path);
  return doc.lessons;
@@ -535,12 +535,12 @@ async function loadV99DynamicsPDE(path,expected){
    new Set(doc.lessons.map(l=>l.node_id)).size!==expected||
    doc.lessons.some(l=>l.id!==l.node_id||!l.title||!l.definition||!l.assumptions||
      !Array.isArray(l.properties)||l.properties.length<4||
-     !Array.isArray(l.formulas)||l.formulas.length!==3||
-     !Array.isArray(l.derivation)||l.derivation.length!==3||
-     !Array.isArray(l.deep_sections)||l.deep_sections.length!==3||
+     !Array.isArray(l.formulas)||l.formulas.length<3||
+     !Array.isArray(l.derivation)||l.derivation.length<3||
+     !Array.isArray(l.deep_sections)||l.deep_sections.length<3||
      l.deep_sections.some(x=>!x.title||!x.question||!x.proof||!x.worked||!x.limitation||
-       !Array.isArray(x.paragraphs)||x.paragraphs.length!==2||
-       !Array.isArray(x.formulas)||x.formulas.length!==1)||
+       !Array.isArray(x.paragraphs)||x.paragraphs.length<2||
+       !Array.isArray(x.formulas)||x.formulas.length<1)||
      !l.example||!l.application||!l.caveat))
   throw Error("V99矩阵动力学、PDE与随机控制讲义数量或结构损坏："+path);
  return doc.lessons;
@@ -551,12 +551,12 @@ async function loadV100Finance(path,expected){
    new Set(doc.lessons.map(l=>l.node_id)).size!==expected||
    doc.lessons.some(l=>l.id!==l.node_id||!l.title||!l.definition||!l.assumptions||
      !Array.isArray(l.properties)||l.properties.length<4||
-     !Array.isArray(l.formulas)||l.formulas.length!==3||
-     !Array.isArray(l.derivation)||l.derivation.length!==3||
-     !Array.isArray(l.deep_sections)||l.deep_sections.length!==3||
+     !Array.isArray(l.formulas)||l.formulas.length<3||
+     !Array.isArray(l.derivation)||l.derivation.length<3||
+     !Array.isArray(l.deep_sections)||l.deep_sections.length<3||
      l.deep_sections.some(x=>!x.title||!x.question||!x.proof||!x.worked||!x.limitation||
-       !Array.isArray(x.paragraphs)||x.paragraphs.length!==2||
-       !Array.isArray(x.formulas)||x.formulas.length!==1)||
+       !Array.isArray(x.paragraphs)||x.paragraphs.length<2||
+       !Array.isArray(x.formulas)||x.formulas.length<1)||
      !l.example||!l.application||!l.caveat))
   throw Error("V100金融数学完整讲义校验失败："+path);
  return doc.lessons;
@@ -567,12 +567,12 @@ async function loadV101TimeseriesRisk(path,expected){
    new Set(doc.lessons.map(l=>l.node_id)).size!==expected||
    doc.lessons.some(l=>l.id!==l.node_id||!l.title||!l.definition||!l.assumptions||
      !Array.isArray(l.properties)||l.properties.length<4||
-     !Array.isArray(l.formulas)||l.formulas.length!==3||
-     !Array.isArray(l.derivation)||l.derivation.length!==3||
-     !Array.isArray(l.deep_sections)||l.deep_sections.length!==3||
+     !Array.isArray(l.formulas)||l.formulas.length<3||
+     !Array.isArray(l.derivation)||l.derivation.length<3||
+     !Array.isArray(l.deep_sections)||l.deep_sections.length<3||
      l.deep_sections.some(x=>!x.title||!x.question||!x.proof||!x.worked||!x.limitation||
-       !Array.isArray(x.paragraphs)||x.paragraphs.length!==2||
-       !Array.isArray(x.formulas)||x.formulas.length!==1)||
+       !Array.isArray(x.paragraphs)||x.paragraphs.length<2||
+       !Array.isArray(x.formulas)||x.formulas.length<1)||
      !l.example||!l.application||!l.caveat))
   throw Error("V101时间序列与风险数学讲义完整性校验失败："+path);
  return doc.lessons;
@@ -583,12 +583,12 @@ async function loadV102MachineLearningMath(path,expected){
    new Set(doc.lessons.map(l=>l.node_id)).size!==expected||
    doc.lessons.some(l=>l.id!==l.node_id||!l.title||!l.definition||!l.assumptions||
      !Array.isArray(l.properties)||l.properties.length<4||
-     !Array.isArray(l.formulas)||l.formulas.length!==3||
-     !Array.isArray(l.derivation)||l.derivation.length!==3||
-     !Array.isArray(l.deep_sections)||l.deep_sections.length!==3||
+     !Array.isArray(l.formulas)||l.formulas.length<3||
+     !Array.isArray(l.derivation)||l.derivation.length<3||
+     !Array.isArray(l.deep_sections)||l.deep_sections.length<3||
      l.deep_sections.some(x=>!x.title||!x.question||!x.proof||!x.worked||!x.limitation||
-       !Array.isArray(x.paragraphs)||x.paragraphs.length!==2||
-       !Array.isArray(x.formulas)||x.formulas.length!==1)||
+       !Array.isArray(x.paragraphs)||x.paragraphs.length<2||
+       !Array.isArray(x.formulas)||x.formulas.length<1)||
      !l.example||!l.application||!l.caveat))
   throw Error("V102机器学习数学讲义完整性校验失败："+path);
  return doc.lessons;
@@ -599,12 +599,12 @@ async function loadV103InformationSignals(path,expected){
    new Set(doc.lessons.map(l=>l.node_id)).size!==expected||
    doc.lessons.some(l=>l.id!==l.node_id||!l.title||!l.definition||!l.assumptions||
      !Array.isArray(l.properties)||l.properties.length<4||
-     !Array.isArray(l.formulas)||l.formulas.length!==3||
-     !Array.isArray(l.derivation)||l.derivation.length!==3||
-     !Array.isArray(l.deep_sections)||l.deep_sections.length!==3||
+     !Array.isArray(l.formulas)||l.formulas.length<3||
+     !Array.isArray(l.derivation)||l.derivation.length<3||
+     !Array.isArray(l.deep_sections)||l.deep_sections.length<3||
      l.deep_sections.some(x=>!x.title||!x.question||!x.proof||!x.worked||!x.limitation||
-       !Array.isArray(x.paragraphs)||x.paragraphs.length!==2||
-       !Array.isArray(x.formulas)||x.formulas.length!==1)||
+       !Array.isArray(x.paragraphs)||x.paragraphs.length<2||
+       !Array.isArray(x.formulas)||x.formulas.length<1)||
      !l.example||!l.application||!l.caveat))
   throw Error("V103信息论与信号处理讲义结构校验失败："+path);
  return doc.lessons;
@@ -615,12 +615,12 @@ async function loadV104DiscreteGraphs(path,expected){
    new Set(doc.lessons.map(l=>l.node_id)).size!==expected||
    doc.lessons.some(l=>l.id!==l.node_id||!l.title||!l.definition||!l.assumptions||
      !Array.isArray(l.properties)||l.properties.length<4||
-     !Array.isArray(l.formulas)||l.formulas.length!==3||
-     !Array.isArray(l.derivation)||l.derivation.length!==3||
-     !Array.isArray(l.deep_sections)||l.deep_sections.length!==3||
+     !Array.isArray(l.formulas)||l.formulas.length<3||
+     !Array.isArray(l.derivation)||l.derivation.length<3||
+     !Array.isArray(l.deep_sections)||l.deep_sections.length<3||
      l.deep_sections.some(x=>!x.title||!x.question||!x.proof||!x.worked||!x.limitation||
-       !Array.isArray(x.paragraphs)||x.paragraphs.length!==2||
-       !Array.isArray(x.formulas)||x.formulas.length!==1)||
+       !Array.isArray(x.paragraphs)||x.paragraphs.length<2||
+       !Array.isArray(x.formulas)||x.formulas.length<1)||
      !l.example||!l.application||!l.caveat))
   throw Error("V104离散数学与金融网络讲义完整性校验失败："+path);
  return doc.lessons;
@@ -631,12 +631,12 @@ async function loadV105ControlGame(path,expected){
    new Set(doc.lessons.map(l=>l.node_id)).size!==expected||
    doc.lessons.some(l=>l.id!==l.node_id||!l.title||!l.definition||!l.assumptions||
      !Array.isArray(l.properties)||l.properties.length<4||
-     !Array.isArray(l.formulas)||l.formulas.length!==3||
-     !Array.isArray(l.derivation)||l.derivation.length!==3||
-     !Array.isArray(l.deep_sections)||l.deep_sections.length!==3||
+     !Array.isArray(l.formulas)||l.formulas.length<3||
+     !Array.isArray(l.derivation)||l.derivation.length<3||
+     !Array.isArray(l.deep_sections)||l.deep_sections.length<3||
      l.deep_sections.some(x=>!x.title||!x.question||!x.proof||!x.worked||!x.limitation||
-       !Array.isArray(x.paragraphs)||x.paragraphs.length!==2||
-       !Array.isArray(x.formulas)||x.formulas.length!==1)||
+       !Array.isArray(x.paragraphs)||x.paragraphs.length<2||
+       !Array.isArray(x.formulas)||x.formulas.length<1)||
      !l.example||!l.application||!l.caveat))
   throw Error("V105控制理论、博弈论与做市讲义结构校验失败："+path);
  return doc.lessons;
@@ -647,11 +647,11 @@ async function loadV106Calculus(path,expected){
     new Set(doc.lessons.map(l=>l.node_id)).size!==expected||
     doc.lessons.some(l=>l.id!==l.node_id||!l.title||!l.definition||!l.assumptions||
       !Array.isArray(l.properties)||l.properties.length<4||
-      !Array.isArray(l.formulas)||l.formulas.length!==3||
-      !Array.isArray(l.derivation)||l.derivation.length!==3||
-      !Array.isArray(l.deep_sections)||l.deep_sections.length!==3||
-      l.deep_sections.some(d=>!d.title||!d.question||!Array.isArray(d.paragraphs)||d.paragraphs.length!==2||
-        !Array.isArray(d.formulas)||d.formulas.length!==1||!d.proof||!d.worked||!d.limitation)||
+      !Array.isArray(l.formulas)||l.formulas.length<3||
+      !Array.isArray(l.derivation)||l.derivation.length<3||
+      !Array.isArray(l.deep_sections)||l.deep_sections.length<3||
+      l.deep_sections.some(d=>!d.title||!d.question||!Array.isArray(d.paragraphs)||d.paragraphs.length<2||
+        !Array.isArray(d.formulas)||d.formulas.length<1||!d.proof||!d.worked||!d.limitation)||
       !Array.isArray(l.links)||l.links.length<3||!l.example||!l.application||!l.caveat))
    throw Error("V106微积分讲义内容或结构校验失败："+path);
  return doc.lessons;
@@ -662,12 +662,12 @@ async function loadV107IntegralOptimization(path,expected){
    new Set(doc.lessons.map(l=>l.node_id)).size!==expected||
    doc.lessons.some(l=>l.id!==l.node_id||!l.title||!l.definition||!l.assumptions||
      !Array.isArray(l.properties)||l.properties.length<4||
-     !Array.isArray(l.formulas)||l.formulas.length!==3||
-     !Array.isArray(l.derivation)||l.derivation.length!==3||
-     !Array.isArray(l.deep_sections)||l.deep_sections.length!==3||
-     l.deep_sections.some(x=>!x.title||!x.question||!Array.isArray(x.paragraphs)||x.paragraphs.length!==2||
-       !Array.isArray(x.formulas)||x.formulas.length!==1||!x.proof||!x.worked||!x.limitation)||
-     !Array.isArray(l.links)||l.links.length!==3||!l.example||!l.application||!l.caveat))
+     !Array.isArray(l.formulas)||l.formulas.length<3||
+     !Array.isArray(l.derivation)||l.derivation.length<3||
+     !Array.isArray(l.deep_sections)||l.deep_sections.length<3||
+     l.deep_sections.some(x=>!x.title||!x.question||!Array.isArray(x.paragraphs)||x.paragraphs.length<2||
+       !Array.isArray(x.formulas)||x.formulas.length<1||!x.proof||!x.worked||!x.limitation)||
+     !Array.isArray(l.links)||l.links.length<3||!l.example||!l.application||!l.caveat))
    throw Error("V107多重积分、隐函数与约束优化讲义不完整："+path);
  return doc.lessons;
 }
@@ -677,12 +677,12 @@ async function loadV108FoundationsMeasure(path,expected,discipline){
    new Set(doc.lessons.map(l=>l.node_id)).size!==expected||
    doc.lessons.some(l=>l.id!==l.node_id||!l.node_id.startsWith(discipline+"-")||!l.title||
      !l.definition||!l.assumptions||!Array.isArray(l.properties)||l.properties.length<4||
-     !Array.isArray(l.formulas)||l.formulas.length!==3||
-     !Array.isArray(l.derivation)||l.derivation.length!==3||
-     !Array.isArray(l.deep_sections)||l.deep_sections.length!==3||
-     l.deep_sections.some(d=>!d.title||!d.question||!Array.isArray(d.paragraphs)||d.paragraphs.length!==2||
-       !Array.isArray(d.formulas)||d.formulas.length!==1||!d.proof||!d.worked||!d.limitation)||
-     !Array.isArray(l.links)||l.links.length!==3||!l.example||!l.application||!l.caveat))
+     !Array.isArray(l.formulas)||l.formulas.length<3||
+     !Array.isArray(l.derivation)||l.derivation.length<3||
+     !Array.isArray(l.deep_sections)||l.deep_sections.length<3||
+     l.deep_sections.some(d=>!d.title||!d.question||!Array.isArray(d.paragraphs)||d.paragraphs.length<2||
+       !Array.isArray(d.formulas)||d.formulas.length<1||!d.proof||!d.worked||!d.limitation)||
+     !Array.isArray(l.links)||l.links.length<3||!l.example||!l.application||!l.caveat))
    throw Error("V108数学基础与测度理论讲义缺失或结构错误："+path);
  return doc.lessons;
 }
@@ -691,13 +691,13 @@ async function loadV109RegressionEconometrics(path,expected,discipline){
  if(doc.version!==1||doc.revision!=="V109"||!Array.isArray(doc.lessons)||doc.lessons.length!==expected||
     new Set(doc.lessons.map(l=>l.node_id)).size!==expected||
     doc.lessons.some(l=>l.id!==l.node_id||!l.node_id.startsWith(discipline+"-")||!l.title||
-      !l.definition||!l.assumptions||!Array.isArray(l.properties)||l.properties.length!==4||
-      !Array.isArray(l.formulas)||l.formulas.length!==3||
-      !Array.isArray(l.derivation)||l.derivation.length!==3||
-      !Array.isArray(l.deep_sections)||l.deep_sections.length!==3||
-      l.deep_sections.some(v=>!v.title||!v.question||!Array.isArray(v.paragraphs)||v.paragraphs.length!==2||
-        !Array.isArray(v.formulas)||v.formulas.length!==1||!v.proof||!v.worked||!v.limitation)||
-      !Array.isArray(l.links)||l.links.length!==3||!l.example||!l.application||!l.caveat))
+      !l.definition||!l.assumptions||!Array.isArray(l.properties)||l.properties.length<4||
+      !Array.isArray(l.formulas)||l.formulas.length<3||
+      !Array.isArray(l.derivation)||l.derivation.length<3||
+      !Array.isArray(l.deep_sections)||l.deep_sections.length<3||
+      l.deep_sections.some(v=>!v.title||!v.question||!Array.isArray(v.paragraphs)||v.paragraphs.length<2||
+        !Array.isArray(v.formulas)||v.formulas.length<1||!v.proof||!v.worked||!v.limitation)||
+      !Array.isArray(l.links)||l.links.length<3||!l.example||!l.application||!l.caveat))
    throw Error("V109回归推断与因果计量讲义结构缺失："+path);
  return doc.lessons;
 }
@@ -706,13 +706,13 @@ async function loadV110NumericalMonteCarlo(path,expected){
  if(doc.version!==1||doc.revision!=="V110"||!Array.isArray(doc.lessons)||doc.lessons.length!==expected||
    new Set(doc.lessons.map(l=>l.node_id)).size!==expected||
    doc.lessons.some(l=>l.id!==l.node_id||!l.node_id.startsWith("numerical-")||!l.title||
-     !l.definition||!l.assumptions||!Array.isArray(l.properties)||l.properties.length!==4||
-     !Array.isArray(l.formulas)||l.formulas.length!==3||
-     !Array.isArray(l.derivation)||l.derivation.length!==3||
-     !Array.isArray(l.deep_sections)||l.deep_sections.length!==3||
-     l.deep_sections.some(d=>!d.title||!d.question||!Array.isArray(d.paragraphs)||d.paragraphs.length!==2||
-       !Array.isArray(d.formulas)||d.formulas.length!==1||!d.proof||!d.worked||!d.limitation)||
-     !Array.isArray(l.links)||l.links.length!==3||!l.example||!l.application||!l.caveat))
+     !l.definition||!l.assumptions||!Array.isArray(l.properties)||l.properties.length<4||
+     !Array.isArray(l.formulas)||l.formulas.length<3||
+     !Array.isArray(l.derivation)||l.derivation.length<3||
+     !Array.isArray(l.deep_sections)||l.deep_sections.length<3||
+     l.deep_sections.some(d=>!d.title||!d.question||!Array.isArray(d.paragraphs)||d.paragraphs.length<2||
+       !Array.isArray(d.formulas)||d.formulas.length<1||!d.proof||!d.worked||!d.limitation)||
+     !Array.isArray(l.links)||l.links.length<3||!l.example||!l.application||!l.caveat))
    throw Error("V110数值分析与蒙特卡洛讲义内容不完整："+path);
  return doc.lessons;
 }

@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import vm from "node:vm";
 import assert from "node:assert/strict";
 import katex from "katex";
 
@@ -252,6 +253,29 @@ near("Sinusoid relative dot",Math.cos(-Math.PI),-1);
 near("Bernoulli REINFORCE expectation",.3*(1/.3),1);
 near("PPO positive clipping",Math.min(1.4*2,1.2*2),2.4);
 near("PPO negative clipping",Math.min(.5*(-2),.8*(-2)),-1.6);
+
+function extractCourseLoader(name,nextName){
+ const start=app.indexOf("async function "+name+"(");
+ const finish=app.indexOf("async function "+nextName+"(",start);
+ assert(start>=0&&finish>start,"Cannot isolate course loader "+name);
+ return vm.runInNewContext(app.slice(start,finish)+"\n"+name,{
+  fetchMathJson:async filename=>json(filename.replace(/^\.\//,""))
+ });
+}
+for(const [name,nextName,filenames] of [
+ ["loadV100Finance","loadV101TimeseriesRisk",["lessons-finance-v100a.json","lessons-finance-v100b.json","lessons-finance-v100c.json","lessons-finance-v100d.json"]],
+ ["loadV101TimeseriesRisk","loadV102MachineLearningMath",["lessons-timeseries-v101.json","lessons-risk-tail-v101.json","lessons-risk-axioms-v101.json","lessons-risk-governance-v101.json"]],
+ ["loadV102MachineLearningMath","loadV103InformationSignals",files]
+]){
+ const loader=extractCourseLoader(name,nextName);
+ for(const filename of filenames){
+  const expected=json(filename).lessons.length;
+  const actual=await loader("./"+filename,expected);
+  assert.equal(actual.length,expected,"Live math reader rejected existing chapter file "+filename);
+  assert(actual.every(l=>l.deep_sections.length>=4),"Reader dropped extended sections "+filename);
+  assert(actual.every(l=>l.deep_sections.at(-1).formulas.length>=1),"Reader dropped extended formula "+filename);
+ }
+}
 console.log("V102 PASS",newest.length,"new lessons;",all.length,"total;",
  mathCount,"strict KaTeX;",deepCount,"proof chapters;",deepChars,"deep prose chars;",
  checks,"independent numerics;",linkCount,"connected knowledge links; machine learning mathematics 36/36.");

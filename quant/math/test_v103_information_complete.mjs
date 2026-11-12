@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import vm from "node:vm";
 import assert from "node:assert/strict";
 import katex from "katex";
 
@@ -308,6 +309,19 @@ near("Three-period correlated-return variance",3+2*(2*.5+1*.25),5.5);
 near("Conditional XOR mutual information bits",1-0,1);
 near("Signal latency four periods bp",10*.8**4,4.096);
 near("Signal latency five periods bp",10*.8**5,3.2768);
+
+const startLoad103=app.indexOf("async function loadV103InformationSignals(");
+const endLoad103=app.indexOf("async function loadV104DiscreteGraphs(",startLoad103);
+assert(startLoad103>=0&&endLoad103>startLoad103,"Cannot find production V103 loader");
+const loadInformation=vm.runInNewContext(app.slice(startLoad103,endLoad103)+"\nloadV103InformationSignals",{
+ fetchMathJson:async filename=>json(filename.replace(/^\.\//,""))
+});
+for(const filename of files){
+ const actual=await loadInformation("./"+filename,6);
+ assert.equal(actual.length,6,"Browser would reject advanced information chapters "+filename);
+ assert(actual.every(l=>l.deep_sections.length>=4),"Advanced information sections not available in reader "+filename);
+ assert(actual.every(l=>l.deep_sections.at(-1).formulas.length>=2),"Reader lost advanced signal mathematics "+filename);
+}
 console.log("V103 PASS:",newest.length,"new full lessons;",all.length,"total;",
  mathCount,"strict KaTeX;",deepCount,"deep proof chapters;",deepChars,"deep prose characters;",
  checks,"independent computations;",linkCount,"cross references; information 32/32.");
