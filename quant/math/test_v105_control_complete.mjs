@@ -104,8 +104,8 @@ for(const l of newest){
   linkCount++;
  }
 }
-assert(mathCount>=252,"All original strict mathematics preserved");
-assert(deepCount>=84,"All original deep chapters preserved");
+assert(mathCount>=308,"Original and expanded control and stopping mathematics must remain");
+assert(deepCount>=112,"All original and added strategic-control chapters must remain");
 assert(deepChars>=22500,"Depth reduced from reviewed version");
 assert.equal(linkCount,84,"Cross-lesson link count changed");
 const html=read("index.html"),css=read("styles.css"),app=read("app.js");
@@ -283,13 +283,14 @@ near("MARL opponent H prob0.2",2*.2-1,-.6);
 near("MARL mixed Nash exploitability",0,0);
 assert(checks>=135,"V105 independent control and trading arithmetic checks unexpectedly incomplete");
 
-for(const file of ["lessons-control-v105c.json","lessons-control-v105d.json"]){
+for(const file of files){
  for(const l of json(file).lessons){
-  assert.equal(l.deep_sections.length,4,l.id+" new strategic modeling chapter missing");
+  assert(l.deep_sections.length>=4,l.id+" new strategic modeling chapter missing");
   const s=l.deep_sections.at(-1);
   assert(s.paragraphs.length>=2&&s.paragraphs.every(p=>p.length>=70),l.id+" control explanation incomplete");
   assert(s.proof.length>=95&&s.worked.length>=78&&s.limitation.length>=60,l.id+" proof, example or applicability boundary missing");
   assert(s.formulas.length>=2,l.id+" independent control equations missing");
+  assert(l.deep_sections.slice(0,3).every(x=>x.proof&&x.worked&&x.limitation&&x.formulas.length>=1),l.id+" pre-existing course chapter lost");
  }
 }
 const loaderStart=app.indexOf("async function loadV105ControlGame(");
@@ -317,6 +318,27 @@ near("Hawkes branching mean intensity",2/(1-.6),5);
 near("Market-maker inventory reservation price",100-10*.01*4*.5,99.8);
 near("Ask markout adverse movement",100.10-100.15,-.05);
 near("Matching pennies exploitability in deterministic play",1-(-1),2);
+
+near("Value iteration posterior bound",.9/(1-.9)*.001,.009);
+near("Advantage under old mixed policy",.5*(4-3)+.5*(2-3),0);
+near("New policy under old Q advantage",.75*(4-3)+.25*(2-3),.5);
+near("Policy improvement multiplier",1/(1-.9),10);
+near("Terminal condition discounted difference",100*.9**10,34.86784401);
+near("Snell continuation expectation",(.5*0+.5*6),3);
+near("American call risk-neutral probability",(1.05-.9)/(1.2-.9),.5);
+near("American call continuation advantage",(.5*30)/1.05,14.285714285714286);
+near("Stopping prophet value",(.5*3+.5*10),6.5);
+near("Perpetual investment beta positive root",(1+Math.sqrt(21))/2,2.79128784747792);
+near("Perpetual investment threshold",(2.79128784747792/(2.79128784747792-1))*100,155.8257569495584);
+near("L1 turnover no-trade lower",(.08-.01)/.02,3.5);
+near("L1 turnover no-trade upper",(.08+.01)/.02,4.5);
+near("Limit fill one minute probability",1-Math.exp(-1),.6321205588285577);
+near("Limit one-minute fallback cost",(1-Math.exp(-1))*1+Math.exp(-1)*10,4.310914970542981);
+near("State augmented cumulative volume",990+100*1,1090);
+near("HJB deterministic discount value",1/2,.5);
+near("Scalar Riccati steady state",(1+Math.sqrt(5))/2,1.618033988749895);
+near("LQR stationary closed loop",1-((1+Math.sqrt(5))/2)/(1+(1+Math.sqrt(5))/2),.3819660112501051);
+near("Entropic risk symmetric two-point",Math.log(Math.cosh(1)),.4337808304830271);
 console.log("V105 PASS",newest.length,"new control lectures;",all.length,"total;",
  mathCount,"strict KaTeX;",deepCount,"deep proof chapters;",deepChars,"deep prose chars;",
  checks,"independent numerics;",linkCount,"valid cross-links; control theory 30/30.");

@@ -99,8 +99,8 @@ for(const l of newest){
   linkCount++;
  }
 }
-assert(mathCount>=252,"Original and expanded strict mathematics must remain");
-assert(deepCount>=84,"Original and expanded deep chapters must remain");
+assert(mathCount>=308,"All original and newly proved graph formulas must remain");
+assert(deepCount>=112,"All original and extended graph chapters must remain");
 assert(deepChars>=22000,"Depth reduced from reviewed version");
 assert.equal(linkCount,84,"Cross-lesson link count changed");
 const html=read("index.html"),css=read("styles.css"),app=read("app.js");
@@ -283,14 +283,15 @@ near("Hoeffding required count half precision",Math.ceil(Math.log(40)/(2*.025**2
 yes("Hoeffding 738 sufficient",2*Math.exp(-2*738*.05**2)<=.05);
 assert(checks>=120,"Independent graph and combinatorics computations unexpectedly incomplete");
 
-for(const file of ["lessons-discrete-v104b.json","lessons-discrete-v104c.json"]){
+for(const file of files){
  const doc=json(file);
  for(const l of doc.lessons){
-  assert.equal(l.deep_sections.length,4,l.id+" advanced graph chapter not present");
+  assert(l.deep_sections.length>=4,l.id+" advanced graph chapter not present");
   const s=l.deep_sections.at(-1);
   assert(s.paragraphs.length>=2&&s.paragraphs.every(p=>p.length>=70),l.id+" deep context missing");
   assert(s.proof.length>=95&&s.worked.length>=78&&s.limitation.length>=60,l.id+" incomplete proof or example");
   assert(s.formulas.length>=2,l.id+" missing independent equations");
+  assert(l.deep_sections.slice(0,3).every(x=>x.proof&&x.worked&&x.limitation&&x.formulas.length>=1),l.id+" pre-existing mathematical chapters incomplete");
  }
 }
 const loaderStart=app.indexOf("async function loadV104DiscreteGraphs(");
@@ -313,6 +314,22 @@ near("Crossholding A value",150/.9,166.66666666666666);
 near("CVA wrong-way true loss",.5*10,5);
 near("CVA independent mistaken loss",.5*(.5*10),2.5);
 near("Contagion isolated loop zero external assets",Math.min(10,5),5);
+
+near("Hypergeometric pair of successes",1/10,.1);
+near("Hypergeometric population correction",2*(2/5)*(3/5)*(3/4),.36);
+near("Bonferroni lower bound",3*.1-3*.02,.24);
+near("Repeated-root recurrence n4",2*3-2,4);
+near("Bernoulli PGF variance",.3-.3**2,.21);
+near("Pruefer fixed degree sequence count",2/(1*1),2);
+near("Undirected triangle trace divisor",6/6,1);
+near("Knapsack capacity three best value",Math.max(5,6),6);
+near("Random nonlinear Bellman terminal cost",(0**2+2**2)/2,2);
+near("Held Karp closed three-city tour",1+2+3,6);
+near("Dynamic array eight insert total copies",1+2+4,7);
+near("Metric TSP shortcut bound",2+2+3,7);
+yes("Metric TSP two approximation",7<=2*(2+2));
+near("Median of means 32-group error upper",Math.exp(-32/8),Math.exp(-4));
+near("Value iteration tree symbolic growth example",3+4*2,11);
 console.log("V104 PASS",newest.length,"new lectures,",all.length,"total;",mathCount,"strict KaTeX;",
  deepCount,"proof chapters;",deepChars,"deep prose characters;",checks,"independent numerical checks;",
  linkCount,"crosslinks; discrete graph mathematics 30/30.");
