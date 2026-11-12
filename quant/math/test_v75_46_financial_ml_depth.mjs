@@ -155,6 +155,78 @@ near("dollar-neutral net",.5-.5,0);
 near("dollar-neutral beta",.5*1.2-.5*.8,.2);
 near("beta-neutral beta",.4*1.2-.6*.8,0);
 near("beta-neutral net",.4-.6,-.2);
+
+const v75CompleteProofLabels={
+  "m01-c04-p01": "双时间条件下的点时数据版本选择",
+  "m02-c05-p01": "收缩到单位阵使负最小特征值恢复非负的阈值",
+  "m03-c03-p01": "均匀Beta先验下Beta-Binomial计数的精确尾部",
+  "m04-c02-p02": "一维闭区间分类器的增长函数和VC维",
+  "m05-c02-p02": "无放回两次样本梯度之间的负协方差",
+  "m06-c04-p03": "只对决策前已知观察求滚动均值的可得性掩码",
+  "m07-c02-p06": "特征标准化与原始系数L1惩罚的等价转换",
+  "m08-c04-p03": "分桶合并可隐藏任意大的精确分裂收益",
+  "m09-c01-p01": "软间隔SVM的松弛变量与Hinge损失等价",
+  "m10-c01-p01": "重复使用同一证据会虚增Bayes似然比",
+  "m11-c05-p06": "随机重排时间序列可改变以路径粗糙度定义的标签",
+  "m12-c01-p03": "Average Precision以正样本召回跳变加权的定义",
+  "m13-c05-p03": "Adam首步更新并非对梯度尺度完全不变",
+  "m14-c03-p02": "重复预测框与一对一匹配会降低检测平均精度",
+  "m15-c05-p02": "Ornstein–Uhlenbeck状态噪声精确离散化的方差",
+  "m16-c05-p01": "交替时间与资产注意力的计算量与完全展平对照",
+  "m17-c02-p04": "MLM条件概率的乘积一般不是归一化联合概率",
+  "m18-c04-p03": "历史边邻接掩码与图数据的幸存者前视偏差",
+  "m19-c03-p02": "支持集不重叠时最优GAN目标达到Jensen–Shannon上限",
+  "m20-c03-p02": "归一化优先回放权重与无偏校正的尺度区别",
+  "m21-c01-p01": "离线行为策略零支持动作的奖励不可识别反例",
+  "m22-c03-p02": "GARCH持久度为一时条件方差预测不再均值回复",
+  "m23-c05-p02": "行业内信号去均值与行业中性多空权重"
+};
+assert.equal(Object.keys(v75CompleteProofLabels).length,23,"All 23 extended v75 lectures must remain");
+for(const [id,label] of Object.entries(v75CompleteProofLabels)){
+ const d=docs.find(x=>x.lessons[id]);
+ assert(d,"Missing original course for deep extension "+id);
+ const lesson=d.lessons[id];
+ assert(lesson.equations.at(-1).label===label,id+" expected additional mathematics not present");
+ assert(lesson.derivation.at(-1).length>=100,id+" full new proof deleted or compressed");
+ assert(lesson.worked_example.includes("进一步推导与可复算示例："),id+" extra worked example missing");
+ assert(lesson.protocol.at(-1).length>=70,id+" additional verification procedure missing");
+ assert(lesson.pitfalls.at(-1).length>=95,id+" extended boundary analysis missing");
+ tex(lesson.equations.at(-1).tex,true);
+}
+assert.equal(strictCount,117,"All 94 historical and 23 additional strict formula checks required");
+near("PIT version selection received time",Number(4<=10&&11>10),1);
+near("Minimum PSD shrinkage",.2/1.2,1/6);
+near("Shrinked covariance small eigenvalue",-.2+1.2*.2,.04);
+near("BetaBinomial tail with shared success probability",3/11,.2727272727272727);
+near("Binomial tail compared with shared state",(45+10+1)/(2**10),.0546875);
+near("Interval classifier VC growth on three points",1+3*4/2,7);
+near("Finite population pairwise covariance",-5/(4-1),-5/3);
+near("Finite population sample mean variance",(5+5-10/3)/4,5/3);
+near("Legally known rolling two observations",(2+4)/2,3);
+near("Standardized L1 penalty in two factors",1+1,2);
+near("Raw unscaled L1 difference",.01+1,1.01);
+near("Histogram hidden exact split gain",2*5**2,50);
+near("Soft margin Hinge misclassification",Math.max(0,1-(-.5)),1.5);
+near("Bayesian posterior one unique signal",((1/9)*9)/(1+(1/9)*9),.5);
+near("Bayesian false duplicate evidence",((1/9)*81)/(1+(1/9)*81),.9);
+near("Financial temporal roughness original",(0-0)**2+(1-0)**2+(1-1)**2,1);
+near("Financial temporal roughness reordered",(1-0)**2+(0-1)**2+(1-0)**2,3);
+near("Average Precision first and third ranked",(.5*1)+(.5*(2/3)),5/6);
+near("Adam first corrected update",-0.01/(1+.001),-.00999000999000999);
+near("Adam epsilon dominated update",-0.01*.0001/(.0001+.001),-.000909090909090909);
+near("Detection duplicate box lowers AP",(1+2/3)/2,5/6);
+near("Ornstein Uhlenbeck exact process covariance",(2/2)*(1-Math.exp(-2*Math.log(2))),.75);
+near("Flattened 37 ETF 252 day attention positions",(37*252)**2,86936976);
+near("Factorized 37 ETF 252 day attention positions",37*252**2+252*37**2,2694636);
+near("MLM conditional pseudo likelihood total",2*.9**2+2*.1**2,1.64);
+near("Graph PIT edge not yet received",Number(20<=10),0);
+near("Disjoint GAN support Jensen Shannon",Math.log(2),.6931471805599453);
+near("Normalized prioritized replay expectation",.75*(1/3)*2+.25*1*4,1.5);
+near("Offline RL unsupported action logged count",0,0);
+near("Integrated GARCH conditional forecast",.02+10*.0001,.021);
+near("Sector normalized centered gross exposure",4*.25,1);
+near("Sector normalized centered net exposure",.25-.25+.25-.25,0);
+
 const mathCSS=read("styles.css"),mlCSS=read("../ml/atlas.css");
 for(const [name,css] of [["math",mathCSS],["ml",mlCSS]]){
  for(const marker of ["overflow-x:auto","line-break:strict",":focus-visible","@media print","@media(max-width:700px)"])
