@@ -93,8 +93,8 @@ for(const l of newest){
  assert(/[\u3400-\u9FFF]/u.test(JSON.stringify(l)),id+" no Chinese body");
  assert(!/TODO|FIXME|Lorem ipsum|待补充/i.test(JSON.stringify(l)),id+" placeholder");
 }
-assert(chapterCount>=68,"Original 51 deep chapters and 17 extended chapters missing");
-assert(katexCount>=187,"Original 153 KaTeX expressions and new derivations missing");
+assert(chapterCount>=85,"All 51 historical deep chapters, 17 prior extensions and 17 new rigorous chapters required");
+assert(katexCount>=221,"All 187 historical expressions and 34 new strict finance expressions required");
 assert(deepChars>=13500);
 assert(crossRefs>=48);
 const html=read("index.html"),app=read("app.js"),css=read("styles.css");
@@ -229,6 +229,66 @@ for(const lesson of newest){
  assert(advanced.proof.length>=80&&advanced.worked.length>=65&&advanced.limitation.length>=45,lesson.id+" incomplete derivation, example or assumptions");
  assert(advanced.formulas.length>=2,lesson.id+" needs independent mathematical expressions");
 }
+
+const extendedFinanceTitles={
+  "finance-n0421": "资金流入流出时，时间加权收益与资金加权收益为何不同",
+  "finance-n0422": "几何布朗运动的连续复利与波动率拖累",
+  "finance-n0423": "期限结构不平坦时，单个IRR不足以决定现金流的无套利现值",
+  "finance-n0424": "连续远期利率可以为负，贴现因子却仍保持正值",
+  "finance-n0425": "关键期限DV01如何揭示非平行收益率曲线敞口",
+  "finance-n0426": "匹配现值和久期仍可能因凸性差异导致免疫失败",
+  "finance-n0427": "远期合约的现金持有复制与融资利率不对称的无套利范围",
+  "finance-n0428": "不完备市场中状态价格非唯一但复制支付价格仍唯一",
+  "finance-n0429": "支付矩阵的零空间解释不可复制状态支付与最小对冲误差",
+  "finance-n0443": "HJM瞬时远期波动如何积累成零息债价格的随机风险",
+  "finance-n0444": "风险中性违约强度与现实违约频率不能直接互换",
+  "finance-n0445": "Expected Shortfall的风险包络表达与最坏尾部概率重新加权",
+  "finance-n0446": "两两合法相关系数拼接也可能构成非法协方差矩阵",
+  "finance-n0447": "多因子模型的旋转不变性与因子收益归因的不唯一",
+  "finance-n0448": "GPD尾指数如何分别决定均值与方差是否存在",
+  "finance-n0449": "对数障碍风险预算目标与正仓位风险平价权重",
+  "finance-n0450": "带比例交易成本的单期最优仓位为什么存在无交易区间"
+};
+assert.equal(Object.keys(extendedFinanceTitles).length,17,"17 full follow-on finance chapters required");
+for(const l of newest){
+ const added=l.deep_sections.at(-1);
+ assert.equal(l.deep_sections.length,5,l.id+" original finance chapters were removed or new chapter is missing");
+ assert.equal(added.title,extendedFinanceTitles[l.id],l.id+" independent finance topic missing");
+ assert(added.paragraphs.length===2&&added.paragraphs.every(p=>p.length>=100),l.id+" explanations shortened");
+ assert(added.formulas.length===2,l.id+" two independent equations missing");
+ assert(added.proof.length>=180&&added.worked.length>=110&&added.limitation.length>=65,l.id+" full mathematical proof and example required");
+ assert(!added.paragraphs.some(p=>p.includes("\\n")),l.id+" paragraphs should remain readable");
+}
+near("Investment TWR with intermediate funding",1.2*.9-1,.08);
+const moneyWeighted=(-120+Math.sqrt(120**2+4*100*216))/200-1;
+near("Investment funding MWR",moneyWeighted,-.0125492133612457);
+near("GBM expected log drift",.08-.5*.3**2,.035);
+near("GBM volatility drift compensation",.08-.5*.4**2,0);
+near("Two different zero-coupon discount rates",100*Math.exp(-.05)+100*Math.exp(-.2),176.9960177578696,1e-7);
+near("Negative forward produces increasing discount",Math.exp(.01),1.010050167084168);
+near("One year key-rate DV01",.0001*1*100,.01);
+near("Two year key-rate DV01",.0001*2*100,.02);
+near("Matched duration but convexity mismatch",Math.exp(-.2)-.5*(Math.exp(-.1)+Math.exp(-.3)),-.004096928616,1e-6);
+near("Forward lower carry bound",100*Math.exp(.02),102.02013400267558);
+near("Forward upper carry bound",100*Math.exp(.05),105.12710963760242);
+near("Risk state price budget first solution",.4+.55,.95);
+near("Incomplete digital replication error",.5**2+(-.5)**2,.5);
+near("HJM one-year price volatility",.02*1,.02);
+near("HJM three-year price volatility",.02*3,.06);
+near("HJM bond covariance",.02*.06,.0012);
+near("Credit risk neutral one-year default",1-Math.exp(-.04),.03921056084767682);
+near("Credit real one-year default",1-Math.exp(-.01),.009950166250831893);
+near("Expected shortfall two high loss states",.5*10+.5*4,7);
+near("Non PSD three asset risk",3+2*(-.9-.9-.9),-2.4);
+near("Factor rotation old total",.02+.01,.03);
+near("Factor rotation new total",.03+0*.01,.03);
+near("GPD heavy tail finite mean",2/(1-.6),5);
+near("Risk budget unnormalized weight one",Math.sqrt(.5/.04),Math.sqrt(12.5));
+near("Risk budget normalized first weight",Math.sqrt(.5/.04)/(Math.sqrt(.5/.04)+Math.sqrt(.5/.09)),.6);
+near("No trade region keeps prior weight",.4,.4);
+near("No trade high signal buy",(.08-.01)/.1,.7);
+near("No trade low signal sell",(.02+.01)/.1,.3);
+
 assert(Math.abs((1.03**4-1)-0.12550881)<1e-10,"nominal/effective compounding");
 assert(Math.abs(-100+230/1.1-132/1.21)<1e-10,"first IRR root");
 assert(Math.abs(-100+230/1.2-132/1.44)<1e-10,"second IRR root");
