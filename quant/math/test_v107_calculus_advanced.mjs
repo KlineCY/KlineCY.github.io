@@ -233,7 +233,7 @@ near("KKT convex constrained optimum",(1-2)**2,1);
 near("Hessian tangent valid curvature",2*1**2,2);
 near("Frobenius gradient first component",-1,-1);
 near("Trace multiplication noncyclic",2-1,1);
-near("Inverse perturbation derivative",-100**2*.001,-10);
+near("Inverse perturbation derivative",-(100**2)*.001,-10);
 near("Precision likelihood one dimension",1/4,.25);
 near("Reverse mode shared gradient",2*2+3,7);
 console.log("V107: 586/656 total lessons, calculus 30/30, "+formulas+" strict TeX, "+chapters+" deep sections, "+proofChars+" reasoning chars, "+links+" links, "+numerics+" verified numerics");
