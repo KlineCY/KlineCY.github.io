@@ -104,8 +104,8 @@ for(const l of newest){
   linkCount++;
  }
 }
-assert(mathCount>=308,"Original and expanded control and stopping mathematics must remain");
-assert(deepCount>=112,"All original and added strategic-control chapters must remain");
+assert(mathCount>=364,"All historical control equations and 56 newly derived mathematical expressions must remain");
+assert(deepCount>=140,"All 112 historical and 28 new strategic-control deep chapters must remain");
 assert(deepChars>=22500,"Depth reduced from reviewed version");
 assert.equal(linkCount,84,"Cross-lesson link count changed");
 const html=read("index.html"),css=read("styles.css"),app=read("app.js");
@@ -339,6 +339,89 @@ near("HJB deterministic discount value",1/2,.5);
 near("Scalar Riccati steady state",(1+Math.sqrt(5))/2,1.618033988749895);
 near("LQR stationary closed loop",1-((1+Math.sqrt(5))/2)/(1+(1+Math.sqrt(5))/2),.3819660112501051);
 near("Entropic risk symmetric two-point",Math.log(Math.cosh(1)),.4337808304830271);
+
+const completeControlChapters={
+  "control-n0542": "非有界回报下折扣小于一仍可能无法保证价值有界",
+  "control-n0543": "风险中性价值相同的行动可能具有不同下行尾部风险",
+  "control-n0544": "策略评价矩阵逆与折扣占用分布的Neumann级数",
+  "control-n0546": "非平稳有限期最优策略可能随剩余交易时间发生逆转",
+  "control-n0547": "随机贴现因子下的Snell包络必须按实际执行现金流递推",
+  "control-n0548": "除息日前分红现金流能够改变美式看涨期权的提前执行决策",
+  "control-n0549": "路径先知收益和可执行停时收益之间的条件信息差",
+  "control-n0550": "布朗运动到达障碍的Laplace变换与连续最优停止边界",
+  "control-n0551": "固定交易费用导致只有足够大的收益改善才值得切换仓位",
+  "control-n0552": "指数到达限价单与线性等待损失的最优取消期限",
+  "control-n0553": "转换仓位成本使前期动作成为动态规划所需的额外状态",
+  "control-n0554": "线性状态收益与二次行动成本的无限期HJB显式解",
+  "control-n0555": "LQG分离结构下应以Kalman后验状态而非原始带噪观测反馈",
+  "control-n0556": "指数风险效用对稀有大损失的惩罚可以超过方差二阶近似",
+  "control-n0557": "非矩形动态不确定性会使逐期最坏情形组合成不存在的路径",
+  "control-n0558": "主动收集信息的期望价值来自行动对后验状态的适应",
+  "control-n0559": "相关均衡可以消除协调失败并优于独立混合Nash结果",
+  "control-n0560": "不对称零和二乘二博弈的混合均衡与双方无差异方程",
+  "control-n0561": "有限重复囚徒困境的反向归纳与无限期合作的根本差别",
+  "control-n0562": "共同价值竞价的赢家诅咒来自获胜事件本身携带的信息",
+  "control-n0563": "VCG外部性支付如何同时实现资源效率与激励相容",
+  "control-n0564": "二价拍卖保留价的最优设置与成交概率—支付额权衡",
+  "control-n0565": "逆向选择预期损失使最佳被动报价距离增加",
+  "control-n0566": "两个相关库存头寸的最低方差线性对冲仓位",
+  "control-n0567": "竞争性买卖订单Poisson强度如何决定第一笔成交类型",
+  "control-n0568": "预期中间价漂移与库存风险如何共同决定做市商保留价",
+  "control-n0569": "只对成交订单计算Markout会因订单选择机制产生条件偏差",
+  "control-n0570": "最佳反应循环可使多智能体最终行动始终不收敛"
+};
+assert.equal(Object.keys(completeControlChapters).length,28,"Every new control lecture must have an additional full proof chapter");
+for(const lesson of newest){
+ const sec=lesson.deep_sections.at(-1);
+ assert.equal(lesson.deep_sections.length,5,lesson.id+" original complete control chapters lost");
+ assert.equal(sec.title,completeControlChapters[lesson.id],lesson.id+" new topic was lost");
+ assert(sec.paragraphs.length===2&&sec.paragraphs.every(x=>x.length>=100),lesson.id+" complete detailed explanations missing");
+ assert(sec.proof.length>=180&&sec.worked.length>=115&&sec.limitation.length>=70,lesson.id+" proof worked case or boundary cut down");
+ assert(sec.formulas.length===2,lesson.id+" complete mathematical relations required");
+}
+near("Discounted unbounded state growth finite",1/(1-.8),5);
+yes("Discounting cannot dominate doubling with gamma .6",2*.6>1);
+near("Risk neutral action mean",.5*11+.5*(-9),1);
+near("Risk neutral action variance",.5*(11-1)**2+.5*(-9-1)**2,100);
+near("Alternating two state policy value",1/(1-.5**2),4/3);
+near("Terminal switching opportunity net", -5+4+4,3);
+near("Random discount now exercise",.9*11,9.9);
+near("Random discount later continue",.95*11,10.45);
+near("Dividend early exercise advantage",100-80-(90-80),10);
+near("Stopping prophet expectation",.5*1+.5*3,2);
+near("Stopping adaptive expectation",Math.max(1,.5*0+.5*3),1.5);
+near("Brownian discounted hitting time",Math.exp(-1),.36787944117144233);
+near("Fixed fee switch first signal",.2**2/2,.02);
+near("Fixed fee switch strong signal",.4**2/2,.08);
+near("Limit optimal cancellation",Math.log(4),1.3862943611198906);
+near("Limit schedule true expected cost",2+8*.25+2*Math.log(4),6.772588722239782);
+near("Markov past warehouse positive inventory",5-6,-1);
+near("HJB affine-control optimal value at zero",1-.5,.5);
+near("Kalman conditional state mean",1/(1+1)*2,1);
+near("Separation state feedback action",-.5*1,-.5);
+near("Rare tail entropic risk",Math.log(.9+.1*Math.exp(1))/.1,1.5856507874042909);
+near("Nonrectangular fixed model worst total",1-1+1,1);
+near("Rectangular unnatural worst",0+0,0);
+near("Perfect information purchase net",2-.6,1.4);
+near("Coordinated CE optimal reward",2,2);
+near("Independent symmetric Nash reward",2*.5,1);
+near("Asymmetric zero sum row mix",1/3,1/3);
+near("Asymmetric zero sum value",2/3,2/3);
+near("Cooperation discount threshold",(5-3)/(5-1),.5);
+near("Common value winner conditional posterior",.75*.25/(.75*.25+.25*.75),.5);
+near("Common value winning bid conditional utility",5-7.5,-2.5);
+near("VCG externality for winner",8+5-8,5);
+near("VCG second winner externality",10+5-10,5);
+near("Uniform reserve price optimum",.5,.5);
+near("Uniform auction expected revenue",1/3+.5**2-(4/3)*(.5**3),5/12);
+near("Maker optimal distance adverse selection",.02+.01+1/10,.13);
+near("Hedged inventory conditional variance",1+.8**2+2*.8*(-.8),.36);
+near("First buy order competing hazards",(2/3)*(1-Math.exp(-3)),.6334752877547574);
+near("Inventory-aware reserve price long",100+.4-.1*3,100.1);
+near("Markout adverse fill posterior",.9*.5/(.9*.5+.1*.5),.9);
+near("Filled Markout expectation",.9*1+.1*(-1),.8);
+near("Best response cycle mixed empirical frequency",2/4,.5);
+
 console.log("V105 PASS",newest.length,"new control lectures;",all.length,"total;",
  mathCount,"strict KaTeX;",deepCount,"deep proof chapters;",deepChars,"deep prose chars;",
  checks,"independent numerics;",linkCount,"valid cross-links; control theory 30/30.");
