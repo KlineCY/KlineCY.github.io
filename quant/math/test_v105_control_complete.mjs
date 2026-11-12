@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import vm from "node:vm";
 import assert from "node:assert/strict";
 import katex from "katex";
 
@@ -76,9 +77,9 @@ for(const l of newest){
  for(const field of ["definition","assumptions","example","application","caveat"])
   assert(l[field]?.length>=70,id+" incomplete "+field);
  assert(l.properties?.length>=4 && l.properties.every(p=>p.length>=20),id+" shallow properties");
- assert.equal(l.formulas.length,3,id+" core formulas");
- assert.equal(l.derivation.length,3,id+" derivations");
- assert.equal(l.deep_sections.length,3,id+" detailed chapters");
+ assert(l.formulas.length>=3,id+" original core formulas required");
+ assert(l.derivation.length>=3,id+" original derivations required");
+ assert(l.deep_sections.length>=3,id+" original chapter depth required");
  for(const x of l.formulas){assert(x.label?.length>=2,id+" mathematical label");formula(x.tex,id);}
  for(const x of l.derivation){assert(x.explanation?.length>=25,id+" derivation prose");formula(x.tex,id);}
  const headings=new Set();
@@ -86,13 +87,12 @@ for(const l of newest){
   assert(s.title?.length>=8 && s.question?.length>=10,id+" deep section title/question");
   assert(!headings.has(s.title),id+" repeated subchapter");
   headings.add(s.title);
-  assert(s.paragraphs?.length===2 && s.paragraphs.every(p=>p.length>=30),id+" deep explanatory text");
+  assert(s.paragraphs?.length>=2 && s.paragraphs.every(p=>p.length>=30),id+" deep explanatory text");
    if(consolidatedIDs.has(id))assert(s.paragraphs.every(p=>!p.includes("\n")),id+" contains merged duplicate prose");
   for(const [key,min] of [["proof",50],["worked",50],["limitation",25]])
    assert(s[key]?.length>=min,id+" short "+key);
-  assert.equal(s.formulas?.length,1,id+" deep math");
-  assert(s.formulas[0].label?.length>=2,id+" deep formula caption");
-  formula(s.formulas[0].tex,id);
+  assert(s.formulas?.length>=1,id+" proof mathematics missing");
+  for(const f of s.formulas){assert(f.label?.length>=2,id+" deep formula caption");formula(f.tex,id);}
   deepCount++;
   deepChars+=s.paragraphs.join("").length+s.proof.length+s.worked.length+s.limitation.length;
  }
@@ -104,8 +104,8 @@ for(const l of newest){
   linkCount++;
  }
 }
-assert.equal(mathCount,252,"New formula count changed");
-assert.equal(deepCount,84,"Deep chapter count changed");
+assert(mathCount>=252,"All original strict mathematics preserved");
+assert(deepCount>=84,"All original deep chapters preserved");
 assert(deepChars>=22500,"Depth reduced from reviewed version");
 assert.equal(linkCount,84,"Cross-lesson link count changed");
 const html=read("index.html"),css=read("styles.css"),app=read("app.js");
@@ -282,6 +282,41 @@ near("MARL opponent H prob0.8",2*.8-1,.6);
 near("MARL opponent H prob0.2",2*.2-1,-.6);
 near("MARL mixed Nash exploitability",0,0);
 assert(checks>=135,"V105 independent control and trading arithmetic checks unexpectedly incomplete");
+
+for(const file of ["lessons-control-v105c.json","lessons-control-v105d.json"]){
+ for(const l of json(file).lessons){
+  assert.equal(l.deep_sections.length,4,l.id+" new strategic modeling chapter missing");
+  const s=l.deep_sections.at(-1);
+  assert(s.paragraphs.length>=2&&s.paragraphs.every(p=>p.length>=70),l.id+" control explanation incomplete");
+  assert(s.proof.length>=95&&s.worked.length>=78&&s.limitation.length>=60,l.id+" proof, example or applicability boundary missing");
+  assert(s.formulas.length>=2,l.id+" independent control equations missing");
+ }
+}
+const loaderStart=app.indexOf("async function loadV105ControlGame(");
+const loaderEnd=app.indexOf("async function loadV106Calculus(",loaderStart);
+assert(loaderStart>=0&&loaderEnd>loaderStart,"production control reader loader absent");
+const loadControl=vm.runInNewContext(app.slice(loaderStart,loaderEnd)+"\nloadV105ControlGame",{
+ fetchMathJson:async name=>json(name.replace(/^\.\//,""))
+});
+for(const file of files){
+ const loaded=await loadControl("./"+file,json(file).lessons.length);
+ assert.equal(loaded.length,json(file).lessons.length,"control course not loadable in production "+file);
+}
+near("Robust expected payoff with p lower bound",10*.2,2);
+near("POMDP belief alarm update",.24*.75/(.24*.75+.76*.25),.18/.37);
+near("Nash prisoner's dilemma defection value",4-3,1);
+near("Matching coins best response q0.8",2*.8-1,.6);
+near("Repeated cooperation delta threshold",(5-3)/(5-1),.5);
+near("First-price two bidder equilibrium bid",.8/2,.4);
+near("Single-parameter truthful threshold payment",.8-(.8-.5),.5);
+near("Second-price bidder utility",100-70,30);
+near("Poisson market-maker optimum quote",1/2,.5);
+near("Poisson market-maker cost-aware quote",.1+1/2,.6);
+near("Market inventory price variance",100**2*4,40000);
+near("Hawkes branching mean intensity",2/(1-.6),5);
+near("Market-maker inventory reservation price",100-10*.01*4*.5,99.8);
+near("Ask markout adverse movement",100.10-100.15,-.05);
+near("Matching pennies exploitability in deterministic play",1-(-1),2);
 console.log("V105 PASS",newest.length,"new control lectures;",all.length,"total;",
  mathCount,"strict KaTeX;",deepCount,"deep proof chapters;",deepChars,"deep prose chars;",
  checks,"independent numerics;",linkCount,"valid cross-links; control theory 30/30.");

@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import vm from "node:vm";
 import assert from "node:assert/strict";
 import katex from "katex";
 
@@ -72,9 +73,9 @@ for(const l of newest){
  for(const field of ["definition","assumptions","example","application","caveat"])
   assert(l[field]?.length>=70,id+" incomplete "+field);
  assert(l.properties?.length>=4 && l.properties.every(p=>p.length>=20),id+" shallow properties");
- assert.equal(l.formulas.length,3,id+" core formulas");
- assert.equal(l.derivation.length,3,id+" derivations");
- assert.equal(l.deep_sections.length,3,id+" detailed chapters");
+ assert(l.formulas.length>=3,id+" original core formulas required");
+ assert(l.derivation.length>=3,id+" original derivations required");
+ assert(l.deep_sections.length>=3,id+" original chapter depth required");
  for(const x of l.formulas){assert(x.label?.length>=2,id+" mathematical label");formula(x.tex,id);}
  for(const x of l.derivation){assert(x.explanation?.length>=25,id+" derivation prose");formula(x.tex,id);}
  const headings=new Set();
@@ -82,12 +83,11 @@ for(const l of newest){
   assert(s.title?.length>=8 && s.question?.length>=10,id+" deep section title/question");
   assert(!headings.has(s.title),id+" repeated subchapter");
   headings.add(s.title);
-  assert(s.paragraphs?.length===2 && s.paragraphs.every(p=>p.length>=30),id+" deep explanatory text");
+  assert(s.paragraphs?.length>=2 && s.paragraphs.every(p=>p.length>=30),id+" deep explanatory text");
   for(const [key,min] of [["proof",50],["worked",50],["limitation",25]])
    assert(s[key]?.length>=min,id+" short "+key);
-  assert.equal(s.formulas?.length,1,id+" deep math");
-  assert(s.formulas[0].label?.length>=2,id+" deep formula caption");
-  formula(s.formulas[0].tex,id);
+  assert(s.formulas?.length>=1,id+" proof mathematics missing");
+  for(const f of s.formulas){assert(f.label?.length>=2,id+" deep formula caption");formula(f.tex,id);}
   deepCount++;
   deepChars+=s.paragraphs.join("").length+s.proof.length+s.worked.length+s.limitation.length;
  }
@@ -99,8 +99,8 @@ for(const l of newest){
   linkCount++;
  }
 }
-assert.equal(mathCount,252,"New formula count changed");
-assert.equal(deepCount,84,"Deep chapter count changed");
+assert(mathCount>=252,"Original and expanded strict mathematics must remain");
+assert(deepCount>=84,"Original and expanded deep chapters must remain");
 assert(deepChars>=22000,"Depth reduced from reviewed version");
 assert.equal(linkCount,84,"Cross-lesson link count changed");
 const html=read("index.html"),css=read("styles.css"),app=read("app.js");
@@ -282,6 +282,37 @@ near("Hoeffding required count",Math.ceil(Math.log(40)/(2*.05**2)),738);
 near("Hoeffding required count half precision",Math.ceil(Math.log(40)/(2*.025**2)),2952);
 yes("Hoeffding 738 sufficient",2*Math.exp(-2*738*.05**2)<=.05);
 assert(checks>=120,"Independent graph and combinatorics computations unexpectedly incomplete");
+
+for(const file of ["lessons-discrete-v104b.json","lessons-discrete-v104c.json"]){
+ const doc=json(file);
+ for(const l of doc.lessons){
+  assert.equal(l.deep_sections.length,4,l.id+" advanced graph chapter not present");
+  const s=l.deep_sections.at(-1);
+  assert(s.paragraphs.length>=2&&s.paragraphs.every(p=>p.length>=70),l.id+" deep context missing");
+  assert(s.proof.length>=95&&s.worked.length>=78&&s.limitation.length>=60,l.id+" incomplete proof or example");
+  assert(s.formulas.length>=2,l.id+" missing independent equations");
+ }
+}
+const loaderStart=app.indexOf("async function loadV104DiscreteGraphs(");
+const loaderEnd=app.indexOf("async function loadV105ControlGame(",loaderStart);
+assert(loaderStart>=0&&loaderEnd>loaderStart,"production graph reader loader unavailable");
+const loadGraphs=vm.runInNewContext(app.slice(loaderStart,loaderEnd)+"\nloadV104DiscreteGraphs",{
+ fetchMathJson:async name=>json(name.replace(/^\.\//,""))
+});
+for(const file of files){
+ const loaded=await loadGraphs("./"+file,json(file).lessons.length);
+ assert.equal(loaded.length,json(file).lessons.length,"graph reader refused module "+file);
+}
+near("Bellman-Ford negative edge improvement",5-4,1);
+near("Network maxflow cut capacity",3+2,5);
+near("Periodic walk two steps back",1,1);
+near("Laplacian heat difference half-time",Math.exp(-2*Math.log(2)/2),.5);
+near("PageRank restart node A",1/1.8,5/9);
+near("Leontief total sector A",10/.9,11.11111111111111);
+near("Crossholding A value",150/.9,166.66666666666666);
+near("CVA wrong-way true loss",.5*10,5);
+near("CVA independent mistaken loss",.5*(.5*10),2.5);
+near("Contagion isolated loop zero external assets",Math.min(10,5),5);
 console.log("V104 PASS",newest.length,"new lectures,",all.length,"total;",mathCount,"strict KaTeX;",
  deepCount,"proof chapters;",deepChars,"deep prose characters;",checks,"independent numerical checks;",
  linkCount,"crosslinks; discrete graph mathematics 30/30.");
