@@ -73,9 +73,9 @@ for(const l of newest){
  for(const field of ["definition","assumptions","example","application","caveat"])
   assert(l[field]?.length>=70,id+" incomplete "+field);
  assert(l.properties?.length>=4 && l.properties.every(p=>p.length>=20),id+" shallow properties");
- assert.equal(l.formulas.length,3,id+" core formulas");
- assert.equal(l.derivation.length,3,id+" derivations");
- assert.equal(l.deep_sections.length,3,id+" detailed chapters");
+ assert(l.formulas.length>=3,id+" original core formulas preserved");
+ assert(l.derivation.length>=3,id+" original derivations preserved");
+ assert(l.deep_sections.length>=3,id+" original deep chapters preserved");
  for(const x of l.formulas){assert(x.label?.length>=2,id+" mathematical label");formula(x.tex,id);}
  for(const x of l.derivation){assert(x.explanation?.length>=25,id+" derivation prose");formula(x.tex,id);}
  const headings=new Set();
@@ -83,12 +83,11 @@ for(const l of newest){
   assert(s.title?.length>=8 && s.question?.length>=10,id+" deep section title/question");
   assert(!headings.has(s.title),id+" repeated subchapter");
   headings.add(s.title);
-  assert(s.paragraphs?.length===2 && s.paragraphs.every(p=>p.length>=30),id+" deep explanatory text");
+  assert(s.paragraphs?.length>=2 && s.paragraphs.every(p=>p.length>=30),id+" deep explanatory text");
   for(const [key,min] of [["proof",50],["worked",50],["limitation",25]])
    assert(s[key]?.length>=min,id+" short "+key);
-  assert.equal(s.formulas?.length,1,id+" deep math");
-  assert(s.formulas[0].label?.length>=2,id+" deep formula caption");
-  formula(s.formulas[0].tex,id);
+  assert(s.formulas?.length>=1,id+" deep mathematical expressions preserved");
+  for(const f of s.formulas){assert(f.label?.length>=2,id+" deep formula caption");formula(f.tex,id);}
   deepCount++;
   deepChars+=s.paragraphs.join("").length+s.proof.length+s.worked.length+s.limitation.length;
  }
@@ -100,10 +99,10 @@ for(const l of newest){
   linkCount++;
  }
 }
-assert.equal(mathCount,108,"New formula count changed");
-assert.equal(deepCount,36,"Deep chapter count changed");
+assert(mathCount>=108,"Original strict KaTeX mathematics must not be lost");
+assert(deepCount>=36,"Original deep mathematical chapters must remain");
 assert(deepChars>=9700,"Depth reduced from reviewed version");
-assert.equal(linkCount,36,"Cross-lesson link count changed");
+assert(linkCount>=36,"Original cross-chapter references must remain");
 const html=read("index.html"),css=read("styles.css"),app=read("app.js");
 const workflow=read("../../.github/workflows/test-quant-math.yml");
 assert(/app[.]js[?]v=[0-9]{8}/.test(html),"Reader must bust V101 cache");
@@ -226,6 +225,33 @@ near("PPO GAE discount",.9*.8,.72);
 near("PPO GAE 2 step",.4+.9*.8*.2,.544);
 yes("PPO clipped r can exceed clip bound",1.3>1.2);
 assert(checks>=75,"V102 independently calculated financial and ML checks unexpectedly incomplete");
+
+for(const lecture of newest){
+ const seen=new Set(lecture.deep_sections.map(s=>s.title));
+ assert.equal(seen.size,lecture.deep_sections.length,lecture.id+" duplicate mathematical chapter");
+ assert(lecture.deep_sections.length>=4,lecture.id+" original mathematics and independent deeper analysis missing");
+ const extended=lecture.deep_sections.at(-1);
+ assert(extended.paragraphs.length>=2&&extended.paragraphs.every(p=>p.length>=80),lecture.id+" new explanation inadequate");
+ assert(extended.proof.length>=100&&extended.worked.length>=70&&extended.limitation.length>=65,lecture.id+" insufficient added derivation, worked example or boundary");
+ assert(extended.formulas.length>=1,lecture.id+" missing mathematical formulation");
+}
+near("Quantile check loss at a0",.2*.9*10,1.8);
+near("Quantile check loss at a10",.8*.1*10,.8);
+yes("Quantile optimum lower loss",.8<1.8);
+near("Sample complexity ceiling",Math.ceil(Math.log(40000)/(.02)),530);
+near("Branched graph full derivative",2*2+3,7);
+near("Matrix BCE class 1 first gradient",(-.5*1+.5*2)/2,.25);
+near("Approximation and estimation risk",(.5-.25)+.25,.5);
+near("Hard SVM dual primal equality",1-.5,.5);
+near("Orthogonal embedding distance",Math.sqrt(2),Math.sqrt(2));
+near("Shared convolution w0 gradient",1+2,3);
+near("Shared convolution w1 gradient",2+3,5);
+near("Causal softmax first weight",1/(1+3),.25);
+near("Causal softmax second weight",3/(1+3),.75);
+near("Sinusoid relative dot",Math.cos(-Math.PI),-1);
+near("Bernoulli REINFORCE expectation",.3*(1/.3),1);
+near("PPO positive clipping",Math.min(1.4*2,1.2*2),2.4);
+near("PPO negative clipping",Math.min(.5*(-2),.8*(-2)),-1.6);
 console.log("V102 PASS",newest.length,"new lessons;",all.length,"total;",
  mathCount,"strict KaTeX;",deepCount,"proof chapters;",deepChars,"deep prose chars;",
  checks,"independent numerics;",linkCount,"connected knowledge links; machine learning mathematics 36/36.");

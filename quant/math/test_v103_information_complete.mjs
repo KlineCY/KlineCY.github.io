@@ -70,9 +70,9 @@ for(const l of newest){
  for(const field of ["definition","assumptions","example","application","caveat"])
   assert(l[field]?.length>=70,id+" incomplete "+field);
  assert(l.properties?.length>=4 && l.properties.every(p=>p.length>=20),id+" shallow properties");
- assert.equal(l.formulas.length,3,id+" core formulas");
- assert.equal(l.derivation.length,3,id+" derivations");
- assert.equal(l.deep_sections.length,3,id+" detailed chapters");
+ assert(l.formulas.length>=3,id+" original core formulas preserved");
+ assert(l.derivation.length>=3,id+" original derivations preserved");
+ assert(l.deep_sections.length>=3,id+" original deep chapters preserved");
  for(const x of l.formulas){assert(x.label?.length>=2,id+" mathematical label");formula(x.tex,id);}
  for(const x of l.derivation){assert(x.explanation?.length>=25,id+" derivation prose");formula(x.tex,id);}
  const headings=new Set();
@@ -80,12 +80,11 @@ for(const l of newest){
   assert(s.title?.length>=8 && s.question?.length>=10,id+" deep section title/question");
   assert(!headings.has(s.title),id+" repeated subchapter");
   headings.add(s.title);
-  assert(s.paragraphs?.length===2 && s.paragraphs.every(p=>p.length>=30),id+" deep explanatory text");
+  assert(s.paragraphs?.length>=2 && s.paragraphs.every(p=>p.length>=30),id+" deep explanatory text");
   for(const [key,min] of [["proof",50],["worked",50],["limitation",25]])
    assert(s[key]?.length>=min,id+" short "+key);
-  assert.equal(s.formulas?.length,1,id+" deep math");
-  assert(s.formulas[0].label?.length>=2,id+" deep formula caption");
-  formula(s.formulas[0].tex,id);
+  assert(s.formulas?.length>=1,id+" deep mathematical expressions preserved");
+  for(const f of s.formulas){assert(f.label?.length>=2,id+" deep formula caption");formula(f.tex,id);}
   deepCount++;
   deepChars+=s.paragraphs.join("").length+s.proof.length+s.worked.length+s.limitation.length;
  }
@@ -97,10 +96,10 @@ for(const l of newest){
   linkCount++;
  }
 }
-assert.equal(mathCount,162,"New formula count changed");
-assert.equal(deepCount,54,"Deep chapter count changed");
+assert(mathCount>=162,"All original and expanded strict expressions required");
+assert(deepCount>=54,"All original deep chapters required");
 assert(deepChars>=14000,"Depth reduced from reviewed version");
-assert.equal(linkCount,54,"Cross-lesson link count changed");
+assert(linkCount>=54,"Original cross-chapter references must remain");
 const html=read("index.html"),css=read("styles.css"),app=read("app.js");
 const workflow=read("../../.github/workflows/test-quant-math.yml");
 assert(/app[.]js[?]v=[0-9]{8}/.test(html),"Reader must bust V102 cache");
@@ -277,6 +276,38 @@ near("Signal φ eighth",.8**8,.16777216);
 near("Signal execution net lag8",.01*.8**8-.002,-.0003222784);
 yes("Signal expected net switches sign",.01*.8**8-.002<0);
 assert(checks>=110,"Independent signal and mathematical computations unexpectedly incomplete");
+
+for(const lecture of newest){
+ const seen=new Set(lecture.deep_sections.map(s=>s.title));
+ assert.equal(seen.size,lecture.deep_sections.length,lecture.id+" duplicate mathematical chapter");
+ assert(lecture.deep_sections.length>=4,lecture.id+" missing independent advanced mathematical analysis");
+ const advanced=lecture.deep_sections.at(-1);
+ assert(advanced.paragraphs.length>=2&&advanced.paragraphs.every(p=>p.length>=80),lecture.id+" new explanation inadequate");
+ assert(advanced.proof.length>=100&&advanced.worked.length>=70&&advanced.limitation.length>=65,lecture.id+" proof, arithmetic, or applicability boundary incomplete");
+ assert(advanced.formulas.length>=1,lecture.id+" mathematical expression missing");
+}
+near("Euler complex multiplication real part",2*Math.cos(Math.PI),-2);
+near("Fourier exponential pulse a2 omega2",2*2/(2*2+2*2),.5);
+near("Eight point cosine bin amplitude",8/2,4);
+near("Four point FFT k1 real",1-3,-2);
+near("Four point FFT k1 imaginary",4-2,2);
+near("AR1 spectral frequency contrast",((1+.5)/(1-.5))**2,9);
+near("Parseval alternating time energy",[1,-1,1,-1].reduce((z,x)=>z+x*x,0),4);
+near("Correlated two-period average variance",(4+1)/2,2.5);
+near("Differenced white noise variance",2*1,2);
+near("Kalman Joseph covariance",(.2)**2*4+(.8)**2*1,.8);
+near("Wiener scalar shrink",4/(4+1),.8);
+near("Wiener minimum MSE",4*1/(4+1),.8);
+near("Haar energy",8+2,10);
+near("STFT twenty-day frequency interval",1/20,.05);
+near("HP highest frequency gain",1/(1+16),1/17);
+near("High-frequency observed variance",.04+2*.01,.06);
+near("HF observed negative lag-one correlation",-.01/.06,-1/6);
+near("Welch four-independent-segment variance",9/4,2.25);
+near("Three-period correlated-return variance",3+2*(2*.5+1*.25),5.5);
+near("Conditional XOR mutual information bits",1-0,1);
+near("Signal latency four periods bp",10*.8**4,4.096);
+near("Signal latency five periods bp",10*.8**5,3.2768);
 console.log("V103 PASS:",newest.length,"new full lessons;",all.length,"total;",
  mathCount,"strict KaTeX;",deepCount,"deep proof chapters;",deepChars,"deep prose characters;",
  checks,"independent computations;",linkCount,"cross references; information 32/32.");
