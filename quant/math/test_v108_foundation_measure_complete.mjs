@@ -75,8 +75,8 @@ for(const lesson of added){
   links.push(link.id);
  }
 }
-assert(formulas.length>=196,"Original V108 mathematics and 16 new formulas required");
-assert(depth>=68,"All original 60 sections and 8 additional complete proofs required");
+assert.equal(formulas.length,220,"All 180 original and 40 added V108 formulas must strictly parse");
+assert.equal(depth,80,"All original 60 and 20 additional mathematical chapters must remain");
 assert.equal(links.length,60,"Every lesson needs three functional learning links");
 assert(prose>=18000,"Proofs, examples or limitations have been excessively shortened");
 const app=read("app.js"),html=read("index.html"),css=read("styles.css");
@@ -136,13 +136,13 @@ near("hedge replication",(2/3)*100-60/1.05,10/1.05);
 near("real risk premium",111-105,6);
 yes("equivalent P and Q positive",.7>0&&.3>0&&.5>0&&.5<1);
 const reviewedMeasure=["lessons-measure-v108a.json","lessons-measure-v108b.json"].flatMap(f=>json(f).lessons).flatMap(l=>l.deep_sections);
-assert(reviewedMeasure.length>=18,"All historical and added conditional-probability and measure sections required");
+assert(reviewedMeasure.length===20,"All original and added conditional-probability and measure sections required");
 for(const s of reviewedMeasure)assert(s.paragraphs[1].length>=145&&!s.paragraphs[1].includes("\n"),s.title+" requires coherent substantive assumptions");
 assert(Math.abs(0.08-0.2*0.25-0.03)<1e-12,"Risk-neutral drift arithmetic incorrect");
 assert(reviewedMeasure.find(s=>s.title==="密度过程为什么必须是真鞅").paragraphs[1].includes("足够条件"),"Novikov sufficiency qualification missing");
 
 
-for(const file of ["lessons-foundation-v108a.json","lessons-measure-v108a.json"]){
+for(const file of ["lessons-foundation-v108a.json","lessons-foundation-v108b.json","lessons-foundation-v108c.json","lessons-measure-v108a.json","lessons-measure-v108b.json"]){
  const doc=json(file);
  for(const lecture of doc.lessons){
   assert(lecture.deep_sections.length>=4,lecture.id+" added fully independent mathematical chapter missing");
@@ -158,7 +158,7 @@ assert(loaderStart>=0&&loaderEnd>loaderStart,"V108 reader source missing");
 const loadAdvancedFoundation=vm.runInNewContext(app.slice(loaderStart,loaderEnd)+"\nloadV108FoundationsMeasure",{
  fetchMathJson:async name=>json(name.replace(/^\.\//,""))
 });
-for(const [file,n,discipline] of [["lessons-foundation-v108a.json",5,"foundation"],["lessons-measure-v108a.json",3,"measure"]]){
+for(const [file,n,discipline] of [["lessons-foundation-v108a.json",5,"foundation"],["lessons-foundation-v108b.json",5,"foundation"],["lessons-foundation-v108c.json",5,"foundation"],["lessons-measure-v108a.json",3,"measure"],["lessons-measure-v108b.json",2,"measure"]]){
  const sections=await loadAdvancedFoundation("./"+file,n,discipline);
  assert.equal(sections.length,n,"V108 runtime rejected additional mathematics");
  assert(sections.every(l=>l.deep_sections.length>=4),"V108 reader lost one or more advanced mathematical chapters");
@@ -175,6 +175,21 @@ near("ES95 rare one-percent disaster",(.01*100)/(.05),20);
 near("Constant Girsanov market price of risk",(.08-.03)/.20,.25);
 near("Risk-neutral drift from original model",.08-.2*.25,.03);
 near("Exponential density average",Math.exp(.5*.25**2)*Math.exp(-.5*.25**2),1);
+
+near("Compact continuous optimum",.5**2+(1-.5)**2,.5);
+near("Noncompact exponential infimum",Math.exp(-15),3.059023205018258e-7,1e-10);
+near("Infinite dimensional Hilbert basis separation",Math.sqrt(1+1),Math.SQRT2);
+near("Uniform sequence power near boundary",.9999**100,.9900493386913719,1e-8);
+near("Oscillatory derivative at zero",Math.cos(1000*0),1);
+near("Discrete metric for unequal points",Number(1/10!==0),1);
+near("Uniform Cauchy geometric tail",2**(-10),.0009765625);
+near("Conditional mean squared extra risk",.5*3**2+.5*(-3)**2,9);
+near("Unbounded derivative despite low amplitude",100,.01*10000);
+near("Contraction estimate x3",.5*(.5*(.5*0+1)+1)+1,1.75);
+near("Weak convergence basis inner product",.5**9,1/512);
+near("Novikov constant theta sufficient",Math.exp(.5*.25**2),1.0317434074991028,1e-7);
+near("Two-state risk neutral rise weight",(1.05-.9)/(1.2-.9),.5);
+near("Two-state call replication price",(.5*20)/1.05,9.523809523809524);
 console.log("V108 PASS: "+combined.length+"/"+nodes.length+" authored, foundation 30/30, measure 30/30, "+
   depth+" proof sections, "+formulas.length+" strict KaTeX expressions, "+prose+" Chinese proof characters, "+
   links.length+" verified links, "+checks+" independent numerical checks, full CI/typography guards");
