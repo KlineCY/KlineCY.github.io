@@ -235,6 +235,35 @@ near("Kalman filtering current information",0/2,0);
 near("Kalman future smoothed information",(0+3)/3,1);
 near("Four-day square root impact relative cost",1/Math.sqrt(4),.5);
 
+
+const additionalV76FifthCycle={
+  "m19-c02-p04": "解码器忽略潜变量时，VAE的KL最优项直接鼓励后验塌缩",
+  "m20-c02-p02": "折扣Bellman算子压缩性给出价值迭代的可验证误差证书",
+  "m21-c02-p02": "微小转移总变差在灾难损失下仍可造成巨大经济误差",
+  "m22-c01-p06": "似然比非负鞅通过Ville不等式控制任意时刻报警概率",
+  "m23-c04-p05": "交易费直接减少再平衡资本时，目标仓位需要解隐式财富方程"
+};
+assert.equal(Object.keys(additionalV76FifthCycle).length,5,"All five additional V76 full lessons must remain");
+for(const [id,label] of Object.entries(additionalV76FifthCycle)){
+ const d=docs.find(x=>x.lessons[id]);
+ assert(d,"Missing canonical course "+id);
+ const l=d.lessons[id];
+ assert.equal(l.equations.at(-1).label,label,id+" advanced proof equation was lost");
+ assert(l.derivation.at(-1).length>=180,id+" full derivation compressed");
+ assert(l.worked_example.includes("独立推导与数值检验："),id+" independent worked example missing");
+ assert(l.protocol.at(-1).length>=70,id+" validation instructions removed");
+ assert(l.pitfalls.at(-1).length>=125,id+" important limitations missing");
+ validTex(l.equations.at(-1).tex,true);
+}
+assert.equal(strictTex,118,"Original 90 plus 23 prior and 5 new strict V76 equations must parse");
+near("Posterior collapse noninformative decoder KL",-Math.log(.8)-(-Math.log(.8)),0);
+near("Posterior collapse shifted normal KL",.5*(1**2),.5);
+near("Bellman residual error certificate",.02/(1-.9),.2);
+near("Rare disaster transition expected cost",.001*1000000,1000);
+near("Sequential martingale five percent threshold",1/.05,20);
+near("Post-fee exact rebalance wealth",100.2/1.004,99.800796812749,1e-7);
+near("Post-fee cash fee balance",100-100.2/1.004,.199203187250996,1e-7);
+
 const mathCSS=read("styles.css"),mlCSS=read("../ml/atlas.css");
 for(const [name,css] of [["math",mathCSS],["ml",mlCSS]]){
  for(const mark of ["overflow-x:auto","line-break:strict",":focus-visible","@media print","@media(max-width:700px)"])

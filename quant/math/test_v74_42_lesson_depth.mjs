@@ -171,6 +171,62 @@ near("total variation",(.5+.5)/2,.5);
 near("Pinsker JSD lower bound",(.5**2)/2,.125);
 truth("Pinsker numerical bound",js>=(.5**2)/2);
 truth("Pinsker inverted bound",Math.sqrt(2*js)>=.5);
+
+const extension13={
+  "m01-c03-p03": "目标环境变动时的偏差方差分解必须以目标条件均值为基准",
+  "m02-c03-p05": "带正则矩阵Gram的logdet关于原始特征矩阵的梯度",
+  "m03-c02-p02": "偏态损失分布中平方损失最优均值与绝对损失最优中位数不同",
+  "m04-c05-p04": "小概率源域状态在目标域常见时的重要性权重方差爆炸",
+  "m05-c05-p03": "裁剪稀有大梯度引入系统性方向偏差的精确期望公式",
+  "m06-c01-p02": "完全相同已观测数据可以对应不同总体事件率的MNAR不可识别反例",
+  "m07-c01-p04": "有偏收缩估计可能以更低均方风险优于BLUE",
+  "m08-c01-p06": "Bagging可降低个体方差但无法消除共同系统偏差",
+  "m09-c03-p02": "两点硬间隔SVM的原始与对偶解完整核验",
+  "m10-c04-p04": "切分MCMC链能够揭示同步漂移而原始链间比较可能遗漏",
+  "m11-c05-p04": "温度参数改变InfoNCE损失尺度但不改变相似度排序",
+  "m12-c03-p06": "高度相关候选策略不会产生与独立策略相同的多重比较惩罚",
+  "m13-c02-p06": "解析函数的复步长导数避免实数中心差分的消去误差",
+  "m14-c04-p04": "没有位置编码的ViT对图像patch排列的CLS表示保持不变",
+  "m15-c01-p01": "多期联合预测必须与较短期限的边际分布保持一致",
+  "m16-c03-p01": "只对注意力加因果mask仍无法修复全序列标准化的未来信息泄漏",
+  "m17-c02-p02": "Teacher forcing下单token正确率不能代表自由生成全路径正确率",
+  "m18-c03-p01": "非均匀邻居采样的均值重要性估计方差可以极高"
+};
+assert.equal(Object.keys(extension13).length,18,"All eighteen new V74 ML proofs must remain");
+for(const [id,label] of Object.entries(extension13)){
+ const d=modules.find(x=>x.lessons[id]);
+ assert(d,"Original ML module missing "+id);
+ const l=d.lessons[id];
+ assert.equal(l.equations.at(-1).label,label,id+" added mathematical claim missing");
+ assert(l.derivation.at(-1).length>=180,id+" full proof compressed");
+ assert(l.worked_example.includes("独立推导与数值检验："),id+" numeric worked example missing");
+ assert(l.protocol.at(-1).length>=70,id+" verification procedure removed");
+ assert(l.pitfalls.at(-1).length>=125,id+" limitations incomplete");
+ formula(l.equations.at(-1).tex,true);
+}
+assert.equal(strictCount,102,"Original 84 strict math validations plus 18 new expressions required");
+near("Target-shift bias and noise risk",.03**2+(-.01-.02)**2+.0001,.0019);
+near("Matrix Gram logdet first gradient component",2/6,1/3);
+near("Matrix Gram logdet second gradient component",4/6,2/3);
+near("Absolute loss at median forecast",.9*0+.1*100,10);
+near("Absolute loss at mean forecast",.9*10+.1*90,18);
+near("Heavy importance weight second moment",.25/.99+.25/.01,25.252525252525253);
+near("Heavy importance theoretical ESS",1000/(.25/.99+.25/.01),39.599999999999994,1e-7);
+near("Rare event gradient clipping expectation",.1*2,.2);
+near("Selection world B observed positive",.25*1,.25);
+near("Selection world B observed negative",.75/3,.25);
+near("Shrunk BLUE bias variance risk",.1**2+(1-.1)**2*.1**2,.0181);
+near("Bagging with common bias and error floor",.1**2+.04*(.25+.75/20),.0215);
+near("Hard margin SVM support dual multiplier",1/8,.125);
+near("Split R-hat detects synchronized drift",Math.sqrt(19/6),1.7795130420052185,1e-8);
+near("Contrastive temperature small",Math.log(1+Math.exp(-5)),.006715348489118068);
+near("Multiple testing independent strategies",1-.95**2,.0975);
+near("Complex step target derivative",Math.cos(1),.5403023058681398);
+near("Multihorizon inconsistent marginal",.1+.1,.2);
+near("Future contaminated token mean",(1+2+100)/3,34.333333333333336);
+near("Causal language model full horizon path",.9**20,.12157665459056935);
+near("Nonuniform neighbor importance variance",.1*(50**2)-5**2,225);
+
 const mathHTML=read("index.html"), mlHTML=read("../ml/index.html");
 assert(mathHTML.includes("?topic=information-n0485"),"JS divergence deep link vanished");
 for(const [name,css] of [["math",read("styles.css")],["ml",read("../ml/atlas.css")]]){
