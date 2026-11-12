@@ -227,6 +227,78 @@ near("Future contaminated token mean",(1+2+100)/3,34.333333333333336);
 near("Causal language model full horizon path",.9**20,.12157665459056935);
 near("Nonuniform neighbor importance variance",.1*(50**2)-5**2,225);
 
+
+const completeML14={
+  "m01-c02-p03": "一维Ridge对病态回归系数的平方风险精确分解",
+  "m02-c01-p02": "L无穷范数扰动球的最坏线性预测误差等于L一范数",
+  "m03-c01-p02": "罕见事件基准率与错误决策成本决定最优预警行动",
+  "m04-c01-p01": "Bernstein界如何利用方差而非只有变量取值范围",
+  "m05-c05-p05": "前向FP16乘法上溢无法通过反向损失缩放修复",
+  "m06-c01-p06": "未来成分池与退市幸存者筛选会改变历史横截面标准化结果",
+  "m07-c02-p02": "Ridge有效自由度随着每个奇异值方向的收缩而连续降低",
+  "m08-c03-p02": "平方损失梯度提升中基学习器最优步长的精确线搜索",
+  "m09-c01-p04": "各向异性特征缩放保持分割预测却改变SVM几何间隔",
+  "m10-c01-p05": "Beta后验共同概率使未来Bernoulli事件之间产生正相关",
+  "m11-c04-p01": "高斯混合模型单个分量方差趋零导致无界似然",
+  "m12-c03-p02": "区块长度过短会按三角权重削弱长期自协方差",
+  "m13-c02-p03": "共享参数的计算图梯度必须沿全部使用路径求和",
+  "m14-c03-p01": "交叉熵是严格适当评分规则而最大准确率不保证概率校准",
+  "m15-c05-p04": "选择性状态递推的历史输入贡献可由全部后续衰减乘积精确展开",
+  "m16-c04-p03": "修改历史前缀会使多层因果Transformer的后续KV缓存失效",
+  "m17-c03-p04": "DPO偏好概率受当前策略相对参考策略的赔率变化控制",
+  "m18-c01-p03": "孤立节点使标准归一化图Laplacian产生除零，需要明确自环规则",
+  "m19-c04-p03": "扩散模型v预测将干净样本重构表示为正交旋转的逆变换",
+  "m20-c01-p06": "静态隐含制度的Bayes过滤可用对数赔率逐条累加证据",
+  "m21-c04-p03": "集中式Critic拥有的全局状态不能默认供分散式Actor执行",
+  "m22-c04-p06": "对称矩阵的Frobenius最近半正定投影与相关矩阵对角约束不同",
+  "m23-c03-p02": "对协方差矩阵加对角惩罚可以限制MVO预期收益误差放大"
+};
+assert.equal(Object.keys(completeML14).length,23,"All 23 additional Atlas fourteen proofs must remain");
+for(const [id,label] of Object.entries(completeML14)){
+ const d=modules.find(m=>m.lessons[id]);
+ assert(d,"Expected ML Atlas lecture not loaded "+id);
+ const l=d.lessons[id];
+ assert.equal(l.equations.at(-1).label,label,id+" new deep mathematics missing");
+ assert(l.derivation.at(-1).length>=170,id+" independent mathematical proof was shortened");
+ assert(l.worked_example.includes("独立推导、适用条件与数值例题："),id+" independent example missing");
+ assert(l.protocol.at(-1).length>=75,id+" independent validation missing");
+ assert(l.pitfalls.at(-1).length>=110,id+" new limiting assumptions missing");
+ formula(l.equations.at(-1).tex,true);
+}
+assert.equal(strictCount,125,"Original 84 plus 18 prior and 23 new strict ML formula checks required");
+near("Univariate Ridge ill conditioned MSE",(.04**2+.04*.1**2)/(.1**2+.04)**2,.8);
+near("Univariate OLS ill conditioned MSE",.04/.1**2,4);
+near("Infinity bounded adversarial input",.1*(2+1),.3);
+near("Rare event Bayes positive predictive value",.9*.01/(.9*.01+.05*.99),.15384615384615385);
+near("False positive versus false negative decision threshold",1/(1+10),1/11);
+near("Bernstein concentration epsilon",2*Math.exp(-100*.2**2/(2*.25+(2/3)*.2)),.003617,1e-5);
+yes("FP16 256 square overflows",256**2>65504);
+near("Past cross section centered ETF feature",2-2,0);
+near("Survivor-only cross section standardized ETF feature",(2-2.5)/.5,-1);
+near("Ridge effective df at lambda one",100/101+1/2,1.49009900990099);
+near("Ridge effective df at lambda hundred",100/200+1/101,.5099009900990099);
+near("Boosting squared loss exact linesearch",3/2,1.5);
+near("Boosting squared loss improvement",5-(.5**2+.5**2),4.5);
+near("SVM margin before scaling",1/Math.sqrt(2),.7071067811865475);
+near("SVM margin after anisotropic scaling",1/Math.sqrt(1+.1**2),.9950371902099892);
+near("Beta posterior paired success rate",2*3/(4*5),.3);
+near("Beta posterior pair correlation",1/(2+2+1),.2);
+near("Gaussian mixture narrow component density",.1/(Math.sqrt(2*Math.PI)*.01),3.989422804014327);
+near("Block bootstrap true AR1 variance",1+2*.8/(1-.8),9);
+near("Block bootstrap length two variance",1+2*(1-.5)*.8,1.8);
+near("Shared neural weight multi branch derivative",(2*(1+3)),8);
+near("Proper Bernoulli logloss at true p",-.8*Math.log(.8)-.2*Math.log(.2),.5004024235381879);
+near("Mis-calibrated Bernoulli logloss",-.8*Math.log(.99)-.2*Math.log(.01),.929078,1e-4);
+near("Selective state scan five history terms",2*(1-.5**5),1.9375);
+near("Changed cached causal attention key",(.0+10+4)/2,7);
+near("DPO reference relative odds loss",-Math.log(.6),.5108256237659907);
+near("Isolated graph self loop output",3,3);
+near("Diffusion v prediction reconstructed x0",.8*2.2-.6*(-.4),2);
+near("Bayesian regime two agreeing positive signals",9/(1+9),.9);
+near("CTDE offline oracle above local best",1-.5,.5);
+near("Eigenvalue clipped correlation altered diagonal",1.5,1.5);
+near("MVO shrinkage reduces first-direction amplification",.001/(.01+.09),.01);
+
 const mathHTML=read("index.html"), mlHTML=read("../ml/index.html");
 assert(mathHTML.includes("?topic=information-n0485"),"JS divergence deep link vanished");
 for(const [name,css] of [["math",read("styles.css")],["ml",read("../ml/atlas.css")]]){
