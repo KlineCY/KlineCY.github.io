@@ -163,6 +163,78 @@ near("GCN symmetric row sum",1/3+2/Math.sqrt(6),1.1498299142610593);
 near("diffusion first var",1-.8,.2);
 near("diffusion second var",1-.8**2,.36);
 near("diffusion path covariance",Math.sqrt(.8)*.2,.17888543819998318);
+
+const additionalV76Labels={
+  "m03-c05-p06": "相同期望和方差不决定相同极端损失概率",
+  "m05-c04-p06": "一致性残差为零不保证ADMM已达到KKT最优性",
+  "m08-c01-p04": "完全拟合两条训练记录的树分裂仍可增大样本外误差",
+  "m09-c03-p04": "高维RBF核以典型距离定标的带宽缩放",
+  "m10-c02-p03": "碰撞节点筛选并不必然产生严格负相关",
+  "m12-c03-p05": "两条零优势高斯策略的选优期望仍严格为正",
+  "m01-c03-p02": "可打散训练数据并不能保证随机标签任务的泛化",
+  "m02-c01-p05": "三矩阵计算链的反向微分与梯度形状",
+  "m04-c04-p03": "样本中位数与样本均值在极端污染下的不同崩溃门槛",
+  "m06-c03-p02": "嵌套交叉验证中的特征选择只能由外层训练数据完成",
+  "m07-c02-p03": "归一化LASSO目标的全局KKT梯度无穷范数界",
+  "m11-c05-p01": "多正例监督对比学习对假负例的显式修正",
+  "m13-c05-p04": "BatchNorm验证阶段更新运行均值会引入跨样本信息",
+  "m14-c01-p05": "因果膨胀卷积的历史索引和真正的可见性边界",
+  "m15-c05-p05": "选择性状态递推中真实时间间隔与记忆衰减",
+  "m16-c02-p02": "Softmax对逐行常数平移不变与数值稳定计算",
+  "m17-c03-p02": "标量Bradley–Terry奖励不能精确实现循环偏好",
+  "m18-c02-p01": "固定维度图聚合对不断增长的邻居信息存在秩瓶颈",
+  "m19-c02-p01": "潜变量混合分布的标签置换不可识别性",
+  "m20-c01-p01": "连续奖励率转换为离散一步奖励时必须同步贴现",
+  "m21-c03-p02": "Expected Shortfall的次可加性与错位损失的分散化效应",
+  "m22-c02-p04": "Kalman平滑使用未来观测，不能充当历史实时过滤值",
+  "m23-c04-p06": "固定平方根冲击模型下多日拆单的总冲击成本"
+};
+assert.equal(Object.keys(additionalV76Labels).length,23,"All 23 additional fully proved V76 lessons must remain");
+for(const [id,label] of Object.entries(additionalV76Labels)){
+ const d=docs.find(x=>x.lessons[id]);
+ assert(d,"Missing expanded V76 Atlas lesson "+id);
+ const l=d.lessons[id];
+ assert(l.equations.at(-1).label===label,id+" mathematical formula append missing");
+ assert(l.derivation.at(-1).length>=120,id+" standalone proof was lost");
+ assert(l.worked_example.includes("进一步推导与可复算示例："),id+" complete numerical worked example missing");
+ assert(l.protocol.at(-1).length>=60,id+" verification method incomplete");
+ assert(l.pitfalls.at(-1).length>=100,id+" applicable limitations omitted");
+ validTex(l.equations.at(-1).tex,true);
+}
+assert.equal(strictTex,113,"All original 90 strict equations and 23 new equations must parse");
+near("Same variance event-tail distribution one",.5*1+.5*1,1);
+near("Same variance event-tail distribution two",.05*10+.05*10,1);
+near("Extreme tail probability mixture",.05+.05,.1);
+near("ADMM false feasibility still incurs objective",.5*(0-10)**2,50);
+near("Overfit split training residual",0,0);
+near("Overfit split true predictive risk",.5*0**2+.5*(2)**2,2);
+near("RBF typical dimension gamma",Math.log(2)/(2*100),.0034657359027997265);
+near("Collider OR selection covariance",1/3-(2/3)**2,-1/9);
+near("Collider AND degenerate covariance",1-1**2,0);
+near("Two model selection optimism",.02/Math.sqrt(Math.PI),.011283791670955126);
+near("Random label independent test error",.5,.5);
+near("Matrix product derivative with respect to A",3*4,12);
+near("Matrix product derivative with respect to B",2*4,8);
+near("Matrix product derivative with respect to C",2*3,6);
+near("Robust median after replacing a single observation",[0,1,2,3,10000].sort((a,b)=>a-b)[2],2);
+near("Nonrobust mean contamination",(0+1+2+3+10000)/5,2001.2);
+near("Normalized LASSO residual KKT",(.5+.5)/2,.5);
+near("Supervised contrastive two positives",Math.log(2+Math.exp(-1)),.861994804058251);
+near("BatchNorm incorrect validation running mean",.9*0+.1*10,1);
+near("Causal dilation receptive span",1+(3-1)*2,5);
+near("Selective SSM real elapsed decay",Math.exp(-.5*(1+3)),Math.exp(-2));
+near("Rowwise stable softmax first entry",Math.exp(-1)/(Math.exp(-1)+1),.2689414213699951);
+near("Bradley Terry cyclical score telescoping",2-1+1-0+0-2,0);
+yes("Graph Jacobian rank upper bound",2<=8);
+near("Label switched mixture mean",.3*(-2)+.7*1,.1);
+near("Continuous reward rate discounted flow",(10/.1)*(1-Math.exp(-.1)),9.51625819640405);
+near("Continuous reward split two half years",(10/.1)*(1-Math.exp(-.05))+(Math.exp(-.05))*(10/.1)*(1-Math.exp(-.05)),9.51625819640405);
+near("Expected shortfall adverse state alone",10,10);
+near("Expected shortfall of disjoint losses",10,10);
+near("Kalman filtering current information",0/2,0);
+near("Kalman future smoothed information",(0+3)/3,1);
+near("Four-day square root impact relative cost",1/Math.sqrt(4),.5);
+
 const mathCSS=read("styles.css"),mlCSS=read("../ml/atlas.css");
 for(const [name,css] of [["math",mathCSS],["ml",mlCSS]]){
  for(const mark of ["overflow-x:auto","line-break:strict",":focus-visible","@media print","@media(max-width:700px)"])
