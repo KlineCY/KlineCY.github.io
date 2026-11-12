@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import assert from "node:assert/strict";
+import vm from "node:vm";
 import katex from "katex";
 const dir=new URL("./",import.meta.url);
 const read=n=>fs.readFileSync(new URL(n,dir),"utf8"),json=n=>JSON.parse(read(n));
@@ -46,7 +47,7 @@ for(const lesson of added){
  assert(lesson.properties.every(p=>p.length>=18),id+" short property");
  assert.equal(lesson.formulas.length,3);
  assert.equal(lesson.derivation.length,3);
- assert.equal(lesson.deep_sections.length,3);
+ assert(lesson.deep_sections.length>=3,"Original deep reasoning chapters must remain");
  assert.equal(lesson.links.length,3);
  for(const formula of lesson.formulas){assert(formula.label?.length>=2);checkTex(formula.tex,id+" core");}
  for(const step of lesson.derivation){
@@ -58,11 +59,11 @@ for(const lesson of added){
   assert(section.title?.length>=8&&section.question?.length>=10,id+" underdeveloped deep topic");
   assert(!headings.has(section.title),id+" duplicate deep topic");
   headings.add(section.title);
-  assert.equal(section.paragraphs?.length,2);
+  assert(section.paragraphs?.length>=2,"At least the full original explanatory paragraphs required");
   assert(section.paragraphs.every(p=>p.length>=40),id+" insufficient context explanation");
   assert(section.proof?.length>=40&&section.worked?.length>=40&&section.limitation?.length>=30,id+" missing rigorous argument, arithmetic, or qualification");
-  assert.equal(section.formulas.length,1);
-  checkTex(section.formulas[0].tex,id+" deep topic");
+  assert(section.formulas.length>=1);
+  for(const f of section.formulas)checkTex(f.tex,id+" deep topic");
   prose+=section.paragraphs.join("").length+section.proof.length+section.worked.length+section.limitation.length;
   depth++;
  }
@@ -74,8 +75,8 @@ for(const lesson of added){
   links.push(link.id);
  }
 }
-assert.equal(formulas.length,180,"Every V108 lesson needs 3 core + 3 steps + 3 deep formulas");
-assert.equal(depth,60,"Each lesson needs 3 fully researched deep sections");
+assert(formulas.length>=196,"Original V108 mathematics and 16 new formulas required");
+assert(depth>=68,"All original 60 sections and 8 additional complete proofs required");
 assert.equal(links.length,60,"Every lesson needs three functional learning links");
 assert(prose>=18000,"Proofs, examples or limitations have been excessively shortened");
 const app=read("app.js"),html=read("index.html"),css=read("styles.css");
@@ -135,11 +136,45 @@ near("hedge replication",(2/3)*100-60/1.05,10/1.05);
 near("real risk premium",111-105,6);
 yes("equivalent P and Q positive",.7>0&&.3>0&&.5>0&&.5<1);
 const reviewedMeasure=["lessons-measure-v108a.json","lessons-measure-v108b.json"].flatMap(f=>json(f).lessons).flatMap(l=>l.deep_sections);
-assert.equal(reviewedMeasure.length,15,"Fifteen conditional-probability and measure-change sections required");
+assert(reviewedMeasure.length>=18,"All historical and added conditional-probability and measure sections required");
 for(const s of reviewedMeasure)assert(s.paragraphs[1].length>=145&&!s.paragraphs[1].includes("\n"),s.title+" requires coherent substantive assumptions");
 assert(Math.abs(0.08-0.2*0.25-0.03)<1e-12,"Risk-neutral drift arithmetic incorrect");
 assert(reviewedMeasure.find(s=>s.title==="密度过程为什么必须是真鞅").paragraphs[1].includes("足够条件"),"Novikov sufficiency qualification missing");
 
+
+for(const file of ["lessons-foundation-v108a.json","lessons-measure-v108a.json"]){
+ const doc=json(file);
+ for(const lecture of doc.lessons){
+  assert(lecture.deep_sections.length>=4,lecture.id+" added fully independent mathematical chapter missing");
+  const section=lecture.deep_sections.at(-1);
+  assert(section.paragraphs.length>=2&&section.paragraphs.every(p=>p.length>=95),lecture.id+" advanced context missing");
+  assert(section.proof.length>=135&&section.worked.length>=95&&section.limitation.length>=75,lecture.id+" incomplete advanced proof or worked example");
+  assert(section.formulas.length>=2,lecture.id+" independent formula missing");
+ }
+}
+const loaderStart=app.indexOf("async function loadV108FoundationsMeasure(");
+const loaderEnd=app.indexOf("async function loadV109RegressionEconometrics(",loaderStart);
+assert(loaderStart>=0&&loaderEnd>loaderStart,"V108 reader source missing");
+const loadAdvancedFoundation=vm.runInNewContext(app.slice(loaderStart,loaderEnd)+"\nloadV108FoundationsMeasure",{
+ fetchMathJson:async name=>json(name.replace(/^\.\//,""))
+});
+for(const [file,n,discipline] of [["lessons-foundation-v108a.json",5,"foundation"],["lessons-measure-v108a.json",3,"measure"]]){
+ const sections=await loadAdvancedFoundation("./"+file,n,discipline);
+ assert.equal(sections.length,n,"V108 runtime rejected additional mathematics");
+ assert(sections.every(l=>l.deep_sections.length>=4),"V108 reader lost one or more advanced mathematical chapters");
+}
+near("Monotone sequence slow iteration count",Math.ceil(1/.001),1000);
+near("Monotone geometric fast iteration count",Math.ceil(Math.log2(1000)),10);
+near("Infinite-dimensional orthogonal basis distance",Math.sqrt(2),Math.sqrt(2));
+near("Upper limit alternating subsequence",1+1/2000,1.0005);
+near("Discontinuous signal sigmoid at threshold",1/(1+Math.exp(0)),.5);
+near("Square root Holder modulus",Math.sqrt(.0001),.01);
+near("Continuous square root local ratio",.01/.0001,100);
+near("Nonuniformly integrable rare loss expectation",100*(1/100),1);
+near("ES95 rare one-percent disaster",(.01*100)/(.05),20);
+near("Constant Girsanov market price of risk",(.08-.03)/.20,.25);
+near("Risk-neutral drift from original model",.08-.2*.25,.03);
+near("Exponential density average",Math.exp(.5*.25**2)*Math.exp(-.5*.25**2),1);
 console.log("V108 PASS: "+combined.length+"/"+nodes.length+" authored, foundation 30/30, measure 30/30, "+
   depth+" proof sections, "+formulas.length+" strict KaTeX expressions, "+prose+" Chinese proof characters, "+
   links.length+" verified links, "+checks+" independent numerical checks, full CI/typography guards");

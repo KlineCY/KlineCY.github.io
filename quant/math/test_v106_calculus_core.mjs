@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import assert from "node:assert/strict";
+import vm from "node:vm";
 import katex from "katex";
 
 const here=new URL("./",import.meta.url);
@@ -48,7 +49,7 @@ for(const lesson of latest){
  assert(lesson.properties.length>=4&&lesson.properties.every(x=>x.length>=20),id+" shallow properties");
  assert.equal(lesson.formulas.length,3,id+" core formulas");
  assert.equal(lesson.derivation.length,3,id+" derivation steps");
- assert.equal(lesson.deep_sections.length,3,id+" detailed proof chapters");
+ assert(lesson.deep_sections.length>=4,id+" original chapters and new complete mathematical section required");
  assert.equal(lesson.links.length,3,id+" prerequisite chain");
  for(const x of lesson.formulas){assert(x.label.length>1);validateTex(x.tex,id);}
  for(const x of lesson.derivation){assert(x.explanation.length>=20);validateTex(x.tex,id);}
@@ -57,10 +58,10 @@ for(const lesson of latest){
   assert(section.title?.length>=8&&section.question?.length>=10,id+" section heading");
   assert(!headings.has(section.title),id+" repeated heading");
   headings.add(section.title);
-  assert(section.paragraphs?.length===2&&section.paragraphs.every(p=>p.length>=30),id+" short exposition");
+  assert(section.paragraphs?.length>=2&&section.paragraphs.every(p=>p.length>=30),id+" short exposition");
   assert(section.proof?.length>=55&&section.worked?.length>=50&&section.limitation?.length>=25,id+" missing proof or worked example");
-  assert.equal(section.formulas?.length,1);
-  validateTex(section.formulas[0].tex,id);
+  assert(section.formulas?.length>=1);
+  for(const f of section.formulas)validateTex(f.tex,id);
   deepCount++;
   proofChars+=section.paragraphs.join("").length+section.proof.length+section.worked.length+section.limitation.length;
  }
@@ -68,8 +69,8 @@ for(const lesson of latest){
  assert(!/TODO|FIXME|待补充|Lorem ipsum/i.test(JSON.stringify(lesson)),id+" filler detected");
  for(const link of lesson.links){assert.equal(link.kind,"math");assert(nodeMap.has(link.id),id+" broken link "+link.id);linkCount++;}
 }
-assert.equal(formulaCount,72,"Expected 72 tested mathematical expressions");
-assert.equal(deepCount,24,"Expected 24 deep proof sections");
+assert(formulaCount>=88,"All original 72 formulas and 16 additional equations must be parsed");
+assert(deepCount>=32,"Original 24 and 8 new complete deep proof sections must remain");
 assert(proofChars>=8000,"V106 explanatory proof detail below reviewed baseline");
 assert.equal(linkCount,24,"Expected 24 internal prerequisite links");
 
@@ -130,4 +131,33 @@ near("directional derivative",2*.6+4*.8,4.4);
 near("maximum directional",Math.sqrt(2**2+4**2),Math.sqrt(20));
 near("budget neutral tangent",2-4,-2);
 yes("directional below max",4.4<Math.sqrt(20));
+
+for(const lecture of latest){
+ const s=lecture.deep_sections.at(-1);
+ assert(lecture.deep_sections.length>=4,lecture.id+" advanced analysis deleted");
+ assert(s.paragraphs.every(p=>p.length>=95),lecture.id+" extended context too short");
+ assert(s.proof.length>=135&&s.worked.length>=95&&s.limitation.length>=75,lecture.id+" insufficient proof, calculation or applicability boundary");
+ assert(s.formulas.length>=2,lecture.id+" additional independent math formulas missing");
+}
+const loaderStart=app.indexOf("async function loadV106Calculus(");
+const loaderEnd=app.indexOf("async function loadV107IntegralOptimization(",loaderStart);
+assert(loaderStart>=0&&loaderEnd>loaderStart,"production calculus reader loader missing");
+const loadCalculus=vm.runInNewContext(app.slice(loaderStart,loaderEnd)+"\nloadV106Calculus",{
+ fetchMathJson:async name=>json(name.replace(/^\.\//,""))
+});
+for(const file of files){
+ const loaded=await loadCalculus("./"+file,json(file).lessons.length);
+ assert.equal(loaded.length,json(file).lessons.length,"V106 extended calculus content rejected at runtime");
+ assert(loaded.every(l=>l.deep_sections.length>=4),"Some extended V106 chapters disappeared");
+}
+near("Bond exact five-year yield shock",Math.exp(-.05)-1,-.048770575499285984);
+near("Bond Delta-Gamma approximation",-.05+.5*.05**2,-.04875);
+near("Exponential Taylor actual remainder",Math.exp(.1)-1-.1-.1**2/2,.000170185988091841);
+near("Exponential Taylor bound",Math.exp(.1)*.1**3/6,.00018419515310348058);
+near("Positive definite risk Hessian determinant",2*6-2*2,8);
+near("Perpetuity growth discounted cash",100/(.05-.02),3333.3333333333335);
+near("Leibniz moving boundaries",4**2*2-2**2,28);
+near("Covariance mixed curvature",2*.8,1.6);
+near("Quadratic second-order mean bias",4+.25,4.25);
+near("Budget-neutral steepest direction",2/Math.sqrt(2),Math.SQRT2);
 console.log("V106 calculus passed: 570 unique lessons, "+formulaCount+" strict formulae, "+deepCount+" deep chapters, "+checks+" independent numerical checks, "+proofChars+" proof characters");
