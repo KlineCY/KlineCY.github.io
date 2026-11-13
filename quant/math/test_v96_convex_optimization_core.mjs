@@ -52,7 +52,7 @@ for(const lesson of added){
  assert(lesson.properties.length>=4&&lesson.properties.every(x=>x.length>=18),lesson.id+": missing mathematical properties");
  assert.equal(lesson.formulas.length,3);
  assert.equal(lesson.derivation.length,3);
- assert.equal(lesson.deep_sections.length,4);
+ assert.equal(lesson.deep_sections.length,5);
  const seen=new Set();
  for(const f of lesson.formulas){assert(f.label.length>=4);strictMath(f.tex,lesson.id);}
  for(const d of lesson.derivation){assert(d.explanation.length>=25);strictMath(d.tex,lesson.id);}
@@ -62,17 +62,16 @@ for(const lesson of added){
   seen.add(s.title);
   assert(s.paragraphs.length===2&&s.paragraphs.every(x=>x.length>=30),lesson.id+": shallow deep section");
   assert(s.proof.length>=50&&s.worked.length>=50&&s.limitation.length>=25,lesson.id+": missing proof, numerical example, or boundary");
-  assert.equal(s.formulas.length,1);
-  assert(s.formulas[0].label.length>=4);
-  strictMath(s.formulas[0].tex,lesson.id);
+  assert.equal(s.formulas.length,lesson.deep_sections.indexOf(s)===4?2:1,lesson.id+" old and new formulas must remain complete");
+  for(const formula of s.formulas){assert(formula.label.length>=4);strictMath(formula.tex,lesson.id);}
   explanationLength+=s.paragraphs.join("").length+s.proof.length+s.worked.length+s.limitation.length;
   chapterCount++;
  }
  assert(/[\u3400-\u9FFF]/u.test(JSON.stringify(lesson)),lesson.id+": Chinese explanation absent");
  assert(!/TODO|FIXME|Lorem ipsum/i.test(JSON.stringify(lesson)),lesson.id+": unfinished placeholder");
 }
-assert.equal(chapterCount,56);
-assert.equal(equationCount,140);
+assert.equal(chapterCount,70);
+assert.equal(equationCount,168);
 assert(explanationLength>12000,"Depth must exceed 12,000 explanatory characters");
 const app=read("app.js"),css=read("styles.css");
 for(const token of [
@@ -156,5 +155,5 @@ close("stochastic objective middle x2",4.5+.5*2,5.5);
 close("CVaR alpha0.5 x1",Math.max(2,8),8);
 close("CVaR alpha0.5 x3",Math.max(6,6),6);
 assert(checked>=55);
-console.log("V96 PASS: 14 new convex optimization lectures, 56 rigorous deep chapters, 140 strict KaTeX expressions, "+checked+" independent numeric checks, historical 386 courses preserved, 400/656 complete, CJK/mobile formatting guards intact.");
+console.log("V96 PASS: 14 new convex optimization lectures, 70 rigorous deep chapters, 168 strict KaTeX expressions, "+checked+" independent numeric checks, historical 386 courses preserved, 400/656 complete, CJK/mobile formatting guards intact.");
 
