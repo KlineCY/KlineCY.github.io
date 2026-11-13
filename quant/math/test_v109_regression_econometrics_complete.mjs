@@ -183,6 +183,22 @@ for(const lecture of added){
  assert(s.paragraphs.length>=2&&s.paragraphs.every(p=>p.length>=95),lecture.id+" explanatory mechanism insufficient");
  assert(s.proof.length>=100&&s.worked.length>=85&&s.limitation.length>=60,lecture.id+" rigorous proof or independent calculation incomplete");
 }
+
+const appended41EconometricRegression={"econometrics-n0224":[7,"Mundlak相关随机效应如何检验组间混杂","Hausman比较检验的效率前提与稳健替代"],"econometrics-n0225":[7,"错位处理DID的组别—时间ATT与对照组构造","错位处理DID为何应按处理组与处理时点构造反事实"],"econometrics-n0226":[7,"双向去均值的投影与非平衡面板限制","双向固定效应无法自动消除的交互式共同因子"],"econometrics-n0227":[7,"Arellano–Bond滞后工具矩与工具变量膨胀","动态面板高持久性如何削弱差分GMM滞后水平工具"],"econometrics-n0229":[6,"ATE与ATT为什么不能互换","处理概率倾向评分的重叠条件与IPW极端权重"],"econometrics-n0230":[6,"随机试验差均值的有限总体方差","集群随机试验的设计效应与有效样本量"],"econometrics-n0240":[6,"AIPW双重稳健性如何通过条件期望证明","AIPW双重稳健估计的二阶余项与重叠恶化"],"regression-n0200":[5,"Probit概率的边际敏感度随风险状态变化","Probit潜在变量的尺度归一化为何不可省略"],"regression-n0201":[5,"Poisson偏差统计量与零计数观测的正确处理","Poisson条件均值正确时的QMLE与过度离散稳健推断"],"regression-n0202":[5,"指数族规范链接下的Fisher信息与概率边界","GLM均值模型错设与Sandwich稳健方差的能力边界"],"regression-n0203":[7,"Firth偏差修正如何在Logistic完全分离时产生有限估计","IRLS加权最小二乘为何应优先用QR而非正规方程求解"],"regression-n0204":[7,"Gauss–Newton忽略残差Hessian项时的曲率误差","Gauss–Newton为什么需要线搜索而非始终接受完整牛顿方向"],"regression-n0210":[7,"DML部分线性模型中的正交残差矩与扰动误差乘积","DML在日期—资产面板中为何应按共同冲击组交叉拟合"]};
+assert.equal(Object.keys(appended41EconometricRegression).length,13,"Thirteen additional full econometrics/regression lectures required");
+for(const [id,check] of Object.entries(appended41EconometricRegression)){
+ const lesson=added.find(l=>l.id===id);
+ assert(lesson,id+" original canonical lecture missing");
+ assert.equal(lesson.deep_sections.length,check[0],id+" existing proofs must remain plus one new full lesson");
+ assert.equal(lesson.deep_sections.at(-2).title,check[1],id+" formerly final section modified");
+ const chapter=lesson.deep_sections.at(-1);
+ assert.equal(chapter.title,check[2],id+" full new topic changed");
+ assert(chapter.paragraphs.length===2&&chapter.paragraphs[0].length>=90&&chapter.paragraphs[1].length>=135,id+" complete explanatory structure needed");
+ assert(chapter.formulas.length===2,id+" two separately derived equations required");
+ assert(chapter.proof.length>=110&&chapter.worked.length>=85&&chapter.limitation.length>=60,id+" proof, independent numerical example and caveats required");
+ assert(!/TODO|FIXME|独立稿|待补充|占位/.test(JSON.stringify(chapter)),id+" draft text forbidden");
+}
+
 const loaderStart=app.indexOf("async function loadV109RegressionEconometrics(");
 const loaderEnd=app.indexOf("async function loadV110NumericalMonteCarlo(",loaderStart);
 assert(loaderStart>=0&&loaderEnd>loaderStart,"production econometrics reader loader not found");
