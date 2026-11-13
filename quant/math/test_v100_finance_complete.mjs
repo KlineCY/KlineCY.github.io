@@ -250,18 +250,19 @@ const extendedFinanceTitles={
   "finance-n0450": "带比例交易成本的单期最优仓位为什么存在无交易区间"
 };
 assert.equal(Object.keys(extendedFinanceTitles).length,17,"17 full follow-on finance chapters required");
-const extendedFullDepthIds=new Set(["finance-n0427","finance-n0428","finance-n0429","finance-n0443","finance-n0444"]);
+const extendedFullDepthIds=new Set(["finance-n0421","finance-n0422","finance-n0423","finance-n0424","finance-n0425","finance-n0426","finance-n0427","finance-n0428","finance-n0429","finance-n0443","finance-n0444","finance-n0445","finance-n0446","finance-n0447","finance-n0448","finance-n0449","finance-n0450"]);
 for(const l of newest){
  const original=l.deep_sections[4];
  assert.equal(original.title,extendedFinanceTitles[l.id],l.id+" pre-existing original chapter title changed");
- assert.equal(l.deep_sections.length,extendedFullDepthIds.has(l.id)?6:5,l.id+" original chapter count or expanded chapter count incorrect");
+ assert.equal(l.deep_sections.length,6,l.id+" five original chapters plus a sixth appended chapter required");
  const added=l.deep_sections.at(-1);
  assert(added.paragraphs.length===2&&added.paragraphs.every(p=>p.length>=100),l.id+" explanations shortened");
  assert(added.formulas.length===2,l.id+" two independent equations missing");
+ assert(added.title!==original.title,l.id+" new sixth chapter repeats fifth title");
  assert(added.proof.length>=180&&added.worked.length>=110&&added.limitation.length>=65,l.id+" full mathematical proof and example required");
  assert(!added.paragraphs.some(p=>p.includes("\\n")),l.id+" paragraphs should remain readable");
 }
-assert.equal([...extendedFullDepthIds].length,5,"Five full-depth finance expansions must remain present");
+assert.equal([...extendedFullDepthIds].length,17,"All seventeen complete six-section finance lectures must remain present");
 near("Investment TWR with intermediate funding",1.2*.9-1,.08);
 const moneyWeighted=(-120+Math.sqrt(120**2+4*100*216))/200-1;
 near("Investment funding MWR",moneyWeighted,-.0125492133612457);
