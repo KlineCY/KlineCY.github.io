@@ -371,13 +371,23 @@ const completeControlChapters={
   "control-n0570": "最佳反应循环可使多智能体最终行动始终不收敛"
 };
 assert.equal(Object.keys(completeControlChapters).length,28,"Every new control lecture must have an additional full proof chapter");
+const additionalFullControlIds=new Set(["control-n0542","control-n0543","control-n0544","control-n0546","control-n0547","control-n0548","control-n0549"]);
+assert.equal(additionalFullControlIds.size,7,"Seven additional complete control lectures required");
 for(const lesson of newest){
- const sec=lesson.deep_sections.at(-1);
- assert.equal(lesson.deep_sections.length,5,lesson.id+" original complete control chapters lost");
- assert.equal(sec.title,completeControlChapters[lesson.id],lesson.id+" new topic was lost");
- assert(sec.paragraphs.length===2&&sec.paragraphs.every(x=>x.length>=100),lesson.id+" complete detailed explanations missing");
- assert(sec.proof.length>=180&&sec.worked.length>=115&&sec.limitation.length>=70,lesson.id+" proof worked case or boundary cut down");
- assert(sec.formulas.length===2,lesson.id+" complete mathematical relations required");
+ const original=lesson.deep_sections[4];
+ assert.equal(original.title,completeControlChapters[lesson.id],lesson.id+" previous exact deep chapter title changed");
+ assert.equal(lesson.deep_sections.length,additionalFullControlIds.has(lesson.id)?6:5,lesson.id+" original or additional proof chapters missing");
+ const validate=(sec,label)=>{
+  assert(sec.paragraphs.length===2&&sec.paragraphs.every(x=>x.length>=100),lesson.id+" "+label+" complete detailed explanations missing");
+  assert(sec.proof.length>=180&&sec.worked.length>=115&&sec.limitation.length>=70,lesson.id+" "+label+" proof worked case or boundary cut down");
+  assert(sec.formulas.length===2,lesson.id+" "+label+" two independent mathematical relations required");
+ };
+ validate(original,"original");
+ if(additionalFullControlIds.has(lesson.id)){
+  const added=lesson.deep_sections[5];
+  assert(added.title!==original.title,lesson.id+" additional topic duplicated");
+  validate(added,"extended");
+ }
 }
 near("Discounted unbounded state growth finite",1/(1-.8),5);
 yes("Discounting cannot dominate doubling with gamma .6",2*.6>1);
