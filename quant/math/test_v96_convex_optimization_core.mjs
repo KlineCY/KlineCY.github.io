@@ -52,7 +52,7 @@ for(const lesson of added){
  assert(lesson.properties.length>=4&&lesson.properties.every(x=>x.length>=18),lesson.id+": missing mathematical properties");
  assert.equal(lesson.formulas.length,3);
  assert.equal(lesson.derivation.length,3);
- assert.equal(lesson.deep_sections.length,second.lessons.some(x=>x.id===lesson.id)?4:3);
+ assert.equal(lesson.deep_sections.length,4);
  const seen=new Set();
  for(const f of lesson.formulas){assert(f.label.length>=4);strictMath(f.tex,lesson.id);}
  for(const d of lesson.derivation){assert(d.explanation.length>=25);strictMath(d.tex,lesson.id);}
@@ -71,8 +71,8 @@ for(const lesson of added){
  assert(/[\u3400-\u9FFF]/u.test(JSON.stringify(lesson)),lesson.id+": Chinese explanation absent");
  assert(!/TODO|FIXME|Lorem ipsum/i.test(JSON.stringify(lesson)),lesson.id+": unfinished placeholder");
 }
-assert.equal(chapterCount,49);
-assert.equal(equationCount,133);
+assert.equal(chapterCount,56);
+assert.equal(equationCount,140);
 assert(explanationLength>12000,"Depth must exceed 12,000 explanatory characters");
 const app=read("app.js"),css=read("styles.css");
 for(const token of [
@@ -156,5 +156,5 @@ close("stochastic objective middle x2",4.5+.5*2,5.5);
 close("CVaR alpha0.5 x1",Math.max(2,8),8);
 close("CVaR alpha0.5 x3",Math.max(6,6),6);
 assert(checked>=55);
-console.log("V96 PASS: 14 new convex optimization lectures, 49 rigorous deep chapters, 133 strict KaTeX expressions, "+checked+" independent numeric checks, historical 386 courses preserved, 400/656 complete, CJK/mobile formatting guards intact.");
+console.log("V96 PASS: 14 new convex optimization lectures, 56 rigorous deep chapters, 140 strict KaTeX expressions, "+checked+" independent numeric checks, historical 386 courses preserved, 400/656 complete, CJK/mobile formatting guards intact.");
 
