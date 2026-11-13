@@ -60,7 +60,7 @@ for(const l of added){
  assert.equal(l.id,l.node_id);
  for(const field of ["definition","assumptions","example","application","caveat"])assert(typeof l[field]==="string"&&l[field].length>=65,l.id+" shallow "+field);
  assert(l.properties.length>=4&&l.properties.every(x=>x.length>=18));
- assert.equal(l.formulas.length,3);assert.equal(l.derivation.length,3);assert.equal(l.deep_sections.length,3);
+ assert.equal(l.formulas.length,3);assert.equal(l.derivation.length,3);assert.equal(l.deep_sections.length,4);
  const titles=new Set();
  for(const f of l.formulas){assert(f.label.length>=4);strict(f.tex,l.id);}
  for(const d of l.derivation){assert(d.explanation.length>=25);strict(d.tex,l.id);}
@@ -88,8 +88,8 @@ for(const e of overlay.extensions){
   checkSection(s,e.node_id);
  }
 }
-assert.equal(chapters,36);
-assert.equal(math,84);
+assert.equal(chapters,44);
+assert.equal(math,92);
 assert(depth>11000,"V94 mathematical prose must remain substantive");
 const app=read("app.js"),css=read("styles.css");
 for(const token of [
@@ -151,5 +151,5 @@ close("conditional Jensen squared",.5*4+.5*4,4);
 close("total covariance in two states",.5*(1*1)+.5*((-1)*(-1)),1);
 close("extra info variance improvement",.25-0,.25);
 assert(numeric>=40);
-console.log("V94 PASS: 8 truly new complete probability lectures plus 6 append-only deepened historical lessons, 36 new rigorous sections, 84 strict KaTeX expressions, "+numeric+" independent numerical invariants, baseline 364 unchanged, total 372/656.");
+console.log("V94 PASS: 8 truly new complete probability lectures plus 6 append-only deepened historical lessons, 44 rigorous sections, 92 strict KaTeX expressions, "+numeric+" independent numerical invariants, baseline 364 unchanged, total 372/656.");
 
