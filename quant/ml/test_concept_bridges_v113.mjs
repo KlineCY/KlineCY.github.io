@@ -235,6 +235,21 @@ assert(psiSection.paragraphs.join("").includes("三角不等式"),"PSI is a dive
 assert(Math.abs(0.25*Math.log(3)-0.27465307216702745)<1e-12,"PSI example arithmetic incorrect");
 assert(reviewed113.find(s=>s.title==="ELBO和后验KL的精确恒等式").paragraphs[1].includes("边际证据"),"ELBO posterior-gap qualification missing");
 
+
+const appended41V113={"m23-c03-p03":["atlas-concept-bridge-v113a.json","Black–Litterman的观点可行性和矛盾观点处理","Black–Litterman后验均值与预测收益协方差为何必须区分"],"m23-c03-p04":["atlas-concept-bridge-v113a.json","协方差扰动下风险平价仓位不必稳定","风险平价的边际协方差贡献为何可能出现负值"],"m23-c03-p05":["atlas-concept-bridge-v113a.json","交易前漂移与目标换手的两种会计口径","L1换手成本与Soft-threshold最优调仓量的精确对应"],"m23-c04-p04":["atlas-concept-bridge-v113a.json","Calmar比率和极端最大回撤的估计稳定性","最大回撤对净值顺序的依赖与路径重抽样边界"],"m24-c03-p01":["atlas-concept-bridge-v113c.json","PSI对特征单调变换与分箱规则的依赖","PSI的离散分箱效应与零概率平滑的偏差"],"m24-c03-p02":["atlas-concept-bridge-v113c.json","KL方向不对称与罕见事件支持错配","Pinsker不等式如何把KL漂移转成概率事件差异上界"],"m24-c03-p05":["atlas-concept-bridge-v113c.json","协变量漂移下风险重加权的识别与方差代价","序贯漂移检测的似然比e-process与全时误报界"],"m24-c04-p03":["atlas-concept-bridge-v113c.json","对抗训练目标与分布鲁棒优化的区别","线性预测器的对抗扰动与对偶范数的精确关系"],"m20-c04-p03":["atlas-concept-bridge-v113e.json","优势估计的时间差分与GAE偏差—方差权衡","GAE的几何累计权重为何构成TD误差的偏差—方差调节"],"m21-c05-p04":["atlas-concept-bridge-v113e.json","交易量参与率与冲击函数的经济可执行性","Almgren–Chriss临时冲击的执行期限与平方成本"],"m18-c02-p03":["atlas-concept-bridge-v113e.json","金融动态图邻接矩阵的点时可得性与图结构泄漏","图卷积反复传播的过平滑为何由归一化邻接谱决定"],"m17-c02-p01":["atlas-concept-bridge-v113e.json","预训练语料时间截断与新闻标签的跨期重复","金融文本预训练的知识截止日与事件标签的信息边界"]};
+assert.equal(Object.keys(appended41V113).length,12,"Twelve V113 full-depth appended lessons required");
+for(const [id,[file,priorTitle,newTitle]] of Object.entries(appended41V113)){
+ const lesson=json(file).lessons[id];
+ assert(lesson,id+" exact canonical source missing");
+ assert.equal(lesson.sections.length,10,id+" original nine complete sections plus one new section required");
+ assert.equal(lesson.sections[8].title,priorTitle,id+" prior full chapter changed");
+ const s=lesson.sections[9];
+ assert.equal(s.title,newTitle,id+" newly appended topic missing");
+ assert(s.paragraphs.length===2&&s.paragraphs[0].length>=90&&s.paragraphs[1].length>=110,id+" full explanatory chapters required");
+ assert(s.equations.length===1&&s.equations[0].tex.length>=14,id+" fully explained KaTeX equation required");
+ assert(s.worked.length>=90&&s.boundary.length>=55,id+" independent worked example and limits required");
+}
+
 console.log("V113 PASS: "+loaded.size+" canonical improved articles, "+sections+
  " substantial reasoning sections, "+strictFormulas+" KaTeX strict formulas, "+crossLinks+
  " exact curriculum links, "+chineseChars+" validated Chinese explanatory characters, "+
