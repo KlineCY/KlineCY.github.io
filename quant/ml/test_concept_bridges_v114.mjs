@@ -327,6 +327,21 @@ near("ETF long short gross payoff",.5*.02-.5*(-.03),.025);
 near("ETF execution cost",.4*.002,.0008);
 near("ETF net realized return",.025-.0008,.0242);
 yes("Publish cut after trade decision is not usable",new Date("2026-03-20")>new Date("2026-01-10"));
+
+const appended41V114={"m06-c02-p04":["atlas-concept-bridge-v114a.json","实体层级留出与目标编码的组内泄漏","目标编码的Leave-one-out平滑与折外训练一致性"],"m06-c02-p05":["atlas-concept-bridge-v114a.json","特征管线组合与转换器版本一致性","训练期标准化参数为何必须与每个Walk-forward折分别冻结"],"m06-c04-p03":["atlas-concept-bridge-v114a.json","直接多步预测与递归预测的误差传播","交易日索引与自然日索引的滞后特征为何不同"],"m06-c04-p06":["atlas-concept-bridge-v114a.json","晚公布和修订公告的两个时间戳","公告发布时间与实际可执行时间的交易时点下界"],"m07-c02-p04":["atlas-concept-bridge-v114b.json","近端梯度步长与Lipschitz常数的推导","近端梯度Majorization何以保证Lasso目标的单步下降"],"m07-c02-p05":["atlas-concept-bridge-v114b.json","正则化前后系数的经济单位换算","Elastic Net的严格成组收缩来自相关列间的L2惩罚"],"m07-c02-p06":["atlas-concept-bridge-v114b.json","最小验证误差与One-standard-error选择","One-standard-error规则为何是在可接受验证误差下偏好更简单的模型"],"m07-c01-p04":["atlas-concept-bridge-v114b.json","已知误差协方差下的GLS精度加权","异方差加权GLS为何比简单均值更有效率"],"m08-c02-p02":["atlas-concept-bridge-v114c.json","Permutation importance的条件分布破坏","袋外误差为何不能直接替代金融时间序列的未来预测误差"],"m11-c03-p01":["atlas-concept-bridge-v114c.json","PCA白化与小特征值噪声放大","PCA主成分方向的不稳定性如何由特征值间隔决定"],"m12-c01-p06":["atlas-concept-bridge-v114c.json","对数损失与Brier损失的适当性比较","Brier得分的校准误差分解为何区分预测准确与预测可靠"],"m12-c03-p06":["atlas-concept-bridge-v114c.json","风险调整绩效与几何财富增长的区别","策略筛选多重试验下Sharpe显著性为何需要整体校准"],"m10-c02-p03":["atlas-concept-bridge-v114d.json","碰撞节点后代条件化为何也会打开路径","碰撞节点选择偏差为何能让原本独立的变量产生负相关"],"m12-c04-p03":["atlas-concept-bridge-v114d.json","前门识别的条件与中介变量求和","观测条件概率与do干预分布为何必须区别"],"m23-c02-p05":["atlas-concept-bridge-v114d.json","高度相关因子组的稳定性与单变量频率","高度相关因子的组稳定性为何不能仅看单个变量被选中的频率"],"m12-c03-p02":["atlas-concept-bridge-v114d.json","自协方差对样本均值Bootstrap标准误的贡献","Moving block bootstrap的区块长度为何是偏差与样本信息的权衡"]};
+assert.equal(Object.keys(appended41V114).length,16,"Sixteen new V114 full-depth canonical lessons required");
+for(const [id,[file,priorTitle,newTitle]] of Object.entries(appended41V114)){
+ const lesson=json(file).lessons[id];
+ assert(lesson,id+" source missing");
+ assert.equal(lesson.sections.length,10,id+" original nine sections plus one complete appended chapter required");
+ assert.equal(lesson.sections[8].title,priorTitle,id+" original final section altered");
+ const s=lesson.sections[9];
+ assert.equal(s.title,newTitle,id+" required new topic not found");
+ assert(s.paragraphs.length===2&&s.paragraphs[0].length>=90&&s.paragraphs[1].length>=110,id+" substantial paragraphs must be retained");
+ assert(s.equations.length===2&&s.equations.every(eq=>eq.tex.length>=14),id+" both full mathematical relationships required");
+ assert(s.worked.length>=90&&s.boundary.length>=55,id+" full numerical example and caveats required");
+}
+
 console.log("V114 PASS: "+loaded.size+" canonical improved articles, "+sections+
  " substantial reasoning sections, "+strictFormulas+" KaTeX strict formulas, "+crossLinks+
  " exact curriculum links, "+chineseChars+" validated Chinese explanatory characters, "+
