@@ -371,8 +371,8 @@ const completeControlChapters={
   "control-n0570": "最佳反应循环可使多智能体最终行动始终不收敛"
 };
 assert.equal(Object.keys(completeControlChapters).length,28,"Every new control lecture must have an additional full proof chapter");
-const additionalFullControlIds=new Set(["control-n0542","control-n0543","control-n0544","control-n0546","control-n0547","control-n0548","control-n0549"]);
-assert.equal(additionalFullControlIds.size,7,"Seven additional complete control lectures required");
+const additionalFullControlIds=new Set(["control-n0542","control-n0543","control-n0544","control-n0546","control-n0547","control-n0548","control-n0549","control-n0550","control-n0551","control-n0552","control-n0553","control-n0554","control-n0555","control-n0556"]);
+assert.equal(additionalFullControlIds.size,14,"Fourteen additional complete control lectures required");
 for(const lesson of newest){
  const original=lesson.deep_sections[4];
  assert.equal(original.title,completeControlChapters[lesson.id],lesson.id+" previous exact deep chapter title changed");
