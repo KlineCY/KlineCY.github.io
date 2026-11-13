@@ -20,6 +20,7 @@ function typeset(el){
  if(typeof window.renderMathInElement==="function"){
    try{window.renderMathInElement(el,{delimiters:[
     {left:"$$",right:"$$",display:true},
+    {left:"\\[",right:"\\]",display:true},
     {left:"\\(",right:"\\)",display:false},
     {left:"$",right:"$",display:false}
    ],throwOnError:false,strict:"ignore"})}catch(error){console.warn("Math parsing",error)}
