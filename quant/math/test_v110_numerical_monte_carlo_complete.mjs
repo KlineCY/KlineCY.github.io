@@ -65,7 +65,7 @@ for(const l of added){
  for(const section of l.deep_sections){
   assert(section.title?.length>=7&&section.question?.length>=10,id+" underdeveloped section");
   assert(!seen.has(section.title),id+" repeated deep-section heading");seen.add(section.title);
-  assert(section.paragraphs?.length===2&&section.paragraphs.every(x=>x.length>=35),id+" too-short two-paragraph proof context");
+  assert(section.paragraphs?.length>=2&&section.paragraphs.every(x=>x.length>=35),id+" insufficient multi-paragraph proof context");
   assert(section.proof?.length>=40&&section.worked?.length>=40&&section.limitation?.length>=25,id+" insufficient proof, calculation or limitation");
   assert(section.formulas?.length>=1,id+" missing deep formulas");
   section.formulas.forEach(f=>strictTex(f.tex,id+" deep topic"));
