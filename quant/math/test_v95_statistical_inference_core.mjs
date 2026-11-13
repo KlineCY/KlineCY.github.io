@@ -53,7 +53,7 @@ for(const lesson of newLessons){
  assert(lesson.properties.length>=4&&lesson.properties.every(x=>x.length>=18));
  assert.equal(lesson.formulas.length,3);
  assert.equal(lesson.derivation.length,3);
- assert.equal(lesson.deep_sections.length,3);
+ assert.equal(lesson.deep_sections.length,4);
  const titles=new Set();
  for(const f of lesson.formulas){assert(f.label.length>=4);strictMath(f.tex,lesson.id);}
  for(const d of lesson.derivation){assert(d.explanation.length>=24);strictMath(d.tex,lesson.id);}
@@ -72,8 +72,8 @@ for(const lesson of newLessons){
  assert(/[\u3400-\u9FFF]/u.test(JSON.stringify(lesson)),lesson.id+" lacks Chinese technical prose");
  assert(!/TODO|FIXME|Lorem ipsum/i.test(JSON.stringify(lesson)),lesson.id+" contains incomplete placeholder");
 }
-assert.equal(sections,42);
-assert.equal(equations,126);
+assert.equal(sections,56);
+assert.equal(equations,140);
 assert(depth>=12000,"Mathematical explanation depth below threshold");
 const app=read("app.js"),css=read("styles.css");
 for(const token of [
@@ -136,5 +136,5 @@ close("power example needed n",Math.ceil(((1.645+.842)/.5)**2),25);
 close("long run autocovariance",1+2*.2,1.4);
 close("dependent two-period mean variance",(1+1+2*.5)/4,.75);
 assert(checks>=40);
-console.log("V95 PASS: 14 new canonical statistics lectures, 42 deep proof chapters, 126 strict KaTeX expressions, "+checks+" numerical checks, 372 historic lessons retained and unique total 386/656; responsive CJK/KaTeX rules retained.");
+console.log("V95 PASS: 14 new canonical statistics lectures, 56 deep proof chapters, 140 strict KaTeX expressions, "+checks+" numerical checks, 372 historic lessons retained and unique total 386/656; responsive CJK/KaTeX rules retained.");
 
