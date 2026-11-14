@@ -60,15 +60,17 @@ for(const [id,lesson] of entries){
   if(consolidatedIDs.has(id))assert(s.paragraphs.every(p=>!p.includes("\n")),id+" contains merged duplicate prose");
   assert(s.worked?.length>=55,id+" requires an independently replicable worked example");
   assert(s.boundary?.length>=30,id+" missing method failure boundary");
-  assert.equal(s.equations?.length,1,id+" must explain each equation rather than list formulas");
-  const eq=s.equations[0];
-  assert(eq.label?.length>=3&&eq.tex?.length>=14,id+" missing labelled substantive equation");
-  assert(!/[\uFFFD\u200B\u200C\u200D\uFEFF]/u.test(eq.tex),id+" invalid Unicode in formula");
-  try{katex.renderToString(eq.tex,{displayMode:true,throwOnError:true,strict:"error"});}
-  catch(e){throw Error(id+" / "+s.title+" strictly invalid KaTeX: "+eq.tex+" | "+e.message);}
+  assert(s.equations?.length>=1,id+" requires explained mathematics");
+  for(const eq of s.equations){
+   assert(eq.label?.length>=3&&eq.tex?.length>=14,id+" missing labelled substantive equation");
+   assert(!/[\uFFFD\u200B\u200C\u200D\uFEFF]/u.test(eq.tex),id+" invalid Unicode in formula");
+   try{katex.renderToString(eq.tex,{displayMode:true,throwOnError:true,strict:"error"});}
+   catch(e){throw Error(id+" / "+s.title+" strictly invalid KaTeX: "+eq.tex+" | "+e.message);}
+   strictFormulas++;
+  }
   assert(/[\u3400-\u9FFF]/u.test(JSON.stringify(s)),id+" lacks Chinese explanatory text");
   assert(!/TODO|FIXME|待补充|独立稿|占位|Lorem ipsum/.test(JSON.stringify(s)),id+" placeholder found");
-  sections++;strictFormulas++;
+  sections++;
   chineseChars+=s.paragraphs.join("").length+s.worked.length+s.boundary.length;
  }
  for(const link of lesson.links){
@@ -241,7 +243,7 @@ assert.equal(Object.keys(appended41V113).length,12,"Twelve V113 full-depth appen
 for(const [id,[file,priorTitle,newTitle]] of Object.entries(appended41V113)){
  const lesson=json(file).lessons[id];
  assert(lesson,id+" exact canonical source missing");
- assert.equal(lesson.sections.length,10,id+" original nine complete sections plus one new section required");
+ assert(lesson.sections.length>=10,id+" original ten complete sections must remain; further full chapters are supported");
  assert.equal(lesson.sections[8].title,priorTitle,id+" prior full chapter changed");
  const s=lesson.sections[9];
  assert.equal(s.title,newTitle,id+" newly appended topic missing");
@@ -249,6 +251,34 @@ for(const [id,[file,priorTitle,newTitle]] of Object.entries(appended41V113)){
  assert(s.equations.length===1&&s.equations[0].tex.length>=14,id+" fully explained KaTeX equation required");
  assert(s.worked.length>=90&&s.boundary.length>=55,id+" independent worked example and limits required");
 }
+
+
+const extra20261114={
+ "atlas-concept-bridge-v113a.json":["m23-c03-p03","m23-c03-p04","m23-c03-p05","m23-c04-p04"],
+ "atlas-concept-bridge-v113d.json":["m13-c05-p01","m14-c04-p03","m15-c05-p01","m19-c02-p03"],
+ "atlas-concept-bridge-v113e.json":["m20-c04-p03","m21-c05-p04","m18-c02-p03","m17-c02-p01"]
+};
+let extraSections=0,extraEquations=0;
+for(const [file,ids] of Object.entries(extra20261114)){
+ for(const id of ids){
+  const lesson=json(file).lessons[id],count=file.includes("113d")?8:10;
+  assert.equal(lesson.sections.length,count+1,id+" exact old chapters and append-only new chapter");
+  const added=lesson.sections[count];
+  assert(added.title?.length>=8&&added.question?.length>=12,id+" new section title or question missing");
+  assert(added.paragraphs.length===2&&added.paragraphs.every(p=>p.length>=95),id+" complete two-part explanation missing");
+  assert(added.worked.length>=95&&added.boundary.length>=75,id+" worked example or limits incomplete");
+  assert.equal(added.equations.length,2,id+" independent formulas missing");
+  assert.equal(new Set(lesson.sections.map(x=>x.title)).size,lesson.sections.length,id+" duplicate heading");
+  for(const equation of added.equations){
+   assert(equation.label?.length>=3&&equation.tex?.length>=14,id+" formula not substantive");
+   katex.renderToString(equation.tex,{displayMode:true,throwOnError:true,strict:"error"});
+   extraEquations++;
+  }
+  extraSections++;
+ }
+}
+assert.equal(extraSections,12,"All 12 new in-place ML sections must remain");
+assert.equal(extraEquations,24,"All 24 new ML formulae must pass strict KaTeX");
 
 console.log("V113 PASS: "+loaded.size+" canonical improved articles, "+sections+
  " substantial reasoning sections, "+strictFormulas+" KaTeX strict formulas, "+crossLinks+
