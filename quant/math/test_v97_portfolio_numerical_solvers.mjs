@@ -180,5 +180,5 @@ near("CG first residual component",2-2*(17/33),32/33);
 near("CG second residual component",8-4*(68/33),-8/33);
 near("CG first residual orthogonality",2*(32/33)+8*(-8/33),0);
 assert(checks>=70);
-console.log("V97 PASS: all 42 optimization nodes completed; 14 original lessons; 42 deep proof chapters; 126 strict KaTeX formulas; "+checks+" independent numeric assertions; 400 historic lessons preserved; 414/656 unique complete; Chinese and responsive math CSS rules preserved.");
+console.log("V97 PASS: all 42 optimization nodes completed; 14 original lessons; "+chapters+" deep proof chapters; "+formulas+" strict KaTeX formulas; "+checks+" independent numeric assertions; 400 historic lessons preserved; 414/656 unique complete; Chinese and responsive math CSS rules preserved.");
 
