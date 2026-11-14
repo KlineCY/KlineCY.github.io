@@ -254,8 +254,8 @@ const extendedFullDepthIds=new Set(["finance-n0421","finance-n0422","finance-n04
 for(const l of newest){
  const original=l.deep_sections[4];
  assert.equal(original.title,extendedFinanceTitles[l.id],l.id+" pre-existing original chapter title changed");
- assert.equal(l.deep_sections.length,6,l.id+" five original chapters plus a sixth appended chapter required");
- const added=l.deep_sections.at(-1);
+ assert(l.deep_sections.length>=6,l.id+" five original chapters and the original sixth chapter must remain");
+ const added=l.deep_sections[5];
  assert(added.paragraphs.length===2&&added.paragraphs.every(p=>p.length>=100),l.id+" explanations shortened");
  assert(added.formulas.length===2,l.id+" two independent equations missing");
  assert(added.title!==original.title,l.id+" new sixth chapter repeats fifth title");
@@ -263,6 +263,27 @@ for(const l of newest){
  assert(!added.paragraphs.some(p=>p.includes("\\n")),l.id+" paragraphs should remain readable");
 }
 assert.equal([...extendedFullDepthIds].length,17,"All seventeen complete six-section finance lectures must remain present");
+
+const fullyDeepened20261114=new Set([
+ "finance-n0421","finance-n0422","finance-n0423",
+ "finance-n0424","finance-n0425","finance-n0426"
+]);
+for(const lesson of newest){
+ const expectedSections=fullyDeepened20261114.has(lesson.id)?7:6;
+ assert.equal(lesson.deep_sections.length,expectedSections,lesson.id+" original sixth section and append-only expansion must be preserved");
+ if(!fullyDeepened20261114.has(lesson.id))continue;
+ const section=lesson.deep_sections[6];
+ assert(section.title.length>=8&&section.question.length>=12,lesson.id+" final section heading and research question");
+ assert(section.paragraphs.length===2&&section.paragraphs.every(p=>p.length>=85),lesson.id+" explanatory arguments incomplete");
+ assert(section.proof.length>=90&&section.worked.length>=90&&section.limitation.length>=60,lesson.id+" missing full derivation, example or boundary");
+ assert(section.formulas.length===2,lesson.id+" both follow-on mathematical statements required");
+ assert.equal(new Set(lesson.deep_sections.map(s=>s.title)).size,7,lesson.id+" duplicate finance section title");
+ for(const equation of section.formulas) {
+  assert(equation.label.length>=4&&equation.tex.length>=14,lesson.id+" mathematical expression incomplete");
+  katex.renderToString(equation.tex,{displayMode:true,throwOnError:true,strict:"error"});
+ }
+}
+
 near("Investment TWR with intermediate funding",1.2*.9-1,.08);
 const moneyWeighted=(-120+Math.sqrt(120**2+4*100*216))/200-1;
 near("Investment funding MWR",moneyWeighted,-.0125492133612457);
