@@ -179,7 +179,7 @@ for(const title of ["IPW的可识别条件","分配效应与实际治疗效应",
 for(const lecture of added){
  const s=lecture.deep_sections.at(-1);
  assert(lecture.deep_sections.length>=4,lecture.id+" new rigorous inference chapter missing");
- assert(s.formulas.length===2,lecture.id+" independent new mathematical relations missing");
+ assert(s.formulas.length>=2,lecture.id+" independently derived mathematical relations missing");
  assert(s.paragraphs.length>=2&&s.paragraphs.every(p=>p.length>=95),lecture.id+" explanatory mechanism insufficient");
  assert(s.proof.length>=100&&s.worked.length>=85&&s.limitation.length>=60,lecture.id+" rigorous proof or independent calculation incomplete");
 }
@@ -189,9 +189,9 @@ assert.equal(Object.keys(appended41EconometricRegression).length,13,"Thirteen ad
 for(const [id,check] of Object.entries(appended41EconometricRegression)){
  const lesson=added.find(l=>l.id===id);
  assert(lesson,id+" original canonical lecture missing");
- assert.equal(lesson.deep_sections.length,check[0],id+" existing proofs must remain plus one new full lesson");
- assert.equal(lesson.deep_sections.at(-2).title,check[1],id+" formerly final section modified");
- const chapter=lesson.deep_sections.at(-1);
+ assert(lesson.deep_sections.length>=check[0],id+" all original historical proofs must remain and additional chapters are supported");
+ assert.equal(lesson.deep_sections[check[0]-2].title,check[1],id+" historical penultimate anchor modified");
+ const chapter=lesson.deep_sections[check[0]-1];
  assert.equal(chapter.title,check[2],id+" full new topic changed");
  assert(chapter.paragraphs.length===2&&chapter.paragraphs[0].length>=90&&chapter.paragraphs[1].length>=135,id+" complete explanatory structure needed");
  assert(chapter.formulas.length===2,id+" two separately derived equations required");
