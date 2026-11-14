@@ -157,5 +157,5 @@ close("stochastic objective middle x2",4.5+.5*2,5.5);
 close("CVaR alpha0.5 x1",Math.max(2,8),8);
 close("CVaR alpha0.5 x3",Math.max(6,6),6);
 assert(checked>=55);
-console.log("V96 PASS: 14 new convex optimization lectures, 70 rigorous deep chapters, 168 strict KaTeX expressions, "+checked+" independent numeric checks, historical 386 courses preserved, 400/656 complete, CJK/mobile formatting guards intact.");
+console.log("V96 PASS: 14 new convex optimization lectures, "+chapterCount+" rigorous deep chapters, "+equationCount+" strict KaTeX expressions, "+checked+" independent numeric checks, historical 386 courses preserved, 400/656 complete, CJK/mobile formatting guards intact.");
 
