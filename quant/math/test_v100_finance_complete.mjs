@@ -255,7 +255,7 @@ for(const l of newest){
  const original=l.deep_sections[4];
  assert.equal(original.title,extendedFinanceTitles[l.id],l.id+" pre-existing original chapter title changed");
  assert(l.deep_sections.length>=6,l.id+" five original chapters and the original sixth chapter must remain");
- const added=l.deep_sections.at(-1);
+ const added=l.deep_sections[5];
  assert(added.paragraphs.length===2&&added.paragraphs.every(p=>p.length>=100),l.id+" explanations shortened");
  assert(added.formulas.length===2,l.id+" two independent equations missing");
  assert(added.title!==original.title,l.id+" new sixth chapter repeats fifth title");
