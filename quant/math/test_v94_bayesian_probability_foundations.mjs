@@ -45,12 +45,13 @@ function strict(tex,where){
  katex.renderToString(tex,{throwOnError:true,strict:"error",displayMode:true});
  math++;
 }
-function checkSection(section,where){
+function checkSection(section,where,isExtension=false){
  assert(section.title.length>=8&&section.question.length>=10,where+" unclear title");
  assert(Array.isArray(section.paragraphs)&&section.paragraphs.length===2&&section.paragraphs.every(x=>x.length>=30),where+" shallow explanation");
  assert(section.proof.length>=50&&section.worked.length>=50&&section.limitation.length>=25,where+" lacks rigorous proof, worked example or boundary");
- assert(section.formulas.length===1&&section.formulas[0].label.length>=4);
- strict(section.formulas[0].tex,where);
+ if(isExtension)assert(section.formulas.length>=2,where+" requires two complete new equations");
+ else assert(section.formulas.length===1,where+" original section equation count preserved");
+ for(const expr of section.formulas){assert(expr.label.length>=4);strict(expr.tex,where);}
  depth+=section.paragraphs.join("").length+section.proof.length+section.worked.length+section.limitation.length;
  chapters++;
 }
@@ -60,13 +61,13 @@ for(const l of added){
  assert.equal(l.id,l.node_id);
  for(const field of ["definition","assumptions","example","application","caveat"])assert(typeof l[field]==="string"&&l[field].length>=65,l.id+" shallow "+field);
  assert(l.properties.length>=4&&l.properties.every(x=>x.length>=18));
- assert.equal(l.formulas.length,3);assert.equal(l.derivation.length,3);assert.equal(l.deep_sections.length,4);
+ assert.equal(l.formulas.length,3);assert.equal(l.derivation.length,3);assert(l.deep_sections.length>=5,l.id+" preserve four sections and add one complete extension");
  const titles=new Set();
  for(const f of l.formulas){assert(f.label.length>=4);strict(f.tex,l.id);}
  for(const d of l.derivation){assert(d.explanation.length>=25);strict(d.tex,l.id);}
  for(const s of l.deep_sections){
   assert(!titles.has(s.title),l.id+" repeated section");titles.add(s.title);
-  checkSection(s,l.id);
+  checkSection(s,l.id,l.deep_sections.indexOf(s)>=4);
  }
  assert(/[\u3400-\u9FFF]/u.test(JSON.stringify(l)),l.id+" lacks Chinese textbook narrative");
 }
@@ -88,8 +89,8 @@ for(const e of overlay.extensions){
   checkSection(s,e.node_id);
  }
 }
-assert.equal(chapters,44);
-assert.equal(math,92);
+assert(chapters>=52,"Original 44 sections and eight rigorous extensions must remain");
+assert(math>=108,"Original 92 equations and sixteen strict new ones must parse");
 assert(depth>11000,"V94 mathematical prose must remain substantive");
 const app=read("app.js"),css=read("styles.css");
 for(const token of [
@@ -151,5 +152,5 @@ close("conditional Jensen squared",.5*4+.5*4,4);
 close("total covariance in two states",.5*(1*1)+.5*((-1)*(-1)),1);
 close("extra info variance improvement",.25-0,.25);
 assert(numeric>=40);
-console.log("V94 PASS: 8 truly new complete probability lectures plus 6 append-only deepened historical lessons, 44 rigorous sections, 92 strict KaTeX expressions, "+numeric+" independent numerical invariants, baseline 364 unchanged, total 372/656.");
+console.log("V94 PASS: 8 completed probability lectures and 6 historical overlays, "+chapters+" rigorous sections, "+math+" strict KaTeX expressions, "+numeric+" independent numerical invariants, baseline 364 unchanged, total 372/656.");
 
