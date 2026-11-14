@@ -59,7 +59,7 @@ for(const l of added){
  assert(l.properties.length>=4&&l.properties.every(q=>q.length>=20),l.id+" insufficient properties");
  assert.equal(l.formulas.length,3);
  assert.equal(l.derivation.length,3);
- assert.equal(l.deep_sections.length,3);
+ assert(l.deep_sections.length>=3,l.id+" original three deep sections retained");
  for(const f of l.formulas){assert(f.label.length>=4);math(f.tex,l.id);}
  for(const d of l.derivation){assert(d.explanation.length>=25);math(d.tex,l.id);}
  const uniqueTitles=new Set();
@@ -69,17 +69,18 @@ for(const l of added){
   uniqueTitles.add(s.title);
   assert(s.paragraphs.length===2&&s.paragraphs.every(t=>t.length>=30),l.id+" shallow paragraphs");
   assert(s.proof.length>=50&&s.worked.length>=50&&s.limitation.length>=25,l.id+" incomplete deep reasoning");
-  assert.equal(s.formulas.length,1);
-  assert(s.formulas[0].label.length>=4);
-  math(s.formulas[0].tex,l.id);
+  const index=l.deep_sections.indexOf(s);
+  if(index<3)assert.equal(s.formulas.length,1,l.id+" original deep formula count retained");
+  else assert(s.formulas.length>=2,l.id+" new portfolio section equations required");
+  for(const expr of s.formulas){assert(expr.label.length>=4);math(expr.tex,l.id);}
   chapters++;
   deepLength+=s.paragraphs.join("").length+s.proof.length+s.worked.length+s.limitation.length;
  }
  assert(/[\u3400-\u9FFF]/u.test(JSON.stringify(l)),l.id+" no Chinese exposition");
  assert(!/TODO|FIXME|Lorem ipsum/i.test(JSON.stringify(l)),l.id+" unfinished content");
 }
-assert.equal(chapters,42);
-assert.equal(formulas,126);
+assert(chapters>=47,"At least 42 original and 5 added deep chapters required");
+assert(formulas>=136,"At least 126 original and 10 additional strict formula checks required");
 assert(deepLength>=12000);
 const app=read("app.js"),css=read("styles.css");
 for(const token of [
@@ -179,5 +180,5 @@ near("CG first residual component",2-2*(17/33),32/33);
 near("CG second residual component",8-4*(68/33),-8/33);
 near("CG first residual orthogonality",2*(32/33)+8*(-8/33),0);
 assert(checks>=70);
-console.log("V97 PASS: all 42 optimization nodes completed; 14 original lessons; 42 deep proof chapters; 126 strict KaTeX formulas; "+checks+" independent numeric assertions; 400 historic lessons preserved; 414/656 unique complete; Chinese and responsive math CSS rules preserved.");
+console.log("V97 PASS: all 42 optimization nodes completed; 14 original lessons; "+chapters+" deep proof chapters; "+formulas+" strict KaTeX formulas; "+checks+" independent numeric assertions; 400 historic lessons preserved; 414/656 unique complete; Chinese and responsive math CSS rules preserved.");
 
