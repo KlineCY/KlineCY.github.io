@@ -333,7 +333,7 @@ assert.equal(Object.keys(appended41V114).length,16,"Sixteen new V114 full-depth 
 for(const [id,[file,priorTitle,newTitle]] of Object.entries(appended41V114)){
  const lesson=json(file).lessons[id];
  assert(lesson,id+" source missing");
- assert.equal(lesson.sections.length,10,id+" original nine sections plus one complete appended chapter required");
+ assert(lesson.sections.length>=10,id+" original ten historical sections must remain intact; additional complete chapters are supported");
  assert.equal(lesson.sections[8].title,priorTitle,id+" original final section altered");
  const s=lesson.sections[9];
  assert.equal(s.title,newTitle,id+" required new topic not found");
