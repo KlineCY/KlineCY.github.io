@@ -373,10 +373,21 @@ const completeControlChapters={
 assert.equal(Object.keys(completeControlChapters).length,28,"Every new control lecture must have an additional full proof chapter");
 const additionalFullControlIds=new Set(["control-n0542","control-n0543","control-n0544","control-n0546","control-n0547","control-n0548","control-n0549","control-n0550","control-n0551","control-n0552","control-n0553","control-n0554","control-n0555","control-n0556","control-n0557","control-n0558","control-n0559","control-n0560","control-n0561","control-n0562","control-n0563","control-n0564","control-n0565","control-n0566","control-n0567","control-n0568","control-n0569","control-n0570"]);
 assert.equal(additionalFullControlIds.size,28,"All twenty-eight additional complete control lectures required");
+const fullMicrostructureTopics={
+ "control-n0564":"拍卖收入等价的边界条件与出价分布依赖",
+ "control-n0565":"逆向选择的条件成交期望与被动报价净值",
+ "control-n0566":"库存对冲的最小方差比率、对冲误差与基差风险",
+ "control-n0567":"非齐次Poisson订单流、首单等待分布与价格风险",
+ "control-n0568":"CARA做市保留价的库存敏感性与边界假设",
+ "control-n0569":"成交选择机制、IPW修正与Markout的识别条件",
+ "control-n0570":"外部遗憾最小化与粗相关均衡的经验收敛"
+};
+assert.equal(Object.keys(fullMicrostructureTopics).length,7,"Seven new complete microstructure and trading-game lessons required");
+
 for(const lesson of newest){
  const original=lesson.deep_sections[4];
  assert.equal(original.title,completeControlChapters[lesson.id],lesson.id+" previous exact deep chapter title changed");
- assert.equal(lesson.deep_sections.length,additionalFullControlIds.has(lesson.id)?6:5,lesson.id+" original or additional proof chapters missing");
+ assert.equal(lesson.deep_sections.length,additionalFullControlIds.has(lesson.id)?(fullMicrostructureTopics[lesson.id]?7:6):5,lesson.id+" original proofs and new full advanced chapter required");
  const validate=(sec,label)=>{
   assert(sec.paragraphs.length===2&&sec.paragraphs.every(x=>x.length>=100),lesson.id+" "+label+" complete detailed explanations missing");
   assert(sec.proof.length>=180&&sec.worked.length>=115&&sec.limitation.length>=70,lesson.id+" "+label+" proof worked case or boundary cut down");
@@ -387,6 +398,14 @@ for(const lesson of newest){
   const added=lesson.deep_sections[5];
   assert(added.title!==original.title,lesson.id+" additional topic duplicated");
   validate(added,"extended");
+ }
+ if(fullMicrostructureTopics[lesson.id]){
+  const advanced=lesson.deep_sections[6];
+  assert.equal(advanced.title,fullMicrostructureTopics[lesson.id],lesson.id+" appended canonical topic changed");
+  assert(advanced.paragraphs.length===2&&advanced.paragraphs.every(p=>p.length>=110),lesson.id+" detailed explanation missing");
+  assert(advanced.proof.length>=115&&advanced.worked.length>=95&&advanced.limitation.length>=65,lesson.id+" proof, worked case or limits incomplete");
+  assert.equal(advanced.formulas.length,2,lesson.id+" two strict mathematical identities missing");
+  assert.equal(new Set(lesson.deep_sections.map(x=>x.title)).size,lesson.deep_sections.length,lesson.id+" duplicate chapter heading");
  }
 }
 near("Discounted unbounded state growth finite",1/(1-.8),5);
@@ -431,6 +450,14 @@ near("Inventory-aware reserve price long",100+.4-.1*3,100.1);
 near("Markout adverse fill posterior",.9*.5/(.9*.5+.1*.5),.9);
 near("Filled Markout expectation",.9*1+.1*(-1),.8);
 near("Best response cycle mixed empirical frequency",2/4,.5);
+
+near("Optimal two asset hedge dollar position",1e6*.8*.2/.25,640000);
+near("Minimum hedge residual risk dollars",1e6*.2*Math.sqrt(1-.8**2),120000);
+near("Nonstationary Poisson first event survival",Math.exp(-5),.006737946999085467);
+near("Quote adverse selected conditional pnl bp",2-3,-1);
+near("Inventory reserve price after positive inventory",100-.01*10*.04,99.996);
+near("IPW quote opportunity latent mean",.8*2+.2*(-4),.8);
+near("CCE empirical fixed action deviation bound",5/100,.05);
 
 console.log("V105 PASS",newest.length,"new control lectures;",all.length,"total;",
  mathCount,"strict KaTeX;",deepCount,"deep proof chapters;",deepChars,"deep prose chars;",
