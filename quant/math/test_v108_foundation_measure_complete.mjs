@@ -75,8 +75,8 @@ for(const lesson of added){
   links.push(link.id);
  }
 }
-assert.equal(formulas.length,220,"All 180 original and 40 added V108 formulas must strictly parse");
-assert.equal(depth,80,"All original 60 and 20 additional mathematical chapters must remain");
+assert(formulas.length>=240,"All 220 historical plus at least 20 new strict V108 formulas must parse");
+assert(depth>=90,"All 80 historical and at least 10 additional mathematical chapters must remain");
 assert.equal(links.length,60,"Every lesson needs three functional learning links");
 assert(prose>=18000,"Proofs, examples or limitations have been excessively shortened");
 const app=read("app.js"),html=read("index.html"),css=read("styles.css");
@@ -136,7 +136,7 @@ near("hedge replication",(2/3)*100-60/1.05,10/1.05);
 near("real risk premium",111-105,6);
 yes("equivalent P and Q positive",.7>0&&.3>0&&.5>0&&.5<1);
 const reviewedMeasure=["lessons-measure-v108a.json","lessons-measure-v108b.json"].flatMap(f=>json(f).lessons).flatMap(l=>l.deep_sections);
-assert(reviewedMeasure.length===20,"All original and added conditional-probability and measure sections required");
+assert(reviewedMeasure.length>=25,"All 20 historical plus five new measure theory sections required");
 for(const s of reviewedMeasure)assert(s.paragraphs[1].length>=145&&!s.paragraphs[1].includes("\n"),s.title+" requires coherent substantive assumptions");
 assert(Math.abs(0.08-0.2*0.25-0.03)<1e-12,"Risk-neutral drift arithmetic incorrect");
 assert(reviewedMeasure.find(s=>s.title==="密度过程为什么必须是真鞅").paragraphs[1].includes("足够条件"),"Novikov sufficiency qualification missing");
