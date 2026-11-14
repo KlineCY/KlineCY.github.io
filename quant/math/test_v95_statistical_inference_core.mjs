@@ -36,6 +36,17 @@ const newLessons=[...a.lessons,...b.lessons],all=[...old,...newLessons];
 assert.equal(newLessons.length,14);
 assert.equal(all.length,386,"Total complete lesson count must be 386/656");
 assert.equal(new Set(all.map(x=>x.node_id)).size,386,"V95 duplicates a historical complete lesson");
+const addedFullStat={
+ "statistics-n0152":"非同方差独立样本的Bessel校正与均值风险",
+ "statistics-n0153":"次序统计量的非渐近分位点覆盖区间",
+ "statistics-n0154":"充分统计量的模型相对性与路径风险的不可恢复",
+ "statistics-n0155":"对数配分函数的曲率与自然参数Fisher信息",
+ "statistics-n0156":"Student t精确分布的正交投影证明和厚尾边界",
+ "statistics-n0157":"GMM最优权重矩阵与长程矩条件协方差",
+ "statistics-n0159":"一阶Delta导数为零时的二阶极限"
+};
+assert.equal(Object.keys(addedFullStat).length,7,"Seven new full statistical proofs required");
+
 let equations=0,sections=0,depth=0;
 function strictMath(source,id){
  assert(typeof source==="string"&&source.length>=10,id+" formula missing");
@@ -53,7 +64,7 @@ for(const lesson of newLessons){
  assert(lesson.properties.length>=4&&lesson.properties.every(x=>x.length>=18));
  assert.equal(lesson.formulas.length,3);
  assert.equal(lesson.derivation.length,3);
- assert.equal(lesson.deep_sections.length,5);
+ assert.equal(lesson.deep_sections.length,addedFullStat[lesson.id]?6:5,lesson.id+" preserved five original chapters plus validated sixth");
  const titles=new Set();
  for(const f of lesson.formulas){assert(f.label.length>=4);strictMath(f.tex,lesson.id);}
  for(const d of lesson.derivation){assert(d.explanation.length>=24);strictMath(d.tex,lesson.id);}
@@ -63,7 +74,11 @@ for(const lesson of newLessons){
   titles.add(s.title);
   assert(s.paragraphs.length===2&&s.paragraphs.every(x=>x.length>=30),lesson.id+" shallow exposition");
   assert(s.proof.length>=50&&s.worked.length>=50&&s.limitation.length>=25,lesson.id+" lacks proof, calculation or validity boundary");
-  assert.equal(s.formulas.length,lesson.deep_sections.indexOf(s)===4?2:1,lesson.id+" original sections and appended complete formulas required");
+  assert.equal(s.formulas.length,lesson.deep_sections.indexOf(s)>=4?2:1,lesson.id+" all original formulas preserved and advanced chapter complete");
+   if(lesson.deep_sections.indexOf(s)===5){
+    assert.equal(s.title,addedFullStat[lesson.id],lesson.id+" exact added inference argument missing");
+    assert(s.paragraphs.every(x=>x.length>=100)&&s.proof.length>=100&&s.worked.length>=90&&s.limitation.length>=55,lesson.id+" rigorous worked proof not complete");
+   }
   for(const formula of s.formulas){assert(formula.label.length>=4);strictMath(formula.tex,lesson.id);}
   depth+=s.paragraphs.join("").length+s.proof.length+s.worked.length+s.limitation.length;
   sections++;
@@ -71,8 +86,8 @@ for(const lesson of newLessons){
  assert(/[\u3400-\u9FFF]/u.test(JSON.stringify(lesson)),lesson.id+" lacks Chinese technical prose");
  assert(!/TODO|FIXME|Lorem ipsum/i.test(JSON.stringify(lesson)),lesson.id+" contains incomplete placeholder");
 }
-assert.equal(sections,70);
-assert.equal(equations,168);
+assert.equal(sections,77,"Original 70 proof chapters plus 7 additional deep proofs required");
+assert.equal(equations,182,"Original 168 strict formulae plus 14 new formulae must parse");
 assert(depth>=12000,"Mathematical explanation depth below threshold");
 const app=read("app.js"),css=read("styles.css");
 for(const token of [
@@ -135,5 +150,5 @@ close("power example needed n",Math.ceil(((1.645+.842)/.5)**2),25);
 close("long run autocovariance",1+2*.2,1.4);
 close("dependent two-period mean variance",(1+1+2*.5)/4,.75);
 assert(checks>=40);
-console.log("V95 PASS: 14 new canonical statistics lectures, 70 deep proof chapters, 168 strict KaTeX expressions, "+checks+" numerical checks, 372 historic lessons retained and unique total 386/656; responsive CJK/KaTeX rules retained.");
+console.log("V95 PASS: 14 new canonical statistics lectures, 77 complete proof chapters, 182 strict KaTeX expressions, "+checks+" numerical checks, 372 historic lessons retained and unique total 386/656; responsive CJK/KaTeX rules retained.");
 
