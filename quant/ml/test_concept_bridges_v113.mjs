@@ -280,6 +280,54 @@ for(const [file,ids] of Object.entries(extra20261114)){
 assert.equal(extraSections,12,"All 12 new in-place ML sections must remain");
 assert.equal(extraEquations,24,"All 24 new ML formulae must pass strict KaTeX");
 
+
+// V120: rigorously integrated Black–Litterman, portfolio construction and time-series evaluation.
+const v120ML={
+ "atlas-concept-bridge-v113a.json":{
+  "m23-c03-p03":"Black–Litterman后验观点精度与均衡先验精度的矩阵融合",
+  "m23-c03-p04":"对角协方差下非等额风险预算的平方根权重公式",
+  "m23-c03-p05":"比例换手成本下的Soft-threshold调仓与无交易带",
+  "m23-c04-p04":"最大回撤的峰值递推、损失恢复比例与终值信息不足"
+ },
+ "atlas-concept-bridge-v113b.json":{
+  "m23-c04-p01":"嵌套Walk-forward的标签成熟约束与外层封存测试",
+  "m12-c03-p03":"Newey–West Bartlett权重的长期方差估计与滞后折中",
+  "m22-c04-p05":"VaR分位原子与ES超额损失的精确联动回测",
+  "m23-c05-p06":"多空ETF回测的现金余额、持仓市值与交易费用三表守恒"
+ }
+};
+let coveredV120ML=0;
+for(const [file,records] of Object.entries(v120ML)){
+ const doc=json(file);
+ for(const [id,title] of Object.entries(records)){
+  const lesson=doc.lessons[id];
+  assert(lesson,id+" V120 canonical ML article missing");
+  assert.equal(new Set(lesson.sections.map(x=>x.title)).size,lesson.sections.length,id+" repeated ML chapter");
+  const s=lesson.sections.find(x=>x.title===title);
+  assert(s,id+" V120 fully authored topic missing");
+  assert(s.question.length>=12&&s.paragraphs.length===2&&s.paragraphs.every(p=>p.length>=130),id+" two complete paragraphs required");
+  assert(s.worked.length>=125&&s.boundary.length>=65,id+" complete numerical example or practical boundary missing");
+  assert.equal(s.equations.length,2,id+" two valid labeled mathematical equations required");
+  for(const eq of s.equations){
+   assert(eq.label.length>=4&&eq.tex.length>=18,id+" incomplete formula");
+   katex.renderToString(eq.tex,{throwOnError:true,strict:"error",displayMode:true});
+  }
+  coveredV120ML++;
+ }
+}
+assert.equal(coveredV120ML,8,"V120 must contain eight complete ML finance extensions");
+const nearV120ML=(x,y,n,tol=1e-8)=>assert(Number.isFinite(x)&&Math.abs(x-y)<=tol,n+" numerical error "+x);
+nearV120ML((.04/.01+.08/.01)/(1/.01+1/.01),.06,"Black Litterman Bayesian mean");
+nearV120ML((.8*.1)**2/((.8*.1)**2+(.2*.2)**2),.8,"unequal ETF risk budgets");
+nearV120ML(.50+(.53-.50)-.02/4,.525,"cost-penalized no trade threshold");
+nearV120ML(1-90/120,.25,"path A maximum drawdown");
+nearV120ML(1-90/100,.1,"path B maximum drawdown");
+assert(55>52,"forward label maturity must follow training cut");
+nearV120ML(Math.sqrt((1+2*.5*.2)/100),Math.sqrt(.012),"Newey West Bartlett HAC SE");
+nearV120ML(10+.05*(100-10)/.1,55,"VaR and ES threshold atom");
+nearV120ML(.6*.05+(-.4)*(-.02)+.8*.01-.002,.044,"cash and short ETF accounting");
+console.log("V120 ML PASS: 8 complete portfolio/inference chapters and 16 strict KaTeX formulas");
+
 console.log("V113 PASS: "+loaded.size+" canonical improved articles, "+sections+
  " substantial reasoning sections, "+strictFormulas+" KaTeX strict formulas, "+crossLinks+
  " exact curriculum links, "+chineseChars+" validated Chinese explanatory characters, "+
