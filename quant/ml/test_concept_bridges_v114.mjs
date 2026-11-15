@@ -422,8 +422,8 @@ for(const [file,expected] of Object.entries(mlV117)){
   assert(lesson,id+" V117 canonical topic absent");
   const chapters=lesson.sections;
   assert.equal(new Set(chapters.map(s=>s.title)).size,chapters.length,id+" duplicate title");
-  const s=chapters.at(-1);
-  assert.equal(s.title,title,id+" V117 added chapter missing");
+  const s=chapters.find(x=>x.title===title);
+  assert(s,id+" V117 original expanded chapter missing");
   assert(s.question.length>=14&&s.paragraphs.length===2&&s.paragraphs.every(p=>p.length>=110),id+" incomplete reasoning");
   assert(s.worked.length>=100&&s.boundary.length>=60,id+" missing numerical case or bounds");
   assert.equal(s.equations.length,2,id+" incomplete equations");
@@ -476,8 +476,8 @@ for(const [file,expected] of Object.entries(v118MLChapters)){
   assert(course,id+" canonical Atlas course missing");
   const chapters=course.sections;
   assert.equal(new Set(chapters.map(x=>x.title)).size,chapters.length,id+" duplicate course section");
-  const s=chapters.at(-1);
-  assert(s.title===title,id+" new mathematical topic altered");
+  const s=chapters.find(x=>x.title===title);
+  assert(s,id+" V118 historical mathematical topic missing");
   assert(s.question.length>=14&&s.paragraphs.length===2&&s.paragraphs.every(p=>p.length>=120),id+" requires two complete mathematical paragraphs");
   assert(s.worked.length>=120&&s.boundary.length>=70,id+" worked calculation or validity conditions missing");
   assert.equal(s.equations.length,2,id+" two new strict mathematical equations required");
