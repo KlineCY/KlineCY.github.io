@@ -398,6 +398,54 @@ eqV116(.5+.3,.8,"ETF gross leverage projection");
 eqV116((.1**2+.1**2)/2,.01,"ETF least-distance objective");
 console.log("V116 ML PASS: 12 deep courses, 24 newly validated strict KaTeX equations");
 
+
+// V117 canonical Atlas mathematical bridges: retain every historical section.
+const mlV117={
+ "atlas-concept-bridge-v114a.json":{
+  "m06-c02-p04":"Beta–Binomial目标编码的后验收缩与低频类别",
+  "m06-c02-p05":"训练经验CDF映射的单点影响界与未来支持",
+  "m06-c04-p03":"不规则到达事件的连续时间指数衰减特征",
+  "m06-c04-p06":"交易日历上的下一可执行时刻映射"
+ },
+ "atlas-concept-bridge-v114d.json":{
+  "m10-c02-p03":"碰撞变量的条件关联与干预分布的严格区别",
+  "m12-c04-p03":"线性中介DAG的总效应与控制直接效应",
+  "m23-c02-p05":"稳定性选择频率的Monte Carlo误差与依赖抽样",
+  "m12-c03-p02":"平稳Bootstrap的几何区块长度与连续保留概率"
+ }
+};
+let completeV117=0;
+for(const [file,expected] of Object.entries(mlV117)){
+ const doc=json(file);
+ for(const [id,title] of Object.entries(expected)){
+  const lesson=doc.lessons[id];
+  assert(lesson,id+" V117 canonical topic absent");
+  const chapters=lesson.sections;
+  assert.equal(new Set(chapters.map(s=>s.title)).size,chapters.length,id+" duplicate title");
+  const s=chapters.at(-1);
+  assert.equal(s.title,title,id+" V117 added chapter missing");
+  assert(s.question.length>=14&&s.paragraphs.length===2&&s.paragraphs.every(p=>p.length>=110),id+" incomplete reasoning");
+  assert(s.worked.length>=100&&s.boundary.length>=60,id+" missing numerical case or bounds");
+  assert.equal(s.equations.length,2,id+" incomplete equations");
+  for(const eq of s.equations) {
+   assert(eq.label.length>=4&&eq.tex.length>=28,id+" incomplete math relation");
+   katex.renderToString(eq.tex,{throwOnError:true,strict:"error",displayMode:true});
+  }
+  completeV117++;
+ }
+}
+assert.equal(completeV117,8);
+const closeV117=(x,y,title,tol=1e-9)=>assert(Math.abs(x-y)<=tol,title+" incorrect: "+x);
+closeV117((3+2)/(5+2+8),1/3,"Beta-binomial shrinkage");
+closeV117(3/4,.75,"training CDF");
+closeV117(10*.25+3,5.5,"irregular event half life");
+closeV117(-1/(2+1),-1/3,"Gaussian collider");
+closeV117(1+2*3,7,"mediated total effect");
+closeV117(.7*.3/100,.0021,"stability selection Monte Carlo");
+closeV117(1/.2,5,"stationary bootstrap block mean");
+closeV117(.8**3,.512,"stationary bootstrap continuation");
+console.log("V117 ML PASS: 8 complete concept bridges and 16 strict mathematical relationships");
+
 console.log("V114 PASS: "+loaded.size+" canonical improved articles, "+sections+
  " substantial reasoning sections, "+strictFormulas+" KaTeX strict formulas, "+crossLinks+
  " exact curriculum links, "+chineseChars+" validated Chinese explanatory characters, "+
