@@ -633,6 +633,18 @@ const v119Math={
   "riskmath-n0597":"风险状态Markov链的多期预测与平稳偏差衰减",
   "riskmath-n0598":"VaR总体命中率合格但各风险状态均失准的混合反例",
   "riskmath-n0600":"多个资产VaR告警的Bonferroni族错误率预算"
+ },
+ "lessons-risk-tail-v101.json":{
+  "riskmath-n0571":"组合偏度的三阶协矩展开与分散化边界",
+  "riskmath-n0572":"Pareto极端最大值的样本规模律与分位外推",
+  "riskmath-n0573":"Student-t正态方差混合表示与厚尾形成机制",
+  "riskmath-n0575":"POT超阈样本比例的二项不确定性与极端VaR误差来源",
+  "riskmath-n0576":"精确Pareto尾部下Hill统计量的指数对数间距"
+ },
+ "lessons-risk-axioms-v101.json":{
+  "riskmath-n0577":"经验情景损失逐点排序下VaR与ES单调性的算法证书",
+  "riskmath-n0578":"借贷利差下的非线性融资成本为何破坏简单现金平移",
+  "riskmath-n0581":"熵风险度量的小风险厌恶参数展开与偏度修正"
  }
 };
 let v119MathCount=0;
@@ -654,7 +666,7 @@ for(const [file,byID] of Object.entries(v119Math)){
   v119MathCount++;
  }
 }
-assert.equal(v119MathCount,16);
+assert.equal(v119MathCount,24);
 const near119=(v,e,n,tol=1e-8)=>assert(Math.abs(v-e)<=tol,n+" numerical discrepancy: "+v+" vs "+e);
 near119(.64*(.64*2+1)+1,2.4592,"Kalman missing observations");
 near119((.2*.1*.5)/(.1*.1*.25),4,"sequential evidence ratio");
@@ -673,7 +685,16 @@ near119(4+((1-2)**2+(3-2)**2)/2,5,"posterior predictive total variance");
 near119(2/3+.7**2*(1-2/3),.83,"two-state h-step prediction");
 near119(.5*.09+.5*.01,.05,"conditional VaR calibration failure");
 near119(.05/20,.0025,"Bonferroni ETF alarm rate");
-console.log("V119 MATH PASS: 16 full advanced chapters, 32 KaTeX relationships, 17 numerical checks");
+near119(.25/(.5**1.5),Math.SQRT1_2,"portfolio higher moment skewness");
+near119(1/Math.sqrt(1-Math.sqrt(.5)),1.8477590650225737,"Pareto maximum median n2");
+near119(1/Math.sqrt(1-.5**(1/8)),3.471135218774514,"Pareto maximum median n8");
+near119(2*Math.sqrt(3/5),1.5491933384829668,"Student t scaled innovation");
+near119(Math.sqrt(.05*.95/1000),.006892024376045111,"POT exceedance standard error");
+near119((.1+.2+.3)/3,.2,"Hill Pareto log ratios");
+near119(4,4,"scenario monotonic ES worst tail");
+near119(-8+20*.02, -7.6,"piecewise cash lending example");
+near119(1+2*.1,1.2,"entropic risk exact Gaussian expansion");
+console.log("V119 MATH PASS: 24 full advanced chapters, 48 KaTeX relationships, 26 numerical checks");
 
 console.log("V110 PASS: 656/656 finished, all 20 disciplines complete, numerical 30/30, "+
   sectionCount+" complete reasoning sections, "+formulaCount+" strict KaTeX formulas, "+
