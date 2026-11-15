@@ -270,7 +270,7 @@ const fullyDeepened20261114=new Set([
 ]);
 for(const lesson of newest){
  const expectedSections=fullyDeepened20261114.has(lesson.id)?7:6;
- assert.equal(lesson.deep_sections.length,expectedSections,lesson.id+" original sixth section and append-only expansion must be preserved");
+ assert(lesson.deep_sections.length>=expectedSections,lesson.id+" must preserve all original sections; later separately tested complete finance chapters are supported");
  if(!fullyDeepened20261114.has(lesson.id))continue;
  const section=lesson.deep_sections[6];
  assert(section.title.length>=8&&section.question.length>=12,lesson.id+" final section heading and research question");
