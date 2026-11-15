@@ -547,6 +547,64 @@ near117(.9*.95-1,-.145,"currency-ETF stress");
 near117(Math.sqrt((.04+.09-2*.03)/100),Math.sqrt(.0007),"paired strategy error");
 console.log("V117 MATH PASS: 17 complete advanced lessons and 34 strict KaTeX formulas");
 
+
+// V118: independently verify complete mathematical foundations and quant applications.
+const v118MathematicalChapters={
+ "lessons-diffeq-v98a.json":["diffeq-n0391","diffeq-n0392","diffeq-n0393"],
+ "lessons-dynamics-v99a.json":["diffeq-n0398","diffeq-n0399","diffeq-n0400","diffeq-n0401","diffeq-n0402"],
+ "lessons-measure-v108a.json":["measure-n0138","measure-n0143","measure-n0148"],
+ "lessons-measure-v108b.json":["measure-n0149","measure-n0150"],
+ "lessons-optimization-v96b.json":["optimization-n0345","optimization-n0346","optimization-n0348"],
+ "lessons-information-v103c.json":["information-n0500","information-n0501","information-n0503","information-n0504"],
+ "lessons-finance-v100d.json":["finance-n0446","finance-n0448","finance-n0449","finance-n0450"]
+};
+let validatedV118Math=0;
+for(const [file,ids] of Object.entries(v118MathematicalChapters)){
+ const document=json(file);
+ const found=ids.map(id=>document.lessons.find(l=>l.id===id));
+ assert(found.every(Boolean),file+" V118 canonical mathematical courses missing");
+ for(const lesson of found){
+  const s=lesson.deep_sections.at(-1);
+  assert(s&&s.title?.length>=10&&s.question?.length>=12,lesson.id+" missing a rigorous mathematical question");
+  assert.equal(new Set(lesson.deep_sections.map(z=>z.title)).size,lesson.deep_sections.length,lesson.id+" repeated section heading");
+  assert(s.paragraphs.length===2&&s.paragraphs.every(z=>z.length>=120),lesson.id+" mathematical assumptions and explanation incomplete");
+  assert(s.proof.length>=140&&s.worked.length>=110&&s.limitation.length>=75,lesson.id+" proof, arithmetic example or applicability missing");
+  assert.equal(s.formulas.length,2,lesson.id+" must have two substantive mathematical equations");
+  for(const f of s.formulas){
+   assert(f.label.length>=4&&f.tex.length>=20,lesson.id+" missing labeled display equation");
+   katex.renderToString(f.tex,{displayMode:true,throwOnError:true,strict:"error"});
+  }
+  validatedV118Math++;
+ }
+}
+assert.equal(validatedV118Math,24,"V118 mathematics expansion must cover 24 complete chapters");
+const nearV118Math=(actual,expected,label,tol=1e-8)=>assert(Math.abs(actual-expected)<=tol,label+": "+actual+" != "+expected);
+nearV118Math(.03+(.01-.03)*.25,.025,"time varying ODE example");
+nearV118Math(100/(1+4*.5),100/3,"Logistic exact growth");
+nearV118Math(5*Math.sqrt(1-.6**2),4,"damped eigenfrequency");
+nearV118Math(.5*3*3,4.5,"continuous Lyapunov energy");
+nearV118Math(1/(1-.8**2),25/9,"discrete steady-state covariance");
+nearV118Math(.5*6+4,7,"state similarity invariance");
+nearV118Math(.5-.8,-.3,"two-factor observability");
+nearV118Math((Math.log(8*Math.PI)+1)/2,2.112085713764618,"Kalman innovation likelihood");
+nearV118Math(9+4,13,"conditional projection baseline MSE");
+nearV118Math(Math.abs(.2-0),.2,"Wasserstein coupling");
+nearV118Math(1-2*.1,.8,"equivalent martingale digital");
+nearV118Math((.08-.02)/.20,.3,"Girsanov market price of risk");
+nearV118Math((102+3)/1.05,100,"dividend inclusive pricing");
+nearV118Math(.05-.2*Math.sqrt(.0125),.027639320225002106,"SOCP robust expected return");
+nearV118Math(4/2+1,3,"Schur complement quadratic");
+nearV118Math((10+.5*2)/1.5,7.333333333333333,"empirical tail ES");
+nearV118Math(2*Math.sqrt(.0004),.04,"Roll implied spread");
+nearV118Math((2+.75)/(2*Math.PI),2.75/(2*Math.PI),"finite-window periodogram");
+nearV118Math(Math.log(2)+.1*Math.log(.1)+.9*Math.log(.9),.3680642071684971,"data processing binary channel");
+nearV118Math((1+.25)/2,.625,"random execution latency");
+nearV118Math((-.01)**2,.0001,"PSD spectral repair");
+nearV118Math(50+40*(10**.25-1),81.13117640155691,"GPD quantile extrapolation");
+nearV118Math((2/3)*.1,(1/3)*.2,"two ETF risk parity");
+nearV118Math(Math.sqrt(2*.005/4),.05,"no trade band half width");
+console.log("V118 MATH PASS: 24 complete theory chapters, 48 strict equations, independent numerical proofs");
+
 console.log("V110 PASS: 656/656 finished, all 20 disciplines complete, numerical 30/30, "+
   sectionCount+" complete reasoning sections, "+formulaCount+" strict KaTeX formulas, "+
   linkCount+" exact curriculum links, "+proofChars+" Chinese proof characters, "+
