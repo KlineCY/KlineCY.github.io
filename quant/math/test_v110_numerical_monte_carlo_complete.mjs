@@ -497,6 +497,56 @@ v116Check((1-Math.exp(-2))/2,.43233235838169365,"exact OU variance");
 v116Check(.8**2+.2**2*4,.8,"Aitken GLS variance cross-link");
 console.log("V116 NUMERICAL PASS: 15 additional rigorous sections and 30 strict formulas");
 
+
+// Validate newly expanded inference, optimization, time-series and risk mathematics.
+const v117Courses={
+ "lessons-phase-20-a.json":["econometrics-x003"],
+ "lessons-phase-20-c.json":["econometrics-x005","econometrics-x006"],
+ "lessons-phase-21-c.json":["mlmath-n0460","mlmath-n0461"],
+ "lessons-phase-21-d.json":["mlmath-n0462","mlmath-n0465"],
+ "lessons-phase-22-a.json":["timeseries-n0244","timeseries-n0245"],
+ "lessons-phase-22-b.json":["timeseries-n0248","timeseries-n0249"],
+ "lessons-phase-27-a.json":["statistics-n0171","statistics-n0170","statistics-n0172"],
+ "lessons-phase-27-c.json":["riskmath-n0589","riskmath-n0594","riskmath-n0595"]
+};
+let validatedV117=0;
+for(const [file,ids] of Object.entries(v117Courses)){
+ const doc=json(file);
+ assert.deepEqual(doc.lessons.map(l=>l.id),ids,"V117 canonical topic identity drift "+file);
+ for(const lesson of doc.lessons){
+  const s=lesson.deep_sections.at(-1);
+  assert(s&&s.title?.length>=12&&s.question?.length>=12,lesson.id+" missing V117 analytical chapter");
+  assert.equal(new Set(lesson.deep_sections.map(x=>x.title)).size,lesson.deep_sections.length,lesson.id+" repeated heading");
+  assert(s.paragraphs.length===2&&s.paragraphs.every(p=>p.length>=110),lesson.id+" must retain complete explanation");
+  assert(s.proof.length>=125&&s.worked.length>=90&&s.limitation.length>=75,lesson.id+" incomplete proof/example/limits");
+  assert.equal(s.formulas.length,2,lesson.id+" exactly two new substantive displayed mathematical results");
+  for(const f of s.formulas){
+   assert(f.label.length>=4&&f.tex.length>=30,lesson.id+" missing labeled relationship");
+   katex.renderToString(f.tex,{throwOnError:true,strict:"error",displayMode:true});
+  }
+  validatedV117++;
+ }
+}
+assert.equal(validatedV117,17);
+const near117=(v,e,name,tol=1e-9)=>assert(Math.abs(v-e)<=tol,name+" arithmetic invalid: "+v);
+near117((1+1+9+9)/8,2.5,"ATE reweighting");
+near117(8*8/20,3.2,"transport effective count");
+near117(.1**2/.01+.2**2/.04,2,"joint Wald");
+near117((2/3)**3,8/27,"Rosenbaum odds");
+near117(.25/(2*2-.25*2**2),1/12,"SGD stationary variance");
+near117((1+.9)/(1-.9),19,"Adam momentum effective count");
+near117(.5*3**2,4.5,"clipped gradient descent");
+near117((3-3)**2+(-2+2)**2+(1-0)**2,1,"L0 projection residual");
+near117(1+.5**2,1.25,"Wold Parseval variance");
+near117(4*(1+.5**2),5,"MA two-step forecast");
+near117(((1+.2)/(1-.5))**2,5.76,"ARMA long-run variance");
+near117((7/3)/3,7/9,"Jackknife sample mean variance");
+near117(2/6,1/3,"exact permutation p-value");
+near117((1+4+4)**.5,3,"factor-plus-idiosyncratic risk");
+near117(.9*.95-1,-.145,"currency-ETF stress");
+near117(Math.sqrt((.04+.09-2*.03)/100),Math.sqrt(.0007),"paired strategy error");
+console.log("V117 MATH PASS: 17 complete advanced lessons and 34 strict KaTeX formulas");
+
 console.log("V110 PASS: 656/656 finished, all 20 disciplines complete, numerical 30/30, "+
   sectionCount+" complete reasoning sections, "+formulaCount+" strict KaTeX formulas, "+
   linkCount+" exact curriculum links, "+proofChars+" Chinese proof characters, "+
