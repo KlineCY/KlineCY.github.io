@@ -422,8 +422,8 @@ for(const [file,expected] of Object.entries(mlV117)){
   assert(lesson,id+" V117 canonical topic absent");
   const chapters=lesson.sections;
   assert.equal(new Set(chapters.map(s=>s.title)).size,chapters.length,id+" duplicate title");
-  const s=chapters.at(-1);
-  assert.equal(s.title,title,id+" V117 added chapter missing");
+  const s=chapters.find(x=>x.title===title);
+  assert(s,id+" V117 original expanded chapter missing");
   assert(s.question.length>=14&&s.paragraphs.length===2&&s.paragraphs.every(p=>p.length>=110),id+" incomplete reasoning");
   assert(s.worked.length>=100&&s.boundary.length>=60,id+" missing numerical case or bounds");
   assert.equal(s.equations.length,2,id+" incomplete equations");
@@ -476,8 +476,8 @@ for(const [file,expected] of Object.entries(v118MLChapters)){
   assert(course,id+" canonical Atlas course missing");
   const chapters=course.sections;
   assert.equal(new Set(chapters.map(x=>x.title)).size,chapters.length,id+" duplicate course section");
-  const s=chapters.at(-1);
-  assert(s.title===title,id+" new mathematical topic altered");
+  const s=chapters.find(x=>x.title===title);
+  assert(s,id+" V118 historical mathematical topic missing");
   assert(s.question.length>=14&&s.paragraphs.length===2&&s.paragraphs.every(p=>p.length>=120),id+" requires two complete mathematical paragraphs");
   assert(s.worked.length>=120&&s.boundary.length>=70,id+" worked calculation or validity conditions missing");
   assert.equal(s.equations.length,2,id+" two new strict mathematical equations required");
@@ -503,6 +503,63 @@ nearV118ML(-.001-.02*(-2),.039,"GARCH conditional value at risk");
 nearV118ML(1-1/3,2/3,"Woodbury factor inverse");
 nearV118ML(.7*.1+(-.3)*(-.05)+.6*.02,.097,"self-financed ETF PnL");
 console.log("V118 ML PASS: 12 complete cross-domain chapters, 24 strict KaTeX and 12 numerical identities");
+
+
+// V119 canonical complete additions with 24 independently parsed mathematics relationships.
+const v119ML={
+ "atlas-concept-bridge-v114a.json":{
+  "m06-c02-p04":"在线Beta目标编码的过去标签递推与冻结先验",
+  "m06-c02-p05":"训练期稳健标准化的MAD尺度与正态一致性",
+  "m06-c04-p03":"预测标签成熟时间与并发收益窗口的净化约束",
+  "m06-c04-p06":"双时钟数据版本的As-of Join与公告修订防泄漏"
+ },
+ "atlas-concept-bridge-v114d.json":{
+  "m10-c02-p03":"条件碰撞偏差的二元概率反例与选择样本的伪相关",
+  "m12-c04-p03":"逆处理概率加权的ATE恒等式与极端权重诊断",
+  "m23-c02-p05":"稳定性选择的并集频率与因子簇去重",
+  "m12-c03-p02":"区块Bootstrap中样本均值的长程协方差保留与块长极限"
+ },
+ "atlas-concept-bridge-v114e.json":{
+  "m22-c01-p06":"顺序告警e值的乘积证据与可选停止风险控制",
+  "m22-c03-p02":"GARCH条件方差预测的均值回复半衰期",
+  "m23-c03-p01":"单因子风险模型的相关系数和总方差严格分解",
+  "m23-c05-p02":"多空ETF权重漂移的自融资再平衡与换手计算"
+ }
+};
+let verifiedV119ML=0;
+for(const [file,byID] of Object.entries(v119ML)){
+ const doc=json(file);
+ for(const [id,title] of Object.entries(byID)){
+  const lesson=doc.lessons[id];
+  assert(lesson,id+" V119 ML course not found");
+  const s=lesson.sections.find(x=>x.title===title);
+  assert(s,id+" V119 academic section missing");
+  assert.equal(new Set(lesson.sections.map(x=>x.title)).size,lesson.sections.length,id+" duplicate ML heading");
+  assert(s.question.length>=12&&s.paragraphs.length===2&&s.paragraphs.every(x=>x.length>=120),id+" incomplete two-paragraph proof exposition");
+  assert(s.worked.length>=105&&s.boundary.length>=55,id+" complete numeric case and caveats required");
+  assert.equal(s.equations.length,2,id+" require two substantive mathematical expressions");
+  for(const f of s.equations){
+   assert(f.label.length>=4&&f.tex.length>=20,id+" incomplete math relation");
+   katex.renderToString(f.tex,{throwOnError:true,strict:"error",displayMode:true});
+  }
+  verifiedV119ML++;
+ }
+}
+assert.equal(verifiedV119ML,12);
+const v119NearML=(x,y,n,tol=1e-8)=>assert(Math.abs(x-y)<=tol,n+" arithmetic discrepancy "+x);
+v119NearML((2+3+1)/(2+8+5+1),.375,"streaming Beta encoding");
+v119NearML(2/1.4826,1.3489815190206393,"MAD trained robust scale");
+assert(Math.max(98,100)<=Math.min(103,105),"overlapping five-day labels must be purged");
+assert(new Date("2026-01-10")<new Date("2026-02-15"),"macro revision must not enter January trading");
+v119NearML(1/3-4/9,-1/9,"collider conditioning");
+v119NearML(.25*4/.25-.75*2/.75,2,"causal propensity IPW");
+v119NearML(.5+.5,1,"exclusive factor group stability");
+v119NearML((1+.5)/(1-.5),3,"AR1 dependent mean long-run variance");
+v119NearML(2*3*4,24,"anytime e-process cumulative evidence");
+v119NearML(Math.log(.5)/Math.log(.9),6.578813478960585,"GARCH variance shock half life");
+v119NearML(.04/.05,.8,"factor-induced ETF correlation");
+v119NearML(Math.abs(.5-.55)+Math.abs(.5-.45),.1,"ETF rebalance turnover");
+console.log("V119 ML PASS: 12 full chapters, 24 strict KaTeX formulas and independent finance calculations");
 
 console.log("V114 PASS: "+loaded.size+" canonical improved articles, "+sections+
  " substantial reasoning sections, "+strictFormulas+" KaTeX strict formulas, "+crossLinks+

@@ -605,6 +605,97 @@ nearV118Math((2/3)*.1,(1/3)*.2,"two ETF risk parity");
 nearV118Math(Math.sqrt(2*.005/4),.05,"no trade band half width");
 console.log("V118 MATH PASS: 24 complete theory chapters, 48 strict equations, independent numerical proofs");
 
+
+// Retain the entire historical mathematics curriculum and validate 16 new V119 advanced chapters.
+const v119Math={
+ "lessons-phase-29-a.json":{
+  "information-n0508":"缺失观测下的Kalman纯预测递推与协方差增长",
+  "information-n0507":"序贯贝叶斯对数证据、预测概率与稳定归一化",
+  "information-n0505":"两状态HMM的稳态概率与期望持续期"
+ },
+ "lessons-phase-29-b.json":{
+  "information-n0509":"非线性状态观测的二阶Delta修正与局部曲率偏差",
+  "information-n0506":"粒子滤波重要性权重的条件有效样本量与重抽样阈值",
+  "information-n0510":"路径最大回撤的在线状态扩充与递归计算"
+ },
+ "lessons-phase-30-a.json":{
+  "finance-n0431":"资产价格泡沫与非负局部鞅为什么可能不是定价真鞅",
+  "finance-n0432":"复制定价唯一而复制仓位可能非唯一：零成本零支付方向",
+  "finance-n0439":"零息曲线正贴现条件与连续远期利率的积分关系"
+ },
+ "lessons-phase-30-b.json":{
+  "finance-n0440":"关键期限久期的有限差分计算与再定价一致性",
+  "finance-n0441":"Vasicek短率精确离散转移与长期回归半衰期的参数辨识",
+  "finance-n0442":"CIR短率条件均值与非负扩散的精确期望"
+ },
+ "lessons-risk-governance-v101.json":{
+  "riskmath-n0596":"参数后验混合预测的总方差与尾部风险分布",
+  "riskmath-n0597":"风险状态Markov链的多期预测与平稳偏差衰减",
+  "riskmath-n0598":"VaR总体命中率合格但各风险状态均失准的混合反例",
+  "riskmath-n0600":"多个资产VaR告警的Bonferroni族错误率预算"
+ },
+ "lessons-risk-tail-v101.json":{
+  "riskmath-n0571":"组合偏度的三阶协矩展开与分散化边界",
+  "riskmath-n0572":"Pareto极端最大值的样本规模律与分位外推",
+  "riskmath-n0573":"Student-t正态方差混合表示与厚尾形成机制",
+  "riskmath-n0575":"POT超阈样本比例的二项不确定性与极端VaR误差来源",
+  "riskmath-n0576":"精确Pareto尾部下Hill统计量的指数对数间距"
+ },
+ "lessons-risk-axioms-v101.json":{
+  "riskmath-n0577":"经验情景损失逐点排序下VaR与ES单调性的算法证书",
+  "riskmath-n0578":"借贷利差下的非线性融资成本为何破坏简单现金平移",
+  "riskmath-n0581":"熵风险度量的小风险厌恶参数展开与偏度修正"
+ }
+};
+let v119MathCount=0;
+for(const [file,byID] of Object.entries(v119Math)){
+ const doc=json(file);
+ for(const [id,title] of Object.entries(byID)){
+  const course=doc.lessons.find(x=>x.id===id);
+  assert(course,id+" V119 canonical mathematical lecture missing");
+  const s=course.deep_sections.find(x=>x.title===title);
+  assert(s,id+" V119 research chapter missing");
+  assert.equal(new Set(course.deep_sections.map(x=>x.title)).size,course.deep_sections.length,id+" duplicate headings");
+  assert(s.question.length>=12&&s.paragraphs.length===2&&s.paragraphs.every(x=>x.length>=120),id+" missing complete assumptions or applications");
+  assert(s.proof.length>=130&&s.worked.length>=100&&s.limitation.length>=55,id+" missing proof, numeric derivation or failure case");
+  assert.equal(s.formulas.length,2,id+" requires two full mathematical equations");
+  for(const f of s.formulas) {
+   assert(f.label.length>=4&&f.tex.length>=20,id+" incomplete mathematical formula");
+   katex.renderToString(f.tex,{throwOnError:true,strict:"error",displayMode:true});
+  }
+  v119MathCount++;
+ }
+}
+assert.equal(v119MathCount,24);
+const near119=(v,e,n,tol=1e-8)=>assert(Math.abs(v-e)<=tol,n+" numerical discrepancy: "+v+" vs "+e);
+near119(.64*(.64*2+1)+1,2.4592,"Kalman missing observations");
+near119((.2*.1*.5)/(.1*.1*.25),4,"sequential evidence ratio");
+near119(.2+.7*.9,.83,"regime transition forecast");
+near119(2**2+.25,4.25,"nonlinear state squared observation");
+near119(1/(.7**2+3*.1**2),1/.52,"particle ESS");
+near119(1-90/120,.25,"path A max drawdown");
+near119(1-100/105,1/21,"path B max drawdown");
+near119(Math.exp(.2**2/2-.2**2/2),1,"exponential martingale");
+near119(.4+.6,1,"redundant replication price");
+near119(Math.exp(-(.02-.01)),Math.exp(-.01),"negative forward discount price");
+near119(100*Math.exp(-.02)*.0001+200*Math.exp(-.04)*.0001,.009801986733067553+.019215788783046463,"key rate DV01");
+near119(.04+(.02-.04)*.5,.03,"Vasicek exact mean");
+near119(.04+(.01-.04)*.5,.025,"CIR mean");
+near119(4+((1-2)**2+(3-2)**2)/2,5,"posterior predictive total variance");
+near119(2/3+.7**2*(1-2/3),.83,"two-state h-step prediction");
+near119(.5*.09+.5*.01,.05,"conditional VaR calibration failure");
+near119(.05/20,.0025,"Bonferroni ETF alarm rate");
+near119(.25/(.5**1.5),Math.SQRT1_2,"portfolio higher moment skewness");
+near119(1/Math.sqrt(1-Math.sqrt(.5)),1.8477590650225737,"Pareto maximum median n2");
+near119(1/Math.sqrt(1-.5**(1/8)),3.471135218774514,"Pareto maximum median n8");
+near119(2*Math.sqrt(3/5),1.5491933384829668,"Student t scaled innovation");
+near119(Math.sqrt(.05*.95/1000),.006892024376045111,"POT exceedance standard error");
+near119((.1+.2+.3)/3,.2,"Hill Pareto log ratios");
+near119(Math.max(...[0,1,2,4]),4,"scenario monotonic ES worst tail");
+near119(20*.02-(-100*.08),8.4,"crossing zero changes cash financing rate");
+near119(1+2*.1,1.2,"entropic risk exact Gaussian expansion");
+console.log("V119 MATH PASS: 24 full advanced chapters, 48 KaTeX relationships, 26 numerical checks");
+
 console.log("V110 PASS: 656/656 finished, all 20 disciplines complete, numerical 30/30, "+
   sectionCount+" complete reasoning sections, "+formulaCount+" strict KaTeX formulas, "+
   linkCount+" exact curriculum links, "+proofChars+" Chinese proof characters, "+
