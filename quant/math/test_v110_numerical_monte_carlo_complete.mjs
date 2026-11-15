@@ -691,8 +691,8 @@ near119(1/Math.sqrt(1-.5**(1/8)),3.471135218774514,"Pareto maximum median n8");
 near119(2*Math.sqrt(3/5),1.5491933384829668,"Student t scaled innovation");
 near119(Math.sqrt(.05*.95/1000),.006892024376045111,"POT exceedance standard error");
 near119((.1+.2+.3)/3,.2,"Hill Pareto log ratios");
-near119(4,4,"scenario monotonic ES worst tail");
-near119(-8+20*.02, -7.6,"piecewise cash lending example");
+near119(Math.max(...[0,1,2,4]),4,"scenario monotonic ES worst tail");
+near119(20*.02-(-100*.08),8.4,"crossing zero changes cash financing rate");
 near119(1+2*.1,1.2,"entropic risk exact Gaussian expansion");
 console.log("V119 MATH PASS: 24 full advanced chapters, 48 KaTeX relationships, 26 numerical checks");
 
