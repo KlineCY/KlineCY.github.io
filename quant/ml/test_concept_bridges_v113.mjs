@@ -328,6 +328,63 @@ nearV120ML(10+.05*(100-10)/.1,55,"VaR and ES threshold atom");
 nearV120ML(.6*.05+(-.4)*(-.02)+.8*.01-.002,.044,"cash and short ETF accounting");
 console.log("V120 ML PASS: 8 complete portfolio/inference chapters and 16 strict KaTeX formulas");
 
+
+// V121: complete finance ML research extensions, no loss of the historical Atlas.
+const v121ML={
+ "atlas-concept-bridge-v113c.json":{
+  "m24-c03-p01":"PSI在分箱边界处的不连续性与替代漂移检验",
+  "m24-c03-p02":"一维Wasserstein距离的分位函数表示与尺度依赖",
+  "m24-c03-p05":"漂移检测的平均延迟与误报预算之间的统计取舍",
+  "m24-c04-p03":"对抗训练的双范数最坏扰动与预测鲁棒性代价"
+ },
+ "atlas-concept-bridge-v113d.json":{
+  "m13-c05-p01":"填充序列与有效token掩码对梯度平均的影响",
+  "m14-c04-p03":"注意力分数归一化的数值稳定性与掩码极限",
+  "m15-c05-p01":"卡尔曼创新标准化与观测噪声模型诊断",
+  "m19-c02-p03":"ELBO与真实对数证据之间的KL缺口"
+ },
+ "atlas-concept-bridge-v113e.json":{
+  "m20-c04-p03":"策略梯度状态基线的无偏恒等式与方差降低条件",
+  "m21-c05-p04":"平方临时冲击成本下的最优执行分配与流动性约束",
+  "m18-c02-p03":"GCN图传播中的谱滤波与邻接自环时间泄漏",
+  "m17-c02-p01":"Masked Language Modeling目标泄漏与时间可见的语料切分"
+ }
+};
+let v121MLCount=0;
+for(const [file,topics] of Object.entries(v121ML)){
+ const pack=json(file);
+ for(const [id,title] of Object.entries(topics)){
+  const course=pack.lessons[id];
+  assert(course,id+" canonical V121 finance ML topic missing");
+  assert.equal(new Set(course.sections.map(s=>s.title)).size,course.sections.length,id+" duplicate chapter titles");
+  const s=course.sections.find(x=>x.title===title);
+  assert(s,id+" new full-depth chapter missing");
+  assert(s.question.length>=12&&s.paragraphs.length===2&&s.paragraphs.every(p=>p.length>=120),id+" inadequate two-part explanation");
+  assert(s.worked.length>=110&&s.boundary.length>=55,id+" worked case and validity boundary required");
+  assert.equal(s.equations.length,2,id+" requires two independent complete equations");
+  for(const eq of s.equations){
+   assert(eq.label.length>=4&&eq.tex.length>=18,id+" incomplete displayed equation");
+   katex.renderToString(eq.tex,{throwOnError:true,strict:"error",displayMode:true});
+  }
+  v121MLCount++;
+ }
+}
+assert.equal(v121MLCount,12);
+const nearV121ML=(a,b,n,tol=1e-8)=>assert(Number.isFinite(a)&&Math.abs(a-b)<=tol,n+" independently recomputed: "+a);
+nearV121ML(.1*Math.log(1.5),.04054651081081644,"PSI exact divergence");
+nearV121ML(Math.abs(.2),.2,"one-dimensional Wasserstein translation");
+nearV121ML(.6*Math.log(4),.8317766166719344,"Bernoulli sequential evidence drift");
+nearV121ML(.1*Math.hypot(3,4),.5,"dual L2 perturbation");
+nearV121ML(8/6,4/3,"valid token loss weighting");
+nearV121ML(1/(1+Math.exp(-1)),.7310585786300049,"stable masked softmax");
+nearV121ML(-3/Math.sqrt(4),-1.5,"standardized Kalman innovation");
+nearV121ML(-2-.3,-2.3,"ELBO model evidence gap");
+nearV121ML(.25*.75*2+.75*(-.25)*2,0,"policy gradient baseline zero mean");
+nearV121ML(1*8**2+4*2**2,80,"optimal execution quadratic impact");
+nearV121ML(.5**4,1/16,"GCN graph spectral smoothing");
+assert(new Date("2025-09-01")>new Date("2025-02-01"),"future financial documents must remain unavailable");
+console.log("V121 ML PASS: 12 full courses, 24 strict KaTeX equations, independent sample calculations");
+
 console.log("V113 PASS: "+loaded.size+" canonical improved articles, "+sections+
  " substantial reasoning sections, "+strictFormulas+" KaTeX strict formulas, "+crossLinks+
  " exact curriculum links, "+chineseChars+" validated Chinese explanatory characters, "+

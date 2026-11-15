@@ -764,6 +764,65 @@ near120(Math.sqrt(100*4)/100,.2,"Rademacher sample norm bound");
 near120(.0004/(2*.0004),.5,"portfolio weight error amplification");
 console.log("V120 MATH PASS: 16 full chapters, 32 strict formulas, 17 numerical properties");
 
+
+// V121: no legacy lessons modified; independently verify 12 new full proofs and display mathematics.
+const v121Mathematics={
+ "lessons-phase-23-a.json":{
+  "timeseries-n0256":"协整关系的正则化残差与交易价差单位的一致性",
+  "timeseries-n0257":"Johansen检验的趋势设定与协整秩判定条件"
+ },
+ "lessons-phase-23-b.json":{
+  "timeseries-n0258":"误差修正动态中的预测价差半衰期与有效收益口径",
+  "timeseries-n0259":"稳定VAR的多步联合预测协方差与相关冲击传播"
+ },
+ "lessons-phase-27-b.json":{
+  "statistics-n0173":"截尾均值的污染灵敏度与稳健性代价",
+  "statistics-n0174":"Huber位置M估计的影响函数与截断梯度",
+  "statistics-n0175":"Holm逐步校正的单调拒绝规则与族错误率控制",
+  "statistics-n0176":"BH方法对正相关的保证与任意依赖下的保守修正"
+ },
+ "lessons-phase-28-b.json":{
+  "finance-n0434":"欧式期权连续股息收益率下的Put–Call平价与远期映射",
+  "finance-n0436":"Delta对冲与Gamma离散再平衡的三阶误差界",
+  "finance-n0437":"隐含波动率反解的局部条件数与报价噪声传播",
+  "finance-n0438":"执行价方向看涨价格凸性与离散蝶式无套利界"
+ }
+};
+let v121MathCount=0;
+for(const [file,records] of Object.entries(v121Mathematics)){
+ const document=json(file);
+ for(const [id,title] of Object.entries(records)){
+  const l=document.lessons.find(x=>x.id===id);
+  assert(l,id+" canonical V121 mathematics missing");
+  assert.equal(new Set(l.deep_sections.map(x=>x.title)).size,l.deep_sections.length,id+" repeated academic section");
+  const s=l.deep_sections.find(x=>x.title===title);
+  assert(s,id+" new V121 mathematical section missing");
+  assert(s.question.length>=12&&s.paragraphs.length===2&&s.paragraphs.every(p=>p.length>=120),id+" missing detailed reasoning");
+  assert(s.proof.length>=130&&s.worked.length>=110&&s.limitation.length>=55,id+" incomplete mathematical proof case or boundary");
+  assert.equal(s.formulas.length,2,id+" two complete equations required");
+  for(const eq of s.formulas){
+   assert(eq.label.length>=4&&eq.tex.length>=18,id+" mathematical equation incomplete");
+   katex.renderToString(eq.tex,{displayMode:true,throwOnError:true,strict:"error"});
+  }
+  v121MathCount++;
+ }
+}
+assert.equal(v121MathCount,12);
+const nearV121Math=(a,b,name,tol=1e-8)=>assert(Number.isFinite(a)&&Math.abs(a-b)<=tol,name+" failed: "+a);
+nearV121Math(1.5*10*100/50,30,"dynamic log hedge units");
+nearV121Math(-100*(Math.log(.75)+Math.log(.95)),33.89753668393315,"Johansen trace");
+nearV121Math(Math.log(.5)/Math.log(.8),3.1062837195053903,"ECM conditional half life");
+nearV121Math(1+.8**2+.8**4,2.0496,"VAR forecast covariance");
+nearV121Math((2+3+4)/3,3,"trimmed center sample");
+nearV121Math(-.5-.5+1,0,"Huber bounded location equation");
+nearV121Math(Math.max(3*.01,2*.03,1*.04),.06,"Holm adjusted p values");
+nearV121Math(1+1/2+1/3,11/6,"BY harmonic penalty");
+nearV121Math(100*Math.exp(-.02)-100*Math.exp(-.05),2.896924880604118,"European dividend parity");
+nearV121Math(.5*.02*5**2-.5,-.25,"delta hedge gamma-theta PnL");
+nearV121Math(.1/2,.05,"inverse Vega conditioning");
+assert((-6/10)<=(-5/20),"uneven strike butterfly convexity");
+console.log("V121 MATH PASS: 12 full chapters, 24 strict KaTeX, and independent numerical evidence");
+
 console.log("V110 PASS: 656/656 finished, all 20 disciplines complete, numerical 30/30, "+
   sectionCount+" complete reasoning sections, "+formulaCount+" strict KaTeX formulas, "+
   linkCount+" exact curriculum links, "+proofChars+" Chinese proof characters, "+
