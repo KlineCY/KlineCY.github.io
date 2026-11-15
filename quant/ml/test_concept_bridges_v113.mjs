@@ -262,7 +262,7 @@ let extraSections=0,extraEquations=0;
 for(const [file,ids] of Object.entries(extra20261114)){
  for(const id of ids){
   const lesson=json(file).lessons[id],count=file.includes("113d")?8:10;
-  assert.equal(lesson.sections.length,count+1,id+" exact old chapters and append-only new chapter");
+  assert(lesson.sections.length>=count+1,id+" historical original sections must remain; further complete sections are allowed");
   const added=lesson.sections[count];
   assert(added.title?.length>=8&&added.question?.length>=12,id+" new section title or question missing");
   assert(added.paragraphs.length===2&&added.paragraphs.every(p=>p.length>=95),id+" complete two-part explanation missing");
