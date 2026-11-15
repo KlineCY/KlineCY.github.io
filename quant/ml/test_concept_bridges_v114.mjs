@@ -446,6 +446,64 @@ closeV117(1/.2,5,"stationary bootstrap block mean");
 closeV117(.8**3,.512,"stationary bootstrap continuation");
 console.log("V117 ML PASS: 8 complete concept bridges and 16 strict mathematical relationships");
 
+
+// V118: mathematical ML and executable-finance teaching extensions.
+const v118MLChapters={
+ "atlas-concept-bridge-v114b.json":{
+  "m07-c02-p04":"Lasso原对偶问题与可计算的最优性间隙",
+  "m07-c02-p05":"Elastic Net的坐标下降更新与标准化尺度",
+  "m07-c02-p06":"共用交易日模型损失差的长期方差与比较检验",
+  "m07-c01-p04":"GLS预白化与异方差加权最小二乘的严格等价"
+ },
+ "atlas-concept-bridge-v114c.json":{
+  "m08-c02-p02":"相关特征的边际置换与条件置换重要性反例",
+  "m11-c03-p01":"正则化PCA白化与微小特征值的噪声放大",
+  "m12-c01-p06":"对数损失的严格适当性与Bernoulli KL分解",
+  "m12-c03-p06":"独立正态收益Sharpe估计量的Delta方法标准误"
+ },
+ "atlas-concept-bridge-v114e.json":{
+  "m22-c01-p06":"变点预警的基础发生率与阳性预测值",
+  "m22-c03-p02":"条件波动率GARCH与下一期VaR的标准化分位映射",
+  "m23-c03-p01":"因子协方差的Woodbury逆与高维资产优化",
+  "m23-c05-p02":"多空ETF组合的现金权重与融资口径完整收益"
+ }
+};
+let validatedV118ML=0;
+for(const [file,expected] of Object.entries(v118MLChapters)){
+ const document=json(file);
+ for(const [id,title] of Object.entries(expected)){
+  const course=document.lessons[id];
+  assert(course,id+" canonical Atlas course missing");
+  const chapters=course.sections;
+  assert.equal(new Set(chapters.map(x=>x.title)).size,chapters.length,id+" duplicate course section");
+  const s=chapters.at(-1);
+  assert(s.title===title,id+" new mathematical topic altered");
+  assert(s.question.length>=14&&s.paragraphs.length===2&&s.paragraphs.every(p=>p.length>=120),id+" requires two complete mathematical paragraphs");
+  assert(s.worked.length>=120&&s.boundary.length>=70,id+" worked calculation or validity conditions missing");
+  assert.equal(s.equations.length,2,id+" two new strict mathematical equations required");
+  for(const eq of s.equations){
+   assert(eq.label.length>=4&&eq.tex.length>=20,id+" incomplete labeled LaTeX");
+   katex.renderToString(eq.tex,{displayMode:true,throwOnError:true,strict:"error"});
+  }
+  validatedV118ML++;
+ }
+}
+assert.equal(validatedV118ML,12);
+const nearV118ML=(x,y,name,tol=1e-8)=>assert(Math.abs(x-y)<=tol,name+" numerical calculation mismatch: "+x);
+nearV118ML(.5*(3-2)**2+2,2.5,"Lasso primal dual convergence");
+nearV118ML((3-1)/(1+1),1,"Elastic Net coordinate descent");
+nearV118ML((1+2*(1-1/100)*.2)/100,.01396,"common-date loss difference long-run variance");
+nearV118ML((1+.5*1.5)/(1+.25),1.4,"GLS whitening");
+nearV118ML(1-.5,.5,"marginal versus conditional permutation");
+nearV118ML(9/(9+1),.9,"regularized PCA whitening");
+nearV118ML(-.8*Math.log(.6)-.2*Math.log(.4),.5919186453876236,"Bernoulli proper log loss");
+nearV118ML(Math.sqrt(1.5/100),.1224744871391589,"iid-normal Sharpe SE");
+nearV118ML(.008/(.008+.0495),.1391304347826087,"change alarm posterior");
+nearV118ML(-.001-.02*(-2),.039,"GARCH conditional value at risk");
+nearV118ML(1-1/3,2/3,"Woodbury factor inverse");
+nearV118ML(.7*.1+(-.3)*(-.05)+.6*.02,.097,"self-financed ETF PnL");
+console.log("V118 ML PASS: 12 complete cross-domain chapters, 24 strict KaTeX and 12 numerical identities");
+
 console.log("V114 PASS: "+loaded.size+" canonical improved articles, "+sections+
  " substantial reasoning sections, "+strictFormulas+" KaTeX strict formulas, "+crossLinks+
  " exact curriculum links, "+chineseChars+" validated Chinese explanatory characters, "+
