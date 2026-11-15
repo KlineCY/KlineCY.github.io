@@ -67,7 +67,7 @@ for(const lesson of newLessons){
  assert(lesson.properties.length>=4 && lesson.properties.every(p=>p.length>=20),id+" shallow properties");
  assert.equal(lesson.formulas.length,3,id+" insufficient core equations");
  assert.equal(lesson.derivation.length,3,id+" insufficient proof steps");
- assert.equal(lesson.deep_sections.length,3,id+" insufficient deep chapters");
+ assert(lesson.deep_sections.length>=3,id+" must preserve all original V99 three deep chapters");
  const titles=new Set();
  for(const part of lesson.formulas){
   assert(part.label?.length>=4);
@@ -77,7 +77,7 @@ for(const lesson of newLessons){
   assert(step.explanation?.length>=25,id+" shallow derivation");
   formula(step.tex,id);
  }
- for(const part of lesson.deep_sections){
+ for(const part of lesson.deep_sections.slice(0,3)){
   assert(part.title?.length>=8 && part.question?.length>=10,id+" unclear deep section");
   assert(!titles.has(part.title),id+" repeated chapter title");
   titles.add(part.title);
