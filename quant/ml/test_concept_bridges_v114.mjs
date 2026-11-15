@@ -342,6 +342,62 @@ for(const [id,[file,priorTitle,newTitle]] of Object.entries(appended41V114)){
  assert(s.worked.length>=90&&s.boundary.length>=55,id+" full numerical example and caveats required");
 }
 
+
+// Additional complete V116 lessons retain the original canonical Atlas archive.
+const v116Ml={
+ "atlas-concept-bridge-v114b.json":{
+  "m07-c02-p04":"近端梯度的下降引理、步长界与回溯验证",
+  "m07-c02-p05":"完全共线特征下Elastic Net的严格成组结论",
+  "m07-c02-p06":"一标准误差正则化选择规则的统计含义",
+  "m07-c01-p04":"Aitken广义最小二乘效率证明与BLUE边界"
+ },
+ "atlas-concept-bridge-v114c.json":{
+  "m08-c02-p02":"袋外预测的覆盖概率与每条记录的有效树数",
+  "m11-c03-p01":"相关矩阵PCA与协方差PCA的经济量纲区别",
+  "m12-c01-p06":"Brier评分的可靠性、分辨率与基准不确定性分解",
+  "m12-c03-p06":"自相关收益的多期Sharpe缩放与长期方差"
+ },
+ "atlas-concept-bridge-v114e.json":{
+  "m22-c01-p06":"多资产序贯预警的家族错误率预算",
+  "m22-c03-p02":"GARCH多步预测方差的闭式递推与聚合",
+  "m23-c03-p01":"线性收缩协方差的特征值下界与求逆稳定",
+  "m23-c05-p02":"多空ETF目标权重的L1杠杆投影与实际交易约束"
+ }
+};
+let coveredV116=0;
+for(const [name,byID] of Object.entries(v116Ml)){
+ const pack=json(name);
+ for(const [id,title] of Object.entries(byID)){
+  const course=pack.lessons[id];
+  assert(course,id+" canonical deep lecture missing");
+  const chapters=course.sections;
+  assert.equal(new Set(chapters.map(x=>x.title)).size,chapters.length,id+" duplicate course subsection");
+  const chapter=chapters.find(s=>s.title===title);
+  assert(chapter,id+" new section missing");
+  assert.equal(chapter.paragraphs.length,2,id+" must explain theory in two complete paragraphs");
+  assert(chapter.paragraphs.every(p=>p.length>=115),id+" too little mathematical or empirical explanation");
+  assert(chapter.worked.length>=100&&chapter.boundary.length>=90,id+" inadequate worked example or assumptions");
+  assert.equal(chapter.equations.length,2,id+" lost mathematical derivation");
+  for(const eq of chapter.equations){
+   assert(eq.label.length>=4&&eq.tex.length>=28,id+" empty mathematical statement");
+   katex.renderToString(eq.tex,{throwOnError:true,strict:"error",displayMode:true});
+  }
+  coveredV116++;
+ }
+}
+assert.equal(coveredV116,12);
+const eqV116=(x,y,label)=>assert(Math.abs(x-y)<1e-9,label+" numerical mismatch: "+x);
+eqV116(.5*(1+.25)+2,2.625,"Lasso step");
+eqV116(-2*(3-2*.5)+2+4*.5,0,"Elastic Net symmetric KKT");
+eqV116(.8**2+.2**2*4,.8,"GLS variance");
+eqV116(.01-.16+.25,.1,"Brier exact decomposition");
+eqV116(2+2*.2,2.4,"two-period covariance");
+eqV116(3*.04+(.10-.04)*(1-.9**3)/(1-.9),.2826,"GARCH horizon risk");
+eqV116(.07/.03,7/3,"covariance spectral conditioning");
+eqV116(.5+.3,.8,"ETF gross leverage projection");
+eqV116((.1**2+.1**2)/2,.01,"ETF least-distance objective");
+console.log("V116 ML PASS: 12 deep courses, 24 newly validated strict KaTeX equations");
+
 console.log("V114 PASS: "+loaded.size+" canonical improved articles, "+sections+
  " substantial reasoning sections, "+strictFormulas+" KaTeX strict formulas, "+crossLinks+
  " exact curriculum links, "+chineseChars+" validated Chinese explanatory characters, "+
