@@ -430,6 +430,73 @@ nearMath(.2/5,.04,"inverse Vega quote sensitivity");
 nearMath(100/(2*20),2.5,"uniform risk-neutral terminal-price call");
 nearMath(-10/20,-.5,"strike slope equals discounted tail probability");
 
+
+// V116: retain every historical proof and validate all newly appended full chapters.
+const v116Numerical={
+ "lessons-numerical-v110a.json":{
+  "numerical-n0364":"对数求和指数的浮点稳定变换与Softmax",
+  "numerical-n0365":"对数贴现因子的形状约束与分段远期利率",
+  "numerical-n0366":"Crank–Nicolson的无条件稳定与非单调震荡",
+  "numerical-n0368":"随机化子空间近似的正交误差分解"
+ },
+ "lessons-numerical-v110b.json":{
+  "numerical-n0372":"共轭梯度残差与二次目标误差的精确联系",
+  "numerical-n0373":"带确定性函数误差界的可靠根区间更新",
+  "numerical-n0374":"Levenberg–Marquardt阻尼步与局部最小二乘模型",
+  "numerical-n0375":"带区间保护的割线插值与保根迭代"
+ },
+ "lessons-numerical-v110c.json":{
+  "numerical-n0376":"端点可积奇异性的变量代换与误差控制",
+  "numerical-n0377":"Gauss–Laguerre求积与指数折现型积分",
+  "numerical-n0378":"共同随机数与数值Greek差分的方差分解",
+  "numerical-n0379":"离散随机变量的随机化概率积分变换"
+ },
+ "lessons-numerical-v110d.json":{
+  "numerical-n0381":"重要性采样中有限均值却无限方差的尾部失配"
+ },
+ "lessons-numerical-v110e.json":{
+  "numerical-n0388":"Ornstein–Uhlenbeck过程的精确一步抽样与Euler误差",
+  "numerical-n0389":"异方差回归的Wild Bootstrap与时间依赖的区分"
+ }
+};
+let deepenedV116=0;
+for(const [name,records] of Object.entries(v116Numerical)){
+ const doc=json(name);
+ for(const [id,title] of Object.entries(records)){
+  const lesson=doc.lessons.find(x=>x.id===id);
+  assert(lesson,id+" missing from canonical file");
+  const sections=lesson.deep_sections;
+  assert.equal(new Set(sections.map(x=>x.title)).size,sections.length,id+" duplicate headings");
+  const s=sections.find(x=>x.title===title);
+  assert(s,id+" added chapter not found");
+  assert(s.paragraphs.length===2&&s.paragraphs.every(x=>x.length>=115),id+" short mathematical explanation");
+  assert(s.proof.length>=110&&s.worked.length>=90&&s.limitation.length>=65,id+" incomplete proof/example/boundary");
+  assert.equal(s.formulas.length,2,id+" new mathematical equations lost");
+  for(const f of s.formulas){
+   assert(f.tex.length>=30&&f.label.length>=4,id+" weak displayed formula");
+   katex.renderToString(f.tex,{throwOnError:true,strict:"error",displayMode:true});
+  }
+  deepenedV116++;
+ }
+}
+assert.equal(deepenedV116,15);
+const v116Check=(actual,expected,label,tol=1e-8)=>assert(Math.abs(actual-expected)<tol,label+" discrepancy");
+v116Check(1000+Math.log1p(Math.exp(-1)),1000.3132616875182,"stable log-sum-exp");
+v116Check(Math.exp(-.055),.9464851479534838,"log discount midpoint");
+v116Check((1-2)/(1+2),-1/3,"CN high frequency amplification");
+v116Check(Math.sqrt(1+4),Math.sqrt(5),"orthogonal randomized SVD residual");
+v116Check(.1**2/2,.005,"CG energy-residual");
+v116Check((1+1)/2,1,"damped LM step");
+v116Check(2-2/3,4/3,"safeguarded secant root");
+v116Check(2+2/3,8/3,"endpoint substitution");
+const qminus=2-Math.sqrt(2),qplus=2+Math.sqrt(2);
+const wminus=(2+Math.sqrt(2))/4,wplus=(2-Math.sqrt(2))/4;
+v116Check(wminus*qminus*qminus+wplus*qplus*qplus,2,"Gauss Laguerre moment");
+v116Check(1/(2*100*.1**2),.5,"independent finite-difference Monte Carlo noise");
+v116Check((1-Math.exp(-2))/2,.43233235838169365,"exact OU variance");
+v116Check(.8**2+.2**2*4,.8,"Aitken GLS variance cross-link");
+console.log("V116 NUMERICAL PASS: 15 additional rigorous sections and 30 strict formulas");
+
 console.log("V110 PASS: 656/656 finished, all 20 disciplines complete, numerical 30/30, "+
   sectionCount+" complete reasoning sections, "+formulaCount+" strict KaTeX formulas, "+
   linkCount+" exact curriculum links, "+proofChars+" Chinese proof characters, "+
