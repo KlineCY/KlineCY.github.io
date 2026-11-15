@@ -696,6 +696,74 @@ near119(20*.02-(-100*.08),8.4,"crossing zero changes cash financing rate");
 near119(1+2*.1,1.2,"entropic risk exact Gaussian expansion");
 console.log("V119 MATH PASS: 24 full advanced chapters, 48 KaTeX relationships, 26 numerical checks");
 
+
+// V120: full mathematical explanations, history-preserving exact formula and numerical checks.
+const v120Mathematics={
+ "lessons-phase-25-a.json":{
+  "timeseries-x003":"含独立报价噪声的实现方差偏差与最佳采样间隔",
+  "timeseries-x004":"无未来数据的上一次成交时间对齐与陈旧价格效应",
+  "timeseries-x006":"指数时间重标定的PIT与离散事件等待时间诊断",
+  "mlmath-x006":"带界重要性权重的重加权均值浓缩与ESS局限",
+  "riskmath-x001":"含概率原子的Expected Shortfall完整尾部质量分配"
+ },
+ "lessons-phase-26-a.json":{
+  "timeseries-n0260":"稳定VAR的长期累计脉冲响应与近单位根放大",
+  "timeseries-n0261":"正交冲击FEVD的份额守恒及相关冲击的双计问题",
+  "timeseries-n0262":"Granger预测增量的嵌套投影风险与样本外经济意义"
+ },
+ "lessons-phase-26-b.json":{
+  "timeseries-n0266":"GJR-GARCH非对称冲击项的无条件方差存在条件",
+  "timeseries-n0267":"DCC相关矩阵的标准化与组合动态方差精确计算",
+  "timeseries-n0269":"ARFIMA长记忆的样本均值收敛速度与有效信息减少",
+  "timeseries-n0270":"状态混合风险的均值差异项与条件协方差"
+ },
+ "lessons-phase-24-a.json":{
+  "statistics-x003":"平稳Bootstrap的几何区块存续概率与自相关保留",
+  "statistics-x004":"Sharpe比率影响函数的均值与方差双重扰动",
+  "mlmath-x003":"Rademacher复杂度的样本依赖界与特征范数",
+  "mlmath-x004":"稳定正则化估计到组合优化仓位的敏感性传播"
+ }
+};
+let verifiedV120Math=0;
+for(const [file,titles] of Object.entries(v120Mathematics)){
+ const doc=json(file);
+ for(const [id,title] of Object.entries(titles)){
+  const lesson=doc.lessons.find(x=>x.id===id);
+  assert(lesson,id+" V120 math topic missing");
+  assert.equal(new Set(lesson.deep_sections.map(x=>x.title)).size,lesson.deep_sections.length,id+" duplicate chapter");
+  const s=lesson.deep_sections.find(x=>x.title===title);
+  assert(s,id+" V120 complete topic missing");
+  assert(s.question.length>=12&&s.paragraphs.length===2&&s.paragraphs.every(p=>p.length>=125),id+" insufficient coherent explanation");
+  assert(s.proof.length>=135&&s.worked.length>=115&&s.limitation.length>=65,id+" full proof numerical example or limitations missing");
+  assert.equal(s.formulas.length,2,id+" two independent mathematical relationships required");
+  for(const eq of s.formulas){
+   assert(eq.label.length>=4&&eq.tex.length>=18,id+" incomplete displayed mathematical statement");
+   katex.renderToString(eq.tex,{throwOnError:true,strict:"error",displayMode:true});
+  }
+  verifiedV120Math++;
+ }
+}
+assert.equal(verifiedV120Math,16,"V120 math must contain 16 complete additional teaching chapters");
+const near120=(x,y,n,tol=1e-8)=>assert(Number.isFinite(x)&&Math.abs(x-y)<=tol,n+" independently recomputed error: "+x+" expected "+y);
+near120(.0004+2*20*.000001,.00044,"20 quote differences realized variance");
+near120(.0004+2*200*.000001,.0008,"200 quote differences realized variance");
+assert(new Date("2026-11-15T10:04:00Z")<=new Date("2026-11-15T10:05:00Z"),"asof timestamp must not be future");
+near120(1-Math.exp(-1),.6321205588285577,"point-process PIT uniform");
+near120(2*Math.exp(-2),.2706705664732254,"weighted bounded Hoeffding");
+near120((100*.05+10*.05)/.1,55,"ES partial atom tail");
+near120(1/(1-.8),5,"stable VAR long-run response");
+near120(4/(4+1),.8,"orthogonal FEVD conservation");
+near120((9+4)-4,9,"Granger nested risk improvement");
+near120(.000002/(1-.05-.85-.1/2),.00004,"GJR GARCH stationary variance");
+near120(.25*.04+.25*.01+.5*.01,.0175,"DCC portfolio risk");
+near120(16**(-.25),.5,"ARFIMA long-memory standard error");
+near120(.0004+.25*.1**2,.0029,"regime-mixture predictive variance");
+near120(.8**3,.512,"stationary Bootstrap block retention");
+near120((5-1)/2-1*(16-4)/(2*2**3),1.25,"Sharpe nonzero influence");
+near120(Math.sqrt(100*4)/100,.2,"Rademacher sample norm bound");
+near120(.0004/(2*.0004),.5,"portfolio weight error amplification");
+console.log("V120 MATH PASS: 16 full chapters, 32 strict formulas, 17 numerical properties");
+
 console.log("V110 PASS: 656/656 finished, all 20 disciplines complete, numerical 30/30, "+
   sectionCount+" complete reasoning sections, "+formulaCount+" strict KaTeX formulas, "+
   linkCount+" exact curriculum links, "+proofChars+" Chinese proof characters, "+
