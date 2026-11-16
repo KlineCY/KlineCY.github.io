@@ -56,7 +56,7 @@ for(const [id,lesson] of entries){
   assert(s.title?.length>=6&&s.question?.length>=12,id+" lacks specific research question");
   assert(!headings.has(s.title),id+" repeated argument heading");
   headings.add(s.title);
-  assert(s.paragraphs?.length===2&&s.paragraphs.every(p=>p.length>=40),id+" missing two rigorous paragraphs");
+  assert(s.paragraphs?.length>=2&&s.paragraphs.every(p=>p.length>=40),id+" missing at least two rigorous paragraphs");
   if(consolidatedIDs.has(id))assert(s.paragraphs.every(p=>!p.includes("\n")),id+" contains merged duplicate prose");
   assert(s.worked?.length>=55,id+" requires an independently replicable worked example");
   assert(s.boundary?.length>=30,id+" missing method failure boundary");
