@@ -264,6 +264,34 @@ assert(Math.abs(11.0625/(2.25**2)-2.185185185185185)<1e-12,"discrete kurtosis ex
 assert(.96>=.95&&.92<.95,"VaR violates subadditivity example");
 assert(Math.abs(.8*.9+.2*.3-.78)<1e-12,"Markov state filter");
 assert(Math.abs(250*.01*.99-2.475)<1e-12,"VaR exceedance variance");
+const rigorousTailExtensions={
+ "riskmath-n0572":["Pareto超额损失期望与尾部保险赔付","极端分位数对Pareto尾指数的对数敏感度"],
+ "riskmath-n0573":["Student-t上尾ES闭式与方差标准化","共同尺度Student-t中的零相关和平方收益共振"],
+ "riskmath-n0576":["固定阈值Pareto对数超额的Gamma与Hill精确标准误","Pareto尾指数MLE的有限样本偏差和校正"]
+};
+const reviewedTails=json("lessons-risk-tail-v101.json").lessons;
+let reviewed=0;
+for(const [id,titles] of Object.entries(rigorousTailExtensions)){
+ const lesson=reviewedTails.find(l=>l.id===id);
+ assert(lesson,"missing full tail-risk course "+id);
+ for(const title of titles){
+  const section=lesson.deep_sections.find(s=>s.title===title);
+  assert(section,"missing advanced tail-risk proof "+title);
+  assert(section.paragraphs.length===2 && section.paragraphs.every(p=>p.length>=75));
+  assert(section.formulas.length===2);
+  assert(section.proof.length>=110 && section.worked.length>=90 && section.limitation.length>=70);
+  for(const f of section.formulas)katex.renderToString(f.tex,{throwOnError:true,strict:"error",displayMode:true});
+  reviewed++;
+ }
+}
+assert.equal(reviewed,6,"all new tail-risk proofs must remain complete");
+near("Pareto stop-loss expectation",2**(-1)/(2-1),.5);
+near("Pareto 0.001 survival quantile",.001**(-1/2),Math.sqrt(1000));
+near("Student t3 unit-variance upper-half ES",2/Math.PI,.6366197723675814);
+near("common student scale squared covariance",36/(4*2)-(6/4)**2,2.25);
+near("Hill exact variance",1/(25*4**2),.0025);
+near("Pareto alpha MLE mean",25*4/24,4.166666666666667);
+near("unbiased Pareto alpha variance",16/23,.6956521739130435);
 console.log("V101 PASS",newest.length,"new lessons;",all.length,"total;",mathCount,
  "strict KaTeX;",deepCount,"deep proof chapters;",deepChars,"deep prose chars;",
  checks,"independent computations;",linkCount,"internal references; time series and risk each 36/36.");
