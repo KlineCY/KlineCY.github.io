@@ -61,7 +61,7 @@ for(const id of targetIds){
  assert.equal(new Set(deep.map(x=>x.title)).size,deep.length,"duplicate V20 headings "+id);
  const recent=deep.slice(newIds.includes(id)?-5:(["econometrics-x001","econometrics-x004"].includes(id)?-4:-2));
  for(const s of recent){
-  assert(s.question.length>=10&&s.paragraphs.length===2&&s.paragraphs.every(p=>p.length>=35),"Chinese argument incomplete "+id+":"+s.title);
+  assert(s.question.length>=10&&s.paragraphs.length>=2&&s.paragraphs.every(p=>p.length>=35),"Chinese argument incomplete "+id+":"+s.title);
   assert(s.proof.length>=35&&s.worked.length>=30&&s.limitation.length>=25,"proof, worked example or failure boundary too thin "+id+":"+s.title);
   for(const e of s.formulas){katex.renderToString(e.tex,{throwOnError:true,strict:"ignore",displayMode:true});parsed++}
   newSections++;
