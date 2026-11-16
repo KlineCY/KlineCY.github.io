@@ -18,8 +18,9 @@ for(const doc of docs)assert(doc.schema===1&&doc.chapters.length>=1);
 for(const l of rows){
  assert(!beforeIds.has(l.id)&&!core.catalog.items.some(x=>x.id===l.id),"duplicate new course "+l.id);
  assert(l.goal.length>=80&&l.protocol.length>=4&&l.sources.length>=2);
- assert.equal(l.sections.length,5);
- assert.equal(new Set(l.sections.map(s=>s.title)).size,5);
+ const expectedCount=["m12-c11-p01","m23-c11-p01"].includes(l.id)?7:5;
+ assert.equal(l.sections.length,expectedCount,"all original and extended sections "+l.id);
+ assert.equal(new Set(l.sections.map(s=>s.title)).size,l.sections.length);
  for(const s of l.sections){
   assert(s.question.length>=13&&s.paragraphs.length===2&&s.paragraphs.every(p=>p.length>=70),"insufficient detailed Chinese explanation "+l.id+" "+s.title);
   assert(s.worked.length>=65&&s.boundary.length>=55,"worked calculation or validity boundary incomplete "+l.id+" "+s.title);
@@ -49,9 +50,16 @@ assert.equal(new Set(core.catalog.items.map(x=>x.id)).size,780,"duplicate course
 for(const id of expected){
  const art=core.domains[id.slice(0,3)][id];
  assert(art?.html.includes("atlas-concept-toc"),"course reader cannot display "+id);
- assert.equal((art.html.match(/class="atlas-concept-unit"/g)||[]).length,5,"lost an internal subsection "+id);
+ assert.equal((art.html.match(/class="atlas-concept-unit"/g)||[]).length,rows.find(l=>l.id===id).sections.length,"lost an internal subsection "+id);
  assert(art.html.includes("tabindex=\"0\""),"long formula container not keyboard scrollable "+id);
  assert(core.catalog.items.some(x=>x.id===id),"not in navigation "+id);
+}
+for(const l of rows.filter(l=>["m12-c11-p01","m23-c11-p01"].includes(l.id))){
+ for(const s of l.sections.slice(5)){
+  assert(s.paragraphs.length===2&&s.paragraphs.every(p=>p.length>=75),"new multivariate theory incomplete "+l.id);
+  assert(s.equations.length===2&&s.worked.length>=100&&s.boundary.length>=95,"new multivariate evidence incomplete "+l.id);
+  for(const e of s.equations)katex.renderToString(e.tex,{throwOnError:true,strict:"error"});
+ }
 }
 const near=(a,b,t=1e-8)=>assert(Math.abs(a-b)<t,"numerical invariant incorrect "+a+" vs "+b);
 near(.05**2,.0025);
@@ -64,6 +72,11 @@ near(Math.hypot(1-0,3-2),Math.sqrt(2));
 near(37*36/2,666);
 near(.5*(1+.8*(1-.5)*(1-2*.25)),.6);
 near(15/50,.3);
+near(2/3-8/(2*3*2),0);
+near(2/3-8/(2*3**2),2/9);
+near(.05*.05,.0025);
+near(.05/.0025,20);
+near(.3+.7,1);
 near(Math.sqrt(.5)*1.96,1.385929291125633);
 const html=fs.readFileSync(new URL("index.html",root),"utf8"),css=fs.readFileSync(new URL("atlas.css",root),"utf8");
 for(const id of expected)assert(html.includes("#lesson/"+id),"sixth learning route missing "+id);

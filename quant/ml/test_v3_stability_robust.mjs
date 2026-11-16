@@ -21,8 +21,9 @@ let sections=0,formula=0,sources=0;
 for(const l of rows){
  assert(!ids.has(l.id)&&!priorIds.has(l.id),"duplicate stable course ID "+l.id);
  assert(l.title.length>=12&&l.goal.length>=70&&l.protocol.length>=4&&l.sources.length>=2,"insufficient overview "+l.id);
- assert.equal(l.sections.length,5,"deep course requires five connected sections "+l.id);
- assert.equal(new Set(l.sections.map(s=>s.title)).size,5,"duplicate section headings "+l.id);
+ const expectedSections=["m12-c08-p01","m23-c08-p01","m23-c08-p02"].includes(l.id)?7:5;
+ assert.equal(l.sections.length,expectedSections,"complete original and expanded course sections "+l.id);
+ assert.equal(new Set(l.sections.map(s=>s.title)).size,l.sections.length,"duplicate section headings "+l.id);
  for(const s of l.sections){
   assert(s.title.length>=7&&s.question.length>=12&&s.paragraphs.length===2&&s.paragraphs.every(p=>p.length>=65),"short theory paragraph "+l.id+" / "+s.title);
   assert(s.worked.length>=55&&s.boundary.length>=45,"worked example or failure boundary missing "+l.id+" / "+s.title);
@@ -52,8 +53,15 @@ assert.equal(new Set(core.catalog.items.map(x=>x.id)).size,764);
 for(const id of expected){
  const art=core.domains[id.slice(0,3)][id];
  assert(art?.html.includes("atlas-concept-toc"),"not visible to reader "+id);
- assert.equal((art.html.match(/class="atlas-concept-unit"/g)||[]).length,5);
+ assert.equal((art.html.match(/class="atlas-concept-unit"/g)||[]).length,rows.find(l=>l.id===id).sections.length);
  assert(core.catalog.items.some(x=>x.id===id),"missing index entry "+id);
+}
+for(const l of rows.filter(l=>["m12-c08-p01","m23-c08-p01","m23-c08-p02"].includes(l.id))){
+ for(const s of l.sections.slice(5)){
+  assert(s.paragraphs.length===2&&s.paragraphs.every(p=>p.length>=75),"new evidence needs complete explanations "+l.id);
+  assert(s.equations.length===2&&s.worked.length>=100&&s.boundary.length>=95,"new evidence missing formulas, calculation or boundaries "+l.id);
+  for(const e of s.equations)katex.renderToString(e.tex,{throwOnError:true,strict:"error"});
+ }
 }
 const close=(a,b,t=1e-9)=>assert(Math.abs(a-b)<t,"numeric check "+a+" vs "+b);
 close(2*4/100,.08);
@@ -66,6 +74,13 @@ close(.95+.05,1);
 close(5-.5,4.5);
 close(((0-1)**2+(1-1)**2+(2-1)**2)/2,1);
 close(1+2*.2,1.4);
+close(.9+(.1/200),.9005);
+close(.02-.16/10,.004);
+close(.02-(-.12)/10,.032);
+close(.6*.01+.2*.03,.012);
+close(Math.sqrt(.006**2+.006**2),.008485281374238571);
+close(1.5/.9,1.6666666666666667);
+close((3-5.4)/3,-.8);
 const html=fs.readFileSync(new URL("./index.html",dir),"utf8"),css=fs.readFileSync(new URL("./atlas.css",dir),"utf8");
 for(const id of expected)assert(html.includes("#lesson/"+id),"missing advanced learning route "+id);
 assert(html.includes('atlas.js?v=20261109'));
