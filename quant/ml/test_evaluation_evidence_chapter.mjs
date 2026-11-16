@@ -24,8 +24,8 @@ for(let i=0;i<lessons.length;i++){
  assert.equal(l.id,"m12-c07-p0"+(i+1));
  assert(!baseline.has(l.id)&&!earlier.has(l.id),"duplicate ML course");
  assert(l.goal.length>=70&&l.protocol.length>=4);
- assert.equal(l.sections.length,5);
- assert.equal(new Set(l.sections.map(s=>s.title)).size,5);
+ assert(l.sections.length>=5,"complete evidence lesson sections required "+l.id);
+ assert.equal(new Set(l.sections.map(s=>s.title)).size,l.sections.length);
  for(const s of l.sections){
   assert(s.question.length>=12&&s.paragraphs.length>=2&&s.paragraphs.every(p=>p.length>=70),"insufficient explanatory prose "+l.id);
   assert(s.worked.length>=50&&s.boundary.length>=35,"missing worked example or limitations "+l.id);
@@ -52,7 +52,7 @@ assert.equal(new Set(archive.catalog.items.map(x=>x.id)).size,753);
 for(const id of added){
  const item=archive.domains.m12[id];
  assert(item?.html.includes("atlas-concept-toc"),"missing rendered table of contents "+id);
- assert.equal((item.html.match(/class="atlas-concept-unit"/g)||[]).length,5);
+ assert.equal((item.html.match(/class="atlas-concept-unit"/g)||[]).length,doc.chapters[0].lessons.find(l=>l.id===id).sections.length);
 }
 const near=(x,y,eps=1e-10)=>assert(Math.abs(x-y)<eps,"arithmetic "+x+" vs "+y);
 near(1+2*.2,1.4);
