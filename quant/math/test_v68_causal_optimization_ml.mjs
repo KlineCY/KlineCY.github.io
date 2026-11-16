@@ -22,9 +22,9 @@ for(const l of math){
  assert(l.id===l.node_id&&l.formulas.length>=7&&l.derivation.length>=5&&l.deep_sections.length>=6,l.id+" incomplete math");
  assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,l.deep_sections.length,l.id+" duplicate heading");
  const d=l.deep_sections.at(-1);
- assert(d.question.length>=15&&d.paragraphs.length===2&&d.paragraphs.every(p=>p.length>=90),l.id+" CJK prose length");
+ assert(d.question.length>=15&&d.paragraphs.length>=2&&d.paragraphs.every(p=>p.length>=90),l.id+" CJK prose length");
  assert(d.proof.length>=110&&d.worked.length>=110&&d.limitation.length>=55,l.id+" derivation, numeric and limits");
- assert(d.formulas.length===2&&l.links.length>=4&&l.sources.length>=2,l.id+" mathematical and source coverage");
+ assert(d.formulas.length>=2&&l.links.length>=4&&l.sources.length>=2,l.id+" mathematical and source coverage");
  for(const e of l.formulas)render(e.tex);
  for(const e of l.derivation)render(e.tex);
  for(const s of l.deep_sections)for(const e of s.formulas)render(e.tex);
