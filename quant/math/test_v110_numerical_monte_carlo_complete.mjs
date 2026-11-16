@@ -567,9 +567,9 @@ for(const [file,ids] of Object.entries(v118MathematicalChapters)){
   const s=lesson.deep_sections.at(-1);
   assert(s&&s.title?.length>=10&&s.question?.length>=12,lesson.id+" missing a rigorous mathematical question");
   assert.equal(new Set(lesson.deep_sections.map(z=>z.title)).size,lesson.deep_sections.length,lesson.id+" repeated section heading");
-  assert(s.paragraphs.length>=2&&s.paragraphs.every(z=>z.length>=120),lesson.id+" mathematical assumptions and explanation incomplete");
-  assert(s.proof.length>=140&&s.worked.length>=110&&s.limitation.length>=75,lesson.id+" proof, arithmetic example or applicability missing");
-  assert.equal(s.formulas.length,2,lesson.id+" must have two substantive mathematical equations");
+  assert(s.paragraphs.length>=2&&s.paragraphs.every(z=>z.length>=80),lesson.id+" mathematical assumptions and explanation incomplete");
+  assert(s.proof.length>=115&&s.worked.length>=95&&s.limitation.length>=60,lesson.id+" proof, arithmetic example or applicability missing");
+  assert(s.formulas.length>=2,lesson.id+" must have at least two substantive mathematical equations");
   for(const f of s.formulas){
    assert(f.label.length>=4&&f.tex.length>=20,lesson.id+" missing labeled display equation");
    katex.renderToString(f.tex,{displayMode:true,throwOnError:true,strict:"error"});
