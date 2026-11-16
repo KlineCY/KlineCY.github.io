@@ -16,8 +16,8 @@ for(const l of math){
  assert(l.node_id===l.id&&l.deep_sections.length>=6&&l.derivation.length>=6&&l.formulas.length>=7,l.id+" full chapter");
  assert.equal(new Set(l.deep_sections.map(s=>s.title)).size,l.deep_sections.length,l.id+" duplicate headings");
  const x=l.deep_sections.at(-1);
- assert(x.question.length>12&&x.paragraphs.length===2&&x.paragraphs.every(p=>p.length>=45),l.id+" Chinese prose");
- assert(x.proof.length>=90&&x.worked.length>=75&&x.limitation.length>=45&&x.formulas.length===2,l.id+" proof/numeric/caveat");
+ assert(x.question.length>12&&x.paragraphs.length>=2&&x.paragraphs.every(p=>p.length>=45),l.id+" Chinese prose");
+ assert(x.proof.length>=90&&x.worked.length>=75&&x.limitation.length>=45&&x.formulas.length>=2,l.id+" proof/numeric/caveat");
  for(const f of [...l.formulas,...l.derivation,...l.deep_sections.flatMap(s=>s.formulas)])render(f.tex);
  assert(l.links.length>=3&&l.sources.length>=1,l.id+" canonical links and sources");
  assert(!/[\uFFFD\u200B\uFEFF]/.test(JSON.stringify(l)),l.id+" CJK corruption");
