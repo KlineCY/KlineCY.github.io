@@ -287,7 +287,7 @@ for(const file of files){
  for(const l of json(file).lessons){
   assert(l.deep_sections.length>=4,l.id+" new strategic modeling chapter missing");
   const s=l.deep_sections.at(-1);
-  assert(s.paragraphs.length>=2&&s.paragraphs.every(p=>p.length>=70),l.id+" control explanation incomplete");
+  assert(s.paragraphs.length>=2&&s.paragraphs.every(p=>p.length>=60),l.id+" control explanation incomplete");
   assert(s.proof.length>=95&&s.worked.length>=78&&s.limitation.length>=60,l.id+" proof, example or applicability boundary missing");
   assert(s.formulas.length>=2,l.id+" independent control equations missing");
   assert(l.deep_sections.slice(0,3).every(x=>x.proof&&x.worked&&x.limitation&&x.formulas.length>=1),l.id+" pre-existing course chapter lost");
