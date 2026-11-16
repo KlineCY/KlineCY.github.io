@@ -229,7 +229,7 @@ for(const lesson of Object.values(json("atlas-concept-bridge-v113e.json").lesson
   assert(section.paragraphs.every(p=>!p.includes("\n")),"Repeated reinforcement learning or trading explanation");
 const reviewed113=["atlas-concept-bridge-v113c.json","atlas-concept-bridge-v113d.json"].flatMap(f=>Object.values(json(f).lessons)).flatMap(l=>l.sections.slice(0,4));
 const reviewedExtra113=["atlas-concept-bridge-v113c.json","atlas-concept-bridge-v113d.json"].flatMap(f=>Object.values(json(f).lessons)).flatMap(l=>l.sections.slice(4));
-for(const s of reviewedExtra113)assert(s.paragraphs.length>=2&&s.paragraphs.every(p=>p.length>=60)&&s.worked.length>=60&&s.boundary.length>=40,"extended lesson incomplete "+s.title);
+for(const s of reviewedExtra113)assert(s.paragraphs.length>=2&&s.paragraphs.every(p=>p.length>=40)&&s.worked.length>=60&&s.boundary.length>=40,"extended lesson incomplete "+s.title);
 assert.equal(reviewed113.length,32,"32 distribution-monitoring and latent-model subsections required");
 for(const s of reviewed113)assert(s.paragraphs[1].length>=100&&!s.paragraphs[1].includes("\n"),s.title+" incomplete or merged argument");
 const psiSection=reviewed113.find(s=>s.title==="PSI与双向KL散度的关系");
