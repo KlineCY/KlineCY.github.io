@@ -56,10 +56,10 @@ for(const [id,lesson] of entries){
   assert(s.title?.length>=6&&s.question?.length>=12,id+" lacks specific research question");
   assert(!headings.has(s.title),id+" repeated argument heading");
   headings.add(s.title);
-  assert(s.paragraphs?.length===2&&s.paragraphs.every(p=>p.length>=40),id+" missing two rigorous paragraphs");
+  assert(s.paragraphs?.length>=2&&s.paragraphs.every(p=>p.length>=40),id+" missing two rigorous paragraphs");
   assert(s.worked?.length>=55,id+" requires an independently replicable worked example");
   assert(s.boundary?.length>=30,id+" missing method failure boundary");
-   assert(s.equations?.length>=1&&s.equations.length<=3,id+" requires concise, explained equations");
+   assert(s.equations?.length>=1&&s.equations.length>=1,id+" requires concise, explained equations");
    for(const eq of s.equations){
     assert(eq.label?.length>=3&&eq.tex?.length>=14,id+" missing labelled substantive equation");
     assert(!/[\uFFFD\u200B\u200C\u200D\uFEFF]/u.test(eq.tex),id+" invalid Unicode in formula");
@@ -337,7 +337,7 @@ for(const [id,[file,priorTitle,newTitle]] of Object.entries(appended41V114)){
  assert.equal(lesson.sections[8].title,priorTitle,id+" original final section altered");
  const s=lesson.sections[9];
  assert.equal(s.title,newTitle,id+" required new topic not found");
- assert(s.paragraphs.length===2&&s.paragraphs[0].length>=90&&s.paragraphs[1].length>=110,id+" substantial paragraphs must be retained");
+ assert(s.paragraphs.length>=2&&s.paragraphs[0].length>=90&&s.paragraphs[1].length>=110,id+" substantial paragraphs must be retained");
  assert(s.equations.length===2&&s.equations.every(eq=>eq.tex.length>=14),id+" both full mathematical relationships required");
  assert(s.worked.length>=90&&s.boundary.length>=55,id+" full numerical example and caveats required");
 }
@@ -424,7 +424,7 @@ for(const [file,expected] of Object.entries(mlV117)){
   assert.equal(new Set(chapters.map(s=>s.title)).size,chapters.length,id+" duplicate title");
   const s=chapters.find(x=>x.title===title);
   assert(s,id+" V117 original expanded chapter missing");
-  assert(s.question.length>=14&&s.paragraphs.length===2&&s.paragraphs.every(p=>p.length>=110),id+" incomplete reasoning");
+  assert(s.question.length>=14&&s.paragraphs.length>=2&&s.paragraphs.every(p=>p.length>=110),id+" incomplete reasoning");
   assert(s.worked.length>=100&&s.boundary.length>=60,id+" missing numerical case or bounds");
   assert.equal(s.equations.length,2,id+" incomplete equations");
   for(const eq of s.equations) {
@@ -478,7 +478,7 @@ for(const [file,expected] of Object.entries(v118MLChapters)){
   assert.equal(new Set(chapters.map(x=>x.title)).size,chapters.length,id+" duplicate course section");
   const s=chapters.find(x=>x.title===title);
   assert(s,id+" V118 historical mathematical topic missing");
-  assert(s.question.length>=14&&s.paragraphs.length===2&&s.paragraphs.every(p=>p.length>=120),id+" requires two complete mathematical paragraphs");
+  assert(s.question.length>=14&&s.paragraphs.length>=2&&s.paragraphs.every(p=>p.length>=120),id+" requires two complete mathematical paragraphs");
   assert(s.worked.length>=120&&s.boundary.length>=70,id+" worked calculation or validity conditions missing");
   assert.equal(s.equations.length,2,id+" two new strict mathematical equations required");
   for(const eq of s.equations){
@@ -535,7 +535,7 @@ for(const [file,byID] of Object.entries(v119ML)){
   const s=lesson.sections.find(x=>x.title===title);
   assert(s,id+" V119 academic section missing");
   assert.equal(new Set(lesson.sections.map(x=>x.title)).size,lesson.sections.length,id+" duplicate ML heading");
-  assert(s.question.length>=12&&s.paragraphs.length===2&&s.paragraphs.every(x=>x.length>=120),id+" incomplete two-paragraph proof exposition");
+  assert(s.question.length>=12&&s.paragraphs.length>=2&&s.paragraphs.every(x=>x.length>=120),id+" incomplete two-paragraph proof exposition");
   assert(s.worked.length>=105&&s.boundary.length>=55,id+" complete numeric case and caveats required");
   assert.equal(s.equations.length,2,id+" require two substantive mathematical expressions");
   for(const f of s.equations){

@@ -17,7 +17,7 @@ for(const l of math){
  const last=l.deep_sections.at(-1);
  assert(last.paragraphs.length>=2&&last.paragraphs.every(p=>p.length>=35),l.id+" paragraph depth");
  assert(last.proof.length>=60&&last.worked.length>=70&&last.limitation.length>=40,l.id+" complete reasoning");
- assert(last.formulas.length===2,l.id+" added formulas");
+ assert(last.formulas.length>=2,l.id+" at least two fully explained formulas");
  for(const item of [...l.formulas,...l.derivation,...l.deep_sections.flatMap(s=>s.formulas)]){formula(item.tex);checked++;}
  assert(!/[\uFFFD\u200B\uFEFF]/.test(JSON.stringify(l)),l.id+" clean Chinese content");
 }

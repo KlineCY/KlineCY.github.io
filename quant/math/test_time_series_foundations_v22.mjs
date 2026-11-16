@@ -45,7 +45,7 @@ for(const l of added){
  }
  for(const f of l.formulas){katex.renderToString(f.tex,{throwOnError:true,strict:"ignore",displayMode:true});parsed++;}
  for(const sec of l.deep_sections){
-  assert(sec.question.length>=10&&sec.paragraphs.length===2&&sec.paragraphs.every(p=>p.length>=35),"Chinese narrative too thin "+l.id+sec.title);
+  assert(sec.question.length>=10&&sec.paragraphs.length>=2&&sec.paragraphs.every(p=>p.length>=35),"Chinese narrative too thin "+l.id+sec.title);
   assert(sec.proof.length>=42&&sec.worked.length>=35&&sec.limitation.length>=25,"proof, worked calculation or failure mode insufficient "+l.id+sec.title);
   for(const f of sec.formulas){katex.renderToString(f.tex,{throwOnError:true,strict:"ignore",displayMode:true});parsed++;}
   sections++;

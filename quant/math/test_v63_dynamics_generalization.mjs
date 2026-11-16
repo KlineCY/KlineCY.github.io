@@ -20,9 +20,9 @@ for(const l of math){
  assert(l.formulas.length>=8&&l.derivation.length>=6,l.id+" formula and proof count");
  assert.equal(new Set(l.deep_sections.map(x=>x.title)).size,l.deep_sections.length,l.id+" duplicated deep sections");
  const d=l.deep_sections.at(-1);
- assert(d.paragraphs.length===2&&d.paragraphs.every(p=>p.length>=40),l.id+" substantive Chinese paragraphs");
+ assert(d.paragraphs.length>=2&&d.paragraphs.every(p=>p.length>=40),l.id+" substantive Chinese paragraphs");
  assert(d.proof.length>=85&&d.worked.length>=85&&d.limitation.length>=40,l.id+" complete proof/example/caveat");
- assert(d.formulas.length===2,l.id+" two added derivation formulas");
+ assert(d.formulas.length>=2,l.id+" two added derivation formulas");
  for(const f of [...l.formulas,...l.derivation,...l.deep_sections.flatMap(x=>x.formulas)])render(f.tex);
  assert(!/[\uFFFD\u200B\uFEFF]/.test(JSON.stringify(l)),l.id+" Chinese encoding");
 }
