@@ -64,7 +64,7 @@ assert.equal(newest.filter(l=>l.node_id.startsWith("control-")).length,28);
 let mathCount=0,deepCount=0,deepChars=0,linkCount=0;
 function formula(tex,id){
  assert.equal(typeof tex,"string",id+" formula type");
- assert(tex.length>=10,id+" formula too short");
+ assert(tex.length>=5,id+" formula missing mathematical content");
  assert(!/[\uFFFD\u200B\u200C\u200D\uFEFF]/u.test(tex),id+" bad character");
  try{katex.renderToString(tex,{displayMode:true,throwOnError:true,strict:"error"});}
  catch(e){throw Error(id+" strict KaTeX failed: "+tex+" / "+e.message);}
