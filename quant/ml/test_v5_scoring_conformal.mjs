@@ -150,6 +150,6 @@ for(const id of expected)assert(html.includes("#lesson/"+id),"fifth advanced lea
 assert(html.includes("atlas.js?v=20261109"));
 assert(html.includes("atlas.css?v=20261109"));
 assert(html.includes("第五条高级学习链"));
-assert(html.includes("776 篇系统课程")&&!html.includes("0 / 776 篇已标记"),"course count or retired learning progress UI incorrect");
+assert(html.includes("780 篇系统课程")&&!html.includes("0 / 776 篇已标记"),"published course count or retired learning progress UI incorrect");
 assert(css.includes("focus-visible")&&css.includes("@media print"),"responsive Chinese formula style missing");
 console.log("PASS: V5 six scoring/CQR/density/PIT/shift chapters, "+sections+" full lessons subchapters, "+formula+" KaTeX expressions, "+sources+" referenced sources; 776 unique reader courses, exact arithmetic and keyboard-accessible formulas.");
