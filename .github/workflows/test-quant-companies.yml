@@ -5,6 +5,7 @@ on:
     paths:
       - 'quant/companies.json'
       - 'quant/company-research.json'
+      - 'quant/company-methods.json'
       - 'quant/index.html'
       - 'quant/test_companies.mjs'
       - '.github/workflows/test-quant-companies.yml'
@@ -12,6 +13,7 @@ on:
     paths:
       - 'quant/companies.json'
       - 'quant/company-research.json'
+      - 'quant/company-methods.json'
       - 'quant/index.html'
       - 'quant/test_companies.mjs'
       - '.github/workflows/test-quant-companies.yml'
@@ -26,5 +28,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Install KaTeX for strict finance formula verification
+        run: npm install --no-save --no-package-lock --ignore-scripts katex@0.16.11
       - name: Check company records, research sources and reader logic
         run: node quant/test_companies.mjs
