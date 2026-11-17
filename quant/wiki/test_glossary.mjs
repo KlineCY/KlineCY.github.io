@@ -22,6 +22,12 @@ for(const t of terms){
   assert(t.reference_url.startsWith("https://"),t.id+": invalid source URL");
 }
 assert.equal(manifest.total_terms,terms.length,"Manifest count out of date");
+assert.equal(terms.length,172,"All 172 financial glossary entries must remain available");
+for(const t of terms){
+  assert(t.example.includes("数值例题："),"Missing independent quantitative example: "+t.id);
+  assert(t.example.length>=70&&t.definition.length>=35&&t.pitfall.length>=25,"Incomplete detailed definition, computation or falsification: "+t.id);
+}
+
 for(const c of categories){
   assert(c.term_ids.length>0,c.id+": empty category");
   for(const id of c.term_ids){
