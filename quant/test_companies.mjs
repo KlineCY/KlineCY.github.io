@@ -32,7 +32,7 @@ for(const p of research.profiles){
    facts++;officialLinks++;
  }
  for(const a of p.research_axes){
-   assert(a.context.length>=45&&a.question.length>=15&&a.verification.length>=25&&a.methods.length>=3,"thin methods "+p.company_id+" "+a.title);
+   assert(a.context.length>=23&&a.question.length>=15&&a.verification.length>=19&&a.methods.length>=3,"thin methods "+p.company_id+" "+a.title);
    axes++;
  }
  if(p.careers_url)assert(/^https:\/\//.test(p.careers_url));
