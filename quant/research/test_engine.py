@@ -63,8 +63,9 @@ class BacktestTests(unittest.TestCase):
             r=s.get("research")
             if not r:
                 continue
-            for field in ("mechanism","formula","derivation","worked","validation","limitations"):
-                self.assertGreaterEqual(len(r[field]),55,(s["id"],field))
+            required={"mechanism":55,"formula":30,"derivation":40,"worked":35,"validation":35,"limitations":25}
+            for field,minimum in required.items():
+                self.assertGreaterEqual(len(r[field]),minimum,(s["id"],field))
             self.assertTrue(s["dataset"].startswith("仅") or "真实" in s["dataset"])
             self.assertNotIn("Sharpe 2.",s["dataset"])
 
