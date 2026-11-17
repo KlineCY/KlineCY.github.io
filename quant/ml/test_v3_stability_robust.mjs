@@ -21,7 +21,7 @@ let sections=0,formula=0,sources=0;
 for(const l of rows){
  assert(!ids.has(l.id)&&!priorIds.has(l.id),"duplicate stable course ID "+l.id);
  assert(l.title.length>=12&&l.goal.length>=70&&l.protocol.length>=4&&l.sources.length>=2,"insufficient overview "+l.id);
- const expectedSections=["m12-c08-p01","m23-c08-p01","m23-c08-p02"].includes(l.id)?7:5;
+ const expectedSections=7;
  assert.equal(l.sections.length,expectedSections,"complete original and expanded course sections "+l.id);
  assert.equal(new Set(l.sections.map(s=>s.title)).size,l.sections.length,"duplicate section headings "+l.id);
  for(const s of l.sections){
@@ -63,6 +63,15 @@ for(const l of rows.filter(l=>["m12-c08-p01","m23-c08-p01","m23-c08-p02"].includ
   for(const e of s.equations)katex.renderToString(e.tex,{throwOnError:true,strict:"error"});
  }
 }
+for(const l of rows.filter(l=>["m04-c08-p01","m09-c08-p01","m09-c08-p02"].includes(l.id))){
+ const original=5;
+ assert.equal(l.sections.length,7,"two new rigorous sections per stability/kernel course "+l.id);
+ for(const section of l.sections.slice(original)){
+  assert(section.paragraphs.length===2&&section.paragraphs.every(p=>p.length>=95),"expanded stability reasoning too short "+l.id);
+  assert(section.equations.length===2&&section.worked.length>=85&&section.boundary.length>=60,"missing independent example or caveat "+l.id);
+  for(const eq of section.equations)katex.renderToString(eq.tex,{throwOnError:true,strict:"error",displayMode:true});
+ }
+}
 const close=(a,b,t=1e-9)=>assert(Math.abs(a-b)<t,"numeric check "+a+" vs "+b);
 close(2*4/100,.08);
 close(1/Math.sqrt(2),.7071067811865476);
@@ -73,6 +82,12 @@ close(.064-2*.01,.044);
 close(.95+.05,1);
 close(5-.5,4.5);
 close(((0-1)**2+(1-1)**2+(2-1)**2)/2,1);
+close(1+2*.2,1.4);
+close(2/(.5*1000),.004);
+close(Math.sqrt(2*.001/.5),Math.sqrt(.004));
+close(2/(.5*2000),.002);
+close(2*Math.exp(-4),.03663127777746836);
+close(2*Math.exp(-8),.0006709252558050237);
 close(1+2*.2,1.4);
 close(.9+(.1/200),.9005);
 close(.02-.16/10,.004);
