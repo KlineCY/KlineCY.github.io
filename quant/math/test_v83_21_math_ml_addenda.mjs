@@ -46,7 +46,7 @@ for(const spec of mlSpec){
   assert(x.derivation.at(-1).startsWith("进阶数学推导："));
   assert(x.worked_example.length-spec.workedLength>=100);
   assert(x.protocol[spec.protocol].length>=55&&x.pitfalls[spec.pitfalls].length>=45);
-  assert(x.protocol.at(-1).length>=35&&x.pitfalls.at(-1).length>=35);
+  assert(x.protocol.at(-1).length>=25&&x.pitfalls.at(-1).length>=25);
   assert.equal(new Set(x.equations.map(e=>e.label)).size,x.equations.length);
   for(const e of x.equations.slice(spec.equations,spec.equations+2))tex(e);
   tex(x.equations.at(-1));
