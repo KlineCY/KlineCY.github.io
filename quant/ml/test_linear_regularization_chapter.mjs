@@ -25,8 +25,8 @@ for(let i=0;i<chapter.lessons.length;i++){
  assert.equal(lesson.id,"m07-c06-p0"+(i+1),"course must follow proof dependency order");
  assert(!baseIds.has(lesson.id)&&!previousIds.has(lesson.id),"new course must not overwrite existing course");
  assert(lesson.goal.length>=45&&lesson.protocol.length>=4&&lesson.sources.length>=2,"missing long-form tutorial "+lesson.id);
- assert.equal(lesson.sections.length,5,"full tutorial must have five connected subchapters");
- assert.equal(new Set(lesson.sections.map(s=>s.title)).size,5,"repeated subchapter heading "+lesson.id);
+ assert.equal(lesson.sections.length,6,"five original and one complete mathematical continuation required");
+ assert.equal(new Set(lesson.sections.map(s=>s.title)).size,6,"repeated subchapter heading "+lesson.id);
  for(const section of lesson.sections){
   assert(section.title.length>=5&&section.question.length>=10,"subchapter must have explicit research question");
   assert(section.paragraphs.length>=2&&section.paragraphs.every(x=>x.length>=48),"thin reasoning chain "+lesson.id);
@@ -73,7 +73,7 @@ assert.equal(new Set(catalog.catalog.items.map(x=>x.id)).size,750);
 for(const id of regularization){
  const article=catalog.domains.m07[id];
  assert(article?.html.includes("atlas-concept-toc"),"navigation missing "+id);
- assert.equal((article.html.match(/class="atlas-concept-unit"/g)||[]).length,5,"five full subchapters must render "+id);
+ assert.equal((article.html.match(/class="atlas-concept-unit"/g)||[]).length,6,"every expanded full subchapter must render "+id);
  assert(catalog.catalog.items.find(x=>x.id===id).chapter===chapter.chapter);
 }
 const mathHome=fs.readFileSync(new URL("../math/index.html",root),"utf8");
@@ -84,6 +84,20 @@ for(const id of ["linear-n0075","linear-n0078","linear-n0083","linear-n0086","re
  assert(mathHome.includes("?topic="+id),"mathematical lesson navigation missing "+id);
 }
 assert(mathHome.includes("../ml/#lesson/m07-c06-p05"),"reverse path to ETF research missing");
+const expandedLinearTopics={
+ "m07-c06-p01":"不惩罚截距的Ridge中心化等价与预测均值恢复",
+ "m07-c06-p02":"正规方程条件数平方放大与QR求解的数值意义",
+ "m07-c06-p03":"Ridge有效自由度的谱递减和惩罚强度导数",
+ "m07-c06-p04":"LASSO的对偶可行证书与原始—对偶间隙",
+ "m07-c06-p05":"ETF再平衡前的权重自然漂移与正确双边换手"
+};
+for(const [id,title] of Object.entries(expandedLinearTopics)){
+ const l=byId.get(id),sec=l?.sections.find(x=>x.title===title);
+ assert(l&&l.sections.length===6&&sec,"missing linear research proof "+id);
+ assert(sec.paragraphs.length===2&&sec.paragraphs.every(p=>p.length>=90),"linear regression numeric context underexplained "+id);
+ assert(sec.equations.length===2&&sec.worked.length>=110&&sec.boundary.length>=85,"missing linear derivation, case or limitations "+id);
+ for(const equation of sec.equations)katex.renderToString(equation.tex,{throwOnError:true,strict:"error",displayMode:true});
+}
 function near(a,b,delta=1e-11){assert(Math.abs(a-b)<=delta,"independent arithmetic check failed "+a+" vs "+b);}
 near(1/36+1/9+1/36,1/6);
 near(3/0.1,30);
@@ -96,4 +110,14 @@ near(Math.max(1-1,0),0);
 near((3-.8)/(1+.5),2.2/1.5);
 near((-1+.8)/(1+.5),-.2/1.5);
 near(.6*.02+(-.2)*(-.01)-.001,.013);
+near(4/(2+2),1);
+near(4-1*2,2);
+near((1/.01)**2,10000);
+near((1+.01)/(.0001+.01),100);
+near(9/(9+1)+1/(1+1),1.4);
+near(9/(9+3)+1/(1+3),1);
+near(.5*(1**2+1**2)+2,3);
+near((3+1)-.5*(1+1),3);
+near(.6*1.1/.104e1,.6346153846153846);
+near(.5*(Math.abs(.6-.66/1.04)+Math.abs(.4-.38/1.04)),.034615384615384604);
 console.log("PASS: V2 linear-model chapter; "+regularization.size+" lessons, "+sections+" substantial subchapters, "+formulas+" valid KaTeX formulas, "+sourceCount+" source records, linked math graph and independent arithmetic.");

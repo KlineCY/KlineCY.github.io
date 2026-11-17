@@ -328,6 +328,26 @@ near("Markov survival 5",.95**5,.7737809375);
 near("rolling fifth day correlation",4/5,.8);
 near("independent multiple tests family error",1-.95**20,.6415140775914581);
 near("Bonferroni threshold",.05/20,.0025);
+const newCoherentRisks={
+ "riskmath-n0578":"熵风险的确定现金平移与随机现金流边界",
+ "riskmath-n0579":"ES尾部概率包络对偶：尾部权重为何不能超过原概率的倍数",
+ "riskmath-n0580":"正齐次风险的Euler贡献与总风险对账",
+ "riskmath-n0581":"谱风险度量的分位权重与相干性适用条件"
+};
+for(const [id,title] of Object.entries(newCoherentRisks)){
+ const lesson=newest.find(l=>l.id===id),section=lesson?.deep_sections.find(s=>s.title===title);
+ assert(section,"risk theory continuation absent "+title);
+ assert(section.paragraphs.length===2&&section.paragraphs.every(p=>p.length>=90),"risk cash/ES argument underexplained "+id);
+ assert(section.proof.length>=140&&section.worked.length>=110&&section.limitation.length>=80,"risk capital proof and assumptions not complete "+id);
+ assert(section.formulas.length===2,"risk proof must have two equations "+id);
+ for(const f of section.formulas)formula(f.tex,id+" appended");
+}
+near("entropic risk Bernoulli collateral",Math.log((Math.exp(1)+Math.exp(-1))/2),.4337808304830271);
+near("ES upper envelope tail",.5*10+.5*1,5.5);
+near("Euler variance sum",1+.04-.32,.72);
+near("Euler risk contributions",.84/Math.sqrt(.72)-.12/Math.sqrt(.72),Math.sqrt(.72));
+near("spectral risk normalization",2*(1/2),1);
+near("spectral two-point loss",10*(1-.5**2),7.5);
 console.log("V101 PASS",newest.length,"new lessons;",all.length,"total;",mathCount,
  "strict KaTeX;",deepCount,"deep proof chapters;",deepChars,"deep prose chars;",
  checks,"independent computations;",linkCount,"internal references; time series and risk each 36/36.");

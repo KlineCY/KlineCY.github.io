@@ -190,6 +190,30 @@ near("Weak convergence basis inner product",.5**9,1/512);
 near("Novikov constant theta sufficient",Math.exp(.5*.25**2),1.0317434074991028,1e-7);
 near("Two-state risk neutral rise weight",(1.05-.9)/(1.2-.9),.5);
 near("Two-state call replication price",(.5*20)/1.05,9.523809523809524);
+const newRiskNeutralMeasure={
+ "measure-n0149":["条件变换测度的Bayes公式与时点一致性","密度鞅在有界停止时刻的可选抽样与路径事件"],
+ "measure-n0150":["状态价格密度与Arrow证券：风险中性概率的无套利存在条件","三状态不完全市场中的非唯一鞅测度与期权价格区间"]
+};
+for(const [id,titles] of Object.entries(newRiskNeutralMeasure)){
+ const l=added.find(x=>x.id===id);
+ assert(l&&l.deep_sections.length>=11,"measure theoretic full course not loaded "+id);
+ for(const title of titles){
+  const sec=l.deep_sections.find(x=>x.title===title);
+  assert(sec,"independent change-of-measure chapter absent "+title);
+  assert(sec.paragraphs.length===2&&sec.paragraphs.every(x=>x.length>=95),"insufficient measure proof context "+title);
+  assert(sec.proof.length>=135&&sec.worked.length>=95&&sec.limitation.length>=75&&sec.formulas.length===2,"incomplete conditional density or market example "+title);
+  for(const f of sec.formulas)checkTex(f.tex,id+" risk neutral");
+ }
+}
+near("terminal likelihood average",.5*1.5+.5*.5,1);
+near("Bayes event Q probability",.5*1.5,.75);
+near("stopped event probability",.2*1.5,.3);
+near("stopped complementary density",(.8*.875),.7);
+near("arrow no-arbitrage up probability",(105-90)/(120-90),.5);
+near("arrow claim replication present value",.5*20/1.05,9.523809523809524);
+near("three-state martingale condition",.1*80+.8*100+.1*120,100);
+near("three-state option price a.1",20*.1/1.05,1.9047619047619047);
+near("three-state option price a.4",20*.4/1.05,7.619047619047619);
 console.log("V108 PASS: "+combined.length+"/"+nodes.length+" authored, foundation 30/30, measure 30/30, "+
   depth+" proof sections, "+formulas.length+" strict KaTeX expressions, "+prose+" Chinese proof characters, "+
   links.length+" verified links, "+checks+" independent numerical checks, full CI/typography guards");
