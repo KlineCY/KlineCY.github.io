@@ -5554,6 +5554,292 @@
         "量化研究"
       ],
       "caveat": "机构业务定位来自第三方汇编，不把履历或业绩宣传作为实时监管证明。"
+    },
+    {
+      "company_id": "global-quant-011",
+      "orientation": "香港注册的亚太股票量化投资管理人，官网披露市场中性股票多空研究定位",
+      "facts": [
+        {
+          "statement": "Zentific 官网将机构描述为香港资产管理人，并明确其量化、市场中性、股票多空策略主要面向亚太市场。",
+          "source_title": "Zentific · Official company overview",
+          "source_url": "https://zentific-im.com/"
+        },
+        {
+          "statement": "与官网名称及香港地址相符的法律实体 LEI 记录显示 Zentific Investment Management Limited 为 ACTIVE；该记录不代表核验基金业绩或实时规模。",
+          "source_title": "Bloomberg LEI · Zentific legal entity",
+          "source_url": "https://lei.bloomberg.com/leis/view/549300TB9DJIX31MPY88"
+        }
+      ],
+      "research_axes": [
+        {
+          "title": "亚太股票多空与多维暴露中性",
+          "context": "从收益预测信号构造多空组合时应同时约束净敞口、市场Beta、行业、国家、币种和风格因子；名义市场中性不等于所有风险中性。",
+          "methods": [
+            "横截面回归",
+            "因子暴露矩阵",
+            "约束组合优化"
+          ],
+          "question": "净敞口为零的组合为何仍可能在行业轮动时系统性亏损？",
+          "verification": "基于亚太股票和公开风险因子建立多空模拟，逐日报告Beta、国家/行业、融资成本与持仓集中度，并对比仅美元净敞口中性的组合。"
+        },
+        {
+          "title": "多市场交易日历与可交易信息",
+          "context": "亚太市场跨交易所存在节假日、收盘时点、停牌与股票可借性差异，晚收盘市场价格不可用于较早市场已执行订单的决策。",
+          "methods": [
+            "双时间戳数据",
+            "交易日历连接",
+            "PIT数据校验"
+          ],
+          "question": "如何防止同一自然日不同市场收盘价的时点错配造成隐含前视？",
+          "verification": "构建交易所当地时区的行情可知时间和执行时间表，禁止在各市场订单决策前读取后来披露的价格，另列无法借券股票的执行拒单比例。"
+        },
+        {
+          "title": "股票市场中性策略的容量与成本",
+          "context": "统计信号的预测效果必须扣除冲击成本、借券费、融券召回与再平衡费用；市场中性组合在压力时仍有流动性相关损失。",
+          "methods": [
+            "冲击成本函数",
+            "借券费敏感性",
+            "风险预算"
+          ],
+          "question": "从小规模回测扩容后，哪类股票首先让净Alpha无法覆盖成本？",
+          "verification": "按股票日成交额与预期成交参与率约束仓位，做成本/容量曲线，报告退市、停牌和样本外风险而不虚构机构真实成交数据。"
+        }
+      ],
+      "roles": [
+        "股票量化研究",
+        "风险建模",
+        "交易执行"
+      ],
+      "caveat": "官网业务类型与法律实体状态可核验，但具体因子、信号、组合持仓与收益为非公开信息；本站三个研究方向是独立教学研究设计，不代表该公司内部使用相应方法。"
+    },
+    {
+      "company_id": "global-quant-020",
+      "orientation": "美国系统化交易机构关联品牌与注册投资顾问法律实体；需要区分 Teza 官网品牌和 Teza Capital Management LLC",
+      "facts": [
+        {
+          "statement": "Teza Technologies LLC 官网介绍其使用数学模型与技术研究系统化交易，并展示量化研究相关职位；官网主体名称是 Teza Technologies LLC。",
+          "source_title": "Teza · Official site",
+          "source_url": "https://www.teza.com/"
+        },
+        {
+          "statement": "美国 SEC 投资顾问登记系统列示 TEZA CAPITAL MANAGEMENT LLC，CRD 173124，登记获准日期为 2014 年 12 月 5 日；官网品牌与登记法人不可未经核实直接视为同一主体。",
+          "source_title": "SEC IAPD · Teza Capital Management LLC",
+          "source_url": "https://adviserinfo.sec.gov/firm/summary/173124"
+        }
+      ],
+      "research_axes": [
+        {
+          "title": "系统化信号与执行延迟的净价值",
+          "context": "任何预测信号在真实可成交时间可能衰减；只有同时考虑时间戳、可达盘口、手续费和滑点，才能判断统计优势是否有交易意义。",
+          "methods": [
+            "事件时间回测",
+            "成本敏感预测",
+            "延迟压力测试"
+          ],
+          "question": "对同一个短周期信号，延迟100毫秒和延迟1秒造成的净收益变化如何衡量？",
+          "verification": "在公开数据中设置可复现的观测和执行延迟网格，所有撮合价格均取决策后的可用报价，并披露无逐笔数据时的模型局限。"
+        },
+        {
+          "title": "多持有期策略的相关性与风险聚合",
+          "context": "不同交易频率的策略可能在风险事件中持有相似隐性因子，相关性及尾部依赖随市场状态变化；不能仅凭单策略Sharpe分配资本。",
+          "methods": [
+            "动态协方差",
+            "状态依赖尾部风险",
+            "风险预算"
+          ],
+          "question": "短周期与中周期策略在极端行情中是否会同时触发流动性风险？",
+          "verification": "构造相同交易日历上的收益样本，用滚动协方差、尾部共跌频率和压力流动性敞口比较静态与动态风险聚合。"
+        },
+        {
+          "title": "投资顾问实体、产品与集团品牌消歧",
+          "context": "网站品牌、投资顾问登记主体、基金产品和自营交易实体可能不一致；统计AUM、监管资格与招聘部门需分别指向适用法律主体。",
+          "methods": [
+            "法律主体消歧",
+            "SEC Form ADV 口径",
+            "披露时间轴"
+          ],
+          "question": "为什么一份基金管理规模资料不能自动归属于同品牌的技术公司？",
+          "verification": "对公开登记名称、业务主体、申报日期、基金产品及品牌主页逐项建映射，未找到同一实体证据时保持独立记录。"
+        }
+      ],
+      "roles": [
+        "量化研究",
+        "系统化交易",
+        "研究工程"
+      ],
+      "careers_url": "https://www.teza.com/careers/",
+      "caveat": "官网及 SEC 登记分别核验品牌业务与注册顾问；尚未取得直接证明两者所有权关系及具体研究分工的完整文件。研究问题不等于公司披露策略；原第三方AUM仍只作历史估计。"
+    },
+    {
+      "company_id": "global-quant-004",
+      "orientation": "以结构化投资与跨领域系统化分析为特色的美国投资管理人；应同时研究公开监管诉讼背景",
+      "facts": [
+        {
+          "statement": "SBB Research Group 官网公开介绍其于2010年成立，提供定制化投资，投资研究采用系统化、跨学科视角。",
+          "source_title": "SBB Research Group · About",
+          "source_url": "https://www.sbbrg.com/about"
+        },
+        {
+          "statement": "美国 SEC 2019年公告表示已对 SBB Research Group LLC 及两名高管提起涉及基金估值的诉讼指控；诉讼指控本身不能写成已经生效的责任认定。",
+          "source_title": "SEC Litigation Release No. 24680",
+          "source_url": "https://www.sec.gov/enforcement-litigation/litigation-releases/lr-24680"
+        }
+      ],
+      "research_axes": [
+        {
+          "title": "结构化票据的估值输入及不确定性",
+          "context": "结构性产品估值依赖标的波动率、相关性、信用、期限、赎回权和贴现曲线；非活跃市场模型价格与可成交报价可能显著不同。",
+          "methods": [
+            "风险中性估值",
+            "模型风险",
+            "独立价格验证"
+          ],
+          "question": "在缺少市场报价时，如何判断结构化产品估值是否过度依赖不可验证参数？",
+          "verification": "以可复现的简化障碍/区间票据示例给出参数敏感性、双模型交叉估值和实际报价差；不映射到该公司真实资产明细。"
+        },
+        {
+          "title": "基金估值治理与利益冲突",
+          "context": "基金估值不只是数学建模，还涉及估值职责隔离、独立输入、复核与重大偏差上报；监管指控只能按原文件表述并跟踪后续裁判。",
+          "methods": [
+            "估值控制矩阵",
+            "审计线索",
+            "模型验证"
+          ],
+          "question": "如何把管理人自估价与第三方独立估值的差异纳入治理流程？",
+          "verification": "设计估值政策、阈值升级、数据留痕、估值委员会和第三方核查的完整流程，并区分指控、判决和和解三个法律状态。"
+        },
+        {
+          "title": "非线性投资产品压力情景",
+          "context": "票据、期权和信用敞口存在路径依赖、跳跃及流动性折价，线性股票因子模型难以完整刻画极端市场风险。",
+          "methods": [
+            "路径模拟",
+            "信用利差压力",
+            "流动性折价"
+          ],
+          "question": "隐含波动率跳升同时伴随买卖价差扩大时，非线性组合的损益如何变化？",
+          "verification": "建立两层估值：理论模型重估与可退出报价折价，分别报告风险因子贡献与交易执行缺口。"
+        }
+      ],
+      "roles": [
+        "结构性产品研究",
+        "估值风险",
+        "合规治理"
+      ],
+      "caveat": "公司官网业务说明与 SEC 2019 年诉讼公告为两种不同证据。本站不对个别人员或机构作超出监管原文的法律定性；诉讼后续状态须根据最新法院/监管文件单独更新。第三方名录AUM不视为经审计值。"
+    },
+    {
+      "company_id": "global-quant-010",
+      "orientation": "曾独立提供机构资产配置、资产负债管理及衍生品对冲方案，2025年5月已由 Mercer 完成收购",
+      "facts": [
+        {
+          "statement": "Mercer 2025年5月2日公告确认已完成收购 SECOR Asset Management，SECOR 团队加入 Mercer，不能在当前机构比较中继续当作未经收购的独立管理人。",
+          "source_title": "Mercer · Acquisition completed",
+          "source_url": "https://www.mercer.com/en-us/about/newsroom/marsh-mclennan-mercer-completes-acquisition-of-secor-asset-management/"
+        },
+        {
+          "statement": "Mercer 公告说明 SECOR 在2024年9月30日拥有138亿美元咨询资产、214亿美元被对冲资产和1亿美元基金策略资产；214+1=215亿美元为公告所称AUM，咨询规模不能额外并入。",
+          "source_title": "Mercer · SECOR historical scale definitions",
+          "source_url": "https://www.mercer.com/en-us/about/newsroom/marsh-mclennan-mercer-completes-acquisition-of-secor-asset-management/"
+        }
+      ],
+      "research_axes": [
+        {
+          "title": "负债驱动投资与现金流匹配",
+          "context": "养老金及保险机构的配置目标来自未来负债现金流；利率敏感性、通胀、流动性与资金约束须联立建模，不能仅按资产组合波动率优化。",
+          "methods": [
+            "久期匹配",
+            "关键期限DV01",
+            "现金流优化"
+          ],
+          "question": "资产组合久期与负债相同，是否已充分对冲收益率曲线非平行移动？",
+          "verification": "构建两端现金流表，逐期限计算PV01及凸性，再在平行与陡峭化冲击下比较对冲前后盈余变动。"
+        },
+        {
+          "title": "衍生品覆盖对冲与保证金流动性",
+          "context": "大型机构常用利率或外汇衍生品对冲底层资产风险，名义金额、对冲资产、受托管理资产及资金占用的经济含义不同。",
+          "methods": [
+            "对冲有效性",
+            "保证金现金流",
+            "期限错配"
+          ],
+          "question": "对冲会降低账面利率风险，但在压力时是否增加即时现金需求？",
+          "verification": "设计利率冲击、保证金追缴与可用现金联合场景，核对对冲名义本金、AUM、咨询资产不重复计量。"
+        },
+        {
+          "title": "公司并购前后AUM可比性与研究资料归属",
+          "context": "收购完成后，基金、人员及策略可能转入集团管理口径；历史SECOR披露不能自动替代当前Mercer业务线的独立AUM或人员规模。",
+          "methods": [
+            "并购事件研究",
+            "管理规模去重",
+            "业务实体映射"
+          ],
+          "question": "2024年的独立管理人AUM与2026年集团AUM是否属于同一统计集合？",
+          "verification": "制作带日期和法律主体的资产层级图，对比交易前后披露，缺乏可比口径时明确记作不可直接比较。"
+        }
+      ],
+      "roles": [
+        "机构投资咨询",
+        "负债驱动投资",
+        "组合风险管理"
+      ],
+      "caveat": "2024年规模为 Mercer 在2025年收购公告回溯披露的历史口径，2026年第三方名录数字不应覆盖此事实；集团合并后的当前独立AUM未在本档案核定。所有研究机制属于本站设计。"
+    },
+    {
+      "company_id": "global-quant-024",
+      "orientation": "荷兰历史对冲基金管理法律实体；LEI 记录显示 Saemor Capital B.V. 于2023年解散，不能标为2026年仍独立运营的量化基金",
+      "facts": [
+        {
+          "statement": "Saemor Capital B.V. 的 LEI 724500UQ6H0LXUR3U428 记录载明实体 INACTIVE，解散生效日期为2023年6月29日（UTC日期转换），LEI登记状态 RETIRED。",
+          "source_title": "Bloomberg LEI · Saemor legal entity dissolution",
+          "source_url": "https://lei.bloomberg.com/leis/view/724500UQ6H0LXUR3U428"
+        },
+        {
+          "statement": "基于 ESMA 来源的欧洲另类投资管理人登记资料亦将 Saemor Capital B.V. 标为 Inactive；历史登记不能作为当前基金存续证据。",
+          "source_title": "ESMA-derived AIFM registry · Saemor",
+          "source_url": "https://www.citiumtech.com/resources/aifm-register/managers/724500uq6h0lxur3u428"
+        }
+      ],
+      "research_axes": [
+        {
+          "title": "历史管理人的存续核验",
+          "context": "法律实体解散、基金清算、投资团队迁移及品牌存续是不同事件。不能将名录后期抓取日期误当为机构仍实际经营的证明。",
+          "methods": [
+            "LEI实体时间轴",
+            "登记变更追踪",
+            "基金主体映射"
+          ],
+          "question": "2026年商业名录显示的历史名称为何不足以确认管理人当前仍在运营？",
+          "verification": "对照公司注册号、LEI、监管登记与历史网站存档，逐条标注业务中止、法律解散和第三方数据抓取日期。"
+        },
+        {
+          "title": "历史AUM数据的时间一致性",
+          "context": "商业名录提供的数字可能是旧估算或误归属；管理规模属于有观察时点和主体范围的存量，不可回填到实体解散后的日期。",
+          "methods": [
+            "时间戳审计",
+            "AUM口径检查",
+            "实体去重"
+          ],
+          "question": "为何一个2026年标注金额不能直接解释为2026年已解散主体的资产？",
+          "verification": "建立源发布日期、数据观测日、法定解散日和规模口径四列证据表，对未说明底层日期的数字只保留为未核验历史估计。"
+        },
+        {
+          "title": "量化基金关闭后的策略研究可复现性",
+          "context": "历史策略研究可以利用公开市场数据探究市场中性与尾部暴露，但不能从停运事实倒推出基金真实回报或失败原因。",
+          "methods": [
+            "市场中性因子检验",
+            "存活偏差",
+            "回测再现性"
+          ],
+          "question": "如何在不掌握基金交易记录的情况下，区分市场行业一般机制与该机构真实历史行为？",
+          "verification": "用公开市场指数构建明确标识为教学模拟的中性投资策略，检验样本选择和成本偏差，不使用机构名称制造虚构业绩。"
+        }
+      ],
+      "roles": [
+        "基金尽调",
+        "法律实体核验",
+        "历史策略研究"
+      ],
+      "caveat": "Saemor Capital B.V. 按所引LEI已解散；不能由此推断所有同名品牌、人员或历史产品的现状。2026年第三方名录AUM未独立核实，应显示为历史估计且不用于当前独立机构规模排名。"
     }
   ]
 }
