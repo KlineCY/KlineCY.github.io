@@ -40,6 +40,31 @@ for(const p of research.profiles){
  if(p.careers_url)assert(/^https:\/\//.test(p.careers_url));
 }
 assert(axes>=426&&facts>=239,"research coverage below required quality");
+const historicalDeepProfileIds=new Set(["jane-street","hrt","citadel-securities","imc","optiver","xtx","flow","virtu","aqr","two-sigma","citadel","deshaw","qrt","worldquant","blackwing-cn","century-cn","global-quant-018","global-quant-022","cn-qiml-041","cn-qiml-029","cn-qiml-017","cn-public-bucket-002","cn-public-bucket-007","cn-qiml-051","cn-qiml-023","cn-public-bucket-008"]);
+const newlyDeepened=research.profiles.filter(p=>!historicalDeepProfileIds.has(p.company_id));
+assert.equal(newlyDeepened.length,116,"full remaining firm coverage missing");
+let newDeepAxes=0;
+for(const p of newlyDeepened){
+ assert.equal(p.research_axes.length,3,"original research topics lost "+p.company_id);
+ for(const a of p.research_axes){
+  assert(a.derivation?.length>=80,"insufficient mechanism or proof "+p.company_id+"/"+a.title);
+  assert(a.worked_example?.length>=60&&/[0-9０-９]/u.test(a.worked_example),"missing numeric worked case "+p.company_id+"/"+a.title);
+  assert(a.pitfalls?.length>=45,"missing limitations "+p.company_id+"/"+a.title);
+  assert(/[-+−=≈∑ΣΠαγσβλρΔ√∫]/u.test(a.derivation),"missing quantitative mechanism "+p.company_id+"/"+a.title);
+  newDeepAxes++;
+ }
+}
+assert.equal(newDeepAxes,348,"not all remaining research axes were developed");
+assert.equal(research.profiles.flatMap(p=>p.research_axes).filter(a=>a.derivation&&a.worked_example&&a.pitfalls).length,426,"all 426 research directions must remain detailed");
+assert.equal(10000000*5*0.002,100000,"duration shock example incorrect");
+assert.equal(10000000*0.03*0.5,150000,"credit loss example incorrect");
+assert(Math.abs(Math.log(0.5)/Math.log(0.8)-3.1062837)<1e-5,"AR(1) half-life inconsistent");
+assert.equal(5*300*30,45000,"futures variation margin example incorrect");
+assert.equal(0.8*0.1+0.2*(-0.15),0.05,"survivorship example inconsistent");
+assert.equal(30000000/(0.1*20000000),15,"liquidity exit days inconsistent");
+assert(html.includes("x.derivation||\"\",x.worked_example||\"\""),"deep research content must be searchable");
+assert(html.includes("overflow-wrap:anywhere"),"research mathematical text should wrap on mobile");
+
 const verifiedIds=["renaissance","global-quant-001","global-quant-002","global-quant-003","global-quant-005","cn-qiml-062","cn-qiml-055","cn-qiml-042","cn-public-bucket-013","cn-qiml-046","cn-qiml-002","cn-public-bucket-001","cn-qiml-054","cn-amac-002"];
 const fourthWaveIds=["cn-amac-001","cn-qiml-039","cn-qiml-061","cn-qiml-063","cn-qiml-066","cn-qiml-033","cn-qiml-060","cn-qiml-047","cn-qiml-024","cn-qiml-035","cn-qiml-027","cn-qiml-050","cn-qiml-044","cn-qiml-043","cn-qiml-052","cn-qiml-019"];
 verifiedIds.push(...fourthWaveIds);
