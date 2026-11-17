@@ -43,14 +43,14 @@ assert(axes>=135&&facts>=76,"research coverage below required quality");
 for(const term of ['id="profileCount"','id="profileFilter"','id="currencyFilter"','company-research.json','function researchHTML','function compareWithinCurrency','data-explanation']){
  assert(html.includes(term),"missing company atlas UI "+term);
 }
-assert(!/学习进度|标记已学|已学\\s*\\/\\s*总/.test(html),"unrequested learning tracker");
+assert(!html.includes("学习进度")&&!html.includes("标记已学"),"unrequested learning tracker");
 assert.equal(methods.schema_version,1);
 assert(methods.lessons.length>=8,"company curriculum missing full chapters");
 assert.equal(new Set(methods.lessons.map(l=>l.id)).size,methods.lessons.length);
 let units=0,maths=0;
 for(const lesson of methods.lessons){
  assert(lesson.title.length>=8&&lesson.objective.length>=40&&lesson.sections.length>=4);
- for(const source of lesson.sources)assert(source.title&&/^https:\\/\\//.test(source.url));
+ for(const source of lesson.sources)assert(source.title&&source.url.startsWith("https://"));
  const headings=new Set();
  for(const unit of lesson.sections){
   assert(!headings.has(unit.title),"duplicate technical section "+unit.title);
