@@ -18,7 +18,7 @@ for(const doc of docs)assert(doc.schema===1&&doc.chapters.length>=1);
 for(const l of rows){
  assert(!beforeIds.has(l.id)&&!core.catalog.items.some(x=>x.id===l.id),"duplicate new course "+l.id);
  assert(l.goal.length>=80&&l.protocol.length>=4&&l.sources.length>=2);
- const expectedCount=["m12-c11-p01","m23-c11-p01"].includes(l.id)?9:5;
+ const expectedCount=["m12-c11-p01","m23-c11-p01"].includes(l.id)?9:7;
  assert.equal(l.sections.length,expectedCount,"all original and extended sections "+l.id);
  assert.equal(new Set(l.sections.map(s=>s.title)).size,l.sections.length);
  for(const s of l.sections){
@@ -74,6 +74,20 @@ for(const [id,titles] of Object.entries(jointAdvancedTopics)){
   for(const eq of s.equations)katex.renderToString(eq.tex,{throwOnError:true,strict:"error"});
  }
 }
+const detailedCopulaContinuations={
+ "m09-c10-p01":["离散资产收益的Sklar非唯一性与随机化PIT","Gaussian Copula的条件h函数与依赖零值检验"],
+ "m09-c10-p02":["三维D-vine的完整密度分解与条件h函数","37资产Vine的层数、参数规模和截断误差"]
+};
+for(const [id,titles] of Object.entries(detailedCopulaContinuations)){
+ const l=rows.find(l=>l.id===id);
+ assert(l.sections.length===7,"five original and two extended Copula sections required "+id);
+ for(const title of titles){
+  const section=l.sections.find(s=>s.title===title);
+  assert(section&&section.paragraphs.length===2&&section.paragraphs.every(p=>p.length>=95),"incomplete Copula derivation "+id);
+  assert(section.equations.length===2&&section.worked.length>=115&&section.boundary.length>=95,"missing numerical joint-distribution example "+id);
+  for(const eq of section.equations)katex.renderToString(eq.tex,{throwOnError:true,strict:"error"});
+ }
+}
 const near=(a,b,t=1e-8)=>assert(Math.abs(a-b)<t,"numerical invariant incorrect "+a+" vs "+b);
 near(.05**2,.0025);
 near(.05/.05,1);
@@ -96,6 +110,11 @@ near(Math.sqrt(.00036)*1.96,.03718838528358014);
 near(1-1/Math.sqrt(2),.2928932188134524);
 near(10+2-14-1-.5,-3.5);
 near(.5*(1+1),1);
+near(.75/.75,1);
+near(0.5,0.5);
+near(37*36/2,666);
+near(36+35+34,105);
+near(105/666,.15765765765765766);
 const html=fs.readFileSync(new URL("index.html",root),"utf8"),css=fs.readFileSync(new URL("atlas.css",root),"utf8");
 for(const id of expected)assert(html.includes("#lesson/"+id),"sixth learning route missing "+id);
 assert(html.includes("780篇可导航课程")&&html.includes("第六条高级学习链"));
