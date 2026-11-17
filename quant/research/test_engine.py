@@ -78,7 +78,7 @@ class BacktestTests(unittest.TestCase):
             ds=(start+timedelta(days=i)).isoformat()
             for t in ("SYN_A","SYN_B","SYN_C"):
                 lines.append(f"{ds},{t},100,100,100,100,1000")
-        csv="\\n".join(lines)
+        csv="\n".join(lines)
         for strategy in self.strategies:
             with self.subTest(strategy=strategy["id"]):
                 result=self.execute(strategy["code"],csv=csv)
