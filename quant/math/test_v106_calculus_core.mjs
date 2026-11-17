@@ -160,4 +160,22 @@ near("Leibniz moving boundaries",4**2*2-2**2,28);
 near("Covariance mixed curvature",2*.8,1.6);
 near("Quadratic second-order mean bias",4+.25,4.25);
 near("Budget-neutral steepest direction",2/Math.sqrt(2),Math.SQRT2);
+const calculusDeepIds=["calculus-n0031","calculus-n0033","calculus-n0034","calculus-n0035","calculus-n0036","calculus-n0037","calculus-n0038","calculus-n0039"];
+const deepDocs=[...json("lessons-calculus-v106a.json").lessons,...json("lessons-calculus-v106b.json").lessons];
+for(const id of calculusDeepIds){
+ const lesson=deepDocs.find(x=>x.id===id),unit=lesson?.deep_sections.at(-1);
+ assert(lesson.deep_sections.length>=5,"Four historical proofs and financial application must remain: "+id);
+ assert(unit?.paragraphs.length===2&&unit.paragraphs.every(x=>x.length>=45),"Incomplete calculus analysis: "+id);
+ assert(unit.proof.length>=75&&unit.worked.length>=75&&unit.limitation.length>=40,"Missing proof or execution boundary: "+id);
+ assert.equal(unit.formulas.length,2,"Two rigorous calculus equations required: "+id);
+ for(const f of unit.formulas)katex.renderToString(f.tex,{displayMode:true,throwOnError:true,strict:"error"});
+}
+near("zero coupon 10bp exact return",Math.exp(-3*.001)-1,-.0029955044966269995);
+near("cubic third-order valuation",1.1**3-1-.3-.03,.001);
+near("risk Hessian positive determinant",2*2-(-1)**2,3);
+near("growing cashflow perpetuity",3/(.05-.02),100);
+near("linear cashflow integral",2*3+3**2/2,10.5);
+near("two-asset variance gradient",2*.09*.5,.09);
+near("finite difference portfolio valuation",100*1+10*2+1*2,122);
+near("budget-neutral transfer contribution",.1*(.06-.02),.004);
 console.log("V106 calculus passed: 570 unique lessons, "+formulaCount+" strict formulae, "+deepCount+" deep chapters, "+checks+" independent numerical checks, "+proofChars+" proof characters");
