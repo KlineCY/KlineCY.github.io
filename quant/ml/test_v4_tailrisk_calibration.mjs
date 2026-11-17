@@ -19,7 +19,7 @@ let units=0,tex=0,sources=0;
 for(const l of rows){
  assert(!priorIds.has(l.id)&&!core.catalog.items.some(x=>x.id===l.id),"duplicate ML lecture ID "+l.id);
  assert(l.goal.length>=70&&l.protocol.length>=4&&l.sources.length>=2);
- assert.equal(l.sections.length,l.id==="m04-c09-p01"||l.id==="m12-c09-p01"||l.id==="m12-c09-p02"?7:5);
+ assert.equal(l.sections.length,["m22-c07-p01","m23-c09-p01"].includes(l.id)?6:7);
  assert.equal(new Set(l.sections.map(s=>s.title)).size,l.sections.length);
  for(const s of l.sections){
   assert(s.question?.length>=12&&s.paragraphs.length===2&&s.paragraphs.every(x=>x.length>=55),"incomplete Chinese reasoning "+l.id+" "+s.title);
@@ -54,6 +54,20 @@ for(const l of rows.filter(l=>["m04-c09-p01","m12-c09-p01","m12-c09-p02"].includ
  assert(s.paragraphs.length===2&&s.paragraphs.every(p=>p.length>=65)&&s.equations.length===2&&s.worked.length>=75&&s.boundary.length>=55,"advanced quantile material incomplete "+l.id);
  for(const eq of s.equations)katex.renderToString(eq.tex,{throwOnError:true,strict:"error"});
 }
+const tailAdvancedTopics={
+ "m22-c07-p01":["单位方差Student-t创新的VaR与ES尺度不能混淆"],
+ "m23-c09-p01":["历史模拟组合VaR必须重放联合市场情景"],
+ "m23-c09-p02":["ES尾部均值的超额损失识别矩与原子处理","滚动VaR与ES回测的模型选择偏差和有效样本规模"]
+};
+for(const [id,titles] of Object.entries(tailAdvancedTopics)){
+ const l=rows.find(x=>x.id===id);
+ for(const title of titles){
+  const sec=l.sections.find(s=>s.title===title);
+  assert(sec&&sec.paragraphs.length===2&&sec.paragraphs.every(p=>p.length>=85),"missing complete tail risk theory "+title);
+  assert(sec.equations.length===2&&sec.worked.length>=125&&sec.boundary.length>=75,"new tail backtest validation incomplete "+title);
+  for(const e of sec.equations)katex.renderToString(e.tex,{throwOnError:true,strict:"error"});
+ }
+}
 const close=(a,b,t=1e-9)=>assert(Math.abs(a-b)<t,"arithmetic invariant "+a+" ≠ "+b);
 close(6.8/5,1.36);
 close(Math.ceil((9+1)*.8),8);
@@ -75,6 +89,12 @@ close(2-.3,1.7);
 close(5/95,.05263157894736842);
 close(4/9,.4444444444444444);
 close(4/5,.8);
+close(Math.sqrt((4-2)/4),Math.SQRT1_2);
+close((2+(10-2)/.2/5),10);
+close((10+2)/2,6);
+close(1-.05, .95);
+close(Math.sqrt(.05*.95/100),.02179449471770337);
+close(10+0,10);
 const html=fs.readFileSync(new URL("index.html",dir),"utf8"),css=fs.readFileSync(new URL("atlas.css",dir),"utf8");
 for(const id of expected)assert(html.includes("#lesson/"+id),"new learning path missing "+id);
 assert(html.includes("atlas.js?v=20261109"));

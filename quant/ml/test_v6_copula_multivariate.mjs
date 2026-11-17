@@ -18,7 +18,7 @@ for(const doc of docs)assert(doc.schema===1&&doc.chapters.length>=1);
 for(const l of rows){
  assert(!beforeIds.has(l.id)&&!core.catalog.items.some(x=>x.id===l.id),"duplicate new course "+l.id);
  assert(l.goal.length>=80&&l.protocol.length>=4&&l.sources.length>=2);
- const expectedCount=["m12-c11-p01","m23-c11-p01"].includes(l.id)?7:5;
+ const expectedCount=["m12-c11-p01","m23-c11-p01"].includes(l.id)?9:5;
  assert.equal(l.sections.length,expectedCount,"all original and extended sections "+l.id);
  assert.equal(new Set(l.sections.map(s=>s.title)).size,l.sections.length);
  for(const s of l.sections){
@@ -61,6 +61,19 @@ for(const l of rows.filter(l=>["m12-c11-p01","m23-c11-p01"].includes(l.id))){
   for(const e of s.equations)katex.renderToString(e.tex,{throwOnError:true,strict:"error"});
  }
 }
+const jointAdvancedTopics={
+ "m12-c11-p01":["Energy Score与边际CRPS：联合相关结构不能由单变量评分替代","多元高斯组合预测：投影之后的VaR与ES精确式"],
+ "m23-c11-p01":["Student-t Copula的尾部依赖与Gaussian Copula差异","联合压力场景中的现金账户与融资缺口守恒"]
+};
+for(const [id,titles] of Object.entries(jointAdvancedTopics)){
+ const lesson=rows.find(l=>l.id===id);
+ for(const title of titles){
+  const s=lesson.sections.find(s=>s.title===title);
+  assert(s&&s.paragraphs.length===2&&s.paragraphs.every(p=>p.length>=85),"missing joint-distribution explanation "+title);
+  assert(s.equations.length===2&&s.worked.length>=125&&s.boundary.length>=75,"incomplete joint stress evidence "+title);
+  for(const eq of s.equations)katex.renderToString(eq.tex,{throwOnError:true,strict:"error"});
+ }
+}
 const near=(a,b,t=1e-8)=>assert(Math.abs(a-b)<t,"numerical invariant incorrect "+a+" vs "+b);
 near(.05**2,.0025);
 near(.05/.05,1);
@@ -78,6 +91,11 @@ near(.05*.05,.0025);
 near(.05/.0025,20);
 near(.3+.7,1);
 near(Math.sqrt(.5)*1.96,1.385929291125633);
+near(Math.sqrt(.00036),.018973665961010276);
+near(Math.sqrt(.00036)*1.96,.03718838528358014);
+near(1-1/Math.sqrt(2),.2928932188134524);
+near(10+2-14-1-.5,-3.5);
+near(.5*(1+1),1);
 const html=fs.readFileSync(new URL("index.html",root),"utf8"),css=fs.readFileSync(new URL("atlas.css",root),"utf8");
 for(const id of expected)assert(html.includes("#lesson/"+id),"sixth learning route missing "+id);
 assert(html.includes("780篇可导航课程")&&html.includes("第六条高级学习链"));
