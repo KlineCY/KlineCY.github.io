@@ -823,6 +823,28 @@ nearV121Math(.1/2,.05,"inverse Vega conditioning");
 assert((-6/10)<=(-5/20),"uneven strike butterfly convexity");
 console.log("V121 MATH PASS: 12 full chapters, 24 strict KaTeX, and independent numerical evidence");
 
+const newlyVerifiedMonteCarlo={
+ "numerical-n0387":"Milstein离散对数正态扩散仍可能产生负价格：一步反例",
+ "numerical-n0388":"多层Monte Carlo的方差—成本最优样本配置",
+ "numerical-n0389":"循环块Bootstrap与真实时间边界：保留局部依赖不等于重现原始路径",
+ "numerical-n0390":"分层Monte Carlo的Neyman最优配置与期权尾部稀有情景"
+};
+for(const [id,title] of Object.entries(newlyVerifiedMonteCarlo)){
+ const l=added.find(l=>l.id===id),sec=l?.deep_sections.find(s=>s.title===title);
+ assert(sec,"missing detailed Monte Carlo mathematical continuation "+title);
+ assert(sec.paragraphs.length===2&&sec.paragraphs.every(p=>p.length>=90),"probabilistic assumptions incomplete "+id);
+ assert(sec.formulas.length===2&&sec.proof.length>=140&&sec.worked.length>=105&&sec.limitation.length>=75,"proof, sample paths and limitations incomplete "+id);
+ for(const eq of sec.formulas)katex.renderToString(eq.tex,{displayMode:true,throwOnError:true,strict:"error"});
+}
+const nearV147=(a,b,name,tol=1e-8)=>assert(Number.isFinite(a)&&Math.abs(a-b)<=tol,name+": "+a+" versus "+b);
+nearV147(1+2*(-.5)+2*((-.5)**2-1),-1.5,"Milstein invalid GBM step");
+nearV147(Math.exp(-3),.049787068367863944,"GBM positive exact transition");
+nearV147(.04/8+.01/2,.01,"MLMC controlled variance");
+nearV147(8*1+2*4,16,"MLMC total work");
+nearV147(5-3+1,3,"moving blocks boundary candidates");
+nearV147(5,5,"circular block start candidates");
+nearV147(.64/80+.36/20,.026,"stratified proportional variance");
+nearV147(.64/(100*.8/1.4)+.36/(100*.6/1.4),.0196,"stratified Neyman variance");
 console.log("V110 PASS: 656/656 finished, all 20 disciplines complete, numerical 30/30, "+
   sectionCount+" complete reasoning sections, "+formulaCount+" strict KaTeX formulas, "+
   linkCount+" exact curriculum links, "+proofChars+" Chinese proof characters, "+
