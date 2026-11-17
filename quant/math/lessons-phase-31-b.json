@@ -1,0 +1,625 @@
+{
+  "version": 1,
+  "revision": "V116",
+  "focus": "risk quantiles, expected shortfall, copulas and systemic risk",
+  "lessons": [
+    {
+      "id": "riskmath-x001",
+      "node_id": "riskmath-x001",
+      "title": "VaR广义分位数与离散损失",
+      "definition": "VaR定义为损失分布函数的广义逆分位数，在有质量点的损失分布中，恰好等于阈值的概率可能正值，因此必须用广义逆定义而不能只取某个经验尾部百分位。",
+      "assumptions": "损失L取正数表示亏损，置信水平α∈(0,1)，分位数采取左连续广义逆；数据频率与持有期口径一致。",
+      "properties": [
+        "VaR定义为损失分布函数的广义逆分位数，在有质量点的损失分布中，恰好等于阈值的概率可能正值，因此必须用广义逆定义而不能只取某个经验尾部百分位。",
+        "损失L取正数表示亏损，置信水平α∈(0,1)，分位数采取左连续广义逆；数据频率与持有期口径一致。",
+        "回测基金尾部风险时统一损失定义、清算时点和合同保证金，避免把每日历史VaR误读为未来绝不超过的损失上界。",
+        "VaR不描述超过阈值后的损失严重程度，离散数据不同分位插值选项须明示。"
+      ],
+      "formulas": [
+        {
+          "label": "广义VaR",
+          "tex": "\\mathrm{VaR}_\\alpha(L)=\\inf\\{x:F_L(x)\\ge\\alpha\\}"
+        },
+        {
+          "label": "CDF分位性质",
+          "tex": "F_L(q_\\alpha^-)\\le\\alpha\\le F_L(q_\\alpha)"
+        },
+        {
+          "label": "经验分位",
+          "tex": "\\widehat q_\\alpha=L_{(\\lceil n\\alpha\\rceil)}"
+        },
+        {
+          "label": "右尾损失概率",
+          "tex": "\\Pr(L>q_\\alpha)\\le1-\\alpha"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "按CDF到达给定覆盖率α时的最低损失点定义广义逆。",
+          "tex": "q_\\alpha=\\inf\\{x:\\Pr(L\\le x)\\ge\\alpha\\}"
+        },
+        {
+          "explanation": "有原子质量时CDF可能从α以下跳跃到α以上，导致严格大于和大于等于阈值的概率不等。",
+          "tex": "\\Pr(L>q_\\alpha)\\ne\\Pr(L\\ge q_\\alpha)"
+        },
+        {
+          "explanation": "经验损失从小到大排序后取第ceil(nα)个样本，得到标准经验分位。",
+          "tex": "\\widehat{\\mathrm{VaR}}_\\alpha=L_{(\\lceil n\\alpha\\rceil)}"
+        }
+      ],
+      "example": "损失L在0、10两点取值概率分别0.9、0.1。90% VaR为0，95% VaR为10；对90% VaR，严格超过阈值的概率0.1，包含阈值则概率为1。",
+      "application": "回测基金尾部风险时统一损失定义、清算时点和合同保证金，避免把每日历史VaR误读为未来绝不超过的损失上界。",
+      "caveat": "VaR不描述超过阈值后的损失严重程度，离散数据不同分位插值选项须明示。",
+      "deep_sections": [
+        {
+          "title": "概率定义及关键性质的证明",
+          "question": "VaR广义分位数与离散损失所用概率极限或条件分布如何推出？",
+          "paragraphs": [
+            "VaR定义为损失分布函数的广义逆分位数，在有质量点的损失分布中，恰好等于阈值的概率可能正值，因此必须用广义逆定义而不能只取某个经验尾部百分位。",
+            "损失L取正数表示亏损，置信水平α∈(0,1)，分位数采取左连续广义逆；数据频率与持有期口径一致。"
+          ],
+          "formulas": [
+            {
+              "label": "广义VaR",
+              "tex": "\\mathrm{VaR}_\\alpha(L)=\\inf\\{x:F_L(x)\\ge\\alpha\\}"
+            },
+            {
+              "label": "CDF分位性质",
+              "tex": "F_L(q_\\alpha^-)\\le\\alpha\\le F_L(q_\\alpha)"
+            }
+          ],
+          "proof": "按CDF到达给定覆盖率α时的最低损失点定义广义逆。 有原子质量时CDF可能从α以下跳跃到α以上，导致严格大于和大于等于阈值的概率不等。 经验损失从小到大排序后取第ceil(nα)个样本，得到标准经验分位。",
+          "worked": "损失L在0、10两点取值概率分别0.9、0.1。90% VaR为0，95% VaR为10；对90% VaR，严格超过阈值的概率0.1，包含阈值则概率为1。",
+          "limitation": "VaR不描述超过阈值后的损失严重程度，离散数据不同分位插值选项须明示。"
+        },
+        {
+          "title": "金融情景、经验估计与边界",
+          "question": "怎样验证VaR广义分位数与离散损失是否可靠地估计系统损失？",
+          "paragraphs": [
+            "回测基金尾部风险时统一损失定义、清算时点和合同保证金，避免把每日历史VaR误读为未来绝不超过的损失上界。",
+            "研究应以同一风险持有期、资产集合和时间可得信息独立评价。VaR不描述超过阈值后的损失严重程度，离散数据不同分位插值选项须明示。"
+          ],
+          "formulas": [
+            {
+              "label": "经验分位",
+              "tex": "\\widehat q_\\alpha=L_{(\\lceil n\\alpha\\rceil)}"
+            },
+            {
+              "label": "右尾损失概率",
+              "tex": "\\Pr(L>q_\\alpha)\\le1-\\alpha"
+            }
+          ],
+          "proof": "按CDF到达给定覆盖率α时的最低损失点定义广义逆。 有原子质量时CDF可能从α以下跳跃到α以上，导致严格大于和大于等于阈值的概率不等。 经验损失从小到大排序后取第ceil(nα)个样本，得到标准经验分位。",
+          "worked": "损失L在0、10两点取值概率分别0.9、0.1。90% VaR为0，95% VaR为10；对90% VaR，严格超过阈值的概率0.1，包含阈值则概率为1。",
+          "limitation": "VaR不描述超过阈值后的损失严重程度，离散数据不同分位插值选项须明示。"
+        }
+      ],
+      "links": [],
+      "sources": [
+        {
+          "title": "BIS Research",
+          "url": "https://www.bis.org/"
+        },
+        {
+          "title": "Federal Reserve Financial Stability",
+          "url": "https://www.federalreserve.gov/financial-stability.htm"
+        }
+      ]
+    },
+    {
+      "id": "riskmath-x002",
+      "node_id": "riskmath-x002",
+      "title": "ES分位数积分公式",
+      "definition": "Expected Shortfall是从α至1的损失分位数积分平均，在离散概率分布中会正确切分分位点上的概率质量，因此通常不能直接用E[L|L≥VaR]替代。",
+      "assumptions": "损失L可积，α∈(0,1)，ES使用上分位积分定义，所有损失值在相同时间和货币口径下计算。",
+      "properties": [
+        "Expected Shortfall是从α至1的损失分位数积分平均，在离散概率分布中会正确切分分位点上的概率质量，因此通常不能直接用E[L|L≥VaR]替代。",
+        "损失L可积，α∈(0,1)，ES使用上分位积分定义，所有损失值在相同时间和货币口径下计算。",
+        "使用Rockafellar–Uryasev凸形式实现组合ES预算，必须保存尾部样本和损失原子处理规则。",
+        "连续分布的简化条件期望表达不可在有分位点原子的样本直接使用，极端尾部数据有限。"
+      ],
+      "formulas": [
+        {
+          "label": "ES定义",
+          "tex": "\\mathrm{ES}_\\alpha(L)=\\frac1{1-\\alpha}\\int_\\alpha^1\\mathrm{VaR}_u(L)\\,du"
+        },
+        {
+          "label": "RU优化表示",
+          "tex": "\\mathrm{ES}_\\alpha(L)=\\min_z\\left(z+\\frac{\\mathbb E[(L-z)_+]}{1-\\alpha}\\right)"
+        },
+        {
+          "label": "连续分布尾条件",
+          "tex": "\\mathrm{ES}_\\alpha(L)=\\mathbb E[L\\mid L\\ge\\mathrm{VaR}_\\alpha(L)]"
+        },
+        {
+          "label": "一般分位单调",
+          "tex": "\\mathrm{ES}_\\alpha(L)\\ge\\mathrm{VaR}_\\alpha(L)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "把最差1−α概率质量中的所有分位值求平均，得到与概率原子相容的上尾风险测量。",
+          "tex": "\\frac1{1-\\alpha}\\int_\\alpha^1q_u\\,du"
+        },
+        {
+          "explanation": "正部函数下RU目标在合理的分位点附近取最小值，最优值等于ES。",
+          "tex": "\\min_z\\{z+\\frac1{1-\\alpha}E[(L-z)_+]\\}"
+        },
+        {
+          "explanation": "只有当损失分位点无影响尾部划分的原子时，简单条件尾部均值才相符。",
+          "tex": "\\Pr(L=q_\\alpha)=0"
+        }
+      ],
+      "example": "令损失0的概率95%、损失100的概率5%，95% VaR为0，95% ES为100；然而E[L|L≥0]=5，不等于ES。",
+      "application": "使用Rockafellar–Uryasev凸形式实现组合ES预算，必须保存尾部样本和损失原子处理规则。",
+      "caveat": "连续分布的简化条件期望表达不可在有分位点原子的样本直接使用，极端尾部数据有限。",
+      "deep_sections": [
+        {
+          "title": "概率定义及关键性质的证明",
+          "question": "ES分位数积分公式所用概率极限或条件分布如何推出？",
+          "paragraphs": [
+            "Expected Shortfall是从α至1的损失分位数积分平均，在离散概率分布中会正确切分分位点上的概率质量，因此通常不能直接用E[L|L≥VaR]替代。",
+            "损失L可积，α∈(0,1)，ES使用上分位积分定义，所有损失值在相同时间和货币口径下计算。"
+          ],
+          "formulas": [
+            {
+              "label": "ES定义",
+              "tex": "\\mathrm{ES}_\\alpha(L)=\\frac1{1-\\alpha}\\int_\\alpha^1\\mathrm{VaR}_u(L)\\,du"
+            },
+            {
+              "label": "RU优化表示",
+              "tex": "\\mathrm{ES}_\\alpha(L)=\\min_z\\left(z+\\frac{\\mathbb E[(L-z)_+]}{1-\\alpha}\\right)"
+            }
+          ],
+          "proof": "把最差1−α概率质量中的所有分位值求平均，得到与概率原子相容的上尾风险测量。 正部函数下RU目标在合理的分位点附近取最小值，最优值等于ES。 只有当损失分位点无影响尾部划分的原子时，简单条件尾部均值才相符。",
+          "worked": "令损失0的概率95%、损失100的概率5%，95% VaR为0，95% ES为100；然而E[L|L≥0]=5，不等于ES。",
+          "limitation": "连续分布的简化条件期望表达不可在有分位点原子的样本直接使用，极端尾部数据有限。"
+        },
+        {
+          "title": "金融情景、经验估计与边界",
+          "question": "怎样验证ES分位数积分公式是否可靠地估计系统损失？",
+          "paragraphs": [
+            "使用Rockafellar–Uryasev凸形式实现组合ES预算，必须保存尾部样本和损失原子处理规则。",
+            "研究应以同一风险持有期、资产集合和时间可得信息独立评价。连续分布的简化条件期望表达不可在有分位点原子的样本直接使用，极端尾部数据有限。"
+          ],
+          "formulas": [
+            {
+              "label": "连续分布尾条件",
+              "tex": "\\mathrm{ES}_\\alpha(L)=\\mathbb E[L\\mid L\\ge\\mathrm{VaR}_\\alpha(L)]"
+            },
+            {
+              "label": "一般分位单调",
+              "tex": "\\mathrm{ES}_\\alpha(L)\\ge\\mathrm{VaR}_\\alpha(L)"
+            }
+          ],
+          "proof": "把最差1−α概率质量中的所有分位值求平均，得到与概率原子相容的上尾风险测量。 正部函数下RU目标在合理的分位点附近取最小值，最优值等于ES。 只有当损失分位点无影响尾部划分的原子时，简单条件尾部均值才相符。",
+          "worked": "令损失0的概率95%、损失100的概率5%，95% VaR为0，95% ES为100；然而E[L|L≥0]=5，不等于ES。",
+          "limitation": "连续分布的简化条件期望表达不可在有分位点原子的样本直接使用，极端尾部数据有限。"
+        }
+      ],
+      "links": [],
+      "sources": [
+        {
+          "title": "BIS Research",
+          "url": "https://www.bis.org/"
+        },
+        {
+          "title": "Federal Reserve Financial Stability",
+          "url": "https://www.federalreserve.gov/financial-stability.htm"
+        }
+      ]
+    },
+    {
+      "id": "riskmath-x003",
+      "node_id": "riskmath-x003",
+      "title": "Sklar定理与Copula分解",
+      "definition": "Sklar定理允许把多维联合分布写成Copula作用于各自边际CDF的形式；边际连续时Copula唯一，边际存在离散质量时在可达到的边际概率集合之外不唯一。",
+      "assumptions": "随机向量有联合CDF和边际CDF；涉及相关结构的模拟需要使用合法的二维或多维Copula及同一个时点的资产数据。",
+      "properties": [
+        "Sklar定理允许把多维联合分布写成Copula作用于各自边际CDF的形式；边际连续时Copula唯一，边际存在离散质量时在可达到的边际概率集合之外不唯一。",
+        "随机向量有联合CDF和边际CDF；涉及相关结构的模拟需要使用合法的二维或多维Copula及同一个时点的资产数据。",
+        "多资产ETF风险建模需分别估计边际收益厚尾和联合依赖结构，不允许用固定Pearson相关替代所有极端联合情景。",
+        "拟合Copula依赖赖于历史危机样本，错误选型会造成危险的联合尾部外推。"
+      ],
+      "formulas": [
+        {
+          "label": "Sklar分解",
+          "tex": "F_{X,Y}(x,y)=C(F_X(x),F_Y(y))"
+        },
+        {
+          "label": "独立Copula",
+          "tex": "C_\\perp(u,v)=uv"
+        },
+        {
+          "label": "完全同向Copula",
+          "tex": "C_+(u,v)=\\min(u,v)"
+        },
+        {
+          "label": "联合低尾概率",
+          "tex": "\\Pr(U\\le u,V\\le v)=C(u,v)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "令U=F_X(X)、V=F_Y(Y)，连续边际时两者分别服从均匀分布。",
+          "tex": "U,V\\sim\\operatorname{Unif}(0,1)"
+        },
+        {
+          "explanation": "把联合事件映射为分位空间的联合概率，即得到Copula。",
+          "tex": "C(u,v)=\\Pr(U\\le u,V\\le v)"
+        },
+        {
+          "explanation": "如果边际存在原子，映射未必严格均匀且Copula在不可达到的CDF区间并不唯一。",
+          "tex": "F_X(x^-)\\ne F_X(x)"
+        }
+      ],
+      "example": "两资产各有10%概率发生低尾亏损。独立Copula下同时亏损概率为0.1×0.1=1%；完全同向Copula下为10%，虽然两者边际完全相同。",
+      "application": "多资产ETF风险建模需分别估计边际收益厚尾和联合依赖结构，不允许用固定Pearson相关替代所有极端联合情景。",
+      "caveat": "拟合Copula依赖赖于历史危机样本，错误选型会造成危险的联合尾部外推。",
+      "deep_sections": [
+        {
+          "title": "概率定义及关键性质的证明",
+          "question": "Sklar定理与Copula分解所用概率极限或条件分布如何推出？",
+          "paragraphs": [
+            "Sklar定理允许把多维联合分布写成Copula作用于各自边际CDF的形式；边际连续时Copula唯一，边际存在离散质量时在可达到的边际概率集合之外不唯一。",
+            "随机向量有联合CDF和边际CDF；涉及相关结构的模拟需要使用合法的二维或多维Copula及同一个时点的资产数据。"
+          ],
+          "formulas": [
+            {
+              "label": "Sklar分解",
+              "tex": "F_{X,Y}(x,y)=C(F_X(x),F_Y(y))"
+            },
+            {
+              "label": "独立Copula",
+              "tex": "C_\\perp(u,v)=uv"
+            }
+          ],
+          "proof": "令U=F_X(X)、V=F_Y(Y)，连续边际时两者分别服从均匀分布。 把联合事件映射为分位空间的联合概率，即得到Copula。 如果边际存在原子，映射未必严格均匀且Copula在不可达到的CDF区间并不唯一。",
+          "worked": "两资产各有10%概率发生低尾亏损。独立Copula下同时亏损概率为0.1×0.1=1%；完全同向Copula下为10%，虽然两者边际完全相同。",
+          "limitation": "拟合Copula依赖赖于历史危机样本，错误选型会造成危险的联合尾部外推。"
+        },
+        {
+          "title": "金融情景、经验估计与边界",
+          "question": "怎样验证Sklar定理与Copula分解是否可靠地估计系统损失？",
+          "paragraphs": [
+            "多资产ETF风险建模需分别估计边际收益厚尾和联合依赖结构，不允许用固定Pearson相关替代所有极端联合情景。",
+            "研究应以同一风险持有期、资产集合和时间可得信息独立评价。拟合Copula依赖赖于历史危机样本，错误选型会造成危险的联合尾部外推。"
+          ],
+          "formulas": [
+            {
+              "label": "完全同向Copula",
+              "tex": "C_+(u,v)=\\min(u,v)"
+            },
+            {
+              "label": "联合低尾概率",
+              "tex": "\\Pr(U\\le u,V\\le v)=C(u,v)"
+            }
+          ],
+          "proof": "令U=F_X(X)、V=F_Y(Y)，连续边际时两者分别服从均匀分布。 把联合事件映射为分位空间的联合概率，即得到Copula。 如果边际存在原子，映射未必严格均匀且Copula在不可达到的CDF区间并不唯一。",
+          "worked": "两资产各有10%概率发生低尾亏损。独立Copula下同时亏损概率为0.1×0.1=1%；完全同向Copula下为10%，虽然两者边际完全相同。",
+          "limitation": "拟合Copula依赖赖于历史危机样本，错误选型会造成危险的联合尾部外推。"
+        }
+      ],
+      "links": [],
+      "sources": [
+        {
+          "title": "BIS Research",
+          "url": "https://www.bis.org/"
+        },
+        {
+          "title": "Federal Reserve Financial Stability",
+          "url": "https://www.federalreserve.gov/financial-stability.htm"
+        }
+      ]
+    },
+    {
+      "id": "riskmath-x004",
+      "node_id": "riskmath-x004",
+      "title": "上下尾依赖系数",
+      "definition": "尾部依赖系数通过越来越极端的联合分位事件描述资产共同崩跌或共同上涨的条件概率极限，线性相关系数不足以确定这些极限。",
+      "assumptions": "连续边际且U,V为概率积分变换后的均匀变量，低尾和高尾极限存在；有限金融样本只能估计阈值级条件共现率。",
+      "properties": [
+        "尾部依赖系数通过越来越极端的联合分位事件描述资产共同崩跌或共同上涨的条件概率极限，线性相关系数不足以确定这些极限。",
+        "连续边际且U,V为概率积分变换后的均匀变量，低尾和高尾极限存在；有限金融样本只能估计阈值级条件共现率。",
+        "对股票和债券共同下跌、CTA与权益极端损失进行联合风险场景测试，报告阈值选择和区间不确定性。",
+        "危机下相关状态变化使静态Copula可能失效，数据极少时点估计不稳。"
+      ],
+      "formulas": [
+        {
+          "label": "下尾依赖",
+          "tex": "\\lambda_L=\\lim_{u\\downarrow0}\\frac{C(u,u)}{u}"
+        },
+        {
+          "label": "上尾依赖",
+          "tex": "\\lambda_U=\\lim_{u\\uparrow1}\\frac{1-2u+C(u,u)}{1-u}"
+        },
+        {
+          "label": "Gaussian独立尾部",
+          "tex": "|\\rho|<1\\Longrightarrow\\lambda_L=\\lambda_U=0"
+        },
+        {
+          "label": "阈值条件共损",
+          "tex": "\\lambda_L(u)=\\Pr(V\\le u\\mid U\\le u)"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "下尾联合事件概率为C(u,u)，边际低尾概率为u，条件概率除法得到下尾公式。",
+          "tex": "\\Pr(V\\le u\\mid U\\le u)=C(u,u)/u"
+        },
+        {
+          "explanation": "上尾联合事件以容斥公式求得，其边际尾概率为1−u。",
+          "tex": "\\Pr(U>u,V>u)=1-2u+C(u,u)"
+        },
+        {
+          "explanation": "对极端阈值取极限，获得理论渐近依赖，但金融历史有限无法直接观察极限。",
+          "tex": "\\lambda_L=\\lim_{u\\downarrow0}\\lambda_L(u)"
+        }
+      ],
+      "example": "两个资产各有1%的重大下跌概率，联合发生概率0.6%，则此阈值下条件共损率60%；这一单阈值结果不能直接证明理论极限系数也是0.6。",
+      "application": "对股票和债券共同下跌、CTA与权益极端损失进行联合风险场景测试，报告阈值选择和区间不确定性。",
+      "caveat": "危机下相关状态变化使静态Copula可能失效，数据极少时点估计不稳。",
+      "deep_sections": [
+        {
+          "title": "概率定义及关键性质的证明",
+          "question": "上下尾依赖系数所用概率极限或条件分布如何推出？",
+          "paragraphs": [
+            "尾部依赖系数通过越来越极端的联合分位事件描述资产共同崩跌或共同上涨的条件概率极限，线性相关系数不足以确定这些极限。",
+            "连续边际且U,V为概率积分变换后的均匀变量，低尾和高尾极限存在；有限金融样本只能估计阈值级条件共现率。"
+          ],
+          "formulas": [
+            {
+              "label": "下尾依赖",
+              "tex": "\\lambda_L=\\lim_{u\\downarrow0}\\frac{C(u,u)}{u}"
+            },
+            {
+              "label": "上尾依赖",
+              "tex": "\\lambda_U=\\lim_{u\\uparrow1}\\frac{1-2u+C(u,u)}{1-u}"
+            }
+          ],
+          "proof": "下尾联合事件概率为C(u,u)，边际低尾概率为u，条件概率除法得到下尾公式。 上尾联合事件以容斥公式求得，其边际尾概率为1−u。 对极端阈值取极限，获得理论渐近依赖，但金融历史有限无法直接观察极限。",
+          "worked": "两个资产各有1%的重大下跌概率，联合发生概率0.6%，则此阈值下条件共损率60%；这一单阈值结果不能直接证明理论极限系数也是0.6。",
+          "limitation": "危机下相关状态变化使静态Copula可能失效，数据极少时点估计不稳。"
+        },
+        {
+          "title": "金融情景、经验估计与边界",
+          "question": "怎样验证上下尾依赖系数是否可靠地估计系统损失？",
+          "paragraphs": [
+            "对股票和债券共同下跌、CTA与权益极端损失进行联合风险场景测试，报告阈值选择和区间不确定性。",
+            "研究应以同一风险持有期、资产集合和时间可得信息独立评价。危机下相关状态变化使静态Copula可能失效，数据极少时点估计不稳。"
+          ],
+          "formulas": [
+            {
+              "label": "Gaussian独立尾部",
+              "tex": "|\\rho|<1\\Longrightarrow\\lambda_L=\\lambda_U=0"
+            },
+            {
+              "label": "阈值条件共损",
+              "tex": "\\lambda_L(u)=\\Pr(V\\le u\\mid U\\le u)"
+            }
+          ],
+          "proof": "下尾联合事件概率为C(u,u)，边际低尾概率为u，条件概率除法得到下尾公式。 上尾联合事件以容斥公式求得，其边际尾概率为1−u。 对极端阈值取极限，获得理论渐近依赖，但金融历史有限无法直接观察极限。",
+          "worked": "两个资产各有1%的重大下跌概率，联合发生概率0.6%，则此阈值下条件共损率60%；这一单阈值结果不能直接证明理论极限系数也是0.6。",
+          "limitation": "危机下相关状态变化使静态Copula可能失效，数据极少时点估计不稳。"
+        }
+      ],
+      "links": [],
+      "sources": [
+        {
+          "title": "BIS Research",
+          "url": "https://www.bis.org/"
+        },
+        {
+          "title": "Federal Reserve Financial Stability",
+          "url": "https://www.federalreserve.gov/financial-stability.htm"
+        }
+      ]
+    },
+    {
+      "id": "riskmath-x005",
+      "node_id": "riskmath-x005",
+      "title": "边际预期短缺MES",
+      "definition": "边际预期短缺衡量市场系统已经发生下尾极端损失时某机构的条件平均损失，因而不同于该机构自身的无条件ES，也不自动具备因果风险贡献解释。",
+      "assumptions": "市场损失L_M和机构损失L_i定义在同一时期与币种，系统压力事件选择固定分位阈值，必要条件期望存在。",
+      "properties": [
+        "边际预期短缺衡量市场系统已经发生下尾极端损失时某机构的条件平均损失，因而不同于该机构自身的无条件ES，也不自动具备因果风险贡献解释。",
+        "市场损失L_M和机构损失L_i定义在同一时期与币种，系统压力事件选择固定分位阈值，必要条件期望存在。",
+        "审视多经理组合压力期共同损失，MES与系统仓位和现金流冲击分别核算。",
+        "市场压力事件不构成随机试验，MES是条件相关而不是机构对系统风险的因果边际贡献。"
+      ],
+      "formulas": [
+        {
+          "label": "市场压力事件",
+          "tex": "A_\\alpha=\\{L_M\\ge\\mathrm{VaR}_\\alpha(L_M)\\}"
+        },
+        {
+          "label": "机构MES",
+          "tex": "\\mathrm{MES}_{i,\\alpha}=\\mathbb E[L_i\\mid A_\\alpha]"
+        },
+        {
+          "label": "尾部样本估计",
+          "tex": "\\widehat{\\mathrm{MES}}_i=\\frac{\\sum_tL_{i,t}\\mathbf1(A_t)}{\\sum_t\\mathbf1(A_t)}"
+        },
+        {
+          "label": "普通机构ES",
+          "tex": "\\mathrm{ES}_{i,\\alpha}\\ne\\mathrm{MES}_{i,\\alpha}\\ \\text{一般而言}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "先按市场整体损失定义极端压力事件A，而非按照机构自身损失阈值选择样本。",
+          "tex": "A_\\alpha=\\{L_M\\ge q_{M,\\alpha}\\}"
+        },
+        {
+          "explanation": "在该市场压力事件下求机构损失的条件期望。",
+          "tex": "E[L_i\\mid A_\\alpha]=E[L_i1_A]/P(A)"
+        },
+        {
+          "explanation": "估计时使用所有市场压力日期，并明确事件条件与尾部原子处理。",
+          "tex": "\\sum_t1(A_t)>0"
+        }
+      ],
+      "example": "四个市场压力日某策略损失分别为1%、3%、−1%、5%，MES样本估计为(1+3−1+5)/4=2%，而不依赖该策略自身95%损失分位。",
+      "application": "审视多经理组合压力期共同损失，MES与系统仓位和现金流冲击分别核算。",
+      "caveat": "市场压力事件不构成随机试验，MES是条件相关而不是机构对系统风险的因果边际贡献。",
+      "deep_sections": [
+        {
+          "title": "概率定义及关键性质的证明",
+          "question": "边际预期短缺MES所用概率极限或条件分布如何推出？",
+          "paragraphs": [
+            "边际预期短缺衡量市场系统已经发生下尾极端损失时某机构的条件平均损失，因而不同于该机构自身的无条件ES，也不自动具备因果风险贡献解释。",
+            "市场损失L_M和机构损失L_i定义在同一时期与币种，系统压力事件选择固定分位阈值，必要条件期望存在。"
+          ],
+          "formulas": [
+            {
+              "label": "市场压力事件",
+              "tex": "A_\\alpha=\\{L_M\\ge\\mathrm{VaR}_\\alpha(L_M)\\}"
+            },
+            {
+              "label": "机构MES",
+              "tex": "\\mathrm{MES}_{i,\\alpha}=\\mathbb E[L_i\\mid A_\\alpha]"
+            }
+          ],
+          "proof": "先按市场整体损失定义极端压力事件A，而非按照机构自身损失阈值选择样本。 在该市场压力事件下求机构损失的条件期望。 估计时使用所有市场压力日期，并明确事件条件与尾部原子处理。",
+          "worked": "四个市场压力日某策略损失分别为1%、3%、−1%、5%，MES样本估计为(1+3−1+5)/4=2%，而不依赖该策略自身95%损失分位。",
+          "limitation": "市场压力事件不构成随机试验，MES是条件相关而不是机构对系统风险的因果边际贡献。"
+        },
+        {
+          "title": "金融情景、经验估计与边界",
+          "question": "怎样验证边际预期短缺MES是否可靠地估计系统损失？",
+          "paragraphs": [
+            "审视多经理组合压力期共同损失，MES与系统仓位和现金流冲击分别核算。",
+            "研究应以同一风险持有期、资产集合和时间可得信息独立评价。市场压力事件不构成随机试验，MES是条件相关而不是机构对系统风险的因果边际贡献。"
+          ],
+          "formulas": [
+            {
+              "label": "尾部样本估计",
+              "tex": "\\widehat{\\mathrm{MES}}_i=\\frac{\\sum_tL_{i,t}\\mathbf1(A_t)}{\\sum_t\\mathbf1(A_t)}"
+            },
+            {
+              "label": "普通机构ES",
+              "tex": "\\mathrm{ES}_{i,\\alpha}\\ne\\mathrm{MES}_{i,\\alpha}\\ \\text{一般而言}"
+            }
+          ],
+          "proof": "先按市场整体损失定义极端压力事件A，而非按照机构自身损失阈值选择样本。 在该市场压力事件下求机构损失的条件期望。 估计时使用所有市场压力日期，并明确事件条件与尾部原子处理。",
+          "worked": "四个市场压力日某策略损失分别为1%、3%、−1%、5%，MES样本估计为(1+3−1+5)/4=2%，而不依赖该策略自身95%损失分位。",
+          "limitation": "市场压力事件不构成随机试验，MES是条件相关而不是机构对系统风险的因果边际贡献。"
+        }
+      ],
+      "links": [],
+      "sources": [
+        {
+          "title": "BIS Research",
+          "url": "https://www.bis.org/"
+        },
+        {
+          "title": "Federal Reserve Financial Stability",
+          "url": "https://www.federalreserve.gov/financial-stability.htm"
+        }
+      ]
+    },
+    {
+      "id": "riskmath-x006",
+      "node_id": "riskmath-x006",
+      "title": "CoVaR与条件系统风险",
+      "definition": "CoVaR研究系统损失在某机构处于特定压力状态时的条件分位数。它随条件事件定义和模型形式变化，不应自动解释为机构造成的系统风险。",
+      "assumptions": "定义系统损失L_sys和机构损失L_i、条件概率事件A_i，P(A_i)>0；区分机构压力与正常状态。",
+      "properties": [
+        "CoVaR研究系统损失在某机构处于特定压力状态时的条件分位数。它随条件事件定义和模型形式变化，不应自动解释为机构造成的系统风险。",
+        "定义系统损失L_sys和机构损失L_i、条件概率事件A_i，P(A_i)>0；区分机构压力与正常状态。",
+        "研究多个资金管理人的系统性金融风险时，应控制共同宏观冲击、交易拥挤和合约融资结构。",
+        "机构压力状态可能由同一系统市场因子驱动，条件CoVaR变化不能单凭数据识别机构外溢因果性。"
+      ],
+      "formulas": [
+        {
+          "label": "CoVaR",
+          "tex": "\\mathrm{CoVaR}_{\\alpha\\mid A_i}=\\inf\\{x:\\Pr(L_{\\rm sys}\\le x\\mid A_i)\\ge\\alpha\\}"
+        },
+        {
+          "label": "条件损失CDF",
+          "tex": "F_{{sys}\\mid A_i}(x)=\\Pr(L_{\\rm sys}\\le x,A_i)/\\Pr(A_i)"
+        },
+        {
+          "label": "压力差",
+          "tex": "\\Delta\\mathrm{CoVaR}=\\mathrm{CoVaR}_{\\alpha\\mid A_i^{stress}}-\\mathrm{CoVaR}_{\\alpha\\mid A_i^{normal}}"
+        },
+        {
+          "label": "机构条件",
+          "tex": "A_i^{stress}=\\{L_i\\ge q_{i,\\beta}\\}"
+        }
+      ],
+      "derivation": [
+        {
+          "explanation": "定义压力状态A并构造系统损失条件CDF。",
+          "tex": "F_{sys\\mid A}(x)=P(L_{sys}\\le x,A)/P(A)"
+        },
+        {
+          "explanation": "在这一条件分布上计算系统高置信损失分位，得到CoVaR。",
+          "tex": "\\inf\\{x:F_{sys\\mid A}(x)\\ge\\alpha\\}"
+        },
+        {
+          "explanation": "对机构正常和压力状态的系统条件分位取差，得到状态关联的条件风险增量。",
+          "tex": "\\Delta CoVaR=CoVaR^{stress}-CoVaR^{normal}"
+        }
+      ],
+      "example": "如果系统损失在机构压力日的95%条件分位为15万元，机构正常日为8万元，则ΔCoVaR为7万元。这不是机构导致系统额外亏损7万元的因果证明。",
+      "application": "研究多个资金管理人的系统性金融风险时，应控制共同宏观冲击、交易拥挤和合约融资结构。",
+      "caveat": "机构压力状态可能由同一系统市场因子驱动，条件CoVaR变化不能单凭数据识别机构外溢因果性。",
+      "deep_sections": [
+        {
+          "title": "概率定义及关键性质的证明",
+          "question": "CoVaR与条件系统风险所用概率极限或条件分布如何推出？",
+          "paragraphs": [
+            "CoVaR研究系统损失在某机构处于特定压力状态时的条件分位数。它随条件事件定义和模型形式变化，不应自动解释为机构造成的系统风险。",
+            "定义系统损失L_sys和机构损失L_i、条件概率事件A_i，P(A_i)>0；区分机构压力与正常状态。"
+          ],
+          "formulas": [
+            {
+              "label": "CoVaR",
+              "tex": "\\mathrm{CoVaR}_{\\alpha\\mid A_i}=\\inf\\{x:\\Pr(L_{\\rm sys}\\le x\\mid A_i)\\ge\\alpha\\}"
+            },
+            {
+              "label": "条件损失CDF",
+              "tex": "F_{{sys}\\mid A_i}(x)=\\Pr(L_{\\rm sys}\\le x,A_i)/\\Pr(A_i)"
+            }
+          ],
+          "proof": "定义压力状态A并构造系统损失条件CDF。 在这一条件分布上计算系统高置信损失分位，得到CoVaR。 对机构正常和压力状态的系统条件分位取差，得到状态关联的条件风险增量。",
+          "worked": "如果系统损失在机构压力日的95%条件分位为15万元，机构正常日为8万元，则ΔCoVaR为7万元。这不是机构导致系统额外亏损7万元的因果证明。",
+          "limitation": "机构压力状态可能由同一系统市场因子驱动，条件CoVaR变化不能单凭数据识别机构外溢因果性。"
+        },
+        {
+          "title": "金融情景、经验估计与边界",
+          "question": "怎样验证CoVaR与条件系统风险是否可靠地估计系统损失？",
+          "paragraphs": [
+            "研究多个资金管理人的系统性金融风险时，应控制共同宏观冲击、交易拥挤和合约融资结构。",
+            "研究应以同一风险持有期、资产集合和时间可得信息独立评价。机构压力状态可能由同一系统市场因子驱动，条件CoVaR变化不能单凭数据识别机构外溢因果性。"
+          ],
+          "formulas": [
+            {
+              "label": "压力差",
+              "tex": "\\Delta\\mathrm{CoVaR}=\\mathrm{CoVaR}_{\\alpha\\mid A_i^{stress}}-\\mathrm{CoVaR}_{\\alpha\\mid A_i^{normal}}"
+            },
+            {
+              "label": "机构条件",
+              "tex": "A_i^{stress}=\\{L_i\\ge q_{i,\\beta}\\}"
+            }
+          ],
+          "proof": "定义压力状态A并构造系统损失条件CDF。 在这一条件分布上计算系统高置信损失分位，得到CoVaR。 对机构正常和压力状态的系统条件分位取差，得到状态关联的条件风险增量。",
+          "worked": "如果系统损失在机构压力日的95%条件分位为15万元，机构正常日为8万元，则ΔCoVaR为7万元。这不是机构导致系统额外亏损7万元的因果证明。",
+          "limitation": "机构压力状态可能由同一系统市场因子驱动，条件CoVaR变化不能单凭数据识别机构外溢因果性。"
+        }
+      ],
+      "links": [],
+      "sources": [
+        {
+          "title": "BIS Research",
+          "url": "https://www.bis.org/"
+        },
+        {
+          "title": "Federal Reserve Financial Stability",
+          "url": "https://www.federalreserve.gov/financial-stability.htm"
+        }
+      ]
+    }
+  ]
+}
