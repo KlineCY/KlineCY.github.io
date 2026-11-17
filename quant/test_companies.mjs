@@ -12,7 +12,7 @@ assert.equal(core.schema_version,1);
 assert.equal(research.schema_version,1);
 assert(core.companies.length>=156,"historical company records removed");
 assert.equal(new Set(core.companies.map(c=>c.id)).size,core.companies.length);
-assert(research.profiles.length>=99,"company research coverage shrank");
+assert(research.profiles.length>=104,"company research coverage shrank");
 assert.equal(new Set(research.profiles.map(p=>p.company_id)).size,research.profiles.length);
 const ids=new Set(core.companies.map(c=>c.id));
 let axes=0,facts=0,officialLinks=0;
@@ -39,15 +39,21 @@ for(const p of research.profiles){
  }
  if(p.careers_url)assert(/^https:\/\//.test(p.careers_url));
 }
-assert(axes>=297&&facts>=153,"research coverage below required quality");
+assert(axes>=312&&facts>=163,"research coverage below required quality");
 const verifiedIds=["renaissance","global-quant-001","global-quant-002","global-quant-003","global-quant-005","cn-qiml-062","cn-qiml-055","cn-qiml-042","cn-public-bucket-013","cn-qiml-046","cn-qiml-002","cn-public-bucket-001","cn-qiml-054","cn-amac-002"];
 const fourthWaveIds=["cn-amac-001","cn-qiml-039","cn-qiml-061","cn-qiml-063","cn-qiml-066","cn-qiml-033","cn-qiml-060","cn-qiml-047","cn-qiml-024","cn-qiml-035","cn-qiml-027","cn-qiml-050","cn-qiml-044","cn-qiml-043","cn-qiml-052","cn-qiml-019"];
 verifiedIds.push(...fourthWaveIds);
 const fifthWaveIds=["cn-public-bucket-012","cn-public-bucket-009","cn-public-bucket-015","cn-public-bucket-003","cn-public-bucket-011","cn-qiml-015","cn-qiml-031","cn-qiml-004","cn-qiml-067","cn-qiml-026","cn-qiml-025","cn-qiml-048","cn-qiml-021","cn-qiml-020"];
 verifiedIds.push(...fifthWaveIds);
 const sixthWaveIds=['global-quant-007','global-quant-016','cn-public-bucket-010','cn-qiml-059'];verifiedIds.push(...sixthWaveIds);
+const reconciledOfficialIds=["global-quant-011","global-quant-020","global-quant-004","global-quant-010"];verifiedIds.push(...reconciledOfficialIds);
+for(const id of [...reconciledOfficialIds,"global-quant-024"])assert(research.profiles.some(p=>p.company_id===id),"missing new sourced research "+id);
+assert(core.companies.find(c=>c.id==="global-quant-024").entity_status.includes("已解散"),"Saemor dissolution not disclosed");
+assert(core.companies.find(c=>c.id==="global-quant-024").entity_status_source.includes("lei.bloomberg.com"),"Saemor legal entity source missing");
+assert(core.companies.find(c=>c.id==="global-quant-010").description.includes("Mercer"),"SECOR acquisition context missing");
+assert(html.includes("法人存续状态")&&html.includes("法律实体登记来源")&&html.includes("资料核验提示"),"legal status evidence must be visible in company detail");
 assert.equal(new Set(verifiedIds).size,verifiedIds.length,"duplicate website verification");
-assert.equal(core.companies.filter(c=>c.official_website_source).length,48,"unexpected official source metadata");
+assert.equal(core.companies.filter(c=>c.official_website_source).length,52,"unexpected official source metadata");
 assert.equal(core.companies.find(c=>c.id==="cn-qiml-035").category,"综合资管","Tongyi should not be ungroundedly advertised as wholly quant");
 assert.equal(core.companies.find(c=>c.id==="cn-public-bucket-009").category,"宏观投资","macro manager should not be described as quant");
 assert(core.companies.find(c=>c.id==="cn-qiml-020").entity_note?.includes("2026年2月9日"),"public regulatory finding should remain visible");
@@ -224,7 +230,7 @@ ctx.db=core;ctx.researchDb=research;
 evalJS("firms=db.companies;byId=new Map(firms.map(c=>[c.id,c]));profiles=new Map(researchDb.profiles.map(p=>[p.company_id,p]));");
 el("sourceFilter").value="verified";
 evalJS("render()");
-assert(el("status").textContent.includes("48 / 156"),"official source filter should match 30 newly verified institutions");
+assert(el("status").textContent.includes("52 / 156"),"official source filter should match all 52 explicitly linked institutions");
 el("sourceFilter").value="";
 el("q").value="天演";
 evalJS("render()");
@@ -232,6 +238,11 @@ assert(el("status").textContent.includes("1 / 156"),"confirmed company should be
 evalJS("openDetails('cn-qiml-062')");
 assert(el("detailBody").innerHTML.includes("官方网站核验来源"),"verified source must render in detail");
 assert(el("detailBody").innerHTML.includes("研究档案"),"full technical dossier must remain accessible");
+evalJS("openDetails('global-quant-024')");
+assert(el("detailBody").innerHTML.includes("法人存续状态")&&el("detailBody").innerHTML.includes("法律实体登记来源"),"Saemor dissolved status not surfaced");
+assert(el("detailBody").innerHTML.includes("2023"),"Saemor dissolution date absent from detail");
+evalJS("openDetails('global-quant-010')");
+assert(el("detailBody").innerHTML.includes("Mercer"),"SECOR acquisition context not visible");
 el("q").value="";
 
 
