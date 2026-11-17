@@ -12,7 +12,7 @@ assert.equal(core.schema_version,1);
 assert.equal(research.schema_version,1);
 assert(core.companies.length>=156,"historical company records removed");
 assert.equal(new Set(core.companies.map(c=>c.id)).size,core.companies.length);
-assert(research.profiles.length>=89,"company research coverage shrank");
+assert(research.profiles.length>=99,"company research coverage shrank");
 assert.equal(new Set(research.profiles.map(p=>p.company_id)).size,research.profiles.length);
 const ids=new Set(core.companies.map(c=>c.id));
 let axes=0,facts=0,officialLinks=0;
@@ -39,14 +39,15 @@ for(const p of research.profiles){
  }
  if(p.careers_url)assert(/^https:\/\//.test(p.careers_url));
 }
-assert(axes>=267&&facts>=143,"research coverage below required quality");
+assert(axes>=297&&facts>=153,"research coverage below required quality");
 const verifiedIds=["renaissance","global-quant-001","global-quant-002","global-quant-003","global-quant-005","cn-qiml-062","cn-qiml-055","cn-qiml-042","cn-public-bucket-013","cn-qiml-046","cn-qiml-002","cn-public-bucket-001","cn-qiml-054","cn-amac-002"];
 const fourthWaveIds=["cn-amac-001","cn-qiml-039","cn-qiml-061","cn-qiml-063","cn-qiml-066","cn-qiml-033","cn-qiml-060","cn-qiml-047","cn-qiml-024","cn-qiml-035","cn-qiml-027","cn-qiml-050","cn-qiml-044","cn-qiml-043","cn-qiml-052","cn-qiml-019"];
 verifiedIds.push(...fourthWaveIds);
 const fifthWaveIds=["cn-public-bucket-012","cn-public-bucket-009","cn-public-bucket-015","cn-public-bucket-003","cn-public-bucket-011","cn-qiml-015","cn-qiml-031","cn-qiml-004","cn-qiml-067","cn-qiml-026","cn-qiml-025","cn-qiml-048","cn-qiml-021","cn-qiml-020"];
 verifiedIds.push(...fifthWaveIds);
+const sixthWaveIds=['global-quant-007','global-quant-016','cn-public-bucket-010','cn-qiml-059'];verifiedIds.push(...sixthWaveIds);
 assert.equal(new Set(verifiedIds).size,verifiedIds.length,"duplicate website verification");
-assert.equal(core.companies.filter(c=>c.official_website_source).length,44,"unexpected official source metadata");
+assert.equal(core.companies.filter(c=>c.official_website_source).length,48,"unexpected official source metadata");
 assert.equal(core.companies.find(c=>c.id==="cn-qiml-035").category,"综合资管","Tongyi should not be ungroundedly advertised as wholly quant");
 assert.equal(core.companies.find(c=>c.id==="cn-public-bucket-009").category,"宏观投资","macro manager should not be described as quant");
 assert(core.companies.find(c=>c.id==="cn-qiml-020").entity_note?.includes("2026年2月9日"),"public regulatory finding should remain visible");
@@ -64,8 +65,10 @@ for(const term of ['id="profileCount"','id="profileFilter"','id="currencyFilter"
  assert(html.includes(term),"missing company atlas UI "+term);
 }
 assert(!html.includes("学习进度")&&!html.includes("标记已学"),"unrequested learning tracker");
+assert(!html.includes("一手来源深度档案")&&!html.includes("一手来源研究档案"),"unrequested profile badge must remain removed");
+assert(!html.includes("profile-badge\">一手来源"),"promotional research badge returned");
 assert.equal(methods.schema_version,1);
-assert(methods.lessons.length>=48,"company curriculum missing full chapters");
+assert(methods.lessons.length>=100,"company curriculum missing full chapters");
 assert.equal(new Set(methods.lessons.map(l=>l.id)).size,methods.lessons.length);
 let units=0,maths=0;
 for(const lesson of methods.lessons){
@@ -82,16 +85,16 @@ for(const lesson of methods.lessons){
   units++;
  }
 }
-assert(units>=192&&maths>=384,"technical curriculum compressed");
+assert(units>=400&&maths>=800,"technical curriculum compressed");
 for(const id of ["company-method-01","company-method-02","company-method-03","company-method-04","company-method-05","company-method-06","company-method-07","company-method-08","company-method-09","company-method-10","company-method-11","company-method-12","company-method-13","company-method-14","company-method-15","company-method-16","company-method-17","company-method-18","company-method-19","company-method-20","company-method-21"])assert(methods.lessons.some(l=>l.id===id),"missing subject area "+id);
-for(let n=22;n<=48;n++)assert(methods.lessons.some(l=>l.id==="company-method-"+n),"missing new technical subject "+n);
-const domainCounts={"数学与统计":17,"机器学习与AI":15,"衍生品与交易":16,"组合与风控":17,"实务工程":17};
+for(let n=22;n<=100;n++)assert(methods.lessons.some(l=>l.id==="company-method-"+n),"missing new technical subject "+n);
+const domainCounts={"数学与统计":47,"机器学习与AI":25,"衍生品与交易":46,"组合与风控":39,"实务工程":29};
 for(const lesson of methods.lessons){
  assert(Array.isArray(lesson.domains)&&lesson.domains.length>0,"untagged lesson "+lesson.id);
  assert(lesson.domains.every(tag=>tag in domainCounts),"unknown course category "+lesson.id);
 }
 for(const [tag,count] of Object.entries(domainCounts))assert.equal(methods.lessons.filter(l=>l.domains.includes(tag)).length,count,"incorrect course taxonomy "+tag);
-for(const fragment of ['id="methodDomain"','id="methodSearch"',"method-search-label","company-method[open] .katex-zone","company-methods.json",'id="companyMethodList"','id="methodStats"',"function renderCompanyMethods","function renderCourseMath","katex.min.js","katex-zone"])assert(html.includes(fragment),"curriculum reader missing "+fragment);
+for(const fragment of ['id="methodPrev"','id="methodNext"','id="methodAll"','id="methodPageStatus"','id="methodDomain"','id="methodSearch"',"method-search-label","company-method[open] .katex-zone","company-methods.json",'id="companyMethodList"','id="methodStats"',"function renderCompanyMethods","function renderCourseMath","katex.min.js","katex-zone"])assert(html.includes(fragment),"curriculum reader missing "+fragment);
 const near=(a,b,tol=1e-8)=>assert(Math.abs(a-b)<=tol,"finance identity "+a+" != "+b);
 near(80+50-20,110);
 near(112-100*(1+.05),7);
@@ -130,6 +133,14 @@ near(.6*.95,0.57);
 near((1.06*.95)-1,.007);
 near((40-30-15),-5);
 near((.8*.2+.2*.7),.30);
+near((98+3)/100-1,.01);
+near(1.2*.8-1,-.04);
+near(1.06/1.04-1,0.01923076923076916);
+near(1-Math.exp(-.02),0.019801326693244747);
+near((120-90)/120,.25);
+near(.5*.1+.5*(-.1),0);
+near(.6*.3+.4*.7,.46);
+near(.8*.5+.2*.5,.5);
 near(Math.exp(-.02),.9801986733067553);
 near(1-Math.exp(-1),.6321205588285577);
 near(.01*100,1);
@@ -176,36 +187,44 @@ assert(smoke.includes("&lt;img")&&smoke.includes("&lt;script&gt;"));
 assert(!smoke.includes("<script>alert(1)</script>")&&!smoke.includes('<img src=x'));
 assert(smoke.includes("https://example.com/a?q=1&amp;x=2"));
 assert.equal(evalJS("researchHTML('not-yet-researched')"),"");
+
 ctx.courseData=methods;
 evalJS("renderCompanyMethods(courseData)");
-assert(el("methodStats").textContent.includes("48 讲")&&el("methodStats").textContent.includes("384 组"),"curriculum count not rendered");
-assert((el("companyMethodList").innerHTML.match(/class="course-unit"/g)||[]).length===192,"curriculum reader lost technical sections");
-assert((el("companyMethodList").innerHTML.match(/class="katex-zone"/g)||[]).length===384,"curriculum reader lost formulas");
+assert(el("methodStats").textContent.includes("100 讲")&&el("methodStats").textContent.includes("800 组"),"course totals not rendered");
+assert((el("companyMethodList").innerHTML.match(/class="course-unit"/g)||[]).length===48,"first page should show twelve intact four-section courses");
+assert((el("companyMethodList").innerHTML.match(/class="katex-zone"/g)||[]).length===96,"first page should show all 96 math expressions");
+assert(el("methodPageStatus").textContent.includes("第 1 / 9 组"),"100 courses should have nine pages at size twelve");
+evalJS("methodPage=1;renderCompanyMethods(courseData)");
+assert(el("methodPageStatus").textContent.includes("第 2 / 9 组"),"course pagination must advance");
+assert((el("companyMethodList").innerHTML.match(/class="course-unit"/g)||[]).length===48,"second page lost full sections");
+evalJS("methodShowAll=true;renderCompanyMethods(courseData)");
+assert((el("companyMethodList").innerHTML.match(/class="course-unit"/g)||[]).length===400,"show-all must preserve all four hundred technical sections");
+assert((el("companyMethodList").innerHTML.match(/class="katex-zone"/g)||[]).length===800,"show-all must preserve all eight hundred formulas");
+evalJS("methodShowAll=false;methodPage=0;");
 el("methodDomain").value="机器学习与AI";
 evalJS("renderCompanyMethods(courseData)");
-assert(el("methodStats").textContent.includes("当前匹配 15 讲"),"domain filter count incorrect");
-assert((el("companyMethodList").innerHTML.match(/class="course-unit"/g)||[]).length===60,"domain filter lost course units");
+assert(el("methodStats").textContent.includes("当前匹配 25 讲"),"AI domain filter count incorrect");
+assert((el("companyMethodList").innerHTML.match(/class="course-unit"/g)||[]).length===48,"filtered first page should preserve full sections");
+evalJS("methodShowAll=true;renderCompanyMethods(courseData)");
+assert((el("companyMethodList").innerHTML.match(/class="course-unit"/g)||[]).length===100,"domain show-all should include exactly twenty-five complete courses");
 el("methodDomain").value="";
-evalJS("renderCompanyMethods(courseData)");
-assert((el("companyMethodList").innerHTML.match(/class="course-unit"/g)||[]).length===192,"domain reset lost original curricula");
-
+evalJS("methodShowAll=false;methodPage=0;renderCompanyMethods(courseData)");
 el("methodSearch").value="可转债";
 evalJS("renderCompanyMethods(courseData)");
-assert(el("methodStats").textContent.includes("当前匹配"),"course search not active");
-const matches=(el("companyMethodList").innerHTML.match(/class="course-unit"/g)||[]).length;
-assert(matches>0&&matches<192,"course search did not narrow curriculum");
+assert(el("methodStats").textContent.includes("当前匹配"),"course keyword search inactive");
+assert((el("companyMethodList").innerHTML.match(/class="course-unit"/g)||[]).length>0,"search omitted relevant courses");
 el("methodSearch").value="___impossible_subject_keyword___";
 evalJS("renderCompanyMethods(courseData)");
 assert(el("companyMethodList").innerHTML.includes("未找到匹配课程"),"missing honest empty result");
 el("methodSearch").value="";
-evalJS("renderCompanyMethods(courseData)");
-assert((el("companyMethodList").innerHTML.match(/class="course-unit"/g)||[]).length===192,"course search must restore every complete section");
+evalJS("methodPage=0;renderCompanyMethods(courseData)");
+assert((el("companyMethodList").innerHTML.match(/class="course-unit"/g)||[]).length===48,"clearing search should return original first page");
 
 ctx.db=core;ctx.researchDb=research;
 evalJS("firms=db.companies;byId=new Map(firms.map(c=>[c.id,c]));profiles=new Map(researchDb.profiles.map(p=>[p.company_id,p]));");
 el("sourceFilter").value="verified";
 evalJS("render()");
-assert(el("status").textContent.includes("44 / 156"),"official source filter should match 30 newly verified institutions");
+assert(el("status").textContent.includes("48 / 156"),"official source filter should match 30 newly verified institutions");
 el("sourceFilter").value="";
 el("q").value="天演";
 evalJS("render()");
