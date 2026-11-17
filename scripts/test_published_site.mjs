@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 
 const repo=new URL("../",import.meta.url);
 const read=path=>fs.readFileSync(new URL(path,repo),"utf8");
-const files=["quant/ml/index.html","quant/math/index.html","quant/index.html"];
+const files=["quant/ml/index.html","quant/math/index.html","quant/index.html","quant/assets/index.html","quant/feeds/index.html","quant/research/index.html","quant/wiki/index.html","quant/papers/index.html","quant/rankings/index.html","quant/news/index.html"];
 const retired=[
  "quant/CURRICULUM_V2.md","quant/COMPANY_DATA_README.md",
  "quant/ml/atlas/README.md","quant/research/README.md",
@@ -38,4 +38,51 @@ assert((math.match(/<details class="math-spectral-path/g)||[]).length===50);
 assert(ml.indexOf('id="atlas-reader-section"')<ml.indexOf('aria-label="系统学习路径"'));
 assert(math.indexOf('id="math-reader-section"')<math.indexOf('class="math-study-library"'));
 assert(!fs.existsSync(new URL("quant/ml/test_examples.py",repo)));
+
+const json=path=>JSON.parse(read(path));
+const assetData=json("quant/assets/data.json");
+assert.equal(assetData.assets.length,113,"Asset coverage changed unexpectedly");
+assert.equal(new Set(assetData.assets.map(a=>a.id)).size,113,"Duplicate asset identifier");
+for(const a of assetData.assets){
+ assert(a.notes?.length>=30,"Asset lacks specific pricing/data risk notes: "+a.id);
+ assert(/^https:\/\//.test(a.data_source?.url||""),"Asset missing original data-provider URL: "+a.id);
+}
+const siteData=json("quant/rankings/sites.json");
+assert.equal(siteData.sites.length,51,"Academic portal coverage changed");
+for(const p of siteData.sites){
+ assert(p.description?.length>=30,"Academic site purpose is too generic: "+p.id);
+ assert(/^https:\/\//.test(p.url),"Invalid academic site URL: "+p.id);
+}
+const wikiMeta=json("quant/wiki/manifest.json");
+const wikiTerms=wikiMeta.data_files.flatMap(name=>json("quant/wiki/"+name).terms);
+assert.equal(wikiTerms.length,wikiMeta.total_terms,"Wiki index and data files disagree");
+const expandedWiki=wikiTerms.filter(t=>t.example?.includes("数值例题："));
+assert(expandedWiki.length>=64,"Encyclopedia lost independent numerical case coverage");
+const catalog=json("quant/feeds/catalog.json"),providers=json("quant/feeds/providers.json");
+assert.equal(catalog.categories.length,7,"Data feed category coverage changed");
+assert.equal(catalog.items.length,497,"Data source field coverage changed");
+const providerIds=new Set(providers.providers.map(p=>p.id));
+assert.equal(new Set(catalog.items.map(x=>x.id)).size,497);
+for(const c of catalog.categories){
+ assert(c.research_protocol?.length>=30&&c.failure_modes?.length>=20,"Data-family research contract missing: "+c.id);
+}
+const researched=catalog.items.filter(x=>x.research_protocol&&x.failure_modes);
+assert(researched.length>=35,"Field-level PIT research protocols missing");
+for(const item of catalog.items)for(const id of item.provider_ids)
+ assert(providerIds.has(id),"Unknown data provider: "+item.id+" -> "+id);
+const strategyData=json("quant/research/strategies.json");
+assert.equal(strategyData.strategies.length,70,"Strategy template coverage changed");
+for(const strategy of strategyData.strategies){
+ assert(strategy.code?.includes("def signals("),"Strategy code missing: "+strategy.id);
+ assert(strategy.research?.validation&&strategy.research?.derivation,"Strategy proof or validation missing: "+strategy.id);
+}
+const paperData=json("quant/papers/data.json");
+const paperIds=new Set(paperData.papers.map(p=>p.id));
+assert.equal(paperIds.size,paperData.papers.length,"Duplicate research paper");
+for(const issue of paperData.issues)for(const id of issue.papers)
+ assert(paperIds.has(id),"Paper archive references nonexistent paper "+id);
+const macroNews=json("quant/news/news.json");
+assert.equal(new Set(macroNews.items.map(item=>item.id)).size,macroNews.items.length,"Duplicate macro news ID");
+assert(macroNews.items.every(item=>item.date&&item.url&&item.title),"Macro release lacks essential source metadata");
+
 console.log("PASS: published routes are topical, maintenance records and legacy readers are absent, runtime assets resolve");
