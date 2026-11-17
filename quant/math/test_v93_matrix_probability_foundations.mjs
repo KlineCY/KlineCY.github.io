@@ -51,11 +51,11 @@ for(const lesson of added){
  assert.equal(lesson.formulas.length,3,id+" must contain three precise core relations");
  assert.equal(lesson.derivation.length,3,id+" must have three explicit derivations");
  assert(lesson.properties.length>=4&&lesson.properties.every(x=>x.length>=18));
- assert.equal(lesson.deep_sections.length,3,id+" should have three substantive deep chapters");
+ assert(lesson.deep_sections.length>=3,id+" original three deep chapters missing");
  const titles=new Set();
  for(const formula of lesson.formulas){assert(formula.label.length>=4);tex(formula.tex);}
  for(const item of lesson.derivation){assert(item.explanation.length>=25);tex(item.tex);}
- for(const section of lesson.deep_sections){
+ for(const section of lesson.deep_sections.slice(0,3)){
   assert(section.title.length>=8&&section.question.length>=10,id+" vague title");
   assert(!titles.has(section.title),id+" repeated chapter");
   titles.add(section.title);
@@ -69,6 +69,12 @@ for(const lesson of added){
  }
  assert(/[\u3400-\u9FFF]/u.test(JSON.stringify(lesson)),id+" missing Chinese narrative");
  assert(!/TODO|FIXME|Lorem ipsum/i.test(JSON.stringify(lesson)),id+" draft text");
+}
+for(const m of matrix.lessons){
+ assert.equal(m.deep_sections.length,4,m.id+" fourth analytical chapter missing");
+ const add=m.deep_sections[3];
+ assert(add.formulas.length===1&&add.proof.length>=80&&add.worked.length>=40&&add.limitation.length>=30,m.id+" added chapter incomplete");
+ katex.renderToString(add.formulas[0].tex,{throwOnError:true,strict:"error",displayMode:true});
 }
 assert.equal(chapters,36);
 assert.equal(formulaCount,108);
