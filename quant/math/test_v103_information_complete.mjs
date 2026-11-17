@@ -322,6 +322,26 @@ for(const filename of files){
  assert(actual.every(l=>l.deep_sections.length>=4),"Advanced information sections not available in reader "+filename);
  assert(actual.every(l=>l.deep_sections.at(-1).formulas.length>=2),"Reader lost advanced signal mathematics "+filename);
 }
+const finalDepthTargets={
+  "information-n0499": "状态空间局部水平模型的实时滤波与事后平滑",
+  "information-n0500": "观测噪声的一阶负相关与潜在单期方差反演",
+  "information-n0501": "离散采样的Nyquist混叠：不同连续频率为什么产生相同数据",
+  "information-n0503": "条件互信息的链式法则与XOR型协同预测信息"
+};
+for(const [id,title] of Object.entries(finalDepthTargets)){
+ const lesson=newest.find(l=>l.id===id);
+ assert(lesson,"original complete lecture absent "+id);
+ const section=lesson.deep_sections.find(s=>s.title===title);
+ assert(section,"new full proof missing "+title);
+ assert(section.paragraphs.length===2&&section.paragraphs.every(p=>p.length>=85),"weak mathematical explanation "+id);
+ assert(section.formulas.length===2&&section.proof.length>=135&&section.worked.length>=105&&section.limitation.length>=75,"missing exact derivation or example "+id);
+ for(const equation of section.formulas)formula(equation.tex,id+" advanced proof");
+}
+near("Kalman local level gain",4/(4+1),.8);
+near("online state filter",100+.8*(103-100),102.4);
+near("microstructure noise inverse",.00018+2*(-.00004),.0001);
+near("sample alias frequency",Math.cos(2*Math.PI*.6*2),Math.cos(2*Math.PI*.4*2));
+near("XOR conditional bits",1-0,1);
 console.log("V103 PASS:",newest.length,"new full lessons;",all.length,"total;",
  mathCount,"strict KaTeX;",deepCount,"deep proof chapters;",deepChars,"deep prose characters;",
  checks,"independent computations;",linkCount,"cross references; information 32/32.");
