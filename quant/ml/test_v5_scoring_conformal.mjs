@@ -19,8 +19,8 @@ for(const file of files){assert.equal(file.schema,1);assert(file.chapters.length
 for(const x of rows){
  assert(!previous.has(x.id),"duplicate original course "+x.id);
  assert(x.goal.length>=80&&x.protocol.length>=4&&x.sources.length>=2);
- assert.equal(x.sections.length,5,"short V5 expanded textbook "+x.id);
- assert.equal(new Set(x.sections.map(s=>s.title)).size,5);
+ assert.equal(x.sections.length,["m09-c09-p01","m23-c10-p01","m23-c10-p02"].includes(x.id)?7:5,"all original and advanced sections required "+x.id);
+ assert.equal(new Set(x.sections.map(s=>s.title)).size,x.sections.length);
  for(const s of x.sections){
   assert(s.question?.length>=12&&s.paragraphs.length===2&&s.paragraphs.every(p=>p.length>=48),"thin explanatory paragraph "+x.id+" "+s.title);
   assert(s.worked.length>=48&&s.boundary.length>=35,"missing quantitative example or applicability limit "+x.id+" "+s.title);
@@ -50,8 +50,12 @@ assert.equal(new Set(core.catalog.items.map(x=>x.id)).size,776,"duplicate naviga
 for(const id of expected){
  const lesson=core.domains[id.slice(0,3)][id];
  assert(lesson?.html.includes("atlas-concept-toc"),"missing lesson body "+id);
- assert.equal((lesson.html.match(/class="atlas-concept-unit"/g)||[]).length,5,"lost detailed sections "+id);
+ assert.equal((lesson.html.match(/class="atlas-concept-unit"/g)||[]).length,rows.find(l=>l.id===id).sections.length,"lost detailed sections "+id);
  assert(lesson.html.includes('tabindex="0" role="region"'),"formula keyboard scrolling missing "+id);
+}
+for(const l of rows.filter(l=>["m09-c09-p01","m23-c10-p01","m23-c10-p02"].includes(l.id)))for(const s of l.sections.slice(5)){
+ assert(s.paragraphs.length===2&&s.paragraphs.every(p=>p.length>=65)&&s.equations.length===2&&s.worked.length>=75&&s.boundary.length>=55,"advanced probability material incomplete "+l.id);
+ for(const eq of s.equations)katex.renderToString(eq.tex,{throwOnError:true,strict:"error"});
 }
 const near=(a,b,t=1e-8)=>assert(Math.abs(a-b)<t,"numeric invariant "+a+" != "+b);
 near((1-.7)**2,.09);
@@ -68,6 +72,13 @@ near(Math.log(2*Math.PI)/2+Math.log(2),1.612085713764618);
 near(Math.log(2*Math.PI)/2+2,2.9189385332046727);
 near(1.612085713764618+.5,2.112085713764618);
 near(.3+.7,1);
+near(-1000-Math.log(2)+Math.log(1+Math.exp(-10)),-1000.6931017816607);
+near(.5*1+.5*1+.5*1**2+.5*(-1)**2,2);
+near(.5*1+.5*0,.5);
+near(.5*.16+.5*2.56,1.36);
+near(1/1.36,.7352941176470588);
+near(.8/.2,4);
+near(1/3,.3333333333333333);
 const html=fs.readFileSync(new URL("index.html",here),"utf8"),css=fs.readFileSync(new URL("atlas.css",here),"utf8");
 for(const id of expected)assert(html.includes("#lesson/"+id),"fifth advanced learning route missing "+id);
 assert(html.includes("atlas.js?v=20261109"));
