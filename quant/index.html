@@ -26,7 +26,7 @@
 .research-deep .research-fact p{margin:0 0 4px}
 .research-deep .research-fact small{font-size:12px}
 .research-axis{border:1px solid #e1e8ef;padding:15px 18px;margin:12px 0;background:#f8fafc}
-.research-axis p{margin:8px 0;line-height:1.75}
+.research-axis p{margin:9px 0;line-height:1.85;overflow-wrap:anywhere;word-break:normal}.research-axis strong{color:#183e5d}.research-axis .scope-warning{overflow-wrap:anywhere}
 .research-axis .methods{font-size:12px;color:#44617b}
 .research-deep .scope-warning{border-left:3px solid #c99851;background:#fff9ee;padding:12px 15px;margin:16px 0;font-size:12px}
 .detail-links{display:flex;flex-wrap:wrap;gap:16px;margin:10px 0}
@@ -34,7 +34,7 @@
 .data-explanation article{background:white;padding:16px 18px;border:1px solid var(--line)}
 .data-explanation h2{font-size:14px;margin:0 0 7px;color:var(--ink)}
 .data-explanation p{font-size:12px;color:var(--muted);margin:0}
-dialog{width:min(820px,96vw)}
+dialog{width:min(920px,96vw);max-height:90vh;overflow:auto;overscroll-behavior:contain}
 @media(max-width:850px){.data-explanation{grid-template-columns:1fr}.stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:520px){.stat b{font-size:26px}.research-axis{padding:12px}.research-deep h3{font-size:19px}.controls input,.controls select{min-width:0;width:100%}}
 .company-curriculum{border-top:2px solid var(--line);padding-top:30px;margin:42px 0}
@@ -124,7 +124,7 @@ function compareWithinCurrency(a,b,ascending){const ca=isAum(a)?a.scale.currency
 function alpha(a,b){const aCN=/[\u3400-\u9fff]/.test(a.name),bCN=/[\u3400-\u9fff]/.test(b.name);if(aCN&&bCN)return a.name.localeCompare(b.name,"zh-CN-u-co-pinyin");return a.name.localeCompare(b.name,"en",{sensitivity:"base"})}
 function render(){const query=$("q").value.trim().toLowerCase(),sf=$("scaleFilter").value,order=$("sortFilter").value;
 const cur=$("currencyFilter").value,pf=$("profileFilter").value,source=$("sourceFilter").value;
-const view=firms.filter(c=>(filter.kind==="all"||(filter.kind==="type"?c.category===filter.value:c.country===filter.value))&&(!query||[c.name,c.name_cn,c.base,c.country,c.category,c.description,...(c.products||[]),...(c.strategies||[]),...(profiles.get(c.id)?.roles||[]),...(profiles.get(c.id)?.research_axes||[]).map(x=>x.title+" "+x.context+" "+x.methods.join(" "))].join(" ").toLowerCase().includes(query))&&isMatchScale(c,sf)&&(!cur||c.scale?.currency===cur)&&(pf!=="deep"||profiles.has(c.id))&&(pf!=="basic"||!profiles.has(c.id))&&(source!=="verified"||!!c.official_website_source)&&(source!=="unverified"||!c.official_website_source));
+const view=firms.filter(c=>(filter.kind==="all"||(filter.kind==="type"?c.category===filter.value:c.country===filter.value))&&(!query||[c.name,c.name_cn,c.base,c.country,c.category,c.description,...(c.products||[]),...(c.strategies||[]),...(profiles.get(c.id)?.roles||[]),...(profiles.get(c.id)?.research_axes||[]).map(x=>[x.title,x.context,x.methods.join(" "),x.question,x.verification,x.derivation||"",x.worked_example||"",x.pitfalls||""].join(" "))].join(" ").toLowerCase().includes(query))&&isMatchScale(c,sf)&&(!cur||c.scale?.currency===cur)&&(pf!=="deep"||profiles.has(c.id))&&(pf!=="basic"||!profiles.has(c.id))&&(source!=="verified"||!!c.official_website_source)&&(source!=="unverified"||!c.official_website_source));
 view.sort((a,b)=>order==="alpha"?alpha(a,b):compareWithinCurrency(a,b,order==="scaleAsc"));
 const totalPages=Math.max(1,Math.ceil(view.length/pageSize));page=Math.min(Math.max(0,page),totalPages-1);let visible=view.slice(page*pageSize,(page+1)*pageSize);
 $("status").textContent=(filter.kind==="all"?"全部公司":filter.value)+" · "+view.length+" / "+firms.length+" 家 · "+view.filter(x=>profiles.has(x.id)).length+" 家含研究资料"+(order==="alpha"?"":" · 规模按币种分组，非全球跨币排名");
