@@ -459,6 +459,27 @@ near("Inventory reserve price after positive inventory",100-.01*10*.04,99.996);
 near("IPW quote opportunity latent mean",.8*2+.2*(-4),.8);
 near("CCE empirical fixed action deviation bound",5/100,.05);
 
+const appendedMarketMicrostructure={
+ "control-n0565":"限价排队的Erlang成交等待时间与订单前量",
+ "control-n0567":"时间变换定理的补偿强度与Poisson订单模型诊断",
+ "control-n0568":"最优连续报价映射到最小跳价网格的舍入误差界",
+ "control-n0570":"相关均衡与粗相关均衡的条件偏离检验差异"
+};
+for(const [id,title] of Object.entries(appendedMarketMicrostructure)){
+ const l=newest.find(x=>x.id===id),sec=l?.deep_sections.find(x=>x.title===title);
+ assert(sec,"market-making theory missing "+id);
+ assert(sec.paragraphs.length===2&&sec.paragraphs.every(p=>p.length>=95),"queue, quoting or game assumptions incomplete "+id);
+ assert(sec.formulas.length===2&&sec.proof.length>=140&&sec.worked.length>=115&&sec.limitation.length>=80,"independent market-making result incomplete "+id);
+ for(const eq of sec.formulas)formula(eq.tex,id+" appended");
+}
+near("FIFO Erlang third Poisson event",1-Math.exp(-3)*(1+3+9/2),.5768099188731565);
+near("Poisson first event overstates fill",1-Math.exp(-3),.950212931632136);
+near("mean time of third arrival",3/3,1);
+near("time-rescale exponential survival",Math.exp(-1),.36787944117144233);
+near("tick nearest executed price",.01*Math.round(100.023/.01),100.02);
+near("tick local objective bound",20*.003,.06);
+near("correlated recommendation fixed RPS utility",(0+1-1)/3,0);
+near("correlated conditional profitable deviation",1-0,1);
 console.log("V105 PASS",newest.length,"new control lectures;",all.length,"total;",
  mathCount,"strict KaTeX;",deepCount,"deep proof chapters;",deepChars,"deep prose chars;",
  checks,"independent numerics;",linkCount,"valid cross-links; control theory 30/30.");
