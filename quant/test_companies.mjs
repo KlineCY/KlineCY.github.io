@@ -56,6 +56,24 @@ for(const p of newlyDeepened){
 }
 assert.equal(newDeepAxes,348,"not all remaining research axes were developed");
 assert.equal(research.profiles.flatMap(p=>p.research_axes).filter(a=>a.derivation&&a.worked_example&&a.pitfalls).length,426,"all 426 research directions must remain detailed");
+const crossDomainCompanyIds=["jane-street","hrt","citadel-securities","imc","optiver","xtx","flow","virtu","aqr","two-sigma","citadel","deshaw","qrt","worldquant","blackwing-cn","century-cn","chengqi-cn","highflyer-cn","lingjun-cn","mengxi-cn","minghong-cn","ubiquant-cn","wizard-cn","yanfu-cn","yanhe-cn","acadian","arrowstreet","blackrock","bridgewater","cfm","dimensional","man","robeco","systematica","winton"];
+assert.equal(crossDomainCompanyIds.length,35,"cross-domain case archive should cover thirty-five independent firms");
+let independentTechnicalCases=0;
+for(const id of crossDomainCompanyIds){
+ const p=research.profiles.find(x=>x.company_id===id);
+ assert(p&&p.research_axes.length>=3,"company technical case scope missing "+id);
+ for(const a of p.research_axes.slice(0,2)){
+  assert(a.derivation.includes("独立专题推导：")&&a.derivation.length>=150,"independent quantitative derivation missing "+id+"/"+a.title);
+  assert(a.worked_example.includes("条件数值例题：")&&a.worked_example.length>=95,"independently calculated scenario missing "+id+"/"+a.title);
+  assert(a.verification.includes("补充证伪检验：")&&a.verification.length>=80,"falsification design missing "+id+"/"+a.title);
+  assert(a.pitfalls.includes("机构归因限制："),"unverified proprietary attribution risk "+id+"/"+a.title);
+  independentTechnicalCases++;
+ }
+}
+assert.equal(independentTechnicalCases,70,"seventy distinct institutional research extensions must remain");
+assert(Math.abs(Math.sqrt(0.5*0.5*0.04+0.5*0.5*0.01+2*0.5*0.5*(-0.004))-Math.sqrt(0.0105))<1e-12,"multi-strategy covariance example inconsistent");
+assert(Math.abs((1.1*0.95-1)-0.045)<1e-12,"global equity FX example inconsistent");
+
 assert.equal(10000000*5*0.002,100000,"duration shock example incorrect");
 assert.equal(10000000*0.03*0.5,150000,"credit loss example incorrect");
 assert(Math.abs(Math.log(0.5)/Math.log(0.8)-3.1062837)<1e-5,"AR(1) half-life inconsistent");
