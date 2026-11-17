@@ -319,6 +319,33 @@ assert(Math.abs(-100+230/1.1-132/1.21)<1e-10,"first IRR root");
 assert(Math.abs(-100+230/1.2-132/1.44)<1e-10,"second IRR root");
 assert(Math.abs(.0125+.005-.0175)<1e-10,"correlation stress");
 assert(Math.abs(5+10*(10**.2-1)-10.848931924611136)<1e-9,"POT tail extrapolation");
+const advancedCreditHJM={
+ "finance-n0443":["指数型HJM波动核的无套利漂移：从期限衰减到曲线移动","零息债期限因子的HJM随机波动：积分为何改变期限风险"],
+ "finance-n0444":["回收面值信用债：默认发生时支付回收金的精确定价","信用利差的短期限近似及回收协议的误差边界"]
+};
+let verified=0;
+for(const [id,titles] of Object.entries(advancedCreditHJM)){
+ const lesson=newest.find(x=>x.id===id);
+ assert(lesson&&lesson.deep_sections.length>=8,"incomplete full HJM/credit course "+id);
+ for(const title of titles){
+  const chapter=lesson.deep_sections.find(x=>x.title===title);
+  assert(chapter,"missing independent finance chapter "+title);
+  assert(chapter.paragraphs.length===2&&chapter.paragraphs.every(x=>x.length>=80),"insufficient economic context "+title);
+  assert(chapter.proof.length>=135&&chapter.worked.length>=90&&chapter.limitation.length>=70,"missing proof or research limits "+title);
+  assert(chapter.formulas.length===2,"missing finance identities "+title);
+  for(const e of chapter.formulas)katex.renderToString(e.tex,{throwOnError:true,strict:"error",displayMode:true});
+  verified++;
+ }
+}
+assert.equal(verified,4);
+near("HJM exp vol",.01*Math.exp(-.2),.008187307530779819);
+near("HJM exp integration",.01*(1-Math.exp(-.2))/.2,.00906346234610091);
+near("HJM exp risk neutral drift",.01**2/.2*Math.exp(-.2)*(1-Math.exp(-.2)),.000074205353783);
+near("HJM five year bond diffusion",.01*5,.05);
+near("Default survival PV",Math.exp(-.06),.9417645335842487);
+near("Default par recovery PV",.008/.06*(1-Math.exp(-.06)),.00776472885543351);
+near("Default bond total PV",Math.exp(-.06)+(.008/.06)*(1-Math.exp(-.06)),.9495292624396822);
+near("Hazard approximate short spread",.02*(1-.4),.012);
 console.log("V100 PASS:",newest.length,"finance lessons;",all.length,"total math;",finance.length,
  "/36 finance complete;",katexCount,"strict KaTeX;",chapterCount,"deep sections;",
  deepChars,"proof characters;",numerical,"independent numeric checks;",crossRefs,"cross references.");
