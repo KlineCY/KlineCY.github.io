@@ -230,7 +230,7 @@ ctx.db=core;ctx.researchDb=research;
 evalJS("firms=db.companies;byId=new Map(firms.map(c=>[c.id,c]));profiles=new Map(researchDb.profiles.map(p=>[p.company_id,p]));");
 el("sourceFilter").value="verified";
 evalJS("render()");
-assert(el("status").textContent.includes("48 / 156"),"official source filter should match 30 newly verified institutions");
+assert(el("status").textContent.includes("52 / 156"),"official source filter should match all 52 explicitly linked institutions");
 el("sourceFilter").value="";
 el("q").value="天演";
 evalJS("render()");
@@ -238,6 +238,11 @@ assert(el("status").textContent.includes("1 / 156"),"confirmed company should be
 evalJS("openDetails('cn-qiml-062')");
 assert(el("detailBody").innerHTML.includes("官方网站核验来源"),"verified source must render in detail");
 assert(el("detailBody").innerHTML.includes("研究档案"),"full technical dossier must remain accessible");
+evalJS("openDetails('global-quant-024')");
+assert(el("detailBody").innerHTML.includes("法人存续状态")&&el("detailBody").innerHTML.includes("法律实体登记来源"),"Saemor dissolved status not surfaced");
+assert(el("detailBody").innerHTML.includes("2023"),"Saemor dissolution date absent from detail");
+evalJS("openDetails('global-quant-010')");
+assert(el("detailBody").innerHTML.includes("Mercer"),"SECOR acquisition context not visible");
 el("q").value="";
 
 
