@@ -1,10 +1,10 @@
-name: Validate quant finance wiki
+name: Validate quant site content and navigation
 on:
   push:
     branches: [main]
     paths:
-      - 'quant/wiki/**'
-      - 'quant/sidebar-v2.js'
+      - 'quant/**'
+      - 'scripts/test_published_site.mjs'
       - '.github/workflows/test-quant-wiki.yml'
   workflow_dispatch:
 permissions:
@@ -19,3 +19,5 @@ jobs:
           node-version: '22'
       - name: Check glossary consistency and JavaScript syntax
         run: node quant/wiki/test_glossary.mjs
+      - name: Verify all quant modules and data contracts
+        run: node scripts/test_published_site.mjs
