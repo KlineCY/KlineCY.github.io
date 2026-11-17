@@ -53,11 +53,11 @@
       subsection("wikiLearningNav","系统学习路径","wikiPaths"),
     math:
       '<a class="q-menu-link" href="'+route("math")+'">完整数学知识树</a>'+
-      '<a class="q-menu-link" href="'+route("math")+'?status=complete">已写讲义</a>'+
+      '<a class="q-menu-link" href="'+route("math")+'#math-reader-section">数学讲义正文</a>'+
       subsection("mathDisciplineNav","按学科推进","mathDisciplineChoices",page==="math"),
     ml:
       '<a class="q-menu-link" href="'+route("ml")+'">完整机器学习课程树</a>'+
-      '<a class="q-menu-link" href="'+route("ml")+'?status=complete">720篇系统讲义</a>'+
+      '<a class="q-menu-link" href="'+route("ml")+'#atlas-reader-section">机器学习课程正文</a>'+
       subsection("mlDisciplineNav","按专题推进","mlDisciplineChoices",page==="ml"),
     papers:
       '<a class="q-menu-link" href="'+route("papers")+'">全部论文</a>'+
