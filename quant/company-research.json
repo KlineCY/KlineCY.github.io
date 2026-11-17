@@ -1415,6 +1415,655 @@
       ],
       "caveat": "官网披露具体岗位方向不构成对某毕业年份或地区的招聘资格承诺。",
       "careers_url": "https://www.yanhe-fund.com/"
+    },
+    {
+      "company_id": "acadian",
+      "orientation": "全球系统化股票投资与机器学习研究",
+      "facts": [
+        {
+          "statement": "Acadian官方2026年纪念文章将自身定义为系统化投资管理人，介绍了机器学习、自然语言处理和另类数据在投资研发中的使用。",
+          "source_title": "Acadian：40 Years of Systematic Investing",
+          "source_url": "https://www.acadian-asset.com/about-us/news/acadian-marks-40-years-of-systematic-investing"
+        },
+        {
+          "statement": "其全球股票产品页说明策略采用系统化流程、多个预测因子和风险控制的组合构建框架。",
+          "source_title": "Acadian：Global Equity Strategy",
+          "source_url": "https://www.acadian-asset.com/au/strategies/global-equity"
+        }
+      ],
+      "research_axes": [
+        {
+          "title": "多因子信息增量与强相关",
+          "context": "从价值、盈利能力、质量、动量和非结构化因子构建股票截面预测。因子表达式即使各自显著，也可能共享同一经济信息；真正的增量应在控制已有信号和风险因子之后测量。",
+          "methods": [
+            "横截面回归",
+            "残差正交化",
+            "正则化"
+          ],
+          "question": "新增NLP信号在旧因子已知后还贡献多少条件收益预测信息？",
+          "verification": "按发布时间冻结数据，逐层比较残差IC、费后组合增益及跨市场稳定性。"
+        },
+        {
+          "title": "因子组合的风险与优化",
+          "context": "将预测分数映射为持仓时，交易规模、行业风险和因子暴露约束会决定策略最终实现的Alpha。高模型分数集中在少数股票时，优化可能削弱或重排信号。",
+          "methods": [
+            "协方差收缩",
+            "跟踪误差",
+            "约束二次规划"
+          ],
+          "question": "风险约束改变时，模型排序质量与组合经济效果是否同向变化？",
+          "verification": "固定选股模型，比较无约束、行业中性与成本惩罚组合的净收益和风险贡献。"
+        },
+        {
+          "title": "另类数据与时间泄漏",
+          "context": "企业招聘、文本与事件数据往往存在采集滞后、回填以及历史版本变化。若按最终修订数据库对历史信息回测，会显著高估可预测性。",
+          "methods": [
+            "点时数据库",
+            "文本嵌入",
+            "数据版本审计"
+          ],
+          "question": "如何证明某条另类数据在历史交易时刻真实可用？",
+          "verification": "分别保存首发时间、采集时间与版本时间，并用时间前推测试比较信号退化。"
+        }
+      ],
+      "roles": [
+        "量化股票研究",
+        "机器学习",
+        "投资组合优化",
+        "数据工程"
+      ],
+      "caveat": "公司官方介绍证明研究方向存在，不代表公开了实时模型权重或所有产品的实际持仓。",
+      "careers_url": "https://www.acadian-asset.com/"
+    },
+    {
+      "company_id": "arrowstreet",
+      "orientation": "全球量化股票、Alpha延展及市场中性管理",
+      "facts": [
+        {
+          "statement": "Arrowstreet官网披露整合经济推理、系统化研究、数据分析与风险管理的全球股票投资框架，产品形态包括Long-only、Alpha Extension和Long/Short Beta Neutral。",
+          "source_title": "Arrowstreet：What We Do",
+          "source_url": "https://www.arrowstreetcapital.com/what-we-do/"
+        },
+        {
+          "statement": "官网投资团队介绍定量研究、投资分析和组合管理之间的合作，以及从研究模型到投资决策的过程。",
+          "source_title": "Arrowstreet：Investment",
+          "source_url": "https://www.arrowstreetcapital.com/investment/"
+        }
+      ],
+      "research_axes": [
+        {
+          "title": "130/30类Alpha延展的杠杆与净敞口",
+          "context": "传统多头股票基金受不卖空约束，Alpha延展允许部分多空头寸同时存在，但需把毛杠杆、净敞口和卖空借券成本分别计算。不能用多空头寸总量直接表示额外可实现收益。",
+          "methods": [
+            "多空约束优化",
+            "风险预算",
+            "借券费用"
+          ],
+          "question": "扩展卖空约束是否一定提高经成本调整的最优信息比率？",
+          "verification": "用同一股票Alpha向量与风险协方差，比较100/0及130/30示例组合。"
+        },
+        {
+          "title": "全球股票的经济信号与本地风险",
+          "context": "多个国家市场的交易日历、汇率和行业构成不同，原始Alpha与风险曝险必须使用统一币种和可获取时钟进行评估。",
+          "methods": [
+            "区域中性化",
+            "汇率风险",
+            "异步面板"
+          ],
+          "question": "全球统一因子与分区域建模何时产生相反的选股结论？",
+          "verification": "按区域分层估计IC、残余风险及收益单位转换，核查交易日不一致情形。"
+        },
+        {
+          "title": "系统性组合归因",
+          "context": "预测、风险模型和交易执行共同决定结果。统一模型下的组合收益需要区分因子预测贡献、行业偏离、货币风险和交易摩擦。",
+          "methods": [
+            "Brinson归因",
+            "因子回归",
+            "TCA"
+          ],
+          "question": "组合净Alpha能否仅凭预测分数的横截面相关性证明？",
+          "verification": "拆分预测期望、优化偏离、成交滑点以及实际持仓收益，做前向再平衡审计。"
+        }
+      ],
+      "roles": [
+        "量化投资研究",
+        "全球股票",
+        "风险建模",
+        "投资工程"
+      ],
+      "caveat": "公开业务形态只说明可供研究的策略类别，不等于机构承诺任何杠杆比例或实际固定模型。",
+      "careers_url": "https://www.arrowstreetcapital.com/"
+    },
+    {
+      "company_id": "blackrock",
+      "orientation": "综合资管中的系统化主动股票与ETF风险科技",
+      "facts": [
+        {
+          "statement": "BlackRock公开的系统化股票团队介绍结合另类数据、建模、风险管理与持续迭代的系统投资方法。",
+          "source_title": "BlackRock：Systematic Equities",
+          "source_url": "https://www.blackrock.com/institutions/en-us/investment-capabilities/strategies/systematic-equities"
+        },
+        {
+          "statement": "BlackRock面向投资者的系统化股票页面公开提及非结构化信息源、风险工具和规模化投资流程。",
+          "source_title": "BlackRock：Systematic Active Equities",
+          "source_url": "https://www.blackrock.com/us/individual/education/equities/active-equities/systematic-active-equity"
+        }
+      ],
+      "research_axes": [
+        {
+          "title": "系统化主动与被动指数的界限",
+          "context": "同为数据与规则驱动，指数复制以基准跟踪为主要目标，主动股票投资则追求相对收益。比较管理方式时应统一基准、投资约束和风险预算，不能仅凭技术手段将二者视作同一策略。",
+          "methods": [
+            "指数复制",
+            "主动风险",
+            "收益归因"
+          ],
+          "question": "组合更紧密跟踪指数是否意味着更高的主动投资效率？",
+          "verification": "分别检验跟踪误差、费后超额收益与资产流动性预算。"
+        },
+        {
+          "title": "另类数据与收益预测",
+          "context": "非结构化的电话会文本、招聘信息可能提供基础财报之外的增量，但发布时间、实体匹配和结果可解释性是必要约束。",
+          "methods": [
+            "文本学习",
+            "横截面预测",
+            "消融检验"
+          ],
+          "question": "保留传统财务因子后，文本特征是否继续提供统计与经济两种增量？",
+          "verification": "冻结各时点公开文本、控制传统因子，比较IC与成本后增强组合。"
+        },
+        {
+          "title": "系统风险平台与投资优化",
+          "context": "风险工具能够识别和限制多维风险曝险，但风险模型的估计误差以及冲击成本可能使理论最优权重无法实施。",
+          "methods": [
+            "风险因子模型",
+            "二次规划",
+            "交易成本"
+          ],
+          "question": "指数或主动作业在大规模资金下出现的容量约束如何量化？",
+          "verification": "对不同资金规模计算参与率、换手、预期冲击及跟踪偏差。"
+        }
+      ],
+      "roles": [
+        "系统化股票研究",
+        "投资科技",
+        "ETF与指数研究",
+        "组合风险"
+      ],
+      "caveat": "BlackRock集团AUM不等于系统化股票单独AUM；亦不能以iShares指数ETF规模推断主动系统策略规模。",
+      "careers_url": "https://careers.blackrock.com/"
+    },
+    {
+      "company_id": "bridgewater",
+      "orientation": "因果机制驱动的系统化全球宏观投资",
+      "facts": [
+        {
+          "statement": "Bridgewater官网将其定位为全球宏观投资公司，并说明通过经济与市场因果机制理解形成系统化、可重复的投资流程。",
+          "source_title": "Bridgewater：Home",
+          "source_url": "https://www.bridgewater.com/"
+        },
+        {
+          "statement": "Bridgewater官方问答指出，其投资过程围绕基本驱动因素、系统化表达、现实检验以及持续迭代展开。",
+          "source_title": "Bridgewater：Working Here FAQs",
+          "source_url": "https://www.bridgewater.com/working-at-bridgewater/faqs"
+        }
+      ],
+      "research_axes": [
+        {
+          "title": "宏观因果机制与资产价格传导",
+          "context": "宏观变量对资产价格的影响需要通过增长、通胀、货币政策、贴现率和风险溢价中介。同期市场反应不能被简单解释为某条经济数据的因果效应。",
+          "methods": [
+            "结构宏观模型",
+            "状态空间",
+            "事件研究"
+          ],
+          "question": "意外通胀冲击通过哪些渠道改变国债、股票与汇率的条件回报？",
+          "verification": "采用实时可得共识预期和公告时点价格变化，区分意外项、政策共同冲击及市场风险偏好。"
+        },
+        {
+          "title": "风险平价与条件相关性",
+          "context": "风险平价试图按风险贡献而非名义资金分配组合，但其可行性依赖协方差估计、杠杆融资和多资产联合尾部。",
+          "methods": [
+            "风险预算",
+            "动态协方差",
+            "杠杆约束"
+          ],
+          "question": "股债相关性快速由负转正时，原有风险预算怎样发生变化？",
+          "verification": "构建两资产协方差状态切换例子并计算风险贡献、保证金和调仓成本。"
+        },
+        {
+          "title": "宏观判断和系统化模型治理",
+          "context": "定性判断可用于形成可检验机制，系统化执行则要求信息集、参数调整、例外处理和绩效评估有清晰时间记录。",
+          "methods": [
+            "贝叶斯更新",
+            "模型风险",
+            "样本外检验"
+          ],
+          "question": "人类判断改变模型规则后，如何防止事后解释与数据窥探？",
+          "verification": "对每次规则修改留存假设、可用证据、独立检验数据和比较基线。"
+        }
+      ],
+      "roles": [
+        "宏观研究",
+        "系统投资",
+        "经济建模",
+        "风险研究"
+      ],
+      "caveat": "独立研究模型仅用于教学解释宏观机制，不等同于桥水的具体资产配置、内部因果图谱或资金杠杆。",
+      "careers_url": "https://www.bridgewater.com/careers"
+    },
+    {
+      "company_id": "cfm",
+      "orientation": "统计物理与数据科学驱动的多资产系统化投资",
+      "facts": [
+        {
+          "statement": "CFM官方策略页面介绍多策略、期货、系统化宏观及趋势跟踪计划，并指出机器学习和另类数据用于持续研发。",
+          "source_title": "CFM：Quantitative and Systematic Strategies",
+          "source_url": "https://www.cfm.com/strategies-quantitative-and-systematic/"
+        },
+        {
+          "statement": "CFM研究团队公开文章讨论样本内回测收益由于过拟合需要如何折减及其统计解释。",
+          "source_title": "CFM：How should you discount your backtest PnL?",
+          "source_url": "https://www.cfm.com/wp-content/uploads/2022/12/166-2019-How-you-should-discount-your-backtest-PnL.pdf"
+        }
+      ],
+      "research_axes": [
+        {
+          "title": "趋势、Carry和相对价值的收益机制",
+          "context": "不同策略使用相同期货市场，却可能利用不同的统计结构：时间延续、期限结构溢价、或相对价格偏差。必须按策略信号与经济风险逐一分解，不能统一命名为CTA。",
+          "methods": [
+            "时间序列动量",
+            "期限结构",
+            "相对价值"
+          ],
+          "question": "趋势和Carry在市场快速反转时有哪些相关损失渠道？",
+          "verification": "按合约期限及风险标准化仓位分别回测，报告联合尾部和保证金约束。"
+        },
+        {
+          "title": "回测选择偏差及收益折减",
+          "context": "优化信号、参数与市场样本时，最大化历史绩效将产生赢家偏差。估计策略真实优势应考虑完整候选搜索历史，而不能仅报告最终模型的时间内Sharpe。",
+          "methods": [
+            "多重比较",
+            "Deflated Sharpe",
+            "嵌套验证"
+          ],
+          "question": "一次包含几千次尝试的研究，优胜策略的历史Sharpe应怎样校正？",
+          "verification": "保存候选数量及测试使用记录，模拟零收益选择过程，并以冻结时间外期间验证。"
+        },
+        {
+          "title": "期货资金账本与执行",
+          "context": "多资产期货策略的合约名义敞口不等于支付保证金，现金抵押收益、展期与滑点可能构成重要绩效项。",
+          "methods": [
+            "合约乘数",
+            "保证金",
+            "期货展期"
+          ],
+          "question": "从连续期货价格曲线直接回测，最容易遗漏哪些真实现金流？",
+          "verification": "用可交易合约逐日核算价格变化、展期成交、手续费和现金收益。"
+        }
+      ],
+      "roles": [
+        "CTA研究",
+        "统计套利",
+        "多资产期货",
+        "机器学习"
+      ],
+      "caveat": "研究论文与产品介绍分别说明学术思想及产品方向，不能将示例结果误记为任何基金实盘净收益。",
+      "careers_url": "https://www.cfm.com/"
+    },
+    {
+      "company_id": "dimensional",
+      "orientation": "基于资产定价证据与交易实施的规则化资产管理",
+      "facts": [
+        {
+          "statement": "Dimensional官网明确将公司规模、相对价格与盈利能力作为股票预期收益的重要维度，同时强调灵活交易和成本约束。",
+          "source_title": "Dimensional：Our Approach",
+          "source_url": "https://www.dimensional.com/us-en/our-approach"
+        },
+        {
+          "statement": "2026年11月的官方研究访谈介绍将利润增长信息系统地纳入股票投资研究并验证未来盈利与回报关系。",
+          "source_title": "Dimensional：Profit Growth and Expected Returns",
+          "source_url": "https://www.dimensional.com/us-en/insights/qa-on-profit-growth-and-expected-returns"
+        }
+      ],
+      "research_axes": [
+        {
+          "title": "盈利能力与预期回报的区分",
+          "context": "企业高利润水平、利润增长率与市场给予的估值不等价。建立因子时要区分基本面预测和价格已经包含的市场预期，并使用当时公开的财务口径。",
+          "methods": [
+            "资产定价",
+            "面板回归",
+            "信息时点"
+          ],
+          "question": "盈利增长的截面信号是否在控制估值和当前盈利后仍预测未来收益？",
+          "verification": "采用多地区横截面回归及严格披露滞后，分别报告增量系数和可交易组合结果。"
+        },
+        {
+          "title": "规则化持仓与灵活交易",
+          "context": "宽泛的股票分层暴露可以减少对某一收盘时点的机械调仓需求，但也需要说明持续风格目标与短期交易弹性之间的取舍。",
+          "methods": [
+            "因子暴露",
+            "交易成本",
+            "库存管理"
+          ],
+          "question": "为什么不追求逐日完全复制静态因子组合可能降低实现成本？",
+          "verification": "在相同风险目标下比较每日固定调仓和容忍区间策略的费用、漂移和收益。"
+        },
+        {
+          "title": "规模价值盈利多维风险",
+          "context": "大小盘、价值和盈利能力特征具有共线性，不同时期、国家市场与行业会放大这种依赖。",
+          "methods": [
+            "因子分层",
+            "多重共线性",
+            "Fama–MacBeth"
+          ],
+          "question": "某一维度看似有收益，如何判断不是另外两个因子的替代暴露？",
+          "verification": "使用双重排序、条件回归及多国稳健性分析，披露样本覆盖和费用。"
+        }
+      ],
+      "roles": [
+        "资产定价",
+        "量化股票",
+        "因子研究",
+        "交易实施"
+      ],
+      "caveat": "因子研究中的长期平均溢价不代表未来收益承诺，单一基金业绩与集团规模亦需区别。",
+      "careers_url": "https://www.dimensional.com/"
+    },
+    {
+      "company_id": "man",
+      "orientation": "系统化CTA、量化股票与多资产策略的综合资管集团",
+      "facts": [
+        {
+          "statement": "Man Group官方介绍其系统化业务由Man AHL与Man Numeric等团队组成，且同时经营主观管理及其他资产管理业务。",
+          "source_title": "Man Group：About Us",
+          "source_url": "https://www.man.com/about-us"
+        },
+        {
+          "statement": "Man AHL官方介绍核心研究覆盖趋势、均值回归和Carry等可检验价格或基本面模式，执行和风控形成统一研究闭环。",
+          "source_title": "Man AHL：Investment Philosophy",
+          "source_url": "https://www.man.com/ahl?language=en-gb"
+        }
+      ],
+      "research_axes": [
+        {
+          "title": "时间序列趋势策略的数学结构",
+          "context": "根据过去收益的方向或风险调整动量设置期货多空仓位，研究信号窗口、波动率目标和风险预算如何共同影响危机表现。",
+          "methods": [
+            "趋势跟踪",
+            "波动率目标",
+            "时间序列交叉验证"
+          ],
+          "question": "不同趋势窗口为何可能在趋势逆转阶段遭受一致损失？",
+          "verification": "设置长中短窗口并进行按波动状态分层的费用后回测和共同尾部分析。"
+        },
+        {
+          "title": "系统化股票与期货研究差异",
+          "context": "股票横截面Alpha对个股排名和行业中性敏感，期货趋势对时序价格和合约展期敏感；两者统计目标、成本及容量完全不同。",
+          "methods": [
+            "截面预测",
+            "期货展期",
+            "风险模型"
+          ],
+          "question": "如何在同一多资产组合里比较两类模型的边际贡献？",
+          "verification": "使用共同币种、资金账本、扣费净收益及协方差风险贡献检验。"
+        },
+        {
+          "title": "跨部门策略与AUM统计",
+          "context": "集团总AUM、系统化业务规模和趋势跟踪产品AUM可能相互包含。研究上市资管集团时需使用有统计日的集团和分部数据。",
+          "methods": [
+            "财务披露",
+            "AUM归因",
+            "产品层级"
+          ],
+          "question": "为何把多条产品线的管理规模直接相加可能超过集团AUM？",
+          "verification": "从官网统计日与分部说明建立业务层级及重叠检查表。"
+        }
+      ],
+      "roles": [
+        "CTA研究",
+        "多资产系统化投资",
+        "风险管理",
+        "量化股票"
+      ],
+      "caveat": "Man Group集团AUM与单一AHL或Numeric策略AUM口径不同；不能将统计截至2026年9月的数值当作永久实时数据。",
+      "careers_url": "https://www.man.com/careers"
+    },
+    {
+      "company_id": "robeco",
+      "orientation": "多因子系统化股票与量化研究",
+      "facts": [
+        {
+          "statement": "Robeco官方量化专题介绍因子投资，涵盖价值、动量、低波动与质量等股票特征，并区分风险溢价与其他行为机制。",
+          "source_title": "Robeco：Quantitative Investing",
+          "source_url": "https://www.robeco.com/en-int/glossary/quantitative-investing"
+        },
+        {
+          "statement": "Robeco研究文章分析大量历史股票因子的冗余，检验因子动物园是否能够以少量代表因子解释大部分Alpha。",
+          "source_title": "Robeco：Honey, We Shrunk the Factor Zoo",
+          "source_url": "https://www.robeco.com/en-us/insights/2023/11/honey-we-shrunk-the-factor-zoo"
+        }
+      ],
+      "research_axes": [
+        {
+          "title": "因子动物园与信息冗余",
+          "context": "文献中的大量因子可共享同一会计比率、动量计算或风险暴露。真正的研究需要在因子层面做去重和样本外稳定性，而非机械增加公式数量。",
+          "methods": [
+            "因子聚类",
+            "主成分分析",
+            "多重检验"
+          ],
+          "question": "新增财务因子是否给现有价值和质量因子提供独立预测？",
+          "verification": "按全行业和各市场计算因子间相关、条件IC和费用后增量。"
+        },
+        {
+          "title": "低波动因子的风险与经济解释",
+          "context": "低风险股票长期表现不能只以CAPM一种模型解释，行业集中、杠杆约束及投资者偏好可能形成不同机制。",
+          "methods": [
+            "BAB",
+            "风险因子",
+            "行业中性"
+          ],
+          "question": "低波动组合超额收益是否来自防御行业或杠杆约束？",
+          "verification": "进行行业中性重建、因子归因和样本外下行风险对比。"
+        },
+        {
+          "title": "价值动量共存与拥挤交易",
+          "context": "价值与动量可能在不同状态呈现相反趋势，组合表面分散并不保证容量和统一平仓冲击安全。",
+          "methods": [
+            "风格相关",
+            "拥挤度",
+            "市场冲击"
+          ],
+          "question": "多因子均衡配置在极端同向平仓时有何潜在失效？",
+          "verification": "模拟不同流动性折价与风险预算，报告尾部分位数与换手。"
+        }
+      ],
+      "roles": [
+        "因子投资",
+        "资产定价",
+        "统计模型",
+        "风险研究"
+      ],
+      "caveat": "Robeco所述因子收益多为历史研究与策略框架，不可作为当前基金的确定暴露或未来收益保证。",
+      "careers_url": "https://www.robeco.com/"
+    },
+    {
+      "company_id": "systematica",
+      "orientation": "趋势、宏观非趋势及股票市场中性系统化资管",
+      "facts": [
+        {
+          "statement": "Systematica官方策略页明确列示BlueTrend、另类市场、宏观相对价值、股票市场中性和定制组合等投资方向。",
+          "source_title": "Systematica：Investment Strategies",
+          "source_url": "https://www.systematica.com/strategies"
+        },
+        {
+          "statement": "官网公司介绍将量化研究、交易与技术基础设施作为长期投入，并说明通过研究程序更新系统模型。",
+          "source_title": "Systematica：Our Firm",
+          "source_url": "https://systematica.com/our-firm"
+        }
+      ],
+      "research_axes": [
+        {
+          "title": "传统期货趋势与另类市场扩展",
+          "context": "将同一趋势模型扩展到流动性差异较大的利率互换、非主流货币和商品市场时，需要重新估计成交容量与风险权重。",
+          "methods": [
+            "趋势过滤",
+            "OTC定价",
+            "流动性调整"
+          ],
+          "question": "新增非主流市场带来的相关性改善是否能够抵消费用和执行限制？",
+          "verification": "分别建立传统与扩展市场组合，比较扣费净信息比率及尾部流动性风险。"
+        },
+        {
+          "title": "非趋势宏观相对价值",
+          "context": "市场中性的相对价值策略未必没有宏观风险：利率曲线形状、融资、基差和期权尾部都能造成共同损失。",
+          "methods": [
+            "利率久期中性",
+            "收益率曲线",
+            "融资风险"
+          ],
+          "question": "DV01中性是否足以保证收益率曲线变化时无损失？",
+          "verification": "对水平、斜率、曲率及非平行移动分别做关键利率久期压力测试。"
+        },
+        {
+          "title": "多策略共同风险预算",
+          "context": "趋势、宏观非趋势和股票市场中性策略在正常状态下的相关性可能较低，压力时期仍会共享去杠杆与流动性冲击。",
+          "methods": [
+            "动态相关",
+            "ES",
+            "约束优化"
+          ],
+          "question": "按单策略波动目标配置是否可能高估总体分散效果？",
+          "verification": "重估联合尾损与保证金约束，测量集中平仓成本。"
+        }
+      ],
+      "roles": [
+        "CTA与宏观研究",
+        "股票市场中性",
+        "衍生品定价",
+        "风险预算"
+      ],
+      "caveat": "公司披露的策略类别和部分地区业务不等于公开了具体头寸及交易信号；公司AUM数字需注明统计日。",
+      "careers_url": "https://www.systematica.com/"
+    },
+    {
+      "company_id": "winton",
+      "orientation": "科学研究驱动的跨资产系统化投资",
+      "facts": [
+        {
+          "statement": "Winton官网说明其系统化投资策略覆盖不同交易频率和风格，并在大量场内及场外金融工具中实施。",
+          "source_title": "Winton：What We Do",
+          "source_url": "https://www.winton.com/about"
+        },
+        {
+          "statement": "官网将趋势跟踪列为其长期研究领域，同时强调研究、开发和交易的协作。",
+          "source_title": "Winton：Investment Research",
+          "source_url": "https://www.winton.com/about"
+        }
+      ],
+      "research_axes": [
+        {
+          "title": "跨市场系统化策略的外推限制",
+          "context": "同一统计规律在股指、国债与商品之间迁移时，交易制度、期限结构、风险单位和市场容量不同，需区分相关性降低与样本不足。",
+          "methods": [
+            "多市场统计",
+            "迁移检验",
+            "风险标准化"
+          ],
+          "question": "扩充更多市场是否必然提升策略分散度？",
+          "verification": "按市场簇统计独立信息贡献、交易费和联合尾部表现。"
+        },
+        {
+          "title": "多频率信号合成",
+          "context": "短周期与长周期模型在价格震荡和趋势持续两种状态下响应不同，组合需要考虑信号共线性和调仓冲击。",
+          "methods": [
+            "滤波器",
+            "时间尺度",
+            "换手惩罚"
+          ],
+          "question": "两个不同持有期模型的组合何时会增加而非减少换手？",
+          "verification": "保留每日信号与订单序列，比较先净额合并信号与分开执行。"
+        },
+        {
+          "title": "可重复研究证据",
+          "context": "科学研究文化意味着建立明确可证伪假设、独立测试与可复算交易账本；漂亮的历史夏普比率不足以替代这一链条。",
+          "methods": [
+            "嵌套回测",
+            "检验力",
+            "实验版本控制"
+          ],
+          "question": "不同市场与参数的大量选择何时使最终回测指标失真？",
+          "verification": "登记全部尝试和终版冻结测试，并估计模型选择后的样本外不确定性。"
+        }
+      ],
+      "roles": [
+        "量化研究",
+        "期货策略",
+        "统计学习",
+        "多资产交易"
+      ],
+      "caveat": "机构公开研究风格无法证明所提教学模型是其实际执行策略，研究与资金规模必须分别核验。",
+      "careers_url": "https://www.winton.com/"
+    },
+    {
+      "company_id": "vanguard",
+      "orientation": "指数化与规则化因子管理的大型资产管理机构",
+      "facts": [
+        {
+          "statement": "Vanguard面向投资者的资料将因子基金解释为对动量、质量与估值等股票特征实施规则化倾斜，并提醒因子收益具有风险和周期性。",
+          "source_title": "Vanguard：Factor-based Funds",
+          "source_url": "https://investor.vanguard.com/investor-resources-education/understanding-investment-types/what-are-factor-based-funds"
+        },
+        {
+          "statement": "Vanguard研究报告比较市值加权与信号加权的因子组合，强调不同构建方法对风险和资金效率的影响。",
+          "source_title": "Vanguard：Factors' Role in Asset Allocation",
+          "source_url": "https://corporate.vanguard.com/content/dam/corp/research/pdf/not_all_factors_are_created_equal_factors_role_in_asset_allocation.pdf"
+        }
+      ],
+      "research_axes": [
+        {
+          "title": "指数复制误差与交易优化",
+          "context": "跟踪指数需要同时控制成分权重偏差、资金流入流出、企业行动与交易成本。在成分流动性不足时，严格复制和优化抽样可能具有不同损益。",
+          "methods": [
+            "跟踪误差",
+            "最小方差抽样",
+            "现金管理"
+          ],
+          "question": "什么时候优化抽样优于完全复制的费用后效果？",
+          "verification": "在统一指数与费用下比较抽样数量、跟踪风险和冲击成本。"
+        },
+        {
+          "title": "因子权重和风险预算",
+          "context": "市值加权的因子倾斜和纯信号加权会显著改变行业偏离、个股集中度与跟踪误差，因子暴露强不意味着风险调整收益必然更优。",
+          "methods": [
+            "因子组合",
+            "集中度",
+            "风险贡献"
+          ],
+          "question": "相同因子预测下哪种权重分配带来更稳定的实现风险溢价？",
+          "verification": "固定信号并分别优化市值基准偏离与因子权重组合，比较净收益及风格漂移。"
+        },
+        {
+          "title": "可投资ETF指数与公告效应",
+          "context": "ETF和指数产品研究须识别指数发布日期、生效日期、基准重构和基金成交时点，避免将事后成分回溯当成历史可交易集合。",
+          "methods": [
+            "指数事件",
+            "证券主数据",
+            "点时一致性"
+          ],
+          "question": "旧版指数成分与当前回填成分之间的差异会如何影响回测？",
+          "verification": "使用历史生效清单复现再平衡，并核算分红、费用与交易限制。"
+        }
+      ],
+      "roles": [
+        "ETF研究",
+        "指数编制",
+        "因子投资",
+        "交易实施"
+      ],
+      "caveat": "Vanguard集团全部资产并非量化主动策略；本页主要研究其指数与规则化因子业务，不作狭义量化基金归类。",
+      "careers_url": "https://corporate.vanguard.com/"
     }
   ]
 }
