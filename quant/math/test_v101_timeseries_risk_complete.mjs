@@ -292,6 +292,42 @@ near("common student scale squared covariance",36/(4*2)-(6/4)**2,2.25);
 near("Hill exact variance",1/(25*4**2),.0025);
 near("Pareto alpha MLE mean",25*4/24,4.166666666666667);
 near("unbiased Pareto alpha variance",16/23,.6956521739130435);
+const advancedTimeseriesAndGovernance={
+ "timeseries-n0246":["自相关样本均值的精确有限样本方差与长程方差近似"],
+ "timeseries-n0252":["条件预测优势检验：从平均损失差到状态依赖矩条件","预测模型比较的Newey–West长程方差与非重叠评估"],
+ "timeseries-n0253":["结构突变下的伪长记忆：均值分段常数为何引起慢衰减样本相关"],
+ "riskmath-n0596":["二阶Delta近似：非线性风险指标的参数偏差与方差"],
+ "riskmath-n0597":["隐马尔可夫状态持续期与几何分布：转移概率怎样影响风险监测"],
+ "riskmath-n0598":["多日风险标签的重叠相关：风险状态变化与共享现金流必须分开"],
+ "riskmath-n0600":["多次模型筛选中的家族误报率与独立审计样本"]
+};
+let advancedCount=0;
+for(const [id,titles] of Object.entries(advancedTimeseriesAndGovernance)){
+ const l=newest.find(x=>x.id===id);
+ assert(l,"historical risk/time-series lesson missing "+id);
+ for(const title of titles){
+  const s=l.deep_sections.find(x=>x.title===title);
+  assert(s,"missing full advanced technical chapter "+title);
+  assert(s.paragraphs.length===2&&s.paragraphs.every(x=>x.length>=80),"insufficient detailed theory "+title);
+  assert(s.proof.length>=135&&s.worked.length>=90&&s.limitation.length>=70,"missing full proof, numbers or validity "+title);
+  assert(s.formulas.length===2,"two derivations required "+title);
+  for(const e of s.formulas)formula(e.tex,id+" advanced");
+  advancedCount++;
+ }
+}
+assert.equal(advancedCount,8);
+near("exact mean variance n4", (4+2*(3*.5+2*.25+.125))/16,.515625);
+near("long run approximation n4",(1+.5)/(1-.5)/4,.75);
+near("Newey West Bartlett one lag",4+2*(1-.5)*1,5);
+near("NW mean variance T100",5/100,.05);
+near("two regime sample variance",1+.25*((-1)-1)**2,2);
+near("second order uncertainty expectation",.1**2,.01);
+near("Gaussian quadratic uncertainty variance",2*.1**4,.0002);
+near("Markov duration state p95",1/(1-.95),20);
+near("Markov survival 5",.95**5,.7737809375);
+near("rolling fifth day correlation",4/5,.8);
+near("independent multiple tests family error",1-.95**20,.6415140775914581);
+near("Bonferroni threshold",.05/20,.0025);
 console.log("V101 PASS",newest.length,"new lessons;",all.length,"total;",mathCount,
  "strict KaTeX;",deepCount,"deep proof chapters;",deepChars,"deep prose chars;",
  checks,"independent computations;",linkCount,"internal references; time series and risk each 36/36.");
