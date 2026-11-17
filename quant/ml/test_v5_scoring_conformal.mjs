@@ -19,7 +19,7 @@ for(const file of files){assert.equal(file.schema,1);assert(file.chapters.length
 for(const x of rows){
  assert(!previous.has(x.id),"duplicate original course "+x.id);
  assert(x.goal.length>=80&&x.protocol.length>=4&&x.sources.length>=2);
- assert.equal(x.sections.length,7,"all original and advanced sections required "+x.id);
+ assert.equal(x.sections.length,x.id==="m23-c10-p02"?9:["m09-c09-p01","m23-c10-p01"].includes(x.id)?8:7,"all original and extended density sections required "+x.id);
  assert.equal(new Set(x.sections.map(s=>s.title)).size,x.sections.length);
  for(const s of x.sections){
   assert(s.question?.length>=12&&s.paragraphs.length===2&&s.paragraphs.every(p=>p.length>=48),"thin explanatory paragraph "+x.id+" "+s.title);
@@ -62,6 +62,20 @@ for(const l of rows.filter(l=>["m04-c10-p01","m12-c10-p01","m12-c10-p02"].includ
  assert(section.equations.length===2&&section.worked.length>=85&&section.boundary.length>=60,"new conformal validity example incomplete "+l.id);
  for(const eq of section.equations)katex.renderToString(eq.tex,{throwOnError:true,strict:"error",displayMode:true});
 }
+const addedDensityPITWork={
+ "m09-c09-p01":["高斯异方差模型的方差塌缩与负对数似然下界"],
+ "m23-c10-p01":["条件高斯AR过程的正确PIT与无条件PIT的区别"],
+ "m23-c10-p02":["协变量分布迁移下的稀有状态密度比放大","重要性权重截尾的风险偏差与方差折中"]
+};
+for(const [id,titles] of Object.entries(addedDensityPITWork)){
+ const l=rows.find(r=>r.id===id);
+ for(const title of titles){
+  const sec=l.sections.find(s=>s.title===title);
+  assert(sec&&sec.paragraphs.length===2&&sec.paragraphs.every(p=>p.length>=90),"density or covariate shift theory incomplete "+id);
+  assert(sec.equations.length===2&&sec.worked.length>=105&&sec.boundary.length>=75,"missing numerical density case and caveat "+id);
+  for(const e of sec.equations)katex.renderToString(e.tex,{throwOnError:true,strict:"error",displayMode:true});
+ }
+}
 const near=(a,b,t=1e-8)=>assert(Math.abs(a-b)<t,"numeric invariant "+a+" != "+b);
 near((1-.7)**2,.09);
 near(.75*Math.log(1.5)+.25*Math.log(.5),.13081203594113697);
@@ -77,6 +91,12 @@ near(Math.log(2*Math.PI)/2+Math.log(2),1.612085713764618);
 near(Math.log(2*Math.PI)/2+2,2.9189385332046727);
 near(1.612085713764618+.5,2.112085713764618);
 near(.3+.7,1);
+near(.5*Math.log(2*Math.PI*.0001),-3.6862316527834187);
+near((.8-.8*1)/Math.sqrt(1-.8**2),0);
+near(.2/.01,20);
+near(.01*20,.2);
+near(.01*Math.min(20,5),.05);
+near(.2-.05,.15);
 near(-.75*Math.log(.75)-.25*Math.log(.25),.5623351446188083);
 near(Math.log(2)-(-.75*Math.log(.75)-.25*Math.log(.25)),.130812035941137);
 near((.5-.7)**2+.7*.3,.25);
