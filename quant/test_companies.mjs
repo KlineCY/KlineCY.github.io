@@ -62,8 +62,10 @@ const dom={
 const ctx=vm.createContext({document:dom,location:{search:""},URLSearchParams,fetch(){return new Promise(()=>{})},console});
 vm.runInContext(inline,ctx,{timeout:2500});
 const evalJS=code=>vm.runInContext(code,ctx,{timeout:2500});
-assert.equal(evalJS("qualified({scale:{currency:'USD',metric:'集团AUM',amount_billion:0.02}})"),true);
+assert.equal(evalJS("qualified({scale:{currency:'USD',metric:'集团AUM',amount_billion:0.2}})"),true);
 assert.equal(evalJS("qualified({scale:{currency:'USD',metric:'集团AUM',amount_billion:0.005}})"),false);
+assert.equal(evalJS("qualified({scale:{currency:'USD',metric:'集团AUM',amount_billion:0.1}})"),true);
+assert.equal(evalJS("qualified({scale:{currency:'USD',metric:'集团AUM',amount_billion:0.099}})"),false);
 assert.equal(evalJS("qualified({scale:{currency:'USD',metric:'投资资本',amount_billion:200}})"),false);
 assert.equal(evalJS("compareWithinCurrency({name:'CN',scale:{currency:'CNY',metric:'集团AUM',amount_billion:100}},{name:'US',scale:{currency:'USD',metric:'集团AUM',amount_billion:1}},true)<0"),true,"mixed currencies sorted by nominal amount");
 assert.equal(evalJS("compareWithinCurrency({name:'A',scale:{currency:'CNY',metric:'集团AUM',amount_billion:1}},{name:'B',scale:{currency:'CNY',metric:'集团AUM',amount_billion:3}},true)<0"),true,"same currency ascending");
