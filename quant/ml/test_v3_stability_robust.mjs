@@ -21,7 +21,7 @@ let sections=0,formula=0,sources=0;
 for(const l of rows){
  assert(!ids.has(l.id)&&!priorIds.has(l.id),"duplicate stable course ID "+l.id);
  assert(l.title.length>=12&&l.goal.length>=70&&l.protocol.length>=4&&l.sources.length>=2,"insufficient overview "+l.id);
- const expectedSections=7;
+ const expectedSections=l.id==="m12-c08-p01"?9:["m23-c08-p01","m23-c08-p02"].includes(l.id)?8:7;
  assert.equal(l.sections.length,expectedSections,"complete original and expanded course sections "+l.id);
  assert.equal(new Set(l.sections.map(s=>s.title)).size,l.sections.length,"duplicate section headings "+l.id);
  for(const s of l.sections){
@@ -72,6 +72,20 @@ for(const l of rows.filter(l=>["m04-c08-p01","m09-c08-p01","m09-c08-p02"].includ
   for(const eq of section.equations)katex.renderToString(eq.tex,{throwOnError:true,strict:"error",displayMode:true});
  }
 }
+const robustNewTopics={
+ "m12-c08-p01":["Purged交叉验证：重叠事件标签的严格剔除条件","同日跨ETF区块Bootstrap：为什么必须共同重采样交易日期"],
+ "m23-c08-p01":["谱范数协方差不确定集下的最坏方差闭式"],
+ "m23-c08-p02":["Huber稳健位置估计与真实尾损失应分别评价"]
+};
+for(const [id,titles] of Object.entries(robustNewTopics)){
+ const l=rows.find(x=>x.id===id);
+ for(const title of titles){
+  const section=l.sections.find(s=>s.title===title);
+  assert(section&&section.paragraphs.length===2&&section.paragraphs.every(p=>p.length>=95),"missing robust research proof "+title);
+  assert(section.equations.length===2&&section.worked.length>=110&&section.boundary.length>=95,"incomplete quantitative robust research "+title);
+  for(const eq of section.equations)katex.renderToString(eq.tex,{throwOnError:true,strict:"error"});
+ }
+}
 const close=(a,b,t=1e-9)=>assert(Math.abs(a-b)<t,"numeric check "+a+" vs "+b);
 close(2*4/100,.08);
 close(1/Math.sqrt(2),.7071067811865476);
@@ -96,6 +110,12 @@ close(.6*.01+.2*.03,.012);
 close(Math.sqrt(.006**2+.006**2),.008485281374238571);
 close(1.5/.9,1.6666666666666667);
 close((3-5.4)/3,-.8);
+close(.25*.0004+.25*.0004+2*.5*.5*.8*.0004,.00036);
+close(Math.sqrt(.00036),.018973665961010276);
+close(Math.sqrt(.0002),.01414213562373095);
+close(.5**2*.0004+.5**2*.0009,.000325);
+close(.000325+.0001*.5,.000375);
+close(Math.sqrt(.000375),.019364916731037084);
 const html=fs.readFileSync(new URL("./index.html",dir),"utf8"),css=fs.readFileSync(new URL("./atlas.css",dir),"utf8");
 for(const id of expected)assert(html.includes("#lesson/"+id),"missing advanced learning route "+id);
 assert(html.includes('atlas.js?v=20261109'));
