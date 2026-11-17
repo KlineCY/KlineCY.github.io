@@ -12,7 +12,7 @@ assert.equal(core.schema_version,1);
 assert.equal(research.schema_version,1);
 assert(core.companies.length>=156,"historical company records removed");
 assert.equal(new Set(core.companies.map(c=>c.id)).size,core.companies.length);
-assert(research.profiles.length>=104,"company research coverage shrank");
+assert(research.profiles.length>=116,"company research coverage shrank");
 assert.equal(new Set(research.profiles.map(p=>p.company_id)).size,research.profiles.length);
 const ids=new Set(core.companies.map(c=>c.id));
 let axes=0,facts=0,officialLinks=0;
@@ -39,7 +39,7 @@ for(const p of research.profiles){
  }
  if(p.careers_url)assert(/^https:\/\//.test(p.careers_url));
 }
-assert(axes>=312&&facts>=163,"research coverage below required quality");
+assert(axes>=348&&facts>=187,"research coverage below required quality");
 const verifiedIds=["renaissance","global-quant-001","global-quant-002","global-quant-003","global-quant-005","cn-qiml-062","cn-qiml-055","cn-qiml-042","cn-public-bucket-013","cn-qiml-046","cn-qiml-002","cn-public-bucket-001","cn-qiml-054","cn-amac-002"];
 const fourthWaveIds=["cn-amac-001","cn-qiml-039","cn-qiml-061","cn-qiml-063","cn-qiml-066","cn-qiml-033","cn-qiml-060","cn-qiml-047","cn-qiml-024","cn-qiml-035","cn-qiml-027","cn-qiml-050","cn-qiml-044","cn-qiml-043","cn-qiml-052","cn-qiml-019"];
 verifiedIds.push(...fourthWaveIds);
@@ -47,13 +47,19 @@ const fifthWaveIds=["cn-public-bucket-012","cn-public-bucket-009","cn-public-buc
 verifiedIds.push(...fifthWaveIds);
 const sixthWaveIds=['global-quant-007','global-quant-016','cn-public-bucket-010','cn-qiml-059'];verifiedIds.push(...sixthWaveIds);
 const reconciledOfficialIds=["global-quant-011","global-quant-020","global-quant-004","global-quant-010"];verifiedIds.push(...reconciledOfficialIds);
+const seventhWaveIds=["global-quant-017","cn-qiml-028","cn-qiml-007","cn-qiml-065","cn-qiml-049","cn-qiml-005"];verifiedIds.push(...seventhWaveIds);
+const seventhProfileIds=["cn-qiml-056","cn-qiml-018","cn-qiml-013","cn-qiml-009","cn-qiml-058","cn-qiml-012"];
+for(const id of [...seventhWaveIds,...seventhProfileIds])assert(research.profiles.some(p=>p.company_id===id),"missing verified or source-bounded research "+id);
+for(const id of seventhProfileIds)assert(!core.companies.find(c=>c.id===id).official_website_source,"third-party institution incorrectly presented as official "+id);
+assert(core.companies.find(c=>c.id==="cn-qiml-009").description.includes("模板"),"pseudo-official placeholder site not flagged");
+assert(core.companies.find(c=>c.id==="cn-qiml-012").description.includes("冲突"),"conflicting historic AUM not flagged");
 for(const id of [...reconciledOfficialIds,"global-quant-024"])assert(research.profiles.some(p=>p.company_id===id),"missing new sourced research "+id);
 assert(core.companies.find(c=>c.id==="global-quant-024").entity_status.includes("已解散"),"Saemor dissolution not disclosed");
 assert(core.companies.find(c=>c.id==="global-quant-024").entity_status_source.includes("lei.bloomberg.com"),"Saemor legal entity source missing");
 assert(core.companies.find(c=>c.id==="global-quant-010").description.includes("Mercer"),"SECOR acquisition context missing");
 assert(html.includes("法人存续状态")&&html.includes("法律实体登记来源")&&html.includes("资料核验提示"),"legal status evidence must be visible in company detail");
 assert.equal(new Set(verifiedIds).size,verifiedIds.length,"duplicate website verification");
-assert.equal(core.companies.filter(c=>c.official_website_source).length,52,"unexpected official source metadata");
+assert.equal(core.companies.filter(c=>c.official_website_source).length,58,"unexpected official source metadata");
 assert.equal(core.companies.find(c=>c.id==="cn-qiml-035").category,"综合资管","Tongyi should not be ungroundedly advertised as wholly quant");
 assert.equal(core.companies.find(c=>c.id==="cn-public-bucket-009").category,"宏观投资","macro manager should not be described as quant");
 assert(core.companies.find(c=>c.id==="cn-qiml-020").entity_note?.includes("2026年2月9日"),"public regulatory finding should remain visible");
@@ -71,10 +77,11 @@ for(const term of ['id="profileCount"','id="profileFilter"','id="currencyFilter"
  assert(html.includes(term),"missing company atlas UI "+term);
 }
 assert(!html.includes("学习进度")&&!html.includes("标记已学"),"unrequested learning tracker");
+assert(html.includes("公开资料与来源核对"),"source evidence heading missing");
 assert(!html.includes("一手来源深度档案")&&!html.includes("一手来源研究档案"),"unrequested profile badge must remain removed");
 assert(!html.includes("profile-badge\">一手来源"),"promotional research badge returned");
 assert.equal(methods.schema_version,1);
-assert(methods.lessons.length>=100,"company curriculum missing full chapters");
+assert(methods.lessons.length>=112,"company curriculum missing full chapters");
 assert.equal(new Set(methods.lessons.map(l=>l.id)).size,methods.lessons.length);
 let units=0,maths=0;
 for(const lesson of methods.lessons){
@@ -91,10 +98,12 @@ for(const lesson of methods.lessons){
   units++;
  }
 }
-assert(units>=400&&maths>=800,"technical curriculum compressed");
+assert(units>=448&&maths>=896,"technical curriculum compressed");
 for(const id of ["company-method-01","company-method-02","company-method-03","company-method-04","company-method-05","company-method-06","company-method-07","company-method-08","company-method-09","company-method-10","company-method-11","company-method-12","company-method-13","company-method-14","company-method-15","company-method-16","company-method-17","company-method-18","company-method-19","company-method-20","company-method-21"])assert(methods.lessons.some(l=>l.id===id),"missing subject area "+id);
 for(let n=22;n<=100;n++)assert(methods.lessons.some(l=>l.id==="company-method-"+n),"missing new technical subject "+n);
-const domainCounts={"数学与统计":47,"机器学习与AI":25,"衍生品与交易":46,"组合与风控":39,"实务工程":29};
+for(let n=101;n<=112;n++)assert(methods.lessons.some(l=>l.id==="company-method-"+n),"missing advanced noncompressing subject "+n);
+assert(methods.lessons.slice(-12).every(l=>l.sections.length===4&&l.sources.length>=2),"new technical courses incomplete");
+const domainCounts={"数学与统计":49,"机器学习与AI":27,"衍生品与交易":52,"组合与风控":46,"实务工程":36};
 for(const lesson of methods.lessons){
  assert(Array.isArray(lesson.domains)&&lesson.domains.length>0,"untagged lesson "+lesson.id);
  assert(lesson.domains.every(tag=>tag in domainCounts),"unknown course category "+lesson.id);
@@ -196,23 +205,23 @@ assert.equal(evalJS("researchHTML('not-yet-researched')"),"");
 
 ctx.courseData=methods;
 evalJS("renderCompanyMethods(courseData)");
-assert(el("methodStats").textContent.includes("100 讲")&&el("methodStats").textContent.includes("800 组"),"course totals not rendered");
+assert(el("methodStats").textContent.includes("112 讲")&&el("methodStats").textContent.includes("896 组"),"course totals not rendered");
 assert((el("companyMethodList").innerHTML.match(/class="course-unit"/g)||[]).length===48,"first page should show twelve intact four-section courses");
 assert((el("companyMethodList").innerHTML.match(/class="katex-zone"/g)||[]).length===96,"first page should show all 96 math expressions");
-assert(el("methodPageStatus").textContent.includes("第 1 / 9 组"),"100 courses should have nine pages at size twelve");
+assert(el("methodPageStatus").textContent.includes("第 1 / 10 组"),"112 courses should have ten pages at size twelve");
 evalJS("methodPage=1;renderCompanyMethods(courseData)");
-assert(el("methodPageStatus").textContent.includes("第 2 / 9 组"),"course pagination must advance");
+assert(el("methodPageStatus").textContent.includes("第 2 / 10 组"),"course pagination must advance");
 assert((el("companyMethodList").innerHTML.match(/class="course-unit"/g)||[]).length===48,"second page lost full sections");
 evalJS("methodShowAll=true;renderCompanyMethods(courseData)");
-assert((el("companyMethodList").innerHTML.match(/class="course-unit"/g)||[]).length===400,"show-all must preserve all four hundred technical sections");
-assert((el("companyMethodList").innerHTML.match(/class="katex-zone"/g)||[]).length===800,"show-all must preserve all eight hundred formulas");
+assert((el("companyMethodList").innerHTML.match(/class="course-unit"/g)||[]).length===448,"show-all must preserve all four hundred forty-eight technical sections");
+assert((el("companyMethodList").innerHTML.match(/class="katex-zone"/g)||[]).length===896,"show-all must preserve all eight hundred ninety-six formulas");
 evalJS("methodShowAll=false;methodPage=0;");
 el("methodDomain").value="机器学习与AI";
 evalJS("renderCompanyMethods(courseData)");
-assert(el("methodStats").textContent.includes("当前匹配 25 讲"),"AI domain filter count incorrect");
+assert(el("methodStats").textContent.includes("当前匹配 27 讲"),"AI domain filter count incorrect");
 assert((el("companyMethodList").innerHTML.match(/class="course-unit"/g)||[]).length===48,"filtered first page should preserve full sections");
 evalJS("methodShowAll=true;renderCompanyMethods(courseData)");
-assert((el("companyMethodList").innerHTML.match(/class="course-unit"/g)||[]).length===100,"domain show-all should include exactly twenty-five complete courses");
+assert((el("companyMethodList").innerHTML.match(/class="course-unit"/g)||[]).length===108,"domain show-all should include exactly twenty-seven complete courses");
 el("methodDomain").value="";
 evalJS("methodShowAll=false;methodPage=0;renderCompanyMethods(courseData)");
 el("methodSearch").value="可转债";
@@ -230,7 +239,7 @@ ctx.db=core;ctx.researchDb=research;
 evalJS("firms=db.companies;byId=new Map(firms.map(c=>[c.id,c]));profiles=new Map(researchDb.profiles.map(p=>[p.company_id,p]));");
 el("sourceFilter").value="verified";
 evalJS("render()");
-assert(el("status").textContent.includes("52 / 156"),"official source filter should match all 52 explicitly linked institutions");
+assert(el("status").textContent.includes("58 / 156"),"official source filter should match all 58 explicitly linked institutions");
 el("sourceFilter").value="";
 el("q").value="天演";
 evalJS("render()");
