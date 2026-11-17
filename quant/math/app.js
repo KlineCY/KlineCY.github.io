@@ -342,6 +342,17 @@ async function loadMathAdditions(){
   throw Error("数学讲义模块出现重复或缺页");
  return added;
 }
+async function loadV116MathExpansion(){
+ const files=["./lessons-phase-31-a.json","./lessons-phase-31-b.json","./lessons-phase-31-c.json","./lessons-phase-31-d.json"];
+ const docs=await Promise.all(files.map(path=>fetchMathJson(path)));
+ for(const doc of docs){
+  if(doc.version!==1||doc.revision!=="V116"||!Array.isArray(doc.lessons)||doc.lessons.length!==6)
+   throw Error("新增数学完整讲义缺失或版本异常");
+ }
+ const result=docs.flatMap(doc=>doc.lessons);
+ if(new Set(result.map(x=>x.node_id)).size!==24)throw Error("V116数学讲义存在重复节点");
+ return result;
+}
 async function loadV89Foundations(){
  const doc=await fetchMathJson("./lessons-foundations-v89.json");
  if(doc.version!==1||!Array.isArray(doc.lessons)||doc.lessons.length!==12||new Set(doc.lessons.map(l=>l.node_id)).size!==12)
@@ -793,10 +804,11 @@ Promise.all([
  loadV110NumericalMonteCarlo("./lessons-numerical-v110b.json",5),
  loadV110NumericalMonteCarlo("./lessons-numerical-v110c.json",5),
  loadV110NumericalMonteCarlo("./lessons-numerical-v110d.json",4),
- loadV110NumericalMonteCarlo("./lessons-numerical-v110e.json",4)
-]).then(([c,l1,l2,l3,extra,v89,v91,v90,v92,v93matrix,v93probability,v94a,v94b,v94c,v94deep,v95a,v95b,v96a,v96b,v97portfolio,v97algorithms,v97numerical,v98a,v98b,v99a,v99b,v99c,v99d,v100a,v100b,v100c,v100d,v101time,v101tail,v101axioms,v101governance,v102a,v102b,v102c,v103a,v103b,v103c,v104a,v104b,v104c,v104d,v105a,v105b,v105c,v105d,v106a,v106b,v107a,v107b,v107c,v107d,v107e,v107f,v108fa,v108fb,v108fc,v108ma,v108mb,v109ra,v109rb,v109rc,v109rd,v109re,v109rf,v109ea,v109eb,v110a,v110b,v110c,v110d,v110e])=>{
+ loadV110NumericalMonteCarlo("./lessons-numerical-v110e.json",4),
+ loadV116MathExpansion()
+]).then(([c,l1,l2,l3,extra,v89,v91,v90,v92,v93matrix,v93probability,v94a,v94b,v94c,v94deep,v95a,v95b,v96a,v96b,v97portfolio,v97algorithms,v97numerical,v98a,v98b,v99a,v99b,v99c,v99d,v100a,v100b,v100c,v100d,v101time,v101tail,v101axioms,v101governance,v102a,v102b,v102c,v103a,v103b,v103c,v104a,v104b,v104c,v104d,v105a,v105b,v105c,v105d,v106a,v106b,v107a,v107b,v107c,v107d,v107e,v107f,v108fa,v108fb,v108fc,v108ma,v108mb,v109ra,v109rb,v109rc,v109rd,v109re,v109rf,v109ea,v109eb,v110a,v110b,v110c,v110d,v110e,v116])=>{
 applyV91FoundationDeepening(v89,v91);
-curriculum=c;depts=c.disciplines;chapters=c.chapters;nodes=c.nodes;lessons=[...l1.lessons,...l2.lessons,...l3.lessons,...extra,...v89,...v90,...v92,...v93matrix,...v93probability,...v94a,...v94b,...v94c,...v95a,...v95b,...v96a,...v96b,...v97portfolio,...v97algorithms,...v97numerical,...v98a,...v98b,...v99a,...v99b,...v99c,...v99d,...v100a,...v100b,...v100c,...v100d,...v101time,...v101tail,...v101axioms,...v101governance,...v102a,...v102b,...v102c,...v103a,...v103b,...v103c,...v104a,...v104b,...v104c,...v104d,...v105a,...v105b,...v105c,...v105d,...v106a,...v106b,...v107a,...v107b,...v107c,...v107d,...v107e,...v107f,...v108fa,...v108fb,...v108fc,...v108ma,...v108mb,...v109ra,...v109rb,...v109rc,...v109rd,...v109re,...v109rf,...v109ea,...v109eb,...v110a,...v110b,...v110c,...v110d,...v110e];
+curriculum=c;depts=c.disciplines;chapters=c.chapters;nodes=c.nodes;lessons=[...l1.lessons,...l2.lessons,...l3.lessons,...extra,...v89,...v90,...v92,...v93matrix,...v93probability,...v94a,...v94b,...v94c,...v95a,...v95b,...v96a,...v96b,...v97portfolio,...v97algorithms,...v97numerical,...v98a,...v98b,...v99a,...v99b,...v99c,...v99d,...v100a,...v100b,...v100c,...v100d,...v101time,...v101tail,...v101axioms,...v101governance,...v102a,...v102b,...v102c,...v103a,...v103b,...v103c,...v104a,...v104b,...v104c,...v104d,...v105a,...v105b,...v105c,...v105d,...v106a,...v106b,...v107a,...v107b,...v107c,...v107d,...v107e,...v107f,...v108fa,...v108fb,...v108fc,...v108ma,...v108mb,...v109ra,...v109rb,...v109rc,...v109rd,...v109re,...v109rf,...v109ea,...v109eb,...v110a,...v110b,...v110c,...v110d,...v110e,...v116];
 applyV94HistoricalProbabilityDeepening(lessons,v94deep);
 if(new Set(lessons.map(l=>l.node_id)).size!==lessons.length)throw Error("数学讲义节点ID重复");
 nodeMap=new Map(nodes.map(n=>[n.id,n]));chapMap=new Map(chapters.map(c=>[c.id,c]));deptMap=new Map(depts.map(d=>[d.id,d]));lessonMap=new Map(lessons.map(l=>[l.node_id,l]));
