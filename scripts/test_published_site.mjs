@@ -43,6 +43,9 @@ const json=path=>JSON.parse(read(path));
 const assetData=json("quant/assets/data.json");
 assert.equal(assetData.assets.length,113,"Asset coverage changed unexpectedly");
 assert.equal(new Set(assetData.assets.map(a=>a.id)).size,113,"Duplicate asset identifier");
+const assetChapters=assetData.assets.filter(a=>a.pricing_mechanism&&a.worked_case&&a.research_audit);
+assert(assetChapters.length>=58,"Instrument valuation chapters unexpectedly missing");
+for(const a of assetChapters)assert(a.worked_case.length>=38&&a.pricing_mechanism.length>=30&&a.research_audit.length>=25,"Insufficient instrument validation: "+a.id);
 for(const a of assetData.assets){
  assert(a.notes?.length>=30,"Asset lacks specific pricing/data risk notes: "+a.id);
  assert(/^https:\/\//.test(a.data_source?.url||""),"Asset missing original data-provider URL: "+a.id);
@@ -61,6 +64,12 @@ assert(expandedWiki.length>=64,"Encyclopedia lost independent numerical case cov
 const catalog=json("quant/feeds/catalog.json"),providers=json("quant/feeds/providers.json");
 assert.equal(catalog.categories.length,7,"Data feed category coverage changed");
 assert.equal(catalog.items.length,497,"Data source field coverage changed");
+const subgroups=catalog.categories.flatMap(c=>c.subgroups);
+assert.equal(subgroups.length,50,"Data feed subgroup taxonomy drift");
+for(const s of subgroups){
+ assert(s.research_definition?.length>=50&&s.numerical_case?.length>=40&&s.failure_boundary?.length>=30,"Insufficient subgroup mathematical and empirical study: "+s.name);
+ assert(s.item_ids.every(id=>catalog.items.some(x=>x.id===id)),"Unknown subgroup field: "+s.name);
+}
 const providerIds=new Set(providers.providers.map(p=>p.id));
 assert.equal(new Set(catalog.items.map(x=>x.id)).size,497);
 for(const c of catalog.categories){
@@ -79,6 +88,15 @@ for(const strategy of strategyData.strategies){
 const paperData=json("quant/papers/data.json");
 const paperIds=new Set(paperData.papers.map(p=>p.id));
 assert.equal(paperIds.size,paperData.papers.length,"Duplicate research paper");
+assert(paperData.papers.length>=23&&paperData.issues.length>=5,"New November research issues missing");
+for(const p of paperData.papers){
+ assert(/^https:\/\/arxiv\.org\/abs\//.test(p.source_url||""),"Paper source is not a verified arXiv record: "+p.id);
+ assert(p.ml_methods?.length>0&&p.curator_note?.length>15,"Missing independent paper methodology: "+p.id);
+}
+for(const issue of paperData.issues)for(const id of issue.papers){
+ const p=paperData.papers.find(x=>x.id===id);
+ assert(p.published>=issue.period_start&&p.published<=issue.period_end,"Paper publication falls outside the weekly issue: "+id);
+}
 for(const issue of paperData.issues)for(const id of issue.papers)
  assert(paperIds.has(id),"Paper archive references nonexistent paper "+id);
 const macroNews=json("quant/news/news.json");
