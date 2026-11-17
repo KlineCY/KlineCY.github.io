@@ -287,8 +287,16 @@ for(const file of files){
  const doc=json(file);
  for(const l of doc.lessons){
   assert(l.deep_sections.length>=4,l.id+" advanced graph chapter not present");
-  const s=l.deep_sections.at(-1);
-  assert(s.paragraphs.length>=2&&s.paragraphs.every(p=>p.length>=70),l.id+" deep context missing");
+  const isNewlyExtended=file==="lessons-discrete-v104a.json";
+  const s=l.deep_sections.at(isNewlyExtended?-2:-1);
+  if(isNewlyExtended){
+   const extra=l.deep_sections.at(-1);
+   assert(extra.paragraphs.length===2&&extra.paragraphs.every(p=>p.length>=40),l.id+" newly appended technical exposition missing");
+   assert(extra.proof.length>=65&&extra.worked.length>=50&&extra.limitation.length>=35,l.id+" added calculation or limitation incomplete");
+   assert(extra.formulas.length>=1,l.id+" new combinatorial formula missing");
+   for(const eq of extra.formulas)katex.renderToString(eq.tex,{throwOnError:true,strict:"error",displayMode:true});
+  }
+  assert(s.paragraphs.length>=2&&s.paragraphs.every(p=>p.length>=70),l.id+" historical deep context missing");
   assert(s.proof.length>=95&&s.worked.length>=78&&s.limitation.length>=60,l.id+" incomplete proof or example");
   assert(s.formulas.length>=2,l.id+" missing independent equations");
   assert(l.deep_sections.slice(0,3).every(x=>x.proof&&x.worked&&x.limitation&&x.formulas.length>=1),l.id+" pre-existing mathematical chapters incomplete");
