@@ -254,6 +254,174 @@
         "validation": "与单资产60日趋势和长期持有等权基准比较，重点测试集中度、空仓时间与换手成本。",
         "limitations": "只持一资产风险集中；现金不计利息，策略净值对零利率假设敏感。"
       }
+    },
+    {
+      "id": "pairs_zratio",
+      "name": "双资产对数价差滚动Z分数",
+      "category": "统计套利",
+      "level": "高级",
+      "requirements": "至少2只资产、每只≥41个收盘价",
+      "description": "用两资产对数价格差的过去40日均值和标准差判断相对偏离，做一多一空各50%，仅为固定一比一弹性对冲的教学示例。",
+      "theory": "相对价值策略把两个价格的对数比与其历史均值比较，标准化后定义一个可能的均值回复信号。固定股数之外还需要实际的美元中性或Beta中性，当前权重仅按净值百分比作粗略对冲。",
+      "code": "import math\ndef signals(history):\n    names=sorted(history)\n    if len(names)<2:\n        return {}\n    a,b=names[:2]\n    p=[r[\"close\"] for r in history[a]]\n    q=[r[\"close\"] for r in history[b]]\n    n=min(len(p),len(q))\n    if n<41:\n        return {}\n    spreads=[math.log(x/y) for x,y in zip(p[-41:],q[-41:])]\n    past=spreads[:-1]\n    mean=sum(past)/40.0\n    sd=(sum((x-mean)**2 for x in past)/39.0)**0.5\n    if sd<1e-8:\n        return {}\n    z=(spreads[-1]-mean)/sd\n    if z>1.5:\n        return {a:-0.5,b:0.5}\n    if z<-1.5:\n        return {a:0.5,b:-0.5}\n    return {}\n",
+      "metrics": null,
+      "equity": null,
+      "dataset": "仅为可编辑代码及研究设计。无虚构历史净值或风险调整绩效。",
+      "research": {
+        "mechanism": "相对价值策略把两个价格的对数比与其历史均值比较，标准化后定义一个可能的均值回复信号。固定股数之外还需要实际的美元中性或Beta中性，当前权重仅按净值百分比作粗略对冲。",
+        "formula": "spread_t=log(P_A/P_B)，z=(spread_t−过去40日均值)/过去40日标准差；z>1.5做空A、做多B。",
+        "derivation": "均值和标准差只用截至昨日的40条价差，今天最后一条价差只用于当前信号判断，防止信号自身进入基准。",
+        "worked": "过去均值0、标准差0.1、今日对数价差0.2，z=2，则做空A50%、做多B50%。",
+        "validation": "先在训练期验证价差平稳性和可能协整关系；在测试期报告借券费、两市场交易时钟和真实可借股票限制。",
+        "limitations": "两资产价差可能有随机趋势或结构性断裂；相同净值权重不构成严格对冲，单纯价差回归不能证明协整。"
+      }
+    },
+    {
+      "id": "cross_reversal_5",
+      "name": "五日横截面赢家输家反转",
+      "category": "股票对冲",
+      "level": "高级",
+      "requirements": "至少2只资产，每只≥6日收盘价",
+      "description": "做多过去五日回报最低的资产，做空最高的资产，测试短期反转。限制多空各50%，不假设可融资无限杠杆。",
+      "theory": "短期反转假设部分价格过度反应在未来回归，但实际市场中趋势、新闻传播和小盘流动性都可能产生相反效应。这个模型没有行业或市场Beta中性保证。",
+      "code": "def signals(history):\n    scores=[]\n    for ticker,bars in history.items():\n        c=[r[\"close\"] for r in bars]\n        if len(c)>=6 and c[-6]>0:\n            scores.append((c[-1]/c[-6]-1.0,ticker))\n    if len(scores)<2:\n        return {}\n    scores.sort()\n    loser=scores[0][1]\n    winner=scores[-1][1]\n    if loser==winner:\n        return {}\n    return {loser:0.5,winner:-0.5}\n",
+      "metrics": null,
+      "equity": null,
+      "dataset": "仅为可编辑代码及研究设计。无虚构历史净值或风险调整绩效。",
+      "research": {
+        "mechanism": "短期反转假设部分价格过度反应在未来回归，但实际市场中趋势、新闻传播和小盘流动性都可能产生相反效应。这个模型没有行业或市场Beta中性保证。",
+        "formula": "r_{i,5}=P_t/P_{t−5}−1；持有w_loser=+0.5，w_winner=−0.5。",
+        "derivation": "只使用最后六个已完成收盘价形成五期收益，排序选第一和最后，避免用当前未来五日标签作训练。",
+        "worked": "资产A五日收益−6%、B五日收益+5%，则A多头50%、B空头50%；两者下期表现仍不确定。",
+        "validation": "比较20日反转与5日反转、大小盘流动性分组、借券成本、做空不可用时的表现，严格保留全部失败参数组合。",
+        "limitations": "实际短券可能无法借到；长期单边趋势或重大基本面事件会造成亏损，非严格市场中性。"
+      }
+    },
+    {
+      "id": "residual_cross",
+      "name": "市场残差短期反转",
+      "category": "统计学习 / 中性",
+      "level": "高级",
+      "requirements": "至少3只资产，各自≥42日收盘价",
+      "description": "先用等权市场收益近似剔除资产的线性Beta，再按最近残差极值构造对冲多空组合。",
+      "theory": "市场残差把资产收益的共同市场部分剔除，试图寻找短期未被公共因子解释的异常回报并检验反转，而不是直接按原始跌幅交易。",
+      "code": "def signals(history):\n    names=sorted(history)\n    if len(names)<3 or any(len(history[t])<42 for t in names):\n        return {}\n    r={}\n    for t in names:\n        c=[row[\"close\"] for row in history[t]]\n        r[t]=[c[i]/c[i-1]-1.0 for i in range(len(c)-41,len(c))]\n    market=[sum(r[t][k] for t in names)/len(names) for k in range(41)]\n    mx=sum(market[:-1])/40.0\n    mv=sum((x-mx)**2 for x in market[:-1])\n    if mv<1e-12:\n        return {}\n    scores=[]\n    for t in names:\n        ys=r[t][:-1]\n        my=sum(ys)/40.0\n        beta=sum((x-mx)*(y-my) for x,y in zip(market[:-1],ys))/mv\n        resid=r[t][-1]-(my+beta*(market[-1]-mx))\n        scores.append((resid,t))\n    scores.sort()\n    if scores[0][1]==scores[-1][1]:\n        return {}\n    return {scores[0][1]:0.5,scores[-1][1]:-0.5}\n",
+      "metrics": null,
+      "equity": null,
+      "dataset": "仅为可编辑代码及研究设计。无虚构历史净值或风险调整绩效。",
+      "research": {
+        "mechanism": "市场残差把资产收益的共同市场部分剔除，试图寻找短期未被公共因子解释的异常回报并检验反转，而不是直接按原始跌幅交易。",
+        "formula": "β_i=Cov(r_i,r_m)/Var(r_m)；e_i,t=r_i,t−(μ_i+β_i(r_m,t−μ_m))。",
+        "derivation": "使用过去40期收益拟合各资产Beta，在最新已完成的收益上计算残差，再按残差排序做多最低、做空最高者。",
+        "worked": "资产A真实日收益−2%，按过去Beta预测−0.5%，其残差−1.5%；B实际+1%、预测+0.2%，残差+0.8%，若两者极端则A多、B空。",
+        "validation": "用可投资股票池重建等权市场代理，避免少量资产虚构市场指数，检验横截面中性、行业控制与交易容量。",
+        "limitations": "等权样本市场不是公开指数，未来收益可能继续趋势；β稳定和横截面回报可比性不能保证。"
+      }
+    },
+    {
+      "id": "trend_vol_contraction",
+      "name": "波动收缩后价格突破",
+      "category": "趋势 / 波动",
+      "level": "中级",
+      "requirements": "每只资产≥61日收盘价",
+      "description": "用20日价格突破与最近10日相对60日历史波动收缩共同过滤趋势入场，减少高波虚假突破。",
+      "theory": "此处研究一个联合假设：短期波动较历史长期水平收缩，随后价格向上突破先前区间。采用收益二阶均方根而非去均值样本标准差。",
+      "code": "def signals(history):\n    chosen=[]\n    for t,bars in history.items():\n        c=[row[\"close\"] for row in bars]\n        if len(c)<61:\n            continue\n        r=[c[i]/c[i-1]-1 for i in range(len(c)-60,len(c))]\n        s10=(sum(x*x for x in r[-10:])/10.0)**0.5\n        s60=(sum(x*x for x in r)/60.0)**0.5\n        if s60>1e-8 and s10<0.75*s60 and c[-1]>max(c[-21:-1]):\n            chosen.append(t)\n    return {t:1.0/len(chosen) for t in chosen} if chosen else {}\n",
+      "metrics": null,
+      "equity": null,
+      "dataset": "仅为可编辑代码及研究设计。无虚构历史净值或风险调整绩效。",
+      "research": {
+        "mechanism": "此处研究一个联合假设：短期波动较历史长期水平收缩，随后价格向上突破先前区间。采用收益二阶均方根而非去均值样本标准差。",
+        "formula": "s10=sqrt(Σ_10r²/10)，s60=sqrt(Σ_60r²/60)，若s10<0.75s60且P_t>过去20日最高收盘价则持有。",
+        "derivation": "先用真实已发生的60个简单日收盘收益估计波动，再以今日最后收盘突破上一20日区间条件下单。",
+        "worked": "若10日均方根0.5%、60日均方根1%、价格突破此前20日最高100升至101，则满足入场条件。",
+        "validation": "与只用突破、只用低波和均线动量做消融检验，报告信号稀疏度及样本不足时的估计误差。",
+        "limitations": "波动下降可能只是市场短期沉寂，突破后易出现高波回撤；引擎不模拟真实盘中上轨突破。"
+      }
+    },
+    {
+      "id": "drawdown_guard",
+      "name": "40日高点回撤与趋势风控",
+      "category": "风险控制",
+      "level": "中级",
+      "requirements": "每只资产≥41日收盘价",
+      "description": "持有高于40日简单均线、且距离过去40日最高收盘价回撤小于8%的资产；超限时退出风险资产。",
+      "theory": "滚动高点与均线共同限制多头状态，提供一个可复制的技术性撤退规则。该规则不是真实订单级止损，因为亏损超限后的执行在次日开盘才发生。",
+      "code": "def signals(history):\n    chosen=[]\n    for t,bars in history.items():\n        c=[r[\"close\"] for r in bars]\n        if len(c)<41:\n            continue\n        hist=c[-41:-1]\n        peak=max(hist)\n        ma=sum(hist)/40.0\n        if peak>0 and c[-1]>=0.92*peak and c[-1]>ma:\n            chosen.append(t)\n    return {t:1.0/len(chosen) for t in chosen} if chosen else {}\n",
+      "metrics": null,
+      "equity": null,
+      "dataset": "仅为可编辑代码及研究设计。无虚构历史净值或风险调整绩效。",
+      "research": {
+        "mechanism": "滚动高点与均线共同限制多头状态，提供一个可复制的技术性撤退规则。该规则不是真实订单级止损，因为亏损超限后的执行在次日开盘才发生。",
+        "formula": "滚动回撤d_t=1−P_t/max(P_{t−40:t−1})；条件d_t≤8%且P_t>历史40日均线。",
+        "derivation": "最高价和均线严格只用前40日历史，当期新收盘价用于决定次日目标权重，避免未来任何价格参与阈值设定。",
+        "worked": "前40日高点100、均价90、今日93时，回撤7%且高于均值，继续持有；若今日90则回撤10%，空仓。",
+        "validation": "比较不同回撤阈值和趋势约束下组合换手及尾部，注意不能根据最终测试调出最佳阈值。",
+        "limitations": "回撤门槛无法阻止隔夜跳空暴跌，价格停牌会破坏理想退出执行。"
+      }
+    },
+    {
+      "id": "low_vol_top2",
+      "name": "低波动资产优选Top2",
+      "category": "资产配置 / 防守",
+      "level": "中级",
+      "requirements": "至少2只资产，各自≥41日收盘价",
+      "description": "选择过去40日收益波动率最低的两只资产，再按逆波动加权。适用于构建不含复杂优化器的稳健配置比较基准。",
+      "theory": "两阶段选择先找近期统计波动最小资产，再按其波动倒数分配持仓。对股票、国债和商品跨资产比较时需注意各资产日收盘口径一致。",
+      "code": "def signals(history):\n    ranked=[]\n    for t,bars in history.items():\n        c=[r[\"close\"] for r in bars]\n        if len(c)<41:\n            continue\n        rs=[c[j]/c[j-1]-1 for j in range(len(c)-40,len(c))]\n        avg=sum(rs)/40.0\n        sd=(sum((x-avg)**2 for x in rs)/39.0)**0.5\n        if sd>1e-8:\n            ranked.append((sd,t))\n    ranked.sort()\n    picks=ranked[:2]\n    weights={t:1.0/sd for sd,t in picks}\n    denom=sum(weights.values())\n    return {t:v/denom for t,v in weights.items()} if denom else {}\n",
+      "metrics": null,
+      "equity": null,
+      "dataset": "仅为可编辑代码及研究设计。无虚构历史净值或风险调整绩效。",
+      "research": {
+        "mechanism": "两阶段选择先找近期统计波动最小资产，再按其波动倒数分配持仓。对股票、国债和商品跨资产比较时需注意各资产日收盘口径一致。",
+        "formula": "选σ20最低的两只（本实现使用40期σ40），再w_i∝1/σ_i并归一。",
+        "derivation": "使用40个历史日收益计算样本波动。排序只依赖波动并没有使用历史收益均值，在长期危机中也可能选到低流动性资产。",
+        "worked": "若三资产波动为1%、2%、3%，选择前两只，并分别配重2/3和1/3。",
+        "validation": "与等权、逆波动全资产和收缩协方差基线比较，压力测试利率上升时股债共同损失。",
+        "limitations": "低波动可隐含卖尾部或信用风险，不能仅凭标准差称为低风险。"
+      }
+    },
+    {
+      "id": "trend_vote",
+      "name": "多时间尺度动量投票",
+      "category": "趋势集成",
+      "level": "中级",
+      "requirements": "每只资产≥61日收盘价",
+      "description": "将10日、30日与60日动量符号投票，只在至少两个窗口正收益时持有风险资产。",
+      "theory": "多时域投票可以降低某个单一窗口参数的敏感度，但三个趋势窗口共享大量历史数据，因此这些投票不是三个独立统计证据。",
+      "code": "def signals(history):\n    picks=[]\n    for t,bars in history.items():\n        c=[row[\"close\"] for row in bars]\n        if len(c)<61:\n            continue\n        votes=sum(c[-1]>c[-1-k] for k in [10,30,60])\n        if votes>=2:\n            picks.append(t)\n    return {t:1.0/len(picks) for t in picks} if picks else {}\n",
+      "metrics": null,
+      "equity": null,
+      "dataset": "仅为可编辑代码及研究设计。无虚构历史净值或风险调整绩效。",
+      "research": {
+        "mechanism": "多时域投票可以降低某个单一窗口参数的敏感度，但三个趋势窗口共享大量历史数据，因此这些投票不是三个独立统计证据。",
+        "formula": "v_t=Σ_{k∈{10,30,60}}1{P_t>P_{t−k}}，v_t≥2时持有。",
+        "derivation": "每只资产用合法历史日价对三个持有期分别计算涨跌方向，在全部时间窗口判断完成后等权。",
+        "worked": "某ETF10日涨2%、30日跌1%、60日涨5%，得到两票，满足持有条件。",
+        "validation": "比较单窗口与投票集成的费后净值、滞后和风格暴露，投票参数需在最终测试前固定。",
+        "limitations": "投票相关性高，不会自动形成风险分散；在震荡区间内会频繁翻转。"
+      }
+    },
+    {
+      "id": "rolling_rel_value",
+      "name": "滚动价比均值回复加趋势过滤",
+      "category": "跨资产相对价值",
+      "level": "高级",
+      "requirements": "至少2只资产，各自≥61日收盘价",
+      "description": "用两只资产滚动对数价比的标准化偏离做配对，同时只在两者中期收益方向相近时允许价差交易，以减少明显基本面分化。",
+      "theory": "比值均值回复可能发生在同一行业或高相关资产之间，但共同动量条件只降低一些趋势分化情形，不能证明价比具有长期稳定均衡。",
+      "code": "import math\ndef signals(history):\n    names=sorted(history)\n    if len(names)<2:\n        return {}\n    a,b=names[:2]\n    x=[r[\"close\"] for r in history[a]]\n    y=[r[\"close\"] for r in history[b]]\n    if min(len(x),len(y))<61:\n        return {}\n    mom_a=x[-1]/x[-61]-1\n    mom_b=y[-1]/y[-61]-1\n    if (mom_a>0)!=(mom_b>0):\n        return {}\n    spread=[math.log(i/j) for i,j in zip(x[-61:],y[-61:])]\n    hist=spread[:-1]\n    mu=sum(hist)/60.0\n    sd=(sum((v-mu)**2 for v in hist)/59.0)**0.5\n    if sd<1e-8:\n        return {}\n    z=(spread[-1]-mu)/sd\n    return {a:-0.5,b:0.5} if z>1.8 else ({a:0.5,b:-0.5} if z<-1.8 else {})\n",
+      "metrics": null,
+      "equity": null,
+      "dataset": "仅为可编辑代码及研究设计。无虚构历史净值或风险调整绩效。",
+      "research": {
+        "mechanism": "比值均值回复可能发生在同一行业或高相关资产之间，但共同动量条件只降低一些趋势分化情形，不能证明价比具有长期稳定均衡。",
+        "formula": "z=(log(P_A/P_B)−过去60日均值)/样本标准差；|z|>1.8且二者60日回报符号一致时对冲。",
+        "derivation": "从过去60日对数价比估计中心和方差，今天最新价比与历史阈值比较，配对两腿共用资金绝对敞口1。",
+        "worked": "两资产60日涨幅均为正，过去价比均值0.1、标准差0.05，当前价比0.2，z=2，做空第一资产并做多第二资产。",
+        "validation": "必须开展价比协整或单位根研究、参数稳定性与换手成本检验，并把空头借券限制写入资金账本。",
+        "limitations": "真实对冲比率可能不是1，个股停牌和跨币对齐可能使双腿无法同时交易。"
+      }
     }
   ]
 }
