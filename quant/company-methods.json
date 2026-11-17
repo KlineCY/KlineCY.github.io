@@ -10760,17 +10760,17 @@
           ],
           "equations": [
             {
-              "label": "真实换月现金流",
-              "tex": "\\Pi_{\\rm roll}=-nM(F^{\\rm new}_{\\rm buy}-F^{\\rm old}_{\\rm sell})"
+              "label": "双腿实际执行费用近似",
+              "tex": "C_{\\rm roll}\\approx nM(s_{\\rm old}+s_{\\rm new})/2+C_{\\rm commissions}"
             },
             {
               "label": "展期价差",
               "tex": "S_t=F_t^{\\rm next}-F_t^{\\rm near}"
             }
           ],
-          "derivation": "卖出旧合约与买入新合约通常使账户存在价差和新头寸，不能仅凭新合约较旧合约贵就直接认定一次性损失等于价差；该式表示两笔相反方向交易的报价现金流差，并非跨不同合约的即时已实现利润。",
-          "worked": "旧月在95元卖出，新月在97元买入，两张合约的差价是2元；新合约价格97元是新头寸成本基准，若随后升至98元，新合约的价格收益为1元/单位而非-1元。",
-          "boundary": "在期货盯市结算中合约建立通常无全额名义现金支出；把两个不同交割月的开平价直接相减只能用于研究展期结构，不能误作当天现金盈亏。"
+          "derivation": "展期交易先按真实时点卖出旧合约、买入新合约，并对两腿各自计提半点差、冲击与佣金。旧新合约价格差反映两种到期结构的相对定价，不是换月当日直接损益；后续持仓的逐日盯市应从新合约的成交和结算价格独立核算。",
+          "worked": "旧月合约成交卖价95元，新月成交买价97元，期限价差为2元；它不是当天已实现亏损2元。若随后新月结算价升至98元，则新仓价格盈亏为每单位1元，此外仍应扣两腿成交点差与费用。",
+          "boundary": "期货名义本金不按开仓价格全额支付，公式仅衡量交易成本，最终资金和持仓损益必须与清算账本逐笔一致。"
         }
       ],
       "sources": [
@@ -11199,12 +11199,16 @@
       ],
       "sources": [
         {
-          "title": "NBER · Research on backtest overfitting",
-          "url": "https://www.nber.org/"
+          "title": "Bailey等 · The Probability of Backtest Overfitting",
+          "url": "https://escholarship.org/uc/item/4w1110bb"
         },
         {
-          "title": "American Statistical Association",
-          "url": "https://www.amstat.org/"
+          "title": "Benjamini–Hochberg (1995) · False Discovery Rate",
+          "url": "https://doi.org/10.1111/j.2517-6161.1995.tb02031.x"
+        },
+        {
+          "title": "Howard等 (2021) · Time-uniform Confidence Sequences",
+          "url": "https://doi.org/10.1214/20-AOS1991"
         }
       ]
     },
