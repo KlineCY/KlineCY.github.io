@@ -54,6 +54,21 @@ for(const id of added){
  assert(item?.html.includes("atlas-concept-toc"),"missing rendered table of contents "+id);
  assert.equal((item.html.match(/class="atlas-concept-unit"/g)||[]).length,doc.chapters[0].lessons.find(l=>l.id===id).sections.length);
 }
+const completeEvidenceTopics={
+ "m12-c07-p01":["配对符号翻转检验：无需正态假设但仍有交换性条件","模型比较的Holm逐步校正与相关金融检验"],
+ "m12-c07-p02":["稀疏因子选择频率的Hoeffding误差带与重复重抽样","Ridge预测信号的稳定性界与持仓敏感度"],
+ "m12-c07-p03":["回测现金守恒：组合净值与换手费用逐期核对","训练集标准化的时间可得性与未来均值泄漏"]
+};
+for(const [id,titles] of Object.entries(completeEvidenceTopics)){
+ const lesson=lessons.find(l=>l.id===id);
+ assert(lesson&&lesson.sections.length===8,"original and expanded research chapters absent "+id);
+ for(const title of titles){
+  const section=lesson.sections.find(s=>s.title===title);
+  assert(section&&section.paragraphs.length===2&&section.paragraphs.every(p=>p.length>=85),"missing empirical explanation "+id);
+  assert(section.equations.length===2&&section.worked.length>=105&&section.boundary.length>=75,"missing empirical example and inference limit "+id);
+  for(const e of section.equations)katex.renderToString(e.tex,{throwOnError:true,strict:"error"});
+ }
+}
 const near=(x,y,eps=1e-10)=>assert(Math.abs(x-y)<eps,"arithmetic "+x+" vs "+y);
 near(1+2*.2,1.4);
 near(1+2*.5*.2,1.2);
@@ -62,6 +77,13 @@ near(1/3,.3333333333333333);
 near(Math.sqrt(2),1.4142135623730951);
 near(.5*(.1+.1),.1);
 near(100-1,99);
+near(2/8,.25);
+near(3*.01,.03);
+near(Math.max(3*.01,2*.03),.06);
+near(Math.sqrt(Math.log(40)/200),.13580960291004073);
+near(.01/(.04+.1),.07142857142857142);
+near(100-1,99);
+near(2/Math.sqrt(8/3),1.224744871391589);
 const html=fs.readFileSync(new URL("./index.html",base),"utf8"),css=fs.readFileSync(new URL("./atlas.css",base),"utf8");
 for(const id of added)assert(html.includes("#lesson/"+id),"entry route missing "+id);
 assert(html.includes("atlas.js?v=20261109"));
