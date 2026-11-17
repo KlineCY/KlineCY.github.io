@@ -239,6 +239,30 @@ near("backward Euler high mode",1/41,1/(1+4*10));
 near("combined convection CFL",.1+2*.2,.5);
 near("combined convection weights",(.2+.1)+(1-2*.2-.1)+.2,1);
 
+const advancedStochasticControl={
+ "diffeq-n0415":"包含交易成本的Bellman状态为何必须记录上一期权重",
+ "diffeq-n0416":"离散LQR Bellman递推与Riccati矩阵方程",
+ "diffeq-n0417":"Merton最优比例的借款限制与分段最优解",
+ "diffeq-n0418":"验证定理中的超鞅界与终端剩余项",
+ "diffeq-n0419":"最优停止的超额贴现收益与Snell包络的离散递推",
+ "diffeq-n0420":"折扣Bellman算子的压缩映射与值迭代误差界"
+};
+for(const [id,title] of Object.entries(advancedStochasticControl)){
+ const l=newLessons.find(l=>l.id===id);
+ const section=l?.deep_sections.find(s=>s.title===title);
+ assert(section,"missing advanced stochastic-control argument "+id);
+ assert(section.paragraphs.length===2&&section.paragraphs.every(p=>p.length>=95),"incomplete HJB/Bellman explanations "+id);
+ assert(section.formulas.length===2&&section.proof.length>=100&&section.worked.length>=85&&section.limitation.length>=60,"incomplete stochastic-control proof "+id);
+ for(const f of section.formulas)formula(f.tex,id+" stochastic control");
+}
+near("Bellman transaction history first",.01*Math.abs(.6-.5),.001);
+near("Bellman transaction history second",.01*Math.abs(.6-(-.2)),.008);
+near("discrete scalar Riccati",1+1-1/2,1.5);
+near("Merton borrowing constrained",Math.min(1,.08/(2*.15**2)),1);
+near("verification deterministic objective",1,1);
+near("discounted Bellman V3",1+.5+.5**2,1.75);
+near("discounted Bellman limit",1/(1-.5),2);
+near("discounted Bellman error",2-1.75,.25);
 assert(checks>=80,"insufficient independently calculated invariants");
 console.log("V99 PASS",newLessons.length,"new lessons;",all.length,"total;",diffeq.length,
  "of",diffeq.length,"diffeq nodes completed;",formulaCount,"KaTeX;",chapterCount,

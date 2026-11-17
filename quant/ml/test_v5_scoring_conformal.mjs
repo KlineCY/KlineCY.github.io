@@ -19,7 +19,7 @@ for(const file of files){assert.equal(file.schema,1);assert(file.chapters.length
 for(const x of rows){
  assert(!previous.has(x.id),"duplicate original course "+x.id);
  assert(x.goal.length>=80&&x.protocol.length>=4&&x.sources.length>=2);
- assert.equal(x.sections.length,["m09-c09-p01","m23-c10-p01","m23-c10-p02"].includes(x.id)?7:5,"all original and advanced sections required "+x.id);
+ assert.equal(x.sections.length,7,"all original and advanced sections required "+x.id);
  assert.equal(new Set(x.sections.map(s=>s.title)).size,x.sections.length);
  for(const s of x.sections){
   assert(s.question?.length>=12&&s.paragraphs.length===2&&s.paragraphs.every(p=>p.length>=48),"thin explanatory paragraph "+x.id+" "+s.title);
@@ -57,6 +57,11 @@ for(const l of rows.filter(l=>["m09-c09-p01","m23-c10-p01","m23-c10-p02"].includ
  assert(s.paragraphs.length===2&&s.paragraphs.every(p=>p.length>=65)&&s.equations.length===2&&s.worked.length>=75&&s.boundary.length>=55,"advanced probability material incomplete "+l.id);
  for(const eq of s.equations)katex.renderToString(eq.tex,{throwOnError:true,strict:"error"});
 }
+for(const l of rows.filter(l=>["m04-c10-p01","m12-c10-p01","m12-c10-p02"].includes(l.id)))for(const section of l.sections.slice(5)){
+ assert(section.paragraphs.length===2&&section.paragraphs.every(p=>p.length>=95),"new proper score/conformal proof missing explanation "+l.id);
+ assert(section.equations.length===2&&section.worked.length>=85&&section.boundary.length>=60,"new conformal validity example incomplete "+l.id);
+ for(const eq of section.equations)katex.renderToString(eq.tex,{throwOnError:true,strict:"error",displayMode:true});
+}
 const near=(a,b,t=1e-8)=>assert(Math.abs(a-b)<t,"numeric invariant "+a+" != "+b);
 near((1-.7)**2,.09);
 near(.75*Math.log(1.5)+.25*Math.log(.5),.13081203594113697);
@@ -72,6 +77,13 @@ near(Math.log(2*Math.PI)/2+Math.log(2),1.612085713764618);
 near(Math.log(2*Math.PI)/2+2,2.9189385332046727);
 near(1.612085713764618+.5,2.112085713764618);
 near(.3+.7,1);
+near(-.75*Math.log(.75)-.25*Math.log(.25),.5623351446188083);
+near(Math.log(2)-(-.75*Math.log(.75)-.25*Math.log(.25)),.130812035941137);
+near((.5-.7)**2+.7*.3,.25);
+near(.95*1+.05*0,.95);
+near(Math.ceil((4+1)*.9),5);
+near(2/(4+2),1/3);
+near(12**2/(1+1+1+9**2),12/7);
 near(-1000-Math.log(2)+Math.log(1+Math.exp(-10)),-1000.6931017816607);
 near(.5*1+.5*1+.5*1**2+.5*(-1)**2,2);
 near(.5*1+.5*0,.5);
