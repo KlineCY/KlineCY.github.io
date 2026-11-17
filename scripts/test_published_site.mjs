@@ -53,6 +53,11 @@ for(const a of assetData.assets){
 const siteData=json("quant/rankings/sites.json");
 assert.equal(siteData.sites.length,51,"Academic portal coverage changed");
 for(const p of siteData.sites){
+ assert(p.research_use?.length>=45&&p.evidence_boundary?.length>=26,"Incomplete research-portal evaluation: "+p.id);
+}
+const rankingHtml=read("quant/rankings/index.html");
+assert(rankingHtml.includes("s.research_use")&&rankingHtml.includes("s.evidence_boundary"),"Research portal methods not rendered");
+for(const p of siteData.sites){
  assert(p.description?.length>=30,"Academic site purpose is too generic: "+p.id);
  assert(/^https:\/\//.test(p.url),"Invalid academic site URL: "+p.id);
 }
@@ -60,7 +65,7 @@ const wikiMeta=json("quant/wiki/manifest.json");
 const wikiTerms=wikiMeta.data_files.flatMap(name=>json("quant/wiki/"+name).terms);
 assert.equal(wikiTerms.length,wikiMeta.total_terms,"Wiki index and data files disagree");
 const expandedWiki=wikiTerms.filter(t=>t.example?.includes("数值例题："));
-assert(expandedWiki.length>=64,"Encyclopedia lost independent numerical case coverage");
+assert.equal(expandedWiki.length,172,"Every financial encyclopedia entry requires an independent numerical case");
 const catalog=json("quant/feeds/catalog.json"),providers=json("quant/feeds/providers.json");
 assert.equal(catalog.categories.length,7,"Data feed category coverage changed");
 assert.equal(catalog.items.length,497,"Data source field coverage changed");
@@ -76,7 +81,11 @@ for(const c of catalog.categories){
  assert(c.research_protocol?.length>=30&&c.failure_modes?.length>=20,"Data-family research contract missing: "+c.id);
 }
 const researched=catalog.items.filter(x=>x.research_protocol&&x.failure_modes);
-assert(researched.length>=35,"Field-level PIT research protocols missing");
+assert.equal(researched.length,497,"All 497 quantitative data fields need research and failure contracts");
+for(const f of researched){
+ assert(f.research_protocol.length>=25&&f.failure_modes.length>=18,"Field-level source and PIT contract too shallow: "+f.id);
+ assert(!f.research_protocol.startsWith("所属数据口径：")&&!f.research_protocol.startsWith("细分数据核验："),"Field lacks specific research meaning: "+f.id);
+}
 for(const item of catalog.items)for(const id of item.provider_ids)
  assert(providerIds.has(id),"Unknown data provider: "+item.id+" -> "+id);
 const strategyData=json("quant/research/strategies.json");
