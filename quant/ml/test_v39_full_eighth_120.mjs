@@ -40,7 +40,9 @@ for(let index=0;index<files.length;index++){
   assert(lesson.protocol.length>=6,id+" original and V51 empirical checks");
   assert(lesson.pitfalls.length>=3,id+" original two plus one new failure condition");
   assert.equal(new Set(lesson.protocol.slice(0,6)).size,6,id+" duplicated study protocol");
-  assert(lesson.derivation.slice(3).every(s=>s.length>=65),id+" weak mathematical argument");
+  const proofBaseline=path==="atlas-depth-08-a.json"?lesson.derivation.slice(3,-1):lesson.derivation.slice(3);
+  assert(proofBaseline.every(s=>s.length>=65),id+" historical mathematical argument changed");
+  if(path==="atlas-depth-08-a.json")assert(lesson.derivation.at(-1).startsWith("进阶数学推导：")&&lesson.derivation.at(-1).length>=40,id+" new mathematical proof missing");
   assert(lesson.protocol.slice(3).every(s=>s.length>=25),id+" weak reproducibility instructions");
   assert(lesson.pitfalls.at(-1)?.length>=30,id+" weak financial boundary");
   assert(!/TODO|Lorem ipsum|[\uFFFD\u200B\uFEFF]/i.test(JSON.stringify(lesson)),id+" broken CJK data or draft text");

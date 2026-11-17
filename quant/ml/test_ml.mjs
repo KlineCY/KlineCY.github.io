@@ -115,7 +115,7 @@ for(const [file,expected] of extendedMLGroups){
   assert(l.derivation.slice(-2).every(s=>s.length>=85),"expanded ML reasoning underdeveloped "+id);
   assert(l.worked_example.length>=360,"expanded ML example missing "+id);
   assert.equal(new Set(l.equations.map(f=>f.label)).size,l.equations.length,"duplicate expanded ML equations "+id);
-  for(const f of l.equations.slice(-2)){
+  for(const f of (file==="atlas-depth-14-a.json"?l.equations.slice(-3,-1):l.equations.slice(-2))){
    assert(f.label?.length>=3&&f.tex?.length>=14,"missing extended ML formula "+id);
    katex.renderToString(f.tex,{displayMode:true,throwOnError:true,strict:"error"});
   }
@@ -168,7 +168,9 @@ for(const [file,minEquations,ids] of nextMLGroups){
  assert.deepEqual(Object.keys(doc.lessons),ids,"further-deepened ML canonical identities changed "+file);
  for(const [id,l] of Object.entries(doc.lessons)){
   assert(l.equations.length>=minEquations&&l.derivation.length>=10,"new deepened equations/derivations missing "+id);
-  assert(l.derivation.slice(-2).every(s=>s.length>=88),"new proof paragraphs underdeveloped "+id);
+  const originalDeepProofs=file==="atlas-depth-14-a.json"?l.derivation.slice(-3,-1):l.derivation.slice(-2);
+  assert(originalDeepProofs.every(s=>s.length>=88),"original deep proof paragraphs underdeveloped "+id);
+  if(file==="atlas-depth-14-a.json")assert(l.derivation.at(-1).startsWith("专题进阶推导："),"new proof omitted "+id);
   assert(l.worked_example.length>=435,"new worked numerical example missing "+id);
   assert(l.protocol.length>=6&&l.pitfalls.length>=5,"new validation protocol or limitation missing "+id);
   assert.equal(new Set(l.equations.map(e=>e.label)).size,l.equations.length,"duplicate ML formula titles "+id);
@@ -225,11 +227,11 @@ for(const [file,ids] of cycleMLGroups){
  assert.deepEqual(Object.keys(doc.lessons),ids,"new ML course identities modified "+file);
  for(const [id,l] of Object.entries(doc.lessons)){
   assert(l.equations.length>=10&&l.derivation.length>=10,"new ML course formula or derivation missing "+id);
-  assert(l.derivation.slice(-2).every(s=>s.length>=85),"new ML derivation requires two substantive passages "+id);
+  assert((file==="atlas-depth-13-a.json"?l.derivation.slice(-3,-1):l.derivation.slice(-2)).every(s=>s.length>=85),"new ML derivation requires two substantive passages "+id);
   assert(l.worked_example.length>=430,"new ML worked example missing "+id);
   assert(l.protocol.length>=6&&l.pitfalls.length>=5,"new ML protocol or caveat missing "+id);
   assert.equal(new Set(l.equations.map(e=>e.label)).size,l.equations.length,"new ML equation labels duplicated "+id);
-  for(const e of l.equations.slice(-2)){
+  for(const e of (file==="atlas-depth-13-a.json"?l.equations.slice(-3,-1):l.equations.slice(-2))){
    assert(e.tex.length>=18&&e.label.length>=4,"new ML equation incomplete "+id);
    katex.renderToString(e.tex,{displayMode:true,throwOnError:true,strict:"error"});
   }
@@ -315,10 +317,10 @@ for(const [filename,ids] of expandedV12Groups){
  assert.deepEqual(Object.keys(doc.lessons),ids,"V12 canonical ML order changed "+filename);
  for(const [id,l] of Object.entries(doc.lessons)){
   assert(l.equations.length>=10&&l.derivation.length>=10&&l.protocol.length>=6&&l.pitfalls.length>=5,"V12 lesson depth incomplete "+id);
-  assert(l.worked_example.length>=410&&l.derivation.slice(-2).every(s=>s.length>=100),"V12 mathematical proof or numerical example too brief "+id);
+  assert(l.worked_example.length>=410&&(filename==="atlas-depth-12-a.json"?l.derivation.slice(-3,-1):l.derivation.slice(-2)).every(s=>s.length>=100),"V12 mathematical proof or numerical example too brief "+id);
   assert.equal(new Set(l.equations.map(e=>e.label)).size,l.equations.length,"V12 repeated equation labels "+id);
   assert(!/TODO|FIXME|独立稿|待完善|占位/u.test(JSON.stringify(l)),"unfinished V12 content "+id);
-  for(const e of l.equations.slice(-2)){
+  for(const e of (filename==="atlas-depth-12-a.json"?l.equations.slice(-3,-1):l.equations.slice(-2))){
    assert(e.label.length>=4&&e.tex.length>=17,"V12 formula incomplete "+id);
    katex.renderToString(e.tex,{displayMode:true,throwOnError:true,strict:"error"});
   }
@@ -364,9 +366,9 @@ for(const [file,ids] of v11DeepGroups){
  for(const [id,l] of Object.entries(d.lessons)){
   assert(l.equations.length>=10&&l.derivation.length>=10,"V11 lesson proof/formula incomplete "+id);
   assert(l.worked_example.length>=405&&l.protocol.length>=6&&l.pitfalls.length>=5,"V11 example, financial validation or boundary incomplete "+id);
-  assert(l.derivation.slice(-2).every(s=>s.length>=95),"V11 rigorous proof paragraph too short "+id);
+  assert((file==="atlas-depth-11-a.json"?l.derivation.slice(-3,-1):l.derivation.slice(-2)).every(s=>s.length>=95),"V11 rigorous proof paragraph too short "+id);
   assert.equal(new Set(l.equations.map(e=>e.label)).size,l.equations.length,"V11 formula labels repeated "+id);
-  for(const e of l.equations.slice(-2)){
+  for(const e of (file==="atlas-depth-11-a.json"?l.equations.slice(-3,-1):l.equations.slice(-2))){
    assert(e.tex.length>=15&&e.label.length>=4,"V11 equation fragment missing "+id);
    katex.renderToString(e.tex,{displayMode:true,throwOnError:true,strict:"error"});
   }

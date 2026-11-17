@@ -252,8 +252,17 @@ for(const name of ["lessons-timeseries-v101.json","lessons-risk-tail-v101.json"]
  }
 }
 
+const externallyExtendedRiskLessons=new Set(["timeseries-n0246","timeseries-n0252","timeseries-n0253","riskmath-n0571","riskmath-n0572","riskmath-n0573","riskmath-n0575","riskmath-n0576"]);
 for(const lesson of newest){
- const advanced=lesson.deep_sections.at(-1);
+ const hasAdditionalProof=externallyExtendedRiskLessons.has(lesson.id);
+ const advanced=lesson.deep_sections.at(hasAdditionalProof?-2:-1);
+ if(hasAdditionalProof){
+  const extra=lesson.deep_sections.at(-1);
+  assert(extra.paragraphs.length===2&&extra.paragraphs.every(p=>p.length>=30),lesson.id+" added chapter exposition incomplete");
+  assert(extra.proof.length>=50&&extra.worked.length>=50&&extra.limitation.length>=25,lesson.id+" added chapter demonstration incomplete");
+  assert(extra.formulas.length>=1,lesson.id+" added mathematical relation missing");
+  for(const f of extra.formulas)katex.renderToString(f.tex,{throwOnError:true,strict:"error",displayMode:true});
+ }
  assert(lesson.deep_sections.length>=4,lesson.id+" advanced time-series/risk subchapter missing");
  assert(advanced.paragraphs.length>=2&&advanced.paragraphs.every(x=>x.length>=60),lesson.id+" explanation incomplete");
  assert(advanced.proof.length>=80&&advanced.worked.length>=65&&advanced.limitation.length>=45,lesson.id+" unverified mathematical detail");

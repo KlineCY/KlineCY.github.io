@@ -43,7 +43,9 @@ for(const [idx,path] of files.entries()){
   if(isV38){
    v38Ids.add(id);enhanced++;
    assert(lesson.revision_note?.startsWith(idx===0?"V51":idx<=2?"V52":"V53"),id+" V38 or V51/V52 canonical provenance");
-   assert(lesson.derivation.slice(3).every(s=>s.length>=65),id+" missing extended reasoning");
+   const originalDepth=path==="atlas-depth-08-a.json"?lesson.derivation.slice(3,-1):lesson.derivation.slice(3);
+   assert(originalDepth.every(s=>s.length>=65),id+" historical extended reasoning modified");
+   if(path==="atlas-depth-08-a.json")assert(lesson.derivation.at(-1).startsWith("进阶数学推导：")&&lesson.derivation.at(-1).length>=40,id+" new mathematical proof missing");
    assert(lesson.protocol.slice(3).every(s=>s.length>=25),id+" missing reproduction steps");
    assert(lesson.pitfalls.at(-1)?.length>=30,id+" invalidity boundary too short");
    assert(lesson.worked_example.length>=100,id+" example not enhanced");

@@ -42,7 +42,9 @@ for(let f=0;f<files.length;f++){
   assert(x.equations.length>=8&&x.derivation.length>=8,id+" formula/derivation missing");
   assert(x.protocol.length>=5&&x.pitfalls.length>=4,id+" verification and boundary missing");
   assert(x.worked_example.length>=250,id+" worked example too short");
-  assert(x.derivation.slice(-2).every(z=>z.length>=90),id+" thin new derivation");
+  const shifted=[0,4].includes(f);
+  assert((shifted?x.derivation.slice(-3,-1):x.derivation.slice(-2)).every(z=>z.length>=90),id+" original deep proofs must remain");
+  if(shifted)assert(x.derivation.at(-1).startsWith("专题进阶推导："),id+" new independent argument missing");
   assert.equal(new Set(x.equations.map(z=>z.label)).size,x.equations.length,id+" duplicate formula labels");
   assert.equal(new Set(x.protocol).size,x.protocol.length,id+" duplicate audit protocols");
   const s=JSON.stringify(x);
@@ -50,7 +52,8 @@ for(let f=0;f<files.length;f++){
   assert(!/TODO|FIXME|Lorem ipsum/iu.test(s),id+" unfinished draft");
   assert(/[\u3400-\u9FFF]/u.test(s),id+" Chinese lecture lost");
   for(const e of x.equations)tex(e.tex);
-  for(const e of x.equations.slice(-2))tex(e.tex,true);
+  for(const e of (shifted?x.equations.slice(-3,-1):x.equations.slice(-2)))tex(e.tex,true);
+  if(shifted)tex(x.equations.at(-1).tex,true);
  }
 }
 const vintage=load("../ml/atlas-depth-14-a.json").lessons["m06-c01-p06"];
@@ -64,7 +67,7 @@ assert(sourceVintageRule.tex.includes("rev"),"must sort by source version not re
 const sourceVintageChoice=vintage.equations.find(e=>e.label==="允许进入决策特征的修订版本");
 assert(sourceVintageChoice,"valid historical revision selection missing");
 for(const f of [sourceVintageRule,sourceVintageChoice])tex(f.tex,true);
-assert.equal(strictCount,94,"46 x2 new formulas and two corrected strict formulas");
+assert.equal(strictCount,106,"94 retained strict formulas plus twelve new mathematics expressions");
 function near(name,x,y,tol=1e-9){
  assert(Number.isFinite(x)&&Number.isFinite(y)&&Math.abs(x-y)<=tol,name+" "+x+" != "+y);
  independentArithmetic++;
@@ -186,14 +189,16 @@ for(const [id,label] of Object.entries(v75CompleteProofLabels)){
  const d=docs.find(x=>x.lessons[id]);
  assert(d,"Missing original course for deep extension "+id);
  const lesson=d.lessons[id];
- assert(lesson.equations.at(-1).label===label,id+" expected additional mathematics not present");
- assert(lesson.derivation.at(-1).length>=100,id+" full new proof deleted or compressed");
- assert(lesson.worked_example.includes("进一步推导与可复算示例："),id+" extra worked example missing");
- assert(lesson.protocol.at(-1).length>=70,id+" additional verification procedure missing");
- assert(lesson.pitfalls.at(-1).length>=95,id+" extended boundary analysis missing");
- tex(lesson.equations.at(-1).tex,true);
+ const shifted=Object.hasOwn(docs[0].lessons,id)||Object.hasOwn(docs[4].lessons,id);
+ const originalEquation=lesson.equations.at(shifted?-2:-1);
+ assert(originalEquation.label===label,id+" original additional mathematics not present");
+ assert(lesson.derivation.at(shifted?-2:-1).length>=100,id+" prior full proof changed");
+ assert(lesson.worked_example.includes("进一步推导与可复算示例："),id+" original arithmetic example missing");
+ assert(lesson.protocol.at(shifted?-2:-1).length>=70,id+" original verification procedure missing");
+ assert(lesson.pitfalls.at(shifted?-2:-1).length>=95,id+" original mathematical boundaries missing");
+ tex(originalEquation.tex,true);
 }
-assert.equal(strictCount,117,"All 94 historical and 23 additional strict formula checks required");
+assert.equal(strictCount,129,"Original 94+23 mathematically strict formulas and twelve new expressions must parse");
 near("PIT version selection received time",Number(4<=10&&11>10),1);
 near("Minimum PSD shrinkage",.2/1.2,1/6);
 near("Shrinked covariance small eigenvalue",-.2+1.2*.2,.04);

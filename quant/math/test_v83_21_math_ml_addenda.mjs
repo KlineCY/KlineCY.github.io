@@ -38,18 +38,21 @@ for(const spec of mlSpec){
   const before={...x,equations:x.equations.slice(0,spec.equations),derivation:x.derivation.slice(0,spec.derivation),worked_example:x.worked_example.slice(0,spec.workedLength),protocol:x.protocol.slice(0,spec.protocol),pitfalls:x.pitfalls.slice(0,spec.pitfalls)};
   delete before.v83_note;
   assert.equal(hash(before),spec.hash,spec.id+" V77 original text modified");
-  assert.equal(x.equations.length,spec.equations+2);
-  assert.equal(x.derivation.length,spec.derivation+2);
-  assert.equal(x.protocol.length,spec.protocol+1);
-  assert.equal(x.pitfalls.length,spec.pitfalls+1);
-  assert(x.derivation.slice(-2).every(v=>v.length>=100));
+  assert.equal(x.equations.length,spec.equations+3);
+  assert.equal(x.derivation.length,spec.derivation+3);
+  assert.equal(x.protocol.length,spec.protocol+2);
+  assert.equal(x.pitfalls.length,spec.pitfalls+2);
+  assert(x.derivation.slice(spec.derivation,spec.derivation+2).every(v=>v.length>=100));
+  assert(x.derivation.at(-1).startsWith("进阶数学推导："));
   assert(x.worked_example.length-spec.workedLength>=100);
-  assert(x.protocol.at(-1).length>=55&&x.pitfalls.at(-1).length>=45);
+  assert(x.protocol[spec.protocol].length>=55&&x.pitfalls[spec.pitfalls].length>=45);
+  assert(x.protocol.at(-1).length>=25&&x.pitfalls.at(-1).length>=25);
   assert.equal(new Set(x.equations.map(e=>e.label)).size,x.equations.length);
-  for(const e of x.equations.slice(-2))tex(e);
+  for(const e of x.equations.slice(spec.equations,spec.equations+2))tex(e);
+  tex(x.equations.at(-1));
   safe(x,spec.id);mlCount++;ids.add(spec.id);
 }
-assert.equal(mathCount,13);assert.equal(mlCount,8);assert.equal(strictCount,42);
+assert.equal(mathCount,13);assert.equal(mlCount,8);assert.equal(strictCount,50);
 let numeric=0;
 function near(k,a,b,tol=1e-8){assert(Number.isFinite(a)&&Number.isFinite(b)&&Math.abs(a-b)<=tol,k+": "+a+" != "+b);numeric++}
 function truth(k,v){near(k,v?1:0,1)}

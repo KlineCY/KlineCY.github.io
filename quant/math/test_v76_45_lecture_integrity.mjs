@@ -48,15 +48,18 @@ for(let f=0;f<docs.length;f++){
   assert(x.equations.length>=7&&x.derivation.length>=8,id+" insufficient depth");
   assert(x.protocol.length>=5&&x.pitfalls.length>=4,id+" application validation/pitfall missing");
   assert(x.worked_example.length>=260,id+" worked case too short");
-  assert(x.derivation.slice(-2).every(t=>t.length>=90),id+" short derivation");
+  const historicalProofPair=files[f].endsWith("atlas-depth-12-a.json")?x.derivation.slice(-3,-1):x.derivation.slice(-2);
+  assert(historicalProofPair.every(t=>t.length>=90),id+" historical proofs too short");
+  if(files[f].endsWith("atlas-depth-12-a.json"))assert(x.derivation.at(-1).startsWith("专题进阶推导："),id+" newly appended proof missing");
   assert.equal(new Set(x.equations.map(e=>e.label)).size,x.equations.length,id+" duplicate formula heading");
   assert.equal(new Set(x.protocol).size,x.protocol.length,id+" duplicate validation");
   for(const eq of x.equations)validTex(eq.tex);
-  for(const eq of x.equations.slice(-2))validTex(eq.tex,true);
+  for(const eq of (files[f].endsWith("atlas-depth-12-a.json")?x.equations.slice(-3,-1):x.equations.slice(-2)))validTex(eq.tex,true);
+  if(files[f].endsWith("atlas-depth-12-a.json"))validTex(x.equations.at(-1).tex,true);
   cjkSafe(x,id);
  }
 }
-assert.equal(strictTex,90,"two strict new formulas required for all 45 lectures");
+assert.equal(strictTex,96,"original two strict formulas and six appended strict formulas required");
 const manifest=load("../ml/atlas-depth-manifest.json");
 assert.equal(manifest.schema,1);
 assert.equal(manifest.expected_lessons,720);
@@ -194,14 +197,16 @@ for(const [id,label] of Object.entries(additionalV76Labels)){
  const d=docs.find(x=>x.lessons[id]);
  assert(d,"Missing expanded V76 Atlas lesson "+id);
  const l=d.lessons[id];
- assert(l.equations.at(-1).label===label,id+" mathematical formula append missing");
- assert(l.derivation.at(-1).length>=120,id+" standalone proof was lost");
- assert(l.worked_example.includes("进一步推导与可复算示例："),id+" complete numerical worked example missing");
- assert(l.protocol.at(-1).length>=60,id+" verification method incomplete");
- assert(l.pitfalls.at(-1).length>=100,id+" applicable limitations omitted");
- validTex(l.equations.at(-1).tex,true);
+ const shifted=Object.hasOwn(docs[0].lessons,id);
+ const existingEquation=l.equations.at(shifted?-2:-1);
+ assert(existingEquation.label===label,id+" original extra mathematical formula changed");
+ assert(l.derivation.at(shifted?-2:-1).length>=120,id+" original standalone proof was lost");
+ assert(l.worked_example.includes("进一步推导与可复算示例："),id+" original complete numeric case missing");
+ assert(l.protocol.at(shifted?-2:-1).length>=60,id+" original verification method incomplete");
+ assert(l.pitfalls.at(shifted?-2:-1).length>=100,id+" original applicable limitations omitted");
+ validTex(existingEquation.tex,true);
 }
-assert.equal(strictTex,113,"All original 90 strict equations and 23 new equations must parse");
+assert.equal(strictTex,119,"Original 90+23 strict equations and six new independent formulas must parse");
 near("Same variance event-tail distribution one",.5*1+.5*1,1);
 near("Same variance event-tail distribution two",.05*10+.05*10,1);
 near("Extreme tail probability mixture",.05+.05,.1);
@@ -255,7 +260,7 @@ for(const [id,label] of Object.entries(additionalV76FifthCycle)){
  assert(l.pitfalls.at(-1).length>=125,id+" important limitations missing");
  validTex(l.equations.at(-1).tex,true);
 }
-assert.equal(strictTex,118,"Original 90 plus 23 prior and 5 new strict V76 equations must parse");
+assert.equal(strictTex,124,"Original 90, prior 23+5 and six appended independent math expressions must parse");
 near("Posterior collapse noninformative decoder KL",-Math.log(.8)-(-Math.log(.8)),0);
 near("Posterior collapse shifted normal KL",.5*(1**2),.5);
 near("Bellman residual error certificate",.02/(1-.9),.2);
