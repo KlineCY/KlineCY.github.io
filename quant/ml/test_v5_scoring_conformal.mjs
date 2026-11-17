@@ -19,7 +19,7 @@ for(const file of files){assert.equal(file.schema,1);assert(file.chapters.length
 for(const x of rows){
  assert(!previous.has(x.id),"duplicate original course "+x.id);
  assert(x.goal.length>=80&&x.protocol.length>=4&&x.sources.length>=2);
- assert.equal(x.sections.length,x.id==="m23-c10-p02"?9:["m09-c09-p01","m23-c10-p01"].includes(x.id)?8:7,"all original and extended density sections required "+x.id);
+ assert.equal(x.sections.length,["m04-c10-p01","m12-c10-p01","m12-c10-p02"].includes(x.id)?10:x.id==="m23-c10-p02"?9:["m09-c09-p01","m23-c10-p01"].includes(x.id)?8:7,"all original and extended density sections required "+x.id);
  assert.equal(new Set(x.sections.map(s=>s.title)).size,x.sections.length);
  for(const s of x.sections){
   assert(s.question?.length>=12&&s.paragraphs.length===2&&s.paragraphs.every(p=>p.length>=48),"thin explanatory paragraph "+x.id+" "+s.title);
@@ -62,6 +62,32 @@ for(const l of rows.filter(l=>["m04-c10-p01","m12-c10-p01","m12-c10-p02"].includ
  assert(section.equations.length===2&&section.worked.length>=85&&section.boundary.length>=60,"new conformal validity example incomplete "+l.id);
  for(const eq of section.equations)katex.renderToString(eq.tex,{throwOnError:true,strict:"error",displayMode:true});
 }
+const addedScoringConformalSections={
+ "m04-c10-p01": [
+  "有限情景CRPS：经验分布与无偏估计的区别",
+  "密度单位变换：为什么Log Score绝对值依赖计量单位",
+  "尾部加权CRPS：严格适当性取决于权重支持"
+ ],
+ "m12-c10-p01": [
+  "局部尺度标准化CQR：为什么宽区间可以随状态变化",
+  "分位交叉与负非一致性分数的精确含义",
+  "标签到期时点与时间漂移：Conformal可交换性的现实边界"
+ ],
+ "m12-c10-p02": [
+  "测试点无穷质量与权重共同缩放不变性",
+  "加权边际覆盖与子群覆盖不是同一个命题",
+  "密度比估计误差的总变差覆盖下界"
+ ]
+};
+for(const [id,titles] of Object.entries(addedScoringConformalSections)){
+ const lesson=rows.find(r=>r.id===id);
+ for(const title of titles){
+  const s=lesson.sections.find(x=>x.title===title);
+  assert(s&&s.paragraphs.length===2&&s.paragraphs.every(p=>p.length>=95),"missing advanced proof explanation "+id+" "+title);
+  assert(s.equations.length===2&&s.worked.length>=85&&s.boundary.length>=60,"missing rigorous example or boundary "+title);
+  for(const eq of s.equations)katex.renderToString(eq.tex,{throwOnError:true,strict:"error",displayMode:true});
+ }
+}
 const addedDensityPITWork={
  "m09-c09-p01":["高斯异方差模型的方差塌缩与负对数似然下界"],
  "m23-c10-p01":["条件高斯AR过程的正确PIT与无条件PIT的区别"],
@@ -100,6 +126,14 @@ near(.2-.05,.15);
 near(-.75*Math.log(.75)-.25*Math.log(.25),.5623351446188083);
 near(Math.log(2)-(-.75*Math.log(.75)-.25*Math.log(.25)),.130812035941137);
 near((.5-.7)**2+.7*.3,.25);
+near(1-(0+2+2+0)/(2*2*2),.5);
+near(1-2/(2*(2-1)),0);
+near(-Math.log(.02)+Math.log(2),Math.log(100));
+near(.9*1+.1*0,.9);
+near((1+2)/(1+2+1),.75);
+near((1+1+1+9)**2/(1+1+1+9**2),12/7);
+near((Math.abs(.6-.5)+Math.abs(.4-.5))/2,.1);
+near(1-.1-.1,.8);
 near(.95*1+.05*0,.95);
 near(Math.ceil((4+1)*.9),5);
 near(2/(4+2),1/3);
@@ -116,6 +150,6 @@ for(const id of expected)assert(html.includes("#lesson/"+id),"fifth advanced lea
 assert(html.includes("atlas.js?v=20261109"));
 assert(html.includes("atlas.css?v=20261109"));
 assert(html.includes("第五条高级学习链"));
-assert(html.includes("776 篇系统课程")&&html.includes("0 / 776 篇已标记"),"stale total count in user-facing interface");
+assert(html.includes("776 篇系统课程")&&!html.includes("0 / 776 篇已标记"),"course count or retired learning progress UI incorrect");
 assert(css.includes("focus-visible")&&css.includes("@media print"),"responsive Chinese formula style missing");
 console.log("PASS: V5 six scoring/CQR/density/PIT/shift chapters, "+sections+" full lessons subchapters, "+formula+" KaTeX expressions, "+sources+" referenced sources; 776 unique reader courses, exact arithmetic and keyboard-accessible formulas.");
