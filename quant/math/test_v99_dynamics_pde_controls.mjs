@@ -215,6 +215,30 @@ near("HJB discrete action 0",.5*0+.5*(1+0)**2,.5);
 near("HJB discrete action 1",.5+ .5*4,2.5);
 near("HJB fixed policy value B",2/(1-.9),20);
 near("HJB improved policy value A",1/(1-.9),10);
+const advancedPricingTopics={
+ "diffeq-n0410":"连续股息收益下的折现总回报鞅与期权PDE",
+ "diffeq-n0411":"现金股息使美式看涨期权提前行权可能最优",
+ "diffeq-n0412":"显式热方程差分的非负性与离散最大值原理",
+ "diffeq-n0413":"Crank–Nicolson高频模态的非L稳定振荡",
+ "diffeq-n0414":"对流扩散显式差分的联合CFL与凸组合权重"
+};
+for(const [id,title] of Object.entries(advancedPricingTopics)){
+ const lesson=newLessons.find(l=>l.id===id);
+ const part=lesson?.deep_sections.find(s=>s.title===title);
+ assert(part,"missing advanced pricing/PDE proof "+id);
+ assert(part.paragraphs.length===2&&part.paragraphs.every(x=>x.length>=65),id+" incomplete theory");
+ assert(part.formulas.length===2&&part.proof.length>=110&&part.worked.length>=75&&part.limitation.length>=55,id+" incomplete derivation, example or validity");
+ for(const equation of part.formulas)formula(equation.tex,id+" advanced pricing");
+}
+near("dividend stock present value",100*Math.exp(-.02)+100*(1-Math.exp(-.02)),100);
+check("cash dividend exercise example",110-100>Math.max(90-100,0));
+near("explicit heat diffusion",.25*.01/.1**2,.25);
+near("explicit heat negative weight",1-2*.6,-.2);
+near("CN high mode",-19/21,(1-2*10)/(1+2*10));
+near("backward Euler high mode",1/41,1/(1+4*10));
+near("combined convection CFL",.1+2*.2,.5);
+near("combined convection weights",(.2+.1)+(1-2*.2-.1)+.2,1);
+
 assert(checks>=80,"insufficient independently calculated invariants");
 console.log("V99 PASS",newLessons.length,"new lessons;",all.length,"total;",diffeq.length,
  "of",diffeq.length,"diffeq nodes completed;",formulaCount,"KaTeX;",chapterCount,
