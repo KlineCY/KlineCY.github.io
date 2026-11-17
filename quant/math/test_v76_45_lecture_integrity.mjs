@@ -48,15 +48,18 @@ for(let f=0;f<docs.length;f++){
   assert(x.equations.length>=7&&x.derivation.length>=8,id+" insufficient depth");
   assert(x.protocol.length>=5&&x.pitfalls.length>=4,id+" application validation/pitfall missing");
   assert(x.worked_example.length>=260,id+" worked case too short");
-  assert(x.derivation.slice(-2).every(t=>t.length>=90),id+" short derivation");
+  const historicalProofPair=files[f].endsWith("atlas-depth-12-a.json")?x.derivation.slice(-3,-1):x.derivation.slice(-2);
+  assert(historicalProofPair.every(t=>t.length>=90),id+" historical proofs too short");
+  if(files[f].endsWith("atlas-depth-12-a.json"))assert(x.derivation.at(-1).startsWith("专题进阶推导："),id+" newly appended proof missing");
   assert.equal(new Set(x.equations.map(e=>e.label)).size,x.equations.length,id+" duplicate formula heading");
   assert.equal(new Set(x.protocol).size,x.protocol.length,id+" duplicate validation");
   for(const eq of x.equations)validTex(eq.tex);
-  for(const eq of x.equations.slice(-2))validTex(eq.tex,true);
+  for(const eq of (files[f].endsWith("atlas-depth-12-a.json")?x.equations.slice(-3,-1):x.equations.slice(-2)))validTex(eq.tex,true);
+  if(files[f].endsWith("atlas-depth-12-a.json"))validTex(x.equations.at(-1).tex,true);
   cjkSafe(x,id);
  }
 }
-assert.equal(strictTex,90,"two strict new formulas required for all 45 lectures");
+assert.equal(strictTex,96,"original two strict formulas and six appended strict formulas required");
 const manifest=load("../ml/atlas-depth-manifest.json");
 assert.equal(manifest.schema,1);
 assert.equal(manifest.expected_lessons,720);
