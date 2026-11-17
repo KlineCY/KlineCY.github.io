@@ -1,0 +1,904 @@
+{
+  "schema_version": 1,
+  "as_of": "2026-11-17",
+  "scope": "基于公开公司业务资料的量化机构研究档案。事实逐条附一手来源；研究问题、方法和检验流程属于本站独立教学建议，非公司内部策略、招聘承诺或投资建议。",
+  "profiles": [
+    {
+      "company_id": "jane-street",
+      "orientation": "多资产流动性提供与自营交易",
+      "facts": [
+        {
+          "statement": "官网将公司定位为利用量化分析和市场结构知识提供流动性的全球交易机构，公开描述ETF、股票、债券和期权业务。",
+          "source_title": "Jane Street · Overview",
+          "source_url": "https://www.janestreet.com/what-we-do/overview/"
+        },
+        {
+          "statement": "官网量化研究岗位说明涵盖实验设计、时间序列、特征工程和模型训练，研究人员与工程师、交易员协作。",
+          "source_title": "Jane Street · Quantitative Researcher",
+          "source_url": "https://www.janestreet.com/join-jane-street/position/7514485002/"
+        }
+      ],
+      "research_axes": [
+        {
+          "title": "ETF定价与跨市场对冲",
+          "context": "研究ETF篮子、可交易现货与衍生品之间的价格传导；区分可观测净值偏差与因时区、申赎规则或成交价格产生的基差。",
+          "methods": [
+            "ETF套利边界",
+            "篮子复制",
+            "最优对冲"
+          ],
+          "question": "在交易费、借券成本和申赎摩擦下，怎样定义可执行的偏离阈值？",
+          "verification": "复算两个资产与一个ETF的简单复制账本，分开报告理论定价误差和可成交净收益。"
+        },
+        {
+          "title": "统计建模与交易实验",
+          "context": "把短时预测和报价决策区分；预测准确率必须进一步映射到实际成交概率、滑点与库存变化。",
+          "methods": [
+            "时间序列验证",
+            "概率校准",
+            "成本敏感决策"
+          ],
+          "question": "为什么价格方向预测得更准不保证做市策略更赚钱？",
+          "verification": "建立具有信息时点、手续费、不同成交情景及完整仓位变动的前向模拟。"
+        },
+        {
+          "title": "跨资产微观结构",
+          "context": "研究期权、股票、债券和ETF之间共享的风险因子与流动性冲击，而不假设公司采用特定的未公开策略。",
+          "methods": [
+            "限价订单簿",
+            "冲击成本",
+            "因子风险"
+          ],
+          "question": "一个市场的流动性冲击何时会传导到关联交易品种？",
+          "verification": "按公开交易规则设计跨市场事件研究，披露时钟同步与报价可交易性。"
+        }
+      ],
+      "roles": [
+        "量化研究",
+        "量化交易",
+        "研究工程",
+        "交易系统开发"
+      ],
+      "caveat": "这些研究问题是本站基于公开业务构造的学习框架，不代表披露了公司私有信号、真实盈亏或具体订单算法。",
+      "careers_url": "https://www.janestreet.com/join-jane-street/"
+    },
+    {
+      "company_id": "hrt",
+      "orientation": "多资产自动化交易与流动性提供",
+      "facts": [
+        {
+          "statement": "官网说明HRT为多资产量化交易公司，以数学、技术与自动化交易算法向交易所和客户提供流动性。",
+          "source_title": "HRT · About",
+          "source_url": "https://www.hudsonrivertrading.com/about/"
+        },
+        {
+          "statement": "官网对Algorithm Developer岗位的描述包括统计建模、实时部署、训练方法和执行效率研究。",
+          "source_title": "HRT · Work at HRT",
+          "source_url": "https://www.hudsonrivertrading.com/work-at-hrt/"
+        }
+      ],
+      "research_axes": [
+        {
+          "title": "从预测模型到实时执行",
+          "context": "将建模、线上推理、订单路由和交易后监控视作具有不同约束的系统模块，理解预测价值如何随时延衰减。",
+          "methods": [
+            "统计学习",
+            "低延迟系统",
+            "事件时间"
+          ],
+          "question": "信息延迟增大时，什么信号仍有可交易价值？",
+          "verification": "用不同延迟和成本模拟信号衰减，并严格禁止未来行情回填。"
+        },
+        {
+          "title": "订单选择与逆向选择",
+          "context": "比较挂单获得点差与被更快交易对手选中的损失，显式建模成交概率和库存风险。",
+          "methods": [
+            "条件成交概率",
+            "逆向选择",
+            "做市库存"
+          ],
+          "question": "提高挂单成交率为何可能降低单位订单期望收益？",
+          "verification": "分解被动成交后的短期价格变化、手续费和库存对冲损失。"
+        },
+        {
+          "title": "研究基础设施",
+          "context": "把大规模样本重放、数据质量与模型版本控制纳入策略验证，避免离线得分好但实盘环境无法执行。",
+          "methods": [
+            "分布式计算",
+            "回放测试",
+            "监控告警"
+          ],
+          "question": "如何验证策略对撮合事件顺序和异常数据的敏感性？",
+          "verification": "按事件编号重放并核验输入、预测、订单和成交记录之间的一致性。"
+        }
+      ],
+      "roles": [
+        "算法开发",
+        "量化研究",
+        "系统工程",
+        "交易基础设施"
+      ],
+      "caveat": "官网描述的研究岗位不等于当前具体职位开放；本页不推断内部交易频率或可复现的专有实现。",
+      "careers_url": "https://www.hudsonrivertrading.com/careers/"
+    },
+    {
+      "company_id": "citadel-securities",
+      "orientation": "电子做市与全球市场流动性提供",
+      "facts": [
+        {
+          "statement": "官网将量化研究描述为数学、统计学习、大规模计算和市场微观结构的结合，研究从假设验证走向实时交易。",
+          "source_title": "Citadel Securities · Quantitative Research",
+          "source_url": "https://www.citadelsecurities.com/careers/quantitative-research/"
+        },
+        {
+          "statement": "官网市场与交易团队公开说明报价定价、风险承担、执行和自动化系统的职能。",
+          "source_title": "Citadel Securities · Markets and Trading",
+          "source_url": "https://www.citadelsecurities.com/careers/markets-and-trading/"
+        }
+      ],
+      "research_axes": [
+        {
+          "title": "做市商与资管管理人的商业模式区别",
+          "context": "做市业务关注双边报价、承担与转移库存风险及执行质量，不应拿成交金额代替投资管理AUM。",
+          "methods": [
+            "点差与库存",
+            "做市盈亏归因",
+            "风险资本"
+          ],
+          "question": "高交易量是否足以说明管理资产规模大？",
+          "verification": "区分成交额、风险资本、持仓余额、收入和第三方受托管理资产。"
+        },
+        {
+          "title": "微观结构研究流程",
+          "context": "理解短期信号、价格发现、报价更新与风险限额共同决定交易决策。",
+          "methods": [
+            "预测与校准",
+            "市场冲击",
+            "在线风险管理"
+          ],
+          "question": "如何验证报价模型在不同市场波动状态下的稳健性？",
+          "verification": "将模拟行情划分为高低波动、跳价和流动性紧张事件，逐类检查PnL与尾部库存。"
+        },
+        {
+          "title": "统计模型到生产系统",
+          "context": "研究模型误差、特征计算延迟、交易成本及容量之间的耦合关系，避免只依据交叉验证误差决策。",
+          "methods": [
+            "统计推断",
+            "实时计算",
+            "成本归因"
+          ],
+          "question": "什么时候更复杂的模型会被低延迟的简单模型超越？",
+          "verification": "保持同一数据截面和订单约束，仅改变预测器与延迟，比较费用后预期收益。"
+        }
+      ],
+      "roles": [
+        "量化研究",
+        "量化交易",
+        "量化开发",
+        "交易系统工程"
+      ],
+      "caveat": "Citadel Securities与Citadel投资管理业务为不同公司，本页不合并其AUM、投资产品和职位信息。",
+      "careers_url": "https://www.citadelsecurities.com/careers/open-opportunities/"
+    },
+    {
+      "company_id": "imc",
+      "orientation": "研究驱动的全球自营做市公司",
+      "facts": [
+        {
+          "statement": "IMC官网说明定量研究、机器学习及自建高性能交易技术共同支持市场报价与交易策略。",
+          "source_title": "IMC · What We Do",
+          "source_url": "https://www.imc.com/us/what-we-do"
+        }
+      ],
+      "research_axes": [
+        {
+          "title": "信号研发与实际成交闭环",
+          "context": "从特征、预测、交易决策到回报反馈建立研究链；实时市场反馈不能被误作事前可观测训练样本。",
+          "methods": [
+            "时间序列建模",
+            "实验设计",
+            "逐笔成交归因"
+          ],
+          "question": "高频预测的标签应该按时间窗口还是按订单事件定义？",
+          "verification": "对每次预测记录真实生成时点、到期条件、订单状态和交易成本。"
+        },
+        {
+          "title": "期权与ETF的风险传导",
+          "context": "研究价格、隐含波动率、对冲成本和流动性之间的关系，重点区分方向性与相对价值风险。",
+          "methods": [
+            "Greeks",
+            "期权组合",
+            "跨市场套保"
+          ],
+          "question": "大幅波动时为什么静态Delta对冲可能失效？",
+          "verification": "用离散再平衡实验分解Gamma、交易费用和对冲离散误差。"
+        },
+        {
+          "title": "交易技术与模型适配",
+          "context": "比较高容量模型与轻量模型在训练速度、推理延迟和风险控制上的可行性。",
+          "methods": [
+            "机器学习",
+            "系统优化",
+            "风险预算"
+          ],
+          "question": "模型A离线损失更小，为什么模型B可能有更高净利润？",
+          "verification": "要求相同实测延迟、相同成交约束和共同日期的离线仿真对照。"
+        }
+      ],
+      "roles": [
+        "量化研究",
+        "做市交易",
+        "机器学习",
+        "高性能工程"
+      ],
+      "caveat": "官网提及多种AI技术，不代表每个交易团队均采用同一模型；具体参数和资产配置未公开。",
+      "careers_url": "https://www.imc.com/us/careers"
+    },
+    {
+      "company_id": "optiver",
+      "orientation": "用自有资本在全球市场持续报价的做市机构",
+      "facts": [
+        {
+          "statement": "Optiver官网说明模型和风险框架用于定价、交易执行和跨市场流动性提供，并公开提及统计建模与机器学习。",
+          "source_title": "Optiver · What We Do",
+          "source_url": "https://www.optiver.com/what-we-do/"
+        }
+      ],
+      "research_axes": [
+        {
+          "title": "报价和库存风险的联合优化",
+          "context": "将买卖价差、成交强度、库存惩罚与价格风险放到一个动态目标函数中讨论，区分最优报价和盈利保证。",
+          "methods": [
+            "随机控制",
+            "成交强度",
+            "库存管理"
+          ],
+          "question": "库存偏离中性目标后，报价为何应在买卖两侧不对称调整？",
+          "verification": "在简化Poisson成交模型中比较不同库存、风险厌恶与波动参数下的报价。"
+        },
+        {
+          "title": "期权定价与波动率曲面",
+          "context": "从无套利条件、隐含波动率拟合及离散对冲检验模型风险。",
+          "methods": [
+            "随机波动率",
+            "无套利插值",
+            "风险中性定价"
+          ],
+          "question": "表面上拟合更好的曲面为何未必带来更低对冲误差？",
+          "verification": "使用冻结校准窗口、样本外到期日以及实际再对冲成本检验。"
+        },
+        {
+          "title": "市场压力与流动性供给",
+          "context": "研究快速价格变化时点差、深度与库存风险共同变化的机制。",
+          "methods": [
+            "盘口深度",
+            "尾部风险",
+            "成交回放"
+          ],
+          "question": "市场波动骤升时，为什么扩大点差可能同时降低和提高不同风险？",
+          "verification": "分解成交率下降、单次逆向选择和库存风险的条件期望。"
+        }
+      ],
+      "roles": [
+        "量化交易",
+        "量化研究",
+        "期权研究",
+        "软件工程"
+      ],
+      "caveat": "模型名称与框架仅用于教学分析，不应理解为Optiver公开了自身的报价函数或内部库存上限。",
+      "careers_url": "https://www.optiver.com/working-at-optiver/"
+    },
+    {
+      "company_id": "xtx",
+      "orientation": "机器学习驱动的算法交易与流动性供给",
+      "facts": [
+        {
+          "statement": "XTX官网说明使用机器学习构建跨股票、利率、外汇、大宗商品和数字资产的价格预测，并提供电子交易流动性。",
+          "source_title": "XTX Markets · About",
+          "source_url": "https://about.xtxmarkets.com/"
+        }
+      ],
+      "research_axes": [
+        {
+          "title": "多资产预测与目标定义",
+          "context": "区分交易收益预测、短期中间价预测和实际成交价格预测，避免将不同期限的结果混合比较。",
+          "methods": [
+            "预测期限",
+            "多任务学习",
+            "时间信息集"
+          ],
+          "question": "不同资产交易时区不一致时，如何构造共同信息集？",
+          "verification": "按公开市场时间戳对齐信号生成时间，记录缺失、停市和异步更新。"
+        },
+        {
+          "title": "高容量模型的经济验证",
+          "context": "从统计损失、概率校准、尾部性能、成交约束和模型容量开展多维评估。",
+          "methods": [
+            "深度学习",
+            "分布漂移",
+            "样本外测试"
+          ],
+          "question": "深模型在训练期领先，怎样识别其收益来自拥挤行情特征？",
+          "verification": "冻结时间外测试集并比较市况分层损失与费用后真实可交易账本。"
+        },
+        {
+          "title": "模型计算与系统成本",
+          "context": "在训练资源与可执行延迟之间建立工程预算，研究模型复杂度的边际收益。",
+          "methods": [
+            "大规模训练",
+            "延迟预算",
+            "成本收益"
+          ],
+          "question": "增加计算资源何时无法弥补交易延迟带来的信号损耗？",
+          "verification": "明确线上推理与数据到达时延，将其与净收益敏感度同步记录。"
+        }
+      ],
+      "roles": [
+        "机器学习研究",
+        "量化交易",
+        "计算系统",
+        "研究工程"
+      ],
+      "caveat": "官网披露的交易量、算力或覆盖市场不是AUM，也不能转换为管理规模。",
+      "careers_url": "https://www.xtxmarkets.com/careers/"
+    },
+    {
+      "company_id": "flow",
+      "orientation": "以交易所交易产品为特色的流动性提供机构",
+      "facts": [
+        {
+          "statement": "Flow Traders官网将其描述为全球交易与流动性提供公司，并突出交易所交易产品（ETP）的专业能力。",
+          "source_title": "Flow Traders · Official Site",
+          "source_url": "https://www.flowtraders.com/"
+        }
+      ],
+      "research_axes": [
+        {
+          "title": "ETF及ETP二级市场流动性",
+          "context": "围绕标的篮子、一级市场申赎、二级市场报价和市场价格偏离开展研究。",
+          "methods": [
+            "ETF微观结构",
+            "价格发现",
+            "套利约束"
+          ],
+          "question": "何时ETF折溢价是可套利机会，何时只是滞后估值现象？",
+          "verification": "依据实际交易时段、申赎资格与费用逐项核算价格偏离可交易性。"
+        },
+        {
+          "title": "做市盈亏与冲击交易",
+          "context": "研究有限深度下成交规模、点差和不利选择共同作用于库存价值。",
+          "methods": [
+            "执行成本",
+            "盘口冲击",
+            "库存VaR"
+          ],
+          "question": "为何没有方向观点仍然可能承担巨大价格风险？",
+          "verification": "逐笔拆解持仓、点差收入、库存重估和对冲结果。"
+        },
+        {
+          "title": "跨市场ETF联系",
+          "context": "研究不同地区ETF在标的休市时的价格发现与流动性外溢。",
+          "methods": [
+            "异步交易",
+            "相关市场",
+            "事件研究"
+          ],
+          "question": "跨时区ETF价格变化能否直接当作当日净值偏离？",
+          "verification": "明确计算时点与可观测标的价格，并比较汇率与基准时段的变化。"
+        }
+      ],
+      "roles": [
+        "量化交易",
+        "ETF市场结构",
+        "交易技术",
+        "风控"
+      ],
+      "caveat": "Flow Traders是做市与交易机构，不应因为ETF交易活跃就被视作管理等值ETF AUM。",
+      "careers_url": "https://www.flowtraders.com/careers"
+    },
+    {
+      "company_id": "virtu",
+      "orientation": "电子做市及交易执行服务",
+      "facts": [
+        {
+          "statement": "Virtu官网公开其市场做市和全球电子流动性提供业务。",
+          "source_title": "Virtu · Market Making",
+          "source_url": "https://www.virtu.com/market-making/"
+        }
+      ],
+      "research_axes": [
+        {
+          "title": "做市与机构执行的指标分离",
+          "context": "主动报价与客户执行属于不同业务场景，需分别研究执行质量、价格改善、成交概率与库存风险。",
+          "methods": [
+            "执行基准",
+            "有效点差",
+            "订单流"
+          ],
+          "question": "以较高成交率衡量机构执行品质是否充分？",
+          "verification": "同时报告实现点差、到达价偏离、价格改善及市场冲击。"
+        },
+        {
+          "title": "市场质量研究",
+          "context": "将报价宽度、深度、成交延迟和波动跳跃联合评价，避免以单日成交总额代替流动性质量。",
+          "methods": [
+            "市场微观结构",
+            "价格发现",
+            "风险转移"
+          ],
+          "question": "报价变窄能否保证极端行情下的可交易深度？",
+          "verification": "在正常与压力时段分别计算可成交深度和交易后价格滑移。"
+        },
+        {
+          "title": "风险资本与AUM口径",
+          "context": "比较主自营交易中的库存风险资本与第三方受托管理资产，明确二者财务定义不可互换。",
+          "methods": [
+            "经济资本",
+            "做市PnL",
+            "净敞口"
+          ],
+          "question": "做市商未披露AUM是否意味着业务规模很小？",
+          "verification": "构建规模指标字典，分别标注账户资本、收入、成交量、AUM及其来源。"
+        }
+      ],
+      "roles": [
+        "量化交易",
+        "执行研究",
+        "市场结构",
+        "交易工程"
+      ],
+      "caveat": "该公司公开市场份额和交易量随日期变化，不应被当作当前AUM或未来收益保证。",
+      "careers_url": "https://www.virtu.com/careers/"
+    },
+    {
+      "company_id": "aqr",
+      "orientation": "系统化多资产投资管理与风险溢价研究",
+      "facts": [
+        {
+          "statement": "AQR研究讨论价值、动量、套利持有收益、低风险等风格溢价及其跨资产多空构造。",
+          "source_title": "AQR · Understanding Alternative Risk Premia",
+          "source_url": "https://www.aqr.com/Insights/Research/White-Papers/Understanding-Alternative-Risk-Premia"
+        },
+        {
+          "statement": "AQR公开策略分类包含趋势跟踪、另类风险溢价、系统化股票与多资产配置。",
+          "source_title": "AQR · Strategies",
+          "source_url": "https://funds.aqr.com/Strategy"
+        }
+      ],
+      "research_axes": [
+        {
+          "title": "风格溢价的经济机制",
+          "context": "从价值、动量、Carry、Defensive、Trend等风格的风险补偿或行为机制出发，设计稳定性与容量检验。",
+          "methods": [
+            "因子定价",
+            "跨资产动量",
+            "风格轮动"
+          ],
+          "question": "跨资产风格多样化如何在危机中改变相关性结构？",
+          "verification": "逐资产检验收益来源、因子暴露、交易成本和状态依赖，防止只展示合并净值。"
+        },
+        {
+          "title": "系统化多空组合",
+          "context": "把信号强度与目标风险预算、协方差估计、杠杆和融资条件共同优化。",
+          "methods": [
+            "Markowitz",
+            "协方差收缩",
+            "约束优化"
+          ],
+          "question": "组合层面低波动是否证明因子收益来自独立Alpha？",
+          "verification": "加入市场、风格、行业和期限因子进行收益归因，并考察费用后的残差收益。"
+        },
+        {
+          "title": "趋势与截面动量区别",
+          "context": "区分时间序列自身趋势信号与同一期横截面相对强弱排序。",
+          "methods": [
+            "时间序列趋势",
+            "横截面排名",
+            "波动率目标"
+          ],
+          "question": "两种动量在整体市场单边行情中可能形成何种方向敞口？",
+          "verification": "构建同标的、同费用的趋势与截面动量实验，对比净敞口与Beta。"
+        }
+      ],
+      "roles": [
+        "多资产量化研究",
+        "资产配置",
+        "风险模型",
+        "统计研究"
+      ],
+      "caveat": "AQR发布的学术研究与示意投资组合不能自动代表所有真实产品配置；已披露ESG子策略AUM亦非集团整体AUM。",
+      "careers_url": "https://www.aqr.com/About-Us/Careers"
+    },
+    {
+      "company_id": "two-sigma",
+      "orientation": "数据驱动的量化投资管理",
+      "facts": [
+        {
+          "statement": "Two Sigma官网介绍从数据采集、特征构建、建模到组合构建和执行的系统化投资流程。",
+          "source_title": "Two Sigma · Investment Management",
+          "source_url": "https://www.twosigma.com/businesses/investment-management/"
+        }
+      ],
+      "research_axes": [
+        {
+          "title": "另类数据研究的因果与点时性",
+          "context": "区分数据预测性、信息可得性与经济解释，严查发布滞后、未来修订及样本覆盖变化。",
+          "methods": [
+            "面板预测",
+            "因果识别",
+            "特征治理"
+          ],
+          "question": "信号统计显著却不可实盘，可能是哪些数据路径造成的？",
+          "verification": "保存数据采集、发布时间、修订历史和交易可用性四套时间戳。"
+        },
+        {
+          "title": "模型到组合的误差传递",
+          "context": "从个股预测置信度、横截面风险因子与优化约束研究预测改善的经济价值。",
+          "methods": [
+            "机器学习",
+            "风险模型",
+            "组合优化"
+          ],
+          "question": "预测MSE降低如何转化为可检验的超额收益改善？",
+          "verification": "先固定风险预算与交易规则，再比较不同预测器净Alpha和周转成本。"
+        },
+        {
+          "title": "大规模实验与研究治理",
+          "context": "研究多团队信号搜索、特征依赖与测试集复用对推断的影响。",
+          "methods": [
+            "多重比较",
+            "实验登记",
+            "模型监控"
+          ],
+          "question": "挑选数百个特征后如何界定真正独立的样本外证据？",
+          "verification": "固定最终测试期，保留完整候选日志并对搜索过程作多重检验敏感性分析。"
+        }
+      ],
+      "roles": [
+        "量化研究",
+        "数据科学",
+        "风险建模",
+        "研究工程"
+      ],
+      "caveat": "官网公开的平台规模指标不表示每位研究人员都有相同数据权限，也不揭示真实策略持仓。",
+      "careers_url": "https://www.twosigma.com/careers/"
+    },
+    {
+      "company_id": "citadel",
+      "orientation": "多策略对冲基金与系统化投资团队",
+      "facts": [
+        {
+          "statement": "Citadel官网将Global Quantitative Strategies（GQS）描述为其自动化量化投资业务，并披露跨资产研究、组合与执行流程。",
+          "source_title": "Citadel · Global Quantitative Strategies",
+          "source_url": "https://www.citadel.com/what-we-do/global-quantitative-strategies/"
+        },
+        {
+          "statement": "Citadel官网同时披露股票、宏观、信用和大宗商品等独立策略板块。",
+          "source_title": "Citadel · What We Do",
+          "source_url": "https://www.citadel.com/what-we-do/"
+        }
+      ],
+      "research_axes": [
+        {
+          "title": "系统化Alpha与跨资产组合",
+          "context": "以独立收益信号、组合相关性、容量和动态风险预算为对象研究真实可配置收益。",
+          "methods": [
+            "多因子模型",
+            "组合优化",
+            "风险分解"
+          ],
+          "question": "为什么大量预测信号的组合可能比单一高Sharpe信号稳定？",
+          "verification": "进行成分策略收益相关性、协方差稳定性及样本外容量检验。"
+        },
+        {
+          "title": "量化与主观策略协同",
+          "context": "区分系统化交易团队、基本面团队与统一风险管控平台的职责，避免把所有持仓视为量化策略。",
+          "methods": [
+            "策略分类",
+            "风险归因",
+            "宏观敞口"
+          ],
+          "question": "怎样比较多策略平台不同团队的风险贡献？",
+          "verification": "按统一统计日、价格口径与资本分配对不同策略做可比风险分析。"
+        },
+        {
+          "title": "投资管理与做市业务边界",
+          "context": "与Citadel Securities的电子报价业务区分，资产管理基金净值规模与做市库存不能相加。",
+          "methods": [
+            "基金AUM",
+            "净敞口",
+            "市场微观结构"
+          ],
+          "question": "为何集团关联的两个品牌不能合并形成单一量化公司资产排序？",
+          "verification": "从监管实体、资产所有权、收益来源和财务统计对象逐项核验。"
+        }
+      ],
+      "roles": [
+        "全球量化投资",
+        "多资产Alpha",
+        "组合研究",
+        "量化开发"
+      ],
+      "caveat": "GQS是Citadel内部业务策略，不能将全集团规模或收益直接作为GQS单独绩效。",
+      "careers_url": "https://www.citadel.com/careers/"
+    },
+    {
+      "company_id": "deshaw",
+      "orientation": "系统化与非系统化策略兼有的全球投资管理机构",
+      "facts": [
+        {
+          "statement": "D. E. Shaw官网介绍系统化投资团队依靠长期量化研究、数据和技术基础设施构建预测、风险管理与组合策略。",
+          "source_title": "D. E. Shaw · Careers and Systematic Investing",
+          "source_url": "https://www.deshaw.com/careers"
+        }
+      ],
+      "research_axes": [
+        {
+          "title": "统计研究与有效信号判别",
+          "context": "把因子发现、过拟合控制、模型误差和实盘容量放到同一评价框架中。",
+          "methods": [
+            "假设检验",
+            "多重比较",
+            "正则化"
+          ],
+          "question": "显著因子在策略投入后衰减，如何区分市场变化与原先测试过拟合？",
+          "verification": "冻结研究时间线并报告扩展窗口、费后收益及参数稳定性。"
+        },
+        {
+          "title": "组合风险和执行联动",
+          "context": "在风险约束下研究交易成本、冲击和投资期限，避免预测系统与组合系统各自独立得出冲突结论。",
+          "methods": [
+            "鲁棒优化",
+            "执行成本",
+            "动态风险预算"
+          ],
+          "question": "持有期延长对信号衰减和市场冲击如何产生相反影响？",
+          "verification": "建立不同持有期下的同一基准组合、费用和成交规则。"
+        },
+        {
+          "title": "数学与软件共同研究",
+          "context": "从统计模型到可维护计算流程，核验训练数据、风险参数与订单生成的一致性。",
+          "methods": [
+            "统计学习",
+            "版本管理",
+            "数值稳定性"
+          ],
+          "question": "数值精度与数据版本变更可能产生什么类型的虚假收益？",
+          "verification": "用不变测试样本和完整输入快照重放每日权重、净值和成本。"
+        }
+      ],
+      "roles": [
+        "量化研究",
+        "投资系统工程",
+        "数据科学",
+        "风险分析"
+      ],
+      "caveat": "研究模块属于本站建议内容，不能据此认定公司全部策略或研究人员都遵循这些具体方法。",
+      "careers_url": "https://www.deshaw.com/careers"
+    },
+    {
+      "company_id": "qrt",
+      "orientation": "全球多策略量化投资管理",
+      "facts": [
+        {
+          "statement": "QRT官网将公司描述为覆盖多个地区、资产和时间跨度的全球多策略投资管理人，强调研究、技术与交易协作。",
+          "source_title": "QRT · About Us",
+          "source_url": "https://www.qube-rt.com/"
+        }
+      ],
+      "research_axes": [
+        {
+          "title": "多期限信号与风险预算",
+          "context": "从不同持有期的相关性、容量和调仓频率出发分析同一资产上的多策略叠加。",
+          "methods": [
+            "多期限动量",
+            "组合风险",
+            "调仓优化"
+          ],
+          "question": "高频与低频信号如何避免在同一日期重复计算风险？",
+          "verification": "统一持仓日期、资金账本与同日总敞口，对跨策略相关性做区块估计。"
+        },
+        {
+          "title": "资产跨区域异步数据",
+          "context": "为全球不同交易时区资产定义明确的行情落地时间与信号可用时点。",
+          "methods": [
+            "时区校准",
+            "信息滞后",
+            "收益归因"
+          ],
+          "question": "全球股票与期货的共同因子在异步日历下该如何估计？",
+          "verification": "冻结各市场收盘时间及数据发布时间，分批验证可交易预测。"
+        },
+        {
+          "title": "多策略实验治理",
+          "context": "研究信号之间的共线性、残差相关及后验挑选偏差。",
+          "methods": [
+            "统计检验",
+            "正则化",
+            "多重比较"
+          ],
+          "question": "为什么叠加更多Alpha未必提升组合的独立信息比率？",
+          "verification": "先估计相关风险与边际贡献，再在独立样本外检验净收益。"
+        }
+      ],
+      "roles": [
+        "多资产量化研究",
+        "优化研究",
+        "交易技术",
+        "风险管理"
+      ],
+      "caveat": "公开的全球多策略定位不能推出未公开的交易品种权重、模型架构或实际回撤。",
+      "careers_url": "https://www.qube-rt.com/careers"
+    },
+    {
+      "company_id": "worldquant",
+      "orientation": "分散式Alpha研究及量化投资管理",
+      "facts": [
+        {
+          "statement": "WorldQuant官网介绍BRAIN平台供符合地区规则的参与者进行Alpha模拟研究并参与外部研究贡献。",
+          "source_title": "WorldQuant · BRAIN",
+          "source_url": "https://www.worldquant.com/brain/"
+        },
+        {
+          "statement": "WorldQuant官网将机构定位为量化资产管理人。",
+          "source_title": "WorldQuant · Official Site",
+          "source_url": "https://www.worldquant.com/"
+        }
+      ],
+      "research_axes": [
+        {
+          "title": "横截面Alpha设计",
+          "context": "研究排序因子、行业与风险暴露中性化、信号周转和交易费如何共同影响可投资性。",
+          "methods": [
+            "因子研究",
+            "横截面标准化",
+            "风险中性化"
+          ],
+          "question": "高IC的Alpha是否能在组合约束后保留收益？",
+          "verification": "记录因子生成时点，比较IC、费后长短组合收益和稳定性。"
+        },
+        {
+          "title": "大规模搜索中的选择偏差",
+          "context": "当一个研究平台迭代大量候选表达式时，单个回测最优结果很容易受到数据挖掘影响。",
+          "methods": [
+            "过拟合检验",
+            "有效试验数",
+            "样本外验证"
+          ],
+          "question": "如何识别从数万个公式中挑出的偶然成功？",
+          "verification": "保留完整搜索历史，使用未参与筛选的测试期与多重检验控制。"
+        },
+        {
+          "title": "Alpha融合与风险控制",
+          "context": "研究大量弱相关信号的组合、去重与多样性，辨别共享基础因子导致的虚假独立性。",
+          "methods": [
+            "相关聚类",
+            "组合优化",
+            "稳健统计"
+          ],
+          "question": "形式不同的两个Alpha是否提供独立信息？",
+          "verification": "对预测序列、持仓与净收益做相关分析并检查市场状态稳定性。"
+        }
+      ],
+      "roles": [
+        "因子挖掘",
+        "横截面建模",
+        "量化投资",
+        "数据科学"
+      ],
+      "caveat": "BRAIN平台研究不等于正式实习或录用；资格、地区和职位必须以官方实时说明为准。",
+      "careers_url": "https://www.worldquant.com/careers/"
+    },
+    {
+      "company_id": "blackwing-cn",
+      "orientation": "以股票量化、指数增强、CTA和宏观对冲为产品方向的中国管理人",
+      "facts": [
+        {
+          "statement": "黑翼官网说明股票策略覆盖指数增强、量化成长及市场中性，另有CTA和宏观对冲产品。",
+          "source_title": "黑翼资产 · 产品服务",
+          "source_url": "https://blackwingasset.com/index.php?a=lists&c=index&catid=8&m=content"
+        },
+        {
+          "statement": "官网公开介绍CTA组合采用趋势策略及期限结构、均值回归与套利等辅助方向。",
+          "source_title": "黑翼资产 · CTA产品",
+          "source_url": "https://blackwingasset.com/index.php?a=lists&c=index&catid=8&m=content"
+        }
+      ],
+      "research_axes": [
+        {
+          "title": "指数增强的基准风险",
+          "context": "以相对沪深300、中证500或中证1000的超额收益为对象，区分基准Beta和主动权重风险。",
+          "methods": [
+            "指数增强",
+            "行业约束",
+            "跟踪误差"
+          ],
+          "question": "相同选股模型用于不同指数，什么约束改变了可获得的Alpha？",
+          "verification": "用一致股票池、交易费及风险预算比较增强组合与目标指数。"
+        },
+        {
+          "title": "CTA趋势与股票Alpha融合",
+          "context": "比较时序趋势收益与股票横截面选股收益，在统一资金账本中测量相关性和风险贡献。",
+          "methods": [
+            "趋势跟踪",
+            "波动率目标",
+            "风险平价"
+          ],
+          "question": "两类策略在高波动市场中是否真能分散风险？",
+          "verification": "估计滚动相关性、联合尾部损失及资金杠杆边界。"
+        },
+        {
+          "title": "AI因子与可执行优化",
+          "context": "把特征提取、收益预测、风险模型、交易成本与组合优化视为完整研究体系。",
+          "methods": [
+            "机器学习",
+            "协方差收缩",
+            "组合优化"
+          ],
+          "question": "预测IC提高在真实股票组合中能转换成多少扣费超额收益？",
+          "verification": "逐层比较信号、仓位、成交与PnL，保留样本外时间一致性。"
+        }
+      ],
+      "roles": [
+        "股票量化",
+        "指数增强研究",
+        "CTA研究",
+        "组合优化"
+      ],
+      "caveat": "该管理人官网不同页面出现不同规模描述，现有规模信息保留原始来源和时间，不能合成为单一实时精确值。"
+    },
+    {
+      "company_id": "century-cn",
+      "orientation": "面向多策略与多资产组合的中国量化私募",
+      "facts": [
+        {
+          "statement": "世纪前沿官网将自身定位为专注量化投资研究和资产管理的管理人，并强调多样化、低相关策略组合。",
+          "source_title": "世纪前沿 · 官方网站",
+          "source_url": "https://www.centuryfrontier.com/"
+        }
+      ],
+      "research_axes": [
+        {
+          "title": "Alpha低相关性与组合增益",
+          "context": "把模型彼此低相关转化为联合风险和净收益实证，而不依赖单一宣传语。",
+          "methods": [
+            "相关矩阵",
+            "协方差收缩",
+            "多策略优化"
+          ],
+          "question": "如何验证策略间低相关在市场压力时仍成立？",
+          "verification": "按波动分组并计算下行相关、共同回撤和持仓重叠。"
+        },
+        {
+          "title": "组合配置的稳健性",
+          "context": "研究收益估计误差和风险模型误差对多资产组合权重的敏感性。",
+          "methods": [
+            "鲁棒优化",
+            "风险预算",
+            "重抽样"
+          ],
+          "question": "为何预测均值的小扰动可能导致大幅换仓？",
+          "verification": "开展参数扰动、权重稳定性与成本敏感性实验。"
+        },
+        {
+          "title": "量化投研与风险系统",
+          "context": "把信号研发、组合交易、容量评估与实盘监控作为相互制约的生产过程。",
+          "methods": [
+            "研究流程",
+            "容量模型",
+            "风险监控"
+          ],
+          "question": "资金规模增大如何影响策略实际净Alpha？",
+          "verification": "以成交参与率和市场冲击模型估计不同规模下的净收益区间。"
+        }
+      ],
+      "roles": [
+        "量化策略研究",
+        "多资产组合",
+        "风控",
+        "研究工程"
+      ],
+      "caveat": "第三方公布的管理规模区间与官网百亿级自述属于不同统计时点和精度，展示时必须分开。"
+    }
+  ]
+}
