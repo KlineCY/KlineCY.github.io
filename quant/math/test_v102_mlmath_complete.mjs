@@ -293,7 +293,7 @@ for(const [id,title] of Object.entries(finalDepthTargets)){
 }
 near("masked attention weight",Math.exp(2)/(Math.exp(2)+Math.exp(1)),.7310585786300049);
 near("continuous time position",2*Math.sin(Math.PI/4),Math.SQRT2);
-near("entropy gradient",-.1875*Math.log(3),-.2059897993900958);
+near("entropy gradient",-.1875*Math.log(3),-.20598980412527057);
 near("GAE two TD residuals",1+.9*.95*2,2.71);
 console.log("V102 PASS",newest.length,"new lessons;",all.length,"total;",
  mathCount,"strict KaTeX;",deepCount,"proof chapters;",deepChars,"deep prose chars;",
