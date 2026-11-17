@@ -85,7 +85,13 @@ for(const lesson of methods.lessons){
 assert(units>=192&&maths>=384,"technical curriculum compressed");
 for(const id of ["company-method-01","company-method-02","company-method-03","company-method-04","company-method-05","company-method-06","company-method-07","company-method-08","company-method-09","company-method-10","company-method-11","company-method-12","company-method-13","company-method-14","company-method-15","company-method-16","company-method-17","company-method-18","company-method-19","company-method-20","company-method-21"])assert(methods.lessons.some(l=>l.id===id),"missing subject area "+id);
 for(let n=22;n<=48;n++)assert(methods.lessons.some(l=>l.id==="company-method-"+n),"missing new technical subject "+n);
-for(const fragment of ['id="methodSearch"',"method-search-label","company-method[open] .katex-zone","company-methods.json",'id="companyMethodList"','id="methodStats"',"function renderCompanyMethods","function renderCourseMath","katex.min.js","katex-zone"])assert(html.includes(fragment),"curriculum reader missing "+fragment);
+const domainCounts={"数学与统计":17,"机器学习与AI":15,"衍生品与交易":16,"组合与风控":17,"实务工程":17};
+for(const lesson of methods.lessons){
+ assert(Array.isArray(lesson.domains)&&lesson.domains.length>0,"untagged lesson "+lesson.id);
+ assert(lesson.domains.every(tag=>tag in domainCounts),"unknown course category "+lesson.id);
+}
+for(const [tag,count] of Object.entries(domainCounts))assert.equal(methods.lessons.filter(l=>l.domains.includes(tag)).length,count,"incorrect course taxonomy "+tag);
+for(const fragment of ['id="methodDomain"','id="methodSearch"',"method-search-label","company-method[open] .katex-zone","company-methods.json",'id="companyMethodList"','id="methodStats"',"function renderCompanyMethods","function renderCourseMath","katex.min.js","katex-zone"])assert(html.includes(fragment),"curriculum reader missing "+fragment);
 const near=(a,b,tol=1e-8)=>assert(Math.abs(a-b)<=tol,"finance identity "+a+" != "+b);
 near(80+50-20,110);
 near(112-100*(1+.05),7);
@@ -175,6 +181,14 @@ evalJS("renderCompanyMethods(courseData)");
 assert(el("methodStats").textContent.includes("48 讲")&&el("methodStats").textContent.includes("384 组"),"curriculum count not rendered");
 assert((el("companyMethodList").innerHTML.match(/class="course-unit"/g)||[]).length===192,"curriculum reader lost technical sections");
 assert((el("companyMethodList").innerHTML.match(/class="katex-zone"/g)||[]).length===384,"curriculum reader lost formulas");
+el("methodDomain").value="机器学习与AI";
+evalJS("renderCompanyMethods(courseData)");
+assert(el("methodStats").textContent.includes("当前匹配 15 讲"),"domain filter count incorrect");
+assert((el("companyMethodList").innerHTML.match(/class="course-unit"/g)||[]).length===60,"domain filter lost course units");
+el("methodDomain").value="";
+evalJS("renderCompanyMethods(courseData)");
+assert((el("companyMethodList").innerHTML.match(/class="course-unit"/g)||[]).length===192,"domain reset lost original curricula");
+
 el("methodSearch").value="可转债";
 evalJS("renderCompanyMethods(courseData)");
 assert(el("methodStats").textContent.includes("当前匹配"),"course search not active");
