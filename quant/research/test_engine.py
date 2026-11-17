@@ -52,6 +52,39 @@ class BacktestTests(unittest.TestCase):
                 self.assertIn("beta",result["metrics"])
                 self.assertEqual(result["meta"]["data_label"],"单元测试合成数据")
 
+    def test_strategy_library_research_design_and_uniqueness(self):
+        ids=[s["id"] for s in self.strategies]
+        self.assertEqual(len(ids),len(set(ids)))
+        self.assertGreaterEqual(len(ids),38)
+        self.assertGreaterEqual(sum(bool(s.get("research")) for s in self.strategies),32)
+        for s in self.strategies:
+            self.assertTrue(s["name"] and s["description"] and s["requirements"])
+            self.assertIn("def signals(history):",s["code"])
+            r=s.get("research")
+            if not r:
+                continue
+            required={"mechanism":55,"formula":30,"derivation":40,"worked":35,"validation":35,"limitations":25}
+            for field,minimum in required.items():
+                self.assertGreaterEqual(len(r[field]),minimum,(s["id"],field))
+            self.assertTrue(s["dataset"].startswith("仅") or "真实" in s["dataset"])
+            self.assertNotIn("Sharpe 2.",s["dataset"])
+
+    def test_all_new_models_no_nan_on_constant_market(self):
+        # The engine must handle no-information prices and return finite reports.
+        lines=["Date,Ticker,Open,High,Low,Close,Volume"]
+        from datetime import date,timedelta
+        start=date(2024,1,1)
+        for i in range(110):
+            ds=(start+timedelta(days=i)).isoformat()
+            for t in ("SYN_A","SYN_B","SYN_C"):
+                lines.append(f"{ds},{t},100,100,100,100,1000")
+        csv="\n".join(lines)
+        for strategy in self.strategies:
+            with self.subTest(strategy=strategy["id"]):
+                result=self.execute(strategy["code"],csv=csv)
+                self.assertTrue(-1<result["metrics"]["total_return"]<100)
+                self.assertTrue(all(e["strategy"]>0 for e in result["equity"]))
+
     def test_next_open_no_lookahead(self):
         code="def signals(history):\n    return {'SYN_A':1.0}\n"
         result=self.execute(code,commission_bps=0,slippage_bps=0,borrow_bps_annual=0)
