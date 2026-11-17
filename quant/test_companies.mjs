@@ -61,6 +61,21 @@ for(const id of nextResearchIds){
  assert(p&&p.research_axes.length===3&&p.facts.length===2,"missing deep research profile "+id);
  for(const a of p.research_axes)assert(a.derivation?.length>=35&&a.worked_example?.length>=27&&a.pitfalls?.length>=25,"institutional research lacks derivation and examples "+id);
 }
+const extendedResearchIds=["jane-street","hrt","citadel-securities","imc","optiver","xtx","flow","virtu","aqr","two-sigma","citadel","deshaw","qrt","worldquant","blackwing-cn","century-cn"];
+for(const id of extendedResearchIds){
+ const p=research.profiles.find(x=>x.company_id===id);
+ assert(p&&p.research_axes.length===3,"missing established deep research "+id);
+ for(const a of p.research_axes){
+  assert(a.derivation?.length>=35&&a.worked_example?.length>=27&&a.pitfalls?.length>=25,"incomplete analytic mechanism or case "+id+" / "+a.title);
+  assert(/[-+−=≈∑ΣΠαγσβλρΔ]/u.test(a.derivation),"mechanism lacks mathematical relation "+id+" / "+a.title);
+ }
+}
+assert.equal(extendedResearchIds.length*3,48,"full breadth regression");
+const deepAxes=research.profiles.flatMap(p=>p.research_axes).filter(a=>a.derivation&&a.worked_example&&a.pitfalls);
+assert(deepAxes.length>=78,"historical and added analytical cases were lost");
+assert(Math.abs(Math.sqrt((0.1**2+0.1**2)/4)-0.070710678)<1e-7,"uncorrelated equal-weight volatility identity");
+assert(Math.abs(Math.sqrt((0.1**2+0.1**2+2*0.8*0.1**2)/4)-0.094868330)<1e-7,"stress correlation identity");
+assert(Math.abs(1-0.95**100-0.9940794708)<1e-7,"selection-bias illustration");
 assert(core.companies.find(c=>c.id==="global-quant-022").regulatory_warning_source.includes("fca.org.uk"),"GSD FCA warning source missing");
 assert(!core.companies.find(c=>c.id==="global-quant-022").entity_status_source,"FCA warning must not be labelled corporate registration");
 assert(html.includes("监管机构风险警示（同名关系待核）"),"FCA warning not visible in reader");
