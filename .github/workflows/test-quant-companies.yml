@@ -1,0 +1,30 @@
+name: Validate quantitative company atlas
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'quant/companies.json'
+      - 'quant/company-research.json'
+      - 'quant/index.html'
+      - 'quant/test_companies.mjs'
+      - '.github/workflows/test-quant-companies.yml'
+  pull_request:
+    paths:
+      - 'quant/companies.json'
+      - 'quant/company-research.json'
+      - 'quant/index.html'
+      - 'quant/test_companies.mjs'
+      - '.github/workflows/test-quant-companies.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  company-atlas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check company records, research sources and reader logic
+        run: node quant/test_companies.mjs
