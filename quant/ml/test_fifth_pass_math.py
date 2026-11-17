@@ -33,13 +33,23 @@ class FifthPassWorkedExamples(unittest.TestCase):
         distribution = {}
         for identifier, chapter in LESSONS.items():
             distribution[identifier[:3]] = distribution.get(identifier[:3], 0) + 1
-            self.assertEqual(len(chapter["equations"]), 5, identifier)
+            self.assertGreaterEqual(len(chapter["equations"]), 5, identifier)
             self.assertTrue(chapter.get("revision_note", "").startswith("V35"), identifier)
             self.assertGreaterEqual(len(chapter["worked_example"]), 120, identifier)
-            self.assertEqual(len(chapter["derivation"]), 5, identifier)
-            self.assertEqual(len(chapter["protocol"]), 5, identifier)
+            self.assertGreaterEqual(len(chapter["derivation"]), 5, identifier)
+            self.assertGreaterEqual(len(chapter["protocol"]), 5, identifier)
             self.assertEqual(len(chapter["pitfalls"]), 3, identifier)
         self.assertEqual(distribution, {f"m{i:02d}": 2 for i in range(1, 25)})
+
+    def test_v35_finance_extensions_preserve_original_five(self):
+        extended = ["m21-c02-p06","m21-c03-p04","m22-c04-p02","m22-c05-p02","m23-c01-p05","m23-c05-p01","m24-c02-p04","m24-c01-p06"]
+        for identity in extended:
+            chapter = LESSONS[identity]
+            self.assertEqual(len(chapter['equations']), 6)
+            self.assertTrue(chapter['equations'][-1]['label'].startswith('进阶推导：'))
+            self.assertGreaterEqual(len(chapter['derivation']), 6)
+            self.assertGreaterEqual(len(chapter['protocol']), 6)
+            self.assertIn('独立推演：', chapter['worked_example'])
 
     def test_one_recalculated_example_per_topic(self):
         # id, independent calculation, numeric expected, verbatim answer marker, tolerance
