@@ -179,6 +179,40 @@ near("CG x second",8*(17/66),68/33);
 near("CG first residual component",2-2*(17/33),32/33);
 near("CG second residual component",8-4*(68/33),-8/33);
 near("CG first residual orthogonality",2*(32/33)+8*(-8/33),0);
+const advancedTopics={
+ "optimization-n0349":"含现金的Markowitz最优解与参数误差传递",
+ "optimization-n0350":"双资产相关最小方差组合的解析解",
+ "optimization-n0352":"双资产风险平价与相关性抵消恒等式",
+ "optimization-n0353":"Black–Litterman观点单位变化与后验不变性",
+ "optimization-n0354":"L1点差成本诱导的精确不交易区域",
+ "numerical-n0361":"log1p与expm1在微小收益计算中的必要性",
+ "numerical-n0363":"刚性动力系统的显式Euler稳定区间",
+ "numerical-n0367":"秩亏设计下的最小范数OLS与Ridge连续极限",
+ "numerical-n0369":"Cholesky分解失败与最小特征值对角修复",
+ "numerical-n0370":"对角预条件CG的条件数改善与精确解保持"
+};
+for(const [id,title] of Object.entries(advancedTopics)){
+ const lesson=added.find(l=>l.node_id===id);
+ assert(lesson&&lesson.deep_sections.some(s=>s.title===title),"missing rigorous advanced course argument "+id);
+ const s=lesson.deep_sections.find(s=>s.title===title);
+ assert(s.paragraphs.length===2 && s.paragraphs.every(x=>x.length>=80),id+" incomplete exposition");
+ assert(s.formulas.length===2 && s.proof.length>=95 && s.worked.length>=90 && s.limitation.length>=85,id+" incomplete proof or empirical check");
+ for(const f of s.formulas)math(f.tex,id+" advanced strict");
+}
+near("cash-aware Markowitz first weight",.06/(3*.04),.5);
+near("cash-aware Markowitz second weight",.03/(3*.09),1/9);
+near("correlated GMV first weight",(.09-.02)/(.04+.09-2*.02),7/9);
+near("correlated GMV variance",(.04*.09-.02**2)/(.04+.09-2*.02),.035555555555555556);
+near("two-asset risk parity second weight",.2/(.2+.3),.4);
+near("BL view rescaling unchanged",(.04/.01+2*.16/.04)/(1/.01+4/.04),.06);
+near("trading soft threshold",Math.max(.015-.02/4,0),.01);
+assert.equal(Math.log(1+1e-16),0,"floating cancellation must be observable");
+assert(Math.abs(Math.log1p(1e-16)-1e-16)<1e-30);
+near("Euler stiff factor unstable",1-100*.03,-2);
+near("Ridge duplicate factor weight",5/(10+2),5/12);
+near("Cholesky repaired condition number",2.003/.001,2003);
+near("preconditioned condition ratio",(1+1/6)/(1-1/6),7/5);
+
 assert(checks>=70);
 console.log("V97 PASS: all 42 optimization nodes completed; 14 original lessons; "+chapters+" deep proof chapters; "+formulas+" strict KaTeX formulas; "+checks+" independent numeric assertions; 400 historic lessons preserved; 414/656 unique complete; Chinese and responsive math CSS rules preserved.");
 
