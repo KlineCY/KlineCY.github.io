@@ -55,8 +55,8 @@ class BacktestTests(unittest.TestCase):
     def test_strategy_library_research_design_and_uniqueness(self):
         ids=[s["id"] for s in self.strategies]
         self.assertEqual(len(ids),len(set(ids)))
-        self.assertGreaterEqual(len(ids),38)
-        self.assertGreaterEqual(sum(bool(s.get("research")) for s in self.strategies),32)
+        self.assertGreaterEqual(len(ids),70)
+        self.assertGreaterEqual(sum(bool(s.get("research")) for s in self.strategies),64)
         for s in self.strategies:
             self.assertTrue(s["name"] and s["description"] and s["requirements"])
             self.assertIn("def signals(history):",s["code"])
