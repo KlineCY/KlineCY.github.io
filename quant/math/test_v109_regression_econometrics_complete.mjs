@@ -239,6 +239,30 @@ near("Uncollapsed difference GMM lag instruments",19*18/2,171);
 near("Network spillover distorted comparison",6-4,2);
 near("Complier local average treatment effect",.06/.2,.3);
 near("Clipped IPW selected mean",.01/.1,.1);
+const deeperCausalTopics={
+ "econometrics-n0229":["潜在结果的Manski界：缺少反事实时哪些结论仍可识别","异质处理效应下的倾向评分重加权与目标总体"],
+ "econometrics-n0230":["分层随机试验的加权效应与总体目标","随机鼓励设计中的单调性与LATE识别"],
+ "econometrics-n0240":["交叉拟合AIPW的Neyman正交性与误差乘积","选择进入样本的正值性与Hájek权重稳定化"]
+};
+for(const [id,titles] of Object.entries(deeperCausalTopics)){
+ const l=added.find(l=>l.id===id);
+ assert(l&&l.deep_sections.length>=8,"original causal teaching must remain "+id);
+ for(const title of titles){
+  const s=l.deep_sections.find(s=>s.title===title);
+  assert(s,"missing advanced causal theorem "+title);
+  assert(s.paragraphs.length===2&&s.paragraphs[0].length>=95&&s.paragraphs[1].length>=135,"insufficient causal identification argument "+id);
+  assert(s.formulas.length===2&&s.proof.length>=100&&s.worked.length>=85&&s.limitation.length>=60,"causal proof, calculation or boundary missing "+id);
+  for(const e of s.formulas)validTex(e.tex,id+" causal");
+ }
+}
+near("Manski ATE lower",.4*.8-.6*.5-.4,-.38);
+near("Manski ATE upper",.4*.8+.6-.6*.5,.62);
+near("stratified RCT ATE",.8*3+.2*(-1),2.2);
+near("complier LATE",.6/.2,3);
+near("ATE heterogeneous",.5*2+.5*0,1);
+near("ATT heterogeneous",.8*2+.2*0,1.6);
+near("AIPW nuisance product",.08*.05,.004);
+near("Hajek sample weighting",11/12,.9166666666666666);
 console.log("V109 PASS: "+all.length+"/"+nodes.length+" full lessons, regression 30/30, econometrics 36/36; "+
  sectionCount+" detailed proof sections, "+texCount+" strict KaTeX expressions, "+linkCount+
  " exact prerequisite links, "+proofChars+" Chinese proof characters, "+checked+" arithmetic checks, legacy/CJK CI guards");
