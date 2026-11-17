@@ -197,14 +197,16 @@ for(const [id,label] of Object.entries(additionalV76Labels)){
  const d=docs.find(x=>x.lessons[id]);
  assert(d,"Missing expanded V76 Atlas lesson "+id);
  const l=d.lessons[id];
- assert(l.equations.at(-1).label===label,id+" mathematical formula append missing");
- assert(l.derivation.at(-1).length>=120,id+" standalone proof was lost");
- assert(l.worked_example.includes("进一步推导与可复算示例："),id+" complete numerical worked example missing");
- assert(l.protocol.at(-1).length>=60,id+" verification method incomplete");
- assert(l.pitfalls.at(-1).length>=100,id+" applicable limitations omitted");
- validTex(l.equations.at(-1).tex,true);
+ const shifted=Object.hasOwn(docs[0].lessons,id);
+ const existingEquation=l.equations.at(shifted?-2:-1);
+ assert(existingEquation.label===label,id+" original extra mathematical formula changed");
+ assert(l.derivation.at(shifted?-2:-1).length>=120,id+" original standalone proof was lost");
+ assert(l.worked_example.includes("进一步推导与可复算示例："),id+" original complete numeric case missing");
+ assert(l.protocol.at(shifted?-2:-1).length>=60,id+" original verification method incomplete");
+ assert(l.pitfalls.at(shifted?-2:-1).length>=100,id+" original applicable limitations omitted");
+ validTex(existingEquation.tex,true);
 }
-assert.equal(strictTex,113,"All original 90 strict equations and 23 new equations must parse");
+assert.equal(strictTex,119,"Original 90+23 strict equations and six new independent formulas must parse");
 near("Same variance event-tail distribution one",.5*1+.5*1,1);
 near("Same variance event-tail distribution two",.05*10+.05*10,1);
 near("Extreme tail probability mixture",.05+.05,.1);
