@@ -330,6 +330,29 @@ near("Metric TSP shortcut bound",2+2+3,7);
 yes("Metric TSP two approximation",7<=2*(2+2));
 near("Median of means 32-group error upper",Math.exp(-32/8),Math.exp(-4));
 near("Value iteration tree symbolic growth example",3+4*2,11);
+const finalDepthTargets={
+  "discrete-n0535": "零一背包的不可行状态与精确容量递推",
+  "discrete-n0536": "随机Bellman递推与期望值代入的Jensen偏差",
+  "discrete-n0537": "Held–Karp子集状态数、时间复杂度与回路闭合",
+  "discrete-n0538": "动态扩容数组的势能法：为什么偶尔整段复制仍是常数摊还代价",
+  "discrete-n0539": "贪心集合覆盖的调和数近似界与分摊证明",
+  "discrete-n0540": "随机QuickSort的期望比较次数与两元素配对概率"
+};
+for(const [id,title] of Object.entries(finalDepthTargets)){
+ const lesson=newest.find(l=>l.id===id);
+ assert(lesson,"original complete lecture absent "+id);
+ const section=lesson.deep_sections.find(s=>s.title===title);
+ assert(section,"new full proof missing "+title);
+ assert(section.paragraphs.length===2&&section.paragraphs.every(p=>p.length>=85),"weak mathematical explanation "+id);
+ assert(section.formulas.length===2&&section.proof.length>=135&&section.worked.length>=105&&section.limitation.length>=75,"missing exact derivation or example "+id);
+ for(const equation of section.formulas)formula(equation.tex,id+" advanced proof");
+}
+near("exact knapsack feasible",Math.max(0,4,5),5);
+near("stochastic Bellman value",.5*Math.max(-2,0)+.5*Math.max(2,0),1);
+near("Held Karp valid states",4*2**3,32);
+near("dynamic array 8 inserts",8+(1+2+4),15);
+near("set cover harmonic 4",1+1/2+1/3+1/4,25/12);
+near("random quicksort three",2*(3+1)*(1+1/2+1/3)-4*3,8/3);
 console.log("V104 PASS",newest.length,"new lectures,",all.length,"total;",mathCount,"strict KaTeX;",
  deepCount,"proof chapters;",deepChars,"deep prose characters;",checks,"independent numerical checks;",
  linkCount,"crosslinks; discrete graph mathematics 30/30.");
