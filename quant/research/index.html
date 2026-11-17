@@ -14,6 +14,7 @@
 [hidden]{display:none!important}
 @media(max-width:820px){.main{margin:0;padding:0 16px}.hero{padding:32px 0 17px}.form-row{grid-template-columns:repeat(2,minmax(0,1fr))}.workbench{padding:15px}.canvas-wrap{height:240px}}
 @media(max-width:560px){.form-row{grid-template-columns:1fr 1fr}.strategy-grid{grid-template-columns:1fr}.metrics{grid-template-columns:1fr 1fr}.source-links{display:block}.source-links a{display:block;margin:7px 0}.canvas-wrap{height:220px}}
+.strategy-research{border:1px solid var(--line);background:#fff;padding:21px 26px;border-radius:12px}.strategy-research h3{margin:4px 0 16px;font-size:20px}.strategy-research h4{font-size:14px;margin:18px 0 6px}.strategy-research p{font-size:13px;line-height:1.86;margin:0;color:var(--ink)}.strategy-research pre{white-space:pre-wrap;overflow-wrap:anywhere;padding:15px;background:#f4f7fb;border-radius:8px;color:#174469;font-size:13px}.research-muted{font-size:12px;color:var(--mute)}#strategyFilters{margin-bottom:12px}#strategyFilters input,#strategyFilters select{width:100%;max-width:450px;padding:10px;border:1px solid var(--line);border-radius:8px;background:#fff}
 </style><link rel="stylesheet" href="../sidebar-v2.css">
 </head>
 <body><aside id="quantSidebar" class="sidebar" data-page="research" aria-label="量化研究分类导航"></aside><script src="../sidebar-v2.js"></script>
@@ -21,10 +22,11 @@
 <header class="hero"><div class="eyebrow">QUANT RESEARCH / INTERACTIVE RESEARCH LAB</div>
 <h1>策略研究与回测 <em>Research & Backtesting.</em></h1>
 <p>浏览经典开源研究思路，上传日频行情CSV，在网页内运行可编辑的 Python 策略并生成净值曲线及风险报告。回测工具在浏览器内工作，不上传你的CSV至本站服务器；高精度撮合、期权、分红等需独立专业引擎。</p></header>
-<div class="top-stats"><div class="top-stat"><b id="strategyN">6</b><span>可编辑策略模板</span></div><div class="top-stat"><b>Python</b><span>浏览器内 WebAssembly 运行</span></div><div class="top-stat"><b>13+</b><span>组合风险与业绩指标</span></div><div class="top-stat"><b>CSV</b><span>支持单资产与多资产</span></div></div>
+<div class="top-stats"><div class="top-stat"><b id="strategyN">22</b><span>可编辑策略模板</span></div><div class="top-stat"><b>Python</b><span>浏览器内 WebAssembly 运行</span></div><div class="top-stat"><b>13+</b><span>组合风险与业绩指标</span></div><div class="top-stat"><b>CSV</b><span>支持单资产与多资产</span></div></div>
 <div class="notice"><strong>数据真实性说明：</strong>默认样本为明确标注的合成模拟行情，仅用于检查策略逻辑和页面功能，任何收益或Sharpe都不是历史实盘表现。要获得真实历史回测，请自行上传有授权的真实行情CSV。此引擎不是原版 Backtrader 或 Zipline；完整框架可通过下方 Colab 模板使用。</div>
 <section class="section" id="marketplace"><div class="section-head"><div><h2>策略超市 / Strategy Library</h2><p>点击卡片将Python示例加载进编辑器。运行后显示与当前数据对应的指标，不预填虚构历史成绩。</p></div></div>
-<div id="strategies" class="strategy-grid" aria-label="策略模板列表">正在载入策略…</div></section>
+<div class="form-row" id="strategyFilters"><div class="field"><label for="strategySearch">检索策略名称、研究机制与数据需求</label><input id="strategySearch" type="search" placeholder="例如：动量、波动、配对交易"></div><div class="field"><label for="strategyCategory">按策略类型查看</label><select id="strategyCategory"><option value="">全部策略</option></select></div></div><p id="strategyListStatus" class="research-muted" aria-live="polite"></p><div id="strategies" class="strategy-grid" aria-label="策略模板列表">正在载入策略…</div></section>
+<section class="section" id="researchDesign"><div class="section-head"><div><h2>策略原理与研究设计</h2><p>每个可编辑策略对应数学关系、具体算例、时间外验证与不可忽略的模型边界。</p></div></div><div id="strategyResearch" class="strategy-research" aria-live="polite">从上方选择策略，可在这里查看研究设计。</div></section>
 <section class="section" id="studio"><div class="section-head"><div><h2>在线 Python 回测实验室</h2><p>信号在 t−1 日收盘后形成、t 日开盘执行，持有至 t+1 日开盘。先上传CSV或使用模拟数据。</p></div></div>
 <div class="workbench">
 <div class="tools"><div class="field"><label for="csvFile">导入历史行情 CSV</label><input id="csvFile" type="file" accept=".csv,text/csv"><small>列：Date, Open, Close, 可选 Ticker / Volume</small></div>
@@ -55,7 +57,7 @@ def signals(history):
 </main><footer style="padding:0 0 36px;font-size:12px;color:#486581">© Kline Quant · <a href="./strategies.json">策略源码库</a> · <a href="./engine.py">Python引擎源代码</a> · <a href="../">返回量化专区</a></footer></div>
 <script>
 const $=id=>document.getElementById(id);const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-let library=[],selected=null,dataText="",label="合成模拟数据（非真实历史行情）",worker=null,workerId=0,runTimeout=null,report=null,results={},running=false;
+let library=[],selected=null,strategyKeyword="",strategyCategory="",dataText="",label="合成模拟数据（非真实历史行情）",worker=null,workerId=0,runTimeout=null,report=null,results={},running=false;
 const pct=(v,d=2)=>v===null||v===undefined?"—":(v*100).toFixed(d)+"%";const num=(v,d=3)=>v===null||v===undefined?"—":Number(v).toFixed(d);
 function demoCSV(){
   let seed=812243;const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296};
@@ -84,10 +86,20 @@ function demoCSV(){
 }
 function activateDataset(csv,name,source){dataText=csv;label=name;$("dataStatus").textContent=name+" · 数据只在当前浏览器处理；修改数据后需要重新回测。";$("sourceType").querySelector('option[value="upload"]').disabled=source!=="upload";$("sourceType").value=source;results={};report=null;$("report").classList.remove("visible");renderLibrary()}
 function renderLibrary(){
-$("strategies").innerHTML=library.map(s=>{const r=results[s.id];const status=r?'<strong>总收益 '+pct(r.metrics.total_return)+' · Sharpe '+num(r.metrics.sharpe)+'</strong>':'<span>未在当前数据上运行</span>';return '<article class="strategy'+(selected?.id===s.id?" selected":"")+'"><span class="type">'+esc(s.category)+" · "+esc(s.level)+'</span><h3>'+esc(s.name)+'</h3><p>'+esc(s.description)+'</p><p><strong>数据需求：</strong>'+esc(s.requirements)+'</p><div class="result">'+status+'</div><button type="button" data-select="'+esc(s.id)+'">加载并编辑 Python 代码</button></article>'}).join("");
+const match=library.filter(s=>(!strategyCategory||s.category===strategyCategory)&&(!strategyKeyword||[s.name,s.category,s.description,s.requirements,s.research?.mechanism||""].join(" ").toLowerCase().includes(strategyKeyword)));
+$("strategyListStatus").textContent="当前显示 "+match.length+" / "+library.length+" 个可编辑策略";
+$("strategies").innerHTML=match.map(s=>{const r=results[s.id];const status=r?'<strong>总收益 '+pct(r.metrics.total_return)+' · Sharpe '+num(r.metrics.sharpe)+'</strong>':'<span>未在当前数据上运行</span>';return '<article class="strategy'+(selected?.id===s.id?" selected":"")+'"><span class="type">'+esc(s.category)+" · "+esc(s.level)+'</span><h3>'+esc(s.name)+'</h3><p>'+esc(s.description)+'</p><p><strong>数据需求：</strong>'+esc(s.requirements)+'</p><div class="result">'+status+'</div><button type="button" data-select="'+esc(s.id)+'">加载并编辑 Python 代码</button></article>'}).join("")||'<p>没有与当前检索条件匹配的策略。</p>';
 }
-function selectStrategy(id){const s=library.find(x=>x.id===id);if(!s)return;selected=s;$("editor").value=s.code;$("selectedName").textContent="· "+s.name;report=null;$("report").classList.remove("visible");renderLibrary();}
+function renderStrategyResearch(s){
+ const r=s.research;
+ if(!r){$("strategyResearch").innerHTML='<h3>'+esc(s.name)+'</h3><h4>研究原理</h4><p>'+esc(s.theory||s.description)+'</p><h4>适用边界</h4><p>'+esc(s.note||"仅为教学策略模板，须独立核对数据和风险。")+'</p>';return}
+ const fields=[["研究机制",r.mechanism],["数学关系（符号定义以正文为准）",r.formula],["推导与信号时点",r.derivation],["计算示例",r.worked],["样本外验证方案",r.validation],["局限与风险",r.limitations]];
+ $("strategyResearch").innerHTML='<h3>'+esc(s.name)+'</h3>'+fields.map(([label,value])=>'<h4>'+esc(label)+'</h4>'+(label.startsWith("数学关系")?'<pre>'+esc(value)+'</pre>':'<p>'+esc(value)+'</p>')).join("");
+}
+function selectStrategy(id){const s=library.find(x=>x.id===id);if(!s)return;selected=s;$("editor").value=s.code;$("selectedName").textContent="· "+s.name;report=null;$("report").classList.remove("visible");renderStrategyResearch(s);renderLibrary();}
 $("strategies").addEventListener("click",e=>{const b=e.target.closest("button[data-select]");if(b)selectStrategy(b.dataset.select)});
+$("strategySearch").addEventListener("input",e=>{strategyKeyword=e.target.value.trim().toLowerCase();renderLibrary()});
+$("strategyCategory").addEventListener("change",e=>{strategyCategory=e.target.value;renderLibrary()});
 function invalidateReport(reason,all=false){report=null;$("report").classList.remove("visible");if(all)results={};else if(selected)delete results[selected.id];renderLibrary();if(reason)$("runtimeStatus").textContent=reason;}
 $("editor").addEventListener("input",()=>{if(!running)invalidateReport("策略代码已修改，旧报告已失效；请重新回测。")});
 for(const id of ["commission","slippage","borrow","riskfree"]){
@@ -161,6 +173,6 @@ $("run").onclick=()=>{
 };
 $("downloadReport").onclick=()=>{if(!report)return;downloadFile("Kline_Quant_Backtest_"+Date.now()+".json",JSON.stringify(report,null,2),"application/json")};
 $("downloadEquity").onclick=()=>{if(!report)return;downloadFile("Kline_Quant_Equity_"+Date.now()+".csv","Date,Strategy,Benchmark\n"+report.equity.map(x=>[x.date,x.strategy,x.benchmark].join(",")).join("\n"),"text/csv;charset=utf-8")};
-fetch("./strategies.json").then(r=>{if(!r.ok)throw Error("策略库HTTP "+r.status);return r.json()}).then(d=>{library=d.strategies||[];$("strategyN").textContent=library.length;selectStrategy("ma");activateDataset(demoCSV(),"合成模拟数据（非真实历史行情）","demo")}).catch(e=>{$("strategies").textContent="策略库加载失败："+e.message});
+fetch("./strategies.json").then(r=>{if(!r.ok)throw Error("策略库HTTP "+r.status);return r.json()}).then(d=>{library=d.strategies||[];$("strategyN").textContent=library.length;const categories=[...new Set(library.map(s=>s.category))].sort((a,b)=>a.localeCompare(b,"zh-CN"));$("strategyCategory").innerHTML='<option value="">全部策略</option>'+categories.map(x=>'<option value="'+esc(x)+'">'+esc(x)+'</option>').join("");selectStrategy("ma");activateDataset(demoCSV(),"合成模拟数据（非真实历史行情）","demo")}).catch(e=>{$("strategies").textContent="策略库加载失败："+e.message});
 </script>
 </body></html>
