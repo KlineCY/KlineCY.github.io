@@ -44,7 +44,7 @@ const assetData=json("quant/assets/data.json");
 assert.equal(assetData.assets.length,113,"Asset coverage changed unexpectedly");
 assert.equal(new Set(assetData.assets.map(a=>a.id)).size,113,"Duplicate asset identifier");
 const assetChapters=assetData.assets.filter(a=>a.pricing_mechanism&&a.worked_case&&a.research_audit);
-assert(assetChapters.length>=58,"Instrument valuation chapters unexpectedly missing");
+assert.equal(assetChapters.length,113,"All instrument records must have detailed valuation chapters");
 for(const a of assetChapters)assert(a.worked_case.length>=38&&a.pricing_mechanism.length>=30&&a.research_audit.length>=25,"Insufficient instrument validation: "+a.id);
 for(const a of assetData.assets){
  assert(a.notes?.length>=30,"Asset lacks specific pricing/data risk notes: "+a.id);
