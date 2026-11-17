@@ -156,6 +156,28 @@ close("stochastic objective piecewise left x.5",6-.5,5.5);
 close("stochastic objective middle x2",4.5+.5*2,5.5);
 close("CVaR alpha0.5 x1",Math.max(2,8),8);
 close("CVaR alpha0.5 x3",Math.max(6,6),6);
+const newerOptimization={
+ "optimization-n0344":"单变量持仓上限下的QP解析解与活动集切换",
+ "optimization-n0345":"二阶锥形式的鲁棒线性约束与误差球对偶范数",
+ "optimization-n0346":"二资产最近相关矩阵的投影闭式与奇异边界",
+ "optimization-n0348":"随机情景聚合与Jensen低估：非线性补偿损失不能在均值情景直接求值"
+};
+for(const [id,title] of Object.entries(newerOptimization)){
+ const lesson=added.find(l=>l.id===id),sec=lesson?.deep_sections.find(s=>s.title===title);
+ assert(sec,"missing financial convex optimization chapter "+title);
+ assert(sec.paragraphs.length===2&&sec.paragraphs.every(p=>p.length>=90),"incomplete risk optimization assumptions "+id);
+ assert(sec.proof.length>=140&&sec.worked.length>=105&&sec.limitation.length>=75,"missing full exact proof and case "+id);
+ assert(sec.formulas.length===2,"two precise optimization relationships required "+id);
+ for(const e of sec.formulas)strictMath(e.tex,id+" new");
+}
+close("QP no-trade lower",Math.max(0,Math.min(.6,-.01/.1)),0);
+close("QP middle",Math.max(0,Math.min(.6,.03/.1)),.3);
+close("QP upper saturation",Math.max(0,Math.min(.6,.08/.1)),.6);
+close("robust cone worst risk",4+Math.hypot(3,4),9);
+close("nearest PSD correlation projection",Math.max(-1,Math.min(1,1.2)),1);
+close("nearest correlation Frobenius",2*(1.2-1)**2,.08);
+close("Jensen market payoff",.5*Math.max(-2,0)+.5*Math.max(2,0),1);
+close("Jensen mean shock payoff",Math.max(.5*(-2)+.5*2,0),0);
 assert(checked>=55);
 console.log("V96 PASS: 14 new convex optimization lectures, "+chapterCount+" rigorous deep chapters, "+equationCount+" strict KaTeX expressions, "+checked+" independent numeric checks, historical 386 courses preserved, 400/656 complete, CJK/mobile formatting guards intact.");
 

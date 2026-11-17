@@ -36,6 +36,12 @@ const newLessons=[...a.lessons,...b.lessons],all=[...old,...newLessons];
 assert.equal(newLessons.length,14);
 assert.equal(all.length,386,"Total complete lesson count must be 386/656");
 assert.equal(new Set(all.map(x=>x.node_id)).size,386,"V95 duplicates a historical complete lesson");
+const subsequentInferences={
+  "statistics-n0160": "干扰参数存在时的有效Fisher信息与Schur补",
+  "statistics-n0163": "无限次阶段检验的显著性预算与联合误报上界",
+  "statistics-n0165": "似然比对一一重参数化不变而Wald未必不变",
+  "statistics-n0168": "Fieller置信区间：分母不确定时比率参数为何可能无界"
+};
 const addedFullStat={
  "statistics-n0152":"非同方差独立样本的Bessel校正与均值风险",
  "statistics-n0153":"次序统计量的非渐近分位点覆盖区间",
@@ -64,7 +70,7 @@ for(const lesson of newLessons){
  assert(lesson.properties.length>=4&&lesson.properties.every(x=>x.length>=18));
  assert.equal(lesson.formulas.length,3);
  assert.equal(lesson.derivation.length,3);
- assert.equal(lesson.deep_sections.length,addedFullStat[lesson.id]?6:5,lesson.id+" preserved five original chapters plus validated sixth");
+ assert.equal(lesson.deep_sections.length,(addedFullStat[lesson.id]||subsequentInferences[lesson.id])?6:5,lesson.id+" preserves all original proofs and targeted continuations");
  const titles=new Set();
  for(const f of lesson.formulas){assert(f.label.length>=4);strictMath(f.tex,lesson.id);}
  for(const d of lesson.derivation){assert(d.explanation.length>=24);strictMath(d.tex,lesson.id);}
@@ -75,7 +81,7 @@ for(const lesson of newLessons){
   assert(s.paragraphs.length===2&&s.paragraphs.every(x=>x.length>=30),lesson.id+" shallow exposition");
   assert(s.proof.length>=50&&s.worked.length>=50&&s.limitation.length>=25,lesson.id+" lacks proof, calculation or validity boundary");
   assert.equal(s.formulas.length,lesson.deep_sections.indexOf(s)>=4?2:1,lesson.id+" all original formulas preserved and advanced chapter complete");
-   if(lesson.deep_sections.indexOf(s)===5){
+   if(lesson.deep_sections.indexOf(s)===5&&addedFullStat[lesson.id]){
     assert.equal(s.title,addedFullStat[lesson.id],lesson.id+" exact added inference argument missing");
     assert(s.paragraphs.every(x=>x.length>=100)&&s.proof.length>=100&&s.worked.length>=90&&s.limitation.length>=55,lesson.id+" rigorous worked proof not complete");
    }
@@ -86,8 +92,8 @@ for(const lesson of newLessons){
  assert(/[\u3400-\u9FFF]/u.test(JSON.stringify(lesson)),lesson.id+" lacks Chinese technical prose");
  assert(!/TODO|FIXME|Lorem ipsum/i.test(JSON.stringify(lesson)),lesson.id+" contains incomplete placeholder");
 }
-assert.equal(sections,77,"Original 70 proof chapters plus 7 additional deep proofs required");
-assert.equal(equations,182,"Original 168 strict formulae plus 14 new formulae must parse");
+assert.equal(sections,81,"Original 77 proof chapters plus four new inference arguments required");
+assert.equal(equations,190,"Original 182 strict formulae plus eight new inference expressions must parse");
 assert(depth>=12000,"Mathematical explanation depth below threshold");
 const app=read("app.js"),css=read("styles.css");
 for(const token of [
@@ -149,6 +155,21 @@ close("CI halfwidth",1.96/Math.sqrt(100),.196);
 close("power example needed n",Math.ceil(((1.645+.842)/.5)**2),25);
 close("long run autocovariance",1+2*.2,1.4);
 close("dependent two-period mean variance",(1+1+2*.5)/4,.75);
+for(const [id,title] of Object.entries(subsequentInferences)){
+ const lesson=newLessons.find(l=>l.id===id),chapter=lesson?.deep_sections.find(x=>x.title===title);
+ assert(chapter,"missing later rigorous statistical proof "+title);
+ assert(chapter.paragraphs.length===2&&chapter.paragraphs.every(p=>p.length>=90),"statistical assumptions not complete "+id);
+ assert(chapter.proof.length>=140&&chapter.worked.length>=105&&chapter.limitation.length>=75,"incomplete identification, numerical example or limits "+id);
+ assert(chapter.formulas.length===2,"two independent identities required "+id);
+ for(const e of chapter.formulas)strictMath(e.tex,id+" new derivation");
+}
+close("nuisance effective information",4-1/2,3.5);
+close("nuisance variance lower bound",1/(100*3.5),1/350);
+close("alpha spending first",.05/(1*2),.025);
+close("alpha spending first three",.05/(1*2)+.05/(2*3)+.05/(3*4),.0375);
+close("LRT nonlinear Wald",100*(1.1**2-1)**2/(2*1.1)**2,.9111570247933896);
+close("Fieller candidate ratio2", (2-2*1)**2,0);
+close("Fieller candidate ratio1 RHS",1.96**2*(.2**2+.1**2),.19208);
 assert(checks>=40);
 console.log("V95 PASS: 14 new canonical statistics lectures, 77 complete proof chapters, 182 strict KaTeX expressions, "+checks+" numerical checks, 372 historic lessons retained and unique total 386/656; responsive CJK/KaTeX rules retained.");
 

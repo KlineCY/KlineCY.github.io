@@ -19,7 +19,7 @@ let units=0,tex=0,sources=0;
 for(const l of rows){
  assert(!priorIds.has(l.id)&&!core.catalog.items.some(x=>x.id===l.id),"duplicate ML lecture ID "+l.id);
  assert(l.goal.length>=70&&l.protocol.length>=4&&l.sources.length>=2);
- assert.equal(l.sections.length,["m22-c07-p01","m23-c09-p01"].includes(l.id)?6:7);
+ assert.equal(l.sections.length,["m22-c07-p01","m23-c09-p01"].includes(l.id)?6:l.id==="m12-c09-p02"?9:["m04-c09-p01","m12-c09-p01"].includes(l.id)?8:7);
  assert.equal(new Set(l.sections.map(s=>s.title)).size,l.sections.length);
  for(const s of l.sections){
   assert(s.question?.length>=12&&s.paragraphs.length===2&&s.paragraphs.every(x=>x.length>=55),"incomplete Chinese reasoning "+l.id+" "+s.title);
@@ -68,6 +68,20 @@ for(const [id,titles] of Object.entries(tailAdvancedTopics)){
   for(const e of sec.equations)katex.renderToString(e.tex,{throwOnError:true,strict:"error"});
  }
 }
+const addedQuantileCoverage={
+ "m04-c09-p01":["经验Pinball目标的次梯度条件与整段最优分位集合"],
+ "m12-c09-p01":["Conformal校准分数严格单调变换下的秩不变性"],
+ "m12-c09-p02":["零次VaR超限不等于已证明覆盖：二项分布上置信界","总体超限率正确而风险状态内失效的VaR构造"]
+};
+for(const [id,titles] of Object.entries(addedQuantileCoverage)){
+ const l=rows.find(r=>r.id===id);
+ for(const title of titles){
+  const sec=l.sections.find(s=>s.title===title);
+  assert(sec&&sec.paragraphs.length===2&&sec.paragraphs.every(p=>p.length>=90),"missing full quantile validity reasoning "+id);
+  assert(sec.equations.length===2&&sec.worked.length>=105&&sec.boundary.length>=75,"missing finite-sample quantile counterexample "+id);
+  for(const e of sec.equations)katex.renderToString(e.tex,{throwOnError:true,strict:"error"});
+ }
+}
 const close=(a,b,t=1e-9)=>assert(Math.abs(a-b)<t,"arithmetic invariant "+a+" ≠ "+b);
 close(6.8/5,1.36);
 close(Math.ceil((9+1)*.8),8);
@@ -95,6 +109,12 @@ close((10+2)/2,6);
 close(1-.05, .95);
 close(Math.sqrt(.05*.95/100),.02179449471770337);
 close(10+0,10);
+close((2/3)*10/3,20/9);
+close(2*(1/3)*10/3,20/9);
+close(Math.pow(3,2),9);
+close(Math.pow(.99,100),0.3660323412732292);
+close(1-Math.pow(.05,1/100),0.02951304960703993);
+close(.5*.2+.5*0,.1);
 const html=fs.readFileSync(new URL("index.html",dir),"utf8"),css=fs.readFileSync(new URL("atlas.css",dir),"utf8");
 for(const id of expected)assert(html.includes("#lesson/"+id),"new learning path missing "+id);
 assert(html.includes("atlas.js?v=20261109"));
