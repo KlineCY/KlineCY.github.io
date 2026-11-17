@@ -13,7 +13,7 @@ const title=document.createElement("summary");title.innerHTML='<div class="catna
 const inner=document.createElement("div");inner.className="cat-content";const grid=document.createElement("div");grid.className="entries";
 for(const term of subset){
 const card=document.createElement("article");card.className="entry";
-card.innerHTML='<div><h3>'+esc(term.title)+'</h3><div class="en">'+esc(term.english)+'</div></div><p>'+esc(term.definition)+'</p><div class="bottom"><span class="level">'+esc(term.level)+'</span><button type="button" data-term="'+esc(term.id)+'">查看解释、示例与关联 →</button></div>';
+card.innerHTML='<div><h3>'+esc(term.title)+'</h3><div class="en">'+esc(term.english)+'</div></div><p>'+esc((term.definition||'').split(/\n\n/)[0])+'</p><div class="bottom"><span class="level">'+esc(term.level)+'</span><button type="button" data-term="'+esc(term.id)+'">查看解释、示例与关联 →</button></div>';
 grid.appendChild(card);
 }
 inner.appendChild(grid);root.appendChild(inner);
