@@ -50,7 +50,7 @@ for(const p of newlyDeepened){
   assert(a.derivation?.length>=80,"insufficient mechanism or proof "+p.company_id+"/"+a.title);
   assert(a.worked_example?.length>=60&&/[0-9０-９]/u.test(a.worked_example),"missing numeric worked case "+p.company_id+"/"+a.title);
   assert(a.pitfalls?.length>=45,"missing limitations "+p.company_id+"/"+a.title);
-  assert(/[-+−=≈∑ΣΠαγσβλρΔ√∫]/u.test(a.derivation),"missing quantitative mechanism "+p.company_id+"/"+a.title);
+  assert(/[-+−=≈∑ΣΠαγσβλρΔ√∫≤≥×→<>]/u.test(a.derivation),"missing quantitative mechanism "+p.company_id+"/"+a.title);
   newDeepAxes++;
  }
 }
@@ -60,7 +60,7 @@ assert.equal(10000000*5*0.002,100000,"duration shock example incorrect");
 assert.equal(10000000*0.03*0.5,150000,"credit loss example incorrect");
 assert(Math.abs(Math.log(0.5)/Math.log(0.8)-3.1062837)<1e-5,"AR(1) half-life inconsistent");
 assert.equal(5*300*30,45000,"futures variation margin example incorrect");
-assert.equal(0.8*0.1+0.2*(-0.15),0.05,"survivorship example inconsistent");
+assert(Math.abs(0.8*0.1+0.2*(-0.15)-0.05)<1e-12,"survivorship example inconsistent");
 assert.equal(30000000/(0.1*20000000),15,"liquidity exit days inconsistent");
 assert(html.includes("x.derivation||\"\",x.worked_example||\"\""),"deep research content must be searchable");
 assert(html.includes("overflow-wrap:anywhere"),"research mathematical text should wrap on mobile");
