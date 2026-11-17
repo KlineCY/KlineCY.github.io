@@ -422,6 +422,174 @@
         "validation": "必须开展价比协整或单位根研究、参数稳定性与换手成本检验，并把空头借券限制写入资金账本。",
         "limitations": "真实对冲比率可能不是1，个股停牌和跨币对齐可能使双腿无法同时交易。"
       }
+    },
+    {
+      "id": "volume_breakout",
+      "name": "价格突破与成交额放大确认",
+      "category": "成交量 / 趋势",
+      "level": "中级",
+      "requirements": "≥31日收盘价与有效成交量；所有资产交易计价需一致",
+      "description": "昨日收盘价突破此前20日高点，且当期成交额超过前20日平均成交额1.5倍才买入。",
+      "theory": "价格与成交额共振可能过滤缺乏参与者确认的趋势信号。这里交易金额近似由日收盘价乘成交量表示，不等于精确逐笔成交额。",
+      "code": "def signals(history):\n    chosen=[]\n    for t,bars in history.items():\n        if len(bars)<31:\n            continue\n        past=bars[-21:-1]\n        last=bars[-1]\n        turnover=[x[\"close\"]*x[\"volume\"] for x in past]\n        avg=sum(turnover)/20.0\n        current=last[\"close\"]*last[\"volume\"]\n        if avg>0 and last[\"close\"]>max(x[\"close\"] for x in past) and current>1.5*avg:\n            chosen.append(t)\n    return {t:1.0/len(chosen) for t in chosen} if chosen else {}\n",
+      "metrics": null,
+      "equity": null,
+      "dataset": "仅有策略规则、代码和教学算例；未提供任何真实历史收益或统计业绩。",
+      "research": {
+        "mechanism": "价格与成交额共振可能过滤缺乏参与者确认的趋势信号。这里交易金额近似由日收盘价乘成交量表示，不等于精确逐笔成交额。",
+        "formula": "P_t>max(P_{t−20:t−1}) 且 P_t×V_t > 1.5×mean(P×V)_{t−20:t−1}。",
+        "derivation": "对今天以前20个交易日构造上轨及成交额阈值，再使用今天收盘数据产生明日开盘目标仓位。",
+        "worked": "昨日20日最高价100、日均成交额1000万元，今天收盘101且成交额1800万元，则同时满足突破与成交确认。",
+        "validation": "对比单纯价格突破；在成交额高低组检验回撤、成交冲击及尾部事件，不预填任何收益。",
+        "limitations": "不同市场货币和股数单位可能无法直接比较成交额；成交额放大也可能来自利空抛售。"
+      }
+    },
+    {
+      "id": "obv_confirmation",
+      "name": "OBV成交量趋势与价格过滤",
+      "category": "成交量 / 技术指标",
+      "level": "中级",
+      "requirements": "≥41日收盘价及日成交量",
+      "description": "根据收盘涨跌方向累积带符号成交量，比较最近5日OBV增量与20日价格趋势方向。仅在有正成交量时形成信号。",
+      "theory": "OBV将成交量按照当日价格方向赋予正负号累加，尝试表达资金参与方向。但成交量不能直接区分主动买入与主动卖出，OBV只是粗糙代理。",
+      "code": "def signals(history):\n    selected=[]\n    for t,bars in history.items():\n        if len(bars)<41:\n            continue\n        v=0.0\n        obv=[]\n        for i in range(1,len(bars)):\n            diff=bars[i][\"close\"]-bars[i-1][\"close\"]\n            if diff>0:\n                v+=bars[i][\"volume\"]\n            elif diff<0:\n                v-=bars[i][\"volume\"]\n            obv.append(v)\n        if len(obv)<6 or sum(x[\"volume\"] for x in bars[-20:])<=0:\n            continue\n        if obv[-1]>obv[-6] and bars[-1][\"close\"]>bars[-21][\"close\"]:\n            selected.append(t)\n    return {t:1.0/len(selected) for t in selected} if selected else {}\n",
+      "metrics": null,
+      "equity": null,
+      "dataset": "仅有策略规则、代码和教学算例；未提供任何真实历史收益或统计业绩。",
+      "research": {
+        "mechanism": "OBV将成交量按照当日价格方向赋予正负号累加，尝试表达资金参与方向。但成交量不能直接区分主动买入与主动卖出，OBV只是粗糙代理。",
+        "formula": "OBV_t=OBV_{t−1}+sign(C_t−C_{t−1})V_t；若OBV_t>OBV_{t−5}且20日收益为正则持仓。",
+        "derivation": "对历史所有可见收盘价和成交量逐日累计OBV，比较当前与五日前；当输入缺乏有效成交量时保持空仓。",
+        "worked": "最近五次OBV累计增加100万股，20日价格从100升至105，则满足本例持仓过滤，但下期仍可能下跌。",
+        "validation": "对比同一价格趋势不带成交量过滤的策略，检验成交量缺失、单位变更、ETF拆份对模型的影响。",
+        "limitations": "OBV会受股数拆分与成交量口径影响，长历史初值不影响差值但数据修订会影响可复现性。"
+      }
+    },
+    {
+      "id": "slope_tstat",
+      "name": "60日对数趋势斜率与t统计量",
+      "category": "统计趋势",
+      "level": "高级",
+      "requirements": "≥61日收盘价",
+      "description": "用过去60日对数价格相对时间的OLS斜率及标准误估计趋势是否足够明显，正趋势且t统计量超过2时持仓。",
+      "theory": "对数价格趋势斜率可以估计局部增长方向，t值衡量相对残差波动的线性趋势强度，但金融价格创新高度相关，传统OLS标准误往往不是可靠显著性推断。",
+      "code": "import math\ndef signals(history):\n    active=[]\n    n=60\n    avg_t=(n-1)/2.0\n    sxx=sum((k-avg_t)**2 for k in range(n))\n    for ticker,bars in history.items():\n        if len(bars)<n:\n            continue\n        y=[math.log(r[\"close\"]) for r in bars[-n:]]\n        my=sum(y)/n\n        slope=sum((k-avg_t)*(z-my) for k,z in enumerate(y))/sxx\n        resid=[z-my-slope*(k-avg_t) for k,z in enumerate(y)]\n        sse=sum(z*z for z in resid)\n        se=((sse/(n-2))/sxx)**0.5 if sse>0 else 0.0\n        if se>0 and slope/se>2.0:\n            active.append(ticker)\n    return {t:1.0/len(active) for t in active} if active else {}\n",
+      "metrics": null,
+      "equity": null,
+      "dataset": "仅有策略规则、代码和教学算例；未提供任何真实历史收益或统计业绩。",
+      "research": {
+        "mechanism": "对数价格趋势斜率可以估计局部增长方向，t值衡量相对残差波动的线性趋势强度，但金融价格创新高度相关，传统OLS标准误往往不是可靠显著性推断。",
+        "formula": "b=Σ(t−t̄)(logP_t−mean(logP))/Σ(t−t̄)²；t_stat=b/SE(b)；只在t_stat>2时买入。",
+        "derivation": "从最近60个已经发生的收盘价做OLS回归，残差方差按n−2自由度计算，斜率标准误用于策略阈值。",
+        "worked": "若估计斜率为0.002/日、标准误0.0008，则t=2.5，按教学规则形成多头信号。",
+        "validation": "采用区块Bootstrap和HAC检验斜率显著性的有效性，比较纯价格动量基线，避免把OLS的2当成真实p值。",
+        "limitations": "对数价格通常接近随机游走，普通OLS显著性可能虚高；本策略只是统计分数门槛，非正式显著性保证。"
+      }
+    },
+    {
+      "id": "minvar_two",
+      "name": "两资产闭式最小方差配置",
+      "category": "组合优化",
+      "level": "高级",
+      "requirements": "至少2只资产；均需≥41日收盘价",
+      "description": "以前40日收益协方差估计两资产最小方差长仓权重，并裁剪在[0,1]以满足无杠杆、无卖空的资金约束。",
+      "theory": "两资产最小方差优化在只有权重和为1的约束下有简单闭式解。长仓限制需要把无约束权重裁剪到可行区间；资产相关性直接决定结果。",
+      "code": "def signals(history):\n    names=sorted(history)[:2]\n    if len(names)<2 or any(len(history[t])<41 for t in names):\n        return {}\n    series=[]\n    for t in names:\n        c=[bar[\"close\"] for bar in history[t]]\n        series.append([c[i]/c[i-1]-1 for i in range(len(c)-40,len(c))])\n    a,b=series\n    ma=sum(a)/40.0\n    mb=sum(b)/40.0\n    va=sum((x-ma)**2 for x in a)/39.0\n    vb=sum((x-mb)**2 for x in b)/39.0\n    cov=sum((x-ma)*(y-mb) for x,y in zip(a,b))/39.0\n    denom=va+vb-2*cov\n    w=(vb-cov)/denom if denom>1e-12 else 0.5\n    w=max(0.0,min(1.0,w))\n    return {names[0]:w,names[1]:1.0-w}\n",
+      "metrics": null,
+      "equity": null,
+      "dataset": "仅有策略规则、代码和教学算例；未提供任何真实历史收益或统计业绩。",
+      "research": {
+        "mechanism": "两资产最小方差优化在只有权重和为1的约束下有简单闭式解。长仓限制需要把无约束权重裁剪到可行区间；资产相关性直接决定结果。",
+        "formula": "w_A=(σ_B²−cov_AB)/(σ_A²+σ_B²−2cov_AB)；w_B=1−w_A。若无约束权重出界，则按[0,1]裁剪。",
+        "derivation": "将40个已发生的收盘简单收益配对，计算两个样本方差和协方差。在分母接近零时回退等权，避免病态数值权重。",
+        "worked": "若资产A方差0.01、B方差0.04、协方差0，则w_A=0.04/0.05=80%，w_B=20%。",
+        "validation": "与逆波动和等权配置对照，报告协方差稳定性、边界裁剪次数及样本外费后风险。",
+        "limitations": "只配置字母排序最前的两资产；忽略现金和收益预测，若两个资产共同跳跃仍可能亏损。"
+      }
+    },
+    {
+      "id": "sortino_rank",
+      "name": "下行波动调整的多资产筛选",
+      "category": "风险调整选强",
+      "level": "中级",
+      "requirements": "≥61日收盘价；建议至少3只资产",
+      "description": "按照最近60期收益均值与负回报平方均值的比值评分，选择平均收益正且下行风险较小的前两只资产。",
+      "theory": "下行风险调整后的排序可避免用总波动一视同仁地惩罚上涨波动。这里收益目标为零，按均值除负收益二阶矩作简化日度Sortino排序。",
+      "code": "def signals(history):\n    ranked=[]\n    for t,bars in history.items():\n        c=[x[\"close\"] for x in bars]\n        if len(c)<61:\n            continue\n        r=[c[i]/c[i-1]-1 for i in range(len(c)-60,len(c))]\n        mean=sum(r)/60.0\n        downside=(sum(min(0.0,x)**2 for x in r)/60.0)**0.5\n        if mean>0 and downside>1e-9:\n            ranked.append((mean/downside,t))\n    ranked.sort(reverse=True)\n    names=[t for score,t in ranked[:2]]\n    return {t:1.0/len(names) for t in names} if names else {}\n",
+      "metrics": null,
+      "equity": null,
+      "dataset": "仅有策略规则、代码和教学算例；未提供任何真实历史收益或统计业绩。",
+      "research": {
+        "mechanism": "下行风险调整后的排序可避免用总波动一视同仁地惩罚上涨波动。这里收益目标为零，按均值除负收益二阶矩作简化日度Sortino排序。",
+        "formula": "score=mean(r_60)/sqrt(Σmin(r_t,0)²/60)，只保留score>0。",
+        "derivation": "计算严格历史60个日度收盘收益；下行方差零时不贸然给予无限大分数，而是排除该资产。",
+        "worked": "两资产日均收益分别0.1%和0.08%，下行偏差分别0.2%和0.1%，对应分数0.5和0.8，后者排序更高。",
+        "validation": "与Sharpe排名、纯动量排名和低波动Top2比较，关注收益频率、极端亏损与费用敏感性。",
+        "limitations": "简化Sortino评分不提供系统尾部保护，零负收益样本可能来自数据错误或低流动性估值平滑。"
+      }
+    },
+    {
+      "id": "rsi_trend",
+      "name": "趋势过滤下的RSI反弹",
+      "category": "多条件均值回复",
+      "level": "中级",
+      "requirements": "≥51日收盘价",
+      "description": "只在价格位于此前50日均线以上时考虑14期RSI低于40的反弹，尝试避免明显下行趋势中的无条件抄底。",
+      "theory": "短期超卖可能发生在长期上升趋势的回撤阶段，但长期均线也可能过度滞后。该策略明确把两种机制视作联合假说。",
+      "code": "def signals(history):\n    keep=[]\n    for t,bars in history.items():\n        c=[r[\"close\"] for r in bars]\n        if len(c)<51:\n            continue\n        trend=sum(c[-51:-1])/50.0\n        moves=[c[j]-c[j-1] for j in range(len(c)-14,len(c))]\n        gain=sum(max(0.0,v) for v in moves)\n        loss=sum(max(0.0,-v) for v in moves)\n        rsi=100.0 if loss==0 else 100*gain/(gain+loss)\n        if c[-1]>trend and rsi<40:\n            keep.append(t)\n    return {t:1.0/len(keep) for t in keep} if keep else {}\n",
+      "metrics": null,
+      "equity": null,
+      "dataset": "仅有策略规则、代码和教学算例；未提供任何真实历史收益或统计业绩。",
+      "research": {
+        "mechanism": "短期超卖可能发生在长期上升趋势的回撤阶段，但长期均线也可能过度滞后。该策略明确把两种机制视作联合假说。",
+        "formula": "条件一：P_t>mean(P_{t−50:t−1})；条件二：RSI14<40；所有通过者等权。",
+        "derivation": "均线严格使用今日之前50个收盘价，RSI使用截至今日的14次价格差。信号于今日收盘形成，下一交易日开盘才执行。",
+        "worked": "50日历史均值100、今日价格103、RSI为32，满足反弹信号；若价格95则不会抄底。",
+        "validation": "比较单独RSI与单独趋势条件，按市场暴跌阶段做样本外消融、报告错过反弹与换手成本。",
+        "limitations": "均线趋势不具因果保护，极端跳空、停牌和成交不足使次日开盘执行不一定实现。"
+      }
+    },
+    {
+      "id": "liquidity_momentum",
+      "name": "成交金额门槛下的动量配置",
+      "category": "容量与流动性",
+      "level": "中级",
+      "requirements": "≥61日收盘价及有效Volume；所有资产在同一计价货币",
+      "description": "按20日平均估计成交金额过滤低流动性资产，再从过滤后资产中选择60日动量最高的两只多头。",
+      "theory": "成交金额是可交易容量的重要必要信息。只用预测回报筛选容易在低流动性资产上高估净收益，本模型加入最基本的资金可承载性过滤。",
+      "code": "def signals(history):\n    ranked=[]\n    for t,bars in history.items():\n        if len(bars)<61:\n            continue\n        window=bars[-20:]\n        dollar=sum(x[\"close\"]*x[\"volume\"] for x in window)/20.0\n        closes=[x[\"close\"] for x in bars]\n        mom=closes[-1]/closes[-61]-1.0\n        if dollar>=1000000.0 and mom>0:\n            ranked.append((mom,t))\n    ranked.sort(reverse=True)\n    names=[t for score,t in ranked[:2]]\n    return {t:1.0/len(names) for t in names} if names else {}\n",
+      "metrics": null,
+      "equity": null,
+      "dataset": "仅有策略规则、代码和教学算例；未提供任何真实历史收益或统计业绩。",
+      "research": {
+        "mechanism": "成交金额是可交易容量的重要必要信息。只用预测回报筛选容易在低流动性资产上高估净收益，本模型加入最基本的资金可承载性过滤。",
+        "formula": "筛选条件 mean(P_t×Volume_t,20日)≥1,000,000货币单位且60日动量>0，入选Top2等权。",
+        "derivation": "逐资产用最近20日收盘价乘成交量估计近似日成交金额；如果数据中Volume缺失而默认零，则自动不能入选。",
+        "worked": "资产A平均日成交额300万元、60日收益+8%则入选候选；B成交额50万元即便涨20%也被流动性阈值剔除。",
+        "validation": "严格用真实交易金额数据按市场币种归一后验证，增加持仓规模并模拟参与率和冲击成本。",
+        "limitations": "这里固定100万元门槛仅是示例参数，不对不同市场和币种通用；日成交额不等于可保证成交容量。"
+      }
+    },
+    {
+      "id": "vol_spike_riskoff",
+      "name": "短期波动冲击下的风险缩减",
+      "category": "风险预算 / 状态过滤",
+      "level": "中级",
+      "requirements": "≥61日收盘价",
+      "description": "若近期10期均方收益波动相对过去60期基准突然超过1.5倍，则不再满仓，而将正动量资产组合仓位缩减为20%。",
+      "theory": "急剧放大的短期市场波动可能预示流动性与尾部风险上升。本模型把10日实现收益二阶均方根与60日基准比较，并按资产缩放风险敞口。",
+      "code": "def signals(history):\n    signals={}\n    for t,bars in history.items():\n        c=[x[\"close\"] for x in bars]\n        if len(c)<61:\n            continue\n        r=[c[j]/c[j-1]-1.0 for j in range(len(c)-60,len(c))]\n        v10=(sum(x*x for x in r[-10:])/10.0)**0.5\n        v60=(sum(x*x for x in r)/60.0)**0.5\n        if c[-1]>c[-61] and v60>1e-9:\n            signals[t]=0.2 if v10>1.5*v60 else 1.0\n    gross=sum(signals.values())\n    return {t:w/max(1.0,gross) for t,w in signals.items()}\n",
+      "metrics": null,
+      "equity": null,
+      "dataset": "仅有策略规则、代码和教学算例；未提供任何真实历史收益或统计业绩。",
+      "research": {
+        "mechanism": "急剧放大的短期市场波动可能预示流动性与尾部风险上升。本模型把10日实现收益二阶均方根与60日基准比较，并按资产缩放风险敞口。",
+        "formula": "风险倍数k=RMS(r10)/RMS(r60)，若k>1.5且60日动量>0，单资产原始权重降至0.2；组合毛敞口上限1。",
+        "derivation": "先计算已知60日收益序列，得到10和60日价格相对变动二阶均方根；正趋势资产按波动状态给原始权重，再总量归一。",
+        "worked": "资产60日均方波动1%、近10日2%时k=2，风险原始权重从1降至0.2。",
+        "validation": "将状态过滤与全额趋势策略逐项比较，关注危机开始前的信号延迟、交易时的冲击以及冲击后的高波反弹。",
+        "limitations": "波动冲击只能事后被观察，价格跳空已发生后的缩减不能阻止既有损失；多个风险资产同时降至0.2后总体权重可能增加，需按真实资金账本验收。"
+      }
     }
   ]
 }
