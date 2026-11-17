@@ -37,11 +37,11 @@ for(const spec of baseline){
   const id=old.id,x=d.lessons[id];n++;
   assert.equal(hash(originalSnapshot(x,old)),old.hash,id+" historical original content was edited");
   assert(x.v79_note?.startsWith("V79"),id+" new layer absent");
-  assert.equal(x.equations.length,old.counts.equations+2+(/atlas-depth-07-[ij]\.json$/.test(spec.path)?2:0)+(spec.path.endsWith("atlas-depth-07-a.json")?1:0),id+" original V79 and optional V88 equations append");
-  assert.equal(x.derivation.length,old.counts.derivation+2+(/atlas-depth-07-[ij]\.json$/.test(spec.path)?2:0)+(spec.path.endsWith("atlas-depth-07-a.json")?1:0),id+" original V79 and optional V88 derivations append");
-  assert.equal(x.protocol.length,old.counts.protocol+1+(/atlas-depth-07-[ij]\.json$/.test(spec.path)?1:0)+(spec.path.endsWith("atlas-depth-07-a.json")?1:0),id+" original V79 and optional V88 protocols append");
-  assert.equal(x.pitfalls.length,old.counts.pitfalls+1+(/atlas-depth-07-[ij]\.json$/.test(spec.path)?1:0)+(spec.path.endsWith("atlas-depth-07-a.json")?1:0),id+" original V79 and optional V88 limitations append");
-  if(spec.path.endsWith("atlas-depth-07-a.json")){
+  assert.equal(x.equations.length,old.counts.equations+2+(/atlas-depth-07-[ij]\.json$/.test(spec.path)?2:0)+(/(?:atlas-depth-07-a|atlas-depth-08-a|atlas-depth-09-a)\.json$/.test(spec.path)?1:0),id+" original V79 and optional V88 equations append");
+  assert.equal(x.derivation.length,old.counts.derivation+2+(/atlas-depth-07-[ij]\.json$/.test(spec.path)?2:0)+(/(?:atlas-depth-07-a|atlas-depth-08-a|atlas-depth-09-a)\.json$/.test(spec.path)?1:0),id+" original V79 and optional V88 derivations append");
+  assert.equal(x.protocol.length,old.counts.protocol+1+(/atlas-depth-07-[ij]\.json$/.test(spec.path)?1:0)+(/(?:atlas-depth-07-a|atlas-depth-08-a|atlas-depth-09-a)\.json$/.test(spec.path)?1:0),id+" original V79 and optional V88 protocols append");
+  assert.equal(x.pitfalls.length,old.counts.pitfalls+1+(/atlas-depth-07-[ij]\.json$/.test(spec.path)?1:0)+(/(?:atlas-depth-07-a|atlas-depth-08-a|atlas-depth-09-a)\.json$/.test(spec.path)?1:0),id+" original V79 and optional V88 limitations append");
+  if(/(?:atlas-depth-07-a|atlas-depth-08-a|atlas-depth-09-a)\.json$/.test(spec.path)){
    assert(x.derivation.at(-1).startsWith("进阶数学推导："),id+" additional proof missing");
    katex.renderToString(x.equations.at(-1).tex,{throwOnError:true,strict:"error",displayMode:true});
   }
