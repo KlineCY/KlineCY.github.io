@@ -260,7 +260,7 @@ for(const [id,label] of Object.entries(additionalV76FifthCycle)){
  assert(l.pitfalls.at(-1).length>=125,id+" important limitations missing");
  validTex(l.equations.at(-1).tex,true);
 }
-assert.equal(strictTex,118,"Original 90 plus 23 prior and 5 new strict V76 equations must parse");
+assert.equal(strictTex,124,"Original 90, prior 23+5 and six appended independent math expressions must parse");
 near("Posterior collapse noninformative decoder KL",-Math.log(.8)-(-Math.log(.8)),0);
 near("Posterior collapse shifted normal KL",.5*(1**2),.5);
 near("Bellman residual error certificate",.02/(1-.9),.2);
