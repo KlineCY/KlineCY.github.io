@@ -30,12 +30,22 @@ class SixthPassWorkedExamples(unittest.TestCase):
         self.assertEqual({k[:3] for k in LESSONS}, {f"m{i:02d}" for i in range(1, 25)})
         for identity, lesson in LESSONS.items():
             with self.subTest(id=identity):
-                self.assertEqual(len(lesson["equations"]), 5)
+                self.assertGreaterEqual(len(lesson["equations"]), 5)
                 self.assertTrue(lesson.get("revision_note", "").startswith("V36"))
                 self.assertGreaterEqual(len(lesson["worked_example"]), 60)
-                self.assertEqual(len(lesson["derivation"]), 5)
-                self.assertEqual(len(lesson["protocol"]), 5)
+                self.assertGreaterEqual(len(lesson["derivation"]), 5)
+                self.assertGreaterEqual(len(lesson["protocol"]), 5)
                 self.assertEqual(len(lesson["pitfalls"]), 3)
+
+    def test_v36_finance_extensions_preserve_original_five(self):
+        extended = ["m17-c04-p02","m18-c05-p01","m19-c05-p05","m20-c05-p03","m21-c04-p02","m22-c04-p01","m23-c01-p02","m24-c04-p02"]
+        for identity in extended:
+            chapter = LESSONS[identity]
+            self.assertEqual(len(chapter['equations']), 6)
+            self.assertTrue(chapter['equations'][-1]['label'].startswith('进阶推导：'))
+            self.assertGreaterEqual(len(chapter['derivation']), 6)
+            self.assertGreaterEqual(len(chapter['protocol']), 6)
+            self.assertIn('独立推演：', chapter['worked_example'])
 
     def test_one_arithmetic_case_per_topic(self):
         checks = [
