@@ -21,7 +21,7 @@ let sections=0,formulaCount=0,sources=0;
 for(const l of lessons){
  assert(!baseIds.has(l.id)&&!prior.has(l.id),"duplicate course "+l.id);
  assert(l.goal.length>=70&&l.protocol.length>=4,"incomplete learning objective or research protocol "+l.id);
- assert.equal(l.sections.length,["m04-c07-p01","m04-c07-p02"].includes(l.id)?9:7,"all old and expanded generalization sections required "+l.id);
+ assert.equal(l.sections.length,["m04-c07-p01","m04-c07-p02","m23-c07-p01"].includes(l.id)?9:["m09-c07-p01","m09-c07-p02"].includes(l.id)?8:7,"all original and expanded spectral courses required "+l.id);
  assert.equal(new Set(l.sections.map(s=>s.title)).size,l.sections.length,"repeated title "+l.id);
  for(const s of l.sections){
   assert(s.question.length>=12&&s.paragraphs.length>=2&&s.paragraphs.every(p=>p.length>=65),"short explanatory content "+l.id);
@@ -72,6 +72,20 @@ for(const [id,titles] of Object.entries(advancedRiskAndCapacity)){
   for(const f of part.equations)katex.renderToString(f.tex,{throwOnError:true,strict:"error",displayMode:true});
  }
 }
+const newKernelEvidence={
+ "m09-c07-p01":["二次多项式核的显式特征映射与正半定证明"],
+ "m09-c07-p02":["线性核岭回归与原始Ridge的原始—对偶完全等价"],
+ "m23-c07-p01":["样本协方差奇异时的球形收缩与最小特征值闭式","协方差球形收缩怎样改变两资产GMV权重"]
+};
+for(const [id,titles] of Object.entries(newKernelEvidence)){
+ const lesson=lessons.find(l=>l.id===id);
+ for(const title of titles){
+  const part=lesson.sections.find(x=>x.title===title);
+  assert(part&&part.paragraphs.length===2&&part.paragraphs.every(p=>p.length>=95),"incomplete mathematical kernel explanation "+id);
+  assert(part.equations.length===2&&part.worked.length>=105&&part.boundary.length>=85,"kernel/PSD numerical counterexample missing "+id);
+  for(const e of part.equations)katex.renderToString(e.tex,{throwOnError:true,strict:"error",displayMode:true});
+ }
+}
 function near(a,b,t=1e-9){assert(Math.abs(a-b)<t,"numeric mismatch "+a+" vs "+b);}
 near(Math.sqrt(Math.log(400)/400),.12238734153404082);
 near(2*3/Math.sqrt(100),.6);
@@ -88,6 +102,13 @@ near((.04+.0004)/2,.0202);
 near(.5*.04+.5*.0202,.0301);
 near(.5*.0004+.5*.0202,.0103);
 near(25/(25+80),5/21);
+near(4+4+1,9);
+near(1/2,1);
+near(2/2,1);
+near(2*(4/5),1.6);
+near(.2*.04,.008);
+near(1/(.2*.04),125);
+near(.0325/(.0175+.0325),.65);
 near(.95*.02+.05*.5,.044);
 near(.8*.05+.2*.5,.14);
 near((2/.5)**2,16);
