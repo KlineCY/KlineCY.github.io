@@ -131,5 +131,23 @@ close("Gaussian loss VaR",.02*1.96,.0392);
 truth("positive semidefinite shrink",.034>0&&.000508>0);
 truth("Poisson thinning mean",.2*5===1);
 assert(numeric>=35);
+const deeperProbabilityIds=["probability-n0091","probability-n0092","probability-n0093","probability-n0094","probability-n0097","probability-n0098","probability-n0099","probability-n0101","probability-n0102"];
+for(const id of deeperProbabilityIds){
+ const lesson=probability.lessons.find(x=>x.id===id);
+ const newest=lesson?.deep_sections.at(-1);
+ assert(lesson.deep_sections.length>=4,"Original three plus one new full probability proof: "+id);
+ assert(newest.paragraphs.length===2&&newest.paragraphs.every(x=>x.length>=45),"Missing advanced probability explanation: "+id);
+ assert(newest.proof.length>=75&&newest.worked.length>=75&&newest.limitation.length>=40,"Proof, arithmetic or validity boundary incomplete: "+id);
+ assert.equal(newest.formulas.length,2,"Two distinct mathematical relations expected: "+id);
+ for(const f of newest.formulas)katex.renderToString(f.tex,{displayMode:true,throwOnError:true,strict:"error"});
+}
+close("without-replacement probability",15/28,.5357142857142857);
+close("with-replacement probability",(6/8)**2,.5625);
+close("three-way event union",.2+.3+.1-.05-.02-.03+.01,.51);
+close("discrete scenario variance",10.8-1.4**2,8.84);
+close("nonlinear transformed CDF",Math.log(2),.6931471805599453);
+close("Poisson mixture count variance",2+1,3);
+close("Poisson mixture zero",(.5*Math.exp(-1)+.5*Math.exp(-3)),.20883325476965317);
+close("conditional Gaussian tail standardized",(2-.6*2)/Math.sqrt(1-.6**2),1);
 console.log("V93 PASS: 12 new matrix/probability lectures, 36 full proof sections, 108 strict KaTeX expressions, "+numeric+" verified mathematical invariants, preserved 352 historic lessons, total 364/656 completed, responsive CJK formula guards.");
 
