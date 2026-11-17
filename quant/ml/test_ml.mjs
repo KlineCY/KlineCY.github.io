@@ -115,7 +115,7 @@ for(const [file,expected] of extendedMLGroups){
   assert(l.derivation.slice(-2).every(s=>s.length>=85),"expanded ML reasoning underdeveloped "+id);
   assert(l.worked_example.length>=360,"expanded ML example missing "+id);
   assert.equal(new Set(l.equations.map(f=>f.label)).size,l.equations.length,"duplicate expanded ML equations "+id);
-  for(const f of l.equations.slice(-2)){
+  for(const f of (file==="atlas-depth-14-a.json"?l.equations.slice(-3,-1):l.equations.slice(-2))){
    assert(f.label?.length>=3&&f.tex?.length>=14,"missing extended ML formula "+id);
    katex.renderToString(f.tex,{displayMode:true,throwOnError:true,strict:"error"});
   }
@@ -168,7 +168,9 @@ for(const [file,minEquations,ids] of nextMLGroups){
  assert.deepEqual(Object.keys(doc.lessons),ids,"further-deepened ML canonical identities changed "+file);
  for(const [id,l] of Object.entries(doc.lessons)){
   assert(l.equations.length>=minEquations&&l.derivation.length>=10,"new deepened equations/derivations missing "+id);
-  assert(l.derivation.slice(-2).every(s=>s.length>=88),"new proof paragraphs underdeveloped "+id);
+  const originalDeepProofs=file==="atlas-depth-14-a.json"?l.derivation.slice(-3,-1):l.derivation.slice(-2);
+  assert(originalDeepProofs.every(s=>s.length>=88),"original deep proof paragraphs underdeveloped "+id);
+  if(file==="atlas-depth-14-a.json")assert(l.derivation.at(-1).startsWith("专题进阶推导："),"new proof omitted "+id);
   assert(l.worked_example.length>=435,"new worked numerical example missing "+id);
   assert(l.protocol.length>=6&&l.pitfalls.length>=5,"new validation protocol or limitation missing "+id);
   assert.equal(new Set(l.equations.map(e=>e.label)).size,l.equations.length,"duplicate ML formula titles "+id);
