@@ -19,8 +19,8 @@ let units=0,tex=0,sources=0;
 for(const l of rows){
  assert(!priorIds.has(l.id)&&!core.catalog.items.some(x=>x.id===l.id),"duplicate ML lecture ID "+l.id);
  assert(l.goal.length>=70&&l.protocol.length>=4&&l.sources.length>=2);
- assert.equal(l.sections.length,5);
- assert.equal(new Set(l.sections.map(s=>s.title)).size,5);
+ assert.equal(l.sections.length,l.id==="m04-c09-p01"||l.id==="m12-c09-p01"||l.id==="m12-c09-p02"?7:5);
+ assert.equal(new Set(l.sections.map(s=>s.title)).size,l.sections.length);
  for(const s of l.sections){
   assert(s.question?.length>=12&&s.paragraphs.length===2&&s.paragraphs.every(x=>x.length>=55),"incomplete Chinese reasoning "+l.id+" "+s.title);
   assert(s.worked.length>=40&&s.boundary.length>=35,"missing worked quantitative example or caveat "+l.id+" "+s.title);
@@ -47,8 +47,12 @@ assert.equal(new Set(core.catalog.items.map(x=>x.id)).size,770,"duplicate runtim
 for(const id of expected){
  const lesson=core.domains[id.slice(0,3)][id];
  assert(lesson?.html?.includes("atlas-concept-toc"),"not rendered to article "+id);
- assert.equal((lesson.html.match(/class="atlas-concept-unit"/g)||[]).length,5,"depth lost in reader "+id);
+ assert.equal((lesson.html.match(/class="atlas-concept-unit"/g)||[]).length,rows.find(l=>l.id===id).sections.length,"depth lost in reader "+id);
  assert(core.catalog.items.some(x=>x.id===id));
+}
+for(const l of rows.filter(l=>["m04-c09-p01","m12-c09-p01","m12-c09-p02"].includes(l.id)))for(const s of l.sections.slice(5)){
+ assert(s.paragraphs.length===2&&s.paragraphs.every(p=>p.length>=65)&&s.equations.length===2&&s.worked.length>=75&&s.boundary.length>=55,"advanced quantile material incomplete "+l.id);
+ for(const eq of s.equations)katex.renderToString(eq.tex,{throwOnError:true,strict:"error"});
 }
 const close=(a,b,t=1e-9)=>assert(Math.abs(a-b)<t,"arithmetic invariant "+a+" ≠ "+b);
 close(6.8/5,1.36);
@@ -63,6 +67,14 @@ close(Math.ceil(5*.8),4);
 close(Math.sqrt(1000*.05*.95),Math.sqrt(47.5));
 close((1+1+1+1-4)/5,0);
 close(1-.95**20,.6415140775914581);
+close(.75*.25*.4+.25*.75*.6,.1875);
+close((.02+.01)/2,.015);
+close(Math.ceil((9+1)*.9),9);
+close(Math.ceil((4+1)*.8),4);
+close(2-.3,1.7);
+close(5/95,.05263157894736842);
+close(4/9,.4444444444444444);
+close(4/5,.8);
 const html=fs.readFileSync(new URL("index.html",dir),"utf8"),css=fs.readFileSync(new URL("atlas.css",dir),"utf8");
 for(const id of expected)assert(html.includes("#lesson/"+id),"new learning path missing "+id);
 assert(html.includes("atlas.js?v=20261109"));
