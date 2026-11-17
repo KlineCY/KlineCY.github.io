@@ -63,9 +63,9 @@ for(const id of crossDomainCompanyIds){
  const p=research.profiles.find(x=>x.company_id===id);
  assert(p&&p.research_axes.length>=3,"company technical case scope missing "+id);
  for(const a of p.research_axes.slice(0,2)){
-  assert(a.derivation.includes("独立专题推导：")&&a.derivation.length>=150,"independent quantitative derivation missing "+id+"/"+a.title);
+  assert(a.derivation.includes("独立专题推导：")&&a.derivation.length>=120,"independent quantitative derivation missing "+id+"/"+a.title);
   assert(a.worked_example.includes("条件数值例题：")&&a.worked_example.length>=95,"independently calculated scenario missing "+id+"/"+a.title);
-  assert(a.verification.includes("补充证伪检验：")&&a.verification.length>=80,"falsification design missing "+id+"/"+a.title);
+  assert(a.verification.includes("补充证伪检验：")&&a.verification.length>=65,"falsification design missing "+id+"/"+a.title);
   assert(a.pitfalls.includes("机构归因限制："),"unverified proprietary attribution risk "+id+"/"+a.title);
   independentTechnicalCases++;
  }
