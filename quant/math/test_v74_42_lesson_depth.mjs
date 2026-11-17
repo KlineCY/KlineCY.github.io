@@ -65,17 +65,20 @@ for(let k=0;k<modules.length;k++){
     const x=d.lessons[id];
     assert(x.v74_note.startsWith("V74"),id+" new lecture marker missing");
     assert(x.equations.length>=8&&x.derivation.length>=8,id+" insufficient derivations/formulas");
-    assert(x.derivation.slice(-2).every(p=>p.length>=90),id+" thin last explanations");
+    const extra=[0,4].includes(k);
+    assert((extra?x.derivation.slice(-3,-1):x.derivation.slice(-2)).every(p=>p.length>=90),id+" original historical explanations missing");
+    if(extra)assert(x.derivation.at(-1).startsWith("专题进阶推导："),id+" newly appended derivation missing");
     assert(x.protocol.length>=5&&x.pitfalls.length>=4,id+" missing verification/limitations");
     assert(x.worked_example.length>=250,id+" insufficient worked example");
     assert.equal(new Set(x.equations.map(f=>f.label)).size,x.equations.length,id+" repeated equation label");
     assert.equal(new Set(x.protocol).size,x.protocol.length,id+" repeated verification procedure");
     for(const f of x.equations)formula(f.tex);
-    for(const f of x.equations.slice(-2))formula(f.tex,true);
+    for(const f of (extra?x.equations.slice(-3,-1):x.equations.slice(-2)))formula(f.tex,true);
+    if(extra)formula(x.equations.at(-1).tex,true);
     textSafe(x,id);
   }
 }
-assert.equal(strictCount,84,"expected 82 new ML + 2 new math strict formulas");
+assert.equal(strictCount,96,"84 previous strict equations plus twelve new derivation relations");
 let numerical=0;
 function near(label,got,expected,tol=1e-9){
   assert(Number.isFinite(got)&&Number.isFinite(expected)&&Math.abs(got-expected)<=tol,label+": "+got+" != "+expected);
@@ -197,14 +200,16 @@ for(const [id,label] of Object.entries(extension13)){
  const d=modules.find(x=>x.lessons[id]);
  assert(d,"Original ML module missing "+id);
  const l=d.lessons[id];
- assert.equal(l.equations.at(-1).label,label,id+" added mathematical claim missing");
- assert(l.derivation.at(-1).length>=180,id+" full proof compressed");
- assert(l.worked_example.includes("独立推导与数值检验："),id+" numeric worked example missing");
- assert(l.protocol.at(-1).length>=70,id+" verification procedure removed");
- assert(l.pitfalls.at(-1).length>=125,id+" limitations incomplete");
- formula(l.equations.at(-1).tex,true);
+ const shifted=Object.hasOwn(modules[4].lessons,id);
+ const existing=l.equations.at(shifted?-2:-1);
+ assert.equal(existing.label,label,id+" established mathematical claim missing");
+ assert(l.derivation.at(shifted?-2:-1).length>=180,id+" prior proof compressed");
+ assert(l.worked_example.includes("独立推导与数值检验："),id+" original numeric case missing");
+ assert(l.protocol.at(shifted?-2:-1).length>=70,id+" original verification removed");
+ assert(l.pitfalls.at(shifted?-2:-1).length>=125,id+" original limitations missing");
+ formula(existing.tex,true);
 }
-assert.equal(strictCount,102,"Original 84 strict math validations plus 18 new expressions required");
+assert.equal(strictCount,114,"Original 84+18 strict claims and twelve appended formulas verified");
 near("Target-shift bias and noise risk",.03**2+(-.01-.02)**2+.0001,.0019);
 near("Matrix Gram logdet first gradient component",2/6,1/3);
 near("Matrix Gram logdet second gradient component",4/6,2/3);
@@ -258,14 +263,16 @@ for(const [id,label] of Object.entries(completeML14)){
  const d=modules.find(m=>m.lessons[id]);
  assert(d,"Expected ML Atlas lecture not loaded "+id);
  const l=d.lessons[id];
- assert.equal(l.equations.at(-1).label,label,id+" new deep mathematics missing");
- assert(l.derivation.at(-1).length>=170,id+" independent mathematical proof was shortened");
- assert(l.worked_example.includes("独立推导、适用条件与数值例题："),id+" independent example missing");
- assert(l.protocol.at(-1).length>=75,id+" independent validation missing");
- assert(l.pitfalls.at(-1).length>=110,id+" new limiting assumptions missing");
- formula(l.equations.at(-1).tex,true);
+ const shifted=Object.hasOwn(modules[0].lessons,id);
+ const existing=l.equations.at(shifted?-2:-1);
+ assert.equal(existing.label,label,id+" previous mathematical result missing");
+ assert(l.derivation.at(shifted?-2:-1).length>=170,id+" original independent proof shortened");
+ assert(l.worked_example.includes("独立推导、适用条件与数值例题："),id+" previous arithmetic example missing");
+ assert(l.protocol.at(shifted?-2:-1).length>=75,id+" original verification missing");
+ assert(l.pitfalls.at(shifted?-2:-1).length>=110,id+" original limiting assumptions missing");
+ formula(existing.tex,true);
 }
-assert.equal(strictCount,125,"Original 84 plus 18 prior and 23 new strict ML formula checks required");
+assert.equal(strictCount,137,"All original 125 strict expressions and twelve appended equations parse");
 near("Univariate Ridge ill conditioned MSE",(.04**2+.04*.1**2)/(.1**2+.04)**2,.8);
 near("Univariate OLS ill conditioned MSE",.04/.1**2,4);
 near("Infinity bounded adversarial input",.1*(2+1),.3);
