@@ -86,6 +86,174 @@
       "metrics": null,
       "equity": null,
       "dataset": "未提供真实历史回测结果；运行模拟样本或上传CSV后生成。"
+    },
+    {
+      "id": "donchian20",
+      "name": "20日唐奇安上轨突破",
+      "category": "趋势跟踪",
+      "level": "中级",
+      "requirements": "每只资产≥21日收盘价",
+      "description": "以当前可得收盘价突破此前20日最高收盘价作为下一期开仓信号，避免把当前最高值放进同一比较窗口。",
+      "theory": "唐奇安上轨通过过去20个已完成交易日的最高收盘价建立趋势阈值。信号必须在今日收盘后形成，并在下一交易日开盘执行；未设固定仓位以外的复杂止损。",
+      "code": "def signals(history):\n    active=[]\n    for ticker,bars in history.items():\n        c=[row[\"close\"] for row in bars]\n        if len(c)>=21 and c[-1]>max(c[-21:-1]):\n            active.append(ticker)\n    return {t:1.0/len(active) for t in active} if active else {}\n",
+      "metrics": null,
+      "equity": null,
+      "dataset": "仅提供策略规则与可编辑代码；未提供任何真实历史回测成绩。",
+      "research": {
+        "mechanism": "唐奇安上轨通过过去20个已完成交易日的最高收盘价建立趋势阈值。信号必须在今日收盘后形成，并在下一交易日开盘执行；未设固定仓位以外的复杂止损。",
+        "formula": "突破条件 P_t > max(P_{t−20}, …, P_{t−1})；总毛敞口 ∑|w_i| ≤ 1。",
+        "derivation": "若把今日P_t也包含在最高值计算内，严格大于条件永远不成立，所以右端历史窗必须在t−1结束。对所有符合突破条件资产等权，保证无杠杆。",
+        "worked": "若前20日最高收盘价100，今日101，则下一期开仓。若三只资产中两只突破，则两只各持有50%。",
+        "validation": "同时比较无条件等权持有和20/60日动量；在时间外窗口检验突破次数、持仓半衰期、交易费后收益以及涨跌停无法成交情形。",
+        "limitations": "依赖日收盘数据，不能模拟盘中突破挂单、跳空止损或真实次日开盘成交深度。"
+      }
+    },
+    {
+      "id": "bollinger_reversion",
+      "name": "20日布林带均值回复",
+      "category": "均值回复",
+      "level": "中级",
+      "requirements": "每只资产≥20日收盘价",
+      "description": "价格落在过去20日均值下方1.5个样本标准差以外时买入，超过均值上轨则空仓。该规则仅是可检验的逆势示例。",
+      "theory": "均值回复假设价格偏离近期中心后可能出现反弹；但价位本身非平稳，长期单边下跌可能连续触发买入，因此只能以风险受限的假设检验研究。",
+      "code": "def signals(history):\n    selected=[]\n    for ticker,bars in history.items():\n        c=[row[\"close\"] for row in bars]\n        if len(c)<20:\n            continue\n        x=c[-20:]\n        mean=sum(x)/20.0\n        var=sum((v-mean)**2 for v in x)/19.0\n        if var>0 and c[-1] < mean-1.5*var**0.5:\n            selected.append(ticker)\n    return {t:1.0/len(selected) for t in selected} if selected else {}\n",
+      "metrics": null,
+      "equity": null,
+      "dataset": "仅提供策略规则与可编辑代码；未提供任何真实历史回测成绩。",
+      "research": {
+        "mechanism": "均值回复假设价格偏离近期中心后可能出现反弹；但价位本身非平稳，长期单边下跌可能连续触发买入，因此只能以风险受限的假设检验研究。",
+        "formula": "μ_t=20日样本均值，s_t²=∑(P−μ_t)²/19；当(P_t−μ_t)/s_t < −1.5时买入。",
+        "derivation": "样本方差使用n−1分母，仅在s>0时计算标准化偏离。多资产同时产生信号时等权，不强行卖空。",
+        "worked": "窗口均值100，样本标准差4，今日93，则z=(93−100)/4=−1.75，满足逆势入场条件。",
+        "validation": "与随机入场及正向趋势策略配对比较，分市场下跌、震荡和流动性收缩状态检验费后收益及最大回撤。",
+        "limitations": "20日均值非真实公允价值，破位持续下跌时可造成大亏；不具止损和低频价值估计。"
+      }
+    },
+    {
+      "id": "rsi14",
+      "name": "14日RSI超卖反弹",
+      "category": "技术指标",
+      "level": "入门",
+      "requirements": "每只资产≥15日收盘价",
+      "description": "计算最近14次收盘变动的上涨均值和下跌均值，RSI低于30时建立多头；适合检验短期反转而非保证反弹。",
+      "theory": "RSI把收益上行变动相对于总绝对变动的比值缩放到0至100。实现采用14次简单价格差的均值，而非Wilder指数平滑版本，应明确指标定义差异。",
+      "code": "def signals(history):\n    pick=[]\n    for ticker,bars in history.items():\n        c=[row[\"close\"] for row in bars]\n        if len(c)<15:\n            continue\n        changes=[c[j]-c[j-1] for j in range(len(c)-14,len(c))]\n        gain=sum(max(v,0.0) for v in changes)/14.0\n        loss=sum(max(-v,0.0) for v in changes)/14.0\n        rsi=100.0 if loss==0 else 100.0*gain/(gain+loss)\n        if rsi<30.0:\n            pick.append(ticker)\n    return {t:1.0/len(pick) for t in pick} if pick else {}\n",
+      "metrics": null,
+      "equity": null,
+      "dataset": "仅提供策略规则与可编辑代码；未提供任何真实历史回测成绩。",
+      "research": {
+        "mechanism": "RSI把收益上行变动相对于总绝对变动的比值缩放到0至100。实现采用14次简单价格差的均值，而非Wilder指数平滑版本，应明确指标定义差异。",
+        "formula": "RSI=100×AvgGain/(AvgGain+AvgLoss)；AvgGain=Σmax(ΔP,0)/14。",
+        "derivation": "把最近15个收盘价形成14次价差，对正负部分取均值。若没有下跌，则RSI定义为100；若全部无变动，为避免0/0定义为100，空仓。",
+        "worked": "最近14次价格差总涨幅为2、总跌幅为8时，RSI=100×2/(2+8)=20，产生下期多头信号。",
+        "validation": "控制同样换手率和持仓期限，比较30、20与固定分位阈值，所有阈值须在验证期锁定。",
+        "limitations": "单边下跌可能长期超卖并持续亏损；不同RSI平滑版本结果不相同，当前引擎不实现实际盘中止损。"
+      }
+    },
+    {
+      "id": "macd_12_26",
+      "name": "MACD 12/26/9趋势交叉",
+      "category": "趋势跟踪",
+      "level": "中级",
+      "requirements": "每只资产≥40日收盘价",
+      "description": "两条不同半衰期EMA形成MACD差异，通过9日EMA信号线比较识别顺势状态。只使用历史及当前收盘价。",
+      "theory": "EMA对较新价格赋更高权重，因此短EMA与长EMA之差可以表达趋势速度和方向。MACD值受到价格水平影响，不可直接横截面比较不同标的绝对差。",
+      "code": "def signals(history):\n    def ema(xs,n):\n        a=2.0/(n+1)\n        v=xs[0]\n        out=[]\n        for x in xs:\n            v=a*x+(1-a)*v\n            out.append(v)\n        return out\n    chosen=[]\n    for ticker,bars in history.items():\n        c=[row[\"close\"] for row in bars]\n        if len(c)<40:\n            continue\n        f=ema(c,12)\n        s=ema(c,26)\n        mac=[x-y for x,y in zip(f,s)]\n        sig=ema(mac,9)\n        if mac[-1]>sig[-1] and c[-1]>s[-1]:\n            chosen.append(ticker)\n    return {t:1.0/len(chosen) for t in chosen} if chosen else {}\n",
+      "metrics": null,
+      "equity": null,
+      "dataset": "仅提供策略规则与可编辑代码；未提供任何真实历史回测成绩。",
+      "research": {
+        "mechanism": "EMA对较新价格赋更高权重，因此短EMA与长EMA之差可以表达趋势速度和方向。MACD值受到价格水平影响，不可直接横截面比较不同标的绝对差。",
+        "formula": "EMA_t=αP_t+(1−α)EMA_{t−1}，α=2/(n+1)；MACD=EMA12−EMA26。",
+        "derivation": "初始EMA取窗口第一个价格而非完整无穷历史，指标前40日只用于预热。若MACD高于9期自身EMA且价格高于EMA26则持有。",
+        "worked": "若短EMA为103、长EMA为100，MACD=3，信号EMA为2.2且现价104，则满足趋势持有条件。",
+        "validation": "比较相同时间窗口的简单均线和滚动回归趋势，报告交易频率、初始化敏感度和净值。",
+        "limitations": "EMA初始化引起初期偏差，波动反复时来回交易，不能从MACD拟合图推断未来价格因果机制。"
+      }
+    },
+    {
+      "id": "time_series_vol",
+      "name": "时间序列动量与波动目标",
+      "category": "CTA / 风险预算",
+      "level": "高级",
+      "requirements": "每只资产≥61日收盘价",
+      "description": "以最近60日动量决定方向，以最近20日收益波动率约束目标仓位，采用长仓或现金而非假设免费杠杆。",
+      "theory": "先按历史趋势判断是否承担多头风险，再按年化预测标准差估计目标波动仓位。多资产合计毛敞口若超过1，统一缩减以符合演示引擎禁用杠杆要求。",
+      "code": "def signals(history):\n    raw={}\n    for ticker,bars in history.items():\n        c=[row[\"close\"] for row in bars]\n        if len(c)<61 or c[-61]<=0:\n            continue\n        if c[-1]/c[-61]-1 <= 0:\n            continue\n        r=[c[j]/c[j-1]-1 for j in range(len(c)-20,len(c))]\n        avg=sum(r)/20.0\n        vol=(sum((z-avg)**2 for z in r)/19.0)**0.5\n        raw[ticker]=min(1.0,0.12/(vol*252**0.5)) if vol>0 else 0.0\n    gross=sum(abs(w) for w in raw.values())\n    return {t:w/max(1.0,gross) for t,w in raw.items() if w>0}\n",
+      "metrics": null,
+      "equity": null,
+      "dataset": "仅提供策略规则与可编辑代码；未提供任何真实历史回测成绩。",
+      "research": {
+        "mechanism": "先按历史趋势判断是否承担多头风险，再按年化预测标准差估计目标波动仓位。多资产合计毛敞口若超过1，统一缩减以符合演示引擎禁用杠杆要求。",
+        "formula": "m60=P_t/P_{t−60}−1；σ20=std(r_{t−19:t})√252；w_i∝min(1,12%/σ20)。",
+        "derivation": "先用61个日价产生60期动量，再取20个有效的每日收盘收益形成波动估计。组合超限时进行全体缩放，不改变相对风格。",
+        "worked": "某资产年化预估波动24%、60日动量为正，独立目标权重12%/24%=50%；如果两只资产都满足且各目标50%，总敞口100%。",
+        "validation": "对不同波动目标与训练期长度做滚动验证，分离买入信号、仓位缩放与费用贡献，检查尾部波动率突变。",
+        "limitations": "用日收盘收益测算而在次日开盘至再次开盘持有，收益定义不完全一致；不含真实期货乘数和保证金。"
+      }
+    },
+    {
+      "id": "inverse_vol",
+      "name": "30日逆波动率等权风险近似",
+      "category": "资产配置",
+      "level": "中级",
+      "requirements": "每只资产≥31日收盘价",
+      "description": "用日回报波动率倒数分配权重，构成独立于动量方向的风险分散基准。该方法不是严格考虑相关性的风险平价。",
+      "theory": "逆波动权重优先降低高波动资产资金份额。没有纳入收益相关性、因子Beta和交易可行性，因此只是风险平价的简单比较基准。",
+      "code": "def signals(history):\n    scores={}\n    for ticker,bars in history.items():\n        c=[row[\"close\"] for row in bars]\n        if len(c)<31:\n            continue\n        r=[c[j]/c[j-1]-1 for j in range(len(c)-30,len(c))]\n        mean=sum(r)/30.0\n        sd=(sum((x-mean)**2 for x in r)/29.0)**0.5\n        if sd>1e-8:\n            scores[ticker]=1.0/sd\n    total=sum(scores.values())\n    return {t:v/total for t,v in scores.items()} if total else {}\n",
+      "metrics": null,
+      "equity": null,
+      "dataset": "仅提供策略规则与可编辑代码；未提供任何真实历史回测成绩。",
+      "research": {
+        "mechanism": "逆波动权重优先降低高波动资产资金份额。没有纳入收益相关性、因子Beta和交易可行性，因此只是风险平价的简单比较基准。",
+        "formula": "w_i=(1/σ_i)/Σ_j(1/σ_j)；Σ_iw_i=1。",
+        "derivation": "每只资产以30个已知收盘收益估计样本标准差，忽略波动为零或数据不足资产，所有有效资产按倒数归一。",
+        "worked": "两资产日波动分别1%和2%，风险近似资金权重为2/3和1/3，二者在相关性为0时个体波动贡献相同，但有相关性时不能概括为所有风险贡献相等。",
+        "validation": "对比等权与协方差收缩最小方差，报告滚动窗口误差、行业共同风险、费用与回撤。",
+        "limitations": "波动低不意味着未来安全，低波债券可能有信用跳跃和非线性久期风险。"
+      }
+    },
+    {
+      "id": "cross_strength_20_60",
+      "name": "20/60日横截面强势资产筛选",
+      "category": "股票与ETF选强",
+      "level": "中级",
+      "requirements": "至少3只资产；每只≥61个收盘价",
+      "description": "在具有正60日动量的资产中按20日动量排序，持有前两只，避免对不同资产的价格绝对水平排序。",
+      "theory": "将中期与短期动量各赋50%权重形成横截面得分，筛掉长期趋势为负资产再持有最强两只。分母使用各资产自身历史价格，不混淆美元股价与百分比收益。",
+      "code": "def signals(history):\n    ranked=[]\n    for ticker,bars in history.items():\n        c=[row[\"close\"] for row in bars]\n        if len(c)<61 or c[-61]<=0 or c[-21]<=0:\n            continue\n        m60=c[-1]/c[-61]-1.0\n        m20=c[-1]/c[-21]-1.0\n        if m60>0:\n            ranked.append((0.5*m60+0.5*m20,ticker))\n    ranked.sort(reverse=True)\n    names=[t for score,t in ranked[:2]]\n    return {t:1.0/len(names) for t in names} if names else {}\n",
+      "metrics": null,
+      "equity": null,
+      "dataset": "仅提供策略规则与可编辑代码；未提供任何真实历史回测成绩。",
+      "research": {
+        "mechanism": "将中期与短期动量各赋50%权重形成横截面得分，筛掉长期趋势为负资产再持有最强两只。分母使用各资产自身历史价格，不混淆美元股价与百分比收益。",
+        "formula": "score_i=0.5(P_t/P_{t−60}−1)+0.5(P_t/P_{t−20}−1)；若m60≤0不入选。",
+        "derivation": "每次只用各资产截至信号日已完成收盘数据。排序中的同分情况由股票代码次序决定，不使用后续收益。",
+        "worked": "资产A的60/20日收益分别10%/4%，得分7%；资产B分别5%/8%，得分6.5%，A排名更前。",
+        "validation": "使用不同持有期和换手成本进行独立前向比较，控制股票停牌、ETF历史样本选择和真实可交易性。",
+        "limitations": "无行业中性和估值约束，可能在资产持续下跌时持有现金，不能保证任何特定市场的收益。"
+      }
+    },
+    {
+      "id": "defensive_dual",
+      "name": "绝对动量过滤的双动量配置",
+      "category": "资产配置 / 风险开关",
+      "level": "中级",
+      "requirements": "至少2只资产；每只≥61个收盘价",
+      "description": "从60日绝对动量为正的资产里选择动量最高者。如果所有候选动量都为负，则保持现金，避免强制满仓。",
+      "theory": "绝对动量控制是否持有风险资产，相对动量决定在候选中选择哪一个。该模式没有独立国债或货币市场数据，现金在本引擎中视作零收益而非赚取无风险利率。",
+      "code": "def signals(history):\n    scores=[]\n    for ticker,bars in history.items():\n        c=[row[\"close\"] for row in bars]\n        if len(c)<61 or c[-61]<=0:\n            continue\n        m=c[-1]/c[-61]-1.0\n        if m>0:\n            scores.append((m,ticker))\n    if not scores:\n        return {}\n    scores.sort(reverse=True)\n    return {scores[0][1]:1.0}\n",
+      "metrics": null,
+      "equity": null,
+      "dataset": "仅提供策略规则与可编辑代码；未提供任何真实历史回测成绩。",
+      "research": {
+        "mechanism": "绝对动量控制是否持有风险资产，相对动量决定在候选中选择哪一个。该模式没有独立国债或货币市场数据，现金在本引擎中视作零收益而非赚取无风险利率。",
+        "formula": "i*=argmax_i m60_i，若max_i m60_i>0，w_i*=1；否则w=0。",
+        "derivation": "计算每个ETF历史60日总回报，正值候选才参与排序；任何一天最多持有一只标的且不加杠杆。",
+        "worked": "若三资产60日回报为8%、2%、−5%，持有第一个100%；若全部为负则空仓。",
+        "validation": "与单资产60日趋势和长期持有等权基准比较，重点测试集中度、空仓时间与换手成本。",
+        "limitations": "只持一资产风险集中；现金不计利息，策略净值对零利率假设敏感。"
+      }
     }
   ]
 }
