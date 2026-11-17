@@ -276,6 +276,25 @@ for(const [name,nextName,filenames] of [
   assert(actual.every(l=>l.deep_sections.at(-1).formulas.length>=1),"Reader dropped extended formula "+filename);
  }
 }
+const finalDepthTargets={
+  "mlmath-n0476": "因果注意力的全遮罩行：归一化定义与数值下溢",
+  "mlmath-n0477": "不规则交易日上的连续时间位置编码与时间距离上界",
+  "mlmath-n0479": "策略熵正则化的二元Softmax梯度与探索强度",
+  "mlmath-n0480": "GAE时间递推中的真实终止与采样截断"
+};
+for(const [id,title] of Object.entries(finalDepthTargets)){
+ const lesson=newest.find(l=>l.id===id);
+ assert(lesson,"original complete lecture absent "+id);
+ const section=lesson.deep_sections.find(s=>s.title===title);
+ assert(section,"new full proof missing "+title);
+ assert(section.paragraphs.length===2&&section.paragraphs.every(p=>p.length>=85),"weak mathematical explanation "+id);
+ assert(section.formulas.length===2&&section.proof.length>=135&&section.worked.length>=105&&section.limitation.length>=75,"missing exact derivation or example "+id);
+ for(const equation of section.formulas)formula(equation.tex,id+" advanced proof");
+}
+near("masked attention weight",Math.exp(2)/(Math.exp(2)+Math.exp(1)),.7310585786300049);
+near("continuous time position",2*Math.sin(Math.PI/4),Math.SQRT2);
+near("entropy gradient",-.1875*Math.log(3),-.2059897993900958);
+near("GAE two TD residuals",1+.9*.95*2,2.71);
 console.log("V102 PASS",newest.length,"new lessons;",all.length,"total;",
  mathCount,"strict KaTeX;",deepCount,"proof chapters;",deepChars,"deep prose chars;",
  checks,"independent numerics;",linkCount,"connected knowledge links; machine learning mathematics 36/36.");
