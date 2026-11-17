@@ -590,6 +590,174 @@
         "validation": "将状态过滤与全额趋势策略逐项比较，关注危机开始前的信号延迟、交易时的冲击以及冲击后的高波反弹。",
         "limitations": "波动冲击只能事后被观察，价格跳空已发生后的缩减不能阻止既有损失；多个风险资产同时降至0.2后总体权重可能增加，需按真实资金账本验收。"
       }
+    },
+    {
+      "id": "ewma_risk",
+      "name": "EWMA指数加权波动率目标",
+      "category": "风险预算 / EWMA",
+      "level": "高级",
+      "requirements": "≥61日收盘价",
+      "description": "使用风险因子波动率的指数加权估计分配多头仓位，短期波动冲击在该估计里获得更高权重。",
+      "theory": "EWMA方差通过给近期平方收益更高权重响应风险状态，适合对比简单滚动样本标准差。价格风险目标设为年化12%，若多资产合计超限则统一缩放。",
+      "code": "def signals(history):\n    scores={}\n    lam=0.94\n    for t,bars in history.items():\n        c=[z[\"close\"] for z in bars]\n        if len(c)<61:\n            continue\n        r=[c[i]/c[i-1]-1.0 for i in range(len(c)-60,len(c))]\n        h=sum(x*x for x in r)/60.0\n        for x in r:\n            h=lam*h+(1-lam)*x*x\n        vol=(252*h)**0.5\n        if vol>1e-6 and c[-1]>c[-61]:\n            scores[t]=min(1.0,0.12/vol)\n    gross=sum(scores.values())\n    return {t:w/max(1.0,gross) for t,w in scores.items()}\n",
+      "metrics": null,
+      "equity": null,
+      "dataset": "策略原理与合成测试代码；未声称取得任何真实历史回报或Sharpe。",
+      "research": {
+        "mechanism": "EWMA方差通过给近期平方收益更高权重响应风险状态，适合对比简单滚动样本标准差。价格风险目标设为年化12%，若多资产合计超限则统一缩放。",
+        "formula": "h_t=0.94h_{t−1}+0.06r_t²；σ_ann=sqrt(252h_t)；目标w=min(1,12%/σ_ann)。",
+        "derivation": "用历史60期平方收益初始化递推方差，逐个已发生交易日更新EWMA；动量为正时设置多头目标，否则空仓。",
+        "worked": "某资产EWMA年化波动24%，则单资产原始目标权重0.12/0.24=50%；风险组合若超限仍缩减总额。",
+        "validation": "对比20日样本波动和EWMA风险模型，以费用后收益和突发波动期最大损失为标准评价。",
+        "limitations": "EWMA平方收益包含均值项且不是完整GARCH，无法保证下一交易日开盘波动与历史日收盘频率一致。"
+      }
+    },
+    {
+      "id": "garch_vol_target",
+      "name": "GARCH(1,1)条件方差风险预算",
+      "category": "波动模型 / CTA",
+      "level": "高级",
+      "requirements": "≥81日收盘价",
+      "description": "使用固定αβ参数和历史方差初始化GARCH递推，预测下一时点条件波动率并按正向趋势配置多头风险。",
+      "theory": "GARCH按历史冲击平方和前期条件方差预测下一期风险。这里α、β均为预先给定的示例参数，不属于对任意资产自动最大似然拟合。",
+      "code": "def signals(history):\n    weights={}\n    alpha=0.10\n    beta=0.85\n    for t,bars in history.items():\n        c=[x[\"close\"] for x in bars]\n        if len(c)<81 or c[-61]<=0:\n            continue\n        r=[c[i]/c[i-1]-1 for i in range(len(c)-80,len(c))]\n        mean=sum(r)/80.0\n        var=sum((x-mean)**2 for x in r)/79.0\n        if var<1e-12:\n            continue\n        omega=(1-alpha-beta)*var\n        h=var\n        for ret in r:\n            eps=ret-mean\n            h=omega+alpha*eps*eps+beta*h\n        annual=(252*h)**0.5\n        if annual>0 and c[-1]/c[-61]>1.0:\n            weights[t]=min(1.0,0.12/annual)\n    gross=sum(weights.values())\n    return {t:w/max(1,gross) for t,w in weights.items()}\n",
+      "metrics": null,
+      "equity": null,
+      "dataset": "策略原理与合成测试代码；未声称取得任何真实历史回报或Sharpe。",
+      "research": {
+        "mechanism": "GARCH按历史冲击平方和前期条件方差预测下一期风险。这里α、β均为预先给定的示例参数，不属于对任意资产自动最大似然拟合。",
+        "formula": "h_{t+1}=ω+0.10ε_t²+0.85h_t，ω=(1−0.10−0.85)×样本方差；w=min(1,12%/σ_ann)。",
+        "derivation": "首先用过去80个收盘收益计算样本方差，再用固定参数递推条件方差并转换为年化波动；正60日动量才建立多头。",
+        "worked": "若样本长期日方差0.0004，α=0.1、β=0.85，则ω=0.05×0.0004=0.00002；后续条件风险依实际新冲击变化。",
+        "validation": "与EWMA和历史波动目标做同期间消融，严格使用训练期风险参数，不能以测试期重新选择最优αβ。",
+        "limitations": "固定参数非所有资产适用，条件方差递推可能因结构变化漂移；不构成真正估计GARCH的全部程序。"
+      }
+    },
+    {
+      "id": "ridge_ar1",
+      "name": "正则化AR(1)收益预测",
+      "category": "机器学习 / 回归",
+      "level": "高级",
+      "requirements": "≥63日收盘价",
+      "description": "从历史收益学习下一日收益对上一日收益的线性依赖，Ridge收缩斜率后仅持有预测下一期收益为正的资产。",
+      "theory": "AR(1)将最新日收益作为下一日收益的线性预测特征，Ridge给斜率L2收缩以减少低信噪比样本的极端系数。",
+      "code": "def signals(history):\n    picks=[]\n    for t,bars in history.items():\n        c=[r[\"close\"] for r in bars]\n        if len(c)<63:\n            continue\n        rr=[c[i]/c[i-1]-1.0 for i in range(len(c)-62,len(c))]\n        x=rr[:-1]\n        y=rr[1:]\n        mx=sum(x)/len(x)\n        my=sum(y)/len(y)\n        sx=sum((v-mx)**2 for v in x)\n        beta=sum((a-mx)*(b-my) for a,b in zip(x,y))/(sx+0.001)\n        pred=my+beta*(rr[-1]-mx)\n        if pred>0:\n            picks.append((pred,t))\n    picks.sort(reverse=True)\n    names=[t for score,t in picks[:2]]\n    return {t:1.0/len(names) for t in names} if names else {}\n",
+      "metrics": null,
+      "equity": null,
+      "dataset": "策略原理与合成测试代码；未声称取得任何真实历史回报或Sharpe。",
+      "research": {
+        "mechanism": "AR(1)将最新日收益作为下一日收益的线性预测特征，Ridge给斜率L2收缩以减少低信噪比样本的极端系数。",
+        "formula": "r_{t+1}=a+br_t+ε；b=Σ(x−x̄)(y−ȳ)/(Σ(x−x̄)²+λ)，这里λ=0.001。",
+        "derivation": "训练数据按历史相邻收益对x_i=r_i、y_i=r_{i+1}构建，最新r_t只用于预测未来而不被用作已知标签，保持时间方向。",
+        "worked": "若训练得到历史平均收益0、收缩斜率b=0.2，今日收益+1%，则简化预测下一日收益+0.2%。",
+        "validation": "对比无正则AR(1)和常数均值预测，检查滚动回归误差、预测系数漂移和费用后收益。",
+        "limitations": "训练目标是次日收盘收益，回测持仓收益为下一交易日开盘至次开盘收益，两者存在基差，应单独评价。"
+      }
+    },
+    {
+      "id": "variance_ratio_filter",
+      "name": "Variance Ratio随机游走偏离过滤",
+      "category": "序列相关 / 趋势",
+      "level": "高级",
+      "requirements": "≥81日收盘价",
+      "description": "使用五期重叠累计对数收益方差与单期收益方差之比判断近期是否具有趋势型正相关，仅在正动量和VR大于1.15时持仓。",
+      "theory": "Variance Ratio比较多期收益方差和单期收益方差按期数线性放大的关系，趋势型序列相关可能使VR大于1。实际正式统计检验需调整重叠收益与异方差。",
+      "code": "import math\ndef signals(history):\n    chosen=[]\n    for t,bars in history.items():\n        c=[x[\"close\"] for x in bars]\n        if len(c)<81:\n            continue\n        r=[math.log(c[i]/c[i-1]) for i in range(len(c)-80,len(c))]\n        mu=sum(r)/80.0\n        v1=sum((x-mu)**2 for x in r)/79.0\n        block=[sum(r[i:i+5]) for i in range(len(r)-4)]\n        m5=sum(block)/len(block)\n        v5=sum((x-m5)**2 for x in block)/(len(block)-1)\n        vr=v5/(5*v1) if v1>1e-12 else 0.0\n        if vr>1.15 and c[-1]>c[-61]:\n            chosen.append(t)\n    return {t:1.0/len(chosen) for t in chosen} if chosen else {}\n",
+      "metrics": null,
+      "equity": null,
+      "dataset": "策略原理与合成测试代码；未声称取得任何真实历史回报或Sharpe。",
+      "research": {
+        "mechanism": "Variance Ratio比较多期收益方差和单期收益方差按期数线性放大的关系，趋势型序列相关可能使VR大于1。实际正式统计检验需调整重叠收益与异方差。",
+        "formula": "VR(5)=Var(五期累计对数收益)/(5Var(一期对数收益))；VR>1.15且60日动量>0时买入。",
+        "derivation": "将过去80期日对数收益组成76个重叠五期和，分别估计方差，再除以单期方差五倍，最后结合长期方向条件。",
+        "worked": "如果单期收益方差0.0001、五期累计收益方差0.0007，则VR=0.0007/(5×0.0001)=1.4。",
+        "validation": "应与纯60日动量比较，并采用异方差稳健Lo–MacKinlay式检验在训练阶段评估VR，不能仅用阈值当统计证据。",
+        "limitations": "重叠五期样本高度相关，直接当独立样本估计置信度会误导；市场状态变化可使VR迅速失效。"
+      }
+    },
+    {
+      "id": "momentum_diversified",
+      "name": "正动量资产的低相关配对配置",
+      "category": "跨资产相关 / 分散",
+      "level": "高级",
+      "requirements": "至少2只资产，均≥61日收盘价",
+      "description": "先选过去60日动量最高的正收益资产，再从其它正动量资产中选与第一资产最近40日收益相关性最低者，避免只按动量叠加共性风险。",
+      "theory": "相同趋势收益资产可能暴露于同一市场因子，加入相关性过滤有机会改善组合分散。只优化两只资产的历史相关，不能保证压力期不会共同亏损。",
+      "code": "def signals(history):\n    data={}\n    scores=[]\n    for t,bars in history.items():\n        c=[r[\"close\"] for r in bars]\n        if len(c)<61:\n            continue\n        mom=c[-1]/c[-61]-1\n        if mom<=0:\n            continue\n        rr=[c[i]/c[i-1]-1 for i in range(len(c)-40,len(c))]\n        data[t]=rr\n        scores.append((mom,t))\n    scores.sort(reverse=True)\n    if not scores:\n        return {}\n    first=scores[0][1]\n    if len(scores)==1:\n        return {first:1.0}\n    def corr(a,b):\n        ma=sum(a)/len(a);mb=sum(b)/len(b)\n        da=sum((x-ma)**2 for x in a)\n        db=sum((y-mb)**2 for y in b)\n        if da*db<1e-16:\n            return 1.0\n        return sum((x-ma)*(y-mb) for x,y in zip(a,b))/(da*db)**0.5\n    second=min([t for score,t in scores[1:]],key=lambda t:corr(data[first],data[t]))\n    return {first:0.5,second:0.5}\n",
+      "metrics": null,
+      "equity": null,
+      "dataset": "策略原理与合成测试代码；未声称取得任何真实历史回报或Sharpe。",
+      "research": {
+        "mechanism": "相同趋势收益资产可能暴露于同一市场因子，加入相关性过滤有机会改善组合分散。只优化两只资产的历史相关，不能保证压力期不会共同亏损。",
+        "formula": "先取60日正动量最大资产A；第二资产B=argmin_{i≠A,动量>0}Corr(r_A40,r_i40)，各占50%。",
+        "derivation": "使用最近40日同频收益对所有候选计算相关性，选择低相关正动量资产；如果只存在一个候选则持有100%。",
+        "worked": "资产A动量最高，B与A相关0.2、C与A相关0.9，则优先A+B各50%，而非机械选择第二高动量C。",
+        "validation": "对比动量Top2、等权和风险预算约束组合，报告压力期相关性变化、费后净值和不稳定选股。",
+        "limitations": "仅使用历史样本相关，未估计实时尾部共损和行业拥挤；小样本相关性排名噪声很大。"
+      }
+    },
+    {
+      "id": "beta_neutral_two",
+      "name": "基于第三资产市场代理的Beta对冲配对",
+      "category": "风险对冲 / CAPM",
+      "level": "高级",
+      "requirements": "至少3只资产且≥61日收盘价",
+      "description": "以前两个资产作为多空交易腿、第三资产作为共同市场代理，估计各自Beta并按比例设置多空资金敞口，以消除线性市场Beta近似。",
+      "theory": "市场中性对冲应以风险因子载荷中性为目标，而不是简单多空各一半。Beta通过过去40期收益对第三资产市场代理回归估计。",
+      "code": "def signals(history):\n    names=sorted(history)[:3]\n    if len(names)<3 or any(len(history[t])<61 for t in names):\n        return {}\n    rets={}\n    for t in names:\n        c=[r[\"close\"] for r in history[t]]\n        rets[t]=[c[i]/c[i-1]-1 for i in range(len(c)-40,len(c))]\n    m=rets[names[2]]\n    mm=sum(m)/40.0\n    vm=sum((x-mm)**2 for x in m)\n    if vm<1e-12:\n        return {}\n    beta={}\n    for t in names[:2]:\n        a=rets[t];ma=sum(a)/40.0\n        beta[t]=sum((x-ma)*(y-mm) for x,y in zip(a,m))/vm\n    a,b=names[:2]\n    if beta[a]<=0 or beta[b]<=0:\n        return {}\n    ca=[r[\"close\"] for r in history[a]]\n    cb=[r[\"close\"] for r in history[b]]\n    if ca[-1]/ca[-21]<=cb[-1]/cb[-21]:\n        return {}\n    wa=beta[b]/(beta[a]+beta[b])\n    wb=beta[a]/(beta[a]+beta[b])\n    return {a:wa,b:-wb}\n",
+      "metrics": null,
+      "equity": null,
+      "dataset": "策略原理与合成测试代码；未声称取得任何真实历史回报或Sharpe。",
+      "research": {
+        "mechanism": "市场中性对冲应以风险因子载荷中性为目标，而不是简单多空各一半。Beta通过过去40期收益对第三资产市场代理回归估计。",
+        "formula": "令w_Aβ_A+w_Bβ_B=0且|w_A|+|w_B|=1，β_A,β_B>0，则w_A=β_B/(β_A+β_B)、w_B=−β_A/(β_A+β_B)。",
+        "derivation": "首先估计两个候选腿相对第三资产的历史回归Beta，判断A最近20日表现强于B，才建立对应的Beta对冲多空。",
+        "worked": "若β_A=1.5、β_B=0.5，则多A权重0.25、空B权重−0.75，净市场Beta约0.25×1.5−0.75×0.5=0。",
+        "validation": "应将第三资产改为真实可交易市场风险因子代理并测试残余Beta、短券可得性、保证金和融资成本。",
+        "limitations": "仅按字母顺序选择前三个Ticker，第三资产不一定是合理市场指数；短端借券与因子残差风险仍存在。"
+      }
+    },
+    {
+      "id": "ewma_minvar_two",
+      "name": "EWMA协方差下的双资产最小方差",
+      "category": "动态协方差",
+      "level": "高级",
+      "requirements": "至少2只资产，各自≥41日收盘价",
+      "description": "使用指数衰减权重估计最近40期收益协方差矩阵，再计算双资产长仓最小方差权重；较新数据有更高权重。",
+      "theory": "指数衰减使近期收益对方差和协方差有更大影响。这里保留全额多头，不引入期货杠杆、融资与短卖。",
+      "code": "def signals(history):\n    names=sorted(history)[:2]\n    if len(names)<2 or any(len(history[t])<41 for t in names):\n        return {}\n    rr=[]\n    for t in names:\n        c=[x[\"close\"] for x in history[t]]\n        rr.append([c[j]/c[j-1]-1 for j in range(len(c)-40,len(c))])\n    x,y=rr\n    decay=0.94\n    wg=[(1-decay)*decay**k for k in range(39,-1,-1)]\n    sw=sum(wg)\n    wg=[w/sw for w in wg]\n    mx=sum(w*v for w,v in zip(wg,x))\n    my=sum(w*v for w,v in zip(wg,y))\n    va=sum(w*(v-mx)**2 for w,v in zip(wg,x))\n    vb=sum(w*(v-my)**2 for w,v in zip(wg,y))\n    cov=sum(w*(u-mx)*(v-my) for w,u,v in zip(wg,x,y))\n    den=va+vb-2*cov\n    wa=(vb-cov)/den if den>1e-12 else 0.5\n    wa=min(1,max(0,wa))\n    return {names[0]:wa,names[1]:1-wa}\n",
+      "metrics": null,
+      "equity": null,
+      "dataset": "策略原理与合成测试代码；未声称取得任何真实历史回报或Sharpe。",
+      "research": {
+        "mechanism": "指数衰减使近期收益对方差和协方差有更大影响。这里保留全额多头，不引入期货杠杆、融资与短卖。",
+        "formula": "ω_t∝(1−λ)λ^{40−t}，Σ_EWMA=Σω_t(r_t−μ)(r_t−μ)'；w_A=(var_B−cov)/(var_A+var_B−2cov)。",
+        "derivation": "用过去40个有效收益标准化指数权重求均值及协方差，再套用双资产最小方差闭式并裁剪至[0,1]。",
+        "worked": "若动态估计方差为var_A=0.01、var_B=0.04、cov=0，则A权重80%、B20%；实际协方差变化会改变结果。",
+        "validation": "与普通样本协方差最小方差、逆波动配置比较，记录风险频率、相关突变和费后表现。",
+        "limitations": "EWMA参数λ=0.94仅为示例，样本协方差强相关时优化器仍可能出现边界集中和高换手。"
+      }
+    },
+    {
+      "id": "rolling_sharpe_rank",
+      "name": "滚动Sharpe方向过滤与Top2",
+      "category": "横截面风险调整",
+      "level": "中级",
+      "requirements": "至少2只资产、每只≥61日收盘价",
+      "description": "根据最近60期收益均值与样本波动率的比值排序，筛选正均值资产并持有前两只，形成明确的风险调整动量基准。",
+      "theory": "风险调整排名与单纯收益动量不同：同样正均值的资产如果波动很高，其单位波动回报不一定更高。该分数属于历史滚动Sharpe代理，不代表未来真实Sharpe。",
+      "code": "def signals(history):\n    ranked=[]\n    for t,bars in history.items():\n        c=[v[\"close\"] for v in bars]\n        if len(c)<61:\n            continue\n        r=[c[i]/c[i-1]-1 for i in range(len(c)-60,len(c))]\n        avg=sum(r)/60.0\n        sd=(sum((v-avg)**2 for v in r)/59.0)**0.5\n        if sd>1e-8 and avg>0:\n            ranked.append((avg/sd,t))\n    ranked.sort(reverse=True)\n    names=[t for score,t in ranked[:2]]\n    return {t:1/len(names) for t in names} if names else {}\n",
+      "metrics": null,
+      "equity": null,
+      "dataset": "策略原理与合成测试代码；未声称取得任何真实历史回报或Sharpe。",
+      "research": {
+        "mechanism": "风险调整排名与单纯收益动量不同：同样正均值的资产如果波动很高，其单位波动回报不一定更高。该分数属于历史滚动Sharpe代理，不代表未来真实Sharpe。",
+        "formula": "score_i=mean(r_60)/std(r_60)，仅保留均值>0者；按score取前两名等资金持有。",
+        "derivation": "在每个预测日对60个已知收盘收益计算均值与样本标准差，不使用未来收益或现行可投资股票池以外的数据。",
+        "worked": "资产A日均收益0.1%、波动2%得分0.05；B日均收益0.08%、波动0.8%得分0.10，B排名更高。",
+        "validation": "比较纯60日收益排序和Sortino排序，使用区块Bootstrap检验两策略费后信息比率差异。",
+        "limitations": "日均回报高度噪声，极端样本可能扭曲排序；多次参数选择需纳入真实实验数量。"
+      }
     }
   ]
 }
