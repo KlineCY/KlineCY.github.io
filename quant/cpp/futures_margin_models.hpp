@@ -29,6 +29,9 @@ inline MarginAccount mark_margin_account(MarginAccount account,
     double pnl=held_futures_pnl(old_settlement,new_settlement,contracts,multiplier);
     account.equity+=pnl;account.cumulative_pnl+=pnl;
     require(account.equity>0,"Futures account equity exhausted");
+    require(std::isfinite(new_settlement)&&new_settlement>0&&
+            std::isfinite(initial_fraction)&&initial_fraction>0&&
+            initial_fraction<=1,"Invalid margin settlement");
     double notional=std::fabs(contracts)*new_settlement*multiplier;
     require(notional>=0&&initial_fraction>=maintenance_fraction&&
             maintenance_fraction>0,"Invalid futures maintenance");
