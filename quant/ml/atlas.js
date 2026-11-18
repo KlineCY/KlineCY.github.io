@@ -322,7 +322,7 @@ async function start(){
   if(cppBundle.schema!==1||!cppBundle.lessons||Object.keys(cppBundle.lessons).length<44)
    throw Error("C++17课程示例数量与索引不匹配");
   const cppManifest=await fetchAtlasJson("./cpp-topic-manifest.json",{cache:"no-cache"});
-  if(cppManifest.schema!==1||!Array.isArray(cppManifest.modules)||cppManifest.modules.length!==6)
+  if(cppManifest.schema!==1||!Array.isArray(cppManifest.modules)||cppManifest.modules.length!==5)
    throw Error("C++课程专题目录不完整");
   const cppFiles=await Promise.all(cppManifest.modules.map(async m=>{
    if(!/^\.\/cpp-topic-pack-\d\d\.json$/.test(m.path))throw Error("C++课程路径不合法");
