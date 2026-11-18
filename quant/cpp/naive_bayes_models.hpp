@@ -19,7 +19,7 @@ inline GaussianNaiveBayes fit_gaussian_naive_bayes(
     m.variances.assign(2,std::vector<double>(p,floor_variance));
     std::vector<int> counts(2,0);
     for(int i=0;i<n;i++){
-        require(labels[i]==0||labels[i]==1&&int(x[i].size())==p,
+        require((labels[i]==0||labels[i]==1)&&int(x[i].size())==p,
                 "Naive Bayes input shape or label");
         check_finite(x[i]);
         int c=labels[i];counts[c]++;
