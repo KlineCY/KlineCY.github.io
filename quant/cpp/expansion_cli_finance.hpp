@@ -192,8 +192,8 @@ inline bool run_expansion_finance(const std::string& command,int argc,char** arg
     }else if(command=="calibration-ece"||command=="calibration-brier"){
         require(argc==5||argc==6,"Calibration CSV PROB LABEL [BINS]");
         auto t=read_csv(argv[2]);
-        auto p=t.numbers(argv[3]),labels=expansion_finance_ints(
-            t.numbers(argv[4]));
+        auto p=t.numbers(argv[3]);
+        auto labels=expansion_finance_ints(t.numbers(argv[4]));
         if(command=="calibration-ece"){
             exact(6);out<<"ECE "<<expected_calibration_error(
                 p,labels,std::stoi(argv[5]))<<"\n";
