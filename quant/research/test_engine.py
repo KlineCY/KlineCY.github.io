@@ -85,6 +85,36 @@ class BacktestTests(unittest.TestCase):
                 self.assertTrue(-1<result["metrics"]["total_return"]<100)
                 self.assertTrue(all(e["strategy"]>0 for e in result["equity"]))
 
+    def test_rebalance_cost_charges_drift_after_a_price_shock(self):
+        # Flat quotes after a single +20% move on A, B always remains 100.
+        # Repeated equal-weight targets still require real cash rebalancing.
+        days=[]
+        d=date(2024,1,2)
+        while len(days)<45:
+            if d.weekday()<5:
+                days.append(d.isoformat())
+            d+=timedelta(days=1)
+        csv=["Date,Ticker,Open,Close,Volume"]
+        for i,dt in enumerate(days):
+            for ticker in ("SYN_A","SYN_B"):
+                px=120 if ticker=="SYN_A" and i>=2 else 100
+                csv.append(f"{dt},{ticker},{px},{px},10000")
+        code="def signals(history):\\n    return {'SYN_A':0.5,'SYN_B':0.5}\\n".replace("\\n","\n")
+        result=self.execute(code,csv="\n".join(csv),commission_bps=100,slippage_bps=0,borrow_bps_annual=0)
+        # First trade costs 1% NAV (0.5+0.5), next open's 20% stock jump
+        # creates drift: stale-target logic would incorrectly report 50% turnover.
+        self.assertGreater(result["metrics"]["turnover_oneway"],0.53)
+        self.assertGreater(result["metrics"]["adjustment_events"],2)
+        self.assertLess(result["metrics"]["total_return"],0.09)
+
+    def test_static_single_asset_remains_fee_free_after_initial_purchase(self):
+        code="def signals(history):\\n    return {'SYN_A':1.0}\\n".replace("\\n","\n")
+        result=self.execute(code,commission_bps=100,slippage_bps=0,borrow_bps_annual=0)
+        self.assertAlmostEqual(result["metrics"]["turnover_oneway"],0.5,places=6)
+        # 100% initial purchase is 1.0 one-way traded NAV under the report's
+        # stated 0.5*sum absolute change convention (reported as 0.5).
+        self.assertEqual(result["metrics"]["adjustment_events"],1)
+
     def test_next_open_no_lookahead(self):
         code="def signals(history):\n    return {'SYN_A':1.0}\n"
         result=self.execute(code,commission_bps=0,slippage_bps=0,borrow_bps_annual=0)
