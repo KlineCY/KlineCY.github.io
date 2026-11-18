@@ -1,4 +1,5 @@
 #include "data.hpp"
+#include "allocation.hpp"
 #include "derivatives.hpp"
 #include "execution.hpp"
 #include "factors.hpp"
@@ -542,6 +543,60 @@ void test_learning_and_ledger() {
 
 }
 
+
+void test_allocation_models() {
+    auto prior = kline::black_litterman_posterior(
+        {0.05, 0.03}, {{0.04, 0}, {0, 0.01}}, 1.0,
+        {{1.0, -1.0}}, {0.04}, {0.01});
+    near(prior[0], 0.0633333333333333, 1e-12,
+         "BL view increases the return of the first asset");
+    near(prior[1], 0.0266666666666667, 1e-12,
+         "BL view adjusts the second asset by its covariance");
+    auto weak = kline::black_litterman_posterior(
+        {0.05, 0.03}, {{0.04, 0}, {0, 0.01}}, 1.0,
+        {{1.0, -1.0}}, {0.04}, {1000000.0});
+    near(weak[0], 0.05, 1e-8, "uncertain views barely affect prior");
+    auto independent = kline::black_litterman_posterior(
+        {0.05, 0.03}, {{0.04, 0}, {0, 0.01}}, 1.0,
+        {{1, 0}, {0, 1}}, {0.06, 0.01}, {0.01, 0.01});
+    near(independent[0], 0.058, 1e-12,
+         "BL supports two separate views");
+    near(independent[1], 0.02, 1e-12,
+         "BL combines independent views by variance");
+    expect_error([&]() {
+        kline::black_litterman_posterior({0.05, 0.03},
+            {{1, 2}, {2, 1}}, 1, {{1, -1}}, {0.03}, {0.1});
+    }, "indefinite covariance is not a legal prior");
+    expect_error([&]() {
+        kline::black_litterman_posterior({0.05, 0.03},
+            {{0.04, 0}, {0, 0.01}}, 1, {{1, -1}}, {0.03}, {0});
+    }, "view variance must be strictly positive");
+
+    auto simple = kline::optimize_long_only(
+        {0.2, 0}, {{1, 0}, {0, 1}}, {0.5, 0.5}, 1, 0);
+    near(simple.weights[0], 0.6, 1e-10,
+         "mean-variance optimum of a two-asset portfolio");
+    near(simple.weights[1], 0.4, 1e-10, "fully invested allocation");
+    auto less_turnover = kline::optimize_long_only(
+        {0.2, 0}, {{1, 0}, {0, 1}}, {0.5, 0.5}, 1, 10);
+    near(less_turnover.weights[0], 0.5 + 0.1 / 11, 1e-10,
+         "turnover penalty shrinks active rebalancing");
+    expect(less_turnover.one_way_turnover < simple.one_way_turnover,
+           "regularization reduces turnover in example");
+    auto corner = kline::optimize_long_only(
+        {0.1, 0.2}, {{0, 0}, {0, 0}}, {0.3, 0.7}, 1, 0);
+    near(corner.weights[1], 1, 1e-12,
+         "zero-risk linear objective chooses best expected return");
+    expect_error([&]() {
+        kline::optimize_long_only({0.1, 0.2},
+            {{1, 2}, {2, 1}}, {0.5, 0.5}, 1, 0);
+    }, "optimizer rejects indefinite risk matrix");
+    expect_error([&]() {
+        kline::optimize_long_only({0.1, 0.2},
+            {{1, 0}, {0, 1}}, {0.5, 0.5}, 0, 0);
+    }, "risk aversion must be positive");
+}
+
 int main() {
     try {
         test_stats();
@@ -554,6 +609,7 @@ int main() {
         test_macro_and_etf();
         test_validation_simulation_attribution();
         test_learning_and_ledger();
+        test_allocation_models();
         cout << "PASS: " << checks << " independent C++17 numerical and safety assertions\n";
         return 0;
     } catch (const exception& error) {
