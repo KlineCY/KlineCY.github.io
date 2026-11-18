@@ -11,9 +11,6 @@ inline double roll_effective_spread(const std::vector<double>& prices) {
     std::vector<double> changes;
     for(int t=1;t<int(prices.size());t++)
         changes.push_back(prices[t]-prices[t-1]);
-    double lagged=0;
-    for(int t=1;t<int(changes.size());t++)
-        lagged+=changes[t]*changes[t-1];
     std::vector<double> left(changes.begin()+1,changes.end());
     std::vector<double> right(changes.begin(),changes.end()-1);
     double autocov=covariance(left,right,false);
