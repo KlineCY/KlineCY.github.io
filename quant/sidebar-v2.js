@@ -13,6 +13,7 @@
     ["assets","金融资产分类"],
     ["feeds","核心数据源 Data Feeds"],
     ["research","策略研究与回测"],
+    ["cpp","C++ 量化研究工具"],
     ["wiki","量化百科 Wiki"],
     ["math","量化数学 Mathematics"],
     ["ml","机器学习 Machine Learning"],
@@ -47,6 +48,11 @@
       '<a class="q-menu-link" href="'+route("research")+'">在线 Python 回测</a>'+
       '<a class="q-menu-link" href="'+route("research")+'?strategy=ma">策略超市 / Python 示例</a>'+
       subsection("researchStrategyNav","按策略选择","strategyChoices",page==="research"),
+    cpp:
+      '<a class="q-menu-link" href="'+route("cpp")+'">研究工具库总览</a>'+
+      '<a class="q-menu-link" href="'+route("cpp")+'#modules">C++ 源码与主题</a>'+
+      '<a class="q-menu-link" href="'+route("cpp")+'#workflow">实际数据与命令行</a>'+
+      '<a class="q-menu-link" href="'+route("cpp")+'#assumptions">方法适用范围</a>',
     wiki:
       '<a class="q-menu-link" href="'+route("wiki")+'">全部词条</a>'+
       subsection("wikiCategoryNav","按知识主题","wikiCategories",page==="wiki")+
