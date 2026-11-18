@@ -337,7 +337,8 @@ inline bool run_fullstack_cli(const std::string& cmd,int argc,char** argv,
             number(2),number(3),number(4),number(5),number(6),number(7));
         out<<"ClosePnL "<<result.close_pnl<<"\n"
            <<"EntryCost "<<result.entry_cost<<"\n"
-           <<"NewContracts "<<result.next_contracts<<"\n";
+           <<"NewContracts "<<result.next_contracts<<"\n"
+           <<"NextEntryPrice "<<result.next_entry_price<<"\n";
     }else if(cmd=="credit-portfolio"){
         exact(3);auto table=read_csv(argv[2]);
         out<<"PortfolioECL "<<portfolio_expected_credit_loss(
