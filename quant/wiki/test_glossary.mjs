@@ -22,7 +22,14 @@ for(const t of terms){
   assert(t.reference_url.startsWith("https://"),t.id+": invalid source URL");
 }
 assert.equal(manifest.total_terms,terms.length,"Manifest count out of date");
-assert.equal(terms.length,172,"All 172 financial glossary entries must remain available");
+assert.equal(terms.length,205,"All 205 financial glossary entries must remain available");
+const preserved={"market":16,"execution":15,"risk":18,"factors":17,"strategies":17,"backtest":18,"stats":14,"ml":18,"options":17,"macro":13,"crypto":9};
+for(const [category,min] of Object.entries(preserved)){
+ assert(categories.find(c=>c.id===category)?.term_ids.length>=min,"Missing original glossary coverage in "+category);
+}
+for(const c of manifest.categories){
+ assert.equal(c.count,terms.filter(t=>t.category_id===c.id).length,"Incorrect manifest category total "+c.id);
+}
 for(const t of terms){
   assert(t.example.includes("数值例题："),"Missing independent quantitative example: "+t.id);
   assert(t.example.length>=70&&t.definition.length>=35&&t.pitfall.length>=25,"Incomplete detailed definition, computation or falsification: "+t.id);
