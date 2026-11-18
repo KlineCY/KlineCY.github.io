@@ -31,7 +31,9 @@ inline std::vector<BarrierLabel> label_all_barriers(
     double profit_take,double stop_loss){
     check_finite(prices);
     std::vector<BarrierLabel> out;
-    for(int t=0;t+1<int(prices.size());t++)
+    require(horizon>=1&&horizon<int(prices.size()),
+            "Full triple-barrier horizon exceeds sample");
+    for(int t=0;t+horizon<int(prices.size());t++)
         out.push_back(label_triple_barrier(prices,t,horizon,
                                            profit_take,stop_loss));
     return out;
