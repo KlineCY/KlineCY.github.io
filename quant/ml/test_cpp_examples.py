@@ -33,10 +33,10 @@ def collect(area):
 
 math, math_origin = collect("math")
 ml, ml_origin = collect("ml")
-assert len(math) == 340 and len(ml) == 369
+assert len(math) == 656 and len(ml) == 369
 curriculum = read("math/curriculum.json")
 math_nodes = {node["id"]: node for node in curriculum["nodes"]}
-assert set(math) <= set(math_nodes)
+assert set(math) == set(math_nodes), 'Every mathematics curriculum node needs runnable C++17'
 
 ml_paths = [
     root / "ml/atlas-concept-chapters.json",
