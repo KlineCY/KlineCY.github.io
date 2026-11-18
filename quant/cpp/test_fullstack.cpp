@@ -155,7 +155,8 @@ void credit_microstructure_suite(){
          "realized quadratic variation");
     ok(kline::bipower_variation({0.1,-0.2})>0,"bipower variation");
     ok(kline::realized_jump_variation({0.1,-0.2})>=0,"nonnegative jump estimate");
-    near(kline::roll_effective_spread({100,101,100,101,100}),2,1e-12,
+    near(kline::roll_effective_spread({100,101,100,101,100}),
+         2*sqrt(8.0/9),1e-12,
          "Roll spread for alternating trades");
     bad([]{kline::kyle_lambda({1,2,3},{1,1,1});},"constant order flow");
     bad([]{kline::implied_hazard_from_cds(0.01,1);},"full recovery hazard unidentifiable");
