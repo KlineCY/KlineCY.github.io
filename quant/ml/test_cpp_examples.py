@@ -33,7 +33,7 @@ def collect(area):
 
 math, math_origin = collect("math")
 ml, ml_origin = collect("ml")
-assert len(math) == 656 and len(ml) == 369
+assert len(math) == 656 and len(ml) == 514
 curriculum = read("math/curriculum.json")
 math_nodes = {node["id"]: node for node in curriculum["nodes"]}
 assert set(math) == set(math_nodes), 'Every mathematics curriculum node needs runnable C++17'
@@ -45,6 +45,15 @@ ml_paths = [
     *sorted((root / "ml").glob("atlas-depth-07-*.json")),
     *sorted((root / "ml").glob("atlas-depth-08-*.json")),
     *sorted((root / "ml").glob("atlas-depth-09-*.json")),
+    *sorted((root / "ml").glob("atlas-depth-10-*.json")),
+    *sorted((root / "ml").glob("atlas-depth-11-*.json")),
+    *sorted((root / "ml").glob("atlas-depth-12-*.json")),
+    *sorted((root / "ml").glob("atlas-depth-13-*.json")),
+    *sorted((root / "ml").glob("atlas-depth-14-*.json")),
+    *sorted((root / "ml").glob("atlas-depth-15-*.json")),
+    *sorted((root / "ml").glob("atlas-depth-16-*.json")),
+    *sorted((root / "ml").glob("atlas-depth-17-*.json")),
+    *sorted((root / "ml").glob("atlas-depth-18-*.json")),
     *sorted((root / "ml").glob("atlas-depth-10-*.json")),
     *sorted((root / "ml").glob("atlas-depth-11-*.json")),
 ]
