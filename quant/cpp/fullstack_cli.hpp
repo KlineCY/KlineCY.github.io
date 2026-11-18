@@ -66,7 +66,7 @@ inline bool run_fullstack_cli(const std::string& cmd,int argc,char** argv,
         fullstack_print_vector(out,"Projected",project_l1_ball(
             read_csv(argv[2]).numbers(argv[3]),number(4)));
     }else if(cmd=="qp2"){
-        exact(12);
+        exact(11);
         Matrix h={{number(2),number(3)},{number(3),number(4)}};
         auto x=solve_box_quadratic(h,{number(5),number(6)},
                                     {number(7),number(9)},
@@ -123,7 +123,7 @@ inline bool run_fullstack_cli(const std::string& cmd,int argc,char** argv,
         for(int i=0;i<int(filtered.size());i++)
             out<<i<<","<<filtered[i].state<<","<<filtered[i].variance<<"\n";
     }else if(cmd=="regime"){
-        exact(11);
+        exact(10);
         auto posterior=markov_filter_step({number(2),number(3)},
                          {{number(4),number(5)},{number(6),number(7)}},
                          {number(8),number(9)});
@@ -231,9 +231,9 @@ inline bool run_fullstack_cli(const std::string& cmd,int argc,char** argv,
             delete_one_jackknife_means(x))<<"\n";
     }else if(cmd=="zero-bootstrap"){
         exact(5);
-        out<<"ZeroRate "<<-std::log(number(3)/number(4))/number(2)<<"\n";
         require(number(2)>0&&number(3)>0&&number(4)>0,
                 "Zero bootstrap needs maturity, price and redemption");
+        out<<"ZeroRate "<<-std::log(number(3)/number(4))/number(2)<<"\n";
     }else if(cmd=="bond-ytm"){
         exact(4);auto table=read_csv(argv[2]);
         out<<"ContinuousYTM "<<yield_to_maturity_continuous(
@@ -370,7 +370,7 @@ inline void print_fullstack_usage(std::ostream& out){
     out<<"Full-stack C++17 research commands:\n"
        <<"  box-project CSV VALUES LOWERS UPPERS\n"
        <<"  l1-project CSV VALUES RADIUS\n"
-       <<"  qp2 H11 H12 H22 B1 B2 LOW1 HIGH1 LOW2 HIGH2 RESERVED\n"
+       <<"  qp2 H11 H12 H22 B1 B2 LOW1 HIGH1 LOW2 HIGH2\n"
        <<"  ols CSV LABEL FEATURE...\n"
        <<"  elastic CSV LABEL L1 L2 FEATURE...\n"
        <<"  kmeans CSV CLUSTERS FEATURE...\n"
@@ -378,7 +378,7 @@ inline void print_fullstack_usage(std::ostream& out){
        <<"  unitroot CSV LEVEL\n"
        <<"  spread-z CSV SPREAD WINDOW\n"
        <<"  kalman CSV OBS INITIAL_STATE INITIAL_VAR PROCESS_VAR OBS_VAR\n"
-       <<"  regime PRIOR0 PRIOR1 P00 P01 P10 P11 LIKE0 LIKE1 RESERVED\n"
+       <<"  regime PRIOR0 PRIOR1 P00 P01 P10 P11 LIKE0 LIKE1\n"
        <<"  factor-neutral CSV SIGNAL CONTROL...\n"
        <<"  factor-rank CSV FACTOR GROSS\n"
        <<"  factor-buckets CSV FACTOR FUTURE_RETURN COUNT\n"
