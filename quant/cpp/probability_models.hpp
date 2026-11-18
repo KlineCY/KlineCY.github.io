@@ -8,7 +8,9 @@ namespace kline {
 inline double normal_inverse_cdf(double probability){
     require(std::isfinite(probability)&&probability>0&&probability<1,
             "Normal quantile probability must be interior");
-    double lo=-12,hi=12;
+    double lo=-1,hi=1;
+    while(standard_normal_cdf(lo)>probability)lo*=2;
+    while(standard_normal_cdf(hi)<probability)hi*=2;
     for(int i=0;i<140;i++){
         double mid=(lo+hi)/2;
         if(standard_normal_cdf(mid)<probability)lo=mid;else hi=mid;
