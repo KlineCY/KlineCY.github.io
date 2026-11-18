@@ -61,6 +61,24 @@ with tempfile.TemporaryDirectory() as work:
     roll = run("futures-roll", 98, 100)
     assert "StaticRollYield -0.02000000" in roll
 
+    split = run("walkforward", 120, 60, 20, 5)
+    assert "0,60,65,85" in split and "20,80,85,105" in split
+    bootstrap = run("bootstrap", returns, "A", 5, 80, 2026)
+    assert "Bootstrap025" in bootstrap and "Bootstrap975" in bootstrap
+    mc = run("montecarlo", 100, 100, 0.05, 0.0, 0.2, 1, "call", 15000, 2026)
+    assert "MonteCarloStandardError" in mc and "AntitheticPairs 15000" in mc
+    calibration_csv = directory / "calibration.csv"
+    csv_write(calibration_csv, ["Probability", "Label"],
+              [[0.1, 0], [0.3, 1], [0.8, 1], [0.9, 1]])
+    calibration = run("calibration", calibration_csv, "Probability", "Label", 2)
+    assert "Brier" in calibration and "Bin,Count" in calibration
+    attribution_csv = directory / "attribution.csv"
+    csv_write(attribution_csv, ["WP", "WB", "RP", "RB"],
+              [[0.6, 0.5, 0.08, 0.05], [0.4, 0.5, 0.03, 0.02]])
+    attribution = run("brinson", attribution_csv, "WP", "WB", "RP", "RB")
+    assert "ActiveReturn 0.02500000" in attribution
+    assert "ExplainedActiveReturn 0.02500000" in attribution
+
     option = run("option", 100, 100, 0.02, 0.01, 0.2, 1, "call")
     premium = float(next(line.split()[1] for line in option.splitlines()
                          if line.startswith("Premium")))
@@ -108,5 +126,7 @@ with tempfile.TemporaryDirectory() as work:
     run("bond", 100, 0.05, 0.04, 0, 2, success=False)
     run("fx", 1.2, -2, 0.05, 1, success=False)
     run("curve", 2, 0.03, 1, 0.04, success=False)
+    run("calibration", calibration_csv, "Probability", "Label", 0, success=False)
+    run("montecarlo", 100, 100, 0.05, 0, 0.2, 1, "call", 0, 2026, success=False)
 
-print("PASS: all 17 CLI workflows and error-rejection cases")
+print("PASS: 22 CLI workflows plus invalid-input rejection cases")
