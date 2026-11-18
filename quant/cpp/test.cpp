@@ -5,6 +5,9 @@
 #include "io.hpp"
 #include "macro.hpp"
 #include "etf.hpp"
+#include "attribution.hpp"
+#include "simulation.hpp"
+#include "validation.hpp"
 #include "portfolio.hpp"
 #include "risk.hpp"
 #include "stats.hpp"
@@ -322,6 +325,94 @@ void test_macro_and_etf() {
                  "volatility target zero observed risk");
 }
 
+void test_validation_simulation_attribution() {
+    auto folds = kline::walk_forward_folds(120, 60, 20, 5);
+    expect(folds.size() == 2, "Walk-forward number of nonoverlapping test folds");
+    expect(folds[0].train_begin == 0 && folds[0].train_end == 60 &&
+           folds[0].test_begin == 65 && folds[0].test_end == 85,
+           "Time split with embargo");
+    expect(folds[1].train_begin == 20 && folds[1].test_begin == 85,
+           "Rolling training window");
+    auto expanding = kline::walk_forward_folds(120, 60, 20, 5, true);
+    expect(expanding[1].train_begin == 0, "Expanding training window");
+    auto idx1 = kline::moving_block_resample(20, 4, 42);
+    auto idx2 = kline::moving_block_resample(20, 4, 42);
+    expect(idx1 == idx2 && idx1.size() == 20, "Seeded block bootstrap reproducibility");
+    for (int index : idx1) expect(index >= 0 && index < 20, "Bootstrap indices valid");
+    auto bootstrap = kline::block_bootstrap_means({1, 2, 3, 4, 5, 6}, 2, 30, 42);
+    expect(bootstrap.size() == 30, "Bootstrap replicate count");
+    near(kline::bonferroni_adjusted_p(0.01, 10), 0.1, 1e-12, "Bonferroni adjustment");
+    near(kline::bonferroni_adjusted_p(0.6, 10), 1, 1e-12, "Bonferroni cap");
+    auto fdr = kline::benjamini_hochberg({0.03, 0.001, 0.02, 0.2}, 0.05);
+    expect(fdr[0] && fdr[1] && fdr[2] && !fdr[3], "BH step-up retains ordering");
+    near(kline::brier_score({0.2, 0.8}, {0, 1}), 0.04, 1e-12, "Brier score");
+    auto bins = kline::reliability_bins({0.1, 0.2, 0.8, 0.9}, {0, 1, 1, 1}, 2);
+    expect(bins[0].observations == 2 && bins[1].observations == 2,
+           "Calibration sample bins");
+    near(bins[0].observed_frequency, 0.5, 1e-12, "Calibration observed frequency");
+    near(bins[1].predicted_frequency, 0.85, 1e-12, "Calibration average probability");
+    expect_error([&]() { kline::walk_forward_folds(50, 0, 5); },
+                 "Zero training window disallowed");
+    expect_error([&]() { kline::moving_block_resample(10, 11, 1); },
+                 "Bootstrap block longer than sample");
+    expect_error([&]() { kline::brier_score({1.2}, {1}); },
+                 "Probabilities above one rejected");
+
+    auto deterministic = kline::geometric_brownian_path(100, 0.05, 0, 1,
+                                                        {0, 1, -1});
+    near(deterministic[1], 100 * exp(0.05), 1e-10,
+         "GBM zero volatility solves deterministic exponential");
+    expect(deterministic.size() == 4, "GBM includes initial time");
+    auto ou = kline::ornstein_uhlenbeck_path(2, 0.5, 1, 0, 1, {0, 0});
+    near(ou[1], 1.5, 1e-12, "OU mean reversion");
+    near(ou[2], 1.25, 1e-12, "OU second deterministic step");
+    auto cir = kline::cir_full_truncation_path(0.001, 2, 0.001, 2, 1, {-5, 0});
+    for (double value : cir) expect(value >= 0, "CIR nonnegative truncated path");
+    auto markov = kline::markov_distribution_after_steps(
+        {{0.9, 0.1}, {0.2, 0.8}}, {1, 0}, 2);
+    near(markov[0], 0.83, 1e-12, "Markov two-step distribution");
+    near(markov[0] + markov[1], 1, 1e-12, "Markov total probability");
+    auto mc = kline::monte_carlo_european_option(
+        100, 100, 0.05, 0, 0.2, 1, true, 30000, 2026);
+    auto bs = kline::black_scholes(100, 100, 0.05, 0, 0.2, 1, true);
+    expect(std::fabs(mc.estimate - bs.value) < 0.2,
+           "Antithetic Monte Carlo within pricing tolerance");
+    expect(mc.standard_error > 0 && mc.simulated_pairs == 30000,
+           "Monte Carlo uncertainty and number of antithetic pairs");
+    auto mc_again = kline::monte_carlo_european_option(
+        100, 100, 0.05, 0, 0.2, 1, true, 30000, 2026);
+    near(mc.estimate, mc_again.estimate, 1e-12, "Fixed Monte Carlo seed");
+    expect_error([&]() {
+        kline::markov_distribution_after_steps({{0.5, 0.4}, {0.2, 0.8}}, {1, 0}, 2);
+    }, "Markov probabilities must be normalized");
+
+    auto brinson = kline::brinson_fachler_single_period(
+        {0.6, 0.4}, {0.5, 0.5}, {0.08, 0.03}, {0.05, 0.02});
+    near(brinson.active_return, 0.025, 1e-12, "Portfolio benchmark active return");
+    near(brinson.explained_active_return, brinson.active_return, 1e-12,
+         "Brinson allocation, selection and interaction reconcile");
+    near(brinson.allocation_by_sector[0] + brinson.allocation_by_sector[1],
+         0.003, 1e-12, "Brinson-Fachler allocation");
+    near(brinson.selection_by_sector[0] + brinson.selection_by_sector[1],
+         0.02, 1e-12, "Brinson selection");
+    near(brinson.interaction_by_sector[0] + brinson.interaction_by_sector[1],
+         0.002, 1e-12, "Brinson interaction");
+    auto factor_attr = kline::factor_return_attribution({0.8, -0.2},
+                                                        {0.05, 0.01}, 0.06);
+    near(factor_attr.systematic_return, 0.038, 1e-12,
+         "Linear factor explained return");
+    near(factor_attr.idiosyncratic_return, 0.022, 1e-12,
+         "Unexplained factor return");
+    auto contributions = kline::asset_return_contributions({0.6, 0.4},
+                                                            {0.05, -0.01});
+    near(kline::single_period_active_return(contributions), 0.026, 1e-12,
+         "Portfolio beginning-weight return contribution");
+    expect_error([&]() {
+        kline::brinson_fachler_single_period({0.5, 0.4}, {0.5, 0.5},
+                                             {0.1, 0}, {0.05, 0.01});
+    }, "Brinson weights must sum to one");
+}
+
 int main() {
     try {
         test_stats();
@@ -332,6 +423,7 @@ int main() {
         test_execution();
         test_data();
         test_macro_and_etf();
+        test_validation_simulation_attribution();
         cout << "PASS: " << checks << " independent C++17 numerical and safety assertions\n";
         return 0;
     } catch (const exception& error) {
