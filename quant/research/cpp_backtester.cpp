@@ -48,6 +48,13 @@ vector<string> parseCsvRow(const string& line) {
     return result;
 }
 
+string trim(const string& text) {
+    size_t first = text.find_first_not_of(" \t\r\n");
+    if (first == string::npos) return "";
+    size_t last = text.find_last_not_of(" \t\r\n");
+    return text.substr(first, last - first + 1);
+}
+
 string normalize(const string& text) {
     string result;
     for (char c : text) {
@@ -100,7 +107,7 @@ Market readMarket(const string& path) {
         auto field = [&](const string& name) -> string {
             int column = columns.at(name);
             if (column >= int(item.size())) throw runtime_error("Incomplete CSV row");
-            return item[column];
+            return trim(item[column]);
         };
         string date = field(dateColumn);
         if (date.size() < 10) throw runtime_error("Malformed date");
