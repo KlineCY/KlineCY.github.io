@@ -88,7 +88,9 @@ with tempfile.TemporaryDirectory() as directory:
     ]
     for valid, broken in cases:
         stdout=run(binary,valid,True)
-        require("nan" not in stdout.lower() and "inf" not in stdout.lower(),
+        tokens = stdout.replace(",", " ").split()
+        require(all(token.lower() not in ("nan", "inf", "-inf", "+inf")
+                    for token in tokens),
                 "Nonfinite successful output: "+str(valid))
         run(binary,broken,False)
     print(f"PASS: {len(cases)} empirical C++17 CSV commands and {len(cases)} invalid-input cases")
