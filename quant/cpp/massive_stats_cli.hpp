@@ -46,21 +46,21 @@ inline bool run_massive_stats_cli(const std::string& c,int argc,char** argv,
         exact(5);
         out<<"VarianceRatio "<<overlapping_variance_ratio(
             read_csv(argv[2]).numbers(argv[3]),mass_int(argv[4],2))<<"\n";
-    }else if(c=="ljung-box"){
+    }else if(c=="ljung-box-portmanteau"){
         exact(5);
         out<<"LjungBoxQ "<<ljung_box_q_statistic(
             read_csv(argv[2]).numbers(argv[3]),mass_int(argv[4],1))<<"\n";
-    }else if(c=="jarque-bera"){
+    }else if(c=="jarque-bera-moments"){
         exact(4);auto result=normality_moments(read_csv(argv[2]).numbers(argv[3]));
         out<<"Skewness "<<result.skewness<<"\nExcessKurtosis "
            <<result.excess_kurtosis<<"\nJarqueBera "<<result.jarque_bera<<"\n";
     }else if(c=="discrete-entropy"){
         exact(4);out<<"Entropy "<<discrete_entropy(
             read_csv(argv[2]).numbers(argv[3]))<<"\n";
-    }else if(c=="kl-divergence"||c=="js-divergence"){
+    }else if(c=="kl-discrete-divergence"||c=="js-divergence"){
         exact(5);auto table=read_csv(argv[2]);
         auto p=table.numbers(argv[3]),q=table.numbers(argv[4]);
-        out<<"Divergence "<<(c=="kl-divergence"?
+        out<<"Divergence "<<(c=="kl-discrete-divergence"?
             kl_divergence(p,q):jensen_shannon_divergence(p,q))<<"\n";
     }else if(c=="tail-coincide"){
         exact(7);auto table=read_csv(argv[2]);
@@ -146,7 +146,7 @@ inline bool run_massive_stats_cli(const std::string& c,int argc,char** argv,
         exact(7);auto r=drifted_portfolio_weights(
             {v(2),v(3)},{v(4),v(5)},v(6));
         massive_output_vector(out,"Weight",r);
-    }else if(c=="kelly-binary"){
+    }else if(c=="kelly-binary-growth"){
         exact(5);
         out<<"KellyFraction "<<binary_kelly_fraction(v(2),v(3),v(4))<<"\n";
     }else if(c=="fractional-kelly"){
@@ -202,9 +202,9 @@ inline bool run_massive_stats_cli(const std::string& c,int argc,char** argv,
 inline void massive_stats_usage(std::ostream& out){
     out<<"Advanced statistical and asset-management research:\n"
        <<"  variance-ratio CSV INCREMENT HORIZON\n"
-       <<"  ljung-box CSV RESIDUAL LAGS | jarque-bera CSV SERIES\n"
+       <<"  ljung-box-portmanteau CSV RESIDUAL LAGS | jarque-bera-moments CSV SERIES\n"
        <<"  discrete-entropy CSV PROBABILITY\n"
-       <<"  kl-divergence|js-divergence CSV PROBABILITY1 PROBABILITY2\n"
+       <<"  kl-discrete-divergence|js-divergence CSV PROBABILITY1 PROBABILITY2\n"
        <<"  tail-coincide CSV X Y FRACTION LOWER|UPPER\n"
        <<"  hac-mean CSV SERIES LAGS | kendall-tau CSV X Y\n"
        <<"  forecast-loss CSV ACTUAL FORECAST1 FORECAST2 HAC_LAGS\n"
@@ -216,7 +216,7 @@ inline void massive_stats_usage(std::ostream& out){
        <<"  cov-shrink2 C11 C12 C22 INTENSITY | risk-parity2 VAR1 COV VAR2\n"
        <<"  rebalance-band2 CURRENT1 CURRENT2 TARGET1 TARGET2 BAND\n"
        <<"  weight-drift2 WEIGHT1 WEIGHT2 RETURN1 RETURN2 CASH\n"
-       <<"  kelly-binary PROB WIN LOSS | fractional-kelly PROB WIN LOSS FRACTION\n"
+       <<"  kelly-binary-growth PROB WIN LOSS | fractional-kelly PROB WIN LOSS FRACTION\n"
        <<"  fund-watermark-fees NAV RETURN HIGH_WATERMARK MGMT_FEE INCENTIVE_FEE\n"
        <<"  hhi|effective-holdings CSV WEIGHT | loan-amortization LOAN RATE PERIODS\n"
        <<"  information-ratio CSV ACTIVE_RETURN PERIODS_PER_YEAR\n"

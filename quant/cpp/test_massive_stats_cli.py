@@ -40,10 +40,10 @@ with tempfile.TemporaryDirectory() as folder:
         writer.writerows(values)
     good=[
        ("variance-ratio",(sample,"Increment",3)),
-       ("ljung-box",(sample,"Residual",4)),
-       ("jarque-bera",(sample,"Residual")),
+       ("ljung-box-portmanteau",(sample,"Residual",4)),
+       ("jarque-bera-moments",(sample,"Residual")),
        ("discrete-entropy",(sample,"Probability")),
-       ("kl-divergence",(sample,"Probability","Probability2")),
+       ("kl-discrete-divergence",(sample,"Probability","Probability2")),
        ("js-divergence",(sample,"Probability","Probability2")),
        ("tail-coincide",(sample,"Increment","ReturnB",0.2,"LOWER")),
        ("hac-mean",(sample,"Increment",3)),
@@ -60,7 +60,7 @@ with tempfile.TemporaryDirectory() as folder:
        ("risk-parity2",(1,0,4)),
        ("rebalance-band2",(0.5,0.5,0.55,0.45,0.1)),
        ("weight-drift2",(0.5,0.5,0.1,-0.1,0)),
-       ("kelly-binary",(0.6,1,1)),
+       ("kelly-binary-growth",(0.6,1,1)),
        ("fractional-kelly",(0.6,1,1,0.5)),
        ("fund-watermark-fees",(100,0.2,100,0.01,0.2)),
        ("hhi",(sample,"Weight")),
@@ -81,17 +81,17 @@ with tempfile.TemporaryDirectory() as folder:
     assert abs(float(output["market-capture"].split()[1])-2)<1e-5
     assert abs(float(output["risk-parity2"].splitlines()[1].split(",")[1])-2/3)<1e-5
     assert abs(float(output["fund-watermark-fees"].splitlines()[3].split()[1])-115.04)<1e-5
-    assert "LjungBoxQ" in output["ljung-box"]
+    assert "LjungBoxQ" in output["ljung-box-portmanteau"]
     assert "MeanLossDifference" in output["forecast-loss"]
     assert "Index,Weight" in output["weight-drift2"]
     assert "Time,AtRisk,Events,Survival" in output["kaplan-meier"]
     assert "Period,Interest,Principal,Balance" in output["loan-amortization"]
     fail=[
        ("variance-ratio",(sample,"Increment",50)),
-       ("ljung-box",(sample,"Residual",80)),
-       ("jarque-bera",(sample,"Absent")),
+       ("ljung-box-portmanteau",(sample,"Residual",80)),
+       ("jarque-bera-moments",(sample,"Absent")),
        ("discrete-entropy",(sample,"Increment")),
-       ("kl-divergence",(sample,"Increment","Probability")),
+       ("kl-discrete-divergence",(sample,"Increment","Probability")),
        ("js-divergence",(sample,"Probability","Increment")),
        ("tail-coincide",(sample,"Increment","ReturnB",0.8,"LOWER")),
        ("hac-mean",(sample,"Increment",90)),
@@ -108,7 +108,7 @@ with tempfile.TemporaryDirectory() as folder:
        ("risk-parity2",(1,-0.2,4)),
        ("rebalance-band2",(0.5,0.5,0.55,0.45,-1)),
        ("weight-drift2",(0.5,0.5,-2,0.1,0)),
-       ("kelly-binary",(2,1,1)),
+       ("kelly-binary-growth",(2,1,1)),
        ("fractional-kelly",(0.6,1,1,2)),
        ("fund-watermark-fees",(100,0.2,100,-0.01,0.2)),
        ("hhi",(sample,"Increment")),
