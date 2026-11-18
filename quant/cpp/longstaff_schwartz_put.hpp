@@ -48,6 +48,11 @@ inline double longstaff_schwartz_american_put(
                     if(strike-simulated_spot_paths[index][t]>continuation)
                         cashflows[index]=strike-simulated_spot_paths[index][t];
             }
+        }else if(!in_money.empty()){
+            double continuation=mean(y);
+            for(int index:in_money)
+                if(strike-simulated_spot_paths[index][t]>continuation)
+                    cashflows[index]=strike-simulated_spot_paths[index][t];
         }
     }
     double result=0;

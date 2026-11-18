@@ -17,6 +17,8 @@ inline GaussianHmmPath gaussian_hmm_two_state(
     require(initial.size()==2&&state_means.size()==2&&
             state_std.size()==2&&std::fabs(initial[0]+initial[1]-1)<1e-10,
             "Two-state HMM dimensions");
+    require(transition.size()==2&&transition[0].size()==2&&
+            transition[1].size()==2,"HMM needs a 2x2 transition matrix");
     for(double sigma:state_std)require(sigma>0,"Invalid Gaussian HMM sigma");
     GaussianHmmPath result;auto probabilities=initial;
     for(double observation:observations){

@@ -31,8 +31,6 @@ inline AdfRegression augmented_dickey_fuller(
         std::vector<double> v={1};v.insert(v.end(),row.begin(),row.end());
         for(int i=0;i<p;i++)for(int j=0;j<p;j++)xx[i][j]+=v[i]*v[j];
     }
-    auto variance=solve_linear_system(xx,std::vector<double>(p,0));
-    (void)variance;
     std::vector<double> e(p,0);e[1]=1;
     auto column=solve_linear_system(xx,e);
     double standard_error=std::sqrt(fit.mse*column[1]);
