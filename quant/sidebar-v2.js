@@ -62,6 +62,7 @@
       '<a class="q-menu-link" href="'+route("cpp")+'advanced.html">数值算法与金融建模课程</a>'+
       '<a class="q-menu-link" href="'+route("cpp")+'fullstack.html">全链路数值与量化实证</a>'+
       '<a class="q-menu-link" href="'+route("cpp")+'extended.html">跨领域数学、机器学习与金融计算</a>'+
+      '<a class="q-menu-link" href="'+route("cpp")+'research.html">数值分析、统计学习与真实交易研究</a>'+
       '<a class="q-menu-link" href="'+route("cpp")+'#workflow">实际数据与命令行</a>'+
       '<a class="q-menu-link" href="'+route("cpp")+'#assumptions">方法适用范围</a>',
     wiki:
