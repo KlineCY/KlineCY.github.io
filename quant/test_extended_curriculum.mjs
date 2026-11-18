@@ -28,12 +28,32 @@ for(const [file,expected,index] of pages){
     lessons+=articleIds.length;
     assert.equal(new Set(articleIds).size,expected,file+" repeated lesson IDs");
     assert(html.includes("katex.min.js"),file+" missing KaTeX");
+    for(const match of html.matchAll(/<div class="(?:math|formula)">\$\$([^$]*)\$\$<\/div>/g)){
+      const expr=match[1];
+      assert(!(/[\u3400-\u9fff]/u.test(expr)&&!/[\\=^_]/.test(expr)),
+             file+" display math contains an unrenderable natural-language label");
+    }
+    assert(!/<p>\\(?:mathrm|tau|lambda|widehat|frac|operatorname|sum|hat|mathbb)\b/.test(html),
+           file+" raw TeX is displayed outside a KaTeX delimiter");
+    if(file.startsWith("quant/math/")){
+      assert(html.includes("left:'\\\\('")&&html.includes("right:'\\\\)'"),
+             file+" missing inline mathematics renderer");
+      assert.equal((html.match(/<p class="math-topic">/g)||[]).length,expected,
+                   file+" missing preserved descriptive course labels");
+    }
     assert(html.includes("../sidebar-v2.js")||html.includes("./sidebar-v2.js"),
            file+" missing shared site navigation");
     assert(html.includes("Times New Roman")&&html.includes("SimSun"),
            file+" textbook typography");
     const formulaDelimiters=(html.match(/\$\$/g)||[]).length;
-    assert.equal(formulaDelimiters,expected*2+2,file+" unpaired math formulas");
+    assert(formulaDelimiters%2===0,file+" unpaired mathematics delimiters");
+    if(file.startsWith("quant/math/")){
+      assert(formulaDelimiters>=expected*2+2+4*(expected/8),file+" independent worked formulas missing");
+      assert.equal((html.match(/<div class="worked-example">/g)||[]).length,expected/8,
+                   file+" topic-specific mathematical derivation missing");
+    }else{
+      assert.equal(formulaDelimiters,expected*2+2,file+" unpaired math formulas");
+    }
     const fullSourceCount=(html.match(/<pre><code>#pragma once/g)||[]).length;
     assert.equal(fullSourceCount,expected/8,file+" incomplete C++17 source modules");
     const headers=[...html.matchAll(/https:\/\/github\.com\/KlineCY\/KlineCY\.github\.io\/blob\/main\/quant\/cpp\/([a-z0-9_]+\.hpp)/g)].map(match=>match[1]);
