@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>C++ 量化研究工具库｜Kline Quant</title>
+<meta name="description" content="可编译的 C++17 量化金融研究工具：风险、资产配置、因子研究、衍生品、利率和外汇、ETF、市场微观结构、历史数据和时间信息防泄漏。">
+<link rel="stylesheet" href="../sidebar-v2.css">
+<style>
+:root{--ink:#102a43;--muted:#516b80;--line:#d7e2ec;--blue:#1d5d8f;--gold:#d89b3d}
+*{box-sizing:border-box}
+body{margin:0;background:#f7fafc;color:var(--ink);font:15px/1.78 "Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+a{color:#155d90}
+.main{margin-left:252px;padding:28px 32px 68px;min-width:0}
+main{max-width:1190px;margin:auto}
+.hero{background:#102a43;color:white;border-radius:15px;padding:34px 35px;margin-bottom:21px}
+.hero .eyebrow{font-size:11px;letter-spacing:2px;color:#f0bd69;font-weight:700}
+.hero h1{font-size:clamp(26px,3vw,38px);line-height:1.35;margin:9px 0}
+.hero h1 em{color:#f0bd69;font-style:normal}
+.hero p{color:#dce6ee;max-width:890px;margin:0;line-height:1.9}
+.counts{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.count{border:1px solid var(--line);border-radius:11px;padding:15px 16px;background:white}
+.count strong{display:block;font-size:23px;color:#1a5177}
+.count span{font-size:12px;color:var(--muted)}
+nav.jump{background:white;border:1px solid var(--line);border-radius:11px;padding:13px 17px;margin-bottom:22px;display:flex;flex-wrap:wrap;gap:7px 16px}
+nav.jump a{text-decoration:none;font-size:13px}
+section.panel{background:white;border:1px solid var(--line);padding:26px 28px;border-radius:12px;margin:15px 0}
+h2{font-size:21px;margin:0 0 13px;line-height:1.5}
+h3{font-size:16px;margin:19px 0 8px}
+p{margin:10px 0;line-height:1.9}
+.panel p{max-width:980px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.item{border:1px solid #dce6ee;border-radius:9px;padding:16px;background:#fcfeff}
+.item h3{margin:0 0 7px;font-size:16px}
+.item p{font-size:13px;color:#40566c;margin:6px 0}
+.file{display:inline-block;margin-top:8px;font-size:13px}
+code{font-family:Consolas,"Courier New",monospace;font-size:.91em}
+pre{background:#12243b;color:#edf5fd;border-radius:9px;padding:17px;line-height:1.65;overflow:auto;font:12px/1.65 Consolas,monospace}
+table{border-collapse:collapse;width:100%;font-size:13px}
+td,th{border-bottom:1px solid var(--line);padding:11px 9px;text-align:left;vertical-align:top}
+th{background:#eff5f9}
+.note{background:#f4f8fc;border-left:3px solid #6d9bbd;padding:11px 16px;border-radius:0 6px 6px 0;font-size:13px}
+footer{margin:25px 0;color:#587186;font-size:12px}
+@media(max-width:960px){.counts{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}}
+@media(max-width:760px){.main{margin:0;padding:15px}.hero{padding:25px 19px}.counts{gap:7px}.count{padding:12px}section.panel{padding:19px 16px}table{display:block;overflow:auto}}
+</style>
+</head>
+<body>
+<aside id="quantSidebar" class="sidebar" data-page="cpp" aria-label="量化研究分类导航"></aside>
+<script src="../sidebar-v2.js"></script>
+<div class="main"><main>
+<header class="hero">
+<div class="eyebrow">QUANTITATIVE RESEARCH / C++17</div>
+<h1>C++ 量化研究工具库 <em>Research Toolkit.</em></h1>
+<p>从数学讲义和策略模板延伸到完整的可调用计算组件。代码可在本地使用 GCC、Clang 或 CMake 编译，不需要外部数值计算库。每个函数都明确输入、时间口径、边界条件及算法适用范围；命令行支持使用自己的 CSV 数据。</p>
+</header>
+<div class="counts" aria-label="工具库核心范围">
+<div class="count"><strong>10</strong><span>研究主题：数据至衍生品</span></div>
+<div class="count"><strong>C++17</strong><span>标准语言，无第三方运行时依赖</span></div>
+<div class="count"><strong>17</strong><span>命令行分析工作流</span></div>
+<div class="count"><strong>GCC / Clang</strong><span>双编译器数值和集成测试</span></div>
+</div>
+<nav class="jump" aria-label="本页快速导航">
+<a href="#modules">源码目录</a><a href="#workflow">命令行研究</a><a href="#risk">组合风险</a><a href="#derivatives">衍生品与利率</a><a href="#data">历史可得信息</a><a href="#assumptions">方法和边界</a>
+</nav>
+<section class="panel" id="modules">
+<h2>十个计算主题与源码</h2>
+<p>课程中的 C++ 数值算例用于解释单一数学对象；此处的模块将多种金融计算组合成可复用函数，并在输入不符合要求时返回明确错误。源码中的每个接口可分别调用，不要求依赖整套命令行工具。</p>
+<div class="grid">
+<article class="item"><h3>统计与时间序列</h3><p>样本与总体方差、协方差、Pearson/Spearman、并列秩、分位数、HAC 标准误、滚动均值、对数收益。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/stats.hpp">查看 stats.hpp</a></article>
+<article class="item"><h3>风险与绩效</h3><p>经验 VaR、尾部部分样本权重 ES、回撤持续期、Sharpe、Sortino、复利收益、Beta、Alpha、跟踪误差、情景损益。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/risk.hpp">查看 risk.hpp</a></article>
+<article class="item"><h3>组合构建</h3><p>协方差估计、显式强度的对角收缩、非负单纯形投影、最小方差组合、逆波动率配置、Euler 风险贡献、换手费用。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/portfolio.hpp">查看 portfolio.hpp</a></article>
+<article class="item"><h3>因子研究</h3><p>横截面缩尾、标准化、行业去均值、OLS 残差化、Rank IC、ICIR、因子稳定性、分位多空收益。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/factors.hpp">查看 factors.hpp</a></article>
+<article class="item"><h3>衍生品定价</h3><p>含连续股息率的 Black–Scholes、Greeks、隐含波动率、看涨看跌平价、美式期权二叉树、票息债久期与 DV01。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/derivatives.hpp">查看 derivatives.hpp</a></article>
+<article class="item"><h3>订单执行与微观结构</h3><p>报价和有效价差、微价格、已实现价差、成交 VWAP、实施缺口、成交率、POV、成交量分配与平方根冲击。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/execution.hpp">查看 execution.hpp</a></article>
+<article class="item"><h3>历史数据与时点核验</h3><p>OHLCV 合法性、复权收盘收益、公司事件按可用时点连接、标签重叠净化、Embargo、跨资产日期对齐。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/data.hpp">查看 data.hpp</a></article>
+<article class="item"><h3>利率、外汇与期货</h3><p>零息贴现、远期利率、期限利差、盈亏平衡通胀、久期对冲、曲率调整、外汇套保平价、静态展期收益。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/macro.hpp">查看 macro.hpp</a></article>
+<article class="item"><h3>ETF 与杠杆敞口</h3><p>市价相对净值溢折价、跟踪差异、跟踪误差、费用拖累、总/净敞口、目标波动率杠杆、现金分配。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/etf.hpp">查看 etf.hpp</a></article>
+<article class="item"><h3>本地 CSV 输入</h3><p>数据列读取、带引号字段、重复列检查、CRLF 换行处理、数值合法性、缺失字段报错，避免静默生成结果。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/io.hpp">查看 io.hpp</a></article>
+</div>
+</section>
+<section class="panel" id="workflow">
+<h2>完整可运行的命令行研究工作流</h2>
+<p>下载 <a href="https://github.com/KlineCY/KlineCY.github.io/tree/main/quant/cpp">C++ 工具库源码</a> 后，在 <code>quant/cpp</code> 目录编译；C++17 编译器即可运行。CSV 中的收益必须使用小数表示，例如 0.01 代表 1%。示例以日频数据为基础，所有年化结果默认使用 252 期。</p>
+<pre>g++ -std=c++17 -O2 -Wall -Wextra -pedantic cli.cpp -o kline_quant
+g++ -std=c++17 -O2 -Wall -Wextra -pedantic test.cpp -o kline_tests
+./kline_tests
+
+./kline_quant risk returns.csv Return 0.95
+./kline_quant portfolio returns.csv SPY TLT GLD
+./kline_quant factor factor.csv Factor ForwardReturn
+./kline_quant etf returns.csv Fund Benchmark
+./kline_quant option 100 100 0.03 0.01 0.20 1 call
+./kline_quant implied 100 100 0.03 0.01 9.0 1 call
+./kline_quant bond 100 0.05 0.04 3 2
+./kline_quant curve 1 0.03 2 0.04
+./kline_quant fx 1.2 0.02 0.05 1
+./kline_quant quote 99 101 30 10 101 buy 100.5</pre>
+<p>更多命令包含 <code>stats</code>、<code>relative</code>、<code>american</code>、<code>fills</code>、<code>bars</code>、<code>asof</code>、<code>duration-hedge</code> 和 <code>futures-roll</code>。运行时使用精确参数与 CSV 列名；无法满足要求时主动报错。</p>
+<p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/cli.cpp">查看完整 CLI 入口</a> · <a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/CMakeLists.txt">查看 CMake 构建</a> · <a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test.cpp">查看数值回归测试</a></p>
+</section>
+<section class="panel" id="risk">
+<h2>组合风险：统计口径与风险贡献</h2>
+<p>单期简单收益为 <code>r[t]</code>，损失为 <code>L[t] = -r[t]</code>。置信水平为 <code>α</code> 时，经验 VaR 对损失排序后计算 α 分位；ES 是最坏 <code>(1−α)</code> 质量的加权平均。若 <code>n(1−α)</code> 不是整数，只计算边界观测对应的那部分权重，不强行向上取整。</p>
+<p>组合方差定义为 <code>σ² = wᵀΣw</code>，单一资产对组合波动率的 Euler 贡献为 <code>RCᵢ = wᵢ(Σw)ᵢ/σ</code>；在有效协方差矩阵下，所有资产的贡献之和等于总波动率。长期配置中，样本协方差估计必须使用同一组已对齐日期。</p>
+<div class="note">协方差的线性对角收缩使用调用者提供的收缩强度，并未自动估计 Ledoit–Wolf 最优系数。最小方差优化默认非负权重且权重和为 1；带杠杆、净敞口约束或交易费用的优化属于不同问题。</div>
+</section>
+<section class="panel" id="derivatives">
+<h2>期权、债券与期限结构</h2>
+<p>欧式期权采用连续复利的无套利 Black–Scholes 口径，输入为现价、执行价、无风险利率、连续股息率、波动率及剩余到期年数。<code>Vega</code> 报告波动率变化 1.00（100 个百分点）时的导数，<code>Rho</code> 对应利率变化 1.00；不能直接把这两个导数当作 1% 变动的实际损益。</p>
+<p>美式期权使用 Cox–Ross–Rubinstein 二叉树进行后向归纳，在每一节点比较立即行权价值和风险中性续持价值。若单步风险中性概率不在 [0,1]，程序拒绝计算，而不是隐含修正结果。固定息债使用定期付息收益率，<code>DV01 = P × 修改久期 × 0.0001</code>，表示收益率上升 1 个基点时的一阶价格下降幅度（按正值报告）。</p>
+<p>外汇远期按「1 单位基础货币兑换多少报价货币」定义即期汇率，套保平价采用 <code>F = S(1+r_quote×T)/(1+r_base×T)</code>。通胀盈亏平衡利率的名义减实际近似可能包含风险和流动性溢价；不能被直接解释为纯预期通胀。</p>
+</section>
+<section class="panel" id="data">
+<h2>回测时点可得信息与数据契约</h2>
+<p>历史财务数据和事件至少区分三个时点：对应的经济事件日期、正式发布日期和研究系统实际接收日期。策略在时点 <code>t</code> 能使用该记录，当且仅当 <code>max(published_at, received_at) ≤ t</code>。相同指标的历史修订应依照版本及可用时间处理，不能无条件用最新版覆盖过去的回测输入。</p>
+<p>标签净化检查训练区间与验证区间的实际时间重叠，<code>Embargo</code> 进一步排除验证区间结束后的一段影响窗口。公司行动调整必须保持复权价格口径一致；没有复权价格的 OHLCV 输入，程序不允许将普通收盘收益冒充总回报。</p>
+<table><thead><tr><th>CSV 场景</th><th>需要的字段</th><th>检查项目</th></tr></thead><tbody>
+<tr><td>收益和组合</td><td>命名资产收益列，例如 <code>SPY,TLT,GLD</code></td><td>同长度、有限值、协方差可估计</td></tr>
+<tr><td>因子 IC</td><td><code>Factor,ForwardReturn</code></td><td>同一横截面、未来收益与历史预测信号对齐</td></tr>
+<tr><td>OHLCV</td><td><code>Date,Open,High,Low,Close,Volume,AdjustedClose</code></td><td>日期严格递增、OHLC 合法、复权值为正</td></tr>
+<tr><td>订单成交</td><td><code>Price,Quantity</code></td><td>价格和数量严格为正、交易方向合法</td></tr>
+<tr><td>时点连接</td><td><code>Date,Published,Received,Value</code>；查询表 <code>Decision</code></td><td>发布时间与接收时间均不晚于决策时间</td></tr>
+</tbody></table>
+</section>
+<section class="panel" id="assumptions">
+<h2>适用范围、模型边界和检验要求</h2>
+<p>该工具库面向研究、教学、回测前验证及数值实验，不能代替券商 OMS、实时交易所行情、生产级风险系统或正式估值模型。投资组合与因子函数默认输入已经处理时点对齐与价格调整；若输入代表未来标签，研究者仍须自行确保预测和训练阶段没有信息泄漏。</p>
+<p>交易执行采用明示成本、成交数据和简化的市场冲击模型，不模拟完整限价订单簿、排队优先级或订单成交概率。Black–Scholes 假设、静态期货展期收益和债券久期的局部近似，均需根据实际合约和市场条件判断适用性。</p>
+<p>项目使用 <strong>GCC 与 Clang 双编译器</strong>执行数值断言、异常输入检查和 CSV 命令行集成测试；与 <a href="../research/">策略研究回测</a> 和 <a href="../math/">量化数学课程</a> 保持独立但可互相参考。</p>
+</section>
+<footer>Kline Quant · C++17 Research Toolkit · 独立研究与学习使用</footer>
+</main></div>
+</body></html>
