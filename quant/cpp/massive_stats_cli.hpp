@@ -184,14 +184,14 @@ inline bool run_massive_stats_cli(const std::string& c,int argc,char** argv,
     }else if(c=="tax-unrealized"){
         exact(6);auto t=read_csv(argv[2]);
         auto quantity=t.numbers(argv[3]),basis=t.numbers(argv[4]);
-        std::vector<TaxLot> lots;
+        std::vector<DatedTaxLot> lots;
         for(int i=0;i<int(quantity.size());i++)
             lots.push_back({0,quantity[i],basis[i]});
         out<<"UnrealizedPnL "<<unrealized_tax_lot_profit(lots,v(5))<<"\n";
     }else if(c=="tax-held"){
         exact(7);auto t=read_csv(argv[2]);
         auto dates=t.numbers(argv[3]),quantity=t.numbers(argv[4]);
-        std::vector<TaxLot> lots;
+        std::vector<DatedTaxLot> lots;
         for(int i=0;i<int(dates.size());i++)
             lots.push_back({int(dates[i]),quantity[i],0});
         out<<"EligibleShares "<<held_more_than_days(

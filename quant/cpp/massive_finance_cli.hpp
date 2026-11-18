@@ -109,7 +109,7 @@ inline bool run_massive_finance_cli(const std::string& c,int argc,char** argv,
             out<<i<<","<<steps[i].variation_margin<<","
                <<steps[i].equity<<","<<steps[i].maintenance_shortfall<<"\n";
     }else if(c=="poisson-glm"){
-        exact(9);auto t=read_csv(argv[2]),x=t.numbers(argv[3]);
+        exact(9);auto t=read_csv(argv[2]);auto x=t.numbers(argv[3]);
         auto y=t.numbers(argv[4]);
         Matrix features;for(double z:x)features.push_back({z});
         auto model=fit_poisson_glm_sgd(features,y,v(6),

@@ -4,9 +4,9 @@
 #include <cmath>
 #include <vector>
 namespace kline {
-struct TaxLot{int acquired_day=0;double shares=0,cost_per_share=0;};
+struct DatedTaxLot{int acquired_day=0;double shares=0,cost_per_share=0;};
 inline double unrealized_tax_lot_profit(
-    const std::vector<TaxLot>& lots,double current_price){
+    const std::vector<DatedTaxLot>& lots,double current_price){
     require(std::isfinite(current_price)&&current_price>=0,
             "Invalid tax lot market price");
     double result=0;
@@ -18,7 +18,7 @@ inline double unrealized_tax_lot_profit(
     }
     return result;
 }
-inline double held_more_than_days(const std::vector<TaxLot>& lots,
+inline double held_more_than_days(const std::vector<DatedTaxLot>& lots,
                                   int current_day,int threshold_days){
     require(threshold_days>=0,"Negative holding threshold");
     double shares=0;

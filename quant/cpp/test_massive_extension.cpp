@@ -265,7 +265,7 @@ try{
             "Invalid binary win probability");
     invalid([]{charge_fund_fees(100,0,100,-0.1,0.2);},
             "Invalid negative fund fee");
-    invalid([]{american_crr_option(100,100,0,0,0.01,1,1,false);},
+    invalid([]{american_crr_option(100,100,2,0,0.01,1,1,false);},
             "CRR probability outside one rejected");
     invalid([]{implied_black_scholes_volatility(200,100,100,0,0,1,true);},
             "Option price exceeding spot rejected");
