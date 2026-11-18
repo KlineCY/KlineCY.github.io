@@ -144,6 +144,26 @@ class BacktestTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,"超过1"):
             self.execute(bad)
 
+    def test_high_low_are_available_as_validated_observations(self):
+        code="def signals(history):\\n    for bars in history.values():\\n        assert bars[-1]['high'] >= max(bars[-1]['open'],bars[-1]['close'])\\n        assert bars[-1]['low'] <= min(bars[-1]['open'],bars[-1]['close'])\\n    return {}\\n".replace("\\n","\n")
+        result=self.execute(code)
+        self.assertEqual(len(result["equity"]),109)
+
+    def test_invalid_ohlc_high_low_and_negative_volume_are_rejected(self):
+        lines=self.csv.splitlines()
+        fields=lines[1].split(",")
+        fields[3]="0.01"
+        bad=lines.copy()
+        bad[1]=",".join(fields)
+        with self.assertRaisesRegex(ValueError,"High/Low与Open/Close不一致"):
+            self.execute("def signals(history):\n    return {}\n",csv="\n".join(bad))
+        fields=lines[1].split(",")
+        fields[6]="-1"
+        bad=lines.copy()
+        bad[1]=",".join(fields)
+        with self.assertRaisesRegex(ValueError,"无效价格或成交量"):
+            self.execute("def signals(history):\n    return {}\n",csv="\n".join(bad))
+
     def test_input_duplicates_are_rejected(self):
         bad=self.csv+"\n"+self.csv.splitlines()[1]
         with self.assertRaisesRegex(ValueError,"重复记录"):
