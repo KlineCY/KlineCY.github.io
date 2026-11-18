@@ -99,12 +99,15 @@
       subsection("mlDisciplineNav","按专题推进","mlDisciplineChoices",page==="ml"),
     papers:
       '<a class="q-menu-link" href="'+route("papers")+'">全部论文</a>'+
+      '<a class="q-menu-link" href="'+route("papers")+'financial-ml-replication.html">论文复现、验证设计与统计证据</a>'+
       subsection("weekNav","按周浏览","weeks",page==="papers"),
     rankings:
       '<a class="q-menu-link" href="'+route("rankings")+'">全部学术网站</a>'+
+      '<a class="q-menu-link" href="'+route("rankings")+'research-source-quality.html">研究资源、数据质量与证据评价</a>'+
       '<details class="q-nav-subgroup academic-fold" id="academicFold" '+(page==="rankings"?"open":"")+'><summary><span>按资源类别</span><span class="q-sub-chevron" aria-hidden="true">▸</span></summary><div class="q-nav-leaves academic-fold-items" id="catsNav"></div></details>',
     news:
       '<a class="q-menu-link" href="'+route("news")+'">全部新闻 / 官方发布源</a>'+
+      '<a class="q-menu-link" href="'+route("news")+'macro-asset-transmission.html">宏观传导、利率与资金链条</a>'+
       subsection("regionNewsNav","按国家 / 地区","newsRegionChoices",page==="news")+
       subsection("topicNewsNav","按消息类型","newsTopicChoices")
   };
