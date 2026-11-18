@@ -41,13 +41,12 @@ int main(){
  rejected_domain([]{standardized_mean_difference({1,1,1,1},{0,0,1,1});});
  rejected_domain([]{ipw_effective_sample_size({0,0,1,1},{.5,.5,1,.5});});
 
- const double roll=roll_effective_spread({99,101,99,101,99});
- if(!(roll>0&&roll<5))throw std::runtime_error("Roll quote spread range");
- near_domain(amihud_illiquidity({.1,-.1},{10,20}),.0075);
+ near_domain(quoted_spread_basis_points({99,99},{101,101}),20000.0*2/200);
+ near_domain(liquidity_replenishment_ratio({1,3},{2,2}),1);
  near_domain(kyle_price_impact_slope({1,2,3},{3,5,7}),2);
  near_domain(lag_one_order_sign_correlation({1,1,-1,-1,1,1}),.16666666666666666,1e-8);
- rejected_domain([]{roll_effective_spread({1,2});});
- rejected_domain([]{amihud_illiquidity({.1},{0});});
+ rejected_domain([]{quoted_spread_basis_points({100},{99});});
+ rejected_domain([]{liquidity_replenishment_ratio({0,0},{1,2});});
  rejected_domain([]{kyle_price_impact_slope({1,1,1},{1,2,3});});
  rejected_domain([]{lag_one_order_sign_correlation({1,1,1});});
 
