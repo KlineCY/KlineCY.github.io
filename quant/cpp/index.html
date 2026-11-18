@@ -55,16 +55,16 @@ footer{margin:25px 0;color:#587186;font-size:12px}
 <p>从数学讲义和策略模板延伸到完整的可调用计算组件。代码可在本地使用 GCC、Clang 或 CMake 编译，不需要外部数值计算库。每个函数都明确输入、时间口径、边界条件及算法适用范围；命令行支持使用自己的 CSV 数据。</p>
 </header>
 <div class="counts" aria-label="工具库核心范围">
-<div class="count"><strong>13</strong><span>研究主题：数据至随机模拟</span></div>
+<div class="count"><strong>16</strong><span>研究主题：数据、模型至组合净值</span></div>
 <div class="count"><strong>C++17</strong><span>标准语言，无第三方运行时依赖</span></div>
-<div class="count"><strong>22</strong><span>命令行分析工作流</span></div>
+<div class="count"><strong>29</strong><span>命令行分析工作流</span></div>
 <div class="count"><strong>GCC / Clang</strong><span>双编译器数值和集成测试</span></div>
 </div>
 <nav class="jump" aria-label="本页快速导航">
-<a href="#modules">源码目录</a><a href="#workflow">命令行研究</a><a href="#risk">组合风险</a><a href="#derivatives">衍生品与利率</a><a href="#data">历史可得信息</a><a href="#validation">研究验证</a><a href="#assumptions">方法和边界</a>
+<a href="#modules">源码目录</a><a href="#workflow">命令行研究</a><a href="#risk">组合风险</a><a href="#derivatives">衍生品与利率</a><a href="#data">历史可得信息</a><a href="#validation">研究验证</a><a href="#learning">金融机器学习</a><a href="#allocation">配置优化</a><a href="#ledger">净成本组合账本</a><a href="#assumptions">方法和边界</a>
 </nav>
 <section class="panel" id="modules">
-<h2>十三个计算主题与源码</h2>
+<h2>十六个计算主题与源码</h2>
 <p>课程中的 C++ 数值算例用于解释单一数学对象；此处的模块将多种金融计算组合成可复用函数，并在输入不符合要求时返回明确错误。源码中的每个接口可分别调用，不要求依赖整套命令行工具。</p>
 <div class="grid">
 <article class="item"><h3>统计与时间序列</h3><p>样本与总体方差、协方差、Pearson/Spearman、并列秩、分位数、HAC 标准误、滚动均值、对数收益。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/stats.hpp">查看 stats.hpp</a></article>
@@ -79,6 +79,9 @@ footer{margin:25px 0;color:#587186;font-size:12px}
 <article class="item"><h3>时间序列验证与统计检验</h3><p>固定长度和扩展窗口的前推验证、Embargo、移动区块 Bootstrap、Bonferroni、Benjamini–Hochberg、Brier 与概率校准分箱。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/validation.hpp">查看 validation.hpp</a></article>
 <article class="item"><h3>随机过程与蒙特卡洛</h3><p>GBM、OU、CIR 路径模拟、反变量欧式期权蒙特卡洛价格与标准误、有限状态马尔可夫链分布递推。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/simulation.hpp">查看 simulation.hpp</a></article>
 <article class="item"><h3>主动收益与风险归因</h3><p>单期 Brinson–Fachler 配置、选股和交互三分解；线性因子收益贡献与特质收益；期初持仓的资产收益贡献。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/attribution.hpp">查看 attribution.hpp</a></article>
+<article class="item"><h3>Ridge、前向预测与协方差收缩</h3><p>从线性方程组的带主元消元到训练内标准化Ridge；按标签成熟时点实施无前视的滚动/扩展预测；按样本估计的球形目标Ledoit–Wolf收缩。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/learning.hpp">查看 learning.hpp</a></article>
+<article class="item"><h3>长期与多空组合净成本账本</h3><p>长期配置严格满足现金约束；多空配置单独计算受限卖空所得、现金融资和借券成本。两者均处理实际交易费、仓位漂移与净值连续性，并验证杠杆上限。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/ledger.hpp">查看 ledger.hpp</a></article>
+<article class="item"><h3>组合优化与Black–Litterman</h3><p>先验与多观点置信度融合、协方差半正定检查、带L2换手惩罚的长期均值–方差优化、严格单纯形权重约束和优化目标复算。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/allocation.hpp">查看 allocation.hpp</a></article>
 <article class="item"><h3>本地 CSV 输入</h3><p>数据列读取、带引号字段、重复列检查、CRLF 换行处理、数值合法性、缺失字段报错，避免静默生成结果。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/io.hpp">查看 io.hpp</a></article>
 </div>
 </section>
@@ -98,7 +101,13 @@ g++ -std=c++17 -O2 -Wall -Wextra -pedantic test.cpp -o kline_tests
 ./kline_quant bond 100 0.05 0.04 3 2
 ./kline_quant curve 1 0.03 2 0.04
 ./kline_quant fx 1.2 0.02 0.05 1
-./kline_quant quote 99 101 30 10 101 buy 100.5</pre>
+./kline_quant quote 99 101 30 10 101 buy 100.5
+./kline_quant ridge supervised.csv Y 0.1 Momentum Volatility
+./kline_quant ridge-forward supervised.csv Y LabelEnd 120 20 120 5 0.1 Momentum Volatility
+./kline_quant ledoit-wolf returns.csv SPY TLT GLD
+./kline_quant rebalance allocation.csv 5 0.0001 WeightSPY ReturnSPY WeightTLT ReturnTLT
+./kline_quant allocate returns.csv 10 1 SPY 0.0005 0.5 TLT 0.0002 0.5
+./kline_quant bl-pair returns.csv SPY TLT 0.0005 0.0002 0.0004 0.00001 0.1</pre>
 <p>更多命令包含 <code>walkforward</code>、<code>bootstrap</code>、<code>calibration</code>、<code>montecarlo</code>、<code>brinson</code>，以及 <code>stats</code>、<code>relative</code>、<code>american</code>、<code>fills</code>、<code>bars</code>、<code>asof</code>、<code>duration-hedge</code> 和 <code>futures-roll</code>。运行时使用精确参数与 CSV 列名；无法满足要求时主动报错。</p>
 <p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/cli.cpp">查看完整 CLI 入口</a> · <a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/CMakeLists.txt">查看 CMake 构建</a> · <a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test.cpp">查看数值回归测试</a></p>
 </section>
@@ -137,6 +146,38 @@ g++ -std=c++17 -O2 -Wall -Wextra -pedantic test.cpp -o kline_tests
 ./kline_quant calibration predictions.csv Probability Label 10
 ./kline_quant montecarlo 100 100 0.05 0 0.20 1 call 50000 2026
 ./kline_quant brinson attribution.csv WP WB RP RB</pre>
+</section>
+
+<section class="panel" id="learning">
+<h2>从Ridge训练到严格时间外预测</h2>
+<p><strong>模型设定。</strong>对第t期的p维特征向量xₜ，以训练样本内各列的平均数和总体标准差将非恒定特征标准化，令zₜⱼ=(xₜⱼ−mⱼ)/sⱼ。随后求解最小化 <code>(1/n)Σ(yₜ−a−zₜᵀβ)² + λΣβⱼ²</code> 的模型。截距不参与正则化，若λ=0且特征共线，求解器会报告矩阵奇异。常数特征的标准差按1处理；λ&gt;0时它的回归系数自动收缩为零。所有训练期标准化参数都随模型一起保存，预测时只能使用本次训练期的参数。</p>
+<p><strong>数值实现。</strong>学习模块通过构造p×p正规方程并作带部分主元的高斯消元求解，适用于列数适中、经过合理缩放的教学和实证算例。由于显式正规方程会放大条件数，极端高维或病态问题仍应采用QR/SVD或专业线性代数库。命令行打印原始特征单位下的系数以及对应的原始截距，训练均方误差只是拟合诊断，不代表样本外表现。</p>
+<p><strong>时序正确性。</strong>前向预测接收每个样本对应的整数标签成熟时点 <code>LabelEnd</code>，含义是完整标签首次可以观察到的时间索引（允许等于当前决策索引）。在决策时点t，训练样本同时满足样本索引小于t−gap、标签成熟索引不大于t−gap；每隔指定步长重新训练一次，并用冻结模型预测下一组时点。若符合条件的训练样本不足两条，则直接报错。预测数据列仍须由研究者保证是真实历史可得特征。</p>
+<p><strong>协方差收缩。</strong>函数 <code>ledoit_wolf_identity</code> 对齐各资产历史收益，对每只资产先减去样本均值，采用1/n口径计算样本协方差S；以平均资产方差乘单位矩阵为目标F，通过 <code>min(1,估计抽样误差平方/||S−F||²)</code> 选择收缩强度，最终返回(1−δ)S+δF。该估计对应独立同分布观测下的球形目标近似，遇到强序列依赖或时间变化波动率应另外验证其适用性，不能混同于既有的“手动设置对角收缩强度”接口。</p>
+<table><thead><tr><th>命令</th><th>数据契约</th><th>返回结果</th></tr></thead><tbody>
+<tr><td><code>ridge</code></td><td>目标值、非负λ、一个或多个数值特征列</td><td>原始单位截距与系数、训练MSE</td></tr>
+<tr><td><code>ridge-forward</code></td><td>目标值、成熟索引、首次预测位置、重训间隔、训练窗口、隔离期及λ</td><td>预测索引、模型拟合时点、成熟训练样本数、预测与事后实现标签</td></tr>
+<tr><td><code>ledoit-wolf</code></td><td>各资产对齐收益列，至少两个时点</td><td>估计收缩强度、完整协方差矩阵</td></tr>
+</tbody></table>
+</section>
+<section class="panel" id="ledger">
+<h2>交易费率、资金约束与组合权益守恒</h2>
+<p>组合账本以期初权益E、调仓前资产权重w⁻、目标权重w及每交易一单位资产产生的比例费率c为输入。费用直接从权益扣减，因此调仓后权益E′需满足固定点方程 <code>E′ = E − c Σ|E′wᵢ−Ewᵢ⁻|</code>。在[0,E]上二分求解，得到真实成交名义金额与费用；相比简单用调仓前权益直接乘目标权重，能够避免支付手续费后仍假设全额资金买入资产的问题。</p>
+<p>每期在调仓完成后才发生资产收益：<code>rₚ = Σwᵢrᵢ + (1−Σwᵢ)r_cash</code>，期末权益为 <code>E′(1+rₚ)</code>。下一期调仓前的资产权重来自真实持仓增值后占期末权益的比例，因而会发生自然权重漂移。输出逐期记录交易名义金额、实际费用、毛收益、净收益与权益曲线，便于核算回撤与换手成本。</p>
+<p><strong>适用边界。</strong>此账本只针对多资产长期持有、无卖空且不加杠杆的情形，要求所有资产权重非负、总和不超过1，现金按指定单期收益率计息。所有资产收益须为下单之后的持有期简单收益，现金收益须与同一个时间尺度对齐。它并未模拟部分成交、保证金或期货逐日盯市。</p>
+<p><strong>多空与融资账本。</strong><code>simulate_long_short_rebalance</code> 允许正负资产权重，要求目标总敞口 <code>Σ|wᵢ|</code> 不超过预先设定上限。组合持有收益仍为各带符号权重乘以标的收益，但将空头卖券所得全部视为受限担保品，不允许无条件转作可投资现金：自由现金为 <code>max(0,1−Σ正权重)</code>，融资额为 <code>max(0,Σ正权重−1)</code>，借券名义仓位为 <code>Σ|负权重|</code>。因此单期持有收益额外包含自由现金收益，扣除借入现金利息和借券成本；每次重新平衡依然通过权益—成交额联立方程计算手续费，避免免费扩大名义仓位。</p>
+<p>此多空模型假定卖空收益受限、各类融资利率及借券费率在单个持有期内固定，按期末价格重新估值，暂不包含券商初始/维持保证金、动态借券费、融券回补或强制平仓。<strong>权重是权益倍数，收益率与费率均采用小数且处于同一个持有期；模型的名义限制与融资口径必须在实际策略中单独核验。</strong></p>
+<pre>./kline_quant longshort signed.csv 5 0.0001 0.0004 0.0002 2 WeightA ReturnA WeightB ReturnB</pre>
+<p>可把 <code>ridge-forward</code> 的时间外预测进一步转换为仅使用当期已经知道的信息生成的目标权重，再用 <code>rebalance</code> 核算权益；为避免前视偏差，切勿把未来收益列直接用于构造同一期的权重列。</p>
+</section>
+
+<section class="panel" id="allocation">
+<h2>预期收益、风险先验与可解释的组合权重</h2>
+<p><strong>Black–Litterman。</strong>给定先验收益μ₀、收益协方差Σ、先验尺度τ、m条观点构成的矩阵P及观点收益q，模型采用正定对角观点误差协方差Ω。后验均值可写为 <code>μ_post = μ₀ + τΣPᵀ (τPΣPᵀ + Ω)⁻¹ (q − Pμ₀)</code>。观点的方差越大，后验越接近先验；两条高度相似的观点不应在现实中被当作两个独立且具有相同可信度的信号。头文件支持多个观点，本地 <code>bl-pair</code> 命令提供最易检验的两资产相对收益观点。为了避免错误风险模型被直接用于优化，所有协方差矩阵都会检查有限性、对称性与半正定条件。</p>
+<p><strong>含换手惩罚的长期配置。</strong>对于给定预期收益μ、风险厌恶λ&gt;0、换手惩罚κ≥0、上期权重w₀，优化器求解 <code>maximize μᵀw − (λ/2)wᵀΣw − (κ/2)||w−w₀||₂²</code>，要求每个资产权重≥0、全部资产权重和为1。实现采用逐步梯度与单纯形投影，学习率由协方差行绝对值和给出安全上界，并在权重变化足够小时停止。该惩罚为二次平滑成本，不能冒充真实券商扣费；实际净值须继续通过 <code>rebalance</code> 或 <code>longshort</code> 账本计算。</p>
+<p><strong>数值与证据边界。</strong>协方差估计采用同一组对齐样本，并通过球形目标Ledoit–Wolf收缩改善条件。优化前的预测均值需要独立训练和时间外验证，绝不可用当前持有期的未来收益反向挑选预期收益。矩阵求解器采用带主元的高斯消元，适合低维教学及实证验证；高维病态风险模型应使用更稳定的数值分解、更多数据与专业库。<code>allocate</code> 接收各资产的历史收益列、独立给出的预期收益、前一期权重以及风险与换手参数，输出权重、收益、波动率、单边换手及目标函数。</p>
+<pre>./kline_quant allocate returns.csv 10 1 SPY 0.0005 0.5 TLT 0.0002 0.5
+./kline_quant bl-pair returns.csv SPY TLT 0.0005 0.0002 0.0004 0.00001 0.1</pre>
 </section>
 <section class="panel" id="assumptions">
 <h2>适用范围、模型边界和检验要求</h2>

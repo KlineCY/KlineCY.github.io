@@ -1,8 +1,11 @@
 #include "data.hpp"
+#include "allocation.hpp"
 #include "derivatives.hpp"
 #include "execution.hpp"
 #include "factors.hpp"
 #include "io.hpp"
+#include "learning.hpp"
+#include "ledger.hpp"
 #include "macro.hpp"
 #include "etf.hpp"
 #include "attribution.hpp"
@@ -413,6 +416,187 @@ void test_validation_simulation_attribution() {
     }, "Brinson weights must sum to one");
 }
 
+
+void test_learning_and_ledger() {
+    auto solution = kline::solve_linear_system({{3, 2}, {1, 2}}, {7, 5});
+    near(solution[0], 1, 1e-12, "pivoted linear solve first coefficient");
+    near(solution[1], 2, 1e-12, "pivoted linear solve second coefficient");
+    expect_error([&]() {
+        kline::solve_linear_system({{1, 1}, {2, 2}}, {3, 6});
+    }, "reject singular normal equations");
+
+    kline::Matrix x = {{0}, {1}, {2}, {3}, {4}};
+    vector<double> y = {1, 3, 5, 7, 9};
+    auto exact = kline::fit_ridge(x, y, 0);
+    near(kline::ridge_predict(exact, {5}), 11, 1e-10,
+         "OLS limit of ridge recovers intercept and slope");
+    near(kline::ridge_training_mse(exact, x, y), 0, 1e-12, "fitted model residual");
+    auto regularized = kline::fit_ridge(x, y, 1);
+    near(kline::ridge_predict(regularized, {4}), 7, 1e-12,
+         "ridge penalty shrinks standardized coefficient");
+    near(kline::ridge_predict(regularized, {2}), 5, 1e-12,
+         "ridge leaves the intercept unpenalized");
+    auto flat = kline::fit_ridge({{5}, {5}, {5}}, {1, 2, 3}, 1);
+    near(kline::ridge_predict(flat, {5}), 2, 1e-12,
+         "ridge handles a constant predictor");
+    expect_error([&]() {
+        kline::fit_ridge({{1, 2}, {2, 4}, {3, 6}}, {1, 2, 3}, 0);
+    }, "unpenalized collinear normal equations are rejected");
+    expect_error([&]() { kline::fit_ridge(x, y, -1); },
+                 "reject negative ridge penalty");
+    expect_error([&]() { kline::ridge_predict(exact, {1, 2}); },
+                 "predictor count must match training");
+
+    kline::Matrix features;
+    vector<double> labels;
+    vector<int> matured;
+    for (int i = 0; i < 12; i++) {
+        features.push_back({double(i)});
+        labels.push_back(1 + 2.0 * i);
+        matured.push_back(i + 2);
+    }
+    auto predictions = kline::forward_ridge(features, labels, matured,
+                                             5, 2, 5, 1, 0);
+    expect(predictions.size() == 7, "forward forecast count");
+    near(predictions[0].prediction, 11, 1e-11,
+         "first forecast uses mature training labels only");
+    expect(predictions[0].fitted_at == 5 && predictions[0].training_rows == 3,
+           "purging and embargo remove immature labels");
+    auto revised = labels;
+    for (int i = 3; i < int(revised.size()); i++) revised[i] = -999;
+    auto unchanged = kline::forward_ridge(features, revised, matured,
+                                           5, 2, 5, 1, 0);
+    near(unchanged.front().prediction, predictions.front().prediction, 1e-12,
+         "future labels cannot affect the previous forecast");
+    expect_error([&]() {
+        kline::forward_ridge(features, labels, matured, 2, 2, 3, 1, 0);
+    }, "reject folds without two mature labels");
+    expect_error([&]() {
+        auto invalid_end = matured;
+        invalid_end[0] = 0;
+        kline::forward_ridge(features, labels, invalid_end, 5, 2, 5, 1, 0);
+    }, "label maturity must be after feature time");
+
+    auto shrink = kline::ledoit_wolf_identity({{1, 3, 5, 7}, {7, 5, 3, 1}});
+    expect(shrink.intensity >= 0 && shrink.intensity <= 1,
+           "shrinkage stays within its statistical bounds");
+    near(shrink.covariance[0][0], shrink.covariance[1][1], 1e-12,
+         "equal asset variances stay equal");
+    near(shrink.covariance[0][1], shrink.covariance[1][0], 1e-12,
+         "shrunk covariance is symmetric");
+    expect(kline::portfolio_variance(shrink.covariance, {1, -1}) >= 0,
+           "shrunk covariance stays nonnegative for a long-short portfolio");
+    auto identical = kline::ledoit_wolf_identity({{1, 1, 1}, {1, 1, 1}});
+    near(identical.covariance[0][0], 0, 1e-12, "constant input covariance is zero");
+    expect_error([&]() { kline::ledoit_wolf_identity({{1}, {2}}); },
+                 "reject covariance with one time observation");
+
+    auto periods = kline::simulate_long_only_rebalance(
+        {{1}, {1}, {0}}, {{0.1}, {0}, {0}}, 100);
+    near(periods[0].ending_equity, 1.1 / 1.01, 1e-12,
+         "first entry pays the exact cash-financed commission");
+    near(periods[1].trading_cost, 0, 1e-12,
+         "no cost when target equals price-drifted exposure");
+    near(periods[2].ending_equity,
+         (1.1 / 1.01) * 0.99, 1e-12,
+         "full exit pays a percentage of the sold notional");
+    auto equity = kline::equity_curve_from_periods(periods);
+    expect(equity.size() == 4, "equity curve includes the starting balance");
+    near(equity.back(), periods.back().ending_equity, 1e-12,
+         "period ledger reconciles with total equity");
+    auto two_assets = kline::simulate_long_only_rebalance(
+        {{0.5, 0.5}, {0.5, 0.5}}, {{0.1, -0.1}, {0, 0}}, 100);
+    near(two_assets[0].gross_return, 0, 1e-12,
+         "equally weighted opposing returns net to zero before costs");
+    expect(two_assets[1].traded_notional > 0,
+           "price drift creates turnover during rebalancing");
+    expect_error([&]() {
+        kline::simulate_long_only_rebalance({{0.7, 0.6}}, {{0, 0}}, 10);
+    }, "reject infeasible cash budget");
+    expect_error([&]() {
+        kline::simulate_long_only_rebalance({{1}}, {{-1}}, 0);
+    }, "reject exhausted portfolio equity");
+
+    auto long_short = kline::simulate_long_short_rebalance(
+        {{1, -1}}, {{0.1, -0.05}}, 0, 0, 0, 0.01, 2);
+    near(long_short[0].ending_equity, 1.14, 1e-12,
+         "long-short returns include both signed legs and short borrow fee");
+    auto short_cash = kline::simulate_long_short_rebalance(
+        {{-1}}, {{0.5}}, 0, 0.02, 0.04, 0.01, 2);
+    near(short_cash[0].ending_equity, 0.51, 1e-12,
+         "restricted short sale proceeds do not earn a second cash return");
+    auto funded = kline::simulate_long_short_rebalance(
+        {{1.5, -0.5}}, {{0, 0}}, 0, 0.02, 0.02, 0.01, 2);
+    near(funded[0].ending_equity, 0.985, 1e-12,
+         "leveraged longs pay funding and shorts pay borrow fees");
+    expect_error([&]() {
+        kline::simulate_long_short_rebalance({{1.5, -1}}, {{0, 0}},
+                                              0, 0, 0, 0, 2);
+    }, "reject gross exposure beyond limit");
+    expect_error([&]() {
+        kline::simulate_long_short_rebalance({{-2}}, {{0.6}},
+                                              0, 0, 0, 0, 2);
+    }, "reject short-side bankruptcy");
+    expect_error([&]() {
+        kline::simulate_long_only_rebalance({{1}}, {{0}}, 15000);
+    }, "long-only ledger rejects commission above total equity");
+
+}
+
+
+void test_allocation_models() {
+    auto prior = kline::black_litterman_posterior(
+        {0.05, 0.03}, {{0.04, 0}, {0, 0.01}}, 1.0,
+        {{1.0, -1.0}}, {0.04}, {0.01});
+    near(prior[0], 0.0633333333333333, 1e-12,
+         "BL view increases the return of the first asset");
+    near(prior[1], 0.0266666666666667, 1e-12,
+         "BL view adjusts the second asset by its covariance");
+    auto weak = kline::black_litterman_posterior(
+        {0.05, 0.03}, {{0.04, 0}, {0, 0.01}}, 1.0,
+        {{1.0, -1.0}}, {0.04}, {1000000.0});
+    near(weak[0], 0.05, 1e-8, "uncertain views barely affect prior");
+    auto independent = kline::black_litterman_posterior(
+        {0.05, 0.03}, {{0.04, 0}, {0, 0.01}}, 1.0,
+        {{1, 0}, {0, 1}}, {0.06, 0.01}, {0.01, 0.01});
+    near(independent[0], 0.058, 1e-12,
+         "BL supports two separate views");
+    near(independent[1], 0.02, 1e-12,
+         "BL combines independent views by variance");
+    expect_error([&]() {
+        kline::black_litterman_posterior({0.05, 0.03},
+            {{1, 2}, {2, 1}}, 1, {{1, -1}}, {0.03}, {0.1});
+    }, "indefinite covariance is not a legal prior");
+    expect_error([&]() {
+        kline::black_litterman_posterior({0.05, 0.03},
+            {{0.04, 0}, {0, 0.01}}, 1, {{1, -1}}, {0.03}, {0});
+    }, "view variance must be strictly positive");
+
+    auto simple = kline::optimize_long_only(
+        {0.2, 0}, {{1, 0}, {0, 1}}, {0.5, 0.5}, 1, 0);
+    near(simple.weights[0], 0.6, 1e-10,
+         "mean-variance optimum of a two-asset portfolio");
+    near(simple.weights[1], 0.4, 1e-10, "fully invested allocation");
+    auto less_turnover = kline::optimize_long_only(
+        {0.2, 0}, {{1, 0}, {0, 1}}, {0.5, 0.5}, 1, 10);
+    near(less_turnover.weights[0], 0.5 + 0.1 / 11, 1e-10,
+         "turnover penalty shrinks active rebalancing");
+    expect(less_turnover.one_way_turnover < simple.one_way_turnover,
+           "regularization reduces turnover in example");
+    auto corner = kline::optimize_long_only(
+        {0.1, 0.2}, {{0, 0}, {0, 0}}, {0.3, 0.7}, 1, 0);
+    near(corner.weights[1], 1, 1e-12,
+         "zero-risk linear objective chooses best expected return");
+    expect_error([&]() {
+        kline::optimize_long_only({0.1, 0.2},
+            {{1, 2}, {2, 1}}, {0.5, 0.5}, 1, 0);
+    }, "optimizer rejects indefinite risk matrix");
+    expect_error([&]() {
+        kline::optimize_long_only({0.1, 0.2},
+            {{1, 0}, {0, 1}}, {0.5, 0.5}, 0, 0);
+    }, "risk aversion must be positive");
+}
+
 int main() {
     try {
         test_stats();
@@ -424,6 +608,8 @@ int main() {
         test_data();
         test_macro_and_etf();
         test_validation_simulation_attribution();
+        test_learning_and_ledger();
+        test_allocation_models();
         cout << "PASS: " << checks << " independent C++17 numerical and safety assertions\n";
         return 0;
     } catch (const exception& error) {

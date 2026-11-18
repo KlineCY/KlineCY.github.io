@@ -1,8 +1,11 @@
 #include "data.hpp"
+#include "allocation.hpp"
 #include "derivatives.hpp"
 #include "execution.hpp"
 #include "factors.hpp"
 #include "io.hpp"
+#include "learning.hpp"
+#include "ledger.hpp"
 #include "etf.hpp"
 #include "macro.hpp"
 #include "attribution.hpp"
@@ -44,6 +47,13 @@ void usage() {
          << "  calibration CSV PROBABILITY_COLUMN LABEL_COLUMN [BINS=10]\n"
          << "  montecarlo SPOT STRIKE RATE DIVIDEND VOL YEARS call|put PAIRS SEED\n"
          << "  brinson CSV PORTFOLIO_WEIGHT BENCHMARK_WEIGHT PORTFOLIO_RETURN BENCHMARK_RETURN\n"
+         << "  ridge CSV LABEL LAMBDA FEATURE [MORE_FEATURES...]\n"
+         << "  ridge-forward CSV LABEL MATURITY_INDEX FIRST_TRAIN STEP WINDOW GAP LAMBDA FEATURE...\n"
+         << "  ledoit-wolf CSV ASSET_RETURN_A ASSET_RETURN_B [MORE_COLUMNS...]\n"
+         << "  rebalance CSV COST_BPS CASH_RETURN WEIGHT_A RETURN_A [MORE_PAIRS...]\n"
+         << "  longshort CSV COST_BPS CASH_RATE FUND_RATE BORROW_RATE MAX_GROSS WEIGHT RETURN [PAIRS...]\n"
+         << "  allocate CSV RISK_LAMBDA TURNOVER_PENALTY ASSET_COLUMN EXPECTED_RETURN PREVIOUS_WEIGHT [MORE_TRIPLES...]\n"
+         << "  bl-pair CSV ASSET_COLUMN_A ASSET_COLUMN_B PRIOR_A PRIOR_B VIEW_A_MINUS_B VIEW_VARIANCE TAU\n"
          << "  asof EVENT_CSV DECISION_CSV (event columns Date,Published,Received,Value)\n";
 }
 
@@ -298,6 +308,153 @@ int main(int argc, char** argv) {
                      << result.interaction_by_sector[i] << "\n";
             cout << "ActiveReturn " << result.active_return << "\n"
                  << "ExplainedActiveReturn " << result.explained_active_return << "\n";
+        } else if (command == "ridge") {
+            kline::require(argc >= 6, "Use ridge CSV LABEL LAMBDA FEATURE...");
+            auto table = kline::read_csv(argv[2]);
+            auto y = table.numbers(argv[3]);
+            kline::Matrix x(y.size());
+            vector<string> features;
+            for (int arg = 5; arg < argc; arg++) {
+                features.push_back(argv[arg]);
+                auto column = table.numbers(argv[arg]);
+                for (int t = 0; t < int(y.size()); t++) x[t].push_back(column[t]);
+            }
+            auto model = kline::fit_ridge(x, y, number(argv[4]));
+            double raw_intercept = model.intercept;
+            for (int j = 0; j < int(features.size()); j++)
+                raw_intercept -= model.coefficients[j] *
+                                 model.feature_mean[j] / model.feature_scale[j];
+            cout << "Intercept " << raw_intercept << "\n";
+            cout << "Feature,CoefficientPerRawUnit\n";
+            for (int j = 0; j < int(features.size()); j++)
+                cout << features[j] << "," <<
+                    model.coefficients[j] / model.feature_scale[j] << "\n";
+            cout << "TrainingMSE " << kline::ridge_training_mse(model, x, y) << "\n";
+        } else if (command == "ridge-forward") {
+            kline::require(argc >= 11,
+                           "Use ridge-forward CSV LABEL MATURITY FIRST_TRAIN STEP WINDOW GAP LAMBDA FEATURE...");
+            auto table = kline::read_csv(argv[2]);
+            auto y = table.numbers(argv[3]);
+            auto maturity_raw = table.numbers(argv[4]);
+            vector<int> maturity;
+            for (double value : maturity_raw) {
+                kline::require(value >= 0 && value <= int(y.size()) + 1000000 &&
+                               value == std::floor(value),
+                               "Maturity index must be a nonnegative integer");
+                maturity.push_back(int(value));
+            }
+            kline::Matrix x(y.size());
+            for (int arg = 10; arg < argc; arg++) {
+                auto column = table.numbers(argv[arg]);
+                for (int t = 0; t < int(y.size()); t++) x[t].push_back(column[t]);
+            }
+            auto forecasts = kline::forward_ridge(x, y, maturity,
+                stoi(argv[5]), stoi(argv[6]), stoi(argv[7]), stoi(argv[8]),
+                number(argv[9]));
+            cout << "Index,ModelFitAt,TrainingRows,Prediction,RealizedLabel\n";
+            for (const auto& forecast : forecasts)
+                cout << forecast.index << "," << forecast.fitted_at << ","
+                     << forecast.training_rows << "," << forecast.prediction << ","
+                     << y[forecast.index] << "\n";
+        } else if (command == "ledoit-wolf") {
+            kline::require(argc >= 5, "Use ledoit-wolf CSV ASSET_A ASSET_B...");
+            auto table = kline::read_csv(argv[2]);
+            vector<vector<double>> assets;
+            vector<string> names;
+            for (int arg = 3; arg < argc; arg++) {
+                names.push_back(argv[arg]);
+                assets.push_back(table.numbers(argv[arg]));
+            }
+            auto result = kline::ledoit_wolf_identity(assets);
+            cout << "ShrinkageIntensity " << result.intensity << "\n";
+            cout << "Asset";
+            for (const auto& name : names) cout << "," << name;
+            cout << "\n";
+            for (int i = 0; i < int(names.size()); i++) {
+                cout << names[i];
+                for (double value : result.covariance[i]) cout << "," << value;
+                cout << "\n";
+            }
+        } else if (command == "rebalance") {
+            kline::require(argc >= 7 && (argc - 5) % 2 == 0,
+                           "Use rebalance CSV COST_BPS CASH_RETURN WEIGHT RETURN...");
+            auto table = kline::read_csv(argv[2]);
+            kline::Matrix weights(table.rows.size()), returns(table.rows.size());
+            for (int arg = 5; arg < argc; arg += 2) {
+                auto weight = table.numbers(argv[arg]);
+                auto asset_return = table.numbers(argv[arg + 1]);
+                for (int t = 0; t < int(weight.size()); t++) {
+                    weights[t].push_back(weight[t]);
+                    returns[t].push_back(asset_return[t]);
+                }
+            }
+            auto history = kline::simulate_long_only_rebalance(
+                weights, returns, number(argv[3]), number(argv[4]));
+            cout << "Index,BeginningEquity,TradedNotional,TradingCost,GrossReturn,NetReturn,EndingEquity\n";
+            for (const auto& point : history)
+                cout << point.index << "," << point.beginning_equity << ","
+                     << point.traded_notional << "," << point.trading_cost << ","
+                     << point.gross_return << "," << point.net_return << ","
+                     << point.ending_equity << "\n";
+        } else if (command == "longshort") {
+            kline::require(argc >= 10 && (argc - 8) % 2 == 0,
+                           "Use longshort CSV COST_BPS CASH_RATE FUND_RATE BORROW_RATE MAX_GROSS WEIGHT RETURN...");
+            auto table = kline::read_csv(argv[2]);
+            kline::Matrix weights(table.rows.size()), returns(table.rows.size());
+            for (int arg = 8; arg < argc; arg += 2) {
+                auto weight = table.numbers(argv[arg]);
+                auto asset_return = table.numbers(argv[arg + 1]);
+                for (int t = 0; t < int(weight.size()); t++) {
+                    weights[t].push_back(weight[t]);
+                    returns[t].push_back(asset_return[t]);
+                }
+            }
+            auto history = kline::simulate_long_short_rebalance(
+                weights, returns, number(argv[3]), number(argv[4]),
+                number(argv[5]), number(argv[6]), number(argv[7]));
+            cout << "Index,BeginningEquity,TradedNotional,TradingCost,ReturnBeforeTradingCost,NetReturn,EndingEquity\n";
+            for (const auto& point : history)
+                cout << point.index << "," << point.beginning_equity << ","
+                     << point.traded_notional << "," << point.trading_cost << ","
+                     << point.gross_return << "," << point.net_return << ","
+                     << point.ending_equity << "\n";
+        } else if (command == "allocate") {
+            kline::require(argc >= 11 && (argc - 5) % 3 == 0,
+                           "Use allocate CSV RISK TURNOVER RETURN_COLUMN MU PREVIOUS_WEIGHT...");
+            auto table = kline::read_csv(argv[2]);
+            vector<string> names;
+            vector<vector<double>> returns;
+            vector<double> expected, previous;
+            for (int arg = 5; arg < argc; arg += 3) {
+                names.push_back(argv[arg]);
+                returns.push_back(table.numbers(argv[arg]));
+                expected.push_back(number(argv[arg + 1]));
+                previous.push_back(number(argv[arg + 2]));
+            }
+            auto shrink = kline::ledoit_wolf_identity(returns);
+            auto result = kline::optimize_long_only(
+                expected, shrink.covariance, previous,
+                number(argv[3]), number(argv[4]));
+            cout << "ShrinkageIntensity " << shrink.intensity << "\n";
+            cout << "Asset,TargetWeight\n";
+            for (int i = 0; i < int(names.size()); i++)
+                cout << names[i] << "," << result.weights[i] << "\n";
+            cout << "ExpectedReturn " << result.expected_return << "\n"
+                 << "ExpectedVolatility " << result.expected_volatility << "\n"
+                 << "HalfTurnover " << result.one_way_turnover << "\n"
+                 << "PenalizedObjective " << result.objective << "\n";
+        } else if (command == "bl-pair") {
+            require_arguments(argc, 10);
+            auto table = kline::read_csv(argv[2]);
+            auto shrink = kline::ledoit_wolf_identity(
+                {table.numbers(argv[3]), table.numbers(argv[4])});
+            vector<double> prior = {number(argv[5]), number(argv[6])};
+            auto posterior = kline::black_litterman_posterior(
+                prior, shrink.covariance, number(argv[9]),
+                {{1, -1}}, {number(argv[7])}, {number(argv[8])});
+            cout << "ShrinkageIntensity " << shrink.intensity << "\n"
+                 << "PosteriorA " << posterior[0] << "\n"
+                 << "PosteriorB " << posterior[1] << "\n";
         } else if (command == "asof") {
             require_arguments(argc, 4);
             auto events = kline::read_csv(argv[2]);
