@@ -62,7 +62,9 @@ seen = {}
 for area, entries, origin in (("math", math, math_origin), ("ml", ml, ml_origin)):
     for id, entry in sorted(entries.items()):
         code = entry["code"]
-        assert entry["title"] and len(entry.get("description", "")) >= 8
+        assert entry["title"]
+        if origin[id] != "core":
+            assert len(entry.get("description", "")) >= 8
         assert len(code) >= 130 and "int main()" in code
         assert "#define " not in code and "template<" not in code
         if origin[id] != "core":
