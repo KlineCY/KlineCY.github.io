@@ -39,10 +39,12 @@
        subsection("regionNavMenu","按地区划分","regionSub")),
     assets:
       '<a class="q-menu-link" href="'+route("assets")+'">全部金融资产</a>'+
+      '<a class="q-menu-link" href="'+route("assets")+'risk-and-pricing.html">资产定价、合同现金流与风险</a>'+
       subsection("marketNav","按市场 / 地区","marketChoices",page==="assets")+
       subsection("typeNav","按金融工具类型","typeChoices"),
     feeds:
       '<a class="q-menu-link" href="'+route("feeds")+'">全部数据字段</a>'+
+      '<a class="q-menu-link" href="'+route("feeds")+'point-in-time-data.html">金融数据工程与历史可得信息</a>'+
       '<a class="q-menu-link" href="'+route("feeds")+'?mode=providers">数据供应商目录</a>'+
       subsection("feedsCategoryNav","按数据类别","feedChoices",page==="feeds"),
     research:
