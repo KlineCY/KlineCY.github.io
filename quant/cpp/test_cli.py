@@ -146,6 +146,20 @@ with tempfile.TemporaryDirectory() as work:
     assert abs(float(rows[0][-1]) - 1.1 / 1.01) < 1e-7
     assert abs(float(rows[1][3])) < 1e-7
     assert abs(float(rows[2][-1]) - 1.1 / 1.01 * 0.99) < 1e-7
+
+    longshort_csv = directory / "longshort.csv"
+    csv_write(longshort_csv, ["WA", "RA", "WB", "RB"], [
+        [1, 0.1, -1, -0.05], [0, 0, 0, 0]
+    ])
+    signed = run("longshort", longshort_csv, 0, 0, 0, 0.01, 2,
+                 "WA", "RA", "WB", "RB")
+    signed_rows = [line.split(",") for line in signed.strip().splitlines()[1:]]
+    assert abs(float(signed_rows[0][-1]) - 1.14) < 1e-7
+    run("longshort", longshort_csv, 0, 0, 0, 0, 1, "WA", "RA", "WB", "RB",
+        success=False)
+    run("longshort", longshort_csv, 9999, 0, 0, 0, 2,
+        "WA", "RA", "WB", "RB", success=False)
+
     run("ridge", learning_csv, "Y", -1, "X", success=False)
     run("ridge-forward", learning_csv, "Y", "Maturity", 2, 5, 3, 1, 0, "X",
         success=False)
@@ -164,4 +178,4 @@ with tempfile.TemporaryDirectory() as work:
     run("calibration", calibration_csv, "Probability", "Label", 0, success=False)
     run("montecarlo", 100, 100, 0.05, 0, 0.2, 1, "call", 0, 2026, success=False)
 
-print("PASS: 26 CLI workflows, time-safe Ridge and cash-ledger invalid-input checks")
+print("PASS: 27 CLI workflows, time-safe Ridge and cash-ledger invalid-input checks")
