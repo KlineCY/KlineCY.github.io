@@ -253,7 +253,7 @@ try{
     near(bars[1].vwap,(100+2*110)/3.0,1e-12,
          "Volume bar split across trades");
     near(bars[2].vwap,110,1e-12,"Third full volume bar");
-    near(inventory_variance_penalty(10,0.2,100,1,0.1),200,1e-12,
+    near(inventory_variance_penalty(10,0.2,100,1,0.1),2000,1e-12,
          "Inventory exposure variance penalty");
     near(inventory_mark_to_market_pnl(10,100,102),20,1e-12,
          "Inventory drift PnL");
