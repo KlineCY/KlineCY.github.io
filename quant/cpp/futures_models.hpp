@@ -42,6 +42,7 @@ inline double futures_basis(double future_price,double spot_price) {
 inline double annualized_futures_basis(double future_price,double spot_price,
                                        double years) {
     require(std::isfinite(years)&&years>0,"Futures basis maturity must be positive");
+    require(future_price>0,"Log futures basis needs positive forward");
     return std::log(1+futures_basis(future_price,spot_price))/years;
 }
 
