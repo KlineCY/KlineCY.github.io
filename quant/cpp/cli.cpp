@@ -316,7 +316,11 @@ int main(int argc, char** argv) {
                 for (int t = 0; t < int(y.size()); t++) x[t].push_back(column[t]);
             }
             auto model = kline::fit_ridge(x, y, number(argv[4]));
-            cout << "Intercept " << model.intercept << "\n";
+            double raw_intercept = model.intercept;
+            for (int j = 0; j < int(features.size()); j++)
+                raw_intercept -= model.coefficients[j] *
+                                 model.feature_mean[j] / model.feature_scale[j];
+            cout << "Intercept " << raw_intercept << "\n";
             cout << "Feature,CoefficientPerRawUnit\n";
             for (int j = 0; j < int(features.size()); j++)
                 cout << features[j] << "," <<
