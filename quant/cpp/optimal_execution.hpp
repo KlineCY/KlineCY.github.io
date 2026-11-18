@@ -16,6 +16,7 @@ inline std::vector<double> almgren_chriss_schedule(
     if(shares==0)return std::vector<double>(intervals,0);
     double kappa=std::sqrt(risk_aversion*volatility*volatility/
                            temporary_impact);
+    require(kappa*intervals<650,"Execution risk scale is numerically excessive");
     std::vector<double> weights(intervals);
     if(kappa<1e-8){
         for(double& v:weights)v=1.0/intervals;
