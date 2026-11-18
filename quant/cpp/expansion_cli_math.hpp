@@ -28,6 +28,7 @@
 #include <cmath>
 #include <iomanip>
 #include <iostream>
+#include <map>
 #include <string>
 #include <vector>
 namespace kline {
@@ -122,6 +123,29 @@ inline bool run_expansion_math(const std::string& command,int argc,char** argv,
         exact(7);
         out<<"HorizonVariance "<<garch_forecast_horizon(
             number(2),number(3),number(4),number(5),std::stoi(argv[6]))<<"\n";
+    }else if(command=="fama-macbeth"){
+        exact(6);
+        auto t=read_csv(argv[2]);
+        auto times=t.numbers(argv[3]),factors=t.numbers(argv[4]),
+             realized=t.numbers(argv[5]);
+        std::map<int,std::pair<Matrix,std::vector<double>>> grouped;
+        for(int i=0;i<int(times.size());i++){
+            require(times[i]==std::floor(times[i])&&times[i]>=0&&
+                    times[i]<=100000000,"Cross-section date index invalid");
+            auto& entry=grouped[int(times[i])];
+            entry.first.push_back({factors[i]});
+            entry.second.push_back(realized[i]);
+        }
+        std::vector<Matrix> features;
+        std::vector<std::vector<double>> returns;
+        for(const auto& item:grouped){
+            features.push_back(item.second.first);
+            returns.push_back(item.second.second);
+        }
+        auto result=fama_macbeth(features,returns);
+        out<<"Intercept "<<result.average_coefficients[0]<<"\n"
+           <<"FactorPrice "<<result.average_coefficients[1]<<"\n"
+           <<"FactorSE "<<result.standard_errors[1]<<"\n";
     }else if(command=="panel-fe"){
         exact(6);
         auto t=read_csv(argv[2]);
@@ -311,6 +335,7 @@ inline void expansion_math_usage(std::ostream& out){
        <<"  garch-steady OMEGA ALPHA BETA\n"
        <<"  garch-horizon VAR OMEGA ALPHA BETA HORIZON\n"
        <<"  panel-fe CSV ENTITY_ID OUTCOME CONTROL\n"
+       <<"  fama-macbeth CSV PERIOD_INDEX FACTOR FUTURE_RETURN\n"
        <<"  gpd-survival|gpd-quantile VALUE SHAPE SCALE\n"
        <<"  hill-index CSV POSITIVE_LOSS TOP_COUNT\n"
        <<"  gaussian-es MEAN_LOSS SIGMA CONFIDENCE\n"
