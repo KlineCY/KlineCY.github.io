@@ -515,6 +515,31 @@ void test_learning_and_ledger() {
     expect_error([&]() {
         kline::simulate_long_only_rebalance({{1}}, {{-1}}, 0);
     }, "reject exhausted portfolio equity");
+
+    auto long_short = kline::simulate_long_short_rebalance(
+        {{1, -1}}, {{0.1, -0.05}}, 0, 0, 0, 0.01, 2);
+    near(long_short[0].ending_equity, 1.14, 1e-12,
+         "long-short returns include both signed legs and short borrow fee");
+    auto short_cash = kline::simulate_long_short_rebalance(
+        {{-1}}, {{0.5}}, 0, 0.02, 0.04, 0.01, 2);
+    near(short_cash[0].ending_equity, 0.51, 1e-12,
+         "restricted short sale proceeds do not earn a second cash return");
+    auto funded = kline::simulate_long_short_rebalance(
+        {{1.5, -0.5}}, {{0, 0}}, 0, 0.02, 0.02, 0.01, 2);
+    near(funded[0].ending_equity, 0.985, 1e-12,
+         "leveraged longs pay funding and shorts pay borrow fees");
+    expect_error([&]() {
+        kline::simulate_long_short_rebalance({{1.5, -1}}, {{0, 0}},
+                                              0, 0, 0, 0, 2);
+    }, "reject gross exposure beyond limit");
+    expect_error([&]() {
+        kline::simulate_long_short_rebalance({{-2}}, {{0.6}},
+                                              0, 0, 0, 0, 2);
+    }, "reject short-side bankruptcy");
+    expect_error([&]() {
+        kline::simulate_long_only_rebalance({{1}}, {{0}}, 15000);
+    }, "long-only ledger rejects commission above total equity");
+
 }
 
 int main() {
