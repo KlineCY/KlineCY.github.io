@@ -40,6 +40,8 @@ assert set(math) == set(math_nodes), 'Every mathematics curriculum node needs ru
 
 ml_paths = [
     root / "ml/atlas-concept-chapters.json",
+    root / "ml/atlas-depth-foundations.json",
+    root / "ml/atlas-depth-learning.json",
     *sorted((root / "ml").glob("atlas-concept-bridge-v113*.json")),
     *sorted((root / "ml").glob("atlas-concept-bridge-v114*.json")),
     *sorted((root / "ml").glob("atlas-depth-07-*.json")),
