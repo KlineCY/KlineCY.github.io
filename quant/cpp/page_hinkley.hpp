@@ -1,5 +1,6 @@
 #pragma once
 #include "stats.hpp"
+#include <algorithm>
 #include <cmath>
 #include <vector>
 namespace kline {

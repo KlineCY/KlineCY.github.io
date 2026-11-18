@@ -1,5 +1,6 @@
 #pragma once
 #include "stats.hpp"
+#include <algorithm>
 #include <cmath>
 namespace kline {
 inline double square_root_impact_fraction(

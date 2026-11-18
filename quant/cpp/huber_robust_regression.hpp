@@ -1,5 +1,6 @@
 #pragma once
 #include "weighted_qr_regression.hpp"
+#include <algorithm>
 #include <cmath>
 #include <vector>
 namespace kline {
