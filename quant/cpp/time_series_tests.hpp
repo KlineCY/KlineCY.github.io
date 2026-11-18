@@ -1,5 +1,5 @@
 #pragma once
-#include "stats.hpp"
+#include "ols_models.hpp"
 #include <cmath>
 #include <vector>
 namespace kline {

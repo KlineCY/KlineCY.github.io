@@ -1,5 +1,5 @@
 #pragma once
-#include "stats.hpp"
+#include "portfolio.hpp"
 #include <cmath>
 #include <functional>
 #include <vector>

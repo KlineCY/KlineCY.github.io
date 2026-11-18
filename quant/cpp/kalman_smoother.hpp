@@ -4,8 +4,8 @@
 #include <cmath>
 #include <vector>
 namespace kline {
-inline std::vector<KalmanState> rts_random_walk_smoother(
-    const std::vector<double>& measurements,KalmanState initial,
+inline std::vector<ScalarKalman> rts_random_walk_smoother(
+    const std::vector<double>& measurements,ScalarKalman initial,
     double process_variance,double measurement_variance){
     auto filtered=kalman_filter(measurements,initial,process_variance,
                                 measurement_variance);
