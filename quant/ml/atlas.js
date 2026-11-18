@@ -319,7 +319,7 @@ async function start(){
   showStatus("正在读取并解压720篇正式讲义…");
   const data=await loadArchive();
   const cppBundle=await fetchAtlasJson("./atlas-cpp-examples.json",{cache:"no-cache"});
-  if(cppBundle.schema!==1||!cppBundle.lessons||Object.keys(cppBundle.lessons).length!==20)
+  if(cppBundle.schema!==1||!cppBundle.lessons||Object.keys(cppBundle.lessons).length<44)
    throw Error("C++17课程示例数量与索引不匹配");
   for(const [id,item] of Object.entries(cppBundle.lessons)){
    if(!/^m\d\d-c\d\d-p\d\d$/.test(id)||!item.title||!item.code?.includes("int main()"))throw Error("C++17示例损坏："+id);
