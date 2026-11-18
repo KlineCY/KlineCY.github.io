@@ -3,6 +3,8 @@
 #include "execution.hpp"
 #include "factors.hpp"
 #include "io.hpp"
+#include "macro.hpp"
+#include "etf.hpp"
 #include "portfolio.hpp"
 #include "risk.hpp"
 #include "stats.hpp"
@@ -270,6 +272,56 @@ void test_data() {
     expect_error([&]() { kline::csv_fields("\"bad"); }, "unclosed quote");
 }
 
+void test_macro_and_etf() {
+    near(kline::continuous_discount_factor(0.05, 2), exp(-0.1), 1e-12,
+         "continuous zero discount");
+    near(kline::continuous_forward_rate(0.03, 1, 0.04, 2), 0.05, 1e-12,
+         "bootstrapped continuously compounded forward");
+    near(kline::term_spread_bps(0.045, 0.035), 100, 1e-10,
+         "term spread basis points");
+    near(kline::breakeven_inflation(0.04, 0.015), 0.025, 1e-12,
+         "nominal minus real yield");
+    near(kline::duration_hedge_notional(1000000, 5, 10), -500000, 1e-9,
+         "short duration hedge convention");
+    near(kline::approximate_parallel_shift_pnl(1000000, 5, 40, 0.01),
+         -48000, 1e-8, "duration and convexity shock PnL");
+    near(kline::fx_forward_quote_per_base(1.2, 0.02, 0.05, 1),
+         1.2 * 1.05 / 1.02, 1e-12, "FX covered parity direction");
+    near(kline::futures_roll_yield(98, 100), -0.02, 1e-12,
+         "contango simplified roll return");
+    near(kline::excess_bond_return_approx(0.04, 3, 0.01, 15),
+         0.01075, 1e-12, "bond return carry and convexity");
+
+    near(kline::nav_premium_discount(102, 100), 0.02, 1e-12, "ETF NAV premium");
+    near(kline::tracking_difference_annualized({0.01, 0.02}, {0.011, 0.021}),
+         -0.252, 1e-12, "arithmetic tracking difference");
+    near(kline::tracking_error_annualized({0.01, 0.02, 0.03},
+                                          {0.009, 0.020, 0.031}),
+         0.001 * sqrt(252.0), 1e-12, "annual ETF tracking error");
+    near(kline::daily_expense_drag(0), 0, 1e-12, "zero expense ratio");
+    double one_day = kline::daily_expense_drag(0.01);
+    near(pow(1 - one_day, 252), 0.99, 1e-12,
+         "daily expense compounds to one-year annual ratio");
+    near(kline::gross_exposure({0.6, -0.4, 0.2}), 1.2, 1e-12,
+         "ETF/CTA gross exposure");
+    near(kline::net_exposure({0.6, -0.4, 0.2}), 0.4, 1e-12,
+         "ETF/CTA net exposure");
+    near(kline::volatility_target_multiplier(0.2, 0.1, 1.2), 0.5, 1e-12,
+         "volatility target deleveraging");
+    near(kline::volatility_target_multiplier(0.05, 0.2, 1.5), 1.5, 1e-12,
+         "volatility target leverage cap");
+    near(kline::total_return_with_cash_distribution(100, 98, 3), 0.01, 1e-12,
+         "simple return with cash distribution");
+    near(kline::exchange_traded_fund_liquidity_cost_bps(20, 2, 3),
+         15, 1e-12, "half spread plus commission and impact");
+    expect_error([&]() { kline::fx_forward_quote_per_base(1, -2, 0.04, 1); },
+                 "covered parity invalid discount");
+    expect_error([&]() { kline::nav_premium_discount(100, 0); },
+                 "ETF nonpositive NAV");
+    expect_error([&]() { kline::volatility_target_multiplier(0, 0.1, 2); },
+                 "volatility target zero observed risk");
+}
+
 int main() {
     try {
         test_stats();
@@ -279,6 +331,7 @@ int main() {
         test_factors();
         test_execution();
         test_data();
+        test_macro_and_etf();
         cout << "PASS: " << checks << " independent C++17 numerical and safety assertions\n";
         return 0;
     } catch (const exception& error) {
