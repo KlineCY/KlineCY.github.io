@@ -173,6 +173,9 @@ void ml(){
         {0,0,0,0,0,0},{1,2,3,4,5,6},{1,2,3,4,5,6},1);
     ensure(dm.mean_loss_difference>0&&dm.hac_se>0&&dm.t>0,
            "DM improves second prediction");
+    rejects([]{kline::diebold_mariano_squared_error(
+        {1,2,3,4},{1,2,3,4},{1,2,3,4},1);},
+        "Identical forecast losses must reject zero HAC variance");
     auto best=kline::select_top_abs_correlation(
         {{1,3},{2,1},{3,3},{4,1},{5,3},{6,1}},
         {1,2,3,4,5,6},1);

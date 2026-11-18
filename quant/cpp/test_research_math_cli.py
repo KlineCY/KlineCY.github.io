@@ -112,7 +112,7 @@ with tempfile.TemporaryDirectory() as d:
         ("kernel-predict",(data,"Factor","Target",0,0,1)),
         ("gp-predict",(data,"Factor","Target",0,1,0)),
         ("conformal-interval",(data,"Target","Actual",0.5,0.001)),
-        ("forecast-dm",(data,"PredA","PredA","Actual",1)),
+        ("forecast-dm",(data,"PredA","PredA","Actual",200)),
         ("feature-filter",(data,"Target",100,"Factor")),
         ("adam-predict",(data,"Factor","Target",0,0,0.1)),
         ("mlp-predict",(data,"Factor","Target",0,0,300,0.01)),
