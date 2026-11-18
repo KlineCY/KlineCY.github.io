@@ -119,7 +119,7 @@ inline bool run_expansion_math(const std::string& command,int argc,char** argv,
         out<<"UnconditionalVariance "<<garch_unconditional_variance(
             number(2),number(3),number(4))<<"\n";
     }else if(command=="garch-horizon"){
-        exact(8);
+        exact(7);
         out<<"HorizonVariance "<<garch_forecast_horizon(
             number(2),number(3),number(4),number(5),std::stoi(argv[6]))<<"\n";
     }else if(command=="panel-fe"){
@@ -194,7 +194,7 @@ inline bool run_expansion_math(const std::string& command,int argc,char** argv,
                                                          {number(5)},k)<<"\n";
         }
     }else if(command=="stump-regress" || command=="boost-regress"){
-        exact(7);auto t=read_csv(argv[2]);
+        exact(command=="stump-regress"?6:7);auto t=read_csv(argv[2]);
         auto y=t.numbers(argv[4]);
         Matrix x=expansion_numeric_rows(t,{argv[3]});
         if(command=="stump-regress"){
@@ -319,7 +319,7 @@ inline void expansion_math_usage(std::ostream& out){
        <<"  binary-entropy P\n"
        <<"  rls-train CSV FEATURE TARGET RIDGE\n"
        <<"  knn-regress|knn-probability CSV FEATURE LABEL QUERY K\n"
-       <<"  stump-regress|boost-regress CSV FEATURE TARGET QUERY ROUNDS\n"
+       <<"  stump-regress CSV FEATURE TARGET QUERY | boost-regress CSV FEATURE TARGET QUERY ROUNDS\n"
        <<"  gaussian-nb|isotonic-fit CSV FEATURE LABEL QUERY\n"
        <<"  cov-eigen-floor CSV RETURN_A RETURN_B FLOOR_FRACTION\n"
        <<"  gmv2|hrp2 CSV RETURN_A RETURN_B\n"
