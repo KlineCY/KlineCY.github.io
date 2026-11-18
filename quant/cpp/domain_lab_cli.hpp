@@ -48,12 +48,12 @@ inline bool run_domain_lab_cli(const std::string& c,int argc,char** argv,
   exact(5);auto d=read_csv(argv[2]);
   out<<"EffectiveSampleSize "<<ipw_effective_sample_size(
    d.numbers(argv[3]),d.numbers(argv[4]))<<"\n";
- }else if(c=="roll-spread"){
-  exact(4);out<<"EffectiveSpread "<<roll_effective_spread(
-   read_csv(argv[2]).numbers(argv[3]))<<"\n";
- }else if(c=="amihud"){
+ }else if(c=="quoted-spread"){
+  exact(5);out<<"QuotedSpreadBps "<<quoted_spread_basis_points(
+   read_csv(argv[2]).numbers(argv[3]),read_csv(argv[2]).numbers(argv[4]))<<"\n";
+ }else if(c=="replenishment"){
   exact(5);auto d=read_csv(argv[2]);
-  out<<"Amihud "<<amihud_illiquidity(d.numbers(argv[3]),d.numbers(argv[4]))<<"\n";
+  out<<"Replenishment "<<liquidity_replenishment_ratio(d.numbers(argv[3]),d.numbers(argv[4]))<<"\n";
  }else if(c=="kyle-lambda"){
   exact(5);auto d=read_csv(argv[2]);
   out<<"ImpactLambda "<<kyle_price_impact_slope(d.numbers(argv[3]),d.numbers(argv[4]))<<"\n";
@@ -138,8 +138,8 @@ inline void domain_lab_usage(std::ostream& out){
     <<"  aipw-ate CSV TREATMENT OUTCOME PROPENSITY MU0 MU1\n"
     <<"  smd-covariate CSV FEATURE TREATMENT\n"
     <<"  ipw-ess CSV TREATMENT PROPENSITY\n"
-    <<"  roll-spread CSV TRADE_PRICE\n"
-    <<"  amihud CSV RETURN DOLLAR_VOLUME\n"
+    <<"  quoted-spread CSV BID ASK\n"
+    <<"  replenishment CSV EXECUTED REPLENISHED\n"
     <<"  kyle-lambda CSV SIGNED_VOLUME PRICE_CHANGE\n"
     <<"  sign-autocorr CSV SIGN\n"
     <<"  forward-zero DISCOUNT_START DISCOUNT_END START_YEARS END_YEARS\n"
