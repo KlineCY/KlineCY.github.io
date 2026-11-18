@@ -73,8 +73,16 @@ with tempfile.TemporaryDirectory() as folder:
                                   text=True, capture_output=True, timeout=30)
         if compiled.returncode:
             raise AssertionError(f"Compile failed [{key}]:\n{compiled.stderr[:4000]}")
-        for seed, days in [(1, 100), (2, 61), (3, 90), (4, 41), (5, 20)]:
+        for seed, days in [(1, 100), (2, 61), (3, 90), (4, 41), (5, 20),
+                           (6, 40), (7, 60), (8, 63), (9, 81), (10, 140),
+                           (11, 100), (12, 0)]:
             history = make_history(seed, days)
+            if seed == 11:
+                for j, bars in enumerate(history.values()):
+                    for bar in bars:
+                        bar["open"] = 100 + j * 10
+                        bar["close"] = 100 + j * 10
+                        bar["volume"] = 300000.0
             expected = expected_weights(item["code"], history)
             actual = actual_weights(binary, history)
             if set(expected) != set(actual):
@@ -84,4 +92,4 @@ with tempfile.TemporaryDirectory() as folder:
                     raise AssertionError(f"{key} / {seed} / {days} / {name}: "
                                          f"Python={value} C++={actual[name]}")
         print("PASS", key)
-print("All 70 C++ strategy programs compile and match five Python scenarios each.")
+print("All 70 C++ strategy programs compile and match twelve Python scenarios each, including flat prices, empty data and history-window boundaries.")
