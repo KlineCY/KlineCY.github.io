@@ -46,7 +46,11 @@ ml_paths = [
 ]
 ml_sources = {}
 for p in ml_paths:
-    for id, item in json.loads(p.read_text(encoding="utf-8"))["lessons"].items():
+    data = json.loads(p.read_text(encoding="utf-8"))
+    lessons = data.get("lessons")
+    if not isinstance(lessons, dict):
+        continue
+    for id, item in lessons.items():
         ml_sources[id] = item.get("source_title") or item.get("title")
 assert set(ml) <= set(ml_sources)
 
