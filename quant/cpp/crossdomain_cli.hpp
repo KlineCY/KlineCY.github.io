@@ -172,7 +172,7 @@ inline bool run_crossdomain_cli(const std::string& cmd,int argc,
         out<<"Cov11 "<<cov[0][0]<<"\nCov12 "<<cov[0][1]
            <<"\nCov22 "<<cov[1][1]<<"\n";
     }else if(cmd=="factor-neutral2"){
-        exact(7);auto t=read_csv(argv[2]);
+        exact(6);auto t=read_csv(argv[2]);
         auto result=minimum_change_factor_neutral(
             t.numbers(argv[3]),{t.numbers(argv[4])},{num(5)});
         out<<"Index,NeutralWeight\n";
