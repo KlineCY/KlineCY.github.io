@@ -1,0 +1,278 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>量化金融机器学习文献：识别、验证与复现｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><style>*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:white;color:#1a2c3a;font:15px/1.93 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:30px 35px 74px}main{max-width:1200px;margin:auto}header,.toc,article{border:1px solid #ced9e3;background:white}header{padding:30px 33px}.toc{display:flex;flex-wrap:wrap;gap:10px 19px;padding:17px;margin:19px 0}h1{font-size:clamp(29px,3vw,41px)}h2{font-size:23px;margin:34px 0 15px;border-bottom:1px solid #cdd8e1;padding-bottom:11px}h3{font-size:19px;margin:0 0 12px}article{padding:18px 26px;margin:13px 0}a{color:#205d86}.formula{padding:14px 8px;border-block:1px solid #d6dfe6;margin:15px 0;overflow:auto}pre{font:12px/1.58 "Times New Roman",monospace;overflow:auto;border:1px solid #d1dbe4;max-height:530px;padding:14px}footer{font-size:13px;color:#526c7c;margin-top:27px}@media(max-width:760px){.main{margin:0;padding:12px}header,article{padding:17px}}</style></head><body><aside id="quantSidebar" class="sidebar" data-page="papers"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><small>ACADEMIC REPLICATION / FINANCIAL MACHINE LEARNING</small><h1>金融机器学习论文的完整复现与实证识别</h1><p>56节体系化课程，覆盖数据历史可得、标签成熟、Purging与Embargo、多模型统计选择、滚动样本外验证、预测损失比较和净成本交易归因。每个模块包含数学结构、识别逻辑、实际源码及复算方式，与既有论文周报独立衔接。</p></header><nav class="toc"><a href="#paper0">研究数据中的As-of与历史可得性</a><a href="#paper1">Purging与Embargo的标签时间清理</a><a href="#paper2">金融事件标签与多期限目标</a><a href="#paper3">多重模型搜索与统计检验</a><a href="#paper4">嵌套时序训练与最终测试</a><a href="#paper5">预测误差差分与统计稳定性</a><a href="#paper6">从预测论文到真实交易归因</a></nav><section id="paper0"><h2>1．研究数据中的As-of与历史可得性</h2><article id="paper0-0"><h3>1.1　论文研究问题及数学对象</h3><p>金融研究的特征采样时间与实际发布时间经常不同。通过As-of匹配选择当时最后一条已经发布的有效信息，才能构造历史投资者可获得的研究数据集。</p><div class="formula">$$X_{t}^{available}=X_{\arg\max_s\{s:publish_s\le decision_t\}}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/market_data_alignment.hpp">完整C++17实现：market_data_alignment.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper0-1"><h3>1.2　推导、目标与数据生成</h3><p>在每个资产决策时点，先形成所有已知记录的候选集合，再按发布时间选择最近有效条目。若数据有不同修订版本，应保留当时可用版本而不是使用后来的最终修订数据。</p><div class="formula">$$X_{t}^{available}=X_{\arg\max_s\{s:publish_s\le decision_t\}}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/market_data_alignment.hpp">完整C++17实现：market_data_alignment.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper0-2"><h3>1.3　时间可得性和识别边界</h3><p>同一自然日期可能跨多个市场交易时钟，按日期直接合并会把之后才收盘的数据错误提前。数据源还要记录时区、缺失机制与原始证券标识。</p><div class="formula">$$X_{t}^{available}=X_{\arg\max_s\{s:publish_s\le decision_t\}}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/market_data_alignment.hpp">完整C++17实现：market_data_alignment.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper0-3"><h3>1.4　数据样本、模型验证与参数单位</h3><p>本论文复现主题需要在同一数据样本内维护明确的日期、标签和参数单位。同一自然日期可能跨多个市场交易时钟，按日期直接合并会把之后才收盘的数据错误提前。数据源还要记录时区、缺失机制与原始证券标识。</p><div class="formula">$$X_{t}^{available}=X_{\arg\max_s\{s:publish_s\le decision_t\}}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/market_data_alignment.hpp">完整C++17实现：market_data_alignment.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper0-4"><h3>1.5　实际可编译C++17算法</h3><p>用原仓库的C++17接口实现具体计算步骤，便于检查研究设定与程序计算是否一致。在每个资产决策时点，先形成所有已知记录的候选集合，再按发布时间选择最近有效条目。若数据有不同修订版本，应保留当时可用版本而不是使用后来的最终修订数据。</p><div class="formula">$$X_{t}^{available}=X_{\arg\max_s\{s:publish_s\le decision_t\}}$$</div><pre><code>#pragma once
+#include &quot;stats.hpp&quot;
+#include &lt;algorithm&gt;
+#include &lt;map&gt;
+#include &lt;vector&gt;
+namespace kline {
+struct DatedValue{
+    int date=0;
+    double value=0;
+};
+inline std::vector&lt;DatedValue&gt; aligned_intersection(
+    const std::vector&lt;DatedValue&gt;&amp; a,const std::vector&lt;DatedValue&gt;&amp; b,
+    std::vector&lt;double&gt;&amp; paired_b){
+    require(!a.empty()&amp;&amp;!b.empty(),&quot;Dated series required&quot;);
+    auto validate=[](const std::vector&lt;DatedValue&gt;&amp; values){
+        for(int i=0;i&lt;int(values.size());i++){
+            require(std::isfinite(values[i].value),&quot;Nonfinite dated value&quot;);
+            if(i&gt;0)require(values[i].date&gt;values[i-1].date,
+                            &quot;Dates must be strictly ordered&quot;);
+        }
+    };
+    validate(a);validate(b);
+    int i=0,j=0;
+    std::vector&lt;DatedValue&gt; out;paired_b.clear();
+    while(i&lt;int(a.size())&amp;&amp;j&lt;int(b.size())){
+        if(a[i].date==b[j].date){
+            out.push_back(a[i]);paired_b.push_back(b[j].value);i++;j++;
+        }else if(a[i].date&lt;b[j].date)i++;else j++;
+    }
+    require(!out.empty(),&quot;No overlapping market dates&quot;);
+    return out;
+}
+inline std::vector&lt;double&gt; asof_last_known(
+    const std::vector&lt;DatedValue&gt;&amp; published,
+    const std::vector&lt;int&gt;&amp; decision_dates){
+    require(!published.empty()&amp;&amp;!decision_dates.empty(),&quot;Missing asof inputs&quot;);
+    for(int i=1;i&lt;int(published.size());i++)
+        require(published[i].date&gt;published[i-1].date,
+                &quot;Publication sequence not sorted&quot;);
+    std::vector&lt;double&gt; out;
+    int j=-1;
+    for(int i=0;i&lt;int(decision_dates.size());i++){
+        if(i&gt;0)require(decision_dates[i]&gt;=decision_dates[i-1],
+                       &quot;Decisions must be chronological&quot;);
+        while(j+1&lt;int(published.size())&amp;&amp;
+              published[j+1].date&lt;=decision_dates[i])j++;
+        require(j&gt;=0,&quot;No known value at decision time&quot;);
+        require(std::isfinite(published[j].value),&quot;Nonfinite asof value&quot;);
+        out.push_back(published[j].value);
+    }
+    return out;
+}
+} // namespace kline
+</code></pre><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/market_data_alignment.hpp">完整C++17实现：market_data_alignment.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper0-5"><h3>1.6　复现步骤的经济解释</h3><p>机器学习论文复现中，模型性能通常对特征时点非常敏感。应与作者明确的预测决策时刻比较，独立重建输入特征和标签的可得信息集。</p><div class="formula">$$X_{t}^{available}=X_{\arg\max_s\{s:publish_s\le decision_t\}}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/market_data_alignment.hpp">完整C++17实现：market_data_alignment.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper0-6"><h3>1.7　结果偏差和替代研究设计</h3><p>即使时点匹配正确，退市与幸存者选择仍可能使资产池发生偏差，不能以正确As-of Join替代历史投资样本全面审计。</p><div class="formula">$$X_{t}^{available}=X_{\arg\max_s\{s:publish_s\le decision_t\}}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/market_data_alignment.hpp">完整C++17实现：market_data_alignment.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper0-7"><h3>1.8　可复核输出与可靠文献来源</h3><p>研究报告应保留最终样本外数据、源文献识别信息和原始计算设置。即使时点匹配正确，退市与幸存者选择仍可能使资产池发生偏差，不能以正确As-of Join替代历史投资样本全面审计。公开源码只能证明实现可复核，不能替代论文实证识别和可靠样本支持。</p><div class="formula">$$X_{t}^{available}=X_{\arg\max_s\{s:publish_s\le decision_t\}}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/market_data_alignment.hpp">完整C++17实现：market_data_alignment.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article></section><section id="paper1"><h2>2．Purging与Embargo的标签时间清理</h2><article id="paper1-0"><h3>2.1　论文研究问题及数学对象</h3><p>金融收益标签常依赖从进场至退出的一段未来价格路径。单看训练样本日期与测试样本日期是否重叠，不足以防止标签区间共享未来收益。</p><div class="formula">$$Train_i\cap Test_j=\varnothing\quad\text{for overlapping label intervals}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/validation_advanced.hpp">完整C++17实现：validation_advanced.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper1-1"><h3>2.2　推导、目标与数据生成</h3><p>为每条标签保存开始与结束时间，逐条比较其标签路径是否与测试期间相交；对测试附近额外预留时间间隔，降低特征和事件结果延迟共享造成的信息交叉。</p><div class="formula">$$Train_i\cap Test_j=\varnothing\quad\text{for overlapping label intervals}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/validation_advanced.hpp">完整C++17实现：validation_advanced.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper1-2"><h3>2.3　时间可得性和识别边界</h3><p>Purging清理的是标签结果窗口的重叠，Embargo还可以限制模型训练与测试之间的接近程度。应根据真实成熟时间而非固定想象的观察期完成清理。</p><div class="formula">$$Train_i\cap Test_j=\varnothing\quad\text{for overlapping label intervals}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/validation_advanced.hpp">完整C++17实现：validation_advanced.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper1-3"><h3>2.4　数据样本、模型验证与参数单位</h3><p>本论文复现主题需要在同一数据样本内维护明确的日期、标签和参数单位。Purging清理的是标签结果窗口的重叠，Embargo还可以限制模型训练与测试之间的接近程度。应根据真实成熟时间而非固定想象的观察期完成清理。</p><div class="formula">$$Train_i\cap Test_j=\varnothing\quad\text{for overlapping label intervals}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/validation_advanced.hpp">完整C++17实现：validation_advanced.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper1-4"><h3>2.5　实际可编译C++17算法</h3><p>用原仓库的C++17接口实现具体计算步骤，便于检查研究设定与程序计算是否一致。为每条标签保存开始与结束时间，逐条比较其标签路径是否与测试期间相交；对测试附近额外预留时间间隔，降低特征和事件结果延迟共享造成的信息交叉。</p><div class="formula">$$Train_i\cap Test_j=\varnothing\quad\text{for overlapping label intervals}$$</div><pre><code>#pragma once
+#include &quot;validation.hpp&quot;
+#include &lt;algorithm&gt;
+#include &lt;vector&gt;
+
+namespace kline {
+struct LabeledPeriod {
+    int start=0;
+    int end=0;
+};
+
+inline std::vector&lt;int&gt; purge_label_intervals(
+    const std::vector&lt;LabeledPeriod&gt;&amp; training,
+    const LabeledPeriod&amp; test,int embargo=0) {
+    require(test.end&gt;test.start&amp;&amp;embargo&gt;=0,
+            &quot;Invalid validation interval or embargo&quot;);
+    std::vector&lt;int&gt; keep;
+    for(int i=0;i&lt;int(training.size());i++){
+        auto event=training[i];
+        require(event.end&gt;event.start,&quot;Invalid training event interval&quot;);
+        bool overlaps=event.start&lt;test.end&amp;&amp;event.end&gt;test.start;
+        bool embargoed=event.start&gt;=test.end&amp;&amp;
+                        event.start&lt;test.end+embargo;
+        if(!overlaps&amp;&amp;!embargoed)keep.push_back(i);
+    }
+    return keep;
+}
+
+inline int eligible_training_count(const std::vector&lt;int&gt;&amp; maturity,
+                                    int decision,int gap=0) {
+    require(!maturity.empty()&amp;&amp;decision&gt;=0&amp;&amp;gap&gt;=0&amp;&amp;decision&gt;=gap,
+            &quot;Invalid label maturity gate&quot;);
+    int cutoff=decision-gap,count=0;
+    for(int i=0;i&lt;int(maturity.size());i++){
+        require(maturity[i]&gt;i,&quot;Label maturity must follow feature time&quot;);
+        if(i&lt;cutoff&amp;&amp;maturity[i]&lt;=cutoff)count++;
+    }
+    return count;
+}
+
+inline std::vector&lt;int&gt; chronological_holdout_indices(
+    int observations,int last_test_count,int gap=0) {
+    require(observations&gt;=3&amp;&amp;last_test_count&gt;0&amp;&amp;gap&gt;=0&amp;&amp;
+            last_test_count+gap&lt;observations,
+            &quot;Invalid chronological holdout parameters&quot;);
+    std::vector&lt;int&gt; labels;
+    for(int t=observations-last_test_count;t&lt;observations;t++)
+        labels.push_back(t);
+    return labels;
+}
+} // namespace kline
+</code></pre><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/validation_advanced.hpp">完整C++17实现：validation_advanced.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper1-5"><h3>2.6　复现步骤的经济解释</h3><p>对多资产ETF价格图像模型、事件驱动机器学习和策略模型比较，可以使用相同的时间隔离规则，使样本外评价具有可解释性。</p><div class="formula">$$Train_i\cap Test_j=\varnothing\quad\text{for overlapping label intervals}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/validation_advanced.hpp">完整C++17实现：validation_advanced.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper1-6"><h3>2.7　结果偏差和替代研究设计</h3><p>过度清理可能降低有效训练样本数量，清理不足则高估性能；具体差异应通过时点追踪和折划分审计。</p><div class="formula">$$Train_i\cap Test_j=\varnothing\quad\text{for overlapping label intervals}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/validation_advanced.hpp">完整C++17实现：validation_advanced.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper1-7"><h3>2.8　可复核输出与可靠文献来源</h3><p>研究报告应保留最终样本外数据、源文献识别信息和原始计算设置。过度清理可能降低有效训练样本数量，清理不足则高估性能；具体差异应通过时点追踪和折划分审计。公开源码只能证明实现可复核，不能替代论文实证识别和可靠样本支持。</p><div class="formula">$$Train_i\cap Test_j=\varnothing\quad\text{for overlapping label intervals}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/validation_advanced.hpp">完整C++17实现：validation_advanced.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article></section><section id="paper2"><h2>3．金融事件标签与多期限目标</h2><article id="paper2-0"><h3>3.1　论文研究问题及数学对象</h3><p>方向标签、固定期限收益与价格触及预设上下障碍的标签具有不同的信息区间。对研究模型，需要记录每一条事件的开始时间、结束时间、结果与成熟时点。</p><div class="formula">$$Y_{t,h}=\frac{P_{t+h}}{P_t}-1$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/event_labeling.hpp">完整C++17实现：event_labeling.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper2-1"><h3>3.2　推导、目标与数据生成</h3><p>对未来持有期价格路径检查累计回报与障碍阈值，按规定先发生的事件确定标签和退出时间。即使两个样本起点相近，其实际退出时点也可能不同。</p><div class="formula">$$Y_{t,h}=\frac{P_{t+h}}{P_t}-1$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/event_labeling.hpp">完整C++17实现：event_labeling.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper2-2"><h3>3.3　时间可得性和识别边界</h3><p>事件标签规则、资金止损上限和持有期限制应在样本外预测前固定。使用未来实现最高价帮助设置历史标签阈值会引入目标选择偏差。</p><div class="formula">$$Y_{t,h}=\frac{P_{t+h}}{P_t}-1$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/event_labeling.hpp">完整C++17实现：event_labeling.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper2-3"><h3>3.4　数据样本、模型验证与参数单位</h3><p>本论文复现主题需要在同一数据样本内维护明确的日期、标签和参数单位。事件标签规则、资金止损上限和持有期限制应在样本外预测前固定。使用未来实现最高价帮助设置历史标签阈值会引入目标选择偏差。</p><div class="formula">$$Y_{t,h}=\frac{P_{t+h}}{P_t}-1$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/event_labeling.hpp">完整C++17实现：event_labeling.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper2-4"><h3>3.5　实际可编译C++17算法</h3><p>用原仓库的C++17接口实现具体计算步骤，便于检查研究设定与程序计算是否一致。对未来持有期价格路径检查累计回报与障碍阈值，按规定先发生的事件确定标签和退出时间。即使两个样本起点相近，其实际退出时点也可能不同。</p><div class="formula">$$Y_{t,h}=\frac{P_{t+h}}{P_t}-1$$</div><pre><code>#pragma once
+#include &quot;stats.hpp&quot;
+#include &lt;cmath&gt;
+#include &lt;vector&gt;
+namespace kline {
+struct BarrierLabel{
+    int start=0,end=0,direction=0;
+    double realized_return=0;
+};
+inline BarrierLabel label_triple_barrier(const std::vector&lt;double&gt;&amp; prices,
+    int start,int horizon,double profit_take,double stop_loss){
+    check_finite(prices);
+    require(start&gt;=0&amp;&amp;start&lt;int(prices.size())-1&amp;&amp;
+            horizon&gt;=1&amp;&amp;std::isfinite(profit_take)&amp;&amp;profit_take&gt;0&amp;&amp;
+            std::isfinite(stop_loss)&amp;&amp;stop_loss&gt;0,
+            &quot;Invalid triple barrier parameters&quot;);
+    for(double p:prices)require(p&gt;0,&quot;Triple barrier needs positive prices&quot;);
+    int last=std::min(int(prices.size())-1,start+horizon);
+    double entry=prices[start];BarrierLabel result;
+    result.start=start;result.end=last;
+    for(int t=start+1;t&lt;=last;t++){
+        double r=prices[t]/entry-1;
+        if(r&gt;=profit_take){result.end=t;result.direction=1;break;}
+        if(r&lt;=-stop_loss){result.end=t;result.direction=-1;break;}
+    }
+    result.realized_return=prices[result.end]/entry-1;
+    return result;
+}
+inline std::vector&lt;BarrierLabel&gt; label_all_barriers(
+    const std::vector&lt;double&gt;&amp; prices,int horizon,
+    double profit_take,double stop_loss){
+    check_finite(prices);
+    std::vector&lt;BarrierLabel&gt; out;
+    require(horizon&gt;=1&amp;&amp;horizon&lt;int(prices.size()),
+            &quot;Full triple-barrier horizon exceeds sample&quot;);
+    for(int t=0;t+horizon&lt;int(prices.size());t++)
+        out.push_back(label_triple_barrier(prices,t,horizon,
+                                           profit_take,stop_loss));
+    return out;
+}
+} // namespace kline
+</code></pre><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/event_labeling.hpp">完整C++17实现：event_labeling.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper2-5"><h3>3.6　复现步骤的经济解释</h3><p>复现三重障碍、趋势分类或多期收益预测文献时，明确目标是否属于同一个经济交易行为，再比较模型精度和净收益。</p><div class="formula">$$Y_{t,h}=\frac{P_{t+h}}{P_t}-1$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/event_labeling.hpp">完整C++17实现：event_labeling.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper2-6"><h3>3.7　结果偏差和替代研究设计</h3><p>标签与交易执行的关系受成交价格、停牌和滑点影响。数学上触及价格并不意味着真实市场中能够在该价格成交。</p><div class="formula">$$Y_{t,h}=\frac{P_{t+h}}{P_t}-1$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/event_labeling.hpp">完整C++17实现：event_labeling.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper2-7"><h3>3.8　可复核输出与可靠文献来源</h3><p>研究报告应保留最终样本外数据、源文献识别信息和原始计算设置。标签与交易执行的关系受成交价格、停牌和滑点影响。数学上触及价格并不意味着真实市场中能够在该价格成交。公开源码只能证明实现可复核，不能替代论文实证识别和可靠样本支持。</p><div class="formula">$$Y_{t,h}=\frac{P_{t+h}}{P_t}-1$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/event_labeling.hpp">完整C++17实现：event_labeling.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article></section><section id="paper3"><h2>4．多重模型搜索与统计检验</h2><article id="paper3-0"><h3>4.1　论文研究问题及数学对象</h3><p>当研究反复尝试多个特征、算法和市场窗口时，即使单项检验都使用相同显著性水平，整组研究出现偶然显著结果的机会仍会增加。</p><div class="formula">$$P(\text{至少一次假阳性})=1-(1-\alpha)^m$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/hypothesis_testing.hpp">完整C++17实现：hypothesis_testing.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper3-1"><h3>4.2　推导、目标与数据生成</h3><p>若m个独立原假设检验都以α为误报概率，全部不误报的概率为(1-α)^m，因此至少一项误报的概率是其补集。实际研究中检验往往相关，需要更一般的多重比较控制。</p><div class="formula">$$P(\text{至少一次假阳性})=1-(1-\alpha)^m$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/hypothesis_testing.hpp">完整C++17实现：hypothesis_testing.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper3-2"><h3>4.3　时间可得性和识别边界</h3><p>论文复现应记录候选因子、超参数试验数量与事前定义的检验目标。Bonferroni控制家族错误率，BH过程控制预期错误发现比例，不能混淆二者。</p><div class="formula">$$P(\text{至少一次假阳性})=1-(1-\alpha)^m$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/hypothesis_testing.hpp">完整C++17实现：hypothesis_testing.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper3-3"><h3>4.4　数据样本、模型验证与参数单位</h3><p>本论文复现主题需要在同一数据样本内维护明确的日期、标签和参数单位。论文复现应记录候选因子、超参数试验数量与事前定义的检验目标。Bonferroni控制家族错误率，BH过程控制预期错误发现比例，不能混淆二者。</p><div class="formula">$$P(\text{至少一次假阳性})=1-(1-\alpha)^m$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/hypothesis_testing.hpp">完整C++17实现：hypothesis_testing.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper3-4"><h3>4.5　实际可编译C++17算法</h3><p>用原仓库的C++17接口实现具体计算步骤，便于检查研究设定与程序计算是否一致。若m个独立原假设检验都以α为误报概率，全部不误报的概率为(1-α)^m，因此至少一项误报的概率是其补集。实际研究中检验往往相关，需要更一般的多重比较控制。</p><div class="formula">$$P(\text{至少一次假阳性})=1-(1-\alpha)^m$$</div><pre><code>#pragma once
+#include &quot;stats.hpp&quot;
+#include &lt;cmath&gt;
+#include &lt;vector&gt;
+namespace kline {
+struct TStatistic{
+    double estimate=0,standard_error=0,t_value=0;
+};
+inline TStatistic welch_t_statistic(const std::vector&lt;double&gt;&amp; a,
+                                    const std::vector&lt;double&gt;&amp; b){
+    check_finite(a);check_finite(b);
+    require(a.size()&gt;=2&amp;&amp;b.size()&gt;=2,&quot;Welch test needs two observations per group&quot;);
+    double va=variance(a)/a.size(),vb=variance(b)/b.size();
+    double se=std::sqrt(va+vb);
+    require(se&gt;0,&quot;Welch statistic undefined for zero variance&quot;);
+    return {mean(a)-mean(b),se,(mean(a)-mean(b))/se};
+}
+inline TStatistic paired_t_statistic(const std::vector&lt;double&gt;&amp; a,
+                                     const std::vector&lt;double&gt;&amp; b){
+    check_finite(a);check_finite(b);
+    require(a.size()==b.size()&amp;&amp;a.size()&gt;=2,&quot;Paired test shape mismatch&quot;);
+    std::vector&lt;double&gt; d(a.size());
+    for(int i=0;i&lt;int(a.size());i++)d[i]=a[i]-b[i];
+    double se=std::sqrt(variance(d)/d.size());
+    require(se&gt;0,&quot;Paired t undefined for zero differences variance&quot;);
+    return {mean(d),se,mean(d)/se};
+}
+inline double population_standard_error(const std::vector&lt;double&gt;&amp; data){
+    check_finite(data);
+    require(data.size()&gt;=2,&quot;Standard error needs two observations&quot;);
+    return std::sqrt(variance(data)/data.size());
+}
+} // namespace kline
+</code></pre><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/hypothesis_testing.hpp">完整C++17实现：hypothesis_testing.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper3-5"><h3>4.6　复现步骤的经济解释</h3><p>筛选多种量化策略时，可以将统计检验方法与样本外再训练过程统一记录，避免只保留历史上业绩最好的策略配置。</p><div class="formula">$$P(\text{至少一次假阳性})=1-(1-\alpha)^m$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/hypothesis_testing.hpp">完整C++17实现：hypothesis_testing.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper3-6"><h3>4.7　结果偏差和替代研究设计</h3><p>通过单个检验显著的Alpha不能证明策略未来可持续，也不能替代金融风险承担、交易成本和资金容量解释。</p><div class="formula">$$P(\text{至少一次假阳性})=1-(1-\alpha)^m$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/hypothesis_testing.hpp">完整C++17实现：hypothesis_testing.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper3-7"><h3>4.8　可复核输出与可靠文献来源</h3><p>研究报告应保留最终样本外数据、源文献识别信息和原始计算设置。通过单个检验显著的Alpha不能证明策略未来可持续，也不能替代金融风险承担、交易成本和资金容量解释。公开源码只能证明实现可复核，不能替代论文实证识别和可靠样本支持。</p><div class="formula">$$P(\text{至少一次假阳性})=1-(1-\alpha)^m$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/hypothesis_testing.hpp">完整C++17实现：hypothesis_testing.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article></section><section id="paper4"><h2>5．嵌套时序训练与最终测试</h2><article id="paper4-0"><h3>5.1　论文研究问题及数学对象</h3><p>滚动起点验证让模型只接收历史标签已成熟的训练数据，并在未来明确区间评价预测。它比随机打乱金融时间序列更接近真实策略上线过程。</p><div class="formula">$$Train_k=[a_k,b_k),\quad Test_k=[b_k+g,b_k+g+h)$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/rolling_origin_validation.hpp">完整C++17实现：rolling_origin_validation.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper4-1"><h3>5.2　推导、目标与数据生成</h3><p>按固定步长推进训练截止时点，构造仅包含之前观测的训练集与之后测试集。再以相同模型与参数处理每一折，最后拼接完整样本外误差时间序列。</p><div class="formula">$$Train_k=[a_k,b_k),\quad Test_k=[b_k+g,b_k+g+h)$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/rolling_origin_validation.hpp">完整C++17实现：rolling_origin_validation.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper4-2"><h3>5.3　时间可得性和识别边界</h3><p>模型选择和标准化都必须在各训练折内部完成。如果在整个历史数据上先选择最佳特征再滚动验证，测试信息仍通过特征选择返回训练过程。</p><div class="formula">$$Train_k=[a_k,b_k),\quad Test_k=[b_k+g,b_k+g+h)$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/rolling_origin_validation.hpp">完整C++17实现：rolling_origin_validation.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper4-3"><h3>5.4　数据样本、模型验证与参数单位</h3><p>本论文复现主题需要在同一数据样本内维护明确的日期、标签和参数单位。模型选择和标准化都必须在各训练折内部完成。如果在整个历史数据上先选择最佳特征再滚动验证，测试信息仍通过特征选择返回训练过程。</p><div class="formula">$$Train_k=[a_k,b_k),\quad Test_k=[b_k+g,b_k+g+h)$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/rolling_origin_validation.hpp">完整C++17实现：rolling_origin_validation.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper4-4"><h3>5.5　实际可编译C++17算法</h3><p>用原仓库的C++17接口实现具体计算步骤，便于检查研究设定与程序计算是否一致。按固定步长推进训练截止时点，构造仅包含之前观测的训练集与之后测试集。再以相同模型与参数处理每一折，最后拼接完整样本外误差时间序列。</p><div class="formula">$$Train_k=[a_k,b_k),\quad Test_k=[b_k+g,b_k+g+h)$$</div><pre><code>#pragma once
+#include &quot;learning.hpp&quot;
+#include &lt;vector&gt;
+namespace kline {
+struct OriginSplit{
+    int train_start=0,train_end=0,test_start=0,test_end=0;
+};
+inline std::vector&lt;OriginSplit&gt; rolling_origin_splits(
+    int observations,int initial_train,int test_length,
+    int step,int gap=0,int max_train=0){
+    require(initial_train&gt;=3&amp;&amp;test_length&gt;=1&amp;&amp;step&gt;=1&amp;&amp;gap&gt;=0&amp;&amp;
+            observations&gt;=initial_train+gap+test_length&amp;&amp;
+            max_train&gt;=0,&quot;Invalid rolling origin parameters&quot;);
+    std::vector&lt;OriginSplit&gt; splits;
+    for(int end=initial_train;end+gap+test_length&lt;=observations;end+=step){
+        int start=max_train?std::max(0,end-max_train):0;
+        require(end-start&gt;=3,&quot;Short training segment&quot;);
+        splits.push_back({start,end,end+gap,end+gap+test_length});
+    }
+    return splits;
+}
+inline std::vector&lt;double&gt; rolling_origin_ridge_errors(
+    const Matrix&amp; x,const std::vector&lt;double&gt;&amp; y,
+    const std::vector&lt;OriginSplit&gt;&amp; splits,double penalty){
+    check_feature_table(x,y);
+    require(penalty&gt;0&amp;&amp;!splits.empty(),&quot;Invalid rolling origin Ridge penalty&quot;);
+    std::vector&lt;double&gt; errors;
+    for(const auto&amp; segment:splits){
+        require(segment.train_start&gt;=0&amp;&amp;segment.train_end&lt;=segment.test_start&amp;&amp;
+                segment.test_start&lt;segment.test_end&amp;&amp;
+                segment.test_end&lt;=int(x.size()),
+                &quot;Rolling origin split leaks future data&quot;);
+        Matrix training(x.begin()+segment.train_start,
+                        x.begin()+segment.train_end);
+        std::vector&lt;double&gt; labels(y.begin()+segment.train_start,
+                                   y.begin()+segment.train_end);
+        auto fit=fit_ridge(training,labels,penalty);
+        for(int i=segment.test_start;i&lt;segment.test_end;i++)
+            errors.push_back(y[i]-ridge_predict(fit,x[i]));
+    }
+    return errors;
+}
+} // namespace kline
+</code></pre><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/rolling_origin_validation.hpp">完整C++17实现：rolling_origin_validation.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper4-5"><h3>5.6　复现步骤的经济解释</h3><p>对不同股票、ETF或期货模型进行论文复现时，统一训练期限、测试样本和风险成本是评价算法增量贡献的基础。</p><div class="formula">$$Train_k=[a_k,b_k),\quad Test_k=[b_k+g,b_k+g+h)$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/rolling_origin_validation.hpp">完整C++17实现：rolling_origin_validation.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper4-6"><h3>5.7　结果偏差和替代研究设计</h3><p>测试期被反复用来调参后，其性质会退化为验证集。最终经济价值评价最好保留一个从未参与选择的时间区间。</p><div class="formula">$$Train_k=[a_k,b_k),\quad Test_k=[b_k+g,b_k+g+h)$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/rolling_origin_validation.hpp">完整C++17实现：rolling_origin_validation.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper4-7"><h3>5.8　可复核输出与可靠文献来源</h3><p>研究报告应保留最终样本外数据、源文献识别信息和原始计算设置。测试期被反复用来调参后，其性质会退化为验证集。最终经济价值评价最好保留一个从未参与选择的时间区间。公开源码只能证明实现可复核，不能替代论文实证识别和可靠样本支持。</p><div class="formula">$$Train_k=[a_k,b_k),\quad Test_k=[b_k+g,b_k+g+h)$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/rolling_origin_validation.hpp">完整C++17实现：rolling_origin_validation.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article></section><section id="paper5"><h2>6．预测误差差分与统计稳定性</h2><article id="paper5-0"><h3>6.1　论文研究问题及数学对象</h3><p>论文中两个模型的预测MSE相差很小，不能仅凭平均值高低断言改进具有稳定统计意义。逐期配对损失差可以直接观察增量优势出现在哪些市场阶段。</p><div class="formula">$$d_t=(y_t-\widehat y_{1t})^2-(y_t-\widehat y_{2t})^2$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/forecast_loss_tests.hpp">完整C++17实现：forecast_loss_tests.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper5-1"><h3>6.2　推导、目标与数据生成</h3><p>以同一真实标签计算两个预测器的损失差，形成新的时间序列。对差序列应用HAC均值推断，得到平均差异及依赖调整后的标准误。</p><div class="formula">$$d_t=(y_t-\widehat y_{1t})^2-(y_t-\widehat y_{2t})^2$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/forecast_loss_tests.hpp">完整C++17实现：forecast_loss_tests.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper5-2"><h3>6.3　时间可得性和识别边界</h3><p>预测损失比较必须明确目标变量、预测期限和是否有重叠收益。某一模型若只在更容易的时期报告误差，其对照比较不具可比性。</p><div class="formula">$$d_t=(y_t-\widehat y_{1t})^2-(y_t-\widehat y_{2t})^2$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/forecast_loss_tests.hpp">完整C++17实现：forecast_loss_tests.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper5-3"><h3>6.4　数据样本、模型验证与参数单位</h3><p>本论文复现主题需要在同一数据样本内维护明确的日期、标签和参数单位。预测损失比较必须明确目标变量、预测期限和是否有重叠收益。某一模型若只在更容易的时期报告误差，其对照比较不具可比性。</p><div class="formula">$$d_t=(y_t-\widehat y_{1t})^2-(y_t-\widehat y_{2t})^2$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/forecast_loss_tests.hpp">完整C++17实现：forecast_loss_tests.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper5-4"><h3>6.5　实际可编译C++17算法</h3><p>用原仓库的C++17接口实现具体计算步骤，便于检查研究设定与程序计算是否一致。以同一真实标签计算两个预测器的损失差，形成新的时间序列。对差序列应用HAC均值推断，得到平均差异及依赖调整后的标准误。</p><div class="formula">$$d_t=(y_t-\widehat y_{1t})^2-(y_t-\widehat y_{2t})^2$$</div><pre><code>#pragma once
+#include &quot;hac_mean_inference.hpp&quot;
+#include &lt;cmath&gt;
+namespace kline {
+struct LossComparison{double average_difference=0,standard_error=0,standardized=0;};
+inline LossComparison squared_forecast_loss_comparison(
+    const std::vector&lt;double&gt;&amp; truth,
+    const std::vector&lt;double&gt;&amp; forecast_one,
+    const std::vector&lt;double&gt;&amp; forecast_two,int hac_lags){
+    check_finite(truth);check_finite(forecast_one);check_finite(forecast_two);
+    require(truth.size()==forecast_one.size()&amp;&amp;
+            truth.size()==forecast_two.size(),
+            &quot;Forecast loss lengths must match&quot;);
+    std::vector&lt;double&gt; differences;
+    for(int i=0;i&lt;int(truth.size());i++){
+        double a=std::pow(truth[i]-forecast_one[i],2);
+        double b=std::pow(truth[i]-forecast_two[i],2);
+        differences.push_back(a-b);
+    }
+    auto report=bartlett_hac_mean(differences,hac_lags);
+    return {report.estimate,report.standard_error,report.t_stat};
+}
+} // namespace kline
+</code></pre><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/forecast_loss_tests.hpp">完整C++17实现：forecast_loss_tests.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper5-5"><h3>6.6　复现步骤的经济解释</h3><p>量化研究复现可以同时报告损失差的时间分布和成本后投资表现，观察模型是否只在波动剧烈时期降低少量大误差。</p><div class="formula">$$d_t=(y_t-\widehat y_{1t})^2-(y_t-\widehat y_{2t})^2$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/forecast_loss_tests.hpp">完整C++17实现：forecast_loss_tests.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper5-6"><h3>6.7　结果偏差和替代研究设计</h3><p>显著的MSE差异仍可能与最终仓位收益无关：预测结果的风险敞口、资产价格单位和交易费用决定经济可投资性。</p><div class="formula">$$d_t=(y_t-\widehat y_{1t})^2-(y_t-\widehat y_{2t})^2$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/forecast_loss_tests.hpp">完整C++17实现：forecast_loss_tests.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper5-7"><h3>6.8　可复核输出与可靠文献来源</h3><p>研究报告应保留最终样本外数据、源文献识别信息和原始计算设置。显著的MSE差异仍可能与最终仓位收益无关：预测结果的风险敞口、资产价格单位和交易费用决定经济可投资性。公开源码只能证明实现可复核，不能替代论文实证识别和可靠样本支持。</p><div class="formula">$$d_t=(y_t-\widehat y_{1t})^2-(y_t-\widehat y_{2t})^2$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/forecast_loss_tests.hpp">完整C++17实现：forecast_loss_tests.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article></section><section id="paper6"><h2>7．从预测论文到真实交易归因</h2><article id="paper6-0"><h3>7.1　论文研究问题及数学对象</h3><p>金融机器学习论文的策略收益若只依据收盘理论目标权重，会忽视订单成交偏差、市场波动以及佣金与剩余未成交风险。TCA可以形成可追踪的真实执行成本拆分。</p><div class="formula">$$Cost=\sum q_t(P_t-M_t)+\sum q_t(M_t-M_0)+Fees$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/execution_tca_decomposition.hpp">完整C++17实现：execution_tca_decomposition.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper6-1"><h3>7.2　推导、目标与数据生成</h3><p>将每笔真实成交金额相对同期中间价的偏离与该时点中间价相对到达基准的变化分开求和，再加各笔佣金，保证合计回到原始到达价格成本。</p><div class="formula">$$Cost=\sum q_t(P_t-M_t)+\sum q_t(M_t-M_0)+Fees$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/execution_tca_decomposition.hpp">完整C++17实现：execution_tca_decomposition.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper6-2"><h3>7.3　时间可得性和识别边界</h3><p>买卖方向必须用有符号成交股数，估值币种和成交时间需要统一。TCA是可观测的成本分解，而非证明本方订单造成某一价格变化的因果估计。</p><div class="formula">$$Cost=\sum q_t(P_t-M_t)+\sum q_t(M_t-M_0)+Fees$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/execution_tca_decomposition.hpp">完整C++17实现：execution_tca_decomposition.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper6-3"><h3>7.4　数据样本、模型验证与参数单位</h3><p>本论文复现主题需要在同一数据样本内维护明确的日期、标签和参数单位。买卖方向必须用有符号成交股数，估值币种和成交时间需要统一。TCA是可观测的成本分解，而非证明本方订单造成某一价格变化的因果估计。</p><div class="formula">$$Cost=\sum q_t(P_t-M_t)+\sum q_t(M_t-M_0)+Fees$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/execution_tca_decomposition.hpp">完整C++17实现：execution_tca_decomposition.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper6-4"><h3>7.5　实际可编译C++17算法</h3><p>用原仓库的C++17接口实现具体计算步骤，便于检查研究设定与程序计算是否一致。将每笔真实成交金额相对同期中间价的偏离与该时点中间价相对到达基准的变化分开求和，再加各笔佣金，保证合计回到原始到达价格成本。</p><div class="formula">$$Cost=\sum q_t(P_t-M_t)+\sum q_t(M_t-M_0)+Fees$$</div><pre><code>#pragma once
+#include &quot;trade_fill_reconciliation.hpp&quot;
+#include &lt;cmath&gt;
+#include &lt;vector&gt;
+namespace kline {
+struct ExecutionAttribution{
+    double spread_cost=0,market_movement=0,fees=0,total=0;
+};
+inline ExecutionAttribution execution_cost_attribution(
+    const std::vector&lt;Fill&gt;&amp; fills,
+    const std::vector&lt;double&gt;&amp; contemporaneous_midpoints,
+    double arrival_mid){
+    require(fills.size()==contemporaneous_midpoints.size()&amp;&amp;
+            std::isfinite(arrival_mid)&amp;&amp;arrival_mid&gt;0,
+            &quot;Invalid execution benchmark alignment&quot;);
+    check_finite(contemporaneous_midpoints);
+    ExecutionAttribution result;
+    for(int i=0;i&lt;int(fills.size());i++){
+        require(std::isfinite(fills[i].signed_shares)&amp;&amp;
+                std::isfinite(fills[i].price)&amp;&amp;fills[i].price&gt;0&amp;&amp;
+                std::isfinite(fills[i].commission)&amp;&amp;fills[i].commission&gt;=0&amp;&amp;
+                contemporaneous_midpoints[i]&gt;0,
+                &quot;Invalid execution fill or midpoint&quot;);
+        result.spread_cost+=fills[i].signed_shares*
+                            (fills[i].price-contemporaneous_midpoints[i]);
+        result.market_movement+=fills[i].signed_shares*
+                               (contemporaneous_midpoints[i]-arrival_mid);
+        result.fees+=fills[i].commission;
+    }
+    result.total=result.spread_cost+result.market_movement+result.fees;
+    return result;
+}
+} // namespace kline
+</code></pre><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/execution_tca_decomposition.hpp">完整C++17实现：execution_tca_decomposition.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper6-5"><h3>7.6　复现步骤的经济解释</h3><p>在市场微观结构、做市和算法交易论文复现中，可使用逐笔成交与盘口数据把模型Alpha连接到实际交易和现金净值。</p><div class="formula">$$Cost=\sum q_t(P_t-M_t)+\sum q_t(M_t-M_0)+Fees$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/execution_tca_decomposition.hpp">完整C++17实现：execution_tca_decomposition.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper6-6"><h3>7.7　结果偏差和替代研究设计</h3><p>只报告完成订单的平均滑点可能忽视未成交机会成本。历史盘口价差还受到交易所队列与撮合规则的影响。</p><div class="formula">$$Cost=\sum q_t(P_t-M_t)+\sum q_t(M_t-M_0)+Fees$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/execution_tca_decomposition.hpp">完整C++17实现：execution_tca_decomposition.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article><article id="paper6-7"><h3>7.8　可复核输出与可靠文献来源</h3><p>研究报告应保留最终样本外数据、源文献识别信息和原始计算设置。只报告完成订单的平均滑点可能忽视未成交机会成本。历史盘口价差还受到交易所队列与撮合规则的影响。公开源码只能证明实现可复核，不能替代论文实证识别和可靠样本支持。</p><div class="formula">$$Cost=\sum q_t(P_t-M_t)+\sum q_t(M_t-M_0)+Fees$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/execution_tca_decomposition.hpp">完整C++17实现：execution_tca_decomposition.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA论文数据与代码政策</a></p></article></section><footer>研究方法和论文来源：<a href="https://www.aeaweb.org/journals/data/data-code-policy">American Economic Association Data & Code Policy</a>；<a href="https://www.nber.org/papers">NBER Working Papers</a>；<a href="https://arxiv.org/">arXiv</a>。<a href="./">返回机器学习量化金融论文周报</a>。</footer></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>
