@@ -30,6 +30,7 @@
   const staticMenu={
     companies:
       '<a class="q-menu-link" href="'+route("companies")+'institutional-quant-research.html">机构策略、容量与风险治理</a>'+
+      '<a class="q-menu-link" href="'+route("companies")+'institutional-quant-economics.html">管理费、投资容量与机构经济模型</a>'+
       (page==="companies"
         ?'<button id="all" class="q-menu-link active" data-filter="all" type="button">全部公司 <span class="q-menu-count" id="allN"></span></button>'
         :'<a class="q-menu-link" href="'+route("companies")+'">全部公司</a>')+
@@ -41,17 +42,21 @@
     assets:
       '<a class="q-menu-link" href="'+route("assets")+'">全部金融资产</a>'+
       '<a class="q-menu-link" href="'+route("assets")+'risk-and-pricing.html">资产定价、合同现金流与风险</a>'+
+      '<a class="q-menu-link" href="'+route("assets")+'derivatives-pricing-lab.html">期权定价数值实验室</a>'+
       subsection("marketNav","按市场 / 地区","marketChoices",page==="assets")+
       subsection("typeNav","按金融工具类型","typeChoices"),
     feeds:
       '<a class="q-menu-link" href="'+route("feeds")+'">全部数据字段</a>'+
       '<a class="q-menu-link" href="'+route("feeds")+'point-in-time-data.html">金融数据工程与历史可得信息</a>'+
+      '<a class="q-menu-link" href="'+route("feeds")+'market-microstructure-lab.html">高频事件、成交量与订单簿</a>'+
       '<a class="q-menu-link" href="'+route("feeds")+'?mode=providers">数据供应商目录</a>'+
       subsection("feedsCategoryNav","按数据类别","feedChoices",page==="feeds"),
     research:
       '<a class="q-menu-link" href="'+route("research")+'">在线 Python 回测</a>'+
       '<a class="q-menu-link" href="'+route("research")+'?strategy=ma">策略超市 / Python 示例</a>'+
       '<a class="q-menu-link" href="'+route("research")+'execution-risk.html">衍生品、信用与真实执行专题</a>'+
+      '<a class="q-menu-link" href="'+route("research")+'fund-portfolio-economics.html">基金资金、容量与风险平价</a>'+
+      '<a class="q-menu-link" href="'+route("research")+'credit-derivatives-lab.html">信用衍生品与期货清算</a>'+
       subsection("researchStrategyNav","按策略选择","strategyChoices",page==="research"),
     audit:
       '<a class="q-menu-link" href="'+route("audit")+'">完整研究验证课程</a>'+
@@ -70,22 +75,27 @@
       '<a class="q-menu-link" href="'+route("cpp")+'research.html">数值分析、统计学习与真实交易研究</a>'+
       '<a class="q-menu-link" href="'+route("cpp")+'crossdomain.html">金融计量、Bayesian ML与市场过程</a>'+
       '<a class="q-menu-link" href="'+route("cpp")+'#sitewide">全站互联C++17算法与课程</a>'+
+      '<a class="q-menu-link" href="'+route("cpp")+'#massive">360节数理金融与真实交易专题</a>'+
       '<a class="q-menu-link" href="'+route("cpp")+'#workflow">实际数据与命令行</a>'+
       '<a class="q-menu-link" href="'+route("cpp")+'#assumptions">方法适用范围</a>',
     wiki:
       '<a class="q-menu-link" href="'+route("wiki")+'">全部词条</a>'+
       '<a class="q-menu-link" href="'+route("wiki")+'method-lexicon.html">数学与金融模型机制词典</a>'+
+      '<a class="q-menu-link" href="'+route("math")+'inference-and-survival.html">统计推断与风险模型专题</a>'+
       subsection("wikiCategoryNav","按知识主题","wikiCategories",page==="wiki")+
       subsection("wikiLearningNav","系统学习路径","wikiPaths"),
     math:
       '<a class="q-menu-link" href="'+route("math")+'">完整数学知识树</a>'+
       '<a class="q-menu-link" href="'+route("math")+'#math-reader-section">数学讲义正文</a>'+
       '<a class="q-menu-link" href="'+route("math")+'robust-statistics.html">稳健统计与时间序列数学</a>'+
+      '<a class="q-menu-link" href="'+route("math")+'return-series-diagnostics.html">收益序列与概率信息</a>'+
+      '<a class="q-menu-link" href="'+route("math")+'inference-and-survival.html">HAC与生存估计</a>'+
       subsection("mathDisciplineNav","按学科推进","mathDisciplineChoices",page==="math"),
     ml:
       '<a class="q-menu-link" href="'+route("ml")+'">完整机器学习课程树</a>'+
       '<a class="q-menu-link" href="'+route("ml")+'#atlas-reader-section">机器学习课程正文</a>'+
       '<a class="q-menu-link" href="'+route("ml")+'financial-ml-validation.html">金融机器学习与样本外验证</a>'+
+      '<a class="q-menu-link" href="'+route("ml")+'predictive-risk-calibration.html">在线计数预测与概率可靠性</a>'+
       subsection("mlDisciplineNav","按专题推进","mlDisciplineChoices",page==="ml"),
     papers:
       '<a class="q-menu-link" href="'+route("papers")+'">全部论文</a>'+
