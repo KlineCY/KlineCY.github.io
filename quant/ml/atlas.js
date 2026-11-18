@@ -3,7 +3,7 @@
 const $=id=>document.getElementById(id);
 const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const LESSON=/^#(?:lesson|ml)\/(m\d\d-c\d\d-p\d\d)$/;
-const state={index:[],byId:new Map(),domains:{},searchText:new Map(),term:"",topic:"",activeId:"",enhanced:new Set(),conceptChapters:new Set(),chapterOpen:new Map(),domainOpen:new Map()};
+const state={index:[],byId:new Map(),domains:{},searchText:new Map(),term:"",topic:"",activeId:"",enhanced:new Set(),conceptChapters:new Set(),cppExamples:new Map(),chapterOpen:new Map(),domainOpen:new Map()};
 function showStatus(message,error=false){const el=$("atlas-status");el.textContent=message;el.classList.toggle("atlas-error",error)}
 function parseID(){return (location.hash.match(LESSON)||[])[1]||""}
 function setTopic(v,updateUrl=true){
@@ -259,6 +259,8 @@ function display(){
  }
  const position=state.index.findIndex(x=>x.id===id);
  const prev=state.index[position-1],next=state.index[position+1];
+ const cpp=state.cppExamples.get(id);
+ const cppPanel=cpp?'<section class="atlas-cpp-panel" aria-label="C++17辅助计算实例"><h2>配套 C++17 数值实现</h2><p>独立、易读的课程同主题计算例题。可本地编译运行，不代表与讲义全部 Python 代码逐行等价。</p><h3>'+esc(cpp.title)+'</h3><div class="atlas-cpp-actions"><button type="button" data-copy-cpp>复制 C++</button><button type="button" data-download-cpp>下载 .cpp</button></div><pre tabindex="0"><code>'+esc(cpp.code)+'</code></pre></section>':"";
  const actions='<div class="atlas-lesson-actions">'+
   '<button id="atlas-prev" type="button"'+(!prev?' disabled':'')+'>上一篇</button>'+
   '<button id="atlas-next" type="button"'+(!next?' disabled':'')+'>下一篇</button>'+
@@ -266,7 +268,7 @@ function display(){
    (state.enhanced.has(id)?'<button id="atlas-jump-depth" type="button">跳至进阶推导</button>':'')+'</div>';
  root.innerHTML='<div class="atlas-crumb">'+esc(meta.domain)+" / "+esc(meta.chapter)+" / 第"+esc((id.match(/-p(\d+)$/)||[])[1]||"")+"节"+
   '</div><h1>'+esc(data.title)+'</h1>'+actions+
-  '<div class="article">'+data.html+'</div><p class="atlas-note">系统教材 · 公式、证明和代码请按对应条件使用；示例不构成投资建议。</p>';
+  '<div class="article">'+data.html+'</div>'+cppPanel+'<p class="atlas-note">系统教材 · 公式、证明和代码请按对应条件使用；示例不构成投资建议。</p>';
  $("atlas-prev").addEventListener("click",()=>prev&&jump(prev.id));
  $("atlas-next").addEventListener("click",()=>next&&jump(next.id));
   $("atlas-jump-depth")?.addEventListener("click",()=>root.querySelector(".atlas-depth")?.scrollIntoView({block:"start",behavior:"smooth"}));
@@ -277,6 +279,13 @@ function display(){
  root.querySelectorAll(".atlas-concept-jump").forEach(button=>button.addEventListener("click",()=>{
   root.querySelector("#"+button.dataset.target)?.scrollIntoView({block:"start",behavior:"smooth"});
  }));
+ root.querySelector("[data-copy-cpp]")?.addEventListener("click",e=>copyText(cpp.code,e.currentTarget,"C++ 已复制"));
+ root.querySelector("[data-download-cpp]")?.addEventListener("click",()=>{
+   const blob=new Blob([cpp.code],{type:"text/x-c++src;charset=utf-8"});
+   const url=URL.createObjectURL(blob),link=document.createElement("a");
+   link.href=url;link.download="Kline_ML_"+id+".cpp";document.body.appendChild(link);link.click();link.remove();
+   setTimeout(()=>URL.revokeObjectURL(url),1000);
+ });
  fixInlineMarkdown(root.querySelector(".article"));
  cleanCodeComments(root.querySelector(".article"));
  renderMath(root.querySelector(".article"));
@@ -309,6 +318,13 @@ async function start(){
  try{
   showStatus("正在读取并解压720篇正式讲义…");
   const data=await loadArchive();
+  const cppBundle=await fetchAtlasJson("./atlas-cpp-examples.json",{cache:"no-cache"});
+  if(cppBundle.schema!==1||!cppBundle.lessons||Object.keys(cppBundle.lessons).length!==20)
+   throw Error("C++17课程示例数量与索引不匹配");
+  for(const [id,item] of Object.entries(cppBundle.lessons)){
+   if(!/^m\d\d-c\d\d-p\d\d$/.test(id)||!item.title||!item.code?.includes("int main()"))throw Error("C++17示例损坏："+id);
+   state.cppExamples.set(id,item);
+  }
   showStatus("课程档案已校验，正在读取进阶模块清单…");
   const manifest=await fetchAtlasJson("./atlas-depth-manifest.json",{cache:"no-cache"});
   if(manifest.schema!==1||!Number.isSafeInteger(manifest.expected_lessons)||manifest.expected_lessons<80||
