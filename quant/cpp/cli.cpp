@@ -3,6 +3,8 @@
 #include "execution.hpp"
 #include "factors.hpp"
 #include "io.hpp"
+#include "etf.hpp"
+#include "macro.hpp"
 #include "portfolio.hpp"
 #include "risk.hpp"
 #include "stats.hpp"
@@ -29,6 +31,11 @@ void usage() {
          << "  quote BID ASK BID_SIZE ASK_SIZE FILL_PRICE buy|sell FUTURE_MID\n"
          << "  fills CSV ARRIVAL_PRICE buy|sell (requires Price,Quantity)\n"
          << "  bars CSV (requires Date,Open,High,Low,Close,Volume,AdjustedClose)\n"
+         << "  etf CSV FUND_RETURN_COLUMN INDEX_RETURN_COLUMN\n"
+         << "  curve SHORT_YEARS SHORT_ZERO_RATE LONG_YEARS LONG_ZERO_RATE\n"
+         << "  fx SPOT_QUOTE_PER_BASE BASE_RATE QUOTE_RATE YEARS\n"
+         << "  duration-hedge ASSET_MARKET_VALUE ASSET_DURATION HEDGE_DURATION\n"
+         << "  futures-roll NEAR_PRICE FAR_PRICE\n"
          << "  asof EVENT_CSV DECISION_CSV (event columns Date,Published,Received,Value)\n";
 }
 
@@ -194,6 +201,37 @@ int main(int argc, char** argv) {
             cout << "Bars " << bars.size() << "\n"
                  << "MeanAdjustedSimpleReturn " << kline::mean(returns) << "\n"
                  << "AdjustedCumulativeReturn " << kline::compounded_return(returns) << "\n";
+        } else if (command == "etf") {
+            require_arguments(argc, 5);
+            auto table = kline::read_csv(argv[2]);
+            auto fund = table.numbers(argv[3]), index = table.numbers(argv[4]);
+            cout << "AnnualTrackingDifference " <<
+                kline::tracking_difference_annualized(fund, index) << "\n"
+                 << "AnnualTrackingError " <<
+                kline::tracking_error_annualized(fund, index) << "\n";
+        } else if (command == "curve") {
+            require_arguments(argc, 6);
+            double short_years = number(argv[2]), short_rate = number(argv[3]);
+            double long_years = number(argv[4]), long_rate = number(argv[5]);
+            cout << "ForwardContinuousZeroRate " <<
+                kline::continuous_forward_rate(short_rate, short_years, long_rate, long_years)
+                 << "\n"
+                 << "LongDiscountFactor " <<
+                kline::continuous_discount_factor(long_rate, long_years) << "\n";
+        } else if (command == "fx") {
+            require_arguments(argc, 6);
+            cout << "CoveredParityForwardQuotePerBase " <<
+                kline::fx_forward_quote_per_base(number(argv[2]), number(argv[3]),
+                                                 number(argv[4]), number(argv[5])) << "\n";
+        } else if (command == "duration-hedge") {
+            require_arguments(argc, 5);
+            cout << "HedgeNotional " <<
+                kline::duration_hedge_notional(number(argv[2]), number(argv[3]),
+                                               number(argv[4])) << "\n";
+        } else if (command == "futures-roll") {
+            require_arguments(argc, 4);
+            cout << "StaticRollYield " <<
+                kline::futures_roll_yield(number(argv[2]), number(argv[3])) << "\n";
         } else if (command == "asof") {
             require_arguments(argc, 4);
             auto events = kline::read_csv(argv[2]);
