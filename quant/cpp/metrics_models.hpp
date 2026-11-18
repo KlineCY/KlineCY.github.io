@@ -27,7 +27,7 @@ inline double binary_log_loss(const std::vector<double>& probability,
     require(probability.size()==labels.size(),"Log loss dimensions differ");
     double sum=0;
     for(int i=0;i<int(probability.size());i++){
-        require(labels[i]==0||labels[i]==1&&0<=probability[i]&&
+        require((labels[i]==0||labels[i]==1)&&probability[i]>=0&&
                 probability[i]<=1,"Invalid binary probability or label");
         double p=std::max(1e-15,std::min(1-1e-15,probability[i]));
         sum-=labels[i]*std::log(p)+(1-labels[i])*std::log1p(-p);
@@ -47,7 +47,7 @@ inline ClassificationCounts binary_confusion(
             threshold>=0&&threshold<=1,"Invalid binary decision threshold");
     ClassificationCounts c;
     for(int i=0;i<int(probability.size());i++){
-        require(labels[i]==0||labels[i]==1&&0<=probability[i]&&
+        require((labels[i]==0||labels[i]==1)&&probability[i]>=0&&
                 probability[i]<=1,"Invalid prediction or binary label");
         bool guess=probability[i]>=threshold;
         if(guess&&labels[i]==1)c.tp++;
