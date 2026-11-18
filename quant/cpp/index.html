@@ -55,16 +55,16 @@ footer{margin:25px 0;color:#587186;font-size:12px}
 <p>从数学讲义和策略模板延伸到完整的可调用计算组件。代码可在本地使用 GCC、Clang 或 CMake 编译，不需要外部数值计算库。每个函数都明确输入、时间口径、边界条件及算法适用范围；命令行支持使用自己的 CSV 数据。</p>
 </header>
 <div class="counts" aria-label="工具库核心范围">
-<div class="count"><strong>16</strong><span>研究主题：数据、模型至组合净值</span></div>
+<div class="count"><strong>26</strong><span>研究模块：数值、策略、执行与风控</span></div>
 <div class="count"><strong>C++17</strong><span>标准语言，无第三方运行时依赖</span></div>
-<div class="count"><strong>29</strong><span>命令行分析工作流</span></div>
+<div class="count"><strong>55</strong><span>命令行分析工作流</span></div>
 <div class="count"><strong>GCC / Clang</strong><span>双编译器数值和集成测试</span></div>
 </div>
 <nav class="jump" aria-label="本页快速导航">
-<a href="#modules">源码目录</a><a href="#workflow">命令行研究</a><a href="#risk">组合风险</a><a href="#derivatives">衍生品与利率</a><a href="#data">历史可得信息</a><a href="#validation">研究验证</a><a href="#learning">金融机器学习</a><a href="#allocation">配置优化</a><a href="#ledger">净成本组合账本</a><a href="#assumptions">方法和边界</a>
+<a href="#modules">源码目录</a><a href="./advanced.html">进阶数值课程与算例</a><a href="#workflow">命令行研究</a><a href="#risk">组合风险</a><a href="#derivatives">衍生品与利率</a><a href="#data">历史可得信息</a><a href="#validation">研究验证</a><a href="#learning">金融机器学习</a><a href="#allocation">配置优化</a><a href="#ledger">净成本组合账本</a><a href="#assumptions">方法和边界</a>
 </nav>
 <section class="panel" id="modules">
-<h2>十六个计算主题与源码</h2>
+<h2>二十六个计算主题与源码</h2>
 <p>课程中的 C++ 数值算例用于解释单一数学对象；此处的模块将多种金融计算组合成可复用函数，并在输入不符合要求时返回明确错误。源码中的每个接口可分别调用，不要求依赖整套命令行工具。</p>
 <div class="grid">
 <article class="item"><h3>统计与时间序列</h3><p>样本与总体方差、协方差、Pearson/Spearman、并列秩、分位数、HAC 标准误、滚动均值、对数收益。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/stats.hpp">查看 stats.hpp</a></article>
@@ -82,6 +82,16 @@ footer{margin:25px 0;color:#587186;font-size:12px}
 <article class="item"><h3>Ridge、前向预测与协方差收缩</h3><p>从线性方程组的带主元消元到训练内标准化Ridge；按标签成熟时点实施无前视的滚动/扩展预测；按样本估计的球形目标Ledoit–Wolf收缩。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/learning.hpp">查看 learning.hpp</a></article>
 <article class="item"><h3>长期与多空组合净成本账本</h3><p>长期配置严格满足现金约束；多空配置单独计算受限卖空所得、现金融资和借券成本。两者均处理实际交易费、仓位漂移与净值连续性，并验证杠杆上限。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/ledger.hpp">查看 ledger.hpp</a></article>
 <article class="item"><h3>组合优化与Black–Litterman</h3><p>先验与多观点置信度融合、协方差半正定检查、带L2换手惩罚的长期均值–方差优化、严格单纯形权重约束和优化目标复算。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/allocation.hpp">查看 allocation.hpp</a></article>
+<article class="item"><h3>对称矩阵与主成分</h3><p>数值Jacobi旋转、特征谱、PCA载荷与得分、协方差条件数。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/numerical.hpp">查看 numerical.hpp</a></article>
+<article class="item"><h3>金融时间序列与条件波动</h3><p>AR(1)拟合预测、指数均值与EWMA方差、GARCH(1,1)递推及滚动波动率。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/timeseries.hpp">查看 timeseries.hpp</a></article>
+<article class="item"><h3>价格技术信号</h3><p>动量与跳过期、Wilder RSI、ATR真实波幅和历史价格突破位置。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/indicators.hpp">查看 indicators.hpp</a></article>
+<article class="item"><h3>稀疏回归与二元分类</h3><p>Lasso坐标下降、训练内标准化、带L2惩罚的Logistic回归及概率损失。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/regression_models.hpp">查看 regression_models.hpp</a></article>
+<article class="item"><h3>组合风险预算与尾部贡献</h3><p>风险平价坐标优化、单资产权重上限投影、历史ES按情景贡献。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/portfolio_risk.hpp">查看 portfolio_risk.hpp</a></article>
+<article class="item"><h3>期货期权与正常波动率</h3><p>Black-76、Bachelier欧式定价、正常波动率反解与Black-76 Vega。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/options_models.hpp">查看 options_models.hpp</a></article>
+<article class="item"><h3>完整期限结构估值</h3><p>零息利率插值、现金流贴现、平价掉期利率及关键期限DV01。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/curve_models.hpp">查看 curve_models.hpp</a></article>
+<article class="item"><h3>订单簿与可成交执行</h3><p>买卖盘逐档模拟、可成交量约束计划、TWAP、队列可成交量和成交后Markout。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/execution_models.hpp">查看 execution_models.hpp</a></article>
+<article class="item"><h3>稳健推断与序贯监测</h3><p>移动区块Bootstrap均值置信区间、HAC t值、Holm校正与CUSUM报警。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/inference_models.hpp">查看 inference_models.hpp</a></article>
+<article class="item"><h3>相关随机过程与路径模拟</h3><p>协方差Cholesky、相关GBM联合路径模拟与OU过程精确一步转移。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/stochastic_models.hpp">查看 stochastic_models.hpp</a></article>
 <article class="item"><h3>本地 CSV 输入</h3><p>数据列读取、带引号字段、重复列检查、CRLF 换行处理、数值合法性、缺失字段报错，避免静默生成结果。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/io.hpp">查看 io.hpp</a></article>
 </div>
 </section>
@@ -178,6 +188,18 @@ g++ -std=c++17 -O2 -Wall -Wextra -pedantic test.cpp -o kline_tests
 <p><strong>数值与证据边界。</strong>协方差估计采用同一组对齐样本，并通过球形目标Ledoit–Wolf收缩改善条件。优化前的预测均值需要独立训练和时间外验证，绝不可用当前持有期的未来收益反向挑选预期收益。矩阵求解器采用带主元的高斯消元，适合低维教学及实证验证；高维病态风险模型应使用更稳定的数值分解、更多数据与专业库。<code>allocate</code> 接收各资产的历史收益列、独立给出的预期收益、前一期权重以及风险与换手参数，输出权重、收益、波动率、单边换手及目标函数。</p>
 <pre>./kline_quant allocate returns.csv 10 1 SPY 0.0005 0.5 TLT 0.0002 0.5
 ./kline_quant bl-pair returns.csv SPY TLT 0.0005 0.0002 0.0004 0.00001 0.1</pre>
+</section>
+<section class="panel" id="advanced">
+<h2>十个进阶模块与26种新命令</h2>
+<p>在已有Ridge、Black–Litterman、交易账本及风险测算基础上，扩展数值线性代数、统计学习、波动率模型、风险预算、期限结构、期货期权、订单簿、序贯检验与随机模拟。所有新算法都可通过标准C++17头文件直接调用，并通过统一CLI使用CSV数据运行；独立数值回归测试与GCC/Clang双编译器测试覆盖代码边界。</p>
+<p>进阶课程按十个计算领域逐节解释数学定义、估计与预测时点、数值实现、数据契约和适用边界。<a href="./advanced.html">阅读C++17进阶算法课程及全部26种新命令的示例</a>。</p>
+<pre>./kline_quant pca factors.csv Momentum Volatility Carry
+./kline_quant ar1 returns.csv Return
+./kline_quant lasso training.csv Target 0.01 Momentum Volatility
+./kline_quant risk-budget returns.csv SPY 0.4 TLT 0.4 GLD 0.2
+./kline_quant book-walk asks.csv buy 1000
+./kline_quant bootstrap-ci monthly.csv IC 4 1000 2026 0.95</pre>
+<p>新命令还包括 <code>cov-condition</code>、<code>ema</code>、<code>ewma-var</code>、<code>garch</code>、<code>momentum</code>、<code>rsi</code>、<code>atr</code>、<code>logistic</code>、<code>cap-project</code>、<code>es-contrib</code>、<code>black76</code>、<code>bachelier</code>、<code>normal-iv</code>、<code>curve-pv</code>、<code>swap-par</code>、<code>keyrate</code>、<code>capped-schedule</code>、<code>cusum</code>、<code>holm</code>、<code>ou-step</code>。</p>
 </section>
 <section class="panel" id="assumptions">
 <h2>适用范围、模型边界和检验要求</h2>
