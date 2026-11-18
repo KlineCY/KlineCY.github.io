@@ -4,23 +4,35 @@ on:
   push:
     paths:
       - 'quant/math/cpp-examples.json'
+      - 'quant/math/cpp-topic-*.json'
+      - 'quant/math/app.js'
       - 'quant/ml/atlas-cpp-examples.json'
+      - 'quant/ml/cpp-topic-*.json'
+      - 'quant/ml/atlas.js'
       - 'quant/ml/test_cpp_examples.py'
       - '.github/workflows/validate-cpp-education.yml'
   pull_request:
     paths:
       - 'quant/math/cpp-examples.json'
+      - 'quant/math/cpp-topic-*.json'
+      - 'quant/math/app.js'
       - 'quant/ml/atlas-cpp-examples.json'
+      - 'quant/ml/cpp-topic-*.json'
+      - 'quant/ml/atlas.js'
       - 'quant/ml/test_cpp_examples.py'
       - '.github/workflows/validate-cpp-education.yml'
 
 jobs:
   education-cpp:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Compile and execute all mathematical and ML C++ examples
-        run: python quant/ml/test_cpp_examples.py
+      - name: Compile and run C++17 educational programs
+        run: python quant/ml/test_cpp_examples.py --shard ${{ matrix.shard }} --shards 8

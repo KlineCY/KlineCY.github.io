@@ -45,6 +45,7 @@ def signals(history):
 <div class="code-label"><h3>C++17 独立实现</h3><div><button id="copyCpp" class="secondary" type="button">复制 C++</button> <button id="downloadCpp" class="secondary" type="button">下载 .cpp</button></div></div>
 <p>与上方 Python 策略相同的目标权重信号规则。输入格式：第一行资产数量 N；随后对每个资产输入一行 Ticker 与交易日数 M，再输入 M 行 Open Close Volume。输出为每行 Ticker 和目标权重。使用 <code>g++ -std=c++17 -O2 example.cpp -o example</code> 在本地编译运行；本页面不会在浏览器内执行 C++。</p>
 <pre id="cppCode" tabindex="0" aria-label="当前策略C++17实现">正在读取对应C++源码…</pre>
+<p>本地完整回测还可使用 <a href="./cpp_backtester.cpp" download>C++17 多资产回测程序</a>：它独立读取 <code>Date,Ticker,Open,Close</code> CSV，支持等权、趋势过滤和动量多空三种可复核基线，核算交易成本、借券费、开盘执行和净值指标。编译：<code>g++ -std=c++17 -O2 cpp_backtester.cpp -o cpp_backtester</code>；运行：<code>./cpp_backtester prices.csv trend 12</code>。这一独立演示程序不会自动调用上方 70 个策略信号源码，后者可作为二次开发参考；当前网页依旧只执行 Python。</p>
 </section>
 <div class="form-row"><div class="field"><label for="commission">单边佣金（bps）</label><input id="commission" type="number" value="3" min="0" max="500" step=".1"></div>
 <div class="field"><label for="slippage">单边滑点（bps）</label><input id="slippage" type="number" value="2" min="0" max="500" step=".1"></div>
@@ -62,7 +63,7 @@ def signals(history):
 <div class="report-foot"><button id="downloadReport" type="button">导出完整 JSON 回测报告</button><button id="downloadEquity" type="button">导出净值曲线 CSV</button></div>
 </section>
 <div class="disclaimer"><strong>回测方法边界：</strong>本浏览器引擎以开盘价为执行/估值基准，按目标权重简化模拟，日收益使用下一日开盘价变化；不具备交易所L2/L3逐笔撮合、实际流动性及融资融券撮合。多资产取交易日期交集，可能排除停牌/退市日期，不能自动纠正幸存者偏差。调整仓位时计佣金与滑点，做空按输入参数扣借券费；没有期末平仓费、现金利息或保证金模型。交易胜率为“调仓前持仓段估计”，与真实逐笔成交胜率不同。年化采用252期惯例；分钟数据不适用于此模型。所有结果不构成投资建议。</div>
-</main><footer style="padding:0 0 36px;font-size:12px;color:#486581">© Kline Quant · <a href="./strategies.json">Python策略源码库</a> · <a href="./strategies-cpp.json">C++17源码库</a> · <a href="./engine.py">Python引擎源代码</a> · <a href="../">返回量化专区</a></footer></div>
+</main><footer style="padding:0 0 36px;font-size:12px;color:#486581">© Kline Quant · <a href="./strategies.json">Python策略源码库</a> · <a href="./strategies-cpp.json">C++17源码库</a> · <a href="./engine.py">Python引擎源代码</a> · <a href="./cpp_backtester.cpp">C++17本地回测程序</a> · <a href="../">返回量化专区</a></footer></div>
 <script>
 const $=id=>document.getElementById(id);const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 let cppLibrary={},library=[],selected=null,strategyKeyword="",strategyCategory="",dataText="",label="合成模拟数据（非真实历史行情）",worker=null,workerId=0,runTimeout=null,report=null,results={},running=false;

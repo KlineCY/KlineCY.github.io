@@ -8,15 +8,26 @@ let curriculum=null,depts=[],chapters=[],nodes=[],lessons=[],lessonMap=new Map()
 let cppExamples=new Map();
 let nodeMap=new Map(),chapMap=new Map(),deptMap=new Map(),activeId="",filterDept="",filterLevel="",query="";
 const getDept=id=>deptMap.get(id),getChap=id=>chapMap.get(id),getNode=id=>nodeMap.get(id);
-fetch("./cpp-examples.json",{cache:"no-cache"}).then(response=>{
- if(!response.ok)throw Error("C++示例文件不可用："+response.status);
- return response.json();
-}).then(doc=>{
- if(doc.schema!==1||!doc.examples||Object.keys(doc.examples).length<20)throw Error("C++示例目录不完整");
- for(const [id,example] of Object.entries(doc.examples)){
-   if(!example.title||!example.description||!example.code?.includes("int main()"))throw Error("C++源码缺损："+id);
+Promise.all([
+ fetch("./cpp-examples.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw Error("基础C++示例加载失败");return r.json()}),
+ fetch("./cpp-topic-manifest.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw Error("C++专题目录加载失败");return r.json()})
+]).then(async ([base,manifest])=>{
+ if(base.schema!==1||manifest.schema!==1||!Array.isArray(manifest.modules))throw Error("C++索引数据不完整");
+ const modules=await Promise.all(manifest.modules.map(async m=>{
+   if(!/^\.\/cpp-topic-pack-\d\d\.json$/.test(m.path))throw Error("C++专题模块路径非法");
+   const r=await fetch(m.path,{cache:"no-cache"});
+   if(!r.ok)throw Error("C++专题模块加载失败："+m.path);
+   const data=await r.json();
+   if(data.schema!==1||!data.examples||Object.keys(data.examples).length!==m.count)throw Error("C++模块数量错误："+m.path);
+   return data;
+ }));
+ const all=[base,...modules];
+ for(const pack of all)for(const [id,example] of Object.entries(pack.examples)){
+   if(cppExamples.has(id)||!example.title||!example.description||!example.code?.includes("int main()"))
+     throw Error("C++源码缺损或重复："+id);
    cppExamples.set(id,example);
  }
+ if(cppExamples.size!==manifest.expected_total)throw Error("C++数学示例总数不匹配");
  if(activeId&&nodeMap.has(activeId))selectNode(activeId,false);
 }).catch(error=>console.warn("C++数学示例：",error.message));
 const humanStatus=node=>lessonMap.has(node.id)?"完整讲义":"正文暂不可用";
