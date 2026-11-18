@@ -1,5 +1,6 @@
 #pragma once
 #include "portfolio.hpp"
+#include "allocation.hpp"
 #include <algorithm>
 #include <cmath>
 #include <numeric>
@@ -28,7 +29,7 @@ inline std::vector<double> project_capped_simplex(
 inline std::vector<double> risk_budget_weights(
     const Matrix& covariance, const std::vector<double>& budget,
     int iterations = 3000) {
-    check_covariance(covariance);
+    require_positive_semidefinite(covariance);
     check_finite(budget);
     int n = int(budget.size());
     require(n == int(covariance.size()) && iterations > 0,
