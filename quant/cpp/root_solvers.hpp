@@ -9,7 +9,8 @@ inline double bisect_root(const std::function<double(double)>& f,
             std::isfinite(tolerance)&&tolerance>0,"Invalid root bracket");
     double fl=f(left),fr=f(right);
     require(std::isfinite(fl)&&std::isfinite(fr)&&fl*fr<=0,"Root not bracketed");
-    if(fl==0)return left;if(fr==0)return right;
+    if(fl==0)return left;
+    if(fr==0)return right;
     for(int i=0;i<200;i++){
         double mid=left+0.5*(right-left),fm=f(mid);
         require(std::isfinite(fm),"Nonfinite bracket objective");
