@@ -162,7 +162,8 @@ inline bool run_sitewide_math_ml_cli(const std::string& cmd,int argc,char** argv
         out<<"Probability "<<ftrl_predict(model,{number(6)})<<"\n";
     }else if(cmd=="binary-auc"||cmd=="brier"||cmd=="binary-logloss"){
         exact(5);auto t=read_csv(argv[2]);
-        auto score=t.numbers(argv[3]),label=sitewide_binary(t.numbers(argv[4]));
+        auto score=t.numbers(argv[3]);
+        auto label=sitewide_binary(t.numbers(argv[4]));
         double result=cmd=="binary-auc"?binary_auc_mann_whitney(score,label):
             cmd=="brier"?binary_brier_score(score,label):
                          binary_logarithmic_score(score,label);
