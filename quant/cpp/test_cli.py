@@ -117,6 +117,41 @@ with tempfile.TemporaryDirectory() as work:
     assert "2026-01-03,2.50000000" in joined
     assert "2026-01-06,4.50000000" in joined
 
+
+    learning_csv = directory / "learning.csv"
+    csv_write(learning_csv, ["X", "Y", "Maturity"], [
+        [i, 1 + 2 * i, i + 2] for i in range(30)
+    ])
+    ridge = run("ridge", learning_csv, "Y", 0, "X")
+    assert "Intercept 1.00000000" in ridge
+    assert "X,2.00000000" in ridge
+    assert "TrainingMSE 0.00000000" in ridge
+    forward = run("ridge-forward", learning_csv, "Y", "Maturity", 12, 6, 12, 1, 0, "X")
+    assert "12,12,10,25.00000000,25.00000000" in forward
+    assert "18,18" in forward and "Index,ModelFitAt,TrainingRows" in forward
+
+    shrink = run("ledoit-wolf", returns, "A", "B")
+    assert "ShrinkageIntensity " in shrink
+    intensity = float(shrink.splitlines()[0].split()[1])
+    assert 0 <= intensity <= 1
+    assert "Asset,A,B" in shrink
+
+    ledger_csv = directory / "ledger.csv"
+    csv_write(ledger_csv, ["WA", "RA", "WB", "RB"], [
+        [1, 0.1, 0, 0], [1, 0, 0, 0], [0, 0, 0, 0]
+    ])
+    ledger = run("rebalance", ledger_csv, 100, 0, "WA", "RA", "WB", "RB")
+    rows = [line.split(",") for line in ledger.strip().splitlines()[1:]]
+    assert len(rows) == 3
+    assert abs(float(rows[0][-1]) - 1.1 / 1.01) < 1e-7
+    assert abs(float(rows[1][3])) < 1e-7
+    assert abs(float(rows[2][-1]) - 1.1 / 1.01 * 0.99) < 1e-7
+    run("ridge", learning_csv, "Y", -1, "X", success=False)
+    run("ridge-forward", learning_csv, "Y", "Maturity", 2, 5, 3, 1, 0, "X",
+        success=False)
+    run("ledoit-wolf", returns, "A", success=False)
+    run("rebalance", ledger_csv, -1, 0, "WA", "RA", success=False)
+
     run("stats", returns, "MissingColumn", success=False)
     run("risk", returns, "A", 1, success=False)
     run("option", 100, 100, 0, 0, -1, 1, "call", success=False)
@@ -129,4 +164,4 @@ with tempfile.TemporaryDirectory() as work:
     run("calibration", calibration_csv, "Probability", "Label", 0, success=False)
     run("montecarlo", 100, 100, 0.05, 0, 0.2, 1, "call", 0, 2026, success=False)
 
-print("PASS: 22 CLI workflows plus invalid-input rejection cases")
+print("PASS: 26 CLI workflows, time-safe Ridge and cash-ledger invalid-input checks")
