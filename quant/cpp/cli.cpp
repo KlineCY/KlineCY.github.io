@@ -1,4 +1,5 @@
 #include "data.hpp"
+#include "allocation.hpp"
 #include "derivatives.hpp"
 #include "execution.hpp"
 #include "factors.hpp"
@@ -51,6 +52,8 @@ void usage() {
          << "  ledoit-wolf CSV ASSET_RETURN_A ASSET_RETURN_B [MORE_COLUMNS...]\n"
          << "  rebalance CSV COST_BPS CASH_RETURN WEIGHT_A RETURN_A [MORE_PAIRS...]\n"
          << "  longshort CSV COST_BPS CASH_RATE FUND_RATE BORROW_RATE MAX_GROSS WEIGHT RETURN [PAIRS...]\n"
+         << "  allocate CSV RISK_LAMBDA TURNOVER_PENALTY ASSET_COLUMN EXPECTED_RETURN PREVIOUS_WEIGHT [MORE_TRIPLES...]\n"
+         << "  bl-pair CSV ASSET_COLUMN_A ASSET_COLUMN_B PRIOR_A PRIOR_B VIEW_A_MINUS_B VIEW_VARIANCE TAU\n"
          << "  asof EVENT_CSV DECISION_CSV (event columns Date,Published,Received,Value)\n";
 }
 
@@ -415,6 +418,43 @@ int main(int argc, char** argv) {
                      << point.traded_notional << "," << point.trading_cost << ","
                      << point.gross_return << "," << point.net_return << ","
                      << point.ending_equity << "\n";
+        } else if (command == "allocate") {
+            kline::require(argc >= 11 && (argc - 5) % 3 == 0,
+                           "Use allocate CSV RISK TURNOVER RETURN_COLUMN MU PREVIOUS_WEIGHT...");
+            auto table = kline::read_csv(argv[2]);
+            vector<string> names;
+            vector<vector<double>> returns;
+            vector<double> expected, previous;
+            for (int arg = 5; arg < argc; arg += 3) {
+                names.push_back(argv[arg]);
+                returns.push_back(table.numbers(argv[arg]));
+                expected.push_back(number(argv[arg + 1]));
+                previous.push_back(number(argv[arg + 2]));
+            }
+            auto shrink = kline::ledoit_wolf_identity(returns);
+            auto result = kline::optimize_long_only(
+                expected, shrink.covariance, previous,
+                number(argv[3]), number(argv[4]));
+            cout << "ShrinkageIntensity " << shrink.intensity << "\n";
+            cout << "Asset,TargetWeight\n";
+            for (int i = 0; i < int(names.size()); i++)
+                cout << names[i] << "," << result.weights[i] << "\n";
+            cout << "ExpectedReturn " << result.expected_return << "\n"
+                 << "ExpectedVolatility " << result.expected_volatility << "\n"
+                 << "HalfTurnover " << result.one_way_turnover << "\n"
+                 << "PenalizedObjective " << result.objective << "\n";
+        } else if (command == "bl-pair") {
+            require_arguments(argc, 10);
+            auto table = kline::read_csv(argv[2]);
+            auto shrink = kline::ledoit_wolf_identity(
+                {table.numbers(argv[3]), table.numbers(argv[4])});
+            vector<double> prior = {number(argv[5]), number(argv[6])};
+            auto posterior = kline::black_litterman_posterior(
+                prior, shrink.covariance, number(argv[9]),
+                {{1, -1}}, {number(argv[7])}, {number(argv[8])});
+            cout << "ShrinkageIntensity " << shrink.intensity << "\n"
+                 << "PosteriorA " << posterior[0] << "\n"
+                 << "PosteriorB " << posterior[1] << "\n";
         } else if (command == "asof") {
             require_arguments(argc, 4);
             auto events = kline::read_csv(argv[2]);
