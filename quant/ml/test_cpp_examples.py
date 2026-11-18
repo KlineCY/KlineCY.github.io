@@ -33,7 +33,7 @@ def collect(area):
 
 math, math_origin = collect("math")
 ml, ml_origin = collect("ml")
-assert len(math) == 656 and len(ml) == 369
+assert len(math) == 656 and len(ml) == 566
 curriculum = read("math/curriculum.json")
 math_nodes = {node["id"]: node for node in curriculum["nodes"]}
 assert set(math) == set(math_nodes), 'Every mathematics curriculum node needs runnable C++17'
@@ -42,15 +42,15 @@ ml_paths = [
     root / "ml/atlas-concept-chapters.json",
     *sorted((root / "ml").glob("atlas-concept-bridge-v113*.json")),
     *sorted((root / "ml").glob("atlas-concept-bridge-v114*.json")),
-    *sorted((root / "ml").glob("atlas-depth-07-*.json")),
-    *sorted((root / "ml").glob("atlas-depth-08-*.json")),
-    *sorted((root / "ml").glob("atlas-depth-09-*.json")),
-    *sorted((root / "ml").glob("atlas-depth-10-*.json")),
-    *sorted((root / "ml").glob("atlas-depth-11-*.json")),
+    *sorted((root / "ml").glob("atlas-depth*.json")),
 ]
 ml_sources = {}
 for p in ml_paths:
-    for id, item in json.loads(p.read_text(encoding="utf-8"))["lessons"].items():
+    data = json.loads(p.read_text(encoding="utf-8"))
+    lessons = data.get("lessons")
+    if not isinstance(lessons, dict):
+        continue
+    for id, item in lessons.items():
         ml_sources[id] = item.get("source_title") or item.get("title")
 assert set(ml) <= set(ml_sources)
 
