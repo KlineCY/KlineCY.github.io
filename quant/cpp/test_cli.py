@@ -49,6 +49,18 @@ with tempfile.TemporaryDirectory() as work:
     relative = run("relative", returns, "A", "B")
     assert "TrackingErrorAnnual" in relative
 
+    etf = run("etf", returns, "A", "B")
+    assert "AnnualTrackingDifference" in etf
+    assert "AnnualTrackingError" in etf
+    curve = run("curve", 1, 0.03, 2, 0.04)
+    assert abs(float(curve.splitlines()[0].split()[1]) - 0.05) < 1e-7
+    fx = run("fx", 1.2, 0.02, 0.05, 1)
+    assert abs(float(fx.split()[1]) - 1.2 * 1.05 / 1.02) < 1e-7
+    hedge = run("duration-hedge", 1000000, 5, 10)
+    assert "HedgeNotional -500000.00000000" in hedge
+    roll = run("futures-roll", 98, 100)
+    assert "StaticRollYield -0.02000000" in roll
+
     option = run("option", 100, 100, 0.02, 0.01, 0.2, 1, "call")
     premium = float(next(line.split()[1] for line in option.splitlines()
                          if line.startswith("Premium")))
@@ -94,5 +106,7 @@ with tempfile.TemporaryDirectory() as work:
     run("american", 100, 100, 0, 0, 0.2, 1, 0, "put", success=False)
     run("quote", 101, 99, 10, 10, 101, "buy", 100, success=False)
     run("bond", 100, 0.05, 0.04, 0, 2, success=False)
+    run("fx", 1.2, -2, 0.05, 1, success=False)
+    run("curve", 2, 0.03, 1, 0.04, success=False)
 
-print("PASS: all 12 CLI workflows and error-rejection cases")
+print("PASS: all 17 CLI workflows and error-rejection cases")
