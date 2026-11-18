@@ -20,7 +20,10 @@ inline IsotonicModel fit_isotonic(const std::vector<double>& scores,
     struct Block{double sum=0;int count=0;double right=0;};
     std::vector<Block> blocks;
     for(const auto& row:rows){
-        blocks.push_back({double(row.second),1,row.first});
+        if(!blocks.empty()&&blocks.back().right==row.first){
+            blocks.back().sum+=row.second;
+            blocks.back().count++;
+        }else blocks.push_back({double(row.second),1,row.first});
         while(blocks.size()>=2){
             int n=int(blocks.size());
             if(blocks[n-2].sum/blocks[n-2].count<=
