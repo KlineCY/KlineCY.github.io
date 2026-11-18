@@ -36,10 +36,21 @@ def _parse(text):
             cl=float(value(row,"close"))
             voltext=value(row,"volume")
             vol=float(voltext) if voltext else 0.
+            hightext=value(row,"high")
+            lowtext=value(row,"low")
+            if bool(hightext)!=bool(lowtext):
+                raise ValueError(f"第{line}行High/Low必须同时提供或同时为空")
+            high=float(hightext) if hightext else None
+            low=float(lowtext) if lowtext else None
         except (ValueError,OverflowError) as exc:
             raise ValueError(f"第{line}行日期或价格无法解析") from exc
-        if not (math.isfinite(op) and math.isfinite(cl) and op>0 and cl>0 and math.isfinite(vol)):
+        if not (math.isfinite(op) and math.isfinite(cl) and op>0 and cl>0 and math.isfinite(vol) and vol>=0):
             raise ValueError(f"第{line}行存在无效价格或成交量")
+        if high is not None and not (
+            math.isfinite(high) and math.isfinite(low) and low>0
+            and high>=max(op,cl) and low<=min(op,cl)
+        ):
+            raise ValueError(f"第{line}行High/Low与Open/Close不一致")
         ticker=value(row,"ticker","symbol","asset",default="ASSET").upper() or "ASSET"
         if ticker in ("__ALL__","__BENCHMARK__"):
             raise ValueError("Ticker 不得使用保留名 __ALL__ 或 __BENCHMARK__")
@@ -47,7 +58,11 @@ def _parse(text):
             raise ValueError(f"第{line}行Ticker异常")
         if date in series[ticker]:
             raise ValueError(f"重复记录 {ticker} {date}；请先去重")
-        series[ticker][date]={"date":date,"open":op,"close":cl,"volume":vol}
+        bar={"date":date,"open":op,"close":cl,"volume":vol}
+        if high is not None:
+            bar["high"]=high
+            bar["low"]=low
+        series[ticker][date]=bar
         count+=1
         if count>120000:
             raise ValueError("浏览器回测最多处理120,000行CSV，请先按资产或时间筛选")
