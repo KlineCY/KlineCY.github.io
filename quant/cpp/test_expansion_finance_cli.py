@@ -140,6 +140,7 @@ with tempfile.TemporaryDirectory() as tmp:
         ("sabr-vol",[100,100,1,0.2,1,1,0.2]),
         ("sabr-atm",[100,1,0.2,1,1,0.2]),
         ("option-reprice",[0,100,0,0,0.2,1,1,0,0,"call"]),
+        ("option-reprice",[100,100,0,0,0.2,1,1,0,0,"invalid"]),
         ("bond-risk",[cash,-99999]),
         ("swap-payer",[curve,payment,0.05,-1]),
         ("swap-float",[curve,-1,100]),
