@@ -50,6 +50,7 @@ void usage() {
          << "  ridge-forward CSV LABEL MATURITY_INDEX FIRST_TRAIN STEP WINDOW GAP LAMBDA FEATURE...\n"
          << "  ledoit-wolf CSV ASSET_RETURN_A ASSET_RETURN_B [MORE_COLUMNS...]\n"
          << "  rebalance CSV COST_BPS CASH_RETURN WEIGHT_A RETURN_A [MORE_PAIRS...]\n"
+         << "  longshort CSV COST_BPS CASH_RATE FUND_RATE BORROW_RATE MAX_GROSS WEIGHT RETURN [PAIRS...]\n"
          << "  asof EVENT_CSV DECISION_CSV (event columns Date,Published,Received,Value)\n";
 }
 
@@ -387,6 +388,28 @@ int main(int argc, char** argv) {
             auto history = kline::simulate_long_only_rebalance(
                 weights, returns, number(argv[3]), number(argv[4]));
             cout << "Index,BeginningEquity,TradedNotional,TradingCost,GrossReturn,NetReturn,EndingEquity\n";
+            for (const auto& point : history)
+                cout << point.index << "," << point.beginning_equity << ","
+                     << point.traded_notional << "," << point.trading_cost << ","
+                     << point.gross_return << "," << point.net_return << ","
+                     << point.ending_equity << "\n";
+        } else if (command == "longshort") {
+            kline::require(argc >= 10 && (argc - 8) % 2 == 0,
+                           "Use longshort CSV COST_BPS CASH_RATE FUND_RATE BORROW_RATE MAX_GROSS WEIGHT RETURN...");
+            auto table = kline::read_csv(argv[2]);
+            kline::Matrix weights(table.rows.size()), returns(table.rows.size());
+            for (int arg = 8; arg < argc; arg += 2) {
+                auto weight = table.numbers(argv[arg]);
+                auto asset_return = table.numbers(argv[arg + 1]);
+                for (int t = 0; t < int(weight.size()); t++) {
+                    weights[t].push_back(weight[t]);
+                    returns[t].push_back(asset_return[t]);
+                }
+            }
+            auto history = kline::simulate_long_short_rebalance(
+                weights, returns, number(argv[3]), number(argv[4]),
+                number(argv[5]), number(argv[6]), number(argv[7]));
+            cout << "Index,BeginningEquity,TradedNotional,TradingCost,ReturnBeforeTradingCost,NetReturn,EndingEquity\n";
             for (const auto& point : history)
                 cout << point.index << "," << point.beginning_equity << ","
                      << point.traded_notional << "," << point.trading_cost << ","
