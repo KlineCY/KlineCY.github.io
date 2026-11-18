@@ -1,5 +1,5 @@
 #pragma once
-#include "portfolio.hpp"
+#include "allocation.hpp"
 #include <algorithm>
 #include <cmath>
 #include <numeric>
@@ -57,7 +57,7 @@ inline std::vector<double> solve_box_quadratic(
     const Matrix& h,const std::vector<double>& linear,
     const std::vector<double>& lower,const std::vector<double>& upper,
     int iterations=8000) {
-    check_covariance(h);check_finite(linear);
+    require_positive_semidefinite(h);check_finite(linear);
     require(h.size()==linear.size() && h.size()==lower.size() &&
             h.size()==upper.size() && iterations>0,"Invalid box QP dimensions");
     std::vector<double> x=project_box(std::vector<double>(linear.size(),0),lower,upper);
