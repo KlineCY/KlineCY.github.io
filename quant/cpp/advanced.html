@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>C++17 量化研究进阶数值方法｜Kline Quant</title>
+<meta name="description" content="系统介绍C++17量化研究工具：PCA、GARCH、Lasso、风险预算、Black-76、收益率曲线、限价订单簿、Bootstrap、相关蒙特卡洛及真实可得信息边界。">
+<link rel="stylesheet" href="../sidebar-v2.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<style>
+:root{--ink:#102a43;--muted:#4a647c;--line:#dbe5ee;--blue:#1d5d8f}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:#f7fafc;color:var(--ink);font:15px/1.95 "Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+a{color:var(--blue)}.main{margin-left:252px;padding:26px 34px 65px}main{max-width:1140px;margin:auto}
+header{background:#102a43;color:white;border-radius:12px;padding:35px 39px}
+header small{color:#edbd70;letter-spacing:1.6px}
+h1{font-size:clamp(26px,3.5vw,43px);line-height:1.35;margin:13px 0}
+header p{color:#d9e5ed;max-width:950px}
+.quick{background:white;border:1px solid var(--line);padding:16px 21px;margin:20px 0;display:flex;flex-wrap:wrap;gap:12px 18px}
+.quick a{text-decoration:none;font-size:13px}
+article{background:white;border:1px solid var(--line);padding:27px 33px;margin:18px 0;scroll-margin-top:14px}
+article h2{margin:0 0 15px;font-size:23px}
+article h3{font-size:16px;margin:18px 0 6px}p{margin:10px 0}
+.formula{overflow:auto;background:#f4f7fa;border-left:3px solid #d49b4c;padding:12px 15px;margin:15px 0}
+pre{padding:16px 19px;background:#102a43;color:#ecf5ff;overflow:auto;font:13px/1.8 Consolas,monospace}
+code{font:0.9em Consolas,monospace}ul{padding-left:21px}
+.note{font-size:13px;color:#4e667b;border-left:3px solid #d49b4c;padding:9px 15px;background:#f7fafc}
+footer{font-size:12px;color:var(--muted);padding:18px 0}
+@media(max-width:760px){.main{margin:0;padding:12px}header,article{padding:22px 18px}}
+</style>
+</head>
+<body><aside id="quantSidebar" class="sidebar" data-page="cpp" aria-label="量化研究分类导航"></aside>
+<script src="../sidebar-v2.js"></script>
+<div class="main"><main>
+<header><small>NUMERICAL METHODS / QUANTITATIVE C++17</small>
+<h1>量化研究 C++17 进阶算法体系</h1>
+<p>10 个新的独立研究模块，覆盖数值线性代数、时序建模、特征工程、机器学习、组合风控、衍生品、固定收益、订单执行、统计检验与随机模拟。提供直接可调用的头文件和 26 种新增命令行研究操作，均不依赖第三方数值库。</p>
+<p>全部例题适用于研究复现和数值教学。实现特别区分历史合法数据、预测时点、模型假设和现实交易限制，避免将数学模拟结果直接解释为可执行投资业绩。</p>
+</header>
+<nav class="quick">
+<a href="#numerical">线性代数与PCA</a><a href="#timeseries">金融时间序列</a><a href="#indicators">技术因子</a><a href="#regression">回归与分类</a><a href="#portfolio">风险预算</a><a href="#options">衍生品</a><a href="#curves">期限结构</a><a href="#execution">交易执行</a><a href="#inference">统计推断</a><a href="#stochastic">随机模拟</a>
+</nav>
+<article id="numerical">
+<h2>一、对称特征值分解与主成分分析</h2>
+<p>PCA 的目的，是从一组高相关资产或因子中找出解释共同波动的正交方向。首先只能用训练窗口的均值对原始样本按列中心化，再构造样本协方差矩阵并进行对称特征值分解。按特征值降序排序的特征向量组成载荷矩阵，数据投影得到低维主成分得分。</p>
+<div class="formula">$$S=\frac{1}{T-1}X_c^\top X_c,\qquad Sv_j=\lambda_jv_j,\qquad Z=X_cV_k$$</div>
+<p>对应 <code>numerical.hpp</code>：Jacobi 旋转法迭代消去非对角元，返回排序后的特征值与正交方向；<code>principal_components</code> 同时返回训练均值、载荷、得分和完整特征谱；<code>condition_number_symmetric</code> 检测近奇异性。无可识别信号时条件数可为无穷大，而非强行伪造有限结果。</p>
+<p class="note">PCA 对新样本的变换必须使用训练期拟合的中心和载荷。这里使用协方差矩阵，因此没有自动对每个维度进行方差标准化；如果各因子具有不同量纲，需要先根据研究目的明确统一尺度。Jacobi 方法适合中小型密集矩阵，高维生产系统通常应采用高性能特征分解库。</p>
+<pre>./kline_quant pca factors.csv Value Growth Quality
+./kline_quant cov-condition returns.csv SPY TLT GLD</pre>
+<p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/numerical.hpp">查看数值线性代数源码</a></p>
+</article>
+<article id="timeseries">
+<h2>二、AR(1)、EWMA 与条件异方差</h2>
+<p>金融波动率常呈现聚集而收益均值的自相关可能较弱。<code>timeseries.hpp</code> 将均值预测与条件风险预测分别建模：EMA 是历史数值的指数加权平滑；EWMA 方差以已实现残差平方更新下一期预测；AR(1) 使用相邻观测对进行带截距的OLS估计；GARCH(1,1) 通过给定参数递推条件方差。</p>
+<div class="formula">$$x_t=c+\phi x_{t-1}+\epsilon_t,\qquad h_{t+1}=\omega+\alpha\epsilon_t^2+\beta h_t$$</div>
+<p>GARCH 函数返回每期结果发生之前可用的条件方差，要求非负参数、正截距及 \(\alpha+\beta<1\) 的常见平稳充分条件。输入的 GARCH 参数由调用者提供，当前接口不会声称已完成极大似然拟合。AR(1) 半衰期计算要求 \(0<\phi<1\)；若系数超出范围，不应解释为常规指数衰减。</p>
+<pre>./kline_quant ema returns.csv Return 0.06
+./kline_quant ewma-var returns.csv Return 0.94 0.0001
+./kline_quant ar1 returns.csv Return
+./kline_quant garch returns.csv Residual 0.000001 0.07 0.91 0.0001</pre>
+<p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/timeseries.hpp">查看金融时间序列源码</a></p>
+</article>
+<article id="indicators">
+<h2>三、动量、RSI、ATR 与突破位置</h2>
+<p>价格衍生特征必须明确历史窗口及当前信号最早可使用的时刻。动量可指定完整回溯窗口和近期跳过期；RSI 以Wilder递推平均上涨与下跌幅度；ATR使用日内高低差及相对昨日收盘价的跳空幅度；突破指标在不包含当期价格的历史区间上计算上下界，因而允许数值超过传统的0—1区间。</p>
+<div class="formula">$$m_t=\frac{P_{t-s}}{P_{t-s-L}}-1,\qquad \mathrm{RSI}_t=100\frac{G_t}{G_t+L_t}$$</div>
+<p>这里的 \(L\) 在动量公式中是回溯期，在RSI中 \(L_t\) 是平均下跌幅度；二者含义不同。日期与交易所时区需在进入算法前对齐，代码不会将使用今日收盘价构造的完整信号假设为可以在同日收盘前无成本成交。</p>
+<pre>./kline_quant momentum prices.csv Close 252 21
+./kline_quant rsi prices.csv Close 14
+./kline_quant atr prices.csv High Low Close 14</pre>
+<p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/indicators.hpp">查看指标源码</a></p>
+</article>
+<article id="regression">
+<h2>四、Lasso 坐标下降与二元 Logistic 回归</h2>
+<p>在已有 Ridge 模型基础上，新模块增加L1稀疏回归和带L2系数惩罚的Logistic分类。特征仅使用训练集统计量标准化，截距单独更新而不正则化。Lasso利用软阈值逐坐标优化，并维护当前残差以避免每次重新计算全量拟合值；Logistic采用稳定Sigmoid和全样本梯度迭代，避免指数溢出。</p>
+<div class="formula">$$\widehat\beta=\underset{\beta}{\operatorname{arg\,min}}\;\frac{1}{2T}\Vert y-a\mathbf1-Z\beta\Vert_2^2+\lambda\Vert\beta\Vert_1$$</div>
+<p>二元分类模型使用对数损失评价概率预测，不能仅凭训练分类正确率评价交易价值。因子、标准化、超参数以及分类阈值必须纳入时间外验证。这里的模型均属不依赖外部库的简明教学实现，不声称具备稀疏大矩阵、GPU或分布式训练能力。</p>
+<pre>./kline_quant lasso training.csv Target 0.01 Momentum Volatility
+./kline_quant logistic training.csv Up 0.10 Momentum Volatility</pre>
+<p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/regression_models.hpp">查看机器学习算法源码</a></p>
+</article>
+<article id="portfolio">
+<h2>五、风险预算、资产权重上限与尾部贡献</h2>
+<p>风险预算把每个资产的组合风险贡献按指定比例分配。代码通过正权重的风险预算凸目标进行坐标优化，再归一化为满仓权重。<code>project_capped_simplex</code> 将任意实数权重投影到非负、总和为1且每项不超过上限的可行集合；不可行的上限应直接拒绝。</p>
+<div class="formula">$$RC_i=\frac{w_i(\Sigma w)_i}{\sqrt{w^\top\Sigma w}},\qquad \frac{RC_i}{\sum_j RC_j}=b_i$$</div>
+<p>历史ES贡献在最差收益情景上使用逐资产损失分解，并允许尾部分位点落在观测之间时按分数概率权重计算。总贡献应与同样损失约定的组合经验ES一致。若要将其用于真实风险限额，应对尾部样本量、估值与相关性突变做独立检验。</p>
+<pre>./kline_quant risk-budget returns.csv SPY 0.4 TLT 0.4 GLD 0.2
+./kline_quant cap-project signals.csv Score 0.10
+./kline_quant es-contrib scenarios.csv 0.975 0.5 SPY 0.5 TLT</pre>
+<p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/portfolio_risk.hpp">查看风险预算源码</a></p>
+</article>
+<article id="options">
+<h2>六、Black-76 与 Bachelier 期权模型</h2>
+<p>Black-76通常采用正的远期或期货价格作为标的定价变量，Bachelier模型则允许远期价格为负，适合研究正常波动率与相应市场报价约定。两者都需要给定到期时间、贴现因子与波动率；程序提供欧式看涨、看跌、Bachelier隐含波动率反解，以及Black-76 Vega。</p>
+<div class="formula">$$C_{\mathrm{normal}}=D\left[(F-K)\Phi(d)+\sigma_N\sqrt{T}\,\phi(d)\right],\quad d=\frac{F-K}{\sigma_N\sqrt T}$$</div>
+<p>必须严格区分正常波动率 \(\sigma_N\) 的价格绝对单位与Black-76对数正态波动率的相对单位，不能把两个数值当作同一风险指标。当前代码不涵盖波动率曲面套利约束、非欧式合约的提前行权及真实期货期权结算细节。</p>
+<pre>./kline_quant black76 100 100 0.2 1 0.95 call
+./kline_quant bachelier 100 100 10 1 0.95 call
+./kline_quant normal-iv 3.98942280 100 100 1 1 call</pre>
+<p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/options_models.hpp">查看期权模型源码</a></p>
+</article>
+<article id="curves">
+<h2>七、零息期限结构、掉期与关键期限DV01</h2>
+<p>收益率曲线由严格递增的期限节点和连续复利零息利率构成。节点之间采用零息利率线性插值，边界外使用最邻近节点的水平外推，再依照 \(D(t)=e^{-t z(t)}\) 计算贴现因子。现金流现值通过按支付日期贴现求和得到，普通固定利率掉期的平价利率由浮动端与固定端贴现现金流平衡获得。</p>
+<div class="formula">$$K_{\mathrm{swap}}=\frac{1-D(T)}{\sum_{i=1}^{n}(t_i-t_{i-1})D(t_i)},\qquad \mathrm{KRDV01}_j\approx\frac{PV(z_j-1bp)-PV(z_j+1bp)}{2}$$</div>
+<p>关键期限DV01逐节点上下各移动一个基点重新估价，除本节点外保持其他曲线节点不变。它是依赖插值规则的局部敏感度，不能直接套用到另一套曲线表示法。真实固定收益研究还需处理日计数、节假日、曲线多重贴现、信用利差与浮息重设规则。</p>
+<pre>./kline_quant curve-pv curve.csv cashflows.csv
+./kline_quant swap-par curve.csv payment_times.csv
+./kline_quant keyrate curve.csv cashflows.csv</pre>
+<p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/curve_models.hpp">查看期限结构源码</a></p>
+</article>
+<article id="execution">
+<h2>八、订单簿逐档成交与执行计划</h2>
+<p>对一个主动买单，程序按卖盘最优价格至更差价格逐档撮合，并计算实际撮合数量、未成交数量及成交量加权均价；主动卖单则使用反向排序的买盘。执行容量计划根据每个时间切片的最大可交易量选择统一填单门槛，满足总订单量并防止任何时间切片超过输入容量。</p>
+<div class="formula">$$P_{\mathrm{VWAP}}=\frac{\sum_\ell p_\ell q_\ell}{\sum_\ell q_\ell},\qquad q_\ell\leq \text{available depth}_\ell$$</div>
+<p>被动队列的简单演示模型依据前方显示挂单量与对手盘主动成交量决定可能成交的数量，尚未模拟同价位撤单、隐藏单、非FIFO规则或高速市场动态订单事件。真实执行系统必须处理报价过期、订单回报、部分成交、交易时段及各券商风控限制。</p>
+<pre>./kline_quant book-walk asks.csv buy 1000
+./kline_quant capped-schedule liquidity.csv MaxQuantity 300</pre>
+<p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/execution_models.hpp">查看交易执行源码</a></p>
+</article>
+<article id="inference">
+<h2>九、相关数据下的统计推断与监测</h2>
+<p>移动区块Bootstrap会保留连续历史片段的局部时序依赖，再对重复抽样均值计算百分位区间。Newey–West HAC 标准误可以用来构造研究均值的近似t统计量，但需要合理选择滞后阶数。Holm逐步校正控制多次检验的家族错误率，比仅保留单个最优策略的未经调整p值更符合模型筛选的证据要求。</p>
+<p>CUSUM将超过参考均值加允许波动带的正向偏离累积为监测统计量；只有首次越过事先确定的报警阈值时，程序才报告相应观测索引。漂移报警不同于确认模型已经失效，策略调整应结合数据缺失、成交率、风险暴露及成熟标签的真实预测结果。</p>
+<pre>./kline_quant bootstrap-ci monthly.csv IC 4 1000 2026 0.95
+./kline_quant holm tests.csv PValue
+./kline_quant cusum observations.csv RealizedCost 0.001 0.0002 0.01</pre>
+<p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/inference_models.hpp">查看统计检验源码</a></p>
+</article>
+<article id="stochastic">
+<h2>十、多资产相关随机路径与精确OU转移</h2>
+<p>多资产GBM先对年化收益协方差矩阵进行半正定Cholesky分解，再从固定种子的标准正态随机数构造联合冲击。各资产按自身漂移与波动率更新，输出每个时间步的价格路径矩阵。若协方差不满足半正定约束，或数值产生不可解释的溢出/下溢，程序拒绝继续生成结果。</p>
+<div class="formula">$$S_{i,t+\Delta t}=S_{i,t}\exp\left[(\mu_i-\tfrac12\Sigma_{ii})\Delta t+\sqrt{\Delta t}\sum_jL_{ij}Z_j\right],\quad LL^\top=\Sigma$$</div>
+<p>Ornstein–Uhlenbeck过程的下一期转移采用解析条件均值与方差，不必使用Euler离散近似。函数要求给定均值回复速度、扩散强度和时间间隔，提供确定性正态冲击作为输入，方便测试与组合模型衔接。相关GBM仅模拟指定模型下的路径，不包含极端跳跃、结构突变或历史资产池变化。</p>
+<p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/stochastic_models.hpp">查看随机过程源码</a></p>
+</article>
+<article id="workflow">
+<h2>运行、数据口径与交叉检查</h2>
+<p>工具使用C++17标准库编译，提供单独的 <code>test_advanced.cpp</code> 及 <code>test_advanced_cli.py</code>。数值断言覆盖解析例题、矩阵维度、参数边界、收益统计、价格路径与成本方向，CSV测试覆盖全部26个新增命令。GCC与Clang分别独立编译运行，CMake也提供对应测试目标。</p>
+<pre>cmake -S quant/cpp -B build/quant-cpp
+cmake --build build/quant-cpp
+ctest --test-dir build/quant-cpp --output-on-failure</pre>
+<p>命令行CSV必须含有列名并且数字使用十进制小数；历史价格、净值、收益、波动率、融资与费用的计量单位必须与对应接口一致。新增的模型仅提供给定输入条件下的研究计算，所有超参数应在独立训练期选择，时间外测试结果不得用于回填当期决策。对融资、借券与实际订单行为，应继续使用站内原有的组合账本和成交约束验证。</p>
+<p><a href="./">返回 C++ 工具库总览</a> · <a href="../audit/">量化研究设计与交易审计课程</a> · <a href="../research/">策略研究与回测</a></p>
+</article>
+<footer>© Kline Quant · C++17 numerical research</footer>
+</main></div>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}],throwOnError:false});"></script>
+</body></html>
