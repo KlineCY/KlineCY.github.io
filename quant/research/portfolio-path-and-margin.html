@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>组合净值路径、尾部回撤与保证金｜Kline Quant</title><meta name="description" content="动态组合的风险不仅依赖单期平均收益或协方差矩阵，也依赖复利路径、再平衡频率、保证金占用与极端情景。四个模型分别处理每日重置、场景最大回撤、仓位保证金和分散比率的计算口径。">
+<link rel="stylesheet" href="../sidebar-v2.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<style>
+*{box-sizing:border-box}body{margin:0;background:white;color:#172c3c;font:16px/1.95 "Times New Roman","SimSun",serif}
+.main{margin-left:252px;padding:25px 32px 70px}main{max-width:1110px;margin:auto}
+h1{font-size:clamp(27px,3.3vw,39px);line-height:1.3;margin:9px 0 14px}
+h2{font-size:24px;margin:30px 0 16px;border-bottom:1px solid #bdcbd6;padding-bottom:10px}
+h3{font-size:18px;margin:17px 0 8px}p{line-height:1.95;margin:12px 0}
+a{color:#19577e}.header,.chapter,.sources,.source-code{border:1px solid #c7d3dc;background:white;padding:25px 29px;margin:17px 0}
+.eyebrow{font:13px "Times New Roman",serif;letter-spacing:1px}
+.toc{display:flex;flex-wrap:wrap;gap:12px 22px;border:1px solid #cad5dd;padding:17px 24px;margin:20px 0}
+.formula{overflow-x:auto;border-block:1px solid #d1dce3;padding:16px 7px;margin:15px 0}
+.formula .katex-display{overflow-x:auto;overflow-y:hidden}
+.ch-meta{font-size:13px;color:#4b6375}.data-command{border:1px solid #ccd5dd;padding:13px;overflow-x:auto;font:14px/1.7 "Times New Roman",monospace;white-space:pre-wrap}
+pre{border:1px solid #ced8df;overflow:auto;padding:16px;max-height:700px;font:12px/1.65 "Times New Roman",monospace;white-space:pre}
+.source-links{display:flex;flex-wrap:wrap;gap:9px 23px}
+@media(max-width:790px){.main{margin:0;padding:14px}.header,.chapter,.sources,.source-code{padding:16px}}
+</style></head>
+<body><aside id="quantSidebar" class="sidebar" data-page="research"></aside>
+<script src="../sidebar-v2.js"></script><div class="main"><main>
+<header class="header"><div class="eyebrow">PORTFOLIO RESEARCH / DYNAMIC RISK</div><h1>组合净值路径、尾部回撤与保证金</h1><p>动态组合的风险不仅依赖单期平均收益或协方差矩阵，也依赖复利路径、再平衡频率、保证金占用与极端情景。四个模型分别处理每日重置、场景最大回撤、仓位保证金和分散比率的计算口径。</p>
+<p class="ch-meta">研究工具：标准C++17，CSV数据输入，数值边界与异常输入检测。</p></header>
+<nav class="toc" aria-label="专题目录"><a href="#chapter1">1．每日重置杠杆产品的复利路径</a><a href="#chapter2">2．路径最大回撤的情景尾部统计</a><a href="#chapter3">3．多空头寸保证金压力</a><a href="#chapter4">4．长期配置的资产分散比率</a>
+<a href="#code">完整C++17源码</a><a href="#sources">方法资料</a></nav>
+<article class="chapter" id="chapter1">
+<h2>1．每日重置杠杆产品的复利路径</h2><div class="formula">$$V_T=V_0\prod_{t=1}^{T}\left(1+Lr_t-\frac{f}{D}\right)$$</div>
+<h3>统计定义与推导</h3><p>杠杆目标(L)按每个交易日重新设置，故每日净值增长因子分别取当日基准收益乘杠杆，再扣除当日近似费用。多日收益是因子连乘，因此一般不等于基准累计收益的固定倍数。</p>
+<h3>数值复算与经济含义</h3><p>基准连续两天上涨10%和下跌10%，基准累计回报为-1%。不计费用、每日2倍杠杆的净值路径为1、1.2、0.96，累计回报-4%，表现出波动拖累。</p>
+<h3>输入口径与适用范围</h3><p>模型采用每日固定倍数、线性费用近似，并对净值归零或转负的路径拒绝计算；真实ETF还有融资利差、衍生品展期及跟踪差异。</p>
+<h3>实际数据命令</h3><pre class="data-command"><code>./kline_quant leveraged-nav etf.csv Return 2 0 252</code></pre>
+<p class="ch-meta">命令行读取具有对应列名的CSV数据；所有计算入口均在<a href="#code">portfolio_path_lab.hpp</a>中实现。</p>
+</article>
+<article class="chapter" id="chapter2">
+<h2>2．路径最大回撤的情景尾部统计</h2><div class="formula">$$MDD_s=\max_t\left(1-\frac{V_{s,t}}{\max_{u\le t}V_{s,u}}\right),\quad \mathrm{DDaR}_{\alpha}=Q_{\alpha}(MDD_s)$$</div>
+<h3>统计定义与推导</h3><p>把每条模拟路径的最大回撤视为一个独立风险情景，再在情景之间估计回撤分位数与最坏尾部平均值。这种设计保留了路径峰值与谷值的先后顺序，而历史单期收益VaR通常只关注收益分布的单个时点。</p>
+<h3>数值复算与经济含义</h3><p>两条情景净值分别为100、80、90与100、90、100，对应最大回撤为20%和10%。取50%经验分位，回撤分位值为10%，最坏半数情景均值为20%。</p>
+<h3>输入口径与适用范围</h3><p>场景依赖性、模拟生成机制与尾部样本数量控制结果稳定性。程序按最近秩定义经验分位数，尾部均值采用分数边界权重并在报告中保持该约定。</p>
+<h3>实际数据命令</h3><pre class="data-command"><code>./kline_quant drawdown-tail scenarios.csv NavA NavB 0.5</code></pre>
+<p class="ch-meta">命令行读取具有对应列名的CSV数据；所有计算入口均在<a href="#code">portfolio_path_lab.hpp</a>中实现。</p>
+</article>
+<article class="chapter" id="chapter3">
+<h2>3．多空头寸保证金压力</h2><div class="formula">$$E_t=E_0+q(P_t-P_0),\quad M_t=m|q|P_t,\quad D_t=\max(0,M_t-E_t)$$</div>
+<h3>统计定义与推导</h3><p>有符号持仓(q)统一处理多头与空头的盯市损益。维护保证金按标记价格乘绝对持仓规模计算，当账户权益\(E_t\)低于维护要求\(M_t\)时，差额\(D_t\)构成需补充的金额。</p>
+<h3>数值复算与经济含义</h3><p>初始权益50、持有10股多头、开仓价100、现价90、维护比例10%，盯市权益为-50、维护要求为90，保证金缺口为140。</p>
+<h3>输入口径与适用范围</h3><p>该账户例子仅计入给定头寸的价格损益，没有分红、借券利息、融资现金、交叉保证金与券商实时风控规则；实际交易中这些项目影响是否被强制平仓。</p>
+<h3>实际数据命令</h3><pre class="data-command"><code>./kline_quant margin-call 50 10 100 90 0.1</code></pre>
+<p class="ch-meta">命令行读取具有对应列名的CSV数据；所有计算入口均在<a href="#code">portfolio_path_lab.hpp</a>中实现。</p>
+</article>
+<article class="chapter" id="chapter4">
+<h2>4．长期配置的资产分散比率</h2><div class="formula">$$DR(w)=\frac{\sum_i w_i\sqrt{\Sigma_{ii}}}{\sqrt{w^\top\Sigma w}}$$</div>
+<h3>统计定义与推导</h3><p>分散比率比较资产单独波动率的加权和与组合实际波动率。在权重为非负且归一化、协方差矩阵有效的情况下，低相关资产可通过协方差项降低分母，显示多资产配置的风险分散效应。</p>
+<h3>数值复算与经济含义</h3><p>两项资产方差都为1、协方差为0、权重各占50%，分子为1，分母为\(\sqrt{0.5}\)，分散比率为\(\sqrt2\approx1.4142\)。</p>
+<h3>输入口径与适用范围</h3><p>该指标不描述预期收益、交易费用或尾部相关结构。计算要求输入权重和为1，并检验对称性、非负对角元及成对Cauchy界；完整PSD检查属于协方差估计阶段。</p>
+<h3>实际数据命令</h3><pre class="data-command"><code>./kline_quant diversification-2 0.5 1 0 1</code></pre>
+<p class="ch-meta">命令行读取具有对应列名的CSV数据；所有计算入口均在<a href="#code">portfolio_path_lab.hpp</a>中实现。</p>
+</article>
+<section class="source-code" id="code"><h2>完整、独立可引用的C++17源码</h2>
+<p>源码可作为头文件直接包含于C++17工程中，使用标准库完成数值计算。所有入口在命令行研究工具中可调用，并接受边界与数学恒等式测试。</p>
+<div class="source-links"><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/portfolio_path_lab.hpp">GitHub头文件</a><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_empirical_labs.cpp">数值回归测试</a><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_empirical_labs_cli.py">真实CSV与非法输入测试</a></div>
+<pre><code>#pragma once
+#include "stats.hpp"
+#include &lt;algorithm&gt;
+#include &lt;cmath&gt;
+#include &lt;numeric&gt;
+#include &lt;vector&gt;
+
+namespace kline {
+inline std::vector&lt;double&gt; daily_reset_leveraged_nav(const std::vector&lt;double&gt;&amp; benchmarkReturns,
+                                                     double leverage,double annualFee,
+                                                     int periodsPerYear=252){
+    check_finite(benchmarkReturns);
+    require(std::isfinite(leverage)&amp;&amp;std::abs(leverage)&lt;=10&amp;&amp;
+            std::isfinite(annualFee)&amp;&amp;annualFee&gt;=0&amp;&amp;annualFee&lt;=1&amp;&amp;
+            periodsPerYear&gt;0,"Invalid daily-reset fund inputs");
+    double nav=1;std::vector&lt;double&gt; path{nav};
+    for(double r:benchmarkReturns){
+        const double growth=1+leverage*r-annualFee/periodsPerYear;
+        require(growth&gt;0&amp;&amp;std::isfinite(growth),
+                "Daily reset portfolio has exhausted capital");
+        nav*=growth;require(std::isfinite(nav)&amp;&amp;nav&gt;0,"Fund NAV overflow");
+        path.push_back(nav);
+    }
+    return path;
+}
+struct DrawdownTailRisk{double quantile=0,expectedTail=0;};
+inline DrawdownTailRisk simulated_drawdown_tail(
+    const std::vector&lt;std::vector&lt;double&gt;&gt;&amp; simulatedNav,double confidence){
+    require(!simulatedNav.empty()&amp;&amp;std::isfinite(confidence)&amp;&amp;
+            confidence&gt;0&amp;&amp;confidence&lt;1,"Invalid drawdown simulation inputs");
+    std::vector&lt;double&gt; draws;
+    for(const auto&amp; nav:simulatedNav){
+        check_finite(nav);require(nav.size()&gt;=2,"Scenario must contain two NAV observations");
+        double peak=nav.front(),worst=0;
+        for(double x:nav){
+            require(x&gt;0,"NAV must be strictly positive");
+            peak=std::max(peak,x);worst=std::max(worst,1-x/peak);
+        }
+        draws.push_back(worst);
+    }
+    std::sort(draws.begin(),draws.end());
+    const std::size_t index=std::max(std::size_t(1),
+        std::size_t(std::ceil(confidence*draws.size())))-1;
+    const double q=draws[index],tail=(1-confidence)*draws.size();
+    double sum=0,left=tail;
+    for(auto it=draws.rbegin();it!=draws.rend();++it){
+        const double weight=std::min(1.0,left);
+        if(weight&lt;=0)break;
+        sum+=weight*(*it);left-=weight;
+    }
+    return {q,sum/tail};
+}
+struct MarginCall{double equity=0,maintenance=0,deficiency=0;};
+inline MarginCall position_margin_call(double originalEquity,double signedShares,
+                                        double entryPrice,double markPrice,
+                                        double maintenanceFraction){
+    require(std::isfinite(originalEquity)&amp;&amp;originalEquity&gt;=0&amp;&amp;
+            std::isfinite(signedShares)&amp;&amp;std::isfinite(entryPrice)&amp;&amp;entryPrice&gt;0&amp;&amp;
+            std::isfinite(markPrice)&amp;&amp;markPrice&gt;0&amp;&amp;
+            std::isfinite(maintenanceFraction)&amp;&amp;maintenanceFraction&gt;=0&amp;&amp;
+            maintenanceFraction&lt;=1,"Invalid margin parameters");
+    const double equity=originalEquity+signedShares*(markPrice-entryPrice);
+    const double required=std::abs(signedShares)*markPrice*maintenanceFraction;
+    return {equity,required,std::max(0.0,required-equity)};
+}
+inline double long_only_diversification_ratio(
+    const std::vector&lt;double&gt;&amp; weights,
+    const std::vector&lt;std::vector&lt;double&gt;&gt;&amp; covariance){
+    check_finite(weights);
+    require(weights.size()&gt;=2&amp;&amp;covariance.size()==weights.size(),
+            "Diversification requires multiple aligned assets");
+    const std::size_t n=weights.size();
+    for(std::size_t i=0;i&lt;n;++i)
+        require(covariance[i].size()==n,"Covariance matrix must be square");
+    double sumWeight=0,weightedVol=0,variance=0;
+    for(std::size_t i=0;i&lt;n;++i){
+        require(weights[i]&gt;=0&amp;&amp;covariance[i].size()==n,
+                "Long-only covariance has invalid dimensions");
+        sumWeight+=weights[i];
+        require(std::isfinite(covariance[i][i])&amp;&amp;covariance[i][i]&gt;=0,
+                "Covariance diagonal must be nonnegative");
+        weightedVol+=weights[i]*std::sqrt(covariance[i][i]);
+        for(std::size_t j=0;j&lt;n;++j){
+            require(std::isfinite(covariance[i][j])&amp;&amp;
+                    std::abs(covariance[i][j]-covariance[j][i])&lt;1e-8,
+                    "Covariance matrix must be symmetric");
+            require(std::abs(covariance[i][j])&lt;=
+                    std::sqrt(covariance[i][i]*covariance[j][j])+1e-8,
+                    "Covariance violates pairwise Cauchy bound");
+            variance+=weights[i]*weights[j]*covariance[i][j];
+        }
+    }
+    require(std::abs(sumWeight-1)&lt;1e-8&amp;&amp;variance&gt;0,
+            "Long-only weights or portfolio variance invalid");
+    return weightedVol/std::sqrt(variance);
+}
+} // namespace kline
+</code></pre></section>
+<section class="sources" id="sources"><h2>学术与技术资料</h2><p><a href="https://www.investor.gov/introduction-investing/general-resources/news-alerts/alerts-bulletins/investor-alerts/sec">SEC杠杆与反向ETF投资者公告</a>；<a href="https://www.itl.nist.gov/div898/handbook/">NIST统计风险方法</a>。</p>
+<p>相关模型的数值性质按本文给定的统计对象、样本范围和输入单位解释。实证研究的制度识别、模型校准及样本外决策仍由对应研究设计确定。</p></section>
+<footer><p><a href="../research/">返回策略研究与回测</a>　<a href="../cpp/">进入C++量化研究工具</a></p></footer>
+</main></div>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}],throwOnError:false});"></script></body></html>

@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>队列成交、冲击传播与事件时间测度｜Kline Quant</title><meta name="description" content="交易执行的核心风险来自订单的排队位置、成交到达过程、价格冲击的时序传播及不同采样频率的波动测度。这里将这些机制写成具有明确时间单位的C++17模型，区分统计假设下的模拟与真实订单簿回放。">
+<link rel="stylesheet" href="../sidebar-v2.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<style>
+*{box-sizing:border-box}body{margin:0;background:white;color:#172c3c;font:16px/1.95 "Times New Roman","SimSun",serif}
+.main{margin-left:252px;padding:25px 32px 70px}main{max-width:1110px;margin:auto}
+h1{font-size:clamp(27px,3.3vw,39px);line-height:1.3;margin:9px 0 14px}
+h2{font-size:24px;margin:30px 0 16px;border-bottom:1px solid #bdcbd6;padding-bottom:10px}
+h3{font-size:18px;margin:17px 0 8px}p{line-height:1.95;margin:12px 0}
+a{color:#19577e}.header,.chapter,.sources,.source-code{border:1px solid #c7d3dc;background:white;padding:25px 29px;margin:17px 0}
+.eyebrow{font:13px "Times New Roman",serif;letter-spacing:1px}
+.toc{display:flex;flex-wrap:wrap;gap:12px 22px;border:1px solid #cad5dd;padding:17px 24px;margin:20px 0}
+.formula{overflow-x:auto;border-block:1px solid #d1dce3;padding:16px 7px;margin:15px 0}
+.formula .katex-display{overflow-x:auto;overflow-y:hidden}
+.ch-meta{font-size:13px;color:#4b6375}.data-command{border:1px solid #ccd5dd;padding:13px;overflow-x:auto;font:14px/1.7 "Times New Roman",monospace;white-space:pre-wrap}
+pre{border:1px solid #ced8df;overflow:auto;padding:16px;max-height:700px;font:12px/1.65 "Times New Roman",monospace;white-space:pre}
+.source-links{display:flex;flex-wrap:wrap;gap:9px 23px}
+@media(max-width:790px){.main{margin:0;padding:14px}.header,.chapter,.sources,.source-code{padding:16px}}
+</style></head>
+<body><aside id="quantSidebar" class="sidebar" data-page="feeds"></aside>
+<script src="../sidebar-v2.js"></script><div class="main"><main>
+<header class="header"><div class="eyebrow">MARKET MICROSTRUCTURE / EXECUTION</div><h1>队列成交、冲击传播与事件时间测度</h1><p>交易执行的核心风险来自订单的排队位置、成交到达过程、价格冲击的时序传播及不同采样频率的波动测度。这里将这些机制写成具有明确时间单位的C++17模型，区分统计假设下的模拟与真实订单簿回放。</p>
+<p class="ch-meta">研究工具：标准C++17，CSV数据输入，数值边界与异常输入检测。</p></header>
+<nav class="toc" aria-label="专题目录"><a href="#chapter1">1．泊松队列完整成交概率</a><a href="#chapter2">2．指数衰减的暂态市场冲击</a><a href="#chapter3">3．已实现方差的多尺度签名</a><a href="#chapter4">4．固定成交量桶的带符号不平衡</a>
+<a href="#code">完整C++17源码</a><a href="#sources">方法资料</a></nav>
+<article class="chapter" id="chapter1">
+<h2>1．泊松队列完整成交概率</h2><div class="formula">$$P(\mathrm{fill})=P(N_T\ge q_0+q)=1-e^{-\lambda T}\sum_{k=0}^{q_0+q-1}\frac{(\lambda T)^k}{k!}$$</div>
+<h3>统计定义与推导</h3><p>若队列前方尚有\(q_0\)个单位、自己订单量为(q)，且该价位的可消耗成交量按强度\(\lambda\)的泊松事件到达，则完全成交要求研究窗口内至少出现\(q_0+q\)次单位成交。尾概率由离散泊松分布计算。</p>
+<h3>数值复算与经济含义</h3><p>当队列前方为零、自己的订单量为1、到达率每单位时间为1且观察期限同为1时，完整成交概率为\(1-e^{-1}\approx0.6321\)。</p>
+<h3>输入口径与适用范围</h3><p>此公式把每次到达视为一个单位的有效消耗，没有考虑订单撤单、插队、部分成交批量、隐藏流动性及队列的内生变化。市场实盘概率需要订单簿事件级数据识别。</p>
+<h3>实际数据命令</h3><pre class="data-command"><code>./kline_quant queue-poisson 1 1 0 1</code></pre>
+<p class="ch-meta">命令行读取具有对应列名的CSV数据；所有计算入口均在<a href="#code">execution_dynamics_lab.hpp</a>中实现。</p>
+</article>
+<article class="chapter" id="chapter2">
+<h2>2．指数衰减的暂态市场冲击</h2><div class="formula">$$I_t=\rho I_{t-1}+\eta q_t,\qquad 0\le\rho\le1$$</div>
+<h3>统计定义与推导</h3><p>将带符号的订单量\(q_t\)映射为即时价格冲击，再让尚未消散的冲击以保持系数\(\rho\)递推。该状态变量记录历史订单对当前价格的持续影响，正负方向由订单符号决定。</p>
+<h3>数值复算与经济含义</h3><p>令每单位冲击系数为2、持续系数为0.5，订单序列为1、0、-1。冲击路径为2、1、-1.5，说明撤单或反向交易可部分抵消此前冲击。</p>
+<h3>输入口径与适用范围</h3><p>这是单指数核的简化传播机制，不自动区分永久冲击与暂态冲击；交易量单位、时间步长与实际订单簿流动性必须一并报告。</p>
+<h3>实际数据命令</h3><pre class="data-command"><code>./kline_quant transient-impact trades.csv SignedOrders 2 0.5</code></pre>
+<p class="ch-meta">命令行读取具有对应列名的CSV数据；所有计算入口均在<a href="#code">execution_dynamics_lab.hpp</a>中实现。</p>
+</article>
+<article class="chapter" id="chapter3">
+<h2>3．已实现方差的多尺度签名</h2><div class="formula">$$RV(k)=\sum_{j=1}^{\lfloor(n-1)/k\rfloor}\left[\ln P_{jk}-\ln P_{(j-1)k}\right]^2$$</div>
+<h3>统计定义与推导</h3><p>以相同一日内价格序列为基础，分别用最细网格\(k=1\)与粗网格\(k>1\)计算非重叠对数收益平方和，形成波动率签名。比较不同采样尺度能够观察由报价跳变、反弹及价格发现形成的高频测度差异。</p>
+<h3>数值复算与经济含义</h3><p>价格序列100、110、100，细网格平方和严格为正；粗网格以首尾价格计算的对数收益为零，因此两期跨度的已实现方差为零。</p>
+<h3>输入口径与适用范围</h3><p>当粗网格不能覆盖整个序列时，尾部未完成区间不参与粗测度。零成交时段、盘口中间价选择及数据时钟同步会影响结果。</p>
+<h3>实际数据命令</h3><pre class="data-command"><code>./kline_quant rv-signature trades.csv Price 2</code></pre>
+<p class="ch-meta">命令行读取具有对应列名的CSV数据；所有计算入口均在<a href="#code">execution_dynamics_lab.hpp</a>中实现。</p>
+</article>
+<article class="chapter" id="chapter4">
+<h2>4．固定成交量桶的带符号不平衡</h2><div class="formula">$$B_j=\frac{|V_j^+-V_j^-|}{V_{\mathrm{bucket}}}$$</div>
+<h3>统计定义与推导</h3><p>事件时间按照固定累计成交量分桶，订单方向由外部已识别的买卖符号给出。若一笔交易跨过桶边界，算法将其成交量拆分到多个桶，确保每个完整桶具有相同总成交量。</p>
+<h3>数值复算与经济含义</h3><p>先有3单位主动买入，后有7单位主动卖出，桶大小为5。第一个桶记录3单位买入和2单位卖出，绝对不平衡为0.2；第二个桶全部为卖出，不平衡为1。</p>
+<h3>输入口径与适用范围</h3><p>该统计只使用完整成交量桶，最后不足一个桶的尾部保留在数据口径之外。买卖方向误分类和订单拆分会影响解释，指标本身不等同于真实VPIN的全部估计步骤。</p>
+<h3>实际数据命令</h3><pre class="data-command"><code>./kline_quant volume-bucket trades.csv Volume Sign 5</code></pre>
+<p class="ch-meta">命令行读取具有对应列名的CSV数据；所有计算入口均在<a href="#code">execution_dynamics_lab.hpp</a>中实现。</p>
+</article>
+<section class="source-code" id="code"><h2>完整、独立可引用的C++17源码</h2>
+<p>源码可作为头文件直接包含于C++17工程中，使用标准库完成数值计算。所有入口在命令行研究工具中可调用，并接受边界与数学恒等式测试。</p>
+<div class="source-links"><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/execution_dynamics_lab.hpp">GitHub头文件</a><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_empirical_labs.cpp">数值回归测试</a><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_empirical_labs_cli.py">真实CSV与非法输入测试</a></div>
+<pre><code>#pragma once
+#include "stats.hpp"
+#include &lt;algorithm&gt;
+#include &lt;cmath&gt;
+#include &lt;vector&gt;
+
+namespace kline {
+inline double poisson_queue_completion_probability(double arrivalRate,
+                                                    double horizon,
+                                                    int quantityAhead,int ownQuantity){
+    require(std::isfinite(arrivalRate)&amp;&amp;arrivalRate&gt;=0&amp;&amp;std::isfinite(horizon)&amp;&amp;
+            horizon&gt;=0&amp;&amp;quantityAhead&gt;=0&amp;&amp;ownQuantity&gt;0&amp;&amp;
+            quantityAhead+ownQuantity&lt;=10000&amp;&amp;arrivalRate*horizon&lt;=600,
+            "Invalid queue arrival model inputs");
+    const double mu=arrivalRate*horizon;
+    if(mu==0)return 0;
+    const int requirement=quantityAhead+ownQuantity;
+    double term=std::exp(-mu),cdf=term;
+    for(int k=1;k&lt;requirement;++k){
+        term*=mu/k;cdf+=term;
+    }
+    return std::max(0.0,std::min(1.0,1-cdf));
+}
+inline std::vector&lt;double&gt; exponential_transient_impact(
+    const std::vector&lt;double&gt;&amp; signedOrders,double impactPerUnit,double persistence){
+    check_finite(signedOrders);
+    require(std::isfinite(impactPerUnit)&amp;&amp;impactPerUnit&gt;=0&amp;&amp;
+            std::isfinite(persistence)&amp;&amp;persistence&gt;=0&amp;&amp;persistence&lt;=1,
+            "Invalid transient-impact process");
+    double state=0;std::vector&lt;double&gt; path;
+    path.reserve(signedOrders.size());
+    for(double q:signedOrders){
+        state=persistence*state+impactPerUnit*q;
+        require(std::isfinite(state),"Transient impact overflows");
+        path.push_back(state);
+    }
+    return path;
+}
+struct SignatureVariance{double finest=0,coarse=0,ratio=0;};
+inline SignatureVariance realized_variance_signature(
+    const std::vector&lt;double&gt;&amp; prices,int coarseStep){
+    check_finite(prices);
+    require(prices.size()&gt;=3&amp;&amp;coarseStep&gt;=1&amp;&amp;
+            coarseStep&lt;int(prices.size()),"Invalid realized signature grid");
+    for(double p:prices)require(p&gt;0,"Positive prices required");
+    double fine=0,coarse=0;
+    for(std::size_t i=1;i&lt;prices.size();++i){
+        const double r=std::log(prices[i]/prices[i-1]);fine+=r*r;
+    }
+    for(std::size_t i=coarseStep;i&lt;prices.size();i+=coarseStep){
+        const double r=std::log(prices[i]/prices[i-coarseStep]);coarse+=r*r;
+    }
+    return {fine,coarse,fine&gt;0?coarse/fine:0};
+}
+inline std::vector&lt;double&gt; fixed_volume_signed_imbalance(
+    const std::vector&lt;double&gt;&amp; volumes,
+    const std::vector&lt;double&gt;&amp; tradeDirections,double bucketVolume){
+    check_finite(volumes);check_finite(tradeDirections);
+    require(volumes.size()==tradeDirections.size()&amp;&amp;
+            std::isfinite(bucketVolume)&amp;&amp;bucketVolume&gt;0,
+            "Invalid volume-bucket data");
+    double filled=0,signedFilled=0;
+    std::vector&lt;double&gt; completed;
+    for(std::size_t i=0;i&lt;volumes.size();++i){
+        require(volumes[i]&gt;=0&amp;&amp;(tradeDirections[i]==1||tradeDirections[i]==-1),
+                "Invalid nonnegative trade volume or sign");
+        double remaining=volumes[i];
+        while(remaining&gt;0){
+            double piece=std::min(remaining,bucketVolume-filled);
+            require(piece&gt;0,"Volume bucket has numerical underflow");
+            filled+=piece;signedFilled+=piece*tradeDirections[i];remaining-=piece;
+            if(filled&gt;=bucketVolume-1e-12*bucketVolume){
+                completed.push_back(std::abs(signedFilled)/bucketVolume);
+                filled=0;signedFilled=0;
+                require(completed.size()&lt;=250000,"Too many volume buckets");
+            }
+        }
+    }
+    return completed;
+}
+} // namespace kline
+</code></pre></section>
+<section class="sources" id="sources"><h2>学术与技术资料</h2><p><a href="https://www.nasdaqtrader.com/trader.aspx?id=marketdata">NASDAQ市场数据说明</a>；<a href="https://www.itl.nist.gov/div898/handbook/">NIST泊松分布背景</a>。</p>
+<p>相关模型的数值性质按本文给定的统计对象、样本范围和输入单位解释。实证研究的制度识别、模型校准及样本外决策仍由对应研究设计确定。</p></section>
+<footer><p><a href="../feeds/">返回核心数据源</a>　<a href="../cpp/">进入C++量化研究工具</a></p></footer>
+</main></div>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}],throwOnError:false});"></script></body></html>

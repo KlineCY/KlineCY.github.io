@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>日内区间波动率与跨时段风险｜Kline Quant</title><meta name="description" content="同一条OHLC记录同时包含交易时段价格区间、开盘与收盘位置及隔夜跳变。不同估计量对连续交易、漂移、开盘跳空和微观结构噪声的假设各不相同，因此宜分别报告估计对象，不把区间波动率与收盘收益方差混作同一个参数。">
+<link rel="stylesheet" href="../sidebar-v2.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<style>
+*{box-sizing:border-box}body{margin:0;background:white;color:#172c3c;font:16px/1.95 "Times New Roman","SimSun",serif}
+.main{margin-left:252px;padding:25px 32px 70px}main{max-width:1110px;margin:auto}
+h1{font-size:clamp(27px,3.3vw,39px);line-height:1.3;margin:9px 0 14px}
+h2{font-size:24px;margin:30px 0 16px;border-bottom:1px solid #bdcbd6;padding-bottom:10px}
+h3{font-size:18px;margin:17px 0 8px}p{line-height:1.95;margin:12px 0}
+a{color:#19577e}.header,.chapter,.sources,.source-code{border:1px solid #c7d3dc;background:white;padding:25px 29px;margin:17px 0}
+.eyebrow{font:13px "Times New Roman",serif;letter-spacing:1px}
+.toc{display:flex;flex-wrap:wrap;gap:12px 22px;border:1px solid #cad5dd;padding:17px 24px;margin:20px 0}
+.formula{overflow-x:auto;border-block:1px solid #d1dce3;padding:16px 7px;margin:15px 0}
+.formula .katex-display{overflow-x:auto;overflow-y:hidden}
+.ch-meta{font-size:13px;color:#4b6375}.data-command{border:1px solid #ccd5dd;padding:13px;overflow-x:auto;font:14px/1.7 "Times New Roman",monospace;white-space:pre-wrap}
+pre{border:1px solid #ced8df;overflow:auto;padding:16px;max-height:700px;font:12px/1.65 "Times New Roman",monospace;white-space:pre}
+.source-links{display:flex;flex-wrap:wrap;gap:9px 23px}
+@media(max-width:790px){.main{margin:0;padding:14px}.header,.chapter,.sources,.source-code{padding:16px}}
+</style></head>
+<body><aside id="quantSidebar" class="sidebar" data-page="math"></aside>
+<script src="../sidebar-v2.js"></script><div class="main"><main>
+<header class="header"><div class="eyebrow">QUANTITATIVE MATHEMATICS / PRICE VARIATION</div><h1>日内区间波动率与跨时段风险</h1><p>同一条OHLC记录同时包含交易时段价格区间、开盘与收盘位置及隔夜跳变。不同估计量对连续交易、漂移、开盘跳空和微观结构噪声的假设各不相同，因此宜分别报告估计对象，不把区间波动率与收盘收益方差混作同一个参数。</p>
+<p class="ch-meta">研究工具：标准C++17，CSV数据输入，数值边界与异常输入检测。</p></header>
+<nav class="toc" aria-label="专题目录"><a href="#chapter1">1．Parkinson极差估计</a><a href="#chapter2">2．Garman–Klass区间估计</a><a href="#chapter3">3．Rogers–Satchell漂移鲁棒估计</a><a href="#chapter4">4．隔夜跳空的二阶矩</a>
+<a href="#code">完整C++17源码</a><a href="#sources">方法资料</a></nav>
+<article class="chapter" id="chapter1">
+<h2>1．Parkinson极差估计</h2><div class="formula">$$\widehat{\sigma}_{P}^{2}=\frac{1}{4n\ln2}\sum_{t=1}^{n}\left[\ln(H_t/L_t)\right]^2$$</div>
+<h3>统计定义与推导</h3><p>布朗运动连续交易且漂移可以忽略时，最高价与最低价包含比收盘差更充分的日内价格路径信息。取对数极差平方并除以\(4\ln2\)，得到每个交易时段的扩散方差近似；跨时段取平均时权重相同。</p>
+<h3>数值复算与经济含义</h3><p>单日\(H=110,L=90\)，则对数极差为\(\ln(11/9)\\)，对应估计量约为\(0.0145\)；该数值是时段方差，年化前应与所用交易日数及交易时段长度对应。</p>
+<h3>输入口径与适用范围</h3><p>极差估计不直接包含开盘前风险；价格涨跌停、稀疏交易和数据中混用复权价会破坏其统计含义。</p>
+<h3>实际数据命令</h3><pre class="data-command"><code>./kline_quant range-parkinson market.csv High Low</code></pre>
+<p class="ch-meta">命令行读取具有对应列名的CSV数据；所有计算入口均在<a href="#code">range_volatility_lab.hpp</a>中实现。</p>
+</article>
+<article class="chapter" id="chapter2">
+<h2>2．Garman–Klass区间估计</h2><div class="formula">$$\widehat{\sigma}_{GK}^{2}=\frac1n\sum_t\left[\tfrac12\ln^2(H_t/L_t)-(2\ln2-1)\ln^2(C_t/O_t)\right]$$</div>
+<h3>统计定义与推导</h3><p>该估计在极差平方基础上减去收盘相对于开盘的对数变动平方，利用价格区间与端点共同识别连续扩散波动。两项系数来自特定几何布朗运动假设下的矩关系，数值结果不是对收益协方差的直接估计。</p>
+<h3>数值复算与经济含义</h3><p>取\(O=C=100,H=110,L=90\)，收开盘项为零，故该日估计量等于极差平方的一半，约为\(0.0201\)。这与Parkinson估计数值不同，说明它们有不同的样本路径权重。</p>
+<h3>输入口径与适用范围</h3><p>非零漂移、跳跃和离散报价可能造成偏差；程序严格校验每条记录满足\(L\le O,C\le H\)，避免非法K线被纳入计算。</p>
+<h3>实际数据命令</h3><pre class="data-command"><code>./kline_quant range-gk market.csv Open High Low Close</code></pre>
+<p class="ch-meta">命令行读取具有对应列名的CSV数据；所有计算入口均在<a href="#code">range_volatility_lab.hpp</a>中实现。</p>
+</article>
+<article class="chapter" id="chapter3">
+<h2>3．Rogers–Satchell漂移鲁棒估计</h2><div class="formula">$$\widehat{\sigma}_{RS}^{2}=\frac1n\sum_t\left[\ln(H_t/C_t)\ln(H_t/O_t)+\ln(L_t/C_t)\ln(L_t/O_t)\right]$$</div>
+<h3>统计定义与推导</h3><p>该估计分别比较最高价、最低价与开收盘端点的位置。对于连续对数价格过程，它能够在常数漂移存在的情况下估计扩散方差，因而适合分析日内明显趋势的价格区间。</p>
+<h3>数值复算与经济含义</h3><p>若\(O=C=100,H=110,L=90\)，两项依次是\(\ln^2(1.1)\)和\(\ln^2(0.9)\)，合计约为\(0.02018\)。其结构与Garman–Klass有所不同，不能在选择后追溯更改风险口径。</p>
+<h3>输入口径与适用范围</h3><p>该估计仍依赖完整日内高低价与一致的复权规则；不包含隔夜跳跃，也不直接提供参数置信区间。</p>
+<h3>实际数据命令</h3><pre class="data-command"><code>./kline_quant range-rs market.csv Open High Low Close</code></pre>
+<p class="ch-meta">命令行读取具有对应列名的CSV数据；所有计算入口均在<a href="#code">range_volatility_lab.hpp</a>中实现。</p>
+</article>
+<article class="chapter" id="chapter4">
+<h2>4．隔夜跳空的二阶矩</h2><div class="formula">$$\widehat{m}_{ON,2}=\frac1n\sum_t\left[\ln(O_t/C_{t-1})\right]^2$$</div>
+<h3>统计定义与推导</h3><p>开盘相对上一交易日收盘的跳空连接两个交易时段，它的风险机制受到隔夜消息、市场休市制度和盘前流动性的影响。这里计算未去均值的平方对数跳空，精确名称为二阶原点矩，与去均值的样本方差不同。</p>
+<h3>数值复算与经济含义</h3><p>前收盘价为100、次日开盘价为110，单次隔夜对数收益约为\(0.09531\)，平方约为\(0.009084\)。正向与负向跳空对二阶矩产生相同的非负贡献。</p>
+<h3>输入口径与适用范围</h3><p>遇到分红、拆股和不同币种报价时，应先对齐前收与开盘口径；不能直接把这一矩与日内方差相加并声称得到已校正的Yang–Zhang估计。</p>
+<h3>实际数据命令</h3><pre class="data-command"><code>./kline_quant overnight-gap market.csv Open PreviousClose</code></pre>
+<p class="ch-meta">命令行读取具有对应列名的CSV数据；所有计算入口均在<a href="#code">range_volatility_lab.hpp</a>中实现。</p>
+</article>
+<section class="source-code" id="code"><h2>完整、独立可引用的C++17源码</h2>
+<p>源码可作为头文件直接包含于C++17工程中，使用标准库完成数值计算。所有入口在命令行研究工具中可调用，并接受边界与数学恒等式测试。</p>
+<div class="source-links"><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/range_volatility_lab.hpp">GitHub头文件</a><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_empirical_labs.cpp">数值回归测试</a><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_empirical_labs_cli.py">真实CSV与非法输入测试</a></div>
+<pre><code>#pragma once
+#include "stats.hpp"
+#include &lt;algorithm&gt;
+#include &lt;cmath&gt;
+#include &lt;vector&gt;
+
+namespace kline {
+inline void validate_ohlc(const std::vector&lt;double&gt;&amp; open,
+                          const std::vector&lt;double&gt;&amp; high,
+                          const std::vector&lt;double&gt;&amp; low,
+                          const std::vector&lt;double&gt;&amp; close) {
+    check_finite(open); check_finite(high); check_finite(low); check_finite(close);
+    require(open.size()==high.size() &amp;&amp; open.size()==low.size() &amp;&amp;
+            open.size()==close.size(),"OHLC columns must align");
+    for(std::size_t i=0;i&lt;open.size();++i)
+        require(low[i]&gt;0 &amp;&amp; open[i]&gt;0 &amp;&amp; close[i]&gt;0 &amp;&amp;
+                high[i]&gt;=std::max(open[i],close[i]) &amp;&amp;
+                low[i]&lt;=std::min(open[i],close[i]) &amp;&amp; high[i]&gt;=low[i],
+                "Invalid positive OHLC price range");
+}
+inline double parkinson_intraday_variance(const std::vector&lt;double&gt;&amp; high,
+                                          const std::vector&lt;double&gt;&amp; low) {
+    check_finite(high);check_finite(low);
+    require(high.size()==low.size(),"High and low must align");
+    double sum=0;
+    for(std::size_t i=0;i&lt;high.size();++i){
+        require(low[i]&gt;0&amp;&amp;high[i]&gt;=low[i],"Invalid price range");
+        const double x=std::log(high[i]/low[i]);sum+=x*x;
+    }
+    return sum/(4*std::log(2.0)*high.size());
+}
+inline double garman_klass_intraday_variance(
+    const std::vector&lt;double&gt;&amp; open,const std::vector&lt;double&gt;&amp; high,
+    const std::vector&lt;double&gt;&amp; low,const std::vector&lt;double&gt;&amp; close){
+    validate_ohlc(open,high,low,close);
+    double sum=0;
+    for(std::size_t i=0;i&lt;open.size();++i){
+        const double range=std::log(high[i]/low[i]);
+        const double closeOpen=std::log(close[i]/open[i]);
+        sum+=0.5*range*range-(2*std::log(2.0)-1)*closeOpen*closeOpen;
+    }
+    return std::max(0.0,sum/open.size());
+}
+inline double rogers_satchell_intraday_variance(
+    const std::vector&lt;double&gt;&amp; open,const std::vector&lt;double&gt;&amp; high,
+    const std::vector&lt;double&gt;&amp; low,const std::vector&lt;double&gt;&amp; close){
+    validate_ohlc(open,high,low,close);
+    double sum=0;
+    for(std::size_t i=0;i&lt;open.size();++i)
+        sum+=std::log(high[i]/close[i])*std::log(high[i]/open[i])+
+             std::log(low[i]/close[i])*std::log(low[i]/open[i]);
+    return std::max(0.0,sum/open.size());
+}
+inline double overnight_gap_second_moment(const std::vector&lt;double&gt;&amp; open,
+                                           const std::vector&lt;double&gt;&amp; previousClose){
+    check_finite(open);check_finite(previousClose);
+    require(open.size()==previousClose.size(),"Open and previous close must align");
+    double sum=0;
+    for(std::size_t i=0;i&lt;open.size();++i){
+        require(open[i]&gt;0&amp;&amp;previousClose[i]&gt;0,"Invalid overnight price");
+        const double gap=std::log(open[i]/previousClose[i]);sum+=gap*gap;
+    }
+    return sum/open.size();
+}
+} // namespace kline
+</code></pre></section>
+<section class="sources" id="sources"><h2>学术与技术资料</h2><p><a href="https://www.itl.nist.gov/div898/handbook/">NIST统计方法手册</a>；<a href="https://doi.org/10.1086/209650">Yang–Zhang波动率研究（Journal of Business）</a>。</p>
+<p>相关模型的数值性质按本文给定的统计对象、样本范围和输入单位解释。实证研究的制度识别、模型校准及样本外决策仍由对应研究设计确定。</p></section>
+<footer><p><a href="../math/">返回量化数学</a>　<a href="../cpp/">进入C++量化研究工具</a></p></footer>
+</main></div>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}],throwOnError:false});"></script></body></html>

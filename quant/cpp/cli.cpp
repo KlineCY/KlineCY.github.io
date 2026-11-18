@@ -9,6 +9,7 @@
 #include "sitewide_finance_cli.hpp"
 #include "massive_stats_cli.hpp"
 #include "massive_finance_cli.hpp"
+#include "empirical_lab_cli.hpp"
 #include "data.hpp"
 #include "allocation.hpp"
 #include "derivatives.hpp"
@@ -77,6 +78,7 @@ void usage() {
     kline::sitewide_finance_usage(cerr);
     kline::massive_stats_usage(cerr);
     kline::massive_finance_usage(cerr);
+    kline::empirical_lab_usage(cerr);
 }
 
 double number(const char* value) {
@@ -509,6 +511,7 @@ int main(int argc, char** argv) {
         } else if (kline::run_sitewide_finance_cli(command,argc,argv,cout)) {
         } else if (kline::run_massive_stats_cli(command,argc,argv,cout)) {
         } else if (kline::run_massive_finance_cli(command,argc,argv,cout)) {
+        } else if (kline::run_empirical_lab_cli(command,argc,argv,cout)) {
         } else {
             usage();
             return 2;

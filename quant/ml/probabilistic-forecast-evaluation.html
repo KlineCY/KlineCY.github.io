@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>金融预测分布、排序与概率评分｜Kline Quant</title><meta name="description" content="金融预测可以输出点预测、分位数、完整概率分布或风险排序。它们对应的损失函数具有不同的统计目标；选择评分前，需要明确预测时点、标签成熟时点、是否存在类不平衡，以及交易层面的净成本目标。">
+<link rel="stylesheet" href="../sidebar-v2.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<style>
+*{box-sizing:border-box}body{margin:0;background:white;color:#172c3c;font:16px/1.95 "Times New Roman","SimSun",serif}
+.main{margin-left:252px;padding:25px 32px 70px}main{max-width:1110px;margin:auto}
+h1{font-size:clamp(27px,3.3vw,39px);line-height:1.3;margin:9px 0 14px}
+h2{font-size:24px;margin:30px 0 16px;border-bottom:1px solid #bdcbd6;padding-bottom:10px}
+h3{font-size:18px;margin:17px 0 8px}p{line-height:1.95;margin:12px 0}
+a{color:#19577e}.header,.chapter,.sources,.source-code{border:1px solid #c7d3dc;background:white;padding:25px 29px;margin:17px 0}
+.eyebrow{font:13px "Times New Roman",serif;letter-spacing:1px}
+.toc{display:flex;flex-wrap:wrap;gap:12px 22px;border:1px solid #cad5dd;padding:17px 24px;margin:20px 0}
+.formula{overflow-x:auto;border-block:1px solid #d1dce3;padding:16px 7px;margin:15px 0}
+.formula .katex-display{overflow-x:auto;overflow-y:hidden}
+.ch-meta{font-size:13px;color:#4b6375}.data-command{border:1px solid #ccd5dd;padding:13px;overflow-x:auto;font:14px/1.7 "Times New Roman",monospace;white-space:pre-wrap}
+pre{border:1px solid #ced8df;overflow:auto;padding:16px;max-height:700px;font:12px/1.65 "Times New Roman",monospace;white-space:pre}
+.source-links{display:flex;flex-wrap:wrap;gap:9px 23px}
+@media(max-width:790px){.main{margin:0;padding:14px}.header,.chapter,.sources,.source-code{padding:16px}}
+</style></head>
+<body><aside id="quantSidebar" class="sidebar" data-page="ml"></aside>
+<script src="../sidebar-v2.js"></script><div class="main"><main>
+<header class="header"><div class="eyebrow">FINANCIAL MACHINE LEARNING / VALIDATION</div><h1>金融预测分布、排序与概率评分</h1><p>金融预测可以输出点预测、分位数、完整概率分布或风险排序。它们对应的损失函数具有不同的统计目标；选择评分前，需要明确预测时点、标签成熟时点、是否存在类不平衡，以及交易层面的净成本目标。</p>
+<p class="ch-meta">研究工具：标准C++17，CSV数据输入，数值边界与异常输入检测。</p></header>
+<nav class="toc" aria-label="专题目录"><a href="#chapter1">1．分位数预测的Pinball损失</a><a href="#chapter2">2．Gaussian预测分布的CRPS</a><a href="#chapter3">3．并列分数下的平均精确率</a><a href="#chapter4">4．有序多分类概率的RPS</a>
+<a href="#code">完整C++17源码</a><a href="#sources">方法资料</a></nav>
+<article class="chapter" id="chapter1">
+<h2>1．分位数预测的Pinball损失</h2><div class="formula">$$L_{\tau}(y,q)=\bigl(\tau-\mathbf1_{\{y&lt;q\}}\bigr)(y-q)$$</div>
+<h3>统计定义与推导</h3><p>分位数预测关注条件分布的非对称尾部。若真实值高于预测分位数，低估损失的系数为\(\tau\)；低于预测时的系数为\(1-\tau\)。在相应正则条件下，期望Pinball损失由真实条件\(\tau\)分位数最小化。</p>
+<h3>数值复算与经济含义</h3><p>目标值为1和2、预测值为0和3，在\(\tau=0.5\)下两条样本损失均为0.5，平均损失0.5。改变分位水平会改变对上涨与下跌误差的惩罚。</p>
+<h3>输入口径与适用范围</h3><p>不同分位的损失不能简单等同于完整分布预测的质量；训练与测试数据应按时间划分，极端尾部分位的有效样本量往往更小。</p>
+<h3>实际数据命令</h3><pre class="data-command"><code>./kline_quant pinball-loss forecast.csv Target Forecast 0.5</code></pre>
+<p class="ch-meta">命令行读取具有对应列名的CSV数据；所有计算入口均在<a href="#code">forecast_verification_lab.hpp</a>中实现。</p>
+</article>
+<article class="chapter" id="chapter2">
+<h2>2．Gaussian预测分布的CRPS</h2><div class="formula">$$\mathrm{CRPS}=\sigma\left[z\bigl(2\Phi(z)-1\bigr)+2\phi(z)-\frac1{\sqrt\pi}\right],\quad z=\frac{y-\mu}{\sigma}$$</div>
+<h3>统计定义与推导</h3><p>连续排序概率评分CRPS综合考察预测分布的校准程度和集中程度。正态预测提供闭式表达式，模型同时报告条件均值与严格正的条件标准差。评分越小代表预测分布对所给观测越贴近。</p>
+<h3>数值复算与经济含义</h3><p>当预测为标准正态且实际值恰好为零时，\(z=0\)，得到\(\mathrm{CRPS}=(\sqrt2-1)/\sqrt\pi\approx0.2337\)。这一结果给数值程序提供不依赖历史数据的解析基准。</p>
+<h3>输入口径与适用范围</h3><p>CRPS检验的是概率预测，不保证策略利润；预测标准差是否包含波动制度突变，应结合PIT和样本外覆盖率共同分析。</p>
+<h3>实际数据命令</h3><pre class="data-command"><code>./kline_quant gaussian-crps forecast.csv Target Mean Sd</code></pre>
+<p class="ch-meta">命令行读取具有对应列名的CSV数据；所有计算入口均在<a href="#code">forecast_verification_lab.hpp</a>中实现。</p>
+</article>
+<article class="chapter" id="chapter3">
+<h2>3．并列分数下的平均精确率</h2><div class="formula">$$\mathrm{AP}=\sum_j(R_j-R_{j-1})P_j$$</div>
+<h3>统计定义与推导</h3><p>按模型分数从高到低逐个阈值积累精确率与召回率。遇到相同预测分数时，把并列样本视为同一个阈值组，随后按该组新增召回量加权，得到与scikit-learn一致的不插值平均精确率定义。</p>
+<h3>数值复算与经济含义</h3><p>四个样本的分数为0.9、0.8、0.8、0.1，标签为1、0、1、0。首个阈值的贡献为0.5，第二个阈值的贡献为\(0.5\times2/3\)，因此AP为\(5/6\)。</p>
+<h3>输入口径与适用范围</h3><p>AP与ROC AUC对类别比例及阈值排序的反应不同。没有正类时评价对象未定义，本实现明确拒绝输入而不输出一个具有误导性的零值。</p>
+<h3>实际数据命令</h3><pre class="data-command"><code>./kline_quant average-precision forecast.csv Score Label</code></pre>
+<p class="ch-meta">命令行读取具有对应列名的CSV数据；所有计算入口均在<a href="#code">forecast_verification_lab.hpp</a>中实现。</p>
+</article>
+<article class="chapter" id="chapter4">
+<h2>4．有序多分类概率的RPS</h2><div class="formula">$$\mathrm{RPS}=\frac1{K-1}\sum_{k=1}^{K-1}\left[\sum_{j=1}^{k}p_j-\mathbf1_{\{y\le k\}}\right]^2$$</div>
+<h3>统计定义与推导</h3><p>当市场状态具有自然顺序，例如低、中、高波动制度，逐类准确率会丢失错分距离。RPS比较预测累积概率与观测类别的累积分布，错误跨越更多类别会产生更大的累积偏差。</p>
+<h3>数值复算与经济含义</h3><p>三类问题中，将第一类概率全设为1并观察到第一类，得分为0；将第三类概率全设为1但实际仍为第一类，两个阈值的误差平方均为1，得分为1。两例的均值得分为0.5。</p>
+<h3>输入口径与适用范围</h3><p>各类别概率必须非负且严格归一化，实际状态的序关系也要有经济含义；本命令行接口展示三类情况，C++函数支持任意不少于两类的维度。</p>
+<h3>实际数据命令</h3><pre class="data-command"><code>./kline_quant ranked-score3 forecast.csv P0 P1 P2 Ordinal</code></pre>
+<p class="ch-meta">命令行读取具有对应列名的CSV数据；所有计算入口均在<a href="#code">forecast_verification_lab.hpp</a>中实现。</p>
+</article>
+<section class="source-code" id="code"><h2>完整、独立可引用的C++17源码</h2>
+<p>源码可作为头文件直接包含于C++17工程中，使用标准库完成数值计算。所有入口在命令行研究工具中可调用，并接受边界与数学恒等式测试。</p>
+<div class="source-links"><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/forecast_verification_lab.hpp">GitHub头文件</a><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_empirical_labs.cpp">数值回归测试</a><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_empirical_labs_cli.py">真实CSV与非法输入测试</a></div>
+<pre><code>#pragma once
+#include "stats.hpp"
+#include &lt;algorithm&gt;
+#include &lt;cmath&gt;
+#include &lt;numeric&gt;
+#include &lt;utility&gt;
+#include &lt;vector&gt;
+
+namespace kline {
+inline double pinball_mean_loss(const std::vector&lt;double&gt;&amp; observed,
+                                const std::vector&lt;double&gt;&amp; forecast,double quantileLevel){
+    check_finite(observed);check_finite(forecast);
+    require(observed.size()==forecast.size()&amp;&amp;quantileLevel&gt;0&amp;&amp;
+            quantileLevel&lt;1,"Invalid quantile forecast inputs");
+    double sum=0;
+    for(std::size_t i=0;i&lt;observed.size();++i){
+        const double error=observed[i]-forecast[i];
+        sum+=error&gt;=0?quantileLevel*error:(quantileLevel-1)*error;
+    }
+    return sum/observed.size();
+}
+inline double gaussian_crps_mean(const std::vector&lt;double&gt;&amp; observed,
+                                const std::vector&lt;double&gt;&amp; predictedMean,
+                                const std::vector&lt;double&gt;&amp; predictedSd){
+    check_finite(observed);check_finite(predictedMean);check_finite(predictedSd);
+    require(observed.size()==predictedMean.size()&amp;&amp;
+            observed.size()==predictedSd.size(),"Gaussian CRPS columns must align");
+    const double pi=std::acos(-1.0),sqrtTwo=std::sqrt(2.0);
+    double sum=0;
+    for(std::size_t i=0;i&lt;observed.size();++i){
+        const double sd=predictedSd[i];require(sd&gt;0,"Predictive SD must be positive");
+        const double z=(observed[i]-predictedMean[i])/sd;
+        const double cdf=0.5*std::erfc(-z/sqrtTwo);
+        const double pdf=std::exp(-0.5*z*z)/std::sqrt(2*pi);
+        sum+=sd*(z*(2*cdf-1)+2*pdf-1/std::sqrt(pi));
+    }
+    return sum/observed.size();
+}
+inline double average_precision_with_ties(const std::vector&lt;double&gt;&amp; scores,
+                                           const std::vector&lt;double&gt;&amp; labels){
+    check_finite(scores);check_finite(labels);
+    require(scores.size()==labels.size(),"Precision columns must align");
+    std::vector&lt;std::pair&lt;double,int&gt;&gt; pairs;int positive=0;
+    for(std::size_t i=0;i&lt;scores.size();++i){
+        require(labels[i]==0||labels[i]==1,"Precision labels must be binary");
+        positive+=int(labels[i]);pairs.push_back({scores[i],int(labels[i])});
+    }
+    require(positive&gt;0,"Average precision needs a positive label");
+    std::sort(pairs.begin(),pairs.end(),[](const auto&amp; a,const auto&amp; b){
+        return a.first&gt;b.first;
+    });
+    double area=0;int tp=0;
+    for(std::size_t i=0;i&lt;pairs.size();){
+        std::size_t j=i;int groupPos=0;
+        while(j&lt;pairs.size()&amp;&amp;pairs[j].first==pairs[i].first){
+            groupPos+=pairs[j].second;++j;
+        }
+        tp+=groupPos;
+        area+=double(groupPos)/positive*(double(tp)/j);
+        i=j;
+    }
+    return area;
+}
+inline double ordinal_ranked_probability_score(
+    const std::vector&lt;std::vector&lt;double&gt;&gt;&amp; probabilities,
+    const std::vector&lt;int&gt;&amp; outcomes){
+    require(!probabilities.empty()&amp;&amp;probabilities.size()==outcomes.size(),
+            "Categorical probability rows must align");
+    const std::size_t groups=probabilities.front().size();
+    require(groups&gt;=2,"Ranked probability score needs two classes");
+    double total=0;
+    for(std::size_t i=0;i&lt;probabilities.size();++i){
+        require(probabilities[i].size()==groups&amp;&amp;outcomes[i]&gt;=0&amp;&amp;
+                std::size_t(outcomes[i])&lt;groups,"Invalid ranked class");
+        double cumulative=0,sum=0,loss=0;
+        for(std::size_t j=0;j&lt;groups;++j){
+            const double probability=probabilities[i][j];
+            require(std::isfinite(probability)&amp;&amp;probability&gt;=0&amp;&amp;probability&lt;=1,
+                    "Invalid categorical probability");
+            sum+=probability;cumulative+=probability;
+            if(j+1&lt;groups){
+                const double target=outcomes[i]&lt;=int(j)?1.0:0.0;
+                loss+=(cumulative-target)*(cumulative-target);
+            }
+        }
+        require(std::abs(sum-1)&lt;1e-8,"Class probabilities must sum to one");
+        total+=loss/(groups-1);
+    }
+    return total/probabilities.size();
+}
+} // namespace kline
+</code></pre></section>
+<section class="sources" id="sources"><h2>学术与技术资料</h2><p><a href="https://scikit-learn.org/stable/modules/generated/sklearn.metrics.average_precision_score.html">scikit-learn平均精确率定义</a>；<a href="https://doi.org/10.1198/016214506000001437">Gneiting–Raftery严格适当评分规则</a>。</p>
+<p>相关模型的数值性质按本文给定的统计对象、样本范围和输入单位解释。实证研究的制度识别、模型校准及样本外决策仍由对应研究设计确定。</p></section>
+<footer><p><a href="../ml/">返回金融机器学习</a>　<a href="../cpp/">进入C++量化研究工具</a></p></footer>
+</main></div>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}],throwOnError:false});"></script></body></html>
