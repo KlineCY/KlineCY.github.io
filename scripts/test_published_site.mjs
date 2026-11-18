@@ -65,7 +65,7 @@ const wikiMeta=json("quant/wiki/manifest.json");
 const wikiTerms=wikiMeta.data_files.flatMap(name=>json("quant/wiki/"+name).terms);
 assert.equal(wikiTerms.length,wikiMeta.total_terms,"Wiki index and data files disagree");
 const expandedWiki=wikiTerms.filter(t=>t.example?.includes("数值例题："));
-assert.equal(expandedWiki.length,172,"Every financial encyclopedia entry requires an independent numerical case");
+assert.equal(expandedWiki.length,wikiTerms.length,"Every financial encyclopedia entry requires an independent numerical case");
 const catalog=json("quant/feeds/catalog.json"),providers=json("quant/feeds/providers.json");
 assert.equal(catalog.categories.length,7,"Data feed category coverage changed");
 assert.equal(catalog.items.length,497,"Data source field coverage changed");
