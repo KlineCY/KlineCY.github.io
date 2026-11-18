@@ -58,13 +58,13 @@ inline bool run_research_finance_cli(const std::string& cmd,int argc,
         else finance_research_vector(out,"Weight",
             minimum_cvar_long_only(scenarios,num(6)));
     }else if(cmd=="risk-budget2"){
-        exact(10);
+        exact(9);
         Matrix cov={{num(2),num(3)},{num(3),num(4)}};
         finance_research_vector(out,"Weight",
             risk_budget_weights(cov,{num(5),num(6)},
                                 std::stoi(argv[7]),num(8)));
     }else if(cmd=="black-litterman-full"){
-        exact(8);
+        exact(7);
         auto bl=black_litterman_full(
             {num(2)},{{num(3)}},{{1}},{num(4)},{num(5)},num(6));
         out<<"PosteriorMean "<<bl.mean[0]<<"\n"
@@ -83,14 +83,14 @@ inline bool run_research_finance_cli(const std::string& cmd,int argc,
             {{num(6),num(7)},{num(7),num(8)}},
             {num(9),num(10)},num(11),num(12))<<"\n";
     }else if(cmd=="factor-cov2"){
-        exact(8);
+        exact(7);
         auto matrix=factor_structured_covariance(
             {{num(3)},{num(4)}},{{num(2)}},{num(5),num(6)});
         out<<"Cov11 "<<matrix[0][0]<<"\n"
            <<"Cov12 "<<matrix[0][1]<<"\n"
            <<"Cov22 "<<matrix[1][1]<<"\n";
     }else if(cmd=="factor-exposure2"){
-        exact(8);
+        exact(6);
         auto values=portfolio_factor_exposure(
             {{num(2)},{num(3)}},{num(4),num(5)});
         out<<"Exposure "<<values[0]<<"\n";
@@ -114,7 +114,7 @@ inline bool run_research_finance_cli(const std::string& cmd,int argc,
            <<"RemainingShares "<<l.remaining_shares<<"\n"
            <<"RemainingBasis "<<l.remaining_basis<<"\n";
     }else if(cmd=="integer-allocation2"){
-        exact(9);
+        exact(8);
         auto result=budgeted_whole_share_allocation(
             num(2),{num(3),num(4)},{num(5),num(6)},num(7));
         out<<"SharesA "<<result.shares[0]<<"\n"
@@ -142,33 +142,33 @@ inline bool run_research_finance_cli(const std::string& cmd,int argc,
         out<<"ParCoupon "<<par_coupon_rate_from_discounts(
             read_csv(argv[2]).numbers(argv[3]))<<"\n";
     }else if(cmd=="credit-migration2"){
-        exact(9);
+        exact(8);
         auto result=credit_rating_distribution(
             {num(2),1-num(2)},{{num(3),num(4)},{num(5),num(6)}},
             std::stoi(argv[7]));
         finance_research_vector(out,"StateProbability",result);
     }else if(cmd=="credit-migration-loss"){
-        exact(7);
+        exact(6);
         out<<"ExpectedLoss "<<credit_migration_expected_loss(
             {num(2),num(3)},{num(4),num(5)})<<"\n";
     }else if(cmd=="credit-dv01"||cmd=="credit-duration"){
-        exact(6);auto t=read_csv(argv[2]);
+        exact(5);auto t=read_csv(argv[2]);
         auto times=t.numbers("Time"),flows=t.numbers("Cashflow");
         double v=cmd=="credit-dv01"?
               credit_spread_dv01(times,flows,num(3),num(4)):
               credit_spread_duration(times,flows,num(3),num(4));
         out<<(cmd=="credit-dv01"?"SpreadDV01 ":"SpreadDuration ")<<v<<"\n";
     }else if(cmd=="american-binomial-greeks"){
-        exact(11);
-        require(std::string(argv[10])=="call"||std::string(argv[10])=="put",
+        exact(10);
+        require(std::string(argv[9])=="call"||std::string(argv[9])=="put",
                 "Option contract side must be call or put");
         auto g=american_binomial_greeks(
             num(2),num(3),num(4),num(5),num(6),
-            num(7),std::stoi(argv[8]),std::string(argv[10])=="call");
+            num(7),std::stoi(argv[8]),std::string(argv[9])=="call");
         out<<"Value "<<g.value<<"\nDelta "<<g.delta<<"\n"
            <<"Gamma "<<g.gamma<<"\nVega "<<g.vega<<"\n";
     }else if(cmd=="barrier-downout-mc"){
-        exact(12);
+        exact(11);
         auto r=down_and_out_call_monte_carlo(num(2),num(3),num(4),
             num(5),num(6),num(7),std::stoi(argv[8]),
             std::stoi(argv[9]),std::stoul(argv[10]));
@@ -187,7 +187,7 @@ inline bool run_research_finance_cli(const std::string& cmd,int argc,
         out<<"VarianceNotional "<<vega_notional_to_variance_notional(
             num(2),num(3))<<"\n";
     }else if(cmd=="continuous-future"){
-        exact(6);
+        exact(5);
         auto prices=read_csv(argv[2]).numbers(argv[3]);
         auto t=read_csv(argv[4]);
         auto ids=t.numbers("RollIndex");

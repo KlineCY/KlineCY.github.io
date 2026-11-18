@@ -58,7 +58,7 @@ inline bool run_research_math_cli(const std::string& cmd,int argc,char** argv,
         exact(5);
         out<<"LogDet "<<log_determinant_positive_definite(matrix2(2))<<"\n";
     }else if(cmd=="normal-logpdf2"){
-        exact(10);
+        exact(9);
         out<<"LogDensity "<<multivariate_gaussian_log_density(
             {num(2),num(3)},{num(4),num(5)},
             {{num(6),num(7)},{num(7),num(8)}})<<"\n";
@@ -229,7 +229,7 @@ inline bool run_research_math_cli(const std::string& cmd,int argc,char** argv,
         out<<"LossDifference "<<compare.mean_loss_difference<<"\n"
            <<"HAC_SE "<<compare.hac_se<<"\nT "<<compare.t<<"\n";
     }else if(cmd=="feature-filter"){
-        require(argc>=7,"Feature selection needs CSV, target, K and features");
+        require(argc>=6,"Feature selection needs CSV, target, K and features");
         auto t=read_csv(argv[2]);Matrix x(t.rows.size());
         for(int j=5;j<argc;j++){
             auto column=t.numbers(argv[j]);
