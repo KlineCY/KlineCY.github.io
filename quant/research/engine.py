@@ -240,8 +240,8 @@ def main(run_json):
         "meta":{"assets":tickers,"first_date":dates[0],"last_date":dates[-1],"input_rows":stats["rows"],
                 "intersection_dates":stats["common_dates"],"dropped_unaligned_rows":stats["discarded_rows"],
                 "data_label":params.get("label","用户上传数据"),
-                "execution":"收盘日t-1产生信号，t日Open按目标权重调仓，持有至t+1日Open。无当日收盘成交假设。",
+                "execution":"收盘日t-1产生信号，t日Open按目标权重调仓，持有至t+1日Open。无当日收盘成交假设。先按历史价格变化恢复交易前漂移权重，再计算实际成交额和费用，以费用后净资产定义交易后权重。",
                 "benchmark":"多资产等权每日再平衡基准，单资产时为买入并持有；基准不计交易费用",
                 "fee_bps":fees,"slippage_bps":slip,"borrow_bps_annual":borrow,"risk_free_annual":rf,
-                "limitations":"资金比例简化模型，不模拟逐笔成交、现金利息、保证金、流动性、期权行权及真实退市；持仓段胜率将每次调仓作为一段，非交易所真实成交胜率。未包含终止时强制平仓费用。"}}
+                "limitations":"资金比例简化模型，不模拟逐笔成交、现金利息、保证金、流动性、期权行权及真实退市。可选High/Low用于策略历史特征，不代表已模拟盘中止损或限价订单成交。持仓段胜率将每次调仓作为一段，非交易所真实成交胜率。未包含终止时强制平仓费用。"}}
     return json.dumps(result,allow_nan=False,ensure_ascii=False)
