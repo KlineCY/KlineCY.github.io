@@ -1,0 +1,26 @@
+name: Validate C++ strategy equivalence
+
+on:
+  push:
+    paths:
+      - 'quant/research/strategies.json'
+      - 'quant/research/strategies-cpp.json'
+      - 'quant/research/test_cpp_parity.py'
+      - '.github/workflows/validate-cpp-strategies.yml'
+  pull_request:
+    paths:
+      - 'quant/research/strategies.json'
+      - 'quant/research/strategies-cpp.json'
+      - 'quant/research/test_cpp_parity.py'
+      - '.github/workflows/validate-cpp-strategies.yml'
+
+jobs:
+  cpp-parity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile and compare all C++ strategy programs with Python
+        run: python quant/research/test_cpp_parity.py
