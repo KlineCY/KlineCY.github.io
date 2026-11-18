@@ -215,7 +215,7 @@ try{
     auto interval=interval_coverage_report({2,4,6},{1,4,7},{3,5,8});
     near(interval.empirical_coverage,2.0/3,1e-12,
          "Interval inclusion includes boundaries");
-    near(interval.average_width,2,1e-12,"Interval mean width");
+    near(interval.average_width,4.0/3,1e-12,"Interval mean width");
     OnlineMomentsState running;
     for(double y:{1.0,2.0,3.0,4.0})running=online_moment_update(running,y);
     near(running.mean_value,2.5,1e-12,"Welford online mean");
