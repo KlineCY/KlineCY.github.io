@@ -59,6 +59,8 @@ void optimization_suite(){
     auto q=kline::solve_box_quadratic({{2,0},{0,2}},{4,2},{0,0},{1,1});
     near(q[0],1,1e-10,"QP box constrained");
     near(q[1],1,1e-10,"QP second variable");
+    bad([]{kline::solve_box_quadratic({{1,2},{2,1}},
+        {1,1},{0,0},{1,1});},"indefinite box QP rejected");
     near(kline::quadratic_objective({{2}},{4},{1}),-3,1e-12,"QP objective");
     near(kline::finite_difference_derivative({0,1,4},1,1),2,1e-12,"central derivative");
     bad([]{kline::project_l1_ball({1,2},-1);},"invalid L1 radius");
@@ -251,6 +253,7 @@ void futures_fx_suite(){
     near(roll.close_pnl,60,1e-12,"realized old contract pnl");
     near(roll.entry_cost,12,1e-12,"commission for close and reopen");
     near(roll.next_contracts,3,1e-12,"positions preserved on roll");
+    near(roll.next_entry_price,105,1e-12,"new contract entry stored");
     near(kline::futures_basis(105,100),0.05,1e-12,"future spot basis");
     near(kline::cash_and_carry_futures(100,0.05,0.01,0.02,1),
          100*exp(0.04),1e-12,"cost of carry");
