@@ -160,6 +160,28 @@ with tempfile.TemporaryDirectory() as work:
     run("longshort", longshort_csv, 9999, 0, 0, 0, 2,
         "WA", "RA", "WB", "RB", success=False)
 
+
+    allocation = run("allocate", returns, 10, 1,
+                     "A", 0.004, 0.5, "B", 0.002, 0.5)
+    assert "ShrinkageIntensity" in allocation
+    assert "Asset,TargetWeight" in allocation
+    assert "PenalizedObjective" in allocation
+    assert "HalfTurnover" in allocation
+    result_lines = allocation.splitlines()
+    weight_a = float(next(line.split(",")[1] for line in result_lines
+                          if line.startswith("A,")))
+    weight_b = float(next(line.split(",")[1] for line in result_lines
+                          if line.startswith("B,")))
+    assert abs(weight_a + weight_b - 1) < 1e-7
+    assert weight_a >= 0 and weight_b >= 0
+    posterior = run("bl-pair", returns, "A", "B", 0.004, 0.002,
+                    0.003, 0.00001, 0.1)
+    assert "PosteriorA" in posterior and "PosteriorB" in posterior
+    run("allocate", returns, 0, 1, "A", 0.004, 0.5,
+        "B", 0.002, 0.5, success=False)
+    run("bl-pair", returns, "A", "B", 0.004, 0.002, 0.003,
+        0, 0.1, success=False)
+
     run("ridge", learning_csv, "Y", -1, "X", success=False)
     run("ridge-forward", learning_csv, "Y", "Maturity", 2, 5, 3, 1, 0, "X",
         success=False)
@@ -178,4 +200,4 @@ with tempfile.TemporaryDirectory() as work:
     run("calibration", calibration_csv, "Probability", "Label", 0, success=False)
     run("montecarlo", 100, 100, 0.05, 0, 0.2, 1, "call", 0, 2026, success=False)
 
-print("PASS: 27 CLI workflows, time-safe Ridge and cash-ledger invalid-input checks")
+print("PASS: 29 CLI workflows, time-safe Ridge and cash-ledger invalid-input checks")
