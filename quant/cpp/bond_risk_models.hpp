@@ -19,7 +19,9 @@ inline ContinuousBondRisk continuous_bond_risk(
         double pv=cashflows[i]*std::exp(-yield*times[i]);
         r.price+=pv;first+=times[i]*pv;second+=times[i]*times[i]*pv;
     }
-    require(r.price>0,"Duration requires positive bond price");
+    require(std::isfinite(r.price)&&r.price>0&&
+            std::isfinite(first)&&std::isfinite(second),
+            "Bond price, duration or convexity overflow");
     r.duration=first/r.price;
     r.convexity=second/r.price;
     r.dv01=first*1e-4;
