@@ -23,7 +23,10 @@
         "market-013",
         "market-014",
         "market-015",
-        "market-016"
+        "market-016",
+        "market-017",
+        "market-018",
+        "market-019"
       ]
     },
     {
@@ -46,7 +49,10 @@
         "execution-028",
         "execution-029",
         "execution-030",
-        "execution-031"
+        "execution-031",
+        "execution-032",
+        "execution-033",
+        "execution-034"
       ]
     },
     {
@@ -72,7 +78,10 @@
         "risk-046",
         "risk-047",
         "risk-048",
-        "risk-049"
+        "risk-049",
+        "risk-050",
+        "risk-051",
+        "risk-052"
       ]
     },
     {
@@ -97,7 +106,10 @@
         "factors-063",
         "factors-064",
         "factors-065",
-        "factors-066"
+        "factors-066",
+        "factors-067",
+        "factors-068",
+        "factors-069"
       ]
     },
     {
@@ -122,7 +134,10 @@
         "strategies-080",
         "strategies-081",
         "strategies-082",
-        "strategies-083"
+        "strategies-083",
+        "strategies-084",
+        "strategies-085",
+        "strategies-086"
       ]
     }
   ],
@@ -1591,6 +1606,261 @@
       "related_ids": [
         "strategies-081",
         "strategies-082"
+      ]
+    },
+    {
+      "id": "market-017",
+      "category_id": "market",
+      "title": "全国最优买卖报价",
+      "english": "National Best Bid and Offer (NBBO)",
+      "definition": "在美国股票市场，NBBO通常指受相关报价保护规则覆盖的交易场所之间可观察到的最优买价与最优卖价。该报价反映聚合后的公开最优报价，不代表任何订单规模都能立即按该价格成交，也不自动包含全部暗池流动性。",
+      "example": "数值例题：A交易所最佳买价为99.98、卖价100.03；B交易所最佳买价100.00、卖价100.05，则汇总最优买价100.00、最优卖价100.03，报价价差为0.03。若B的买盘仅有100股，卖出1000股不可能全部按100.00成交。",
+      "pitfall": "注意报价时间戳与SIP或直连数据延迟；锁定、交叉报价和保护报价范围存在具体规则，历史NBBO不等于可执行的统一订单簿。",
+      "formula": "NBBO_bid=max(eligible bids); NBBO_ask=min(eligible asks)",
+      "level": "中级",
+      "reference_url": "https://www.nasdaq.com/market-activity",
+      "related_ids": [
+        "market-005",
+        "market-007",
+        "execution-023"
+      ]
+    },
+    {
+      "id": "market-018",
+      "category_id": "market",
+      "title": "有效价差",
+      "english": "Effective Spread",
+      "definition": "有效价差用实际成交价相对于成交时可观察的参考中间价计算，衡量交易者为立即成交付出的往返尺度交易成本。常用定义为成交方向乘以成交价偏离中间价的两倍；其估计依赖成交方向识别和报价同步。",
+      "example": "数值例题：交易前买一99.99、卖一100.01，中间价100.00；主动买单以100.015成交，则有符号有效价差=2×(100.015−100.00)=0.03，即相对中间价3基点。若以毫秒错配的报价测算，结果可能偏离真实成交成本。",
+      "pitfall": "有效价差与挂单的实现收益、逆向选择成本不是同一指标；多市场报价时间不同步及主动买卖方向误判会产生系统性误差。",
+      "formula": "ES_t=2 q_t(P_t−M_t); q_t∈{−1,+1}",
+      "level": "高级",
+      "reference_url": "https://www.nasdaq.com/market-activity",
+      "related_ids": [
+        "market-005",
+        "market-006",
+        "execution-026"
+      ]
+    },
+    {
+      "id": "market-019",
+      "category_id": "market",
+      "title": "集合竞价指示性价格",
+      "english": "Indicative Auction Price",
+      "definition": "集合竞价期间交易所可能发布按当前可见买卖意向估算的指示性撮合价格与失衡数量，供交易者了解潜在开盘或收盘成交。该价格会随新增、撤销和修改委托持续变化，最终成交还取决于市场具体撮合规则。",
+      "example": "数值例题：某时刻指示性价格为50.00元，能匹配10000股，剩余未匹配买单2000股。随后一个大卖单加入，指示价变为49.98元、失衡改为卖方1000股；早先的50.00只是当时状态，不能当成最终开盘价。",
+      "pitfall": "模拟集合竞价必须考虑订单可撤期限、市场分层规则和数据实际发布时间；不能用最终撮合价反推开盘前每一时刻的交易信号。",
+      "formula": "imbalance=eligible_buy_volume−eligible_sell_volume",
+      "level": "中级",
+      "reference_url": "https://www.nasdaq.com/market-activity",
+      "related_ids": [
+        "market-013",
+        "market-008",
+        "execution-024"
+      ]
+    },
+    {
+      "id": "execution-032",
+      "category_id": "execution",
+      "title": "成交量参与率算法",
+      "english": "Percentage of Volume (POV)",
+      "definition": "POV执行算法把自身订单成交节奏与同期市场交易量挂钩，目标是在每个观察区间维持预先设定的交易参与比例。算法依赖对市场成交量的观测或预估，参与率约束并不保证价格冲击与完成时间固定。",
+      "example": "数值例题：目标买入12000股，参与率上限设为10%。若接下来三个区间各有20000、30000和10000股市场成交，理论上限可分别参与2000、3000和1000股，合计只能成交6000股，余下6000股不能假设自动按最后报价成交。",
+      "pitfall": "必须辨别市场总成交量是否包含自己的成交、是否跨场所重复计算，以及尾盘量骤降和部分成交带来的订单完成风险。",
+      "formula": "executed_t≤participation_rate×market_volume_t",
+      "level": "中级",
+      "reference_url": "https://www.cmegroup.com/education.html",
+      "related_ids": [
+        "execution-027",
+        "execution-028",
+        "execution-023"
+      ]
+    },
+    {
+      "id": "execution-033",
+      "category_id": "execution",
+      "title": "逆向选择成本",
+      "english": "Adverse Selection Cost",
+      "definition": "逆向选择指订单另一侧可能拥有更及时的信息，导致提供流动性的一方在成交之后承受不利的价格变化。微观结构研究常通过成交后参考价格变化分解有效价差；它不是所有价格漂移都能被证明由信息优势造成。",
+      "example": "数值例题：挂单卖方以100.01元成交，当时中间价100.00；五分钟后的中间价为100.04。相对于成交时中间价，卖方承受不利的4分价格漂移，超过其收取的1分半价差，不能仅凭成交当时正价差断言做市盈利。",
+      "pitfall": "结果对持有窗口、市场整体趋势、主动交易方向和中间价时间对齐敏感；漂移的因果来源不能仅靠这项相关统计识别。",
+      "formula": "post_trade_drift=q×(M_(t+h)−M_t)",
+      "level": "高级",
+      "reference_url": "https://www.cmegroup.com/education.html",
+      "related_ids": [
+        "execution-021",
+        "market-006",
+        "market-018"
+      ]
+    },
+    {
+      "id": "execution-034",
+      "category_id": "execution",
+      "title": "订单完成率",
+      "english": "Fill Rate",
+      "definition": "订单完成率衡量指定统计期内实际成交数量占原计划交易数量的比例，可按订单、股份或名义金额定义。对于限价策略，完成率必须与成交后的价格表现一起分析，否则低成本数字可能来自只在有利行情才发生的少数成交。",
+      "example": "数值例题：计划买入10000股，排队挂单只成交3500股，股份口径完成率35%。如果市场随后上涨2%，未完成的6500股意味着错过的建仓机会；只计算3500股已成交订单的交易成本将产生样本选择偏差。",
+      "pitfall": "须固定分母与统计截止时刻，明确撤单、改单、跨日订单及拆分子单的处理；高完成率不保证执行质量，也不保证较低的总成本。",
+      "formula": "fill_rate=filled_quantity/planned_quantity",
+      "level": "中级",
+      "reference_url": "https://www.cmegroup.com/education.html",
+      "related_ids": [
+        "execution-023",
+        "execution-025",
+        "execution-026"
+      ]
+    },
+    {
+      "id": "risk-050",
+      "category_id": "risk",
+      "title": "回撤持续期",
+      "english": "Drawdown Duration",
+      "definition": "回撤持续期描述组合净值从历史高点跌入回撤到再次恢复该高点所经历的时间。它补充最大回撤的幅度信息，尤其适合衡量长期水下持有对资金约束和投资者行为的影响；期末未恢复的回撤需要单独标识为右删失。",
+      "example": "数值例题：净值在第1日达到1.00，第2日跌到0.92，第3日回升到0.96，第4日才达到1.01，则该次回撤从第2日至第3日连续水下2个观察日，并在第4日恢复。若样本结束在第3日，不能宣称已经完成恢复。",
+      "pitfall": "每日、每周和交易日计数会改变持续期单位；期末仍处水下状态不是已知完整持续时间，比较不同长度样本时须一致处理。",
+      "formula": "D_t=number_of_periods_since_last_highwatermark",
+      "level": "中级",
+      "reference_url": "https://www.cfainstitute.org/",
+      "related_ids": [
+        "risk-039",
+        "risk-035",
+        "risk-040"
+      ]
+    },
+    {
+      "id": "risk-051",
+      "category_id": "risk",
+      "title": "尾部相关性",
+      "english": "Tail Dependence",
+      "definition": "尾部依赖刻画一个资产处于极端损失分位时另一资产也落入极端损失区域的条件概率极限。普通皮尔逊相关只描述整体线性共同波动，不足以确定极端状态下的共同暴露；尾部依赖估计对样本大小和边缘分布处理非常敏感。",
+      "example": "数值例题：对1000个同步交易日，将两资产收益各自最差5%的50日标记为尾部事件，若其中共同落入尾部的有20日，则有限阈值下的经验条件比例为20/50=40%。这只是5%阈值估计，不能直接宣称极限尾部依赖系数为0.4。",
+      "pitfall": "有限分位阈值的共同极端频率不等于极限尾依赖；危机样本少、波动状态混合及资产筛选会放大不确定性。",
+      "formula": "lambda_L=lim_(u→0+) P(V≤u | U≤u)",
+      "level": "高级",
+      "reference_url": "https://www.cfainstitute.org/",
+      "related_ids": [
+        "risk-045",
+        "risk-046",
+        "stats-019"
+      ]
+    },
+    {
+      "id": "risk-052",
+      "category_id": "risk",
+      "title": "风险贡献",
+      "english": "Euler Risk Contribution",
+      "definition": "对可微、正齐次的组合风险度量，Euler分解可用每个仓位乘以风险对该仓位的偏导数来表示边际风险贡献。方差风险、波动率风险与Expected Shortfall的分解约定不同，计算前须明确目标函数及正则条件。",
+      "example": "数值例题：两资产权重均为0.5、年化波动率均为20%，两者相关为0，则组合波动率为sqrt(0.5²×0.2²+0.5²×0.2²)=14.14%。对称条件下两资产Euler波动率贡献各为7.07个百分点，和为14.14%。",
+      "pitfall": "持仓存在对冲时个别风险贡献可以为负；若风险度量不可微或非齐次，不能不经验证直接套用同一Euler恒等式。",
+      "formula": "RC_i=w_i∂sigma_p/∂w_i; sum_i RC_i=sigma_p",
+      "level": "高级",
+      "reference_url": "https://www.cfainstitute.org/",
+      "related_ids": [
+        "risk-036",
+        "risk-046",
+        "strategies-079"
+      ]
+    },
+    {
+      "id": "factors-067",
+      "category_id": "factors",
+      "title": "横截面缩尾",
+      "english": "Cross-sectional Winsorization",
+      "definition": "横截面缩尾按指定截面分位点或稳健阈值限制极端因子观测的影响，通常是因子预处理的一步。分位阈值只能从对应历史时点可投资的截面计算，过度缩尾可能抹掉真正有效的稀有风险信号。",
+      "example": "数值例题：同一天五只资产因子值为−2、−1、0、1、20。若研究方案事前规定将数值截到[−2,2]，则变成−2、−1、0、1、2，样本均值从3.6降为0。该示例是固定阈值截尾，不能冒充由五点数据估计的某个指定百分位数阈值。",
+      "pitfall": "分位缩尾与删除异常值不同；跨期或跨行业共用全样本未来分位阈值会造成信息泄漏，且不能对缺失数据机械填零。",
+      "formula": "x_w=min(upper,max(lower,x))",
+      "level": "中级",
+      "reference_url": "https://www.msci.com/our-solutions/indexes/factor-indexes",
+      "related_ids": [
+        "factors-050",
+        "factors-064",
+        "ml-033"
+      ]
+    },
+    {
+      "id": "factors-068",
+      "category_id": "factors",
+      "title": "因子收益衰减",
+      "english": "Factor Decay",
+      "definition": "因子收益衰减研究特征在预测时点之后不同持有期或滞后区间的预测效力变化。分析应固定信号形成时间、可交易执行时间与收益归属区间，防止用重叠收益重复夸大样本量。",
+      "example": "数值例题：在一组独立外部窗口中，某因子的第1周RankIC为0.08，第2周为0.04，第3周为0.01。可以描述相关性随预测地平线减弱，但必须说明是单周增量收益还是从建仓日起的累计收益，否则三点不能直接比较。",
+      "pitfall": "IC衰减不是实际组合收益衰减；换手、暴露中性化、交易成本和重叠标签依赖都可能改变可交易的持有期限。",
+      "formula": "IC(h)=Corr(rank(f_t),rank(r_(t+1:t+h)))",
+      "level": "高级",
+      "reference_url": "https://www.msci.com/our-solutions/indexes/factor-indexes",
+      "related_ids": [
+        "factors-061",
+        "factors-062",
+        "backtest-010"
+      ]
+    },
+    {
+      "id": "factors-069",
+      "category_id": "factors",
+      "title": "因子覆盖率",
+      "english": "Factor Coverage",
+      "definition": "因子覆盖率表示在给定交易时点与投资池内，拥有合法、已发布、可交易因子值的标的比例。覆盖率变化本身可能携带选择偏差，因此覆盖缺失不仅是机器学习表格预处理问题，也影响组合可投资范围。",
+      "example": "数值例题：某日投资池有500只股票，其中420只有当时已公布并满足数据质量要求的财务因子，则覆盖率为420/500=84%。若只在420只股票上报告收益，同时忽略另外80只，结果反映的是被选择的子样本而非全部原始投资池。",
+      "pitfall": "覆盖分母必须固定为当时可投资池，停牌、IPO、新上市、报告延迟与退市都应明确；不能用今天的成分股重建历史分母。",
+      "formula": "coverage_t=valid_asof_count_t/eligible_universe_count_t",
+      "level": "中级",
+      "reference_url": "https://www.msci.com/our-solutions/indexes/factor-indexes",
+      "related_ids": [
+        "factors-050",
+        "backtest-005",
+        "backtest-007"
+      ]
+    },
+    {
+      "id": "strategies-084",
+      "category_id": "strategies",
+      "title": "波动率目标配置",
+      "english": "Volatility Targeting",
+      "definition": "波动率目标通过对事前估计的条件风险缩放组合名义敞口，使计划风险接近给定目标。实现中应考虑杠杆上限、预测误差、交易成本和波动率突变，不能把事后实现波动率用于当期调仓。",
+      "example": "数值例题：基础投资组合的下一期预测年化波动率为20%，目标为10%，则无约束名义缩放因子为10%/20%=0.5。若预测波动率为5%，理论因子2倍，但最大杠杆为1.5时实际只能取1.5，风险目标不保证达到。",
+      "pitfall": "波动率目标并不消除尾部跳跃或流动性风险，风险估计必须使用调仓前可得历史；高频去杠杆本身可能产生市场反馈。",
+      "formula": "leverage_t=min(leverage_cap,target_vol/forecast_vol_t)",
+      "level": "中级",
+      "reference_url": "https://www.aqr.com/Insights/Research",
+      "related_ids": [
+        "risk-036",
+        "risk-052",
+        "strategies-081"
+      ]
+    },
+    {
+      "id": "strategies-085",
+      "category_id": "strategies",
+      "title": "全球最小方差组合",
+      "english": "Global Minimum Variance Portfolio",
+      "definition": "最小方差组合在预算及其他约束下最小化给定协方差矩阵对应的组合方差，不直接依赖预期收益率输入。其实际配置通常对协方差估计、杠杆和卖空约束高度敏感，估计误差可能使样本外风险显著偏离目标。",
+      "example": "数值例题：两只相互独立的资产预测方差分别为0.04与0.01，无卖空且权重和为1。最小方差解使w_A=0.01/(0.04+0.01)=0.2，w_B=0.8；组合方差=0.2²×0.04+0.8²×0.01=0.008。",
+      "pitfall": "有交易成本、仓位上下限或协方差不正定时应使用对应的约束优化；不能将历史最小方差权重宣称为未来最优配置。",
+      "formula": "min_w wᵀΣw; subject to 1ᵀw=1",
+      "level": "中级",
+      "reference_url": "https://www.aqr.com/Insights/Research",
+      "related_ids": [
+        "strategies-077",
+        "stats-031",
+        "risk-052"
+      ]
+    },
+    {
+      "id": "strategies-086",
+      "category_id": "strategies",
+      "title": "期货连续合约换月",
+      "english": "Futures Contract Rolling",
+      "definition": "期货趋势与CTA策略需要明确到期合约的换月日期、成交品种与不同到期月份价格的拼接方式。连续价格序列可以用于生成信号，但不直接等于一项可交易资产；实际回测应记录平旧仓、开新仓与合约乘数及价差。",
+      "example": "数值例题：旧合约价格99元、新合约价格101元，名义乘数相同，按当前价同时平旧开新，价差为2元。直接把旧合约99到新合约101当作持仓当天赚取2元的价格上涨，会虚构换月收益；真实盈亏取决于各合约持仓期间价格变化。",
+      "pitfall": "后复权或比率拼接连续序列的收益含义不同；期限结构、保证金、交易规则、节假日和流动性决定换月可行性，必须保留交易账本。",
+      "formula": "roll_execution=close(old_contract)+open(new_contract)",
+      "level": "高级",
+      "reference_url": "https://www.aqr.com/Insights/Research",
+      "related_ids": [
+        "strategies-083",
+        "options-066",
+        "execution-018"
       ]
     }
   ]
