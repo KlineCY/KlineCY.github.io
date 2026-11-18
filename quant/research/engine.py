@@ -151,7 +151,7 @@ def main(run_json):
         raise ValueError("策略代码必须定义 def signals(history): 返回 {Ticker: 目标权重}")
     weights={t:0.0 for t in tickers}
     prior_market=None
-    prior_day=None
+    prior_growth=None
     seg_pnl={t:0.0 for t in tickers}
     closed_segments=[]
     position_events=[]
@@ -179,10 +179,19 @@ def main(run_json):
         # Convert last open's post-trade targets into actual pre-trade weights
         # after each asset's realized open-to-open return and net portfolio costs.
         # Weights refer to economic NAV exposure, not fixed target labels.
-        old=({t:weights[t]*(1+prior_market[t])/(1+prior_day) for t in tickers}
+        old=({t:weights[t]*(1+prior_market[t])/prior_growth for t in tickers}
              if prior_market is not None else dict(weights))
-        change=sum(abs(requested[t]-old[t]) for t in tickers)
-        period_cost=change*(fees+slip)/10000
+        # Targets apply to NAV *after* execution fees. Solve the small
+        # self-financing fixed point: fee = rate*|target*(1-fee)-pretrade|.
+        fee_rate=(fees+slip)/10000
+        period_cost=0.0
+        for _ in range(20):
+            next_cost=fee_rate*sum(abs(requested[t]*(1-period_cost)-old[t]) for t in tickers)
+            if abs(next_cost-period_cost)<1e-13:
+                period_cost=next_cost
+                break
+            period_cost=next_cost
+        change=sum(abs(requested[t]*(1-period_cost)-old[t]) for t in tickers)
         short_cost=sum(-min(0,requested[t]) for t in tickers)*borrow/10000/252
         market={}
         for t in tickers:
@@ -196,7 +205,10 @@ def main(run_json):
                 position_events.append({"date":dates[i],"ticker":t,"from":_fmt(old[t]),"to":_fmt(requested[t])})
             if abs(requested[t])>1e-9:
                 seg_pnl[t]+=requested[t]*market[t]-abs(requested[t]-old[t])*(fees+slip)/10000
-        day=sum(requested[t]*market[t] for t in tickers)-period_cost-short_cost
+        # First settle the actual trade fees, then earn next-open asset
+        # returns and pay borrowing on the post-fee NAV base.
+        period_growth=1+sum(requested[t]*market[t] for t in tickers)-short_cost
+        day=(1-period_cost)*period_growth-1
         bday=sum(market.values())/len(tickers) # equal-weight daily rebalanced, no trading friction
         if day<=-1:
             raise ValueError("组合本金损失达到或超过100%，停止回测")
@@ -206,7 +218,7 @@ def main(run_json):
         equity.append({"date":dates[i+1],"strategy":_fmt(eq),"benchmark":_fmt(bench)})
         weights=requested
         prior_market=market
-        prior_day=1+day
+        prior_growth=period_growth
     result={"metrics":_metrics(rets,baseline,equity,position_events,closed_segments,turnover,fees+slip,rf),
         "equity":equity,
         "trades":position_events[-1500:],
