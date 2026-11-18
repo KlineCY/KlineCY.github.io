@@ -4,27 +4,29 @@
 #include <cmath>
 #include <vector>
 namespace kline {
-inline double roll_effective_spread(const std::vector<double>& transactionPrice){
- check_finite(transactionPrice);
- require(transactionPrice.size()>=4,"Roll estimate needs four transaction prices");
- std::vector<double> difference;
- for(std::size_t i=1;i<transactionPrice.size();++i)
-   difference.push_back(transactionPrice[i]-transactionPrice[i-1]);
- const double cov=covariance(
-   std::vector<double>(difference.begin()+1,difference.end()),
-   std::vector<double>(difference.begin(),difference.end()-1),false);
- return cov<0?2*std::sqrt(-cov):0;
-}
-inline double amihud_illiquidity(
- const std::vector<double>& simpleReturns,const std::vector<double>& dollarVolume){
- check_finite(simpleReturns);check_finite(dollarVolume);
- require(simpleReturns.size()==dollarVolume.size(),"Return/volume rows differ");
- double sum=0;
- for(std::size_t i=0;i<simpleReturns.size();++i){
-   require(dollarVolume[i]>0,"Dollar volume must be positive");
-   sum+=std::abs(simpleReturns[i])/dollarVolume[i];
+inline double quoted_spread_basis_points(
+ const std::vector<double>& bid,const std::vector<double>& ask){
+ check_finite(bid);check_finite(ask);
+ require(bid.size()==ask.size(),"Quote sides do not align");
+ double total=0;
+ for(std::size_t i=0;i<bid.size();++i){
+  require(bid[i]>0&&ask[i]>bid[i],"Valid non-crossed quotes required");
+  total+=20000.0*(ask[i]-bid[i])/(ask[i]+bid[i]);
  }
- return sum/simpleReturns.size();
+ return total/bid.size();
+}
+inline double liquidity_replenishment_ratio(
+ const std::vector<double>& executed,const std::vector<double>& replenished){
+ check_finite(executed);check_finite(replenished);
+ require(executed.size()==replenished.size(),"Liquidity flow rows differ");
+ double out=0,in=0;
+ for(std::size_t i=0;i<executed.size();++i){
+  require(executed[i]>=0&&replenished[i]>=0,
+          "Signed trades are invalid for total replenishment");
+  out+=executed[i];in+=replenished[i];
+ }
+ require(out>0,"Replenishment requires executed volume");
+ return in/out;
 }
 inline double kyle_price_impact_slope(
  const std::vector<double>& signedVolume,const std::vector<double>& priceChange){
