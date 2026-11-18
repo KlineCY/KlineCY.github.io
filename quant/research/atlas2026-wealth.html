@@ -1,0 +1,98 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+ <title>主动策略的复利财富、回撤与波动拖累｜Kline Quant</title><meta name="description" content="五节完整数理金融专题、数学推导、复算案例及C++17实现。">
+ <link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+ <style>body{margin:0;background:white;color:#192b38;font:16px/1.92 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:24px 28px 70px}main{max-width:1140px;margin:auto}header,.lesson,.sources,.source{padding:24px 28px;border:1px solid #cbd5df;background:white;margin:18px 0}h1{font-size:30px;line-height:1.4}h2{font-size:22px;margin:12px 0 20px}h3{font-size:17px;margin:21px 0 7px}p{margin:12px 0;line-height:1.95}nav.toc{display:flex;flex-wrap:wrap;gap:12px 25px;border:1px solid #cbd5df;padding:18px 23px}.equation{overflow:auto;border-block:1px solid #d4dce4;padding:15px 7px;margin:16px 0}.katex-display{overflow-x:auto;overflow-y:hidden}a{color:#215579}code,pre{font-family:"Times New Roman",monospace}pre{border:1px solid #ccd6dd;padding:14px;overflow:auto;white-space:pre;font-size:13px;line-height:1.65;max-height:650px}small{letter-spacing:1px}.method{font-size:15px}@media(max-width:790px){.main{padding:12px;margin:0}header,.lesson,.sources,.source{padding:15px}}</style>
+ </head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main>
+ <header><small>QUANTITATIVE METHODS / C++17 RESEARCH</small><h1>主动策略的复利财富、回撤与波动拖累</h1>
+ <p>该专题以一致的数学定义连接数据字段、数值计算、金融解释与实际研究用途。五个子主题保留相互独立的估计对象，所有公式都有对应的可复算输入和可检查的C++17实现。</p>
+ </header><nav class="toc"><a href="#lesson1">1．扣费后相对对数财富</a><a href="#lesson2">2．相对财富路径最大回撤</a><a href="#lesson3">3．超额收益超过门槛的比例</a><a href="#lesson4">4．主动收益的算术与几何差</a><a href="#lesson5">5．扣费后终点相对财富</a><a href="#implementation">完整C++17源码</a><a href="#references">参考文献</a></nav>
+ <article class="lesson" id="lesson1"><h2>1．扣费后相对对数财富</h2><div class="equation">$$\ell_T=\sum_t\log\frac{1+r_{s,t}-c}{1+r_{b,t}}$$</div>
+ <h3>经济含义与理论结构</h3><p>将策略收益扣除每期固定交易或管理费用近似，再与基准收益增长因子求比并取对数，得到整个区间的累计相对对数财富。</p>
+ <h3>数值案例与复算</h3><p>策略两期收益为10%和−10%，基准两期均为零，不计费用时相对财富为0.99，累计对数相对财富为log(0.99)。</p>
+ <div class="equation">$$\mathrm{Output}\approx -0.010050336$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+0.1,0
+-0.1,0</code></pre><pre><code>./kline_quant atlas-wealth-relative-log-wealth study.csv X Y 0</code></pre>
+ <h3>识别条件与数据解释</h3><p>每期固定成本c是按收益单位记载的近似，真实交易费用随换手率变化。负或零总增长因子的路径无法继续使用对数财富模型。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article>
+<article class="lesson" id="lesson2"><h2>2．相对财富路径最大回撤</h2><div class="equation">$$MDD=\max_t\left(1-\frac{W_t}{\max_{0\le s\le t}W_s}\right)$$</div>
+ <h3>经济含义与理论结构</h3><p>依次累乘策略相对于基准的增长因子，保留从初始相对财富1开始的历史最高点，并记录各期财富相对峰值的最大下降比例。</p>
+ <h3>数值案例与复算</h3><p>策略收益先涨10%再跌10%，基准不变时，相对财富由1升至1.1再降至0.99，相对峰值最大回撤为10%。</p>
+ <div class="equation">$$\mathrm{Output}\approx 0.1$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+0.1,0
+-0.1,0</code></pre><pre><code>./kline_quant atlas-wealth-relative-wealth-max-drawdown study.csv X Y 0</code></pre>
+ <h3>识别条件与数据解释</h3><p>相对财富回撤描述跑输先前相对峰值的风险，与策略自身绝对净值最大回撤可能不同。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article>
+<article class="lesson" id="lesson3"><h2>3．超额收益超过门槛的比例</h2><div class="equation">$$H(h)=\frac1n\sum_t\mathbf1_{\{r_{s,t}-r_{b,t}&gt;h\}}$$</div>
+ <h3>经济含义与理论结构</h3><p>将主动策略相对基准的单期收益差与指定超额收益门槛比较，衡量真正达到业务收益目标的周期占比。</p>
+ <h3>数值案例与复算</h3><p>策略两期超额收益为10%和−10%，门槛为5%，其中一个周期达标，因此达标率为50%。</p>
+ <div class="equation">$$\mathrm{Output}\approx 0.5$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+0.1,0
+-0.1,0</code></pre><pre><code>./kline_quant atlas-wealth-excess-return-hurdle-hit study.csv X Y 0.05</code></pre>
+ <h3>识别条件与数据解释</h3><p>单期收益门槛未考虑最大回撤、隔夜风险或收益的负偏度，仅适合作为策略可靠性的一项补充指标。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article>
+<article class="lesson" id="lesson4"><h2>4．主动收益的算术与几何差</h2><div class="equation">$$D=\overline{(r_s-r_b)}-\left[\exp\!\left(\frac1n\sum_t\log\frac{1+r_s-c}{1+r_b}\right)-1\right]$$</div>
+ <h3>经济含义与理论结构</h3><p>把算术平均单期超额收益与累计相对财富对应的几何平均单期超额收益比较，反映相对收益路径的复利影响。</p>
+ <h3>数值案例与复算</h3><p>基准收益均为零，策略先上涨10%再下跌10%时，算术平均收益为零，而几何平均收益约为−0.501%，两者差为约0.501个百分点。</p>
+ <div class="equation">$$\mathrm{Output}\approx 0.005012563$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+0.1,0
+-0.1,0</code></pre><pre><code>./kline_quant atlas-wealth-relative-volatility-drag study.csv X Y 0</code></pre>
+ <h3>识别条件与数据解释</h3><p>此统计同时受到净费用参数和基准回报波动影响。其结果不是对所有波动拖累的因果分解。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article>
+<article class="lesson" id="lesson5"><h2>5．扣费后终点相对财富</h2><div class="equation">$$W_T=\prod_t\frac{1+r_{s,t}-c}{1+r_{b,t}}$$</div>
+ <h3>经济含义与理论结构</h3><p>把各期策略扣费后毛增长与基准毛增长做比，连续复利累乘，得到初始相对财富为1时的最终相对财富倍数。</p>
+ <h3>数值案例与复算</h3><p>两期收益为+10%和−10%，基准不变且无费用时，终点相对财富为1.1×0.9=0.99。</p>
+ <div class="equation">$$\mathrm{Output}\approx 0.99$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+0.1,0
+-0.1,0</code></pre><pre><code>./kline_quant atlas-wealth-relative-terminal-wealth study.csv X Y 0</code></pre>
+ <h3>识别条件与数据解释</h3><p>该财富指标要求明确再平衡与费用收取时点；在严重杠杆亏损导致增长因子非正时，模型拒绝继续复利。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article><section class="source" id="implementation"><h2>完整数值实现与数据接口</h2>
+ <p>底层算法使用标准C++17、明确的数值边界检查与双列CSV输入。页面中的数学形式、数值案例及代码指向同一实际函数；源码可在独立研究项目中按文件链接获取。</p>
+ <p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/atlas2026_wealth.hpp">查看五个算法的头文件</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/atlas2026_common.hpp">公共数值检查与基础接口</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_atlas2026.cpp">数学回归测试</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_atlas2026_cli.py">真实CSV工作流测试</a>。</p>
+ <h3>独立算法头文件</h3><pre><code>#pragma once
+#include "atlas2026_common.hpp"
+namespace kline { namespace atlas2026 {
+inline double relative_log_wealth(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);require(p&gt;=0&amp;&amp;p&lt;1,"Period cost fraction invalid");double z=0;for(std::size_t i=0;i&lt;x.size();++i){require(1+x[i]-p&gt;0&amp;&amp;1+y[i]&gt;0,"Nonpositive gross wealth factor");z+=std::log((1+x[i]-p)/(1+y[i]));}return z;}
+inline double relative_wealth_max_drawdown(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);require(p&gt;=0&amp;&amp;p&lt;1,"Period cost invalid");double nav=1,peak=1,worst=0;for(std::size_t i=0;i&lt;x.size();++i){require(1+x[i]-p&gt;0&amp;&amp;1+y[i]&gt;0,"Invalid relative wealth factors");nav*=(1+x[i]-p)/(1+y[i]);peak=std::max(peak,nav);worst=std::max(worst,1-nav/peak);}return worst;}
+inline double excess_return_hurdle_hit(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);int n=0;for(std::size_t i=0;i&lt;x.size();++i)n+=(x[i]-y[i]&gt;p);return double(n)/x.size();}
+inline double relative_volatility_drag(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);require(p&gt;=0&amp;&amp;p&lt;1,"Period cost invalid");double ar=0,lg=0;for(std::size_t i=0;i&lt;x.size();++i){require(1+x[i]-p&gt;0&amp;&amp;1+y[i]&gt;0,"Nonpositive wealth growth");ar+=x[i]-y[i];lg+=std::log((1+x[i]-p)/(1+y[i]));}return ar/x.size()-(std::exp(lg/x.size())-1);}
+inline double relative_terminal_wealth(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);require(p&gt;=0&amp;&amp;p&lt;1,"Period cost invalid");double wealth=1;for(std::size_t i=0;i&lt;x.size();++i){require(1+x[i]-p&gt;0&amp;&amp;1+y[i]&gt;0,"Nonpositive growth factors");wealth*=(1+x[i]-p)/(1+y[i]);}return wealth;}
+} }
+</code></pre><h3>统一输入校验</h3><pre><code>#pragma once
+#include "stats.hpp"
+#include &lt;algorithm&gt;
+#include &lt;cmath&gt;
+#include &lt;numeric&gt;
+#include &lt;stdexcept&gt;
+#include &lt;vector&gt;
+namespace kline {
+namespace atlas2026 {
+using Values=std::vector&lt;double&gt;;
+inline void valid(const Values&amp; x,const Values&amp; y,double p){
+ check_finite(x);check_finite(y);
+ require(x.size()==y.size()&amp;&amp;std::isfinite(p),"Data rows and parameter must be finite and aligned");
+}
+inline double positive_weights(const Values&amp; y){
+ double sum=0;
+ for(double w:y){require(w&gt;=0,"Weights must be nonnegative");sum+=w;}
+ require(sum&gt;0&amp;&amp;std::isfinite(sum),"Positive finite total weight required");
+ return sum;
+}
+inline void nonnegative(const Values&amp; x){
+ for(double z:x)require(z&gt;=0,"Inputs must be nonnegative");
+}
+}
+}
+</code></pre></section>
+ <section class="sources" id="references"><h2>方法与技术资料</h2><p><a href="https://www.investor.gov/introduction-investing/investing-basics/investment-products/exchange-traded-funds-etfs">美国SEC交易所交易基金说明</a>。数值恒等式、模型条件与算法源码构成本文各节的可复核依据。</p>
+ <p>实际经济研究所需的样本时间区间、预测时点、标签成熟规则、事件制度和交易成本应与所使用的数据共同定义；相应条件在各节分别展开。</p></section>
+ </main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

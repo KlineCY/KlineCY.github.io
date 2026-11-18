@@ -41,6 +41,8 @@
        subsection("regionNavMenu","按地区划分","regionSub")),
     assets:
       '<a class="q-menu-link" href="'+route("assets")+'">全部金融资产</a>'+
+      '<a class="q-menu-link" href="'+route("assets")+'atlas2026-credit.html">信用组合预期损失</a>'+
+      '<a class="q-menu-link" href="'+route("assets")+'atlas2026-cashflows.html">现金流与贴现回收</a>'+
       '<a class="q-menu-link" href="'+route("assets")+'volatility-surface-greeks.html">期权Vanna、Volga与远期方差</a>'+
       '<a class="q-menu-link" href="'+route("assets")+'discount-curve-dv01-convexity.html">贴现曲线、DV01与凸性</a>'+
       '<a class="q-menu-link" href="'+route("assets")+'risk-and-pricing.html">资产定价、合同现金流与风险</a>'+
@@ -50,6 +52,7 @@
       subsection("typeNav","按金融工具类型","typeChoices"),
     feeds:
       '<a class="q-menu-link" href="'+route("feeds")+'">全部数据字段</a>'+
+      '<a class="q-menu-link" href="'+route("feeds")+'atlas2026-execution.html">交易执行容量</a>'+
       '<a class="q-menu-link" href="'+route("feeds")+'point-in-time-vintage-diagnostics.html">历史数据版本与报价质量</a>'+
       '<a class="q-menu-link" href="'+route("feeds")+'orderbook-liquidity-structure.html">报价价差与订单流持续性</a>'+
       '<a class="q-menu-link" href="'+route("feeds")+'point-in-time-data.html">金融数据工程与历史可得信息</a>'+
@@ -59,6 +62,8 @@
       subsection("feedsCategoryNav","按数据类别","feedChoices",page==="feeds"),
     research:
       '<a class="q-menu-link" href="'+route("research")+'">在线 Python 回测</a>'+
+      '<a class="q-menu-link" href="'+route("research")+'atlas2026-wealth.html">相对财富与波动拖累</a>'+
+      '<a class="q-menu-link" href="'+route("research")+'atlas2026-signals.html">量化因子经济性</a>'+
       '<a class="q-menu-link" href="'+route("research")+'euler-risk-tail-attribution.html">Euler风险与尾部归因</a>'+
       '<a class="q-menu-link" href="'+route("research")+'?strategy=ma">策略超市 / Python 示例</a>'+
       '<a class="q-menu-link" href="'+route("research")+'execution-risk.html">衍生品、信用与真实执行专题</a>'+
@@ -89,8 +94,12 @@
       '<a class="q-menu-link" href="'+route("research")+'portfolio-path-and-margin.html">净值路径、杠杆与保证金</a>'+
       '<a class="q-menu-link" href="'+route("audit")+'causal-inference-estimators.html">断点、工具变量与合成对照</a>'+
       '<a class="q-menu-link" href="'+route("math")+'ohlc-realized-volatility.html">高低价波动率与隔夜跳空</a>'+
+      '<a class="q-menu-link" href="'+route("math")+'atlas2026-dependence.html">下行尾部相依</a>'+
+      '<a class="q-menu-link" href="'+route("math")+'atlas2026-robust.html">稳健回归损失</a>'+
+      '<a class="q-menu-link" href="'+route("math")+'atlas2026-tail.html">极端损失与尾部风险</a>'+
       '<a class="q-menu-link" href="'+route("math")+'asynchronous-financial-variation.html">异步高频收益与四次变差</a>'+
       '<a class="q-menu-link" href="'+route("ml")+'probabilistic-forecast-evaluation.html">分位、CRPS与概率评分</a>'+
+      '<a class="q-menu-link" href="'+route("ml")+'atlas2026-forecast.html">金融预测误差</a>'+
       '<a class="q-menu-link" href="'+route("ml")+'imbalanced-classification-evidence.html">分类评价与概率评分</a>'+
       '<a class="q-menu-link" href="'+route("cpp")+'#sitewide">全站互联C++17算法与课程</a>'+
       '<a class="q-menu-link" href="'+route("cpp")+'#massive">360节数理金融与真实交易专题</a>'+
@@ -127,6 +136,7 @@
       '<details class="q-nav-subgroup academic-fold" id="academicFold" '+(page==="rankings"?"open":"")+'><summary><span>按资源类别</span><span class="q-sub-chevron" aria-hidden="true">▸</span></summary><div class="q-nav-leaves academic-fold-items" id="catsNav"></div></details>',
     news:
       '<a class="q-menu-link" href="'+route("news")+'">全部新闻 / 官方发布源</a>'+
+      '<a class="q-menu-link" href="'+route("news")+'atlas2026-macro.html">宏观实际收益与政策规则</a>'+
       '<a class="q-menu-link" href="'+route("news")+'macro-asset-transmission.html">宏观传导、利率与资金链条</a>'+
       subsection("regionNewsNav","按国家 / 地区","newsRegionChoices",page==="news")+
       subsection("topicNewsNav","按消息类型","newsTopicChoices")

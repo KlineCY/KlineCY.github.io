@@ -1,0 +1,108 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+ <title>极端损失分布与加权尾部风险｜Kline Quant</title><meta name="description" content="五节完整数理金融专题、数学推导、复算案例及C++17实现。">
+ <link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+ <style>body{margin:0;background:white;color:#192b38;font:16px/1.92 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:24px 28px 70px}main{max-width:1140px;margin:auto}header,.lesson,.sources,.source{padding:24px 28px;border:1px solid #cbd5df;background:white;margin:18px 0}h1{font-size:30px;line-height:1.4}h2{font-size:22px;margin:12px 0 20px}h3{font-size:17px;margin:21px 0 7px}p{margin:12px 0;line-height:1.95}nav.toc{display:flex;flex-wrap:wrap;gap:12px 25px;border:1px solid #cbd5df;padding:18px 23px}.equation{overflow:auto;border-block:1px solid #d4dce4;padding:15px 7px;margin:16px 0}.katex-display{overflow-x:auto;overflow-y:hidden}a{color:#215579}code,pre{font-family:"Times New Roman",monospace}pre{border:1px solid #ccd6dd;padding:14px;overflow:auto;white-space:pre;font-size:13px;line-height:1.65;max-height:650px}small{letter-spacing:1px}.method{font-size:15px}@media(max-width:790px){.main{padding:12px;margin:0}header,.lesson,.sources,.source{padding:15px}}</style>
+ </head><body><aside id="quantSidebar" class="sidebar" data-page="math"></aside><script src="../sidebar-v2.js"></script><div class="main"><main>
+ <header><small>QUANTITATIVE METHODS / C++17 RESEARCH</small><h1>极端损失分布与加权尾部风险</h1>
+ <p>该专题以一致的数学定义连接数据字段、数值计算、金融解释与实际研究用途。五个子主题保留相互独立的估计对象，所有公式都有对应的可复算输入和可检查的C++17实现。</p>
+ </header><nav class="toc"><a href="#lesson1">1．加权超阈值频率</a><a href="#lesson2">2．超阈值平均超额损失</a><a href="#lesson3">3．条件尾部损失均值</a><a href="#lesson4">4．超额损失二阶原点矩</a><a href="#lesson5">5．加权情景Expected Shortfall</a><a href="#implementation">完整C++17源码</a><a href="#references">参考文献</a></nav>
+ <article class="lesson" id="lesson1"><h2>1．加权超阈值频率</h2><div class="equation">$$P_w(X&gt;u)=\frac{\sum_iw_i\mathbf1_{\{x_i&gt;u\}}}{\sum_iw_i}$$</div>
+ <h3>经济含义与理论结构</h3><p>对每一个损失情景，根据情景权重计算发生超阈值事件的比率，用以比较不同损失边界下的极端风险。</p>
+ <h3>数值案例与复算</h3><p>四个等权情景损失为1、2、3、4，阈值2.5，发生两次超阈值，频率为0.5。</p>
+ <div class="equation">$$\mathrm{Output}\approx 0.5$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+1,1
+2,1
+3,1
+4,1</code></pre><pre><code>./kline_quant atlas-tail-tail-frequency study.csv X Y 2.5</code></pre>
+ <h3>识别条件与数据解释</h3><p>权重代表样本重要性或情景概率；历史样本权重并不自动产生独立同分布条件。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article>
+<article class="lesson" id="lesson2"><h2>2．超阈值平均超额损失</h2><div class="equation">$$e(u)=\frac{\sum_i w_i(x_i-u)\mathbf1_{\{x_i&gt;u\}}}{\sum_iw_i\mathbf1_{\{x_i&gt;u\}}}$$</div>
+ <h3>经济含义与理论结构</h3><p>给定极端损失已经越过阈值的条件，计算超过该阈值的平均程度。它对应均值超额函数的经验加权形式。</p>
+ <h3>数值案例与复算</h3><p>四个等权情景中，损失3和4超过2.5的幅度分别为0.5和1.5，平均值为1。</p>
+ <div class="equation">$$\mathrm{Output}\approx 1$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+1,1
+2,1
+3,1
+4,1</code></pre><pre><code>./kline_quant atlas-tail-mean-excess study.csv X Y 2.5</code></pre>
+ <h3>识别条件与数据解释</h3><p>若没有超阈值观察值，条件均值没有定义；本方法直接拒绝这种情形。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article>
+<article class="lesson" id="lesson3"><h2>3．条件尾部损失均值</h2><div class="equation">$$m(u)=\frac{\sum_i w_ix_i\mathbf1_{\{x_i&gt;u\}}}{\sum_i w_i\mathbf1_{\{x_i&gt;u\}}}$$</div>
+ <h3>经济含义与理论结构</h3><p>从超阈值情景的损失水平出发直接计算条件均值，与平均超额损失满足精确关系m(u)=u+e(u)。</p>
+ <h3>数值案例与复算</h3><p>损失序列1、2、3、4，阈值2.5，条件尾部损失均值为(3+4)/2=3.5；与阈值加平均超额损失的结果一致。</p>
+ <div class="equation">$$\mathrm{Output}\approx 3.5$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+1,1
+2,1
+3,1
+4,1</code></pre><pre><code>./kline_quant atlas-tail-conditional-tail-mean study.csv X Y 2.5</code></pre>
+ <h3>识别条件与数据解释</h3><p>定义依赖严格大于阈值的集合，等于阈值的观察值不计入尾部。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article>
+<article class="lesson" id="lesson4"><h2>4．超额损失二阶原点矩</h2><div class="equation">$$q_2(u)=\frac{\sum_iw_i[(x_i-u)_+]^2}{\sum_iw_i}$$</div>
+ <h3>经济含义与理论结构</h3><p>对超过阈值的非负部分求平方并加权，衡量大额超额损失对总体风险的贡献。指标没有去均值，因此是尾部超额损失的二阶原点矩。</p>
+ <h3>数值案例与复算</h3><p>对损失1、2、3、4与阈值2.5，只有0.5和1.5的超额参与计算，二阶矩为(0.25+2.25)/4=0.625。</p>
+ <div class="equation">$$\mathrm{Output}\approx 0.625$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+1,1
+2,1
+3,1
+4,1</code></pre><pre><code>./kline_quant atlas-tail-exceedance-second-moment study.csv X Y 2.5</code></pre>
+ <h3>识别条件与数据解释</h3><p>平方项对离群值极为敏感；在重尾损失下，二阶矩可能缺乏稳定的总体极限。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article>
+<article class="lesson" id="lesson5"><h2>5．加权情景Expected Shortfall</h2><div class="equation">$$ES_\alpha=\frac{\sum_i\omega_i^*x_i}{(1-\alpha)\sum_iw_i}$$</div>
+ <h3>经济含义与理论结构</h3><p>将损失情景由大到小排序，取最坏的1−α权重质量；位于边界的样本仅使用必要的部分权重，避免小样本尾部比例的整点跳变。</p>
+ <h3>数值案例与复算</h3><p>四个损失1、2、3、4，等权且置信度α=0.5时，最坏半数为4与3，尾部平均损失为3.5。</p>
+ <div class="equation">$$\mathrm{Output}\approx 3.5$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+1,1
+2,1
+3,1
+4,1</code></pre><pre><code>./kline_quant atlas-tail-weighted-expected-shortfall study.csv X Y 0.5</code></pre>
+ <h3>识别条件与数据解释</h3><p>该算法在情景损失已使用一致金额口径时适用；置信水平需要严格位于0与1之间。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article><section class="source" id="implementation"><h2>完整数值实现与数据接口</h2>
+ <p>底层算法使用标准C++17、明确的数值边界检查与双列CSV输入。页面中的数学形式、数值案例及代码指向同一实际函数；源码可在独立研究项目中按文件链接获取。</p>
+ <p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/atlas2026_tail.hpp">查看五个算法的头文件</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/atlas2026_common.hpp">公共数值检查与基础接口</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_atlas2026.cpp">数学回归测试</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_atlas2026_cli.py">真实CSV工作流测试</a>。</p>
+ <h3>独立算法头文件</h3><pre><code>#pragma once
+#include "atlas2026_common.hpp"
+namespace kline { namespace atlas2026 {
+inline double tail_frequency(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);const double sw=positive_weights(y);double hit=0;for(std::size_t i=0;i&lt;x.size();++i)if(x[i]&gt;p)hit+=y[i];return hit/sw;}
+inline double mean_excess(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);positive_weights(y);double a=0,b=0;for(std::size_t i=0;i&lt;x.size();++i)if(x[i]&gt;p){a+=y[i]*(x[i]-p);b+=y[i];}require(b&gt;0,"No observations above threshold");return a/b;}
+inline double conditional_tail_mean(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);positive_weights(y);double a=0,b=0;for(std::size_t i=0;i&lt;x.size();++i)if(x[i]&gt;p){a+=y[i]*x[i];b+=y[i];}require(b&gt;0,"No tail observations");return a/b;}
+inline double exceedance_second_moment(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);const double sw=positive_weights(y);double s=0;for(std::size_t i=0;i&lt;x.size();++i){double z=std::max(0.0,x[i]-p);s+=y[i]*z*z;}return s/sw;}
+inline double weighted_expected_shortfall(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);require(p&gt;0&amp;&amp;p&lt;1,"Expected shortfall confidence must be in (0,1)");double mass=(1-p)*positive_weights(y),remain=mass,sum=0;std::vector&lt;std::pair&lt;double,double&gt;&gt; s;for(std::size_t i=0;i&lt;x.size();++i)s.push_back({x[i],y[i]});std::sort(s.begin(),s.end(),[](const auto&amp; a,const auto&amp; b){return a.first&gt;b.first;});for(const auto&amp; z:s){double take=std::min(remain,z.second);sum+=take*z.first;remain-=take;if(remain&lt;=0)break;}return sum/mass;}
+} }
+</code></pre><h3>统一输入校验</h3><pre><code>#pragma once
+#include "stats.hpp"
+#include &lt;algorithm&gt;
+#include &lt;cmath&gt;
+#include &lt;numeric&gt;
+#include &lt;stdexcept&gt;
+#include &lt;vector&gt;
+namespace kline {
+namespace atlas2026 {
+using Values=std::vector&lt;double&gt;;
+inline void valid(const Values&amp; x,const Values&amp; y,double p){
+ check_finite(x);check_finite(y);
+ require(x.size()==y.size()&amp;&amp;std::isfinite(p),"Data rows and parameter must be finite and aligned");
+}
+inline double positive_weights(const Values&amp; y){
+ double sum=0;
+ for(double w:y){require(w&gt;=0,"Weights must be nonnegative");sum+=w;}
+ require(sum&gt;0&amp;&amp;std::isfinite(sum),"Positive finite total weight required");
+ return sum;
+}
+inline void nonnegative(const Values&amp; x){
+ for(double z:x)require(z&gt;=0,"Inputs must be nonnegative");
+}
+}
+}
+</code></pre></section>
+ <section class="sources" id="references"><h2>方法与技术资料</h2><p><a href="https://www.itl.nist.gov/div898/handbook/">NIST统计工程手册</a>。数值恒等式、模型条件与算法源码构成本文各节的可复核依据。</p>
+ <p>实际经济研究所需的样本时间区间、预测时点、标签成熟规则、事件制度和交易成本应与所使用的数据共同定义；相应条件在各节分别展开。</p></section>
+ </main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

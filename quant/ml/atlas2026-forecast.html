@@ -1,0 +1,98 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+ <title>金融回归误差、尺度选择与阈值决策｜Kline Quant</title><meta name="description" content="五节完整数理金融专题、数学推导、复算案例及C++17实现。">
+ <link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+ <style>body{margin:0;background:white;color:#192b38;font:16px/1.92 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:24px 28px 70px}main{max-width:1140px;margin:auto}header,.lesson,.sources,.source{padding:24px 28px;border:1px solid #cbd5df;background:white;margin:18px 0}h1{font-size:30px;line-height:1.4}h2{font-size:22px;margin:12px 0 20px}h3{font-size:17px;margin:21px 0 7px}p{margin:12px 0;line-height:1.95}nav.toc{display:flex;flex-wrap:wrap;gap:12px 25px;border:1px solid #cbd5df;padding:18px 23px}.equation{overflow:auto;border-block:1px solid #d4dce4;padding:15px 7px;margin:16px 0}.katex-display{overflow-x:auto;overflow-y:hidden}a{color:#215579}code,pre{font-family:"Times New Roman",monospace}pre{border:1px solid #ccd6dd;padding:14px;overflow:auto;white-space:pre;font-size:13px;line-height:1.65;max-height:650px}small{letter-spacing:1px}.method{font-size:15px}@media(max-width:790px){.main{padding:12px;margin:0}header,.lesson,.sources,.source{padding:15px}}</style>
+ </head><body><aside id="quantSidebar" class="sidebar" data-page="ml"></aside><script src="../sidebar-v2.js"></script><div class="main"><main>
+ <header><small>QUANTITATIVE METHODS / C++17 RESEARCH</small><h1>金融回归误差、尺度选择与阈值决策</h1>
+ <p>该专题以一致的数学定义连接数据字段、数值计算、金融解释与实际研究用途。五个子主题保留相互独立的估计对象，所有公式都有对应的可复算输入和可检查的C++17实现。</p>
+ </header><nav class="toc"><a href="#lesson1">1．分母受控的加权绝对百分比误差</a><a href="#lesson2">2．带稳定分母的对称百分比误差</a><a href="#lesson3">3．均值Log-Cosh误差</a><a href="#lesson4">4．容差区间外的平均绝对误差</a><a href="#lesson5">5．给定阈值的预测方向一致率</a><a href="#implementation">完整C++17源码</a><a href="#references">参考文献</a></nav>
+ <article class="lesson" id="lesson1"><h2>1．分母受控的加权绝对百分比误差</h2><div class="equation">$$\mathrm{WAPE}_\varepsilon=\frac{\sum_i|\hat y_i-y_i|}{\max(\sum_i|y_i|,\varepsilon)}$$</div>
+ <h3>经济含义与理论结构</h3><p>对总绝对预测误差求和，再除以实际值绝对量级之和；为避免近零总目标量级导致数值不稳定，分母设置事先约定的正下界。</p>
+ <h3>数值案例与复算</h3><p>预测1和3、实际均为2，绝对误差之和为2，实际绝对值之和为4，WAPE为0.5。</p>
+ <div class="equation">$$\mathrm{Output}\approx 0.5$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+1,2
+3,2</code></pre><pre><code>./kline_quant atlas-forecast-wape-guarded study.csv X Y 1</code></pre>
+ <h3>识别条件与数据解释</h3><p>损失标量对小规模事件及目标净值为零的样本高度敏感，下界应按业务尺度设定。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article>
+<article class="lesson" id="lesson2"><h2>2．带稳定分母的对称百分比误差</h2><div class="equation">$$\mathrm{sMAPE}=\frac1n\sum_i\frac{2|\hat y_i-y_i|}{\max(|\hat y_i|+|y_i|,\varepsilon)}$$</div>
+ <h3>经济含义与理论结构</h3><p>同时以预测值和实际值的绝对尺度对误差进行归一化，相对于仅以实际值作分母的方法，在预测误差方向上表现出一定程度的对称性。</p>
+ <h3>数值案例与复算</h3><p>预测1和3、实际均为2，两个比例均为2/3，平均sMAPE亦为2/3。</p>
+ <div class="equation">$$\mathrm{Output}\approx 0.666666667$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+1,2
+3,2</code></pre><pre><code>./kline_quant atlas-forecast-symmetric-mape study.csv X Y 1</code></pre>
+ <h3>识别条件与数据解释</h3><p>在预测和目标同时接近零时，稳定分母阈值对结果影响明显；定义版本在不同软件实现中可能不同。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article>
+<article class="lesson" id="lesson3"><h2>3．均值Log-Cosh误差</h2><div class="equation">$$L_c=\frac{c^2}{n}\sum_i\log\cosh((\hat y_i-y_i)/c)$$</div>
+ <h3>经济含义与理论结构</h3><p>Log-Cosh在微小误差处表现为二次损失，在极端误差处趋于线性增长；其光滑梯度使误差对参数更新的影响逐渐饱和。</p>
+ <h3>数值案例与复算</h3><p>预测误差为0和1、尺度为1时，平均损失为log(cosh(1))/2。</p>
+ <div class="equation">$$\mathrm{Output}\approx 0.216890415$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+0,0
+1,0</code></pre><pre><code>./kline_quant atlas-forecast-mean-log-cosh-error study.csv X Y 1</code></pre>
+ <h3>识别条件与数据解释</h3><p>它度量回归误差而不自动反映方向性交易成本，资产间比较须统一目标变量单位。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article>
+<article class="lesson" id="lesson4"><h2>4．容差区间外的平均绝对误差</h2><div class="equation">$$L_\varepsilon=\frac1n\sum_i\max(0,|\hat y_i-y_i|-\varepsilon)$$</div>
+ <h3>经济含义与理论结构</h3><p>在事先定义的业务容差内不计入惩罚，只有越过容差的误差部分进入损失。这与支持向量回归常用的ε不敏感损失具有相同基本结构。</p>
+ <h3>数值案例与复算</h3><p>误差均为1、容差ε为0.5，则每条有效损失为0.5，均值为0.5。</p>
+ <div class="equation">$$\mathrm{Output}\approx 0.5$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+1,2
+3,2</code></pre><pre><code>./kline_quant atlas-forecast-epsilon-tube-mae study.csv X Y 0.5</code></pre>
+ <h3>识别条件与数据解释</h3><p>容差内预测误差不会被区分，因此应当由交易成本或实际预测用途定义ε。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article>
+<article class="lesson" id="lesson5"><h2>5．给定阈值的预测方向一致率</h2><div class="equation">$$A(c)=\frac1n\sum_i\mathbf1_{\{(\hat y_i&gt;c)=(y_i&gt;c)\}}$$</div>
+ <h3>经济含义与理论结构</h3><p>将连续预测和实际值按照同一经济阈值转换为二元事件，并计算两者分类方向是否一致；适合用于分析信号能否检出高于收益门槛的机会。</p>
+ <h3>数值案例与复算</h3><p>预测1和3、实际均为2、阈值2.5时，首个样本两者均不超过阈值、第二个预测超过但实际未超过，一致率为0.5。</p>
+ <div class="equation">$$\mathrm{Output}\approx 0.5$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+1,2
+3,2</code></pre><pre><code>./kline_quant atlas-forecast-threshold-class-hit study.csv X Y 2.5</code></pre>
+ <h3>识别条件与数据解释</h3><p>类别比例会影响阈值分类准确率；对收益分布极不平衡的任务应进一步报告混淆矩阵和成本敏感指标。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article><section class="source" id="implementation"><h2>完整数值实现与数据接口</h2>
+ <p>底层算法使用标准C++17、明确的数值边界检查与双列CSV输入。页面中的数学形式、数值案例及代码指向同一实际函数；源码可在独立研究项目中按文件链接获取。</p>
+ <p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/atlas2026_forecast.hpp">查看五个算法的头文件</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/atlas2026_common.hpp">公共数值检查与基础接口</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_atlas2026.cpp">数学回归测试</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_atlas2026_cli.py">真实CSV工作流测试</a>。</p>
+ <h3>独立算法头文件</h3><pre><code>#pragma once
+#include "atlas2026_common.hpp"
+namespace kline { namespace atlas2026 {
+inline double wape_guarded(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);require(p&gt;0,"WAPE floor must be positive");double a=0,b=0;for(std::size_t i=0;i&lt;x.size();++i){a+=std::abs(x[i]-y[i]);b+=std::abs(y[i]);}return a/std::max(b,p);}
+inline double symmetric_mape(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);require(p&gt;0,"sMAPE floor must be positive");double s=0;for(std::size_t i=0;i&lt;x.size();++i)s+=2*std::abs(x[i]-y[i])/std::max(std::abs(x[i])+std::abs(y[i]),p);return s/x.size();}
+inline double mean_log_cosh_error(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);require(p&gt;0,"Log-cosh scale must be positive");double s=0;for(std::size_t i=0;i&lt;x.size();++i){double a=std::abs((x[i]-y[i])/p);s+=p*p*(a+std::log1p(std::exp(-2*a))-std::log(2.0));}return s/x.size();}
+inline double epsilon_tube_mae(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);require(p&gt;=0,"Epsilon tolerance must be nonnegative");double s=0;for(std::size_t i=0;i&lt;x.size();++i)s+=std::max(0.0,std::abs(x[i]-y[i])-p);return s/x.size();}
+inline double threshold_class_hit(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);int ok=0;for(std::size_t i=0;i&lt;x.size();++i)ok+=((x[i]&gt;p)==(y[i]&gt;p));return double(ok)/x.size();}
+} }
+</code></pre><h3>统一输入校验</h3><pre><code>#pragma once
+#include "stats.hpp"
+#include &lt;algorithm&gt;
+#include &lt;cmath&gt;
+#include &lt;numeric&gt;
+#include &lt;stdexcept&gt;
+#include &lt;vector&gt;
+namespace kline {
+namespace atlas2026 {
+using Values=std::vector&lt;double&gt;;
+inline void valid(const Values&amp; x,const Values&amp; y,double p){
+ check_finite(x);check_finite(y);
+ require(x.size()==y.size()&amp;&amp;std::isfinite(p),"Data rows and parameter must be finite and aligned");
+}
+inline double positive_weights(const Values&amp; y){
+ double sum=0;
+ for(double w:y){require(w&gt;=0,"Weights must be nonnegative");sum+=w;}
+ require(sum&gt;0&amp;&amp;std::isfinite(sum),"Positive finite total weight required");
+ return sum;
+}
+inline void nonnegative(const Values&amp; x){
+ for(double z:x)require(z&gt;=0,"Inputs must be nonnegative");
+}
+}
+}
+</code></pre></section>
+ <section class="sources" id="references"><h2>方法与技术资料</h2><p><a href="https://scikit-learn.org/stable/modules/model_evaluation.html">scikit-learn回归评价指标</a>。数值恒等式、模型条件与算法源码构成本文各节的可复核依据。</p>
+ <p>实际经济研究所需的样本时间区间、预测时点、标签成熟规则、事件制度和交易成本应与所使用的数据共同定义；相应条件在各节分别展开。</p></section>
+ </main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

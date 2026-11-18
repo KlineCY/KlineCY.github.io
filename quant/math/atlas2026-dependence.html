@@ -1,0 +1,108 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+ <title>非对称相依、极端共跌与下行Beta｜Kline Quant</title><meta name="description" content="五节完整数理金融专题、数学推导、复算案例及C++17实现。">
+ <link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+ <style>body{margin:0;background:white;color:#192b38;font:16px/1.92 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:24px 28px 70px}main{max-width:1140px;margin:auto}header,.lesson,.sources,.source{padding:24px 28px;border:1px solid #cbd5df;background:white;margin:18px 0}h1{font-size:30px;line-height:1.4}h2{font-size:22px;margin:12px 0 20px}h3{font-size:17px;margin:21px 0 7px}p{margin:12px 0;line-height:1.95}nav.toc{display:flex;flex-wrap:wrap;gap:12px 25px;border:1px solid #cbd5df;padding:18px 23px}.equation{overflow:auto;border-block:1px solid #d4dce4;padding:15px 7px;margin:16px 0}.katex-display{overflow-x:auto;overflow-y:hidden}a{color:#215579}code,pre{font-family:"Times New Roman",monospace}pre{border:1px solid #ccd6dd;padding:14px;overflow:auto;white-space:pre;font-size:13px;line-height:1.65;max-height:650px}small{letter-spacing:1px}.method{font-size:15px}@media(max-width:790px){.main{padding:12px;margin:0}header,.lesson,.sources,.source{padding:15px}}</style>
+ </head><body><aside id="quantSidebar" class="sidebar" data-page="math"></aside><script src="../sidebar-v2.js"></script><div class="main"><main>
+ <header><small>QUANTITATIVE METHODS / C++17 RESEARCH</small><h1>非对称相依、极端共跌与下行Beta</h1>
+ <p>该专题以一致的数学定义连接数据字段、数值计算、金融解释与实际研究用途。五个子主题保留相互独立的估计对象，所有公式都有对应的可复算输入和可检查的C++17实现。</p>
+ </header><nav class="toc"><a href="#lesson1">1．双变量同步跌破阈值概率</a><a href="#lesson2">2．市场下行条件下的资产下行概率</a><a href="#lesson3">3．双变量同步超过阈值概率</a><a href="#lesson4">4．市场下跌样本的条件Beta</a><a href="#lesson5">5．下行状态的资产与基准利差</a><a href="#implementation">完整C++17源码</a><a href="#references">参考文献</a></nav>
+ <article class="lesson" id="lesson1"><h2>1．双变量同步跌破阈值概率</h2><div class="equation">$$\hat p_{--}(u)=n^{-1}\sum_i\mathbf1_{\{x_i&lt;u,y_i&lt;u\}}$$</div>
+ <h3>经济含义与理论结构</h3><p>对市场因子与资产回报采用相同下行阈值，统计两者同时跌破阈值的观察频率，用于度量有限阈值下的共同下行事件。</p>
+ <h3>数值案例与复算</h3><p>市场收益为−2、−1、1、2，资产收益为−3、1、−1、3，阈值为零，只有第一组同时下跌，共跌频率为1/4。</p>
+ <div class="equation">$$\mathrm{Output}\approx 0.25$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+-2,-3
+-1,1
+1,-1
+2,3</code></pre><pre><code>./kline_quant atlas-dependence-downside-cohit study.csv X Y 0</code></pre>
+ <h3>识别条件与数据解释</h3><p>有限样本共同跌破率不同于极限尾部相依系数，后者需要阈值序列向分布端点推进。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article>
+<article class="lesson" id="lesson2"><h2>2．市场下行条件下的资产下行概率</h2><div class="equation">$$\hat P(Y&lt;u\mid X&lt;u)=\frac{\sum_i\mathbf1_{\{x_i&lt;u,y_i&lt;u\}}}{\sum_i\mathbf1_{\{x_i&lt;u\}}}$$</div>
+ <h3>经济含义与理论结构</h3><p>将市场已经跌破阈值视为条件事件，只在这些交易日里观察资产进一步跌破阈值的比例，以衡量资产对市场下行状态的共振。</p>
+ <h3>数值案例与复算</h3><p>四条观测里市场下跌的两条中只有一条资产也跌破零，因此条件下行概率为0.5。</p>
+ <div class="equation">$$\mathrm{Output}\approx 0.5$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+-2,-3
+-1,1
+1,-1
+2,3</code></pre><pre><code>./kline_quant atlas-dependence-conditional-downside study.csv X Y 0</code></pre>
+ <h3>识别条件与数据解释</h3><p>必须保证条件事件具有足够样本；若市场从未跌破阈值，条件概率定义无法计算。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article>
+<article class="lesson" id="lesson3"><h2>3．双变量同步超过阈值概率</h2><div class="equation">$$\hat p_{++}(u)=n^{-1}\sum_i\mathbf1_{\{x_i&gt;u,y_i&gt;u\}}$$</div>
+ <h3>经济含义与理论结构</h3><p>通过计算两变量同时超过上行阈值的比例，可与共同下行指标构成非对称依赖的初步比较。</p>
+ <h3>数值案例与复算</h3><p>市场与资产四组观测中，只有最后一组同时大于零；上行共同超阈值概率为1/4。</p>
+ <div class="equation">$$\mathrm{Output}\approx 0.25$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+-2,-3
+-1,1
+1,-1
+2,3</code></pre><pre><code>./kline_quant atlas-dependence-upside-cohit study.csv X Y 0</code></pre>
+ <h3>识别条件与数据解释</h3><p>该指标依赖绝对阈值和收益量纲；用于不同资产比较时可同时报告各自分位阈值的定义。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article>
+<article class="lesson" id="lesson4"><h2>4．市场下跌样本的条件Beta</h2><div class="equation">$$\hat\beta^-=\frac{\sum_{i:x_i&lt;u}(x_i-\bar x_-)(y_i-\bar y_-)}{\sum_{i:x_i&lt;u}(x_i-\bar x_-)^2}$$</div>
+ <h3>经济含义与理论结构</h3><p>仅在市场回报低于指定阈值时计算资产对市场的回归斜率，通过条件样本的协变动刻画下行状态下的相对敏感度。</p>
+ <h3>数值案例与复算</h3><p>两条下行市场收益−2、−1，对应资产收益−3、1，因此资产每单位市场变动对应4单位资产变动，下行Beta为4。</p>
+ <div class="equation">$$\mathrm{Output}\approx 4$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+-2,-3
+-1,1
+1,-1
+2,3</code></pre><pre><code>./kline_quant atlas-dependence-conditional-downside-beta study.csv X Y 0</code></pre>
+ <h3>识别条件与数据解释</h3><p>极端市场样本较少时回归斜率可能极不稳定。该指标仅描述下行子样本的线性关联，不证明因果影响。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article>
+<article class="lesson" id="lesson5"><h2>5．下行状态的资产与基准利差</h2><div class="equation">$$\hat s^-=\frac{\sum_i(y_i-x_i)\mathbf1_{\{x_i&lt;u\}}}{\sum_i\mathbf1_{\{x_i&lt;u\}}}$$</div>
+ <h3>经济含义与理论结构</h3><p>在基准已经处于下行状态的观测中，计算资产相对于基准的平均回报差。负值代表下行期间资产表现弱于基准，正值则代表相对缓冲。</p>
+ <h3>数值案例与复算</h3><p>基准回报−2和−1时，资产对应−3和1，两个相对收益分别为−1和2，平均为0.5。</p>
+ <div class="equation">$$\mathrm{Output}\approx 0.5$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+-2,-3
+-1,1
+1,-1
+2,3</code></pre><pre><code>./kline_quant atlas-dependence-downside-relative-spread study.csv X Y 0</code></pre>
+ <h3>识别条件与数据解释</h3><p>与市场下行Beta不同，该指标度量的是均值层面的条件相对表现，无法识别回报对基准变化的斜率。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article><section class="source" id="implementation"><h2>完整数值实现与数据接口</h2>
+ <p>底层算法使用标准C++17、明确的数值边界检查与双列CSV输入。页面中的数学形式、数值案例及代码指向同一实际函数；源码可在独立研究项目中按文件链接获取。</p>
+ <p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/atlas2026_dependence.hpp">查看五个算法的头文件</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/atlas2026_common.hpp">公共数值检查与基础接口</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_atlas2026.cpp">数学回归测试</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_atlas2026_cli.py">真实CSV工作流测试</a>。</p>
+ <h3>独立算法头文件</h3><pre><code>#pragma once
+#include "atlas2026_common.hpp"
+namespace kline { namespace atlas2026 {
+inline double downside_cohit(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);int hits=0;for(std::size_t i=0;i&lt;x.size();++i)hits+=(x[i]&lt;p&amp;&amp;y[i]&lt;p);return double(hits)/x.size();}
+inline double conditional_downside(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);int cond=0,hits=0;for(std::size_t i=0;i&lt;x.size();++i)if(x[i]&lt;p){++cond;hits+=y[i]&lt;p;}require(cond&gt;0,"No downside conditioning observations");return double(hits)/cond;}
+inline double upside_cohit(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);int hits=0;for(std::size_t i=0;i&lt;x.size();++i)hits+=(x[i]&gt;p&amp;&amp;y[i]&gt;p);return double(hits)/x.size();}
+inline double conditional_downside_beta(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);double sx=0,sy=0;int n=0;for(std::size_t i=0;i&lt;x.size();++i)if(x[i]&lt;p){sx+=x[i];sy+=y[i];++n;}require(n&gt;=2,"Downside beta needs two observations");double mx=sx/n,my=sy/n,top=0,bot=0;for(std::size_t i=0;i&lt;x.size();++i)if(x[i]&lt;p){top+=(x[i]-mx)*(y[i]-my);bot+=(x[i]-mx)*(x[i]-mx);}require(bot&gt;0,"Downside beta has no factor variation");return top/bot;}
+inline double downside_relative_spread(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);double sum=0;int n=0;for(std::size_t i=0;i&lt;x.size();++i)if(x[i]&lt;p){sum+=y[i]-x[i];++n;}require(n&gt;0,"No downside return observations");return sum/n;}
+} }
+</code></pre><h3>统一输入校验</h3><pre><code>#pragma once
+#include "stats.hpp"
+#include &lt;algorithm&gt;
+#include &lt;cmath&gt;
+#include &lt;numeric&gt;
+#include &lt;stdexcept&gt;
+#include &lt;vector&gt;
+namespace kline {
+namespace atlas2026 {
+using Values=std::vector&lt;double&gt;;
+inline void valid(const Values&amp; x,const Values&amp; y,double p){
+ check_finite(x);check_finite(y);
+ require(x.size()==y.size()&amp;&amp;std::isfinite(p),"Data rows and parameter must be finite and aligned");
+}
+inline double positive_weights(const Values&amp; y){
+ double sum=0;
+ for(double w:y){require(w&gt;=0,"Weights must be nonnegative");sum+=w;}
+ require(sum&gt;0&amp;&amp;std::isfinite(sum),"Positive finite total weight required");
+ return sum;
+}
+inline void nonnegative(const Values&amp; x){
+ for(double z:x)require(z&gt;=0,"Inputs must be nonnegative");
+}
+}
+}
+</code></pre></section>
+ <section class="sources" id="references"><h2>方法与技术资料</h2><p><a href="https://www.itl.nist.gov/div898/handbook/">NIST统计方法手册</a>。数值恒等式、模型条件与算法源码构成本文各节的可复核依据。</p>
+ <p>实际经济研究所需的样本时间区间、预测时点、标签成熟规则、事件制度和交易成本应与所使用的数据共同定义；相应条件在各节分别展开。</p></section>
+ </main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>
