@@ -61,6 +61,8 @@ inline bool run_expansion_finance(const std::string& command,int argc,char** arg
             num(2),num(3),num(4),num(5),num(6),num(7))<<"\n";
     }else if(command=="option-reprice"){
         exact(12);
+        require(std::string(argv[11])=="call"||
+                std::string(argv[11])=="put","Option side must be call or put");
         out<<"ShockPnL "<<reprice_option_shock(
             num(2),num(3),num(4),num(5),num(6),num(7),
             {num(8),num(9),num(10)},std::string(argv[11])=="call")<<"\n";
