@@ -7,7 +7,9 @@
 namespace kline {
 inline std::vector<std::complex<double>> discrete_fourier_transform(
     const std::vector<double>& series){
-    check_finite(series);int n=int(series.size());
+    check_finite(series);
+    require(series.size()<=4096,"Direct DFT limited to 4096 samples");
+    int n=int(series.size());
     std::vector<std::complex<double>> result(n);
     const double pi=std::acos(-1.0);
     for(int k=0;k<n;k++)
