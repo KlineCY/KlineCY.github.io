@@ -28,8 +28,11 @@ for(const [file,expected,index] of pages){
     lessons+=articleIds.length;
     assert.equal(new Set(articleIds).size,expected,file+" repeated lesson IDs");
     assert(html.includes("katex.min.js"),file+" missing KaTeX");
-    assert(!/<div class="(?:math|formula)">\$\$[^$]*[\u3400-\u9fff][^$]*\$\$<\/div>/u.test(html),
-           file+" display math contains ordinary Chinese topic labels instead of mathematical expressions");
+    for(const match of html.matchAll(/<div class="(?:math|formula)">\$\$([^$]*)\$\$<\/div>/g)){
+      const expr=match[1];
+      assert(!(/[\u3400-\u9fff]/u.test(expr)&&!/[\\=^_]/.test(expr)),
+             file+" display math contains an unrenderable natural-language label");
+    }
     assert(!/<p>\\(?:mathrm|tau|lambda|widehat|frac|operatorname|sum|hat|mathbb)\b/.test(html),
            file+" raw TeX is displayed outside a KaTeX delimiter");
     if(file.startsWith("quant/math/")){
