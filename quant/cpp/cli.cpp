@@ -1,3 +1,4 @@
+#include "advanced_cli.hpp"
 #include "data.hpp"
 #include "allocation.hpp"
 #include "derivatives.hpp"
@@ -55,6 +56,7 @@ void usage() {
          << "  allocate CSV RISK_LAMBDA TURNOVER_PENALTY ASSET_COLUMN EXPECTED_RETURN PREVIOUS_WEIGHT [MORE_TRIPLES...]\n"
          << "  bl-pair CSV ASSET_COLUMN_A ASSET_COLUMN_B PRIOR_A PRIOR_B VIEW_A_MINUS_B VIEW_VARIANCE TAU\n"
          << "  asof EVENT_CSV DECISION_CSV (event columns Date,Published,Received,Value)\n";
+    kline::advanced_cli_usage(cerr);
 }
 
 double number(const char* value) {
@@ -476,6 +478,7 @@ int main(int argc, char** argv) {
                 if (joined[i].first) cout << joined[i].second;
                 cout << "\n";
             }
+        } else if (kline::run_advanced_cli(command,argc,argv,cout)) {
         } else {
             usage();
             return 2;
