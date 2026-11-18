@@ -98,7 +98,8 @@ with tempfile.TemporaryDirectory() as temporary:
     write_csv(curve, ["Tenor", "ZeroRate"], [[1,0.05],[2,0.05],[3,0.05]])
     write_csv(flows, ["Time", "Cashflow"], [[1,5],[2,105]])
     write_csv(payments, ["PaymentTime"], [[1],[2]])
-    assert first_value(run("curve-pv", curve, flows)) > 100
+    assert abs(first_value(run("curve-pv", curve, flows)) -
+               (5*math.exp(-0.05)+105*math.exp(-0.1))) < 1e-6
     assert first_value(run("swap-par", curve, payments)) > 0.05
     sensitivity = run("keyrate", curve, flows)
     assert "Index,KeyRateDV01" in sensitivity
