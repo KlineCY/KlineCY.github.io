@@ -1,5 +1,7 @@
 #include "advanced_cli.hpp"
 #include "fullstack_cli.hpp"
+#include "expansion_cli_math.hpp"
+#include "expansion_cli_finance.hpp"
 #include "data.hpp"
 #include "allocation.hpp"
 #include "derivatives.hpp"
@@ -59,6 +61,8 @@ void usage() {
          << "  asof EVENT_CSV DECISION_CSV (event columns Date,Published,Received,Value)\n";
     kline::advanced_cli_usage(cerr);
     kline::print_fullstack_usage(cerr);
+    kline::expansion_math_usage(cerr);
+    kline::expansion_finance_usage(cerr);
 }
 
 double number(const char* value) {
@@ -482,6 +486,8 @@ int main(int argc, char** argv) {
             }
         } else if (kline::run_advanced_cli(command,argc,argv,cout)) {
         } else if (kline::run_fullstack_cli(command,argc,argv,cout)) {
+        } else if (kline::run_expansion_math(command,argc,argv,cout)) {
+        } else if (kline::run_expansion_finance(command,argc,argv,cout)) {
         } else {
             usage();
             return 2;
