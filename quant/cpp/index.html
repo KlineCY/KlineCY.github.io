@@ -55,16 +55,16 @@ footer{margin:25px 0;color:#587186;font-size:12px}
 <p>从数学讲义和策略模板延伸到完整的可调用计算组件。代码可在本地使用 GCC、Clang 或 CMake 编译，不需要外部数值计算库。每个函数都明确输入、时间口径、边界条件及算法适用范围；命令行支持使用自己的 CSV 数据。</p>
 </header>
 <div class="counts" aria-label="工具库核心范围">
-<div class="count"><strong>50</strong><span>研究模块：完整数值与量化实证体系</span></div>
+<div class="count"><strong>100</strong><span>研究模块：数学、机器学习与金融全链路</span></div>
 <div class="count"><strong>C++17</strong><span>标准语言，无第三方运行时依赖</span></div>
-<div class="count"><strong>114</strong><span>命令行分析工作流</span></div>
+<div class="count"><strong>222</strong><span>命令行分析工作流</span></div>
 <div class="count"><strong>GCC / Clang</strong><span>双编译器数值和集成测试</span></div>
 </div>
 <nav class="jump" aria-label="本页快速导航">
-<a href="#modules">源码目录</a><a href="./advanced.html">进阶数值课程与算例</a><a href="./fullstack.html">全链路数值与实证专题</a><a href="#workflow">命令行研究</a><a href="#risk">组合风险</a><a href="#derivatives">衍生品与利率</a><a href="#data">历史可得信息</a><a href="#validation">研究验证</a><a href="#learning">金融机器学习</a><a href="#allocation">配置优化</a><a href="#ledger">净成本组合账本</a><a href="#assumptions">方法和边界</a>
+<a href="#modules">源码目录</a><a href="./advanced.html">进阶数值课程与算例</a><a href="./fullstack.html">全链路数值与实证专题</a><a href="./extended.html">50章跨领域扩展课程</a><a href="#workflow">命令行研究</a><a href="#risk">组合风险</a><a href="#derivatives">衍生品与利率</a><a href="#data">历史可得信息</a><a href="#validation">研究验证</a><a href="#learning">金融机器学习</a><a href="#allocation">配置优化</a><a href="#ledger">净成本组合账本</a><a href="#assumptions">方法和边界</a>
 </nav>
 <section class="panel" id="modules">
-<h2>五十个计算主题与源码</h2>
+<h2>一百个计算主题与源码</h2>
 <p>课程中的 C++ 数值算例用于解释单一数学对象；此处的模块将多种金融计算组合成可复用函数，并在输入不符合要求时返回明确错误。源码中的每个接口可分别调用，不要求依赖整套命令行工具。</p>
 <div class="grid">
 <article class="item"><h3>统计与时间序列</h3><p>样本与总体方差、协方差、Pearson/Spearman、并列秩、分位数、HAC 标准误、滚动均值、对数收益。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/stats.hpp">查看 stats.hpp</a></article>
@@ -116,6 +116,56 @@ footer{margin:25px 0;color:#587186;font-size:12px}
 <article class="item"><h3>波动率曲面基本检验</h3><p>总隐含方差、区间远期方差、垂直价差、蝴蝶凸性筛查。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/volatility_surface.hpp">查看 volatility_surface.hpp</a></article>
 <article class="item"><h3>事件标签净化</h3><p>事件区间重叠Purging、Embargo、成熟标签计数、时间留出。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/validation_advanced.hpp">查看 validation_advanced.hpp</a></article>
 <article class="item"><h3>净总敞口与换手</h3><p>美元中性、总敞口缩放、单边换手上限、净敞口合规。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/portfolio_constraints.hpp">查看 portfolio_constraints.hpp</a></article>
+<article class="item"><h3>矩阵运算与马氏距离</h3><p>矩阵转置、乘法、部分主元行列式与逐列求解逆矩阵；马氏距离以协方差度量相关因子组合的偏离。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/matrix_algorithms.hpp">查看 matrix_algorithms.hpp</a></article>
+<article class="item"><h3>中位数、MAD及稳健位置</h3><p>截尾均值减少极端观测影响，Huber位置估计限制单个误差的边际影响，滞后自相关反映时间依赖。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/robust_statistics.hpp">查看 robust_statistics.hpp</a></article>
+<article class="item"><h3>正态与离散分布计算</h3><p>正态分位数通过单调二分反演，Student t与泊松密度使用对数伽马函数稳定计算。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/probability_models.hpp">查看 probability_models.hpp</a></article>
+<article class="item"><h3>DFT、功率谱与谱熵</h3><p>将离散时间序列分解成不同频率分量，利用周期图识别周期结构，以谱熵测度频率功率分散程度。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/spectral_analysis.hpp">查看 spectral_analysis.hpp</a></article>
+<article class="item"><h3>广义帕累托与Hill指数</h3><p>广义帕累托描述阈值以上损失的尾部生存概率，Hill估计使用最大损失的对数相对差判断尾部厚度。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/tail_distributions.hpp">查看 tail_distributions.hpp</a></article>
+<article class="item"><h3>Welch与配对均值检验</h3><p>分别实现两组异方差均值差和逐对差值的标准误与t统计量，保留抽样方式的区别。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/hypothesis_testing.hpp">查看 hypothesis_testing.hpp</a></article>
+<article class="item"><h3>熵、KL与有效状态数</h3><p>Shannon熵描述概率不确定性，KL散度描述两组概率分布的不对称差异，有效状态数为熵的指数。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/information_theory.hpp">查看 information_theory.hpp</a></article>
+<article class="item"><h3>模拟置信区间与反变量</h3><p>从模拟收益样本计算均值、标准误和95％区间；反变量欧式看涨收益将正负冲击配对以降低方差。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/monte_carlo_precision.hpp">查看 monte_carlo_precision.hpp</a></article>
+<article class="item"><h3>Halton低差异采样</h3><p>根逆展开构造均匀覆盖样本空间的低差异序列，利用正态逆分布变换构造正态维度。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/quasi_monte_carlo.hpp">查看 quasi_monte_carlo.hpp</a></article>
+<article class="item"><h3>高阶AR与时间差分</h3><p>用多个历史滞后值联合估计AR(p)截距与系数，并给出下一期预测、有限差分与长期均值。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/autoregressive_models.hpp">查看 autoregressive_models.hpp</a></article>
+<article class="item"><h3>受约束GARCH参数估计</h3><p>在平稳参数网格内最大化高斯准似然的相反数，返回波动持久性和下一期条件方差，并计算远期方差回复。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/volatility_estimation.hpp">查看 volatility_estimation.hpp</a></article>
+<article class="item"><h3>实体固定效应</h3><p>对实体逐组减去实体内均值，再用带截距的回归拟合组内变化，以消除时间不变的异质截距。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/panel_econometrics.hpp">查看 panel_econometrics.hpp</a></article>
+<article class="item"><h3>逐期Fama–MacBeth回归</h3><p>每期单独估计横截面回归系数，再对时间序列的系数求平均与均值标准误。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/fama_macbeth.hpp">查看 fama_macbeth.hpp</a></article>
+<article class="item"><h3>市场制度变化与CUSUM</h3><p>比较断点前后的收益均值和方差，用全样本去中心累计和的峰值衡量可能的状态变化。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/regime_diagnostics.hpp">查看 regime_diagnostics.hpp</a></article>
+<article class="item"><h3>递推最小二乘</h3><p>每条新样本通过预测残差、协方差逆矩阵和可选遗忘因子更新线性系数。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/online_learning.hpp">查看 online_learning.hpp</a></article>
+<article class="item"><h3>KNN回归与分类</h3><p>按训练样本到查询点的欧氏距离排序，使用最近k个标签均值生成回归值或二元类别概率。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/neighbors_models.hpp">查看 neighbors_models.hpp</a></article>
+<article class="item"><h3>平方损失回归树桩</h3><p>枚举每个特征的相邻可区分阈值，选取左右叶结点平方误差最低的单次划分。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/tree_models.hpp">查看 tree_models.hpp</a></article>
+<article class="item"><h3>梯度提升树桩</h3><p>以目标均值作为常数初始模型，逐轮拟合上一轮剩余残差，并按学习率加入预测值。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/boosting_models.hpp">查看 boosting_models.hpp</a></article>
+<article class="item"><h3>高斯朴素贝叶斯</h3><p>估计两类下各数值特征的均值和方差，在条件独立假设下按对数密度求稳定后验概率。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/naive_bayes_models.hpp">查看 naive_bayes_models.hpp</a></article>
+<article class="item"><h3>保序概率校准</h3><p>将预测分数排序，对概率违反单调性的相邻区块实施池化，形成非下降分段常数概率。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/isotonic_calibration.hpp">查看 isotonic_calibration.hpp</a></article>
+<article class="item"><h3>多项式及高斯径向基</h3><p>创建特征交互、平方和高次幂，以及距指定中心的高斯核距离函数，供线性预测器利用非线性结构。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/nonlinear_features.hpp">查看 nonlinear_features.hpp</a></article>
+<article class="item"><h3>因子乘积与截面相似度</h3><p>利用因子成对乘积建立非线性交互，并用向量内积及范数计算两组截面暴露的余弦相似度。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/factor_interactions.hpp">查看 factor_interactions.hpp</a></article>
+<article class="item"><h3>协方差特征谱下限</h3><p>在对称协方差特征分解后提高过小特征值并重建矩阵，改善高相关资产的优化稳定性。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/covariance_regularization.hpp">查看 covariance_regularization.hpp</a></article>
+<article class="item"><h3>解析最小方差与目标收益</h3><p>求解协方差逆与预算向量、预期收益向量的关系，构造无额外箱约束的解析有效前沿。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/efficient_frontier.hpp">查看 efficient_frontier.hpp</a></article>
+<article class="item"><h3>层次风险平价</h3><p>由相关系数生成资产距离，按平均簇间距离聚类，再依据簇内逆方差风险估计递归分配权重。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/hierarchical_portfolio.hpp">查看 hierarchical_portfolio.hpp</a></article>
+<article class="item"><h3>持仓熵与有效数量</h3><p>将绝对持仓敞口归一化为概率，计算熵、有效持仓数量及HHI集中度。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/portfolio_entropy.hpp">查看 portfolio_entropy.hpp</a></article>
+<article class="item"><h3>Kelly与波动率头寸</h3><p>实现二元收益的Kelly最优比例、近似正态收益的均值方差头寸，以及带总敞口限制的目标波动率缩放。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/trade_sizing.hpp">查看 trade_sizing.hpp</a></article>
+<article class="item"><h3>滚动Beta与动态套保</h3><p>使用指定历史窗口的协方差与方差计算动态因子Beta，依据对冲资产Beta调整组合整体风险暴露。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/factor_exposure_models.hpp">查看 factor_exposure_models.hpp</a></article>
+<article class="item"><h3>SABR隐含波动率</h3><p>使用给定远期、执行价、到期时间、弹性、相关和波动率波动率，计算Hagan型对数正态微笑近似。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/sabr_models.hpp">查看 sabr_models.hpp</a></article>
+<article class="item"><h3>期权重新估值与Gamma收益</h3><p>对标的、波动率与利率联合冲击重新计算Black–Scholes价格，并给出Gamma和实现方差的局部收益近似。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/option_risk_scenarios.hpp">查看 option_risk_scenarios.hpp</a></article>
+<article class="item"><h3>久期、凸性与DV01</h3><p>逐现金流连续贴现计算债券现值，以现金流时点加权得到一阶久期和二阶凸性风险。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/bond_risk_models.hpp">查看 bond_risk_models.hpp</a></article>
+<article class="item"><h3>掉期固定浮动端估值</h3><p>按支付期折现固定票息，利用到期贴现因子计算单曲线平价浮动端，并提供区间简单远期利率。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/swap_models.hpp">查看 swap_models.hpp</a></article>
+<article class="item"><h3>Nelson–Siegel收益率曲线</h3><p>通过水平、斜率、曲率和衰减尺度形成平滑连续零息曲线，并计算指定两期限的利差。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/yield_curve_shape.hpp">查看 yield_curve_shape.hpp</a></article>
+<article class="item"><h3>一因子相关违约</h3><p>将债务人的潜在资产收益分解为系统性与特质正态因子，根据正态分位数违约阈值产生联合损失。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/credit_copula.hpp">查看 credit_copula.hpp</a></article>
+<article class="item"><h3>NPV、WACC与永续估值</h3><p>对项目投资现金流折现，计算税后债务和权益加权资本成本，并求稳定成长永续现金流的现值。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/corporate_finance_models.hpp">查看 corporate_finance_models.hpp</a></article>
+<article class="item"><h3>期货保证金与逐日盯市</h3><p>按手数和合约乘数计算初始及维持保证金，结算价差改变权益后重新计算自由现金和追保条件。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/futures_margin_models.hpp">查看 futures_margin_models.hpp</a></article>
+<article class="item"><h3>订单簿更新与微价格</h3><p>分别按买卖价格优先级维护最优档订单，处理数量替换与撤单，并由盘口挂单量计算微价格。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/order_book_events.hpp">查看 order_book_events.hpp</a></article>
+<article class="item"><h3>盘口流动性订单流</h3><p>根据前后买卖价与挂单量变化计算OFI，以描述最优档位流动性从哪一侧撤出或增加。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/order_flow_imbalance.hpp">查看 order_flow_imbalance.hpp</a></article>
+<article class="item"><h3>Almgren–Chriss离散执行</h3><p>使用风险厌恶、波动率与暂时市场冲击参数构造前置成交或等量成交的目标执行序列。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/optimal_execution.hpp">查看 optimal_execution.hpp</a></article>
+<article class="item"><h3>持仓收益与调仓贡献</h3><p>分别计算期初持仓资产收益、权重变更对应的收益贡献以及按绝对交易比例计算的费用拖累。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/cross_asset_attribution.hpp">查看 cross_asset_attribution.hpp</a></article>
+<article class="item"><h3>清算时间与分阶段冲击</h3><p>按股票数量、平均每日成交量及参与率估计组合全部清仓所需天数，叠加交易价差和平方根冲击。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/liquidity_stress.hpp">查看 liquidity_stress.hpp</a></article>
+<article class="item"><h3>Merton跳跃扩散</h3><p>叠加扩散正态冲击与泊松次数控制的对数正态跳跃，用风险补偿项调整漂移并模拟未来价格路径。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/jump_diffusion.hpp">查看 jump_diffusion.hpp</a></article>
+<article class="item"><h3>三重障碍事件标签</h3><p>按盈利上障碍、亏损下障碍和最大持有期检测首次触发，并记录事件终止时点与实际路径收益。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/event_labeling.hpp">查看 event_labeling.hpp</a></article>
+<article class="item"><h3>PurgedKFold与隔离区</h3><p>以每条事件标签的起止时间删除与测试窗口重叠的训练事件，并对测试结束后的指定时间范围施加Embargo。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/cross_validation_extended.hpp">查看 cross_validation_extended.hpp</a></article>
+<article class="item"><h3>概率校准与Brier分数</h3><p>按预测概率分桶衡量预期与实现频率差异，或直接计算二元概率的均方误差。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/calibration_diagnostics.hpp">查看 calibration_diagnostics.hpp</a></article>
+<article class="item"><h3>时间加权净值及资金IRR</h3><p>区分组合本身收益连乘和投资者外部现金流产生的资金加权回报，同时跟踪期末账户资产。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/backtest_cashflows.hpp">查看 backtest_cashflows.hpp</a></article>
+<article class="item"><h3>日期交集和历史As-of</h3><p>采用双指针匹配跨市场交易日期，只使用在决策时点之前已经发布的信息观测。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/market_data_alignment.hpp">查看 market_data_alignment.hpp</a></article>
+<article class="item"><h3>股息、拆股及配股调整</h3><p>根据拆股比率与现金股息重建每期经济总收益，再由认购价与新增股数估算理论配股除权价。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/corporate_actions.hpp">查看 corporate_actions.hpp</a></article>
+<article class="item"><h3>回撤峰谷与修复期</h3><p>沿净值路径记录每轮低于历史高点时的起点、谷底、最大幅度和恢复日期。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/drawdown_analytics.hpp">查看 drawdown_analytics.hpp</a></article>
+<article class="item"><h3>VaR违约覆盖及ES诊断</h3><p>逐期比较实现损失和提前生成的VaR阈值，计算违约次数与Kupiec似然比，另提供超过VaR的ES残差。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/risk_backtesting.hpp">查看 risk_backtesting.hpp</a></article>
 <article class="item"><h3>本地 CSV 输入</h3><p>数据列读取、带引号字段、重复列检查、CRLF 换行处理、数值合法性、缺失字段报错，避免静默生成结果。</p><a class="file" href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/io.hpp">查看 io.hpp</a></article>
 </div>
 </section>
@@ -232,6 +282,18 @@ g++ -std=c++17 -O2 -Wall -Wextra -pedantic test.cpp -o kline_tests
 ./kline_quant roll-futures 100 102 3 105 10 2
 ./kline_quant market-maker 100 2 0.1 4 1 2
 ./kline_quant stress-worst scenarios.csv 0.6 Equity 0.4 Rates</pre><p>数值回归和异常输入测试在 <a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_fullstack.cpp">C++全链路测试</a>、<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_fullstack_cli.py">CSV端到端测试</a> 中可复查，并纳入既有的GCC/Clang双编译器CI。</p></section>
+<section class="panel" id="extended">
+<h2>跨领域数理金融与量化研究：50个新增模块</h2>
+<p>从一般矩阵数值计算、Robust Statistics、频域分析、尾部分布、面板固定效应及Fama–MacBeth，扩展到在线学习、树模型与Boosting、SABR、相关信用违约、利率交换、期货保证金、订单流失衡、大额订单执行、事件标签、概率校准与独立样本外风险检验。对应50章的 <a href="./extended.html">C++17量化研究跨领域扩展课程</a> 逐节解释算法结构、研究问题及数值适用条件。</p>
+<p>新增命令可直接使用历史CSV或明确数值参数执行，独立数值测试在GCC与Clang环境中进行严格编译。新增两个CLI入口分别位于<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/expansion_cli_math.hpp">数学、计量和机器学习命令</a>、<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/expansion_cli_finance.hpp">衍生品、风险及交易命令</a>。</p>
+<pre>./kline_quant garch-estimate returns.csv Residual 20
+./kline_quant panel-fe panel.csv Entity Outcome Exposure
+./kline_quant gaussian-nb samples.csv Factor Label 0.2
+./kline_quant sabr-vol 100 105 1 0.2 1 0 0.3
+./kline_quant execution-optimal 1000 10 0.1 0.2 1
+./kline_quant triple-barrier prices.csv Close 20 10 0.04 0.03
+./kline_quant kupiec-backtest risk.csv RealizedLoss VaR 0.99</pre>
+<p>原有100个主题构成由数值基础走向量化实证与交易系统的统一源码目录。所有新算法仍以研究复现为基础：数据时点、交易执行、衍生品合约和风险资本约束由研究者明确负责。</p></section>
 <section class="panel" id="assumptions">
 <h2>适用范围、模型边界和检验要求</h2>
 <p>该工具库面向研究、教学、回测前验证及数值实验，不能代替券商 OMS、实时交易所行情、生产级风险系统或正式估值模型。投资组合与因子函数默认输入已经处理时点对齐与价格调整；若输入代表未来标签，研究者仍须自行确保预测和训练阶段没有信息泄漏。</p>
