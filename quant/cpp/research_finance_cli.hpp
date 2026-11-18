@@ -96,7 +96,8 @@ inline bool run_research_finance_cli(const std::string& cmd,int argc,
         out<<"Exposure "<<values[0]<<"\n";
     }else if(cmd=="online-cov2"){
         exact(5);
-        auto t=read_csv(argv[2]),a=t.numbers(argv[3]),b=t.numbers(argv[4]);
+        auto t=read_csv(argv[2]);
+        auto a=t.numbers(argv[3]),b=t.numbers(argv[4]);
         auto state=new_online_covariance(2);
         for(int i=0;i<int(a.size());i++)
             update_online_covariance(state,{a[i],b[i]});
