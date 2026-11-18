@@ -69,7 +69,7 @@ inline bool run_expansion_finance(const std::string& command,int argc,char** arg
         out<<"GammaScalpingApprox "<<gamma_scalping_approx(
             num(2),num(3),num(4),num(5),num(6))<<"\n";
     }else if(command=="bond-risk"){
-        exact(5);auto t=read_csv(argv[2]);
+        exact(4);auto t=read_csv(argv[2]);
         auto r=continuous_bond_risk(t.numbers("Time"),
              t.numbers("Cashflow"),num(3));
         out<<"Price "<<r.price<<"\nDuration "<<r.duration<<"\n"
@@ -94,11 +94,11 @@ inline bool run_expansion_finance(const std::string& command,int argc,char** arg
         out<<"ForwardSimple "<<forward_rate_from_discounts(
             expansion_finance_curve(read_csv(argv[2])),num(3),num(4))<<"\n";
     }else if(command=="nelson-siegel"){
-        exact(8);
+        exact(7);
         out<<"ZeroRate "<<nelson_siegel_zero(
             num(2),num(3),num(4),num(5),num(6))<<"\n";
     }else if(command=="curve-slope-ns"){
-        exact(9);
+        exact(8);
         auto curve=nelson_siegel_curve({num(2),num(3)},
                                       num(4),num(5),num(6),num(7));
         out<<"Slope "<<curve_slope(curve,num(2),num(3))<<"\n";
@@ -107,7 +107,7 @@ inline bool run_expansion_finance(const std::string& command,int argc,char** arg
         out<<"ConditionalDefaultRate "<<vasicek_conditional_default_rate(
             num(2),num(3),num(4))<<"\n";
     }else if(command=="credit-simulate"){
-        exact(7);
+        exact(6);
         auto t=read_csv(argv[2]);
         auto losses=one_factor_credit_losses(
             t.numbers("Exposure"),t.numbers("DefaultProbability"),
@@ -122,7 +122,7 @@ inline bool run_expansion_finance(const std::string& command,int argc,char** arg
            <<"Maintenance "<<m.maintenance_margin<<"\nFreeCash "
            <<m.free_cash<<"\n";
     }else if(command=="margin-mark"){
-        exact(11);
+        exact(9);
         auto initial=open_margin_account(num(2),num(3),num(4),num(6),
                                          num(7),num(8));
         auto updated=mark_margin_account(initial,num(3),num(4),num(5),
@@ -170,7 +170,7 @@ inline bool run_expansion_finance(const std::string& command,int argc,char** arg
             out<<v.start<<","<<v.end<<","<<v.direction<<","
                <<v.realized_return<<"\n";
     }else if(command=="purged-folds"){
-        exact(6);auto t=read_csv(argv[2]);
+        exact(5);auto t=read_csv(argv[2]);
         auto starts=expansion_finance_ints(t.numbers("Start"));
         auto ends=expansion_finance_ints(t.numbers("End"));
         std::vector<LabeledPeriod> periods;
@@ -215,7 +215,7 @@ inline bool run_expansion_finance(const std::string& command,int argc,char** arg
         out<<"GrowthFactor "<<time_weighted_growth(
             read_csv(argv[2]).numbers(argv[3]))<<"\n";
     }else if(command=="asof-numeric"){
-        exact(6);auto records=read_csv(argv[2]),decisions=read_csv(argv[3]);
+        exact(4);auto records=read_csv(argv[2]),decisions=read_csv(argv[3]);
         auto dates=expansion_finance_ints(records.numbers("Date"));
         auto values=records.numbers("Value");
         std::vector<DatedValue> points;
@@ -223,7 +223,7 @@ inline bool run_expansion_finance(const std::string& command,int argc,char** arg
         auto query=expansion_finance_ints(decisions.numbers("Date"));
         expansion_finance_print(out,"AsOf",asof_last_known(points,query));
     }else if(command=="align-numeric"){
-        exact(6);auto a=read_csv(argv[2]),b=read_csv(argv[3]);
+        exact(4);auto a=read_csv(argv[2]),b=read_csv(argv[3]);
         auto da=expansion_finance_ints(a.numbers("Date"));
         auto db=expansion_finance_ints(b.numbers("Date"));
         auto va=a.numbers("Value"),vb=b.numbers("Value");
@@ -320,9 +320,9 @@ inline bool run_expansion_finance(const std::string& command,int argc,char** arg
                <<"EffectiveHoldings "<<holdings_effective_number(weights)<<"\n";
         else out<<"Herfindahl "<<herfindahl_exposure(weights)<<"\n";
     }else if(command=="project-npv"){
-        exact(5);
+        exact(6);
         out<<"NPV "<<net_present_value(num(3),
-                 read_csv(argv[2]).numbers(argv[4]),num(3))<<"\n";
+                 read_csv(argv[2]).numbers(argv[4]),num(5))<<"\n";
     }else if(command=="project-wacc"){
         exact(6);
         out<<"WACC "<<weighted_average_cost_of_capital(
@@ -382,7 +382,7 @@ inline void expansion_finance_usage(std::ostream& out){
        <<"  jump-correction INTENSITY LOGJUMP_MEAN LOGJUMP_STD\n"
        <<"  jump-simulate SPOT DRIFT VOL INTENSITY LOGJUMP_MEAN LOGJUMP_STD DT STEPS SEED\n"
        <<"  holdings-entropy|holdings-hhi CSV WEIGHT\n"
-       <<"  project-npv CSV INITIAL_INVESTMENT CASHFLOW DISCOUNT\n"
+       <<"  project-npv CSV INITIAL_INVESTMENT CASHFLOW_COLUMN DISCOUNT\n"
        <<"  project-wacc EQUITY_WEIGHT COST_EQUITY COST_DEBT TAX\n"
        <<"  perpetuity NEXT_CF GROWTH DISCOUNT\n";
 }
