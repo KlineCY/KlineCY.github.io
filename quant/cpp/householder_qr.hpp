@@ -10,6 +10,10 @@ inline QrFit solve_householder_least_squares(Matrix x,std::vector<double> y){
     check_finite(y);int m=int(x.size()),n=int(x[0].size());
     require(m>=n,"QR requires at least as many samples as predictors");
     for(const auto& row:x){require(int(row.size())==n,"QR ragged design");check_finite(row);}
+    std::vector<double> original_scale(n,0);
+    for(int j=0;j<n;j++)
+        for(int i=0;i<m;i++)
+            original_scale[j]=std::max(original_scale[j],std::fabs(x[i][j]));
     for(int j=0;j<n;j++){
         double norm=0,scale=0;
         for(int i=j;i<m;i++)scale=std::max(scale,std::fabs(x[i][j]));
@@ -29,7 +33,8 @@ inline QrFit solve_householder_least_squares(Matrix x,std::vector<double> y){
         }
         double ydot=0;for(int i=j;i<m;i++)ydot+=v[i-j]*y[i];
         for(int i=j;i<m;i++)y[i]-=factor*v[i-j]*ydot;
-        require(std::fabs(x[j][j])>1e-12*scale,"QR rank deficiency");
+        require(std::fabs(x[j][j])>1e-10*original_scale[j],
+                "QR rank deficiency");
     }
     QrFit fit;fit.coefficients.assign(n,0);
     for(int i=n-1;i>=0;i--){
