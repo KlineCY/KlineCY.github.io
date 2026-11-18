@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>债券应计利息、隔夜贴现与信用现金流｜Kline Quant</title><meta name="description" content="债券与信用合约的价格由现金流金额、时间和违约机制共同决定。票息应计、隔夜复利贴现、结构信用事件概率和违约回收现金流在本页采用四套明确区分的计量口径。">
+<link rel="stylesheet" href="../sidebar-v2.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<style>
+*{box-sizing:border-box}body{margin:0;background:white;color:#172c3c;font:16px/1.95 "Times New Roman","SimSun",serif}
+.main{margin-left:252px;padding:25px 32px 70px}main{max-width:1110px;margin:auto}
+h1{font-size:clamp(27px,3.3vw,39px);line-height:1.3;margin:9px 0 14px}
+h2{font-size:24px;margin:30px 0 16px;border-bottom:1px solid #bdcbd6;padding-bottom:10px}
+h3{font-size:18px;margin:17px 0 8px}p{line-height:1.95;margin:12px 0}
+a{color:#19577e}.header,.chapter,.sources,.source-code{border:1px solid #c7d3dc;background:white;padding:25px 29px;margin:17px 0}
+.eyebrow{font:13px "Times New Roman",serif;letter-spacing:1px}
+.toc{display:flex;flex-wrap:wrap;gap:12px 22px;border:1px solid #cad5dd;padding:17px 24px;margin:20px 0}
+.formula{overflow-x:auto;border-block:1px solid #d1dce3;padding:16px 7px;margin:15px 0}
+.formula .katex-display{overflow-x:auto;overflow-y:hidden}
+.ch-meta{font-size:13px;color:#4b6375}.data-command{border:1px solid #ccd5dd;padding:13px;overflow-x:auto;font:14px/1.7 "Times New Roman",monospace;white-space:pre-wrap}
+pre{border:1px solid #ced8df;overflow:auto;padding:16px;max-height:700px;font:12px/1.65 "Times New Roman",monospace;white-space:pre}
+.source-links{display:flex;flex-wrap:wrap;gap:9px 23px}
+@media(max-width:790px){.main{margin:0;padding:14px}.header,.chapter,.sources,.source-code{padding:16px}}
+</style></head>
+<body><aside id="quantSidebar" class="sidebar" data-page="assets"></aside>
+<script src="../sidebar-v2.js"></script><div class="main"><main>
+<header class="header"><div class="eyebrow">FIXED INCOME / CREDIT CASHFLOW</div><h1>债券应计利息、隔夜贴现与信用现金流</h1><p>债券与信用合约的价格由现金流金额、时间和违约机制共同决定。票息应计、隔夜复利贴现、结构信用事件概率和违约回收现金流在本页采用四套明确区分的计量口径。</p>
+<p class="ch-meta">研究工具：标准C++17，CSV数据输入，数值边界与异常输入检测。</p></header>
+<nav class="toc" aria-label="专题目录"><a href="#chapter1">1．票息债的期间应计利息</a><a href="#chapter2">2．逐期隔夜复利贴现</a><a href="#chapter3">3．Merton结构信用的终点违约概率</a><a href="#chapter4">4．平坦危险率的回收本金零息债</a>
+<a href="#code">完整C++17源码</a><a href="#sources">方法资料</a></nav>
+<article class="chapter" id="chapter1">
+<h2>1．票息债的期间应计利息</h2><div class="formula">$$AI=F\,c\,\frac{1}{m}\,\frac{d}{D}$$</div>
+<h3>统计定义与推导</h3><p>在票面金额(F)、年票息率(c)和年支付次数(m)确定后，单期完整票息为(Fc/m)。这里以该期已过去的日数(d)占完整票息期日数(D)的比例分摊；由此得到从净价到全价的应计项目。</p>
+<h3>数值复算与经济含义</h3><p>面值1000、年票息率6%、半年付息、已过45天且该期总长90天时，完整半年票息为30，应计利息为15。</p>
+<h3>输入口径与适用范围</h3><p>实际发行条款可能采用ACT/ACT、ACT/360、30/360等不同日数规则。函数只实现用户明确提供的当期日数占比，不自动判断债券市场惯例。</p>
+<h3>实际数据命令</h3><pre class="data-command"><code>./kline_quant coupon-accrual 1000 0.06 2 45 90</code></pre>
+<p class="ch-meta">命令行读取具有对应列名的CSV数据；所有计算入口均在<a href="#code">credit_cashflow_lab.hpp</a>中实现。</p>
+</article>
+<article class="chapter" id="chapter2">
+<h2>2．逐期隔夜复利贴现</h2><div class="formula">$$D(0,T)=\prod_{i=1}^{n}(1+r_i\Delta_i)^{-1}$$</div>
+<h3>统计定义与推导</h3><p>隔夜资金市场逐日累积利息时，一个区间内的复利因子由每个有效计息时段的简单利率与日数因子相乘。对所有日段取对数求和可以减少直接乘法的累积舍入误差，并得到贴现因子。</p>
+<h3>数值复算与经济含义</h3><p>两段各半年，简单年化利率依次为5%和4%时，复利增长因子为\(1.025\times1.02=1.0455\)，贴现因子约为\(0.9565\)。</p>
+<h3>输入口径与适用范围</h3><p>真实OIS定价还涉及节假日展期、观察日滞后、支付延迟和折现曲线插值。该工具用于已给定每期利率及日数因子的复利环节。</p>
+<h3>实际数据命令</h3><pre class="data-command"><code>./kline_quant ois-discount cashflow.csv Rate Accrual</code></pre>
+<p class="ch-meta">命令行读取具有对应列名的CSV数据；所有计算入口均在<a href="#code">credit_cashflow_lab.hpp</a>中实现。</p>
+</article>
+<article class="chapter" id="chapter3">
+<h2>3．Merton结构信用的终点违约概率</h2><div class="formula">$$PD=\Phi\left(-\frac{\ln(A_0/D)+(\mu_A-\sigma_A^2/2)T}{\sigma_A\sqrt T}\right)$$</div>
+<h3>统计定义与推导</h3><p>在结构信用模型中，资产价值遵循对数正态扩散，债务在到期时形成阈值(D)。到期资产低于债务阈值视为违约，由终点对数资产分布计算违约概率。输入资产漂移与资产波动率须使用相互一致的概率测度。</p>
+<h3>数值复算与经济含义</h3><p>当\(A_0=D\)、\(\sigma_A=0.2\)、\(\mu_A=0.02\)、\(T=1\)时，对数正态标准化阈值为零，违约概率恰为0.5。</p>
+<h3>输入口径与适用范围</h3><p>风险中性违约概率与真实世界违约概率使用不同漂移口径；资产价值与资产波动率的估计通常也要结合权益及债务结构，不能直接把股票波动率代入。</p>
+<h3>实际数据命令</h3><pre class="data-command"><code>./kline_quant merton-default 100 100 0.02 0.2 1</code></pre>
+<p class="ch-meta">命令行读取具有对应列名的CSV数据；所有计算入口均在<a href="#code">credit_cashflow_lab.hpp</a>中实现。</p>
+</article>
+<article class="chapter" id="chapter4">
+<h2>4．平坦危险率的回收本金零息债</h2><div class="formula">$$PV=F\left[e^{-(r+h)T}+Rh\frac{1-e^{-(r+h)T}}{r+h}\right]$$</div>
+<h3>统计定义与推导</h3><p>假设无风险利率(r)和风险中性违约强度(h)常数，且在违约时立即回收面值比例(R)。到期未违约付款与各违约时点的回收本金现金流分别贴现，再对违约时间积分得到这一闭式价格。</p>
+<h3>数值复算与经济含义</h3><p>面值100、无风险利率零、危险率10%、回收率零、期限一年时，价格为\(100e^{-0.1}\\)。当危险率为零时，无信用损失，价格回到无风险零息债现值。</p>
+<h3>输入口径与适用范围</h3><p>回收本金和回收市值是不同合同假设；信用利差曲线期限结构、跳跃违约及风险中性校准会改变价格。代码对\(r+h=0\)的极限情形单独处理。</p>
+<h3>实际数据命令</h3><pre class="data-command"><code>./kline_quant credit-zero 100 0.02 0.1 0.4 1</code></pre>
+<p class="ch-meta">命令行读取具有对应列名的CSV数据；所有计算入口均在<a href="#code">credit_cashflow_lab.hpp</a>中实现。</p>
+</article>
+<section class="source-code" id="code"><h2>完整、独立可引用的C++17源码</h2>
+<p>源码可作为头文件直接包含于C++17工程中，使用标准库完成数值计算。所有入口在命令行研究工具中可调用，并接受边界与数学恒等式测试。</p>
+<div class="source-links"><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/credit_cashflow_lab.hpp">GitHub头文件</a><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_empirical_labs.cpp">数值回归测试</a><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_empirical_labs_cli.py">真实CSV与非法输入测试</a></div>
+<pre><code>#pragma once
+#include "stats.hpp"
+#include &lt;cmath&gt;
+#include &lt;vector&gt;
+
+namespace kline {
+inline double bond_accrued_coupon(double face,double annualCoupon,
+                                  int paymentsPerYear,int daysElapsed,int daysInPeriod){
+    require(std::isfinite(face)&amp;&amp;face&gt;0&amp;&amp;std::isfinite(annualCoupon)&amp;&amp;annualCoupon&gt;=0&amp;&amp;
+            paymentsPerYear&gt;=1&amp;&amp;paymentsPerYear&lt;=365&amp;&amp;daysInPeriod&gt;0&amp;&amp;
+            daysElapsed&gt;=0&amp;&amp;daysElapsed&lt;=daysInPeriod,"Invalid bond accrual inputs");
+    return face*annualCoupon/paymentsPerYear*daysElapsed/daysInPeriod;
+}
+inline double overnight_compounded_discount(const std::vector&lt;double&gt;&amp; overnightRates,
+                                            const std::vector&lt;double&gt;&amp; accrualYears){
+    check_finite(overnightRates);check_finite(accrualYears);
+    require(overnightRates.size()==accrualYears.size(),
+            "Overnight rates and day count fractions must align");
+    double logAccrual=0;
+    for(std::size_t i=0;i&lt;overnightRates.size();++i){
+        require(accrualYears[i]&gt;0&amp;&amp;accrualYears[i]&lt;=1&amp;&amp;
+                1+overnightRates[i]*accrualYears[i]&gt;0,
+                "Invalid overnight compounding factor");
+        logAccrual+=std::log1p(overnightRates[i]*accrualYears[i]);
+    }
+    require(std::isfinite(logAccrual),"Overnight accumulation overflow");
+    return std::exp(-logAccrual);
+}
+inline double merton_structural_default_probability(double assetValue,double debtDue,
+                                                      double assetDrift,double assetVol,
+                                                      double years){
+    require(std::isfinite(assetValue)&amp;&amp;assetValue&gt;0&amp;&amp;
+            std::isfinite(debtDue)&amp;&amp;debtDue&gt;0&amp;&amp;std::isfinite(assetDrift)&amp;&amp;
+            std::isfinite(assetVol)&amp;&amp;assetVol&gt;0&amp;&amp;std::isfinite(years)&amp;&amp;
+            years&gt;0,"Invalid structural credit inputs");
+    const double d2=(std::log(assetValue/debtDue)+
+        (assetDrift-0.5*assetVol*assetVol)*years)/(assetVol*std::sqrt(years));
+    return 0.5*std::erfc(d2/std::sqrt(2.0));
+}
+inline double risky_zero_coupon_recovery_of_par(double face,double rate,
+                                               double hazard,double recovery,double years){
+    require(std::isfinite(face)&amp;&amp;face&gt;0&amp;&amp;std::isfinite(rate)&amp;&amp;rate&gt;=0&amp;&amp;
+            std::isfinite(hazard)&amp;&amp;hazard&gt;=0&amp;&amp;std::isfinite(recovery)&amp;&amp;
+            recovery&gt;=0&amp;&amp;recovery&lt;=1&amp;&amp;std::isfinite(years)&amp;&amp;years&gt;=0,
+            "Invalid risky zero-coupon terms");
+    const double sum=rate+hazard;
+    const double undiscountedRecovery=sum==0?years:-std::expm1(-sum*years)/sum;
+    return face*(std::exp(-sum*years)+recovery*hazard*undiscountedRecovery);
+}
+} // namespace kline
+</code></pre></section>
+<section class="sources" id="sources"><h2>学术与技术资料</h2><p><a href="https://www.finra.org/investors/investing/investment-products/bonds">FINRA债券知识</a>；<a href="https://www.isda.org/">ISDA行业标准与信用衍生品</a>。</p>
+<p>相关模型的数值性质按本文给定的统计对象、样本范围和输入单位解释。实证研究的制度识别、模型校准及样本外决策仍由对应研究设计确定。</p></section>
+<footer><p><a href="../assets/">返回金融资产分类</a>　<a href="../cpp/">进入C++量化研究工具</a></p></footer>
+</main></div>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}],throwOnError:false});"></script></body></html>
