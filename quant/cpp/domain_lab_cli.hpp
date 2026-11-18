@@ -95,7 +95,7 @@ inline bool run_domain_lab_cli(const std::string& c,int argc,char** argv,
   for(std::size_t i=0;i<a.size();++i)losses.push_back({a[i],b[i]});
   auto v=scenario_expected_shortfall_contributions(losses,{num(5),num(6)},num(7));
   out<<"Asset1ESContribution "<<v[0]<<"\nAsset2ESContribution "<<v[1]<<"\n";
- }else if(c=="factor-stress2"){
+ }else if(c=="quad-factor-pnl2"){
   exact(9);out<<"QuadraticPnL "<<quadratic_factor_stress_pnl(
    {num(2),num(3)},{num(4),num(5)},
    {{num(6),num(7)},{num(7),num(8)}})<<"\n";
@@ -150,7 +150,7 @@ inline void domain_lab_usage(std::ostream& out){
     <<"  multiclass-brier3 CSV P0 P1 P2 ACTUAL\n"
     <<"  euler-vol2 W1 W2 VAR1 COV VAR2\n"
     <<"  tail-es2 CSV LOSS1 LOSS2 W1 W2 CONFIDENCE\n"
-    <<"  factor-stress2 DELTA1 DELTA2 SHOCK1 SHOCK2 G11 G12 G22\n"
+    <<"  quad-factor-pnl2 DELTA1 DELTA2 SHOCK1 SHOCK2 G11 G12 G22\n"
     <<"  scenario-expectation CSV SCENARIO_LOSS PROBABILITY\n"
     <<"  vintage-rmse CSV INITIAL REVISED\n"
     <<"  publish-delay CSV OBSERVATION_TIMESTAMP RELEASE_TIMESTAMP\n"
