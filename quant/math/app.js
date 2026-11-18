@@ -5,8 +5,20 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,x=>({"&":"&amp;","<":"&lt;",">":"&
 const alpha=(a,b)=>String(a).localeCompare(String(b),"en",{sensitivity:"base"});
 const link=(u,label)=>/^https:\/\//.test(u||"")?'<a href="'+esc(u)+'" target="_blank" rel="noopener noreferrer">'+esc(label)+'</a>':"";
 let curriculum=null,depts=[],chapters=[],nodes=[],lessons=[],lessonMap=new Map();
+let cppExamples=new Map();
 let nodeMap=new Map(),chapMap=new Map(),deptMap=new Map(),activeId="",filterDept="",filterLevel="",query="";
 const getDept=id=>deptMap.get(id),getChap=id=>chapMap.get(id),getNode=id=>nodeMap.get(id);
+fetch("./cpp-examples.json",{cache:"no-cache"}).then(response=>{
+ if(!response.ok)throw Error("C++示例文件不可用："+response.status);
+ return response.json();
+}).then(doc=>{
+ if(doc.schema!==1||!doc.examples||Object.keys(doc.examples).length<20)throw Error("C++示例目录不完整");
+ for(const [id,example] of Object.entries(doc.examples)){
+   if(!example.title||!example.description||!example.code?.includes("int main()"))throw Error("C++源码缺损："+id);
+   cppExamples.set(id,example);
+ }
+ if(activeId&&nodeMap.has(activeId))selectNode(activeId,false);
+}).catch(error=>console.warn("C++数学示例：",error.message));
 const humanStatus=node=>lessonMap.has(node.id)?"完整讲义":"正文暂不可用";
 const isComplete=node=>lessonMap.has(node.id);
 function setURL(updates){
@@ -219,6 +231,38 @@ const chapterNodes=ch.node_ids.map(getNode).filter(Boolean);
 for(const topic of chapterNodes){const li=document.createElement("li");li.textContent=topic.title+(topic.id===n.id?"（当前知识点）":"");list.appendChild(li)}
 section.appendChild(list);container.appendChild(section);
 }
+function appendCppExample(node,container){
+ const example=cppExamples.get(node.id);
+ if(!example)return;
+ const details=document.createElement("details");
+ details.className="math-cpp-example";
+ const summary=document.createElement("summary");
+ summary.textContent="C++17 数值计算示例 · "+example.title;
+ details.appendChild(summary);
+ const intro=document.createElement("p");
+ intro.textContent=example.description+"。本程序包含 main，可用 g++ -std=c++17 编译运行；数值演示不代替数学证明。";
+ details.appendChild(intro);
+ const actions=document.createElement("div");
+ actions.className="math-cpp-actions";
+ const copy=document.createElement("button"),download=document.createElement("button");
+ copy.type="button";download.type="button";
+ copy.textContent="复制 C++";download.textContent="下载 .cpp";
+ copy.addEventListener("click",async()=>{
+   try{await navigator.clipboard.writeText(example.code);copy.textContent="复制成功";}
+   catch(error){copy.textContent="请手动选择下方代码复制";}
+ });
+ download.addEventListener("click",()=>{
+   const file=new Blob([example.code],{type:"text/x-c++src;charset=utf-8"});
+   const link=document.createElement("a"),url=URL.createObjectURL(file);
+   link.href=url;link.download="Kline_Math_"+node.id+".cpp";
+   document.body.appendChild(link);link.click();link.remove();
+   setTimeout(()=>URL.revokeObjectURL(url),1000);
+ });
+ actions.append(copy,download);details.appendChild(actions);
+ const pre=document.createElement("pre"),code=document.createElement("code");
+ code.textContent=example.code;pre.appendChild(code);details.appendChild(pre);
+ container.appendChild(details);
+}
 function appendLearningSequence(node,container){
  const chapter=getChap(node.chapter_id);
  if(!chapter)return;
@@ -266,6 +310,7 @@ function selectNode(id,update=true){
  const lesson=lessonMap.get(id);
  if(lesson)lessonArticle(node,lesson,article);
  else outlineArticle(node,article);
+ appendCppExample(node,article);
  appendLearningSequence(node,article);
  article.appendChild(resourceArea(dept));
  makeControls(node,article);
