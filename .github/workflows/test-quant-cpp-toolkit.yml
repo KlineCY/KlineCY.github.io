@@ -27,11 +27,15 @@ jobs:
           ${{ matrix.compiler }} -std=c++17 -O2 -Wall -Wextra -Wpedantic quant/cpp/test.cpp -o /tmp/kline_quant_tests
           ${{ matrix.compiler }} -std=c++17 -O2 -Wall -Wextra -Wpedantic -Werror quant/cpp/test_advanced.cpp -o /tmp/kline_quant_advanced_tests
           ${{ matrix.compiler }} -std=c++17 -O2 -Wall -Wextra -Wpedantic -Werror quant/cpp/test_fullstack.cpp -o /tmp/kline_quant_fullstack_tests
+          ${{ matrix.compiler }} -std=c++17 -O2 -Wall -Wextra -Wpedantic -Werror quant/cpp/test_expansion_math.cpp -o /tmp/kline_quant_expansion_math_tests
+          ${{ matrix.compiler }} -std=c++17 -O2 -Wall -Wextra -Wpedantic -Werror quant/cpp/test_expansion_finance.cpp -o /tmp/kline_quant_expansion_finance_tests
       - name: Execute mathematical and financial numerical assertions
         run: |
           /tmp/kline_quant_tests
           /tmp/kline_quant_advanced_tests
           /tmp/kline_quant_fullstack_tests
+          /tmp/kline_quant_expansion_math_tests
+          /tmp/kline_quant_expansion_finance_tests
       - name: Exercise real CSV command line workflows
         run: |
           python quant/cpp/test_cli.py /tmp/kline_quant
