@@ -15,7 +15,19 @@ struct EigenDecomposition {
 inline EigenDecomposition symmetric_eigen(const Matrix& matrix,
                                           int max_sweeps = 120,
                                           double tolerance = 1e-12) {
-    check_covariance(matrix);
+    require(!matrix.empty(), "Symmetric eigensolver needs a matrix");
+    int dimension = int(matrix.size());
+    for (int i = 0; i < dimension; i++) {
+        require(int(matrix[i].size()) == dimension,
+                "Symmetric eigensolver needs a square matrix");
+        for (int j = 0; j < dimension; j++) {
+            require(std::isfinite(matrix[i][j]),
+                    "Symmetric eigensolver input is nonfinite");
+            if (j < i)
+                require(std::fabs(matrix[i][j]-matrix[j][i]) < 1e-9,
+                        "Symmetric eigensolver input is asymmetric");
+        }
+    }
     require(max_sweeps > 0 && tolerance > 0 && std::isfinite(tolerance),
             "Invalid Jacobi eigen parameters");
     int n = int(matrix.size());
