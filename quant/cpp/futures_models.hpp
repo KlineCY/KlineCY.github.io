@@ -16,6 +16,7 @@ struct FuturesRoll {
     double close_pnl=0;
     double entry_cost=0;
     double next_contracts=0;
+    double next_entry_price=0;
 };
 
 inline FuturesRoll roll_futures_position(
@@ -30,6 +31,7 @@ inline FuturesRoll roll_futures_position(
     result.close_pnl=held_futures_pnl(old_entry,old_exit,old_contracts,multiplier);
     result.entry_cost=2*std::fabs(old_contracts)*commission_per_contract;
     result.next_contracts=old_contracts;
+    result.next_entry_price=new_entry;
     return result;
 }
 
