@@ -43,7 +43,14 @@ for(const [file,expected,index] of pages){
     assert(html.includes("Times New Roman")&&html.includes("SimSun"),
            file+" textbook typography");
     const formulaDelimiters=(html.match(/\$\$/g)||[]).length;
-    assert.equal(formulaDelimiters,expected*2+2,file+" unpaired math formulas");
+    assert(formulaDelimiters%2===0,file+" unpaired mathematics delimiters");
+    if(file.startsWith("quant/math/")){
+      assert(formulaDelimiters>=expected*2+2+4*(expected/8),file+" independent worked formulas missing");
+      assert.equal((html.match(/<div class="worked-example">/g)||[]).length,expected/8,
+                   file+" topic-specific mathematical derivation missing");
+    }else{
+      assert.equal(formulaDelimiters,expected*2+2,file+" unpaired math formulas");
+    }
     const fullSourceCount=(html.match(/<pre><code>#pragma once/g)||[]).length;
     assert.equal(fullSourceCount,expected/8,file+" incomplete C++17 source modules");
     const headers=[...html.matchAll(/https:\/\/github\.com\/KlineCY\/KlineCY\.github\.io\/blob\/main\/quant\/cpp\/([a-z0-9_]+\.hpp)/g)].map(match=>match[1]);
