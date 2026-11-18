@@ -7,7 +7,7 @@ struct CrossFitResidual{std::vector<double> labels,model_residual;};
 inline CrossFitResidual contiguous_crossfit_ridge(
     const Matrix& x,const std::vector<double>& y,int folds,double ridge){
     check_feature_table(x,y);
-    require(folds>=2&&int(x.size())>=folds*3&&ridge>0,
+    require(folds>=2&&int(x.size())>=folds*2&&ridge>0,
             "Invalid cross-fitting groups");
     int n=int(y.size());
     CrossFitResidual result;result.labels=y;
