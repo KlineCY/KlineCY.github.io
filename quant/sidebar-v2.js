@@ -13,6 +13,7 @@
     ["assets","金融资产分类"],
     ["feeds","核心数据源 Data Feeds"],
     ["research","策略研究与回测"],
+    ["audit","研究设计与实证验证"],
     ["cpp","C++ 量化研究工具"],
     ["wiki","量化百科 Wiki"],
     ["math","量化数学 Mathematics"],
@@ -48,6 +49,13 @@
       '<a class="q-menu-link" href="'+route("research")+'">在线 Python 回测</a>'+
       '<a class="q-menu-link" href="'+route("research")+'?strategy=ma">策略超市 / Python 示例</a>'+
       subsection("researchStrategyNav","按策略选择","strategyChoices",page==="research"),
+    audit:
+      '<a class="q-menu-link" href="'+route("audit")+'">完整研究验证课程</a>'+
+      '<a class="q-menu-link" href="'+route("audit")+'#c01">历史数据与公司行为</a>'+
+      '<a class="q-menu-link" href="'+route("audit")+'#c06">时序验证与Purging</a>'+
+      '<a class="q-menu-link" href="'+route("audit")+'#c14">交易冲击与容量</a>'+
+      '<a class="q-menu-link" href="'+route("audit")+'#c20">研究证据链</a>'+
+      '<a class="q-menu-link" href="'+route("audit")+'audit_examples.cpp">C++17数值检验源码</a>',
     cpp:
       '<a class="q-menu-link" href="'+route("cpp")+'">研究工具库总览</a>'+
       '<a class="q-menu-link" href="'+route("cpp")+'#modules">C++ 源码与主题</a>'+

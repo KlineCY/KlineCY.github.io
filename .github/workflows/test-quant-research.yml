@@ -4,10 +4,12 @@ on:
     branches: [main]
     paths:
       - 'quant/research/**'
+      - 'quant/audit/**'
       - '.github/workflows/test-quant-research.yml'
   pull_request:
     paths:
       - 'quant/research/**'
+      - 'quant/audit/**'
       - '.github/workflows/test-quant-research.yml'
   workflow_dispatch:
 permissions:
@@ -22,3 +24,15 @@ jobs:
           python-version: '3.11'
       - name: Validate Python engine and all strategy templates
         run: python -m unittest discover quant/research -p 'test_*.py' -v
+
+  audit-cpp:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        compiler: [g++, clang++]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile research-audit C++17 numerical examples
+        run: ${{ matrix.compiler }} -std=c++17 -O2 -Wall -Wextra -Wpedantic -Werror quant/audit/audit_examples.cpp -o /tmp/quant_audit_tests
+      - name: Run quantitative research consistency checks
+        run: /tmp/quant_audit_tests
