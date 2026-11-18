@@ -42,6 +42,11 @@ void numerical_tests() {
     close_to(eigen.vectors[1][0],1/sqrt(2.0),1e-10,"leading loading");
     close_to(kline::condition_number_symmetric({{2,1},{1,2}}),3,1e-10,
              "symmetric condition number");
+    auto indefinite=kline::symmetric_eigen({{-2,0},{0,3}});
+    close_to(indefinite.values[0],3,1e-12,
+             "general symmetric matrix permits negative diagonal");
+    close_to(indefinite.values[1],-2,1e-12,
+             "negative eigenvalue is correctly retained");
     check(isinf(kline::condition_number_symmetric({{1,1},{1,1}})),
           "singular condition number");
     auto pca=kline::principal_components({{1,2},{2,4},{3,6},{4,8}},2);
@@ -136,6 +141,8 @@ void portfolio_tests() {
              "two equally weighted assets");
     must_throw([] {kline::project_capped_simplex({1,2},0.4);},
                "infeasible asset cap rejected");
+    must_throw([] {kline::risk_budget_weights({{1,2},{2,1}},{1,1});},
+               "indefinite risk covariance rejected");
     must_throw([] {kline::risk_budget_weights({{1,0},{0,0}},{1,1});},
                "zero risk asset rejected");
 }
