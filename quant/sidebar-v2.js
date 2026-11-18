@@ -29,6 +29,7 @@
   const subsection=(id,label,content,open=false)=>'<details class="q-nav-subgroup" id="'+id+'" '+(open?"open":"")+'><summary><span>'+label+'</span><span class="q-sub-chevron" aria-hidden="true">▸</span></summary><div class="q-nav-leaves" id="'+content+'"></div></details>';
   const staticMenu={
     companies:
+      '<a class="q-menu-link" href="'+route("companies")+'institutional-quant-research.html">机构策略、容量与风险治理</a>'+
       (page==="companies"
         ?'<button id="all" class="q-menu-link active" data-filter="all" type="button">全部公司 <span class="q-menu-count" id="allN"></span></button>'
         :'<a class="q-menu-link" href="'+route("companies")+'">全部公司</a>')+
@@ -39,18 +40,22 @@
        subsection("regionNavMenu","按地区划分","regionSub")),
     assets:
       '<a class="q-menu-link" href="'+route("assets")+'">全部金融资产</a>'+
+      '<a class="q-menu-link" href="'+route("assets")+'risk-and-pricing.html">资产定价、合同现金流与风险</a>'+
       subsection("marketNav","按市场 / 地区","marketChoices",page==="assets")+
       subsection("typeNav","按金融工具类型","typeChoices"),
     feeds:
       '<a class="q-menu-link" href="'+route("feeds")+'">全部数据字段</a>'+
+      '<a class="q-menu-link" href="'+route("feeds")+'point-in-time-data.html">金融数据工程与历史可得信息</a>'+
       '<a class="q-menu-link" href="'+route("feeds")+'?mode=providers">数据供应商目录</a>'+
       subsection("feedsCategoryNav","按数据类别","feedChoices",page==="feeds"),
     research:
       '<a class="q-menu-link" href="'+route("research")+'">在线 Python 回测</a>'+
       '<a class="q-menu-link" href="'+route("research")+'?strategy=ma">策略超市 / Python 示例</a>'+
+      '<a class="q-menu-link" href="'+route("research")+'execution-risk.html">衍生品、信用与真实执行专题</a>'+
       subsection("researchStrategyNav","按策略选择","strategyChoices",page==="research"),
     audit:
       '<a class="q-menu-link" href="'+route("audit")+'">完整研究验证课程</a>'+
+      '<a class="q-menu-link" href="'+route("audit")+'empirical-research-lab.html">实证验证、统计推断与资金审计</a>'+
       '<a class="q-menu-link" href="'+route("audit")+'#c01">历史数据与公司行为</a>'+
       '<a class="q-menu-link" href="'+route("audit")+'#c06">时序验证与Purging</a>'+
       '<a class="q-menu-link" href="'+route("audit")+'#c14">交易冲击与容量</a>'+
@@ -64,19 +69,23 @@
       '<a class="q-menu-link" href="'+route("cpp")+'extended.html">跨领域数学、机器学习与金融计算</a>'+
       '<a class="q-menu-link" href="'+route("cpp")+'research.html">数值分析、统计学习与真实交易研究</a>'+
       '<a class="q-menu-link" href="'+route("cpp")+'crossdomain.html">金融计量、Bayesian ML与市场过程</a>'+
+      '<a class="q-menu-link" href="'+route("cpp")+'#sitewide">全站互联C++17算法与课程</a>'+
       '<a class="q-menu-link" href="'+route("cpp")+'#workflow">实际数据与命令行</a>'+
       '<a class="q-menu-link" href="'+route("cpp")+'#assumptions">方法适用范围</a>',
     wiki:
       '<a class="q-menu-link" href="'+route("wiki")+'">全部词条</a>'+
+      '<a class="q-menu-link" href="'+route("wiki")+'method-lexicon.html">数学与金融模型机制词典</a>'+
       subsection("wikiCategoryNav","按知识主题","wikiCategories",page==="wiki")+
       subsection("wikiLearningNav","系统学习路径","wikiPaths"),
     math:
       '<a class="q-menu-link" href="'+route("math")+'">完整数学知识树</a>'+
       '<a class="q-menu-link" href="'+route("math")+'#math-reader-section">数学讲义正文</a>'+
+      '<a class="q-menu-link" href="'+route("math")+'robust-statistics.html">稳健统计与时间序列数学</a>'+
       subsection("mathDisciplineNav","按学科推进","mathDisciplineChoices",page==="math"),
     ml:
       '<a class="q-menu-link" href="'+route("ml")+'">完整机器学习课程树</a>'+
       '<a class="q-menu-link" href="'+route("ml")+'#atlas-reader-section">机器学习课程正文</a>'+
+      '<a class="q-menu-link" href="'+route("ml")+'financial-ml-validation.html">金融机器学习与样本外验证</a>'+
       subsection("mlDisciplineNav","按专题推进","mlDisciplineChoices",page==="ml"),
     papers:
       '<a class="q-menu-link" href="'+route("papers")+'">全部论文</a>'+
