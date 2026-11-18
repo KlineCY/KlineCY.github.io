@@ -5,6 +5,9 @@
 #include "io.hpp"
 #include "etf.hpp"
 #include "macro.hpp"
+#include "attribution.hpp"
+#include "simulation.hpp"
+#include "validation.hpp"
 #include "portfolio.hpp"
 #include "risk.hpp"
 #include "stats.hpp"
@@ -36,6 +39,11 @@ void usage() {
          << "  fx SPOT_QUOTE_PER_BASE BASE_RATE QUOTE_RATE YEARS\n"
          << "  duration-hedge ASSET_MARKET_VALUE ASSET_DURATION HEDGE_DURATION\n"
          << "  futures-roll NEAR_PRICE FAR_PRICE\n"
+         << "  walkforward OBSERVATIONS TRAIN TEST EMBARGO [EXPANDING=0|1]\n"
+         << "  bootstrap CSV RETURN_COLUMN BLOCK_LENGTH REPLICATES SEED\n"
+         << "  calibration CSV PROBABILITY_COLUMN LABEL_COLUMN [BINS=10]\n"
+         << "  montecarlo SPOT STRIKE RATE DIVIDEND VOL YEARS call|put PAIRS SEED\n"
+         << "  brinson CSV PORTFOLIO_WEIGHT BENCHMARK_WEIGHT PORTFOLIO_RETURN BENCHMARK_RETURN\n"
          << "  asof EVENT_CSV DECISION_CSV (event columns Date,Published,Received,Value)\n";
 }
 
@@ -232,6 +240,64 @@ int main(int argc, char** argv) {
             require_arguments(argc, 4);
             cout << "StaticRollYield " <<
                 kline::futures_roll_yield(number(argv[2]), number(argv[3])) << "\n";
+        } else if (command == "walkforward") {
+            kline::require(argc == 6 || argc == 7, "Invalid walkforward arguments");
+            bool expanding = argc == 7 ? stoi(argv[6]) != 0 : false;
+            auto folds = kline::walk_forward_folds(stoi(argv[2]), stoi(argv[3]),
+                                                  stoi(argv[4]), stoi(argv[5]), expanding);
+            cout << "TrainBegin,TrainEndExclusive,TestBegin,TestEndExclusive\n";
+            for (const auto& fold : folds)
+                cout << fold.train_begin << "," << fold.train_end << ","
+                     << fold.test_begin << "," << fold.test_end << "\n";
+        } else if (command == "bootstrap") {
+            require_arguments(argc, 7);
+            auto x = kline::read_csv(argv[2]).numbers(argv[3]);
+            auto means = kline::block_bootstrap_means(x, stoi(argv[4]),
+                                                       stoi(argv[5]), stoul(argv[6]));
+            cout << "BootstrapMean " << kline::mean(means) << "\n"
+                 << "Bootstrap025 " << kline::quantile(means, 0.025) << "\n"
+                 << "Bootstrap975 " << kline::quantile(means, 0.975) << "\n";
+        } else if (command == "calibration") {
+            kline::require(argc == 5 || argc == 6, "Invalid calibration arguments");
+            auto table = kline::read_csv(argv[2]);
+            auto p = table.numbers(argv[3]), raw = table.numbers(argv[4]);
+            vector<int> labels;
+            for (double y : raw) {
+                kline::require(y == 0 || y == 1, "Calibration labels must be 0 or 1");
+                labels.push_back(int(y));
+            }
+            int bins = argc == 6 ? stoi(argv[5]) : 10;
+            cout << "Brier " << kline::brier_score(p, labels) << "\n";
+            auto groups = kline::reliability_bins(p, labels, bins);
+            cout << "Bin,Count,MeanPredicted,ObservedFrequency\n";
+            for (int i = 0; i < int(groups.size()); i++)
+                cout << i << "," << groups[i].observations << ","
+                     << groups[i].predicted_frequency << ","
+                     << groups[i].observed_frequency << "\n";
+        } else if (command == "montecarlo") {
+            require_arguments(argc, 11);
+            string type = argv[8];
+            kline::require(type == "call" || type == "put", "Option type must be call or put");
+            auto result = kline::monte_carlo_european_option(
+                number(argv[2]), number(argv[3]), number(argv[4]), number(argv[5]),
+                number(argv[6]), number(argv[7]), type == "call",
+                stoi(argv[9]), stoul(argv[10]));
+            cout << "MonteCarloPremium " << result.estimate << "\n"
+                 << "MonteCarloStandardError " << result.standard_error << "\n"
+                 << "AntitheticPairs " << result.simulated_pairs << "\n";
+        } else if (command == "brinson") {
+            require_arguments(argc, 7);
+            auto table = kline::read_csv(argv[2]);
+            auto result = kline::brinson_fachler_single_period(
+                table.numbers(argv[3]), table.numbers(argv[4]),
+                table.numbers(argv[5]), table.numbers(argv[6]));
+            cout << "Sector,Allocation,Selection,Interaction\n";
+            for (int i = 0; i < int(result.allocation_by_sector.size()); i++)
+                cout << i << "," << result.allocation_by_sector[i] << ","
+                     << result.selection_by_sector[i] << ","
+                     << result.interaction_by_sector[i] << "\n";
+            cout << "ActiveReturn " << result.active_return << "\n"
+                 << "ExplainedActiveReturn " << result.explained_active_return << "\n";
         } else if (command == "asof") {
             require_arguments(argc, 4);
             auto events = kline::read_csv(argv[2]);
