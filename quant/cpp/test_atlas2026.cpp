@@ -73,7 +73,7 @@ int main(){
   near(atlas2026::wape_guarded({1,3},{2,2},1),0.5,1e-7,"wape_guarded");
   rejects([]{atlas2026::wape_guarded({}, {1},1);});
   rejects([]{atlas2026::wape_guarded({1,3},{2,2},std::numeric_limits<double>::infinity());});
-  near(atlas2026::symmetric_mape({1,3},{2,2},1),0.6666666666666666,1e-7,"symmetric_mape");
+  near(atlas2026::symmetric_mape({1,3},{2,2},1),0.5333333333333333,1e-7,"symmetric_mape");
   rejects([]{atlas2026::symmetric_mape({}, {1},1);});
   rejects([]{atlas2026::symmetric_mape({1,3},{2,2},std::numeric_limits<double>::infinity());});
   near(atlas2026::mean_log_cosh_error({0,1},{0,0},1),0.21689041524151356,1e-7,"mean_log_cosh_error");
