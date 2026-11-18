@@ -321,10 +321,22 @@ async function start(){
   const cppBundle=await fetchAtlasJson("./atlas-cpp-examples.json",{cache:"no-cache"});
   if(cppBundle.schema!==1||!cppBundle.lessons||Object.keys(cppBundle.lessons).length<44)
    throw Error("C++17课程示例数量与索引不匹配");
-  for(const [id,item] of Object.entries(cppBundle.lessons)){
-   if(!/^m\d\d-c\d\d-p\d\d$/.test(id)||!item.title||!item.code?.includes("int main()"))throw Error("C++17示例损坏："+id);
+  const cppManifest=await fetchAtlasJson("./cpp-topic-manifest.json",{cache:"no-cache"});
+  if(cppManifest.schema!==1||!Array.isArray(cppManifest.modules)||cppManifest.modules.length!==6)
+   throw Error("C++课程专题目录不完整");
+  const cppFiles=await Promise.all(cppManifest.modules.map(async m=>{
+   if(!/^\.\/cpp-topic-pack-\d\d\.json$/.test(m.path))throw Error("C++课程路径不合法");
+   const data=await fetchAtlasJson(m.path,{cache:"no-cache"});
+   if(data.schema!==1||!data.lessons||Object.keys(data.lessons).length!==m.count)
+    throw Error("C++课程模块数量错误："+m.path);
+   return data;
+  }));
+  for(const pack of [cppBundle,...cppFiles])for(const [id,item] of Object.entries(pack.lessons)){
+   if(!/^m\d\d-c\d\d-p\d\d$/.test(id)||state.cppExamples.has(id)||!item.title||!item.code?.includes("int main()"))
+    throw Error("C++17课程示例损坏或重复："+id);
    state.cppExamples.set(id,item);
   }
+  if(state.cppExamples.size!==cppManifest.expected_total)throw Error("C++课程示例总数不一致");
   showStatus("课程档案已校验，正在读取进阶模块清单…");
   const manifest=await fetchAtlasJson("./atlas-depth-manifest.json",{cache:"no-cache"});
   if(manifest.schema!==1||!Number.isSafeInteger(manifest.expected_lessons)||manifest.expected_lessons<80||
