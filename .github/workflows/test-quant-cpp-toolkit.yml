@@ -1,0 +1,31 @@
+name: Validate quant C++ research toolkit
+
+on:
+  push:
+    paths:
+      - 'quant/cpp/**'
+      - '.github/workflows/test-quant-cpp-toolkit.yml'
+  pull_request:
+    paths:
+      - 'quant/cpp/**'
+      - '.github/workflows/test-quant-cpp-toolkit.yml'
+
+jobs:
+  research-toolkit:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        compiler: [g++, clang++]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build C++17 CLI and numerical tests
+        run: |
+          ${{ matrix.compiler }} -std=c++17 -O2 -Wall -Wextra -Wpedantic quant/cpp/cli.cpp -o /tmp/kline_quant
+          ${{ matrix.compiler }} -std=c++17 -O2 -Wall -Wextra -Wpedantic quant/cpp/test.cpp -o /tmp/kline_quant_tests
+      - name: Execute mathematical and financial numerical assertions
+        run: /tmp/kline_quant_tests
+      - name: Exercise real CSV command line workflows
+        run: python quant/cpp/test_cli.py /tmp/kline_quant
