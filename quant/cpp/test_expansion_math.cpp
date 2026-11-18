@@ -77,6 +77,8 @@ void robust_suite(){
 void probability_suite(){
     approx(kline::normal_inverse_cdf(0.5),0,1e-12,
            "Normal median");
+    approx(kline::standard_normal_cdf(kline::normal_inverse_cdf(1e-100)),
+           1e-100,1e-110,"Extreme normal tail quantile");
     approx(kline::normal_inverse_cdf(0.975),1.959963984540054,1e-10,
            "Normal 97.5th percentile");
     approx(kline::student_t_density(0,1),1/acos(-1.0),1e-12,
