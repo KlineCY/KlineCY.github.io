@@ -12,7 +12,14 @@ inline double survival_probability(const HazardCurve& curve,double years){
     require(curve.end_times.size()==curve.hazard_rates.size()&&
             std::isfinite(years)&&years>=0,
             "Invalid piecewise hazard curve");
-    double log_survival=0,previous=0;
+    double previous=0;
+    for(int i=0;i<int(curve.end_times.size());i++){
+        require(curve.end_times[i]>previous&&curve.hazard_rates[i]>=0,
+                "Hazard times and rates invalid");
+        previous=curve.end_times[i];
+    }
+    double log_survival=0;
+    previous=0;
     for(int i=0;i<int(curve.end_times.size());i++){
         require(curve.end_times[i]>previous&&curve.hazard_rates[i]>=0,
                 "Hazard times and rates invalid");
