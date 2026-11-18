@@ -30,7 +30,9 @@ inline double sabr_lognormal_volatility(
         one_minus*one_minus*alpha*alpha/(24*std::pow(fk,one_minus))+
         rho*beta*nu*alpha/(4*factor)+
         (2-3*rho*rho)*nu*nu/24);
-    return alpha/denominator*ratio*adjustment;
+    double result=alpha/denominator*ratio*adjustment;
+    require(std::isfinite(result)&&result>0,"Invalid SABR approximation");
+    return result;
 }
 inline double sabr_atm_volatility(double forward,double maturity,double alpha,
                                   double beta,double rho,double nu){
