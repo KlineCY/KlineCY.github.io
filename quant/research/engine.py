@@ -150,6 +150,8 @@ def main(run_json):
     if not callable(signal_fn):
         raise ValueError("策略代码必须定义 def signals(history): 返回 {Ticker: 目标权重}")
     weights={t:0.0 for t in tickers}
+    prior_market=None
+    prior_day=None
     seg_pnl={t:0.0 for t in tickers}
     closed_segments=[]
     position_events=[]
@@ -174,7 +176,11 @@ def main(run_json):
         gross=sum(abs(v) for v in requested.values())
         if gross>1.000000001:
             raise ValueError(f"{dates[i-1]}: 总绝对敞口 {gross:.3f} 超过1，当前演示引擎不支持杠杆")
-        old=weights
+        # Convert last open's post-trade targets into actual pre-trade weights
+        # after each asset's realized open-to-open return and net portfolio costs.
+        # Weights refer to economic NAV exposure, not fixed target labels.
+        old=({t:weights[t]*(1+prior_market[t])/(1+prior_day) for t in tickers}
+             if prior_market is not None else dict(weights))
         change=sum(abs(requested[t]-old[t]) for t in tickers)
         period_cost=change*(fees+slip)/10000
         short_cost=sum(-min(0,requested[t]) for t in tickers)*borrow/10000/252
@@ -199,6 +205,8 @@ def main(run_json):
         turnover+=change
         equity.append({"date":dates[i+1],"strategy":_fmt(eq),"benchmark":_fmt(bench)})
         weights=requested
+        prior_market=market
+        prior_day=1+day
     result={"metrics":_metrics(rets,baseline,equity,position_events,closed_segments,turnover,fees+slip,rf),
         "equity":equity,
         "trades":position_events[-1500:],
