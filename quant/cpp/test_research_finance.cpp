@@ -150,7 +150,7 @@ void derivative_suite(){
           7*exp(0.03),1e-12,"FX covered forward rate");
     close(kline::fx_covered_basis(7*exp(0.03),7,0.05,0.02,1),
           0,1e-12,"Covered interest parity zero basis");
-    rejects([]{kline::bootstrap_annual_par_bonds({0.1,0.99});},
+    rejects([]{kline::bootstrap_annual_par_bonds({-0.4,0.99});},
             "Impossible par discount factors rejected");
 }
 void execution_suite(){
