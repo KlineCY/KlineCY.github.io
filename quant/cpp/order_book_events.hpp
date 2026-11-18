@@ -13,6 +13,10 @@ inline void update_limit_level(LimitBook& book,bool is_bid,
     double price,double quantity){
     require(std::isfinite(price)&&price>0&&std::isfinite(quantity)&&quantity>=0,
             "Invalid limit level");
+    if(is_bid&&quantity>0&&!book.asks.empty())
+        require(price<book.asks.begin()->first,"Crossed limit book");
+    if(!is_bid&&quantity>0&&!book.bids.empty())
+        require(price>book.bids.begin()->first,"Crossed limit book");
     if(is_bid){
         if(quantity==0)book.bids.erase(price);else book.bids[price]=quantity;
     }else{
