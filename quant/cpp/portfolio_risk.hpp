@@ -53,7 +53,7 @@ inline std::vector<double> risk_budget_weights(
             require(std::isfinite(updated) && updated > 0,
                     "Risk budget optimization is numerically invalid");
             changed = std::max(changed,std::fabs(updated-x[i])/
-                                      std::max(1,x[i]));
+                                      std::max(1.0,x[i]));
             x[i] = updated;
         }
         if (changed < 1e-11) break;
