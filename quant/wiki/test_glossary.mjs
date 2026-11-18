@@ -22,7 +22,7 @@ for(const t of terms){
   assert(t.reference_url.startsWith("https://"),t.id+": invalid source URL");
 }
 assert.equal(manifest.total_terms,terms.length,"Manifest count out of date");
-assert.equal(terms.length,205,"All 205 financial glossary entries must remain available");
+assert(terms.length>=227,"Encyclopedia must preserve all 227 expanded financial entries");
 const preserved={"market":16,"execution":15,"risk":18,"factors":17,"strategies":17,"backtest":18,"stats":14,"ml":18,"options":17,"macro":13,"crypto":9};
 for(const [category,min] of Object.entries(preserved)){
  assert(categories.find(c=>c.id===category)?.term_ids.length>=min,"Missing original glossary coverage in "+category);
