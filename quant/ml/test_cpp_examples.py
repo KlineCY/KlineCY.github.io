@@ -33,7 +33,7 @@ def collect(area):
 
 math, math_origin = collect("math")
 ml, ml_origin = collect("ml")
-assert len(math) == 656 and len(ml) == 566
+assert len(math) == 656 and len(ml) == 720
 curriculum = read("math/curriculum.json")
 math_nodes = {node["id"]: node for node in curriculum["nodes"]}
 assert set(math) == set(math_nodes), 'Every mathematics curriculum node needs runnable C++17'
