@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Euler风险贡献、尾部场景归因与因子压力｜Kline Quant</title>
+<link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<style>body{margin:0;background:white;color:#182d3b;font:16px/1.95 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:22px 30px 60px}main{max-width:1120px;margin:auto}header,.chapter,.source,.references{padding:23px 28px;border:1px solid #cbd4dc;margin:16px 0;background:white}h1{font-size:31px}h2{font-size:23px;margin:10px 0 22px}h3{font-size:18px;margin:21px 0 8px}.toc{display:flex;flex-wrap:wrap;gap:10px 22px;border:1px solid #cbd4dc;padding:16px 25px}.formula{border-block:1px solid #cbd4dc;overflow:auto;padding:16px 3px;margin:18px 0}.katex-display{overflow:auto}a{color:#195675}p{line-height:1.94}.reference{font-size:14px}pre{white-space:pre;overflow:auto;max-height:720px;border:1px solid #cbd4dc;padding:16px;font:12px/1.7 "Times New Roman",monospace}code{font-family:"Times New Roman",monospace}@media(max-width:790px){.main{margin:0;padding:12px}header,.chapter,.source,.references{padding:15px}}</style>
+</head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script>
+<div class="main"><main><header><small>QUANTITATIVE FINANCE / NUMERICAL METHODS</small><h1>Euler风险贡献、尾部场景归因与因子压力</h1><p>组合的整体风险可以分解为单资产风险贡献、尾部亏损场景贡献和因子冲击损益。使用相同权重与损失符号约定，可以把配置、极端市场情景和对冲效果放入同一个可加总的研究账本。</p><p>每个模型均对应可执行的标准C++17实现、明确单位与前提、解析计算案例，以及真实CSV或参数输入工作流。</p></header>
+<nav class="toc"><a href="#chapter1">1．组合波动率Euler贡献</a><a href="#chapter2">2．情景Expected Shortfall资产贡献</a><a href="#chapter3">3．因子冲击的Delta–Gamma局部近似</a><a href="#chapter4">4．非等概率情景的期望损失</a><a href="#source">完整C++17源文件</a></nav>
+<article class="chapter" id="chapter1"><h2>1．组合波动率Euler贡献</h2><h3>数学对象与估计量</h3><div class="formula">$$RC_i^{\sigma}=\frac{w_i(\Sigma w)_i}{\sqrt{w^\top\Sigma w}},\qquad \sum_iRC_i^\sigma=\sigma_p$$</div><h3>统计结构与推导</h3><p>组合标准差是权重的一次齐次函数，对权重求偏导并乘以相应权重得到Euler贡献。所有分项相加必须等于组合波动率，这为数值实现提供可独立检查的恒等式。</p><h3>数值计算与经济解释</h3><p>两项资产方差均为1、协方差为零、权重各为0.5时，组合波动率为√0.5，两个资产的贡献各为0.25／√0.5，二者相加等于组合波动率。</p><h3>识别条件、数据口径与边界</h3><p>风险贡献可以是负数，说明该头寸在当前配置附近具有局部对冲作用。协方差输入要求对称且权重组合风险为正；实际数据还需独立检验协方差矩阵的半正定性。</p><h3>CSV或参数复算</h3><pre><code>./kline_quant euler-vol2 0.5 0.5 1 0 1</code></pre></article>
+<article class="chapter" id="chapter2"><h2>2．情景Expected Shortfall资产贡献</h2><h3>数学对象与估计量</h3><div class="formula">$$RC_j^{ES}=w_j\,\frac{\sum_{s\in\mathrm{tail}}\alpha_sL_{sj}}{\sum_{s\in\mathrm{tail}}\alpha_s}$$</div><h3>统计结构与推导</h3><p>先根据组合总损失对市场情景排序，再抽取最坏的1减置信水平部分，并允许尾部边界情景按比例计入。对于选定的尾部集合，按资产亏损对组合的线性贡献计算分项ES。</p><h3>数值计算与经济解释</h3><p>两个情景分别给出资产损失(1,0)和(0,2)，权重均为0.5，组合损失依次为0.5与1。置信度为0.5时，只保留最坏情景，资产贡献依次为0和1，合计等于ES。</p><h3>识别条件、数据口径与边界</h3><p>排序使用组合总损失，资产亏损可以为负以表示对冲收益。尾部情景数量不足或原始情景依赖严重时，估计的尾部风险归因可能不稳定。</p><h3>CSV或参数复算</h3><pre><code>./kline_quant tail-es2 scenarios.csv Loss1 Loss2 0.5 0.5 0.95</code></pre></article>
+<article class="chapter" id="chapter3"><h2>3．因子冲击的Delta–Gamma局部近似</h2><h3>数学对象与估计量</h3><div class="formula">$$\Delta V\approx\delta^\top\Delta f+\frac12\Delta f^\top\Gamma\Delta f$$</div><h3>统计结构与推导</h3><p>在当前市场状态附近对资产价值函数做二阶泰勒展开，一阶项代表线性因子风险，二阶项代表价格曲率及交叉因子影响。该结构可用于收益率、波动率或汇率冲击的场景近似。</p><h3>数值计算与经济解释</h3><p>两项因子一阶敏感度分别为1和2，冲击为0.1和0.2，二阶矩阵为单位阵时，一阶项为0.5、二阶项为0.025，总近似损益为0.525。</p><h3>识别条件、数据口径与边界</h3><p>所有因子单位、Gamma矩阵的交叉项和定价币种必须统一。大冲击时高阶项会变得重要，因此该方法是局部损益近似，不自动等于全重估价格。</p><h3>CSV或参数复算</h3><pre><code>./kline_quant quad-factor-pnl2 1 2 0.1 0.2 1 0 1</code></pre></article>
+<article class="chapter" id="chapter4"><h2>4．非等概率情景的期望损失</h2><h3>数学对象与估计量</h3><div class="formula">$$\mathbb E[L]=\sum_{s=1}^{S}p_sL_s,\quad \sum_sp_s=1$$</div><h3>统计结构与推导</h3><p>实际研究常包含基准、滞胀、流动性冲击等多类情景。若情景的概率权重已由研究模型或外部条件给定，则加权平均损失提供与简单算术均值不同的风险汇总。</p><h3>数值计算与经济解释</h3><p>两个情景损失为2和4，权重为0.25和0.75时，期望损失为0.5+3=3.5。负损失表示收益，此时公式仍为代数意义上的有符号期望损失。</p><h3>识别条件、数据口径与边界</h3><p>情景概率必须非负且总和为1。权重是否可以解释为真实世界发生概率取决于建模依据；模型压力情景经常用于敏感度分析，其概率可能并非直接可观察。</p><h3>CSV或参数复算</h3><pre><code>./kline_quant scenario-expectation scenarios.csv Loss Probability</code></pre></article>
+<section class="source" id="source"><h2>完整C++17算法源码</h2><p>以下为可独立引用的实际头文件内容。使用网站统一的<code>stats.hpp</code>输入检查和标准C++17库。可通过命令行调度并运行独立数值及异常输入测试。</p>
+<p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/scenario_risk_attribution_lab.hpp">在GitHub查看头文件</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_domain_labs.cpp">数学数值测试</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_domain_labs_cli.py">CSV测试</a></p>
+<pre><code>#pragma once
+#include "stats.hpp"
+#include &lt;algorithm&gt;
+#include &lt;cmath&gt;
+#include &lt;numeric&gt;
+#include &lt;utility&gt;
+#include &lt;vector&gt;
+namespace kline {
+inline std::vector&lt;double&gt; euler_volatility_contributions(
+ const std::vector&lt;double&gt;&amp; weights,const std::vector&lt;std::vector&lt;double&gt;&gt;&amp; covariance){
+ check_finite(weights);
+ const std::size_t n=weights.size();
+ require(covariance.size()==n,"Euler risk matrix dimension mismatch");
+ std::vector&lt;double&gt; marginal(n,0),result(n);
+ for(std::size_t i=0;i&lt;n;++i)require(covariance[i].size()==n,"Euler covariance not square");
+ for(std::size_t i=0;i&lt;n;++i){
+  require(covariance[i].size()==n,"Euler covariance not square");
+  for(std::size_t j=0;j&lt;n;++j){
+   require(std::isfinite(covariance[i][j])&amp;&amp;
+           std::abs(covariance[i][j]-covariance[j][i])&lt;1e-9,
+           "Euler covariance must be symmetric");
+   marginal[i]+=covariance[i][j]*weights[j];
+  }
+ }
+ double var=std::inner_product(weights.begin(),weights.end(),marginal.begin(),0.);
+ require(var&gt;0&amp;&amp;std::isfinite(var),"Euler portfolio volatility must be positive");
+ for(std::size_t i=0;i&lt;n;++i)result[i]=weights[i]*marginal[i]/std::sqrt(var);
+ return result;
+}
+inline std::vector&lt;double&gt; scenario_expected_shortfall_contributions(
+ const std::vector&lt;std::vector&lt;double&gt;&gt;&amp; assetLosses,
+ const std::vector&lt;double&gt;&amp; portfolioWeights,double confidence){
+ check_finite(portfolioWeights);
+ require(!assetLosses.empty()&amp;&amp;assetLosses.size()&gt;=2&amp;&amp;
+         std::isfinite(confidence)&amp;&amp;confidence&gt;0&amp;&amp;confidence&lt;1,
+         "Expected shortfall requires valid scenarios and confidence");
+ const std::size_t n=portfolioWeights.size();
+ std::vector&lt;std::pair&lt;double,std::size_t&gt;&gt; rank;
+ for(std::size_t t=0;t&lt;assetLosses.size();++t){
+  check_finite(assetLosses[t]);
+  require(assetLosses[t].size()==n,"Scenario matrix and weight dimensions disagree");
+  const double loss=std::inner_product(assetLosses[t].begin(),assetLosses[t].end(),
+                                       portfolioWeights.begin(),0.);
+  require(std::isfinite(loss),"Portfolio loss not finite");
+  rank.push_back({loss,t});
+ }
+ std::sort(rank.begin(),rank.end(),[](const auto&amp; a,const auto&amp; b){
+  return a.first&gt;b.first;
+ });
+ double mass=(1-confidence)*rank.size(),remaining=mass;
+ std::vector&lt;double&gt; contribution(n,0);
+ for(const auto&amp; [loss,index]:rank){
+  (void)loss;
+  const double w=std::min(1.0,remaining);if(w&lt;=0)break;
+  for(std::size_t j=0;j&lt;n;++j)contribution[j]+=w*portfolioWeights[j]*assetLosses[index][j];
+  remaining-=w;
+ }
+ for(double&amp; x:contribution)x/=mass;
+ return contribution;
+}
+inline double quadratic_factor_stress_pnl(
+ const std::vector&lt;double&gt;&amp; delta,const std::vector&lt;double&gt;&amp; shocks,
+ const std::vector&lt;std::vector&lt;double&gt;&gt;&amp; gamma){
+ check_finite(delta);check_finite(shocks);
+ const std::size_t n=delta.size();
+ require(shocks.size()==n&amp;&amp;gamma.size()==n,"Risk-factor dimensions disagree");
+ double pnl=std::inner_product(delta.begin(),delta.end(),shocks.begin(),0.);
+ for(std::size_t i=0;i&lt;n;++i){
+  require(gamma[i].size()==n,"Factor gamma matrix must be square");
+  for(std::size_t j=0;j&lt;n;++j){
+   require(std::isfinite(gamma[i][j]),"Nonfinite second-order factor sensitivity");
+   pnl+=0.5*shocks[i]*gamma[i][j]*shocks[j];
+  }
+ }
+ require(std::isfinite(pnl),"Nonfinite quadratic stress approximation");
+ return pnl;
+}
+inline double probability_weighted_scenario_loss(
+ const std::vector&lt;double&gt;&amp; scenarioLoss,const std::vector&lt;double&gt;&amp; probabilities){
+ check_finite(scenarioLoss);check_finite(probabilities);
+ require(scenarioLoss.size()==probabilities.size(),"Scenario weights not aligned");
+ double mass=0,expectation=0;
+ for(std::size_t i=0;i&lt;scenarioLoss.size();++i){
+  require(probabilities[i]&gt;=0&amp;&amp;probabilities[i]&lt;=1,"Probability outside range");
+  mass+=probabilities[i];expectation+=probabilities[i]*scenarioLoss[i];
+ }
+ require(std::abs(mass-1)&lt;1e-8,"Scenario probabilities must sum to one");
+ return expectation;
+}
+}
+</code></pre></section><section class="references"><h2>参考来源</h2><p class="reference"><a href="https://www.bis.org/bcbs/publ/d457.htm">Basel Committee Minimum Capital Requirements for Market Risk</a>。数学结构以展示的计算式、输入单位与源码实现为依据；实证估计所需的外生性和市场微观结构假设在各章分别陈述。</p></section>
+</main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

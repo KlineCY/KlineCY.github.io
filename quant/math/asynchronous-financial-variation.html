@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>异步高频收益、积分四次变差与跳跃识别｜Kline Quant</title>
+<link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<style>body{margin:0;background:white;color:#182d3b;font:16px/1.95 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:22px 30px 60px}main{max-width:1120px;margin:auto}header,.chapter,.source,.references{padding:23px 28px;border:1px solid #cbd4dc;margin:16px 0;background:white}h1{font-size:31px}h2{font-size:23px;margin:10px 0 22px}h3{font-size:18px;margin:21px 0 8px}.toc{display:flex;flex-wrap:wrap;gap:10px 22px;border:1px solid #cbd4dc;padding:16px 25px}.formula{border-block:1px solid #cbd4dc;overflow:auto;padding:16px 3px;margin:18px 0}.katex-display{overflow:auto}a{color:#195675}p{line-height:1.94}.reference{font-size:14px}pre{white-space:pre;overflow:auto;max-height:720px;border:1px solid #cbd4dc;padding:16px;font:12px/1.7 "Times New Roman",monospace}code{font-family:"Times New Roman",monospace}@media(max-width:790px){.main{margin:0;padding:12px}header,.chapter,.source,.references{padding:15px}}</style>
+</head><body><aside id="quantSidebar" class="sidebar" data-page="math"></aside><script src="../sidebar-v2.js"></script>
+<div class="main"><main><header><small>HIGH-FREQUENCY ECONOMETRICS</small><h1>异步高频收益、积分四次变差与跳跃识别</h1><p>高频价格观测的交易时间戳通常不一致。区分连续路径的协变差、四次变差、噪声相关与截断变差，有助于将日内共振、价格跳跃和市场微观结构噪声分别纳入实证测度。</p><p>每个模型均对应可执行的标准C++17实现、明确单位与前提、解析计算案例，以及真实CSV或参数输入工作流。</p></header>
+<nav class="toc"><a href="#chapter1">1．Hayashi–Yoshida异步收益协方差</a><a href="#chapter2">2．已实现四次变差</a><a href="#chapter3">3．一阶Bartlett权重的已实现核</a><a href="#chapter4">4．阈值截断已实现方差</a><a href="#source">完整C++17源文件</a></nav>
+<article class="chapter" id="chapter1"><h2>1．Hayashi–Yoshida异步收益协方差</h2><h3>数学对象与估计量</h3><div class="formula">$$\widehat{[X,Y]}=\sum_{i,j}\Delta X_i\Delta Y_j\,\mathbf 1\{(t_{i-1},t_i]\cap(s_{j-1},s_j]\ne\varnothing\}$$</div><h3>统计结构与推导</h3><p>两个资产的收益以各自上次成交与本次成交间隔定义。只要两个收益区间的时间内部存在重合，协方差估计就纳入这两个增量的乘积。算法用两个指针遍历已排序且无自重叠的区间，不必强行把成交时钟同步到固定频率。</p><h3>数值计算与经济解释</h3><p>资产A两个收益区间为(0,1]与(1,2]，收益分别为0.1和0.2；资产B区间为(0,0.5]与(0.5,2]，收益分别为0.3和0.4。三组有效重叠贡献为0.03、0.04和0.08，合计0.15。</p><h3>识别条件、数据口径与边界</h3><p>此方法的时间标签表示区间端点，收益需与各自价格增量准确对应。异步协变差对微观结构噪声、交易不同步及跳跃的统计性质有所不同；算法计算估计量本身，不代替噪声修正或显著性检验。</p><h3>CSV或参数复算</h3><pre><code>./kline_quant hy-cov async.csv StartA EndA RetA StartB EndB RetB</code></pre></article>
+<article class="chapter" id="chapter2"><h2>2．已实现四次变差</h2><h3>数学对象与估计量</h3><div class="formula">$$\widehat{IQ}=\frac{n}{3}\sum_{i=1}^n(\Delta_iX)^4$$</div><h3>统计结构与推导</h3><p>在固定日内窗口与适当高频渐近条件下，四次收益幂能够识别连续扩散波动的积分四次变差。高阶幂对极端价格跳跃更加敏感，在研究中常与已实现方差共同检视风险测度的渐近不确定性。</p><h3>数值计算与经济解释</h3><p>观察两个收益增量1与2的纯数学例子，对应四次幂求和为17，因此该定义得到2×17／3，即约11.3333。实际收益为百分数或小数时，四次方尺度相差八个数量级，需要统一单位。</p><h3>识别条件、数据口径与边界</h3><p>当存在大跳跃时，未截断的四次幂会受到跳跃主导；不同文献对四次变差的标准化和采样间隔有不同口径，应按研究使用的估计量确定解释。</p><h3>CSV或参数复算</h3><pre><code>./kline_quant realized-quarticity ticks.csv Return</code></pre></article>
+<article class="chapter" id="chapter3"><h2>3．一阶Bartlett权重的已实现核</h2><h3>数学对象与估计量</h3><div class="formula">$$\widehat K_1=\sum_{i=1}^nr_i^2+\sum_{i=2}^nr_ir_{i-1}$$</div><h3>统计结构与推导</h3><p>已实现核通过对相邻收益乘积赋权，把微观结构噪声导致的短期负自相关纳入计算。这里采用单个滞后、Bartlett权重为二分之一的简化核，二倍加权项最终恰为相邻收益乘积之和。</p><h3>数值计算与经济解释</h3><p>收益序列为1、2、3时，平方和为14，滞后一阶乘积和为2+6=8，因此核估计值为22。例子突出估计量的代数结构，不将其视为实际资产方差的合理数值。</p><h3>识别条件、数据口径与边界</h3><p>实际噪声稳健已实现核通常还涉及端点修正、带宽选择、不同滞后核与交易时钟抽样。单滞后形式用于理解序列相关项，无法自动消除所有高频噪声。</p><h3>CSV或参数复算</h3><pre><code>./kline_quant kernel-1 ticks.csv Return</code></pre></article>
+<article class="chapter" id="chapter4"><h2>4．阈值截断已实现方差</h2><h3>数学对象与估计量</h3><div class="formula">$$\mathrm{TRV}(u)=\sum_{i=1}^nr_i^2\mathbf1\{|r_i|\le u\}$$</div><h3>统计结构与推导</h3><p>以固定阈值过滤绝对收益过大的观测，再对其余收益平方求和，可以把可能由稀疏跳跃驱动的极端增量与日常连续波动区分。截断决定规则应先于样本外比较确定。</p><h3>数值计算与经济解释</h3><p>收益为0.1、0.3和-0.2，阈值为0.2时，中间的0.3被排除，其余两项平方和为0.01+0.04=0.05。阈值等于绝对增量时仍予以保留。</p><h3>识别条件、数据口径与边界</h3><p>阈值应随价格尺度、采样频率与波动状态调整。若把任意固定阈值直接用于不同市场，可能把正常波动错误识别为跳跃；该实现报告确定性的截断平方和。</p><h3>CSV或参数复算</h3><pre><code>./kline_quant truncated-rv ticks.csv Return 0.02</code></pre></article>
+<section class="source" id="source"><h2>完整C++17算法源码</h2><p>以下为可独立引用的实际头文件内容。使用网站统一的<code>stats.hpp</code>输入检查和标准C++17库。可通过命令行调度并运行独立数值及异常输入测试。</p>
+<p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/high_frequency_inference_lab.hpp">在GitHub查看头文件</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_domain_labs.cpp">数学数值测试</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_domain_labs_cli.py">CSV测试</a></p>
+<pre><code>#pragma once
+#include "stats.hpp"
+#include &lt;algorithm&gt;
+#include &lt;cmath&gt;
+#include &lt;vector&gt;
+namespace kline {
+inline double hayashi_yoshida_covariance(
+ const std::vector&lt;double&gt;&amp; startA,const std::vector&lt;double&gt;&amp; endA,
+ const std::vector&lt;double&gt;&amp; returnA,const std::vector&lt;double&gt;&amp; startB,
+ const std::vector&lt;double&gt;&amp; endB,const std::vector&lt;double&gt;&amp; returnB) {
+ check_finite(startA);check_finite(endA);check_finite(returnA);
+ check_finite(startB);check_finite(endB);check_finite(returnB);
+ require(startA.size()==endA.size()&amp;&amp;startA.size()==returnA.size()&amp;&amp;
+         startB.size()==endB.size()&amp;&amp;startB.size()==returnB.size(),
+         "Timestamp and asynchronous returns disagree");
+ for(std::size_t i=0;i&lt;startA.size();++i)
+   require(startA[i]&lt;endA[i]&amp;&amp;(i==0||startA[i]&gt;=endA[i-1]),
+           "Intervals A must be disjoint, sorted and positive");
+ for(std::size_t i=0;i&lt;startB.size();++i)
+   require(startB[i]&lt;endB[i]&amp;&amp;(i==0||startB[i]&gt;=endB[i-1]),
+           "Intervals B must be disjoint, sorted and positive");
+ double sum=0;std::size_t i=0,j=0;
+ while(i&lt;startA.size()&amp;&amp;j&lt;startB.size()) {
+   if(std::min(endA[i],endB[j])&gt;std::max(startA[i],startB[j]))
+      sum+=returnA[i]*returnB[j];
+   if(endA[i]&lt;=endB[j])++i; else ++j;
+ }
+ return sum;
+}
+inline double realized_quarticity(const std::vector&lt;double&gt;&amp; logReturns) {
+ check_finite(logReturns);
+ double sum=0;
+ for(double r:logReturns)sum+=r*r*r*r;
+ return double(logReturns.size())/3.0*sum;
+}
+inline double one_lag_bartlett_realized_kernel(const std::vector&lt;double&gt;&amp; logReturns){
+ check_finite(logReturns);
+ require(logReturns.size()&gt;=2,"Two returns required for realized kernel");
+ double gamma0=0,gamma1=0;
+ for(double r:logReturns)gamma0+=r*r;
+ for(std::size_t i=1;i&lt;logReturns.size();++i)
+   gamma1+=logReturns[i]*logReturns[i-1];
+ return gamma0+gamma1;
+}
+inline double truncated_realized_variance(
+ const std::vector&lt;double&gt;&amp; logReturns,double threshold) {
+ check_finite(logReturns);
+ require(std::isfinite(threshold)&amp;&amp;threshold&gt;0,
+         "Truncation threshold must be positive");
+ double sum=0;
+ for(double r:logReturns)if(std::abs(r)&lt;=threshold)sum+=r*r;
+ return sum;
+}
+}
+</code></pre></section><section class="references"><h2>参考来源</h2><p class="reference"><a href="https://www.itl.nist.gov/div898/handbook/">NIST Engineering Statistics Handbook</a>。数学结构以展示的计算式、输入单位与源码实现为依据；实证估计所需的外生性和市场微观结构假设在各章分别陈述。</p></section>
+</main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

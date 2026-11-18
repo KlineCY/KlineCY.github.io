@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>零息贴现曲线、现金流久期与利率凸性｜Kline Quant</title>
+<link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<style>body{margin:0;background:white;color:#182d3b;font:16px/1.95 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:22px 30px 60px}main{max-width:1120px;margin:auto}header,.chapter,.source,.references{padding:23px 28px;border:1px solid #cbd4dc;margin:16px 0;background:white}h1{font-size:31px}h2{font-size:23px;margin:10px 0 22px}h3{font-size:18px;margin:21px 0 8px}.toc{display:flex;flex-wrap:wrap;gap:10px 22px;border:1px solid #cbd4dc;padding:16px 25px}.formula{border-block:1px solid #cbd4dc;overflow:auto;padding:16px 3px;margin:18px 0}.katex-display{overflow:auto}a{color:#195675}p{line-height:1.94}.reference{font-size:14px}pre{white-space:pre;overflow:auto;max-height:720px;border:1px solid #cbd4dc;padding:16px;font:12px/1.7 "Times New Roman",monospace}code{font-family:"Times New Roman",monospace}@media(max-width:790px){.main{margin:0;padding:12px}header,.chapter,.source,.references{padding:15px}}</style>
+</head><body><aside id="quantSidebar" class="sidebar" data-page="assets"></aside><script src="../sidebar-v2.js"></script>
+<div class="main"><main><header><small>FIXED INCOME / INTEREST RATE SENSITIVITY</small><h1>零息贴现曲线、现金流久期与利率凸性</h1><p>固定收益估值可以从贴现因子与合同现金流出发推导利率敏感度。连续复利远期利率、零息债DV01、现金流久期和凸性分别度量利率曲线斜率、一基点风险及一阶和二阶价格暴露。</p><p>每个模型均对应可执行的标准C++17实现、明确单位与前提、解析计算案例，以及真实CSV或参数输入工作流。</p></header>
+<nav class="toc"><a href="#chapter1">1．连续复利远期零息利率</a><a href="#chapter2">2．零息债的离散一基点DV01</a><a href="#chapter3">3．折现现金流的Macaulay久期</a><a href="#chapter4">4．连续复利现金流凸性</a><a href="#source">完整C++17源文件</a></nav>
+<article class="chapter" id="chapter1"><h2>1．连续复利远期零息利率</h2><h3>数学对象与估计量</h3><div class="formula">$$f(t_1,t_2)=\frac{\ln D(0,t_1)-\ln D(0,t_2)}{t_2-t_1}$$</div><h3>统计结构与推导</h3><p>无套利远期利率由两个期限的折现因子比值决定。在连续复利下，初始期限到远期期限之间的累计利率恰为贴现因子对数差，除以区间年数得到年化远期利率。</p><h3>数值计算与经济解释</h3><p>设期限起点为零、终点为一年，折现因子分别为1和e的负0.05次幂，则连续复利远期利率为0.05，即5%。这一算例满足复利口径完全一致。</p><h3>识别条件、数据口径与边界</h3><p>贴现因子的构建涉及交易日基准、计息规则、抵押品和曲线插值；这里计算的是两点隐含的区间远期利率，不强制远期必须为正。</p><h3>CSV或参数复算</h3><pre><code>./kline_quant forward-zero 1 0.95 0 1</code></pre></article>
+<article class="chapter" id="chapter2"><h2>2．零息债的离散一基点DV01</h2><h3>数学对象与估计量</h3><div class="formula">$$\mathrm{DV01}=F e^{-rT}\bigl(1-e^{-10^{-4}T}\bigr)$$</div><h3>统计结构与推导</h3><p>零息债在连续复利收益率r下的现值为面值F乘e的负rT次幂。若收益率上升一个基点，价格降低的绝对金额等于原价与上移后价格之差；闭式表达避免有限差分的额外舍入误差。</p><h3>数值计算与经济解释</h3><p>面值100、零收益率、一年到期时，DV01为100乘以(1减e的负0.0001次幂)，约0.0099995，表明一基点上移导致债券现值小幅下降。</p><h3>识别条件、数据口径与边界</h3><p>DV01定义与利率曲线平移方式紧密相关；该公式采用连续复利收益率统一平移，不直接代表一般票息债的关键利率DV01。</p><h3>CSV或参数复算</h3><pre><code>./kline_quant zero-dv01 100 0.03 2</code></pre></article>
+<article class="chapter" id="chapter3"><h2>3．折现现金流的Macaulay久期</h2><h3>数学对象与估计量</h3><div class="formula">$$D_M=\frac{\sum_i t_i C_i e^{-yt_i}}{\sum_i C_i e^{-yt_i}}$$</div><h3>统计结构与推导</h3><p>将各支付时点的未来现金流按连续复利收益率折现，得到每条现金流在总价格中的贡献权重。用这些权重对支付时间加权平均，得到现金流的价值加权到期时间。</p><h3>数值计算与经济解释</h3><p>如果现金流只在第2年末支付100，而其他年份现金流均为零，则全部现值集中在第2年，Macaulay久期严格等于2年，且与折现收益率无关。</p><h3>识别条件、数据口径与边界</h3><p>时间变量以年计量、现金流必须有序且非负，债券负现金流或嵌入期权会改变简单久期的解释。连续复利下，该值同时对应平行利率冲击的相对价格一阶敏感度。</p><h3>CSV或参数复算</h3><pre><code>./kline_quant cash-duration bond.csv Time Cash 0.03</code></pre></article>
+<article class="chapter" id="chapter4"><h2>4．连续复利现金流凸性</h2><h3>数学对象与估计量</h3><div class="formula">$$\mathcal C=\frac{\sum_i t_i^2 C_i e^{-yt_i}}{\sum_i C_i e^{-yt_i}}$$</div><h3>统计结构与推导</h3><p>价格对连续复利收益率求两次导数后，再除以现值，得到以时间平方加权的现金流风险。凸性可以在利率小幅变化时改善只用一阶久期的价格变动近似。</p><h3>数值计算与经济解释</h3><p>仅在第2年末支付面值时，久期为2、凸性为4。若收益率上升一个小幅度h，价格比例变动的二阶近似为负2h加2h的平方。</p><h3>识别条件、数据口径与边界</h3><p>二阶泰勒近似只在局部小变动下有效。曲线非平行变动、信用利差调整和嵌入期权均可能改变实际价格曲率。</p><h3>CSV或参数复算</h3><pre><code>./kline_quant cash-convexity bond.csv Time Cash 0.03</code></pre></article>
+<section class="source" id="source"><h2>完整C++17算法源码</h2><p>以下为可独立引用的实际头文件内容。使用网站统一的<code>stats.hpp</code>输入检查和标准C++17库。可通过命令行调度并运行独立数值及异常输入测试。</p>
+<p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/fixed_income_sensitivity_lab.hpp">在GitHub查看头文件</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_domain_labs.cpp">数学数值测试</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_domain_labs_cli.py">CSV测试</a></p>
+<pre><code>#pragma once
+#include "stats.hpp"
+#include &lt;cmath&gt;
+#include &lt;vector&gt;
+namespace kline {
+inline double continuously_compounded_forward_rate(
+ double discountStart,double discountEnd,double startYears,double endYears){
+ require(std::isfinite(discountStart)&amp;&amp;discountStart&gt;0&amp;&amp;
+         std::isfinite(discountEnd)&amp;&amp;discountEnd&gt;0&amp;&amp;
+         std::isfinite(startYears)&amp;&amp;startYears&gt;=0&amp;&amp;
+         std::isfinite(endYears)&amp;&amp;endYears&gt;startYears,
+         "Invalid dates or discount factors");
+ return std::log(discountStart/discountEnd)/(endYears-startYears);
+}
+inline double zero_coupon_dv01(double face,double rate,double maturity){
+ require(std::isfinite(face)&amp;&amp;face&gt;0&amp;&amp;std::isfinite(rate)&amp;&amp;
+         std::isfinite(maturity)&amp;&amp;maturity&gt;=0,
+         "Invalid zero-coupon bond");
+ const double pv=face*std::exp(-rate*maturity);
+ return pv*(1-std::exp(-0.0001*maturity));
+}
+inline double cashflow_macaulay_duration(
+ const std::vector&lt;double&gt;&amp; time,const std::vector&lt;double&gt;&amp; cash,
+ double annualContinuouslyCompoundedYield){
+ check_finite(time);check_finite(cash);
+ require(time.size()==cash.size()&amp;&amp;std::isfinite(annualContinuouslyCompoundedYield),
+         "Cash-flow schedule does not align");
+ double pv=0,weighted=0;
+ for(std::size_t i=0;i&lt;time.size();++i){
+   require(time[i]&gt;0&amp;&amp;cash[i]&gt;=0&amp;&amp;(i==0||time[i]&gt;time[i-1]),
+           "Cash flows need sorted positive payment times");
+   const double present=cash[i]*std::exp(-annualContinuouslyCompoundedYield*time[i]);
+   pv+=present;weighted+=time[i]*present;
+ }
+ require(pv&gt;0&amp;&amp;std::isfinite(pv),"Cash-flow present value must be positive");
+ return weighted/pv;
+}
+inline double cashflow_continuous_convexity(
+ const std::vector&lt;double&gt;&amp; time,const std::vector&lt;double&gt;&amp; cash,double yield){
+ check_finite(time);check_finite(cash);
+ require(time.size()==cash.size()&amp;&amp;std::isfinite(yield),
+         "Invalid continuous convexity data");
+ double pv=0,weighted=0;
+ for(std::size_t i=0;i&lt;time.size();++i){
+   require(time[i]&gt;0&amp;&amp;cash[i]&gt;=0&amp;&amp;(i==0||time[i]&gt;time[i-1]),
+           "Cash flow schedule must increase");
+   const double present=cash[i]*std::exp(-yield*time[i]);
+   pv+=present;weighted+=time[i]*time[i]*present;
+ }
+ require(pv&gt;0&amp;&amp;std::isfinite(pv),"Cash-flow PV invalid");
+ return weighted/pv;
+}
+}
+</code></pre></section><section class="references"><h2>参考来源</h2><p class="reference"><a href="https://home.treasury.gov/resource-center/data-chart-center/interest-rates">美国财政部市场收益率曲线</a>。数学结构以展示的计算式、输入单位与源码实现为依据；实证估计所需的外生性和市场微观结构假设在各章分别陈述。</p></section>
+</main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

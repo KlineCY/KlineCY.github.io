@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>盘口流动性、价格冲击斜率与订单流持续性｜Kline Quant</title>
+<link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<style>body{margin:0;background:white;color:#182d3b;font:16px/1.95 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:22px 30px 60px}main{max-width:1120px;margin:auto}header,.chapter,.source,.references{padding:23px 28px;border:1px solid #cbd4dc;margin:16px 0;background:white}h1{font-size:31px}h2{font-size:23px;margin:10px 0 22px}h3{font-size:18px;margin:21px 0 8px}.toc{display:flex;flex-wrap:wrap;gap:10px 22px;border:1px solid #cbd4dc;padding:16px 25px}.formula{border-block:1px solid #cbd4dc;overflow:auto;padding:16px 3px;margin:18px 0}.katex-display{overflow:auto}a{color:#195675}p{line-height:1.94}.reference{font-size:14px}pre{white-space:pre;overflow:auto;max-height:720px;border:1px solid #cbd4dc;padding:16px;font:12px/1.7 "Times New Roman",monospace}code{font-family:"Times New Roman",monospace}@media(max-width:790px){.main{margin:0;padding:12px}header,.chapter,.source,.references{padding:15px}}</style>
+</head><body><aside id="quantSidebar" class="sidebar" data-page="feeds"></aside><script src="../sidebar-v2.js"></script>
+<div class="main"><main><header><small>MARKET MICROSTRUCTURE / ORDER FLOW</small><h1>盘口流动性、价格冲击斜率与订单流持续性</h1><p>报价、成交与挂单恢复各自代表不同的市场流动性机制。将相对报价价差、流动性补充、成交引致的价格变动和订单流方向依赖放在同一研究框架，有助于区分交易成本与订单簿动态。</p><p>每个模型均对应可执行的标准C++17实现、明确单位与前提、解析计算案例，以及真实CSV或参数输入工作流。</p></header>
+<nav class="toc"><a href="#chapter1">1．相对报价价差（基点）</a><a href="#chapter2">2．成交后流动性补充比率</a><a href="#chapter3">3．Kyle线性价格冲击斜率</a><a href="#chapter4">4．订单方向一阶依赖</a><a href="#source">完整C++17源文件</a></nav>
+<article class="chapter" id="chapter1"><h2>1．相对报价价差（基点）</h2><h3>数学对象与估计量</h3><div class="formula">$$S_{\mathrm{bps}}=\frac1n\sum_t10^4\frac{A_t-B_t}{(A_t+B_t)/2}$$</div><h3>统计结构与推导</h3><p>将最优卖价减去最优买价，除以当时中间价得到无量纲相对价差，再乘以10000换算为基点。相比以货币单位直接表示的绝对价差，它便于比较不同价格水平的资产。</p><h3>数值计算与经济解释</h3><p>在每条记录中卖一价为101、买一价为99，价差为2，中间价为100，对应价差为200基点。多个记录取平均得到时点等权的市场报价价差。</p><h3>识别条件、数据口径与边界</h3><p>快照时点等权不同于成交量加权或持续时间加权；本函数拒绝交叉与锁定报价，不将这些无效市场状态计入正常价差均值。</p><h3>CSV或参数复算</h3><pre><code>./kline_quant quoted-spread quotes.csv Bid Ask</code></pre></article>
+<article class="chapter" id="chapter2"><h2>2．成交后流动性补充比率</h2><h3>数学对象与估计量</h3><div class="formula">$$R_{\mathrm{replenish}}=\frac{\sum_tV^{\mathrm{posted}}_t}{\sum_tV^{\mathrm{executed}}_t}$$</div><h3>统计结构与推导</h3><p>订单簿遭受成交消耗后，新挂入的流动性决定深度恢复。把同一观察窗口内新增挂单数量与被成交消耗的数量相除，可得到简单的流动性补充强度诊断。</p><h3>数值计算与经济解释</h3><p>某一窗口两次消耗量分别为1和3，同时对应新增挂单量为2和2，则补充比率为4／4，即1。这一比率等于1并不表示订单簿的价格层级和队列位置完全恢复。</p><h3>识别条件、数据口径与边界</h3><p>撤单、价格档位迁移及隐藏成交可能使新增挂单与真实可执行深度不同。输入必须以相同股数或合约数计量，且总成交消耗量为正。</p><h3>CSV或参数复算</h3><pre><code>./kline_quant replenishment quotes.csv Executed Replenished</code></pre></article>
+<article class="chapter" id="chapter3"><h2>3．Kyle线性价格冲击斜率</h2><h3>数学对象与估计量</h3><div class="formula">$$\widehat\lambda=\frac{\sum_t(Q_t-\bar Q)(\Delta P_t-\overline{\Delta P})}{\sum_t(Q_t-\bar Q)^2}$$</div><h3>统计结构与推导</h3><p>把带符号成交量作为解释变量，对同时段价格变化做单变量OLS回归。斜率量化平均每单位订单流不平衡对应的价格变动，是衡量交易信息含量和冲击的一个研究代理指标。</p><h3>数值计算与经济解释</h3><p>若三个窗口的带符号交易量为1、2、3，价格变动为3、5、7，则线性关系的斜率为2，截距为1。输出斜率的单位取决于价格币种及交易量单位。</p><h3>识别条件、数据口径与边界</h3><p>斜率是回归关联指标，订单流和价格具有内生反馈；采样时间窗口、共同信息到达和买卖方向识别都会影响研究解释。</p><h3>CSV或参数复算</h3><pre><code>./kline_quant kyle-lambda trades.csv SignedVolume PriceChange</code></pre></article>
+<article class="chapter" id="chapter4"><h2>4．订单方向一阶依赖</h2><h3>数学对象与估计量</h3><div class="formula">$$\widehat\rho_1=\frac{\widehat{\operatorname{Cov}}(\epsilon_t,\epsilon_{t-1})}{\widehat{\sigma}(\epsilon_t)\widehat{\sigma}(\epsilon_{t-1})}$$</div><h3>统计结构与推导</h3><p>将主动买卖方向分别编码为正一与负一，通过相邻交易方向样本的相关系数，描述订单拆分或持续性买卖压力产生的方向延续。分母使用两段滞后样本各自的方差。</p><h3>数值计算与经济解释</h3><p>买卖方向交替且持续的序列会产生接近负一的一阶相关，说明成交方向经常反转；同向连续区段较多的序列则可能呈正相关。该值始终在相关系数的定义范围内。</p><h3>识别条件、数据口径与边界</h3><p>只有真实方向标签可用时，结果才具有主动成交含义。使用报价规则推断的方向标签可能含系统误差；全部为同一方向时相关系数无定义。</p><h3>CSV或参数复算</h3><pre><code>./kline_quant sign-autocorr trades.csv Sign</code></pre></article>
+<section class="source" id="source"><h2>完整C++17算法源码</h2><p>以下为可独立引用的实际头文件内容。使用网站统一的<code>stats.hpp</code>输入检查和标准C++17库。可通过命令行调度并运行独立数值及异常输入测试。</p>
+<p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/market_quality_lab.hpp">在GitHub查看头文件</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_domain_labs.cpp">数学数值测试</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_domain_labs_cli.py">CSV测试</a></p>
+<pre><code>#pragma once
+#include "stats.hpp"
+#include &lt;algorithm&gt;
+#include &lt;cmath&gt;
+#include &lt;vector&gt;
+namespace kline {
+inline double quoted_spread_basis_points(
+ const std::vector&lt;double&gt;&amp; bid,const std::vector&lt;double&gt;&amp; ask){
+ check_finite(bid);check_finite(ask);
+ require(bid.size()==ask.size(),"Quote sides do not align");
+ double total=0;
+ for(std::size_t i=0;i&lt;bid.size();++i){
+  require(bid[i]&gt;0&amp;&amp;ask[i]&gt;bid[i],"Valid non-crossed quotes required");
+  total+=20000.0*(ask[i]-bid[i])/(ask[i]+bid[i]);
+ }
+ return total/bid.size();
+}
+inline double liquidity_replenishment_ratio(
+ const std::vector&lt;double&gt;&amp; executed,const std::vector&lt;double&gt;&amp; replenished){
+ check_finite(executed);check_finite(replenished);
+ require(executed.size()==replenished.size(),"Liquidity flow rows differ");
+ double out=0,in=0;
+ for(std::size_t i=0;i&lt;executed.size();++i){
+  require(executed[i]&gt;=0&amp;&amp;replenished[i]&gt;=0,
+          "Signed trades are invalid for total replenishment");
+  out+=executed[i];in+=replenished[i];
+ }
+ require(out&gt;0,"Replenishment requires executed volume");
+ return in/out;
+}
+inline double kyle_price_impact_slope(
+ const std::vector&lt;double&gt;&amp; signedVolume,const std::vector&lt;double&gt;&amp; priceChange){
+ check_finite(signedVolume);check_finite(priceChange);
+ require(signedVolume.size()==priceChange.size()&amp;&amp;signedVolume.size()&gt;=3,
+         "Kyle regression needs at least three aligned observations");
+ const double mu=mean(signedVolume),mv=mean(priceChange);
+ double numerator=0,denominator=0;
+ for(std::size_t i=0;i&lt;signedVolume.size();++i){
+   numerator+=(signedVolume[i]-mu)*(priceChange[i]-mv);
+   denominator+=(signedVolume[i]-mu)*(signedVolume[i]-mu);
+ }
+ require(denominator&gt;0,"Kyle impact requires variation in signed volume");
+ return numerator/denominator;
+}
+inline double lag_one_order_sign_correlation(const std::vector&lt;double&gt;&amp; signs){
+ check_finite(signs);require(signs.size()&gt;=3,"Order signs require three trades");
+ for(double s:signs)require(s==-1||s==1,"Trade signs must be -1 or +1");
+ const std::vector&lt;double&gt; a(signs.begin()+1,signs.end());
+ const std::vector&lt;double&gt; b(signs.begin(),signs.end()-1);
+ const double varA=variance(a,false),varB=variance(b,false);
+ require(varA&gt;0&amp;&amp;varB&gt;0,"Both lagged signs require variation");
+ return covariance(a,b,false)/std::sqrt(varA*varB);
+}
+}
+</code></pre></section><section class="references"><h2>参考来源</h2><p class="reference"><a href="https://www.finra.org/finra-data/market-data">FINRA Market Data</a>。数学结构以展示的计算式、输入单位与源码实现为依据；实证估计所需的外生性和市场微观结构假设在各章分别陈述。</p></section>
+</main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

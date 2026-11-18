@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>倾向得分、双重稳健估计与处理重叠性｜Kline Quant</title>
+<link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<style>body{margin:0;background:white;color:#182d3b;font:16px/1.95 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:22px 30px 60px}main{max-width:1120px;margin:auto}header,.chapter,.source,.references{padding:23px 28px;border:1px solid #cbd4dc;margin:16px 0;background:white}h1{font-size:31px}h2{font-size:23px;margin:10px 0 22px}h3{font-size:18px;margin:21px 0 8px}.toc{display:flex;flex-wrap:wrap;gap:10px 22px;border:1px solid #cbd4dc;padding:16px 25px}.formula{border-block:1px solid #cbd4dc;overflow:auto;padding:16px 3px;margin:18px 0}.katex-display{overflow:auto}a{color:#195675}p{line-height:1.94}.reference{font-size:14px}pre{white-space:pre;overflow:auto;max-height:720px;border:1px solid #cbd4dc;padding:16px;font:12px/1.7 "Times New Roman",monospace}code{font-family:"Times New Roman",monospace}@media(max-width:790px){.main{margin:0;padding:12px}header,.chapter,.source,.references{padding:15px}}</style>
+</head><body><aside id="quantSidebar" class="sidebar" data-page="audit"></aside><script src="../sidebar-v2.js"></script>
+<div class="main"><main><header><small>CAUSAL INFERENCE / POLICY EVALUATION</small><h1>倾向得分、双重稳健估计与处理重叠性</h1><p>政策与投资策略效果评估需要区分处理组选择偏差、倾向得分边界和反事实结果模型。逆概率加权、增强逆概率加权与处理组协变量平衡可以共同构成可复核的识别证据。</p><p>每个模型均对应可执行的标准C++17实现、明确单位与前提、解析计算案例，以及真实CSV或参数输入工作流。</p></header>
+<nav class="toc"><a href="#chapter1">1．Horvitz–Thompson形式的逆倾向加权</a><a href="#chapter2">2．双重稳健AIPW平均处理效应</a><a href="#chapter3">3．处理前协变量的标准化均值差</a><a href="#chapter4">4．逆概率权重的有效样本量</a><a href="#source">完整C++17源文件</a></nav>
+<article class="chapter" id="chapter1"><h2>1．Horvitz–Thompson形式的逆倾向加权</h2><h3>数学对象与估计量</h3><div class="formula">$$\widehat\tau_{HT}=\frac1n\sum_i\left\{\frac{D_iY_i}{e_i}-\frac{(1-D_i)Y_i}{1-e_i}\right\}$$</div><h3>统计结构与推导</h3><p>将每一个处理组观测按照其进入处理组的概率倒数赋权，对照组则按未处理概率倒数赋权。这一结构使观测样本重新代表在给定协变量条件下的潜在结果分布。</p><h3>数值计算与经济解释</h3><p>四个样本中前两人未处理、后两人处理，结果依次为0、2、4、6，倾向得分全部为0.5。处理项之和为20，对照项之和为4，除以四得到平均效应4。</p><h3>识别条件、数据口径与边界</h3><p>由观察数据解释为平均因果效应要求条件可交换性、重叠性和处理定义一致。非常接近0或1的倾向得分可能导致巨大权重与方差，计算器会拒绝边界概率。</p><h3>CSV或参数复算</h3><pre><code>./kline_quant ht-ate study.csv Treatment Outcome Propensity</code></pre></article>
+<article class="chapter" id="chapter2"><h2>2．双重稳健AIPW平均处理效应</h2><h3>数学对象与估计量</h3><div class="formula">$$\widehat\tau=\frac1n\sum_i\left[\widehat\mu_1(X_i)-\widehat\mu_0(X_i)+\frac{D_i(Y_i-\widehat\mu_1)}{\widehat e_i}-\frac{(1-D_i)(Y_i-\widehat\mu_0)}{1-\widehat e_i}\right]$$</div><h3>统计结构与推导</h3><p>AIPW先计算两个结果模型所给出的反事实差值，再用逆概率加权的残差纠偏。在相应的条件、交叉拟合与正则性假设下，倾向得分或结果回归的一方正确指定可提供一致性基础。</p><h3>数值计算与经济解释</h3><p>取四个观测的倾向得分均为0.5，预测未处理均值恒为1、预测处理均值恒为5，并使用上一节的结果数据。每个观测的模型差均为4，残差修正的全样本和恰为零，估计效应仍为4。</p><h3>识别条件、数据口径与边界</h3><p>模型误差若来自样本内过拟合，AIPW的渐近推断可能不可靠；金融政策事件往往还面临动态处理、群体依赖与共同冲击，此处代码给出点估计而不自动生成标准误。</p><h3>CSV或参数复算</h3><pre><code>./kline_quant aipw-ate study.csv Treatment Outcome Propensity Mu0 Mu1</code></pre></article>
+<article class="chapter" id="chapter3"><h2>3．处理前协变量的标准化均值差</h2><h3>数学对象与估计量</h3><div class="formula">$$\mathrm{SMD}=\frac{\bar X_1-\bar X_0}{\sqrt{(s_1^2+s_0^2)/2}}$$</div><h3>统计结构与推导</h3><p>标准化均值差把处理组与对照组的协变量均值差转换为共同标准差单位，避免因特征量纲不同而影响平衡诊断。计算所使用的组内方差是各组自身的样本方差。</p><h3>数值计算与经济解释</h3><p>前两条控制组观测为0、2，后两条处理组观测为4、6，组均值分别为1和5，组内样本方差均为2。因此SMD为4／√2，约2.828，显示两组明显不平衡。</p><h3>识别条件、数据口径与边界</h3><p>SMD接近零不能证明未观测混杂因素已消除。对于连续变量还需关注分布尾部、支持区间、极端权重及组内样本容量，程序对组内方差为零的情况拒绝分母计算。</p><h3>CSV或参数复算</h3><pre><code>./kline_quant smd-covariate study.csv Feature Treatment</code></pre></article>
+<article class="chapter" id="chapter4"><h2>4．逆概率权重的有效样本量</h2><h3>数学对象与估计量</h3><div class="formula">$$n_{\mathrm{eff}}=\frac{\left(\sum_iw_i\right)^2}{\sum_iw_i^2},\quad w_i=\frac{D_i}{e_i}+\frac{1-D_i}{1-e_i}$$</div><h3>统计结构与推导</h3><p>有效样本量利用权重集中程度刻画重加权后的信息规模。权重全部相同时，有效样本量等于观测数；当少数样本权重非常大时，分母增长得更快，估计的实际信息量下降。</p><h3>数值计算与经济解释</h3><p>四个样本倾向得分都为0.5，对应权重均为2。有效样本量为64／16，即4。它描述了权重结构，不等于参数估计量的精确标准误。</p><h3>识别条件、数据口径与边界</h3><p>该定义把处理组与对照组整体合并，实际政策研究还应分别观察两组的权重分布和有效样本量，并结合协变量平衡与重叠区间开展识别诊断。</p><h3>CSV或参数复算</h3><pre><code>./kline_quant ipw-ess study.csv Treatment Propensity</code></pre></article>
+<section class="source" id="source"><h2>完整C++17算法源码</h2><p>以下为可独立引用的实际头文件内容。使用网站统一的<code>stats.hpp</code>输入检查和标准C++17库。可通过命令行调度并运行独立数值及异常输入测试。</p>
+<p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/causal_robustness_lab.hpp">在GitHub查看头文件</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_domain_labs.cpp">数学数值测试</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_domain_labs_cli.py">CSV测试</a></p>
+<pre><code>#pragma once
+#include "stats.hpp"
+#include &lt;algorithm&gt;
+#include &lt;cmath&gt;
+#include &lt;vector&gt;
+namespace kline {
+inline void validate_propensities(const std::vector&lt;double&gt;&amp; treatment,
+                                  const std::vector&lt;double&gt;&amp; propensity) {
+ check_finite(treatment);check_finite(propensity);
+ require(treatment.size()==propensity.size()&amp;&amp;treatment.size()&gt;=4,
+         "Causal estimator needs aligned samples");
+ int observed=0;
+ for(std::size_t i=0;i&lt;treatment.size();++i){
+   require(treatment[i]==0||treatment[i]==1,
+           "Treatment must be exactly binary");
+   require(propensity[i]&gt;0&amp;&amp;propensity[i]&lt;1,
+           "Propensities must be strictly between zero and one");
+   observed+=int(treatment[i]);
+ }
+ require(observed&gt;0&amp;&amp;observed&lt;int(treatment.size()),
+         "Both groups must be observed");
+}
+inline double horvitz_thompson_ate(
+ const std::vector&lt;double&gt;&amp; treatment,const std::vector&lt;double&gt;&amp; outcome,
+ const std::vector&lt;double&gt;&amp; propensity) {
+ validate_propensities(treatment,propensity);check_finite(outcome);
+ require(outcome.size()==treatment.size(),"Outcome and treatment misaligned");
+ double sum=0;
+ for(std::size_t i=0;i&lt;treatment.size();++i){
+   const double d=treatment[i],p=propensity[i];
+   sum+=d*outcome[i]/p-(1-d)*outcome[i]/(1-p);
+ }
+ return sum/treatment.size();
+}
+inline double augmented_ipw_ate(
+ const std::vector&lt;double&gt;&amp; treatment,const std::vector&lt;double&gt;&amp; outcome,
+ const std::vector&lt;double&gt;&amp; propensity,const std::vector&lt;double&gt;&amp; mu0,
+ const std::vector&lt;double&gt;&amp; mu1) {
+ validate_propensities(treatment,propensity);
+ check_finite(outcome);check_finite(mu0);check_finite(mu1);
+ require(treatment.size()==outcome.size()&amp;&amp;treatment.size()==mu0.size()&amp;&amp;
+         treatment.size()==mu1.size(),"AIPW requires aligned nuisance predictions");
+ double sum=0;
+ for(std::size_t i=0;i&lt;treatment.size();++i){
+   const double d=treatment[i],p=propensity[i];
+   sum+=mu1[i]-mu0[i]+d*(outcome[i]-mu1[i])/p-
+                    (1-d)*(outcome[i]-mu0[i])/(1-p);
+ }
+ return sum/treatment.size();
+}
+inline double standardized_mean_difference(
+ const std::vector&lt;double&gt;&amp; x,const std::vector&lt;double&gt;&amp; treatment){
+ check_finite(x);check_finite(treatment);
+ require(x.size()==treatment.size(),"SMD dimensions differ");
+ double n0=0,n1=0,m0=0,m1=0;
+ for(std::size_t i=0;i&lt;x.size();++i){
+   require(treatment[i]==0||treatment[i]==1,"Invalid group label");
+   if(treatment[i]==1){++n1;m1+=x[i];}
+   else{++n0;m0+=x[i];}
+ }
+ require(n0&gt;=2&amp;&amp;n1&gt;=2,"SMD requires at least two per group");
+ m0/=n0;m1/=n1;double v0=0,v1=0;
+ for(std::size_t i=0;i&lt;x.size();++i){
+   if(treatment[i]==1)v1+=(x[i]-m1)*(x[i]-m1);
+   else v0+=(x[i]-m0)*(x[i]-m0);
+ }
+ const double scale=std::sqrt((v0/(n0-1)+v1/(n1-1))/2);
+ require(scale&gt;0,"SMD requires nonzero pooled variance");
+ return (m1-m0)/scale;
+}
+inline double ipw_effective_sample_size(
+ const std::vector&lt;double&gt;&amp; treatment,const std::vector&lt;double&gt;&amp; propensity){
+ validate_propensities(treatment,propensity);
+ double sum=0,sq=0;
+ for(std::size_t i=0;i&lt;treatment.size();++i){
+   const double weight=treatment[i]/propensity[i]+
+                       (1-treatment[i])/(1-propensity[i]);
+   sum+=weight;sq+=weight*weight;
+ }
+ return sum*sum/sq;
+}
+}
+</code></pre></section><section class="references"><h2>参考来源</h2><p class="reference"><a href="https://www.nber.org/papers/w23564">NBER Double/Debiased Machine Learning</a>。数学结构以展示的计算式、输入单位与源码实现为依据；实证估计所需的外生性和市场微观结构假设在各章分别陈述。</p></section>
+</main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

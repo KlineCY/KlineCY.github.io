@@ -41,6 +41,8 @@
        subsection("regionNavMenu","按地区划分","regionSub")),
     assets:
       '<a class="q-menu-link" href="'+route("assets")+'">全部金融资产</a>'+
+      '<a class="q-menu-link" href="'+route("assets")+'volatility-surface-greeks.html">期权Vanna、Volga与远期方差</a>'+
+      '<a class="q-menu-link" href="'+route("assets")+'discount-curve-dv01-convexity.html">贴现曲线、DV01与凸性</a>'+
       '<a class="q-menu-link" href="'+route("assets")+'risk-and-pricing.html">资产定价、合同现金流与风险</a>'+
       '<a class="q-menu-link" href="'+route("assets")+'derivatives-pricing-lab.html">期权定价数值实验室</a>'+
       '<a class="q-menu-link" href="'+route("assets")+'credit-cashflow-models.html">债券、隔夜利率与信用现金流</a>'+
@@ -48,6 +50,8 @@
       subsection("typeNav","按金融工具类型","typeChoices"),
     feeds:
       '<a class="q-menu-link" href="'+route("feeds")+'">全部数据字段</a>'+
+      '<a class="q-menu-link" href="'+route("feeds")+'point-in-time-vintage-diagnostics.html">历史数据版本与报价质量</a>'+
+      '<a class="q-menu-link" href="'+route("feeds")+'orderbook-liquidity-structure.html">报价价差与订单流持续性</a>'+
       '<a class="q-menu-link" href="'+route("feeds")+'point-in-time-data.html">金融数据工程与历史可得信息</a>'+
       '<a class="q-menu-link" href="'+route("feeds")+'market-microstructure-lab.html">高频事件、成交量与订单簿</a>'+
       '<a class="q-menu-link" href="'+route("feeds")+'execution-microstructure-dynamics.html">队列成交与暂态价格冲击</a>'+
@@ -55,6 +59,7 @@
       subsection("feedsCategoryNav","按数据类别","feedChoices",page==="feeds"),
     research:
       '<a class="q-menu-link" href="'+route("research")+'">在线 Python 回测</a>'+
+      '<a class="q-menu-link" href="'+route("research")+'euler-risk-tail-attribution.html">Euler风险与尾部归因</a>'+
       '<a class="q-menu-link" href="'+route("research")+'?strategy=ma">策略超市 / Python 示例</a>'+
       '<a class="q-menu-link" href="'+route("research")+'execution-risk.html">衍生品、信用与真实执行专题</a>'+
       '<a class="q-menu-link" href="'+route("research")+'fund-portfolio-economics.html">基金资金、容量与风险平价</a>'+
@@ -63,6 +68,7 @@
       subsection("researchStrategyNav","按策略选择","strategyChoices",page==="research"),
     audit:
       '<a class="q-menu-link" href="'+route("audit")+'">完整研究验证课程</a>'+
+      '<a class="q-menu-link" href="'+route("audit")+'doubly-robust-causal-analysis.html">IPW与双重稳健估计</a>'+
       '<a class="q-menu-link" href="'+route("audit")+'empirical-research-lab.html">实证验证、统计推断与资金审计</a>'+
       '<a class="q-menu-link" href="'+route("audit")+'causal-inference-estimators.html">断点、工具变量与合成对照</a>'+
       '<a class="q-menu-link" href="'+route("audit")+'#c01">历史数据与公司行为</a>'+
@@ -83,7 +89,9 @@
       '<a class="q-menu-link" href="'+route("research")+'portfolio-path-and-margin.html">净值路径、杠杆与保证金</a>'+
       '<a class="q-menu-link" href="'+route("audit")+'causal-inference-estimators.html">断点、工具变量与合成对照</a>'+
       '<a class="q-menu-link" href="'+route("math")+'ohlc-realized-volatility.html">高低价波动率与隔夜跳空</a>'+
+      '<a class="q-menu-link" href="'+route("math")+'asynchronous-financial-variation.html">异步高频收益与四次变差</a>'+
       '<a class="q-menu-link" href="'+route("ml")+'probabilistic-forecast-evaluation.html">分位、CRPS与概率评分</a>'+
+      '<a class="q-menu-link" href="'+route("ml")+'imbalanced-classification-evidence.html">分类评价与概率评分</a>'+
       '<a class="q-menu-link" href="'+route("cpp")+'#sitewide">全站互联C++17算法与课程</a>'+
       '<a class="q-menu-link" href="'+route("cpp")+'#massive">360节数理金融与真实交易专题</a>'+
       '<a class="q-menu-link" href="'+route("cpp")+'#workflow">实际数据与命令行</a>'+
