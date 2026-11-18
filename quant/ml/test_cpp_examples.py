@@ -75,29 +75,35 @@ for area, entries, origin in (("math", math, math_origin), ("ml", ml, ml_origin)
         seen[normalized] = id
         programs.append((area, id, code))
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--shard", type=int, default=0)
-parser.add_argument("--shards", type=int, default=1)
-args = parser.parse_args()
-assert args.shards >= 1 and 0 <= args.shard < args.shards
-chosen = [p for i, p in enumerate(programs) if i % args.shards == args.shard]
 
-with tempfile.TemporaryDirectory() as directory:
-    for area, id, code in chosen:
-        cpp = pathlib.Path(directory) / (id + ".cpp")
-        exe = pathlib.Path(directory) / id
-        cpp.write_text(code, encoding="utf-8")
-        compiled = subprocess.run(
-            ["g++", "-std=c++17", "-O0", "-Wall", "-Wextra", "-pedantic", str(cpp), "-o", str(exe)],
-            capture_output=True, text=True, timeout=30
-        )
-        if compiled.returncode:
-            raise AssertionError(f"{area}/{id} compilation failed:\n{compiled.stderr[:3500]}")
-        run = subprocess.run([str(exe)], capture_output=True, text=True, timeout=8)
-        if run.returncode or not run.stdout.strip():
-            raise AssertionError(f"{area}/{id}: execution failed ({run.returncode}) {run.stderr[:500]}")
-        if re.search(r"(?<![a-z])(?:-?nan|-?inf)(?![a-z])", run.stdout.lower()):
-            raise AssertionError(f"{area}/{id}: invalid numeric output {run.stdout[:100]}")
-        print("PASS", area, id)
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--shard", type=int, default=0)
+    parser.add_argument("--shards", type=int, default=1)
+    args = parser.parse_args()
+    assert args.shards >= 1 and 0 <= args.shard < args.shards
+    chosen = [p for i, p in enumerate(programs) if i % args.shards == args.shard]
 
-print(f"Validated {len(chosen)} / {len(programs)} independent educational C++17 programs")
+    with tempfile.TemporaryDirectory() as directory:
+        for area, id, code in chosen:
+            cpp = pathlib.Path(directory) / (id + ".cpp")
+            exe = pathlib.Path(directory) / id
+            cpp.write_text(code, encoding="utf-8")
+            compiled = subprocess.run(
+                ["g++", "-std=c++17", "-O0", "-Wall", "-Wextra", "-pedantic", str(cpp), "-o", str(exe)],
+                capture_output=True, text=True, timeout=30
+            )
+            if compiled.returncode:
+                raise AssertionError(f"{area}/{id} compilation failed:\n{compiled.stderr[:3500]}")
+            run = subprocess.run([str(exe)], capture_output=True, text=True, timeout=8)
+            if run.returncode or not run.stdout.strip():
+                raise AssertionError(f"{area}/{id}: execution failed ({run.returncode}) {run.stderr[:500]}")
+            if re.search(r"(?<![a-z])(?:-?nan|-?inf)(?![a-z])", run.stdout.lower()):
+                raise AssertionError(f"{area}/{id}: invalid numeric output {run.stdout[:100]}")
+            print("PASS", area, id)
+
+    print(f"Validated {len(chosen)} / {len(programs)} independent educational C++17 programs")
+
+
+if __name__ == '__main__':
+    main()
