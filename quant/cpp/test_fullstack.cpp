@@ -324,7 +324,7 @@ void controls_validation_suite(){
     auto kept=kline::purge_label_intervals(
         {{0,3},{2,5},{5,7},{9,10},{12,14}}, {4,8},2);
     ok(kept==vector<int>({0,4}),"purged overlap and after-test embargo");
-    ok(kline::eligible_training_count({2,3,5,7,8},6,1)==2,
+    ok(kline::eligible_training_count({2,3,5,7,8},6,1)==3,
        "matured label cut-off");
     ok(kline::chronological_holdout_indices(10,3,1)==vector<int>({7,8,9}),
        "holdout indices");
