@@ -33,7 +33,7 @@ def collect(area):
 
 math, math_origin = collect("math")
 ml, ml_origin = collect("ml")
-assert len(math) == 190 and len(ml) == 169
+assert len(math) == 340 and len(ml) == 169
 curriculum = read("math/curriculum.json")
 math_nodes = {node["id"]: node for node in curriculum["nodes"]}
 assert set(math) <= set(math_nodes)
