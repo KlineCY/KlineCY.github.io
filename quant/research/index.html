@@ -86,14 +86,14 @@ function demoCSV(){
 }
 function activateDataset(csv,name,source){dataText=csv;label=name;$("dataStatus").textContent=name+" · 数据只在当前浏览器处理；修改数据后需要重新回测。";$("sourceType").querySelector('option[value="upload"]').disabled=source!=="upload";$("sourceType").value=source;results={};report=null;$("report").classList.remove("visible");renderLibrary()}
 function renderLibrary(){
-const match=library.filter(s=>(!strategyCategory||s.category===strategyCategory)&&(!strategyKeyword||[s.name,s.category,s.description,s.requirements,s.research?.mechanism||"",s.research?.derivation||"",s.research?.worked||"",s.research?.formula||"",s.research?.validation||"",s.research?.limitations||""].join(" ").toLowerCase().includes(strategyKeyword)));
+const match=library.filter(s=>(!strategyCategory||s.category===strategyCategory)&&(!strategyKeyword||[s.name,s.category,s.description,s.requirements,s.research?.mechanism||"",s.research?.derivation||"",s.research?.worked||"",s.research?.formula||"",s.research?.validation||"",s.research?.limitations||"",s.research?.falsification||"",s.research?.execution_stress||""].join(" ").toLowerCase().includes(strategyKeyword)));
 $("strategyListStatus").textContent="当前显示 "+match.length+" / "+library.length+" 个可编辑策略";
 $("strategies").innerHTML=match.map(s=>{const r=results[s.id];const status=r?'<strong>总收益 '+pct(r.metrics.total_return)+' · Sharpe '+num(r.metrics.sharpe)+'</strong>':'<span>未在当前数据上运行</span>';return '<article class="strategy'+(selected?.id===s.id?" selected":"")+'"><span class="type">'+esc(s.category)+" · "+esc(s.level)+'</span><h3>'+esc(s.name)+'</h3><p>'+esc(s.description)+'</p><p><strong>数据需求：</strong>'+esc(s.requirements)+'</p><div class="result">'+status+'</div><button type="button" data-select="'+esc(s.id)+'">加载并编辑 Python 代码</button></article>'}).join("")||'<p>没有与当前检索条件匹配的策略。</p>';
 }
 function renderStrategyResearch(s){
  const r=s.research;
  if(!r){$("strategyResearch").innerHTML='<h3>'+esc(s.name)+'</h3><h4>研究原理</h4><p>'+esc(s.theory||s.description)+'</p><h4>适用边界</h4><p>'+esc(s.note||"仅为教学策略模板，须独立核对数据和风险。")+'</p>';return}
- const fields=[["研究机制",r.mechanism],["数学关系（符号定义以正文为准）",r.formula],["推导与信号时点",r.derivation],["计算示例",r.worked],["样本外验证方案",r.validation],["局限与风险",r.limitations]];
+ const fields=[["研究机制",r.mechanism],["数学关系（符号定义以正文为准）",r.formula],["推导与信号时点",r.derivation],["计算示例",r.worked],["样本外验证方案",r.validation],["局限与风险",r.limitations],["独立反证实验与消融检验",r.falsification],["成交、容量与风险压力复核",r.execution_stress]];
  $("strategyResearch").innerHTML='<h3>'+esc(s.name)+'</h3>'+fields.map(([label,value])=>'<h4>'+esc(label)+'</h4>'+(label.startsWith("数学关系")?'<pre>'+esc(value)+'</pre>':'<p>'+esc(value)+'</p>')).join("");
 }
 function selectStrategy(id){const s=library.find(x=>x.id===id);if(!s)return;selected=s;$("editor").value=s.code;$("selectedName").textContent="· "+s.name;report=null;$("report").classList.remove("visible");renderStrategyResearch(s);renderLibrary();}
