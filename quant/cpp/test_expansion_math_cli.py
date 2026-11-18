@@ -42,6 +42,10 @@ with tempfile.TemporaryDirectory() as temp:
     panel=d/"panel.csv"
     write(panel,["Entity","X","Y"],
           [[entity,t,10*entity+2*t] for entity in (1,2,3) for t in range(1,9)])
+    fmb=d/"fama.csv"
+    write(fmb,["Period","Factor","NextReturn"],
+          [[period,asset,0.01*period+0.2*asset]
+           for period in range(5) for asset in range(8)])
     positives=d/"positive.csv"
     write(positives,["V"],[[1+i] for i in range(30)])
     scores=d/"scores.csv"
@@ -74,6 +78,7 @@ with tempfile.TemporaryDirectory() as temp:
         ("garch-steady",[0.02,0.2,0.3]),
         ("garch-horizon",[0.04,0.02,0.2,0.3,3]),
         ("panel-fe",[panel,"Entity","Y","X"]),
+        ("fama-macbeth",[fmb,"Period","Factor","NextReturn"]),
         ("gpd-survival",[2,0.1,2]),
         ("gpd-quantile",[0.8,0.1,2]),
         ("hill-index",[positives,"V",5]),
@@ -104,7 +109,7 @@ with tempfile.TemporaryDirectory() as temp:
         ("regime-compare",[samples,"Return",40]),
         ("cusum-change",[samples,"Target"]),
     ]
-    assert len(cases)==52,len(cases)
+    assert len(cases)==53,len(cases)
     results={}
     for command,args in cases:
         results[command]=call(command,args)
@@ -114,6 +119,7 @@ with tempfile.TemporaryDirectory() as temp:
     assert abs(float(results["garch-steady"].split()[1])-0.04)<1e-8
     assert abs(float(results["garch-horizon"].split()[1])-0.04)<1e-8
     assert abs(float(results["panel-fe"].splitlines()[0].split()[1])-2)<1e-6
+    assert abs(float(results["fama-macbeth"].splitlines()[1].split()[1])-0.2)<1e-7
     assert abs(float(results["entropy"].split()[1])-
                (-sum(p*math.log(p) for p in [0.2,0.3,0.5])))<1e-6
     assert abs(float(results["rls-train"].splitlines()[1].split()[1])-2)<0.01
@@ -135,6 +141,7 @@ with tempfile.TemporaryDirectory() as temp:
         ("garch-estimate",[tiny,"Value",10]),
         ("garch-steady",[0.02,0.5,0.5]),
         ("panel-fe",[samples,"Missing","Target","Signal"]),
+        ("fama-macbeth",[samples,"Missing","A","B"]),
         ("gpd-quantile",[1,0,1]),
         ("hill-index",[samples,"A",80]),
         ("gaussian-es",[0,1,1]),
@@ -158,4 +165,4 @@ with tempfile.TemporaryDirectory() as temp:
     ]
     for command,args in invalid:
         call(command,args,valid=False)
-print("PASS: 52 expanded math/ML CLI commands and 31 invalid-input cases")
+print("PASS: 53 expanded math/ML CLI commands and 32 invalid-input cases")
