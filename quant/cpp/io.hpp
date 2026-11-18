@@ -68,6 +68,7 @@ inline CsvTable read_csv(const std::string& path) {
     require(bool(input), "Cannot open CSV");
     std::string line;
     require(bool(std::getline(input, line)), "CSV is empty");
+    if (!line.empty() && line.back() == '\r') line.pop_back();
     CsvTable table;
     table.header = csv_fields(line);
     require(!table.header.empty(), "CSV has no columns");
@@ -77,6 +78,7 @@ inline CsvTable read_csv(const std::string& path) {
             require(table.header[i] != table.header[j], "Duplicate CSV column");
     }
     while (std::getline(input, line)) {
+        if (!line.empty() && line.back() == '\r') line.pop_back();
         if (line.empty()) continue;
         auto row = csv_fields(line);
         require(row.size() == table.header.size(), "CSV row does not match header width");
