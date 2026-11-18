@@ -29,6 +29,7 @@
   const subsection=(id,label,content,open=false)=>'<details class="q-nav-subgroup" id="'+id+'" '+(open?"open":"")+'><summary><span>'+label+'</span><span class="q-sub-chevron" aria-hidden="true">▸</span></summary><div class="q-nav-leaves" id="'+content+'"></div></details>';
   const staticMenu={
     companies:
+      '<a class="q-menu-link" href="'+route("companies")+'institutional-quant-research.html">机构策略、容量与风险治理</a>'+
       (page==="companies"
         ?'<button id="all" class="q-menu-link active" data-filter="all" type="button">全部公司 <span class="q-menu-count" id="allN"></span></button>'
         :'<a class="q-menu-link" href="'+route("companies")+'">全部公司</a>')+
@@ -73,6 +74,7 @@
       '<a class="q-menu-link" href="'+route("cpp")+'#assumptions">方法适用范围</a>',
     wiki:
       '<a class="q-menu-link" href="'+route("wiki")+'">全部词条</a>'+
+      '<a class="q-menu-link" href="'+route("wiki")+'method-lexicon.html">数学与金融模型机制词典</a>'+
       subsection("wikiCategoryNav","按知识主题","wikiCategories",page==="wiki")+
       subsection("wikiLearningNav","系统学习路径","wikiPaths"),
     math:
