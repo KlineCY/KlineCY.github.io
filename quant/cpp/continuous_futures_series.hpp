@@ -14,13 +14,11 @@ inline std::vector<double> back_adjust_additive_futures(
             "Futures roll series dimensions");
     check_finite(old_contract_on_roll);check_finite(new_contract_on_roll);
     std::vector<double> adjusted=raw_settlements;
-    double cumulative=0;
     for(int k=int(roll_indices.size())-1;k>=0;k--){
         int boundary=roll_indices[k];
         require(boundary>0&&boundary<int(raw_settlements.size())&&
                 (k==0||roll_indices[k-1]<boundary),
                 "Roll boundaries must be strictly ascending");
-        cumulative+=new_contract_on_roll[k]-old_contract_on_roll[k];
         for(int t=0;t<boundary;t++)adjusted[t]+=new_contract_on_roll[k]-
                                                   old_contract_on_roll[k];
     }

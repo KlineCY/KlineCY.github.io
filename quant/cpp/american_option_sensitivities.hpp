@@ -11,7 +11,7 @@ inline BinomialGreeks american_binomial_greeks(double spot,double strike,
             std::isfinite(volatility)&&volatility>0&&years>0&&
             steps>=3,"Invalid American Greek contract");
     double ds=std::max(1e-3,spot*1e-3);
-    double dv=std::max(1e-4,volatility*1e-3);
+    double dv=volatility*1e-3;
     auto price=[&](double s,double v){
         return american_binomial(s,strike,rate,dividend,v,years,steps,call);
     };

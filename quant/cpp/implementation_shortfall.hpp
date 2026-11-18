@@ -24,8 +24,7 @@ inline ShortfallBreakdown implementation_shortfall(
                 direction*fill.signed_shares>=0,
                 "Implementation shortfall execution side mismatch");
         executed+=std::fabs(fill.signed_shares);
-        result.execution_cost+=direction*fill.signed_shares*
-                               direction*(fill.price-arrival_price);
+        result.execution_cost+=fill.signed_shares*(fill.price-arrival_price);
         result.commissions+=fill.commission;
     }
     require(executed<=ordered+1e-10,"Fills exceed intended order quantity");
