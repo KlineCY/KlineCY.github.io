@@ -1,0 +1,108 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+ <title>因子信号的筛选命中、收益贡献与分层差异｜Kline Quant</title><meta name="description" content="五节完整数理金融专题、数学推导、复算案例及C++17实现。">
+ <link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+ <style>body{margin:0;background:white;color:#192b38;font:16px/1.92 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:24px 28px 70px}main{max-width:1140px;margin:auto}header,.lesson,.sources,.source{padding:24px 28px;border:1px solid #cbd5df;background:white;margin:18px 0}h1{font-size:30px;line-height:1.4}h2{font-size:22px;margin:12px 0 20px}h3{font-size:17px;margin:21px 0 7px}p{margin:12px 0;line-height:1.95}nav.toc{display:flex;flex-wrap:wrap;gap:12px 25px;border:1px solid #cbd5df;padding:18px 23px}.equation{overflow:auto;border-block:1px solid #d4dce4;padding:15px 7px;margin:16px 0}.katex-display{overflow-x:auto;overflow-y:hidden}a{color:#215579}code,pre{font-family:"Times New Roman",monospace}pre{border:1px solid #ccd6dd;padding:14px;overflow:auto;white-space:pre;font-size:13px;line-height:1.65;max-height:650px}small{letter-spacing:1px}.method{font-size:15px}@media(max-width:790px){.main{padding:12px;margin:0}header,.lesson,.sources,.source{padding:15px}}</style>
+ </head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main>
+ <header><small>QUANTITATIVE METHODS / C++17 RESEARCH</small><h1>因子信号的筛选命中、收益贡献与分层差异</h1>
+ <p>该专题以一致的数学定义连接数据字段、数值计算、金融解释与实际研究用途。五个子主题保留相互独立的估计对象，所有公式都有对应的可复算输入和可检查的C++17实现。</p>
+ </header><nav class="toc"><a href="#lesson1">1．触发信号后的正收益命中率</a><a href="#lesson2">2．信号触发后平均收益</a><a href="#lesson3">3．双边阈值仓位的平均收益</a><a href="#lesson4">4．因子上尾与下尾平均收益差</a><a href="#lesson5">5．信息系数相对目标值的差</a><a href="#implementation">完整C++17源码</a><a href="#references">参考文献</a></nav>
+ <article class="lesson" id="lesson1"><h2>1．触发信号后的正收益命中率</h2><div class="equation">$$H=\frac{\sum_i\mathbf1_{\{s_i&gt;c,r_i&gt;0\}}}{\sum_i\mathbf1_{\{s_i&gt;c\}}}$$</div>
+ <h3>经济含义与理论结构</h3><p>只有信号分数超过提前指定的执行阈值时才形成交易机会，统计这些机会最终收益为正的比例，反映信号在交易触发事件上的方向性准确度。</p>
+ <h3>数值案例与复算</h3><p>信号分数1、2、3、4，阈值2.5，只有后两条触发，实际收益分别为2和3，命中率为100%。</p>
+ <div class="equation">$$\mathrm{Output}\approx 1$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+1,-1
+2,1
+3,2
+4,3</code></pre><pre><code>./kline_quant atlas-signals-signal-hit-rate study.csv X Y 2.5</code></pre>
+ <h3>识别条件与数据解释</h3><p>命中率不体现盈利幅度和亏损尾部，实际策略需要进一步扣除佣金、滑点和融资成本。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article>
+<article class="lesson" id="lesson2"><h2>2．信号触发后平均收益</h2><div class="equation">$$\bar r_{s&gt;c}=\frac{\sum_i r_i\mathbf1_{\{s_i&gt;c\}}}{\sum_i\mathbf1_{\{s_i&gt;c\}}}$$</div>
+ <h3>经济含义与理论结构</h3><p>将交易信号看作选择规则，仅针对触发交易的观察样本求平均收益，使信号强度门槛与条件收益直接对应。</p>
+ <h3>数值案例与复算</h3><p>两个触发交易的收益为2和3，平均收益为2.5。该例数值只是回报单位的计算演示，不代表真实策略的可交易收益率。</p>
+ <div class="equation">$$\mathrm{Output}\approx 2.5$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+1,-1
+2,1
+3,2
+4,3</code></pre><pre><code>./kline_quant atlas-signals-signal-conditional-payoff study.csv X Y 2.5</code></pre>
+ <h3>识别条件与数据解释</h3><p>需要对标签成熟时间、持仓可行性和样本外筛选机制保持一致，否则条件平均收益会受到前瞻信息污染。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article>
+<article class="lesson" id="lesson3"><h2>3．双边阈值仓位的平均收益</h2><div class="equation">$$R=\frac1n\sum_i(2\mathbf1_{\{s_i&gt;c\}}-1)r_i$$</div>
+ <h3>经济含义与理论结构</h3><p>把高于阈值的信号解释为多头、低于或等于阈值的信号解释为空头，每个观察期使用单位名义仓位，形成多空方向策略的平均毛收益。</p>
+ <h3>数值案例与复算</h3><p>信号1、2、3、4，阈值2.5，对应仓位−1、−1、+1、+1；回报−1、1、2、3时，平均仓位收益为(1−1+2+3)/4=1.25。</p>
+ <div class="equation">$$\mathrm{Output}\approx 1.25$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+1,-1
+2,1
+3,2
+4,3</code></pre><pre><code>./kline_quant atlas-signals-signal-signed-return study.csv X Y 2.5</code></pre>
+ <h3>识别条件与数据解释</h3><p>输出未考虑融资、做空可借性和换手费用。若信号每天产生新仓位，需要把持仓延迟与执行时点写入研究设计。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article>
+<article class="lesson" id="lesson4"><h2>4．因子上尾与下尾平均收益差</h2><div class="equation">$$S_q=\bar r_{\mathrm{top}\ q}-\bar r_{\mathrm{bottom}\ q}$$</div>
+ <h3>经济含义与理论结构</h3><p>先按因子信号从低到高排序，再分别选取底部和顶部预先指定比例的样本，比较两组后验收益的均值差。它是研究横截面排序能力的简单统计诊断。</p>
+ <h3>数值案例与复算</h3><p>信号1、2、3、4与对应收益−1、1、2、3，顶部和底部各取25%，均只有一个样本，价差为3−(−1)=4。</p>
+ <div class="equation">$$\mathrm{Output}\approx 4$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+1,-1
+2,1
+3,2
+4,3</code></pre><pre><code>./kline_quant atlas-signals-signal-top-bottom-spread study.csv X Y 0.25</code></pre>
+ <h3>识别条件与数据解释</h3><p>截面样本量、分组权重、同分并列处理和观测时点会改变分层结果；不能从训练期分层价差推断样本外超额收益。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article>
+<article class="lesson" id="lesson5"><h2>5．信息系数相对目标值的差</h2><div class="equation">$$IC_{\rm excess}=\mathrm{Corr}(s_i,r_i)-IC^*$$</div>
+ <h3>经济含义与理论结构</h3><p>以连续因子信号与未来收益之间的Pearson相关系数作为信息系数，再扣除事先指定的研究基准相关水平，检验线性预测关联是否超过业务门槛。</p>
+ <h3>数值案例与复算</h3><p>当信号与未来收益均为1、2、3、4，二者相关系数为1；若研究基准IC为0.1，指标为0.9。</p>
+ <div class="equation">$$\mathrm{Output}\approx 0.9$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+1,1
+2,2
+3,3
+4,4</code></pre><pre><code>./kline_quant atlas-signals-signal-ic-excess study.csv X Y 0.1</code></pre>
+ <h3>识别条件与数据解释</h3><p>真实横截面IC通常逐日期计算后聚合，不能将多个日期不同投资范围的样本无条件混合；Pearson相关性也无法捕捉纯非线性预测关系。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article><section class="source" id="implementation"><h2>完整数值实现与数据接口</h2>
+ <p>底层算法使用标准C++17、明确的数值边界检查与双列CSV输入。页面中的数学形式、数值案例及代码指向同一实际函数；源码可在独立研究项目中按文件链接获取。</p>
+ <p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/atlas2026_signals.hpp">查看五个算法的头文件</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/atlas2026_common.hpp">公共数值检查与基础接口</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_atlas2026.cpp">数学回归测试</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_atlas2026_cli.py">真实CSV工作流测试</a>。</p>
+ <h3>独立算法头文件</h3><pre><code>#pragma once
+#include "atlas2026_common.hpp"
+namespace kline { namespace atlas2026 {
+inline double signal_hit_rate(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);double n=0,k=0;for(std::size_t i=0;i&lt;x.size();++i)if(x[i]&gt;p){++n;k+=y[i]&gt;0;}require(n&gt;0,"No active trading signals");return k/n;}
+inline double signal_conditional_payoff(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);double n=0,s=0;for(std::size_t i=0;i&lt;x.size();++i)if(x[i]&gt;p){++n;s+=y[i];}require(n&gt;0,"No active trading signals");return s/n;}
+inline double signal_signed_return(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);double s=0;for(std::size_t i=0;i&lt;x.size();++i)s+=(x[i]&gt;p?1.0:-1.0)*y[i];return s/x.size();}
+inline double signal_top_bottom_spread(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);require(p&gt;0&amp;&amp;p&lt;.5,"Top-bottom fraction must be in (0,0.5)");std::vector&lt;std::pair&lt;double,double&gt;&gt; a;for(std::size_t i=0;i&lt;x.size();++i)a.push_back({x[i],y[i]});std::stable_sort(a.begin(),a.end(),[](auto u,auto v){return u.first&lt;v.first;});std::size_t k=std::size_t(std::ceil(p*a.size()));require(k&gt;0&amp;&amp;2*k&lt;=a.size(),"Insufficient observations for disjoint tails");double lo=0,hi=0;for(std::size_t i=0;i&lt;k;++i){lo+=a[i].second;hi+=a[a.size()-1-i].second;}return (hi-lo)/k;}
+inline double signal_ic_excess(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);return correlation(x,y)-p;}
+} }
+</code></pre><h3>统一输入校验</h3><pre><code>#pragma once
+#include "stats.hpp"
+#include &lt;algorithm&gt;
+#include &lt;cmath&gt;
+#include &lt;numeric&gt;
+#include &lt;stdexcept&gt;
+#include &lt;vector&gt;
+namespace kline {
+namespace atlas2026 {
+using Values=std::vector&lt;double&gt;;
+inline void valid(const Values&amp; x,const Values&amp; y,double p){
+ check_finite(x);check_finite(y);
+ require(x.size()==y.size()&amp;&amp;std::isfinite(p),"Data rows and parameter must be finite and aligned");
+}
+inline double positive_weights(const Values&amp; y){
+ double sum=0;
+ for(double w:y){require(w&gt;=0,"Weights must be nonnegative");sum+=w;}
+ require(sum&gt;0&amp;&amp;std::isfinite(sum),"Positive finite total weight required");
+ return sum;
+}
+inline void nonnegative(const Values&amp; x){
+ for(double z:x)require(z&gt;=0,"Inputs must be nonnegative");
+}
+}
+}
+</code></pre></section>
+ <section class="sources" id="references"><h2>方法与技术资料</h2><p><a href="https://rpc.cfainstitute.org/">CFA Institute研究资料</a>。数值恒等式、模型条件与算法源码构成本文各节的可复核依据。</p>
+ <p>实际经济研究所需的样本时间区间、预测时点、标签成熟规则、事件制度和交易成本应与所使用的数据共同定义；相应条件在各节分别展开。</p></section>
+ </main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

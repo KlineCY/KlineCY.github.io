@@ -1,0 +1,100 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+ <title>现金流贴现、付款时间离散度与动态回收｜Kline Quant</title><meta name="description" content="五节完整数理金融专题、数学推导、复算案例及C++17实现。">
+ <link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+ <style>body{margin:0;background:white;color:#192b38;font:16px/1.92 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:24px 28px 70px}main{max-width:1140px;margin:auto}header,.lesson,.sources,.source{padding:24px 28px;border:1px solid #cbd5df;background:white;margin:18px 0}h1{font-size:30px;line-height:1.4}h2{font-size:22px;margin:12px 0 20px}h3{font-size:17px;margin:21px 0 7px}p{margin:12px 0;line-height:1.95}nav.toc{display:flex;flex-wrap:wrap;gap:12px 25px;border:1px solid #cbd5df;padding:18px 23px}.equation{overflow:auto;border-block:1px solid #d4dce4;padding:15px 7px;margin:16px 0}.katex-display{overflow-x:auto;overflow-y:hidden}a{color:#215579}code,pre{font-family:"Times New Roman",monospace}pre{border:1px solid #ccd6dd;padding:14px;overflow:auto;white-space:pre;font-size:13px;line-height:1.65;max-height:650px}small{letter-spacing:1px}.method{font-size:15px}@media(max-width:790px){.main{padding:12px;margin:0}header,.lesson,.sources,.source{padding:15px}}</style>
+ </head><body><aside id="quantSidebar" class="sidebar" data-page="assets"></aside><script src="../sidebar-v2.js"></script><div class="main"><main>
+ <header><small>QUANTITATIVE METHODS / C++17 RESEARCH</small><h1>现金流贴现、付款时间离散度与动态回收</h1>
+ <p>该专题以一致的数学定义连接数据字段、数值计算、金融解释与实际研究用途。五个子主题保留相互独立的估计对象，所有公式都有对应的可复算输入和可检查的C++17实现。</p>
+ </header><nav class="toc"><a href="#lesson1">1．连续复利现金流现值</a><a href="#lesson2">2．现金流的现值加权平均支付时间</a><a href="#lesson3">3．折现支付时间的标准差</a><a href="#lesson4">4．贴现正负现金流覆盖比</a><a href="#lesson5">5．贴现现金流的插值回收年限</a><a href="#implementation">完整C++17源码</a><a href="#references">参考文献</a></nav>
+ <article class="lesson" id="lesson1"><h2>1．连续复利现金流现值</h2><div class="equation">$$PV=\sum_i C_ie^{-rt_i}$$</div>
+ <h3>经济含义与理论结构</h3><p>按每笔支付的距离当前年数和连续复利折现率，将未来净现金流逐笔折现并求和，得到在该贴现口径下的现金流现值。</p>
+ <h3>数值案例与复算</h3><p>两笔现金流分别在第1年和第2年支付10与20，折现率为零，现值为30。</p>
+ <div class="equation">$$\mathrm{Output}\approx 30$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+1,10
+2,20</code></pre><pre><code>./kline_quant atlas-cashflows-cashflow-present-value study.csv X Y 0</code></pre>
+ <h3>识别条件与数据解释</h3><p>若贴现率具有期限结构，需要逐期使用对应期限的贴现因子；这里采用单一平坦连续复利率。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article>
+<article class="lesson" id="lesson2"><h2>2．现金流的现值加权平均支付时间</h2><div class="equation">$$D=\frac{\sum_i t_iC_ie^{-rt_i}}{\sum_i C_ie^{-rt_i}}$$</div>
+ <h3>经济含义与理论结构</h3><p>将非负现金流的现值作为权重，对所有支付时间求加权平均，得到由合同支付结构决定的平均资本回收时间。</p>
+ <h3>数值案例与复算</h3><p>第1年支付10、第2年支付20、折现率零时，平均支付时间为(10+40)/30，即5/3年。</p>
+ <div class="equation">$$\mathrm{Output}\approx 1.666666667$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+1,10
+2,20</code></pre><pre><code>./kline_quant atlas-cashflows-cashflow-discounted-duration study.csv X Y 0</code></pre>
+ <h3>识别条件与数据解释</h3><p>该平均时间对负现金流和含权债券不再具有相同的久期经济含义，程序限制现金流为非负且总现值为正。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article>
+<article class="lesson" id="lesson3"><h2>3．折现支付时间的标准差</h2><div class="equation">$$\sigma_T=\sqrt{\frac{\sum_i t_i^2PV_i}{\sum_iPV_i}-D^2}$$</div>
+ <h3>经济含义与理论结构</h3><p>从现值权重下的支付时间二阶原点矩减去平方平均时间，再开根号，衡量合同现金流支付时点在时间维度的分散程度。</p>
+ <h3>数值案例与复算</h3><p>第1年支付10、第2年支付20、贴现率零时，时间二阶矩为3，久期平方为25/9，方差为2/9，标准差为√(2/9)。</p>
+ <div class="equation">$$\mathrm{Output}\approx 0.471404521$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+1,10
+2,20</code></pre><pre><code>./kline_quant atlas-cashflows-cashflow-time-dispersion study.csv X Y 0</code></pre>
+ <h3>识别条件与数据解释</h3><p>现金流时间分散程度与利率凸性存在代数联系，但该统计不直接度量违约、提前偿付和再投资风险。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article>
+<article class="lesson" id="lesson4"><h2>4．贴现正负现金流覆盖比</h2><div class="equation">$$CR=\frac{\sum_i (PV_i)_+}{\sum_i(-PV_i)_+}$$</div>
+ <h3>经济含义与理论结构</h3><p>将未来项目现金流贴现后划分为正向现金流入与负向投资现金流出，比较现值口径下的现金流覆盖能力。</p>
+ <h3>数值案例与复算</h3><p>零贴现率下，初始投入10，第1年回收5、第2年回收10时，流入总现值15，流出现值10，覆盖比为1.5。</p>
+ <div class="equation">$$\mathrm{Output}\approx 1.5$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+0,-10
+1,5
+2,10</code></pre><pre><code>./kline_quant atlas-cashflows-cashflow-coverage-ratio study.csv X Y 0</code></pre>
+ <h3>识别条件与数据解释</h3><p>只比较正负现金流现值可能掩盖短期流动性缺口；期限结构和融资约束应独立纳入现金管理分析。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article>
+<article class="lesson" id="lesson5"><h2>5．贴现现金流的插值回收年限</h2><div class="equation">$$T^*=t_{j-1}+(t_j-t_{j-1})\frac{-S_{j-1}}{PV_j}$$</div>
+ <h3>经济含义与理论结构</h3><p>沿时间轴累计折现现金流，若在某个相邻支付区间首次由负转非负，则以该区间内的现金流线性插值估计回本时间。</p>
+ <h3>数值案例与复算</h3><p>期初投入10、第1年回收5、第2年回收10，贴现率零。第1年累计仍为−5，在第2年累计转正，插值回本时间为1.5年。</p>
+ <div class="equation">$$\mathrm{Output}\approx 1.5$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+0,-10
+1,5
+2,10</code></pre><pre><code>./kline_quant atlas-cashflows-cashflow-discounted-payback study.csv X Y 0</code></pre>
+ <h3>识别条件与数据解释</h3><p>插值默认区间内部资金回收均匀，只适合分析近似回本时点；实际离散现金流在合同支付时刻才发生。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article><section class="source" id="implementation"><h2>完整数值实现与数据接口</h2>
+ <p>底层算法使用标准C++17、明确的数值边界检查与双列CSV输入。页面中的数学形式、数值案例及代码指向同一实际函数；源码可在独立研究项目中按文件链接获取。</p>
+ <p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/atlas2026_cashflows.hpp">查看五个算法的头文件</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/atlas2026_common.hpp">公共数值检查与基础接口</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_atlas2026.cpp">数学回归测试</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_atlas2026_cli.py">真实CSV工作流测试</a>。</p>
+ <h3>独立算法头文件</h3><pre><code>#pragma once
+#include "atlas2026_common.hpp"
+namespace kline { namespace atlas2026 {
+inline double cashflow_present_value(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);double sum=0;for(std::size_t i=0;i&lt;x.size();++i){require(x[i]&gt;=0&amp;&amp;(i==0||x[i]&gt;x[i-1]),"Cash-flow dates must increase");sum+=y[i]*std::exp(-p*x[i]);}require(std::isfinite(sum),"Cash-flow PV overflow");return sum;}
+inline double cashflow_discounted_duration(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);double sum=0,weighted=0;for(std::size_t i=0;i&lt;x.size();++i){require(x[i]&gt;=0&amp;&amp;y[i]&gt;=0&amp;&amp;(i==0||x[i]&gt;x[i-1]),"Invalid positive cash-flow schedule");double pv=y[i]*std::exp(-p*x[i]);sum+=pv;weighted+=x[i]*pv;}require(sum&gt;0,"Positive cash-flow PV required");return weighted/sum;}
+inline double cashflow_time_dispersion(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);double sum=0,a=0,b=0;for(std::size_t i=0;i&lt;x.size();++i){require(x[i]&gt;=0&amp;&amp;y[i]&gt;=0&amp;&amp;(i==0||x[i]&gt;x[i-1]),"Invalid time dispersion schedule");double v=y[i]*std::exp(-p*x[i]);sum+=v;a+=x[i]*v;b+=x[i]*x[i]*v;}require(sum&gt;0,"Positive PV required");double d=a/sum;return std::sqrt(std::max(0.0,b/sum-d*d));}
+inline double cashflow_coverage_ratio(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);double inc=0,out=0;for(std::size_t i=0;i&lt;x.size();++i){require(x[i]&gt;=0&amp;&amp;(i==0||x[i]&gt;x[i-1]),"Invalid payment schedule");double v=y[i]*std::exp(-p*x[i]);inc+=std::max(0.0,v);out+=std::max(0.0,-v);}require(out&gt;0,"Negative funding cashflow required");return inc/out;}
+inline double cashflow_discounted_payback(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);require(y[0]&lt;0&amp;&amp;x[0]&gt;=0,"First cash flow must be an initial outflow");double accum=y[0]*std::exp(-p*x[0]);for(std::size_t i=1;i&lt;x.size();++i){require(x[i]&gt;x[i-1],"Cash-flow times must strictly increase");double change=y[i]*std::exp(-p*x[i]);double prev=accum;accum+=change;if(prev&lt;0&amp;&amp;accum&gt;=0){require(change&gt;0,"Payback crossing requires inflow");return x[i-1]+(x[i]-x[i-1])*(-prev/change);}}throw std::invalid_argument("Discounted cash flows never recover initial outlay");}
+} }
+</code></pre><h3>统一输入校验</h3><pre><code>#pragma once
+#include "stats.hpp"
+#include &lt;algorithm&gt;
+#include &lt;cmath&gt;
+#include &lt;numeric&gt;
+#include &lt;stdexcept&gt;
+#include &lt;vector&gt;
+namespace kline {
+namespace atlas2026 {
+using Values=std::vector&lt;double&gt;;
+inline void valid(const Values&amp; x,const Values&amp; y,double p){
+ check_finite(x);check_finite(y);
+ require(x.size()==y.size()&amp;&amp;std::isfinite(p),"Data rows and parameter must be finite and aligned");
+}
+inline double positive_weights(const Values&amp; y){
+ double sum=0;
+ for(double w:y){require(w&gt;=0,"Weights must be nonnegative");sum+=w;}
+ require(sum&gt;0&amp;&amp;std::isfinite(sum),"Positive finite total weight required");
+ return sum;
+}
+inline void nonnegative(const Values&amp; x){
+ for(double z:x)require(z&gt;=0,"Inputs must be nonnegative");
+}
+}
+}
+</code></pre></section>
+ <section class="sources" id="references"><h2>方法与技术资料</h2><p><a href="https://www.finra.org/investors/investing/investment-products/bonds">FINRA固定收益投资者教育</a>。数值恒等式、模型条件与算法源码构成本文各节的可复核依据。</p>
+ <p>实际经济研究所需的样本时间区间、预测时点、标签成熟规则、事件制度和交易成本应与所使用的数据共同定义；相应条件在各节分别展开。</p></section>
+ </main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

@@ -1,0 +1,98 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+ <title>信用组合的预期损失、回收与独立违约波动｜Kline Quant</title><meta name="description" content="五节完整数理金融专题、数学推导、复算案例及C++17实现。">
+ <link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+ <style>body{margin:0;background:white;color:#192b38;font:16px/1.92 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:24px 28px 70px}main{max-width:1140px;margin:auto}header,.lesson,.sources,.source{padding:24px 28px;border:1px solid #cbd5df;background:white;margin:18px 0}h1{font-size:30px;line-height:1.4}h2{font-size:22px;margin:12px 0 20px}h3{font-size:17px;margin:21px 0 7px}p{margin:12px 0;line-height:1.95}nav.toc{display:flex;flex-wrap:wrap;gap:12px 25px;border:1px solid #cbd5df;padding:18px 23px}.equation{overflow:auto;border-block:1px solid #d4dce4;padding:15px 7px;margin:16px 0}.katex-display{overflow-x:auto;overflow-y:hidden}a{color:#215579}code,pre{font-family:"Times New Roman",monospace}pre{border:1px solid #ccd6dd;padding:14px;overflow:auto;white-space:pre;font-size:13px;line-height:1.65;max-height:650px}small{letter-spacing:1px}.method{font-size:15px}@media(max-width:790px){.main{padding:12px;margin:0}header,.lesson,.sources,.source{padding:15px}}</style>
+ </head><body><aside id="quantSidebar" class="sidebar" data-page="assets"></aside><script src="../sidebar-v2.js"></script><div class="main"><main>
+ <header><small>QUANTITATIVE METHODS / C++17 RESEARCH</small><h1>信用组合的预期损失、回收与独立违约波动</h1>
+ <p>该专题以一致的数学定义连接数据字段、数值计算、金融解释与实际研究用途。五个子主题保留相互独立的估计对象，所有公式都有对应的可复算输入和可检查的C++17实现。</p>
+ </header><nav class="toc"><a href="#lesson1">1．组合预期信用损失</a><a href="#lesson2">2．独立Bernoulli违约的信用损失方差</a><a href="#lesson3">3．高损失率债项的预期违约笔数</a><a href="#lesson4">4．发生违约时的预期回收现金流</a><a href="#lesson5">5．独立违约信用损失标准差</a><a href="#implementation">完整C++17源码</a><a href="#references">参考文献</a></nav>
+ <article class="lesson" id="lesson1"><h2>1．组合预期信用损失</h2><div class="equation">$$EL=\sum_i EAD_i\,PD_i\,LGD_i$$</div>
+ <h3>经济含义与理论结构</h3><p>将每笔信用敞口在研究期内的违约概率与违约损失率相乘，再乘违约时敞口金额并汇总。这里统一假设各债项使用相同EAD，以参数p表示。</p>
+ <h3>数值案例与复算</h3><p>两笔债项违约概率10%和20%、损失率50%和25%、每笔敞口100时，预期损失为100×(0.05+0.05)=10。</p>
+ <div class="equation">$$\mathrm{Output}\approx 10$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+0.1,0.5
+0.2,0.25</code></pre><pre><code>./kline_quant atlas-credit-portfolio-expected-credit-loss study.csv X Y 100</code></pre>
+ <h3>识别条件与数据解释</h3><p>实际敞口可能随额度提取和偿还变化，且违约概率、损失率和敞口可能相关；本公式计算给定参数下的期望。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article>
+<article class="lesson" id="lesson2"><h2>2．独立Bernoulli违约的信用损失方差</h2><div class="equation">$$\operatorname{Var}(L)=\sum_i(EAD\cdot LGD_i)^2PD_i(1-PD_i)$$</div>
+ <h3>经济含义与理论结构</h3><p>每笔债项以违约指示变量刻画全部损失，并假定不同债项违约独立。Bernoulli指示变量的方差为PD乘以1减PD，由此直接得到组合损失方差。</p>
+ <h3>数值案例与复算</h3><p>两笔各100的信用敞口，PD为0.1和0.2、LGD为0.5和0.25时，组合独立损失方差为325。</p>
+ <div class="equation">$$\mathrm{Output}\approx 325$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+0.1,0.5
+0.2,0.25</code></pre><pre><code>./kline_quant atlas-credit-independent-credit-loss-variance study.csv X Y 100</code></pre>
+ <h3>识别条件与数据解释</h3><p>当违约具有共同宏观因子时，损失方差还包含协方差项；该实现适用的独立性假设应与信用组合风险模型一致。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article>
+<article class="lesson" id="lesson3"><h2>3．高损失率债项的预期违约笔数</h2><div class="equation">$$N_{\rm high}=\sum_iPD_i\mathbf1_{\{LGD_i&gt;g\}}$$</div>
+ <h3>经济含义与理论结构</h3><p>在所有债项中按违约损失率阈值筛选高严重程度债项，再汇总这些债项的违约概率，得到观察期限内预期违约笔数。</p>
+ <h3>数值案例与复算</h3><p>两笔债项PD为0.1和0.2、LGD为0.5和0.25，设置阈值0.3时，仅第一笔被纳入，预期违约笔数为0.1。</p>
+ <div class="equation">$$\mathrm{Output}\approx 0.1$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+0.1,0.5
+0.2,0.25</code></pre><pre><code>./kline_quant atlas-credit-high-lgd-expected-defaults study.csv X Y 0.3</code></pre>
+ <h3>识别条件与数据解释</h3><p>预期违约笔数不等于实际违约频率，也不包含单笔敞口金额；不同期限的PD不能不加调整地直接求和。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article>
+<article class="lesson" id="lesson4"><h2>4．发生违约时的预期回收现金流</h2><div class="equation">$$ER=\sum_iEAD_i\,PD_i(1-LGD_i)$$</div>
+ <h3>经济含义与理论结构</h3><p>对发生违约且存在剩余本金回收的情景，使用违约概率乘以回收率与敞口计算期望回收金额。它与未违约合同的正常本金回款属于不同现金流。</p>
+ <h3>数值案例与复算</h3><p>两笔各100的债项，违约概率为10%和20%、损失率为50%和25%，期望违约回收现金流为100×(0.05+0.15)=20。</p>
+ <div class="equation">$$\mathrm{Output}\approx 20$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+0.1,0.5
+0.2,0.25</code></pre><pre><code>./kline_quant atlas-credit-expected-credit-recovery study.csv X Y 100</code></pre>
+ <h3>识别条件与数据解释</h3><p>违约后回收时间和折现率会影响现金流现值；该公式暂以回收金额而非折现现值衡量。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article>
+<article class="lesson" id="lesson5"><h2>5．独立违约信用损失标准差</h2><div class="equation">$$\sigma_L=\sqrt{\sum_i(EAD\cdot LGD_i)^2PD_i(1-PD_i)}$$</div>
+ <h3>经济含义与理论结构</h3><p>先按独立Bernoulli违约模型计算组合损失方差，再开根号，得到以损失货币金额表示的信用组合不确定性尺度。</p>
+ <h3>数值案例与复算</h3><p>上一组参数的独立损失方差为325，损失标准差为√325，约18.03。</p>
+ <div class="equation">$$\mathrm{Output}\approx 18.027756377$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+0.1,0.5
+0.2,0.25</code></pre><pre><code>./kline_quant atlas-credit-independent-credit-loss-sd study.csv X Y 100</code></pre>
+ <h3>识别条件与数据解释</h3><p>默认相关性对信用组合尾部风险的影响通常很重要；独立违约标准差只能作为明确假设下的比较基准。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article><section class="source" id="implementation"><h2>完整数值实现与数据接口</h2>
+ <p>底层算法使用标准C++17、明确的数值边界检查与双列CSV输入。页面中的数学形式、数值案例及代码指向同一实际函数；源码可在独立研究项目中按文件链接获取。</p>
+ <p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/atlas2026_credit.hpp">查看五个算法的头文件</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/atlas2026_common.hpp">公共数值检查与基础接口</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_atlas2026.cpp">数学回归测试</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_atlas2026_cli.py">真实CSV工作流测试</a>。</p>
+ <h3>独立算法头文件</h3><pre><code>#pragma once
+#include "atlas2026_common.hpp"
+namespace kline { namespace atlas2026 {
+inline double portfolio_expected_credit_loss(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);require(p&gt;=0,"Exposure must be nonnegative");double s=0;for(std::size_t i=0;i&lt;x.size();++i){require(x[i]&gt;=0&amp;&amp;x[i]&lt;=1&amp;&amp;y[i]&gt;=0&amp;&amp;y[i]&lt;=1,"Invalid PD/LGD");s+=p*x[i]*y[i];}return s;}
+inline double independent_credit_loss_variance(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);require(p&gt;=0,"Exposure must be nonnegative");double s=0;for(std::size_t i=0;i&lt;x.size();++i){require(x[i]&gt;=0&amp;&amp;x[i]&lt;=1&amp;&amp;y[i]&gt;=0&amp;&amp;y[i]&lt;=1,"Invalid PD/LGD");double v=p*y[i];s+=v*v*x[i]*(1-x[i]);}return s;}
+inline double high_lgd_expected_defaults(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);require(p&gt;=0&amp;&amp;p&lt;=1,"LGD selection threshold invalid");double s=0;for(std::size_t i=0;i&lt;x.size();++i){require(x[i]&gt;=0&amp;&amp;x[i]&lt;=1&amp;&amp;y[i]&gt;=0&amp;&amp;y[i]&lt;=1,"Invalid PD/LGD");if(y[i]&gt;p)s+=x[i];}return s;}
+inline double expected_credit_recovery(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);require(p&gt;=0,"Exposure must be nonnegative");double s=0;for(std::size_t i=0;i&lt;x.size();++i){require(x[i]&gt;=0&amp;&amp;x[i]&lt;=1&amp;&amp;y[i]&gt;=0&amp;&amp;y[i]&lt;=1,"Invalid PD/LGD");s+=p*x[i]*(1-y[i]);}return s;}
+inline double independent_credit_loss_sd(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);require(p&gt;=0,"Exposure must be nonnegative");double s=0;for(std::size_t i=0;i&lt;x.size();++i){require(x[i]&gt;=0&amp;&amp;x[i]&lt;=1&amp;&amp;y[i]&gt;=0&amp;&amp;y[i]&lt;=1,"Invalid PD/LGD");double v=p*y[i];s+=v*v*x[i]*(1-x[i]);}return std::sqrt(s);}
+} }
+</code></pre><h3>统一输入校验</h3><pre><code>#pragma once
+#include "stats.hpp"
+#include &lt;algorithm&gt;
+#include &lt;cmath&gt;
+#include &lt;numeric&gt;
+#include &lt;stdexcept&gt;
+#include &lt;vector&gt;
+namespace kline {
+namespace atlas2026 {
+using Values=std::vector&lt;double&gt;;
+inline void valid(const Values&amp; x,const Values&amp; y,double p){
+ check_finite(x);check_finite(y);
+ require(x.size()==y.size()&amp;&amp;std::isfinite(p),"Data rows and parameter must be finite and aligned");
+}
+inline double positive_weights(const Values&amp; y){
+ double sum=0;
+ for(double w:y){require(w&gt;=0,"Weights must be nonnegative");sum+=w;}
+ require(sum&gt;0&amp;&amp;std::isfinite(sum),"Positive finite total weight required");
+ return sum;
+}
+inline void nonnegative(const Values&amp; x){
+ for(double z:x)require(z&gt;=0,"Inputs must be nonnegative");
+}
+}
+}
+</code></pre></section>
+ <section class="sources" id="references"><h2>方法与技术资料</h2><p><a href="https://www.bis.org/bcbs/">巴塞尔银行监管委员会信用风险资料</a>。数值恒等式、模型条件与算法源码构成本文各节的可复核依据。</p>
+ <p>实际经济研究所需的样本时间区间、预测时点、标签成熟规则、事件制度和交易成本应与所使用的数据共同定义；相应条件在各节分别展开。</p></section>
+ </main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

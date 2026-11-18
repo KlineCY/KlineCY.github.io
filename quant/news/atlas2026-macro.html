@@ -1,0 +1,93 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+ <title>宏观实际收益、政策规则与价格水平换算｜Kline Quant</title><meta name="description" content="五节完整数理金融专题、数学推导、复算案例及C++17实现。">
+ <link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+ <style>body{margin:0;background:white;color:#192b38;font:16px/1.92 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:24px 28px 70px}main{max-width:1140px;margin:auto}header,.lesson,.sources,.source{padding:24px 28px;border:1px solid #cbd5df;background:white;margin:18px 0}h1{font-size:30px;line-height:1.4}h2{font-size:22px;margin:12px 0 20px}h3{font-size:17px;margin:21px 0 7px}p{margin:12px 0;line-height:1.95}nav.toc{display:flex;flex-wrap:wrap;gap:12px 25px;border:1px solid #cbd5df;padding:18px 23px}.equation{overflow:auto;border-block:1px solid #d4dce4;padding:15px 7px;margin:16px 0}.katex-display{overflow-x:auto;overflow-y:hidden}a{color:#215579}code,pre{font-family:"Times New Roman",monospace}pre{border:1px solid #ccd6dd;padding:14px;overflow:auto;white-space:pre;font-size:13px;line-height:1.65;max-height:650px}small{letter-spacing:1px}.method{font-size:15px}@media(max-width:790px){.main{padding:12px;margin:0}header,.lesson,.sources,.source{padding:15px}}</style>
+ </head><body><aside id="quantSidebar" class="sidebar" data-page="news"></aside><script src="../sidebar-v2.js"></script><div class="main"><main>
+ <header><small>QUANTITATIVE METHODS / C++17 RESEARCH</small><h1>宏观实际收益、政策规则与价格水平换算</h1>
+ <p>该专题以一致的数学定义连接数据字段、数值计算、金融解释与实际研究用途。五个子主题保留相互独立的估计对象，所有公式都有对应的可复算输入和可检查的C++17实现。</p>
+ </header><nav class="toc"><a href="#lesson1">1．税后名义回报的累计实际购买力</a><a href="#lesson2">2．Fisher实际利率与比较基准差</a><a href="#lesson3">3．零通胀目标的简化Taylor规则</a><a href="#lesson4">4．名义与实际产出的隐含价格指数</a><a href="#lesson5">5．购买力基准化的实际工资</a><a href="#implementation">完整C++17源码</a><a href="#references">参考文献</a></nav>
+ <article class="lesson" id="lesson1"><h2>1．税后名义回报的累计实际购买力</h2><div class="equation">$$G_{\rm real}=\prod_t\frac{1+(1-\tau)r_t}{1+\pi_t}-1$$</div>
+ <h3>经济含义与理论结构</h3><p>名义增长因子先扣除收益税费近似，再除以同一期价格水平增长因子，最终逐期连乘。与简单用收益减通胀相比，此方法保留跨期复利。</p>
+ <h3>数值案例与复算</h3><p>投资回报为10%、通胀为2%、税费近似率为10%时，单期实际回报为1.09／1.02减1，约6.86%。</p>
+ <div class="equation">$$\mathrm{Output}\approx 0.068627451$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+0.1,0.02</code></pre><pre><code>./kline_quant atlas-macro-after-tax-real-growth study.csv X Y 0.1</code></pre>
+ <h3>识别条件与数据解释</h3><p>这是一种对收益按固定比例扣除的简化模型，无法自动处理实际税制中的亏损抵扣和资本利得纳税时点。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article>
+<article class="lesson" id="lesson2"><h2>2．Fisher实际利率与比较基准差</h2><div class="equation">$$\Delta r=\frac1n\sum_t\left(\frac{1+i_t}{1+\pi_t}-1-r^*\right)$$</div>
+ <h3>经济含义与理论结构</h3><p>Fisher恒等式将名义利率转换为同期期实际利率，再与给定的实际利率基准比较。输出为多个观测期的算术平均实际利率差。</p>
+ <h3>数值案例与复算</h3><p>名义收益10%、通胀2%、实际利率基准为2%时，利率差为1.10／1.02−1−0.02。</p>
+ <div class="equation">$$\mathrm{Output}\approx 0.058431373$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+0.1,0.02</code></pre><pre><code>./kline_quant atlas-macro-real-rate-gap study.csv X Y 0.02</code></pre>
+ <h3>识别条件与数据解释</h3><p>预期通胀与已实现通胀用于不同经济学问题，数据口径和期限必须一致。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article>
+<article class="lesson" id="lesson3"><h2>3．零通胀目标的简化Taylor规则</h2><div class="equation">$$i_t=r^*+1.5\pi_t+0.5y_t^{gap}$$</div>
+ <h3>经济含义与理论结构</h3><p>给定长期中性实际利率、通胀率和产出缺口，在零通胀目标这一明确假设下，应用Taylor规则的一种简化线性形式。</p>
+ <h3>数值案例与复算</h3><p>通胀2%、产出缺口1%、中性实际利率2%时，建议名义政策利率为2%+3%+0.5%=5.5%。</p>
+ <div class="equation">$$\mathrm{Output}\approx 0.055$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+0.02,0.01</code></pre><pre><code>./kline_quant atlas-macro-taylor-zero-target study.csv X Y 0.02</code></pre>
+ <h3>识别条件与数据解释</h3><p>真实货币政策可能包含非零通胀目标、平滑调整、零利率下界与金融稳定考虑，此式只是特定政策反应函数。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article>
+<article class="lesson" id="lesson4"><h2>4．名义与实际产出的隐含价格指数</h2><div class="equation">$$P_t=P_0\frac{NGDP_t}{RGDP_t}$$</div>
+ <h3>经济含义与理论结构</h3><p>在名义GDP与按基期价格核算的实际GDP保持一致的前提下，两者之比反映价格水平变化。以给定的指数基值进行缩放。</p>
+ <h3>数值案例与复算</h3><p>名义GDP为120、实际GDP为100、基准指数为100时，隐含价格指数为120。</p>
+ <div class="equation">$$\mathrm{Output}\approx 120$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+120,100</code></pre><pre><code>./kline_quant atlas-macro-gdp-deflator-level study.csv X Y 100</code></pre>
+ <h3>识别条件与数据解释</h3><p>实际GDP采用链式数量指数时，分量加总及不同时期的可比性会受到链式编制方法影响。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article>
+<article class="lesson" id="lesson5"><h2>5．购买力基准化的实际工资</h2><div class="equation">$$W_t^{real}=W_t^{nominal}\frac{P_0}{CPI_t}$$</div>
+ <h3>经济含义与理论结构</h3><p>将名义工资除以消费价格指数并乘以统一基准，得到以固定购买力口径表达的工资水平。用于跨期工资比较时需要统一居民消费篮子及指标基期。</p>
+ <h3>数值案例与复算</h3><p>工资为110、CPI指数为110、基准指数100时，实际工资为100个基期购买力单位。</p>
+ <div class="equation">$$\mathrm{Output}\approx 100$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+110,110</code></pre><pre><code>./kline_quant atlas-macro-cpi-deflated-wage study.csv X Y 100</code></pre>
+ <h3>识别条件与数据解释</h3><p>CPI是居民消费价格篮子的度量，不能直接替代企业产出价格或个人差异化生活成本指数。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article><section class="source" id="implementation"><h2>完整数值实现与数据接口</h2>
+ <p>底层算法使用标准C++17、明确的数值边界检查与双列CSV输入。页面中的数学形式、数值案例及代码指向同一实际函数；源码可在独立研究项目中按文件链接获取。</p>
+ <p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/atlas2026_macro.hpp">查看五个算法的头文件</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/atlas2026_common.hpp">公共数值检查与基础接口</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_atlas2026.cpp">数学回归测试</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_atlas2026_cli.py">真实CSV工作流测试</a>。</p>
+ <h3>独立算法头文件</h3><pre><code>#pragma once
+#include "atlas2026_common.hpp"
+namespace kline { namespace atlas2026 {
+inline double after_tax_real_growth(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);require(p&gt;=0&amp;&amp;p&lt;=1,"Tax fraction must be within [0,1]");double z=1;for(std::size_t i=0;i&lt;x.size();++i){require(1+(1-p)*x[i]&gt;0&amp;&amp;1+y[i]&gt;0,"Invalid gross return or price growth");z*=(1+(1-p)*x[i])/(1+y[i]);}return z-1;}
+inline double real_rate_gap(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);double sum=0;for(std::size_t i=0;i&lt;x.size();++i){require(1+y[i]&gt;0,"Inflation gross factor must be positive");sum+=(1+x[i])/(1+y[i])-1-p;}return sum/x.size();}
+inline double taylor_zero_target(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);double sum=0;for(std::size_t i=0;i&lt;x.size();++i)sum+=p+1.5*x[i]+.5*y[i];return sum/x.size();}
+inline double gdp_deflator_level(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);require(p&gt;0,"Price index reference must be positive");double sum=0;for(std::size_t i=0;i&lt;x.size();++i){require(y[i]&gt;0&amp;&amp;x[i]&gt;=0,"GDP output must be valid");sum+=p*x[i]/y[i];}return sum/x.size();}
+inline double cpi_deflated_wage(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);require(p&gt;0,"CPI base must be positive");double sum=0;for(std::size_t i=0;i&lt;x.size();++i){require(y[i]&gt;0,"CPI index must be positive");sum+=p*x[i]/y[i];}return sum/x.size();}
+} }
+</code></pre><h3>统一输入校验</h3><pre><code>#pragma once
+#include "stats.hpp"
+#include &lt;algorithm&gt;
+#include &lt;cmath&gt;
+#include &lt;numeric&gt;
+#include &lt;stdexcept&gt;
+#include &lt;vector&gt;
+namespace kline {
+namespace atlas2026 {
+using Values=std::vector&lt;double&gt;;
+inline void valid(const Values&amp; x,const Values&amp; y,double p){
+ check_finite(x);check_finite(y);
+ require(x.size()==y.size()&amp;&amp;std::isfinite(p),"Data rows and parameter must be finite and aligned");
+}
+inline double positive_weights(const Values&amp; y){
+ double sum=0;
+ for(double w:y){require(w&gt;=0,"Weights must be nonnegative");sum+=w;}
+ require(sum&gt;0&amp;&amp;std::isfinite(sum),"Positive finite total weight required");
+ return sum;
+}
+inline void nonnegative(const Values&amp; x){
+ for(double z:x)require(z&gt;=0,"Inputs must be nonnegative");
+}
+}
+}
+</code></pre></section>
+ <section class="sources" id="references"><h2>方法与技术资料</h2><p><a href="https://fred.stlouisfed.org/">美联储FRED经济数据库</a>。数值恒等式、模型条件与算法源码构成本文各节的可复核依据。</p>
+ <p>实际经济研究所需的样本时间区间、预测时点、标签成熟规则、事件制度和交易成本应与所使用的数据共同定义；相应条件在各节分别展开。</p></section>
+ </main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

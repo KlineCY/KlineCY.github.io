@@ -1,0 +1,108 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+ <title>成交参与率、流动性容量与执行约束｜Kline Quant</title><meta name="description" content="五节完整数理金融专题、数学推导、复算案例及C++17实现。">
+ <link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+ <style>body{margin:0;background:white;color:#192b38;font:16px/1.92 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:24px 28px 70px}main{max-width:1140px;margin:auto}header,.lesson,.sources,.source{padding:24px 28px;border:1px solid #cbd5df;background:white;margin:18px 0}h1{font-size:30px;line-height:1.4}h2{font-size:22px;margin:12px 0 20px}h3{font-size:17px;margin:21px 0 7px}p{margin:12px 0;line-height:1.95}nav.toc{display:flex;flex-wrap:wrap;gap:12px 25px;border:1px solid #cbd5df;padding:18px 23px}.equation{overflow:auto;border-block:1px solid #d4dce4;padding:15px 7px;margin:16px 0}.katex-display{overflow-x:auto;overflow-y:hidden}a{color:#215579}code,pre{font-family:"Times New Roman",monospace}pre{border:1px solid #ccd6dd;padding:14px;overflow:auto;white-space:pre;font-size:13px;line-height:1.65;max-height:650px}small{letter-spacing:1px}.method{font-size:15px}@media(max-width:790px){.main{padding:12px;margin:0}header,.lesson,.sources,.source{padding:15px}}</style>
+ </head><body><aside id="quantSidebar" class="sidebar" data-page="feeds"></aside><script src="../sidebar-v2.js"></script><div class="main"><main>
+ <header><small>QUANTITATIVE METHODS / C++17 RESEARCH</small><h1>成交参与率、流动性容量与执行约束</h1>
+ <p>该专题以一致的数学定义连接数据字段、数值计算、金融解释与实际研究用途。五个子主题保留相互独立的估计对象，所有公式都有对应的可复算输入和可检查的C++17实现。</p>
+ </header><nav class="toc"><a href="#lesson1">1．成交参与率剩余空间</a><a href="#lesson2">2．超过参与率上限的时段比例</a><a href="#lesson3">3．超出参与率预算的订单量</a><a href="#lesson4">4．参与率峰值容量利用倍数</a><a href="#lesson5">5．分时段参与率目标均方偏差</a><a href="#implementation">完整C++17源码</a><a href="#references">参考文献</a></nav>
+ <article class="lesson" id="lesson1"><h2>1．成交参与率剩余空间</h2><div class="equation">$$h=\rho_{\max}-\frac{\sum_iq_i}{\sum_iV_i}$$</div>
+ <h3>经济含义与理论结构</h3><p>将算法执行成交量占对应市场总成交量的比例与预先设定的最高参与率比较，差值衡量整体成交容量的剩余空间。</p>
+ <h3>数值案例与复算</h3><p>四个时段执行量为1、3、1、2，市场成交量为10、10、5、10，合计参与率为7/35=20%；最高参与率为20%时剩余空间为零。</p>
+ <div class="equation">$$\mathrm{Output}\approx 0$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+1,10
+3,10
+1,5
+2,10</code></pre><pre><code>./kline_quant atlas-execution-participation-headroom study.csv X Y 0.2</code></pre>
+ <h3>识别条件与数据解释</h3><p>整体比例低于上限不保证每个细分时段也符合容量约束，需要同时检查分时段超限情况。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article>
+<article class="lesson" id="lesson2"><h2>2．超过参与率上限的时段比例</h2><div class="equation">$$f=\frac1n\sum_i\mathbf1_{\{q_i/V_i&gt;\rho_{\max}\}}$$</div>
+ <h3>经济含义与理论结构</h3><p>逐时段计算订单成交量占市场成交量的比例，统计严格高于上限的时段占比。这个指标补充整体参与率均值，直接观察短时流动性压力。</p>
+ <h3>数值案例与复算</h3><p>四个时段参与率依次为10%、30%、20%、20%，参与率上限为20%，仅第二个时段超限，比例为25%。</p>
+ <div class="equation">$$\mathrm{Output}\approx 0.25$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+1,10
+3,10
+1,5
+2,10</code></pre><pre><code>./kline_quant atlas-execution-overcap-window-share study.csv X Y 0.2</code></pre>
+ <h3>识别条件与数据解释</h3><p>采样窗口长短会改变指标，盘中开收盘、事件突发时段与其他时间不应无条件视为同等容量。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article>
+<article class="lesson" id="lesson3"><h2>3．超出参与率预算的订单量</h2><div class="equation">$$Q_{\rm excess}=\sum_i(q_i-\rho_{\max}V_i)_+$$</div>
+ <h3>经济含义与理论结构</h3><p>把每个时段高于允许参与量的部分保留为非负值，再跨时段相加，得到执行计划超过容量约束的累计订单量。</p>
+ <h3>数值案例与复算</h3><p>第二时段允许成交量为0.2×10=2，但实际为3，因此超限订单量为1；其他时段未超限，总超限量亦为1。</p>
+ <div class="equation">$$\mathrm{Output}\approx 1$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+1,10
+3,10
+1,5
+2,10</code></pre><pre><code>./kline_quant atlas-execution-exceeding-market-volume study.csv X Y 0.2</code></pre>
+ <h3>识别条件与数据解释</h3><p>参与率上限是外生执行约束；本函数不会模拟超过市场深度后增加的真实价格冲击成本。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article>
+<article class="lesson" id="lesson4"><h2>4．参与率峰值容量利用倍数</h2><div class="equation">$$U_{\max}=\frac{\max_i(q_i/V_i)}{\rho_{\max}}$$</div>
+ <h3>经济含义与理论结构</h3><p>将最高时段参与率相对于允许上限的倍数汇总。若峰值利用倍数大于1，说明至少一个时段的执行节奏突破了既定上限。</p>
+ <h3>数值案例与复算</h3><p>示例参与率的峰值为30%，上限为20%，峰值利用倍数为1.5。</p>
+ <div class="equation">$$\mathrm{Output}\approx 1.5$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+1,10
+3,10
+1,5
+2,10</code></pre><pre><code>./kline_quant atlas-execution-peak-participation-utilization study.csv X Y 0.2</code></pre>
+ <h3>识别条件与数据解释</h3><p>该指标由单个极端时段决定，应结合订单规模、市场成交分布及预设执行时窗解释。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article>
+<article class="lesson" id="lesson5"><h2>5．分时段参与率目标均方偏差</h2><div class="equation">$$D=\frac1n\sum_i(q_i/V_i-\rho^*)^2$$</div>
+ <h3>经济含义与理论结构</h3><p>给定目标参与率后，把各个时段的真实参与率与目标之差平方并平均，刻画执行路径是否围绕计划容量均匀展开。</p>
+ <h3>数值案例与复算</h3><p>目标为20%，四个时段参与率为10%、30%、20%、20%，均方偏差为(0.01+0.01)/4=0.005。</p>
+ <div class="equation">$$\mathrm{Output}\approx 0.005$$</div>
+ <p>以下示例对应两列对齐的数值序列。保存为<code>study.csv</code>，参数按上述定义录入。</p>
+ <pre><code>X,Y
+1,10
+3,10
+1,5
+2,10</code></pre><pre><code>./kline_quant atlas-execution-participation-target-deviation study.csv X Y 0.2</code></pre>
+ <h3>识别条件与数据解释</h3><p>执行均匀不必然代表成交成本最低，因为不同时间的冲击成本、波动率和信号收益可能有较大差异。</p>
+ <p class="method">算法输入包含两组等长的数值序列和一个有明确经济含义的标量。实现统一检查空样本、非法数值与样本长度；特定模型的额外数学条件直接在对应函数中限制。</p></article><section class="source" id="implementation"><h2>完整数值实现与数据接口</h2>
+ <p>底层算法使用标准C++17、明确的数值边界检查与双列CSV输入。页面中的数学形式、数值案例及代码指向同一实际函数；源码可在独立研究项目中按文件链接获取。</p>
+ <p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/atlas2026_execution.hpp">查看五个算法的头文件</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/atlas2026_common.hpp">公共数值检查与基础接口</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_atlas2026.cpp">数学回归测试</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_atlas2026_cli.py">真实CSV工作流测试</a>。</p>
+ <h3>独立算法头文件</h3><pre><code>#pragma once
+#include "atlas2026_common.hpp"
+namespace kline { namespace atlas2026 {
+inline double participation_headroom(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);require(p&gt;0&amp;&amp;p&lt;=1,"Participation cap must be in (0,1]");double q=0,v=0;for(std::size_t i=0;i&lt;x.size();++i){require(y[i]&gt;0&amp;&amp;x[i]&gt;=0&amp;&amp;x[i]&lt;=y[i],"Invalid child and market volume");q+=x[i];v+=y[i];}return p-q/v;}
+inline double overcap_window_share(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);require(p&gt;0&amp;&amp;p&lt;=1,"Participation cap must be in (0,1]");int bad=0;for(std::size_t i=0;i&lt;x.size();++i){require(y[i]&gt;0&amp;&amp;x[i]&gt;=0&amp;&amp;x[i]&lt;=y[i],"Invalid trading volumes");bad+=x[i]/y[i]&gt;p;}return double(bad)/x.size();}
+inline double exceeding_market_volume(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);require(p&gt;0&amp;&amp;p&lt;=1,"Participation cap must be in (0,1]");double excess=0;for(std::size_t i=0;i&lt;x.size();++i){require(y[i]&gt;0&amp;&amp;x[i]&gt;=0&amp;&amp;x[i]&lt;=y[i],"Invalid volumes");excess+=std::max(0.0,x[i]-p*y[i]);}return excess;}
+inline double peak_participation_utilization(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);require(p&gt;0&amp;&amp;p&lt;=1,"Participation cap must be in (0,1]");double u=0;for(std::size_t i=0;i&lt;x.size();++i){require(y[i]&gt;0&amp;&amp;x[i]&gt;=0&amp;&amp;x[i]&lt;=y[i],"Invalid volumes");u=std::max(u,x[i]/y[i]);}return u/p;}
+inline double participation_target_deviation(const Values&amp; x,const Values&amp; y,double p){valid(x,y,p);require(p&gt;=0&amp;&amp;p&lt;=1,"Participation target must be in [0,1]");double s=0;for(std::size_t i=0;i&lt;x.size();++i){require(y[i]&gt;0&amp;&amp;x[i]&gt;=0&amp;&amp;x[i]&lt;=y[i],"Invalid volumes");double d=x[i]/y[i]-p;s+=d*d;}return s/x.size();}
+} }
+</code></pre><h3>统一输入校验</h3><pre><code>#pragma once
+#include "stats.hpp"
+#include &lt;algorithm&gt;
+#include &lt;cmath&gt;
+#include &lt;numeric&gt;
+#include &lt;stdexcept&gt;
+#include &lt;vector&gt;
+namespace kline {
+namespace atlas2026 {
+using Values=std::vector&lt;double&gt;;
+inline void valid(const Values&amp; x,const Values&amp; y,double p){
+ check_finite(x);check_finite(y);
+ require(x.size()==y.size()&amp;&amp;std::isfinite(p),"Data rows and parameter must be finite and aligned");
+}
+inline double positive_weights(const Values&amp; y){
+ double sum=0;
+ for(double w:y){require(w&gt;=0,"Weights must be nonnegative");sum+=w;}
+ require(sum&gt;0&amp;&amp;std::isfinite(sum),"Positive finite total weight required");
+ return sum;
+}
+inline void nonnegative(const Values&amp; x){
+ for(double z:x)require(z&gt;=0,"Inputs must be nonnegative");
+}
+}
+}
+</code></pre></section>
+ <section class="sources" id="references"><h2>方法与技术资料</h2><p><a href="https://www.finra.org/finra-data/market-data">FINRA市场数据</a>。数值恒等式、模型条件与算法源码构成本文各节的可复核依据。</p>
+ <p>实际经济研究所需的样本时间区间、预测时点、标签成熟规则、事件制度和交易成本应与所使用的数据共同定义；相应条件在各节分别展开。</p></section>
+ </main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>
