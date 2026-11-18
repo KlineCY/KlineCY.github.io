@@ -33,7 +33,7 @@ def collect(area):
 
 math, math_origin = collect("math")
 ml, ml_origin = collect("ml")
-assert len(math) == 340 and len(ml) == 319
+assert len(math) == 340 and len(ml) == 369
 curriculum = read("math/curriculum.json")
 math_nodes = {node["id"]: node for node in curriculum["nodes"]}
 assert set(math) <= set(math_nodes)
@@ -45,6 +45,8 @@ ml_paths = [
     *sorted((root / "ml").glob("atlas-depth-07-*.json")),
     *sorted((root / "ml").glob("atlas-depth-08-*.json")),
     *sorted((root / "ml").glob("atlas-depth-09-*.json")),
+    *sorted((root / "ml").glob("atlas-depth-10-*.json")),
+    *sorted((root / "ml").glob("atlas-depth-11-*.json")),
 ]
 ml_sources = {}
 for p in ml_paths:
