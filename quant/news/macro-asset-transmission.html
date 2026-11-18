@@ -1,0 +1,265 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>宏观政策、资产价格和融资流动性：完整数理研究｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><style>*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:white;color:#1b2d3c;font:15px/1.94 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:30px 34px 74px}main{max-width:1200px;margin:auto}header,article,.toc{border:1px solid #d0dbe3;background:white}header{padding:28px 33px}.toc{display:flex;flex-wrap:wrap;gap:10px 20px;padding:18px;margin:20px 0}h1{font-size:clamp(29px,3vw,42px)}h2{font-size:23px;margin:35px 0 14px;border-bottom:1px solid #d0dae3;padding-bottom:12px}h3{font-size:19px;margin:0 0 12px}article{padding:19px 26px;margin:14px 0}a{color:#195c84}.formula{padding:15px 8px;border-block:1px solid #d5dfe5;margin:15px 0;overflow:auto}pre{font:12px/1.6 "Times New Roman",monospace;overflow:auto;border:1px solid #d3dfe7;padding:14px;max-height:530px}footer{font-size:13px;margin:26px 0}@media(max-width:760px){.main{margin:0;padding:13px}header,article{padding:16px}}</style></head><body><aside id="quantSidebar" class="sidebar" data-page="news"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><small>MACRO ECONOMICS / RATES / REAL INVESTMENT / LIQUIDITY</small><h1>宏观政策、资产定价与资金链条</h1><p>48节数理金融课程独立解释期限结构、通胀预期、利率定价、跨币种融资、企业投资回报与杠杆流动性压力。讨论明确区分宏观指标、资产价格机制与投资结果，每个模型展示完整C++17实现。</p></header><nav class="toc"><a href="#m1">宏观利率、通胀预期与期限差</a><a href="#m2">Nelson–Siegel收益率曲线因子</a><a href="#m3">利率估值传导与债券久期凸性</a><a href="#m4">跨币种利率、外汇远期与基差</a><a href="#m5">投资现值、资本成本与真实回报</a><a href="#m6">融资流动性、仓位削减与市场冲击</a></nav><section id="m1"><h2>1．宏观利率、通胀预期与期限差</h2><article id="m1-1"><h3>1.1　概念和经济研究对象</h3><p>宏观研究同时观察政策短端利率、长期期限溢价、通胀预期及真实融资成本。不同到期收益率的差额可以描述市场对未来政策和经济状态的综合定价。</p><div class="formula">$$Spread_{bps}=10^4(y_{long}-y_{short})$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/macro.hpp">实际C++17算法：macro.hpp</a>　<a href="https://www.federalreserve.gov/econres/feds/">相关官方原始资料</a></p></article><article id="m1-2"><h3>1.2　方程、现金流与模型构造</h3><p>利用连续贴现因子和远期利率关系，可以将整个期限曲线拆成对未来短期利率路径的隐含评价。名义债券与实际债券收益率的差额近似反映通胀补偿，并包含市场流动性与风险溢价。</p><div class="formula">$$Spread_{bps}=10^4(y_{long}-y_{short})$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/macro.hpp">实际C++17算法：macro.hpp</a>　<a href="https://www.federalreserve.gov/econres/feds/">相关官方原始资料</a></p></article><article id="m1-3"><h3>1.3　时间信息和统计识别</h3><p>同一曲线的收益率报价单位、复利方式和日期必须统一。通胀盈亏平衡率属于市场价格补偿，不能直接当作公众或央行的无风险预测值。</p><div class="formula">$$Spread_{bps}=10^4(y_{long}-y_{short})$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/macro.hpp">实际C++17算法：macro.hpp</a>　<a href="https://www.federalreserve.gov/econres/feds/">相关官方原始资料</a></p></article><article id="m1-4"><h3>1.4　利率、货币与实际计量单位</h3><p>经济模型必须确定收益率期限、贴现方式、现金流币种及指标发布时间。同一曲线的收益率报价单位、复利方式和日期必须统一。通胀盈亏平衡率属于市场价格补偿，不能直接当作公众或央行的无风险预测值。</p><div class="formula">$$Spread_{bps}=10^4(y_{long}-y_{short})$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/macro.hpp">实际C++17算法：macro.hpp</a>　<a href="https://www.federalreserve.gov/econres/feds/">相关官方原始资料</a></p></article><article id="m1-5"><h3>1.5　C++17完整计算和可复用接口</h3><p>代码直接用标准C++17构建可计算指标和经济约束。利用连续贴现因子和远期利率关系，可以将整个期限曲线拆成对未来短期利率路径的隐含评价。名义债券与实际债券收益率的差额近似反映通胀补偿，并包含市场流动性与风险溢价。</p><div class="formula">$$Spread_{bps}=10^4(y_{long}-y_{short})$$</div><pre><code>#pragma once
+#include &quot;stats.hpp&quot;
+#include &lt;algorithm&gt;
+#include &lt;cmath&gt;
+#include &lt;vector&gt;
+
+namespace kline {
+
+inline double continuous_discount_factor(double zero_rate, double years) {
+    require(std::isfinite(zero_rate) &amp;&amp; years &gt;= 0 &amp;&amp; std::isfinite(years),
+            &quot;Invalid continuously compounded zero rate or maturity&quot;);
+    return std::exp(-zero_rate * years);
+}
+
+inline double continuous_forward_rate(double zero_rate_short, double short_years,
+                                       double zero_rate_long, double long_years) {
+    require(short_years &gt;= 0 &amp;&amp; long_years &gt; short_years &amp;&amp;
+            std::isfinite(zero_rate_short) &amp;&amp; std::isfinite(zero_rate_long),
+            &quot;Forward tenor must be increasing&quot;);
+    return (zero_rate_long * long_years - zero_rate_short * short_years) /
+           (long_years - short_years);
+}
+
+inline double term_spread_bps(double long_yield, double short_yield) {
+    require(std::isfinite(long_yield) &amp;&amp; std::isfinite(short_yield),
+            &quot;Yields must be finite&quot;);
+    return (long_yield - short_yield) * 10000;
+}
+
+inline double breakeven_inflation(double nominal_zero_yield, double real_zero_yield) {
+    require(std::isfinite(nominal_zero_yield) &amp;&amp; std::isfinite(real_zero_yield),
+            &quot;Zero rates must be finite&quot;);
+    // This difference can also include liquidity and inflation risk premia.
+    return nominal_zero_yield - real_zero_yield;
+}
+
+inline double approximate_parallel_shift_pnl(double bond_market_value,
+                                              double modified_duration,
+                                              double convexity,
+                                              double yield_change) {
+    require(bond_market_value &gt;= 0 &amp;&amp; modified_duration &gt;= 0 &amp;&amp; convexity &gt;= 0 &amp;&amp;
+            std::isfinite(bond_market_value) &amp;&amp; std::isfinite(yield_change),
+            &quot;Invalid rate-shock parameters&quot;);
+    double fractional_change =
+        -modified_duration * yield_change +
+        0.5 * convexity * yield_change * yield_change;
+    return bond_market_value * fractional_change;
+}
+
+inline double duration_hedge_notional(double asset_market_value,
+                                       double asset_duration, double hedge_duration) {
+    require(asset_market_value &gt;= 0 &amp;&amp; asset_duration &gt;= 0 &amp;&amp; hedge_duration &gt; 0,
+            &quot;Invalid asset or hedge duration&quot;);
+    // Sign convention: negative means short the hedging instrument.
+    return -asset_market_value * asset_duration / hedge_duration;
+}
+
+inline double fx_forward_quote_per_base(double spot_quote_per_base,
+                                         double base_annual_rate,
+                                         double quote_annual_rate,
+                                         double years) {
+    require(spot_quote_per_base &gt; 0 &amp;&amp; years &gt;= 0 &amp;&amp;
+            std::isfinite(base_annual_rate) &amp;&amp; std::isfinite(quote_annual_rate),
+            &quot;Invalid FX forward inputs&quot;);
+    require(1 + base_annual_rate * years &gt; 0 &amp;&amp;
+            1 + quote_annual_rate * years &gt; 0, &quot;Money-market factors must be positive&quot;);
+    // Spot is units of quote currency for one unit of base currency.
+    // Covered interest parity: forward = spot*(1+r_quote*T)/(1+r_base*T).
+    return spot_quote_per_base * (1 + quote_annual_rate * years) /
+           (1 + base_annual_rate * years);
+}
+
+inline double futures_roll_yield(double expiring_contract_price,
+                                  double deferred_contract_price) {
+    require(expiring_contract_price &gt; 0 &amp;&amp; deferred_contract_price &gt; 0 &amp;&amp;
+            std::isfinite(expiring_contract_price) &amp;&amp; std::isfinite(deferred_contract_price),
+            &quot;Futures prices must be positive for this proportional roll measure&quot;);
+    // A simplified static roll measure; realized futures returns also depend on
+    // subsequent changes in the contracts' prices.
+    return expiring_contract_price / deferred_contract_price - 1;
+}
+
+inline double excess_bond_return_approx(double carry_yield,
+                                         double modified_duration,
+                                         double yield_change, double convexity) {
+    require(modified_duration &gt;= 0 &amp;&amp; convexity &gt;= 0 &amp;&amp;
+            std::isfinite(carry_yield) &amp;&amp; std::isfinite(yield_change),
+            &quot;Invalid approximate bond return inputs&quot;);
+    return carry_yield - modified_duration * yield_change +
+           0.5 * convexity * yield_change * yield_change;
+}
+
+}  // namespace kline
+</code></pre><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/macro.hpp">实际C++17算法：macro.hpp</a>　<a href="https://www.federalreserve.gov/econres/feds/">相关官方原始资料</a></p></article><article id="m1-6"><h3>1.6　资产市场中的传导渠道</h3><p>中美利率市场、通胀与货币政策传导可分别按各自制度研究，再观察其如何进入股票估值、信用利差和外汇远期，避免用单一市场推广全部经济体。</p><div class="formula">$$Spread_{bps}=10^4(y_{long}-y_{short})$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/macro.hpp">实际C++17算法：macro.hpp</a>　<a href="https://www.federalreserve.gov/econres/feds/">相关官方原始资料</a></p></article><article id="m1-7"><h3>1.7　压力状态与机制失效范围</h3><p>期限利差可能因期限溢价变化而移动，即使市场对未来政策利率预测没有发生同方向调整。</p><div class="formula">$$Spread_{bps}=10^4(y_{long}-y_{short})$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/macro.hpp">实际C++17算法：macro.hpp</a>　<a href="https://www.federalreserve.gov/econres/feds/">相关官方原始资料</a></p></article><article id="m1-8"><h3>1.8　可靠数据、来源与数值复算</h3><p>所有变量应使用其当时可获得的数据，并以官方机构的原始发布时间和计量定义作来源依据。期限利差可能因期限溢价变化而移动，即使市场对未来政策利率预测没有发生同方向调整。</p><div class="formula">$$Spread_{bps}=10^4(y_{long}-y_{short})$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/macro.hpp">实际C++17算法：macro.hpp</a>　<a href="https://www.federalreserve.gov/econres/feds/">相关官方原始资料</a></p></article></section><section id="m2"><h2>2．Nelson–Siegel收益率曲线因子</h2><article id="m2-1"><h3>2.1　概念和经济研究对象</h3><p>收益率曲线的水平、短长斜率和中间期限曲率可以通过Nelson–Siegel参数化曲线描述，使高维不同期限收益率压缩到少量经济可解释因子。</p><div class="formula">$$y(t)=\beta_0+\beta_1\frac{1-e^{-t/\tau}}{t/\tau}+\beta_2(\frac{1-e^{-t/\tau}}{t/\tau}-e^{-t/\tau})$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/yield_curve_shape.hpp">实际C++17算法：yield_curve_shape.hpp</a>　<a href="https://www.bis.org/publ/bppdf/bispap25.htm">相关官方原始资料</a></p></article><article id="m2-2"><h3>2.2　方程、现金流与模型构造</h3><p>水平项影响远期长期限；第一衰减项在短端影响较强，第二项产生中间期限鼓包。通过对历史收益率曲线定期拟合，可以观察这些因子在政策周期中的变化。</p><div class="formula">$$y(t)=\beta_0+\beta_1\frac{1-e^{-t/\tau}}{t/\tau}+\beta_2(\frac{1-e^{-t/\tau}}{t/\tau}-e^{-t/\tau})$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/yield_curve_shape.hpp">实际C++17算法：yield_curve_shape.hpp</a>　<a href="https://www.bis.org/publ/bppdf/bispap25.htm">相关官方原始资料</a></p></article><article id="m2-3"><h3>2.3　时间信息和统计识别</h3><p>期限t与衰减尺度τ必须使用同一种年数单位。模型不能保证所有曲线形状无套利，参数拟合结果也取决于选择的债券和权重。</p><div class="formula">$$y(t)=\beta_0+\beta_1\frac{1-e^{-t/\tau}}{t/\tau}+\beta_2(\frac{1-e^{-t/\tau}}{t/\tau}-e^{-t/\tau})$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/yield_curve_shape.hpp">实际C++17算法：yield_curve_shape.hpp</a>　<a href="https://www.bis.org/publ/bppdf/bispap25.htm">相关官方原始资料</a></p></article><article id="m2-4"><h3>2.4　利率、货币与实际计量单位</h3><p>经济模型必须确定收益率期限、贴现方式、现金流币种及指标发布时间。期限t与衰减尺度τ必须使用同一种年数单位。模型不能保证所有曲线形状无套利，参数拟合结果也取决于选择的债券和权重。</p><div class="formula">$$y(t)=\beta_0+\beta_1\frac{1-e^{-t/\tau}}{t/\tau}+\beta_2(\frac{1-e^{-t/\tau}}{t/\tau}-e^{-t/\tau})$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/yield_curve_shape.hpp">实际C++17算法：yield_curve_shape.hpp</a>　<a href="https://www.bis.org/publ/bppdf/bispap25.htm">相关官方原始资料</a></p></article><article id="m2-5"><h3>2.5　C++17完整计算和可复用接口</h3><p>代码直接用标准C++17构建可计算指标和经济约束。水平项影响远期长期限；第一衰减项在短端影响较强，第二项产生中间期限鼓包。通过对历史收益率曲线定期拟合，可以观察这些因子在政策周期中的变化。</p><div class="formula">$$y(t)=\beta_0+\beta_1\frac{1-e^{-t/\tau}}{t/\tau}+\beta_2(\frac{1-e^{-t/\tau}}{t/\tau}-e^{-t/\tau})$$</div><pre><code>#pragma once
+#include &quot;curve_models.hpp&quot;
+#include &lt;cmath&gt;
+#include &lt;vector&gt;
+namespace kline {
+inline double nelson_siegel_zero(double maturity,double level,
+    double slope,double curvature,double decay){
+    require(std::isfinite(maturity)&amp;&amp;maturity&gt;=0&amp;&amp;
+            std::isfinite(level)&amp;&amp;std::isfinite(slope)&amp;&amp;
+            std::isfinite(curvature)&amp;&amp;std::isfinite(decay)&amp;&amp;decay&gt;0,
+            &quot;Invalid Nelson-Siegel zero inputs&quot;);
+    if(maturity==0)return level+slope;
+    double x=maturity/decay;
+    double loading=-std::expm1(-x)/x;
+    return level+slope*loading+
+           curvature*(loading-std::exp(-x));
+}
+inline ZeroCurve nelson_siegel_curve(const std::vector&lt;double&gt;&amp; times,
+    double level,double slope,double curvature,double decay){
+    check_finite(times);
+    std::vector&lt;double&gt; rates;
+    for(int i=0;i&lt;int(times.size());i++){
+        require(times[i]&gt;0&amp;&amp;(i==0||times[i]&gt;times[i-1]),
+                &quot;Nelson Siegel tenor order&quot;);
+        rates.push_back(nelson_siegel_zero(times[i],level,slope,
+                                           curvature,decay));
+    }
+    return {times,rates};
+}
+inline double curve_slope(const ZeroCurve&amp; curve,double short_term,
+                           double long_term){
+    require(long_term&gt;short_term,&quot;Yield curve slope tenors&quot;);
+    return interpolate_zero_rate(curve,long_term)-
+           interpolate_zero_rate(curve,short_term);
+}
+} // namespace kline
+</code></pre><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/yield_curve_shape.hpp">实际C++17算法：yield_curve_shape.hpp</a>　<a href="https://www.bis.org/publ/bppdf/bispap25.htm">相关官方原始资料</a></p></article><article id="m2-6"><h3>2.6　资产市场中的传导渠道</h3><p>对不同宏观经济体分别构建期限曲线因子，可以研究货币政策意外、财政预期和风险偏好改变时各期限的价格反应。</p><div class="formula">$$y(t)=\beta_0+\beta_1\frac{1-e^{-t/\tau}}{t/\tau}+\beta_2(\frac{1-e^{-t/\tau}}{t/\tau}-e^{-t/\tau})$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/yield_curve_shape.hpp">实际C++17算法：yield_curve_shape.hpp</a>　<a href="https://www.bis.org/publ/bppdf/bispap25.htm">相关官方原始资料</a></p></article><article id="m2-7"><h3>2.7　压力状态与机制失效范围</h3><p>收益率曲线的统计因子与政策因果关系不同；需要明确政策冲击识别及资产定价时钟，不能从曲率变化直接推导宏观经济增长。</p><div class="formula">$$y(t)=\beta_0+\beta_1\frac{1-e^{-t/\tau}}{t/\tau}+\beta_2(\frac{1-e^{-t/\tau}}{t/\tau}-e^{-t/\tau})$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/yield_curve_shape.hpp">实际C++17算法：yield_curve_shape.hpp</a>　<a href="https://www.bis.org/publ/bppdf/bispap25.htm">相关官方原始资料</a></p></article><article id="m2-8"><h3>2.8　可靠数据、来源与数值复算</h3><p>所有变量应使用其当时可获得的数据，并以官方机构的原始发布时间和计量定义作来源依据。收益率曲线的统计因子与政策因果关系不同；需要明确政策冲击识别及资产定价时钟，不能从曲率变化直接推导宏观经济增长。</p><div class="formula">$$y(t)=\beta_0+\beta_1\frac{1-e^{-t/\tau}}{t/\tau}+\beta_2(\frac{1-e^{-t/\tau}}{t/\tau}-e^{-t/\tau})$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/yield_curve_shape.hpp">实际C++17算法：yield_curve_shape.hpp</a>　<a href="https://www.bis.org/publ/bppdf/bispap25.htm">相关官方原始资料</a></p></article></section><section id="m3"><h2>3．利率估值传导与债券久期凸性</h2><article id="m3-1"><h3>3.1　概念和经济研究对象</h3><p>债券价格来自未来合同现金流的贴现现值，利率变化通过贴现因子影响当期市场价值。久期对应一阶价格敏感度，凸性对应二阶曲率修正。</p><div class="formula">$$\Delta P/P\approx-D\Delta y+\tfrac12 C(\Delta y)^2$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/bond_risk_models.hpp">实际C++17算法：bond_risk_models.hpp</a>　<a href="https://home.treasury.gov/resource-center/data-chart-center/interest-rates">相关官方原始资料</a></p></article><article id="m3-2"><h3>3.2　方程、现金流与模型构造</h3><p>对价格关于收益率做泰勒展开，第一导数形成修正久期，第二导数形成凸性。对长期贴现现金流，远期利率变化更容易产生显著估值作用。</p><div class="formula">$$\Delta P/P\approx-D\Delta y+\tfrac12 C(\Delta y)^2$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/bond_risk_models.hpp">实际C++17算法：bond_risk_models.hpp</a>　<a href="https://home.treasury.gov/resource-center/data-chart-center/interest-rates">相关官方原始资料</a></p></article><article id="m3-3"><h3>3.3　时间信息和统计识别</h3><p>收益率变化以小数单位进入微分公式，基点变化要换算；现金流本身和交易结算日期必须事先固定。久期和凸性在含权债券中需要重估。</p><div class="formula">$$\Delta P/P\approx-D\Delta y+\tfrac12 C(\Delta y)^2$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/bond_risk_models.hpp">实际C++17算法：bond_risk_models.hpp</a>　<a href="https://home.treasury.gov/resource-center/data-chart-center/interest-rates">相关官方原始资料</a></p></article><article id="m3-4"><h3>3.4　利率、货币与实际计量单位</h3><p>经济模型必须确定收益率期限、贴现方式、现金流币种及指标发布时间。收益率变化以小数单位进入微分公式，基点变化要换算；现金流本身和交易结算日期必须事先固定。久期和凸性在含权债券中需要重估。</p><div class="formula">$$\Delta P/P\approx-D\Delta y+\tfrac12 C(\Delta y)^2$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/bond_risk_models.hpp">实际C++17算法：bond_risk_models.hpp</a>　<a href="https://home.treasury.gov/resource-center/data-chart-center/interest-rates">相关官方原始资料</a></p></article><article id="m3-5"><h3>3.5　C++17完整计算和可复用接口</h3><p>代码直接用标准C++17构建可计算指标和经济约束。对价格关于收益率做泰勒展开，第一导数形成修正久期，第二导数形成凸性。对长期贴现现金流，远期利率变化更容易产生显著估值作用。</p><div class="formula">$$\Delta P/P\approx-D\Delta y+\tfrac12 C(\Delta y)^2$$</div><pre><code>#pragma once
+#include &quot;fixed_income_advanced.hpp&quot;
+#include &lt;cmath&gt;
+#include &lt;vector&gt;
+namespace kline {
+struct ContinuousBondRisk{
+    double price=0,duration=0,convexity=0,dv01=0;
+};
+inline ContinuousBondRisk continuous_bond_risk(
+    const std::vector&lt;double&gt;&amp; times,const std::vector&lt;double&gt;&amp; cashflows,
+    double yield){
+    check_finite(times);check_finite(cashflows);
+    require(times.size()==cashflows.size()&amp;&amp;
+            std::isfinite(yield),&quot;Invalid bond risk cashflows&quot;);
+    ContinuousBondRisk r;
+    double first=0,second=0;
+    for(int i=0;i&lt;int(times.size());i++){
+        require(times[i]&gt;0,&quot;Bond times must be future&quot;);
+        double pv=cashflows[i]*std::exp(-yield*times[i]);
+        r.price+=pv;first+=times[i]*pv;second+=times[i]*times[i]*pv;
+    }
+    require(std::isfinite(r.price)&amp;&amp;r.price&gt;0&amp;&amp;
+            std::isfinite(first)&amp;&amp;std::isfinite(second),
+            &quot;Bond price, duration or convexity overflow&quot;);
+    r.duration=first/r.price;
+    r.convexity=second/r.price;
+    r.dv01=first*1e-4;
+    return r;
+}
+inline double bond_shock_pnl_approx(double price,double duration,
+                                   double convexity,double rate_change){
+    require(std::isfinite(price)&amp;&amp;price&gt;0&amp;&amp;std::isfinite(duration)&amp;&amp;
+            std::isfinite(convexity)&amp;&amp;std::isfinite(rate_change),
+            &quot;Invalid rate shock parameters&quot;);
+    return price*(-duration*rate_change+
+                  0.5*convexity*rate_change*rate_change);
+}
+} // namespace kline
+</code></pre><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/bond_risk_models.hpp">实际C++17算法：bond_risk_models.hpp</a>　<a href="https://home.treasury.gov/resource-center/data-chart-center/interest-rates">相关官方原始资料</a></p></article><article id="m3-6"><h3>3.6　资产市场中的传导渠道</h3><p>股票估值中的贴现率变化、长期国债和高收益债的市场风险可以通过统一的贴现逻辑比较，但现金流类型及风险溢价必须分别处理。</p><div class="formula">$$\Delta P/P\approx-D\Delta y+\tfrac12 C(\Delta y)^2$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/bond_risk_models.hpp">实际C++17算法：bond_risk_models.hpp</a>　<a href="https://home.treasury.gov/resource-center/data-chart-center/interest-rates">相关官方原始资料</a></p></article><article id="m3-7"><h3>3.7　压力状态与机制失效范围</h3><p>不能用单个总久期覆盖期限结构扭转或信用利差冲击；需要节点DV01及完整现金流情景。</p><div class="formula">$$\Delta P/P\approx-D\Delta y+\tfrac12 C(\Delta y)^2$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/bond_risk_models.hpp">实际C++17算法：bond_risk_models.hpp</a>　<a href="https://home.treasury.gov/resource-center/data-chart-center/interest-rates">相关官方原始资料</a></p></article><article id="m3-8"><h3>3.8　可靠数据、来源与数值复算</h3><p>所有变量应使用其当时可获得的数据，并以官方机构的原始发布时间和计量定义作来源依据。不能用单个总久期覆盖期限结构扭转或信用利差冲击；需要节点DV01及完整现金流情景。</p><div class="formula">$$\Delta P/P\approx-D\Delta y+\tfrac12 C(\Delta y)^2$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/bond_risk_models.hpp">实际C++17算法：bond_risk_models.hpp</a>　<a href="https://home.treasury.gov/resource-center/data-chart-center/interest-rates">相关官方原始资料</a></p></article></section><section id="m4"><h2>4．跨币种利率、外汇远期与基差</h2><article id="m4-1"><h3>4.1　概念和经济研究对象</h3><p>抛补利率平价把当前即期汇率、不同货币融资利率和相同期限的远期汇率联系起来，是跨国资产收益转换和汇率套保的重要基准。</p><div class="formula">$$F=S\exp[(r_D-r_F)T]$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/fx_forward_parity.hpp">实际C++17算法：fx_forward_parity.hpp</a>　<a href="https://www.bis.org/statistics/about_fx_stats.htm">相关官方原始资料</a></p></article><article id="m4-2"><h3>4.2　方程、现金流与模型构造</h3><p>比较将本币资产直接投资与换成外币、投资外币资产并同时锁定未来换汇的两种现金流；若没有市场摩擦，两条路径的同币种到期价值相等。</p><div class="formula">$$F=S\exp[(r_D-r_F)T]$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/fx_forward_parity.hpp">实际C++17算法：fx_forward_parity.hpp</a>　<a href="https://www.bis.org/statistics/about_fx_stats.htm">相关官方原始资料</a></p></article><article id="m4-3"><h3>4.3　时间信息和统计识别</h3><p>外汇报价方向、计息频率、抵押融资及远期结算期限必须一致。在不同币种抵押条件下，市场远期报价可能具有持续基差。</p><div class="formula">$$F=S\exp[(r_D-r_F)T]$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/fx_forward_parity.hpp">实际C++17算法：fx_forward_parity.hpp</a>　<a href="https://www.bis.org/statistics/about_fx_stats.htm">相关官方原始资料</a></p></article><article id="m4-4"><h3>4.4　利率、货币与实际计量单位</h3><p>经济模型必须确定收益率期限、贴现方式、现金流币种及指标发布时间。外汇报价方向、计息频率、抵押融资及远期结算期限必须一致。在不同币种抵押条件下，市场远期报价可能具有持续基差。</p><div class="formula">$$F=S\exp[(r_D-r_F)T]$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/fx_forward_parity.hpp">实际C++17算法：fx_forward_parity.hpp</a>　<a href="https://www.bis.org/statistics/about_fx_stats.htm">相关官方原始资料</a></p></article><article id="m4-5"><h3>4.5　C++17完整计算和可复用接口</h3><p>代码直接用标准C++17构建可计算指标和经济约束。比较将本币资产直接投资与换成外币、投资外币资产并同时锁定未来换汇的两种现金流；若没有市场摩擦，两条路径的同币种到期价值相等。</p><div class="formula">$$F=S\exp[(r_D-r_F)T]$$</div><pre><code>#pragma once
+#include &quot;stats.hpp&quot;
+#include &lt;cmath&gt;
+namespace kline {
+inline double covered_fx_forward(
+    double spot_base_per_foreign,double domestic_rate,
+    double foreign_rate,double years){
+    require(std::isfinite(spot_base_per_foreign)&amp;&amp;spot_base_per_foreign&gt;0&amp;&amp;
+            std::isfinite(domestic_rate)&amp;&amp;std::isfinite(foreign_rate)&amp;&amp;
+            std::isfinite(years)&amp;&amp;years&gt;=0,
+            &quot;Invalid covered interest parity input&quot;);
+    return spot_base_per_foreign*
+           std::exp((domestic_rate-foreign_rate)*years);
+}
+inline double fx_covered_basis(
+    double observed_forward,double spot,double domestic_rate,
+    double foreign_rate,double years){
+    require(std::isfinite(observed_forward)&amp;&amp;observed_forward&gt;0&amp;&amp;
+            std::isfinite(years)&amp;&amp;years&gt;0,&quot;Invalid FX covered basis&quot;);
+    double parity=covered_fx_forward(spot,domestic_rate,foreign_rate,years);
+    return std::log(observed_forward/parity)/years;
+}
+} // namespace kline
+</code></pre><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/fx_forward_parity.hpp">实际C++17算法：fx_forward_parity.hpp</a>　<a href="https://www.bis.org/statistics/about_fx_stats.htm">相关官方原始资料</a></p></article><article id="m4-6"><h3>4.6　资产市场中的传导渠道</h3><p>国际股票、债券和ETF投资者需要区分外币资产本身收益与汇率收益，并将远期套保成本从投资回报中独立分解。</p><div class="formula">$$F=S\exp[(r_D-r_F)T]$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/fx_forward_parity.hpp">实际C++17算法：fx_forward_parity.hpp</a>　<a href="https://www.bis.org/statistics/about_fx_stats.htm">相关官方原始资料</a></p></article><article id="m4-7"><h3>4.7　压力状态与机制失效范围</h3><p>有交易对手信用、资金流动性和市场分割时，简单平价不是无条件可交易的套利恒等式。</p><div class="formula">$$F=S\exp[(r_D-r_F)T]$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/fx_forward_parity.hpp">实际C++17算法：fx_forward_parity.hpp</a>　<a href="https://www.bis.org/statistics/about_fx_stats.htm">相关官方原始资料</a></p></article><article id="m4-8"><h3>4.8　可靠数据、来源与数值复算</h3><p>所有变量应使用其当时可获得的数据，并以官方机构的原始发布时间和计量定义作来源依据。有交易对手信用、资金流动性和市场分割时，简单平价不是无条件可交易的套利恒等式。</p><div class="formula">$$F=S\exp[(r_D-r_F)T]$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/fx_forward_parity.hpp">实际C++17算法：fx_forward_parity.hpp</a>　<a href="https://www.bis.org/statistics/about_fx_stats.htm">相关官方原始资料</a></p></article></section><section id="m5"><h2>5．投资现值、资本成本与真实回报</h2><article id="m5-1"><h3>5.1　概念和经济研究对象</h3><p>产业投资与企业估值可以从预期现金流、资本成本及资本支出期限结构出发研究。资本开支增加可能压低近期自由现金流，但同时改变长期经营产能和技术效率。</p><div class="formula">$$NPV=-I_0+\sum_{t=1}^T\frac{CF_t}{(1+r)^t}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/corporate_finance_models.hpp">实际C++17算法：corporate_finance_models.hpp</a>　<a href="https://www.sec.gov/edgar/search/">相关官方原始资料</a></p></article><article id="m5-2"><h3>5.2　方程、现金流与模型构造</h3><p>先把未来每期自由现金流用与其风险一致的资本成本贴现，再减去初始投入。永续增长近似使用稳定增长现金流和风险贴现率，只有在合理的长期稳态下可解释。</p><div class="formula">$$NPV=-I_0+\sum_{t=1}^T\frac{CF_t}{(1+r)^t}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/corporate_finance_models.hpp">实际C++17算法：corporate_finance_models.hpp</a>　<a href="https://www.sec.gov/edgar/search/">相关官方原始资料</a></p></article><article id="m5-3"><h3>5.3　时间信息和统计识别</h3><p>名义现金流应与名义贴现率配对，实质现金流与实质贴现率配对。增长率不能在永续假设中无条件高于资本成本。</p><div class="formula">$$NPV=-I_0+\sum_{t=1}^T\frac{CF_t}{(1+r)^t}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/corporate_finance_models.hpp">实际C++17算法：corporate_finance_models.hpp</a>　<a href="https://www.sec.gov/edgar/search/">相关官方原始资料</a></p></article><article id="m5-4"><h3>5.4　利率、货币与实际计量单位</h3><p>经济模型必须确定收益率期限、贴现方式、现金流币种及指标发布时间。名义现金流应与名义贴现率配对，实质现金流与实质贴现率配对。增长率不能在永续假设中无条件高于资本成本。</p><div class="formula">$$NPV=-I_0+\sum_{t=1}^T\frac{CF_t}{(1+r)^t}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/corporate_finance_models.hpp">实际C++17算法：corporate_finance_models.hpp</a>　<a href="https://www.sec.gov/edgar/search/">相关官方原始资料</a></p></article><article id="m5-5"><h3>5.5　C++17完整计算和可复用接口</h3><p>代码直接用标准C++17构建可计算指标和经济约束。先把未来每期自由现金流用与其风险一致的资本成本贴现，再减去初始投入。永续增长近似使用稳定增长现金流和风险贴现率，只有在合理的长期稳态下可解释。</p><div class="formula">$$NPV=-I_0+\sum_{t=1}^T\frac{CF_t}{(1+r)^t}$$</div><pre><code>#pragma once
+#include &quot;stats.hpp&quot;
+#include &lt;cmath&gt;
+#include &lt;vector&gt;
+namespace kline {
+inline double net_present_value(double initial_investment,
+    const std::vector&lt;double&gt;&amp; future_cashflows,double discount){
+    check_finite(future_cashflows);
+    require(std::isfinite(initial_investment)&amp;&amp;
+            std::isfinite(discount)&amp;&amp;discount&gt;-1,
+            &quot;Invalid NPV inputs&quot;);
+    double value=-initial_investment;
+    for(int t=0;t&lt;int(future_cashflows.size());t++)
+        value+=future_cashflows[t]/std::pow(1+discount,t+1);
+    return value;
+}
+inline double weighted_average_cost_of_capital(double equity_weight,
+    double cost_equity,double pretax_cost_debt,double tax_rate){
+    require(std::isfinite(equity_weight)&amp;&amp;equity_weight&gt;=0&amp;&amp;equity_weight&lt;=1&amp;&amp;
+            std::isfinite(cost_equity)&amp;&amp;std::isfinite(pretax_cost_debt)&amp;&amp;
+            std::isfinite(tax_rate)&amp;&amp;tax_rate&gt;=0&amp;&amp;tax_rate&lt;=1,
+            &quot;Invalid WACC values&quot;);
+    return equity_weight*cost_equity+
+           (1-equity_weight)*pretax_cost_debt*(1-tax_rate);
+}
+inline double perpetuity_value(double next_cashflow,double growth,
+                                double discount){
+    require(std::isfinite(next_cashflow)&amp;&amp;std::isfinite(growth)&amp;&amp;
+            std::isfinite(discount)&amp;&amp;discount&gt;growth,
+            &quot;Perpetuity growth must be below discount rate&quot;);
+    return next_cashflow/(discount-growth);
+}
+} // namespace kline
+</code></pre><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/corporate_finance_models.hpp">实际C++17算法：corporate_finance_models.hpp</a>　<a href="https://www.sec.gov/edgar/search/">相关官方原始资料</a></p></article><article id="m5-6"><h3>5.6　资产市场中的传导渠道</h3><p>研究AI基础设施资本开支时，可以沿设备投资、算力使用率、企业收入、利润转化和融资自由现金流形成完整价值链，而不能仅凭资本开支上升判断投资回报。</p><div class="formula">$$NPV=-I_0+\sum_{t=1}^T\frac{CF_t}{(1+r)^t}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/corporate_finance_models.hpp">实际C++17算法：corporate_finance_models.hpp</a>　<a href="https://www.sec.gov/edgar/search/">相关官方原始资料</a></p></article><article id="m5-7"><h3>5.7　压力状态与机制失效范围</h3><p>贴现模型的结果对长期毛利率、折现率和终值假设高度敏感，应以多个情景和完整现金流进行分析。</p><div class="formula">$$NPV=-I_0+\sum_{t=1}^T\frac{CF_t}{(1+r)^t}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/corporate_finance_models.hpp">实际C++17算法：corporate_finance_models.hpp</a>　<a href="https://www.sec.gov/edgar/search/">相关官方原始资料</a></p></article><article id="m5-8"><h3>5.8　可靠数据、来源与数值复算</h3><p>所有变量应使用其当时可获得的数据，并以官方机构的原始发布时间和计量定义作来源依据。贴现模型的结果对长期毛利率、折现率和终值假设高度敏感，应以多个情景和完整现金流进行分析。</p><div class="formula">$$NPV=-I_0+\sum_{t=1}^T\frac{CF_t}{(1+r)^t}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/corporate_finance_models.hpp">实际C++17算法：corporate_finance_models.hpp</a>　<a href="https://www.sec.gov/edgar/search/">相关官方原始资料</a></p></article></section><section id="m6"><h2>6．融资流动性、仓位削减与市场冲击</h2><article id="m6-1"><h3>6.1　概念和经济研究对象</h3><p>资产价格波动与资金流动性形成相互影响。赎回、保证金追缴或融资收紧可能迫使投资者削减仓位，订单规模和可用流动性的差异决定退出时间与冲击成本。</p><div class="formula">$$DaysToExit_i=\frac{|Position_i|}{Participation_i\cdot ADV_i}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/liquidity_stress.hpp">实际C++17算法：liquidity_stress.hpp</a>　<a href="https://www.bis.org/fsi/">相关官方原始资料</a></p></article><article id="m6-2"><h3>6.2　方程、现金流与模型构造</h3><p>把需要退出的持仓数量除以可接受的每日日成交量比例，可得到理论退出天数；再按多个时段的成交安排汇总估计资金周转和流动性成本。</p><div class="formula">$$DaysToExit_i=\frac{|Position_i|}{Participation_i\cdot ADV_i}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/liquidity_stress.hpp">实际C++17算法：liquidity_stress.hpp</a>　<a href="https://www.bis.org/fsi/">相关官方原始资料</a></p></article><article id="m6-3"><h3>6.3　时间信息和统计识别</h3><p>日成交量与可执行成交量不相同，极端市场时差价和深度会迅速改变；参与率需要根据具体资产和时段设定。</p><div class="formula">$$DaysToExit_i=\frac{|Position_i|}{Participation_i\cdot ADV_i}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/liquidity_stress.hpp">实际C++17算法：liquidity_stress.hpp</a>　<a href="https://www.bis.org/fsi/">相关官方原始资料</a></p></article><article id="m6-4"><h3>6.4　利率、货币与实际计量单位</h3><p>经济模型必须确定收益率期限、贴现方式、现金流币种及指标发布时间。日成交量与可执行成交量不相同，极端市场时差价和深度会迅速改变；参与率需要根据具体资产和时段设定。</p><div class="formula">$$DaysToExit_i=\frac{|Position_i|}{Participation_i\cdot ADV_i}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/liquidity_stress.hpp">实际C++17算法：liquidity_stress.hpp</a>　<a href="https://www.bis.org/fsi/">相关官方原始资料</a></p></article><article id="m6-5"><h3>6.5　C++17完整计算和可复用接口</h3><p>代码直接用标准C++17构建可计算指标和经济约束。把需要退出的持仓数量除以可接受的每日日成交量比例，可得到理论退出天数；再按多个时段的成交安排汇总估计资金周转和流动性成本。</p><div class="formula">$$DaysToExit_i=\frac{|Position_i|}{Participation_i\cdot ADV_i}$$</div><pre><code>#pragma once
+#include &quot;stats.hpp&quot;
+#include &lt;algorithm&gt;
+#include &lt;cmath&gt;
+#include &lt;numeric&gt;
+#include &lt;vector&gt;
+namespace kline {
+inline double liquidation_days(const std::vector&lt;double&gt;&amp; shares,
+    const std::vector&lt;double&gt;&amp; average_daily_volume,double participation){
+    check_finite(shares);check_finite(average_daily_volume);
+    require(shares.size()==average_daily_volume.size()&amp;&amp;
+            std::isfinite(participation)&amp;&amp;participation&gt;0&amp;&amp;participation&lt;=1,
+            &quot;Invalid liquidation inputs&quot;);
+    double days=0;
+    for(int i=0;i&lt;int(shares.size());i++){
+        require(average_daily_volume[i]&gt;0,&quot;Nonpositive ADV&quot;);
+        days=std::max(days,std::fabs(shares[i])/
+             (participation*average_daily_volume[i]));
+    }
+    return days;
+}
+inline double staged_liquidation_cost(const std::vector&lt;double&gt;&amp; quantities,
+    const std::vector&lt;double&gt;&amp; spreads,
+    const std::vector&lt;double&gt;&amp; participation_rates,
+    double impact_coefficient){
+    check_finite(quantities);check_finite(spreads);
+    check_finite(participation_rates);
+    require(quantities.size()==spreads.size()&amp;&amp;
+            quantities.size()==participation_rates.size()&amp;&amp;
+            std::isfinite(impact_coefficient)&amp;&amp;impact_coefficient&gt;=0,
+            &quot;Invalid liquidity cost arrays&quot;);
+    double total=0;
+    for(int i=0;i&lt;int(quantities.size());i++){
+        require(spreads[i]&gt;=0&amp;&amp;participation_rates[i]&gt;=0,
+                &quot;Negative liquidity cost rate&quot;);
+        total+=std::fabs(quantities[i])*(spreads[i]+
+                 impact_coefficient*std::sqrt(participation_rates[i]));
+    }
+    return total;
+}
+} // namespace kline
+</code></pre><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/liquidity_stress.hpp">实际C++17算法：liquidity_stress.hpp</a>　<a href="https://www.bis.org/fsi/">相关官方原始资料</a></p></article><article id="m6-6"><h3>6.6　资产市场中的传导渠道</h3><p>杠杆ETF、市场中性基金与债券基金的风险管理需要同时考察账户净值和融资现金流，尤其在市场集中抛压期间。</p><div class="formula">$$DaysToExit_i=\frac{|Position_i|}{Participation_i\cdot ADV_i}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/liquidity_stress.hpp">实际C++17算法：liquidity_stress.hpp</a>　<a href="https://www.bis.org/fsi/">相关官方原始资料</a></p></article><article id="m6-7"><h3>6.7　压力状态与机制失效范围</h3><p>典型市场平均ADV不能代表危机时的保证成交量。风险机制在不同国家和交易所规则下存在明显异质性。</p><div class="formula">$$DaysToExit_i=\frac{|Position_i|}{Participation_i\cdot ADV_i}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/liquidity_stress.hpp">实际C++17算法：liquidity_stress.hpp</a>　<a href="https://www.bis.org/fsi/">相关官方原始资料</a></p></article><article id="m6-8"><h3>6.8　可靠数据、来源与数值复算</h3><p>所有变量应使用其当时可获得的数据，并以官方机构的原始发布时间和计量定义作来源依据。典型市场平均ADV不能代表危机时的保证成交量。风险机制在不同国家和交易所规则下存在明显异质性。</p><div class="formula">$$DaysToExit_i=\frac{|Position_i|}{Participation_i\cdot ADV_i}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/liquidity_stress.hpp">实际C++17算法：liquidity_stress.hpp</a>　<a href="https://www.bis.org/fsi/">相关官方原始资料</a></p></article></section><footer>其他官方资料：<a href="https://fred.stlouisfed.org/">FRED</a>；<a href="https://data.imf.org/">IMF Data</a>；<a href="https://www.bis.org/statistics/">BIS Statistics</a>。<a href="./">全球宏观新闻与数据源目录</a>。</footer></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

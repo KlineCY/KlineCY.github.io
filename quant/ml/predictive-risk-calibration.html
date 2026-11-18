@@ -1,0 +1,175 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>概率校准、计数预测与模型样本外误差｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><style>*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:white;color:#1c2d3c;font:15px/1.93 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:28px 36px 74px}main{max-width:1190px;margin:auto}header,.toc,article{border:1px solid #cbd7e0;background:white}header{padding:28px 33px}.toc{display:flex;flex-wrap:wrap;gap:10px 21px;padding:17px;margin:21px 0}a{color:#1e5d83}h1{font-size:clamp(28px,3vw,40px)}h2{font-size:23px;padding-bottom:12px;border-bottom:1px solid #c9d6e0;margin-top:34px}h3{font-size:18px;margin:0 0 12px}article{padding:19px 25px;margin:13px 0;scroll-margin-top:15px}.math{padding:14px 8px;margin:14px 0;border-block:1px solid #d7e0e8;overflow:auto}pre{font:12px/1.6 "Times New Roman",monospace;border:1px solid #d6dfe8;padding:14px;max-height:530px;overflow:auto}footer{font-size:13px;color:#586e7d;margin:28px 0}@media(max-width:790px){.main{margin:0;padding:12px}header,article{padding:16px}}</style></head><body><aside id="quantSidebar" class="sidebar" data-page="ml"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><small>FINANCIAL AI / MARKET DATA / REAL-TIME RESEARCH</small><h1>概率校准、计数预测与模型样本外误差</h1><p>本卷包含48节独立课程，分别提供模型定义、统计推导、经济假设、可用输入、完整可编译C++17源码、交易连接、偏差限制和数值验证。</p><p>定量预测与实际交易保持各自的经济口径；所有实验均须尊重可得信息时间、真实资产数量及费用约束。</p></header><nav class="toc"><a href="#model1">Poisson广义线性模型与到达强度</a><a href="#model2">多分类概率对数损失</a><a href="#model3">二元概率可靠性曲线</a><a href="#model4">预测区间经验覆盖率与宽度</a><a href="#model5">Welford在线均值与方差</a><a href="#model6">样本外MAE、RMSE与预测偏差</a></nav><section id="model1"><h2>1．Poisson广义线性模型与到达强度</h2><article id="model1-l1"><h3>1.1　对象、目标和定义</h3><p>Poisson回归针对非负整数计数，采用对数连接函数使给定特征下的预期事件次数为正，适用于订单到达、违约事件与交易次数的基准建模。</p><div class="math">$$E[Y_i\mid X_i]=\lambda_i=\exp(\beta_0+X_i^\top\beta)$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/poisson_glm_sgd.hpp">C++17算法源码：poisson_glm_sgd.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model1-l2"><h3>1.2　模型推导及基本公式</h3><p>从Poisson对数似然的指数部分可得预测均值，对系数求导形成预测计数减去实现计数的梯度。逐次下降更新参数，并可对斜率施加L2收缩。</p><div class="math">$$E[Y_i\mid X_i]=\lambda_i=\exp(\beta_0+X_i^\top\beta)$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/poisson_glm_sgd.hpp">C++17算法源码：poisson_glm_sgd.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model1-l3"><h3>1.3　数据分布与可用信息</h3><p>计数必须是非负整数，样本时间窗需要长度一致。Poisson模型隐含条件均值与条件方差相同，真实高频事件若有显著自激或过度离散需要更丰富的强度模型。</p><div class="math">$$E[Y_i\mid X_i]=\lambda_i=\exp(\beta_0+X_i^\top\beta)$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/poisson_glm_sgd.hpp">C++17算法源码：poisson_glm_sgd.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model1-l4"><h3>1.4　参数与预测结果的单位</h3><p>研究需要区分价格、无量纲概率、货币风险金额、成交量及自然时间。计数必须是非负整数，样本时间窗需要长度一致。Poisson模型隐含条件均值与条件方差相同，真实高频事件若有显著自激或过度离散需要更丰富的强度模型。</p><div class="math">$$E[Y_i\mid X_i]=\lambda_i=\exp(\beta_0+X_i^\top\beta)$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/poisson_glm_sgd.hpp">C++17算法源码：poisson_glm_sgd.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model1-l5"><h3>1.5　标准C++17数值计算</h3><p>算法直接采用C++17容器、数值运算和输入条件检查。从Poisson对数似然的指数部分可得预测均值，对系数求导形成预测计数减去实现计数的梯度。逐次下降更新参数，并可对斜率施加L2收缩。</p><div class="math">$$E[Y_i\mid X_i]=\lambda_i=\exp(\beta_0+X_i^\top\beta)$$</div><pre><code>#pragma once
+#include &quot;portfolio.hpp&quot;
+#include &lt;algorithm&gt;
+#include &lt;cmath&gt;
+namespace kline {
+struct PoissonFit{std::vector&lt;double&gt; coefficients;};
+inline PoissonFit fit_poisson_glm_sgd(
+    const Matrix&amp; features,const std::vector&lt;double&gt;&amp; counts,
+    double learning_rate,int epochs,double l2=0.001){
+    require(features.size()==counts.size()&amp;&amp;!features.empty()&amp;&amp;
+            std::isfinite(learning_rate)&amp;&amp;learning_rate&gt;0&amp;&amp;
+            epochs&gt;=1&amp;&amp;epochs&lt;=100000&amp;&amp;std::isfinite(l2)&amp;&amp;l2&gt;=0,
+            &quot;Invalid Poisson GLM optimizer inputs&quot;);
+    check_finite(counts);
+    int p=int(features.front().size());
+    require(p&gt;0,&quot;Poisson GLM requires at least one feature&quot;);
+    for(const auto&amp; row:features){
+        check_finite(row);
+        require(int(row.size())==p,&quot;Poisson regression feature shape&quot;);
+    }
+    double average=mean(counts);
+    for(double c:counts)require(c&gt;=0&amp;&amp;std::floor(c)==c,
+                                &quot;Poisson target requires count outcomes&quot;);
+    std::vector&lt;double&gt; beta(p+1,0);
+    beta[0]=std::log(std::max(0.001,average));
+    for(int epoch=0;epoch&lt;epochs;epoch++){
+        std::vector&lt;double&gt; gradient(p+1,0);
+        for(int t=0;t&lt;int(counts.size());t++){
+            double linear=beta[0];
+            for(int j=0;j&lt;p;j++)linear+=beta[j+1]*features[t][j];
+            double expected=std::exp(std::clamp(linear,-20.0,20.0));
+            double error=std::clamp(expected-counts[t],-100.0,100.0)/
+                         counts.size();
+            gradient[0]+=error;
+            for(int j=0;j&lt;p;j++)gradient[j+1]+=error*features[t][j];
+        }
+        double eta=learning_rate/std::sqrt(epoch+1.0);
+        for(int j=0;j&lt;p+1;j++)
+            beta[j]-=eta*(gradient[j]+(j?l2*beta[j]:0));
+    }
+    return {beta};
+}
+inline double predict_poisson_glm(const PoissonFit&amp; model,
+                                  const std::vector&lt;double&gt;&amp; feature){
+    check_finite(feature);
+    require(feature.size()+1==model.coefficients.size(),
+            &quot;Poisson prediction dimensionality mismatch&quot;);
+    double score=model.coefficients[0];
+    for(int j=0;j&lt;int(feature.size());j++)
+        score+=feature[j]*model.coefficients[j+1];
+    return std::exp(std::clamp(score,-20.0,20.0));
+}
+} // namespace kline
+</code></pre><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/poisson_glm_sgd.hpp">C++17算法源码：poisson_glm_sgd.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model1-l6"><h3>1.6　机器学习或市场交易应用</h3><p>订单流研究中可利用上一期成交量或盘口状态预测下一固定窗口到达次数，并把模型结果转化为做市报价的流动性输入。</p><div class="math">$$E[Y_i\mid X_i]=\lambda_i=\exp(\beta_0+X_i^\top\beta)$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/poisson_glm_sgd.hpp">C++17算法源码：poisson_glm_sgd.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model1-l7"><h3>1.7　风险、漂移及典型失效条件</h3><p>对极端特征值，指数链接会产生数值溢出；实现限制线性预测范围以稳定计算，但这种裁剪并不代表完整的概率模型。</p><div class="math">$$E[Y_i\mid X_i]=\lambda_i=\exp(\beta_0+X_i^\top\beta)$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/poisson_glm_sgd.hpp">C++17算法源码：poisson_glm_sgd.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model1-l8"><h3>1.8　复现程序、测试与边界处理</h3><p>完整实现可以通过代码仓库的数值回归与CSV端到端测试运行。对极端特征值，指数链接会产生数值溢出；实现限制线性预测范围以稳定计算，但这种裁剪并不代表完整的概率模型。测试与业务计算使用一致的参数语义，避免只核对无异常退出。</p><div class="math">$$E[Y_i\mid X_i]=\lambda_i=\exp(\beta_0+X_i^\top\beta)$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/poisson_glm_sgd.hpp">C++17算法源码：poisson_glm_sgd.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article></section><section id="model2"><h2>2．多分类概率对数损失</h2><article id="model2-l1"><h3>2.1　对象、目标和定义</h3><p>多状态分类模型应输出对所有候选状态求和为一的概率，而非只输出最可能类别。对数损失在真实类别概率过低时施加更大的惩罚。</p><div class="math">$$L=-\frac1n\sum_i\ln P_{i,y_i}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/multiclass_log_loss.hpp">C++17算法源码：multiclass_log_loss.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model2-l2"><h3>2.2　模型推导及基本公式</h3><p>对于每条观测，先抽取模型给真实类别赋予的概率，再取负对数并按样本平均。它是条件类别概率模型的严格适当评分规则。</p><div class="math">$$L=-\frac1n\sum_i\ln P_{i,y_i}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/multiclass_log_loss.hpp">C++17算法源码：multiclass_log_loss.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model2-l3"><h3>2.3　数据分布与可用信息</h3><p>类别概率必须非负、有限、长度一致且每行和为一；标签索引必须与概率列顺序严格一致。不同状态类别的解释方式不能在测试期间改变。</p><div class="math">$$L=-\frac1n\sum_i\ln P_{i,y_i}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/multiclass_log_loss.hpp">C++17算法源码：multiclass_log_loss.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model2-l4"><h3>2.4　参数与预测结果的单位</h3><p>研究需要区分价格、无量纲概率、货币风险金额、成交量及自然时间。类别概率必须非负、有限、长度一致且每行和为一；标签索引必须与概率列顺序严格一致。不同状态类别的解释方式不能在测试期间改变。</p><div class="math">$$L=-\frac1n\sum_i\ln P_{i,y_i}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/multiclass_log_loss.hpp">C++17算法源码：multiclass_log_loss.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model2-l5"><h3>2.5　标准C++17数值计算</h3><p>算法直接采用C++17容器、数值运算和输入条件检查。对于每条观测，先抽取模型给真实类别赋予的概率，再取负对数并按样本平均。它是条件类别概率模型的严格适当评分规则。</p><div class="math">$$L=-\frac1n\sum_i\ln P_{i,y_i}$$</div><pre><code>#pragma once
+#include &quot;portfolio.hpp&quot;
+#include &lt;algorithm&gt;
+#include &lt;cmath&gt;
+namespace kline {
+inline double multiclass_negative_log_likelihood(
+    const Matrix&amp; probabilities,const std::vector&lt;int&gt;&amp; labels,
+    double probability_floor=1e-12){
+    require(!probabilities.empty()&amp;&amp;probabilities.size()==labels.size()&amp;&amp;
+            std::isfinite(probability_floor)&amp;&amp;probability_floor&gt;0&amp;&amp;
+            probability_floor&lt;1,&quot;Invalid multiclass log loss shape&quot;);
+    int classes=int(probabilities.front().size());
+    require(classes&gt;=2,&quot;Multiclass log loss needs at least two classes&quot;);
+    double loss=0;
+    for(int i=0;i&lt;int(labels.size());i++){
+        check_finite(probabilities[i]);
+        require(int(probabilities[i].size())==classes&amp;&amp;
+                labels[i]&gt;=0&amp;&amp;labels[i]&lt;classes,
+                &quot;Multiclass prediction dimension or label&quot;);
+        double total=0;
+        for(double p:probabilities[i]){
+            require(p&gt;=0&amp;&amp;p&lt;=1,&quot;Invalid multiclass probability&quot;);
+            total+=p;
+        }
+        require(std::fabs(total-1)&lt;1e-8,&quot;Class probabilities must sum to one&quot;);
+        loss-=std::log(std::max(probability_floor,
+                               probabilities[i][labels[i]]))/labels.size();
+    }
+    return loss;
+}
+} // namespace kline
+</code></pre><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/multiclass_log_loss.hpp">C++17算法源码：multiclass_log_loss.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model2-l6"><h3>2.6　机器学习或市场交易应用</h3><p>对信用评级迁移和市场制度概率的多分类预测，除准确率外还应评价概率分布是否与真实事件频率一致。</p><div class="math">$$L=-\frac1n\sum_i\ln P_{i,y_i}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/multiclass_log_loss.hpp">C++17算法源码：multiclass_log_loss.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model2-l7"><h3>2.7　风险、漂移及典型失效条件</h3><p>仅以预测类别准确率评估会忽略置信度；而在真实事件极少的状态下，LogLoss又可能受到少量极端错配显著影响。</p><div class="math">$$L=-\frac1n\sum_i\ln P_{i,y_i}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/multiclass_log_loss.hpp">C++17算法源码：multiclass_log_loss.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model2-l8"><h3>2.8　复现程序、测试与边界处理</h3><p>完整实现可以通过代码仓库的数值回归与CSV端到端测试运行。仅以预测类别准确率评估会忽略置信度；而在真实事件极少的状态下，LogLoss又可能受到少量极端错配显著影响。测试与业务计算使用一致的参数语义，避免只核对无异常退出。</p><div class="math">$$L=-\frac1n\sum_i\ln P_{i,y_i}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/multiclass_log_loss.hpp">C++17算法源码：multiclass_log_loss.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article></section><section id="model3"><h2>3．二元概率可靠性曲线</h2><article id="model3-l1"><h3>3.1　对象、目标和定义</h3><p>概率可靠性图将预测值分箱并比较箱内平均预测概率与实际事件率，以观察模型在不同风险区间是否系统性高估或低估。</p><div class="math">$$Calibration_b=\overline y_b-\overline p_b$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/probability_reliability_bins.hpp">C++17算法源码：probability_reliability_bins.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model3-l2"><h3>3.2　模型推导及基本公式</h3><p>预先确定固定概率区间，把每条二元标签记录到对应区间。按箱分别累计样本数、预测概率和实际事件次数，再通过样本数计算均值。</p><div class="math">$$Calibration_b=\overline y_b-\overline p_b$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/probability_reliability_bins.hpp">C++17算法源码：probability_reliability_bins.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model3-l3"><h3>3.3　数据分布与可用信息</h3><p>分箱边界覆盖零至一，最右侧包括概率一。稀疏分箱可能无法可靠估计事件率，尤其低违约概率任务需要更长样本。</p><div class="math">$$Calibration_b=\overline y_b-\overline p_b$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/probability_reliability_bins.hpp">C++17算法源码：probability_reliability_bins.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model3-l4"><h3>3.4　参数与预测结果的单位</h3><p>研究需要区分价格、无量纲概率、货币风险金额、成交量及自然时间。分箱边界覆盖零至一，最右侧包括概率一。稀疏分箱可能无法可靠估计事件率，尤其低违约概率任务需要更长样本。</p><div class="math">$$Calibration_b=\overline y_b-\overline p_b$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/probability_reliability_bins.hpp">C++17算法源码：probability_reliability_bins.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model3-l5"><h3>3.5　标准C++17数值计算</h3><p>算法直接采用C++17容器、数值运算和输入条件检查。预先确定固定概率区间，把每条二元标签记录到对应区间。按箱分别累计样本数、预测概率和实际事件次数，再通过样本数计算均值。</p><div class="math">$$Calibration_b=\overline y_b-\overline p_b$$</div><pre><code>#pragma once
+#include &quot;stats.hpp&quot;
+#include &lt;algorithm&gt;
+#include &lt;cmath&gt;
+namespace kline {
+struct ReliabilityBin{int count=0;double mean_forecast=0,event_rate=0;};
+inline std::vector&lt;ReliabilityBin&gt; binary_reliability_bins(
+    const std::vector&lt;double&gt;&amp; probabilities,const std::vector&lt;int&gt;&amp; labels,
+    int bins){
+    check_finite(probabilities);
+    require(probabilities.size()==labels.size()&amp;&amp;bins&gt;=2&amp;&amp;bins&lt;=1000,
+            &quot;Invalid probability calibration bins&quot;);
+    std::vector&lt;ReliabilityBin&gt; result(bins);
+    for(int i=0;i&lt;int(labels.size());i++){
+        double p=probabilities[i];
+        require(p&gt;=0&amp;&amp;p&lt;=1&amp;&amp;(labels[i]==0||labels[i]==1),
+                &quot;Invalid probability or binary outcome&quot;);
+        int bin=std::min(bins-1,int(p*bins));
+        result[bin].count++;
+        result[bin].mean_forecast+=p;
+        result[bin].event_rate+=labels[i];
+    }
+    for(auto&amp; bucket:result)if(bucket.count&gt;0){
+        bucket.mean_forecast/=bucket.count;
+        bucket.event_rate/=bucket.count;
+    }
+    return result;
+}
+} // namespace kline
+</code></pre><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/probability_reliability_bins.hpp">C++17算法源码：probability_reliability_bins.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model3-l6"><h3>3.6　机器学习或市场交易应用</h3><p>风险模型的预测概率可用可靠性曲线检查，再决定是否做保序或Logistic校准；概率排序好不保证价格决策的阈值合理。</p><div class="math">$$Calibration_b=\overline y_b-\overline p_b$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/probability_reliability_bins.hpp">C++17算法源码：probability_reliability_bins.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model3-l7"><h3>3.7　风险、漂移及典型失效条件</h3><p>同一训练样本上绘制的校准图往往高估可靠性，分箱选择和模型校准必须使用独立数据。</p><div class="math">$$Calibration_b=\overline y_b-\overline p_b$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/probability_reliability_bins.hpp">C++17算法源码：probability_reliability_bins.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model3-l8"><h3>3.8　复现程序、测试与边界处理</h3><p>完整实现可以通过代码仓库的数值回归与CSV端到端测试运行。同一训练样本上绘制的校准图往往高估可靠性，分箱选择和模型校准必须使用独立数据。测试与业务计算使用一致的参数语义，避免只核对无异常退出。</p><div class="math">$$Calibration_b=\overline y_b-\overline p_b$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/probability_reliability_bins.hpp">C++17算法源码：probability_reliability_bins.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article></section><section id="model4"><h2>4．预测区间经验覆盖率与宽度</h2><article id="model4-l1"><h3>4.1　对象、目标和定义</h3><p>点预测没有表达未来价格或经济指标结果的范围；预测区间同时提供下界、上界及目标覆盖水平，让研究者观察模型不确定性与区间长度的权衡。</p><div class="math">$$Coverage=\frac1n\sum_i{\bf1}(L_i\le Y_i\le U_i)$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/prediction_interval_coverage.hpp">C++17算法源码：prediction_interval_coverage.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model4-l2"><h3>4.2　模型推导及基本公式</h3><p>对每条样本检查真实结果是否位于区间两端之间，再计算经验覆盖比例。对所有区间的上界减下界求均值形成平均宽度。</p><div class="math">$$Coverage=\frac1n\sum_i{\bf1}(L_i\le Y_i\le U_i)$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/prediction_interval_coverage.hpp">C++17算法源码：prediction_interval_coverage.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model4-l3"><h3>4.3　数据分布与可用信息</h3><p>上下界必须是同一资产、同一时间目标和相同量纲的预测。覆盖率是样本统计，不代表每个资产或市场状态都有相同条件覆盖概率。</p><div class="math">$$Coverage=\frac1n\sum_i{\bf1}(L_i\le Y_i\le U_i)$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/prediction_interval_coverage.hpp">C++17算法源码：prediction_interval_coverage.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model4-l4"><h3>4.4　参数与预测结果的单位</h3><p>研究需要区分价格、无量纲概率、货币风险金额、成交量及自然时间。上下界必须是同一资产、同一时间目标和相同量纲的预测。覆盖率是样本统计，不代表每个资产或市场状态都有相同条件覆盖概率。</p><div class="math">$$Coverage=\frac1n\sum_i{\bf1}(L_i\le Y_i\le U_i)$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/prediction_interval_coverage.hpp">C++17算法源码：prediction_interval_coverage.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model4-l5"><h3>4.5　标准C++17数值计算</h3><p>算法直接采用C++17容器、数值运算和输入条件检查。对每条样本检查真实结果是否位于区间两端之间，再计算经验覆盖比例。对所有区间的上界减下界求均值形成平均宽度。</p><div class="math">$$Coverage=\frac1n\sum_i{\bf1}(L_i\le Y_i\le U_i)$$</div><pre><code>#pragma once
+#include &quot;stats.hpp&quot;
+#include &lt;cmath&gt;
+namespace kline {
+struct CoverageSummary{double empirical_coverage=0,average_width=0;
+    int observations=0;};
+inline CoverageSummary interval_coverage_report(
+    const std::vector&lt;double&gt;&amp; actual,
+    const std::vector&lt;double&gt;&amp; lower,const std::vector&lt;double&gt;&amp; upper){
+    check_finite(actual);check_finite(lower);check_finite(upper);
+    require(actual.size()==lower.size()&amp;&amp;actual.size()==upper.size(),
+            &quot;Prediction intervals must align to actuals&quot;);
+    int covered=0;double width=0;
+    for(int i=0;i&lt;int(actual.size());i++){
+        require(lower[i]&lt;=upper[i],&quot;Lower interval exceeds upper interval&quot;);
+        covered+=actual[i]&gt;=lower[i]&amp;&amp;actual[i]&lt;=upper[i];
+        width+=upper[i]-lower[i];
+    }
+    return {double(covered)/actual.size(),width/actual.size(),
+            int(actual.size())};
+}
+} // namespace kline
+</code></pre><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/prediction_interval_coverage.hpp">C++17算法源码：prediction_interval_coverage.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model4-l6"><h3>4.6　机器学习或市场交易应用</h3><p>对于未来收益区间、波动率预测或风险敞口区间，可联合报告名义覆盖、实际覆盖及平均区间宽度，避免利用无限宽区间制造表面高覆盖。</p><div class="math">$$Coverage=\frac1n\sum_i{\bf1}(L_i\le Y_i\le U_i)$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/prediction_interval_coverage.hpp">C++17算法源码：prediction_interval_coverage.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model4-l7"><h3>4.7　风险、漂移及典型失效条件</h3><p>若模型在极端行情中的条件覆盖远低于正常时期，整体样本覆盖率可能掩盖真正的风险暴露。</p><div class="math">$$Coverage=\frac1n\sum_i{\bf1}(L_i\le Y_i\le U_i)$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/prediction_interval_coverage.hpp">C++17算法源码：prediction_interval_coverage.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model4-l8"><h3>4.8　复现程序、测试与边界处理</h3><p>完整实现可以通过代码仓库的数值回归与CSV端到端测试运行。若模型在极端行情中的条件覆盖远低于正常时期，整体样本覆盖率可能掩盖真正的风险暴露。测试与业务计算使用一致的参数语义，避免只核对无异常退出。</p><div class="math">$$Coverage=\frac1n\sum_i{\bf1}(L_i\le Y_i\le U_i)$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/prediction_interval_coverage.hpp">C++17算法源码：prediction_interval_coverage.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article></section><section id="model5"><h2>5．Welford在线均值与方差</h2><article id="model5-l1"><h3>5.1　对象、目标和定义</h3><p>实时市场流不断产生新观测，在线统计通过维护样本数量、均值与二阶中心矩，就可以不保存完整历史而逐笔更新基础描述性量度。</p><div class="math">$$\mu_n=\mu_{n-1}+\frac{x_n-\mu_{n-1}}n$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/online_moments_state.hpp">C++17算法源码：online_moments_state.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model5-l2"><h3>5.2　模型推导及基本公式</h3><p>计算新样本与旧均值的差，再更新均值和二阶中心矩m2。采用新旧均值之间的增量乘积，有助于减轻直接计算大数平方差的抵消误差。</p><div class="math">$$\mu_n=\mu_{n-1}+\frac{x_n-\mu_{n-1}}n$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/online_moments_state.hpp">C++17算法源码：online_moments_state.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model5-l3"><h3>5.3　数据分布与可用信息</h3><p>逐期统计量的数值稳定性受输入量纲影响；样本方差需要至少两条有效记录，时间衰减权重和非平稳遗忘机制不属于该基础状态。</p><div class="math">$$\mu_n=\mu_{n-1}+\frac{x_n-\mu_{n-1}}n$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/online_moments_state.hpp">C++17算法源码：online_moments_state.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model5-l4"><h3>5.4　参数与预测结果的单位</h3><p>研究需要区分价格、无量纲概率、货币风险金额、成交量及自然时间。逐期统计量的数值稳定性受输入量纲影响；样本方差需要至少两条有效记录，时间衰减权重和非平稳遗忘机制不属于该基础状态。</p><div class="math">$$\mu_n=\mu_{n-1}+\frac{x_n-\mu_{n-1}}n$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/online_moments_state.hpp">C++17算法源码：online_moments_state.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model5-l5"><h3>5.5　标准C++17数值计算</h3><p>算法直接采用C++17容器、数值运算和输入条件检查。计算新样本与旧均值的差，再更新均值和二阶中心矩m2。采用新旧均值之间的增量乘积，有助于减轻直接计算大数平方差的抵消误差。</p><div class="math">$$\mu_n=\mu_{n-1}+\frac{x_n-\mu_{n-1}}n$$</div><pre><code>#pragma once
+#include &quot;stats.hpp&quot;
+#include &lt;cmath&gt;
+namespace kline {
+struct OnlineMomentsState{long long observations=0;double mean_value=0,m2=0;};
+inline OnlineMomentsState online_moment_update(OnlineMomentsState state,double value){
+    require(std::isfinite(value)&amp;&amp;state.observations&gt;=0&amp;&amp;
+            state.observations&lt;1000000000000LL,&quot;Invalid online moment state&quot;);
+    state.observations++;
+    double delta=value-state.mean_value;
+    state.mean_value+=delta/state.observations;
+    state.m2+=delta*(value-state.mean_value);
+    return state;
+}
+inline double online_moment_sample_variance(const OnlineMomentsState&amp; state){
+    require(state.observations&gt;=2&amp;&amp;state.m2&gt;=-1e-9,
+            &quot;Sample online variance needs two observations&quot;);
+    return std::max(0.0,state.m2/(state.observations-1));
+}
+} // namespace kline
+</code></pre><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/online_moments_state.hpp">C++17算法源码：online_moments_state.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model5-l6"><h3>5.6　机器学习或市场交易应用</h3><p>日内盘口、成交价差和策略实时风险监控可使用在线状态统计最近样本总体特征，并结合滑动窗口结构处理制度变化。</p><div class="math">$$\mu_n=\mu_{n-1}+\frac{x_n-\mu_{n-1}}n$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/online_moments_state.hpp">C++17算法源码：online_moments_state.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model5-l7"><h3>5.7　风险、漂移及典型失效条件</h3><p>即便在线更新精确，若样本来自不断变化的数据生成机制，全历史均值也可能不适合作为当前的风险参数。</p><div class="math">$$\mu_n=\mu_{n-1}+\frac{x_n-\mu_{n-1}}n$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/online_moments_state.hpp">C++17算法源码：online_moments_state.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model5-l8"><h3>5.8　复现程序、测试与边界处理</h3><p>完整实现可以通过代码仓库的数值回归与CSV端到端测试运行。即便在线更新精确，若样本来自不断变化的数据生成机制，全历史均值也可能不适合作为当前的风险参数。测试与业务计算使用一致的参数语义，避免只核对无异常退出。</p><div class="math">$$\mu_n=\mu_{n-1}+\frac{x_n-\mu_{n-1}}n$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/online_moments_state.hpp">C++17算法源码：online_moments_state.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article></section><section id="model6"><h2>6．样本外MAE、RMSE与预测偏差</h2><article id="model6-l1"><h3>6.1　对象、目标和定义</h3><p>回归评价至少应区分绝对误差、平方误差和有符号预测偏差。MAE强调典型绝对偏离，RMSE提高较大偏离的权重，均值偏差揭示整体高估或低估。</p><div class="math">$$RMSE=\sqrt{\frac1n\sum_i(\widehat y_i-y_i)^2}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/regression_prediction_metrics.hpp">C++17算法源码：regression_prediction_metrics.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model6-l2"><h3>6.2　模型推导及基本公式</h3><p>对每个实际值与预测值计算有符号差，分别累计绝对值、平方与原始差；最后形成MAE、RMSE及均值偏差。</p><div class="math">$$RMSE=\sqrt{\frac1n\sum_i(\widehat y_i-y_i)^2}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/regression_prediction_metrics.hpp">C++17算法源码：regression_prediction_metrics.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model6-l3"><h3>6.3　数据分布与可用信息</h3><p>真实标签与预测必须按相同日期、资产和经济单位对齐。若模型只在完成训练后才观察某些测试标签，不能将这些标签反馈给此前的预测。</p><div class="math">$$RMSE=\sqrt{\frac1n\sum_i(\widehat y_i-y_i)^2}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/regression_prediction_metrics.hpp">C++17算法源码：regression_prediction_metrics.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model6-l4"><h3>6.4　参数与预测结果的单位</h3><p>研究需要区分价格、无量纲概率、货币风险金额、成交量及自然时间。真实标签与预测必须按相同日期、资产和经济单位对齐。若模型只在完成训练后才观察某些测试标签，不能将这些标签反馈给此前的预测。</p><div class="math">$$RMSE=\sqrt{\frac1n\sum_i(\widehat y_i-y_i)^2}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/regression_prediction_metrics.hpp">C++17算法源码：regression_prediction_metrics.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model6-l5"><h3>6.5　标准C++17数值计算</h3><p>算法直接采用C++17容器、数值运算和输入条件检查。对每个实际值与预测值计算有符号差，分别累计绝对值、平方与原始差；最后形成MAE、RMSE及均值偏差。</p><div class="math">$$RMSE=\sqrt{\frac1n\sum_i(\widehat y_i-y_i)^2}$$</div><pre><code>#pragma once
+#include &quot;stats.hpp&quot;
+#include &lt;cmath&gt;
+namespace kline {
+struct PredictionMetrics{double mae=0,rmse=0,mean_bias=0;};
+inline PredictionMetrics out_of_sample_regression_metrics(
+    const std::vector&lt;double&gt;&amp; actual,const std::vector&lt;double&gt;&amp; forecast){
+    check_finite(actual);check_finite(forecast);
+    require(actual.size()==forecast.size(),
+            &quot;Regression forecasts and actuals must align&quot;);
+    double abs_sum=0,square=0,bias=0;
+    for(int i=0;i&lt;int(actual.size());i++){
+        double error=forecast[i]-actual[i];
+        abs_sum+=std::fabs(error);square+=error*error;bias+=error;
+    }
+    double n=double(actual.size());
+    return {abs_sum/n,std::sqrt(square/n),bias/n};
+}
+} // namespace kline
+</code></pre><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/regression_prediction_metrics.hpp">C++17算法源码：regression_prediction_metrics.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model6-l6"><h3>6.6　机器学习或市场交易应用</h3><p>在资产收益、波动率及宏观指标预测中，可同时评价模型平均误差和尾部大误差，再转换为投资组合收益和净交易成本。</p><div class="math">$$RMSE=\sqrt{\frac1n\sum_i(\widehat y_i-y_i)^2}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/regression_prediction_metrics.hpp">C++17算法源码：regression_prediction_metrics.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model6-l7"><h3>6.7　风险、漂移及典型失效条件</h3><p>RMSE下降不等于策略净回报提高，因为预测误差所对应的资产风险、成交容量和持仓决策可能改变金融价值。</p><div class="math">$$RMSE=\sqrt{\frac1n\sum_i(\widehat y_i-y_i)^2}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/regression_prediction_metrics.hpp">C++17算法源码：regression_prediction_metrics.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article><article id="model6-l8"><h3>6.8　复现程序、测试与边界处理</h3><p>完整实现可以通过代码仓库的数值回归与CSV端到端测试运行。RMSE下降不等于策略净回报提高，因为预测误差所对应的资产风险、成交容量和持仓决策可能改变金融价值。测试与业务计算使用一致的参数语义，避免只核对无异常退出。</p><div class="math">$$RMSE=\sqrt{\frac1n\sum_i(\widehat y_i-y_i)^2}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/regression_prediction_metrics.hpp">C++17算法源码：regression_prediction_metrics.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">验证输入与预期数值</a></p></article></section><footer>参考：<a href="https://www.itl.nist.gov/div898/handbook/">NIST Engineering Statistics</a>；<a href="https://scikit-learn.org/stable/user_guide.html">scikit-learn User Guide</a>；<a href="https://www.bis.org/">BIS市场微观结构研究资源</a>。<a href="./">返回对应栏目首页</a>。</footer></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

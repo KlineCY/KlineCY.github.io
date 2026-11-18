@@ -1,0 +1,429 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>量化金融学术研究资源：数据与方法的证据质量｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><style>*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:white;color:#1a2c3a;font:15px/1.93 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:30px 34px 74px}main{max-width:1200px;margin:auto}header,.toc,article{border:1px solid #cbd8e1;background:white}header{padding:30px 33px}.toc{display:flex;flex-wrap:wrap;gap:11px 20px;margin:20px 0;padding:17px}h1{font-size:clamp(29px,3vw,41px)}h2{font-size:23px;border-bottom:1px solid #cad6df;padding-bottom:11px;margin:33px 0 14px}h3{font-size:19px;margin:0 0 12px}article{padding:18px 26px;margin:14px 0}a{color:#1d6089}.formula{border-block:1px solid #d2dde6;margin:15px 0;padding:14px 8px;overflow:auto}pre{font:12px/1.6 "Times New Roman",monospace;max-height:540px;overflow:auto;padding:14px;border:1px solid #d6dfe7}footer{font-size:13px;margin:28px 0;color:#526f80}@media(max-width:760px){.main{margin:0;padding:12px}header,article{padding:16px}}</style></head><body><aside id="quantSidebar" class="sidebar" data-page="rankings"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><small>RESEARCH RESOURCE DILIGENCE / EVIDENCE QUALITY</small><h1>研究资源与金融数据质量的可复核评价</h1><p>56节系统研究课程，对金融数据源、公司行为、实证统计、面板数据、尾部模型、协方差稳定性与风险模型覆盖检验分别建立可复核的数学与计算方法，并提供完整C++17源码。该专题专注研究资源的质量与方法，不改变既有学术网站及排名目录。</p></header><nav class="toc"><a href="#resource0">学术数据源的粒度、缺失与发布时间</a><a href="#resource1">复权价格、分红与公司行为真实性</a><a href="#resource2">研究资源中的可复现统计流程</a><a href="#resource3">跨公司与跨地区面板数据的识别</a><a href="#resource4">极端金融风险样本与尾部分布</a><a href="#resource5">风险协方差的正定性与估计可靠性</a><a href="#resource6">VaR覆盖检验与预期短缺模型审计</a></nav><section id="resource0"><h2>1．学术数据源的粒度、缺失与发布时间</h2><article id="resource0-0"><h3>1.1　研究资源及评价对象</h3><p>金融数据质量由字段定义、样本覆盖、历史缺失和观测时点共同决定。一个数据平台的页面被广泛引用，不代表其历史股价、宏观修订及资产池具有相同质量。</p><div class="formula">$$Coverage=\frac{\#\{\text{有效观测}\}}{\#\{\text{应有观测}\}}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/data_quality.hpp">C++17算法与数据检验：data_quality.hpp</a>　<a href="https://www.itl.nist.gov/div898/handbook/">官方或学术资料入口</a></p></article><article id="resource0-1"><h3>1.2　数理定义与核心公式</h3><p>针对每条序列统计合法观察和缺失数量，保留输入交易时间，并用明确的可得时间规则控制填充与滞后。价格跳跃检查可识别异常值，但真实的极端行情不应被机械删除。</p><div class="formula">$$Coverage=\frac{\#\{\text{有效观测}\}}{\#\{\text{应有观测}\}}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/data_quality.hpp">C++17算法与数据检验：data_quality.hpp</a>　<a href="https://www.itl.nist.gov/div898/handbook/">官方或学术资料入口</a></p></article><article id="resource0-2"><h3>1.3　采样总体、使用许可和识别条件</h3><p>研究必须区分数据接口中断、证券停牌、新股未上市和真实零成交量。不同缺失机制对组合回测的经济含义不同。</p><div class="formula">$$Coverage=\frac{\#\{\text{有效观测}\}}{\#\{\text{应有观测}\}}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/data_quality.hpp">C++17算法与数据检验：data_quality.hpp</a>　<a href="https://www.itl.nist.gov/div898/handbook/">官方或学术资料入口</a></p></article><article id="resource0-3"><h3>1.4　数据单位与来源一致性</h3><p>比较同类数据或模型前，应分别识别日期、计量单位、币种、修订和记录粒度。研究必须区分数据接口中断、证券停牌、新股未上市和真实零成交量。不同缺失机制对组合回测的经济含义不同。</p><div class="formula">$$Coverage=\frac{\#\{\text{有效观测}\}}{\#\{\text{应有观测}\}}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/data_quality.hpp">C++17算法与数据检验：data_quality.hpp</a>　<a href="https://www.itl.nist.gov/div898/handbook/">官方或学术资料入口</a></p></article><article id="resource0-4"><h3>1.5　可编译C++17计算实现</h3><p>研究中的统计对象可以通过以下C++17实现独立计算。针对每条序列统计合法观察和缺失数量，保留输入交易时间，并用明确的可得时间规则控制填充与滞后。价格跳跃检查可识别异常值，但真实的极端行情不应被机械删除。</p><div class="formula">$$Coverage=\frac{\#\{\text{有效观测}\}}{\#\{\text{应有观测}\}}$$</div><pre><code>#pragma once
+#include &quot;stats.hpp&quot;
+#include &lt;algorithm&gt;
+#include &lt;cmath&gt;
+#include &lt;numeric&gt;
+#include &lt;vector&gt;
+
+namespace kline {
+struct SeriesQuality {
+    int observations=0;
+    int missing=0;
+    int valid=0;
+    int repeated_values=0;
+    double coverage=0;
+};
+
+inline SeriesQuality inspect_series(const std::vector&lt;double&gt;&amp; values) {
+    require(!values.empty(),&quot;Series quality needs observations&quot;);
+    SeriesQuality result;
+    result.observations=int(values.size());
+    for(int i=0;i&lt;int(values.size());i++){
+        if(!std::isfinite(values[i]))result.missing++;
+        else {
+            result.valid++;
+            if(i&gt;0 &amp;&amp; std::isfinite(values[i-1])&amp;&amp;
+               values[i]==values[i-1])result.repeated_values++;
+        }
+    }
+    result.coverage=double(result.valid)/result.observations;
+    return result;
+}
+
+inline std::vector&lt;double&gt; forward_fill(
+    const std::vector&lt;double&gt;&amp; values,int maximum_gap) {
+    require(!values.empty()&amp;&amp;maximum_gap&gt;=0,
+            &quot;Invalid forward-fill gap&quot;);
+    std::vector&lt;double&gt; out=values;
+    double last=0;
+    bool known=false;
+    int gap=0;
+    for(double&amp; value:out){
+        if(std::isfinite(value)){
+            known=true;last=value;gap=0;
+        }else{
+            gap++;
+            if(known &amp;&amp; gap&lt;=maximum_gap)value=last;
+        }
+    }
+    return out;
+}
+
+inline std::vector&lt;int&gt; available_rows(const std::vector&lt;double&gt;&amp; values) {
+    require(!values.empty(),&quot;No observations to inspect&quot;);
+    std::vector&lt;int&gt; indices;
+    for(int i=0;i&lt;int(values.size());i++)
+        if(std::isfinite(values[i]))indices.push_back(i);
+    return indices;
+}
+
+inline std::vector&lt;double&gt; lagged_signal(
+    const std::vector&lt;double&gt;&amp; values,int delay) {
+    check_finite(values);
+    require(delay&gt;=1&amp;&amp;delay&lt;int(values.size()),
+            &quot;Signal delay must be positive and shorter than history&quot;);
+    std::vector&lt;double&gt; output;
+    for(int i=delay;i&lt;int(values.size());i++)
+        output.push_back(values[i-delay]);
+    return output;
+}
+
+inline double max_relative_jump(const std::vector&lt;double&gt;&amp; prices) {
+    check_finite(prices);
+    require(prices.size()&gt;=2,&quot;Jump check needs prices&quot;);
+    double largest=0;
+    for(int i=1;i&lt;int(prices.size());i++){
+        require(prices[i]&gt;0&amp;&amp;prices[i-1]&gt;0,&quot;Jump check needs positive prices&quot;);
+        largest=std::max(largest,std::fabs(prices[i]/prices[i-1]-1));
+    }
+    return largest;
+}
+} // namespace kline
+</code></pre><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/data_quality.hpp">C++17算法与数据检验：data_quality.hpp</a>　<a href="https://www.itl.nist.gov/div898/handbook/">官方或学术资料入口</a></p></article><article id="resource0-5"><h3>1.6　研究质量在金融中的影响</h3><p>比较不同市场数据供应商时，可把覆盖年限、资产范围、时间更新、修订机制和使用许可证列为独立评价维度，不用单一区域表现概括全球数据。</p><div class="formula">$$Coverage=\frac{\#\{\text{有效观测}\}}{\#\{\text{应有观测}\}}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/data_quality.hpp">C++17算法与数据检验：data_quality.hpp</a>　<a href="https://www.itl.nist.gov/div898/handbook/">官方或学术资料入口</a></p></article><article id="resource0-6"><h3>1.7　失效情形和稳健性审计</h3><p>再完整的字段表也无法自动消除幸存者偏差。最终复现结果需与原始数据版本及生成过程共同存档。</p><div class="formula">$$Coverage=\frac{\#\{\text{有效观测}\}}{\#\{\text{应有观测}\}}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/data_quality.hpp">C++17算法与数据检验：data_quality.hpp</a>　<a href="https://www.itl.nist.gov/div898/handbook/">官方或学术资料入口</a></p></article><article id="resource0-7"><h3>1.8　原始资料、数值验证与研究结论</h3><p>应将原始公开机构资料与对应C++17实现的输出一一对应。再完整的字段表也无法自动消除幸存者偏差。最终复现结果需与原始数据版本及生成过程共同存档。只采用能够逐项追踪研究变量和样本总体的信息，不以机构网页的单一展示值作为全市场结论。</p><div class="formula">$$Coverage=\frac{\#\{\text{有效观测}\}}{\#\{\text{应有观测}\}}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/data_quality.hpp">C++17算法与数据检验：data_quality.hpp</a>　<a href="https://www.itl.nist.gov/div898/handbook/">官方或学术资料入口</a></p></article></section><section id="resource1"><h2>2．复权价格、分红与公司行为真实性</h2><article id="resource1-0"><h3>2.1　研究资源及评价对象</h3><p>上市公司拆股、现金分红、配股和退市会改变持仓股数、现金与报价历史。仅使用最终复权历史价格进行回测容易混淆历史成交价格与事后数据调整。</p><div class="formula">$$R_t^{total}=\frac{P_t+D_t}{P_{t-1}}-1$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/corporate_actions.hpp">C++17算法与数据检验：corporate_actions.hpp</a>　<a href="https://www.sec.gov/edgar/search/">官方或学术资料入口</a></p></article><article id="resource1-1"><h3>2.2　数理定义与核心公式</h3><p>持仓总收益应根据资产市价及区间分红独立核算。若输入已包含分红复权因子，再额外加入现金分红就会形成收益双重计算。</p><div class="formula">$$R_t^{total}=\frac{P_t+D_t}{P_{t-1}}-1$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/corporate_actions.hpp">C++17算法与数据检验：corporate_actions.hpp</a>　<a href="https://www.sec.gov/edgar/search/">官方或学术资料入口</a></p></article><article id="resource1-2"><h3>2.3　采样总体、使用许可和识别条件</h3><p>公司行为生效时间、支付时间及具体证券类别需要同资产市场对齐；不同地区有不同除权和税务约定。</p><div class="formula">$$R_t^{total}=\frac{P_t+D_t}{P_{t-1}}-1$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/corporate_actions.hpp">C++17算法与数据检验：corporate_actions.hpp</a>　<a href="https://www.sec.gov/edgar/search/">官方或学术资料入口</a></p></article><article id="resource1-3"><h3>2.4　数据单位与来源一致性</h3><p>比较同类数据或模型前，应分别识别日期、计量单位、币种、修订和记录粒度。公司行为生效时间、支付时间及具体证券类别需要同资产市场对齐；不同地区有不同除权和税务约定。</p><div class="formula">$$R_t^{total}=\frac{P_t+D_t}{P_{t-1}}-1$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/corporate_actions.hpp">C++17算法与数据检验：corporate_actions.hpp</a>　<a href="https://www.sec.gov/edgar/search/">官方或学术资料入口</a></p></article><article id="resource1-4"><h3>2.5　可编译C++17计算实现</h3><p>研究中的统计对象可以通过以下C++17实现独立计算。持仓总收益应根据资产市价及区间分红独立核算。若输入已包含分红复权因子，再额外加入现金分红就会形成收益双重计算。</p><div class="formula">$$R_t^{total}=\frac{P_t+D_t}{P_{t-1}}-1$$</div><pre><code>#pragma once
+#include &quot;stats.hpp&quot;
+#include &lt;cmath&gt;
+#include &lt;vector&gt;
+namespace kline {
+inline double stock_total_return(double old_price,double new_price,
+                                  double cash_dividend,double split_ratio=1){
+    require(old_price&gt;0&amp;&amp;new_price&gt;0&amp;&amp;split_ratio&gt;0&amp;&amp;
+            std::isfinite(old_price)&amp;&amp;std::isfinite(new_price)&amp;&amp;
+            std::isfinite(cash_dividend)&amp;&amp;cash_dividend&gt;=0&amp;&amp;
+            std::isfinite(split_ratio),&quot;Invalid corporate action&quot;);
+    return (new_price*split_ratio+cash_dividend)/old_price-1;
+}
+inline std::vector&lt;double&gt; stock_total_returns(
+    const std::vector&lt;double&gt;&amp; close,
+    const std::vector&lt;double&gt;&amp; dividend,
+    const std::vector&lt;double&gt;&amp; split){
+    check_finite(close);check_finite(dividend);check_finite(split);
+    require(close.size()==dividend.size()&amp;&amp;close.size()==split.size()&amp;&amp;
+            close.size()&gt;=2,&quot;Corporate action series shapes&quot;);
+    std::vector&lt;double&gt; results;
+    for(int t=1;t&lt;int(close.size());t++)
+        results.push_back(stock_total_return(close[t-1],close[t],
+                                             dividend[t],split[t]));
+    return results;
+}
+inline double rights_adjusted_theoretical_ex_price(double price_before,
+    double subscription_price,double new_shares_per_old){
+    require(std::isfinite(price_before)&amp;&amp;price_before&gt;0&amp;&amp;
+            std::isfinite(subscription_price)&amp;&amp;subscription_price&gt;=0&amp;&amp;
+            std::isfinite(new_shares_per_old)&amp;&amp;new_shares_per_old&gt;=0,
+            &quot;Invalid rights issue&quot;);
+    return (price_before+new_shares_per_old*subscription_price)/
+            (1+new_shares_per_old);
+}
+} // namespace kline
+</code></pre><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/corporate_actions.hpp">C++17算法与数据检验：corporate_actions.hpp</a>　<a href="https://www.sec.gov/edgar/search/">官方或学术资料入口</a></p></article><article id="resource1-5"><h3>2.6　研究质量在金融中的影响</h3><p>数据资源评价可以检视供应商是否提供拆股、分红、退市现金价值及历史证券标识，研究者可以用C++总收益函数独立核对。</p><div class="formula">$$R_t^{total}=\frac{P_t+D_t}{P_{t-1}}-1$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/corporate_actions.hpp">C++17算法与数据检验：corporate_actions.hpp</a>　<a href="https://www.sec.gov/edgar/search/">官方或学术资料入口</a></p></article><article id="resource1-6"><h3>2.7　失效情形和稳健性审计</h3><p>只保留当前活跃证券会造成历史投资机会集选择偏差，必须从历史时点重新构造真实可投证券池。</p><div class="formula">$$R_t^{total}=\frac{P_t+D_t}{P_{t-1}}-1$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/corporate_actions.hpp">C++17算法与数据检验：corporate_actions.hpp</a>　<a href="https://www.sec.gov/edgar/search/">官方或学术资料入口</a></p></article><article id="resource1-7"><h3>2.8　原始资料、数值验证与研究结论</h3><p>应将原始公开机构资料与对应C++17实现的输出一一对应。只保留当前活跃证券会造成历史投资机会集选择偏差，必须从历史时点重新构造真实可投证券池。只采用能够逐项追踪研究变量和样本总体的信息，不以机构网页的单一展示值作为全市场结论。</p><div class="formula">$$R_t^{total}=\frac{P_t+D_t}{P_{t-1}}-1$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/corporate_actions.hpp">C++17算法与数据检验：corporate_actions.hpp</a>　<a href="https://www.sec.gov/edgar/search/">官方或学术资料入口</a></p></article></section><section id="resource2"><h2>3．研究资源中的可复现统计流程</h2><article id="resource2-0"><h3>3.1　研究资源及评价对象</h3><p>公开代码、数据字典、随机种子和标准化实验设定，是定量研究可以由第三方独立核验的基础。统计显著性还需考虑多个模型及资产的筛选过程。</p><div class="formula">$$p_{Bonf}=\min(1,mp),\qquad FDR=E\left[\frac{V}{R\vee1}\right]$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/validation.hpp">C++17算法与数据检验：validation.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">官方或学术资料入口</a></p></article><article id="resource2-1"><h3>3.2　数理定义与核心公式</h3><p>研究设计可采用时间向前分割、移动区块重采样、多重检验调整和概率预测评分等模块。每个步骤对应不同统计目的，不能以一个总体得分代替全部研究证据。</p><div class="formula">$$p_{Bonf}=\min(1,mp),\qquad FDR=E\left[\frac{V}{R\vee1}\right]$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/validation.hpp">C++17算法与数据检验：validation.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">官方或学术资料入口</a></p></article><article id="resource2-2"><h3>3.3　采样总体、使用许可和识别条件</h3><p>可复现程序要求指定输入来源、特征处理和模型参数；固定种子只控制程序随机性，不能补救数据来源不可追踪或研究样本选择。</p><div class="formula">$$p_{Bonf}=\min(1,mp),\qquad FDR=E\left[\frac{V}{R\vee1}\right]$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/validation.hpp">C++17算法与数据检验：validation.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">官方或学术资料入口</a></p></article><article id="resource2-3"><h3>3.4　数据单位与来源一致性</h3><p>比较同类数据或模型前，应分别识别日期、计量单位、币种、修订和记录粒度。可复现程序要求指定输入来源、特征处理和模型参数；固定种子只控制程序随机性，不能补救数据来源不可追踪或研究样本选择。</p><div class="formula">$$p_{Bonf}=\min(1,mp),\qquad FDR=E\left[\frac{V}{R\vee1}\right]$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/validation.hpp">C++17算法与数据检验：validation.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">官方或学术资料入口</a></p></article><article id="resource2-4"><h3>3.5　可编译C++17计算实现</h3><p>研究中的统计对象可以通过以下C++17实现独立计算。研究设计可采用时间向前分割、移动区块重采样、多重检验调整和概率预测评分等模块。每个步骤对应不同统计目的，不能以一个总体得分代替全部研究证据。</p><div class="formula">$$p_{Bonf}=\min(1,mp),\qquad FDR=E\left[\frac{V}{R\vee1}\right]$$</div><pre><code>#pragma once
+#include &quot;stats.hpp&quot;
+#include &lt;algorithm&gt;
+#include &lt;cmath&gt;
+#include &lt;numeric&gt;
+#include &lt;random&gt;
+#include &lt;stdexcept&gt;
+#include &lt;vector&gt;
+
+namespace kline {
+
+struct TimeFold {
+    int train_begin = 0;
+    int train_end = 0; // Exclusive
+    int test_begin = 0;
+    int test_end = 0; // Exclusive
+};
+
+inline std::vector&lt;TimeFold&gt; walk_forward_folds(
+    int observations, int training_window, int testing_window,
+    int embargo = 0, bool expanding = false) {
+    require(observations &gt;= 1 &amp;&amp; training_window &gt;= 2 &amp;&amp; testing_window &gt;= 1
+            &amp;&amp; embargo &gt;= 0, &quot;Invalid walk-forward window parameters&quot;);
+    std::vector&lt;TimeFold&gt; result;
+    for (int train_end = training_window;
+         train_end + embargo + testing_window &lt;= observations;
+         train_end += testing_window) {
+        int first = expanding ? 0 : train_end - training_window;
+        result.push_back({first, train_end, train_end + embargo,
+                          train_end + embargo + testing_window});
+    }
+    return result;
+}
+
+inline std::vector&lt;int&gt; moving_block_resample(int observations, int block_length,
+                                               unsigned int seed) {
+    require(observations &gt;= 2 &amp;&amp; block_length &gt; 0 &amp;&amp;
+            block_length &lt;= observations, &quot;Invalid bootstrap block parameters&quot;);
+    std::mt19937 random(seed);
+    std::uniform_int_distribution&lt;int&gt; start(0, observations - block_length);
+    std::vector&lt;int&gt; indices;
+    while (int(indices.size()) &lt; observations) {
+        int beginning = start(random);
+        for (int offset = 0; offset &lt; block_length &amp;&amp;
+             int(indices.size()) &lt; observations; offset++) {
+            indices.push_back(beginning + offset);
+        }
+    }
+    return indices;
+}
+
+inline std::vector&lt;double&gt; block_bootstrap_means(const std::vector&lt;double&gt;&amp; returns,
+                                                   int block_length,
+                                                   int replicates, unsigned int seed) {
+    check_finite(returns);
+    require(replicates &gt; 0 &amp;&amp; replicates &lt;= 100000, &quot;Invalid bootstrap replicates&quot;);
+    std::vector&lt;double&gt; result;
+    for (int r = 0; r &lt; replicates; r++) {
+        auto indices = moving_block_resample(int(returns.size()), block_length, seed + r);
+        double sum = 0;
+        for (int id : indices) sum += returns[id];
+        result.push_back(sum / indices.size());
+    }
+    return result;
+}
+
+inline double bonferroni_adjusted_p(double raw_p, int number_of_tests) {
+    require(raw_p &gt;= 0 &amp;&amp; raw_p &lt;= 1 &amp;&amp; number_of_tests &gt; 0,
+            &quot;Invalid p-value or test count&quot;);
+    return std::min(1.0, raw_p * number_of_tests);
+}
+
+inline std::vector&lt;bool&gt; benjamini_hochberg(const std::vector&lt;double&gt;&amp; p_values,
+                                             double false_discovery_rate = 0.05) {
+    check_finite(p_values);
+    require(false_discovery_rate &gt; 0 &amp;&amp; false_discovery_rate &lt; 1,
+            &quot;Invalid target FDR&quot;);
+    int m = int(p_values.size());
+    std::vector&lt;int&gt; order(m);
+    std::iota(order.begin(), order.end(), 0);
+    for (double p : p_values) require(p &gt;= 0 &amp;&amp; p &lt;= 1, &quot;Invalid individual p-value&quot;);
+    std::stable_sort(order.begin(), order.end(),
+                     [&amp;](int a, int b) { return p_values[a] &lt; p_values[b]; });
+    int k = 0;
+    for (int i = 0; i &lt; m; i++)
+        if (p_values[order[i]] &lt;= false_discovery_rate * (i + 1) / m) k = i + 1;
+    std::vector&lt;bool&gt; rejected(m, false);
+    for (int i = 0; i &lt; k; i++) rejected[order[i]] = true;
+    return rejected;
+}
+
+inline double brier_score(const std::vector&lt;double&gt;&amp; probability,
+                          const std::vector&lt;int&gt;&amp; binary_label) {
+    check_finite(probability);
+    require(binary_label.size() == probability.size(), &quot;Labels must align with predictions&quot;);
+    double result = 0;
+    for (int i = 0; i &lt; int(probability.size()); i++) {
+        require(probability[i] &gt;= 0 &amp;&amp; probability[i] &lt;= 1 &amp;&amp;
+                (binary_label[i] == 0 || binary_label[i] == 1),
+                &quot;Brier requires probabilities and binary labels&quot;);
+        result += std::pow(probability[i] - binary_label[i], 2);
+    }
+    return result / probability.size();
+}
+
+struct CalibrationBin {
+    int observations = 0;
+    double predicted_frequency = 0;
+    double observed_frequency = 0;
+};
+
+inline std::vector&lt;CalibrationBin&gt; reliability_bins(
+    const std::vector&lt;double&gt;&amp; probabilities, const std::vector&lt;int&gt;&amp; labels,
+    int bins = 10) {
+    check_finite(probabilities);
+    require(probabilities.size() == labels.size() &amp;&amp; bins &gt;= 1 &amp;&amp; bins &lt;= 100,
+            &quot;Invalid calibration bin inputs&quot;);
+    std::vector&lt;CalibrationBin&gt; results(bins);
+    for (int i = 0; i &lt; int(probabilities.size()); i++) {
+        require(probabilities[i] &gt;= 0 &amp;&amp; probabilities[i] &lt;= 1 &amp;&amp;
+                (labels[i] == 0 || labels[i] == 1), &quot;Invalid probability or label&quot;);
+        int index = std::min(bins - 1, int(probabilities[i] * bins));
+        results[index].observations++;
+        results[index].predicted_frequency += probabilities[i];
+        results[index].observed_frequency += labels[i];
+    }
+    for (auto&amp; bin : results) {
+        if (bin.observations &gt; 0) {
+            bin.predicted_frequency /= bin.observations;
+            bin.observed_frequency /= bin.observations;
+        }
+    }
+    return results;
+}
+
+}  // namespace kline
+</code></pre><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/validation.hpp">C++17算法与数据检验：validation.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">官方或学术资料入口</a></p></article><article id="resource2-5"><h3>3.6　研究质量在金融中的影响</h3><p>评价论文平台或开源研究网站时，可按是否给出原始数据、模型环境、数据处理代码及实际测试划分逐项评估复现基础。</p><div class="formula">$$p_{Bonf}=\min(1,mp),\qquad FDR=E\left[\frac{V}{R\vee1}\right]$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/validation.hpp">C++17算法与数据检验：validation.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">官方或学术资料入口</a></p></article><article id="resource2-6"><h3>3.7　失效情形和稳健性审计</h3><p>代码可运行与结论可靠是两个不同判断；经济机制仍需样本外检验及交易成本解释。</p><div class="formula">$$p_{Bonf}=\min(1,mp),\qquad FDR=E\left[\frac{V}{R\vee1}\right]$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/validation.hpp">C++17算法与数据检验：validation.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">官方或学术资料入口</a></p></article><article id="resource2-7"><h3>3.8　原始资料、数值验证与研究结论</h3><p>应将原始公开机构资料与对应C++17实现的输出一一对应。代码可运行与结论可靠是两个不同判断；经济机制仍需样本外检验及交易成本解释。只采用能够逐项追踪研究变量和样本总体的信息，不以机构网页的单一展示值作为全市场结论。</p><div class="formula">$$p_{Bonf}=\min(1,mp),\qquad FDR=E\left[\frac{V}{R\vee1}\right]$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/validation.hpp">C++17算法与数据检验：validation.hpp</a>　<a href="https://www.aeaweb.org/journals/data/data-code-policy">官方或学术资料入口</a></p></article></section><section id="resource3"><h2>4．跨公司与跨地区面板数据的识别</h2><article id="resource3-0"><h3>4.1　研究资源及评价对象</h3><p>公司、地区或证券面板数据包含个体不随时间变化的特征。固定效应模型允许用组内变化识别共同斜率，避免部分恒定遗漏差异直接混入回归参数。</p><div class="formula">$$y_{it}=\alpha_i+x_{it}^{\top}\beta+\varepsilon_{it}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/panel_econometrics.hpp">C++17算法与数据检验：panel_econometrics.hpp</a>　<a href="https://www.nber.org/papers">官方或学术资料入口</a></p></article><article id="resource3-1"><h3>4.2　数理定义与核心公式</h3><p>对每个实体沿时间维度进行组内去均值，将不随时间变化的个体截距消除，再对处理后的自变量和结果应用回归。</p><div class="formula">$$y_{it}=\alpha_i+x_{it}^{\top}\beta+\varepsilon_{it}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/panel_econometrics.hpp">C++17算法与数据检验：panel_econometrics.hpp</a>　<a href="https://www.nber.org/papers">官方或学术资料入口</a></p></article><article id="resource3-2"><h3>4.3　采样总体、使用许可和识别条件</h3><p>固定效应需要足够个体内部变化及适当严格外生性；在有共同冲击时，还可能需要时间固定效应与按依赖结构聚类的标准误。</p><div class="formula">$$y_{it}=\alpha_i+x_{it}^{\top}\beta+\varepsilon_{it}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/panel_econometrics.hpp">C++17算法与数据检验：panel_econometrics.hpp</a>　<a href="https://www.nber.org/papers">官方或学术资料入口</a></p></article><article id="resource3-3"><h3>4.4　数据单位与来源一致性</h3><p>比较同类数据或模型前，应分别识别日期、计量单位、币种、修订和记录粒度。固定效应需要足够个体内部变化及适当严格外生性；在有共同冲击时，还可能需要时间固定效应与按依赖结构聚类的标准误。</p><div class="formula">$$y_{it}=\alpha_i+x_{it}^{\top}\beta+\varepsilon_{it}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/panel_econometrics.hpp">C++17算法与数据检验：panel_econometrics.hpp</a>　<a href="https://www.nber.org/papers">官方或学术资料入口</a></p></article><article id="resource3-4"><h3>4.5　可编译C++17计算实现</h3><p>研究中的统计对象可以通过以下C++17实现独立计算。对每个实体沿时间维度进行组内去均值，将不随时间变化的个体截距消除，再对处理后的自变量和结果应用回归。</p><div class="formula">$$y_{it}=\alpha_i+x_{it}^{\top}\beta+\varepsilon_{it}$$</div><pre><code>#pragma once
+#include &quot;ols_models.hpp&quot;
+#include &lt;algorithm&gt;
+#include &lt;map&gt;
+#include &lt;vector&gt;
+namespace kline {
+inline OLSResult entity_fixed_effects(
+    const Matrix&amp; features,const std::vector&lt;double&gt;&amp; outcomes,
+    const std::vector&lt;int&gt;&amp; entity_ids){
+    check_feature_table(features,outcomes);
+    require(entity_ids.size()==outcomes.size(),
+            &quot;Entity panel identities differ&quot;);
+    int n=int(features.size()),p=int(features.front().size());
+    std::map&lt;int,std::vector&lt;int&gt;&gt; groups;
+    for(int i=0;i&lt;n;i++)groups[entity_ids[i]].push_back(i);
+    require(int(groups.size())&gt;=2,&quot;Panel requires multiple entities&quot;);
+    Matrix x=features;
+    std::vector&lt;double&gt; y=outcomes;
+    for(const auto&amp; group:groups){
+        const auto&amp; ids=group.second;
+        require(ids.size()&gt;=2,&quot;Each entity needs repeated observations&quot;);
+        double ym=0;std::vector&lt;double&gt; xm(p,0);
+        for(int index:ids){
+            ym+=outcomes[index]/ids.size();
+            for(int j=0;j&lt;p;j++)xm[j]+=features[index][j]/ids.size();
+        }
+        for(int index:ids){
+            y[index]-=ym;
+            for(int j=0;j&lt;p;j++)x[index][j]-=xm[j];
+        }
+    }
+    auto result=ordinary_least_squares(x,y);
+    return result;
+}
+inline double panel_within_r_squared(
+    const Matrix&amp; x,const std::vector&lt;double&gt;&amp; y,
+    const std::vector&lt;int&gt;&amp; entity_ids){
+    return entity_fixed_effects(x,y,entity_ids).r_squared;
+}
+} // namespace kline
+</code></pre><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/panel_econometrics.hpp">C++17算法与数据检验：panel_econometrics.hpp</a>　<a href="https://www.nber.org/papers">官方或学术资料入口</a></p></article><article id="resource3-5"><h3>4.6　研究质量在金融中的影响</h3><p>比较企业财务数据、跨地区政策和证券特征的数据供应商时，应检查实体ID持续性、时间覆盖、财务口径变化与面板不平衡处理。</p><div class="formula">$$y_{it}=\alpha_i+x_{it}^{\top}\beta+\varepsilon_{it}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/panel_econometrics.hpp">C++17算法与数据检验：panel_econometrics.hpp</a>　<a href="https://www.nber.org/papers">官方或学术资料入口</a></p></article><article id="resource3-6"><h3>4.7　失效情形和稳健性审计</h3><p>不能把某一家机构或一个地区的面板估计结果直接当作全行业因果规律，识别结论取决于样本总体及明确的研究设计。</p><div class="formula">$$y_{it}=\alpha_i+x_{it}^{\top}\beta+\varepsilon_{it}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/panel_econometrics.hpp">C++17算法与数据检验：panel_econometrics.hpp</a>　<a href="https://www.nber.org/papers">官方或学术资料入口</a></p></article><article id="resource3-7"><h3>4.8　原始资料、数值验证与研究结论</h3><p>应将原始公开机构资料与对应C++17实现的输出一一对应。不能把某一家机构或一个地区的面板估计结果直接当作全行业因果规律，识别结论取决于样本总体及明确的研究设计。只采用能够逐项追踪研究变量和样本总体的信息，不以机构网页的单一展示值作为全市场结论。</p><div class="formula">$$y_{it}=\alpha_i+x_{it}^{\top}\beta+\varepsilon_{it}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/panel_econometrics.hpp">C++17算法与数据检验：panel_econometrics.hpp</a>　<a href="https://www.nber.org/papers">官方或学术资料入口</a></p></article></section><section id="resource4"><h2>5．极端金融风险样本与尾部分布</h2><article id="resource4-0"><h3>5.1　研究资源及评价对象</h3><p>金融研究需要足够长的尾部观察样本以评估高置信度VaR和Expected Shortfall。常规正态风险模型对极端价格事件的估计往往非常敏感。</p><div class="formula">$$P(X>x\mid X>u)\approx\left(1+\xi\frac{x-u}{\beta}\right)^{-1/\xi}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/tail_distributions.hpp">C++17算法与数据检验：tail_distributions.hpp</a>　<a href="https://www.bis.org/">官方或学术资料入口</a></p></article><article id="resource4-1"><h3>5.2　数理定义与核心公式</h3><p>超过阈值u的超额损失可采用广义帕累托分布近似，尾指数与尺度参数决定稀有损失概率随阈值增长的速度。</p><div class="formula">$$P(X>x\mid X>u)\approx\left(1+\xi\frac{x-u}{\beta}\right)^{-1/\xi}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/tail_distributions.hpp">C++17算法与数据检验：tail_distributions.hpp</a>　<a href="https://www.bis.org/">官方或学术资料入口</a></p></article><article id="resource4-2"><h3>5.3　采样总体、使用许可和识别条件</h3><p>尾部分布近似依赖极值理论条件和足够极端样本；阈值过低或过高分别增加模型偏差与估计方差。</p><div class="formula">$$P(X>x\mid X>u)\approx\left(1+\xi\frac{x-u}{\beta}\right)^{-1/\xi}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/tail_distributions.hpp">C++17算法与数据检验：tail_distributions.hpp</a>　<a href="https://www.bis.org/">官方或学术资料入口</a></p></article><article id="resource4-3"><h3>5.4　数据单位与来源一致性</h3><p>比较同类数据或模型前，应分别识别日期、计量单位、币种、修订和记录粒度。尾部分布近似依赖极值理论条件和足够极端样本；阈值过低或过高分别增加模型偏差与估计方差。</p><div class="formula">$$P(X>x\mid X>u)\approx\left(1+\xi\frac{x-u}{\beta}\right)^{-1/\xi}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/tail_distributions.hpp">C++17算法与数据检验：tail_distributions.hpp</a>　<a href="https://www.bis.org/">官方或学术资料入口</a></p></article><article id="resource4-4"><h3>5.5　可编译C++17计算实现</h3><p>研究中的统计对象可以通过以下C++17实现独立计算。超过阈值u的超额损失可采用广义帕累托分布近似，尾指数与尺度参数决定稀有损失概率随阈值增长的速度。</p><div class="formula">$$P(X>x\mid X>u)\approx\left(1+\xi\frac{x-u}{\beta}\right)^{-1/\xi}$$</div><pre><code>#pragma once
+#include &quot;probability_models.hpp&quot;
+#include &lt;cmath&gt;
+#include &lt;vector&gt;
+namespace kline {
+struct GeneralizedPareto{
+    double shape=0,scale=1;
+};
+inline double gpd_survival(double excess,GeneralizedPareto p){
+    require(std::isfinite(excess)&amp;&amp;excess&gt;=0&amp;&amp;
+            std::isfinite(p.shape)&amp;&amp;std::isfinite(p.scale)&amp;&amp;p.scale&gt;0,
+            &quot;GPD parameters&quot;);
+    if(std::fabs(p.shape)&lt;1e-10)return std::exp(-excess/p.scale);
+    double base=1+p.shape*excess/p.scale;
+    return base&lt;=0?0:std::pow(base,-1/p.shape);
+}
+inline double gpd_quantile(double probability,GeneralizedPareto p){
+    require(std::isfinite(probability)&amp;&amp;probability&gt;=0&amp;&amp;probability&lt;1&amp;&amp;
+            std::isfinite(p.shape)&amp;&amp;std::isfinite(p.scale)&amp;&amp;p.scale&gt;0,
+            &quot;GPD quantile parameters&quot;);
+    if(std::fabs(p.shape)&lt;1e-10)return -p.scale*std::log1p(-probability);
+    return p.scale*std::expm1(-p.shape*std::log1p(-probability))/p.shape;
+}
+inline double hill_tail_index(std::vector&lt;double&gt; losses,int upper_count){
+    check_finite(losses);
+    require(upper_count&gt;=2&amp;&amp;upper_count&lt;int(losses.size()),
+            &quot;Hill estimator needs threshold and exceedances&quot;);
+    for(double v:losses)require(v&gt;0,&quot;Hill estimator positive losses only&quot;);
+    std::sort(losses.begin(),losses.end(),std::greater&lt;double&gt;());
+    double threshold=losses[upper_count];
+    double mean_log=0;
+    for(int i=0;i&lt;upper_count;i++)
+        mean_log+=std::log(losses[i]/threshold)/upper_count;
+    require(mean_log&gt;0,&quot;No positive Hill tail variation&quot;);
+    return 1/mean_log;
+}
+inline double gaussian_expected_shortfall(double mean_loss,double loss_sigma,
+                                           double confidence){
+    require(std::isfinite(mean_loss)&amp;&amp;std::isfinite(loss_sigma)&amp;&amp;loss_sigma&gt;=0&amp;&amp;
+            std::isfinite(confidence)&amp;&amp;confidence&gt;0&amp;&amp;confidence&lt;1,
+            &quot;Gaussian ES parameters&quot;);
+    double z=normal_inverse_cdf(confidence);
+    return mean_loss+loss_sigma*standard_normal_pdf(z)/(1-confidence);
+}
+} // namespace kline
+</code></pre><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/tail_distributions.hpp">C++17算法与数据检验：tail_distributions.hpp</a>　<a href="https://www.bis.org/">官方或学术资料入口</a></p></article><article id="resource4-5"><h3>5.6　研究质量在金融中的影响</h3><p>比较研究数据库时，应记录危机时期、退市证券及尾部事件是否被完整覆盖，再考察极值分布估计对数据供应商的稳健性。</p><div class="formula">$$P(X>x\mid X>u)\approx\left(1+\xi\frac{x-u}{\beta}\right)^{-1/\xi}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/tail_distributions.hpp">C++17算法与数据检验：tail_distributions.hpp</a>　<a href="https://www.bis.org/">官方或学术资料入口</a></p></article><article id="resource4-6"><h3>5.7　失效情形和稳健性审计</h3><p>单一历史危机不能概括所有未来市场压力状态。尾部估计应同时报告数据窗口、阈值与依赖调整。</p><div class="formula">$$P(X>x\mid X>u)\approx\left(1+\xi\frac{x-u}{\beta}\right)^{-1/\xi}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/tail_distributions.hpp">C++17算法与数据检验：tail_distributions.hpp</a>　<a href="https://www.bis.org/">官方或学术资料入口</a></p></article><article id="resource4-7"><h3>5.8　原始资料、数值验证与研究结论</h3><p>应将原始公开机构资料与对应C++17实现的输出一一对应。单一历史危机不能概括所有未来市场压力状态。尾部估计应同时报告数据窗口、阈值与依赖调整。只采用能够逐项追踪研究变量和样本总体的信息，不以机构网页的单一展示值作为全市场结论。</p><div class="formula">$$P(X>x\mid X>u)\approx\left(1+\xi\frac{x-u}{\beta}\right)^{-1/\xi}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/tail_distributions.hpp">C++17算法与数据检验：tail_distributions.hpp</a>　<a href="https://www.bis.org/">官方或学术资料入口</a></p></article></section><section id="resource5"><h2>6．风险协方差的正定性与估计可靠性</h2><article id="resource5-0"><h3>6.1　研究资源及评价对象</h3><p>高维资产收益样本中，协方差矩阵可能具有负的数值特征值、近零方向或极高条件数，导致最优化权重不稳定。正定修正是金融风险数值计算的重要基础。</p><div class="formula">$$\Sigma=Q\Lambda Q^\top,\quad\Lambda_{adj}=\max(\Lambda,\epsilon)$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/covariance_regularization.hpp">C++17算法与数据检验：covariance_regularization.hpp</a>　<a href="https://www.itl.nist.gov/div898/handbook/">官方或学术资料入口</a></p></article><article id="resource5-1"><h3>6.2　数理定义与核心公式</h3><p>通过对称特征值分解识别最小特征方向，给过小的特征值设定正下界，再把矩阵重新组装并检查得到的相关与协方差性质。</p><div class="formula">$$\Sigma=Q\Lambda Q^\top,\quad\Lambda_{adj}=\max(\Lambda,\epsilon)$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/covariance_regularization.hpp">C++17算法与数据检验：covariance_regularization.hpp</a>　<a href="https://www.itl.nist.gov/div898/handbook/">官方或学术资料入口</a></p></article><article id="resource5-2"><h3>6.3　采样总体、使用许可和识别条件</h3><p>特征值下界单位依赖资产方差尺度；无量纲相关矩阵和原始收益协方差需要分别选择数值条件。</p><div class="formula">$$\Sigma=Q\Lambda Q^\top,\quad\Lambda_{adj}=\max(\Lambda,\epsilon)$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/covariance_regularization.hpp">C++17算法与数据检验：covariance_regularization.hpp</a>　<a href="https://www.itl.nist.gov/div898/handbook/">官方或学术资料入口</a></p></article><article id="resource5-3"><h3>6.4　数据单位与来源一致性</h3><p>比较同类数据或模型前，应分别识别日期、计量单位、币种、修订和记录粒度。特征值下界单位依赖资产方差尺度；无量纲相关矩阵和原始收益协方差需要分别选择数值条件。</p><div class="formula">$$\Sigma=Q\Lambda Q^\top,\quad\Lambda_{adj}=\max(\Lambda,\epsilon)$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/covariance_regularization.hpp">C++17算法与数据检验：covariance_regularization.hpp</a>　<a href="https://www.itl.nist.gov/div898/handbook/">官方或学术资料入口</a></p></article><article id="resource5-4"><h3>6.5　可编译C++17计算实现</h3><p>研究中的统计对象可以通过以下C++17实现独立计算。通过对称特征值分解识别最小特征方向，给过小的特征值设定正下界，再把矩阵重新组装并检查得到的相关与协方差性质。</p><div class="formula">$$\Sigma=Q\Lambda Q^\top,\quad\Lambda_{adj}=\max(\Lambda,\epsilon)$$</div><pre><code>#pragma once
+#include &quot;numerical.hpp&quot;
+#include &lt;algorithm&gt;
+#include &lt;cmath&gt;
+#include &lt;vector&gt;
+namespace kline {
+inline Matrix eigenvalue_floor_covariance(const Matrix&amp; covariance,
+                                           double fraction=1e-5){
+    require(std::isfinite(fraction)&amp;&amp;fraction&gt;=0,&quot;Invalid spectral floor&quot;);
+    auto eigen=symmetric_eigen(covariance);
+    double largest=std::max(0.0,eigen.values.front());
+    double floor=largest*fraction;
+    int n=int(covariance.size());
+    Matrix result(n,std::vector&lt;double&gt;(n,0));
+    for(int k=0;k&lt;n;k++){
+        double value=std::max(floor,eigen.values[k]);
+        for(int i=0;i&lt;n;i++)
+            for(int j=0;j&lt;n;j++)
+                result[i][j]+=value*eigen.vectors[i][k]*eigen.vectors[j][k];
+    }
+    return result;
+}
+inline Matrix covariance_correlation(const Matrix&amp; covariance){
+    check_covariance(covariance);
+    int n=int(covariance.size());
+    Matrix corr(n,std::vector&lt;double&gt;(n,0));
+    for(int i=0;i&lt;n;i++)
+        for(int j=0;j&lt;n;j++){
+            double denom=std::sqrt(covariance[i][i]*covariance[j][j]);
+            corr[i][j]=denom&gt;0?covariance[i][j]/denom:0;
+            if(i==j&amp;&amp;denom&gt;0)corr[i][i]=1;
+        }
+    return corr;
+}
+inline double covariance_condition_regularized(const Matrix&amp; covariance,
+                                                double fraction){
+    return condition_number_symmetric(eigenvalue_floor_covariance(covariance,fraction));
+}
+} // namespace kline
+</code></pre><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/covariance_regularization.hpp">C++17算法与数据检验：covariance_regularization.hpp</a>　<a href="https://www.itl.nist.gov/div898/handbook/">官方或学术资料入口</a></p></article><article id="resource5-5"><h3>6.6　研究质量在金融中的影响</h3><p>评价资产组合优化的公开代码及开源数据时，除了回测Sharpe，还需要检查协方差正定、模型条件数及不同行情下的仓位稳定性。</p><div class="formula">$$\Sigma=Q\Lambda Q^\top,\quad\Lambda_{adj}=\max(\Lambda,\epsilon)$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/covariance_regularization.hpp">C++17算法与数据检验：covariance_regularization.hpp</a>　<a href="https://www.itl.nist.gov/div898/handbook/">官方或学术资料入口</a></p></article><article id="resource5-6"><h3>6.7　失效情形和稳健性审计</h3><p>提高特征值下界虽改善数值稳定性，但会改变估计风险结构；从单次优化成功不能推导真实组合风险无偏。</p><div class="formula">$$\Sigma=Q\Lambda Q^\top,\quad\Lambda_{adj}=\max(\Lambda,\epsilon)$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/covariance_regularization.hpp">C++17算法与数据检验：covariance_regularization.hpp</a>　<a href="https://www.itl.nist.gov/div898/handbook/">官方或学术资料入口</a></p></article><article id="resource5-7"><h3>6.8　原始资料、数值验证与研究结论</h3><p>应将原始公开机构资料与对应C++17实现的输出一一对应。提高特征值下界虽改善数值稳定性，但会改变估计风险结构；从单次优化成功不能推导真实组合风险无偏。只采用能够逐项追踪研究变量和样本总体的信息，不以机构网页的单一展示值作为全市场结论。</p><div class="formula">$$\Sigma=Q\Lambda Q^\top,\quad\Lambda_{adj}=\max(\Lambda,\epsilon)$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/covariance_regularization.hpp">C++17算法与数据检验：covariance_regularization.hpp</a>　<a href="https://www.itl.nist.gov/div898/handbook/">官方或学术资料入口</a></p></article></section><section id="resource6"><h2>7．VaR覆盖检验与预期短缺模型审计</h2><article id="resource6-0"><h3>7.1　研究资源及评价对象</h3><p>风险模型的目标是把未来损失与预先预测的风险阈值联系起来。VaR超过次数、覆盖频率与Expected Shortfall损失残差属于独立的回测诊断对象。</p><div class="formula">$$LR_{uc}=-2\ln\frac{(1-\alpha)^{n-x}\alpha^x}{(1-\widehat p)^{n-x}\widehat p^x}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/risk_backtesting.hpp">C++17算法与数据检验：risk_backtesting.hpp</a>　<a href="https://www.bis.org/bcbs/">官方或学术资料入口</a></p></article><article id="resource6-1"><h3>7.2　数理定义与核心公式</h3><p>Kupiec无条件覆盖检验比较实际超过次数比例与模型给定尾概率，形成似然比；而预期短缺还需考察严重超阈值损失的平均尺度。</p><div class="formula">$$LR_{uc}=-2\ln\frac{(1-\alpha)^{n-x}\alpha^x}{(1-\widehat p)^{n-x}\widehat p^x}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/risk_backtesting.hpp">C++17算法与数据检验：risk_backtesting.hpp</a>　<a href="https://www.bis.org/bcbs/">官方或学术资料入口</a></p></article><article id="resource6-2"><h3>7.3　采样总体、使用许可和识别条件</h3><p>VaR阈值应与下一期真实损失同币种、同观测频率，并在损失实现之前生成。覆盖次数的相关性会影响无条件覆盖检验的解释。</p><div class="formula">$$LR_{uc}=-2\ln\frac{(1-\alpha)^{n-x}\alpha^x}{(1-\widehat p)^{n-x}\widehat p^x}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/risk_backtesting.hpp">C++17算法与数据检验：risk_backtesting.hpp</a>　<a href="https://www.bis.org/bcbs/">官方或学术资料入口</a></p></article><article id="resource6-3"><h3>7.4　数据单位与来源一致性</h3><p>比较同类数据或模型前，应分别识别日期、计量单位、币种、修订和记录粒度。VaR阈值应与下一期真实损失同币种、同观测频率，并在损失实现之前生成。覆盖次数的相关性会影响无条件覆盖检验的解释。</p><div class="formula">$$LR_{uc}=-2\ln\frac{(1-\alpha)^{n-x}\alpha^x}{(1-\widehat p)^{n-x}\widehat p^x}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/risk_backtesting.hpp">C++17算法与数据检验：risk_backtesting.hpp</a>　<a href="https://www.bis.org/bcbs/">官方或学术资料入口</a></p></article><article id="resource6-4"><h3>7.5　可编译C++17计算实现</h3><p>研究中的统计对象可以通过以下C++17实现独立计算。Kupiec无条件覆盖检验比较实际超过次数比例与模型给定尾概率，形成似然比；而预期短缺还需考察严重超阈值损失的平均尺度。</p><div class="formula">$$LR_{uc}=-2\ln\frac{(1-\alpha)^{n-x}\alpha^x}{(1-\widehat p)^{n-x}\widehat p^x}$$</div><pre><code>#pragma once
+#include &quot;stats.hpp&quot;
+#include &lt;cmath&gt;
+#include &lt;vector&gt;
+namespace kline {
+struct VaRBacktest{
+    int observations=0,exceptions=0;
+    double expected_exception_rate=0,realized_exception_rate=0;
+    double kupiec_lr=0;
+};
+inline VaRBacktest kupiec_var_coverage(
+    const std::vector&lt;double&gt;&amp; realized_losses,
+    const std::vector&lt;double&gt;&amp; var_forecasts,double confidence){
+    check_finite(realized_losses);check_finite(var_forecasts);
+    require(realized_losses.size()==var_forecasts.size()&amp;&amp;
+            std::isfinite(confidence)&amp;&amp;confidence&gt;0&amp;&amp;confidence&lt;1,
+            &quot;Invalid VaR coverage inputs&quot;);
+    VaRBacktest r;
+    r.observations=int(realized_losses.size());
+    r.expected_exception_rate=1-confidence;
+    for(int i=0;i&lt;r.observations;i++)
+        if(realized_losses[i]&gt;var_forecasts[i])r.exceptions++;
+    r.realized_exception_rate=double(r.exceptions)/r.observations;
+    double p=r.expected_exception_rate,q=r.realized_exception_rate;
+    double null_ll=r.exceptions*std::log(p)+
+        (r.observations-r.exceptions)*std::log1p(-p);
+    double alt_ll=0;
+    if(r.exceptions&gt;0)alt_ll+=r.exceptions*std::log(q);
+    if(r.exceptions&lt;r.observations)
+        alt_ll+=(r.observations-r.exceptions)*std::log1p(-q);
+    r.kupiec_lr=std::max(0.0,2*(alt_ll-null_ll));
+    return r;
+}
+inline double expected_shortfall_residual(
+    const std::vector&lt;double&gt;&amp; realized_losses,
+    const std::vector&lt;double&gt;&amp; var_forecasts,
+    const std::vector&lt;double&gt;&amp; es_forecasts){
+    check_finite(realized_losses);check_finite(var_forecasts);
+    check_finite(es_forecasts);
+    require(realized_losses.size()==var_forecasts.size()&amp;&amp;
+            realized_losses.size()==es_forecasts.size(),
+            &quot;ES residual series shape&quot;);
+    double sum=0;int count=0;
+    for(int i=0;i&lt;int(realized_losses.size());i++)
+        if(realized_losses[i]&gt;var_forecasts[i]){
+            sum+=realized_losses[i]-es_forecasts[i];count++;
+        }
+    require(count&gt;0,&quot;No VaR exceptions for ES residual&quot;);
+    return sum/count;
+}
+} // namespace kline
+</code></pre><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/risk_backtesting.hpp">C++17算法与数据检验：risk_backtesting.hpp</a>　<a href="https://www.bis.org/bcbs/">官方或学术资料入口</a></p></article><article id="resource6-5"><h3>7.6　研究质量在金融中的影响</h3><p>比较银行风险系统、开源VaR模型及资产组合风控文献时，可由同一真实损失样本复算覆盖检验，再对极端损失幅度进行独立评价。</p><div class="formula">$$LR_{uc}=-2\ln\frac{(1-\alpha)^{n-x}\alpha^x}{(1-\widehat p)^{n-x}\widehat p^x}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/risk_backtesting.hpp">C++17算法与数据检验：risk_backtesting.hpp</a>　<a href="https://www.bis.org/bcbs/">官方或学术资料入口</a></p></article><article id="resource6-6"><h3>7.7　失效情形和稳健性审计</h3><p>即使覆盖频率符合名义概率，极端损失聚集也可能表明模型条件覆盖不充分，仍须研究危机状态和序列依赖。</p><div class="formula">$$LR_{uc}=-2\ln\frac{(1-\alpha)^{n-x}\alpha^x}{(1-\widehat p)^{n-x}\widehat p^x}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/risk_backtesting.hpp">C++17算法与数据检验：risk_backtesting.hpp</a>　<a href="https://www.bis.org/bcbs/">官方或学术资料入口</a></p></article><article id="resource6-7"><h3>7.8　原始资料、数值验证与研究结论</h3><p>应将原始公开机构资料与对应C++17实现的输出一一对应。即使覆盖频率符合名义概率，极端损失聚集也可能表明模型条件覆盖不充分，仍须研究危机状态和序列依赖。只采用能够逐项追踪研究变量和样本总体的信息，不以机构网页的单一展示值作为全市场结论。</p><div class="formula">$$LR_{uc}=-2\ln\frac{(1-\alpha)^{n-x}\alpha^x}{(1-\widehat p)^{n-x}\widehat p^x}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/risk_backtesting.hpp">C++17算法与数据检验：risk_backtesting.hpp</a>　<a href="https://www.bis.org/bcbs/">官方或学术资料入口</a></p></article></section><footer>学术资料：<a href="https://www.aeaweb.org/journals/data/data-code-policy">AEA Data & Code Policy</a>；<a href="https://www.sec.gov/edgar/search/">SEC EDGAR</a>；<a href="https://www.itl.nist.gov/div898/handbook/">NIST</a>。<a href="./">返回量化学术资源与研究网站目录</a>。</footer></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

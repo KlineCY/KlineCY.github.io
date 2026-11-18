@@ -1,0 +1,193 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>基金现金流、策略容量与组合风险平价｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><style>*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#fff;color:#1a2b37;font:15px/1.92 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:29px 35px 68px}main{max-width:1200px;margin:auto}header,.toc,article{border:1px solid #cbd5dd;padding:23px;background:white}header{padding:28px 34px}.toc{display:flex;flex-wrap:wrap;gap:11px 22px;margin:20px 0}h1{font-size:clamp(28px,3vw,41px)}h2{font-size:24px;border-bottom:1px solid #cbd5df;padding-bottom:10px;margin:35px 0 14px}h3{font-size:19px;margin:0 0 13px}article{margin:14px 0;scroll-margin-top:12px;padding:18px 26px}a{color:#175d88}.formula{padding:13px 7px;margin:14px 0;border-block:1px solid #d4dfe6;overflow:auto}pre{font:12px/1.55 "Times New Roman",monospace;border:1px solid #d4dce3;padding:13px;overflow:auto;max-height:490px}footer{font-size:13px;margin:30px 0;color:#566b7b}@media(max-width:770px){.main{margin-left:0;padding:12px}header,article{padding:16px}}</style></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><small>PORTFOLIO MANAGEMENT / FUND ECONOMICS</small><h1>基金现金流、策略容量与组合风险平价</h1><p>全部48节围绕资产管理的经济目标、现金流、资金规模、组合风控与费用机制，提供数学定义、推导、数据条件、金融应用、C++17源码和风险判断。模型计算与产品合同约束分别描述，保留原站全部课程。</p></header><nav class="toc"><a href="#p0">基金高水位线与激励费用</a><a href="#p1">时间加权收益与Modified Dietz</a><a href="#p2">平方根冲击下的策略容量</a><a href="#p3">协方差矩阵对角收缩</a><a href="#p4">多资产等风险贡献组合</a><a href="#p5">权重漂移与再平衡缓冲带</a></nav><section id="p0"><h2>1．基金高水位线与激励费用</h2><article id="p0-lesson0"><h3>1.1　研究对象及基本定义</h3><p>高水位线把业绩费与此前已达到的份额净值高点关联，防止基金在尚未修复历史亏损时重复为恢复原净值收取业绩费。</p><div class="formula">$$NAV_{net}=NAV_{gross}-Fee_{mgmt}-\alpha(NAV_{postmgmt}-HWM)^+$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/high_watermark_fees.hpp">C++17：high_watermark_fees.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p0-lesson1"><h3>1.2　目标函数与数学构造</h3><p>先根据本期毛收益计算计费前净值，再扣除本期管理费；对扣管理费后的净值超过旧高水位线的部分乘以激励比例，最后更新净高水位。</p><div class="formula">$$NAV_{net}=NAV_{gross}-Fee_{mgmt}-\alpha(NAV_{postmgmt}-HWM)^+$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/high_watermark_fees.hpp">C++17：high_watermark_fees.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p0-lesson2"><h3>1.3　投资、合同及统计前提</h3><p>本模型以份额净值计价，并假定费用在期末计提；真实合同可能含Hurdle Rate、Equalization及多系列份额，需要按合同分别处理。</p><div class="formula">$$NAV_{net}=NAV_{gross}-Fee_{mgmt}-\alpha(NAV_{postmgmt}-HWM)^+$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/high_watermark_fees.hpp">C++17：high_watermark_fees.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p0-lesson3"><h3>1.4　资产与资金单位</h3><p>计算结果与资产管理规模、价格、持仓股数、年化收益率或期限的单位保持一致。本模型以份额净值计价，并假定费用在期末计提；真实合同可能含Hurdle Rate、Equalization及多系列份额，需要按合同分别处理。</p><div class="formula">$$NAV_{net}=NAV_{gross}-Fee_{mgmt}-\alpha(NAV_{postmgmt}-HWM)^+$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/high_watermark_fees.hpp">C++17：high_watermark_fees.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p0-lesson4"><h3>1.5　数值算法及完整源码</h3><p>以标准C++17实现可调用算法，不依赖第三方数值库。先根据本期毛收益计算计费前净值，再扣除本期管理费；对扣管理费后的净值超过旧高水位线的部分乘以激励比例，最后更新净高水位。</p><div class="formula">$$NAV_{net}=NAV_{gross}-Fee_{mgmt}-\alpha(NAV_{postmgmt}-HWM)^+$$</div><pre><code>#pragma once
+#include &quot;stats.hpp&quot;
+#include &lt;algorithm&gt;
+#include &lt;cmath&gt;
+namespace kline {
+struct FundFeePeriod{double before_fee=0,management_fee=0,performance_fee=0;
+    double after_fee=0,high_watermark_per_share=0;};
+inline FundFeePeriod charge_fund_fees(
+    double previous_nav_per_share,double gross_return,
+    double previous_high_watermark,double management_fee_period,
+    double incentive_rate){
+    require(std::isfinite(previous_nav_per_share)&amp;&amp;previous_nav_per_share&gt;0&amp;&amp;
+            std::isfinite(gross_return)&amp;&amp;gross_return&gt;-1&amp;&amp;
+            std::isfinite(previous_high_watermark)&amp;&amp;previous_high_watermark&gt;0&amp;&amp;
+            std::isfinite(management_fee_period)&amp;&amp;management_fee_period&gt;=0&amp;&amp;
+            management_fee_period&lt;1&amp;&amp;std::isfinite(incentive_rate)&amp;&amp;
+            incentive_rate&gt;=0&amp;&amp;incentive_rate&lt;=1,&quot;Invalid fund fee parameters&quot;);
+    double before=previous_nav_per_share*(1+gross_return);
+    double mgmt=before*management_fee_period;
+    double pre_incentive=before-mgmt;
+    double incentive=std::max(0.0,pre_incentive-previous_high_watermark)*
+                     incentive_rate;
+    double net=pre_incentive-incentive;
+    return {before,mgmt,incentive,net,std::max(previous_high_watermark,net)};
+}
+} // namespace kline
+</code></pre><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/high_watermark_fees.hpp">C++17：high_watermark_fees.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p0-lesson5"><h3>1.6　组合与管理机构应用</h3><p>研究基金管理规模时，可将管理费收入与真实净收益分开，检视不同市场状态和赎回路径如何影响投资者与管理人的收益分配。</p><div class="formula">$$NAV_{net}=NAV_{gross}-Fee_{mgmt}-\alpha(NAV_{postmgmt}-HWM)^+$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/high_watermark_fees.hpp">C++17：high_watermark_fees.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p0-lesson6"><h3>1.7　约束失效与风险对比</h3><p>业绩费和管理费的计提顺序与税务处理会改变净值。不能把某一个基金合同的条款推广为所有量化管理机构。</p><div class="formula">$$NAV_{net}=NAV_{gross}-Fee_{mgmt}-\alpha(NAV_{postmgmt}-HWM)^+$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/high_watermark_fees.hpp">C++17：high_watermark_fees.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p0-lesson7"><h3>1.8　历史数据复算与测试</h3><p>研究可以从真实历史持仓及现金流建立可核对输入，运行算法并与数值测试结果比较。业绩费和管理费的计提顺序与税务处理会改变净值。不能把某一个基金合同的条款推广为所有量化管理机构。</p><div class="formula">$$NAV_{net}=NAV_{gross}-Fee_{mgmt}-\alpha(NAV_{postmgmt}-HWM)^+$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/high_watermark_fees.hpp">C++17：high_watermark_fees.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article></section><section id="p1"><h2>2．时间加权收益与Modified Dietz</h2><article id="p1-lesson0"><h3>2.1　研究对象及基本定义</h3><p>时间加权收益排除外部资金流时间对投资表现的机械影响，Modified Dietz则通过资金流在区间剩余时间的比例近似加权在投资本金。</p><div class="formula">$$R_{TWR}=\prod_t\frac{V_{end,t}}{V_{start,t}}-1$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/cash_flow_time_weighted.hpp">C++17：cash_flow_time_weighted.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p1-lesson1"><h3>2.2　目标函数与数学构造</h3><p>对每个外部资金流之间的子期先计算投资组合收益，再将各子期总收益相乘；Dietz把终值减初值及所有外部流，并以时间加权资本作分母。</p><div class="formula">$$R_{TWR}=\prod_t\frac{V_{end,t}}{V_{start,t}}-1$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/cash_flow_time_weighted.hpp">C++17：cash_flow_time_weighted.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p1-lesson2"><h3>2.3　投资、合同及统计前提</h3><p>必须把投资收益与资金出入分开标记，现金流权重表示资金处于组合中的相对时长。若现金流中途特别大，Dietz近似可能有明显误差。</p><div class="formula">$$R_{TWR}=\prod_t\frac{V_{end,t}}{V_{start,t}}-1$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/cash_flow_time_weighted.hpp">C++17：cash_flow_time_weighted.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p1-lesson3"><h3>2.4　资产与资金单位</h3><p>计算结果与资产管理规模、价格、持仓股数、年化收益率或期限的单位保持一致。必须把投资收益与资金出入分开标记，现金流权重表示资金处于组合中的相对时长。若现金流中途特别大，Dietz近似可能有明显误差。</p><div class="formula">$$R_{TWR}=\prod_t\frac{V_{end,t}}{V_{start,t}}-1$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/cash_flow_time_weighted.hpp">C++17：cash_flow_time_weighted.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p1-lesson4"><h3>2.5　数值算法及完整源码</h3><p>以标准C++17实现可调用算法，不依赖第三方数值库。对每个外部资金流之间的子期先计算投资组合收益，再将各子期总收益相乘；Dietz把终值减初值及所有外部流，并以时间加权资本作分母。</p><div class="formula">$$R_{TWR}=\prod_t\frac{V_{end,t}}{V_{start,t}}-1$$</div><pre><code>#pragma once
+#include &quot;stats.hpp&quot;
+#include &lt;cmath&gt;
+#include &lt;vector&gt;
+namespace kline {
+inline double period_time_weighted_return(
+    const std::vector&lt;double&gt;&amp; start_values,
+    const std::vector&lt;double&gt;&amp; end_values_before_external_flow){
+    check_finite(start_values);check_finite(end_values_before_external_flow);
+    require(start_values.size()==end_values_before_external_flow.size(),
+            &quot;Time weighted subperiod dimensions differ&quot;);
+    double compound=1;
+    for(int i=0;i&lt;int(start_values.size());i++){
+        require(start_values[i]&gt;0&amp;&amp;end_values_before_external_flow[i]&gt;=0,
+                &quot;Invalid time weighted portfolio values&quot;);
+        compound*=end_values_before_external_flow[i]/start_values[i];
+    }
+    return compound-1;
+}
+inline double dietz_modified_return(
+    double beginning_equity,double ending_equity,
+    const std::vector&lt;double&gt;&amp; external_contributions,
+    const std::vector&lt;double&gt;&amp; remaining_time_fraction){
+    check_finite(external_contributions);check_finite(remaining_time_fraction);
+    require(external_contributions.size()==remaining_time_fraction.size()&amp;&amp;
+            std::isfinite(beginning_equity)&amp;&amp;beginning_equity&gt;0&amp;&amp;
+            std::isfinite(ending_equity)&amp;&amp;ending_equity&gt;=0,
+            &quot;Invalid Modified Dietz cashflow report&quot;);
+    double contribution=0,weighted=beginning_equity;
+    for(int i=0;i&lt;int(external_contributions.size());i++){
+        require(remaining_time_fraction[i]&gt;=0&amp;&amp;remaining_time_fraction[i]&lt;=1,
+                &quot;Contribution weights must be inside period&quot;);
+        contribution+=external_contributions[i];
+        weighted+=external_contributions[i]*remaining_time_fraction[i];
+    }
+    require(weighted&gt;0,&quot;Modified Dietz invested capital nonpositive&quot;);
+    return (ending_equity-beginning_equity-contribution)/weighted;
+}
+} // namespace kline
+</code></pre><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/cash_flow_time_weighted.hpp">C++17：cash_flow_time_weighted.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p1-lesson5"><h3>2.6　组合与管理机构应用</h3><p>比较基金管理能力时，TWR突出资产组合本身的投资回报，资金加权方式则可以描述实际投资者经历的资金投入时间差异。</p><div class="formula">$$R_{TWR}=\prod_t\frac{V_{end,t}}{V_{start,t}}-1$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/cash_flow_time_weighted.hpp">C++17：cash_flow_time_weighted.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p1-lesson6"><h3>2.7　约束失效与风险对比</h3><p>申购赎回与投资损益混算会扭曲管理人回报；真实资金加权IRR还需使用有日期的全部外部现金流求解。</p><div class="formula">$$R_{TWR}=\prod_t\frac{V_{end,t}}{V_{start,t}}-1$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/cash_flow_time_weighted.hpp">C++17：cash_flow_time_weighted.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p1-lesson7"><h3>2.8　历史数据复算与测试</h3><p>研究可以从真实历史持仓及现金流建立可核对输入，运行算法并与数值测试结果比较。申购赎回与投资损益混算会扭曲管理人回报；真实资金加权IRR还需使用有日期的全部外部现金流求解。</p><div class="formula">$$R_{TWR}=\prod_t\frac{V_{end,t}}{V_{start,t}}-1$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/cash_flow_time_weighted.hpp">C++17：cash_flow_time_weighted.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article></section><section id="p2"><h2>3．平方根冲击下的策略容量</h2><article id="p2-lesson0"><h3>3.1　研究对象及基本定义</h3><p>资金规模增长可以增加绝对毛Alpha，但订单量与交易冲击可能以超过线性的速度增长，最终形成净收益最大化的容量问题。</p><div class="formula">$$\Pi(A)=\alpha A-\kappa T A^{3/2}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/capacity_profitability.hpp">C++17：capacity_profitability.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p2-lesson1"><h3>3.2　目标函数与数学构造</h3><p>假定交易冲击成本与订单量的平方根比例关系成立，若交易金额与资本规模线性变化，则绝对成本可近似呈A的三分之二次幂。对净利润求导可得到内点最优资金规模。</p><div class="formula">$$\Pi(A)=\alpha A-\kappa T A^{3/2}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/capacity_profitability.hpp">C++17：capacity_profitability.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p2-lesson2"><h3>3.3　投资、合同及统计前提</h3><p>Alpha率、换手率与冲击系数的单位必须一致。冲击系数包含资产成交量和波动率的具体量纲，本例提供透明的参数化研究模型。</p><div class="formula">$$\Pi(A)=\alpha A-\kappa T A^{3/2}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/capacity_profitability.hpp">C++17：capacity_profitability.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p2-lesson3"><h3>3.4　资产与资金单位</h3><p>计算结果与资产管理规模、价格、持仓股数、年化收益率或期限的单位保持一致。Alpha率、换手率与冲击系数的单位必须一致。冲击系数包含资产成交量和波动率的具体量纲，本例提供透明的参数化研究模型。</p><div class="formula">$$\Pi(A)=\alpha A-\kappa T A^{3/2}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/capacity_profitability.hpp">C++17：capacity_profitability.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p2-lesson4"><h3>3.5　数值算法及完整源码</h3><p>以标准C++17实现可调用算法，不依赖第三方数值库。假定交易冲击成本与订单量的平方根比例关系成立，若交易金额与资本规模线性变化，则绝对成本可近似呈A的三分之二次幂。对净利润求导可得到内点最优资金规模。</p><div class="formula">$$\Pi(A)=\alpha A-\kappa T A^{3/2}$$</div><pre><code>#pragma once
+#include &quot;stats.hpp&quot;
+#include &lt;cmath&gt;
+namespace kline {
+struct CapacityEconomics{double gross_profit=0,impact_cost=0,net_profit=0;};
+inline CapacityEconomics square_root_capacity_profit(
+    double deployed_capital,double gross_alpha_fraction,
+    double annual_turnover,double market_impact_coefficient){
+    require(std::isfinite(deployed_capital)&amp;&amp;deployed_capital&gt;=0&amp;&amp;
+            std::isfinite(gross_alpha_fraction)&amp;&amp;
+            std::isfinite(annual_turnover)&amp;&amp;annual_turnover&gt;=0&amp;&amp;
+            std::isfinite(market_impact_coefficient)&amp;&amp;
+            market_impact_coefficient&gt;=0,&quot;Invalid strategy capacity inputs&quot;);
+    double gross=deployed_capital*gross_alpha_fraction;
+    double impact=market_impact_coefficient*annual_turnover*
+                  std::pow(deployed_capital,1.5);
+    return {gross,impact,gross-impact};
+}
+inline double square_root_capacity_optimal_capital(
+    double alpha_fraction,double turnover,double impact_coefficient){
+    require(std::isfinite(alpha_fraction)&amp;&amp;alpha_fraction&gt;=0&amp;&amp;
+            std::isfinite(turnover)&amp;&amp;turnover&gt;0&amp;&amp;
+            std::isfinite(impact_coefficient)&amp;&amp;impact_coefficient&gt;0,
+            &quot;Capacity optimum needs positive cost and turnover&quot;);
+    double ratio=2*alpha_fraction/(3*turnover*impact_coefficient);
+    return ratio*ratio;
+}
+} // namespace kline
+</code></pre><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/capacity_profitability.hpp">C++17：capacity_profitability.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p2-lesson5"><h3>3.6　组合与管理机构应用</h3><p>比较不同执行策略和ETF资金容量时，可改变预期日成交量、总换手和可用资本，观察规模扩张使净投资收益的边际变化。</p><div class="formula">$$\Pi(A)=\alpha A-\kappa T A^{3/2}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/capacity_profitability.hpp">C++17：capacity_profitability.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p2-lesson6"><h3>3.7　约束失效与风险对比</h3><p>这种凹形利润函数是简化模型；实际市场参与率、订单集中的日内时段和借券费用会产生非平滑容量约束。</p><div class="formula">$$\Pi(A)=\alpha A-\kappa T A^{3/2}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/capacity_profitability.hpp">C++17：capacity_profitability.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p2-lesson7"><h3>3.8　历史数据复算与测试</h3><p>研究可以从真实历史持仓及现金流建立可核对输入，运行算法并与数值测试结果比较。这种凹形利润函数是简化模型；实际市场参与率、订单集中的日内时段和借券费用会产生非平滑容量约束。</p><div class="formula">$$\Pi(A)=\alpha A-\kappa T A^{3/2}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/capacity_profitability.hpp">C++17：capacity_profitability.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article></section><section id="p3"><h2>4．协方差矩阵对角收缩</h2><article id="p3-lesson0"><h3>4.1　研究对象及基本定义</h3><p>对角收缩让样本协方差的非对角元素向零靠拢，同时保留各资产方差，可降低有限样本相关结构噪声对组合权重的影响。</p><div class="formula">$$\widehat\Sigma_\lambda=(1-\lambda)\widehat\Sigma+\lambda\operatorname{diag}(\widehat\Sigma)$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/covariance_diagonal_shrinkage.hpp">C++17：covariance_diagonal_shrinkage.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p3-lesson1"><h3>4.2　目标函数与数学构造</h3><p>将历史协方差与只保留方差项的目标矩阵按凸权重混合。对角矩阵和原协方差若都为半正定，混合矩阵仍半正定。</p><div class="formula">$$\widehat\Sigma_\lambda=(1-\lambda)\widehat\Sigma+\lambda\operatorname{diag}(\widehat\Sigma)$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/covariance_diagonal_shrinkage.hpp">C++17：covariance_diagonal_shrinkage.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p3-lesson2"><h3>4.3　投资、合同及统计前提</h3><p>收缩强度λ介于零和一。λ=1表示完全移除资产之间的样本协方差，不等于所有资产收益现实中都独立。</p><div class="formula">$$\widehat\Sigma_\lambda=(1-\lambda)\widehat\Sigma+\lambda\operatorname{diag}(\widehat\Sigma)$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/covariance_diagonal_shrinkage.hpp">C++17：covariance_diagonal_shrinkage.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p3-lesson3"><h3>4.4　资产与资金单位</h3><p>计算结果与资产管理规模、价格、持仓股数、年化收益率或期限的单位保持一致。收缩强度λ介于零和一。λ=1表示完全移除资产之间的样本协方差，不等于所有资产收益现实中都独立。</p><div class="formula">$$\widehat\Sigma_\lambda=(1-\lambda)\widehat\Sigma+\lambda\operatorname{diag}(\widehat\Sigma)$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/covariance_diagonal_shrinkage.hpp">C++17：covariance_diagonal_shrinkage.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p3-lesson4"><h3>4.5　数值算法及完整源码</h3><p>以标准C++17实现可调用算法，不依赖第三方数值库。将历史协方差与只保留方差项的目标矩阵按凸权重混合。对角矩阵和原协方差若都为半正定，混合矩阵仍半正定。</p><div class="formula">$$\widehat\Sigma_\lambda=(1-\lambda)\widehat\Sigma+\lambda\operatorname{diag}(\widehat\Sigma)$$</div><pre><code>#pragma once
+#include &quot;portfolio.hpp&quot;
+#include &lt;cmath&gt;
+namespace kline {
+inline Matrix shrink_covariance_to_diagonal(const Matrix&amp; raw,double intensity){
+    check_covariance(raw);
+    require(std::isfinite(intensity)&amp;&amp;intensity&gt;=0&amp;&amp;intensity&lt;=1,
+            &quot;Covariance shrinkage must lie in [0,1]&quot;);
+    Matrix result=raw;
+    for(int i=0;i&lt;int(raw.size());i++)
+        for(int j=0;j&lt;int(raw.size());j++)
+            if(i!=j)result[i][j]*=1-intensity;
+    return result;
+}
+inline double covariance_average_variance(const Matrix&amp; raw){
+    check_covariance(raw);
+    double total=0;
+    for(int i=0;i&lt;int(raw.size());i++)total+=raw[i][i];
+    return total/raw.size();
+}
+} // namespace kline
+</code></pre><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/covariance_diagonal_shrinkage.hpp">C++17：covariance_diagonal_shrinkage.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p3-lesson5"><h3>4.6　组合与管理机构应用</h3><p>在股票、债券、商品及ETF组合风险估计中，可比较不同收缩系数下的样本外组合波动和组合权重稳定性。</p><div class="formula">$$\widehat\Sigma_\lambda=(1-\lambda)\widehat\Sigma+\lambda\operatorname{diag}(\widehat\Sigma)$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/covariance_diagonal_shrinkage.hpp">C++17：covariance_diagonal_shrinkage.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p3-lesson6"><h3>4.7　约束失效与风险对比</h3><p>对角收缩可能损失真实风险对冲关系，尤其股票与债券在特定宏观制度中出现显著负相关时。</p><div class="formula">$$\widehat\Sigma_\lambda=(1-\lambda)\widehat\Sigma+\lambda\operatorname{diag}(\widehat\Sigma)$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/covariance_diagonal_shrinkage.hpp">C++17：covariance_diagonal_shrinkage.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p3-lesson7"><h3>4.8　历史数据复算与测试</h3><p>研究可以从真实历史持仓及现金流建立可核对输入，运行算法并与数值测试结果比较。对角收缩可能损失真实风险对冲关系，尤其股票与债券在特定宏观制度中出现显著负相关时。</p><div class="formula">$$\widehat\Sigma_\lambda=(1-\lambda)\widehat\Sigma+\lambda\operatorname{diag}(\widehat\Sigma)$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/covariance_diagonal_shrinkage.hpp">C++17：covariance_diagonal_shrinkage.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article></section><section id="p4"><h2>5．多资产等风险贡献组合</h2><article id="p4-lesson0"><h3>5.1　研究对象及基本定义</h3><p>等风险贡献组合要求各资产在组合整体方差中的Euler贡献相同，避免简单等权组合被少数高波动证券主导。</p><div class="formula">$$w_i(\Sigma w)_i=\frac{w^\top\Sigma w}{N}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/long_only_risk_parity.hpp">C++17：long_only_risk_parity.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p4-lesson1"><h3>5.2　目标函数与数学构造</h3><p>先计算当前协方差乘权重得到边际风险，再用各资产风险贡献相对于目标平均贡献的偏离调整权重，随后归一化。</p><div class="formula">$$w_i(\Sigma w)_i=\frac{w^\top\Sigma w}{N}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/long_only_risk_parity.hpp">C++17：long_only_risk_parity.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p4-lesson2"><h3>5.3　投资、合同及统计前提</h3><p>当前乘法更新只接受正方差及非负协方差以保证更新值合法，并只构造长仓权重。包含负相关及卖空约束的完整问题需要单独求解。</p><div class="formula">$$w_i(\Sigma w)_i=\frac{w^\top\Sigma w}{N}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/long_only_risk_parity.hpp">C++17：long_only_risk_parity.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p4-lesson3"><h3>5.4　资产与资金单位</h3><p>计算结果与资产管理规模、价格、持仓股数、年化收益率或期限的单位保持一致。当前乘法更新只接受正方差及非负协方差以保证更新值合法，并只构造长仓权重。包含负相关及卖空约束的完整问题需要单独求解。</p><div class="formula">$$w_i(\Sigma w)_i=\frac{w^\top\Sigma w}{N}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/long_only_risk_parity.hpp">C++17：long_only_risk_parity.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p4-lesson4"><h3>5.5　数值算法及完整源码</h3><p>以标准C++17实现可调用算法，不依赖第三方数值库。先计算当前协方差乘权重得到边际风险，再用各资产风险贡献相对于目标平均贡献的偏离调整权重，随后归一化。</p><div class="formula">$$w_i(\Sigma w)_i=\frac{w^\top\Sigma w}{N}$$</div><pre><code>#pragma once
+#include &quot;portfolio.hpp&quot;
+#include &lt;cmath&gt;
+#include &lt;numeric&gt;
+namespace kline {
+inline std::vector&lt;double&gt; positive_covariance_risk_parity(
+    const Matrix&amp; covariance,int iterations=1000,double tolerance=1e-9){
+    check_covariance(covariance);
+    int n=int(covariance.size());
+    require(iterations&gt;=1&amp;&amp;tolerance&gt;0&amp;&amp;
+            std::isfinite(tolerance),&quot;Invalid risk parity iterations&quot;);
+    for(int i=0;i&lt;n;i++)for(int j=0;j&lt;n;j++){
+        require(covariance[i][j]&gt;=0,
+                &quot;Multiplicative risk parity requires nonnegative covariance&quot;);
+        if(i==j)require(covariance[i][i]&gt;0,
+                        &quot;Risk parity needs positive asset variance&quot;);
+    }
+    std::vector&lt;double&gt; w(n,1.0/n);
+    for(int step=0;step&lt;iterations;step++){
+        auto marginal=covariance_times_weights(covariance,w);
+        double total=0;
+        for(int i=0;i&lt;n;i++)total+=w[i]*marginal[i];
+        double target=total/n;
+        std::vector&lt;double&gt; next=w;
+        for(int i=0;i&lt;n;i++)
+            next[i]*=std::sqrt(target/(w[i]*marginal[i]));
+        double normalizer=std::accumulate(next.begin(),next.end(),0.0);
+        for(double&amp; v:next)v/=normalizer;
+        double change=0;
+        for(int i=0;i&lt;n;i++)
+            change=std::max(change,std::fabs(next[i]-w[i]));
+        w=next;
+        if(change&lt;tolerance)break;
+    }
+    return w;
+}
+} // namespace kline
+</code></pre><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/long_only_risk_parity.hpp">C++17：long_only_risk_parity.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p4-lesson5"><h3>5.6　组合与管理机构应用</h3><p>在多ETF和多策略风险预算中，可与等权、最小方差及目标波动策略进行相同样本外期间的风险比较。</p><div class="formula">$$w_i(\Sigma w)_i=\frac{w^\top\Sigma w}{N}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/long_only_risk_parity.hpp">C++17：long_only_risk_parity.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p4-lesson6"><h3>5.7　约束失效与风险对比</h3><p>等风险贡献不保证最大收益或最小回撤；估计协方差的制度变化和交易成本可能改变实盘结果。</p><div class="formula">$$w_i(\Sigma w)_i=\frac{w^\top\Sigma w}{N}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/long_only_risk_parity.hpp">C++17：long_only_risk_parity.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p4-lesson7"><h3>5.8　历史数据复算与测试</h3><p>研究可以从真实历史持仓及现金流建立可核对输入，运行算法并与数值测试结果比较。等风险贡献不保证最大收益或最小回撤；估计协方差的制度变化和交易成本可能改变实盘结果。</p><div class="formula">$$w_i(\Sigma w)_i=\frac{w^\top\Sigma w}{N}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/long_only_risk_parity.hpp">C++17：long_only_risk_parity.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article></section><section id="p5"><h2>6．权重漂移与再平衡缓冲带</h2><article id="p5-lesson0"><h3>6.1　研究对象及基本定义</h3><p>资产价格变化会使组合权重在没有任何交易时自然漂移；只有相对于目标权重偏离过大时再平衡，可以减少不必要的成交成本。</p><div class="formula">$$w_{i,t}^{drift}=\frac{w_{i,t-1}(1+r_{i,t})}{w_{cash}+\sum_jw_{j,t-1}(1+r_{j,t})}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/portfolio_rebalance_bands.hpp">C++17：portfolio_rebalance_bands.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p5-lesson1"><h3>6.2　目标函数与数学构造</h3><p>将每项资产原持仓权重乘其总收益因子，连同现金权重共同归一化形成漂移权重；若任何资产偏离预设缓冲带，则返回新的目标权重。</p><div class="formula">$$w_{i,t}^{drift}=\frac{w_{i,t-1}(1+r_{i,t})}{w_{cash}+\sum_jw_{j,t-1}(1+r_{j,t})}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/portfolio_rebalance_bands.hpp">C++17：portfolio_rebalance_bands.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p5-lesson2"><h3>6.3　投资、合同及统计前提</h3><p>模型采用长仓与非负现金权重，明确区分持有期后的漂移权重和下一期执行目标。缓冲带是绝对权重差而非相对百分比差。</p><div class="formula">$$w_{i,t}^{drift}=\frac{w_{i,t-1}(1+r_{i,t})}{w_{cash}+\sum_jw_{j,t-1}(1+r_{j,t})}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/portfolio_rebalance_bands.hpp">C++17：portfolio_rebalance_bands.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p5-lesson3"><h3>6.4　资产与资金单位</h3><p>计算结果与资产管理规模、价格、持仓股数、年化收益率或期限的单位保持一致。模型采用长仓与非负现金权重，明确区分持有期后的漂移权重和下一期执行目标。缓冲带是绝对权重差而非相对百分比差。</p><div class="formula">$$w_{i,t}^{drift}=\frac{w_{i,t-1}(1+r_{i,t})}{w_{cash}+\sum_jw_{j,t-1}(1+r_{j,t})}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/portfolio_rebalance_bands.hpp">C++17：portfolio_rebalance_bands.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p5-lesson4"><h3>6.5　数值算法及完整源码</h3><p>以标准C++17实现可调用算法，不依赖第三方数值库。将每项资产原持仓权重乘其总收益因子，连同现金权重共同归一化形成漂移权重；若任何资产偏离预设缓冲带，则返回新的目标权重。</p><div class="formula">$$w_{i,t}^{drift}=\frac{w_{i,t-1}(1+r_{i,t})}{w_{cash}+\sum_jw_{j,t-1}(1+r_{j,t})}$$</div><pre><code>#pragma once
+#include &quot;stats.hpp&quot;
+#include &lt;algorithm&gt;
+#include &lt;cmath&gt;
+#include &lt;numeric&gt;
+namespace kline {
+inline std::vector&lt;double&gt; drifted_portfolio_weights(
+    const std::vector&lt;double&gt;&amp; initial_weights,
+    const std::vector&lt;double&gt;&amp; period_returns,double cash_weight=0){
+    check_finite(initial_weights);check_finite(period_returns);
+    require(initial_weights.size()==period_returns.size()&amp;&amp;
+            std::isfinite(cash_weight)&amp;&amp;cash_weight&gt;=0,
+            &quot;Invalid portfolio drift weights&quot;);
+    double assets=cash_weight;
+    std::vector&lt;double&gt; next;
+    for(int i=0;i&lt;int(initial_weights.size());i++){
+        require(initial_weights[i]&gt;=0&amp;&amp;period_returns[i]&gt;-1,
+                &quot;Long only drift requires nonnegative weights and viable returns&quot;);
+        next.push_back(initial_weights[i]*(1+period_returns[i]));
+        assets+=next.back();
+    }
+    require(assets&gt;0,&quot;Drifted portfolio has no value&quot;);
+    for(double&amp; v:next)v/=assets;
+    return next;
+}
+inline std::vector&lt;double&gt; no_trade_band_rebalance(
+    const std::vector&lt;double&gt;&amp; current,
+    const std::vector&lt;double&gt;&amp; target,double maximum_deviation){
+    check_finite(current);check_finite(target);
+    require(current.size()==target.size()&amp;&amp;
+            std::isfinite(maximum_deviation)&amp;&amp;maximum_deviation&gt;=0,
+            &quot;Invalid no trade band portfolio&quot;);
+    for(int i=0;i&lt;int(current.size());i++)
+        require(current[i]&gt;=0&amp;&amp;target[i]&gt;=0,
+                &quot;Rebalancing rule uses nonnegative long-only weights&quot;);
+    bool needed=false;
+    for(int i=0;i&lt;int(current.size());i++)
+        needed|=std::fabs(target[i]-current[i])&gt;maximum_deviation;
+    return needed?target:current;
+}
+} // namespace kline
+</code></pre><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/portfolio_rebalance_bands.hpp">C++17：portfolio_rebalance_bands.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p5-lesson5"><h3>6.6　组合与管理机构应用</h3><p>ETF资产配置研究可以在固定风险目标下调节缓冲带，观察换手、风险偏离和组合净收益之间的权衡。</p><div class="formula">$$w_{i,t}^{drift}=\frac{w_{i,t-1}(1+r_{i,t})}{w_{cash}+\sum_jw_{j,t-1}(1+r_{j,t})}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/portfolio_rebalance_bands.hpp">C++17：portfolio_rebalance_bands.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p5-lesson6"><h3>6.7　约束失效与风险对比</h3><p>该简单规则假定触发后能完全成交，未计及最小交易股数和执行价差；真实策略还须经过订单与现金账本。</p><div class="formula">$$w_{i,t}^{drift}=\frac{w_{i,t-1}(1+r_{i,t})}{w_{cash}+\sum_jw_{j,t-1}(1+r_{j,t})}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/portfolio_rebalance_bands.hpp">C++17：portfolio_rebalance_bands.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article><article id="p5-lesson7"><h3>6.8　历史数据复算与测试</h3><p>研究可以从真实历史持仓及现金流建立可核对输入，运行算法并与数值测试结果比较。该简单规则假定触发后能完全成交，未计及最小交易股数和执行价差；真实策略还须经过订单与现金账本。</p><div class="formula">$$w_{i,t}^{drift}=\frac{w_{i,t-1}(1+r_{i,t})}{w_{cash}+\sum_jw_{j,t-1}(1+r_{j,t})}$$</div><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/portfolio_rebalance_bands.hpp">C++17：portfolio_rebalance_bands.hpp</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_massive_extension.cpp">数值回归测试</a></p></article></section><footer>资产管理公开信息来源：<a href="https://www.sec.gov/edgar/search/">SEC EDGAR</a>；统计方法参考<a href="https://www.itl.nist.gov/div898/handbook/">NIST统计工程手册</a>。<a href="./">返回本栏目首页</a>。</footer></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>
