@@ -110,9 +110,10 @@ class BacktestTests(unittest.TestCase):
     def test_static_single_asset_remains_fee_free_after_initial_purchase(self):
         code="def signals(history):\\n    return {'SYN_A':1.0}\\n".replace("\\n","\n")
         result=self.execute(code,commission_bps=100,slippage_bps=0,borrow_bps_annual=0)
-        self.assertAlmostEqual(result["metrics"]["turnover_oneway"],0.5,places=6)
-        # 100% initial purchase is 1.0 one-way traded NAV under the report's
-        # stated 0.5*sum absolute change convention (reported as 0.5).
+        # A 1% initial trade fee reduces the cash available for the initial
+        # purchase; post-fee 100%-invested weights must not trigger re-trades.
+        expected_initial_turnover=0.5/(1+0.01)
+        self.assertAlmostEqual(result["metrics"]["turnover_oneway"],expected_initial_turnover,places=6)
         self.assertEqual(result["metrics"]["adjustment_events"],1)
 
     def test_next_open_no_lookahead(self):
