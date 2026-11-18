@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>不平衡金融事件的分类指标与概率评分｜Kline Quant</title>
+<link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<style>body{margin:0;background:white;color:#182d3b;font:16px/1.95 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:22px 30px 60px}main{max-width:1120px;margin:auto}header,.chapter,.source,.references{padding:23px 28px;border:1px solid #cbd4dc;margin:16px 0;background:white}h1{font-size:31px}h2{font-size:23px;margin:10px 0 22px}h3{font-size:18px;margin:21px 0 8px}.toc{display:flex;flex-wrap:wrap;gap:10px 22px;border:1px solid #cbd4dc;padding:16px 25px}.formula{border-block:1px solid #cbd4dc;overflow:auto;padding:16px 3px;margin:18px 0}.katex-display{overflow:auto}a{color:#195675}p{line-height:1.94}.reference{font-size:14px}pre{white-space:pre;overflow:auto;max-height:720px;border:1px solid #cbd4dc;padding:16px;font:12px/1.7 "Times New Roman",monospace}code{font-family:"Times New Roman",monospace}@media(max-width:790px){.main{margin:0;padding:12px}header,.chapter,.source,.references{padding:15px}}</style>
+</head><body><aside id="quantSidebar" class="sidebar" data-page="ml"></aside><script src="../sidebar-v2.js"></script>
+<div class="main"><main><header><small>QUANTITATIVE FINANCE / NUMERICAL METHODS</small><h1>不平衡金融事件的分类指标与概率评分</h1><p>违约预测、市场压力识别和信号事件分类通常存在明显的类别不平衡。分类结果的评价需要区分阈值决策、类别召回与概率预测，避免高总体正确率掩盖小类别识别能力。</p><p>每个模型均对应可执行的标准C++17实现、明确单位与前提、解析计算案例，以及真实CSV或参数输入工作流。</p></header>
+<nav class="toc"><a href="#chapter1">1．Matthews相关系数</a><a href="#chapter2">2．多分类Macro-F1</a><a href="#chapter3">3．平衡准确率</a><a href="#chapter4">4．多分类Brier概率评分</a><a href="#source">完整C++17源文件</a></nav>
+<article class="chapter" id="chapter1"><h2>1．Matthews相关系数</h2><h3>数学对象与估计量</h3><div class="formula">$$\mathrm{MCC}=\frac{TP\cdot TN-FP\cdot FN}{\sqrt{(TP+FP)(TP+FN)(TN+FP)(TN+FN)}}$$</div><h3>统计结构与推导</h3><p>MCC综合使用二元混淆矩阵四个单元格，通过四个边际数量构成标准化分母。相对于普通准确率，它同时体现正类、负类的识别结构。</p><h3>数值计算与经济解释</h3><p>真实类别为1、1、0、0，预测类别为1、0、1、0时，四个单元格均为1，分子为零，故MCC为零。它表示此分类模式对两类缺少净关联。</p><h3>识别条件、数据口径与边界</h3><p>当某个混淆矩阵边际为零时，相关系数定义失去有效分母。此实现明确拒绝这种输入，不以人为约定的零值替代未定义的数学量。</p><h3>CSV或参数复算</h3><pre><code>./kline_quant mcc events.csv Actual Predicted</code></pre></article>
+<article class="chapter" id="chapter2"><h2>2．多分类Macro-F1</h2><h3>数学对象与估计量</h3><div class="formula">$$\mathrm{MacroF1}=\frac1K\sum_{k=1}^{K}\frac{2TP_k}{2TP_k+FP_k+FN_k}$$</div><h3>统计结构与推导</h3><p>每个类别分别作为一对其余的二元分类，计算其精确率与召回率的调和均值，再对K类等权平均。类别规模不会直接决定该类在最终Macro-F1中的重要性。</p><h3>数值计算与经济解释</h3><p>若三类各有一个样本且均被正确识别，则每类F1均为1，Macro-F1为1。若某类既没有真实支持也从未被预测，代码对其F1使用零的明确约定。</p><h3>识别条件、数据口径与边界</h3><p>类别标签从0到K−1依次编码。Macro-F1适用于分析不同事件类别的覆盖，但它与概率校准、交易损益及错误成本矩阵是不同评价目标。</p><h3>CSV或参数复算</h3><pre><code>./kline_quant macro-f1 events.csv ActualClass PredictedClass 3</code></pre></article>
+<article class="chapter" id="chapter3"><h2>3．平衡准确率</h2><h3>数学对象与估计量</h3><div class="formula">$$\mathrm{BA}=\frac1K\sum_{k=1}^{K}\frac{TP_k}{TP_k+FN_k}$$</div><h3>统计结构与推导</h3><p>平衡准确率把各类召回率等权平均，使样本稀少的类别具有与常见类别相同的指标权重。它衡量分类模型对每个已观察类别的检出能力。</p><h3>数值计算与经济解释</h3><p>三类分别各有一个样本且全部预测正确时，三类召回率均为1，因此平衡准确率为1。若大量正常交易全被正确预测却漏掉罕见异常，指标会反映异常类低召回。</p><h3>识别条件、数据口径与边界</h3><p>每个被指定的类别都要在真值中出现，否则该类的召回率分母为零。代码拒绝缺少支持的类别，要求研究者明确统计口径。</p><h3>CSV或参数复算</h3><pre><code>./kline_quant balanced-acc events.csv ActualClass PredictedClass 3</code></pre></article>
+<article class="chapter" id="chapter4"><h2>4．多分类Brier概率评分</h2><h3>数学对象与估计量</h3><div class="formula">$$\mathrm{Brier}_{K}=\frac1n\sum_{i=1}^{n}\sum_{k=1}^{K}(p_{ik}-\mathbf1_{\{y_i=k\}})^2$$</div><h3>统计结构与推导</h3><p>Brier评分把预测类别概率与真实单热向量逐维比较，平方后加总。它保留了模型概率强弱的信息，与阈值后仅使用预测标签的准确率、F1形成互补。</p><h3>数值计算与经济解释</h3><p>当实际类别为第一类，模型给出(1,0,0)时，全部概率误差为零；若完全预测第三类，则第一类与第三类平方误差各为1，总评分为2。该实现采用未经类别数归一化的多分类Brier定义。</p><h3>识别条件、数据口径与边界</h3><p>输入要求全部类别概率非负、至多为1且行和为1。实际三分类的CLI输入是三个概率列，底层C++函数支持2至100类。</p><h3>CSV或参数复算</h3><pre><code>./kline_quant multiclass-brier3 events.csv P0 P1 P2 ActualClass</code></pre></article>
+<section class="source" id="source"><h2>完整C++17算法源码</h2><p>以下为可独立引用的实际头文件内容。使用网站统一的<code>stats.hpp</code>输入检查和标准C++17库。可通过命令行调度并运行独立数值及异常输入测试。</p>
+<p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/classification_audit_lab.hpp">在GitHub查看头文件</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_domain_labs.cpp">数学数值测试</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_domain_labs_cli.py">CSV测试</a></p>
+<pre><code>#pragma once
+#include "stats.hpp"
+#include &lt;cmath&gt;
+#include &lt;vector&gt;
+namespace kline {
+inline double matthews_correlation(
+ const std::vector&lt;double&gt;&amp; actual,const std::vector&lt;double&gt;&amp; predicted){
+ check_finite(actual);check_finite(predicted);
+ require(actual.size()==predicted.size(),"Classification labels must align");
+ double tp=0,tn=0,fp=0,fn=0;
+ for(std::size_t i=0;i&lt;actual.size();++i){
+  require((actual[i]==0||actual[i]==1)&amp;&amp;(predicted[i]==0||predicted[i]==1),
+          "MCC requires binary classes");
+  if(actual[i]==1&amp;&amp;predicted[i]==1)++tp;
+  else if(actual[i]==0&amp;&amp;predicted[i]==0)++tn;
+  else if(actual[i]==0)++fp;
+  else ++fn;
+ }
+ const double scale=(tp+fp)*(tp+fn)*(tn+fp)*(tn+fn);
+ require(scale&gt;0,"MCC is undefined for degenerate class marginals");
+ return (tp*tn-fp*fn)/std::sqrt(scale);
+}
+inline void audit_multiclass_inputs(
+ const std::vector&lt;double&gt;&amp; actual,const std::vector&lt;double&gt;&amp; predicted,int classes){
+ check_finite(actual);check_finite(predicted);
+ require(actual.size()==predicted.size()&amp;&amp;classes&gt;=2&amp;&amp;classes&lt;=100,
+         "Multiclass sample dimensions invalid");
+ for(std::size_t i=0;i&lt;actual.size();++i)
+  require(actual[i]&gt;=0&amp;&amp;actual[i]&lt;classes&amp;&amp;std::floor(actual[i])==actual[i]&amp;&amp;
+          predicted[i]&gt;=0&amp;&amp;predicted[i]&lt;classes&amp;&amp;std::floor(predicted[i])==predicted[i],
+          "Class labels must be integral and in range");
+}
+inline double macro_f1_score(const std::vector&lt;double&gt;&amp; actual,
+                             const std::vector&lt;double&gt;&amp; predicted,int classes){
+ audit_multiclass_inputs(actual,predicted,classes);
+ double score=0;
+ for(int k=0;k&lt;classes;++k){
+  double tp=0,fp=0,fn=0;
+  for(std::size_t i=0;i&lt;actual.size();++i){
+   if(actual[i]==k&amp;&amp;predicted[i]==k)++tp;
+   else if(actual[i]!=k&amp;&amp;predicted[i]==k)++fp;
+   else if(actual[i]==k)++fn;
+  }
+  const double denominator=2*tp+fp+fn;
+  score+=denominator&gt;0?2*tp/denominator:0;
+ }
+ return score/classes;
+}
+inline double balanced_multiclass_accuracy(
+ const std::vector&lt;double&gt;&amp; actual,const std::vector&lt;double&gt;&amp; predicted,int classes){
+ audit_multiclass_inputs(actual,predicted,classes);
+ double score=0;
+ for(int k=0;k&lt;classes;++k){
+  double correct=0,positive=0;
+  for(std::size_t i=0;i&lt;actual.size();++i)if(actual[i]==k){
+   ++positive;if(predicted[i]==k)++correct;
+  }
+  require(positive&gt;0,"Balanced accuracy requires observed support for each class");
+  score+=correct/positive;
+ }
+ return score/classes;
+}
+inline double multiclass_brier_score(
+ const std::vector&lt;std::vector&lt;double&gt;&gt;&amp; probabilities,
+ const std::vector&lt;double&gt;&amp; actual){
+ check_finite(actual);
+ require(probabilities.size()==actual.size(),"Brier probabilities and labels differ");
+ const std::size_t classes=probabilities.front().size();
+ require(classes&gt;=2&amp;&amp;classes&lt;=100,"Invalid class dimension");
+ double total=0;
+ for(std::size_t i=0;i&lt;actual.size();++i){
+  require(std::floor(actual[i])==actual[i]&amp;&amp;actual[i]&gt;=0&amp;&amp;actual[i]&lt;classes&amp;&amp;
+          probabilities[i].size()==classes,"Invalid Brier category");
+  double psum=0;
+  for(std::size_t k=0;k&lt;classes;++k){
+   const double p=probabilities[i][k];
+   require(std::isfinite(p)&amp;&amp;p&gt;=0&amp;&amp;p&lt;=1,"Invalid forecast probability");
+   psum+=p;
+   total+=(p-(k==std::size_t(actual[i])?1.0:0.0))*
+          (p-(k==std::size_t(actual[i])?1.0:0.0));
+  }
+  require(std::abs(psum-1)&lt;1e-8,"Probability rows must sum to one");
+ }
+ return total/actual.size();
+}
+}
+</code></pre></section><section class="references"><h2>参考来源</h2><p class="reference"><a href="https://scikit-learn.org/stable/modules/model_evaluation.html">scikit-learn Classification Metrics</a>。数学结构以展示的计算式、输入单位与源码实现为依据；实证估计所需的外生性和市场微观结构假设在各章分别陈述。</p></section>
+</main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

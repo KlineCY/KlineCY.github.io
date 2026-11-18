@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>数字期权、波动率二阶敏感度与远期方差｜Kline Quant</title>
+<link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<style>body{margin:0;background:white;color:#182d3b;font:16px/1.95 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:22px 30px 60px}main{max-width:1120px;margin:auto}header,.chapter,.source,.references{padding:23px 28px;border:1px solid #cbd4dc;margin:16px 0;background:white}h1{font-size:31px}h2{font-size:23px;margin:10px 0 22px}h3{font-size:18px;margin:21px 0 8px}.toc{display:flex;flex-wrap:wrap;gap:10px 22px;border:1px solid #cbd4dc;padding:16px 25px}.formula{border-block:1px solid #cbd4dc;overflow:auto;padding:16px 3px;margin:18px 0}.katex-display{overflow:auto}a{color:#195675}p{line-height:1.94}.reference{font-size:14px}pre{white-space:pre;overflow:auto;max-height:720px;border:1px solid #cbd4dc;padding:16px;font:12px/1.7 "Times New Roman",monospace}code{font-family:"Times New Roman",monospace}@media(max-width:790px){.main{margin:0;padding:12px}header,.chapter,.source,.references{padding:15px}}</style>
+</head><body><aside id="quantSidebar" class="sidebar" data-page="assets"></aside><script src="../sidebar-v2.js"></script>
+<div class="main"><main><header><small>QUANTITATIVE FINANCE / NUMERICAL METHODS</small><h1>数字期权、波动率二阶敏感度与远期方差</h1><p>期权组合的风险既包括标的价格暴露，也包括波动率冲击与期限结构变化。数字期权价值、Vanna、Volga和远期方差从分布概率、混合偏导及总方差无套利关系出发建立一致的研究口径。</p><p>每个模型均对应可执行的标准C++17实现、明确单位与前提、解析计算案例，以及真实CSV或参数输入工作流。</p></header>
+<nav class="toc"><a href="#chapter1">1．现金结算数字看涨期权</a><a href="#chapter2">2．看涨期权Vanna</a><a href="#chapter3">3．看涨期权Volga（Vomma）</a><a href="#chapter4">4．两期限隐含远期方差</a><a href="#source">完整C++17源文件</a></nav>
+<article class="chapter" id="chapter1"><h2>1．现金结算数字看涨期权</h2><h3>数学对象与估计量</h3><div class="formula">$$V_{\mathrm{digital}}=e^{-rT}\Phi(d_2),\quad d_2=\frac{\ln(S/K)+(r-q-\sigma^2/2)T}{\sigma\sqrt T}$$</div><h3>统计结构与推导</h3><p>在连续股息收益率、常数波动率和风险中性几何布朗运动假设下，到期标的高于执行价的风险中性概率为标准正态分布函数在d2处的值。乘无风险贴现因子得到支付固定一单位现金的数字期权价格。</p><h3>数值计算与经济解释</h3><p>标的与执行价都为100、利率股息率均为零、波动率为20%、期限为一年时，d2为负0.1，数字看涨价格约为0.46017。该数值是单位现金到期支付的现值。</p><h3>识别条件、数据口径与边界</h3><p>数字期权的支付在行权点不连续，实际交易的报价跳跃与复制对冲成本可能显著。模型假设使用连续路径与常数参数，不能直接等同于真实分布尾概率。</p><h3>CSV或参数复算</h3><pre><code>./kline_quant digital-call 100 100 0 0 0.2 1</code></pre></article>
+<article class="chapter" id="chapter2"><h2>2．看涨期权Vanna</h2><h3>数学对象与估计量</h3><div class="formula">$$\mathrm{Vanna}=\frac{\partial^2C}{\partial S\,\partial\sigma}=-e^{-qT}\varphi(d_1)\frac{d_2}{\sigma}$$</div><h3>统计结构与推导</h3><p>Vanna是Delta对隐含波动率的偏导，亦可解释为Vega对标的价格的偏导。由Black–Scholes看涨Delta对波动率求导，利用d1与d2关系得到解析式。</p><h3>数值计算与经济解释</h3><p>当标的和执行价相等，利率与股息率为零，波动率为20%、期限为一年时，d1为0.1、d2为负0.1，Vanna为正，说明小幅增加波动率会提高该位置的Delta。</p><h3>识别条件、数据口径与边界</h3><p>Vanna数值的单位依赖波动率输入的表示方式；代码使用小数形式的年化波动率，二阶局部敏感度不替代大幅波动冲击时的期权全重估。</p><h3>CSV或参数复算</h3><pre><code>./kline_quant vanna-call 100 100 0 0 0.2 1</code></pre></article>
+<article class="chapter" id="chapter3"><h2>3．看涨期权Volga（Vomma）</h2><h3>数学对象与估计量</h3><div class="formula">$$\mathrm{Volga}=\frac{\partial^2C}{\partial\sigma^2}=\mathrm{Vega}\frac{d_1d_2}{\sigma}$$</div><h3>统计结构与推导</h3><p>Volga度量Vega随波动率变化的曲率。以Black–Scholes的Vega为起点对波动率再求导，可将二阶敏感度表示为Vega乘以d1和d2的乘积再除以波动率。</p><h3>数值计算与经济解释</h3><p>平值期权且r=q=0、sigma为0.2、T为1时，d1=0.1、d2=-0.1，所以Volga为负；这一局部二阶符号与实际大幅波动变化的总价格方向是不同概念。</p><h3>识别条件、数据口径与边界</h3><p>隐含波动率曲面变形包含到期和执行价之间的联动，不同点的Vega与Volga不能在无共同冲击规则下机械求和。</p><h3>CSV或参数复算</h3><pre><code>./kline_quant volga-call 100 100 0 0 0.2 1</code></pre></article>
+<article class="chapter" id="chapter4"><h2>4．两期限隐含远期方差</h2><h3>数学对象与估计量</h3><div class="formula">$$\sigma^2_{f}(T_1,T_2)=\frac{T_2\sigma_2^2-T_1\sigma_1^2}{T_2-T_1}$$</div><h3>统计结构与推导</h3><p>在零息贴现与方差期限结构的简化研究中，总方差可以写成期限乘对应年化隐含方差。两个期限的总方差差除以期限差，形成区间隐含远期方差。</p><h3>数值计算与经济解释</h3><p>近期限1年波动率为20%，远期限2年波动率为30%，隐含总方差分别为0.04和0.18。期限差为1年，远期方差为0.14，对应远期波动率约37.4%。</p><h3>识别条件、数据口径与边界</h3><p>不同执行价的隐含波动率曲面并不天然对应可交易方差合约的无套利总方差。函数拒绝负向总方差差，但实际期限结构还涉及风险中性方差、定价误差和插值规则。</p><h3>CSV或参数复算</h3><pre><code>./kline_quant forward-variance 1 0.2 2 0.3</code></pre></article>
+<section class="source" id="source"><h2>完整C++17算法源码</h2><p>以下为可独立引用的实际头文件内容。使用网站统一的<code>stats.hpp</code>输入检查和标准C++17库。可通过命令行调度并运行独立数值及异常输入测试。</p>
+<p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/options_surface_diagnostics_lab.hpp">在GitHub查看头文件</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_domain_labs.cpp">数学数值测试</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_domain_labs_cli.py">CSV测试</a></p>
+<pre><code>#pragma once
+#include "stats.hpp"
+#include &lt;algorithm&gt;
+#include &lt;cmath&gt;
+#include &lt;vector&gt;
+namespace kline {
+inline double black_scholes_cash_digital_call(
+ double spot,double strike,double rate,double dividend,double sigma,double maturity){
+ require(std::isfinite(spot)&amp;&amp;spot&gt;0&amp;&amp;std::isfinite(strike)&amp;&amp;strike&gt;0&amp;&amp;
+         std::isfinite(rate)&amp;&amp;std::isfinite(dividend)&amp;&amp;
+         std::isfinite(sigma)&amp;&amp;sigma&gt;0&amp;&amp;std::isfinite(maturity)&amp;&amp;maturity&gt;0,
+         "Invalid cash-or-nothing option");
+ const double d2=(std::log(spot/strike)+(rate-dividend-0.5*sigma*sigma)*maturity)/
+                 (sigma*std::sqrt(maturity));
+ return std::exp(-rate*maturity)*0.5*std::erfc(-d2/std::sqrt(2.0));
+}
+inline double black_scholes_vanna_call(
+ double spot,double strike,double rate,double dividend,double sigma,double maturity){
+ require(std::isfinite(spot)&amp;&amp;spot&gt;0&amp;&amp;std::isfinite(strike)&amp;&amp;strike&gt;0&amp;&amp;
+         std::isfinite(rate)&amp;&amp;std::isfinite(dividend)&amp;&amp;
+         std::isfinite(sigma)&amp;&amp;sigma&gt;0&amp;&amp;std::isfinite(maturity)&amp;&amp;maturity&gt;0,
+         "Invalid vanna option");
+ const double d1=(std::log(spot/strike)+(rate-dividend+0.5*sigma*sigma)*maturity)/
+                 (sigma*std::sqrt(maturity));
+ const double d2=d1-sigma*std::sqrt(maturity);
+ return -std::exp(-dividend*maturity-d1*d1/2)/std::sqrt(2*std::acos(-1.0))*
+        d2/sigma;
+}
+inline double black_scholes_volga_call(
+ double spot,double strike,double rate,double dividend,double sigma,double maturity){
+ require(std::isfinite(spot)&amp;&amp;spot&gt;0&amp;&amp;std::isfinite(strike)&amp;&amp;strike&gt;0&amp;&amp;
+         std::isfinite(rate)&amp;&amp;std::isfinite(dividend)&amp;&amp;
+         std::isfinite(sigma)&amp;&amp;sigma&gt;0&amp;&amp;std::isfinite(maturity)&amp;&amp;maturity&gt;0,
+         "Invalid volga option");
+ const double d1=(std::log(spot/strike)+(rate-dividend+0.5*sigma*sigma)*maturity)/
+                 (sigma*std::sqrt(maturity));
+ const double d2=d1-sigma*std::sqrt(maturity);
+ const double vega=spot*std::exp(-dividend*maturity-d1*d1/2)*
+                   std::sqrt(maturity/(2*std::acos(-1.0)));
+ return vega*d1*d2/sigma;
+}
+inline double annualized_forward_variance(
+ double nearYears,double nearVol,double farYears,double farVol){
+ require(std::isfinite(nearYears)&amp;&amp;nearYears&gt;=0&amp;&amp;
+         std::isfinite(farYears)&amp;&amp;farYears&gt;nearYears&amp;&amp;
+         std::isfinite(nearVol)&amp;&amp;nearVol&gt;=0&amp;&amp;
+         std::isfinite(farVol)&amp;&amp;farVol&gt;=0,
+         "Invalid implied volatility maturities");
+ const double diff=farYears*farVol*farVol-nearYears*nearVol*nearVol;
+ require(diff&gt;=-1e-12,"Calendar total variance decreases");
+ return std::max(0.0,diff)/(farYears-nearYears);
+}
+}
+</code></pre></section><section class="references"><h2>参考来源</h2><p class="reference"><a href="https://www.optionseducation.org/">Options Industry Council Education</a>。数学结构以展示的计算式、输入单位与源码实现为依据；实证估计所需的外生性和市场微观结构假设在各章分别陈述。</p></section>
+</main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

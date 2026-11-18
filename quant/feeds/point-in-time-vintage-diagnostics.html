@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>历史数据版本、发布时间与盘口完整性｜Kline Quant</title>
+<link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<style>body{margin:0;background:white;color:#182d3b;font:16px/1.95 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:22px 30px 60px}main{max-width:1120px;margin:auto}header,.chapter,.source,.references{padding:23px 28px;border:1px solid #cbd4dc;margin:16px 0;background:white}h1{font-size:31px}h2{font-size:23px;margin:10px 0 22px}h3{font-size:18px;margin:21px 0 8px}.toc{display:flex;flex-wrap:wrap;gap:10px 22px;border:1px solid #cbd4dc;padding:16px 25px}.formula{border-block:1px solid #cbd4dc;overflow:auto;padding:16px 3px;margin:18px 0}.katex-display{overflow:auto}a{color:#195675}p{line-height:1.94}.reference{font-size:14px}pre{white-space:pre;overflow:auto;max-height:720px;border:1px solid #cbd4dc;padding:16px;font:12px/1.7 "Times New Roman",monospace}code{font-family:"Times New Roman",monospace}@media(max-width:790px){.main{margin:0;padding:12px}header,.chapter,.source,.references{padding:15px}}</style>
+</head><body><aside id="quantSidebar" class="sidebar" data-page="feeds"></aside><script src="../sidebar-v2.js"></script>
+<div class="main"><main><header><small>QUANTITATIVE FINANCE / NUMERICAL METHODS</small><h1>历史数据版本、发布时间与盘口完整性</h1><p>宏观经济指标、上市公司财务数据及高频报价拥有不同的观测时间、公开发布时间和更正时间。数据工程只有明确这些时间维度和异常规则，才能支持真正可复现的历史研究。</p><p>每个模型均对应可执行的标准C++17实现、明确单位与前提、解析计算案例，以及真实CSV或参数输入工作流。</p></header>
+<nav class="toc"><a href="#chapter1">1．两期数据版本的修订RMSE</a><a href="#chapter2">2．观测期至公开发布的平均时滞</a><a href="#chapter3">3．盘口快照的陈旧报价比例</a><a href="#chapter4">4．无效、锁定与交叉盘口频率</a><a href="#source">完整C++17源文件</a></nav>
+<article class="chapter" id="chapter1"><h2>1．两期数据版本的修订RMSE</h2><h3>数学对象与估计量</h3><div class="formula">$$\mathrm{RMSE}_{vintage}=\sqrt{\frac1n\sum_{i=1}^{n}(X_i^{revised}-X_i^{initial})^2}$$</div><h3>统计结构与推导</h3><p>为同一个历史观测期保留初次发布值及后续修订值，逐条计算版本差的平方并平均开根号，可以刻画经济指标在不同发布版本之间的修订幅度。</p><h3>数值计算与经济解释</h3><p>原始数值为1、2，修订后为2、2时，版本变化分别为1和0，因此修订均方根误差为√0.5，约0.7071。结果单位与指标本身保持一致。</p><h3>识别条件、数据口径与边界</h3><p>两个版本必须严格匹配同一观测期及数据定义。修订RMSE不直接识别事前预测误差，因为后期真实值的生成和统计定义变化会影响修订数据的含义。</p><h3>CSV或参数复算</h3><pre><code>./kline_quant vintage-rmse macro.csv Initial Revised</code></pre></article>
+<article class="chapter" id="chapter2"><h2>2．观测期至公开发布的平均时滞</h2><h3>数学对象与估计量</h3><div class="formula">$$\bar\ell=\frac1n\sum_i(t_i^{release}-t_i^{reference})$$</div><h3>统计结构与推导</h3><p>经济数据所属月份与首次可得日期之间通常存在时间距离。把这两个时点统一转换为相同单位的可比较时间轴，得到平均发布时间滞后，可为As-of历史合并提供初步诊断。</p><h3>数值计算与经济解释</h3><p>若两个指标观测的参考时间分别为1和3，发布时间分别为2和5，则时滞为1和2，平均时滞为1.5个时间单位。</p><h3>识别条件、数据口径与边界</h3><p>时间单位应保持一致，并依据真实交易日历与时区定义；仅记录平均滞后不足以替代每条数据的真实公开时间，代码拒绝发生在观测时间之前的发布日期。</p><h3>CSV或参数复算</h3><pre><code>./kline_quant publish-delay macro.csv Reference Released</code></pre></article>
+<article class="chapter" id="chapter3"><h2>3．盘口快照的陈旧报价比例</h2><h3>数学对象与估计量</h3><div class="formula">$$\widehat p_{\mathrm{stale}}=\frac1{n-1}\sum_{i=2}^{n}\mathbf1\{t_i-t_{i-1}&gt;g\}$$</div><h3>统计结构与推导</h3><p>按严格递增的报价时间戳计算相邻快照间距，超过事先指定阈值的时间段被标记为陈旧间隔。该指标以时间戳间隔的个数为分母，反映采样与行情更新中的数据空窗。</p><h3>数值计算与经济解释</h3><p>若报价时间依次为0、1、4、5，阈值为1.5，那么三个间隔中仅中间的间隔3超阈值，陈旧间隔比例为三分之一。</p><h3>识别条件、数据口径与边界</h3><p>该定义不是按自然时间长度计算的陈旧时间占比。不同交易时段和消息频率需要不同阈值，交易所停牌和非交易时间应单独识别。</p><h3>CSV或参数复算</h3><pre><code>./kline_quant quote-stale quotes.csv Timestamp 1.5</code></pre></article>
+<article class="chapter" id="chapter4"><h2>4．无效、锁定与交叉盘口频率</h2><h3>数学对象与估计量</h3><div class="formula">$$\widehat p_{\mathrm{invalid}}=\frac1n\sum_i\mathbf1\{B_i\le0\;\lor\;A_i\le0\;\lor\;B_i\ge A_i\}$$</div><h3>统计结构与推导</h3><p>最优买价不低于最优卖价时，报价处于锁定或交叉状态；非正价格在正常证券报价数据中同样标记为无效。将这些异常快照占全部快照的比例报告，有利于评估行情源在数据清洗前的质量。</p><h3>数值计算与经济解释</h3><p>三个报价中，第一条为买1卖2，第二条为买2卖1，第三条为买5卖5。后二条为交叉与锁定，异常频率为2／3。</p><h3>识别条件、数据口径与边界</h3><p>交易场所之间的合法交叉报价、集合竞价和不同市场币种单位可能具有特殊制度含义。统计应保留原始记录，并由市场规则决定清洗与研究口径。</p><h3>CSV或参数复算</h3><pre><code>./kline_quant crossed-quotes quotes.csv Bid Ask</code></pre></article>
+<section class="source" id="source"><h2>完整C++17算法源码</h2><p>以下为可独立引用的实际头文件内容。使用网站统一的<code>stats.hpp</code>输入检查和标准C++17库。可通过命令行调度并运行独立数值及异常输入测试。</p>
+<p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/vintage_data_audit_lab.hpp">在GitHub查看头文件</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_domain_labs.cpp">数学数值测试</a>　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_domain_labs_cli.py">CSV测试</a></p>
+<pre><code>#pragma once
+#include "stats.hpp"
+#include &lt;algorithm&gt;
+#include &lt;cmath&gt;
+#include &lt;vector&gt;
+namespace kline {
+inline double vintage_revision_rmse(
+ const std::vector&lt;double&gt;&amp; initialVintage,const std::vector&lt;double&gt;&amp; revised){
+ check_finite(initialVintage);check_finite(revised);
+ require(initialVintage.size()==revised.size(),"Revision vintage rows do not align");
+ double squared=0;
+ for(std::size_t i=0;i&lt;initialVintage.size();++i)
+  squared+=std::pow(revised[i]-initialVintage[i],2);
+ return std::sqrt(squared/initialVintage.size());
+}
+inline double average_publication_delay(
+ const std::vector&lt;double&gt;&amp; referenceTime,const std::vector&lt;double&gt;&amp; releasedTime){
+ check_finite(referenceTime);check_finite(releasedTime);
+ require(referenceTime.size()==releasedTime.size(),"Release events misaligned");
+ double lag=0;
+ for(std::size_t i=0;i&lt;referenceTime.size();++i){
+  require(releasedTime[i]&gt;=referenceTime[i],"Release cannot predate reference time");
+  lag+=releasedTime[i]-referenceTime[i];
+ }
+ return lag/referenceTime.size();
+}
+inline double stale_quote_fraction(
+ const std::vector&lt;double&gt;&amp; quoteTimestamps,double allowedGap){
+ check_finite(quoteTimestamps);
+ require(quoteTimestamps.size()&gt;=2&amp;&amp;std::isfinite(allowedGap)&amp;&amp;allowedGap&gt;=0,
+         "Stale quote requires ordered timestamp gaps");
+ int stale=0;
+ for(std::size_t i=1;i&lt;quoteTimestamps.size();++i){
+  require(quoteTimestamps[i]&gt;quoteTimestamps[i-1],
+          "Quote timestamps must be strictly increasing");
+  stale+=quoteTimestamps[i]-quoteTimestamps[i-1]&gt;allowedGap;
+ }
+ return double(stale)/(quoteTimestamps.size()-1);
+}
+inline double invalid_bid_ask_fraction(
+ const std::vector&lt;double&gt;&amp; bids,const std::vector&lt;double&gt;&amp; asks){
+ check_finite(bids);check_finite(asks);
+ require(bids.size()==asks.size(),"Bid ask events misaligned");
+ int invalid=0;
+ for(std::size_t i=0;i&lt;bids.size();++i)
+   invalid+=(bids[i]&lt;=0||asks[i]&lt;=0||bids[i]&gt;=asks[i]);
+ return double(invalid)/bids.size();
+}
+}
+</code></pre></section><section class="references"><h2>参考来源</h2><p class="reference"><a href="https://fred.stlouisfed.org/docs/api/fred/series_vintagedates.html">FRED API Series Vintage Dates</a>。数学结构以展示的计算式、输入单位与源码实现为依据；实证估计所需的外生性和市场微观结构假设在各章分别陈述。</p><p>专题研究文献：<a href="https://fred.stlouisfed.org/docs/api/fred/alfred.html">Federal Reserve Bank of St. Louis: ALFRED Real-Time Vintages</a>。</p></section>
+</main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>
