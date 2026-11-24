@@ -84,6 +84,7 @@ inline Report structural_credit_fit(const Mat& x,const Vec& p){
         auto f=[&](double vol){return metrics(asset(vol),vol)[1]-ev;};
         double a=lo,b=hi,fa=f(a),fb=f(b);
         require(fa==0||fb==0||(fa<0&&fb>0)||(fa>0&&fb<0),"Asset volatility root not bracketed");
+        if(fa==0)b=a;else if(fb==0)a=b;
         for(int i=0;i<100;++i){double m=a/2+b/2,g=f(m);if(g==0){a=b=m;break;}if((g>0)==(fa>0)){a=m;fa=g;}else b=m;}
         double vol=a/2+b/2,V=asset(vol);Vec z=metrics(V,vol);
         require(std::abs(z[0]-E)<=tol*std::max(1.,E)&&std::abs(z[1]-ev)<=tol*std::max(1.,ev),"Credit calibration residual");

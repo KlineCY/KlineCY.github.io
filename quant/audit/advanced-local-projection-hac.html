@@ -6,7 +6,7 @@
 1,2
 -1,-2
 </pre><pre>./build/kline_quant advanced-local-projection-hac quant/research/advanced-examples/local-projection-hac.csv 1 1</pre><div class="wide"><table><thead><tr><th>Horizon</th><th>Observations</th><th>Response</th><th>HACVariance</th><th>HACStandardError</th><th>Intercept</th><th>ResidualSSE</th></tr></thead><tbody><tr><td>0</td><td>6</td><td>2</td><td>0</td><td>0</td><td>0</td><td>0</td></tr><tr><td>1</td><td>5</td><td>-2</td><td>0</td><td>0</td><td>0</td><td>0</td></tr></tbody></table></div><p>输出字段：Horizon，Observations，Response，HACVariance，HACStandardError，Intercept，ResidualSSE。</p><h2>计算复杂度与研究边界</h2><p>成本O((H+1)nd²(L+1))，最大期限和HAC带宽明确输入。冲击必须具有外生或结构识别依据，否则β是条件关联。控制变量应在冲击时点可用；大规模重叠期限研究需要联合推断与多重检验。</p><h2>C++17完整实现</h2><pre>inline Report local_projection_hac(const Mat&amp; x,const Vec&amp; p){
-    auto d=validate(x,4,2,18);parameters(p,2);auto H=count(p[0],0,x.size()-d-2),L=count(p[1],0,x.size()-H-1);
+    auto d=validate(x,4,2,18);parameters(p,2);require(x.size()&gt;=d+2,"Insufficient projection sample");auto H=count(p[0],0,x.size()-d-2),L=count(p[1],0,x.size()-H-1);
     require(double(H+1)*x.size()*d*d*(L+1)&lt;=5e7,"Local projection work limit");
     Report o{{"Horizon","Observations","Response","HACVariance","HACStandardError","Intercept","ResidualSSE"},{}};
     for(std::size_t h=0;h&lt;=H;++h){

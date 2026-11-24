@@ -17,6 +17,7 @@
         auto f=[&amp;](double vol){return metrics(asset(vol),vol)[1]-ev;};
         double a=lo,b=hi,fa=f(a),fb=f(b);
         require(fa==0||fb==0||(fa&lt;0&amp;&amp;fb&gt;0)||(fa&gt;0&amp;&amp;fb&lt;0),"Asset volatility root not bracketed");
+        if(fa==0)b=a;else if(fb==0)a=b;
         for(int i=0;i&lt;100;++i){double m=a/2+b/2,g=f(m);if(g==0){a=b=m;break;}if((g&gt;0)==(fa&gt;0)){a=m;fa=g;}else b=m;}
         double vol=a/2+b/2,V=asset(vol);Vec z=metrics(V,vol);
         require(std::abs(z[0]-E)&lt;=tol*std::max(1.,E)&amp;&amp;std::abs(z[1]-ev)&lt;=tol*std::max(1.,ev),"Credit calibration residual");

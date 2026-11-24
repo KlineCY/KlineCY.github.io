@@ -5,7 +5,7 @@
 #include <set>
 namespace kline { namespace advanced_research {
 inline Report local_projection_hac(const Mat& x,const Vec& p){
-    auto d=validate(x,4,2,18);parameters(p,2);auto H=count(p[0],0,x.size()-d-2),L=count(p[1],0,x.size()-H-1);
+    auto d=validate(x,4,2,18);parameters(p,2);require(x.size()>=d+2,"Insufficient projection sample");auto H=count(p[0],0,x.size()-d-2),L=count(p[1],0,x.size()-H-1);
     require(double(H+1)*x.size()*d*d*(L+1)<=5e7,"Local projection work limit");
     Report o{{"Horizon","Observations","Response","HACVariance","HACStandardError","Intercept","ResidualSSE"},{}};
     for(std::size_t h=0;h<=H;++h){
