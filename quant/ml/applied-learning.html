@@ -1,0 +1,86 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>核方法与预测决策｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><style>body{margin:0;background:white;color:#182a35;font:16px/1.95 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:24px 32px 64px}main{max-width:1120px;margin:auto}header,article,section{border:1px solid #cbd4dc;padding:24px 28px;margin:18px 0;background:white}.equation,pre,.wide{overflow:auto}pre{border:1px solid #cbd4dc;padding:14px;font:14px/1.7 "Times New Roman",monospace}table{border-collapse:collapse;width:100%}th,td{padding:7px 10px;border:1px solid #ccd5dd;text-align:right;background:white;white-space:nowrap}a{color:#1a5478}@media(max-width:790px){.main{margin:0;padding:12px}header,article,section{padding:15px}}</style></head><body><aside id="quantSidebar" class="sidebar" data-page="ml"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>核方法与预测决策</h1><p>四项独立研究方法：数学定义、推导、适用条件、构造样本、解析基准与C++17实现。数据均为教学构造。</p><p><a href="../research/applied-laboratories.html">量化研究应用实验室</a>　<a href="../cpp/applied_learning.hpp" download>完整源码</a></p><nav><a href="#kernel-alignment">中心化线性核目标对齐</a>　｜　<a href="#gram-centering">核矩阵双中心化</a>　｜　<a href="#soft-label">软标签交叉熵与KL差距</a>　｜　<a href="#calibration-slope">线性概率校准截距与斜率</a></nav></header><article id="kernel-alignment"><h2>中心化线性核目标对齐</h2><p>单特征线性核的中心化为中心化向量外积，标签核同理；Frobenius内积化简为中心化内积的平方。</p><div class="equation">$$K_c=HKH,\quad L_c=Hyy^\top H,\quad H=I-\mathbf1\mathbf1^\top/n$$</div><div class="equation">$$A(K,L)=\langle K_c,L_c\rangle_F/(\|K_c\|_F\|L_c\|_F)$$</div><p>样本特征与标签一致时对齐值1，两个核范数均2。可筛选金融特征，标签参与筛选必须限制在训练集；非线性核需完整矩阵。</p><h3>构造样本与数值复算</h3><p><a href="../research/applied-examples/kernel-alignment.csv" download>下载CSV</a>　<a href="../cpp/applied_learning.hpp" download>算法源码</a></p><pre>X,Y
+1,1
+-1,-1
+0,0
+</pre><pre>./build/kline_quant applied-kernel-alignment quant/research/applied-examples/kernel-alignment.csv</pre><div class="wide"><table><thead><tr><th>Alignment</th><th>KernelNorm</th><th>TargetNorm</th></tr></thead><tbody><tr><td>1</td><td>2</td><td>2</td></tr></tbody></table></div><p>参考文献：Cristianini et al. (2002), On kernel-target alignment, Advances in Neural Information Processing Systems.</p></article><article id="gram-centering"><h2>核矩阵双中心化</h2><p>对称矩阵行列均值一致，减去二者再加回总均值得双中心化；原核半正定时中心化仍半正定。</p><div class="equation">$$K_c=HKH=K-\mathbf1m^\top-m\mathbf1^\top+\bar K\mathbf1\mathbf1^\top$$</div><div class="equation">$$K_c\mathbf1=0,\quad z^\top HKHz=(Hz)^\top K(Hz)\ge0$$</div><p>核PCA中外积矩阵中心化后元素±0.25。代码检查对称性，不自动检验半正定；样本外核需沿用训练集中心化口径。</p><h3>构造样本与数值复算</h3><p><a href="../research/applied-examples/gram-centering.csv" download>下载CSV</a>　<a href="../cpp/applied_learning.hpp" download>算法源码</a></p><pre>K1,K2
+1,2
+2,4
+</pre><pre>./build/kline_quant applied-gram-centering quant/research/applied-examples/gram-centering.csv</pre><div class="wide"><table><thead><tr><th>Row</th><th>Kc1</th><th>Kc2</th></tr></thead><tbody><tr><td>1</td><td>0.25</td><td>-0.25</td></tr><tr><td>2</td><td>-0.25</td><td>0.25</td></tr></tbody></table></div><p>参考文献：Hastie, Tibshirani and Friedman (2009), The Elements of Statistical Learning, Springer.</p></article><article id="soft-label"><h2>软标签交叉熵与KL差距</h2><p>目标熵固定时交叉熵最小化等价于KL最小化，最优预测为目标概率。两列概率分别归一，预测概率严格正，目标允许零。</p><div class="equation">$$H(q,p)=-\sum_kq_k\log p_k,\quad H(q)=-\sum_kq_k\log q_k$$</div><div class="equation">$$D_{\mathrm{KL}}(q\Vert p)=H(q,p)-H(q)\ge0$$</div><p>教师模型概率蒸馏：均匀预测对目标0.25、0.75，交叉熵ln2、KL约0.1308。软标签也要遵循训练信息时点约束。</p><h3>构造样本与数值复算</h3><p><a href="../research/applied-examples/soft-label.csv" download>下载CSV</a>　<a href="../cpp/applied_learning.hpp" download>算法源码</a></p><pre>P,Q
+0.5,0.25
+0.5,0.75
+</pre><pre>./build/kline_quant applied-soft-label quant/research/applied-examples/soft-label.csv</pre><div class="wide"><table><thead><tr><th>CrossEntropy</th><th>TargetEntropy</th><th>KL</th></tr></thead><tbody><tr><td>0.69314718056</td><td>0.562335144619</td><td>0.130812035941</td></tr></tbody></table></div><p>参考文献：Hastie, Tibshirani and Friedman (2009), The Elements of Statistical Learning, Springer.</p></article><article id="calibration-slope"><h2>线性概率校准截距与斜率</h2><p>若条件事件概率等于预测值，线性投影截距斜率必为0、1；反向不成立，非线性失准也可能满足两矩条件。</p><div class="equation">$$y_i=a+bp_i+u_i,\quad \hat b=S_{py}/S_{pp}$$</div><div class="equation">$$\hat a=\bar y-\hat b\bar p,\quad (a,b)=(0,1)\ \text{under calibration}$$</div><p>违约概率案例平均预测及频率均0.5，但斜率1.5、截距−0.25。此为线性诊断，不是Logistic校准，不能保证输出在单位区间。</p><h3>构造样本与数值复算</h3><p><a href="../research/applied-examples/calibration-slope.csv" download>下载CSV</a>　<a href="../cpp/applied_learning.hpp" download>算法源码</a></p><pre>P,Y
+0.1,0
+0.3,0
+0.7,1
+0.9,1
+</pre><pre>./build/kline_quant applied-calibration-slope quant/research/applied-examples/calibration-slope.csv</pre><div class="wide"><table><thead><tr><th>Intercept</th><th>Slope</th><th>MeanForecast</th><th>MeanOutcome</th></tr></thead><tbody><tr><td>-0.25</td><td>1.5</td><td>0.5</td><td>0.5</td></tr></tbody></table></div><p>参考文献：Hastie, Tibshirani and Friedman (2009), The Elements of Statistical Learning, Springer.</p></article><section><h2>C++17完整实现</h2><pre>#pragma once
+#include "evidence_common.hpp"
+namespace kline { namespace applied_learning {
+using namespace evidence;
+inline Report kernel_alignment(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,2,2);
+    parameters(p,0);
+    double a=mean(column(x,0)),b=mean(column(x,1)),s=0,t=0,c=0;
+    for(auto&amp;r:x){double u=r[0]-a,v=r[1]-b;
+    s+=u*u;
+    t+=v*v;
+    c+=u*v;
+    }return scalar({"Alignment","KernelNorm","TargetNorm"},{c*c/(positive(s)*positive(t)),s,t});
+    
+}
+
+inline Report gram_centering(const Mat&amp; x,const Vec&amp; p){
+    auto n=validate(x,2,2,64);
+    parameters(p,0);
+    require(x.size()==n,"Square Gram matrix required");
+    Vec m(n,0);
+    double a=0;
+    for(std::size_t i=0;
+    i&lt;n;
+    ++i)for(std::size_t j=0;
+    j&lt;n;
+    ++j){require(std::abs(x[i][j]-x[j][i])&lt;=1e-10*std::max({1.,std::abs(x[i][j]),std::abs(x[j][i])}),"Symmetric Gram matrix required");
+    m[i]+=x[i][j]/n;
+    a+=x[i][j]/double(n*n);
+    }Report o{{"Row"},{}};
+    for(std::size_t j=0;
+    j&lt;n;
+    ++j)o.header.push_back("Kc"+std::to_string(j+1));
+    for(std::size_t i=0;
+    i&lt;n;
+    ++i){Vec r{double(i+1)};
+    for(std::size_t j=0;
+    j&lt;n;
+    ++j)r.push_back(x[i][j]-m[i]-m[j]+a);
+    o.rows.push_back(r);
+    }return o;
+    
+}
+
+inline Report soft_label(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,2,2);
+    parameters(p,0);
+    double a=0,b=0,ce=0,h=0;
+    for(auto&amp;r:x){require(r[0]&gt;0&amp;&amp;r[0]&lt;=1&amp;&amp;r[1]&gt;=0&amp;&amp;r[1]&lt;=1,"Invalid probability");
+    a+=r[0];
+    b+=r[1];
+    if(r[1]&gt;0){ce-=r[1]*std::log(r[0]);
+    h-=r[1]*std::log(r[1]);
+    }}require(std::abs(a-1)&lt;1e-10&amp;&amp;std::abs(b-1)&lt;1e-10,"Probabilities must sum to one");
+    return scalar({"CrossEntropy","TargetEntropy","KL"},{ce,h,ce-h});
+    
+}
+
+inline Report calibration_slope(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,2,2);
+    parameters(p,0);
+    double a=mean(column(x,0)),b=mean(column(x,1)),s=0,c=0;
+    for(auto&amp;r:x){require(r[0]&gt;=0&amp;&amp;r[0]&lt;=1&amp;&amp;(r[1]==0||r[1]==1),"Invalid forecast or event");
+    s+=(r[0]-a)*(r[0]-a);
+    c+=(r[0]-a)*(r[1]-b);
+    }double beta=c/positive(s);
+    return scalar({"Intercept","Slope","MeanForecast","MeanOutcome"},{b-beta*a,beta,a,b});
+    
+}
+} }
+</pre></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

@@ -8,6 +8,8 @@ on:
       - 'quant/research/numerical-examples/**'
       - 'quant/research/evidence-examples/**'
       - 'quant/research/inference-examples/**'
+      - 'quant/research/applied-examples/**'
+      - 'quant/research/run_applied_labs.py'
       - 'quant/research/run_researchflow.py'
       - 'quant/research/run_numerical_labs.py'
       - 'quant/research/run_evidence_labs.py'
@@ -19,6 +21,8 @@ on:
       - 'quant/research/numerical-examples/**'
       - 'quant/research/evidence-examples/**'
       - 'quant/research/inference-examples/**'
+      - 'quant/research/applied-examples/**'
+      - 'quant/research/run_applied_labs.py'
       - 'quant/research/run_researchflow.py'
       - 'quant/research/run_numerical_labs.py'
       - 'quant/research/run_evidence_labs.py'
@@ -96,6 +100,7 @@ jobs:
           python quant/cpp/test_numerical_lab.py /tmp/kline_quant
           python quant/cpp/test_evidence.py /tmp/kline_quant
           python quant/cpp/test_inference_labs.py /tmp/kline_quant
+          python quant/cpp/test_applied_labs.py /tmp/kline_quant
       - name: Execute the complete research suite and chained model evaluations
         run: |
           python quant/research/run_researchflow.py /tmp/kline_quant /tmp/kline-research-results
@@ -118,3 +123,8 @@ jobs:
           test -s /tmp/kline-evidence-results/studies/call_curve_reconstruction.csv
           test -s /tmp/kline-evidence-results/studies/auction_conservation.csv
           test -s /tmp/kline-evidence-results/studies/margin_economic_equity.csv
+
+      - name: Reproduce applied quantitative laboratories
+        run: |
+          python quant/research/run_applied_labs.py /tmp/kline_quant /tmp/kline-applied-results
+          test $(find /tmp/kline-applied-results -name '*.csv' | wc -l) -eq 32

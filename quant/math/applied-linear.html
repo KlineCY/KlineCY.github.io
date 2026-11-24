@@ -1,0 +1,88 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>回归几何与稳健统计｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><style>body{margin:0;background:white;color:#182a35;font:16px/1.95 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:24px 32px 64px}main{max-width:1120px;margin:auto}header,article,section{border:1px solid #cbd4dc;padding:24px 28px;margin:18px 0;background:white}.equation,pre,.wide{overflow:auto}pre{border:1px solid #cbd4dc;padding:14px;font:14px/1.7 "Times New Roman",monospace}table{border-collapse:collapse;width:100%}th,td{padding:7px 10px;border:1px solid #ccd5dd;text-align:right;background:white;white-space:nowrap}a{color:#1a5478}@media(max-width:790px){.main{margin:0;padding:12px}header,article,section{padding:15px}}</style></head><body><aside id="quantSidebar" class="sidebar" data-page="math"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>回归几何与稳健统计</h1><p>四项独立研究方法：数学定义、推导、适用条件、构造样本、解析基准与C++17实现。数据均为教学构造。</p><p><a href="../research/applied-laboratories.html">量化研究应用实验室</a>　<a href="../cpp/applied_linear.hpp" download>完整源码</a></p><nav><a href="#hc3">一元回归HC3稳健方差</a>　｜　<a href="#press">删除一预测残差与PRESS</a>　｜　<a href="#partial-r2">嵌套回归偏决定系数</a>　｜　<a href="#vif">两变量方差膨胀因子</a></nav></header><article id="hc3"><h2>一元回归HC3稳健方差</h2><p>带截距的一元回归帽子矩阵由常数项与中心化解释变量投影组成。HC3把残差除以1减杠杆值，再代入三明治方差公式，对高杠杆点的残差给予更大修正。</p><div class="equation">$$\hat\beta=S_{xy}/S_{xx},\quad h_i=1/n+(x_i-\bar x)^2/S_{xx}$$</div><div class="equation">$$\widehat V_{\mathrm{HC3}}(\hat\beta)=S_{xx}^{-2}\sum_i (x_i-\bar x)^2e_i^2/(1-h_i)^2$$</div><p>同期资产收益对市场因子回归，斜率0.9、截距0.9、端点杠杆0.7。HC3适用于独立异方差误差，不能替代序列相关下的HAC或聚类估计。</p><h3>构造样本与数值复算</h3><p><a href="../research/applied-examples/hc3.csv" download>下载CSV</a>　<a href="../cpp/applied_linear.hpp" download>算法源码</a></p><pre>X,Y
+0,1
+1,2
+2,2
+3,4
+</pre><pre>./build/kline_quant applied-hc3 quant/research/applied-examples/hc3.csv</pre><div class="wide"><table><thead><tr><th>Intercept</th><th>Slope</th><th>HC3SE</th></tr></thead><tbody><tr><td>0.9</td><td>0.9</td><td>0.425225030461</td></tr></tbody></table></div><p>参考文献：MacKinnon and White (1985), Some heteroskedasticity-consistent covariance matrix estimators with improved finite sample properties, Journal of Econometrics.</p></article><article id="press"><h2>删除一预测残差与PRESS</h2><p>删除观测对正规方程形成秩一变化，由Sherman–Morrison公式得到留一残差，无需反复拟合。杠杆为1时删除后模型退化。</p><div class="equation">$$\hat y=Hy,\quad H=X(X^\top X)^{-1}X^\top$$</div><div class="equation">$$e_{i,(-i)}=e_i/(1-h_{ii}),\quad \mathrm{PRESS}=\sum_i e_{i,(-i)}^2$$</div><p>案例首尾留一残差1／3和4／3。横截面模型可据此诊断单个资产影响；时间序列随机留一使用未来数据，不能代替滚动预测。</p><h3>构造样本与数值复算</h3><p><a href="../research/applied-examples/press.csv" download>下载CSV</a>　<a href="../cpp/applied_linear.hpp" download>算法源码</a></p><pre>X,Y
+0,1
+1,2
+2,2
+3,4
+</pre><pre>./build/kline_quant applied-press quant/research/applied-examples/press.csv</pre><div class="wide"><table><thead><tr><th>Index</th><th>Fitted</th><th>Residual</th><th>Leverage</th><th>LOOResidual</th></tr></thead><tbody><tr><td>1</td><td>0.9</td><td>0.1</td><td>0.7</td><td>0.333333333333</td></tr><tr><td>2</td><td>1.8</td><td>0.2</td><td>0.3</td><td>0.285714285714</td></tr><tr><td>3</td><td>2.7</td><td>-0.7</td><td>0.3</td><td>-1</td></tr><tr><td>4</td><td>3.6</td><td>0.4</td><td>0.7</td><td>1.33333333333</td></tr></tbody></table></div><p>参考文献：Wooldridge (2010), Econometric Analysis of Cross Section and Panel Data, MIT Press.</p></article><article id="partial-r2"><h2>嵌套回归偏决定系数</h2><p>在相同观测上拟合嵌套模型，以受限模型剩余平方和衡量新增变量解释比例。F统计量按限制数及剩余自由度缩放，经典分布依赖同方差正态误差。</p><div class="equation">$$R^2_{\mathrm{partial}}=1-\mathrm{SSE}_U/\mathrm{SSE}_R$$</div><div class="equation">$$F=\frac{(\mathrm{SSE}_R-\mathrm{SSE}_U)/q}{\mathrm{SSE}_U/(n-k_U)}$$</div><p>残差算术案例给定平方和6与1.5，限制数1、参数数3，偏决定系数0.75、F为9。实际研究可检验新增行业因子的联合贡献，输入必须来自真实嵌套拟合。</p><h3>构造样本与数值复算</h3><p><a href="../research/applied-examples/partial-r2.csv" download>下载CSV</a>　<a href="../cpp/applied_linear.hpp" download>算法源码</a></p><pre>RestrictedResidual,FullResidual
+1,0.5
+-1,-0.5
+1,0.5
+-1,-0.5
+1,0.5
+-1,-0.5
+</pre><pre>./build/kline_quant applied-partial-r2 quant/research/applied-examples/partial-r2.csv 1 3</pre><div class="wide"><table><thead><tr><th>RestrictedSSE</th><th>FullSSE</th><th>PartialR2</th><th>F</th></tr></thead><tbody><tr><td>6</td><td>1.5</td><td>0.75</td><td>9</td></tr></tbody></table></div><p>参考文献：Wooldridge (2010), Econometric Analysis of Cross Section and Panel Data, MIT Press.</p></article><article id="vif"><h2>两变量方差膨胀因子</h2><p>带截距的两变量模型中辅助回归决定系数等于相关系数平方。条件斜率方差相对正交设计放大VIF倍；完全共线时个别系数无法识别。</p><div class="equation">$$\rho=S_{xz}/\sqrt{S_{xx}S_{zz}}$$</div><div class="equation">$$\mathrm{VIF}=(1-\rho^2)^{-1}$$</div><p>趋势与动量暴露的重叠诊断：相关系数1／√5，VIF为1.25。标准化不改变VIF；多变量模型需对全部其他解释变量回归。</p><h3>构造样本与数值复算</h3><p><a href="../research/applied-examples/vif.csv" download>下载CSV</a>　<a href="../cpp/applied_linear.hpp" download>算法源码</a></p><pre>X1,X2
+0,0
+1,1
+2,0
+3,1
+</pre><pre>./build/kline_quant applied-vif quant/research/applied-examples/vif.csv</pre><div class="wide"><table><thead><tr><th>Correlation</th><th>R2</th><th>VIF</th></tr></thead><tbody><tr><td>0.4472135955</td><td>0.2</td><td>1.25</td></tr></tbody></table></div><p>参考文献：Wooldridge (2010), Econometric Analysis of Cross Section and Panel Data, MIT Press.</p></article><section><h2>C++17完整实现</h2><pre>#pragma once
+#include "evidence_common.hpp"
+namespace kline { namespace applied_linear {
+using namespace evidence;
+inline Report hc3(const Mat&amp; x,const Vec&amp; p){
+    validate(x,3,2,2);
+    parameters(p,0);
+    double n=x.size(),a=mean(column(x,0)),b=mean(column(x,1)),s=0,c=0;
+    for(auto&amp;r:x){s+=(r[0]-a)*(r[0]-a);
+    c+=(r[0]-a)*(r[1]-b);
+    }positive(s);
+    double beta=c/s,alpha=b-beta*a,v=0;
+    for(auto&amp;r:x){double d=r[0]-a,e=r[1]-alpha-beta*r[0],h=1/n+d*d/s;
+    positive(1-h);
+    v+=d*d*e*e/((1-h)*(1-h));
+    }return scalar({"Intercept","Slope","HC3SE"},{alpha,beta,std::sqrt(v)/s});
+    
+}
+
+inline Report press(const Mat&amp; x,const Vec&amp; p){
+    validate(x,3,2,2);
+    parameters(p,0);
+    double n=x.size(),a=mean(column(x,0)),b=mean(column(x,1)),s=0,c=0;
+    for(auto&amp;r:x){s+=(r[0]-a)*(r[0]-a);
+    c+=(r[0]-a)*(r[1]-b);
+    }positive(s);
+    double beta=c/s,alpha=b-beta*a;
+    Report o{{"Index","Fitted","Residual","Leverage","LOOResidual"},{}};
+    for(std::size_t i=0;
+    i&lt;x.size();
+    ++i){double d=x[i][0]-a,f=alpha+beta*x[i][0],e=x[i][1]-f,h=1/n+d*d/s;
+    positive(1-h);
+    o.rows.push_back({double(i+1),f,e,h,e/(1-h)});
+    }return o;
+    
+}
+
+inline Report partial_r2(const Mat&amp; x,const Vec&amp; p){
+    validate(x,3,2,2);
+    parameters(p,2);
+    auto q=count(p[0],1,x.size()-1),k=count(p[1],q+1,x.size()-1);
+    double a=0,b=0;
+    for(auto&amp;r:x){a+=r[0]*r[0];
+    b+=r[1]*r[1];
+    }positive(a);
+    positive(b);
+    require(a&gt;=b,"Nested SSE required");
+    return scalar({"RestrictedSSE","FullSSE","PartialR2","F"},{a,b,1-b/a,(a-b)/q/(b/(x.size()-k))});
+    
+}
+
+inline Report vif(const Mat&amp; x,const Vec&amp; p){
+    validate(x,3,2,2);
+    parameters(p,0);
+    double a=mean(column(x,0)),b=mean(column(x,1)),v=0,w=0,c=0;
+    for(auto&amp;r:x){double d=r[0]-a,e=r[1]-b;
+    v+=d*d;
+    w+=e*e;
+    c+=d*e;
+    }double rho=c/std::sqrt(positive(v)*positive(w)),r2=rho*rho;
+    require(1-r2&gt;1e-14,"Collinear regressors");
+    return scalar({"Correlation","R2","VIF"},{rho,r2,1/(1-r2)});
+    
+}
+} }
+</pre></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

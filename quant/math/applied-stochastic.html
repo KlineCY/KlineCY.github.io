@@ -1,0 +1,85 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>随机过程与路径变差｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><style>body{margin:0;background:white;color:#182a35;font:16px/1.95 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:24px 32px 64px}main{max-width:1120px;margin:auto}header,article,section{border:1px solid #cbd4dc;padding:24px 28px;margin:18px 0;background:white}.equation,pre,.wide{overflow:auto}pre{border:1px solid #cbd4dc;padding:14px;font:14px/1.7 "Times New Roman",monospace}table{border-collapse:collapse;width:100%}th,td{padding:7px 10px;border:1px solid #ccd5dd;text-align:right;background:white;white-space:nowrap}a{color:#1a5478}@media(max-width:790px){.main{margin:0;padding:12px}header,article,section{padding:15px}}</style></head><body><aside id="quantSidebar" class="sidebar" data-page="math"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>随机过程与路径变差</h1><p>四项独立研究方法：数学定义、推导、适用条件、构造样本、解析基准与C++17实现。数据均为教学构造。</p><p><a href="../research/applied-laboratories.html">量化研究应用实验室</a>　<a href="../cpp/applied_stochastic.hpp" download>完整源码</a></p><nav><a href="#semivariance">正负实现半方差</a>　｜　<a href="#bridge">Brownian桥条件矩</a>　｜　<a href="#covariation">嵌套分割的二次协变差</a>　｜　<a href="#ar-aggregation">平稳AR(1)累积收益方差</a></nav></header><article id="semivariance"><h2>正负实现半方差</h2><p>路径平方增量按符号分解。连续半鞅在适当高频极限下连续部分对正负半方差各贡献一半，跳跃按符号进入相应项；有限样本分解无分布要求。</p><div class="equation">$$RV^+=\sum_i(\Delta X_i)^2\mathbf1_{\Delta X_i&gt;0},\quad RV^-=\sum_i(\Delta X_i)^2\mathbf1_{\Delta X_i&lt;0}$$</div><div class="equation">$$RV=RV^++RV^-$$</div><p>日内对数价格增量的下行波动案例：正0.1、负0.05。注意微观结构噪声和不同收益尺度。</p><h3>构造样本与数值复算</h3><p><a href="../research/applied-examples/semivariance.csv" download>下载CSV</a>　<a href="../cpp/applied_stochastic.hpp" download>算法源码</a></p><pre>Increment
+0.1
+-0.2
+0.3
+-0.1
+</pre><pre>./build/kline_quant applied-semivariance quant/research/applied-examples/semivariance.csv</pre><div class="wide"><table><thead><tr><th>PositiveRV</th><th>NegativeRV</th><th>TotalRV</th></tr></thead><tbody><tr><td>0.1</td><td>0.05</td><td>0.15</td></tr></tbody></table></div><p>参考文献：Barndorff-Nielsen, Kinnebrock and Shephard (2010), Measuring downside risk: realised semivariance, in Volatility and Time Series Econometrics.</p></article><article id="bridge"><h2>Brownian桥条件矩</h2><p>将Brownian运动分解为终点线性投影及独立桥，联合正态保证零协方差意味着独立。条件方差为σ²t（1－t／T），本实现固定T＝1。</p><div class="equation">$$\mathbb E[X_t\mid X_0=a,X_T=b]=a+t(b-a)/T$$</div><div class="equation">$$\operatorname{Cov}(X_s,X_t\mid X_T)=\sigma^2(\min(s,t)-st/T)$$</div><p>起点0、终点1、扩散系数2，中央时点条件方差1。已知未来终点的桥仅作条件模拟，不能直接构成事前交易信号。</p><h3>构造样本与数值复算</h3><p><a href="../research/applied-examples/bridge.csv" download>下载CSV</a>　<a href="../cpp/applied_stochastic.hpp" download>算法源码</a></p><pre>Time
+0.25
+0.5
+0.75
+</pre><pre>./build/kline_quant applied-bridge quant/research/applied-examples/bridge.csv 0 1 2</pre><div class="wide"><table><thead><tr><th>Time</th><th>ConditionalMean</th><th>ConditionalVariance</th></tr></thead><tbody><tr><td>0.25</td><td>0.25</td><td>0.75</td></tr><tr><td>0.5</td><td>0.5</td><td>1</td></tr><tr><td>0.75</td><td>0.75</td><td>0.75</td></tr></tbody></table></div><p>参考文献：Shreve (2004), Stochastic Calculus for Finance II, Springer.</p></article><article id="covariation"><h2>嵌套分割的二次协变差</h2><p>在给定分割上累计同步增量乘积。粗细分割的有限样本值不同，连续半鞅在网格趋零的适当条件下收敛到二次协变差。</p><div class="equation">$$[X,Y]_\pi=\sum_{[t_i,t_{i+1}]\in\pi}\Delta X_i\Delta Y_i$$</div><div class="equation">$$[X+Y]_\pi=[X]_\pi+[Y]_\pi+2[X,Y]_\pi$$</div><p>案例细分割协变差2，两步粗分割为0。高频估计需真实时间同步及噪声控制，两种步长比较不能证明一致性。</p><h3>构造样本与数值复算</h3><p><a href="../research/applied-examples/covariation.csv" download>下载CSV</a>　<a href="../cpp/applied_stochastic.hpp" download>算法源码</a></p><pre>X,Y
+0,0
+1,2
+0,1
+2,0
+3,1
+</pre><pre>./build/kline_quant applied-covariation quant/research/applied-examples/covariation.csv 2</pre><div class="wide"><table><thead><tr><th>Stride</th><th>Intervals</th><th>QVX</th><th>QVY</th><th>QCov</th></tr></thead><tbody><tr><td>1</td><td>4</td><td>7</td><td>7</td><td>2</td></tr><tr><td>2</td><td>2</td><td>9</td><td>1</td><td>0</td></tr></tbody></table></div><p>参考文献：Shreve (2004), Stochastic Calculus for Finance II, Springer.</p></article><article id="ar-aggregation"><h2>平稳AR(1)累积收益方差</h2><p>展开累积方差，滞后k的协方差出现h−k次。平稳条件为自回归系数绝对值小于1，参数是无条件单期方差。</p><div class="equation">$$\gamma_k=\gamma_0\phi^{|k|},\quad \operatorname{Var}(\sum_{t=1}^h r_t)=h\gamma_0+2\sum_{k=1}^{h-1}(h-k)\gamma_k$$</div><div class="equation">$$\operatorname{Var}(\sum_{t=1}^h r_t)/(h\gamma_0)=1+\frac2h\sum_{k=1}^{h-1}(h-k)\phi^k$$</div><p>φ＝0.5、单期方差2，1、2、3期方差2、6、11。正自相关提高长期风险；简单收益复利不能直接代入加法公式。</p><h3>构造样本与数值复算</h3><p><a href="../research/applied-examples/ar-aggregation.csv" download>下载CSV</a>　<a href="../cpp/applied_stochastic.hpp" download>算法源码</a></p><pre>Horizon
+1
+2
+3
+</pre><pre>./build/kline_quant applied-ar-aggregation quant/research/applied-examples/ar-aggregation.csv 0.5 2</pre><div class="wide"><table><thead><tr><th>Horizon</th><th>SingleVariance</th><th>SumVariance</th><th>IndependentVariance</th></tr></thead><tbody><tr><td>1</td><td>2</td><td>2</td><td>2</td></tr><tr><td>2</td><td>2</td><td>6</td><td>4</td></tr><tr><td>3</td><td>2</td><td>11</td><td>6</td></tr></tbody></table></div><p>参考文献：Hamilton (1994), Time Series Analysis, Princeton University Press.</p></article><section><h2>C++17完整实现</h2><pre>#pragma once
+#include "evidence_common.hpp"
+namespace kline { namespace applied_stochastic {
+using namespace evidence;
+inline Report semivariance(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,1,1);
+    parameters(p,0);
+    double a=0,b=0;
+    for(auto&amp;r:x){double v=r[0]*r[0];
+    if(r[0]&gt;0)a+=v;
+    else b+=v;
+    }return scalar({"PositiveRV","NegativeRV","TotalRV"},{a,b,a+b});
+    
+}
+
+inline Report bridge(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,1,1);
+    parameters(p,3);
+    double sigma=positive(p[2]);
+    Report o{{"Time","ConditionalMean","ConditionalVariance"},{}};
+    for(auto&amp;r:x){double t=r[0];
+    require(t&gt;=0&amp;&amp;t&lt;=1,"Time outside unit interval");
+    o.rows.push_back({t,p[0]+t*(p[1]-p[0]),sigma*sigma*t*(1-t)});
+    }return o;
+    
+}
+
+inline Report covariation(const Mat&amp; x,const Vec&amp; p){
+    validate(x,3,2,2);
+    parameters(p,1);
+    auto k=count(p[0],2,x.size()-1);
+    require((x.size()-1)%k==0,"Stride must divide interval count");
+    Report o{{"Stride","Intervals","QVX","QVY","QCov"},{}};
+    for(auto step:{std::size_t(1),k}){double a=0,b=0,c=0;
+    for(std::size_t i=step;
+    i&lt;x.size();
+    i+=step){double u=x[i][0]-x[i-step][0],v=x[i][1]-x[i-step][1];
+    a+=u*u;
+    b+=v*v;
+    c+=u*v;
+    }o.rows.push_back({double(step),double((x.size()-1)/step),a,b,c});
+    }return o;
+    
+}
+
+inline Report ar_aggregation(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,1,1);
+    parameters(p,2);
+    double phi=p[0],v=positive(p[1]);
+    require(std::abs(phi)&lt;1,"Stationary AR required");
+    Report o{{"Horizon","SingleVariance","SumVariance","IndependentVariance"},{}};
+    double work=0;
+    for(auto&amp;r:x){auto h=count(r[0],1,100000);
+    work+=h;
+    require(work&lt;=2e7,"Work limit");
+    double z=h*v,power=phi;
+    for(std::size_t k=1;
+    k&lt;h;
+    ++k){z+=2*v*(h-k)*power;
+    power*=phi;
+    }o.rows.push_back({double(h),v,z,h*v});
+    }return o;
+    
+}
+} }
+</pre></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

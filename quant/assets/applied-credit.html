@@ -1,0 +1,88 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>对手方信用暴露与竞争风险｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><style>body{margin:0;background:white;color:#182a35;font:16px/1.95 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:24px 32px 64px}main{max-width:1120px;margin:auto}header,article,section{border:1px solid #cbd4dc;padding:24px 28px;margin:18px 0;background:white}.equation,pre,.wide{overflow:auto}pre{border:1px solid #cbd4dc;padding:14px;font:14px/1.7 "Times New Roman",monospace}table{border-collapse:collapse;width:100%}th,td{padding:7px 10px;border:1px solid #ccd5dd;text-align:right;background:white;white-space:nowrap}a{color:#1a5478}@media(max-width:790px){.main{margin:0;padding:12px}header,article,section{padding:15px}}</style></head><body><aside id="quantSidebar" class="sidebar" data-page="assets"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>对手方信用暴露与竞争风险</h1><p>四项独立研究方法：数学定义、推导、适用条件、构造样本、解析基准与C++17实现。数据均为教学构造。</p><p><a href="../research/applied-laboratories.html">量化研究应用实验室</a>　<a href="../cpp/applied_credit.hpp" download>完整源码</a></p><nav><a href="#competing-incidence">竞争风险Aalen–Johansen累积发生率</a>　｜　<a href="#exposure-profile">正向暴露及潜在未来暴露PFE</a>　｜　<a href="#wrong-way">违约概率与暴露的错误方向风险</a>　｜　<a href="#netting">净额结算及抵押品暴露缩减</a></nav></header><article id="competing-incidence"><h2>竞争风险Aalen–Johansen累积发生率</h2><p>竞争事件使其他类型无法后续发生，累计发生率以整体无事件生存率加权。每时点先计算风险集事件比例，再移除事件及删失。</p><div class="equation">$$\hat S(t)=\prod_{u\le t}(1-[d_1(u)+d_2(u)]/Y(u))$$</div><div class="equation">$$\widehat F_j(t)=\sum_{u\le t}\hat S(u^-)\,d_j(u)/Y(u)$$</div><p>违约与提前偿还两种退出。例中最终发生率0.75及0.25，生存率0。假设独立删失和共同起始时间，不支持左截断。</p><h3>构造样本与数值复算</h3><p><a href="../research/applied-examples/competing-incidence.csv" download>下载CSV</a>　<a href="../cpp/applied_credit.hpp" download>算法源码</a></p><pre>Time,Event
+1,1
+2,2
+3,0
+4,1
+</pre><pre>./build/kline_quant applied-competing-incidence quant/research/applied-examples/competing-incidence.csv</pre><div class="wide"><table><thead><tr><th>Time</th><th>AtRisk</th><th>Event1</th><th>Event2</th><th>Censored</th><th>Survival</th><th>CIF1</th><th>CIF2</th></tr></thead><tbody><tr><td>1</td><td>4</td><td>1</td><td>0</td><td>0</td><td>0.75</td><td>0.25</td><td>0</td></tr><tr><td>2</td><td>3</td><td>0</td><td>1</td><td>0</td><td>0.5</td><td>0.25</td><td>0.25</td></tr><tr><td>3</td><td>2</td><td>0</td><td>0</td><td>1</td><td>0.5</td><td>0.25</td><td>0.25</td></tr><tr><td>4</td><td>1</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0.75</td><td>0.25</td></tr></tbody></table></div><p>参考文献：Aalen and Johansen (1978), An empirical transition matrix for non-homogeneous Markov chains based on censored observations, Scandinavian Journal of Statistics.</p></article><article id="exposure-profile"><h2>正向暴露及潜在未来暴露PFE</h2><p>净额结算组合情景市值取正部，均值为预期暴露，经验分位数为PFE。采用最近秩分位数，不插值。</p><div class="equation">$$EE_t=M^{-1}\sum_m(V_t^{(m)})^+$$</div><div class="equation">$$PFE_{\alpha,t}=X_{(\lceil\alpha M\rceil)},\quad X_m=(V_t^{(m)})^+$$</div><p>首期正暴露0、0、10、30，均值10，75％分位数10。各行表示同组合不同期限等概率情景，尚不含贴现、抵押及违约概率。</p><h3>构造样本与数值复算</h3><p><a href="../research/applied-examples/exposure-profile.csv" download>下载CSV</a>　<a href="../cpp/applied_credit.hpp" download>算法源码</a></p><pre>Scenario1,Scenario2,Scenario3,Scenario4
+-10,0,10,30
+-5,5,15,25
+</pre><pre>./build/kline_quant applied-exposure-profile quant/research/applied-examples/exposure-profile.csv 0.75</pre><div class="wide"><table><thead><tr><th>Horizon</th><th>ExpectedPositiveExposure</th><th>PFE</th></tr></thead><tbody><tr><td>1</td><td>10</td><td>10</td></tr><tr><td>2</td><td>11.25</td><td>15</td></tr></tbody></table></div><p>参考文献：Gregory (2020), The xVA Challenge, Wiley.</p></article><article id="wrong-way"><h2>违约概率与暴露的错误方向风险</h2><p>情景条件违约概率乘暴露为条件损失。将乘积期望拆成均值乘积及协方差，得到依赖附加项。参数为LGD，情景等概率。</p><div class="equation">$$L=\mathrm{LGD}\,\mathbb E[E^+p(Z)]$$</div><div class="equation">$$L-L_{\mathrm{ind}}=\mathrm{LGD}\operatorname{Cov}(E^+,p(Z))$$</div><p>暴露10及30，PD10％及30％，LGD60％，联合损失3、独立近似2.4。若暴露已经条件于违约，不可重复加权。</p><h3>构造样本与数值复算</h3><p><a href="../research/applied-examples/wrong-way.csv" download>下载CSV</a>　<a href="../cpp/applied_credit.hpp" download>算法源码</a></p><pre>Exposure,ConditionalPD
+10,0.1
+30,0.3
+</pre><pre>./build/kline_quant applied-wrong-way quant/research/applied-examples/wrong-way.csv 0.6</pre><div class="wide"><table><thead><tr><th>ExpectedExposure</th><th>MeanPD</th><th>JointLoss</th><th>IndependentLoss</th><th>DependenceAddOn</th></tr></thead><tbody><tr><td>20</td><td>0.2</td><td>3</td><td>2.4</td><td>0.6</td></tr></tbody></table></div><p>参考文献：Gregory (2020), The xVA Challenge, Wiley.</p></article><article id="netting"><h2>净额结算及抵押品暴露缩减</h2><p>可执行的净额结算允许正负市值抵销，再扣除可用于抵销的已收抵押。正部函数的次可加性保证净额暴露不高于逐笔正暴露。</p><div class="equation">$$E_{\mathrm{gross}}=\sum_j V_j^+,\quad E_{\mathrm{net}}=(\sum_jV_j)^+$$</div><div class="equation">$$E_{\mathrm{coll}}=(\sum_jV_j-C)^+$$</div><p>首场景市值100、−60，净额40，抵押10后暴露30。抵押需考虑币种、折扣、法律约束；不模拟保证金追加与返还。</p><h3>构造样本与数值复算</h3><p><a href="../research/applied-examples/netting.csv" download>下载CSV</a>　<a href="../cpp/applied_credit.hpp" download>算法源码</a></p><pre>Trade1,Trade2,Collateral
+100,-60,10
+-20,40,25
+</pre><pre>./build/kline_quant applied-netting quant/research/applied-examples/netting.csv</pre><div class="wide"><table><thead><tr><th>Scenario</th><th>GrossPositive</th><th>NetPositive</th><th>Collateralized</th><th>NettingBenefit</th><th>CollateralBenefit</th></tr></thead><tbody><tr><td>1</td><td>100</td><td>40</td><td>30</td><td>60</td><td>10</td></tr><tr><td>2</td><td>40</td><td>20</td><td>0</td><td>20</td><td>20</td></tr></tbody></table></div><p>参考文献：Gregory (2020), The xVA Challenge, Wiley.</p></article><section><h2>C++17完整实现</h2><pre>#pragma once
+#include "evidence_common.hpp"
+namespace kline { namespace applied_credit {
+using namespace evidence;
+inline Report competing_incidence(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,2,2);
+    parameters(p,0);
+    std::map&lt;double,Vec&gt; g;
+    for(auto&amp;r:x){positive(r[0]);
+    auto e=count(r[1],0,2);
+    if(!g.count(r[0]))g[r[0]]=Vec(3,0);
+    g[r[0]][e]++;
+    }double n=x.size(),s=1,a=0,b=0;
+    Report o{{"Time","AtRisk","Event1","Event2","Censored","Survival","CIF1","CIF2"},{}};
+    for(auto&amp;z:g){auto&amp;r=z.second;
+    a+=s*r[1]/n;
+    b+=s*r[2]/n;
+    s*=1-(r[1]+r[2])/n;
+    o.rows.push_back({z.first,n,r[1],r[2],r[0],s,a,b});
+    n-=sum(r);
+    }return o;
+    
+}
+
+inline Report exposure_profile(const Mat&amp; x,const Vec&amp; p){
+    auto n=validate(x,1,2,64);
+    parameters(p,1);
+    require(p[0]&gt;0&amp;&amp;p[0]&lt;=1,"Invalid quantile");
+    auto k=std::size_t(std::ceil(p[0]*n))-1;
+    Report o{{"Horizon","ExpectedPositiveExposure","PFE"},{}};
+    for(std::size_t i=0;
+    i&lt;x.size();
+    ++i){Vec v=x[i];
+    for(double&amp;z:v)z=std::max(z,0.);
+    double a=mean(v);
+    std::sort(v.begin(),v.end());
+    o.rows.push_back({double(i+1),a,v[k]});
+    }return o;
+    
+}
+
+inline Report wrong_way(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,2,2);
+    parameters(p,1);
+    require(p[0]&gt;=0&amp;&amp;p[0]&lt;=1,"Invalid LGD");
+    double a=0,b=0,c=0,n=x.size();
+    for(auto&amp;r:x){require(r[0]&gt;=0&amp;&amp;r[1]&gt;=0&amp;&amp;r[1]&lt;=1,"Invalid exposure or PD");
+    a+=r[0]/n;
+    b+=r[1]/n;
+    c+=r[0]*r[1]/n;
+    }return scalar({"ExpectedExposure","MeanPD","JointLoss","IndependentLoss","DependenceAddOn"},{a,b,p[0]*c,p[0]*a*b,p[0]*(c-a*b)});
+    
+}
+
+inline Report netting(const Mat&amp; x,const Vec&amp; p){
+    auto n=validate(x,1,3,64);
+    parameters(p,0);
+    Report o{{"Scenario","GrossPositive","NetPositive","Collateralized","NettingBenefit","CollateralBenefit"},{}};
+    for(std::size_t i=0;
+    i&lt;x.size();
+    ++i){auto&amp;r=x[i];
+    require(r.back()&gt;=0,"Negative collateral");
+    double a=0,b=0;
+    for(std::size_t j=0;
+    j+1&lt;n;
+    ++j){a+=std::max(r[j],0.);
+    b+=r[j];
+    }double net=std::max(b,0.),c=std::max(b-r.back(),0.);
+    o.rows.push_back({double(i+1),a,net,c,a-net,net-c});
+    }return o;
+    
+}
+} }
+</pre></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

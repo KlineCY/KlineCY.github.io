@@ -1,0 +1,90 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>交易执行与成本诊断｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><style>body{margin:0;background:white;color:#182a35;font:16px/1.95 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:24px 32px 64px}main{max-width:1120px;margin:auto}header,article,section{border:1px solid #cbd4dc;padding:24px 28px;margin:18px 0;background:white}.equation,pre,.wide{overflow:auto}pre{border:1px solid #cbd4dc;padding:14px;font:14px/1.7 "Times New Roman",monospace}table{border-collapse:collapse;width:100%}th,td{padding:7px 10px;border:1px solid #ccd5dd;text-align:right;background:white;white-space:nowrap}a{color:#1a5478}@media(max-width:790px){.main{margin:0;padding:12px}header,article,section{padding:15px}}</style></head><body><aside id="quantSidebar" class="sidebar" data-page="feeds"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>交易执行与成本诊断</h1><p>四项独立研究方法：数学定义、推导、适用条件、构造样本、解析基准与C++17实现。数据均为教学构造。</p><p><a href="../research/applied-laboratories.html">量化研究应用实验室</a>　<a href="../cpp/applied_execution.hpp" download>完整源码</a></p><nav><a href="#markout">成交后多期限Markout</a>　｜　<a href="#participation-cap">参与率上限与剩余订单</a>　｜　<a href="#recovery">冲击后价差恢复比例</a>　｜　<a href="#maker-taker">做市成交费用净Markout</a></nav></header><article id="markout"><h2>成交后多期限Markout</h2><p>买后中价上涨及卖后中价下降均为正Markout。区分单位价格变化与数量乘价格的货币变化，尚未扣费。</p><div class="equation">$$M_{i,h}=s_i(m_{i,h}-P_i),\quad s_i\in\{-1,1\}$$</div><div class="equation">$$\bar M_h=\sum_iq_iM_{i,h}/\sum_iq_i$$</div><p>买2单位、卖1单位，首期限总Markout4，第二期限−3。未来中价须和真实成交时间对齐，不能用不规则行号代替时间。</p><h3>构造样本与数值复算</h3><p><a href="../research/applied-examples/markout.csv" download>下载CSV</a>　<a href="../cpp/applied_execution.hpp" download>算法源码</a></p><pre>Side,FillPrice,Quantity,Mid1,Mid2
+1,100,2,101,99
+-1,100,1,98,101
+</pre><pre>./build/kline_quant applied-markout quant/research/applied-examples/markout.csv</pre><div class="wide"><table><thead><tr><th>Horizon</th><th>SignedMarkout</th><th>QuantityWeightedMarkout</th></tr></thead><tbody><tr><td>1</td><td>4</td><td>1.33333333333</td></tr><tr><td>2</td><td>-3</td><td>-1</td></tr></tbody></table></div><p>参考文献：Hasbrouck (2007), Empirical Market Microstructure, Oxford University Press.</p></article><article id="participation-cap"><h2>参与率上限与剩余订单</h2><p>每期成交不超过剩余订单和固定比例市场量，形成守恒账本。零量时不成交，给定实现量的情景计算并非事前预测。</p><div class="equation">$$q_t=\min(Q_{t-1},\eta V_t),\quad Q_t=Q_{t-1}-q_t$$</div><div class="equation">$$\sum_{u\le t}q_u+Q_t=Q_0$$</div><p>目标30、参与率10％，市场量100、50、200，成交10、5、15。真实执行仍受价格、队列、撤单与冲击约束。</p><h3>构造样本与数值复算</h3><p><a href="../research/applied-examples/participation-cap.csv" download>下载CSV</a>　<a href="../cpp/applied_execution.hpp" download>算法源码</a></p><pre>MarketVolume
+100
+50
+200
+</pre><pre>./build/kline_quant applied-participation-cap quant/research/applied-examples/participation-cap.csv 30 0.1</pre><div class="wide"><table><thead><tr><th>Period</th><th>MarketVolume</th><th>Fill</th><th>Remaining</th><th>Participation</th></tr></thead><tbody><tr><td>1</td><td>100</td><td>10</td><td>20</td><td>0.1</td></tr><tr><td>2</td><td>50</td><td>5</td><td>15</td><td>0.1</td></tr><tr><td>3</td><td>200</td><td>15</td><td>0</td><td>0.075</td></tr></tbody></table></div><p>参考文献：Hasbrouck (2007), Empirical Market Microstructure, Oxford University Press.</p></article><article id="recovery"><h2>冲击后价差恢复比例</h2><p>以冲击前正常价差为基准，异常价差缩减比例即恢复程度，可超1或为负。首次越过一半是观测网格上的首次触及。</p><div class="equation">$$R(t)=1-\frac{s(t)-s_*}{s(0)-s_*}$$</div><div class="equation">$$\tau_{1/2}=\inf\{t:R(t)\ge1/2\}$$</div><p>正常价差1，冲击后4、3、2、1，半恢复在时点2。多个冲击叠加及基准变化时，应按事件对齐分层比较。</p><h3>构造样本与数值复算</h3><p><a href="../research/applied-examples/recovery.csv" download>下载CSV</a>　<a href="../cpp/applied_execution.hpp" download>算法源码</a></p><pre>Time,Spread
+0,4
+1,3
+2,2
+3,1
+</pre><pre>./build/kline_quant applied-recovery quant/research/applied-examples/recovery.csv 1</pre><div class="wide"><table><thead><tr><th>Time</th><th>Spread</th><th>Recovery</th><th>HalfRecovered</th></tr></thead><tbody><tr><td>0</td><td>4</td><td>0</td><td>0</td></tr><tr><td>1</td><td>3</td><td>0.333333333333</td><td>0</td></tr><tr><td>2</td><td>2</td><td>0.666666666667</td><td>1</td></tr><tr><td>3</td><td>1</td><td>1</td><td>1</td></tr></tbody></table></div><p>参考文献：Hasbrouck (2007), Empirical Market Microstructure, Oxford University Press.</p></article><article id="maker-taker"><h2>做市成交费用净Markout</h2><p>成交后中价相对成交价的有利变化为毛Markout。费用可为负表示返佣，按量计算后从毛值扣除。方向为该交易者自身买卖方向。</p><div class="equation">$$G_i=q_is_i(m_{i,h}-P_i),\quad F_i=q_if_i$$</div><div class="equation">$$N_i=G_i-F_i$$</div><p>买2单位毛收益2、返佣0.2，净2.2；卖1单位后价格上涨，净−1.2。不包含后续库存和资金风险。</p><h3>构造样本与数值复算</h3><p><a href="../research/applied-examples/maker-taker.csv" download>下载CSV</a>　<a href="../cpp/applied_execution.hpp" download>算法源码</a></p><pre>Side,Fill,MidAfter,Quantity,FeePerUnit
+1,99,100,2,-0.1
+-1,101,102,1,0.2
+</pre><pre>./build/kline_quant applied-maker-taker quant/research/applied-examples/maker-taker.csv</pre><div class="wide"><table><thead><tr><th>Trade</th><th>GrossMarkout</th><th>Fee</th><th>NetMarkout</th></tr></thead><tbody><tr><td>1</td><td>2</td><td>-0.2</td><td>2.2</td></tr><tr><td>2</td><td>-1</td><td>0.2</td><td>-1.2</td></tr></tbody></table></div><p>参考文献：Hasbrouck (2007), Empirical Market Microstructure, Oxford University Press.</p></article><section><h2>C++17完整实现</h2><pre>#pragma once
+#include "evidence_common.hpp"
+namespace kline { namespace applied_execution {
+using namespace evidence;
+inline Report markout(const Mat&amp; x,const Vec&amp; p){
+    auto n=validate(x,1,4,64);
+    parameters(p,0);
+    double q=0;
+    for(auto&amp;r:x){require(r[0]==1||r[0]==-1,"Invalid side");
+    positive(r[1]);
+    q+=positive(r[2]);
+    for(std::size_t j=3;
+    j&lt;n;
+    ++j)positive(r[j]);
+    }Report o{{"Horizon","SignedMarkout","QuantityWeightedMarkout"},{}};
+    for(std::size_t j=3;
+    j&lt;n;
+    ++j){double v=0;
+    for(auto&amp;r:x)v+=r[0]*r[2]*(r[j]-r[1]);
+    o.rows.push_back({double(j-2),v,v/q});
+    }return o;
+    
+}
+
+inline Report participation_cap(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,1,1);
+    parameters(p,2);
+    double rem=positive(p[0]),eta=p[1];
+    require(eta&gt;=0&amp;&amp;eta&lt;=1,"Invalid participation");
+    Report o{{"Period","MarketVolume","Fill","Remaining","Participation"},{}};
+    for(std::size_t i=0;
+    i&lt;x.size();
+    ++i){double v=x[i][0];
+    require(v&gt;=0,"Negative volume");
+    double q=std::min(rem,eta*v);
+    rem-=q;
+    o.rows.push_back({double(i+1),v,q,rem,v==0?0:q/v});
+    }return o;
+    
+}
+
+inline Report recovery(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,2,2);
+    parameters(p,1);
+    double b=p[0],d=positive(x[0][1]-b);
+    require(b&gt;=0,"Negative reference spread");
+    Report o{{"Time","Spread","Recovery","HalfRecovered"},{}};
+    for(std::size_t i=0;
+    i&lt;x.size();
+    ++i){auto&amp;r=x[i];
+    require(r[0]&gt;=0&amp;&amp;r[1]&gt;=0&amp;&amp;(i==0||r[0]&gt;x[i-1][0]),"Invalid time or spread");
+    double z=1-(r[1]-b)/d;
+    o.rows.push_back({r[0],r[1],z,double(z&gt;=.5)});
+    }return o;
+    
+}
+
+inline Report maker_taker(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,5,5);
+    parameters(p,0);
+    Report o{{"Trade","GrossMarkout","Fee","NetMarkout"},{}};
+    for(std::size_t i=0;
+    i&lt;x.size();
+    ++i){auto&amp;r=x[i];
+    require(r[0]==1||r[0]==-1,"Invalid side");
+    positive(r[1]);
+    positive(r[2]);
+    positive(r[3]);
+    double g=r[0]*(r[2]-r[1])*r[3],f=r[3]*r[4];
+    o.rows.push_back({double(i+1),g,f,g-f});
+    }return o;
+    
+}
+} }
+</pre></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>
