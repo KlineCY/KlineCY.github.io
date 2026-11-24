@@ -1,0 +1,954 @@
+[
+  {
+    "command": "depth-execution-kkt",
+    "group": "executiontheory",
+    "file": "execution-kkt.csv",
+    "title": "离散执行路径的成本与驻点证书",
+    "columns": [
+      "Trade",
+      "ImpactCurvature",
+      "RiskCoefficient"
+    ],
+    "params": [
+      10
+    ],
+    "header": [
+      "Period",
+      "Trade",
+      "Remaining",
+      "TemporaryCost",
+      "RiskCost",
+      "Gradient",
+      "KKTResidual"
+    ],
+    "expected": [
+      [
+        1,
+        5,
+        5,
+        25,
+        0,
+        10,
+        0
+      ],
+      [
+        2,
+        5,
+        0,
+        25,
+        0,
+        10,
+        0
+      ]
+    ]
+  },
+  {
+    "command": "depth-competing-execution-hazards",
+    "group": "executiontheory",
+    "file": "competing-execution-hazards.csv",
+    "title": "成交与撤单的竞争指数时钟",
+    "columns": [
+      "FillHazard",
+      "CancelHazard"
+    ],
+    "params": [
+      0.23104906018664842
+    ],
+    "header": [
+      "FillProbability",
+      "CancelProbability",
+      "NoEventProbability",
+      "ExpectedFirstEventTime"
+    ],
+    "expected": [
+      [
+        0.3333333333333333,
+        0.16666666666666666,
+        0.5,
+        0.3333333333333333
+      ],
+      [
+        0,
+        0.2062994740159002,
+        0.7937005259840998,
+        1
+      ]
+    ]
+  },
+  {
+    "command": "depth-queue-cancel-bounds",
+    "group": "executiontheory",
+    "file": "queue-cancel-bounds.csv",
+    "title": "未知撤单位置下的队列成交上下界",
+    "columns": [
+      "Trades",
+      "Cancellations"
+    ],
+    "params": [
+      5,
+      3
+    ],
+    "header": [
+      "Period",
+      "LowerAhead",
+      "UpperAhead",
+      "MinCumulativeFill",
+      "MaxCumulativeFill"
+    ],
+    "expected": [
+      [
+        1,
+        0,
+        3,
+        0,
+        0
+      ],
+      [
+        2,
+        0,
+        1,
+        0,
+        2
+      ],
+      [
+        3,
+        0,
+        0,
+        3,
+        3
+      ]
+    ]
+  },
+  {
+    "command": "depth-quote-bayesian-selection",
+    "group": "executiontheory",
+    "file": "quote-bayesian-selection.csv",
+    "title": "Glosten–Milgrom两状态逆向选择报价",
+    "columns": [
+      "PriorHigh",
+      "InformedProbability"
+    ],
+    "params": [
+      90,
+      110
+    ],
+    "header": [
+      "PriorMid",
+      "Bid",
+      "Ask",
+      "Spread",
+      "PosteriorHighBuy",
+      "PosteriorHighSell"
+    ],
+    "expected": [
+      [
+        100,
+        98,
+        102,
+        4,
+        0.6,
+        0.4
+      ],
+      [
+        100,
+        100,
+        100,
+        0,
+        0.5,
+        0.5
+      ]
+    ]
+  },
+  {
+    "command": "depth-bitemporal-asof",
+    "group": "engineering",
+    "file": "bitemporal-asof.csv",
+    "title": "双时间轴下的按资产时点连接",
+    "columns": [
+      "Type",
+      "Asset",
+      "EffectiveTime",
+      "AvailableTime",
+      "Value"
+    ],
+    "params": [
+      10
+    ],
+    "header": [
+      "QueryRow",
+      "Asset",
+      "DecisionTime",
+      "Found",
+      "EffectiveTime",
+      "AvailableTime",
+      "Value"
+    ],
+    "expected": [
+      [
+        4,
+        1,
+        4,
+        1,
+        1,
+        3,
+        10
+      ],
+      [
+        5,
+        1,
+        5,
+        1,
+        1,
+        5,
+        12
+      ],
+      [
+        6,
+        1,
+        6,
+        1,
+        4,
+        6,
+        20
+      ],
+      [
+        7,
+        2,
+        6,
+        0,
+        0,
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "command": "depth-event-watermark",
+    "group": "engineering",
+    "file": "event-watermark.csv",
+    "title": "事件时间水位与迟到数据分类",
+    "columns": [
+      "EventTime"
+    ],
+    "params": [
+      3
+    ],
+    "header": [
+      "Arrival",
+      "EventTime",
+      "PriorWatermark",
+      "Late",
+      "UpdatedWatermark"
+    ],
+    "expected": [
+      [
+        1,
+        10,
+        7,
+        0,
+        7
+      ],
+      [
+        2,
+        15,
+        7,
+        0,
+        12
+      ],
+      [
+        3,
+        12,
+        12,
+        0,
+        12
+      ],
+      [
+        4,
+        9,
+        12,
+        1,
+        12
+      ],
+      [
+        5,
+        18,
+        12,
+        0,
+        15
+      ]
+    ]
+  },
+  {
+    "command": "depth-event-idempotency",
+    "group": "engineering",
+    "file": "event-idempotency.csv",
+    "title": "成交事件ID去重与幂等现金数量归集",
+    "columns": [
+      "EventID",
+      "SignedQuantity",
+      "Price",
+      "Fee"
+    ],
+    "params": [],
+    "header": [
+      "Row",
+      "EventID",
+      "Duplicate",
+      "Position",
+      "CashChange"
+    ],
+    "expected": [
+      [
+        1,
+        101,
+        0,
+        2,
+        -201
+      ],
+      [
+        2,
+        101,
+        1,
+        2,
+        -201
+      ],
+      [
+        3,
+        102,
+        0,
+        1,
+        -98.5
+      ]
+    ]
+  },
+  {
+    "command": "depth-tick-grid",
+    "group": "engineering",
+    "file": "tick-grid.csv",
+    "title": "最小价格单位网格与整数Tick诊断",
+    "columns": [
+      "Price"
+    ],
+    "params": [
+      0.05,
+      1e-8
+    ],
+    "header": [
+      "Price",
+      "NearestTick",
+      "GridPrice",
+      "AbsoluteError",
+      "OnGrid"
+    ],
+    "expected": [
+      [
+        100.05,
+        2001,
+        100.05,
+        0,
+        1
+      ],
+      [
+        100.051,
+        2001,
+        100.05,
+        0.001,
+        0
+      ],
+      [
+        100.1,
+        2002,
+        100.1,
+        0,
+        1
+      ]
+    ]
+  },
+  {
+    "command": "depth-unbalanced-two-way-projection",
+    "group": "identification",
+    "file": "unbalanced-two-way-projection.csv",
+    "title": "非平衡面板的双向固定效应交替投影",
+    "columns": [
+      "Entity",
+      "Time",
+      "Value"
+    ],
+    "params": [
+      1e-12,
+      1000
+    ],
+    "header": [
+      "Row",
+      "Entity",
+      "Time",
+      "Residual",
+      "MaxGroupMean"
+    ],
+    "expected": [
+      [
+        1,
+        1,
+        1,
+        0.5,
+        0
+      ],
+      [
+        2,
+        1,
+        2,
+        -0.5,
+        0
+      ],
+      [
+        3,
+        2,
+        1,
+        -0.5,
+        0
+      ],
+      [
+        4,
+        2,
+        2,
+        0.5,
+        0
+      ],
+      [
+        5,
+        2,
+        3,
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "command": "depth-manski-missing-bounds",
+    "group": "identification",
+    "file": "manski-missing-bounds.csv",
+    "title": "有界结果缺失时的部分识别区间",
+    "columns": [
+      "Observed",
+      "Outcome"
+    ],
+    "params": [
+      0,
+      10
+    ],
+    "header": [
+      "ObservedCount",
+      "MissingCount",
+      "ObservedMean",
+      "LowerMean",
+      "UpperMean"
+    ],
+    "expected": [
+      [
+        2,
+        2,
+        3,
+        1.5,
+        6.5
+      ]
+    ]
+  },
+  {
+    "command": "depth-lee-trimming-bounds",
+    "group": "identification",
+    "file": "lee-trimming-bounds.csv",
+    "title": "单调样本选择下的Lee截尾效应界",
+    "columns": [
+      "Treatment",
+      "Selected",
+      "Outcome"
+    ],
+    "params": [],
+    "header": [
+      "TreatmentSelection",
+      "ControlSelection",
+      "RetainFraction",
+      "ControlMean",
+      "LowerATE",
+      "UpperATE"
+    ],
+    "expected": [
+      [
+        1,
+        0.5,
+        0.5,
+        3,
+        -1.5,
+        0.5
+      ]
+    ]
+  },
+  {
+    "command": "depth-synthetic-control-gap",
+    "group": "identification",
+    "file": "synthetic-control-gap.csv",
+    "title": "固定合成控制权重的前后期拟合诊断",
+    "columns": [
+      "PostFlag",
+      "Treated",
+      "Donor1",
+      "Donor2"
+    ],
+    "params": [
+      0.5,
+      0.5
+    ],
+    "header": [
+      "PreRMSPE",
+      "PostRMSPE",
+      "PostPreRatio",
+      "MeanPostGap"
+    ],
+    "expected": [
+      [
+        0.7071067811865476,
+        2,
+        2.82842712474619,
+        2
+      ]
+    ]
+  },
+  {
+    "command": "depth-leontief-demand",
+    "group": "economics",
+    "file": "leontief-demand.csv",
+    "title": "Leontief投入产出网络的需求冲击传导",
+    "columns": [
+      "Input1",
+      "Input2",
+      "FinalDemand"
+    ],
+    "params": [
+      1e-12,
+      200
+    ],
+    "header": [
+      "Sector",
+      "DirectDemand",
+      "TotalOutput",
+      "IndirectOutput",
+      "Residual"
+    ],
+    "expected": [
+      [
+        1,
+        9,
+        12.857142857142858,
+        3.857142857142857,
+        0
+      ],
+      [
+        2,
+        9,
+        12.857142857142858,
+        3.857142857142857,
+        0
+      ]
+    ]
+  },
+  {
+    "command": "depth-fisher-price-index",
+    "group": "economics",
+    "file": "fisher-price-index.csv",
+    "title": "Laspeyres、Paasche与Fisher价格指数",
+    "columns": [
+      "Price0",
+      "Quantity0",
+      "Price1",
+      "Quantity1"
+    ],
+    "params": [],
+    "header": [
+      "Laspeyres",
+      "Paasche",
+      "Fisher",
+      "NominalValueRatio",
+      "QuantityFisher"
+    ],
+    "expected": [
+      [
+        1.5,
+        1.2,
+        1.3416407864998738,
+        1.5,
+        1.118033988749895
+      ]
+    ]
+  },
+  {
+    "command": "depth-shift-share-exposure",
+    "group": "economics",
+    "file": "shift-share-exposure.csv",
+    "title": "基期产业份额与外生冲击的Shift–Share暴露",
+    "columns": [
+      "Region",
+      "Industry",
+      "BaseShare",
+      "IndustryShock"
+    ],
+    "params": [],
+    "header": [
+      "Region",
+      "ShareSum",
+      "Exposure"
+    ],
+    "expected": [
+      [
+        1,
+        1,
+        0.05
+      ],
+      [
+        2,
+        1,
+        -0.05
+      ]
+    ]
+  },
+  {
+    "command": "depth-taylor-inertia",
+    "group": "economics",
+    "file": "taylor-inertia.csv",
+    "title": "带利率平滑的条件Taylor规则情景",
+    "columns": [
+      "Inflation",
+      "OutputGap"
+    ],
+    "params": [
+      0.01,
+      0.02,
+      1.5,
+      0.5,
+      0.5,
+      0.03
+    ],
+    "header": [
+      "Period",
+      "TargetRate",
+      "SmoothedRate",
+      "RealRateApprox"
+    ],
+    "expected": [
+      [
+        1,
+        0.03,
+        0.03,
+        0.01
+      ],
+      [
+        2,
+        0.065,
+        0.0475,
+        0.0075
+      ]
+    ]
+  },
+  {
+    "command": "depth-mixed-nash-interior",
+    "group": "games",
+    "file": "mixed-nash-interior.csv",
+    "title": "二乘二双矩阵博弈的完全混合均衡",
+    "columns": [
+      "RowPayoff1",
+      "RowPayoff2",
+      "ColPayoff1",
+      "ColPayoff2"
+    ],
+    "params": [],
+    "header": [
+      "RowProbFirst",
+      "ColProbFirst",
+      "RowExpectedPayoff",
+      "ColExpectedPayoff",
+      "RowIndifferenceGap",
+      "ColIndifferenceGap"
+    ],
+    "expected": [
+      [
+        0.5,
+        0.5,
+        0.5,
+        -0.5,
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "command": "depth-cournot-active-set",
+    "group": "games",
+    "file": "cournot-active-set.csv",
+    "title": "异质边际成本Cournot均衡的活跃集",
+    "columns": [
+      "MarginalCost"
+    ],
+    "params": [
+      10,
+      1
+    ],
+    "header": [
+      "Firm",
+      "Quantity",
+      "MarketPrice",
+      "Profit",
+      "KKTGap"
+    ],
+    "expected": [
+      [
+        1,
+        3.3333333333333335,
+        5.333333333333333,
+        11.11111111111111,
+        0
+      ],
+      [
+        2,
+        1.3333333333333333,
+        5.333333333333333,
+        1.7777777777777777,
+        0
+      ],
+      [
+        3,
+        0,
+        5.333333333333333,
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "command": "depth-auction-uniform-bid",
+    "group": "games",
+    "file": "auction-uniform-bid.csv",
+    "title": "独立均匀私人价值的第一价格拍卖均衡",
+    "columns": [
+      "Valuation"
+    ],
+    "params": [
+      3
+    ],
+    "header": [
+      "Valuation",
+      "EquilibriumBid",
+      "WinProbability",
+      "ExpectedUtility"
+    ],
+    "expected": [
+      [
+        0.2,
+        0.13333333333333333,
+        0.04,
+        0.0026666666666666666
+      ],
+      [
+        0.5,
+        0.3333333333333333,
+        0.25,
+        0.041666666666666664
+      ],
+      [
+        1,
+        0.6666666666666666,
+        1,
+        0.3333333333333333
+      ]
+    ]
+  },
+  {
+    "command": "depth-kyle-linear-equilibrium",
+    "group": "games",
+    "file": "kyle-linear-equilibrium.csv",
+    "title": "Kyle单期线性信息交易均衡",
+    "columns": [
+      "ValueVariance",
+      "NoiseOrderVariance"
+    ],
+    "params": [],
+    "header": [
+      "InsiderSlope",
+      "PriceImpact",
+      "ResidualValueVariance",
+      "ExpectedInsiderProfit"
+    ],
+    "expected": [
+      [
+        1.5,
+        0.3333333333333333,
+        2,
+        3
+      ],
+      [
+        1,
+        0.5,
+        0.5,
+        0.5
+      ]
+    ]
+  },
+  {
+    "command": "depth-tie-aware-tail-weights",
+    "group": "factorconstruction",
+    "file": "tie-aware-tail-weights.csv",
+    "title": "并列信号的分数化尾部组合权重",
+    "columns": [
+      "Score"
+    ],
+    "params": [
+      0.5
+    ],
+    "header": [
+      "Asset",
+      "Score",
+      "LongWeight",
+      "ShortWeight",
+      "NetWeight"
+    ],
+    "expected": [
+      [
+        1,
+        0,
+        0,
+        0.5,
+        -0.5
+      ],
+      [
+        2,
+        1,
+        0.25,
+        0.25,
+        0
+      ],
+      [
+        3,
+        1,
+        0.25,
+        0.25,
+        0
+      ],
+      [
+        4,
+        2,
+        0.5,
+        0,
+        0.5
+      ]
+    ]
+  },
+  {
+    "command": "depth-size-value-six-cells",
+    "group": "factorconstruction",
+    "file": "size-value-six-cells.csv",
+    "title": "规模—价值六组合的市值加权因子构造",
+    "columns": [
+      "SizeBin",
+      "ValueBin",
+      "MarketCap",
+      "Return"
+    ],
+    "params": [],
+    "header": [
+      "SmallLow",
+      "SmallMid",
+      "SmallHigh",
+      "BigLow",
+      "BigMid",
+      "BigHigh",
+      "SMB",
+      "HML"
+    ],
+    "expected": [
+      [
+        0.01,
+        0.02,
+        0.03,
+        0.04,
+        0.05,
+        0.06,
+        -0.03,
+        0.02
+      ]
+    ]
+  },
+  {
+    "command": "depth-beta-posterior-shrink",
+    "group": "factorconstruction",
+    "file": "beta-posterior-shrink.csv",
+    "title": "单因子Beta的正态共轭收缩",
+    "columns": [
+      "EstimatedBeta",
+      "StandardError"
+    ],
+    "params": [
+      1,
+      1
+    ],
+    "header": [
+      "EstimatedBeta",
+      "SamplingVariance",
+      "PosteriorMean",
+      "PosteriorVariance",
+      "DataWeight"
+    ],
+    "expected": [
+      [
+        2,
+        1,
+        1.5,
+        0.5,
+        0.5
+      ],
+      [
+        2,
+        0.25,
+        1.8,
+        0.2,
+        0.8
+      ]
+    ]
+  },
+  {
+    "command": "depth-constant-mix-diversification",
+    "group": "factorconstruction",
+    "file": "constant-mix-diversification.csv",
+    "title": "常权重组合的逐期再平衡与买入持有对照",
+    "columns": [
+      "ReturnA",
+      "ReturnB"
+    ],
+    "params": [
+      0.5
+    ],
+    "header": [
+      "Period",
+      "ConstantMixNAV",
+      "BuyHoldNAV",
+      "RebalanceExcess",
+      "PostReturnWeightA",
+      "OneWayTurnover"
+    ],
+    "expected": [
+      [
+        1,
+        1.05,
+        1.05,
+        0,
+        0.5714285714285714,
+        0.07142857142857142
+      ],
+      [
+        2,
+        1.0208333333333333,
+        1,
+        0.02083333333333326,
+        0.42857142857142855,
+        0.07142857142857142
+      ]
+    ]
+  }
+]
