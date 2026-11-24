@@ -37,6 +37,8 @@ inline Vec event_time_bars(const Mat& x,const Vec& p){
     for(const auto& r:x){positive(r[0]);require(r[1]>=0,"Negative trade quantity");double remain=r[1];
         while(remain>0){if(v==0){o=h=l=r[0];}h=std::max(h,r[0]);l=std::min(l,r[0]);c=r[0];double q=std::min(remain,cap-v);require(q>0&&remain-q<remain,"Volume resolution too small");v+=q;turn+=q*r[0];remain-=q;if(v>=cap*(1-1e-12))emit();}
     }
-    if(v>0)emit();require(!out.empty(),"No positive trade volume");return checked(out);
+    if(v>0){emit();}
+    require(!out.empty(),"No positive trade volume");
+    return checked(out);
 }
 } }

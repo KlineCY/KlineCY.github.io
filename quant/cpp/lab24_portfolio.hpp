@@ -15,7 +15,8 @@ inline Vec risk_budget_diag(const Mat& x,const Vec& p){
     inputs(x,p,2,0);double b=0;Vec w;
     for(const auto& r:x){positive(r[0]);require(r[1]>=0,"Negative risk budget");b+=r[1];w.push_back(std::sqrt(r[1])/r[0]);}
     require(std::abs(b-1)<1e-10,"Risk budgets must sum to one");double z=positive(sum(w));
-    for(double& q:w)q/=z;return checked(w);
+    for(double& q:w){q/=z;}
+    return checked(w);
 }
 
 inline Vec factor_cov_risk(const Mat& x,const Vec& p){

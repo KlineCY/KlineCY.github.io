@@ -4,7 +4,8 @@
 namespace kline { namespace lab24 {
 inline Vec migration_two(const Mat& x,const Vec& p){
     inputs(x,p,3,4,3);require(x.size()==3,"Three rating states required");auto h=integer(p[0],1,100000);Vec v(p.begin()+1,p.end());
-    for(double q:v)require(q>=0&&q<=1,"Invalid initial state probability");require(std::abs(sum(v)-1)<1e-10,"Initial probabilities must sum to one");
+    for(double q:v){require(q>=0&&q<=1,"Invalid initial state probability");}
+    require(std::abs(sum(v)-1)<1e-10,"Initial probabilities must sum to one");
     for(const auto& r:x){for(double q:r)require(q>=0&&q<=1,"Invalid transition");require(std::abs(sum(r)-1)<1e-10,"Transition rows must sum to one");}
     require(x[2][0]==0&&x[2][1]==0&&x[2][2]==1,"Default state must be absorbing");
     for(std::size_t t=0;t<h;++t){Vec w(3,0);for(std::size_t i=0;i<3;++i)for(std::size_t j=0;j<3;++j)w[j]+=v[i]*x[i][j];v=std::move(w);}
