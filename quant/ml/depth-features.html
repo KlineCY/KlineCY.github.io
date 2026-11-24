@@ -1,0 +1,53 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>横截面特征、缺失与动态标准化｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="ml"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>横截面特征、缺失与动态标准化</h1><p>金融特征工程常涉及行业、权重、缺失及时间依赖。把截面处理与训练期估计分离，使每个特征转换都有明确的信息集和经济含义。</p><p><a href="../research/depth-laboratories.html">研究专题总览</a>　<a href="../cpp/depth_features.hpp" download>完整C++17源码</a></p><nav><a href="#weighted-group-demean">按行业权重进行截面去均值</a>　｜　<a href="#train-missing-indicator">训练期均值填补与缺失指示变量</a>　｜　<a href="#ew-prior-zscore">只用历史状态的指数加权标准化</a>　｜　<a href="#regime-covariance">状态内与状态间的协方差分解</a></nav></header><article id="weighted-group-demean"><h2>按行业权重进行截面去均值</h2><h3>数学定义与推导</h3><p>加权去均值等价于以行业虚拟变量进行加权最小二乘投影，残差与每个组指示向量在加权内积下正交。它去除行业均值差异，但不去除行业内规模、波动等其他暴露。若使用市值权重与等权，得到不同的正交口径。</p><div class="equation">$$\mu_g=\frac{\sum_{i\in g}w_ix_i}{\sum_{i\in g}w_i}$$</div><div class="equation">$$\widetilde x_i=x_i-\mu_{g_i}$$</div><div class="equation">$$\sum_{i\in g}w_i\widetilde x_i=0$$</div><h3>数值演算与金融应用</h3><p>行业1值1、3，权重1、3，均值2.5，残差−1.5与0.5；行业2等权均值6。行业1的加权残差和−1.5+3×0.5=0。可用于单日截面因子处理；行业分类需采用当时可用版本。</p><h3>算法复杂度、输入契约与边界</h3><p>O(n log G)，每组总权重正、权重非负，组ID整数。处理多个日期必须按日期分别运行，不能跨期估计同一行业均值。若缺失分类，应显式处理未知组。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/weighted-group-demean.csv" download>CSV数据</a>　<a href="../cpp/depth_features.hpp" download>算法源码</a></p><pre>Group,Value,Weight
+1,1,1
+1,3,3
+2,5,1
+2,7,1
+</pre><pre>./build/kline_quant depth-weighted-group-demean quant/research/depth-examples/weighted-group-demean.csv</pre><div class="wide"><table><thead><tr><th>Group</th><th>Value</th><th>GroupMean</th><th>Residual</th><th>Weight</th></tr></thead><tbody><tr><td>1</td><td>1</td><td>2.5</td><td>-1.5</td><td>1</td></tr><tr><td>1</td><td>3</td><td>2.5</td><td>0.5</td><td>3</td></tr><tr><td>2</td><td>5</td><td>6</td><td>-1</td><td>1</td></tr><tr><td>2</td><td>7</td><td>6</td><td>1</td><td>1</td></tr></tbody></table></div><p class="note">参考文献：Hastie, Tibshirani and Friedman (2009), The Elements of Statistical Learning, Springer.</p></article><article id="train-missing-indicator"><h2>训练期均值填补与缺失指示变量</h2><h3>数学定义与推导</h3><p>均值填补将缺失值替换为训练期已观察值的均值，同时保留二元缺失指示变量，使模型可区分实际等于均值与缺失后填补的样本。缺失指示变量可能携带经济信息，但也可能反映数据源失效或供应商制度变化。</p><div class="equation">$$\mu_T=\frac{\sum_{i\in T}m_ix_i}{\sum_{i\in T}m_i}$$</div><div class="equation">$$\widetilde x_i=m_ix_i+(1-m_i)\mu_T$$</div><div class="equation">$$d_i=1-m_i$$</div><h3>数值演算与金融应用</h3><p>训练已观察值2、4，均值3，训练及测试缺失均填3且指示1；测试观察值10保持不变。金融财务字段未披露时，不能用0替代实际缺失并忽略掩码。</p><h3>算法复杂度、输入契约与边界</h3><p>O(n)，至少一个训练已观察值；0/1标记显式表示训练集合和可观察性，缺失占位可为任意有限数。不能仅靠均值填补解决非随机缺失或数据发布延迟。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/train-missing-indicator.csv" download>CSV数据</a>　<a href="../cpp/depth_features.hpp" download>算法源码</a></p><pre>TrainFlag,Observed,Value
+1,1,2
+1,1,4
+1,0,0
+0,0,0
+0,1,10
+</pre><pre>./build/kline_quant depth-train-missing-indicator quant/research/depth-examples/train-missing-indicator.csv</pre><div class="wide"><table><thead><tr><th>Row</th><th>TrainFlag</th><th>Imputed</th><th>MissingIndicator</th><th>TrainingMean</th></tr></thead><tbody><tr><td>1</td><td>1</td><td>2</td><td>0</td><td>3</td></tr><tr><td>2</td><td>1</td><td>4</td><td>0</td><td>3</td></tr><tr><td>3</td><td>1</td><td>3</td><td>1</td><td>3</td></tr><tr><td>4</td><td>0</td><td>3</td><td>1</td><td>3</td></tr><tr><td>5</td><td>0</td><td>10</td><td>0</td><td>3</td></tr></tbody></table></div><p class="note">参考文献：Hastie, Tibshirani and Friedman (2009), The Elements of Statistical Learning, Springer.</p></article><article id="ew-prior-zscore"><h2>只用历史状态的指数加权标准化</h2><h3>数学定义与推导</h3><p>指数加权状态视为对过去分布与当前点质量的混合。全方差公式给出更新方差中α(1−α)的均值移动项。先用上一期状态计算z，再更新均值方差，可避免将当前观测自身用于其基准；该递推为总体型加权方差。</p><div class="equation">$$z_t=(x_t-m_{t-1})/\sqrt{v_{t-1}}$$</div><div class="equation">$$m_t=(1-\alpha)m_{t-1}+\alpha x_t$$</div><div class="equation">$$v_t=(1-\alpha)v_{t-1}+\alpha(1-\alpha)(x_t-m_{t-1})^2$$</div><h3>数值演算与金融应用</h3><p>α=0.5，初值均值0、方差1，首期值1得到z=1、更新均值0.5、方差0.75；第二期值3的z为2.5/√0.75。动态因子标准化须记录初始化和更新顺序。</p><h3>算法复杂度、输入契约与边界</h3><p>O(n)，α严格介于0与1，初始方差严格正。极长常值序列可能使方差下溢，程序要求每期旧方差为正；生产实现可预设明确方差地板，不可用未来样本估计。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/ew-prior-zscore.csv" download>CSV数据</a>　<a href="../cpp/depth_features.hpp" download>算法源码</a></p><pre>Value
+1
+3
+2
+</pre><pre>./build/kline_quant depth-ew-prior-zscore quant/research/depth-examples/ew-prior-zscore.csv 0.5 0 1</pre><div class="wide"><table><thead><tr><th>Time</th><th>PriorMean</th><th>PriorVariance</th><th>ZScore</th><th>UpdatedMean</th><th>UpdatedVariance</th></tr></thead><tbody><tr><td>1</td><td>0</td><td>1</td><td>1</td><td>0.5</td><td>0.75</td></tr><tr><td>2</td><td>0.5</td><td>0.75</td><td>2.88675134595</td><td>1.75</td><td>1.9375</td></tr><tr><td>3</td><td>1.75</td><td>1.9375</td><td>0.179605302027</td><td>1.875</td><td>0.984375</td></tr></tbody></table></div><p class="note">参考文献：Hastie, Tibshirani and Friedman (2009), The Elements of Statistical Learning, Springer.</p></article><article id="regime-covariance"><h2>状态内与状态间的协方差分解</h2><h3>数学定义与推导</h3><p>将两个变量分别写成组条件均值加组内残差，交叉项因组内残差均值为零而消失。使用总体型分母，使样本协方差严格满足全协方差恒等式。即使各组内相关很弱，状态均值共同变动也能造成整体较强协方差。</p><div class="equation">$$\operatorname{Cov}(X,Y)=\mathbb E[\operatorname{Cov}(X,Y\mid G)]+\operatorname{Cov}(\mathbb E[X\mid G],\mathbb E[Y\mid G])$$</div><div class="equation">$$C_W=\sum_g\frac{n_g}{n}\frac1{n_g}\sum_{i\in g}(x_i-\bar x_g)(y_i-\bar y_g)$$</div><div class="equation">$$C_B=\sum_g\frac{n_g}{n}(\bar x_g-\bar x)(\bar y_g-\bar y)$$</div><h3>数值演算与金融应用</h3><p>两状态均值分别(2,3)与(6,9)，总体均值(4,6)，组内协方差均1，组间协方差6，整体7。可解释风险状态混合下因子相关升高；组内去均值后的协方差不等于总体预测能力。</p><h3>算法复杂度、输入契约与边界</h3><p>O(n log G)，组ID整数，可允许单观察组（组内协方差0）。状态标签必须在所研究时点可用；若用未来收益定义状态，仅可作事后描述。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/regime-covariance.csv" download>CSV数据</a>　<a href="../cpp/depth_features.hpp" download>算法源码</a></p><pre>Regime,X,Y
+1,1,2
+1,3,4
+2,5,8
+2,7,10
+</pre><pre>./build/kline_quant depth-regime-covariance quant/research/depth-examples/regime-covariance.csv</pre><div class="wide"><table><thead><tr><th>MeanX</th><th>MeanY</th><th>WithinCovariance</th><th>BetweenCovariance</th><th>TotalCovariance</th></tr></thead><tbody><tr><td>4</td><td>6</td><td>1</td><td>6</td><td>7</td></tr></tbody></table></div><p class="note">参考文献：Hastie, Tibshirani and Friedman (2009), The Elements of Statistical Learning, Springer.</p></article><section><h2>C++17完整实现</h2><pre>#pragma once
+#include "evidence_common.hpp"
+namespace kline { namespace depth_features {
+using namespace evidence;
+inline Report weighted_group_demean(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,3,3);parameters(p,0);std::map&lt;double,std::pair&lt;double,double&gt;&gt; g;
+    for(auto&amp;r:x){require(r[0]==std::floor(r[0])&amp;&amp;r[2]&gt;=0,"Invalid group or weight");g[r[0]].first+=r[1]*r[2];g[r[0]].second+=r[2];}
+    Report o{{"Group","Value","GroupMean","Residual","Weight"},{}};
+    for(auto&amp;r:x){auto&amp;v=g[r[0]];double m=v.first/positive(v.second);o.rows.push_back({r[0],r[1],m,r[1]-m,r[2]});}return o;
+}
+
+inline Report train_missing_indicator(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,3,3);parameters(p,0);double s=0,n=0;
+    for(auto&amp;r:x){require((r[0]==0||r[0]==1)&amp;&amp;(r[1]==0||r[1]==1),"Binary flags required");if(r[0]&amp;&amp;r[1]){s+=r[2];++n;}}
+    double m=s/positive(n);Report o{{"Row","TrainFlag","Imputed","MissingIndicator","TrainingMean"},{}};
+    for(std::size_t i=0;i&lt;x.size();++i){auto&amp;r=x[i];o.rows.push_back({double(i+1),r[0],r[1]?r[2]:m,1-r[1],m});}return o;
+}
+
+inline Report ew_prior_zscore(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,1,1);parameters(p,3);double a=p[0],m=p[1],v=positive(p[2]);require(a&gt;0&amp;&amp;a&lt;1,"Invalid decay weight");Report o{{"Time","PriorMean","PriorVariance","ZScore","UpdatedMean","UpdatedVariance"},{}};
+    for(std::size_t i=0;i&lt;x.size();++i){double e=x[i][0]-m,z=e/std::sqrt(positive(v)),u=m+a*e,w=(1-a)*v+a*(1-a)*e*e;o.rows.push_back({double(i+1),m,v,z,u,w});m=u;v=w;}return o;
+}
+
+inline Report regime_covariance(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,3,3);parameters(p,0);std::map&lt;double,Vec&gt; g;double n=x.size(),a=mean(column(x,1)),b=mean(column(x,2));
+    for(auto&amp;r:x){require(r[0]==std::floor(r[0]),"Integer regime required");if(!g.count(r[0]))g[r[0]]=Vec(3,0);auto&amp;v=g[r[0]];++v[0];v[1]+=r[1];v[2]+=r[2];}
+    for(auto&amp;z:g){z.second[1]/=z.second[0];z.second[2]/=z.second[0];}
+    double w=0,c=0;for(auto&amp;r:x){auto&amp;v=g[r[0]];w+=(r[1]-v[1])*(r[2]-v[2])/n;}
+    for(auto&amp;z:g){auto&amp;v=z.second;c+=v[0]*(v[1]-a)*(v[2]-b)/n;}
+    return scalar({"MeanX","MeanY","WithinCovariance","BetweenCovariance","TotalCovariance"},{a,b,w,c,w+c});
+}
+} }
+</pre></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

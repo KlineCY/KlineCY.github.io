@@ -1,0 +1,49 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>时间区间隔离与预测验证设计｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="audit"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>时间区间隔离与预测验证设计</h1><p>金融标签具有起止时间与重叠区间，训练和验证的隔离须根据实际信息时点而非行索引。比较预处理、固定基准和分块损失，构成可审计验证设计。</p><p><a href="../research/depth-laboratories.html">研究专题总览</a>　<a href="../cpp/depth_validation.hpp" download>完整C++17源码</a></p><nav><a href="#purge-interval">按标签区间进行净化与禁入期划分</a>　｜　<a href="#train-only-standardization">训练统计量冻结与样本外标准化</a>　｜　<a href="#forecast-oos-r2">固定可用基准的样本外决定系数</a>　｜　<a href="#block-loss-decomposition">模型损失差的分块贡献与不稳定性</a></nav></header><article id="purge-interval"><h2>按标签区间进行净化与禁入期划分</h2><h3>数学定义与推导</h3><p>使用半开标签区间明确边界：标签结束等于测试开始时不重叠；若标签跨越测试区间，即使起点在测试前，也须从训练候选删除。测试之后的禁入期另按开始时点标记。这里把整个测试时间窗作为净化区间，并非自动生成K折或滚动训练。</p><div class="equation">$$I_i=[s_i,e_i),\quad J=[a,b)$$</div><div class="equation">$$\operatorname{overlap}(I_i,J)=\mathbf1\{s_i&lt;b,\ e_i&gt;a\}$$</div><div class="equation">$$\operatorname{train}_i=\mathbf1\{I_i\cap J=\varnothing,\ s_i\notin[b,b+E)\}$$</div><h3>数值演算与金融应用</h3><p>测试窗[3,5)、禁入长度2。区间[1,3)可训练，[3,4)和[4,6)重叠而剔除，[6,7)位于禁入期，起点8可训练。真实部署若仅允许过去训练，则还须额外排除所有测试后的样本。</p><h3>算法复杂度、输入契约与边界</h3><p>O(n)，要求开始&lt;结束、测试开始&lt;结束、禁入期非负。金融标签包含实际结束时点，特征可用时点也需独立检查；本例不假定普通随机K折合法。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/purge-interval.csv" download>CSV数据</a>　<a href="../cpp/depth_validation.hpp" download>算法源码</a></p><pre>Start,End
+0,1
+1,3
+3,4
+4,6
+6,7
+8,9
+</pre><pre>./build/kline_quant depth-purge-interval quant/research/depth-examples/purge-interval.csv 3 5 2</pre><div class="wide"><table><thead><tr><th>Row</th><th>Start</th><th>End</th><th>TestOverlap</th><th>Embargo</th><th>TrainEligible</th></tr></thead><tbody><tr><td>1</td><td>0</td><td>1</td><td>0</td><td>0</td><td>1</td></tr><tr><td>2</td><td>1</td><td>3</td><td>0</td><td>0</td><td>1</td></tr><tr><td>3</td><td>3</td><td>4</td><td>1</td><td>0</td><td>0</td></tr><tr><td>4</td><td>4</td><td>6</td><td>1</td><td>0</td><td>0</td></tr><tr><td>5</td><td>6</td><td>7</td><td>0</td><td>1</td><td>0</td></tr><tr><td>6</td><td>8</td><td>9</td><td>0</td><td>0</td><td>1</td></tr></tbody></table></div><p class="note">参考文献：López de Prado (2018), Advances in Financial Machine Learning, Wiley.</p></article><article id="train-only-standardization"><h2>训练统计量冻结与样本外标准化</h2><h3>数学定义与推导</h3><p>训练集确定中心和尺度，验证及测试只应用该转换。标准化使用总体型分母，与常见机器学习标准化器一致。若将未来样本并入均值或方差，训练表示本身会随测试信息变化，构成数据泄漏。</p><div class="equation">$$\mu_{\mathrm{tr}}=n_{\mathrm{tr}}^{-1}\sum_{i\in T}x_i$$</div><div class="equation">$$s_{\mathrm{tr}}^2=n_{\mathrm{tr}}^{-1}\sum_{i\in T}(x_i-\mu_{\mathrm{tr}})^2$$</div><div class="equation">$$z_i=(x_i-\mu_{\mathrm{tr}})/s_{\mathrm{tr}}\quad(i\in T\cup V)$$</div><h3>数值演算与金融应用</h3><p>训练值1、3，均值2、尺度1，样本外5及9标准化为3、7。极端测试值被如实保留，便于发现分布漂移，而不是将测试截面强行变成单位方差。</p><h3>算法复杂度、输入契约与边界</h3><p>O(n)两遍扫描，至少两条训练观察且训练方差正。标记只表示集合归属，时间顺序需由上游切分保证；交叉验证必须逐折单独估计。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/train-only-standardization.csv" download>CSV数据</a>　<a href="../cpp/depth_validation.hpp" download>算法源码</a></p><pre>TrainFlag,Value
+1,1
+1,3
+0,5
+0,9
+</pre><pre>./build/kline_quant depth-train-only-standardization quant/research/depth-examples/train-only-standardization.csv</pre><div class="wide"><table><thead><tr><th>Row</th><th>TrainFlag</th><th>Value</th><th>TrainingMean</th><th>TrainingScale</th><th>Standardized</th></tr></thead><tbody><tr><td>1</td><td>1</td><td>1</td><td>2</td><td>1</td><td>-1</td></tr><tr><td>2</td><td>1</td><td>3</td><td>2</td><td>1</td><td>1</td></tr><tr><td>3</td><td>0</td><td>5</td><td>2</td><td>1</td><td>3</td></tr><tr><td>4</td><td>0</td><td>9</td><td>2</td><td>1</td><td>7</td></tr></tbody></table></div><p class="note">参考文献：López de Prado (2018), Advances in Financial Machine Learning, Wiley.</p></article><article id="forecast-oos-r2"><h2>固定可用基准的样本外决定系数</h2><h3>数学定义与推导</h3><p>样本外决定系数与样本内拟合优度不同，比较模型和当时真实可用基准的预测平方误差。基准可以是滚动历史均值或其他预先固定的模型，不应使用测试期实际均值。负值表示样本外预测不及基准。</p><div class="equation">$$\mathrm{SSE}_m=\sum_t(y_t-\hat y_{t|t-1})^2$$</div><div class="equation">$$\mathrm{SSE}_b=\sum_t(y_t-b_{t|t-1})^2$$</div><div class="equation">$$R^2_{\mathrm{OOS}}=1-\mathrm{SSE}_m/\mathrm{SSE}_b$$</div><h3>数值演算与金融应用</h3><p>实际1、2，模型1、1，基准0、0，模型平方误差1，基准5，样本外R²为0.8。可用于收益率或波动预测，但经济收益还取决于信号映射、风险及成本。</p><h3>算法复杂度、输入契约与边界</h3><p>O(n)，两组预测必须共享完全相同目标、时间和样本。基准误差严格正，避免未定义比率。统计显著性需另用损失差检验及依赖调整。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/forecast-oos-r2.csv" download>CSV数据</a>　<a href="../cpp/depth_validation.hpp" download>算法源码</a></p><pre>Actual,Forecast,Benchmark
+1,1,0
+2,1,0
+</pre><pre>./build/kline_quant depth-forecast-oos-r2 quant/research/depth-examples/forecast-oos-r2.csv</pre><div class="wide"><table><thead><tr><th>ModelSSE</th><th>BenchmarkSSE</th><th>OOSR2</th><th>MSERatio</th></tr></thead><tbody><tr><td>1</td><td>5</td><td>0.8</td><td>0.2</td></tr></tbody></table></div><p class="note">参考文献：Campbell and Thompson (2008), Predicting excess stock returns out of sample: Can anything beat the historical average?, Review of Financial Studies.</p></article><article id="block-loss-decomposition"><h2>模型损失差的分块贡献与不稳定性</h2><h3>数学定义与推导</h3><p>整体平均损失改善可按互斥时间块分解，贡献使用样本量权重而非简单平均块均值。分块诊断能发现总体优势是否集中于单一时期；它是描述性归因，不自动构成独立块检验。</p><div class="equation">$$d_i=L_{b,i}-L_{m,i},\quad \bar d_g=n_g^{-1}\sum_{i\in g}d_i$$</div><div class="equation">$$\bar d=\sum_g (n_g/n)\bar d_g$$</div><div class="equation">$$C_g=(n_g/n)\bar d_g$$</div><h3>数值演算与金融应用</h3><p>第一块两条损失差均1，贡献2/3；第二块损失差−3，贡献−1，整体改善−1/3。即使多数时间块表现较好，也可能被大幅失效块抵销。适用于跨市场状态的样本外模型比较。</p><h3>算法复杂度、输入契约与边界</h3><p>O(n log G)，块ID整数、损失非负（如平方误差），至少一条。若损失可为负的评分，则需根据其定义扩展输入约束；分块规则必须预先固定。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/block-loss-decomposition.csv" download>CSV数据</a>　<a href="../cpp/depth_validation.hpp" download>算法源码</a></p><pre>Block,ModelLoss,BenchmarkLoss
+1,1,2
+1,3,4
+2,5,2
+</pre><pre>./build/kline_quant depth-block-loss-decomposition quant/research/depth-examples/block-loss-decomposition.csv</pre><div class="wide"><table><thead><tr><th>Block</th><th>Count</th><th>MeanModelLoss</th><th>MeanBenchmarkLoss</th><th>MeanImprovement</th><th>Contribution</th></tr></thead><tbody><tr><td>1</td><td>2</td><td>2</td><td>3</td><td>1</td><td>0.666666666667</td></tr><tr><td>2</td><td>1</td><td>5</td><td>2</td><td>-3</td><td>-1</td></tr></tbody></table></div><p class="note">参考文献：López de Prado (2018), Advances in Financial Machine Learning, Wiley.</p></article><section><h2>C++17完整实现</h2><pre>#pragma once
+#include "evidence_common.hpp"
+namespace kline { namespace depth_validation {
+using namespace evidence;
+inline Report purge_interval(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,2,2);parameters(p,3);require(p[0]&lt;p[1]&amp;&amp;p[2]&gt;=0,"Invalid test interval");Report o{{"Row","Start","End","TestOverlap","Embargo","TrainEligible"},{}};
+    for(std::size_t i=0;i&lt;x.size();++i){auto&amp;r=x[i];require(r[0]&lt;r[1],"Invalid label interval");bool a=r[0]&lt;p[1]&amp;&amp;r[1]&gt;p[0],b=r[0]&gt;=p[1]&amp;&amp;r[0]&lt;p[1]+p[2];o.rows.push_back({double(i+1),r[0],r[1],double(a),double(b),double(!a&amp;&amp;!b)});}return o;
+}
+
+inline Report train_only_standardization(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,2,2);parameters(p,0);double n=0,m=0;
+    for(auto&amp;r:x){require(r[0]==0||r[0]==1,"Binary train flag required");if(r[0]){++n;m+=r[1];}}
+    require(n&gt;=2,"Two training values required");m/=n;double v=0;for(auto&amp;r:x)if(r[0])v+=(r[1]-m)*(r[1]-m)/n;double s=std::sqrt(positive(v));
+    Report o{{"Row","TrainFlag","Value","TrainingMean","TrainingScale","Standardized"},{}};
+    for(std::size_t i=0;i&lt;x.size();++i)o.rows.push_back({double(i+1),x[i][0],x[i][1],m,s,(x[i][1]-m)/s});return o;
+}
+
+inline Report forecast_oos_r2(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,3,3);parameters(p,0);double a=0,b=0;
+    for(auto&amp;r:x){a+=(r[0]-r[1])*(r[0]-r[1]);b+=(r[0]-r[2])*(r[0]-r[2]);}double q=a/positive(b);return scalar({"ModelSSE","BenchmarkSSE","OOSR2","MSERatio"},{a,b,1-q,q});
+}
+
+inline Report block_loss_decomposition(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,3,3);parameters(p,0);std::map&lt;double,Vec&gt; a;
+    for(auto&amp;r:x){require(r[0]==std::floor(r[0])&amp;&amp;r[1]&gt;=0&amp;&amp;r[2]&gt;=0,"Invalid block or loss");if(!a.count(r[0]))a[r[0]]=Vec(3,0);auto&amp;v=a[r[0]];++v[0];v[1]+=r[1];v[2]+=r[2];}
+    Report o{{"Block","Count","MeanModelLoss","MeanBenchmarkLoss","MeanImprovement","Contribution"},{}};
+    for(auto&amp;z:a){auto&amp;v=z.second;double d=v[2]-v[1];o.rows.push_back({z.first,v[0],v[1]/v[0],v[2]/v[0],d/v[0],d/x.size()});}return o;
+}
+} }
+</pre></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

@@ -1,0 +1,41 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>核学习中的低秩近似与样本外几何｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="ml"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>核学习中的低秩近似与样本外几何</h1><p>核方法以训练样本定义内积几何。低秩逼近、随机特征、距离度量和样本外中心化均须保持训练空间的一致性，避免重新在测试样本上建立基准。</p><p><a href="../research/depth-laboratories.html">研究专题总览</a>　<a href="../cpp/depth_kernel.hpp" download>完整C++17源码</a></p><nav><a href="#nystrom-schur">Nyström核对角近似与Schur余量</a>　｜　<a href="#rff-pair">随机傅里叶特征的单频余弦核近似</a>　｜　<a href="#mahalanobis-residual">协方差几何中的Mahalanobis距离</a>　｜　<a href="#outofsample-kernel-center">训练核中心化的样本外延拓</a></nav></header><article id="nystrom-schur"><h2>Nyström核对角近似与Schur余量</h2><h3>数学定义与推导</h3><p>以地标特征张成的子空间投影新样本特征。系数由正规方程Wα=k得到，投影范数平方为kᵀW⁻¹k，正交残差平方即Schur补。若原核半正定而地标矩阵严格正定，余量必须非负。实现通过SPD求解避免显式求逆。</p><div class="equation">$$K=\begin{pmatrix}W&amp;k\\k^\top&amp;k_{xx}\end{pmatrix}$$</div><div class="equation">$$\widetilde k_{xx}=k^\top W^{-1}k$$</div><div class="equation">$$K\succeq0,\ W\succ0\ \Longrightarrow\ k_{xx}-\widetilde k_{xx}\ge0$$</div><h3>数值演算与金融应用</h3><p>地标核(2,1;1,2)，新样本与两地标核值均1，自核2，近似2/3，余量4/3。金融大样本核回归可用地标减少内存，余量有助于判断地标是否覆盖目标资产。地标选择只能使用训练信息。</p><h3>算法复杂度、输入契约与边界</h3><p>矩阵前d列为地标Gram矩阵，末列为交叉核向量；参数为新样本自核。O(d³)时间、O(d²)空间，d≤32。若余量显著为负，联合Gram矩阵不满足半正定条件，程序拒绝。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/nystrom-schur.csv" download>CSV数据</a>　<a href="../cpp/depth_kernel.hpp" download>算法源码</a></p><pre>Landmark1,Landmark2,Kx
+2,1,1
+1,2,1
+</pre><pre>./build/kline_quant depth-nystrom-schur quant/research/depth-examples/nystrom-schur.csv 2</pre><div class="wide"><table><thead><tr><th>ApproximatedDiagonal</th><th>SchurResidual</th><th>RelativeResidual</th></tr></thead><tbody><tr><td>0.666666666667</td><td>1.33333333333</td><td>0.666666666667</td></tr></tbody></table></div><p class="note">参考文献：Williams and Seeger (2001), Using the Nyström method to speed up kernel machines, NIPS.</p></article><article id="rff-pair"><h2>随机傅里叶特征的单频余弦核近似</h2><h3>数学定义与推导</h3><p>Bochner定理将连续平移不变正定核表示为谱测度的傅里叶变换。若频率按归一谱测度抽样且相位独立均匀，余弦乘积的和频项在相位平均后消失，差频项期望等于核。实现接收已生成频率和相位，不自行重采样。</p><div class="equation">$$k(x-y)=\int e^{i\omega(x-y)}\,d\Lambda(\omega)$$</div><div class="equation">$$z_j(x)=\sqrt{2/m}\cos(\omega_jx+b_j)$$</div><div class="equation">$$\widehat k(x,y)=z(x)^\top z(y),\quad\mathbb E_{\omega,b}\widehat k(x,y)=k(x-y)$$</div><h3>数值演算与金融应用</h3><p>两个频率均0，相位0和π/2，特征对任意输入分别1与0，样本内积1。此构造用于验证尺度；实际RBF核的频率按相应高斯谱抽样。不同训练和测试批次必须复用同一组随机特征。</p><h3>算法复杂度、输入契约与边界</h3><p>O(m)时间；一维标量输入x,y作为参数。相位和频率应由可复现随机种子生成；此工具计算单一近似内积，不保证任意有限特征集合的近似误差。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/rff-pair.csv" download>CSV数据</a>　<a href="../cpp/depth_kernel.hpp" download>算法源码</a></p><pre>Frequency,Phase
+0,0
+0,1.5707963267948966
+</pre><pre>./build/kline_quant depth-rff-pair quant/research/depth-examples/rff-pair.csv 1 2</pre><div class="wide"><table><thead><tr><th>Feature</th><th>Zx</th><th>Zy</th><th>Product</th><th>CumulativeKernel</th></tr></thead><tbody><tr><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr><tr><td>2</td><td>0</td><td>0</td><td>0</td><td>1</td></tr></tbody></table></div><p class="note">参考文献：Rahimi and Recht (2007), Random features for large-scale kernel machines, NIPS.</p></article><article id="mahalanobis-residual"><h2>协方差几何中的Mahalanobis距离</h2><h3>数学定义与推导</h3><p>协方差定义不同方向的尺度：在白化坐标中，Mahalanobis距离就是欧氏距离。高方差方向的同等绝对偏移被下调，低方差方向被放大。使用SPD求解得到Σ⁻¹δ，再与δ内积，无需计算完整逆矩阵。</p><div class="equation">$$d_M^2(x,\mu)=(x-\mu)^\top\Sigma^{-1}(x-\mu)$$</div><div class="equation">$$\Sigma=LL^\top,\quad d_M^2=\|L^{-1}(x-\mu)\|_2^2$$</div><div class="equation">$$\Sigma v=\delta,\quad d_M^2=\delta^\top v$$</div><h3>数值演算与金融应用</h3><p>协方差(2,1;1,2)，偏移(1,−1)位于特征值1的方向，欧氏平方距离2与Mahalanobis平方距离2一致；若偏移(1,1)，距离平方变为2/3。适用于金融异常特征及风险调整距离。</p><h3>算法复杂度、输入契约与边界</h3><p>O(d³)，输入协方差必须来自训练数据且严格正定。样本协方差秩亏时应使用收缩或降维；厚尾分布下距离平方不一定服从卡方分布。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/mahalanobis-residual.csv" download>CSV数据</a>　<a href="../cpp/depth_kernel.hpp" download>算法源码</a></p><pre>Cov1,Cov2,Delta
+2,1,1
+1,2,-1
+</pre><pre>./build/kline_quant depth-mahalanobis-residual quant/research/depth-examples/mahalanobis-residual.csv</pre><div class="wide"><table><thead><tr><th>EuclideanSquared</th><th>MahalanobisSquared</th><th>Distance</th></tr></thead><tbody><tr><td>2</td><td>2</td><td>1.41421356237</td></tr></tbody></table></div><p class="note">参考文献：Schölkopf and Smola (2002), Learning with Kernels, MIT Press.</p></article><article id="outofsample-kernel-center"><h2>训练核中心化的样本外延拓</h2><h3>数学定义与推导</h3><p>样本外特征必须减去训练集特征均值，而非测试批次均值。展开两个中心化特征的内积，得到交叉核减其行均值、训练核列均值再加训练核全局均值。训练核列均值的平均必须与输入全局均值一致。</p><div class="equation">$$\bar\phi_{\mathrm{tr}}=n^{-1}\sum_i\phi(x_i)$$</div><div class="equation">$$k_c(x,x_j)=k(x,x_j)-n^{-1}\sum_i k(x,x_i)-n^{-1}\sum_i k(x_i,x_j)+\bar K_{\mathrm{tr}}$$</div><div class="equation">$$\sum_j k_c(x,x_j)=0$$</div><h3>数值演算与金融应用</h3><p>新样本到两训练点的核值2、4，均值3；训练列均值1、3，全局均值2，中心化交叉核均为0。此时新样本在训练中心化方向上的核投影为零。适用于核PCA与核岭回归的预测阶段。</p><h3>算法复杂度、输入契约与边界</h3><p>O(n)，传入训练时保存的统计量；若重新估计这些量，模型坐标系变化且可能产生测试信息泄漏。程序核对训练行均值平均与全局均值的数值一致性。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/outofsample-kernel-center.csv" download>CSV数据</a>　<a href="../cpp/depth_kernel.hpp" download>算法源码</a></p><pre>KxTrain,TrainRowMean
+2,1
+4,3
+</pre><pre>./build/kline_quant depth-outofsample-kernel-center quant/research/depth-examples/outofsample-kernel-center.csv 2</pre><div class="wide"><table><thead><tr><th>TrainingIndex</th><th>CenteredCrossKernel</th></tr></thead><tbody><tr><td>1</td><td>0</td></tr><tr><td>2</td><td>0</td></tr></tbody></table></div><p class="note">参考文献：Schölkopf and Smola (2002), Learning with Kernels, MIT Press.</p></article><section><h2>C++17完整实现</h2><pre>#pragma once
+#include "evidence_common.hpp"
+namespace kline { namespace depth_kernel {
+using namespace evidence;
+inline Report nystrom_schur(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,1,2,33)-1;parameters(p,1);require(x.size()==d&amp;&amp;p[0]&gt;0,"Invalid landmark dimensions");
+    Mat W;Vec k;for(auto&amp;r:x){W.emplace_back(r.begin(),r.end()-1);k.push_back(r.back());}
+    Vec a=solve_spd(W,k);double v=dot(k,a),err=p[0]-v;
+    require(err&gt;=-1e-10*std::max(1.,p[0]),"Negative Schur residual");
+    return scalar({"ApproximatedDiagonal","SchurResidual","RelativeResidual"},{v,err,err/p[0]});
+}
+
+inline Report rff_pair(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,2,2);parameters(p,2);double a=std::sqrt(2./x.size()),s=0;Report o{{"Feature","Zx","Zy","Product","CumulativeKernel"},{}};
+    for(std::size_t i=0;i&lt;x.size();++i){auto&amp;r=x[i];double u=a*std::cos(r[0]*p[0]+r[1]),v=a*std::cos(r[0]*p[1]+r[1]);s+=u*v;o.rows.push_back({double(i+1),u,v,u*v,s});}return o;
+}
+
+inline Report mahalanobis_residual(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,1,2,33)-1;parameters(p,0);require(x.size()==d,"Square covariance required");Mat s;Vec z;
+    for(auto&amp;r:x){s.emplace_back(r.begin(),r.end()-1);z.push_back(r.back());}
+    Vec v=solve_spd(s,z);double q=dot(z,v);require(q&gt;=0,"Negative squared distance");return scalar({"EuclideanSquared","MahalanobisSquared","Distance"},{dot(z,z),q,std::sqrt(q)});
+}
+
+inline Report outofsample_kernel_center(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,2,2);parameters(p,1);double a=mean(column(x,0)),b=mean(column(x,1));require(std::abs(b-p[0])&lt;=1e-10*std::max({1.,std::abs(b),std::abs(p[0])}),"Inconsistent training grand mean");Report o{{"TrainingIndex","CenteredCrossKernel"},{}};
+    for(std::size_t i=0;i&lt;x.size();++i)o.rows.push_back({double(i+1),x[i][0]-a-x[i][1]+p[0]});return o;
+}
+} }
+</pre></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

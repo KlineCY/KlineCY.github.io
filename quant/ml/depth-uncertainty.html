@@ -1,0 +1,46 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>条件预测分布与不确定性分解｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="ml"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>条件预测分布与不确定性分解</h1><p>预测分布同时描述条件随机性及模型间差异。方差、熵和分组覆盖是互补对象，不将单一不确定性指标视为所有风险的充分描述。</p><p><a href="../research/depth-laboratories.html">研究专题总览</a>　<a href="../cpp/depth_uncertainty.hpp" download>完整C++17源码</a></p><nav><a href="#mixture-predictive-variance">预测混合分布的全方差分解</a>　｜　<a href="#ensemble-entropy-mi">分类集成的预测熵与模型互信息</a>　｜　<a href="#mondrian-calibration">分组Split Conformal有限样本阈值</a>　｜　<a href="#wilson-coverage">覆盖率的Wilson二项比例区间</a></nav></header><article id="mixture-predictive-variance"><h2>预测混合分布的全方差分解</h2><h3>数学定义与推导</h3><p>将预测理解为先随机选择模型或情景M，再从其条件分布抽取Y。全方差公式把模型内条件方差和模型间均值分散分开。两项均非负，第二项只有在均值相同时为零；这不要求各条件分布是高斯。</p><div class="equation">$$\mathbb E[Y]=\sum_m w_m\mu_m$$</div><div class="equation">$$\mathbb E[\operatorname{Var}(Y\mid M)]=\sum_m w_m v_m$$</div><div class="equation">$$\operatorname{Var}(Y)=\sum_m w_m v_m+\sum_m w_m(\mu_m-\bar\mu)^2$$</div><h3>数值演算与金融应用</h3><p>两个等权模型均值1、3、方差均1，混合均值2，模型内方差1、模型间方差1，总方差2。用于集成收益预测时，模型间差异仅是所选集成的分散度，并不等同于全部参数或模型不确定性。</p><h3>算法复杂度、输入契约与边界</h3><p>O(M)，权重非负且和为1、方差非负。若模型依赖，混合分布的方差仍按给定混合成立，但平均模型预测的误差方差是另一对象，需要模型误差协方差。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/mixture-predictive-variance.csv" download>CSV数据</a>　<a href="../cpp/depth_uncertainty.hpp" download>算法源码</a></p><pre>Weight,Mean,Variance
+0.5,1,1
+0.5,3,1
+</pre><pre>./build/kline_quant depth-mixture-predictive-variance quant/research/depth-examples/mixture-predictive-variance.csv</pre><div class="wide"><table><thead><tr><th>PredictiveMean</th><th>WithinVariance</th><th>BetweenVariance</th><th>TotalVariance</th></tr></thead><tbody><tr><td>2</td><td>1</td><td>1</td><td>2</td></tr></tbody></table></div><p class="note">参考文献：Gneiting and Raftery (2007), Strictly proper scoring rules, prediction, and estimation, JASA.</p></article><article id="ensemble-entropy-mi"><h2>分类集成的预测熵与模型互信息</h2><h3>数学定义与推导</h3><p>混合预测熵衡量整体类别不确定性，平均条件熵反映模型内部不确定性；差值等于类别与模型索引的互信息，也等于加权Jensen–Shannon散度。熵的凹性保证差值非负。零概率项按0log0=0处理。</p><div class="equation">$$\bar p_k=\sum_m w_m p_{mk}$$</div><div class="equation">$$H(Y)=-\sum_k\bar p_k\log\bar p_k,\quad H(Y\mid M)=\sum_m w_m H(p_m)$$</div><div class="equation">$$I(Y;M)=H(\bar p)-\sum_m w_m H(p_m)\ge0$$</div><h3>数值演算与金融应用</h3><p>两个模型分别确定预测相反类别，内部熵均0，混合概率均0.5，互信息ln2。用于金融状态模型集成时，它揭示模型间概率分歧，但不能证明集成覆盖真实分布或全部认识不确定性。</p><h3>算法复杂度、输入契约与边界</h3><p>O(MK)，每行概率和1，模型权重和1；自然对数单位为nat。实际分类校准仍需独立标签和适当评分；熵低不代表预测正确。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/ensemble-entropy-mi.csv" download>CSV数据</a>　<a href="../cpp/depth_uncertainty.hpp" download>算法源码</a></p><pre>Weight,P0,P1
+0.5,1,0
+0.5,0,1
+</pre><pre>./build/kline_quant depth-ensemble-entropy-mi quant/research/depth-examples/ensemble-entropy-mi.csv</pre><div class="wide"><table><thead><tr><th>PredictiveEntropy</th><th>MeanConditionalEntropy</th><th>MutualInformation</th></tr></thead><tbody><tr><td>0.69314718056</td><td>0</td><td>0.69314718056</td></tr></tbody></table></div><p class="note">参考文献：Gneiting and Raftery (2007), Strictly proper scoring rules, prediction, and estimation, JASA.</p></article><article id="mondrian-calibration"><h2>分组Split Conformal有限样本阈值</h2><h3>数学定义与推导</h3><p>在固定组内，校准分数与新样本分数交换时，新分数秩均匀（并列时保守），使用n_g+1的有限样本校正获得条件于组的边际覆盖。分组规则必须与待预测标签无关且事前固定。本实现只输出有限阈值；若秩超过n_g，理论阈值为无穷，程序拒绝该有限数值输出。</p><div class="equation">$$k_g=\lceil(n_g+1)(1-\alpha)\rceil$$</div><div class="equation">$$q_g=s_{g,(k_g)},\quad C_g(x)=\{y:s(x,y)\le q_g\}$$</div><div class="equation">$$\Pr(Y_{\mathrm{new}}\in C_g(X_{\mathrm{new}})\mid G=g)\ge1-\alpha$$</div><h3>数值演算与金融应用</h3><p>两组各3条分数，α=0.5，秩2，阈值分别2与4。波动高的市场状态可能需要更宽预测区间，但时间序列状态并不自然交换，实际金融覆盖依赖适当的序列条件。</p><h3>算法复杂度、输入契约与边界</h3><p>O(n log n)，分数非负，组ID整数。覆盖水平更高时每组需要足够校准样本；不要使用测试集标签调整组别或校准阈值。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/mondrian-calibration.csv" download>CSV数据</a>　<a href="../cpp/depth_uncertainty.hpp" download>算法源码</a></p><pre>Group,Nonconformity
+1,1
+1,2
+1,3
+2,2
+2,4
+2,6
+</pre><pre>./build/kline_quant depth-mondrian-calibration quant/research/depth-examples/mondrian-calibration.csv 0.5</pre><div class="wide"><table><thead><tr><th>Group</th><th>CalibrationCount</th><th>Rank</th><th>Threshold</th></tr></thead><tbody><tr><td>1</td><td>3</td><td>2</td><td>2</td></tr><tr><td>2</td><td>3</td><td>2</td><td>4</td></tr></tbody></table></div><p class="note">参考文献：Vovk, Gammerman and Shafer (2005), Algorithmic Learning in a Random World, Springer.</p></article><article id="wilson-coverage"><h2>覆盖率的Wilson二项比例区间</h2><h3>数学定义与推导</h3><p>反演二项比例的正态得分检验，而非将估计比例直接代入Wald标准误。整理关于p的二次不等式得到Wilson区间，边界成功数为0或n时仍有非退化长度。覆盖是近似的，不是精确Clopper–Pearson区间。</p><div class="equation">$$\left|\frac{\hat p-p}{\sqrt{p(1-p)/n}}\right|\le z$$</div><div class="equation">$$c=\frac{\hat p+z^2/(2n)}{1+z^2/n}$$</div><div class="equation">$$h=\frac{z\sqrt{\hat p(1-\hat p)/n+z^2/(4n^2)}}{1+z^2/n},\quad [c-h,c+h]$$</div><h3>数值演算与金融应用</h3><p>10次预测覆盖5次，z=2，中心0.5、半宽约0.2673；0次覆盖时上界约0.2857。用于评估独立测试事件的覆盖率不确定性，若金融预测区间跨期重叠，应采用依赖调整。</p><h3>算法复杂度、输入契约与边界</h3><p>O(n_rows)，每行整数成功数与试验数，z&gt;0。若目标是同时比较多个组，需要考虑多重比较；样本内校准覆盖与真正样本外覆盖需分开。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/wilson-coverage.csv" download>CSV数据</a>　<a href="../cpp/depth_uncertainty.hpp" download>算法源码</a></p><pre>Successes,Trials
+5,10
+0,10
+</pre><pre>./build/kline_quant depth-wilson-coverage quant/research/depth-examples/wilson-coverage.csv 2</pre><div class="wide"><table><thead><tr><th>Successes</th><th>Trials</th><th>Observed</th><th>Lower</th><th>Upper</th></tr></thead><tbody><tr><td>5</td><td>10</td><td>0.5</td><td>0.232738758088</td><td>0.767261241912</td></tr><tr><td>0</td><td>10</td><td>0</td><td>0</td><td>0.285714285714</td></tr></tbody></table></div><p class="note">参考文献：Wilson (1927), Probable inference, the law of succession, and statistical inference, JASA.</p></article><section><h2>C++17完整实现</h2><pre>#pragma once
+#include "evidence_common.hpp"
+namespace kline { namespace depth_uncertainty {
+using namespace evidence;
+inline Report mixture_predictive_variance(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,3,3);parameters(p,0);double s=0,m=0,a=0;
+    for(auto&amp;r:x){require(r[0]&gt;=0&amp;&amp;r[2]&gt;=0,"Invalid weight or variance");s+=r[0];m+=r[0]*r[1];a+=r[0]*r[2];}require(std::abs(s-1)&lt;1e-10,"Weight sum");double b=0;for(auto&amp;r:x)b+=r[0]*(r[1]-m)*(r[1]-m);
+    return scalar({"PredictiveMean","WithinVariance","BetweenVariance","TotalVariance"},{m,a,b,a+b});
+}
+
+inline Report ensemble_entropy_mi(const Mat&amp; x,const Vec&amp; p){
+    auto K=validate(x,1,3,64)-1;parameters(p,0);Vec q(K,0);double s=0,H=0;
+    for(auto&amp;r:x){require(r[0]&gt;=0,"Negative weight");s+=r[0];double a=0,h=0;for(std::size_t k=0;k&lt;K;++k){double v=r[k+1];require(v&gt;=0&amp;&amp;v&lt;=1,"Invalid probability");a+=v;q[k]+=r[0]*v;if(v&gt;0)h-=v*std::log(v);}require(std::abs(a-1)&lt;1e-10,"Probability sum");H+=r[0]*h;}
+    require(std::abs(s-1)&lt;1e-10,"Weight sum");double v=0;for(double a:q)if(a&gt;0)v-=a*std::log(a);
+    return scalar({"PredictiveEntropy","MeanConditionalEntropy","MutualInformation"},{v,H,std::max(0.,v-H)});
+}
+
+inline Report mondrian_calibration(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,2,2);parameters(p,1);require(p[0]&gt;0&amp;&amp;p[0]&lt;1,"Invalid alpha");std::map&lt;double,Vec&gt; g;
+    for(auto&amp;r:x){require(r[0]==std::floor(r[0])&amp;&amp;r[1]&gt;=0,"Invalid group or score");g[r[0]].push_back(r[1]);}
+    Report o{{"Group","CalibrationCount","Rank","Threshold"},{}};
+    for(auto&amp;z:g){auto&amp;v=z.second;std::sort(v.begin(),v.end());auto n=v.size(),k=std::size_t(std::ceil((n+1)*(1-p[0])));require(k&gt;=1&amp;&amp;k&lt;=n,"Infinite threshold: insufficient calibration observations");o.rows.push_back({z.first,double(n),double(k),v[k-1]});}return o;
+}
+
+inline Report wilson_coverage(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,2,2);parameters(p,1);double z=positive(p[0]),a=z*z;Report o{{"Successes","Trials","Observed","Lower","Upper"},{}};
+    for(auto&amp;r:x){double n=count(r[1],1,1000000000),k=count(r[0],0,std::size_t(n)),q=k/n,d=1+a/n,c=(q+a/(2*n))/d,h=z*std::sqrt(q*(1-q)/n+a/(4*n*n))/d;o.rows.push_back({k,n,q,std::max(0.,c-h),std::min(1.,c+h)});}return o;
+}
+} }
+</pre></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>
