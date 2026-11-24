@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>金融网络、图扩散与共同风险结构｜Kline Quant</title><meta name="description" content="多变量量化研究、公式推导、数值案例与C++17算法">
+<link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<style>body{margin:0;background:white;color:#142733;font:16px/1.95 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:24px 32px 64px}main{max-width:1150px;margin:auto}header,.lesson,.source,.references{border:1px solid #cad3d9;padding:24px 28px;margin:18px 0;background:white}h1{font-size:31px;line-height:1.4}h2{font-size:23px;margin:10px 0 20px}h3{font-size:17px;margin:22px 0 6px}p{line-height:1.95;margin:12px 0}.toc{display:flex;flex-wrap:wrap;gap:9px 24px;border:1px solid #cad3d9;padding:17px 24px}.equation{overflow:auto;border-block:1px solid #d7dfe4;margin:18px 0;padding:16px 6px}.katex-display{overflow-x:auto;overflow-y:hidden}a{color:#1a5478}code,pre{font-family:"Times New Roman",monospace}pre{border:1px solid #cbd5dc;padding:15px;overflow:auto;white-space:pre;font-size:13px;line-height:1.7;max-height:850px}@media(max-width:790px){.main{margin:0;padding:12px}header,.lesson,.source,.references{padding:15px}}</style>
+</head><body><aside id="quantSidebar" class="sidebar" data-page="math"></aside><script src="../sidebar-v2.js"></script><div class="main"><main>
+<header><small>QUANTITATIVE RESEARCH / MULTIVARIATE NUMERICAL METHODS</small><h1>金融网络、图扩散与共同风险结构</h1><p>金融相关网络可由经过明确时间窗口估计的协方差或经济联系构建。网络结构的含义取决于边的定义：相似度用于扩散和中心性，距离用于最小瓶颈与生成树。</p><p>同一图上应分别考察边能量、扩散守恒、中心性概率归一化以及生成树连通性。网络度量提供结构化描述，不直接识别资产风险传播的因果机制。</p></header>
+<nav class="toc"><a href="#lesson1">1．加权图拉普拉斯能量</a><a href="#lesson2">2．带悬挂节点修正的PageRank</a><a href="#lesson3">3．图上热扩散的守恒离散演化</a><a href="#lesson4">4．最小瓶颈路径与连通阈值</a><a href="#lesson5">5．Kruskal最小生成树</a><a href="#source">C++17完整实现</a><a href="#references">参考文献</a></nav>
+<article class="lesson" id="lesson1"><h2>1．加权图拉普拉斯能量</h2>
+<h3>模型结构与数学定义</h3><p>以无向边的连接权重刻画节点之间的依赖强度。图拉普拉斯二次型衡量节点风险或因子得分在相连资产间的不一致程度。输入边表中的节点编号、连接权重和两个端点的标量状态，逐边计算能量贡献。</p><div class="equation">$$f^\top Lf=\sum_{i&lt;j}w_{ij}(f_i-f_j)^2$$</div>
+<h3>推导、最优性条件与数值结构</h3><div class="equation">$$L=D-W,\quad f^\top Df-f^\top Wf=\tfrac12\sum_{i,j}w_{ij}(f_i-f_j)^2$$</div><p>每条无向边在双重求和中出现两次，边列表只录入一次时不需要二分之一系数。能量为零表示每个连通分量内部状态恒定。</p>
+<h3>完整计算案例</h3><p>两条边的权重为2、1，对应状态差为1、2，能量为2+4=6。</p><div class="equation">$$\mathrm{Output}\approx\left(6\right)$$</div>
+<p>输出顺序：加权边状态差的平方和。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>From,To,Weight,ValueFrom,ValueTo
+0,1,2,1,2
+1,2,1,2,4</code></pre><pre><code>./kline_quant lab24-network-laplacian-energy study.csv</code></pre>
+<h3>估计假设与应用边界</h3><p>每条无向边应只录入一次，节点状态应在重复出现时一致。该形式对平行边自然加总。</p></article>
+<article class="lesson" id="lesson2"><h2>2．带悬挂节点修正的PageRank</h2>
+<h3>模型结构与数学定义</h3><p>对有向加权图构造每个节点的出边归一化概率。每次迭代把现有概率质量沿出边分配，出度为零的节点将其质量均匀返还所有节点，再加入均匀随机跳转。输出节点排名概率。</p><div class="equation">$$\pi^{(k+1)}=(1-d)\mathbf1/n+dP^\top\pi^{(k)}$$</div>
+<h3>推导、最优性条件与数值结构</h3><div class="equation">$$P_{ij}=w_{ij}/\sum_kw_{ik},\quad \mathbf1^\top\pi^{(k)}=1$$</div><p>所有非悬挂行通过归一化获得转移概率；悬挂节点对应均匀转移。阻尼参数小于1使迭代映射具有收缩性质，而概率总质量在每步保持为1。</p>
+<h3>完整计算案例</h3><p>两个节点彼此连接，权重相同；无论阻尼0.85还是其他合法值，稳定分布均为(0.5,0.5)。</p><div class="equation">$$\mathrm{Output}\approx\left(0.5,\ 0.5\right)$$</div>
+<p>输出顺序：按节点编号排列的稳定概率近似。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>From,To,Weight
+0,1,1
+1,0,1</code></pre><pre><code>./kline_quant lab24-network-pagerank study.csv 2 0.85 50</code></pre>
+<h3>估计假设与应用边界</h3><p>图关系必须由独立可得的数据定义。中心性反映图结构而非信用风险的因果方向；节点编号从0开始，参数依次为节点数、阻尼、迭代次数。</p></article>
+<article class="lesson" id="lesson3"><h2>3．图上热扩散的守恒离散演化</h2>
+<h3>模型结构与数学定义</h3><p>将每一条无向边上的状态差视为离散热通量。按同步更新计算相邻节点之间的净传递，在步长与最大加权度的乘积不超过1时，各节点更新为原状态与邻居状态的非负加权平均。输出演化后的全部节点状态。</p><div class="equation">$$f^{k+1}=f^k-hLf^k$$</div>
+<h3>推导、最优性条件与数值结构</h3><div class="equation">$$f_i^{k+1}=(1-hd_i)f_i^k+h\sum_jw_{ij}f_j^k$$</div><p>当步长满足稳定性条件时，系数均非负且和为1，单步不会产生超过原最大值的状态。无向边上的净流在两个端点相互抵消，总质量守恒。</p>
+<h3>完整计算案例</h3><p>两节点初始值分别为1、0，边权1，步长0.25，一步以后得到0.75、0.25，总和仍为1。</p><div class="equation">$$\mathrm{Output}\approx\left(0.75,\ 0.25\right)$$</div>
+<p>输出顺序：每个节点演化后的状态。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>From,To,Weight
+0,1,1</code></pre><pre><code>./kline_quant lab24-network-diffusion study.csv 0.25 1 1 0</code></pre>
+<h3>估计假设与应用边界</h3><p>参数为步长、迭代次数以及初始节点状态；边表按无向边唯一记录。真实传染机制可能含方向和阈值，线性扩散只是一种模型。</p></article>
+<article class="lesson" id="lesson4"><h2>4．最小瓶颈路径与连通阈值</h2>
+<h3>模型结构与数学定义</h3><p>普通最短路对边距离求和；瓶颈路径则沿路径取最大边距离，再在候选路径间最小化。采用Dijkstra式松弛，将加法替换为max运算；每次确定尚未访问的最小瓶颈节点。它与单链接聚类的连通阈值等价。</p><div class="equation">$$b(s,t)=\min_{\gamma:s\leadsto t}\max_{e\in\gamma}d_e$$</div>
+<h3>推导、最优性条件与数值结构</h3><div class="equation">$$b_v\leftarrow\min\{b_v,\max(b_u,d_{uv})\}$$</div><p>将最小化总长度的加法松弛替换为最大边权松弛，路径延伸不会降低已形成的瓶颈。已确定最小瓶颈的节点可安全完成标记。</p>
+<h3>完整计算案例</h3><p>边0—1距离2、1—2距离3、0—2距离5，从0到2的最佳路径经节点1，瓶颈值为3。</p><div class="equation">$$\mathrm{Output}\approx\left(3\right)$$</div>
+<p>输出顺序：起点至终点的最小瓶颈距离。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>From,To,Distance
+0,1,2
+1,2,3
+0,2,5</code></pre><pre><code>./kline_quant lab24-network-minimax-path study.csv 3 0 2</code></pre>
+<h3>估计假设与应用边界</h3><p>参数为节点数、起点、终点；无向距离必须非负。若图不连通，程序拒绝输出不可达路径。</p></article>
+<article class="lesson" id="lesson5"><h2>5．Kruskal最小生成树</h2>
+<h3>模型结构与数学定义</h3><p>将所有无向边按距离从小到大排序。利用并查集跟踪连通分量，只有连接两个不同分量的边才被加入生成树，从而避免环并逐步构造最小总距离的树。输出树的总距离及最大选中边距离。</p><div class="equation">$$\min_{T\ {\rm spanning\ tree}}\sum_{(i,j)\in T}d_{ij}$$</div>
+<h3>推导、最优性条件与数值结构</h3><div class="equation">$$|E(T)|=n-1,\qquad \text{weight}(T)=\sum_{e\in E(T)}w_e$$</div><p>切分性质保证跨越任一连通分量切分的最轻边可属于某个最小生成树。并查集仅连接不同分量，选入n−1条边后恰好获得连通无环图。</p>
+<h3>完整计算案例</h3><p>三节点距离为2、3、5，选中前两条边，总距离5，最大边距离3。</p><div class="equation">$$\mathrm{Output}\approx\left(5,\ 3\right)$$</div>
+<p>输出顺序：生成树总距离、选中边的最大距离。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>From,To,Distance
+0,1,2
+1,2,3
+0,2,5</code></pre><pre><code>./kline_quant lab24-network-minimum-spanning-tree study.csv 3</code></pre>
+<h3>估计假设与应用边界</h3><p>适用于连通无向图；边距离可以来自相关系数的合法距离变换，但估计噪声会造成生成树不稳定。</p></article>
+<section class="source" id="source"><h2>完整C++17实现</h2><p>输入为逐行组织的数值矩阵及标量参数向量，输出为按前文约定排列的数值向量。各方法对维度、参数范围、数值有限性及可行性进行检查。以下头文件和公共接口与实际工具库一致。</p><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/lab24_network.hpp">算法源文件</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/lab24_common.hpp">公共接口</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_lab24.cpp">数值回归与结构恒等式测试</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_lab24_cli.py">CSV接口复算测试</a>。</p><h3>独立算法</h3><pre><code>#pragma once
+#include "lab24_common.hpp"
+#include &lt;functional&gt;
+
+namespace kline { namespace lab24 {
+inline Vec laplacian_energy(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,5,0);double s=0;
+    for(const auto&amp; r:x){integer(r[0],0,100000);integer(r[1],0,100000);require(r[2]&gt;=0,"Negative edge weight");double d=r[3]-r[4];s+=r[2]*d*d;}
+    return checked({s});
+}
+
+inline Vec pagerank(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,3,3);auto n=integer(p[0],1,5000),steps=integer(p[2],1,10000);
+    double d=p[1];require(d&gt;=0&amp;&amp;d&lt;1,"Invalid damping");
+    Vec out(n,0),v(n,1.0/n);
+    for(const auto&amp; r:x){auto i=integer(r[0],0,n-1);integer(r[1],0,n-1);require(r[2]&gt;=0,"Negative graph weight");out[i]+=r[2];}
+    for(std::size_t k=0;k&lt;steps;++k){
+        double dangling=0;for(std::size_t i=0;i&lt;n;++i)if(out[i]==0)dangling+=v[i];
+        Vec z(n,(1-d+d*dangling)/n);
+        for(const auto&amp; r:x){auto i=std::size_t(r[0]),j=std::size_t(r[1]);if(out[i]&gt;0)z[j]+=d*v[i]*r[2]/out[i];}
+        v=std::move(z);
+    }
+    return checked(v);
+}
+
+inline Vec diffusion(const Mat&amp; x,const Vec&amp; p){
+    require(p.size()&gt;=3&amp;&amp;p.size()&lt;=502,"Initial state and two parameters required");
+    inputs(x,p,3,p.size());std::size_t n=p.size()-2;double h=p[0];auto steps=integer(p[1],1,10000);
+    require(h&gt;=0,"Negative diffusion step");Vec v(p.begin()+2,p.end()),degree(n,0);
+    for(const auto&amp; r:x){auto i=integer(r[0],0,n-1),j=integer(r[1],0,n-1);require(i!=j&amp;&amp;r[2]&gt;=0,"Invalid edge");degree[i]+=r[2];degree[j]+=r[2];}
+    require(h*(*std::max_element(degree.begin(),degree.end()))&lt;=1,"Explicit diffusion violates stability bound");
+    for(std::size_t k=0;k&lt;steps;++k){Vec z=v;for(const auto&amp; r:x){auto i=std::size_t(r[0]),j=std::size_t(r[1]);double flow=h*r[2]*(v[j]-v[i]);z[i]+=flow;z[j]-=flow;}v=std::move(z);}
+    return checked(v);
+}
+
+inline Vec minimax_path(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,3,3);auto n=integer(p[0],1,1000),s=integer(p[1],0,n-1),t=integer(p[2],0,n-1);
+    std::vector&lt;std::vector&lt;std::pair&lt;std::size_t,double&gt;&gt;&gt; adj(n);
+    for(const auto&amp; r:x){auto i=integer(r[0],0,n-1),j=integer(r[1],0,n-1);require(r[2]&gt;=0,"Negative distance");adj[i].push_back({j,r[2]});adj[j].push_back({i,r[2]});}
+    Vec d(n,std::numeric_limits&lt;double&gt;::infinity());d[s]=0;std::vector&lt;bool&gt; done(n,false);
+    for(std::size_t k=0;k&lt;n;++k){std::size_t u=n;for(std::size_t i=0;i&lt;n;++i)if(!done[i]&amp;&amp;(u==n||d[i]&lt;d[u]))u=i;if(u==n||!std::isfinite(d[u]))break;done[u]=true;if(u==t)break;for(auto e:adj[u])d[e.first]=std::min(d[e.first],std::max(d[u],e.second));}
+    require(std::isfinite(d[t]),"Target unreachable");
+    return {d[t]};
+}
+
+inline Vec minimum_spanning_tree(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,3,1);auto n=integer(p[0],2,10000);Mat edges=x;
+    for(const auto&amp; r:edges){integer(r[0],0,n-1);integer(r[1],0,n-1);require(r[2]&gt;=0,"Negative edge distance");}
+    std::sort(edges.begin(),edges.end(),[](const Vec&amp; a,const Vec&amp; b){return a[2]&lt;b[2];});
+    std::vector&lt;std::size_t&gt; parent(n);std::iota(parent.begin(),parent.end(),0);
+    auto root=[&amp;](std::size_t i){while(parent[i]!=i){parent[i]=parent[parent[i]];i=parent[i];}return i;};
+    std::size_t used=0;double total=0,last=0;
+    for(const auto&amp; r:edges){auto a=root(std::size_t(r[0])),b=root(std::size_t(r[1]));if(a==b)continue;parent[a]=b;total+=r[2];last=r[2];if(++used==n-1)break;}
+    require(used==n-1,"Graph disconnected");return checked({total,last});
+}
+} }
+</code></pre><h3>公共数值接口</h3><pre><code>#pragma once
+#include "stats.hpp"
+#include &lt;algorithm&gt;
+#include &lt;cmath&gt;
+#include &lt;cstddef&gt;
+#include &lt;limits&gt;
+#include &lt;numeric&gt;
+#include &lt;stdexcept&gt;
+#include &lt;utility&gt;
+#include &lt;vector&gt;
+
+namespace kline { namespace lab24 {
+using Vec=std::vector&lt;double&gt;;
+using Mat=std::vector&lt;Vec&gt;;
+
+inline void inputs(const Mat&amp; x,const Vec&amp; p,std::size_t cols,std::size_t params,
+                   std::size_t min_rows=1) {
+    require(x.size()&gt;=min_rows&amp;&amp;x.size()&lt;=250000,"Invalid number of observations");
+    require(p.size()==params,"Incorrect scalar parameter count");
+    for(double v:p)require(std::isfinite(v),"Nonfinite scalar parameter");
+    for(const auto&amp; row:x){
+        require(row.size()==cols,"Unexpected CSV column count");
+        for(double v:row)require(std::isfinite(v),"Nonfinite matrix entry");
+    }
+}
+inline std::size_t integer(double x,std::size_t low,std::size_t high){
+    require(std::isfinite(x)&amp;&amp;x&gt;=double(low)&amp;&amp;x&lt;=double(high)&amp;&amp;std::floor(x)==x,
+            "Integer parameter outside allowed range");
+    return std::size_t(x);
+}
+inline double dot(const Vec&amp; a,const Vec&amp; b){
+    require(a.size()==b.size(),"Dot product dimension mismatch");
+    return std::inner_product(a.begin(),a.end(),b.begin(),0.0);
+}
+inline Vec col(const Mat&amp; x,std::size_t j){
+    Vec out;out.reserve(x.size());
+    for(const auto&amp; row:x)out.push_back(row.at(j));
+    return out;
+}
+inline double positive(double x){require(x&gt;0&amp;&amp;std::isfinite(x),"Positive finite quantity required");return x;}
+inline Vec checked(Vec v){check_finite(v);return v;}
+inline double logistic(double x){
+    if(x&gt;=0)return 1/(1+std::exp(-x));
+    double e=std::exp(x);return e/(1+e);
+}
+inline double normal_cdf(double x){return 0.5*std::erfc(-x/std::sqrt(2.0));}
+inline double sum(const Vec&amp; v){return std::accumulate(v.begin(),v.end(),0.0);}
+} }
+</code></pre></section>
+<section class="references" id="references"><h2>参考文献与进一步阅读</h2><p><a href="https://global.oup.com/academic/product/networks-9780198805090">Newman, Networks</a></p><p><a href="https://networkx.org/documentation/stable/reference/algorithms/index.html">NetworkX Algorithms Reference</a></p><p>课程中的数值样本均为明确构造的教学算例，不代表真实市场实证结果。</p></section>
+</main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

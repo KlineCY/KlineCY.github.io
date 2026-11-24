@@ -1,0 +1,131 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>信用迁移、违约分布与回收现金流｜Kline Quant</title><meta name="description" content="多变量量化研究、公式推导、数值案例与C++17算法"><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><style>body{margin:0;background:white;color:#142733;font:16px/1.95 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:24px 32px 64px}main{max-width:1150px;margin:auto}header,.lesson,.source,.references{border:1px solid #cad3d9;padding:24px 28px;margin:18px 0;background:white}h1{font-size:31px;line-height:1.4}h2{font-size:23px;margin:10px 0 20px}h3{font-size:17px;margin:22px 0 6px}p{line-height:1.95;margin:12px 0}.toc{display:flex;flex-wrap:wrap;gap:9px 24px;border:1px solid #cad3d9;padding:17px 24px}.equation{overflow:auto;border-block:1px solid #d7dfe4;margin:18px 0;padding:16px 6px}.katex-display{overflow-x:auto;overflow-y:hidden}a{color:#1a5478}code,pre{font-family:"Times New Roman",monospace}pre{border:1px solid #cbd5dc;padding:15px;overflow:auto;white-space:pre;font-size:13px;line-height:1.7;max-height:850px}@media(max-width:790px){.main{margin:0;padding:12px}header,.lesson,.source,.references{padding:15px}}</style></head><body><aside id="quantSidebar" class="sidebar" data-page="assets"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><small>QUANTITATIVE RESEARCH / MULTIVARIATE NUMERICAL METHODS</small><h1>信用迁移、违约分布与回收现金流</h1><p>信用研究不仅需要违约概率与平均损失，还需要描述期限迁移、损失分布及回收现金流。矩阵状态推进刻画评级变动，卷积动态规划在独立假设下计算组合违约数与损失概率。</p><p>离散损失尾部的概率质量及其原子分布直接影响VaR与Expected Shortfall。生存曲线与信用保护费率需要明确风险中性强度和市场支付规则，避免将实际违约频率直接用于市场估值。</p></header><nav class="toc"><a href="#lesson1">1．三状态信用迁移矩阵的多期推进</a><a href="#lesson2">2．独立异质违约概率的Poisson–Binomial分布</a><a href="#lesson3">3．独立信用损失的整数格点卷积</a><a href="#lesson4">4．分段常数违约强度的边际违约与生存概率</a><a href="#lesson5">5．离散支付CDS平价保护费率</a><a href="#source">C++17完整实现</a><a href="#references">参考文献</a></nav><article class="lesson" id="lesson1"><h2>1．三状态信用迁移矩阵的多期推进</h2>
+ <h3>模型结构与数学定义</h3><p>将信用状态划分为两个非违约评级和一个吸收违约状态。验证三行转移概率分别和为1、最后一行是吸收状态，再逐期推进初始概率向量。输出期限末三个状态的完整概率分布。</p><div class="equation">$$p_{t+h}=p_tP^h$$</div>
+ <h3>推导、最优性条件与数值结构</h3><div class="equation">$$\sum_jP_{ij}=1,\quad P_{D,D}=1,\quad p_D(t+1)\ge p_D(t)$$</div><p>转移矩阵每行概率和为1，所以概率向量在矩阵乘法下保持总质量。违约状态为吸收态，其质量只能增加；多期违约率可由最后一分量直接读取。</p>
+ <h3>完整计算案例</h3><p>初始全在优质状态，转移矩阵第一行(0.8,0.1,0.1)，第二行(0,0.8,0.2)，违约状态吸收。两期后概率为(0.64,0.16,0.2)。</p><div class="equation">$$\mathrm{Output}\approx\left(0.64,\ 0.16,\ 0.2\right)$$</div>
+ <p>输出顺序：期限末优质评级、弱评级、违约状态的概率。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>Good,Weak,Default
+0.8,0.1,0.1
+0,0.8,0.2
+0,0,1</code></pre><pre><code>./kline_quant lab24-credit-migration-two study.csv 2 1 0 0</code></pre>
+ <h3>估计假设与应用边界</h3><p>齐次转移矩阵假设在跨周期预测中可能不成立；在经济压力情景下可按每期条件迁移矩阵扩展。参数为步数和初始三个状态概率。</p></article>
+<article class="lesson" id="lesson2"><h2>2．独立异质违约概率的Poisson–Binomial分布</h2>
+ <h3>模型结构与数学定义</h3><p>初始化零违约概率为1。每加入一笔信用敞口，就从高违约数向低违约数倒序更新概率质量，分别考虑新增债项违约和不违约两种状态。输出从零违约至全部违约的完整概率质量函数。</p><div class="equation">$$p_k^{(i)}=(1-q_i)p_k^{(i-1)}+q_ip_{k-1}^{(i-1)}$$</div>
+ <h3>推导、最优性条件与数值结构</h3><div class="equation">$$G(z)=\prod_{i=1}^n[(1-q_i)+q_i z],\quad \Pr(N=k)=[z^k]G(z)$$</div><p>独立指示变量的概率生成函数相乘，每次乘入一个一次多项式即产生概率卷积。倒序更新避免本轮新概率覆盖尚未读取的上一轮概率。</p>
+ <h3>完整计算案例</h3><p>两笔独立违约概率0.1、0.2：零笔违约0.72、一笔0.26、两笔0.02。</p><div class="equation">$$\mathrm{Output}\approx\left(0.72,\ 0.26,\ 0.02\right)$$</div>
+ <p>输出顺序：由零违约到所有债项违约的概率质量。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>PD
+0.1
+0.2</code></pre><pre><code>./kline_quant lab24-credit-poisson-binomial study.csv</code></pre>
+ <h3>估计假设与应用边界</h3><p>不同债项信用事件相关时，独立Bernoulli卷积会低估或错误刻画尾部风险。复杂度O(n²)，此处限制1000个债项。</p></article>
+<article class="lesson" id="lesson3"><h2>3．独立信用损失的整数格点卷积</h2>
+ <h3>模型结构与数学定义</h3><p>将每个债项的违约损失金额映射到整数损失格点。动态规划在每新增一个债项后更新组合损失分布，然后计算预期损失、分位损失与精确尾部质量的Expected Shortfall。</p><div class="equation">$$f_i(\ell)=(1-q_i)f_{i-1}(\ell)+q_i f_{i-1}(\ell-L_i)$$</div>
+ <h3>推导、最优性条件与数值结构</h3><div class="equation">$$ES_\alpha=\frac{\sum_{k&gt;v}k f(k)+v\,[1-\alpha-\Pr(L&gt;v)]}{1-\alpha},\quad v=VaR_\alpha$$</div><p>先按损失格点分布求累计概率达到置信水平的最小损失。离散分布可能在分位数点存在概率原子，因此从最大损失开始精确取满1−α概率质量，比直接对超过VaR的样本平均更符合积分定义。</p>
+ <h3>完整计算案例</h3><p>两笔损失金额均1，违约概率0.1、0.2，置信度0.9；平均损失0.3，VaR为1，最坏10%质量含2%双违约、8%单违约，ES=1.2。</p><div class="equation">$$\mathrm{Output}\approx\left(0.3,\ 1,\ 1.2\right)$$</div>
+ <p>输出顺序：组合预期损失、分位数VaR、按尾部质量积分的ES。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>PD,LossUnits
+0.1,1
+0.2,1</code></pre><pre><code>./kline_quant lab24-credit-loss-convolution study.csv 0.9</code></pre>
+ <h3>估计假设与应用边界</h3><p>损失额必须为非负整数单位，真实金额需选择可解释的离散单位。独立假设与格点最大损失限制明确约束使用范围。</p></article>
+<article class="lesson" id="lesson4"><h2>4．分段常数违约强度的边际违约与生存概率</h2>
+ <h3>模型结构与数学定义</h3><p>在每段时间区间内假设违约强度常数。利用条件生存概率的指数形式逐段推进累计生存概率，并记录该段边际违约质量。输出交替排列的生存概率及边际违约概率。</p><div class="equation">$$S(t_i)=S(t_{i-1})e^{-\lambda_i\Delta t_i},\quad PD_i=S(t_{i-1})-S(t_i)$$</div>
+ <h3>推导、最优性条件与数值结构</h3><div class="equation">$$S(t)=\exp(-\int_0^t\lambda(s)ds),\quad \Pr(t_{i-1}&lt;\tau\le t_i)=S(t_{i-1})(1-e^{-\lambda_i\Delta t_i})$$</div><p>累计强度为每段强度乘持续时间之和，生存概率由累计强度的指数衰减给出。边际违约质量使用前段末生存概率乘当前段条件违约概率；数值实现用expm1减少极短区间的消减误差。</p>
+ <h3>完整计算案例</h3><p>每段一年、强度log2，两段生存概率分别0.5、0.25，边际违约质量分别0.5、0.25。</p><div class="equation">$$\mathrm{Output}\approx\left(0.5,\ 0.5,\ 0.25,\ 0.25\right)$$</div>
+ <p>输出顺序：每个区间末生存概率与该区间边际违约概率，交替排列。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>EndTime,Hazard
+1,0.6931471805599453
+2,0.6931471805599453</code></pre><pre><code>./kline_quant lab24-credit-survival-hazard study.csv</code></pre>
+ <h3>估计假设与应用边界</h3><p>强度必须非负，期限必须严格递增；风险中性强度与真实世界违约强度的经济含义不同。</p></article>
+<article class="lesson" id="lesson5"><h2>5．离散支付CDS平价保护费率</h2>
+ <h3>模型结构与数学定义</h3><p>按各期生存曲线下降确定边际违约概率，把约定损失率乘边际违约概率及期末贴现因子，构成保护腿；保费腿由生存概率加权的计息期现值构成。令双方现值相等，求平价年化费率。输出保护腿、风险年金及费率。</p><div class="equation">$$s=\frac{(1-R)\sum_iD_i(S_{i-1}-S_i)}{\sum_i\Delta t_iD_i S_i}$$</div>
+ <h3>推导、最优性条件与数值结构</h3><div class="equation">$$PV_{\rm protection}=LGD\sum_iD_i\Delta PD_i,\quad PV_{\rm premium}=s\sum_i\Delta t_iD_iS_i$$</div><p>用边际违约质量计算违约支付的期望，以生存概率计算仍需缴纳的保费。固定回收率下，令两个现值相等得到平价费率，若保费腿为零则费率没有定义。</p>
+ <h3>完整计算案例</h3><p>一年期生存概率0.9、贴现因子1、回收率0.4时，保护腿0.06、年金0.9、费率0.0666667。</p><div class="equation">$$\mathrm{Output}\approx\left(0.06,\ 0.9,\ 0.0666666667\right)$$</div>
+ <p>输出顺序：单位名义金额保护腿现值、风险年金、年化平价费率。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>EndTime,Survival,Discount
+1,0.9,1</code></pre><pre><code>./kline_quant lab24-credit-discrete-cds-spread study.csv 0.4</code></pre>
+ <h3>估计假设与应用边界</h3><p>这是期末支付近似，忽略违约时点保费应计和连续支付；真实CDS合同需按交易市场标准处理。</p></article>
+<section class="source" id="source"><h2>完整C++17实现</h2><p>输入为逐行组织的数值矩阵及标量参数向量，输出为按前文约定排列的数值向量。各方法对维度、参数范围、数值有限性及可行性进行检查。</p><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/lab24_credit.hpp">算法源文件</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/lab24_common.hpp">公共接口</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_lab24.cpp">数值回归与结构恒等式测试</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_lab24_cli.py">CSV接口复算测试</a>。</p><h3>独立算法</h3><pre><code>#pragma once
+#include "lab24_common.hpp"
+
+namespace kline { namespace lab24 {
+inline Vec migration_two(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,3,4,3);require(x.size()==3,"Three rating states required");auto h=integer(p[0],1,100000);Vec v(p.begin()+1,p.end());
+    for(double q:v){require(q&gt;=0&amp;&amp;q&lt;=1,"Invalid initial state probability");}
+    require(std::abs(sum(v)-1)&lt;1e-10,"Initial probabilities must sum to one");
+    for(const auto&amp; r:x){for(double q:r)require(q&gt;=0&amp;&amp;q&lt;=1,"Invalid transition");require(std::abs(sum(r)-1)&lt;1e-10,"Transition rows must sum to one");}
+    require(x[2][0]==0&amp;&amp;x[2][1]==0&amp;&amp;x[2][2]==1,"Default state must be absorbing");
+    for(std::size_t t=0;t&lt;h;++t){Vec w(3,0);for(std::size_t i=0;i&lt;3;++i)for(std::size_t j=0;j&lt;3;++j)w[j]+=v[i]*x[i][j];v=std::move(w);}
+    return checked(v);
+}
+
+inline Vec poisson_binomial(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,1,0);require(x.size()&lt;=1000,"Exact convolution limited to 1000 debts");Vec d(x.size()+1,0);d[0]=1;std::size_t n=0;
+    for(const auto&amp; r:x){double q=r[0];require(q&gt;=0&amp;&amp;q&lt;=1,"Invalid PD");++n;for(std::size_t k=n;k&gt;0;--k)d[k]=(1-q)*d[k]+q*d[k-1];d[0]*=1-q;}
+    return checked(d);
+}
+
+inline Vec loss_convolution(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,2,1);require(p[0]&gt;0&amp;&amp;p[0]&lt;1,"Invalid confidence");require(x.size()&lt;=1000,"Too many credit names");std::size_t maxloss=0;
+    for(const auto&amp; r:x){require(r[0]&gt;=0&amp;&amp;r[0]&lt;=1,"Invalid PD");maxloss+=integer(r[1],0,20000);require(maxloss&lt;=20000,"Loss grid too large");}
+    Vec d(maxloss+1,0);d[0]=1;std::size_t current=0;
+    for(const auto&amp; r:x){auto l=std::size_t(r[1]);double q=r[0];if(l==0)continue;current+=l;for(std::size_t k=current+1;k--&gt;0;){d[k]=(1-q)*d[k]+(k&gt;=l?q*d[k-l]:0);}}
+    double el=0,cdf=0,var=0;bool found=false;for(std::size_t k=0;k&lt;d.size();++k){el+=k*d[k];cdf+=d[k];if(!found&amp;&amp;cdf&gt;=p[0]-1e-14){var=double(k);found=true;}}
+    double mass=1-p[0],left=mass,tail=0;for(std::size_t k=d.size();k--&gt;0&amp;&amp;left&gt;0;){double take=std::min(left,d[k]);tail+=take*k;left-=take;}
+    return checked({el,var,tail/mass});
+}
+
+inline Vec survival_hazard(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,2,0);double last=0,s=1;Vec out;
+    for(const auto&amp; r:x){require(r[0]&gt;last&amp;&amp;r[1]&gt;=0,"Invalid hazard interval");double e=-r[1]*(r[0]-last),d=s*(-std::expm1(e));s*=std::exp(e);out.push_back(s);out.push_back(d);last=r[0];}
+    return checked(out);
+}
+
+inline Vec discrete_cds_spread(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,3,1);require(p[0]&gt;=0&amp;&amp;p[0]&lt;=1,"Invalid recovery");double t=0,s=1,a=0,b=0;
+    for(const auto&amp; r:x){require(r[0]&gt;t&amp;&amp;r[1]&gt;=0&amp;&amp;r[1]&lt;=s,"Invalid survival schedule");positive(r[2]);a+=(1-p[0])*r[2]*(s-r[1]);b+=(r[0]-t)*r[2]*r[1];t=r[0];s=r[1];}
+    return checked({a,b,a/positive(b)});
+}
+} }
+</code></pre><h3>公共数值接口</h3><pre><code>#pragma once
+#include "stats.hpp"
+#include &lt;algorithm&gt;
+#include &lt;cmath&gt;
+#include &lt;cstddef&gt;
+#include &lt;limits&gt;
+#include &lt;numeric&gt;
+#include &lt;stdexcept&gt;
+#include &lt;utility&gt;
+#include &lt;vector&gt;
+
+namespace kline { namespace lab24 {
+using Vec=std::vector&lt;double&gt;;
+using Mat=std::vector&lt;Vec&gt;;
+
+inline void inputs(const Mat&amp; x,const Vec&amp; p,std::size_t cols,std::size_t params,
+                   std::size_t min_rows=1) {
+    require(x.size()&gt;=min_rows&amp;&amp;x.size()&lt;=250000,"Invalid number of observations");
+    require(p.size()==params,"Incorrect scalar parameter count");
+    for(double v:p)require(std::isfinite(v),"Nonfinite scalar parameter");
+    for(const auto&amp; row:x){
+        require(row.size()==cols,"Unexpected CSV column count");
+        for(double v:row)require(std::isfinite(v),"Nonfinite matrix entry");
+    }
+}
+inline std::size_t integer(double x,std::size_t low,std::size_t high){
+    require(std::isfinite(x)&amp;&amp;x&gt;=double(low)&amp;&amp;x&lt;=double(high)&amp;&amp;std::floor(x)==x,
+            "Integer parameter outside allowed range");
+    return std::size_t(x);
+}
+inline double dot(const Vec&amp; a,const Vec&amp; b){
+    require(a.size()==b.size(),"Dot product dimension mismatch");
+    return std::inner_product(a.begin(),a.end(),b.begin(),0.0);
+}
+inline Vec col(const Mat&amp; x,std::size_t j){
+    Vec out;out.reserve(x.size());
+    for(const auto&amp; row:x)out.push_back(row.at(j));
+    return out;
+}
+inline double positive(double x){require(x&gt;0&amp;&amp;std::isfinite(x),"Positive finite quantity required");return x;}
+inline Vec checked(Vec v){check_finite(v);return v;}
+inline double logistic(double x){
+    if(x&gt;=0)return 1/(1+std::exp(-x));
+    double e=std::exp(x);return e/(1+e);
+}
+inline double normal_cdf(double x){return 0.5*std::erfc(-x/std::sqrt(2.0));}
+inline double sum(const Vec&amp; v){return std::accumulate(v.begin(),v.end(),0.0);}
+} }
+</code></pre></section><section class="references" id="references"><h2>参考文献与进一步阅读</h2><p><a href="https://www.bis.org/basel_framework/">Basel Framework: Credit Risk</a></p><p><a href="https://www.federalreserve.gov/supervisionreg/dfa-stress-tests.htm">Federal Reserve Supervisory Stress Test Methodology</a></p><p>课程中的数值样本均为明确构造的教学算例，不代表真实市场实证结果。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

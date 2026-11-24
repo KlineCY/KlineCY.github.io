@@ -41,6 +41,9 @@
        subsection("regionNavMenu","按地区划分","regionSub")),
     assets:
       '<a class="q-menu-link" href="'+route("assets")+'">全部金融资产</a>'+
+      '<a class="q-menu-link" href="'+route("assets")+'lab24-credit.html">信用迁移、损失分布与回收</a>'+
+      '<a class="q-menu-link" href="'+route("assets")+'lab24-derivative.html">期权动态规划、复制与曲面条件</a>'+
+      '<a class="q-menu-link" href="'+route("assets")+'lab24-rates.html">利率期限结构与现金流匹配</a>'+
       '<a class="q-menu-link" href="'+route("assets")+'atlas2026-credit.html">信用组合预期损失</a>'+
       '<a class="q-menu-link" href="'+route("assets")+'atlas2026-cashflows.html">现金流与贴现回收</a>'+
       '<a class="q-menu-link" href="'+route("assets")+'volatility-surface-greeks.html">期权Vanna、Volga与远期方差</a>'+
@@ -52,6 +55,7 @@
       subsection("typeNav","按金融工具类型","typeChoices"),
     feeds:
       '<a class="q-menu-link" href="'+route("feeds")+'">全部数据字段</a>'+
+      '<a class="q-menu-link" href="'+route("feeds")+'lab24-execution.html">执行路径、订单队列与市场冲击</a>'+
       '<a class="q-menu-link" href="'+route("feeds")+'atlas2026-execution.html">交易执行容量</a>'+
       '<a class="q-menu-link" href="'+route("feeds")+'point-in-time-vintage-diagnostics.html">历史数据版本与报价质量</a>'+
       '<a class="q-menu-link" href="'+route("feeds")+'orderbook-liquidity-structure.html">报价价差与订单流持续性</a>'+
@@ -62,6 +66,7 @@
       subsection("feedsCategoryNav","按数据类别","feedChoices",page==="feeds"),
     research:
       '<a class="q-menu-link" href="'+route("research")+'">在线 Python 回测</a>'+
+      '<a class="q-menu-link" href="'+route("research")+'lab24-portfolio.html">多资产约束、配置与风险分解</a>'+
       '<a class="q-menu-link" href="'+route("research")+'atlas2026-wealth.html">相对财富与波动拖累</a>'+
       '<a class="q-menu-link" href="'+route("research")+'atlas2026-signals.html">量化因子经济性</a>'+
       '<a class="q-menu-link" href="'+route("research")+'euler-risk-tail-attribution.html">Euler风险与尾部归因</a>'+
@@ -73,6 +78,8 @@
       subsection("researchStrategyNav","按策略选择","strategyChoices",page==="research"),
     audit:
       '<a class="q-menu-link" href="'+route("audit")+'">完整研究验证课程</a>'+
+      '<a class="q-menu-link" href="'+route("audit")+'lab24-data.html">时点一致性、样本划分与事件诊断</a>'+
+      '<a class="q-menu-link" href="'+route("audit")+'lab24-panel.html">面板计量、配对样本与聚类误差</a>'+
       '<a class="q-menu-link" href="'+route("audit")+'doubly-robust-causal-analysis.html">IPW与双重稳健估计</a>'+
       '<a class="q-menu-link" href="'+route("audit")+'empirical-research-lab.html">实证验证、统计推断与资金审计</a>'+
       '<a class="q-menu-link" href="'+route("audit")+'causal-inference-estimators.html">断点、工具变量与合成对照</a>'+
@@ -94,11 +101,16 @@
       '<a class="q-menu-link" href="'+route("research")+'portfolio-path-and-margin.html">净值路径、杠杆与保证金</a>'+
       '<a class="q-menu-link" href="'+route("audit")+'causal-inference-estimators.html">断点、工具变量与合成对照</a>'+
       '<a class="q-menu-link" href="'+route("math")+'ohlc-realized-volatility.html">高低价波动率与隔夜跳空</a>'+
+      '<a class="q-menu-link" href="'+route("math")+'lab24-state.html">随机状态模型、滤波与概率推断</a>'+
+      '<a class="q-menu-link" href="'+route("math")+'lab24-network.html">金融网络、图扩散与风险结构</a>'+
+      '<a class="q-menu-link" href="'+route("math")+'lab24-optim.html">约束优化、近端映射与权重求解</a>'+
+      '<a class="q-menu-link" href="'+route("math")+'lab24-linear.html">矩阵分解、谱分析与多元数值计算</a>'+
       '<a class="q-menu-link" href="'+route("math")+'atlas2026-dependence.html">下行尾部相依</a>'+
       '<a class="q-menu-link" href="'+route("math")+'atlas2026-robust.html">稳健回归损失</a>'+
       '<a class="q-menu-link" href="'+route("math")+'atlas2026-tail.html">极端损失与尾部风险</a>'+
       '<a class="q-menu-link" href="'+route("math")+'asynchronous-financial-variation.html">异步高频收益与四次变差</a>'+
       '<a class="q-menu-link" href="'+route("ml")+'probabilistic-forecast-evaluation.html">分位、CRPS与概率评分</a>'+
+      '<a class="q-menu-link" href="'+route("ml")+'lab24-learning.html">在线学习、概率预测与模型校准</a>'+
       '<a class="q-menu-link" href="'+route("ml")+'atlas2026-forecast.html">金融预测误差</a>'+
       '<a class="q-menu-link" href="'+route("ml")+'imbalanced-classification-evidence.html">分类评价与概率评分</a>'+
       '<a class="q-menu-link" href="'+route("cpp")+'#sitewide">全站互联C++17算法与课程</a>'+

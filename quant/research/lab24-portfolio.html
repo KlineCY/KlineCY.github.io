@@ -1,0 +1,131 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>多资产组合约束、稳健配置与风险分解｜Kline Quant</title><meta name="description" content="多变量量化研究、公式推导、数值案例与C++17算法"><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><style>body{margin:0;background:white;color:#142733;font:16px/1.95 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:24px 32px 64px}main{max-width:1150px;margin:auto}header,.lesson,.source,.references{border:1px solid #cad3d9;padding:24px 28px;margin:18px 0;background:white}h1{font-size:31px;line-height:1.4}h2{font-size:23px;margin:10px 0 20px}h3{font-size:17px;margin:22px 0 6px}p{line-height:1.95;margin:12px 0}.toc{display:flex;flex-wrap:wrap;gap:9px 24px;border:1px solid #cad3d9;padding:17px 24px}.equation{overflow:auto;border-block:1px solid #d7dfe4;margin:18px 0;padding:16px 6px}.katex-display{overflow-x:auto;overflow-y:hidden}a{color:#1a5478}code,pre{font-family:"Times New Roman",monospace}pre{border:1px solid #cbd5dc;padding:15px;overflow:auto;white-space:pre;font-size:13px;line-height:1.7;max-height:850px}@media(max-width:790px){.main{margin:0;padding:12px}header,.lesson,.source,.references{padding:15px}}</style></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><small>QUANTITATIVE RESEARCH / MULTIVARIATE NUMERICAL METHODS</small><h1>多资产组合约束、稳健配置与风险分解</h1><p>多资产组合构建必须将风险模型、目标头寸与执行可行性放入同一数学框架。线性因子约束与风险预算解决暴露和风险分配问题，交易成本则通过近端映射改变无成本目标权重。</p><p>组合在两个再平衡时点之间还会因价格变化自然漂移。用漂移后头寸计算真实换手，再将系统性风险与特质风险分开核算，可以形成配置、风险和交易三者一致的研究链。</p></header><nav class="toc"><a href="#lesson1">1．双约束最小扰动的因子中性投影</a><a href="#lesson2">2．对角协方差下的风险预算组合</a><a href="#lesson3">3．单公共因子模型的系统性与特质风险</a><a href="#lesson4">4．交易成本下的逐资产不交易区间</a><a href="#lesson5">5．再平衡前权重漂移与实现换手</a><a href="#source">C++17完整实现</a><a href="#references">参考文献</a></nav><article class="lesson" id="lesson1"><h2>1．双约束最小扰动的因子中性投影</h2>
+ <h3>模型结构与数学定义</h3><p>将目标头寸向量投影到指定净敞口和单因子暴露的线性约束集合。根据拉格朗日条件，最小二乘扰动必位于两行约束向量的张成空间内。求解二维Gram系统得到乘子，并减去相应调整量。</p><div class="equation">$$w=z-A^\top(AA^\top)^{-1}(Az-b),\quad A=\begin{pmatrix}\mathbf1^\top\\f^\top\end{pmatrix}$$</div>
+ <h3>推导、最优性条件与数值结构</h3><div class="equation">$$AA^\top=\begin{pmatrix}n&amp;\sum_i f_i\\ \sum_i f_i&amp;\sum_i f_i^2\end{pmatrix},\quad \det(AA^\top)=n\sum_i(f_i-\bar f)^2$$</div><p>从目标权重扣除约束行向量的线性组合，使新权重满足约束。两个乘子由Gram矩阵确定；若因子载荷完全相同，第二个约束与预算约束线性相关，矩阵不可逆。</p>
+ <h3>完整计算案例</h3><p>三个资产的原始头寸为(1,1,1)，因子载荷为(−1,0,1)，要求净敞口和因子暴露均为0，最小扰动解为三个零头寸。</p><div class="equation">$$\mathrm{Output}\approx\left(0,\ 0,\ 0\right)$$</div>
+ <p>输出顺序：各资产投影后的带符号权重。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>TargetWeight,Factor
+1,-1
+1,0
+1,1</code></pre><pre><code>./kline_quant lab24-portfolio-factor-neutral-two study.csv 0 0</code></pre>
+ <h3>估计假设与应用边界</h3><p>两个约束必须线性独立；当前方法允许空头，不同时施加总敞口与单资产上界。参数依次为目标净敞口与因子敞口。</p></article>
+<article class="lesson" id="lesson2"><h2>2．对角协方差下的风险预算组合</h2>
+ <h3>模型结构与数学定义</h3><p>无相关资产的波动风险贡献比例为w_i²σ_i²除以组合方差。令这一比例等于预算b_i，直接反解w_i与√b_i/σ_i成正比。归一化后输出满足全额投资的组合权重。</p><div class="equation">$$w_i=\frac{\sqrt{b_i}/\sigma_i}{\sum_j\sqrt{b_j}/\sigma_j}$$</div>
+ <h3>推导、最优性条件与数值结构</h3><div class="equation">$$RC_i=\frac{w_i^2\sigma_i^2}{\sigma_p},\qquad b_i=\frac{RC_i}{\sigma_p}=\frac{w_i^2\sigma_i^2}{\sum_jw_j^2\sigma_j^2}$$</div><p>由Euler齐次函数分解，波动率对资产权重的边际贡献为w_iσ_i²除以组合波动率。乘权重后得到绝对风险贡献，再除以总风险即为风险预算比例。</p>
+ <h3>完整计算案例</h3><p>两个资产波动率为1和2，风险预算均为0.5，权重比例为2:1，得到(2/3,1/3)。两项加权波动率相等，风险预算也相等。</p><div class="equation">$$\mathrm{Output}\approx\left(0.666666667,\ 0.333333333\right)$$</div>
+ <p>输出顺序：各资产满足目标风险预算的权重。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>Volatility,RiskBudget
+1,0.5
+2,0.5</code></pre><pre><code>./kline_quant lab24-portfolio-risk-budget-diag study.csv</code></pre>
+ <h3>估计假设与应用边界</h3><p>资产协方差非零时此闭式解不再成立；预算必须非负且和为1，波动率严格为正。</p></article>
+<article class="lesson" id="lesson3"><h2>3．单公共因子模型的系统性与特质风险</h2>
+ <h3>模型结构与数学定义</h3><p>由因子收益模型r_i=β_if+ε_i以及特质残差互不相关、与因子不相关的假设，组合收益方差可分为因子暴露平方乘因子方差与各特质方差加权平方。返回净因子载荷、系统性方差、特质方差和总波动率。</p><div class="equation">$$\Sigma=\sigma_f^2\beta\beta^\top+\operatorname{diag}(\sigma_{\epsilon,i}^2),\quad \sigma_p^2=\sigma_f^2(w^\top\beta)^2+\sum_iw_i^2\sigma_{\epsilon,i}^2$$</div>
+ <h3>推导、最优性条件与数值结构</h3><div class="equation">$$r_p=(\sum_iw_i\beta_i)f+\sum_iw_i\epsilon_i,\quad \operatorname{Cov}(f,\epsilon_i)=\operatorname{Cov}(\epsilon_i,\epsilon_j)=0\ (i\ne j)$$</div><p>把持仓加权收益代入因子结构，方差的交叉项在零协方差假设下消失。系统性风险由所有资产的净载荷共同决定，特质风险则由各资产权重平方相加决定。</p>
+ <h3>完整计算案例</h3><p>两资产各权重0.5，载荷均为1，特质方差均为1，公共因子方差为1。系统性方差1，特质方差0.5，总波动√1.5。</p><div class="equation">$$\mathrm{Output}\approx\left(1,\ 1,\ 0.5,\ 1.22474487\right)$$</div>
+ <p>输出顺序：因子净暴露、系统性方差、特质方差、总波动率。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>Weight,Beta,IdioVariance
+0.5,1,1
+0.5,1,1</code></pre><pre><code>./kline_quant lab24-portfolio-factor-cov-risk study.csv 1</code></pre>
+ <h3>估计假设与应用边界</h3><p>输入方差而非波动率。残差相关与多个公共因子需要使用完整因子协方差矩阵。</p></article>
+<article class="lesson" id="lesson4"><h2>4．交易成本下的逐资产不交易区间</h2>
+ <h3>模型结构与数学定义</h3><p>将每资产目标偏离的平方损失与线性换手成本相加，目标函数按资产分离。通过对增量头寸求次梯度，交易量为原目标变动经成本阈值软缩减后的结果。输出新头寸向量。</p><div class="equation">$$w_i=w_i^{old}+\operatorname{sgn}(z_i-w_i^{old})\left(|z_i-w_i^{old}|-\frac{c_i}{a_i}\right)_+$$</div>
+ <h3>推导、最优性条件与数值结构</h3><div class="equation">$$\min_{\Delta w_i}\tfrac{a_i}{2}(\Delta w_i-z_i+w_i^{old})^2+c_i|\Delta w_i|$$</div><p>将旧头寸平移为增量变量。在零交易点，L1项的次梯度区间为[−c_i,c_i]，当目标偏移的边际收益不足以超过成本时，零交易满足一阶条件。</p>
+ <h3>完整计算案例</h3><p>旧权重0.2、0.4，目标0.5、0.35，惩罚曲率均1、成本0.1，则第一资产调至0.4，第二资产差值0.05在不交易区间内，仍为0.4。</p><div class="equation">$$\mathrm{Output}\approx\left(0.4,\ 0.4\right)$$</div>
+ <p>输出顺序：每个资产调整后的权重。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>Old,Target,Curvature,Cost
+0.2,0.5,1,0.1
+0.4,0.35,1,0.1</code></pre><pre><code>./kline_quant lab24-portfolio-turnover-prox study.csv</code></pre>
+ <h3>估计假设与应用边界</h3><p>此近端解独立处理每个资产，不保证预算总和或其他组合约束。用于实际配置时需结合约束优化。</p></article>
+<article class="lesson" id="lesson5"><h2>5．再平衡前权重漂移与实现换手</h2>
+ <h3>模型结构与数学定义</h3><p>先利用资产回报推进各持仓的金额，再除以组合总金额得到实际再平衡前权重。将目标与漂移后权重比较，半L1距离给出全额投资长仓组合的单边换手。输出组合期收益、单边换手和全部漂移权重。</p><div class="equation">$$\widetilde w_{i,t}=\frac{w_{i,t-1}(1+r_{i,t})}{1+\sum_jw_{j,t-1}r_{j,t}},\quad TO_t=\tfrac12\sum_i|w_{i,t}^*-\widetilde w_{i,t}|$$</div>
+ <h3>推导、最优性条件与数值结构</h3><div class="equation">$$V_t=V_{t-1}\sum_i w_{i,t-1}(1+r_{i,t}),\qquad \sum_i\widetilde w_{i,t}=1$$</div><p>再平衡前的资产金额各自随回报变化，金额归一化后得到漂移权重。在目标与原权重都和为1时，买入总额等于卖出总额，故总绝对变化量的一半对应单边换手。</p>
+ <h3>完整计算案例</h3><p>起始等权，两资产回报0.2、0，组合收益0.1；漂移权重分别为6/11、5/11，回归等权的单边换手为1/22。</p><div class="equation">$$\mathrm{Output}\approx\left(0.1,\ 0.0454545455,\ 0.545454545,\ 0.454545455\right)$$</div>
+ <p>输出顺序：组合收益、单边换手率、各资产漂移后权重。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>OldWeight,Return,TargetWeight
+0.5,0.2,0.5
+0.5,0,0.5</code></pre><pre><code>./kline_quant lab24-portfolio-rebalance-drift study.csv</code></pre>
+ <h3>估计假设与应用边界</h3><p>输入起始权重和目标权重均非负且和为1，资产毛增长因子非负，组合净值必须为正。半L1换手的含义依赖全额投资假设。</p></article>
+<section class="source" id="source"><h2>完整C++17实现</h2><p>输入为逐行组织的数值矩阵及标量参数向量，输出为按前文约定排列的数值向量。各方法对维度、参数范围、数值有限性及可行性进行检查。</p><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/lab24_portfolio.hpp">算法源文件</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/lab24_common.hpp">公共接口</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_lab24.cpp">数值回归与结构恒等式测试</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_lab24_cli.py">CSV接口复算测试</a>。</p><h3>独立算法</h3><pre><code>#pragma once
+#include "lab24_common.hpp"
+#include &lt;map&gt;
+
+namespace kline { namespace lab24 {
+inline Vec factor_neutral_two(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,2,2,2);Vec z=col(x,0),f=col(x,1);
+    double n=double(x.size()),sf=sum(f),ff=dot(f,f),d=positive(n*ff-sf*sf);
+    double e=sum(z)-p[0],g=dot(z,f)-p[1],a=(ff*e-sf*g)/d,b=(n*g-sf*e)/d;
+    for(std::size_t i=0;i&lt;z.size();++i)z[i]-=a+b*f[i];
+    return checked(z);
+}
+
+inline Vec risk_budget_diag(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,2,0);double b=0;Vec w;
+    for(const auto&amp; r:x){positive(r[0]);require(r[1]&gt;=0,"Negative risk budget");b+=r[1];w.push_back(std::sqrt(r[1])/r[0]);}
+    require(std::abs(b-1)&lt;1e-10,"Risk budgets must sum to one");double z=positive(sum(w));
+    for(double&amp; q:w){q/=z;}
+    return checked(w);
+}
+
+inline Vec factor_cov_risk(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,3,1);require(p[0]&gt;=0,"Negative factor variance");double beta=0,idio=0;
+    for(const auto&amp; r:x){require(r[2]&gt;=0,"Negative idiosyncratic variance");beta+=r[0]*r[1];idio+=r[0]*r[0]*r[2];}
+    double sys=p[0]*beta*beta;return checked({beta,sys,idio,std::sqrt(sys+idio)});
+}
+
+inline Vec turnover_prox(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,4,0);Vec w;
+    for(const auto&amp; r:x){positive(r[2]);require(r[3]&gt;=0,"Negative trading cost");double d=r[1]-r[0];w.push_back(r[0]+std::copysign(std::max(0.0,std::abs(d)-r[3]/r[2]),d));}
+    return checked(w);
+}
+
+inline Vec rebalance_drift(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,3,0);double old=0,target=0,ret=0;
+    for(const auto&amp; r:x){require(r[0]&gt;=0&amp;&amp;r[2]&gt;=0&amp;&amp;r[1]&gt;=-1,"Invalid long-only return or weight");old+=r[0];target+=r[2];ret+=r[0]*r[1];}
+    require(std::abs(old-1)&lt;1e-10&amp;&amp;std::abs(target-1)&lt;1e-10,"Weights must sum to one");double gross=positive(1+ret),to=0;Vec v;
+    for(const auto&amp; r:x){double w=r[0]*(1+r[1])/gross;v.push_back(w);to+=std::abs(w-r[2]);}
+    Vec out={ret,to/2};out.insert(out.end(),v.begin(),v.end());return checked(out);
+}
+} }
+</code></pre><h3>公共数值接口</h3><pre><code>#pragma once
+#include "stats.hpp"
+#include &lt;algorithm&gt;
+#include &lt;cmath&gt;
+#include &lt;cstddef&gt;
+#include &lt;limits&gt;
+#include &lt;numeric&gt;
+#include &lt;stdexcept&gt;
+#include &lt;utility&gt;
+#include &lt;vector&gt;
+
+namespace kline { namespace lab24 {
+using Vec=std::vector&lt;double&gt;;
+using Mat=std::vector&lt;Vec&gt;;
+
+inline void inputs(const Mat&amp; x,const Vec&amp; p,std::size_t cols,std::size_t params,
+                   std::size_t min_rows=1) {
+    require(x.size()&gt;=min_rows&amp;&amp;x.size()&lt;=250000,"Invalid number of observations");
+    require(p.size()==params,"Incorrect scalar parameter count");
+    for(double v:p)require(std::isfinite(v),"Nonfinite scalar parameter");
+    for(const auto&amp; row:x){
+        require(row.size()==cols,"Unexpected CSV column count");
+        for(double v:row)require(std::isfinite(v),"Nonfinite matrix entry");
+    }
+}
+inline std::size_t integer(double x,std::size_t low,std::size_t high){
+    require(std::isfinite(x)&amp;&amp;x&gt;=double(low)&amp;&amp;x&lt;=double(high)&amp;&amp;std::floor(x)==x,
+            "Integer parameter outside allowed range");
+    return std::size_t(x);
+}
+inline double dot(const Vec&amp; a,const Vec&amp; b){
+    require(a.size()==b.size(),"Dot product dimension mismatch");
+    return std::inner_product(a.begin(),a.end(),b.begin(),0.0);
+}
+inline Vec col(const Mat&amp; x,std::size_t j){
+    Vec out;out.reserve(x.size());
+    for(const auto&amp; row:x)out.push_back(row.at(j));
+    return out;
+}
+inline double positive(double x){require(x&gt;0&amp;&amp;std::isfinite(x),"Positive finite quantity required");return x;}
+inline Vec checked(Vec v){check_finite(v);return v;}
+inline double logistic(double x){
+    if(x&gt;=0)return 1/(1+std::exp(-x));
+    double e=std::exp(x);return e/(1+e);
+}
+inline double normal_cdf(double x){return 0.5*std::erfc(-x/std::sqrt(2.0));}
+inline double sum(const Vec&amp; v){return std::accumulate(v.begin(),v.end(),0.0);}
+} }
+</code></pre></section><section class="references" id="references"><h2>参考文献与进一步阅读</h2><p><a href="https://web.stanford.edu/~boyd/cvxbook/">Boyd and Vandenberghe, Convex Optimization</a></p><p><a href="https://riskfolio-lib.readthedocs.io/">Riskfolio-Lib Portfolio Optimization</a></p><p>课程中的数值样本均为明确构造的教学算例，不代表真实市场实证结果。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

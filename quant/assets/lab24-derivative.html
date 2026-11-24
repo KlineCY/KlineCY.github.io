@@ -1,0 +1,135 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>期权复制、离散动态规划与波动曲面条件｜Kline Quant</title><meta name="description" content="多变量量化研究、公式推导、数值案例与C++17算法"><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><style>body{margin:0;background:white;color:#142733;font:16px/1.95 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:24px 32px 64px}main{max-width:1150px;margin:auto}header,.lesson,.source,.references{border:1px solid #cad3d9;padding:24px 28px;margin:18px 0;background:white}h1{font-size:31px;line-height:1.4}h2{font-size:23px;margin:10px 0 20px}h3{font-size:17px;margin:22px 0 6px}p{line-height:1.95;margin:12px 0}.toc{display:flex;flex-wrap:wrap;gap:9px 24px;border:1px solid #cad3d9;padding:17px 24px}.equation{overflow:auto;border-block:1px solid #d7dfe4;margin:18px 0;padding:16px 6px}.katex-display{overflow-x:auto;overflow-y:hidden}a{color:#1a5478}code,pre{font-family:"Times New Roman",monospace}pre{border:1px solid #cbd5dc;padding:15px;overflow:auto;white-space:pre;font-size:13px;line-height:1.7;max-height:850px}@media(max-width:790px){.main{margin:0;padding:12px}header,.lesson,.source,.references{padding:15px}}</style></head><body><aside id="quantSidebar" class="sidebar" data-page="assets"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><small>QUANTITATIVE RESEARCH / MULTIVARIATE NUMERICAL METHODS</small><h1>期权复制、离散动态规划与波动曲面条件</h1><p>期权价格把支付结构、风险中性概率及交易约束联系起来。树模型与路径方法分别解决离散动态选择和路径依赖问题，执行价曲面则提供风险中性分布的信息。</p><p>从理论价值到可交易损益之间存在离散对冲、融资、费用和报价限制。通过无套利条件、路径支付、复制现金流三条计算链，可以在相同假设下对定价与真实执行口径进行区分。</p></header><nav class="toc"><a href="#lesson1">1．带连续股息率的CRR美式期权倒推</a><a href="#lesson2">2．离散算术平均亚式期权路径定价</a><a href="#lesson3">3．非均匀执行价网格的无蝶式套利检查</a><a href="#lesson4">4．离散期权条带的方差互换积分近似</a><a href="#lesson5">5．带融资与交易成本的离散Delta对冲账本</a><a href="#source">C++17完整实现</a><a href="#references">参考文献</a></nav><article class="lesson" id="lesson1"><h2>1．带连续股息率的CRR美式期权倒推</h2>
+ <h3>模型结构与数学定义</h3><p>在每一期二叉树节点，风险中性概率由无套利条件下的标的增长因子确定。末期从内在价值开始，逐期计算持有价值并与提前行权价值比较。内存仅保留当前层和下一层的值；输出美式价格及同树欧式价格。</p><div class="equation">$$V_{t,j}=\max\{g(S_{t,j}),e^{-r\Delta t}[qV_{t+1,j+1}+(1-q)V_{t+1,j}]\}$$</div>
+ <h3>推导、最优性条件与数值结构</h3><div class="equation">$$u=e^{\sigma\sqrt{\Delta t}},\quad d=u^{-1},\quad q=\frac{e^{(r-q_d)\Delta t}-d}{u-d}$$</div><p>复制两个下一期状态的期权现金流，可解出无套利价格的贴现概率形式。提前行权产生一个额外选择：若立即支付更高，则节点价值取立即行权收益；欧式树仅使用继续持有价值。</p>
+ <h3>完整计算案例</h3><p>标的100、执行价100、零利率零股息、波动率log(2)、到期1年、一步看跌。上节点200、下节点50，风险中性向上概率1/3，欧式及美式价格均为100/3。</p><div class="equation">$$\mathrm{Output}\approx\left(33.3333333,\ 33.3333333\right)$$</div>
+ <p>输出顺序：美式期权价格、相同树参数的欧式期权价格。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>Input
+1</code></pre><pre><code>./kline_quant lab24-derivative-crr-american study.csv 100 100 0 0 0.6931471805599453 1 1 0</code></pre>
+ <h3>估计假设与应用边界</h3><p>参数为标的、执行价、利率、股息率、波动率、年限、步数和看涨标志（1看涨、0看跌）。当风险中性概率不在[0,1]时模型拒绝计算。</p></article>
+<article class="lesson" id="lesson2"><h2>2．离散算术平均亚式期权路径定价</h2>
+ <h3>模型结构与数学定义</h3><p>每条路径占一行、三个等权观察时间的标的价格占三列，按行计算算术均值及看涨或看跌收益。再对预设风险中性等权样本计算贴现均值和基于独立路径假设的Monte Carlo标准误。输出期权价格、标准误。</p><div class="equation">$$\widehat V=e^{-rT}N^{-1}\sum_{i=1}^N(\overline S_i-K)_+$$</div>
+ <h3>推导、最优性条件与数值结构</h3><div class="equation">$$SE(\widehat V)=\sqrt{\frac{1}{N(N-1)}\sum_i(Y_i-\bar Y)^2},\quad Y_i=e^{-rT}g(\overline S_i)$$</div><p>贴现后的路径收益Y_i构成风险中性独立同分布样本。以路径均值估计期权价值，再以样本方差除以路径数得到均值估计方差，标准误反映抽样误差而非模型误差。</p>
+ <h3>完整计算案例</h3><p>两条路径的三个价格均为110或90，执行价100、零利率、期限1年。收益为10、0，价格5，样本标准误5。</p><div class="equation">$$\mathrm{Output}\approx\left(5,\ 5\right)$$</div>
+ <p>输出顺序：期权估计现值、Monte Carlo标准误。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>S1,S2,S3
+110,110,110
+90,90,90</code></pre><pre><code>./kline_quant lab24-derivative-asian-path study.csv 100 0 1 1</code></pre>
+ <h3>估计假设与应用边界</h3><p>路径须由已定义的风险中性模型产生，不能直接用历史真实分布替代。控制变量或反向变量抽样会改变标准误计算。</p></article>
+<article class="lesson" id="lesson3"><h2>3．非均匀执行价网格的无蝶式套利检查</h2>
+ <h3>模型结构与数学定义</h3><p>在同到期日看涨价格曲线上，先计算相邻执行价的割线斜率。无套利要求看涨价格非增且对执行价凸；两侧斜率差的非均匀二阶差分近似Breeden–Litzenberger风险中性密度。输出最小未贴现密度及负密度节点数量。</p><div class="equation">$$\rho_i\approx e^{rT}\frac{2}{K_{i+1}-K_{i-1}}\left(\frac{C_{i+1}-C_i}{K_{i+1}-K_i}-\frac{C_i-C_{i-1}}{K_i-K_{i-1}}\right)$$</div>
+ <h3>推导、最优性条件与数值结构</h3><div class="equation">$$C(K)=e^{-rT}\mathbb E^Q[(S_T-K)_+],\quad \frac{\partial^2 C}{\partial K^2}=e^{-rT}f_{S_T}(K)$$</div><p>对连续分布的看涨价格关于执行价求导，一阶导数对应负的风险中性尾概率，二阶导数对应贴现密度。实现以相邻割线斜率差检查凸性；价格单调性和边界斜率需额外检查。</p>
+ <h3>完整计算案例</h3><p>执行价90、100、120，对应价格15、8、2。斜率−0.7与−0.3，二阶差分为2×0.4/30=0.0266667；利率为零，负密度节点0。</p><div class="equation">$$\mathrm{Output}\approx\left(0.0266666667,\ 0\right)$$</div>
+ <p>输出顺序：最小离散风险中性密度近似、负密度内部节点数。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>Strike,Call
+90,15
+100,8
+120,2</code></pre><pre><code>./kline_quant lab24-derivative-butterfly-density study.csv 0 1</code></pre>
+ <h3>估计假设与应用边界</h3><p>离散密度检查不能保证插值曲面在所有执行价和到期日均无套利。必须使用同一到期日、相同单位的可比较报价。</p></article>
+<article class="lesson" id="lesson4"><h2>4．离散期权条带的方差互换积分近似</h2>
+ <h3>模型结构与数学定义</h3><p>输入远期价附近及两侧的价外期权报价，采用相邻执行价半间距作为内部积分权重、端点用最近间距。累计期权价格除以执行价平方的贡献，最后扣除远期价和基准执行价偏离的离散修正。输出年化方差与平方根波动率。</p><div class="equation">$$K_{\rm var}\approx\frac{2e^{rT}}{T}\sum_i\frac{\Delta K_i}{K_i^2}Q(K_i)-\frac1T(F/K_0-1)^2$$</div>
+ <h3>推导、最优性条件与数值结构</h3><div class="equation">$$\Delta K_i=\frac{K_{i+1}-K_{i-1}}2\quad (1&lt;i&lt;n),\qquad \sigma_{\rm ann}=\sqrt{K_{\rm var}}$$</div><p>连续复制表达式中，期权价格按执行价平方的倒数加权。离散化使用非均匀网格的区间宽度，对远期与基准执行价的偏离进行修正。实际基准执行价应采用不超过远期的最大可用执行价。</p>
+ <h3>完整计算案例</h3><p>三个执行价90、100、110，OTM期权价格均为1，远期与基准价均为100、零利率、期限1。方差为20×(1/90²+1/100²+1/110²)。</p><div class="equation">$$\mathrm{Output}\approx\left(0.00612202836,\ 0.0782433918\right)$$</div>
+ <p>输出顺序：离散年化方差、平方根年化波动率。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>Strike,OTMPrice
+90,1
+100,1
+110,1</code></pre><pre><code>./kline_quant lab24-derivative-variance-strip study.csv 100 100 0 1</code></pre>
+ <h3>估计假设与应用边界</h3><p>有限执行价条带不能完全复现连续全执行价积分；基准执行价需由研究者按报价规则选定，价格应为对应价外期权或基准执行价的平均报价。</p></article>
+<article class="lesson" id="lesson5"><h2>5．带融资与交易成本的离散Delta对冲账本</h2>
+ <h3>模型结构与数学定义</h3><p>卖出一份期权并按初始Delta买入标的，将剩余权利金记入现金账户。每个时间间隔现金账户先计息，随后按新Delta调整标的仓位并扣除比例交易成本；到期清算标的并支付给定的期权收益。返回最终复制盈亏和累计交易成本。</p><div class="equation">$$B_{t+1}=B_te^{r\Delta t}-(\Delta_{t+1}-\Delta_t)S_{t+1}-c|\Delta_{t+1}-\Delta_t|S_{t+1}$$</div>
+ <h3>推导、最优性条件与数值结构</h3><div class="equation">$$\Pi_T=B_T+\Delta_TS_T-H_T,\quad TC=\sum_t c|\Delta_t-\Delta_{t-1}|S_t$$</div><p>初始Delta购入股票消耗现金、期权权利金增加现金；之后自融资的现金账户变化来自持仓调整与费用。终止时归零持仓，现金余额减去期权支付即为盈亏。公式中Delta_T表示清算前库存，代码在最后一步显式将其清算。</p>
+ <h3>完整计算案例</h3><p>标的价格从100变至110，初始与末期Delta均0.5，期权初始权利金5，终值支付10，无成本零利率；初始现金−45、股票终值55，最终盈亏0。</p><div class="equation">$$\mathrm{Output}\approx\left(0,\ 0\right)$$</div>
+ <p>输出顺序：最终复制盈亏、累计交易成本。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>Time,Spot,Delta
+0,100,0.5
+1,110,0.5</code></pre><pre><code>./kline_quant lab24-derivative-discrete-delta-pnl study.csv 5 10 0 0</code></pre>
+ <h3>估计假设与应用边界</h3><p>每行依次为年化时间、现货、预先给定Delta；参数为初始权利金、到期支付、融资利率和比例交易成本。末行Delta不用作新开仓，策略无分红。</p></article>
+<section class="source" id="source"><h2>完整C++17实现</h2><p>输入为逐行组织的数值矩阵及标量参数向量，输出为按前文约定排列的数值向量。各方法对维度、参数范围、数值有限性及可行性进行检查。</p><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/lab24_derivative.hpp">算法源文件</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/lab24_common.hpp">公共接口</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_lab24.cpp">数值回归与结构恒等式测试</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_lab24_cli.py">CSV接口复算测试</a>。</p><h3>独立算法</h3><pre><code>#pragma once
+#include "lab24_common.hpp"
+
+namespace kline { namespace lab24 {
+inline Vec crr_american(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,1,8);require(x.size()==1,"Single placeholder row required");double s=positive(p[0]),k=positive(p[1]),r=p[2],div=p[3],sig=positive(p[4]),T=positive(p[5]);auto n=integer(p[6],1,2500);require(p[7]==0||p[7]==1,"Call flag must be binary");
+    double dt=T/n,a=sig*std::sqrt(dt),u=std::exp(a),d=1/u,q=(std::exp((r-div)*dt)-d)/(u-d),disc=std::exp(-r*dt);
+    require(q&gt;=0&amp;&amp;q&lt;=1&amp;&amp;std::isfinite(disc),"Invalid risk-neutral tree");
+    auto payoff=[&amp;](double st){return std::max(0.0,p[7]==1?st-k:k-st);};
+    Vec v(n+1),e(n+1);for(std::size_t j=0;j&lt;=n;++j)v[j]=e[j]=payoff(s*std::exp((2.0*j-n)*a));
+    for(std::size_t i=n;i--&gt;0;)for(std::size_t j=0;j&lt;=i;++j){v[j]=std::max(payoff(s*std::exp((2.0*j-i)*a)),disc*((1-q)*v[j]+q*v[j+1]));e[j]=disc*((1-q)*e[j]+q*e[j+1]);}
+    return checked({v[0],e[0]});
+}
+
+inline Vec asian_path(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,3,4,2);double k=positive(p[0]),T=positive(p[2]);require(p[3]==0||p[3]==1,"Call flag must be binary");Vec payoff;
+    double disc=std::exp(-p[1]*T);
+    for(const auto&amp; r:x){for(double q:r)positive(q);double a=sum(r)/3;payoff.push_back(disc*std::max(0.0,p[3]==1?a-k:k-a));}
+    return checked({mean(payoff),std::sqrt(variance(payoff)/payoff.size())});
+}
+
+inline Vec butterfly_density(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,2,2,3);double T=positive(p[1]),minv=std::numeric_limits&lt;double&gt;::infinity();int bad=0;
+    for(std::size_t i=0;i&lt;x.size();++i){positive(x[i][0]);require(x[i][1]&gt;=0,"Negative call price");if(i)require(x[i][0]&gt;x[i-1][0],"Strikes must increase");}
+    for(std::size_t i=1;i+1&lt;x.size();++i){double l=(x[i][1]-x[i-1][1])/(x[i][0]-x[i-1][0]),r=(x[i+1][1]-x[i][1])/(x[i+1][0]-x[i][0]);double v=std::exp(p[0]*T)*2*(r-l)/(x[i+1][0]-x[i-1][0]);minv=std::min(minv,v);bad+=v&lt;-1e-12;}
+    return checked({minv,double(bad)});
+}
+
+inline Vec variance_strip(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,2,4,2);double F=positive(p[0]),K0=positive(p[1]),T=positive(p[3]),s=0;bool found=false;
+    require(K0&lt;=F,"Base strike must not exceed forward");
+    for(std::size_t i=0;i&lt;x.size();++i){positive(x[i][0]);require(x[i][1]&gt;=0,"Negative option price");if(i)require(x[i][0]&gt;x[i-1][0],"Strike grid must increase");found=found||x[i][0]==K0;}
+    require(found,"Base strike missing");
+    for(std::size_t i=0;i&lt;x.size();++i){double dk=i==0?x[1][0]-x[0][0]:(i+1==x.size()?x[i][0]-x[i-1][0]:(x[i+1][0]-x[i-1][0])/2);s+=dk*x[i][1]/(x[i][0]*x[i][0]);}
+    double v=(2*std::exp(p[2]*T)*s-std::pow(F/K0-1,2))/T;require(v&gt;=0,"Negative discretized variance");return checked({v,std::sqrt(v)});
+}
+
+inline Vec discrete_delta_pnl(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,3,4,2);require(p[0]&gt;=0&amp;&amp;p[1]&gt;=0&amp;&amp;p[3]&gt;=0&amp;&amp;x.front()[0]==0,"Invalid hedge setup");
+    for(std::size_t i=0;i&lt;x.size();++i){positive(x[i][1]);if(i)require(x[i][0]&gt;x[i-1][0],"Hedge times must increase");}
+    double h=x[0][2],cost=p[3]*std::abs(h)*x[0][1],cash=p[0]-h*x[0][1]-cost;
+    for(std::size_t i=1;i&lt;x.size();++i){cash*=std::exp(p[2]*(x[i][0]-x[i-1][0]));double target=i+1==x.size()?0:x[i][2],change=target-h,fee=p[3]*std::abs(change)*x[i][1];cash-=change*x[i][1]+fee;cost+=fee;h=target;}
+    return checked({cash-p[1],cost});
+}
+} }
+</code></pre><h3>公共数值接口</h3><pre><code>#pragma once
+#include "stats.hpp"
+#include &lt;algorithm&gt;
+#include &lt;cmath&gt;
+#include &lt;cstddef&gt;
+#include &lt;limits&gt;
+#include &lt;numeric&gt;
+#include &lt;stdexcept&gt;
+#include &lt;utility&gt;
+#include &lt;vector&gt;
+
+namespace kline { namespace lab24 {
+using Vec=std::vector&lt;double&gt;;
+using Mat=std::vector&lt;Vec&gt;;
+
+inline void inputs(const Mat&amp; x,const Vec&amp; p,std::size_t cols,std::size_t params,
+                   std::size_t min_rows=1) {
+    require(x.size()&gt;=min_rows&amp;&amp;x.size()&lt;=250000,"Invalid number of observations");
+    require(p.size()==params,"Incorrect scalar parameter count");
+    for(double v:p)require(std::isfinite(v),"Nonfinite scalar parameter");
+    for(const auto&amp; row:x){
+        require(row.size()==cols,"Unexpected CSV column count");
+        for(double v:row)require(std::isfinite(v),"Nonfinite matrix entry");
+    }
+}
+inline std::size_t integer(double x,std::size_t low,std::size_t high){
+    require(std::isfinite(x)&amp;&amp;x&gt;=double(low)&amp;&amp;x&lt;=double(high)&amp;&amp;std::floor(x)==x,
+            "Integer parameter outside allowed range");
+    return std::size_t(x);
+}
+inline double dot(const Vec&amp; a,const Vec&amp; b){
+    require(a.size()==b.size(),"Dot product dimension mismatch");
+    return std::inner_product(a.begin(),a.end(),b.begin(),0.0);
+}
+inline Vec col(const Mat&amp; x,std::size_t j){
+    Vec out;out.reserve(x.size());
+    for(const auto&amp; row:x)out.push_back(row.at(j));
+    return out;
+}
+inline double positive(double x){require(x&gt;0&amp;&amp;std::isfinite(x),"Positive finite quantity required");return x;}
+inline Vec checked(Vec v){check_finite(v);return v;}
+inline double logistic(double x){
+    if(x&gt;=0)return 1/(1+std::exp(-x));
+    double e=std::exp(x);return e/(1+e);
+}
+inline double normal_cdf(double x){return 0.5*std::erfc(-x/std::sqrt(2.0));}
+inline double sum(const Vec&amp; v){return std::accumulate(v.begin(),v.end(),0.0);}
+} }
+</code></pre></section><section class="references" id="references"><h2>参考文献与进一步阅读</h2><p><a href="https://www.optionseducation.org/">Options Industry Council Education</a></p><p><a href="https://doi.org/10.1016/0304-405X(79)90015-1">Cox, Ross and Rubinstein, Option Pricing: A Simplified Approach</a></p><p><a href="https://doi.org/10.1086/296025">Breeden and Litzenberger (1978), Prices of State-Contingent Claims Implicit in Option Prices</a></p><p>课程中的数值样本均为明确构造的教学算例，不代表真实市场实证结果。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

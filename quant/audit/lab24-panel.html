@@ -1,0 +1,116 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>计量识别、配对样本与面板误差结构｜Kline Quant</title><meta name="description" content="多变量量化研究、公式推导、数值案例与C++17算法"><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><style>body{margin:0;background:white;color:#142733;font:16px/1.95 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:24px 32px 64px}main{max-width:1150px;margin:auto}header,.lesson,.source,.references{border:1px solid #cad3d9;padding:24px 28px;margin:18px 0;background:white}h1{font-size:31px;line-height:1.4}h2{font-size:23px;margin:10px 0 20px}h3{font-size:17px;margin:22px 0 6px}p{line-height:1.95;margin:12px 0}.toc{display:flex;flex-wrap:wrap;gap:9px 24px;border:1px solid #cad3d9;padding:17px 24px}.equation{overflow:auto;border-block:1px solid #d7dfe4;margin:18px 0;padding:16px 6px}.katex-display{overflow-x:auto;overflow-y:hidden}a{color:#1a5478}code,pre{font-family:"Times New Roman",monospace}pre{border:1px solid #cbd5dc;padding:15px;overflow:auto;white-space:pre;font-size:13px;line-height:1.7;max-height:850px}@media(max-width:790px){.main{margin:0;padding:12px}header,.lesson,.source,.references{padding:15px}}</style></head><body><aside id="quantSidebar" class="sidebar" data-page="audit"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><small>QUANTITATIVE RESEARCH / MULTIVARIATE NUMERICAL METHODS</small><h1>计量识别、配对样本与面板误差结构</h1><p>在实证金融与政策研究中，横截面差异、组内依赖和处理分配机制决定了统计推断的有效性。面板去均值能够控制实体不随时间变化的因素，聚类方差则允许同组误差相关。</p><p>配对检验与随机化检验必须依赖相应的数据生成或分配机制。工具变量估计还要求工具变量相关性与外生性，单独的第一阶段统计量不能替代完整因果识别。</p></header><nav class="toc"><a href="#lesson1">1．单解释变量实体固定效应与组内R²</a><a href="#lesson2">2．带实体聚类CR1方差的OLS</a><a href="#lesson3">3．匹配样本的均值差与配对t统计量</a><a href="#lesson4">4．小样本配对符号翻转随机化检验</a><a href="#lesson5">5．单工具变量一阶段F统计量与Wald估计</a><a href="#source">C++17完整实现</a><a href="#references">参考文献</a></nav><article class="lesson" id="lesson1"><h2>1．单解释变量实体固定效应与组内R²</h2><h3>模型结构与数学定义</h3><p>先按实体编号累计变量总和和样本数，再对每条记录去除实体自身的样本均值。回归仅依赖实体内部时间变化，从而消除与时间无关的实体截距。输出组内估计斜率和组内R²。</p><div class="equation">$$\widehat\beta_{\rm FE}=\frac{\sum_{it}(x_{it}-\bar x_i)(y_{it}-\bar y_i)}{\sum_{it}(x_{it}-\bar x_i)^2}$$</div><h3>推导、最优性条件与数值结构</h3><div class="equation">$$y_{it}=\alpha_i+\beta x_{it}+u_{it}\ \Longrightarrow\ \widetilde y_{it}=\beta\widetilde x_{it}+\widetilde u_{it}$$</div><p>对每个实体分别取时间均值后相减，固定截距恰好消除。组内目标函数只依赖去均值数据，令平方残差的一阶导数为零即可得到闭式斜率。</p><h3>完整计算案例</h3><p>两家实体各有两个观测，X从0变1，Y分别从1变3、10变12；实体截距不同而组内斜率均为2，组内R²为1。</p><div class="equation">$$\mathrm{Output}\approx\left(2,\ 1\right)$$</div><p>输出顺序：实体固定效应回归斜率、组内决定系数。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>Entity,X,Y
+0,0,1
+0,1,3
+1,0,10
+1,1,12</code></pre><pre><code>./kline_quant lab24-panel-within-panel study.csv</code></pre><h3>估计假设与应用边界</h3><p>固定效应无法消除随时间变化且与X相关的遗漏因素；实体编号必须为非负整数，组内X和Y方差为正。</p></article>
+<article class="lesson" id="lesson2"><h2>2．带实体聚类CR1方差的OLS</h2><h3>模型结构与数学定义</h3><p>首先拟合带截距的一元OLS。聚类稳健方差将同组残差得分先求和、再平方求和，保留组内相关性，最后应用常见CR1有限样本修正。返回截距、斜率与斜率聚类标准误。</p><div class="equation">$$\widehat V(\widehat\beta)=\frac{G}{G-1}\frac{n-1}{n-2}\frac{\sum_g[\sum_{i\in g}(x_i-\bar x)\widehat u_i]^2}{[\sum_i(x_i-\bar x)^2]^2}$$</div><h3>推导、最优性条件与数值结构</h3><div class="equation">$$S_g=\sum_{i\in g}(x_i-\bar x)\widehat u_i,\quad \widehat V_{\rm CR0}=(X_c^\top X_c)^{-2}\sum_gS_g^2$$</div><p>在聚类独立而组内相关结构任意的近似下，以聚类总得分的平方替代独立样本的逐行残差平方。CR1进一步调整聚类数和回归自由度，不能凭借该修正消除少聚类问题。</p><h3>完整计算案例</h3><p>两组数据X各为0、1，Y分别为1、3与5、7，斜率2、截距3；每个组的中心化X与残差内积为0，聚类标准误为0。</p><div class="equation">$$\mathrm{Output}\approx\left(3,\ 2,\ 0\right)$$</div><p>输出顺序：带截距OLS的截距、斜率、CR1聚类标准误。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>Cluster,X,Y
+0,0,1
+0,1,3
+1,0,5
+1,1,7</code></pre><pre><code>./kline_quant lab24-panel-cluster-ols study.csv</code></pre><h3>估计假设与应用边界</h3><p>需要至少两个独立聚类且n>2。少聚类推断仍可能失真；此处只报告CR1标准误，不自动给出可靠显著性。</p></article>
+<article class="lesson" id="lesson3"><h2>3．匹配样本的均值差与配对t统计量</h2><h3>模型结构与数学定义</h3><p>将匹配前后两次观测首先转化为同一单位的差值，再在差值样本上计算均值及样本标准差。这样保留了组内相关性并取消单位层面的共同成分。返回均值差、标准误和t统计量。</p><div class="equation">$$\bar d=n^{-1}\sum_i(y_{i1}-y_{i0}),\quad t=\bar d/(s_d/\sqrt n)$$</div><h3>推导、最优性条件与数值结构</h3><div class="equation">$$s_d^2=\frac{\sum_i(d_i-\bar d)^2}{n-1},\qquad \operatorname{Var}(\bar d)\approx s_d^2/n$$</div><p>差值方差包含前后观测之间的协方差，配对处理保留该信息。假设独立且具有相同差值方差时，样本均值的方差按样本量缩小。</p><h3>完整计算案例</h3><p>三个配对差值为1、2、3，均值2、样本方差1，标准误1/√3，t为2√3。</p><div class="equation">$$\mathrm{Output}\approx\left(2,\ 0.577350269,\ 3.46410162\right)$$</div><p>输出顺序：均值差、均值差标准误、t统计量。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>Before,After
+0,1
+0,2
+0,3</code></pre><pre><code>./kline_quant lab24-panel-paired-t study.csv</code></pre><h3>估计假设与应用边界</h3><p>配对差值必须独立或满足适当渐近条件；零方差情形的t统计量无定义。</p></article>
+<article class="lesson" id="lesson4"><h2>4．小样本配对符号翻转随机化检验</h2><h3>模型结构与数学定义</h3><p>在零效应与每对处理分配可交换的条件下，每对差值可独立翻转符号。枚举所有2^n种分配，使用双侧绝对均值差的尾部比例作为精确随机化p值。返回观测平均差与尾部概率。</p><div class="equation">$$p_{\rm exact}=2^{-n}\sum_{s\in\{-1,1\}^n}\mathbf1\{|\sum_i s_i d_i|\ge|\sum_i d_i|\}$$</div><h3>推导、最优性条件与数值结构</h3><div class="equation">$$T(s)=\left|\frac1n\sum_is_id_i\right|,\quad p=\Pr_s\{T(s)\ge T(\mathbf1)\}$$</div><p>在等概率符号分配条件下，所有符号向量构成完整随机化分布。统计量是否超过观测值由枚举直接确定，平局计入尾部，避免把有限离散分布错误当作连续正态近似。</p><h3>完整计算案例</h3><p>差值1、1时，四种符号组合的绝对和为2、0、0、2，观测值2，双侧p值为0.5。</p><div class="equation">$$\mathrm{Output}\approx\left(1,\ 0.5\right)$$</div><p>输出顺序：观测平均差、双侧精确随机化概率。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>Difference
+1
+1</code></pre><pre><code>./kline_quant lab24-panel-randomization-exact study.csv</code></pre><h3>估计假设与应用边界</h3><p>枚举复杂度指数增长，限制n≤18。若配对并非随机分配，符号对称条件须另有依据。</p></article>
+<article class="lesson" id="lesson5"><h2>5．单工具变量一阶段F统计量与Wald估计</h2><h3>模型结构与数学定义</h3><p>以工具变量Z解释处理D的一元带截距回归，计算一阶段斜率的经典同方差t统计量并平方。再用Z与结果Y的协方差除以Z与处理D的协方差，得到恰好识别模型的IV斜率。输出一阶段斜率、F及IV估计。</p><div class="equation">$$F=t_{\widehat\pi}^2,\qquad \widehat\beta_{\rm IV}=\frac{\operatorname{Cov}(Z,Y)}{\operatorname{Cov}(Z,D)}$$</div><h3>推导、最优性条件与数值结构</h3><div class="equation">$$\widehat{\operatorname{Var}}(\widehat\pi)=\widehat\sigma_u^2/\sum_i(Z_i-\bar Z)^2,\qquad \widehat\sigma_u^2=RSS/(n-2)$$</div><p>一阶段为带截距的一元回归，残差自由度为n−2。恰好识别的结构方程满足工具变量与误差正交，代入样本矩条件即可获得协方差比值。</p><h3>完整计算案例</h3><p>Z为−1、−1、1、1；D为−2、0、0、2，Y=2D。一阶段斜率为1，残差平方和4，经典F=2，IV斜率2。</p><div class="equation">$$\mathrm{Output}\approx\left(1,\ 2,\ 2\right)$$</div><p>输出顺序：一阶段回归斜率、经典F统计量、IV斜率。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>Instrument,Treatment,Outcome
+-1,-2,-4
+-1,0,0
+1,0,0
+1,2,4</code></pre><pre><code>./kline_quant lab24-panel-iv-first-stage study.csv</code></pre><h3>估计假设与应用边界</h3><p>工具相关性只是识别条件之一，排除限制、独立性仍由研究设计决定。F为经典同方差版本。</p></article><section class="source" id="source"><h2>完整C++17实现</h2><p>输入为逐行组织的数值矩阵及标量参数向量，输出为按前文约定排列的数值向量。各方法对维度、参数范围、数值有限性及可行性进行检查。</p><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/lab24_panel.hpp">算法源文件</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/lab24_common.hpp">公共接口</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_lab24.cpp">数值回归与结构恒等式测试</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_lab24_cli.py">CSV接口复算测试</a>。</p><h3>独立算法</h3><pre><code>#pragma once
+#include "lab24_common.hpp"
+#include &lt;map&gt;
+
+namespace kline { namespace lab24 {
+inline Vec within_panel(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,3,0,3);std::map&lt;std::size_t,Vec&gt; groups;
+    for(const auto&amp; r:x){auto id=integer(r[0],0,1000000000);auto&amp; g=groups[id];if(g.empty())g={0,0,0};g[0]+=r[1];g[1]+=r[2];++g[2];}
+    double xx=0,xy=0,yy=0;
+    for(const auto&amp; r:x){const auto&amp; g=groups.at(std::size_t(r[0]));double a=r[1]-g[0]/g[2],b=r[2]-g[1]/g[2];xx+=a*a;xy+=a*b;yy+=b*b;}
+    double beta=xy/positive(xx);return checked({beta,xy*xy/(xx*positive(yy))});
+}
+
+inline Vec cluster_ols(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,3,0,3);double mx=mean(col(x,1)),my=mean(col(x,2)),xx=0,xy=0;
+    for(const auto&amp; r:x){integer(r[0],0,1000000000);xx+=(r[1]-mx)*(r[1]-mx);xy+=(r[1]-mx)*(r[2]-my);}
+    double b=xy/positive(xx),a=my-b*mx;std::map&lt;std::size_t,double&gt; score;
+    for(const auto&amp; r:x)score[std::size_t(r[0])]+=(r[1]-mx)*(r[2]-a-b*r[1]);
+    require(score.size()&gt;=2,"At least two clusters required");
+    double v=0;for(auto g:score)v+=g.second*g.second;
+    double G=double(score.size()),n=double(x.size());v*=G/(G-1)*(n-1)/(n-2)/(xx*xx);
+    return checked({a,b,std::sqrt(v)});
+}
+
+inline Vec paired_t(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,2,0,2);Vec d;for(const auto&amp; r:x)d.push_back(r[1]-r[0]);
+    double m=mean(d),se=positive(std::sqrt(variance(d)/d.size()));return checked({m,se,m/se});
+}
+
+inline Vec randomization_exact(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,1,0);require(x.size()&lt;=18,"Exact enumeration limited to 18 pairs");Vec d=col(x,0);
+    double obs=std::abs(sum(d));std::size_t N=std::size_t(1)&lt;&lt;d.size(),hits=0;
+    for(std::size_t k=0;k&lt;N;++k){double z=0;for(std::size_t i=0;i&lt;d.size();++i)z+=((k&gt;&gt;i)&amp;1)?d[i]:-d[i];if(std::abs(z)+1e-12*std::max(1.0,obs)&gt;=obs)++hits;}
+    return checked({mean(d),double(hits)/N});
+}
+
+inline Vec iv_first_stage(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,3,0,3);Vec z=col(x,0),d=col(x,1),y=col(x,2);
+    double mz=mean(z),md=mean(d),zz=0,zd=0,zy=0,my=mean(y);
+    for(std::size_t i=0;i&lt;x.size();++i){double a=z[i]-mz;zz+=a*a;zd+=a*(d[i]-md);zy+=a*(y[i]-my);}
+    require(std::abs(zd)&gt;0,"Irrelevant instrument");double b=zd/positive(zz),sse=0;
+    for(std::size_t i=0;i&lt;x.size();++i){double e=d[i]-md-b*(z[i]-mz);sse+=e*e;}
+    double se2=positive(sse/(x.size()-2)/zz);
+    return checked({b,b*b/se2,zy/zd});
+}
+} }
+</code></pre><h3>公共数值接口</h3><pre><code>#pragma once
+#include "stats.hpp"
+#include &lt;algorithm&gt;
+#include &lt;cmath&gt;
+#include &lt;cstddef&gt;
+#include &lt;limits&gt;
+#include &lt;numeric&gt;
+#include &lt;stdexcept&gt;
+#include &lt;utility&gt;
+#include &lt;vector&gt;
+
+namespace kline { namespace lab24 {
+using Vec=std::vector&lt;double&gt;;
+using Mat=std::vector&lt;Vec&gt;;
+
+inline void inputs(const Mat&amp; x,const Vec&amp; p,std::size_t cols,std::size_t params,
+                   std::size_t min_rows=1) {
+    require(x.size()&gt;=min_rows&amp;&amp;x.size()&lt;=250000,"Invalid number of observations");
+    require(p.size()==params,"Incorrect scalar parameter count");
+    for(double v:p)require(std::isfinite(v),"Nonfinite scalar parameter");
+    for(const auto&amp; row:x){
+        require(row.size()==cols,"Unexpected CSV column count");
+        for(double v:row)require(std::isfinite(v),"Nonfinite matrix entry");
+    }
+}
+inline std::size_t integer(double x,std::size_t low,std::size_t high){
+    require(std::isfinite(x)&amp;&amp;x&gt;=double(low)&amp;&amp;x&lt;=double(high)&amp;&amp;std::floor(x)==x,
+            "Integer parameter outside allowed range");
+    return std::size_t(x);
+}
+inline double dot(const Vec&amp; a,const Vec&amp; b){
+    require(a.size()==b.size(),"Dot product dimension mismatch");
+    return std::inner_product(a.begin(),a.end(),b.begin(),0.0);
+}
+inline Vec col(const Mat&amp; x,std::size_t j){
+    Vec out;out.reserve(x.size());
+    for(const auto&amp; row:x)out.push_back(row.at(j));
+    return out;
+}
+inline double positive(double x){require(x&gt;0&amp;&amp;std::isfinite(x),"Positive finite quantity required");return x;}
+inline Vec checked(Vec v){check_finite(v);return v;}
+inline double logistic(double x){
+    if(x&gt;=0)return 1/(1+std::exp(-x));
+    double e=std::exp(x);return e/(1+e);
+}
+inline double normal_cdf(double x){return 0.5*std::erfc(-x/std::sqrt(2.0));}
+inline double sum(const Vec&amp; v){return std::accumulate(v.begin(),v.end(),0.0);}
+} }
+</code></pre></section><section class="references" id="references"><h2>参考文献与进一步阅读</h2><p><a href="https://mitpress.mit.edu/9780262232586/econometric-analysis-of-cross-section-and-panel-data/">Wooldridge, Econometric Analysis of Cross Section and Panel Data</a></p><p><a href="https://cameron.econ.ucdavis.edu/research/Cameron_Miller_JHR_2015_February.pdf">Cameron and Miller, A Practitioner's Guide to Cluster-Robust Inference</a></p><p>课程中的数值样本均为明确构造的教学算例，不代表真实市场实证结果。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

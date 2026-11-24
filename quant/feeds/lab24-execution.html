@@ -1,0 +1,130 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>交易成本、队列模型与市场冲击的路径计算｜Kline Quant</title><meta name="description" content="多变量量化研究、公式推导、数值案例与C++17算法"><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><style>body{margin:0;background:white;color:#142733;font:16px/1.95 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:24px 32px 64px}main{max-width:1150px;margin:auto}header,.lesson,.source,.references{border:1px solid #cad3d9;padding:24px 28px;margin:18px 0;background:white}h1{font-size:31px;line-height:1.4}h2{font-size:23px;margin:10px 0 20px}h3{font-size:17px;margin:22px 0 6px}p{line-height:1.95;margin:12px 0}.toc{display:flex;flex-wrap:wrap;gap:9px 24px;border:1px solid #cad3d9;padding:17px 24px}.equation{overflow:auto;border-block:1px solid #d7dfe4;margin:18px 0;padding:16px 6px}.katex-display{overflow-x:auto;overflow-y:hidden}a{color:#1a5478}code,pre{font-family:"Times New Roman",monospace}pre{border:1px solid #cbd5dc;padding:15px;overflow:auto;white-space:pre;font-size:13px;line-height:1.7;max-height:850px}@media(max-width:790px){.main{margin:0;padding:12px}header,.lesson,.source,.references{padding:15px}}</style></head><body><aside id="quantSidebar" class="sidebar" data-page="feeds"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><small>QUANTITATIVE RESEARCH / MULTIVARIATE NUMERICAL METHODS</small><h1>交易成本、队列模型与市场冲击的路径计算</h1><p>算法交易研究需要明确父订单、时间窗口、市场可用深度及交易成本。离散二次目标给出库存最优路径，而参与率上限和FIFO回放描述订单在流动性限制下的实际可执行性。</p><p>静态多场所扫单与指数冲击衰减分别描述瞬时成本和事件后成本持续性。前者依赖同时可执行的市场报价，后者依赖事件时间结构；两者都不能无条件从历史均价推断真实成交。</p></header><nav class="toc"><a href="#lesson1">1．离散二次风险下的Almgren–Chriss执行路径</a><a href="#lesson2">2．成交量上限约束的最早可行执行计划</a><a href="#lesson3">3．价格时间优先队列的部分成交回放</a><a href="#lesson4">4．多交易场所含费用的最优静态扫单</a><a href="#lesson5">5．指数冲击衰减的对数线性估计</a><a href="#source">C++17完整实现</a><a href="#references">参考文献</a></nav><article class="lesson" id="lesson1"><h2>1．离散二次风险下的Almgren–Chriss执行路径</h2>
+ <h3>模型结构与数学定义</h3><p>将暂态冲击近似为成交量平方成本，将持仓未清算风险近似为剩余库存平方。对内部库存节点求导得到三对角线性系统；用Thomas算法前向消元、逆向回代得到最优库存路径，输出每期应成交量。</p><div class="equation">$$\min_{x_0=Q,x_N=0}\sum_{k=1}^N \eta(x_k-x_{k-1})^2+\lambda\sigma^2 x_k^2$$</div>
+ <h3>推导、最优性条件与数值结构</h3><div class="equation">$$-\eta x_{k-1}+(2\eta+\lambda\sigma^2)x_k-\eta x_{k+1}=0,\quad 1\le k&lt;N$$</div><p>对内部库存节点的二次目标求导，前一期与后一期成交量同时依赖当前库存，产生三对角方程。首行右端为ηQ，尾端库存固定为零。风险惩罚增大时，最优路径倾向提前完成更多成交。</p>
+ <h3>完整计算案例</h3><p>总量100、4个等长时段、冲击参数1、库存风险惩罚0，目标最小化四期成交量平方和，最优成交量各25。</p><div class="equation">$$\mathrm{Output}\approx\left(25,\ 25,\ 25,\ 25\right)$$</div>
+ <p>输出顺序：按时间顺序排列的各期成交数量。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>Quantity
+100</code></pre><pre><code>./kline_quant lab24-execution-ac-schedule study.csv 4 1 0</code></pre>
+ <h3>估计假设与应用边界</h3><p>此版本把λσ²合并为单步库存惩罚参数，使用等长时段，假设二次暂态冲击且无硬参与率限制。</p></article>
+<article class="lesson" id="lesson2"><h2>2．成交量上限约束的最早可行执行计划</h2>
+ <h3>模型结构与数学定义</h3><p>给定未来各时间窗的成交量预测和最大参与率，将剩余父订单依次与各窗允许的最大数量比较。该规则在仅有逐窗上限约束时尽可能提前完成订单；输出各窗成交量和最终未成交量。</p><div class="equation">$$q_t=\min\{Q-\sum_{s&lt;t}q_s,\ \rho V_t\}$$</div>
+ <h3>推导、最优性条件与数值结构</h3><div class="equation">$$R_0=Q,\quad R_t=R_{t-1}-q_t,\quad q_t\le \rho V_t$$</div><p>每期在剩余数量与当期容量之间取较小值，保持成交非负并不超过容量约束。递推的剩余量与累计成交之和恒等于初始订单总量。</p>
+ <h3>完整计算案例</h3><p>市场量100、200、100，最高参与率0.2，父订单50，依次成交20、30、0，未成交0。</p><div class="equation">$$\mathrm{Output}\approx\left(20,\ 30,\ 0,\ 0\right)$$</div>
+ <p>输出顺序：各期成交数量及最后未成交数量。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>MarketVolume
+100
+200
+100</code></pre><pre><code>./kline_quant lab24-execution-participation-schedule study.csv 50 0.2</code></pre>
+ <h3>估计假设与应用边界</h3><p>使用的成交量应为执行时点可获得的预测或已实现的审计数据。最早执行不代表最低交易成本；该算法没有价格与风险优化。</p></article>
+<article class="lesson" id="lesson3"><h2>3．价格时间优先队列的部分成交回放</h2>
+ <h3>模型结构与数学定义</h3><p>在每个事件窗口，首先假设位于本订单之前的撤单量减少排队数量，再由对手方主动成交消耗前方队列，只有剩余主动量到达本订单时才形成部分成交。追踪累计成交与剩余订单量，输出最终成交、未成交及前方剩余队列。</p><div class="equation">$$A_{t+1}=(A_t-C_t-M_t)_+,\quad F_t=\min\{R_t,(M_t-(A_t-C_t)_+)_+\}$$</div>
+ <h3>推导、最优性条件与数值结构</h3><div class="equation">$$A'_t=A_t-C_t,\quad M_t^A=\min(A'_t,M_t),\quad R_{t+1}=R_t-F_t$$</div><p>在假设撤单全部确实位于前方的前提下，先以主动成交消耗前方队列，再将未被前方队列吸收的主动量分配给自身订单，因而不会把前方排队成交误判为自身成交。</p>
+ <h3>完整计算案例</h3><p>初始前方排队10，本订单5。第一窗口前方撤单2、主动成交5，前方剩3；第二窗口主动成交6，前方消耗3，自己的订单成交3，未成交2。</p><div class="equation">$$\mathrm{Output}\approx\left(3,\ 2,\ 0\right)$$</div>
+ <p>输出顺序：累计成交量、剩余订单量、前方剩余队列。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>AheadCancellation,AggressiveQuantity
+2,5
+0,6</code></pre><pre><code>./kline_quant lab24-execution-queue-fifo study.csv 10 5</code></pre>
+ <h3>估计假设与应用边界</h3><p>必须使用能识别前方撤单和主动成交的订单级事件；聚合快照不能无条件恢复真实FIFO优先级。新加入的同价订单假设在后方。</p></article>
+<article class="lesson" id="lesson4"><h2>4．多交易场所含费用的最优静态扫单</h2>
+ <h3>模型结构与数学定义</h3><p>对于可拆分的买单，各场所和价位的有效单位成本为卖价加单位费用。按有效成本排序，依次使用最低成本可用深度，直到满足订单或深度耗尽。返回总花费、已成交量、未成交量和每一原始记录分配量。</p><div class="equation">$$\min_{0\le q_i\le a_i,\ \sum q_i=Q}\sum_i q_i(P_i+f_i)$$</div>
+ <h3>推导、最优性条件与数值结构</h3><div class="equation">$$c_i=P_i+f_i,\quad c_i&lt;c_j,\ q_i&lt;a_i,\ q_j&gt;0\ \Rightarrow\ \text{成本仍可下降}$$</div><p>若高成本场所已经成交而低成本场所仍有可用深度，将一小部分成交从前者交换至后者必能降低成本。因此连续可分割的线性目标可以用按成本排序的贪心算法求解。</p>
+ <h3>完整计算案例</h3><p>两个场所卖价10、11，深度2、4，单位费用0，订单5，先用第一场所2，再用第二场所3，总花费53。</p><div class="equation">$$\mathrm{Output}\approx\left(53,\ 5,\ 0,\ 2,\ 3\right)$$</div>
+ <p>输出顺序：总成本、已成交量、未成交量、各输入行的成交分配量。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>Ask,Available,UnitFee
+10,2,0
+11,4,0</code></pre><pre><code>./kline_quant lab24-execution-multi-venue-sweep study.csv 5</code></pre>
+ <h3>估计假设与应用边界</h3><p>静态最优依赖同时可见且可执行的报价与深度，不考虑延迟、最低成交单位、隐藏流动性和跨场所响应。仅处理买入。</p></article>
+<article class="lesson" id="lesson5"><h2>5．指数冲击衰减的对数线性估计</h2>
+ <h3>模型结构与数学定义</h3><p>假设冲击的正幅度沿时间指数衰减。把冲击幅度取对数，回归于事件后时间，斜率取负得到衰减速度，截距指数化恢复初始幅度，再由半衰期公式衡量冲击持续性。</p><div class="equation">$$\log I_t=a-\kappa t+\epsilon_t,\quad h_{1/2}=\log 2/\kappa$$</div>
+ <h3>推导、最优性条件与数值结构</h3><div class="equation">$$\widehat b=\frac{\sum_i(t_i-\bar t)(\log I_i-\overline{\log I})}{\sum_i(t_i-\bar t)^2},\quad \widehat\kappa=-\widehat b$$</div><p>指数衰减通过取对数变为线性模型，估计斜率即负衰减率。令预测冲击降至初始冲击的一半，可解出半衰期为log2除以衰减速度。</p>
+ <h3>完整计算案例</h3><p>时间0、1、2对应冲击4、2、1，拟合初始幅度4、衰减速度log2、半衰期1。</p><div class="equation">$$\mathrm{Output}\approx\left(4,\ 0.693147181,\ 1\right)$$</div>
+ <p>输出顺序：初始冲击估计、衰减速度、半衰期。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>Elapsed,Impact
+0,4
+1,2
+2,1</code></pre><pre><code>./kline_quant lab24-execution-impact-decay-fit study.csv</code></pre>
+ <h3>估计假设与应用边界</h3><p>冲击幅度必须严格为正，衰减速度必须为正；对变号冲击、永久冲击和多尺度衰减，需要其他模型。</p></article>
+<section class="source" id="source"><h2>完整C++17实现</h2><p>输入为逐行组织的数值矩阵及标量参数向量，输出为按前文约定排列的数值向量。各方法对维度、参数范围、数值有限性及可行性进行检查。</p><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/lab24_execution.hpp">算法源文件</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/lab24_common.hpp">公共接口</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_lab24.cpp">数值回归与结构恒等式测试</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_lab24_cli.py">CSV接口复算测试</a>。</p><h3>独立算法</h3><pre><code>#pragma once
+#include "lab24_common.hpp"
+#include &lt;map&gt;
+
+namespace kline { namespace lab24 {
+inline Vec ac_schedule(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,1,3);require(x.size()==1,"One parent order required");double Q=positive(x[0][0]),eta=positive(p[1]),risk=p[2];require(risk&gt;=0,"Negative risk penalty");auto n=integer(p[0],1,10000);
+    if(n==1)return {Q};
+    Vec d(n-1,2*eta+risk),rhs(n-1,0),u(n-2,-eta),inv(n+1,0);rhs[0]=eta*Q;inv[0]=Q;
+    for(std::size_t i=1;i&lt;d.size();++i){double k=-eta/positive(d[i-1]);d[i]-=k*u[i-1];rhs[i]-=k*rhs[i-1];}
+    for(std::size_t i=d.size();i--&gt;0;){double z=rhs[i]-(i+1&lt;d.size()?u[i]*inv[i+2]:0);inv[i+1]=z/positive(d[i]);}
+    Vec trades;for(std::size_t i=1;i&lt;=n;++i)trades.push_back(inv[i-1]-inv[i]);return checked(trades);
+}
+
+inline Vec participation_schedule(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,1,2);double left=p[0],rate=p[1];require(left&gt;=0&amp;&amp;rate&gt;=0&amp;&amp;rate&lt;=1,"Invalid order or cap");Vec q;
+    for(const auto&amp; r:x){require(r[0]&gt;=0,"Negative market volume");double fill=std::min(left,rate*r[0]);q.push_back(fill);left-=fill;}
+    q.push_back(left);return checked(q);
+}
+
+inline Vec queue_fifo(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,2,2);double ahead=p[0],remaining=p[1],total=0;require(ahead&gt;=0&amp;&amp;remaining&gt;=0,"Negative initial queue");
+    for(const auto&amp; r:x){require(r[0]&gt;=0&amp;&amp;r[1]&gt;=0&amp;&amp;r[0]&lt;=ahead+1e-10,"Invalid queue event");ahead=std::max(0.0,ahead-r[0]);double before=std::min(ahead,r[1]);ahead-=before;double f=std::min(remaining,r[1]-before);remaining-=f;total+=f;}
+    return checked({total,remaining,ahead});
+}
+
+inline Vec multi_venue_sweep(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,3,1);double left=p[0],cost=0;require(left&gt;=0,"Negative order");std::vector&lt;std::size_t&gt; ix(x.size());std::iota(ix.begin(),ix.end(),0);
+    for(const auto&amp; r:x){positive(r[0]);require(r[1]&gt;=0&amp;&amp;r[0]+r[2]&gt;0,"Invalid venue quote");}
+    std::stable_sort(ix.begin(),ix.end(),[&amp;](std::size_t a,std::size_t b){return x[a][0]+x[a][2]&lt;x[b][0]+x[b][2];});
+    Vec q(x.size(),0);for(auto i:ix){q[i]=std::min(left,x[i][1]);left-=q[i];cost+=q[i]*(x[i][0]+x[i][2]);}
+    Vec out={cost,p[0]-left,left};out.insert(out.end(),q.begin(),q.end());return checked(out);
+}
+
+inline Vec impact_decay_fit(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,2,0,3);Vec t=col(x,0),y;for(std::size_t i=0;i&lt;x.size();++i){require(t[i]&gt;=0&amp;&amp;(i==0||t[i]&gt;t[i-1]),"Invalid elapsed time");y.push_back(std::log(positive(x[i][1])));}
+    double b=covariance(t,y,false)/positive(variance(t,false)),a=mean(y)-b*mean(t),k=positive(-b);
+    return checked({std::exp(a),k,std::log(2.0)/k});
+}
+} }
+</code></pre><h3>公共数值接口</h3><pre><code>#pragma once
+#include "stats.hpp"
+#include &lt;algorithm&gt;
+#include &lt;cmath&gt;
+#include &lt;cstddef&gt;
+#include &lt;limits&gt;
+#include &lt;numeric&gt;
+#include &lt;stdexcept&gt;
+#include &lt;utility&gt;
+#include &lt;vector&gt;
+
+namespace kline { namespace lab24 {
+using Vec=std::vector&lt;double&gt;;
+using Mat=std::vector&lt;Vec&gt;;
+
+inline void inputs(const Mat&amp; x,const Vec&amp; p,std::size_t cols,std::size_t params,
+                   std::size_t min_rows=1) {
+    require(x.size()&gt;=min_rows&amp;&amp;x.size()&lt;=250000,"Invalid number of observations");
+    require(p.size()==params,"Incorrect scalar parameter count");
+    for(double v:p)require(std::isfinite(v),"Nonfinite scalar parameter");
+    for(const auto&amp; row:x){
+        require(row.size()==cols,"Unexpected CSV column count");
+        for(double v:row)require(std::isfinite(v),"Nonfinite matrix entry");
+    }
+}
+inline std::size_t integer(double x,std::size_t low,std::size_t high){
+    require(std::isfinite(x)&amp;&amp;x&gt;=double(low)&amp;&amp;x&lt;=double(high)&amp;&amp;std::floor(x)==x,
+            "Integer parameter outside allowed range");
+    return std::size_t(x);
+}
+inline double dot(const Vec&amp; a,const Vec&amp; b){
+    require(a.size()==b.size(),"Dot product dimension mismatch");
+    return std::inner_product(a.begin(),a.end(),b.begin(),0.0);
+}
+inline Vec col(const Mat&amp; x,std::size_t j){
+    Vec out;out.reserve(x.size());
+    for(const auto&amp; row:x)out.push_back(row.at(j));
+    return out;
+}
+inline double positive(double x){require(x&gt;0&amp;&amp;std::isfinite(x),"Positive finite quantity required");return x;}
+inline Vec checked(Vec v){check_finite(v);return v;}
+inline double logistic(double x){
+    if(x&gt;=0)return 1/(1+std::exp(-x));
+    double e=std::exp(x);return e/(1+e);
+}
+inline double normal_cdf(double x){return 0.5*std::erfc(-x/std::sqrt(2.0));}
+inline double sum(const Vec&amp; v){return std::accumulate(v.begin(),v.end(),0.0);}
+} }
+</code></pre></section><section class="references" id="references"><h2>参考文献与进一步阅读</h2><p><a href="https://doi.org/10.21314/JOR.2001.041">Almgren and Chriss (2001), Optimal Execution of Portfolio Transactions</a></p><p><a href="https://www.nasdaqtrader.com/content/technicalsupport/specifications/dataproducts/NQTVITCHSpecification.pdf">Nasdaq TotalView ITCH specification</a></p><p>课程中的数值样本均为明确构造的教学算例，不代表真实市场实证结果。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

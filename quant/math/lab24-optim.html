@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>约束优化、近端映射与组合权重求解｜Kline Quant</title><meta name="description" content="多变量量化研究、公式推导、数值案例与C++17算法">
+<link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<style>body{margin:0;background:white;color:#142733;font:16px/1.95 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:24px 32px 64px}main{max-width:1150px;margin:auto}header,.lesson,.source,.references{border:1px solid #cad3d9;padding:24px 28px;margin:18px 0;background:white}h1{font-size:31px;line-height:1.4}h2{font-size:23px;margin:10px 0 20px}h3{font-size:17px;margin:22px 0 6px}p{line-height:1.95;margin:12px 0}.toc{display:flex;flex-wrap:wrap;gap:9px 24px;border:1px solid #cad3d9;padding:17px 24px}.equation{overflow:auto;border-block:1px solid #d7dfe4;margin:18px 0;padding:16px 6px}.katex-display{overflow-x:auto;overflow-y:hidden}a{color:#1a5478}code,pre{font-family:"Times New Roman",monospace}pre{border:1px solid #cbd5dc;padding:15px;overflow:auto;white-space:pre;font-size:13px;line-height:1.7;max-height:850px}@media(max-width:790px){.main{margin:0;padding:12px}header,.lesson,.source,.references{padding:15px}}</style>
+</head><body><aside id="quantSidebar" class="sidebar" data-page="math"></aside><script src="../sidebar-v2.js"></script><div class="main"><main>
+<header><small>QUANTITATIVE RESEARCH / MULTIVARIATE NUMERICAL METHODS</small><h1>约束优化、近端映射与组合权重求解</h1><p>组合优化需要区分目标函数、可行域与优化算法。欧氏投影直接解决最小扰动问题，并可作为其他凸优化方法的一个步骤，而软阈值对应可分离正则化项的近端映射。</p><p>先用可行性恒等式检验权重预算与上界，再观察目标函数差异；概率倾斜则以相对熵描述偏离原情景分布的代价。对不同约束同时存在的真实策略，不能把独立投影结果直接当成联合最优。</p></header>
+<nav class="toc"><a href="#lesson1">1．排序阈值法投影至概率单纯形</a><a href="#lesson2">2．绝对敞口L1球投影</a><a href="#lesson3">3．带上下界的预算约束欧氏投影</a><a href="#lesson4">4．正交特征Elastic Net近端坐标解</a><a href="#lesson5">5．指数倾斜下的概率重加权</a><a href="#source">C++17完整实现</a><a href="#references">参考文献</a></nav>
+<article class="lesson" id="lesson1"><h2>1．排序阈值法投影至概率单纯形</h2>
+<h3>模型结构与数学定义</h3><p>由KKT条件，正权重坐标具有相同拉格朗日乘子θ，其他坐标被截断为零。将原向量降序排序，逐步确定有效支持并求满足权重和为1的阈值。计算复杂度为O(n log n)，可用于投影梯度法的每一步。</p><div class="equation">$$\min_{w\ge0,\ \mathbf1^\top w=1}\tfrac12\|w-z\|_2^2,\quad w_i=(z_i-\theta)_+$$</div>
+<h3>推导、最优性条件与数值结构</h3><div class="equation">$$\mathcal L=\tfrac12\|w-z\|^2+\theta(\mathbf1^\top w-1)-\nu^\top w,\quad \nu_iw_i=0$$</div><p>一阶条件给出w_i=z_i−θ+ν_i；互补松弛使正权重坐标的ν_i为零，零权重坐标的z_i不超过θ。排序定位满足支持集合条件的θ。</p>
+<h3>完整计算案例</h3><p>z=(0.2,1.2,−0.3)，有效支持只有第二项，投影为(0,1,0)。</p><div class="equation">$$\mathrm{Output}\approx\left(0,\ 1,\ 0\right)$$</div>
+<p>输出顺序：每个资产投影后的权重。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>Z
+0.2
+1.2
+-0.3</code></pre><pre><code>./kline_quant lab24-optim-simplex-projection study.csv</code></pre>
+<h3>估计假设与应用边界</h3><p>投影解决欧氏距离目标而非均值方差组合本身。极端大数应先缩放或使用更高精度。</p></article>
+<article class="lesson" id="lesson2"><h2>2．绝对敞口L1球投影</h2>
+<h3>模型结构与数学定义</h3><p>若原始头寸绝对和不超过总敞口预算，则原始向量已经可行；否则将绝对值投影到和为B的单纯形，再恢复原始方向。这一操作自然允许多空头寸并约束gross exposure。</p><div class="equation">$$\min_{\|w\|_1\le B}\|w-z\|_2^2,\quad w_i=\operatorname{sgn}(z_i)(|z_i|-\theta)_+$$</div>
+<h3>推导、最优性条件与数值结构</h3><div class="equation">$$\theta=\frac{\sum_{j=1}^k|z|_{(j)}-B}{k},\qquad \sum_i|w_i|=B$$</div><p>对固定绝对值，恢复原始符号使欧氏误差最小。若预算绑定，绝对值的最优支持由排序后的阈值确定；若预算不绑定，则原头寸已经是最优解。</p>
+<h3>完整计算案例</h3><p>z=(2,−1,0.5)，预算B=2，阈值0.5，有效投影为(1.5,−0.5,0)。</p><div class="equation">$$\mathrm{Output}\approx\left(1.5,\ -0.5,\ 0\right)$$</div>
+<p>输出顺序：每个资产的带符号投影权重。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>Z
+2
+-1
+0.5</code></pre><pre><code>./kline_quant lab24-optim-l1-ball study.csv 2</code></pre>
+<h3>估计假设与应用边界</h3><p>总敞口约束不同时约束净敞口或行业暴露。多组约束可使用Dykstra或其他交替投影方法。</p></article>
+<article class="lesson" id="lesson3"><h2>3．带上下界的预算约束欧氏投影</h2>
+<h3>模型结构与数学定义</h3><p>对带上下限的凸二次目标，固定乘子θ时各坐标可独立截断。权重总和关于θ单调不增，因此可在所有可能断点之间二分搜索，并通过最终预算残差判断数值精度。</p><div class="equation">$$w_i=\min(u_i,\max(l_i,z_i-\theta)),\quad \sum_iw_i=B$$</div>
+<h3>推导、最优性条件与数值结构</h3><div class="equation">$$F(\theta)=\sum_i\operatorname{clip}(z_i-\theta,l_i,u_i)-B=0$$</div><p>F连续、分段线性且单调不增。边界由z_i−u_i和z_i−l_i确定；中点若使总量过大，增大乘子即可降低全部自由坐标。</p>
+<h3>完整计算案例</h3><p>三个目标头寸为0.8、0.6、0.2，范围均为[0,0.7]，预算为1，乘子为0.2，解为(0.6,0.4,0)。</p><div class="equation">$$\mathrm{Output}\approx\left(0.6,\ 0.4,\ 0\right)$$</div>
+<p>输出顺序：各资产的最终可行权重。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>Z,Lower,Upper
+0.8,0,0.7
+0.6,0,0.7
+0.2,0,0.7</code></pre><pre><code>./kline_quant lab24-optim-box-budget study.csv 1</code></pre>
+<h3>估计假设与应用边界</h3><p>需要先确认上下界之和允许目标预算。此法只处理一个线性总量约束。</p></article>
+<article class="lesson" id="lesson4"><h2>4．正交特征Elastic Net近端坐标解</h2>
+<h3>模型结构与数学定义</h3><p>当标准化或变换后的设计矩阵具有正交列时，Elastic Net目标可以按坐标分离。对每个坐标求次梯度的零点，得到软阈值加二次收缩的闭式解。输入c为X_jᵀy、g为X_jᵀX_j；参数为L1和L2惩罚系数。</p><div class="equation">$$\widehat\beta_j=\frac{\operatorname{sgn}(c_j)(|c_j|-\lambda_1)_+}{g_j+\lambda_2}$$</div>
+<h3>推导、最优性条件与数值结构</h3><div class="equation">$$0\in(g_j+\lambda_2)\beta_j-c_j+\lambda_1\partial|\beta_j|$$</div><p>正、负、零三种情形分别代入次梯度条件。当绝对交叉乘积不超过L1惩罚时，零系数满足最优条件；超过时得到软阈值。</p>
+<h3>完整计算案例</h3><p>c=(3,−1,0.2)、g=(2,2,2)，λ1=1、λ2=1时，系数为(2/3,0,0)。</p><div class="equation">$$\mathrm{Output}\approx\left(0.666666667,\ 0,\ 0\right)$$</div>
+<p>输出顺序：各坐标最优系数。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>CrossProduct,GramDiagonal
+3,2
+-1,2
+0.2,2</code></pre><pre><code>./kline_quant lab24-optim-elastic-coordinate study.csv 1 1</code></pre>
+<h3>估计假设与应用边界</h3><p>正交性为此闭式解的关键前提。相关特征需在每次坐标更新时重新计算部分残差。</p></article>
+<article class="lesson" id="lesson5"><h2>5．指数倾斜下的概率重加权</h2>
+<h3>模型结构与数学定义</h3><p>最大化给定特征的期望，同时用相对熵惩罚偏离先验概率，可从拉格朗日一阶条件得到指数倾斜形式。数值实现先计算对数权重并减去最大值，再归一化以降低溢出风险；输出重加权期望与KL距离。</p><div class="equation">$$q_i=\frac{p_i e^{\eta f_i}}{\sum_jp_j e^{\eta f_j}},\quad D_{\rm KL}(q\Vert p)=\sum_iq_i\log(q_i/p_i)$$</div>
+<h3>推导、最优性条件与数值结构</h3><div class="equation">$$\max_q\left\{\eta\sum_iq_if_i-\sum_iq_i\log(q_i/p_i)\right\},\quad \mathbf1^\top q=1$$</div><p>对概率q的一阶条件取指数，并用预算约束归一化。对数配分函数的导数是倾斜特征的期望，第二导数是其方差，因此可进一步反解给定矩条件。</p>
+<h3>完整计算案例</h3><p>先验概率相等，特征为0、1，η=log(3)时后验权重为1/4、3/4，期望0.75，KL为0.25log(0.5)+0.75log(1.5)。</p><div class="equation">$$\mathrm{Output}\approx\left(0.75,\ 0.130812036\right)$$</div>
+<p>输出顺序：倾斜后的特征期望、相对熵。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>Prior,Feature
+0.5,0
+0.5,1</code></pre><pre><code>./kline_quant lab24-optim-entropy-tilt study.csv 1.0986122886681098</code></pre>
+<h3>估计假设与应用边界</h3><p>先验概率必须严格为正且加总为1。η是给定的对偶参数，若需达到精确目标矩，应另行求解η。</p></article>
+<section class="source" id="source"><h2>完整C++17实现</h2><p>输入为逐行组织的数值矩阵及标量参数向量，输出为按前文约定排列的数值向量。各方法对维度、参数范围、数值有限性及可行性进行检查。以下头文件和公共接口与实际工具库一致。</p><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/lab24_optim.hpp">算法源文件</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/lab24_common.hpp">公共接口</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_lab24.cpp">数值回归与结构恒等式测试</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_lab24_cli.py">CSV接口复算测试</a>。</p><h3>独立算法</h3><pre><code>#pragma once
+#include "lab24_common.hpp"
+#include &lt;functional&gt;
+
+namespace kline { namespace lab24 {
+inline Vec simplex_projection(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,1,0);Vec z=col(x,0),u=z;
+    std::sort(u.begin(),u.end(),std::greater&lt;double&gt;());
+    double s=0,theta=0;std::size_t active=0;
+    for(std::size_t j=0;j&lt;u.size();++j){s+=u[j];double t=(s-1)/double(j+1);if(u[j]&gt;t){theta=t;active=j+1;}}
+    require(active&gt;0,"Numerically empty simplex support");
+    for(double&amp; v:z)v=std::max(0.0,v-theta);
+    require(std::abs(sum(z)-1)&lt;1e-8,"Simplex projection lost precision");
+    return checked(z);
+}
+
+inline Vec l1_ball(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,1,1);require(p[0]&gt;=0,"Gross budget must be nonnegative");
+    Vec z=col(x,0),u;for(double v:z)u.push_back(std::abs(v));
+    if(sum(u)&lt;=p[0])return z;
+    if(p[0]==0)return Vec(z.size(),0);
+    std::sort(u.begin(),u.end(),std::greater&lt;double&gt;());
+    double s=0,t=0;
+    for(std::size_t j=0;j&lt;u.size();++j){s+=u[j];double q=(s-p[0])/double(j+1);if(u[j]&gt;q)t=q;}
+    for(double&amp; v:z)v=std::copysign(std::max(0.0,std::abs(v)-t),v);
+    double gross=0;for(double v:z)gross+=std::abs(v);
+    require(std::abs(gross-p[0])&lt;=1e-8*std::max(1.0,p[0]),"L1 projection lost precision");
+    return checked(z);
+}
+
+inline Vec box_budget(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,3,1);double lo=std::numeric_limits&lt;double&gt;::infinity(),hi=-lo,L=0,U=0;
+    for(const auto&amp; r:x){require(r[1]&lt;=r[2],"Reversed box bounds");L+=r[1];U+=r[2];lo=std::min(lo,r[0]-r[2]);hi=std::max(hi,r[0]-r[1]);}
+    require(p[0]&gt;=L-1e-12&amp;&amp;p[0]&lt;=U+1e-12,"Infeasible budget");
+    Vec w(x.size());
+    for(int k=0;k&lt;100;++k){double mid=lo+(hi-lo)/2,s=0;for(const auto&amp; r:x)s+=std::clamp(r[0]-mid,r[1],r[2]);if(s&gt;p[0])lo=mid;else hi=mid;}
+    for(std::size_t i=0;i&lt;x.size();++i)w[i]=std::clamp(x[i][0]-(lo+(hi-lo)/2),x[i][1],x[i][2]);
+    require(std::abs(sum(w)-p[0])&lt;=1e-8*std::max(1.0,std::abs(p[0])),"Budget residual too large");
+    return checked(w);
+}
+
+inline Vec elastic_coordinate(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,2,2);require(p[0]&gt;=0&amp;&amp;p[1]&gt;=0,"Penalty must be nonnegative");
+    Vec w;
+    for(const auto&amp; r:x){positive(r[1]);w.push_back(std::copysign(std::max(0.0,std::abs(r[0])-p[0]),r[0])/(r[1]+p[1]));}
+    return checked(w);
+}
+
+inline Vec entropy_tilt(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,2,1);Vec logw;double total=0;
+    for(const auto&amp; r:x){positive(r[0]);total+=r[0];logw.push_back(std::log(r[0])+p[0]*r[1]);}
+    require(std::abs(total-1)&lt;1e-10,"Prior probabilities must sum to one");
+    check_finite(logw);double m=*std::max_element(logw.begin(),logw.end()),z=0;
+    for(double q:logw)z+=std::exp(q-m);
+    double expectation=0,kl=0;
+    for(std::size_t i=0;i&lt;x.size();++i){double q=std::exp(logw[i]-m)/z;expectation+=q*x[i][1];if(q&gt;0)kl+=q*(std::log(q)-std::log(x[i][0]));}
+    return checked({expectation,kl});
+}
+} }
+</code></pre><h3>公共数值接口</h3><pre><code>#pragma once
+#include "stats.hpp"
+#include &lt;algorithm&gt;
+#include &lt;cmath&gt;
+#include &lt;cstddef&gt;
+#include &lt;limits&gt;
+#include &lt;numeric&gt;
+#include &lt;stdexcept&gt;
+#include &lt;utility&gt;
+#include &lt;vector&gt;
+
+namespace kline { namespace lab24 {
+using Vec=std::vector&lt;double&gt;;
+using Mat=std::vector&lt;Vec&gt;;
+
+inline void inputs(const Mat&amp; x,const Vec&amp; p,std::size_t cols,std::size_t params,
+                   std::size_t min_rows=1) {
+    require(x.size()&gt;=min_rows&amp;&amp;x.size()&lt;=250000,"Invalid number of observations");
+    require(p.size()==params,"Incorrect scalar parameter count");
+    for(double v:p)require(std::isfinite(v),"Nonfinite scalar parameter");
+    for(const auto&amp; row:x){
+        require(row.size()==cols,"Unexpected CSV column count");
+        for(double v:row)require(std::isfinite(v),"Nonfinite matrix entry");
+    }
+}
+inline std::size_t integer(double x,std::size_t low,std::size_t high){
+    require(std::isfinite(x)&amp;&amp;x&gt;=double(low)&amp;&amp;x&lt;=double(high)&amp;&amp;std::floor(x)==x,
+            "Integer parameter outside allowed range");
+    return std::size_t(x);
+}
+inline double dot(const Vec&amp; a,const Vec&amp; b){
+    require(a.size()==b.size(),"Dot product dimension mismatch");
+    return std::inner_product(a.begin(),a.end(),b.begin(),0.0);
+}
+inline Vec col(const Mat&amp; x,std::size_t j){
+    Vec out;out.reserve(x.size());
+    for(const auto&amp; row:x)out.push_back(row.at(j));
+    return out;
+}
+inline double positive(double x){require(x&gt;0&amp;&amp;std::isfinite(x),"Positive finite quantity required");return x;}
+inline Vec checked(Vec v){check_finite(v);return v;}
+inline double logistic(double x){
+    if(x&gt;=0)return 1/(1+std::exp(-x));
+    double e=std::exp(x);return e/(1+e);
+}
+inline double normal_cdf(double x){return 0.5*std::erfc(-x/std::sqrt(2.0));}
+inline double sum(const Vec&amp; v){return std::accumulate(v.begin(),v.end(),0.0);}
+} }
+</code></pre></section>
+<section class="references" id="references"><h2>参考文献与进一步阅读</h2><p><a href="https://web.stanford.edu/~boyd/cvxbook/">Boyd and Vandenberghe, Convex Optimization</a></p><p><a href="https://web.stanford.edu/~boyd/papers/prox_algs.html">Parikh and Boyd, Proximal Algorithms</a></p><p><a href="https://doi.org/10.1145/1390156.1390191">Duchi et al. (2008), Efficient Projections onto the L1-Ball</a></p><p>课程中的数值样本均为明确构造的教学算例，不代表真实市场实证结果。</p></section>
+</main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>
