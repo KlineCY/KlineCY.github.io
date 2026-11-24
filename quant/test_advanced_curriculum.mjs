@@ -54,3 +54,12 @@ assert.equal(ids.length,48);assert.equal(new Set(ids).size,48);
 assert.deepEqual(ids.slice().sort(),reports.slice().sort());
 for(const id of ids)assert(studies.includes("advanced-results/studies/"+id+".csv"));
 console.log("PASS: 48 advanced model chapters, 220 strict formulas, 124 reference rows, 751 coordinates and 48 independent studies");
+
+const methodology=read("quant/research/advanced-methodology.html");
+assert.equal([...methodology.matchAll(/<section id="([a-z]+)"/g)].length,8);
+const unified=[...methodology.matchAll(/<div class="equation">\$\$([\s\S]*?)\$\$<\/div>/g)];
+assert.equal(unified.length,32);
+for(const m of unified)katex.renderToString(unesc(m[1]),{throwOnError:true,strict:"error"});
+for(const command of all)assert(methodology.includes(command+".html"),command);
+assert(hub.includes("advanced-methodology.html"));
+console.log("PASS: eight synthesis sections and 32 independently rendered mathematical relations");
