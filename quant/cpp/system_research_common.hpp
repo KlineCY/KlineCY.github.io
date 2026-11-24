@@ -2,4 +2,6 @@
 #include "advanced_research_common.hpp"
 namespace kline { namespace system_research {
 using namespace advanced_research;
+using researchflow::l1;
+using researchflow::trade_step;
 } }
