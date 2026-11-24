@@ -1,0 +1,32 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>局部水平Kalman模型：创新似然网格校准与序贯预测｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="math"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>局部水平Kalman模型：创新似然网格校准与序贯预测</h1><p><a href="../research/model-laboratories.html">完整模型研究</a>　<a href="../cpp/model_research_dynamics.hpp" download>模型源码</a>　<a href="../cpp/model_research_common.hpp" download>公共数值函数</a></p></header><article><h2>问题、模型与数学推导</h2><p>状态空间模型把观察噪声与潜在水平波动分开。每个时点先用过去状态得到先验预测，再观察真实数据更新滤波均值。创新序列的条件高斯密度乘积构成精确似然（给定初始先验），因此无需先观察潜在状态即可校准过程噪声及测量噪声。</p><p>实现对Q、R分别使用对数等距网格，在训练前缀上枚举创新负似然，并按确定性循环顺序处理并列目标。选定参数后从初始先验重新过滤整个序列，报告训练标志、观察前预测、创新方差、滤波状态与共同训练似然。测试观测只能影响下一期预测，不影响已选参数。</p><div class="equation">$$x_t=x_{t-1}+\eta_t,\quad y_t=x_t+\varepsilon_t,\quad \eta_t\sim N(0,Q),\ \varepsilon_t\sim N(0,R)$$</div><div class="equation">$$a_t=m_{t-1},\quad P_t^-=P_{t-1}+Q,\quad S_t=P_t^-+R$$</div><div class="equation">$$v_t=y_t-a_t,\quad K_t=P_t^-/S_t,\quad m_t=a_t+K_tv_t,\quad P_t=(1-K_t)P_t^-$$</div><div class="equation">$$\mathcal L_T(Q,R)=\frac12\sum_{t\in T}[\log(2\pi S_t)+v_t^2/S_t]$$</div><div class="equation">$$(\widehat Q,\widehat R)=\arg\min_{Q\in\mathcal G_Q,R\in\mathcal G_R}\mathcal L_T(Q,R)$$</div><h2>解析案例与研究设计</h2><p>样本初始均值0、方差1，Q=0.1、R=0.2，第一期预测均值0，先验状态方差1.1、创新方差1.3、增益11/13，观测1后的滤波均值11/13。通过固定网格上下限得到独立递推基准；非退化网格时在训练期实际选择噪声参数。</p><p>网格搜索O(g²nT)，滤波O(n)，存储常数（输出除外）。Q、R严格正，初始方差非负；该工具进行有限网格最优而非连续最大似然。若参数落在边界，应扩大事前网格并使用独立验证；局部水平模型无法表达季节性、结构突变或重尾噪声。</p><h2>可执行输入与解析基准</h2><p>输入数据为独立构造的教学样本。下表给出可解析核对的输出前缀；其他诊断字段由模型实际拟合产生，并通过回归测试检查。</p><p><a href="../research/model-examples/kalman-grid-fit.csv" download>下载CSV样本</a></p><pre>Value
+1
+1
+2
+2.5
+3
+</pre><pre>./build/kline_quant model-kalman-grid-fit quant/research/model-examples/kalman-grid-fit.csv 3 0.1 0.1 0.2 0.2 2 0 1</pre><div class="wide"><table><thead><tr><th>Time</th><th>Train</th><th>Observed</th><th>Prediction</th><th>InnovationVariance</th><th>Innovation</th><th>Gain</th><th>FilteredMean</th></tr></thead><tbody><tr><td>1</td><td>1</td><td>1</td><td>0</td><td>1.3</td><td>1</td><td>0.846153846154</td><td>0.846153846154</td></tr><tr><td>2</td><td>1</td><td>1</td><td>0.846153846154</td><td>0.469230769231</td><td>0.153846153846</td><td>0.573770491803</td><td>0.934426229508</td></tr><tr><td>3</td><td>1</td><td>2</td><td>0.934426229508</td><td>0.414754098361</td><td>1.06557377049</td><td>0.517786561265</td><td>1.48616600791</td></tr><tr><td>4</td><td>0</td><td>2.5</td><td>1.48616600791</td><td>0.403557312253</td><td>1.01383399209</td><td>0.504407443683</td><td>1.99755142018</td></tr><tr><td>5</td><td>0</td><td>3</td><td>1.99755142018</td><td>0.400881488737</td><td>1.00244857982</td><td>0.501099438065</td><td>2.49987784022</td></tr></tbody></table></div><p>输出字段：Time，Train，Observed，Prediction，InnovationVariance，Innovation，Gain，FilteredMean，FilteredVariance，Q，R，TrainingNLL。</p><h2>C++17实现</h2><pre>inline Report kalman_grid_fit(const Mat&amp; x,const Vec&amp; p){
+    validate(x,4,1,1);parameters(p,8);
+    auto nt=count(p[0],2,x.size()-1),g=count(p[5],2,100);
+    double ql=positive(p[1]),qh=positive(p[2]),rl=positive(p[3]),rh=positive(p[4]);
+    require(qh&gt;=ql&amp;&amp;rh&gt;=rl&amp;&amp;p[7]&gt;=0&amp;&amp;double(g)*g*nt&lt;=5e7,"Invalid grid or work limit");
+    auto eval=[&amp;](double Q,double R,std::size_t n,Report* out,double train_nll){
+        double m=p[6],P=p[7],ll=0;
+        for(std::size_t t=0;t&lt;n;++t){
+            double a=P+Q,S=positive(a+R),v=x[t][0]-m,k=a/S,old=m;
+            ll+=.5*(std::log(2*std::acos(-1.)*S)+v*v/S);
+            m+=k*v;P=a*(R/S);
+            if(out)out-&gt;rows.push_back({double(t+1),double(t&lt;nt),x[t][0],old,S,v,k,m,P,Q,R,train_nll});
+        }
+        return ll;
+    };
+    double best=std::numeric_limits&lt;double&gt;::infinity(),Q=ql,R=rl;
+    for(std::size_t i=0;i&lt;g;++i)for(std::size_t j=0;j&lt;g;++j){
+        double q=std::exp(std::log(ql)+(std::log(qh)-std::log(ql))*i/(g-1));
+        double r=std::exp(std::log(rl)+(std::log(rh)-std::log(rl))*j/(g-1));
+        double v=eval(q,r,nt,nullptr,0);
+        if(v&lt;best){best=v;Q=q;R=r;}
+    }
+    require(std::isfinite(best),"No finite grid candidate");
+    Report o{{"Time","Train","Observed","Prediction","InnovationVariance","Innovation","Gain","FilteredMean","FilteredVariance","Q","R","TrainingNLL"},{}};
+    eval(Q,R,x.size(),&amp;o,best);return o;
+}</pre><p>参考文献：<a href="https://doi.org/10.1093/acprof:oso/9780199641178.001.0001">Durbin and Koopman (2012), Time Series Analysis by State Space Methods, 2nd ed., Oxford University Press.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

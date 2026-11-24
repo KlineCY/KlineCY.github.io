@@ -1,0 +1,26 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>多变量VAR岭估计与冻结一步预测｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="math"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>多变量VAR岭估计与冻结一步预测</h1><p><a href="../research/model-laboratories.html">完整模型研究</a>　<a href="../cpp/model_research_dynamics.hpp" download>模型源码</a>　<a href="../cpp/model_research_common.hpp" download>公共数值函数</a></p></header><article><h2>问题、模型与数学推导</h2><p>VAR将多资产或宏观变量的滞后值同时纳入预测，允许交叉滞后效应；本实现不含截距，输入应为事先定义的中心化变量或零均值模型，不在完整样本上重新中心化。多变量方程共享滞后设计矩阵，通过同一正则化Gram矩阵逐响应求解，避免把各资产建模成彼此无关的单变量AR。</p><p>训练前缀长度nT、滞后阶数p与λ由参数指定。训练行t仅取t−1至t−p的值，标签取t。岭项保证SPD并缓解高维共线性。测试期每个一步预测都使用已经实现的历史滞后，但系数完全冻结；这里的一步走动预测不等于从训练末端直接递归多步预测。</p><div class="equation">$$Y_t=B_1Y_{t-1}+\cdots+B_pY_{t-p}+u_t$$</div><div class="equation">$$Z_t=(Y_{t-1}^\top,\ldots,Y_{t-p}^\top)^\top$$</div><div class="equation">$$\widehat B=(Z^\top Z+\lambda I)^{-1}Z^\top Y$$</div><div class="equation">$$\hat Y_{t\mid t-1}=\widehat B^\top Z_t,\quad e_t=Y_t-\hat Y_{t\mid t-1}$$</div><div class="equation">$$\widehat{\mathrm{RMSE}}_{\mathrm{tr},j}=\sqrt{\frac{\sum_{t=p}^{n_T-1}e_{tj}^2}{n_T-p}}$$</div><h2>解析案例与研究设计</h2><p>解析样本两资产交替取(1,0)和(0,1)，前四条训练，p=1、λ=1。设计第一列出现两次、第二列一次，系数映射(1,0)至(0,2/3)，(0,1)至(1/2,0)。第五及第六条预测恰为上述两种映射。输出逐资产真实值、预测误差及训练RMSE。</p><p>计算维数为dp≤64，Gram构造O(nd²p²)，逐响应Cholesky O(d(dp)³)，大规模应复用矩阵分解。岭估计并不自动保证VAR伴随矩阵稳定性；多步脉冲响应或长期预测须另外检查谱半径。超参数选择应在训练内部以时间顺序完成。</p><h2>可执行输入与解析基准</h2><p>输入数据为独立构造的教学样本。下表给出可解析核对的输出前缀；其他诊断字段由模型实际拟合产生，并通过回归测试检查。</p><p><a href="../research/model-examples/var-ridge-forecast.csv" download>下载CSV样本</a></p><pre>R1,R2
+1,0
+0,1
+1,0
+0,1
+1,0
+0,1
+</pre><pre>./build/kline_quant model-var-ridge-forecast quant/research/model-examples/var-ridge-forecast.csv 4 1 1</pre><div class="wide"><table><thead><tr><th>Time</th><th>Asset</th><th>Actual</th><th>Forecast</th><th>Error</th></tr></thead><tbody><tr><td>5</td><td>1</td><td>1</td><td>0.5</td><td>0.5</td></tr><tr><td>5</td><td>2</td><td>0</td><td>0</td><td>0</td></tr><tr><td>6</td><td>1</td><td>0</td><td>0</td><td>0</td></tr><tr><td>6</td><td>2</td><td>1</td><td>0.666666666667</td><td>0.333333333333</td></tr></tbody></table></div><p>输出字段：Time，Asset，Actual，Forecast，Error，TrainingRMSE。</p><h2>C++17实现</h2><pre>inline Report var_ridge_forecast(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,4,1,16);parameters(p,3);
+    auto nt=count(p[0],3,x.size()-1),lag=count(p[1],1,nt-2);
+    double lam=positive(p[2]);auto m=d*lag;
+    require(m&lt;=64&amp;&amp;double(nt)*m*m&lt;=5e7,"VAR design work limit");
+    auto design=[&amp;](std::size_t t){Vec z;z.reserve(m);for(std::size_t k=1;k&lt;=lag;++k)z.insert(z.end(),x[t-k].begin(),x[t-k].end());return z;};
+    Mat H(m,Vec(m,0)),b(d,Vec(m,0)),coef(d);
+    for(std::size_t t=lag;t&lt;nt;++t){
+        Vec z=design(t);add_outer(H,z,1);
+        for(std::size_t j=0;j&lt;d;++j)for(std::size_t k=0;k&lt;m;++k)b[j][k]+=z[k]*x[t][j];
+    }
+    for(std::size_t k=0;k&lt;m;++k)H[k][k]+=lam;
+    for(std::size_t j=0;j&lt;d;++j)coef[j]=solve_spd(H,b[j]);
+    Vec err(d,0);
+    for(std::size_t t=lag;t&lt;nt;++t){Vec z=design(t);for(std::size_t j=0;j&lt;d;++j){double e=x[t][j]-dot(coef[j],z);err[j]+=e*e/(nt-lag);}}
+    Report o{{"Time","Asset","Actual","Forecast","Error","TrainingRMSE"},{}};
+    for(std::size_t t=nt;t&lt;x.size();++t){Vec z=design(t);for(std::size_t j=0;j&lt;d;++j){double f=dot(coef[j],z);o.rows.push_back({double(t+1),double(j+1),x[t][j],f,x[t][j]-f,std::sqrt(err[j])});}}
+    return o;
+}</pre><p>参考文献：<a href="https://doi.org/10.1007/978-3-540-27752-1">Lütkepohl (2005), New Introduction to Multiple Time Series Analysis, Springer.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>
