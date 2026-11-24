@@ -67,8 +67,8 @@ for(const [file,expected,index] of pages){
 }
 assert.equal(lessons,520,"Expected 520 actual full-length course units");
 assert(algorithmFiles.size>=45,"Expected 45+ distinct algorithm source links");
-assert(cppIndex.includes("<strong>313</strong>"),"Algorithm total inconsistent");
-assert(cppIndex.includes("<strong>675</strong>"),"CLI workflow total inconsistent");
+assert(cppIndex.includes("<strong>321</strong>"),"Algorithm total inconsistent");
+assert(cppIndex.includes("<strong>707</strong>"),"CLI workflow total inconsistent");
 for(const [file] of pages){
     const relative=path.relative(path.join(root,"quant/cpp"),
                                  path.join(root,file)).replaceAll(path.sep,"/");

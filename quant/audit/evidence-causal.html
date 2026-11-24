@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>面板政策识别、局部设计与结构分解｜Kline Quant</title><meta name="description" content="量化研究专题：模型、数学推导、C++17计算、独立数值算例与实证边界">
+<link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<style>body{margin:0;background:white;color:#182a35;font:16px/1.95 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:24px 32px 64px}main{max-width:1180px;margin:auto}header,.lesson,.source,.references,.framework{border:1px solid #cbd4dc;padding:24px 28px;margin:18px 0;background:white}h1{font-size:31px;line-height:1.4}h2{font-size:23px;margin:10px 0 20px}h3{font-size:18px;margin:24px 0 8px}p{line-height:1.95;margin:12px 0}.toc{display:flex;flex-wrap:wrap;gap:9px 24px;border:1px solid #cad3d9;padding:17px 24px}.equation{overflow:auto;border-block:1px solid #d7dfe4;margin:18px 0;padding:16px 6px}.katex-display{overflow-x:auto;overflow-y:hidden}a{color:#1a5478}code,pre{font-family:"Times New Roman",monospace}pre{border:1px solid #cbd5dc;padding:15px;overflow:auto;white-space:pre;font-size:14px;line-height:1.7;max-height:900px}table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}td,th{border:1px solid #ccd5dd;padding:8px 12px;text-align:right;background:white;white-space:nowrap}th{font-weight:bold;text-align:left}.wide{overflow-x:auto}dl{display:grid;grid-template-columns:110px minmax(0,1fr);gap:10px 15px}dt{font-weight:bold}dd{margin:0;overflow-wrap:anywhere}@media(max-width:790px){.main{margin:0;padding:12px}header,.lesson,.source,.references,.framework{padding:15px}dl{display:block}dt{margin-top:12px}}</style>
+</head><body><aside id="quantSidebar" class="sidebar" data-page="audit"></aside><script src="../sidebar-v2.js"></script><div class="main"><main>
+<header><small>QUANTITATIVE RESEARCH / EVIDENCE LABORATORIES</small><h1>面板政策识别、局部设计与结构分解</h1><p>金融经济学的实证研究既需要清晰的识别对象，也需要从原始面板直接复算的估计过程。本专题比较双向固定效应、分批处理下的组别—时期ATT、局部线性断点估计及组间均值分解，明确识别假设与估计量的关系。</p><p><a href="../research/evidence-laboratories.html">完整研究入口</a>　｜　<a href="../cpp/">C++17工具库</a></p></header><nav class="toc"><a href="#lesson1">1．平衡面板的双向固定效应与残差化</a><a href="#lesson2">2．分批处理的组别—时期ATT</a><a href="#lesson3">3．三角核局部线性断点估计</a><a href="#lesson4">4．参考组系数下的Oaxaca均值差分解</a><a href="#source">完整算法源码</a><a href="#references">参考文献</a></nav><section class="framework"><h2>研究流程与模型联系</h2><p>在平衡面板上可直接核对双向残差化及组别—时期差分，比较不同处理时间结构下的估计对象。局部线性RD使用阈值附近的独立识别逻辑，Oaxaca分解则是条件模型下的描述性恒等式。估计结果能否解释为因果，取决于研究设计和具体识别假设。</p></section><article class="lesson" id="lesson1"><h2>1．平衡面板的双向固定效应与残差化</h2><h3>经济问题与数学定义</h3><div class="equation">$$\widetilde z_{it}=z_{it}-\bar z_{i\cdot}-\bar z_{\cdot t}+\bar z_{\cdot\cdot}$$</div><p>要求每个单位在每个观测日期恰有一条记录。对处理变量与结果分别去除单位均值、时期均值并加回全样本均值，等价于对单位与时间虚拟变量做Frisch–Waugh–Lovell残差化。然后执行无截距单变量回归。</p><h3>估计推导与计算结构</h3><div class="equation">$$\widehat\beta=\frac{\sum_{it}\widetilde D_{it}\widetilde Y_{it}}{\sum_{it}\widetilde D_{it}^2}$$</div><h3>可复现数据与参数</h3><dl><dt>输入文件</dt><dd><a href="../research/evidence-examples/twfe-balanced.csv" download>twfe-balanced.csv</a></dd><dt>输入字段</dt><dd>Unit,Time,Treatment,Outcome</dd><dt>参数顺序</dt><dd>无额外参数</dd><dt>输出字段</dt><dd>Observations, Units, Periods, Coefficient, ResidualSSE, WithinTreatmentSS</dd></dl><pre><code>Unit,Time,Treatment,Outcome
+1,0,0,1
+1,1,0,2
+1,2,1,5
+2,0,0,3
+2,1,0,4
+2,2,0,5
+</code></pre><pre><code>./build/kline_quant evidence-twfe-balanced quant/research/evidence-examples/twfe-balanced.csv</code></pre><h3>解析基准与输出</h3><p>两单位三期，第一单位末期接受处理，结果包含2单位处理效应、单位常数及共同趋势。残差化处理平方和为1/3，估计系数2，残差平方和0。</p><div class="wide"><table><thead><tr><th>Observations</th><th>Units</th><th>Periods</th><th>Coefficient</th><th>ResidualSSE</th><th>WithinTreatmentSS</th></tr></thead><tbody><tr><td>6</td><td>2</td><td>3</td><td>2</td><td>0</td><td>0.3333333333</td></tr></tbody></table></div><h3>实证假设与适用边界</h3><p>平衡面板公式不适用于任意缺失格；异质分批处理效应下TWFE系数可能具有难以解释的权重，需另外做组别—时期识别。此处不输出不恰当的独立标准误。</p></article>
+<article class="lesson" id="lesson2"><h2>2．分批处理的组别—时期ATT</h2><h3>经济问题与数学定义</h3><div class="equation">$$ATT(g,t)=E[Y_t-Y_{b(g)}\mid G=g]-E[Y_t-Y_{b(g)}\mid G&gt;t\ \text{or}\ G=\infty]$$</div><p>FirstTreatment为单位首次处理日期，−1代表永不处理。对每一处理组g使用处理前最后一个观测日期作为固定基期，比较处理组到t的结果变化与截至t仍未处理的单位变化。已经处理的其他组不作为对照。</p><h3>估计推导与计算结构</h3><div class="equation">$$b(g)=\max\{s:s&lt;g\},\quad t\ge g$$</div><h3>可复现数据与参数</h3><dl><dt>输入文件</dt><dd><a href="../research/evidence-examples/cohort-att.csv" download>cohort-att.csv</a></dd><dt>输入字段</dt><dd>Unit,Time,FirstTreatment,Outcome</dd><dt>参数顺序</dt><dd>无额外参数</dd><dt>输出字段</dt><dd>Cohort, Period, Baseline, TreatedN, ControlN, TreatedChange, ControlChange, ATT</dd></dl><pre><code>Unit,Time,FirstTreatment,Outcome
+1,0,1,0
+1,1,1,3
+1,2,1,4
+2,0,2,2
+2,1,2,3
+2,2,2,7
+3,0,-1,5
+3,1,-1,6
+3,2,-1,7
+</code></pre><pre><code>./build/kline_quant evidence-cohort-att quant/research/evidence-examples/cohort-att.csv</code></pre><h3>解析基准与输出</h3><p>第一组从日期1开始处理，第二组从2开始，第三组永不处理；第一组在日期1及2的ATT均为2，第二组日期2的ATT为3。处理组和对照组数量随日期输出。</p><div class="wide"><table><thead><tr><th>Cohort</th><th>Period</th><th>Baseline</th><th>TreatedN</th><th>ControlN</th><th>TreatedChange</th><th>ControlChange</th><th>ATT</th></tr></thead><tbody><tr><td>1</td><td>1</td><td>0</td><td>1</td><td>2</td><td>3</td><td>1</td><td>2</td></tr><tr><td>1</td><td>2</td><td>0</td><td>1</td><td>1</td><td>4</td><td>2</td><td>2</td></tr><tr><td>2</td><td>2</td><td>1</td><td>1</td><td>1</td><td>4</td><td>1</td><td>3</td></tr></tbody></table></div><h3>实证假设与适用边界</h3><p>要求无预期效应、组别特定的平行趋势及稳定单位处理值。仅计算无协变量平衡面板的组别—时期差分，不包括原论文的双重稳健推断、聚合标准误或重复截面估计。</p></article>
+<article class="lesson" id="lesson3"><h2>3．三角核局部线性断点估计</h2><h3>经济问题与数学定义</h3><div class="equation">$$(\widehat a_\pm,\widehat b_\pm)=\arg\min_{a,b}\sum_{i\in\mathcal I_\pm}K((x_i-c)/h)(y_i-a-b(x_i-c))^2$$</div><p>在阈值两侧分别使用三角核加权的局部线性回归。中心化运行变量使截距直接对应断点处的左右极限；距离超过带宽的观测不参与，阈值本身归右侧。</p><h3>估计推导与计算结构</h3><div class="equation">$$K(u)=(1-|u|)_+,\qquad \widehat\tau=\widehat a_+-\widehat a_-$$</div><h3>可复现数据与参数</h3><dl><dt>输入文件</dt><dd><a href="../research/evidence-examples/local-linear-rd.csv" download>local-linear-rd.csv</a></dd><dt>输入字段</dt><dd>Running,Outcome</dd><dt>参数顺序</dt><dd>断点c、带宽h</dd><dt>输出字段</dt><dd>LeftIntercept, RightIntercept, LeftSlope, RightSlope, Discontinuity, LeftN, RightN</dd></dl><pre><code>Running,Outcome
+-2,-3
+-1,-1
+-0.5,0
+0,3
+0.5,3.5
+1,4
+</code></pre><pre><code>./build/kline_quant evidence-local-linear-rd quant/research/evidence-examples/local-linear-rd.csv 0 3</code></pre><h3>解析基准与输出</h3><p>左侧真实关系1+2x、右侧3+x；带宽3覆盖所有六个观测，左右截距分别1和3，断点差2。</p><div class="wide"><table><thead><tr><th>LeftIntercept</th><th>RightIntercept</th><th>LeftSlope</th><th>RightSlope</th><th>Discontinuity</th><th>LeftN</th><th>RightN</th></tr></thead><tbody><tr><td>1</td><td>3</td><td>2</td><td>1</td><td>2</td><td>3</td><td>3</td></tr></tbody></table></div><h3>实证假设与适用边界</h3><p>因果解释依赖阈值附近潜在结果连续、无精确操控及处理规则明确；此处为sharp RD点估计，不提供稳健偏差校正区间或自动带宽选择。</p></article>
+<article class="lesson" id="lesson4"><h2>4．参考组系数下的Oaxaca均值差分解</h2><h3>经济问题与数学定义</h3><div class="equation">$$\bar y_1-\bar y_0=(\bar x_1-\bar x_0)^\top\widehat\beta_0+\bar x_1^\top(\widehat\beta_1-\widehat\beta_0)$$</div><p>分别拟合两组含截距的OLS模型，将组0系数固定为参考。均值差中由特征均值变化产生的部分与由系数变化产生的部分精确相加。截距包含于特征向量的第一维。</p><h3>估计推导与计算结构</h3><div class="equation">$$\widehat y_g=X_g\widehat\beta_g,\quad \bar{\widehat y}_g=\bar y_g$$</div><h3>可复现数据与参数</h3><dl><dt>输入文件</dt><dd><a href="../research/evidence-examples/oaxaca-reference.csv" download>oaxaca-reference.csv</a></dd><dt>输入字段</dt><dd>Group,X,Outcome</dd><dt>参数顺序</dt><dd>无额外参数</dd><dt>输出字段</dt><dd>Mean0, Mean1, Gap, Composition, Coefficient, IdentityResidual, N0, N1</dd></dl><pre><code>Group,X,Outcome
+0,0,1
+0,1,3
+0,2,5
+1,1,4
+1,2,7
+1,3,10
+</code></pre><pre><code>./build/kline_quant evidence-oaxaca-reference quant/research/evidence-examples/oaxaca-reference.csv</code></pre><h3>解析基准与输出</h3><p>组0关系1+2x、组1关系1+3x，特征均值1和2，结果均值3和7。均值差4中，特征构成差为2，系数差为2，恒等式残差为零。</p><div class="wide"><table><thead><tr><th>Mean0</th><th>Mean1</th><th>Gap</th><th>Composition</th><th>Coefficient</th><th>IdentityResidual</th><th>N0</th><th>N1</th></tr></thead><tbody><tr><td>3</td><td>7</td><td>4</td><td>2</td><td>2</td><td>0</td><td>3</td><td>3</td></tr></tbody></table></div><h3>实证假设与适用边界</h3><p>分解取决于参考系数和变量定义，系数差不能自动解释为因果歧视或政策效果；共线、遗漏变量与样本选择均会影响估计。</p></article><section class="source" id="source"><h2>完整C++17实现</h2><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/evidence_causal.hpp">算法源码</a>　｜　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/evidence_common.hpp">公共数值接口</a>　｜　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_evidence.py">独立测试</a></p><pre><code>#pragma once
+#include "evidence_common.hpp"
+namespace kline { namespace evidence {
+inline Report twfe_balanced(const Mat&amp; x,const Vec&amp; p){
+    validate(x,4,4,4);parameters(p,0);std::map&lt;double,Vec&gt; unit,time;std::set&lt;std::pair&lt;double,double&gt;&gt; seen;Vec grand(2,0);
+    for(const auto&amp; r:x){require(seen.emplace(r[0],r[1]).second,"Duplicate panel cell");
+        auto&amp; a=unit[r[0]];auto&amp; b=time[r[1]];if(a.empty())a=Vec(2,0);if(b.empty())b=Vec(2,0);
+        for(std::size_t j=0;j&lt;2;++j){a[j]+=r[j+2];b[j]+=r[j+2];grand[j]+=r[j+2];}}
+    require(unit.size()&gt;=2&amp;&amp;time.size()&gt;=2&amp;&amp;unit.size()*time.size()==x.size(),"Balanced panel required");
+    Mat z;double xx=0,xy=0;
+    for(const auto&amp; r:x){Vec v(2);for(std::size_t j=0;j&lt;2;++j)v[j]=r[j+2]-unit[r[0]][j]/time.size()-time[r[1]][j]/unit.size()+grand[j]/x.size();xx+=v[0]*v[0];xy+=v[0]*v[1];z.push_back(v);}
+    double b=xy/positive(xx),sse=0;for(const auto&amp; v:z)sse+=(v[1]-b*v[0])*(v[1]-b*v[0]);
+    return scalar({"Observations","Units","Periods","Coefficient","ResidualSSE","WithinTreatmentSS"},{double(x.size()),double(unit.size()),double(time.size()),b,sse,xx});
+}
+
+inline Report cohort_att(const Mat&amp; x,const Vec&amp; p){
+    validate(x,4,4,4);parameters(p,0);std::map&lt;double,std::map&lt;double,double&gt;&gt; y;std::map&lt;double,double&gt; g;std::set&lt;double&gt; times,cohorts;
+    for(const auto&amp; r:x){require(r[1]&gt;=0&amp;&amp;(r[2]==-1||r[2]&gt;=0),"Invalid date or treatment date");
+        auto a=g.emplace(r[0],r[2]);require(a.first-&gt;second==r[2],"Treatment cohort changed");require(y[r[0]].emplace(r[1],r[3]).second,"Duplicate panel cell");times.insert(r[1]);if(r[2]&gt;=0)cohorts.insert(r[2]);}
+    require(y.size()*times.size()==x.size(),"Balanced panel required");require(double(cohorts.size())*times.size()*y.size()&lt;=5e7,"Cohort work limit exceeded");
+    Report o{{"Cohort","Period","Baseline","TreatedN","ControlN","TreatedChange","ControlChange","ATT"},{}};
+    for(double c:cohorts){auto it=times.find(c);require(it!=times.end()&amp;&amp;it!=times.begin(),"Treatment date and pre-period required");double base=*std::prev(it);
+        for(;it!=times.end();++it){double t=*it,na=0,nb=0,a=0,b=0;
+            for(const auto&amp; v:y){double h=g.at(v.first),change=v.second.at(t)-v.second.at(base);
+                if(h==c){++na;a+=change;}else if(h==-1||h&gt;t){++nb;b+=change;}}
+            positive(na);positive(nb);o.rows.push_back({c,t,base,na,nb,a/na,b/nb,a/na-b/nb});}}
+    require(!o.rows.empty(),"No treated cohorts");return o;
+}
+
+inline Report local_linear_rd(const Mat&amp; x,const Vec&amp; p){
+    validate(x,4,2,2);parameters(p,2);double c=p[0],h=positive(p[1]);Vec a(2),b(2),n(2,0);
+    for(int side=0;side&lt;2;++side){Mat A(2,Vec(2,0));Vec z(2,0);
+        for(const auto&amp; r:x){double u=r[0]-c,w=1-std::abs(u)/h;if(w&lt;=0||int(u&gt;=0)!=side)continue;++n[side];Vec v={1,u};
+            for(std::size_t i=0;i&lt;2;++i){z[i]+=w*v[i]*r[1];for(std::size_t j=0;j&lt;2;++j)A[i][j]+=w*v[i]*v[j];}}
+        require(n[side]&gt;=2,"Insufficient local observations");auto beta=solve_spd(A,z);a[side]=beta[0];b[side]=beta[1];}
+    return scalar({"LeftIntercept","RightIntercept","LeftSlope","RightSlope","Discontinuity","LeftN","RightN"},{a[0],a[1],b[0],b[1],a[1]-a[0],n[0],n[1]});
+}
+
+inline Report oaxaca_reference(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,4,3,20)-1;parameters(p,0);Mat A[2]={Mat(d,Vec(d,0)),Mat(d,Vec(d,0))};Vec b[2]={Vec(d,0),Vec(d,0)},m[2]={Vec(d,0),Vec(d,0)};double n[2]={0,0},y[2]={0,0};
+    for(const auto&amp; r:x){require(r[0]==0||r[0]==1,"Binary group required");auto g=std::size_t(r[0]);Vec z={1};z.insert(z.end(),r.begin()+1,r.end()-1);++n[g];y[g]+=r.back();
+        for(std::size_t i=0;i&lt;d;++i){m[g][i]+=z[i];b[g][i]+=z[i]*r.back();for(std::size_t j=0;j&lt;d;++j)A[g][i][j]+=z[i]*z[j];}}
+    for(int g=0;g&lt;2;++g){require(n[g]&gt;=d,"Insufficient group observations");for(double&amp; v:m[g])v/=n[g];y[g]/=n[g];}
+    Vec beta0=solve_spd(A[0],b[0]),beta1=solve_spd(A[1],b[1]),dx=m[1],db=beta1;
+    for(std::size_t j=0;j&lt;d;++j){dx[j]-=m[0][j];db[j]-=beta0[j];}
+    double composition=dot(dx,beta0),coefficient=dot(m[1],db),gap=y[1]-y[0];
+    return scalar({"Mean0","Mean1","Gap","Composition","Coefficient","IdentityResidual","N0","N1"},{y[0],y[1],gap,composition,coefficient,gap-composition-coefficient,n[0],n[1]});
+}
+} }
+</code></pre><p>仓库根目录编译后即可执行各章节命令。Windows多配置生成器使用<code>.\build\Release\kline_quant.exe</code>，单配置生成器使用<code>.\build\kline_quant.exe</code>。</p><pre><code>cmake -S quant/cpp -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+python quant/research/run_evidence_labs.py ./build/kline_quant evidence-results</code></pre></section><section class="references" id="references"><h2>参考文献与技术资料</h2><p><a href="https://doi.org/10.1016/j.jeconom.2020.12.001">Callaway &amp; Sant'Anna (2021), Difference-in-Differences with Multiple Time Periods</a></p><p><a href="https://doi.org/10.1016/j.jeconom.2007.05.001">Imbens &amp; Lemieux (2008), Regression Discontinuity Designs: A Guide to Practice</a></p><p><a href="https://doi.org/10.2307/2525981">Oaxaca (1973), Male-Female Wage Differentials in Urban Labor Markets</a></p><p>所有样本均为构造的教学数据；基准结果用于复算公式和软件实现，不代表真实交易市场表现。</p></section>
+</main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

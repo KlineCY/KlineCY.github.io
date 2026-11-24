@@ -917,5 +917,5 @@ for(const entry of catalog){
  }
 }
 assert.equal(chapters,60);assert.equal(equations,180);assert.equal(commands.size,60);
-assert(cpp.includes("<strong>313</strong>")&&cpp.includes("<strong>675</strong>"));
+assert(cpp.includes("<strong>321</strong>")&&cpp.includes("<strong>707</strong>"));
 console.log("PASS: "+chapters+" substantive chapters, "+equations+" strict KaTeX equations, "+values+" verified vector coordinates, "+commands.size+" executable recipes and twelve exact source-linked pages");

@@ -40,6 +40,8 @@
       :subsection("typeNavMenu","按类型划分","typeSub")+
        subsection("regionNavMenu","按地区划分","regionSub")),
     assets:
+      '<a class="q-menu-link" href="'+route("assets")+'evidence-pricing.html">随机折现因子与资产定价检验</a>'+
+      '<a class="q-menu-link" href="'+route("assets")+'evidence-stateprice.html">状态价格、复制与无套利价格区间</a>'+
       '<a class="q-menu-link" href="'+route("assets")+'">全部金融资产</a>'+
       '<a class="q-menu-link" href="'+route("assets")+'lab24-credit.html">信用迁移、损失分布与回收</a>'+
       '<a class="q-menu-link" href="'+route("assets")+'numerical-rates.html">固定收益期限结构、现金流与对冲</a>'+
@@ -56,6 +58,7 @@
       subsection("marketNav","按市场 / 地区","marketChoices",page==="assets")+
       subsection("typeNav","按金融工具类型","typeChoices"),
     feeds:
+      '<a class="q-menu-link" href="'+route("feeds")+'evidence-marketdesign.html">集合竞价、订单分配与市场事件模型</a>'+
       '<a class="q-menu-link" href="'+route("feeds")+'">全部数据字段</a>'+
       '<a class="q-menu-link" href="'+route("feeds")+'lab24-execution.html">执行路径、订单队列与市场冲击</a>'+
       '<a class="q-menu-link" href="'+route("feeds")+'numerical-market.html">高频金融与市场微观结构</a>'+
@@ -69,6 +72,8 @@
       '<a class="q-menu-link" href="'+route("feeds")+'?mode=providers">数据供应商目录</a>'+
       subsection("feedsCategoryNav","按数据类别","feedChoices",page==="feeds"),
     research:
+      '<a class="q-menu-link" href="'+route("research")+'evidence-ledger.html">多资产交易会计与自融资约束</a>'+
+      '<a class="q-menu-link" href="'+route("research")+'evidence-laboratories.html">量化研究证据实验室</a>'+
       '<a class="q-menu-link" href="'+route("research")+'">在线 Python 回测</a>'+
       '<a class="q-menu-link" href="'+route("research")+'lab24-portfolio.html">多资产约束、配置与风险分解</a>'+
       '<a class="q-menu-link" href="'+route("research")+'numerical-factors.html">实证资产定价与横截面研究</a>'+
@@ -86,6 +91,8 @@
       '<a class="q-menu-link" href="'+route("research")+'credit-derivatives-lab.html">信用衍生品与期货清算</a>'+
       subsection("researchStrategyNav","按策略选择","strategyChoices",page==="research"),
     audit:
+      '<a class="q-menu-link" href="'+route("audit")+'evidence-selection.html">多重检验、模型选择与回测过拟合</a>'+
+      '<a class="q-menu-link" href="'+route("audit")+'evidence-causal.html">面板政策识别、局部设计与结构分解</a>'+
       '<a class="q-menu-link" href="'+route("audit")+'">完整研究验证课程</a>'+
       '<a class="q-menu-link" href="'+route("audit")+'lab24-data.html">时点一致性、样本划分与事件诊断</a>'+
       '<a class="q-menu-link" href="'+route("audit")+'numerical-inference.html">多元稳健推断与联合检验</a>'+
@@ -147,6 +154,8 @@
       '<a class="q-menu-link" href="'+route("math")+'inference-and-survival.html">HAC与生存估计</a>'+
       subsection("mathDisciplineNav","按学科推进","mathDisciplineChoices",page==="math"),
     ml:
+      '<a class="q-menu-link" href="'+route("ml")+'evidence-density.html">多元概率预测与分布校准</a>'+
+      '<a class="q-menu-link" href="'+route("ml")+'evidence-shift.html">分布迁移、预测集合与选择性决策</a>'+
       '<a class="q-menu-link" href="'+route("ml")+'">完整机器学习课程树</a>'+
       '<a class="q-menu-link" href="'+route("ml")+'#atlas-reader-section">机器学习课程正文</a>'+
       '<a class="q-menu-link" href="'+route("ml")+'financial-ml-validation.html">金融机器学习与样本外验证</a>'+

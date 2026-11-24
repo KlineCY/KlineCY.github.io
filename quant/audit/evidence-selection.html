@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>多重检验、模型选择与回测过拟合｜Kline Quant</title><meta name="description" content="量化研究专题：模型、数学推导、C++17计算、独立数值算例与实证边界">
+<link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<style>body{margin:0;background:white;color:#182a35;font:16px/1.95 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:24px 32px 64px}main{max-width:1180px;margin:auto}header,.lesson,.source,.references,.framework{border:1px solid #cbd4dc;padding:24px 28px;margin:18px 0;background:white}h1{font-size:31px;line-height:1.4}h2{font-size:23px;margin:10px 0 20px}h3{font-size:18px;margin:24px 0 8px}p{line-height:1.95;margin:12px 0}.toc{display:flex;flex-wrap:wrap;gap:9px 24px;border:1px solid #cad3d9;padding:17px 24px}.equation{overflow:auto;border-block:1px solid #d7dfe4;margin:18px 0;padding:16px 6px}.katex-display{overflow-x:auto;overflow-y:hidden}a{color:#1a5478}code,pre{font-family:"Times New Roman",monospace}pre{border:1px solid #cbd5dc;padding:15px;overflow:auto;white-space:pre;font-size:14px;line-height:1.7;max-height:900px}table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}td,th{border:1px solid #ccd5dd;padding:8px 12px;text-align:right;background:white;white-space:nowrap}th{font-weight:bold;text-align:left}.wide{overflow-x:auto}dl{display:grid;grid-template-columns:110px minmax(0,1fr);gap:10px 15px}dt{font-weight:bold}dd{margin:0;overflow-wrap:anywhere}@media(max-width:790px){.main{margin:0;padding:12px}header,.lesson,.source,.references,.framework{padding:15px}dl{display:block}dt{margin-top:12px}}</style>
+</head><body><aside id="quantSidebar" class="sidebar" data-page="audit"></aside><script src="../sidebar-v2.js"></script><div class="main"><main>
+<header><small>QUANTITATIVE RESEARCH / EVIDENCE LABORATORIES</small><h1>多重检验、模型选择与回测过拟合</h1><p>当研究者从大量因子、参数组合与策略版本中择优时，单个统计量的显著性不再能够描述整个搜索过程。通过显式记录全部候选检验及完整的策略收益矩阵，分别研究错误发现率、家族错误率、样本分割下的择优偏差与相关检验的联合零假设。</p><p><a href="../research/evidence-laboratories.html">完整研究入口</a>　｜　<a href="../cpp/">C++17工具库</a></p></header><nav class="toc"><a href="#lesson1">1．BH与BY错误发现率控制</a><a href="#lesson2">2．Holm逐步家族错误率控制</a><a href="#lesson3">3．CSCV样本分割与均值策略择优偏差</a><a href="#lesson4">4．联合符号翻转最大统计量检验</a><a href="#source">完整算法源码</a><a href="#references">参考文献</a></nav><section class="framework"><h2>研究流程与模型联系</h2><p>策略搜索必须保留原始候选集合和同日期收益矩阵。先按假设家族选择FDR或FWER控制；再以CSCV评估择优排序在互补样本中的表现；联合翻转则保持候选间的横截面依赖，检验完整零假设。三类方法回答不同问题，不能把PBO当作单项p值，也不能以多重检验修正替代时间顺序验证。</p></section><article class="lesson" id="lesson1"><h2>1．BH与BY错误发现率控制</h2><h3>经济问题与数学定义</h3><div class="equation">$$q_{(i)}^{BH}=\min\{1,\min_{j\ge i}mp_{(j)}/j\}$$</div><p>将原始p值升序排列。从末位反向递推取最小值，保证调整值随秩单调。BY通过调和数放大阈值，在任意依赖的有效边际p值条件下控制FDR；BH的控制依赖独立性或适当正依赖结构。最后恢复原始候选顺序。</p><h3>估计推导与计算结构</h3><div class="equation">$$q_{(i)}^{BY}=\min\{1,H_m q_{(i)}^{BH}\},\quad H_m=\sum_{j=1}^m1/j$$</div><h3>可复现数据与参数</h3><dl><dt>输入文件</dt><dd><a href="../research/evidence-examples/fdr-adjustment.csv" download>fdr-adjustment.csv</a></dd><dt>输入字段</dt><dd>PValue</dd><dt>参数顺序</dt><dd>显著性水平α</dd><dt>输出字段</dt><dd>Hypothesis, PValue, BHAdjusted, BYAdjusted, BHReject, BYReject</dd></dl><pre><code>PValue
+0.01
+0.04
+0.03
+0.2
+</code></pre><pre><code>./build/kline_quant evidence-fdr-adjustment quant/research/evidence-examples/fdr-adjustment.csv 0.05</code></pre><h3>解析基准与输出</h3><p>四个p值0.01、0.04、0.03、0.2，BH调整值分别0.04、0.053333、0.053333、0.2，5%水平仅拒绝第一项；BY因依赖保护更保守。</p><div class="wide"><table><thead><tr><th>Hypothesis</th><th>PValue</th><th>BHAdjusted</th><th>BYAdjusted</th><th>BHReject</th><th>BYReject</th></tr></thead><tbody><tr><td>1</td><td>0.01</td><td>0.04</td><td>0.08333333333</td><td>1</td><td>0</td></tr><tr><td>2</td><td>0.04</td><td>0.05333333333</td><td>0.1111111111</td><td>0</td><td>0</td></tr><tr><td>3</td><td>0.03</td><td>0.05333333333</td><td>0.1111111111</td><td>0</td><td>0</td></tr><tr><td>4</td><td>0.2</td><td>0.2</td><td>0.4166666667</td><td>0</td><td>0</td></tr></tbody></table></div><h3>实证假设与适用边界</h3><p>必须把真实搜索家族中的全部检验纳入；删除失败候选会破坏误差率解释。</p></article>
+<article class="lesson" id="lesson2"><h2>2．Holm逐步家族错误率控制</h2><h3>经济问题与数学定义</h3><div class="equation">$$q_{(i)}^{Holm}=\min\{1,\max_{j\le i}(m-j+1)p_{(j)}\}$$</div><p>从最小p值开始按剩余假设数修正，并将先前最大调整值传递至下一项。该逐步拒绝方式保证一旦较早假设不能拒绝，较晚假设也不被拒绝。有效p值下不要求检验之间独立。</p><h3>估计推导与计算结构</h3><div class="equation">$$P(\text{at least one false rejection})\le\alpha$$</div><h3>可复现数据与参数</h3><dl><dt>输入文件</dt><dd><a href="../research/evidence-examples/holm-adjustment.csv" download>holm-adjustment.csv</a></dd><dt>输入字段</dt><dd>PValue</dd><dt>参数顺序</dt><dd>显著性水平α</dd><dt>输出字段</dt><dd>Hypothesis, PValue, HolmAdjusted, Reject</dd></dl><pre><code>PValue
+0.01
+0.04
+0.03
+0.2
+</code></pre><pre><code>./build/kline_quant evidence-holm-adjustment quant/research/evidence-examples/holm-adjustment.csv 0.05</code></pre><h3>解析基准与输出</h3><p>四个候选的调整值0.04、0.09、0.09、0.2，仅第一项在0.05水平拒绝。比较BH与Holm时，应区分错误发现占比和至少一次错误拒绝的概率。</p><div class="wide"><table><thead><tr><th>Hypothesis</th><th>PValue</th><th>HolmAdjusted</th><th>Reject</th></tr></thead><tbody><tr><td>1</td><td>0.01</td><td>0.04</td><td>1</td></tr><tr><td>2</td><td>0.04</td><td>0.09</td><td>0</td></tr><tr><td>3</td><td>0.03</td><td>0.09</td><td>0</td></tr><tr><td>4</td><td>0.2</td><td>0.2</td><td>0</td></tr></tbody></table></div><h3>实证假设与适用边界</h3><p>对于探索性候选筛选与最终投资决策应事先确定控制目标，避免观察结果后在不同修正方法间择优。</p></article>
+<article class="lesson" id="lesson3"><h2>3．CSCV样本分割与均值策略择优偏差</h2><h3>经济问题与数学定义</h3><div class="equation">$$\lambda_A=\log\frac{\omega_A}{1-\omega_A},\quad \omega_A=\frac{\operatorname{rank}_{A^c}(j_A^*)}{M+1}$$</div><p>将时间轴切成偶数个等长连续区块，遍历恰好一半区块组成的训练集合，其余区块作为测试。训练均值最高的候选在测试集合中从低至高排名，并将名次转为开区间分位及logit。并列测试名次使用平均秩；训练并列按输入顺序取第一项。</p><h3>估计推导与计算结构</h3><div class="equation">$$j_A^*=\arg\max_j\overline r_{A,j},\quad \widehat{PBO}=\frac1{|\mathcal A|}\sum_{A\in\mathcal A}\mathbf1_{\{\lambda_A&lt;0\}}$$</div><h3>可复现数据与参数</h3><dl><dt>输入文件</dt><dd><a href="../research/evidence-examples/cscv-mean-pbo.csv" download>cscv-mean-pbo.csv</a></dd><dt>输入字段</dt><dd>Strategy1,Strategy2,Strategy3</dd><dt>参数顺序</dt><dd>偶数等长区块数B</dd><dt>输出字段</dt><dd>Split, TrainMask, SelectedStrategy, TrainMean, TestMean, TestRank, RankFraction, Logit, BelowMedian</dd></dl><pre><code>Strategy1,Strategy2,Strategy3
+4,2,1
+4,2,1
+1,2,4
+1,2,4
+</code></pre><pre><code>./build/kline_quant evidence-cscv-mean-pbo quant/research/evidence-examples/cscv-mean-pbo.csv 2</code></pre><h3>解析基准与输出</h3><p>两个区块各两期，区块1的最优候选为策略1、区块2为策略3；互换测试时均排在末位。秩分位0.25，logit=−1.098612，两个分割都发生样本外落入下半区的情况。PBO可用BelowMedian列平均复算。</p><div class="wide"><table><thead><tr><th>Split</th><th>TrainMask</th><th>SelectedStrategy</th><th>TrainMean</th><th>TestMean</th><th>TestRank</th><th>RankFraction</th><th>Logit</th><th>BelowMedian</th></tr></thead><tbody><tr><td>1</td><td>1</td><td>1</td><td>4</td><td>1</td><td>1</td><td>0.25</td><td>-1.098612289</td><td>1</td></tr><tr><td>2</td><td>2</td><td>3</td><td>4</td><td>1</td><td>1</td><td>0.25</td><td>-1.098612289</td><td>1</td></tr></tbody></table></div><h3>实证假设与适用边界</h3><p>此处用算术均值作为策略目标，不是Sharpe版本；CSCV不保持单向时间顺序，因此用于回测搜索诊断而非实时walk-forward验证。并列训练规则可能影响结果。</p></article>
+<article class="lesson" id="lesson4"><h2>4．联合符号翻转最大统计量检验</h2><h3>经济问题与数学定义</h3><div class="equation">$$T_j=\left|T^{-1}\sum_t d_{tj}\right|,\quad M(s)=\max_j\left|T^{-1}\sum_t s_td_{tj}\right|$$</div><p>在同一时期对所有候选同步翻转符号，从而保留候选之间的横截面依赖。遍历全部符号组合，得到每个候选的边际双侧p值与最大统计量调整p值。统计量使用均值绝对值，需确保各候选的经济量纲可比。</p><h3>估计推导与计算结构</h3><div class="equation">$$p_j^{\max}=2^{-T}\sum_{s\in\{-1,1\}^T}\mathbf1_{\{M(s)\ge T_j\}}$$</div><h3>可复现数据与参数</h3><dl><dt>输入文件</dt><dd><a href="../research/evidence-examples/max-signflip.csv" download>max-signflip.csv</a></dd><dt>输入字段</dt><dd>Strategy1,Strategy2</dd><dt>参数顺序</dt><dd>无额外参数</dd><dt>输出字段</dt><dd>Strategy, ObservedAbsMean, MarginalP, MaxAdjustedP, Permutations</dd></dl><pre><code>Strategy1,Strategy2
+1,0
+1,0
+1,0
+</code></pre><pre><code>./build/kline_quant evidence-max-signflip quant/research/evidence-examples/max-signflip.csv</code></pre><h3>解析基准与输出</h3><p>三个时期策略1差值均为1，策略2均为0。八种符号中只有全正和全负使最大绝对均值达到1，第一项调整p值0.25，第二项为1。</p><div class="wide"><table><thead><tr><th>Strategy</th><th>ObservedAbsMean</th><th>MarginalP</th><th>MaxAdjustedP</th><th>Permutations</th></tr></thead><tbody><tr><td>1</td><td>1</td><td>0.25</td><td>0.25</td><td>8</td></tr><tr><td>2</td><td>0</td><td>1</td><td>1</td><td>8</td></tr></tbody></table></div><h3>实证假设与适用边界</h3><p>精确检验要求联合零假设下各期差值向量独立符号对称；有序列相关时不能任意逐期翻转。强家族错误率控制还依赖相应子集枢轴条件。</p></article><section class="source" id="source"><h2>完整C++17实现</h2><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/evidence_selection.hpp">算法源码</a>　｜　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/evidence_common.hpp">公共数值接口</a>　｜　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_evidence.py">独立测试</a></p><pre><code>#pragma once
+#include "evidence_common.hpp"
+namespace kline { namespace evidence {
+inline Report fdr_adjustment(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,1,1);parameters(p,1);require(p[0]&gt;0&amp;&amp;p[0]&lt;1,"Invalid FDR level");
+    Vec v=column(x,0),bh(v.size()),by(v.size());auto ix=order(v);double H=0,m=double(v.size());
+    for(std::size_t j=0;j&lt;v.size();++j){require(v[j]&gt;=0&amp;&amp;v[j]&lt;=1,"Invalid p-value");H+=1.0/(j+1);}
+    double q=1;
+    for(std::size_t j=ix.size();j--&gt;0;){q=std::min(q,m*v[ix[j]]/(j+1));bh[ix[j]]=q;by[ix[j]]=std::min(1.0,H*q);}
+    Report o{{"Hypothesis","PValue","BHAdjusted","BYAdjusted","BHReject","BYReject"},{}};
+    for(std::size_t j=0;j&lt;v.size();++j)o.rows.push_back({double(j+1),v[j],bh[j],by[j],double(bh[j]&lt;=p[0]),double(by[j]&lt;=p[0])});
+    return o;
+}
+
+inline Report holm_adjustment(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,1,1);parameters(p,1);require(p[0]&gt;0&amp;&amp;p[0]&lt;1,"Invalid FWER level");
+    Vec v=column(x,0),adj(v.size());auto ix=order(v);double a=0;
+    for(std::size_t j=0;j&lt;ix.size();++j){double u=v[ix[j]];require(u&gt;=0&amp;&amp;u&lt;=1,"Invalid p-value");a=std::max(a,std::min(1.0,u*(ix.size()-j)));adj[ix[j]]=a;}
+    Report o{{"Hypothesis","PValue","HolmAdjusted","Reject"},{}};
+    for(std::size_t j=0;j&lt;v.size();++j)o.rows.push_back({double(j+1),v[j],adj[j],double(adj[j]&lt;=p[0])});
+    return o;
+}
+
+inline Report cscv_mean_pbo(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,4,2,32);parameters(p,1);auto B=count(p[0],2,16);
+    require(B%2==0&amp;&amp;x.size()%B==0,"Even equal-length blocks required");
+    require(double(std::uint64_t(1)&lt;&lt;B)*B*d&lt;=5e7,"CSCV work limit exceeded");
+    Mat block(B,Vec(d,0));Vec total(d,0);auto L=x.size()/B;
+    for(std::size_t t=0;t&lt;x.size();++t)for(std::size_t j=0;j&lt;d;++j){block[t/L][j]+=x[t][j];total[j]+=x[t][j];}
+    Report o{{"Split","TrainMask","SelectedStrategy","TrainMean","TestMean","TestRank","RankFraction","Logit","BelowMedian"},{}};
+    for(std::uint64_t mask=1;mask&lt;(std::uint64_t(1)&lt;&lt;B);++mask){
+        if(bits(mask)!=B/2)continue;
+        Vec a(d,0),b(d,0);
+        for(std::size_t k=0;k&lt;B;++k)if(mask&amp;(std::uint64_t(1)&lt;&lt;k))for(std::size_t j=0;j&lt;d;++j)a[j]+=block[k][j];
+        for(std::size_t j=0;j&lt;d;++j)b[j]=total[j]-a[j];
+        auto j=std::size_t(std::max_element(a.begin(),a.end())-a.begin());double rank=1;
+        for(std::size_t k=0;k&lt;d;++k)if(k!=j){if(b[k]&lt;b[j])rank+=1;else if(b[k]==b[j])rank+=.5;}
+        double w=rank/(d+1),z=std::log(w/(1-w));
+        o.rows.push_back({double(o.rows.size()+1),double(mask),double(j+1),a[j]/(x.size()/2),b[j]/(x.size()/2),rank,w,z,double(z&lt;0)});
+    }
+    return o;
+}
+
+inline Report max_signflip(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,2,1,32);parameters(p,0);auto T=x.size();
+    require(T&lt;=20&amp;&amp;double(std::uint64_t(1)&lt;&lt;T)*T*d&lt;=5e7,"Exact sign-flip work limit exceeded");
+    Vec obs=means(x),single(d,0),joint(d,0);
+    for(double&amp; v:obs)v=std::abs(v);
+    auto M=std::uint64_t(1)&lt;&lt;T;
+    double scale=0;for(const auto&amp; row:x)for(double v:row)scale=std::max(scale,std::abs(v));
+    for(std::uint64_t mask=0;mask&lt;M;++mask){
+        Vec z(d,0);for(std::size_t t=0;t&lt;T;++t)for(std::size_t j=0;j&lt;d;++j)z[j]+=(mask&amp;(std::uint64_t(1)&lt;&lt;t)?1:-1)*x[t][j]/T;
+        double mx=0;for(double&amp; v:z){v=std::abs(v);mx=std::max(mx,v);}
+        for(std::size_t j=0;j&lt;d;++j){if(z[j]+1e-12*scale&gt;=obs[j])++single[j];if(mx+1e-12*scale&gt;=obs[j])++joint[j];}
+    }
+    Report o{{"Strategy","ObservedAbsMean","MarginalP","MaxAdjustedP","Permutations"},{}};
+    for(std::size_t j=0;j&lt;d;++j)o.rows.push_back({double(j+1),obs[j],single[j]/M,joint[j]/M,double(M)});
+    return o;
+}
+} }
+</code></pre><p>仓库根目录编译后即可执行各章节命令。Windows多配置生成器使用<code>.\build\Release\kline_quant.exe</code>，单配置生成器使用<code>.\build\kline_quant.exe</code>。</p><pre><code>cmake -S quant/cpp -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+python quant/research/run_evidence_labs.py ./build/kline_quant evidence-results</code></pre></section><section class="references" id="references"><h2>参考文献与技术资料</h2><p><a href="https://doi.org/10.1111/j.2517-6161.1995.tb02031.x">Benjamini &amp; Hochberg (1995), Controlling the False Discovery Rate</a></p><p><a href="https://doi.org/10.1214/aos/1013699998">Benjamini &amp; Yekutieli (2001), The Control of the False Discovery Rate in Multiple Testing under Dependency</a></p><p><a href="https://escholarship.org/uc/item/4w1110bb">Bailey et al., The Probability of Backtest Overfitting</a></p><p>所有样本均为构造的教学数据；基准结果用于复算公式和软件实现，不代表真实交易市场表现。</p></section>
+</main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>
