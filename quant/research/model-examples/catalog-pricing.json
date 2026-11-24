@@ -1,0 +1,354 @@
+[
+  {
+    "command": "model-american-put-pde",
+    "title": "美式看跌PDE：单调隐式离散与线性互补求解",
+    "area": "assets",
+    "ref": "Ikonen and Toivanen (2004), Operator Splitting Methods for American Option Pricing, Applied Mathematics Letters.",
+    "url": "https://doi.org/10.1016/j.aml.2004.06.010",
+    "columns": [
+      "QuerySpot"
+    ],
+    "file": "american-put-pde.csv",
+    "params": [
+      100,
+      0,
+      0,
+      0,
+      1,
+      200,
+      40,
+      20,
+      1e-9,
+      1000
+    ],
+    "header": [
+      "Spot",
+      "AmericanPut",
+      "EuropeanPut",
+      "EarlyExercisePremium",
+      "MaxComplementarityResidual",
+      "MaxIterations"
+    ],
+    "expected_prefix": [
+      [
+        50,
+        50,
+        50,
+        0
+      ],
+      [
+        100,
+        0,
+        0,
+        0
+      ],
+      [
+        150,
+        0,
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "command": "model-localvol-call-pde",
+    "title": "局部波动率欧式期权：非恒定扩散系数的隐式PDE",
+    "area": "assets",
+    "ref": "Dupire (1994), Pricing with a Smile, Risk; Wilmott, Howison and Dewynne (1995), The Mathematics of Financial Derivatives.",
+    "url": "https://doi.org/10.1017/CBO9780511812545",
+    "columns": [
+      "Spot",
+      "LocalVol"
+    ],
+    "file": "localvol-call-pde.csv",
+    "params": [
+      100,
+      0,
+      0,
+      1,
+      10
+    ],
+    "header": [
+      "Spot",
+      "LocalVol",
+      "CallPrice",
+      "TerminalPayoff",
+      "MaxLinearResidual"
+    ],
+    "expected_prefix": [
+      [
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        50,
+        0,
+        0,
+        0
+      ],
+      [
+        100,
+        0,
+        0,
+        0
+      ],
+      [
+        150,
+        0,
+        50,
+        50
+      ],
+      [
+        200,
+        0,
+        100,
+        100
+      ]
+    ]
+  },
+  {
+    "command": "model-asian-independent-control",
+    "title": "算术亚式期权：独立试验样本的几何控制变量Monte Carlo",
+    "area": "assets",
+    "ref": "Kemna and Vorst (1990), A Pricing Method for Options Based on Average Asset Values, Journal of Banking & Finance.",
+    "url": "https://doi.org/10.1016/0378-4266(90)90039-5",
+    "columns": [
+      "Spot",
+      "Strike",
+      "Rate",
+      "Dividend",
+      "Vol",
+      "Time"
+    ],
+    "file": "asian-independent-control.csv",
+    "params": [
+      12,
+      128,
+      512,
+      42
+    ],
+    "header": [
+      "PlainPrice",
+      "ControlPrice",
+      "PlainSE",
+      "ControlSE",
+      "Beta",
+      "GeometricAnalytic",
+      "MainPaths"
+    ],
+    "expected_prefix": [
+      [
+        10,
+        10,
+        0,
+        0,
+        0,
+        10,
+        512
+      ]
+    ]
+  },
+  {
+    "command": "model-cds-hazard-bootstrap",
+    "title": "CDS期限结构：分段常强度逐段校准及现金流复算",
+    "area": "assets",
+    "ref": "Duffie and Singleton (2003), Credit Risk: Pricing, Measurement, and Management, Princeton University Press.",
+    "url": "https://press.princeton.edu/books/hardcover/9780691090467/credit-risk",
+    "columns": [
+      "Maturity",
+      "Spread"
+    ],
+    "file": "cds-hazard-bootstrap.csv",
+    "params": [
+      0.4,
+      0,
+      0.5,
+      1e-10
+    ],
+    "header": [
+      "Maturity",
+      "Hazard",
+      "Survival",
+      "MarketSpread",
+      "FittedSpread",
+      "SpreadResidual",
+      "PremiumAnnuity",
+      "ProtectionPV"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        0.1,
+        0.9048374180359595,
+        0.061525315651228846,
+        0.061525315651228846,
+        0
+      ],
+      [
+        2,
+        0.1,
+        0.8187307530779818,
+        0.061525315651228846,
+        0.061525315651228846,
+        0
+      ],
+      [
+        3,
+        0.1,
+        0.7408182206817179,
+        0.061525315651228846,
+        0.061525315651228846,
+        0
+      ]
+    ]
+  },
+  {
+    "command": "model-nelson-siegel-calibration",
+    "title": "Nelson–Siegel曲线：期限因子、轮廓损失与网格估计",
+    "area": "assets",
+    "ref": "Nelson and Siegel (1987), Parsimonious Modeling of Yield Curves, Journal of Business.",
+    "url": "https://www.nber.org/papers/w1594",
+    "columns": [
+      "Maturity",
+      "ZeroRate",
+      "Weight"
+    ],
+    "file": "nelson-siegel-calibration.csv",
+    "params": [
+      2,
+      2,
+      3,
+      0
+    ],
+    "header": [
+      "Maturity",
+      "ObservedRate",
+      "FittedRate",
+      "Residual",
+      "Level",
+      "Slope",
+      "Curvature",
+      "Tau",
+      "PenalizedSSE"
+    ],
+    "expected_prefix": [
+      [
+        0.25,
+        0.011774783180921677,
+        0.011774783180921677,
+        0,
+        0.03,
+        -0.02,
+        0.01,
+        2,
+        0
+      ],
+      [
+        0.5,
+        0.013364023492142144,
+        0.013364023492142144,
+        0,
+        0.03,
+        -0.02,
+        0.01,
+        2,
+        0
+      ],
+      [
+        1,
+        0.016065306597126332,
+        0.016065306597126332,
+        0,
+        0.03,
+        -0.02,
+        0.01,
+        2,
+        0
+      ],
+      [
+        2,
+        0.02,
+        0.02,
+        0,
+        0.03,
+        -0.02,
+        0.01,
+        2,
+        0
+      ],
+      [
+        5,
+        0.025507490008256608,
+        0.025507490008256608,
+        0,
+        0.03,
+        -0.02,
+        0.01,
+        2,
+        0
+      ],
+      [
+        10,
+        0.027946096424007316,
+        0.027946096424007316,
+        0,
+        0.03,
+        -0.02,
+        0.01,
+        2,
+        0
+      ]
+    ]
+  },
+  {
+    "command": "model-risk-neutral-entropy-fit",
+    "title": "离散风险中性分布：期权价格、远期约束与最小相对熵",
+    "area": "assets",
+    "ref": "Buchen and Kelly (1996), The Maximum Entropy Distribution of an Asset Inferred from Option Prices, JFQA.",
+    "url": "https://doi.org/10.2307/2331382",
+    "columns": [
+      "TerminalState",
+      "PriorWeight"
+    ],
+    "file": "risk-neutral-entropy-fit.csv",
+    "params": [
+      1,
+      100,
+      100,
+      5,
+      1e-10,
+      100
+    ],
+    "header": [
+      "State",
+      "Probability",
+      "StatePrice",
+      "Forward",
+      "KL",
+      "MaxMomentResidual",
+      "CallPrice1"
+    ],
+    "expected_prefix": [
+      [
+        80,
+        0.25,
+        0.25,
+        100
+      ],
+      [
+        100,
+        0.5,
+        0.5,
+        100
+      ],
+      [
+        120,
+        0.25,
+        0.25,
+        100
+      ]
+    ]
+  }
+]

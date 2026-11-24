@@ -1,0 +1,41 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>熵平衡：指数权重、目标矩与Newton校准｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="audit"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>熵平衡：指数权重、目标矩与Newton校准</h1><p><a href="../research/model-laboratories.html">完整模型研究</a>　<a href="../cpp/model_research_optimization.hpp" download>模型源码</a>　<a href="../cpp/model_research_common.hpp" download>公共数值函数</a></p></header><article><h2>问题、模型与数学推导</h2><p>研究对象：对观察样本进行最小信息距离的再加权，使特定协变量矩达到外部目标。它与简单倾向得分逆概率权重不同，直接约束经验矩；但平衡观测协变量仍不能消除未观测混杂，因果解释需要独立识别假设。</p><p>由拉格朗日乘子求权重：对严格正基础概率q，熵目标在单纯形内部严格凸。一阶条件给出指数倾斜；代入归一化约束后，剩余乘子通过最小化log-partition减目标矩内积求出。Hessian恰为当前加权协方差，因此在特征仿射独立的内部解附近为正定。采用Cholesky方向及Armijo回溯，避免无约束Newton步过大。</p><div class="equation">$$\min_{w_i\ge0}\sum_i w_i\log(w_i/q_i),\quad \sum_iw_i=1,\quad \sum_iw_i x_i=m$$</div><div class="equation">$$w_i(\theta)=\frac{q_i\exp(\theta^\top x_i)}{\sum_jq_j\exp(\theta^\top x_j)}$$</div><div class="equation">$$\psi(\theta)=\log\sum_iq_i e^{\theta^\top x_i}-\theta^\top m$$</div><div class="equation">$$\nabla\psi=\sum_iw_ix_i-m,\quad\nabla^2\psi=\operatorname{Cov}_w(x)$$</div><div class="equation">$$\theta^{k+1}=\theta^k-\alpha_k[\nabla^2\psi(\theta^k)]^{-1}\nabla\psi(\theta^k)$$</div><h2>解析案例与研究设计</h2><p>可行性：目标必须位于观测特征的凸包内，有限严格正权重一般要求相对内部。若特征存在冗余或目标在边界，Hessian可能奇异；应先做秩检查、合并冗余矩或改变问题定义。实现不通过任意截断权重来伪造平衡，无法达到容差时拒绝。</p><p>示例：基础点0、1各半，目标均值0.75；权重由约束直接确定为0.25及0.75，KL=0.25ln0.5+0.75ln1.5，ESS=1/(0.25²+0.75²)=1.6。输出每条权重及共同矩残差、KL和有效样本量。复杂度每次Newton O(nd²+d³)，回溯另需概率和目标计算。真实处理组目标应独立构建；极端权重需报告重叠与方差，而非只报告均值平衡。</p><h2>可执行输入与解析基准</h2><p>输入数据为独立构造的教学样本。下表给出可解析核对的输出前缀；其他诊断字段由模型实际拟合产生，并通过回归测试检查。</p><p><a href="../research/model-examples/entropy-balance-fit.csv" download>下载CSV样本</a></p><pre>BaseWeight,X1
+1,0
+1,1
+</pre><pre>./build/kline_quant model-entropy-balance-fit quant/research/model-examples/entropy-balance-fit.csv 0.75 1e-10 100</pre><div class="wide"><table><thead><tr><th>Observation</th><th>Weight</th><th>BaseProbability</th></tr></thead><tbody><tr><td>1</td><td>0.25</td><td>0.5</td></tr><tr><td>2</td><td>0.75</td><td>0.5</td></tr></tbody></table></div><p>输出字段：Observation，Weight，BaseProbability，KL，MomentResidual，EffectiveN，Iterations。</p><h2>C++17实现</h2><pre>inline Report entropy_balance_fit(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,2,2,17)-1;
+    parameters(p,d+2);Vec target(p.begin(),p.begin()+d);
+    double tol=positive(p[d]);auto K=count(p[d+1],1,2000);
+    require(double(K)*x.size()*d*d&lt;=5e7,"Calibration work limit");
+    Mat a;Vec q;
+    for(auto&amp;r:x){q.push_back(positive(r[0]));a.emplace_back(r.begin()+1,r.end());}
+    double den=positive(sum(q));for(double&amp;v:q)v/=den;
+    struct State{Vec w,g;Mat H;double obj;};
+    auto eval=[&amp;](const Vec&amp; theta,bool curvature){
+        State s{Vec(x.size()),Vec(d,0),Mat(d,Vec(d,0)),0};
+        double m=-std::numeric_limits&lt;double&gt;::infinity();
+        for(std::size_t i=0;i&lt;x.size();++i){s.w[i]=std::log(q[i])+dot(a[i],theta);m=std::max(m,s.w[i]);}
+        double total=0;
+        for(double&amp;v:s.w){v=std::exp(v-m);total+=v;}
+        for(std::size_t i=0;i&lt;x.size();++i){s.w[i]/=total;for(std::size_t j=0;j&lt;d;++j)s.g[j]+=s.w[i]*a[i][j];}
+        if(curvature)for(std::size_t i=0;i&lt;x.size();++i){Vec z=a[i];for(std::size_t j=0;j&lt;d;++j)z[j]-=s.g[j];add_outer(s.H,z,s.w[i]);}
+        for(std::size_t j=0;j&lt;d;++j)s.g[j]-=target[j];
+        s.obj=m+std::log(total)-dot(theta,target);return s;
+    };
+    Vec theta(d,0);State s=eval(theta,true);std::size_t it=0;
+    while(inf_norm(s.g)&gt;tol&amp;&amp;it&lt;K){
+        Vec dir=solve_spd(s.H,s.g);double descent=positive(dot(dir,s.g));bool ok=false;
+        for(int k=0;k&lt;40;++k){
+            double step=std::ldexp(1.,-k);Vec v=theta;
+            for(std::size_t j=0;j&lt;d;++j)v[j]-=step*dir[j];
+            auto trial=eval(v,false);
+            if(trial.obj&lt;=s.obj-1e-4*step*descent+1e-15*std::max(1.,std::abs(s.obj))){theta=v;s=eval(theta,true);ok=true;break;}
+        }
+        require(ok,"Entropy line search failed");++it;
+    }
+    double gap=inf_norm(s.g);require(gap&lt;=tol,"Moment target not reached");
+    double kl=0,ess=1/positive(squared(s.w));
+    for(std::size_t i=0;i&lt;x.size();++i)if(s.w[i]&gt;0)kl+=s.w[i]*std::log(s.w[i]/q[i]);
+    Report o{{"Observation","Weight","BaseProbability","KL","MomentResidual","EffectiveN","Iterations"},{}};
+    for(std::size_t i=0;i&lt;x.size();++i)o.rows.push_back({double(i+1),s.w[i],q[i],kl,gap,ess,double(it)});
+    return o;
+}</pre><p>参考文献：<a href="https://doi.org/10.1093/pan/mpr025">Hainmueller (2012), Entropy Balancing for Causal Effects, Political Analysis.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

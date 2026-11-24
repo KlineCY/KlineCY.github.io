@@ -1,0 +1,237 @@
+[
+  {
+    "command": "model-fista-elastic",
+    "title": "FISTA弹性网：加速近端拟合与KKT收敛",
+    "area": "ml",
+    "ref": "Beck and Teboulle (2009), A Fast Iterative Shrinkage-Thresholding Algorithm for Linear Inverse Problems.",
+    "url": "https://doi.org/10.1137/080716542",
+    "columns": [
+      "X1",
+      "X2",
+      "Y"
+    ],
+    "file": "fista-elastic.csv",
+    "params": [
+      0.5,
+      0.5,
+      1e-9,
+      2000
+    ],
+    "header": [
+      "Feature",
+      "Coefficient",
+      "Objective",
+      "KKTResidual",
+      "Iterations"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        1.6666666666666667
+      ],
+      [
+        2,
+        -1
+      ]
+    ]
+  },
+  {
+    "command": "model-fused-admm",
+    "title": "一维总变差去噪：Fused Lasso的ADMM求解",
+    "area": "math",
+    "ref": "Boyd et al. (2011), Distributed Optimization and Statistical Learning via the Alternating Direction Method of Multipliers.",
+    "url": "https://stanford.edu/~boyd/papers/admm_distr_stats.html",
+    "columns": [
+      "Value"
+    ],
+    "file": "fused-admm.csv",
+    "params": [
+      1,
+      1,
+      1e-8,
+      10000
+    ],
+    "header": [
+      "Index",
+      "Observed",
+      "Fitted",
+      "Difference",
+      "Objective",
+      "PrimalResidual",
+      "DualResidual",
+      "KKTResidual",
+      "Iterations"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        0,
+        0.5
+      ],
+      [
+        2,
+        0,
+        0.5
+      ],
+      [
+        3,
+        4,
+        3.5
+      ],
+      [
+        4,
+        4,
+        3.5
+      ]
+    ]
+  },
+  {
+    "command": "model-box-covariance-qp",
+    "title": "全协方差盒约束组合优化：投影梯度与可行性",
+    "area": "research",
+    "ref": "Boyd and Vandenberghe (2004), Convex Optimization.",
+    "url": "https://web.stanford.edu/~boyd/cvxbook/",
+    "columns": [
+      "Cov1",
+      "Cov2",
+      "Mean",
+      "Lower",
+      "Upper"
+    ],
+    "file": "box-covariance-qp.csv",
+    "params": [
+      1,
+      1,
+      1e-9,
+      2000
+    ],
+    "header": [
+      "Asset",
+      "Weight",
+      "Gradient",
+      "Objective",
+      "BudgetGap",
+      "ProjectedGradient",
+      "Iterations"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        0.5
+      ],
+      [
+        2,
+        0.5
+      ]
+    ]
+  },
+  {
+    "command": "model-entropy-balance-fit",
+    "title": "熵平衡：指数权重、目标矩与Newton校准",
+    "area": "audit",
+    "ref": "Hainmueller (2012), Entropy Balancing for Causal Effects, Political Analysis.",
+    "url": "https://doi.org/10.1093/pan/mpr025",
+    "columns": [
+      "BaseWeight",
+      "X1"
+    ],
+    "file": "entropy-balance-fit.csv",
+    "params": [
+      0.75,
+      1e-10,
+      100
+    ],
+    "header": [
+      "Observation",
+      "Weight",
+      "BaseProbability",
+      "KL",
+      "MomentResidual",
+      "EffectiveN",
+      "Iterations"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        0.25,
+        0.5
+      ],
+      [
+        2,
+        0.75,
+        0.5
+      ]
+    ]
+  },
+  {
+    "command": "model-nnls-coordinate",
+    "title": "非负岭回归：坐标下降与互补松弛",
+    "area": "ml",
+    "ref": "Lawson and Hanson (1995), Solving Least Squares Problems, SIAM.",
+    "url": "https://doi.org/10.1137/1.9781611971217",
+    "columns": [
+      "X1",
+      "X2",
+      "Y"
+    ],
+    "file": "nnls-coordinate.csv",
+    "params": [
+      0.5,
+      1e-10,
+      1000
+    ],
+    "header": [
+      "Feature",
+      "Coefficient",
+      "Gradient",
+      "Objective",
+      "KKTResidual",
+      "Iterations"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        2
+      ],
+      [
+        2,
+        0
+      ]
+    ]
+  },
+  {
+    "command": "model-graph-smoother",
+    "title": "图Laplacian正则化：异质观测与网络平滑",
+    "area": "math",
+    "ref": "Chung (1997), Spectral Graph Theory, AMS; Belkin, Niyogi and Sindhwani (2006), Manifold Regularization, JMLR.",
+    "url": "https://jmlr.org/papers/v7/belkin06a.html",
+    "columns": [
+      "Adj1",
+      "Adj2",
+      "Observed",
+      "ObservationWeight"
+    ],
+    "file": "graph-smoother.csv",
+    "params": [
+      1
+    ],
+    "header": [
+      "Node",
+      "Fitted",
+      "ObservationResidual",
+      "GraphPenaltyContribution",
+      "StationarityResidual",
+      "Objective"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        1.3333333333333333
+      ],
+      [
+        2,
+        2.6666666666666665
+      ]
+    ]
+  }
+]

@@ -1,0 +1,61 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>滚动弹性网多资产多空：历史训练、信号排序及自融资回测｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>滚动弹性网多资产多空：历史训练、信号排序及自融资回测</h1><p><a href="../research/model-laboratories.html">完整模型研究</a>　<a href="../cpp/model_research_portfolio.hpp" download>模型源码</a>　<a href="../cpp/model_research_common.hpp" download>公共数值函数</a></p></header><article><h2>问题、模型与数学推导</h2><p>研究流程：每个日期的特征必须在该收益区间开始前可得，标签是之后实现的简单收益。数据按日期和资产编号排序，要求固定资产池且每个日期都有完整同序资产记录。每个预测时点仅使用前L个完整日期的横截面数据拟合弹性网，并冻结当期系数计算分数。程序不在完整样本上做特征标准化，也不自行推断披露时点。</p><p>将预测分数按相同分数的分数组进行质量加权，最高与最低尾部各分配单位名义权重；边界并列者按相同权重分摊。若两端重叠，净持仓自然抵销，不通过资产编号任意打破并列。交易费用按交易后权益分数隐式求解，旧权重来自上一期收益后的实际漂移，故不把目标权重之差误当作真实换手。</p><div class="equation">$$\hat\beta_t=\arg\min_\beta\frac12\sum_{s=t-L}^{t-1}\sum_i(r_{i,s}-x_{i,s}^\top\beta)^2+\lambda_1\|\beta\|_1+\frac{\lambda_2}{2}\|\beta\|^2$$</div><div class="equation">$$\hat r_{i,t}=x_{i,t}^\top\hat\beta_t,\quad w_{i,t}=w^+_{i,t}-w^-_{i,t}$$</div><div class="equation">$$\sum_i w^+_{i,t}=\sum_iw^-_{i,t}=1,\quad \sum_iw_{i,t}=0$$</div><div class="equation">$$f_t=c\sum_i|(1-f_t)w_{i,t}-\widetilde w_{i,t-1}|$$</div><div class="equation">$$V_t=V_{t-1}(1-f_t)(1+w_t^\top r_t),\quad \widetilde w_{i,t}=\frac{w_{i,t}(1+r_{i,t})}{1+w_t^\top r_t}$$</div><h2>解析案例与研究设计</h2><p>解析例：四资产特征−2、−1、1、2，收益为0.01倍特征，前3日训练、尾部25％，拟合斜率严格正。每期做多第四资产、做空第一资产，零成本毛收益及净收益均4％。该样本故意构造预测关系，仅用于会计与排序验证，不是实证策略绩效。</p><p>程序输出日期级权益、回撤、毛净暴露、实际费用、换手、模型残差及每个资产的权重和分数。计算成本约为每期Gram构造O(LAd²)及迭代O(Kd²)，资产数A受限。研究中应另行嵌套超参数选择、加入借券费与融资、处理交易约束及动态资产池；固定尾部高杠杆与理想成交均是明确的教学简化。</p><h2>可执行输入与解析基准</h2><p>输入数据为独立构造的教学样本。下表给出可解析核对的输出前缀；其他诊断字段由模型实际拟合产生，并通过回归测试检查。</p><p><a href="../research/model-examples/rolling-elastic-portfolio.csv" download>下载CSV样本</a></p><pre>Date,Asset,RealizedReturn,X1
+1,1,-0.02,-2
+1,2,-0.01,-1
+1,3,0.01,1
+1,4,0.02,2
+2,1,-0.02,-2
+2,2,-0.01,-1
+2,3,0.01,1
+2,4,0.02,2
+3,1,-0.02,-2
+3,2,-0.01,-1
+3,3,0.01,1
+3,4,0.02,2
+4,1,-0.02,-2
+4,2,-0.01,-1
+4,3,0.01,1
+4,4,0.02,2
+5,1,-0.02,-2
+5,2,-0.01,-1
+5,3,0.01,1
+5,4,0.02,2
+6,1,-0.02,-2
+6,2,-0.01,-1
+6,3,0.01,1
+6,4,0.02,2
+</pre><pre>./build/kline_quant model-rolling-elastic-portfolio quant/research/model-examples/rolling-elastic-portfolio.csv 3 0.25 0 0.1 0 1e-9 1000</pre><div class="wide"><table><thead><tr><th>Date</th><th>GrossReturn</th><th>NetReturn</th></tr></thead><tbody><tr><td>4</td><td>0.04</td><td>0.04</td></tr><tr><td>5</td><td>0.04</td><td>0.04</td></tr><tr><td>6</td><td>0.04</td><td>0.04</td></tr></tbody></table></div><p>输出字段：Date，GrossReturn，NetReturn，FeeFraction，Turnover，NAV，Drawdown，GrossExposure，NetExposure，ModelKKT，Weight1，Weight2，Weight3，Weight4，Score1，Score2，Score3，Score4。</p><h2>C++17实现</h2><pre>inline Report rolling_elastic_portfolio(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,8,4,19)-3;parameters(p,7);
+    double frac=p[1],l1=p[2],l2=positive(p[3]),cost=p[4],tol=positive(p[5]);
+    auto K=count(p[6],1,100000);
+    require(frac&gt;0&amp;&amp;frac&lt;=.5&amp;&amp;l1&gt;=0&amp;&amp;cost&gt;=0&amp;&amp;cost&lt;.5,"Invalid tail, penalty or cost");
+    auto A=std::size_t(1);while(A&lt;x.size()&amp;&amp;x[A][0]==x[0][0])++A;
+    require(A&gt;=2&amp;&amp;A&lt;=32&amp;&amp;x.size()%A==0,"Balanced asset panel required");auto n=x.size()/A;
+    auto look=count(p[0],2,n-1);
+    require(double(n-look)*(double(look)*A+K)*d*d&lt;=1e8,"Rolling fit work limit");
+    for(std::size_t t=0;t&lt;n;++t)for(std::size_t j=0;j&lt;A;++j){
+        const auto&amp;r=x[t*A+j];
+        require(r[0]==x[t*A][0]&amp;&amp;r[1]==x[j][1]&amp;&amp;r[0]==std::floor(r[0])&amp;&amp;r[1]==std::floor(r[1])&amp;&amp;r[2]&gt;=-1,"Invalid date, asset or return");
+        if(j)require(x[j][1]&gt;x[j-1][1],"Increasing asset IDs required");
+        if(t)require(r[0]&gt;x[(t-1)*A][0],"Increasing dates required");
+    }
+    Report o{{"Date","GrossReturn","NetReturn","FeeFraction","Turnover","NAV","Drawdown","GrossExposure","NetExposure","ModelKKT"},{}};
+    for(std::size_t j=0;j&lt;A;++j)o.header.push_back("Weight"+std::to_string(j+1));
+    for(std::size_t j=0;j&lt;A;++j)o.header.push_back("Score"+std::to_string(j+1));
+    Vec old(A,0);double nav=1,peak=1;
+    for(std::size_t t=look;t&lt;n;++t){
+        Mat train;train.reserve(look*A);
+        for(std::size_t k=(t-look)*A;k&lt;t*A;++k){Vec a(x[k].begin()+3,x[k].end());a.push_back(x[k][2]);train.push_back(a);}
+        auto fit=fista_elastic(train,{l1,l2,tol,double(K)});Vec beta;
+        for(auto&amp;r:fit.rows)beta.push_back(r[1]);
+        Mat rank;Vec score,ret,w;
+        for(std::size_t j=0;j&lt;A;++j){auto&amp;r=x[t*A+j];Vec a(r.begin()+3,r.end());double s=dot(a,beta);score.push_back(s);rank.push_back({s});ret.push_back(r[2]);}
+        auto tails=depth_factorconstruction::tie_aware_tail_weights(rank,{frac});
+        for(auto&amp;r:tails.rows)w.push_back(r[4]);
+        auto step=researchflow::trade_step(old,w,ret,cost);
+        nav=positive(nav*(1+step.net));peak=std::max(peak,nav);
+        Vec r{x[t*A][0],step.gross,step.net,step.fee,step.turnover,nav,1-nav/peak,researchflow::l1(w),sum(w),fit.rows[0][3]};
+        r.insert(r.end(),w.begin(),w.end());r.insert(r.end(),score.begin(),score.end());
+        o.rows.push_back(r);old=std::move(step.drift);
+    }
+    return o;
+}</pre><p>参考文献：<a href="https://doi.org/10.1093/rfs/hhaa009">Zou and Hastie (2005), Regularization and Variable Selection via the Elastic Net, JRSS B; Gu, Kelly and Xiu (2020), Empirical Asset Pricing via Machine Learning, RFS.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

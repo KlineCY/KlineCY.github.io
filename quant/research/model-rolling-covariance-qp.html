@@ -1,0 +1,28 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>滚动收缩协方差配置：真实收益、约束QP及交易成本｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>滚动收缩协方差配置：真实收益、约束QP及交易成本</h1><p><a href="../research/model-laboratories.html">完整模型研究</a>　<a href="../cpp/model_research_portfolio.hpp" download>模型源码</a>　<a href="../cpp/model_research_common.hpp" download>公共数值函数</a></p></header><article><h2>问题、模型与数学推导</h2><p>框架：在每期交易前，以前L期资产收益估计均值与样本协方差，进行固定强度的对角目标收缩并加正ridge。这里收缩强度由输入给定，不声称是Ledoit–Wolf数据驱动最优强度；两者的区别体现在收缩估计误差与参数选择方法。正ridge使完全共线或零历史方差时仍有合法QP。</p><p>对完整风险矩阵求带预算与单资产上界的长仓均值方差最优权重，复用投影梯度求解器；每期输出投影梯度与预算差。在实际收益实现后，通过自融资交易步骤计入费用和持仓漂移。报告预测组合方差，它是训练协方差下的条件风险近似，与当期实现收益平方不同。</p><div class="equation">$$\hat\mu_t=L^{-1}\sum_{s=t-L}^{t-1}r_s$$</div><div class="equation">$$\tilde\Sigma_t=(1-\delta)\hat\Sigma_t+\delta\frac{\operatorname{tr}\hat\Sigma_t}{d}I+\epsilon I$$</div><div class="equation">$$\hat w_t=\arg\min_{0\le w_i\le u,\ \mathbf1^\top w=1}\frac{\gamma}{2}w^\top\tilde\Sigma_tw-\hat\mu_t^\top w$$</div><div class="equation">$$\widehat{\operatorname{Var}}_t(r_p)=\hat w_t^\top\tilde\Sigma_t\hat w_t$$</div><div class="equation">$$V_t=V_{t-1}(1-f_t)(1+\hat w_t^\top r_t)$$</div><h2>解析案例与研究设计</h2><p>解析例：两资产收益恒为1％，历史样本协方差为零，ridge相同、均值相同，故最优各半。零费用时每期净值乘1.01，三期分别为1.01、1.0201、1.030301。常数序列不是现实可投资资产，只用于检查奇异原协方差的正则化、对称最优解与权益会计。</p><p>复杂度每期为O(Ld²+d³+K(d²+80d))。输入为共同频率、按时间排序的简单收益且无缺失；固定资产池，最高权重至少1/d。均值风险敏感，真实研究需用训练期内验证、稳健均值、风险预算、换手惩罚及融资约束比较，不从完整样本选择最优风险厌恶系数。</p><h2>可执行输入与解析基准</h2><p>输入数据为独立构造的教学样本。下表给出可解析核对的输出前缀；其他诊断字段由模型实际拟合产生，并通过回归测试检查。</p><p><a href="../research/model-examples/rolling-covariance-qp.csv" download>下载CSV样本</a></p><pre>R1,R2
+0.01,0.01
+0.01,0.01
+0.01,0.01
+0.01,0.01
+0.01,0.01
+0.01,0.01
+</pre><pre>./build/kline_quant model-rolling-covariance-qp quant/research/model-examples/rolling-covariance-qp.csv 3 0.5 0.001 1 1 0 1e-9 1000</pre><div class="wide"><table><thead><tr><th>Time</th><th>GrossReturn</th><th>NetReturn</th><th>NAV</th></tr></thead><tbody><tr><td>4</td><td>0.01</td><td>0.01</td><td>1.01</td></tr><tr><td>5</td><td>0.01</td><td>0.01</td><td>1.0201</td></tr><tr><td>6</td><td>0.01</td><td>0.01</td><td>1.030301</td></tr></tbody></table></div><p>输出字段：Time，GrossReturn，NetReturn，NAV，FeeFraction，Turnover，ForecastVariance，ProjectedGradient，BudgetGap，Weight1，Weight2。</p><h2>C++17实现</h2><pre>inline Report rolling_covariance_qp(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,3,1,32);parameters(p,8);
+    auto look=count(p[0],2,x.size()-1),K=count(p[7],1,100000);
+    double shrink=p[1],ridge=positive(p[2]),gamma=positive(p[3]),cap=p[4],cost=p[5],tol=positive(p[6]);
+    require(shrink&gt;=0&amp;&amp;shrink&lt;=1&amp;&amp;cap&gt;=1./d&amp;&amp;cap&lt;=1&amp;&amp;cost&gt;=0&amp;&amp;cost&lt;1,"Invalid shrinkage, cap or cost");
+    require(double(x.size()-look)*(double(look)*d*d+double(K)*d*(d+80)+d*d*d)&lt;=2e8,"Rolling optimization work limit");
+    for(auto&amp;r:x)for(double v:r)require(v&gt;=-1,"Invalid simple return");
+    Report o{{"Time","GrossReturn","NetReturn","NAV","FeeFraction","Turnover","ForecastVariance","ProjectedGradient","BudgetGap"},{}};
+    for(std::size_t j=0;j&lt;d;++j)o.header.push_back("Weight"+std::to_string(j+1));
+    Vec old(d,0);double nav=1;
+    for(std::size_t t=look;t&lt;x.size();++t){
+        Vec mu(d,0);for(std::size_t s=t-look;s&lt;t;++s)for(std::size_t j=0;j&lt;d;++j)mu[j]+=x[s][j]/look;
+        Mat s=researchflow::covariance_window(x,t-look,t,shrink,ridge),a=s;
+        for(std::size_t j=0;j&lt;d;++j){a[j].push_back(mu[j]);a[j].push_back(0);a[j].push_back(cap);}
+        auto fit=box_covariance_qp(a,{1,gamma,tol,double(K)});Vec w;for(auto&amp;r:fit.rows)w.push_back(r[1]);
+        auto step=researchflow::trade_step(old,w,x[t],cost);nav=positive(nav*(1+step.net));
+        Vec r{double(t+1),step.gross,step.net,nav,step.fee,step.turnover,dot(w,mul(s,w)),fit.rows[0][5],fit.rows[0][4]};
+        r.insert(r.end(),w.begin(),w.end());o.rows.push_back(r);old=std::move(step.drift);
+    }
+    return o;
+}</pre><p>参考文献：<a href="https://doi.org/10.1111/j.1540-6261.1952.tb01525.x">Markowitz (1952), Portfolio Selection, Journal of Finance; Ledoit and Wolf (2004), A Well-Conditioned Estimator for Large-Dimensional Covariance Matrices.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

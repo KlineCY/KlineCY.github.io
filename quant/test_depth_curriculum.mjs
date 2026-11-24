@@ -52,7 +52,7 @@ for(const [g,area] of Object.entries(map)){
 }
 assert.equal(eq,288);assert.equal(rows,201);assert.equal(coords,911);assert.equal(sections,384);
 assert(read("quant/sidebar-v2.js").includes("depth-laboratories.html"));
-assert(read("quant/cpp/index.html").includes("<strong>911</strong>"));
+assert(read("quant/cpp/index.html").includes("<strong>947</strong>"));
 const studies=read("quant/research/depth-integrated-studies.html"),script=read("quant/research/run_depth_labs.py");
 assert.equal((studies.match(/<article id="study-/g)||[]).length,16);
 assert.equal([...studies.matchAll(/<div class="equation">\$\$([\s\S]*?)\$\$<\/div>/g)].length,16);

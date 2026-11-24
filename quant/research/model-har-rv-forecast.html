@@ -1,0 +1,44 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>HAR-RV异质期限波动率模型：日、周、月信息的冻结拟合｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>HAR-RV异质期限波动率模型：日、周、月信息的冻结拟合</h1><p><a href="../research/model-laboratories.html">完整模型研究</a>　<a href="../cpp/model_research_dynamics.hpp" download>模型源码</a>　<a href="../cpp/model_research_common.hpp" download>公共数值函数</a></p></header><article><h2>问题、模型与数学推导</h2><p>HAR模型以日、周、月三个历史期限的实现方差近似长期持续性。较长窗口平均反映慢变化状态，较短窗口反映新近冲击。这里直接建模方差水平（不是log RV），带截距且只对三个斜率做岭惩罚，避免训练恒定水平被惩罚项压向零。</p><p>实现使用前缀和计算五日及二十二日历史均值，每个预测特征仅依赖t−1之前的信息。训练从索引22开始，到训练末端为止；训练后冻结系数并逐期计算一步预测。输出实际值、预测、误差、三个历史期限特征及全部参数，使研究者可以逐行核对信息时点。</p><div class="equation">$$RV_t=\beta_0+\beta_dRV_{t-1}+\beta_w\overline{RV}_{t-1}^{(5)}+\beta_m\overline{RV}_{t-1}^{(22)}+\varepsilon_t$$</div><div class="equation">$$\overline{RV}_{t-1}^{(h)}=\frac1h\sum_{j=1}^{h}RV_{t-j}$$</div><div class="equation">$$F(\beta)=\sum_{t=22}^{n_T-1}(RV_t-z_t^\top\beta)^2+\lambda\sum_{j=1}^3\beta_j^2$$</div><div class="equation">$$(Z^\top Z+\lambda\operatorname{diag}(0,1,1,1))\hat\beta=Z^\top y$$</div><div class="equation">$$\hat{RV}_{t\mid t-1}=z_t^\top\hat\beta$$</div><h2>解析案例与研究设计</h2><p>构造前26条RV均为1，训练目标恒为1。最优截距1、所有斜率0，尽管设计中三特征共线，正岭惩罚使解唯一。测试第一条RV=2，预测仍为1，后续历史特征发生变化但冻结零斜率使预测不变；这同时构成训练—测试隔离基准。</p><p>O(n)前缀和及固定四维线性系统。至少训练23条并保留测试；λ严格正，RV非负。线性水平模型可能输出负预测，不自动截断以掩盖模型错设；若需要严格正波动率，可另用log HAR并处理反变换偏差。RV输入构造需一致采样及年化口径。</p><h2>可执行输入与解析基准</h2><p>输入数据为独立构造的教学样本。下表给出可解析核对的输出前缀；其他诊断字段由模型实际拟合产生，并通过回归测试检查。</p><p><a href="../research/model-examples/har-rv-forecast.csv" download>下载CSV样本</a></p><pre>RealizedVariance
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+2
+1
+1
+1
+</pre><pre>./build/kline_quant model-har-rv-forecast quant/research/model-examples/har-rv-forecast.csv 26 1</pre><div class="wide"><table><thead><tr><th>Time</th><th>Actual</th><th>Forecast</th><th>Error</th></tr></thead><tbody><tr><td>27</td><td>2</td><td>1</td><td>1</td></tr><tr><td>28</td><td>1</td><td>1</td><td>0</td></tr><tr><td>29</td><td>1</td><td>1</td><td>0</td></tr><tr><td>30</td><td>1</td><td>1</td><td>0</td></tr></tbody></table></div><p>输出字段：Time，Actual，Forecast，Error，Daily，Weekly，Monthly，Intercept，DailyBeta，WeeklyBeta，MonthlyBeta。</p><h2>C++17实现</h2><pre>inline Report har_rv_forecast(const Mat&amp; x,const Vec&amp; p){
+    validate(x,24,1,1);parameters(p,2);
+    auto nt=count(p[0],23,x.size()-1);double lam=positive(p[1]);
+    Vec pref(x.size()+1,0);for(std::size_t t=0;t&lt;x.size();++t){require(x[t][0]&gt;=0,"Negative realized variance");pref[t+1]=pref[t]+x[t][0];}
+    auto z=[&amp;](std::size_t t){return Vec{1,x[t-1][0],(pref[t]-pref[t-5])/5,(pref[t]-pref[t-22])/22};};
+    Mat H(4,Vec(4,0));Vec b(4,0);
+    for(std::size_t t=22;t&lt;nt;++t){Vec a=z(t);add_outer(H,a,1);for(std::size_t j=0;j&lt;4;++j)b[j]+=a[j]*x[t][0];}
+    for(std::size_t j=1;j&lt;4;++j)H[j][j]+=lam;
+    Vec w=solve_spd(H,b);
+    Report o{{"Time","Actual","Forecast","Error","Daily","Weekly","Monthly","Intercept","DailyBeta","WeeklyBeta","MonthlyBeta"},{}};
+    for(std::size_t t=nt;t&lt;x.size();++t){Vec a=z(t);double v=dot(a,w);o.rows.push_back({double(t+1),x[t][0],v,x[t][0]-v,a[1],a[2],a[3],w[0],w[1],w[2],w[3]});}
+    return o;
+}</pre><p>参考文献：<a href="https://doi.org/10.1093/jjfinec/nbp001">Corsi (2009), A Simple Approximate Long-Memory Model of Realized Volatility, Journal of Financial Econometrics.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

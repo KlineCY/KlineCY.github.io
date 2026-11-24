@@ -1,0 +1,22 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ornstein–Uhlenbeck过程：精确转移MLE与样本外预测｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="math"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>Ornstein–Uhlenbeck过程：精确转移MLE与样本外预测</h1><p><a href="../research/model-laboratories.html">完整模型研究</a>　<a href="../cpp/model_research_dynamics.hpp" download>模型源码</a>　<a href="../cpp/model_research_common.hpp" download>公共数值函数</a></p></header><article><h2>问题、模型与数学推导</h2><p>OU过程的线性SDE可通过积分因子精确求解，等间隔观察的条件分布是高斯AR(1)。这避免Euler离散化误差。给定第一个观察值，条件似然等价于AR线性回归的高斯似然；采用MLE分母（转移数）而非无偏残差方差分母。</p><p>训练前缀中对相邻状态拟合截距及斜率，要求无约束条件MLE落在0&lt;φ&lt;1的OU稳定域内。若估计为负或不小于1，不把其强行截断为合法OU，而是拒绝该内部解并保留模型不适用的信息。再由精确转移关系恢复连续时间均值回复、长期均值及扩散波动率。</p><div class="equation">$$dX_t=\kappa(\theta-X_t)\,dt+\sigma\,dW_t$$</div><div class="equation">$$X_{t+\Delta}=c+\phi X_t+\epsilon_t,\quad\phi=e^{-\kappa\Delta},\quad c=\theta(1-\phi)$$</div><div class="equation">$$v=\operatorname{Var}(\epsilon_t)=\sigma^2(1-\phi^2)/(2\kappa)$$</div><div class="equation">$$\hat\phi=\frac{\sum(x_t-\bar x)(x_{t+\Delta}-\bar y)}{\sum(x_t-\bar x)^2},\quad\hat c=\bar y-\hat\phi\bar x$$</div><div class="equation">$$\hat\kappa=-\log\hat\phi/\Delta,\quad\hat\theta=\hat c/(1-\hat\phi),\quad \hat\sigma=\sqrt{2\hat\kappa\hat v/(1-\hat\phi^2)}$$</div><h2>解析案例与研究设计</h2><p>教学样本0、1、1.4、1.6、1.5、1.8为训练前缀，最后两点为留出。使用相邻对中心化的闭式斜率、截距及训练残差平方均值独立复算全部参数和逐期预测。预测第一个留出点时仅使用训练末端的1.8，下一点可用已实现的1.6。</p><p>O(n)，需要等间隔Δ&gt;0、训练至少三个转移且自变量变异及残差方差正。接近单位根时θ的误差会放大，有限样本OLS存在动态偏差；OU的高斯、连续扩散和恒定参数假设对真实价差可能失效。若以套利价差建模，应事前估计组合关系与稳定性并考虑执行成本。</p><h2>可执行输入与解析基准</h2><p>输入数据为独立构造的教学样本。下表给出可解析核对的输出前缀；其他诊断字段由模型实际拟合产生，并通过回归测试检查。</p><p><a href="../research/model-examples/ou-conditional-fit.csv" download>下载CSV样本</a></p><pre>State
+0
+1
+1.4
+1.6
+1.5
+1.8
+1.6
+1.7
+</pre><pre>./build/kline_quant model-ou-conditional-fit quant/research/model-examples/ou-conditional-fit.csv 6 1</pre><div class="wide"><table><thead><tr><th>Time</th><th>Actual</th><th>Forecast</th><th>Error</th><th>Phi</th><th>LongRunMean</th><th>MeanReversion</th><th>DiffusionVol</th><th>InnovationVariance</th></tr></thead><tbody><tr><td>7</td><td>1.6</td><td>1.74895348837</td><td>-0.148953488372</td><td>0.412790697674</td><td>1.71306930693</td><td>0.884814599772</td><td>0.158542968472</td><td>0.0117837209302</td></tr><tr><td>8</td><td>1.7</td><td>1.66639534884</td><td>0.0336046511628</td><td>0.412790697674</td><td>1.71306930693</td><td>0.884814599772</td><td>0.158542968472</td><td>0.0117837209302</td></tr></tbody></table></div><p>输出字段：Time，Actual，Forecast，Error，Phi，LongRunMean，MeanReversion，DiffusionVol，InnovationVariance。</p><h2>C++17实现</h2><pre>inline Report ou_conditional_fit(const Mat&amp; x,const Vec&amp; p){
+    validate(x,5,1,1);parameters(p,2);auto nt=count(p[0],4,x.size()-1);double dt=positive(p[1]),n=nt-1,a=0,b=0;
+    for(std::size_t t=1;t&lt;nt;++t){a+=x[t-1][0]/n;b+=x[t][0]/n;}
+    double xx=0,xy=0;
+    for(std::size_t t=1;t&lt;nt;++t){double z=x[t-1][0]-a;xx+=z*z;xy+=z*(x[t][0]-b);}
+    double phi=xy/positive(xx),c=b-phi*a;
+    require(phi&gt;0&amp;&amp;phi&lt;1,"Conditional MLE outside stationary OU domain");
+    double v=0;for(std::size_t t=1;t&lt;nt;++t){double e=x[t][0]-c-phi*x[t-1][0];v+=e*e/n;}
+    positive(v);double k=-std::log(phi)/dt,theta=c/(1-phi),sig=std::sqrt(2*k*v/((1-phi)*(1+phi)));
+    Report o{{"Time","Actual","Forecast","Error","Phi","LongRunMean","MeanReversion","DiffusionVol","InnovationVariance"},{}};
+    for(std::size_t t=nt;t&lt;x.size();++t){double f=c+phi*x[t-1][0];o.rows.push_back({double(t+1),x[t][0],f,x[t][0]-f,phi,theta,k,sig,v});}
+    return o;
+}</pre><p>参考文献：<a href="https://doi.org/10.1103/PhysRev.36.823">Uhlenbeck and Ornstein (1930), On the Theory of the Brownian Motion, Physical Review; Shreve (2004), Stochastic Calculus for Finance II.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

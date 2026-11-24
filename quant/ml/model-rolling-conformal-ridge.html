@@ -1,0 +1,30 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>滚动Split Conformal：训练、校准与测试时点隔离｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="ml"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>滚动Split Conformal：训练、校准与测试时点隔离</h1><p><a href="../research/model-laboratories.html">完整模型研究</a>　<a href="../cpp/model_research_portfolio.hpp" download>模型源码</a>　<a href="../cpp/model_research_common.hpp" download>公共数值函数</a></p></header><article><h2>问题、模型与数学推导</h2><p>每个预测日都划出连续且互不重叠的训练窗与校准窗。先在更早训练窗拟合带截距岭回归，再对紧邻测试日前的校准样本计算绝对残差。有限样本分位数采用ceil((m+1)(1−α))次序统计量而非插值百分位；若该秩超过校准样本量，理论区间为无穷，本实现拒绝输出有限区间。</p><p>当前测试标签只在预测区间形成后用于计算Covered。下一期重新滚动时可以使用过去已实现标签。此实现没有用整个样本标准化，也没有依据测试覆盖选择α。输出训练及校准区间的一基行号，便于独立核对每个预测的时间边界。</p><div class="equation">$$\hat f_t=\operatorname{RidgeFit}\{(X_s,Y_s):t-m-n\le s&lt;t-m\}$$</div><div class="equation">$$s_{i,t}=|Y_i-\hat f_t(X_i)|,\quad t-m\le i&lt;t$$</div><div class="equation">$$k=\lceil(m+1)(1-\alpha)\rceil,\quad q_t=s_{(k),t}$$</div><div class="equation">$$C_t=[\hat f_t(X_t)-q_t,\hat f_t(X_t)+q_t]$$</div><div class="equation">$$\widehat{\operatorname{Coverage}}=\frac1{T_{\mathrm{test}}}\sum_t\mathbf1\{Y_t\in C_t\}$$</div><h2>解析案例与研究设计</h2><p>样本结果恒为2、特征变化，训练3条、校准3条、α=0.25，有限样本秩3。带不惩罚截距的岭回归给出常数预测2，校准残差理论为0，三条测试均覆盖。浮点微小误差用明确的机器精度边界处理，不改变校准分位数的统计含义。</p><p>交换性条件下，标准split conformal提供有限样本边际覆盖；金融时序的波动聚集、漂移与标签重叠会破坏交换性，滚动窗口本身不恢复一般覆盖保证。计算成本每期O(nd²+d³+md+m log m)，校准和训练长度由事前方案确定。实际研究应报告分状态覆盖、宽度及损失，不能只比较平均覆盖率。</p><h2>可执行输入与解析基准</h2><p>输入数据为独立构造的教学样本。下表给出可解析核对的输出前缀；其他诊断字段由模型实际拟合产生，并通过回归测试检查。</p><p><a href="../research/model-examples/rolling-conformal-ridge.csv" download>下载CSV样本</a></p><pre>X1,Y
+0,2
+1,2
+2,2
+3,2
+4,2
+5,2
+6,2
+7,2
+8,2
+</pre><pre>./build/kline_quant model-rolling-conformal-ridge quant/research/model-examples/rolling-conformal-ridge.csv 3 3 1 0.25</pre><div class="wide"><table><thead><tr><th>Time</th><th>Actual</th><th>Prediction</th><th>Threshold</th><th>Lower</th><th>Upper</th><th>Covered</th><th>TrainStart</th><th>TrainEnd</th><th>CalibrationStart</th><th>CalibrationEnd</th></tr></thead><tbody><tr><td>7</td><td>2</td><td>2</td><td>0</td><td>2</td><td>2</td><td>1</td><td>1</td><td>3</td><td>4</td><td>6</td></tr><tr><td>8</td><td>2</td><td>2</td><td>0</td><td>2</td><td>2</td><td>1</td><td>2</td><td>4</td><td>5</td><td>7</td></tr><tr><td>9</td><td>2</td><td>2</td><td>0</td><td>2</td><td>2</td><td>1</td><td>3</td><td>5</td><td>6</td><td>8</td></tr></tbody></table></div><p>输出字段：Time，Actual，Prediction，Threshold，Lower，Upper，Covered，TrainStart，TrainEnd，CalibrationStart，CalibrationEnd。</p><h2>C++17实现</h2><pre>inline Report rolling_conformal_ridge(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,5,2,17)-1;parameters(p,4);
+    auto n=count(p[0],2,x.size()-2),m=count(p[1],1,x.size()-n-1);
+    double lam=positive(p[2]),alpha=p[3];require(alpha&gt;0&amp;&amp;alpha&lt;1,"Invalid alpha");
+    auto k=std::size_t(std::ceil((m+1)*(1-alpha)));require(k&gt;=1&amp;&amp;k&lt;=m,"Finite conformal threshold unavailable");
+    auto h=d+1;require(double(x.size()-n-m)*(double(n)*h*h+h*h*h+double(m)*h)&lt;=1e8,"Rolling conformal work limit");
+    Mat z;for(auto&amp;r:x){Vec a{1};a.insert(a.end(),r.begin(),r.end()-1);z.push_back(a);}
+    Report o{{"Time","Actual","Prediction","Threshold","Lower","Upper","Covered","TrainStart","TrainEnd","CalibrationStart","CalibrationEnd"},{}};
+    for(std::size_t t=n+m;t&lt;x.size();++t){
+        Mat H(h,Vec(h,0));Vec b(h,0);
+        for(std::size_t i=t-m-n;i&lt;t-m;++i){add_outer(H,z[i],1);for(std::size_t j=0;j&lt;h;++j)b[j]+=z[i][j]*x[i].back();}
+        for(std::size_t j=1;j&lt;h;++j)H[j][j]+=lam;
+        Vec w=solve_spd(H,b),score;
+        for(std::size_t i=t-m;i&lt;t;++i)score.push_back(std::abs(x[i].back()-dot(w,z[i])));
+        std::sort(score.begin(),score.end());double q=score[k-1],f=dot(w,z[t]),y=x[t].back(),lo=f-q,hi=f+q;
+        double eps=16*std::numeric_limits&lt;double&gt;::epsilon()*std::max({1.,std::abs(y),std::abs(f),q});
+        o.rows.push_back({double(t+1),y,f,q,lo,hi,double(y&gt;=lo-eps&amp;&amp;y&lt;=hi+eps),double(t-m-n+1),double(t-m),double(t-m+1),double(t)});
+    }
+    return o;
+}</pre><p>参考文献：<a href="https://doi.org/10.1561/2200000101">Vovk, Gammerman and Shafer (2005), Algorithmic Learning in a Random World; Angelopoulos and Bates (2023), Conformal Prediction: A Gentle Introduction.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

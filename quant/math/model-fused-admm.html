@@ -1,0 +1,41 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>一维总变差去噪：Fused Lasso的ADMM求解｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="math"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>一维总变差去噪：Fused Lasso的ADMM求解</h1><p><a href="../research/model-laboratories.html">完整模型研究</a>　<a href="../cpp/model_research_optimization.hpp" download>模型源码</a>　<a href="../cpp/model_research_common.hpp" download>公共数值函数</a></p></header><article><h2>问题、模型与数学推导</h2><p>研究对象：总变差惩罚对相邻水平变化收费，能够形成分段常数估计，而非传统移动平均的连续过渡。可用于离线识别波动状态、期限曲线的局部台阶或因子暴露分段变化。由于该拟合使用整个序列，直接在全样本上估计后回测存在前视偏差；实时应用应使用过去窗口或单边滤波。</p><p>求解推导：引入相邻差分变量z后，二次子问题具有三对角结构，端点对角为1+ρ，内部为1+2ρ，非对角为−ρ。Thomas消元使每轮为O(n)；z更新是L1近端映射，缩放对偶u累计约束违反。原始残差衡量差分约束，对偶残差反映目标驻点误差。进一步核对x−y+Dᵀ(ρu)及L1次梯度条件。</p><div class="equation">$$\min_x\frac12\sum_t(x_t-y_t)^2+\lambda\sum_{t=1}^{n-1}|x_{t+1}-x_t|$$</div><div class="equation">$$z=Dx,\quad (Dx)_t=x_{t+1}-x_t$$</div><div class="equation">$$(I+\rho D^\top D)x^{k+1}=y+\rho D^\top(z^k-u^k)$$</div><div class="equation">$$z^{k+1}=\operatorname{soft}(Dx^{k+1}+u^k,\lambda/\rho),\quad u^{k+1}=u^k+Dx^{k+1}-z^{k+1}$$</div><div class="equation">$$r=Dx-z,\quad s=\rho D^\top(z^{k+1}-z^k),\quad 0=x-y+D^\top(\rho u)$$</div><h2>解析案例与研究设计</h2><p>解析案例：y=(0,0,4,4)、λ=1，分段解为(0.5,0.5,3.5,3.5)，目标值3.5。最优非零差分3对应正向对偶λ，平台内差分的次梯度允许在[−λ,λ]之间。程序报告原始观测、拟合、相邻差分、目标值、两类残差及原问题KKT误差。</p><p>模型边界：λ控制平台合并，ρ只控制数值迭代，在完全收敛时不改变目标解。对于不规则时间网格，应按时间及经济含义重新定义差分权重。对跳跃位置的统计推断不能直接用普通OLS置信区间；需考虑选择变点后的不确定性。</p><h2>可执行输入与解析基准</h2><p>输入数据为独立构造的教学样本。下表给出可解析核对的输出前缀；其他诊断字段由模型实际拟合产生，并通过回归测试检查。</p><p><a href="../research/model-examples/fused-admm.csv" download>下载CSV样本</a></p><pre>Value
+0
+0
+4
+4
+</pre><pre>./build/kline_quant model-fused-admm quant/research/model-examples/fused-admm.csv 1 1 1e-8 10000</pre><div class="wide"><table><thead><tr><th>Index</th><th>Observed</th><th>Fitted</th></tr></thead><tbody><tr><td>1</td><td>0</td><td>0.5</td></tr><tr><td>2</td><td>0</td><td>0.5</td></tr><tr><td>3</td><td>4</td><td>3.5</td></tr><tr><td>4</td><td>4</td><td>3.5</td></tr></tbody></table></div><p>输出字段：Index，Observed，Fitted，Difference，Objective，PrimalResidual，DualResidual，KKTResidual，Iterations。</p><h2>C++17实现</h2><pre>inline Report fused_admm(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,1,1);parameters(p,4);
+    double lam=p[0],rho=positive(p[1]),tol=positive(p[2]);
+    auto K=count(p[3],1,100000),n=x.size();
+    require(lam&gt;=0&amp;&amp;double(K)*n&lt;=5e7,"Invalid penalty or work limit");
+    Vec y=column(x,0),w=y,z(n-1,0),u(n-1,0);
+    Vec lower(n,-rho),upper(n,-rho),diag(n,1+2*rho);
+    lower[0]=upper[n-1]=0;diag[0]=diag[n-1]=1+rho;
+    auto dt=[&amp;](const Vec&amp; a){Vec b(n,0);for(std::size_t j=0;j+1&lt;n;++j){b[j]-=a[j];b[j+1]+=a[j];}return b;};
+    double pr=0,du=0,gap=0;std::size_t it=0;
+    for(;it&lt;K;){
+        Vec v(n-1);
+        for(std::size_t j=0;j+1&lt;n;++j)v[j]=rho*(z[j]-u[j]);
+        Vec b=dt(v);
+        for(std::size_t j=0;j&lt;n;++j)b[j]+=y[j];
+        w=tridiagonal(lower,diag,upper,b);
+        Vec dz(n-1),r(n-1);gap=0;
+        for(std::size_t j=0;j+1&lt;n;++j){
+            double a=w[j+1]-w[j],old=z[j];
+            z[j]=soft(a+u[j],lam/rho);r[j]=a-z[j];u[j]+=r[j];dz[j]=rho*(z[j]-old);
+            double vj=rho*u[j],e=z[j]==0?std::max(0.,std::abs(vj)-lam):std::abs(vj-lam*std::copysign(1.,z[j]));
+            gap=std::max(gap,e);
+        }
+        pr=inf_norm(r);du=inf_norm(dt(dz));
+        Vec g=dt(u);
+        for(std::size_t j=0;j&lt;n;++j)gap=std::max(gap,std::abs(w[j]-y[j]+rho*g[j]));
+        ++it;
+        if(std::max({pr,du,gap})&lt;=tol)break;
+    }
+    require(std::max({pr,du,gap})&lt;=tol,"ADMM did not converge");
+    double obj=0;
+    for(std::size_t j=0;j&lt;n;++j){obj+=.5*(w[j]-y[j])*(w[j]-y[j]);if(j)obj+=lam*std::abs(w[j]-w[j-1]);}
+    Report o{{"Index","Observed","Fitted","Difference","Objective","PrimalResidual","DualResidual","KKTResidual","Iterations"},{}};
+    for(std::size_t j=0;j&lt;n;++j)o.rows.push_back({double(j+1),y[j],w[j],j?w[j]-w[j-1]:0,obj,pr,du,gap,double(it)});
+    return o;
+}</pre><p>参考文献：<a href="https://stanford.edu/~boyd/papers/admm_distr_stats.html">Boyd et al. (2011), Distributed Optimization and Statistical Learning via the Alternating Direction Method of Multipliers.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

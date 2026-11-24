@@ -1,0 +1,35 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CDS期限结构：分段常强度逐段校准及现金流复算｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="assets"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>CDS期限结构：分段常强度逐段校准及现金流复算</h1><p><a href="../research/model-laboratories.html">完整模型研究</a>　<a href="../cpp/model_research_pricing.hpp" download>模型源码</a>　<a href="../cpp/model_research_common.hpp" download>公共数值函数</a></p></header><article><h2>问题、模型与数学推导</h2><p>CDS平价利差通过预期保护腿现值与保费年金的比率定义。给定回收率、贴现曲线和到期报价，分段常风险中性违约强度可按期限逐段校准。本实现采用离散支付日、违约保护在区间末端支付、保费只在存活时支付，不含违约应计保费；它是明确的简化合同口径，不是ISDA标准CDS定价引擎。</p><p>固定已校准的早期现金流后，新段只包含当前未知λ。提高λ减少新增保费并增加相对于保费的保护腿价值；对非负贴现利率和利差，净保护减保费在λ上单调不减。检查零强度及有限高强度时的根括号，再二分求解；若新报价不允许非负强度则拒绝，不通过负强度或修改早期曲线掩盖不一致。</p><div class="equation">$$S(t_j)=S(t_{j-1})e^{-\lambda_k\Delta},\quad t_j\in(T_{k-1},T_k]$$</div><div class="equation">$$A_k=\sum_{j:t_j\le T_k}\Delta D(t_j)S(t_j)$$</div><div class="equation">$$P_k=(1-R)\sum_{j:t_j\le T_k}D(t_j)[S(t_{j-1})-S(t_j)]$$</div><div class="equation">$$F_k(\lambda_k)=P_k-s_k A_k=0$$</div><div class="equation">$$\hat s_k=P_k/A_k,\quad \epsilon_k=\hat s_k-s_k$$</div><h2>解析案例与研究设计</h2><p>当r=0且每期相同λ时，保护腿与保费年金的比率化为(1−R)(e^{λΔ}−1)/Δ，与到期长度无关。样本R=0.4、Δ=0.5、λ=0.1，1、2、3年报价均按该公式构造。校准后存活概率分别e^{−0.1}、e^{−0.2}、e^{−0.3}，可独立检验。</p><p>输入期限严格递增且为统一计息步长的整数倍，利差非负、R∈[0,1)、r≥0。每段二分O(80×新增支付数)，总支付数限制。校准残差与生存单调性是必要诊断，实际市场还需考虑抵押贴现、日计数、应计保费、报价方式、结算、回收率不确定性和流动性风险。</p><h2>可执行输入与解析基准</h2><p>输入数据为独立构造的教学样本。下表给出可解析核对的输出前缀；其他诊断字段由模型实际拟合产生，并通过回归测试检查。</p><p><a href="../research/model-examples/cds-hazard-bootstrap.csv" download>下载CSV样本</a></p><pre>Maturity,Spread
+1,0.061525315651228846
+2,0.061525315651228846
+3,0.061525315651228846
+</pre><pre>./build/kline_quant model-cds-hazard-bootstrap quant/research/model-examples/cds-hazard-bootstrap.csv 0.4 0 0.5 1e-10</pre><div class="wide"><table><thead><tr><th>Maturity</th><th>Hazard</th><th>Survival</th><th>MarketSpread</th><th>FittedSpread</th><th>SpreadResidual</th></tr></thead><tbody><tr><td>1</td><td>0.1</td><td>0.904837418036</td><td>0.0615253156512</td><td>0.0615253156512</td><td>0</td></tr><tr><td>2</td><td>0.1</td><td>0.818730753078</td><td>0.0615253156512</td><td>0.0615253156512</td><td>0</td></tr><tr><td>3</td><td>0.1</td><td>0.740818220682</td><td>0.0615253156512</td><td>0.0615253156512</td><td>0</td></tr></tbody></table></div><p>输出字段：Maturity，Hazard，Survival，MarketSpread，FittedSpread，SpreadResidual，PremiumAnnuity，ProtectionPV。</p><h2>C++17实现</h2><pre>inline Report cds_hazard_bootstrap(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,2,2);parameters(p,4);double rec=p[0],r=p[1],dt=positive(p[2]),tol=positive(p[3]);
+    require(rec&gt;=0&amp;&amp;rec&lt;1&amp;&amp;r&gt;=0,"Invalid recovery or discount rate");
+    std::size_t prior=0;double surv=1,ann=0,prot=0;
+    Report o{{"Maturity","Hazard","Survival","MarketSpread","FittedSpread","SpreadResidual","PremiumAnnuity","ProtectionPV"},{}};
+    for(auto&amp;row:x){
+        double units=positive(row[0])/dt,round=std::round(units),spread=row[1];
+        require(std::abs(units-round)&lt;=1e-9*std::max(1.,units)&amp;&amp;spread&gt;=0,"Maturity must align to accrual grid and spread nonnegative");
+        auto end=count(round,1,10000);require(end&gt;prior,"Increasing maturities required");
+        struct Leg{double s,a,b;};
+        auto calc=[&amp;](double h){
+            Leg z{surv,ann,prot};double decay=std::exp(-h*dt);
+            for(std::size_t j=prior+1;j&lt;=end;++j){
+                double next=z.s*decay,df=std::exp(-r*j*dt);
+                z.a+=dt*df*next;z.b+=(1-rec)*df*(z.s-next);z.s=next;
+            }
+            return z;
+        };
+        auto f=[&amp;](double h){auto z=calc(h);return z.b-spread*z.a;};
+        double lo=0,hi=100/dt;require(f(lo)&lt;=tol&amp;&amp;f(hi)&gt;=-tol,"CDS quote has no nonnegative hazard root");
+        double h=0;
+        if(std::abs(f(0))&gt;tol){
+            for(int k=0;k&lt;100;++k){double m=lo/2+hi/2;if(f(m)&lt;0)lo=m;else hi=m;}
+            h=lo/2+hi/2;
+        }
+        auto z=calc(h);double fitted=z.b/positive(z.a);require(std::abs(fitted-spread)&lt;=tol,"CDS calibration residual");
+        surv=z.s;ann=z.a;prot=z.b;prior=end;
+        o.rows.push_back({row[0],h,surv,spread,fitted,fitted-spread,ann,prot});
+    }
+    return o;
+}</pre><p>参考文献：<a href="https://press.princeton.edu/books/hardcover/9780691090467/credit-risk">Duffie and Singleton (2003), Credit Risk: Pricing, Measurement, and Management, Princeton University Press.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

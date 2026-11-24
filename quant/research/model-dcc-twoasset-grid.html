@@ -1,0 +1,32 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>双资产DCC动态相关：训练似然网格与前瞻风险｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>双资产DCC动态相关：训练似然网格与前瞻风险</h1><p><a href="../research/model-laboratories.html">完整模型研究</a>　<a href="../cpp/model_research_dynamics.hpp" download>模型源码</a>　<a href="../cpp/model_research_common.hpp" download>公共数值函数</a></p></header><article><h2>问题、模型与数学推导</h2><p>DCC将条件协方差拆成边际波动与动态相关矩阵。输入必须是已经按历史条件波动标准化的两资产创新，不能直接把未标准化收益当作DCC残差。第一阶段边际模型不在此工具中估计；该工具负责给定标准化创新后的第二阶段相关参数拟合。</p><p>基础矩阵Qbar仅由训练创新的未中心化二阶矩估计，要求严格正定。初始化Q=Qbar；每条观测在读取当前创新之前先计算相关性及条件高斯损失，再按外积更新Q。有限网格搜索非负a,b且a+b&lt;1，测试期使用冻结参数和训练Qbar进行序贯更新。</p><div class="equation">$$Q_t=(1-a-b)\bar Q+a z_{t-1}z_{t-1}^\top+bQ_{t-1}$$</div><div class="equation">$$R_t=\operatorname{diag}(Q_t)^{-1/2}Q_t\operatorname{diag}(Q_t)^{-1/2}$$</div><div class="equation">$$\rho_t=Q_{12,t}/\sqrt{Q_{11,t}Q_{22,t}}$$</div><div class="equation">$$L_t=\frac12[\log(1-\rho_t^2)+(z_{1t}^2-2\rho_tz_{1t}z_{2t}+z_{2t}^2)/(1-\rho_t^2)]$$</div><div class="equation">$$(\hat a,\hat b)=\arg\min_{a,b\ge0,\ a+b&lt;1}\sum_{t\in T}L_t$$</div><h2>解析案例与研究设计</h2><p>样本训练创新四种符号组合各出现一次，Qbar=I。令a=b=0，相关预测恒为0，测试创新幅度变化也不影响相关。非退化网格通过训练条件损失选择参数；将未来数据附加到输入后，训练矩阵、选择结果及之前测试预测应不变。</p><p>网格成本O(g²nT)，序贯输出O(n)，固定二维。损失忽略与相关参数无关的常数及边际项，不能跨不同边际模型直接比较。完整DCC还应检验标准化残差质量、边际GARCH及参数稳定性；网格最优不等于连续极大似然，a+b接近1时需留意持久性。</p><h2>可执行输入与解析基准</h2><p>输入数据为独立构造的教学样本。下表给出可解析核对的输出前缀；其他诊断字段由模型实际拟合产生，并通过回归测试检查。</p><p><a href="../research/model-examples/dcc-twoasset-grid.csv" download>下载CSV样本</a></p><pre>Z1,Z2
+1,1
+1,-1
+-1,1
+-1,-1
+2,1
+-1,2
+</pre><pre>./build/kline_quant model-dcc-twoasset-grid quant/research/model-examples/dcc-twoasset-grid.csv 4 0 0 2</pre><div class="wide"><table><thead><tr><th>Time</th><th>Train</th><th>Z1</th><th>Z2</th><th>PredictedCorrelation</th></tr></thead><tbody><tr><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td></tr><tr><td>2</td><td>1</td><td>1</td><td>-1</td><td>0</td></tr><tr><td>3</td><td>1</td><td>-1</td><td>1</td><td>0</td></tr><tr><td>4</td><td>1</td><td>-1</td><td>-1</td><td>0</td></tr><tr><td>5</td><td>0</td><td>2</td><td>1</td><td>0</td></tr><tr><td>6</td><td>0</td><td>-1</td><td>2</td><td>0</td></tr></tbody></table></div><p>输出字段：Time，Train，Z1，Z2，PredictedCorrelation，ConditionalNLL，A，B，TrainingNLL。</p><h2>C++17实现</h2><pre>inline Report dcc_twoasset_grid(const Mat&amp; x,const Vec&amp; p){
+    validate(x,5,2,2);parameters(p,4);auto nt=count(p[0],3,x.size()-1),g=count(p[3],2,100);
+    double am=p[1],bm=p[2];require(am&gt;=0&amp;&amp;am&lt;1&amp;&amp;bm&gt;=0&amp;&amp;bm&lt;1&amp;&amp;double(g)*g*nt&lt;=5e7,"Invalid DCC grid");
+    double u=0,v=0,c=0;
+    for(std::size_t t=0;t&lt;nt;++t){u+=x[t][0]*x[t][0]/nt;v+=x[t][1]*x[t][1]/nt;c+=x[t][0]*x[t][1]/nt;}
+    positive(u);positive(v);positive(u*v-c*c);
+    auto eval=[&amp;](double a,double b,std::size_t n,Report* out,double training){
+        double q1=u,q2=v,q12=c,ll=0;
+        for(std::size_t t=0;t&lt;n;++t){
+            double rho=q12/std::sqrt(positive(q1*q2)),det=positive(1-rho*rho),z=x[t][0],w=x[t][1];
+            double loss=.5*(std::log(det)+(z*z-2*rho*z*w+w*w)/det);ll+=loss;
+            if(out)out-&gt;rows.push_back({double(t+1),double(t&lt;nt),z,w,rho,loss,a,b,training});
+            q1=(1-a-b)*u+a*z*z+b*q1;q2=(1-a-b)*v+a*w*w+b*q2;q12=(1-a-b)*c+a*z*w+b*q12;
+        }
+        return ll;
+    };
+    double best=std::numeric_limits&lt;double&gt;::infinity(),a=0,b=0;
+    for(std::size_t i=0;i&lt;g;++i)for(std::size_t j=0;j&lt;g;++j){
+        double z=am*i/(g-1),w=bm*j/(g-1);if(z+w&gt;=1)continue;
+        double l=eval(z,w,nt,nullptr,0);if(l&lt;best){best=l;a=z;b=w;}
+    }
+    require(std::isfinite(best),"No finite DCC candidate");
+    Report o{{"Time","Train","Z1","Z2","PredictedCorrelation","ConditionalNLL","A","B","TrainingNLL"},{}};
+    eval(a,b,x.size(),&amp;o,best);return o;
+}</pre><p>参考文献：<a href="https://doi.org/10.1198/073500102288618487">Engle (2002), Dynamic Conditional Correlation: A Simple Class of Multivariate GARCH Models, JBES.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

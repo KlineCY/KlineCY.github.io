@@ -1,0 +1,43 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>滚动多因子风险模型：暴露拟合、风险分解与约束配置｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>滚动多因子风险模型：暴露拟合、风险分解与约束配置</h1><p><a href="../research/model-laboratories.html">完整模型研究</a>　<a href="../cpp/model_research_systems.hpp" download>模型源码</a>　<a href="../cpp/model_research_common.hpp" download>公共数值函数</a></p></header><article><h2>问题、模型与数学推导</h2><p>多因子风险模型将资产协方差分解为共同因子驱动及特异风险。与直接估计全资产样本协方差相比，它在因子数小于资产数时减少自由参数，但依赖因子充分性和特异收益相关结构。这里输入已对齐的已实现因子收益及资产收益，因子只在历史估计中使用，不把当期尚未实现的因子收益用于预测持仓。</p><p>每期用历史窗口拟合所有资产的截距及因子暴露，截距不惩罚、暴露岭收缩；以历史样本协方差估计因子风险，并为因子矩阵及特异残差方差加入明确正地板。假设特异协方差为对角，构造正定资产风险矩阵。求带权重上限的最小方差配置，计算因子风险及特异风险两个可加项，再用实际下一期资产收益完成自融资回测。</p><div class="equation">$$r_{i,s}=a_i+b_i^\top f_s+\epsilon_{i,s},\quad s\in[t-L,t)$$</div><div class="equation">$$(\hat a_i,\hat b_i)=\arg\min_{a,b}\sum_s(r_{i,s}-a-b^\top f_s)^2+\lambda\|b\|^2$$</div><div class="equation">$$\widehat\Sigma_t=B_t\widehat\Sigma_{f,t}B_t^\top+\operatorname{diag}(\hat v_{\epsilon_i,t})$$</div><div class="equation">$$\hat w_t=\arg\min_{0\le w_i\le u,\ \mathbf1^\top w=1}\tfrac12w^\top\widehat\Sigma_tw$$</div><div class="equation">$$V_f=(B^\top w)^\top\widehat\Sigma_f(B^\top w),\quad V_{\epsilon}=\sum_iw_i^2\hat v_{\epsilon_i},\quad V_p=V_f+V_\epsilon$$</div><h2>解析案例与研究设计</h2><p>解析样本因子恒0、两资产历史收益同为1％，暴露为0，特异方差地板相同，风险最小权重各半。每期净值乘1.01，因子风险0。非退化样本输出每个资产因子暴露、组合权重、风险分解及最优性证书，可独立检查风险加总。</p><p>工作量每期为O(Lk²+ALk+Ak³+A²k²+QP)，限制因子与资产维度。固定方差地板是模型假设，不等同于数据驱动收缩。实际金融研究应验证残差相关性、暴露稳定性、因子时点、预测风险校准与成本。这里不估计预期收益，避免将事后因子收益当作未来均值预测。</p><h2>可执行输入与解析基准</h2><p>输入数据为独立构造的教学样本。下表给出可解析核对的输出前缀；其他诊断字段由模型实际拟合产生，并通过回归测试检查。</p><p><a href="../research/model-examples/rolling-factor-risk-qp.csv" download>下载CSV样本</a></p><pre>Factor1,R1,R2
+0,0.01,0.01
+0,0.01,0.01
+0,0.01,0.01
+0,0.01,0.01
+0,0.01,0.01
+0,0.01,0.01
+</pre><pre>./build/kline_quant model-rolling-factor-risk-qp quant/research/model-examples/rolling-factor-risk-qp.csv 1 3 0.1 0.001 1 0 1e-9 1000</pre><div class="wide"><table><thead><tr><th>Time</th><th>GrossReturn</th><th>NetReturn</th><th>NAV</th><th>Fee</th></tr></thead><tbody><tr><td>4</td><td>0.01</td><td>0.01</td><td>1.01</td><td>0</td></tr><tr><td>5</td><td>0.01</td><td>0.01</td><td>1.0201</td><td>0</td></tr><tr><td>6</td><td>0.01</td><td>0.01</td><td>1.030301</td><td>0</td></tr></tbody></table></div><p>输出字段：Time，GrossReturn，NetReturn，NAV，Fee，Turnover，FactorVariance，SpecificVariance，TotalVariance，ProjectedGradient，Weight1，Weight2，Beta1_1，Beta2_1。</p><h2>C++17实现</h2><pre>inline Report rolling_factor_risk_qp(const Mat&amp; x,const Vec&amp; p){
+    auto cols=validate(x,4,2,48);parameters(p,8);
+    auto k=count(p[0],1,std::min&lt;std::size_t&gt;(16,cols-1)),A=cols-k,look=count(p[1],3,x.size()-1),K=count(p[7],1,100000);
+    double lam=positive(p[2]),floor=positive(p[3]),cap=p[4],cost=p[5],tol=positive(p[6]);
+    require(A&lt;=32&amp;&amp;cap&gt;=1./A&amp;&amp;cap&lt;=1&amp;&amp;cost&gt;=0&amp;&amp;cost&lt;1,"Invalid factor portfolio constraints");
+    auto m=k+1;
+    require(double(x.size()-look)*(double(look)*(m*m+A*m)+double(A)*m*m*m+double(A)*A*k*k+double(K)*A*(A+80))&lt;=2e8,"Factor risk work limit");
+    Mat f,r;for(auto&amp;a:x){f.emplace_back(a.begin(),a.begin()+k);r.emplace_back(a.begin()+k,a.end());for(double v:r.back())require(v&gt;=-1,"Invalid asset return");}
+    Report o{{"Time","GrossReturn","NetReturn","NAV","Fee","Turnover","FactorVariance","SpecificVariance","TotalVariance","ProjectedGradient"},{}};
+    for(std::size_t i=0;i&lt;A;++i)o.header.push_back("Weight"+std::to_string(i+1));
+    for(std::size_t i=0;i&lt;A;++i)for(std::size_t j=0;j&lt;k;++j)o.header.push_back("Beta"+std::to_string(i+1)+"_"+std::to_string(j+1));
+    Vec old(A,0);double nav=1;
+    for(std::size_t t=look;t&lt;x.size();++t){
+        Mat H(m,Vec(m,0)),rhs(A,Vec(m,0)),design;
+        for(std::size_t s=t-look;s&lt;t;++s){
+            Vec z{1};z.insert(z.end(),f[s].begin(),f[s].end());design.push_back(z);add_outer(H,z,1);
+            for(std::size_t i=0;i&lt;A;++i)for(std::size_t j=0;j&lt;m;++j)rhs[i][j]+=z[j]*r[s][i];
+        }
+        for(std::size_t j=1;j&lt;m;++j)H[j][j]+=lam;
+        Mat B(A,Vec(k));Vec specific(A,floor);
+        for(std::size_t i=0;i&lt;A;++i){
+            Vec w=solve_spd(H,rhs[i]);for(std::size_t j=0;j&lt;k;++j)B[i][j]=w[j+1];
+            double v=0;for(std::size_t s=0;s&lt;look;++s){double e=r[t-look+s][i]-dot(w,design[s]);v+=e*e/look;}
+            specific[i]+=v;
+        }
+        Mat S=researchflow::covariance_window(f,t-look,t,0,floor),cov(A,Vec(A,0));
+        for(std::size_t i=0;i&lt;A;++i){Vec sb=mul(S,B[i]);for(std::size_t j=0;j&lt;=i;++j){double v=dot(B[j],sb)+(i==j?specific[i]:0);cov[i][j]=cov[j][i]=v;}}
+        Mat a=cov;for(auto&amp;row:a){row.push_back(0);row.push_back(0);row.push_back(cap);}
+        auto opt=box_covariance_qp(a,{1,1,tol,double(K)});Vec w;for(auto&amp;v:opt.rows)w.push_back(v[1]);
+        Vec beta(k,0);double idio=0;for(std::size_t i=0;i&lt;A;++i){idio+=w[i]*w[i]*specific[i];for(std::size_t j=0;j&lt;k;++j)beta[j]+=w[i]*B[i][j];}
+        double fv=dot(beta,mul(S,beta));auto step=researchflow::trade_step(old,w,r[t],cost);nav=positive(nav*(1+step.net));
+        Vec row{double(t+1),step.gross,step.net,nav,step.fee,step.turnover,fv,idio,fv+idio,opt.rows[0][5]};
+        row.insert(row.end(),w.begin(),w.end());for(auto&amp;b:B)row.insert(row.end(),b.begin(),b.end());o.rows.push_back(row);old=std::move(step.drift);
+    }
+    return o;
+}</pre><p>参考文献：<a href="https://doi.org/10.2469/faj.v51.n3.1904">Connor (1995), The Three Types of Factor Models: A Comparison of Their Explanatory Power, Financial Analysts Journal.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

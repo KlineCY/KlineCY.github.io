@@ -1,0 +1,355 @@
+[
+  {
+    "command": "model-var-ridge-forecast",
+    "title": "多变量VAR岭估计与冻结一步预测",
+    "area": "math",
+    "ref": "Lütkepohl (2005), New Introduction to Multiple Time Series Analysis, Springer.",
+    "url": "https://doi.org/10.1007/978-3-540-27752-1",
+    "columns": [
+      "R1",
+      "R2"
+    ],
+    "file": "var-ridge-forecast.csv",
+    "params": [
+      4,
+      1,
+      1
+    ],
+    "header": [
+      "Time",
+      "Asset",
+      "Actual",
+      "Forecast",
+      "Error",
+      "TrainingRMSE"
+    ],
+    "expected_prefix": [
+      [
+        5,
+        1,
+        1,
+        0.5,
+        0.5
+      ],
+      [
+        5,
+        2,
+        0,
+        0,
+        0
+      ],
+      [
+        6,
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        6,
+        2,
+        1,
+        0.6666666666666666,
+        0.3333333333333333
+      ]
+    ]
+  },
+  {
+    "command": "model-kalman-grid-fit",
+    "title": "局部水平Kalman模型：创新似然网格校准与序贯预测",
+    "area": "math",
+    "ref": "Durbin and Koopman (2012), Time Series Analysis by State Space Methods, 2nd ed., Oxford University Press.",
+    "url": "https://doi.org/10.1093/acprof:oso/9780199641178.001.0001",
+    "columns": [
+      "Value"
+    ],
+    "file": "kalman-grid-fit.csv",
+    "params": [
+      3,
+      0.1,
+      0.1,
+      0.2,
+      0.2,
+      2,
+      0,
+      1
+    ],
+    "header": [
+      "Time",
+      "Train",
+      "Observed",
+      "Prediction",
+      "InnovationVariance",
+      "Innovation",
+      "Gain",
+      "FilteredMean",
+      "FilteredVariance",
+      "Q",
+      "R",
+      "TrainingNLL"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        1,
+        1,
+        0,
+        1.3,
+        1,
+        0.8461538461538461,
+        0.8461538461538461
+      ],
+      [
+        2,
+        1,
+        1,
+        0.8461538461538461,
+        0.4692307692307693,
+        0.15384615384615385,
+        0.5737704918032787,
+        0.9344262295081968
+      ],
+      [
+        3,
+        1,
+        2,
+        0.9344262295081968,
+        0.4147540983606558,
+        1.0655737704918034,
+        0.5177865612648221,
+        1.4861660079051384
+      ],
+      [
+        4,
+        0,
+        2.5,
+        1.4861660079051384,
+        0.4035573122529645,
+        1.0138339920948616,
+        0.5044074436826641,
+        1.9975514201762978
+      ],
+      [
+        5,
+        0,
+        3,
+        1.9975514201762978,
+        0.40088148873653284,
+        1.0024485798237022,
+        0.501099438064989,
+        2.4998778402150013
+      ]
+    ]
+  },
+  {
+    "command": "model-hawkes-fixed-decay-fit",
+    "title": "指数Hawkes过程：固定衰减的约束似然拟合",
+    "area": "feeds",
+    "ref": "Ogata (1988), Statistical Models for Earthquake Occurrences and Residual Analysis for Point Processes, JASA; Hawkes (1971), Spectra of Some Self-Exciting and Mutually Exciting Point Processes.",
+    "url": "https://doi.org/10.1093/biomet/58.1.83",
+    "columns": [
+      "EventTime"
+    ],
+    "file": "hawkes-fixed-decay-fit.csv",
+    "params": [
+      2,
+      1,
+      0.01,
+      5,
+      0.9,
+      1e-9,
+      2000
+    ],
+    "header": [
+      "Baseline",
+      "BranchingRatio",
+      "NegativeLogLikelihood",
+      "KKTResidual",
+      "Iterations",
+      "Compensator"
+    ],
+    "expected_prefix": [
+      [
+        0.5,
+        0
+      ]
+    ]
+  },
+  {
+    "command": "model-har-rv-forecast",
+    "title": "HAR-RV异质期限波动率模型：日、周、月信息的冻结拟合",
+    "area": "research",
+    "ref": "Corsi (2009), A Simple Approximate Long-Memory Model of Realized Volatility, Journal of Financial Econometrics.",
+    "url": "https://doi.org/10.1093/jjfinec/nbp001",
+    "columns": [
+      "RealizedVariance"
+    ],
+    "file": "har-rv-forecast.csv",
+    "params": [
+      26,
+      1
+    ],
+    "header": [
+      "Time",
+      "Actual",
+      "Forecast",
+      "Error",
+      "Daily",
+      "Weekly",
+      "Monthly",
+      "Intercept",
+      "DailyBeta",
+      "WeeklyBeta",
+      "MonthlyBeta"
+    ],
+    "expected_prefix": [
+      [
+        27,
+        2,
+        1,
+        1
+      ],
+      [
+        28,
+        1,
+        1,
+        0
+      ],
+      [
+        29,
+        1,
+        1,
+        0
+      ],
+      [
+        30,
+        1,
+        1,
+        0
+      ]
+    ]
+  },
+  {
+    "command": "model-ou-conditional-fit",
+    "title": "Ornstein–Uhlenbeck过程：精确转移MLE与样本外预测",
+    "area": "math",
+    "ref": "Uhlenbeck and Ornstein (1930), On the Theory of the Brownian Motion, Physical Review; Shreve (2004), Stochastic Calculus for Finance II.",
+    "url": "https://doi.org/10.1103/PhysRev.36.823",
+    "columns": [
+      "State"
+    ],
+    "file": "ou-conditional-fit.csv",
+    "params": [
+      6,
+      1
+    ],
+    "header": [
+      "Time",
+      "Actual",
+      "Forecast",
+      "Error",
+      "Phi",
+      "LongRunMean",
+      "MeanReversion",
+      "DiffusionVol",
+      "InnovationVariance"
+    ],
+    "expected_prefix": [
+      [
+        7,
+        1.6,
+        1.7489534883720932,
+        -0.1489534883720931,
+        0.41279069767441867,
+        1.713069306930693,
+        0.8848145997721375,
+        0.15854296847160615,
+        0.011783720930232564
+      ],
+      [
+        8,
+        1.7,
+        1.6663953488372094,
+        0.033604651162790544,
+        0.41279069767441867,
+        1.713069306930693,
+        0.8848145997721375,
+        0.15854296847160615,
+        0.011783720930232564
+      ]
+    ]
+  },
+  {
+    "command": "model-dcc-twoasset-grid",
+    "title": "双资产DCC动态相关：训练似然网格与前瞻风险",
+    "area": "research",
+    "ref": "Engle (2002), Dynamic Conditional Correlation: A Simple Class of Multivariate GARCH Models, JBES.",
+    "url": "https://doi.org/10.1198/073500102288618487",
+    "columns": [
+      "Z1",
+      "Z2"
+    ],
+    "file": "dcc-twoasset-grid.csv",
+    "params": [
+      4,
+      0,
+      0,
+      2
+    ],
+    "header": [
+      "Time",
+      "Train",
+      "Z1",
+      "Z2",
+      "PredictedCorrelation",
+      "ConditionalNLL",
+      "A",
+      "B",
+      "TrainingNLL"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        1,
+        1,
+        1,
+        0
+      ],
+      [
+        2,
+        1,
+        1,
+        -1,
+        0
+      ],
+      [
+        3,
+        1,
+        -1,
+        1,
+        0
+      ],
+      [
+        4,
+        1,
+        -1,
+        -1,
+        0
+      ],
+      [
+        5,
+        0,
+        2,
+        1,
+        0
+      ],
+      [
+        6,
+        0,
+        -1,
+        2,
+        0
+      ]
+    ]
+  }
+]

@@ -1,0 +1,26 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>离散风险中性分布：期权价格、远期约束与最小相对熵｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="assets"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>离散风险中性分布：期权价格、远期约束与最小相对熵</h1><p><a href="../research/model-laboratories.html">完整模型研究</a>　<a href="../cpp/model_research_pricing.hpp" download>模型源码</a>　<a href="../cpp/model_research_common.hpp" download>公共数值函数</a></p></header><article><h2>问题、模型与数学推导</h2><p>从期权价格恢复终端分布是一个欠识别逆问题。有限状态下，无套利要求非负状态价格、总贴现价值及标的远期和各期权支付的定价约束。给定严格正的参考概率，最小相对熵在满足矩条件的分布中选择距离参考最小的一个；只有约束数足够且独立时分布才可能唯一识别。</p><p>将终端标的及各执行价的看涨支付构造为特征矩，目标为远期与未贴现期权价格。为了改善数值尺度，全部货币特征及目标除以共同尺度，随后复用熵平衡的Newton求解器。返回实际概率、状态价格、重建远期及每个期权价格，并核对原货币约束误差。</p><div class="equation">$$\min_{q_i\ge0}\sum_iq_i\log(q_i/p_i),\quad \sum_iq_i=1$$</div><div class="equation">$$\sum_iq_iS_i=F,\quad D\sum_iq_i(S_i-K_j)^+=C_j$$</div><div class="equation">$$a_i=(S_i,(S_i-K_1)^+,\ldots,(S_i-K_m)^+)^\top$$</div><div class="equation">$$q_i(\theta)=\frac{p_i e^{\theta^\top a_i}}{\sum_kp_k e^{\theta^\top a_k}}$$</div><div class="equation">$$\pi_i=Dq_i,\quad \sum_i\pi_i=D,\quad\sum_i\pi_iS_i=DF$$</div><h2>解析案例与研究设计</h2><p>三个终端状态80、100、120，参考等概率、贴现1、远期100、K=100看涨价格5。看涨支付仅在120状态为20，因此q120=0.25；均值约束给q80=0.25，剩余q100=0.5。这是无需求解器的解析基准。报价若位于可行域边界或违反静态约束，严格正熵内点模型可能无解。</p><p>输入终端状态正且严格递增、参考权重严格正；参数为贴现、远期、按递增执行价给出的(执行价,价格)对、归一化矩容差和迭代上限。要求有至少一个期权及充分独立状态。计算为O(nd²+d³)每Newton步。离散分布仅为指定网格与先验下的风险中性结果，不应当作真实世界概率或直接预测未来资产收益。</p><h2>可执行输入与解析基准</h2><p>输入数据为独立构造的教学样本。下表给出可解析核对的输出前缀；其他诊断字段由模型实际拟合产生，并通过回归测试检查。</p><p><a href="../research/model-examples/risk-neutral-entropy-fit.csv" download>下载CSV样本</a></p><pre>TerminalState,PriorWeight
+80,1
+100,1
+120,1
+</pre><pre>./build/kline_quant model-risk-neutral-entropy-fit quant/research/model-examples/risk-neutral-entropy-fit.csv 1 100 100 5 1e-10 100</pre><div class="wide"><table><thead><tr><th>State</th><th>Probability</th><th>StatePrice</th><th>Forward</th></tr></thead><tbody><tr><td>80</td><td>0.25</td><td>0.25</td><td>100</td></tr><tr><td>100</td><td>0.5</td><td>0.5</td><td>100</td></tr><tr><td>120</td><td>0.25</td><td>0.25</td><td>100</td></tr></tbody></table></div><p>输出字段：State，Probability，StatePrice，Forward，KL，MaxMomentResidual，CallPrice1。</p><h2>C++17实现</h2><pre>inline Report risk_neutral_entropy_fit(const Mat&amp; x,const Vec&amp; p){
+    validate(x,3,2,2);
+    require(p.size()&gt;=6&amp;&amp;p.size()%2==0,"Discount, forward, strike-price pairs, tolerance and iterations required");
+    parameters(p,p.size());double D=positive(p[0]),F=positive(p[1]),tol=positive(p[p.size()-2]);auto m=(p.size()-4)/2;
+    require(m&lt;=15&amp;&amp;x.size()&gt;=m+2,"Insufficient state support or too many strikes");
+    double scale=std::max(F,x.back()[0]);Vec target{F/scale};
+    for(std::size_t j=0;j&lt;m;++j){double K=positive(p[2+2*j]),price=p[3+2*j];require(K&gt;x.front()[0]&amp;&amp;K&lt;x.back()[0]&amp;&amp;price&gt;=0&amp;&amp;(j==0||K&gt;p[2*j]),"Invalid strike or price");target.push_back(price/(D*scale));}
+    target.push_back(tol);target.push_back(p.back());Mat data;
+    for(std::size_t i=0;i&lt;x.size();++i){
+        double s=positive(x[i][0]),w=positive(x[i][1]);require(i==0||s&gt;x[i-1][0],"Increasing terminal states required");
+        Vec r{w,s/scale};for(std::size_t j=0;j&lt;m;++j)r.push_back(std::max(s-p[2+2*j],0.)/scale);data.push_back(r);
+    }
+    auto fit=entropy_balance_fit(data,target);double forward=0,kl=fit.rows[0][3],gap=0;Vec calls(m,0);
+    for(std::size_t i=0;i&lt;x.size();++i){
+        double q=fit.rows[i][1];forward+=q*x[i][0];for(std::size_t j=0;j&lt;m;++j)calls[j]+=D*q*std::max(x[i][0]-p[2+2*j],0.);
+    }
+    gap=std::abs(forward-F);for(std::size_t j=0;j&lt;m;++j)gap=std::max(gap,std::abs(calls[j]-p[3+2*j]));
+    Report o{{"State","Probability","StatePrice","Forward","KL","MaxMomentResidual"},{}};
+    for(std::size_t j=0;j&lt;m;++j)o.header.push_back("CallPrice"+std::to_string(j+1));
+    for(std::size_t i=0;i&lt;x.size();++i){double q=fit.rows[i][1];Vec r{x[i][0],q,D*q,forward,kl,gap};r.insert(r.end(),calls.begin(),calls.end());o.rows.push_back(r);}
+    return o;
+}</pre><p>参考文献：<a href="https://doi.org/10.2307/2331382">Buchen and Kelly (1996), The Maximum Entropy Distribution of an Asset Inferred from Option Prices, JFQA.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

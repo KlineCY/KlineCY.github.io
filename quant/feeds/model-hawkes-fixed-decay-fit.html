@@ -1,0 +1,27 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>指数Hawkes过程：固定衰减的约束似然拟合｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="feeds"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>指数Hawkes过程：固定衰减的约束似然拟合</h1><p><a href="../research/model-laboratories.html">完整模型研究</a>　<a href="../cpp/model_research_dynamics.hpp" download>模型源码</a>　<a href="../cpp/model_research_common.hpp" download>公共数值函数</a></p></header><article><h2>问题、模型与数学推导</h2><p>Hawkes强度由外生基线与历史事件激发共同决定。指数核的积分为α，因此α&lt;1是平稳分支过程的常用条件。这里固定β并估计基线μ和分支比α，假设观察开始前没有历史事件；真实交易序列可能需预热或对初始强度建模。</p><p>指数核允许以h_i=e^{−βΔt}(h_{i−1}+β)递推历史激发，避免每次重新遍历所有过去事件。总补偿器可解析积分。负对数似然在μ、α上凸，固定一个参数时，另一个参数的得分单调不减；使用带边界的一维二分坐标更新，每轮核查原始盒约束KKT残差。</p><div class="equation">$$\lambda(t)=\mu+\alpha\beta\sum_{t_i&lt;t}e^{-\beta(t-t_i)},\quad 0\le\alpha&lt;1$$</div><div class="equation">$$h_i=\beta\sum_{j&lt;i}e^{-\beta(t_i-t_j)},\quad C=\sum_i[1-e^{-\beta(T-t_i)}]$$</div><div class="equation">$$-\ell=\mu T+\alpha C-\sum_i\log(\mu+\alpha h_i)$$</div><div class="equation">$$\nabla F=(T,C)^\top-\sum_i\frac{(1,h_i)^\top}{\mu+\alpha h_i}$$</div><div class="equation">$$H=\sum_i\frac{(1,h_i)^\top(1,h_i)}{(\mu+\alpha h_i)^2}\succeq0$$</div><h2>解析案例与研究设计</h2><p>单事件位于t=1，观察窗T=2、β=1，事件前无激发，因此似然为2μ+α(1−e^{−1})−logμ。最优μ=0.5、α=0；KKT在α下界成立。事件聚集的非平凡样本由实际拟合器计算，并可通过直接积分及有限差分核对。</p><p>O(n)预计算，每轮两次最多80步的单维根搜索，复杂度O(160nK)。输入事件严格递增且位于(0,T]；μ下上界正，α上界&lt;1。重复时间戳意味着观测精度或批量事件，需要事前定义并列事件机制。固定β的凸性不延伸到所有参数联合拟合。</p><h2>可执行输入与解析基准</h2><p>输入数据为独立构造的教学样本。下表给出可解析核对的输出前缀；其他诊断字段由模型实际拟合产生，并通过回归测试检查。</p><p><a href="../research/model-examples/hawkes-fixed-decay-fit.csv" download>下载CSV样本</a></p><pre>EventTime
+1
+</pre><pre>./build/kline_quant model-hawkes-fixed-decay-fit quant/research/model-examples/hawkes-fixed-decay-fit.csv 2 1 0.01 5 0.9 1e-9 2000</pre><div class="wide"><table><thead><tr><th>Baseline</th><th>BranchingRatio</th></tr></thead><tbody><tr><td>0.5</td><td>0</td></tr></tbody></table></div><p>输出字段：Baseline，BranchingRatio，NegativeLogLikelihood，KKTResidual，Iterations，Compensator。</p><h2>C++17实现</h2><pre>inline Report hawkes_fixed_decay_fit(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,1,1);parameters(p,7);
+    double T=positive(p[0]),decay=positive(p[1]),lo=positive(p[2]),hi=positive(p[3]),cap=p[4],tol=positive(p[5]);auto K=count(p[6],1,10000);
+    require(hi&gt;=lo&amp;&amp;cap&gt;=0&amp;&amp;cap&lt;1&amp;&amp;double(K)*x.size()*160&lt;=1e8,"Invalid bounds or work limit");
+    Vec h;double past=0,C=0,last=0;
+    for(std::size_t i=0;i&lt;x.size();++i){
+        double t=x[i][0];require(t&gt;last&amp;&amp;t&lt;=T,"Strictly ordered events inside observation window required");
+        if(i)past=std::exp(-decay*(t-last))*(past+decay);
+        h.push_back(past);C+=-std::expm1(-decay*(T-t));last=t;
+    }
+    double mu=std::clamp(double(h.size())/T,lo,hi),a=0;
+    auto grad=[&amp;](double m,double b){Vec g{T,C};for(double z:h){double v=positive(m+b*z);g[0]-=1/v;g[1]-=z/v;}return g;};
+    auto root=[&amp;](double l,double u,auto f){if(f(l)&gt;=0)return l;if(f(u)&lt;=0)return u;for(int k=0;k&lt;80;++k){double m=l/2+u/2;if(f(m)&lt;0)l=m;else u=m;}return l/2+u/2;};
+    auto violation=[](double v,double l,double u,double g){if(l==u)return 0.;if(v==l)return std::max(0.,-g);if(v==u)return std::max(0.,g);return std::abs(g);};
+    double gap=0;std::size_t it=0;
+    for(;it&lt;K;){
+        mu=root(lo,hi,[&amp;](double m){return grad(m,a)[0];});
+        a=root(0,cap,[&amp;](double b){return grad(mu,b)[1];});
+        Vec g=grad(mu,a);gap=std::max(violation(mu,lo,hi,g[0]),violation(a,0,cap,g[1]));++it;
+        if(gap&lt;=tol)break;
+    }
+    require(gap&lt;=tol,"Hawkes coordinate fit did not converge");
+    double comp=mu*T+a*C,nll=comp;for(double z:h)nll-=std::log(mu+a*z);
+    return scalar({"Baseline","BranchingRatio","NegativeLogLikelihood","KKTResidual","Iterations","Compensator"},{mu,a,nll,gap,double(it),comp});
+}</pre><p>参考文献：<a href="https://doi.org/10.1093/biomet/58.1.83">Ogata (1988), Statistical Models for Earthquake Occurrences and Residual Analysis for Point Processes, JASA; Hawkes (1971), Spectra of Some Self-Exciting and Mutually Exciting Point Processes.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>
