@@ -1,0 +1,31 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>负二项NB2计数回归：暴露量、曲率与似然估计｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="ml"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>负二项NB2计数回归：暴露量、曲率与似然估计</h1><p><a href="../research/model-laboratories.html">完整模型研究</a>　<a href="../cpp/model_research_likelihood.hpp" download>模型与求解器源码</a>　<a href="../cpp/model_research_common.hpp" download>公共数值函数</a></p></header><article><h2>问题、模型与数学推导</h2><p>计数模型：交易到达数、事件数量和违约次数依赖观察暴露长度，直接将不同窗口计数作为同分布因变量会混淆强度与暴露。使用log(e)作为固定offset，使均值随暴露成比例。NB2在Poisson的均值基础上引入二次过度离散项；本实现将α作为给定参数，不对离散度作联合极大似然估计。</p><p>将NB2写成Gamma函数与Logistic概率的组合后，可以在logit尺度上使用softplus计算稳定似然。对线性预测量求导得到一阶得分及严格非负曲率；若设计满秩或λ&gt;0，Hessian为正定。采用带回溯Newton法，最终直接检查惩罚目标的无穷范数梯度，而非只比较对数似然。</p><div class="equation">$$\mu_i=e_i\exp(x_i^\top\beta),\quad \operatorname{Var}(Y_i\mid X_i)=\mu_i+\alpha\mu_i^2$$</div><div class="equation">$$k=1/\alpha,\quad P(Y_i=y)=\frac{\Gamma(y+k)}{\Gamma(k)y!}(1-p_i)^k p_i^y,\quad p_i=\frac{\alpha\mu_i}{1+\alpha\mu_i}$$</div><div class="equation">$$\ell_i^-=\log\Gamma(k)+\log\Gamma(y_i+1)-\log\Gamma(y_i+k)+k\log(1+\alpha\mu_i)+y_i\log(1+1/(\alpha\mu_i))$$</div><div class="equation">$$\nabla F=\sum_i x_i[(y_i+k)p_i-y_i]+\lambda\beta$$</div><div class="equation">$$H=\sum_i(y_i+k)p_i(1-p_i)x_ix_i^\top+\lambda I$$</div><h2>解析案例与研究设计</h2><p>解析样本：两条观测均具有常数特征，暴露1及2、计数2及4，α=0.5、无惩罚。β=ln2使每条预测均值恰等于计数，各项得分均为零，因此是凸目标的全局最优。与Poisson相比，计数的条件方差更大，预测分布和风险尾部会不同。</p><p>输入最后两列为暴露和非负整数计数，其余列为设计矩阵。λ可取0，但需有效识别及有限最优值；全零计数的无惩罚截距可能发散。每轮O(nd²+d³)，本实现限制迭代工作量。若研究日内事件流，自相关、Hawkes内生性与时间变化强度需独立建模，NB2边际离散度不等于完整点过程。</p><h2>可执行输入与解析基准</h2><p>输入数据为独立构造的教学样本。下表给出可解析核对的输出前缀；其他诊断字段由模型实际拟合产生，并通过回归测试检查。</p><p><a href="../research/model-examples/nb2-exposure.csv" download>下载CSV样本</a></p><pre>X1,Exposure,Count
+1,1,2
+1,2,4
+</pre><pre>./build/kline_quant model-nb2-exposure quant/research/model-examples/nb2-exposure.csv 0.5 0 1e-9 100</pre><div class="wide"><table><thead><tr><th>Feature</th><th>Coefficient</th></tr></thead><tbody><tr><td>1</td><td>0.69314718056</td></tr></tbody></table></div><p>输出字段：Feature，Coefficient，PenalizedNLL，ScoreResidual，Iterations。</p><h2>C++17实现</h2><pre>inline Report nb2_exposure(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,1,3,18)-2;
+    parameters(p,4);
+    double alpha=positive(p[0]),lam=p[1],tol=positive(p[2]),k=1/alpha;
+    auto K=count(p[3],1,2000);
+    require(lam&gt;=0&amp;&amp;double(K)*x.size()*d*d&lt;=5e7,"Invalid penalty or work limit");
+    Mat a;Vec offset,y;
+    for(auto&amp;r:x){
+        a.emplace_back(r.begin(),r.begin()+d);
+        offset.push_back(std::log(positive(r[d]))+std::log(alpha));
+        y.push_back(double(count(r[d+1],0,10000000)));
+    }
+    auto evaluate=[&amp;](const Vec&amp;w){
+        auto s=regularized_state(w,lam);
+        for(std::size_t i=0;i&lt;a.size();++i){
+            double z=dot(a[i],w)+offset[i],q=logistic(z),v=y[i];
+            s.value+=std::lgamma(k)+std::lgamma(v+1)-std::lgamma(v+k)+k*softplus(z)+v*softplus(-z);
+            double g=(v+k)*q-v;
+            for(std::size_t j=0;j&lt;d;++j)s.gradient[j]+=g*a[i][j];
+            add_outer(s.hessian,a[i],(v+k)*q*(1-q));
+        }
+        return s;
+    };
+    auto f=damped_newton(d,tol,K,evaluate);
+    Report o{{"Feature","Coefficient","PenalizedNLL","ScoreResidual","Iterations"},{}};
+    for(std::size_t j=0;j&lt;d;++j)o.rows.push_back({double(j+1),f.beta[j],f.state.value,inf_norm(f.state.gradient),double(f.iterations)});
+    return o;
+}</pre><p>参考文献：<a href="https://cameron.econ.ucdavis.edu/racd2/RACD2programs.html">Cameron and Trivedi (2013), Regression Analysis of Count Data, 2nd ed., Cambridge University Press.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

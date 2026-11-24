@@ -1,0 +1,44 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cox比例风险：Breslow并列时间、风险集与岭惩罚｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="assets"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>Cox比例风险：Breslow并列时间、风险集与岭惩罚</h1><p><a href="../research/model-laboratories.html">完整模型研究</a>　<a href="../cpp/model_research_likelihood.hpp" download>模型与求解器源码</a>　<a href="../cpp/model_research_common.hpp" download>公共数值函数</a></p></header><article><h2>问题、模型与数学推导</h2><p>生存分析：企业违约或订单寿命常出现右删失，即观察结束前没有发生事件。Cox模型将基准强度与协变量乘数分开，借助风险集中的条件事件概率估计β，不需要为基准强度设具体分布。事件和删失时点相同时，本实现将该时点删失主体保留在风险集；并列事件采用Breslow近似。</p><p>将记录按时间降序处理，相同时间的全部记录先进入风险集，再计算该时点事件项。风险集的零阶、一阶和二阶指数加权矩可逐步累积；遇到更大的线性预测量时按指数差重新缩放累积矩，避免不必要上溢。负部分似然梯度为风险集均值与实际事件特征之差，Hessian为风险集协方差乘事件数，岭项使其严格正定。</p><div class="equation">$$\lambda(t\mid x)=\lambda_0(t)e^{x^\top\beta},\quad R(t)=\{j:T_j\ge t\}$$</div><div class="equation">$$\ell_B(\beta)=\sum_{t:d_t&gt;0}\left[\sum_{i\in D(t)}x_i^\top\beta-d_t\log\sum_{j\in R(t)}e^{x_j^\top\beta}\right]$$</div><div class="equation">$$\bar x(t)=\frac{\sum_{j\in R(t)}x_je^{x_j^\top\beta}}{\sum_{j\in R(t)}e^{x_j^\top\beta}}$$</div><div class="equation">$$\nabla F=\sum_t[d_t\bar x(t)-\sum_{i\in D(t)}x_i]+\lambda\beta$$</div><div class="equation">$$\nabla^2 F=\sum_t d_t\operatorname{Cov}_{R(t),\beta}(x)+\lambda I$$</div><h2>解析案例与研究设计</h2><p>解析案例：两个时间点各有一对特征+1及−1的事件。每个风险集与事件集均关于0对称，因此β=0使得分为0，风险比为1。在非对称样本中，程序实际求解惩罚部分似然。输出每个协变量系数、单位特征变化风险比及得分残差。</p><p>模型边界：仅固定协变量、单一风险类型、无延迟进入，默认非信息性删失及比例风险。并列事件占比很高时，Efron或精确方法可更合适；岭惩罚改变估计对象，不能直接套未惩罚标准误。本实现每次计算O(nd²+d³)，排序一次O(n log n)；不同特征的风险比单位需按输入解释。</p><h2>可执行输入与解析基准</h2><p>输入数据为独立构造的教学样本。下表给出可解析核对的输出前缀；其他诊断字段由模型实际拟合产生，并通过回归测试检查。</p><p><a href="../research/model-examples/cox-breslow-ridge.csv" download>下载CSV样本</a></p><pre>Time,Event,X1
+2,1,1
+2,1,-1
+1,1,1
+1,1,-1
+</pre><pre>./build/kline_quant model-cox-breslow-ridge quant/research/model-examples/cox-breslow-ridge.csv 0.1 1e-9 100</pre><div class="wide"><table><thead><tr><th>Feature</th><th>Coefficient</th><th>HazardRatio</th></tr></thead><tbody><tr><td>1</td><td>0</td><td>1</td></tr></tbody></table></div><p>输出字段：Feature，Coefficient，HazardRatio，PenalizedNLL，ScoreResidual，Iterations。</p><h2>C++17实现</h2><pre>inline Report cox_breslow_ridge(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,2,3,18)-2;parameters(p,3);
+    double lam=positive(p[0]),tol=positive(p[1]);auto K=count(p[2],1,2000);
+    require(double(K)*x.size()*d*d&lt;=5e7,"Cox work limit");
+    Mat rows=x;std::sort(rows.begin(),rows.end(),[](const Vec&amp;a,const Vec&amp;b){return a[0]&gt;b[0];});
+    double events=0;
+    Mat a;for(auto&amp;r:rows){positive(r[0]);require(r[1]==0||r[1]==1,"Binary event indicator");events+=r[1];a.emplace_back(r.begin()+2,r.end());}
+    positive(events);
+    auto evaluate=[&amp;](const Vec&amp;w){
+        auto s=regularized_state(w,lam);
+        double shift=-std::numeric_limits&lt;double&gt;::infinity(),total=0;
+        Vec sx(d,0);Mat sxx(d,Vec(d,0));
+        for(std::size_t i=0;i&lt;rows.size();){
+            std::size_t j=i;double deaths=0,ev=0;Vec ex(d,0);
+            while(j&lt;rows.size()&amp;&amp;rows[j][0]==rows[i][0]){
+                double z=dot(a[j],w);
+                if(z&gt;shift){double f=std::exp(shift-z);total*=f;for(double&amp;v:sx)v*=f;for(auto&amp;r:sxx)for(double&amp;v:r)v*=f;shift=z;}
+                double v=std::exp(z-shift);total+=v;
+                for(std::size_t k=0;k&lt;d;++k)sx[k]+=v*a[j][k];
+                add_outer(sxx,a[j],v);
+                if(rows[j][1]){++deaths;ev+=z;for(std::size_t k=0;k&lt;d;++k)ex[k]+=a[j][k];}
+                ++j;
+            }
+            if(deaths){
+                s.value+=deaths*(shift+std::log(total))-ev;
+                for(std::size_t k=0;k&lt;d;++k){
+                    s.gradient[k]+=deaths*sx[k]/total-ex[k];
+                    for(std::size_t h=0;h&lt;d;++h)s.hessian[k][h]+=deaths*(sxx[k][h]/total-(sx[k]/total)*(sx[h]/total));
+                }
+            }
+            i=j;
+        }
+        return s;
+    };
+    auto f=damped_newton(d,tol,K,evaluate);
+    Report o{{"Feature","Coefficient","HazardRatio","PenalizedNLL","ScoreResidual","Iterations"},{}};
+    for(std::size_t j=0;j&lt;d;++j)o.rows.push_back({double(j+1),f.beta[j],std::exp(f.beta[j]),f.state.value,inf_norm(f.state.gradient),double(f.iterations)});
+    return o;
+}</pre><p>参考文献：<a href="https://stat.ethz.ch/R-manual/R-devel/library/survival/html/coxph.html">Cox (1972), Regression Models and Life-Tables, JRSS B; Breslow (1974), Covariance Analysis of Censored Survival Data, Biometrics.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

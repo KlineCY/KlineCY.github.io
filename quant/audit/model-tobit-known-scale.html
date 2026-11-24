@@ -1,0 +1,42 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>左删失Tobit回归：已知尺度下的截断正态EM｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="audit"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>左删失Tobit回归：已知尺度下的截断正态EM</h1><p><a href="../research/model-laboratories.html">完整模型研究</a>　<a href="../cpp/model_research_likelihood.hpp" download>模型与求解器源码</a>　<a href="../cpp/model_research_common.hpp" download>公共数值函数</a></p></header><article><h2>问题、模型与数学推导</h2><p>左删失与样本截断具有不同似然。左删失数据保留所有观测单位，但低于阈值的真实结果不可见；其似然贡献为低于阈值的概率，而非阈值处的连续密度。模型假设潜在正态线性结果、已知共同标准差σ；σ固定是明确的简化，完整Tobit通常联合估计尺度。</p><p>EM将删失的潜在结果视为缺失量。E步计算截断正态的条件均值，M步最小化完整数据期望平方误差加岭惩罚。固定σ时，条件方差部分与新β无关，因此仅需期望结果作为回归目标。为避免极端左尾的正态CDF下溢，使用逆Mills比率的连分式近似，并通过logφ−logR计算logCDF。</p><div class="equation">$$Y_i^*=x_i^\top\beta+\sigma\varepsilon_i,\quad Y_i=\max(c_i,Y_i^*)$$</div><div class="equation">$$\ell_i=\begin{cases}-\log\sigma+\log\varphi((y_i-\mu_i)/\sigma)&amp;\delta_i=0\\\log\Phi((c_i-\mu_i)/\sigma)&amp;\delta_i=1\end{cases}$$</div><div class="equation">$$\mathbb E[Y_i^*\mid Y_i^*\le c_i]=\mu_i-\sigma\varphi(a_i)/\Phi(a_i),\quad a_i=(c_i-\mu_i)/\sigma$$</div><div class="equation">$$(X^\top X+\lambda\sigma^2 I)\beta^{k+1}=X^\top \widetilde y^{\,k}$$</div><div class="equation">$$\nabla F=\lambda\beta+\sum_{\delta_i=0}\frac{\mu_i-y_i}{\sigma^2}x_i+\sum_{\delta_i=1}\frac{\varphi(a_i)}{\sigma\Phi(a_i)}x_i$$</div><h2>解析案例与研究设计</h2><p>无删失、常数设计、结果1及3、σ=1、无惩罚时，模型退化为普通正态回归，估计均值2。加入左删失记录后，真实潜在结果期望一般低于阈值；把阈值直接作为真实观察会产生系统偏差。程序检查惩罚负似然单调性和原始得分残差。</p><p>输入前d列设计矩阵，其后三列为删失阈值、记录值、删失标志；删失时记录必须等于阈值，未删失值严格高于阈值。至少有有效未删失观察，λ=0时需满秩；工作量含每轮Cholesky。交易量下限、报表测量界及政策变量的零值机制可能不同，不能把结构性零自动解释为删失。</p><h2>可执行输入与解析基准</h2><p>输入数据为独立构造的教学样本。下表给出可解析核对的输出前缀；其他诊断字段由模型实际拟合产生，并通过回归测试检查。</p><p><a href="../research/model-examples/tobit-known-scale.csv" download>下载CSV样本</a></p><pre>X1,CensorLimit,Observed,Censored
+1,0,1,0
+1,0,3,0
+</pre><pre>./build/kline_quant model-tobit-known-scale quant/research/model-examples/tobit-known-scale.csv 1 0 1e-8 1000</pre><div class="wide"><table><thead><tr><th>Feature</th><th>Coefficient</th></tr></thead><tbody><tr><td>1</td><td>2</td></tr></tbody></table></div><p>输出字段：Feature，Coefficient，PenalizedNLL，ScoreResidual，Iterations。</p><h2>C++17实现</h2><pre>inline Report tobit_known_scale(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,2,4,19)-3;parameters(p,4);
+    double sig=positive(p[0]),lam=p[1],tol=positive(p[2]),v=sig*sig;
+    auto K=count(p[3],1,100000);
+    require(lam&gt;=0&amp;&amp;double(K)*(x.size()*d+d*d*d)&lt;=5e7,"Invalid penalty or work limit");
+    Mat a,H(d,Vec(d,0));double observed=0;
+    for(auto&amp;r:x){
+        require(r[d+2]==0||r[d+2]==1,"Binary censor flag");
+        require(r[d+2]?r[d+1]==r[d]:r[d+1]&gt;r[d],"Inconsistent censored observation");
+        observed+=1-r[d+2];a.emplace_back(r.begin(),r.begin()+d);add_outer(H,a.back(),1);
+    }
+    positive(observed);for(std::size_t j=0;j&lt;d;++j)H[j][j]+=lam*v;
+    auto eval=[&amp;](const Vec&amp;w){
+        double nll=.5*lam*squared(w);Vec g=w;for(double&amp;z:g)z*=lam;
+        for(std::size_t i=0;i&lt;x.size();++i){
+            double mu=dot(a[i],w),h;
+            if(x[i][d+2]){double z=(x[i][d]-mu)/sig;nll-=log_normal_cdf(z);h=left_mills(z)/sig;}
+            else{double e=(mu-x[i][d+1])/sig;nll+=std::log(sig)+.5*std::log(2*std::acos(-1.))+.5*e*e;h=e/sig;}
+            for(std::size_t j=0;j&lt;d;++j)g[j]+=h*a[i][j];
+        }
+        return std::make_pair(nll,inf_norm(g));
+    };
+    Vec w(d,0);auto st=eval(w);std::size_t it=0;
+    while(st.second&gt;tol&amp;&amp;it&lt;K){
+        Vec b(d,0);
+        for(std::size_t i=0;i&lt;x.size();++i){
+            double mu=dot(a[i],w),y=x[i][d+1];
+            if(x[i][d+2])y=mu-sig*left_mills((x[i][d]-mu)/sig);
+            for(std::size_t j=0;j&lt;d;++j)b[j]+=a[i][j]*y;
+        }
+        auto z=solve_spd(H,b);auto next=eval(z);
+        require(next.first&lt;=st.first+1e-10*std::max(1.,std::abs(st.first)),"Tobit EM likelihood decreased");
+        w=z;st=next;++it;
+    }
+    require(st.second&lt;=tol,"Tobit EM did not converge");
+    Report o{{"Feature","Coefficient","PenalizedNLL","ScoreResidual","Iterations"},{}};
+    for(std::size_t j=0;j&lt;d;++j)o.rows.push_back({double(j+1),w[j],st.first,st.second,double(it)});
+    return o;
+}</pre><p>参考文献：<a href="https://doi.org/10.2307/1907382">Tobin (1958), Estimation of Relationships for Limited Dependent Variables, Econometrica.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

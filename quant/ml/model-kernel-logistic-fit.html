@@ -1,0 +1,32 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>核Logistic回归：RKHS正则、Newton求解与冻结预测｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="ml"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>核Logistic回归：RKHS正则、Newton求解与冻结预测</h1><p><a href="../research/model-laboratories.html">完整模型研究</a>　<a href="../cpp/model_research_likelihood.hpp" download>模型与求解器源码</a>　<a href="../cpp/model_research_common.hpp" download>公共数值函数</a></p></header><article><h2>问题、模型与数学推导</h2><p>模型：非线性分类可由核函数在隐式特征空间中建立线性Logistic模型。表示定理将RKHS正则化解限制在训练特征张成空间；本实现另加明确的系数ridge ε以处理重复样本与Gram矩阵秩亏。该附加项改变目标，不能把它称为纯粹核范数正则的无影响数值抖动。</p><p>训练时只从Train=1的行建立RBF Gram矩阵；由链式法则计算系数梯度及Hessian。核矩阵半正定，ε&gt;0使目标严格凸。使用阻尼Newton与梯度收敛条件；最终以训练中心和冻结系数计算训练及测试概率，测试标签不参与核构造或拟合。</p><div class="equation">$$k(x,z)=e^{-\gamma\|x-z\|^2},\quad f(x)=\sum_{j\in T}\alpha_jk(x,x_j)$$</div><div class="equation">$$F(\alpha)=\sum_{i\in T}[\log(1+e^{f_i})-y_if_i]+\frac{\lambda}{2}\alpha^\top K\alpha+\frac{\epsilon}{2}\|\alpha\|^2$$</div><div class="equation">$$g=K^\top(p-y)+\lambda K\alpha+\epsilon\alpha$$</div><div class="equation">$$H=K^\top\operatorname{diag}(p_i(1-p_i))K+\lambda K+\epsilon I$$</div><div class="equation">$$P(Y=1\mid x)=\sigma(k_T(x)^\top\hat\alpha)$$</div><h2>解析案例与研究设计</h2><p>对称样本−1与1，类别0与1，γ=1，交叉核k=e^{−4}。对称性使系数为(−a,a)，得分条件为(λ+ε/(1−k))a=1/(1+exp((1−k)a))；独立一维二分可得预测概率。测试x=0与两中心等距，因此概率严格0.5。</p><p>稠密模型存储O(m²)，每次Newton O(m³)，限制训练中心数≤64并限制迭代。高频大样本需Nyström、随机特征或稀疏近似；γ与正则强度必须由训练内验证决定。概率需要在独立校准集合上评价，不能以训练NLL低证明可交易性。</p><h2>可执行输入与解析基准</h2><p>输入数据为独立构造的教学样本。下表给出可解析核对的输出前缀；其他诊断字段由模型实际拟合产生，并通过回归测试检查。</p><p><a href="../research/model-examples/kernel-logistic-fit.csv" download>下载CSV样本</a></p><pre>Train,Label,X1
+1,0,-1
+1,1,1
+0,0,0
+0,1,1
+</pre><pre>./build/kline_quant model-kernel-logistic-fit quant/research/model-examples/kernel-logistic-fit.csv 1 0.5 0.1 1e-9 100</pre><div class="wide"><table><thead><tr><th>Row</th><th>Train</th><th>Label</th><th>Probability</th></tr></thead><tbody><tr><td>1</td><td>1</td><td>0</td><td>0.358022187493</td></tr><tr><td>2</td><td>1</td><td>1</td><td>0.641977812507</td></tr><tr><td>3</td><td>0</td><td>0</td><td>0.5</td></tr><tr><td>4</td><td>0</td><td>1</td><td>0.641977812507</td></tr></tbody></table></div><p>输出字段：Row，Train，Label，Probability，Logit，PenalizedNLL，ScoreResidual，Iterations。</p><h2>C++17实现</h2><pre>inline Report kernel_logistic_fit(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,3,3,18)-2;parameters(p,5);
+    double gam=positive(p[0]),lam=positive(p[1]),ridge=positive(p[2]),tol=positive(p[3]);auto Kmax=count(p[4],1,2000);
+    Mat a;Vec y;std::vector&lt;std::size_t&gt; train;
+    for(std::size_t i=0;i&lt;x.size();++i){auto&amp;r=x[i];require((r[0]==0||r[0]==1)&amp;&amp;(r[1]==0||r[1]==1),"Binary flags required");a.emplace_back(r.begin()+2,r.end());if(r[0]){train.push_back(i);y.push_back(r[1]);}}
+    auto n=train.size();require(n&gt;=2&amp;&amp;n&lt;=64&amp;&amp;sum(y)&gt;0&amp;&amp;sum(y)&lt;n,"Both classes and at most 64 training centers required");
+    require(double(Kmax)*n*n*n&lt;=5e7&amp;&amp;double(x.size())*n*d&lt;=5e7,"Kernel work limit");
+    auto kernel=[&amp;](const Vec&amp; u,const Vec&amp; v){double s=0;for(std::size_t j=0;j&lt;d;++j){double z=u[j]-v[j];s+=z*z;}return std::exp(-gam*s);};
+    Mat K(n,Vec(n));for(std::size_t i=0;i&lt;n;++i)for(std::size_t j=0;j&lt;n;++j)K[i][j]=kernel(a[train[i]],a[train[j]]);
+    auto evaluate=[&amp;](const Vec&amp;w){
+        auto s=regularized_state(w,ridge);Vec z=mul(K,w);s.value+=.5*lam*dot(w,z);
+        for(std::size_t i=0;i&lt;n;++i){
+            s.gradient[i]+=lam*z[i];
+            for(std::size_t j=0;j&lt;n;++j)s.hessian[i][j]+=lam*K[i][j];
+        }
+        for(std::size_t i=0;i&lt;n;++i){
+            double q=logistic(z[i]);s.value+=softplus(z[i])-y[i]*z[i];
+            for(std::size_t j=0;j&lt;n;++j)s.gradient[j]+=(q-y[i])*K[i][j];
+            add_outer(s.hessian,K[i],q*(1-q));
+        }
+        return s;
+    };
+    auto f=damped_newton(n,tol,Kmax,evaluate);
+    Report o{{"Row","Train","Label","Probability","Logit","PenalizedNLL","ScoreResidual","Iterations"},{}};
+    for(std::size_t i=0;i&lt;x.size();++i){double z=0;for(std::size_t j=0;j&lt;n;++j)z+=f.beta[j]*kernel(a[i],a[train[j]]);o.rows.push_back({double(i+1),x[i][0],x[i][1],logistic(z),z,f.state.value,inf_norm(f.state.gradient),double(f.iterations)});}
+    return o;
+}</pre><p>参考文献：<a href="https://jmlr.org/papers/v8/rifkin07a.html">Schölkopf and Smola (2002), Learning with Kernels, MIT Press; Rifkin and Lippert (2007), Value Regularization and Fenchel Duality, JMLR.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

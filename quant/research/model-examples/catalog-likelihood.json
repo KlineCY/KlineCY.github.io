@@ -1,0 +1,267 @@
+[
+  {
+    "command": "model-nb2-exposure",
+    "title": "负二项NB2计数回归：暴露量、曲率与似然估计",
+    "area": "ml",
+    "ref": "Cameron and Trivedi (2013), Regression Analysis of Count Data, 2nd ed., Cambridge University Press.",
+    "url": "https://cameron.econ.ucdavis.edu/racd2/RACD2programs.html",
+    "columns": [
+      "X1",
+      "Exposure",
+      "Count"
+    ],
+    "file": "nb2-exposure.csv",
+    "params": [
+      0.5,
+      0,
+      1e-9,
+      100
+    ],
+    "header": [
+      "Feature",
+      "Coefficient",
+      "PenalizedNLL",
+      "ScoreResidual",
+      "Iterations"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        0.6931471805599453
+      ]
+    ]
+  },
+  {
+    "command": "model-zip-em",
+    "title": "零膨胀Poisson：潜在结构零与EM混合拟合",
+    "area": "ml",
+    "ref": "Lambert (1992), Zero-Inflated Poisson Regression, Technometrics.",
+    "url": "https://doi.org/10.1080/00401706.1992.10485228",
+    "columns": [
+      "Count"
+    ],
+    "file": "zip-em.csv",
+    "params": [
+      1e-8,
+      10000
+    ],
+    "header": [
+      "Rate",
+      "StructuralZeroProbability",
+      "LogLikelihood",
+      "ScoreResidual",
+      "Iterations",
+      "ModelZeroProbability"
+    ],
+    "expected_prefix": [
+      [
+        1.5936242600400403,
+        0.4979996100336098
+      ]
+    ]
+  },
+  {
+    "command": "model-cox-breslow-ridge",
+    "title": "Cox比例风险：Breslow并列时间、风险集与岭惩罚",
+    "area": "assets",
+    "ref": "Cox (1972), Regression Models and Life-Tables, JRSS B; Breslow (1974), Covariance Analysis of Censored Survival Data, Biometrics.",
+    "url": "https://stat.ethz.ch/R-manual/R-devel/library/survival/html/coxph.html",
+    "columns": [
+      "Time",
+      "Event",
+      "X1"
+    ],
+    "file": "cox-breslow-ridge.csv",
+    "params": [
+      0.1,
+      1e-9,
+      100
+    ],
+    "header": [
+      "Feature",
+      "Coefficient",
+      "HazardRatio",
+      "PenalizedNLL",
+      "ScoreResidual",
+      "Iterations"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        0,
+        1
+      ]
+    ]
+  },
+  {
+    "command": "model-tobit-known-scale",
+    "title": "左删失Tobit回归：已知尺度下的截断正态EM",
+    "area": "audit",
+    "ref": "Tobin (1958), Estimation of Relationships for Limited Dependent Variables, Econometrica.",
+    "url": "https://doi.org/10.2307/1907382",
+    "columns": [
+      "X1",
+      "CensorLimit",
+      "Observed",
+      "Censored"
+    ],
+    "file": "tobit-known-scale.csv",
+    "params": [
+      1,
+      0,
+      1e-8,
+      1000
+    ],
+    "header": [
+      "Feature",
+      "Coefficient",
+      "PenalizedNLL",
+      "ScoreResidual",
+      "Iterations"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        2
+      ]
+    ]
+  },
+  {
+    "command": "model-shrinkage-lda",
+    "title": "收缩线性判别分析：训练协方差与样本外分类",
+    "area": "ml",
+    "ref": "Hastie, Tibshirani and Friedman (2009), The Elements of Statistical Learning, 2nd ed., Springer.",
+    "url": "https://hastie.su.domains/ElemStatLearn/",
+    "columns": [
+      "Train",
+      "Label",
+      "X1"
+    ],
+    "file": "shrinkage-lda.csv",
+    "params": [
+      0,
+      0.5
+    ],
+    "header": [
+      "Row",
+      "Train",
+      "Label",
+      "Probability",
+      "PredictedLabel",
+      "LogOdds",
+      "TrainingPrior"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        1,
+        0,
+        0.16798161486607552,
+        0,
+        -1.6,
+        0.5
+      ],
+      [
+        2,
+        1,
+        0,
+        0.5,
+        1,
+        0,
+        0.5
+      ],
+      [
+        3,
+        1,
+        1,
+        0.5,
+        1,
+        0,
+        0.5
+      ],
+      [
+        4,
+        1,
+        1,
+        0.8320183851339245,
+        1,
+        1.6,
+        0.5
+      ],
+      [
+        5,
+        0,
+        0,
+        0.31002551887238755,
+        0,
+        -0.8,
+        0.5
+      ],
+      [
+        6,
+        0,
+        1,
+        0.6899744811276125,
+        1,
+        0.8,
+        0.5
+      ]
+    ]
+  },
+  {
+    "command": "model-kernel-logistic-fit",
+    "title": "核Logistic回归：RKHS正则、Newton求解与冻结预测",
+    "area": "ml",
+    "ref": "Schölkopf and Smola (2002), Learning with Kernels, MIT Press; Rifkin and Lippert (2007), Value Regularization and Fenchel Duality, JMLR.",
+    "url": "https://jmlr.org/papers/v8/rifkin07a.html",
+    "columns": [
+      "Train",
+      "Label",
+      "X1"
+    ],
+    "file": "kernel-logistic-fit.csv",
+    "params": [
+      1,
+      0.5,
+      0.1,
+      1e-9,
+      100
+    ],
+    "header": [
+      "Row",
+      "Train",
+      "Label",
+      "Probability",
+      "Logit",
+      "PenalizedNLL",
+      "ScoreResidual",
+      "Iterations"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        1,
+        0,
+        0.3580221874934629
+      ],
+      [
+        2,
+        1,
+        1,
+        0.6419778125065372
+      ],
+      [
+        3,
+        0,
+        0,
+        0.5
+      ],
+      [
+        4,
+        0,
+        1,
+        0.6419778125065372
+      ]
+    ]
+  }
+]
