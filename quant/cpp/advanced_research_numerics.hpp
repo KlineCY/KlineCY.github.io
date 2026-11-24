@@ -62,6 +62,19 @@ inline Report equality_ridge(const Mat& x,const Vec& p){
     Mat X,A;Vec y,b;
     for(auto&r:x){Vec z(r.begin()+1,r.end()-1);require(r[0]==0||r[0]==1,"Invalid row type");if(r[0]){A.push_back(z);b.push_back(r.back());}else{X.push_back(z);y.push_back(r.back());}}
     auto m=A.size();require(!X.empty()&&m>=1&&m<=d&&double(X.size())*d*d<=5e7,"Invalid constrained design");
+    Mat basis;
+    for(const auto& row:A){
+        Vec v=row;double scale=std::sqrt(squared(v));
+        require(scale>0,"Zero equality constraint");
+        for(double& a:v)a/=scale;
+        for(int pass=0;pass<2;++pass)for(const auto& q:basis){
+            double c=dot(v,q);for(std::size_t j=0;j<d;++j)v[j]-=c*q[j];
+        }
+        double length=std::sqrt(squared(v));
+        require(length>1e-10,"Equality constraints must have independent rows");
+        for(double& a:v)a/=length;
+        basis.push_back(v);
+    }
     Mat H(d,Vec(d,0));Vec rhs(d,0);
     for(std::size_t i=0;i<X.size();++i){add_outer(H,X[i],1);for(std::size_t j=0;j<d;++j)rhs[j]+=X[i][j]*y[i];}
     for(std::size_t j=0;j<d;++j)H[j][j]+=lam;
