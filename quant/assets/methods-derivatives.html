@@ -1,0 +1,70 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>多资产与路径条件衍生品定价｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/methods-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="assets"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>多资产与路径条件衍生品定价</h1><p>由模型定义、数学推导和可复算数值案例构成的独立研究方法。输入数据为教学构造，输出不代表实际投资结果。</p><p><a href="../research/methods-laboratories.html">研究方法实验室</a>　<a href="../cpp/methods_derivatives.hpp" download>完整C++17源码</a></p><nav><a href="#margrabe-exchange">Margrabe双资产交换期权</a>　｜　<a href="#forward-start">远期起始平值比例期权</a>　｜　<a href="#quanto-expectation">Quanto外币资产的本币测度漂移</a>　｜　<a href="#power-payoff">对数正态幂支付的解析价格</a></nav></header><article id="margrabe-exchange"><h2>Margrabe双资产交换期权</h2><h3>模型与推导</h3><p>将到期支付(S₁−S₂)正部改以第二资产总收益为计价基准，资产比率的对数扩散由两资产协方差决定。相对波动率替代单资产波动率，风险中性利率在该交换支付中抵销。相关性必须处于合法范围；有效波动率为零时采用确定性极限。</p><div class="equation">$$\sigma_*^2=\sigma_1^2+\sigma_2^2-2\rho\sigma_1\sigma_2$$</div><div class="equation">$$C=S_1e^{-q_1T}\Phi(d_1)-S_2e^{-q_2T}\Phi(d_2),\quad d_1=\frac{\log(S_1/S_2)+(q_2-q_1+\sigma_*^2/2)T}{\sigma_*\sqrt T},\ d_2=d_1-\sigma_*\sqrt T$$</div><h3>研究应用与成立条件</h3><p>两个现货均100，波动率均20％、相关0.5、无分红，交换波动20％，价格约7.97。适用于成对资产交换的理想化欧式定价；随机相关、非同步交易或融资差异需要更丰富模型。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/margrabe-exchange.csv" download>CSV数据</a>　<a href="../cpp/methods_derivatives.hpp" download>算法源码</a></p><pre>S1,S2,Vol1,Vol2,Correlation
+100,100,0.2,0.2,0.5
+</pre><pre>./build/kline_quant methods-margrabe-exchange quant/research/methods-examples/margrabe-exchange.csv 1 0 0</pre><div class="wide"><table><thead><tr><th>EffectiveVol</th><th>ExchangeCall</th></tr></thead><tbody><tr><td>0.2</td><td>7.96556745541</td></tr></tbody></table></div><p>参考文献：Margrabe (1978), The value of an option to exchange one asset for another, Journal of Finance.</p></article><article id="forward-start"><h2>远期起始平值比例期权</h2><h3>模型与推导</h3><p>在起始日t₀，执行价成为κ倍当期标的，Black–Scholes价格对S_{t₀}一次齐次。再将该条件价格贴现取期望，得到现值S₀e^{-qt₀}乘剩余期限比例期权价值。实现固定κ＝1。</p><div class="equation">$$H_T=(S_T-\kappa S_{t_0})^+$$</div><div class="equation">$$C_0=S_0e^{-qt_0}\left[e^{-q\Delta}\Phi(d_1)-\kappa e^{-r\Delta}\Phi(d_2)\right],\quad d_1=\frac{-\log\kappa+(r-q+\sigma^2/2)\Delta}{\sigma\sqrt\Delta}$$</div><h3>研究应用与成立条件</h3><p>起始0.5年、到期1年、现货100、波动30％且利率分红为零，剩余有效波动约0.2121。该公式依赖常波动与确定利率，不能直接用于带波动率偏斜的远期起始报价。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/forward-start.csv" download>CSV数据</a>　<a href="../cpp/methods_derivatives.hpp" download>算法源码</a></p><pre>Start,Expiry
+0.5,1
+</pre><pre>./build/kline_quant methods-forward-start quant/research/methods-examples/forward-start.csv 100 0 0 0.3</pre><div class="wide"><table><thead><tr><th>RemainingVol</th><th>Call</th></tr></thead><tbody><tr><td>0.212132034356</td><td>8.44700266232</td></tr></tbody></table></div><p>参考文献：Shreve (2004), Stochastic Calculus for Finance II, Springer.</p></article><article id="quanto-expectation"><h2>Quanto外币资产的本币测度漂移</h2><h3>模型与推导</h3><p>外汇X定义为每单位外币的本币价格。将外币资产转换为本币价值XS，Itô乘积的协变差项为ρσSσX；本币风险中性漂移约束使外币资产漂移扣除该项。此处输出固定汇率Quanto支付的基础期望，未乘本币贴现和约定汇率。</p><div class="equation">$$dS/S=(r_f-q-\rho\sigma_S\sigma_X)\,dt+\sigma_S\,dW^{(d)}$$</div><div class="equation">$$\mathbb E^{Q_d}S_T=S_0\exp[(r_f-q-\rho\sigma_S\sigma_X)T]$$</div><h3>研究应用与成立条件</h3><p>外币利率3％、分红1％、波动20％与10％、相关0.5，调整漂移1％。外汇报价倒数会改变相关符号；随机波动和随机利率需联合模型。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/quanto-expectation.csv" download>CSV数据</a>　<a href="../cpp/methods_derivatives.hpp" download>算法源码</a></p><pre>Horizon
+0
+1
+2
+</pre><pre>./build/kline_quant methods-quanto-expectation quant/research/methods-examples/quanto-expectation.csv 100 0.03 0.01 0.2 0.1 0.5</pre><div class="wide"><table><thead><tr><th>Horizon</th><th>AdjustedDrift</th><th>ExpectedForeignPrice</th></tr></thead><tbody><tr><td>0</td><td>0.01</td><td>100</td></tr><tr><td>1</td><td>0.01</td><td>101.005016708</td></tr><tr><td>2</td><td>0.01</td><td>102.020134003</td></tr></tbody></table></div><p>参考文献：Shreve (2004), Stochastic Calculus for Finance II, Springer.</p></article><article id="power-payoff"><h2>对数正态幂支付的解析价格</h2><h3>模型与推导</h3><p>高斯矩母函数将幂支付转化为指数函数期望，公式对任意有限实数幂成立。幂0对应贴现债券，幂1对应预付远期，幂2包含波动率凸性调整。</p><div class="equation">$$\log S_T=\log S_0+(r-q-\sigma^2/2)T+\sigma W_T$$</div><div class="equation">$$e^{-rT}\mathbb E^{Q}S_T^a=S_0^a\exp\{[-r+a(r-q)+\tfrac12a(a-1)\sigma^2]T\}$$</div><h3>研究应用与成立条件</h3><p>现货100、波动20％、零利率及分红，一年二次支付价值10000e^0.04。支付单位随幂变化，实际合约需确定货币缩放；负幂对接近零的价格极敏感。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/power-payoff.csv" download>CSV数据</a>　<a href="../cpp/methods_derivatives.hpp" download>算法源码</a></p><pre>Power
+0
+1
+2
+</pre><pre>./build/kline_quant methods-power-payoff quant/research/methods-examples/power-payoff.csv 100 0 0 0.2 1</pre><div class="wide"><table><thead><tr><th>Power</th><th>DiscountedMoment</th></tr></thead><tbody><tr><td>0</td><td>1</td></tr><tr><td>1</td><td>100</td></tr><tr><td>2</td><td>10408.1077419</td></tr></tbody></table></div><p>参考文献：Shreve (2004), Stochastic Calculus for Finance II, Springer.</p></article><section><h2>C++17实现</h2><pre>#pragma once
+#include "evidence_common.hpp"
+namespace kline { namespace methods_derivatives {
+using namespace evidence;
+inline Report margrabe_exchange(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,5,5);
+    parameters(p,3);
+    double T=positive(p[0]),q1=p[1],q2=p[2];
+    Report o{{"EffectiveVol","ExchangeCall"},{}};
+    for(auto&amp;r:x){double a=positive(r[0]),b=positive(r[1]),u=r[2],v=r[3],c=r[4];
+    require(u&gt;=0&amp;&amp;v&gt;=0&amp;&amp;std::abs(c)&lt;=1,"Invalid volatility or correlation");
+    double vol=std::sqrt((u-v)*(u-v)+2*u*v*(1-c)),f=a*std::exp(-q1*T),g=b*std::exp(-q2*T),z=vol*std::sqrt(T),price=std::max(f-g,0.);
+    if(z&gt;0){double d=std::log(f/g)/z+.5*z;
+    price=f*normal(d)-g*normal(d-z);
+    }o.rows.push_back({vol,price});
+    }return o;
+    
+}
+
+inline Report forward_start(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,2,2);
+    parameters(p,4);
+    double S=positive(p[0]),r=p[1],q=p[2],vol=positive(p[3]);
+    Report o{{"RemainingVol","Call"},{}};
+    for(auto&amp;a:x){double t=a[0],T=a[1];
+    require(t&gt;=0&amp;&amp;T&gt;t,"Invalid exercise times");
+    double h=T-t,z=vol*std::sqrt(h),d=(r-q+.5*vol*vol)*h/z;
+    o.rows.push_back({z,S*std::exp(-q*t)*(std::exp(-q*h)*normal(d)-std::exp(-r*h)*normal(d-z))});
+    }return o;
+    
+}
+
+inline Report quanto_expectation(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,1,1);
+    parameters(p,6);
+    double s=positive(p[0]),rf=p[1],q=p[2],u=p[3],v=p[4],rho=p[5];
+    require(u&gt;=0&amp;&amp;v&gt;=0&amp;&amp;std::abs(rho)&lt;=1,"Invalid vol or correlation");
+    double a=rf-q-rho*u*v;
+    Report o{{"Horizon","AdjustedDrift","ExpectedForeignPrice"},{}};
+    for(auto&amp;r:x){require(r[0]&gt;=0,"Negative horizon");
+    o.rows.push_back({r[0],a,s*std::exp(a*r[0])});
+    }return o;
+    
+}
+
+inline Report power_payoff(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,1,1);
+    parameters(p,5);
+    double S=positive(p[0]),r=p[1],q=p[2],v=p[3],T=positive(p[4]);
+    require(v&gt;=0,"Negative volatility");
+    Report o{{"Power","DiscountedMoment"},{}};
+    for(auto&amp;z:x){double a=z[0];
+    o.rows.push_back({a,std::exp(a*std::log(S)+(-r+a*(r-q)+.5*a*(a-1)*v*v)*T)});
+    }return o;
+    
+}
+} }
+</pre></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

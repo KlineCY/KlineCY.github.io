@@ -1,0 +1,1065 @@
+[
+  {
+    "command": "methods-margrabe-exchange",
+    "group": "derivatives",
+    "file": "margrabe-exchange.csv",
+    "title": "Margrabe双资产交换期权",
+    "columns": [
+      "S1",
+      "S2",
+      "Vol1",
+      "Vol2",
+      "Correlation"
+    ],
+    "params": [
+      1,
+      0,
+      0
+    ],
+    "header": [
+      "EffectiveVol",
+      "ExchangeCall"
+    ],
+    "expected": [
+      [
+        0.2,
+        7.965567455405775
+      ]
+    ]
+  },
+  {
+    "command": "methods-forward-start",
+    "group": "derivatives",
+    "file": "forward-start.csv",
+    "title": "远期起始平值比例期权",
+    "columns": [
+      "Start",
+      "Expiry"
+    ],
+    "params": [
+      100,
+      0,
+      0,
+      0.3
+    ],
+    "header": [
+      "RemainingVol",
+      "Call"
+    ],
+    "expected": [
+      [
+        0.21213203435596426,
+        8.447002662322811
+      ]
+    ]
+  },
+  {
+    "command": "methods-quanto-expectation",
+    "group": "derivatives",
+    "file": "quanto-expectation.csv",
+    "title": "Quanto外币资产的本币测度漂移",
+    "columns": [
+      "Horizon"
+    ],
+    "params": [
+      100,
+      0.03,
+      0.01,
+      0.2,
+      0.1,
+      0.5
+    ],
+    "header": [
+      "Horizon",
+      "AdjustedDrift",
+      "ExpectedForeignPrice"
+    ],
+    "expected": [
+      [
+        0,
+        0.01,
+        100
+      ],
+      [
+        1,
+        0.01,
+        101.00501670841679
+      ],
+      [
+        2,
+        0.01,
+        102.02013400267558
+      ]
+    ]
+  },
+  {
+    "command": "methods-power-payoff",
+    "group": "derivatives",
+    "file": "power-payoff.csv",
+    "title": "对数正态幂支付的解析价格",
+    "columns": [
+      "Power"
+    ],
+    "params": [
+      100,
+      0,
+      0,
+      0.2,
+      1
+    ],
+    "header": [
+      "Power",
+      "DiscountedMoment"
+    ],
+    "expected": [
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        100
+      ],
+      [
+        2,
+        10408.107741923883
+      ]
+    ]
+  },
+  {
+    "command": "methods-duration-immunization",
+    "group": "rates",
+    "file": "duration-immunization.csv",
+    "title": "双债券市值与久期免疫",
+    "columns": [
+      "AssetPrice",
+      "Duration"
+    ],
+    "params": [
+      1000,
+      5
+    ],
+    "header": [
+      "Asset",
+      "Units",
+      "MarketValue",
+      "DurationExposure"
+    ],
+    "expected": [
+      [
+        1,
+        5,
+        500,
+        1000
+      ],
+      [
+        2,
+        6.25,
+        500,
+        4000
+      ]
+    ]
+  },
+  {
+    "command": "methods-bond-holding-return",
+    "group": "rates",
+    "file": "bond-holding-return.csv",
+    "title": "债券持有期票息、再投资及卖出价",
+    "columns": [
+      "CashTime",
+      "Coupon"
+    ],
+    "params": [
+      100,
+      101,
+      1,
+      0
+    ],
+    "header": [
+      "InitialPrice",
+      "ReinvestedCoupon",
+      "SalePrice",
+      "HoldingReturn"
+    ],
+    "expected": [
+      [
+        100,
+        4,
+        101,
+        0.05
+      ]
+    ]
+  },
+  {
+    "command": "methods-fisher-breakeven",
+    "group": "rates",
+    "file": "fisher-breakeven.csv",
+    "title": "名义、实际与隐含通胀的复利恒等式",
+    "columns": [
+      "Nominal",
+      "Real"
+    ],
+    "params": [],
+    "header": [
+      "Nominal",
+      "Real",
+      "ExactInflation",
+      "LinearApproximation"
+    ],
+    "expected": [
+      [
+        0.05,
+        0.02,
+        0.02941176470588247,
+        0.03
+      ],
+      [
+        0.03,
+        0.03,
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "command": "methods-discount-forward-roll",
+    "group": "rates",
+    "file": "discount-forward-roll.csv",
+    "title": "零息曲线远期贴现与隐含简单远期",
+    "columns": [
+      "Start",
+      "End",
+      "DStart",
+      "DEnd"
+    ],
+    "params": [],
+    "header": [
+      "Start",
+      "End",
+      "ForwardDiscount",
+      "SimpleForward"
+    ],
+    "expected": [
+      [
+        1,
+        2,
+        0.9473684210526316,
+        0.05555555555555558
+      ],
+      [
+        2,
+        3,
+        0.9,
+        0.11111111111111116
+      ]
+    ]
+  },
+  {
+    "command": "methods-discrete-cva",
+    "group": "counterparty",
+    "file": "discrete-cva.csv",
+    "title": "期限边际违约概率与离散CVA",
+    "columns": [
+      "Discount",
+      "ExpectedExposure",
+      "Survival"
+    ],
+    "params": [
+      0.6
+    ],
+    "header": [
+      "Period",
+      "MarginalPD",
+      "Contribution",
+      "CumulativeCVA"
+    ],
+    "expected": [
+      [
+        1,
+        0.02,
+        1.176,
+        1.176
+      ],
+      [
+        2,
+        0.03,
+        1.368,
+        2.544
+      ]
+    ]
+  },
+  {
+    "command": "methods-joint-default",
+    "group": "counterparty",
+    "file": "joint-default.csv",
+    "title": "双Bernoulli违约联合分布与相关",
+    "columns": [
+      "P1",
+      "P2",
+      "JointPD"
+    ],
+    "params": [],
+    "header": [
+      "Neither",
+      "Only1",
+      "Only2",
+      "Both",
+      "Correlation"
+    ],
+    "expected": [
+      [
+        0.75,
+        0.05,
+        0.15,
+        0.05,
+        0.24999999999999997
+      ]
+    ]
+  },
+  {
+    "command": "methods-tranche-loss",
+    "group": "counterparty",
+    "file": "tranche-loss.csv",
+    "title": "信用损失分层与期望损失率",
+    "columns": [
+      "Loss",
+      "Probability"
+    ],
+    "params": [
+      0.05,
+      0.25
+    ],
+    "header": [
+      "ExpectedPortfolioLoss",
+      "ExpectedTrancheLoss",
+      "TrancheLossRate"
+    ],
+    "expected": [
+      [
+        0.11,
+        0.055,
+        0.275
+      ]
+    ]
+  },
+  {
+    "command": "methods-constant-hazard-bond",
+    "group": "counterparty",
+    "file": "constant-hazard-bond.csv",
+    "title": "常强度下回收本金的违约债券",
+    "columns": [
+      "Horizon"
+    ],
+    "params": [
+      100,
+      0,
+      0.6931471805599453,
+      0.4
+    ],
+    "header": [
+      "Horizon",
+      "Survival",
+      "SurvivalLeg",
+      "RecoveryLeg",
+      "Price"
+    ],
+    "expected": [
+      [
+        1,
+        0.5,
+        50,
+        20,
+        70
+      ],
+      [
+        2,
+        0.25,
+        25,
+        30,
+        55
+      ]
+    ]
+  },
+  {
+    "command": "methods-quote-time-weighted",
+    "group": "microstructure",
+    "file": "quote-time-weighted.csv",
+    "title": "不规则报价的时间加权价差",
+    "columns": [
+      "Time",
+      "Bid",
+      "Ask"
+    ],
+    "params": [
+      5
+    ],
+    "header": [
+      "Duration",
+      "WeightedSpread",
+      "WeightedMid"
+    ],
+    "expected": [
+      [
+        5,
+        2,
+        100.4
+      ]
+    ]
+  },
+  {
+    "command": "methods-signed-response",
+    "group": "microstructure",
+    "file": "signed-response.csv",
+    "title": "订单方向与未来中价的响应函数",
+    "columns": [
+      "Side",
+      "Mid"
+    ],
+    "params": [
+      2
+    ],
+    "header": [
+      "Lag",
+      "Pairs",
+      "MeanSignedResponse"
+    ],
+    "expected": [
+      [
+        1,
+        3,
+        1.6666666666666667
+      ],
+      [
+        2,
+        2,
+        0
+      ]
+    ]
+  },
+  {
+    "command": "methods-depth-walk",
+    "group": "microstructure",
+    "file": "depth-walk.csv",
+    "title": "分档深度与边际成交成本",
+    "columns": [
+      "Ask",
+      "Size"
+    ],
+    "params": [
+      6
+    ],
+    "header": [
+      "Level",
+      "Fill",
+      "Remaining",
+      "CumulativeVWAP"
+    ],
+    "expected": [
+      [
+        1,
+        2,
+        4,
+        100
+      ],
+      [
+        2,
+        3,
+        1,
+        100.6
+      ],
+      [
+        3,
+        1,
+        0,
+        101
+      ]
+    ]
+  },
+  {
+    "command": "methods-depth-concentration",
+    "group": "microstructure",
+    "file": "depth-concentration.csv",
+    "title": "订单簿深度的集中度与有效档数",
+    "columns": [
+      "BidSize",
+      "AskSize"
+    ],
+    "params": [],
+    "header": [
+      "BidHHI",
+      "AskHHI",
+      "BidEffectiveLevels",
+      "AskEffectiveLevels",
+      "TotalImbalance"
+    ],
+    "expected": [
+      [
+        0.375,
+        0.375,
+        2.6666666666666665,
+        2.6666666666666665,
+        0.3333333333333333
+      ]
+    ]
+  },
+  {
+    "command": "methods-active-factor-risk",
+    "group": "portfolio",
+    "file": "active-factor-risk.csv",
+    "title": "主动因子与特异风险的方差归因",
+    "columns": [
+      "ActiveWeight",
+      "Exposure",
+      "SpecificVariance"
+    ],
+    "params": [
+      0.09
+    ],
+    "header": [
+      "FactorExposure",
+      "FactorVariance",
+      "SpecificVariance",
+      "TotalVariance"
+    ],
+    "expected": [
+      [
+        -0.2,
+        0.0036,
+        0.002,
+        0.0056
+      ]
+    ]
+  },
+  {
+    "command": "methods-variance-shapley",
+    "group": "portfolio",
+    "file": "variance-shapley.csv",
+    "title": "双因子风险变动的对称Shapley分解",
+    "columns": [
+      "WeightOld",
+      "WeightNew"
+    ],
+    "params": [
+      1,
+      2,
+      0,
+      2,
+      1,
+      0
+    ],
+    "header": [
+      "OldVariance",
+      "NewVariance",
+      "WeightEffect",
+      "CovarianceEffect",
+      "Residual"
+    ],
+    "expected": [
+      [
+        0.75,
+        1.32,
+        0.27,
+        0.3,
+        0
+      ]
+    ]
+  },
+  {
+    "command": "methods-binary-kelly",
+    "group": "portfolio",
+    "file": "binary-kelly.csv",
+    "title": "二点收益分布的约束Kelly配置",
+    "columns": [
+      "Return",
+      "Probability"
+    ],
+    "params": [
+      0,
+      1
+    ],
+    "header": [
+      "UnconstrainedWeight",
+      "ConstrainedWeight",
+      "ExpectedLog"
+    ],
+    "expected": [
+      [
+        4,
+        1,
+        0.06724872781324223
+      ]
+    ]
+  },
+  {
+    "command": "methods-liability-surplus",
+    "group": "portfolio",
+    "file": "liability-surplus.csv",
+    "title": "资产负债剩余价值的情景风险",
+    "columns": [
+      "AssetReturn",
+      "LiabilityReturn"
+    ],
+    "params": [
+      120,
+      100
+    ],
+    "header": [
+      "Scenario",
+      "AssetValue",
+      "LiabilityValue",
+      "Surplus",
+      "FundingRatio"
+    ],
+    "expected": [
+      [
+        1,
+        132,
+        102,
+        30,
+        1.2941176470588236
+      ],
+      [
+        2,
+        108,
+        105,
+        3,
+        1.0285714285714285
+      ]
+    ]
+  },
+  {
+    "command": "methods-event-car",
+    "group": "empirical",
+    "file": "event-car.csv",
+    "title": "事件窗口市场模型异常收益累计",
+    "columns": [
+      "RelativeDay",
+      "AssetReturn",
+      "MarketReturn"
+    ],
+    "params": [
+      0.001,
+      1.2
+    ],
+    "header": [
+      "RelativeDay",
+      "ExpectedReturn",
+      "AbnormalReturn",
+      "CAR"
+    ],
+    "expected": [
+      [
+        -1,
+        0.013,
+        -0.003,
+        -0.003
+      ],
+      [
+        0,
+        0.025,
+        0.025,
+        0.022
+      ],
+      [
+        1,
+        0.001,
+        -0.011,
+        0.011
+      ]
+    ]
+  },
+  {
+    "command": "methods-paired-randomization",
+    "group": "empirical",
+    "file": "paired-randomization.csv",
+    "title": "配对实验的精确随机化检验",
+    "columns": [
+      "Treated",
+      "Control"
+    ],
+    "params": [],
+    "header": [
+      "Pairs",
+      "MeanDifference",
+      "TwoSidedP",
+      "Assignments"
+    ],
+    "expected": [
+      [
+        3,
+        2,
+        0.25,
+        8
+      ]
+    ]
+  },
+  {
+    "command": "methods-ipw-balance",
+    "group": "empirical",
+    "file": "ipw-balance.csv",
+    "title": "逆概率权重的协变量平衡诊断",
+    "columns": [
+      "Treatment",
+      "Propensity",
+      "Covariate"
+    ],
+    "params": [],
+    "header": [
+      "TreatedMean",
+      "ControlMean",
+      "RawDifference",
+      "WeightedDifference"
+    ],
+    "expected": [
+      [
+        4,
+        2,
+        2,
+        2
+      ]
+    ]
+  },
+  {
+    "command": "methods-placebo-rank",
+    "group": "empirical",
+    "file": "placebo-rank.csv",
+    "title": "安慰剂分布的有限样本秩概率",
+    "columns": [
+      "Statistic"
+    ],
+    "params": [],
+    "header": [
+      "ObservedAbs",
+      "Placebos",
+      "Exceedances",
+      "RankP"
+    ],
+    "expected": [
+      [
+        3,
+        4,
+        1,
+        0.4
+      ]
+    ]
+  },
+  {
+    "command": "methods-debt-dynamics",
+    "group": "macroeconomics",
+    "file": "debt-dynamics.csv",
+    "title": "政府债务率、增长与初级余额",
+    "columns": [
+      "Interest",
+      "Growth",
+      "PrimarySurplus",
+      "StockFlowAdjustment"
+    ],
+    "params": [
+      0.6
+    ],
+    "header": [
+      "Period",
+      "PreviousDebt",
+      "InterestGrowthEffect",
+      "PrimaryEffect",
+      "StockFlow",
+      "DebtRatio"
+    ],
+    "expected": [
+      [
+        1,
+        0.6,
+        -0.027272727272727268,
+        -0.02,
+        0,
+        0.5527272727272726
+      ],
+      [
+        2,
+        0.5527272727272726,
+        0.027636363636363633,
+        0.01,
+        0.02,
+        0.6103636363636363
+      ]
+    ]
+  },
+  {
+    "command": "methods-gdp-growth-contributions",
+    "group": "macroeconomics",
+    "file": "gdp-growth-contributions.csv",
+    "title": "固定基期总量增长贡献",
+    "columns": [
+      "Previous",
+      "Current"
+    ],
+    "params": [],
+    "header": [
+      "Component",
+      "BaseShare",
+      "OwnGrowth",
+      "Contribution"
+    ],
+    "expected": [
+      [
+        1,
+        0.6,
+        0.1,
+        0.06
+      ],
+      [
+        2,
+        0.4,
+        -0.05,
+        -0.02
+      ]
+    ]
+  },
+  {
+    "command": "methods-real-fx-decomposition",
+    "group": "macroeconomics",
+    "file": "real-fx-decomposition.csv",
+    "title": "实际汇率的对数价格分解",
+    "columns": [
+      "NominalFX",
+      "ForeignPrice",
+      "DomesticPrice"
+    ],
+    "params": [],
+    "header": [
+      "Period",
+      "RealFX",
+      "LogNominalChange",
+      "LogForeignInflation",
+      "LogDomesticInflation",
+      "LogRealChange"
+    ],
+    "expected": [
+      [
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        2,
+        1.05,
+        0.09531017980432493,
+        0.04879016416943205,
+        0.09531017980432493,
+        0.04879016416943205
+      ]
+    ]
+  },
+  {
+    "command": "methods-uip-carry",
+    "group": "macroeconomics",
+    "file": "uip-carry.csv",
+    "title": "外币存款的精确超额收益与UIP",
+    "columns": [
+      "SpotNow",
+      "SpotNext",
+      "DomesticRate",
+      "ForeignRate"
+    ],
+    "params": [],
+    "header": [
+      "DomesticGross",
+      "ForeignInDomesticGross",
+      "ArithmeticExcess",
+      "LogExcess"
+    ],
+    "expected": [
+      [
+        1.02,
+        1.092,
+        0.072,
+        0.06820825002653357
+      ],
+      [
+        1.02,
+        1.0192,
+        -0.0008,
+        -0.0007846214604178179
+      ]
+    ]
+  },
+  {
+    "command": "methods-sequence-gap",
+    "group": "dataengineering",
+    "file": "sequence-gap.csv",
+    "title": "交易流序号缺口与重复事件诊断",
+    "columns": [
+      "Sequence"
+    ],
+    "params": [],
+    "header": [
+      "Row",
+      "Sequence",
+      "GapDetected",
+      "DuplicateOrLate",
+      "HighWatermark"
+    ],
+    "expected": [
+      [
+        1,
+        10,
+        0,
+        0,
+        10
+      ],
+      [
+        2,
+        11,
+        0,
+        0,
+        11
+      ],
+      [
+        3,
+        11,
+        0,
+        1,
+        11
+      ],
+      [
+        4,
+        14,
+        2,
+        0,
+        14
+      ],
+      [
+        5,
+        13,
+        0,
+        1,
+        14
+      ],
+      [
+        6,
+        15,
+        0,
+        0,
+        15
+      ]
+    ]
+  },
+  {
+    "command": "methods-asof-staleness",
+    "group": "dataengineering",
+    "file": "asof-staleness.csv",
+    "title": "时点可用数据与陈旧度过滤",
+    "columns": [
+      "DecisionTime",
+      "AvailableTime",
+      "Value"
+    ],
+    "params": [
+      3
+    ],
+    "header": [
+      "DecisionTime",
+      "Age",
+      "Accepted",
+      "Value"
+    ],
+    "expected": [
+      [
+        10,
+        2,
+        1,
+        1
+      ],
+      [
+        20,
+        0,
+        1,
+        2
+      ],
+      [
+        30,
+        5,
+        0,
+        3
+      ]
+    ]
+  },
+  {
+    "command": "methods-latency-tail",
+    "group": "dataengineering",
+    "file": "latency-tail.csv",
+    "title": "分段交易延迟及尾部分位数",
+    "columns": [
+      "Send",
+      "Exchange",
+      "Ack"
+    ],
+    "params": [
+      0.75
+    ],
+    "header": [
+      "MeanOutbound",
+      "MeanInbound",
+      "MeanRoundTrip",
+      "RoundTripQuantile",
+      "Maximum"
+    ],
+    "expected": [
+      [
+        2.5,
+        4,
+        6.5,
+        6,
+        10
+      ]
+    ]
+  },
+  {
+    "command": "methods-position-cash-reconcile",
+    "group": "dataengineering",
+    "file": "position-cash-reconcile.csv",
+    "title": "成交回报的持仓、现金与权益守恒",
+    "columns": [
+      "SignedQty",
+      "FillPrice",
+      "Fee",
+      "Mark"
+    ],
+    "params": [
+      1000
+    ],
+    "header": [
+      "Trade",
+      "Position",
+      "Cash",
+      "MarkedEquity",
+      "TradeMarkImpact"
+    ],
+    "expected": [
+      [
+        1,
+        2,
+        799,
+        1001,
+        1
+      ],
+      [
+        2,
+        1,
+        900.5,
+        1003.5,
+        -1.5
+      ],
+      [
+        3,
+        0,
+        1001,
+        1001,
+        -0.5
+      ]
+    ]
+  }
+]

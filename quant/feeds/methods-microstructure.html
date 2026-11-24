@@ -1,0 +1,93 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>微观结构的时间与深度诊断｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/methods-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="feeds"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>微观结构的时间与深度诊断</h1><p>由模型定义、数学推导和可复算数值案例构成的独立研究方法。输入数据为教学构造，输出不代表实际投资结果。</p><p><a href="../research/methods-laboratories.html">研究方法实验室</a>　<a href="../cpp/methods_microstructure.hpp" download>完整C++17源码</a></p><nav><a href="#quote-time-weighted">不规则报价的时间加权价差</a>　｜　<a href="#signed-response">订单方向与未来中价的响应函数</a>　｜　<a href="#depth-walk">分档深度与边际成交成本</a>　｜　<a href="#depth-concentration">订单簿深度的集中度与有效档数</a></nav></header><article id="quote-time-weighted"><h2>不规则报价的时间加权价差</h2><h3>模型与推导</h3><p>将每条报价视为持续至下一次更新的左连续区间状态，按存续时长加权而非事件次数。末条报价持续至明确的观察结束时间，拒绝乱序与交叉报价。</p><div class="equation">$$\bar s_T=T^{-1}\sum_i(t_{i+1}-t_i)(a_i-b_i)$$</div><div class="equation">$$\bar m_T=T^{-1}\sum_i(t_{i+1}-t_i)(a_i+b_i)/2$$</div><h3>研究应用与成立条件</h3><p>报价时点0、2、3，观察结束5，持续时长2、1、2。时间加权价差2，避免高频更新状态被过度计数；停牌或断线时不应默认报价持续有效。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/quote-time-weighted.csv" download>CSV数据</a>　<a href="../cpp/methods_microstructure.hpp" download>算法源码</a></p><pre>Time,Bid,Ask
+0,99,101
+2,99,103
+3,100,101
+</pre><pre>./build/kline_quant methods-quote-time-weighted quant/research/methods-examples/quote-time-weighted.csv 5</pre><div class="wide"><table><thead><tr><th>Duration</th><th>WeightedSpread</th><th>WeightedMid</th></tr></thead><tbody><tr><td>5</td><td>2</td><td>100.4</td></tr></tbody></table></div><p>参考文献：Hasbrouck (2007), Empirical Market Microstructure, Oxford University Press.</p></article><article id="signed-response"><h2>订单方向与未来中价的响应函数</h2><h3>模型与推导</h3><p>以当前订单方向乘未来中价变化，按有效滞后对数取均值。该响应包含订单方向相关、市场信息及暂时冲击，不能直接分解为结构永久冲击；此实现仅计算R，不估计C。</p><div class="equation">$$R(h)=\frac1{n-h}\sum_{i=1}^{n-h}\epsilon_i(m_{i+h}-m_i)$$</div><div class="equation">$$C(h)=\mathbb E[\epsilon_t\epsilon_{t+h}]$$</div><h3>研究应用与成立条件</h3><p>案例滞后1方向乘价格变化为2、1、2，均值5／3，滞后2为1、−1，均值0。数据为按事件排序的中价，同一事件的方向定义必须一致。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/signed-response.csv" download>CSV数据</a>　<a href="../cpp/methods_microstructure.hpp" download>算法源码</a></p><pre>Side,Mid
+1,100
+-1,102
+1,101
+-1,103
+</pre><pre>./build/kline_quant methods-signed-response quant/research/methods-examples/signed-response.csv 2</pre><div class="wide"><table><thead><tr><th>Lag</th><th>Pairs</th><th>MeanSignedResponse</th></tr></thead><tbody><tr><td>1</td><td>3</td><td>1.66666666667</td></tr><tr><td>2</td><td>2</td><td>0</td></tr></tbody></table></div><p>参考文献：Hasbrouck (2007), Empirical Market Microstructure, Oxford University Press.</p></article><article id="depth-walk"><h2>分档深度与边际成交成本</h2><h3>模型与推导</h3><p>按卖方价格从低到高扫过当前显示深度，每档成交取剩余订单与显示量的较小值。累计成交价为数量加权，若订单大于深度，保留未成交量而不虚构流动性。</p><div class="equation">$$q_i=\min(Q_{i-1},v_i),\quad Q_i=Q_{i-1}-q_i$$</div><div class="equation">$$\mathrm{VWAP}_i=\sum_{j\le i}p_jq_j/\sum_{j\le i}q_j$$</div><h3>研究应用与成立条件</h3><p>买入6单位，前两档2及3、第三档1，总费用606，VWAP101。快照静态假设忽略订单撤销、隐藏深度与新增报价，不能代替动态成交仿真。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/depth-walk.csv" download>CSV数据</a>　<a href="../cpp/methods_microstructure.hpp" download>算法源码</a></p><pre>Ask,Size
+100,2
+101,3
+103,5
+</pre><pre>./build/kline_quant methods-depth-walk quant/research/methods-examples/depth-walk.csv 6</pre><div class="wide"><table><thead><tr><th>Level</th><th>Fill</th><th>Remaining</th><th>CumulativeVWAP</th></tr></thead><tbody><tr><td>1</td><td>2</td><td>4</td><td>100</td></tr><tr><td>2</td><td>3</td><td>1</td><td>100.6</td></tr><tr><td>3</td><td>1</td><td>0</td><td>101</td></tr></tbody></table></div><p>参考文献：Hasbrouck (2007), Empirical Market Microstructure, Oxford University Press.</p></article><article id="depth-concentration"><h2>订单簿深度的集中度与有效档数</h2><h3>模型与推导</h3><p>按买卖两侧分别归一化档位数量，平方集中度衡量深度分布，倒数为有效档数；总体不平衡衡量两侧总量差。相同总量可对应不同集中度。</p><div class="equation">$$H_b=\sum_i(v_i^b/\sum_jv_j^b)^2,\quad H_a=\sum_i(v_i^a/\sum_jv_j^a)^2$$</div><div class="equation">$$N_{\mathrm{eff}}=1/H,\qquad I=(V_b-V_a)/(V_b+V_a)$$</div><h3>研究应用与成立条件</h3><p>买侧总量8、卖侧4，集中度均0.375，有效档数约2.67，不平衡1／3。跨资产比较需统一价格档位范围及最小价格单位；显示数量可能撤回。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/depth-concentration.csv" download>CSV数据</a>　<a href="../cpp/methods_microstructure.hpp" download>算法源码</a></p><pre>BidSize,AskSize
+4,1
+2,1
+2,2
+</pre><pre>./build/kline_quant methods-depth-concentration quant/research/methods-examples/depth-concentration.csv</pre><div class="wide"><table><thead><tr><th>BidHHI</th><th>AskHHI</th><th>BidEffectiveLevels</th><th>AskEffectiveLevels</th><th>TotalImbalance</th></tr></thead><tbody><tr><td>0.375</td><td>0.375</td><td>2.66666666667</td><td>2.66666666667</td><td>0.333333333333</td></tr></tbody></table></div><p>参考文献：Hasbrouck (2007), Empirical Market Microstructure, Oxford University Press.</p></article><section><h2>C++17实现</h2><pre>#pragma once
+#include "evidence_common.hpp"
+namespace kline { namespace methods_microstructure {
+using namespace evidence;
+inline Report quote_time_weighted(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,3,3);
+    parameters(p,1);
+    double end=p[0],T=positive(end-x[0][0]),a=0,b=0;
+    for(std::size_t i=0;
+    i&lt;x.size();
+    ++i){auto&amp;r=x[i];
+    positive(r[1]);
+    require(r[2]&gt;=r[1],"Crossed quote");
+    double h=positive((i+1&lt;x.size()?x[i+1][0]:end)-r[0]);
+    a+=h*(r[2]-r[1]);
+    b+=h*(r[1]+r[2])/2;
+    }return scalar({"Duration","WeightedSpread","WeightedMid"},{T,a/T,b/T});
+    
+}
+
+inline Report signed_response(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,2,2);
+    parameters(p,1);
+    auto h=count(p[0],1,x.size()-1);
+    require(double(h)*x.size()&lt;=2e7,"Work limit");
+    for(auto&amp;r:x){require(r[0]==1||r[0]==-1,"Invalid side");
+    positive(r[1]);
+    }Report o{{"Lag","Pairs","MeanSignedResponse"},{}};
+    for(std::size_t j=1;
+    j&lt;=h;
+    ++j){double s=0;
+    for(std::size_t i=0;
+    i+j&lt;x.size();
+    ++i)s+=x[i][0]*(x[i+j][1]-x[i][1]);
+    o.rows.push_back({double(j),double(x.size()-j),s/(x.size()-j)});
+    }return o;
+    
+}
+
+inline Report depth_walk(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,2,2);
+    parameters(p,1);
+    double rem=positive(p[0]),n=0,c=0;
+    Report o{{"Level","Fill","Remaining","CumulativeVWAP"},{}};
+    for(std::size_t i=0;
+    i&lt;x.size();
+    ++i){auto&amp;r=x[i];
+    positive(r[0]);
+    positive(r[1]);
+    require(i==0||r[0]&gt;x[i-1][0],"Increasing ask prices required");
+    double q=std::min(rem,r[1]);
+    rem-=q;
+    n+=q;
+    c+=q*r[0];
+    o.rows.push_back({double(i+1),q,rem,c/n});
+    }return o;
+    
+}
+
+inline Report depth_concentration(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,2,2);
+    parameters(p,0);
+    double a=0,b=0;
+    for(auto&amp;r:x){require(r[0]&gt;=0&amp;&amp;r[1]&gt;=0,"Negative depth");
+    a+=r[0];
+    b+=r[1];
+    }positive(a);
+    positive(b);
+    double u=0,v=0;
+    for(auto&amp;r:x){u+=(r[0]/a)*(r[0]/a);
+    v+=(r[1]/b)*(r[1]/b);
+    }return scalar({"BidHHI","AskHHI","BidEffectiveLevels","AskEffectiveLevels","TotalImbalance"},{u,v,1/u,1/v,(a-b)/(a+b)});
+    
+}
+} }
+</pre></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

@@ -1,0 +1,93 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>事件研究与准实验推断｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/methods-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="audit"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>事件研究与准实验推断</h1><p>由模型定义、数学推导和可复算数值案例构成的独立研究方法。输入数据为教学构造，输出不代表实际投资结果。</p><p><a href="../research/methods-laboratories.html">研究方法实验室</a>　<a href="../cpp/methods_empirical.hpp" download>完整C++17源码</a></p><nav><a href="#event-car">事件窗口市场模型异常收益累计</a>　｜　<a href="#paired-randomization">配对实验的精确随机化检验</a>　｜　<a href="#ipw-balance">逆概率权重的协变量平衡诊断</a>　｜　<a href="#placebo-rank">安慰剂分布的有限样本秩概率</a></nav></header><article id="event-car"><h2>事件窗口市场模型异常收益累计</h2><h3>模型与推导</h3><p>先用事件前独立估计窗口拟合市场模型，在事件窗口固定参数构造反事实期望收益，再累计异常收益。代码只执行给定参数的事件窗口计算，不重新拟合。</p><div class="equation">$$AR_{it}=r_{it}-(\hat\alpha_i+\hat\beta_i r_{mt})$$</div><div class="equation">$$CAR_i[a,b]=\sum_{t=a}^bAR_{it}$$</div><h3>研究应用与成立条件</h3><p>示例α＝0.001、β＝1.2，三日异常收益−0.003、0.025、−0.011，累计0.011。事件时钟与公告可用时间一致；事件重叠会影响统计推断。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/event-car.csv" download>CSV数据</a>　<a href="../cpp/methods_empirical.hpp" download>算法源码</a></p><pre>RelativeDay,AssetReturn,MarketReturn
+-1,0.01,0.01
+0,0.05,0.02
+1,-0.01,0
+</pre><pre>./build/kline_quant methods-event-car quant/research/methods-examples/event-car.csv 0.001 1.2</pre><div class="wide"><table><thead><tr><th>RelativeDay</th><th>ExpectedReturn</th><th>AbnormalReturn</th><th>CAR</th></tr></thead><tbody><tr><td>-1</td><td>0.013</td><td>-0.003</td><td>-0.003</td></tr><tr><td>0</td><td>0.025</td><td>0.025</td><td>0.022</td></tr><tr><td>1</td><td>0.001</td><td>-0.011</td><td>0.011</td></tr></tbody></table></div><p>参考文献：MacKinlay (1997), Event studies in economics and finance, Journal of Economic Literature.</p></article><article id="paired-randomization"><h2>配对实验的精确随机化检验</h2><h3>模型与推导</h3><p>在每对独立随机分配处理且尖锐零假设成立时，交换处理标签等价于改变差值符号。遍历全部2^n分配获得有限样本精确p值，无需正态假设。</p><div class="equation">$$T(z)=n^{-1}\sum_i z_i d_i,\quad z_i\in\{-1,1\}$$</div><div class="equation">$$p=2^{-n}\sum_z\mathbf1\{|T(z)|\ge|T(\mathbf1)|\}$$</div><h3>研究应用与成立条件</h3><p>三对差值3、2、1，均值2，只有全正与全负两种达到同样绝对统计量，双侧p为0.25。观察性匹配不自动获得随机化有效性；程序限制对数以控制指数复杂度。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/paired-randomization.csv" download>CSV数据</a>　<a href="../cpp/methods_empirical.hpp" download>算法源码</a></p><pre>Treated,Control
+4,1
+3,1
+2,1
+</pre><pre>./build/kline_quant methods-paired-randomization quant/research/methods-examples/paired-randomization.csv</pre><div class="wide"><table><thead><tr><th>Pairs</th><th>MeanDifference</th><th>TwoSidedP</th><th>Assignments</th></tr></thead><tbody><tr><td>3</td><td>2</td><td>0.25</td><td>8</td></tr></tbody></table></div><p>参考文献：Fisher (1935), The Design of Experiments, Oliver and Boyd.</p></article><article id="ipw-balance"><h2>逆概率权重的协变量平衡诊断</h2><h3>模型与推导</h3><p>ATE逆概率加权以处理概率的倒数重新构造两组可比总体，归一化组内权重后比较协变量均值。平衡只是可观测诊断，不能证明无未观测混杂。</p><div class="equation">$$w_i^1=D_i/e_i,\quad w_i^0=(1-D_i)/(1-e_i)$$</div><div class="equation">$$\Delta_w=\frac{\sum_iw_i^1X_i}{\sum_iw_i^1}-\frac{\sum_iw_i^0X_i}{\sum_iw_i^0}$$</div><h3>研究应用与成立条件</h3><p>倾向得分均0.5时组内权重一致，处理协变量均值4，对照2，差异2未改善。极端倾向得分会提高方差，截尾改变估计对象。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/ipw-balance.csv" download>CSV数据</a>　<a href="../cpp/methods_empirical.hpp" download>算法源码</a></p><pre>Treatment,Propensity,Covariate
+1,0.5,3
+1,0.5,5
+0,0.5,1
+0,0.5,3
+</pre><pre>./build/kline_quant methods-ipw-balance quant/research/methods-examples/ipw-balance.csv</pre><div class="wide"><table><thead><tr><th>TreatedMean</th><th>ControlMean</th><th>RawDifference</th><th>WeightedDifference</th></tr></thead><tbody><tr><td>4</td><td>2</td><td>2</td><td>2</td></tr></tbody></table></div><p>参考文献：Angrist and Pischke (2009), Mostly Harmless Econometrics, Princeton University Press.</p></article><article id="placebo-rank"><h2>安慰剂分布的有限样本秩概率</h2><h3>模型与推导</h3><p>将第一行视为观测统计量，其余为同一设计产生的安慰剂，按绝对值比较并加入观测本身。平局保守计入，避免报告零p。交换性来自抽样或随机化设计，不由计算公式自动保证。</p><div class="equation">$$p=(1+\sum_{j=1}^B\mathbf1\{|T_j|\ge|T_{\mathrm{obs}}|\})/(B+1)$$</div><div class="equation">$$\Pr(p\le\alpha)\le\alpha\quad\text{under exchangeable ranks}$$</div><h3>研究应用与成立条件</h3><p>观测3、四个安慰剂1、−2、4、−1，只有4超过，秩概率2／5。适用于合成控制等置换诊断；非可交换的预趋势、规模和误差需要设计处理。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/placebo-rank.csv" download>CSV数据</a>　<a href="../cpp/methods_empirical.hpp" download>算法源码</a></p><pre>Statistic
+3
+1
+-2
+4
+-1
+</pre><pre>./build/kline_quant methods-placebo-rank quant/research/methods-examples/placebo-rank.csv</pre><div class="wide"><table><thead><tr><th>ObservedAbs</th><th>Placebos</th><th>Exceedances</th><th>RankP</th></tr></thead><tbody><tr><td>3</td><td>4</td><td>1</td><td>0.4</td></tr></tbody></table></div><p>参考文献：Angrist and Pischke (2009), Mostly Harmless Econometrics, Princeton University Press.</p></article><section><h2>C++17实现</h2><pre>#pragma once
+#include "evidence_common.hpp"
+namespace kline { namespace methods_empirical {
+using namespace evidence;
+inline Report event_car(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,3,3);
+    parameters(p,2);
+    double s=0;
+    Report o{{"RelativeDay","ExpectedReturn","AbnormalReturn","CAR"},{}};
+    for(std::size_t i=0;
+    i&lt;x.size();
+    ++i){auto&amp;r=x[i];
+    require(i==0||r[0]&gt;x[i-1][0],"Increasing event time required");
+    double a=p[0]+p[1]*r[2],e=r[1]-a;
+    s+=e;
+    o.rows.push_back({r[0],a,e,s});
+    }return o;
+    
+}
+
+inline Report paired_randomization(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,2,2);
+    parameters(p,0);
+    auto n=x.size();
+    require(n&lt;=20&amp;&amp;double(std::uint64_t(1)&lt;&lt;n)*n&lt;=3e7,"Exact enumeration work limit");
+    Vec d;
+    double s=0,scale=0;
+    for(auto&amp;r:x){d.push_back(r[0]-r[1]);
+    s+=d.back();
+    scale+=std::abs(d.back());
+    }auto M=std::uint64_t(1)&lt;&lt;n;
+    double hit=0;
+    for(std::uint64_t z=0;
+    z&lt;M;
+    ++z){double t=0;
+    for(std::size_t i=0;
+    i&lt;n;
+    ++i)t+=(z&amp;(std::uint64_t(1)&lt;&lt;i)?1:-1)*d[i];
+    if(std::abs(t)+1e-12*scale&gt;=std::abs(s))++hit;
+    }return scalar({"Pairs","MeanDifference","TwoSidedP","Assignments"},{double(n),s/n,hit/M,double(M)});
+    
+}
+
+inline Report ipw_balance(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,3,3);
+    parameters(p,0);
+    double n1=0,n0=0,a=0,b=0,w1=0,w0=0,c=0,d=0;
+    for(auto&amp;r:x){require((r[0]==0||r[0]==1)&amp;&amp;r[1]&gt;0&amp;&amp;r[1]&lt;1,"Invalid treatment or propensity");
+    if(r[0]){++n1;
+    a+=r[2];
+    w1+=1/r[1];
+    c+=r[2]/r[1];
+    }else{++n0;
+    b+=r[2];
+    w0+=1/(1-r[1]);
+    d+=r[2]/(1-r[1]);
+    }}positive(n1);
+    positive(n0);
+    return scalar({"TreatedMean","ControlMean","RawDifference","WeightedDifference"},{c/w1,d/w0,a/n1-b/n0,c/w1-d/w0});
+    
+}
+
+inline Report placebo_rank(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,1,1);
+    parameters(p,0);
+    double z=std::abs(x[0][0]),h=0;
+    for(std::size_t i=1;
+    i&lt;x.size();
+    ++i)if(std::abs(x[i][0])&gt;=z)++h;
+    return scalar({"ObservedAbs","Placebos","Exceedances","RankP"},{z,double(x.size()-1),h,(1+h)/x.size()});
+    
+}
+} }
+</pre></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

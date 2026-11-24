@@ -1,0 +1,77 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>信用联合分布与损失分层｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/methods-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="assets"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>信用联合分布与损失分层</h1><p>由模型定义、数学推导和可复算数值案例构成的独立研究方法。输入数据为教学构造，输出不代表实际投资结果。</p><p><a href="../research/methods-laboratories.html">研究方法实验室</a>　<a href="../cpp/methods_counterparty.hpp" download>完整C++17源码</a></p><nav><a href="#discrete-cva">期限边际违约概率与离散CVA</a>　｜　<a href="#joint-default">双Bernoulli违约联合分布与相关</a>　｜　<a href="#tranche-loss">信用损失分层与期望损失率</a>　｜　<a href="#constant-hazard-bond">常强度下回收本金的违约债券</a></nav></header><article id="discrete-cva"><h2>期限边际违约概率与离散CVA</h2><h3>模型与推导</h3><p>从存活概率下降量而非累积违约概率取得区间边际违约概率；独立暴露及违约的离散近似将贴现预期暴露和边际概率相乘。累积CVA为各期损失贡献和。</p><div class="equation">$$\Delta PD_i=S(t_{i-1})-S(t_i)$$</div><div class="equation">$$\mathrm{CVA}\approx\mathrm{LGD}\sum_i D_i EE_i\Delta PD_i$$</div><h3>研究应用与成立条件</h3><p>存活从1降至0.98再至0.95，边际违约概率2％、3％，给定暴露及贴现后累计2.544。需风险中性违约曲线和合适暴露条件；错误方向风险须额外联合建模。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/discrete-cva.csv" download>CSV数据</a>　<a href="../cpp/methods_counterparty.hpp" download>算法源码</a></p><pre>Discount,ExpectedExposure,Survival
+0.98,100,0.98
+0.95,80,0.95
+</pre><pre>./build/kline_quant methods-discrete-cva quant/research/methods-examples/discrete-cva.csv 0.6</pre><div class="wide"><table><thead><tr><th>Period</th><th>MarginalPD</th><th>Contribution</th><th>CumulativeCVA</th></tr></thead><tbody><tr><td>1</td><td>0.02</td><td>1.176</td><td>1.176</td></tr><tr><td>2</td><td>0.03</td><td>1.368</td><td>2.544</td></tr></tbody></table></div><p>参考文献：Gregory (2020), The xVA Challenge, Wiley.</p></article><article id="joint-default"><h2>双Bernoulli违约联合分布与相关</h2><h3>模型与推导</h3><p>联合违约概率决定四个互斥事件质量：双违约、各单违约及均不违约。非负约束导出Fréchet边界；指标协方差等于联合概率减边际概率乘积。</p><div class="equation">$$\max(0,p_1+p_2-1)\le p_{12}\le\min(p_1,p_2)$$</div><div class="equation">$$\rho_D=(p_{12}-p_1p_2)/\sqrt{p_1(1-p_1)p_2(1-p_2)}$$</div><h3>研究应用与成立条件</h3><p>边际0.1、0.2、联合0.05，独立联合仅0.02，违约相关0.25。此相关是二元事件相关，不等于资产潜变量相关，二者不能直接混用。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/joint-default.csv" download>CSV数据</a>　<a href="../cpp/methods_counterparty.hpp" download>算法源码</a></p><pre>P1,P2,JointPD
+0.1,0.2,0.05
+</pre><pre>./build/kline_quant methods-joint-default quant/research/methods-examples/joint-default.csv</pre><div class="wide"><table><thead><tr><th>Neither</th><th>Only1</th><th>Only2</th><th>Both</th><th>Correlation</th></tr></thead><tbody><tr><td>0.75</td><td>0.05</td><td>0.15</td><td>0.05</td><td>0.25</td></tr></tbody></table></div><p>参考文献：Gregory (2020), The xVA Challenge, Wiley.</p></article><article id="tranche-loss"><h2>信用损失分层与期望损失率</h2><h3>模型与推导</h3><p>损失首先由低于attachment的次级资本吸收，进入区间后逐元承担，达到detachment后封顶。按情景概率加权得到期望分层损失，其损失率需除以该层名义宽度。</p><div class="equation">$$L_{A,D}(L)=\min((L-A)_+,D-A)$$</div><div class="equation">$$\mathrm{EL}_{A,D}=\sum_s p_sL_{A,D}(L_s),\quad \ell_{A,D}=\mathrm{EL}_{A,D}/(D-A)$$</div><h3>研究应用与成立条件</h3><p>损失0、10％、40％对应概率0.5、0.3、0.2，5％至25％层期望损失5.5％总体名义，层损失率27.5％。这只是单期损失分布，不是完整CDO现金流定价。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/tranche-loss.csv" download>CSV数据</a>　<a href="../cpp/methods_counterparty.hpp" download>算法源码</a></p><pre>Loss,Probability
+0,0.5
+0.1,0.3
+0.4,0.2
+</pre><pre>./build/kline_quant methods-tranche-loss quant/research/methods-examples/tranche-loss.csv 0.05 0.25</pre><div class="wide"><table><thead><tr><th>ExpectedPortfolioLoss</th><th>ExpectedTrancheLoss</th><th>TrancheLossRate</th></tr></thead><tbody><tr><td>0.11</td><td>0.055</td><td>0.275</td></tr></tbody></table></div><p>参考文献：Gregory (2020), The xVA Challenge, Wiley.</p></article><article id="constant-hazard-bond"><h2>常强度下回收本金的违约债券</h2><h3>模型与推导</h3><p>违约强度恒定时生存分布指数型，违约密度λe^{-λt}。零息信用债价格等于生存偿付腿加在违约时立即回收固定本金比例的现金流积分。使用expm1处理r＋λ接近零。</p><div class="equation">$$S(T)=e^{-\lambda T},\quad P_{\mathrm{surv}}=Ne^{-(r+\lambda)T}$$</div><div class="equation">$$P_{\mathrm{rec}}=NR\lambda\int_0^T e^{-(r+\lambda)t}dt$$</div><h3>研究应用与成立条件</h3><p>本金100、零利率、强度ln2、回收率40％，一年生存50％，价格70，两年55。该模型为违约时本金回收，不能用于回收市场价值或有息债而不调整。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/constant-hazard-bond.csv" download>CSV数据</a>　<a href="../cpp/methods_counterparty.hpp" download>算法源码</a></p><pre>Horizon
+1
+2
+</pre><pre>./build/kline_quant methods-constant-hazard-bond quant/research/methods-examples/constant-hazard-bond.csv 100 0 0.6931471805599453 0.4</pre><div class="wide"><table><thead><tr><th>Horizon</th><th>Survival</th><th>SurvivalLeg</th><th>RecoveryLeg</th><th>Price</th></tr></thead><tbody><tr><td>1</td><td>0.5</td><td>50</td><td>20</td><td>70</td></tr><tr><td>2</td><td>0.25</td><td>25</td><td>30</td><td>55</td></tr></tbody></table></div><p>参考文献：Gregory (2020), The xVA Challenge, Wiley.</p></article><section><h2>C++17实现</h2><pre>#pragma once
+#include "evidence_common.hpp"
+namespace kline { namespace methods_counterparty {
+using namespace evidence;
+inline Report discrete_cva(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,3,3);
+    parameters(p,1);
+    require(p[0]&gt;=0&amp;&amp;p[0]&lt;=1,"Invalid LGD");
+    double prev=1,total=0;
+    Report o{{"Period","MarginalPD","Contribution","CumulativeCVA"},{}};
+    for(std::size_t i=0;
+    i&lt;x.size();
+    ++i){auto&amp;r=x[i];
+    positive(r[0]);
+    require(r[1]&gt;=0&amp;&amp;r[2]&gt;=0&amp;&amp;r[2]&lt;=prev,"Invalid exposure or survival");
+    double dp=prev-r[2],v=p[0]*r[0]*r[1]*dp;
+    total+=v;
+    prev=r[2];
+    o.rows.push_back({double(i+1),dp,v,total});
+    }return o;
+    
+}
+
+inline Report joint_default(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,3,3);
+    parameters(p,0);
+    Report o{{"Neither","Only1","Only2","Both","Correlation"},{}};
+    for(auto&amp;r:x){double a=r[0],b=r[1],c=r[2];
+    require(a&gt;0&amp;&amp;a&lt;1&amp;&amp;b&gt;0&amp;&amp;b&lt;1&amp;&amp;c&gt;=std::max(0.,a+b-1)&amp;&amp;c&lt;=std::min(a,b),"Invalid joint probability");
+    o.rows.push_back({1-a-b+c,a-c,b-c,c,(c-a*b)/std::sqrt(a*(1-a)*b*(1-b))});
+    }return o;
+    
+}
+
+inline Report tranche_loss(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,2,2);
+    parameters(p,2);
+    double a=p[0],b=p[1];
+    require(a&gt;=0&amp;&amp;b&gt;a&amp;&amp;b&lt;=1,"Invalid attachment/detachment");
+    double s=0,m=0,t=0;
+    for(auto&amp;r:x){require(r[0]&gt;=0&amp;&amp;r[0]&lt;=1&amp;&amp;r[1]&gt;=0&amp;&amp;r[1]&lt;=1,"Invalid loss or probability");
+    s+=r[1];
+    m+=r[0]*r[1];
+    t+=std::min(std::max(r[0]-a,0.),b-a)*r[1];
+    }require(std::abs(s-1)&lt;1e-9,"Probability sum");
+    return scalar({"ExpectedPortfolioLoss","ExpectedTrancheLoss","TrancheLossRate"},{m,t,t/(b-a)});
+    
+}
+
+inline Report constant_hazard_bond(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,1,1);
+    parameters(p,4);
+    double N=positive(p[0]),r=p[1],lambda=p[2],rec=p[3];
+    require(lambda&gt;=0&amp;&amp;rec&gt;=0&amp;&amp;rec&lt;=1,"Invalid hazard or recovery");
+    double k=r+lambda;
+    Report o{{"Horizon","Survival","SurvivalLeg","RecoveryLeg","Price"},{}};
+    for(auto&amp;a:x){double t=a[0];
+    require(t&gt;=0,"Negative tenor");
+    double s=std::exp(-lambda*t),v=N*std::exp(-k*t),u=N*rec*lambda*(k==0?t:-std::expm1(-k*t)/k);
+    o.rows.push_back({t,s,v,u,v+u});
+    }return o;
+    
+}
+} }
+</pre></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>
