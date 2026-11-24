@@ -1,0 +1,23 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>局部投影脉冲响应：逐期限回归与HAC推断｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="audit"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>局部投影脉冲响应：逐期限回归与HAC推断</h1><p><a href="../research/advanced-research.html">高级研究方法</a>　<a href="../cpp/advanced_research_inference.hpp" download>完整模型源码</a>　<a href="../cpp/advanced_research_common.hpp" download>公共数值函数</a></p></header><article><h2>模型定义与识别条件</h2><p>局部投影直接针对每个响应期限拟合独立回归，避免预先约束所有期限响应必须由一个VAR递推产生。输入包含冲击、结果及可选事前控制变量；程序自动加入截距。响应期限h越长，可用样本越少，且重叠未来结果可诱发残差序列相关。</p><h2>数学推导与求解机制</h2><p>对每个期限构造以t为索引的设计及t+h结果，计算OLS系数及Bartlett权重HAC sandwich。HAC使用未标准化得分和，左右乘逆Gram后得到系数方差。输出冲击系数与对应边际标准误，不将逐期限标准误解释为联合置信带。</p><div class="equation">$$Y_{t+h}=\alpha_h+\beta_h S_t+\Gamma_h^\top X_t+u_{t,h}$$</div><div class="equation">$$\hat\theta_h=(D_h^\top D_h)^{-1}D_h^\top y_h$$</div><div class="equation">$$s_{t,h}=d_t\hat u_{t,h}$$</div><div class="equation">$$M_h=\sum_ts_{t,h}s_{t,h}^\top+\sum_{\ell=1}^L(1-\ell/(L+1))\sum_{t&gt;\ell}(s_{t,h}s_{t-\ell,h}^\top+s_{t-\ell,h}s_{t,h}^\top)$$</div><div class="equation">$$\widehat V_h=(D_h^\top D_h)^{-1}M_h(D_h^\top D_h)^{-1}$$</div><h2>独立解析基准</h2><p>交替冲击±1且结果为当期冲击的2倍时，h=0响应2，h=1响应−2，各期限残差为0。该确定性例验证响应索引及协方差口径；在非退化数据中可与独立回归及得分自协方差比较。</p><p><a href="../research/advanced-examples/local-projection-hac.csv" download>下载CSV样本</a></p><pre>Shock,Outcome
+1,2
+-1,-2
+1,2
+-1,-2
+1,2
+-1,-2
+</pre><pre>./build/kline_quant advanced-local-projection-hac quant/research/advanced-examples/local-projection-hac.csv 1 1</pre><div class="wide"><table><thead><tr><th>Horizon</th><th>Observations</th><th>Response</th><th>HACVariance</th><th>HACStandardError</th><th>Intercept</th><th>ResidualSSE</th></tr></thead><tbody><tr><td>0</td><td>6</td><td>2</td><td>0</td><td>0</td><td>0</td><td>0</td></tr><tr><td>1</td><td>5</td><td>-2</td><td>0</td><td>0</td><td>0</td><td>0</td></tr></tbody></table></div><p>输出字段：Horizon，Observations，Response，HACVariance，HACStandardError，Intercept，ResidualSSE。</p><h2>计算复杂度与研究边界</h2><p>成本O((H+1)nd²(L+1))，最大期限和HAC带宽明确输入。冲击必须具有外生或结构识别依据，否则β是条件关联。控制变量应在冲击时点可用；大规模重叠期限研究需要联合推断与多重检验。</p><h2>C++17完整实现</h2><pre>inline Report local_projection_hac(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,4,2,18);parameters(p,2);auto H=count(p[0],0,x.size()-d-2),L=count(p[1],0,x.size()-H-1);
+    require(double(H+1)*x.size()*d*d*(L+1)&lt;=5e7,"Local projection work limit");
+    Report o{{"Horizon","Observations","Response","HACVariance","HACStandardError","Intercept","ResidualSSE"},{}};
+    for(std::size_t h=0;h&lt;=H;++h){
+        auto n=x.size()-h;Mat D;Vec y;
+        for(std::size_t t=0;t&lt;n;++t){Vec a{1,x[t][0]};a.insert(a.end(),x[t].begin()+2,x[t].end());D.push_back(a);y.push_back(x[t+h][1]);}
+        Vec b=fit_ridge(D,y,0,false);Mat gram(d,Vec(d,0)),scores;double ss=0;
+        for(std::size_t t=0;t&lt;n;++t){add_outer(gram,D[t],1);double e=y[t]-dot(D[t],b);ss+=e*e;Vec s=D[t];for(double&amp;v:s)v*=e;scores.push_back(s);}
+        Vec unit(d,0);unit[1]=1;Vec v=solve_spd(gram,unit),z;for(auto&amp;s:scores)z.push_back(dot(v,s));
+        double var=squared(z);
+        for(std::size_t l=1;l&lt;=L;++l){double cov=0;for(std::size_t t=l;t&lt;n;++t)cov+=z[t]*z[t-l];var+=2*(1-double(l)/(L+1))*cov;}
+        require(var&gt;=-1e-12*std::max(1.,squared(z)),"Negative HAC variance");
+        o.rows.push_back({double(h),double(n),b[1],std::max(0.,var),std::sqrt(std::max(0.,var)),b[0],ss});
+    }return o;
+}</pre><p>参考文献：<a href="https://doi.org/10.1257/0002828053828518">Jordà (2005), Estimation and Inference of Impulse Responses by Local Projections, American Economic Review.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>
