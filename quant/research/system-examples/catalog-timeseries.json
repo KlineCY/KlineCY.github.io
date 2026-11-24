@@ -1,0 +1,293 @@
+[
+  {
+    "command": "system-haar-energy",
+    "title": "多尺度Haar分解：收益尺度、能量守恒与重构",
+    "area": "math",
+    "columns": [
+      "Return"
+    ],
+    "file": "haar-energy.csv",
+    "params": [
+      2
+    ],
+    "header": [
+      "Level",
+      "Index",
+      "Type",
+      "Coefficient",
+      "Energy",
+      "TotalEnergy",
+      "ReconstructionError"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        1,
+        1,
+        -1.4142135623730951,
+        2,
+        30,
+        0
+      ],
+      [
+        1,
+        2,
+        1,
+        -1.4142135623730951,
+        2,
+        30,
+        0
+      ],
+      [
+        2,
+        1,
+        1,
+        -1,
+        1,
+        30,
+        0
+      ],
+      [
+        2,
+        1,
+        0,
+        5,
+        25,
+        30,
+        0
+      ]
+    ],
+    "ref": "Mallat (1989), A Theory for Multiresolution Signal Decomposition, IEEE TPAMI.",
+    "url": "https://doi.org/10.1109/34.192463"
+  },
+  {
+    "command": "system-fractional-filter",
+    "title": "有限分数差分：记忆权重、截断与因果滤波",
+    "area": "math",
+    "columns": [
+      "Value"
+    ],
+    "file": "fractional-filter.csv",
+    "params": [
+      1,
+      2
+    ],
+    "header": [
+      "Time",
+      "Filtered",
+      "WeightSum",
+      "WeightL1"
+    ],
+    "expected_prefix": [
+      [
+        3,
+        2,
+        0,
+        2
+      ],
+      [
+        4,
+        3,
+        0,
+        2
+      ]
+    ],
+    "ref": "Hosking (1981), Fractional Differencing, Biometrika.",
+    "url": "https://doi.org/10.1093/biomet/68.1.165"
+  },
+  {
+    "command": "system-ou-irregular-profile",
+    "title": "不等间隔Ornstein–Uhlenbeck：精确转移似然及参数轮廓",
+    "area": "audit",
+    "columns": [
+      "Time",
+      "Value"
+    ],
+    "file": "ou-irregular-profile.csv",
+    "params": [
+      0.6931471805599453,
+      0.6931471805599453,
+      2
+    ],
+    "header": [
+      "Kappa",
+      "Mean",
+      "DiffusionVariance",
+      "NLL",
+      "MeanScore"
+    ],
+    "expected_prefix": [
+      [
+        0.6931471805599453,
+        1,
+        0.9241962407465937
+      ]
+    ],
+    "ref": "Uhlenbeck and Ornstein (1930), On the Theory of the Brownian Motion, Physical Review.",
+    "url": "https://doi.org/10.1103/PhysRev.36.823"
+  },
+  {
+    "command": "system-fourier-seasonal-fit",
+    "title": "日内周期回归：傅里叶基、训练期拟合及留出预测",
+    "area": "feeds",
+    "columns": [
+      "Time",
+      "Value",
+      "Train"
+    ],
+    "file": "fourier-seasonal-fit.csv",
+    "params": [
+      4,
+      1,
+      0
+    ],
+    "header": [
+      "Time",
+      "Train",
+      "Actual",
+      "Prediction",
+      "Residual",
+      "Coefficient0",
+      "Cos1",
+      "Sin1"
+    ],
+    "expected_prefix": [
+      [
+        0,
+        1,
+        3,
+        3,
+        0,
+        2,
+        1,
+        0
+      ],
+      [
+        1,
+        1,
+        2,
+        2,
+        0,
+        2,
+        1,
+        0
+      ],
+      [
+        2,
+        1,
+        1,
+        1,
+        0,
+        2,
+        1,
+        0
+      ],
+      [
+        3,
+        1,
+        2,
+        2,
+        0,
+        2,
+        1,
+        0
+      ],
+      [
+        4,
+        0,
+        3,
+        3,
+        0,
+        2,
+        1,
+        0
+      ]
+    ],
+    "ref": "Bloomfield (2000), Fourier Analysis of Time Series, 2nd ed., Wiley.",
+    "url": "https://doi.org/10.1002/0471722235"
+  },
+  {
+    "command": "system-garch-horizon-risk",
+    "title": "GARCH多期限条件方差：预期积分风险与期限换算",
+    "area": "research",
+    "columns": [
+      "Variance",
+      "Omega",
+      "Alpha",
+      "Beta",
+      "LastShock"
+    ],
+    "file": "garch-horizon-risk.csv",
+    "params": [
+      3
+    ],
+    "header": [
+      "Scenario",
+      "Horizon",
+      "ForecastVariance",
+      "CumulativeVariance",
+      "MeanVariancePerPeriod"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        1,
+        0.03,
+        0.03,
+        0.03
+      ],
+      [
+        1,
+        2,
+        0.031,
+        0.061,
+        0.0305
+      ],
+      [
+        1,
+        3,
+        0.0317,
+        0.0927,
+        0.0309
+      ]
+    ],
+    "ref": "Bollerslev (1986), Generalized Autoregressive Conditional Heteroskedasticity, Journal of Econometrics.",
+    "url": "https://doi.org/10.1016/0304-4076(86)90063-1"
+  },
+  {
+    "command": "system-rolling-forecast-comparison",
+    "title": "滚动预测比较：共同信息集、损失差与HAC统计量",
+    "area": "audit",
+    "columns": [
+      "Actual",
+      "ForecastA",
+      "ForecastB"
+    ],
+    "file": "rolling-forecast-comparison.csv",
+    "params": [
+      1
+    ],
+    "header": [
+      "Observations",
+      "MSEA",
+      "MSEB",
+      "MeanLossDiff",
+      "HACVariance",
+      "DMStatistic",
+      "Degenerate"
+    ],
+    "expected_prefix": [
+      [
+        3,
+        0,
+        1,
+        -1,
+        0,
+        0,
+        1
+      ]
+    ],
+    "ref": "Diebold and Mariano (1995), Comparing Predictive Accuracy, JBES.",
+    "url": "https://doi.org/10.1080/07350015.1995.10524599"
+  }
+]
