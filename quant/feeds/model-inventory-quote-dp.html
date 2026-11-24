@@ -1,0 +1,36 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>有限库存做市控制：单侧报价、成交概率与动态价值函数｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="feeds"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>有限库存做市控制：单侧报价、成交概率与动态价值函数</h1><p><a href="../research/model-laboratories.html">完整模型研究</a>　<a href="../cpp/model_research_systems.hpp" download>模型源码</a>　<a href="../cpp/model_research_common.hpp" download>公共数值函数</a></p></header><article><h2>问题、模型与数学推导</h2><p>做市策略需在价差收入、成交不确定性与库存风险之间权衡。本模型建立离散有限期、单单位成交、每期最多选择一侧报价的教学MDP。动作a=+1表示买入成交增加库存，a=−1表示卖出成交减少库存，a=0表示不报价。不同报价距离对应外生Bernoulli成交概率，不能将概率模型视为实际订单簿成交保证。</p><p>给定报价距离候选、买卖两侧基础成交概率、衰减系数、逐期库存惩罚及终端惩罚，枚举库存状态和所有可行动作，按Bellman方程反推价值。成交时获得报价距离减费用，未成交时仅承担当前库存风险；在库存边界不允许进一步向外增加仓位。每个状态保留最优动作、成交概率、期望下一期库存与离散Bellman一致性。</p><div class="equation">$$p_t(a,\delta)=p_{0,t}^{(a)}e^{-\kappa_t\delta},\quad a\in\{-1,1\}$$</div><div class="equation">$$Q_{t+1}=Q_t+aI_t,\quad I_t\sim\operatorname{Bernoulli}(p_t)$$</div><div class="equation">$$V_{T+1}(q)=-\phi q^2$$</div><div class="equation">$$V_t(q)=\max_{(a,\delta)}\left\{p_t[\delta-c-\lambda_t(q+a)^2+V_{t+1}(q+a)]+(1-p_t)[-\lambda_tq^2+V_{t+1}(q)]\right\}$$</div><div class="equation">$$V_t^{\mathrm{no\ quote}}(q)=-\lambda_tq^2+V_{t+1}(q)$$</div><h2>解析案例与研究设计</h2><p>样本单期、库存范围−1至1，买卖基础成交概率0.5、衰减0、费用与风险为0，报价距离候选1及2。任一可行方向选择距离2的期望收益1；库存−1只能买，库存1只能卖，库存0两方向并列按确定性顺序取卖。加入库存惩罚后，靠近边界的最优方向及报价距离会改变。</p><p>复杂度O(TQJ)，存储O(TQ)，J为报价候选数。基础概率[0,1]、衰减与风险非负、候选距离严格正，费用可非负。本模型不包含双侧同时报价、真实队列、逆向选择、价格跳跃及连续时间最优控制，不能冒充Avellaneda–Stoikov原论文的完整模型。它提供可复算的有限状态控制结构，用于研究假设与策略机制。</p><h2>可执行输入与解析基准</h2><p>输入数据为独立构造的教学样本。下表给出可解析核对的输出前缀；其他诊断字段由模型实际拟合产生，并通过回归测试检查。</p><p><a href="../research/model-examples/inventory-quote-dp.csv" download>下载CSV样本</a></p><pre>BuyBase,SellBase,Decay,Risk
+0.5,0.5,0,0
+</pre><pre>./build/kline_quant model-inventory-quote-dp quant/research/model-examples/inventory-quote-dp.csv 1 0 0 1 2</pre><div class="wide"><table><thead><tr><th>Period</th><th>Inventory</th><th>Action</th><th>Spread</th><th>FillProbability</th><th>Value</th><th>ExpectedNextInventory</th><th>BellmanResidual</th></tr></thead><tbody><tr><td>1</td><td>-1</td><td>1</td><td>2</td><td>0.5</td><td>1</td><td>-0.5</td><td>0</td></tr><tr><td>1</td><td>0</td><td>-1</td><td>2</td><td>0.5</td><td>1</td><td>-0.5</td><td>0</td></tr><tr><td>1</td><td>1</td><td>-1</td><td>2</td><td>0.5</td><td>1</td><td>0.5</td><td>0</td></tr></tbody></table></div><p>输出字段：Period，Inventory，Action，Spread，FillProbability，Value，ExpectedNextInventory，BellmanResidual。</p><h2>C++17实现</h2><pre>inline Report inventory_quote_dp(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,4,4);require(p.size()&gt;=4,"Inventory bound, terminal risk, fee and quote candidates required");parameters(p,p.size());
+    auto Q=count(p[0],1,2000),n=x.size(),states=2*Q+1;double terminal=p[1],fee=p[2];
+    require(terminal&gt;=0&amp;&amp;fee&gt;=0&amp;&amp;p.size()&lt;=103&amp;&amp;double(n)*states*(p.size()-3)&lt;=5e7,"Invalid quote controls");
+    for(std::size_t j=3;j&lt;p.size();++j)positive(p[j]);
+    for(auto&amp;r:x)require(r[0]&gt;=0&amp;&amp;r[0]&lt;=1&amp;&amp;r[1]&gt;=0&amp;&amp;r[1]&lt;=1&amp;&amp;r[2]&gt;=0&amp;&amp;r[3]&gt;=0,"Invalid fill or risk parameters");
+    Mat V(n+1,Vec(states,0)),act(n,Vec(states,0)),spread=act,prob=act;
+    for(std::size_t i=0;i&lt;states;++i){double q=double(i)-Q;V[n][i]=-terminal*q*q;}
+    auto candidate=[&amp;](std::size_t t,std::size_t i,int side,double delta,double z){
+        double q=double(i)-Q,qn=q+side,r=x[t][3];auto next=std::size_t(int(i)+side);
+        return z*(delta-fee-r*qn*qn+V[t+1][next])+(1-z)*(-r*q*q+V[t+1][i]);
+    };
+    for(std::size_t t=n;t--&gt;0;){
+        for(std::size_t i=0;i&lt;states;++i){
+            double q=double(i)-Q,best=V[t+1][i]-x[t][3]*q*q;
+            for(int side:{-1,1}){
+                if((side&lt;0&amp;&amp;i==0)||(side&gt;0&amp;&amp;i+1==states))continue;
+                double base=x[t][side&gt;0?0:1];
+                for(std::size_t j=3;j&lt;p.size();++j){
+                    double delta=p[j],z=base*std::exp(-x[t][2]*delta),v=candidate(t,i,side,delta,z);
+                    if(v&gt;best){best=v;act[t][i]=side;spread[t][i]=delta;prob[t][i]=z;}
+                }
+            }
+            V[t][i]=best;
+        }
+    }
+    Report o{{"Period","Inventory","Action","Spread","FillProbability","Value","ExpectedNextInventory","BellmanResidual"},{}};
+    for(std::size_t t=0;t&lt;n;++t)for(std::size_t i=0;i&lt;states;++i){
+        double q=double(i)-Q,a=act[t][i],d=spread[t][i],z=prob[t][i];
+        double ref=a==0?V[t+1][i]-x[t][3]*q*q:candidate(t,i,int(a),d,z);
+        o.rows.push_back({double(t+1),q,a,d,z,V[t][i],q+a*z,std::abs(V[t][i]-ref)});
+    }
+    return o;
+}</pre><p>参考文献：<a href="https://doi.org/10.1080/14697680701381228">Avellaneda and Stoikov (2008), High-Frequency Trading in a Limit Order Book, Quantitative Finance.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

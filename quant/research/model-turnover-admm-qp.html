@@ -1,0 +1,41 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>完整均值方差换手惩罚：预算、盒约束与ADMM｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>完整均值方差换手惩罚：预算、盒约束与ADMM</h1><p><a href="../research/model-laboratories.html">完整模型研究</a>　<a href="../cpp/model_research_systems.hpp" download>模型源码</a>　<a href="../cpp/model_research_common.hpp" download>公共数值函数</a></p></header><article><h2>问题、模型与数学推导</h2><p>单资产不交易区间不能直接推广到非对角协方差及组合预算，因为风险与资金约束耦合所有交易。该模型以完整协方差二次目标、上一期实际持仓和线性权重换手惩罚构造凸优化；上一期权重可以是漂移后的组合，费用惩罚是优化代理，与真实自融资费用方程并不完全相同。</p><p>将预算约束和光滑目标放在w子问题，把盒约束与L1换手成本放在z子问题。w更新解SPD线性系统并沿H逆乘单位向量调整预算乘子；z更新按坐标软阈值后截断至区间。缩放对偶变量累计两副本差。停止时检查预算差、原始及对偶残差，并从z的实际原目标梯度、预算乘子、L1次梯度和盒法锥构造KKT证书。</p><div class="equation">$$\min_{w\in\mathcal C}\frac\gamma2w^\top\Sigma w-\mu^\top w+c\|w-w_0\|_1,\quad\mathcal C=\{l\le w\le u,\ \mathbf1^\top w=B\}$$</div><div class="equation">$$H=\gamma\Sigma+\rho I,\quad H\widetilde w=\mu+\rho(z-u_d)$$</div><div class="equation">$$w=\widetilde w-\frac{\mathbf1^\top\widetilde w-B}{\mathbf1^\top H^{-1}\mathbf1}H^{-1}\mathbf1$$</div><div class="equation">$$z=\operatorname{clip}\left(w_0+\operatorname{soft}(w+u_d-w_0,c/\rho),l,u\right),\quad u_d\leftarrow u_d+w-z$$</div><div class="equation">$$0\in\gamma\Sigma z-\mu+\eta\mathbf1+c\,\partial\|z-w_0\|_1+N_{[l,u]}(z)$$</div><h2>解析案例与研究设计</h2><p>示例Σ=I、μ=0、预算1、旧权重(0.8,0.2)，风险厌恶1、换手惩罚0.4。无成本最优是各半，但在旧点从第一资产向第二资产移动一单位质量的边际风险改善为0.6，换手惩罚为0.8，因此旧权重全局最优。该解析结果同时验证不交易区间与预算耦合。</p><p>每轮需SPD求解、近端映射及原始KKT检查，当前稠密实现O(d³)；生产环境应复用分解。协方差严格正定，盒预算可行，γ、ρ正，成本非负。输出z满足盒约束并在容差内满足预算。惩罚c不能直接等同于手续费率，实际回测应另以交易后权益计算现金及费用。</p><h2>可执行输入与解析基准</h2><p>输入数据为独立构造的教学样本。下表给出可解析核对的输出前缀；其他诊断字段由模型实际拟合产生，并通过回归测试检查。</p><p><a href="../research/model-examples/turnover-admm-qp.csv" download>下载CSV样本</a></p><pre>Cov1,Cov2,Mean,Lower,Upper,Previous
+1,0,0,0,1,0.8
+0,1,0,0,1,0.2
+</pre><pre>./build/kline_quant model-turnover-admm-qp quant/research/model-examples/turnover-admm-qp.csv 1 1 0.4 1 1e-8 10000</pre><div class="wide"><table><thead><tr><th>Asset</th><th>Weight</th><th>Previous</th><th>Trade</th></tr></thead><tbody><tr><td>1</td><td>0.8</td><td>0.8</td><td>0</td></tr><tr><td>2</td><td>0.2</td><td>0.2</td><td>0</td></tr></tbody></table></div><p>输出字段：Asset，Weight，Previous，Trade，Objective，BudgetGap，PrimalResidual，DualResidual，KKTResidual，Iterations。</p><h2>C++17实现</h2><pre>inline Report turnover_admm_qp(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,1,5,36)-4;parameters(p,6);
+    require(x.size()==d,"Square covariance required");
+    double B=p[0],gamma=positive(p[1]),cost=p[2],rho=positive(p[3]),tol=positive(p[4]);auto K=count(p[5],1,100000);
+    require(cost&gt;=0&amp;&amp;double(K)*d*d*d&lt;=1e8,"Invalid cost or work limit");
+    Mat s;Vec mu,l,h,old;
+    for(auto&amp;r:x){s.emplace_back(r.begin(),r.begin()+d);mu.push_back(r[d]);l.push_back(r[d+1]);h.push_back(r[d+2]);old.push_back(r[d+3]);}
+    solve_spd(s,Vec(d,0));Mat H=s;
+    for(std::size_t i=0;i&lt;d;++i){for(double&amp;v:H[i])v*=gamma;H[i][i]+=rho;}
+    Vec one(d,1),v=solve_spd(H,one),z=box_projection(old,l,h,B),u(d,0),w=z;
+    double den=positive(sum(v)),pr=0,du=0,gap=0,bg=0;std::size_t it=0;
+    for(;it&lt;K;){
+        Vec rhs=mu;
+        for(std::size_t j=0;j&lt;d;++j)rhs[j]+=rho*(z[j]-u[j]);
+        w=solve_spd(H,rhs);double eta=(sum(w)-B)/den;
+        Vec prev=z;
+        for(std::size_t j=0;j&lt;d;++j){
+            w[j]-=eta*v[j];z[j]=std::clamp(old[j]+soft(w[j]+u[j]-old[j],cost/rho),l[j],h[j]);u[j]+=w[j]-z[j];
+        }
+        pr=du=gap=0;Vec g=mul(s,z);
+        for(std::size_t j=0;j&lt;d;++j){
+            pr=std::max(pr,std::abs(w[j]-z[j]));du=std::max(du,rho*std::abs(z[j]-prev[j]));
+            gap=std::max(gap,std::abs(gamma*g[j]-mu[j]+eta+rho*u[j]));
+            double a=z[j]&lt;old[j]?-cost:z[j]&gt;old[j]?cost:-cost;
+            double b=z[j]==old[j]?cost:a,dual=rho*u[j];
+            double e=l[j]==h[j]?0:z[j]==l[j]?std::max(0.,dual-b):z[j]==h[j]?std::max(0.,a-dual):std::max({0.,a-dual,dual-b});
+            gap=std::max(gap,e);
+        }
+        bg=std::abs(sum(z)-B);++it;
+        if(std::max({pr,du,gap,bg})&lt;=tol)break;
+    }
+    require(std::max({pr,du,gap,bg})&lt;=tol,"Turnover ADMM did not converge");
+    double obj=.5*gamma*dot(z,mul(s,z))-dot(mu,z);
+    for(std::size_t j=0;j&lt;d;++j)obj+=cost*std::abs(z[j]-old[j]);
+    Report o{{"Asset","Weight","Previous","Trade","Objective","BudgetGap","PrimalResidual","DualResidual","KKTResidual","Iterations"},{}};
+    for(std::size_t j=0;j&lt;d;++j)o.rows.push_back({double(j+1),z[j],old[j],z[j]-old[j],obj,bg,pr,du,gap,double(it)});
+    return o;
+}</pre><p>参考文献：<a href="https://stanford.edu/~boyd/papers/admm_distr_stats.html">Boyd et al. (2011), Distributed Optimization and Statistical Learning via the Alternating Direction Method of Multipliers.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

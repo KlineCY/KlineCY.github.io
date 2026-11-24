@@ -1,0 +1,38 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CVaR组合优化：有限情景尾部风险与原始—对偶间隙｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>CVaR组合优化：有限情景尾部风险与原始—对偶间隙</h1><p><a href="../research/model-laboratories.html">完整模型研究</a>　<a href="../cpp/model_research_systems.hpp" download>模型源码</a>　<a href="../cpp/model_research_common.hpp" download>公共数值函数</a></p></header><article><h2>问题、模型与数学推导</h2><p>样本CVaR可由Rockafellar–Uryasev辅助分位数目标表示，也可通过有限情景概率上界的线性规划对偶表示。这里每条情景等概率，尾部权重受上界约束且和为1；当尾部质量不是整数个观测时，最差边界情景按剩余概率质量分配，而非简单取固定数量最坏收益。</p><p>将目标写成有界双线性鞍点问题。对情景概率与资产权重分别做投影，前者投影到带概率上限的单纯形，后者先进行平方正则的近端缩放再投影到预算盒。取Frobenius范数上界确定步长，使鞍点迭代满足标准步长条件。计算当前及平均迭代的原始上界，利用任意可行情景概率产生的精确二次最小值作为对偶下界，并保存最佳证书。</p><div class="equation">$$\min_{w\in\mathcal C}\operatorname{CVaR}_\alpha(-Rw)+\frac\lambda2\|w\|^2,\quad \mathcal C=\{w:0\le w_i\le u,\ \mathbf1^\top w=1\}$$</div><div class="equation">$$\operatorname{CVaR}_\alpha(\ell)=\max_{p\in\mathcal P}p^\top\ell,\quad \mathcal P=\{p:0\le p_i\le[(1-\alpha)n]^{-1},\ \mathbf1^\top p=1\}$$</div><div class="equation">$$p^{k+1}=\Pi_{\mathcal P}(p^k-\sigma R\bar w^k),\quad w^{k+1}=\Pi_{\mathcal C}\left(\frac{w^k+\tau R^\top p^{k+1}}{1+\tau\lambda}\right)$$</div><div class="equation">$$\bar w^{k+1}=2w^{k+1}-w^k,\quad \tau\sigma\|R\|_2^2&lt;1$$</div><div class="equation">$$G(w,p)=\left[\operatorname{CVaR}_\alpha(-Rw)+\frac\lambda2\|w\|^2\right]-\min_{v\in\mathcal C}\left[\frac\lambda2\|v\|^2-p^\top Rv\right]\ge0$$</div><h2>解析案例与研究设计</h2><p>解析样本两资产在四种对称情景分别实现(−0.1,0.1)及其相反值，等权组合每条损失均0；在预算下平方范数最低，因此λ=0.1时目标0.025且原始—对偶间隙0。非对称情景则真实执行鞍点求解。输出最优权重、原始CVaR、正则化目标、对偶下界及间隙。</p><p>迭代时间O(nd+80(n+d))，存储O(nd)，限制情景数和最大工作量。λ严格正保证权重唯一；α越接近1越依赖少量尾部情景。CVaR是给定情景经验风险，不能直接解释为真实分布尾部；应使用独立历史或情景生成模型及压力验证。未达到指定间隙时拒绝声称求解完成。</p><h2>可执行输入与解析基准</h2><p>输入数据为独立构造的教学样本。下表给出可解析核对的输出前缀；其他诊断字段由模型实际拟合产生，并通过回归测试检查。</p><p><a href="../research/model-examples/cvar-primal-dual.csv" download>下载CSV样本</a></p><pre>Return1,Return2
+-0.1,0.1
+0.1,-0.1
+-0.1,0.1
+0.1,-0.1
+</pre><pre>./build/kline_quant model-cvar-primal-dual quant/research/model-examples/cvar-primal-dual.csv 0.5 0.1 1 1e-8 10000</pre><div class="wide"><table><thead><tr><th>Asset</th><th>Weight</th><th>CVaR</th><th>PrimalObjective</th><th>DualLowerBound</th><th>PrimalDualGap</th></tr></thead><tbody><tr><td>1</td><td>0.5</td><td>0</td><td>0.025</td><td>0.025</td><td>0</td></tr><tr><td>2</td><td>0.5</td><td>0</td><td>0.025</td><td>0.025</td><td>0</td></tr></tbody></table></div><p>输出字段：Asset，Weight，CVaR，PrimalObjective，DualLowerBound，PrimalDualGap，Iterations。</p><h2>C++17实现</h2><pre>inline Report cvar_primal_dual(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,2,1,32);parameters(p,5);
+    double alpha=p[0],lam=positive(p[1]),cap=p[2],tol=positive(p[3]);auto K=count(p[4],1,100000),n=x.size();
+    require(alpha&gt;0&amp;&amp;alpha&lt;1&amp;&amp;cap&gt;=1./d&amp;&amp;cap&lt;=1&amp;&amp;n&lt;=512&amp;&amp;double(K)*(n*d+80*(n+d))&lt;=3e8,"Invalid CVaR domain or work limit");
+    double pc=std::min(1.,1/((1-alpha)*n));
+    Vec wl(d,0),wu(d,cap),pl(n,0),pu(n,pc),w(d,1./d),q(n,1./n),bar=w,avgw(d,0),avgq(n,0);
+    auto transpose=[&amp;](const Vec&amp; v){Vec z(d,0);for(std::size_t i=0;i&lt;n;++i)for(std::size_t j=0;j&lt;d;++j)z[j]+=v[i]*x[i][j];return z;};
+    auto tail=[&amp;](const Vec&amp; a){Vec loss=mul(x,a);for(double&amp;v:loss)v=-v;std::sort(loss.begin(),loss.end(),std::greater&lt;double&gt;());double rem=1,s=0;for(double v:loss){double m=std::min(rem,pc);s+=m*v;rem-=m;if(rem&lt;=1e-14)break;}return s;};
+    auto primal=[&amp;](const Vec&amp;a){return tail(a)+.5*lam*squared(a);};
+    auto dual=[&amp;](const Vec&amp;v){Vec z=transpose(v),a=z;for(double&amp;u:a)u/=lam;a=box_projection(a,wl,wu,1);return .5*lam*squared(a)-dot(z,a);};
+    double normR=0;for(auto&amp;r:x)for(double v:r)normR=std::hypot(normR,v);
+    double step=normR&gt;0?.95/normR:1.,upper=primal(w),lower=dual(q);Vec best=w;
+    std::size_t it=0;
+    while(upper-lower&gt;tol&amp;&amp;it&lt;K){
+        Vec z=mul(x,bar);for(std::size_t i=0;i&lt;n;++i)z[i]=q[i]-step*z[i];q=box_projection(z,pl,pu,1);
+        Vec a=transpose(q);
+        for(std::size_t j=0;j&lt;d;++j)a[j]=(w[j]+step*a[j])/(1+step*lam);
+        a=box_projection(a,wl,wu,1);
+        for(std::size_t j=0;j&lt;d;++j)bar[j]=2*a[j]-w[j];
+        w=a;++it;
+        for(std::size_t j=0;j&lt;d;++j)avgw[j]+=(w[j]-avgw[j])/it;
+        for(std::size_t i=0;i&lt;n;++i)avgq[i]+=(q[i]-avgq[i])/it;
+        if(it%10==0||it==K){
+            for(const Vec* v:{&amp;w,&amp;avgw}){double f=primal(*v);if(f&lt;upper){upper=f;best=*v;}}
+            lower=std::max({lower,dual(q),dual(avgq)});
+        }
+    }
+    require(upper-lower&lt;=tol&amp;&amp;upper-lower&gt;=-1e-8,"CVaR primal-dual gap not certified");
+    double cv=tail(best),gap=std::max(0.,upper-lower);
+    Report o{{"Asset","Weight","CVaR","PrimalObjective","DualLowerBound","PrimalDualGap","Iterations"},{}};
+    for(std::size_t j=0;j&lt;d;++j)o.rows.push_back({double(j+1),best[j],cv,upper,lower,gap,double(it)});
+    return o;
+}</pre><p>参考文献：<a href="https://doi.org/10.21314/jor.2000.038">Rockafellar and Uryasev (2000), Optimization of Conditional Value-at-Risk; Chambolle and Pock (2011), A First-Order Primal-Dual Algorithm for Convex Problems.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

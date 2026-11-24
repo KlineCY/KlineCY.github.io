@@ -1,0 +1,75 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>嵌套Walk-forward弹性网：内层调参、外层组合及前视隔离｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>嵌套Walk-forward弹性网：内层调参、外层组合及前视隔离</h1><p><a href="../research/model-laboratories.html">完整模型研究</a>　<a href="../cpp/model_research_systems.hpp" download>模型源码</a>　<a href="../cpp/model_research_common.hpp" download>公共数值函数</a></p></header><article><h2>问题、模型与数学推导</h2><p>完整模型选择：固定候选参数集合及训练窗L、内层验证窗V。每个外层预测日期t先回到此前V个日期，分别以这些内层日期的前L个日期拟合候选模型，并计算真正的一步验证预测。按所有内层日期及资产的均方误差选择候选，确定性地以输入顺序解决并列。当前外层收益不参与任何候选比较。</p><p>选择后，按完全相同长度的最新历史训练窗重新拟合选定模型，使用当前可得特征生成分数。复用分数化并列尾部权重及自融资交易会计；因此模型选择、训练、目标权重、实际成交费用、权益变化均在同一流程中。内层误差不应视作外层样本外绩效，外层也不用于回顾性重新确定候选集合。</p><div class="equation">$$\mathcal T_s=\{s-L,\ldots,s-1\},\quad \widehat\beta_s(\lambda)=\operatorname{ElasticNet}(\mathcal T_s;\lambda)$$</div><div class="equation">$$\mathcal V_t=\{t-V,\ldots,t-1\}$$</div><div class="equation">$$\hat\lambda_t=\arg\min_{\lambda\in\Lambda}\frac1{VA}\sum_{s\in\mathcal V_t}\sum_i(r_{is}-x_{is}^\top\widehat\beta_s(\lambda))^2$$</div><div class="equation">$$\widehat\beta_t=\operatorname{ElasticNet}(\mathcal T_t;\hat\lambda_t),\quad s_{it}=x_{it}^\top\widehat\beta_t$$</div><div class="equation">$$V_t^{\mathrm{NAV}}=V_{t-1}^{\mathrm{NAV}}(1-f_t)(1+w_t^\top r_t)$$</div><h2>解析案例与研究设计</h2><p>解析样本为四资产固定特征及线性收益关系，L=3、V=2，两组候选，两个外层日期。第一候选λ₁=0、λ₂=0.1产生较小的内层误差，最终保持正斜率，零成本日收益4％；净值1.04及1.0816。可以直接改变外层第一天的标签，检查当天候选选择、分数及权重保持不变。</p><p>实现每外层需要候选数×V次内层拟合及一次外层拟合，成本明显高于单一固定参数回测。工作量限制使用训练Gram与迭代成本上界。平衡面板、固定资产池和明确起始可用特征为必要输入契约；重叠标签需额外净化，不能仅以日期先后保证标签已知。</p><h2>可执行输入与解析基准</h2><p>输入数据为独立构造的教学样本。下表给出可解析核对的输出前缀；其他诊断字段由模型实际拟合产生，并通过回归测试检查。</p><p><a href="../research/model-examples/nested-elastic-selection.csv" download>下载CSV样本</a></p><pre>Date,Asset,RealizedReturn,X1
+1,1,-0.02,-2
+1,2,-0.01,-1
+1,3,0.01,1
+1,4,0.02,2
+2,1,-0.02,-2
+2,2,-0.01,-1
+2,3,0.01,1
+2,4,0.02,2
+3,1,-0.02,-2
+3,2,-0.01,-1
+3,3,0.01,1
+3,4,0.02,2
+4,1,-0.02,-2
+4,2,-0.01,-1
+4,3,0.01,1
+4,4,0.02,2
+5,1,-0.02,-2
+5,2,-0.01,-1
+5,3,0.01,1
+5,4,0.02,2
+6,1,-0.02,-2
+6,2,-0.01,-1
+6,3,0.01,1
+6,4,0.02,2
+7,1,-0.02,-2
+7,2,-0.01,-1
+7,3,0.01,1
+7,4,0.02,2
+</pre><pre>./build/kline_quant model-nested-elastic-selection quant/research/model-examples/nested-elastic-selection.csv 3 2 0.25 0 1e-9 1000 0 0.1 0.005 0.1</pre><div class="wide"><table><thead><tr><th>Date</th><th>GrossReturn</th><th>NetReturn</th><th>NAV</th></tr></thead><tbody><tr><td>6</td><td>0.04</td><td>0.04</td><td>1.04</td></tr><tr><td>7</td><td>0.04</td><td>0.04</td><td>1.0816</td></tr></tbody></table></div><p>输出字段：Date，GrossReturn，NetReturn，NAV，Fee，Turnover，SelectedCandidate，L1，L2，InnerMSE，OuterKKT，ValidationStart，ValidationEnd，Weight1，Weight2，Weight3，Weight4，Score1，Score2，Score3，Score4。</p><h2>C++17实现</h2><pre>inline Report nested_elastic_selection(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,8,4,19)-3;
+    require(p.size()&gt;=8&amp;&amp;p.size()%2==0,"Six controls followed by L1/L2 pairs");
+    parameters(p,p.size());
+    double frac=p[2],cost=p[3],tol=positive(p[4]);auto K=count(p[5],1,100000),C=(p.size()-6)/2;
+    require(frac&gt;0&amp;&amp;frac&lt;=.5&amp;&amp;cost&gt;=0&amp;&amp;cost&lt;.5&amp;&amp;C&lt;=32,"Invalid portfolio or candidate count");
+    std::size_t A=1;while(A&lt;x.size()&amp;&amp;x[A][0]==x[0][0])++A;
+    require(A&gt;=2&amp;&amp;A&lt;=32&amp;&amp;x.size()%A==0,"Balanced panel required");auto n=x.size()/A;
+    auto look=count(p[0],2,n-2),val=count(p[1],1,n-look-1);
+    require(double(n-look-val)*(double(C)*val+1)*(double(look)*A+K)*d*d&lt;=2e8,"Nested fit work limit");
+    for(std::size_t j=0;j&lt;C;++j)require(p[6+2*j]&gt;=0&amp;&amp;p[7+2*j]&gt;0,"Invalid candidate penalty");
+    for(std::size_t t=0;t&lt;n;++t)for(std::size_t j=0;j&lt;A;++j){
+        auto&amp;r=x[t*A+j];require(r[0]==x[t*A][0]&amp;&amp;r[1]==x[j][1]&amp;&amp;r[0]==std::floor(r[0])&amp;&amp;r[1]==std::floor(r[1])&amp;&amp;r[2]&gt;=-1,"Invalid panel row");
+        if(j)require(x[j][1]&gt;x[j-1][1],"Increasing asset IDs required");
+        if(t)require(r[0]&gt;x[(t-1)*A][0],"Increasing dates required");
+    }
+    auto fit=[&amp;](std::size_t t,std::size_t k){
+        Mat a;for(std::size_t j=(t-look)*A;j&lt;t*A;++j){Vec z(x[j].begin()+3,x[j].end());z.push_back(x[j][2]);a.push_back(z);}
+        auto r=fista_elastic(a,{p[6+2*k],p[7+2*k],tol,double(K)});Vec w;for(auto&amp;v:r.rows)w.push_back(v[1]);return std::make_pair(w,r.rows[0][3]);
+    };
+    auto predict=[&amp;](std::size_t t,const Vec&amp; w){
+        Vec s;for(std::size_t j=0;j&lt;A;++j){Vec a(x[t*A+j].begin()+3,x[t*A+j].end());s.push_back(dot(a,w));}return s;
+    };
+    Report o{{"Date","GrossReturn","NetReturn","NAV","Fee","Turnover","SelectedCandidate","L1","L2","InnerMSE","OuterKKT","ValidationStart","ValidationEnd"},{}};
+    for(std::size_t j=0;j&lt;A;++j)o.header.push_back("Weight"+std::to_string(j+1));
+    for(std::size_t j=0;j&lt;A;++j)o.header.push_back("Score"+std::to_string(j+1));
+    Vec old(A,0);double nav=1;
+    for(std::size_t t=look+val;t&lt;n;++t){
+        double best=std::numeric_limits&lt;double&gt;::infinity();std::size_t selected=0;
+        for(std::size_t k=0;k&lt;C;++k){
+            double loss=0;
+            for(std::size_t s=t-val;s&lt;t;++s){
+                auto w=fit(s,k);Vec z=predict(s,w.first);
+                for(std::size_t j=0;j&lt;A;++j){double e=x[s*A+j][2]-z[j];loss+=e*e/(double(val)*A);}
+            }
+            if(loss&lt;best){best=loss;selected=k;}
+        }
+        auto b=fit(t,selected);Vec score=predict(t,b.first),ret,w;Mat rank;
+        for(std::size_t j=0;j&lt;A;++j){rank.push_back({score[j]});ret.push_back(x[t*A+j][2]);}
+        auto tails=depth_factorconstruction::tie_aware_tail_weights(rank,{frac});for(auto&amp;r:tails.rows)w.push_back(r[4]);
+        auto step=researchflow::trade_step(old,w,ret,cost);nav=positive(nav*(1+step.net));
+        Vec r{x[t*A][0],step.gross,step.net,nav,step.fee,step.turnover,double(selected+1),p[6+2*selected],p[7+2*selected],best,b.second,x[(t-val)*A][0],x[(t-1)*A][0]};
+        r.insert(r.end(),w.begin(),w.end());r.insert(r.end(),score.begin(),score.end());o.rows.push_back(r);old=std::move(step.drift);
+    }
+    return o;
+}</pre><p>参考文献：<a href="https://otexts.com/fpp3/tscv.html">Hyndman and Athanasopoulos (2021), Forecasting: Principles and Practice, 3rd ed., Time Series Cross-Validation.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>
