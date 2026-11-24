@@ -63,6 +63,7 @@
 #include "model_research_dynamics.hpp"
 #include "model_research_pricing.hpp"
 #include "model_research_portfolio.hpp"
+#include "model_research_systems.hpp"
 namespace kline {
 inline bool run_evidence_cli(const std::string& command,int argc,char** argv,std::ostream& out){
     using Function=researchflow::Report(*)(const researchflow::Mat&,const researchflow::Vec&);
@@ -333,6 +334,12 @@ inline bool run_evidence_cli(const std::string& command,int argc,char** argv,std
     if(command=="model-synthetic-control-fit")fn=model_research::synthetic_control_fit;
     if(command=="model-crossfit-dml-ridge")fn=model_research::crossfit_dml_ridge;
     if(command=="model-rolling-conformal-ridge")fn=model_research::rolling_conformal_ridge;
+    if(command=="model-nested-elastic-selection")fn=model_research::nested_elastic_selection;
+    if(command=="model-cvar-primal-dual")fn=model_research::cvar_primal_dual;
+    if(command=="model-turnover-admm-qp")fn=model_research::turnover_admm_qp;
+    if(command=="model-rolling-factor-risk-qp")fn=model_research::rolling_factor_risk_qp;
+    if(command=="model-integer-execution-dp")fn=model_research::integer_execution_dp;
+    if(command=="model-inventory-quote-dp")fn=model_research::inventory_quote_dp;
     if(!fn)return false;
     require(argc>=3,"Evidence laboratory requires a numeric CSV");
     researchflow::Vec p;
@@ -574,6 +581,12 @@ inline void evidence_usage(std::ostream& out){
     out<<"  model-synthetic-control-fit CSV PARAMETERS...\n";
     out<<"  model-crossfit-dml-ridge CSV PARAMETERS...\n";
     out<<"  model-rolling-conformal-ridge CSV PARAMETERS...\n";
+    out<<"  model-nested-elastic-selection CSV PARAMETERS...\n";
+    out<<"  model-cvar-primal-dual CSV PARAMETERS...\n";
+    out<<"  model-turnover-admm-qp CSV PARAMETERS...\n";
+    out<<"  model-rolling-factor-risk-qp CSV PARAMETERS...\n";
+    out<<"  model-integer-execution-dp CSV PARAMETERS...\n";
+    out<<"  model-inventory-quote-dp CSV PARAMETERS...\n";
     out<<"Evidence laboratories: evidence-METHOD CSV [PARAMETERS...]\n";
     out<<"  evidence-hj-bound CSV PARAMETERS...\n";
     out<<"  evidence-minimum-norm-sdf CSV PARAMETERS...\n";

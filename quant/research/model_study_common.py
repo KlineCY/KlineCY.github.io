@@ -7,7 +7,7 @@ import subprocess
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parent/"model-examples"
-GROUPS=("optimization","likelihood","dynamics","pricing","portfolio")
+GROUPS=("optimization","likelihood","dynamics","pricing","portfolio","systems")
 CATALOG=[c for group in GROUPS for c in json.loads((ROOT/f"catalog-{group}.json").read_text(encoding="utf-8"))]
 INDEX={c["command"][6:]:c for c in CATALOG}
 
