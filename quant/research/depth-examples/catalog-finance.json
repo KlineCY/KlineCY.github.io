@@ -1,0 +1,830 @@
+[
+  {
+    "command": "depth-digital-decomposition",
+    "group": "optiongreeks",
+    "file": "digital-decomposition.csv",
+    "title": "现金二元与资产二元期权的支付分解",
+    "columns": [
+      "Spot",
+      "Strike",
+      "Rate",
+      "Dividend",
+      "Vol",
+      "Time"
+    ],
+    "params": [],
+    "header": [
+      "CashDigital",
+      "AssetDigital",
+      "ReplicatedCall",
+      "RiskNeutralITM"
+    ],
+    "expected": [
+      [
+        0.4601721627229711,
+        53.98278372770289,
+        7.965567455405775,
+        0.4601721627229711
+      ]
+    ]
+  },
+  {
+    "command": "depth-vanna-volga",
+    "group": "optiongreeks",
+    "file": "vanna-volga.csv",
+    "title": "Black–Scholes交叉敏感度Vanna与Volga",
+    "columns": [
+      "Spot",
+      "Strike",
+      "Rate",
+      "Dividend",
+      "Vol",
+      "Time"
+    ],
+    "params": [],
+    "header": [
+      "Vega",
+      "Vanna",
+      "Volga"
+    ],
+    "expected": [
+      [
+        39.69525474770118,
+        0.1984762737385059,
+        -1.9847627373850592
+      ]
+    ]
+  },
+  {
+    "command": "depth-delta-hedge-variance",
+    "group": "optiongreeks",
+    "file": "delta-hedge-variance.csv",
+    "title": "零持有成本近似下Gamma对冲方差损益",
+    "columns": [
+      "Spot",
+      "Gamma",
+      "Return",
+      "TimeStep"
+    ],
+    "params": [
+      0.2
+    ],
+    "header": [
+      "Period",
+      "RealizedGamma",
+      "ImpliedTheta",
+      "NetApprox",
+      "Cumulative"
+    ],
+    "expected": [
+      [
+        1,
+        0.09,
+        -0.015873015873015872,
+        0.07412698412698412,
+        0.07412698412698412
+      ],
+      [
+        2,
+        0.01,
+        -0.015873015873015872,
+        -0.005873015873015872,
+        0.06825396825396826
+      ]
+    ]
+  },
+  {
+    "command": "depth-spot-vol-taylor",
+    "group": "optiongreeks",
+    "file": "spot-vol-taylor.csv",
+    "title": "现货与波动率联合冲击的二阶损益归因",
+    "columns": [
+      "Position",
+      "Delta",
+      "Gamma",
+      "Vega",
+      "Vanna",
+      "Volga"
+    ],
+    "params": [
+      3,
+      0.02
+    ],
+    "header": [
+      "PositionIndex",
+      "DeltaPnL",
+      "GammaPnL",
+      "VegaPnL",
+      "VannaPnL",
+      "VolgaPnL",
+      "TotalApprox"
+    ],
+    "expected": [
+      [
+        1,
+        3,
+        0.18,
+        0.4,
+        0.012,
+        0.0008,
+        3.5928
+      ],
+      [
+        2,
+        -0.6,
+        -0.045,
+        -0.08,
+        -0.003,
+        -0.0002,
+        -0.7282
+      ]
+    ]
+  },
+  {
+    "command": "depth-log-discount-forward",
+    "group": "termstructure",
+    "file": "log-discount-forward.csv",
+    "title": "对数贴现曲线的区间瞬时远期",
+    "columns": [
+      "Time",
+      "Discount"
+    ],
+    "params": [],
+    "header": [
+      "Start",
+      "End",
+      "DiscountRatio",
+      "ContinuousForward"
+    ],
+    "expected": [
+      [
+        0,
+        1,
+        0.95,
+        0.05129329438755058
+      ],
+      [
+        1,
+        3,
+        0.8526315789473685,
+        0.07971386846405099
+      ]
+    ]
+  },
+  {
+    "command": "depth-forward-swap-annuity",
+    "group": "termstructure",
+    "file": "forward-swap-annuity.csv",
+    "title": "远期起始互换的固定腿年金与平价利率",
+    "columns": [
+      "Accrual",
+      "Discount"
+    ],
+    "params": [
+      1,
+      100,
+      0.1
+    ],
+    "header": [
+      "Annuity",
+      "ParRate",
+      "FixedPV",
+      "FloatPV",
+      "ReceiveFixedPV",
+      "DV01"
+    ],
+    "expected": [
+      [
+        0.925,
+        0.10810810810810811,
+        9.25,
+        10,
+        -0.75,
+        0.00925
+      ]
+    ]
+  },
+  {
+    "command": "depth-fra-settlement",
+    "group": "termstructure",
+    "file": "fra-settlement.csv",
+    "title": "FRA在计息期开始时的提前现金结算",
+    "columns": [
+      "FixingRate",
+      "Accrual"
+    ],
+    "params": [
+      1000,
+      0.04
+    ],
+    "header": [
+      "FixingRate",
+      "Accrual",
+      "EndPayment",
+      "StartSettlement"
+    ],
+    "expected": [
+      [
+        0.06,
+        0.5,
+        10,
+        9.70873786407767
+      ],
+      [
+        0.02,
+        0.5,
+        -10,
+        -9.900990099009901
+      ]
+    ]
+  },
+  {
+    "command": "depth-overnight-accrual-bridge",
+    "group": "termstructure",
+    "file": "overnight-accrual-bridge.csv",
+    "title": "隔夜复利的逐日累计与线性差额",
+    "columns": [
+      "Rate",
+      "DayFraction"
+    ],
+    "params": [],
+    "header": [
+      "Period",
+      "AccrualFactor",
+      "CompoundedReturn",
+      "SimpleAccrued",
+      "CompoundingGap"
+    ],
+    "expected": [
+      [
+        1,
+        1.01,
+        0.01,
+        0.01,
+        0
+      ],
+      [
+        2,
+        1.02,
+        0.030200000000000005,
+        0.03,
+        0.0002
+      ]
+    ]
+  },
+  {
+    "command": "depth-node-martingale",
+    "group": "dynamicpricing",
+    "file": "node-martingale.csv",
+    "title": "风险中性树的逐节点鞅缺口",
+    "columns": [
+      "Node",
+      "Parent",
+      "Child",
+      "Probability",
+      "Discount"
+    ],
+    "params": [],
+    "header": [
+      "Node",
+      "Parent",
+      "DiscountedChildMean",
+      "MartingaleGap"
+    ],
+    "expected": [
+      [
+        1,
+        100,
+        100,
+        0
+      ],
+      [
+        2,
+        50,
+        47.5,
+        -2.5
+      ]
+    ]
+  },
+  {
+    "command": "depth-numeraire-measure",
+    "group": "dynamicpricing",
+    "file": "numeraire-measure.csv",
+    "title": "有限情景的计价基准测度变换",
+    "columns": [
+      "BaseProbability",
+      "RelativeNumeraire",
+      "PayoffInNewUnits"
+    ],
+    "params": [],
+    "header": [
+      "Scenario",
+      "NewProbability",
+      "BaseWeightedPayoff",
+      "NewWeightedPayoff"
+    ],
+    "expected": [
+      [
+        1,
+        0.25,
+        0.5,
+        0.5
+      ],
+      [
+        2,
+        0.75,
+        3,
+        3
+      ]
+    ]
+  },
+  {
+    "command": "depth-stopping-policy-value",
+    "group": "dynamicpricing",
+    "file": "stopping-policy-value.csv",
+    "title": "固定停止策略的路径估值与行权分布",
+    "columns": [
+      "Payoff0",
+      "Payoff1",
+      "Payoff2",
+      "Exercise0",
+      "Exercise1"
+    ],
+    "params": [],
+    "header": [
+      "Path",
+      "ExerciseTime",
+      "DiscountedPayoff",
+      "RunningMean"
+    ],
+    "expected": [
+      [
+        1,
+        1,
+        3,
+        3
+      ],
+      [
+        2,
+        2,
+        4,
+        3.5
+      ],
+      [
+        3,
+        0,
+        1,
+        2.6666666666666665
+      ]
+    ]
+  },
+  {
+    "command": "depth-dual-stopping-bound",
+    "group": "dynamicpricing",
+    "file": "dual-stopping-bound.csv",
+    "title": "美式期权的鞅对偶上界",
+    "columns": [
+      "H0",
+      "H1",
+      "H2",
+      "M0",
+      "M1",
+      "M2"
+    ],
+    "params": [],
+    "header": [
+      "Path",
+      "PathwiseUpper",
+      "RunningMean"
+    ],
+    "expected": [
+      [
+        1,
+        2,
+        2
+      ],
+      [
+        2,
+        5,
+        3.5
+      ]
+    ]
+  },
+  {
+    "command": "depth-forward-default",
+    "group": "creditmodels",
+    "file": "forward-default.csv",
+    "title": "生存条件下的远期违约概率与区间强度",
+    "columns": [
+      "Start",
+      "End",
+      "SurvivalStart",
+      "SurvivalEnd"
+    ],
+    "params": [],
+    "header": [
+      "Start",
+      "End",
+      "UnconditionalPD",
+      "ConditionalPD",
+      "AverageHazard"
+    ],
+    "expected": [
+      [
+        0,
+        1,
+        0.1,
+        0.1,
+        0.10536051565782628
+      ],
+      [
+        1,
+        3,
+        0.09,
+        0.1,
+        0.05268025782891314
+      ]
+    ]
+  },
+  {
+    "command": "depth-margin-period-risk",
+    "group": "creditmodels",
+    "file": "margin-period-risk.csv",
+    "title": "保证金冻结期间的暴露跃迁",
+    "columns": [
+      "ValueAtMargin",
+      "CollateralAtMargin",
+      "ValueAtCloseout"
+    ],
+    "params": [],
+    "header": [
+      "Scenario",
+      "InitialExposure",
+      "CloseoutExposure",
+      "ExposureIncrease"
+    ],
+    "expected": [
+      [
+        1,
+        5,
+        25,
+        20
+      ],
+      [
+        2,
+        5,
+        0,
+        -5
+      ]
+    ]
+  },
+  {
+    "command": "depth-heterogeneous-credit-mixture",
+    "group": "creditmodels",
+    "file": "heterogeneous-credit-mixture.csv",
+    "title": "异质违约损失的条件矩与共同状态风险",
+    "columns": [
+      "Scenario",
+      "ScenarioProbability",
+      "LossGivenDefault",
+      "ConditionalPD"
+    ],
+    "params": [],
+    "header": [
+      "ExpectedLoss",
+      "WithinVariance",
+      "BetweenVariance",
+      "TotalVariance"
+    ],
+    "expected": [
+      [
+        8,
+        95,
+        9,
+        104
+      ]
+    ]
+  },
+  {
+    "command": "depth-exponential-hazard-mle",
+    "group": "creditmodels",
+    "file": "exponential-hazard-mle.csv",
+    "title": "右删失指数生存模型的强度极大似然",
+    "columns": [
+      "ExposureTime",
+      "DefaultEvent"
+    ],
+    "params": [],
+    "header": [
+      "Defaults",
+      "TotalExposure",
+      "Hazard",
+      "LogLikelihood",
+      "OneYearPD"
+    ],
+    "expected": [
+      [
+        2,
+        4,
+        0.5,
+        -3.386294361119891,
+        0.3934693402873666
+      ]
+    ]
+  },
+  {
+    "command": "depth-ellipsoid-worst-mean",
+    "group": "robustallocation",
+    "file": "ellipsoid-worst-mean.csv",
+    "title": "椭球均值不确定集的最坏组合期望",
+    "columns": [
+      "Weight",
+      "Mean",
+      "UncertaintyScale"
+    ],
+    "params": [
+      2
+    ],
+    "header": [
+      "NominalReturn",
+      "UncertaintyNorm",
+      "WorstCaseReturn"
+    ],
+    "expected": [
+      [
+        0.08,
+        0.01697056274847714,
+        0.04605887450304572
+      ]
+    ]
+  },
+  {
+    "command": "depth-stochastic-dominance",
+    "group": "robustallocation",
+    "file": "stochastic-dominance.csv",
+    "title": "共同有限支持的一阶及二阶随机占优",
+    "columns": [
+      "Outcome",
+      "P_A",
+      "P_B"
+    ],
+    "params": [],
+    "header": [
+      "Outcome",
+      "CDFA",
+      "CDFB",
+      "IntegralDifference",
+      "AFirstOrder",
+      "ASecondOrder"
+    ],
+    "expected": [
+      [
+        0,
+        0.2,
+        0.4,
+        0,
+        1,
+        1
+      ],
+      [
+        1,
+        0.5,
+        0.8,
+        -0.2,
+        1,
+        1
+      ],
+      [
+        2,
+        1,
+        1,
+        -0.5,
+        1,
+        1
+      ]
+    ]
+  },
+  {
+    "command": "depth-single-asset-no-trade",
+    "group": "robustallocation",
+    "file": "single-asset-no-trade.csv",
+    "title": "线性成本下的单资产不交易区间",
+    "columns": [
+      "Current",
+      "Target",
+      "Curvature"
+    ],
+    "params": [
+      0.2,
+      0,
+      1
+    ],
+    "header": [
+      "Current",
+      "Target",
+      "NewWeight",
+      "Trade",
+      "Cost"
+    ],
+    "expected": [
+      [
+        0.2,
+        0.25,
+        0.2,
+        0,
+        0
+      ],
+      [
+        0.2,
+        0.5,
+        0.4,
+        0.2,
+        0.04
+      ],
+      [
+        0.8,
+        0.5,
+        0.6,
+        -0.2,
+        0.04
+      ]
+    ]
+  },
+  {
+    "command": "depth-mean-estimation-risk",
+    "group": "robustallocation",
+    "file": "mean-estimation-risk.csv",
+    "title": "固定组合均值估计误差与收益风险",
+    "columns": [
+      "Cov1",
+      "Cov2",
+      "Weight"
+    ],
+    "params": [
+      100
+    ],
+    "header": [
+      "PortfolioVariance",
+      "MeanEstimateVariance",
+      "MeanEstimateSE"
+    ],
+    "expected": [
+      [
+        0.0336,
+        0.000336,
+        0.01833030277982336
+      ]
+    ]
+  },
+  {
+    "command": "depth-forward-variance",
+    "group": "volatility",
+    "file": "forward-variance.csv",
+    "title": "隐含总方差的远期方差提取",
+    "columns": [
+      "Start",
+      "End",
+      "VolStart",
+      "VolEnd"
+    ],
+    "params": [],
+    "header": [
+      "Start",
+      "End",
+      "TotalVarianceStart",
+      "TotalVarianceEnd",
+      "ForwardVariance",
+      "ForwardVol"
+    ],
+    "expected": [
+      [
+        1,
+        2,
+        0.04,
+        0.125,
+        0.085,
+        0.29154759474226505
+      ],
+      [
+        0,
+        1,
+        0,
+        0.09,
+        0.09,
+        0.3
+      ]
+    ]
+  },
+  {
+    "command": "depth-noise-signature",
+    "group": "volatility",
+    "file": "noise-signature.csv",
+    "title": "独立报价噪声下实现方差的频率偏差",
+    "columns": [
+      "Intervals"
+    ],
+    "params": [
+      0.04,
+      0.00001
+    ],
+    "header": [
+      "Intervals",
+      "EfficientVariance",
+      "NoiseBias",
+      "ExpectedRV"
+    ],
+    "expected": [
+      [
+        10,
+        0.04,
+        0.0002,
+        0.0402
+      ],
+      [
+        100,
+        0.04,
+        0.002,
+        0.042
+      ],
+      [
+        1000,
+        0.04,
+        0.02,
+        0.06
+      ]
+    ]
+  },
+  {
+    "command": "depth-lognormal-vol-convexity",
+    "group": "volatility",
+    "file": "lognormal-vol-convexity.csv",
+    "title": "对数正态实现方差下的波动率凸性调整",
+    "columns": [
+      "MeanVariance",
+      "LogVariance"
+    ],
+    "params": [],
+    "header": [
+      "MeanVariance",
+      "SqrtMeanVariance",
+      "ExpectedVol",
+      "ConvexityGap"
+    ],
+    "expected": [
+      [
+        0.04,
+        0.2,
+        0.19603973466135105,
+        0.003960265338648949
+      ],
+      [
+        0.09,
+        0.3,
+        0.3,
+        0
+      ]
+    ]
+  },
+  {
+    "command": "depth-gjr-news-impact",
+    "group": "volatility",
+    "file": "gjr-news-impact.csv",
+    "title": "GJR-GARCH的非对称新闻冲击曲线",
+    "columns": [
+      "Innovation"
+    ],
+    "params": [
+      0.1,
+      0.1,
+      0.2,
+      0.7,
+      1
+    ],
+    "header": [
+      "Innovation",
+      "SymmetricComponent",
+      "AsymmetryComponent",
+      "NextVariance"
+    ],
+    "expected": [
+      [
+        -2,
+        0.4,
+        0.8,
+        2
+      ],
+      [
+        0,
+        0,
+        0,
+        0.8
+      ],
+      [
+        2,
+        0.4,
+        0,
+        1.2
+      ]
+    ]
+  }
+]
