@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>多资产交易会计与自融资约束｜Kline Quant</title><meta name="description" content="量化研究专题：模型、数学推导、C++17计算、独立数值算例与实证边界">
+<link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<style>body{margin:0;background:white;color:#182a35;font:16px/1.95 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:24px 32px 64px}main{max-width:1180px;margin:auto}header,.lesson,.source,.references,.framework{border:1px solid #cbd4dc;padding:24px 28px;margin:18px 0;background:white}h1{font-size:31px;line-height:1.4}h2{font-size:23px;margin:10px 0 20px}h3{font-size:18px;margin:24px 0 8px}p{line-height:1.95;margin:12px 0}.toc{display:flex;flex-wrap:wrap;gap:9px 24px;border:1px solid #cad3d9;padding:17px 24px}.equation{overflow:auto;border-block:1px solid #d7dfe4;margin:18px 0;padding:16px 6px}.katex-display{overflow-x:auto;overflow-y:hidden}a{color:#1a5478}code,pre{font-family:"Times New Roman",monospace}pre{border:1px solid #cbd5dc;padding:15px;overflow:auto;white-space:pre;font-size:14px;line-height:1.7;max-height:900px}table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}td,th{border:1px solid #ccd5dd;padding:8px 12px;text-align:right;background:white;white-space:nowrap}th{font-weight:bold;text-align:left}.wide{overflow-x:auto}dl{display:grid;grid-template-columns:110px minmax(0,1fr);gap:10px 15px}dt{font-weight:bold}dd{margin:0;overflow-wrap:anywhere}@media(max-width:790px){.main{margin:0;padding:12px}header,.lesson,.source,.references,.framework{padding:15px}dl{display:block}dt{margin-top:12px}}</style>
+</head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main>
+<header><small>QUANTITATIVE RESEARCH / EVIDENCE LABORATORIES</small><h1>多资产交易会计与自融资约束</h1><p>策略的目标权重只有在交易、现金、费用、公司行为与保证金共同进入会计系统后，才能转化为可核对的净值路径。本专题研究多资产持仓的货币单位、交易前后权益、期货逐日结算及外币资产收益的组成关系。</p><p><a href="../research/evidence-laboratories.html">完整研究入口</a>　｜　<a href="../cpp/">C++17工具库</a></p></header><nav class="toc"><a href="#lesson1">1．异质费率下的精确自融资再平衡</a><a href="#lesson2">2．拆股、现金分红与实际股数账本</a><a href="#lesson3">3．期货结算、仓位变化与保证金补足</a><a href="#lesson4">4．外币资产收益的精确汇率交叉项</a><a href="#source">完整算法源码</a><a href="#references">参考文献</a></nav><section class="framework"><h2>研究流程与模型联系</h2><p>费用使用交易前权益比例，实际股数及现金使用货币金额，期货变动保证金使用合约乘数，外币资产使用本币计价收益。每个接口明确自己的单位，避免将名义敞口、现金余额、损益或外部入金混为一谈。真实账本应按事件顺序连接这些模块，并核对每期资金恒等式。</p></section><article class="lesson" id="lesson1"><h2>1．异质费率下的精确自融资再平衡</h2><h3>经济问题与数学定义</h3><div class="equation">$$f=\sum_i c_i|(1-f)w_i-w_i^-|,\quad E^+=(1-f)E^-$$</div><p>将旧权重按交易前权益表示、目标权重按交易后权益表示，各资产具有单独费率。费用方程是分段线性固定点；若总目标费用斜率上界小于1，且完全平仓费用不耗尽权益，则唯一解位于[0,1)。二分求根后逐资产输出实际成交金额比例。</p><h3>估计推导与计算结构</h3><div class="equation">$$|g(f)-g(h)|\le\left(\sum_i c_i|w_i|\right)|f-h|$$</div><h3>可复现数据与参数</h3><dl><dt>输入文件</dt><dd><a href="../research/evidence-examples/heterogeneous-cost-rebalance.csv" download>heterogeneous-cost-rebalance.csv</a></dd><dt>输入字段</dt><dd>OldWeight,TargetWeight,CostRate</dd><dt>参数顺序</dt><dd>无额外参数</dd><dt>输出字段</dt><dd>Asset, OldWeight, TargetWeight, SignedTrade, Fee, TotalFee, PostTradeEquity</dd></dl><pre><code>OldWeight,TargetWeight,CostRate
+0,0.5,0.01
+0,0.5,0.03
+</code></pre><pre><code>./build/kline_quant evidence-heterogeneous-cost-rebalance quant/research/evidence-examples/heterogeneous-cost-rebalance.csv</code></pre><h3>解析基准与输出</h3><p>两资产均从空仓增持至交易后50%权重，费率1%和3%；费用率f满足f=0.02(1−f)，交易后权益为1/1.02，两个成交金额均为0.5/1.02。</p><div class="wide"><table><thead><tr><th>Asset</th><th>OldWeight</th><th>TargetWeight</th><th>SignedTrade</th><th>Fee</th><th>TotalFee</th><th>PostTradeEquity</th></tr></thead><tbody><tr><td>1</td><td>0</td><td>0.5</td><td>0.4901960784</td><td>0.004901960784</td><td>0.01960784314</td><td>0.9803921569</td></tr><tr><td>2</td><td>0</td><td>0.5</td><td>0.4901960784</td><td>0.01470588235</td><td>0.01960784314</td><td>0.9803921569</td></tr></tbody></table></div><h3>实证假设与适用边界</h3><p>仅含线性比例成本，不含固定订单费、市场冲击、整手限制或资金利率。多空融资与借券可得性需另行约束。</p></article>
+<article class="lesson" id="lesson2"><h2>2．拆股、现金分红与实际股数账本</h2><h3>经济问题与数学定义</h3><div class="equation">$$n_t=s_tn_{t-1}+q_t,\quad C_t=C_{t-1}+d_tn_{t-1}-P_tq_t-f_t$$</div><p>使用未复权价格与真实股数。先按旧股数发放每旧股现金股息，再乘拆股比例获得新股数；交易按新股口径和当期价格执行。每期现金扣除成交名义金额与明确费用，最后按当期价格估值。</p><h3>估计推导与计算结构</h3><div class="equation">$$E_t=C_t+P_t n_t$$</div><h3>可复现数据与参数</h3><dl><dt>输入文件</dt><dd><a href="../research/evidence-examples/corporate-action-cashbook.csv" download>corporate-action-cashbook.csv</a></dd><dt>输入字段</dt><dd>Close,SplitRatio,DividendPerOldShare,TradeNewShares,Fee</dd><dt>参数顺序</dt><dd>初始现金、初始股数</dd><dt>输出字段</dt><dd>Period, Shares, Cash, MarketValue, Equity, DividendCash, Fee</dd></dl><pre><code>Close,SplitRatio,DividendPerOldShare,TradeNewShares,Fee
+100,1,0,2,1
+50,2,1,0,0
+55,1,0,-1,1
+</code></pre><pre><code>./build/kline_quant evidence-corporate-action-cashbook quant/research/evidence-examples/corporate-action-cashbook.csv 1000 0</code></pre><h3>解析基准与输出</h3><p>初始现金1000，先买2股100元并支付1元，权益999；随后一拆二、每旧股分红1元、价格50元，权益1001；最后卖1股55元支付1元，剩3股及855元现金，权益1020。</p><div class="wide"><table><thead><tr><th>Period</th><th>Shares</th><th>Cash</th><th>MarketValue</th><th>Equity</th><th>DividendCash</th><th>Fee</th></tr></thead><tbody><tr><td>0</td><td>2</td><td>799</td><td>200</td><td>999</td><td>0</td><td>1</td></tr><tr><td>1</td><td>4</td><td>801</td><td>200</td><td>1001</td><td>2</td><td>0</td></tr><tr><td>2</td><td>3</td><td>855</td><td>165</td><td>1020</td><td>0</td><td>1</td></tr></tbody></table></div><h3>实证假设与适用边界</h3><p>程序按现金到账与拆股先于当期交易的明确约定记账；实际除息、登记、派息日期不同，须先转换至该事件口径。仅长仓且不允许负现金。</p></article>
+<article class="lesson" id="lesson3"><h2>3．期货结算、仓位变化与保证金补足</h2><h3>经济问题与数学定义</h3><div class="equation">$$\Delta C_t=n_{t-1}M(F_t-F_{t-1})-f_t,\quad A_t=|n_t|MF_t\eta_t$$</div><p>每次结算先根据上一期合约数计算变动保证金，再按当前结算价切换到新的合约数并扣除手续费。目标保证金不足时计算外部补足额，并保留扣除累计补足后的净经济权益，避免把外部入金误计为投资利润。</p><h3>估计推导与计算结构</h3><div class="equation">$$I_t=(A_t-C_t^-)_{+},\quad C_t=C_t^-+I_t$$</div><h3>可复现数据与参数</h3><dl><dt>输入文件</dt><dd><a href="../research/evidence-examples/futures-margin-cashbook.csv" download>futures-margin-cashbook.csv</a></dd><dt>输入字段</dt><dd>Settlement,TargetContracts,MarginRate,Fee</dd><dt>参数顺序</dt><dd>初始现金、合约乘数</dd><dt>输出字段</dt><dd>Period, Contracts, VariationMargin, Fee, Cash, RequiredMargin, FreeCash, ExternalTopup, EquityNetOfTopups</dd></dl><pre><code>Settlement,TargetContracts,MarginRate,Fee
+100,2,0.1,2
+90,2,0.1,0
+95,1,0.1,1
+</code></pre><pre><code>./build/kline_quant evidence-futures-margin-cashbook quant/research/evidence-examples/futures-margin-cashbook.csv 300 10</code></pre><h3>解析基准与输出</h3><p>初始300元，乘数10，开2张合约扣2元。价格从100跌至90时亏200元，余额98元低于180元保证金需求，补入82元。下期涨到95，原2张合约盈利100元，减仓手续费1元，现金279元。</p><div class="wide"><table><thead><tr><th>Period</th><th>Contracts</th><th>VariationMargin</th><th>Fee</th><th>Cash</th><th>RequiredMargin</th><th>FreeCash</th><th>ExternalTopup</th><th>EquityNetOfTopups</th></tr></thead><tbody><tr><td>0</td><td>2</td><td>0</td><td>2</td><td>298</td><td>200</td><td>98</td><td>0</td><td>298</td></tr><tr><td>1</td><td>2</td><td>-200</td><td>0</td><td>180</td><td>180</td><td>0</td><td>82</td><td>98</td></tr><tr><td>2</td><td>1</td><td>100</td><td>1</td><td>279</td><td>95</td><td>184</td><td>0</td><td>197</td></tr></tbody></table></div><h3>实证假设与适用边界</h3><p>这是逐日变动保证金与目标保证金的教学账本，不含初始/维持保证金双阈值、盘中强平、利息或滑点；外部补足是假设资金可用。</p></article>
+<article class="lesson" id="lesson4"><h2>4．外币资产收益的精确汇率交叉项</h2><h3>经济问题与数学定义</h3><div class="equation">$$1+r_t^{base}=(1+r_t^{local})(1+r_t^{FX})$$</div><p>汇率定义为每单位外币对应的本币数量，外币升值时FX收益为正。分别保留本地资产收益、货币收益与乘积项，并以期初外币资产权重计算对组合本币收益的贡献。</p><h3>估计推导与计算结构</h3><div class="equation">$$w_{t-1}r_t^{base}=w_{t-1}r_t^{local}+w_{t-1}r_t^{FX}+w_{t-1}r_t^{local}r_t^{FX}$$</div><h3>可复现数据与参数</h3><dl><dt>输入文件</dt><dd><a href="../research/evidence-examples/currency-return-attribution.csv" download>currency-return-attribution.csv</a></dd><dt>输入字段</dt><dd>LocalReturn,FXReturn,InitialForeignWeight</dd><dt>参数顺序</dt><dd>无额外参数</dd><dt>输出字段</dt><dd>Period, Local, FX, Interaction, BaseReturn, LocalContribution, FXContribution, InteractionContribution, TotalContribution</dd></dl><pre><code>LocalReturn,FXReturn,InitialForeignWeight
+0.1,0.2,0.6
+-0.1,0.1,0.5
+</code></pre><pre><code>./build/kline_quant evidence-currency-return-attribution quant/research/evidence-examples/currency-return-attribution.csv</code></pre><h3>解析基准与输出</h3><p>本地上涨10%、外币升值20%，本币总收益为32%，不是30%；期初权重60%时贡献19.2%，其中交叉项贡献1.2个百分点。</p><div class="wide"><table><thead><tr><th>Period</th><th>Local</th><th>FX</th><th>Interaction</th><th>BaseReturn</th><th>LocalContribution</th><th>FXContribution</th><th>InteractionContribution</th><th>TotalContribution</th></tr></thead><tbody><tr><td>0</td><td>0.1</td><td>0.2</td><td>0.02</td><td>0.32</td><td>0.06</td><td>0.12</td><td>0.012</td><td>0.192</td></tr><tr><td>1</td><td>-0.1</td><td>0.1</td><td>-0.01</td><td>-0.01</td><td>-0.05</td><td>0.05</td><td>-0.005</td><td>-0.005</td></tr></tbody></table></div><h3>实证假设与适用边界</h3><p>假设外币资产收益为同一持有期间含分配的总收益，且没有独立对冲。远期或期货对冲须另记其现金流和保证金。</p></article><section class="source" id="source"><h2>完整C++17实现</h2><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/evidence_ledger.hpp">算法源码</a>　｜　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/evidence_common.hpp">公共数值接口</a>　｜　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_evidence.py">独立测试</a></p><pre><code>#pragma once
+#include "evidence_common.hpp"
+namespace kline { namespace evidence {
+inline Report heterogeneous_cost_rebalance(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,3,3);parameters(p,0);double target=0,old=0;
+    for(const auto&amp; r:x){require(r[2]&gt;=0&amp;&amp;r[2]&lt;1,"Invalid cost rate");target+=r[2]*std::abs(r[1]);old+=r[2]*std::abs(r[0]);}
+    require(target&lt;1&amp;&amp;old&lt;1,"Fee fixed point not economically feasible");
+    auto g=[&amp;](double f){double v=0;for(const auto&amp; r:x)v+=r[2]*std::abs((1-f)*r[1]-r[0]);return v;};
+    double lo=0,hi=1;for(int k=0;k&lt;80;++k){double m=(lo+hi)/2;if(g(m)&gt;m)lo=m;else hi=m;}
+    double f=(lo+hi)/2;Report o{{"Asset","OldWeight","TargetWeight","SignedTrade","Fee","TotalFee","PostTradeEquity"},{}};
+    for(std::size_t i=0;i&lt;x.size();++i){const auto&amp; r=x[i];double q=(1-f)*r[1]-r[0];o.rows.push_back({double(i+1),r[0],r[1],q,r[2]*std::abs(q),f,1-f});}
+    return o;
+}
+
+inline Report corporate_action_cashbook(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,5,5);parameters(p,2);double cash=p[0],shares=p[1];require(cash&gt;=0&amp;&amp;shares&gt;=0,"Nonnegative initial account required");
+    Report o{{"Period","Shares","Cash","MarketValue","Equity","DividendCash","Fee"},{}};
+    for(std::size_t t=0;t&lt;x.size();++t){const auto&amp; r=x[t];positive(r[0]);positive(r[1]);require(r[2]&gt;=0&amp;&amp;r[4]&gt;=0,"Negative dividend or fee");
+        double div=shares*r[2];cash+=div-r[0]*r[3]-r[4];shares=shares*r[1]+r[3];
+        require(shares&gt;=0&amp;&amp;cash&gt;=0,"Account cannot finance the proposed trade");
+        o.rows.push_back({double(t),shares,cash,r[0]*shares,cash+r[0]*shares,div,r[4]});
+    }
+    return o;
+}
+
+inline Report futures_margin_cashbook(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,4,4);parameters(p,2);double cash=positive(p[0]),mult=positive(p[1]),old=0,injected=0,prev=x[0][0];
+    Report o{{"Period","Contracts","VariationMargin","Fee","Cash","RequiredMargin","FreeCash","ExternalTopup","EquityNetOfTopups"},{}};
+    for(std::size_t t=0;t&lt;x.size();++t){const auto&amp; r=x[t];positive(r[0]);require(std::floor(r[1])==r[1]&amp;&amp;r[2]&gt;0&amp;&amp;r[2]&lt;=1&amp;&amp;r[3]&gt;=0,"Invalid futures settlement row");
+        double pnl=old*mult*(r[0]-prev),need=std::abs(r[1])*mult*r[0]*r[2];cash+=pnl-r[3];
+        double top=std::max(0.0,need-cash);cash+=top;injected+=top;
+        o.rows.push_back({double(t),r[1],pnl,r[3],cash,need,cash-need,top,cash-injected});old=r[1];prev=r[0];
+    }
+    return o;
+}
+
+inline Report currency_return_attribution(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,3,3);parameters(p,0);Report o{{"Period","Local","FX","Interaction","BaseReturn","LocalContribution","FXContribution","InteractionContribution","TotalContribution"},{}};
+    for(std::size_t t=0;t&lt;x.size();++t){const auto&amp; r=x[t];require(r[0]&gt;=-1&amp;&amp;r[1]&gt;-1,"Invalid simple return");
+        double q=r[0]*r[1],z=r[0]+r[1]+q,w=r[2];
+        o.rows.push_back({double(t),r[0],r[1],q,z,w*r[0],w*r[1],w*q,w*z});}
+    return o;
+}
+} }
+</code></pre><p>仓库根目录编译后即可执行各章节命令。Windows多配置生成器使用<code>.\build\Release\kline_quant.exe</code>，单配置生成器使用<code>.\build\kline_quant.exe</code>。</p><pre><code>cmake -S quant/cpp -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+python quant/research/run_evidence_labs.py ./build/kline_quant evidence-results</code></pre></section><section class="references" id="references"><h2>参考文献与技术资料</h2><p><a href="https://www.cmegroup.com/education/courses/introduction-to-futures/mark-to-market.html">CME Group, Mark-to-Market</a></p><p><a href="https://www.gipsstandards.org/">CFA Institute, Global Investment Performance Standards</a></p><p><a href="https://web.stanford.edu/~boyd/cvxbook/">Boyd &amp; Vandenberghe, Convex Optimization</a></p><p>所有样本均为构造的教学数据；基准结果用于复算公式和软件实现，不代表真实交易市场表现。</p></section>
+</main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

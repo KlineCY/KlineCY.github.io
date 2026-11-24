@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>集合竞价、订单分配与市场事件模型｜Kline Quant</title><meta name="description" content="量化研究专题：模型、数学推导、C++17计算、独立数值算例与实证边界">
+<link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<style>body{margin:0;background:white;color:#182a35;font:16px/1.95 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:24px 32px 64px}main{max-width:1180px;margin:auto}header,.lesson,.source,.references,.framework{border:1px solid #cbd4dc;padding:24px 28px;margin:18px 0;background:white}h1{font-size:31px;line-height:1.4}h2{font-size:23px;margin:10px 0 20px}h3{font-size:18px;margin:24px 0 8px}p{line-height:1.95;margin:12px 0}.toc{display:flex;flex-wrap:wrap;gap:9px 24px;border:1px solid #cad3d9;padding:17px 24px}.equation{overflow:auto;border-block:1px solid #d7dfe4;margin:18px 0;padding:16px 6px}.katex-display{overflow-x:auto;overflow-y:hidden}a{color:#1a5478}code,pre{font-family:"Times New Roman",monospace}pre{border:1px solid #cbd5dc;padding:15px;overflow:auto;white-space:pre;font-size:14px;line-height:1.7;max-height:900px}table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}td,th{border:1px solid #ccd5dd;padding:8px 12px;text-align:right;background:white;white-space:nowrap}th{font-weight:bold;text-align:left}.wide{overflow-x:auto}dl{display:grid;grid-template-columns:110px minmax(0,1fr);gap:10px 15px}dt{font-weight:bold}dd{margin:0;overflow-wrap:anywhere}@media(max-width:790px){.main{margin:0;padding:12px}header,.lesson,.source,.references,.framework{padding:15px}dl{display:block}dt{margin-top:12px}}</style>
+</head><body><aside id="quantSidebar" class="sidebar" data-page="feeds"></aside><script src="../sidebar-v2.js"></script><div class="main"><main>
+<header><small>QUANTITATIVE RESEARCH / EVIDENCE LABORATORIES</small><h1>集合竞价、订单分配与市场事件模型</h1><p>连续竞价模型无法直接描述集中撮合、价格优先与排队样本的观察结构。本专题给出独立的集合竞价价格搜索、边际订单比例分配、基于订单簿状态的下一事件预测及含延迟入组的排队生存估计。</p><p><a href="../research/evidence-laboratories.html">完整研究入口</a>　｜　<a href="../cpp/">C++17工具库</a></p></header><nav class="toc"><a href="#lesson1">1．集中撮合的成交量与失衡价格搜索</a><a href="#lesson2">2．价格优先与边际价位比例成交分配</a><a href="#lesson3">3．订单簿离散状态的下一事件概率预测</a><a href="#lesson4">4．延迟入组与右删失下的订单生存估计</a><a href="#source">完整算法源码</a><a href="#references">参考文献</a></nav><section class="framework"><h2>研究流程与模型联系</h2><p>集合竞价模块先形成候选清算价格，再把选中价格送入成交分配，检验买卖两侧成交量一致。事件模型利用历史状态频数预测下一事件，生存模型则要求观察起止时间明确。实际市场规则、消息延迟和订单优先级须按交易所数据协议建模。</p></section><article class="lesson" id="lesson1"><h2>1．集中撮合的成交量与失衡价格搜索</h2><h3>经济问题与数学定义</h3><div class="equation">$$B(p)=\sum_{i:s_i=1}q_i\mathbf1_{\{b_i\ge p\}},\quad A(p)=\sum_{i:s_i=-1}q_i\mathbf1_{\{a_i\le p\}}$$</div><p>只在提交的限价集合中枚举候选，先最大化可成交量，随后最小化绝对订单失衡，再最小化与参考价的距离，最后选较低价格。该规则是一套明确的教学市场设计，不声称复制任何交易所的完整竞价规则。</p><h3>估计推导与计算结构</h3><div class="equation">$$p^*=\arg\operatorname{lexmax}_{p}\left(\min(B,A),-|B-A|,-|p-p_0|,-p\right)$$</div><h3>可复现数据与参数</h3><dl><dt>输入文件</dt><dd><a href="../research/evidence-examples/call-auction-grid.csv" download>call-auction-grid.csv</a></dd><dt>输入字段</dt><dd>Side,LimitPrice,Quantity</dd><dt>参数顺序</dt><dd>参考价格</dd><dt>输出字段</dt><dd>Price, Demand, Supply, Matched, Imbalance, Selected</dd></dl><pre><code>Side,LimitPrice,Quantity
+1,101,3
+1,100,2
+-1,99,2
+-1,100,4
+</code></pre><pre><code>./build/kline_quant evidence-call-auction-grid quant/research/evidence-examples/call-auction-grid.csv 100</code></pre><h3>解析基准与输出</h3><p>99、100、101三个候选价对应成交量2、5、3，故100为唯一最大成交量价格；买方总需求5，卖方供给6，净失衡−1。</p><div class="wide"><table><thead><tr><th>Price</th><th>Demand</th><th>Supply</th><th>Matched</th><th>Imbalance</th><th>Selected</th></tr></thead><tbody><tr><td>99</td><td>5</td><td>2</td><td>2</td><td>3</td><td>0</td></tr><tr><td>100</td><td>5</td><td>6</td><td>5</td><td>-1</td><td>1</td></tr><tr><td>101</td><td>3</td><td>6</td><td>3</td><td>-3</td><td>0</td></tr></tbody></table></div><h3>实证假设与适用边界</h3><p>不含市价单、交易所特殊价格限制、隐藏订单及连续价格网格；若没有交叉订单，成交量为零，Selected仅表示候选排序结果。</p></article>
+<article class="lesson" id="lesson2"><h2>2．价格优先与边际价位比例成交分配</h2><h3>经济问题与数学定义</h3><div class="equation">$$Q=\min(B(p^*),A(p^*)),\quad f_i=\min(q_i,\theta_{\ell(i)}q_i)$$</div><p>在指定撮合价下，只纳入价格可执行的订单；买方按限价降序、卖方按限价升序分组。每侧分配同一总成交量，优先价格层全额成交，边际价格层在组内按数量比例分配。输出恢复输入顺序。</p><h3>估计推导与计算结构</h3><div class="equation">$$\theta_\ell=\min\left(1,\frac{Q-\sum_{h\prec\ell}F_h}{\sum_{i\in\ell}q_i}\right)$$</div><h3>可复现数据与参数</h3><dl><dt>输入文件</dt><dd><a href="../research/evidence-examples/auction-pro-rata.csv" download>auction-pro-rata.csv</a></dd><dt>输入字段</dt><dd>Side,LimitPrice,Quantity</dd><dt>参数顺序</dt><dd>指定成交价格</dd><dt>输出字段</dt><dd>Order, Side, Price, Quantity, Filled, Remaining</dd></dl><pre><code>Side,LimitPrice,Quantity
+1,101,3
+1,100,2
+-1,99,2
+-1,100,4
+</code></pre><pre><code>./build/kline_quant evidence-auction-pro-rata quant/research/evidence-examples/auction-pro-rata.csv 100</code></pre><h3>解析基准与输出</h3><p>价格100下总成交5。买方两单均成交；卖方99价位先成交2，100价位剩余容量3，原4份订单只成交3。</p><div class="wide"><table><thead><tr><th>Order</th><th>Side</th><th>Price</th><th>Quantity</th><th>Filled</th><th>Remaining</th></tr></thead><tbody><tr><td>0</td><td>1</td><td>101</td><td>3</td><td>3</td><td>0</td></tr><tr><td>1</td><td>1</td><td>100</td><td>2</td><td>2</td><td>0</td></tr><tr><td>2</td><td>-1</td><td>99</td><td>2</td><td>2</td><td>0</td></tr><tr><td>3</td><td>-1</td><td>100</td><td>4</td><td>3</td><td>1</td></tr></tbody></table></div><h3>实证假设与适用边界</h3><p>允许连续数量，未处理整数手数舍入或时间优先；现实交易所边际分配规则应以正式规则为准。</p></article>
+<article class="lesson" id="lesson3"><h2>3．订单簿离散状态的下一事件概率预测</h2><h3>经济问题与数学定义</h3><div class="equation">$$\widehat p_{k\mid s,t}=\frac{N_{s,k}(t^-)+a}{N_s(t^-)+3a},\quad \widehat{\Delta m}_t=p_{+1}-p_{-1}$$</div><p>每行的State为预测下一中间价移动之前观测到的离散订单簿状态，NextMove取−1、0或1。前L行初始化状态转移频数，此后先基于历史计算三类Dirichlet平滑概率，再在真实移动出现后更新计数，形成逐期概率与Brier损失。</p><h3>估计推导与计算结构</h3><div class="equation">$$BS_t=\sum_{k=-1}^1(\widehat p_{k\mid s,t}-\mathbf1_{\{y_t=k\}})^2$$</div><h3>可复现数据与参数</h3><dl><dt>输入文件</dt><dd><a href="../research/evidence-examples/state-event-forecast.csv" download>state-event-forecast.csv</a></dd><dt>输入字段</dt><dd>State,NextMove</dd><dt>参数顺序</dt><dd>初始化样本长度L、Dirichlet伪计数a</dd><dt>输出字段</dt><dd>Period, State, ActualMove, Down, Flat, Up, ExpectedMove, ActualClassProbability, Brier</dd></dl><pre><code>State,NextMove
+0,-1
+0,1
+1,1
+0,-1
+1,0
+</code></pre><pre><code>./build/kline_quant evidence-state-event-forecast quant/research/evidence-examples/state-event-forecast.csv 3 1</code></pre><h3>解析基准与输出</h3><p>前三行初始化，状态0历史上涨及下跌各1次，伪计数1产生(0.4,0.2,0.4)，下一次下跌的三类Brier为0.56；状态1历史上涨1次，预测概率(0.25,0.25,0.5)。</p><div class="wide"><table><thead><tr><th>Period</th><th>State</th><th>ActualMove</th><th>Down</th><th>Flat</th><th>Up</th><th>ExpectedMove</th><th>ActualClassProbability</th><th>Brier</th></tr></thead><tbody><tr><td>3</td><td>0</td><td>-1</td><td>0.4</td><td>0.2</td><td>0.4</td><td>0</td><td>0.4</td><td>0.56</td></tr><tr><td>4</td><td>1</td><td>0</td><td>0.25</td><td>0.25</td><td>0.5</td><td>0.25</td><td>0.25</td><td>0.875</td></tr></tbody></table></div><h3>实证假设与适用边界</h3><p>输入要求上一行标签在下一预测行之前已知，且状态定义不使用事后信息；下一事件概率不直接等于可实现交易收益。</p></article>
+<article class="lesson" id="lesson4"><h2>4．延迟入组与右删失下的订单生存估计</h2><h3>经济问题与数学定义</h3><div class="equation">$$Y(t)=\sum_i\mathbf1_{\{a_i\le t\le b_i\}},\quad d(t)=\sum_i\mathbf1_{\{b_i=t,\delta_i=1\}}$$</div><p>研究样本的观察起点并不总是订单真实产生时刻。使用进入时间、退出时间和事件标志构造风险集；同一时刻先加入新观察，再计算事件及删失，最后退出。分别排序所有进入与退出时间，以扫线方式维护风险集。</p><h3>估计推导与计算结构</h3><div class="equation">$$\widehat S(t)=\prod_{u\le t}\left(1-\frac{d(u)}{Y(u)}\right)$$</div><h3>可复现数据与参数</h3><dl><dt>输入文件</dt><dd><a href="../research/evidence-examples/delayed-entry-survival.csv" download>delayed-entry-survival.csv</a></dd><dt>输入字段</dt><dd>Entry,Exit,Event</dd><dt>参数顺序</dt><dd>无额外参数</dd><dt>输出字段</dt><dd>Time, AtRisk, Events, Censored, Survival</dd></dl><pre><code>Entry,Exit,Event
+0,1,1
+0,2,0
+1,2,1
+2,3,1
+</code></pre><pre><code>./build/kline_quant evidence-delayed-entry-survival quant/research/evidence-examples/delayed-entry-survival.csv</code></pre><h3>解析基准与输出</h3><p>时间1风险集3、事件1，生存率2/3；时间2新观察进入、风险集3、事件1及删失1，生存率4/9；时间3最后观察发生事件，生存率0。</p><div class="wide"><table><thead><tr><th>Time</th><th>AtRisk</th><th>Events</th><th>Censored</th><th>Survival</th></tr></thead><tbody><tr><td>1</td><td>3</td><td>1</td><td>0</td><td>0.6666666667</td></tr><tr><td>2</td><td>3</td><td>1</td><td>1</td><td>0.4444444444</td></tr><tr><td>3</td><td>1</td><td>1</td><td>0</td><td>0</td></tr></tbody></table></div><h3>实证假设与适用边界</h3><p>要求左截断及右删失满足相应条件独立性假设；如果撤单是成交的竞争风险，不应简单把它当成独立右删失。</p></article><section class="source" id="source"><h2>完整C++17实现</h2><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/evidence_marketdesign.hpp">算法源码</a>　｜　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/evidence_common.hpp">公共数值接口</a>　｜　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_evidence.py">独立测试</a></p><pre><code>#pragma once
+#include "evidence_common.hpp"
+namespace kline { namespace evidence {
+inline Report call_auction_grid(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,3,3);parameters(p,1);positive(p[0]);std::map&lt;double,Vec&gt; m;
+    double B=0,A=0;
+    for(const auto&amp; r:x){require(r[0]==1||r[0]==-1,"Invalid order side");positive(r[1]);positive(r[2]);
+        auto&amp; a=m[r[1]];if(a.empty())a=Vec(2,0);if(r[0]==1){a[0]+=r[2];B+=r[2];}else a[1]+=r[2];}
+    Report o{{"Price","Demand","Supply","Matched","Imbalance","Selected"},{}};
+    std::tuple&lt;double,double,double,double&gt; best;std::size_t at=0;
+    for(const auto&amp; a:m){A+=a.second[1];double match=std::min(B,A),imb=B-A;
+        auto k=std::make_tuple(match,-std::abs(imb),-std::abs(a.first-p[0]),-a.first);
+        if(o.rows.empty()||k&gt;best){best=k;at=o.rows.size();}
+        o.rows.push_back({a.first,B,A,match,imb,0});B-=a.second[0];}
+    o.rows[at][5]=1;return o;
+}
+
+inline Report auction_pro_rata(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,3,3);parameters(p,1);positive(p[0]);double B=0,A=0;
+    std::map&lt;double,std::vector&lt;std::size_t&gt;,std::greater&lt;double&gt;&gt; buy;std::map&lt;double,std::vector&lt;std::size_t&gt;&gt; sell;
+    for(std::size_t i=0;i&lt;x.size();++i){const auto&amp; r=x[i];require(r[0]==1||r[0]==-1,"Invalid side");positive(r[1]);positive(r[2]);
+        if(r[0]==1&amp;&amp;r[1]&gt;=p[0]){B+=r[2];buy[r[1]].push_back(i);}if(r[0]==-1&amp;&amp;r[1]&lt;=p[0]){A+=r[2];sell[r[1]].push_back(i);}}
+    Vec fill(x.size(),0);double Q=std::min(B,A);
+    auto allocate=[&amp;](const auto&amp; groups){double left=Q;for(const auto&amp; g:groups){double total=0;for(auto i:g.second)total+=x[i][2];double ratio=std::min(1.0,std::max(0.0,left)/positive(total));for(auto i:g.second)fill[i]=ratio*x[i][2];left-=std::min(left,total);}};
+    allocate(buy);allocate(sell);Report o{{"Order","Side","Price","Quantity","Filled","Remaining"},{}};
+    for(std::size_t i=0;i&lt;x.size();++i){o.rows.push_back({double(i),x[i][0],x[i][1],x[i][2],fill[i],x[i][2]-fill[i]});}
+    return o;
+}
+
+inline Report state_event_forecast(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,2,2);parameters(p,2);auto L=count(p[0],1,x.size()-1);double a=positive(p[1]);std::map&lt;double,Vec&gt; n;
+    Report o{{"Period","State","ActualMove","Down","Flat","Up","ExpectedMove","ActualClassProbability","Brier"},{}};
+    for(std::size_t t=0;t&lt;x.size();++t){const auto&amp; r=x[t];require(r[0]&gt;=0&amp;&amp;std::floor(r[0])==r[0],"Invalid state");require(r[1]==-1||r[1]==0||r[1]==1,"Invalid move");
+        auto&amp; v=n[r[0]];if(v.empty())v=Vec(3,0);auto j=std::size_t(r[1]+1);double den=sum(v)+3*a;
+        if(t&gt;=L){Vec q(3);double loss=0;for(std::size_t k=0;k&lt;3;++k){q[k]=(v[k]+a)/den;double e=q[k]-double(k==j);loss+=e*e;}
+            o.rows.push_back({double(t),r[0],r[1],q[0],q[1],q[2],q[2]-q[0],q[j],loss});}
+        ++v[j];
+    }
+    return o;
+}
+
+inline Report delayed_entry_survival(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,3,3);parameters(p,0);std::map&lt;double,Vec&gt; events;
+    for(const auto&amp; r:x){require(r[0]&gt;=0&amp;&amp;r[1]&gt;=r[0]&amp;&amp;(r[2]==0||r[2]==1),"Invalid observation interval");
+        auto&amp; a=events[r[0]];if(a.empty())a=Vec(3,0);++a[0];auto&amp; b=events[r[1]];if(b.empty())b=Vec(3,0);++b[r[2]==1?1:2];}
+    double risk=0,s=1;Report o{{"Time","AtRisk","Events","Censored","Survival"},{}};
+    for(const auto&amp; a:events){const auto&amp; v=a.second;risk+=v[0];require(v[1]+v[2]&lt;=risk,"Risk set underflow");
+        if(v[1]+v[2]&gt;0){s*=1-v[1]/positive(risk);o.rows.push_back({a.first,risk,v[1],v[2],s});}risk-=v[1]+v[2];}
+    return o;
+}
+} }
+</code></pre><p>仓库根目录编译后即可执行各章节命令。Windows多配置生成器使用<code>.\build\Release\kline_quant.exe</code>，单配置生成器使用<code>.\build\kline_quant.exe</code>。</p><pre><code>cmake -S quant/cpp -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+python quant/research/run_evidence_labs.py ./build/kline_quant evidence-results</code></pre></section><section class="references" id="references"><h2>参考文献与技术资料</h2><p><a href="https://www.nasdaqtrader.com/Trader.aspx?id=OpenClose">Nasdaq, Opening and Closing Crosses</a></p><p><a href="https://doi.org/10.1287/opre.1090.0780">Cont, Stoikov &amp; Talreja (2010), A Stochastic Model for Order Book Dynamics</a></p><p><a href="https://doi.org/10.1007/978-1-4612-4348-9">Andersen et al., Statistical Models Based on Counting Processes</a></p><p>所有样本均为构造的教学数据；基准结果用于复算公式和软件实现，不代表真实交易市场表现。</p></section>
+</main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

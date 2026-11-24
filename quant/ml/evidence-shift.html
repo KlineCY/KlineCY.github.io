@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>分布迁移、预测集合与选择性决策｜Kline Quant</title><meta name="description" content="量化研究专题：模型、数学推导、C++17计算、独立数值算例与实证边界">
+<link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<style>body{margin:0;background:white;color:#182a35;font:16px/1.95 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:24px 32px 64px}main{max-width:1180px;margin:auto}header,.lesson,.source,.references,.framework{border:1px solid #cbd4dc;padding:24px 28px;margin:18px 0;background:white}h1{font-size:31px;line-height:1.4}h2{font-size:23px;margin:10px 0 20px}h3{font-size:18px;margin:24px 0 8px}p{line-height:1.95;margin:12px 0}.toc{display:flex;flex-wrap:wrap;gap:9px 24px;border:1px solid #cad3d9;padding:17px 24px}.equation{overflow:auto;border-block:1px solid #d7dfe4;margin:18px 0;padding:16px 6px}.katex-display{overflow-x:auto;overflow-y:hidden}a{color:#1a5478}code,pre{font-family:"Times New Roman",monospace}pre{border:1px solid #cbd5dc;padding:15px;overflow:auto;white-space:pre;font-size:14px;line-height:1.7;max-height:900px}table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}td,th{border:1px solid #ccd5dd;padding:8px 12px;text-align:right;background:white;white-space:nowrap}th{font-weight:bold;text-align:left}.wide{overflow-x:auto}dl{display:grid;grid-template-columns:110px minmax(0,1fr);gap:10px 15px}dt{font-weight:bold}dd{margin:0;overflow-wrap:anywhere}@media(max-width:790px){.main{margin:0;padding:12px}header,.lesson,.source,.references,.framework{padding:15px}dl{display:block}dt{margin-top:12px}}</style>
+</head><body><aside id="quantSidebar" class="sidebar" data-page="ml"></aside><script src="../sidebar-v2.js"></script><div class="main"><main>
+<header><small>QUANTITATIVE RESEARCH / EVIDENCE LABORATORIES</small><h1>分布迁移、预测集合与选择性决策</h1><p>训练分布与实际部署分布发生变化时，仅报告平均预测误差会掩盖样本权重退化、概率集合覆盖不足与低置信度决策的风险。本专题从一维分布距离、离散密度比到分类预测集合和拒判策略，建立可独立核对的部署评价链。</p><p><a href="../research/evidence-laboratories.html">完整研究入口</a>　｜　<a href="../cpp/">C++17工具库</a></p></header><nav class="toc"><a href="#lesson1">1．离散协变量迁移与重要性加权有效样本量</a><a href="#lesson2">2．不同样本量下的一维Wasserstein与KS距离</a><a href="#lesson3">3．累积概率分类预测集合的校准与覆盖</a><a href="#lesson4">4．选择性分类的风险—覆盖率曲线</a><a href="#source">完整算法源码</a><a href="#references">参考文献</a></nav><section class="framework"><h2>研究流程与模型联系</h2><p>部署评价始于分布差异诊断。Wasserstein和KS描述边际分布变化；当条件标签机制稳定且目标支持被源覆盖时，密度比可用于风险重加权。预测集合和拒判曲线使用独立校准及测试记录，分别评价集合覆盖与接受决策的错误率。</p></section><article class="lesson" id="lesson1"><h2>1．离散协变量迁移与重要性加权有效样本量</h2><h3>经济问题与数学定义</h3><div class="equation">$$w(c)=\frac{P_T(c)}{P_S(c)},\quad \widehat R_T=\frac{\sum_{i\in S}w(c_i)\ell_i}{\sum_{i\in S}w(c_i)}$$</div><p>Domain=0为有标签的源域，Domain=1为仅用于估计类别频数的目标域（Loss字段被忽略）。按离散类别计算目标/源频率比，再计算源损失的加权平均。目标支持中若存在源样本完全缺失的类别，直接拒绝计算；类别内损失分布须满足协变量迁移假设。</p><h3>估计推导与计算结构</h3><div class="equation">$$ESS=\frac{(\sum_{i\in S}w_i)^2}{\sum_{i\in S}w_i^2}$$</div><h3>可复现数据与参数</h3><dl><dt>输入文件</dt><dd><a href="../research/evidence-examples/discrete-shift-weight.csv" download>discrete-shift-weight.csv</a></dd><dt>输入字段</dt><dd>Category,Domain,Loss</dd><dt>参数顺序</dt><dd>无额外参数</dd><dt>输出字段</dt><dd>Category, SourceCount, TargetCount, Weight, SourceMeanLossOrTotalWeightedLoss, EffectiveSampleSize</dd></dl><pre><code>Category,Domain,Loss
+0,0,1
+0,0,3
+1,0,5
+1,1,0
+1,1,0
+0,1,0
+</code></pre><pre><code>./build/kline_quant evidence-discrete-shift-weight quant/research/evidence-examples/discrete-shift-weight.csv</code></pre><h3>解析基准与输出</h3><p>源域类别0有2条、类别1有1条，目标域反过来，因此权重0.5及2；源平均损失3，目标加权估计为4，ESS为9/4.5=2。最后一行索引−1表示汇总。</p><div class="wide"><table><thead><tr><th>Category</th><th>SourceCount</th><th>TargetCount</th><th>Weight</th><th>SourceMeanLossOrTotalWeightedLoss</th><th>EffectiveSampleSize</th></tr></thead><tbody><tr><td>0</td><td>2</td><td>1</td><td>0.5</td><td>2</td><td>2</td></tr><tr><td>1</td><td>1</td><td>2</td><td>2</td><td>5</td><td>1</td></tr><tr><td>-1</td><td>3</td><td>3</td><td>1</td><td>4</td><td>2</td></tr></tbody></table></div><h3>实证假设与适用边界</h3><p>类别划分过粗会残留条件分布变化，过细则导致权重不稳定。若标签条件分布发生变化，重要性加权不足以恢复目标风险。</p></article>
+<article class="lesson" id="lesson2"><h2>2．不同样本量下的一维Wasserstein与KS距离</h2><h3>经济问题与数学定义</h3><div class="equation">$$W_1(F,G)=\int_{\mathbb R}|F(x)-G(x)|\,dx$$</div><p>将两组样本按所有不同取值合并排序；每个相邻区间上经验分布函数为常数。逐区间累加面积得到一维Wasserstein-1，并记录最大绝对CDF差。并列观测同时更新计数，不产生人为中间跳跃。</p><h3>估计推导与计算结构</h3><div class="equation">$$D_{\rm KS}=\sup_x|F(x)-G(x)|,\quad W_1=\sum_j(x_{j+1}-x_j)|F(x_j)-G(x_j)|$$</div><h3>可复现数据与参数</h3><dl><dt>输入文件</dt><dd><a href="../research/evidence-examples/empirical-wasserstein.csv" download>empirical-wasserstein.csv</a></dd><dt>输入字段</dt><dd>Value,Domain</dd><dt>参数顺序</dt><dd>无额外参数</dd><dt>输出字段</dt><dd>Wasserstein1, KSDistance, SourceN, TargetN, PooledRange, MeanShift</dd></dl><pre><code>Value,Domain
+0,0
+2,0
+1,1
+1,1
+1,1
+</code></pre><pre><code>./build/kline_quant evidence-empirical-wasserstein quant/research/evidence-examples/empirical-wasserstein.csv</code></pre><h3>解析基准与输出</h3><p>源样本0、2，目标样本1、1、1。两个长度1的区间中CDF差均为0.5，故W1=1，KS距离0.5。</p><div class="wide"><table><thead><tr><th>Wasserstein1</th><th>KSDistance</th><th>SourceN</th><th>TargetN</th><th>PooledRange</th><th>MeanShift</th></tr></thead><tbody><tr><td>1</td><td>0.5</td><td>2</td><td>3</td><td>2</td><td>0</td></tr></tbody></table></div><h3>实证假设与适用边界</h3><p>W1具有原变量量纲；KS无量纲。程序只输出距离统计量，不报告在依赖金融序列下未经校正的p值。</p></article>
+<article class="lesson" id="lesson3"><h2>3．累积概率分类预测集合的校准与覆盖</h2><h3>经济问题与数学定义</h3><div class="equation">$$s(x,y)=\sum_{j:p_j(x)\ge p_y(x)}p_j(x),\quad k=\lceil(n+1)(1-\alpha)\rceil$$</div><p>CSV首列0表示校准记录、1表示测试记录，标签为从0开始的类别编号。以所有概率不低于真实类概率的类别质量作为非随机累积分数，同概率类别使用同一个分数。将校准分数取有限样本秩，随后仅以测试行概率构造集合；测试标签只用于检查覆盖。</p><h3>估计推导与计算结构</h3><div class="equation">$$\widehat C(x)=\{j:s(x,j)\le s_{(k)}\}$$</div><h3>可复现数据与参数</h3><dl><dt>输入文件</dt><dd><a href="../research/evidence-examples/adaptive-prediction-set.csv" download>adaptive-prediction-set.csv</a></dd><dt>输入字段</dt><dd>IsTest,Label,P0,P1,P2</dd><dt>参数顺序</dt><dd>目标未覆盖概率α</dd><dt>输出字段</dt><dd>Period, Label, Threshold, SetSize, Covered</dd></dl><pre><code>IsTest,Label,P0,P1,P2
+0,0,0.7,0.2,0.1
+0,1,0.1,0.6,0.3
+0,0,0.5,0.3,0.2
+0,0,0.8,0.1,0.1
+1,1,0.1,0.6,0.3
+1,2,0.6,0.3,0.1
+</code></pre><pre><code>./build/kline_quant evidence-adaptive-prediction-set quant/research/evidence-examples/adaptive-prediction-set.csv 0.4</code></pre><h3>解析基准与输出</h3><p>四个校准分数0.7、0.6、0.5、0.8，α=0.4时第3秩为0.7。两测试行均只保留最大概率类别，第一行覆盖真实类，第二行未覆盖。</p><div class="wide"><table><thead><tr><th>Period</th><th>Label</th><th>Threshold</th><th>SetSize</th><th>Covered</th></tr></thead><tbody><tr><td>4</td><td>1</td><td>0.7</td><td>1</td><td>1</td></tr><tr><td>5</td><td>2</td><td>0.7</td><td>1</td><td>0</td></tr></tbody></table></div><h3>实证假设与适用边界</h3><p>这是非随机累计概率分数的split conformal构造；交换性成立时才有经典边际覆盖保证。集合可能为空，有限分位不可得时采用阈值1，即全集。</p></article>
+<article class="lesson" id="lesson4"><h2>4．选择性分类的风险—覆盖率曲线</h2><h3>经济问题与数学定义</h3><div class="equation">$$\operatorname{Cov}(u)=T^{-1}\sum_t\mathbf1_{\{c_t\ge u\}},\quad R(u)=\frac{\sum_t\ell_t\mathbf1_{\{c_t\ge u\}}}{\sum_t\mathbf1_{\{c_t\ge u\}}}$$</div><p>按置信度降序，遇到相同置信度的样本整组纳入。每个实际可实现阈值对应一个覆盖率及接受样本错误率。阈值间曲线可按阶梯约定积分，程序保留所有节点而不混入未知的拒判成本。</p><h3>估计推导与计算结构</h3><div class="equation">$$\text{AURC}=\int_0^1 R(c)\,dc$$</div><h3>可复现数据与参数</h3><dl><dt>输入文件</dt><dd><a href="../research/evidence-examples/risk-coverage-curve.csv" download>risk-coverage-curve.csv</a></dd><dt>输入字段</dt><dd>Confidence,Error</dd><dt>参数顺序</dt><dd>无额外参数</dd><dt>输出字段</dt><dd>Threshold, Accepted, Coverage, Errors, SelectiveRisk</dd></dl><pre><code>Confidence,Error
+0.9,0
+0.7,1
+0.7,0
+0.4,1
+</code></pre><pre><code>./build/kline_quant evidence-risk-coverage-curve quant/research/evidence-examples/risk-coverage-curve.csv</code></pre><h3>解析基准与输出</h3><p>置信度0.9接受1个正确样本；降低至0.7同时纳入两条并列样本，覆盖率0.75、错误率1/3；最终接受全部记录，错误率0.5。</p><div class="wide"><table><thead><tr><th>Threshold</th><th>Accepted</th><th>Coverage</th><th>Errors</th><th>SelectiveRisk</th></tr></thead><tbody><tr><td>0.9</td><td>1</td><td>0.25</td><td>0</td><td>0</td></tr><tr><td>0.7</td><td>3</td><td>0.75</td><td>1</td><td>0.3333333333</td></tr><tr><td>0.4</td><td>4</td><td>1</td><td>2</td><td>0.5</td></tr></tbody></table></div><h3>实证假设与适用边界</h3><p>测试曲线用于描述阈值权衡，不可在同一测试集择优阈值后再当作独立测试成绩。置信度本身也不保证校准。</p></article><section class="source" id="source"><h2>完整C++17实现</h2><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/evidence_shift.hpp">算法源码</a>　｜　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/evidence_common.hpp">公共数值接口</a>　｜　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_evidence.py">独立测试</a></p><pre><code>#pragma once
+#include "evidence_common.hpp"
+namespace kline { namespace evidence {
+inline Report discrete_shift_weight(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,3,3);parameters(p,0);std::map&lt;double,Vec&gt; m;double ns=0,nt=0;
+    for(const auto&amp; r:x){require(r[0]&gt;=0&amp;&amp;r[0]==std::floor(r[0])&amp;&amp;(r[1]==0||r[1]==1),"Invalid category or domain");
+        auto&amp; a=m[r[0]];if(a.empty())a=Vec(3,0);if(r[1]==0){++a[0];a[2]+=r[2];++ns;}else{++a[1];++nt;}}
+    positive(ns);positive(nt);double total=0,sq=0,loss=0;Report o{{"Category","SourceCount","TargetCount","Weight","SourceMeanLossOrTotalWeightedLoss","EffectiveSampleSize"},{}};
+    for(const auto&amp; v:m){const auto&amp; a=v.second;positive(a[0]);double w=(a[1]/nt)/(a[0]/ns);total+=w*a[0];sq+=w*w*a[0];loss+=w*a[2];
+        o.rows.push_back({v.first,a[0],a[1],w,a[2]/a[0],w&gt;0?a[0]:0});}
+    o.rows.push_back({-1,ns,nt,total/ns,loss/positive(total),total*total/positive(sq)});return o;
+}
+
+inline Report empirical_wasserstein(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,2,2);parameters(p,0);std::map&lt;double,Vec&gt; m;double n=0,k=0,ms=0,mt=0;
+    for(const auto&amp; r:x){require(r[1]==0||r[1]==1,"Binary domain required");auto&amp; a=m[r[0]];if(a.empty())a=Vec(2,0);++a[std::size_t(r[1])];if(r[1]==0){++n;ms+=r[0];}else{++k;mt+=r[0];}}
+    positive(n);positive(k);double F=0,G=0,W=0,D=0,prev=m.begin()-&gt;first;
+    for(const auto&amp; a:m){W+=(a.first-prev)*std::abs(F-G);F+=a.second[0]/n;G+=a.second[1]/k;D=std::max(D,std::abs(F-G));prev=a.first;}
+    return scalar({"Wasserstein1","KSDistance","SourceN","TargetN","PooledRange","MeanShift"},{W,D,n,k,m.rbegin()-&gt;first-m.begin()-&gt;first,mt/k-ms/n});
+}
+
+inline Report adaptive_prediction_set(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,2,4,34)-2;parameters(p,1);require(p[0]&gt;0&amp;&amp;p[0]&lt;1,"Invalid alpha");
+    auto score=[&amp;](const Vec&amp; r,std::size_t j){double s=0;for(std::size_t k=0;k&lt;d;++k)if(r[k+2]&gt;=r[j+2])s+=r[k+2];return std::min(1.0,s);};
+    Vec cal;bool testing=false;
+    for(const auto&amp; r:x){require(r[0]==0||r[0]==1,"Invalid split flag");auto y=count(r[1],0,d-1);double z=0;
+        for(std::size_t j=0;j&lt;d;++j){require(r[j+2]&gt;=0&amp;&amp;r[j+2]&lt;=1,"Invalid probability");z+=r[j+2];}require(std::abs(z-1)&lt;1e-10,"Probability row must sum to one");
+        if(r[0]==1)testing=true;else{require(!testing,"Calibration must precede test");cal.push_back(score(r,y));}}
+    require(!cal.empty()&amp;&amp;testing,"Calibration and test rows required");auto rank=std::size_t(std::ceil((cal.size()+1)*(1-p[0])));std::sort(cal.begin(),cal.end());double q=rank&gt;cal.size()?1:cal[rank-1];
+    Report o{{"Period","Label","Threshold","SetSize","Covered"},{}};
+    for(std::size_t i=0;i&lt;x.size();++i)if(x[i][0]==1){auto y=std::size_t(x[i][1]);double n=0;for(std::size_t j=0;j&lt;d;++j)if(score(x[i],j)&lt;=q+1e-12)++n;o.rows.push_back({double(i),double(y),q,n,double(score(x[i],y)&lt;=q+1e-12)});}
+    return o;
+}
+
+inline Report risk_coverage_curve(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,2,2);parameters(p,0);std::map&lt;double,Vec,std::greater&lt;double&gt;&gt; groups;
+    for(const auto&amp; r:x){require(r[0]&gt;=0&amp;&amp;r[0]&lt;=1&amp;&amp;(r[1]==0||r[1]==1),"Invalid confidence or error");auto&amp; a=groups[r[0]];if(a.empty())a=Vec(2,0);++a[0];a[1]+=r[1];}
+    double n=0,e=0;Report o{{"Threshold","Accepted","Coverage","Errors","SelectiveRisk"},{}};
+    for(const auto&amp; a:groups){n+=a.second[0];e+=a.second[1];o.rows.push_back({a.first,n,n/x.size(),e,e/n});}return o;
+}
+} }
+</code></pre><p>仓库根目录编译后即可执行各章节命令。Windows多配置生成器使用<code>.\build\Release\kline_quant.exe</code>，单配置生成器使用<code>.\build\kline_quant.exe</code>。</p><pre><code>cmake -S quant/cpp -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+python quant/research/run_evidence_labs.py ./build/kline_quant evidence-results</code></pre></section><section class="references" id="references"><h2>参考文献与技术资料</h2><p><a href="https://www.jmlr.org/papers/v8/sugiyama07a.html">Sugiyama et al. (2007), Covariate Shift Adaptation by Importance Weighted Cross Validation</a></p><p><a href="https://arxiv.org/abs/2006.02544">Romano, Sesia &amp; Candès (2020), Classification with Valid and Adaptive Coverage</a></p><p><a href="https://doi.org/10.1007/978-3-540-71050-9">Villani, Optimal Transport: Old and New</a></p><p>所有样本均为构造的教学数据；基准结果用于复算公式和软件实现，不代表真实交易市场表现。</p></section>
+</main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

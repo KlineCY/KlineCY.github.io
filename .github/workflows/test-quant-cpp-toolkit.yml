@@ -9,6 +9,7 @@ on:
       - 'quant/research/evidence-examples/**'
       - 'quant/research/run_researchflow.py'
       - 'quant/research/run_numerical_labs.py'
+      - 'quant/research/run_evidence_labs.py'
       - '.github/workflows/test-quant-cpp-toolkit.yml'
   pull_request:
     paths:
@@ -18,6 +19,7 @@ on:
       - 'quant/research/evidence-examples/**'
       - 'quant/research/run_researchflow.py'
       - 'quant/research/run_numerical_labs.py'
+      - 'quant/research/run_evidence_labs.py'
       - '.github/workflows/test-quant-cpp-toolkit.yml'
 
 jobs:
@@ -105,3 +107,11 @@ jobs:
           test -s /tmp/kline-numerical-results/studies/turnover_penalty_path.csv
           test -s /tmp/kline-numerical-results/studies/fitted_curve_keyrate.csv
           test -s /tmp/kline-numerical-results/studies/covariance_comparison.csv
+
+      - name: Run evidence laboratories and linked pricing and market-design studies
+        run: |
+          python quant/research/run_evidence_labs.py /tmp/kline_quant /tmp/kline-evidence-results
+          test -s /tmp/kline-evidence-results/studies/sdf_moment_check.csv
+          test -s /tmp/kline-evidence-results/studies/call_curve_reconstruction.csv
+          test -s /tmp/kline-evidence-results/studies/auction_conservation.csv
+          test -s /tmp/kline-evidence-results/studies/margin_economic_equity.csv

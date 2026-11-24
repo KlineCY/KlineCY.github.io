@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>随机折现因子与资产定价检验｜Kline Quant</title><meta name="description" content="量化研究专题：模型、数学推导、C++17计算、独立数值算例与实证边界">
+<link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<style>body{margin:0;background:white;color:#182a35;font:16px/1.95 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:24px 32px 64px}main{max-width:1180px;margin:auto}header,.lesson,.source,.references,.framework{border:1px solid #cbd4dc;padding:24px 28px;margin:18px 0;background:white}h1{font-size:31px;line-height:1.4}h2{font-size:23px;margin:10px 0 20px}h3{font-size:18px;margin:24px 0 8px}p{line-height:1.95;margin:12px 0}.toc{display:flex;flex-wrap:wrap;gap:9px 24px;border:1px solid #cad3d9;padding:17px 24px}.equation{overflow:auto;border-block:1px solid #d7dfe4;margin:18px 0;padding:16px 6px}.katex-display{overflow-x:auto;overflow-y:hidden}a{color:#1a5478}code,pre{font-family:"Times New Roman",monospace}pre{border:1px solid #cbd5dc;padding:15px;overflow:auto;white-space:pre;font-size:14px;line-height:1.7;max-height:900px}table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}td,th{border:1px solid #ccd5dd;padding:8px 12px;text-align:right;background:white;white-space:nowrap}th{font-weight:bold;text-align:left}.wide{overflow-x:auto}dl{display:grid;grid-template-columns:110px minmax(0,1fr);gap:10px 15px}dt{font-weight:bold}dd{margin:0;overflow-wrap:anywhere}@media(max-width:790px){.main{margin:0;padding:12px}header,.lesson,.source,.references,.framework{padding:15px}dl{display:block}dt{margin-top:12px}}</style>
+</head><body><aside id="quantSidebar" class="sidebar" data-page="assets"></aside><script src="../sidebar-v2.js"></script><div class="main"><main>
+<header><small>QUANTITATIVE RESEARCH / EVIDENCE LABORATORIES</small><h1>随机折现因子与资产定价检验</h1><p>从状态定价方程出发，将随机折现因子、均值—方差边界与多资产联合检验连接起来。输入为同期观测的简单超额收益或现金流，明确物理概率下的矩与价格约束。</p><p><a href="../research/evidence-laboratories.html">完整研究入口</a>　｜　<a href="../cpp/">C++17工具库</a></p></header><nav class="toc"><a href="#lesson1">1．Hansen–Jagannathan波动率下界</a><a href="#lesson2">2．有限状态最小二阶矩定价核</a><a href="#lesson3">3．给定定价核的逐资产矩条件</a><a href="#lesson4">4．GRS多资产联合Alpha检验</a><a href="#source">完整算法源码</a><a href="#references">参考文献</a></nav><section class="framework"><h2>研究流程与模型联系</h2><p>同一观察区间下，将HJ下界和最小二阶矩SDF看作两个互补目标：前者依赖超额收益的一、二阶矩并说明波动率约束，后者通过状态支付及价格构造实际折现核。把生成的核作为后续矩条件评价的输入，可检查价格恒等式是否成立；而GRS则在指定因子回归模型下检验全部资产截距是否同时为零。</p></section><article class="lesson" id="lesson1"><h2>1．Hansen–Jagannathan波动率下界</h2><h3>经济问题与数学定义</h3><div class="equation">$$E[mR^e]=0,\quad \frac{\sigma(m)}{E[m]}\ge\sqrt{\mu^\top\Sigma^{-1}\mu}$$</div><p>设超额收益矩阵每行对应一个同期观测，使用分母为T的经验总体协方差。定价约束使Cov(m,R^e)等于−aμ。将m投影至中心化收益张成的空间，剩余正交分量只能增加方差，由此得到下界。</p><h3>估计推导与计算结构</h3><div class="equation">$$m^*=a[1-\mu^\top\Sigma^{-1}(R^e-\mu)],\quad \operatorname{Var}(m^*)=a^2\mu^\top\Sigma^{-1}\mu$$</div><h3>可复现数据与参数</h3><dl><dt>输入文件</dt><dd><a href="../research/evidence-examples/hj-bound.csv" download>hj-bound.csv</a></dd><dt>输入字段</dt><dd>Excess1,Excess2</dd><dt>参数顺序</dt><dd>SDF均值a</dd><dt>输出字段</dt><dd>MaximumSharpe, MinimumSDFSD, MeanSDF, MaximumSDF, MinimumSDF, NegativeCount</dd></dl><pre><code>Excess1,Excess2
+0,0
+2,0
+0,2
+2,2
+</code></pre><pre><code>./build/kline_quant evidence-hj-bound quant/research/evidence-examples/hj-bound.csv 1</code></pre><h3>解析基准与输出</h3><p>样本两列均值均为1，协方差为单位阵；最小波动率SDF取值3、1、1、−1。负值表明无约束最小方差解未必是正的可接受定价核。</p><div class="wide"><table><thead><tr><th>MaximumSharpe</th><th>MinimumSDFSD</th><th>MeanSDF</th><th>MaximumSDF</th><th>MinimumSDF</th><th>NegativeCount</th></tr></thead><tbody><tr><td>1.414213562</td><td>1.414213562</td><td>1</td><td>3</td><td>-1</td><td>1</td></tr></tbody></table></div><h3>实证假设与适用边界</h3><p>协方差须正定；高维或高度共线时需要另行估计正则化矩阵，不能把正则化后的值直接视为精确HJ下界。</p></article>
+<article class="lesson" id="lesson2"><h2>2．有限状态最小二阶矩定价核</h2><h3>经济问题与数学定义</h3><div class="equation">$$\min_m \frac1T m^\top m\quad\text{s.t.}\quad X^\top m/T=q$$</div><p>每行表示等概率状态，每列表示一个资产的状态支付，参数是同序资产价格。拉格朗日条件给出m位于支付空间内，再代回价格约束求乘子；不需要直接求逆。</p><h3>估计推导与计算结构</h3><div class="equation">$$m^*=X(X^\top X/T)^{-1}q$$</div><h3>可复现数据与参数</h3><dl><dt>输入文件</dt><dd><a href="../research/evidence-examples/minimum-norm-sdf.csv" download>minimum-norm-sdf.csv</a></dd><dt>输入字段</dt><dd>Cash,Payoff</dd><dt>参数顺序</dt><dd>依次与支付矩阵各列对应的资产价格</dd><dt>输出字段</dt><dd>State, SDF</dd></dl><pre><code>Cash,Payoff
+1,0
+1,2
+</code></pre><pre><code>./build/kline_quant evidence-minimum-norm-sdf quant/research/evidence-examples/minimum-norm-sdf.csv 1 0.5</code></pre><h3>解析基准与输出</h3><p>现金支付均为1，风险资产在两个状态分别支付0和2，价格0.5时定价核为1.5与0.5；两种资产的折现支付期望分别为1与0.5。</p><div class="wide"><table><thead><tr><th>State</th><th>SDF</th></tr></thead><tbody><tr><td>0</td><td>1.5</td></tr><tr><td>1</td><td>0.5</td></tr></tbody></table></div><h3>实证假设与适用边界</h3><p>支付矩阵需满列秩；算法不施加m≥0，因此不能据此自动证明无套利。</p></article>
+<article class="lesson" id="lesson3"><h2>3．给定定价核的逐资产矩条件</h2><h3>经济问题与数学定义</h3><div class="equation">$$g_j(m)=T^{-1}\sum_t m_tX_{tj}-q_j$$</div><p>把资产价格约束直接写为经验矩，给定候选折现因子后计算每项资产的模型价格与误差。现金支付列可检验折现因子的均值是否满足无风险价格。</p><h3>估计推导与计算结构</h3><div class="equation">$$q_j^*=E[mX_j]=E[m]E[X_j]+\operatorname{Cov}(m,X_j)$$</div><h3>可复现数据与参数</h3><dl><dt>输入文件</dt><dd><a href="../research/evidence-examples/sdf-pricing-errors.csv" download>sdf-pricing-errors.csv</a></dd><dt>输入字段</dt><dd>SDF,Cash,Payoff</dd><dt>参数顺序</dt><dd>依次与各支付列对应的资产价格</dd><dt>输出字段</dt><dd>Asset, ObservedPrice, ModelPrice, PricingError</dd></dl><pre><code>SDF,Cash,Payoff
+1.5,1,0
+0.5,1,2
+</code></pre><pre><code>./build/kline_quant evidence-sdf-pricing-errors quant/research/evidence-examples/sdf-pricing-errors.csv 1 0.5</code></pre><h3>解析基准与输出</h3><p>使用上一节核函数及两状态支付，两个价格误差均应为零。若使用独立样本，输出为样本外矩条件而非训练内恒等式。</p><div class="wide"><table><thead><tr><th>Asset</th><th>ObservedPrice</th><th>ModelPrice</th><th>PricingError</th></tr></thead><tbody><tr><td>1</td><td>1</td><td>1</td><td>0</td></tr><tr><td>2</td><td>0.5</td><td>0.5</td><td>0</td></tr></tbody></table></div><h3>实证假设与适用边界</h3><p>误差的统计显著性需要考虑矩条件协方差和估计参数的影响；此处只报告误差，不进行GMM检验。</p></article>
+<article class="lesson" id="lesson4"><h2>4．GRS多资产联合Alpha检验</h2><h3>经济问题与数学定义</h3><div class="equation">$$R_t^e=\alpha+Bf_t+\epsilon_t,\quad H_0:\alpha=0$$</div><p>对所有测试资产使用相同的因子回归设计。因子及残差协方差均采用分母T的最大似然尺度，联合统计量同时利用Alpha之间的残差协方差和因子均值修正。</p><h3>估计推导与计算结构</h3><div class="equation">$$F_{\rm GRS}=\frac{T-N-K}{N}\frac{\widehat\alpha^\top\widehat\Sigma_\epsilon^{-1}\widehat\alpha}{1+\bar f^\top\widehat\Sigma_f^{-1}\bar f}$$</div><h3>可复现数据与参数</h3><dl><dt>输入文件</dt><dd><a href="../research/evidence-examples/grs-joint-alpha.csv" download>grs-joint-alpha.csv</a></dd><dt>输入字段</dt><dd>Factor,Asset1,Asset2</dd><dt>参数顺序</dt><dd>因子列数K，其余列为测试资产</dd><dt>输出字段</dt><dd>Observations, Assets, Factors, GRS, NumeratorDF, DenominatorDF, AlphaQuadratic, FactorSharpeSquared</dd></dl><pre><code>Factor,Asset1,Asset2
+-0.1,-0.13,-0.14500000000000002
+0.30000000000000004,0.07,-0.24500000000000002
+-0.1,0.07,-0.14500000000000002
+0.30000000000000004,0.27,-0.24500000000000002
+-0.1,-0.13,0.255
+0.30000000000000004,0.07,0.155
+-0.1,0.07,0.255
+0.30000000000000004,0.27,0.155
+</code></pre><pre><code>./build/kline_quant evidence-grs-joint-alpha quant/research/evidence-examples/grs-joint-alpha.csv 1</code></pre><h3>解析基准与输出</h3><p>构造8期正交扰动，两个Alpha分别0.02和0.03，残差方差0.01与0.04，联合二次型0.0625，因子均值修正0.25，F值0.125。</p><div class="wide"><table><thead><tr><th>Observations</th><th>Assets</th><th>Factors</th><th>GRS</th><th>NumeratorDF</th><th>DenominatorDF</th><th>AlphaQuadratic</th><th>FactorSharpeSquared</th></tr></thead><tbody><tr><td>8</td><td>2</td><td>1</td><td>0.125</td><td>2</td><td>5</td><td>0.0625</td><td>0.25</td></tr></tbody></table></div><h3>实证假设与适用边界</h3><p>有限样本F分布依赖经典独立同分布、正态且同方差的回归误差假设；异方差或序列相关时应采用稳健联合推断。</p></article><section class="source" id="source"><h2>完整C++17实现</h2><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/evidence_pricing.hpp">算法源码</a>　｜　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/evidence_common.hpp">公共数值接口</a>　｜　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_evidence.py">独立测试</a></p><pre><code>#pragma once
+#include "evidence_common.hpp"
+namespace kline { namespace evidence {
+inline Report hj_bound(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,1,32);parameters(p,1);double a=positive(p[0]);
+    Vec mu=means(x),b=solve_spd(moment(x,true),mu);
+    double h=std::sqrt(std::max(0.0,dot(mu,b))),lo=std::numeric_limits&lt;double&gt;::infinity(),hi=-lo,neg=0;
+    for(const auto&amp; r:x){double m=a*(1-dot(b,r)+dot(b,mu));lo=std::min(lo,m);hi=std::max(hi,m);if(m&lt;0)++neg;}
+    return scalar({"MaximumSharpe","MinimumSDFSD","MeanSDF","MaximumSDF","MinimumSDF","NegativeCount"},{h,a*h,a,hi,lo,neg});
+}
+
+inline Report minimum_norm_sdf(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,2,1,32);parameters(p,d);
+    Vec b=solve_spd(moment(x,false),p);Report o{{"State","SDF"},{}};
+    for(std::size_t t=0;t&lt;x.size();++t)o.rows.push_back({double(t),dot(x[t],b)});
+    return o;
+}
+
+inline Report sdf_pricing_errors(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,1,2,33)-1;parameters(p,d);Report o{{"Asset","ObservedPrice","ModelPrice","PricingError"},{}};
+    for(std::size_t j=0;j&lt;d;++j){double m=0;for(const auto&amp; r:x)m+=r[0]*r[j+1]/x.size();o.rows.push_back({double(j+1),p[j],m,m-p[j]});}
+    return o;
+}
+
+inline Report grs_joint_alpha(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,5,2,32);parameters(p,1);auto k=count(p[0],1,d-1),n=d-k,T=x.size();
+    require(T&gt;n+k,"Insufficient GRS degrees of freedom");
+    Mat f,ret;
+    for(const auto&amp; r:x){f.emplace_back(r.begin(),r.begin()+k);ret.emplace_back(r.begin()+k,r.end());}
+    Vec mf=means(f),mr=means(ret),a(n);Mat C=moment(f,true),E(T,Vec(n));
+    for(std::size_t j=0;j&lt;n;++j){
+        Vec z(k,0);for(std::size_t t=0;t&lt;T;++t)for(std::size_t i=0;i&lt;k;++i)z[i]+=(f[t][i]-mf[i])*(ret[t][j]-mr[j])/T;
+        Vec beta=solve_spd(C,z);a[j]=mr[j]-dot(beta,mf);
+        for(std::size_t t=0;t&lt;T;++t)E[t][j]=ret[t][j]-a[j]-dot(beta,f[t]);
+    }
+    double h=dot(mf,solve_spd(C,mf)),v=dot(a,solve_spd(moment(E,false),a));
+    return scalar({"Observations","Assets","Factors","GRS","NumeratorDF","DenominatorDF","AlphaQuadratic","FactorSharpeSquared"},{double(T),double(n),double(k),double(T-n-k)/n*v/(1+h),double(n),double(T-n-k),v,h});
+}
+} }
+</code></pre><p>仓库根目录编译后即可执行各章节命令。Windows多配置生成器使用<code>.\build\Release\kline_quant.exe</code>，单配置生成器使用<code>.\build\kline_quant.exe</code>。</p><pre><code>cmake -S quant/cpp -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+python quant/research/run_evidence_labs.py ./build/kline_quant evidence-results</code></pre></section><section class="references" id="references"><h2>参考文献与技术资料</h2><p><a href="https://doi.org/10.1086/261749">Hansen &amp; Jagannathan (1991), Implications of Security Market Data for Models of Dynamic Economies</a></p><p><a href="https://doi.org/10.2307/1913625">Gibbons, Ross &amp; Shanken (1989), A Test of the Efficiency of a Given Portfolio</a></p><p>所有样本均为构造的教学数据；基准结果用于复算公式和软件实现，不代表真实交易市场表现。</p></section>
+</main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

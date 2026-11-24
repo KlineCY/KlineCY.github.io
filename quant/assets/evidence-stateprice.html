@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>状态价格、复制与无套利价格区间｜Kline Quant</title><meta name="description" content="量化研究专题：模型、数学推导、C++17计算、独立数值算例与实证边界">
+<link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<style>body{margin:0;background:white;color:#182a35;font:16px/1.95 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:24px 32px 64px}main{max-width:1180px;margin:auto}header,.lesson,.source,.references,.framework{border:1px solid #cbd4dc;padding:24px 28px;margin:18px 0;background:white}h1{font-size:31px;line-height:1.4}h2{font-size:23px;margin:10px 0 20px}h3{font-size:18px;margin:24px 0 8px}p{line-height:1.95;margin:12px 0}.toc{display:flex;flex-wrap:wrap;gap:9px 24px;border:1px solid #cad3d9;padding:17px 24px}.equation{overflow:auto;border-block:1px solid #d7dfe4;margin:18px 0;padding:16px 6px}.katex-display{overflow-x:auto;overflow-y:hidden}a{color:#1a5478}code,pre{font-family:"Times New Roman",monospace}pre{border:1px solid #cbd5dc;padding:15px;overflow:auto;white-space:pre;font-size:14px;line-height:1.7;max-height:900px}table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}td,th{border:1px solid #ccd5dd;padding:8px 12px;text-align:right;background:white;white-space:nowrap}th{font-weight:bold;text-align:left}.wide{overflow-x:auto}dl{display:grid;grid-template-columns:110px minmax(0,1fr);gap:10px 15px}dt{font-weight:bold}dd{margin:0;overflow-wrap:anywhere}@media(max-width:790px){.main{margin:0;padding:12px}header,.lesson,.source,.references,.framework{padding:15px}dl{display:block}dt{margin-top:12px}}</style>
+</head><body><aside id="quantSidebar" class="sidebar" data-page="assets"></aside><script src="../sidebar-v2.js"></script><div class="main"><main>
+<header><small>QUANTITATIVE RESEARCH / EVIDENCE LABORATORIES</small><h1>状态价格、复制与无套利价格区间</h1><p>有限状态市场提供了理解风险中性概率的直接线性代数框架。完备市场可以通过复制确定唯一价格；不完备市场中，无套利约束通常只能确定区间。将这些条件用于离散期权曲面与报价一致性，可区分交易数据错误、模型误差与真正的定价约束。</p><p><a href="../research/evidence-laboratories.html">完整研究入口</a>　｜　<a href="../cpp/">C++17工具库</a></p></header><nav class="toc"><a href="#lesson1">1．不等距执行价的离散状态概率恢复</a><a href="#lesson2">2．完备市场复制与状态价格正性</a><a href="#lesson3">3．不完备单资产市场的索赔价格上下界</a><a href="#lesson4">4．买卖报价下的远期价格一致性区间</a><a href="#source">完整算法源码</a><a href="#references">参考文献</a></nav><section class="framework"><h2>研究流程与模型联系</h2><p>将离散看涨曲线反演为状态概率后，可以重新计算各执行价期权价格及预期终值，再与完备市场复制或不完备市场边界对照。报价区间的相容性只约束合成远期；整个状态价格系统还需满足单调性、凸性与概率质量归一。所有资产支付及价格均使用同一货币单位。</p></section><article class="lesson" id="lesson1"><h2>1．不等距执行价的离散状态概率恢复</h2><h3>经济问题与数学定义</h3><div class="equation">$$s_j=\frac{C(K_{j+1})-C(K_j)}{K_{j+1}-K_j},\quad \pi_j=\frac{s_j-s_{j-1}}{D}$$</div><p>假设终值支撑集恰为输入执行价网格，含0及终端最大值，最后一档看涨价格必须为0。分段线性凸曲线的斜率跃迁对应折现状态质量。边界斜率分别为−D及0，包含终值为0或上端点的原子。</p><h3>估计推导与计算结构</h3><div class="equation">$$C(K)=D\sum_j\pi_j(S_j-K)_+,\quad s_{-1}=-D,\quad s_{n-1}=0$$</div><h3>可复现数据与参数</h3><dl><dt>输入文件</dt><dd><a href="../research/evidence-examples/call-implied-atoms.csv" download>call-implied-atoms.csv</a></dd><dt>输入字段</dt><dd>Strike,Call</dd><dt>参数顺序</dt><dd>到期贴现因子D</dd><dt>输出字段</dt><dd>State, StatePrice, RiskNeutralProbability, MeanContribution</dd></dl><pre><code>Strike,Call
+0,2
+1,1.25
+3,0.25
+4,0
+</code></pre><pre><code>./build/kline_quant evidence-call-implied-atoms quant/research/evidence-examples/call-implied-atoms.csv 1</code></pre><h3>解析基准与输出</h3><p>执行价0、1、3、4的看涨价2、1.25、0.25、0，区间斜率−0.75、−0.5、−0.25。四个状态概率均0.25，预期终值2，恢复看涨价格。</p><div class="wide"><table><thead><tr><th>State</th><th>StatePrice</th><th>RiskNeutralProbability</th><th>MeanContribution</th></tr></thead><tbody><tr><td>0</td><td>0.25</td><td>0.25</td><td>0</td></tr><tr><td>1</td><td>0.25</td><td>0.25</td><td>0.25</td></tr><tr><td>3</td><td>0.25</td><td>0.25</td><td>0.75</td></tr><tr><td>4</td><td>0.25</td><td>0.25</td><td>1</td></tr></tbody></table></div><h3>实证假设与适用边界</h3><p>这是假设终值有界且仅在给定网格取值的离散反演；现实期权需外推尾部、平滑报价，并处理bid/ask与不同到期。</p></article>
+<article class="lesson" id="lesson2"><h2>2．完备市场复制与状态价格正性</h2><h3>经济问题与数学定义</h3><div class="equation">$$Xw=h,\quad X^\top q=P,\quad V=P^\top w=q^\top h$$</div><p>输入每行一个状态，最后一列为待复制支付，其余列为交易资产支付。市场完备要求状态数等于资产数且支付矩阵满秩。分别求复制头寸与状态价格，检查所有状态价格严格为正，再验证复制价格与状态价格折现支付相等。</p><h3>估计推导与计算结构</h3><div class="equation">$$w=(X^\top X)^{-1}X^\top h,\quad q=X(X^\top X)^{-1}P$$</div><h3>可复现数据与参数</h3><dl><dt>输入文件</dt><dd><a href="../research/evidence-examples/complete-replication.csv" download>complete-replication.csv</a></dd><dt>输入字段</dt><dd>Cash,Stock,Claim</dd><dt>参数顺序</dt><dd>按交易资产列顺序排列的现价</dd><dt>输出字段</dt><dd>Index, AssetHolding, StatePrice, ReplicatedPayoff, ClaimValue</dd></dl><pre><code>Cash,Stock,Claim
+1,1,0
+1,3,1
+</code></pre><pre><code>./build/kline_quant evidence-complete-replication quant/research/evidence-examples/complete-replication.csv 1 2</code></pre><h3>解析基准与输出</h3><p>现金与股票价格分别1和2，两个状态的股票终值1与3，索赔支付0与1。复制头寸为−0.5现金和0.5股票，价格0.5，两状态价格均0.5。</p><div class="wide"><table><thead><tr><th>Index</th><th>AssetHolding</th><th>StatePrice</th><th>ReplicatedPayoff</th><th>ClaimValue</th></tr></thead><tbody><tr><td>1</td><td>-0.5</td><td>0.5</td><td>0</td><td>0.5</td></tr><tr><td>2</td><td>0.5</td><td>0.5</td><td>1</td><td>0.5</td></tr></tbody></table></div><h3>实证假设与适用边界</h3><p>要求允许任意多空及无交易摩擦；短卖限制或买卖价差会改变可复制价格区间。</p></article>
+<article class="lesson" id="lesson3"><h2>3．不完备单资产市场的索赔价格上下界</h2><h3>经济问题与数学定义</h3><div class="equation">$$\inf_{\pi\ge0}\ D\pi^\top h,\quad \sup_{\pi\ge0}\ D\pi^\top h,\quad \mathbf1^\top\pi=1,\quad \pi^\top S=F$$</div><p>已知贴现因子D和预付远期价格P，风险中性均值F=P/D。线性约束只有概率归一和一阶矩，因此极点至多两个非零状态。枚举所有跨越F的状态对及等于F的单点，取得闭包内最小与最大索赔价格。</p><h3>估计推导与计算结构</h3><div class="equation">$$\pi_i=\frac{S_j-F}{S_j-S_i},\quad \pi_j=\frac{F-S_i}{S_j-S_i}$$</div><h3>可复现数据与参数</h3><dl><dt>输入文件</dt><dd><a href="../research/evidence-examples/incomplete-claim-bounds.csv" download>incomplete-claim-bounds.csv</a></dd><dt>输入字段</dt><dd>TerminalStock,ClaimPayoff</dd><dt>参数顺序</dt><dd>预付远期价格P、到期贴现因子D</dd><dt>输出字段</dt><dd>LowerClosure, UpperClosure, Forward, Discount</dd></dl><pre><code>TerminalStock,ClaimPayoff
+0,0
+1,0
+2,1
+</code></pre><pre><code>./build/kline_quant evidence-incomplete-claim-bounds quant/research/evidence-examples/incomplete-claim-bounds.csv 1 1</code></pre><h3>解析基准与输出</h3><p>股票终值0、1、2，远期均值1，索赔支付0、0、1。单点状态1价格为0，而状态0及2等概率组合给出0.5；故闭包边界0与0.5。</p><div class="wide"><table><thead><tr><th>LowerClosure</th><th>UpperClosure</th><th>Forward</th><th>Discount</th></tr></thead><tbody><tr><td>0</td><td>0.5</td><td>1</td><td>1</td></tr></tbody></table></div><h3>实证假设与适用边界</h3><p>严格正的状态概率通常使非复制索赔的无套利价格落在开区间；算法报告闭包边界。参数使用预付远期，不是含未处理股息的现货。</p></article>
+<article class="lesson" id="lesson4"><h2>4．买卖报价下的远期价格一致性区间</h2><h3>经济问题与数学定义</h3><div class="equation">$$C-P=D(F-K),\quad F\in[K+(C_b-P_a)/D,\ K+(C_a-P_b)/D]$$</div><p>看涨与看跌均具有买卖报价区间。将看涨买价减看跌卖价作为合成远期可卖下界，将看涨卖价减看跌买价作为可买上界；不同执行价的共同远期区间为全部区间的交集。</p><h3>估计推导与计算结构</h3><div class="equation">$$\mathcal F=\bigcap_j[F_j^-,F_j^+]=[\max_jF_j^-,\min_jF_j^+]$$</div><h3>可复现数据与参数</h3><dl><dt>输入文件</dt><dd><a href="../research/evidence-examples/parity-quote-intersection.csv" download>parity-quote-intersection.csv</a></dd><dt>输入字段</dt><dd>Strike,CallBid,CallAsk,PutBid,PutAsk</dd><dt>参数顺序</dt><dd>同到期贴现因子D</dd><dt>输出字段</dt><dd>Strike, ForwardLower, ForwardUpper, CommonLower, CommonUpper, Nonempty</dd></dl><pre><code>Strike,CallBid,CallAsk,PutBid,PutAsk
+90,12,13,1,2
+100,6,7,5,6
+</code></pre><pre><code>./build/kline_quant evidence-parity-quote-intersection quant/research/evidence-examples/parity-quote-intersection.csv 1</code></pre><h3>解析基准与输出</h3><p>两个执行价90及100均产生[100,102]的远期区间，交集非空。若交集为空，说明至少两档报价在此同步无摩擦利率假设下不相容。</p><div class="wide"><table><thead><tr><th>Strike</th><th>ForwardLower</th><th>ForwardUpper</th><th>CommonLower</th><th>CommonUpper</th><th>Nonempty</th></tr></thead><tbody><tr><td>90</td><td>100</td><td>102</td><td>100</td><td>102</td><td>1</td></tr><tr><td>100</td><td>100</td><td>102</td><td>100</td><td>102</td><td>1</td></tr></tbody></table></div><h3>实证假设与适用边界</h3><p>需保证期权同到期、同标的、同步报价、欧洲行权及相同结算。交集非空不保证整个波动率曲面无套利。</p></article><section class="source" id="source"><h2>完整C++17实现</h2><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/evidence_stateprice.hpp">算法源码</a>　｜　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/evidence_common.hpp">公共数值接口</a>　｜　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_evidence.py">独立测试</a></p><pre><code>#pragma once
+#include "evidence_common.hpp"
+namespace kline { namespace evidence {
+inline Report call_implied_atoms(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,2,2);parameters(p,1);double D=positive(p[0]);
+    require(x[0][0]==0&amp;&amp;x.back()[1]==0,"Zero strike and zero final call required");
+    Report o{{"State","StatePrice","RiskNeutralProbability","MeanContribution"},{}};
+    double prev=-D;
+    for(std::size_t j=0;j&lt;x.size();++j){
+        require(x[j][1]&gt;=0,"Negative option price");
+        double next=j+1&lt;x.size()?(x[j+1][1]-x[j][1])/positive(x[j+1][0]-x[j][0]):0;
+        require(next&gt;=prev-1e-12*D&amp;&amp;next&lt;=1e-12*D,"Call curve violates convexity or monotonicity");
+        double mass=std::max(0.0,next-prev);
+        o.rows.push_back({x[j][0],mass,mass/D,x[j][0]*mass/D});prev=next;
+    }
+    return o;
+}
+
+inline Report complete_replication(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,2,3,32)-1;parameters(p,d);require(x.size()==d,"Square payoff matrix required");
+    Mat X;Vec h;
+    for(const auto&amp; r:x){X.emplace_back(r.begin(),r.end()-1);h.push_back(r.back());}
+    Mat A(d,Vec(d,0));Vec b(d,0);
+    for(std::size_t t=0;t&lt;d;++t)for(std::size_t i=0;i&lt;d;++i){b[i]+=X[t][i]*h[t];for(std::size_t j=0;j&lt;d;++j)A[i][j]+=X[t][i]*X[t][j];}
+    Vec w=solve_spd(A,b),z=solve_spd(A,p),q=mul(X,z);
+    for(double a:q)positive(a);
+    double value=dot(w,p);require(std::abs(value-dot(q,h))&lt;=1e-8*std::max(1.0,std::abs(value)),"Replication pricing residual");
+    Report o{{"Index","AssetHolding","StatePrice","ReplicatedPayoff","ClaimValue"},{}};
+    for(std::size_t i=0;i&lt;d;++i)o.rows.push_back({double(i+1),w[i],q[i],dot(X[i],w),value});
+    return o;
+}
+
+inline Report incomplete_claim_bounds(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,2,2);parameters(p,2);double D=positive(p[1]),F=p[0]/D;
+    require(x.size()&lt;=5000,"Finite-state enumeration limit exceeded");
+    for(std::size_t i=0;i&lt;x.size();++i)require(x[i][0]&gt;=0&amp;&amp;(i==0||x[i][0]&gt;x[i-1][0]),"Increasing nonnegative states required");
+    require(F&gt;x.front()[0]&amp;&amp;F&lt;x.back()[0],"Forward must be strictly inside state support");
+    double lo=std::numeric_limits&lt;double&gt;::infinity(),hi=-lo;
+    for(std::size_t i=0;i&lt;x.size();++i){
+        if(x[i][0]==F){lo=std::min(lo,D*x[i][1]);hi=std::max(hi,D*x[i][1]);}
+        if(x[i][0]&gt;F)break;
+        for(std::size_t j=i+1;j&lt;x.size();++j)if(x[j][0]&gt;=F){
+            double a=(x[j][0]-F)/(x[j][0]-x[i][0]),v=D*(a*x[i][1]+(1-a)*x[j][1]);
+            lo=std::min(lo,v);hi=std::max(hi,v);
+        }
+    }
+    return scalar({"LowerClosure","UpperClosure","Forward","Discount"},{lo,hi,F,D});
+}
+
+inline Report parity_quote_intersection(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,5,5);parameters(p,1);double D=positive(p[0]),lo=-std::numeric_limits&lt;double&gt;::infinity(),hi=-lo;
+    Report o{{"Strike","ForwardLower","ForwardUpper","CommonLower","CommonUpper","Nonempty"},{}};
+    for(const auto&amp; r:x){
+        positive(r[0]);require(r[1]&gt;=0&amp;&amp;r[2]&gt;=r[1]&amp;&amp;r[3]&gt;=0&amp;&amp;r[4]&gt;=r[3],"Invalid bid-ask interval");
+        double a=r[0]+(r[1]-r[4])/D,b=r[0]+(r[2]-r[3])/D;
+        lo=std::max(lo,a);hi=std::min(hi,b);o.rows.push_back({r[0],a,b,0,0,0});
+    }
+    for(auto&amp; r:o.rows){r[3]=lo;r[4]=hi;r[5]=double(lo&lt;=hi);}
+    return o;
+}
+} }
+</code></pre><p>仓库根目录编译后即可执行各章节命令。Windows多配置生成器使用<code>.\build\Release\kline_quant.exe</code>，单配置生成器使用<code>.\build\kline_quant.exe</code>。</p><pre><code>cmake -S quant/cpp -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+python quant/research/run_evidence_labs.py ./build/kline_quant evidence-results</code></pre></section><section class="references" id="references"><h2>参考文献与技术资料</h2><p><a href="https://doi.org/10.2307/2296188">Arrow (1964), The Role of Securities in the Optimal Allocation of Risk-bearing</a></p><p><a href="https://doi.org/10.1086/296025">Breeden &amp; Litzenberger (1978), Prices of State-Contingent Claims Implicit in Option Prices</a></p><p><a href="https://web.stanford.edu/~boyd/cvxbook/">Boyd &amp; Vandenberghe, Convex Optimization</a></p><p>所有样本均为构造的教学数据；基准结果用于复算公式和软件实现，不代表真实交易市场表现。</p></section>
+</main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>
