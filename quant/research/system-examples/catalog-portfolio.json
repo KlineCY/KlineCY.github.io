@@ -1,0 +1,336 @@
+[
+  {
+    "command": "system-factor-replicating-gls",
+    "title": "最小风险因子复制：多重目标暴露与精确约束",
+    "area": "research",
+    "columns": [
+      "Cov1",
+      "Cov2",
+      "Loading1"
+    ],
+    "file": "factor-replicating-gls.csv",
+    "params": [
+      1,
+      1
+    ],
+    "header": [
+      "Asset",
+      "Weight",
+      "Variance",
+      "Exposure1",
+      "StationarityResidual"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        0.8,
+        0.8,
+        1,
+        0
+      ],
+      [
+        2,
+        0.2,
+        0.8,
+        1,
+        0
+      ]
+    ],
+    "ref": "Grinold and Kahn (2000), Active Portfolio Management, 2nd ed., McGraw-Hill.",
+    "url": "https://www.mheducation.com/"
+  },
+  {
+    "command": "system-rolling-risk-scaling",
+    "title": "滚动风险目标组合：波动估计、杠杆与净值闭环",
+    "area": "research",
+    "columns": [
+      "Return1",
+      "Return2"
+    ],
+    "file": "rolling-risk-scaling.csv",
+    "params": [
+      2,
+      0.1,
+      1,
+      0,
+      0.5,
+      0.5
+    ],
+    "header": [
+      "Period",
+      "Scale",
+      "ForecastVol",
+      "PortfolioReturn",
+      "NetReturn",
+      "Turnover",
+      "FeeFraction",
+      "NAV",
+      "Weight1",
+      "Weight2"
+    ],
+    "expected_prefix": [
+      [
+        3,
+        1,
+        0,
+        0.03,
+        0.03,
+        1,
+        0,
+        1.03,
+        0.5,
+        0.5
+      ],
+      [
+        4,
+        1,
+        0.021213203435596423,
+        0,
+        0,
+        0.009708737864077669,
+        0,
+        1.03,
+        0.5,
+        0.5
+      ]
+    ],
+    "ref": "Moreira and Muir (2017), Volatility-Managed Portfolios, Journal of Finance.",
+    "url": "https://doi.org/10.1111/jofi.12513"
+  },
+  {
+    "command": "system-minimum-variance-hedge",
+    "title": "多工具最小方差套保：样本协方差与冻结风险归因",
+    "area": "research",
+    "columns": [
+      "Exposure",
+      "Hedge1",
+      "Hedge2",
+      "Train"
+    ],
+    "file": "minimum-variance-hedge.csv",
+    "params": [
+      0
+    ],
+    "header": [
+      "Row",
+      "Train",
+      "Exposure",
+      "HedgedPnL",
+      "Hedge1",
+      "Hedge2"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        1,
+        3,
+        0,
+        3,
+        2
+      ],
+      [
+        2,
+        1,
+        -3,
+        0,
+        3,
+        2
+      ],
+      [
+        3,
+        1,
+        2,
+        0,
+        3,
+        2
+      ],
+      [
+        4,
+        1,
+        -2,
+        0,
+        3,
+        2
+      ],
+      [
+        5,
+        0,
+        5,
+        0,
+        3,
+        2
+      ]
+    ],
+    "ref": "Ederington (1979), The Hedging Performance of the New Futures Markets, Journal of Finance.",
+    "url": "https://doi.org/10.1111/j.1540-6261.1979.tb02077.x"
+  },
+  {
+    "command": "system-scenario-tail-attribution",
+    "title": "离散情景Expected Shortfall：原子概率、尾部份额与Euler归因",
+    "area": "research",
+    "columns": [
+      "Probability",
+      "Loss1",
+      "Loss2"
+    ],
+    "file": "scenario-tail-attribution.csv",
+    "params": [
+      0.7,
+      1,
+      1
+    ],
+    "header": [
+      "Asset",
+      "Weight",
+      "VaR",
+      "ES",
+      "Contribution",
+      "SelectedMass",
+      "ConservationResidual"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        1,
+        3,
+        6.333333333333333,
+        4,
+        0.3,
+        0
+      ],
+      [
+        2,
+        1,
+        3,
+        6.333333333333333,
+        2.3333333333333335,
+        0.3,
+        0
+      ]
+    ],
+    "ref": "Acerbi and Tasche (2002), On the Coherence of Expected Shortfall, Journal of Banking & Finance.",
+    "url": "https://doi.org/10.1016/S0378-4266(02)00283-2"
+  },
+  {
+    "command": "system-cashflow-portfolio-unitization",
+    "title": "外部申赎与组合份额：时间加权收益及资产净值守恒",
+    "area": "research",
+    "columns": [
+      "Flow",
+      "Return"
+    ],
+    "file": "cashflow-portfolio-unitization.csv",
+    "params": [
+      100,
+      1
+    ],
+    "header": [
+      "Period",
+      "OpeningValue",
+      "ExternalFlow",
+      "Units",
+      "UnitPrice",
+      "ClosingValue",
+      "PeriodReturn",
+      "TWR",
+      "ConservationResidual"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        100,
+        100,
+        200,
+        1.1,
+        220,
+        0.1,
+        0.1,
+        0
+      ],
+      [
+        2,
+        220,
+        50,
+        245.45454545454544,
+        1.1,
+        270,
+        0,
+        0.1,
+        0
+      ],
+      [
+        3,
+        270,
+        -30,
+        218.18181818181816,
+        0.99,
+        216,
+        -0.1,
+        -0.01,
+        0
+      ]
+    ],
+    "ref": "CFA Institute, Global Investment Performance Standards (GIPS), 2020.",
+    "url": "https://www.gipsstandards.org/standards/gips-standards-for-firms/"
+  },
+  {
+    "command": "system-portfolio-brinson-linked",
+    "title": "多期Brinson归因：几何主动收益与Carino链接",
+    "area": "research",
+    "columns": [
+      "Period",
+      "Group",
+      "PortfolioWeight",
+      "BenchmarkWeight",
+      "PortfolioReturn",
+      "BenchmarkReturn"
+    ],
+    "file": "portfolio-brinson-linked.csv",
+    "params": [],
+    "header": [
+      "Period",
+      "Group",
+      "Allocation",
+      "Selection",
+      "Interaction",
+      "LinkFactor",
+      "LinkedAllocation",
+      "LinkedSelection",
+      "LinkedInteraction",
+      "TotalActive",
+      "Residual"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        1,
+        0.003,
+        0.01,
+        0.002
+      ],
+      [
+        1,
+        2,
+        0.003,
+        -0.01,
+        0.002
+      ],
+      [
+        2,
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        2,
+        2,
+        0,
+        0,
+        0
+      ]
+    ],
+    "ref": "Carino (1999), Combining Attribution Effects Over Time, Journal of Performance Measurement.",
+    "url": "https://www.spauldinggrp.com/"
+  }
+]
