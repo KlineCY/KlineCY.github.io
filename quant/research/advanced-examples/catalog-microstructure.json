@@ -1,0 +1,387 @@
+[
+  {
+    "command": "advanced-acd-duration-grid",
+    "title": "ACD事件间隔模型：条件持续时间、指数似然及冻结预测",
+    "area": "feeds",
+    "ref": "Engle and Russell (1998), Autoregressive Conditional Duration: A New Model for Irregularly Spaced Transaction Data, Econometrica.",
+    "url": "https://doi.org/10.2307/2999632",
+    "columns": [
+      "Duration"
+    ],
+    "file": "acd-duration-grid.csv",
+    "params": [
+      3,
+      0,
+      0,
+      2
+    ],
+    "header": [
+      "Time",
+      "Train",
+      "Duration",
+      "ExpectedDuration",
+      "StandardizedDuration",
+      "ConditionalNLL",
+      "Alpha",
+      "Beta",
+      "Omega",
+      "TrainingNLL"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        1,
+        3
+      ],
+      [
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        1,
+        3
+      ],
+      [
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        1,
+        3
+      ],
+      [
+        4,
+        0,
+        2,
+        1,
+        2,
+        2,
+        0,
+        0,
+        1,
+        3
+      ],
+      [
+        5,
+        0,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        1,
+        3
+      ]
+    ]
+  },
+  {
+    "command": "advanced-flow-propagator-ridge",
+    "title": "订单流传播核：滞后成交冲击估计与冻结预测",
+    "area": "feeds",
+    "ref": "Bouchaud, Farmer and Lillo (2009), How Markets Slowly Digest Changes in Supply and Demand, Handbook of Financial Markets.",
+    "url": "https://doi.org/10.1016/B978-012374258-2.50004-3",
+    "columns": [
+      "SignedFlow",
+      "PriceChange"
+    ],
+    "file": "flow-propagator-ridge.csv",
+    "params": [
+      4,
+      1,
+      1
+    ],
+    "header": [
+      "Time",
+      "Actual",
+      "Forecast",
+      "Error",
+      "FlowLag1",
+      "Beta1",
+      "CumulativeKernel1"
+    ],
+    "expected_prefix": [
+      [
+        5,
+        2,
+        1.5,
+        0.5,
+        1,
+        1.5,
+        1.5
+      ]
+    ]
+  },
+  {
+    "command": "advanced-queue-fill-uniformization",
+    "title": "有限队列成交概率：吸收状态、出生死亡过程与时间分布",
+    "area": "feeds",
+    "ref": "Cont and de Larrard (2013), Price Dynamics in a Markovian Limit Order Market, SIAM J. Financial Math.",
+    "url": "https://doi.org/10.1137/110856605",
+    "columns": [
+      "Horizon"
+    ],
+    "file": "queue-fill-uniformization.csv",
+    "params": [
+      1,
+      0,
+      1,
+      2,
+      80
+    ],
+    "header": [
+      "Time",
+      "InitialQueue",
+      "FillProbability",
+      "OutstandingProbability",
+      "TruncationTail",
+      "MassResidual"
+    ],
+    "expected_prefix": [
+      [
+        0,
+        1,
+        0,
+        1,
+        0,
+        0
+      ],
+      [
+        1,
+        1,
+        0.6321205588285577,
+        0.36787944117144233,
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "command": "advanced-bivariate-hawkes-likelihood",
+    "title": "双变量Hawkes：互激发、谱半径与事件似然",
+    "area": "feeds",
+    "ref": "Bacry, Mastromatteo and Muzy (2015), Hawkes Processes in Finance, Market Microstructure and Liquidity.",
+    "url": "https://doi.org/10.1142/S2382626615500057",
+    "columns": [
+      "EventTime",
+      "Type"
+    ],
+    "file": "bivariate-hawkes-likelihood.csv",
+    "params": [
+      3,
+      1,
+      1,
+      2,
+      0,
+      0,
+      0,
+      0
+    ],
+    "header": [
+      "Event",
+      "Time",
+      "Type",
+      "Intensity1",
+      "Intensity2",
+      "EventLogIntensity",
+      "Compensator1",
+      "Compensator2",
+      "LogLikelihood",
+      "SpectralRadius"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        1,
+        1,
+        1,
+        2,
+        0,
+        3,
+        6,
+        -8.306852819440055,
+        0
+      ],
+      [
+        2,
+        2,
+        2,
+        1,
+        2,
+        0.6931471805599453,
+        3,
+        6,
+        -8.306852819440055,
+        0
+      ]
+    ]
+  },
+  {
+    "command": "advanced-parzen-realized-kernel",
+    "title": "Parzen实现核：高频噪声、自协方差和非负估计",
+    "area": "feeds",
+    "ref": "Barndorff-Nielsen, Hansen, Lunde and Shephard (2008), Designing Realized Kernels to Measure the Ex Post Variation of Equity Prices in the Presence of Noise, Econometrica.",
+    "url": "https://doi.org/10.3982/ECTA6495",
+    "columns": [
+      "LogReturn"
+    ],
+    "file": "parzen-realized-kernel.csv",
+    "params": [
+      1
+    ],
+    "header": [
+      "Bandwidth",
+      "RealizedVariance",
+      "RealizedKernel",
+      "AutocovarianceAdjustment",
+      "NegativeFlag"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        0.0004,
+        0.00025,
+        -0.00015,
+        0
+      ]
+    ]
+  },
+  {
+    "command": "advanced-var-structural-irf",
+    "title": "双变量结构VAR：递归识别、脉冲响应与预测误差方差分解",
+    "area": "math",
+    "ref": "Sims (1980), Macroeconomics and Reality, Econometrica; Lütkepohl (2005), New Introduction to Multiple Time Series Analysis.",
+    "url": "https://doi.org/10.2307/1912017",
+    "columns": [
+      "AR1",
+      "AR2",
+      "ShockCov1",
+      "ShockCov2"
+    ],
+    "file": "var-structural-irf.csv",
+    "params": [
+      2
+    ],
+    "header": [
+      "Horizon",
+      "Response",
+      "Shock",
+      "ImpulseResponse",
+      "CumulativeResponse",
+      "FEVD"
+    ],
+    "expected_prefix": [
+      [
+        0,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      [
+        0,
+        1,
+        2,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        2,
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        2,
+        2,
+        2,
+        2,
+        1
+      ],
+      [
+        1,
+        1,
+        1,
+        0.5,
+        1.5,
+        1
+      ],
+      [
+        1,
+        1,
+        2,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        2,
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        2,
+        2,
+        0.4,
+        2.4,
+        1
+      ],
+      [
+        2,
+        1,
+        1,
+        0.25,
+        1.75,
+        1
+      ],
+      [
+        2,
+        1,
+        2,
+        0,
+        0,
+        0
+      ],
+      [
+        2,
+        2,
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        2,
+        2,
+        2,
+        0.08,
+        2.48,
+        1
+      ]
+    ]
+  }
+]

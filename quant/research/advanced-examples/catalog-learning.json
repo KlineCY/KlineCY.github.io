@@ -1,0 +1,288 @@
+[
+  {
+    "command": "advanced-masked-als",
+    "title": "带观察掩码的低秩矩阵恢复：交替岭回归与留出重建",
+    "area": "ml",
+    "ref": "Srebro, Rennie and Jaakkola (2004), Maximum-Margin Matrix Factorization, NeurIPS.",
+    "url": "https://proceedings.neurips.cc/paper/2004/hash/e0688d13958a19e087e123148555e4b4-Abstract.html",
+    "columns": [
+      "Row",
+      "Column",
+      "Train",
+      "Value"
+    ],
+    "file": "masked-als.csv",
+    "params": [
+      1,
+      1,
+      1e-9,
+      5000
+    ],
+    "header": [
+      "Row",
+      "Column",
+      "Train",
+      "Value",
+      "Prediction",
+      "Objective",
+      "StationarityResidual",
+      "Iterations"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        1,
+        1,
+        3,
+        2.5
+      ],
+      [
+        1,
+        2,
+        1,
+        3,
+        2.5
+      ],
+      [
+        2,
+        1,
+        1,
+        3,
+        2.5
+      ],
+      [
+        2,
+        2,
+        1,
+        3,
+        2.5
+      ],
+      [
+        3,
+        1,
+        0,
+        3,
+        0
+      ],
+      [
+        3,
+        2,
+        0,
+        3,
+        0
+      ]
+    ]
+  },
+  {
+    "command": "advanced-probit-ridge-fit",
+    "title": "带岭惩罚Probit分类：正态潜变量与尾部稳定得分",
+    "area": "ml",
+    "ref": "Albert and Chib (1993), Bayesian Analysis of Binary and Polychotomous Response Data, JASA.",
+    "url": "https://doi.org/10.1080/01621459.1993.10476321",
+    "columns": [
+      "X1",
+      "Label"
+    ],
+    "file": "probit-ridge-fit.csv",
+    "params": [
+      0.1,
+      1e-9,
+      200
+    ],
+    "header": [
+      "Feature",
+      "Coefficient",
+      "PenalizedNLL",
+      "ScoreResidual",
+      "Iterations"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        0,
+        2.772588722239781,
+        0
+      ]
+    ]
+  },
+  {
+    "command": "advanced-poisson-mixture-weight",
+    "title": "双Poisson混合权重估计：潜在事件状态与EM",
+    "area": "ml",
+    "ref": "McLachlan and Krishnan (2008), The EM Algorithm and Extensions, 2nd ed., Wiley.",
+    "url": "https://doi.org/10.1002/9780470191613",
+    "columns": [
+      "Count"
+    ],
+    "file": "poisson-mixture-weight.csv",
+    "params": [
+      1,
+      3,
+      1e-9,
+      2000
+    ],
+    "header": [
+      "MixtureWeightLow",
+      "MixtureWeightHigh",
+      "LogLikelihood",
+      "ProjectedScoreResidual",
+      "Iterations"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        0,
+        -4,
+        0
+      ]
+    ]
+  },
+  {
+    "command": "advanced-bernoulli-hmm-filter",
+    "title": "Bernoulli隐Markov状态：缩放前向后向与过滤—平滑分离",
+    "area": "ml",
+    "ref": "Rabiner (1989), A Tutorial on Hidden Markov Models and Selected Applications in Speech Recognition, Proceedings of the IEEE.",
+    "url": "https://doi.org/10.1109/5.18626",
+    "columns": [
+      "Observation"
+    ],
+    "file": "bernoulli-hmm-filter.csv",
+    "params": [
+      0.5,
+      0.2,
+      0.2,
+      0.2,
+      0.8
+    ],
+    "header": [
+      "Time",
+      "Observation",
+      "PriorHigh",
+      "FilteredHigh",
+      "SmoothedHigh",
+      "LogPredictiveProbability",
+      "LogLikelihood"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        1,
+        0.5,
+        0.8,
+        0.6530612244897959,
+        -0.6931471805599453
+      ],
+      [
+        2,
+        0,
+        0.68,
+        0.3469387755102041,
+        0.3469387755102041,
+        -0.9364934391916745
+      ]
+    ]
+  },
+  {
+    "command": "advanced-recursive-least-squares",
+    "title": "遗忘因子递归最小二乘：在线一步预测及信息矩阵",
+    "area": "ml",
+    "ref": "Ljung (1999), System Identification: Theory for the User, 2nd ed., Prentice Hall.",
+    "url": "https://www.control.isy.liu.se/research/reports/",
+    "columns": [
+      "X1",
+      "Y"
+    ],
+    "file": "recursive-least-squares.csv",
+    "params": [
+      1,
+      1
+    ],
+    "header": [
+      "Time",
+      "Actual",
+      "Prediction",
+      "Innovation",
+      "PosteriorPrediction",
+      "InformationTrace",
+      "Beta1"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        2,
+        0,
+        2,
+        1,
+        2,
+        1
+      ],
+      [
+        2,
+        4,
+        1,
+        3,
+        2,
+        3,
+        2
+      ],
+      [
+        3,
+        6,
+        2,
+        4,
+        3,
+        4,
+        3
+      ]
+    ]
+  },
+  {
+    "command": "advanced-dirichlet-multinomial-grid",
+    "title": "Dirichlet–多项分布：类别组成、浓度轮廓与后验预测",
+    "area": "ml",
+    "ref": "Mosimann (1962), On the Compound Multinomial Distribution, Biometrika.",
+    "url": "https://doi.org/10.1093/biomet/49.1-2.65",
+    "columns": [
+      "Count1",
+      "Count2"
+    ],
+    "file": "dirichlet-multinomial-grid.csv",
+    "params": [
+      2,
+      2,
+      2,
+      0.5,
+      0.5
+    ],
+    "header": [
+      "Group",
+      "Concentration",
+      "TrainingNLL",
+      "PosteriorMean1",
+      "PosteriorMean2"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        2,
+        3.295836866004329,
+        0.75,
+        0.25
+      ],
+      [
+        2,
+        2,
+        3.295836866004329,
+        0.25,
+        0.75
+      ],
+      [
+        3,
+        2,
+        3.295836866004329,
+        0.5,
+        0.5
+      ]
+    ]
+  }
+]

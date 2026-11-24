@@ -1,0 +1,26 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>带岭惩罚Probit分类：正态潜变量与尾部稳定得分｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="ml"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>带岭惩罚Probit分类：正态潜变量与尾部稳定得分</h1><p><a href="../research/advanced-research.html">高级研究方法</a>　<a href="../cpp/advanced_research_learning.hpp" download>完整模型源码</a>　<a href="../cpp/advanced_research_common.hpp" download>公共数值函数</a></p></header><article><h2>模型定义与识别条件</h2><p>Probit将二元事件建模为潜在高斯线性指数超过阈值的结果，概率函数与Logistic不同，尾部下降速度也不同。这里估计惩罚负似然，全部输入设计系数均受岭惩罚；若需要不惩罚截距，应在目标中显式改变对应项。</p><h2>数学推导与求解机制</h2><p>使用符号化标签将正负类统一为log Φ(a)，通过逆Mills比率获得解析得分与曲率。复用稳定左尾计算及阻尼Newton求解器，避免直接计算很小的1−Φ值。λ&gt;0保证严格凸目标及有限唯一解，最终检查原始目标的梯度，而非只检查预测概率变化。</p><div class="equation">$$P(Y_i=1\mid x_i)=\Phi(x_i^\top\beta)$$</div><div class="equation">$$a_i=(2y_i-1)x_i^\top\beta,\quad F(\beta)=-\sum_i\log\Phi(a_i)+\tfrac\lambda2\|\beta\|^2$$</div><div class="equation">$$R(a)=\varphi(a)/\Phi(a),\quad R'(a)=-R(a)[a+R(a)]$$</div><div class="equation">$$\nabla F=\lambda\beta-\sum_i(2y_i-1)x_iR(a_i)$$</div><div class="equation">$$H=\lambda I+\sum_iR(a_i)[a_i+R(a_i)]x_ix_i^\top$$</div><h2>独立解析基准</h2><p>对每个设计值1、2均包含一个正类与一个负类，β=0由对称性得到，四条似然贡献均为ln2。非对称数据可通过有限差分或独立正态CDF回代检查得分，比较不同惩罚下系数及概率。</p><p><a href="../research/advanced-examples/probit-ridge-fit.csv" download>下载CSV样本</a></p><pre>X1,Label
+1,0
+1,1
+2,0
+2,1
+</pre><pre>./build/kline_quant advanced-probit-ridge-fit quant/research/advanced-examples/probit-ridge-fit.csv 0.1 1e-9 200</pre><div class="wide"><table><thead><tr><th>Feature</th><th>Coefficient</th><th>PenalizedNLL</th><th>ScoreResidual</th></tr></thead><tbody><tr><td>1</td><td>0</td><td>2.77258872224</td><td>0</td></tr></tbody></table></div><p>输出字段：Feature，Coefficient，PenalizedNLL，ScoreResidual，Iterations。</p><h2>计算复杂度与研究边界</h2><p>每轮O(nd²+d³)。标签必须0或1，岭强度正。Probit潜变量尺度固定为1，否则二元概率无法同时识别系数尺度及潜变量方差；经济边际效应为φ(xᵀβ)β_j，而非系数自身。</p><h2>C++17完整实现</h2><pre>inline Report probit_ridge_fit(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,2,2,17)-1;parameters(p,3);
+    double lam=positive(p[0]),tol=positive(p[1]);auto K=count(p[2],1,2000);
+    require(double(K)*x.size()*d*d&lt;=5e7,"Probit work limit");
+    Mat a;Vec sign;
+    for(auto&amp;r:x){require(r.back()==0||r.back()==1,"Binary label required");a.emplace_back(r.begin(),r.end()-1);sign.push_back(2*r.back()-1);}
+    auto evaluate=[&amp;](const Vec&amp; w){
+        auto s=model_research::regularized_state(w,lam);
+        for(std::size_t i=0;i&lt;x.size();++i){
+            double z=sign[i]*dot(a[i],w),v=model_research::left_mills(z);
+            s.value-=model_research::log_normal_cdf(z);
+            for(std::size_t j=0;j&lt;d;++j)s.gradient[j]-=sign[i]*v*a[i][j];
+            add_outer(s.hessian,a[i],std::max(0.,v*(z+v)));
+        }
+        return s;
+    };
+    auto fit=model_research::damped_newton(d,tol,K,evaluate);
+    Report o{{"Feature","Coefficient","PenalizedNLL","ScoreResidual","Iterations"},{}};
+    for(std::size_t j=0;j&lt;d;++j)o.rows.push_back({double(j+1),fit.beta[j],fit.state.value,inf_norm(fit.state.gradient),double(fit.iterations)});
+    return o;
+}</pre><p>参考文献：<a href="https://doi.org/10.1080/01621459.1993.10476321">Albert and Chib (1993), Bayesian Analysis of Binary and Polychotomous Response Data, JASA.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

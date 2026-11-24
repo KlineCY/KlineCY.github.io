@@ -1,0 +1,39 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>多重因子中性组合：仿射约束、盒限制及ADMM｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>多重因子中性组合：仿射约束、盒限制及ADMM</h1><p><a href="../research/advanced-research.html">高级研究方法</a>　<a href="../cpp/advanced_research_allocation.hpp" download>完整模型源码</a>　<a href="../cpp/advanced_research_common.hpp" download>公共数值函数</a></p></header><article><h2>模型定义与识别条件</h2><p>传统市场中性组合往往只约束净敞口为零，但若要同时控制行业、风格、久期或其他因子暴露，需要完整多重线性等式。此处允许给定任意满行秩暴露矩阵A及目标b，配合单资产上下界与SPD风险矩阵；不额外假设所有因子目标为零。</p><h2>数学推导与求解机制</h2><p>ADMM将光滑二次目标及所有仿射等式放入w更新，将盒约束放入z更新。利用KKT消去w得到小型Schur补系统，事前计算H逆乘Aᵀ及Schur矩阵。每轮更新仿射可行w、盒可行z及缩放对偶，最终同时检查真实z的等式残差和盒法锥条件。不可行时不能输出收敛权重。</p><div class="equation">$$\min_{w,z}\frac\gamma2w^\top\Sigma w-\mu^\top w+I_{[l,u]}(z),\quad Aw=b,\quad w=z$$</div><div class="equation">$$H=\gamma\Sigma+\rho I,\quad v=H^{-1}[\mu+\rho(z-u_d)]$$</div><div class="equation">$$\eta=(AH^{-1}A^\top)^{-1}(Av-b),\quad w=v-H^{-1}A^\top\eta$$</div><div class="equation">$$z^+=\operatorname{clip}(w+u_d,l,u),\quad u_d^+=u_d+w-z^+$$</div><div class="equation">$$0\in\gamma\Sigma z-\mu+A^\top\eta+N_{[l,u]}(z),\quad Az=b$$</div><h2>独立解析基准</h2><p>样本三资产，预算及因子目标均0，因子加载(1,−1,0)，所以w1=w2且w3=−2w1。Σ=I、均值(1,0,−1)时，无盒约束的一维极小值w1=0.5、w3=−1，恰在盒边界。该解由解析代入验证。</p><p><a href="../research/advanced-examples/affine-box-admm.csv" download>下载CSV样本</a></p><pre>Cov1,Cov2,Cov3,Mean,Lower,Upper,BudgetLoading,FactorLoading
+1,0,0,1,-1,1,1,1
+0,1,0,0,-1,1,1,-1
+0,0,1,-1,-1,1,1,0
+</pre><pre>./build/kline_quant advanced-affine-box-admm quant/research/advanced-examples/affine-box-admm.csv 2 1 1 1e-9 10000 0 0</pre><div class="wide"><table><thead><tr><th>Asset</th><th>Weight</th></tr></thead><tbody><tr><td>1</td><td>0.5</td></tr><tr><td>2</td><td>0.5</td></tr><tr><td>3</td><td>-1</td></tr></tbody></table></div><p>输出字段：Asset，Weight，Objective，AffineResidual，PrimalResidual，DualResidual，KKTResidual，Iterations。</p><h2>计算复杂度与研究边界</h2><p>联合维数≤32，约束数≤8且独立，ADMM每轮朴素O(d³+m³)。盒与等式的可行性需独立检查；迭代未收敛时不区分不可行与精度不足。此模型控制净暴露和各因子，不直接约束总杠杆；若需要L1总仓位，应增加相应集合或引入辅助变量。</p><h2>C++17完整实现</h2><pre>inline Report affine_box_admm(const Mat&amp; x,const Vec&amp; p){
+    auto cols=validate(x,2,5,44);require(p.size()&gt;=6,"Missing affine controls");parameters(p,p.size());
+    auto m=count(p[0],1,8),d=cols-3-m;require(d==x.size()&amp;&amp;d&lt;=32&amp;&amp;m&lt;=d&amp;&amp;p.size()==5+m,"Invalid affine dimensions");
+    double gamma=positive(p[1]),rho=positive(p[2]),tol=positive(p[3]);auto K=count(p[4],1,100000);
+    require(double(K)*(d*d*d+m*m*m)&lt;=1e8,"Affine ADMM work limit");
+    Mat S,A(m,Vec(d)),H;Vec mu,l,u,b(p.begin()+5,p.end());
+    for(std::size_t i=0;i&lt;d;++i){auto&amp;r=x[i];S.emplace_back(r.begin(),r.begin()+d);mu.push_back(r[d]);l.push_back(r[d+1]);u.push_back(r[d+2]);require(l.back()&lt;=u.back(),"Invalid bounds");for(std::size_t j=0;j&lt;m;++j)A[j][i]=r[d+3+j];}
+    solve_spd(S,Vec(d,0));H=S;for(std::size_t i=0;i&lt;d;++i){for(double&amp;v:H[i])v*=gamma;H[i][i]+=rho;}
+    Mat HA;for(auto&amp;r:A)HA.push_back(solve_spd(H,r));Mat Q(m,Vec(m));for(std::size_t i=0;i&lt;m;++i)for(std::size_t j=0;j&lt;m;++j)Q[i][j]=dot(A[i],HA[j]);
+    solve_spd(Q,Vec(m,0));Vec z(d),dual(d,0),w(d),eta(m);
+    for(std::size_t j=0;j&lt;d;++j)z[j]=std::clamp(0.,l[j],u[j]);
+    double pr=0,dr=0,ar=0,gap=0;std::size_t it=0;
+    for(;it&lt;K;){
+        Vec rhs=mu;for(std::size_t j=0;j&lt;d;++j)rhs[j]+=rho*(z[j]-dual[j]);
+        w=solve_spd(H,rhs);Vec e=mul(A,w);for(std::size_t j=0;j&lt;m;++j)e[j]-=b[j];eta=solve_spd(Q,e);
+        Vec prev=z;pr=dr=gap=ar=0;
+        for(std::size_t j=0;j&lt;d;++j){
+            for(std::size_t k=0;k&lt;m;++k)w[j]-=HA[k][j]*eta[k];
+            z[j]=std::clamp(w[j]+dual[j],l[j],u[j]);dual[j]+=w[j]-z[j];pr=std::max(pr,std::abs(w[j]-z[j]));dr=std::max(dr,rho*std::abs(z[j]-prev[j]));
+        }
+        Vec g=mul(S,z),az=mul(A,z);
+        for(std::size_t j=0;j&lt;m;++j)ar=std::max(ar,std::abs(az[j]-b[j]));
+        for(std::size_t j=0;j&lt;d;++j){
+            double a=gamma*g[j]-mu[j]+rho*dual[j];for(std::size_t k=0;k&lt;m;++k)a+=A[k][j]*eta[k];
+            double v=rho*dual[j],e2=l[j]==u[j]?0:z[j]==l[j]?std::max(0.,v):z[j]==u[j]?std::max(0.,-v):std::abs(v);
+            gap=std::max({gap,std::abs(a),e2});
+        }
+        ++it;if(std::max({pr,dr,ar,gap})&lt;=tol)break;
+    }
+    require(std::max({pr,dr,ar,gap})&lt;=tol,"Affine box ADMM did not converge");
+    double obj=.5*gamma*dot(z,mul(S,z))-dot(mu,z);
+    Report o{{"Asset","Weight","Objective","AffineResidual","PrimalResidual","DualResidual","KKTResidual","Iterations"},{}};
+    for(std::size_t j=0;j&lt;d;++j)o.rows.push_back({double(j+1),z[j],obj,ar,pr,dr,gap,double(it)});
+    return o;
+}</pre><p>参考文献：<a href="https://stanford.edu/~boyd/papers/admm_distr_stats.html">Boyd et al. (2011), Distributed Optimization and Statistical Learning via the Alternating Direction Method of Multipliers.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

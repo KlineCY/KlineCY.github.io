@@ -1,0 +1,24 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Kirk价差期权：有效波动率与隐含相关系数校准｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="assets"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>Kirk价差期权：有效波动率与隐含相关系数校准</h1><p><a href="../research/advanced-research.html">高级研究方法</a>　<a href="../cpp/advanced_research_pricing.hpp" download>完整模型源码</a>　<a href="../cpp/advanced_research_common.hpp" download>公共数值函数</a></p></header><article><h2>模型定义与识别条件</h2><p>价差期权的支付为(F1−F2−K)正部。Kirk近似把F2+K视为具有经调整波动率的有效标的，从而将价差问题近似为交换期权。K=0时退化为Margrabe交换期权；K&gt;0时属于近似定价，不能作为精确风险中性积分。</p><h2>数学推导与求解机制</h2><p>有效方差关于相关系数单调下降，Black形式价格关于波动率非减，因此给定市场看涨价格可在ρ∈[−1,1]内二分。若某边际波动为0，则相关系数不可识别，约定输出0作为占位，并要求市场价格符合唯一模型价。输出校准残差及价差看涨看跌平价。</p><div class="equation">$$C\approx D[F_1\Phi(d_1)-(F_2+K)\Phi(d_2)]$$</div><div class="equation">$$b=F_2/(F_2+K),\quad v_{\mathrm{eff}}=\sigma_1^2+b^2\sigma_2^2-2b\rho\sigma_1\sigma_2$$</div><div class="equation">$$d_1=\frac{\log(F_1/(F_2+K))+v_{\mathrm{eff}}T/2}{\sqrt{v_{\mathrm{eff}}T}},\quad d_2=d_1-\sqrt{v_{\mathrm{eff}}T}$$</div><div class="equation">$$\frac{\partial C}{\partial\rho}\le0,\qquad \rho\in[-1,1]$$</div><h2>独立解析基准</h2><p>两远期120、100，执行价10、两波动0、零利率，确定性支付10。该情形相关系数不可识别，输出0占位，价差看跌0。非退化情况下使用事前给定相关系数生成近似市场价格，再反推相关系数。</p><p><a href="../research/advanced-examples/kirk-spread.csv" download>下载CSV样本</a></p><pre>Forward1,Forward2,Strike,Vol1,Vol2,Rate,Time,MarketCall
+120,100,10,0,0,0,1,10
+</pre><pre>./build/kline_quant advanced-kirk-spread quant/research/advanced-examples/kirk-spread.csv 1e-9</pre><div class="wide"><table><thead><tr><th>ImpliedCorrelation</th><th>EffectiveVol</th><th>Call</th><th>Put</th><th>PriceResidual</th><th>ParityResidual</th></tr></thead><tbody><tr><td>0</td><td>0</td><td>10</td><td>0</td><td>0</td><td>0</td></tr></tbody></table></div><p>输出字段：ImpliedCorrelation，EffectiveVol，Call，Put，PriceResidual，ParityResidual。</p><h2>计算复杂度与研究边界</h2><p>O(1)每条情景，正远期、非负执行价与波动率。相关系数的隐含值依赖Kirk近似、边际波动及交易报价，不直接等于实际收益相关。市场报价处于模型可达区间之外时应拒绝，不截断成伪校准结果。</p><h2>C++17完整实现</h2><pre>inline Report kirk_spread(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,8,8);parameters(p,1);double tol=positive(p[0]);
+    Report o{{"ImpliedCorrelation","EffectiveVol","Call","Put","PriceResidual","ParityResidual"},{}};
+    for(auto&amp;r:x){
+        double f=positive(r[0]),g=positive(r[1]),K=r[2],v=r[3],w=r[4],rate=r[5],T=positive(r[6]),market=r[7];
+        require(K&gt;=0&amp;&amp;v&gt;=0&amp;&amp;w&gt;=0&amp;&amp;market&gt;=0,"Invalid Kirk inputs");double h=g+K,b=g/h,df=positive(std::exp(-rate*T));
+        auto val=[&amp;](double rho){
+            double var=(v-b*w)*(v-b*w)+2*b*v*w*(1-rho),s=std::sqrt(std::max(0.,var)),c,put;
+            if(s==0){c=df*std::max(f-h,0.);put=df*std::max(h-f,0.);}
+            else{double z=s*std::sqrt(T),d1=std::log(f/h)/z+z/2,d2=d1-z;c=df*(f*normal(d1)-h*normal(d2));put=df*(h*normal(-d2)-f*normal(-d1));}
+            return Vec{s,c,put};
+        };
+        double rho=0;
+        if(v*w&gt;0){
+            double a=-1,z=1;require(market&lt;=val(a)[1]+tol&amp;&amp;market&gt;=val(z)[1]-tol,"Kirk target outside price range");
+            for(int i=0;i&lt;100;++i){double m=a/2+z/2;if(val(m)[1]&gt;market)a=m;else z=m;}rho=a/2+z/2;
+        }
+        Vec z=val(rho);require(std::abs(z[1]-market)&lt;=tol,"Kirk calibration residual");
+        o.rows.push_back({rho,z[0],z[1],z[2],z[1]-market,z[1]-z[2]-df*(f-h)});
+    }
+    return o;
+}</pre><p>参考文献：<a href="https://www.mathworks.com/help/fininst/spreadsensbykirk.html">Kirk (1995), Correlation in the Energy Markets, Managing Energy Price Risk, Risk Publications.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

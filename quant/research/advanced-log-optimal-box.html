@@ -1,0 +1,29 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>有限情景对数最优组合：破产约束与可行近端梯度｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>有限情景对数最优组合：破产约束与可行近端梯度</h1><p><a href="../research/advanced-research.html">高级研究方法</a>　<a href="../cpp/advanced_research_allocation.hpp" download>完整模型源码</a>　<a href="../cpp/advanced_research_common.hpp" download>公共数值函数</a></p></header><article><h2>模型定义与识别条件</h2><p>对数最优组合直接最大化情景财富乘数的对数期望，而非均值减方差代理。它重视极端负财富，且只有所有正概率情景下财富乘数严格正时目标才有定义。此实现使用长仓全投资盒约束，要求单资产所有情景简单收益严格大于−1，从而整个可行集合都满足财富正性。</p><h2>数学推导与求解机制</h2><p>负对数增长为凸函数，解析梯度和Hessian由财富乘数分母得到。通过预算盒投影及回溯二次上界获得稳定步长，报告真实期望对数增长、最坏情景财富因子和投影梯度。目标未必严格凸；只有情景收益在预算切空间具有充分变化时权重唯一。</p><div class="equation">$$\max_{w\in\mathcal C}\sum_i p_i\log(1+r_i^\top w),\quad \mathcal C=\{0\le w\le u,\ \mathbf1^\top w=1\}$$</div><div class="equation">$$\nabla F=-\sum_i\frac{p_ir_i}{1+r_i^\top w}$$</div><div class="equation">$$\nabla^2 F=\sum_i\frac{p_ir_ir_i^\top}{(1+r_i^\top w)^2}\succeq0$$</div><div class="equation">$$w^+=\Pi_{\mathcal C}(w-\alpha\nabla F(w))$$</div><div class="equation">$$F(w^+)\le F(w)+\nabla F(w)^\top(w^+-w)+\frac{\|w^+-w\|^2}{2\alpha}$$</div><h2>独立解析基准</h2><p>两情景等概率、收益(0.1,−0.1)与(−0.1,0.1)，等权使每种情景财富因子均1，期望log增长0。任何非等权会形成对称波动且降低增长，由Jensen不等式直接验证。</p><p><a href="../research/advanced-examples/log-optimal-box.csv" download>下载CSV样本</a></p><pre>Return1,Return2,Probability
+0.1,-0.1,0.5
+-0.1,0.1,0.5
+</pre><pre>./build/kline_quant advanced-log-optimal-box quant/research/advanced-examples/log-optimal-box.csv 1 1e-9 2000</pre><div class="wide"><table><thead><tr><th>Asset</th><th>Weight</th><th>ExpectedLogGrowth</th><th>MinimumWealthFactor</th><th>ProjectedGradient</th></tr></thead><tbody><tr><td>1</td><td>0.5</td><td>0</td><td>1</td><td>0</td></tr><tr><td>2</td><td>0.5</td><td>0</td><td>1</td><td>0</td></tr></tbody></table></div><p>输出字段：Asset，Weight，ExpectedLogGrowth，MinimumWealthFactor，ProjectedGradient，Iterations。</p><h2>计算复杂度与研究边界</h2><p>每轮O(nd+80d)，概率严格正且和1。情景为事前指定的分布，模型不保证单期收益或实际最大回撤。对数增长忽略交易成本、杠杆及投资者其他财富来源；若现实中允许空头，应明确额外破产约束及可行域。</p><h2>C++17完整实现</h2><pre>inline Report log_optimal_box(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,2,2,33)-1;parameters(p,3);
+    double cap=p[0],tol=positive(p[1]);auto K=count(p[2],1,100000);
+    require(cap&gt;=1./d&amp;&amp;cap&lt;=1&amp;&amp;double(K)*(x.size()*d+80*d)&lt;=1e8,"Invalid log optimal controls");
+    Mat r;Vec prob;
+    for(auto&amp;a:x){r.emplace_back(a.begin(),a.end()-1);prob.push_back(positive(a.back()));for(double v:r.back())require(v&gt;-1,"Return must exceed -100 percent");}
+    require(std::abs(sum(prob)-1)&lt;=1e-10,"Scenario probabilities must sum to one");
+    auto eval=[&amp;](const Vec&amp;w){double f=0,minwealth=std::numeric_limits&lt;double&gt;::infinity();Vec g(d,0);
+        for(std::size_t i=0;i&lt;r.size();++i){double v=positive(1+dot(r[i],w));f-=prob[i]*std::log(v);minwealth=std::min(minwealth,v);for(std::size_t j=0;j&lt;d;++j)g[j]-=prob[i]*r[i][j]/v;}
+        return std::make_tuple(f,minwealth,g);
+    };
+    Vec l(d,0),u(d,cap),w(d,1./d);auto st=eval(w);double step=1,gap=0;std::size_t it=0;
+    for(;it&lt;K;){
+        bool ok=false;Vec g=std::get&lt;2&gt;(st),z(d);
+        for(int k=0;k&lt;60;++k){
+            for(std::size_t j=0;j&lt;d;++j)z[j]=w[j]-step*g[j];z=box_projection(z,l,u,1);
+            Vec h(d);for(std::size_t j=0;j&lt;d;++j)h[j]=z[j]-w[j];gap=inf_norm(h)/step;auto next=eval(z);
+            if(std::get&lt;0&gt;(next)&lt;=std::get&lt;0&gt;(st)+dot(g,h)+.5*squared(h)/step+1e-14){ok=true;if(gap&gt;tol){w=z;st=next;}break;}step*=.5;
+        }
+        require(ok,"Log growth line search failed");++it;if(gap&lt;=tol)break;step=std::min(1e6,step*1.5);
+    }
+    require(gap&lt;=tol,"Log growth projected gradient did not converge");
+    Report o{{"Asset","Weight","ExpectedLogGrowth","MinimumWealthFactor","ProjectedGradient","Iterations"},{}};
+    for(std::size_t j=0;j&lt;d;++j)o.rows.push_back({double(j+1),w[j],-std::get&lt;0&gt;(st),std::get&lt;1&gt;(st),gap,double(it)});
+    return o;
+}</pre><p>参考文献：<a href="https://doi.org/10.1002/j.1538-7305.1956.tb03809.x">Kelly (1956), A New Interpretation of Information Rate, Bell System Technical Journal; Cover and Thomas (2006), Elements of Information Theory.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

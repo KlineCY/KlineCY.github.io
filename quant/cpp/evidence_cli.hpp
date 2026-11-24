@@ -64,6 +64,14 @@
 #include "model_research_pricing.hpp"
 #include "model_research_portfolio.hpp"
 #include "model_research_systems.hpp"
+#include "advanced_research_econometrics.hpp"
+#include "advanced_research_learning.hpp"
+#include "advanced_research_pricing.hpp"
+#include "advanced_research_allocation.hpp"
+#include "advanced_research_numerics.hpp"
+#include "advanced_research_microstructure.hpp"
+#include "advanced_research_inference.hpp"
+#include "advanced_research_bayesian.hpp"
 namespace kline {
 inline bool run_evidence_cli(const std::string& command,int argc,char** argv,std::ostream& out){
     using Function=researchflow::Report(*)(const researchflow::Mat&,const researchflow::Vec&);
@@ -340,6 +348,54 @@ inline bool run_evidence_cli(const std::string& command,int argc,char** argv,std
     if(command=="model-rolling-factor-risk-qp")fn=model_research::rolling_factor_risk_qp;
     if(command=="model-integer-execution-dp")fn=model_research::integer_execution_dp;
     if(command=="model-inventory-quote-dp")fn=model_research::inventory_quote_dp;
+    if(command=="advanced-tyler-shape")fn=advanced_research::tyler_shape;
+    if(command=="advanced-linear-gmm-two-step")fn=advanced_research::linear_gmm_two_step;
+    if(command=="advanced-ar1-gls-profile")fn=advanced_research::ar1_gls_profile;
+    if(command=="advanced-random-intercept-reml")fn=advanced_research::random_intercept_reml;
+    if(command=="advanced-sur-feasible-gls")fn=advanced_research::sur_feasible_gls;
+    if(command=="advanced-james-stein-means")fn=advanced_research::james_stein_means;
+    if(command=="advanced-masked-als")fn=advanced_research::masked_als;
+    if(command=="advanced-probit-ridge-fit")fn=advanced_research::probit_ridge_fit;
+    if(command=="advanced-poisson-mixture-weight")fn=advanced_research::poisson_mixture_weight;
+    if(command=="advanced-bernoulli-hmm-filter")fn=advanced_research::bernoulli_hmm_filter;
+    if(command=="advanced-recursive-least-squares")fn=advanced_research::recursive_least_squares;
+    if(command=="advanced-dirichlet-multinomial-grid")fn=advanced_research::dirichlet_multinomial_grid;
+    if(command=="advanced-merton-jump-mixture")fn=advanced_research::merton_jump_mixture;
+    if(command=="advanced-vasicek-bond-option")fn=advanced_research::vasicek_bond_option;
+    if(command=="advanced-callable-rate-lattice")fn=advanced_research::callable_rate_lattice;
+    if(command=="advanced-structural-credit-fit")fn=advanced_research::structural_credit_fit;
+    if(command=="advanced-kirk-spread")fn=advanced_research::kirk_spread;
+    if(command=="advanced-heston-full-truncation")fn=advanced_research::heston_full_truncation;
+    if(command=="advanced-ellipsoid-robust-qp")fn=advanced_research::ellipsoid_robust_qp;
+    if(command=="advanced-affine-box-admm")fn=advanced_research::affine_box_admm;
+    if(command=="advanced-scenario-minimax-variance")fn=advanced_research::scenario_minimax_variance;
+    if(command=="advanced-multiasset-execution-lq")fn=advanced_research::multiasset_execution_lq;
+    if(command=="advanced-log-optimal-box")fn=advanced_research::log_optimal_box;
+    if(command=="advanced-stochastic-execution-dp")fn=advanced_research::stochastic_execution_dp;
+    if(command=="advanced-gmres-restarted")fn=advanced_research::gmres_restarted;
+    if(command=="advanced-jacobi-eigensystem")fn=advanced_research::jacobi_eigensystem;
+    if(command=="advanced-equality-ridge")fn=advanced_research::equality_ridge;
+    if(command=="advanced-ctmc-uniformization")fn=advanced_research::ctmc_uniformization;
+    if(command=="advanced-sinkhorn-log")fn=advanced_research::sinkhorn_log;
+    if(command=="advanced-trust-region-quadratic")fn=advanced_research::trust_region_quadratic;
+    if(command=="advanced-acd-duration-grid")fn=advanced_research::acd_duration_grid;
+    if(command=="advanced-flow-propagator-ridge")fn=advanced_research::flow_propagator_ridge;
+    if(command=="advanced-queue-fill-uniformization")fn=advanced_research::queue_fill_uniformization;
+    if(command=="advanced-bivariate-hawkes-likelihood")fn=advanced_research::bivariate_hawkes_likelihood;
+    if(command=="advanced-parzen-realized-kernel")fn=advanced_research::parzen_realized_kernel;
+    if(command=="advanced-var-structural-irf")fn=advanced_research::var_structural_irf;
+    if(command=="advanced-local-projection-hac")fn=advanced_research::local_projection_hac;
+    if(command=="advanced-twfe-two-way-cluster")fn=advanced_research::twfe_two_way_cluster;
+    if(command=="advanced-crossfit-aipw")fn=advanced_research::crossfit_aipw;
+    if(command=="advanced-weibull-survival-profile")fn=advanced_research::weibull_survival_profile;
+    if(command=="advanced-dynamic-panel-diff-iv")fn=advanced_research::dynamic_panel_diff_iv;
+    if(command=="advanced-supf-break-grid")fn=advanced_research::supf_break_grid;
+    if(command=="advanced-bayesian-linear-nig")fn=advanced_research::bayesian_linear_nig;
+    if(command=="advanced-gaussian-process-grid")fn=advanced_research::gaussian_process_grid;
+    if(command=="advanced-student-t-regression-em")fn=advanced_research::student_t_regression_em;
+    if(command=="advanced-hmm-transition-em")fn=advanced_research::hmm_transition_em;
+    if(command=="advanced-bayesian-online-change")fn=advanced_research::bayesian_online_change;
+    if(command=="advanced-dynamic-regression-kalman")fn=advanced_research::dynamic_regression_kalman;
     if(!fn)return false;
     require(argc>=3,"Evidence laboratory requires a numeric CSV");
     researchflow::Vec p;
@@ -587,6 +643,54 @@ inline void evidence_usage(std::ostream& out){
     out<<"  model-rolling-factor-risk-qp CSV PARAMETERS...\n";
     out<<"  model-integer-execution-dp CSV PARAMETERS...\n";
     out<<"  model-inventory-quote-dp CSV PARAMETERS...\n";
+    out<<"  advanced-tyler-shape CSV PARAMETERS...\n";
+    out<<"  advanced-linear-gmm-two-step CSV PARAMETERS...\n";
+    out<<"  advanced-ar1-gls-profile CSV PARAMETERS...\n";
+    out<<"  advanced-random-intercept-reml CSV PARAMETERS...\n";
+    out<<"  advanced-sur-feasible-gls CSV PARAMETERS...\n";
+    out<<"  advanced-james-stein-means CSV PARAMETERS...\n";
+    out<<"  advanced-masked-als CSV PARAMETERS...\n";
+    out<<"  advanced-probit-ridge-fit CSV PARAMETERS...\n";
+    out<<"  advanced-poisson-mixture-weight CSV PARAMETERS...\n";
+    out<<"  advanced-bernoulli-hmm-filter CSV PARAMETERS...\n";
+    out<<"  advanced-recursive-least-squares CSV PARAMETERS...\n";
+    out<<"  advanced-dirichlet-multinomial-grid CSV PARAMETERS...\n";
+    out<<"  advanced-merton-jump-mixture CSV PARAMETERS...\n";
+    out<<"  advanced-vasicek-bond-option CSV\n";
+    out<<"  advanced-callable-rate-lattice CSV PARAMETERS...\n";
+    out<<"  advanced-structural-credit-fit CSV PARAMETERS...\n";
+    out<<"  advanced-kirk-spread CSV PARAMETERS...\n";
+    out<<"  advanced-heston-full-truncation CSV PARAMETERS...\n";
+    out<<"  advanced-ellipsoid-robust-qp CSV PARAMETERS...\n";
+    out<<"  advanced-affine-box-admm CSV PARAMETERS...\n";
+    out<<"  advanced-scenario-minimax-variance CSV PARAMETERS...\n";
+    out<<"  advanced-multiasset-execution-lq CSV PARAMETERS...\n";
+    out<<"  advanced-log-optimal-box CSV PARAMETERS...\n";
+    out<<"  advanced-stochastic-execution-dp CSV PARAMETERS...\n";
+    out<<"  advanced-gmres-restarted CSV PARAMETERS...\n";
+    out<<"  advanced-jacobi-eigensystem CSV PARAMETERS...\n";
+    out<<"  advanced-equality-ridge CSV PARAMETERS...\n";
+    out<<"  advanced-ctmc-uniformization CSV PARAMETERS...\n";
+    out<<"  advanced-sinkhorn-log CSV PARAMETERS...\n";
+    out<<"  advanced-trust-region-quadratic CSV PARAMETERS...\n";
+    out<<"  advanced-acd-duration-grid CSV PARAMETERS...\n";
+    out<<"  advanced-flow-propagator-ridge CSV PARAMETERS...\n";
+    out<<"  advanced-queue-fill-uniformization CSV PARAMETERS...\n";
+    out<<"  advanced-bivariate-hawkes-likelihood CSV PARAMETERS...\n";
+    out<<"  advanced-parzen-realized-kernel CSV PARAMETERS...\n";
+    out<<"  advanced-var-structural-irf CSV PARAMETERS...\n";
+    out<<"  advanced-local-projection-hac CSV PARAMETERS...\n";
+    out<<"  advanced-twfe-two-way-cluster CSV\n";
+    out<<"  advanced-crossfit-aipw CSV PARAMETERS...\n";
+    out<<"  advanced-weibull-survival-profile CSV PARAMETERS...\n";
+    out<<"  advanced-dynamic-panel-diff-iv CSV\n";
+    out<<"  advanced-supf-break-grid CSV PARAMETERS...\n";
+    out<<"  advanced-bayesian-linear-nig CSV PARAMETERS...\n";
+    out<<"  advanced-gaussian-process-grid CSV PARAMETERS...\n";
+    out<<"  advanced-student-t-regression-em CSV PARAMETERS...\n";
+    out<<"  advanced-hmm-transition-em CSV PARAMETERS...\n";
+    out<<"  advanced-bayesian-online-change CSV PARAMETERS...\n";
+    out<<"  advanced-dynamic-regression-kalman CSV PARAMETERS...\n";
     out<<"Evidence laboratories: evidence-METHOD CSV [PARAMETERS...]\n";
     out<<"  evidence-hj-bound CSV PARAMETERS...\n";
     out<<"  evidence-minimum-norm-sdf CSV PARAMETERS...\n";

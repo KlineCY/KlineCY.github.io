@@ -1,0 +1,28 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>椭球均值不确定性：完整协方差鲁棒配置｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>椭球均值不确定性：完整协方差鲁棒配置</h1><p><a href="../research/advanced-research.html">高级研究方法</a>　<a href="../cpp/advanced_research_allocation.hpp" download>完整模型源码</a>　<a href="../cpp/advanced_research_common.hpp" download>公共数值函数</a></p></header><article><h2>模型定义与识别条件</h2><p>均值估计误差可通过椭球不确定集进入组合决策。对给定权重，最坏均值由Cauchy–Schwarz不等式得到；此处将均值误差椭球的形状明确设为资产协方差，半径δ为外生参数。目标同时含方差与标准差惩罚，具有凸性，但二者的经济解释不同。</p><h2>数学推导与求解机制</h2><p>预算严格正、协方差SPD，因此可行权重不为零，风险平方根可微。采用带二次上界回溯的投影梯度，预算盒投影沿用乘子二分。每步检查实际目标满足下降上界，最终报告投影梯度残差、名义与最坏均值及组合方差。</p><div class="equation">$$\mathcal U=\{\mu+\Sigma^{1/2}z:\|z\|_2\le\delta\}$$</div><div class="equation">$$\min_{\tilde\mu\in\mathcal U}\tilde\mu^\top w=\mu^\top w-\delta\sqrt{w^\top\Sigma w}$$</div><div class="equation">$$F(w)=\tfrac\gamma2w^\top\Sigma w-\mu^\top w+\delta\sqrt{w^\top\Sigma w}$$</div><div class="equation">$$\nabla F=(\gamma+\delta/\sqrt{w^\top\Sigma w})\Sigma w-\mu$$</div><div class="equation">$$w^+=\Pi_{\mathcal C}(w-\alpha\nabla F(w)),\quad G_\alpha=(w-w^+)/\alpha$$</div><h2>独立解析基准</h2><p>两资产独立且同方差1、均值0、预算1、γ=1、δ=0.2，等权最小化方差及标准差。方差0.5、最坏均值−0.2/√2、目标0.25+0.2/√2。非对称情况下可用一维凸目标独立求根。</p><p><a href="../research/advanced-examples/ellipsoid-robust-qp.csv" download>下载CSV样本</a></p><pre>Cov1,Cov2,Mean,Lower,Upper
+1,0,0,0,1
+0,1,0,0,1
+</pre><pre>./build/kline_quant advanced-ellipsoid-robust-qp quant/research/advanced-examples/ellipsoid-robust-qp.csv 1 1 0.2 1e-9 1000</pre><div class="wide"><table><thead><tr><th>Asset</th><th>Weight</th><th>NominalMean</th><th>RobustMean</th><th>Variance</th><th>Objective</th><th>ProjectedGradient</th></tr></thead><tbody><tr><td>1</td><td>0.5</td><td>0</td><td>-0.141421356237</td><td>0.5</td><td>0.391421356237</td><td>0</td></tr><tr><td>2</td><td>0.5</td><td>0</td><td>-0.141421356237</td><td>0.5</td><td>0.391421356237</td><td>0</td></tr></tbody></table></div><p>输出字段：Asset，Weight，NominalMean，RobustMean，Variance，Objective，ProjectedGradient，Iterations。</p><h2>计算复杂度与研究边界</h2><p>O(d²)每梯度、投影O(80d)，初始化正定检查O(d³)。δ不能由最终测试收益反推；不确定集置信覆盖依赖统计估计和样本结构。若均值不确定性与收益协方差不同，应输入单独的椭球形状并重写梯度。</p><h2>C++17完整实现</h2><pre>inline Report ellipsoid_robust_qp(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,1,4,35)-3;parameters(p,5);require(x.size()==d,"Square covariance required");
+    double B=positive(p[0]),gamma=positive(p[1]),delta=p[2],tol=positive(p[3]);auto K=count(p[4],1,100000);
+    require(delta&gt;=0&amp;&amp;double(K)*d*(d+80)&lt;=5e7,"Invalid robust optimization controls");
+    Mat S;Vec mu,l,u;for(auto&amp;r:x){S.emplace_back(r.begin(),r.begin()+d);mu.push_back(r[d]);l.push_back(r[d+1]);u.push_back(r[d+2]);}solve_spd(S,Vec(d,0));
+    auto value=[&amp;](const Vec&amp; w){double v=positive(dot(w,mul(S,w)));return .5*gamma*v-dot(mu,w)+delta*std::sqrt(v);};
+    auto grad=[&amp;](const Vec&amp; w){Vec v=mul(S,w);double z=gamma+delta/std::sqrt(positive(dot(w,v)));for(std::size_t j=0;j&lt;d;++j)v[j]=z*v[j]-mu[j];return v;};
+    Vec w=box_projection(Vec(d,B/d),l,u,B);double f=value(w),step=1/(gamma*matrix_lipschitz(S)),gap=0;std::size_t it=0;
+    for(;it&lt;K;){
+        Vec g=grad(w),z(d);bool accepted=false;
+        for(int k=0;k&lt;60;++k){
+            for(std::size_t j=0;j&lt;d;++j)z[j]=w[j]-step*g[j];
+            z=box_projection(z,l,u,B);Vec h(d);for(std::size_t j=0;j&lt;d;++j)h[j]=z[j]-w[j];
+            double fv=value(z);gap=inf_norm(h)/step;
+            if(fv&lt;=f+dot(g,h)+.5*squared(h)/step+1e-14*std::max(1.,std::abs(f))){accepted=true;if(gap&gt;tol){w=z;f=fv;}break;}
+            step*=.5;
+        }
+        require(accepted,"Robust line search failed");++it;if(gap&lt;=tol)break;step=std::min(1/(gamma*matrix_lipschitz(S)),step*1.2);
+    }
+    require(gap&lt;=tol,"Robust projected gradient did not converge");
+    double var=dot(w,mul(S,w)),m=dot(w,mu);
+    Report o{{"Asset","Weight","NominalMean","RobustMean","Variance","Objective","ProjectedGradient","Iterations"},{}};
+    for(std::size_t j=0;j&lt;d;++j)o.rows.push_back({double(j+1),w[j],m,m-delta*std::sqrt(var),var,f,gap,double(it)});
+    return o;
+}</pre><p>参考文献：<a href="https://doi.org/10.1287/moor.28.1.1.14260">Goldfarb and Iyengar (2003), Robust Portfolio Selection Problems, Mathematics of Operations Research.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

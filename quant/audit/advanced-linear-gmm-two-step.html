@@ -1,0 +1,38 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>过度识别线性GMM：两步权重、稳健协方差与J统计量｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="audit"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>过度识别线性GMM：两步权重、稳健协方差与J统计量</h1><p><a href="../research/advanced-research.html">高级研究方法</a>　<a href="../cpp/advanced_research_econometrics.hpp" download>完整模型源码</a>　<a href="../cpp/advanced_research_common.hpp" download>公共数值函数</a></p></header><article><h2>模型定义与识别条件</h2><p>当工具变量数q超过回归参数数d时，全部样本矩通常无法同时精确为零。线性GMM利用正定权重最小化矩残差的二次型，工具相关性体现在A的列秩，工具外生性体现在总体矩为零。实现使用未中心化经验二阶矩及明确正ridge估计第二步权重；ridge固定时不直接宣称标准Hansen J的渐近卡方结论。</p><h2>数学推导与求解机制</h2><p>第一步用单位矩阵得到一致估计的候选值，估计各观察的矩向量协方差；第二步固定权重重新求线性系统。最后用第二步残差构建heteroskedastic-robust sandwich。J为实际加权矩距离，过度识别自由度为q−d；只有标准正则消失条件与有效工具、强识别等成立时才采用经典卡方近似。</p><div class="equation">$$g_i(\beta)=z_i(y_i-x_i^\top\beta),\quad \bar g=b-A\beta$$</div><div class="equation">$$A=n^{-1}Z^\top X,\quad b=n^{-1}Z^\top y$$</div><div class="equation">$$\hat\beta_1=(A^\top W_1A)^{-1}A^\top W_1b,\quad W_1=I$$</div><div class="equation">$$\widehat S_1=n^{-1}\sum_i g_i(\hat\beta_1)g_i(\hat\beta_1)^\top,\quad W_2=(\widehat S_1+\epsilon I)^{-1}$$</div><div class="equation">$$\widehat V=n^{-1}M^{-1}A^\top W_2\widehat S_2W_2AM^{-1},\quad M=A^\top W_2A$$</div><div class="equation">$$J=n\bar g(\hat\beta_2)^\top W_2\bar g(\hat\beta_2)$$</div><h2>独立解析基准</h2><p>教学基准使用一列解释变量与两列工具。为使结果可解析，使用独立计算的A、b和加权法方程作为比较；输出系数、稳健标准误、J、自由度、原始矩范数及加权驻点残差。</p><p><a href="../research/advanced-examples/linear-gmm-two-step.csv" download>下载CSV样本</a></p><pre>Y,X1,Z1,Z2
+1,1,1,1
+3,1,1,-1
+2,-1,-1,1
+-2,-1,-1,-1
+5,2,2,1
+-3,-2,-2,1
+</pre><pre>./build/kline_quant advanced-linear-gmm-two-step quant/research/advanced-examples/linear-gmm-two-step.csv 1 0.1</pre><div class="wide"><table><thead><tr><th>Feature</th><th>Coefficient</th></tr></thead><tbody><tr><td>1</td><td>1.82814302191</td></tr></tbody></table></div><p>输出字段：Feature，Coefficient，RobustSE，JStatistic，OveridentifyingDF，MomentNorm，ScoreResidual。</p><h2>计算复杂度与研究边界</h2><p>输入首列结果，其次d列解释变量，最后q列工具，d由参数指定。必须q≥d、n&gt;q且A满列秩。朴素计算为小规模稠密O(nq²+q⁴+d⁴)。存在聚类、序列相关或弱工具时需要专门的协方差及弱识别推断，不能只用J判断识别有效性。</p><h2>C++17完整实现</h2><pre>inline Report linear_gmm_two_step(const Mat&amp; x,const Vec&amp; p){
+    auto cols=validate(x,4,3,33);parameters(p,2);
+    auto d=count(p[0],1,cols-2),q=cols-d-1,n=x.size();double ridge=positive(p[1]);
+    require(q&gt;=d&amp;&amp;n&gt;q&amp;&amp;q&lt;=16&amp;&amp;double(n)*q*q&lt;=5e7,"Invalid GMM dimensions");
+    Mat A(q,Vec(d,0)),X,Z;Vec b(q,0),y;
+    for(auto&amp;r:x){
+        y.push_back(r[0]);X.emplace_back(r.begin()+1,r.begin()+1+d);Z.emplace_back(r.begin()+1+d,r.end());
+        for(std::size_t j=0;j&lt;q;++j){b[j]+=Z.back()[j]*r[0]/n;for(std::size_t k=0;k&lt;d;++k)A[j][k]+=Z.back()[j]*X.back()[k]/n;}
+    }
+    auto moments=[&amp;](const Vec&amp; beta){
+        Mat S(q,Vec(q,0));for(std::size_t i=0;i&lt;n;++i)add_outer(S,Z[i],std::pow(y[i]-dot(X[i],beta),2)/n);return S;
+    };
+    auto fit=[&amp;](const Mat&amp;W){
+        Mat WA(q,Vec(d,0)),M(d,Vec(d,0));Vec wb=mul(W,b),rhs(d,0);
+        for(std::size_t i=0;i&lt;q;++i)for(std::size_t j=0;j&lt;d;++j)for(std::size_t k=0;k&lt;q;++k)WA[i][j]+=W[i][k]*A[k][j];
+        for(std::size_t i=0;i&lt;d;++i)for(std::size_t k=0;k&lt;q;++k){rhs[i]+=A[k][i]*wb[k];for(std::size_t j=0;j&lt;d;++j)M[i][j]+=A[k][i]*WA[k][j];}
+        return std::make_tuple(solve_spd(M,rhs),M,WA);
+    };
+    auto first=fit(identity(q));Mat S=moments(std::get&lt;0&gt;(first));for(std::size_t j=0;j&lt;q;++j)S[j][j]+=ridge;
+    Mat W=invert_spd(S);auto second=fit(W);Vec beta=std::get&lt;0&gt;(second);
+    Mat M=std::get&lt;1&gt;(second),WA=std::get&lt;2&gt;(second),S2=moments(beta),Mi=invert_spd(M);
+    Vec g=b,v=mul(A,beta);for(std::size_t j=0;j&lt;q;++j)g[j]-=v[j];
+    Vec wg=mul(W,g),score(d,0);
+    for(std::size_t j=0;j&lt;d;++j)for(std::size_t k=0;k&lt;q;++k)score[j]+=A[k][j]*wg[k];
+    Report o{{"Feature","Coefficient","RobustSE","JStatistic","OveridentifyingDF","MomentNorm","ScoreResidual"},{}};
+    for(std::size_t j=0;j&lt;d;++j){
+        Vec a=mul(WA,Mi[j]);double var=dot(a,mul(S2,a))/n;
+        o.rows.push_back({double(j+1),beta[j],std::sqrt(std::max(0.,var)),n*dot(g,wg),double(q-d),std::sqrt(squared(g)),inf_norm(score)});
+    }
+    return o;
+}</pre><p>参考文献：<a href="https://doi.org/10.2307/1912775">Hansen (1982), Large Sample Properties of Generalized Method of Moments Estimators, Econometrica.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

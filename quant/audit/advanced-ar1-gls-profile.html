@@ -1,0 +1,25 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AR(1)误差回归：Prais–Winsten变换与轮廓似然｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="audit"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>AR(1)误差回归：Prais–Winsten变换与轮廓似然</h1><p><a href="../research/advanced-research.html">高级研究方法</a>　<a href="../cpp/advanced_research_econometrics.hpp" download>完整模型源码</a>　<a href="../cpp/advanced_research_common.hpp" download>公共数值函数</a></p></header><article><h2>模型定义与识别条件</h2><p>存在AR(1)残差时，OLS仍可能在严格外生条件下无偏，但效率及通常标准误受影响。这里在平稳高斯误差、等间距观察和给定线性设计下，针对每个候选ρ做Prais–Winsten变换，保留第一个观测而非直接删除。初始误差方差为σ²/(1−ρ²)，故轮廓负似然额外包含Jacobian项。</p><h2>数学推导与求解机制</h2><p>每个ρ将问题变成独立同方差正态回归，求解变换设计的普通最小二乘并计算创新方差MLE。将β与σ²代回似然，扫描预先给定的ρ网格。报告最优网格点、系数、创新方差与正规方程残差。网格最小值不是连续最优值；选择范围及步长应在研究设计中明确。</p><div class="equation">$$y_t=x_t^\top\beta+u_t,\quad u_t=\rho u_{t-1}+\epsilon_t,\quad|\rho|&lt;1$$</div><div class="equation">$$y_1^*=\sqrt{1-\rho^2}y_1,\quad x_1^*=\sqrt{1-\rho^2}x_1$$</div><div class="equation">$$y_t^*=y_t-\rho y_{t-1},\quad x_t^*=x_t-\rho x_{t-1}\quad(t\ge2)$$</div><div class="equation">$$\hat\beta(\rho)=(X^{*\top}X^*)^{-1}X^{*\top}y^*,\quad \hat\sigma^2(\rho)=\mathrm{SSE}(\rho)/n$$</div><div class="equation">$$L(\rho)=\tfrac n2[1+\log(2\pi\hat\sigma^2)]-\tfrac12\log(1-\rho^2)$$</div><h2>独立解析基准</h2><p>固定ρ=0时，常数设计、结果2、4、2、4，模型退化为OLS，系数3、方差1。非零ρ使用首条加权及滞后差分，独立矩阵变换即可复算。测试同时核对加权残差的正规方程，不以原始OLS残差为诊断。</p><p><a href="../research/advanced-examples/ar1-gls-profile.csv" download>下载CSV样本</a></p><pre>Y,X1
+2,1
+4,1
+2,1
+4,1
+</pre><pre>./build/kline_quant advanced-ar1-gls-profile quant/research/advanced-examples/ar1-gls-profile.csv 0 0 2</pre><div class="wide"><table><thead><tr><th>Feature</th><th>Coefficient</th><th>Rho</th><th>InnovationVariance</th></tr></thead><tbody><tr><td>1</td><td>3</td><td>0</td><td>1</td></tr></tbody></table></div><p>输出字段：Feature，Coefficient，Rho，InnovationVariance，ProfileNLL，ScoreResidual。</p><h2>计算复杂度与研究边界</h2><p>设计应包含用户希望估计的截距。输入按时间顺序排列，无缺口；q=0的零残差似然退化需拒绝。搜索成本O(g(nd²+d³))。误差若非平稳、异方差或更高阶相关，AR(1)GLS不自动修复模型；金融预测还须单独区分估计期与外推期。</p><h2>C++17完整实现</h2><pre>inline Report ar1_gls_profile(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,3,2,25)-1;parameters(p,3);
+    double lo=p[0],hi=p[1];auto g=count(p[2],2,10000),n=x.size();
+    require(lo&gt;-1&amp;&amp;hi&lt;1&amp;&amp;lo&lt;=hi&amp;&amp;n&gt;d&amp;&amp;double(g)*n*d*d&lt;=5e7,"Invalid GLS grid");
+    double best=std::numeric_limits&lt;double&gt;::infinity(),rho=0,var=0,gap=0;Vec beta;
+    for(std::size_t k=0;k&lt;g;++k){
+        double a=lo+(hi-lo)*k/(g-1),first=std::sqrt((1-a)*(1+a));Mat X;Vec y;
+        for(std::size_t t=0;t&lt;n;++t){
+            Vec z(d);for(std::size_t j=0;j&lt;d;++j)z[j]=t?x[t][j+1]-a*x[t-1][j+1]:first*x[t][j+1];
+            X.push_back(z);y.push_back(t?x[t][0]-a*x[t-1][0]:first*x[t][0]);
+        }
+        Vec w=fit_ridge(X,y,0,false),score(d,0);double s=0;
+        for(std::size_t t=0;t&lt;n;++t){double e=y[t]-dot(X[t],w);s+=e*e/n;for(std::size_t j=0;j&lt;d;++j)score[j]+=X[t][j]*e;}
+        positive(s);double f=.5*n*(1+std::log(2*std::acos(-1.)*s))-.5*std::log1p(-a*a);
+        if(f&lt;best){best=f;beta=w;rho=a;var=s;gap=inf_norm(score);}
+    }
+    Report o{{"Feature","Coefficient","Rho","InnovationVariance","ProfileNLL","ScoreResidual"},{}};
+    for(std::size_t j=0;j&lt;d;++j)o.rows.push_back({double(j+1),beta[j],rho,var,best,gap});
+    return o;
+}</pre><p>参考文献：<a href="https://cowles.yale.edu/">Prais and Winsten (1954), Trend Estimators and Serial Correlation, Cowles Commission Discussion Paper 383.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

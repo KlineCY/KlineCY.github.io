@@ -12,6 +12,10 @@ on:
       - 'quant/research/methods-examples/**'
       - 'quant/research/depth-examples/**'
       - 'quant/research/model-examples/**'
+      - 'quant/research/advanced-examples/**'
+      - 'quant/research/advanced_study_common.py'
+      - 'quant/research/advanced_studies_*.py'
+      - 'quant/research/run_advanced_studies.py'
       - 'quant/research/run_model_studies.py'
       - 'quant/research/model_study_common.py'
       - 'quant/research/run_depth_labs.py'
@@ -32,6 +36,10 @@ on:
       - 'quant/research/methods-examples/**'
       - 'quant/research/depth-examples/**'
       - 'quant/research/model-examples/**'
+      - 'quant/research/advanced-examples/**'
+      - 'quant/research/advanced_study_common.py'
+      - 'quant/research/advanced_studies_*.py'
+      - 'quant/research/run_advanced_studies.py'
       - 'quant/research/run_model_studies.py'
       - 'quant/research/model_study_common.py'
       - 'quant/research/run_depth_labs.py'
@@ -163,3 +171,12 @@ jobs:
           python quant/research/run_model_studies.py /tmp/kline_quant /tmp/kline-model-results
           test $(find /tmp/kline-model-results/cases -name '*.csv' | wc -l) -eq 36
           test $(find /tmp/kline-model-results/studies -name '*.csv' | wc -l) -eq 22
+      - name: Verify advanced model references and model domains
+        run: python quant/cpp/test_advanced_research.py /tmp/kline_quant
+
+      - name: Reproduce forty-eight advanced research studies
+        run: |
+          python quant/research/run_advanced_studies.py /tmp/kline_quant /tmp/kline-advanced-results
+          test $(find /tmp/kline-advanced-results/cases -name '*.csv' | wc -l) -eq 48
+          test $(find /tmp/kline-advanced-results/studies -name '*.csv' | wc -l) -eq 48
+          test -s /tmp/kline-advanced-results/study-summary.csv

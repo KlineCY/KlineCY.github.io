@@ -1,0 +1,285 @@
+[
+  {
+    "command": "advanced-local-projection-hac",
+    "title": "局部投影脉冲响应：逐期限回归与HAC推断",
+    "area": "audit",
+    "ref": "Jordà (2005), Estimation and Inference of Impulse Responses by Local Projections, American Economic Review.",
+    "url": "https://doi.org/10.1257/0002828053828518",
+    "columns": [
+      "Shock",
+      "Outcome"
+    ],
+    "file": "local-projection-hac.csv",
+    "params": [
+      1,
+      1
+    ],
+    "header": [
+      "Horizon",
+      "Observations",
+      "Response",
+      "HACVariance",
+      "HACStandardError",
+      "Intercept",
+      "ResidualSSE"
+    ],
+    "expected_prefix": [
+      [
+        0,
+        6,
+        2,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        5,
+        -2,
+        0,
+        0,
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "command": "advanced-twfe-two-way-cluster",
+    "title": "双向固定效应与双向聚类：得分聚合及有限样本诊断",
+    "area": "audit",
+    "ref": "Cameron, Gelbach and Miller (2011), Robust Inference With Multiway Clustering, Journal of Business & Economic Statistics.",
+    "url": "https://doi.org/10.1198/jbes.2010.07136",
+    "columns": [
+      "Entity",
+      "Time",
+      "Treatment",
+      "Outcome"
+    ],
+    "file": "twfe-two-way-cluster.csv",
+    "params": [],
+    "header": [
+      "Coefficient",
+      "VarianceEntity",
+      "VarianceTime",
+      "VarianceCell",
+      "TwoWayVariance",
+      "StandardError",
+      "NegativeVarianceFlag",
+      "Observations"
+    ],
+    "expected_prefix": [
+      [
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        4
+      ]
+    ]
+  },
+  {
+    "command": "advanced-crossfit-aipw",
+    "title": "交叉拟合AIPW：二元处理、双重稳健得分与重叠诊断",
+    "area": "audit",
+    "ref": "Robins, Rotnitzky and Zhao (1994), Estimation of Regression Coefficients When Some Regressors Are Not Always Observed, JASA; Chernozhukov et al. (2018), Double/Debiased ML.",
+    "url": "https://doi.org/10.1111/ectj.12097",
+    "columns": [
+      "Fold",
+      "Treatment",
+      "Outcome",
+      "X1"
+    ],
+    "file": "crossfit-aipw.csv",
+    "params": [
+      0.1,
+      0.1,
+      0.05,
+      1e-9,
+      200
+    ],
+    "header": [
+      "Row",
+      "Fold",
+      "Treatment",
+      "Outcome",
+      "Propensity",
+      "Outcome0",
+      "Outcome1",
+      "Score",
+      "ATE",
+      "IIDSE",
+      "ClippedFlag"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        1,
+        0,
+        1,
+        0.5,
+        1,
+        3,
+        2,
+        2,
+        0,
+        0
+      ],
+      [
+        2,
+        1,
+        1,
+        3,
+        0.5,
+        1,
+        3,
+        2,
+        2,
+        0,
+        0
+      ],
+      [
+        3,
+        2,
+        0,
+        1,
+        0.5,
+        1,
+        3,
+        2,
+        2,
+        0,
+        0
+      ],
+      [
+        4,
+        2,
+        1,
+        3,
+        0.5,
+        1,
+        3,
+        2,
+        2,
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "command": "advanced-weibull-survival-profile",
+    "title": "Weibull右删失生存模型：形状轮廓似然与条件风险",
+    "area": "assets",
+    "ref": "Kalbfleisch and Prentice (2002), The Statistical Analysis of Failure Time Data, 2nd ed., Wiley.",
+    "url": "https://doi.org/10.1002/9781118032985",
+    "columns": [
+      "Time",
+      "Event"
+    ],
+    "file": "weibull-survival-profile.csv",
+    "params": [
+      1,
+      1,
+      2
+    ],
+    "header": [
+      "Time",
+      "Event",
+      "Shape",
+      "Scale",
+      "Survival",
+      "Hazard",
+      "NegativeLogLikelihood"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        1,
+        1,
+        1.5,
+        0.513417119032592,
+        0.6666666666666666,
+        2.8109302162163288
+      ],
+      [
+        2,
+        1,
+        1,
+        1.5,
+        0.26359713811572677,
+        0.6666666666666666,
+        2.8109302162163288
+      ]
+    ]
+  },
+  {
+    "command": "advanced-dynamic-panel-diff-iv",
+    "title": "动态面板差分IV：消除个体效应、滞后工具与矩条件",
+    "area": "audit",
+    "ref": "Arellano and Bond (1991), Some Tests of Specification for Panel Data: Monte Carlo Evidence and an Application to Employment Equations, Review of Economic Studies.",
+    "url": "https://doi.org/10.2307/2297968",
+    "columns": [
+      "Entity",
+      "Time",
+      "Outcome"
+    ],
+    "file": "dynamic-panel-diff-iv.csv",
+    "params": [],
+    "header": [
+      "Coefficient",
+      "InstrumentMoment",
+      "FirstStageCoefficient",
+      "FirstStageR2",
+      "Observations",
+      "Entities"
+    ],
+    "expected_prefix": [
+      [
+        0.5,
+        0,
+        -0.5,
+        1,
+        4,
+        2
+      ]
+    ]
+  },
+  {
+    "command": "advanced-supf-break-grid",
+    "title": "未知结构突变扫描：分段回归、Chow F统计量与选择偏差",
+    "area": "audit",
+    "ref": "Andrews (1993), Tests for Parameter Instability and Structural Change With Unknown Change Point, Econometrica.",
+    "url": "https://doi.org/10.2307/2951764",
+    "columns": [
+      "Y",
+      "X1"
+    ],
+    "file": "supf-break-grid.csv",
+    "params": [
+      4
+    ],
+    "header": [
+      "BreakAfter",
+      "PooledSSE",
+      "SegmentSSE",
+      "FStatistic",
+      "Selected",
+      "LeftCoefficient1",
+      "RightCoefficient1"
+    ],
+    "expected_prefix": [
+      [
+        4,
+        40,
+        8,
+        24,
+        1,
+        1,
+        5
+      ]
+    ]
+  }
+]

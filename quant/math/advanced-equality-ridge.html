@@ -1,0 +1,35 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>等式约束岭回归：Schur补、估计偏差与乘子｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="math"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>等式约束岭回归：Schur补、估计偏差与乘子</h1><p><a href="../research/advanced-research.html">高级研究方法</a>　<a href="../cpp/advanced_research_numerics.hpp" download>完整模型源码</a>　<a href="../cpp/advanced_research_common.hpp" download>公共数值函数</a></p></header><article><h2>模型定义与识别条件</h2><p>某些回归系数具有加总、复制或经济暴露约束。等式约束岭回归联合求解而非先拟合再直接归一化；后者一般不是原二次目标下最近的可行解。</p><h2>数学推导与求解机制</h2><p>拉格朗日一阶条件形成KKT方程，通过SPD Hessian消去系数后得到Schur补。若A满行秩，Schur矩阵SPD。实现同时输出等式残差及原目标驻点误差。类型0为训练观察，类型1为约束行；不把约束行误当作训练样本。</p><div class="equation">$$\min_\beta \tfrac12\|X\beta-y\|^2+\tfrac\lambda2\|\beta\|^2,\quad A\beta=b$$</div><div class="equation">$$H=X^\top X+\lambda I,\quad v=H^{-1}X^\top y$$</div><div class="equation">$$\nu=(AH^{-1}A^\top)^{-1}(Av-b)$$</div><div class="equation">$$\hat\beta=v-H^{-1}A^\top\nu,\quad H\hat\beta-X^\top y+A^\top\nu=0$$</div><h2>独立解析基准</h2><p>单位设计、y=(3,1)、λ=0.5，约束β1+β2=1。无约束解(2,2/3)，沿H逆度量投影到等式得到(7/6,−1/6)。直接归一化无约束系数则会给出(0.75,0.25)，目标值不同。</p><p><a href="../research/advanced-examples/equality-ridge.csv" download>下载CSV样本</a></p><pre>Type,V1,V2,RHS
+0,1,0,3
+0,0,1,1
+1,1,1,1
+</pre><pre>./build/kline_quant advanced-equality-ridge quant/research/advanced-examples/equality-ridge.csv 0.5</pre><div class="wide"><table><thead><tr><th>Feature</th><th>Coefficient</th></tr></thead><tbody><tr><td>1</td><td>1.16666666667</td></tr><tr><td>2</td><td>-0.166666666667</td></tr></tbody></table></div><p>输出字段：Feature，Coefficient，Objective，EqualityResidual，StationarityResidual。</p><h2>计算复杂度与研究边界</h2><p>d≤32，约束数不超过d，冗余等式会使Schur矩阵奇异，应先删除线性冗余。固定约束可能引入估计偏差，但能表达经济结构；若约束来自估计数据，应另行传播约束不确定性。</p><h2>C++17完整实现</h2><pre>inline Report equality_ridge(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,2,3,34)-2;parameters(p,1);double lam=positive(p[0]);
+    Mat X,A;Vec y,b;
+    for(auto&amp;r:x){Vec z(r.begin()+1,r.end()-1);require(r[0]==0||r[0]==1,"Invalid row type");if(r[0]){A.push_back(z);b.push_back(r.back());}else{X.push_back(z);y.push_back(r.back());}}
+    auto m=A.size();require(!X.empty()&amp;&amp;m&gt;=1&amp;&amp;m&lt;=d&amp;&amp;double(X.size())*d*d&lt;=5e7,"Invalid constrained design");
+    Mat basis;
+    for(const auto&amp; row:A){
+        Vec v=row;double scale=std::sqrt(squared(v));
+        require(scale&gt;0,"Zero equality constraint");
+        for(double&amp; a:v)a/=scale;
+        for(int pass=0;pass&lt;2;++pass)for(const auto&amp; q:basis){
+            double c=dot(v,q);for(std::size_t j=0;j&lt;d;++j)v[j]-=c*q[j];
+        }
+        double length=std::sqrt(squared(v));
+        require(length&gt;1e-10,"Equality constraints must have independent rows");
+        for(double&amp; a:v)a/=length;
+        basis.push_back(v);
+    }
+    Mat H(d,Vec(d,0));Vec rhs(d,0);
+    for(std::size_t i=0;i&lt;X.size();++i){add_outer(H,X[i],1);for(std::size_t j=0;j&lt;d;++j)rhs[j]+=X[i][j]*y[i];}
+    for(std::size_t j=0;j&lt;d;++j)H[j][j]+=lam;
+    Vec v=solve_spd(H,rhs);Mat HA;for(auto&amp;r:A)HA.push_back(solve_spd(H,r));Mat S(m,Vec(m));Vec z=mul(A,v);
+    for(std::size_t j=0;j&lt;m;++j){z[j]-=b[j];for(std::size_t k=0;k&lt;m;++k)S[j][k]=dot(A[j],HA[k]);}
+    Vec eta=solve_spd(S,z),w=v;
+    for(std::size_t j=0;j&lt;d;++j)for(std::size_t k=0;k&lt;m;++k)w[j]-=HA[k][j]*eta[k];
+    Vec g=mul(H,w),e=mul(A,w);for(std::size_t j=0;j&lt;m;++j)e[j]-=b[j];
+    for(std::size_t j=0;j&lt;d;++j){g[j]-=rhs[j];for(std::size_t k=0;k&lt;m;++k)g[j]+=eta[k]*A[k][j];}
+    double f=.5*lam*squared(w);for(std::size_t i=0;i&lt;X.size();++i)f+=.5*std::pow(dot(w,X[i])-y[i],2);
+    Report o{{"Feature","Coefficient","Objective","EqualityResidual","StationarityResidual"},{}};
+    for(std::size_t j=0;j&lt;d;++j)o.rows.push_back({double(j+1),w[j],f,inf_norm(e),inf_norm(g)});return o;
+}</pre><p>参考文献：<a href="https://web.stanford.edu/~boyd/cvxbook/">Boyd and Vandenberghe (2004), Convex Optimization.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

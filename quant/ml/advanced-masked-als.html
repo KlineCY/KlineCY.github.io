@@ -1,0 +1,44 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>带观察掩码的低秩矩阵恢复：交替岭回归与留出重建｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="ml"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>带观察掩码的低秩矩阵恢复：交替岭回归与留出重建</h1><p><a href="../research/advanced-research.html">高级研究方法</a>　<a href="../cpp/advanced_research_learning.hpp" download>完整模型源码</a>　<a href="../cpp/advanced_research_common.hpp" download>公共数值函数</a></p></header><article><h2>模型定义与识别条件</h2><p>金融面板常因不同上市日期、流动性或缺失披露形成不完整矩阵。低秩分解以共同潜因子恢复部分缺失元素，但训练掩码必须显式给出，留出值不得参与估计。目标同时惩罚两个因子矩阵，避免无约束因子尺度发散；这仍是非凸问题，因子旋转及局部驻点应与矩阵重建区分。</p><h2>数学推导与求解机制</h2><p>交替固定一侧因子，将每行或列拟合转为独立正定岭回归。初始化为确定性非零模式，不从留出值估计；每次完整迭代应降低目标，并直接计算双方梯度的最大残差。目标单调下降不能证明全局最优。无任何训练观察的行被岭项压到零，属于冷启动不可识别，而非成功预测了真实缺失值。</p><div class="equation">$$\Omega=\{(i,j):M_{ij}=1\},\quad X\approx UV^\top$$</div><div class="equation">$$F(U,V)=\frac12\sum_{(i,j)\in\Omega}(X_{ij}-u_i^\top v_j)^2+\frac\lambda2(\|U\|_F^2+\|V\|_F^2)$$</div><div class="equation">$$u_i=(\sum_{j:(i,j)\in\Omega}v_jv_j^\top+\lambda I)^{-1}\sum_{j:(i,j)\in\Omega}X_{ij}v_j$$</div><div class="equation">$$v_j=(\sum_{i:(i,j)\in\Omega}u_iu_i^\top+\lambda I)^{-1}\sum_{i:(i,j)\in\Omega}X_{ij}u_i$$</div><div class="equation">$$\|\nabla_U F\|_{\max}\vee\|\nabla_V F\|_{\max}\le\epsilon$$</div><h2>独立解析基准</h2><p>训练区为2×2的常数3矩阵，秩1、λ=1。最优非零奇异值由6减1得到5，故重建每个训练元素2.5；第三行没有训练记录，预测为0。输出所有给定坐标、掩码、原值、预测及驻点残差；测试改变第三行标签后训练及预测结果应不变。</p><p><a href="../research/advanced-examples/masked-als.csv" download>下载CSV样本</a></p><pre>Row,Column,Train,Value
+1,1,1,3
+1,2,1,3
+2,1,1,3
+2,2,1,3
+3,1,0,3
+3,2,0,3
+</pre><pre>./build/kline_quant advanced-masked-als quant/research/advanced-examples/masked-als.csv 1 1 1e-9 5000</pre><div class="wide"><table><thead><tr><th>Row</th><th>Column</th><th>Train</th><th>Value</th><th>Prediction</th></tr></thead><tbody><tr><td>1</td><td>1</td><td>1</td><td>3</td><td>2.5</td></tr><tr><td>1</td><td>2</td><td>1</td><td>3</td><td>2.5</td></tr><tr><td>2</td><td>1</td><td>1</td><td>3</td><td>2.5</td></tr><tr><td>2</td><td>2</td><td>1</td><td>3</td><td>2.5</td></tr><tr><td>3</td><td>1</td><td>0</td><td>3</td><td>0</td></tr><tr><td>3</td><td>2</td><td>0</td><td>3</td><td>0</td></tr></tbody></table></div><p>输出字段：Row，Column，Train，Value，Prediction，Objective，StationarityResidual，Iterations。</p><h2>计算复杂度与研究边界</h2><p>输入坐标为从1开始的整数且不允许重复，显式训练标志0或1。秩≤8，行列规模≤128。朴素每轮O(|Ω|k²+(m+n)k³)，存储因子和观测索引；非随机缺失、低秩假设破坏及金融时点问题不会被算法自动解决。</p><h2>C++17完整实现</h2><pre>inline Report masked_als(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,4,4);parameters(p,4);
+    auto k=count(p[0],1,8),K=count(p[3],1,100000);double lam=positive(p[1]),tol=positive(p[2]);
+    double scale=1;
+    std::size_t m=0,n=0;
+    for(auto&amp;r:x){m=std::max(m,count(r[0],1,128));n=std::max(n,count(r[1],1,128));require(r[2]==0||r[2]==1,"Binary training mask required");if(r[2])scale=std::max(scale,std::abs(r[3]));}
+    require(k&lt;=std::min(m,n)&amp;&amp;double(K)*(x.size()*k*k+(m+n)*k*k*k)&lt;=2e8,"ALS work limit");
+    std::vector&lt;std::vector&lt;std::pair&lt;std::size_t,double&gt;&gt;&gt; row(m),col(n);
+    std::vector&lt;std::vector&lt;bool&gt;&gt; seen(m,std::vector&lt;bool&gt;(n,false));std::size_t train=0;
+    for(auto&amp;r:x){auto i=std::size_t(r[0])-1,j=std::size_t(r[1])-1;require(!seen[i][j],"Duplicate matrix coordinate");seen[i][j]=true;if(r[2]){row[i].push_back({j,r[3]});col[j].push_back({i,r[3]});++train;}}
+    require(train&gt;0,"No training observations");
+    Mat U(m,Vec(k,0)),V(n,Vec(k,0));
+    for(std::size_t j=0;j&lt;n;++j)for(std::size_t h=0;h&lt;k;++h)V[j][h]=h==0?1:.1*std::sin(double((j+1)*(h+1)));
+    auto update=[&amp;](const auto&amp; groups,const Mat&amp; other,Mat&amp; target){
+        for(std::size_t i=0;i&lt;groups.size();++i){
+            Mat H=identity(k);for(std::size_t h=0;h&lt;k;++h)H[h][h]=lam;
+            Vec b(k,0);for(auto&amp;item:groups[i]){const auto&amp; a=other[item.first];add_outer(H,a,1);for(std::size_t h=0;h&lt;k;++h)b[h]+=a[h]*item.second;}
+            target[i]=solve_spd(H,b);
+        }
+    };
+    auto eval=[&amp;](){double f=0,gap=0;Mat g=U,h=V;
+        for(auto&amp;r:g)for(double&amp;v:r)v*=lam;for(auto&amp;r:h)for(double&amp;v:r)v*=lam;
+        for(auto&amp;r:U)f+=.5*lam*squared(r);for(auto&amp;r:V)f+=.5*lam*squared(r);
+        for(std::size_t i=0;i&lt;m;++i)for(auto&amp;item:row[i]){
+            auto j=item.first;double e=dot(U[i],V[j])-item.second;f+=.5*e*e;
+            for(std::size_t a=0;a&lt;k;++a){g[i][a]+=e*V[j][a];h[j][a]+=e*U[i][a];}
+        }
+        for(auto&amp;r:g)gap=std::max(gap,inf_norm(r));for(auto&amp;r:h)gap=std::max(gap,inf_norm(r));
+        return std::make_pair(f,gap);
+    };
+    auto prev=eval();std::size_t it=0;
+    while(prev.second&gt;tol*scale&amp;&amp;it&lt;K){update(row,V,U);update(col,U,V);auto now=eval();require(now.first&lt;=prev.first+1e-10*std::max(1.,prev.first),"ALS objective increased");prev=now;++it;}
+    require(prev.second&lt;=tol*scale,"ALS did not converge");
+    Report o{{"Row","Column","Train","Value","Prediction","Objective","StationarityResidual","Iterations"},{}};
+    for(auto&amp;r:x)o.rows.push_back({r[0],r[1],r[2],r[3],dot(U[std::size_t(r[0])-1],V[std::size_t(r[1])-1]),prev.first,prev.second,double(it)});
+    return o;
+}</pre><p>参考文献：<a href="https://proceedings.neurips.cc/paper/2004/hash/e0688d13958a19e087e123148555e4b4-Abstract.html">Srebro, Rennie and Jaakkola (2004), Maximum-Margin Matrix Factorization, NeurIPS.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

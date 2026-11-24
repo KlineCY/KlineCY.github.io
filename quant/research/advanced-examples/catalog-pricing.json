@@ -1,0 +1,265 @@
+[
+  {
+    "command": "advanced-merton-jump-mixture",
+    "title": "Merton跳跃扩散：条件Poisson混合定价与截断误差上界",
+    "area": "assets",
+    "ref": "Merton (1976), Option Pricing When Underlying Stock Returns Are Discontinuous, Journal of Financial Economics.",
+    "url": "https://doi.org/10.1016/0304-405X(76)90022-2",
+    "columns": [
+      "Spot",
+      "Strike",
+      "Rate",
+      "Dividend",
+      "Volatility",
+      "Intensity",
+      "JumpLogMean",
+      "JumpLogVol",
+      "Time"
+    ],
+    "file": "merton-jump-mixture.csv",
+    "params": [
+      50
+    ],
+    "header": [
+      "Call",
+      "Put",
+      "PoissonMass",
+      "CallTailBound",
+      "PutTailBound",
+      "ParityResidual"
+    ],
+    "expected_prefix": [
+      [
+        10,
+        0,
+        1,
+        0,
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "command": "advanced-vasicek-bond-option",
+    "title": "Vasicek利率模型：零息债券期权与远期测度",
+    "area": "assets",
+    "ref": "Vasicek (1977), An Equilibrium Characterization of the Term Structure, Journal of Financial Economics.",
+    "url": "https://doi.org/10.1016/0304-405X(77)90016-2",
+    "columns": [
+      "ShortRate",
+      "Kappa",
+      "Theta",
+      "Sigma",
+      "OptionExpiry",
+      "BondMaturity",
+      "Strike"
+    ],
+    "file": "vasicek-bond-option.csv",
+    "params": [],
+    "header": [
+      "DiscountExpiry",
+      "DiscountMaturity",
+      "BondForward",
+      "LogForwardVariance",
+      "Call",
+      "Put",
+      "ParityResidual"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        1,
+        1,
+        0,
+        0.1,
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "command": "advanced-callable-rate-lattice",
+    "title": "可赎回债券短率树：现金流、赎回障碍与向后递推",
+    "area": "assets",
+    "ref": "Black, Derman and Toy (1990), A One-Factor Model of Interest Rates and Its Application to Treasury Bond Options, Financial Analysts Journal.",
+    "url": "https://doi.org/10.2469/faj.v46.n1.33",
+    "columns": [
+      "Period",
+      "BaseRate",
+      "Coupon",
+      "CallPrice"
+    ],
+    "file": "callable-rate-lattice.csv",
+    "params": [
+      100,
+      0,
+      1
+    ],
+    "header": [
+      "Period",
+      "Node",
+      "ShortRate",
+      "StraightValue",
+      "CallableValue",
+      "CallOptionValue",
+      "ExerciseFlag"
+    ],
+    "expected_prefix": [
+      [
+        0,
+        0,
+        0,
+        110,
+        107,
+        3,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        105,
+        102,
+        3,
+        1
+      ],
+      [
+        1,
+        1,
+        0,
+        105,
+        102,
+        3,
+        1
+      ]
+    ]
+  },
+  {
+    "command": "advanced-structural-credit-fit",
+    "title": "Merton结构化信用模型：股权价格与股权波动率反推资产风险",
+    "area": "assets",
+    "ref": "Merton (1974), On the Pricing of Corporate Debt: The Risk Structure of Interest Rates, Journal of Finance.",
+    "url": "https://doi.org/10.1111/j.1540-6261.1974.tb03058.x",
+    "columns": [
+      "EquityValue",
+      "EquityVol",
+      "DebtFace",
+      "Rate",
+      "Time"
+    ],
+    "file": "structural-credit-fit.csv",
+    "params": [
+      0.001,
+      2,
+      1e-9
+    ],
+    "header": [
+      "AssetValue",
+      "AssetVol",
+      "EquityModel",
+      "EquityVolModel",
+      "DefaultProbability",
+      "RiskNeutralDistance",
+      "PriceResidual",
+      "VolResidual"
+    ],
+    "expected_prefix": [
+      [
+        100,
+        1,
+        38.292492254802625,
+        1.8057389857858892,
+        0.6914624612740131,
+        -0.5,
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "command": "advanced-kirk-spread",
+    "title": "Kirk价差期权：有效波动率与隐含相关系数校准",
+    "area": "assets",
+    "ref": "Kirk (1995), Correlation in the Energy Markets, Managing Energy Price Risk, Risk Publications.",
+    "url": "https://www.mathworks.com/help/fininst/spreadsensbykirk.html",
+    "columns": [
+      "Forward1",
+      "Forward2",
+      "Strike",
+      "Vol1",
+      "Vol2",
+      "Rate",
+      "Time",
+      "MarketCall"
+    ],
+    "file": "kirk-spread.csv",
+    "params": [
+      1e-9
+    ],
+    "header": [
+      "ImpliedCorrelation",
+      "EffectiveVol",
+      "Call",
+      "Put",
+      "PriceResidual",
+      "ParityResidual"
+    ],
+    "expected_prefix": [
+      [
+        0,
+        0,
+        10,
+        0,
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "command": "advanced-heston-full-truncation",
+    "title": "Heston随机波动率：全截断Euler路径、鞅检查与Monte Carlo误差",
+    "area": "assets",
+    "ref": "Lord, Koekkoek and van Dijk (2010), A Comparison of Biased Simulation Schemes for Stochastic Volatility Models, Quantitative Finance.",
+    "url": "https://doi.org/10.1080/14697680802392496",
+    "columns": [
+      "Spot",
+      "Strike",
+      "Rate",
+      "Dividend",
+      "V0",
+      "Kappa",
+      "Theta",
+      "VolOfVol",
+      "Rho",
+      "Time"
+    ],
+    "file": "heston-full-truncation.csv",
+    "params": [
+      12,
+      1024,
+      42
+    ],
+    "header": [
+      "Call",
+      "Put",
+      "CallSE",
+      "PutSE",
+      "DiscountedSpot",
+      "SpotSE",
+      "MartingaleResidual",
+      "NegativeVarianceFraction"
+    ],
+    "expected_prefix": [
+      [
+        10,
+        0,
+        0,
+        0,
+        100,
+        0,
+        0,
+        0
+      ]
+    ]
+  }
+]
