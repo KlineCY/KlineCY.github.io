@@ -204,7 +204,7 @@ def studies(model,report):
                     if grad(m)>0:lo=m
                     else:hi=m
                 w=(lo+hi)/2
-            a=model("log-optimal-box",z,[cap,1e-9,10000])
+            a=model("log-optimal-box",z,[cap,1e-11,10000])
             near(a[0][1],w,atol=1e-7)
             f=sum(p*math.log(1+x*w+y*(1-w)) for x,y,p in z)
             near(a[0][2],f)
