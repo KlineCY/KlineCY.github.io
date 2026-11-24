@@ -70,7 +70,7 @@ def studies(model,report):
         conf=model("conformal-classification-set",cal,[.15])
         for j in range(20):
             a=chosen[40+j];b=conf[20+j]
-            near(a[2],b[7]*0+a[2]);near(a[3]+1,b[2])
+            near(a[2],qda[80+j][3]);near(a[3]+1,b[2]);near(b[5],b[6+int(a[3])])
             rows.append([penalty,81+j,a[2],a[3],a[4],a[5],a[6],b[3],b[4],b[5]])
     report("linked_classifier_decision_conformal",["Ridge","TestRow","Probability","Label","DecisionThreshold","Decision","Cost","ConformalThreshold","SetSize","Covered"],rows)
 
@@ -143,20 +143,19 @@ def studies(model,report):
     # Futures external funding and investment performance are separate accounting quantities.
     rows=[]
     for mult in [5,10,20]:
-        data=[[100,2,0],[108,2,1],[95,1,1],[90,-1,1],[105,0,1]]
+        data=[[100,2,0],[108,2,1],[95,1,1],[90,-1,1],[85,0,1]]
         ledger=model("futures-margin-ledger",data,[100,100,mult,.12,.08])
-        # Unitize end-of-day external capital as a beginning-of-next-period zero-return flow.
+        # Explicit accounting convention: treat the ledger's funding as opening capital
+        # for the day's performance measurement. This is retrospective attribution.
         events=[];balance=100
         for r in ledger:
-            net=r[3]-r[4]
-            if balance+net<=0:
-                # A diagnostic capital buffer is injected before the loss to keep unit prices defined.
-                buffer=1-balance-net;events.append([buffer,0]);balance+=buffer
-            events.append([0,net/balance]);balance+=net
-            events.append([r[9],0]);balance+=r[9]
+            net=r[3]-r[4];flow=r[9];invested=balance+flow
+            assert invested>0 and invested+net>0
+            events.append([flow,net/invested]);balance=invested+net
+            near(balance,r[10])
         account=model("cashflow-portfolio-unitization",events,[100,1])
         for i,r in enumerate(account):
-            near(r[8],0);rows.append([mult,i+1,r[2],r[5],r[6],r[7]])
+            near(r[8],0);near(r[5],ledger[i][10]);rows.append([mult,i+1,r[2],r[5],r[6],r[7]])
     report("linked_margin_and_external_flows",["Multiplier","Event","CapitalFlow","AccountValue","PeriodReturn","TWR"],rows)
 
     # Price shock -> Logit market demand -> IO final demand -> direct and embodied footprint.
