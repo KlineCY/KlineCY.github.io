@@ -7,6 +7,9 @@
 #include "evidence_shift.hpp"
 #include "evidence_marketdesign.hpp"
 #include "evidence_causal.hpp"
+#include "inference_monitoring.hpp"
+#include "inference_identification.hpp"
+#include "forecast_comparison.hpp"
 namespace kline {
 inline bool run_evidence_cli(const std::string& command,int argc,char** argv,std::ostream& out){
     using Function=researchflow::Report(*)(const researchflow::Mat&,const researchflow::Vec&);
@@ -43,6 +46,18 @@ inline bool run_evidence_cli(const std::string& command,int argc,char** argv,std
     if(command=="evidence-cohort-att")fn=evidence::cohort_att;
     if(command=="evidence-local-linear-rd")fn=evidence::local_linear_rd;
     if(command=="evidence-oaxaca-reference")fn=evidence::oaxaca_reference;
+    if(command=="inference-bernoulli-mixture")fn=monitoring::bernoulli_mixture;
+    if(command=="inference-bounded-betting")fn=monitoring::bounded_betting;
+    if(command=="inference-alpha-spending")fn=monitoring::alpha_spending;
+    if(command=="inference-likelihood-stopping")fn=monitoring::likelihood_stopping;
+    if(command=="inference-fieller-grid")fn=identification::fieller_grid;
+    if(command=="inference-anderson-rubin-grid")fn=identification::anderson_rubin_grid;
+    if(command=="inference-jackknife-ratio")fn=identification::jackknife_ratio;
+    if(command=="inference-exact-sign")fn=identification::exact_sign;
+    if(command=="inference-brier-groups")fn=comparison::brier_groups;
+    if(command=="inference-forecast-revisions")fn=comparison::forecast_revisions;
+    if(command=="inference-encompassing")fn=comparison::encompassing;
+    if(command=="inference-murphy-quantile")fn=comparison::murphy_quantile;
     if(!fn)return false;
     require(argc>=3,"Evidence laboratory requires a numeric CSV");
     researchflow::Vec p;
@@ -50,6 +65,18 @@ inline bool run_evidence_cli(const std::string& command,int argc,char** argv,std
     researchflow::write(out,fn(researchflow::read_matrix(argv[2]),p));return true;
 }
 inline void evidence_usage(std::ostream& out){
+    out<<"  inference-bernoulli-mixture CSV PARAMETERS...\n";
+    out<<"  inference-bounded-betting CSV PARAMETERS...\n";
+    out<<"  inference-alpha-spending CSV PARAMETERS...\n";
+    out<<"  inference-likelihood-stopping CSV PARAMETERS...\n";
+    out<<"  inference-fieller-grid CSV PARAMETERS...\n";
+    out<<"  inference-anderson-rubin-grid CSV PARAMETERS...\n";
+    out<<"  inference-jackknife-ratio CSV\n";
+    out<<"  inference-exact-sign CSV PARAMETERS...\n";
+    out<<"  inference-brier-groups CSV\n";
+    out<<"  inference-forecast-revisions CSV\n";
+    out<<"  inference-encompassing CSV\n";
+    out<<"  inference-murphy-quantile CSV PARAMETERS...\n";
     out<<"Evidence laboratories: evidence-METHOD CSV [PARAMETERS...]\n";
     out<<"  evidence-hj-bound CSV PARAMETERS...\n";
     out<<"  evidence-minimum-norm-sdf CSV PARAMETERS...\n";

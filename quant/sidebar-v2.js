@@ -73,6 +73,7 @@
       subsection("feedsCategoryNav","按数据类别","feedChoices",page==="feeds"),
     research:
       '<a class="q-menu-link" href="'+route("research")+'evidence-ledger.html">多资产交易会计与自融资约束</a>'+
+      '<a class="q-menu-link" href="'+route("research")+'inference-laboratories.html">量化统计推断与预测证据</a>'+
       '<a class="q-menu-link" href="'+route("research")+'evidence-laboratories.html">量化研究证据实验室</a>'+
       '<a class="q-menu-link" href="'+route("research")+'">在线 Python 回测</a>'+
       '<a class="q-menu-link" href="'+route("research")+'lab24-portfolio.html">多资产约束、配置与风险分解</a>'+
