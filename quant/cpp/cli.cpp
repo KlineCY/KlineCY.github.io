@@ -14,6 +14,7 @@
 #include "atlas2026_cli.hpp"
 #include "lab24_cli.hpp"
 #include "researchflow_cli.hpp"
+#include "numerical_lab_cli.hpp"
 #include "data.hpp"
 #include "allocation.hpp"
 #include "derivatives.hpp"
@@ -87,6 +88,7 @@ void usage() {
     kline::atlas2026_usage(cerr);
     kline::lab24_usage(cerr);
     kline::researchflow_usage(cerr);
+    kline::numerical_lab_usage(cerr);
 }
 
 double number(const char* value) {
@@ -524,6 +526,7 @@ int main(int argc, char** argv) {
         } else if (kline::run_atlas2026_cli(command,argc,argv,cout)) {
         } else if (kline::run_lab24_cli(command,argc,argv,cout)) {
         } else if (kline::run_researchflow_cli(command,argc,argv,cout)) {
+        } else if (kline::run_numerical_lab_cli(command,argc,argv,cout)) {
         } else {
             usage();
             return 2;
