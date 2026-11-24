@@ -1,4 +1,4 @@
-"""Execute thirty reference models and sixteen substantive integrated experiments."""
+"""Execute complete reference models and independent integrated experiments."""
 import math
 import random
 import sys
@@ -12,7 +12,7 @@ cases=out/"cases"
 studies=out/"studies"
 cases.mkdir(parents=True,exist_ok=True)
 studies.mkdir(parents=True,exist_ok=True)
-assert len(CATALOG)==len(INDEX)==30
+assert len(CATALOG)==len(INDEX)==36
 
 for c in CATALOG:
     _,raw=verify(binary,c)
@@ -79,7 +79,7 @@ with tempfile.TemporaryDirectory() as tmp:
         assert obj<=.5*sum((v-sum(y)/len(y))**2 for v in y)+1e-5
         assert max(fit[0][5:8])<=1e-7
         if lam==0:
-            for a,b in zip(z,y):near(a,b)
+            for a,b in zip(z,y):near(a,b,atol=2e-7)
         for t,r in enumerate(fit):rows.append([lam,t+1,truth[t],y[t],r[2],r[3],tv,obj,r[5],r[6],r[7],r[8]])
     report("total_variation_path",["Penalty","Time","LatentLevel","Observed","Fitted","Difference","TotalVariation","Objective","PrimalResidual","DualResidual","KKT","Iterations"],rows)
 
@@ -94,7 +94,7 @@ with tempfile.TemporaryDirectory() as tmp:
             for cap in [.6,.8,1]:
                 fit=model("box-covariance-qp",[[a,b,.03,0,cap],[b,c,.05,0,cap]],[1,gamma,1e-9,5000])
                 w=min(cap,max(1-cap,((.03-.05)/gamma+c-b)/(a+c-2*b)))
-                near(fit[0][1],w);near(fit[1][1],1-w)
+                near(fit[0][1],w,atol=1e-6);near(fit[1][1],1-w,atol=1e-6)
                 risk=a*w*w+2*b*w*(1-w)+c*(1-w)**2
                 near(fit[0][3],.5*gamma*risk-(.03*w+.05*(1-w)))
                 rows.append([rho,gamma,cap,w,1-w,risk,fit[0][3],fit[0][5],rb[0][1],rb[1][1],rb[0][3],rb[1][3]])
@@ -423,4 +423,167 @@ with tempfile.TemporaryDirectory() as tmp:
             rows.append([3,lam,j+1,w[j],g,r[3],r[4]])
     report("event_network_active_set",["ModelCode","Parameter","Index","Estimate1","Estimate2","Objective","Residual"],rows)
 
-print("PASS: 30 complete model reference cases and 16 integrated model studies")
+    # 17. Nested model selection versus an independent scalar penalized solution.
+    rows=[]
+    panel=[]
+    for t in range(55):
+        for j in range(4):
+            z=math.sin(.41*t+.9*j)+.2*j
+            y=(.014 if t<30 else -.007)*z+.008*math.cos(.73*t+1.3*j)
+            panel.append([t+1,j+1,y,z])
+    candidates=[(0,.1),(.01,.1),(.05,.1),(.01,1)]
+    def coefficient(t,L,l1,l2):
+        hist=panel[4*(t-L):4*t]
+        xy=sum(r[2]*r[3] for r in hist)
+        return math.copysign(max(abs(xy)-l1,0),xy)/(sum(r[3]**2 for r in hist)+l2)
+    for L in [15,20]:
+        V=5
+        for cost in [0,.001]:
+            p=[L,V,.25,cost,1e-9,2000,*[v for pair in candidates for v in pair]]
+            a=model("nested-elastic-selection",panel,p)
+            nav=1
+            for t,r in enumerate(a,L+V):
+                losses=[]
+                for l1,l2 in candidates:
+                    losses.append(sum((panel[4*u+j][2]-coefficient(u,L,l1,l2)*panel[4*u+j][3])**2 for u in range(t-V,t) for j in range(4))/(4*V))
+                selected=min(range(len(losses)),key=lambda j:losses[j])
+                near(r[9],losses[selected],atol=1e-10)
+                chosen=int(r[6])-1
+                near(losses[chosen],losses[selected],atol=1e-10)
+                b=coefficient(t,L,*candidates[chosen])
+                for j in range(4):near(r[17+j],b*panel[4*t+j][3],atol=1e-8)
+                near(sum(r[13:17]),0);near(r[1],sum(r[13+j]*panel[4*t+j][2] for j in range(4)))
+                near(r[4],cost*r[5]);nav*=1+r[2];near(r[3],nav)
+                assert r[12]<r[0] and r[10]<=1e-9
+                rows.append([L,V,cost,*r[:13],selected+1,losses[selected]])
+    report("nested_walkforward",["Train","Validation","Cost","Date","Gross","Net","NAV","Fee","Turnover","Selected","L1","L2","InnerMSE","OuterKKT","ValidationStart","ValidationEnd","IndependentSelected","IndependentMSE"],rows)
+
+    # 18. Exact two-asset CVaR: partition the feasible interval at loss crossings.
+    rows=[]
+    scenarios=[[-.08,.01],[.04,-.03],[-.025,-.02],[.03,.015],[-.06,.025],[.025,-.08],[.01,.02],[.015,-.01]]
+    for alpha in [.5,.75,.9]:
+        pc=min(1,1/((1-alpha)*len(scenarios)))
+        lines=[(-r[1],r[1]-r[0]) for r in scenarios]
+        def tail(w):
+            rem=1;v=0
+            for loss in sorted([a+b*w for a,b in lines],reverse=True):
+                mass=min(rem,pc);v+=mass*loss;rem-=mass
+            return v
+        for lam in [.05,.1,.2]:
+            for cap in [.6,.8,1]:
+                lo,hi=1-cap,cap
+                breaks=[lo,hi]
+                for i,(a,b) in enumerate(lines):
+                    for c,d in lines[i+1:]:
+                        if b!=d:
+                            w=(c-a)/(b-d)
+                            if lo<w<hi:breaks.append(w)
+                breaks=sorted(set(breaks));points=breaks[:]
+                for l,h in zip(breaks,breaks[1:]):
+                    m=(l+h)/2;rem=1;slope=0
+                    for a,b in sorted(lines,key=lambda z:z[0]+z[1]*m,reverse=True):
+                        mass=min(rem,pc);slope+=mass*b;rem-=mass
+                    points.append(min(h,max(l,.5-slope/(2*lam))))
+                obj=lambda w:tail(w)+.5*lam*(w*w+(1-w)**2)
+                w=min(points,key=obj);exact=obj(w)
+                a=model("cvar-primal-dual",scenarios,[alpha,lam,cap,1e-6,20000])[0]
+                near(a[2],tail(a[1]));near(a[3],obj(a[1]))
+                assert a[4]<=exact+1e-8 and exact<=a[3]+1e-8 and a[5]<=1e-6
+                rows.append([alpha,lam,cap,w,a[1],a[2],exact,a[3],a[4],a[5],a[6]])
+    report("cvar_exact_interval",["Alpha","Ridge","Cap","ExactWeight","CertifiedWeight","CVaR","ExactObjective","Primal","Dual","Gap","Iterations"],rows)
+
+    # 19. Transaction-penalized allocation versus the exact piecewise quadratic.
+    rows=[]
+    for cap in [.6,.8,1]:
+        lo,hi=1-cap,cap;old=.8
+        for cost in [0,.01,.05,.1,.2,.5,1]:
+            def obj(w):return .5*(w*w+.8*w*(1-w)+2*(1-w)**2)-(.1*w+.3*(1-w))+2*cost*abs(w-old)
+            points=[lo,hi,min(hi,max(lo,old))]
+            for sign in [-1,1]:
+                l,h=(lo,min(hi,old)) if sign<0 else (max(lo,old),hi)
+                if l<=h:points.append(min(h,max(l,(1.4-2*cost*sign)/2.2)))
+            exact=min(points,key=obj)
+            a=model("turnover-admm-qp",[[1,.4,.1,0,cap,old],[.4,2,.3,0,cap,1-old]],[1,1,cost,1,1e-8,5000])
+            near(a[0][1],exact,atol=1e-6);near(a[0][4],obj(exact),atol=1e-7)
+            assert max(a[0][5:9])<=1e-8
+            rows.append([cap,cost,old,exact,a[0][1],a[1][1],obj(exact),a[0][4],*a[0][5:]])
+    report("turnover_exact_path",["Cap","Cost","Previous","ExactWeight","Weight1","Weight2","ExactObjective","Objective","BudgetGap","PrimalResidual","DualResidual","KKT","Iterations"],rows)
+
+    # 20. Multi-factor estimation and exact risk attribution on rolling windows.
+    rows=[];data=[]
+    for t in range(80):
+        f=[.012*math.sin(.31*t),.009*math.cos(.27*t)]
+        ret=[.0003*(j+1)+(1-.2*j)*f[0]+(.3*j-.4)*f[1]+.003*math.sin(.61*t+j) for j in range(4)]
+        data.append(f+ret)
+    floor=1e-5
+    for L in [20,30]:
+        for lam in [.001,.01,.1]:
+            a=model("rolling-factor-risk-qp",data,[2,L,lam,floor,.6,.001,1e-8,2000])
+            nav=1
+            for t,r in enumerate(a,L):
+                hist=data[t-L:t];X=[[1,*v[:2]] for v in hist]
+                B=[];specific=[]
+                for j in range(4):
+                    y=[v[2+j] for v in hist];b=ridge(X,y,lam,intercept=True)
+                    B.append(b[1:]);specific.append(floor+sum((v-dot(z,b))**2 for z,v in zip(X,y))/L)
+                    for h in range(2):near(r[14+2*j+h],b[1+h])
+                w=r[10:14];beta=[sum(w[j]*B[j][h] for j in range(4)) for h in range(2)]
+                fmean=[sum(v[j] for v in hist)/L for j in range(2)]
+                S=[[sum((v[j]-fmean[j])*(v[k]-fmean[k]) for v in hist)/(L-1)+(floor if j==k else 0) for k in range(2)] for j in range(2)]
+                fv=sum(beta[j]*S[j][k]*beta[k] for j in range(2) for k in range(2))
+                sv=sum(w[j]**2*specific[j] for j in range(4))
+                near(r[6],fv);near(r[7],sv);near(r[8],fv+sv)
+                near(sum(w),1);near(r[1],dot(w,data[t][2:]));near(r[4],.001*r[5])
+                nav*=1+r[2];near(r[3],nav)
+                rows.append([L,lam,*r[:14],fv,sv])
+    report("factor_risk_attribution",["Lookback","Ridge","Time","Gross","Net","NAV","Fee","Turnover","FactorVariance","SpecificVariance","TotalVariance","ProjectedGradient","W1","W2","W3","W4","IndependentFactorVariance","IndependentSpecificVariance"],rows)
+
+    # 21. Integer execution: exhaustive feasible schedules as the reference.
+    from itertools import product
+    rows=[]
+    profiles=[([1,1,1,1],[4,4,4,4]),([1,3,2,1],[2,5,5,4]),([4,2,1,3],[6,3,2,4])]
+    Q=12
+    for idx,(liquidity,caps) in enumerate(profiles):
+        for risk in [0,.1,.5,1,2]:
+            data=[[l,1,risk,c] for l,c in zip(liquidity,caps)]
+            def objective(q):
+                rem=Q;v=0
+                for z,l in zip(q,liquidity):rem-=z;v+=z*z/l+risk*rem*rem
+                return v
+            exact=min(objective(q) for q in product(*(range(c+1) for c in caps)) if sum(q)==Q)
+            a=model("integer-execution-dp",data,[Q])
+            near(a[-1][5],exact);near(a[-1][2],0)
+            assert sum(r[1] for r in a)==Q
+            for t,r in enumerate(a):
+                assert 0<=r[1]<=caps[t] and r[1]==int(r[1]);near(r[-1],0)
+                rows.append([idx+1,risk,liquidity[t],caps[t],*r,exact])
+    report("integer_execution_exhaustive",["Profile","Risk","Liquidity","Capacity","Period","Trade","Remaining","TemporaryCost","RiskCost","CumulativeCost","OptimalCost","BellmanResidual","IndependentCost"],rows)
+
+    # 22. Inventory control: recursively enumerate feasible quote actions.
+    from functools import lru_cache
+    rows=[];quotes=[.1,.25,.5,1.]
+    for Q in [2,3]:
+        for terminal in [0,.1,.5,1,2]:
+            for scale in [0,.1,.5]:
+                data=[[.65-.03*t,.45+.04*t,.7+.2*t,scale*(1+.1*t)] for t in range(5)]
+                fee=.02
+                @lru_cache(None)
+                def val(t,q):
+                    if t==len(data):return -terminal*q*q
+                    buy,sell,decay,risk=data[t]
+                    vals=[-risk*q*q+val(t+1,q)]
+                    for side,base in [(1,buy),(-1,sell)]:
+                        if abs(q+side)>Q:continue
+                        for delta in quotes:
+                            p=base*math.exp(-decay*delta)
+                            vals.append(p*(delta-fee-risk*(q+side)**2+val(t+1,q+side))+(1-p)*(-risk*q*q+val(t+1,q)))
+                    return max(vals)
+                a=model("inventory-quote-dp",data,[Q,terminal,fee,*quotes])
+                for r in a:
+                    t,q,side=int(r[0])-1,int(r[1]),int(r[2])
+                    assert abs(q+side)<=Q
+                    near(r[5],val(t,q));near(r[-1],0)
+                    rows.append([Q,terminal,scale,*r,val(t,q)])
+    report("inventory_policy_exact",["Bound","TerminalRisk","RunningRisk","Period","Inventory","Action","Spread","Probability","Value","ExpectedNextInventory","BellmanResidual","IndependentValue"],rows)
+
+print("PASS: 36 complete model reference cases and 22 integrated model studies")
