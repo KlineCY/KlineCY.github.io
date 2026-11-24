@@ -1,0 +1,28 @@
+#pragma once
+#include "system_research_common.hpp"
+#include <map>
+namespace kline { namespace system_research {
+inline Report expert_mixture_logwealth(const Mat& x,const Vec& p){
+    auto d=validate(x,1,1,32);parameters(p,d);for(double v:p)positive(v);require(std::abs(sum(p)-1)<=1e-10,"Prior weights must sum to one");Vec logw(d,0),a(d);auto lse=[&](){Vec z(d);for(std::size_t j=0;j<d;++j)z[j]=std::log(p[j])+logw[j];double m=*std::max_element(z.begin(),z.end()),s=0;for(double v:z)s+=std::exp(v-m);return m+std::log(s);};double last=lse();Report o{{"Period","Return","Wealth","BestExpertWealth","LogRegret"},{}};for(std::size_t j=0;j<d;++j)o.header.push_back("Weight"+std::to_string(j+1));for(std::size_t t=0;t<x.size();++t){for(std::size_t j=0;j<d;++j){require(x[t][j]>-1,"Expert return must exceed -100 percent");a[j]=std::exp(std::log(p[j])+logw[j]-last);logw[j]+=std::log1p(x[t][j]);}double v=lse(),b=*std::max_element(logw.begin(),logw.end());Vec r{double(t+1),std::expm1(v-last),std::exp(v),std::exp(b),b-v};r.insert(r.end(),a.begin(),a.end());o.rows.push_back(r);last=v;}return o;
+}
+
+inline Report gaussian_crps_score(const Mat& x,const Vec& p){
+    validate(x,1,3,3);parameters(p,0);double pi=std::acos(-1.);Report o{{"Row","CRPS","NLL","PIT","StandardizedError"},{}};for(std::size_t i=0;i<x.size();++i){auto&r=x[i];double s=positive(r[2]),z=(r[0]-r[1])/s,F=normal(z),phi=std::exp(-.5*z*z)/std::sqrt(2*pi),c=s*(z*(2*F-1)+2*phi-1/std::sqrt(pi));o.rows.push_back({double(i+1),c,std::log(s)+.5*z*z+.5*std::log(2*pi),F,z});}return o;
+}
+
+inline Report cost_sensitive_threshold(const Mat& x,const Vec& p){
+    validate(x,2,3,3);parameters(p,2);double fp=positive(p[0]),fn=positive(p[1]);Mat v;double cost=0;for(auto&r:x){require(r[0]>=0&&r[0]<=1&&(r[1]==0||r[1]==1)&&(r[2]==0||r[2]==1),"Invalid probability or label");if(r[2]){v.push_back(r);cost+=fn*r[1];}}require(!v.empty(),"No validation records");std::stable_sort(v.begin(),v.end(),[](const Vec&a,const Vec&b){return a[0]>b[0];});double best=cost,threshold=2;for(std::size_t i=0;i<v.size();){std::size_t j=i;while(j<v.size()&&v[j][0]==v[i][0]){cost+=v[j][1]?-fn:fp;++j;}if(cost<best){best=cost;threshold=v[i][0];}i=j;}Report o{{"Row","Validation","Probability","Label","Threshold","Decision","Cost"},{}};for(std::size_t i=0;i<x.size();++i){auto&r=x[i];bool d=r[0]>=threshold;o.rows.push_back({double(i+1),r[2],r[0],r[1],threshold,double(d),d?fp*(1-r[1]):fn*r[1]});}return o;
+}
+
+inline Report conformal_classification_set(const Mat& x,const Vec& p){
+    auto d=validate(x,2,4,34)-2;parameters(p,1);double a=p[0];require(a>0&&a<1,"Invalid miscoverage");Vec s;for(auto&r:x){require(r[0]==0||r[0]==1,"Binary calibration flag");auto y=count(r[1],1,d);double mass=0;for(std::size_t j=0;j<d;++j){require(r[j+2]>=0&&r[j+2]<=1,"Invalid probability");mass+=r[j+2];}require(std::abs(mass-1)<=1e-10,"Class probabilities must sum to one");if(r[0])s.push_back(1-r[y+1]);}require(!s.empty(),"No calibration records");std::sort(s.begin(),s.end());auto k=std::size_t(std::ceil((s.size()+1)*(1-a)));double q=k>s.size()?1:s[k-1];Report o{{"Row","Calibration","Label","Threshold","SetSize","Covered"},{}};for(std::size_t j=0;j<d;++j)o.header.push_back("Include"+std::to_string(j+1));for(std::size_t i=0;i<x.size();++i){auto&r=x[i];Vec v;for(std::size_t j=0;j<d;++j)v.push_back(double(1-r[j+2]<=q+1e-14));Vec z{double(i+1),r[0],r[1],q,sum(v),v[std::size_t(r[1])-1]};z.insert(z.end(),v.begin(),v.end());o.rows.push_back(z);}return o;
+}
+
+inline Report pairwise_rank_logistic(const Mat& x,const Vec& p){
+    validate(x,2,3,3);parameters(p,0);std::map<double,Mat> groups;for(auto&r:x)groups[r[0]].push_back(r);double work=0;for(auto&kv:groups)work+=double(kv.second.size())*kv.second.size();require(work<=5e7,"Pairwise ranking work limit");Report o{{"Group","Pairs","PairLoss","Concordance","MeanAbsGradient","GradientSum"},{}};for(auto&kv:groups){auto&v=kv.second;Vec g(v.size(),0);double n=0,L=0,c=0;for(std::size_t i=0;i<v.size();++i)for(std::size_t j=0;j<v.size();++j)if(v[i][2]>v[j][2]){double z=v[i][1]-v[j][1],a=logistic(-z);L+=model_research::softplus(-z);c+=z>0?1:z==0?.5:0;g[i]-=a;g[j]+=a;++n;}if(n){for(double&z:g)z/=n;o.rows.push_back({kv.first,n,L/n,c/n,l1(g)/g.size(),sum(g)});}}require(!o.rows.empty(),"No comparable ranking pairs");return o;
+}
+
+inline Report weighted_gaussian_discriminant(const Mat& x,const Vec& p){
+    auto d=validate(x,3,3,18)-2;parameters(p,1);double ridge=positive(p[0]);Mat mean(2,Vec(d,0));Vec n(2,0);std::vector<Mat> S(2,Mat(d,Vec(d,0)));for(auto&r:x){require((r[0]==0||r[0]==1)&&(r[1]==0||r[1]==1),"Invalid train or label");if(r[0]){auto k=std::size_t(r[1]);++n[k];for(std::size_t j=0;j<d;++j)mean[k][j]+=r[j+2];}}for(std::size_t k=0;k<2;++k){positive(n[k]);for(double&v:mean[k])v/=n[k];}for(auto&r:x)if(r[0]){auto k=std::size_t(r[1]);Vec z(d);for(std::size_t j=0;j<d;++j)z[j]=r[j+2]-mean[k][j];add_outer(S[k],z,1/n[k]);}Vec ld(2,0);for(std::size_t k=0;k<2;++k){for(std::size_t j=0;j<d;++j)S[k][j][j]+=ridge;Mat L(d,Vec(d,0));for(std::size_t i=0;i<d;++i)for(std::size_t j=0;j<=i;++j){double z=S[k][i][j];for(std::size_t h=0;h<j;++h)z-=L[i][h]*L[j][h];L[i][j]=i==j?std::sqrt(positive(z)):z/L[j][j];if(i==j)ld[k]+=2*std::log(L[i][j]);}}require(double(x.size())*d*d*d<=5e7,"QDA work limit");Report o{{"Row","Train","Label","Probability1","Decision","LogOdds"},{}};for(std::size_t i=0;i<x.size();++i){Vec g(2);for(std::size_t k=0;k<2;++k){Vec z(d);for(std::size_t j=0;j<d;++j)z[j]=x[i][j+2]-mean[k][j];g[k]=std::log(n[k])-.5*(ld[k]+dot(z,solve_spd(S[k],z)));}double a=g[1]-g[0];o.rows.push_back({double(i+1),x[i][0],x[i][1],logistic(a),double(a>0),a});}return o;
+}
+} }
