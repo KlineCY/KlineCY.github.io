@@ -9,6 +9,8 @@ on:
       - 'quant/research/evidence-examples/**'
       - 'quant/research/inference-examples/**'
       - 'quant/research/applied-examples/**'
+      - 'quant/research/methods-examples/**'
+      - 'quant/research/run_methods_labs.py'
       - 'quant/research/run_applied_labs.py'
       - 'quant/research/run_researchflow.py'
       - 'quant/research/run_numerical_labs.py'
@@ -22,6 +24,8 @@ on:
       - 'quant/research/evidence-examples/**'
       - 'quant/research/inference-examples/**'
       - 'quant/research/applied-examples/**'
+      - 'quant/research/methods-examples/**'
+      - 'quant/research/run_methods_labs.py'
       - 'quant/research/run_applied_labs.py'
       - 'quant/research/run_researchflow.py'
       - 'quant/research/run_numerical_labs.py'
@@ -101,6 +105,7 @@ jobs:
           python quant/cpp/test_evidence.py /tmp/kline_quant
           python quant/cpp/test_inference_labs.py /tmp/kline_quant
           python quant/cpp/test_applied_labs.py /tmp/kline_quant
+          python quant/cpp/test_methods_labs.py /tmp/kline_quant
       - name: Execute the complete research suite and chained model evaluations
         run: |
           python quant/research/run_researchflow.py /tmp/kline_quant /tmp/kline-research-results
@@ -128,3 +133,9 @@ jobs:
         run: |
           python quant/research/run_applied_labs.py /tmp/kline_quant /tmp/kline-applied-results
           test $(find /tmp/kline-applied-results -name '*.csv' | wc -l) -eq 32
+
+      - name: Reproduce quantitative research methods and linked studies
+        run: |
+          python quant/research/run_methods_labs.py /tmp/kline_quant /tmp/kline-methods-results
+          test $(find /tmp/kline-methods-results/cases -name '*.csv' | wc -l) -eq 64
+          test $(find /tmp/kline-methods-results/studies -name '*.csv' | wc -l) -eq 8
