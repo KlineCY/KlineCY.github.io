@@ -10,6 +10,14 @@
 #include "inference_monitoring.hpp"
 #include "inference_identification.hpp"
 #include "forecast_comparison.hpp"
+#include "applied_linear.hpp"
+#include "applied_panel.hpp"
+#include "applied_learning.hpp"
+#include "applied_pricing.hpp"
+#include "applied_allocation.hpp"
+#include "applied_credit.hpp"
+#include "applied_execution.hpp"
+#include "applied_stochastic.hpp"
 namespace kline {
 inline bool run_evidence_cli(const std::string& command,int argc,char** argv,std::ostream& out){
     using Function=researchflow::Report(*)(const researchflow::Mat&,const researchflow::Vec&);
@@ -58,6 +66,38 @@ inline bool run_evidence_cli(const std::string& command,int argc,char** argv,std
     if(command=="inference-forecast-revisions")fn=comparison::forecast_revisions;
     if(command=="inference-encompassing")fn=comparison::encompassing;
     if(command=="inference-murphy-quantile")fn=comparison::murphy_quantile;
+    if(command=="applied-hc3")fn=applied_linear::hc3;
+    if(command=="applied-press")fn=applied_linear::press;
+    if(command=="applied-partial-r2")fn=applied_linear::partial_r2;
+    if(command=="applied-vif")fn=applied_linear::vif;
+    if(command=="applied-within-between")fn=applied_panel::within_between;
+    if(command=="applied-cluster-mean")fn=applied_panel::cluster_mean;
+    if(command=="applied-first-stage")fn=applied_panel::first_stage;
+    if(command=="applied-omitted-bias")fn=applied_panel::omitted_bias;
+    if(command=="applied-kernel-alignment")fn=applied_learning::kernel_alignment;
+    if(command=="applied-gram-centering")fn=applied_learning::gram_centering;
+    if(command=="applied-soft-label")fn=applied_learning::soft_label;
+    if(command=="applied-calibration-slope")fn=applied_learning::calibration_slope;
+    if(command=="applied-dividend-forward")fn=applied_pricing::dividend_forward;
+    if(command=="applied-option-box")fn=applied_pricing::option_box;
+    if(command=="applied-implied-dividend")fn=applied_pricing::implied_dividend;
+    if(command=="applied-geometric-asian")fn=applied_pricing::geometric_asian;
+    if(command=="applied-brinson-fachler")fn=applied_allocation::brinson_fachler;
+    if(command=="applied-carino")fn=applied_allocation::carino;
+    if(command=="applied-daily-leverage")fn=applied_allocation::daily_leverage;
+    if(command=="applied-active-wealth")fn=applied_allocation::active_wealth;
+    if(command=="applied-competing-incidence")fn=applied_credit::competing_incidence;
+    if(command=="applied-exposure-profile")fn=applied_credit::exposure_profile;
+    if(command=="applied-wrong-way")fn=applied_credit::wrong_way;
+    if(command=="applied-netting")fn=applied_credit::netting;
+    if(command=="applied-markout")fn=applied_execution::markout;
+    if(command=="applied-participation-cap")fn=applied_execution::participation_cap;
+    if(command=="applied-recovery")fn=applied_execution::recovery;
+    if(command=="applied-maker-taker")fn=applied_execution::maker_taker;
+    if(command=="applied-semivariance")fn=applied_stochastic::semivariance;
+    if(command=="applied-bridge")fn=applied_stochastic::bridge;
+    if(command=="applied-covariation")fn=applied_stochastic::covariation;
+    if(command=="applied-ar-aggregation")fn=applied_stochastic::ar_aggregation;
     if(!fn)return false;
     require(argc>=3,"Evidence laboratory requires a numeric CSV");
     researchflow::Vec p;
@@ -77,6 +117,38 @@ inline void evidence_usage(std::ostream& out){
     out<<"  inference-forecast-revisions CSV\n";
     out<<"  inference-encompassing CSV\n";
     out<<"  inference-murphy-quantile CSV PARAMETERS...\n";
+    out<<"  applied-hc3 CSV\n";
+    out<<"  applied-press CSV\n";
+    out<<"  applied-partial-r2 CSV PARAMETERS...\n";
+    out<<"  applied-vif CSV\n";
+    out<<"  applied-within-between CSV\n";
+    out<<"  applied-cluster-mean CSV\n";
+    out<<"  applied-first-stage CSV\n";
+    out<<"  applied-omitted-bias CSV\n";
+    out<<"  applied-kernel-alignment CSV\n";
+    out<<"  applied-gram-centering CSV\n";
+    out<<"  applied-soft-label CSV\n";
+    out<<"  applied-calibration-slope CSV\n";
+    out<<"  applied-dividend-forward CSV PARAMETERS...\n";
+    out<<"  applied-option-box CSV\n";
+    out<<"  applied-implied-dividend CSV PARAMETERS...\n";
+    out<<"  applied-geometric-asian CSV PARAMETERS...\n";
+    out<<"  applied-brinson-fachler CSV\n";
+    out<<"  applied-carino CSV\n";
+    out<<"  applied-daily-leverage CSV PARAMETERS...\n";
+    out<<"  applied-active-wealth CSV\n";
+    out<<"  applied-competing-incidence CSV\n";
+    out<<"  applied-exposure-profile CSV PARAMETERS...\n";
+    out<<"  applied-wrong-way CSV PARAMETERS...\n";
+    out<<"  applied-netting CSV\n";
+    out<<"  applied-markout CSV\n";
+    out<<"  applied-participation-cap CSV PARAMETERS...\n";
+    out<<"  applied-recovery CSV PARAMETERS...\n";
+    out<<"  applied-maker-taker CSV\n";
+    out<<"  applied-semivariance CSV\n";
+    out<<"  applied-bridge CSV PARAMETERS...\n";
+    out<<"  applied-covariation CSV PARAMETERS...\n";
+    out<<"  applied-ar-aggregation CSV PARAMETERS...\n";
     out<<"Evidence laboratories: evidence-METHOD CSV [PARAMETERS...]\n";
     out<<"  evidence-hj-bound CSV PARAMETERS...\n";
     out<<"  evidence-minimum-norm-sdf CSV PARAMETERS...\n";
