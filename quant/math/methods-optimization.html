@@ -1,0 +1,86 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>约束优化与最优性证据｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/methods-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="math"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>约束优化与最优性证据</h1><p>由模型定义、数学推导和可复算数值案例构成的独立研究方法。输入数据为教学构造，输出不代表实际投资结果。</p><p><a href="../research/methods-laboratories.html">研究方法实验室</a>　<a href="../cpp/methods_optimization.hpp" download>完整C++17源码</a></p><nav><a href="#simplex-projection">概率单纯形欧氏投影</a>　｜　<a href="#diagonal-kkt">预算约束对角二次规划KKT</a>　｜　<a href="#entropic-prox">熵正则化线性决策</a>　｜　<a href="#quadratic-line-search">二次目标的精确步长</a></nav></header><article id="simplex-projection"><h2>概率单纯形欧氏投影</h2><h3>模型与推导</h3><p>拉格朗日乘子θ对应预算约束，非负约束互补松弛得到截断形式。排序后遍历活跃集，最大满足排序值大于临时阈值的位置决定唯一θ，复杂度O(d log d)。</p><div class="equation">$$\min_{w\ge0,\ \mathbf1^\top w=1}\frac12\|w-z\|^2$$</div><div class="equation">$$w_i=(z_i-\theta)_+,\qquad \sum_i(z_i-\theta)_+=1$$</div><h3>研究应用与成立条件</h3><p>目标权重0.8、0.6、−0.2投影为0.6、0.4、0。适合投影梯度法中的无空头预算步骤；有上下限、行业约束或交易成本时须另外处理。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/simplex-projection.csv" download>CSV数据</a>　<a href="../cpp/methods_optimization.hpp" download>算法源码</a></p><pre>Score
+0.8
+0.6
+-0.2
+</pre><pre>./build/kline_quant methods-simplex-projection quant/research/methods-examples/simplex-projection.csv</pre><div class="wide"><table><thead><tr><th>Index</th><th>Weight</th><th>Threshold</th></tr></thead><tbody><tr><td>1</td><td>0.6</td><td>0.2</td></tr><tr><td>2</td><td>0.4</td><td>0.2</td></tr><tr><td>3</td><td>0</td><td>0.2</td></tr></tbody></table></div><p>参考文献：Duchi et al. (2008), Efficient projections onto the l1-ball for learning in high dimensions, ICML.</p></article><article id="diagonal-kkt"><h2>预算约束对角二次规划KKT</h2><h3>模型与推导</h3><p>对每个权重求梯度并引入预算乘子，得到线性驻点；代入预算解出η。所有d_i正且γ正，目标严格凸，驻点为全局唯一最优。允许负权重。</p><div class="equation">$$\min_{\mathbf1^\top w=1}\tfrac{\gamma}{2}\sum_i d_iw_i^2-\sum_i\mu_iw_i$$</div><div class="equation">$$w_i=(\mu_i-\eta)/(\gamma d_i),\quad \eta=\frac{\sum_i\mu_i/d_i-\gamma}{\sum_i1/d_i}$$</div><h3>研究应用与成立条件</h3><p>均值0.3、0.1与对角风险1、2，风险厌恶1，解11／15与4／15；驻点残差应为零。无空头约束时需另做活跃集优化。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/diagonal-kkt.csv" download>CSV数据</a>　<a href="../cpp/methods_optimization.hpp" download>算法源码</a></p><pre>Return,Variance
+0.3,1
+0.1,2
+</pre><pre>./build/kline_quant methods-diagonal-kkt quant/research/methods-examples/diagonal-kkt.csv 1</pre><div class="wide"><table><thead><tr><th>Asset</th><th>Weight</th><th>Multiplier</th><th>StationarityResidual</th></tr></thead><tbody><tr><td>1</td><td>0.733333333333</td><td>-0.433333333333</td><td>0</td></tr><tr><td>2</td><td>0.266666666667</td><td>-0.433333333333</td><td>0</td></tr></tbody></table></div><p>参考文献：Boyd and Vandenberghe (2004), Convex Optimization, Cambridge University Press.</p></article><article id="entropic-prox"><h2>熵正则化线性决策</h2><h3>模型与推导</h3><p>内点一阶条件使权重与指数效用成比例，归一化得到Softmax；熵严格凹保证唯一解。参数为逆温度，减去最大效用后计算指数防溢出。</p><div class="equation">$$\max_{w\in\Delta}\ u^\top w-\tau\sum_iw_i\log w_i$$</div><div class="equation">$$w_i=e^{u_i/\tau}/\sum_j e^{u_j/\tau},\quad V=\tau\log\sum_i e^{u_i/\tau}$$</div><h3>研究应用与成立条件</h3><p>三个相同信号、逆温度2，权重各1／3。温度降低使配置更集中；该模型未包含资产协方差、交易约束，不能直接替代均值方差配置。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/entropic-prox.csv" download>CSV数据</a>　<a href="../cpp/methods_optimization.hpp" download>算法源码</a></p><pre>Utility
+0
+0
+0
+</pre><pre>./build/kline_quant methods-entropic-prox quant/research/methods-examples/entropic-prox.csv 2</pre><div class="wide"><table><thead><tr><th>Asset</th><th>Weight</th><th>Objective</th></tr></thead><tbody><tr><td>1</td><td>0.333333333333</td><td>0.549306144334</td></tr><tr><td>2</td><td>0.333333333333</td><td>0.549306144334</td></tr><tr><td>3</td><td>0.333333333333</td><td>0.549306144334</td></tr></tbody></table></div><p>参考文献：Boyd and Vandenberghe (2004), Convex Optimization, Cambridge University Press.</p></article><article id="quadratic-line-search"><h2>二次目标的精确步长</h2><h3>模型与推导</h3><p>沿下降方向的目标是一维严格凸二次函数，导数置零得到精确步长。需gᵀd负且曲率正，目标下降量为方向导数平方除以两倍曲率。</p><div class="equation">$$f(x+\alpha d)=f(x)+\alpha g^\top d+\tfrac12\alpha^2d^\top Qd$$</div><div class="equation">$$\alpha^*=-g^\top d/(d^\top Qd)$$</div><h3>研究应用与成立条件</h3><p>对角曲率2、4，梯度2、4，取负梯度方向，导数−20、曲率72，步长5／18。非二次目标仅是局部近似，宜使用Armijo等回溯。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/quadratic-line-search.csv" download>CSV数据</a>　<a href="../cpp/methods_optimization.hpp" download>算法源码</a></p><pre>Diagonal,Gradient,Direction
+2,2,-2
+4,4,-4
+</pre><pre>./build/kline_quant methods-quadratic-line-search quant/research/methods-examples/quadratic-line-search.csv</pre><div class="wide"><table><thead><tr><th>Step</th><th>DirectionalDerivative</th><th>Curvature</th><th>ObjectiveDecrease</th></tr></thead><tbody><tr><td>0.277777777778</td><td>-20</td><td>72</td><td>2.77777777778</td></tr></tbody></table></div><p>参考文献：Boyd and Vandenberghe (2004), Convex Optimization, Cambridge University Press.</p></article><section><h2>C++17实现</h2><pre>#pragma once
+#include "evidence_common.hpp"
+namespace kline { namespace methods_optimization {
+using namespace evidence;
+inline Report simplex_projection(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,1,1);
+    parameters(p,0);
+    Vec z=column(x,0),s=z;
+    std::sort(s.begin(),s.end(),std::greater&lt;double&gt;());
+    double sum=0,theta=0;
+    for(std::size_t i=0;
+    i&lt;s.size();
+    ++i){sum+=s[i];
+    double t=(sum-1)/(i+1);
+    if(s[i]&gt;t)theta=t;
+    }Report o{{"Index","Weight","Threshold"},{}};
+    for(std::size_t i=0;
+    i&lt;z.size();
+    ++i)o.rows.push_back({double(i+1),std::max(0.,z[i]-theta),theta});
+    return o;
+    
+}
+
+inline Report diagonal_kkt(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,2,2);
+    parameters(p,1);
+    double g=positive(p[0]),a=0,b=0;
+    for(auto&amp;r:x){a+=r[0]/positive(r[1]);
+    b+=1/r[1];
+    }double eta=(a-g)/b;
+    Report o{{"Asset","Weight","Multiplier","StationarityResidual"},{}};
+    for(std::size_t i=0;
+    i&lt;x.size();
+    ++i){auto&amp;r=x[i];
+    double w=(r[0]-eta)/(g*r[1]);
+    o.rows.push_back({double(i+1),w,eta,g*r[1]*w-r[0]+eta});
+    }return o;
+    
+}
+
+inline Report entropic_prox(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,1,1);
+    parameters(p,1);
+    double b=positive(p[0]);
+    Vec u=column(x,0);
+    double m=*std::max_element(u.begin(),u.end()),s=0;
+    Vec w;
+    for(double z:u){w.push_back(std::exp(b*(z-m)));
+    s+=w.back();
+    }double v=m+std::log(s)/b;
+    Report o{{"Asset","Weight","Objective"},{}};
+    for(std::size_t i=0;
+    i&lt;u.size();
+    ++i)o.rows.push_back({double(i+1),w[i]/s,v});
+    return o;
+    
+}
+
+inline Report quadratic_line_search(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,3,3);
+    parameters(p,0);
+    double a=0,b=0;
+    for(auto&amp;r:x){positive(r[0]);
+    a+=r[1]*r[2];
+    b+=r[0]*r[2]*r[2];
+    }require(a&lt;0,"Descent direction required");
+    positive(b);
+    return scalar({"Step","DirectionalDerivative","Curvature","ObjectiveDecrease"},{-a/b,a,b,a*a/(2*b)});
+    
+}
+} }
+</pre></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

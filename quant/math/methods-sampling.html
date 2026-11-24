@@ -1,0 +1,86 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>抽样设计与稳健估计｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/methods-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="math"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>抽样设计与稳健估计</h1><p>由模型定义、数学推导和可复算数值案例构成的独立研究方法。输入数据为教学构造，输出不代表实际投资结果。</p><p><a href="../research/methods-laboratories.html">研究方法实验室</a>　<a href="../cpp/methods_sampling.hpp" download>完整C++17源码</a></p><nav><a href="#weighted-effective-n">重要性权重的有效样本量</a>　｜　<a href="#stratified-mean">分层总体均值及抽样方差</a>　｜　<a href="#median-of-means">分块Median-of-Means稳健均值</a>　｜　<a href="#self-normalized-is">自归一化重要性抽样与比率误差</a></nav></header><article id="weighted-effective-n"><h2>重要性权重的有效样本量</h2><h3>模型与推导</h3><p>归一化权重集中度的倒数给出Kish有效样本量，Cauchy–Schwarz保证上界n。权重相等达到n，单个非零权重达到1；不等同于自相关调整有效样本量。</p><div class="equation">$$\tilde w_i=w_i/\sum_jw_j,\qquad n_{\mathrm{eff}}=(\sum_i\tilde w_i^2)^{-1}$$</div><div class="equation">$$1\le n_{\mathrm{eff}}\le n$$</div><h3>研究应用与成立条件</h3><p>跨市场分布迁移权重1、2、3，有效样本约2.57，最大权重0.5。极端权重提示方差问题；裁剪会改变目标分布，必须记录。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/weighted-effective-n.csv" download>CSV数据</a>　<a href="../cpp/methods_sampling.hpp" download>算法源码</a></p><pre>Weight
+1
+2
+3
+</pre><pre>./build/kline_quant methods-weighted-effective-n quant/research/methods-examples/weighted-effective-n.csv</pre><div class="wide"><table><thead><tr><th>SumWeight</th><th>EffectiveN</th><th>MaxNormalized</th></tr></thead><tbody><tr><td>6</td><td>2.57142857143</td><td>0.5</td></tr></tbody></table></div><p>参考文献：Kish (1965), Survey Sampling, Wiley.</p></article><article id="stratified-mean"><h2>分层总体均值及抽样方差</h2><h3>模型与推导</h3><p>各层独立简单随机不放回，层均值估计无偏，方差按总体比例平方加权并乘有限总体修正。输入层总体量、样本量、样本均值与样本方差。</p><div class="equation">$$\hat\mu=\sum_h W_h\bar y_h,\quad W_h=N_h/\sum_jN_j$$</div><div class="equation">$$\widehat V(\hat\mu)=\sum_h W_h^2(1-n_h/N_h)s_h^2/n_h$$</div><h3>研究应用与成立条件</h3><p>两层权重0.25及0.75，均值5。若对不等层直接等权，估计对象改变；样本应按设计随机抽取，不适用于任意金融观察样本的因果解释。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/stratified-mean.csv" download>CSV数据</a>　<a href="../cpp/methods_sampling.hpp" download>算法源码</a></p><pre>Population,Sample,Mean,Variance
+100,10,2,4
+300,30,6,9
+</pre><pre>./build/kline_quant methods-stratified-mean quant/research/methods-examples/stratified-mean.csv</pre><div class="wide"><table><thead><tr><th>Estimate</th><th>Variance</th><th>SE</th></tr></thead><tbody><tr><td>5</td><td>0.174375</td><td>0.417582327212</td></tr></tbody></table></div><p>参考文献：Cochran (1977), Sampling Techniques, 3rd ed., Wiley.</p></article><article id="median-of-means"><h2>分块Median-of-Means稳健均值</h2><h3>模型与推导</h3><p>先将数据划分成等大块计算均值，再对块均值取中位数。独立有限方差情形可通过Chebyshev与二项尾界获得稳健集中；分块数量和依赖会影响理论。</p><div class="equation">$$\bar X_b=|B_b|^{-1}\sum_{i\in B_b}X_i,\quad \hat\mu_{\mathrm{MoM}}=\operatorname{median}_b\bar X_b$$</div><div class="equation">$$\Pr(|\hat\mu_{\mathrm{MoM}}-\mu|&gt;\epsilon)\leq\Pr(\text{at least half the block means fail})$$</div><h3>研究应用与成立条件</h3><p>三块均值1、2、100，MoM为2，普通均值约34.33。用于重尾收益均值的稳健诊断；时间序列依赖需按块结构设计，不能任意打乱。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/median-of-means.csv" download>CSV数据</a>　<a href="../cpp/methods_sampling.hpp" download>算法源码</a></p><pre>Value
+1
+1
+2
+2
+100
+100
+</pre><pre>./build/kline_quant methods-median-of-means quant/research/methods-examples/median-of-means.csv 3</pre><div class="wide"><table><thead><tr><th>Blocks</th><th>RobustMean</th><th>OrdinaryMean</th></tr></thead><tbody><tr><td>3</td><td>2</td><td>34.3333333333</td></tr></tbody></table></div><p>参考文献：Lugosi and Mendelson (2019), Mean estimation and regression under heavy-tailed distributions: a survey, Foundations of Computational Mathematics.</p></article><article id="self-normalized-is"><h2>自归一化重要性抽样与比率误差</h2><h3>模型与推导</h3><p>将加权均值写为两个样本均值之比，Delta方法的一阶影响量与w_i(f_i−μ)成比例。代码用有限样本修正计算估计误差，并同时报告权重集中度。</p><div class="equation">$$\hat\mu=\frac{\sum_iw_i f_i}{\sum_iw_i}$$</div><div class="equation">$$\widehat{\mathrm{se}}^2=\frac{n}{n-1}\sum_i\tilde w_i^2(f_i-\hat\mu)^2$$</div><h3>研究应用与成立条件</h3><p>权重1、3，对应值1、3，估计2.5，有效样本1.6。比率估计有限样本有偏，Delta近似需要独立样本和有限二阶矩，极端权重时不可机械依赖正态区间。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/self-normalized-is.csv" download>CSV数据</a>　<a href="../cpp/methods_sampling.hpp" download>算法源码</a></p><pre>Weight,Value
+1,1
+3,3
+</pre><pre>./build/kline_quant methods-self-normalized-is quant/research/methods-examples/self-normalized-is.csv</pre><div class="wide"><table><thead><tr><th>Estimate</th><th>EffectiveN</th><th>DeltaSE</th></tr></thead><tbody><tr><td>2.5</td><td>1.6</td><td>0.75</td></tr></tbody></table></div><p>参考文献：Owen (2013), Monte Carlo theory, methods and examples.</p></article><section><h2>C++17实现</h2><pre>#pragma once
+#include "evidence_common.hpp"
+namespace kline { namespace methods_sampling {
+using namespace evidence;
+inline Report weighted_effective_n(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,1,1);
+    parameters(p,0);
+    double s=0,m=0;
+    for(auto&amp;r:x){require(r[0]&gt;=0,"Negative weight");
+    s+=r[0];
+    m=std::max(m,r[0]);
+    }positive(s);
+    double q=0;
+    for(auto&amp;r:x){double v=r[0]/s;
+    q+=v*v;
+    }return scalar({"SumWeight","EffectiveN","MaxNormalized"},{s,1/q,m/s});
+    
+}
+
+inline Report stratified_mean(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,4,4);
+    parameters(p,0);
+    double N=0;
+    for(auto&amp;r:x){count(r[0],2,1000000000);
+    count(r[1],2,std::size_t(r[0]));
+    require(r[3]&gt;=0,"Negative sample variance");
+    N+=r[0];
+    }double a=0,v=0;
+    for(auto&amp;r:x){double w=r[0]/N;
+    a+=w*r[2];
+    v+=w*w*(1-r[1]/r[0])*r[3]/r[1];
+    }return scalar({"Estimate","Variance","SE"},{a,v,std::sqrt(v)});
+    
+}
+
+inline Report median_of_means(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,1,1);
+    parameters(p,1);
+    auto B=count(p[0],1,x.size());
+    require(x.size()%B==0,"Equal block lengths required");
+    auto n=x.size()/B;
+    Vec v(B,0);
+    double s=0;
+    for(std::size_t i=0;
+    i&lt;x.size();
+    ++i){v[i/n]+=x[i][0]/n;
+    s+=x[i][0];
+    }std::sort(v.begin(),v.end());
+    double med=(v[(B-1)/2]+v[B/2])/2;
+    return scalar({"Blocks","RobustMean","OrdinaryMean"},{double(B),med,s/x.size()});
+    
+}
+
+inline Report self_normalized_is(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,2,2);
+    parameters(p,0);
+    double s=0,a=0;
+    for(auto&amp;r:x){require(r[0]&gt;=0,"Negative weight");
+    s+=r[0];
+    a+=r[0]*r[1];
+    }double m=a/positive(s),q=0,v=0;
+    for(auto&amp;r:x){double w=r[0]/s;
+    q+=w*w;
+    v+=w*w*(r[1]-m)*(r[1]-m);
+    }return scalar({"Estimate","EffectiveN","DeltaSE"},{m,1/q,std::sqrt(v*x.size()/(x.size()-1))});
+    
+}
+} }
+</pre></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>
