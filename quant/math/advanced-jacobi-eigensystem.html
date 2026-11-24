@@ -1,0 +1,27 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>对称Jacobi特征分解：正交旋转与谱重构误差｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="math"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>对称Jacobi特征分解：正交旋转与谱重构误差</h1><p><a href="../research/advanced-research.html">高级研究方法</a>　<a href="../cpp/advanced_research_numerics.hpp" download>完整模型源码</a>　<a href="../cpp/advanced_research_common.hpp" download>公共数值函数</a></p></header><article><h2>模型定义与识别条件</h2><p>Jacobi算法以二维正交旋转逐步消去对称矩阵最大非对角元素，特征值由最终近对角矩阵得到，特征向量由旋转乘积得到。它适合教学及小型风险矩阵，对大规模稀疏问题应使用Lanczos等方法。</p><h2>数学推导与求解机制</h2><p>稳定参数化避免直接用角度的正切计算。每次寻找最大绝对非对角元素，实施相似变换，同时更新特征向量矩阵。最终按特征值降序排列并以首个最大幅度坐标为正来统一符号；重根子空间本身不可唯一识别。</p><div class="equation">$$A=A^\top,\quad A=Q\Lambda Q^\top,\quad Q^\top Q=I$$</div><div class="equation">$$\tau=(a_{jj}-a_{ii})/(2a_{ij}),\quad t=\operatorname{sign}(\tau)/(|\tau|+\sqrt{1+\tau^2})$$</div><div class="equation">$$c=(1+t^2)^{-1/2},\quad s=ct,\quad A^+=J^\top AJ$$</div><div class="equation">$$\epsilon_A=\|A-Q\Lambda Q^\top\|_{\max},\quad \epsilon_Q=\|Q^\top Q-I\|_{\max}$$</div><h2>独立解析基准</h2><p>示例(2,1;1,2)的特征值3及1，对应标准化向量(1,1)/√2及(1,−1)/√2。除特征值外，检查完整谱重构和正交残差；重复特征值时只要求子空间及重构正确。</p><p><a href="../research/advanced-examples/jacobi-eigensystem.csv" download>下载CSV样本</a></p><pre>A1,A2
+2,1
+1,2
+</pre><pre>./build/kline_quant advanced-jacobi-eigensystem quant/research/advanced-examples/jacobi-eigensystem.csv 1e-12 1000</pre><div class="wide"><table><thead><tr><th>EigenIndex</th><th>Coordinate</th><th>Eigenvalue</th><th>Eigenvector</th></tr></thead><tbody><tr><td>1</td><td>1</td><td>3</td><td>0.707106781187</td></tr><tr><td>1</td><td>2</td><td>3</td><td>0.707106781187</td></tr><tr><td>2</td><td>1</td><td>1</td><td>0.707106781187</td></tr><tr><td>2</td><td>2</td><td>1</td><td>-0.707106781187</td></tr></tbody></table></div><p>输出字段：EigenIndex，Coordinate，Eigenvalue，Eigenvector，ReconstructionResidual，OrthogonalityResidual，Iterations。</p><h2>计算复杂度与研究边界</h2><p>每次扫描O(d²)，旋转O(d)，总成本O(Kd²)，d≤32。对协方差负特征值不自动截断，因为负值可能反映输入或估计问题；如需PSD修复必须明确独立目标。</p><h2>C++17完整实现</h2><pre>inline Report jacobi_eigensystem(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,1,1,32);parameters(p,2);require(x.size()==d,"Square symmetric matrix required");
+    double tol=positive(p[0]);auto K=count(p[1],1,1000000);require(double(K)*d*d&lt;=1e8,"Jacobi work limit");
+    Mat a=x,q=identity(d);double scale=1;
+    for(std::size_t i=0;i&lt;d;++i)for(std::size_t j=0;j&lt;d;++j){require(std::abs(x[i][j]-x[j][i])&lt;=1e-12*std::max({1.,std::abs(x[i][j]),std::abs(x[j][i])}),"Symmetric input required");scale=std::max(scale,std::abs(x[i][j]));a[i][j]=(x[i][j]+x[j][i])/2;}
+    std::size_t it=0;double gap=0;
+    for(;it&lt;=K;){
+        std::size_t i=0,j=0;gap=0;
+        for(std::size_t u=0;u&lt;d;++u)for(std::size_t v=u+1;v&lt;d;++v)if(std::abs(a[u][v])&gt;gap){gap=std::abs(a[u][v]);i=u;j=v;}
+        if(gap&lt;=tol*scale)break;require(it&lt;K,"Jacobi eigen iteration limit");
+        double t0=(a[j][j]-a[i][i])/(2*a[i][j]),t=std::copysign(1.,t0)/(std::abs(t0)+std::hypot(1.,t0)),c=1/std::hypot(1.,t),s=t*c;
+        double v=a[i][j];a[i][i]-=t*v;a[j][j]+=t*v;a[i][j]=a[j][i]=0;
+        for(std::size_t k=0;k&lt;d;++k)if(k!=i&amp;&amp;k!=j){double u=a[k][i],w=a[k][j];a[k][i]=a[i][k]=c*u-s*w;a[k][j]=a[j][k]=s*u+c*w;}
+        for(std::size_t k=0;k&lt;d;++k){double u=q[k][i],w=q[k][j];q[k][i]=c*u-s*w;q[k][j]=s*u+c*w;}++it;
+    }
+    std::vector&lt;std::size_t&gt; order(d);std::iota(order.begin(),order.end(),0);std::stable_sort(order.begin(),order.end(),[&amp;](auto i,auto j){return a[i][i]&gt;a[j][j];});
+    Mat V(d,Vec(d));Vec ev(d);
+    for(std::size_t k=0;k&lt;d;++k){auto j=order[k];ev[k]=a[j][j];std::size_t idx=0;for(std::size_t i=1;i&lt;d;++i)if(std::abs(q[i][j])&gt;std::abs(q[idx][j])+1e-14)idx=i;double sign=q[idx][j]&lt;0?-1:1;for(std::size_t i=0;i&lt;d;++i)V[k][i]=sign*q[i][j];}
+    double rec=0,orth=0;
+    for(std::size_t i=0;i&lt;d;++i)for(std::size_t j=0;j&lt;d;++j){double u=0;for(std::size_t k=0;k&lt;d;++k)u+=ev[k]*V[k][i]*V[k][j];rec=std::max(rec,std::abs(u-x[i][j]));orth=std::max(orth,std::abs(dot(V[i],V[j])-double(i==j)));}
+    Report o{{"EigenIndex","Coordinate","Eigenvalue","Eigenvector","ReconstructionResidual","OrthogonalityResidual","Iterations"},{}};
+    for(std::size_t i=0;i&lt;d;++i)for(std::size_t j=0;j&lt;d;++j)o.rows.push_back({double(i+1),double(j+1),ev[i],V[i][j],rec,orth,double(it)});
+    return o;
+}</pre><p>参考文献：<a href="https://www.cs.cornell.edu/cv/GVL4/">Golub and Van Loan (2013), Matrix Computations, 4th ed., Johns Hopkins University Press.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

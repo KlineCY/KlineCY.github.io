@@ -1,0 +1,33 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>重启GMRES：非对称线性方程、Krylov子空间与真残差｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="math"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>重启GMRES：非对称线性方程、Krylov子空间与真残差</h1><p><a href="../research/advanced-research.html">高级研究方法</a>　<a href="../cpp/advanced_research_numerics.hpp" download>完整模型源码</a>　<a href="../cpp/advanced_research_common.hpp" download>公共数值函数</a></p></header><article><h2>模型定义与识别条件</h2><p>非对称矩阵不能直接用Cholesky或共轭梯度。GMRES在由残差生成的Krylov子空间中最小化真实残差的二范数；重启限制存储规模，却可能损失收敛信息。</p><h2>数学推导与求解机制</h2><p>Arnoldi使用两次改进Gram–Schmidt生成正交基。对上Hessenberg矩阵逐列施加Givens旋转，避免构造正规方程。每轮解上三角问题并重新计算真实残差；只有真实残差达到容差才返回成功。Arnoldi崩溃时若子空间尚不能解原方程，则拒绝奇异系统。</p><div class="equation">$$\mathcal K_m(A,r_0)=\operatorname{span}\{r_0,Ar_0,\ldots,A^{m-1}r_0\}$$</div><div class="equation">$$AV_m=V_{m+1}\bar H_m,\qquad x_m=x_0+V_my_m$$</div><div class="equation">$$y_m=\arg\min_y\|\|r_0\|_2e_1-\bar H_my\|_2$$</div><div class="equation">$$r_m=b-Ax_m,\quad \|r_m\|_2\le\epsilon\max(1,\|b\|_2)$$</div><h2>独立解析基准</h2><p>示例A=(4,1;2,3)、b=(9,8)，直接联立得x=(1.9,1.4)。重启长度2足够覆盖二维子空间，真实残差应接近零。非对称高维系统可比较不同重启长度的迭代成本。</p><p><a href="../research/advanced-examples/gmres-restarted.csv" download>下载CSV样本</a></p><pre>A1,A2,B
+4,1,9
+2,3,8
+</pre><pre>./build/kline_quant advanced-gmres-restarted quant/research/advanced-examples/gmres-restarted.csv 2 1e-10 100</pre><div class="wide"><table><thead><tr><th>Index</th><th>Solution</th><th>TrueResidual</th><th>ResidualNorm</th></tr></thead><tbody><tr><td>1</td><td>1.9</td><td>0</td><td>0</td></tr><tr><td>2</td><td>1.4</td><td>0</td><td>0</td></tr></tbody></table></div><p>输出字段：Index，Solution，TrueResidual，ResidualNorm，Iterations。</p><h2>计算复杂度与研究边界</h2><p>稠密乘法O(d²)，每次重启正交化O(dm²)，存储O(dm)。条件数大或矩阵近奇异时残差小不保证前向误差小；应用于定价和状态方程时应同时研究条件数及预条件。</p><h2>C++17完整实现</h2><pre>inline Report gmres_restarted(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,1,2,65)-1;parameters(p,3);require(x.size()==d,"Square system required");
+    auto m=count(p[0],1,d),K=count(p[2],1,100000);double tol=positive(p[1]);
+    require(double(K)*d*(d+m)&lt;=1e8,"GMRES work limit");
+    Mat A;Vec b,w(d,0);for(auto&amp;r:x){A.emplace_back(r.begin(),r.end()-1);b.push_back(r.back());}
+    auto residual=[&amp;](const Vec&amp; z){Vec r=mul(A,z);for(std::size_t i=0;i&lt;d;++i)r[i]=b[i]-r[i];return r;};
+    double target=tol*std::max(1.,std::sqrt(squared(b)));Vec r=residual(w);double rn=std::sqrt(squared(r));std::size_t it=0;
+    while(rn&gt;target&amp;&amp;it&lt;K){
+        Mat V(m+1,Vec(d,0)),H(m+1,Vec(m,0));Vec cs(m),sn(m),g(m+1,0);g[0]=rn;
+        for(std::size_t i=0;i&lt;d;++i)V[0][i]=r[i]/rn;
+        std::size_t used=0;
+        for(std::size_t j=0;j&lt;m&amp;&amp;it&lt;K;++j){
+            Vec z=mul(A,V[j]);double initial=std::sqrt(squared(z));
+            for(int pass=0;pass&lt;2;++pass)for(std::size_t i=0;i&lt;=j;++i){double a=dot(V[i],z);H[i][j]+=a;for(std::size_t k=0;k&lt;d;++k)z[k]-=a*V[i][k];}
+            H[j+1][j]=std::sqrt(squared(z));bool breakdown=H[j+1][j]&lt;=1e-14*std::max(1.,initial);
+            if(!breakdown)for(std::size_t k=0;k&lt;d;++k)V[j+1][k]=z[k]/H[j+1][j];
+            for(std::size_t i=0;i&lt;j;++i){double a=cs[i]*H[i][j]+sn[i]*H[i+1][j];H[i+1][j]=-sn[i]*H[i][j]+cs[i]*H[i+1][j];H[i][j]=a;}
+            double h=positive(std::hypot(H[j][j],H[j+1][j]));cs[j]=H[j][j]/h;sn[j]=H[j+1][j]/h;H[j][j]=h;H[j+1][j]=0;
+            g[j+1]=-sn[j]*g[j];g[j]=cs[j]*g[j];++it;used=j+1;
+            if(breakdown||std::abs(g[j+1])&lt;=target)break;
+        }
+        Vec y(used);for(std::size_t j=used;j--&gt;0;){double a=g[j];for(std::size_t k=j+1;k&lt;used;++k)a-=H[j][k]*y[k];y[j]=a/positive(H[j][j]);}
+        for(std::size_t j=0;j&lt;used;++j)for(std::size_t i=0;i&lt;d;++i)w[i]+=V[j][i]*y[j];
+        r=residual(w);rn=std::sqrt(squared(r));
+    }
+    require(rn&lt;=target,"GMRES true residual did not converge");
+    Report o{{"Index","Solution","TrueResidual","ResidualNorm","Iterations"},{}};
+    for(std::size_t j=0;j&lt;d;++j)o.rows.push_back({double(j+1),w[j],r[j],rn,double(it)});
+    return o;
+}</pre><p>参考文献：<a href="https://doi.org/10.1137/0907058">Saad and Schultz (1986), GMRES: A Generalized Minimal Residual Algorithm for Solving Nonsymmetric Linear Systems, SIAM J. Sci. Stat. Comput.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>
