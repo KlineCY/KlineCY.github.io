@@ -56,5 +56,5 @@ for(const group of groups){
 assert.equal(groups.length,8);assert.equal(chapters,32);assert.equal(formulas,64);assert.equal(rows,71);
 for(const s of [root,cpp,nav,read("quant/research/index.html")])assert(s.includes("evidence-laboratories.html"));
 assert(hub.includes("run_evidence_labs.py")&&hub.includes("catalog.json"));
-assert(cpp.includes("<strong>321</strong>")&&cpp.includes("<strong>941</strong>"));
+assert(cpp.includes("<strong>321</strong>")&&cpp.includes("<strong>947</strong>"));
 console.log("PASS: "+chapters+" evidence chapters, "+formulas+" strict KaTeX equations, "+rows+" analytic output rows, "+coordinates+" verified coordinates, 32 exact data downloads and eight source-linked topics");

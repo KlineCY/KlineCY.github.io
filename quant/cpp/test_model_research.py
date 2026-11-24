@@ -8,8 +8,8 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]/"research"))
 from model_study_common import CATALOG,INDEX,ROOT,near,csvfile,run,verify,dot,ridge,N,pdf,bs
 
 binary=Path(sys.argv[1]).resolve()
-assert len(CATALOG)==len(INDEX)==30
-diagnostics={"KKTResidual","PrimalResidual","DualResidual","ProjectedGradient","BudgetGap","ScoreResidual","MomentResidual","StationarityResidual","SpreadResidual","MaxComplementarityResidual","MaxLinearResidual","ModelKKT","MaxMomentResidual"}
+assert len(CATALOG)==len(INDEX)==36
+diagnostics={"KKTResidual","PrimalResidual","DualResidual","ProjectedGradient","BudgetGap","ScoreResidual","MomentResidual","StationarityResidual","SpreadResidual","MaxComplementarityResidual","MaxLinearResidual","ModelKKT","MaxMomentResidual","PrimalDualGap","OuterKKT","BellmanResidual"}
 
 with tempfile.TemporaryDirectory() as d:
     path=Path(d)/"input.csv"
@@ -19,7 +19,7 @@ with tempfile.TemporaryDirectory() as d:
         v=run(binary,name,csvfile(path,names,rows),params,good)
         return v[1] if good else None
 
-    # Thirty analytical cases, with independent checks of every reported diagnostic.
+    # Analytical cases, with independent checks of every reported diagnostic.
     for c in CATALOG:
         name=c["command"][6:]
         a,_=verify(binary,c)
@@ -65,8 +65,14 @@ with tempfile.TemporaryDirectory() as d:
         ("synthetic-control-fit",[[0,1,1],[1,2,2],[0,3,3]],[1,1e-8,100]),
         ("crossfit-dml-ridge",[[1,1,2,0],[1,-1,-2,0],[1,2,4,1],[1,-2,-4,-1]],[1]),
         ("rolling-conformal-ridge",[[t,2] for t in range(8)],[3,2,1,.01]),
+        ("nested-elastic-selection",[[t,i,.01,1] for t in range(1,8) for i in range(1,5)][:-1],[3,2,.25,0,1e-9,1000,0,.1]),
+        ("cvar-primal-dual",[[.01,.02],[-.01,.03]],[1,.1,1,1e-8,1000]),
+        ("turnover-admm-qp",[[1,0,0,0,.4,.8],[0,1,0,0,.4,.2]],[1,1,.1,1,1e-8,1000]),
+        ("rolling-factor-risk-qp",[[.01,.02,.03]]*6,[1,3,.1,.001,.4,0,1e-8,1000]),
+        ("integer-execution-dp",[[1,1,0,1],[1,1,0,1]],[3]),
+        ("inventory-quote-dp",[[1.1,.4,1,0]],[1,0,0,.5]),
     ]
-    assert len(bad)==30 and {x[0] for x in bad}==set(INDEX)
+    assert len(bad)==36 and {x[0] for x in bad}==set(INDEX)
     for name,rows,p in bad:model(name,rows,p,False)
 
     # 1. Zero L1 gives the independent ridge normal-equation solution.
@@ -234,4 +240,48 @@ with tempfile.TemporaryDirectory() as d:
     b=model("rolling-conformal-ridge",data[:7]+[[7,999]]+data[8:],p)
     for u,v in zip(a[0][2:6],b[0][2:6]):near(u,v)
 
-print("PASS: 30 complete model references, 90 malformed-input cases, 30 domain checks, 30 nontrivial mathematical/temporal invariants")
+    # 31. Nested tuning and prediction must be invariant to the current outcome.
+    data=[[t,j+1,.01*v,v] for t in range(1,9) for j,v in enumerate([-2,-1,1,2])]
+    p=[3,2,.25,.001,1e-9,1000,0,.1,.005,.1]
+    a=model("nested-elastic-selection",data,p)
+    b=model("nested-elastic-selection",[[r[0],r[1],r[2]+.15 if r[0]==6 else r[2],r[3]] for r in data],p)
+    for u,v in zip(a[0][6:],b[0][6:]):near(u,v)
+    assert a[0][12]<a[0][0]
+
+    # 32. A nonsymmetric tail-risk objective has an independent feasible upper bound.
+    data=[[-.08,.01],[.04,-.03],[-.025,-.02],[.03,.015]]
+    a=model("cvar-primal-dual",data,[.5,.1,1,1e-6,20000])
+    def obj(w):
+        loss=sorted([-r[0]*w-r[1]*(1-w) for r in data],reverse=True)
+        return .5*sum(loss[:2])+.05*(w*w+(1-w)**2)
+    ref=min(obj(i/10000) for i in range(10001))
+    near(sum(r[1] for r in a),1);near(a[0][3],obj(a[0][1]))
+    assert a[0][4]<=ref+1e-8 and a[0][3]<=ref+1e-6
+
+    # 33. Zero turnover cost reduces to the original covariance QP.
+    a=model("turnover-admm-qp",[[1,.4,.1,0,1,.8],[.4,2,.3,0,1,.2]],[1,1,0,1,1e-8,5000])
+    near(a[0][1],1.4/2.2,atol=1e-7);near(sum(r[1] for r in a),1)
+
+    # 34. Current factor and asset observations cannot affect the current allocation.
+    data=[[.01*math.sin(i),.02*math.cos(i),.003*math.sin(i)+.01] for i in range(10)]
+    p=[1,5,.01,.001,1,.001,1e-9,2000]
+    a=model("rolling-factor-risk-qp",data,p)
+    b=model("rolling-factor-risk-qp",data[:5]+[[.5,.4,-.2]]+data[6:],p)
+    for u,v in zip(a[0][6:],b[0][6:]):near(u,v)
+    for r in a:near(r[6]+r[7],r[8])
+
+    # 35. Exhaustive feasible schedules validate the integer optimizer.
+    data=[[1,1,.2,3],[2,1,.2,4],[1,1,.2,4]]
+    a=model("integer-execution-dp",data,[6])
+    vals=[]
+    for i in range(4):
+        for j in range(5):
+            k=6-i-j
+            if 0<=k<=4:vals.append(i*i+.2*(6-i)**2+j*j/2+.2*k*k+k*k)
+    near(a[-1][5],min(vals));near(sum(r[1] for r in a),6)
+
+    # 36. A fee larger than every quote makes the zero-risk no-trade policy optimal.
+    a=model("inventory-quote-dp",[[.8,.7,.3,0]]*4,[2,0,10,.1,.5,1])
+    for r in a:near(r[2],0);near(r[5],0)
+
+print("PASS: 36 complete model references, 108 malformed-input cases, 36 domain checks, 36 nontrivial mathematical/temporal invariants")

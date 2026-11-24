@@ -4,7 +4,7 @@ import katex from "katex";
 
 const read=p=>fs.readFileSync(p,"utf8");
 const dir="quant/research/model-examples/";
-const groups=["optimization","likelihood","dynamics","pricing","portfolio"];
+const groups=["optimization","likelihood","dynamics","pricing","portfolio","systems"];
 const cli=read("quant/cpp/evidence_cli.hpp");
 const hub=read("quant/research/model-laboratories.html");
 const esc=s=>s.replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
@@ -42,15 +42,15 @@ for(const g of groups){
     a.forEach((r,i)=>{rows++;assert.equal(r.length,c.expected_prefix[i].length);r.forEach((v,j)=>{coords++;assert(Number.isFinite(v)&&Math.abs(v-c.expected_prefix[i][j])<=1e-9*Math.max(1,Math.abs(v)),c.command);});});
  }
 }
-assert.equal(all.length,30);assert.equal(new Set(all).size,30);
-assert.equal(formulas,150);assert.equal(rows,90);assert.equal(coords,480);
+assert.equal(all.length,36);assert.equal(new Set(all).size,36);
+assert.equal(formulas,180);assert.equal(rows,104);assert.equal(coords,563);
 assert(read("quant/sidebar-v2.js").includes("model-laboratories.html"));
-assert(read("quant/cpp/index.html").includes("<strong>941</strong>"));
+assert(read("quant/cpp/index.html").includes("<strong>947</strong>"));
 const studies=read("quant/research/model-integrated-studies.html"),script=read("quant/research/run_model_studies.py");
-assert.equal((studies.match(/<article id="/g)||[]).length,16);
+assert.equal((studies.match(/<article id="/g)||[]).length,22);
 const eq=[...studies.matchAll(/<div class="equation">\$\$([\s\S]*?)\$\$<\/div>/g)];
 assert.equal(eq.length,16);
 for(const m of eq)katex.renderToString(unesc(m[1]),{throwOnError:true,strict:"error"});
 for(const m of studies.matchAll(/model-results\/studies\/([a-z_]+)\.csv/g))assert(script.includes('report("'+m[1]+'"'),m[1]);
 assert.equal([...script.matchAll(/^\s+report\("/gm)].length,16);
-console.log("PASS: 30 independent model chapters, 166 strict formulas, 90 reference rows, 480 coordinates, embedded code, navigation and 16 studies");
+console.log("PASS: 36 independent model chapters, 202 strict formulas, 104 reference rows, 563 coordinates, embedded code, navigation and 22 studies");
