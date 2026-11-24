@@ -1,0 +1,51 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>美式看跌PDE：单调隐式离散与线性互补求解｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="assets"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>美式看跌PDE：单调隐式离散与线性互补求解</h1><p><a href="../research/model-laboratories.html">完整模型研究</a>　<a href="../cpp/model_research_pricing.hpp" download>模型源码</a>　<a href="../cpp/model_research_common.hpp" download>公共数值函数</a></p></header><article><h2>问题、模型与数学推导</h2><p>模型：美式合约允许到期前行权，价格必须支配立即行权价值。在继续持有区满足Black–Scholes PDE，在行权区满足障碍条件。以剩余期限τ反向推进，离散化后每个时间层都成为一个线性互补问题，而不仅是普通三对角方程。</p><p>空间扩散采用中心差分，漂移按符号使用具有非负生成元非对角系数的一阶差分；时间采用隐式Euler。r≥0时，矩阵对角严格占优且非对角非正，有利于单调性。普通欧式价格用Thomas算法求解；美式价格以投影Gauss–Seidel迭代，逐节点取障碍与线性更新较大值。停止判据同时检查障碍差、离散PDE剩余及互补条件。</p><div class="equation">$$\mathcal L V=\frac12\sigma^2S^2V_{SS}+(r-q)SV_S-rV$$</div><div class="equation">$$\min\{\partial_\tau V-\mathcal L V,V-g(S)\}=0,\quad g(S)=(K-S)^+$$</div><div class="equation">$$a_i=\frac{\sigma^2S_i^2}{2h^2}+\frac{[-(r-q)S_i]_+}{h},\quad c_i=\frac{\sigma^2S_i^2}{2h^2}+\frac{[(r-q)S_i]_+}{h}$$</div><div class="equation">$$A_{ii}=1+\Delta t(a_i+c_i+r),\quad A_{i,i-1}=-\Delta t\,a_i,\quad A_{i,i+1}=-\Delta t\,c_i$$</div><div class="equation">$$V_i^{k+1}=\max\left(g_i,\frac{b_i-A_{i,i-1}V_{i-1}^{k+1}-A_{i,i+1}V_{i+1}^k}{A_{ii}}\right)$$</div><h2>解析案例与研究设计</h2><p>边界：S=0处欧式看跌为Ke^{−rτ}，美式在r≥0时可立即取得K；Smax处均近似0。对查询价格进行线性插值，早行权溢价为两种离散价格差。零波动、零利率及零分红时价格等于静态支付，构成精确基准；正波动时欧式侧可与BS闭式比较，美式侧可与细网格或独立二叉树比较。</p><p>复杂度为O(NM)欧式与O(NMK)美式，M为空间步、N为时间步、K为每层迭代上限。边界截断、低阶漂移差分及时间离散均产生误差，收敛证书只说明已解离散问题，不能代替网格收敛研究。代码限制总工作量，未达互补容差即拒绝。</p><h2>可执行输入与解析基准</h2><p>输入数据为独立构造的教学样本。下表给出可解析核对的输出前缀；其他诊断字段由模型实际拟合产生，并通过回归测试检查。</p><p><a href="../research/model-examples/american-put-pde.csv" download>下载CSV样本</a></p><pre>QuerySpot
+50
+100
+150
+</pre><pre>./build/kline_quant model-american-put-pde quant/research/model-examples/american-put-pde.csv 100 0 0 0 1 200 40 20 1e-9 1000</pre><div class="wide"><table><thead><tr><th>Spot</th><th>AmericanPut</th><th>EuropeanPut</th><th>EarlyExercisePremium</th></tr></thead><tbody><tr><td>50</td><td>50</td><td>50</td><td>0</td></tr><tr><td>100</td><td>0</td><td>0</td><td>0</td></tr><tr><td>150</td><td>0</td><td>0</td><td>0</td></tr></tbody></table></div><p>输出字段：Spot，AmericanPut，EuropeanPut，EarlyExercisePremium，MaxComplementarityResidual，MaxIterations。</p><h2>C++17实现</h2><pre>inline Report american_put_pde(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,1,1);parameters(p,10);
+    double K=positive(p[0]),r=p[1],q=p[2],vol=p[3],T=positive(p[4]),Smax=positive(p[5]);
+    auto M=count(p[6],4,2000),N=count(p[7],1,2000),maxit=count(p[9],1,100000);
+    double tol=positive(p[8]);
+    require(r&gt;=0&amp;&amp;q&gt;=0&amp;&amp;vol&gt;=0&amp;&amp;Smax&gt;K&amp;&amp;double(M)*N*maxit&lt;=3e8,"Invalid PDE parameters or work limit");
+    double h=Smax/M,dt=T/N;auto n=M-1;
+    Vec lower(n,0),diag(n,0),upper(n,0),left(n),right(n),pay(n),e(n),a(n);
+    for(std::size_t j=0;j&lt;n;++j){
+        double s=(j+1)*h,b=(r-q)*s/h,v=.5*vol*vol*s*s/(h*h);
+        left[j]=dt*(v+std::max(-b,0.));right[j]=dt*(v+std::max(b,0.));
+        diag[j]=1+left[j]+right[j]+dt*r;
+        if(j)lower[j]=-left[j];if(j+1&lt;n)upper[j]=-right[j];
+        pay[j]=std::max(K-s,0.);e[j]=a[j]=pay[j];
+    }
+    double maxgap=0,used=0;
+    for(std::size_t t=1;t&lt;=N;++t){
+        Vec b=e,c=a;b[0]+=left[0]*K*std::exp(-r*t*dt);c[0]+=left[0]*K;
+        e=tridiagonal(lower,diag,upper,b);
+        double gap=0;std::size_t it=0;
+        for(;it&lt;maxit;){
+            for(std::size_t j=0;j&lt;n;++j){
+                double z=c[j];if(j)z-=lower[j]*a[j-1];if(j+1&lt;n)z-=upper[j]*a[j+1];
+                a[j]=std::max(pay[j],z/diag[j]);
+            }
+            gap=0;
+            for(std::size_t j=0;j&lt;n;++j){
+                double z=diag[j]*a[j]-c[j];if(j)z+=lower[j]*a[j-1];if(j+1&lt;n)z+=upper[j]*a[j+1];
+                double w=a[j]-pay[j];
+                gap=std::max({gap,std::max(0.,-z),std::max(0.,-w),std::abs(std::min(z,w))});
+            }
+            ++it;if(gap&lt;=tol)break;
+        }
+        require(gap&lt;=tol,"American complementarity iteration did not converge");
+        maxgap=std::max(maxgap,gap);used=std::max(used,double(it));
+    }
+    auto interp=[&amp;](const Vec&amp; v,double low,double s){
+        require(s&gt;=0&amp;&amp;s&lt;=Smax,"Query outside PDE grid");
+        if(s==Smax)return 0.;
+        double z=s/h;auto j=std::min(M-1,std::size_t(std::floor(z)));double f=z-j;
+        double l=j==0?low:v[j-1],u=j+1==M?0:v[j];
+        return (1-f)*l+f*u;
+    };
+    Report o{{"Spot","AmericanPut","EuropeanPut","EarlyExercisePremium","MaxComplementarityResidual","MaxIterations"},{}};
+    for(auto&amp;z:x){double s=z[0],va=interp(a,K,s),ve=interp(e,K*std::exp(-r*T),s);o.rows.push_back({s,va,ve,va-ve,maxgap,used});}
+    return o;
+}</pre><p>参考文献：<a href="https://doi.org/10.1016/j.aml.2004.06.010">Ikonen and Toivanen (2004), Operator Splitting Methods for American Option Pricing, Applied Mathematics Letters.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

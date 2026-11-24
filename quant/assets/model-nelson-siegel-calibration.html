@@ -1,0 +1,28 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Nelson–Siegel曲线：期限因子、轮廓损失与网格估计｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="assets"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>Nelson–Siegel曲线：期限因子、轮廓损失与网格估计</h1><p><a href="../research/model-laboratories.html">完整模型研究</a>　<a href="../cpp/model_research_pricing.hpp" download>模型源码</a>　<a href="../cpp/model_research_common.hpp" download>公共数值函数</a></p></header><article><h2>问题、模型与数学推导</h2><p>Nelson–Siegel以三种因子形状表示零息利率期限结构：长期水平、从短端逐步消失的斜率加载及中期限拱形曲率加载。τ控制加载衰减速度；若同时直接优化全部参数，问题在τ方向非线性，但固定τ后只是线性加权最小二乘。</p><p>使用轮廓目标：在正的对数等距τ网格上，逐候选构建设计矩阵并求三参数加权回归。允许对两斜率项加入明确ridge，截距不惩罚；目标同时计入加权SSE和惩罚。使用expm1稳定计算短期限的L1，避免1−exp(−z)的消减。</p><div class="equation">$$y(t)=\beta_0+\beta_1 L_1(t;\tau)+\beta_2 L_2(t;\tau)$$</div><div class="equation">$$L_1=\frac{1-e^{-t/\tau}}{t/\tau},\quad L_2=L_1-e^{-t/\tau}$$</div><div class="equation">$$F_\tau(\beta)=\sum_iw_i[y_i-X_i(\tau)\beta]^2+\lambda(\beta_1^2+\beta_2^2)$$</div><div class="equation">$$\hat\beta(\tau)=[X(\tau)^\top WX(\tau)+\lambda\operatorname{diag}(0,1,1)]^{-1}X(\tau)^\top Wy$$</div><div class="equation">$$\hat\tau=\arg\min_{\tau\in\mathcal G}F_\tau(\hat\beta(\tau))$$</div><h2>解析案例与研究设计</h2><p>教学零息利率由τ=2、β=(0.03,−0.02,0.01)在六个期限生成；固定τ网格后应重建全部输入利率，残差近零。对于非退化τ网格，需报告所选τ及目标值，并比较网格分辨率、期限覆盖和权重敏感性。</p><p>每候选固定三维线性系统，O(gn)时间。期限严格正、权重正、λ非负；若λ=0且设计不满秩，应拒绝奇异系统。输入是已得到的零息连续复利利率，不直接接收息票债券报价。NS曲线拟合并不自动保证无套利动态、单调贴现或符合交易市场惯例；价格验证应回到真实现金流。</p><h2>可执行输入与解析基准</h2><p>输入数据为独立构造的教学样本。下表给出可解析核对的输出前缀；其他诊断字段由模型实际拟合产生，并通过回归测试检查。</p><p><a href="../research/model-examples/nelson-siegel-calibration.csv" download>下载CSV样本</a></p><pre>Maturity,ZeroRate,Weight
+0.25,0.011774783180921677,1
+0.5,0.013364023492142144,1
+1,0.016065306597126332,1
+2,0.02,1
+5,0.025507490008256608,1
+10,0.027946096424007316,1
+</pre><pre>./build/kline_quant model-nelson-siegel-calibration quant/research/model-examples/nelson-siegel-calibration.csv 2 2 3 0</pre><div class="wide"><table><thead><tr><th>Maturity</th><th>ObservedRate</th><th>FittedRate</th><th>Residual</th><th>Level</th><th>Slope</th><th>Curvature</th><th>Tau</th><th>PenalizedSSE</th></tr></thead><tbody><tr><td>0.25</td><td>0.0117747831809</td><td>0.0117747831809</td><td>0</td><td>0.03</td><td>-0.02</td><td>0.01</td><td>2</td><td>0</td></tr><tr><td>0.5</td><td>0.0133640234921</td><td>0.0133640234921</td><td>0</td><td>0.03</td><td>-0.02</td><td>0.01</td><td>2</td><td>0</td></tr><tr><td>1</td><td>0.0160653065971</td><td>0.0160653065971</td><td>0</td><td>0.03</td><td>-0.02</td><td>0.01</td><td>2</td><td>0</td></tr><tr><td>2</td><td>0.02</td><td>0.02</td><td>0</td><td>0.03</td><td>-0.02</td><td>0.01</td><td>2</td><td>0</td></tr><tr><td>5</td><td>0.0255074900083</td><td>0.0255074900083</td><td>0</td><td>0.03</td><td>-0.02</td><td>0.01</td><td>2</td><td>0</td></tr><tr><td>10</td><td>0.027946096424</td><td>0.027946096424</td><td>0</td><td>0.03</td><td>-0.02</td><td>0.01</td><td>2</td><td>0</td></tr></tbody></table></div><p>输出字段：Maturity，ObservedRate，FittedRate，Residual，Level，Slope，Curvature，Tau，PenalizedSSE。</p><h2>C++17实现</h2><pre>inline Report nelson_siegel_calibration(const Mat&amp; x,const Vec&amp; p){
+    validate(x,3,3,3);parameters(p,4);
+    double lo=positive(p[0]),hi=positive(p[1]),lam=p[3];auto g=count(p[2],2,10000);
+    require(hi&gt;=lo&amp;&amp;lam&gt;=0&amp;&amp;double(g)*x.size()&lt;=5e7,"Invalid curve grid");
+    for(auto&amp;r:x){positive(r[0]);positive(r[2]);}
+    auto z=[](double t,double tau){double a=t/tau,b=-std::expm1(-a)/a;return Vec{1,b,b-std::exp(-a)};};
+    double best=std::numeric_limits&lt;double&gt;::infinity(),tau=lo;Vec w;
+    for(std::size_t k=0;k&lt;g;++k){
+        double t=std::exp(std::log(lo)+(std::log(hi)-std::log(lo))*k/(g-1));
+        Mat H(3,Vec(3,0));Vec b(3,0);
+        for(auto&amp;r:x){Vec a=z(r[0],t);add_outer(H,a,r[2]);for(std::size_t j=0;j&lt;3;++j)b[j]+=r[2]*a[j]*r[1];}
+        H[1][1]+=lam;H[2][2]+=lam;
+        Vec a=solve_spd(H,b);double f=lam*(a[1]*a[1]+a[2]*a[2]);
+        for(auto&amp;r:x){double e=r[1]-dot(a,z(r[0],t));f+=r[2]*e*e;}
+        if(f&lt;best){best=f;tau=t;w=a;}
+    }
+    require(w.size()==3,"No curve fit");
+    Report o{{"Maturity","ObservedRate","FittedRate","Residual","Level","Slope","Curvature","Tau","PenalizedSSE"},{}};
+    for(auto&amp;r:x){double v=dot(w,z(r[0],tau));o.rows.push_back({r[0],r[1],v,r[1]-v,w[0],w[1],w[2],tau,best});}
+    return o;
+}</pre><p>参考文献：<a href="https://www.nber.org/papers/w1594">Nelson and Siegel (1987), Parsimonious Modeling of Yield Curves, Journal of Business.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

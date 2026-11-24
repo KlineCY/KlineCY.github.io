@@ -1,0 +1,35 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>局部波动率欧式期权：非恒定扩散系数的隐式PDE｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="assets"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>局部波动率欧式期权：非恒定扩散系数的隐式PDE</h1><p><a href="../research/model-laboratories.html">完整模型研究</a>　<a href="../cpp/model_research_pricing.hpp" download>模型源码</a>　<a href="../cpp/model_research_common.hpp" download>公共数值函数</a></p></header><article><h2>问题、模型与数学推导</h2><p>局部波动率模型允许扩散强度依赖标的状态，能够产生不同于常波动BS的终端分布。此工具输入一条时间齐次的空间局部波动率网格，并求欧式看涨PDE；它不是从市场隐含波动率面反推Dupire局部波动率的校准器。</p><p>每个空间点使用其自身σloc构造扩散系数，漂移差分同样采用非负生成元系数。隐式三对角求解避免显式时间步稳定性限制。边界条件使用零点支付和高标的远期线性渐近；在有限Smax时后者是近似，需确保网格上界足够大。每层用原始线性系统回代，记录最大绝对残差。</p><div class="equation">$$dS_t=(r-q)S_t\,dt+\sigma_{\mathrm{loc}}(S_t)S_t\,dW_t^Q$$</div><div class="equation">$$\partial_\tau C=\frac12\sigma_{\mathrm{loc}}^2(S)S^2C_{SS}+(r-q)SC_S-rC$$</div><div class="equation">$$C(S,0)=(S-K)^+,\quad C(0,\tau)=0$$</div><div class="equation">$$C(S_{\max},\tau)\approx S_{\max}e^{-q\tau}-Ke^{-r\tau}$$</div><div class="equation">$$(I-\Delta t L_h)C^{n+1}=C^n+b^{n+1}_{\partial}$$</div><h2>解析案例与研究设计</h2><p>样本为均匀空间网格0、50、100、150、200，局部波动率均0，r=q=0，执行价100，价格保持终端支付0、0、0、50、100。将网格所有局部波动率替换为0.2，可与相同参数BS闭式逐点对照；使用不同空间波动率则检验数值稳定与价格单调性。</p><p>O(NM)时间、O(M)状态存储，输入必须为从0开始的严格均匀网格、非负局部波动率。r、q非负，边界线性值须非负。高阶希腊字母对空间离散较敏感；局部波动率时间依赖、跳跃或随机波动率需扩展模型。曲面校准时还必须满足静态无套利与动态一致性。</p><h2>可执行输入与解析基准</h2><p>输入数据为独立构造的教学样本。下表给出可解析核对的输出前缀；其他诊断字段由模型实际拟合产生，并通过回归测试检查。</p><p><a href="../research/model-examples/localvol-call-pde.csv" download>下载CSV样本</a></p><pre>Spot,LocalVol
+0,0
+50,0
+100,0
+150,0
+200,0
+</pre><pre>./build/kline_quant model-localvol-call-pde quant/research/model-examples/localvol-call-pde.csv 100 0 0 1 10</pre><div class="wide"><table><thead><tr><th>Spot</th><th>LocalVol</th><th>CallPrice</th><th>TerminalPayoff</th></tr></thead><tbody><tr><td>0</td><td>0</td><td>0</td><td>0</td></tr><tr><td>50</td><td>0</td><td>0</td><td>0</td></tr><tr><td>100</td><td>0</td><td>0</td><td>0</td></tr><tr><td>150</td><td>0</td><td>50</td><td>50</td></tr><tr><td>200</td><td>0</td><td>100</td><td>100</td></tr></tbody></table></div><p>输出字段：Spot，LocalVol，CallPrice，TerminalPayoff，MaxLinearResidual。</p><h2>C++17实现</h2><pre>inline Report localvol_call_pde(const Mat&amp; x,const Vec&amp; p){
+    validate(x,5,2,2);parameters(p,5);
+    double K=positive(p[0]),r=p[1],q=p[2],T=positive(p[3]);auto N=count(p[4],1,10000);
+    require(r&gt;=0&amp;&amp;q&gt;=0&amp;&amp;x[0][0]==0&amp;&amp;x.back()[0]&gt;K&amp;&amp;double(N)*x.size()&lt;=5e7,"Invalid local volatility grid");
+    double h=positive(x[1][0]),dt=T/N,Smax=x.back()[0];auto M=x.size()-1,n=M-1;
+    for(std::size_t j=0;j&lt;=M;++j){require(std::abs(x[j][0]-j*h)&lt;=1e-10*std::max(1.,x[j][0])&amp;&amp;x[j][1]&gt;=0,"Uniform spot grid and nonnegative volatility required");}
+    Vec lower(n,0),diag(n,0),upper(n,0),left(n),right(n),v(n);
+    for(std::size_t j=0;j&lt;n;++j){
+        double s=x[j+1][0],sig=x[j+1][1],b=(r-q)*s/h,d=.5*sig*sig*s*s/(h*h);
+        left[j]=dt*(d+std::max(-b,0.));right[j]=dt*(d+std::max(b,0.));
+        diag[j]=1+left[j]+right[j]+r*dt;
+        if(j)lower[j]=-left[j];if(j+1&lt;n)upper[j]=-right[j];
+        v[j]=std::max(s-K,0.);
+    }
+    double err=0,high=0;
+    for(std::size_t t=1;t&lt;=N;++t){
+        high=Smax*std::exp(-q*t*dt)-K*std::exp(-r*t*dt);
+        require(high&gt;=0,"Upper asymptotic boundary must be nonnegative");
+        Vec b=v;b[n-1]+=right[n-1]*high;
+        v=tridiagonal(lower,diag,upper,b);
+        for(std::size_t j=0;j&lt;n;++j){
+            double z=diag[j]*v[j]-b[j];if(j)z+=lower[j]*v[j-1];if(j+1&lt;n)z+=upper[j]*v[j+1];
+            err=std::max(err,std::abs(z));
+        }
+    }
+    Report o{{"Spot","LocalVol","CallPrice","TerminalPayoff","MaxLinearResidual"},{}};
+    for(std::size_t j=0;j&lt;=M;++j)o.rows.push_back({x[j][0],x[j][1],j==0?0:j==M?high:v[j-1],std::max(x[j][0]-K,0.),err});
+    return o;
+}</pre><p>参考文献：<a href="https://doi.org/10.1017/CBO9780511812545">Dupire (1994), Pricing with a Smile, Risk; Wilmott, Howison and Dewynne (1995), The Mathematics of Financial Derivatives.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>
