@@ -1,0 +1,80 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>面板识别与聚类推断｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><style>body{margin:0;background:white;color:#182a35;font:16px/1.95 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:24px 32px 64px}main{max-width:1120px;margin:auto}header,article,section{border:1px solid #cbd4dc;padding:24px 28px;margin:18px 0;background:white}.equation,pre,.wide{overflow:auto}pre{border:1px solid #cbd4dc;padding:14px;font:14px/1.7 "Times New Roman",monospace}table{border-collapse:collapse;width:100%}th,td{padding:7px 10px;border:1px solid #ccd5dd;text-align:right;background:white;white-space:nowrap}a{color:#1a5478}@media(max-width:790px){.main{margin:0;padding:12px}header,article,section{padding:15px}}</style></head><body><aside id="quantSidebar" class="sidebar" data-page="audit"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>面板识别与聚类推断</h1><p>四项独立研究方法：数学定义、推导、适用条件、构造样本、解析基准与C++17实现。数据均为教学构造。</p><p><a href="../research/applied-laboratories.html">量化研究应用实验室</a>　<a href="../cpp/applied_panel.hpp" download>完整源码</a></p><nav><a href="#within-between">组内组间平方和分解</a>　｜　<a href="#cluster-mean">均值估计聚类稳健标准误</a>　｜　<a href="#first-stage">单工具变量第一阶段强度</a>　｜　<a href="#omitted-bias">遗漏变量偏误样本恒等式</a></nav></header><article id="within-between"><h2>组内组间平方和分解</h2><p>组内加减组均值后交叉项为零，组间平方和按组样本量加权，不平衡面板也成立。组等权为不同估计对象。</p><div class="equation">$$\sum_{g,i}(y_{gi}-\bar y)^2=\sum_{g,i}(y_{gi}-\bar y_g)^2+\sum_gn_g(\bar y_g-\bar y)^2$$</div><div class="equation">$$\sum_i(y_{gi}-\bar y_g)=0$$</div><p>两组均值2及6，组内平方和4、组间16。可衡量资产内波动与资产间异质性，分解本身不识别因果效应。</p><h3>构造样本与数值复算</h3><p><a href="../research/applied-examples/within-between.csv" download>下载CSV</a>　<a href="../cpp/applied_panel.hpp" download>算法源码</a></p><pre>Group,Y
+1,1
+1,3
+2,5
+2,7
+</pre><pre>./build/kline_quant applied-within-between quant/research/applied-examples/within-between.csv</pre><div class="wide"><table><thead><tr><th>TotalSS</th><th>WithinSS</th><th>BetweenSS</th></tr></thead><tbody><tr><td>20</td><td>4</td><td>16</td></tr></tbody></table></div><p>参考文献：Angrist and Pischke (2009), Mostly Harmless Econometrics, Princeton University Press.</p></article><article id="cluster-mean"><h2>均值估计聚类稳健标准误</h2><p>截距模型的面包矩阵为样本量倒数，肉矩阵为簇内残差和的平方。CR1有限样本乘数为G／（G－1），允许簇内任意相关。</p><div class="equation">$$U_g=\sum_i(y_{gi}-\bar y)$$</div><div class="equation">$$V_{\mathrm{CR0}}=n^{-2}\sum_g U_g^2,\quad V_{\mathrm{CR1}}=\frac G{G-1}V_{\mathrm{CR0}}$$</div><p>同一公司多期预测误差归为一簇。例中残差和−4、4，标准误√2及2。两个簇仅演示计算，渐近推断要求足够多的独立簇。</p><h3>构造样本与数值复算</h3><p><a href="../research/applied-examples/cluster-mean.csv" download>下载CSV</a>　<a href="../cpp/applied_panel.hpp" download>算法源码</a></p><pre>Cluster,Y
+1,1
+1,3
+2,5
+2,7
+</pre><pre>./build/kline_quant applied-cluster-mean quant/research/applied-examples/cluster-mean.csv</pre><div class="wide"><table><thead><tr><th>Mean</th><th>Clusters</th><th>CR0SE</th><th>CR1SE</th></tr></thead><tbody><tr><td>4</td><td>2</td><td>1.41421356237</td><td>2</td></tr></tbody></table></div><p>参考文献：Cameron and Miller (2015), A practitioner's guide to cluster-robust inference, Journal of Human Resources.</p></article><article id="first-stage"><h2>单工具变量第一阶段强度</h2><p>第一阶段带截距回归检验工具变量斜率是否为零，单工具经典F等于t平方。相关性与外生性是不同条件，异方差需稳健统计量。</p><div class="equation">$$X_i=\pi_0+\pi_1Z_i+v_i$$</div><div class="equation">$$F=(n-2)R^2/(1-R^2)$$</div><p>政策资格与融资变化的相关强度。案例斜率2、决定系数0.8、F为8，可配合Anderson–Rubin反演处理弱识别。</p><h3>构造样本与数值复算</h3><p><a href="../research/applied-examples/first-stage.csv" download>下载CSV</a>　<a href="../cpp/applied_panel.hpp" download>算法源码</a></p><pre>X,Z
+1,0
+2,0
+3,1
+4,1
+</pre><pre>./build/kline_quant applied-first-stage quant/research/applied-examples/first-stage.csv</pre><div class="wide"><table><thead><tr><th>Intercept</th><th>Slope</th><th>R2</th><th>F</th></tr></thead><tbody><tr><td>1.5</td><td>2</td><td>0.8</td><td>8</td></tr></tbody></table></div><p>参考文献：Angrist and Pischke (2009), Mostly Harmless Econometrics, Princeton University Press.</p></article><article id="omitted-bias"><h2>遗漏变量偏误样本恒等式</h2><p>将长回归正规方程左乘中心化X，残差项消失，除以X平方和即得恒等式。偏误方向由遗漏变量效应与辅助斜率共同决定。</p><div class="equation">$$Y=\alpha+\beta X+\gamma Z+u,\quad Z=\delta+\pi X+v$$</div><div class="equation">$$\tilde\beta=\hat\beta+\hat\gamma\hat\pi$$</div><p>盈利能力与估值回归遗漏行业指标时，例中长斜率2、遗漏变量系数3、辅助斜率0.2，短斜率2.6。因果解释另需识别假设。</p><h3>构造样本与数值复算</h3><p><a href="../research/applied-examples/omitted-bias.csv" download>下载CSV</a>　<a href="../cpp/applied_panel.hpp" download>算法源码</a></p><pre>Y,X,Z
+0,0,0
+5,1,1
+4,2,0
+9,3,1
+</pre><pre>./build/kline_quant applied-omitted-bias quant/research/applied-examples/omitted-bias.csv</pre><div class="wide"><table><thead><tr><th>ShortSlope</th><th>LongSlope</th><th>ZCoefficient</th><th>AuxiliarySlope</th><th>Bias</th></tr></thead><tbody><tr><td>2.6</td><td>2</td><td>3</td><td>0.2</td><td>0.6</td></tr></tbody></table></div><p>参考文献：Angrist and Pischke (2009), Mostly Harmless Econometrics, Princeton University Press.</p></article><section><h2>C++17完整实现</h2><pre>#pragma once
+#include "evidence_common.hpp"
+namespace kline { namespace applied_panel {
+using namespace evidence;
+inline Report within_between(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,2,2);
+    parameters(p,0);
+    std::map&lt;double,Vec&gt; g;
+    for(auto&amp;r:x)g[r[0]].push_back(r[1]);
+    double a=mean(column(x,1)),w=0,b=0;
+    for(auto&amp;z:g){double m=mean(z.second);
+    b+=z.second.size()*(m-a)*(m-a);
+    for(double v:z.second)w+=(v-m)*(v-m);
+    }return scalar({"TotalSS","WithinSS","BetweenSS"},{w+b,w,b});
+    
+}
+
+inline Report cluster_mean(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,2,2);
+    parameters(p,0);
+    double n=x.size(),m=mean(column(x,1));
+    std::map&lt;double,double&gt; g;
+    for(auto&amp;r:x)g[r[0]]+=r[1]-m;
+    require(g.size()&gt;1,"Two clusters required");
+    double v=0,G=g.size();
+    for(auto&amp;z:g)v+=z.second*z.second/(n*n);
+    return scalar({"Mean","Clusters","CR0SE","CR1SE"},{m,G,std::sqrt(v),std::sqrt(v*G/(G-1))});
+    
+}
+
+inline Report first_stage(const Mat&amp; x,const Vec&amp; p){
+    validate(x,3,2,2);
+    parameters(p,0);
+    double a=mean(column(x,0)),b=mean(column(x,1)),s=0,t=0,c=0;
+    for(auto&amp;r:x){double d=r[0]-a,e=r[1]-b;
+    s+=d*d;
+    t+=e*e;
+    c+=d*e;
+    }double beta=c/positive(t),r2=c*c/(positive(s)*t);
+    require(1-r2&gt;1e-14,"Degenerate first stage");
+    return scalar({"Intercept","Slope","R2","F"},{a-beta*b,beta,r2,r2/(1-r2)*(x.size()-2)});
+    
+}
+
+inline Report omitted_bias(const Mat&amp; x,const Vec&amp; p){
+    validate(x,3,3,3);
+    parameters(p,0);
+    double y=mean(column(x,0)),a=mean(column(x,1)),b=mean(column(x,2)),s=0,t=0,c=0,d=0,e=0;
+    for(auto&amp;r:x){double u=r[1]-a,v=r[2]-b,w=r[0]-y;
+    s+=u*u;
+    t+=v*v;
+    c+=u*v;
+    d+=u*w;
+    e+=v*w;
+    }double det=positive(s*t-c*c),beta=(d*t-e*c)/det,gamma=(e*s-d*c)/det,pi=c/positive(s),shortb=d/s;
+    return scalar({"ShortSlope","LongSlope","ZCoefficient","AuxiliarySlope","Bias"},{shortb,beta,gamma,pi,shortb-beta});
+    
+}
+} }
+</pre></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

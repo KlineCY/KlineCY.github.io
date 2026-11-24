@@ -1,0 +1,67 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>期权复制与现金流定价｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><style>body{margin:0;background:white;color:#182a35;font:16px/1.95 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:24px 32px 64px}main{max-width:1120px;margin:auto}header,article,section{border:1px solid #cbd4dc;padding:24px 28px;margin:18px 0;background:white}.equation,pre,.wide{overflow:auto}pre{border:1px solid #cbd4dc;padding:14px;font:14px/1.7 "Times New Roman",monospace}table{border-collapse:collapse;width:100%}th,td{padding:7px 10px;border:1px solid #ccd5dd;text-align:right;background:white;white-space:nowrap}a{color:#1a5478}@media(max-width:790px){.main{margin:0;padding:12px}header,article,section{padding:15px}}</style></head><body><aside id="quantSidebar" class="sidebar" data-page="assets"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>期权复制与现金流定价</h1><p>四项独立研究方法：数学定义、推导、适用条件、构造样本、解析基准与C++17实现。数据均为教学构造。</p><p><a href="../research/applied-laboratories.html">量化研究应用实验室</a>　<a href="../cpp/applied_pricing.hpp" download>完整源码</a></p><nav><a href="#dividend-forward">离散分红预付远期</a>　｜　<a href="#option-box">盒式价差隐含贴现因子</a>　｜　<a href="#implied-dividend">看涨看跌平价隐含分红</a>　｜　<a href="#geometric-asian">离散几何平均亚式期权</a></nav></header><article id="dividend-forward"><h2>离散分红预付远期</h2><p>持有标的并借入确定分红现值，抵销交割前现金流；预付远期的融资终值即普通远期价。</p><div class="equation">$$F_0^P=S_0-\sum_{t_i\le T}D_ie^{-rt_i}$$</div><div class="equation">$$F_{0,T}=e^{rT}F_0^P$$</div><p>现货100、零利率、分红2及3，远期95。假设分红确定且融资利率一致；随机股息需要相应风险中性现金流定价。</p><h3>构造样本与数值复算</h3><p><a href="../research/applied-examples/dividend-forward.csv" download>下载CSV</a>　<a href="../cpp/applied_pricing.hpp" download>算法源码</a></p><pre>Time,Dividend
+0.5,2
+1,3
+</pre><pre>./build/kline_quant applied-dividend-forward quant/research/applied-examples/dividend-forward.csv 100 0 1</pre><div class="wide"><table><thead><tr><th>DividendPV</th><th>PrepaidForward</th><th>Forward</th></tr></thead><tbody><tr><td>5</td><td>95</td><td>95</td></tr></tbody></table></div><p>参考文献：Hull, Options, Futures, and Other Derivatives, 11th ed., Pearson.</p></article><article id="option-box"><h2>盒式价差隐含贴现因子</h2><p>低执行价看涨多头、高执行价看涨空头、高执行价看跌多头和低执行价看跌空头构成固定现金流。分三个终值区间展开均为执行价差。</p><div class="equation">$$B=C(K_1)-C(K_2)+P(K_2)-P(K_1)$$</div><div class="equation">$$B_T=K_2-K_1,\quad D(0,T)=B/(K_2-K_1)$$</div><p>盒价20、固定终值20，贴现因子1。欧式同步报价前提；可交易套利还需买卖价、费用及保证金，美式提前行权破坏复制。</p><h3>构造样本与数值复算</h3><p><a href="../research/applied-examples/option-box.csv" download>下载CSV</a>　<a href="../cpp/applied_pricing.hpp" download>算法源码</a></p><pre>Strike,Call,Put
+90,14,4
+110,4,14
+</pre><pre>./build/kline_quant applied-option-box quant/research/applied-examples/option-box.csv</pre><div class="wide"><table><thead><tr><th>BoxPrice</th><th>TerminalPayoff</th><th>ImpliedDiscount</th></tr></thead><tbody><tr><td>20</td><td>20</td><td>1</td></tr></tbody></table></div><p>参考文献：Hull, Options, Futures, and Other Derivatives, 11th ed., Pearson.</p></article><article id="implied-dividend"><h2>看涨看跌平价隐含分红</h2><p>欧式看涨看跌差额为远期终值现值，已知现货及贴现因子即可反推确定股息现值。相同到期日的执行价之间应一致。</p><div class="equation">$$C(K)-P(K)=S_0-I-KD(0,T)$$</div><div class="equation">$$I=S_0-KD(0,T)-C(K)+P(K)$$</div><p>现货105、贴现因子1，两组执行价均隐含股息5。借券费、异步报价与非欧式条款会影响解释。</p><h3>构造样本与数值复算</h3><p><a href="../research/applied-examples/implied-dividend.csv" download>下载CSV</a>　<a href="../cpp/applied_pricing.hpp" download>算法源码</a></p><pre>Strike,Call,Put
+90,14,4
+110,4,14
+</pre><pre>./build/kline_quant applied-implied-dividend quant/research/applied-examples/implied-dividend.csv 105 1</pre><div class="wide"><table><thead><tr><th>Strike</th><th>ImpliedDividendPV</th><th>PrepaidForward</th></tr></thead><tbody><tr><td>90</td><td>5</td><td>100</td></tr><tr><td>110</td><td>5</td><td>100</td></tr></tbody></table></div><p>参考文献：Hull, Options, Futures, and Other Derivatives, 11th ed., Pearson.</p></article><article id="geometric-asian"><h2>离散几何平均亚式期权</h2><p>风险中性GBM下对数价格联合正态，几何均值的对数均值为lnS＋（r－q－σ²／2）乘观察时点均值，方差由Brownian协方差求和；截断对数正态矩给出价格。</p><div class="equation">$$\log G=m^{-1}\sum_i\log S_{t_i},\quad v=\frac{\sigma^2}{m^2}\sum_{i,j}\min(t_i,t_j)$$</div><div class="equation">$$C=D[e^{\mu+v/2}\Phi(d_1)-K\Phi(d_2)],\quad d_2=(\mu-\log K)/\sqrt v,\quad d_1=d_2+\sqrt v$$</div><p>观察日0.5及1年，波动率20％，对数方差0.025。几何价格可作为算术亚式模拟控制变量；观察日严格递增，支付不早于最后观察日。</p><h3>构造样本与数值复算</h3><p><a href="../research/applied-examples/geometric-asian.csv" download>下载CSV</a>　<a href="../cpp/applied_pricing.hpp" download>算法源码</a></p><pre>Time
+0.5
+1
+</pre><pre>./build/kline_quant applied-geometric-asian quant/research/applied-examples/geometric-asian.csv 100 100 0 0 0.2 1</pre><div class="wide"><table><thead><tr><th>LogMean</th><th>LogVariance</th><th>Call</th><th>Put</th></tr></thead><tbody><tr><td>4.59017018599</td><td>0.025</td><td>6.16934119735</td><td>6.41902895761</td></tr></tbody></table></div><p>参考文献：Kemna and Vorst (1990), A pricing method for options based on average asset values, Journal of Banking &amp; Finance.</p></article><section><h2>C++17完整实现</h2><pre>#pragma once
+#include "evidence_common.hpp"
+namespace kline { namespace applied_pricing {
+using namespace evidence;
+inline Report dividend_forward(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,2,2);
+    parameters(p,3);
+    double s=positive(p[0]),r=p[1],T=positive(p[2]),pv=0;
+    for(auto&amp;z:x){require(z[0]&gt;0&amp;&amp;z[0]&lt;=T&amp;&amp;z[1]&gt;=0,"Invalid dividend schedule");
+    pv+=z[1]*std::exp(-r*z[0]);
+    }double f=positive(s-pv);
+    return scalar({"DividendPV","PrepaidForward","Forward"},{pv,f,f*std::exp(r*T)});
+    
+}
+
+inline Report option_box(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,3,3);
+    parameters(p,0);
+    require(x.size()==2&amp;&amp;x[0][0]&gt;0&amp;&amp;x[1][0]&gt;x[0][0],"Two increasing strikes required");
+    for(auto&amp;r:x)require(r[1]&gt;=0&amp;&amp;r[2]&gt;=0,"Negative option price");
+    double b=x[0][1]-x[1][1]+x[1][2]-x[0][2],k=x[1][0]-x[0][0];
+    return scalar({"BoxPrice","TerminalPayoff","ImpliedDiscount"},{positive(b),k,b/k});
+    
+}
+
+inline Report implied_dividend(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,3,3);
+    parameters(p,2);
+    double s=positive(p[0]),D=positive(p[1]);
+    Report o{{"Strike","ImpliedDividendPV","PrepaidForward"},{}};
+    for(auto&amp;r:x){positive(r[0]);
+    require(r[1]&gt;=0&amp;&amp;r[2]&gt;=0,"Negative option price");
+    double f=r[1]-r[2]+D*r[0];
+    o.rows.push_back({r[0],s-f,f});
+    }return o;
+    
+}
+
+inline Report geometric_asian(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,1,1);
+    parameters(p,6);
+    double s=positive(p[0]),k=positive(p[1]),r=p[2],q=p[3],sigma=positive(p[4]),T=positive(p[5]),n=x.size(),a=0,v=0;
+    for(std::size_t i=0;
+    i&lt;x.size();
+    ++i){double t=x[i][0];
+    require(t&gt;0&amp;&amp;t&lt;=T&amp;&amp;(i==0||t&gt;x[i-1][0]),"Increasing observation times required");
+    a+=t/n;
+    v+=t*(2*(n-double(i))-1)/(n*n);
+    }v*=sigma*sigma;
+    double m=std::log(s)+(r-q-.5*sigma*sigma)*a,d2=(m-std::log(k))/std::sqrt(positive(v)),d1=d2+std::sqrt(v),f=std::exp(m+v/2),D=std::exp(-r*T);
+    return scalar({"LogMean","LogVariance","Call","Put"},{m,v,D*(f*normal(d1)-k*normal(d2)),D*(k*normal(-d2)-f*normal(-d1))});
+    
+}
+} }
+</pre></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>
