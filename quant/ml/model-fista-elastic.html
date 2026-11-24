@@ -1,0 +1,42 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FISTA弹性网：加速近端拟合与KKT收敛｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="ml"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>FISTA弹性网：加速近端拟合与KKT收敛</h1><p><a href="../research/model-laboratories.html">完整模型研究</a>　<a href="../cpp/model_research_optimization.hpp" download>模型源码</a>　<a href="../cpp/model_research_common.hpp" download>公共数值函数</a></p></header><article><h2>问题、模型与数学推导</h2><p>研究对象：目标是同时控制预测残差、系数稀疏和共线性下的收缩。这里使用损失总和而非样本均值；与以1/n定义损失的库比较时须同步缩放正则参数。数据按训练样本给出，没有隐含截距；如需截距应先中心化或明确添加并处理不惩罚截距。</p><p>推导：光滑部分的Hessian为XᵀX+λ₂I，其最大特征值不超过绝对行和上界。二次上界加L1惩罚可以按坐标独立求解，导数在零点的次梯度区间产生软阈值。加速项将上一轮位移按Nesterov序列外推；迭代目标不必单调，因此直接计算原问题KKT残差，而非仅比较相邻系数。λ₂&gt;0时目标强凸，解唯一。</p><div class="equation">$$\min_\beta F(\beta)=\frac12\|X\beta-y\|^2+\lambda_1\|\beta\|_1+\frac{\lambda_2}{2}\|\beta\|^2$$</div><div class="equation">$$g=X^\top(X\beta-y)+\lambda_2\beta,\quad L\ge\|X^\top X+\lambda_2I\|_2$$</div><div class="equation">$$\beta^{k+1}=\operatorname{soft}(z^k-g(z^k)/L,\lambda_1/L)$$</div><div class="equation">$$t_{k+1}=(1+\sqrt{1+4t_k^2})/2,\quad z^{k+1}=\beta^{k+1}+\frac{t_k-1}{t_{k+1}}(\beta^{k+1}-\beta^k)$$</div><div class="equation">$$r_j=\begin{cases}|g_j+\lambda_1\operatorname{sign}(\beta_j)|&amp;\beta_j\ne0\\(|g_j|-\lambda_1)_+&amp;\beta_j=0\end{cases}$$</div><h2>解析案例与研究设计</h2><p>数值例：设计矩阵为单位阵，y=(3,−2)，λ₁=λ₂=0.5，闭式解为soft(y,0.5)/1.5=(5/3,−1)。非正交设计的解析解一般不存在，完整程序从Gram矩阵构造梯度并迭代至KKT阈值。输出每个系数、共同目标函数、最大驻点残差及迭代次数。</p><p>研究使用：在滚动预测中，训练窗口内估计均值和尺度，验证窗口选择正则参数，再将冻结系数用于未来预测。目标值只能在同一数据、同一损失缩放下比较。计算Gram需O(nd²)，每轮O(d²)，空间O(d²)。最大迭代次数与计算预算受限；未达到指定残差时拒绝输出拟合完成状态。</p><h2>可执行输入与解析基准</h2><p>输入数据为独立构造的教学样本。下表给出可解析核对的输出前缀；其他诊断字段由模型实际拟合产生，并通过回归测试检查。</p><p><a href="../research/model-examples/fista-elastic.csv" download>下载CSV样本</a></p><pre>X1,X2,Y
+1,0,3
+0,1,-2
+</pre><pre>./build/kline_quant model-fista-elastic quant/research/model-examples/fista-elastic.csv 0.5 0.5 1e-9 2000</pre><div class="wide"><table><thead><tr><th>Feature</th><th>Coefficient</th></tr></thead><tbody><tr><td>1</td><td>1.66666666667</td></tr><tr><td>2</td><td>-1</td></tr></tbody></table></div><p>输出字段：Feature，Coefficient，Objective，KKTResidual，Iterations。</p><h2>C++17实现</h2><pre>inline Report fista_elastic(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,1,2,33)-1;
+    parameters(p,4);
+    double l1=p[0],l2=p[1],tol=positive(p[2]);
+    auto K=count(p[3],1,100000);
+    require(l1&gt;=0&amp;&amp;l2&gt;0&amp;&amp;double(K)*d*d&lt;=5e7,"Invalid penalty or iteration budget");
+    Mat H(d,Vec(d,0));
+    Vec b(d,0);
+    for(const auto&amp;r:x){
+        Vec a(r.begin(),r.end()-1);
+        add_outer(H,a,1);
+        for(std::size_t j=0;j&lt;d;++j)b[j]+=a[j]*r.back();
+    }
+    for(std::size_t j=0;j&lt;d;++j)H[j][j]+=l2;
+    double L=matrix_lipschitz(H);
+    Vec w(d,0),z=w;
+    double t=1,gap=0;
+    std::size_t it=0;
+    for(;it&lt;K;){
+        Vec g=mul(H,z),v(d);
+        for(std::size_t j=0;j&lt;d;++j)v[j]=soft(z[j]-(g[j]-b[j])/L,l1/L);
+        Vec q=mul(H,v);gap=0;
+        for(std::size_t j=0;j&lt;d;++j){
+            double a=q[j]-b[j];
+            double e=v[j]==0?std::max(0.,std::abs(a)-l1):std::abs(a+l1*std::copysign(1.,v[j]));
+            gap=std::max(gap,e);
+        }
+        double next=(1+std::sqrt(1+4*t*t))/2;
+        for(std::size_t j=0;j&lt;d;++j)z[j]=v[j]+(t-1)/next*(v[j]-w[j]);
+        w=v;t=next;++it;
+        if(gap&lt;=tol)break;
+    }
+    require(gap&lt;=tol,"FISTA did not converge");
+    double obj=l1*researchflow::l1(w)+.5*l2*squared(w);
+    for(const auto&amp;r:x){double e=-r.back();for(std::size_t j=0;j&lt;d;++j)e+=r[j]*w[j];obj+=.5*e*e;}
+    Report o{{"Feature","Coefficient","Objective","KKTResidual","Iterations"},{}};
+    for(std::size_t j=0;j&lt;d;++j)o.rows.push_back({double(j+1),w[j],obj,gap,double(it)});
+    return o;
+}</pre><p>参考文献：<a href="https://doi.org/10.1137/080716542">Beck and Teboulle (2009), A Fast Iterative Shrinkage-Thresholding Algorithm for Linear Inverse Problems.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>
