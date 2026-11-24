@@ -1,0 +1,26 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Merton结构化信用模型：股权价格与股权波动率反推资产风险｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="assets"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>Merton结构化信用模型：股权价格与股权波动率反推资产风险</h1><p><a href="../research/advanced-research.html">高级研究方法</a>　<a href="../cpp/advanced_research_pricing.hpp" download>完整模型源码</a>　<a href="../cpp/advanced_research_common.hpp" download>公共数值函数</a></p></header><article><h2>模型定义与识别条件</h2><p>结构信用模型将股权视为以企业资产价值为标的、债务面值为执行价的欧式看涨期权。观察股权价值与股权波动率后，可利用股权期权Delta关系同时反推不可直接观察的资产价值及资产波动率。这里假设单一到期零息债务、无资产分红及风险中性GBM。</p><h2>数学推导与求解机制</h2><p>固定资产波动率时，股权价值关于资产价值严格递增，资产价值的根位于观察股权价值和股权价值加债务现值之间。内层二分满足股权价格；外层在给定波动率区间内寻找股权波动率残差的异号根。最终回代两条原始方程，分别报告价格及波动率残差。</p><div class="equation">$$E=V\Phi(d_1)-De^{-rT}\Phi(d_2),\quad d_1=\frac{\log(V/D)+(r+\sigma_A^2/2)T}{\sigma_A\sqrt T},\quad d_2=d_1-\sigma_A\sqrt T$$</div><div class="equation">$$\sigma_E=\frac{V}{E}\Phi(d_1)\sigma_A$$</div><div class="equation">$$V(\sigma_A): E(V,\sigma_A)-E_{\mathrm{obs}}=0$$</div><div class="equation">$$h(\sigma_A)=V(\sigma_A)\Phi(d_1)\sigma_A/E_{\mathrm{obs}}-\sigma_{E,\mathrm{obs}}$$</div><div class="equation">$$Q(V_T&lt;D)=\Phi(-d_2)$$</div><h2>独立解析基准</h2><p>教学样本先用给定资产价值、资产波动率及债务面值生成股权价格和股权波动率，再反向恢复原参数。输出违约概率为风险中性概率Φ(−d2)，不能称为基于历史资产漂移估计的真实世界违约概率。</p><p><a href="../research/advanced-examples/structural-credit-fit.csv" download>下载CSV样本</a></p><pre>EquityValue,EquityVol,DebtFace,Rate,Time
+38.292492254802625,1.8057389857858892,100,0,1
+</pre><pre>./build/kline_quant advanced-structural-credit-fit quant/research/advanced-examples/structural-credit-fit.csv 0.001 2 1e-9</pre><div class="wide"><table><thead><tr><th>AssetValue</th><th>AssetVol</th><th>EquityModel</th><th>EquityVolModel</th><th>DefaultProbability</th><th>RiskNeutralDistance</th><th>PriceResidual</th><th>VolResidual</th></tr></thead><tbody><tr><td>100</td><td>1</td><td>38.2924922548</td><td>1.80573898579</td><td>0.691462461274</td><td>-0.5</td><td>0</td><td>0</td></tr></tbody></table></div><p>输出字段：AssetValue，AssetVol，EquityModel，EquityVolModel，DefaultProbability，RiskNeutralDistance，PriceResidual，VolResidual。</p><h2>计算复杂度与研究边界</h2><p>固定嵌套二分成本O(1)，但高杠杆、极低股权价格及极端波动可能造成数值敏感。模型未考虑多期债务、提前违约、债务优先级及跳跃，实际信用研究应将结构风险与市场利差及资产负债表交叉验证。</p><h2>C++17完整实现</h2><pre>inline Report structural_credit_fit(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,5,5);parameters(p,3);
+    double lo=positive(p[0]),hi=positive(p[1]),tol=positive(p[2]);require(hi&gt;lo&amp;&amp;x.size()&lt;=10000,"Invalid asset volatility bracket");
+    Report o{{"AssetValue","AssetVol","EquityModel","EquityVolModel","DefaultProbability","RiskNeutralDistance","PriceResidual","VolResidual"},{}};
+    for(auto&amp;r:x){
+        double E=positive(r[0]),ev=positive(r[1]),D=positive(r[2]),rate=r[3],T=positive(r[4]),pv=positive(D*std::exp(-rate*T));
+        auto metrics=[&amp;](double V,double vol){
+            double z=vol*std::sqrt(T),d1=(std::log(V/D)+rate*T+.5*z*z)/z,d2=d1-z,price=V*normal(d1)-pv*normal(d2);
+            return Vec{price,V*normal(d1)*vol/E,d2};
+        };
+        auto asset=[&amp;](double vol){
+            double a=E,b=E+pv;
+            for(int i=0;i&lt;100;++i){double m=a/2+b/2;if(metrics(m,vol)[0]&lt;E)a=m;else b=m;}return a/2+b/2;
+        };
+        auto f=[&amp;](double vol){return metrics(asset(vol),vol)[1]-ev;};
+        double a=lo,b=hi,fa=f(a),fb=f(b);
+        require(fa==0||fb==0||(fa&lt;0&amp;&amp;fb&gt;0)||(fa&gt;0&amp;&amp;fb&lt;0),"Asset volatility root not bracketed");
+        for(int i=0;i&lt;100;++i){double m=a/2+b/2,g=f(m);if(g==0){a=b=m;break;}if((g&gt;0)==(fa&gt;0)){a=m;fa=g;}else b=m;}
+        double vol=a/2+b/2,V=asset(vol);Vec z=metrics(V,vol);
+        require(std::abs(z[0]-E)&lt;=tol*std::max(1.,E)&amp;&amp;std::abs(z[1]-ev)&lt;=tol*std::max(1.,ev),"Credit calibration residual");
+        o.rows.push_back({V,vol,z[0],z[1],normal(-z[2]),z[2],z[0]-E,z[1]-ev});
+    }
+    return o;
+}</pre><p>参考文献：<a href="https://doi.org/10.1111/j.1540-6261.1974.tb03058.x">Merton (1974), On the Pricing of Corporate Debt: The Risk Structure of Interest Rates, Journal of Finance.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

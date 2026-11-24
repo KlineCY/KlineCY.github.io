@@ -1,0 +1,25 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Merton跳跃扩散：条件Poisson混合定价与截断误差上界｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="assets"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>Merton跳跃扩散：条件Poisson混合定价与截断误差上界</h1><p><a href="../research/advanced-research.html">高级研究方法</a>　<a href="../cpp/advanced_research_pricing.hpp" download>完整模型源码</a>　<a href="../cpp/advanced_research_common.hpp" download>公共数值函数</a></p></header><article><h2>模型定义与识别条件</h2><p>风险中性跳跃扩散通过补偿跳跃的预期幅度保持贴现标的为鞅。给定跳跃次数n，连续扩散与独立对数正态跳跃之和仍为正态，因此欧式价格可通过Poisson混合求和。输入跳跃强度及跳跃分布是风险中性参数，并非直接取历史跳跃参数。</p><h2>数学推导与求解机制</h2><p>每个条件分布使用对数正态截断期望；零条件方差单独按确定性支付处理。截断次数为明确参数。对看涨遗漏质量不能只用普通Poisson尾部，因为标的支付随跳跃幅度增大；指数倾斜后得到以λT E[J]为均值的Poisson尾部。看跌支付不超过K，因此普通尾部给出上界。</p><div class="equation">$$dS_t/S_{t-}=(r-q-\lambda\kappa)dt+\sigma dW_t+(J-1)dN_t,\quad\kappa=e^{\mu_J+\sigma_J^2/2}-1$$</div><div class="equation">$$\log S_T\mid N_T=n\sim N(m_n,v_n)$$</div><div class="equation">$$m_n=\log S_0+(r-q-\lambda\kappa-\sigma^2/2)T+n\mu_J,\quad v_n=\sigma^2T+n\sigma_J^2$$</div><div class="equation">$$C=e^{-rT}\sum_{n=0}^\infty p_n\left[e^{m_n+v_n/2}\Phi(d_{1,n})-K\Phi(d_{2,n})\right]$$</div><div class="equation">$$0\le C-C_N\le S_0e^{-qT}\Pr\{\operatorname{Pois}(\lambda T\mathbb EJ)&gt;N\}$$</div><div class="equation">$$0\le P-P_N\le Ke^{-rT}\Pr\{\operatorname{Pois}(\lambda T)&gt;N\}$$</div><h2>独立解析基准</h2><p>当扩散与跳跃强度均0、r=q=0时，S=100、K=90，价格为10及0，截断质量为1、误差为0。非退化情景核对看涨看跌平价误差不超过两个截断上界之和，并可与无跳跃BS闭式比较。</p><p><a href="../research/advanced-examples/merton-jump-mixture.csv" download>下载CSV样本</a></p><pre>Spot,Strike,Rate,Dividend,Volatility,Intensity,JumpLogMean,JumpLogVol,Time
+100,90,0,0,0,0,-0.1,0.2,1
+</pre><pre>./build/kline_quant advanced-merton-jump-mixture quant/research/advanced-examples/merton-jump-mixture.csv 50</pre><div class="wide"><table><thead><tr><th>Call</th><th>Put</th><th>PoissonMass</th><th>CallTailBound</th><th>PutTailBound</th><th>ParityResidual</th></tr></thead><tbody><tr><td>10</td><td>0</td><td>1</td><td>0</td><td>0</td><td>0</td></tr></tbody></table></div><p>输出字段：Call，Put，PoissonMass，CallTailBound，PutTailBound，ParityResidual。</p><h2>计算复杂度与研究边界</h2><p>O(N)时间、常数额外存储；限制Poisson均值，防止极端参数下浮点下溢。截断上界用于数值误差而非模型误差。跳跃风险溢价、参数可识别性及跨期限一致性需要独立校准和市场数据。</p><h2>C++17完整实现</h2><pre>inline Report merton_jump_mixture(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,9,9);parameters(p,1);auto N=count(p[0],0,10000);
+    require(double(N+1)*x.size()&lt;=5e7,"Jump mixture work limit");
+    Report o{{"Call","Put","PoissonMass","CallTailBound","PutTailBound","ParityResidual"},{}};
+    auto mass=[&amp;](double a){require(a&gt;=0&amp;&amp;a&lt;=600,"Poisson mean outside stable domain");double w=std::exp(-a),s=w;for(std::size_t n=1;n&lt;=N;++n){w*=a/n;s+=w;}return std::clamp(s,0.,1.);};
+    for(auto&amp;r:x){
+        double S=positive(r[0]),K=positive(r[1]),rate=r[2],q=r[3],vol=r[4],lambda=r[5],mj=r[6],sj=r[7],T=positive(r[8]);
+        require(vol&gt;=0&amp;&amp;lambda&gt;=0&amp;&amp;sj&gt;=0,"Nonnegative volatility and intensity required");
+        double ej=positive(std::exp(mj+.5*sj*sj)),a=lambda*T,tilt=a*ej,pm=mass(a),tm=mass(tilt),w=std::exp(-a);
+        double c=0,put=0,disc=std::exp(-rate*T),base=std::log(S)+(rate-q-lambda*(ej-1)-.5*vol*vol)*T;
+        for(std::size_t n=0;n&lt;=N;++n){
+            if(n)w*=a/n;if(w==0)continue;
+            double m=base+n*mj,v=vol*vol*T+n*sj*sj;
+            double f=positive(std::exp(m+v/2)),cc,pp;
+            if(v==0){cc=std::max(f-K,0.);pp=std::max(K-f,0.);}
+            else{double s=std::sqrt(v),d2=(m-std::log(K))/s,d1=d2+s;cc=f*normal(d1)-K*normal(d2);pp=K*normal(-d2)-f*normal(-d1);}
+            c+=w*disc*std::max(0.,cc);put+=w*disc*std::max(0.,pp);
+        }
+        double cb=S*std::exp(-q*T)*(1-tm),pb=K*disc*(1-pm),par=c-put-(S*std::exp(-q*T)-K*disc);
+        o.rows.push_back({c,put,pm,cb,pb,par});
+    }
+    return o;
+}</pre><p>参考文献：<a href="https://doi.org/10.1016/0304-405X(76)90022-2">Merton (1976), Option Pricing When Underlying Stock Returns Are Discontinuous, Journal of Financial Economics.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

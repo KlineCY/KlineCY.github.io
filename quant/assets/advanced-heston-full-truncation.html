@@ -1,0 +1,25 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Heston随机波动率：全截断Euler路径、鞅检查与Monte Carlo误差｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="assets"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>Heston随机波动率：全截断Euler路径、鞅检查与Monte Carlo误差</h1><p><a href="../research/advanced-research.html">高级研究方法</a>　<a href="../cpp/advanced_research_pricing.hpp" download>完整模型源码</a>　<a href="../cpp/advanced_research_common.hpp" download>公共数值函数</a></p></header><article><h2>模型定义与识别条件</h2><p>Heston模型让方差自身服从均值回复平方根扩散，标的与方差冲击相关可产生偏斜。全截断Euler保留方差辅助变量的负值，但在漂移和扩散中使用正部，避免对负方差开方。标的使用对数更新，条件于上一时点方差，单步风险中性指数具有正确期望。</p><h2>数学推导与求解机制</h2><p>模拟独立路径并在线累计看涨、看跌及贴现终端标的的一阶二阶矩。输出Monte Carlo标准误以及贴现标的与理论S0 e^{−qT}的差，检查模拟风险中性鞅性质。负辅助方差比例反映离散方案的截断频率，不是实际连续模型出现负方差的概率。</p><div class="equation">$$dS/S=(r-q)dt+\sqrt v\,dW^S,\quad dv=\kappa(\theta-v)dt+\xi\sqrt v\,dW^v$$</div><div class="equation">$$d\langle W^S,W^v\rangle=\rho dt$$</div><div class="equation">$$\widetilde v_{k+1}=\widetilde v_k+\kappa(\theta-\widetilde v_k^+)\Delta+\xi\sqrt{\widetilde v_k^+\Delta}Z_v$$</div><div class="equation">$$\log S_{k+1}=\log S_k+(r-q-\widetilde v_k^+/2)\Delta+\sqrt{\widetilde v_k^+\Delta}(\rho Z_v+\sqrt{1-\rho^2}Z_\perp)$$</div><div class="equation">$$\widehat C=e^{-rT}N^{-1}\sum_i(S_T^{(i)}-K)^+,\quad \mathrm{SE}=\widehat\sigma/\sqrt N$$</div><h2>独立解析基准</h2><p>零初始方差、长期方差及vol-of-vol时，标的确定性演化，S=100、K=90、零利率得到看涨10、看跌0、标准误0。固定正方差且κ=ξ=0时退化为常波动GBM，可与BS价格及Monte Carlo标准误比较。</p><p><a href="../research/advanced-examples/heston-full-truncation.csv" download>下载CSV样本</a></p><pre>Spot,Strike,Rate,Dividend,V0,Kappa,Theta,VolOfVol,Rho,Time
+100,90,0,0,0,1,0,0,0,1
+</pre><pre>./build/kline_quant advanced-heston-full-truncation quant/research/advanced-examples/heston-full-truncation.csv 12 1024 42</pre><div class="wide"><table><thead><tr><th>Call</th><th>Put</th><th>CallSE</th><th>PutSE</th><th>DiscountedSpot</th><th>SpotSE</th><th>MartingaleResidual</th><th>NegativeVarianceFraction</th></tr></thead><tbody><tr><td>10</td><td>0</td><td>0</td><td>0</td><td>100</td><td>0</td><td>0</td><td>0</td></tr></tbody></table></div><p>输出字段：Call，Put，CallSE，PutSE，DiscountedSpot，SpotSE，MartingaleResidual，NegativeVarianceFraction。</p><h2>计算复杂度与研究边界</h2><p>O(NM)计算，常数状态存储，独立路径随机种子明确。时间离散偏差与统计标准误必须分别控制；缩小步长不能消除模拟采样误差。ρ必须在[−1,1]，κ、θ、初始方差及ξ非负。此工具不进行Heston隐含波动曲面校准。</p><h2>C++17完整实现</h2><pre>inline Report heston_full_truncation(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,10,10);parameters(p,3);auto m=count(p[0],1,2520),n=count(p[1],2,2000000),seed=count(p[2],0,1000000000);
+    require(double(m)*n*x.size()&lt;=1e8,"Heston simulation work limit");
+    struct Moment{double n=0,m=0,s=0;void push(double x){++n;double d=x-m;m+=d/n;s+=d*(x-m);}double se()const{return std::sqrt(std::max(0.,s)/(n-1)/n);}};
+    Report o{{"Call","Put","CallSE","PutSE","DiscountedSpot","SpotSE","MartingaleResidual","NegativeVarianceFraction"},{}};
+    for(std::size_t row=0;row&lt;x.size();++row){
+        auto&amp;r=x[row];double S=positive(r[0]),K=positive(r[1]),rate=r[2],q=r[3],v0=r[4],k=r[5],theta=r[6],xi=r[7],rho=r[8],T=positive(r[9]);
+        require(v0&gt;=0&amp;&amp;k&gt;=0&amp;&amp;theta&gt;=0&amp;&amp;xi&gt;=0&amp;&amp;std::abs(rho)&lt;=1,"Invalid Heston parameters");
+        std::mt19937_64 rng(std::uint64_t(seed)+row);std::normal_distribution&lt;double&gt; norm(0,1);
+        double dt=T/m,disc=positive(std::exp(-rate*T)),neg=0,orth=std::sqrt(std::max(0.,1-rho*rho));Moment c,put,s;
+        for(std::size_t i=0;i&lt;n;++i){
+            double a=std::log(S),v=v0;
+            for(std::size_t j=0;j&lt;m;++j){
+                double z=norm(rng),u=norm(rng),vp=std::max(0.,v),root=std::sqrt(vp*dt);
+                a+=(rate-q-.5*vp)*dt+root*(rho*z+orth*u);v+=k*(theta-vp)*dt+xi*root*z;
+                neg+=double(v&lt;0);
+            }
+            double st=positive(std::exp(a));c.push(disc*std::max(st-K,0.));put.push(disc*std::max(K-st,0.));s.push(disc*st);
+        }
+        o.rows.push_back({c.m,put.m,c.se(),put.se(),s.m,s.se(),s.m-S*std::exp(-q*T),neg/(double(n)*m)});
+    }
+    return o;
+}</pre><p>参考文献：<a href="https://doi.org/10.1080/14697680802392496">Lord, Koekkoek and van Dijk (2010), A Comparison of Biased Simulation Schemes for Stochastic Volatility Models, Quantitative Finance.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>
