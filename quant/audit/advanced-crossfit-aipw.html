@@ -15,7 +15,7 @@
         for(std::size_t i=0;i&lt;x.size();++i)if(x[i][0]!=kv.first){train.push_back(Z[i]);label.push_back(x[i][1]);if(x[i][1]){X1.push_back(Z[i]);y1.push_back(x[i][2]);}else{X0.push_back(Z[i]);y0.push_back(x[i][2]);}}
         require(!X0.empty()&amp;&amp;!X1.empty(),"Both treatment arms required outside each fold");
         auto eval=[&amp;](const Vec&amp;w){auto s=model_research::regularized_state(w,lp);s.value-=.5*lp*w[0]*w[0];s.gradient[0]=0;s.hessian[0][0]=0;
-            for(std::size_t i=0;i&lt;train.size();++i){double z=dot(train[i],w),v=logistic(z);s.value+=softplus(z)-label[i]*z;for(std::size_t j=0;j&lt;d;++j)s.gradient[j]+=(v-label[i])*train[i][j];add_outer(s.hessian,train[i],v*(1-v));}return s;};
+            for(std::size_t i=0;i&lt;train.size();++i){double z=dot(train[i],w),v=logistic(z);s.value+=model_research::softplus(z)-label[i]*z;for(std::size_t j=0;j&lt;d;++j)s.gradient[j]+=(v-label[i])*train[i][j];add_outer(s.hessian,train[i],v*(1-v));}return s;};
         Vec w=model_research::damped_newton(d,tol,K,eval).beta,b0=fit_ridge(X0,y0,ly,true),b1=fit_ridge(X1,y1,ly,true);
         for(auto i:kv.second){double raw=logistic(dot(Z[i],w)),e=std::clamp(raw,clip,1-clip),a=dot(Z[i],b0),b=dot(Z[i],b1),t=x[i][1],y=x[i][2];score[i]=b-a+t*(y-b)/e-(1-t)*(y-a)/(1-e);rows[i]={double(i+1),x[i][0],t,y,e,a,b,score[i],0,0,double(e!=raw)};}
     }
