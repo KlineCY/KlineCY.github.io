@@ -1,0 +1,52 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>离散分布、混合与测度变换｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="math"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>离散分布、混合与测度变换</h1><p>概率质量、卷积、条件混合与指数倾斜是情景模拟的基本构件。保留分布而非仅保存均值方差，才能分析非线性支付与尾部风险。</p><p><a href="../research/depth-laboratories.html">研究专题总览</a>　<a href="../cpp/depth_distribution.hpp" download>完整C++17源码</a></p><nav><a href="#discrete-convolution">独立整数损失的概率质量卷积</a>　｜　<a href="#latent-binomial">共同情景下的混合二项分布</a>　｜　<a href="#exponential-tilt">指数倾斜、归一化常数与KL</a>　｜　<a href="#randomized-pit">离散预测的随机化概率积分变换</a></nav></header><article id="discrete-convolution"><h2>独立整数损失的概率质量卷积</h2><h3>数学定义与推导</h3><p>独立性使联合质量等于边际乘积，沿i+j=k的斜线求和得到总损失质量。生成函数乘法的系数恰是卷积；质量守恒由在z=1取值得到。输入两列使用相同整数支持0至n−1，可用尾部零补齐不同长度。</p><div class="equation">$$p_{X+Y}(k)=\sum_i p_X(i)p_Y(k-i)$$</div><div class="equation">$$G_{X+Y}(z)=G_X(z)G_Y(z)$$</div><div class="equation">$$\mathbb E[X+Y]=\mathbb E X+\mathbb E Y$$</div><h3>数值演算与金融应用</h3><p>X和Y均为Bernoulli损失，概率分别0.5、0.75。总损失0、1、2的概率0.125、0.5、0.375，累积分布最后为1。独立信用损失或独立交易成本可逐次卷积，但共同因子下不能直接卷积边际。</p><h3>算法复杂度、输入契约与边界</h3><p>直接双循环O(n²)，限制乘法量；较长分布可使用FFT并控制舍入误差。非负概率各列和为1，支持为整数且单位相同。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/discrete-convolution.csv" download>CSV数据</a>　<a href="../cpp/depth_distribution.hpp" download>算法源码</a></p><pre>P,Q
+0.5,0.25
+0.5,0.75
+</pre><pre>./build/kline_quant depth-discrete-convolution quant/research/depth-examples/discrete-convolution.csv</pre><div class="wide"><table><thead><tr><th>Loss</th><th>Probability</th><th>Cumulative</th></tr></thead><tbody><tr><td>0</td><td>0.125</td><td>0.125</td></tr><tr><td>1</td><td>0.5</td><td>0.625</td></tr><tr><td>2</td><td>0.375</td><td>1</td></tr></tbody></table></div><p class="note">参考文献：Ross (2014), Introduction to Probability Models, 11th ed., Academic Press.</p></article><article id="latent-binomial"><h2>共同情景下的混合二项分布</h2><h3>数学定义与推导</h3><p>先在共同经济状态给定后假设个体独立，再对状态权重积分。全方差分解揭示共同PD变动产生的额外相关损失。代码通过对数二项质量避免巨大组合数，PD为0或1时单独处理。</p><div class="equation">$$D\mid Z=z\sim\operatorname{Binomial}(n,p_z)$$</div><div class="equation">$$\Pr(D=k)=\sum_z w_z\binom nkp_z^k(1-p_z)^{n-k}$$</div><div class="equation">$$\operatorname{Var}(D)=n\bar p(1-\bar p)+n(n-1)\operatorname{Var}(p_Z)$$</div><h3>数值演算与金融应用</h3><p>两情景PD0.1、0.5，等概率，两主体组合的0、1、2次违约概率0.53、0.34、0.13；平均PD0.3时独立模型双违约仅0.09。说明混合分布的尾部差异来自共同状态。</p><h3>算法复杂度、输入契约与边界</h3><p>O(nG)时间，限制违约数和总循环。所有情景等于或不同概率均可，权重和1；条件同质PD假设限制了个体异质性。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/latent-binomial.csv" download>CSV数据</a>　<a href="../cpp/depth_distribution.hpp" download>算法源码</a></p><pre>ConditionalPD,ScenarioProbability
+0.1,0.5
+0.5,0.5
+</pre><pre>./build/kline_quant depth-latent-binomial quant/research/depth-examples/latent-binomial.csv 2</pre><div class="wide"><table><thead><tr><th>Defaults</th><th>Probability</th><th>Cumulative</th></tr></thead><tbody><tr><td>0</td><td>0.53</td><td>0.53</td></tr><tr><td>1</td><td>0.34</td><td>0.87</td></tr><tr><td>2</td><td>0.13</td><td>1</td></tr></tbody></table></div><p class="note">参考文献：Ross (2014), Introduction to Probability Models, 11th ed., Academic Press.</p></article><article id="exponential-tilt"><h2>指数倾斜、归一化常数与KL</h2><h3>数学定义与推导</h3><p>指数倾斜保持基础分布的支持，在归一化后提升较高状态的权重（θ&gt;0）。对logZ求导得到均值，再求导得到方差，故在非退化支持上均值随θ严格递增。KL由对数密度比直接积分。使用log-sum-exp避免归一化常数上溢。</p><div class="equation">$$q_i(\theta)=p_i e^{\theta x_i}/Z(\theta),\quad Z=\sum_i p_i e^{\theta x_i}$$</div><div class="equation">$$\partial_\theta\log Z=\mathbb E_qX,\quad \partial_\theta^2\log Z=\operatorname{Var}_qX$$</div><div class="equation">$$D_{\mathrm{KL}}(q\Vert p)=\theta\mathbb E_qX-\log Z$$</div><h3>数值演算与金融应用</h3><p>基础状态0、1等概率，θ=ln3，倾斜概率0.25及0.75，Z=2，倾斜均值0.75。可用于情景压力重加权或最小相对熵约束的构件，但风险中性概率仍须满足实际资产价格约束。</p><h3>算法复杂度、输入契约与边界</h3><p>时间O(n)，额外存储O(n)。零基础质量保持零；极端θ使小概率下溢时仍需说明数值精度。参数不是凭借历史收益自动估计的风险溢价。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/exponential-tilt.csv" download>CSV数据</a>　<a href="../cpp/depth_distribution.hpp" download>算法源码</a></p><pre>State,BaseProbability
+0,0.5
+1,0.5
+</pre><pre>./build/kline_quant depth-exponential-tilt quant/research/depth-examples/exponential-tilt.csv 1.0986122886681098</pre><div class="wide"><table><thead><tr><th>State</th><th>TiltProbability</th><th>LogNormalizer</th><th>TiltMean</th><th>KL</th></tr></thead><tbody><tr><td>0</td><td>0.25</td><td>0.69314718056</td><td>0.75</td><td>0.130812035941</td></tr><tr><td>1</td><td>0.75</td><td>0.69314718056</td><td>0.75</td><td>0.130812035941</td></tr></tbody></table></div><p class="note">参考文献：Ross (2014), Introduction to Probability Models, 11th ed., Academic Press.</p></article><article id="randomized-pit"><h2>离散预测的随机化概率积分变换</h2><h3>数学定义与推导</h3><p>离散CDF存在跳跃，普通F(Y)不会连续均匀。将独立均匀变量映射到每个跳跃区间，条件密度是区间长度倒数，再乘该状态概率等于1，故整体均匀。连续部分跳跃长度为零时直接得到F(Y)。</p><div class="equation">$$U=F(Y^-)+V[F(Y)-F(Y^-)],\quad V\sim U(0,1)$$</div><div class="equation">$$\Pr(U\le u\mid Y=y)=\frac{u-F(y^-)}{F(y)-F(y^-)}\quad (F(y^-)&lt;u&lt;F(y))$$</div><div class="equation">$$Y\sim F,\ V\perp Y\ \Longrightarrow\ U\sim U(0,1)$$</div><h3>数值演算与金融应用</h3><p>三条预测对应CDF区间[0,0.3]、[0.3,0.8]、[0.8,1]，随机化因子0.5、0.2、1，PIT分别0.15、0.4、1。适合计数违约、成交笔数等离散预测校准诊断。</p><h3>算法复杂度、输入契约与边界</h3><p>O(n)。随机化因子必须来自与实现结果独立的均匀随机源，构造数据仅演算，不证明均匀性；时间序列PIT还需检验依赖。输入端点0至1且左≤右。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/randomized-pit.csv" download>CSV数据</a>　<a href="../cpp/depth_distribution.hpp" download>算法源码</a></p><pre>CDFLeft,CDFRight,Uniform
+0,0.3,0.5
+0.3,0.8,0.2
+0.8,1,1
+</pre><pre>./build/kline_quant depth-randomized-pit quant/research/depth-examples/randomized-pit.csv</pre><div class="wide"><table><thead><tr><th>CDFLeft</th><th>CDFRight</th><th>PIT</th></tr></thead><tbody><tr><td>0</td><td>0.3</td><td>0.15</td></tr><tr><td>0.3</td><td>0.8</td><td>0.4</td></tr><tr><td>0.8</td><td>1</td><td>1</td></tr></tbody></table></div><p class="note">参考文献：Brockwell (2007), Universal residuals: a multivariate transformation, Statistics &amp; Probability Letters.</p></article><section><h2>C++17完整实现</h2><pre>#pragma once
+#include "evidence_common.hpp"
+namespace kline { namespace depth_distribution {
+using namespace evidence;
+inline Report discrete_convolution(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,2,2);parameters(p,0);auto n=x.size();require(double(n)*n&lt;=2e7,"Convolution work limit");
+    double a=0,b=0;for(auto&amp;r:x){require(r[0]&gt;=0&amp;&amp;r[1]&gt;=0,"Negative probability");a+=r[0];b+=r[1];}
+    require(std::abs(a-1)&lt;1e-10&amp;&amp;std::abs(b-1)&lt;1e-10,"Probability sums");
+    Vec v(2*n-1,0);for(std::size_t i=0;i&lt;n;++i)for(std::size_t j=0;j&lt;n;++j)v[i+j]+=x[i][0]*x[j][1];
+    Report o{{"Loss","Probability","Cumulative"},{}};double s=0;
+    for(std::size_t i=0;i&lt;v.size();++i){s+=v[i];o.rows.push_back({double(i),v[i],s});}return o;
+}
+
+inline Report latent_binomial(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,2,2);parameters(p,1);auto n=count(p[0],1,10000);require(double(n+1)*x.size()&lt;=2e7,"Mixture work limit");
+    double w=0;for(auto&amp;r:x){require(r[0]&gt;=0&amp;&amp;r[0]&lt;=1&amp;&amp;r[1]&gt;=0,"Invalid mixture");w+=r[1];}require(std::abs(w-1)&lt;1e-10,"Probability sum");
+    Report o{{"Defaults","Probability","Cumulative"},{}};double s=0;
+    for(std::size_t k=0;k&lt;=n;++k){
+        double v=0;for(auto&amp;r:x){double q=r[0],a=0;if(q==0)a=double(k==0);else if(q==1)a=double(k==n);else a=std::exp(std::lgamma(n+1.)-std::lgamma(k+1.)-std::lgamma(n-k+1.)+k*std::log(q)+(n-k)*std::log1p(-q));v+=r[1]*a;}
+        s+=v;o.rows.push_back({double(k),v,s});
+    }return o;
+}
+
+inline Report exponential_tilt(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,2,2);parameters(p,1);
+    double s=0,m=-std::numeric_limits&lt;double&gt;::infinity();Vec logw;
+    for(auto&amp;r:x){require(r[1]&gt;=0,"Negative base probability");s+=r[1];double v=r[1]&gt;0?std::log(r[1])+p[0]*r[0]:-std::numeric_limits&lt;double&gt;::infinity();logw.push_back(v);m=std::max(m,v);}
+    require(std::abs(s-1)&lt;1e-10,"Probability sum");double z=0;for(double v:logw)z+=std::exp(v-m);double l=m+std::log(z),mu=0;Vec q;
+    for(std::size_t i=0;i&lt;x.size();++i){q.push_back(std::exp(logw[i]-m)/z);mu+=q.back()*x[i][0];}
+    Report o{{"State","TiltProbability","LogNormalizer","TiltMean","KL"},{}};
+    for(std::size_t i=0;i&lt;x.size();++i)o.rows.push_back({x[i][0],q[i],l,mu,p[0]*mu-l});return o;
+}
+
+inline Report randomized_pit(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,3,3);parameters(p,0);Report o{{"CDFLeft","CDFRight","PIT"},{}};
+    for(auto&amp;r:x){require(r[0]&gt;=0&amp;&amp;r[1]&lt;=1&amp;&amp;r[0]&lt;=r[1]&amp;&amp;r[2]&gt;=0&amp;&amp;r[2]&lt;=1,"Invalid CDF or uniform");o.rows.push_back({r[0],r[1],r[0]+r[2]*(r[1]-r[0])});}return o;
+}
+} }
+</pre></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

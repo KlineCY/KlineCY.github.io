@@ -1,0 +1,46 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>有限样本、等效性与设计推断｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="audit"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>有限样本、等效性与设计推断</h1><p>显著性、等效性及设计型抽样回答不同问题。有限样本精确检验与正态近似的成立条件不同，报告统计量时同时说明假设和误差控制。</p><p><a href="../research/depth-laboratories.html">研究专题总览</a>　<a href="../cpp/depth_inference.hpp" download>完整C++17源码</a></p><nav><a href="#paired-student">配对差分均值的Student统计量</a>　｜　<a href="#equivalence-tost">已知标准误下的双单侧等效性检验</a>　｜　<a href="#survey-hajek">Horvitz–Thompson总量与Hájek均值</a>　｜　<a href="#fisher-exact">固定边际二乘二表Fisher精确检验</a></nav></header><article id="paired-student"><h2>配对差分均值的Student统计量</h2><h3>数学定义与推导</h3><p>配对设计先计算同一对内部差，再对差值而非原始两组进行单样本推断。配对可去除共同成分，方差取决于组内协方差；正相关配对通常提高精度。实现零假设均值0，不计算p值。</p><div class="equation">$$d_i=y_i^T-y_i^C,\quad \bar d=n^{-1}\sum_i d_i$$</div><div class="equation">$$s_d^2=(n-1)^{-1}\sum_i(d_i-\bar d)^2$$</div><div class="equation">$$T=(\bar d-\mu_0)/(s_d/\sqrt n)\sim t_{n-1}\quad\text{under normal iid differences}$$</div><h3>数值演算与金融应用</h3><p>三对差值1、2、3，均值2，样本方差1，标准误1/√3，t统计量2√3。研究同一资产的两种预测损失差时可形成配对，但序列相关需HAC或块重抽样。</p><h3>算法复杂度、输入契约与边界</h3><p>O(n)；差值标准差严格正。经典t分布依赖独立正态差值，金融重尾和依赖情形不能只凭t数值作显著性结论。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/paired-student.csv" download>CSV数据</a>　<a href="../cpp/depth_inference.hpp" download>算法源码</a></p><pre>Treatment,Control
+2,1
+4,2
+6,3
+</pre><pre>./build/kline_quant depth-paired-student quant/research/depth-examples/paired-student.csv</pre><div class="wide"><table><thead><tr><th>Pairs</th><th>MeanDifference</th><th>StandardError</th><th>TStatistic</th><th>DegreesFreedom</th></tr></thead><tbody><tr><td>3</td><td>2</td><td>0.57735026919</td><td>3.46410161514</td><td>2</td></tr></tbody></table></div><p class="note">参考文献：Wasserman (2004), All of Statistics, Springer.</p></article><article id="equivalence-tost"><h2>已知标准误下的双单侧等效性检验</h2><h3>数学定义与推导</h3><p>等效性原假设是效应落在容忍范围之外，只有同时拒绝两个单侧检验才可宣称等效。使用单侧临界值z对应的双侧区间（覆盖率1−2α）；在标准误已知或渐近正态时成立。未拒绝零效应不等于等效。</p><div class="equation">$$H_0:\theta\le-\Delta\ \text{or}\ \theta\ge\Delta$$</div><div class="equation">$$T_L=(\hat\theta+\Delta)/s,\quad T_U=(\Delta-\hat\theta)/s$$</div><div class="equation">$$\text{equivalence if }\hat\theta-z_{1-\alpha}s&gt;-\Delta,\quad\hat\theta+z_{1-\alpha}s&lt;\Delta$$</div><h3>数值演算与金融应用</h3><p>容忍度0.5、临界值1.96、标准误0.1。估计0.1的区间[−0.096,0.296]在容忍域内；估计0.4的上界0.596超出。可评价新模型性能是否在经济上接近基线，容忍度须事先设定。</p><h3>算法复杂度、输入契约与边界</h3><p>O(n)。参数Δ、临界值均严格正，标准误正。临界值1.96对应单侧约2.5％，若单侧5％则约1.645；等效边界用严格不等式。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/equivalence-tost.csv" download>CSV数据</a>　<a href="../cpp/depth_inference.hpp" download>算法源码</a></p><pre>Estimate,StandardError
+0.1,0.1
+0.4,0.1
+</pre><pre>./build/kline_quant depth-equivalence-tost quant/research/depth-examples/equivalence-tost.csv 0.5 1.96</pre><div class="wide"><table><thead><tr><th>Estimate</th><th>Lower</th><th>Upper</th><th>Equivalent</th></tr></thead><tbody><tr><td>0.1</td><td>-0.096</td><td>0.296</td><td>1</td></tr><tr><td>0.4</td><td>0.204</td><td>0.596</td><td>0</td></tr></tbody></table></div><p class="note">参考文献：Schuirmann (1987), A comparison of the two one-sided tests procedure and the power approach for assessing equivalence, Journal of Pharmacokinetics and Biopharmaceutics.</p></article><article id="survey-hajek"><h2>Horvitz–Thompson总量与Hájek均值</h2><h3>数学定义与推导</h3><p>对每个总体单位，以入样指示I_i乘y_i/π_i，其设计期望等于y_i，求和获得总量无偏性。若总体量N已知，HT总量除以N给出设计无偏均值；Hájek以估计总体量归一化，通常为有限样本有偏但更稳定的比率估计。</p><div class="equation">$$\widehat Y_{\mathrm{HT}}=\sum_{i\in s}y_i/\pi_i,\quad \widehat N_{\mathrm{HT}}=\sum_{i\in s}1/\pi_i$$</div><div class="equation">$$\mathbb E_d[\widehat Y_{\mathrm{HT}}]=\sum_{i\in U}y_i$$</div><div class="equation">$$\widehat\mu_{\mathrm{Hajek}}=\widehat Y_{\mathrm{HT}}/\widehat N_{\mathrm{HT}}$$</div><h3>数值演算与金融应用</h3><p>两观察值1、3，入样概率0.5、0.25，对应权重2、4，总量14、估计总体量6；真实N设10，HT均值1.4，Hájek为7/3。适合有明确抽样设计的总体估计，不把任意公司样本选择当作已知概率抽样。</p><h3>算法复杂度、输入契约与边界</h3><p>O(n)，π严格大于0且≤1，N为不小于观测数的正整数。总量估计方差通常需二阶入样概率，本实现不提供方差或置信区间。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/survey-hajek.csv" download>CSV数据</a>　<a href="../cpp/depth_inference.hpp" download>算法源码</a></p><pre>Value,InclusionProbability
+1,0.5
+3,0.25
+</pre><pre>./build/kline_quant depth-survey-hajek quant/research/depth-examples/survey-hajek.csv 10</pre><div class="wide"><table><thead><tr><th>HTTotal</th><th>HTPopulation</th><th>KnownPopulationMean</th><th>HajekMean</th></tr></thead><tbody><tr><td>14</td><td>6</td><td>1.4</td><td>2.33333333333</td></tr></tbody></table></div><p class="note">参考文献：Horvitz and Thompson (1952), A generalization of sampling without replacement from a finite universe, JASA.</p></article><article id="fisher-exact"><h2>固定边际二乘二表Fisher精确检验</h2><h3>数学定义与推导</h3><p>在独立性零假设下，固定行列边际后左上角计数服从超几何分布。双侧定义采用概率不大于观测表的所有表的质量和，不同双侧定义可有差别。对数阶乘计算避免直接组合数溢出，边际决定可枚举支持。</p><div class="equation">$$X\mid r_1,c_1,N\sim\operatorname{Hypergeom}(N,c_1,r_1)$$</div><div class="equation">$$\Pr(X=k)=\frac{\binom{c_1}{k}\binom{N-c_1}{r_1-k}}{\binom{N}{r_1}}$$</div><div class="equation">$$p_{\mathrm{two}}=\sum_{k:\Pr(X=k)\le\Pr(X=x_{\mathrm{obs}})}\Pr(X=k)$$</div><h3>数值演算与金融应用</h3><p>表(2,0;0,2)，N=4、行列边际均2，支持0、1、2，概率1/6、2/3、1/6。观测表概率1/6，双侧p=1/3，展示小样本离散性。</p><h3>算法复杂度、输入契约与边界</h3><p>O(min(r1,c1))枚举；非负整数计数，边际须非退化，总计数有上限。金融观察性列联表若存在时间聚类，固定边际检验不能自动控制依赖。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/fisher-exact.csv" download>CSV数据</a>　<a href="../cpp/depth_inference.hpp" download>算法源码</a></p><pre>Col1,Col2
+2,0
+0,2
+</pre><pre>./build/kline_quant depth-fisher-exact quant/research/depth-examples/fisher-exact.csv</pre><div class="wide"><table><thead><tr><th>ObservedProbability</th><th>TwoSidedP</th><th>SupportSize</th></tr></thead><tbody><tr><td>0.166666666667</td><td>0.333333333333</td><td>3</td></tr></tbody></table></div><p class="note">参考文献：Wasserman (2004), All of Statistics, Springer.</p></article><section><h2>C++17完整实现</h2><pre>#pragma once
+#include "evidence_common.hpp"
+namespace kline { namespace depth_inference {
+using namespace evidence;
+inline Report paired_student(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,2,2);parameters(p,0);Vec d;for(auto&amp;r:x)d.push_back(r[0]-r[1]);double m=mean(d),s=0;for(double z:d)s+=(z-m)*(z-m);
+    double n=d.size(),se=std::sqrt(positive(s)/(n-1)/n);
+    return scalar({"Pairs","MeanDifference","StandardError","TStatistic","DegreesFreedom"},{n,m,se,m/se,n-1});
+}
+
+inline Report equivalence_tost(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,2,2);parameters(p,2);double d=positive(p[0]),z=positive(p[1]);Report o{{"Estimate","Lower","Upper","Equivalent"},{}};
+    for(auto&amp;r:x){double w=z*positive(r[1]),a=r[0]-w,b=r[0]+w;o.rows.push_back({r[0],a,b,double(a&gt;-d&amp;&amp;b&lt;d)});}return o;
+}
+
+inline Report survey_hajek(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,2,2);parameters(p,1);auto N=count(p[0],x.size(),1000000000);double y=0,n=0;
+    for(auto&amp;r:x){require(r[1]&gt;0&amp;&amp;r[1]&lt;=1,"Invalid inclusion probability");y+=r[0]/r[1];n+=1/r[1];}
+    return scalar({"HTTotal","HTPopulation","KnownPopulationMean","HajekMean"},{y,n,y/N,y/n});
+}
+
+inline Report fisher_exact(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,2,2);parameters(p,0);require(x.size()==2,"Two rows required");
+    double a=count(x[0][0],0,100000),b=count(x[0][1],0,100000),c=count(x[1][0],0,100000),d=count(x[1][1],0,100000);
+    double N=a+b+c+d,r=a+b,k=a+c;require(r&gt;0&amp;&amp;r&lt;N&amp;&amp;k&gt;0&amp;&amp;k&lt;N,"Degenerate margins");
+    auto lc=[](double n,double j){return std::lgamma(n+1)-std::lgamma(j+1)-std::lgamma(n-j+1);};
+    auto lp=[&amp;](double z){return lc(k,z)+lc(N-k,r-z)-lc(N,r);};
+    double lo=std::max(0.,r-(N-k)),hi=std::min(r,k),obs=lp(a),v=0;
+    for(double z=lo;z&lt;=hi;++z){double t=lp(z);if(t&lt;=obs+1e-10)v+=std::exp(t);}
+    return scalar({"ObservedProbability","TwoSidedP","SupportSize"},{std::exp(obs),std::min(v,1.),hi-lo+1});
+}
+} }
+</pre></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

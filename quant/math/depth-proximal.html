@@ -1,0 +1,66 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>近端优化与可行性证书｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="math"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>近端优化与可行性证书</h1><p>将约束与不可微惩罚统一视为近端映射。由一阶条件获得闭式更新，再通过预算和互补松弛验证解，避免以迭代次数代替最优性。</p><p><a href="../research/depth-laboratories.html">研究专题总览</a>　<a href="../cpp/depth_proximal.hpp" download>完整C++17源码</a></p><nav><a href="#group-prox">分组稀疏惩罚的块软阈值</a>　｜　<a href="#affine-projection">单线性等式的欧氏投影</a>　｜　<a href="#bounded-budget">盒约束预算二次规划及KKT证书</a>　｜　<a href="#huber-prox">Huber损失的标量近端映射</a></nav></header><article id="group-prox"><h2>分组稀疏惩罚的块软阈值</h2><h3>数学定义与推导</h3><p>组间惩罚可分离。对非零组，驻点要求b和z同向，解出范数收缩；在零组，二范数次梯度为单位球，故当原组范数不超过λ时整组归零。不同组必须不重叠；重叠组需不同优化结构。</p><div class="equation">$$\min_b\frac12\|b-z\|_2^2+\lambda\sum_g\|b_g\|_2$$</div><div class="equation">$$0=b_g-z_g+\lambda b_g/\|b_g\|\quad(b_g\ne0)$$</div><div class="equation">$$b_g^*=(1-\lambda/\|z_g\|)_+z_g$$</div><h3>数值演算与金融应用</h3><p>组1向量(3,4)，范数5、惩罚2，缩放因子0.6，结果(1.8,2.4)。组2范数1低于惩罚而清零。适用于按经济主题成组选择因子、行业交互项或多任务特征组。</p><h3>算法复杂度、输入契约与边界</h3><p>组ID为整数，输入可不排序。复杂度O(n log G)（有序映射），存储O(G)。λ为非负；λ=0时应返回原向量，零范数组保持零。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/group-prox.csv" download>CSV数据</a>　<a href="../cpp/depth_proximal.hpp" download>算法源码</a></p><pre>Group,Value
+1,3
+1,4
+2,1
+</pre><pre>./build/kline_quant depth-group-prox quant/research/depth-examples/group-prox.csv 2</pre><div class="wide"><table><thead><tr><th>Group</th><th>Value</th><th>Prox</th><th>GroupNorm</th></tr></thead><tbody><tr><td>1</td><td>3</td><td>1.8</td><td>5</td></tr><tr><td>1</td><td>4</td><td>2.4</td><td>5</td></tr><tr><td>2</td><td>1</td><td>0</td><td>1</td></tr></tbody></table></div><p class="note">参考文献：Yuan and Lin (2006), Model selection and estimation in regression with grouped variables, JRSS B.</p></article><article id="affine-projection"><h2>单线性等式的欧氏投影</h2><h3>数学定义与推导</h3><p>将等式约束的拉格朗日驻点代回约束，得到唯一乘子。修正量与超平面法向量平行，因此候选点到投影点的方向与可行切空间正交。这里没有盒约束、非负约束或多个线性约束。</p><div class="equation">$$\min_w\tfrac12\|w-z\|^2\quad\mathrm{s.t.}\ a^\top w=b$$</div><div class="equation">$$w-z+\eta a=0$$</div><div class="equation">$$w=z-\frac{a^\top z-b}{a^\top a}a$$</div><h3>数值演算与金融应用</h3><p>候选(3,1)、总权重目标1，法向量(1,1)，乘子1.5，投影(1.5,−0.5)。用于去除单一市场beta或预算偏差，投影后的空头是数学允许结果，并非自动满足投资约束。</p><h3>算法复杂度、输入契约与边界</h3><p>O(d)时间。法向量非零，目标b与输入单位一致。多约束可用矩阵投影，秩亏时需伪逆并检查可行性；直接连续投影通常不是交集的最短距离。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/affine-projection.csv" download>CSV数据</a>　<a href="../cpp/depth_proximal.hpp" download>算法源码</a></p><pre>Candidate,Exposure
+3,1
+1,1
+</pre><pre>./build/kline_quant depth-affine-projection quant/research/depth-examples/affine-projection.csv 1</pre><div class="wide"><table><thead><tr><th>Index</th><th>Projected</th><th>Multiplier</th></tr></thead><tbody><tr><td>1</td><td>1.5</td><td>1.5</td></tr><tr><td>2</td><td>-0.5</td><td>1.5</td></tr></tbody></table></div><p class="note">参考文献：Parikh and Boyd (2014), Proximal Algorithms, Foundations and Trends in Optimization.</p></article><article id="bounded-budget"><h2>盒约束预算二次规划及KKT证书</h2><h3>数学定义与推导</h3><p>目标严格凸。固定预算乘子后各坐标独立最小化，得到截断闭式；总权重随乘子单调不增，可二分求根。KKT要求内点梯度为零、下界梯度非负、上界梯度非正，固定坐标可任意梯度。程序报告违反这些条件的正部。</p><div class="equation">$$\min_w\sum_i(\tfrac12d_iw_i^2-c_iw_i),\quad l_i\le w_i\le u_i,\quad \sum_iw_i=B$$</div><div class="equation">$$w_i(\eta)=\operatorname{clip}((c_i-\eta)/d_i,l_i,u_i)$$</div><div class="equation">$$\sum_iw_i(\eta)=B,\quad g_i=d_iw_i-c_i+\eta$$</div><h3>数值演算与金融应用</h3><p>两资产原无约束权重0.7、0.3，第一资产上限0.6，预算1。解0.6、0.4，乘子−0.1，第一资产梯度−0.2满足上界符号。该方法可以作为对角风险近似或分块优化的投影步骤。</p><h3>算法复杂度、输入契约与边界</h3><p>必须满足Σl≤B≤Σu、曲率严格正。O(80d)时间，端点预算可能乘子不唯一但权重唯一。若协方差存在非对角项，此逐坐标闭式不再直接成立。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/bounded-budget.csv" download>CSV数据</a>　<a href="../cpp/depth_proximal.hpp" download>算法源码</a></p><pre>Utility,Curvature,Lower,Upper
+0.7,1,0,0.6
+0.3,1,0,0.8
+</pre><pre>./build/kline_quant depth-bounded-budget quant/research/depth-examples/bounded-budget.csv 1</pre><div class="wide"><table><thead><tr><th>Asset</th><th>Weight</th><th>Multiplier</th><th>StationarityGap</th></tr></thead><tbody><tr><td>1</td><td>0.6</td><td>-0.1</td><td>0</td></tr><tr><td>2</td><td>0.4</td><td>-0.1</td><td>0</td></tr></tbody></table></div><p class="note">参考文献：Parikh and Boyd (2014), Proximal Algorithms, Foundations and Trends in Optimization.</p></article><article id="huber-prox"><h2>Huber损失的标量近端映射</h2><h3>数学定义与推导</h3><p>将近端目标按Huber的二次区与线性区求导。二次区候选z/(1+α)须满足|v|≤δ；线性区候选向零移动αδ。边界上两解连续，目标的强凸性保证唯一。</p><div class="equation">$$h_\delta(v)=\begin{cases}v^2/2&amp;|v|\le\delta\\ \delta|v|-\delta^2/2&amp;|v|&gt;\delta\end{cases}$$</div><div class="equation">$$\operatorname{prox}_{\alpha h_\delta}(z)=\arg\min_v\{\tfrac12(v-z)^2+\alpha h_\delta(v)\}$$</div><div class="equation">$$v^*=\begin{cases}z/(1+\alpha)&amp;|z|\le(1+\alpha)\delta\\z-\alpha\delta\operatorname{sign}(z)&amp;\text{otherwise}\end{cases}$$</div><h3>数值演算与金融应用</h3><p>α=1、δ=1，输入−3、0.5、3，近端值−2、0.25、2。与平方损失的无限线性梯度不同，Huber对大误差的惩罚梯度有界，可用于稳健残差更新。</p><h3>算法复杂度、输入契约与边界</h3><p>独立标量近端的时间O(n)。输入不是完整回归模型；完整Huber回归还需对设计矩阵与残差变量联合优化。α≥0且δ&gt;0，边界及零惩罚均有明确解。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/huber-prox.csv" download>CSV数据</a>　<a href="../cpp/depth_proximal.hpp" download>算法源码</a></p><pre>Value
+-3
+0.5
+3
+</pre><pre>./build/kline_quant depth-huber-prox quant/research/depth-examples/huber-prox.csv 1 1</pre><div class="wide"><table><thead><tr><th>Input</th><th>Prox</th><th>Residual</th></tr></thead><tbody><tr><td>-3</td><td>-2</td><td>-1</td></tr><tr><td>0.5</td><td>0.25</td><td>0.25</td></tr><tr><td>3</td><td>2</td><td>1</td></tr></tbody></table></div><p class="note">参考文献：Parikh and Boyd (2014), Proximal Algorithms, Foundations and Trends in Optimization.</p></article><section><h2>C++17完整实现</h2><pre>#pragma once
+#include "evidence_common.hpp"
+namespace kline { namespace depth_proximal {
+using namespace evidence;
+inline Report group_prox(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,2,2);parameters(p,1);require(p[0]&gt;=0,"Negative penalty");
+    std::map&lt;double,double&gt; n;
+    for(auto&amp;r:x){require(r[0]==std::floor(r[0]),"Integer group required");n[r[0]]=std::hypot(n[r[0]],r[1]);}
+    Report o{{"Group","Value","Prox","GroupNorm"},{}};
+    for(auto&amp;r:x){double v=n[r[0]],s=v==0?0:std::max(0.,1-p[0]/v);o.rows.push_back({r[0],r[1],s*r[1],v});}
+    return o;
+}
+
+inline Report affine_projection(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,2,2);parameters(p,1);
+    double s=0,t=0;
+    for(auto&amp;r:x){s+=r[0]*r[1];t+=r[1]*r[1];}
+    double u=(s-p[0])/positive(t);
+    Report o{{"Index","Projected","Multiplier"},{}};
+    for(std::size_t i=0;i&lt;x.size();++i)o.rows.push_back({double(i+1),x[i][0]-u*x[i][1],u});
+    return o;
+}
+
+inline Report bounded_budget(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,4,4);parameters(p,1);
+    double lsum=0,usum=0,lo=std::numeric_limits&lt;double&gt;::infinity(),hi=-lo;
+    for(auto&amp;r:x){
+        positive(r[1]);require(r[2]&lt;=r[3],"Invalid bounds");
+        lsum+=r[2];usum+=r[3];
+        lo=std::min(lo,r[0]-r[1]*r[3]);hi=std::max(hi,r[0]-r[1]*r[2]);
+    }
+    require(p[0]&gt;=lsum-1e-12&amp;&amp;p[0]&lt;=usum+1e-12,"Infeasible budget");
+    auto w=[](const Vec&amp;r,double e){return std::max(r[2],std::min(r[3],(r[0]-e)/r[1]));};
+    for(int k=0;k&lt;80;++k){double mid=lo/2+hi/2,s=0;for(auto&amp;r:x)s+=w(r,mid);if(s&gt;p[0])lo=mid;else hi=mid;}
+    double eta=lo/2+hi/2;
+    Report o{{"Asset","Weight","Multiplier","StationarityGap"},{}};
+    for(std::size_t i=0;i&lt;x.size();++i){
+        auto&amp;r=x[i];double z=w(r,eta),g=r[1]*z-r[0]+eta;
+        double err=r[2]==r[3]?0:z==r[2]?std::max(0.,-g):z==r[3]?std::max(0.,g):std::abs(g);
+        o.rows.push_back({double(i+1),z,eta,err});
+    }
+    return o;
+}
+
+inline Report huber_prox(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,1,1);parameters(p,2);require(p[0]&gt;=0,"Negative proximal weight");double d=positive(p[1]),a=p[0];
+    Report o{{"Input","Prox","Residual"},{}};
+    for(auto&amp;r:x){double z=r[0],v=std::abs(z)&lt;=(1+a)*d?z/(1+a):z-std::copysign(a*d,z);o.rows.push_back({z,v,z-v});}
+    return o;
+}
+} }
+</pre></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>
