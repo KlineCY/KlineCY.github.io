@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>风险模型研究：滚动尾部预测、覆盖率、路径压力与风险归因｜Kline Quant</title><meta name="description" content="可复现量化研究：数据、数学推导、C++17完整工作流与独立验证">
+<link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<style>body{margin:0;background:white;color:#142733;font:16px/1.95 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:24px 32px 64px}main{max-width:1180px;margin:auto}header,.lesson,.source,.references,.framework{border:1px solid #cbd4dc;padding:24px 28px;margin:18px 0;background:white}h1{font-size:31px;line-height:1.4}h2{font-size:23px;margin:10px 0 20px}h3{font-size:18px;margin:24px 0 8px}p{line-height:1.95;margin:12px 0}.toc{display:flex;flex-wrap:wrap;gap:9px 24px;border:1px solid #cad3d9;padding:17px 24px}.equation{overflow:auto;border-block:1px solid #d7dfe4;margin:18px 0;padding:16px 6px}.katex-display{overflow-x:auto;overflow-y:hidden}a{color:#1a5478}code,pre{font-family:"Times New Roman",monospace}pre{border:1px solid #cbd5dc;padding:15px;overflow:auto;white-space:pre;font-size:14px;line-height:1.7;max-height:900px}dl{display:grid;grid-template-columns:110px minmax(0,1fr);gap:10px 15px}dt{font-weight:bold}dd{margin:0;overflow-wrap:anywhere}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccd5dd;padding:10px 12px;text-align:left;background:white}th{font-weight:bold}.wide{overflow-x:auto}@media(max-width:790px){.main{margin:0;padding:12px}header,.lesson,.source,.references,.framework{padding:15px}dl{display:block}dt{margin-top:12px}}</style>
+</head><body><aside id="quantSidebar" class="sidebar" data-page="audit"></aside><script src="../sidebar-v2.js"></script><div class="main"><main>
+<header><small>QUANTITATIVE RESEARCH / REPRODUCIBLE WORKFLOWS</small><h1>风险模型研究：滚动尾部预测、覆盖率、路径压力与风险归因</h1><p>风险估计与风险检验是不同环节。应先在历史信息集内产生损失分位预测，待真实收益出现后再记录超限；路径压力测试和因子归因则从连续财富演化与风险暴露两个角度解释潜在损失。五条工作流共享明确的损失符号与样本时间口径，并可直接衔接策略净收益。</p><p><a href="../research/reproducible-workflows.html">研究工作流总入口</a>　｜　<a href="../cpp/">C++17研究工具库</a>　｜　<a href="../research/run_researchflow.py" download>下载批量复算脚本</a></p></header>
+<nav class="toc"><a href="#lesson1">1．滚动历史VaR及Expected Shortfall预测</a><a href="#lesson2">2．VaR覆盖率与相邻超限独立性检验</a><a href="#lesson3">3．保留区块顺序的收益路径Bootstrap</a><a href="#lesson4">4．滚动因子回归、风险载荷与压力归因</a><a href="#lesson5">5．收缩协方差下的Euler风险贡献</a><a href="#source">完整C++17源码</a><a href="#references">参考文献</a></nav>
+<section class="framework" id="framework"><h2>研究框架与统一口径</h2><h3>损失符号与尾部</h3><div class="equation">$$L_t=-r_t,\quad VaR_\alpha=\inf\{l:F_L(l)\ge\alpha\},\quad ES_\alpha=(1-\alpha)^{-1}\int_\alpha^1F_L^{-1}(u)\,du$$</div><p>损失为正代表亏损。VaR是损失分位点，ES为尾部概率质量上的积分均值；离散分布的分位原子需要部分权重，不应直接等同于严格超过VaR的样本平均。</p>
+<h3>预测与情景的区分</h3><div class="equation">$$\widehat q_t=q(L_{t-L},\ldots,L_{t-1}),\quad I_t=\mathbf1_{\{L_t&gt;\widehat q_t\}}$$</div><p>风险预测应先于实际损失观测。历史Bootstrap与因子压力是给定历史结构或人为冲击下的情景分析；其输出不自动等同于真实未来损失概率。</p></section>
+<article class="lesson" id="lesson1"><h2>1．滚动历史VaR及Expected Shortfall预测</h2><h3>研究问题与经济含义</h3><p>历史模拟直接使用过去L期实际损失的经验分布。滚动窗口在每个预测时点移除最早数据并纳入最近已实现数据。该方法不需要正态分布假设，但对尾部样本数量十分敏感。</p><h3>数学定义与推导</h3><div class="equation">$$\widehat{VaR}_{\alpha,t}=L_{(\lceil L\alpha\rceil)},\quad \widehat{ES}_{\alpha,t}=\widehat{VaR}_{\alpha,t}+\frac{\sum_{s=t-L}^{t-1}(L_s-\widehat{VaR}_{\alpha,t})_+}{L(1-\alpha)}$$</div><p>离散尾部积分可由VaR加超额损失均值表达，这一恒等式包含恰好落在分位点处的必要概率质量。独立Python参考使用此形式核对C++的尾部排序取质量算法。</p><div class="equation">$$I_t=\mathbf1_{\{L_t&gt;\widehat{VaR}_{\alpha,t}\}},\quad \rho_\alpha(e)=e(\alpha-\mathbf1_{\{e&lt;0\}}),\quad e=L_t-\widehat{VaR}_{\alpha,t}$$</div><p>严格超限定义对连续损失分布具有自然解释；对于离散损失分布，分位点相等时超限比例可能低于目标概率。分位损失评分适合比较分位预测的经济误差。</p><div class="equation">$$\widehat p_{\rm breach}=T^{-1}\sum_t I_t$$</div><h3>可复现样本与运行</h3><p>样例使用52期构造收益，窗口12、置信度0.8，历史尾部质量为2.4条观测。首个风险预测在索引12，只使用0至11行收益；第23行包含预先构造的负冲击。</p><dl><dt>样本文件</dt><dd><a href="../research/examples/series.csv" download>series.csv</a></dd><dt>输入字段</dt><dd>Return（逐期简单收益）</dd><dt>参数顺序</dt><dd>历史窗口L、置信水平α</dd><dt>输出结构</dt><dd>逐期实际损失、预测VaR、预测ES、超限标志、分位损失评分</dd></dl><pre><code>./build/kline_quant flow-rolling-tail quant/research/examples/series.csv 12 0.8</code></pre><h3>结果解释与实证研究设计</h3><p>将输出VaRBreach列交给覆盖率检验，同时比较不同置信度下有效尾部观察数。应避免使用测试期损失重新选择最优窗口。</p><h3>模型假设与适用边界</h3><p>历史窗口太短时，极端分位估计高度离散。方法假设近期历史分布具有代表性，不保证对新的市场危机提供充分覆盖。</p></article>
+<article class="lesson" id="lesson2"><h2>2．VaR覆盖率与相邻超限独立性检验</h2><h3>研究问题与经济含义</h3><p>VaR检验既关心超限总次数是否偏离目标，又关心超限是否在时间上聚集。无条件覆盖检验用完整二元序列比较固定超限概率与样本频率；独立性检验用相邻转移计数比较齐次独立过程与一阶Markov过程。</p><h3>数学定义与推导</h3><div class="equation">$$\ell(p)=n_1\log p+n_0\log(1-p),\quad LR_{\rm UC}=2[\ell(n_1/n)-\ell(p_0)]$$</div><p>无条件检验的极大似然概率为超限样本频率。对于零超限或全部超限，使用0log0=0的连续极限，避免产生数值无穷。</p><div class="equation">$$\ell_{\rm dep}=\sum_{i,j}n_{ij}\log\frac{n_{ij}}{\sum_k n_{ik}},\quad LR_{\rm IND}=2(\ell_{\rm dep}-\ell_{\rm iid})$$</div><p>相邻状态转移总数为n−1。独立基准使用转移终点的总体超限概率；依赖模型允许不同的前一状态具有不同超限概率。</p><div class="equation">$$LR_{\rm CC}=LR_{\rm UC}+LR_{\rm IND},\quad LR_{\rm UC},LR_{\rm IND}\overset{a}{\sim}\chi_1^2,\quad LR_{\rm CC}\overset{a}{\sim}\chi_2^2$$</div><h3>可复现样本与运行</h3><p>32行构造二元超限序列包含连续超限，测试将四种相邻状态计数加总验证为31。批量脚本另外接收真实由滚动VaR流程产生的构造样本超限序列。</p><dl><dt>样本文件</dt><dd><a href="../research/examples/breaches.csv" download>breaches.csv</a></dd><dt>输入字段</dt><dd>Breach（0或1）</dd><dt>参数顺序</dt><dd>目标超限概率p（例如置信度0.8对应p=0.2）</dd><dt>输出结构</dt><dd>超限次数与频率、四项转移计数、无条件覆盖与独立性似然比统计量、渐近p值</dd></dl><pre><code>./build/kline_quant flow-coverage quant/research/examples/breaches.csv 0.2</code></pre><h3>结果解释与实证研究设计</h3><p>先检查实际超限数、目标期望超限数及相邻超限聚集，再阅读渐近p值。极端置信度和短样本下，应考虑有限样本模拟或精确检验。</p><h3>模型假设与适用边界</h3><p>独立性检验只检验一阶相邻依赖；稀疏转移与参数边界会使渐近近似失真。这里报告渐近p值，不将其当作保证模型有效的判据。</p></article>
+<article class="lesson" id="lesson3"><h2>3．保留区块顺序的收益路径Bootstrap</h2><h3>研究问题与经济含义</h3><p>单期独立重采样会破坏收益路径中的局部依赖。移动区块Bootstrap从历史全部重叠连续区块中有放回抽取区块，再按抽取顺序拼接到目标期限，以保留区块内部的收益次序。</p><h3>数学定义与推导</h3><div class="equation">$$\mathcal B_j=(r_j,\ldots,r_{j+B-1}),\quad j\in\{0,\ldots,T-B\}$$</div><p>每个可用区块具有相同抽样概率。程序使用明确定义的32位线性同余生成器及拒绝抽样，保证同样的种子和输入在不同编译器上获得相同区块序列。</p><div class="equation">$$V_h^{(s)}=\prod_{u=1}^h(1+r_u^{(s)}),\quad D_h^{(s)}=1-\frac{V_h^{(s)}}{\max_{0\le j\le h}V_j^{(s)}}$$</div><p>逐条情景推进财富及峰值，最大回撤依赖整个路径而非仅终点财富。若最后抽中的区块使长度超过H，只使用剩余所需观测。</p><div class="equation">$$\widehat F_D(d)=N^{-1}\sum_{s=1}^N\mathbf1_{\{\max_hD_h^{(s)}\le d\}}$$</div><h3>可复现样本与运行</h3><p>样例抽取长度5的连续区块，形成32条20期情景，种子2026；批量脚本进一步使用对齐后的CTA净收益生成128条路径。</p><dl><dt>样本文件</dt><dd><a href="../research/examples/series.csv" download>series.csv</a></dd><dt>输入字段</dt><dd>Return（逐期简单收益）</dd><dt>参数顺序</dt><dd>区块长度B、情景期限H、情景数N、32位随机种子</dd><dt>输出结构</dt><dd>情景编号、终点净值、累计收益、最大回撤</dd></dl><pre><code>./build/kline_quant flow-moving-block-paths quant/research/examples/series.csv 5 20 32 2026</code></pre><h3>结果解释与实证研究设计</h3><p>改变区块长度并比较终点损失与最大回撤分布，判断历史短程依赖对风险估计的影响。情景数增加仅降低模拟误差，不消除历史样本偏差。</p><h3>模型假设与适用边界</h3><p>有限样本区块抽样无法生成历史中未出现过的损失机制；简单生成器用于教学复现，不作为高质量生产Monte Carlo随机源。</p></article>
+<article class="lesson" id="lesson4"><h2>4．滚动因子回归、风险载荷与压力归因</h2><h3>研究问题与经济含义</h3><p>因子回归可将组合收益与市场、行业或宏观因子联系起来。每期只利用过去L条对齐因子和组合收益估计斜率；标准化Ridge系数通过训练尺度转换回原始经济单位，使因子冲击与Beta乘积具有收益量纲。</p><h3>数学定义与推导</h3><div class="equation">$$r_s=a+\beta^\top f_s+\epsilon_s,\quad \widehat\beta_j=\widehat b_j/s_{f,j}$$</div><p>训练窗口标准化后的斜率b_j对应一个标准差变动。除以因子训练标准差得到原始单位载荷；常数特征通过中心化得到零载荷。</p><div class="equation">$$\widehat r_t=\widehat a_t+\widehat\beta_t^\top f_t,\quad e_t=r_t-\widehat r_t$$</div><p>当期实际因子收益可能在期末才知道。因此这一行条件拟合值用于事后风险归因，而非决策前可交易预测；载荷和压力损益才是基于历史估计的前瞻风险量。</p><div class="equation">$$\Delta r^{\rm stress}_t=\widehat\beta_t^\top\Delta f,\quad \sigma_{\epsilon,t}=\sqrt{L^{-1}\sum_{s=t-L}^{t-1}\widehat\epsilon_s^2}$$</div><h3>可复现样本与运行</h3><p>40行双因子构造样例采用L=12、λ=0.05，冲击向量(−0.03,0.02)，返回对每期历史Beta的线性压力估计。改变当期组合实际收益不应改变该期载荷和压力损益。</p><dl><dt>样本文件</dt><dd><a href="../research/examples/factor.csv" download>factor.csv</a></dd><dt>输入字段</dt><dd>Factor1, Factor2, Portfolio（因子及组合收益）</dd><dt>参数顺序</dt><dd>训练长度L、Ridge惩罚λ、按因子列排序的情景冲击向量</dd><dt>输出结构</dt><dd>实际收益、条件拟合值、残差、因子冲击损益、训练残差RMS及原始因子Beta</dd></dl><pre><code>./build/kline_quant flow-factor-attribution quant/research/examples/factor.csv 12 0.05 -0.03 0.02</code></pre><h3>结果解释与实证研究设计</h3><p>以滚动Beta观察配置的风险暴露变化，比较原始实际收益与条件残差；压力场景应使用明确的冲击单位并覆盖不同经济机制。</p><h3>模型假设与适用边界</h3><p>线性情景忽略二阶Gamma、相关性变化、流动性及跳跃风险；残差RMS是训练拟合尺度，不是无偏残差标准差，也不等同于未来残差风险。</p></article>
+<article class="lesson" id="lesson5"><h2>5．收缩协方差下的Euler风险贡献</h2><h3>研究问题与经济含义</h3><p>给定可估计的协方差与已知组合权重，可对组合波动率进行Euler归因。与仅报告权重不同，该归因同时考虑资产自身风险与同其他资产的相关性，因此空头或对冲头寸可能具有负的风险贡献。</p><h3>数学定义与推导</h3><div class="equation">$$\sigma_p(w)=\sqrt{w^\top\Sigma w},\quad \frac{\partial\sigma_p}{\partial w_i}=\frac{(\Sigma w)_i}{\sigma_p}$$</div><p>对二次型开平方求导获得边际波动率。使用收缩样本协方差和正则对角项保证正定，避免非零头寸在数值上产生零风险。</p><div class="equation">$$RC_i=w_i\frac{(\Sigma w)_i}{\sigma_p},\quad \sum_iRC_i=\sigma_p$$</div><p>波动率是一阶齐次函数，Euler恒等式把各权重乘边际贡献之和恢复为组合波动率。负贡献反映在给定协方差与当前仓位下对整体风险的抵消作用。</p><div class="equation">$$b_i=\frac{RC_i}{\sigma_p}=\frac{w_i(\Sigma w)_i}{w^\top\Sigma w},\qquad \sum_i b_i=1$$</div><h3>可复现样本与运行</h3><p>四资产样例用全部48期构造收益估计协方差，固定权重为0.4、0.3、0.2、0.1。该计算为指定历史快照的风险分解，若作为实时配置输入，应截断到实际决策之前。</p><dl><dt>样本文件</dt><dd><a href="../research/examples/multiasset.csv" download>multiasset.csv</a></dd><dt>输入字段</dt><dd>AssetA, AssetB, AssetC, AssetD（同步简单收益）</dd><dt>参数顺序</dt><dd>收缩强度a、正对角项ε、依次对应资产列的固定权重</dd><dt>输出结构</dt><dd>每项资产权重、边际波动贡献、Euler绝对贡献、风险份额及组合波动率</dd></dl><pre><code>./build/kline_quant flow-risk-decomposition quant/research/examples/multiasset.csv 0.3 0.0001 0.4 0.3 0.2 0.1</code></pre><h3>结果解释与实证研究设计</h3><p>把风险份额与名义权重比较，识别风险集中于哪些资产；进一步对收缩强度、窗口长度及压力协方差执行敏感性分析。</p><h3>模型假设与适用边界</h3><p>协方差是历史估计并非真实未来参数，风险贡献也会随头寸及相关结构变化；该结果不是边际资本要求或真实尾部损失归因。</p></article>
+<section class="source" id="source"><h2>完整C++17算法实现</h2><p>实际算法使用标准C++17，输入为带表头的有序数值CSV，输出为具名字段的CSV。命令在仓库根目录执行；模型不会隐式读取外部行情或自动填补缺失数据。</p><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/researchflow_risk.hpp">完整算法文件</a>　｜　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/researchflow_common.hpp">线性系统、协方差与交易账本公共接口</a>　｜　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_researchflow.py">独立Python数值参考</a></p><pre><code>#pragma once
+#include "researchflow_ml.hpp"
+#include &lt;cstdint&gt;
+#include &lt;functional&gt;
+
+namespace kline { namespace researchflow {
+inline std::pair&lt;double,double&gt; tail(Vec loss,double alpha){
+    check_finite(loss);require(alpha&gt;0&amp;&amp;alpha&lt;1,"Invalid tail confidence");
+    std::sort(loss.begin(),loss.end(),std::greater&lt;double&gt;());
+    std::size_t q=std::size_t(std::ceil(alpha*loss.size())-1);
+    double mass=(1-alpha)*loss.size(),left=mass,v=0;
+    for(double a:loss){double w=std::min(1.0,left);v+=w*a;left-=w;if(left&lt;=0)break;}
+    return {loss[loss.size()-1-q],v/mass};
+}
+inline Report rolling_tail(const Mat&amp; x,const Vec&amp; p){
+    validate(x,3,1,1);parameters(p,2);auto look=count(p[0],2,x.size()-1);
+    double alpha=p[1];require(alpha&gt;0&amp;&amp;alpha&lt;1,"Invalid tail probability");
+    Report out{{"Period","Loss","ForecastVaR","ForecastES","VaRBreach","TailScore"},{}};
+    for(std::size_t t=look;t&lt;x.size();++t){
+        Vec loss;for(std::size_t i=t-look;i&lt;t;++i)loss.push_back(-x[i][0]);
+        auto risk=tail(loss,alpha);double l=-x[t][0],e=l-risk.first;
+        out.rows.push_back({double(t),l,risk.first,risk.second,l&gt;risk.first?1.0:0.0,e*(alpha-(e&lt;0?1.0:0.0))});
+    }
+    return out;
+}
+inline double binary_ll(double zero,double one,double q){
+    double v=0;if(zero&gt;0){require(q&lt;1,"Impossible zero event");v+=zero*std::log1p(-q);}
+    if(one&gt;0){require(q&gt;0,"Impossible one event");v+=one*std::log(q);}
+    return v;
+}
+inline Report coverage(const Mat&amp; x,const Vec&amp; p){
+    validate(x,3,1,1);parameters(p,1);double q=p[0];require(q&gt;0&amp;&amp;q&lt;1,"Breach probability must lie in (0,1)");
+    double n=double(x.size()),hits=0,t[2][2]={{0,0},{0,0}};
+    for(std::size_t i=0;i&lt;x.size();++i){
+        require(x[i][0]==0||x[i][0]==1,"Binary breach series required");hits+=x[i][0];
+        if(i)t[int(x[i-1][0])][int(x[i][0])]+=1;
+    }
+    double uc=2*(binary_ll(n-hits,hits,hits/n)-binary_ll(n-hits,hits,q));
+    double total1=t[0][1]+t[1][1],total0=t[0][0]+t[1][0];
+    double independent=binary_ll(total0,total1,total1/(n-1)),dependent=0;
+    for(int i=0;i&lt;2;++i){double m=t[i][0]+t[i][1];if(m&gt;0)dependent+=binary_ll(t[i][0],t[i][1],t[i][1]/m);}
+    double ind=std::max(0.0,2*(dependent-independent));
+    uc=std::max(0.0,uc);
+    return {{"Observations","Breaches","ExpectedBreaches","BreachRate","N00","N01","N10","N11","LRUnconditional","LRIndependence","LRConditional","AsymptoticPUnconditional","AsymptoticPIndependence","AsymptoticPConditional"},
+        {{n,hits,n*q,hits/n,t[0][0],t[0][1],t[1][0],t[1][1],uc,ind,uc+ind,std::erfc(std::sqrt(uc/2)),std::erfc(std::sqrt(ind/2)),std::exp(-(uc+ind)/2)}}};
+}
+inline Report moving_block_paths(const Mat&amp; x,const Vec&amp; p){
+    validate(x,3,1,1);parameters(p,4);
+    auto block=count(p[0],1,x.size()),horizon=count(p[1],1,10000),scenarios=count(p[2],1,10000);
+    require(horizon*scenarios&lt;=5000000,"Simulation budget exceeded");
+    std::uint32_t state=std::uint32_t(count(p[3],0,4294967295ULL));
+    for(const auto&amp; r:x)require(r[0]&gt;-1,"Path requires positive wealth");
+    Report out{{"Scenario","TerminalNAV","TotalReturn","MaxDrawdown"},{}};
+    const auto available=std::uint64_t(x.size()-block+1);
+    auto sample=[&amp;](){
+        // Deterministic 32-bit generator; rejection avoids modulo bias.
+        const std::uint64_t range=std::uint64_t(1)&lt;&lt;32,limit=range-range%available;
+        do{state=std::uint32_t(std::uint64_t(state)*1664525ULL+1013904223ULL);}while(std::uint64_t(state)&gt;=limit);
+        return std::size_t(std::uint64_t(state)%available);
+    };
+    for(std::size_t s=0;s&lt;scenarios;++s){
+        double nav=1,peak=1,mdd=0;std::size_t t=0;
+        while(t&lt;horizon){auto j=sample();for(std::size_t k=0;k&lt;block&amp;&amp;t&lt;horizon;++k,++t){nav=positive(nav*(1+x[j+k][0]));peak=std::max(peak,nav);mdd=std::max(mdd,1-nav/peak);}}
+        out.rows.push_back({double(s),nav,nav-1,mdd});
+    }
+    return out;
+}
+inline Report factor_attribution(const Mat&amp; x,const Vec&amp; p){
+    validate(x,3,3);require(p.size()&gt;=2&amp;&amp;p.size()&lt;=16,"Training, Ridge penalty and factor shock vector required");check_finite(p);
+    const auto d=x[0].size()-1,look=count(p[0],2,x.size()-1);
+    require(p.size()==d+2,"One scenario shock per factor required");
+    double ridge=positive(p[1]);
+    Report out{{"Period","Actual","Predicted","Residual","StressFactorPnL","ResidualVol"},{}};
+    for(std::size_t j=0;j&lt;d;++j)out.header.push_back("Beta"+std::to_string(j+1));
+    for(std::size_t t=look;t&lt;x.size();++t){
+        auto fit=ridge_fit(x,t-look,t,ridge);Vec beta(d);
+        for(std::size_t j=0;j&lt;d;++j)beta[j]=fit.beta[j]/fit.scale[j];
+        double v=predict(fit,x[t]),stress=0,sse=0;
+        for(std::size_t j=0;j&lt;d;++j)stress+=beta[j]*p[j+2];
+        for(std::size_t i=t-look;i&lt;t;++i){double e=x[i].back()-predict(fit,x[i]);sse+=e*e/look;}
+        Vec row={double(t),x[t].back(),v,x[t].back()-v,stress,std::sqrt(sse)};
+        row.insert(row.end(),beta.begin(),beta.end());out.rows.push_back(std::move(row));
+    }
+    return out;
+}
+inline Report risk_decomposition(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,3,2,32);require(p.size()==d+2,"Shrinkage, ridge and fixed weights required");check_finite(p);
+    double shrink=p[0],ridge=positive(p[1]);require(shrink&gt;=0&amp;&amp;shrink&lt;=1,"Invalid shrinkage");
+    Vec w(p.begin()+2,p.end());require(l1(w)&gt;0,"Zero portfolio risk");
+    auto s=covariance_window(x,0,x.size(),shrink,ridge);
+    Vec m(d);for(std::size_t j=0;j&lt;d;++j)m[j]=dot(s[j],w);
+    double v=positive(dot(w,m)),vol=std::sqrt(v);
+    Report out{{"Asset","Weight","MarginalVolatility","ComponentVolatility","RiskShare","PortfolioVolatility"},{}};
+    for(std::size_t j=0;j&lt;d;++j)out.rows.push_back({double(j+1),w[j],m[j]/vol,w[j]*m[j]/vol,w[j]*m[j]/v,vol});
+    return out;
+}
+} }
+</code></pre>
+<h3>编译与整套研究运行</h3><pre><code>cmake -S quant/cpp -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+python quant/research/run_researchflow.py ./build/kline_quant research-results</code></pre><p>Windows多配置生成器使用<code>.\build\Release\kline_quant.exe</code>；单配置生成器一般使用<code>.\build\kline_quant.exe</code>。输出目录须为新目录或空目录。批量脚本同时生成各流程输出及共同日期的跨模型评价结果。</p></section>
+<section class="references" id="references"><h2>参考文献与技术资料</h2><p><a href="https://doi.org/10.2307/2527341">Christoffersen (1998), Evaluating Interval Forecasts</a></p>
+<p><a href="https://doi.org/10.1214/aos/1176347265">Künsch (1989), The Jackknife and the Bootstrap for General Stationary Observations</a></p>
+<p><a href="https://doi.org/10.1016/S0047-259X(03)00096-4">Ledoit &amp; Wolf (2004), A Well-Conditioned Estimator for Large-Dimensional Covariance Matrices</a></p>
+<p><a href="https://www.bis.org/bcbs/publ/d457.htm">Basel Committee, Minimum Capital Requirements for Market Risk</a></p><p>以上CSV均为构造教学数据。算例用于复算数学和软件行为，不作为实际资产投资业绩、市场报价或实证结论。</p></section>
+</main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

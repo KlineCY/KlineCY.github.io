@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>多资产组合研究：信号、交易账本与样本外绩效｜Kline Quant</title><meta name="description" content="可复现量化研究：数据、数学推导、C++17完整工作流与独立验证">
+<link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<style>body{margin:0;background:white;color:#142733;font:16px/1.95 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:24px 32px 64px}main{max-width:1180px;margin:auto}header,.lesson,.source,.references,.framework{border:1px solid #cbd4dc;padding:24px 28px;margin:18px 0;background:white}h1{font-size:31px;line-height:1.4}h2{font-size:23px;margin:10px 0 20px}h3{font-size:18px;margin:24px 0 8px}p{line-height:1.95;margin:12px 0}.toc{display:flex;flex-wrap:wrap;gap:9px 24px;border:1px solid #cad3d9;padding:17px 24px}.equation{overflow:auto;border-block:1px solid #d7dfe4;margin:18px 0;padding:16px 6px}.katex-display{overflow-x:auto;overflow-y:hidden}a{color:#1a5478}code,pre{font-family:"Times New Roman",monospace}pre{border:1px solid #cbd5dc;padding:15px;overflow:auto;white-space:pre;font-size:14px;line-height:1.7;max-height:900px}dl{display:grid;grid-template-columns:110px minmax(0,1fr);gap:10px 15px}dt{font-weight:bold}dd{margin:0;overflow-wrap:anywhere}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccd5dd;padding:10px 12px;text-align:left;background:white}th{font-weight:bold}.wide{overflow-x:auto}@media(max-width:790px){.main{margin:0;padding:12px}header,.lesson,.source,.references,.framework{padding:15px}dl{display:block}dt{margin-top:12px}}</style>
+</head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main>
+<header><small>QUANTITATIVE RESEARCH / REPRODUCIBLE WORKFLOWS</small><h1>多资产组合研究：信号、交易账本与样本外绩效</h1><p>组合研究需要在同一时间轴上连接历史信号、目标权重、真实持仓、交易成本与下一期收益。本专题以收益矩阵为输入，在每个决策时点重新估计模型并生成目标头寸，随后使用明确的自融资费用方程推进净值。四种组合共享交易账本，便于比较信号机制，而不将会计口径差异误当成模型优势。</p><p><a href="../research/reproducible-workflows.html">研究工作流总入口</a>　｜　<a href="../cpp/">C++17研究工具库</a>　｜　<a href="../research/run_researchflow.py" download>下载批量复算脚本</a></p></header>
+<nav class="toc"><a href="#lesson1">1．多资产时间序列趋势策略</a><a href="#lesson2">2．横截面多空排序策略</a><a href="#lesson3">3．滚动收缩协方差最小方差策略</a><a href="#lesson4">4．滚动风险平价配置策略</a><a href="#lesson5">5．净值、风险与基准绩效评价</a><a href="#source">完整C++17源码</a><a href="#references">参考文献</a></nav>
+<section class="framework" id="framework"><h2>研究框架与统一口径</h2><h3>统一信息集</h3><div class="equation">$$w_t=g(r_{t-L},\ldots,r_{t-1}),\qquad R_t^g=w_t^\top r_t$$</div><p>第t行是即将实现的简单收益，目标权重只依赖截至第t−1行的历史。输入应当是在可执行的持有区间上构造的总回报，若采用收盘生成信号、次日开盘成交，则需事先按实际成交时点构建对应收益；程序不会把任意收盘收益自动转换为可交易收益。</p>
+<h3>自融资成交费用与权重漂移</h3><div class="equation">$$f_t=c\sum_i|(1-f_t)w_{i,t}-\widetilde w_{i,t-1}|,\quad 1+R_t^n=(1-f_t)(1+R_t^g)$$</div><p>旧头寸按交易前权益归一化，目标权重按交易后权益归一化，故实际成交名义金额相差一个费用因子。费用方程左侧单调增而右侧Lipschitz常数不超过c乘目标总敞口；该常数小于1且完全平仓费用低于权益时，解唯一，可二分求根。</p>
+<h3>实际持仓漂移</h3><div class="equation">$$\widetilde w_{i,t}=\frac{w_{i,t}(1+r_{i,t})}{1+w_t^\top r_t},\quad V_t=V_{t-1}(1+R_t^n)$$</div><p>现金为净敞口之外的余额，假设现金利率为零，暂不计借券费用、保证金利息和融资利差。净值为正是继续运行的必要条件。下一期成本基于漂移头寸而非旧目标权重，因此即使信号未变，价格变化也可能导致交易。</p></section>
+<article class="lesson" id="lesson1"><h2>1．多资产时间序列趋势策略</h2><h3>研究问题与经济含义</h3><p>时间序列趋势信号关注资产自身历史累积收益方向。对不同波动率资产赋予逆波动尺度，能够缓解单个高波动资产对未经调整的信号组合的支配。固定总敞口之后再截断单资产权重，剩余预算保留为现金，而不是在其他资产上无条件补齐。</p><h3>数学定义与推导</h3><div class="equation">$$m_{i,t}=\prod_{s=t-L}^{t-1}(1+r_{i,s})-1,\quad a_{i,t}=\frac{\operatorname{sgn}(m_{i,t})}{\max(\widehat\sigma_{i,t},\sigma_{\min})}$$</div><p>样本标准差只使用历史窗口；极小波动率下界防止估计不稳定导致异常杠杆。累积收益接近零时该资产不建立头寸。</p><div class="equation">$$w_{i,t}=\operatorname{clip}\left(B\frac{a_{i,t}}{\sum_j|a_{j,t}|},-u,u\right)$$</div><p>归一化前的a保留趋势方向，归一化后的绝对权重之和不超过B。逐项截断只降低绝对权重，因此总敞口上界自然成立。</p><div class="equation">$$\sum_i|w_{i,t}|\le B,\qquad |w_{i,t}|\le u$$</div><h3>可复现样本与运行</h3><p>使用四资产48期样例。前八期仅用于估计，第八行索引对应首个持仓决策，实际收益在该行实现；读取Weight1至Weight4检查其绝对值之和及单资产上界。</p><dl><dt>样本文件</dt><dd><a href="../research/examples/multiasset.csv" download>multiasset.csv</a></dd><dt>输入字段</dt><dd>AssetA, AssetB, AssetC, AssetD（同步简单收益）</dd><dt>参数顺序</dt><dd>窗口长度L、单边费用率c、波动率下界、总敞口预算B、单资产上界</dd><dt>输出结构</dt><dd>各期毛收益、净收益、全量成交比例、费用、净值、回撤、总敞口、净敞口及逐资产权重</dd></dl><pre><code>./build/kline_quant flow-cta quant/research/examples/multiasset.csv 8 0.001 0.002 1.5 0.6</code></pre><h3>结果解释与实证研究设计</h3><p>使用相同日期与费用口径，将CTA净值同横截面排序、最小方差和风险平价比较；检查成本前后收益差、仓位翻转与回撤聚集，才能区分趋势信号和风险控制的作用。</p><h3>模型假设与适用边界</h3><p>这是有限窗口趋势研究，不是原论文的完整复现。资产收益必须可交易、含正确复权和货币转换，且做空可借性、现金利息和融资成本应另外处理。</p></article>
+<article class="lesson" id="lesson2"><h2>2．横截面多空排序策略</h2><h3>研究问题与经济含义</h3><p>横截面排序不要求每个资产历史绝对收益为正，而是在同一时点对资产作相对排序。选择最高与最低各k个资产建立等名义敞口的多空组合。由于输入是同一日期的全体资产回报，排名反映同一机会集内的相对强弱。</p><h3>数学定义与推导</h3><div class="equation">$$s_{i,t}=\prod_{u=t-L}^{t-1}(1+r_{i,u}),\quad w_{i,t}=\frac{G}{2k}\left(\mathbf1_{\{i\in T_k\}}-\mathbf1_{\{i\in B_k\}}\right)$$</div><p>将排序分数最高的一组置为正权重，最低的一组置为负权重，其他资产置为零。两组选取集合必须互斥。</p><div class="equation">$$\sum_iw_{i,t}=0,\qquad \sum_i|w_{i,t}|=G$$</div><p>多头名义与空头名义相等，初始不具有净股票名义暴露，但仍可能具有行业、市场Beta及风险暴露。边界并列时程序保持空仓，避免因列顺序任意选入资产。</p><div class="equation">$$R_t^g=\frac{G}{2}\left(\overline r_{T_k,t}-\overline r_{B_k,t}\right)$$</div><h3>可复现样本与运行</h3><p>四资产样例取每侧1个、总敞口1.5，则正常非并列时两个非零头寸各为±0.75；输出的GrossExposure应为1.5，NetExposure应为零。</p><dl><dt>样本文件</dt><dd><a href="../research/examples/multiasset.csv" download>multiasset.csv</a></dd><dt>输入字段</dt><dd>AssetA, AssetB, AssetC, AssetD（同步简单收益）</dd><dt>参数顺序</dt><dd>窗口长度L、单边费用率c、每侧选取资产数k、总敞口G</dd><dt>输出结构</dt><dd>逐期净值及每资产多空权重；净敞口、总敞口与成交费用</dd></dl><pre><code>./build/kline_quant flow-cross-section quant/research/examples/multiasset.csv 8 0.001 1 1.5</code></pre><h3>结果解释与实证研究设计</h3><p>对比不同排序窗口的样本外净收益与换手。跨资产池时，应报告日期内可用资产数量、边界并列和行业权重，否则排序表现难以解释。</p><h3>模型假设与适用边界</h3><p>等名义多空不是Beta中性。并列判定使用精确数值相等；实证应用可事先定义浮点容差与稳定的并列分组规则。</p></article>
+<article class="lesson" id="lesson3"><h2>3．滚动收缩协方差最小方差策略</h2><h3>研究问题与经济含义</h3><p>样本协方差矩阵在样本数与资产数相近时容易出现近奇异问题。这里以显式设定的收缩系数将样本协方差向等方差单位阵目标收缩，并额外增加正对角项，保证数值求解中的正定性。</p><h3>数学定义与推导</h3><div class="equation">$$S_t=\frac1{L-1}\sum_{s=t-L}^{t-1}(r_s-\bar r)(r_s-\bar r)^\top,\quad \Sigma_t=(1-a)S_t+a\frac{\operatorname{tr}S_t}{d}I+\epsilon I$$</div><p>对任意非零向量v，最后一项贡献ε‖v‖²>0，因此当S为半正定且a属于[0,1]时，收缩矩阵严格正定。固定收缩强度是研究参数，不声称自动实现Ledoit–Wolf最优强度估计。</p><div class="equation">$$\min_w \tfrac12 w^\top\Sigma_t w\quad \text{s.t.}\quad \mathbf1^\top w=1$$</div><p>拉格朗日一阶条件给出Σw=ν1。通过Cholesky三角求解Σz=1，再按权重和归一化，避免显式求逆。</p><div class="equation">$$w_t=\frac{\Sigma_t^{-1}\mathbf1}{\mathbf1^\top\Sigma_t^{-1}\mathbf1}$$</div><h3>可复现样本与运行</h3><p>样例协方差窗为10期、收缩强度0.4、正则项0.0001；每期检查权重和1。若无约束闭式解超出总敞口上限，程序拒绝而不伪称得到约束优化解。</p><dl><dt>样本文件</dt><dd><a href="../research/examples/multiasset.csv" download>multiasset.csv</a></dd><dt>输入字段</dt><dd>AssetA, AssetB, AssetC, AssetD（同步简单收益）</dd><dt>参数顺序</dt><dd>协方差窗口L、单边费用率c、收缩强度a、正则对角项d、总敞口上限</dd><dt>输出结构</dt><dd>各期基于历史协方差计算的最小方差权重及统一交易账本</dd></dl><pre><code>./build/kline_quant flow-minimum-variance quant/research/examples/multiasset.csv 10 0.001 0.4 0.0001 4</code></pre><h3>结果解释与实证研究设计</h3><p>在同一资产集合上比较收缩强度与样本外波动。对于需要禁止卖空、权重上限或换手惩罚的任务，应转向实际的约束凸优化，而不能将无约束解事后截断称为最优。</p><h3>模型假设与适用边界</h3><p>这里最小化的是历史估计条件下的方差，并不保证实际样本外方差最小；矩阵缩减参数需在训练期选择。</p></article>
+<article class="lesson" id="lesson4"><h2>4．滚动风险平价配置策略</h2><h3>研究问题与经济含义</h3><p>风险平价将风险贡献作为配置目标。给定正定协方差和等风险预算，采用正变量上的严格凸目标求解不带预算约束的中间头寸，随后利用风险贡献对整体尺度的不变性归一化为权重。</p><h3>数学定义与推导</h3><div class="equation">$$\min_{x_i&gt;0}\frac12 x^\top\Sigma x-\sum_i b_i\log x_i,\qquad b_i=1/d$$</div><p>对x_i求导得(Σx)_i−b_i/x_i=0，乘以x_i得到各项方差贡献等于预设预算。正定二次项与负对数障碍共同保证严格凸性。</p><div class="equation">$$\Sigma_{ii}x_i^2+c_i x_i-b_i=0,\quad c_i=\sum_{j\ne i}\Sigma_{ij}x_j$$</div><p>固定其他坐标后，一阶条件为二次方程。选择唯一正根；当c_i为正时以有理化形式计算，减少两个接近数相减造成的精度损失。</p><div class="equation">$$\frac{w_i(\Sigma w)_i}{w^\top\Sigma w}=b_i,\qquad w=x/(\mathbf1^\top x)$$</div><h3>可复现样本与运行</h3><p>四资产样例对每期历史矩阵使用等预算0.25。独立测试不仅核对权重和，还重新计算每个资产的风险份额是否等于0.25，并检查总风险贡献守恒。</p><dl><dt>样本文件</dt><dd><a href="../research/examples/multiasset.csv" download>multiasset.csv</a></dd><dt>输入字段</dt><dd>AssetA, AssetB, AssetC, AssetD（同步简单收益）</dd><dt>参数顺序</dt><dd>协方差窗口L、费用率c、收缩强度a、正则项d、最大坐标迭代次数</dd><dt>输出结构</dt><dd>逐期正权重、统一账本与净值</dd></dl><pre><code>./build/kline_quant flow-equal-risk quant/research/examples/multiasset.csv 10 0.001 0.4 0.0001 1000</code></pre><h3>结果解释与实证研究设计</h3><p>对照最小方差的权重集中度、组合风险及换手，观察风险预算约束改变的配置结构。风险平价的目标是风险贡献均衡，并非最大化Sharpe。</p><h3>模型假设与适用边界</h3><p>风险贡献依据协方差估计；估计变化会导致再平衡。当前模型无杠杆和其他持仓约束，未收敛时明确拒绝输出。</p></article>
+<article class="lesson" id="lesson5"><h2>5．净值、风险与基准绩效评价</h2><h3>研究问题与经济含义</h3><p>绩效统计把策略和基准的同周期收益连接到复利财富路径及风险度量。几何年化刻画财富增长，算术超额收益与样本波动率构成传统Sharpe；两者对应不同统计对象。所有相对指标使用相同日期的策略与基准。</p><h3>数学定义与推导</h3><div class="equation">$$V_T=\prod_t(1+r_t),\quad CAGR=V_T^{A/T}-1,\quad SR_{\rm IID}=\sqrt A\frac{\bar r-r_f^{(1)}}{s_r}$$</div><p>无风险日收益由年化有效利率换算。以平方根年化需要明确序列相关假设，Lo的研究指出序列相关可能使通常的年化Sharpe产生偏差。</p><div class="equation">$$MDD=\max_t(1-V_t/\max_{0\le s\le t}V_s),\quad TE=\sqrt A\,s_{r-b}$$</div><p>回撤从初始净值1开始追踪历史峰值，避免遗漏第一期亏损。跟踪误差使用主动收益的样本标准差，信息比率使用同一主动收益序列。</p><div class="equation">$$ES_\alpha=\frac{1}{1-\alpha}\int_\alpha^1F_L^{-1}(u)\,du,\quad L=-r$$</div><h3>可复现样本与运行</h3><p>样例为24期构造策略与基准收益。经验VaR按左连续分位定义选取；ES从最坏损失开始精确取足尾部概率质量，包含分位点的部分权重。</p><dl><dt>样本文件</dt><dd><a href="../research/examples/performance.csv" download>performance.csv</a></dd><dt>输入字段</dt><dd>Strategy, Benchmark（同周期简单收益）</dd><dt>参数顺序</dt><dd>每年观测期数A、年化无风险利率rf、尾部分位置信度a</dd><dt>输出结构</dt><dd>收益、CAGR、波动率、IID Sharpe、最大回撤、跟踪误差、IID信息比率、Beta、VaR与ES</dd></dl><pre><code>./build/kline_quant flow-performance quant/research/examples/performance.csv 252 0.02 0.8</code></pre><h3>结果解释与实证研究设计</h3><p>批量研究脚本先对齐四个策略的共同期，再使用同一等权资产基准构建对照结果。通过净收益、波动率、回撤及平均成交比例联合评价策略。</p><h3>模型假设与适用边界</h3><p>正财富是复利统计的前提，零波动、零基准方差或零跟踪误差会导致相应比率无定义。程序对此明确拒绝，不能把未定义值填为零。</p></article>
+<section class="source" id="source"><h2>完整C++17算法实现</h2><p>实际算法使用标准C++17，输入为带表头的有序数值CSV，输出为具名字段的CSV。命令在仓库根目录执行；模型不会隐式读取外部行情或自动填补缺失数据。</p><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/researchflow_portfolio.hpp">完整算法文件</a>　｜　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/researchflow_common.hpp">线性系统、协方差与交易账本公共接口</a>　｜　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_researchflow.py">独立Python数值参考</a></p><pre><code>#pragma once
+#include "researchflow_common.hpp"
+
+namespace kline { namespace researchflow {
+
+inline Report cta(const Mat&amp; r,const Vec&amp; p){
+    std::size_t d=validate(r,3,2);parameters(p,5);
+    auto look=count(p[0],2,r.size()-1);
+    double floor=positive(p[2]),budget=positive(p[3]),cap=positive(p[4]);
+    require(budget&lt;=4&amp;&amp;cap&lt;=budget,"Invalid CTA risk allocation");
+    return backtest(r,look,p[1],[&amp;](std::size_t t){
+        Vec w(d,0);
+        for(std::size_t j=0;j&lt;d;++j){
+            Vec x;double wealth=1;
+            for(std::size_t k=t-look;k&lt;t;++k){x.push_back(r[k][j]);wealth*=1+r[k][j];}
+            double trend=wealth-1,vol=std::max(floor,std::sqrt(variance(x)));
+            if(std::abs(trend)&gt;1e-12)w[j]=(trend&gt;0?1:-1)/vol;
+        }
+        double scale=l1(w);
+        if(scale&gt;0)for(double&amp; v:w)v=std::clamp(budget*v/scale,-cap,cap);
+        return w;
+    });
+}
+inline Report cross_section(const Mat&amp; r,const Vec&amp; p){
+    std::size_t d=validate(r,3,2);parameters(p,4);
+    auto look=count(p[0],2,r.size()-1),k=count(p[2],1,d/2);
+    double gross=positive(p[3]);require(gross&lt;=4,"Gross limit exceeds four");
+    return backtest(r,look,p[1],[&amp;](std::size_t t){
+        Vec score(d,1),w(d,0);std::vector&lt;std::size_t&gt; ix(d);
+        std::iota(ix.begin(),ix.end(),0);
+        for(std::size_t s=t-look;s&lt;t;++s)for(std::size_t j=0;j&lt;d;++j)score[j]*=1+r[s][j];
+        std::stable_sort(ix.begin(),ix.end(),[&amp;](std::size_t a,std::size_t b){return score[a]&lt;score[b];});
+        // A tied boundary is not split into arbitrary long and short positions.
+        if(score[ix[k-1]]==score[ix[k]]||score[ix[d-k-1]]==score[ix[d-k]])return w;
+        for(std::size_t j=0;j&lt;k;++j){w[ix[j]]=-gross/(2*k);w[ix[d-1-j]]=gross/(2*k);}
+        return w;
+    });
+}
+inline Report minimum_variance(const Mat&amp; r,const Vec&amp; p){
+    std::size_t d=validate(r,3,2);parameters(p,5);
+    auto look=count(p[0],2,r.size()-1);double shrink=p[2],ridge=positive(p[3]),maxgross=positive(p[4]);
+    require(shrink&gt;=0&amp;&amp;shrink&lt;=1&amp;&amp;maxgross&gt;=1&amp;&amp;maxgross&lt;=4,"Invalid covariance or gross constraint");
+    return backtest(r,look,p[1],[&amp;](std::size_t t){
+        auto s=covariance_window(r,t-look,t,shrink,ridge);
+        Vec w=solve_spd(s,Vec(d,1));double z=positive(sum(w));
+        for(double&amp; q:w)q/=z;
+        // Infeasible unconstrained solution is rejected, not advertised as a constrained optimum.
+        require(l1(w)&lt;=maxgross+1e-10,"Unconstrained minimum variance exceeds gross limit");
+        return w;
+    });
+}
+inline Report equal_risk(const Mat&amp; r,const Vec&amp; p){
+    std::size_t d=validate(r,3,2);parameters(p,5);
+    auto look=count(p[0],2,r.size()-1);double shrink=p[2],ridge=positive(p[3]);
+    auto sweeps=count(p[4],1,5000);require(shrink&gt;=0&amp;&amp;shrink&lt;=1,"Invalid shrinkage");
+    return backtest(r,look,p[1],[&amp;](std::size_t t){
+        const auto s=covariance_window(r,t-look,t,shrink,ridge);
+        Vec w(d);double b=1.0/d;
+        for(std::size_t j=0;j&lt;d;++j)w[j]=std::sqrt(b/s[j][j]);
+        double residual=1;
+        for(std::size_t k=0;k&lt;sweeps;++k){
+            for(std::size_t j=0;j&lt;d;++j){
+                double c=0;for(std::size_t l=0;l&lt;d;++l)if(l!=j)c+=s[j][l]*w[l];
+                double root=std::hypot(c,2*std::sqrt(s[j][j]*b));
+                w[j]=c&gt;=0?2*b/(c+root):(root-c)/(2*s[j][j]);
+            }
+            residual=0;
+            for(std::size_t j=0;j&lt;d;++j)residual=std::max(residual,std::abs(w[j]*dot(s[j],w)-b));
+            if(residual&lt;1e-10)break;
+        }
+        require(residual&lt;1e-7,"Risk parity did not converge");
+        double z=positive(sum(w));for(double&amp; v:w)v/=z;
+        return w;
+    });
+}
+inline Report performance(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,2,2);parameters(p,3);
+    double annual=positive(p[0]),rf=p[1],alpha=p[2];
+    require(rf&gt;-1&amp;&amp;alpha&gt;0&amp;&amp;alpha&lt;1,"Invalid rate or tail probability");
+    Vec r=column(x,0),benchmark=column(x,1),active,loss;
+    double nav=1,bnav=1,peak=1,mdd=0,er=std::expm1(std::log1p(rf)/annual);
+    for(std::size_t i=0;i&lt;x.size();++i){
+        require(r[i]&gt;-1&amp;&amp;benchmark[i]&gt;-1,"NAV metrics require positive wealth");
+        nav=positive(nav*(1+r[i]));bnav=positive(bnav*(1+benchmark[i]));
+        peak=std::max(peak,nav);mdd=std::max(mdd,1-nav/peak);
+        active.push_back(r[i]-benchmark[i]);loss.push_back(-r[i]);
+    }
+    double sd=std::sqrt(positive(variance(r))),te=std::sqrt(positive(variance(active)));
+    double beta=covariance(r,benchmark)/positive(variance(benchmark));
+    std::sort(loss.begin(),loss.end(),std::greater&lt;double&gt;());
+    double mass=(1-alpha)*loss.size(),left=mass,es=0;
+    for(double v:loss){double a=std::min(1.0,left);es+=a*v;left-=a;if(left&lt;=0)break;}
+    auto q=std::size_t(std::ceil(alpha*loss.size())-1);
+    return {{"Observations","TotalReturn","BenchmarkReturn","CAGR","AnnualVol","SharpeIID","MaxDrawdown","TrackingError","InformationRatioIID","Beta","VaR","ExpectedShortfall"},
+        {{double(r.size()),nav-1,bnav-1,std::pow(nav,annual/r.size())-1,sd*std::sqrt(annual),(mean(r)-er)/sd*std::sqrt(annual),mdd,te*std::sqrt(annual),mean(active)/te*std::sqrt(annual),beta,loss[loss.size()-1-q],es/mass}}};
+}
+} }
+</code></pre>
+<h3>编译与整套研究运行</h3><pre><code>cmake -S quant/cpp -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+python quant/research/run_researchflow.py ./build/kline_quant research-results</code></pre><p>Windows多配置生成器使用<code>.\build\Release\kline_quant.exe</code>；单配置生成器一般使用<code>.\build\kline_quant.exe</code>。输出目录须为新目录或空目录。批量脚本同时生成各流程输出及共同日期的跨模型评价结果。</p></section>
+<section class="references" id="references"><h2>参考文献与技术资料</h2><p><a href="https://doi.org/10.1016/j.jfineco.2011.11.003">Moskowitz, Ooi &amp; Pedersen (2012), Time Series Momentum</a></p>
+<p><a href="https://doi.org/10.1016/S0047-259X(03)00096-4">Ledoit &amp; Wolf (2004), A Well-Conditioned Estimator for Large-Dimensional Covariance Matrices</a></p>
+<p><a href="https://doi.org/10.2469/faj.v58.n4.2453">Lo (2002), The Statistics of Sharpe Ratios</a></p>
+<p><a href="https://web.stanford.edu/~boyd/cvxbook/">Boyd &amp; Vandenberghe, Convex Optimization</a></p><p>以上CSV均为构造教学数据。算例用于复算数学和软件行为，不作为实际资产投资业绩、市场报价或实证结论。</p></section>
+</main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

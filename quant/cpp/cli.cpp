@@ -13,6 +13,7 @@
 #include "domain_lab_cli.hpp"
 #include "atlas2026_cli.hpp"
 #include "lab24_cli.hpp"
+#include "researchflow_cli.hpp"
 #include "data.hpp"
 #include "allocation.hpp"
 #include "derivatives.hpp"
@@ -85,6 +86,7 @@ void usage() {
     kline::domain_lab_usage(cerr);
     kline::atlas2026_usage(cerr);
     kline::lab24_usage(cerr);
+    kline::researchflow_usage(cerr);
 }
 
 double number(const char* value) {
@@ -521,6 +523,7 @@ int main(int argc, char** argv) {
         } else if (kline::run_domain_lab_cli(command,argc,argv,cout)) {
         } else if (kline::run_atlas2026_cli(command,argc,argv,cout)) {
         } else if (kline::run_lab24_cli(command,argc,argv,cout)) {
+        } else if (kline::run_researchflow_cli(command,argc,argv,cout)) {
         } else {
             usage();
             return 2;

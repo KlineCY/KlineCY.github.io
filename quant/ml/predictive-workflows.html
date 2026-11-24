@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>金融机器学习研究：滚动训练、内层选参、校准与模型比较｜Kline Quant</title><meta name="description" content="可复现量化研究：数据、数学推导、C++17完整工作流与独立验证">
+<link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<style>body{margin:0;background:white;color:#142733;font:16px/1.95 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:24px 32px 64px}main{max-width:1180px;margin:auto}header,.lesson,.source,.references,.framework{border:1px solid #cbd4dc;padding:24px 28px;margin:18px 0;background:white}h1{font-size:31px;line-height:1.4}h2{font-size:23px;margin:10px 0 20px}h3{font-size:18px;margin:24px 0 8px}p{line-height:1.95;margin:12px 0}.toc{display:flex;flex-wrap:wrap;gap:9px 24px;border:1px solid #cad3d9;padding:17px 24px}.equation{overflow:auto;border-block:1px solid #d7dfe4;margin:18px 0;padding:16px 6px}.katex-display{overflow-x:auto;overflow-y:hidden}a{color:#1a5478}code,pre{font-family:"Times New Roman",monospace}pre{border:1px solid #cbd5dc;padding:15px;overflow:auto;white-space:pre;font-size:14px;line-height:1.7;max-height:900px}dl{display:grid;grid-template-columns:110px minmax(0,1fr);gap:10px 15px}dt{font-weight:bold}dd{margin:0;overflow-wrap:anywhere}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccd5dd;padding:10px 12px;text-align:left;background:white}th{font-weight:bold}.wide{overflow-x:auto}@media(max-width:790px){.main{margin:0;padding:12px}header,.lesson,.source,.references,.framework{padding:15px}dl{display:block}dt{margin-top:12px}}</style>
+</head><body><aside id="quantSidebar" class="sidebar" data-page="ml"></aside><script src="../sidebar-v2.js"></script><div class="main"><main>
+<header><small>QUANTITATIVE RESEARCH / REPRODUCIBLE WORKFLOWS</small><h1>金融机器学习研究：滚动训练、内层选参、校准与模型比较</h1><p>金融机器学习的研究对象是按信息可得时间排列的预测，而不是随机打乱后的拟合精度。本专题将训练窗口、标签成熟缓冲区、特征标准化与最终测试日期显式纳入数据流。预测表既保留真实标签与模型输出，也保留训练索引；同一套输出可继续用于模型比较、概率校准和预测区间。</p><p><a href="../research/reproducible-workflows.html">研究工作流总入口</a>　｜　<a href="../cpp/">C++17研究工具库</a>　｜　<a href="../research/run_researchflow.py" download>下载批量复算脚本</a></p></header>
+<nav class="toc"><a href="#lesson1">1．训练窗口内标准化的滚动Ridge预测</a><a href="#lesson2">2．内层时间验证选参与外层预测</a><a href="#lesson3">3．滚动残差分位预测区间</a><a href="#lesson4">4．滚动Beta平滑概率分箱校准</a><a href="#lesson5">5．两模型预测误差及HAC比较</a><a href="#source">完整C++17源码</a><a href="#references">参考文献</a></nav>
+<section class="framework" id="framework"><h2>研究框架与统一口径</h2><h3>标签可得时间约束</h3><div class="equation">$$\mathcal I_t^{\rm train}=\{t-g-L,\ldots,t-g-1\},\quad \widehat y_t=f_{\mathcal I_t^{\rm train}}(x_t)$$</div><p>训练长度L与标签缓冲g均以输入行的时间步计量。若标签在行s之后h期才成熟，设置g≥h可保守确保训练标签在决策前已经可得；异步标签应先按真实可得时间做样本筛选。</p>
+<h3>样本外比较口径</h3><div class="equation">$$\mathcal T^*=\mathcal T_1\cap\mathcal T_2,\quad \Delta L_t=L(y_t,\widehat y_{1,t})-L(y_t,\widehat y_{2,t})$$</div><p>不同模型的预热长度不同，应先对齐预测日期和实际标签再计算损失差。不能直接比较两个独立时间段的均方误差。</p></section>
+<article class="lesson" id="lesson1"><h2>1．训练窗口内标准化的滚动Ridge预测</h2><h3>研究问题与经济含义</h3><p>对每个测试时点重新计算训练特征的均值和总体标准差，只使用该窗口估计标准化参数。Ridge以训练均值为未惩罚截距，系数通过带正则的Gram矩阵求解。输入最后一列是对应该行特征的未来标签。</p><h3>数学定义与推导</h3><div class="equation">$$z_{sj}=\frac{x_{sj}-\bar x_{j,t}}{s_{j,t}},\quad s_{j,t}^2=L^{-1}\sum_{s\in\mathcal I_t^{\rm train}}(x_{sj}-\bar x_{j,t})^2$$</div><p>常数特征的标准差为零，数值实现令其尺度为1；中心化列仍为零，不会对斜率产生人为影响。</p><div class="equation">$$\min_{\beta}\ L^{-1}\|y_c-Z\beta\|_2^2+\lambda\|\beta\|_2^2,\quad (Z^\top Z/L+\lambda I)\widehat\beta=Z^\top y_c/L$$</div><p>对目标求导后等式两端同除以2，获得正则化正规方程。λ>0保证严格正定；由于目标误差已经除以L，该惩罚参数与未除以样本数的实现不同。</p><div class="equation">$$\widehat y_t=\bar y_t+\sum_j\widehat\beta_j(x_{tj}-\bar x_{j,t})/s_{j,t}$$</div><h3>可复现样本与运行</h3><p>52行构造特征样例使用16行训练、2行缓冲，首个预测索引为18，训练区间为[0,16)，第16和17行标签不参与拟合。输出中的HistoricalMean为训练均值基准。</p><dl><dt>样本文件</dt><dd><a href="../research/examples/features.csv" download>features.csv</a></dd><dt>输入字段</dt><dd>Momentum, VolatilitySignal, NextReturn（前两列特征、最后一列标签）</dd><dt>参数顺序</dt><dd>训练窗口L、标签缓冲g、Ridge惩罚λ</dd><dt>输出结构</dt><dd>预测时点、训练起止索引（右端不含）、模型预测、实际值、训练均值基准和两者平方误差</dd></dl><pre><code>./build/kline_quant flow-rolling-ridge quant/research/examples/features.csv 16 2 0.1</code></pre><h3>结果解释与实证研究设计</h3><p>比较模型平方误差与训练均值基准的平方误差，检查高波动阶段的残差表现。特征与标签的任何变换都应在训练折内部完成。</p><h3>模型假设与适用边界</h3><p>数据为构造样本，标签的真实可用时间由使用者定义。训练标准化、固定λ与逐期重训不能替代实际成交和净收益分析。</p></article>
+<article class="lesson" id="lesson2"><h2>2．内层时间验证选参与外层预测</h2><h3>研究问题与经济含义</h3><p>模型超参数若由整个测试段的表现决定，测试段就失去独立评价作用。这里在每个外层训练窗口内部划出末端连续验证段，先按候选参数训练于更早的样本，再以该验证段误差选参，最后在整个外层可用训练窗口重拟合。</p><h3>数学定义与推导</h3><div class="equation">$$e=t-g,\quad a=e-L,\quad b=e-v,\quad I_{\rm inner}=[a,b-g),\quad I_{\rm val}=[b,e)$$</div><p>内层训练集与验证集之间同样保留g个行间隔。验证段标签在外层决策时已经可用；测试行不进入候选比较。</p><div class="equation">$$\lambda_t^*=\arg\min_{\lambda\in\Lambda}\frac1v\sum_{s=b}^{e-1}(y_s-f_{\lambda,[a,b-g)}(x_s))^2$$</div><p>每个候选使用自己的训练窗口标准化参数；若验证误差完全相同，按参数输入顺序选择第一个，保证确定性。</p><div class="equation">$$\widehat y_t=f_{\lambda_t^*,[a,e)}(x_t)$$</div><h3>可复现样本与运行</h3><p>样例外层训练20、缓冲2、内层验证5，首个测试索引22。内层训练为[0,13)，验证为[15,20)，外层重拟合为[0,20)。候选λ分别0.01、0.1和1。</p><dl><dt>样本文件</dt><dd><a href="../research/examples/features.csv" download>features.csv</a></dd><dt>输入字段</dt><dd>Momentum, VolatilitySignal, NextReturn（前两列特征、最后一列标签）</dd><dt>参数顺序</dt><dd>外层训练长度L、标签缓冲g、内层验证长度v、至少两个候选λ</dd><dt>输出结构</dt><dd>外层预测日期、训练区间、选定λ、内层验证MSE、外层预测与误差</dd></dl><pre><code>./build/kline_quant flow-nested-ridge quant/research/examples/features.csv 20 2 5 0.01 0.1 1</code></pre><h3>结果解释与实证研究设计</h3><p>把该流程与固定λ的Ridge在共同测试日期上比较；关注选参序列稳定性及训练样本减少带来的估计方差，避免仅依据一次最优参数报告优势。</p><h3>模型假设与适用边界</h3><p>这里只使用单个内层时间保持验证段，而非多折嵌套CV。选择准则仍可能过拟合短期制度；研究时可将候选网格、验证跨度和重训频率预先固定。</p></article>
+<article class="lesson" id="lesson3"><h2>3．滚动残差分位预测区间</h2><h3>研究问题与经济含义</h3><p>预测点值无法反映未来误差的尺度。滚动残差校准利用过去已经产生且标签成熟的样本外预测误差建立区间。每个预测时点仅对历史绝对残差取有限样本修正分位数。</p><h3>数学定义与推导</h3><div class="equation">$$s_i=|y_i-\widehat y_i|,\quad k=\lceil(L+1)(1-\alpha)\rceil$$</div><p>有限样本秩修正对应在L个校准分数外加入一个测试分数的交换性秩论证。若k>L，不存在有限的对应经验上界，此时拒绝输出。</p><div class="equation">$$q_t=s_{(k),t},\qquad C_t=[\widehat y_t-q_t,\widehat y_t+q_t]$$</div><p>历史残差按绝对值排序，取第k小。区间以点预测为中心，因此允许宽度随滚动误差波动自适应变化。</p><div class="equation">$$\widehat c=\frac1T\sum_t\mathbf1_{\{y_t\in C_t\}},\quad \overline W=\frac1T\sum_t2q_t$$</div><h3>可复现样本与运行</h3><p>构造样例校准8行、缓冲1、α=0.2，秩为ceil(9×0.8)=8，首个区间使用0至7行绝对残差。输出Covered为真实标签是否落入闭区间。</p><dl><dt>样本文件</dt><dd><a href="../research/examples/forecast.csv" download>forecast.csv</a></dd><dt>输入字段</dt><dd>Prediction, Actual</dd><dt>参数顺序</dt><dd>校准窗口L、标签缓冲g、未覆盖目标概率α</dd><dt>输出结构</dt><dd>校准样本起止索引、预测上下界、实际值、覆盖标志与区间宽度</dd></dl><pre><code>./build/kline_quant flow-conformal-rolling quant/research/examples/forecast.csv 8 1 0.2</code></pre><h3>结果解释与实证研究设计</h3><p>同时评价覆盖率和平均宽度，过宽区间可能具有较高覆盖却缺乏决策价值。批量脚本还将外层Ridge预测直接接入校准流程。</p><h3>模型假设与适用边界</h3><p>经典有限样本覆盖保证依赖交换性；金融时间序列存在依赖和分布漂移，滚动残差区间不能无条件声称达到目标覆盖。</p></article>
+<article class="lesson" id="lesson4"><h2>4．滚动Beta平滑概率分箱校准</h2><h3>研究问题与经济含义</h3><p>概率校准关心给出某个概率的事件实际发生频率。将历史预测概率固定划分到等宽区间，每箱以Beta先验对历史事件次数进行平滑。预测时点用当前概率所属箱的历史后验均值，而不使用当前标签。</p><h3>数学定义与推导</h3><div class="equation">$$j(p)=\min(B-1,\lfloor Bp\rfloor),\quad n_j=\sum_{i\in I_t}\mathbf1_{\{j(p_i)=j\}},\quad h_j=\sum_{i\in I_t}y_i\mathbf1_{\{j(p_i)=j\}}$$</div><p>概率1归入最后一个箱，标签必须为0或1。滑动窗口通过移除最早样本与加入刚成熟的样本维护计数，避免每期重复完整扫描。</p><div class="equation">$$q_j=\frac{a+h_j}{a+b+n_j}$$</div><p>Beta–Bernoulli共轭关系给出后验均值。若箱内没有历史样本，预测返回先验均值a/(a+b)，而非用当前标签填充。</p><div class="equation">$$BS=(q-y)^2,\quad LL=-y\log q-(1-y)\log(1-q)$$</div><h3>可复现样本与运行</h3><p>样例历史窗10、缓冲1、四箱、均匀Beta(1,1)先验。空箱输出0.5；若某箱过去5次中3次事件，校准概率为4/7。</p><dl><dt>样本文件</dt><dd><a href="../research/examples/probabilities.csv" download>probabilities.csv</a></dd><dt>输入字段</dt><dd>Probability, Label</dd><dt>参数顺序</dt><dd>历史窗口L、标签缓冲g、等宽概率箱数B、Beta先验a与b</dd><dt>输出结构</dt><dd>原始概率、校准概率、实际标签、历史箱样本数、Brier与校准对数损失</dd></dl><pre><code>./build/kline_quant flow-rolling-calibration quant/research/examples/probabilities.csv 10 1 4 1 1</code></pre><h3>结果解释与实证研究设计</h3><p>对同一预测日期比较RawBrier与CalibratedBrier，并按箱样本量识别小样本波动。对数损失会对置信度很高但方向错误的概率施加较大惩罚。</p><h3>模型假设与适用边界</h3><p>等宽分箱会产生不连续映射，且不保证单调；如果需要单调性，可在独立校准窗口使用PAV。Beta平滑需要先验参数与训练外校准数据。</p></article>
+<article class="lesson" id="lesson5"><h2>5．两模型预测误差及HAC比较</h2><h3>研究问题与经济含义</h3><p>预测优劣比较的核心不是独立地检验两个MSE，而是研究同一时点的配对损失差。时间序列预测误差可能自相关，故使用Bartlett加权的长程方差估计损失差均值的不确定性。</p><h3>数学定义与推导</h3><div class="equation">$$d_t=(\widehat y_{1,t}-y_t)^2-(\widehat y_{2,t}-y_t)^2,\quad \bar d=T^{-1}\sum_td_t$$</div><p>正的平均差表示模型1的平方误差大于模型2。MAE和方向准确率作为不同损失口径的补充，不进入这一DM型检验。</p><div class="equation">$$\widehat\gamma_k=T^{-1}\sum_{t=k+1}^T(d_t-\bar d)(d_{t-k}-\bar d),\quad \widehat\Omega=\widehat\gamma_0+2\sum_{k=1}^q(1-k/(q+1))\widehat\gamma_k$$</div><p>长程方差使用有限滞后窗，对越远的自协方差施加越小权重。滞后选择与预测重叠长度、误差相关性有关，不能机械使用固定值。</p><div class="equation">$$DM=\bar d/\sqrt{\widehat\Omega/T}$$</div><h3>可复现样本与运行</h3><p>24行构造双预测样例采用q=2。独立测试重新计算每个误差及自协方差并核对输出。批量脚本则使用固定与嵌套Ridge共有的预测日期构造比较表。</p><dl><dt>样本文件</dt><dd><a href="../research/examples/comparison.csv" download>comparison.csv</a></dd><dt>输入字段</dt><dd>Model1, Model2, Actual</dd><dt>参数顺序</dt><dd>Newey–West/Bartlett滞后阶数q</dd><dt>输出结构</dt><dd>两模型MSE、MAE、正事件方向准确率、损失差、HAC标准误与DM型统计量</dd></dl><pre><code>./build/kline_quant flow-forecast-comparison quant/research/examples/comparison.csv 2</code></pre><h3>结果解释与实证研究设计</h3><p>先报告经济意义上的MSE改善，再结合标准误判断不确定性；多个候选模型的比较需要考虑多重检验和数据挖掘偏差。</p><h3>模型假设与适用边界</h3><p>统计量为渐近型，未加入小样本Harvey–Leybourne–Newbold修正；若损失差长程方差为零则拒绝计算。嵌套模型的预测比较还可能需要专门检验。</p></article>
+<section class="source" id="source"><h2>完整C++17算法实现</h2><p>实际算法使用标准C++17，输入为带表头的有序数值CSV，输出为具名字段的CSV。命令在仓库根目录执行；模型不会隐式读取外部行情或自动填补缺失数据。</p><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/researchflow_ml.hpp">完整算法文件</a>　｜　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/researchflow_common.hpp">线性系统、协方差与交易账本公共接口</a>　｜　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_researchflow.py">独立Python数值参考</a></p><pre><code>#pragma once
+#include "researchflow_common.hpp"
+
+namespace kline { namespace researchflow {
+struct RidgeFit {Vec center,scale,beta;double intercept;};
+inline RidgeFit ridge_fit(const Mat&amp; a,std::size_t start,std::size_t end,double lambda){
+    require(end&lt;=a.size()&amp;&amp;end&gt;=start+2&amp;&amp;lambda&gt;0,"Invalid Ridge training interval");
+    std::size_t d=a[0].size()-1,n=end-start;
+    Vec m(d,0),s(d,0),b(d,0);
+    double y=0;
+    for(std::size_t t=start;t&lt;end;++t){y+=a[t][d]/n;for(std::size_t j=0;j&lt;d;++j)m[j]+=a[t][j]/n;}
+    for(std::size_t t=start;t&lt;end;++t)for(std::size_t j=0;j&lt;d;++j){double u=a[t][j]-m[j];s[j]+=u*u/n;}
+    for(double&amp; v:s){v=std::sqrt(v);if(v&lt;1e-12)v=1;}
+    Mat g(d,Vec(d,0));Vec x(d);
+    for(std::size_t t=start;t&lt;end;++t){
+        for(std::size_t j=0;j&lt;d;++j)x[j]=(a[t][j]-m[j])/s[j];
+        for(std::size_t j=0;j&lt;d;++j){
+            b[j]+=x[j]*(a[t][d]-y)/n;
+            for(std::size_t k=0;k&lt;=j;++k)g[j][k]+=x[j]*x[k]/n;
+        }
+    }
+    for(std::size_t j=0;j&lt;d;++j){g[j][j]+=lambda;for(std::size_t k=0;k&lt;j;++k)g[k][j]=g[j][k];}
+    return {m,s,solve_spd(g,b),y};
+}
+inline double predict(const RidgeFit&amp; f,const Vec&amp; row){
+    double y=f.intercept;
+    for(std::size_t j=0;j&lt;f.beta.size();++j)y+=f.beta[j]*(row[j]-f.center[j])/f.scale[j];
+    return y;
+}
+inline Report rolling_ridge(const Mat&amp; x,const Vec&amp; p){
+    validate(x,4,2);parameters(p,3);
+    auto train=count(p[0],2,x.size()-1),gap=count(p[1],0,x.size()-1);
+    double lambda=positive(p[2]);require(train+gap&lt;x.size(),"No out-of-sample period");
+    Report out{{"Period","TrainStart","TrainEndExclusive","Prediction","Actual","HistoricalMean","SquaredError","BaselineSquaredError"},{}};
+    for(std::size_t t=train+gap;t&lt;x.size();++t){
+        std::size_t end=t-gap,start=end-train;
+        auto f=ridge_fit(x,start,end,lambda);
+        double a=x[t].back(),v=predict(f,x[t]);
+        out.rows.push_back({double(t),double(start),double(end),v,a,f.intercept,std::pow(v-a,2),std::pow(f.intercept-a,2)});
+    }
+    return out;
+}
+inline Report nested_ridge(const Mat&amp; x,const Vec&amp; p){
+    validate(x,6,2);require(p.size()&gt;=5&amp;&amp;p.size()&lt;=24,"Training, gap, validation size and at least two lambdas required");check_finite(p);
+    auto train=count(p[0],4,x.size()-1),gap=count(p[1],0,x.size()-1),val=count(p[2],1,train-1);
+    require(train+gap&lt;x.size()&amp;&amp;train&gt;val+gap+1,"Insufficient nested training history");
+    for(std::size_t j=3;j&lt;p.size();++j)positive(p[j]);
+    Report out{{"Period","TrainStart","TrainEndExclusive","SelectedLambda","ValidationMSE","Prediction","Actual","SquaredError"},{}};
+    for(std::size_t t=train+gap;t&lt;x.size();++t){
+        std::size_t end=t-gap,start=end-train,split=end-val;
+        double best=std::numeric_limits&lt;double&gt;::infinity(),chosen=0;
+        for(std::size_t j=3;j&lt;p.size();++j){
+            auto fit=ridge_fit(x,start,split-gap,p[j]);double mse=0;
+            for(std::size_t k=split;k&lt;end;++k){double e=predict(fit,x[k])-x[k].back();mse+=e*e/val;}
+            if(mse&lt;best){best=mse;chosen=p[j];}
+        }
+        auto fit=ridge_fit(x,start,end,chosen);double v=predict(fit,x[t]),a=x[t].back();
+        out.rows.push_back({double(t),double(start),double(end),chosen,best,v,a,(v-a)*(v-a)});
+    }
+    return out;
+}
+inline Report conformal_rolling(const Mat&amp; x,const Vec&amp; p){
+    validate(x,3,2,2);parameters(p,3);
+    auto n=count(p[0],2,x.size()-1),gap=count(p[1],0,x.size()-1);
+    double alpha=p[2];require(alpha&gt;0&amp;&amp;alpha&lt;1&amp;&amp;n+gap&lt;x.size(),"Invalid calibration parameters");
+    std::size_t rank=std::size_t(std::ceil((n+1)*(1-alpha)));
+    require(rank&gt;=1&amp;&amp;rank&lt;=n,"Finite conformal quantile unavailable for calibration size");
+    Report out{{"Period","CalibrationStart","CalibrationEndExclusive","Prediction","Lower","Upper","Actual","Covered","IntervalWidth"},{}};
+    for(std::size_t t=n+gap;t&lt;x.size();++t){
+        std::size_t end=t-gap,start=end-n;Vec errors;
+        for(std::size_t i=start;i&lt;end;++i)errors.push_back(std::abs(x[i][0]-x[i][1]));
+        std::nth_element(errors.begin(),errors.begin()+rank-1,errors.end());
+        double q=errors[rank-1],v=x[t][0],a=x[t][1];
+        out.rows.push_back({double(t),double(start),double(end),v,v-q,v+q,a,a&gt;=v-q&amp;&amp;a&lt;=v+q?1.0:0.0,2*q});
+    }
+    return out;
+}
+inline Report rolling_calibration(const Mat&amp; x,const Vec&amp; p){
+    validate(x,3,2,2);parameters(p,5);
+    auto n=count(p[0],2,x.size()-1),gap=count(p[1],0,x.size()-1),bins=count(p[2],2,100);
+    double a=positive(p[3]),b=positive(p[4]);require(n+gap&lt;x.size(),"No calibration test period");
+    for(const auto&amp; row:x)require(row[0]&gt;=0&amp;&amp;row[0]&lt;=1&amp;&amp;(row[1]==0||row[1]==1),"Invalid probability or binary outcome");
+    auto bin=[&amp;](double v){return std::min(bins-1,std::size_t(v*bins));};
+    Vec mass(bins,0),hits(bins,0);
+    auto add=[&amp;](std::size_t i,double s){auto j=bin(x[i][0]);mass[j]+=s;hits[j]+=s*x[i][1];};
+    for(std::size_t i=0;i&lt;n;++i)add(i,1);
+    Report out{{"Period","RawProbability","CalibratedProbability","Actual","BinCount","RawBrier","CalibratedBrier","CalibratedLogLoss"},{}};
+    for(std::size_t t=n+gap;t&lt;x.size();++t){
+        if(t&gt;n+gap){add(t-gap-n-1,-1);add(t-gap-1,1);}
+        auto j=bin(x[t][0]);double q=(hits[j]+a)/(mass[j]+a+b),y=x[t][1];
+        double ll=y==1?-std::log(q):-std::log1p(-q);
+        out.rows.push_back({double(t),x[t][0],q,y,mass[j],std::pow(x[t][0]-y,2),std::pow(q-y,2),ll});
+    }
+    return out;
+}
+inline Report forecast_comparison(const Mat&amp; x,const Vec&amp; p){
+    validate(x,3,3,3);parameters(p,1);auto l=count(p[0],0,x.size()-1);
+    Vec differential;double mse1=0,mse2=0,mae1=0,mae2=0,hit1=0,hit2=0,n=double(x.size());
+    for(const auto&amp; row:x){
+        double e1=row[0]-row[2],e2=row[1]-row[2];
+        mse1+=e1*e1/n;mse2+=e2*e2/n;mae1+=std::abs(e1)/n;mae2+=std::abs(e2)/n;
+        hit1+=((row[0]&gt;0)==(row[2]&gt;0)?1.0:0.0)/n;hit2+=((row[1]&gt;0)==(row[2]&gt;0)?1.0:0.0)/n;
+        differential.push_back(e1*e1-e2*e2);
+    }
+    double se=positive(hac_mean_standard_error(differential,int(l)));
+    return {{"Observations","MSE1","MSE2","MAE1","MAE2","PositiveEventAccuracy1","PositiveEventAccuracy2","LossDifference","HACStandardError","DMStatistic"},
+        {{n,mse1,mse2,mae1,mae2,hit1,hit2,mean(differential),se,mean(differential)/se}}};
+}
+} }
+</code></pre>
+<h3>编译与整套研究运行</h3><pre><code>cmake -S quant/cpp -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+python quant/research/run_researchflow.py ./build/kline_quant research-results</code></pre><p>Windows多配置生成器使用<code>.\build\Release\kline_quant.exe</code>；单配置生成器一般使用<code>.\build\kline_quant.exe</code>。输出目录须为新目录或空目录。批量脚本同时生成各流程输出及共同日期的跨模型评价结果。</p></section>
+<section class="references" id="references"><h2>参考文献与技术资料</h2><p><a href="https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.TimeSeriesSplit.html">scikit-learn, TimeSeriesSplit</a></p>
+<p><a href="https://hastie.su.domains/ElemStatLearn/">Hastie, Tibshirani &amp; Friedman, The Elements of Statistical Learning</a></p>
+<p><a href="https://doi.org/10.1080/07350015.1995.10524599">Diebold &amp; Mariano (1995), Comparing Predictive Accuracy</a></p>
+<p><a href="https://proceedings.neurips.cc/paper_files/paper/2023/hash/47f2fad8c1111d07f83c91be7870f8db-Abstract.html">Angelopoulos et al. (2023), Conformal PID Control for Time Series Prediction</a></p><p>以上CSV均为构造教学数据。算例用于复算数学和软件行为，不作为实际资产投资业绩、市场报价或实证结论。</p></section>
+</main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>
