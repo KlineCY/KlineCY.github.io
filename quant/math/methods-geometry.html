@@ -1,0 +1,94 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>矩阵几何与数值诊断｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/methods-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="math"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>矩阵几何与数值诊断</h1><p>由模型定义、数学推导和可复算数值案例构成的独立研究方法。输入数据为教学构造，输出不代表实际投资结果。</p><p><a href="../research/methods-laboratories.html">研究方法实验室</a>　<a href="../cpp/methods_geometry.hpp" download>完整C++17源码</a></p><nav><a href="#gram-schmidt">改进Gram–Schmidt正交分解</a>　｜　<a href="#rank-one-inverse">Sherman–Morrison秩一逆矩阵</a>　｜　<a href="#gershgorin">Gershgorin谱区间与正定充分条件</a>　｜　<a href="#spectral-participation">协方差特征值有效秩</a></nav></header><article id="gram-schmidt"><h2>改进Gram–Schmidt正交分解</h2><h3>模型与推导</h3><p>逐列对当前残差而非原列投影，构成改进Gram–Schmidt；对每列记录残差范数和与已有正交列的最大内积。秩亏或接近秩亏时拒绝，避免除以极小范数。复杂度为O(nd²)，空间O(nd)。</p><div class="equation">$$v_j=a_j-\sum_{i&lt;j}q_i(q_i^\top v_j),\quad r_{jj}=\|v_j\|_2,\quad q_j=v_j/r_{jj}$$</div><div class="equation">$$A=QR,\quad Q^\top Q=I$$</div><h3>研究应用与成立条件</h3><p>在横截面多因子暴露中，第一列和第二列的范数分别√2和√3且正交。正交分解可减少正规方程的条件数平方问题，但列顺序影响分解，近秩亏时应使用带主元QR或SVD。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/gram-schmidt.csv" download>CSV数据</a>　<a href="../cpp/methods_geometry.hpp" download>算法源码</a></p><pre>X1,X2
+1,1
+1,-1
+0,1
+</pre><pre>./build/kline_quant methods-gram-schmidt quant/research/methods-examples/gram-schmidt.csv</pre><div class="wide"><table><thead><tr><th>Column</th><th>RDiagonal</th><th>OrthogonalityError</th></tr></thead><tbody><tr><td>1</td><td>1.41421356237</td><td>0</td></tr><tr><td>2</td><td>1.73205080757</td><td>0</td></tr></tbody></table></div><p>参考文献：Golub and Van Loan (2013), Matrix Computations, 4th ed., Johns Hopkins University Press.</p></article><article id="rank-one-inverse"><h2>Sherman–Morrison秩一逆矩阵</h2><h3>模型与推导</h3><p>对角正定矩阵加一个因子外积时，逆矩阵修正仍为秩一。将候选逆左乘原矩阵，外积项相消；行列式引理由同一标量给出。输出逆矩阵对角和行列式倍率，时间O(d)。</p><div class="equation">$$(D+uu^\top)^{-1}=D^{-1}-\frac{D^{-1}uu^\top D^{-1}}{1+u^\top D^{-1}u}$$</div><div class="equation">$$\det(D+uu^\top)=\det(D)(1+u^\top D^{-1}u)$$</div><h3>研究应用与成立条件</h3><p>对角特异风险2、3与单因子载荷1、2，倍率17／6。可快速计算低秩风险模型的精度矩阵对角，输入必须正定，不能将一般多因子矩阵直接代入对角公式。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/rank-one-inverse.csv" download>CSV数据</a>　<a href="../cpp/methods_geometry.hpp" download>算法源码</a></p><pre>Diagonal,U
+2,1
+3,2
+</pre><pre>./build/kline_quant methods-rank-one-inverse quant/research/methods-examples/rank-one-inverse.csv</pre><div class="wide"><table><thead><tr><th>Index</th><th>InverseDiagonal</th><th>DetRatio</th></tr></thead><tbody><tr><td>1</td><td>0.411764705882</td><td>2.83333333333</td></tr><tr><td>2</td><td>0.176470588235</td><td>2.83333333333</td></tr></tbody></table></div><p>参考文献：Golub and Van Loan (2013), Matrix Computations, 4th ed., Johns Hopkins University Press.</p></article><article id="gershgorin"><h2>Gershgorin谱区间与正定充分条件</h2><h3>模型与推导</h3><p>对特征向量选绝对值最大的分量并展开对应行，得到圆盘约束。实对称矩阵的特征值为实数，圆盘退化为实轴区间；所有下界严格正即正定充分条件。</p><div class="equation">$$\lambda(A)\subseteq\bigcup_i\{z:|z-a_{ii}|\leq\sum_{j\ne i}|a_{ij}|\}$$</div><div class="equation">$$A=A^\top,\ \min_i(a_{ii}-\sum_{j\ne i}|a_{ij}|)&gt;0\Longrightarrow A\succ0$$</div><h3>研究应用与成立条件</h3><p>协方差矩阵对角占优时可用此廉价证书诊断，例中全局下界1。下界非正不证明非正定，应使用Cholesky或精确谱分解。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/gershgorin.csv" download>CSV数据</a>　<a href="../cpp/methods_geometry.hpp" download>算法源码</a></p><pre>A1,A2
+3,-1
+-1,2
+</pre><pre>./build/kline_quant methods-gershgorin quant/research/methods-examples/gershgorin.csv</pre><div class="wide"><table><thead><tr><th>Row</th><th>Lower</th><th>Upper</th><th>GlobalLower</th></tr></thead><tbody><tr><td>1</td><td>2</td><td>4</td><td>1</td></tr><tr><td>2</td><td>1</td><td>3</td><td>1</td></tr></tbody></table></div><p>参考文献：Golub and Van Loan (2013), Matrix Computations, 4th ed., Johns Hopkins University Press.</p></article><article id="spectral-participation"><h2>协方差特征值有效秩</h2><h3>模型与推导</h3><p>对非负谱归一化为概率，平方集中度的倒数与熵的指数分别刻画有效维数。谱全相等时等于维数，单一非零谱时等于1；它们不等于代数秩。</p><div class="equation">$$p_i=\lambda_i/\sum_j\lambda_j,\qquad r_{\mathrm{PR}}=1/\sum_i p_i^2$$</div><div class="equation">$$r_H=\exp(-\sum_{i:p_i&gt;0}p_i\log p_i)$$</div><h3>研究应用与成立条件</h3><p>谱4、1、1的参与秩2，说明能量集中。可比较不同资产集合的风险维度，但需统一变量尺度；非PSD输入不具有该概率解释。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/spectral-participation.csv" download>CSV数据</a>　<a href="../cpp/methods_geometry.hpp" download>算法源码</a></p><pre>Eigenvalue
+4
+1
+1
+</pre><pre>./build/kline_quant methods-spectral-participation quant/research/methods-examples/spectral-participation.csv</pre><div class="wide"><table><thead><tr><th>Trace</th><th>ParticipationRank</th><th>EntropyRank</th></tr></thead><tbody><tr><td>6</td><td>2</td><td>2.38110157795</td></tr></tbody></table></div><p>参考文献：Golub and Van Loan (2013), Matrix Computations, 4th ed., Johns Hopkins University Press.</p></article><section><h2>C++17实现</h2><pre>#pragma once
+#include "evidence_common.hpp"
+namespace kline { namespace methods_geometry {
+using namespace evidence;
+inline Report gram_schmidt(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,2,1,64);
+    parameters(p,0);
+    require(x.size()&gt;=d,"Tall matrix required");
+    Mat Q;
+    Report out{{"Column","RDiagonal","OrthogonalityError"},{}};
+    for(std::size_t j=0;
+    j&lt;d;
+    ++j){Vec v=column(x,j);
+    double scale=std::sqrt(dot(v,v));
+    for(const auto&amp;q:Q){double r=dot(q,v);
+    for(std::size_t i=0;
+    i&lt;v.size();
+    ++i)v[i]-=r*q[i];
+    }double n=std::sqrt(dot(v,v));
+    require(n&gt;1e-12*positive(scale),"Rank deficient column");
+    for(auto&amp;z:v)z/=n;
+    double e=std::abs(dot(v,v)-1);
+    for(const auto&amp;q:Q)e=std::max(e,std::abs(dot(v,q)));
+    Q.push_back(v);
+    out.rows.push_back({double(j+1),n,e});
+    }return out;
+    
+}
+
+inline Report rank_one_inverse(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,2,2);
+    parameters(p,0);
+    double den=1;
+    for(auto&amp;r:x)den+=r[1]*r[1]/positive(r[0]);
+    Report o{{"Index","InverseDiagonal","DetRatio"},{}};
+    for(std::size_t i=0;
+    i&lt;x.size();
+    ++i){auto&amp;r=x[i];
+    double a=1/r[0],b=a*r[1];
+    o.rows.push_back({double(i+1),a-b*b/den,den});
+    }return o;
+    
+}
+
+inline Report gershgorin(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,1,1,64);
+    parameters(p,0);
+    require(x.size()==d,"Square matrix required");
+    Report o{{"Row","Lower","Upper","GlobalLower"},{}};
+    double low=std::numeric_limits&lt;double&gt;::infinity();
+    for(std::size_t i=0;
+    i&lt;d;
+    ++i){double r=0;
+    for(std::size_t j=0;
+    j&lt;d;
+    ++j){require(std::abs(x[i][j]-x[j][i])&lt;=1e-10*std::max({1.,std::abs(x[i][j]),std::abs(x[j][i])}),"Symmetric matrix required");
+    if(i!=j)r+=std::abs(x[i][j]);
+    }low=std::min(low,x[i][i]-r);
+    o.rows.push_back({double(i+1),x[i][i]-r,x[i][i]+r,0});
+    }for(auto&amp;r:o.rows)r.back()=low;
+    return o;
+    
+}
+
+inline Report spectral_participation(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,1,1);
+    parameters(p,0);
+    double s=0;
+    for(auto&amp;r:x){require(r[0]&gt;=0,"Negative eigenvalue");
+    s+=r[0];
+    }positive(s);
+    double q=0,h=0;
+    for(auto&amp;r:x){double v=r[0]/s;
+    q+=v*v;
+    if(v&gt;0)h-=v*std::log(v);
+    }return scalar({"Trace","ParticipationRank","EntropyRank"},{s,1/q,std::exp(h)});
+    
+}
+} }
+</pre></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

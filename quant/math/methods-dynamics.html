@@ -1,0 +1,69 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>随机动态系统与状态估计｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/methods-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="math"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>随机动态系统与状态估计</h1><p>由模型定义、数学推导和可复算数值案例构成的独立研究方法。输入数据为教学构造，输出不代表实际投资结果。</p><p><a href="../research/methods-laboratories.html">研究方法实验室</a>　<a href="../cpp/methods_dynamics.hpp" download>完整C++17源码</a></p><nav><a href="#scalar-riccati">标量Kalman稳态Riccati迭代</a>　｜　<a href="#ou-transition">OU过程精确条件转移矩</a>　｜　<a href="#markov-occupation">两状态Markov占用概率</a>　｜　<a href="#innovation-likelihood">高斯状态空间创新似然</a></nav></header><article id="scalar-riccati"><h2>标量Kalman稳态Riccati迭代</h2><h3>模型与推导</h3><p>线性高斯随机状态预测方差增加过程噪声；增益由最小均方误差确定，Joseph形式的方差更新避免数值负值。输入行只确定更新步数，观测值不参与方差。</p><div class="equation">$$P_t^-=\phi^2P_{t-1}+Q,\quad K_t=P_t^-/(P_t^-+R)$$</div><div class="equation">$$P_t=(1-K_t)^2P_t^-+K_t^2R$$</div><h3>研究应用与成立条件</h3><p>局部水平模型φ＝1，过程与测量方差均1，初始方差0，三步后方差0.5、0.6、8／13，展示趋向稳态。模型错设会影响滤波可信度。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/scalar-riccati.csv" download>CSV数据</a>　<a href="../cpp/methods_dynamics.hpp" download>算法源码</a></p><pre>Observation
+0
+0
+0
+</pre><pre>./build/kline_quant methods-scalar-riccati quant/research/methods-examples/scalar-riccati.csv 1 1 1 0</pre><div class="wide"><table><thead><tr><th>Time</th><th>PredictionVariance</th><th>Gain</th><th>PosteriorVariance</th></tr></thead><tbody><tr><td>1</td><td>1</td><td>0.5</td><td>0.5</td></tr><tr><td>2</td><td>1.5</td><td>0.6</td><td>0.6</td></tr><tr><td>3</td><td>1.6</td><td>0.615384615385</td><td>0.615384615385</td></tr></tbody></table></div><p>参考文献：Durbin and Koopman (2012), Time Series Analysis by State Space Methods, 2nd ed., Oxford University Press.</p></article><article id="ou-transition"><h2>OU过程精确条件转移矩</h2><h3>模型与推导</h3><p>积分因子将均值回复SDE化为确定项加Itô积分，后者条件均值0，方差由Itô等距得到。实现使用expm1稳定计算小时间间隔。</p><div class="equation">$$dX_t=\kappa(\theta-X_t)dt+\sigma dW_t$$</div><div class="equation">$$\mathbb E[X_{t+h}|X_t=x]=\theta+(x-\theta)e^{-\kappa h},\quad V_h=\frac{\sigma^2}{2\kappa}(1-e^{-2\kappa h})$$</div><h3>研究应用与成立条件</h3><p>回复速度ln2、长期均值1、波动2、当前状态3，一期条件均值2，两期1.5。对利差或均值回复价差，参数应以同一时间单位估计；模型允许状态为负。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/ou-transition.csv" download>CSV数据</a>　<a href="../cpp/methods_dynamics.hpp" download>算法源码</a></p><pre>DeltaT
+1
+2
+</pre><pre>./build/kline_quant methods-ou-transition quant/research/methods-examples/ou-transition.csv 0.6931471805599453 1 2 3</pre><div class="wide"><table><thead><tr><th>Horizon</th><th>Mean</th><th>Variance</th></tr></thead><tbody><tr><td>1</td><td>2</td><td>2.16404256133</td></tr><tr><td>2</td><td>1.5</td><td>2.70505320167</td></tr></tbody></table></div><p>参考文献：Uhlenbeck and Ornstein (1930), On the theory of the Brownian motion, Physical Review.</p></article><article id="markov-occupation"><h2>两状态Markov占用概率</h2><h3>模型与推导</h3><p>状态1概率由状态0转入及状态1存留两部分相加，形成一阶递推。平稳概率由固定点方程得到，若a、b均正且不同时为1，则收敛。</p><div class="equation">$$P=\begin{pmatrix}1-a&amp;a\\b&amp;1-b\end{pmatrix},\quad p_{t+1}=a+(1-a-b)p_t$$</div><div class="equation">$$p_t=\frac a{a+b}+(p_0-\frac a{a+b})(1-a-b)^t$$</div><h3>研究应用与成立条件</h3><p>低波动向高波动概率0.2、反向0.4、初始高波动概率1，下一期0.6、两期0.44，长期1／3。状态定义和转移概率应由训练样本估计。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/markov-occupation.csv" download>CSV数据</a>　<a href="../cpp/methods_dynamics.hpp" download>算法源码</a></p><pre>Horizon
+0
+1
+2
+</pre><pre>./build/kline_quant methods-markov-occupation quant/research/methods-examples/markov-occupation.csv 0.2 0.4 1</pre><div class="wide"><table><thead><tr><th>Horizon</th><th>StateOne</th><th>StationaryOne</th></tr></thead><tbody><tr><td>0</td><td>1</td><td>0.333333333333</td></tr><tr><td>1</td><td>0.6</td><td>0.333333333333</td></tr><tr><td>2</td><td>0.44</td><td>0.333333333333</td></tr></tbody></table></div><p>参考文献：Durbin and Koopman (2012), Time Series Analysis by State Space Methods, 2nd ed., Oxford University Press.</p></article><article id="innovation-likelihood"><h2>高斯状态空间创新似然</h2><h3>模型与推导</h3><p>条件观测密度分解为逐期创新密度，联合对数似然为各项相加。标准化创新平方和用于模型拟合诊断；方差必须严格正且来自当期预测而非平滑。</p><div class="equation">$$\nu_t=y_t-\hat y_{t|t-1},\quad S_t=\operatorname{Var}(\nu_t|\mathcal F_{t-1})$$</div><div class="equation">$$\ell=-\tfrac12\sum_t[\log(2\pi S_t)+\nu_t^2/S_t]$$</div><h3>研究应用与成立条件</h3><p>创新0、2和方差1、4的标准化平方和1。可比较状态空间模型，但必须在相同观测及初始化约定下比较，训练似然不代表样本外表现。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/innovation-likelihood.csv" download>CSV数据</a>　<a href="../cpp/methods_dynamics.hpp" download>算法源码</a></p><pre>Innovation,Variance
+0,1
+2,4
+</pre><pre>./build/kline_quant methods-innovation-likelihood quant/research/methods-examples/innovation-likelihood.csv</pre><div class="wide"><table><thead><tr><th>LogLikelihood</th><th>StandardizedSS</th></tr></thead><tbody><tr><td>-3.03102424697</td><td>1</td></tr></tbody></table></div><p>参考文献：Durbin and Koopman (2012), Time Series Analysis by State Space Methods, 2nd ed., Oxford University Press.</p></article><section><h2>C++17实现</h2><pre>#pragma once
+#include "evidence_common.hpp"
+namespace kline { namespace methods_dynamics {
+using namespace evidence;
+inline Report scalar_riccati(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,1,1);
+    parameters(p,4);
+    double phi=p[0],q=positive(p[1]),r=positive(p[2]),v=p[3];
+    require(v&gt;=0,"Negative initial variance");
+    Report o{{"Time","PredictionVariance","Gain","PosteriorVariance"},{}};
+    for(std::size_t i=0;
+    i&lt;x.size();
+    ++i){double a=phi*phi*v+q,k=a/(a+r);
+    v=(1-k)*(1-k)*a+k*k*r;
+    o.rows.push_back({double(i+1),a,k,v});
+    }return o;
+    
+}
+
+inline Report ou_transition(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,1,1);
+    parameters(p,4);
+    double k=positive(p[0]),theta=p[1],s=positive(p[2]),z=p[3];
+    Report o{{"Horizon","Mean","Variance"},{}};
+    for(auto&amp;r:x){require(r[0]&gt;=0,"Negative horizon");
+    o.rows.push_back({r[0],theta+(z-theta)*std::exp(-k*r[0]),-s*s*std::expm1(-2*k*r[0])/(2*k)});
+    }return o;
+    
+}
+
+inline Report markov_occupation(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,1,1);
+    parameters(p,3);
+    double a=p[0],b=p[1],z=p[2];
+    require(a&gt;=0&amp;&amp;a&lt;=1&amp;&amp;b&gt;=0&amp;&amp;b&lt;=1&amp;&amp;a+b&gt;0&amp;&amp;z&gt;=0&amp;&amp;z&lt;=1,"Invalid transition or initial probability");
+    double s=a/(a+b);
+    Report o{{"Horizon","StateOne","StationaryOne"},{}};
+    for(auto&amp;r:x){auto h=count(r[0],0,1000000);
+    o.rows.push_back({double(h),s+(z-s)*std::pow(1-a-b,double(h)),s});
+    }return o;
+    
+}
+
+inline Report innovation_likelihood(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,2,2);
+    parameters(p,0);
+    double l=0,s=0;
+    for(auto&amp;r:x){double v=positive(r[1]),q=r[0]*r[0]/v;
+    s+=q;
+    l-=.5*(std::log(2*std::acos(-1.))+std::log(v)+q);
+    }return scalar({"LogLikelihood","StandardizedSS"},{l,s});
+    
+}
+} }
+</pre></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

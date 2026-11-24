@@ -1,0 +1,70 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>组合约束与风险情景归因｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/methods-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>组合约束与风险情景归因</h1><p>由模型定义、数学推导和可复算数值案例构成的独立研究方法。输入数据为教学构造，输出不代表实际投资结果。</p><p><a href="../research/methods-laboratories.html">研究方法实验室</a>　<a href="../cpp/methods_portfolio.hpp" download>完整C++17源码</a></p><nav><a href="#active-factor-risk">主动因子与特异风险的方差归因</a>　｜　<a href="#variance-shapley">双因子风险变动的对称Shapley分解</a>　｜　<a href="#binary-kelly">二点收益分布的约束Kelly配置</a>　｜　<a href="#liability-surplus">资产负债剩余价值的情景风险</a></nav></header><article id="active-factor-risk"><h2>主动因子与特异风险的方差归因</h2><h3>模型与推导</h3><p>单因子且特异误差相互不相关并与因子正交时，主动组合方差拆成因子暴露平方乘因子方差及各资产特异方差。输出不含主动收益；输入权重为组合减基准。</p><div class="equation">$$r=Bf+\varepsilon,\quad\Sigma=B\Sigma_fB^\top+D$$</div><div class="equation">$$w_a^\top\Sigma w_a=(w_a^\top B)^2\sigma_f^2+\sum_iw_{a,i}^2d_i$$</div><h3>研究应用与成立条件</h3><p>主动权重0.2与−0.2，暴露1与2，净因子暴露−0.2，因子方差0.0036、特异0.002。若残差存在相关性，须使用完整残差协方差矩阵。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/active-factor-risk.csv" download>CSV数据</a>　<a href="../cpp/methods_portfolio.hpp" download>算法源码</a></p><pre>ActiveWeight,Exposure,SpecificVariance
+0.2,1,0.04
+-0.2,2,0.01
+</pre><pre>./build/kline_quant methods-active-factor-risk quant/research/methods-examples/active-factor-risk.csv 0.09</pre><div class="wide"><table><thead><tr><th>FactorExposure</th><th>FactorVariance</th><th>SpecificVariance</th><th>TotalVariance</th></tr></thead><tbody><tr><td>-0.2</td><td>0.0036</td><td>0.002</td><td>0.0056</td></tr></tbody></table></div><p>参考文献：Meucci (2005), Risk and Asset Allocation, Springer.</p></article><article id="variance-shapley"><h2>双因子风险变动的对称Shapley分解</h2><h3>模型与推导</h3><p>组合权重和协方差同时变化时，单一路径归因依赖变化顺序。对权重先变、协方差先变两种顺序平均，得到对称Shapley贡献；协方差贡献用相同对称原则构造，和精确等于总方差变化。</p><div class="equation">$$\Delta V=w_1^\top\Sigma_1w_1-w_0^\top\Sigma_0w_0$$</div><div class="equation">$$C_w=\tfrac12[V(w_1,\Sigma_0)-V(w_0,\Sigma_0)+V(w_1,\Sigma_1)-V(w_0,\Sigma_1)]$$</div><h3>研究应用与成立条件</h3><p>两资产原权重0.5、0.5，新0.8、0.2，原风险对角1、2，新2、1。新方差1.32，权重和风险变化贡献分别按四个交叉情景计算。输出是方差单位而非波动率单位。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/variance-shapley.csv" download>CSV数据</a>　<a href="../cpp/methods_portfolio.hpp" download>算法源码</a></p><pre>WeightOld,WeightNew
+0.5,0.8
+0.5,0.2
+</pre><pre>./build/kline_quant methods-variance-shapley quant/research/methods-examples/variance-shapley.csv 1 2 0 2 1 0</pre><div class="wide"><table><thead><tr><th>OldVariance</th><th>NewVariance</th><th>WeightEffect</th><th>CovarianceEffect</th><th>Residual</th></tr></thead><tbody><tr><td>0.75</td><td>1.32</td><td>0.27</td><td>0.3</td><td>0</td></tr></tbody></table></div><p>参考文献：Meucci (2005), Risk and Asset Allocation, Springer.</p></article><article id="binary-kelly"><h2>二点收益分布的约束Kelly配置</h2><h3>模型与推导</h3><p>两个情景收益为a与−b，财富为正要求−1／a&lt;w&lt;1／b。对数增长率严格凹，驻点闭式解；有额外区间约束时截断到可行区间。程序检查整个约束区间不含破产点。</p><div class="equation">$$g(w)=p\log(1+aw)+(1-p)\log(1-bw)$$</div><div class="equation">$$w^*=\frac{pa-(1-p)b}{ab}$$</div><h3>研究应用与成立条件</h3><p>上涨20％概率0.6、下跌10％概率0.4，无约束权重4，约束0至1后为1。Kelly对概率误估敏感；应区分模型期望增长与历史回测收益。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/binary-kelly.csv" download>CSV数据</a>　<a href="../cpp/methods_portfolio.hpp" download>算法源码</a></p><pre>Return,Probability
+0.2,0.6
+-0.1,0.4
+</pre><pre>./build/kline_quant methods-binary-kelly quant/research/methods-examples/binary-kelly.csv 0 1</pre><div class="wide"><table><thead><tr><th>UnconstrainedWeight</th><th>ConstrainedWeight</th><th>ExpectedLog</th></tr></thead><tbody><tr><td>4</td><td>1</td><td>0.0672487278132</td></tr></tbody></table></div><p>参考文献：Meucci (2005), Risk and Asset Allocation, Springer.</p></article><article id="liability-surplus"><h2>资产负债剩余价值的情景风险</h2><h3>模型与推导</h3><p>资产与负债同时按市场价值重估，剩余是货币差而资金充足率为比例。资产正收益不保证剩余增加，关键是相对负债的绝对变动。</p><div class="equation">$$S_t=A_0(1+r_A)-L_0(1+r_L)$$</div><div class="equation">$$F_t=A_0(1+r_A)/[L_0(1+r_L)]$$</div><h3>研究应用与成立条件</h3><p>期初资产120、负债100；第一情景剩余30，第二3。负债收益表示负债现值变化而非支付收益，若存在外部缴费和现金流须分别建账。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/liability-surplus.csv" download>CSV数据</a>　<a href="../cpp/methods_portfolio.hpp" download>算法源码</a></p><pre>AssetReturn,LiabilityReturn
+0.1,0.02
+-0.1,0.05
+</pre><pre>./build/kline_quant methods-liability-surplus quant/research/methods-examples/liability-surplus.csv 120 100</pre><div class="wide"><table><thead><tr><th>Scenario</th><th>AssetValue</th><th>LiabilityValue</th><th>Surplus</th><th>FundingRatio</th></tr></thead><tbody><tr><td>1</td><td>132</td><td>102</td><td>30</td><td>1.29411764706</td></tr><tr><td>2</td><td>108</td><td>105</td><td>3</td><td>1.02857142857</td></tr></tbody></table></div><p>参考文献：Meucci (2005), Risk and Asset Allocation, Springer.</p></article><section><h2>C++17实现</h2><pre>#pragma once
+#include "evidence_common.hpp"
+namespace kline { namespace methods_portfolio {
+using namespace evidence;
+inline Report active_factor_risk(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,3,3);
+    parameters(p,1);
+    require(p[0]&gt;=0,"Negative factor variance");
+    double b=0,d=0;
+    for(auto&amp;r:x){require(r[2]&gt;=0,"Negative specific variance");
+    b+=r[0]*r[1];
+    d+=r[0]*r[0]*r[2];
+    }double f=b*b*p[0];
+    return scalar({"FactorExposure","FactorVariance","SpecificVariance","TotalVariance"},{b,f,d,f+d});
+    
+}
+
+inline Report variance_shapley(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,2,2);
+    parameters(p,6);
+    require(x.size()==2,"Two assets required");
+    for(int j:{0,3}){require(p[j]&gt;=0&amp;&amp;p[j+1]&gt;=0&amp;&amp;p[j]*p[j+1]&gt;=p[j+2]*p[j+2],"PSD covariance required");
+    }auto V=[&amp;](int w,int k){double a=x[0][w],b=x[1][w];
+    return a*a*p[k]+b*b*p[k+1]+2*a*b*p[k+2];
+    };
+    double a=V(0,0),b=V(1,0),c=V(0,3),d=V(1,3),u=.5*(b-a+d-c),v=.5*(c-a+d-b);
+    return scalar({"OldVariance","NewVariance","WeightEffect","CovarianceEffect","Residual"},{a,d,u,v,d-a-u-v});
+    
+}
+
+inline Report binary_kelly(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,2,2);
+    parameters(p,2);
+    require(x.size()==2&amp;&amp;x[0][0]&gt;0&amp;&amp;x[1][0]&lt;0,"Positive and negative outcomes required");
+    double a=x[0][0],b=-x[1][0],q=x[0][1];
+    require(q&gt;0&amp;&amp;q&lt;1&amp;&amp;std::abs(q+x[1][1]-1)&lt;1e-9,"Invalid probabilities");
+    require(p[0]&lt;=p[1]&amp;&amp;p[0]&gt;-1/a&amp;&amp;p[1]&lt;1/b,"Infeasible wealth interval");
+    double w=(q*a-(1-q)*b)/(a*b),z=std::max(p[0],std::min(p[1],w));
+    return scalar({"UnconstrainedWeight","ConstrainedWeight","ExpectedLog"},{w,z,q*std::log1p(a*z)+(1-q)*std::log1p(-b*z)});
+    
+}
+
+inline Report liability_surplus(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,2,2);
+    parameters(p,2);
+    double a=positive(p[0]),b=positive(p[1]);
+    Report o{{"Scenario","AssetValue","LiabilityValue","Surplus","FundingRatio"},{}};
+    for(std::size_t i=0;
+    i&lt;x.size();
+    ++i){auto&amp;r=x[i];
+    require(r[0]&gt;=-1,"Invalid asset return");
+    double u=a*(1+r[0]),v=b*positive(1+r[1]);
+    o.rows.push_back({double(i+1),u,v,u-v,u/v});
+    }return o;
+    
+}
+} }
+</pre></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

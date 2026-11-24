@@ -1,0 +1,88 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>预测决策与效用比较｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/methods-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="ml"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>预测决策与效用比较</h1><p>由模型定义、数学推导和可复算数值案例构成的独立研究方法。输入数据为教学构造，输出不代表实际投资结果。</p><p><a href="../research/methods-laboratories.html">研究方法实验室</a>　<a href="../cpp/methods_decision.hpp" download>完整C++17源码</a></p><nav><a href="#log-utility-grid">离散收益情景的对数效用配置</a>　｜　<a href="#cara-ce">CARA指数效用确定性等价</a>　｜　<a href="#regret-matrix">情景最大后悔与Minimax决策</a>　｜　<a href="#value-information">离散情景完全信息价值</a></nav></header><article id="log-utility-grid"><h2>离散收益情景的对数效用配置</h2><h3>模型与推导</h3><p>情景加权对数增长率严格关注财富乘数，导数给出边际效用，二阶导数非正保证凹性。实现输出给定网格，不声称离散最优即连续最优，拒绝破产情景。</p><div class="equation">$$U(w)=\sum_s p_s\log(1+wr_s)$$</div><div class="equation">$$CE(w)=e^{U(w)}-1,\quad U''(w)=-\sum_s p_s r_s^2/(1+wr_s)^2\le0$$</div><h3>研究应用与成立条件</h3><p>两情景+20％和−10％等概率，比较0、0.5、1权重的对数效用与确定性等价。历史样本频率不是稳定未来概率，杠杆与流动性约束仍需纳入。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/log-utility-grid.csv" download>CSV数据</a>　<a href="../cpp/methods_decision.hpp" download>算法源码</a></p><pre>Return,Probability
+0.2,0.5
+-0.1,0.5
+</pre><pre>./build/kline_quant methods-log-utility-grid quant/research/methods-examples/log-utility-grid.csv 0 1 3</pre><div class="wide"><table><thead><tr><th>Weight</th><th>ExpectedLog</th><th>CertaintyEquivalent</th></tr></thead><tbody><tr><td>0</td><td>0</td><td>0</td></tr><tr><td>0.5</td><td>0.0220084427084</td><td>0.022252415013</td></tr><tr><td>1</td><td>0.0384805205681</td><td>0.0392304845413</td></tr></tbody></table></div><p>参考文献：Berger (1985), Statistical Decision Theory and Bayesian Analysis, 2nd ed., Springer.</p></article><article id="cara-ce"><h2>CARA指数效用确定性等价</h2><h3>模型与推导</h3><p>通过反解期望效用得到确定性等价。Jensen不等式保证风险溢价非负，平移财富只平移CE。实现使用log-sum-exp稳定求和，支持负支付。</p><div class="equation">$$u(x)=-e^{-\gamma x},\quad CE=-\gamma^{-1}\log\sum_s p_s e^{-\gamma x_s}$$</div><div class="equation">$$\mathrm{RP}=\mathbb E[X]-CE\ge0$$</div><h3>研究应用与成立条件</h3><p>两个等概率支付0和2，风险厌恶1，CE约0.566，小于均值1。指数效用是绝对风险厌恶模型，风险厌恶参数单位必须与支付币种和尺度一致。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/cara-ce.csv" download>CSV数据</a>　<a href="../cpp/methods_decision.hpp" download>算法源码</a></p><pre>Payoff,Probability
+0,0.5
+2,0.5
+</pre><pre>./build/kline_quant methods-cara-ce quant/research/methods-examples/cara-ce.csv 1</pre><div class="wide"><table><thead><tr><th>Mean</th><th>CertaintyEquivalent</th><th>RiskPremium</th></tr></thead><tbody><tr><td>1</td><td>0.566219169517</td><td>0.433780830483</td></tr></tbody></table></div><p>参考文献：Berger (1985), Statistical Decision Theory and Bayesian Analysis, 2nd ed., Springer.</p></article><article id="regret-matrix"><h2>情景最大后悔与Minimax决策</h2><h3>模型与推导</h3><p>对每个情景计算最优可行决策收益，减去各决策收益即事后后悔值。最大后悔最小化不要求情景概率；均值仅作为等权诊断。</p><div class="equation">$$R_{sa}=\max_b U_{sb}-U_{sa}$$</div><div class="equation">$$a^*\in\arg\min_a\max_s R_{sa}$$</div><h3>研究应用与成立条件</h3><p>两个经济情景中行动3最大后悔1，优于行动1和2的3。该准则重视最差机会损失，区别于直接最大化最差收益；情景覆盖决定结果。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/regret-matrix.csv" download>CSV数据</a>　<a href="../cpp/methods_decision.hpp" download>算法源码</a></p><pre>Action1,Action2,Action3
+5,2,4
+0,3,2
+</pre><pre>./build/kline_quant methods-regret-matrix quant/research/methods-examples/regret-matrix.csv</pre><div class="wide"><table><thead><tr><th>Action</th><th>MaximumRegret</th><th>MeanRegret</th><th>Minimax</th></tr></thead><tbody><tr><td>1</td><td>3</td><td>1.5</td><td>0</td></tr><tr><td>2</td><td>3</td><td>1.5</td><td>0</td></tr><tr><td>3</td><td>1</td><td>1</td><td>1</td></tr></tbody></table></div><p>参考文献：Berger (1985), Statistical Decision Theory and Bayesian Analysis, 2nd ed., Springer.</p></article><article id="value-information"><h2>离散情景完全信息价值</h2><h3>模型与推导</h3><p>无额外信息时必须事前选同一行动，完全信息时可按情景选择。最大值的凸性保证信息价值非负，EVPI给出任何同类信号在该模型内的毛价值上界。</p><div class="equation">$$V_0=\max_a\sum_s p_s U_{sa},\quad V_{\mathrm{PI}}=\sum_s p_s\max_a U_{sa}$$</div><div class="equation">$$\mathrm{EVPI}=V_{\mathrm{PI}}-V_0\ge0$$</div><h3>研究应用与成立条件</h3><p>两等概率情景中，固定最佳收益2，知道情景后收益3，信息价值1。真实模型只有部分信息，且信息采购和执行成本必须扣除。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/value-information.csv" download>CSV数据</a>　<a href="../cpp/methods_decision.hpp" download>算法源码</a></p><pre>Probability,Action1,Action2
+0.5,4,0
+0.5,0,2
+</pre><pre>./build/kline_quant methods-value-information quant/research/methods-examples/value-information.csv</pre><div class="wide"><table><thead><tr><th>BestFixedExpectedPayoff</th><th>PerfectInformationPayoff</th><th>EVPI</th></tr></thead><tbody><tr><td>2</td><td>3</td><td>1</td></tr></tbody></table></div><p>参考文献：Berger (1985), Statistical Decision Theory and Bayesian Analysis, 2nd ed., Springer.</p></article><section><h2>C++17实现</h2><pre>#pragma once
+#include "evidence_common.hpp"
+namespace kline { namespace methods_decision {
+using namespace evidence;
+inline Report log_utility_grid(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,2,2);
+    parameters(p,3);
+    auto k=count(p[2],2,10001);
+    require(p[0]&lt;=p[1]&amp;&amp;double(k)*x.size()&lt;=2e7,"Invalid grid");
+    double s=0;
+    for(auto&amp;r:x){require(r[1]&gt;=0&amp;&amp;r[1]&lt;=1,"Invalid probability");
+    s+=r[1];
+    }require(std::abs(s-1)&lt;1e-9,"Probability sum");
+    Report o{{"Weight","ExpectedLog","CertaintyEquivalent"},{}};
+    for(std::size_t j=0;
+    j&lt;k;
+    ++j){double w=p[0]+(p[1]-p[0])*j/(k-1),v=0;
+    for(auto&amp;r:x){if(r[1]&gt;0)v+=r[1]*std::log(positive(1+w*r[0]));
+    }o.rows.push_back({w,v,std::expm1(v)});
+    }return o;
+    
+}
+
+inline Report cara_ce(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,2,2);
+    parameters(p,1);
+    double g=positive(p[0]),m=0,s=0,z=-std::numeric_limits&lt;double&gt;::infinity();
+    for(auto&amp;r:x){require(r[1]&gt;=0&amp;&amp;r[1]&lt;=1,"Invalid probability");
+    s+=r[1];
+    m+=r[0]*r[1];
+    if(r[1]&gt;0)z=std::max(z,std::log(r[1])-g*r[0]);
+    }require(std::abs(s-1)&lt;1e-9,"Probability sum");
+    double q=0;
+    for(auto&amp;r:x)if(r[1]&gt;0)q+=std::exp(std::log(r[1])-g*r[0]-z);
+    double ce=-(z+std::log(q))/g;
+    return scalar({"Mean","CertaintyEquivalent","RiskPremium"},{m,ce,m-ce});
+    
+}
+
+inline Report regret_matrix(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,1,2,64);
+    parameters(p,0);
+    Vec m(d,0),s(d,0);
+    for(auto&amp;r:x){double z=*std::max_element(r.begin(),r.end());
+    for(std::size_t j=0;
+    j&lt;d;
+    ++j){double v=z-r[j];
+    m[j]=std::max(m[j],v);
+    s[j]+=v;
+    }}double b=*std::min_element(m.begin(),m.end());
+    Report o{{"Action","MaximumRegret","MeanRegret","Minimax"},{}};
+    for(std::size_t j=0;
+    j&lt;d;
+    ++j)o.rows.push_back({double(j+1),m[j],s[j]/x.size(),double(m[j]==b)});
+    return o;
+    
+}
+
+inline Report value_information(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,1,3,64);
+    parameters(p,0);
+    Vec a(d-1,0);
+    double s=0,v=0;
+    for(auto&amp;r:x){require(r[0]&gt;=0&amp;&amp;r[0]&lt;=1,"Invalid probability");
+    s+=r[0];
+    v+=r[0]*(*std::max_element(r.begin()+1,r.end()));
+    for(std::size_t j=1;
+    j&lt;d;
+    ++j)a[j-1]+=r[0]*r[j];
+    }require(std::abs(s-1)&lt;1e-9,"Probability sum");
+    double b=*std::max_element(a.begin(),a.end());
+    return scalar({"BestFixedExpectedPayoff","PerfectInformationPayoff","EVPI"},{b,v,v-b});
+    
+}
+} }
+</pre></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

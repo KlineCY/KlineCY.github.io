@@ -1,0 +1,76 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>宏观经济传导与资产定价口径｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/methods-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>宏观经济传导与资产定价口径</h1><p>由模型定义、数学推导和可复算数值案例构成的独立研究方法。输入数据为教学构造，输出不代表实际投资结果。</p><p><a href="../research/methods-laboratories.html">研究方法实验室</a>　<a href="../cpp/methods_macroeconomics.hpp" download>完整C++17源码</a></p><nav><a href="#debt-dynamics">政府债务率、增长与初级余额</a>　｜　<a href="#gdp-growth-contributions">固定基期总量增长贡献</a>　｜　<a href="#real-fx-decomposition">实际汇率的对数价格分解</a>　｜　<a href="#uip-carry">外币存款的精确超额收益与UIP</a></nav></header><article id="debt-dynamics"><h2>政府债务率、增长与初级余额</h2><h3>模型与推导</h3><p>名义债务按有效利率滚存，再扣当期初级盈余并加入存量流量调整，除以当期名义GDP得到债务率恒等式。增长必须是名义增长，初级盈余及调整已按当期GDP归一。</p><div class="equation">$$b_t=\frac{1+i_t}{1+g_t}b_{t-1}-s_t+a_t$$</div><div class="equation">$$\Delta b_t=\frac{i_t-g_t}{1+g_t}b_{t-1}-s_t+a_t$$</div><h3>研究应用与成立条件</h3><p>初始债务率60％，名义增长10％高于利率5％，利息增长项为负。第二期增长为零且初级赤字1％，另有2％存量调整。该核算不预测财政反应或违约概率。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/debt-dynamics.csv" download>CSV数据</a>　<a href="../cpp/methods_macroeconomics.hpp" download>算法源码</a></p><pre>Interest,Growth,PrimarySurplus,StockFlowAdjustment
+0.05,0.1,0.02,0
+0.05,0,-0.01,0.02
+</pre><pre>./build/kline_quant methods-debt-dynamics quant/research/methods-examples/debt-dynamics.csv 0.6</pre><div class="wide"><table><thead><tr><th>Period</th><th>PreviousDebt</th><th>InterestGrowthEffect</th><th>PrimaryEffect</th><th>StockFlow</th><th>DebtRatio</th></tr></thead><tbody><tr><td>1</td><td>0.6</td><td>-0.0272727272727</td><td>-0.02</td><td>0</td><td>0.552727272727</td></tr><tr><td>2</td><td>0.552727272727</td><td>0.0276363636364</td><td>0.01</td><td>0.02</td><td>0.610363636364</td></tr></tbody></table></div><p>参考文献：Blanchard (2017), Macroeconomics, 7th ed., Pearson.</p></article><article id="gdp-growth-contributions"><h2>固定基期总量增长贡献</h2><h3>模型与推导</h3><p>在可加总、同价格基期的实际总量中，整体增长为各组成增长按前期份额加权。链式不变价的非可加总部分须使用统计机构专门贡献率，不能直接用本恒等式。</p><div class="equation">$$g=(\sum_iY_{i,t}-\sum_iY_{i,t-1})/\sum_iY_{i,t-1}$$</div><div class="equation">$$g=\sum_iw_{i,t-1}g_i,\quad w_{i,t-1}=Y_{i,t-1}/Y_{t-1}$$</div><h3>研究应用与成立条件</h3><p>前期60及40，后期66及38，总增长4％，两个贡献6和−2个百分点。案例仅适合正的基期组成，不处理负净出口等带符号分项。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/gdp-growth-contributions.csv" download>CSV数据</a>　<a href="../cpp/methods_macroeconomics.hpp" download>算法源码</a></p><pre>Previous,Current
+60,66
+40,38
+</pre><pre>./build/kline_quant methods-gdp-growth-contributions quant/research/methods-examples/gdp-growth-contributions.csv</pre><div class="wide"><table><thead><tr><th>Component</th><th>BaseShare</th><th>OwnGrowth</th><th>Contribution</th></tr></thead><tbody><tr><td>1</td><td>0.6</td><td>0.1</td><td>0.06</td></tr><tr><td>2</td><td>0.4</td><td>-0.05</td><td>-0.02</td></tr></tbody></table></div><p>参考文献：Blanchard (2017), Macroeconomics, 7th ed., Pearson.</p></article><article id="real-fx-decomposition"><h2>实际汇率的对数价格分解</h2><h3>模型与推导</h3><p>名义汇率E为本币每单位外币，实际汇率比较国外商品篮子的本币成本与国内价格。对数变化可精确拆为名义贬值、外国通胀减国内通胀。实际汇率上升表示按该定义本币实际贬值。</p><div class="equation">$$q_t=E_tP_t^*/P_t$$</div><div class="equation">$$\Delta\log q_t=\Delta\log E_t+\Delta\log P_t^*-\Delta\log P_t$$</div><h3>研究应用与成立条件</h3><p>名义汇率从1至1.1，外国价格100至105、国内100至110，实际汇率从1至1.05。指数基期应一致，贸易加权汇率需要多币种权重，而非单边案例外推。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/real-fx-decomposition.csv" download>CSV数据</a>　<a href="../cpp/methods_macroeconomics.hpp" download>算法源码</a></p><pre>NominalFX,ForeignPrice,DomesticPrice
+1,100,100
+1.1,105,110
+</pre><pre>./build/kline_quant methods-real-fx-decomposition quant/research/methods-examples/real-fx-decomposition.csv</pre><div class="wide"><table><thead><tr><th>Period</th><th>RealFX</th><th>LogNominalChange</th><th>LogForeignInflation</th><th>LogDomesticInflation</th><th>LogRealChange</th></tr></thead><tbody><tr><td>1</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td></tr><tr><td>2</td><td>1.05</td><td>0.0953101798043</td><td>0.0487901641694</td><td>0.0953101798043</td><td>0.0487901641694</td></tr></tbody></table></div><p>参考文献：Blanchard (2017), Macroeconomics, 7th ed., Pearson.</p></article><article id="uip-carry"><h2>外币存款的精确超额收益与UIP</h2><h3>模型与推导</h3><p>从本币换入外币存款，期末按即期汇率换回，外币利息与汇率变化以乘法组合。UIP在适当风险中性或期望条件下约束未对冲超额；实际实现包含汇率风险溢价及预测误差。</p><div class="equation">$$G^f=(1+i_f)E_{t+1}/E_t,\quad G^d=1+i_d$$</div><div class="equation">$$r^{\mathrm{excess}}=G^f-G^d,\quad \log(G^f/G^d)=\log(1+i_f)-\log(1+i_d)+\Delta\log E$$</div><h3>研究应用与成立条件</h3><p>本币利率2％、外币4％，外币升值5％时本币超额7.2个百分点；外币贬值2％时超额约−0.08个百分点。未计交易、融资及资本管制成本。</p><h3>可复算输入及解析输出</h3><p><a href="../research/methods-examples/uip-carry.csv" download>CSV数据</a>　<a href="../cpp/methods_macroeconomics.hpp" download>算法源码</a></p><pre>SpotNow,SpotNext,DomesticRate,ForeignRate
+1,1.05,0.02,0.04
+1,0.98,0.02,0.04
+</pre><pre>./build/kline_quant methods-uip-carry quant/research/methods-examples/uip-carry.csv</pre><div class="wide"><table><thead><tr><th>DomesticGross</th><th>ForeignInDomesticGross</th><th>ArithmeticExcess</th><th>LogExcess</th></tr></thead><tbody><tr><td>1.02</td><td>1.092</td><td>0.072</td><td>0.0682082500265</td></tr><tr><td>1.02</td><td>1.0192</td><td>-0.0008</td><td>-0.000784621460418</td></tr></tbody></table></div><p>参考文献：Blanchard (2017), Macroeconomics, 7th ed., Pearson.</p></article><section><h2>C++17实现</h2><pre>#pragma once
+#include "evidence_common.hpp"
+namespace kline { namespace methods_macroeconomics {
+using namespace evidence;
+inline Report debt_dynamics(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,4,4);
+    parameters(p,1);
+    double b=p[0];
+    require(b&gt;=0,"Negative initial debt ratio");
+    Report o{{"Period","PreviousDebt","InterestGrowthEffect","PrimaryEffect","StockFlow","DebtRatio"},{}};
+    for(std::size_t i=0;
+    i&lt;x.size();
+    ++i){auto&amp;r=x[i];
+    positive(1+r[0]);
+    double g=positive(1+r[1]),e=(r[0]-r[1])/g*b,v=b+e-r[2]+r[3];
+    o.rows.push_back({double(i+1),b,e,-r[2],r[3],v});
+    b=v;
+    }return o;
+    
+}
+
+inline Report gdp_growth_contributions(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,2,2);
+    parameters(p,0);
+    double s=0;
+    for(auto&amp;r:x){s+=positive(r[0]);
+    require(r[1]&gt;=0,"Negative current component");
+    }Report o{{"Component","BaseShare","OwnGrowth","Contribution"},{}};
+    for(std::size_t i=0;
+    i&lt;x.size();
+    ++i){auto&amp;r=x[i];
+    double a=r[0]/s,b=r[1]/r[0]-1;
+    o.rows.push_back({double(i+1),a,b,(r[1]-r[0])/s});
+    }return o;
+    
+}
+
+inline Report real_fx_decomposition(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,3,3);
+    parameters(p,0);
+    Report o{{"Period","RealFX","LogNominalChange","LogForeignInflation","LogDomesticInflation","LogRealChange"},{}};
+    for(std::size_t i=0;
+    i&lt;x.size();
+    ++i){auto&amp;r=x[i];
+    double a=positive(r[0]),b=positive(r[1]),c=positive(r[2]),u=0,v=0,w=0;
+    if(i){u=std::log(a/x[i-1][0]);
+    v=std::log(b/x[i-1][1]);
+    w=std::log(c/x[i-1][2]);
+    }o.rows.push_back({double(i+1),a*b/c,u,v,w,u+v-w});
+    }return o;
+    
+}
+
+inline Report uip_carry(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,4,4);
+    parameters(p,0);
+    Report o{{"DomesticGross","ForeignInDomesticGross","ArithmeticExcess","LogExcess"},{}};
+    for(auto&amp;r:x){double a=positive(1+r[2]),b=positive(1+r[3])*positive(r[1])/positive(r[0]);
+    o.rows.push_back({a,b,b-a,std::log(b/a)});
+    }return o;
+    
+}
+} }
+</pre></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>
