@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>时间序列研究：条件预测、波动动态与状态空间｜Kline Quant</title><meta name="description" content="可复现量化研究：数据、数学推导、C++17完整工作流与独立验证">
+<link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<style>body{margin:0;background:white;color:#142733;font:16px/1.95 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:24px 32px 64px}main{max-width:1180px;margin:auto}header,.lesson,.source,.references,.framework{border:1px solid #cbd4dc;padding:24px 28px;margin:18px 0;background:white}h1{font-size:31px;line-height:1.4}h2{font-size:23px;margin:10px 0 20px}h3{font-size:18px;margin:24px 0 8px}p{line-height:1.95;margin:12px 0}.toc{display:flex;flex-wrap:wrap;gap:9px 24px;border:1px solid #cad3d9;padding:17px 24px}.equation{overflow:auto;border-block:1px solid #d7dfe4;margin:18px 0;padding:16px 6px}.katex-display{overflow-x:auto;overflow-y:hidden}a{color:#1a5478}code,pre{font-family:"Times New Roman",monospace}pre{border:1px solid #cbd5dc;padding:15px;overflow:auto;white-space:pre;font-size:14px;line-height:1.7;max-height:900px}dl{display:grid;grid-template-columns:110px minmax(0,1fr);gap:10px 15px}dt{font-weight:bold}dd{margin:0;overflow-wrap:anywhere}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccd5dd;padding:10px 12px;text-align:left;background:white}th{font-weight:bold}.wide{overflow-x:auto}@media(max-width:790px){.main{margin:0;padding:12px}header,.lesson,.source,.references,.framework{padding:15px}dl{display:block}dt{margin-top:12px}}</style>
+</head><body><aside id="quantSidebar" class="sidebar" data-page="math"></aside><script src="../sidebar-v2.js"></script><div class="main"><main>
+<header><small>QUANTITATIVE RESEARCH / REPRODUCIBLE WORKFLOWS</small><h1>时间序列研究：条件预测、波动动态与状态空间</h1><p>时序研究的每个模型都应明确条件信息集、初始状态及创新误差。本专题从正则化AR、VAR的逐期预测出发，讨论条件方差、可观测状态转换和带测量误差的潜变量估计。各模型输出完整的时间序列预测记录，研究者可以在同一时间轴上核对预测值、实现值和误差。</p><p><a href="../research/reproducible-workflows.html">研究工作流总入口</a>　｜　<a href="../cpp/">C++17研究工具库</a>　｜　<a href="../research/run_researchflow.py" download>下载批量复算脚本</a></p></header>
+<nav class="toc"><a href="#lesson1">1．滚动正则化AR预测</a><a href="#lesson2">2．多资产正则化VAR预测</a><a href="#lesson3">3．EWMA与GARCH逐期波动预测</a><a href="#lesson4">4．滚动状态转换及条件收益预测</a><a href="#lesson5">5．状态空间预测与Kalman更新</a><a href="#source">完整C++17源码</a><a href="#references">参考文献</a></nav>
+<section class="framework" id="framework"><h2>研究框架与统一口径</h2><h3>预测与创新</h3><div class="equation">$$\widehat y_{t|t-1}=\mathbb E(y_t\mid\mathcal F_{t-1}),\quad e_t=y_t-\widehat y_{t|t-1}$$</div><p>先形成预测再观察当期数据，保证创新是相对于先前信息集定义的误差。回归与过滤应在更新模型之前记录预测；不允许将平滑后的历史潜状态冒充当时可得估计。</p>
+<h3>损失口径</h3><div class="equation">$$MSE=T^{-1}\sum_te_t^2,\quad QLIKE_t=\log h_t+r_t^2/h_t$$</div><p>均值模型评价与方差模型评价不同，后者以当期收益平方作为条件方差的噪声代理。两种模型只在共同有效测试期间进行比较。</p></section>
+<article class="lesson" id="lesson1"><h2>1．滚动正则化AR预测</h2><h3>研究问题与经济含义</h3><p>AR模型将过去p期的观测作为当前预测的解释变量。窗口指的是原始序列长度，而不是构造后的回归样本数；因此每个训练窗口内可用标签行数为L−p。程序按原始时点重建训练设计，避免跨窗口的滞后变量不小心扩大训练范围。</p><h3>数学定义与推导</h3><div class="equation">$$y_s=a+\sum_{j=1}^p\phi_jy_{s-j}+\epsilon_s,\quad s=t-L+p,\ldots,t-1$$</div><p>在窗口内构造滞后向量与响应，使用训练内标准化及正则化回归拟合。截距不受惩罚，系数估计采用均方目标尺度。</p><div class="equation">$$\widehat y_t=\bar y_{\rm train}+\widehat\beta^\top D_t^{-1}(z_t-\bar z_t),\qquad z_t=(y_{t-1},\ldots,y_{t-p})^\top$$</div><p>预测时的滞后向量完全由历史观测构成。训练区间的最后一行标签为y_{t−1}，当前y_t不参与拟合。</p><div class="equation">$$d_t=(y_t-y_{t-1})^2-(y_t-\widehat y_t)^2$$</div><h3>可复现样本与运行</h3><p>52期样例用L=15、p=3、λ=0.1。首期预测索引15，训练响应索引3至14，共12条。输出Persistence表示直接使用上一期观测的朴素基准。</p><dl><dt>样本文件</dt><dd><a href="../research/examples/series.csv" download>series.csv</a></dd><dt>输入字段</dt><dd>Return</dd><dt>参数顺序</dt><dd>原始时间窗口L、滞后阶p、Ridge惩罚λ</dd><dt>输出结构</dt><dd>预测日期、AR预测、实际值、上一期值基准、两种平方误差</dd></dl><pre><code>./build/kline_quant flow-rolling-ar quant/research/examples/series.csv 15 3 0.1</code></pre><h3>结果解释与实证研究设计</h3><p>若研究的是价格水平，持久性基准具有特殊意义；若研究的是收益，零收益或历史均值往往也是需要报告的基准。使用误差差值序列判断改进是否集中在少数冲击日。</p><h3>模型假设与适用边界</h3><p>正则化估计并不自动保证AR多项式根位于单位圆外，本程序仅执行一步预测；长期递推与冲击响应需另外进行稳定性检验。</p></article>
+<article class="lesson" id="lesson2"><h2>2．多资产正则化VAR预测</h2><h3>研究问题与经济含义</h3><p>VAR允许一项资产的滞后回报影响其他资产的条件均值。将同一时点的全部资产上一期观测作为特征，对每个响应资产分别拟合正则化线性模型。输出按日期、资产排列，便于随后按资产或截面汇总误差。</p><h3>数学定义与推导</h3><div class="equation">$$r_t=a+A r_{t-1}+\varepsilon_t,\qquad A\in\mathbb R^{d\times d}$$</div><p>每行系数对应一个被预测资产，各列对应滞后解释资产。不同响应共享相同训练时间范围和特征矩阵，但目标变量不同。</p><div class="equation">$$\widehat B=(Z^\top Z/n+\lambda I)^{-1}Z^\top Y_c/n$$</div><p>多响应Ridge在二次惩罚下可按响应列分解，逐个线性系统的解与一次求解多右端系统等价。这里以逐响应形式实现，便于清晰核查。</p><div class="equation">$$MSE_j=\frac1T\sum_t(r_{t,j}-\widehat r_{t,j})^2$$</div><h3>可复现样本与运行</h3><p>四资产48期样例使用15期窗口。首个预测日期索引15，每个资产使用14条训练响应；同一日期形成4条预测结果。</p><dl><dt>样本文件</dt><dd><a href="../research/examples/multiasset.csv" download>multiasset.csv</a></dd><dt>输入字段</dt><dd>AssetA, AssetB, AssetC, AssetD（同步简单收益）</dd><dt>参数顺序</dt><dd>原始窗口长度L、Ridge惩罚λ</dd><dt>输出结构</dt><dd>日期、资产编号、预测值、实现值、持久性基准及平方误差</dd></dl><pre><code>./build/kline_quant flow-rolling-var quant/research/examples/multiasset.csv 15 0.1</code></pre><h3>结果解释与实证研究设计</h3><p>先按资产计算均方误差，再基于事先确定的风险或经济权重汇总。不能仅以整体误差掩盖个别资产的失败。</p><h3>模型假设与适用边界</h3><p>VAR预测关联并不意味着因果关系；高维样本需要更强正则化、稳定性检查和多期预测检验。当前为VAR(1)的一步预测，不是协整VECM。</p></article>
+<article class="lesson" id="lesson3"><h2>3．EWMA与GARCH逐期波动预测</h2><h3>研究问题与经济含义</h3><p>波动聚集意味着相邻时点的条件方差并非恒定。EWMA以指数权重传播过去平方收益；GARCH(1,1)在更新方程中增加常数与独立的滞后方差项，使长期方差能够围绕有限均值回复。</p><h3>数学定义与推导</h3><div class="equation">$$h_{t+1}^{E}=d h_t^E+(1-d)r_t^2,\qquad h_{t+1}^{G}=\omega+\alpha r_t^2+\beta h_t^G$$</div><p>两模型都先输出h_t，再使用r_t更新下一期预测。对于零条件均值、单位创新方差的GARCH，α+β<1是有限无条件二阶矩的常见条件。</p><div class="equation">$$\mathbb E(h_t^G)=\frac{\omega}{1-\alpha-\beta},\qquad z_t=r_t/\sqrt{h_t}$$</div><p>长期方差从无条件方差递推的固定点得到。标准化创新有助于检查剩余波动聚集，但模型参数需先估计，不应利用测试段调节。</p><div class="equation">$$\ell_t(h)=\log h+r_t^2/h$$</div><h3>可复现样本与运行</h3><p>样例初始方差0.0001、EWMA衰减0.94，GARCH参数ω=0.000002、α=0.08、β=0.90；GARCH的无条件方差恰为0.0001。冲击日的平方收益只改变下一期方差。</p><dl><dt>样本文件</dt><dd><a href="../research/examples/series.csv" download>series.csv</a></dd><dt>输入字段</dt><dd>Return</dd><dt>参数顺序</dt><dd>初始方差h0、EWMA衰减d、GARCH常数ω、ARCH系数α、GARCH系数β</dd><dt>输出结构</dt><dd>逐期两种预测方差、标准化收益、QLIKE损失</dd></dl><pre><code>./build/kline_quant flow-volatility-forecast quant/research/examples/series.csv 0.0001 0.94 0.000002 0.08 0.9</code></pre><h3>结果解释与实证研究设计</h3><p>按日期比较两模型QLIKE，并观察标准化收益的平方自相关。若可获得高频实现方差，可使用更有效的波动代理进行独立评价。</p><h3>模型假设与适用边界</h3><p>代码只评估给定参数，不进行GARCH极大似然估计。假设条件均值为零，若存在均值过程，应输入相应创新序列。</p></article>
+<article class="lesson" id="lesson4"><h2>4．滚动状态转换及条件收益预测</h2><h3>研究问题与经济含义</h3><p>可观测制度变量例如事先定义的压力指标，可以作为离散状态。使用历史状态转移频数估计一步转移概率，并对各状态的历史回报求条件均值。当前收益预测对可能的下一状态加权，显式考虑制度切换的不确定性。</p><h3>数学定义与推导</h3><div class="equation">$$\widehat P_{ij,t}=\frac{N_{ij,t}+a}{\sum_kN_{ik,t}+2a}$$</div><p>伪计数避免没有观察到某种转移时直接得到零概率。窗口只有L个状态，因此转移计数共有L−1个相邻状态对。</p><div class="equation">$$\widehat\mu_{j,t}=\frac{\sum_{s&lt;t}r_s\mathbf1_{\{Z_s=j\}}}{\sum_{s&lt;t}\mathbf1_{\{Z_s=j\}}},\quad \widehat r_t=\sum_j\widehat P_{Z_{t-1},j,t}\widehat\mu_{j,t}$$</div><p>状态条件均值只使用同一历史窗口；若某状态未出现，用窗口总体均值作为明确定义的回退值。</p><div class="equation">$$BS_t=(\widehat P_{Z_{t-1},1,t}-Z_t)^2$$</div><h3>可复现样本与运行</h3><p>40期构造样例使用窗口10、每格伪计数1。预测中同时输出下一状态概率和收益预测，二者各自具有评价标准。</p><dl><dt>样本文件</dt><dd><a href="../research/examples/regimes.csv" download>regimes.csv</a></dd><dt>输入字段</dt><dd>State, Return</dd><dt>参数顺序</dt><dd>历史窗口L、每个转移单元的Dirichlet伪计数a</dd><dt>输出结构</dt><dd>前一状态、实际状态、状态1预测概率、Brier、条件收益预测及误差</dd></dl><pre><code>./build/kline_quant flow-regime-forecast quant/research/examples/regimes.csv 10 1</code></pre><h3>结果解释与实证研究设计</h3><p>通过逐期概率校准和条件回报误差比较制度模型与无条件均值。状态标签如果来自未来收益或事后全样本聚类，将使这种测试失去时点有效性。</p><h3>模型假设与适用边界</h3><p>当前状态必须可观测且定义于历史时点。这不是隐马尔可夫状态估计，不能从未来制度标签反推当前状态。</p></article>
+<article class="lesson" id="lesson5"><h2>5．状态空间预测与Kalman更新</h2><h3>研究问题与经济含义</h3><p>状态空间模型区分不可直接观测的潜在状态与含噪声的测量值。随机游走模型将前一期后验均值作为本期先验均值，并将过程噪声加入先验方差。观测的测量方差可以逐期变化。</p><h3>数学定义与推导</h3><div class="equation">$$X_t=X_{t-1}+u_t,\quad Y_t=X_t+v_t,\quad u_t\sim N(0,Q),\ v_t\sim N(0,R_t)$$</div><p>假设过程与测量噪声相互独立且跨期独立。给定历史，先验分布为正态，观测边际方差为预测状态方差加测量方差。</p><div class="equation">$$P_t^-=P_{t-1}+Q,\quad S_t=P_t^-+R_t,\quad K_t=P_t^-/S_t,\quad m_t=m_t^-+K_t(Y_t-m_t^-)$$</div><p>条件正态协方差公式给出Kalman增益。状态不确定性越大、测量越精确，增益越接近1；反之更依赖历史先验。</p><div class="equation">$$P_t=(1-K_t)^2P_t^-+K_t^2R_t,\quad \log p(Y_t\mid\mathcal F_{t-1})=-\tfrac12[\log(2\pi S_t)+e_t^2/S_t]$$</div><h3>可复现样本与运行</h3><p>30行样例初始m=0、P=1、Q=0.05。第一行观测0、R=0.2，先验方差1.05，创新方差1.25、后验方差0.168。程序输出两类方差供核对。</p><dl><dt>样本文件</dt><dd><a href="../research/examples/filter.csv" download>filter.csv</a></dd><dt>输入字段</dt><dd>Observation, MeasurementVariance</dd><dt>参数顺序</dt><dd>初始状态均值m0、初始状态方差P0、过程噪声方差Q</dd><dt>输出结构</dt><dd>逐期先验均值及方差、观测、创新及方差、后验均值方差、预测对数密度</dd></dl><pre><code>./build/kline_quant flow-filter-forecast quant/research/examples/filter.csv 0 1 0.05</code></pre><h3>结果解释与实证研究设计</h3><p>若参数从训练样本估计，可将预测对数密度按共同测试日期相加评价；创新标准化后应检查其相关性及方差，以识别模型遗漏。</p><h3>模型假设与适用边界</h3><p>模型只进行前向过滤而不做全样本平滑；使用后验状态做下一期预测是合法的，但将本期后验当作本期观测前预测会造成信息泄漏。</p></article>
+<section class="source" id="source"><h2>完整C++17算法实现</h2><p>实际算法使用标准C++17，输入为带表头的有序数值CSV，输出为具名字段的CSV。命令在仓库根目录执行；模型不会隐式读取外部行情或自动填补缺失数据。</p><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/researchflow_timeseries.hpp">完整算法文件</a>　｜　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/researchflow_common.hpp">线性系统、协方差与交易账本公共接口</a>　｜　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_researchflow.py">独立Python数值参考</a></p><pre><code>#pragma once
+#include "researchflow_ml.hpp"
+
+namespace kline { namespace researchflow {
+inline Report rolling_ar(const Mat&amp; x,const Vec&amp; p){
+    validate(x,5,1,1);parameters(p,3);
+    auto look=count(p[0],4,x.size()-1),order=count(p[1],1,std::min&lt;std::size_t&gt;(look-2,63));
+    double lambda=positive(p[2]);require(double(x.size()-look)*look*order*order&lt;=2e8,"AR work limit exceeded");Vec y=column(x,0);
+    Mat design;for(std::size_t t=order;t&lt;y.size();++t){
+        Vec row;for(std::size_t j=1;j&lt;=order;++j)row.push_back(y[t-j]);row.push_back(y[t]);design.push_back(row);
+    }
+    Report out{{"Period","Prediction","Actual","Persistence","SquaredError","PersistenceSquaredError"},{}};
+    for(std::size_t t=look;t&lt;y.size();++t){
+        auto f=ridge_fit(design,t-look,t-order,lambda);
+        double v=predict(f,design[t-order]),e=v-y[t],b=y[t-1]-y[t];
+        out.rows.push_back({double(t),v,y[t],y[t-1],e*e,b*b});
+    }
+    return out;
+}
+inline Report rolling_var(const Mat&amp; x,const Vec&amp; p){
+    std::size_t d=validate(x,5,2,16);parameters(p,2);
+    auto look=count(p[0],3,x.size()-1);double lambda=positive(p[1]);
+    require(double(x.size())*d*(d+1)&lt;=5000000&amp;&amp;double(x.size()-look)*look*d*d*d&lt;=2e8,"VAR work limit exceeded");
+    std::vector&lt;Mat&gt; design(d);
+    for(std::size_t t=1;t&lt;x.size();++t){
+        for(std::size_t j=0;j&lt;d;++j){Vec row=x[t-1];row.push_back(x[t][j]);design[j].push_back(std::move(row));}
+    }
+    Report out{{"Period","Asset","Prediction","Actual","Persistence","SquaredError","PersistenceSquaredError"},{}};
+    for(std::size_t t=look;t&lt;x.size();++t){
+        for(std::size_t j=0;j&lt;d;++j){
+            auto f=ridge_fit(design[j],t-look,t-1,lambda);
+            double v=predict(f,design[j][t-1]),e=v-x[t][j],b=x[t-1][j]-x[t][j];
+            out.rows.push_back({double(t),double(j+1),v,x[t][j],x[t-1][j],e*e,b*b});
+        }
+    }
+    return out;
+}
+inline Report volatility_forecast(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,1,1);parameters(p,5);
+    double e=positive(p[0]),g=e,decay=p[1],omega=positive(p[2]),alpha=p[3],beta=p[4];
+    require(decay&gt;=0&amp;&amp;decay&lt;1&amp;&amp;alpha&gt;=0&amp;&amp;beta&gt;=0&amp;&amp;alpha+beta&lt;1,"Invalid variance dynamics");
+    Report out{{"Period","Return","EWMAForecastVariance","GARCHForecastVariance","EWMAStandardized","GARCHStandardized","EWMAQLIKE","GARCHQLIKE"},{}};
+    for(std::size_t t=0;t&lt;x.size();++t){
+        double r=x[t][0],q=r*r;
+        positive(e);positive(g);
+        out.rows.push_back({double(t),r,e,g,r/std::sqrt(e),r/std::sqrt(g),std::log(e)+q/e,std::log(g)+q/g});
+        e=decay*e+(1-decay)*q;g=omega+alpha*q+beta*g;
+    }
+    return out;
+}
+inline Report regime_forecast(const Mat&amp; x,const Vec&amp; p){
+    validate(x,4,2,2);parameters(p,2);
+    auto look=count(p[0],2,x.size()-1);double prior=positive(p[1]);
+    for(const auto&amp; row:x)require(row[0]==0||row[0]==1,"State must be binary");
+    Report out{{"Period","PreviousState","State","State1Probability","Brier","ConditionalReturnPrediction","ActualReturn","SquaredError"},{}};
+    for(std::size_t t=look;t&lt;x.size();++t){
+        double transitions[2][2]={{prior,prior},{prior,prior}},amount[2]={0,0},n[2]={0,0};
+        for(std::size_t i=t-look;i&lt;t;++i){
+            int s=int(x[i][0]);amount[s]+=x[i][1];n[s]+=1;
+            if(i&gt;t-look)transitions[int(x[i-1][0])][s]+=1;
+        }
+        int prev=int(x[t-1][0]);double q=transitions[prev][1]/(transitions[prev][0]+transitions[prev][1]);
+        // The pooled mean is used when a state has no historical return observations.
+        double pooled=(amount[0]+amount[1])/look,m0=n[0]?amount[0]/n[0]:pooled,m1=n[1]?amount[1]/n[1]:pooled;
+        double pred=(1-q)*m0+q*m1;
+        out.rows.push_back({double(t),double(prev),x[t][0],q,std::pow(q-x[t][0],2),pred,x[t][1],std::pow(pred-x[t][1],2)});
+    }
+    return out;
+}
+inline Report filter_forecast(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,2,2);parameters(p,3);double state=p[0],v=p[1],q=p[2];
+    require(v&gt;=0&amp;&amp;q&gt;=0,"Negative state variance");
+    Report out{{"Period","PriorMean","PriorVariance","Observation","Innovation","InnovationVariance","PosteriorMean","PosteriorVariance","LogPredictiveDensity"},{}};
+    for(std::size_t t=0;t&lt;x.size();++t){
+        double obs=x[t][0],r=positive(x[t][1]),a=v+q,s=positive(a+r),err=obs-state,k=a/s;
+        double m=state+k*err,b=(1-k)*(1-k)*a+k*k*r;
+        double ll=-.5*(std::log(2*std::acos(-1.0)*s)+err*err/s);
+        out.rows.push_back({double(t),state,a,obs,err,s,m,b,ll});state=m;v=b;
+    }
+    return out;
+}
+} }
+</code></pre>
+<h3>编译与整套研究运行</h3><pre><code>cmake -S quant/cpp -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+python quant/research/run_researchflow.py ./build/kline_quant research-results</code></pre><p>Windows多配置生成器使用<code>.\build\Release\kline_quant.exe</code>；单配置生成器一般使用<code>.\build\kline_quant.exe</code>。输出目录须为新目录或空目录。批量脚本同时生成各流程输出及共同日期的跨模型评价结果。</p></section>
+<section class="references" id="references"><h2>参考文献与技术资料</h2><p><a href="https://doi.org/10.1016/0304-4076(86)90063-1">Bollerslev (1986), Generalized Autoregressive Conditional Heteroskedasticity</a></p>
+<p><a href="https://doi.org/10.1115/1.3662552">Kalman (1960), A New Approach to Linear Filtering and Prediction Problems</a></p>
+<p><a href="https://doi.org/10.1002/jae.800">Hansen &amp; Lunde (2005), A Forecast Comparison of Volatility Models</a></p>
+<p><a href="https://doi.org/10.1007/978-3-540-27752-1">Lütkepohl, New Introduction to Multiple Time Series Analysis</a></p><p>以上CSV均为构造教学数据。算例用于复算数学和软件行为，不作为实际资产投资业绩、市场报价或实证结论。</p></section>
+</main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

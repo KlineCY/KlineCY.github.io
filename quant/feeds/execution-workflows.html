@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>交易执行研究：订单账本、成交质量、容量优化与竞争风险｜Kline Quant</title><meta name="description" content="可复现量化研究：数据、数学推导、C++17完整工作流与独立验证">
+<link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<style>body{margin:0;background:white;color:#142733;font:16px/1.95 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:24px 32px 64px}main{max-width:1180px;margin:auto}header,.lesson,.source,.references,.framework{border:1px solid #cbd4dc;padding:24px 28px;margin:18px 0;background:white}h1{font-size:31px;line-height:1.4}h2{font-size:23px;margin:10px 0 20px}h3{font-size:18px;margin:24px 0 8px}p{line-height:1.95;margin:12px 0}.toc{display:flex;flex-wrap:wrap;gap:9px 24px;border:1px solid #cad3d9;padding:17px 24px}.equation{overflow:auto;border-block:1px solid #d7dfe4;margin:18px 0;padding:16px 6px}.katex-display{overflow-x:auto;overflow-y:hidden}a{color:#1a5478}code,pre{font-family:"Times New Roman",monospace}pre{border:1px solid #cbd5dc;padding:15px;overflow:auto;white-space:pre;font-size:14px;line-height:1.7;max-height:900px}dl{display:grid;grid-template-columns:110px minmax(0,1fr);gap:10px 15px}dt{font-weight:bold}dd{margin:0;overflow-wrap:anywhere}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccd5dd;padding:10px 12px;text-align:left;background:white}th{font-weight:bold}.wide{overflow-x:auto}@media(max-width:790px){.main{margin:0;padding:12px}header,.lesson,.source,.references,.framework{padding:15px}dl{display:block}dt{margin-top:12px}}</style>
+</head><body><aside id="quantSidebar" class="sidebar" data-page="feeds"></aside><script src="../sidebar-v2.js"></script><div class="main"><main>
+<header><small>QUANTITATIVE RESEARCH / REPRODUCIBLE WORKFLOWS</small><h1>交易执行研究：订单账本、成交质量、容量优化与竞争风险</h1><p>执行研究把策略所需交易量转换为真实订单、市场成交与费用。本专题以父订单、逐时段市场成交量、报价及成交事件为输入，统一分析买卖方向、交易成本、未成交机会成本和流动性容量。最优分配模型与事后成交诊断分开计算，避免将实际已知的成交量或价格误当作决策前的预测。</p><p><a href="../research/reproducible-workflows.html">研究工作流总入口</a>　｜　<a href="../cpp/">C++17研究工具库</a>　｜　<a href="../research/run_researchflow.py" download>下载批量复算脚本</a></p></header>
+<nav class="toc"><a href="#lesson1">1．父订单成交、机会成本与费用账本</a><a href="#lesson2">2．参与率、累计VWAP与执行偏离审计</a><a href="#lesson3">3．有效价差、实现价差与价格冲击</a><a href="#lesson4">4．带容量约束的凸成本执行计划</a><a href="#lesson5">5．成交与撤单的竞争风险累计发生率</a><a href="#source">完整C++17源码</a><a href="#references">参考文献</a></nav>
+<section class="framework" id="framework"><h2>研究框架与统一口径</h2><h3>交易方向与货币成本</h3><div class="equation">$$s\in\{+1,-1\},\quad C_{\rm price}=s\,q(P_{\rm fill}-P_0)$$</div><p>买入时价格高于基准产生正成本；卖出时价格低于基准产生正成本。成交数量使用非负绝对值，方向单独保存。全部费用及未成交机会成本使用相同货币单位。</p>
+<h3>名义金额归一化</h3><div class="equation">$$C_{\rm bps}=10^4 C/(Q P_0)$$</div><p>比较不同规模订单时，以父订单原始名义金额作为分母，而非事后成交名义金额。这使完全成交与部分成交订单在相同预算口径下可比较。</p></section>
+<article class="lesson" id="lesson1"><h2>1．父订单成交、机会成本与费用账本</h2><h3>研究问题与经济含义</h3><p>Implementation Shortfall以事先决定的理想交易价格作为参照，衡量真实执行与理想投资组合之间的价值差。分笔成交先按订单编号聚合，核验方向、基准、计划数量和结束价格的一致性，再计算成交与未成交两个组成部分。</p><h3>数学定义与推导</h3><div class="equation">$$C_{\rm exec}=s\sum_jq_j(P_j-P_0),\quad C_{\rm opp}=s(Q-\sum_jq_j)(P_T-P_0)$$</div><p>成交部分按每笔成交价格计算偏离，未成交部分按结束价格估计失去执行的机会成本。未成交机会成本可为负：若价格走势使等待有利，未成交部分反而减少总成本。</p><div class="equation">$$C_{\rm IS}=C_{\rm exec}+C_{\rm opp}+\sum_jf_j$$</div><p>三项相加恢复总执行缺口，费用应使用货币金额而非费率。父订单超过计划数量或同一订单元数据不一致时拒绝计算。</p><div class="equation">$$FillRate=\sum_jq_j/Q,\quad IS_{\rm bps}=10^4C_{\rm IS}/(QP_0)$$</div><h3>可复现样本与运行</h3><p>构造样例包含四个父订单及六条成交记录，其中有完全成交、部分成交和未成交情形。特别核对卖出方向的价格成本符号、计划量为正和剩余数量的非负性。</p><dl><dt>样本文件</dt><dd><a href="../research/examples/orders.csv" download>orders.csv</a></dd><dt>输入字段</dt><dd>Order, Side, Arrival, Target, FillPrice, FillQuantity, Fee, EndMark</dd><dt>参数顺序</dt><dd>无额外参数；按CSV表头录入订单编号、方向、基准价格、计划量、成交价格、成交量、费用、结束价格</dd><dt>输出结构</dt><dd>每个父订单的计划量、已成交量、成交比例、成交成本、机会成本、费用及总执行缺口</dd></dl><pre><code>./build/kline_quant flow-order-tca quant/research/examples/orders.csv</code></pre><h3>结果解释与实证研究设计</h3><p>比较订单级执行缺口时，应先按流动性、交易规模相对ADV比例和持有时间分层；跨组均值差可能来自订单结构而非执行算法。</p><h3>模型假设与适用边界</h3><p>结束价格及基准必须事先规定。这里仅进行订单账本归因，不识别市场冲击与市场自然波动之间的因果关系。</p></article>
+<article class="lesson" id="lesson2"><h2>2．参与率、累计VWAP与执行偏离审计</h2><h3>研究问题与经济含义</h3><p>以市场逐时段成交量作为可用流动性代理，对真实成交轨迹计算参与率。市场VWAP按全市场成交量加权，执行VWAP按本订单成交量加权。两者分别对应不同的成交集合。</p><h3>数学定义与推导</h3><div class="equation">$$\pi_t=q_t/V_t,\quad I_t=\mathbf1_{\{\pi_t&gt;\rho\}},\quad Q_t^{\rm rem}=Q-\sum_{u\le t}q_u$$</div><p>任何时段的本订单成交不能超过该时段市场成交量；累计成交不能超过父订单目标。参与率超过预设阈值时标记，但事后审计保留真实违规记录。</p><div class="equation">$$VWAP_t^{m}=\frac{\sum_{u\le t}V_uP_u^m}{\sum_{u\le t}V_u},\quad VWAP_t^{e}=\frac{\sum_{u\le t}q_uP_u^e}{\sum_{u\le t}q_u}$$</div><p>如果累计尚未成交，执行VWAP输出0作为未定义占位，同时累计成交为0；不能将该占位值当作真实价格。</p><div class="equation">$$C_t=s\sum_{u\le t}q_u(P_u^e-P_0)+\sum_{u\le t}f_u$$</div><h3>可复现样本与运行</h3><p>样例设定买入40单位、基准100、参与率上限0.2。第二时段市场成交30、本订单成交9，参与率0.3，应被标记超限；最终累计成交等于40。</p><dl><dt>样本文件</dt><dd><a href="../research/examples/participation.csv" download>participation.csv</a></dd><dt>输入字段</dt><dd>MarketVolume, MarketVWAP, FillQuantity, FillPrice, Fee</dd><dt>参数顺序</dt><dd>买卖方向s、父订单数量Q、决策基准P0、最大参与率ρ</dd><dt>输出结构</dt><dd>逐时段成交量、累计成交、剩余量、参与率、超限标志、累计市场与执行VWAP、累计成交缺口及费用</dd></dl><pre><code>./build/kline_quant flow-participation-audit quant/research/examples/participation.csv 1 40 100 0.2</code></pre><h3>结果解释与实证研究设计</h3><p>把成交缺口与参与率轨迹联合分析，可判断高成本是否集中在流动性较差的时段。若需衡量机会成本，应另将剩余量与结束基准接入父订单TCA。</p><h3>模型假设与适用边界</h3><p>实际市场成交量是事后审计数据；制定执行计划时必须使用当时可获得的预测量，不能把全天实现成交量提前传入优化器。</p></article>
+<article class="lesson" id="lesson3"><h2>3．有效价差、实现价差与价格冲击</h2><h3>研究问题与经济含义</h3><p>有效价差衡量主动成交价格相对当时中间价的偏离。固定观察期限后的中间价反映交易后的价格变化，可把有效价差拆成实现价差和价格冲击两部分。</p><h3>数学定义与推导</h3><div class="equation">$$ES=2s(P-M_0)/M_0,\quad RS=2s(P-M_h)/M_0$$</div><p>乘2使从中间价到一侧成交价的距离转为双边价差口径。两种价差均用成交时中间价归一化，确保代数分解一致。</p><div class="equation">$$PI=2s(M_h-M_0)/M_0,\qquad ES=RS+PI$$</div><p>对买入而言，未来中间价上升产生正价格冲击；对卖出而言，未来中间价下降同样产生正冲击。所有输出均乘以10000换算为基点。</p><div class="equation">$$\overline{ES}_t=\frac{\sum_{j\le t}q_jES_j}{\sum_{j\le t}q_j}$$</div><h3>可复现样本与运行</h3><p>样例第一笔买入20单位，成交价100.1、成交时中间价100、未来中间价100.04，有效价差20基点、实现价差12基点、价格冲击8基点。</p><dl><dt>样本文件</dt><dd><a href="../research/examples/spread.csv" download>spread.csv</a></dd><dt>输入字段</dt><dd>Sign, Midpoint, TradePrice, FutureMidpoint, Quantity</dd><dt>参数顺序</dt><dd>无额外参数；输入方向、中间价、成交价、未来中间价、成交数量</dd><dt>输出结构</dt><dd>单笔及累计成交量加权有效价差、实现价差与价格冲击（基点）</dd></dl><pre><code>./build/kline_quant flow-spread-decomposition quant/research/examples/spread.csv</code></pre><h3>结果解释与实证研究设计</h3><p>同一观察期限下按成交量加权，分析不同交易方向或流动性组的价差结构；逐笔检查有效价差等于实现价差与价格冲击之和。</p><h3>模型假设与适用边界</h3><p>未来中间价必须在相同定义的时间跨度获取；价格变化也含公共信息，因此分解中的价格冲击不等同于本笔交易的因果冲击。</p></article>
+<article class="lesson" id="lesson4"><h2>4．带容量约束的凸成本执行计划</h2><h3>研究问题与经济含义</h3><p>在给定各时段预测流动性的条件下，将执行成本写成线性价差成本与二次成交冲击之和。非负成交量和逐时段参与率上界限制可行域；凸目标保证只要预算可行，满足KKT条件的解即为全局最优。</p><h3>数学定义与推导</h3><div class="equation">$$\min_{q}\sum_t(a_tq_t+b_tq_t^2/V_t),\quad \sum_tq_t=Q,\quad 0\le q_t\le\rho V_t$$</div><p>其中V_t为决策时可获得的市场量预测，a_t为每单位线性成本，b_t为正的二次成本系数。可行性要求Q不超过所有时段容量之和。</p><div class="equation">$$q_t(\nu)=\operatorname{clip}\left(\frac{(\nu-a_t)V_t}{2b_t},0,\rho V_t\right)$$</div><p>固定预算乘子ν时，各坐标的无约束驻点可解析求出；在闭区间内取截断值。内部坐标的边际成本等于ν，达到上界时边际成本不高于ν，零头寸时不低于ν。</p><div class="equation">$$\sum_tq_t(\nu)=Q,\quad \frac{\partial C_t}{\partial q_t}=a_t+2b_tq_t/V_t$$</div><h3>可复现样本与运行</h3><p>分配总量关于ν连续且单调不减，二分搜索使数量约束满足。样例六个时段、目标55、容量比例0.2，最大总容量84；独立测试核查预算、上下界和每个坐标的KKT条件。</p><dl><dt>样本文件</dt><dd><a href="../research/examples/schedule.csv" download>schedule.csv</a></dd><dt>输入字段</dt><dd>ForecastVolume, LinearCost, QuadraticCost</dd><dt>参数顺序</dt><dd>父订单目标量Q、最大参与率ρ</dd><dt>输出结构</dt><dd>每个时段的预测量、分配量、参与率、预期成本、累计数量及预算约束乘子</dd></dl><pre><code>./build/kline_quant flow-optimal-participation quant/research/examples/schedule.csv 55 0.2</code></pre><h3>结果解释与实证研究设计</h3><p>将优化计划与均匀分配、按预测成交量等比例分配比较，检验预期成本及可行性；真实执行后用参与率审计重新计算实际偏离。</p><h3>模型假设与适用边界</h3><p>当前为确定性凸成本模型，没有库存风险、随机成交、跨时段永久冲击和价格方向预测；其参数与预测量应从训练数据或明确假设获得。</p></article>
+<article class="lesson" id="lesson5"><h2>5．成交与撤单的竞争风险累计发生率</h2><h3>研究问题与经济含义</h3><p>限价单可能因成交离开风险集，也可能因撤单终止。撤单一旦发生，原订单便不再可能成交，因此撤单不是普通意义下与成交独立的删失。竞争风险框架分别累计成交和撤单的概率质量。</p><h3>数学定义与推导</h3><div class="equation">$$dF_1(t)=S(t^-)\frac{dN_1(t)}{Y(t)},\quad dF_2(t)=S(t^-)\frac{dN_2(t)}{Y(t)}$$</div><p>Y(t)为事件发生前仍处于风险集中的订单数；同一时点的全部成交和撤单使用相同风险集及事件前生存概率。普通删失只改变之后的风险集。</p><div class="equation">$$S(t)=S(t^-)\left(1-\frac{dN_1(t)+dN_2(t)}{Y(t)}\right)$$</div><p>累计发生率增量使用事件前生存概率，随后更新生存率；同时点事件和删失按先计入风险集、后统一移除的约定处理。</p><div class="equation">$$S(t)+F_1(t)+F_2(t)=1$$</div><h3>可复现样本与运行</h3><p>样例15个订单，等待时间1至9，包含成交、撤单和右删失。首时点风险集15，同时一笔成交与一笔撤单，因此两种累计发生率各为1/15、生存率13/15。</p><dl><dt>样本文件</dt><dd><a href="../research/examples/fills.csv" download>fills.csv</a></dd><dt>输入字段</dt><dd>Elapsed, Event</dd><dt>参数顺序</dt><dd>无额外参数；输入非负等待时间与事件编号0（删失）、1（成交）、2（撤单）</dd><dt>输出结构</dt><dd>事件时点、风险集大小、成交数、撤单数、删失数、尚未发生事件的生存概率及两项累计发生率</dd></dl><pre><code>./build/kline_quant flow-competing-fill quant/research/examples/fills.csv</code></pre><h3>结果解释与实证研究设计</h3><p>按距离最优价的tick数、订单大小或队列位置分组估计发生率。将成交概率和等待时间作为限价单策略的执行风险输入，而非单看最终成交比率。</p><h3>模型假设与适用边界</h3><p>假设订单在时间零进入观察，右删失相对于事件过程满足适当独立条件。若撤单由内生决策触发，其累计发生率仍是描述性概率，不能直接解释为反事实保留订单的成交概率。</p></article>
+<section class="source" id="source"><h2>完整C++17算法实现</h2><p>实际算法使用标准C++17，输入为带表头的有序数值CSV，输出为具名字段的CSV。命令在仓库根目录执行；模型不会隐式读取外部行情或自动填补缺失数据。</p><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/researchflow_execution.hpp">完整算法文件</a>　｜　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/researchflow_common.hpp">线性系统、协方差与交易账本公共接口</a>　｜　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_researchflow.py">独立Python数值参考</a></p><pre><code>#pragma once
+#include "researchflow_common.hpp"
+#include &lt;map&gt;
+
+namespace kline { namespace researchflow {
+inline Report order_tca(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,8,8);parameters(p,0);
+    struct Order {double side=0,arrival=0,target=0,mark=0,quantity=0,notional=0,fees=0;};
+    std::map&lt;std::size_t,Order&gt; orders;
+    for(const auto&amp; r:x){
+        auto id=count(r[0],0,1000000000);
+        require(r[1]==1||r[1]==-1,"Side must be +1 for buy or -1 for sell");
+        positive(r[2]);positive(r[3]);positive(r[4]);positive(r[7]);
+        require(r[5]&gt;=0&amp;&amp;r[6]&gt;=0,"Negative fill or fee");
+        auto&amp; o=orders[id];
+        if(o.side==0){o.side=r[1];o.arrival=r[2];o.target=r[3];o.mark=r[7];}
+        require(o.side==r[1]&amp;&amp;o.arrival==r[2]&amp;&amp;o.target==r[3]&amp;&amp;o.mark==r[7],"Inconsistent order metadata");
+        o.quantity+=r[5];o.notional+=r[4]*r[5];o.fees+=r[6];
+        require(o.quantity&lt;=o.target+1e-10*o.target,"Order overfilled");
+    }
+    Report out{{"Order","Side","TargetQuantity","FilledQuantity","UnfilledQuantity","FillRate","ExecutionCost","OpportunityCost","Fees","TotalShortfall","ShortfallBps"},{}};
+    for(const auto&amp; q:orders){
+        const auto&amp; o=q.second;double remaining=std::max(0.0,o.target-o.quantity);
+        double execution=o.side*(o.notional-o.arrival*o.quantity);
+        double opportunity=o.side*(o.mark-o.arrival)*remaining;
+        double total=execution+opportunity+o.fees;
+        out.rows.push_back({double(q.first),o.side,o.target,o.quantity,remaining,o.quantity/o.target,execution,opportunity,o.fees,total,total/(o.target*o.arrival)*10000});
+    }
+    return out;
+}
+inline Report participation_audit(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,5,5);parameters(p,4);double side=p[0],target=positive(p[1]),arrival=positive(p[2]),cap=p[3];
+    require((side==1||side==-1)&amp;&amp;cap&gt;0&amp;&amp;cap&lt;=1,"Invalid side or participation cap");
+    Report out{{"Period","FillQuantity","CumulativeFilled","Remaining","Participation","CapBreach","MarketVWAPToDate","ExecutionVWAPToDate","ExecutionShortfallToDate","FeeToDate"},{}};
+    double market=0,marketvalue=0,fill=0,notional=0,fees=0;
+    for(std::size_t t=0;t&lt;x.size();++t){
+        const auto&amp; r=x[t];positive(r[0]);positive(r[1]);positive(r[3]);require(r[2]&gt;=0&amp;&amp;r[2]&lt;=r[0]&amp;&amp;r[4]&gt;=0,"Invalid market or fill data");
+        market+=r[0];marketvalue+=r[0]*r[1];fill+=r[2];notional+=r[2]*r[3];fees+=r[4];
+        require(fill&lt;=target+1e-10*target,"Target quantity exceeded");
+        double share=r[2]/r[0];
+        out.rows.push_back({double(t),r[2],fill,std::max(0.0,target-fill),share,share&gt;cap+1e-12?1.0:0.0,marketvalue/market,fill&gt;0?notional/fill:0,side*(notional-arrival*fill)+fees,fees});
+    }
+    return out;
+}
+inline Report spread_decomposition(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,5,5);parameters(p,0);
+    Report out{{"Trade","EffectiveSpreadBps","RealizedSpreadBps","PriceImpactBps","CumulativeEffectiveBps","CumulativeRealizedBps","CumulativeImpactBps"},{}};
+    double volume=0,es=0,rs=0,impact=0;
+    for(std::size_t i=0;i&lt;x.size();++i){
+        const auto&amp; r=x[i];require(r[0]==1||r[0]==-1,"Trade sign must be binary");positive(r[1]);positive(r[2]);positive(r[3]);positive(r[4]);
+        double e=2*r[0]*(r[2]-r[1])/r[1]*10000;
+        double s=2*r[0]*(r[2]-r[3])/r[1]*10000;
+        double z=2*r[0]*(r[3]-r[1])/r[1]*10000;
+        volume+=r[4];es+=e*r[4];rs+=s*r[4];impact+=z*r[4];
+        out.rows.push_back({double(i),e,s,z,es/volume,rs/volume,impact/volume});
+    }
+    return out;
+}
+inline Report optimal_participation(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,3,3);parameters(p,2);double target=positive(p[0]),rho=p[1];
+    require(rho&gt;0&amp;&amp;rho&lt;=1,"Participation cap must be in (0,1]");
+    double cap=0,lo=std::numeric_limits&lt;double&gt;::infinity(),hi=-lo;
+    for(const auto&amp; r:x){
+        positive(r[0]);require(r[1]&gt;=0,"Negative linear execution cost");positive(r[2]);
+        cap+=rho*r[0];lo=std::min(lo,r[1]);hi=std::max(hi,r[1]+2*r[2]*rho);
+    }
+    require(target&lt;=cap,"Parent order exceeds forecast capacity");
+    auto quantity=[&amp;](const Vec&amp; r,double nu){return std::clamp((nu-r[1])*r[0]/(2*r[2]),0.0,rho*r[0]);};
+    for(int i=0;i&lt;100;++i){
+        double m=lo+(hi-lo)/2,s=0;for(const auto&amp; r:x)s+=quantity(r,m);
+        if(s&lt;target)lo=m;else hi=m;
+    }
+    double nu=lo+(hi-lo)/2,total=0;
+    Report out{{"Period","ForecastVolume","AllocatedQuantity","Participation","ExpectedCost","CumulativeQuantity","DualPrice"},{}};
+    for(std::size_t i=0;i&lt;x.size();++i){
+        const auto&amp; r=x[i];double q=quantity(r,nu);total+=q;
+        out.rows.push_back({double(i),r[0],q,q/r[0],r[1]*q+r[2]*q*q/r[0],total,nu});
+    }
+    require(std::abs(total-target)&lt;1e-8*std::max(1.0,target),"Quantity constraint not solved");
+    return out;
+}
+inline Report competing_fill(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,2,2);parameters(p,0);
+    std::map&lt;double,Vec&gt; events;
+    for(const auto&amp; r:x){
+        require(r[0]&gt;=0,"Negative elapsed time");auto e=count(r[1],0,2);
+        auto&amp; n=events[r[0]];if(n.empty())n=Vec(3,0);++n[e];
+    }
+    double risk=double(x.size()),survival=1,fill=0,cancel=0;
+    Report out{{"Elapsed","AtRisk","Fills","Cancellations","Censored","StillOpenProbability","FillIncidence","CancelIncidence"},{}};
+    for(const auto&amp; entry:events){
+        const auto&amp; n=entry.second;double f=n[1],c=n[2];
+        fill+=survival*f/risk;cancel+=survival*c/risk;
+        survival*=1-(f+c)/risk;
+        out.rows.push_back({entry.first,risk,f,c,n[0],survival,fill,cancel});risk-=sum(n);
+    }
+    return out;
+}
+} }
+</code></pre>
+<h3>编译与整套研究运行</h3><pre><code>cmake -S quant/cpp -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+python quant/research/run_researchflow.py ./build/kline_quant research-results</code></pre><p>Windows多配置生成器使用<code>.\build\Release\kline_quant.exe</code>；单配置生成器一般使用<code>.\build\kline_quant.exe</code>。输出目录须为新目录或空目录。批量脚本同时生成各流程输出及共同日期的跨模型评价结果。</p></section>
+<section class="references" id="references"><h2>参考文献与技术资料</h2><p><a href="https://doi.org/10.21314/JOR.2001.041">Almgren &amp; Chriss (2001), Optimal Execution of Portfolio Transactions</a></p>
+<p><a href="https://www.nyse.com/market-data/historical/daily-taq">NYSE, Daily TAQ</a></p>
+<p><a href="https://www.sec.gov/rules-regulations/2005/06/regulation-nms">SEC, Regulation NMS</a></p>
+<p><a href="https://www.jstor.org/stable/4615704">Aalen &amp; Johansen (1978), An Empirical Transition Matrix for Non-Homogeneous Markov Chains Based on Censored Observations</a></p><p>以上CSV均为构造教学数据。算例用于复算数学和软件行为，不作为实际资产投资业绩、市场报价或实证结论。</p></section>
+</main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

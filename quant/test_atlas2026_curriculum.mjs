@@ -171,6 +171,6 @@ for(const entry of catalog){
 assert.equal(chapters,50);
 assert.equal(formulas,100);
 assert.equal(cases.size,50);
-assert(cpp.includes("<strong>300</strong>")&&cpp.includes("<strong>610</strong>"),
+assert(cpp.includes("<strong>305</strong>")&&cpp.includes("<strong>635</strong>"),
        "C++ documentation counts conflict with executable models");
 console.log("PASS: 50 complete quantitative chapters, 100 strict KaTeX equations, 50 CLI recipes and 10 exact code-linked directories");
