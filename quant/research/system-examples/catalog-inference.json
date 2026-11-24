@@ -1,0 +1,250 @@
+[
+  {
+    "command": "system-ols-hc3-inference",
+    "title": "异方差稳健回归：杠杆值、HC3与留一误差",
+    "area": "audit",
+    "columns": [
+      "Y",
+      "X1",
+      "X2"
+    ],
+    "file": "ols-hc3-inference.csv",
+    "params": [],
+    "header": [
+      "Feature",
+      "Coefficient",
+      "HC3Variance",
+      "HC3SE",
+      "MeanLeverage",
+      "PRESS"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        2.3
+      ],
+      [
+        2,
+        1.4
+      ]
+    ],
+    "ref": "MacKinnon and White (1985), Some Heteroskedasticity-Consistent Covariance Matrix Estimators with Improved Finite Sample Properties, Journal of Econometrics.",
+    "url": "https://doi.org/10.1016/0304-4076(85)90158-7"
+  },
+  {
+    "command": "system-quantile-crossing-projection",
+    "title": "分位数预测交叉修复：加权PAVA与Pinball评价",
+    "area": "ml",
+    "columns": [
+      "Actual",
+      "Q1",
+      "Q2",
+      "Q3"
+    ],
+    "file": "quantile-crossing-projection.csv",
+    "params": [
+      0.1,
+      0.5,
+      0.9,
+      1,
+      1,
+      1
+    ],
+    "header": [
+      "Row",
+      "Actual",
+      "OriginalPinball",
+      "ProjectedPinball",
+      "ProjectionLoss",
+      "RawCrossings",
+      "Q1",
+      "Q2",
+      "Q3"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        1,
+        0.6,
+        0.4,
+        0.5,
+        1,
+        0,
+        1.5,
+        1.5
+      ],
+      [
+        2,
+        2,
+        0.2,
+        0.2,
+        0,
+        0,
+        1,
+        2,
+        3
+      ]
+    ],
+    "ref": "Chernozhukov, Fernández-Val and Galichon (2010), Quantile and Probability Curves Without Crossing, Econometrica.",
+    "url": "https://doi.org/10.3982/ECTA7880"
+  },
+  {
+    "command": "system-permutation-randomization",
+    "title": "精确随机化推断：固定处理数量、全排列与双侧统计量",
+    "area": "audit",
+    "columns": [
+      "Outcome",
+      "Treatment"
+    ],
+    "file": "permutation-randomization.csv",
+    "params": [],
+    "header": [
+      "ObservedDifference",
+      "Assignments",
+      "ExtremeAssignments",
+      "ExactPValue",
+      "NullMean",
+      "NullVariance"
+    ],
+    "expected_prefix": [
+      [
+        2,
+        6,
+        2,
+        0.3333333333333333,
+        0,
+        1.6666666666666667
+      ]
+    ],
+    "ref": "Fisher (1935), The Design of Experiments, Oliver and Boyd.",
+    "url": "https://archive.org/details/designofexperime0000fish"
+  },
+  {
+    "command": "system-kaplan-meier-rmst",
+    "title": "非参数生存分析：Kaplan–Meier、Greenwood与限制平均存续期",
+    "area": "audit",
+    "columns": [
+      "Time",
+      "Event"
+    ],
+    "file": "kaplan-meier-rmst.csv",
+    "params": [
+      3
+    ],
+    "header": [
+      "Time",
+      "AtRisk",
+      "Events",
+      "Censored",
+      "Survival",
+      "GreenwoodVariance",
+      "RMST"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        3,
+        1,
+        0,
+        0.6666666666666666,
+        0.07407407407407407,
+        1
+      ],
+      [
+        2,
+        2,
+        0,
+        1,
+        0.6666666666666666,
+        0.07407407407407407,
+        1.6666666666666667
+      ],
+      [
+        3,
+        1,
+        1,
+        0,
+        0,
+        0,
+        2.3333333333333335
+      ]
+    ],
+    "ref": "Kaplan and Meier (1958), Nonparametric Estimation from Incomplete Observations, JASA.",
+    "url": "https://doi.org/10.1080/01621459.1958.10501452"
+  },
+  {
+    "command": "system-bunching-rd-local",
+    "title": "局部线性断点回归：左右带宽、核权重与跳跃估计",
+    "area": "audit",
+    "columns": [
+      "Running",
+      "Outcome"
+    ],
+    "file": "bunching-rd-local.csv",
+    "params": [
+      0,
+      3,
+      0
+    ],
+    "header": [
+      "Side",
+      "Intercept",
+      "Slope",
+      "WeightedSSE",
+      "EffectiveSample",
+      "Jump"
+    ],
+    "expected_prefix": [
+      [
+        0,
+        1,
+        2,
+        0,
+        1.8,
+        1
+      ],
+      [
+        1,
+        2,
+        1,
+        0,
+        2.5714285714285716,
+        1
+      ]
+    ],
+    "ref": "Calonico, Cattaneo and Titiunik (2014), Robust Nonparametric Confidence Intervals for Regression-Discontinuity Designs, Econometrica.",
+    "url": "https://doi.org/10.3982/ECTA11757"
+  },
+  {
+    "command": "system-newey-west-long-run",
+    "title": "长期方差与均值置信度：Bartlett核、有效样本量及年化边界",
+    "area": "audit",
+    "columns": [
+      "Value"
+    ],
+    "file": "newey-west-long-run.csv",
+    "params": [
+      0
+    ],
+    "header": [
+      "Mean",
+      "SampleCount",
+      "LongRunVariance",
+      "MeanSE",
+      "EffectiveSampleSize",
+      "Degenerate"
+    ],
+    "expected_prefix": [
+      [
+        2.5,
+        4,
+        1.25,
+        0.5590169943749475,
+        4,
+        0
+      ]
+    ],
+    "ref": "Newey and West (1987), A Simple, Positive Semi-definite, Heteroskedasticity and Autocorrelation Consistent Covariance Matrix, Econometrica.",
+    "url": "https://doi.org/10.2307/1913610"
+  }
+]
