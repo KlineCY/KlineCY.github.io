@@ -1,0 +1,860 @@
+[
+  {
+    "command": "depth-nystrom-schur",
+    "group": "kernel",
+    "file": "nystrom-schur.csv",
+    "title": "Nyström核对角近似与Schur余量",
+    "columns": [
+      "Landmark1",
+      "Landmark2",
+      "Kx"
+    ],
+    "params": [
+      2
+    ],
+    "header": [
+      "ApproximatedDiagonal",
+      "SchurResidual",
+      "RelativeResidual"
+    ],
+    "expected": [
+      [
+        0.6666666666666666,
+        1.3333333333333333,
+        0.6666666666666666
+      ]
+    ]
+  },
+  {
+    "command": "depth-rff-pair",
+    "group": "kernel",
+    "file": "rff-pair.csv",
+    "title": "随机傅里叶特征的单频余弦核近似",
+    "columns": [
+      "Frequency",
+      "Phase"
+    ],
+    "params": [
+      1,
+      2
+    ],
+    "header": [
+      "Feature",
+      "Zx",
+      "Zy",
+      "Product",
+      "CumulativeKernel"
+    ],
+    "expected": [
+      [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      [
+        2,
+        0,
+        0,
+        0,
+        1
+      ]
+    ]
+  },
+  {
+    "command": "depth-mahalanobis-residual",
+    "group": "kernel",
+    "file": "mahalanobis-residual.csv",
+    "title": "协方差几何中的Mahalanobis距离",
+    "columns": [
+      "Cov1",
+      "Cov2",
+      "Delta"
+    ],
+    "params": [],
+    "header": [
+      "EuclideanSquared",
+      "MahalanobisSquared",
+      "Distance"
+    ],
+    "expected": [
+      [
+        2,
+        2,
+        1.4142135623730951
+      ]
+    ]
+  },
+  {
+    "command": "depth-outofsample-kernel-center",
+    "group": "kernel",
+    "file": "outofsample-kernel-center.csv",
+    "title": "训练核中心化的样本外延拓",
+    "columns": [
+      "KxTrain",
+      "TrainRowMean"
+    ],
+    "params": [
+      2
+    ],
+    "header": [
+      "TrainingIndex",
+      "CenteredCrossKernel"
+    ],
+    "expected": [
+      [
+        1,
+        0
+      ],
+      [
+        2,
+        0
+      ]
+    ]
+  },
+  {
+    "command": "depth-binary-focal",
+    "group": "loss",
+    "file": "binary-focal.csv",
+    "title": "二元Focal损失与Logit梯度",
+    "columns": [
+      "Logit",
+      "Label"
+    ],
+    "params": [
+      2
+    ],
+    "header": [
+      "Logit",
+      "Label",
+      "Loss",
+      "Derivative"
+    ],
+    "expected": [
+      [
+        0,
+        1,
+        0.17328679513998632,
+        -0.29828679513998635
+      ],
+      [
+        0,
+        0,
+        0.17328679513998632,
+        0.29828679513998635
+      ]
+    ]
+  },
+  {
+    "command": "depth-huberized-pinball",
+    "group": "loss",
+    "file": "huberized-pinball.csv",
+    "title": "分位数检查损失的平滑近似",
+    "columns": [
+      "Residual"
+    ],
+    "params": [
+      0.75,
+      1
+    ],
+    "header": [
+      "Residual",
+      "Loss",
+      "ResidualGradient"
+    ],
+    "expected": [
+      [
+        -2,
+        0.375,
+        -0.25
+      ],
+      [
+        -0.5,
+        0.03125,
+        -0.125
+      ],
+      [
+        0.5,
+        0.09375,
+        0.375
+      ],
+      [
+        2,
+        1.125,
+        0.75
+      ]
+    ]
+  },
+  {
+    "command": "depth-logit-intercept-score",
+    "group": "loss",
+    "file": "logit-intercept-score.csv",
+    "title": "固定预测Logit的校准截距得分",
+    "columns": [
+      "BaseLogit",
+      "Outcome"
+    ],
+    "params": [
+      0
+    ],
+    "header": [
+      "NLL",
+      "Score",
+      "Information",
+      "NewtonStep"
+    ],
+    "expected": [
+      [
+        2.0794415416798357,
+        -0.5,
+        0.75,
+        0.6666666666666666
+      ]
+    ]
+  },
+  {
+    "command": "depth-temperature-curvature",
+    "group": "loss",
+    "file": "temperature-curvature.csv",
+    "title": "多分类逆温度校准的凸性与曲率",
+    "columns": [
+      "Label",
+      "Z0",
+      "Z1"
+    ],
+    "params": [
+      0
+    ],
+    "header": [
+      "InverseTemperature",
+      "NLL",
+      "Gradient",
+      "Curvature"
+    ],
+    "expected": [
+      [
+        0,
+        1.3862943611198906,
+        -1,
+        0.5
+      ]
+    ]
+  },
+  {
+    "command": "depth-logistic-hvp",
+    "group": "differentiation",
+    "file": "logistic-hvp.csv",
+    "title": "Logistic回归Hessian向量积",
+    "columns": [
+      "X1",
+      "X2",
+      "Outcome"
+    ],
+    "params": [
+      0,
+      0,
+      1,
+      1
+    ],
+    "header": [
+      "Feature",
+      "Gradient",
+      "HessianVector",
+      "DirectionalCurvature"
+    ],
+    "expected": [
+      [
+        1,
+        -0.5,
+        0.25,
+        1.25
+      ],
+      [
+        2,
+        1,
+        1,
+        1.25
+      ]
+    ]
+  },
+  {
+    "command": "depth-softmax-jvp",
+    "group": "differentiation",
+    "file": "softmax-jvp.csv",
+    "title": "Softmax Jacobian向量积与平移不变性",
+    "columns": [
+      "Logit",
+      "Direction"
+    ],
+    "params": [],
+    "header": [
+      "Class",
+      "Probability",
+      "JacobianVector",
+      "SumDerivative"
+    ],
+    "expected": [
+      [
+        0,
+        0.5,
+        0.5,
+        0
+      ],
+      [
+        1,
+        0.5,
+        -0.5,
+        0
+      ]
+    ]
+  },
+  {
+    "command": "depth-gradient-noise",
+    "group": "differentiation",
+    "file": "gradient-noise.csv",
+    "title": "逐样本梯度的噪声尺度估计",
+    "columns": [
+      "G1",
+      "G2"
+    ],
+    "params": [],
+    "header": [
+      "MeanNormSquared",
+      "CovarianceTrace",
+      "NoiseScale"
+    ],
+    "expected": [
+      [
+        4,
+        2,
+        0.5
+      ]
+    ]
+  },
+  {
+    "command": "depth-global-gradient-clip",
+    "group": "differentiation",
+    "file": "global-gradient-clip.csv",
+    "title": "全局梯度裁剪及方向保持",
+    "columns": [
+      "Gradient"
+    ],
+    "params": [
+      2
+    ],
+    "header": [
+      "Coordinate",
+      "Original",
+      "Clipped",
+      "Norm",
+      "Scale"
+    ],
+    "expected": [
+      [
+        1,
+        3,
+        1.2,
+        5,
+        0.4
+      ],
+      [
+        2,
+        4,
+        1.6,
+        5,
+        0.4
+      ]
+    ]
+  },
+  {
+    "command": "depth-purge-interval",
+    "group": "validation",
+    "file": "purge-interval.csv",
+    "title": "按标签区间进行净化与禁入期划分",
+    "columns": [
+      "Start",
+      "End"
+    ],
+    "params": [
+      3,
+      5,
+      2
+    ],
+    "header": [
+      "Row",
+      "Start",
+      "End",
+      "TestOverlap",
+      "Embargo",
+      "TrainEligible"
+    ],
+    "expected": [
+      [
+        1,
+        0,
+        1,
+        0,
+        0,
+        1
+      ],
+      [
+        2,
+        1,
+        3,
+        0,
+        0,
+        1
+      ],
+      [
+        3,
+        3,
+        4,
+        1,
+        0,
+        0
+      ],
+      [
+        4,
+        4,
+        6,
+        1,
+        0,
+        0
+      ],
+      [
+        5,
+        6,
+        7,
+        0,
+        1,
+        0
+      ],
+      [
+        6,
+        8,
+        9,
+        0,
+        0,
+        1
+      ]
+    ]
+  },
+  {
+    "command": "depth-train-only-standardization",
+    "group": "validation",
+    "file": "train-only-standardization.csv",
+    "title": "训练统计量冻结与样本外标准化",
+    "columns": [
+      "TrainFlag",
+      "Value"
+    ],
+    "params": [],
+    "header": [
+      "Row",
+      "TrainFlag",
+      "Value",
+      "TrainingMean",
+      "TrainingScale",
+      "Standardized"
+    ],
+    "expected": [
+      [
+        1,
+        1,
+        1,
+        2,
+        1,
+        -1
+      ],
+      [
+        2,
+        1,
+        3,
+        2,
+        1,
+        1
+      ],
+      [
+        3,
+        0,
+        5,
+        2,
+        1,
+        3
+      ],
+      [
+        4,
+        0,
+        9,
+        2,
+        1,
+        7
+      ]
+    ]
+  },
+  {
+    "command": "depth-forecast-oos-r2",
+    "group": "validation",
+    "file": "forecast-oos-r2.csv",
+    "title": "固定可用基准的样本外决定系数",
+    "columns": [
+      "Actual",
+      "Forecast",
+      "Benchmark"
+    ],
+    "params": [],
+    "header": [
+      "ModelSSE",
+      "BenchmarkSSE",
+      "OOSR2",
+      "MSERatio"
+    ],
+    "expected": [
+      [
+        1,
+        5,
+        0.8,
+        0.2
+      ]
+    ]
+  },
+  {
+    "command": "depth-block-loss-decomposition",
+    "group": "validation",
+    "file": "block-loss-decomposition.csv",
+    "title": "模型损失差的分块贡献与不稳定性",
+    "columns": [
+      "Block",
+      "ModelLoss",
+      "BenchmarkLoss"
+    ],
+    "params": [],
+    "header": [
+      "Block",
+      "Count",
+      "MeanModelLoss",
+      "MeanBenchmarkLoss",
+      "MeanImprovement",
+      "Contribution"
+    ],
+    "expected": [
+      [
+        1,
+        2,
+        2,
+        3,
+        1,
+        0.6666666666666666
+      ],
+      [
+        2,
+        1,
+        5,
+        2,
+        -3,
+        -1
+      ]
+    ]
+  },
+  {
+    "command": "depth-mixture-predictive-variance",
+    "group": "uncertainty",
+    "file": "mixture-predictive-variance.csv",
+    "title": "预测混合分布的全方差分解",
+    "columns": [
+      "Weight",
+      "Mean",
+      "Variance"
+    ],
+    "params": [],
+    "header": [
+      "PredictiveMean",
+      "WithinVariance",
+      "BetweenVariance",
+      "TotalVariance"
+    ],
+    "expected": [
+      [
+        2,
+        1,
+        1,
+        2
+      ]
+    ]
+  },
+  {
+    "command": "depth-ensemble-entropy-mi",
+    "group": "uncertainty",
+    "file": "ensemble-entropy-mi.csv",
+    "title": "分类集成的预测熵与模型互信息",
+    "columns": [
+      "Weight",
+      "P0",
+      "P1"
+    ],
+    "params": [],
+    "header": [
+      "PredictiveEntropy",
+      "MeanConditionalEntropy",
+      "MutualInformation"
+    ],
+    "expected": [
+      [
+        0.6931471805599453,
+        0,
+        0.6931471805599453
+      ]
+    ]
+  },
+  {
+    "command": "depth-mondrian-calibration",
+    "group": "uncertainty",
+    "file": "mondrian-calibration.csv",
+    "title": "分组Split Conformal有限样本阈值",
+    "columns": [
+      "Group",
+      "Nonconformity"
+    ],
+    "params": [
+      0.5
+    ],
+    "header": [
+      "Group",
+      "CalibrationCount",
+      "Rank",
+      "Threshold"
+    ],
+    "expected": [
+      [
+        1,
+        3,
+        2,
+        2
+      ],
+      [
+        2,
+        3,
+        2,
+        4
+      ]
+    ]
+  },
+  {
+    "command": "depth-wilson-coverage",
+    "group": "uncertainty",
+    "file": "wilson-coverage.csv",
+    "title": "覆盖率的Wilson二项比例区间",
+    "columns": [
+      "Successes",
+      "Trials"
+    ],
+    "params": [
+      2
+    ],
+    "header": [
+      "Successes",
+      "Trials",
+      "Observed",
+      "Lower",
+      "Upper"
+    ],
+    "expected": [
+      [
+        5,
+        10,
+        0.5,
+        0.2327387580875756,
+        0.7672612419124244
+      ],
+      [
+        0,
+        10,
+        0,
+        0,
+        0.2857142857142857
+      ]
+    ]
+  },
+  {
+    "command": "depth-weighted-group-demean",
+    "group": "features",
+    "file": "weighted-group-demean.csv",
+    "title": "按行业权重进行截面去均值",
+    "columns": [
+      "Group",
+      "Value",
+      "Weight"
+    ],
+    "params": [],
+    "header": [
+      "Group",
+      "Value",
+      "GroupMean",
+      "Residual",
+      "Weight"
+    ],
+    "expected": [
+      [
+        1,
+        1,
+        2.5,
+        -1.5,
+        1
+      ],
+      [
+        1,
+        3,
+        2.5,
+        0.5,
+        3
+      ],
+      [
+        2,
+        5,
+        6,
+        -1,
+        1
+      ],
+      [
+        2,
+        7,
+        6,
+        1,
+        1
+      ]
+    ]
+  },
+  {
+    "command": "depth-train-missing-indicator",
+    "group": "features",
+    "file": "train-missing-indicator.csv",
+    "title": "训练期均值填补与缺失指示变量",
+    "columns": [
+      "TrainFlag",
+      "Observed",
+      "Value"
+    ],
+    "params": [],
+    "header": [
+      "Row",
+      "TrainFlag",
+      "Imputed",
+      "MissingIndicator",
+      "TrainingMean"
+    ],
+    "expected": [
+      [
+        1,
+        1,
+        2,
+        0,
+        3
+      ],
+      [
+        2,
+        1,
+        4,
+        0,
+        3
+      ],
+      [
+        3,
+        1,
+        3,
+        1,
+        3
+      ],
+      [
+        4,
+        0,
+        3,
+        1,
+        3
+      ],
+      [
+        5,
+        0,
+        10,
+        0,
+        3
+      ]
+    ]
+  },
+  {
+    "command": "depth-ew-prior-zscore",
+    "group": "features",
+    "file": "ew-prior-zscore.csv",
+    "title": "只用历史状态的指数加权标准化",
+    "columns": [
+      "Value"
+    ],
+    "params": [
+      0.5,
+      0,
+      1
+    ],
+    "header": [
+      "Time",
+      "PriorMean",
+      "PriorVariance",
+      "ZScore",
+      "UpdatedMean",
+      "UpdatedVariance"
+    ],
+    "expected": [
+      [
+        1,
+        0,
+        1,
+        1,
+        0.5,
+        0.75
+      ],
+      [
+        2,
+        0.5,
+        0.75,
+        2.886751345948129,
+        1.75,
+        1.9375
+      ],
+      [
+        3,
+        1.75,
+        1.9375,
+        0.1796053020267749,
+        1.875,
+        0.984375
+      ]
+    ]
+  },
+  {
+    "command": "depth-regime-covariance",
+    "group": "features",
+    "file": "regime-covariance.csv",
+    "title": "状态内与状态间的协方差分解",
+    "columns": [
+      "Regime",
+      "X",
+      "Y"
+    ],
+    "params": [],
+    "header": [
+      "MeanX",
+      "MeanY",
+      "WithinCovariance",
+      "BetweenCovariance",
+      "TotalCovariance"
+    ],
+    "expected": [
+      [
+        4,
+        6,
+        1,
+        6,
+        7
+      ]
+    ]
+  }
+]

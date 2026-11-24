@@ -1,0 +1,73 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>数值线性代数的误差与谱证据｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="math"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>数值线性代数的误差与谱证据</h1><p>从求解结果的后向误差开始，再讨论尺度、对称谱与精度矩阵。数值结果只有与矩阵条件、残差及算法适用域同时解释时，才足以支持风险模型。</p><p><a href="../research/depth-laboratories.html">研究专题总览</a>　<a href="../cpp/depth_numerics.hpp" download>完整C++17源码</a></p><nav><a href="#backward-error">线性方程的残差与范数后向误差</a>　｜　<a href="#row-equilibration">线性方程组的行尺度均衡</a>　｜　<a href="#two-by-two-spectrum">实对称二阶矩阵的稳定谱分解</a>　｜　<a href="#precision-conditional">精度矩阵对角与高斯条件方差</a></nav></header><article id="backward-error"><h2>线性方程的残差与范数后向误差</h2><h3>数学定义与推导</h3><p>对非奇异系统Ax=b，将近似解代回原方程得到残差。若允许A及b同时有相对范数扰动，则分母按二者尺度相加，给出范数后向误差。前向误差还取决于A的条件数；因此小残差不能直接证明权重或回归系数准确。无穷范数的矩阵范数取各行绝对值和的最大值。</p><div class="equation">$$r=b-A\hat x$$</div><div class="equation">$$\eta_\infty=\frac{\|r\|_\infty}{\|A\|_\infty\|\hat x\|_\infty+\|b\|_\infty}$$</div><div class="equation">$$\frac{\|\hat x-x\|}{\|x\|}\leq \kappa(A)\frac{\|r\|}{\|b\|}$$</div><h3>数值演算与金融应用</h3><p>样本A的行和为3与4，近似解为(1,2)，Ax=(4,7)，而b=(4,8)，残差无穷范数1。相对残差1/8，后向误差1/(4×2+8)=1/16。适用于均值方差优化的线性方程或隐式定价系统。</p><h3>算法复杂度、输入契约与边界</h3><p>输入最后两列依次是近似解和右端，前面列为方阵；O(d²)时间、O(d)附加存储。零右端时相对残差没有通常定义，程序要求正的右端范数。条件数需要独立估计，不能由本诊断推断。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/backward-error.csv" download>CSV数据</a>　<a href="../cpp/depth_numerics.hpp" download>算法源码</a></p><pre>A1,A2,X,B
+2,1,1,4
+1,3,2,8
+</pre><pre>./build/kline_quant depth-backward-error quant/research/depth-examples/backward-error.csv</pre><div class="wide"><table><thead><tr><th>ResidualInf</th><th>RelativeResidual</th><th>BackwardError</th><th>MatrixInfNorm</th></tr></thead><tbody><tr><td>1</td><td>0.125</td><td>0.0625</td><td>4</td></tr></tbody></table></div><p class="note">参考文献：Golub and Van Loan (2013), Matrix Computations, 4th ed., Johns Hopkins University Press.</p></article><article id="row-equilibration"><h2>线性方程组的行尺度均衡</h2><h3>数学定义与推导</h3><p>非零行的最大绝对元素作为尺度，左乘D的逆不改变精确解集合，却使每一行的最大元素为1。舍入误差及迭代收敛对尺度敏感，均衡可作为预处理；它不保证条件数必然下降。与列缩放不同，行缩放不会改变未知量的单位。</p><div class="equation">$$s_i=\max_j|a_{ij}|,\quad D=\operatorname{diag}(s_i)$$</div><div class="equation">$$D^{-1}Ax=D^{-1}b$$</div><div class="equation">$$\|D^{-1}A\|_\infty\le d$$</div><h3>数值演算与金融应用</h3><p>原方程2x+4y=6、x=3，第一行除以4得0.5x+y=1.5，第二行不变，解仍是x=3、y=0。对不同金额单位的风险约束，均衡使求解器避免仅由数值量级支配容差。</p><h3>算法复杂度、输入契约与边界</h3><p>最后一列为右端，前面为系数。零系数行意味着冗余或不一致，必须在均衡前单独处理。O(nd)时间，输出保留各行尺度以便还原原始残差。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/row-equilibration.csv" download>CSV数据</a>　<a href="../cpp/depth_numerics.hpp" download>算法源码</a></p><pre>A1,A2,B
+2,4,6
+1,0,3
+</pre><pre>./build/kline_quant depth-row-equilibration quant/research/depth-examples/row-equilibration.csv</pre><div class="wide"><table><thead><tr><th>Row</th><th>Scale</th><th>A1</th><th>A2</th><th>B</th></tr></thead><tbody><tr><td>1</td><td>4</td><td>0.5</td><td>1</td><td>1.5</td></tr><tr><td>2</td><td>1</td><td>1</td><td>0</td><td>3</td></tr></tbody></table></div><p class="note">参考文献：Golub and Van Loan (2013), Matrix Computations, 4th ed., Johns Hopkins University Press.</p></article><article id="two-by-two-spectrum"><h2>实对称二阶矩阵的稳定谱分解</h2><h3>数学定义与推导</h3><p>二阶特征多项式配方后得到迹的一半加减谱半径。hypot避免直接对差值和非对角元素平方造成不必要的上溢。特征值和及积分别与迹和行列式一致；接近奇异时小特征值的相消仍可能损失精度，需要更高精度或稳定分解。</p><div class="equation">$$A=\begin{pmatrix}a&amp;b\\b&amp;d\end{pmatrix},\quad \det(A-\lambda I)=0$$</div><div class="equation">$$\lambda_{\pm}=\tfrac12(a+d)\pm\operatorname{hypot}(\tfrac12(a-d),b)$$</div><div class="equation">$$\lambda_++\lambda_-=\operatorname{tr}(A),\quad \lambda_+\lambda_-=\det A$$</div><h3>数值演算与金融应用</h3><p>对协方差(2,1;1,2)，共同方向(1,1)的特征值3，反向方向(1,−1)的特征值1。该例说明相关性使总风险集中到共同方向，谱均为正才支持严格正定二次目标。</p><h3>算法复杂度、输入契约与边界</h3><p>仅针对实对称2×2矩阵，复杂度O(1)。对更高维协方差应采用对称特征分解；数值对称容差不意味着原始观测协方差估计无误。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/two-by-two-spectrum.csv" download>CSV数据</a>　<a href="../cpp/depth_numerics.hpp" download>算法源码</a></p><pre>A1,A2
+2,1
+1,2
+</pre><pre>./build/kline_quant depth-two-by-two-spectrum quant/research/depth-examples/two-by-two-spectrum.csv</pre><div class="wide"><table><thead><tr><th>EigenLow</th><th>EigenHigh</th><th>Trace</th><th>Determinant</th></tr></thead><tbody><tr><td>1</td><td>3</td><td>4</td><td>3</td></tr></tbody></table></div><p class="note">参考文献：Golub and Van Loan (2013), Matrix Computations, 4th ed., Johns Hopkins University Press.</p></article><article id="precision-conditional"><h2>精度矩阵对角与高斯条件方差</h2><h3>数学定义与推导</h3><p>在联合高斯模型中，将协方差按变量j与其余变量分块。条件方差为Schur补，而分块逆的对应对角恰为Schur补的倒数。实现逐列解SPD系统而不显式进行通用矩阵求逆，并以单位向量残差检验每列。对非高斯分布，该量通常仅表示线性预测残差方差。</p><div class="equation">$$\Omega=\Sigma^{-1},\quad \Sigma z_j=e_j$$</div><div class="equation">$$\operatorname{Var}(X_j\mid X_{-j})=\Omega_{jj}^{-1}$$</div><div class="equation">$$\Sigma_{jj}-\Sigma_{j,-j}\Sigma_{-j,-j}^{-1}\Sigma_{-j,j}=\Omega_{jj}^{-1}$$</div><h3>数值演算与金融应用</h3><p>协方差对角均2、交叉项1，精度对角2/3，因此条件方差1.5，低于边际方差2。可解释因子残差风险或资产之间的条件依赖，但条件关系不是因果关系。</p><h3>算法复杂度、输入契约与边界</h3><p>输入须为严格正定对称矩阵。使用共享Cholesky求解器逐列求解，当前实现约O(d⁴)时间；大规模生产宜复用一次分解或稀疏精度估计。d≤64。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/precision-conditional.csv" download>CSV数据</a>　<a href="../cpp/depth_numerics.hpp" download>算法源码</a></p><pre>Cov1,Cov2
+2,1
+1,2
+</pre><pre>./build/kline_quant depth-precision-conditional quant/research/depth-examples/precision-conditional.csv</pre><div class="wide"><table><thead><tr><th>Variable</th><th>PrecisionDiagonal</th><th>ConditionalVariance</th><th>ResidualInf</th></tr></thead><tbody><tr><td>1</td><td>0.666666666667</td><td>1.5</td><td>0</td></tr><tr><td>2</td><td>0.666666666667</td><td>1.5</td><td>0</td></tr></tbody></table></div><p class="note">参考文献：Golub and Van Loan (2013), Matrix Computations, 4th ed., Johns Hopkins University Press.</p></article><section><h2>C++17完整实现</h2><pre>#pragma once
+#include "evidence_common.hpp"
+namespace kline { namespace depth_numerics {
+using namespace evidence;
+inline Report backward_error(const Mat&amp; x,const Vec&amp; p){
+    auto m=validate(x,1,3,64);
+    parameters(p,0);
+    auto d=m-2;
+    require(x.size()==d,"Square system required");
+    Vec z=column(x,d),b=column(x,d+1);
+    double an=0,xn=0,bn=0,rn=0;
+    for(double v:z)xn=std::max(xn,std::abs(v));
+    for(std::size_t i=0;i&lt;d;++i){
+        double a=0,v=0;
+        for(std::size_t j=0;j&lt;d;++j){a+=std::abs(x[i][j]);v+=x[i][j]*z[j];}
+        an=std::max(an,a);bn=std::max(bn,std::abs(b[i]));rn=std::max(rn,std::abs(b[i]-v));
+    }
+    return scalar({"ResidualInf","RelativeResidual","BackwardError","MatrixInfNorm"},{rn,rn/positive(bn),rn/positive(an*xn+bn),an});
+}
+
+inline Report row_equilibration(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,1,2,64)-1;
+    parameters(p,0);
+    Report o{{"Row","Scale"},{}};
+    for(std::size_t j=0;j&lt;d;++j)o.header.push_back("A"+std::to_string(j+1));
+    o.header.push_back("B");
+    for(std::size_t i=0;i&lt;x.size();++i){
+        double s=0;
+        for(std::size_t j=0;j&lt;d;++j)s=std::max(s,std::abs(x[i][j]));
+        positive(s);
+        Vec r{double(i+1),s};
+        for(double v:x[i])r.push_back(v/s);
+        o.rows.push_back(r);
+    }
+    return o;
+}
+
+inline Report two_by_two_spectrum(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,2,2);parameters(p,0);
+    require(x.size()==2,"Two by two matrix required");
+    require(std::abs(x[0][1]-x[1][0])&lt;=1e-12*std::max({1.,std::abs(x[0][1]),std::abs(x[1][0])}),"Symmetric matrix required");
+    double a=x[0][0],d=x[1][1],b=x[0][1]/2+x[1][0]/2;
+    double m=a/2+d/2,h=std::hypot(a/2-d/2,b);
+    return scalar({"EigenLow","EigenHigh","Trace","Determinant"},{m-h,m+h,a+d,a*d-b*b});
+}
+
+inline Report precision_conditional(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,1,1,64);parameters(p,0);
+    require(x.size()==d,"Square covariance required");
+    Report o{{"Variable","PrecisionDiagonal","ConditionalVariance","ResidualInf"},{}};
+    for(std::size_t j=0;j&lt;d;++j){
+        Vec e(d,0);e[j]=1;
+        Vec z=solve_spd(x,e),r=mul(x,z);
+        double err=0;
+        for(std::size_t i=0;i&lt;d;++i)err=std::max(err,std::abs(r[i]-e[i]));
+        o.rows.push_back({double(j+1),z[j],1/positive(z[j]),err});
+    }
+    return o;
+}
+} }
+</pre></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

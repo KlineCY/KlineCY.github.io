@@ -1,0 +1,48 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>梯度传播、曲率与随机优化诊断｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="ml"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>梯度传播、曲率与随机优化诊断</h1><p>将大模型训练中难以观察的梯度和曲率拆成可独立计算的数学对象。计算方向导数和曲率证书，以减少依赖黑箱优化器的误判。</p><p><a href="../research/depth-laboratories.html">研究专题总览</a>　<a href="../cpp/depth_differentiation.hpp" download>完整C++17源码</a></p><nav><a href="#logistic-hvp">Logistic回归Hessian向量积</a>　｜　<a href="#softmax-jvp">Softmax Jacobian向量积与平移不变性</a>　｜　<a href="#gradient-noise">逐样本梯度的噪声尺度估计</a>　｜　<a href="#global-gradient-clip">全局梯度裁剪及方向保持</a></nav></header><article id="logistic-hvp"><h2>Logistic回归Hessian向量积</h2><h3>数学定义与推导</h3><p>Logistic负对数似然的曲率由设计向量外积加权构成，因此为半正定。Hessian向量积先对每条样本算方向投影，再累加加权设计向量，不构造d×d矩阵，可用于Newton-CG和曲率检查。代码采用总和损失，未加正则或截距。</p><div class="equation">$$L(w)=\sum_i[\log(1+e^{x_i^\top w})-y_ix_i^\top w]$$</div><div class="equation">$$\nabla L=X^\top(p-y),\quad H=X^\top\operatorname{diag}(p_i(1-p_i))X$$</div><div class="equation">$$Hv=\sum_i p_i(1-p_i)x_i(x_i^\top v),\quad v^\top Hv\ge0$$</div><h3>数值演算与金融应用</h3><p>两个样本(1,0)和(0,2)，权重0、方向(1,1)，梯度(−0.5,1)，Hessian向量积(0.25,1)，方向曲率1.25。方向若在设计零空间，曲率为0，不能据此保证严格凸。</p><h3>算法复杂度、输入契约与边界</h3><p>O(nd)时间、O(d)附加空间。参数前d项为模型权重，后d项为方向；最后一列标签0/1。截距需作为设计列输入；样本权重与正则项需单独纳入。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/logistic-hvp.csv" download>CSV数据</a>　<a href="../cpp/depth_differentiation.hpp" download>算法源码</a></p><pre>X1,X2,Outcome
+1,0,1
+0,2,0
+</pre><pre>./build/kline_quant depth-logistic-hvp quant/research/depth-examples/logistic-hvp.csv 0 0 1 1</pre><div class="wide"><table><thead><tr><th>Feature</th><th>Gradient</th><th>HessianVector</th><th>DirectionalCurvature</th></tr></thead><tbody><tr><td>1</td><td>-0.5</td><td>0.25</td><td>1.25</td></tr><tr><td>2</td><td>1</td><td>1</td><td>1.25</td></tr></tbody></table></div><p class="note">参考文献：Goodfellow, Bengio and Courville (2016), Deep Learning, MIT Press.</p></article><article id="softmax-jvp"><h2>Softmax Jacobian向量积与平移不变性</h2><h3>数学定义与推导</h3><p>商法则给出Softmax Jacobian，写成diag(p)−ppᵀ。对任意方向v只需一次概率内积即可计算Jv；所有输出分量和为0，对统一logit平移的导数为零。该Jacobian也等于分类分布指标向量的协方差。</p><div class="equation">$$p_i=\frac{e^{z_i}}{\sum_j e^{z_j}}$$</div><div class="equation">$$J_{ij}=p_i(\delta_{ij}-p_j)$$</div><div class="equation">$$(Jv)_i=p_i(v_i-p^\top v),\quad J\mathbf1=0$$</div><h3>数值演算与金融应用</h3><p>两个logit均0，方向(1,−1)，输出概率(0.5,0.5)，Jv=(0.5,−0.5)。在神经网络分类头和策略网络中，方向导数可用于检查自动微分实现及概率归一化。</p><h3>算法复杂度、输入契约与边界</h3><p>O(K)时间，减最大logit稳定计算。极端概率接近0时部分方向几乎无梯度；概率饱和不代表模型已获得可靠的校准。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/softmax-jvp.csv" download>CSV数据</a>　<a href="../cpp/depth_differentiation.hpp" download>算法源码</a></p><pre>Logit,Direction
+0,1
+0,-1
+</pre><pre>./build/kline_quant depth-softmax-jvp quant/research/depth-examples/softmax-jvp.csv</pre><div class="wide"><table><thead><tr><th>Class</th><th>Probability</th><th>JacobianVector</th><th>SumDerivative</th></tr></thead><tbody><tr><td>0</td><td>0.5</td><td>0.5</td><td>0</td></tr><tr><td>1</td><td>0.5</td><td>-0.5</td><td>0</td></tr></tbody></table></div><p class="note">参考文献：Goodfellow, Bengio and Courville (2016), Deep Learning, MIT Press.</p></article><article id="gradient-noise"><h2>逐样本梯度的噪声尺度估计</h2><h3>数学定义与推导</h3><p>在独立同分布梯度抽样近似下，小批均值梯度协方差约为Σg/B，噪声相对信号强度与批大小有关。使用无偏样本协方差迹估计总噪声，分母为当前样本均值梯度平方范数。该比率是诊断量，不是无偏的真实噪声尺度估计。</p><div class="equation">$$\bar g=n^{-1}\sum_i g_i$$</div><div class="equation">$$\widehat{\operatorname{tr}\Sigma_g}=(n-1)^{-1}\sum_i\|g_i-\bar g\|^2$$</div><div class="equation">$$\widehat B_{\mathrm{noise}}=\widehat{\operatorname{tr}\Sigma_g}/\|\bar g\|^2$$</div><h3>数值演算与金融应用</h3><p>两条梯度(1,0)、(3,0)，均值(2,0)，平方范数4，协方差迹2，比率0.5。金融时间序列的批间相关会改变批均值方差；重叠标签下不能直接将该量解释为最佳batch size。</p><h3>算法复杂度、输入契约与边界</h3><p>O(nd)两遍，均值梯度范数必须非零。近驻点时该比率可能很大；应同时保留分子与分母，比较同一损失缩放和参数空间。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/gradient-noise.csv" download>CSV数据</a>　<a href="../cpp/depth_differentiation.hpp" download>算法源码</a></p><pre>G1,G2
+1,0
+3,0
+</pre><pre>./build/kline_quant depth-gradient-noise quant/research/depth-examples/gradient-noise.csv</pre><div class="wide"><table><thead><tr><th>MeanNormSquared</th><th>CovarianceTrace</th><th>NoiseScale</th></tr></thead><tbody><tr><td>4</td><td>2</td><td>0.5</td></tr></tbody></table></div><p class="note">参考文献：McCandlish et al. (2018), An empirical model of large-batch training, arXiv:1812.06162.</p></article><article id="global-gradient-clip"><h2>全局梯度裁剪及方向保持</h2><h3>数学定义与推导</h3><p>将梯度投影到二范数球；若已可行，原梯度即最近点，否则沿原方向缩放到球面。由对称性或KKT条件得到统一比例，保留整体方向，与逐元素截断不同。梯度裁剪改变优化更新幅度，并不改变模型损失函数本身。</p><div class="equation">$$\tilde g=g\min(1,C/\|g\|_2)$$</div><div class="equation">$$\tilde g=\arg\min_{\|v\|_2\le C}\tfrac12\|v-g\|^2$$</div><div class="equation">$$g\ne0,\ C&gt;0\ \Longrightarrow\ \cos(g,\tilde g)=1$$</div><h3>数值演算与金融应用</h3><p>梯度(3,4)的范数5，阈值2，比例0.4，裁剪后(1.2,1.6)，范数2。金融深度模型训练中大梯度可来自异常收益标签或不稳定状态，但裁剪不能替代数据质量诊断。</p><h3>算法复杂度、输入契约与边界</h3><p>O(d)，使用hypot累计范数减轻中间平方溢出。阈值严格正；零梯度输出不变。混合精度训练应在取消损失缩放后裁剪。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/global-gradient-clip.csv" download>CSV数据</a>　<a href="../cpp/depth_differentiation.hpp" download>算法源码</a></p><pre>Gradient
+3
+4
+</pre><pre>./build/kline_quant depth-global-gradient-clip quant/research/depth-examples/global-gradient-clip.csv 2</pre><div class="wide"><table><thead><tr><th>Coordinate</th><th>Original</th><th>Clipped</th><th>Norm</th><th>Scale</th></tr></thead><tbody><tr><td>1</td><td>3</td><td>1.2</td><td>5</td><td>0.4</td></tr><tr><td>2</td><td>4</td><td>1.6</td><td>5</td><td>0.4</td></tr></tbody></table></div><p class="note">参考文献：Pascanu, Mikolov and Bengio (2013), On the difficulty of training recurrent neural networks, ICML.</p></article><section><h2>C++17完整实现</h2><pre>#pragma once
+#include "evidence_common.hpp"
+namespace kline { namespace depth_differentiation {
+using namespace evidence;
+inline Report logistic_hvp(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,1,2,33)-1;parameters(p,2*d);Vec w(p.begin(),p.begin()+d),v(p.begin()+d,p.end()),g(d,0),hv(d,0);
+    for(auto&amp;r:x){double y=r.back();require(y==0||y==1,"Binary label required");double z=0,a=0;
+        for(std::size_t j=0;j&lt;d;++j){z+=r[j]*w[j];a+=r[j]*v[j];}
+        double q=z&gt;=0?1/(1+std::exp(-z)):std::exp(z)/(1+std::exp(z));double b=q*(1-q)*a;
+        for(std::size_t j=0;j&lt;d;++j){g[j]+=(q-y)*r[j];hv[j]+=b*r[j];}
+    }double cur=dot(v,hv);Report o{{"Feature","Gradient","HessianVector","DirectionalCurvature"},{}};
+    for(std::size_t j=0;j&lt;d;++j)o.rows.push_back({double(j+1),g[j],hv[j],cur});return o;
+}
+
+inline Report softmax_jvp(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,2,2);parameters(p,0);double m=x[0][0];for(auto&amp;r:x)m=std::max(m,r[0]);Vec q;double s=0,a=0;
+    for(auto&amp;r:x){q.push_back(std::exp(r[0]-m));s+=q.back();}
+    for(std::size_t i=0;i&lt;x.size();++i){q[i]/=s;a+=q[i]*x[i][1];}
+    Vec v;double z=0;for(std::size_t i=0;i&lt;x.size();++i){v.push_back(q[i]*(x[i][1]-a));z+=v.back();}
+    Report o{{"Class","Probability","JacobianVector","SumDerivative"},{}};
+    for(std::size_t i=0;i&lt;x.size();++i)o.rows.push_back({double(i),q[i],v[i],z});return o;
+}
+
+inline Report gradient_noise(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,2,1,64);parameters(p,0);Vec m=means(x);double a=dot(m,m),b=0;
+    for(auto&amp;r:x)for(std::size_t j=0;j&lt;d;++j)b+=(r[j]-m[j])*(r[j]-m[j]);b/=x.size()-1;
+    return scalar({"MeanNormSquared","CovarianceTrace","NoiseScale"},{a,b,b/positive(a)});
+}
+
+inline Report global_gradient_clip(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,1,1);parameters(p,1);double c=positive(p[0]),n=0;for(auto&amp;r:x)n=std::hypot(n,r[0]);double s=n&gt;c?c/n:1;
+    Report o{{"Coordinate","Original","Clipped","Norm","Scale"},{}};
+    for(std::size_t i=0;i&lt;x.size();++i)o.rows.push_back({double(i+1),x[i][0],s*x[i][0],n,s});return o;
+}
+} }
+</pre></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

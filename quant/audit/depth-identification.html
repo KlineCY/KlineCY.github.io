@@ -1,0 +1,57 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>面板投影、部分识别与反事实证据｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="audit"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>面板投影、部分识别与反事实证据</h1><p>将线性投影与因果识别分开。固定效应消除指定加性异质性，缺失和选择性退出则需要识别假设与边界；反事实拟合效果还必须结合研究设计。</p><p><a href="../research/depth-laboratories.html">研究专题总览</a>　<a href="../cpp/depth_identification.hpp" download>完整C++17源码</a></p><nav><a href="#unbalanced-two-way-projection">非平衡面板的双向固定效应交替投影</a>　｜　<a href="#manski-missing-bounds">有界结果缺失时的部分识别区间</a>　｜　<a href="#lee-trimming-bounds">单调样本选择下的Lee截尾效应界</a>　｜　<a href="#synthetic-control-gap">固定合成控制权重的前后期拟合诊断</a></nav></header><article id="unbalanced-two-way-projection"><h2>非平衡面板的双向固定效应交替投影</h2><h3>数学定义与推导</h3><p>非平衡面板的实体均值与时间均值基于不同观测集合，一次双去均值一般不能同时消除两类固定效应。反复将残差投影到实体零均值和时间零均值子空间，根据有限维交替投影收敛定理趋于交集投影。停止条件使用两类最大组均值，而非固定次数。</p><div class="equation">$$\mathcal U=\{r:\sum_{t:(i,t)\in\Omega}r_{it}=0\ \forall i\},\quad\mathcal V=\{r:\sum_{i:(i,t)\in\Omega}r_{it}=0\ \forall t\}$$</div><div class="equation">$$r^{(k+1)}=P_{\mathcal V}P_{\mathcal U}r^{(k)}$$</div><div class="equation">$$r^{(\infty)}=P_{\mathcal U\cap\mathcal V}y$$</div><h3>数值演算与金融应用</h3><p>样本包含完整2×2子面板与实体2独占的时点3。最终残差在2×2部分为0.5、−0.5、−0.5、0.5，独占时点残差0。单一时点观测被时间效应完全吸收。可分别对结果与解释变量残差化后进行Frisch–Waugh–Lovell回归。</p><h3>算法复杂度、输入契约与边界</h3><p>每轮O(n log G)或预建索引后O(n+G)，实现采用预建分组，限制迭代总工作量。实体时间键唯一；若有限迭代不能达容差则拒绝，避免将未收敛残差称为固定效应解。固定效应不消除时变混杂。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/unbalanced-two-way-projection.csv" download>CSV数据</a>　<a href="../cpp/depth_identification.hpp" download>算法源码</a></p><pre>Entity,Time,Value
+1,1,1
+1,2,3
+2,1,2
+2,2,6
+2,3,8
+</pre><pre>./build/kline_quant depth-unbalanced-two-way-projection quant/research/depth-examples/unbalanced-two-way-projection.csv 1e-12 1000</pre><div class="wide"><table><thead><tr><th>Row</th><th>Entity</th><th>Time</th><th>Residual</th><th>MaxGroupMean</th></tr></thead><tbody><tr><td>1</td><td>1</td><td>1</td><td>0.5</td><td>0</td></tr><tr><td>2</td><td>1</td><td>2</td><td>-0.5</td><td>0</td></tr><tr><td>3</td><td>2</td><td>1</td><td>-0.5</td><td>0</td></tr><tr><td>4</td><td>2</td><td>2</td><td>0.5</td><td>0</td></tr><tr><td>5</td><td>2</td><td>3</td><td>0</td><td>0</td></tr></tbody></table></div><p class="note">参考文献：von Neumann (1950), Functional Operators, Vol. II, Princeton University Press.</p></article><article id="manski-missing-bounds"><h2>有界结果缺失时的部分识别区间</h2><h3>数学定义与推导</h3><p>不对缺失机制施加独立性假设，只使用结果的已知上下界。缺失子总体的未知均值必在[L,U]内，代入全期望即得到识别区间；若允许缺失结果任意取界，区间端点可以达到，因而在该信息集下为尖锐界。样本版本是有限总体算术界，抽样置信区间另需推断。</p><div class="equation">$$Y\in[L,U],\quad M=\mathbf1\{Y\text{ observed}\}$$</div><div class="equation">$$\mathbb E Y=\Pr(M=1)\mathbb E[Y\mid M=1]+\Pr(M=0)\mathbb E[Y\mid M=0]$$</div><div class="equation">$$\mu\in[\pi\mu_{\mathrm{obs}}+(1-\pi)L,\ \pi\mu_{\mathrm{obs}}+(1-\pi)U]$$</div><h3>数值演算与金融应用</h3><p>四个总体单位中仅观察2与4，另两条缺失，结果支持0至10。完整均值下界(2+4)/4=1.5，上界(2+4+20)/4=6.5。直接报告观察均值3隐含额外缺失假设。适用于退出样本或财务未披露的有界指标。</p><h3>算法复杂度、输入契约与边界</h3><p>O(n)，掩码二元，已观察结果必须在支持内，至少一条已观察以报告其均值；缺失占位不参与计算。上下界必须有制度或变量定义依据，不能任意缩小以制造精确结论。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/manski-missing-bounds.csv" download>CSV数据</a>　<a href="../cpp/depth_identification.hpp" download>算法源码</a></p><pre>Observed,Outcome
+1,2
+1,4
+0,0
+0,0
+</pre><pre>./build/kline_quant depth-manski-missing-bounds quant/research/depth-examples/manski-missing-bounds.csv 0 10</pre><div class="wide"><table><thead><tr><th>ObservedCount</th><th>MissingCount</th><th>ObservedMean</th><th>LowerMean</th><th>UpperMean</th></tr></thead><tbody><tr><td>2</td><td>2</td><td>3</td><td>1.5</td><td>6.5</td></tr></tbody></table></div><p class="note">参考文献：Manski (2003), Partial Identification of Probability Distributions, Springer.</p></article><article id="lee-trimming-bounds"><h2>单调样本选择下的Lee截尾效应界</h2><h3>数学定义与推导</h3><p>在处理随机分配及单调选择假设（处理不会使原本可观察者变不可观察）下，处理组被观察人群含始终可观察者及新增可观察者。始终可观察者占比为选择率之比。极端地保留处理组结果分布的最低或最高该比例，得到始终可观察人群平均处理效应边界。样本尾部保留非整数观测质量时使用分数权重。</p><div class="equation">$$s_1=\Pr(S=1\mid D=1),\quad s_0=\Pr(S=1\mid D=0)$$</div><div class="equation">$$s_1\ge s_0,\quad q=s_0/s_1$$</div><div class="equation">$$\tau_L=\bar Y_{1,\mathrm{bottom}\ q}-\bar Y_{0,S=1},\quad\tau_U=\bar Y_{1,\mathrm{top}\ q}-\bar Y_{0,S=1}$$</div><h3>数值演算与金融应用</h3><p>处理组四条均观察1、2、3、4，对照组四条中观察2、4，选择率1与0.5，保留比例0.5。处理组下尾均值1.5、上尾3.5，对照均值3，界为[−1.5,0.5]。这不等于所有主体ATE；选择单调性需有研究设计依据。</p><h3>算法复杂度、输入契约与边界</h3><p>O(n log n)，两组均有观察且处理选择率不低于对照；反向单调情形需重新定义处理方向。未观察结果占位不使用。此处仅计算样本界，不提供考虑选择率估计误差的置信区间。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/lee-trimming-bounds.csv" download>CSV数据</a>　<a href="../cpp/depth_identification.hpp" download>算法源码</a></p><pre>Treatment,Selected,Outcome
+1,1,1
+1,1,2
+1,1,3
+1,1,4
+0,1,2
+0,1,4
+0,0,0
+0,0,0
+</pre><pre>./build/kline_quant depth-lee-trimming-bounds quant/research/depth-examples/lee-trimming-bounds.csv</pre><div class="wide"><table><thead><tr><th>TreatmentSelection</th><th>ControlSelection</th><th>RetainFraction</th><th>ControlMean</th><th>LowerATE</th><th>UpperATE</th></tr></thead><tbody><tr><td>1</td><td>0.5</td><td>0.5</td><td>3</td><td>-1.5</td><td>0.5</td></tr></tbody></table></div><p class="note">参考文献：Lee (2009), Training, wages, and sample selection: estimating sharp bounds on treatment effects, Review of Economic Studies.</p></article><article id="synthetic-control-gap"><h2>固定合成控制权重的前后期拟合诊断</h2><h3>数学定义与推导</h3><p>用训练期选择并冻结的非负、和为1的供体权重构造反事实路径。事前RMSPE描述可比性，事后RMSPE与平均缺口描述偏离；比率在前拟合非常小的情形可能不稳定。此工具不使用事后结果优化权重，也不将比率自动解释为p值。</p><div class="equation">$$\widetilde Y_t=\sum_jw_jY_{jt},\quad g_t=Y_{1t}-\widetilde Y_t$$</div><div class="equation">$$\mathrm{RMSPE}_{\mathrm{pre}}=\sqrt{T_0^{-1}\sum_{t\le T_0}g_t^2}$$</div><div class="equation">$$\mathcal R=\mathrm{RMSPE}_{\mathrm{post}}/\mathrm{RMSPE}_{\mathrm{pre}}$$</div><h3>数值演算与金融应用</h3><p>两供体等权，前期合成2、3，处理结果2、4，前期缺口0、1，RMSPE=√0.5。后期合成5、6，处理7、8，缺口均2，RMSPE2、比率2/√0.5。因果解释还取决于无溢出、供体适宜和共同冲击条件。</p><h3>算法复杂度、输入契约与边界</h3><p>O(nJ)，至少一前期和一后期，按时间排序且前期必须先于后期，权重和1且非负。前期RMSPE为0时比率未定义，程序拒绝而非报告无穷。供体选择及权重训练须独立记录。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/synthetic-control-gap.csv" download>CSV数据</a>　<a href="../cpp/depth_identification.hpp" download>算法源码</a></p><pre>PostFlag,Treated,Donor1,Donor2
+0,2,1,3
+0,4,2,4
+1,7,4,6
+1,8,5,7
+</pre><pre>./build/kline_quant depth-synthetic-control-gap quant/research/depth-examples/synthetic-control-gap.csv 0.5 0.5</pre><div class="wide"><table><thead><tr><th>PreRMSPE</th><th>PostRMSPE</th><th>PostPreRatio</th><th>MeanPostGap</th></tr></thead><tbody><tr><td>0.707106781187</td><td>2</td><td>2.82842712475</td><td>2</td></tr></tbody></table></div><p class="note">参考文献：Abadie, Diamond and Hainmueller (2010), Synthetic control methods for comparative case studies, JASA.</p></article><section><h2>C++17完整实现</h2><pre>#pragma once
+#include "evidence_common.hpp"
+namespace kline { namespace depth_identification {
+using namespace evidence;
+inline Report unbalanced_two_way_projection(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,3,3);parameters(p,2);double tol=positive(p[0]);auto K=count(p[1],1,100000);require(double(K)*x.size()&lt;=5e7,"Projection work limit");std::map&lt;double,std::vector&lt;std::size_t&gt;&gt; e,t;std::set&lt;std::pair&lt;double,double&gt;&gt; keys;Vec r;
+    for(std::size_t i=0;i&lt;x.size();++i){auto&amp;a=x[i];require(a[0]==std::floor(a[0])&amp;&amp;a[1]==std::floor(a[1])&amp;&amp;keys.emplace(a[0],a[1]).second,"Invalid or duplicate panel key");e[a[0]].push_back(i);t[a[1]].push_back(i);r.push_back(a[2]);}
+    auto project=[&amp;](const auto&amp; g){for(auto&amp;z:g){double m=0;for(auto i:z.second)m+=r[i]/z.second.size();for(auto i:z.second)r[i]-=m;}};
+    auto gap=[&amp;](const auto&amp; g){double a=0;for(auto&amp;z:g){double m=0;for(auto i:z.second)m+=r[i]/z.second.size();a=std::max(a,std::abs(m));}return a;};
+    double err=std::numeric_limits&lt;double&gt;::infinity();for(std::size_t k=0;k&lt;K;++k){project(e);project(t);err=std::max(gap(e),gap(t));if(err&lt;=tol)break;}require(err&lt;=tol,"Projection did not converge");
+    Report o{{"Row","Entity","Time","Residual","MaxGroupMean"},{}};for(std::size_t i=0;i&lt;x.size();++i)o.rows.push_back({double(i+1),x[i][0],x[i][1],r[i],err});return o;
+}
+
+inline Report manski_missing_bounds(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,2,2);parameters(p,2);require(p[0]&lt;=p[1],"Invalid outcome support");double n=0,s=0;for(auto&amp;r:x){require(r[0]==0||r[0]==1,"Binary observation mask required");if(r[0]){require(r[1]&gt;=p[0]&amp;&amp;r[1]&lt;=p[1],"Observed outcome outside support");++n;s+=r[1];}}
+    double m=x.size()-n;return scalar({"ObservedCount","MissingCount","ObservedMean","LowerMean","UpperMean"},{n,m,s/positive(n),(s+m*p[0])/x.size(),(s+m*p[1])/x.size()});
+}
+
+inline Report lee_trimming_bounds(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,3,3);parameters(p,0);double n1=0,n0=0;Vec a,b;for(auto&amp;r:x){require((r[0]==0||r[0]==1)&amp;&amp;(r[1]==0||r[1]==1),"Binary flags required");if(r[0]){++n1;if(r[1])a.push_back(r[2]);}else{++n0;if(r[1])b.push_back(r[2]);}}
+    require(n1&gt;0&amp;&amp;n0&gt;0&amp;&amp;!a.empty()&amp;&amp;!b.empty(),"Both selected groups required");double s1=a.size()/n1,s0=b.size()/n0;require(s1&gt;=s0,"Treatment selection must be weakly greater");double q=s0/s1,m=q*a.size(),c=mean(b);std::sort(a.begin(),a.end());double lo=0,hi=0,left=m;
+    for(std::size_t i=0;i&lt;a.size()&amp;&amp;left&gt;0;++i){double w=std::min(1.,left);lo+=w*a[i];hi+=w*a[a.size()-1-i];left-=w;}
+    return scalar({"TreatmentSelection","ControlSelection","RetainFraction","ControlMean","LowerATE","UpperATE"},{s1,s0,q,c,lo/m-c,hi/m-c});
+}
+
+inline Report synthetic_control_gap(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,2,3,64)-2;parameters(p,d);double s=0;for(double w:p){require(w&gt;=0,"Negative donor weight");s+=w;}require(std::abs(s-1)&lt;1e-10,"Donor weights must sum to one");double a=0,b=0,c=0,n=0,m=0;bool post=false;
+    for(auto&amp;r:x){require(r[0]==0||r[0]==1,"Binary post flag");require(!post||r[0]==1,"Pre period after post period");double v=0;for(std::size_t j=0;j&lt;d;++j)v+=p[j]*r[j+2];double g=r[1]-v;if(r[0]){post=true;++m;b+=g*g;c+=g;}else{++n;a+=g*g;}}
+    require(n&gt;0&amp;&amp;m&gt;0,"Both time periods required");double u=std::sqrt(positive(a)/n),v=std::sqrt(b/m);return scalar({"PreRMSPE","PostRMSPE","PostPreRatio","MeanPostGap"},{u,v,v/u,c/m});
+}
+} }
+</pre></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

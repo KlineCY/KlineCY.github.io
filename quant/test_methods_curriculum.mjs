@@ -39,7 +39,7 @@ for(const [g,area] of Object.entries(map)){
 }
 assert.equal(eq,128);assert.equal(rows,122);assert.equal(coords,450);
 assert(read("quant/sidebar-v2.js").includes("methods-laboratories.html"));
-assert(read("quant/cpp/index.html").includes("<strong>815</strong>"));
+assert(read("quant/cpp/index.html").includes("<strong>911</strong>"));
 const studies=read("quant/research/methods-integrated-studies.html");
 assert.equal((studies.match(/<article id="study-/g)||[]).length,8);
 for(const m of studies.matchAll(/<div class="equation">\$\$([\s\S]*?)\$\$<\/div>/g))katex.renderToString(unesc(m[1]),{throwOnError:true,strict:"error"});

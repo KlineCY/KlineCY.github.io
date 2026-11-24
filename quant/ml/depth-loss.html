@@ -1,0 +1,49 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>分类与分位数损失的局部性质｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="ml"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>分类与分位数损失的局部性质</h1><p>预测损失决定模型所估计的条件对象。讨论调制损失、分位数平滑、校准参数和温度的梯度，从概率模型的结构理解优化结果。</p><p><a href="../research/depth-laboratories.html">研究专题总览</a>　<a href="../cpp/depth_loss.hpp" download>完整C++17源码</a></p><nav><a href="#binary-focal">二元Focal损失与Logit梯度</a>　｜　<a href="#huberized-pinball">分位数检查损失的平滑近似</a>　｜　<a href="#logit-intercept-score">固定预测Logit的校准截距得分</a>　｜　<a href="#temperature-curvature">多分类逆温度校准的凸性与曲率</a></nav></header><article id="binary-focal"><h2>二元Focal损失与Logit梯度</h2><h3>数学定义与推导</h3><p>Focal损失在交叉熵前乘难度调制因子，使易分类样本的贡献随正确类别概率趋近1而更快衰减。对t求导使用σ′=σ(1−σ)，再乘类别符号。代码用稳定的log-sigmoid计算，避免极端logit产生log(0)。这里不额外引入类别权重。</p><div class="equation">$$t=(2y-1)z,\quad p_t=\sigma(t)$$</div><div class="equation">$$L=- (1-p_t)^\gamma\log p_t$$</div><div class="equation">$$\frac{\partial L}{\partial z}=(2y-1)(1-p_t)^\gamma[\gamma p_t\log p_t-(1-p_t)]$$</div><h3>数值演算与金融应用</h3><p>logit为0时正确类别概率0.5，γ=2损失0.25ln2，正类梯度为−(0.25ln2+0.125)，负类符号相反。适用于极不平衡金融事件训练，但调制损失一般不保证直接获得校准概率。</p><h3>算法复杂度、输入契约与边界</h3><p>O(n)，γ≥0，标签二元。γ=0退化为普通交叉熵；过强调制会降低有效训练梯度。比较模型时须固定同一留出样本评分与经济成本。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/binary-focal.csv" download>CSV数据</a>　<a href="../cpp/depth_loss.hpp" download>算法源码</a></p><pre>Logit,Label
+0,1
+0,0
+</pre><pre>./build/kline_quant depth-binary-focal quant/research/depth-examples/binary-focal.csv 2</pre><div class="wide"><table><thead><tr><th>Logit</th><th>Label</th><th>Loss</th><th>Derivative</th></tr></thead><tbody><tr><td>0</td><td>1</td><td>0.17328679514</td><td>-0.29828679514</td></tr><tr><td>0</td><td>0</td><td>0.17328679514</td><td>0.29828679514</td></tr></tbody></table></div><p class="note">参考文献：Lin et al. (2017), Focal loss for dense object detection, ICCV.</p></article><article id="huberized-pinball"><h2>分位数检查损失的平滑近似</h2><h3>数学定义与推导</h3><p>检查损失在零残差处不可微。用分段二次—线性函数平滑绝对值，再按残差方向赋予τ或1−τ权重，可保留不对称梯度且在零点连续可微。δ趋零时逐点逼近原pinball损失；有限δ的总体最优点通常不同于精确条件分位数。</p><div class="equation">$$h_\delta(u)=\begin{cases}u^2/(2\delta)&amp;|u|\le\delta\\|u|-\delta/2&amp;|u|&gt;\delta\end{cases}$$</div><div class="equation">$$L_{\tau,\delta}(u)=|\tau-\mathbf1\{u&lt;0\}|h_\delta(u)$$</div><div class="equation">$$\partial_u L_{\tau,\delta}=|\tau-\mathbf1\{u&lt;0\}|\operatorname{clip}(u/\delta,-1,1)$$</div><h3>数值演算与金融应用</h3><p>τ=0.75、δ=1，正残差2的损失1.125、梯度0.75，负残差−2损失0.375、梯度−0.25。预测残差定义为y−ŷ，因此对预测值的梯度需取反号。适用于近似分位数神经网络的梯度诊断。</p><h3>算法复杂度、输入契约与边界</h3><p>O(n)，τ严格介于0和1、δ&gt;0。δ按收益尺度设定，不能直接在不同计价单位之间复用。此损失不是对精确分位数严格适当的替代评分。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/huberized-pinball.csv" download>CSV数据</a>　<a href="../cpp/depth_loss.hpp" download>算法源码</a></p><pre>Residual
+-2
+-0.5
+0.5
+2
+</pre><pre>./build/kline_quant depth-huberized-pinball quant/research/depth-examples/huberized-pinball.csv 0.75 1</pre><div class="wide"><table><thead><tr><th>Residual</th><th>Loss</th><th>ResidualGradient</th></tr></thead><tbody><tr><td>-2</td><td>0.375</td><td>-0.25</td></tr><tr><td>-0.5</td><td>0.03125</td><td>-0.125</td></tr><tr><td>0.5</td><td>0.09375</td><td>0.375</td></tr><tr><td>2</td><td>1.125</td><td>0.75</td></tr></tbody></table></div><p class="note">参考文献：Hastie, Tibshirani and Friedman (2009), The Elements of Statistical Learning, Springer.</p></article><article id="logit-intercept-score"><h2>固定预测Logit的校准截距得分</h2><h3>数学定义与推导</h3><p>固定基础模型logit，校准截距仅改变整体赔率。负对数似然关于截距为凸函数，一阶条件要求预测概率和等于事件数；Newton步骤用曲率缩放梯度。代码报告一次更新，不保证单步达到最优，也不在测试集自动重新校准。</p><div class="equation">$$p_i(a)=\sigma(z_i+a),\quad L(a)=\sum_i[\log(1+e^{z_i+a})-y_i(z_i+a)]$$</div><div class="equation">$$L'(a)=\sum_i(p_i-y_i),\quad L''(a)=\sum_i p_i(1-p_i)$$</div><div class="equation">$$a_{\mathrm{new}}=a-L'(a)/L''(a)$$</div><h3>数值演算与金融应用</h3><p>三条基础logit为0，标签1、0、1，截距0时NLL为3ln2，梯度−0.5，信息0.75，更新到2/3。精确最优截距是ln2，因此单步仍有误差。可在独立校准窗纠正类别基准率偏差。</p><h3>算法复杂度、输入契约与边界</h3><p>O(n)，至少一条观测，曲率必须为正；全正或全负标签时无有限未正则化最优截距。极端logit下曲率退化应采用阻尼或正则。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/logit-intercept-score.csv" download>CSV数据</a>　<a href="../cpp/depth_loss.hpp" download>算法源码</a></p><pre>BaseLogit,Outcome
+0,1
+0,0
+0,1
+</pre><pre>./build/kline_quant depth-logit-intercept-score quant/research/depth-examples/logit-intercept-score.csv 0</pre><div class="wide"><table><thead><tr><th>NLL</th><th>Score</th><th>Information</th><th>NewtonStep</th></tr></thead><tbody><tr><td>2.07944154168</td><td>-0.5</td><td>0.75</td><td>0.666666666667</td></tr></tbody></table></div><p class="note">参考文献：Hastie, Tibshirani and Friedman (2009), The Elements of Statistical Learning, Springer.</p></article><article id="temperature-curvature"><h2>多分类逆温度校准的凸性与曲率</h2><h3>数学定义与推导</h3><p>将温度倒数b作为优化变量，log-sum-exp在b上凸。梯度衡量预测概率加权logit与真实标签logit差，Hessian为条件logit方差。b≥0保持类别排序；b=0给出均匀概率的闭区间边界。校准通常在独立留出集估计。</p><div class="equation">$$p_{ik}(b)=\frac{\exp(bz_{ik})}{\sum_j\exp(bz_{ij})}$$</div><div class="equation">$$L(b)=\sum_i[\log\sum_k e^{bz_{ik}}-bz_{i,y_i}]$$</div><div class="equation">$$L'(b)=\sum_i(\mathbb E_{p_i}z_i-z_{i,y_i}),\quad L''(b)=\sum_i\operatorname{Var}_{p_i}(z_i)\ge0$$</div><h3>数值演算与金融应用</h3><p>两个样本logit分别(1,0)、(0,1)，标签均为各自较大者。b=0时均匀概率，NLL=2ln2，梯度−1、曲率0.5。数据完全正确分类时最优逆温度可能趋于无穷，需约束或更多校准信息。</p><h3>算法复杂度、输入契约与边界</h3><p>O(nK)，标签为从0开始的整数，至少两类。使用减最大logit后的log-sum-exp稳定归一化；不同模型的温度参数不可直接横向比较。</p><h3>独立样本与输出基准</h3><p><a href="../research/depth-examples/temperature-curvature.csv" download>CSV数据</a>　<a href="../cpp/depth_loss.hpp" download>算法源码</a></p><pre>Label,Z0,Z1
+0,1,0
+1,0,1
+</pre><pre>./build/kline_quant depth-temperature-curvature quant/research/depth-examples/temperature-curvature.csv 0</pre><div class="wide"><table><thead><tr><th>InverseTemperature</th><th>NLL</th><th>Gradient</th><th>Curvature</th></tr></thead><tbody><tr><td>0</td><td>1.38629436112</td><td>-1</td><td>0.5</td></tr></tbody></table></div><p class="note">参考文献：Guo et al. (2017), On calibration of modern neural networks, ICML.</p></article><section><h2>C++17完整实现</h2><pre>#pragma once
+#include "evidence_common.hpp"
+namespace kline { namespace depth_loss {
+using namespace evidence;
+inline Report binary_focal(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,2,2);parameters(p,1);double g=p[0];require(g&gt;=0,"Negative focal gamma");Report o{{"Logit","Label","Loss","Derivative"},{}};
+    for(auto&amp;r:x){
+        require(r[1]==0||r[1]==1,"Binary label required");
+        double sign=2*r[1]-1,t=sign*r[0],lp=t&gt;=0?-std::log1p(std::exp(-t)):t-std::log1p(std::exp(t));
+        double q=-std::expm1(lp),pt=std::exp(lp),f=g==0?1:std::pow(q,g);
+        o.rows.push_back({r[0],r[1],-f*lp,sign*f*(g*pt*lp-q)});
+    }return o;
+}
+
+inline Report huberized_pinball(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,1,1);parameters(p,2);require(p[0]&gt;0&amp;&amp;p[0]&lt;1,"Invalid quantile");double d=positive(p[1]);Report o{{"Residual","Loss","ResidualGradient"},{}};
+    for(auto&amp;r:x){double u=r[0],a=std::abs(u),w=u&lt;0?1-p[0]:p[0],h=a&lt;=d?a*a/(2*d):a-d/2,g=std::max(-1.,std::min(1.,u/d));o.rows.push_back({u,w*h,w*g});}return o;
+}
+
+inline Report logit_intercept_score(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,2,2);parameters(p,1);double L=0,g=0,h=0;
+    for(auto&amp;r:x){require(r[1]==0||r[1]==1,"Binary label required");double z=r[0]+p[0],q=z&gt;=0?1/(1+std::exp(-z)):std::exp(z)/(1+std::exp(z));L+=std::max(z,0.)-r[1]*z+std::log1p(std::exp(-std::abs(z)));g+=q-r[1];h+=q*(1-q);}
+    return scalar({"NLL","Score","Information","NewtonStep"},{L,g,h,p[0]-g/positive(h)});
+}
+
+inline Report temperature_curvature(const Mat&amp; x,const Vec&amp; p){
+    auto K=validate(x,1,3,64)-1;parameters(p,1);double b=p[0];require(b&gt;=0,"Negative inverse temperature");double L=0,g=0,h=0;
+    for(auto&amp;r:x){auto y=count(r[0],0,K-1);double m=*std::max_element(r.begin()+1,r.end()),s=0,u=0,v=0;
+        for(std::size_t j=0;j&lt;K;++j){double z=r[j+1]-m,w=std::exp(b*z);s+=w;u+=w*z;v+=w*z*z;}
+        L+=std::log(s)-b*(r[y+1]-m);u/=s;g+=u-(r[y+1]-m);h+=std::max(0.,v/s-u*u);
+    }return scalar({"InverseTemperature","NLL","Gradient","Curvature"},{b,L,g,h});
+}
+} }
+</pre></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>
