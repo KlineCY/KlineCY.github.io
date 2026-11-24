@@ -44,5 +44,5 @@ for(const [g,area] of Object.entries(map)){
 assert.equal(equations,64);
 assert.equal(coordinates,252);
 assert(read("quant/sidebar-v2.js").includes("applied-laboratories.html"));
-assert(read("quant/cpp/index.html").includes("<strong>947</strong>"));
+assert(read("quant/cpp/index.html").includes("<strong>995</strong>"));
 console.log("PASS: 32 research lessons, "+equations+" strict KaTeX equations, "+coordinates+" numeric coordinates, source and navigation consistency");
