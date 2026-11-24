@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>矩阵分解、谱分析与多元数值计算｜Kline Quant</title><meta name="description" content="多变量量化研究、公式推导、数值案例与C++17算法">
+<link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<style>body{margin:0;background:white;color:#142733;font:16px/1.95 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:24px 32px 64px}main{max-width:1150px;margin:auto}header,.lesson,.source,.references{border:1px solid #cad3d9;padding:24px 28px;margin:18px 0;background:white}h1{font-size:31px;line-height:1.4}h2{font-size:23px;margin:10px 0 20px}h3{font-size:17px;margin:22px 0 6px}p{line-height:1.95;margin:12px 0}.toc{display:flex;flex-wrap:wrap;gap:9px 24px;border:1px solid #cad3d9;padding:17px 24px}.equation{overflow:auto;border-block:1px solid #d7dfe4;margin:18px 0;padding:16px 6px}.katex-display{overflow-x:auto;overflow-y:hidden}a{color:#1a5478}code,pre{font-family:"Times New Roman",monospace}pre{border:1px solid #cbd5dc;padding:15px;overflow:auto;white-space:pre;font-size:13px;line-height:1.7;max-height:850px}@media(max-width:790px){.main{margin:0;padding:12px}header,.lesson,.source,.references{padding:15px}}</style>
+</head><body><aside id="quantSidebar" class="sidebar" data-page="math"></aside><script src="../sidebar-v2.js"></script><div class="main"><main>
+<header><small>QUANTITATIVE RESEARCH / MULTIVARIATE NUMERICAL METHODS</small><h1>矩阵分解、谱分析与多元数值计算</h1><p>数值线性代数构成回归、风险矩阵与优化的共同基础。以资产×特征矩阵为例，先检验设计列的独立性，再决定QR、谱分解或正则化逆矩阵的计算路径。</p><p>比较同一个矩阵在不同算法下的残差、有效秩与条件性，比单独检查拟合优度更能识别数值误差。秩一更新适合研究新增公共风险因子，而幂迭代适合快速追踪主要方向。</p></header>
+<nav class="toc"><a href="#lesson1">1．修正Gram–Schmidt薄QR最小二乘</a><a href="#lesson2">2．对称矩阵的Jacobi特征分解</a><a href="#lesson3">3．中心化双因子Ridge回归与有效自由度</a><a href="#lesson4">4．Sherman–Morrison秩一协方差更新</a><a href="#lesson5">5．三维协方差矩阵幂迭代与残差证书</a><a href="#source">C++17完整实现</a><a href="#references">参考文献</a></nav>
+<article class="lesson" id="lesson1"><h2>1．修正Gram–Schmidt薄QR最小二乘</h2>
+<h3>模型结构与数学定义</h3><p>以逐列正交化构造薄QR分解，对剩余列进行两次投影以减轻正交性损失，再以逆序三角回代求系数。相比直接形成正规方程，QR避免将设计矩阵的条件数平方。输入前三列分别是两个解释变量及响应；截距由常数列显式传入。输出两个回归系数与残差平方和。</p><div class="equation">$$X=QR,\quad R\widehat\beta=Q^\top y$$</div>
+<h3>推导、最优性条件与数值结构</h3><div class="equation">$$\|y-X\beta\|_2^2=\|Q^\top y-R\beta\|_2^2+\|(I-QQ^\top)y\|_2^2$$</div><p>将最小化问题在正交子空间及其正交补中分解。正交补项与β无关，故只需令三角系统的残差为零。程序的两次正交化是在同一列上重新投影，数学上与修正Gram–Schmidt一致，并非Householder反射。</p>
+<h3>完整计算案例</h3><p>两列完全正交的设计矩阵使投影系数可直接由内积求出；给定响应为两个解释变量的线性组合，理论残差为零。</p><div class="equation">$$\mathrm{Output}\approx\left(2,\ 3,\ 0\right)$$</div>
+<p>输出顺序：回归系数1、回归系数2、残差平方和。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>X1,X2,Y
+1,0,2
+0,1,3
+1,1,5</code></pre><pre><code>./kline_quant lab24-linear-qr-solve study.csv</code></pre>
+<h3>估计假设与应用边界</h3><p>仅处理两列满秩设计。若样本特征接近共线，应优先使用带列主元QR或SVD；相对列范数阈值用于拒绝数值秩亏。</p></article>
+<article class="lesson" id="lesson2"><h2>2．对称矩阵的Jacobi特征分解</h2>
+<h3>模型结构与数学定义</h3><p>二维对称矩阵的特征根由特征多项式的两个实根得到。最大特征向量沿旋转角θ的一阶轴排列，其中2θ的正弦、余弦方向由非对角项和对角差共同决定。输出两个特征值、第一特征向量的两个坐标以及两根之差。</p><div class="equation">$$A=\begin{pmatrix}a&amp;b\\b&amp;d\end{pmatrix},\quad \lambda_\pm=\tfrac12(a+d)\pm\sqrt{((a-d)/2)^2+b^2}$$</div>
+<h3>推导、最优性条件与数值结构</h3><div class="equation">$$\det(A-\lambda I)=(a-\lambda)(d-\lambda)-b^2=0,\qquad \tan(2\theta)=\frac{2b}{a-d}$$</div><p>特征多项式的判别式非负。用atan2确定象限，即使对角差为零也能避免直接除零；当特征值重合时，任意正交旋转都满足分解。</p>
+<h3>完整计算案例</h3><p>矩阵[[2,1],[1,2]]的主轴是45度方向，特征根为3、1，主特征向量两个坐标均为1/√2。</p><div class="equation">$$\mathrm{Output}\approx\left(3,\ 1,\ 0.707106781,\ 0.707106781,\ 2\right)$$</div>
+<p>输出顺序：最大特征值、最小特征值、主特征向量第一分量、第二分量、谱间距。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>A,B
+2,1
+1,2</code></pre><pre><code>./kline_quant lab24-linear-spectral2 study.csv</code></pre>
+<h3>估计假设与应用边界</h3><p>重根下特征方向不唯一；此实现以确定的旋转方向返回一组基向量。协方差矩阵另需半正定约束。</p></article>
+<article class="lesson" id="lesson3"><h2>3．中心化双因子Ridge回归与有效自由度</h2>
+<h3>模型结构与数学定义</h3><p>以样本均值去除截距影响，在二维Gram矩阵上加入正则项；解析逆矩阵求两项斜率，随后恢复未受惩罚的截距。利用迹恒等式计算斜率的有效自由度并加上截距的一维。参数λ以未除以样本量的残差平方和为目标尺度。</p><div class="equation">$$\widehat\beta=(X_c^\top X_c+\lambda I)^{-1}X_c^\top y_c,\quad d_{\rm eff}=1+\operatorname{tr}[(G+\lambda I)^{-1}G]$$</div>
+<h3>推导、最优性条件与数值结构</h3><div class="equation">$$\min_{\beta_0,\beta}\|y-\beta_0\mathbf1-X\beta\|^2+\lambda\|\beta\|^2,\quad \beta_0=\bar y-\bar x^\top\beta$$</div><p>截距的一阶条件给出均值关系。代入后目标只含中心化样本，斜率正规方程中的λI对应二次惩罚；帽子矩阵的迹表征拟合复杂度。</p>
+<h3>完整计算案例</h3><p>四行设计为两个相互正交的±1变量，响应为2X1+4X2；λ=4时两斜率缩半为1、2，截距为0，有效自由度为2。</p><div class="equation">$$\mathrm{Output}\approx\left(0,\ 1,\ 2,\ 2\right)$$</div>
+<p>输出顺序：截距、斜率1、斜率2、含截距有效自由度。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>X1,X2,Y
+-1,-1,-6
+-1,1,2
+1,-1,-2
+1,1,6</code></pre><pre><code>./kline_quant lab24-linear-ridge2 study.csv 4</code></pre>
+<h3>估计假设与应用边界</h3><p>该算例为二维解析版本；实际高维设计应使用稳定分解并在训练折内标准化特征。λ必须为正。</p></article>
+<article class="lesson" id="lesson4"><h2>4．Sherman–Morrison秩一协方差更新</h2>
+<h3>模型结构与数学定义</h3><p>在单位基准协方差中加入一项公共因子的秩一冲击；利用Sherman–Morrison公式计算逆矩阵作用于右端向量，无需构造稠密矩阵。每行是因子载荷与目标向量的对应维度，返回完整解向量。</p><div class="equation">$$(I+\gamma uu^\top)^{-1}b=b-\frac{\gamma u(u^\top b)}{1+\gamma u^\top u}$$</div>
+<h3>推导、最优性条件与数值结构</h3><div class="equation">$$(I+\gamma uu^\top)\left(b-\frac{\gamma u(u^\top b)}{1+\gamma u^\top u}\right)=b$$</div><p>直接左乘验证恒等式，所有与u平行的增量相互抵消。复杂度仅与向量长度线性相关，可用于对单位基准协方差的单因子压力调整。</p>
+<h3>完整计算案例</h3><p>载荷u=(1,1)，右端b=(3,1)，γ=1时分母为3、内积为4，解为(5/3,−1/3)。</p><div class="equation">$$\mathrm{Output}\approx\left(1.66666667,\ -0.333333333\right)$$</div>
+<p>输出顺序：线性系统解的各坐标。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>U,B
+1,3
+1,1</code></pre><pre><code>./kline_quant lab24-linear-woodbury-rank1 study.csv 1</code></pre>
+<h3>估计假设与应用边界</h3><p>限制γ≥0保证更新矩阵正定。一般非单位基准可通过预先求解基准矩阵线性方程推广。</p></article>
+<article class="lesson" id="lesson5"><h2>5．三维协方差矩阵幂迭代与残差证书</h2>
+<h3>模型结构与数学定义</h3><p>从全一归一化初值开始，交替进行矩阵向量乘法和归一化。在对称正定且主特征方向具有非零初始投影的前提下，迭代逐渐集中于主特征方向；Rayleigh商估计特征值，残差范数衡量所得近似特征对是否满足方程。返回特征值、残差。</p><div class="equation">$$v_{k+1}=\frac{Av_k}{\|Av_k\|_2},\quad \lambda=v^\top Av,\quad e=\|Av-\lambda v\|_2$$</div>
+<h3>推导、最优性条件与数值结构</h3><div class="equation">$$A^kv_0=\sum_jc_j\lambda_j^k e_j,\qquad |\lambda_j/\lambda_1|^k\to0\ (j&gt;1)$$</div><p>若最大特征值严格大于其他特征值且对应初始系数非零，反复乘矩阵后其余方向的相对分量指数衰减。残差证书只检验当前特征对。</p>
+<h3>完整计算案例</h3><p>对角矩阵diag(4,2,1)，40次迭代后主特征值趋近4，特征残差趋近零。</p><div class="equation">$$\mathrm{Output}\approx\left(4,\ 0\right)$$</div>
+<p>输出顺序：Rayleigh商、特征残差的二范数。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>C1,C2,C3
+4,0,0
+0,2,0
+0,0,1</code></pre><pre><code>./kline_quant lab24-linear-power-iteration study.csv 40</code></pre>
+<h3>估计假设与应用边界</h3><p>固定初值可能恰与主特征向量正交，残差小只证明近似特征对，不保证一定是最大特征根。生产系统可使用多初值或完整对称特征分解。</p></article>
+<section class="source" id="source"><h2>完整C++17实现</h2><p>输入为逐行组织的数值矩阵及标量参数向量，输出为按前文约定排列的数值向量。各方法对维度、参数范围、数值有限性及可行性进行检查。以下头文件和公共接口与实际工具库一致。</p><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/lab24_linear.hpp">算法源文件</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/lab24_common.hpp">公共接口</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_lab24.cpp">数值回归与结构恒等式测试</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_lab24_cli.py">CSV接口复算测试</a>。</p><h3>独立算法</h3><pre><code>#pragma once
+#include "lab24_common.hpp"
+#include &lt;functional&gt;
+
+namespace kline { namespace lab24 {
+inline Vec qr_solve(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,3,0,2);
+    Vec a=col(x,0),b=col(x,1),y=col(x,2);
+    double r11=positive(std::sqrt(dot(a,a)));
+    for(double&amp; z:a)z/=r11;
+    double r12=dot(a,b),b0=std::sqrt(dot(b,b));
+    for(std::size_t i=0;i&lt;b.size();++i)b[i]-=r12*a[i];
+    double corr=dot(a,b);r12+=corr;
+    for(std::size_t i=0;i&lt;b.size();++i)b[i]-=corr*a[i];
+    double r22=std::sqrt(dot(b,b));
+    require(r22&gt;1e-12*b0&amp;&amp;r22&gt;0,"Rank-deficient design");
+    for(double&amp; z:b)z/=r22;
+    double v=dot(b,y)/r22,u=(dot(a,y)-r12*v)/r11,sse=0;
+    for(const auto&amp; row:x){double e=row[2]-row[0]*u-row[1]*v;sse+=e*e;}
+    return checked({u,v,sse});
+}
+
+inline Vec spectral2(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,2,0,2);require(x.size()==2,"A 2 by 2 matrix is required");
+    require(std::abs(x[0][1]-x[1][0])&lt;=1e-12*std::max(1.0,std::abs(x[0][1])),"Matrix must be symmetric");
+    double a=x[0][0],b=x[0][1],d=x[1][1];
+    double mid=0.5*a+0.5*d,gap=std::hypot(0.5*a-0.5*d,b);
+    double theta=0.5*std::atan2(b,0.5*a-0.5*d);
+    return checked({mid+gap,mid-gap,std::cos(theta),std::sin(theta),2*gap});
+}
+
+inline Vec ridge2(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,3,1,2);double l=positive(p[0]);
+    double m1=mean(col(x,0)),m2=mean(col(x,1)),my=mean(col(x,2));
+    double a=0,b=0,d=0,u=0,v=0;
+    for(const auto&amp; r:x){
+        double q=r[0]-m1,s=r[1]-m2,t=r[2]-my;
+        a+=q*q;b+=q*s;d+=s*s;u+=q*t;v+=s*t;
+    }
+    double aa=a+l,dd=d+l,det=positive(aa*dd-b*b);
+    double c1=(dd*u-b*v)/det,c2=(aa*v-b*u)/det;
+    double df=1+(dd*a+aa*d-2*b*b)/det;
+    return checked({my-c1*m1-c2*m2,c1,c2,df});
+}
+
+inline Vec woodbury_rank1(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,2,1);require(p[0]&gt;=0,"Rank-one variance must be nonnegative");
+    Vec u=col(x,0),b=col(x,1);
+    double scale=p[0]*dot(u,b)/positive(1+p[0]*dot(u,u));
+    for(std::size_t i=0;i&lt;b.size();++i)b[i]-=scale*u[i];
+    return checked(b);
+}
+
+inline Vec power_iteration(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,3,1,3);require(x.size()==3,"A 3 by 3 matrix is required");
+    for(std::size_t i=0;i&lt;3;++i)for(std::size_t j=0;j&lt;3;++j)
+        require(std::abs(x[i][j]-x[j][i])&lt;1e-12,"Symmetric matrix required");
+    require(x[0][0]&gt;0&amp;&amp;x[0][0]*x[1][1]-x[0][1]*x[0][1]&gt;0,"Positive leading minors required");
+    double det=x[0][0]*(x[1][1]*x[2][2]-x[1][2]*x[2][1])-x[0][1]*(x[1][0]*x[2][2]-x[1][2]*x[2][0])+x[0][2]*(x[1][0]*x[2][1]-x[1][1]*x[2][0]);
+    positive(det);
+    auto multiply=[&amp;](const Vec&amp; v){Vec z;for(const auto&amp; r:x)z.push_back(dot(r,v));return z;};
+    Vec v(3,1/std::sqrt(3.0));auto steps=integer(p[0],1,10000);
+    for(std::size_t k=0;k&lt;steps;++k){v=multiply(v);double n=positive(std::sqrt(dot(v,v)));for(double&amp; q:v)q/=n;}
+    Vec a=multiply(v);double lambda=dot(v,a);for(std::size_t i=0;i&lt;3;++i)a[i]-=lambda*v[i];
+    return checked({lambda,std::sqrt(dot(a,a))});
+}
+} }
+</code></pre><h3>公共数值接口</h3><pre><code>#pragma once
+#include "stats.hpp"
+#include &lt;algorithm&gt;
+#include &lt;cmath&gt;
+#include &lt;cstddef&gt;
+#include &lt;limits&gt;
+#include &lt;numeric&gt;
+#include &lt;stdexcept&gt;
+#include &lt;utility&gt;
+#include &lt;vector&gt;
+
+namespace kline { namespace lab24 {
+using Vec=std::vector&lt;double&gt;;
+using Mat=std::vector&lt;Vec&gt;;
+
+inline void inputs(const Mat&amp; x,const Vec&amp; p,std::size_t cols,std::size_t params,
+                   std::size_t min_rows=1) {
+    require(x.size()&gt;=min_rows&amp;&amp;x.size()&lt;=250000,"Invalid number of observations");
+    require(p.size()==params,"Incorrect scalar parameter count");
+    for(double v:p)require(std::isfinite(v),"Nonfinite scalar parameter");
+    for(const auto&amp; row:x){
+        require(row.size()==cols,"Unexpected CSV column count");
+        for(double v:row)require(std::isfinite(v),"Nonfinite matrix entry");
+    }
+}
+inline std::size_t integer(double x,std::size_t low,std::size_t high){
+    require(std::isfinite(x)&amp;&amp;x&gt;=double(low)&amp;&amp;x&lt;=double(high)&amp;&amp;std::floor(x)==x,
+            "Integer parameter outside allowed range");
+    return std::size_t(x);
+}
+inline double dot(const Vec&amp; a,const Vec&amp; b){
+    require(a.size()==b.size(),"Dot product dimension mismatch");
+    return std::inner_product(a.begin(),a.end(),b.begin(),0.0);
+}
+inline Vec col(const Mat&amp; x,std::size_t j){
+    Vec out;out.reserve(x.size());
+    for(const auto&amp; row:x)out.push_back(row.at(j));
+    return out;
+}
+inline double positive(double x){require(x&gt;0&amp;&amp;std::isfinite(x),"Positive finite quantity required");return x;}
+inline Vec checked(Vec v){check_finite(v);return v;}
+inline double logistic(double x){
+    if(x&gt;=0)return 1/(1+std::exp(-x));
+    double e=std::exp(x);return e/(1+e);
+}
+inline double normal_cdf(double x){return 0.5*std::erfc(-x/std::sqrt(2.0));}
+inline double sum(const Vec&amp; v){return std::accumulate(v.begin(),v.end(),0.0);}
+} }
+</code></pre></section>
+<section class="references" id="references"><h2>参考文献与进一步阅读</h2><p><a href="https://www.netlib.org/lapack/lug/">LAPACK Users' Guide</a></p><p><a href="https://ee263.stanford.edu/">Stanford EE263: Linear Dynamical Systems</a></p><p>课程中的数值样本均为明确构造的教学算例，不代表真实市场实证结果。</p></section>
+</main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

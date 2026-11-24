@@ -63,7 +63,7 @@ for(const [area,file,header,recipes] of catalog){
 }
 assert.equal(formulas,32);
 assert.equal(commands.size,32);
-assert(cpp.includes("<strong>288</strong>")&&cpp.includes("<strong>550</strong>"),
+assert(cpp.includes("<strong>300</strong>")&&cpp.includes("<strong>610</strong>"),
        "C++ header and command totals disagree with the site");
 const approx=(a,b)=>Math.abs(a-b)<1e-10;
 assert(approx(Math.log(1/Math.exp(-.05)),.05));

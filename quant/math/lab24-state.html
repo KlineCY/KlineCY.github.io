@@ -1,0 +1,120 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>随机状态模型、滤波与离散概率推断｜Kline Quant</title><meta name="description" content="多变量量化研究、公式推导、数值案例与C++17算法"><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><style>body{margin:0;background:white;color:#142733;font:16px/1.95 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:24px 32px 64px}main{max-width:1150px;margin:auto}header,.lesson,.source,.references{border:1px solid #cad3d9;padding:24px 28px;margin:18px 0;background:white}h1{font-size:31px;line-height:1.4}h2{font-size:23px;margin:10px 0 20px}h3{font-size:17px;margin:22px 0 6px}p{line-height:1.95;margin:12px 0}.toc{display:flex;flex-wrap:wrap;gap:9px 24px;border:1px solid #cad3d9;padding:17px 24px}.equation{overflow:auto;border-block:1px solid #d7dfe4;margin:18px 0;padding:16px 6px}.katex-display{overflow-x:auto;overflow-y:hidden}a{color:#1a5478}code,pre{font-family:"Times New Roman",monospace}pre{border:1px solid #cbd5dc;padding:15px;overflow:auto;white-space:pre;font-size:13px;line-height:1.7;max-height:850px}@media(max-width:790px){.main{margin:0;padding:12px}header,.lesson,.source,.references{padding:15px}}</style></head><body><aside id="quantSidebar" class="sidebar" data-page="math"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><small>QUANTITATIVE RESEARCH / MULTIVARIATE NUMERICAL METHODS</small><h1>随机状态模型、滤波与离散概率推断</h1><p>金融收益与潜在状态并不完全同步。随机状态模型把系统演化和观测生成分开，使潜在风险水平、制度状态与观测噪声可以被分别建模。</p><p>过滤解决当前状态推断，Viterbi解决最可能路径，OU估计描述连续时间均值回复，而首次命中概率刻画状态退出的期限风险。各方法都需要区分时间排序、估计区间和预测时点。</p></header><nav class="toc"><a href="#lesson1">1．具有逐期测量误差的Kalman滤波</a><a href="#lesson2">2．双状态隐马尔可夫模型的缩放前向算法</a><a href="#lesson3">3．双状态Viterbi最可能状态路径</a><a href="#lesson4">4．等距采样OU过程的条件矩估计</a><a href="#lesson5">5．双状态吸收前的有限期首次命中概率</a><a href="#source">C++17完整实现</a><a href="#references">参考文献</a></nav><article class="lesson" id="lesson1"><h2>1．具有逐期测量误差的Kalman滤波</h2><h3>模型结构与数学定义</h3><p>假设潜在状态服从随机游走，每期观测由状态与独立测量噪声组成。预测方差加上过程方差Q，按测量精度形成Kalman增益。使用Joseph形式计算后验方差，以非负平方项减轻舍入误差。返回最终后验均值、方差及累计预测对数似然。</p><div class="equation">$$P_t^-=P_{t-1}+Q,\quad K_t=P_t^-/(P_t^-+R_t),\quad m_t=m_{t-1}+K_t(y_t-m_{t-1})$$</div><h3>推导、最优性条件与数值结构</h3><div class="equation">$$P_t=(1-K_t)^2P_t^-+K_t^2R_t,\quad \log L=-\frac12\sum_t\{\log(2\pi S_t)+e_t^2/S_t\}$$</div><p>预测误差e_t是观测与先验均值之差，方差S_t是过程预测方差与测量方差的和。根据正态条件分布，后验均值线性更新，Joseph形式则显式保留两个非负方差贡献。</p><h3>完整计算案例</h3><p>初始均值0、方差1、过程方差0；观测2、测量方差1，则增益1/2，后验均值1、方差0.5。观测边际方差为2，似然为正态密度。</p><div class="equation">$$\mathrm{Output}\approx\left(1,\ 0.5,\ -2.26551212\right)$$</div><p>输出顺序：最后一期状态均值、后验方差、观测累计对数似然。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>Observation,MeasurementVariance
+2,1</code></pre><pre><code>./kline_quant lab24-state-scalar-kalman study.csv 0 1 0</code></pre><h3>估计假设与应用边界</h3><p>各观测必须按时间递增排序，Q非负、测量方差正；参数估计和未来预测都须遵循实际时点。</p></article>
+<article class="lesson" id="lesson2"><h2>2．双状态隐马尔可夫模型的缩放前向算法</h2><h3>模型结构与数学定义</h3><p>输入每期两个状态下的观测似然。先使用行随机转移矩阵推进上一期状态分布，再逐状态乘似然并归一化；记录每次归一化常数的对数，避免对长时间序列直接连乘概率。首期只使用先验与观测似然。输出最后一期两状态过滤概率和对数似然。</p><div class="equation">$$\widetilde\alpha_t(j)=b_j(y_t)\sum_i\alpha_{t-1}(i)P_{ij},\quad \alpha_t=\widetilde\alpha_t/c_t,\quad \log L=\sum_t\log c_t$$</div><h3>推导、最优性条件与数值结构</h3><div class="equation">$$c_t=\sum_j b_j(y_t)\sum_i\alpha_{t-1}(i)P_{ij},\qquad \sum_j\alpha_t(j)=1$$</div><p>缩放常数恰为给定历史观测的当期边际似然。联合似然按条件概率的乘积展开，因此累加对数缩放常数即可恢复完整样本似然，而不用保存极小的联合概率。</p><h3>完整计算案例</h3><p>初始概率各0.5，首期观测似然为0.8、0.2，最终状态概率为0.8、0.2，边际似然为0.5。</p><div class="equation">$$\mathrm{Output}\approx\left(0.8,\ 0.2,\ -0.693147181\right)$$</div><p>输出顺序：状态0过滤概率、状态1过滤概率、累计对数似然。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>Likelihood0,Likelihood1
+0.8,0.2</code></pre><pre><code>./kline_quant lab24-state-hmm-forward study.csv 0.5 0.9 0.8</code></pre><h3>估计假设与应用边界</h3><p>似然允许大于1，例如连续密度，但不得为负。参数为初始状态0概率、留在0的概率、留在1的概率。</p></article>
+<article class="lesson" id="lesson3"><h2>3．双状态Viterbi最可能状态路径</h2><h3>模型结构与数学定义</h3><p>将状态路径的联合概率最大化转化为对数域动态规划。每期为两个终点状态保存最大累计对数得分及其前驱，最后从得分较大的终点反向恢复整个路径。与逐时点最大过滤概率不同，Viterbi优化的是联合路径。</p><div class="equation">$$\delta_t(j)=\max_i\{\delta_{t-1}(i)+\log P_{ij}\}+\log b_j(y_t)$$</div><h3>推导、最优性条件与数值结构</h3><div class="equation">$$\psi_t(j)=\arg\max_i[\delta_{t-1}(i)+\log P_{ij}],\quad z_{t-1}^*=\psi_t(z_t^*)$$</div><p>最优路径若在给定终点之前包含非最优子路径，则可替换子路径提高整体联合概率，产生矛盾。动态规划利用这一最优子结构，前向只保留两个状态得分，反向使用前驱数组恢复路径。</p><h3>完整计算案例</h3><p>两期状态似然分别为(0.9,0.1)、(0.8,0.2)，初始状态概率0.5且两状态留存率0.9，最大联合概率路径为(0,0)。</p><div class="equation">$$\mathrm{Output}\approx\left(0,\ 0\right)$$</div><p>输出顺序：每个观测时点对应的最优状态编号。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>Likelihood0,Likelihood1
+0.9,0.1
+0.8,0.2</code></pre><pre><code>./kline_quant lab24-state-viterbi study.csv 0.5 0.9 0.9</code></pre><h3>估计假设与应用边界</h3><p>参数同前向算法，但概率与似然严格为正以保证可直接取对数。输出状态编号，平局固定选择状态0。</p></article>
+<article class="lesson" id="lesson4"><h2>4．等距采样OU过程的条件矩估计</h2><h3>模型结构与数学定义</h3><p>OU过程的离散精确转移均值为θ+(X_t−θ)e^(−κΔ)。在等距样本中对下一期状态回归当前状态，获得截距与斜率，再反解均值回复速度、长期均值与扩散系数。创新方差采用条件高斯极大似然的n分母，按精确转移方差反推σ。</p><div class="equation">$$X_{t+\Delta}=\alpha+\phi X_t+\epsilon_t,\quad \kappa=-\log\phi/\Delta,\quad \theta=\alpha/(1-\phi)$$</div><h3>推导、最优性条件与数值结构</h3><div class="equation">$$\operatorname{Var}(\epsilon_t)=\frac{\sigma^2}{2\kappa}(1-e^{-2\kappa\Delta}),\qquad \widehat\sigma^2=\frac{2\widehat\kappa\,\widehat{\operatorname{Var}}(\epsilon)}{1-\widehat\phi^2}$$</div><p>对OU随机微分方程使用积分因子可得到条件正态转移，其确定性部分是指数回复，随机积分的方差由Itô等距性质获得。回归的创新方差由此转换为连续时间扩散系数。</p><h3>完整计算案例</h3><p>序列1、0.5、0.25、0.125，Δ=1，回归斜率0.5、截距0，回复速度log2、长期均值0、扩散系数0。</p><div class="equation">$$\mathrm{Output}\approx\left(0.693147181,\ 0,\ 0\right)$$</div><p>输出顺序：均值回复速度κ、长期均值θ、扩散系数σ。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>State
+1
+0.5
+0.25
+0.125</code></pre><pre><code>./kline_quant lab24-state-ou-transition-fit study.csv 1</code></pre><h3>估计假设与应用边界</h3><p>要求0<φ<1且状态样本非退化。短样本估计可能有偏；当前实现只处理等距连续序列。</p></article>
+<article class="lesson" id="lesson5"><h2>5．双状态吸收前的有限期首次命中概率</h2><h3>模型结构与数学定义</h3><p>将正常状态视为尚未触发事件，压力状态定义为首次命中的目标。每个时段若仍留在正常状态，路径乘以P00；补事件即有限期限内至少一次命中。命中时间为几何分布，故其均值为单期退出概率的倒数。返回有限期限首次命中概率、期望命中期数。</p><div class="equation">$$h_0(t)=1-P_{00}^{\,t},\quad E_0[\tau]=1/(1-P_{00})$$</div><h3>推导、最优性条件与数值结构</h3><div class="equation">$$\Pr(\tau=k)=s^{k-1}(1-s),\qquad \Pr(\tau&gt;h)=s^h$$</div><p>从正常状态出发，首次命中在第k期意味着前k−1期持续正常且第k期退出。将几何概率求和得到累计命中概率；由非负整数变量的尾和公式得到期望时间。</p><h3>完整计算案例</h3><p>正常状态单期留存概率0.8，期限2期，首次命中概率0.36，期望命中时间5期。</p><div class="equation">$$\mathrm{Output}\approx\left(0.36,\ 5\right)$$</div><p>输出顺序：期限内首次命中概率、期望首次命中期数。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>StayProbability
+0.8</code></pre><pre><code>./kline_quant lab24-state-markov-hitting study.csv 2</code></pre><h3>估计假设与应用边界</h3><p>一旦首次命中，后续是否退出压力状态不影响该统计。此处仅处理齐次两状态转移且P00<1。</p></article><section class="source" id="source"><h2>完整C++17实现</h2><p>输入为逐行组织的数值矩阵及标量参数向量，输出为按前文约定排列的数值向量。各方法对维度、参数范围、数值有限性及可行性进行检查。</p><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/lab24_state.hpp">算法源文件</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/lab24_common.hpp">公共接口</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_lab24.cpp">数值回归与结构恒等式测试</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_lab24_cli.py">CSV接口复算测试</a>。</p><h3>独立算法</h3><pre><code>#pragma once
+#include "lab24_common.hpp"
+#include &lt;map&gt;
+
+namespace kline { namespace lab24 {
+inline Vec scalar_kalman(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,2,3);double m=p[0],v=p[1],q=p[2],ll=0;
+    require(v&gt;=0&amp;&amp;q&gt;=0,"Invalid state variance");
+    for(const auto&amp; r:x){
+        positive(r[1]);double prior=v+q,s=positive(prior+r[1]),e=r[0]-m,k=prior/s;
+        m+=k*e;v=(1-k)*(1-k)*prior+k*k*r[1];
+        ll-=0.5*(std::log(2*std::acos(-1.0)*s)+e*e/s);
+    }
+    return checked({m,v,ll});
+}
+
+inline Vec hmm_forward(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,2,3);for(double q:p)require(q&gt;=0&amp;&amp;q&lt;=1,"Invalid probability");
+    double a=p[0],b=1-a,ll=0;
+    for(std::size_t t=0;t&lt;x.size();++t){
+        if(t){double z=a*p[1]+b*(1-p[2]);b=a*(1-p[1])+b*p[2];a=z;}
+        require(x[t][0]&gt;=0&amp;&amp;x[t][1]&gt;=0,"Negative observation likelihood");
+        a*=x[t][0];b*=x[t][1];double z=positive(a+b);ll+=std::log(z);a/=z;b/=z;
+    }
+    return checked({a,b,ll});
+}
+
+inline Vec viterbi(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,2,3);for(double q:p)require(q&gt;0&amp;&amp;q&lt;1,"Transition and prior must lie in (0,1)");
+    for(const auto&amp; r:x){positive(r[0]);positive(r[1]);}
+    double a=std::log(p[0])+std::log(x[0][0]),b=std::log(1-p[0])+std::log(x[0][1]);
+    std::vector&lt;std::pair&lt;int,int&gt;&gt; back(x.size());
+    for(std::size_t t=1;t&lt;x.size();++t){
+        double aa=a+std::log(p[1]),ba=b+std::log(1-p[2]),ab=a+std::log(1-p[1]),bb=b+std::log(p[2]);
+        back[t]={aa&gt;=ba?0:1,ab&gt;=bb?0:1};a=std::max(aa,ba)+std::log(x[t][0]);b=std::max(ab,bb)+std::log(x[t][1]);
+    }
+    Vec states(x.size());int z=a&gt;=b?0:1;
+    for(std::size_t t=x.size();t--&gt;0;){states[t]=z;if(t)z=z==0?back[t].first:back[t].second;}
+    return states;
+}
+
+inline Vec ou_transition_fit(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,1,1,4);double dt=positive(p[0]);Vec a,b;
+    for(std::size_t i=1;i&lt;x.size();++i){a.push_back(x[i-1][0]);b.push_back(x[i][0]);}
+    double phi=covariance(a,b,false)/positive(variance(a,false));
+    require(phi&gt;0&amp;&amp;phi&lt;1,"OU autoregressive coefficient must lie in (0,1)");
+    double alpha=mean(b)-phi*mean(a),k=-std::log(phi)/dt,sse=0;
+    for(std::size_t i=0;i&lt;a.size();++i){double e=b[i]-alpha-phi*a[i];sse+=e*e;}
+    return checked({k,alpha/(1-phi),std::sqrt(2*k*(sse/a.size())/(1-phi*phi))});
+}
+
+inline Vec markov_hitting(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,1,1);require(x.size()==1,"Single normal-state probability required");
+    auto h=integer(p[0],1,1000000);double s=x[0][0];require(s&gt;=0&amp;&amp;s&lt;1,"Stay probability must be in [0,1)");
+    double hit=s==0?1:-std::expm1(double(h)*std::log(s));
+    return checked({hit,1/(1-s)});
+}
+} }
+</code></pre><h3>公共数值接口</h3><pre><code>#pragma once
+#include "stats.hpp"
+#include &lt;algorithm&gt;
+#include &lt;cmath&gt;
+#include &lt;cstddef&gt;
+#include &lt;limits&gt;
+#include &lt;numeric&gt;
+#include &lt;stdexcept&gt;
+#include &lt;utility&gt;
+#include &lt;vector&gt;
+
+namespace kline { namespace lab24 {
+using Vec=std::vector&lt;double&gt;;
+using Mat=std::vector&lt;Vec&gt;;
+
+inline void inputs(const Mat&amp; x,const Vec&amp; p,std::size_t cols,std::size_t params,
+                   std::size_t min_rows=1) {
+    require(x.size()&gt;=min_rows&amp;&amp;x.size()&lt;=250000,"Invalid number of observations");
+    require(p.size()==params,"Incorrect scalar parameter count");
+    for(double v:p)require(std::isfinite(v),"Nonfinite scalar parameter");
+    for(const auto&amp; row:x){
+        require(row.size()==cols,"Unexpected CSV column count");
+        for(double v:row)require(std::isfinite(v),"Nonfinite matrix entry");
+    }
+}
+inline std::size_t integer(double x,std::size_t low,std::size_t high){
+    require(std::isfinite(x)&amp;&amp;x&gt;=double(low)&amp;&amp;x&lt;=double(high)&amp;&amp;std::floor(x)==x,
+            "Integer parameter outside allowed range");
+    return std::size_t(x);
+}
+inline double dot(const Vec&amp; a,const Vec&amp; b){
+    require(a.size()==b.size(),"Dot product dimension mismatch");
+    return std::inner_product(a.begin(),a.end(),b.begin(),0.0);
+}
+inline Vec col(const Mat&amp; x,std::size_t j){
+    Vec out;out.reserve(x.size());
+    for(const auto&amp; row:x)out.push_back(row.at(j));
+    return out;
+}
+inline double positive(double x){require(x&gt;0&amp;&amp;std::isfinite(x),"Positive finite quantity required");return x;}
+inline Vec checked(Vec v){check_finite(v);return v;}
+inline double logistic(double x){
+    if(x&gt;=0)return 1/(1+std::exp(-x));
+    double e=std::exp(x);return e/(1+e);
+}
+inline double normal_cdf(double x){return 0.5*std::erfc(-x/std::sqrt(2.0));}
+inline double sum(const Vec&amp; v){return std::accumulate(v.begin(),v.end(),0.0);}
+} }
+</code></pre></section><section class="references" id="references"><h2>参考文献与进一步阅读</h2><p><a href="https://users.aalto.fi/~ssarkka/pub/bfs_book_2023_online.pdf">Särkkä and Svensson, Bayesian Filtering and Smoothing</a></p><p><a href="https://www.itl.nist.gov/div898/handbook/">NIST Engineering Statistics Handbook</a></p><p>课程中的数值样本均为明确构造的教学算例，不代表真实市场实证结果。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

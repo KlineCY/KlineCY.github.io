@@ -1,0 +1,128 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>利率期限结构、现金流匹配与固定收益估值｜Kline Quant</title><meta name="description" content="多变量量化研究、公式推导、数值案例与C++17算法"><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><style>body{margin:0;background:white;color:#142733;font:16px/1.95 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:24px 32px 64px}main{max-width:1150px;margin:auto}header,.lesson,.source,.references{border:1px solid #cad3d9;padding:24px 28px;margin:18px 0;background:white}h1{font-size:31px;line-height:1.4}h2{font-size:23px;margin:10px 0 20px}h3{font-size:17px;margin:22px 0 6px}p{line-height:1.95;margin:12px 0}.toc{display:flex;flex-wrap:wrap;gap:9px 24px;border:1px solid #cad3d9;padding:17px 24px}.equation{overflow:auto;border-block:1px solid #d7dfe4;margin:18px 0;padding:16px 6px}.katex-display{overflow-x:auto;overflow-y:hidden}a{color:#1a5478}code,pre{font-family:"Times New Roman",monospace}pre{border:1px solid #cbd5dc;padding:15px;overflow:auto;white-space:pre;font-size:13px;line-height:1.7;max-height:850px}@media(max-width:790px){.main{margin:0;padding:12px}header,.lesson,.source,.references{padding:15px}}</style></head><body><aside id="quantSidebar" class="sidebar" data-page="assets"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><small>QUANTITATIVE RESEARCH / MULTIVARIATE NUMERICAL METHODS</small><h1>利率期限结构、现金流匹配与固定收益估值</h1><p>固定收益研究依赖一致的贴现曲线、支付日与复利约定。先用平价报价识别贴现因子，再计算远期利率；在这些基础对象上才能比较久期、关键节点风险与投资组合现金流匹配。</p><p>曲线局部形变与统一收益率变化是不同的风险情景。节点DV01通过曲线插值传导，久期免疫只处理平行冲击；收益率求解则为给定债券现价确定单一折现参数。</p></header><nav class="toc"><a href="#lesson1">1．年度平价息票债的贴现曲线自举</a><a href="#lesson2">2．非等距贴现节点的连续复利远期利率</a><a href="#lesson3">3．分段线性零息曲线的节点DV01</a><a href="#lesson4">4．双零息债对确定性负债的久期免疫</a><a href="#lesson5">5．带括区保护的连续复利债券到期收益率求解</a><a href="#source">C++17完整实现</a><a href="#references">参考文献</a></nav><article class="lesson" id="lesson1"><h2>1．年度平价息票债的贴现曲线自举</h2>
+ <h3>模型结构与数学定义</h3><p>以面值1的年度付息平价债券为基本工具，先确定一年期贴现因子，再逐期限利用已知短端贴现因子解出最后一笔现金流的贴现因子。输出各年度贴现因子，供随后估值使用。</p><div class="equation">$$D_n=\frac{1-c_n\sum_{j&lt;n}D_j}{1+c_n}$$</div>
+ <h3>推导、最优性条件与数值结构</h3><div class="equation">$$1=c_nD_1+\cdots+c_nD_{n-1}+(1+c_n)D_n$$</div><p>每个期限的平价债券定价方程包含先前全部付息日贴现因子，以及最后一期面值和息票。已知短端因子后，方程仅剩一个未知数，直接移项获得自举递推。</p>
+ <h3>完整计算案例</h3><p>第一年息票率5%、第二年息票率5%，平坦年度利率曲线给出贴现因子1/1.05、1/1.05²。</p><div class="equation">$$\mathrm{Output}\approx\left(0.952380952,\ 0.907029478\right)$$</div>
+ <p>输出顺序：依期限排列的贴现因子。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>ParCoupon
+0.05
+0.05</code></pre><pre><code>./kline_quant lab24-rates-discount-bootstrap study.csv</code></pre>
+ <h3>估计假设与应用边界</h3><p>只适用于从第一年起连续的年度到期平价债券。输入按到期年排序；须校验现金流日期及报价，负利率环境下贴现因子可以大于1。</p></article>
+<article class="lesson" id="lesson2"><h2>2．非等距贴现节点的连续复利远期利率</h2>
+ <h3>模型结构与数学定义</h3><p>贴现曲线节点间的连续复利远期利率由无套利贴现因子比值推出。将时间0、贴现因子1作为隐含起点，逐相邻节点计算区间平均远期利率，避免直接将零息利率差解释为远期利率。</p><div class="equation">$$f(t_i,t_{i+1})=\frac{\log D(t_i)-\log D(t_{i+1})}{t_{i+1}-t_i}$$</div>
+ <h3>推导、最优性条件与数值结构</h3><div class="equation">$$D(t_{i+1})=D(t_i)e^{-f_i(t_{i+1}-t_i)},\quad f_i=\frac{t_{i+1}z_{i+1}-t_i z_i}{t_{i+1}-t_i}$$</div><p>从贴现因子的一致性条件可解出远期折现率。若使用零息利率表达，连续复利远期为相邻两个总利率期限乘积之差再除以期限差。</p>
+ <h3>完整计算案例</h3><p>期限1、2年的贴现因子分别为exp(−0.02)、exp(−0.06)，两个区间的远期利率依次为2%、4%。</p><div class="equation">$$\mathrm{Output}\approx\left(0.02,\ 0.04\right)$$</div>
+ <p>输出顺序：从时间0起各相邻期限区间的连续复利远期利率。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>Time,Discount
+1,0.9801986733067553
+2,0.9417645335842487</code></pre><pre><code>./kline_quant lab24-rates-forward-curve study.csv</code></pre>
+ <h3>估计假设与应用边界</h3><p>远期利率包含风险溢价与市场定价信息，不能直接视为未来政策利率预测。</p></article>
+<article class="lesson" id="lesson3"><h2>3．分段线性零息曲线的节点DV01</h2>
+ <h3>模型结构与数学定义</h3><p>将给定节点零息利率通过分段线性方式插值到现金流时间，并在曲线端点采用平坦外推。独立向上平移一个节点1个基点，重复完整估值，得到节点敏感度向量；与所有节点同时平移不同，该方法保留曲线局部形变。</p><div class="equation">$$P=\sum_j C_je^{-t_j z(t_j)},\quad DV01_k=P(z)-P(z+10^{-4}e_k)$$</div>
+ <h3>推导、最优性条件与数值结构</h3><div class="equation">$$z(t)=(1-\omega_t)z_1+\omega_tz_2,\quad \omega_t=\min(1,\max(0,(t-t_1)/(t_2-t_1)))$$</div><p>节点利率的扰动经插值权重传导至各现金流折现率。节点1上移后，第j笔现金流的相对现值变化为1−exp(−t_j(1−ω_j)10⁻⁴)，节点2同理。该表达使有限差分无需对两个接近的大数作差。</p>
+ <h3>完整计算案例</h3><p>曲线节点为1年2%、2年4%，支付时间恰在两节点，现金流10、100。每个节点DV01等于对应现金流现值乘以1−exp(−0.0001t)。</p><div class="equation">$$\mathrm{Output}\approx\left(102.113621,\ 0.000980149665,\ 0.0184604808\right)$$</div>
+ <p>输出顺序：原始现值、第一个节点DV01、第二个节点DV01。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>Time,Cash
+1,10
+2,100</code></pre><pre><code>./kline_quant lab24-rates-curve-keyrate study.csv 1 2 0.02 0.04</code></pre>
+ <h3>估计假设与应用边界</h3><p>CSV每行为现金流时间和金额；参数依次为两个节点时间及两个连续复利零息利率，节点期限必须递增。敏感度为有限差分而非严格导数。</p></article>
+<article class="lesson" id="lesson4"><h2>4．双零息债对确定性负债的久期免疫</h2>
+ <h3>模型结构与数学定义</h3><p>以两个到期年限不同的零息债组合匹配负债的现值与对连续复利平行利率冲击的一阶敏感度。求解两元线性系统获得两债现值权重，再由贴现率转换为到期面值。输出两项配置面值及两项现值。</p><div class="equation">$$V_1+V_2=L,\quad t_1V_1+t_2V_2=t_LL$$</div>
+ <h3>推导、最优性条件与数值结构</h3><div class="equation">$$V_2=L\frac{t_L-t_1}{t_2-t_1},\quad V_1=L-V_2,\quad F_i=V_ie^{rt_i}$$</div><p>以第二债权重代替第一债权重，现值约束代入久期约束后得到一元线性方程。零息债的连续复利修正久期等于其到期时间，故现值匹配与一阶风险匹配可同时满足。</p>
+ <h3>完整计算案例</h3><p>负债现值100，久期2年；两债期限1年、3年，利率0，所需两债现值及面值均为50。</p><div class="equation">$$\mathrm{Output}\approx\left(50,\ 50,\ 50,\ 50\right)$$</div>
+ <p>输出顺序：第一债到期面值、第二债到期面值、第一债现值、第二债现值。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>Maturity
+1
+3</code></pre><pre><code>./kline_quant lab24-rates-duration-immunize study.csv 100 2 0</code></pre>
+ <h3>估计假设与应用边界</h3><p>若负债久期超出两债期限范围，将出现负持仓；当前实现要求非负配置。免疫仅针对局部平行变动，不覆盖曲线扭曲、信用变化及支付不确定性。</p></article>
+<article class="lesson" id="lesson5"><h2>5．带括区保护的连续复利债券到期收益率求解</h2>
+ <h3>模型结构与数学定义</h3><p>对正现金流债券，现值随连续复利收益率严格下降。先验证给定收益率上下界夹住目标价格，再利用二分法稳定缩小括区；若Newton步仍落在括区内，则使用其加速收敛。输出收益率及价格残差。</p><div class="equation">$$F(y)=\sum_iC_ie^{-yt_i}-P,\quad F'(y)=-\sum_it_iC_ie^{-yt_i}$$</div>
+ <h3>推导、最优性条件与数值结构</h3><div class="equation">$$y_{k+1}^{N}=y_k-\frac{F(y_k)}{F'(y_k)}$$</div><p>严格正现金流使F单调下降，且F二阶导数为正。Newton法通常局部快速收敛；利用价格残差符号不断缩小括区，只有候选Newton步保持在括区内部才采用，否则回到二分中点。</p>
+ <h3>完整计算案例</h3><p>一年后支付110，现价100，连续复利收益率为log(1.1)，价格残差趋近0。</p><div class="equation">$$\mathrm{Output}\approx\left(0.0953101798,\ 0\right)$$</div>
+ <p>输出顺序：连续复利收益率、剩余价格残差。以下CSV按列顺序定义输入，首行为字段名。命令按上述参数口径读取数值。</p><pre><code>Time,Cash
+1,110</code></pre><pre><code>./kline_quant lab24-rates-yield-newton study.csv 100 -0.5 0.5</code></pre>
+ <h3>估计假设与应用边界</h3><p>支付时间必须为正、现金流严格为正。收益率是给定价格对应的单一折现参数，无法替代期限结构。</p></article>
+<section class="source" id="source"><h2>完整C++17实现</h2><p>输入为逐行组织的数值矩阵及标量参数向量，输出为按前文约定排列的数值向量。各方法对维度、参数范围、数值有限性及可行性进行检查。</p><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/lab24_rates.hpp">算法源文件</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/lab24_common.hpp">公共接口</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_lab24.cpp">数值回归与结构恒等式测试</a>；<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_lab24_cli.py">CSV接口复算测试</a>。</p><h3>独立算法</h3><pre><code>#pragma once
+#include "lab24_common.hpp"
+
+namespace kline { namespace lab24 {
+inline Vec discount_bootstrap(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,1,0);Vec d;double s=0;
+    for(const auto&amp; r:x){require(r[0]&gt;-1,"Invalid coupon rate");double q=positive((1-r[0]*s)/(1+r[0]));d.push_back(q);s+=q;}
+    return checked(d);
+}
+
+inline Vec forward_curve(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,2,0);double t=0,logd=0;Vec out;
+    for(const auto&amp; r:x){require(r[0]&gt;t,"Maturities must increase");double q=std::log(positive(r[1]));out.push_back((logd-q)/(r[0]-t));t=r[0];logd=q;}
+    return checked(out);
+}
+
+inline Vec curve_keyrate(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,2,4);require(p[0]&gt;0&amp;&amp;p[1]&gt;p[0],"Invalid key-rate nodes");
+    double pv=0,k1=0,k2=0;
+    for(const auto&amp; r:x){require(r[0]&gt;=0,"Negative cash-flow time");double h=std::clamp((r[0]-p[0])/(p[1]-p[0]),0.0,1.0);double v=r[1]*std::exp(-r[0]*((1-h)*p[2]+h*p[3]));pv+=v;k1+=v*(-std::expm1(-.0001*r[0]*(1-h)));k2+=v*(-std::expm1(-.0001*r[0]*h));}
+    return checked({pv,k1,k2});
+}
+
+inline Vec duration_immunize(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,1,3,2);require(x.size()==2,"Two instruments required");
+    double a=x[0][0],b=x[1][0],l=positive(p[0]),t=p[1],r=p[2];require(a&gt;0&amp;&amp;b&gt;a&amp;&amp;t&gt;=a&amp;&amp;t&lt;=b,"Invalid maturity bracket");
+    double v2=l*(t-a)/(b-a),v1=l-v2;
+    return checked({v1*std::exp(r*a),v2*std::exp(r*b),v1,v2});
+}
+
+inline Vec yield_newton(const Mat&amp; x,const Vec&amp; p){
+    inputs(x,p,2,3);double price=positive(p[0]),lo=p[1],hi=p[2];require(lo&lt;hi,"Reversed yield bracket");
+    for(const auto&amp; r:x){positive(r[0]);positive(r[1]);}
+    auto f=[&amp;](double y){double v=-price,d=0;for(const auto&amp; r:x){double c=r[1]*std::exp(-y*r[0]);v+=c;d-=r[0]*c;}require(std::isfinite(v)&amp;&amp;std::isfinite(d),"Yield bracket causes overflow");return std::pair&lt;double,double&gt;{v,d};};
+    require(f(lo).first&gt;=0&amp;&amp;f(hi).first&lt;=0,"Price not bracketed");
+    double y=lo+(hi-lo)/2;
+    for(int i=0;i&lt;150;++i){auto a=f(y);if(std::abs(a.first)&lt;1e-12*price)break;if(a.first&gt;0)lo=y;else hi=y;double z=y-a.first/a.second;y=std::isfinite(z)&amp;&amp;z&gt;lo&amp;&amp;z&lt;hi?z:lo+(hi-lo)/2;}
+    require(std::abs(f(y).first)&lt;=1e-8*price,"Yield iteration did not converge");return checked({y,f(y).first});
+}
+} }
+</code></pre><h3>公共数值接口</h3><pre><code>#pragma once
+#include "stats.hpp"
+#include &lt;algorithm&gt;
+#include &lt;cmath&gt;
+#include &lt;cstddef&gt;
+#include &lt;limits&gt;
+#include &lt;numeric&gt;
+#include &lt;stdexcept&gt;
+#include &lt;utility&gt;
+#include &lt;vector&gt;
+
+namespace kline { namespace lab24 {
+using Vec=std::vector&lt;double&gt;;
+using Mat=std::vector&lt;Vec&gt;;
+
+inline void inputs(const Mat&amp; x,const Vec&amp; p,std::size_t cols,std::size_t params,
+                   std::size_t min_rows=1) {
+    require(x.size()&gt;=min_rows&amp;&amp;x.size()&lt;=250000,"Invalid number of observations");
+    require(p.size()==params,"Incorrect scalar parameter count");
+    for(double v:p)require(std::isfinite(v),"Nonfinite scalar parameter");
+    for(const auto&amp; row:x){
+        require(row.size()==cols,"Unexpected CSV column count");
+        for(double v:row)require(std::isfinite(v),"Nonfinite matrix entry");
+    }
+}
+inline std::size_t integer(double x,std::size_t low,std::size_t high){
+    require(std::isfinite(x)&amp;&amp;x&gt;=double(low)&amp;&amp;x&lt;=double(high)&amp;&amp;std::floor(x)==x,
+            "Integer parameter outside allowed range");
+    return std::size_t(x);
+}
+inline double dot(const Vec&amp; a,const Vec&amp; b){
+    require(a.size()==b.size(),"Dot product dimension mismatch");
+    return std::inner_product(a.begin(),a.end(),b.begin(),0.0);
+}
+inline Vec col(const Mat&amp; x,std::size_t j){
+    Vec out;out.reserve(x.size());
+    for(const auto&amp; row:x)out.push_back(row.at(j));
+    return out;
+}
+inline double positive(double x){require(x&gt;0&amp;&amp;std::isfinite(x),"Positive finite quantity required");return x;}
+inline Vec checked(Vec v){check_finite(v);return v;}
+inline double logistic(double x){
+    if(x&gt;=0)return 1/(1+std::exp(-x));
+    double e=std::exp(x);return e/(1+e);
+}
+inline double normal_cdf(double x){return 0.5*std::erfc(-x/std::sqrt(2.0));}
+inline double sum(const Vec&amp; v){return std::accumulate(v.begin(),v.end(),0.0);}
+} }
+</code></pre></section><section class="references" id="references"><h2>参考文献与进一步阅读</h2><p><a href="https://home.treasury.gov/policy-issues/financing-the-government/interest-rate-statistics">U.S. Treasury Interest Rate Statistics</a></p><p><a href="https://www.bis.org/publ/bppdf/bispap25.htm">BIS Zero-coupon yield curves</a></p><p>课程中的数值样本均为明确构造的教学算例，不代表真实市场实证结果。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

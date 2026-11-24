@@ -56,7 +56,7 @@ for(const [folder,file,header,commands] of volumes){
  assert(!/(学习进度|本轮修订|修改规则|版本修订)/.test(html),
         "Internal administration content in published page: "+file);
 }
-assert(cppIndex.includes("<strong>288</strong>")&&cppIndex.includes("<strong>550</strong>"),
+assert(cppIndex.includes("<strong>300</strong>")&&cppIndex.includes("<strong>610</strong>"),
        "C++ catalog totals do not include empirical labs");
 const near=(a,b)=>assert(Math.abs(a-b)<1e-6);
 near(Math.pow(Math.log(110/90),2)/(4*Math.log(2)),.014523873553353111);
