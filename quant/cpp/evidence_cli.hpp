@@ -72,6 +72,14 @@
 #include "advanced_research_microstructure.hpp"
 #include "advanced_research_inference.hpp"
 #include "advanced_research_bayesian.hpp"
+#include "system_research_timeseries.hpp"
+#include "system_research_portfolio.hpp"
+#include "system_research_derivatives.hpp"
+#include "system_research_execution.hpp"
+#include "system_research_learning.hpp"
+#include "system_research_inference.hpp"
+#include "system_research_economics.hpp"
+#include "system_research_engineering.hpp"
 namespace kline {
 inline bool run_evidence_cli(const std::string& command,int argc,char** argv,std::ostream& out){
     using Function=researchflow::Report(*)(const researchflow::Mat&,const researchflow::Vec&);
@@ -396,6 +404,54 @@ inline bool run_evidence_cli(const std::string& command,int argc,char** argv,std
     if(command=="advanced-hmm-transition-em")fn=advanced_research::hmm_transition_em;
     if(command=="advanced-bayesian-online-change")fn=advanced_research::bayesian_online_change;
     if(command=="advanced-dynamic-regression-kalman")fn=advanced_research::dynamic_regression_kalman;
+    if(command=="system-haar-energy")fn=system_research::haar_energy;
+    if(command=="system-fractional-filter")fn=system_research::fractional_filter;
+    if(command=="system-ou-irregular-profile")fn=system_research::ou_irregular_profile;
+    if(command=="system-fourier-seasonal-fit")fn=system_research::fourier_seasonal_fit;
+    if(command=="system-garch-horizon-risk")fn=system_research::garch_horizon_risk;
+    if(command=="system-rolling-forecast-comparison")fn=system_research::rolling_forecast_comparison;
+    if(command=="system-factor-replicating-gls")fn=system_research::factor_replicating_gls;
+    if(command=="system-rolling-risk-scaling")fn=system_research::rolling_risk_scaling;
+    if(command=="system-minimum-variance-hedge")fn=system_research::minimum_variance_hedge;
+    if(command=="system-scenario-tail-attribution")fn=system_research::scenario_tail_attribution;
+    if(command=="system-cashflow-portfolio-unitization")fn=system_research::cashflow_portfolio_unitization;
+    if(command=="system-portfolio-brinson-linked")fn=system_research::portfolio_brinson_linked;
+    if(command=="system-tridiagonal-cn-option")fn=system_research::tridiagonal_cn_option;
+    if(command=="system-asian-geometric-exact")fn=system_research::asian_geometric_exact;
+    if(command=="system-asian-arithmetic-control")fn=system_research::asian_arithmetic_control;
+    if(command=="system-cashflow-zspread-fit")fn=system_research::cashflow_zspread_fit;
+    if(command=="system-swap-curve-keyrate")fn=system_research::swap_curve_keyrate;
+    if(command=="system-credit-tranche-loss")fn=system_research::credit_tranche_loss;
+    if(command=="system-venue-convex-routing")fn=system_research::venue_convex_routing;
+    if(command=="system-fifo-position-ledger")fn=system_research::fifo_position_ledger;
+    if(command=="system-futures-margin-ledger")fn=system_research::futures_margin_ledger;
+    if(command=="system-fx-cash-ledger")fn=system_research::fx_cash_ledger;
+    if(command=="system-integer-lot-allocation")fn=system_research::integer_lot_allocation;
+    if(command=="system-batch-auction-clearing")fn=system_research::batch_auction_clearing;
+    if(command=="system-expert-mixture-logwealth")fn=system_research::expert_mixture_logwealth;
+    if(command=="system-gaussian-crps-score")fn=system_research::gaussian_crps_score;
+    if(command=="system-cost-sensitive-threshold")fn=system_research::cost_sensitive_threshold;
+    if(command=="system-conformal-classification-set")fn=system_research::conformal_classification_set;
+    if(command=="system-pairwise-rank-logistic")fn=system_research::pairwise_rank_logistic;
+    if(command=="system-weighted-gaussian-discriminant")fn=system_research::weighted_gaussian_discriminant;
+    if(command=="system-ols-hc3-inference")fn=system_research::ols_hc3_inference;
+    if(command=="system-quantile-crossing-projection")fn=system_research::quantile_crossing_projection;
+    if(command=="system-permutation-randomization")fn=system_research::permutation_randomization;
+    if(command=="system-kaplan-meier-rmst")fn=system_research::kaplan_meier_rmst;
+    if(command=="system-bunching-rd-local")fn=system_research::bunching_rd_local;
+    if(command=="system-newey-west-long-run")fn=system_research::newey_west_long_run;
+    if(command=="system-ces-cost-demand")fn=system_research::ces_cost_demand;
+    if(command=="system-logit-market-share")fn=system_research::logit_market_share;
+    if(command=="system-solow-transition")fn=system_research::solow_transition;
+    if(command=="system-two-period-consumption")fn=system_research::two_period_consumption;
+    if(command=="system-input-output-carbon")fn=system_research::input_output_carbon;
+    if(command=="system-market-clearing-tatonnement")fn=system_research::market_clearing_tatonnement;
+    if(command=="system-corporate-action-ledger")fn=system_research::corporate_action_ledger;
+    if(command=="system-survivorship-cohort")fn=system_research::survivorship_cohort;
+    if(command=="system-lagged-asof-panel")fn=system_research::lagged_asof_panel;
+    if(command=="system-session-ohlcv-bars")fn=system_research::session_ohlcv_bars;
+    if(command=="system-cross-sectional-weighted-standardize")fn=system_research::cross_sectional_weighted_standardize;
+    if(command=="system-label-interval-purge-folds")fn=system_research::label_interval_purge_folds;
     if(!fn)return false;
     require(argc>=3,"Evidence laboratory requires a numeric CSV");
     researchflow::Vec p;
@@ -691,6 +747,54 @@ inline void evidence_usage(std::ostream& out){
     out<<"  advanced-hmm-transition-em CSV PARAMETERS...\n";
     out<<"  advanced-bayesian-online-change CSV PARAMETERS...\n";
     out<<"  advanced-dynamic-regression-kalman CSV PARAMETERS...\n";
+    out<<"  system-haar-energy CSV PARAMETERS...\n";
+    out<<"  system-fractional-filter CSV PARAMETERS...\n";
+    out<<"  system-ou-irregular-profile CSV PARAMETERS...\n";
+    out<<"  system-fourier-seasonal-fit CSV PARAMETERS...\n";
+    out<<"  system-garch-horizon-risk CSV PARAMETERS...\n";
+    out<<"  system-rolling-forecast-comparison CSV PARAMETERS...\n";
+    out<<"  system-factor-replicating-gls CSV PARAMETERS...\n";
+    out<<"  system-rolling-risk-scaling CSV PARAMETERS...\n";
+    out<<"  system-minimum-variance-hedge CSV PARAMETERS...\n";
+    out<<"  system-scenario-tail-attribution CSV PARAMETERS...\n";
+    out<<"  system-cashflow-portfolio-unitization CSV PARAMETERS...\n";
+    out<<"  system-portfolio-brinson-linked CSV\n";
+    out<<"  system-tridiagonal-cn-option CSV PARAMETERS...\n";
+    out<<"  system-asian-geometric-exact CSV PARAMETERS...\n";
+    out<<"  system-asian-arithmetic-control CSV PARAMETERS...\n";
+    out<<"  system-cashflow-zspread-fit CSV PARAMETERS...\n";
+    out<<"  system-swap-curve-keyrate CSV PARAMETERS...\n";
+    out<<"  system-credit-tranche-loss CSV PARAMETERS...\n";
+    out<<"  system-venue-convex-routing CSV PARAMETERS...\n";
+    out<<"  system-fifo-position-ledger CSV PARAMETERS...\n";
+    out<<"  system-futures-margin-ledger CSV PARAMETERS...\n";
+    out<<"  system-fx-cash-ledger CSV PARAMETERS...\n";
+    out<<"  system-integer-lot-allocation CSV PARAMETERS...\n";
+    out<<"  system-batch-auction-clearing CSV PARAMETERS...\n";
+    out<<"  system-expert-mixture-logwealth CSV PARAMETERS...\n";
+    out<<"  system-gaussian-crps-score CSV\n";
+    out<<"  system-cost-sensitive-threshold CSV PARAMETERS...\n";
+    out<<"  system-conformal-classification-set CSV PARAMETERS...\n";
+    out<<"  system-pairwise-rank-logistic CSV\n";
+    out<<"  system-weighted-gaussian-discriminant CSV PARAMETERS...\n";
+    out<<"  system-ols-hc3-inference CSV\n";
+    out<<"  system-quantile-crossing-projection CSV PARAMETERS...\n";
+    out<<"  system-permutation-randomization CSV\n";
+    out<<"  system-kaplan-meier-rmst CSV PARAMETERS...\n";
+    out<<"  system-bunching-rd-local CSV PARAMETERS...\n";
+    out<<"  system-newey-west-long-run CSV PARAMETERS...\n";
+    out<<"  system-ces-cost-demand CSV PARAMETERS...\n";
+    out<<"  system-logit-market-share CSV PARAMETERS...\n";
+    out<<"  system-solow-transition CSV PARAMETERS...\n";
+    out<<"  system-two-period-consumption CSV\n";
+    out<<"  system-input-output-carbon CSV\n";
+    out<<"  system-market-clearing-tatonnement CSV\n";
+    out<<"  system-corporate-action-ledger CSV PARAMETERS...\n";
+    out<<"  system-survivorship-cohort CSV\n";
+    out<<"  system-lagged-asof-panel CSV PARAMETERS...\n";
+    out<<"  system-session-ohlcv-bars CSV PARAMETERS...\n";
+    out<<"  system-cross-sectional-weighted-standardize CSV\n";
+    out<<"  system-label-interval-purge-folds CSV PARAMETERS...\n";
     out<<"Evidence laboratories: evidence-METHOD CSV [PARAMETERS...]\n";
     out<<"  evidence-hj-bound CSV PARAMETERS...\n";
     out<<"  evidence-minimum-norm-sdf CSV PARAMETERS...\n";
