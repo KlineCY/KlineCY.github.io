@@ -5,13 +5,17 @@ on:
     paths:
       - 'quant/cpp/**'
       - 'quant/research/examples/**'
+      - 'quant/research/numerical-examples/**'
       - 'quant/research/run_researchflow.py'
+      - 'quant/research/run_numerical_labs.py'
       - '.github/workflows/test-quant-cpp-toolkit.yml'
   pull_request:
     paths:
       - 'quant/cpp/**'
       - 'quant/research/examples/**'
+      - 'quant/research/numerical-examples/**'
       - 'quant/research/run_researchflow.py'
+      - 'quant/research/run_numerical_labs.py'
       - '.github/workflows/test-quant-cpp-toolkit.yml'
 
 jobs:
@@ -83,9 +87,18 @@ jobs:
           python quant/cpp/test_atlas2026_cli.py /tmp/kline_quant
           python quant/cpp/test_lab24_cli.py /tmp/kline_quant
           python quant/cpp/test_researchflow.py /tmp/kline_quant
+          python quant/cpp/test_numerical_lab.py /tmp/kline_quant
       - name: Execute the complete research suite and chained model evaluations
         run: |
           python quant/research/run_researchflow.py /tmp/kline_quant /tmp/kline-research-results
           test -s /tmp/kline-research-results/derived/strategy_comparison.csv
           test -s /tmp/kline-research-results/derived/ridge_comparison.csv
           test -s /tmp/kline-research-results/derived/rolling_var_coverage.csv
+
+      - name: Run all advanced numerical laboratories and six parameter studies
+        run: |
+          python quant/research/run_numerical_labs.py /tmp/kline_quant /tmp/kline-numerical-results
+          test -s /tmp/kline-numerical-results/studies/put_call_parity.csv
+          test -s /tmp/kline-numerical-results/studies/turnover_penalty_path.csv
+          test -s /tmp/kline-numerical-results/studies/fitted_curve_keyrate.csv
+          test -s /tmp/kline-numerical-results/studies/covariance_comparison.csv

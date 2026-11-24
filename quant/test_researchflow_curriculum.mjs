@@ -65,5 +65,5 @@ assert.equal(chapters,25);
 assert.equal(commands.size,25);
 assert.equal(fixtures.size,16);
 assert.equal(formulas,86);
-assert(cpp.includes("<strong>305</strong>")&&cpp.includes("<strong>635</strong>"));
+assert(cpp.includes("<strong>313</strong>")&&cpp.includes("<strong>675</strong>"));
 console.log("PASS: "+chapters+" research chapters, "+formulas+" strict KaTeX equations, "+fixtures.size+" real downloadable synthetic CSV files, "+observations+" input rows and exact workflow recipes");

@@ -42,6 +42,8 @@
     assets:
       '<a class="q-menu-link" href="'+route("assets")+'">全部金融资产</a>'+
       '<a class="q-menu-link" href="'+route("assets")+'lab24-credit.html">信用迁移、损失分布与回收</a>'+
+      '<a class="q-menu-link" href="'+route("assets")+'numerical-rates.html">固定收益期限结构、现金流与对冲</a>'+
+      '<a class="q-menu-link" href="'+route("assets")+'numerical-options.html">期权PDE、自由边界与波动率曲面</a>'+
       '<a class="q-menu-link" href="'+route("assets")+'lab24-derivative.html">期权动态规划、复制与曲面条件</a>'+
       '<a class="q-menu-link" href="'+route("assets")+'lab24-rates.html">利率期限结构与现金流匹配</a>'+
       '<a class="q-menu-link" href="'+route("assets")+'atlas2026-credit.html">信用组合预期损失</a>'+
@@ -56,6 +58,7 @@
     feeds:
       '<a class="q-menu-link" href="'+route("feeds")+'">全部数据字段</a>'+
       '<a class="q-menu-link" href="'+route("feeds")+'lab24-execution.html">执行路径、订单队列与市场冲击</a>'+
+      '<a class="q-menu-link" href="'+route("feeds")+'numerical-market.html">高频金融与市场微观结构</a>'+
       '<a class="q-menu-link" href="'+route("feeds")+'execution-workflows.html">交易执行研究</a>'+
       '<a class="q-menu-link" href="'+route("feeds")+'atlas2026-execution.html">交易执行容量</a>'+
       '<a class="q-menu-link" href="'+route("feeds")+'point-in-time-vintage-diagnostics.html">历史数据版本与报价质量</a>'+
@@ -68,6 +71,9 @@
     research:
       '<a class="q-menu-link" href="'+route("research")+'">在线 Python 回测</a>'+
       '<a class="q-menu-link" href="'+route("research")+'lab24-portfolio.html">多资产约束、配置与风险分解</a>'+
+      '<a class="q-menu-link" href="'+route("research")+'numerical-factors.html">实证资产定价与横截面研究</a>'+
+      '<a class="q-menu-link" href="'+route("research")+'numerical-optim.html">约束组合优化与稳健配置</a>'+
+      '<a class="q-menu-link" href="'+route("research")+'numerical-laboratories.html">高级量化数值研究实验室</a>'+
       '<a class="q-menu-link" href="'+route("research")+'portfolio-workflows.html">多资产组合研究</a>'+
       '<a class="q-menu-link" href="'+route("research")+'reproducible-workflows.html">可复现量化研究工作流</a>'+
       '<a class="q-menu-link" href="'+route("research")+'atlas2026-wealth.html">相对财富与波动拖累</a>'+
@@ -82,6 +88,7 @@
     audit:
       '<a class="q-menu-link" href="'+route("audit")+'">完整研究验证课程</a>'+
       '<a class="q-menu-link" href="'+route("audit")+'lab24-data.html">时点一致性、样本划分与事件诊断</a>'+
+      '<a class="q-menu-link" href="'+route("audit")+'numerical-inference.html">多元稳健推断与联合检验</a>'+
       '<a class="q-menu-link" href="'+route("audit")+'risk-workflows.html">风险模型研究</a>'+
       '<a class="q-menu-link" href="'+route("audit")+'lab24-panel.html">面板计量、配对样本与聚类误差</a>'+
       '<a class="q-menu-link" href="'+route("audit")+'doubly-robust-causal-analysis.html">IPW与双重稳健估计</a>'+
@@ -106,6 +113,7 @@
       '<a class="q-menu-link" href="'+route("audit")+'causal-inference-estimators.html">断点、工具变量与合成对照</a>'+
       '<a class="q-menu-link" href="'+route("math")+'ohlc-realized-volatility.html">高低价波动率与隔夜跳空</a>'+
       '<a class="q-menu-link" href="'+route("math")+'lab24-state.html">随机状态模型、滤波与概率推断</a>'+
+      '<a class="q-menu-link" href="'+route("math")+'numerical-simulation.html">随机模拟与方差缩减</a>'+
       '<a class="q-menu-link" href="'+route("math")+'timeseries-workflows.html">时间序列研究</a>'+
       '<a class="q-menu-link" href="'+route("math")+'lab24-network.html">金融网络、图扩散与风险结构</a>'+
       '<a class="q-menu-link" href="'+route("math")+'lab24-optim.html">约束优化、近端映射与权重求解</a>'+
@@ -116,6 +124,7 @@
       '<a class="q-menu-link" href="'+route("math")+'asynchronous-financial-variation.html">异步高频收益与四次变差</a>'+
       '<a class="q-menu-link" href="'+route("ml")+'probabilistic-forecast-evaluation.html">分位、CRPS与概率评分</a>'+
       '<a class="q-menu-link" href="'+route("ml")+'lab24-learning.html">在线学习、概率预测与模型校准</a>'+
+      '<a class="q-menu-link" href="'+route("ml")+'numerical-learning.html">机器学习数值求解与状态更新</a>'+
       '<a class="q-menu-link" href="'+route("ml")+'predictive-workflows.html">金融机器学习研究</a>'+
       '<a class="q-menu-link" href="'+route("ml")+'atlas2026-forecast.html">金融预测误差</a>'+
       '<a class="q-menu-link" href="'+route("ml")+'imbalanced-classification-evidence.html">分类评价与概率评分</a>'+

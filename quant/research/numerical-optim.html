@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>约束投资组合、ADMM与稳健配置的数值优化｜Kline Quant</title><meta name="description" content="高级量化数值研究：模型推导、计算案例、独立数值验证与C++17实现">
+<link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<style>
+body{margin:0;background:#fff;color:#192b36;font:16px/1.95 "Times New Roman","SimSun",serif}
+.main{margin-left:252px;padding:24px 30px 64px}main{max-width:1180px;margin:auto}header,.lesson,.source,.references,.framework{border:1px solid #bfcbd4;background:white;margin:18px 0;padding:25px 28px}
+h1{font-size:31px;line-height:1.4;margin:12px 0 22px}h2{font-size:24px;line-height:1.5;margin:8px 0 20px}h3{font-size:18px;margin:24px 0 8px}p{line-height:1.95;margin:12px 0}.toc{display:flex;flex-wrap:wrap;gap:9px 22px;border:1px solid #cbd5dc;padding:17px 23px}
+.equation{overflow:auto;border-block:1px solid #d6dfe5;margin:18px 0;padding:13px 5px}.katex-display{overflow-x:auto;overflow-y:hidden}a{color:#17537b}code,pre{font-family:"Times New Roman",monospace}pre{border:1px solid #cbd5dc;padding:15px;overflow:auto;white-space:pre;font-size:14px;line-height:1.7;max-height:900px}
+dl{display:grid;grid-template-columns:115px minmax(0,1fr);gap:8px 15px}dt{font-weight:bold}dd{margin:0;overflow-wrap:anywhere}table{border-collapse:collapse;width:100%}th,td{border:1px solid #cad3dc;background:white;padding:10px 13px;text-align:left}th{font-weight:bold}.wide{overflow-x:auto}
+@media(max-width:790px){.main{margin:0;padding:10px}header,.lesson,.source,.references,.framework{padding:15px}dl{display:block}dt{margin-top:12px}}
+</style></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main>
+<header><small>QUANTITATIVE RESEARCH / ADVANCED NUMERICAL LABORATORIES</small><h1>约束投资组合、ADMM与稳健配置的数值优化</h1><p>组合目标函数的最优性必须与实际可行域同时考虑。本专题建立投影梯度、变量分裂、协方差度量下的KKT系统、稳健均值及有效前沿五类优化模型，分别说明适用的约束与可核对的数值停止条件。</p><p><a href="../research/numerical-laboratories.html">高级数值研究总入口</a>　｜　<a href="../cpp/">C++17研究工具库</a>　｜　<a href="../research/numerical-examples/catalog.json" download>下载数据与参数索引</a></p></header>
+<nav class="toc"><a href="#lesson1">1．箱形与资金预算约束的投影梯度Markowitz</a><a href="#lesson2">2．ADMM联合资金预算、单资产边界与L1换手惩罚</a><a href="#lesson3">3．协方差度量下双线性约束的KKT闭式求解</a><a href="#lesson4">4．椭球均值不确定集下的无约束稳健配置</a><a href="#lesson5">5．目标收益约束有效前沿与总敞口诊断</a><a href="#source">完整C++17实现</a><a href="#references">参考文献</a></nav>
+<article class="lesson" id="lesson1"><h2>1．箱形与资金预算约束的投影梯度Markowitz</h2><h3>模型定义与经济含义</h3><div class="equation">$$\min_w\tfrac{\gamma}{2}w^\top\Sigma w-\mu^\top w,\quad \mathbf1^\top w=B,\quad l\le w\le u$$</div><p>凸目标的梯度由协方差乘权重与预期收益组成。对可行集合的欧氏投影通过单调标量乘子二分完成，保持预算与上下界同时满足。取协方差最大绝对行和乘γ作为梯度Lipschitz上界，步长取其倒数；梯度映射趋零是约束最优性的证书。</p><h3>数学推导与求解结构</h3><div class="equation">$$w^{k+1}=\Pi_{\mathcal C}(w^k-\eta(\gamma\Sigma w^k-\mu)),\quad [\Pi_{\mathcal C}(z)]_i=\operatorname{clip}(z_i-\nu,l_i,u_i)$$</div><div class="equation">$$G_\eta(w)=\eta^{-1}[w-\Pi_{\mathcal C}(w-\eta\nabla f(w))],\qquad G_\eta(w^*)=0$$</div><p>即使最优点位于权重边界，普通梯度也未必为零。因此不能用未投影梯度范数判断约束问题收敛；梯度映射刻画沿可行方向是否仍存在下降空间。</p><h3>完整构造案例与独立数值对照</h3><p>三资产协方差为单位阵，预期收益(0,0.2,1)，权重上界0.6、预算1，第三资产达到上界；其余两资产的一阶边际目标相等，得到(0.1,0.3,0.6)。</p><dl><dt>输入字段</dt><dd>Mean、Lower、Upper、CovA、CovB、CovC</dd><dt>参数顺序</dt><dd>风险厌恶γ、预算、最大迭代次数</dd><dt>输出字段</dt><dd>Weight为可行权重，MarginalVariance为Σw的相应分量；ExpectedReturn、PortfolioVariance、Objective为组合量，GradientMappingNorm为停止证书。</dd><dt>样本文件</dt><dd><a href="../research/numerical-examples/box-markowitz.csv" download>box-markowitz.csv</a></dd></dl><pre><code>Mean,Lower,Upper,CovA,CovB,CovC
+0,0,0.6,1,0,0
+0.2,0,0.6,0,1,0
+1,0,0.6,0,0,1</code></pre><pre><code>./build/kline_quant num-box-markowitz quant/research/numerical-examples/box-markowitz.csv 1 1 2000</code></pre><div class="wide"><table><thead><tr><th>输出行（从0开始）</th><th>字段</th><th>解析或参考值</th></tr></thead><tbody><tr><td>0</td><td>Weight</td><td>0.1</td></tr><tr><td>1</td><td>Weight</td><td>0.3</td></tr><tr><td>2</td><td>Weight</td><td>0.6</td></tr></tbody></table></div><h3>估计假设、实证解释与适用边界</h3><p>要求严格正定协方差，均值与方差必须同一期间口径。收敛速度受条件数影响，不支持非凸整数持仓。</p></article>
+<article class="lesson" id="lesson2"><h2>2．ADMM联合资金预算、单资产边界与L1换手惩罚</h2><h3>模型定义与经济含义</h3><div class="equation">$$\min_w\tfrac\gamma2w^\top\Sigma w-\mu^\top w+\lambda\|w-w^0\|_1+\iota_{\mathcal C}(w)$$</div><p>引入z=w和v=w−w⁰，分别承载预算边界与绝对值成本。w更新为正定线性系统，z为箱形预算投影，v为软阈值近端算子。缩放乘子累计两项原始残差；对偶残差由辅助变量变化传回w空间。两类残差同时小于阈值才返回可行的z。</p><h3>数学推导与求解结构</h3><div class="equation">$$(\gamma\Sigma+2\rho I)w=\mu+\rho(z-u+v+w^0-h),\quad z=\Pi_{\mathcal C}(w+u),\quad v=\operatorname{soft}_{\lambda/\rho}(w-w^0+h)$$</div><div class="equation">$$r^k=\begin{pmatrix}w^k-z^k\\w^k-w^0-v^k\end{pmatrix},\quad s^k=\rho[(z^k-z^{k-1})+(v^k-v^{k-1})]$$</div><p>原始残差分别衡量预算边界辅助变量和换手辅助变量的一致性；对偶残差衡量辅助变量变化对原变量最优性条件的影响。二者应同时收敛，单独目标下降不足以证明算法成功。</p><h3>完整构造案例与独立数值对照</h3><p>两资产初始各0.5、协方差单位阵、第二资产收益0.3、λ=0.05；设第二权重x≥0.5，导数为2x−1−0.3+0.1，得x=0.6，第一权重0.4，L1换手0.2。</p><dl><dt>输入字段</dt><dd>Mean、Old、Lower、Upper、CovA、CovB</dd><dt>参数顺序</dt><dd>风险厌恶γ、换手惩罚λ、ADMM增广参数ρ、最大迭代次数</dd><dt>输出字段</dt><dd>Weight、Trade为最终权重及增量；TurnoverL1、PortfolioVariance、Objective为组合量；PrimalResidual、DualResidual、Iterations用于检查求解。</dd><dt>样本文件</dt><dd><a href="../research/numerical-examples/turnover-admm.csv" download>turnover-admm.csv</a></dd></dl><pre><code>Mean,Old,Lower,Upper,CovA,CovB
+0,0.5,0,1,1,0
+0.3,0.5,0,1,0,1</code></pre><pre><code>./build/kline_quant num-turnover-admm quant/research/numerical-examples/turnover-admm.csv 1 0.05 1 5000</code></pre><div class="wide"><table><thead><tr><th>输出行（从0开始）</th><th>字段</th><th>解析或参考值</th></tr></thead><tbody><tr><td>0</td><td>Weight</td><td>0.4（数值容差1e-7）</td></tr><tr><td>1</td><td>Weight</td><td>0.6（数值容差1e-7）</td></tr><tr><td>0</td><td>TurnoverL1</td><td>0.2（数值容差1e-7）</td></tr></tbody></table></div><h3>估计假设、实证解释与适用边界</h3><p>惩罚λ为目标函数中的单位头寸成本，与实际自融资费用账本不同；若同时存在冲击成本或硬换手约束，需要改写目标与近端步骤。</p></article>
+<article class="lesson" id="lesson3"><h2>3．协方差度量下双线性约束的KKT闭式求解</h2><h3>模型定义与经济含义</h3><div class="equation">$$\min_w\tfrac12w^\top\Sigma w-\mu^\top w,\quad Aw=b,\quad A=\begin{pmatrix}\mathbf1^\top\\ f^\top\end{pmatrix}$$</div><p>KKT一阶条件Σw−μ+Aᵀν=0给出权重关于乘子的表达式。代入线性约束得到二阶Gram系统；通过三次正定求解构造矩阵向量积，不显式求大矩阵逆。约束独立时Gram矩阵正定。</p><h3>数学推导与求解结构</h3><div class="equation">$$w=\Sigma^{-1}\mu-\Sigma^{-1}A^\top(A\Sigma^{-1}A^\top)^{-1}(A\Sigma^{-1}\mu-b)$$</div><div class="equation">$$\Sigma w^*-\mu+A^\top\nu^*=0,\qquad Aw^*-b=0$$</div><p>正定协方差使目标严格凸，线性独立约束使乘子方程可逆。两项KKT条件共同成立即证明全局最优；与普通欧氏中性化不同，此处调整方向由协方差风险度量决定。</p><h3>完整构造案例与独立数值对照</h3><p>三资产单位协方差、零预期收益，因子载荷(−1,0,1)，目标预算1、暴露0.2，解为(7/30,1/3,13/30)。</p><dl><dt>输入字段</dt><dd>Mean、Factor、CovA、CovB、CovC</dd><dt>参数顺序</dt><dd>目标净敞口、目标因子载荷</dd><dt>输出字段</dt><dd>Weight、FactorLoading为逐资产权重及载荷；PortfolioBudget、FactorExposure为最终约束值；StationarityResidual为最大一阶残差。</dd><dt>样本文件</dt><dd><a href="../research/numerical-examples/equality-quadratic.csv" download>equality-quadratic.csv</a></dd></dl><pre><code>Mean,Factor,CovA,CovB,CovC
+0,-1,1,0,0
+0,0,0,1,0
+0,1,0,0,1</code></pre><pre><code>./build/kline_quant num-equality-quadratic quant/research/numerical-examples/equality-quadratic.csv 1 0.2</code></pre><div class="wide"><table><thead><tr><th>输出行（从0开始）</th><th>字段</th><th>解析或参考值</th></tr></thead><tbody><tr><td>0</td><td>Weight</td><td>0.2333333333</td></tr><tr><td>1</td><td>Weight</td><td>0.3333333333</td></tr><tr><td>2</td><td>Weight</td><td>0.4333333333</td></tr><tr><td>0</td><td>FactorExposure</td><td>0.2</td></tr></tbody></table></div><h3>估计假设、实证解释与适用边界</h3><p>允许空头，无边界及总敞口约束；约束行相关会导致Gram系统不可逆，必须拒绝。</p></article>
+<article class="lesson" id="lesson4"><h2>4．椭球均值不确定集下的无约束稳健配置</h2><h3>模型定义与经济含义</h3><div class="equation">$$\min_{\delta^\top\Sigma^{-1}\delta\le\kappa^2}(\mu+\delta)^\top w=\mu^\top w-\kappa\sqrt{w^\top\Sigma w}$$</div><p>在协方差内积下，Cauchy–Schwarz给出均值扰动对组合收益的最坏线性影响。将权重转换至Σ的平方根空间后，目标是线性收益减欧氏范数惩罚和二次风险；最优方向与变换后的均值一致，径向一阶条件给出软收缩尺度。</p><h3>数学推导与求解结构</h3><div class="equation">$$w^*=\frac{(1-\kappa/\sqrt{\mu^\top\Sigma^{-1}\mu})_+}{\gamma}\Sigma^{-1}\mu$$</div><div class="equation">$$\delta^*=-\kappa\frac{\Sigma w}{\sqrt{w^\top\Sigma w}}\quad(w\ne0)$$</div><p>最坏均值误差沿与组合风险相关的方向，而非对每个资产同时施加独立最坏冲击。若均值的协方差度量范数不超过不确定半径，最优风险头寸为零。</p><h3>完整构造案例与独立数值对照</h3><p>μ=(3,4)、Σ=I、γ=2、κ=1，信号范数5，权重(1.2,1.6)，波动率2，名义预期收益10、最坏预期收益8。</p><dl><dt>输入字段</dt><dd>Mean、CovA、CovB</dd><dt>参数顺序</dt><dd>风险厌恶γ、不确定性半径κ</dd><dt>输出字段</dt><dd>Weight为各资产权重；Volatility、NominalExpectedReturn、WorstCaseExpectedReturn和Objective分别为风险、名义收益、最坏收益与稳健目标。</dd><dt>样本文件</dt><dd><a href="../research/numerical-examples/robust-mean-ellipsoid.csv" download>robust-mean-ellipsoid.csv</a></dd></dl><pre><code>Mean,CovA,CovB
+3,1,0
+4,0,1</code></pre><pre><code>./build/kline_quant num-robust-mean-ellipsoid quant/research/numerical-examples/robust-mean-ellipsoid.csv 2 1</code></pre><div class="wide"><table><thead><tr><th>输出行（从0开始）</th><th>字段</th><th>解析或参考值</th></tr></thead><tbody><tr><td>0</td><td>Weight</td><td>1.2</td></tr><tr><td>1</td><td>Weight</td><td>1.6</td></tr><tr><td>0</td><td>WorstCaseExpectedReturn</td><td>8</td></tr></tbody></table></div><h3>估计假设、实证解释与适用边界</h3><p>这是无资金预算和仓位边界的风险资产加零利率现金的简化模型；不确定集与风险协方差共享形状是特定假设。</p></article>
+<article class="lesson" id="lesson5"><h2>5．目标收益约束有效前沿与总敞口诊断</h2><h3>模型定义与经济含义</h3><div class="equation">$$\min_w w^\top\Sigma w,\quad \mathbf1^\top w=1,\quad \mu^\top w=m$$</div><p>定义A=1ᵀΣ⁻¹1、B=1ᵀΣ⁻¹μ、C=μᵀΣ⁻¹μ，两个资金与收益约束组成线性方程。对于每个目标收益独立求出乘子，输出方差、总敞口和全体资产权重。低于全局最小方差组合收益的分支不是均值–方差有效分支。</p><h3>数学推导与求解结构</h3><div class="equation">$$w=\frac{C-Bm}{AC-B^2}\Sigma^{-1}\mathbf1+\frac{Am-B}{AC-B^2}\Sigma^{-1}\mu$$</div><div class="equation">$$\sigma_p^2(m)=\frac{Am^2-2Bm+C}{AC-B^2},\quad m_{\rm GMV}=B/A$$</div><p>目标收益变化产生一条二次方差曲线，最低点是全局最小方差组合。比较目标收益与该点即可识别上半支，另外输出总敞口以揭示无约束解可能需要的杠杆。</p><h3>完整构造案例与独立数值对照</h3><p>两资产均值0与1、协方差单位阵，目标收益0.2、0.5、0.8，第二权重分别等于目标收益，方差分别0.68、0.5、0.68。</p><dl><dt>输入字段</dt><dd>Mean、CovA、CovB</dd><dt>参数顺序</dt><dd>一个或多个目标收益</dd><dt>输出字段</dt><dd>TargetReturn、ExpectedReturn、Variance、GrossExposure为各前沿点的目标与实现收益、方差和绝对权重和；Weight列依次对应输入资产。</dd><dt>样本文件</dt><dd><a href="../research/numerical-examples/exposure-frontier.csv" download>exposure-frontier.csv</a></dd></dl><pre><code>Mean,CovA,CovB
+0,1,0
+1,0,1</code></pre><pre><code>./build/kline_quant num-exposure-frontier quant/research/numerical-examples/exposure-frontier.csv 0.2 0.5 0.8</code></pre><div class="wide"><table><thead><tr><th>输出行（从0开始）</th><th>字段</th><th>解析或参考值</th></tr></thead><tbody><tr><td>0</td><td>Variance</td><td>0.68</td></tr><tr><td>1</td><td>Variance</td><td>0.5</td></tr><tr><td>2</td><td>Weight2</td><td>0.8</td></tr></tbody></table></div><h3>估计假设、实证解释与适用边界</h3><p>无卖空限制；远离样本预期收益范围的目标可能产生高杠杆，不能将全部数学前沿都视作可交易配置。</p></article>
+<section class="source" id="source"><h2>完整C++17实现与复算环境</h2><p>以下头文件与工具库的实际实现一致。算法使用数值矩阵与参数向量，输出具名CSV。仓库提供共享线性系统、三对角求解、数值输入检查和回归测试。</p><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/numerical_lab_optim.hpp">完整算法头文件</a>　｜　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/numerical_lab_common.hpp">公共数学接口</a>　｜　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_numerical_lab.py">独立数值验证</a>　｜　<a href="../research/run_numerical_labs.py" download>批量复算脚本</a></p>
+<pre><code>#pragma once
+#include "numerical_lab_common.hpp"
+
+namespace kline { namespace numerical_lab {
+inline Vec box_project(const Vec&amp; z,const Vec&amp; lo,const Vec&amp; hi,double budget){
+    require(sum(lo)&lt;=budget+1e-12&amp;&amp;sum(hi)&gt;=budget-1e-12,"Infeasible portfolio budget");
+    double a=std::numeric_limits&lt;double&gt;::infinity(),b=-a;
+    for(std::size_t j=0;j&lt;z.size();++j){require(lo[j]&lt;=hi[j],"Reversed weight bounds");a=std::min(a,z[j]-hi[j]);b=std::max(b,z[j]-lo[j]);}
+    Vec w(z.size());
+    for(int k=0;k&lt;90;++k){
+        double m=a+(b-a)/2;
+        for(std::size_t j=0;j&lt;z.size();++j)w[j]=std::clamp(z[j]-m,lo[j],hi[j]);
+        if(sum(w)&gt;budget)a=m;else b=m;
+    }
+    require(std::abs(sum(w)-budget)&lt;1e-8,"Projection budget residual");
+    return w;
+}
+inline Report box_markowitz(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,3,4,32);parameters(p,3);d-=3;
+    require(x.size()==d,"One covariance row per asset required");
+    double gamma=positive(p[0]),budget=p[1];auto n=count(p[2],1,50000);
+    Mat A;Vec mu,lo,hi;
+    for(const auto&amp; row:x){mu.push_back(row[0]);lo.push_back(row[1]);hi.push_back(row[2]);A.emplace_back(row.begin()+3,row.end());}
+    solve_spd(A,Vec(d,1));
+    double L=0;
+    for(const auto&amp; row:A){double z=0;for(double v:row)z+=std::abs(v);L=std::max(L,z);}
+    double step=1/positive(gamma*L);
+    Vec w=box_project(Vec(d,budget/d),lo,hi,budget);
+    double error=1;std::size_t it=0;
+    for(;it&lt;n;++it){
+        Vec grad=mul(A,w),z=w;
+        for(std::size_t j=0;j&lt;d;++j)z[j]-=step*(gamma*grad[j]-mu[j]);
+        z=box_project(z,lo,hi,budget);
+        Vec delta=w;for(std::size_t j=0;j&lt;d;++j)delta[j]=(w[j]-z[j])/step;
+        error=norm(delta);w=std::move(z);
+        if(error&lt;1e-9)break;
+    }
+    require(error&lt;1e-7,"Projected-gradient iteration did not converge");
+    Vec risk=mul(A,w);double objective=.5*gamma*dot(w,risk)-dot(w,mu);
+    Report out{{"Asset","Weight","MarginalVariance","ExpectedReturn","PortfolioVariance","Objective","GradientMappingNorm","Iterations"},{}};
+    for(std::size_t j=0;j&lt;d;++j)out.rows.push_back({double(j+1),w[j],risk[j],dot(w,mu),dot(w,risk),objective,error,double(std::min(n,it+1))});
+    return out;
+}
+inline Report turnover_admm(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,2,5,32);parameters(p,4);d-=4;
+    require(x.size()==d,"One covariance row per asset required");
+    double gamma=positive(p[0]),lambda=p[1],rho=positive(p[2]);auto n=count(p[3],1,30000);
+    require(lambda&gt;=0,"Negative turnover penalty");
+    Vec mu,old,lo,hi;
+    Mat A;
+    for(const auto&amp; row:x){mu.push_back(row[0]);old.push_back(row[1]);lo.push_back(row[2]);hi.push_back(row[3]);A.emplace_back(row.begin()+4,row.end());}
+    solve_spd(A,Vec(d,1));Mat H=A;
+    for(std::size_t i=0;i&lt;d;++i){for(double&amp; v:H[i])v*=gamma;H[i][i]+=2*rho;}
+    Vec w=box_project(old,lo,hi,1),z=w,v(d,0),u(d,0),h(d,0);
+    for(std::size_t i=0;i&lt;d;++i)v[i]=w[i]-old[i];
+    double primal=1,dual=1;std::size_t iter=0;
+    for(;iter&lt;n;++iter){
+        Vec b=mu;
+        for(std::size_t i=0;i&lt;d;++i)b[i]+=rho*(z[i]-u[i]+v[i]+old[i]-h[i]);
+        w=solve_spd(H,b);
+        Vec prevz=z,prevv=v,shift=w;
+        for(std::size_t i=0;i&lt;d;++i)shift[i]+=u[i];
+        z=box_project(shift,lo,hi,1);
+        double r2=0,s2=0;
+        for(std::size_t i=0;i&lt;d;++i){
+            double a=w[i]-old[i]+h[i];
+            v[i]=std::copysign(std::max(0.0,std::abs(a)-lambda/rho),a);
+            double r1=w[i]-z[i],r3=w[i]-old[i]-v[i];u[i]+=r1;h[i]+=r3;
+            r2+=r1*r1+r3*r3;
+            double s=rho*(z[i]-prevz[i]+v[i]-prevv[i]);s2+=s*s;
+        }
+        primal=std::sqrt(r2);dual=std::sqrt(s2);
+        if(primal&lt;1e-9&amp;&amp;dual&lt;1e-9)break;
+    }
+    require(primal&lt;1e-7&amp;&amp;dual&lt;1e-7,"ADMM residuals exceed tolerance");
+    Vec trade=z;for(std::size_t i=0;i&lt;d;++i)trade[i]-=old[i];
+    double turnover=researchflow::l1(trade),var=dot(z,mul(A,z)),objective=.5*gamma*var-dot(mu,z)+lambda*turnover;
+    Report out{{"Asset","Weight","Trade","TurnoverL1","PortfolioVariance","Objective","PrimalResidual","DualResidual","Iterations"},{}};
+    for(std::size_t j=0;j&lt;d;++j)out.rows.push_back({double(j+1),z[j],trade[j],turnover,var,objective,primal,dual,double(std::min(n,iter+1))});
+    return out;
+}
+inline Report equality_quadratic(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,2,4,32);parameters(p,2);d-=2;
+    require(x.size()==d,"One covariance row per asset required");
+    Vec f,mu;Mat A;
+    for(const auto&amp; row:x){mu.push_back(row[0]);f.push_back(row[1]);A.emplace_back(row.begin()+2,row.end());}
+    Vec one(d,1),a=solve_spd(A,one),b=solve_spd(A,f),z=solve_spd(A,mu);
+    double aa=dot(one,a),ab=dot(one,b),bb=dot(f,b),det=positive(aa*bb-ab*ab);
+    double e=dot(one,z)-p[0],g=dot(f,z)-p[1];
+    double m=(bb*e-ab*g)/det,n=(aa*g-ab*e)/det;
+    Vec w=z;for(std::size_t i=0;i&lt;d;++i)w[i]-=m*a[i]+n*b[i];
+    Vec risk=mul(A,w);double residual=0;
+    for(std::size_t i=0;i&lt;d;++i)residual=std::max(residual,std::abs(risk[i]-mu[i]+m+n*f[i]));
+    Report out{{"Asset","Weight","FactorLoading","PortfolioBudget","FactorExposure","StationarityResidual"},{}};
+    for(std::size_t i=0;i&lt;d;++i)out.rows.push_back({double(i+1),w[i],f[i],sum(w),dot(w,f),residual});
+    return out;
+}
+inline Report robust_mean_ellipsoid(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,2,3,32);parameters(p,2);d-=1;require(x.size()==d,"One covariance row per asset required");
+    double gamma=positive(p[0]),radius=p[1];require(radius&gt;=0,"Negative uncertainty radius");
+    Vec mu;Mat A;for(const auto&amp; r:x){mu.push_back(r[0]);A.emplace_back(r.begin()+1,r.end());}
+    Vec z=solve_spd(A,mu);double signal=std::sqrt(std::max(0.0,dot(mu,z)));
+    double scale=signal&gt;radius?(1-radius/signal)/gamma:0;
+    Vec w=z;for(double&amp; v:w)v*=scale;
+    double vol=std::sqrt(std::max(0.0,dot(w,mul(A,w)))),worst=dot(mu,w)-radius*vol;
+    Report out{{"Asset","Weight","Volatility","NominalExpectedReturn","WorstCaseExpectedReturn","Objective"},{}};
+    for(std::size_t i=0;i&lt;d;++i)out.rows.push_back({double(i+1),w[i],vol,dot(mu,w),worst,worst-.5*gamma*vol*vol});
+    return out;
+}
+inline Report exposure_frontier(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,2,3,32);require(p.size()&gt;=1&amp;&amp;p.size()&lt;=100,"At least one target return required");check_finite(p);d-=1;
+    require(x.size()==d,"One covariance row per asset required");
+    Vec mu;Mat A;for(const auto&amp; r:x){mu.push_back(r[0]);A.emplace_back(r.begin()+1,r.end());}
+    Vec one(d,1),a=solve_spd(A,one),b=solve_spd(A,mu);
+    double aa=dot(one,a),ab=dot(one,b),bb=dot(mu,b),det=positive(aa*bb-ab*ab);
+    Report out{{"TargetReturn","ExpectedReturn","Variance","GrossExposure"},{}};
+    for(std::size_t j=0;j&lt;d;++j)out.header.push_back("Weight"+std::to_string(j+1));
+    for(double target:p){
+        double c=(bb-ab*target)/det,k=(aa*target-ab)/det;Vec w(d);
+        for(std::size_t i=0;i&lt;d;++i)w[i]=c*a[i]+k*b[i];
+        Vec row={target,dot(mu,w),dot(w,mul(A,w)),researchflow::l1(w)};
+        row.insert(row.end(),w.begin(),w.end());out.rows.push_back(row);
+    }
+    return out;
+}
+} }
+</code></pre><h3>本地运行</h3><pre><code>cmake -S quant/cpp -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+python quant/research/run_numerical_labs.py ./build/kline_quant numerical-results</code></pre><p>Windows多配置生成器通常使用<code>.\build\Release\kline_quant.exe</code>；单配置生成器使用<code>.\build\kline_quant.exe</code>。输出目录须为空。构造样例用于复核计算与模型结构，不代表真实市场实证结果。</p></section>
+<section class="references" id="references"><h2>参考文献与技术资料</h2><p><a href="https://web.stanford.edu/~boyd/cvxbook/">Boyd &amp; Vandenberghe, Convex Optimization</a></p><p><a href="https://web.stanford.edu/~boyd/papers/admm_distr_stats.html">Boyd et al., Distributed Optimization and Statistical Learning via ADMM</a></p><p><a href="https://doi.org/10.2307/2975974">Markowitz (1952), Portfolio Selection</a></p></section>
+</main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>
