@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>机器学习数值求解、留一误差与在线状态更新｜Kline Quant</title><meta name="description" content="高级量化数值研究：模型推导、计算案例、独立数值验证与C++17实现">
+<link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<style>
+body{margin:0;background:#fff;color:#192b36;font:16px/1.95 "Times New Roman","SimSun",serif}
+.main{margin-left:252px;padding:24px 30px 64px}main{max-width:1180px;margin:auto}header,.lesson,.source,.references,.framework{border:1px solid #bfcbd4;background:white;margin:18px 0;padding:25px 28px}
+h1{font-size:31px;line-height:1.4;margin:12px 0 22px}h2{font-size:24px;line-height:1.5;margin:8px 0 20px}h3{font-size:18px;margin:24px 0 8px}p{line-height:1.95;margin:12px 0}.toc{display:flex;flex-wrap:wrap;gap:9px 22px;border:1px solid #cbd5dc;padding:17px 23px}
+.equation{overflow:auto;border-block:1px solid #d6dfe5;margin:18px 0;padding:13px 5px}.katex-display{overflow-x:auto;overflow-y:hidden}a{color:#17537b}code,pre{font-family:"Times New Roman",monospace}pre{border:1px solid #cbd5dc;padding:15px;overflow:auto;white-space:pre;font-size:14px;line-height:1.7;max-height:900px}
+dl{display:grid;grid-template-columns:115px minmax(0,1fr);gap:8px 15px}dt{font-weight:bold}dd{margin:0;overflow-wrap:anywhere}table{border-collapse:collapse;width:100%}th,td{border:1px solid #cad3dc;background:white;padding:10px 13px;text-align:left}th{font-weight:bold}.wide{overflow-x:auto}
+@media(max-width:790px){.main{margin:0;padding:10px}header,.lesson,.source,.references,.framework{padding:15px}dl{display:block}dt{margin-top:12px}}
+</style></head><body><aside id="quantSidebar" class="sidebar" data-page="ml"></aside><script src="../sidebar-v2.js"></script><div class="main"><main>
+<header><small>QUANTITATIVE RESEARCH / ADVANCED NUMERICAL LABORATORIES</small><h1>机器学习数值求解、留一误差与在线状态更新</h1><p>机器学习模型的可信度来自明确的目标函数、稳定的数值求解和正确的样本外信息边界。本专题从凸优化、解析验证、递归学习、概率分类和特征投影五个角度构建可独立复算的学习过程。</p><p><a href="../research/numerical-laboratories.html">高级数值研究总入口</a>　｜　<a href="../cpp/">C++17研究工具库</a>　｜　<a href="../research/numerical-examples/catalog.json" download>下载数据与参数索引</a></p></header>
+<nav class="toc"><a href="#lesson1">1．带Armijo回溯的正则化Logistic Newton求解</a><a href="#lesson2">2．Ridge帽子矩阵与精确留一交叉验证PRESS</a><a href="#lesson3">3．遗忘因子递归最小二乘与逐期参数路径</a><a href="#lesson4">4．训练期收缩协方差高斯判别分析</a><a href="#lesson5">5．训练期Jacobi特征分解与样本外PCA重构</a><a href="#source">完整C++17实现</a><a href="#references">参考文献</a></nav>
+<article class="lesson" id="lesson1"><h2>1．带Armijo回溯的正则化Logistic Newton求解</h2><h3>模型定义与经济含义</h3><div class="equation">$$J(w)=n^{-1}\sum_i[\log(1+e^{x_i^\top w})-y_ix_i^\top w]+\tfrac\lambda2\|w_{-0}\|^2$$</div><p>截距不参与正则，P对角第一项为零。Hessian由非负Bernoulli方差及正则项构成；两类均出现、λ正时目标具有有限唯一最优解。Armijo回溯选择满足充分下降的步长，防止远离最优点时无保护Newton步损坏目标。softplus使用稳定的log1p表达，迭代以梯度范数判断收敛。</p><h3>数学推导与求解结构</h3><div class="equation">$$g=X^\top(p-y)/n+\lambda Pw,\quad H=X^\top\operatorname{diag}(p_i(1-p_i))X/n+\lambda P,\quad w^+=w-\alpha H^{-1}g$$</div><div class="equation">$$J(w-\alpha H^{-1}g)\le J(w)-c\alpha g^\top H^{-1}g$$</div><p>正定Hessian使Newton方向具有负方向导数，充分下降条件通过逐次折半步长得到满足。softplus计算为max(z,0)+log1p(exp(−|z|))，无需对很大的正z直接取指数。</p><h3>完整构造案例与独立数值对照</h3><p>六个对称样本完全线性可分。无惩罚MLE可能无有限斜率；λ=0.1给出有限正斜率、零截距。可直接对输出系数计算目标梯度。</p><dl><dt>输入字段</dt><dd>X、Label</dd><dt>参数顺序</dt><dd>L2惩罚λ、最大Newton迭代次数</dd><dt>输出字段</dt><dd>Coefficient编号0为截距，Estimate为最终权重；MeanPenalizedLoss、GradientNorm及Iterations为目标、梯度证书及迭代次数。</dd><dt>样本文件</dt><dd><a href="../research/numerical-examples/damped-logistic.csv" download>damped-logistic.csv</a></dd></dl><pre><code>X,Label
+-2,0
+-1,0
+-0.5,0
+0.5,1
+1,1
+2,1</code></pre><pre><code>./build/kline_quant num-damped-logistic quant/research/numerical-examples/damped-logistic.csv 0.1 100</code></pre><div class="wide"><table><thead><tr><th>输出行（从0开始）</th><th>字段</th><th>解析或参考值</th></tr></thead><tbody><tr><td>0</td><td>Estimate</td><td>0（数值容差1e-8）</td></tr></tbody></table></div><h3>估计假设、实证解释与适用边界</h3><p>输入特征未自动标准化，λ依赖特征尺度；近乎极端的特征或极小惩罚仍可能导致病态Hessian。训练分类损失不是样本外性能。</p></article>
+<article class="lesson" id="lesson2"><h2>2．Ridge帽子矩阵与精确留一交叉验证PRESS</h2><h3>模型定义与经济含义</h3><div class="equation">$$H_\lambda=X(X^\top X+\lambda P)^{-1}X^\top,\quad \widehat y=H_\lambda y$$</div><p>固定λ、固定设计变换下，删除一行相当于正规方程的秩一减法。Sherman–Morrison恒等式直接导出留一残差，不需要重新训练n次。输出各行杠杆、拟合值和真正删除本行后的预测，独立参考逐次删除并重拟合验证恒等式。</p><h3>数学推导与求解结构</h3><div class="equation">$$e_i^{(-i)}=\frac{y_i-\widehat y_i}{1-(H_\lambda)_{ii}},\quad PRESS=\sum_i(e_i^{(-i)})^2$$</div><div class="equation">$$A_{-i}=A-x_ix_i^\top,\quad A_{-i}^{-1}=A^{-1}+\frac{A^{-1}x_ix_i^\top A^{-1}}{1-x_i^\top A^{-1}x_i}$$</div><p>将删样本后的右端Xᵀy−x_i y_i同时代入更新式，就得到留一误差。若帽子矩阵对角接近1，留一预测高度不稳定；这正是高杠杆观测主导拟合的诊断。</p><h3>完整构造案例与独立数值对照</h3><p>六个一维回归样本、λ=1、自动增加未惩罚截距。对每行直接删除该行进行Ridge拟合，与PRESS公式的逐行输出比较。</p><dl><dt>输入字段</dt><dd>X、Y</dd><dt>参数顺序</dt><dd>未除样本数的平方损失惩罚λ</dd><dt>输出字段</dt><dd>Row、Actual、Fitted、Leverage、LeaveOneOutPrediction、LeaveOneOutSquaredError依次为行索引、标签、全样本拟合、杠杆和留一预测与误差。</dd><dt>样本文件</dt><dd><a href="../research/numerical-examples/ridge-press.csv" download>ridge-press.csv</a></dd></dl><pre><code>X,Y
+-2,-2
+-1,0
+0,1
+1,3
+2,4
+3,5</code></pre><pre><code>./build/kline_quant num-ridge-press quant/research/numerical-examples/ridge-press.csv 1</code></pre><p>完整逐行留一结果由逐次删样本的独立参考回归核对。</p><h3>估计假设、实证解释与适用边界</h3><p>该恒等式不适用于每个留一折重新估计标准化尺度后仍直接沿用同一个帽子矩阵；金融序列应使用时间前向验证而非随机或留一划分评价交易预测。</p></article>
+<article class="lesson" id="lesson3"><h2>3．遗忘因子递归最小二乘与逐期参数路径</h2><h3>模型定义与经济含义</h3><div class="equation">$$K_t=\frac{P_{t-1}x_t}{\delta+x_t^\top P_{t-1}x_t},\quad w_t=w_{t-1}+K_t(y_t-x_t^\top w_{t-1})$$</div><p>递归更新来自指数加权正规方程与秩一逆矩阵更新。每一行先使用旧系数形成预测，再观察真实值更新系数和逆信息矩阵；遗忘因子小于1时早期样本的权重指数下降。初始逆信息矩阵对应零均值二次先验。</p><h3>数学推导与求解结构</h3><div class="equation">$$P_t=\delta^{-1}\left(P_{t-1}-\frac{P_{t-1}x_tx_t^\top P_{t-1}}{\delta+x_t^\top P_{t-1}x_t}\right)$$</div><div class="equation">$$A_t=\delta A_{t-1}+x_tx_t^\top,\quad b_t=\delta b_{t-1}+x_ty_t,\quad w_t=A_t^{-1}b_t$$</div><p>令P_t=A_t⁻¹并使用矩阵逆更新恒等式，即恢复递归形式。δ=1时与累计Ridge正规方程等价，δ小于1时，旧样本贡献及先验信息随时间衰减。</p><h3>完整构造案例与独立数值对照</h3><p>四条样本的X恒为0、标签为1至4，遗忘因子和初始对角值均为1。截距等于累计标签和除以观测数加1，依次为0.5、1、1.5、2，最后一期先验预测1.5。</p><dl><dt>输入字段</dt><dd>X、Y</dd><dt>参数顺序</dt><dd>遗忘因子δ、初始逆信息矩阵对角值</dd><dt>输出字段</dt><dd>PriorPrediction、Actual、Innovation是更新前预测、标签和创新；InnovationVariance为单位观测噪声下的预测尺度，PosteriorPrediction与Coefficient列为更新后的状态。</dd><dt>样本文件</dt><dd><a href="../research/numerical-examples/recursive-least-squares.csv" download>recursive-least-squares.csv</a></dd></dl><pre><code>X,Y
+0,1
+0,2
+0,3
+0,4</code></pre><pre><code>./build/kline_quant num-recursive-least-squares quant/research/numerical-examples/recursive-least-squares.csv 1 1</code></pre><div class="wide"><table><thead><tr><th>输出行（从0开始）</th><th>字段</th><th>解析或参考值</th></tr></thead><tbody><tr><td>0</td><td>Coefficient0</td><td>0.5</td></tr><tr><td>3</td><td>PriorPrediction</td><td>1.5</td></tr><tr><td>3</td><td>Coefficient0</td><td>2</td></tr></tbody></table></div><h3>估计假设、实证解释与适用边界</h3><p>重复浮点秩一更新可能积累对称性与正定误差，长序列生产系统可采用平方根RLS；异常值与漂移需要另行建模。</p></article>
+<article class="lesson" id="lesson4"><h2>4．训练期收缩协方差高斯判别分析</h2><h3>模型定义与经济含义</h3><div class="equation">$$x\mid y=k\sim N(\mu_k,\Sigma),\quad \log\frac{P(y=1\mid x)}{P(y=0\mid x)}=a+x^\top\Sigma^{-1}(\mu_1-\mu_0)$$</div><p>共享协方差使两类高斯对数密度的二次项相消，得到线性对数几率。训练期估计类均值、先验概率与组内合并协方差，对后者做收缩及正则以稳定求解。测试标签仅用于计算Brier和对数损失，不用于估计。</p><h3>数学推导与求解结构</h3><div class="equation">$$a=\log(\pi_1/\pi_0)-\tfrac12(\mu_1+\mu_0)^\top\Sigma^{-1}(\mu_1-\mu_0)$$</div><div class="equation">$$\widehat\Sigma_\alpha=(1-\alpha)S+\alpha\frac{\operatorname{tr}S}{d}I+\varepsilon I,\quad p_1(x)=\frac1{1+e^{-(a+x^\top b)}}$$</div><p>先按类中心计算组内协方差，再在正定目标上收缩，区别于直接对全样本协方差收缩；后者还包含类间均值差异。训练特征数量较多时应在时间验证集选择收缩强度。</p><h3>完整构造案例与独立数值对照</h3><p>训练类0为−2、−1，类1为1、2，类均值±1.5，合并组内方差0.5，加0.5正则后为1。对数几率为3x；x=0概率0.5，x=1概率1/(1+exp(−3))。</p><dl><dt>输入字段</dt><dd>X、Label</dd><dt>参数顺序</dt><dd>训练行数、协方差收缩强度、正对角项</dd><dt>输出字段</dt><dd>Row与Actual为测试行及标签；LogOdds、Probability、Prediction为对数几率、概率及0.5阈值预测；Brier、LogLoss为逐样本评分。</dd><dt>样本文件</dt><dd><a href="../research/numerical-examples/gaussian-discriminant.csv" download>gaussian-discriminant.csv</a></dd></dl><pre><code>X,Label
+-2,0
+-1,0
+1,1
+2,1
+0,0
+1,1
+-1,0</code></pre><pre><code>./build/kline_quant num-gaussian-discriminant quant/research/numerical-examples/gaussian-discriminant.csv 4 0 0.5</code></pre><div class="wide"><table><thead><tr><th>输出行（从0开始）</th><th>字段</th><th>解析或参考值</th></tr></thead><tbody><tr><td>0</td><td>Probability</td><td>0.5</td></tr><tr><td>1</td><td>LogOdds</td><td>3</td></tr><tr><td>1</td><td>Probability</td><td>0.9525741268</td></tr></tbody></table></div><h3>估计假设、实证解释与适用边界</h3><p>共享高斯协方差是结构假设，不保证金融特征符合正态；概率需在独立样本上校准，训练与测试应按实际可得时间划分。</p></article>
+<article class="lesson" id="lesson5"><h2>5．训练期Jacobi特征分解与样本外PCA重构</h2><h3>模型定义与经济含义</h3><div class="equation">$$S=\frac1{n-1}\sum_{t\in\mathcal I}(x_t-\bar x)(x_t-\bar x)^\top,\quad S=Q\Lambda Q^\top$$</div><p>对称Jacobi旋转逐次消除绝对值最大的非对角元，并累计正交特征向量；当剩余非对角元相对于迹足够小才结束。特征值按降序排列，训练均值和主轴被冻结后用于测试投影。正交投影使重构误差等于被舍弃子空间上的平方长度。</p><h3>数学推导与求解结构</h3><div class="equation">$$z_t=Q_k^\top(x_t-\bar x),\quad \widehat x_t=\bar x+Q_kz_t,\quad \eta_k=\frac{\sum_{j=1}^k\lambda_j}{\operatorname{tr}S}$$</div><div class="equation">$$\tan(2\theta)=\frac{2A_{ij}}{A_{jj}-A_{ii}},\quad A^+=R^\top AR,\quad Q^+=QR$$</div><p>旋转保持迹、Frobenius范数及特征值，并将选定非对角元消为零。逐次旋转使非对角平方和下降；排序后以训练中心将测试点映射到固定子空间。</p><h3>完整构造案例与独立数值对照</h3><p>四个训练点为(±2,0)、(0,±1)，第一主轴为横轴，保留方差比例8/(8+2)=0.8。测试点(3,2)及(−3,−1)的重构平方误差为4和1。</p><dl><dt>输入字段</dt><dd>FeatureA、FeatureB</dd><dt>参数顺序</dt><dd>训练行数、保留主成分数</dd><dt>输出字段</dt><dd>Row为测试索引，ReconstructionSquaredError为投影残差平方范数，RetainedVarianceShare为训练解释方差比例，PC列为投影坐标。</dd><dt>样本文件</dt><dd><a href="../research/numerical-examples/pca-jacobi.csv" download>pca-jacobi.csv</a></dd></dl><pre><code>FeatureA,FeatureB
+-2,0
+2,0
+0,-1
+0,1
+3,2
+-3,-1</code></pre><pre><code>./build/kline_quant num-pca-jacobi quant/research/numerical-examples/pca-jacobi.csv 4 1</code></pre><div class="wide"><table><thead><tr><th>输出行（从0开始）</th><th>字段</th><th>解析或参考值</th></tr></thead><tbody><tr><td>0</td><td>RetainedVarianceShare</td><td>0.8</td></tr><tr><td>0</td><td>ReconstructionSquaredError</td><td>4</td></tr><tr><td>1</td><td>ReconstructionSquaredError</td><td>1</td></tr></tbody></table></div><h3>估计假设、实证解释与适用边界</h3><p>特征尺度决定协方差PCA的主轴；重复特征值的特征向量不唯一，方向符号也不唯一。不得利用测试数据重新估计中心与轴。</p></article>
+<section class="source" id="source"><h2>完整C++17实现与复算环境</h2><p>以下头文件与工具库的实际实现一致。算法使用数值矩阵与参数向量，输出具名CSV。仓库提供共享线性系统、三对角求解、数值输入检查和回归测试。</p><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/numerical_lab_learning.hpp">完整算法头文件</a>　｜　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/numerical_lab_common.hpp">公共数学接口</a>　｜　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_numerical_lab.py">独立数值验证</a>　｜　<a href="../research/run_numerical_labs.py" download>批量复算脚本</a></p>
+<pre><code>#pragma once
+#include "numerical_lab_common.hpp"
+
+namespace kline { namespace numerical_lab {
+inline double sigmoid(double z){if(z&gt;=0)return 1/(1+std::exp(-z));double e=std::exp(z);return e/(1+e);}
+inline double softplus(double z){return std::max(z,0.0)+std::log1p(std::exp(-std::abs(z)));}
+inline Report damped_logistic(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,4,2,16);parameters(p,2);double lam=positive(p[0]);auto maxit=count(p[1],1,1000);
+    require(double(x.size())*d*d*maxit&lt;=1e8,"Logistic work limit exceeded");
+    Mat X;Vec y;double ones=0;
+    for(const auto&amp; row:x){require(row.back()==0||row.back()==1,"Binary outcome required");Vec v={1};v.insert(v.end(),row.begin(),row.end()-1);X.push_back(v);y.push_back(row.back());ones+=row.back();}
+    require(ones&gt;0&amp;&amp;ones&lt;x.size(),"Both outcome classes required");
+    double n=double(x.size());Vec w(d,0);
+    auto loss=[&amp;](const Vec&amp; z){double v=0;for(std::size_t i=0;i&lt;X.size();++i){double a=dot(X[i],z);v+=(softplus(a)-a*y[i])/n;}for(std::size_t j=1;j&lt;d;++j)v+=.5*lam*z[j]*z[j];return v;};
+    double error=1;std::size_t iter=0;
+    for(;iter&lt;maxit;++iter){
+        Mat H(d,Vec(d,0));Vec g(d,0);
+        for(std::size_t i=0;i&lt;X.size();++i){double q=sigmoid(dot(X[i],w)),a=q*(1-q);
+            for(std::size_t j=0;j&lt;d;++j){g[j]+=X[i][j]*(q-y[i])/n;for(std::size_t k=0;k&lt;d;++k)H[j][k]+=X[i][j]*X[i][k]*a/n;}}
+        for(std::size_t j=1;j&lt;d;++j){g[j]+=lam*w[j];H[j][j]+=lam;}
+        error=norm(g);if(error&lt;1e-9)break;
+        Vec step=solve_spd(H,g);double old=loss(w),t=1,descent=dot(g,step);bool accepted=false;
+        for(int k=0;k&lt;60;++k){
+            Vec z=w;for(std::size_t j=0;j&lt;d;++j)z[j]-=t*step[j];
+            if(loss(z)&lt;=old-1e-4*t*descent){w=std::move(z);accepted=true;break;}
+            t*=.5;
+        }
+        require(accepted,"Logistic line search failed");
+    }
+    require(error&lt;1e-7,"Logistic first-order residual too large");
+    Report out{{"Coefficient","Estimate","MeanPenalizedLoss","GradientNorm","Iterations"},{}};
+    for(std::size_t j=0;j&lt;d;++j)out.rows.push_back({double(j),w[j],loss(w),error,double(iter)});
+    return out;
+}
+inline Report ridge_press(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,4,2,24);parameters(p,1);double lam=positive(p[0]);
+    Mat X;Vec y;for(const auto&amp; r:x){Vec v={1};v.insert(v.end(),r.begin(),r.end()-1);X.push_back(v);y.push_back(r.back());}
+    Mat A(d,Vec(d,0));Vec b(d,0);
+    for(std::size_t t=0;t&lt;x.size();++t)for(std::size_t i=0;i&lt;d;++i){
+        b[i]+=X[t][i]*y[t];for(std::size_t j=0;j&lt;d;++j)A[i][j]+=X[t][i]*X[t][j];}
+    for(std::size_t i=1;i&lt;d;++i)A[i][i]+=lam;
+    Vec w=solve_spd(A,b);Mat inv(d,Vec(d,0));
+    for(std::size_t j=0;j&lt;d;++j){Vec e(d,0);e[j]=1;auto v=solve_spd(A,e);for(std::size_t i=0;i&lt;d;++i)inv[i][j]=v[i];}
+    Report out{{"Row","Actual","Fitted","Leverage","LeaveOneOutPrediction","LeaveOneOutSquaredError"},{}};
+    for(std::size_t t=0;t&lt;x.size();++t){
+        double pred=dot(X[t],w),h=dot(X[t],mul(inv,X[t])),err=(y[t]-pred)/positive(1-h);
+        out.rows.push_back({double(t),y[t],pred,h,y[t]-err,err*err});
+    }
+    return out;
+}
+inline Report recursive_least_squares(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,2,2,24);parameters(p,2);double forget=p[0],prior=positive(p[1]);require(forget&gt;0&amp;&amp;forget&lt;=1,"Invalid forgetting factor");
+    Mat P(d,Vec(d,0));for(std::size_t j=0;j&lt;d;++j)P[j][j]=prior;
+    Vec w(d,0);Report out{{"Period","PriorPrediction","Actual","Innovation","InnovationVariance","PosteriorPrediction"},{}};
+    for(std::size_t j=0;j&lt;d;++j)out.header.push_back("Coefficient"+std::to_string(j));
+    for(std::size_t t=0;t&lt;x.size();++t){
+        Vec z={1};z.insert(z.end(),x[t].begin(),x[t].end()-1);double y=x[t].back(),pred=dot(w,z);
+        Vec q=mul(P,z);double den=positive(forget+dot(z,q)),e=y-pred;
+        for(std::size_t j=0;j&lt;d;++j)w[j]+=q[j]*e/den;
+        for(std::size_t i=0;i&lt;d;++i)for(std::size_t j=0;j&lt;d;++j)P[i][j]=(P[i][j]-q[i]*q[j]/den)/forget;
+        Vec row={double(t),pred,y,e,den/forget,dot(w,z)};row.insert(row.end(),w.begin(),w.end());out.rows.push_back(row);
+    }
+    return out;
+}
+inline Report gaussian_discriminant(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,6,2,16)-1;parameters(p,3);auto n=count(p[0],4,x.size()-1);double shrink=p[1],ridge=positive(p[2]);
+    require(shrink&gt;=0&amp;&amp;shrink&lt;=1,"Invalid shrinkage");
+    Mat means(2,Vec(d,0));Vec counts(2,0);
+    for(const auto&amp; r:x)require(r.back()==0||r.back()==1,"Binary outcome required");
+    for(std::size_t i=0;i&lt;n;++i){auto k=std::size_t(x[i].back());++counts[k];for(std::size_t j=0;j&lt;d;++j)means[k][j]+=x[i][j];}
+    for(std::size_t k=0;k&lt;2;++k){require(counts[k]&gt;=2,"Each training class needs two observations");for(double&amp; v:means[k])v/=counts[k];}
+    Mat A(d,Vec(d,0));for(std::size_t t=0;t&lt;n;++t){
+        auto k=std::size_t(x[t].back());for(std::size_t i=0;i&lt;d;++i)for(std::size_t j=0;j&lt;d;++j)
+        A[i][j]+=(x[t][i]-means[k][i])*(x[t][j]-means[k][j])/(n-2);}
+    double mu=0;for(std::size_t i=0;i&lt;d;++i)mu+=A[i][i]/d;
+    for(std::size_t i=0;i&lt;d;++i)for(std::size_t j=0;j&lt;d;++j)A[i][j]=(1-shrink)*A[i][j]+(i==j?shrink*mu+ridge:0);
+    Vec delta(d);for(std::size_t j=0;j&lt;d;++j)delta[j]=means[1][j]-means[0][j];
+    Vec beta=solve_spd(A,delta);double a=std::log(counts[1]/counts[0])-.5*(dot(means[1],beta)+dot(means[0],beta));
+    Report out{{"Row","Actual","LogOdds","Probability","Prediction","Brier","LogLoss"},{}};
+    for(std::size_t t=n;t&lt;x.size();++t){
+        Vec z(x[t].begin(),x[t].end()-1);double l=a+dot(z,beta),q=sigmoid(l),y=x[t].back();
+        out.rows.push_back({double(t),y,l,q,q&gt;=.5?1.0:0.0,(q-y)*(q-y),softplus(l)-y*l});
+    }
+    return out;
+}
+inline Report pca_jacobi(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,3,2,24);parameters(p,2);auto train=count(p[0],2,x.size()-1),keep=count(p[1],1,d);
+    require(double(x.size())*d*d&lt;=1e8,"PCA work limit exceeded");
+    Vec m(d,0);for(std::size_t t=0;t&lt;train;++t)for(std::size_t j=0;j&lt;d;++j)m[j]+=x[t][j]/train;
+    Mat A(d,Vec(d,0)),Q(d,Vec(d,0));for(std::size_t i=0;i&lt;d;++i)Q[i][i]=1;
+    for(std::size_t t=0;t&lt;train;++t)for(std::size_t i=0;i&lt;d;++i)for(std::size_t j=0;j&lt;d;++j)A[i][j]+=(x[t][i]-m[i])*(x[t][j]-m[j])/(train-1);
+    double trace=0;for(std::size_t i=0;i&lt;d;++i)trace+=A[i][i];positive(trace);
+    double residual=trace;for(std::size_t iter=0;iter&lt;100*d*d;++iter){
+        std::size_t a=0,b=1;residual=0;
+        for(std::size_t i=0;i&lt;d;++i)for(std::size_t j=i+1;j&lt;d;++j)if(std::abs(A[i][j])&gt;residual){a=i;b=j;residual=std::abs(A[i][j]);}
+        if(residual&lt;=1e-12*trace)break;
+        double angle=.5*std::atan2(2*A[a][b],A[b][b]-A[a][a]),c=std::cos(angle),s=std::sin(angle);
+        double aa=A[a][a],bb=A[b][b],ab=A[a][b];
+        A[a][a]=c*c*aa-2*c*s*ab+s*s*bb;A[b][b]=s*s*aa+2*c*s*ab+c*c*bb;A[a][b]=A[b][a]=0;
+        for(std::size_t i=0;i&lt;d;++i){
+            if(i!=a&amp;&amp;i!=b){double u=A[i][a],v=A[i][b];A[i][a]=A[a][i]=c*u-s*v;A[i][b]=A[b][i]=s*u+c*v;}
+            double u=Q[i][a],v=Q[i][b];Q[i][a]=c*u-s*v;Q[i][b]=s*u+c*v;
+        }
+    }
+    require(residual&lt;=1e-10*trace,"Jacobi eigensolver failed");
+    std::vector&lt;std::size_t&gt; order(d);std::iota(order.begin(),order.end(),0);
+    std::stable_sort(order.begin(),order.end(),[&amp;](auto a,auto b){return A[a][a]&gt;A[b][b];});
+    Report out{{"Row","ReconstructionSquaredError","RetainedVarianceShare"},{}};
+    for(std::size_t j=0;j&lt;keep;++j)out.header.push_back("PC"+std::to_string(j+1));
+    double explained=0;for(std::size_t j=0;j&lt;keep;++j)explained+=A[order[j]][order[j]]/trace;
+    for(std::size_t t=train;t&lt;x.size();++t){
+        Vec z=x[t],scores,recon(d,0);for(std::size_t j=0;j&lt;d;++j)z[j]-=m[j];
+        for(std::size_t k=0;k&lt;keep;++k){
+            auto j=order[k];Vec v(d);for(std::size_t i=0;i&lt;d;++i)v[i]=Q[i][j];
+            double a=dot(z,v);scores.push_back(a);for(std::size_t i=0;i&lt;d;++i)recon[i]+=a*v[i];
+        }
+        for(std::size_t j=0;j&lt;d;++j)z[j]-=recon[j];
+        Vec row={double(t),dot(z,z),explained};row.insert(row.end(),scores.begin(),scores.end());out.rows.push_back(row);
+    }
+    return out;
+}
+} }
+</code></pre><h3>本地运行</h3><pre><code>cmake -S quant/cpp -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+python quant/research/run_numerical_labs.py ./build/kline_quant numerical-results</code></pre><p>Windows多配置生成器通常使用<code>.\build\Release\kline_quant.exe</code>；单配置生成器使用<code>.\build\kline_quant.exe</code>。输出目录须为空。构造样例用于复核计算与模型结构，不代表真实市场实证结果。</p></section>
+<section class="references" id="references"><h2>参考文献与技术资料</h2><p><a href="https://hastie.su.domains/ElemStatLearn/">Hastie, Tibshirani &amp; Friedman, The Elements of Statistical Learning</a></p><p><a href="https://web.stanford.edu/~boyd/cvxbook/">Boyd &amp; Vandenberghe, Convex Optimization</a></p><p><a href="https://scikit-learn.org/stable/modules/lda_qda.html">scikit-learn, Linear and Quadratic Discriminant Analysis</a></p><p><a href="https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html">scikit-learn, PCA</a></p></section>
+</main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

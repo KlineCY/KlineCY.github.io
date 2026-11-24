@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>多元回归稳健推断、联合检验与Bootstrap｜Kline Quant</title><meta name="description" content="高级量化数值研究：模型推导、计算案例、独立数值验证与C++17实现">
+<link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<style>
+body{margin:0;background:#fff;color:#192b36;font:16px/1.95 "Times New Roman","SimSun",serif}
+.main{margin-left:252px;padding:24px 30px 64px}main{max-width:1180px;margin:auto}header,.lesson,.source,.references,.framework{border:1px solid #bfcbd4;background:white;margin:18px 0;padding:25px 28px}
+h1{font-size:31px;line-height:1.4;margin:12px 0 22px}h2{font-size:24px;line-height:1.5;margin:8px 0 20px}h3{font-size:18px;margin:24px 0 8px}p{line-height:1.95;margin:12px 0}.toc{display:flex;flex-wrap:wrap;gap:9px 22px;border:1px solid #cbd5dc;padding:17px 23px}
+.equation{overflow:auto;border-block:1px solid #d6dfe5;margin:18px 0;padding:13px 5px}.katex-display{overflow-x:auto;overflow-y:hidden}a{color:#17537b}code,pre{font-family:"Times New Roman",monospace}pre{border:1px solid #cbd5dc;padding:15px;overflow:auto;white-space:pre;font-size:14px;line-height:1.7;max-height:900px}
+dl{display:grid;grid-template-columns:115px minmax(0,1fr);gap:8px 15px}dt{font-weight:bold}dd{margin:0;overflow-wrap:anywhere}table{border-collapse:collapse;width:100%}th,td{border:1px solid #cad3dc;background:white;padding:10px 13px;text-align:left}th{font-weight:bold}.wide{overflow-x:auto}
+@media(max-width:790px){.main{margin:0;padding:10px}header,.lesson,.source,.references,.framework{padding:15px}dl{display:block}dt{margin-top:12px}}
+</style></head><body><aside id="quantSidebar" class="sidebar" data-page="audit"></aside><script src="../sidebar-v2.js"></script><div class="main"><main>
+<header><small>QUANTITATIVE RESEARCH / ADVANCED NUMERICAL LABORATORIES</small><h1>多元回归稳健推断、联合检验与Bootstrap</h1><p>回归系数的估计与统计不确定性是两个不同计算环节。以下五种方法共享多元设计矩阵，在异方差、时间依赖、聚类误差及联合限制下采用不同的协方差或重采样结构。</p><p><a href="../research/numerical-laboratories.html">高级数值研究总入口</a>　｜　<a href="../cpp/">C++17研究工具库</a>　｜　<a href="../research/numerical-examples/catalog.json" download>下载数据与参数索引</a></p></header>
+<nav class="toc"><a href="#lesson1">1．多元OLS的HC3杠杆修正异方差稳健协方差</a><a href="#lesson2">2．多元OLS的Newey–West得分长程协方差</a><a href="#lesson3">3．任意多元设计的单维聚类稳健CR1推断</a><a href="#lesson4">4．原假设约束下的Rademacher Wild Bootstrap系数检验</a><a href="#lesson5">5．多元OLS的HC0联合线性限制Wald统计量</a><a href="#source">完整C++17实现</a><a href="#references">参考文献</a></nav>
+<article class="lesson" id="lesson1"><h2>1．多元OLS的HC3杠杆修正异方差稳健协方差</h2><h3>模型定义与经济含义</h3><div class="equation">$$\widehat\beta=(X^\top X)^{-1}X^\top y,\quad h_i=x_i^\top(X^\top X)^{-1}x_i$$</div><p>普通最小二乘点估计在不同稳健协方差口径下不变。HC3利用杠杆值缩放残差，补偿高杠杆观测拟合残差被机械压小的问题。三明治矩阵左右乘逆Gram，取对角元平方根作为各系数标准误。</p><h3>数学推导与求解结构</h3><div class="equation">$$\widehat V_{\rm HC3}=(X^\top X)^{-1}\left[\sum_i\frac{\widehat u_i^2}{(1-h_i)^2}x_ix_i^\top\right](X^\top X)^{-1}$$</div><div class="equation">$$SE_j=\sqrt{\widehat V_{jj}},\qquad CI_{95\%}=\widehat\beta_j\pm1.959964\,SE_j$$</div><p>杠杆值越接近1，留一残差与原拟合残差的差异越大。HC3正是用留一残差尺度构造稳健协方差。区间使用渐近标准正态临界值，并非宣称有限样本精确覆盖。</p><h3>完整构造案例与独立数值对照</h3><p>16条构造样本含两个解释变量、截距和随行变化的误差振幅。独立测试以高斯消元求解OLS和完整三明治矩阵，对照三个系数的估计及标准误。</p><dl><dt>输入字段</dt><dd>X1、X2、Y</dd><dt>参数顺序</dt><dd>无额外参数；自动增加截距</dd><dt>输出字段</dt><dd>Coefficient从0开始，0为截距；Estimate、StandardError、NormalStatistic、Lower95Normal、Upper95Normal为点估计和渐近推断，Observations与ResidualDF为样本规模。</dd><dt>样本文件</dt><dd><a href="../research/numerical-examples/multivariate-hc3.csv" download>multivariate-hc3.csv</a></dd></dl><pre><code>X1,X2,Y
+-1.5,-1.5,-1.25
+-0.5,-1.5,0.8898058629
+0.5,-1.5,2.885092636
+1.5,-1.5,4.639369889
+-1.5,-0.5,-2.048849383
+-0.5,-0.5,0.1522045756
+0.5,-0.5,2.567467146
+1.5,-0.5,4.634569509
+-1.5,0.5,-2.337163391
+-0.5,0.5,-0.7895149265
+0.5,0.5,1.428056249
+1.5,0.5,4.134847785
+-1.5,1.5,-2.074039556
+-0.5,1.5,-0.6691847608
+0.5,1.5,0.5399463731
+1.5,1.5,2.61166084</code></pre><pre><code>./build/kline_quant num-multivariate-hc3 quant/research/numerical-examples/multivariate-hc3.csv</code></pre><p>本案例的完整系数、协方差与残差由独立Python参考重新计算，测试文件保留逐项核对过程。</p><h3>估计假设、实证解释与适用边界</h3><p>大样本正态区间要求独立观测及适当矩条件；HC3不自动处理时间依赖或组内相关。高杠杆趋于1时拒绝计算。</p></article>
+<article class="lesson" id="lesson2"><h2>2．多元OLS的Newey–West得分长程协方差</h2><h3>模型定义与经济含义</h3><div class="equation">$$s_t=x_t\widehat u_t,\quad M_0=\sum_ts_ts_t^\top$$</div><p>在时间序列回归中，影响系数不确定性的对象是回归得分而非单独残差。Bartlett核按滞后衰减加权得分交叉乘积，再与逆Gram形成协方差矩阵。HAC不改变点估计，滞后为0时退化为HC0。</p><h3>数学推导与求解结构</h3><div class="equation">$$M=M_0+\sum_{k=1}^L(1-k/(L+1))\sum_{t=k+1}^n(s_ts_{t-k}^\top+s_{t-k}s_t^\top)$$</div><div class="equation">$$\widehat V_{\rm HAC}=(X^\top X)^{-1}M(X^\top X)^{-1}$$</div><p>得分外积以未归一化求和构造，因此逆Gram也使用未归一化的XᵀX，不再额外乘除样本数。回归系数及标准误的量纲由因变量和解释变量的单位决定。</p><h3>完整构造案例与独立数值对照</h3><p>相同16条有序构造回归样本，滞后阶2。独立Python参考按得分的每一对坐标直接求和，核对三个稳健标准误。</p><dl><dt>输入字段</dt><dd>X1、X2、Y</dd><dt>参数顺序</dt><dd>Bartlett核最大滞后阶</dd><dt>输出字段</dt><dd>输出列与HC3一致，标准误替换为指定滞后阶下的HAC协方差对角平方根。</dd><dt>样本文件</dt><dd><a href="../research/numerical-examples/multivariate-hc3.csv" download>multivariate-hc3.csv</a></dd></dl><pre><code>X1,X2,Y
+-1.5,-1.5,-1.25
+-0.5,-1.5,0.8898058629
+0.5,-1.5,2.885092636
+1.5,-1.5,4.639369889
+-1.5,-0.5,-2.048849383
+-0.5,-0.5,0.1522045756
+0.5,-0.5,2.567467146
+1.5,-0.5,4.634569509
+-1.5,0.5,-2.337163391
+-0.5,0.5,-0.7895149265
+0.5,0.5,1.428056249
+1.5,0.5,4.134847785
+-1.5,1.5,-2.074039556
+-0.5,1.5,-0.6691847608
+0.5,1.5,0.5399463731
+1.5,1.5,2.61166084</code></pre><pre><code>./build/kline_quant num-multivariate-hac quant/research/numerical-examples/multivariate-hc3.csv 2</code></pre><p>本案例的完整系数、协方差与残差由独立Python参考重新计算，测试文件保留逐项核对过程。</p><h3>估计假设、实证解释与适用边界</h3><p>输入行必须按等时间间隔排序；不含有限样本自由度缩放。渐近正态推断依赖弱依赖及一致的长程方差估计。</p></article>
+<article class="lesson" id="lesson3"><h2>3．任意多元设计的单维聚类稳健CR1推断</h2><h3>模型定义与经济含义</h3><div class="equation">$$S_g=\sum_{i\in g}x_i\widehat u_i,\quad M=\sum_g S_gS_g^\top$$</div><p>将同组观测的回归得分先合并为组得分，再做外积，允许组内任意相关而要求组间适当独立。CR1修正因子包含聚类数G及回归参数数d。</p><h3>数学推导与求解结构</h3><div class="equation">$$\widehat V_{\rm CR1}=\frac{G}{G-1}\frac{n-1}{n-d}(X^\top X)^{-1}M(X^\top X)^{-1}$$</div><div class="equation">$$\operatorname{Var}\left(\sum_{i\in g}s_i\right)=\sum_{i,j\in g}\operatorname{Cov}(s_i,s_j)$$</div><p>组得分外积包含同组所有观测的交叉项，这是聚类估计允许组内相关的原因。不能以样本行数很多代替独立聚类数很多的条件。</p><h3>完整构造案例与独立数值对照</h3><p>16条样本分为4个聚类，每组4条，计算三个系数的CR1标准误，并同HC3、HAC口径对照。</p><dl><dt>输入字段</dt><dd>Cluster、X1、X2、Y</dd><dt>参数顺序</dt><dd>无额外参数；首列为聚类编号</dd><dt>输出字段</dt><dd>输出列与HC3一致；首列聚类编号不进入回归设计，ResidualDF是普通回归残差自由度。</dd><dt>样本文件</dt><dd><a href="../research/numerical-examples/multivariate-cluster.csv" download>multivariate-cluster.csv</a></dd></dl><pre><code>Cluster,X1,X2,Y
+0,-1.5,-1.5,-1.25
+0,-0.5,-1.5,0.8898058629
+0,0.5,-1.5,2.885092636
+0,1.5,-1.5,4.639369889
+1,-1.5,-0.5,-2.048849383
+1,-0.5,-0.5,0.1522045756
+1,0.5,-0.5,2.567467146
+1,1.5,-0.5,4.634569509
+2,-1.5,0.5,-2.337163391
+2,-0.5,0.5,-0.7895149265
+2,0.5,0.5,1.428056249
+2,1.5,0.5,4.134847785
+3,-1.5,1.5,-2.074039556
+3,-0.5,1.5,-0.6691847608
+3,0.5,1.5,0.5399463731
+3,1.5,1.5,2.61166084</code></pre><pre><code>./build/kline_quant num-multivariate-cluster quant/research/numerical-examples/multivariate-cluster.csv</code></pre><p>本案例的完整系数、协方差与残差由独立Python参考重新计算，测试文件保留逐项核对过程。</p><h3>估计假设、实证解释与适用边界</h3><p>四个聚类仅供复算，实际推断中聚类数很少会使正态近似不可靠；多维聚类需要不同的协方差组合。</p></article>
+<article class="lesson" id="lesson4"><h2>4．原假设约束下的Rademacher Wild Bootstrap系数检验</h2><h3>模型定义与经济含义</h3><div class="equation">$$\widetilde\beta=\widehat\beta-(X^\top X)^{-1}e_j\frac{\widehat\beta_j-b_0}{[(X^\top X)^{-1}]_{jj}}$$</div><p>在原假设下拟合约束最小二乘，保留逐观测残差尺度，通过独立随机符号生成伪样本。因为解释变量固定，只需要预计算OLS估计算子的目标行，就可从每次伪响应计算目标系数。使用绝对系数差统计量和加一Monte Carlo概率。</p><h3>数学推导与求解结构</h3><div class="equation">$$y_i^*=x_i^\top\widetilde\beta+\widetilde u_i\xi_i,\quad \xi_i\in\{-1,1\},\quad \widehat p=(1+\#\{|\widehat\beta_j^*-b_0|\ge|\widehat\beta_j-b_0|\})/(B+1)$$</div><div class="equation">$$\widehat\beta_j^*=e_j^\top(X^\top X)^{-1}X^\top y^*$$</div><p>固定设计使每次重新拟合等价于对伪响应做一次预计算线性映射，复杂度从重复矩阵分解下降为每次线性扫描。独立随机符号保留残差平方尺度，但不能保留跨组或跨时间相关。</p><h3>完整构造案例与独立数值对照</h3><p>检验第一斜率是否等于2，1000次重复、种子2026；重复运行输出完全一致，报告原估计、观测差及超出次数。</p><dl><dt>输入字段</dt><dd>X1、X2、Y</dd><dt>参数顺序</dt><dd>待检验系数编号（0为截距）、原假设值、重复次数、随机种子</dd><dt>输出字段</dt><dd>Coefficient、Estimate、Null、ObservedAbsDifference为检验对象；Replications、Exceedances、MonteCarloP为模拟次数、超出次数和加一估计概率。</dd><dt>样本文件</dt><dd><a href="../research/numerical-examples/multivariate-hc3.csv" download>multivariate-hc3.csv</a></dd></dl><pre><code>X1,X2,Y
+-1.5,-1.5,-1.25
+-0.5,-1.5,0.8898058629
+0.5,-1.5,2.885092636
+1.5,-1.5,4.639369889
+-1.5,-0.5,-2.048849383
+-0.5,-0.5,0.1522045756
+0.5,-0.5,2.567467146
+1.5,-0.5,4.634569509
+-1.5,0.5,-2.337163391
+-0.5,0.5,-0.7895149265
+0.5,0.5,1.428056249
+1.5,0.5,4.134847785
+-1.5,1.5,-2.074039556
+-0.5,1.5,-0.6691847608
+0.5,1.5,0.5399463731
+1.5,1.5,2.61166084</code></pre><pre><code>./build/kline_quant num-wild-coefficient quant/research/numerical-examples/multivariate-hc3.csv 1 2 1000 2026</code></pre><div class="wide"><table><thead><tr><th>输出行（从0开始）</th><th>字段</th><th>解析或参考值</th></tr></thead><tbody><tr><td>0</td><td>Replications</td><td>1000</td></tr></tbody></table></div><h3>估计假设、实证解释与适用边界</h3><p>未学生化的Wild Bootstrap示范，不是Wild Cluster Bootstrap，也不保证小样本精确显著性；推断仍依赖适当外生性和误差结构。</p></article>
+<article class="lesson" id="lesson5"><h2>5．多元OLS的HC0联合线性限制Wald统计量</h2><h3>模型定义与经济含义</h3><div class="equation">$$H_0:R\beta=r,\qquad W=(R\widehat\beta-r)^\top(R\widehat VR^\top)^{-1}(R\widehat\beta-r)$$</div><p>选择矩阵R取出被联合限制的系数。将限制偏离用其协方差度量，而不是简单加总单独t统计量平方，因为估计系数之间存在协方差。正定系统求解避免显式计算小矩阵逆。</p><h3>数学推导与求解结构</h3><div class="equation">$$\widehat V=(X^\top X)^{-1}\left(\sum_i x_ix_i^\top\widehat u_i^2\right)(X^\top X)^{-1},\qquad W\overset{a}{\sim}\chi^2_{\operatorname{rank}(R)}$$</div><div class="equation">$$\operatorname{rank}(R\widehat VR^\top)=q,\qquad W=\|L^{-1}(R\widehat\beta-r)\|_2^2,\quad LL^\top=R\widehat VR^\top$$</div><p>联合协方差须满秩，Cholesky分解将联合偏离变为白化后的平方距离。若限制方向的协方差不可逆，统计量没有该定义下的有效数值。</p><h3>完整构造案例与独立数值对照</h3><p>同时检验两条斜率等于2和−0.5；自由度为2，独立参考构造限制协方差并直接求解二阶二次型。</p><dl><dt>输入字段</dt><dd>X1、X2、Y</dd><dt>参数顺序</dt><dd>系数编号与原假设值对，可同时指定多个</dd><dt>输出字段</dt><dd>Restrictions为限制数，WaldChiSquareStatistic为渐近卡方型统计量，Observations为样本行数。</dd><dt>样本文件</dt><dd><a href="../research/numerical-examples/multivariate-hc3.csv" download>multivariate-hc3.csv</a></dd></dl><pre><code>X1,X2,Y
+-1.5,-1.5,-1.25
+-0.5,-1.5,0.8898058629
+0.5,-1.5,2.885092636
+1.5,-1.5,4.639369889
+-1.5,-0.5,-2.048849383
+-0.5,-0.5,0.1522045756
+0.5,-0.5,2.567467146
+1.5,-0.5,4.634569509
+-1.5,0.5,-2.337163391
+-0.5,0.5,-0.7895149265
+0.5,0.5,1.428056249
+1.5,0.5,4.134847785
+-1.5,1.5,-2.074039556
+-0.5,1.5,-0.6691847608
+0.5,1.5,0.5399463731
+1.5,1.5,2.61166084</code></pre><pre><code>./build/kline_quant num-joint-wald-hc0 quant/research/numerical-examples/multivariate-hc3.csv 1 2 2 -0.5</code></pre><div class="wide"><table><thead><tr><th>输出行（从0开始）</th><th>字段</th><th>解析或参考值</th></tr></thead><tbody><tr><td>0</td><td>Restrictions</td><td>2</td></tr></tbody></table></div><h3>估计假设、实证解释与适用边界</h3><p>当前支持不同单系数的联合限制而非任意线性组合；HC0渐近分布依赖独立与正则条件，样本完美拟合导致协方差奇异时拒绝。</p></article>
+<section class="source" id="source"><h2>完整C++17实现与复算环境</h2><p>以下头文件与工具库的实际实现一致。算法使用数值矩阵与参数向量，输出具名CSV。仓库提供共享线性系统、三对角求解、数值输入检查和回归测试。</p><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/numerical_lab_inference.hpp">完整算法头文件</a>　｜　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/numerical_lab_common.hpp">公共数学接口</a>　｜　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_numerical_lab.py">独立数值验证</a>　｜　<a href="../research/run_numerical_labs.py" download>批量复算脚本</a></p>
+<pre><code>#pragma once
+#include "numerical_lab_common.hpp"
+#include &lt;random&gt;
+namespace kline { namespace numerical_lab {
+struct LinearFit {Mat X,inv;Vec y,beta,residual,leverage;};
+inline LinearFit ols(const Mat&amp; x,std::size_t skip=0){
+    const auto d=validate(x,4,skip+2,20)-skip;
+    require(x.size()&gt;d,"Residual degrees of freedom required");
+    Mat X;Vec y;
+    for(const auto&amp; row:x){Vec v={1};v.insert(v.end(),row.begin()+skip,row.end()-1);X.push_back(v);y.push_back(row.back());}
+    Mat A(d,Vec(d,0));Vec b(d,0);
+    for(std::size_t t=0;t&lt;X.size();++t){
+        for(std::size_t i=0;i&lt;d;++i){b[i]+=X[t][i]*y[t];for(std::size_t j=0;j&lt;d;++j)A[i][j]+=X[t][i]*X[t][j];}
+    }
+    Vec beta=solve_spd(A,b);Mat inv(d,Vec(d,0));
+    for(std::size_t j=0;j&lt;d;++j){Vec e(d,0);e[j]=1;Vec z=solve_spd(A,e);for(std::size_t i=0;i&lt;d;++i)inv[i][j]=z[i];}
+    Vec residual,leverage;
+    for(std::size_t i=0;i&lt;X.size();++i){residual.push_back(y[i]-dot(X[i],beta));leverage.push_back(dot(X[i],mul(inv,X[i])));}
+    return {X,inv,y,beta,residual,leverage};
+}
+inline void add_outer(Mat&amp; A,const Vec&amp; x,const Vec&amp; y,double w=1){
+    for(std::size_t i=0;i&lt;x.size();++i)for(std::size_t j=0;j&lt;y.size();++j)A[i][j]+=w*x[i]*y[j];
+}
+inline Report sandwich_report(const LinearFit&amp; f,const Mat&amp; meat,double scale){
+    const auto d=f.beta.size();
+    Report out{{"Coefficient","Estimate","StandardError","NormalStatistic","Lower95Normal","Upper95Normal","Observations","ResidualDF"},{}};
+    for(std::size_t i=0;i&lt;d;++i){
+        double v=dot(f.inv[i],mul(meat,f.inv[i]))*scale;
+        double se=std::sqrt(positive(v));
+        out.rows.push_back({double(i),f.beta[i],se,f.beta[i]/se,f.beta[i]-1.959963984540054*se,f.beta[i]+1.959963984540054*se,double(f.X.size()),double(f.X.size()-d)});
+    }
+    return out;
+}
+inline Report multivariate_hc3(const Mat&amp; x,const Vec&amp; p){
+    parameters(p,0);auto f=ols(x);auto d=f.beta.size();Mat M(d,Vec(d,0));
+    for(std::size_t t=0;t&lt;x.size();++t){
+        double r=f.residual[t]/positive(1-f.leverage[t]);
+        add_outer(M,f.X[t],f.X[t],r*r);
+    }
+    return sandwich_report(f,M,1);
+}
+inline Report multivariate_hac(const Mat&amp; x,const Vec&amp; p){
+    parameters(p,1);auto f=ols(x);auto d=f.beta.size(),L=count(p[0],0,x.size()-1);
+    require(double(x.size())*(L+1)*d*d&lt;=1e8,"HAC work limit exceeded");
+    Mat M(d,Vec(d,0)),scores=f.X;
+    for(std::size_t t=0;t&lt;x.size();++t){for(double&amp; v:scores[t])v*=f.residual[t];add_outer(M,scores[t],scores[t]);}
+    for(std::size_t k=1;k&lt;=L;++k){
+        double w=1-double(k)/(L+1);
+        for(std::size_t t=k;t&lt;x.size();++t){add_outer(M,scores[t],scores[t-k],w);add_outer(M,scores[t-k],scores[t],w);}
+    }
+    return sandwich_report(f,M,1);
+}
+inline Report multivariate_cluster(const Mat&amp; x,const Vec&amp; p){
+    parameters(p,0);auto f=ols(x,1);auto d=f.beta.size();std::map&lt;double,Vec&gt; score;
+    for(std::size_t i=0;i&lt;x.size();++i){
+        auto&amp; v=score[x[i][0]];if(v.empty())v=Vec(d,0);
+        for(std::size_t j=0;j&lt;d;++j)v[j]+=f.X[i][j]*f.residual[i];
+    }
+    require(score.size()&gt;=2,"At least two clusters required");
+    Mat M(d,Vec(d,0));for(const auto&amp; v:score)add_outer(M,v.second,v.second);
+    double n=double(x.size()),G=double(score.size());
+    return sandwich_report(f,M,G/(G-1)*(n-1)/(n-d));
+}
+inline Report wild_coefficient(const Mat&amp; x,const Vec&amp; p){
+    parameters(p,4);auto f=ols(x);auto d=f.beta.size();
+    auto j=count(p[0],0,d-1),B=count(p[2],100,20000),seed=count(p[3],0,4294967295ULL);
+    double null=p[1],delta=f.beta[j]-null,den=positive(f.inv[j][j]);
+    require(double(B)*x.size()*d&lt;=1e8,"Bootstrap work limit exceeded");
+    Vec restricted=f.beta;for(std::size_t k=0;k&lt;d;++k)restricted[k]-=f.inv[k][j]*delta/den;
+    Vec fitted,err;
+    for(std::size_t i=0;i&lt;x.size();++i){double m=dot(f.X[i],restricted);fitted.push_back(m);err.push_back(f.y[i]-m);}
+    std::mt19937 rng(static_cast&lt;std::uint32_t&gt;(seed));std::size_t exceed=0;
+    // Refit only the tested coefficient using the jth row of the fixed OLS operator.
+    Vec influence;for(const auto&amp; v:f.X)influence.push_back(dot(f.inv[j],v));
+    for(std::size_t k=0;k&lt;B;++k){
+        double stat=0;
+        for(std::size_t i=0;i&lt;x.size();++i)stat+=influence[i]*(fitted[i]+((rng()&amp;1U)?1:-1)*err[i]);
+        if(std::abs(stat-null)&gt;=std::abs(delta)-1e-12)++exceed;
+    }
+    return scalar_rows({"Coefficient","Estimate","Null","ObservedAbsDifference","Replications","Exceedances","MonteCarloP"},{double(j),f.beta[j],null,std::abs(delta),double(B),double(exceed),double(exceed+1)/(B+1)});
+}
+inline Report joint_wald_hc0(const Mat&amp; x,const Vec&amp; p){
+    auto f=ols(x);auto d=f.beta.size();
+    require(!p.empty()&amp;&amp;p.size()%2==0&amp;&amp;p.size()/2&lt;=d,"Coefficient-null pairs required");check_finite(p);
+    Mat M(d,Vec(d,0));for(std::size_t i=0;i&lt;x.size();++i)add_outer(M,f.X[i],f.X[i],f.residual[i]*f.residual[i]);
+    std::vector&lt;std::size_t&gt; ix;Vec diff;
+    for(std::size_t i=0;i&lt;p.size();i+=2){auto j=count(p[i],0,d-1);require(std::find(ix.begin(),ix.end(),j)==ix.end(),"Repeated coefficient restriction");ix.push_back(j);diff.push_back(f.beta[j]-p[i+1]);}
+    Mat V(ix.size(),Vec(ix.size(),0));
+    for(std::size_t i=0;i&lt;ix.size();++i)for(std::size_t j=0;j&lt;ix.size();++j)V[i][j]=dot(f.inv[ix[i]],mul(M,f.inv[ix[j]]));
+    double stat=dot(diff,solve_spd(V,diff));
+    return scalar_rows({"Restrictions","WaldChiSquareStatistic","Observations"},{double(ix.size()),stat,double(x.size())});
+}
+} }
+</code></pre><h3>本地运行</h3><pre><code>cmake -S quant/cpp -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+python quant/research/run_numerical_labs.py ./build/kline_quant numerical-results</code></pre><p>Windows多配置生成器通常使用<code>.\build\Release\kline_quant.exe</code>；单配置生成器使用<code>.\build\kline_quant.exe</code>。输出目录须为空。构造样例用于复核计算与模型结构，不代表真实市场实证结果。</p></section>
+<section class="references" id="references"><h2>参考文献与技术资料</h2><p><a href="https://doi.org/10.2307/1913610">Newey &amp; West (1987), A Simple Positive Semi-definite Heteroskedasticity and Autocorrelation Consistent Covariance Matrix</a></p><p><a href="https://doi.org/10.3368/jhr.50.2.317">Cameron &amp; Miller (2015), A Practitioner's Guide to Cluster-Robust Inference</a></p><p><a href="https://www.statsmodels.org/stable/generated/statsmodels.regression.linear_model.RegressionResults.get_robustcov_results.html">statsmodels, RegressionResults.get_robustcov_results</a></p></section>
+</main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

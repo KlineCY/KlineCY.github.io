@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>固定收益期限结构拟合、现金流风险与对冲｜Kline Quant</title><meta name="description" content="高级量化数值研究：模型推导、计算案例、独立数值验证与C++17实现">
+<link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<style>
+body{margin:0;background:#fff;color:#192b36;font:16px/1.95 "Times New Roman","SimSun",serif}
+.main{margin-left:252px;padding:24px 30px 64px}main{max-width:1180px;margin:auto}header,.lesson,.source,.references,.framework{border:1px solid #bfcbd4;background:white;margin:18px 0;padding:25px 28px}
+h1{font-size:31px;line-height:1.4;margin:12px 0 22px}h2{font-size:24px;line-height:1.5;margin:8px 0 20px}h3{font-size:18px;margin:24px 0 8px}p{line-height:1.95;margin:12px 0}.toc{display:flex;flex-wrap:wrap;gap:9px 22px;border:1px solid #cbd5dc;padding:17px 23px}
+.equation{overflow:auto;border-block:1px solid #d6dfe5;margin:18px 0;padding:13px 5px}.katex-display{overflow-x:auto;overflow-y:hidden}a{color:#17537b}code,pre{font-family:"Times New Roman",monospace}pre{border:1px solid #cbd5dc;padding:15px;overflow:auto;white-space:pre;font-size:14px;line-height:1.7;max-height:900px}
+dl{display:grid;grid-template-columns:115px minmax(0,1fr);gap:8px 15px}dt{font-weight:bold}dd{margin:0;overflow-wrap:anywhere}table{border-collapse:collapse;width:100%}th,td{border:1px solid #cad3dc;background:white;padding:10px 13px;text-align:left}th{font-weight:bold}.wide{overflow-x:auto}
+@media(max-width:790px){.main{margin:0;padding:10px}header,.lesson,.source,.references,.framework{padding:15px}dl{display:block}dt{margin-top:12px}}
+</style></head><body><aside id="quantSidebar" class="sidebar" data-page="assets"></aside><script src="../sidebar-v2.js"></script><div class="main"><main>
+<header><small>QUANTITATIVE RESEARCH / ADVANCED NUMERICAL LABORATORIES</small><h1>固定收益期限结构拟合、现金流风险与对冲</h1><p>固定收益研究依赖正确的零息曲线、支付时点、现金流计价单位和风险冲击。本专题将曲线拟合、节点风险、利差重估、对冲权重和指数化现金流分别建模，并以明确构造案例检查其相互关系。</p><p><a href="../research/numerical-laboratories.html">高级数值研究总入口</a>　｜　<a href="../cpp/">C++17研究工具库</a>　｜　<a href="../research/numerical-examples/catalog.json" download>下载数据与参数索引</a></p></header>
+<nav class="toc"><a href="#lesson1">1．Nelson–Siegel剖面最小二乘期限结构</a><a href="#lesson2">2．多节点曲线关键期限DV01与二阶敏感度</a><a href="#lesson3">3．信用利差冲击的久期凸性近似与精确重估</a><a href="#lesson4">4．多情景风险暴露的正则化现金流对冲</a><a href="#lesson5">5．通胀指数化现金流与滞后参考指数估值</a><a href="#source">完整C++17实现</a><a href="#references">参考文献</a></nav>
+<article class="lesson" id="lesson1"><h2>1．Nelson–Siegel剖面最小二乘期限结构</h2><h3>模型定义与经济含义</h3><div class="equation">$$z(t)=\beta_0+\beta_1\frac{1-e^{-t/\tau}}{t/\tau}+\beta_2\left(\frac{1-e^{-t/\tau}}{t/\tau}-e^{-t/\tau}\right)$$</div><p>给定τ后，收益率对三项载荷线性；对数间距网格搜索τ，每个候选以最小二乘计算三个系数，选择残差平方和最低的候选。短端水平接近β0+β1，长期水平趋于β0，曲率项描述中间期限形状。对t z(t)求导得到瞬时远期利率，折现因子为exp(−tz(t))。</p><h3>数学推导与求解结构</h3><div class="equation">$$f(t)=\frac{d[t z(t)]}{dt}=\beta_0+\beta_1e^{-t/\tau}+\beta_2(t/\tau)e^{-t/\tau}$$</div><div class="equation">$$\widehat\beta(\tau)=(X_\tau^\top X_\tau)^{-1}X_\tau^\top z,\qquad \widehat\tau=\arg\min_{\tau\in\mathcal G}\|z-X_\tau\widehat\beta(\tau)\|^2$$</div><p>剖面法把四维非线性问题缩为一维离散搜索加三个线性系数。τ过小或过大时载荷列可能近共线，代码跳过无法正定求解的候选。正式研究中可用QR而非正规方程改善条件数，并检验日度参数的时间稳定性。</p><h3>完整构造案例与独立数值对照</h3><p>八个期限由β0=0.04、β1=−0.025、β2=0.015、τ=1构造，搜索[0.5,2]的301个对数网格节点，真值位于中点。</p><dl><dt>输入字段</dt><dd>Maturity、ZeroYield</dd><dt>参数顺序</dt><dd>衰减尺度搜索下界与上界</dd><dt>输出字段</dt><dd>FittedYield、Residual、Discount、InstantaneousForward分别表示拟合收益率、残差、贴现因子、瞬时远期率；Beta0至Beta2、Tau和RSS为整条曲线参数。</dd><dt>样本文件</dt><dd><a href="../research/numerical-examples/nelson-siegel.csv" download>nelson-siegel.csv</a></dd></dl><pre><code>Maturity,ZeroYield
+0.25,0.01947001958
+0.5,0.0230326533
+1,0.02816060279
+2,0.03364664717
+3,0.03608581754
+5,0.03791240669
+10,0.0389993644
+20,0.03949999997</code></pre><pre><code>./build/kline_quant num-nelson-siegel quant/research/numerical-examples/nelson-siegel.csv 0.5 2</code></pre><div class="wide"><table><thead><tr><th>输出行（从0开始）</th><th>字段</th><th>解析或参考值</th></tr></thead><tbody><tr><td>0</td><td>Beta0</td><td>0.04</td></tr><tr><td>0</td><td>Beta1</td><td>-0.025</td></tr><tr><td>0</td><td>Beta2</td><td>0.015</td></tr><tr><td>0</td><td>Tau</td><td>1</td></tr></tbody></table></div><h3>估计假设、实证解释与适用边界</h3><p>输入必须为连续复利零息收益率，不能直接把官方平价收益率当零息利率。离散剖面搜索不是连续全局最优证明；曲线形态也不自动满足所有无套利和外推要求。</p></article>
+<article class="lesson" id="lesson2"><h2>2．多节点曲线关键期限DV01与二阶敏感度</h2><h3>模型定义与经济含义</h3><div class="equation">$$P(z)=\sum_i C_i e^{-t_i z(t_i)},\qquad z(t)=\sum_k\phi_k(t)z_k$$</div><p>线性插值使每笔现金流的零息率由相邻节点权重决定。分别上移与下移单个节点并重新估值，中央差分抵消一阶截断项，二阶差分估计局部凸性。端点之外采用平坦零息率外推。</p><h3>数学推导与求解结构</h3><div class="equation">$$DV01_k\approx10^{-4}\frac{P(z-he_k)-P(z+he_k)}{2h},\quad \partial_{kk}P\approx\frac{P(z+he_k)+P(z-he_k)-2P(z)}{h^2}$$</div><div class="equation">$$\frac{\partial P}{\partial z_k}=-\sum_i t_i\phi_k(t_i)C_i e^{-t_i z(t_i)},\quad \frac{\partial^2P}{\partial z_k\partial z_l}=\sum_i t_i^2\phi_k(t_i)\phi_l(t_i)C_i e^{-t_i z(t_i)}$$</div><p>插值基函数的支撑区间决定现金流对各节点的敏感度。由解析导数可检查中央差分；所有节点同时平移时基函数权重和为1，故一阶节点敏感度之和恢复平行曲线敏感度。</p><h3>完整构造案例与独立数值对照</h3><p>1、1.5、2年现金流为5、5、105，曲线节点1年2%、2年4%。中间现金流同时对两个节点敏感；每个节点独立输出基准与双向扰动现值。</p><dl><dt>输入字段</dt><dd>Time、Cash</dd><dt>参数顺序</dt><dd>差分扰动、按到期时间递增的节点时间与零息率对</dd><dt>输出字段</dt><dd>BasePV为未扰动现值，UpPV和DownPV为节点双向扰动现值，CentralDV01为每基点风险，SecondDerivative为对连续零息率的二阶导数近似。</dd><dt>样本文件</dt><dd><a href="../research/numerical-examples/keyrate-curve.csv" download>keyrate-curve.csv</a></dd></dl><pre><code>Time,Cash
+1,5
+1.5,5
+2,105</code></pre><pre><code>./build/kline_quant num-keyrate-curve quant/research/numerical-examples/keyrate-curve.csv 0.0001 1 0.02 2 0.04</code></pre><div class="wide"><table><thead><tr><th>输出行（从0开始）</th><th>字段</th><th>解析或参考值</th></tr></thead><tbody><tr><td>0</td><td>BasePV</td><td>106.6081971</td></tr><tr><td>0</td><td>CentralDV01</td><td>0.0008485983935</td></tr><tr><td>1</td><td>CentralDV01</td><td>0.01974394246</td></tr></tbody></table></div><h3>估计假设、实证解释与适用边界</h3><p>节点DV01依赖插值及扰动定义；二阶交叉项未报告，不能只加总单节点凸性作为任意曲线冲击的二阶风险。</p></article>
+<article class="lesson" id="lesson3"><h2>3．信用利差冲击的久期凸性近似与精确重估</h2><h3>模型定义与经济含义</h3><div class="equation">$$P(s)=\sum_iC_i\exp[-t_i(z_i+s)]$$</div><p>固定基础零息曲线和现金流，仅平移信用利差。对指数贴现求一、二阶导数得到现金流时间的一阶和二阶现值矩。久期与凸性分别控制小幅利差变化的一阶损益和曲率项。比较Taylor近似与精确逐笔重估可以测量非线性误差。</p><h3>数学推导与求解结构</h3><div class="equation">$$D_s=-P'(s)/P(s),\quad C_s=P''(s)/P(s),\quad P(s+h)\approx P(s)(1-D_sh+\tfrac12C_sh^2)$$</div><div class="equation">$$P'(s)=-\sum_i t_i C_i e^{-t_i(z_i+s)},\qquad P''(s)=\sum_i t_i^2 C_i e^{-t_i(z_i+s)}$$</div><p>正现金流使一阶导数非正、二阶非负。DV01以−P′乘10⁻⁴计算，单位是现金流币种的金额。二阶Taylor剩余项为三阶及以上贡献，利差冲击很大时应直接重估。</p><h3>完整构造案例与独立数值对照</h3><p>两笔现金流5和105、基础利率2%和3%、初始利差1%、冲击2个百分点，精确估值使用新的合计贴现率。</p><dl><dt>输入字段</dt><dd>Time、Cash、ZeroRate</dd><dt>参数顺序</dt><dd>初始连续利差、利差冲击</dd><dt>输出字段</dt><dd>PV、SpreadDuration、SpreadConvexity、DV01为基准风险量；ShockedPV为精确重估，QuadraticPV为二阶近似，ApproximationError为近似减精确。</dd><dt>样本文件</dt><dd><a href="../research/numerical-examples/bond-cashflow-risk.csv" download>bond-cashflow-risk.csv</a></dd></dl><pre><code>Time,Cash,ZeroRate
+1,5,0.02
+2,105,0.03</code></pre><pre><code>./build/kline_quant num-bond-cashflow-risk quant/research/numerical-examples/bond-cashflow-risk.csv 0.01 0.02</code></pre><div class="wide"><table><thead><tr><th>输出行（从0开始）</th><th>字段</th><th>解析或参考值</th></tr></thead><tbody><tr><td>0</td><td>PV</td><td>101.779444</td></tr><tr><td>0</td><td>ShockedPV</td><td>97.88279298</td></tr></tbody></table></div><h3>估计假设、实证解释与适用边界</h3><p>假定现金流不因信用迁移或违约改变，故为确定性现金流的利差敏感度，而非完整信用估值模型。</p></article>
+<article class="lesson" id="lesson4"><h2>4．多情景风险暴露的正则化现金流对冲</h2><h3>模型定义与经济含义</h3><div class="equation">$$\min_w\|Hw-\ell\|_2^2+\lambda\|w\|_2^2$$</div><p>将不同利率节点或情景的对冲工具暴露排列为矩阵H，负债暴露为向量ℓ。若工具数量与风险因子数量不一致，完全匹配可能不可行；正则项在匹配误差与头寸规模间取舍，λ>0使正规方程严格正定。</p><h3>数学推导与求解结构</h3><div class="equation">$$(H^\top H+\lambda I)w=H^\top\ell$$</div><div class="equation">$$H^\top(\ell-Hw)=\lambda w$$</div><p>一阶条件表明最优残差不是无条件与每个工具正交，而是其内积等于惩罚系数乘头寸。λ=0且设计满秩时恢复普通最小二乘。λ增大使头寸收缩，在较强正则下保留更多未对冲风险。</p><h3>完整构造案例与独立数值对照</h3><p>三个情景中两工具暴露为(1,0)、(0,1)、(1,1)，负债暴露(1,2,3)，λ=1，正规方程解为(7/8,11/8)。</p><dl><dt>输入字段</dt><dd>HedgeA、HedgeB、Liability</dd><dt>参数顺序</dt><dd>二次头寸惩罚λ</dd><dt>输出字段</dt><dd>LiabilityExposure、HedgeExposure和ResidualExposure逐情景输出，Hedge1起的列为同一组最优头寸。</dd><dt>样本文件</dt><dd><a href="../research/numerical-examples/cashflow-hedge.csv" download>cashflow-hedge.csv</a></dd></dl><pre><code>HedgeA,HedgeB,Liability
+1,0,1
+0,1,2
+1,1,3</code></pre><pre><code>./build/kline_quant num-cashflow-hedge quant/research/numerical-examples/cashflow-hedge.csv 1</code></pre><div class="wide"><table><thead><tr><th>输出行（从0开始）</th><th>字段</th><th>解析或参考值</th></tr></thead><tbody><tr><td>0</td><td>Hedge1</td><td>0.875</td></tr><tr><td>0</td><td>Hedge2</td><td>1.375</td></tr><tr><td>2</td><td>ResidualExposure</td><td>0.75</td></tr></tbody></table></div><h3>估计假设、实证解释与适用边界</h3><p>输入情景暴露必须同单位且具有经济可比性。允许带符号头寸，无交易成本、预算或流动性约束；情景权重可在预处理时缩放各行。</p></article>
+<article class="lesson" id="lesson5"><h2>5．通胀指数化现金流与滞后参考指数估值</h2><h3>模型定义与经济含义</h3><div class="equation">$$C_t^{\rm nom}=C_t^{\rm real}\frac{I_{t-\ell}}{I_{\rm base}},\quad PV=\sum_t C_t^{\rm nom}e^{-z_t t}$$</div><p>先根据合同规定的参考期和基准指数调整实际现金流，再以名义贴现因子计算现值。输入的指数必须已经按合同参考日对齐，不能无条件用支付日最新CPI代替。指数敏感度直接来自线性比例关系。</p><h3>数学推导与求解结构</h3><div class="equation">$$\frac{\partial PV_t}{\partial I_{t-\ell}}=\frac{C_t^{\rm real}e^{-z_tt}}{I_{\rm base}}$$</div><div class="equation">$$\Delta PV_t=C_t^{\rm real}(I'_{t-\ell}-I_{t-\ell})e^{-z_tt}/I_{\rm base}$$</div><p>在固定名义贴现曲线条件下，指数情景变化对现金流现值线性。实际券的通胀参考日可能与CPI发布时间不同，估值时必须分别处理经济参考期、合同规定插值日与数据可得性。</p><h3>完整构造案例与独立数值对照</h3><p>基准指数100，滞后0.25年，两笔实际现金流3和103对应参考指数105和110，名义现金分别3.15、113.3，再以2%、3%连续贴现。</p><dl><dt>输入字段</dt><dd>PaymentTime、RealCash、ReferenceIndex、NominalZeroRate</dd><dt>参数顺序</dt><dd>合同规定的指数参考滞后、基准指数</dd><dt>输出字段</dt><dd>PaymentTime、ReferenceTime为支付时间与参考时间，IndexRatio、NominalCash、DiscountedCash、CumulativePV为指数比、名义支付、贴现支付及累计现值。</dd><dt>样本文件</dt><dd><a href="../research/numerical-examples/inflation-indexed.csv" download>inflation-indexed.csv</a></dd></dl><pre><code>PaymentTime,RealCash,ReferenceIndex,NominalZeroRate
+1,3,105,0.02
+2,103,110,0.03</code></pre><pre><code>./build/kline_quant num-inflation-indexed quant/research/numerical-examples/inflation-indexed.csv 0.25 100</code></pre><div class="wide"><table><thead><tr><th>输出行（从0开始）</th><th>字段</th><th>解析或参考值</th></tr></thead><tbody><tr><td>0</td><td>NominalCash</td><td>3.15</td></tr><tr><td>1</td><td>NominalCash</td><td>113.3</td></tr><tr><td>1</td><td>CumulativePV</td><td>109.7895475</td></tr></tbody></table></div><h3>估计假设、实证解释与适用边界</h3><p>确定性指数情景，不模拟随机通胀或风险溢价；真实TIPS等合同可能包含日内插值、本金通缩保护和应计利息，须按合同处理。</p></article>
+<section class="source" id="source"><h2>完整C++17实现与复算环境</h2><p>以下头文件与工具库的实际实现一致。算法使用数值矩阵与参数向量，输出具名CSV。仓库提供共享线性系统、三对角求解、数值输入检查和回归测试。</p><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/numerical_lab_rates.hpp">完整算法头文件</a>　｜　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/numerical_lab_common.hpp">公共数学接口</a>　｜　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_numerical_lab.py">独立数值验证</a>　｜　<a href="../research/run_numerical_labs.py" download>批量复算脚本</a></p>
+<pre><code>#pragma once
+#include "numerical_lab_common.hpp"
+
+namespace kline { namespace numerical_lab {
+inline double ns_loading(double z){return std::abs(z)&lt;1e-6?1-z/2+z*z/6:-std::expm1(-z)/z;}
+inline Report nelson_siegel(const Mat&amp; x,const Vec&amp; p){
+    validate(x,4,2,2);parameters(p,2);double lo=positive(p[0]),hi=positive(p[1]);
+    require(lo&lt;hi,"Invalid decay search interval");
+    for(const auto&amp; r:x)positive(r[0]);
+    // Profile least squares over a logarithmically spaced decay grid.
+    double best=std::numeric_limits&lt;double&gt;::infinity(),decay=lo;Vec beta;
+    for(int k=0;k&lt;=300;++k){
+        double tau=std::exp(std::log(lo)+(std::log(hi)-std::log(lo))*k/300);
+        Mat A(3,Vec(3,0));Vec b(3,0);
+        for(const auto&amp; r:x){double z=r[0]/tau,f=ns_loading(z);Vec v={1,f,f-std::exp(-z)};
+            for(std::size_t i=0;i&lt;3;++i){b[i]+=v[i]*r[1];for(std::size_t j=0;j&lt;3;++j)A[i][j]+=v[i]*v[j];}}
+        Vec v;try{v=solve_spd(A,b);}catch(const std::invalid_argument&amp;){continue;}
+        double rss=0;
+        for(const auto&amp; r:x){double z=r[0]/tau,f=ns_loading(z),e=v[0]+v[1]*f+v[2]*(f-std::exp(-z))-r[1];rss+=e*e;}
+        if(rss&lt;best){best=rss;decay=tau;beta=v;}
+    }
+    require(beta.size()==3,"No nonsingular Nelson-Siegel profile");
+    Report out{{"Maturity","ObservedYield","FittedYield","Residual","Discount","InstantaneousForward","Beta0","Beta1","Beta2","Tau","RSS"},{}};
+    for(const auto&amp; r:x){
+        double t=r[0],z=t/decay,f=ns_loading(z),y=beta[0]+beta[1]*f+beta[2]*(f-std::exp(-z));
+        double forward=beta[0]+beta[1]*std::exp(-z)+beta[2]*z*std::exp(-z);
+        out.rows.push_back({t,r[1],y,r[1]-y,std::exp(-t*y),forward,beta[0],beta[1],beta[2],decay,best});
+    }
+    return out;
+}
+inline Report keyrate_curve(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,2,2);require(p.size()&gt;=5&amp;&amp;p.size()%2==1,"Bump and at least two maturity-rate node pairs required");check_finite(p);
+    double bump=positive(p[0]);require(bump&lt;=.01,"Bump exceeds 100 basis points");
+    Vec time,rate;
+    for(std::size_t i=1;i&lt;p.size();i+=2){positive(p[i]);if(!time.empty())require(p[i]&gt;time.back(),"Curve times must increase");time.push_back(p[i]);rate.push_back(p[i+1]);}
+    auto pv=[&amp;](const Vec&amp; z){
+        double v=0;
+        for(const auto&amp; r:x){
+            require(r[0]&gt;=0,"Negative cash-flow time");double t=r[0],y=z.front();
+            if(t&gt;=time.back())y=z.back();
+            else if(t&gt;time.front()){
+                auto j=std::size_t(std::upper_bound(time.begin(),time.end(),t)-time.begin());
+                double h=(t-time[j-1])/(time[j]-time[j-1]);y=(1-h)*z[j-1]+h*z[j];
+            }
+            v+=r[1]*std::exp(-t*y);
+        }
+        return v;
+    };
+    double base=pv(rate);Report out{{"Node","Maturity","BasePV","UpPV","DownPV","CentralDV01","SecondDerivative"},{}};
+    for(std::size_t j=0;j&lt;rate.size();++j){
+        Vec up=rate,down=rate;up[j]+=bump;down[j]-=bump;
+        double a=pv(up),b=pv(down);
+        out.rows.push_back({double(j+1),time[j],base,a,b,(b-a)/(2*bump)*.0001,(a+b-2*base)/(bump*bump)});
+    }
+    return out;
+}
+inline Report bond_cashflow_risk(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,3,3);parameters(p,2);double spread=p[0],shock=p[1];
+    double price=0,first=0,second=0,scenario=0;
+    for(const auto&amp; r:x){
+        require(r[0]&gt;=0&amp;&amp;r[1]&gt;=0,"Invalid bond cash flow");double v=r[1]*std::exp(-r[0]*(r[2]+spread));
+        price+=v;first+=r[0]*v;second+=r[0]*r[0]*v;scenario+=v*std::exp(-shock*r[0]);
+    }
+    positive(price);
+    double approx=price-first*shock+.5*second*shock*shock;
+    return scalar_rows({"PV","SpreadDuration","SpreadConvexity","DV01","ShockedPV","QuadraticPV","ApproximationError"},{price,first/price,second/price,first*.0001,scenario,approx,approx-scenario});
+}
+inline Report cashflow_hedge(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,2,3,17);parameters(p,1);double lambda=positive(p[0]);
+    // Each row is an exposure scenario; last column is liability exposure.
+    --d;Mat A(d,Vec(d,0));Vec b(d,0);
+    for(const auto&amp; r:x){for(std::size_t i=0;i&lt;d;++i){
+        b[i]+=r[i]*r[d];for(std::size_t j=0;j&lt;d;++j)A[i][j]+=r[i]*r[j];
+    }}
+    for(std::size_t j=0;j&lt;d;++j)A[j][j]+=lambda;
+    Vec w=solve_spd(A,b);
+    Report out{{"Scenario","LiabilityExposure","HedgeExposure","ResidualExposure"},{}};
+    for(std::size_t j=0;j&lt;d;++j)out.header.push_back("Hedge"+std::to_string(j+1));
+    for(std::size_t i=0;i&lt;x.size();++i){
+        double y=0;for(std::size_t j=0;j&lt;d;++j)y+=w[j]*x[i][j];
+        Vec row={double(i),x[i][d],y,x[i][d]-y};row.insert(row.end(),w.begin(),w.end());out.rows.push_back(row);
+    }
+    return out;
+}
+inline Report inflation_indexed(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,4,4);parameters(p,2);double lag=p[0],base=positive(p[1]);
+    require(lag&gt;=0,"Negative indexation lag");
+    // Inputs are contract-aligned reference indices, not contemporaneous CPI.
+    Report out{{"PaymentTime","ReferenceTime","IndexRatio","NominalCash","DiscountedCash","CumulativePV"},{}};
+    double total=0;
+    for(std::size_t i=0;i&lt;x.size();++i){
+        const auto&amp; r=x[i];require(r[0]&gt;=lag&amp;&amp;r[1]&gt;=0,"Invalid payment time or real cash flow");
+        if(i)require(r[0]&gt;x[i-1][0],"Payments must be ordered");
+        double ratio=positive(r[2])/base,cash=r[1]*ratio,v=cash*std::exp(-r[3]*r[0]);total+=v;
+        out.rows.push_back({r[0],r[0]-lag,ratio,cash,v,total});
+    }
+    return out;
+}
+} }
+</code></pre><h3>本地运行</h3><pre><code>cmake -S quant/cpp -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+python quant/research/run_numerical_labs.py ./build/kline_quant numerical-results</code></pre><p>Windows多配置生成器通常使用<code>.\build\Release\kline_quant.exe</code>；单配置生成器使用<code>.\build\kline_quant.exe</code>。输出目录须为空。构造样例用于复核计算与模型结构，不代表真实市场实证结果。</p></section>
+<section class="references" id="references"><h2>参考文献与技术资料</h2><p><a href="https://www.nber.org/papers/w1594">Nelson &amp; Siegel, Parsimonious Modeling of Yield Curves</a></p><p><a href="https://home.treasury.gov/policy-issues/financing-the-government/interest-rate-statistics/treasury-yield-curve-methodology">U.S. Treasury Yield Curve Methodology</a></p><p><a href="https://www.bis.org/publ/bppdf/bispap25.htm">BIS, Zero-coupon yield curves</a></p></section>
+</main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

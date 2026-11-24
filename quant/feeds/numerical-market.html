@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>高频实证：订单流、成交方向、微观噪声与流动性｜Kline Quant</title><meta name="description" content="高级量化数值研究：模型推导、计算案例、独立数值验证与C++17实现">
+<link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<style>
+body{margin:0;background:#fff;color:#192b36;font:16px/1.95 "Times New Roman","SimSun",serif}
+.main{margin-left:252px;padding:24px 30px 64px}main{max-width:1180px;margin:auto}header,.lesson,.source,.references,.framework{border:1px solid #bfcbd4;background:white;margin:18px 0;padding:25px 28px}
+h1{font-size:31px;line-height:1.4;margin:12px 0 22px}h2{font-size:24px;line-height:1.5;margin:8px 0 20px}h3{font-size:18px;margin:24px 0 8px}p{line-height:1.95;margin:12px 0}.toc{display:flex;flex-wrap:wrap;gap:9px 22px;border:1px solid #cbd5dc;padding:17px 23px}
+.equation{overflow:auto;border-block:1px solid #d6dfe5;margin:18px 0;padding:13px 5px}.katex-display{overflow-x:auto;overflow-y:hidden}a{color:#17537b}code,pre{font-family:"Times New Roman",monospace}pre{border:1px solid #cbd5dc;padding:15px;overflow:auto;white-space:pre;font-size:14px;line-height:1.7;max-height:900px}
+dl{display:grid;grid-template-columns:115px minmax(0,1fr);gap:8px 15px}dt{font-weight:bold}dd{margin:0;overflow-wrap:anywhere}table{border-collapse:collapse;width:100%}th,td{border:1px solid #cad3dc;background:white;padding:10px 13px;text-align:left}th{font-weight:bold}.wide{overflow-x:auto}
+@media(max-width:790px){.main{margin:0;padding:10px}header,.lesson,.source,.references,.framework{padding:15px}dl{display:block}dt{margin-top:12px}}
+</style></head><body><aside id="quantSidebar" class="sidebar" data-page="feeds"></aside><script src="../sidebar-v2.js"></script><div class="main"><main>
+<header><small>QUANTITATIVE RESEARCH / ADVANCED NUMERICAL LABORATORIES</small><h1>高频实证：订单流、成交方向、微观噪声与流动性</h1><p>高频研究应从事件时间、盘口状态、成交方向和报价可得性出发。本专题把订单流不平衡、交易方向推断、噪声修正波动率、成交后价格变化及可见深度成本连接到同一个可审计的事件数据框架。</p><p><a href="../research/numerical-laboratories.html">高级数值研究总入口</a>　｜　<a href="../cpp/">C++17研究工具库</a>　｜　<a href="../research/numerical-examples/catalog.json" download>下载数据与参数索引</a></p></header>
+<nav class="toc"><a href="#lesson1">1．最优买卖价事件的订单流不平衡OFI</a><a href="#lesson2">2．报价规则与Tick Rule结合的成交方向推断</a><a href="#lesson3">3．三角权重预平均实现方差及微观噪声修正</a><a href="#lesson4">4．不规则事件时间的成交后多期限Markout</a><a href="#lesson5">5．多档卖盘深度的订单规模–流动性成本曲线</a><a href="#source">完整C++17实现</a><a href="#references">参考文献</a></nav>
+<article class="lesson" id="lesson1"><h2>1．最优买卖价事件的订单流不平衡OFI</h2><h3>模型定义与经济含义</h3><div class="equation">$$e_n=\mathbf1_{\{P_n^B\ge P_{n-1}^B\}}q_n^B-\mathbf1_{\{P_n^B\le P_{n-1}^B\}}q_{n-1}^B-\mathbf1_{\{P_n^A\le P_{n-1}^A\}}q_n^A+\mathbf1_{\{P_n^A\ge P_{n-1}^A\}}q_{n-1}^A$$</div><p>最优买价提高视为新买方深度加入，降低视为旧买方深度移除；价格不变时仅计算同价深度差。卖方变化按相反符号计入。因此OFI同时反映成交、挂单和撤单引起的最优档变化，而不是仅统计主动成交量。</p><h3>数学推导与求解结构</h3><div class="equation">$$OFI_{[a,b]}=\sum_{n:a&lt;t_n\le b}e_n$$</div><div class="equation">$$\Delta M_t=M_t-M_{t-1},\quad \Delta M_t\approx\beta_t OFI_t+\epsilon_t$$</div><p>Cont等人的研究将短期价格变化与订单流不平衡联系起来，其经验关系还取决于市场深度。代码仅计算事件特征而非拟合该价格冲击关系；估计时需要同步聚合价格变化、事件流量与深度。</p><h3>完整构造案例与独立数值对照</h3><p>首个变化买量10→15、卖量12→10，OFI为5+2=7；第二事件买价上移、新买量8且卖量增加1，OFI为7；第三事件卖价上移、旧卖量11移除，OFI为11。</p><dl><dt>输入字段</dt><dd>Time、Bid、Ask、BidSize、AskSize</dd><dt>参数顺序</dt><dd>无额外参数；时间严格递增、买卖价未交叉</dd><dt>输出字段</dt><dd>Time、Midpoint、Spread为当前报价时点和价格；BidContribution、AskContribution按方向统一，OFI为两者之和，CumulativeOFI为累计值。</dd><dt>样本文件</dt><dd><a href="../research/numerical-examples/best-quote-ofi.csv" download>best-quote-ofi.csv</a></dd></dl><pre><code>Time,Bid,Ask,BidSize,AskSize
+0,99,101,10,12
+1,99,101,15,10
+2,100,101,8,11
+3,100,102,8,9
+4,99,102,7,9</code></pre><pre><code>./build/kline_quant num-best-quote-ofi quant/research/numerical-examples/best-quote-ofi.csv</code></pre><div class="wide"><table><thead><tr><th>输出行（从0开始）</th><th>字段</th><th>解析或参考值</th></tr></thead><tbody><tr><td>0</td><td>OFI</td><td>7</td></tr><tr><td>1</td><td>OFI</td><td>7</td></tr><tr><td>2</td><td>OFI</td><td>11</td></tr><tr><td>3</td><td>CumulativeOFI</td><td>17</td></tr></tbody></table></div><h3>估计假设、实证解释与适用边界</h3><p>基于最优档快照更新；若多个事件被聚合在同一快照间，无法恢复真实事件序列。不同市场撮合规则和时间戳需先统一。</p></article>
+<article class="lesson" id="lesson2"><h2>2．报价规则与Tick Rule结合的成交方向推断</h2><h3>模型定义与经济含义</h3><div class="equation">$$\widehat s_t=\operatorname{sgn}(P_t-M_t)\quad(P_t\ne M_t),\qquad M_t=(B_t+A_t)/2$$</div><p>成交价高于或低于当时中间价时使用报价规则；恰等于中间价时使用最近非零成交价格变化方向，若尚无方向信息则保留0。方法编号区分报价推断、Tick推断和未知。</p><h3>数学推导与求解结构</h3><div class="equation">$$\widehat s_t=s_t^{\rm tick}\quad(P_t=M_t),\qquad Q_t^{\rm signed}=\widehat s_tQ_t$$</div><div class="equation">$$s_t^{\rm tick}=\begin{cases}1&amp;P_t&gt;P_{t-1}\\-1&amp;P_t&lt;P_{t-1}\\s_{t-1}^{\rm tick}&amp;P_t=P_{t-1}\end{cases}$$</div><p>Tick状态只由连续成交价格更新，不使用未来报价；中间价成交若无非零历史变化则保持未知，避免任意归为买方或卖方。推断标签用于后续统计时应报告未识别比例。</p><h3>完整构造案例与独立数值对照</h3><p>初始100恰等于中间价且无历史方向，输出0；第二笔101推断买入；第三笔回到100触发负Tick，第四笔同价沿用负Tick，最后一笔高于新中间价99.75推断买入。</p><dl><dt>输入字段</dt><dd>Time、Trade、Bid、Ask、Quantity</dd><dt>参数顺序</dt><dd>无额外参数；报价须事先按成交时点对齐</dd><dt>输出字段</dt><dd>TradePrice、Midpoint为成交价与报价中间价；InferredSign、SignedQuantity为推断方向和带符号成交量；Method为0未知、1报价、2 Tick。</dd><dt>样本文件</dt><dd><a href="../research/numerical-examples/trade-sign-quote-tick.csv" download>trade-sign-quote-tick.csv</a></dd></dl><pre><code>Time,Trade,Bid,Ask,Quantity
+0,100,99,101,5
+1,101,99,101,3
+2,100,99,101,2
+3,100,99,101,4
+4,100,99.5,100,2</code></pre><pre><code>./build/kline_quant num-trade-sign-quote-tick quant/research/numerical-examples/trade-sign-quote-tick.csv</code></pre><div class="wide"><table><thead><tr><th>输出行（从0开始）</th><th>字段</th><th>解析或参考值</th></tr></thead><tbody><tr><td>0</td><td>InferredSign</td><td>0</td></tr><tr><td>1</td><td>InferredSign</td><td>1</td></tr><tr><td>2</td><td>InferredSign</td><td>-1</td></tr><tr><td>3</td><td>SignedQuantity</td><td>-4</td></tr><tr><td>4</td><td>InferredSign</td><td>1</td></tr></tbody></table></div><h3>估计假设、实证解释与适用边界</h3><p>这是报价与Tick混合的教学实现，不含历史Lee–Ready报价时间滞后校正；方向为推断而非真实主动方，交叉报价与拍卖成交需另行处理。</p></article>
+<article class="lesson" id="lesson3"><h2>3．三角权重预平均实现方差及微观噪声修正</h2><h3>模型定义与经济含义</h3><div class="equation">$$\overline r_i=\sum_{j=1}^{k-1}g(j/k)r_{i+j},\quad g(u)=\min(u,1-u)$$</div><p>高频观测价格包含市场微观噪声，直接平方收益会累积噪声差分。先对相邻收益用平滑权重局部聚合，再对重叠预平均平方和进行尺度归一化，并扣除依赖权重差分的噪声修正项。有限样本可能给出负估计，保留该诊断而不自动截断。</p><h3>数学推导与求解结构</h3><div class="equation">$$\widehat{IV}=\frac{\sum_i\overline r_i^2}{k\psi_2}-\frac{\psi_1}{2k^2\psi_2}\sum_i r_i^2,\quad \psi_2=k^{-1}\sum_jg_j^2,\quad\psi_1=k\sum_j(g_j-g_{j-1})^2$$</div><div class="equation">$$Y_i=X_i+\epsilon_i,\quad \Delta Y_i=\Delta X_i+\epsilon_i-\epsilon_{i-1}$$</div><p>相邻噪声差分共享噪声项，因此实现方差会包含随采样频率放大的噪声成分。三角权重在窗口两端为零，局部聚合使噪声项以权重差分出现。当前离散求和使用完整k步窗口，未做边界样本扩展。</p><h3>完整构造案例与独立数值对照</h3><p>13个价格由确定性趋势与交替噪声构造，12条对数收益，窗口3。独立参考按权重逐项计算预平均平方和与修正项，核对各输出字段。</p><dl><dt>输入字段</dt><dd>Price</dd><dt>参数顺序</dt><dd>预平均窗口k</dd><dt>输出字段</dt><dd>Returns、Window为收益数和窗口；RawRV为原始实现方差，PreaveragedSum为归一化预平均平方和，NoiseCorrection为扣除项，IntegratedVarianceEstimate为二者之差。</dd><dt>样本文件</dt><dd><a href="../research/numerical-examples/preaveraging-variation.csv" download>preaveraging-variation.csv</a></dd></dl><pre><code>Price
+100
+100.3004505
+100.2002001
+100.5012521
+100.4008011
+100.7024557
+100.6018036
+100.9040622
+100.8032086
+101.1060722
+101.0050167
+101.3084867
+101.2072289</code></pre><pre><code>./build/kline_quant num-preaveraging-variation quant/research/numerical-examples/preaveraging-variation.csv 3</code></pre><div class="wide"><table><thead><tr><th>输出行（从0开始）</th><th>字段</th><th>解析或参考值</th></tr></thead><tbody><tr><td>0</td><td>Returns</td><td>12</td></tr><tr><td>0</td><td>Window</td><td>3</td></tr></tbody></table></div><h3>估计假设、实证解释与适用边界</h3><p>这是离散三角权重及有限窗口边界约定的教学估计；渐近一致性要求适当采样、噪声结构及窗口随样本增长的条件。不能把单个负估计解释为真实负方差。</p></article>
+<article class="lesson" id="lesson4"><h2>4．不规则事件时间的成交后多期限Markout</h2><h3>模型定义与经济含义</h3><div class="equation">$$j(i,h)=\max\{j:t_j\le t_i+h\},\quad m_i(h)=10^4s_i\frac{M_{j(i,h)}-P_i}{P_i}$$</div><p>目标时间通常落在两个行情事件之间，采用目标时点及之前最后可得中间价作为标记，不使用目标之后的报价。若目标时间超出记录范围，单独记为未匹配。按成交数量加权汇总，并报告匹配数量及未匹配样本数。</p><h3>数学推导与求解结构</h3><div class="equation">$$\overline m(h)=\frac{\sum_{i\in\mathcal A_h}q_im_i(h)}{\sum_{i\in\mathcal A_h}q_i}$$</div><div class="equation">$$\mathcal A_h=\{i:s_i\ne0,\ t_i+h\le t_{\rm last}\}$$</div><p>各期限使用的匹配集合可能不同，例如样本尾部的订单缺失较长期未来中间价。研究不同期限曲线时可额外限制共同匹配样本，以分离观察期限变化与样本构成变化。</p><h3>完整构造案例与独立数值对照</h3><p>两笔成交：0时点买10单位于100，1时点卖20单位于101；1单位时间后的中间价为101与102，因此成交方向Markout分别100和−10000/101基点，按10、20加权。</p><dl><dt>输入字段</dt><dd>Time、Midpoint、TradePrice、Sign、Quantity</dd><dt>参数顺序</dt><dd>一个或多个正时间跨度，与输入时间单位一致</dd><dt>输出字段</dt><dd>Horizon为观察期限，MatchedTrades、UnmatchedTrades、MatchedQuantity为样本覆盖，WeightedMarkoutBps为方向调整后的成交量加权价格变化。</dd><dt>样本文件</dt><dd><a href="../research/numerical-examples/time-markout.csv" download>time-markout.csv</a></dd></dl><pre><code>Time,Midpoint,TradePrice,Sign,Quantity
+0,100,100,1,10
+1,101,101,-1,20
+2,102,102,0,0
+3,103,103,0,0</code></pre><pre><code>./build/kline_quant num-time-markout quant/research/numerical-examples/time-markout.csv 1 2</code></pre><div class="wide"><table><thead><tr><th>输出行（从0开始）</th><th>字段</th><th>解析或参考值</th></tr></thead><tbody><tr><td>0</td><td>MatchedTrades</td><td>2</td></tr><tr><td>0</td><td>WeightedMarkoutBps</td><td>-32.67326733</td></tr><tr><td>1</td><td>WeightedMarkoutBps</td><td>-65.34653465</td></tr></tbody></table></div><h3>估计假设、实证解释与适用边界</h3><p>事后成交质量指标，非交易信号。行情可能长时间不更新，实证中应设最大允许报价年龄；匹配样本变化会影响不同期限均值比较。</p></article>
+<article class="lesson" id="lesson5"><h2>5．多档卖盘深度的订单规模–流动性成本曲线</h2><h3>模型定义与经济含义</h3><div class="equation">$$q_j=\min(a_j,(Q-\sum_{i&lt;j}q_i)_+),\quad VWAP=\frac{\sum_jq_jP_j}{\sum_jq_j}$$</div><p>按价格优先消耗可见卖盘深度，逐档累计成交金额及单位费用。对多个父订单规模重复计算，构造可见流动性的非线性成本曲线，并显式保留无法成交的数量。价格差加费用相对最佳卖价形成实际成交部分的成本。</p><h3>数学推导与求解结构</h3><div class="equation">$$C(Q)=\sum_jq_j(P_j-P_1+f_j),\quad Q_{\rm unfilled}=Q-\sum_jq_j$$</div><div class="equation">$$Q_{\rm fill}=\min(Q,\sum_j a_j),\quad P_{\rm all-in}=\frac{\sum_jq_j(P_j+f_j)}{Q_{\rm fill}}$$</div><p>可成交数量受可见深度限制；在价格严格递增时，不含费用的成交均价随计划数量非减。含费用成本仍取决于档位费率，无法成交的部分不伪造价格或计入已实现成交成本。</p><h3>完整构造案例与独立数值对照</h3><p>卖盘三个档位100、100.1、100.3，深度10、20、30。计划20时成交前两档各10，VWAP100.05、费用0.3；计划80时可见总深度60，未成交20。</p><dl><dt>输入字段</dt><dd>Ask、Available、UnitFee</dd><dt>参数顺序</dt><dd>一个或多个买入计划数量</dd><dt>输出字段</dt><dd>RequestedQuantity、FilledQuantity、UnfilledQuantity为数量守恒三项；VWAP、Fee、CostAboveBestAsk、AllInUnitCost为成交均价、费用、最佳卖价以上成本和含费单位成本。</dd><dt>样本文件</dt><dd><a href="../research/numerical-examples/depth-liquidity-sweep.csv" download>depth-liquidity-sweep.csv</a></dd></dl><pre><code>Ask,Available,UnitFee
+100,10,0.01
+100.1,20,0.02
+100.3,30,0.03</code></pre><pre><code>./build/kline_quant num-depth-liquidity-sweep quant/research/numerical-examples/depth-liquidity-sweep.csv 5 20 40 80</code></pre><div class="wide"><table><thead><tr><th>输出行（从0开始）</th><th>字段</th><th>解析或参考值</th></tr></thead><tbody><tr><td>1</td><td>VWAP</td><td>100.05</td></tr><tr><td>1</td><td>Fee</td><td>0.3</td></tr><tr><td>3</td><td>FilledQuantity</td><td>60</td></tr><tr><td>3</td><td>UnfilledQuantity</td><td>20</td></tr></tbody></table></div><h3>估计假设、实证解释与适用边界</h3><p>静态可见深度回放，不含队列竞争、隐藏订单、撤单、撮合延迟和跨市场价格变化；费用不会改变单场所价格优先的撮合次序。</p></article>
+<section class="source" id="source"><h2>完整C++17实现与复算环境</h2><p>以下头文件与工具库的实际实现一致。算法使用数值矩阵与参数向量，输出具名CSV。仓库提供共享线性系统、三对角求解、数值输入检查和回归测试。</p><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/numerical_lab_market.hpp">完整算法头文件</a>　｜　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/numerical_lab_common.hpp">公共数学接口</a>　｜　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_numerical_lab.py">独立数值验证</a>　｜　<a href="../research/run_numerical_labs.py" download>批量复算脚本</a></p>
+<pre><code>#pragma once
+#include "numerical_lab_common.hpp"
+
+namespace kline { namespace numerical_lab {
+inline Report best_quote_ofi(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,5,5);parameters(p,0);
+    Report out{{"Time","Midpoint","Spread","BidContribution","AskContribution","OFI","CumulativeOFI"},{}};
+    double acc=0;
+    for(std::size_t i=0;i&lt;x.size();++i){
+        const auto&amp; r=x[i];positive(r[1]);require(r[2]&gt;r[1]&amp;&amp;r[3]&gt;=0&amp;&amp;r[4]&gt;=0,"Invalid two-sided quote");
+        if(i==0)continue;
+        const auto&amp; z=x[i-1];require(r[0]&gt;z[0],"Quote timestamps must strictly increase");
+        double bid=(r[1]&gt;=z[1]?r[3]:0)-(r[1]&lt;=z[1]?z[3]:0);
+        double ask=(r[2]&lt;=z[2]?r[4]:0)-(r[2]&gt;=z[2]?z[4]:0);
+        acc+=bid-ask;
+        out.rows.push_back({r[0],.5*(r[1]+r[2]),r[2]-r[1],bid,-ask,bid-ask,acc});
+    }
+    return out;
+}
+inline Report trade_sign_quote_tick(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,5,5);parameters(p,0);
+    Report out{{"Time","TradePrice","Midpoint","InferredSign","SignedQuantity","Method"},{}};
+    double prev=0,tick=0;
+    for(std::size_t i=0;i&lt;x.size();++i){
+        const auto&amp; r=x[i];positive(r[1]);positive(r[2]);positive(r[3]);require(r[3]&gt;r[2]&amp;&amp;r[4]&gt;0,"Invalid trade or quote");
+        if(i){require(r[0]&gt;=x[i-1][0],"Trade timestamps must not decrease");if(r[1]!=prev)tick=r[1]&gt;prev?1:-1;}
+        double mid=.5*(r[2]+r[3]),sgn=tick,method=tick==0?0:2;
+        if(r[1]!=mid){sgn=r[1]&gt;mid?1:-1;method=1;}
+        out.rows.push_back({r[0],r[1],mid,sgn,sgn*r[4],method});prev=r[1];
+    }
+    return out;
+}
+inline Report preaveraging_variation(const Mat&amp; x,const Vec&amp; p){
+    validate(x,8,1,1);parameters(p,1);Vec price=column(x,0),r;
+    auto k=count(p[0],2,(x.size()-1)/2);
+    for(double v:price)positive(v);
+    for(std::size_t i=1;i&lt;price.size();++i)r.push_back(std::log(price[i]/price[i-1]));
+    double psi2=0,psi1=0;Vec g(k+1,0);
+    for(std::size_t j=0;j&lt;=k;++j){double t=double(j)/k;g[j]=std::min(t,1-t);psi2+=g[j]*g[j]/k;if(j)psi1+=std::pow(g[j]-g[j-1],2)*k;}
+    double raw=dot(r,r),pre=0;
+    for(std::size_t i=0;i+k&lt;=r.size();++i){double z=0;for(std::size_t j=1;j&lt;k;++j)z+=g[j]*r[i+j-1];pre+=z*z;}
+    double correction=psi1*raw/(2*k*k*psi2),estimate=pre/(k*psi2)-correction;
+    return scalar_rows({"Returns","Window","RawRV","PreaveragedSum","NoiseCorrection","IntegratedVarianceEstimate"},{double(r.size()),double(k),raw,pre/(k*psi2),correction,estimate});
+}
+inline Report time_markout(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,5,5);require(!p.empty()&amp;&amp;p.size()&lt;=32,"At least one markout horizon required");check_finite(p);
+    Vec time;for(std::size_t i=0;i&lt;x.size();++i){
+        const auto&amp; r=x[i];if(i)require(r[0]&gt;x[i-1][0],"Observation timestamps must increase");
+        positive(r[1]);positive(r[2]);require(r[3]==1||r[3]==-1||r[3]==0,"Invalid trade direction");
+        require(r[4]&gt;=0&amp;&amp;((r[3]==0)==(r[4]==0)),"Inconsistent trade quantity");time.push_back(r[0]);
+    }
+    Report out{{"Horizon","MatchedTrades","UnmatchedTrades","MatchedQuantity","WeightedMarkoutBps"},{}};
+    for(double h:p){
+        positive(h);double qty=0,total=0,matched=0,miss=0;
+        for(std::size_t i=0;i&lt;x.size();++i){
+            if(x[i][3]==0)continue;
+            // Last available observed midpoint at or before the target, with no extrapolation beyond the sample.
+            double target=time[i]+h;
+            if(target&gt;time.back()){++miss;continue;}
+            auto j=std::size_t(std::upper_bound(time.begin(),time.end(),target)-time.begin()-1);
+            ++matched;double q=x[i][4];qty+=q;total+=q*x[i][3]*(x[j][1]-x[i][2])/x[i][2]*10000;
+        }
+        require(qty&gt;0,"No matched trades at requested horizon");out.rows.push_back({h,matched,miss,qty,total/qty});
+    }
+    return out;
+}
+inline Report depth_liquidity_sweep(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,3,3);require(!p.empty()&amp;&amp;p.size()&lt;=100,"At least one order quantity required");check_finite(p);
+    // Ask ladder: strictly increasing prices, available size and explicit per-unit fees.
+    for(std::size_t i=0;i&lt;x.size();++i){positive(x[i][0]);require(x[i][1]&gt;=0&amp;&amp;x[i][2]&gt;=0,"Invalid depth or fee");if(i)require(x[i][0]&gt;x[i-1][0],"Ask prices must increase");}
+    Report out{{"RequestedQuantity","FilledQuantity","UnfilledQuantity","VWAP","Fee","CostAboveBestAsk","AllInUnitCost"},{}};
+    for(double q:p){
+        positive(q);double left=q,notional=0,fee=0;
+        for(const auto&amp; r:x){double v=std::min(left,r[1]);notional+=v*r[0];fee+=v*r[2];left-=v;if(left==0)break;}
+        double fill=positive(q-left);
+        out.rows.push_back({q,fill,left,notional/fill,fee,notional+fee-x[0][0]*fill,(notional+fee)/fill});
+    }
+    return out;
+}
+} }
+</code></pre><h3>本地运行</h3><pre><code>cmake -S quant/cpp -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+python quant/research/run_numerical_labs.py ./build/kline_quant numerical-results</code></pre><p>Windows多配置生成器通常使用<code>.\build\Release\kline_quant.exe</code>；单配置生成器使用<code>.\build\kline_quant.exe</code>。输出目录须为空。构造样例用于复核计算与模型结构，不代表真实市场实证结果。</p></section>
+<section class="references" id="references"><h2>参考文献与技术资料</h2><p><a href="https://arxiv.org/abs/1011.6402">Cont, Kukanov &amp; Stoikov, The Price Impact of Order Book Events</a></p><p><a href="https://ideas.repec.org/a/eee/spapps/v119y2009i7p2249-2276.html">Jacod et al. (2009), Microstructure Noise in the Continuous Case: The Pre-Averaging Approach</a></p><p><a href="https://doi.org/10.1111/j.1540-6261.1991.tb02683.x">Lee &amp; Ready (1991), Inferring Trade Direction from Intraday Data</a></p><p><a href="https://www.nyse.com/market-data/historical/daily-taq">NYSE, Daily TAQ</a></p></section>
+</main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

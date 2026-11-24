@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>期权PDE、自由边界与波动率曲面研究｜Kline Quant</title><meta name="description" content="高级量化数值研究：模型推导、计算案例、独立数值验证与C++17实现">
+<link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<style>
+body{margin:0;background:#fff;color:#192b36;font:16px/1.95 "Times New Roman","SimSun",serif}
+.main{margin-left:252px;padding:24px 30px 64px}main{max-width:1180px;margin:auto}header,.lesson,.source,.references,.framework{border:1px solid #bfcbd4;background:white;margin:18px 0;padding:25px 28px}
+h1{font-size:31px;line-height:1.4;margin:12px 0 22px}h2{font-size:24px;line-height:1.5;margin:8px 0 20px}h3{font-size:18px;margin:24px 0 8px}p{line-height:1.95;margin:12px 0}.toc{display:flex;flex-wrap:wrap;gap:9px 22px;border:1px solid #cbd5dc;padding:17px 23px}
+.equation{overflow:auto;border-block:1px solid #d6dfe5;margin:18px 0;padding:13px 5px}.katex-display{overflow-x:auto;overflow-y:hidden}a{color:#17537b}code,pre{font-family:"Times New Roman",monospace}pre{border:1px solid #cbd5dc;padding:15px;overflow:auto;white-space:pre;font-size:14px;line-height:1.7;max-height:900px}
+dl{display:grid;grid-template-columns:115px minmax(0,1fr);gap:8px 15px}dt{font-weight:bold}dd{margin:0;overflow-wrap:anywhere}table{border-collapse:collapse;width:100%}th,td{border:1px solid #cad3dc;background:white;padding:10px 13px;text-align:left}th{font-weight:bold}.wide{overflow-x:auto}
+@media(max-width:790px){.main{margin:0;padding:10px}header,.lesson,.source,.references,.framework{padding:15px}dl{display:block}dt{margin-top:12px}}
+</style></head><body><aside id="quantSidebar" class="sidebar" data-page="assets"></aside><script src="../sidebar-v2.js"></script><div class="main"><main>
+<header><small>QUANTITATIVE RESEARCH / ADVANCED NUMERICAL LABORATORIES</small><h1>期权PDE、自由边界与波动率曲面研究</h1><p>期权数值研究将风险中性定价、终端支付、边界条件、迭代收敛和波动率曲面无套利诊断放入统一计算框架。以下五节分别从价格PDE、连续障碍、提前行权、总方差拟合和期限结构一致性展开。</p><p><a href="../research/numerical-laboratories.html">高级数值研究总入口</a>　｜　<a href="../cpp/">C++17研究工具库</a>　｜　<a href="../research/numerical-examples/catalog.json" download>下载数据与参数索引</a></p></header>
+<nav class="toc"><a href="#lesson1">1．Crank–Nicolson欧式期权网格收敛</a><a href="#lesson2">2．连续向上敲出看涨期权吸收边界</a><a href="#lesson3">3．美式看跌期权的线性互补问题与PSOR</a><a href="#lesson4">4．固定位置与曲率的Raw SVI截面拟合</a><a href="#lesson5">5．相同远期对数价内外程度的日历套利诊断</a><a href="#source">完整C++17实现</a><a href="#references">参考文献</a></nav>
+<article class="lesson" id="lesson1"><h2>1．Crank–Nicolson欧式期权网格收敛</h2><h3>模型定义与经济含义</h3><div class="equation">$$\partial_\tau V=\mathcal LV,\quad \mathcal L=\tfrac12\sigma^2 S^2\partial_{SS}+(r-q)S\partial_S-r$$</div><p>令剩余到期时间τ=T−t，把终值问题转为初值推进。空间中心差分生成三对角矩阵；θ=1/2时对时间两层的空间算子取平均。初始支付函数在执行价处不可微，先用两个隐式半步进行Rannacher平滑，再以Crank–Nicolson推进。每一步将当期已知边界移入右端，通过Thomas算法在线性时间求解。</p><h3>数学推导与求解结构</h3><div class="equation">$$(I-\theta\Delta\tau L_h)V^{n+1}=(I+(1-\theta)\Delta\tau L_h)V^n$$</div><div class="equation">$$(L_h V)_j=a_jV_{j-1}+b_jV_j+c_jV_{j+1},\quad a_j=\tfrac12(\sigma^2j^2-(r-q)j),\ b_j=-\sigma^2j^2-r,\ c_j=\tfrac12(\sigma^2j^2+(r-q)j)$$</div><p>将S_j=jΔS代入中心差分，ΔS在系数中消去；上式三个系数分别描述向低价节点、高价节点和本节点的贡献。时间推进矩阵的非对角项为−θΔτa_j、−θΔτc_j。边界误差不会随步长无限缩小而自动消失，故实际网格研究需要分别改变Smax、M和N。</p><h3>完整构造案例与独立数值对照</h3><p>现货与执行价均100，年利率3%、股息率1%、波动率20%、期限1年，计算域上界400。三组网格在相同经济参数下对照解析Black–Scholes价格，绝对误差体现时间、空间和截断误差。</p><dl><dt>输入字段</dt><dd>SpaceSteps、TimeSteps</dd><dt>参数顺序</dt><dd>现货、执行价、利率、股息率、波动率、到期年限、价格域上界、看涨标志（1看涨、0看跌）</dd><dt>输出字段</dt><dd>SpaceSteps、TimeSteps为网格大小；GridPrice为插值价格，AnalyticPrice为解析基准，AbsError为绝对价格误差。</dd><dt>样本文件</dt><dd><a href="../research/numerical-examples/pde-european.csv" download>pde-european.csv</a></dd></dl><pre><code>SpaceSteps,TimeSteps
+100,100
+200,200
+400,400</code></pre><pre><code>./build/kline_quant num-pde-european quant/research/numerical-examples/pde-european.csv 100 100 0.03 0.01 0.2 1 400 1</code></pre><div class="wide"><table><thead><tr><th>输出行（从0开始）</th><th>字段</th><th>解析或参考值</th></tr></thead><tbody><tr><td>2</td><td>AnalyticPrice</td><td>8.827321225（数值容差1e-8）</td></tr><tr><td>2</td><td>GridPrice</td><td>8.827321225（数值容差0.015）</td></tr></tbody></table></div><h3>估计假设、实证解释与适用边界</h3><p>有限价格域上的边界是远场近似；网格在执行价处是否对齐也影响误差。中心差分在漂移占优时不保证单调，不能把本例收敛当作所有参数的稳定性证明。</p></article>
+<article class="lesson" id="lesson2"><h2>2．连续向上敲出看涨期权吸收边界</h2><h3>模型定义与经济含义</h3><div class="equation">$$V(B,\tau)=0,\quad V(0,\tau)=0,\quad V(S,0)=(S-K)_+\mathbf1_{\{S&lt;B\}}$$</div><p>在障碍位置强制零价值，相当于首次命中时合约终止；计算域由普通期权的远场上界变为吸收障碍。风险中性条件期望及Feynman–Kac联系说明，吸收边界已经处理连续监测，而非只检测离散时间网格的标的路径。</p><h3>数学推导与求解结构</h3><div class="equation">$$V_{\rm UO}(S)=e^{-rT}\mathbb E^Q[(S_T-K)_+\mathbf1_{\{\sup_{0\le t\le T}S_t&lt;B\}}]$$</div><div class="equation">$$p^{\rm kill}_T(y\mid x)=\varphi_{\sigma^2T}(y-x-\mu T)-e^{2\mu(b-x)/\sigma^2}\varphi_{\sigma^2T}(y-2b+x-\mu T),\quad y&lt;b$$</div><p>令x=log S、b=log B、μ=r−q−σ²/2，φ为零均值正态密度。反射原理产生减去镜像密度的吸收转移核。独立测试将该核与看涨支付在log K至b积分，验证网格价格，而不使用另一套相同PDE离散。</p><h3>完整构造案例与独立数值对照</h3><p>障碍150，执行价100，观察现货80、100、130、150、160。现货达到障碍时价值为零，障碍以内价值不高于同参数普通看涨。</p><dl><dt>输入字段</dt><dd>Spot</dd><dt>参数顺序</dt><dd>执行价、利率、股息率、波动率、到期年限、上障碍、空间步数、时间步数</dd><dt>输出字段</dt><dd>Spot为当前现货；KnockOutCall为敲出价格，VanillaCall为相同参数普通看涨，KnockOutDiscount为二者差。</dd><dt>样本文件</dt><dd><a href="../research/numerical-examples/pde-barrier.csv" download>pde-barrier.csv</a></dd></dl><pre><code>Spot
+80
+100
+130
+150
+160</code></pre><pre><code>./build/kline_quant num-pde-barrier quant/research/numerical-examples/pde-barrier.csv 100 0.03 0.01 0.2 1 150 300 300</code></pre><div class="wide"><table><thead><tr><th>输出行（从0开始）</th><th>字段</th><th>解析或参考值</th></tr></thead><tbody><tr><td>3</td><td>KnockOutCall</td><td>0</td></tr><tr><td>4</td><td>KnockOutCall</td><td>0</td></tr></tbody></table></div><h3>估计假设、实证解释与适用边界</h3><p>无返还金、连续障碍监测、连续股息及常波动假设；离散观察障碍应采用相应的离散事件条件。</p></article>
+<article class="lesson" id="lesson3"><h2>3．美式看跌期权的线性互补问题与PSOR</h2><h3>模型定义与经济含义</h3><div class="equation">$$V\ge g,\quad AV-b\ge0,\quad (V-g)^\top(AV-b)=0$$</div><p>提前行权将PDE转为障碍问题。隐式时间步产生互补条件，继续持有区域满足线性方程，行权区域价值等于支付函数且线性残差非负。投影SOR在每个坐标更新后立即投影到内在价值以上，逐期核对互补残差，而不是仅依据迭代次数判断收敛。</p><h3>数学推导与求解结构</h3><div class="equation">$$V_j^{(k+1)}=\max\left(g_j,V_j^{(k)}+\omega\left[\frac{b_j-\sum_{i&lt;j}A_{ji}V_i^{(k+1)}-\sum_{i&gt;j}A_{ji}V_i^{(k)}}{A_{jj}}-V_j^{(k)}\right]\right)$$</div><div class="equation">$$\mathcal R(V)=\|\min(V-g,AV-b)\|_\infty$$</div><p>互补条件等价于逐坐标最小值为零；因此该范数同时暴露支付下界或线性残差的违规。隐式步长使自由边界被包含在每层迭代内，不必预先猜测行权阈值。测试以独立CRR树验证近似价格。</p><h3>完整构造案例与独立数值对照</h3><p>执行价100、现货60/100/120，给出美式价格、欧式对照、内在价值、最大互补残差和迭代次数。深度实值看跌在本参数下立即行权价值40。</p><dl><dt>输入字段</dt><dd>Spot</dd><dt>参数顺序</dt><dd>执行价、利率、股息率、波动率、到期时间、计算上界、空间步数、时间步数、松弛系数</dd><dt>输出字段</dt><dd>AmericanPut、EuropeanPut、IntrinsicValue为三个价值口径，MaxComplementarityResidual为最大时间层残差，Sweeps为累计坐标扫描次数。</dd><dt>样本文件</dt><dd><a href="../research/numerical-examples/american-psor.csv" download>american-psor.csv</a></dd></dl><pre><code>Spot
+60
+100
+120</code></pre><pre><code>./build/kline_quant num-american-psor quant/research/numerical-examples/american-psor.csv 100 0.03 0.01 0.2 1 300 150 200 1.2</code></pre><div class="wide"><table><thead><tr><th>输出行（从0开始）</th><th>字段</th><th>解析或参考值</th></tr></thead><tbody><tr><td>0</td><td>AmericanPut</td><td>40（数值容差1e-7）</td></tr></tbody></table></div><h3>估计假设、实证解释与适用边界</h3><p>隐式时间离散为一阶，空间误差依赖网格。当前要求非负利率和非正非对角元，以维护单调互补系统；不适用于任意漂移参数。</p></article>
+<article class="lesson" id="lesson4"><h2>4．固定位置与曲率的Raw SVI截面拟合</h2><h3>模型定义与经济含义</h3><div class="equation">$$w(k)=a+b[\rho(k-m)+\sqrt{(k-m)^2+\sigma^2}]$$</div><p>固定m和σ后，令c=bρ，模型对(a,c,b)线性。通过最小二乘求出参数并恢复ρ=c/b，检查正总方差和翼部斜率约束。对每个输入网格计算Gatheral–Jacquier密度因子g(k)，局部负值提示蝶式套利。正值只覆盖所检查的节点。</p><h3>数学推导与求解结构</h3><div class="equation">$$g(k)=\left(1-\frac{kw'(k)}{2w(k)}\right)^2-\frac{w'(k)^2}{4}\left(\frac1{w(k)}+\frac14\right)+\frac{w''(k)}2$$</div><div class="equation">$$z=k-m,\quad h=\sqrt{z^2+\sigma^2},\quad w'=b(\rho+z/h),\quad w''=b\sigma^2/h^3$$</div><p>令回归设计矩阵的三列分别为1、z、h。拟合后的b必须为正、|ρ|小于1，最小方差a+bσ√(1−ρ²)必须为正。总方差尾部斜率b(1±ρ)控制极端执行价渐近行为。</p><h3>完整构造案例与独立数值对照</h3><p>五个对数远期价内外程度节点由a=0.02、b=0.1、ρ=−0.3、m=0.02、σ=0.2生成。无噪声拟合恢复参数与各节点总方差。</p><dl><dt>输入字段</dt><dd>LogMoneyness、TotalVariance</dd><dt>参数顺序</dt><dd>固定位置m、固定曲率尺度σ</dd><dt>输出字段</dt><dd>ObservedVariance与FittedVariance分别为输入和拟合总方差，Residual为观测减拟合，DensityFactor为g(k)，最后三列为a、b、ρ。</dd><dt>样本文件</dt><dd><a href="../research/numerical-examples/svi-slice.csv" download>svi-slice.csv</a></dd></dl><pre><code>LogMoneyness,TotalVariance
+-0.5,0.09131355311
+-0.25,0.06170059523
+0,0.04069975124
+0.25,0.04357950131
+0.5,0.0576</code></pre><pre><code>./build/kline_quant num-svi-slice quant/research/numerical-examples/svi-slice.csv 0.02 0.2</code></pre><div class="wide"><table><thead><tr><th>输出行（从0开始）</th><th>字段</th><th>解析或参考值</th></tr></thead><tbody><tr><td>0</td><td>a</td><td>0.02</td></tr><tr><td>0</td><td>b</td><td>0.1</td></tr><tr><td>0</td><td>rho</td><td>-0.3</td></tr><tr><td>4</td><td>Residual</td><td>0</td></tr></tbody></table></div><h3>估计假设、实证解释与适用边界</h3><p>固定两个非线性参数的条件拟合，不是完整约束SVI全局校准；网格正密度不能证明整个实数轴无套利。</p></article>
+<article class="lesson" id="lesson5"><h2>5．相同远期对数价内外程度的日历套利诊断</h2><h3>模型定义与经济含义</h3><div class="equation">$$k=\log(K/F_T),\qquad w(k,T)=\sigma_{\rm imp}^2(k,T)T$$</div><p>在比例股息等标准假设下，相同远期对数价内外程度的总隐含方差应随到期时间非减。先将各到期截面变换到统一k网格，然后逐相邻期限比较总方差。容差用于区分微小数值差异。</p><h3>数学推导与求解结构</h3><div class="equation">$$\Delta w_{j}(k)=w(k,T_{j+1})-w(k,T_j),\quad I_j(k)=\mathbf1_{\{\Delta w_j(k)&lt;-\varepsilon\}}$$</div><div class="equation">$$C(K,T)=D(T)F_T\,c(k,w),\quad c(k,w)=\Phi(d_+)-e^k\Phi(d_-),\quad \partial_w c&gt;0$$</div><p>在相同远期规范下，归一化Black看涨随总方差严格增加，故期限顺序可通过比较w检验。在实际报价中，每个期限的远期价、贴现因子以及对数价内外程度转换均需单独计算。</p><h3>完整构造案例与独立数值对照</h3><p>三条到期截面在k=0处由0.03下降到0.029，差值−0.001低于容差−0.0001，第二个网格第一对期限产生违规标志。</p><dl><dt>输入字段</dt><dd>LogMoneyness、T1Variance、T2Variance、T3Variance</dd><dt>参数顺序</dt><dd>总方差比较容差</dd><dt>输出字段</dt><dd>NearSlice和FarSlice为相邻期限列的1起始编号；VarianceChange为后一期减前一期，Violation为0或1。</dd><dt>样本文件</dt><dd><a href="../research/numerical-examples/calendar-grid.csv" download>calendar-grid.csv</a></dd></dl><pre><code>LogMoneyness,T1Variance,T2Variance,T3Variance
+-0.2,0.04,0.06,0.09
+0,0.03,0.029,0.06
+0.2,0.05,0.07,0.08</code></pre><pre><code>./build/kline_quant num-calendar-grid quant/research/numerical-examples/calendar-grid.csv 0.0001</code></pre><div class="wide"><table><thead><tr><th>输出行（从0开始）</th><th>字段</th><th>解析或参考值</th></tr></thead><tbody><tr><td>2</td><td>VarianceChange</td><td>-0.001</td></tr><tr><td>2</td><td>Violation</td><td>1</td></tr><tr><td>3</td><td>Violation</td><td>0</td></tr></tbody></table></div><h3>估计假设、实证解释与适用边界</h3><p>输入列顺序必须为期限递增、同一远期规范；仅检查离散网格，不能代替跨期限连续插值和完整静态套利约束。</p></article>
+<section class="source" id="source"><h2>完整C++17实现与复算环境</h2><p>以下头文件与工具库的实际实现一致。算法使用数值矩阵与参数向量，输出具名CSV。仓库提供共享线性系统、三对角求解、数值输入检查和回归测试。</p><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/numerical_lab_options.hpp">完整算法头文件</a>　｜　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/numerical_lab_common.hpp">公共数学接口</a>　｜　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_numerical_lab.py">独立数值验证</a>　｜　<a href="../research/run_numerical_labs.py" download>批量复算脚本</a></p>
+<pre><code>#pragma once
+#include "numerical_lab_common.hpp"
+
+namespace kline { namespace numerical_lab {
+inline Vec european_grid(double K,double r,double q,double sigma,double T,double limit,std::size_t M,std::size_t N,bool call,bool barrier){
+    double ds=limit/M,dt=T/N;
+    Vec v(M+1),a(M-1),b(M-1),c(M-1),rhs(M-1);
+    for(std::size_t j=0;j&lt;=M;++j)v[j]=std::max(0.0,call?j*ds-K:K-j*ds);
+    auto boundaries=[&amp;](double tau){
+        return std::pair&lt;double,double&gt;{call?0:K*std::exp(-r*tau),
+            barrier?0:(call?std::max(0.0,limit*std::exp(-q*tau)-K*std::exp(-r*tau)):0)};
+    };
+    v[M]=boundaries(0).second;
+    // Two implicit half steps smooth the initial payoff kink, followed by CN.
+    for(std::size_t n=0;n&lt;=N;++n){
+        double h=n&lt;2?dt/2:dt,theta=n&lt;2?1:.5;
+        double tau=n&lt;2?(n+1)*dt/2:n*dt;
+        auto bd=boundaries(tau);
+        for(std::size_t j=1;j&lt;M;++j){
+            double x=double(j),diff=.5*sigma*sigma*x*x,drift=.5*(r-q)*x;
+            double l=diff-drift,d=-2*diff-r,u=diff+drift;
+            std::size_t i=j-1;
+            a[i]=-h*theta*l;b[i]=1-h*theta*d;c[i]=-h*theta*u;
+            rhs[i]=v[j]+h*(1-theta)*(l*v[j-1]+d*v[j]+u*v[j+1]);
+        }
+        rhs.front()-=a.front()*bd.first;rhs.back()-=c.back()*bd.second;
+        auto z=tridiagonal(a,b,c,rhs);
+        v[0]=bd.first;v[M]=bd.second;
+        for(std::size_t j=1;j&lt;M;++j)v[j]=z[j-1];
+    }
+    return v;
+}
+inline double interp(const Vec&amp; v,double S,double limit){
+    require(S&gt;=0&amp;&amp;S&lt;=limit,"Spot outside pricing grid");
+    double j=S/limit*(v.size()-1);
+    if(j&gt;=v.size()-1)return v.back();
+    auto k=std::size_t(j);
+    return v[k]+(j-k)*(v[k+1]-v[k]);
+}
+inline Report pde_european(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,2,2);parameters(p,8);
+    double S=positive(p[0]),K=positive(p[1]),r=p[2],q=p[3],sigma=positive(p[4]),T=positive(p[5]),limit=positive(p[6]);
+    require((p[7]==0||p[7]==1)&amp;&amp;limit&gt;std::max(S,K),"Invalid European grid domain");
+    bool call=p[7]==1;
+    double exact=bs(S,K,r,q,sigma,T,call);
+    Report out{{"SpaceSteps","TimeSteps","GridPrice","AnalyticPrice","AbsError"},{}};
+    double work=0;
+    for(const auto&amp; row:x){
+        auto M=count(row[0],10,4000),N=count(row[1],2,4000);
+        work+=double(M)*N;require(work&lt;=3e7,"PDE work limit exceeded");
+        auto v=european_grid(K,r,q,sigma,T,limit,M,N,call,false);
+        double price=interp(v,S,limit);
+        out.rows.push_back({double(M),double(N),price,exact,std::abs(price-exact)});
+    }
+    return out;
+}
+inline Report pde_barrier(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,1,1);parameters(p,8);
+    double K=positive(p[0]),r=p[1],q=p[2],sigma=positive(p[3]),T=positive(p[4]),B=positive(p[5]);
+    auto M=count(p[6],20,4000),N=count(p[7],2,4000);
+    require(B&gt;K&amp;&amp;double(M)*N&lt;=2e7,"Invalid up-and-out grid");
+    auto v=european_grid(K,r,q,sigma,T,B,M,N,true,true);
+    Report out{{"Spot","KnockOutCall","VanillaCall","KnockOutDiscount"},{}};
+    for(const auto&amp; row:x){
+        double S=positive(row[0]),e=bs(S,K,r,q,sigma,T,true),k=S&gt;=B?0:interp(v,S,B);
+        require(k&gt;=-1e-8&amp;&amp;k&lt;=e+1e-5*std::max(1.0,e),"Barrier grid violates price bounds");
+        out.rows.push_back({S,k,e,e-k});
+    }
+    return out;
+}
+inline Report american_psor(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,1,1);parameters(p,9);
+    double K=positive(p[0]),r=p[1],q=p[2],sig=positive(p[3]),T=positive(p[4]),Smax=positive(p[5]);
+    auto M=count(p[6],20,1000),N=count(p[7],2,2000);double omega=p[8];
+    require(r&gt;=0&amp;&amp;Smax&gt;K&amp;&amp;omega&gt;0&amp;&amp;omega&lt;2&amp;&amp;double(M)*N&lt;=1e6,"Invalid American solver parameters");
+    double ds=Smax/M,dt=T/N;
+    Vec v(M+1),g(M+1),l(M+1),d(M+1),u(M+1);
+    for(std::size_t j=0;j&lt;=M;++j)v[j]=g[j]=std::max(K-j*ds,0.0);
+    for(std::size_t j=1;j&lt;M;++j){
+        double z=double(j),a=.5*sig*sig*z*z,b=.5*(r-q)*z;
+        l[j]=-dt*(a-b);u[j]=-dt*(a+b);d[j]=1+dt*(2*a+r);
+        require(l[j]&lt;=0&amp;&amp;u[j]&lt;=0,"PSOR monotonicity needs nonpositive off-diagonal entries");
+    }
+    double max_residual=0;std::size_t iterations=0;
+    for(std::size_t n=0;n&lt;N;++n){
+        Vec rhs=v;double residual=1;
+        for(std::size_t it=0;it&lt;10000;++it){
+            for(std::size_t j=1;j&lt;M;++j){
+                double z=(rhs[j]-l[j]*v[j-1]-u[j]*v[j+1])/d[j];
+                v[j]=std::max(g[j],v[j]+omega*(z-v[j]));
+            }
+            residual=0;
+            for(std::size_t j=1;j&lt;M;++j)residual=std::max(residual,std::abs(std::min(v[j]-g[j],l[j]*v[j-1]+d[j]*v[j]+u[j]*v[j+1]-rhs[j])));
+            ++iterations;require(double(iterations)*M&lt;=5e7,"PSOR iteration budget exceeded");
+            if(residual&lt;=1e-9*std::max(1.0,K))break;
+        }
+        require(residual&lt;=1e-9*std::max(1.0,K),"PSOR complementarity did not converge");
+        max_residual=std::max(max_residual,residual);
+    }
+    Report out{{"Spot","AmericanPut","EuropeanPut","IntrinsicValue","MaxComplementarityResidual","Sweeps"},{}};
+    for(const auto&amp; row:x){
+        double s=positive(row[0]);require(s&lt;Smax,"Spot outside pricing grid");
+        out.rows.push_back({s,interp(v,s,Smax),bs(s,K,r,q,sig,T,false),std::max(K-s,0.0),max_residual,double(iterations)});
+    }
+    return out;
+}
+inline Report svi_slice(const Mat&amp; x,const Vec&amp; p){
+    validate(x,3,2,2);parameters(p,2);
+    double m=p[0],s=positive(p[1]);
+    // Fixed location and curvature reduce the raw SVI fit to linear least squares.
+    Mat g(3,Vec(3,0));Vec b(3,0);
+    for(const auto&amp; r:x){
+        positive(r[1]);double z=r[0]-m;Vec f={1,z,std::hypot(z,s)};
+        for(std::size_t i=0;i&lt;3;++i){b[i]+=f[i]*r[1];for(std::size_t j=0;j&lt;3;++j)g[i][j]+=f[i]*f[j];}
+    }
+    Vec fit=solve_spd(g,b);double a=fit[0],c=fit[1],B=positive(fit[2]),rho=c/B;
+    require(std::abs(rho)&lt;1&amp;&amp;a+B*s*std::sqrt(1-rho*rho)&gt;0&amp;&amp;B*(1+std::abs(rho))&lt;=2,"Inadmissible fitted SVI parameters");
+    Report out{{"LogMoneyness","ObservedVariance","FittedVariance","Residual","DensityFactor","a","b","rho"},{}};
+    for(const auto&amp; r:x){
+        double z=r[0]-m,h=std::hypot(z,s),w=a+B*(rho*z+h),wp=B*(rho+z/h),wpp=B*s*s/(h*h*h);
+        double gf=std::pow(1-r[0]*wp/(2*w),2)-wp*wp/4*(1/w+.25)+wpp/2;
+        out.rows.push_back({r[0],r[1],w,r[1]-w,gf,a,B,rho});
+    }
+    return out;
+}
+inline Report calendar_grid(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,2,3);parameters(p,1);double tol=p[0];require(tol&gt;=0,"Negative variance tolerance");
+    Report out{{"LogMoneyness","NearSlice","FarSlice","VarianceChange","Violation"},{}};
+    for(std::size_t i=0;i&lt;x.size();++i){
+        const auto&amp; row=x[i];if(i)require(row[0]&gt;x[i-1][0],"Moneyness grid must strictly increase");
+        for(std::size_t j=1;j&lt;d;++j)positive(row[j]);
+        for(std::size_t j=1;j+1&lt;d;++j){
+            double change=row[j+1]-row[j];
+            out.rows.push_back({row[0],double(j),double(j+1),change,change&lt;-tol?1.0:0.0});
+        }
+    }
+    return out;
+}
+} }
+</code></pre><h3>本地运行</h3><pre><code>cmake -S quant/cpp -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+python quant/research/run_numerical_labs.py ./build/kline_quant numerical-results</code></pre><p>Windows多配置生成器通常使用<code>.\build\Release\kline_quant.exe</code>；单配置生成器使用<code>.\build\kline_quant.exe</code>。输出目录须为空。构造样例用于复核计算与模型结构，不代表真实市场实证结果。</p></section>
+<section class="references" id="references"><h2>参考文献与技术资料</h2><p><a href="https://link.springer.com/book/10.1007/978-3-540-68688-0">Kwok, Mathematical Models of Financial Derivatives</a></p><p><a href="https://arxiv.org/abs/1204.0646">Gatheral &amp; Jacquier, Arbitrage-free SVI volatility surfaces</a></p><p><a href="https://doi.org/10.1086/260062">Black &amp; Scholes (1973), The Pricing of Options and Corporate Liabilities</a></p></section>
+</main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

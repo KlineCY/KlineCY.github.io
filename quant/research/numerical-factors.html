@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>实证资产定价：横截面回归、事件研究与多因子排序｜Kline Quant</title><meta name="description" content="高级量化数值研究：模型推导、计算案例、独立数值验证与C++17实现">
+<link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<style>
+body{margin:0;background:#fff;color:#192b36;font:16px/1.95 "Times New Roman","SimSun",serif}
+.main{margin-left:252px;padding:24px 30px 64px}main{max-width:1180px;margin:auto}header,.lesson,.source,.references,.framework{border:1px solid #bfcbd4;background:white;margin:18px 0;padding:25px 28px}
+h1{font-size:31px;line-height:1.4;margin:12px 0 22px}h2{font-size:24px;line-height:1.5;margin:8px 0 20px}h3{font-size:18px;margin:24px 0 8px}p{line-height:1.95;margin:12px 0}.toc{display:flex;flex-wrap:wrap;gap:9px 22px;border:1px solid #cbd5dc;padding:17px 23px}
+.equation{overflow:auto;border-block:1px solid #d6dfe5;margin:18px 0;padding:13px 5px}.katex-display{overflow-x:auto;overflow-y:hidden}a{color:#17537b}code,pre{font-family:"Times New Roman",monospace}pre{border:1px solid #cbd5dc;padding:15px;overflow:auto;white-space:pre;font-size:14px;line-height:1.7;max-height:900px}
+dl{display:grid;grid-template-columns:115px minmax(0,1fr);gap:8px 15px}dt{font-weight:bold}dd{margin:0;overflow-wrap:anywhere}table{border-collapse:collapse;width:100%}th,td{border:1px solid #cad3dc;background:white;padding:10px 13px;text-align:left}th{font-weight:bold}.wide{overflow-x:auto}
+@media(max-width:790px){.main{margin:0;padding:10px}header,.lesson,.source,.references,.framework{padding:15px}dl{display:block}dt{margin-top:12px}}
+</style></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main>
+<header><small>QUANTITATIVE RESEARCH / ADVANCED NUMERICAL LABORATORIES</small><h1>实证资产定价：横截面回归、事件研究与多因子排序</h1><p>实证资产定价必须在截面资产定义、信息时点、风险暴露及未来收益标签之间建立一致关系。本专题围绕两阶段风险溢价估计、信号中性化、事件异常收益、多维组合排序和预测期限差异构造五类可复算研究。</p><p><a href="../research/numerical-laboratories.html">高级数值研究总入口</a>　｜　<a href="../cpp/">C++17研究工具库</a>　｜　<a href="../research/numerical-examples/catalog.json" download>下载数据与参数索引</a></p></header>
+<nav class="toc"><a href="#lesson1">1．多因子加权Fama–MacBeth与跨期HAC风险溢价</a><a href="#lesson2">2．逐日期加权因子中性化与残差正交检验</a><a href="#lesson3">3．独立估计窗口的市场模型事件研究与CAR</a><a href="#lesson4">4．独立双重中位数排序与四组合条件收益</a><a href="#lesson5">5．逐日期多预测期限Rank IC衰减矩阵</a><a href="#source">完整C++17实现</a><a href="#references">参考文献</a></nav>
+<article class="lesson" id="lesson1"><h2>1．多因子加权Fama–MacBeth与跨期HAC风险溢价</h2><h3>模型定义与经济含义</h3><div class="equation">$$\widehat\lambda_t=(X_t^\top W_tX_t)^{-1}X_t^\top W_tr_t,\quad \bar\lambda=T^{-1}\sum_t\widehat\lambda_t$$</div><p>每个日期独立拟合带截距的加权截面回归，因子列可同时包含多项特征。第二阶段把各日系数视为风险溢价时间序列，报告均值及Bartlett HAC标准误。这保留截面共同冲击，不把同日不同资产当成彼此独立的时间样本。</p><h3>数学推导与求解结构</h3><div class="equation">$$SE(\bar\lambda_j)=\sqrt{\left[\widehat\gamma_{0j}+2\sum_{k=1}^L(1-k/(L+1))\widehat\gamma_{kj}\right]/T}$$</div><div class="equation">$$X_t^\top W_t(r_t-X_t\widehat\lambda_t)=0$$</div><p>第一阶段截面正规方程保证各加权暴露方向的拟合残差和为零。第二阶段等权平均日期系数，而不是将各日不同数量的资产直接混合。若日度风险溢价存在自相关，HAC长程方差提供不同于独立日标准误的推断口径。</p><h3>完整构造案例与独立数值对照</h3><p>四个构造日期，每日六个资产、两项独立因子，设截距0.01t、第一溢价0.02+0.001t、第二溢价−0.01+0.002t。均值分别0.025、0.0225、−0.005。</p><dl><dt>输入字段</dt><dd>Date、Weight、FactorA、FactorB、Return</dd><dt>参数顺序</dt><dd>时间序列风险溢价HAC滞后阶</dd><dt>输出字段</dt><dd>Coefficient编号0为截距，MeanPremium、HACStandardError、NormalStatistic为时间均值及渐近推断，Dates为日期数，CrossSectionPremiumSD为日度系数样本标准差。</dd><dt>样本文件</dt><dd><a href="../research/numerical-examples/fama-macbeth-multi.csv" download>fama-macbeth-multi.csv</a></dd></dl><pre><code>Date,Weight,FactorA,FactorB,Return
+1,1,-1,-1,-0.003
+1,1.2,-1,1,-0.019
+1,1.4,0,-1,0.018
+1,1.6,0,1,0.002
+1,1.8,1,-1,0.039
+1,2,1,1,0.023
+2,1,-1,-1,0.004
+2,1.2,-1,1,-0.008
+2,1.4,0,-1,0.026
+2,1.6,0,1,0.014
+2,1.8,1,-1,0.048
+2,2,1,1,0.036
+3,1,-1,-1,0.011
+3,1.2,-1,1,0.003
+3,1.4,0,-1,0.034
+3,1.6,0,1,0.026
+3,1.8,1,-1,0.057
+3,2,1,1,0.049
+4,1,-1,-1,0.018
+4,1.2,-1,1,0.014
+4,1.4,0,-1,0.042
+4,1.6,0,1,0.038
+4,1.8,1,-1,0.066
+4,2,1,1,0.062</code></pre><pre><code>./build/kline_quant num-fama-macbeth-multi quant/research/numerical-examples/fama-macbeth-multi.csv 1</code></pre><div class="wide"><table><thead><tr><th>输出行（从0开始）</th><th>字段</th><th>解析或参考值</th></tr></thead><tbody><tr><td>0</td><td>MeanPremium</td><td>0.025</td></tr><tr><td>1</td><td>MeanPremium</td><td>0.0225</td></tr><tr><td>2</td><td>MeanPremium</td><td>-0.005</td></tr></tbody></table></div><h3>估计假设、实证解释与适用边界</h3><p>四日期仅用于复算，不能据此作有效统计推断。权重及因子必须为决策前可得，估计因子载荷带来的误差、Shanken修正和多重检验不在此实现内。</p></article>
+<article class="lesson" id="lesson2"><h2>2．逐日期加权因子中性化与残差正交检验</h2><h3>模型定义与经济含义</h3><div class="equation">$$\widehat b_t=(X_t^\top W_t X_t)^{-1}X_t^\top W_t s_t,\quad s_t^\perp=s_t-X_t\widehat b_t$$</div><p>在指定截面权重内积下，把原始信号投影到包含截距的暴露空间，再减去投影。正规方程直接给出加权残差与各暴露正交，包括加权均值为零。输出每一日期内原始行顺序，保留权重、拟合信号和残差以核查。</p><h3>数学推导与求解结构</h3><div class="equation">$$X_t^\top W_t s_t^\perp=0$$</div><div class="equation">$$P_W=X(X^\top WX)^{-1}X^\top W,\quad P_W^2=P_W,\quad P_W^\top W=WP_W$$</div><p>加权投影对指定内积自伴且幂等；对相同截面和权重重复中性化不会进一步改变残差信号。独立测试检查截距及每个暴露的加权内积，不以普通未加权相关替代。</p><h3>完整构造案例与独立数值对照</h3><p>四个日期各六条信号，加入额外正弦扰动使残差非零；独立测试逐日期检查残差乘每项暴露和权重之和为零。</p><dl><dt>输入字段</dt><dd>Date、Weight、ExposureA、ExposureB、Signal</dd><dt>参数顺序</dt><dd>无额外参数；首列日期、第二列正权重、最后一列待中性化信号</dd><dt>输出字段</dt><dd>Date及WithinDateRow标记原日期内的输入行；RawSignal、FittedSignal、Residual、Weight保存完整分解。</dd><dt>样本文件</dt><dd><a href="../research/numerical-examples/weighted-neutralization.csv" download>weighted-neutralization.csv</a></dd></dl><pre><code>Date,Weight,ExposureA,ExposureB,Signal
+1,1,-1,-1,-0.003
+1,1.2,-1,1,-0.01503334076
+1,1.4,0,-1,0.01697783559
+1,1.6,0,1,-0.001703258729
+1,1.8,1,-1,0.0409764534
+1,2,1,1,0.02619394845
+2,1,-1,-1,0.00120050125
+2,1.2,-1,1,-0.01047254845
+2,1.4,0,-1,0.02943664726
+2,1.6,0,1,0.01558696229
+2,1.8,1,-1,0.04415441003
+2,2,1,1,0.0354040039
+3,1,-1,-1,0.0149991716
+3,1.2,-1,1,0.002565453618
+3,1.4,0,-1,0.03011280622
+3,1.6,0,1,0.02743623342
+3,1.8,1,-1,0.06051709225
+3,2,1,1,0.04665745064
+4,1,-1,-1,0.01508655693
+4,1.2,-1,1,0.01709331156
+4,1.4,0,-1,0.04411633074
+4,1.6,0,1,0.03436133331
+4,1.8,1,-1,0.06482131359
+4,2,1,1,0.0659424012</code></pre><pre><code>./build/kline_quant num-weighted-neutralization quant/research/numerical-examples/weighted-neutralization.csv</code></pre><p>独立参考逐日期检查全部加权正交条件，包括截距及每项暴露。</p><h3>估计假设、实证解释与适用边界</h3><p>中性化是样本内线性投影，不保证后续排序或实际组合的风险暴露为零；需在资产池与权重定义后进行。</p></article>
+<article class="lesson" id="lesson3"><h2>3．独立估计窗口的市场模型事件研究与CAR</h2><h3>模型定义与经济含义</h3><div class="equation">$$r_{i,s}=\alpha_i+\beta_i r_{m,s}+u_{i,s},\quad AR_{i,t}=r_{i,t}-(\widehat\alpha_i+\widehat\beta_i r_{m,t})$$</div><p>每个事件的估计窗口完全位于事件窗口之前，并留出指定缓冲期。用估计窗协方差比及均值关系计算市场Beta与截距，冻结参数计算事件窗异常收益及累计异常收益。拒绝事件窗口重叠，避免重复计量相同观测。</p><h3>数学推导与求解结构</h3><div class="equation">$$CAR_i[a,b]=\sum_{\tau=a}^{b}AR_{i,t_i+\tau}$$</div><div class="equation">$$\widehat\beta=\operatorname{Cov}_{\mathcal E}(r_i,r_m)/\operatorname{Var}_{\mathcal E}(r_m),\qquad\widehat\alpha=\overline r_i-\widehat\beta\overline r_m$$</div><p>估计窗与事件窗严格分离，估计窗中的市场方差必须为正。冻结模型系数后逐日计算异常收益，CAR从事件窗首日开始累计，事件窗末端值对应完整研究窗口。</p><h3>完整构造案例与独立数值对照</h3><p>21期构造收益，真实市场模型截距0.001、Beta1.5；在索引8加入3%异常收益，在18加入−2%，两事件窗均为前后各1期。各CAR终值分别0.03和−0.02。</p><dl><dt>输入字段</dt><dd>AssetReturn、MarketReturn、Event</dd><dt>参数顺序</dt><dd>估计窗口、估计与事件窗间隔、事件前期数、事件后期数</dd><dt>输出字段</dt><dd>EventIndex、RelativePeriod标记事件及相对时点；ActualReturn、ExpectedReturn、AbnormalReturn、CAR为实现、条件基准、异常收益及累计值；Alpha和Beta为估计窗参数。</dd><dt>样本文件</dt><dd><a href="../research/numerical-examples/event-market-model.csv" download>event-market-model.csv</a></dd></dl><pre><code>AssetReturn,MarketReturn,Event
+-0.029,-0.02,0
+-0.014,-0.01,0
+0.001,0,0
+0.016,0.01,0
+0.031,0.02,0
+-0.029,-0.02,0
+-0.014,-0.01,0
+0.001,0,0
+0.046,0.01,1
+0.031,0.02,0
+-0.029,-0.02,0
+-0.014,-0.01,0
+0.001,0,0
+0.016,0.01,0
+0.031,0.02,0
+-0.029,-0.02,0
+-0.014,-0.01,0
+0.001,0,0
+-0.004,0.01,1
+0.031,0.02,0
+-0.029,-0.02,0</code></pre><pre><code>./build/kline_quant num-event-market-model quant/research/numerical-examples/event-market-model.csv 5 1 1 1</code></pre><div class="wide"><table><thead><tr><th>输出行（从0开始）</th><th>字段</th><th>解析或参考值</th></tr></thead><tbody><tr><td>2</td><td>CAR</td><td>0.03</td></tr><tr><td>5</td><td>CAR</td><td>-0.02</td></tr><tr><td>0</td><td>Beta</td><td>1.5</td></tr></tbody></table></div><h3>估计假设、实证解释与适用边界</h3><p>市场模型是条件反事实基准，不自动识别事件因果效应；同期其他新闻、预期泄漏、事件选择和截面相关仍需研究设计控制。CAR为算术异常收益和，不是复利BHAR。</p></article>
+<article class="lesson" id="lesson4"><h2>4．独立双重中位数排序与四组合条件收益</h2><h3>模型定义与经济含义</h3><div class="equation">$$G_i^A=\mathbf1_{\{A_i&gt;\operatorname{med}(A)\}},\quad G_i^B=\mathbf1_{\{B_i&gt;\operatorname{med}(B)\}}$$</div><p>先分别在同日截面确定两个独立中位数断点，再取各分组交集。恰在任一中位数的观察不被强行划入某边，空单元明确报错。输出每个日期四组计数与未来等权平均收益，可进一步比较在固定另一维度下的多空收益差。</p><h3>数学推导与求解结构</h3><div class="equation">$$\bar r_{ab,t}=\frac{\sum_i r_{i,t+1}\mathbf1_{\{G_i^A=a,G_i^B=b\}}}{N_{ab,t}}$$</div><div class="equation">$$\Delta_A(b)=\bar r_{1b}-\bar r_{0b},\qquad \Delta_B(a)=\bar r_{a1}-\bar r_{a0}$$</div><p>四个条件组合可用于观察第一信号在第二信号的两个组内是否具有一致的收益差，反之亦然。应保留各组样本数量和不同日期的可比资产池，避免用单个稀疏单元概括整个截面。</p><h3>完整构造案例与独立数值对照</h3><p>两个日期，各四资产恰形成四个单元；第一日期低A低B回报0.01，高A高B回报0.05，第二日期相应回报−0.01与0.02。</p><dl><dt>输入字段</dt><dd>Date、SignalA、SignalB、FutureReturn</dd><dt>参数顺序</dt><dd>无额外参数；每日期两个排序变量和未来收益</dd><dt>输出字段</dt><dd>Date为日期，Signal1Group和Signal2Group为低组0或高组1，Count与MeanReturn为实际入组数及等权平均未来收益。</dd><dt>样本文件</dt><dd><a href="../research/numerical-examples/independent-double-sort.csv" download>independent-double-sort.csv</a></dd></dl><pre><code>Date,SignalA,SignalB,FutureReturn
+1,-1,-1,0.01
+1,-1,1,0.02
+1,1,-1,0.03
+1,1,1,0.05
+2,-2,-3,-0.01
+2,-2,3,0
+2,2,-3,0.01
+2,2,3,0.02</code></pre><pre><code>./build/kline_quant num-independent-double-sort quant/research/numerical-examples/independent-double-sort.csv</code></pre><div class="wide"><table><thead><tr><th>输出行（从0开始）</th><th>字段</th><th>解析或参考值</th></tr></thead><tbody><tr><td>0</td><td>MeanReturn</td><td>0.01</td></tr><tr><td>3</td><td>MeanReturn</td><td>0.05</td></tr><tr><td>7</td><td>MeanReturn</td><td>0.02</td></tr></tbody></table></div><h3>估计假设、实证解释与适用边界</h3><p>这是独立2×2排序，不是条件顺序排序或完整Fama–French组合构造；样本权重、断点参考池、微盘股及交易成本需单独设定。</p></article>
+<article class="lesson" id="lesson5"><h2>5．逐日期多预测期限Rank IC衰减矩阵</h2><h3>模型定义与经济含义</h3><div class="equation">$$IC_{t,h}=\operatorname{Corr}(\operatorname{rank}(s_{i,t}),\operatorname{rank}(r_{i,t+h}))$$</div><p>Spearman相关以平均秩处理并列值，度量信号与目标收益的单调关系。逐日期对每一未来期限分别计算，保留观察数和期限列编号。不同期限标签可能重叠，汇总均值的不确定性需考虑时间依赖。</p><h3>数学推导与求解结构</h3><div class="equation">$$\overline{IC}_h=T_h^{-1}\sum_t IC_{t,h}$$</div><div class="equation">$$R_i(x)=\tfrac12(L_i+U_i),\quad IC=\frac{\sum_i(R_i(s)-\bar R_s)(R_i(r)-\bar R_r)}{\sqrt{\sum_i(R_i(s)-\bar R_s)^2\sum_i(R_i(r)-\bar R_r)^2}}$$</div><p>并列元素使用从最低到最高的占据秩范围平均值；因此一般情形应直接计算秩的Pearson相关，不能无条件套用无并列时的秩差平方公式。</p><h3>完整构造案例与独立数值对照</h3><p>第一日期三个资产的短期收益顺序同信号一致、长期顺序相反，Rank IC分别1与−1；第二日期短期排序(1,3,2)得到0.5。</p><dl><dt>输入字段</dt><dd>Date、Signal、ReturnH1、ReturnH2</dd><dt>参数顺序</dt><dd>无额外参数；后续各列为事先对齐的不同期限标签</dd><dt>输出字段</dt><dd>Date与HorizonColumn标记日期及1起始标签列编号，Observations为截面资产数量，RankIC为平均秩相关系数。</dd><dt>样本文件</dt><dd><a href="../research/numerical-examples/horizon-rank-ic.csv" download>horizon-rank-ic.csv</a></dd></dl><pre><code>Date,Signal,ReturnH1,ReturnH2
+1,1,1,3
+1,2,2,2
+1,3,3,1
+2,1,1,2
+2,2,3,3
+2,3,2,1</code></pre><pre><code>./build/kline_quant num-horizon-rank-ic quant/research/numerical-examples/horizon-rank-ic.csv</code></pre><div class="wide"><table><thead><tr><th>输出行（从0开始）</th><th>字段</th><th>解析或参考值</th></tr></thead><tbody><tr><td>0</td><td>RankIC</td><td>1</td></tr><tr><td>1</td><td>RankIC</td><td>-1</td></tr><tr><td>2</td><td>RankIC</td><td>0.5</td></tr></tbody></table></div><h3>估计假设、实证解释与适用边界</h3><p>标签列须由使用者确保真实可得时间与未来期限定义，常数信号或常数标签使相关无定义；Rank IC不是扣费投资收益。</p></article>
+<section class="source" id="source"><h2>完整C++17实现与复算环境</h2><p>以下头文件与工具库的实际实现一致。算法使用数值矩阵与参数向量，输出具名CSV。仓库提供共享线性系统、三对角求解、数值输入检查和回归测试。</p><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/numerical_lab_factors.hpp">完整算法头文件</a>　｜　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/numerical_lab_common.hpp">公共数学接口</a>　｜　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_numerical_lab.py">独立数值验证</a>　｜　<a href="../research/run_numerical_labs.py" download>批量复算脚本</a></p>
+<pre><code>#pragma once
+#include "numerical_lab_inference.hpp"
+
+namespace kline { namespace numerical_lab {
+inline std::map&lt;double,Mat&gt; by_date(const Mat&amp; x){
+    std::map&lt;double,Mat&gt; groups;
+    for(const auto&amp; row:x)groups[row.front()].push_back(row);
+    return groups;
+}
+inline Vec wls_cross_section(const Mat&amp; x,std::size_t d){
+    require(x.size()&gt;d,"Insufficient cross-sectional observations");
+    Mat A(d,Vec(d,0));Vec b(d,0);
+    for(const auto&amp; r:x){
+        double weight=positive(r[1]);Vec z={1};z.insert(z.end(),r.begin()+2,r.end()-1);
+        for(std::size_t i=0;i&lt;d;++i){b[i]+=weight*z[i]*r.back();for(std::size_t j=0;j&lt;d;++j)A[i][j]+=weight*z[i]*z[j];}
+    }
+    return solve_spd(A,b);
+}
+inline Report fama_macbeth_multi(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,6,4,16)-2;parameters(p,1);
+    auto groups=by_date(x);require(groups.size()&gt;=3,"Three cross-sectional dates required");
+    auto lag=count(p[0],0,groups.size()-1);Mat co;
+    for(const auto&amp; g:groups)co.push_back(wls_cross_section(g.second,d));
+    Report out{{"Coefficient","MeanPremium","HACStandardError","NormalStatistic","Dates","CrossSectionPremiumSD"},{}};
+    for(std::size_t j=0;j&lt;d;++j){
+        Vec v=column(co,j);double m=mean(v),se=positive(hac_mean_standard_error(v,int(lag)));
+        out.rows.push_back({double(j),m,se,m/se,double(groups.size()),std::sqrt(variance(v))});
+    }
+    return out;
+}
+inline Report weighted_neutralization(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,4,4,16)-2;parameters(p,0);
+    auto groups=by_date(x);
+    Report out{{"Date","WithinDateRow","RawSignal","FittedSignal","Residual","Weight"},{}};
+    for(const auto&amp; g:groups){
+        auto beta=wls_cross_section(g.second,d);
+        for(std::size_t j=0;j&lt;g.second.size();++j){
+            const auto&amp; r=g.second[j];Vec z={1};z.insert(z.end(),r.begin()+2,r.end()-1);
+            double fit=dot(z,beta);
+            out.rows.push_back({g.first,double(j),r.back(),fit,r.back()-fit,r[1]});
+        }
+    }
+    return out;
+}
+inline Report event_market_model(const Mat&amp; x,const Vec&amp; p){
+    validate(x,8,3,3);parameters(p,4);
+    auto est=count(p[0],3,x.size()-1),gap=count(p[1],0,x.size()-1),pre=count(p[2],0,x.size()-1),post=count(p[3],0,x.size()-1);
+    Report out{{"EventIndex","RelativePeriod","ActualReturn","ExpectedReturn","AbnormalReturn","CAR","Alpha","Beta"},{}};
+    for(const auto&amp; row:x)require(row[2]==0||row[2]==1,"Binary event flag required");
+    std::size_t lastend=0;bool first=true;
+    for(std::size_t t=0;t&lt;x.size();++t){
+        if(x[t][2]==0)continue;
+        require(t&gt;=est+gap+pre&amp;&amp;post&lt;x.size()-t,"Event window exceeds sample");
+        require(first||t-pre&gt;lastend,"Overlapping event windows");lastend=t+post;first=false;
+        Vec a,b;std::size_t end=t-pre-gap;
+        for(std::size_t s=end-est;s&lt;end;++s){a.push_back(x[s][0]);b.push_back(x[s][1]);}
+        double beta=covariance(a,b)/positive(variance(b)),alpha=mean(a)-beta*mean(b),car=0;
+        for(std::size_t s=t-pre;s&lt;=t+post;++s){
+            double expected=alpha+beta*x[s][1],ab=x[s][0]-expected;car+=ab;
+            out.rows.push_back({double(t),double(s)-double(t),x[s][0],expected,ab,car,alpha,beta});
+        }
+    }
+    require(!out.rows.empty(),"No events");return out;
+}
+inline Report independent_double_sort(const Mat&amp; x,const Vec&amp; p){
+    validate(x,4,4,4);parameters(p,0);
+    Report out{{"Date","Signal1Group","Signal2Group","Count","MeanReturn"},{}};
+    for(const auto&amp; g:by_date(x)){
+        auto a=column(g.second,1),b=column(g.second,2);
+        require(a.size()&gt;=4,"Four observations required per date");
+        double m1=quantile(a,.5),m2=quantile(b,.5),s[2][2]={{0,0},{0,0}},n[2][2]={{0,0},{0,0}};
+        for(const auto&amp; r:g.second){
+            if(r[1]==m1||r[2]==m2)continue;
+            int i=r[1]&gt;m1,j=r[2]&gt;m2;s[i][j]+=r[3];++n[i][j];
+        }
+        for(int i=0;i&lt;2;++i)for(int j=0;j&lt;2;++j){
+            require(n[i][j]&gt;0,"Empty double-sort cell");
+            out.rows.push_back({g.first,double(i),double(j),n[i][j],s[i][j]/n[i][j]});
+        }
+    }
+    return out;
+}
+inline Report horizon_rank_ic(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,3,3,32);parameters(p,0);
+    Report out{{"Date","HorizonColumn","Observations","RankIC"},{}};
+    for(const auto&amp; g:by_date(x)){
+        auto score=column(g.second,1);
+        require(score.size()&gt;=3,"Three assets required per date");
+        for(std::size_t j=2;j&lt;d;++j)out.rows.push_back({g.first,double(j-1),double(score.size()),spearman(score,column(g.second,j))});
+    }
+    return out;
+}
+} }
+</code></pre><h3>本地运行</h3><pre><code>cmake -S quant/cpp -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+python quant/research/run_numerical_labs.py ./build/kline_quant numerical-results</code></pre><p>Windows多配置生成器通常使用<code>.\build\Release\kline_quant.exe</code>；单配置生成器使用<code>.\build\kline_quant.exe</code>。输出目录须为空。构造样例用于复核计算与模型结构，不代表真实市场实证结果。</p></section>
+<section class="references" id="references"><h2>参考文献与技术资料</h2><p><a href="https://doi.org/10.1086/260061">Fama &amp; MacBeth (1973), Risk, Return, and Equilibrium: Empirical Tests</a></p><p><a href="https://ideas.repec.org/a/aea/jeclit/v35y1997i1p13-39.html">MacKinlay (1997), Event Studies in Economics and Finance</a></p><p><a href="https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/data_library.html">Kenneth R. French Data Library, Portfolio Construction</a></p></section>
+</main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

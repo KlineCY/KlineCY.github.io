@@ -7,6 +7,7 @@ on:
       - 'quant/research/examples/**'
       - 'quant/research/numerical-examples/**'
       - 'quant/research/run_researchflow.py'
+      - 'quant/research/run_numerical_labs.py'
       - '.github/workflows/test-quant-cpp-toolkit.yml'
   pull_request:
     paths:
@@ -14,6 +15,7 @@ on:
       - 'quant/research/examples/**'
       - 'quant/research/numerical-examples/**'
       - 'quant/research/run_researchflow.py'
+      - 'quant/research/run_numerical_labs.py'
       - '.github/workflows/test-quant-cpp-toolkit.yml'
 
 jobs:
@@ -92,3 +94,11 @@ jobs:
           test -s /tmp/kline-research-results/derived/strategy_comparison.csv
           test -s /tmp/kline-research-results/derived/ridge_comparison.csv
           test -s /tmp/kline-research-results/derived/rolling_var_coverage.csv
+
+      - name: Run all advanced numerical laboratories and six parameter studies
+        run: |
+          python quant/research/run_numerical_labs.py /tmp/kline_quant /tmp/kline-numerical-results
+          test -s /tmp/kline-numerical-results/studies/put_call_parity.csv
+          test -s /tmp/kline-numerical-results/studies/turnover_penalty_path.csv
+          test -s /tmp/kline-numerical-results/studies/fitted_curve_keyrate.csv
+          test -s /tmp/kline-numerical-results/studies/covariance_comparison.csv

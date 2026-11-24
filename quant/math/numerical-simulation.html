@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>随机路径模拟、方差缩减与连续障碍修正｜Kline Quant</title><meta name="description" content="高级量化数值研究：模型推导、计算案例、独立数值验证与C++17实现">
+<link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<style>
+body{margin:0;background:#fff;color:#192b36;font:16px/1.95 "Times New Roman","SimSun",serif}
+.main{margin-left:252px;padding:24px 30px 64px}main{max-width:1180px;margin:auto}header,.lesson,.source,.references,.framework{border:1px solid #bfcbd4;background:white;margin:18px 0;padding:25px 28px}
+h1{font-size:31px;line-height:1.4;margin:12px 0 22px}h2{font-size:24px;line-height:1.5;margin:8px 0 20px}h3{font-size:18px;margin:24px 0 8px}p{line-height:1.95;margin:12px 0}.toc{display:flex;flex-wrap:wrap;gap:9px 22px;border:1px solid #cbd5dc;padding:17px 23px}
+.equation{overflow:auto;border-block:1px solid #d6dfe5;margin:18px 0;padding:13px 5px}.katex-display{overflow-x:auto;overflow-y:hidden}a{color:#17537b}code,pre{font-family:"Times New Roman",monospace}pre{border:1px solid #cbd5dc;padding:15px;overflow:auto;white-space:pre;font-size:14px;line-height:1.7;max-height:900px}
+dl{display:grid;grid-template-columns:115px minmax(0,1fr);gap:8px 15px}dt{font-weight:bold}dd{margin:0;overflow-wrap:anywhere}table{border-collapse:collapse;width:100%}th,td{border:1px solid #cad3dc;background:white;padding:10px 13px;text-align:left}th{font-weight:bold}.wide{overflow-x:auto}
+@media(max-width:790px){.main{margin:0;padding:10px}header,.lesson,.source,.references,.framework{padding:15px}dl{display:block}dt{margin-top:12px}}
+</style></head><body><aside id="quantSidebar" class="sidebar" data-page="math"></aside><script src="../sidebar-v2.js"></script><div class="main"><main>
+<header><small>QUANTITATIVE RESEARCH / ADVANCED NUMERICAL LABORATORIES</small><h1>随机路径模拟、方差缩减与连续障碍修正</h1><p>随机模拟需要区分模型离散误差、路径抽样误差、支付计算及方差缩减。五节分别处理反向路径、几何亚式控制变量、精确GBM路径、连续障碍修正与随机方差模拟。</p><p><a href="../research/numerical-laboratories.html">高级数值研究总入口</a>　｜　<a href="../cpp/">C++17研究工具库</a>　｜　<a href="../research/numerical-examples/catalog.json" download>下载数据与参数索引</a></p></header>
+<nav class="toc"><a href="#lesson1">1．GBM欧式看涨期权反向变量估值与成对标准误</a><a href="#lesson2">2．独立先导样本估计几何亚式控制变量</a><a href="#lesson3">3．给定创新序列的风险中性GBM路径账本</a><a href="#lesson4">4．Brownian Bridge条件存活概率修正连续敲出支付</a><a href="#lesson5">5．Heston全截断Euler方差路径与相关创新</a><a href="#source">完整C++17实现</a><a href="#references">参考文献</a></nav>
+<article class="lesson" id="lesson1"><h2>1．GBM欧式看涨期权反向变量估值与成对标准误</h2><h3>模型定义与经济含义</h3><div class="equation">$$S_T(z)=S_0e^{(r-q-\sigma^2/2)T+\sigma\sqrt Tz},\quad Y(z)=e^{-rT}(S_T(z)-K)_+$$</div><p>标准正态的对称性使Z和−Z产生相同边际分布。若支付函数单调，则二者通常负相关，成对均值的方差相对独立同规模模拟降低。正确误差单位是独立的路径对，不能把2N个相关支付直接代入独立样本标准误。</p><h3>数学推导与求解结构</h3><div class="equation">$$\widehat V=N^{-1}\sum_i A_i,\quad A_i=\tfrac12[Y(Z_i)+Y(-Z_i)],\quad SE=\sqrt{s_A^2/N}$$</div><div class="equation">$$\operatorname{Var}(A)=\tfrac12\operatorname{Var}(Y)+\tfrac12\operatorname{Cov}(Y(Z),Y(-Z))$$</div><p>独立路径对之间平均时方差再除以N。与相同2N支付计算量下的独立模拟比较，若协方差为负，则成对平均确实降低方差。不能只比较样本中的两个价格差。</p><h3>完整构造案例与独立数值对照</h3><p>六个预先指定的标准正态创新值，分别计算正负创新支付、简单样本均价、成对均价和标准误，并以Black–Scholes解析价作模型基准。</p><dl><dt>输入字段</dt><dd>Normal</dd><dt>参数顺序</dt><dd>现货、执行价、利率、股息率、波动率、期限</dd><dt>输出字段</dt><dd>Pairs为路径对数；PlainPrice、PlainSE为只用正向输入的均价与标准误；AntitheticPrice、PairSE为成对估计及其标准误；AnalyticPrice为解析价。</dd><dt>样本文件</dt><dd><a href="../research/numerical-examples/antithetic-gbm.csv" download>antithetic-gbm.csv</a></dd></dl><pre><code>Normal
+-1.5
+-0.7
+-0.2
+0.3
+0.8
+1.6</code></pre><pre><code>./build/kline_quant num-antithetic-gbm quant/research/numerical-examples/antithetic-gbm.csv 100 100 0.03 0.01 0.2 1</code></pre><div class="wide"><table><thead><tr><th>输出行（从0开始）</th><th>字段</th><th>解析或参考值</th></tr></thead><tbody><tr><td>0</td><td>Pairs</td><td>6</td></tr><tr><td>0</td><td>AnalyticPrice</td><td>8.827321225（数值容差1e-8）</td></tr></tbody></table></div><h3>估计假设、实证解释与适用边界</h3><p>构造创新用于复算，不是随机抽样实证；统计标准误只有在独立标准正态路径对条件下有相应抽样含义。普通模拟使用N条、反向法使用2N条支付，实际效率需按计算预算比较。</p></article>
+<article class="lesson" id="lesson2"><h2>2．独立先导样本估计几何亚式控制变量</h2><h3>模型定义与经济含义</h3><div class="equation">$$\log G=d^{-1}\sum_{j=1}^d\log S_{j\Delta},\quad \operatorname{Var}(\log G)=\sigma^2\Delta\frac{(d+1)(2d+1)}{6d}$$</div><p>离散几何平均的对数是高斯向量的线性组合，利用Brownian协方差min(t_i,t_j)求均值和方差，从而解析计算几何亚式看涨支付的风险中性现值。算术亚式与几何亚式高度相关，用独立先导样本拟合控制系数，再仅在评价样本应用，避免同一样本选择系数造成的有限样本偏差。</p><h3>数学推导与求解结构</h3><div class="equation">$$\widehat\beta=\operatorname{Cov}_{\rm pilot}(Y,C)/\operatorname{Var}_{\rm pilot}(C),\quad \widetilde Y=Y-\widehat\beta(C-\mathbb E C)$$</div><div class="equation">$$\operatorname{Var}(Y-\beta C)=\operatorname{Var}(Y)-2\beta\operatorname{Cov}(Y,C)+\beta^2\operatorname{Var}(C)$$</div><p>对β求导得到最优控制系数Cov(Y,C)/Var(C)。解析控制均值使固定β的调整不改变期望。以先导样本估计后，在独立评价样本上固定β，条件于先导结果仍保持无偏。</p><h3>完整构造案例与独立数值对照</h3><p>7条构造路径、每条3期独立创新，前三条用于控制系数拟合，后四条评价；输出几何亚式解析控制均值、控制系数及两种价格和标准误。</p><dl><dt>输入字段</dt><dd>Z1、Z2、Z3</dd><dt>参数顺序</dt><dd>现货、执行价、利率、股息率、波动率、期限、先导路径数</dd><dt>输出字段</dt><dd>PilotPaths、EvaluationPaths为两段样本数，ControlMean、ControlCoefficient为解析控制均值与先导系数；RawPrice、RawSE、AdjustedPrice、AdjustedSE为评价段结果。</dd><dt>样本文件</dt><dd><a href="../research/numerical-examples/geometric-control.csv" download>geometric-control.csv</a></dd></dl><pre><code>Z1,Z2,Z3
+-1,-1,-1
+1,1,1
+0,0,0
+0.5,0.2,0.8
+-0.2,0.8,0.1
+1,-0.3,0.4
+-0.8,0,0.5</code></pre><pre><code>./build/kline_quant num-geometric-control quant/research/numerical-examples/geometric-control.csv 100 95 0.03 0.01 0.2 1 3</code></pre><div class="wide"><table><thead><tr><th>输出行（从0开始）</th><th>字段</th><th>解析或参考值</th></tr></thead><tbody><tr><td>0</td><td>PilotPaths</td><td>3</td></tr><tr><td>0</td><td>EvaluationPaths</td><td>4</td></tr></tbody></table></div><h3>估计假设、实证解释与适用边界</h3><p>假定等时间间隔、无初始S0采样、常波动GBM。样本极少只用于数值复算，控制变量并不必然在任何有限评价样本下降低样本标准误。</p></article>
+<article class="lesson" id="lesson3"><h2>3．给定创新序列的风险中性GBM路径账本</h2><h3>模型定义与经济含义</h3><div class="equation">$$\log S_{t+\Delta}=\log S_t+(r-q-\sigma^2/2)\Delta+\sigma\sqrt\Delta Z_t$$</div><p>对数GBM的精确转移不需要Euler近似。给定每步独立标准正态创新，依次累积对数价格并记录离散路径最高价、终值和贴现支付。路径最大值与终值是不同统计对象，尽管相同创新总和可产生相同终值。</p><h3>数学推导与求解结构</h3><div class="equation">$$M=\max_{j=0,\ldots,d}S_{j\Delta},\quad IV=\sum_j\sigma^2\Delta=\sigma^2T$$</div><div class="equation">$$S_T=S_0\exp[(r-q-\sigma^2/2)T+\sigma\sqrt{\Delta}\sum_{j=1}^d Z_j]$$</div><p>终点只依赖创新总和，而路径最高价依赖创新的顺序。置换同一批创新保持终值却可能改变障碍事件与回撤，这说明路径依赖支付不能以终点分布完全替代。</p><h3>完整构造案例与独立数值对照</h3><p>参数满足r−q−σ²/2=0；创新(0,0)、(1,−1)、(−1,1)均产生终值100，但第二条路径最高值为100 exp(0.2/√2)。积分方差均为0.04。</p><dl><dt>输入字段</dt><dd>Z1、Z2</dd><dt>参数顺序</dt><dd>现货、执行价、利率、股息率、波动率、期限</dd><dt>输出字段</dt><dd>Path为路径索引，TerminalSpot、PathMaximum为终值与离散最高价，DiscountedCall为贴现看涨支付，IntegratedVariance为积分方差。</dd><dt>样本文件</dt><dd><a href="../research/numerical-examples/gbm-path-audit.csv" download>gbm-path-audit.csv</a></dd></dl><pre><code>Z1,Z2
+0,0
+1,-1
+-1,1</code></pre><pre><code>./build/kline_quant num-gbm-path-audit quant/research/numerical-examples/gbm-path-audit.csv 100 100 0.03 0.01 0.2 1</code></pre><div class="wide"><table><thead><tr><th>输出行（从0开始）</th><th>字段</th><th>解析或参考值</th></tr></thead><tbody><tr><td>0</td><td>TerminalSpot</td><td>100</td></tr><tr><td>1</td><td>PathMaximum</td><td>115.190991</td></tr><tr><td>2</td><td>IntegratedVariance</td><td>0.04</td></tr></tbody></table></div><h3>估计假设、实证解释与适用边界</h3><p>路径最大值是离散观察最大值，不能用于连续障碍定价而忽略区间内穿越。输入创新应由外部合适随机源产生。</p></article>
+<article class="lesson" id="lesson4"><h2>4．Brownian Bridge条件存活概率修正连续敲出支付</h2><h3>模型定义与经济含义</h3><div class="equation">$$P(\max_{s\in[t,t+\Delta]}X_s&lt;b\mid X_t=x,X_{t+\Delta}=y)=1-\exp[-2(b-x)(b-y)/(\sigma^2\Delta)]$$</div><p>对数GBM在给定区间两端条件下为Brownian Bridge，常漂移项消失。反射原理给出未穿越上障碍的条件概率；若任何观察端点触及障碍，存活权重归零，否则各独立桥段条件概率相乘。条件期望替代未观察的区间敲出指示，减少离散监测偏差。</p><h3>数学推导与求解结构</h3><div class="equation">$$W=\prod_j(1-e^{-2\log(B/S_{j-1})\log(B/S_j)/(\sigma^2\Delta)}),\quad Y=W(S_T-K)_+$$</div><div class="equation">$$\mathbb E[\mathbf1_{\{\tau_B&gt;T\}}(S_T-K)_+\mid S_0,\ldots,S_d]=W(S_T-K)_+$$</div><p>使用条件期望将未观察的穿越事件积分掉。全期条件存活概率乘积来自Markov桥段条件独立性；对于低于障碍但距障碍很近的端点，离散监测可能严重高估连续敲出价值。</p><h3>完整构造案例与独立数值对照</h3><p>上障碍130，路径(110,120)两端均低于障碍但连续存活概率小于1；第二条路径第一节点触及130，存活权重为0。</p><dl><dt>输入字段</dt><dd>S1、S2</dd><dt>参数顺序</dt><dd>初始现货、上障碍、波动率、期限、执行价</dd><dt>输出字段</dt><dd>DiscreteSurvival、ConditionalSurvival为离散指示与连续条件概率；DiscretePayoff、BridgePayoff为未贴现的两种支付。</dd><dt>样本文件</dt><dd><a href="../research/numerical-examples/bridge-survival.csv" download>bridge-survival.csv</a></dd></dl><pre><code>S1,S2
+110,120
+130,110
+95,105</code></pre><pre><code>./build/kline_quant num-bridge-survival quant/research/numerical-examples/bridge-survival.csv 100 130 0.2 1 100</code></pre><div class="wide"><table><thead><tr><th>输出行（从0开始）</th><th>字段</th><th>解析或参考值</th></tr></thead><tbody><tr><td>1</td><td>ConditionalSurvival</td><td>0</td></tr><tr><td>1</td><td>BridgePayoff</td><td>0</td></tr><tr><td>0</td><td>DiscretePayoff</td><td>20</td></tr></tbody></table></div><h3>估计假设、实证解释与适用边界</h3><p>输出未贴现支付，估值时另乘风险中性贴现因子。适用于常波动连续上障碍及给定等间隔端点，不适用于任意跳跃过程。</p></article>
+<article class="lesson" id="lesson5"><h2>5．Heston全截断Euler方差路径与相关创新</h2><h3>模型定义与经济含义</h3><div class="equation">$$d\log S_t=(r-q-v_t/2)dt+\sqrt{v_t}\,dW_t^S,\quad dv_t=\kappa(\theta-v_t)dt+\xi\sqrt{v_t}\,dW_t^v$$</div><p>方差过程的平方根项要求非负输入。全截断Euler保留原始方差状态，但在漂移和扩散系数中使用正部；对数现货同样使用正部方差。两个独立创新经线性组合实现指定相关性。报告原始负方差步数和积分方差用于监控离散误差。</p><h3>数学推导与求解结构</h3><div class="equation">$$v_{n+1}=v_n+\kappa(\theta-v_n^+)\Delta+\xi\sqrt{v_n^+\Delta}(\rho Z_n+\sqrt{1-\rho^2}U_n)$$</div><div class="equation">$$\Delta\log S_n=(r-q-v_n^+/2)\Delta+\sqrt{v_n^+\Delta}\,Z_n,\quad IV=\sum_n v_n^+\Delta$$</div><p>方差原始状态允许暂时为负，下一步系数以正部计算，输出方差则截取正部。令ξ=0且初值等于长期方差时，数值路径退化为常方差GBM，为独立验证提供确定性基准。</p><h3>完整构造案例与独立数值对照</h3><p>令ξ=0且初始方差等于长期方差0.04，Heston退化为常方差GBM。给定正负相抵的现货创新，终值100、方差0.04、积分方差0.04且无负方差步。</p><dl><dt>输入字段</dt><dd>Z1、U1、Z2、U2</dd><dt>参数顺序</dt><dd>现货、初始方差、利率、股息率、均值回复速度、长期方差、波动的波动率、相关系数、期限</dd><dt>输出字段</dt><dd>TerminalSpot、TerminalVariance为终点现货与正部方差，IntegratedVariance为逐步积分近似，NegativeRawVarianceSteps为原始负方差次数。</dd><dt>样本文件</dt><dd><a href="../research/numerical-examples/heston-paths.csv" download>heston-paths.csv</a></dd></dl><pre><code>Z1,U1,Z2,U2
+0,0,0,0
+1,0,-1,0
+-1,0.5,1,-0.5</code></pre><pre><code>./build/kline_quant num-heston-paths quant/research/numerical-examples/heston-paths.csv 100 0.04 0.03 0.01 1 0.04 0 -0.5 1</code></pre><div class="wide"><table><thead><tr><th>输出行（从0开始）</th><th>字段</th><th>解析或参考值</th></tr></thead><tbody><tr><td>0</td><td>TerminalSpot</td><td>100</td></tr><tr><td>1</td><td>TerminalVariance</td><td>0.04</td></tr><tr><td>2</td><td>IntegratedVariance</td><td>0.04</td></tr><tr><td>2</td><td>NegativeRawVarianceSteps</td><td>0</td></tr></tbody></table></div><h3>估计假设、实证解释与适用边界</h3><p>Euler路径存在时间离散偏差，负原始方差步数不能证明整体收敛；真实定价还需独立随机模拟、步长收敛与基准价格对照。</p></article>
+<section class="source" id="source"><h2>完整C++17实现与复算环境</h2><p>以下头文件与工具库的实际实现一致。算法使用数值矩阵与参数向量，输出具名CSV。仓库提供共享线性系统、三对角求解、数值输入检查和回归测试。</p><p><a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/numerical_lab_simulation.hpp">完整算法头文件</a>　｜　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/numerical_lab_common.hpp">公共数学接口</a>　｜　<a href="https://github.com/KlineCY/KlineCY.github.io/blob/main/quant/cpp/test_numerical_lab.py">独立数值验证</a>　｜　<a href="../research/run_numerical_labs.py" download>批量复算脚本</a></p>
+<pre><code>#pragma once
+#include "numerical_lab_common.hpp"
+
+namespace kline { namespace numerical_lab {
+inline Report antithetic_gbm(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,1,1);parameters(p,6);
+    double S=positive(p[0]),K=positive(p[1]),r=p[2],q=p[3],v=positive(p[4]),T=positive(p[5]),disc=std::exp(-r*T);
+    double m=(r-q-.5*v*v)*T,s=v*std::sqrt(T);Vec paired,raw;
+    for(const auto&amp; row:x){
+        double a=disc*std::max(S*std::exp(m+s*row[0])-K,0.0),b=disc*std::max(S*std::exp(m-s*row[0])-K,0.0);
+        raw.push_back(a);paired.push_back((a+b)/2);
+    }
+    double n=double(x.size());
+    return scalar_rows({"Pairs","PlainPrice","PlainSE","AntitheticPrice","PairSE","AnalyticPrice"},{n,mean(raw),std::sqrt(variance(raw)/n),mean(paired),std::sqrt(variance(paired)/n),bs(S,K,r,q,v,T,true)});
+}
+inline Report geometric_control(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,4,2,64);parameters(p,7);
+    double S=positive(p[0]),K=positive(p[1]),r=p[2],q=p[3],v=positive(p[4]),T=positive(p[5]);
+    auto pilot=count(p[6],2,x.size()-2);
+    double dt=T/d,disc=std::exp(-r*T),mu=std::log(S)+(r-q-.5*v*v)*dt*(d+1)/2;
+    double var=v*v*dt*(d+1)*(2*d+1)/(6*d),sd=std::sqrt(var);
+    double a=(mu-std::log(K)+var)/sd,b=a-sd;
+    double known=disc*(std::exp(mu+.5*var)*normal(a)-K*normal(b));
+    Vec Y,C;
+    for(const auto&amp; row:x){
+        double logS=std::log(S),arithmetic=0,geometric=0;
+        for(double z:row){logS+=(r-q-.5*v*v)*dt+v*std::sqrt(dt)*z;arithmetic+=std::exp(logS)/d;geometric+=logS/d;}
+        Y.push_back(disc*std::max(0.0,arithmetic-K));C.push_back(disc*std::max(0.0,std::exp(geometric)-K));
+    }
+    Vec y(Y.begin(),Y.begin()+pilot),c(C.begin(),C.begin()+pilot);
+    double beta=covariance(y,c)/positive(variance(c));
+    Vec adj,raw;
+    for(std::size_t i=pilot;i&lt;x.size();++i){raw.push_back(Y[i]);adj.push_back(Y[i]-beta*(C[i]-known));}
+    double n=double(raw.size());
+    return scalar_rows({"PilotPaths","EvaluationPaths","ControlMean","ControlCoefficient","RawPrice","RawSE","AdjustedPrice","AdjustedSE"},{double(pilot),n,known,beta,mean(raw),std::sqrt(variance(raw)/n),mean(adj),std::sqrt(variance(adj)/n)});
+}
+inline Report gbm_path_audit(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,2,2,64);parameters(p,6);
+    double S=positive(p[0]),K=positive(p[1]),r=p[2],q=p[3],v=positive(p[4]),T=positive(p[5]);
+    double dt=T/d;
+    Report out{{"Path","TerminalSpot","PathMaximum","DiscountedCall","IntegratedVariance"},{}};
+    for(std::size_t i=0;i&lt;x.size();++i){
+        double logS=std::log(S),peak=S;
+        for(double z:x[i]){logS+=(r-q-.5*v*v)*dt+v*std::sqrt(dt)*z;peak=std::max(peak,std::exp(logS));}
+        double terminal=std::exp(logS);
+        out.rows.push_back({double(i),terminal,peak,std::exp(-r*T)*std::max(terminal-K,0.0),v*v*T});
+    }
+    return out;
+}
+inline Report bridge_survival(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,2,2,64);parameters(p,5);
+    double initial=positive(p[0]),barrier=positive(p[1]),sigma=positive(p[2]),T=positive(p[3]),K=positive(p[4]),dt=T/d;
+    require(initial&lt;barrier,"Initial spot reaches upper barrier");
+    Report out{{"Path","TerminalSpot","DiscreteSurvival","ConditionalSurvival","DiscretePayoff","BridgePayoff"},{}};
+    for(std::size_t i=0;i&lt;x.size();++i){
+        double prev=initial,weight=1,discrete=1;
+        for(double curr:x[i]){
+            positive(curr);
+            if(curr&gt;=barrier||prev&gt;=barrier){weight=0;discrete=0;}
+            else if(weight&gt;0)weight*=-std::expm1(-2*std::log(barrier/prev)*std::log(barrier/curr)/(sigma*sigma*dt));
+            prev=curr;
+        }
+        double payoff=std::max(prev-K,0.0);
+        out.rows.push_back({double(i),prev,discrete,weight,discrete*payoff,weight*payoff});
+    }
+    return out;
+}
+inline Report heston_paths(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,2,2,64);parameters(p,9);
+    require(d%2==0,"Paired independent normal innovations required");
+    double S=positive(p[0]),v0=p[1],r=p[2],q=p[3],k=positive(p[4]),theta=p[5],xi=p[6],rho=p[7],T=positive(p[8]);
+    require(v0&gt;=0&amp;&amp;theta&gt;=0&amp;&amp;xi&gt;=0&amp;&amp;std::abs(rho)&lt;=1,"Invalid Heston parameters");
+    double dt=T/(d/2),root=std::sqrt(dt),a=std::sqrt(std::max(0.0,1-rho*rho));
+    Report out{{"Path","TerminalSpot","TerminalVariance","IntegratedVariance","NegativeRawVarianceSteps"},{}};
+    for(std::size_t i=0;i&lt;x.size();++i){
+        double logS=std::log(S),v=v0,iv=0,neg=0;
+        for(std::size_t j=0;j&lt;d;j+=2){
+            double vp=std::max(v,0.0),z=x[i][j],w=rho*z+a*x[i][j+1];iv+=vp*dt;
+            logS+=(r-q-.5*vp)*dt+std::sqrt(vp)*root*z;
+            v+=k*(theta-vp)*dt+xi*std::sqrt(vp)*root*w;if(v&lt;0)++neg;
+        }
+        out.rows.push_back({double(i),std::exp(logS),std::max(0.0,v),iv,neg});
+    }
+    return out;
+}
+} }
+</code></pre><h3>本地运行</h3><pre><code>cmake -S quant/cpp -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+python quant/research/run_numerical_labs.py ./build/kline_quant numerical-results</code></pre><p>Windows多配置生成器通常使用<code>.\build\Release\kline_quant.exe</code>；单配置生成器使用<code>.\build\kline_quant.exe</code>。输出目录须为空。构造样例用于复核计算与模型结构，不代表真实市场实证结果。</p></section>
+<section class="references" id="references"><h2>参考文献与技术资料</h2><p><a href="https://doi.org/10.1007/978-0-387-21617-1">Glasserman, Monte Carlo Methods in Financial Engineering</a></p><p><a href="https://doi.org/10.1093/rfs/6.2.327">Heston (1993), A Closed-Form Solution for Options with Stochastic Volatility</a></p><p><a href="https://doi.org/10.1080/14697680802392496">Lord, Koekkoek &amp; van Dijk, A comparison of biased simulation schemes for stochastic volatility models</a></p></section>
+</main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>
