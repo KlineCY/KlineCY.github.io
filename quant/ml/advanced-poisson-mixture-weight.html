@@ -1,0 +1,27 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>双Poisson混合权重估计：潜在事件状态与EM｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="ml"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>双Poisson混合权重估计：潜在事件状态与EM</h1><p><a href="../research/advanced-research.html">高级研究方法</a>　<a href="../cpp/advanced_research_learning.hpp" download>完整模型源码</a>　<a href="../cpp/advanced_research_common.hpp" download>公共数值函数</a></p></header><article><h2>模型定义与识别条件</h2><p>与单一过度离散计数模型不同，双Poisson混合把事件生成率视为两个潜在类型之一。此处两个强度由外部指定，只估计混合概率；这避免了强度、标签交换和混合权重联合估计的非凸性，便于研究似然与边界解。</p><h2>数学推导与求解机制</h2><p>对数似然关于p凹，边界单侧得分可直接判定最优点。内部解可采用EM：按后验低强度责任更新概率，并核对原始得分。实现使用log密度差及稳定log-sum-exp；边界得分使用截断指数防止上溢，并对内部未达容差的结果拒绝。</p><div class="equation">$$f(y;p)=p\,\mathrm{Pois}(y;\lambda_L)+(1-p)\mathrm{Pois}(y;\lambda_H)$$</div><div class="equation">$$\gamma_i=\frac{p f_L(y_i)}{p f_L(y_i)+(1-p)f_H(y_i)}$$</div><div class="equation">$$p^{k+1}=n^{-1}\sum_i\gamma_i$$</div><div class="equation">$$\ell'(p)=\sum_i\frac{f_L(y_i)-f_H(y_i)}{pf_L(y_i)+(1-p)f_H(y_i)}$$</div><div class="equation">$$\ell''(p)=-\sum_i\left[\frac{f_L(y_i)-f_H(y_i)}{f(y_i;p)}\right]^2\le0$$</div><h2>独立解析基准</h2><p>四个零事件、λL=1、λH=3时，每条零概率在低强度状态更大，因此p=1是最优，log likelihood=−4。边界解不是数值错误，而是混合模型在该样本下不支持高强度占比。对于内部样本，可用单变量凹函数求根独立验证。</p><p><a href="../research/advanced-examples/poisson-mixture-weight.csv" download>下载CSV样本</a></p><pre>Count
+0
+0
+0
+0
+</pre><pre>./build/kline_quant advanced-poisson-mixture-weight quant/research/advanced-examples/poisson-mixture-weight.csv 1 3 1e-9 2000</pre><div class="wide"><table><thead><tr><th>MixtureWeightLow</th><th>MixtureWeightHigh</th><th>LogLikelihood</th><th>ProjectedScoreResidual</th></tr></thead><tbody><tr><td>1</td><td>0</td><td>-4</td><td>0</td></tr></tbody></table></div><p>输出字段：MixtureWeightLow，MixtureWeightHigh，LogLikelihood，ProjectedScoreResidual，Iterations。</p><h2>计算复杂度与研究边界</h2><p>O(nK)，整数计数非负、两个强度严格正且有序。混合类型独立并不等同于Markov状态过程；时间聚集事件可能需要HMM或点过程。权重的标准正态渐近推断在边界附近不成立。</p><h2>C++17完整实现</h2><pre>inline Report poisson_mixture_weight(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,1,1);parameters(p,4);
+    double low=positive(p[0]),high=positive(p[1]),tol=positive(p[2]);auto K=count(p[3],1,100000);
+    require(high&gt;low&amp;&amp;double(K)*x.size()&lt;=5e7,"Invalid Poisson mixture controls");
+    Vec a,b;for(auto&amp;r:x){double y=count(r[0],0,10000000),z=std::lgamma(y+1);a.push_back(y*std::log(low)-low-z);b.push_back(y*std::log(high)-high-z);}
+    auto score=[&amp;](double w){double g=0;for(std::size_t i=0;i&lt;a.size();++i){double m=std::max(a[i],b[i]),u=std::exp(a[i]-m),v=std::exp(b[i]-m),den=w*u+(1-w)*v;if(den==0)g+=w==0?1e300:-1e300;else g+=(u-v)/den;}return g;};
+    double w=.5,gap=0;std::size_t it=0;
+    if(score(0)&lt;=0)w=0;
+    else if(score(1)&gt;=0)w=1;
+    else{
+        for(;it&lt;K;){
+            double z=std::log(w)-std::log1p(-w),s=0;
+            for(std::size_t i=0;i&lt;a.size();++i)s+=logistic(z+a[i]-b[i]);
+            w=s/a.size();++it;
+            require(w&gt;0&amp;&amp;w&lt;1,"Mixture EM reached boundary unexpectedly");
+            gap=std::abs(score(w));if(gap&lt;=tol)break;
+        }
+        require(gap&lt;=tol,"Mixture EM did not converge");
+    }
+    double ll=0;for(std::size_t i=0;i&lt;a.size();++i)ll+=w==0?b[i]:w==1?a[i]:model_research::logadd(std::log(w)+a[i],std::log1p(-w)+b[i]);
+    return scalar({"MixtureWeightLow","MixtureWeightHigh","LogLikelihood","ProjectedScoreResidual","Iterations"},{w,1-w,ll,gap,double(it)});
+}</pre><p>参考文献：<a href="https://doi.org/10.1002/9780470191613">McLachlan and Krishnan (2008), The EM Algorithm and Extensions, 2nd ed., Wiley.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

@@ -1,0 +1,23 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>遗忘因子递归最小二乘：在线一步预测及信息矩阵｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="ml"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>遗忘因子递归最小二乘：在线一步预测及信息矩阵</h1><p><a href="../research/advanced-research.html">高级研究方法</a>　<a href="../cpp/advanced_research_learning.hpp" download>完整模型源码</a>　<a href="../cpp/advanced_research_common.hpp" download>公共数值函数</a></p></header><article><h2>模型定义与识别条件</h2><p>递归最小二乘在新数据到达后更新系数与逆信息矩阵，避免反复求解完整历史设计。遗忘因子γ控制过去误差的指数衰减，同时初始岭先验也按γ^t衰减；这与每个时点固定λ的滚动岭估计不同。</p><h2>数学推导与求解机制</h2><p>Sherman–Morrison恒等式给出秩一逆更新及增益向量。程序先输出利用上一期系数得到的一步预测，再用当前标签更新参数；后验拟合与真实样本外预测必须分开。独立累积信息矩阵并报告迹，便于核查递归关系。</p><div class="equation">$$F_t(\beta)=\gamma^t\lambda\|\beta\|^2+\sum_{s=1}^t\gamma^{t-s}(y_s-x_s^\top\beta)^2$$</div><div class="equation">$$P_0=\lambda^{-1}I,\quad\beta_0=0$$</div><div class="equation">$$K_t=P_{t-1}x_t/(\gamma+x_t^\top P_{t-1}x_t)$$</div><div class="equation">$$\hat y_{t|t-1}=x_t^\top\beta_{t-1},\quad \beta_t=\beta_{t-1}+K_t(y_t-\hat y_{t|t-1})$$</div><div class="equation">$$P_t=\gamma^{-1}(P_{t-1}-K_tx_t^\top P_{t-1})$$</div><h2>独立解析基准</h2><p>常数设计、γ=1、初始λ=1，标签2、4、6。第一期之前系数0，更新后为1；第二期预测1，更新后系数2；第三期预测2，更新后系数3。与每个前缀的岭闭式解一致。</p><p><a href="../research/advanced-examples/recursive-least-squares.csv" download>下载CSV样本</a></p><pre>X1,Y
+1,2
+1,4
+1,6
+</pre><pre>./build/kline_quant advanced-recursive-least-squares quant/research/advanced-examples/recursive-least-squares.csv 1 1</pre><div class="wide"><table><thead><tr><th>Time</th><th>Actual</th><th>Prediction</th><th>Innovation</th><th>PosteriorPrediction</th><th>InformationTrace</th><th>Beta1</th></tr></thead><tbody><tr><td>1</td><td>2</td><td>0</td><td>2</td><td>1</td><td>2</td><td>1</td></tr><tr><td>2</td><td>4</td><td>1</td><td>3</td><td>2</td><td>3</td><td>2</td></tr><tr><td>3</td><td>6</td><td>2</td><td>4</td><td>3</td><td>4</td><td>3</td></tr></tbody></table></div><p>输出字段：Time，Actual，Prediction，Innovation，PosteriorPrediction，InformationTrace，Beta1。</p><h2>计算复杂度与研究边界</h2><p>每期O(d²)，存储O(d²)。0&lt;γ≤1、λ&gt;0；长序列小γ可能导致未激励方向数值不稳定，代码检查有限性及正对角。金融应用需事先定义特征时点、重置规则及稳定性，后验拟合不能被报告为样本外预测。</p><h2>C++17完整实现</h2><pre>inline Report recursive_least_squares(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,1,2,33)-1;parameters(p,2);double gamma=p[0],lam=positive(p[1]);
+    require(gamma&gt;0&amp;&amp;gamma&lt;=1&amp;&amp;double(x.size())*d*d&lt;=5e7,"Invalid RLS controls");
+    Mat P=identity(d),H=identity(d);for(std::size_t j=0;j&lt;d;++j){P[j][j]/=lam;H[j][j]*=lam;}
+    Vec w(d,0);
+    Report o{{"Time","Actual","Prediction","Innovation","PosteriorPrediction","InformationTrace"},{}};
+    for(std::size_t j=0;j&lt;d;++j)o.header.push_back("Beta"+std::to_string(j+1));
+    for(std::size_t t=0;t&lt;x.size();++t){
+        Vec a(x[t].begin(),x[t].end()-1),v=mul(P,a);double y=x[t].back(),pred=dot(a,w),err=y-pred,den=positive(gamma+dot(a,v));
+        for(std::size_t j=0;j&lt;d;++j)w[j]+=v[j]*err/den;
+        double trace=0;
+        for(std::size_t i=0;i&lt;d;++i)for(std::size_t j=0;j&lt;d;++j){
+            P[i][j]=(P[i][j]-v[i]*v[j]/den)/gamma;
+            H[i][j]=gamma*H[i][j]+a[i]*a[j];if(i==j){positive(P[i][j]);trace+=H[i][j];}
+        }
+        Vec r{double(t+1),y,pred,err,dot(a,w),trace};r.insert(r.end(),w.begin(),w.end());o.rows.push_back(r);
+    }
+    return o;
+}</pre><p>参考文献：<a href="https://www.control.isy.liu.se/research/reports/">Ljung (1999), System Identification: Theory for the User, 2nd ed., Prentice Hall.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>

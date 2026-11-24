@@ -1,0 +1,23 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bernoulli隐Markov状态：缩放前向后向与过滤—平滑分离｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="ml"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>Bernoulli隐Markov状态：缩放前向后向与过滤—平滑分离</h1><p><a href="../research/advanced-research.html">高级研究方法</a>　<a href="../cpp/advanced_research_learning.hpp" download>完整模型源码</a>　<a href="../cpp/advanced_research_common.hpp" download>公共数值函数</a></p></header><article><h2>模型定义与识别条件</h2><p>隐Markov模型允许潜在状态随时间依赖，而观察仅是状态的噪声信号。此实现固定转移与发射参数，精确计算Bernoulli观察的过滤及全序列平滑后验；它是状态推断器，参数校准可在独立训练数据上进行。</p><h2>数学推导与求解机制</h2><p>先由上一期过滤概率经转移矩阵预测当前状态，再用当前二元观察更新。每期除以预测观察概率c_t，避免长序列前向概率连乘下溢。后向递推使用相同尺度，最后将前后向乘积归一；平滑使用未来观察，只适合事后解释，实时策略必须使用过滤概率或先验概率。</p><div class="equation">$$P(S_t=1\mid S_{t-1}=0)=a,\quad P(S_t=0\mid S_{t-1}=1)=b$$</div><div class="equation">$$P(Y_t=1\mid S_t=j)=e_j$$</div><div class="equation">$$\alpha_t(j)=\frac{P(Y_t\mid j)\sum_i\alpha_{t-1}(i)P_{ij}}{c_t},\quad c_t=P(Y_t\mid Y_{1:t-1})$$</div><div class="equation">$$\beta_t(i)=\frac{\sum_jP_{ij}P(Y_{t+1}\mid j)\beta_{t+1}(j)}{c_{t+1}}$$</div><div class="equation">$$\gamma_t(j)=\frac{\alpha_t(j)\beta_t(j)}{\sum_i\alpha_t(i)\beta_t(i)},\quad\ell=\sum_t\log c_t$$</div><h2>独立解析基准</h2><p>第一期观察1、初始高状态0.5、发射概率0.2与0.8，过滤高概率0.8。第二期高状态先验为0.68，观察0后高状态概率为0.136/0.392。平滑第一期会受第二期观察影响，可用两期四条隐状态路径独立枚举。</p><p><a href="../research/advanced-examples/bernoulli-hmm-filter.csv" download>下载CSV样本</a></p><pre>Observation
+1
+0
+</pre><pre>./build/kline_quant advanced-bernoulli-hmm-filter quant/research/advanced-examples/bernoulli-hmm-filter.csv 0.5 0.2 0.2 0.2 0.8</pre><div class="wide"><table><thead><tr><th>Time</th><th>Observation</th><th>PriorHigh</th><th>FilteredHigh</th><th>SmoothedHigh</th><th>LogPredictiveProbability</th></tr></thead><tbody><tr><td>1</td><td>1</td><td>0.5</td><td>0.8</td><td>0.65306122449</td><td>-0.69314718056</td></tr><tr><td>2</td><td>0</td><td>0.68</td><td>0.34693877551</td><td>0.34693877551</td><td>-0.936493439192</td></tr></tbody></table></div><p>输出字段：Time，Observation，PriorHigh，FilteredHigh，SmoothedHigh，LogPredictiveProbability，LogLikelihood。</p><h2>计算复杂度与研究边界</h2><p>时间与存储O(n)，概率参数严格位于(0,1)，以避免零似然。输入观察必须二元且按时间排序。过滤、预测与平滑具有不同信息集；金融研究中若使用全样本平滑状态作为事前信号将产生前视偏差。</p><h2>C++17完整实现</h2><pre>inline Report bernoulli_hmm_filter(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,1,1);parameters(p,5);for(double v:p)require(v&gt;0&amp;&amp;v&lt;1,"Interior HMM probabilities required");
+    double init=p[0],a=p[1],b=p[2],e0=p[3],e1=p[4];
+    auto n=x.size();Vec prior(n),f(n),scale(n),smooth(n),logp(n);double ll=0;
+    auto emit=[&amp;](std::size_t t,double e){return x[t][0]?e:1-e;};
+    for(std::size_t t=0;t&lt;n;++t){
+        require(x[t][0]==0||x[t][0]==1,"Binary observation required");
+        prior[t]=t?a*(1-f[t-1])+(1-b)*f[t-1]:init;
+        double lo=(1-prior[t])*emit(t,e0),hi=prior[t]*emit(t,e1);
+        scale[t]=positive(lo+hi);f[t]=hi/scale[t];logp[t]=std::log(scale[t]);ll+=logp[t];
+    }
+    double l=1,h=1;
+    for(std::size_t t=n;t--&gt;0;){
+        smooth[t]=f[t]*h/positive((1-f[t])*l+f[t]*h);
+        if(t){double u=emit(t,e0)*l/scale[t],v=emit(t,e1)*h/scale[t];l=(1-a)*u+a*v;h=b*u+(1-b)*v;}
+    }
+    Report o{{"Time","Observation","PriorHigh","FilteredHigh","SmoothedHigh","LogPredictiveProbability","LogLikelihood"},{}};
+    for(std::size_t t=0;t&lt;n;++t)o.rows.push_back({double(t+1),x[t][0],prior[t],f[t],smooth[t],logp[t],ll});
+    return o;
+}</pre><p>参考文献：<a href="https://doi.org/10.1109/5.18626">Rabiner (1989), A Tutorial on Hidden Markov Models and Selected Applications in Speech Recognition, Proceedings of the IEEE.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>
