@@ -10,7 +10,7 @@ inline Report log_discount_forward(const Mat& x,const Vec& p){
 inline Report forward_swap_annuity(const Mat& x,const Vec& p){
     validate(x,1,2,2);parameters(p,3);double start=positive(p[0]),N=positive(p[1]),K=p[2],a=0;
     for(auto&r:x)a+=positive(r[0])*positive(r[1]);positive(a);
-    double f=N*(start-x.back()[1]),v=N*K*a;return scalar({"Annuity","ParRate","FixedPV","FloatPV","ReceiveFixedPV","DV01"},{a,(start-x.back()[1])/a,v,f,v-f,N*a*1e-4});
+    double f=N*(start-x.back()[1]),v=N*K*a;return scalar({"Annuity","ParRate","FixedPV","FloatPV","ReceiveFixedPV","CouponPV01"},{a,(start-x.back()[1])/a,v,f,v-f,N*a*1e-4});
 }
 
 inline Report fra_settlement(const Mat& x,const Vec& p){
