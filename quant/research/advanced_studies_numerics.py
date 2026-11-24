@@ -68,7 +68,7 @@ def studies(model,report):
                 if deriv(m)<0:lo=m
                 else:hi=m
             z=(lo+hi)/2;ref=[[z,a-z],[b-z,1-a-b+z]]
-            fit=model("sinkhorn-log",[C[0]+[a],C[1]+[1-a]],[eps,1e-10,10000,b,1-b])
+            fit=model("sinkhorn-log",[C[0]+[a],C[1]+[1-a]],[eps,1e-10,100000,b,1-b])
             for r in fit:
                 v=ref[int(r[0])-1][int(r[1])-1];near(r[2],v,atol=2e-8);near(r[5],0)
                 rows.append([a,b,eps,*r,v])
