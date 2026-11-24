@@ -19,12 +19,12 @@ for c in CATALOG:
     (cases/c["file"]).write_text(raw,encoding="utf-8")
 
 with tempfile.TemporaryDirectory() as tmp:
-    f=Path(tmp)/"input.csv"
+    input_file=Path(tmp)/"input.csv"
     def model(name,rows,params,header=None):
         width=len(rows[0])
         names=header or INDEX[name]["columns"]
         if len(names)!=width:names=[f"V{i+1}" for i in range(width)]
-        _,result,_=run(binary,name,csvfile(f,names,rows),params)
+        _,result,_=run(binary,name,csvfile(input_file,names,rows),params)
         return result
     def report(name,header,rows):
         assert rows and all(len(row)==len(header) for row in rows),name
