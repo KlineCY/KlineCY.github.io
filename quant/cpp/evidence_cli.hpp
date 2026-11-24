@@ -58,6 +58,11 @@
 #include "depth_economics.hpp"
 #include "depth_games.hpp"
 #include "depth_factorconstruction.hpp"
+#include "model_research_optimization.hpp"
+#include "model_research_likelihood.hpp"
+#include "model_research_dynamics.hpp"
+#include "model_research_pricing.hpp"
+#include "model_research_portfolio.hpp"
 namespace kline {
 inline bool run_evidence_cli(const std::string& command,int argc,char** argv,std::ostream& out){
     using Function=researchflow::Report(*)(const researchflow::Mat&,const researchflow::Vec&);
@@ -298,6 +303,36 @@ inline bool run_evidence_cli(const std::string& command,int argc,char** argv,std
     if(command=="depth-size-value-six-cells")fn=depth_factorconstruction::size_value_six_cells;
     if(command=="depth-beta-posterior-shrink")fn=depth_factorconstruction::beta_posterior_shrink;
     if(command=="depth-constant-mix-diversification")fn=depth_factorconstruction::constant_mix_diversification;
+    if(command=="model-fista-elastic")fn=model_research::fista_elastic;
+    if(command=="model-fused-admm")fn=model_research::fused_admm;
+    if(command=="model-box-covariance-qp")fn=model_research::box_covariance_qp;
+    if(command=="model-entropy-balance-fit")fn=model_research::entropy_balance_fit;
+    if(command=="model-nnls-coordinate")fn=model_research::nnls_coordinate;
+    if(command=="model-graph-smoother")fn=model_research::graph_smoother;
+    if(command=="model-nb2-exposure")fn=model_research::nb2_exposure;
+    if(command=="model-zip-em")fn=model_research::zip_em;
+    if(command=="model-cox-breslow-ridge")fn=model_research::cox_breslow_ridge;
+    if(command=="model-tobit-known-scale")fn=model_research::tobit_known_scale;
+    if(command=="model-shrinkage-lda")fn=model_research::shrinkage_lda;
+    if(command=="model-kernel-logistic-fit")fn=model_research::kernel_logistic_fit;
+    if(command=="model-var-ridge-forecast")fn=model_research::var_ridge_forecast;
+    if(command=="model-kalman-grid-fit")fn=model_research::kalman_grid_fit;
+    if(command=="model-hawkes-fixed-decay-fit")fn=model_research::hawkes_fixed_decay_fit;
+    if(command=="model-har-rv-forecast")fn=model_research::har_rv_forecast;
+    if(command=="model-ou-conditional-fit")fn=model_research::ou_conditional_fit;
+    if(command=="model-dcc-twoasset-grid")fn=model_research::dcc_twoasset_grid;
+    if(command=="model-american-put-pde")fn=model_research::american_put_pde;
+    if(command=="model-localvol-call-pde")fn=model_research::localvol_call_pde;
+    if(command=="model-asian-independent-control")fn=model_research::asian_independent_control;
+    if(command=="model-cds-hazard-bootstrap")fn=model_research::cds_hazard_bootstrap;
+    if(command=="model-nelson-siegel-calibration")fn=model_research::nelson_siegel_calibration;
+    if(command=="model-risk-neutral-entropy-fit")fn=model_research::risk_neutral_entropy_fit;
+    if(command=="model-rolling-elastic-portfolio")fn=model_research::rolling_elastic_portfolio;
+    if(command=="model-rolling-covariance-qp")fn=model_research::rolling_covariance_qp;
+    if(command=="model-risk-budget-newton")fn=model_research::risk_budget_newton;
+    if(command=="model-synthetic-control-fit")fn=model_research::synthetic_control_fit;
+    if(command=="model-crossfit-dml-ridge")fn=model_research::crossfit_dml_ridge;
+    if(command=="model-rolling-conformal-ridge")fn=model_research::rolling_conformal_ridge;
     if(!fn)return false;
     require(argc>=3,"Evidence laboratory requires a numeric CSV");
     researchflow::Vec p;
@@ -509,6 +544,36 @@ inline void evidence_usage(std::ostream& out){
     out<<"  depth-size-value-six-cells CSV\n";
     out<<"  depth-beta-posterior-shrink CSV PARAMETERS...\n";
     out<<"  depth-constant-mix-diversification CSV PARAMETERS...\n";
+    out<<"  model-fista-elastic CSV PARAMETERS...\n";
+    out<<"  model-fused-admm CSV PARAMETERS...\n";
+    out<<"  model-box-covariance-qp CSV PARAMETERS...\n";
+    out<<"  model-entropy-balance-fit CSV PARAMETERS...\n";
+    out<<"  model-nnls-coordinate CSV PARAMETERS...\n";
+    out<<"  model-graph-smoother CSV PARAMETERS...\n";
+    out<<"  model-nb2-exposure CSV PARAMETERS...\n";
+    out<<"  model-zip-em CSV PARAMETERS...\n";
+    out<<"  model-cox-breslow-ridge CSV PARAMETERS...\n";
+    out<<"  model-tobit-known-scale CSV PARAMETERS...\n";
+    out<<"  model-shrinkage-lda CSV PARAMETERS...\n";
+    out<<"  model-kernel-logistic-fit CSV PARAMETERS...\n";
+    out<<"  model-var-ridge-forecast CSV PARAMETERS...\n";
+    out<<"  model-kalman-grid-fit CSV PARAMETERS...\n";
+    out<<"  model-hawkes-fixed-decay-fit CSV PARAMETERS...\n";
+    out<<"  model-har-rv-forecast CSV PARAMETERS...\n";
+    out<<"  model-ou-conditional-fit CSV PARAMETERS...\n";
+    out<<"  model-dcc-twoasset-grid CSV PARAMETERS...\n";
+    out<<"  model-american-put-pde CSV PARAMETERS...\n";
+    out<<"  model-localvol-call-pde CSV PARAMETERS...\n";
+    out<<"  model-asian-independent-control CSV PARAMETERS...\n";
+    out<<"  model-cds-hazard-bootstrap CSV PARAMETERS...\n";
+    out<<"  model-nelson-siegel-calibration CSV PARAMETERS...\n";
+    out<<"  model-risk-neutral-entropy-fit CSV PARAMETERS...\n";
+    out<<"  model-rolling-elastic-portfolio CSV PARAMETERS...\n";
+    out<<"  model-rolling-covariance-qp CSV PARAMETERS...\n";
+    out<<"  model-risk-budget-newton CSV PARAMETERS...\n";
+    out<<"  model-synthetic-control-fit CSV PARAMETERS...\n";
+    out<<"  model-crossfit-dml-ridge CSV PARAMETERS...\n";
+    out<<"  model-rolling-conformal-ridge CSV PARAMETERS...\n";
     out<<"Evidence laboratories: evidence-METHOD CSV [PARAMETERS...]\n";
     out<<"  evidence-hj-bound CSV PARAMETERS...\n";
     out<<"  evidence-minimum-norm-sdf CSV PARAMETERS...\n";

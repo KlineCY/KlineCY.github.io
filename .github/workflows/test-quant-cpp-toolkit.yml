@@ -11,6 +11,8 @@ on:
       - 'quant/research/applied-examples/**'
       - 'quant/research/methods-examples/**'
       - 'quant/research/depth-examples/**'
+      - 'quant/research/model-examples/**'
+      - 'quant/research/run_model_studies.py'
       - 'quant/research/run_depth_labs.py'
       - 'quant/research/run_methods_labs.py'
       - 'quant/research/run_applied_labs.py'
@@ -28,6 +30,8 @@ on:
       - 'quant/research/applied-examples/**'
       - 'quant/research/methods-examples/**'
       - 'quant/research/depth-examples/**'
+      - 'quant/research/model-examples/**'
+      - 'quant/research/run_model_studies.py'
       - 'quant/research/run_depth_labs.py'
       - 'quant/research/run_methods_labs.py'
       - 'quant/research/run_applied_labs.py'
@@ -111,6 +115,7 @@ jobs:
           python quant/cpp/test_applied_labs.py /tmp/kline_quant
           python quant/cpp/test_methods_labs.py /tmp/kline_quant
           python quant/cpp/test_depth_labs.py /tmp/kline_quant
+          python quant/cpp/test_model_research.py /tmp/kline_quant
       - name: Execute the complete research suite and chained model evaluations
         run: |
           python quant/research/run_researchflow.py /tmp/kline_quant /tmp/kline-research-results
@@ -150,3 +155,9 @@ jobs:
           python quant/research/run_depth_labs.py /tmp/kline_quant /tmp/kline-depth-results
           test $(find /tmp/kline-depth-results/cases -name '*.csv' | wc -l) -eq 96
           test $(find /tmp/kline-depth-results/studies -name '*.csv' | wc -l) -eq 16
+
+      - name: Reproduce full model estimation and integrated numerical studies
+        run: |
+          python quant/research/run_model_studies.py /tmp/kline_quant /tmp/kline-model-results
+          test $(find /tmp/kline-model-results/cases -name '*.csv' | wc -l) -eq 30
+          test $(find /tmp/kline-model-results/studies -name '*.csv' | wc -l) -eq 12
