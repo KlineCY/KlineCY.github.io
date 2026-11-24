@@ -50,8 +50,8 @@ console.log("PASS: 48 complete system-model topics, 194 rendered formulas, 130 r
 
 const studies=read("quant/research/system-studies.html");
 const scripts=["timeseries","finance","learning","economics","linked"].map(g=>read("quant/research/system_studies_"+g+".py")).join("\n");
-const ids=[...studies.matchAll(/<article id="([a-z_]+)"/g)].map(m=>m[1]);
-const reports=[...scripts.matchAll(/^\s+report\("([a-z_]+)"/gm)].map(m=>m[1]);
+const ids=[...studies.matchAll(/<article id="([a-z0-9_]+)"/g)].map(m=>m[1]);
+const reports=[...scripts.matchAll(/^\s+report\("([a-z0-9_]+)"/gm)].map(m=>m[1]);
 assert.equal(ids.length,60);assert.equal(new Set(ids).size,60);
 assert.deepEqual(ids.slice().sort(),reports.slice().sort());
 for(const id of ids)assert(studies.includes("system-results/studies/"+id+".csv"));
