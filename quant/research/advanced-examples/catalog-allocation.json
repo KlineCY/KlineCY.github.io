@@ -1,0 +1,379 @@
+[
+  {
+    "command": "advanced-ellipsoid-robust-qp",
+    "title": "椭球均值不确定性：完整协方差鲁棒配置",
+    "area": "research",
+    "ref": "Goldfarb and Iyengar (2003), Robust Portfolio Selection Problems, Mathematics of Operations Research.",
+    "url": "https://doi.org/10.1287/moor.28.1.1.14260",
+    "columns": [
+      "Cov1",
+      "Cov2",
+      "Mean",
+      "Lower",
+      "Upper"
+    ],
+    "file": "ellipsoid-robust-qp.csv",
+    "params": [
+      1,
+      1,
+      0.2,
+      1e-9,
+      1000
+    ],
+    "header": [
+      "Asset",
+      "Weight",
+      "NominalMean",
+      "RobustMean",
+      "Variance",
+      "Objective",
+      "ProjectedGradient",
+      "Iterations"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        0.5,
+        0,
+        -0.1414213562373095,
+        0.5,
+        0.3914213562373095,
+        0
+      ],
+      [
+        2,
+        0.5,
+        0,
+        -0.1414213562373095,
+        0.5,
+        0.3914213562373095,
+        0
+      ]
+    ]
+  },
+  {
+    "command": "advanced-affine-box-admm",
+    "title": "多重因子中性组合：仿射约束、盒限制及ADMM",
+    "area": "research",
+    "ref": "Boyd et al. (2011), Distributed Optimization and Statistical Learning via the Alternating Direction Method of Multipliers.",
+    "url": "https://stanford.edu/~boyd/papers/admm_distr_stats.html",
+    "columns": [
+      "Cov1",
+      "Cov2",
+      "Cov3",
+      "Mean",
+      "Lower",
+      "Upper",
+      "BudgetLoading",
+      "FactorLoading"
+    ],
+    "file": "affine-box-admm.csv",
+    "params": [
+      2,
+      1,
+      1,
+      1e-9,
+      10000,
+      0,
+      0
+    ],
+    "header": [
+      "Asset",
+      "Weight",
+      "Objective",
+      "AffineResidual",
+      "PrimalResidual",
+      "DualResidual",
+      "KKTResidual",
+      "Iterations"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        0.5
+      ],
+      [
+        2,
+        0.5
+      ],
+      [
+        3,
+        -1
+      ]
+    ]
+  },
+  {
+    "command": "advanced-scenario-minimax-variance",
+    "title": "多风险矩阵Minimax组合：最坏情景与对偶下界",
+    "area": "research",
+    "ref": "Boyd and Vandenberghe (2004), Convex Optimization, Cambridge University Press.",
+    "url": "https://web.stanford.edu/~boyd/cvxbook/",
+    "columns": [
+      "Scenario",
+      "Cov1",
+      "Cov2"
+    ],
+    "file": "scenario-minimax-variance.csv",
+    "params": [
+      1,
+      1e-8,
+      1000
+    ],
+    "header": [
+      "Asset",
+      "Weight",
+      "WorstVariance",
+      "DualLowerBound",
+      "Gap",
+      "Iterations"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        0.5,
+        1.25,
+        1.25,
+        0
+      ],
+      [
+        2,
+        0.5,
+        1.25,
+        1.25,
+        0
+      ]
+    ]
+  },
+  {
+    "command": "advanced-multiasset-execution-lq",
+    "title": "多资产交叉冲击执行：库存路径、矩阵风险及块线性系统",
+    "area": "feeds",
+    "ref": "Almgren and Chriss (2001), Optimal Execution of Portfolio Transactions, Journal of Risk.",
+    "url": "https://doi.org/10.21314/jor.2001.041",
+    "columns": [
+      "Impact1",
+      "Impact2",
+      "Risk1",
+      "Risk2",
+      "InitialInventory"
+    ],
+    "file": "multiasset-execution-lq.csv",
+    "params": [
+      2,
+      0
+    ],
+    "header": [
+      "Period",
+      "Asset",
+      "Trade",
+      "Remaining",
+      "TemporaryCost",
+      "InventoryRisk",
+      "TotalObjective",
+      "StationarityResidual"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        1,
+        2,
+        2,
+        22,
+        0,
+        44,
+        0
+      ],
+      [
+        1,
+        2,
+        3,
+        3,
+        22,
+        0,
+        44,
+        0
+      ],
+      [
+        2,
+        1,
+        2,
+        0,
+        22,
+        0,
+        44,
+        0
+      ],
+      [
+        2,
+        2,
+        3,
+        0,
+        22,
+        0,
+        44,
+        0
+      ]
+    ]
+  },
+  {
+    "command": "advanced-log-optimal-box",
+    "title": "有限情景对数最优组合：破产约束与可行近端梯度",
+    "area": "research",
+    "ref": "Kelly (1956), A New Interpretation of Information Rate, Bell System Technical Journal; Cover and Thomas (2006), Elements of Information Theory.",
+    "url": "https://doi.org/10.1002/j.1538-7305.1956.tb03809.x",
+    "columns": [
+      "Return1",
+      "Return2",
+      "Probability"
+    ],
+    "file": "log-optimal-box.csv",
+    "params": [
+      1,
+      1e-9,
+      2000
+    ],
+    "header": [
+      "Asset",
+      "Weight",
+      "ExpectedLogGrowth",
+      "MinimumWealthFactor",
+      "ProjectedGradient",
+      "Iterations"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        0.5,
+        0,
+        1,
+        0
+      ],
+      [
+        2,
+        0.5,
+        0,
+        1,
+        0
+      ]
+    ]
+  },
+  {
+    "command": "advanced-stochastic-execution-dp",
+    "title": "随机容量执行：成交不确定性、终端剩余惩罚与Bellman策略",
+    "area": "feeds",
+    "ref": "Bertsekas (2017), Dynamic Programming and Optimal Control, Vol. I, 4th ed.",
+    "url": "https://www.mit.edu/~dimitrib/dpbook.html",
+    "columns": [
+      "FillProbability",
+      "Capacity",
+      "Impact",
+      "InventoryRisk"
+    ],
+    "file": "stochastic-execution-dp.csv",
+    "params": [
+      4,
+      100
+    ],
+    "header": [
+      "Period",
+      "Inventory",
+      "Order",
+      "FillProbability",
+      "ExpectedTrade",
+      "Value",
+      "BellmanResidual"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0
+      ],
+      [
+        1,
+        2,
+        1,
+        1,
+        1,
+        2,
+        0
+      ],
+      [
+        1,
+        3,
+        1,
+        1,
+        1,
+        5,
+        0
+      ],
+      [
+        1,
+        4,
+        2,
+        1,
+        2,
+        8,
+        0
+      ],
+      [
+        2,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0
+      ],
+      [
+        2,
+        2,
+        2,
+        1,
+        2,
+        4,
+        0
+      ],
+      [
+        2,
+        3,
+        3,
+        1,
+        3,
+        9,
+        0
+      ],
+      [
+        2,
+        4,
+        4,
+        1,
+        4,
+        16,
+        0
+      ]
+    ]
+  }
+]

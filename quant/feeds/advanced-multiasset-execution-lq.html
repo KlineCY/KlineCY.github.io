@@ -1,0 +1,24 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>多资产交叉冲击执行：库存路径、矩阵风险及块线性系统｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="feeds"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>多资产交叉冲击执行：库存路径、矩阵风险及块线性系统</h1><p><a href="../research/advanced-research.html">高级研究方法</a>　<a href="../cpp/advanced_research_allocation.hpp" download>完整模型源码</a>　<a href="../cpp/advanced_research_common.hpp" download>公共数值函数</a></p></header><article><h2>模型定义与识别条件</h2><p>多资产同步执行需要同时考虑自身与交叉冲击，以及剩余库存的共同风险。给定对称正定临时冲击矩阵H与风险矩阵Σ，离散执行目标是交易量二次成本加剩余库存风险。输入初始仓位可为正或负；模型允许任意实数成交，不强制逐资产单调或容量约束。</p><h2>数学推导与求解机制</h2><p>将成交量替换为相邻库存差，固定初始和终端库存。对每个内部时间点求导，得到块三对角线性系统；H正定保证该固定端点二次问题严格凸。小规模实现显式构建完整SPD系统并求解，逐期恢复交易、剩余仓位及两个成本分量。</p><div class="equation">$$\min_{X_1,\ldots,X_{T-1}}\sum_{t=1}^{T}(X_{t-1}-X_t)^\top H(X_{t-1}-X_t)+\lambda X_t^\top\Sigma X_t$$</div><div class="equation">$$X_0=q,\quad X_T=0$$</div><div class="equation">$$(2H+\lambda\Sigma)X_t-HX_{t-1}-HX_{t+1}=0$$</div><div class="equation">$$M=\operatorname{blocktridiag}(-H,2H+\lambda\Sigma,-H)$$</div><div class="equation">$$M(X_1^\top,\ldots,X_{T-1}^\top)^\top=(Hq,0,\ldots,0)^\top$$</div><h2>独立解析基准</h2><p>两资产库存4、6，冲击对角1、2，两期且风险惩罚0。每期成交2、3，单期成本4+18=22，总44。一般非对角矩阵和正风险时，最优执行路径由耦合方程决定，不能分别按单资产曲线拼接。</p><p><a href="../research/advanced-examples/multiasset-execution-lq.csv" download>下载CSV样本</a></p><pre>Impact1,Impact2,Risk1,Risk2,InitialInventory
+1,0,1,0,4
+0,2,0,1,6
+</pre><pre>./build/kline_quant advanced-multiasset-execution-lq quant/research/advanced-examples/multiasset-execution-lq.csv 2 0</pre><div class="wide"><table><thead><tr><th>Period</th><th>Asset</th><th>Trade</th><th>Remaining</th><th>TemporaryCost</th><th>InventoryRisk</th><th>TotalObjective</th><th>StationarityResidual</th></tr></thead><tbody><tr><td>1</td><td>1</td><td>2</td><td>2</td><td>22</td><td>0</td><td>44</td><td>0</td></tr><tr><td>1</td><td>2</td><td>3</td><td>3</td><td>22</td><td>0</td><td>44</td><td>0</td></tr><tr><td>2</td><td>1</td><td>2</td><td>0</td><td>22</td><td>0</td><td>44</td><td>0</td></tr><tr><td>2</td><td>2</td><td>3</td><td>0</td><td>22</td><td>0</td><td>44</td><td>0</td></tr></tbody></table></div><p>输出字段：Period，Asset，Trade，Remaining，TemporaryCost，InventoryRisk，TotalObjective，StationarityResidual。</p><h2>计算复杂度与研究边界</h2><p>稠密维度d(T−1)≤64，时间O((dT)³)，大规模应使用块Thomas或Riccati递推。未计入整数、流动性上限及信息泄漏；若协方差与冲击不是对称正定，需先明确经济模型及无价格操纵条件。</p><h2>C++17完整实现</h2><pre>inline Report multiasset_execution_lq(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,1,3,65);require(d%2==1,"Two matrices and inventory required");d=(d-1)/2;parameters(p,2);
+    auto T=count(p[0],2,1000),m=d*(T-1);double risk=p[1];
+    require(d==x.size()&amp;&amp;m&lt;=64&amp;&amp;risk&gt;=0,"Invalid LQ dimensions");
+    Mat H,S;Vec q;
+    for(auto&amp;r:x){H.emplace_back(r.begin(),r.begin()+d);S.emplace_back(r.begin()+d,r.begin()+2*d);q.push_back(r.back());}
+    solve_spd(H,Vec(d,0));solve_spd(S,Vec(d,0));Mat M(m,Vec(m,0));Vec rhs(m,0),hq=mul(H,q);
+    for(std::size_t t=0;t&lt;T-1;++t)for(std::size_t i=0;i&lt;d;++i){
+        auto a=t*d+i;if(t==0)rhs[a]=hq[i];
+        for(std::size_t j=0;j&lt;d;++j){
+            M[a][t*d+j]=2*H[i][j]+risk*S[i][j];if(t)M[a][(t-1)*d+j]=-H[i][j];if(t+1&lt;T-1)M[a][(t+1)*d+j]=-H[i][j];
+        }
+    }
+    Vec z=solve_spd(M,rhs),g=mul(M,z);for(std::size_t j=0;j&lt;m;++j)g[j]-=rhs[j];double gap=inf_norm(g);
+    Mat path{q};for(std::size_t t=0;t&lt;T-1;++t)path.emplace_back(z.begin()+t*d,z.begin()+(t+1)*d);path.push_back(Vec(d,0));
+    Vec cost(T),rv(T);double total=0;Mat trades;
+    for(std::size_t t=0;t&lt;T;++t){Vec a(d);for(std::size_t j=0;j&lt;d;++j)a[j]=path[t][j]-path[t+1][j];trades.push_back(a);cost[t]=dot(a,mul(H,a));rv[t]=risk*dot(path[t+1],mul(S,path[t+1]));total+=cost[t]+rv[t];}
+    Report o{{"Period","Asset","Trade","Remaining","TemporaryCost","InventoryRisk","TotalObjective","StationarityResidual"},{}};
+    for(std::size_t t=0;t&lt;T;++t)for(std::size_t j=0;j&lt;d;++j)o.rows.push_back({double(t+1),double(j+1),trades[t][j],path[t+1][j],cost[t],rv[t],total,gap});
+    return o;
+}</pre><p>参考文献：<a href="https://doi.org/10.21314/jor.2001.041">Almgren and Chriss (2001), Optimal Execution of Portfolio Transactions, Journal of Risk.</a></p></article></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>
