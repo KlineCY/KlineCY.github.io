@@ -1,9 +1,30 @@
 #include "predictive_online.hpp"
 #include "predictive_portfolio.hpp"
 #include "predictive_optimization.hpp"
+#include "predictive_distribution.hpp"
+#include "predictive_interpretation.hpp"
+#include "predictive_sequence.hpp"
 using namespace pdq;
 using Method=Vec(*)(const Vec&);
 const std::map<std::string,Method> methods={
+    {"weighted_conformal",pdq::weighted_conformal},
+    {"ulsif_ratio",pdq::ulsif_ratio},
+    {"energy_score",pdq::energy_score},
+    {"variogram_score",pdq::variogram_score},
+    {"ipcw_brier_curve",pdq::ipcw_brier_curve},
+    {"conformal_risk_grid",pdq::conformal_risk_grid},
+    {"shapley_interaction",pdq::shapley_interaction},
+    {"ale_bilinear",pdq::ale_bilinear},
+    {"conditional_permutation",pdq::conditional_permutation},
+    {"knockoff_plus",pdq::knockoff_plus},
+    {"local_linear_smoother",pdq::local_linear_smoother},
+    {"group_calibration",pdq::group_calibration},
+    {"causal_conv_vjp",pdq::causal_conv_vjp},
+    {"diagonal_scan_vjp",pdq::diagonal_scan_vjp},
+    {"gru_scalar_vjp",pdq::gru_scalar_vjp},
+    {"patch_embedding_vjp",pdq::patch_embedding_vjp},
+    {"ohlc_raster",pdq::ohlc_raster},
+    {"matured_gaussian_loss",pdq::matured_gaussian_loss},
     {"adamw_trajectory",pdq::adamw_trajectory},
     {"ridge_hypergrad",pdq::ridge_hypergrad},
     {"ridge_influence",pdq::ridge_influence},

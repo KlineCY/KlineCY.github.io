@@ -7,9 +7,12 @@ import {methods as online} from '../quant/research/predictive_online_reference.m
 import {methods as neural} from '../quant/research/predictive_neural_reference.mjs';
 import {methods as portfolio} from '../quant/research/predictive_portfolio_reference.mjs';
 import {methods as optimization} from '../quant/research/predictive_optimization_reference.mjs';
+import {methods as distribution} from '../quant/research/predictive_distribution_reference.mjs';
+import {methods as interpretation} from '../quant/research/predictive_interpretation_reference.mjs';
+import {methods as sequence} from '../quant/research/predictive_sequence_reference.mjs';
 const root='quant/research/',read=p=>fs.readFileSync(p,'utf8');
-const methods={...kernel,...online,...neural,...portfolio,...optimization};
-const groups=['kernel','online','neural','portfolio','optimization'];
+const methods={...kernel,...online,...neural,...portfolio,...optimization,...distribution,...interpretation,...sequence};
+const groups=['kernel','online','neural','portfolio','optimization','distribution','interpretation','sequence'];
 const exe=process.argv[2];assert(exe);
 const cat=groups.flatMap(g=>JSON.parse(read(root+'predictive-'+g+'-catalog.json')));
 const cases=cat.flatMap(c=>JSON.parse(read(root+c.cases)).map(z=>({id:c.id,...z})));
@@ -44,6 +47,19 @@ for(let i=0;i<cases.length;i++){
  if(c.id==='hutchinson_full')inv(close(a[0],a[2],1e-9)&&close(a[1],a[3],1e-9),'trace moments');
  if(c.id==='logistic_hvp')inv(a[1]>=-1e-9,'PSD curvature');
  if(c.id==='cg_ridge')inv(a[1]<1e-7,'normal-equation residual');
+ if(c.id==='weighted_conformal')inv(close(a[2]+a[3],1,1e-10)&&a[5]>0,'calibration mass');
+ if(c.id==='ulsif_ratio')inv(a[1]>=a[0]-1e-9&&a[3]<=n+1e-8,'ratio objective and ESS');
+ if(c.id==='energy_score')inv(a[0]>=-1e-9&&close(a[0],a[1]-a[2],1e-9),'energy score');
+ if(c.id==='ipcw_brier_curve'){let m=x[1];for(let j=0;j<m;j++)inv(a[1+m+j]+a[1+2*m+j]+a[1+3*m+j]===n,'censoring partition');}
+ if(c.id==='conformal_risk_grid'){let k=x[1];inv(a[0]===0||a[3+k+a[2]]<=x[2]+1e-10,'risk threshold');}
+ if(c.id==='shapley_interaction')inv(Math.abs(a[3])<1e-9,'attribution closure');
+ if(c.id==='ale_bilinear')inv(Math.abs(a[1])<1e-9,'ALE centering');
+ if(c.id==='knockoff_plus')inv(a[0]===0||a[4]<=x[0],'FDP threshold');
+ if(c.id==='local_linear_smoother')inv(close(a[3],1,1e-9)&&Math.abs(a[4])<1e-8,'equivalent weight moments');
+ if(c.id==='group_calibration')inv(a[1]<=a[0]+1e-9&&a[2]<=x[2]+1e-9,'calibration descent');
+ if(c.id==='ohlc_raster'){let size=a[5]*a[6];inv(sum(a.slice(7,7+size))===a[3]&&sum(a.slice(7+size))===a[4],'pixel conservation');}
+ if(c.id==='matured_gaussian_loss'){let n=x[1];for(let j=0;j<n;j++)if(a[3+j]===0)inv(a[3+n+j]===0&&a[3+2*n+j]===0,'unavailable gradient');}
+ if(c.id==='patch_embedding_vjp'){let n=x[0],c0=x[1],m=a[1],d=x[3],at=3+m+m*d;for(let j=0;j<n;j++)if(x[4+j]===0)inv(a.slice(at+j*c0,at+(j+1)*c0).every(v=>v===0),'missing input gradient');}
  if(c.id==='ensemble_risk')inv(a[1]>=0&&a[2]>=0&&close(a[3],a[1]+a[2],1e-9),'total variance');
 }
 assert.equal(errors.length,0,errors.join('\n'));
