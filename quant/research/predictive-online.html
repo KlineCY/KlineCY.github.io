@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>在线学习、反馈时钟及序贯决策｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="depth-labs.css"><link rel="stylesheet" href="predictive-decision.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main class="predictive-decision"><header><h1>在线学习、反馈时钟及序贯决策</h1><p><a href="predictive-decision.html">预测学习与组合决策</a>　<a href="predictive-online.html">在线学习与反馈时钟</a>　<a href="../cpp/predictive_cli.cpp" download>C++17统一入口</a></p></header><section><p>逐时点更新、延迟反馈、非平稳专家、递归回归、间隔分类、误覆盖率控制与部分反馈。所有决策明确先预测后更新的时序。</p><h2><a href="predictive-delayed-ogd.html">延迟反馈下的投影在线梯度与历史决策账本</a></h2><p>60组可复算参数记录。</p><h2><a href="predictive-fixed-share.html">固定份额专家聚合与非平稳市场损失</a></h2><p>60组可复算参数记录。</p><h2><a href="predictive-recursive-ridge.html">指数遗忘递归Ridge与批量加权最小二乘等价性</a></h2><p>60组可复算参数记录。</p><h2><a href="predictive-passive-aggressive.html">被动激进分类的软间隔在线更新</a></h2><p>60组可复算参数记录。</p><h2><a href="predictive-adaptive-miscoverage.html">在线误覆盖率控制与投影修正恒等式</a></h2><p>60组可复算参数记录。</p><h2><a href="predictive-exp3-observed.html">部分反馈下EXP3概率与重要性加权更新</a></h2><p>60组可复算参数记录。</p></section><section><h2>完整C++17实现</h2><pre>#pragma once
+#include "predictive_kernel.hpp"
+namespace pdq {
+inline Vec delayed_ogd(const Vec&amp; x){
+    require(x.size()&gt;=8&amp;&amp;(x.size()-4)%4==0);double eta=x[0],lo=x[1],hi=x[2],w=x[3];positive(eta);require(lo&lt;hi&amp;&amp;w&gt;=lo&amp;&amp;w&lt;=hi);
+    int n=(x.size()-4)/4;require(n&lt;=10000);std::vector&lt;std::tuple&lt;int,int,double&gt;&gt; pending;Vec out;double loss=0;
+    for(int t=0;t&lt;n;++t){
+        std::sort(pending.begin(),pending.end());
+        int count=0;for(auto p:pending){if(std::get&lt;0&gt;(p)&gt;t)break;w=std::clamp(w-eta*std::get&lt;2&gt;(p),lo,hi);++count;}
+        pending.erase(pending.begin(),pending.begin()+count);
+        double a=x[4+4*t],y=x[5+4*t];int delay=integer(x[6+4*t],1,1000000);double wt=x[7+4*t];require(wt&gt;=0);
+        double pred=w*a,l=.5*wt*sq(pred-y);loss+=l;pending.push_back({t+delay,t,wt*(pred-y)*a});
+        out.insert(out.end(),{w,pred,l,double(count)});
+    }
+    out.insert(out.begin(),{loss,w,double(pending.size())});return out;
+}
+inline Vec fixed_share(const Vec&amp; x){
+    require(x.size()&gt;=5);int k=integer(x[0],2,100);double eta=x[1],alpha=x[2];positive(eta);prob(alpha);require((x.size()-3)%k==0);
+    int n=(x.size()-3)/k;require(n&gt;=1&amp;&amp;n*k&lt;=100000);Vec p(k,1./k),cum(k),out;double loss=0;
+    for(int t=0;t&lt;n;++t){Vec l(x.begin()+3+t*k,x.begin()+3+(t+1)*k);for(int j=0;j&lt;k;++j){prob(l[j]);cum[j]+=l[j];}
+        double z=dot(p,l);loss+=z;out.push_back(z);out.insert(out.end(),p.begin(),p.end());double minl=*std::min_element(l.begin(),l.end());
+        for(int j=0;j&lt;k;++j)p[j]*=std::exp(-eta*(l[j]-minl));double den=sum(p);positive(den);
+        for(double&amp; a:p)a=(1-alpha)*a/den+alpha/k;
+    }
+    double best=*std::min_element(cum.begin(),cum.end());out.insert(out.begin(),{loss,best,loss-best});out.insert(out.end(),p.begin(),p.end());return out;
+}
+inline Vec recursive_ridge(const Vec&amp; x){
+    require(x.size()&gt;=6);int d=integer(x[0],1,30);double lambda=x[1],rho=x[2];positive(lambda);require(rho&gt;0&amp;&amp;rho&lt;=1&amp;&amp;(x.size()-3)%(d+1)==0);
+    int n=(x.size()-3)/(d+1);require(n&gt;=1&amp;&amp;n&lt;=5000);Mat P=zeros(d,d);Vec b(d),out;for(int j=0;j&lt;d;++j)P[j][j]=1/lambda;
+    double rss=0;
+    for(int t=0;t&lt;n;++t){
+        Vec a(x.begin()+3+t*(d+1),x.begin()+3+t*(d+1)+d);double y=x[3+t*(d+1)+d],pred=dot(b,a);rss+=sq(y-pred);
+        Vec u=mv(P,a);double den=rho+dot(a,u);positive(den);double e=y-pred;
+        for(int i=0;i&lt;d;++i)b[i]+=u[i]*e/den;
+        for(int i=0;i&lt;d;++i)for(int j=0;j&lt;d;++j)P[i][j]=(P[i][j]-u[i]*u[j]/den)/rho;
+        out.insert(out.end(),{pred,e,den});out.insert(out.end(),b.begin(),b.end());
+    }
+    out.insert(out.begin(),rss);for(auto&amp; r:P)out.insert(out.end(),r.begin(),r.end());return out;
+}
+inline Vec passive_aggressive(const Vec&amp; x){
+    require(x.size()&gt;=5);int d=integer(x[0],1,100);double C=x[1];positive(C);require((x.size()-2)%(d+1)==0);
+    int n=(x.size()-2)/(d+1);require(n&gt;=1&amp;&amp;n*d&lt;=100000);Vec w(d),out;double loss=0,errors=0;
+    for(int t=0;t&lt;n;++t){Vec a(x.begin()+2+t*(d+1),x.begin()+2+t*(d+1)+d);double y=x[2+t*(d+1)+d];require(y==1||y==-1);
+        double margin=y*dot(w,a),l=std::max(0.,1-margin),norm=dot(a,a),tau=norm&gt;0?std::min(C,l/norm):0;
+        loss+=l;errors+=margin&lt;=0;for(int j=0;j&lt;d;++j)w[j]+=tau*y*a[j];
+        out.insert(out.end(),{margin,l,tau});out.insert(out.end(),w.begin(),w.end());
+    }
+    out.insert(out.begin(),{loss,errors});return out;
+}
+inline Vec adaptive_miscoverage(const Vec&amp; x){
+    require(x.size()&gt;=6);double target=x[0],eta=x[1],a=x[2],lo=x[3],hi=x[4];require(target&gt;0&amp;&amp;target&lt;1&amp;&amp;lo&gt;=0&amp;&amp;hi&lt;=1&amp;&amp;lo&lt;hi&amp;&amp;a&gt;=lo&amp;&amp;a&lt;=hi);positive(eta);
+    Vec out;double err=0,correction=0,initial=a;
+    for(size_t t=5;t&lt;x.size();++t){int e=integer(x[t],0,1);double raw=a+eta*(target-e),next=std::clamp(raw,lo,hi);correction+=next-raw;out.insert(out.end(),{a,double(e),next,next-raw});err+=e;a=next;}
+    double n=x.size()-5;
+    out.insert(out.begin(),{err/n,a,correction,a-initial-eta*(n*target-err)-correction});return out;
+}
+inline Vec exp3_observed(const Vec&amp; x){
+    require(x.size()&gt;=6&amp;&amp;(x.size()-3)%2==0);int k=integer(x[0],2,100);double gamma=x[1],eta=x[2];require(gamma&gt;0&amp;&amp;gamma&lt;=1);positive(eta);
+    Vec logw(k),out;double gain=0;
+    for(size_t t=3;t&lt;x.size();t+=2){
+        int a=integer(x[t],0,k-1);double r=x[t+1];prob(r);double m=*std::max_element(logw.begin(),logw.end());Vec p(k);
+        for(int j=0;j&lt;k;++j)p[j]=std::exp(logw[j]-m);double den=sum(p);positive(den);
+        for(double&amp; z:p)z=(1-gamma)*z/den+gamma/k;double estimated=r/p[a];
+        logw[a]+=eta*estimated;gain+=r;out.insert(out.end(),{double(a),r,p[a],estimated});out.insert(out.end(),p.begin(),p.end());
+    }
+    out.insert(out.begin(),gain);return out;
+}
+}
+</pre></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true})"></script></body></html>
