@@ -1,0 +1,24 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>动态离散选择替换模型与嵌套固定点估计｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>动态离散选择替换模型与嵌套固定点估计</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-economics.html">动态经济决策、产业组织与均衡计算</a>　<a href="../cpp/comprehensive_economics.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>状态及行动</h2><p>设备状态由非负成本指数表示，保留与替换分别确定下一状态编号。两种行动有独立I型极值冲击，尺度归一为1、位置调整至均值0，使期望最大效用等于log-sum-exp。</p><div class="equation">$$v_0(s)=-s+\beta V(T_0(s)),\quad v_1(s)=-c+\beta V(T_1(s)).$$</div></section><section><h2>内层动态规划</h2><p>固定替换成本c时，迭代期望价值函数。Log-sum-exp具有平移一致性及非扩张性质，结合折现因子产生收缩。</p><div class="equation">$$V(s)=\log(e^{v_0(s)}+e^{v_1(s)}).$$</div></section><section><h2>外层条件选择似然</h2><p>选择概率为两个行动价值的softmax。每个状态的选择计数用于条件似然；遍历替换成本网格并选择最大似然。当前例假定转移已知且确定，非完整Rust数据复现。</p><div class="equation">$$P_1(s)=\frac{e^{v_1(s)}}{e^{v_0(s)}+e^{v_1(s)}},\quad \ell(c)=\sum_s[n_0(s)\log P_0(s)+n_1(s)\log P_1(s)].$$</div></section><section><h2>结构解释</h2><p>价值函数误差会传入条件选择概率，因此在外层每个网格点必须检查内层Bellman残差。替换成本识别依赖状态变化、折现与效用尺度设定。</p><div class="equation">$$\hat c=\arg\max_{c\in\mathcal G}\ell(c;\hat V_c).$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为State，Value，ReplaceProbability，KeepProbability，ReplacementCost，LogLikelihood，BellmanResidual。</p><p><a href="../research/comprehensive-examples/dynamic-logit-replacement.csv" download>样本CSV</a></p><pre>State,KeepNext,ReplaceNext,KeepCount,ReplaceCount
+0,1,1,1,1
+</pre><pre>./build/kline_quant comprehensive-dynamic-logit-replacement quant/research/comprehensive-examples/dynamic-logit-replacement.csv 0.5 0 0 2 1e-12 1000</pre><div class="wide"><table><thead><tr><th>State</th><th>Value</th><th>ReplaceProbability</th><th>KeepProbability</th><th>ReplacementCost</th><th>LogLikelihood</th><th>BellmanResidual</th></tr></thead><tbody><tr><td>0</td><td>1.38629436112</td><td>0.5</td><td>0.5</td><td>0</td><td>-1.38629436112</td><td>0</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report dynamic_logit_replacement(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,5,5);parameters(p,6);double beta=p[0],lo=p[1],hi=p[2],tol=positive(p[4]);int G=count(p[3],2,10000),cap=count(p[5],1,100000);
+    require(beta&gt;0&amp;&amp;beta&lt;1&amp;&amp;lo&gt;=0&amp;&amp;hi&gt;=lo&amp;&amp;double(G)*cap*x.size()&lt;=1e8,"invalid dynamic grid");
+    size_t n=x.size();std::vector&lt;size_t&gt; k0,k1;
+    for(const auto&amp;r:x){require(r[0]&gt;=0,"negative state cost");k0.push_back(count(r[1],1,int(n))-1);k1.push_back(count(r[2],1,int(n))-1);count(r[3],0,1000000000);count(r[4],0,1000000000);}
+    double best=-std::numeric_limits&lt;double&gt;::infinity(),bc=0,be=0;Vec bv,bp;
+    for(int g=0;g&lt;G;++g){
+        double c=lo+(hi-lo)*g/(G-1);Vec v(n);
+        auto update=[&amp;](const Vec&amp;w){Vec z(n);for(size_t i=0;i&lt;n;++i)z[i]=logsumexp({-x[i][0]+beta*w[k0[i]],-c+beta*w[k1[i]]});return z;};
+        for(int it=0;it&lt;cap;++it){Vec z=update(v);double err=0;for(size_t i=0;i&lt;n;++i)err=std::max(err,std::abs(z[i]-v[i]));v=z;if(err&lt;=tol)break;}
+        Vec z=update(v),probs(n);double err=0,ll=0;
+        for(size_t i=0;i&lt;n;++i){
+            err=std::max(err,std::abs(z[i]-v[i]));double a=-x[i][0]+beta*v[k0[i]],b=-c+beta*v[k1[i]],den=logsumexp({a,b});
+            probs[i]=std::exp(b-den);ll+=x[i][3]*(a-den)+x[i][4]*(b-den);
+        }
+        require(err&lt;=tol,"Bellman iteration did not converge");
+        if(ll&gt;best){best=ll;bc=c;be=err;bv=v;bp=probs;}
+    }
+    Report out;out.header={"State","Value","ReplaceProbability","KeepProbability","ReplacementCost","LogLikelihood","BellmanResidual"};
+    for(size_t i=0;i&lt;n;++i)out.rows.push_back({x[i][0],bv[i],bp[i],1-bp[i],bc,best,be});
+    return out;
+}</pre><p>参考文献：<a href="https://eml.berkeley.edu/Software/abstracts/rust1095.html">Rust, J. (1987). Optimal Replacement of GMC Bus Engines. Econometrica.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

@@ -1,0 +1,24 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>投入产出数量与价格对偶系统｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>投入产出数量与价格对偶系统</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-economics.html">动态经济决策、产业组织与均衡计算</a>　<a href="../cpp/comprehensive_economics.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>技术系数方向</h2><p>A_ij表示生产一单位j部门产出所需i部门中间投入。数量平衡为x=Ax+f；单位价格等于单位中间投入成本加单位增加值，因此价格方程使用转置矩阵。</p><div class="equation">$$x=Ax+f,\quad p=A^\top p+v.$$</div></section><section><h2>存在性充分条件</h2><p>要求非负技术系数及最大列和严格小于1；这是生产性及谱半径小于1的充分条件而非必要条件。使用Neumann迭代求数量和价格，不要求I−A对称正定。</p><div class="equation">$$\rho(A)\le\|A\|_1&lt;1,\quad (I-A)^{-1}=\sum_{k\ge0}A^k.$$</div></section><section><h2>对偶总量</h2><p>数量和价格系统共同成立时，最终需求价值等于总增加值。分别计算两套残差与中间需求，防止矩阵方向、部门排序或单位错误。</p><div class="equation">$$p^\top f=v^\top x.$$</div></section><section><h2>应用范围</h2><p>线性固定技术模型适合分析静态需求或投入成本冲击的第一轮及网络传播，不含容量约束、替代弹性及内生价格需求。若列和条件不成立，本实现明确拒绝，而非宣称所有此类矩阵无解。</p><div class="equation">$$r_x=x-Ax-f,\quad r_p=p-A^\top p-v.$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Sector，GrossOutput，UnitPrice，IntermediateDemand，FinalDemand，ValueAdded，QuantityResidual，PriceResidual。</p><p><a href="../research/comprehensive-examples/leontief-dual-price-system.csv" download>样本CSV</a></p><pre>Input1,Input2,FinalDemand,ValueAdded
+0.2,0.1,1,0.5
+0.1,0.2,1,0.5
+</pre><pre>./build/kline_quant comprehensive-leontief-dual-price-system quant/research/comprehensive-examples/leontief-dual-price-system.csv</pre><div class="wide"><table><thead><tr><th>Sector</th><th>GrossOutput</th><th>UnitPrice</th><th>IntermediateDemand</th><th>FinalDemand</th><th>ValueAdded</th><th>QuantityResidual</th><th>PriceResidual</th></tr></thead><tbody><tr><td>1</td><td>1.428571428571</td><td>0.7142857142857</td><td>0.4285714285714</td><td>1</td><td>0.5</td><td>0</td><td>0</td></tr><tr><td>2</td><td>1.428571428571</td><td>0.7142857142857</td><td>0.4285714285714</td><td>1</td><td>0.5</td><td>0</td><td>0</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report leontief_dual_price_system(const Mat&amp; x,const Vec&amp; p){
+    size_t n=x.size();validate(x,1,3,34);parameters(p,0);require(x[0].size()==n+2&amp;&amp;n&lt;=32,"square technology matrix required");
+    Mat A(n,Vec(n)),At=A;Vec f(n),v(n);
+    for(size_t i=0;i&lt;n;++i){
+        f[i]=x[i][n];v[i]=x[i][n+1];require(f[i]&gt;=0&amp;&amp;v[i]&gt;=0,"negative final demand or value added");
+        for(size_t j=0;j&lt;n;++j){require(x[i][j]&gt;=0,"negative technical coefficient");A[i][j]=At[j][i]=x[i][j];}
+    }
+    for(const auto&amp;r:At)require(sum(r)&lt;1-1e-9,"column contraction condition failed");
+    auto fixed=[&amp;](const Mat&amp;B,const Vec&amp; b){
+        Vec z=b;
+        for(int it=0;it&lt;100000;++it){
+            Vec u=mul(B,z);double err=0;for(size_t i=0;i&lt;n;++i){u[i]+=b[i];err=std::max(err,std::abs(u[i]-z[i]));}
+            z=u;if(err&lt;=1e-11*std::max(1.,inf_norm(z)))return z;
+        }
+        throw std::runtime_error("Leontief iteration cap");
+    };
+    Vec q=fixed(A,f),price=fixed(At,v),inter=mul(A,q),cost=mul(At,price);
+    Report out;out.header={"Sector","GrossOutput","UnitPrice","IntermediateDemand","FinalDemand","ValueAdded","QuantityResidual","PriceResidual"};
+    for(size_t i=0;i&lt;n;++i)out.rows.push_back({double(i+1),q[i],price[i],inter[i],f[i],v[i],q[i]-inter[i]-f[i],price[i]-cost[i]-v[i]});
+    return out;
+}</pre><p>参考文献：<a href="https://doi.org/10.1017/CBO9780511626982">Miller, R. E., and Blair, P. D. (2009). Input-Output Analysis: Foundations and Extensions, 2nd ed. Cambridge University Press.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>
