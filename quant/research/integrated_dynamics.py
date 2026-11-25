@@ -8,7 +8,7 @@ def autoregressive_crosscheck(model,report):
         gamma=[phi**i for i in range(5)]
         lev=model("levinson-durbin-path",[[g] for g in gamma],[4])
         near(lev[-1][4],1-phi**2)
-        y=[1.]
+        y=[2.]
         for _ in range(9):y.append(.2+phi*y[-1])
         rows=model("arx-recursive-fit",[[int(t<6),z] for t,z in enumerate(y)],[1,0])
         for r in rows:
