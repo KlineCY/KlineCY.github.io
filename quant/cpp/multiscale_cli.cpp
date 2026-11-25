@@ -2,9 +2,18 @@
 #include "multiscale_microstructure.hpp"
 #include "multiscale_engineering.hpp"
 #include "multiscale_empirical.hpp"
+#include "multiscale_extensions.hpp"
 using namespace msq;
 using Method=Vec(*)(const Vec&);
 const std::map<std::string,Method> methods={
+    {"mlmc_bias_budget",msq::mlmc_bias_budget},
+    {"neyman_integer",msq::neyman_integer},
+    {"preavg_optimal",msq::preavg_optimal},
+    {"two_scale_unknown",msq::two_scale_unknown},
+    {"cpcv_intervals",msq::cpcv_intervals},
+    {"two_way_cluster",msq::two_way_cluster},
+    {"circular_sharpe_distribution",msq::circular_sharpe_distribution},
+    {"reality_check_circular",msq::reality_check_circular},
     {"mlmc_plan",msq::mlmc_plan},
     {"mlmc_estimate",msq::mlmc_estimate},
     {"asian_coupling",msq::asian_coupling},

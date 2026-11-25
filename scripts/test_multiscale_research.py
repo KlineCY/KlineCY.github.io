@@ -8,10 +8,10 @@ from collections import Counter
 
 root=pathlib.Path(__file__).resolve().parents[1]
 exe=sys.argv[1]
-groups=['simulation','microstructure','engineering','empirical']
+groups=['simulation','microstructure','engineering','empirical','extensions']
 catalog=[c for g in groups for c in json.loads((root/'quant/research'/f'multiscale-{g}-cases.json').read_text(encoding='utf8'))]
 ids={c['id'] for c in catalog}
-assert len(ids)==32 and set(subprocess.check_output([exe,'--list'],text=True).splitlines())==ids
+assert len(ids)==40 and set(subprocess.check_output([exe,'--list'],text=True).splitlines())==ids
 
 def batch(rows):
     source='\n'.join(' '.join([m]+[str(x) for x in a]) for m,a in rows)+'\n'
@@ -39,7 +39,11 @@ assert not fail,'\n'.join(fail)
 print(f'PASS: {len(catalog)} fixed cases, {coords} selected analytical coordinates')
 spec=importlib.util.spec_from_file_location('multiscale_reference',root/'quant/research/multiscale_reference.py')
 ref=importlib.util.module_from_spec(spec);spec.loader.exec_module(ref)
-studies=list(ref.studies());assert set(m for m,_,_,_ in studies)==ids
+studies=list(ref.studies())
+spec2=importlib.util.spec_from_file_location('multiscale_extension_reference',root/'quant/research/multiscale_extension_reference.py')
+ref2=importlib.util.module_from_spec(spec2);spec2.loader.exec_module(ref2)
+studies.extend(ref2.studies())
+assert set(m for m,_,_,_ in studies)==ids
 results=batch([(m,a) for m,a,_,_ in studies])
 checks=Counter();n=0;fail=[]
 for result,(m,a,e,design) in zip(results,studies):
@@ -72,6 +76,7 @@ bad += [
  ('trade_revisions',[1,1,1,0,1,10,1,1,2,0,2]),('fractional_rank',[1,2,1,0,1,0]),('hj_bound',[1,3,1,1,1,1]),
  ('factor_spanning',[1,3,1,2,2,4,3,6]),('timing_regression',[1,1,1,2,1,3,1,4]),('sdf_distance',[1,2,1,1,0,1,0]),
  ('joint_sign_stepdown',[2,2,0,1,0,2]),('fdr_stepup',[.05,-.1]),('sharpe_hac',[0,1,1,1,1]),('rank_ic_panel',[2,0,3,1,1,1,2,1,3,3,1,1,2,2,3,3])]
+bad += [('mlmc_bias_budget',[.01,.5,1,1,1,1,1,1,0]),('neyman_integer',[1,.5,1,1,1,.5,1,1,1]),('preavg_optimal',[1]),('two_scale_unknown',[1,0,0,1,2,2,4]),('cpcv_intervals',[3,3,0,0,0,1,1,1,2,2,2,3]),('two_way_cluster',[0,0,0,1,0,1,1,2,0,2,2,3,0,3,3,4]),('circular_sharpe_distribution',[2,1,1,1,1]),('reality_check_circular',[3,2,2,1,2,1,2,1,2])]
 errors=[(m,a,r) for (m,a),r in zip(bad,batch(bad)) if r is not None]
 assert not errors,errors
 print(f'PASS: {len(bad)} rejected malformed or out-of-domain cases')

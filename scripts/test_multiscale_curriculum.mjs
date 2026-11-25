@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import katex from 'katex';
 const root='quant/research/';
-const groups=['simulation','microstructure','engineering','empirical'];
+const groups=['simulation','microstructure','engineering','empirical','extensions'];
 const read=p=>fs.readFileSync(p,'utf8');
 const decode=s=>s.replaceAll('&lt;','<').replaceAll('&gt;','>').replaceAll('&quot;','"').replaceAll('&amp;','&');
 const main=read(root+'multiscale-research.html'),cli=read('quant/cpp/multiscale_cli.cpp');
@@ -33,6 +33,6 @@ for(const g of groups){
   }
  }
 }
-assert.equal(methods.size,32);assert.equal(equations,96);
+assert.equal(methods.size,40);assert.equal(equations,120);
 for(const p of [root+'index.html',root+'finite-state-research.html',root+'continuous-research.html','quant/cpp/index.html','quant/sidebar-v2.js'])assert(read(p).includes('multiscale-research.html'),p);
-console.log('PASS: '+methods.size+' research chapters, '+equations+' strict KaTeX groups, '+coordinates+' displayed reference values, '+links+' local links, four embedded source files');
+console.log('PASS: '+methods.size+' research chapters, '+equations+' strict KaTeX groups, '+coordinates+' displayed reference values, '+links+' local links, five embedded source files');
