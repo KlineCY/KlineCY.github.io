@@ -1,0 +1,390 @@
+[
+  {
+    "id": "options_one_step_claim",
+    "title": "单期二叉树状态复制与风险中性概率",
+    "file": "applied-options-one-step-claim.html",
+    "fields": [
+      "Price",
+      "Delta",
+      "Cash",
+      "Probability",
+      "ReplicationResidual"
+    ],
+    "cases": [
+      {
+        "input": [
+          100,
+          120,
+          80,
+          1,
+          20,
+          0
+        ],
+        "expected": [
+          10,
+          0.5,
+          -40,
+          0.5,
+          0
+        ]
+      },
+      {
+        "input": [
+          100,
+          120,
+          80,
+          1.1,
+          0,
+          20
+        ],
+        "expected": [
+          4.545454545454545,
+          -0.5,
+          54.54545454545454,
+          0.75,
+          0
+        ]
+      }
+    ],
+    "invalid": [
+      100,
+      110,
+      90,
+      1.2,
+      20,
+      0
+    ]
+  },
+  {
+    "id": "options_american_tree",
+    "title": "二叉树American期权与提前行权溢价",
+    "file": "applied-options-american-tree.html",
+    "fields": [
+      "American",
+      "European",
+      "Premium",
+      "ExerciseNodes"
+    ],
+    "cases": [
+      {
+        "input": [
+          100,
+          100,
+          1.2,
+          0.8,
+          1.05,
+          2,
+          -1
+        ],
+        "expected": [
+          7.9931972789115635,
+          6.292517006802721,
+          1.7006802721088423,
+          1
+        ]
+      },
+      {
+        "input": [
+          100,
+          100,
+          1.2,
+          0.8,
+          1.05,
+          1,
+          1
+        ],
+        "expected": [
+          11.904761904761905,
+          11.904761904761905,
+          0,
+          0
+        ]
+      }
+    ],
+    "invalid": [
+      100,
+      100,
+      1.1,
+      0.9,
+      1.2,
+      2,
+      1
+    ]
+  },
+  {
+    "id": "options_digital_vertical",
+    "title": "垂直看涨价差与区间平均数字概率",
+    "file": "applied-options-digital-vertical.html",
+    "fields": [
+      "DiscountedDigital",
+      "AverageTailProbability",
+      "Width"
+    ],
+    "cases": [
+      {
+        "input": [
+          90,
+          110,
+          15,
+          5,
+          1
+        ],
+        "expected": [
+          0.5,
+          0.5,
+          20
+        ]
+      },
+      {
+        "input": [
+          100,
+          105,
+          9,
+          5,
+          0.9
+        ],
+        "expected": [
+          0.8,
+          0.8888888888888888,
+          5
+        ]
+      }
+    ],
+    "invalid": [
+      100,
+      101,
+      5,
+      0,
+      1
+    ]
+  },
+  {
+    "id": "options_uneven_butterfly",
+    "title": "非等距执行价蝶式组合与凸性证书",
+    "file": "applied-options-uneven-butterfly.html",
+    "fields": [
+      "LeftSlope",
+      "RightSlope",
+      "SlopeJump",
+      "NormalizedDensity",
+      "ButterflyValue"
+    ],
+    "cases": [
+      {
+        "input": [
+          90,
+          100,
+          120,
+          18,
+          12,
+          4,
+          1
+        ],
+        "expected": [
+          -0.6,
+          -0.4,
+          0.2,
+          0.013333333333333334,
+          1.3333333333333333
+        ]
+      },
+      {
+        "input": [
+          90,
+          100,
+          120,
+          18,
+          15,
+          4,
+          1
+        ],
+        "expected": [
+          -0.3,
+          -0.55,
+          -0.25,
+          -0.016666666666666666,
+          -1.6666666666666667
+        ]
+      }
+    ],
+    "invalid": [
+      100,
+      90,
+      120,
+      10,
+      8,
+      4,
+      1
+    ]
+  },
+  {
+    "id": "options_discrete_hedge",
+    "title": "离散Delta自融资现金账本与复制误差",
+    "file": "applied-options-discrete-hedge.html",
+    "fields": [
+      "TerminalHedge",
+      "Payoff",
+      "HedgeError",
+      "TerminalCash"
+    ],
+    "cases": [
+      {
+        "input": [
+          10,
+          1,
+          20,
+          100,
+          0.5,
+          110,
+          0.7,
+          120
+        ],
+        "expected": [
+          22,
+          20,
+          2,
+          -62
+        ]
+      },
+      {
+        "input": [
+          10,
+          1.01,
+          0,
+          100,
+          0.5,
+          90
+        ],
+        "expected": [
+          4.6,
+          0,
+          4.6,
+          -40.4
+        ]
+      }
+    ],
+    "invalid": [
+      10,
+      0,
+      20,
+      100,
+      0.5,
+      110
+    ]
+  },
+  {
+    "id": "options_delta_vega_neutral",
+    "title": "两工具Delta–Vega对冲与剩余Gamma",
+    "file": "applied-options-delta-vega-neutral.html",
+    "fields": [
+      "HedgeOptions",
+      "Underlying",
+      "ResidualDelta",
+      "ResidualVega",
+      "ResidualGamma"
+    ],
+    "cases": [
+      {
+        "input": [
+          30,
+          100,
+          4,
+          0.5,
+          20,
+          0.3
+        ],
+        "expected": [
+          -5,
+          -27.5,
+          0,
+          0,
+          2.5
+        ]
+      },
+      {
+        "input": [
+          -5,
+          -40,
+          -2,
+          0.25,
+          10,
+          0.5
+        ],
+        "expected": [
+          4,
+          4,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "invalid": [
+      1,
+      2,
+      3,
+      0.5,
+      0,
+      0.1
+    ]
+  },
+  {
+    "id": "options_two_step_replication",
+    "title": "两期树逐节点复制与折现期望的独立闭合",
+    "file": "applied-options-two-step-replication.html",
+    "fields": [
+      "RootPrice",
+      "RootDelta",
+      "RootCash",
+      "UpNode",
+      "DownNode",
+      "BinomialResidual"
+    ],
+    "cases": [
+      {
+        "input": [
+          100,
+          100,
+          1.2,
+          0.8,
+          1,
+          1
+        ],
+        "expected": [
+          11,
+          0.55,
+          -44,
+          22,
+          0,
+          0
+        ]
+      },
+      {
+        "input": [
+          100,
+          100,
+          1.2,
+          0.8,
+          1,
+          -1
+        ],
+        "expected": [
+          11,
+          -0.45,
+          56,
+          2,
+          20,
+          0
+        ]
+      }
+    ],
+    "invalid": [
+      100,
+      100,
+      1.1,
+      0.9,
+      1.2,
+      1
+    ]
+  }
+]

@@ -1,0 +1,372 @@
+[
+  {
+    "id": "credit_hazard_curve",
+    "title": "分段常数违约强度与边际违约概率",
+    "file": "applied-credit-hazard-curve.html",
+    "fields": [
+      "SurvivalsThenMarginalPDsThenTotalPD"
+    ],
+    "cases": [
+      {
+        "input": [
+          1,
+          0.6931471805599453,
+          1,
+          0.6931471805599453
+        ],
+        "expected": [
+          0.5,
+          0.25,
+          0.5,
+          0.25,
+          0.75
+        ]
+      },
+      {
+        "input": [
+          1,
+          0,
+          2,
+          0.6931471805599453
+        ],
+        "expected": [
+          1,
+          0.25,
+          0,
+          0.75,
+          0.75
+        ]
+      }
+    ],
+    "invalid": [
+      1,
+      -0.1
+    ]
+  },
+  {
+    "id": "credit_risky_zero",
+    "title": "回收面值假设下信用零息债的解析价格",
+    "file": "applied-credit-risky-zero.html",
+    "fields": [
+      "Price",
+      "SurvivalLeg",
+      "RecoveryLeg",
+      "Survival"
+    ],
+    "cases": [
+      {
+        "input": [
+          100,
+          1,
+          0,
+          0.6931471805599453,
+          0.4
+        ],
+        "expected": [
+          70,
+          50,
+          20,
+          0.5
+        ]
+      },
+      {
+        "input": [
+          100,
+          1,
+          0.6931471805599453,
+          0.6931471805599453,
+          0.4
+        ],
+        "expected": [
+          40,
+          25,
+          15,
+          0.5
+        ]
+      }
+    ],
+    "invalid": [
+      100,
+      1,
+      0,
+      -0.1,
+      0.4
+    ]
+  },
+  {
+    "id": "credit_cds_discrete",
+    "title": "离散CDS保费腿、保护腿与公平利差",
+    "file": "applied-credit-cds-discrete.html",
+    "fields": [
+      "FairSpread",
+      "PremiumAnnuity",
+      "ProtectionPV"
+    ],
+    "cases": [
+      {
+        "input": [
+          0.4,
+          1,
+          1,
+          0.8,
+          1,
+          1,
+          0.6
+        ],
+        "expected": [
+          0.17142857142857143,
+          1.4,
+          0.24
+        ]
+      },
+      {
+        "input": [
+          0.4,
+          0.5,
+          0.95,
+          0.9
+        ],
+        "expected": [
+          0.13333333333333333,
+          0.4275,
+          0.057
+        ]
+      }
+    ],
+    "invalid": [
+      0.4,
+      1,
+      1,
+      0.8,
+      1,
+      1,
+      0.9
+    ]
+  },
+  {
+    "id": "credit_net_collateral",
+    "title": "交易净额、阈值抵押与期望正敞口",
+    "file": "applied-credit-net-collateral.html",
+    "fields": [
+      "GrossEPE",
+      "NettedEPE",
+      "CollateralizedEPE",
+      "ENE",
+      "ExpectedCollateral"
+    ],
+    "cases": [
+      {
+        "input": [
+          2,
+          2,
+          10,
+          100,
+          -80,
+          30,
+          -50
+        ],
+        "expected": [
+          65,
+          10,
+          5,
+          10,
+          5
+        ]
+      },
+      {
+        "input": [
+          2,
+          2,
+          0,
+          10,
+          20,
+          -10,
+          5
+        ],
+        "expected": [
+          17.5,
+          15,
+          0,
+          2.5,
+          15
+        ]
+      }
+    ],
+    "invalid": [
+      2,
+      2,
+      -1,
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  {
+    "id": "credit_cva_independent",
+    "title": "独立性假设下单边CVA逐期归因",
+    "file": "applied-credit-cva-independent.html",
+    "fields": [
+      "CVAPeriodsThenTotal"
+    ],
+    "cases": [
+      {
+        "input": [
+          0.4,
+          1,
+          20,
+          0.1,
+          0.9,
+          40,
+          0.2
+        ],
+        "expected": [
+          1.2,
+          4.32,
+          5.52
+        ]
+      },
+      {
+        "input": [
+          0,
+          1,
+          100,
+          0.01
+        ],
+        "expected": [
+          1,
+          1
+        ]
+      }
+    ],
+    "invalid": [
+      0.4,
+      1,
+      20,
+      0.8,
+      1,
+      40,
+      0.5
+    ]
+  },
+  {
+    "id": "credit_wrong_way",
+    "title": "条件违约率与敞口相关造成的错向风险",
+    "file": "applied-credit-wrong-way.html",
+    "fields": [
+      "MeanExposure",
+      "MeanPD",
+      "JointLoss",
+      "IndependentLoss",
+      "DependenceAdjustment"
+    ],
+    "cases": [
+      {
+        "input": [
+          0.4,
+          0.5,
+          10,
+          0.01,
+          0.5,
+          50,
+          0.09
+        ],
+        "expected": [
+          30,
+          0.05,
+          1.38,
+          0.9,
+          0.48
+        ]
+      },
+      {
+        "input": [
+          0.4,
+          0.5,
+          10,
+          0.09,
+          0.5,
+          50,
+          0.01
+        ],
+        "expected": [
+          30,
+          0.05,
+          0.42,
+          0.9,
+          -0.48
+        ]
+      }
+    ],
+    "invalid": [
+      0.4,
+      0.4,
+      10,
+      0.1,
+      0.4,
+      20,
+      0.2
+    ]
+  },
+  {
+    "id": "credit_credit_curve_pipeline",
+    "title": "违约强度到CDS利差与CVA的完整研究链",
+    "file": "applied-credit-credit-curve-pipeline.html",
+    "fields": [
+      "TotalPD",
+      "FairCDS",
+      "CVA",
+      "CVAFirst",
+      "SurvivalEnd"
+    ],
+    "cases": [
+      {
+        "input": [
+          0.4,
+          1,
+          0.6931471805599453,
+          1,
+          20,
+          1,
+          0.6931471805599453,
+          1,
+          40
+        ],
+        "expected": [
+          0.75,
+          0.6,
+          12,
+          6,
+          0.25
+        ]
+      },
+      {
+        "input": [
+          0.4,
+          1,
+          0,
+          1,
+          100,
+          1,
+          0.6931471805599453,
+          0.9,
+          20
+        ],
+        "expected": [
+          0.5,
+          0.18620689655172415,
+          5.4,
+          0,
+          0.5
+        ]
+      }
+    ],
+    "invalid": [
+      0.4,
+      1,
+      -0.1,
+      1,
+      20
+    ]
+  }
+]
