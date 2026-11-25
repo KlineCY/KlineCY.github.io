@@ -1,0 +1,45 @@
+name: Validate finite state research
+on:
+  pull_request:
+    paths:
+      - 'quant/research/finite-state-*'
+      - 'quant/research/index.html'
+      - 'quant/research/applied-systems.html'
+      - 'quant/cpp/finite_state_*'
+      - 'quant/cpp/index.html'
+      - 'quant/sidebar-v2.js'
+      - 'scripts/test_finite_state*'
+      - '.github/workflows/test-finite-state-research.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'quant/research/finite-state-*'
+      - 'quant/research/index.html'
+      - 'quant/research/applied-systems.html'
+      - 'quant/cpp/finite_state_*'
+      - 'quant/cpp/index.html'
+      - 'quant/sidebar-v2.js'
+      - 'scripts/test_finite_state*'
+      - '.github/workflows/test-finite-state-research.yml'
+permissions:
+  contents: read
+jobs:
+  numerics:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [g++, clang++]
+    steps:
+      - uses: actions/checkout@v4
+      - run: ${{ matrix.compiler }} -std=c++17 -O2 -Wall -Wextra -Werror -pedantic quant/cpp/finite_state_cli.cpp -o /tmp/quant_finite
+      - run: python3 scripts/test_finite_state_research.py /tmp/quant_finite
+  curriculum:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save --no-package-lock katex@0.16.11
+      - run: node scripts/test_finite_state_curriculum.mjs

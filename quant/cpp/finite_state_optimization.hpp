@@ -3,7 +3,7 @@
 namespace fsq {
 // Integer transport by successive shortest residual paths with reverse arcs.
 inline Vec transport_flow(const Vec& x){
-    require(x.size()>=8);
+    require(x.size()>=5);
     int m=count(x[0],1,20),n=count(x[1],1,20);
     require(x.size()==size_t(2+m+n+m*n));
     std::vector<int> supply(m),demand(n);int s=0,d=0;
