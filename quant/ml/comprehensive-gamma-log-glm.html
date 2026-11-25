@@ -1,0 +1,35 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Gamma对数链接回归：正值目标、乘法条件均值及形状参数｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="ml"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>Gamma对数链接回归：正值目标、乘法条件均值及形状参数</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-learning.html">统计学习：完整估计、条件分布与跨域泛化</a>　<a href="../cpp/comprehensive_learning.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>正值响应与异方差</h2><p>金融中的持续时间、绝对损失或条件正值成交量具有非负且右偏的分布。Gamma模型要求严格正值，而不是将零样本无条件加一个常数。形状k固定时均值μ和方差满足Var=μ²/k，对数链接使预测均值严格正并表达乘法关系。</p><div class="equation">$$Y_i\mid x_i\sim\operatorname{Gamma}(k,\mu_i/k),\quad \mu_i=\exp(x_i^\top\beta),\quad \operatorname{Var}(Y_i\mid x_i)=\mu_i^2/k$$</div></section><section><h2>完整负对数似然</h2><p>在形状—尺度参数化中，负对数密度包含lgamma(k)、log y、log μ及y/μ。固定k时，对系数有影响的部分为k(η+y e^{-η})，目标关于η严格凸。岭参数影响训练最优系数，形状参数由输入给定，不在此函数中估计。</p><div class="equation">$$\ell_i=\log\Gamma(k)-k\log k-(k-1)\log y_i+k(\eta_i+y_ie^{-\eta_i}),\quad \eta_i=x_i^\top\beta$$</div></section><section><h2>曲率与冻结估计</h2><p>梯度为k(1−y/μ)x，Hessian为k(y/μ)xx'。阻尼Newton对训练期总目标优化，保留训练—留出隔离。单位偏差使用Gamma deviance，可将不同均值下的相对误差放在可比尺度；偏差与固定形状下的完整概率评分仍有区别。</p><div class="equation">$$g=\sum_{i\in T}k(1-y_i/\mu_i)x_i+\lambda\beta,\quad H=\sum_{i\in T}k(y_i/\mu_i)x_ix_i^\top+\lambda I,\quad D_i=2(y_i/\mu_i-1-\log(y_i/\mu_i))$$</div></section><section><h2>基准与适用域</h2><p>训练响应1、1且特征1，系数0、均值1、形状2时方差0.5；第三条留出响应2，单位偏差2(1−ln2)。正值域之外应使用适当的混合模型或其他分布；极端特征可能造成指数溢出，数值求解将拒绝非有限输出。</p><div class="equation">$$\hat\mu_i=e^{x_i^\top\hat\beta},\quad \hat v_i=\hat\mu_i^2/k$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Row，Train，Actual，Mean，Variance，UnitDeviance，PenalizedNLL，ScoreResidual，Coefficient1。</p><p><a href="../research/comprehensive-examples/gamma-log-glm.csv" download>样本CSV</a></p><pre>Train,Y,X1
+1,1,1
+1,1,1
+0,2,1
+</pre><pre>./build/kline_quant comprehensive-gamma-log-glm quant/research/comprehensive-examples/gamma-log-glm.csv 2 1 1e-10 100</pre><div class="wide"><table><thead><tr><th>Row</th><th>Train</th><th>Actual</th><th>Mean</th><th>Variance</th><th>UnitDeviance</th><th>PenalizedNLL</th><th>ScoreResidual</th><th>Coefficient1</th></tr></thead><tbody><tr><td>1</td><td>1</td><td>1</td><td>1</td><td>0.5</td><td>0</td><td>1.22741127776</td><td>0</td><td>0</td></tr><tr><td>2</td><td>1</td><td>1</td><td>1</td><td>0.5</td><td>0</td><td>1.22741127776</td><td>0</td><td>0</td></tr><tr><td>3</td><td>0</td><td>2</td><td>1</td><td>0.5</td><td>0.6137056388801</td><td>1.22741127776</td><td>0</td><td>0</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report gamma_log_glm(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,2,3,34)-2;parameters(p,4);
+    double k=positive(p[0]),lam=positive(p[1]),tol=positive(p[2]);auto cap=count(p[3],1,1000);
+    require(double(cap)*x.size()*d*d&lt;=5e7,"Gamma work limit");
+    Mat X;std::vector&lt;std::size_t&gt; train;
+    for(std::size_t i=0;i&lt;x.size();++i){
+        auto&amp;r=x[i];require(r[0]==0||r[0]==1,"Binary train flag");positive(r[1]);
+        X.emplace_back(r.begin()+2,r.end());if(r[0])train.push_back(i);
+    }
+    require(!train.empty(),"Training data required");
+    double constant=std::lgamma(k)-k*std::log(k);
+    auto evaluate=[&amp;](const Vec&amp;w){
+        auto s=model_research::regularized_state(w,lam);
+        for(auto i:train){
+            double eta=dot(X[i],w),y=x[i][1],a=y*std::exp(-eta);
+            s.value+=constant-(k-1)*std::log(y)+k*(eta+a);
+            for(std::size_t j=0;j&lt;d;++j)s.gradient[j]+=k*(1-a)*X[i][j];
+            add_outer(s.hessian,X[i],k*a);
+        }
+        return s;
+    };
+    auto f=model_research::damped_newton(d,tol,cap,evaluate);
+    Report out{{"Row","Train","Actual","Mean","Variance","UnitDeviance","PenalizedNLL","ScoreResidual"},{}};
+    for(std::size_t j=1;j&lt;=d;++j)out.header.push_back("Coefficient"+std::to_string(j));
+    for(std::size_t i=0;i&lt;x.size();++i){
+        double mu=positive(std::exp(dot(X[i],f.beta))),a=positive(x[i][1]/mu);
+        Vec r{double(i+1),x[i][0],x[i][1],mu,mu*mu/k,2*(a-1-std::log(a)),f.state.value,inf_norm(f.state.gradient)};
+        r.insert(r.end(),f.beta.begin(),f.beta.end());out.rows.push_back(r);
+    }
+    return out;
+}</pre><p>参考文献：<a href="https://doi.org/10.1201/9780203753736">McCullagh and Nelder (1989), Generalized Linear Models, 2nd ed., Chapman and Hall.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

@@ -1,0 +1,40 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>截面排序的线性RankNet：训练对构造、冻结得分与排序损失｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="ml"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>截面排序的线性RankNet：训练对构造、冻结得分与排序损失</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-learning.html">统计学习：完整估计、条件分布与跨域泛化</a>　<a href="../cpp/comprehensive_learning.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>排序目标与截面结构</h2><p>同一交易时点内，目标相关度较高的资产应获得更高的模型得分。若直接在所有时间之间构造排序对，会混入截面规模、宏观水平及标签分布差异。此实现按组构造训练对，并拒绝同一组跨越训练与留出标记；组内相同标签不形成约束。</p><div class="equation">$$\mathcal P=\{(i,j):g_i=g_j,\ y_i&gt;y_j,\ i,j\in T\},\quad z_{ij}=(x_i-x_j)^\top w$$</div></section><section><h2>线性成对似然</h2><p>RankNet的成对概率可使用任意可微得分函数，这里选择线性形式。对有序对的损失为softplus(−z)，平均每对贡献；较大的组拥有更多对，因此权重由对数决定，并未采用每组等权。岭使不可识别的常数项收缩至零。</p><div class="equation">$$L(w)=|\mathcal P|^{-1}\sum_{(i,j)\in\mathcal P}\log(1+e^{-z_{ij}})+\lambda\|w\|_2^2/2$$</div></section><section><h2>梯度与Hessian</h2><p>每个差分向量贡献梯度−σ(−z)d和曲率σ(z)σ(−z)dd'。利用阻尼Newton直接求完整参数，而不是只输出排序损失或梯度。训练后冻结权重，对原记录输出线性得分。排序指标和收益回测必须另行在留出组进行。</p><div class="equation">$$g=\lambda w-\frac1{|\mathcal P|}\sum\sigma(-z)d,\quad H=\lambda I+\frac1{|\mathcal P|}\sum\sigma(z)\sigma(-z)dd^\top$$</div></section><section><h2>基准与限制</h2><p>训练组两个标签不同但特征相同，差分为零，最优系数0、损失ln2。留出组即使特征相差很大也不改变模型。训练对的枚举成本为O(Σn_g²)，曲率成本O(Pd²)，限制对数与参数维度；大型截面应使用抽样、近似Hessian或列表排序方法。</p><div class="equation">$$\hat s_i=x_i^\top\hat w,\qquad L_{\rm test}=|\mathcal P_{\rm test}|^{-1}\sum_{(i,j)\in\mathcal P_{\rm test}}\log(1+e^{-(\hat s_i-\hat s_j)})$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Row，Train，Group，Relevance，Score，PenalizedLoss，ScoreResidual，Coefficient1。</p><p><a href="../research/comprehensive-examples/ranknet-linear-fit.csv" download>样本CSV</a></p><pre>Train,Group,Relevance,X1
+1,1,1,1
+1,1,0,1
+0,2,1,2
+0,2,0,0
+</pre><pre>./build/kline_quant comprehensive-ranknet-linear-fit quant/research/comprehensive-examples/ranknet-linear-fit.csv 1 1e-10 100</pre><div class="wide"><table><thead><tr><th>Row</th><th>Train</th><th>Group</th><th>Relevance</th><th>Score</th><th>PenalizedLoss</th><th>ScoreResidual</th><th>Coefficient1</th></tr></thead><tbody><tr><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td><td>0.6931471805599</td><td>0</td><td>0</td></tr><tr><td>2</td><td>1</td><td>1</td><td>0</td><td>0</td><td>0.6931471805599</td><td>0</td><td>0</td></tr><tr><td>3</td><td>0</td><td>2</td><td>1</td><td>0</td><td>0.6931471805599</td><td>0</td><td>0</td></tr><tr><td>4</td><td>0</td><td>2</td><td>0</td><td>0</td><td>0.6931471805599</td><td>0</td><td>0</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report ranknet_linear_fit(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,2,4,35)-3;parameters(p,3);
+    double lam=positive(p[0]),tol=positive(p[1]);auto cap=count(p[2],1,1000);
+    std::map&lt;double,std::vector&lt;std::size_t&gt;&gt; groups;std::map&lt;double,double&gt; flag;Mat X;
+    for(std::size_t i=0;i&lt;x.size();++i){
+        auto&amp;r=x[i];require(r[0]==0||r[0]==1,"Binary train flag");
+        auto f=flag.emplace(r[1],r[0]);require(f.first-&gt;second==r[0],"Group crosses train and test");
+        if(r[0])groups[r[1]].push_back(i);
+        X.emplace_back(r.begin()+3,r.end());
+    }
+    double work=0;for(auto&amp;kv:groups)work+=double(kv.second.size())*kv.second.size();
+    require(work&lt;=1e6,"Pair construction limit");
+    Mat dif;
+    for(auto&amp;kv:groups)for(auto i:kv.second)for(auto j:kv.second)if(x[i][2]&gt;x[j][2]){
+        Vec v(d);for(std::size_t k=0;k&lt;d;++k)v[k]=X[i][k]-X[j][k];dif.push_back(v);
+    }
+    require(!dif.empty()&amp;&amp;double(cap)*dif.size()*d*d&lt;=5e7,"Invalid ranking design");
+    auto evaluate=[&amp;](const Vec&amp;w){
+        auto s=model_research::regularized_state(w,lam);double n=dif.size();
+        for(auto&amp;a:dif){
+            double z=dot(a,w),b=logistic(-z);s.value+=model_research::softplus(-z)/n;
+            for(std::size_t j=0;j&lt;d;++j)s.gradient[j]-=b*a[j]/n;
+            add_outer(s.hessian,a,b*(1-b)/n);
+        }
+        return s;
+    };
+    auto f=model_research::damped_newton(d,tol,cap,evaluate);
+    Report out{{"Row","Train","Group","Relevance","Score","PenalizedLoss","ScoreResidual"},{}};
+    for(std::size_t j=1;j&lt;=d;++j)out.header.push_back("Coefficient"+std::to_string(j));
+    for(std::size_t i=0;i&lt;x.size();++i){
+        Vec r{double(i+1),x[i][0],x[i][1],x[i][2],dot(X[i],f.beta),f.state.value,inf_norm(f.state.gradient)};
+        r.insert(r.end(),f.beta.begin(),f.beta.end());out.rows.push_back(r);
+    }
+    return out;
+}</pre><p>参考文献：<a href="https://doi.org/10.1145/1102351.1102363">Burges et al. (2005), Learning to Rank Using Gradient Descent, ICML.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

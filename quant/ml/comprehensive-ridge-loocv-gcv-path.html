@@ -1,0 +1,29 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>岭回归全路径：留一解析误差、广义交叉验证及有效自由度｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="ml"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>岭回归全路径：留一解析误差、广义交叉验证及有效自由度</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-learning.html">统计学习：完整估计、条件分布与跨域泛化</a>　<a href="../cpp/comprehensive_learning.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>线性平滑器视角</h2><p>岭回归对固定设计矩阵的拟合值是响应向量的线性变换。正则化不仅缩小参数，还降低平滑器的迹，即有效自由度。该量通常不是整数，不能简单以非零系数数目替代。这里所有显式特征均受惩罚，包括常数特征。</p><div class="equation">$$\hat\beta_\lambda=(X^\top X+\lambda I)^{-1}X^\top y,\quad \hat y=S_\lambda y,\quad S_\lambda=X(X^\top X+\lambda I)^{-1}X^\top$$</div></section><section><h2>删除一条观测的解析关系</h2><p>固定惩罚系数且不改变特征预处理时，删除一条记录等价于Gram矩阵的秩一调整。Sherman–Morrison公式给出留一残差e_i/(1−h_i)，其中h_i是岭帽子矩阵对角元。这样可在一个参数上用一次矩阵逆和n次内积完成留一误差。</p><div class="equation">$$e_{(-i),i}=\frac{y_i-\hat y_i}{1-h_i},\quad h_i=x_i^\top(X^\top X+\lambda I)^{-1}x_i$$</div></section><section><h2>GCV与风险估计</h2><p>GCV用平均杠杆代替逐条杠杆，构造旋转不变的近似留一标准。若杠杆分布不均匀，GCV与LOOCV可明显不同。输出RSS、迹、最大杠杆及两个评分，而非自动把同一验证路径的最低值报告为独立测试绩效。</p><div class="equation">$$\operatorname{LOOCV}=\frac1n\sum_i(e_i/(1-h_i))^2,\quad \operatorname{GCV}=\frac{RSS/n}{(1-\operatorname{tr}(S_\lambda)/n)^2}$$</div></section><section><h2>参考及边界</h2><p>三条响应1、2、3、常数特征1。λ=0得系数2、RSS2、留一MSE1.5；λ=1得系数1.5、RSS2.75、杠杆0.25，评分44/27。每个λ使用独立矩阵解，拒绝单位杠杆或奇异系统；金融时间序列不得将普通LOOCV直接视为走步验证。</p><div class="equation">$$\operatorname{df}_\lambda=\operatorname{tr}(S_\lambda)=\sum_j \frac{s_j^2}{s_j^2+\lambda}$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Penalty，LOOCVMSE，GCV，RSS，EffectiveDF，MaxLeverage，Coefficient1。</p><p><a href="../research/comprehensive-examples/ridge-loocv-gcv-path.csv" download>样本CSV</a></p><pre>Y,X1
+1,1
+2,1
+3,1
+</pre><pre>./build/kline_quant comprehensive-ridge-loocv-gcv-path quant/research/comprehensive-examples/ridge-loocv-gcv-path.csv 0 1</pre><div class="wide"><table><thead><tr><th>Penalty</th><th>LOOCVMSE</th><th>GCV</th><th>RSS</th><th>EffectiveDF</th><th>MaxLeverage</th><th>Coefficient1</th></tr></thead><tbody><tr><td>0</td><td>1.5</td><td>1.5</td><td>2</td><td>1</td><td>0.3333333333333</td><td>2</td></tr><tr><td>1</td><td>1.62962962963</td><td>1.62962962963</td><td>2.75</td><td>0.75</td><td>0.25</td><td>1.5</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report ridge_loocv_gcv_path(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,2,2,33)-1,n=x.size();require(!p.empty()&amp;&amp;p.size()&lt;=500,"Penalty path required");
+    parameters(p,p.size());require(double(p.size())*n*d*d&lt;=5e7,"GCV work limit");
+    Mat X,H(d,Vec(d,0));Vec y,b(d,0);
+    for(auto&amp;r:x){
+        X.emplace_back(r.begin()+1,r.end());y.push_back(r[0]);
+        add_outer(H,X.back(),1);for(std::size_t j=0;j&lt;d;++j)b[j]+=r[0]*r[j+1];
+    }
+    Report out{{"Penalty","LOOCVMSE","GCV","RSS","EffectiveDF","MaxLeverage"},{}};
+    for(std::size_t j=1;j&lt;=d;++j)out.header.push_back("Coefficient"+std::to_string(j));
+    for(double lam:p){
+        require(lam&gt;=0,"Nonnegative ridge required");Mat A=H;
+        for(std::size_t j=0;j&lt;d;++j)A[j][j]+=lam;
+        Vec w=solve_spd(A,b);Mat inv=invert_spd(A);
+        double rss=0,loo=0,df=0,maxh=0;
+        for(std::size_t i=0;i&lt;n;++i){
+            double h=dot(X[i],mul(inv,X[i])),e=y[i]-dot(X[i],w);
+            require(h&gt;=-1e-10&amp;&amp;h&lt;1-1e-12,"Unit leverage prevents LOOCV");
+            rss+=e*e;loo+=std::pow(e/(1-h),2);df+=h;maxh=std::max(maxh,h);
+        }
+        double gcv=rss/n/std::pow(positive(1-df/n),2);
+        Vec r{lam,loo/n,gcv,rss,df,maxh};r.insert(r.end(),w.begin(),w.end());out.rows.push_back(r);
+    }
+    return out;
+}</pre><p>参考文献：<a href="https://doi.org/10.1080/00401706.1979.10489751">Golub, Heath and Wahba (1979), Generalized Cross-Validation as a Method for Choosing a Good Ridge Parameter, Technometrics.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>
