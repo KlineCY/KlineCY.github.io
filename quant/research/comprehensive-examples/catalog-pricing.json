@@ -1,0 +1,436 @@
+[
+  {
+    "command": "comprehensive-svi-profile-calibration",
+    "title": "SVI单期限校准：线性剖面、翼部斜率与密度诊断",
+    "area": "assets",
+    "columns": [
+      "LogMoneyness",
+      "TotalVariance"
+    ],
+    "params": [
+      0,
+      0,
+      2,
+      1,
+      1,
+      2,
+      0,
+      0,
+      2
+    ],
+    "header": [
+      "LogMoneyness",
+      "MarketVariance",
+      "FittedVariance",
+      "Residual",
+      "A",
+      "B",
+      "Rho",
+      "M",
+      "Sigma",
+      "DensityFactor",
+      "WingLeft",
+      "WingRight",
+      "TrainingSSE"
+    ],
+    "file": "svi-profile-calibration.csv",
+    "expected_prefix": [
+      [
+        -1,
+        0.3828427124746191,
+        0.3828427124746191,
+        0,
+        0.1,
+        0.2,
+        0,
+        0,
+        1
+      ],
+      [
+        0,
+        0.30000000000000004,
+        0.30000000000000004,
+        0,
+        0.1,
+        0.2,
+        0,
+        0,
+        1
+      ],
+      [
+        1,
+        0.3828427124746191,
+        0.3828427124746191,
+        0,
+        0.1,
+        0.2,
+        0,
+        0,
+        1
+      ]
+    ],
+    "ref": "Gatheral and Jacquier (2014), Arbitrage-free SVI volatility surfaces, Quantitative Finance.",
+    "url": "https://doi.org/10.1080/14697688.2013.819986"
+  },
+  {
+    "command": "comprehensive-call-curve-convex-projection",
+    "title": "无套利看涨价格投影：加权Dykstra、斜率约束与对偶差距",
+    "area": "assets",
+    "columns": [
+      "Strike",
+      "ForwardCall",
+      "Weight"
+    ],
+    "params": [
+      100,
+      1e-10,
+      10000
+    ],
+    "header": [
+      "Strike",
+      "RawCall",
+      "ProjectedCall",
+      "LowerBound",
+      "UpperBound",
+      "MaxViolation",
+      "Objective",
+      "DualGap",
+      "Iterations"
+    ],
+    "file": "call-curve-convex-projection.csv",
+    "expected_prefix": [
+      [
+        80,
+        30,
+        30,
+        20,
+        100,
+        0,
+        0,
+        0
+      ],
+      [
+        100,
+        20,
+        20,
+        0,
+        100,
+        0,
+        0,
+        0
+      ],
+      [
+        120,
+        10,
+        10,
+        0,
+        100,
+        0,
+        0,
+        0
+      ]
+    ],
+    "ref": "Boyd and Vandenberghe (2004), Convex Optimization; static call-price convexity and Euclidean projection.",
+    "url": "https://web.stanford.edu/~boyd/cvxbook/"
+  },
+  {
+    "command": "comprehensive-ho-lee-curve-tree",
+    "title": "Ho–Lee利率树精确校准：状态价格、期限漂移与Caplet贡献",
+    "area": "assets",
+    "columns": [
+      "Discount"
+    ],
+    "params": [
+      1,
+      0,
+      0.02
+    ],
+    "header": [
+      "Step",
+      "Node",
+      "Shift",
+      "ShortRate",
+      "StatePrice",
+      "TargetDiscount",
+      "ModelDiscount",
+      "CurveResidual",
+      "CapletContribution"
+    ],
+    "file": "ho-lee-curve-tree.csv",
+    "expected_prefix": [
+      [
+        0,
+        0,
+        0.05129329438755058,
+        0.05129329438755058,
+        1,
+        0.95,
+        0.95,
+        0,
+        0.03099999999999994
+      ],
+      [
+        1,
+        0,
+        0.0540672212702757,
+        0.0540672212702757,
+        0.475,
+        0.9,
+        0.9,
+        0,
+        0.01600000000000001
+      ],
+      [
+        1,
+        1,
+        0.0540672212702757,
+        0.0540672212702757,
+        0.475,
+        0.9,
+        0.9,
+        0,
+        0.01600000000000001
+      ]
+    ],
+    "ref": "Ho and Lee (1986), Term Structure Movements and Pricing Interest Rate Contingent Claims, Journal of Finance.",
+    "url": "https://doi.org/10.1111/j.1540-6261.1986.tb02528.x"
+  },
+  {
+    "command": "comprehensive-multicurve-forward-bootstrap",
+    "title": "多曲线利率Bootstrap：OIS贴现、期限投影与Swap重定价",
+    "area": "assets",
+    "columns": [
+      "Time",
+      "Accrual",
+      "Discount",
+      "ParSwap"
+    ],
+    "params": [],
+    "header": [
+      "Maturity",
+      "Accrual",
+      "Discount",
+      "ParSwap",
+      "Forward",
+      "Annuity",
+      "FloatingPV",
+      "RepricedSwap",
+      "Residual"
+    ],
+    "file": "multicurve-forward-bootstrap.csv",
+    "expected_prefix": [
+      [
+        1,
+        1,
+        0.95,
+        0.02,
+        0.02,
+        0.95,
+        0.019,
+        0.02,
+        0
+      ],
+      [
+        2,
+        1,
+        0.9,
+        0.03,
+        0.04055555555555556,
+        1.85,
+        0.0555,
+        0.03,
+        0
+      ]
+    ],
+    "ref": "Bianchetti (2010), Two Curves, One Price: Pricing and Hedging Interest Rate Derivatives Decoupling Forwarding and Discounting Yield Curves, Risk.",
+    "url": "https://arxiv.org/abs/0905.2770"
+  },
+  {
+    "command": "comprehensive-variance-strip-quadrature",
+    "title": "模型无关方差互换复制：OTM期权条带、有限执行价与积分误差",
+    "area": "assets",
+    "columns": [
+      "Strike",
+      "ForwardCall",
+      "ForwardPut"
+    ],
+    "params": [
+      100,
+      1,
+      1e-10
+    ],
+    "header": [
+      "LowerStrike",
+      "UpperStrike",
+      "LeftIntegrand",
+      "RightIntegrand",
+      "VarianceContribution",
+      "CumulativeVariance",
+      "ParityResidual"
+    ],
+    "file": "variance-strip-quadrature.csv",
+    "expected_prefix": [
+      [
+        80,
+        100,
+        0.0003125,
+        0.0005,
+        0.01625,
+        0.01625,
+        0
+      ],
+      [
+        100,
+        120,
+        0.0005,
+        0.00006944444444444444,
+        0.01138888888888889,
+        0.02763888888888889,
+        0
+      ]
+    ],
+    "ref": "Demeterfi, Derman, Kamal and Zou (1999), More Than You Ever Wanted to Know About Volatility Swaps, Goldman Sachs Quantitative Strategies Research Notes.",
+    "url": "https://emanuelderman.com/more-than-you-ever-wanted-to-know-about-volatility-swaps/"
+  },
+  {
+    "command": "comprehensive-quanto-lognormal-option",
+    "title": "Quanto期权：计价货币变换、相关性调整与解析平价",
+    "area": "assets",
+    "columns": [
+      "Spot",
+      "Strike",
+      "DomesticRate",
+      "ForeignRate",
+      "Dividend",
+      "EquityVol",
+      "FXVol",
+      "Correlation",
+      "Time",
+      "FixedFX"
+    ],
+    "params": [],
+    "header": [
+      "Call",
+      "Put",
+      "QuantoForward",
+      "AdjustedDrift",
+      "DiscountedUnderlying",
+      "ParityResidual"
+    ],
+    "file": "quanto-lognormal-option.csv",
+    "expected_prefix": [
+      [
+        10,
+        0,
+        100,
+        0,
+        100,
+        0
+      ]
+    ],
+    "ref": "Hull (2022), Options, Futures, and Other Derivatives, 11th ed., Pearson, Quanto and foreign-currency derivatives.",
+    "url": "https://www.pearson.com/en-us/subject-catalog/p/options-futures-and-other-derivatives/P200000005155"
+  },
+  {
+    "command": "comprehensive-heston-fourier-inversion",
+    "title": "Heston特征函数定价：风险中性概率、复数分支与积分收敛",
+    "area": "assets",
+    "columns": [
+      "Spot",
+      "Strike",
+      "Rate",
+      "Dividend",
+      "Time",
+      "Kappa",
+      "Theta",
+      "VolOfVol",
+      "Correlation",
+      "InitialVariance"
+    ],
+    "params": [
+      100,
+      2000
+    ],
+    "header": [
+      "Call",
+      "Put",
+      "P1",
+      "P2",
+      "Forward",
+      "MartingaleResidual",
+      "IntegrationDifference",
+      "ParityResidual"
+    ],
+    "file": "heston-fourier-inversion.csv",
+    "expected_prefix": [
+      [
+        7.9655674554058,
+        7.9655674554058,
+        0.539827837277029,
+        0.460172162722971,
+        100,
+        0,
+        0,
+        0
+      ]
+    ],
+    "ref": "Heston (1993), A Closed-Form Solution for Options with Stochastic Volatility with Applications to Bond and Currency Options, Review of Financial Studies.",
+    "url": "https://doi.org/10.1093/rfs/6.2.327"
+  },
+  {
+    "command": "comprehensive-cir-zero-curve-grid",
+    "title": "CIR零息曲线轮廓校准：仿射折现、稳定极限与市场误差",
+    "area": "assets",
+    "columns": [
+      "Maturity",
+      "Discount"
+    ],
+    "params": [
+      0.02,
+      1,
+      1,
+      2,
+      0.02,
+      0.02,
+      2,
+      0,
+      0,
+      2
+    ],
+    "header": [
+      "Maturity",
+      "MarketDiscount",
+      "ModelDiscount",
+      "LogResidual",
+      "Kappa",
+      "Theta",
+      "Sigma",
+      "LogSSE"
+    ],
+    "file": "cir-zero-curve-grid.csv",
+    "expected_prefix": [
+      [
+        1,
+        0.9801986733067553,
+        0.9801986733067553,
+        0,
+        1,
+        0.02,
+        0,
+        0
+      ],
+      [
+        2,
+        0.9607894391523232,
+        0.9607894391523232,
+        0,
+        1,
+        0.02,
+        0,
+        0
+      ]
+    ],
+    "ref": "Cox, Ingersoll and Ross (1985), A Theory of the Term Structure of Interest Rates, Econometrica.",
+    "url": "https://doi.org/10.2307/1911242"
+  }
+]

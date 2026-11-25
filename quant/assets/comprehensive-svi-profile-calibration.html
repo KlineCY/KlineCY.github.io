@@ -1,0 +1,31 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SVI单期限校准：线性剖面、翼部斜率与密度诊断｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="assets"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>SVI单期限校准：线性剖面、翼部斜率与密度诊断</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-pricing.html">金融工程：波动率曲面、定价曲线与随机波动</a>　<a href="../cpp/comprehensive_pricing.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>总方差参数化</h2><p>单期限波动率微笑可以用对数远期价内程度k与总隐含方差w(k)表达。SVI的非对称翼部由ρ控制，m定位曲线中心，σ控制曲率尺度；a、b分别决定水平与斜率。以总方差而非直接隐含波动率拟合，是因为静态无套利条件自然使用总方差及其导数。</p><div class="equation">$$w(k)=a+b\{\rho(k-m)+\sqrt{(k-m)^2+\sigma^2}\},\quad b\ge0,\ |\rho|&lt;1,\ \sigma&gt;0$$</div></section><section><h2>线性参数剖面</h2><p>给定ρ,m,σ后，定义u(k)为括号内函数，拟合w=a+bu成为一元含截距回归。b限制非负；若无约束斜率为负则取b=0及均值截距。对剩余三个参数进行网格扫描，剔除全局总方差下界非正或两翼斜率不满足必要上界的候选。此实现是筛选无约束剖面候选，并非完整约束SVI校准。</p><div class="equation">$$\hat b=\max(0,\sum_i(u_i-\bar u)(w_i-\bar w)/\sum_i(u_i-\bar u)^2),\quad \hat a=\bar w-\hat b\bar u$$</div></section><section><h2>密度因子</h2><p>无蝶式套利要求风险中性密度非负。以隐含总方差表达的密度因子g(k)由w、w'、w''计算；若在采样点出现负值，说明该点存在局部蝶式风险。只检查样本节点不能证明所有实数k上非负，翼部与跨期限日历套利还需要独立分析。</p><div class="equation">$$g(k)=\left(1-\frac{kw'}{2w}\right)^2-\frac{(w')^2}{4}\left(\frac1w+\frac14\right)+\frac{w''}2$$</div></section><section><h2>复算与边界</h2><p>合成微笑w=0.1+0.2√(k²+1)，固定ρ=0,m=0,σ=1，线性剖面精确恢复a=0.1,b=0.2，左右翼斜率均0.2。输出每节点拟合及密度因子。复杂度O(nGρGmGσ)，网格与市场报价误差应分别评估；不将密度诊断当作完整无套利保证。</p><div class="equation">$$w_{\min}=a+b\sigma\sqrt{1-\rho^2},\qquad s_L=b(1-\rho),\ s_R=b(1+\rho)$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为LogMoneyness，MarketVariance，FittedVariance，Residual，A，B，Rho，M，Sigma，DensityFactor，WingLeft，WingRight，TrainingSSE。</p><p><a href="../research/comprehensive-examples/svi-profile-calibration.csv" download>样本CSV</a></p><pre>LogMoneyness,TotalVariance
+-1,0.3828427124746191
+0,0.30000000000000004
+1,0.3828427124746191
+</pre><pre>./build/kline_quant comprehensive-svi-profile-calibration quant/research/comprehensive-examples/svi-profile-calibration.csv 0 0 2 1 1 2 0 0 2</pre><div class="wide"><table><thead><tr><th>LogMoneyness</th><th>MarketVariance</th><th>FittedVariance</th><th>Residual</th><th>A</th><th>B</th><th>Rho</th><th>M</th><th>Sigma</th></tr></thead><tbody><tr><td>-1</td><td>0.3828427124746</td><td>0.3828427124746</td><td>0</td><td>0.1</td><td>0.2</td><td>0</td><td>0</td><td>1</td></tr><tr><td>0</td><td>0.3</td><td>0.3</td><td>0</td><td>0.1</td><td>0.2</td><td>0</td><td>0</td><td>1</td></tr><tr><td>1</td><td>0.3828427124746</td><td>0.3828427124746</td><td>0</td><td>0.1</td><td>0.2</td><td>0</td><td>0</td><td>1</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report svi_profile_calibration(const Mat&amp; x,const Vec&amp; p){
+    validate(x,3,2,2);parameters(p,9);
+    auto R=count(p[2],2,1000),S=count(p[5],2,1000),M=count(p[8],2,1000);
+    require(p[0]&gt;-1&amp;&amp;p[1]&lt;1&amp;&amp;p[0]&lt;=p[1]&amp;&amp;p[3]&gt;0&amp;&amp;p[4]&gt;=p[3]&amp;&amp;p[7]&gt;=p[6]&amp;&amp;double(R)*S*M*x.size()&lt;=5e7,"Invalid SVI grid");
+    double ym=0;for(auto&amp;r:x)ym+=positive(r[1])/x.size();
+    double best=std::numeric_limits&lt;double&gt;::infinity(),a=0,b=0,rho=0,sigma=0,m=0;
+    for(std::size_t i=0;i&lt;R;++i)for(std::size_t j=0;j&lt;S;++j)for(std::size_t k=0;k&lt;M;++k){
+        double r=p[0]+(p[1]-p[0])*i/(R-1),s=p[3]+(p[4]-p[3])*j/(S-1),z=p[6]+(p[7]-p[6])*k/(M-1);
+        Vec u;double um=0;
+        for(auto&amp;v:x){double d=v[0]-z;u.push_back(r*d+std::hypot(d,s));um+=u.back()/x.size();}
+        double uu=0,uy=0;
+        for(std::size_t l=0;l&lt;x.size();++l){uu+=std::pow(u[l]-um,2);uy+=(u[l]-um)*(x[l][1]-ym);}
+        if(uu&lt;=0)continue;
+        double B=std::max(0.,uy/uu),A=ym-B*um;
+        if(!(A+B*s*std::sqrt(1-r*r)&gt;0&amp;&amp;B*(1-r)&lt;2&amp;&amp;B*(1+r)&lt;2))continue;
+        double f=0;for(std::size_t l=0;l&lt;x.size();++l)f+=std::pow(x[l][1]-A-B*u[l],2);
+        if(f&lt;best){best=f;a=A;b=B;rho=r;sigma=s;m=z;}
+    }
+    require(std::isfinite(best),"No admissible SVI candidate");
+    Report out{{"LogMoneyness","MarketVariance","FittedVariance","Residual","A","B","Rho","M","Sigma","DensityFactor","WingLeft","WingRight","TrainingSSE"},{}};
+    for(auto&amp;r:x){
+        double k=r[0],d=k-m,h=std::hypot(d,sigma),w=positive(a+b*(rho*d+h)),v=b*(rho+d/h),curv=b*sigma*sigma/(h*h*h);
+        double g=std::pow(1-k*v/(2*w),2)-v*v/4*(1/w+.25)+curv/2;
+        out.rows.push_back({k,r[1],w,r[1]-w,a,b,rho,m,sigma,g,b*(1-rho),b*(1+rho),best});
+    }
+    return out;
+}</pre><p>参考文献：<a href="https://doi.org/10.1080/14697688.2013.819986">Gatheral and Jacquier (2014), Arbitrage-free SVI volatility surfaces, Quantitative Finance.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

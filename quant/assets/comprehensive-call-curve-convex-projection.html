@@ -1,0 +1,51 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>无套利看涨价格投影：加权Dykstra、斜率约束与对偶差距｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="assets"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>无套利看涨价格投影：加权Dykstra、斜率约束与对偶差距</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-pricing.html">金融工程：波动率曲面、定价曲线与随机波动</a>　<a href="../cpp/comprehensive_pricing.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>离散静态套利约束</h2><p>对未贴现远期看涨价格，非负、内在价值下界、远期上界，以及执行价方向的斜率区间[−1,0]与凸性构成节点离散约束。报价噪声可能破坏这些不等式。这里按报价权重求最近可行价格，保持原执行价网格不变；并不推断未观测尾部的概率分布。</p><div class="equation">$$(F-K_i)^+\le C_i\le F,\quad -1\le\frac{C_{i+1}-C_i}{K_{i+1}-K_i}\le0,\quad s_{i+1}\ge s_i$$</div></section><section><h2>加权投影转换</h2><p>令z_i=√w_i C_i^obs，求u_i=√w_i C_i，使原加权平方距离成为Euclidean投影。所有约束经相应对角尺度变成半空间a'u≤b，再归一化法向量。Dykstra为每个半空间保留修正量，与不保存修正量的循环可行投影不同，目标是最近点。</p><div class="equation">$$\min_u\tfrac12\|u-z\|^2,\quad a_j^\top u\le b_j,\quad \|a_j\|=1$$</div></section><section><h2>逐约束更新与证书</h2><p>对第j个半空间，先将上次修正加回当前向量，再沿法向量投影超出部分，并保存新非负修正系数。由修正系数构造对偶可行向量，计算原始目标减对偶目标。迭代停止同时要求原始约束误差与对偶差距低于容差；有限精度下差距可有舍入级负值。</p><div class="equation">$$v=u+\lambda_j a_j,\quad \lambda_j^+=(a_j^\top v-b_j)_+,\quad u^+=v-\lambda_j^+a_j,\quad d(\lambda)=\lambda^\top(Az-b)-\tfrac12\|A^\top\lambda\|^2$$</div></section><section><h2>实验口径</h2><p>F=100，执行价80、100、120，价格30、20、10已满足约束，投影不改变。对只违反上界的单报价或仅一条凸性约束的组合，可独立计算半空间投影。计算O(In²)为密集法向量教学实现，n至多64；节点无套利并不自动保证任意插值及外推无套利。</p><div class="equation">$$\|Au-b\|_{+,\infty}\le\epsilon,\quad \tfrac12\|u-z\|^2-d(\lambda)\le\epsilon$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Strike，RawCall，ProjectedCall，LowerBound，UpperBound，MaxViolation，Objective，DualGap，Iterations。</p><p><a href="../research/comprehensive-examples/call-curve-convex-projection.csv" download>样本CSV</a></p><pre>Strike,ForwardCall,Weight
+80,30,1
+100,20,1
+120,10,1
+</pre><pre>./build/kline_quant comprehensive-call-curve-convex-projection quant/research/comprehensive-examples/call-curve-convex-projection.csv 100 1e-10 10000</pre><div class="wide"><table><thead><tr><th>Strike</th><th>RawCall</th><th>ProjectedCall</th><th>LowerBound</th><th>UpperBound</th><th>MaxViolation</th><th>Objective</th><th>DualGap</th></tr></thead><tbody><tr><td>80</td><td>30</td><td>30</td><td>20</td><td>100</td><td>0</td><td>0</td><td>0</td></tr><tr><td>100</td><td>20</td><td>20</td><td>0</td><td>100</td><td>0</td><td>0</td><td>0</td></tr><tr><td>120</td><td>10</td><td>10</td><td>0</td><td>100</td><td>0</td><td>0</td><td>0</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report call_curve_convex_projection(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,3,3);parameters(p,3);auto n=x.size();
+    double F=positive(p[0]),tol=positive(p[1]);auto cap=count(p[2],1,100000);
+    require(n&lt;=64&amp;&amp;double(cap)*n*n&lt;=1e8,"Call projection work limit");
+    Vec z(n),w(n),K(n),lo(n);
+    for(std::size_t i=0;i&lt;n;++i){
+        K[i]=positive(x[i][0]);if(i)require(K[i]&gt;K[i-1],"Increasing strikes required");
+        w[i]=std::sqrt(positive(x[i][2]));z[i]=w[i]*x[i][1];lo[i]=std::max(0.,F-K[i]);
+    }
+    Mat A;Vec b;
+    auto constraint=[&amp;](Vec a,double c){
+        for(std::size_t j=0;j&lt;n;++j)a[j]/=w[j];
+        double h=positive(std::sqrt(squared(a)));for(double&amp;v:a)v/=h;
+        A.push_back(a);b.push_back(c/h);
+    };
+    for(std::size_t i=0;i&lt;n;++i){
+        Vec a(n,0);a[i]=1;constraint(a,F);a[i]=-1;constraint(a,-lo[i]);
+        if(i+1&lt;n){
+            a.assign(n,0);a[i]=-1;a[i+1]=1;constraint(a,0);
+            for(double&amp;v:a)v=-v;constraint(a,K[i+1]-K[i]);
+        }
+        if(i+2&lt;n){
+            double h=K[i+1]-K[i],k=K[i+2]-K[i+1];
+            a.assign(n,0);a[i]=-1/h;a[i+1]=1/h+1/k;a[i+2]=-1/k;constraint(a,0);
+        }
+    }
+    Vec u=z,lambda(A.size(),0);double violation=0,obj=0,gap=0;std::size_t it=0;
+    for(;it&lt;cap;){
+        for(std::size_t j=0;j&lt;A.size();++j){
+            double next=std::max(0.,dot(A[j],u)+lambda[j]-b[j]),d=lambda[j]-next;
+            for(std::size_t k=0;k&lt;n;++k)u[k]+=d*A[j][k];lambda[j]=next;
+        }
+        Vec v(n),dual(n,0);double lin=0;violation=0;
+        for(std::size_t j=0;j&lt;A.size();++j){
+            violation=std::max(violation,std::max(0.,dot(A[j],u)-b[j]));
+            lin+=lambda[j]*(dot(A[j],z)-b[j]);
+            for(std::size_t k=0;k&lt;n;++k)dual[k]+=lambda[j]*A[j][k];
+        }
+        for(std::size_t k=0;k&lt;n;++k)v[k]=u[k]-z[k];
+        obj=.5*squared(v);gap=obj-lin+.5*squared(dual);++it;
+        if(violation&lt;=tol&amp;&amp;std::abs(gap)&lt;=tol*std::max(1.,obj))break;
+    }
+    require(violation&lt;=tol&amp;&amp;std::abs(gap)&lt;=tol*std::max(1.,obj),"Call projection did not converge");
+    Report out{{"Strike","RawCall","ProjectedCall","LowerBound","UpperBound","MaxViolation","Objective","DualGap","Iterations"},{}};
+    for(std::size_t i=0;i&lt;n;++i)out.rows.push_back({K[i],x[i][1],u[i]/w[i],lo[i],F,violation,obj,gap,double(it)});
+    return out;
+}</pre><p>参考文献：<a href="https://web.stanford.edu/~boyd/cvxbook/">Boyd and Vandenberghe (2004), Convex Optimization; static call-price convexity and Euclidean projection.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>
