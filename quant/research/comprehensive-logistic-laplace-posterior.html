@@ -1,0 +1,22 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>贝叶斯Logistic回归Laplace后验与证据近似｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>贝叶斯Logistic回归Laplace后验与证据近似</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-bayesian.html">贝叶斯后验、粒子过滤与稀有事件模拟</a>　<a href="../cpp/comprehensive_bayesian.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>先验与模式</h2><p>独立零均值正态系数先验精度λ严格为正；显式输入设计矩阵。后验模式等价于带L2惩罚的logistic极大后验估计。</p><div class="equation">$$\log p(\beta\mid y,X)=\sum_i[y_i x_i^\top\beta-\log(1+e^{x_i^\top\beta})]-\lambda\|\beta\|^2/2+C.$$</div></section><section><h2>二阶近似</h2><p>在后验模式处以Hessian逆近似协方差。精度矩阵由先验精度及观测Fisher信息组成；强先验使分离样本仍有有限后验模式。</p><div class="equation">$$H=\lambda I+X^\top\operatorname{diag}(q_i(1-q_i))X,\quad \beta\mid y\approx N(\hat\beta,H^{-1}).$$</div></section><section><h2>证据近似</h2><p>归一化先验常数必须保留，Laplace积分中的(2π)因子与正态先验归一化抵消。输出证据近似可用于同一观测似然、同一数据的先验比较。</p><div class="equation">$$\log p(y\mid X)\approx-\ell_{\rm pen}(\hat\beta)+\frac d2\log\lambda-\frac12\log|H|.$$</div></section><section><h2>局限</h2><p>Laplace只刻画模式附近曲率，不能保证厚尾、多峰或强非对称后验的区间覆盖率。参数边际标准差是近似值而非频率学标准误。</p><div class="equation">$$SD_j\approx\sqrt{(H^{-1})_{jj}}.$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Feature，Mode，PosteriorSD，LogEvidenceApprox，ScoreNorm。</p><p><a href="../research/comprehensive-examples/logistic-laplace-posterior.csv" download>样本CSV</a></p><pre>Y,Intercept
+0,1
+1,1
+</pre><pre>./build/kline_quant comprehensive-logistic-laplace-posterior quant/research/comprehensive-examples/logistic-laplace-posterior.csv 1 1e-12 100</pre><div class="wide"><table><thead><tr><th>Feature</th><th>Mode</th><th>PosteriorSD</th><th>LogEvidenceApprox</th><th>ScoreNorm</th></tr></thead><tbody><tr><td>1</td><td>0</td><td>0.8164965809277</td><td>-1.589026915174</td><td>0</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report logistic_laplace_posterior(const Mat&amp; x,const Vec&amp; p){
+    size_t d=validate(x,1,2,33)-1;parameters(p,3);
+    double lam=positive(p[0]),tol=positive(p[1]);int cap=count(p[2],1,10000);
+    Mat X;Vec y;for(const auto&amp;r:x){y.push_back(count(r[0],0,1));X.emplace_back(r.begin()+1,r.end());}
+    auto eval=[&amp;](const Vec&amp; b){
+        auto s=model_research::regularized_state(b,lam);
+        for(size_t i=0;i&lt;X.size();++i){
+            double z=dot(X[i],b),q=logistic(z);
+            s.value+=model_research::softplus(z)-y[i]*z;
+            for(size_t j=0;j&lt;d;++j){s.gradient[j]+=(q-y[i])*X[i][j];for(size_t k=0;k&lt;d;++k)s.hessian[j][k]+=q*(1-q)*X[i][j]*X[i][k];}
+        }
+        return s;
+    };
+    auto fit=model_research::damped_newton(d,tol,cap,eval);
+    Mat V=invert_spd(fit.state.hessian);double evidence=-fit.state.value+.5*d*std::log(lam)-.5*logdet_spd(fit.state.hessian);
+    Report out;out.header={"Feature","Mode","PosteriorSD","LogEvidenceApprox","ScoreNorm"};
+    for(size_t j=0;j&lt;d;++j)out.rows.push_back({double(j+1),fit.beta[j],std::sqrt(V[j][j]),evidence,inf_norm(fit.state.gradient)});
+    return out;
+}</pre><p>参考文献：<a href="https://doi.org/10.1162/neco.1992.4.5.720">MacKay, D. J. C. (1992). The Evidence Framework Applied to Classification Networks. Neural Computation.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

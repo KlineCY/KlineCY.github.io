@@ -1,0 +1,22 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Markov转移矩阵Dirichlet后验与预测路径依赖｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>Markov转移矩阵Dirichlet后验与预测路径依赖</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-bayesian.html">贝叶斯后验、粒子过滤与稀有事件模拟</a>　<a href="../cpp/comprehensive_bayesian.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>共轭先验</h2><p>转移矩阵每一行赋予独立Dirichlet先验，每个观测计数增加相应形状参数。计数可来自完全观察状态路径；潜状态情形不可直接把平滑状态概率当作确定计数。</p><div class="equation">$$P_{i,:}\sim\mathrm{Dir}(\alpha_{i,:}),\quad P_{i,:}\mid N\sim\mathrm{Dir}(\alpha_{i,:}+N_{i,:}).$$</div></section><section><h2>边际矩</h2><p>后验单步预测等于后验转移均值，单元素方差由Dirichlet二阶矩给出。不同列负相关，同一行的重复访问共享未知转移概率。</p><div class="equation">$$E[P_{ij}]=a_{ij}/A_i,\quad \operatorname{Var}(P_{ij})=\frac{a_{ij}(A_i-a_{ij})}{A_i^2(A_i+1)}.$$</div></section><section><h2>两步预测</h2><p>积分未知转移矩阵时，先计算E[P_ik P_kj]再对中间状态求和。若k=i，两次使用同一行，不能简单乘后验均值；此差异正是参数不确定性引起的路径依赖。</p><div class="equation">$$P^{(2)}_{ij}=\sum_{k\ne i}E[P_{ik}]E[P_{kj}]+E[P_{ii}P_{ij}],\quad E[P_{ia}P_{ib}]=\frac{a_{ia}(a_{ib}+1_{\{a=b\}})}{A_i(A_i+1)}.$$</div></section><section><h2>预测边界</h2><p>输出每一行两步预测概率，验证行和为1。更长期预测需对各访问计数进行联合积分或后验模拟，不应直接以均值矩阵的幂替代全贝叶斯预测。</p><div class="equation">$$E[P^h\mid N]\ne E[P\mid N]^h\quad(h\ge2).$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为From，To，PosteriorAlpha，MeanTransition，TransitionVariance，TwoStepPredictive。</p><p><a href="../research/comprehensive-examples/dirichlet-transition-posterior.csv" download>样本CSV</a></p><pre>From,To,Count
+1,1,2
+1,2,0
+2,1,1
+2,2,1
+</pre><pre>./build/kline_quant comprehensive-dirichlet-transition-posterior quant/research/comprehensive-examples/dirichlet-transition-posterior.csv 2 1 1</pre><div class="wide"><table><thead><tr><th>From</th><th>To</th><th>PosteriorAlpha</th><th>MeanTransition</th><th>TransitionVariance</th><th>TwoStepPredictive</th></tr></thead><tbody><tr><td>1</td><td>1</td><td>3</td><td>0.75</td><td>0.0375</td><td>0.725</td></tr><tr><td>1</td><td>2</td><td>1</td><td>0.25</td><td>0.0375</td><td>0.275</td></tr><tr><td>2</td><td>1</td><td>2</td><td>0.5</td><td>0.05</td><td>0.575</td></tr><tr><td>2</td><td>2</td><td>2</td><td>0.5</td><td>0.05</td><td>0.425</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report dirichlet_transition_posterior(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,3,3);require(p.size()&gt;=2,"state count and prior required");
+    int K=count(p[0],1,32);require(p.size()==size_t(K+1),"one prior per destination");
+    Mat A(K,Vec(K));for(int i=0;i&lt;K;++i)for(int j=0;j&lt;K;++j)A[i][j]=positive(p[j+1]);
+    for(const auto&amp;r:x){int i=count(r[0],1,K)-1,j=count(r[1],1,K)-1;A[i][j]+=count(r[2],0,1000000000);}
+    Vec total(K);for(int i=0;i&lt;K;++i)total[i]=sum(A[i]);
+    Report out;out.header={"From","To","PosteriorAlpha","MeanTransition","TransitionVariance","TwoStepPredictive"};
+    for(int i=0;i&lt;K;++i)for(int j=0;j&lt;K;++j){
+        double m=A[i][j]/total[i],v=m*(1-m)/(total[i]+1),two=0;
+        for(int k=0;k&lt;K;++k){
+            if(k==i)two+=A[i][i]*(A[i][j]+(j==i))/(total[i]*(total[i]+1));
+            else two+=A[i][k]/total[i]*A[k][j]/total[k];
+        }
+        out.rows.push_back({double(i+1),double(j+1),A[i][j],m,v,two});
+    }
+    return out;
+}</pre><p>参考文献：<a href="https://doi.org/10.1007/0-387-71599-1">Robert, C. P. (2007). The Bayesian Choice, 2nd ed. Springer.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>
