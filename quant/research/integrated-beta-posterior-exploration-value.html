@@ -1,0 +1,19 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Beta后验与有限期探索价值｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="depth-labs.css"><link rel="stylesheet" href="integrated-research.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>Beta后验与有限期探索价值</h1><p><a href="integrated-research.html">跨模型研究课程</a>　<a href="comprehensive-research.html">基础模型目录</a>　<a href="integrated_posterior.py" download>本组实验源码</a></p><p>先由历史成功和失败次数形成Beta后验，再将四个形状参数作为有限期Bellman状态。用独立递归求解始终选择当前均值最大臂的贪心价值。</p></header><section><h2>数学结构与连接关系</h2><div class="equation">$$V_h(s)=\max_j\{p_j+p_jV_{h-1}(s_j^+)+(1-p_j)V_{h-1}(s_j^-)\}$$</div><p>先由历史成功和失败次数形成Beta后验，再将四个形状参数作为有限期Bellman状态。用独立递归求解始终选择当前均值最大臂的贪心价值。各阶段输出作为下一阶段的明确输入，独立数值参照不依赖下一阶段求解器。</p></section><section><h2>模型实现、数据口径与文献</h2><p><a href="../research/comprehensive-beta-binomial-hyper-grid.html">Beta–Binomial层级违约率后验网格</a>　<a href="../cpp/comprehensive_bayesian.hpp" download>C++17完整实现</a>　<a href="https://www.stat.columbia.edu/~gelman/book/">Gelman, A., et al. (2013). Bayesian Data Analysis, 3rd ed.</a></p><p><a href="../research/comprehensive-beta-bandit-finite-horizon.html">Beta–Bernoulli双臂试验的有限期限Bayes最优策略</a>　<a href="../cpp/comprehensive_bayesian.hpp" download>C++17完整实现</a>　<a href="https://doi.org/10.1002/9780470980033">Gittins, J., Glazebrook, K., and Weber, R. (2011). Multi-armed Bandit Allocation Indices, 2nd ed.</a></p><p>全部输入由下方实验源码显式构造，参数与C++接口一致；结果为教学构造情形，不代表真实市场统计量。</p></section><section><h2>独立参考及实验判据</h2><p>核对后验均值、单期最优价值及多期最优价值不低于贪心价值。</p><p>批量运行：<code>python quant/research/run_integrated_research.py ./build/kline_quant integrated-results</code>。</p><p>输出：<code>integrated-results/beta_posterior_exploration_value.csv</code>。该文件由运行程序生成。</p></section><section><h2>可执行实验与证据</h2><pre>def posterior_bandit_value(model,report):
+    out=[]
+    for counts in ((1,4,3,4),(2,4,2,4),(4,4,0,4)):
+        k1,n1,k2,n2=counts
+        post=model("beta-binomial-hyper-grid",[[k1,n1],[k2,n2]],[1,1,1,1,1,1])
+        s=(k1+1,n1-k1+1,k2+1,n2-k2+1)
+        check_vector([r[1] for r in post],[s[0]/(s[0]+s[1]),s[2]/(s[2]+s[3])])
+        @lru_cache(None)
+        def greedy(state,h):
+            if h==0:return 0.
+            a=[state[i]/(state[i]+state[i+1]) for i in (0,2)];j=0 if a[0]&gt;=a[1] else 2;m=max(a)
+            plus=list(state);minus=list(state);plus[j]+=1;minus[j+1]+=1
+            return m+m*greedy(tuple(plus),h-1)+(1-m)*greedy(tuple(minus),h-1)
+        for H in (1,3,6):
+            r=model("beta-bandit-finite-horizon",[list(s)],[H,1])[0]
+            g=greedy(s,H);assert r[3]&gt;=g-1e-10
+            if H==1:near(r[3],max(a[1] for a in post))
+            out.append([*counts,H,r[2],r[3],g,r[3]-g])
+    report("beta_posterior_exploration_value",["Success1","Trials1","Success2","Trials2","Horizon","OptimalAction","OptimalValue","GreedyValue","ExplorationValue"],out)</pre></section><section><h2>经济及数值边界</h2><p>两臂Bernoulli奖励与独立先验是简化决策模型，不能直接代表连续金融收益。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

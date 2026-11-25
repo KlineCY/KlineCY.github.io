@@ -509,5 +509,222 @@
     ],
     "script": "integrated_dynamics.py",
     "formula": "x^*=\\arg\\min_x[-\\log(b-x)-\\log(x-a)],\\quad TE(a)=\\sqrt{a^\\top\\Sigma a}"
+  },
+  {
+    "id": "ordinal_probability_rank_alignment",
+    "title": "有序类别后验与截面排序的一致性",
+    "group": "posterior",
+    "function": "ordinal_rank_alignment",
+    "models": [
+      "ordinal-logit-fixed-cuts",
+      "ranknet-linear-fit"
+    ],
+    "script": "integrated_posterior.py",
+    "formula": "E[Y\\mid x]=\\sum_{k=1}^{K}kP(Y=k\\mid x),\\quad s(x)=\\beta x"
+  },
+  {
+    "id": "mixture_posterior_moments_scenario_risk",
+    "title": "混合回归预测矩与情景熵风险",
+    "group": "posterior",
+    "function": "mixture_state_risk",
+    "models": [
+      "mixture-regression-em",
+      "entropic-risk-allocation"
+    ],
+    "script": "integrated_posterior.py",
+    "formula": "\\mu=\\pi a+(1-\\pi)b,\\quad v=1+\\pi(a-\\mu)^2+(1-\\pi)(b-\\mu)^2"
+  },
+  {
+    "id": "logistic_laplace_hierarchical_pooling",
+    "title": "Logistic Laplace近似与层级部分汇聚",
+    "group": "posterior",
+    "function": "laplace_hierarchy",
+    "models": [
+      "logistic-laplace-posterior",
+      "normal-hierarchical-grid"
+    ],
+    "script": "integrated_posterior.py",
+    "formula": "V=(V_0^{-1}+\\sum_i(s_i^2+\\tau)^{-1})^{-1},\\quad E[\\beta_i\\mid y]=\\frac{\\tau\\hat\\beta_i+s_i^2M}{\\tau+s_i^2}"
+  },
+  {
+    "id": "matrix_normal_predictive_tracking_risk",
+    "title": "矩阵正态预测协方差与主动组合",
+    "group": "posterior",
+    "function": "matrix_normal_prediction_risk",
+    "models": [
+      "bayesian-multivariate-regression",
+      "active-tracking-frontier"
+    ],
+    "script": "integrated_posterior.py",
+    "formula": "V=(X^\\top X+\\lambda I)^{-1},\\quad \\Sigma_*=(1+x_*^\\top Vx_*)\\Sigma"
+  },
+  {
+    "id": "beta_posterior_exploration_value",
+    "title": "Beta后验与有限期探索价值",
+    "group": "posterior",
+    "function": "posterior_bandit_value",
+    "models": [
+      "beta-binomial-hyper-grid",
+      "beta-bandit-finite-horizon"
+    ],
+    "script": "integrated_posterior.py",
+    "formula": "V_h(s)=\\max_j\\{p_j+p_jV_{h-1}(s_j^+)+(1-p_j)V_{h-1}(s_j^-)\\}"
+  },
+  {
+    "id": "empirical_bayes_vs_hypermean_uncertainty",
+    "title": "经验贝叶斯与超均值不确定性传播",
+    "group": "posterior",
+    "function": "pooling_uncertainty",
+    "models": [
+      "empirical-bayes-alpha-grid",
+      "normal-hierarchical-grid"
+    ],
+    "script": "integrated_posterior.py",
+    "formula": "\\operatorname{Var}(\\beta_i\\mid y)=\\frac{\\tau s_i^2}{\\tau+s_i^2}+\\left(\\frac{s_i^2}{\\tau+s_i^2}\\right)^2V"
+  },
+  {
+    "id": "lanczos_tridiagonal_inverse_energy",
+    "title": "Lanczos三对角逆与PCG能量证书",
+    "group": "numerical",
+    "function": "lanczos_inverse",
+    "models": [
+      "lanczos-krylov",
+      "pcg-jacobi"
+    ],
+    "script": "integrated_numerical.py",
+    "formula": "b^\\top A^{-1}b=\\|b\\|^2e_1^\\top T^{-1}e_1,\\quad \\min_x(\\tfrac12x^\\top Ax-b^\\top x)=-\\tfrac12b^\\top A^{-1}b"
+  },
+  {
+    "id": "chebyshev_gaussian_tail_importance",
+    "title": "Chebyshev尾概率逼近与重要性抽样",
+    "group": "numerical",
+    "function": "chebyshev_tail",
+    "models": [
+      "chebyshev-interpolant",
+      "gaussian-tail-importance"
+    ],
+    "script": "integrated_numerical.py",
+    "formula": "p(a)=\\tfrac12\\operatorname{erfc}(a/\\sqrt2),\\quad p(a)\\approx\\sum_{k=0}^{n-1}c_kT_k(2a/5-1)"
+  },
+  {
+    "id": "arma_mean_garch_innovation_filter",
+    "title": "ARMA均值过滤与GARCH创新方差",
+    "group": "numerical",
+    "function": "arma_innovations_garch",
+    "models": [
+      "arma11-profile-grid",
+      "garch-targeted-grid"
+    ],
+    "script": "integrated_numerical.py",
+    "formula": "e_t=y_t-\\mu-\\phi(y_{t-1}-\\mu)-\\theta e_{t-1},\\quad h_t=\\omega+\\alpha e_{t-1}^2+\\beta h_{t-1}"
+  },
+  {
+    "id": "chebyshev_discount_curve_tree_repricing",
+    "title": "Chebyshev贴现曲线与Ho–Lee树重定价",
+    "group": "numerical",
+    "function": "chebyshev_curve_tree",
+    "models": [
+      "chebyshev-interpolant",
+      "ho-lee-curve-tree"
+    ],
+    "script": "integrated_numerical.py",
+    "formula": "D(t)\\approx\\sum_k c_kT_k(2t/T-1),\\quad D(t)=\\sum_j Q_{t-1,j}e^{-r_{t-1,j}\\Delta t}"
+  },
+  {
+    "id": "rrqr_residual_to_factor_precision",
+    "title": "RRQR残差、因子载荷与风险逆",
+    "group": "numerical",
+    "function": "qr_risk_precision",
+    "models": [
+      "rrqr-regression",
+      "woodbury-risk-solve"
+    ],
+    "script": "integrated_numerical.py",
+    "formula": "\\hat\\beta=\\arg\\min_\\beta\\|y-X\\beta\\|_2^2,\\quad H=D+BB^\\top,\\quad x=H^{-1}\\alpha"
+  },
+  {
+    "id": "filter_uncertainty_persistent_state_moments",
+    "title": "异步因子后验与持续状态期限风险",
+    "group": "numerical",
+    "function": "state_observation_moments",
+    "models": [
+      "dynamic-factor-sequential",
+      "markov-cumulative-reward"
+    ],
+    "script": "integrated_numerical.py",
+    "formula": "z_\\pm=m\\pm\\sqrt v,\\quad P=I,\\quad E[S_h]=hm,\\quad \\operatorname{Var}(S_h)=h^2v"
+  },
+  {
+    "id": "split_dividend_currency_cash_wealth",
+    "title": "拆股股息、换汇与外部现金流净值",
+    "group": "wealth",
+    "function": "split_currency_wealth",
+    "models": [
+      "corporate-action-return-ledger",
+      "multi-currency-cash-reconciliation"
+    ],
+    "script": "integrated_wealth.py",
+    "formula": "G_t=(S_tP_t+D_t)/P_{t-1},\\quad V_t=F_tL_t,\\quad \\Pi_t=V_t-V_{t-1}-C_t"
+  },
+  {
+    "id": "historical_fx_vintage_wealth_isolation",
+    "title": "历史汇率版本与基础货币财富隔离",
+    "group": "wealth",
+    "function": "historical_fx_vintage",
+    "models": [
+      "bitemporal-vintage-join",
+      "multi-currency-cash-reconciliation"
+    ],
+    "script": "integrated_wealth.py",
+    "formula": "F_t=F(v^*(t)),\\quad v^*(t)=\\arg\\max_{v:a_v\\le t,e_v\\le t}(e_v,a_v)"
+  },
+  {
+    "id": "base_currency_returns_entropic_allocation",
+    "title": "基础货币收益与熵风险配置",
+    "group": "wealth",
+    "function": "currency_risk_allocation",
+    "models": [
+      "multi-currency-cash-reconciliation",
+      "entropic-risk-allocation"
+    ],
+    "script": "integrated_wealth.py",
+    "formula": "1+r_t^{B}=(1+r_t^{L})(1+r_t^{FX}),\\quad \\min_{w\\in\\Delta}\\eta^{-1}\\log E[e^{-\\eta w^\\top r^B}]"
+  },
+  {
+    "id": "label_maturity_transform_rank_training",
+    "title": "标签成熟、训练期变换与RankNet",
+    "group": "wealth",
+    "function": "label_preprocess_rank",
+    "models": [
+      "label-window-availability",
+      "train-only-winsor-standardize",
+      "ranknet-linear-fit"
+    ],
+    "script": "integrated_wealth.py",
+    "formula": "I_i(t)=\\mathbf1\\{a_i\\le t\\},\\quad z_i=(\\operatorname{clip}(x_i,l,u)-\\mu_{\\rm train})/\\sigma_{\\rm train}"
+  },
+  {
+    "id": "sequence_commit_to_point_in_time_vintage",
+    "title": "序列缺口提交与点时版本连接",
+    "group": "wealth",
+    "function": "stream_vintage_join",
+    "models": [
+      "sequence-gap-replay",
+      "bitemporal-vintage-join"
+    ],
+    "script": "integrated_wealth.py",
+    "formula": "c_t=\\max\\{k:\\{1,\\ldots,k\\}\\subseteq A_t\\},\\quad a_j=\\inf\\{t:c_t\\ge j\\}"
+  },
+  {
+    "id": "late_event_windows_to_label_availability",
+    "title": "迟到事件窗口与前瞻标签资格",
+    "group": "wealth",
+    "function": "watermark_label_eligibility",
+    "models": [
+      "watermark-window-ledger",
+      "label-window-availability"
+    ],
+    "script": "integrated_wealth.py",
+    "formula": "W_t=\\max_{s\\le t}e_s-L,\\quad I_{[a,b]}=\\mathbf1\\{P_a,P_b\\text{ 均有效且标签已成熟}\\}"
   }
 ]

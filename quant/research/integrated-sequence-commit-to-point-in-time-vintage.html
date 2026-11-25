@@ -1,0 +1,22 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>序列缺口提交与点时版本连接｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="depth-labs.css"><link rel="stylesheet" href="integrated-research.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>序列缺口提交与点时版本连接</h1><p><a href="integrated-research.html">跨模型研究课程</a>　<a href="comprehensive-research.html">基础模型目录</a>　<a href="integrated_wealth.py" download>本组实验源码</a></p><p>对乱序且重复的事件执行连续序列提交，将每个序列真正提交的时点映射为数据可用时间，再进行双时间轴历史查询。</p></header><section><h2>数学结构与连接关系</h2><div class="equation">$$c_t=\max\{k:\{1,\ldots,k\}\subseteq A_t\},\quad a_j=\inf\{t:c_t\ge j\}$$</div><p>对乱序且重复的事件执行连续序列提交，将每个序列真正提交的时点映射为数据可用时间，再进行双时间轴历史查询。各阶段输出作为下一阶段的明确输入，独立数值参照不依赖下一阶段求解器。</p></section><section><h2>模型实现、数据口径与文献</h2><p><a href="../audit/comprehensive-sequence-gap-replay.html">分区序列缺口、幂等去重与重放账本</a>　<a href="../cpp/comprehensive_data.hpp" download>C++17完整实现</a>　<a href="https://kafka.apache.org/documentation/#design">Apache Kafka Documentation. Design.</a></p><p><a href="../audit/comprehensive-bitemporal-vintage-join.html">双时间轴数据修订与可用版本连接</a>　<a href="../cpp/comprehensive_data.hpp" download>C++17完整实现</a>　<a href="https://alfred.stlouisfed.org/">Federal Reserve Bank of St. Louis. ALFRED: ArchivaL Federal Reserve Economic Data.</a></p><p>全部输入由下方实验源码显式构造，参数与C++接口一致；结果为教学构造情形，不代表真实市场统计量。</p></section><section><h2>独立参考及实验判据</h2><p>按事件到达排列独立重建可见序列，核对查询值与有效标记。</p><p>批量运行：<code>python quant/research/run_integrated_research.py ./build/kline_quant integrated-results</code>。</p><p>输出：<code>integrated-results/sequence_commit_to_point_in_time_vintage.csv</code>。该文件由运行程序生成。</p></section><section><h2>可执行实验与证据</h2><pre>def stream_vintage_join(model,report):
+    out=[]
+    for order in ((1,2,3),(3,1,2),(2,3,1)):
+        stream=[[1,i,10*i] for i in order]+[[1,2,20]]
+        replay=model("sequence-gap-replay",stream,[1])
+        available={}
+        committed=0
+        for t,r in enumerate(replay,1):
+            end=int(r[3])
+            for j in range(committed+1,end+1):available[j]=t
+            committed=end
+        # Sequence index is the effective time, and the explicit economic clock starts
+        # later than the three source timestamps so availability cannot precede effective time.
+        x=[[0,1,j,available[j]+3,10*j] for j in (1,2,3)]
+        queries=[[1,1,3,t] for t in range(4,8)]
+        result=model("bitemporal-vintage-join",x+queries,[3])
+        for r in result:
+            visible=[j for j in available if available[j]+3&lt;=r[1]]
+            if visible:near(r[5],10*max(visible));near(r[6],1)
+            else:near(r[6],0)
+            out.append([order[0],*r])
+    report("sequence_commit_to_point_in_time_vintage",["FirstSequence","Entity","Decision","Target","Effective","Available","Value","Valid"],out)</pre></section><section><h2>经济及数值边界</h2><p>经济时间与到达序列的时钟映射在实验中显式指定，生产环境需持久化事件时钟。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>
