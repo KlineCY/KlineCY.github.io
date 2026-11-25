@@ -14,6 +14,7 @@ from comprehensive_studies_inference import studies as inference
 from comprehensive_studies_bayesian import studies as bayesian
 from comprehensive_studies_economics import studies as economics
 from comprehensive_studies_data import studies as data
+from comprehensive_studies_linked import studies as linked
 
 def main(binary,output):
     assert len(CATALOG)==len(INDEX)==80
@@ -35,9 +36,9 @@ def main(binary,output):
             assert all(math.isfinite(v) for r in rows for v in r),name
             csvfile(studies/(name+".csv"),header,rows)
             produced[name]=len(rows)
-        for workflow in (numerics,learning,dynamics,pricing,portfolio,microstructure,inference,bayesian,economics,data):workflow(model,report)
-    assert len(produced)==80
+        for workflow in (numerics,learning,dynamics,pricing,portfolio,microstructure,inference,bayesian,economics,data,linked):workflow(model,report)
+    assert len(produced)==92
     csvfile(output/"study-summary.csv",["Study","OutputRows"],sorted(produced.items()))
-    print(f"PASS: 80 analytical model cases, 80 independent studies, {sum(produced.values())} output rows")
+    print(f"PASS: 80 analytical model cases, 80 independent studies, 12 linked pipelines, {sum(produced.values())} output rows")
 
 if __name__=="__main__":main(Path(sys.argv[1]).resolve(),Path(sys.argv[2]))
