@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>无套利贴现曲线、敏感性和资产负债免疫的统一推导｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="depth-labs.css"><link rel="stylesheet" href="applied-systems.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main class="applied-systems"><header><h1>无套利贴现曲线、敏感性和资产负债免疫的统一推导</h1><p><a href="applied-theory.html">应用研究理论体系</a>　<a href="applied-systems.html">完整应用研究</a>　<a href="applied-experiments.html">完整参数项目</a></p></header><section><h2>研究对象与统一数学框架</h2><p>固定收益模型从确定现金流在一致贴现曲线下的现值开始。收益率是价格的参数化表达，久期与凸性则是价格函数对利率的局部导数；关键期限敏感性和免疫配置将标量收益率推广到曲线形状与负债组合。</p><p><a href="applied-rates.html">本领域全部计算专题</a>　<a href="applied-experiment-rates.html">对应完整参数研究</a>。</p></section><section>
+<h2>1．现金流现值与无套利远期贴现</h2>
+<p>对于确定的未来现金流，组合无套利价格为各支付乘对应贴现因子的和。贴现因子表示现在购买单位未来货币的成本。给定两个期限的贴现因子，远期借贷的折现关系由跨期限零息债复制决定：先锁定早期资金、再锁定后期支付，其价格比决定远期增长因子。</p>
+<div class="equation">$$P=\sum_iC_iD(0,t_i),\quad z(t)=-\log D(0,t)/t$$</div>
+<div class="equation">$$D(t_1,t_2)=\frac{D(0,t_2)}{D(0,t_1)},\quad f_{12}=-\frac{\log D(0,t_2)-\log D(0,t_1)}{t_2-t_1}$$</div>
+<p>连续零息率是对贴现因子取负对数再除以期限。即使利率为负，贴现因子仍为正；贴现因子大于1并不自动意味着套利。所有曲线关系需要一致的抵押与融资约定。</p>
+</section>
+<section>
+<h2>2．平价票息与收益率反演</h2>
+<p>面值为N的固定票息债每期支付cNΔ_i，最终归还本金。若价格等于面值，票息年金现值与本金折现之和必须恰为1，故平价票息可由贴现曲线直接解出。到期收益率则是一个使所有现金流按同一收益率贴现后等于市场价格的标量。</p>
+<div class="equation">$$P/N=D_n+c\sum_i\Delta_iD_i,\quad c_{par}=\frac{1-D_n}{\sum_i\Delta_iD_i}$$</div>
+<div class="equation">$$f(y)=\sum_iC_ie^{-yt_i}-P_{mkt},\quad f'(y)=-\sum_it_iC_ie^{-yt_i}&lt;0$$</div>
+<p>正现金流和正期限保证连续复利价格严格递减，故在有限根括区间内具有唯一解。二分法利用单调性，不要求局部导数初值。实际日计数、支付频率、除息和清洁价/全价约定都会影响报价口径。</p>
+</section>
+<section>
+<h2>3．连续复利久期、凸性与现金流矩</h2>
+<p>在平坦连续利率y下，每个正现金流折现为v_i。用v_i/P归一化可得到期限上的概率权重。久期为该期限分布的均值，凸性为二阶原点矩；两者由价格函数的一、二阶导直接得到。</p>
+<div class="equation">$$D=-\frac{P'(y)}{P(y)}=\sum_iw_it_i,\quad \Gamma=\frac{P''(y)}{P(y)}=\sum_iw_it_i^2,\quad w_i=\frac{C_ie^{-yt_i}}P$$</div>
+<div class="equation">$$\Gamma-D^2=\operatorname{Var}_w(t)\ge0,\qquad \Delta P=-PDh+\tfrac12P\Gamma h^2+O(h^3)$$</div>
+<p>凸性减久期平方等于现金流期限的加权方差，因此正固定现金流组合的凸性不小于久期平方。局部风险可用一阶价格变化与二阶修正描述，但对于大幅曲线移动仍应完整重新贴现。</p>
+</section>
+<section>
+<h2>4．关键期限风险与曲线参数的链式法则</h2>
+<p>若每笔现金流恰落在独立零息率节点，其现值对对应节点的偏导等于负期限乘该现金流现值。一般情况下曲线通过节点插值，现金流日期利率是多个节点参数的函数。对定价函数使用链式法则便可得到曲线节点的关键期限风险。</p>
+<div class="equation">$$K_j=-\frac{\partial P}{\partial\theta_j}=\sum_it_iC_ie^{-z(t_i;\theta)t_i}\frac{\partial z(t_i;\theta)}{\partial\theta_j}$$</div>
+<div class="equation">$$\Delta P\approx-\sum_jK_j\Delta\theta_j,\quad \frac{\partial P}{\partial q_k}=\sum_j\frac{\partial P}{\partial\theta_j}\frac{\partial\theta_j}{\partial q_k}$$</div>
+<p>平行冲击使所有节点同步变化；若插值在常数平移下保持相同平移，关键期限敏感性之和等于完整曲线的平行敏感性。若曲线由市场工具报价Bootstrap，报价风险还需乘以曲线参数对原始报价的Jacobian。</p>
+</section>
+<section>
+<h2>5．单笔负债的两零息免疫</h2>
+<p>期限T的负债现值L0需要由两只零息资产的市场价值v1、v2覆盖，同时匹配美元久期。两条线性方程的解使市场价值分别为负债现值乘对应的期限插值权重。当T位于两资产期限之间，解为非负资产持仓。</p>
+<div class="equation">$$v_1+v_2=L_0,\quad t_1v_1+t_2v_2=TL_0,\quad v_1=L_0\frac{t_2-T}{t_2-t_1}$$</div>
+<div class="equation">$$v_1t_1^2+v_2t_2^2-L_0T^2=L_0(T-t_1)(t_2-T)$$</div>
+<p>基准净资产负债差为零，平行利率的一阶导也为零。资产美元凸性与负债美元凸性的差为负债现值乘期限离散方差，即(T−t1)(t2−T)。这同时解释局部免疫后的二阶净现值及期限分散度。</p>
+</section>
+<section>
+<h2>6．平行冲击的凸性保护及非平行风险</h2>
+<p>在冻结资产现金流且负债现金流为单一确定支付的模型中，对平行利率冲击h，资产基准现值权重下的重定价为L0乘指数函数的加权均值。由于指数关于期限为凸函数，Jensen不等式给出资产现值不低于负债重定价的结果；这比仅用二阶Taylor式更强。</p>
+<div class="equation">$$\sum_i v_i e^{-ht_i}\ge L_0 e^{-hT}\quad\text{by Jensen's inequality}$$</div>
+<div class="equation">$$\left.\frac{\partial(PV_A-PV_L)}{\partial s}\right|_{h=s=0}=-L_0(T-t_1)(t_2-T)$$</div>
+<p>然而当节点冲击包含围绕负债期限的斜率s(t−T)时，利率变化不再统一。对s求导得到非零风险项，大小由期限分散度决定。久期免疫并不消除曲线扭曲风险，负债驱动配置还需要现金流匹配、多节点免疫及动态再平衡。</p>
+</section>
+<section>
+<h2>7．数值研究的风险归因口径</h2>
+<p>参数研究同时改变平行与斜率冲击，完整重定价用于经济结果，局部一阶和二阶项用于解释风险方向及近似误差。差值包含斜率的高阶项以及平行与斜率交互项，因此在大幅冲击下不能简单归因为单个参数。</p>
+<div class="equation">$$S(h,s)=PV_A(h,s)-PV_L(h),\quad S(0,0)=0$$</div>
+<div class="equation">$$S(h,s)-\tfrac12L_0\operatorname{Var}_w(t)h^2+L_0\operatorname{Var}_w(t)s=\text{higher-order and interaction terms}$$</div>
+<p>对于含权债券，现金流本身依赖利率，固定现金流久期和凸性不再覆盖全部风险。应以冻结原持仓、更新现金流模型与曲线的完整重定价为基准，并区分市场曲线变化、信用利差和模型参数变化。</p>
+</section><section><h2>计算方法、完整代码与独立实验</h2><p><a href="applied-rates-continuous-duration.html">rates continuous duration</a>　<a href="applied-rates-par-coupon.html">rates par coupon</a>　<a href="applied-rates-key-rate-pv.html">rates key rate pv</a>　<a href="applied-rates-yield-bisect.html">rates yield bisect</a>　<a href="applied-rates-forward-discount.html">rates forward discount</a>　<a href="applied-rates-two-zero-immunize.html">rates two zero immunize</a>　<a href="applied-rates-curve-shock.html">rates curve shock</a>　<a href="applied-synthesis-immunization-shock.html">synthesis immunization shock</a>。</p><p>各计算专题保留C++17源码及独立数值参照；相应参数项目提供完整CSV和可执行批量研究入口。</p></section><section><h2>参考文献</h2><p><a href="https://www.cfainstitute.org/insights/professional-learning/refresher-readings/2026/curve-based-and-empirical-fixed-income-risk-measures">CFA Institute, Curve-Based and Empirical Fixed-Income Risk Measures</a>。<br><a href="https://www.cfainstitute.org/insights/professional-learning/refresher-readings/2026/yield-based-bond-convexity-and-portfolio-properties">CFA Institute, Yield-Based Bond Convexity and Portfolio Properties</a>。<br><a href="https://www.cfainstitute.org/insights/professional-learning/refresher-readings/2026/liability-driven-index-based-strategies">CFA Institute, Liability-Driven and Index-Based Strategies</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

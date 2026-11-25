@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>概率积分变换、分布检验与时间依赖的识别理论｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="depth-labs.css"><link rel="stylesheet" href="applied-systems.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main class="applied-systems"><header><h1>概率积分变换、分布检验与时间依赖的识别理论</h1><p><a href="applied-theory.html">应用研究理论体系</a>　<a href="applied-systems.html">完整应用研究</a>　<a href="applied-experiments.html">完整参数项目</a></p></header><section><h2>研究对象与统一数学框架</h2><p>动态金融模型的预测分布不仅需要描述各日期的边际风险，还需反映依赖信息和条件动态。PIT可将不同日期、不同尺度的连续条件分布预测转化为统一概率单位。分布距离、序列相关检验及重采样条件则分别识别不同层次的模型失配。</p><p><a href="applied-inference.html">本领域全部计算专题</a>　<a href="applied-experiment-inference.html">对应完整参数研究</a>。</p></section><section>
+<h2>1．条件分布正确时的PIT独立性</h2>
+<p>假设给定过去信息的真实条件分布连续，令U_t为实际观测在预测CDF中的位置。对任意u，条件概率P(U_t≤u |过去)等于u。此条件结论比无条件均匀更强：对于任意过去可测事件A，联合概率可用迭代期望分解，U_t独立于过去信息。</p>
+<div class="equation">$$U_t=F_{t\mid t-1}(Y_t),\qquad \Pr(U_t\le u\mid\mathcal F_{t-1})=u$$</div>
+<div class="equation">$$\Pr(U_t\le u,A)=\mathbb E[\mathbf1_A\Pr(U_t\le u\mid\mathcal F_{t-1})]=u\Pr(A)$$</div>
+<p>若条件CDF包含原子质量，直接PIT不一定均匀，需用独立辅助均匀变量在CDF跳跃内随机化。对于金融预测，模型参数的估计、概率分布截断和重叠预测期限都可能改变零分布。检验对象应是实际冻结的预测流程而非不可观察的真实条件CDF。</p>
+</section>
+<section>
+<h2>2．三类CDF距离的几何差异</h2>
+<p>经验CDF在样本顺序统计量处跳跃。Kolmogorov–Smirnov统计量取最大绝对偏离；Cramér–von Mises统计量按Lebesgue测度累计平方偏离；Anderson–Darling通过1/[u(1−u)]给予边缘更大权重。三者分别强调最大差异、整体差异与尾部差异。</p>
+<div class="equation">$$D=\sup_{0\le u\le1}|F_n(u)-u|,\quad W^2=n\int_0^1(F_n(u)-u)^2du$$</div>
+<div class="equation">$$A^2=n\int_0^1\frac{(F_n(u)-u)^2}{u(1-u)}du$$</div>
+<p>这些距离定义均仅使用样本的排序结构。对于固定样本集合，任意重排不影响三个统计量。连续分布参数未知并由同一数据估计时，传统分布无关临界值通常不再直接适用；应根据拟合机制进行参数Bootstrap或采用适当修正。</p>
+</section>
+<section>
+<h2>3．顺序统计量与解析计算</h2>
+<p>对于n个PIT样本，跳点右侧经验CDF为i/n，左侧为(i−1)/n；由分段线性结构，KS无需搜索连续区间。Cramér–von Mises通过在每个经验CDF恒定区间积分平方多项式，得到样本点到等距中点的偏离平方及网格常数。</p>
+<div class="equation">$$D=\max_i\left\{\frac in-u_{(i)},u_{(i)}-\frac{i-1}{n}\right\},\quad W^2=\frac1{12n}+\sum_i\left(u_{(i)}-\frac{2i-1}{2n}\right)^2$$</div>
+<div class="equation">$$A^2=-n-\frac1n\sum_i(2i-1)[\log u_{(i)}+\log(1-u_{(n+1-i)})]$$</div>
+<p>AD的对数形式来自对尾部权重进行分式积分。若样本在0或1端点取得值，对数发散，应报告其定义域问题，而非在未说明的情况下任意裁剪。极端样本的尾部加权响应本身是研究目标。</p>
+</section>
+<section>
+<h2>4．固定符号计数的游程精确分布</h2>
+<p>二元符号序列含a个正号、b个负号，交换性条件下共有组合数C(a+b,a)种等概率排列。给定游程数，相邻符号块交替，每类块长度均为正整数。将a和b拆成相应数量的非空有序部分，由隔板法得到偶数及奇数游程的概率质量。</p>
+<div class="equation">$$\Pr(R=2k)=\frac{2{a-1\choose k-1}{b-1\choose k-1}}{{a+b\choose a}}$$</div>
+<div class="equation">$$\Pr(R=2k+1)=\frac{{a-1\choose k}{b-1\choose k-1}+{a-1\choose k-1}{b-1\choose k}}{{a+b\choose a}}$$</div>
+<p>通过累积条件零分布得到双侧p值；本网站使用两倍较小包含观测值的尾概率再截断到1。连续误差符号的随机性只是独立性的一项必要诊断，幅度依赖、波动率聚集及其他非线性结构仍可能存在。</p>
+</section>
+<section>
+<h2>5．自相关的联合统计量及常量序列</h2>
+<p>令去均值样本的平方和为分母，对每个滞后k计算配对内积得到样本自相关。Ljung–Box汇总多个平方自相关并按照剩余配对数量修正。常量样本的分母为零，自相关在数学上没有定义；程序需直接识别常量，而不能把浮点求均值产生的微小残差作为有效方差。</p>
+<div class="equation">$$\hat\rho_k=\frac{\sum_{t=k+1}^n(x_t-\bar x)(x_{t-k}-\bar x)}{\sum_t(x_t-\bar x)^2}$$</div>
+<div class="equation">$$Q_h=n(n+2)\sum_{k=1}^h\frac{\hat\rho_k^2}{n-k}$$</div>
+<p>在适当弱依赖及参数估计条件下，检验使用渐近参考分布；对拟合残差，自由度还与估计参数有关。重叠持有期收益可能在创新独立时仍产生机械依赖，解释结果必须对应预测频率及标签构造。</p>
+</section>
+<section>
+<h2>6．循环块重采样的条件方差</h2>
+<p>长度b的循环块从n个起点中等概率选取，在全部候选块中每个原观测恰出现b次，所以块均值的经验均值等于原样本均值。如果n可被b整除，拼接m=n/b个独立抽取的块，Bootstrap样本均值等于m个独立块均值的平均。给定原数据，其条件方差可精确计算。</p>
+<div class="equation">$$B_i=\frac1b\sum_{j=0}^{b-1}x_{(i+j)\bmod n},\quad \frac1n\sum_i B_i=\bar x$$</div>
+<div class="equation">$$\operatorname{Var}_*(\bar X^*)=\frac1m\frac1n\sum_i(B_i-\bar x)^2,\quad m=n/b$$</div>
+<p>该条件方差不需要重复模拟，因此可独立验证Bootstrap实现。块长1退化为独立重采样；块长过大则候选块之间差异与有效块数改变。真实时序渐近一致性需要适当的块长增长和依赖条件，不能用有限情景代数代替理论。</p>
+</section>
+<section>
+<h2>7．边际分布与时序结构的联合解释</h2>
+<p>六个均匀网格中点的720种全排列具有完全相同的排序值，因此三种分布统计量恒定；中心化后整数值的平方和固定为70，但相邻乘积因排列而异。完整枚举直接证明边际检验无法识别所有时间依赖。</p>
+<div class="equation">$$u_{(i)}=(2i-1)/12,\quad \sum_i(12u_{(i)}-6)^2=70$$</div>
+<div class="equation">$$\hat\rho_1(\pi)=70^{-1}\sum_{t=2}^6c_{\pi(t)}c_{\pi(t-1)},\quad Q_1(\pi)=48\hat\rho_1(\pi)^2/5$$</div>
+<p>同时报告边际与依赖指标属于多维诊断。若研究者需要做一个总体显著性判断，必须在事前定义联合统计量或多重检验族，并根据真实估计流程标定零分布；不能从多个统计量中事后选择最有利者。</p>
+</section><section><h2>计算方法、完整代码与独立实验</h2><p><a href="applied-inference-pit-ks.html">inference pit ks</a>　<a href="applied-inference-pit-cvm.html">inference pit cvm</a>　<a href="applied-inference-pit-ad.html">inference pit ad</a>　<a href="applied-inference-runs-exact.html">inference runs exact</a>　<a href="applied-inference-circular-boot-var.html">inference circular boot var</a>　<a href="applied-inference-ljung-box.html">inference ljung box</a>　<a href="applied-inference-pit-joint.html">inference pit joint</a>。</p><p>各计算专题保留C++17源码及独立数值参照；相应参数项目提供完整CSV和可执行批量研究入口。</p></section><section><h2>参考文献</h2><p><a href="https://www.itl.nist.gov/div898/handbook/dtoc.htm">NIST/SEMATECH e-Handbook of Statistical Methods</a>。<br><a href="https://doi.org/10.1093/biomet/65.2.297">Ljung &amp; Box (1978), On a Measure of Lack of Fit in Time Series Models</a>。<br><a href="https://doi.org/10.1080/01621459.1994.10476870">Politis &amp; Romano (1994), The Stationary Bootstrap</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>概率预测的统计决策理论：适当性、校准、分位数与覆盖｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="depth-labs.css"><link rel="stylesheet" href="applied-systems.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main class="applied-systems"><header><h1>概率预测的统计决策理论：适当性、校准、分位数与覆盖</h1><p><a href="applied-theory.html">应用研究理论体系</a>　<a href="applied-systems.html">完整应用研究</a>　<a href="applied-experiments.html">完整参数项目</a></p></header><section><h2>研究对象与统一数学框架</h2><p>金融机器学习常将点预测误差、概率校准、风险分位数及预测区间混合为同一个评价指标。它们对应不同的统计决策对象：条件事件概率、条件分布函数、分位数泛函与集合覆盖。只有在评价对象、信息集和损失函数一致时，比较模型才具有明确含义。以下从条件风险的最小化建立统一联系。</p><p><a href="applied-forecast.html">本领域全部计算专题</a>　<a href="applied-experiment-forecast.html">对应完整参数研究</a>。</p></section><section>
+<h2>1．条件期望风险与严格适当性</h2>
+<p>设信息集为决策前可用信息，事件标签Y取0或1，真实条件概率为q。预测报告p的条件Brier风险是关于p的二次函数；展开后，真实概率处的超额风险恰为平方校准误差，因而真实条件概率是唯一最优报告。对数损失的超额条件风险为Bernoulli分布的KL散度，严格适当性在支持匹配时由KL非负性得到。</p>
+<div class="equation">$$\mathbb E[(p-Y)^2\mid\mathcal F]=q(1-p)^2+(1-q)p^2=q(1-q)+(p-q)^2$$</div>
+<div class="equation">$$\mathbb E[\ell_{\log}(p,Y)-\ell_{\log}(q,Y)\mid\mathcal F]=q\log\frac qp+(1-q)\log\frac{1-q}{1-p}\ge0$$</div>
+<p>这说明概率预测的任务并不是使分类准确率最大化。分类决策还取决于误判成本和概率阈值；两个概率报告可能产生完全相同分类，却有不同的概率质量与经济用途。对数损失在错误的零概率或一概率报告处可以无穷大，数值裁剪若被采用必须公开固定规则。</p>
+</section>
+<section>
+<h2>2．可靠性、分辨率与不确定性</h2>
+<p>把离散的预测概率报告按相同值分组，组g占样本比例w_g、事件发生率q_g。组内残差和为零，因此平方误差可以按组分解。对标签应用全方差公式，样本总体方差等于组内方差加组间事件均值方差。于是Brier分数等于可靠性惩罚减分辨率再加总体不确定性。</p>
+<div class="equation">$$BS=\sum_gw_g\{(p_g-q_g)^2+q_g(1-q_g)\}$$</div>
+<div class="equation">$$\bar q=\sum_gw_gq_g,\quad \bar q(1-\bar q)=\sum_gw_gq_g(1-q_g)+\sum_gw_g(q_g-\bar q)^2,\quad BS=REL-RES+UNC$$</div>
+<p>若报告全部相同且等于样本发生率，可靠性项为零但分辨率也为零；若不同组具有不同事件频率，分辨率可以提高，同时错误的报告概率仍会产生可靠性损失。连续模型预测的离散分组近似依赖分箱设定，不能把任意分箱后的分解当作与原始逐点Brier完全相同。</p>
+</section>
+<section>
+<h2>3．分位数损失与中心预测区间</h2>
+<p>给定目标分位数τ，Pinball损失对低估和高估赋予不同权重。对条件风险按报告值求左右导数，最优点满足分布函数的左右值夹住τ；即使分布存在原子概率，最优分位数集合仍可通过次梯度刻画。</p>
+<div class="equation">$$L_\tau(y,q)=(y-q)(\tau-\mathbf1\{y&lt;q\}),\quad 0\in\partial_q\mathbb E L_\tau(Y,q)\Longleftrightarrow F(q^-)\le\tau\le F(q)$$</div>
+<div class="equation">$$IS_\alpha(l,u;y)=\frac2\alpha[L_{\alpha/2}(y,l)+L_{1-\alpha/2}(y,u)]$$</div>
+<p>中心区间评分可写为上下两个分位数损失的线性组合，因此同时约束区间宽度与越界损失。单独要求高覆盖率会鼓励过宽区间；单独要求区间窄则会破坏风险覆盖。金融应用还须明确评价的是收益、损失还是价格分布，避免符号与尾部方向混淆。</p>
+</section>
+<section>
+<h2>4．连续分布评分与CRPS的严格适当性</h2>
+<p>CRPS将所有实数阈值上的二元事件预测误差积分。若真实分布为G，对观测Y取期望并按每个阈值使用Brier分解，预测分布F相对于真实分布G的超额风险为两CDF平方距离的积分。在有限一阶矩条件下，等式为零要求CDF几乎处处一致，右连续性进一步识别分布。</p>
+<div class="equation">$$CRPS(F,y)=\int_{\mathbb R}(F(z)-\mathbf1\{y\le z\})^2dz$$</div>
+<div class="equation">$$\mathbb E_{Y\sim G}[CRPS(F,Y)-CRPS(G,Y)]=\int_{\mathbb R}(F(z)-G(z))^2dz\ge0$$</div>
+<p>对于经验预测分布，CRPS可通过样本到观测的绝对距离减去半个样本间距离期望计算。该扣减项避免将所有概率质量简单集中于单个点。相较于RMSE，CRPS评价完整预测分布，但对多个资产的联合依赖还需要多变量评分规则。</p>
+</section>
+<section>
+<h2>5．保序校准的凸优化证书</h2>
+<p>将训练分数按递增次序排列，同分数先合并，目标值为经验事件率或标签。加权保序平方问题具有闭凸可行域及严格凸目标（所有权重正），所以最优解唯一。令相邻约束的非负乘子为λ_i，端点乘子为零；KKT平稳性、互补松弛共同描述块内与块间关系。</p>
+<div class="equation">$$\min_{z_i\le z_{i+1}}\tfrac12\sum_{i=1}^nw_i(z_i-y_i)^2,\quad w_i(z_i-y_i)+\lambda_i-\lambda_{i-1}=0$$</div>
+<div class="equation">$$\lambda_i\ge0,\quad \lambda_i(z_i-z_{i+1})=0,\qquad z_B=\frac{\sum_{i\in B}w_iy_i}{\sum_{i\in B}w_i}$$</div>
+<p>当一段连续位置被拟合为相同常数且两侧边界约束不活跃，对该块的平稳方程求和，内部乘子望远镜抵消，常数等于块加权平均。PAVA不断合并逆序相邻块，直到所有块均值非减；它提供一维凸问题的结构化求解，而非一般黑箱搜索。</p>
+</section>
+<section>
+<h2>6．交换性下Split Conformal覆盖证明</h2>
+<p>先在独立训练集拟合预测器，再在校准集计算绝对残差或预先规定的非一致性分数。若校准点与新点在给定训练模型后交换，则新分数在n+1个分数中的秩具有对称性；采用随机平局秩时均匀，无随机平局时保守覆盖。选取向上取整的秩，而非直接取经验1−α分位，可控制有限样本漏覆盖。</p>
+<div class="equation">$$k=\lceil(n+1)(1-\alpha)\rceil,\quad q=S_{(k)},\quad k=n+1\Rightarrow q=+\infty$$</div>
+<div class="equation">$$\Pr(S_{n+1}&gt;q)\le\frac{n+1-k}{n+1}\le\alpha,\qquad C(x)=\{y:S(x,y)\le q\}$$</div>
+<p>当k等于n+1时，形式上使用无穷分数阈值以保证覆盖，数值程序明确拒绝有限半径解。该结论是边际覆盖而非任意给定特征点的条件覆盖。连续金融时间序列常有漂移、依赖及重叠标签，直接套用交换性定理并不成立；应按特定的时序或加权理论重新建立条件。</p>
+</section>
+<section>
+<h2>7．训练、校准和外部评价的识别设计</h2>
+<p>将模型拟合、校准器拟合和最终测试分为不同信息阶段。外部测试中，原始预测和校准预测必须使用同一资产、同一日期、同一标签。比较损失时先冻结概率映射；在外部测试结果公布后根据损失重新选择校准器，会将模型选择噪声混入评价。</p>
+<div class="equation">$$\Delta BS=\sum_g w_g[(p_g-q_g^{test})^2-(g(p_g)-q_g^{test})^2]$$</div>
+<div class="equation">$$\mathcal F_{train}\subseteq\mathcal F_{cal}\subseteq\mathcal F_{test},\quad \hat g\text{ frozen before test labels}$$</div>
+<p>参数实验保持训练评分节点固定，仅改变外部概率组的事件频率。对每组而言原始与校准平方损失差等于两种报告到实际条件概率的平方距离之差；该关系解释为什么校准器在条件分布漂移时可能降低样本外质量。研究结论应限定在给定数据生成机制与外部信息分布下。</p>
+</section><section><h2>计算方法、完整代码与独立实验</h2><p><a href="applied-forecast-brier-groups.html">forecast brier groups</a>　<a href="applied-forecast-pinball.html">forecast pinball</a>　<a href="applied-forecast-ensemble-crps.html">forecast ensemble crps</a>　<a href="applied-forecast-split-conformal.html">forecast split conformal</a>　<a href="applied-forecast-isotonic-fit.html">forecast isotonic fit</a>　<a href="applied-forecast-interval-score.html">forecast interval score</a>　<a href="applied-forecast-frozen-calibration.html">forecast frozen calibration</a>。</p><p>各计算专题保留C++17源码及独立数值参照；相应参数项目提供完整CSV和可执行批量研究入口。</p></section><section><h2>参考文献</h2><p><a href="https://doi.org/10.1198/016214506000001437">Gneiting &amp; Raftery (2007), Strictly Proper Scoring Rules, Prediction, and Estimation</a>。<br><a href="https://arxiv.org/abs/2107.07511">Angelopoulos &amp; Bates (2023), Conformal Prediction: A Gentle Introduction</a>。<br><a href="https://web.stanford.edu/~boyd/cvxbook/">Boyd &amp; Vandenberghe (2004), Convex Optimization</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>
