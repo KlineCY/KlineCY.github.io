@@ -1,17 +1,17 @@
 #pragma once
 #include "applied_common.hpp"
 namespace applied_inference {
-输入PIT值，允许0和1。若分布参数使用同一评价样本估计，传统KS临界值不再直接适用；预测PIT的边际均匀也不能证明时序独立。
+Vec pit_ks(const Vec& x){check(!x.empty());Vec a=x;for(double z:a)prob(z);std::sort(a.begin(),a.end());double p=0,m=0,n=a.size();for(size_t i=0;i<a.size();++i){p=std::max(p,(i+1)/n-a[i]);m=std::max(m,a[i]-i/n);}return {p,m,std::max(p,m)};}
 
-相比KS关注最大偏离，该统计量累计整个分布上的差异。返回统计量和网格固定项，不将统计量直接解释为p值。
+Vec pit_cvm(const Vec& x){check(!x.empty());Vec a=x;for(double z:a)prob(z);std::sort(a.begin(),a.end());double n=a.size(),g=1/(12*n),v=g;for(size_t i=0;i<a.size();++i)v+=sq(a[i]-(2*i+1)/(2*n));return {v,g};}
 
-输入严格位于(0,1)的PIT；端点对应无限统计量，代码拒绝而非任意裁剪。检验临界值取决于零分布及拟合过程。
+Vec pit_ad(const Vec& x){check(!x.empty());Vec a=x;for(double z:a)check(z>0&&z<1);std::sort(a.begin(),a.end());double n=a.size(),s=0;for(size_t i=0;i<a.size();++i)s+=(2*i+1)*(std::log(a[i])+std::log1p(-a[a.size()-1-i]));return {-n-s/n};}
 
-输入±1序列，最多60项且两类均出现。只检验符号排列的随机性，不能替代连续残差的完整独立性检验。
+Vec runs_exact(const Vec& x){check(x.size()>=2&&x.size()<=60);int a=0,b=0,r=1;for(size_t i=0;i<x.size();++i){check(x[i]==1||x[i]==-1);a+=x[i]==1;b+=x[i]==-1;if(i)r+=x[i]!=x[i-1];}check(a>0&&b>0);double den=choose(a+b,a),lo=0,hi=0;for(int j=2;j<=a+b;++j){int k=j/2;double ways=j%2?choose(a-1,k)*choose(b-1,k-1)+choose(a-1,k-1)*choose(b-1,k):2*choose(a-1,k-1)*choose(b-1,k-1);if(j<=r)lo+=ways/den;if(j>=r)hi+=ways/den;}return {double(r),1+2.*a*b/(a+b),lo,hi,std::min(1.,2*std::min(lo,hi))};}
 
-输入块长及序列，要求块长整除样本数。该方差是给定数据的Bootstrap分布方差；块长需根据依赖结构选择，不能解释为无条件精确抽样方差。
+Vec circular_boot_var(const Vec& x){check(x.size()>=3);size_t n=x.size()-1,b=integer(x[0],1,n);check(n%b==0);Vec s(x.begin()+1,x.end());double avg=mean(s),v=0;for(size_t i=0;i<n;++i){double t=0;for(size_t j=0;j<b;++j)t+=s[(i+j)%n];v+=sq(t/b-avg);}v/=n;return {avg,v,v/(n/b)};}
 
-输入滞后上限h及时间顺序样本，拒绝常量序列。输出统计量而非未经模型自由度调整的显著性，模型残差的参考自由度需要扣除已估参数。
+Vec ljung_box(const Vec& x){check(x.size()>=4);size_t n=x.size()-1,h=integer(x[0],1,n-1);Vec y(x.begin()+1,x.end());double m=mean(y),den=0,q=0,first=0,last=0;for(double z:y)den+=sq(z-m);check(den>0);for(size_t k=1;k<=h;++k){double r=0;for(size_t j=k;j<n;++j)r+=(y[j]-m)*(y[j-k]-m);r/=den;if(k==1)first=r;last=r;q+=double(n)*(n+2)*r*r/(n-k);}return {q,first,last};}
 
-输入按时间排列的严格内部PIT，至少3项，固定检查一阶自相关。输出多个诊断统计量，联合显著性需适当多重检验或模拟标定，避免根据多个指标事后挑选结果。
+Vec pit_joint(const Vec& x){check(x.size()>=3);Vec y{1};y.insert(y.end(),x.begin(),x.end());return {pit_ks(x)[2],pit_cvm(x)[0],pit_ad(x)[0],ljung_box(y)[0]};}
 }
