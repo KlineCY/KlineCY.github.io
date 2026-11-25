@@ -47,7 +47,28 @@ Vec compound_fee(const Vec& r,const Vec& t,double c){same(r,t);check(c>=0&&std::
 Vec selection_regret(const Vec& train,const Vec& hold){same(train,hold);size_t j=std::min_element(train.begin(),train.end())-train.begin();double best=*std::min_element(hold.begin(),hold.end());return {double(j+1),hold[j],best,hold[j]-best};}
 
 void emit(const std::string& id,int scenario,const std::vector<std::string>& fields,const Vec& values){check(fields.size()==values.size());finite(values);for(size_t i=0;i<fields.size();++i)std::cout<<id<<','<<scenario<<','<<fields[i]<<','<<values[i]<<'\n';}
-int main(){try{std::cout<<std::setprecision(17)<<"id,scenario,field,value\n";
+void invalid_cases(){
+    int count=0;
+    try{(void)paired_loss(Vec{},Vec{});}catch(const std::invalid_argument&){++count;}
+    try{(void)hac_loss(Vec{1,1,1});}catch(const std::invalid_argument&){++count;}
+    try{(void)exact_sign(Vec(21,1));}catch(const std::invalid_argument&){++count;}
+    try{(void)holm_family(Vec{1.2});}catch(const std::invalid_argument&){++count;}
+    try{(void)cost_break_even(Vec{1},Vec{.1},Vec{0},0,0);}catch(const std::invalid_argument&){++count;}
+    try{(void)drift_turnover(Vec{.5,.5},Vec{.1,.1},Vec{.4,.4},.01);}catch(const std::invalid_argument&){++count;}
+    try{(void)shortfall(1,1,100,101,Vec{2},Vec{101},0);}catch(const std::invalid_argument&){++count;}
+    try{(void)margin_shock(Vec{100},Vec{-.9},10,.4);}catch(const std::invalid_argument&){++count;}
+    try{(void)factor_pnl(Vec{1},Vec{1,2},Vec{0},.1);}catch(const std::invalid_argument&){++count;}
+    try{(void)vol_cap(1,1,.01,.02,.01,.1);}catch(const std::invalid_argument&){++count;}
+    try{(void)gross_concentration(Vec{0,0});}catch(const std::invalid_argument&){++count;}
+    try{(void)weighted_tail(Vec{1,2},Vec{.2,.2},.9);}catch(const std::invalid_argument&){++count;}
+    try{(void)regime_moments(Vec{1},Vec{.1},Vec{-1});}catch(const std::invalid_argument&){++count;}
+    try{(void)rank_perturb(Vec{1,2},Vec{1,2},2);}catch(const std::invalid_argument&){++count;}
+    try{(void)compound_fee(Vec{.1},Vec{2},1);}catch(const std::invalid_argument&){++count;}
+    try{(void)selection_regret(Vec{1},Vec{1,2});}catch(const std::invalid_argument&){++count;}
+    check(count==16);
+    std::cout<<"16 invalid-domain cases rejected\n";
+}
+int main(int argc,char** argv){try{if(argc==2&&std::string(argv[1])=="--invalid"){invalid_cases();return 0;}check(argc==1);std::cout<<std::setprecision(17)<<"id,scenario,field,value\n";
     emit("paired_loss",1,{"mean_delta","win_rate"},paired_loss(Vec{2,1,-1},Vec{1,1,0}));
     emit("paired_loss",2,{"mean_delta","win_rate"},paired_loss(Vec{1,1,1},Vec{0,0,3}));
     emit("hac_loss",1,{"mean","long_run_variance","standard_error","z"},hac_loss(Vec{1,2,3,4}));

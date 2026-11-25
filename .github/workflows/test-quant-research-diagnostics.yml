@@ -30,6 +30,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: ${{ matrix.compiler }} -std=c++17 -O2 -Wall -Wextra -Werror -pedantic quant/cpp/research_diagnostics.cpp -o /tmp/quant-diagnostics
       - run: python3 scripts/test_research_diagnostics.py /tmp/quant-diagnostics
+      - run: /tmp/quant-diagnostics --invalid
   curriculum:
     runs-on: ubuntu-latest
     steps:
