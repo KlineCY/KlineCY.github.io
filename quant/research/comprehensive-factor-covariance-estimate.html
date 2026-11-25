@@ -1,0 +1,34 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>多资产因子协方差估计：载荷拟合、特异风险与结构化收缩｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>多资产因子协方差估计：载荷拟合、特异风险与结构化收缩</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-portfolio.html">组合研究：因子风险、主动配置、稳健决策与滚动预测</a>　<a href="../cpp/comprehensive_portfolio.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>因子风险与样本维度</h2><p>资产收益协方差直接样本估计在资产数量相对样本长度较大时容易出现病态。给定同步因子收益矩阵，将每个资产收益分解为截距、公共因子及特异残差。假设残差协方差对角，公共风险由低维因子协方差传递。这个结构假设与对完整样本协方差作Ledoit–Wolf最优强度收缩不同。</p><div class="equation">$$r_{it}=\alpha_i+B_i^\top f_t+\epsilon_{it},\quad \Sigma_r=B\Sigma_f B^\top+D$$</div></section><section><h2>估计及收缩</h2><p>对每个资产用含截距的岭回归估计载荷，截距不惩罚。因子协方差使用样本分母n−1，并按输入强度s向其对角矩阵收缩。特异方差用残差平方和除以n−1并加固定下限；该分母是明确的描述性样本方差口径，不宣称为岭回归下无偏残差方差。</p><div class="equation">$$\hat\Sigma_f=(1-s)S_f+s\operatorname{diag}(S_f),\quad D_{ii}=\frac{\sum_t\hat\epsilon_{it}^2}{n-1}+\delta$$</div></section><section><h2>正定性及风险解释</h2><p>因子样本协方差PSD，向对角收缩保持PSD，正特异方差使总风险矩阵SPD。对组合w，公共风险可写成(B'w)'Σf(B'w)，特异风险为Σd_iw_i²。输出载荷、截距、特异风险及每行完整协方差；组合优化中不得将载荷的历史拟合好直接当作未来预测。</p><div class="equation">$$w^\top\Sigma_r w=(B^\top w)^\top\hat\Sigma_f(B^\top w)+\sum_i D_{ii}w_i^2$$</div></section><section><h2>参考及实证口径</h2><p>因子序列−1、0、1、0，两个资产分别是因子的2倍及1倍，样本因子方差2/3，岭0，特异下限.1。协方差为(8/3+.1,4/3;4/3,2/3+.1)。真实滚动研究须仅用历史窗口、统一频率及资产可用性；截面维度最多32。</p><div class="equation">$$\hat\Sigma_{12}=2\cdot1\cdot 2/3=4/3$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Asset，Alpha，SpecificVariance，FactorLoading1，Covariance1，Covariance2。</p><p><a href="../research/comprehensive-examples/factor-covariance-estimate.csv" download>样本CSV</a></p><pre>Factor1,Asset1,Asset2
+-1,-2,-1
+0,0,0
+1,2,1
+0,0,0
+</pre><pre>./build/kline_quant comprehensive-factor-covariance-estimate quant/research/comprehensive-examples/factor-covariance-estimate.csv 1 0 0 0.1</pre><div class="wide"><table><thead><tr><th>Asset</th><th>Alpha</th><th>SpecificVariance</th><th>FactorLoading1</th><th>Covariance1</th><th>Covariance2</th></tr></thead><tbody><tr><td>1</td><td>0</td><td>0.1</td><td>2</td><td>2.766666666667</td><td>1.333333333333</td></tr><tr><td>2</td><td>0</td><td>0.1</td><td>1</td><td>1.333333333333</td><td>0.7666666666667</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report factor_covariance_estimate(const Mat&amp; x,const Vec&amp; p){
+    auto cols=validate(x,3,2,64);parameters(p,4);
+    auto k=count(p[0],1,16);require(cols&gt;k&amp;&amp;cols-k&lt;=32,"Invalid factor dimensions");auto d=cols-k,n=x.size();
+    double lam=p[1],s=p[2],floor=positive(p[3]);
+    require(lam&gt;=0&amp;&amp;s&gt;=0&amp;&amp;s&lt;=1&amp;&amp;double(n)*d*k*k&lt;=5e7,"Invalid factor controls");
+    Mat X,F;Vec mean(k,0);
+    for(auto&amp;r:x){
+        Vec f(r.begin(),r.begin()+k);F.push_back(f);
+        for(std::size_t j=0;j&lt;k;++j)mean[j]+=f[j]/n;
+        f.insert(f.begin(),1);X.push_back(f);
+    }
+    Mat sf(k,Vec(k,0));
+    for(auto&amp;r:F){Vec z=r;for(std::size_t j=0;j&lt;k;++j)z[j]-=mean[j];add_outer(sf,z,1./(n-1));}
+    for(std::size_t i=0;i&lt;k;++i)for(std::size_t j=0;j&lt;k;++j)if(i!=j)sf[i][j]*=1-s;
+    Vec alpha(d),specific(d);Mat B;
+    for(std::size_t i=0;i&lt;d;++i){
+        Vec y=column(x,k+i),w=fit_ridge(X,y,lam,true);alpha[i]=w[0];
+        double rss=0;for(std::size_t t=0;t&lt;n;++t)rss+=std::pow(y[t]-dot(X[t],w),2);
+        specific[i]=rss/(n-1)+floor;B.emplace_back(w.begin()+1,w.end());
+    }
+    Report out{{"Asset","Alpha","SpecificVariance"},{}};
+    for(std::size_t j=1;j&lt;=k;++j)out.header.push_back("FactorLoading"+std::to_string(j));
+    for(std::size_t j=1;j&lt;=d;++j)out.header.push_back("Covariance"+std::to_string(j));
+    for(std::size_t i=0;i&lt;d;++i){
+        Vec r{double(i+1),alpha[i],specific[i]};r.insert(r.end(),B[i].begin(),B[i].end());Vec z=mul(sf,B[i]);
+        for(std::size_t j=0;j&lt;d;++j)r.push_back(dot(z,B[j])+(i==j?specific[i]:0));out.rows.push_back(r);
+    }
+    return out;
+}</pre><p>参考文献：<a href="https://doi.org/10.1016/S0047-259X(03)00096-4">Ledoit and Wolf (2004), A well-conditioned estimator for large-dimensional covariance matrices, Journal of Multivariate Analysis; structural factor shrinkage differs from the paper's estimated shrinkage intensity.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

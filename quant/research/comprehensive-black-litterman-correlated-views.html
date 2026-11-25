@@ -1,0 +1,36 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Black–Litterman相关观点：高斯更新、均值不确定性与预测协方差｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>Black–Litterman相关观点：高斯更新、均值不确定性与预测协方差</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-portfolio.html">组合研究：因子风险、主动配置、稳健决策与滚动预测</a>　<a href="../cpp/comprehensive_portfolio.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>收益均值的不确定性</h2><p>Black–Litterman将资产预期收益视为具有先验分布的未知向量，市场均衡或其他预测提供先验均值π，τΣ提供均值协方差。观点Pμ=q+误差，观点误差Ω可非对角，从而显式处理多个观点共享信息。这里先验均值由用户输入，不自动从市场权重反推。</p><div class="equation">$$\mu\sim N(\pi,V),\quad V=\tau\Sigma,\qquad q=P\mu+\eta,\quad \eta\sim N(0,\Omega)$$</div></section><section><h2>后验均值与方差</h2><p>将先验与观点的联合正态分布条件化，得到后验均值与协方差。计算K=Ω+PVP'并解观点维度SPD系统，避免求大矩阵逆。更新不是简单加权平均：相对观点会同时改变多个资产均值，相关观点的影响取决于完整Ω。</p><div class="equation">$$\mu^+=\pi+VP^\top K^{-1}(q-P\pi),\quad M=V-VP^\top K^{-1}PV,\quad K=\Omega+PVP^\top$$</div></section><section><h2>预测风险与决策</h2><p>若未来单期资产收益在给定μ时具有Σ条件协方差，则全概率方差给出预测协方差Σ+M。在此风险度量下求无约束均值—方差最优风险资产权重，现金作为剩余账户，不施加净权重和1。若研究要求全投资、卖空或行业中性，应继续使用明确约束优化。</p><div class="equation">$$\Sigma_{\rm pred}=\Sigma+M,\quad w^*=\delta^{-1}(\Sigma+M)^{-1}\mu^+$$</div></section><section><h2>输入结构及精确参考</h2><p>前d行Type=0为Σ行及先验均值；接着m行Type=1为观点矩阵及观点值；最后m行Type=2为Ω的前m列，其余列和Value必须为0，m≤d。例中Σ=I、τ=.5，观点第一资产均值.3，Ω=.5，先验.1。后验均值.2，均值方差.25，预测方差1.25，风险厌恶2时权重.08。</p><div class="equation">$$\mu_1^+=0.1+\frac{0.5}{0.5+0.5}(0.3-0.1)=0.2$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Asset，PriorMean，PosteriorMean，MeanVariance，PredictiveVariance，UnconstrainedWeight，MeanCovariance1，MeanCovariance2。</p><p><a href="../research/comprehensive-examples/black-litterman-correlated-views.csv" download>样本CSV</a></p><pre>Type,C1,C2,Value
+0,1,0,0.1
+0,0,1,0
+1,1,0,0.3
+2,0.5,0,0
+</pre><pre>./build/kline_quant comprehensive-black-litterman-correlated-views quant/research/comprehensive-examples/black-litterman-correlated-views.csv 2 1 0.5 2</pre><div class="wide"><table><thead><tr><th>Asset</th><th>PriorMean</th><th>PosteriorMean</th><th>MeanVariance</th><th>PredictiveVariance</th><th>UnconstrainedWeight</th><th>MeanCovariance1</th><th>MeanCovariance2</th></tr></thead><tbody><tr><td>1</td><td>0.1</td><td>0.2</td><td>0.25</td><td>1.25</td><td>0.08</td><td>0.25</td><td>0</td></tr><tr><td>2</td><td>0</td><td>0</td><td>0.5</td><td>1.5</td><td>0</td><td>0</td><td>0.5</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report black_litterman_correlated_views(const Mat&amp; x,const Vec&amp; p){
+    auto cols=validate(x,3,3,34);parameters(p,4);auto d=count(p[0],1,32),m=count(p[1],1,d);
+    double tau=positive(p[2]),delta=positive(p[3]);require(cols==d+2&amp;&amp;x.size()==d+2*m,"Invalid BL block dimensions");
+    Mat S,P,O;Vec prior,q;
+    for(std::size_t i=0;i&lt;d;++i){
+        auto&amp;r=x[i];require(r[0]==0,"Covariance rows must be type zero");S.emplace_back(r.begin()+1,r.end()-1);prior.push_back(r.back());
+    }
+    for(std::size_t i=0;i&lt;m;++i){
+        auto&amp;r=x[d+i];require(r[0]==1,"View rows must be type one");P.emplace_back(r.begin()+1,r.end()-1);q.push_back(r.back());
+        auto&amp;v=x[d+m+i];require(v[0]==2,"View covariance rows must be type two");
+        O.emplace_back(v.begin()+1,v.begin()+1+m);for(std::size_t j=1+m;j&lt;v.size();++j)require(v[j]==0,"Unused view covariance fields must be zero");
+    }
+    solve_spd(S,Vec(d,0));solve_spd(O,Vec(m,0));
+    Mat V=S;for(auto&amp;r:V)for(double&amp;z:r)z*=tau;
+    Mat C;for(auto&amp;r:P)C.push_back(mul(V,r));
+    Mat K=O;
+    for(std::size_t i=0;i&lt;m;++i)for(std::size_t j=0;j&lt;m;++j)K[i][j]+=dot(P[i],C[j]);
+    Vec e=q;for(std::size_t i=0;i&lt;m;++i)e[i]-=dot(P[i],prior);Vec a=solve_spd(K,e),mean=prior;
+    for(std::size_t i=0;i&lt;d;++i)for(std::size_t j=0;j&lt;m;++j)mean[i]+=C[j][i]*a[j];
+    Mat M=V,pred=S;
+    for(std::size_t j=0;j&lt;d;++j){
+        Vec b(m);for(std::size_t h=0;h&lt;m;++h)b[h]=C[h][j];Vec z=solve_spd(K,b);
+        for(std::size_t i=0;i&lt;d;++i)for(std::size_t h=0;h&lt;m;++h)M[i][j]-=C[h][i]*z[h];
+    }
+    for(std::size_t i=0;i&lt;d;++i)for(std::size_t j=0;j&lt;=i;++j){double v=(M[i][j]+M[j][i])/2;M[i][j]=M[j][i]=v;pred[i][j]=pred[j][i]=S[i][j]+v;}
+    Vec w=solve_spd(pred,mean);for(double&amp;v:w)v/=delta;
+    Report out{{"Asset","PriorMean","PosteriorMean","MeanVariance","PredictiveVariance","UnconstrainedWeight"},{}};
+    for(std::size_t j=1;j&lt;=d;++j)out.header.push_back("MeanCovariance"+std::to_string(j));
+    for(std::size_t i=0;i&lt;d;++i){Vec r{double(i+1),prior[i],mean[i],M[i][i],pred[i][i],w[i]};r.insert(r.end(),M[i].begin(),M[i].end());out.rows.push_back(r);}
+    return out;
+}</pre><p>参考文献：<a href="https://doi.org/10.2469/faj.v48.n5.28">Black and Litterman (1992), Global Portfolio Optimization, Financial Analysts Journal.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>
