@@ -88,6 +88,8 @@
 #include "comprehensive_microstructure.hpp"
 #include "comprehensive_inference.hpp"
 #include "comprehensive_bayesian.hpp"
+#include "comprehensive_economics.hpp"
+#include "comprehensive_data.hpp"
 namespace kline {
 inline bool run_evidence_cli(const std::string& command,int argc,char** argv,std::ostream& out){
     using Function=researchflow::Report(*)(const researchflow::Mat&,const researchflow::Vec&);
@@ -524,6 +526,22 @@ inline bool run_evidence_cli(const std::string& command,int argc,char** argv,std
     if(command=="comprehensive-gaussian-tail-importance")fn=comprehensive::gaussian_tail_importance;
     if(command=="comprehensive-bayesian-multivariate-regression")fn=comprehensive::bayesian_multivariate_regression;
     if(command=="comprehensive-beta-bandit-finite-horizon")fn=comprehensive::beta_bandit_finite_horizon;
+    if(command=="comprehensive-household-saving-bellman")fn=comprehensive::household_saving_bellman;
+    if(command=="comprehensive-mccall-reservation-wage")fn=comprehensive::mccall_reservation_wage;
+    if(command=="comprehensive-dynamic-logit-replacement")fn=comprehensive::dynamic_logit_replacement;
+    if(command=="comprehensive-matching-free-entry-equilibrium")fn=comprehensive::matching_free_entry_equilibrium;
+    if(command=="comprehensive-ces-armington-trade-counterfactual")fn=comprehensive::ces_armington_trade_counterfactual;
+    if(command=="comprehensive-leontief-dual-price-system")fn=comprehensive::leontief_dual_price_system;
+    if(command=="comprehensive-cournot-capacity-equilibrium")fn=comprehensive::cournot_capacity_equilibrium;
+    if(command=="comprehensive-ramsey-steady-state-transition")fn=comprehensive::ramsey_steady_state_transition;
+    if(command=="comprehensive-bitemporal-vintage-join")fn=comprehensive::bitemporal_vintage_join;
+    if(command=="comprehensive-watermark-window-ledger")fn=comprehensive::watermark_window_ledger;
+    if(command=="comprehensive-sequence-gap-replay")fn=comprehensive::sequence_gap_replay;
+    if(command=="comprehensive-label-window-availability")fn=comprehensive::label_window_availability;
+    if(command=="comprehensive-overlapping-label-uniqueness")fn=comprehensive::overlapping_label_uniqueness;
+    if(command=="comprehensive-train-only-winsor-standardize")fn=comprehensive::train_only_winsor_standardize;
+    if(command=="comprehensive-corporate-action-return-ledger")fn=comprehensive::corporate_action_return_ledger;
+    if(command=="comprehensive-multi-currency-cash-reconciliation")fn=comprehensive::multi_currency_cash_reconciliation;
     if(!fn)return false;
     require(argc>=3,"Evidence laboratory requires a numeric CSV");
     researchflow::Vec p;
@@ -931,6 +949,22 @@ inline void evidence_usage(std::ostream& out){
     out<<"  comprehensive-gaussian-tail-importance CSV PARAMETERS...\n";
     out<<"  comprehensive-bayesian-multivariate-regression CSV PARAMETERS...\n";
     out<<"  comprehensive-beta-bandit-finite-horizon CSV PARAMETERS...\n";
+    out<<"  comprehensive-household-saving-bellman CSV PARAMETERS...\n";
+    out<<"  comprehensive-mccall-reservation-wage CSV PARAMETERS...\n";
+    out<<"  comprehensive-dynamic-logit-replacement CSV PARAMETERS...\n";
+    out<<"  comprehensive-matching-free-entry-equilibrium CSV PARAMETERS...\n";
+    out<<"  comprehensive-ces-armington-trade-counterfactual CSV PARAMETERS...\n";
+    out<<"  comprehensive-leontief-dual-price-system CSV\n";
+    out<<"  comprehensive-cournot-capacity-equilibrium CSV PARAMETERS...\n";
+    out<<"  comprehensive-ramsey-steady-state-transition CSV PARAMETERS...\n";
+    out<<"  comprehensive-bitemporal-vintage-join CSV PARAMETERS...\n";
+    out<<"  comprehensive-watermark-window-ledger CSV PARAMETERS...\n";
+    out<<"  comprehensive-sequence-gap-replay CSV PARAMETERS...\n";
+    out<<"  comprehensive-label-window-availability CSV PARAMETERS...\n";
+    out<<"  comprehensive-overlapping-label-uniqueness CSV\n";
+    out<<"  comprehensive-train-only-winsor-standardize CSV PARAMETERS...\n";
+    out<<"  comprehensive-corporate-action-return-ledger CSV\n";
+    out<<"  comprehensive-multi-currency-cash-reconciliation CSV\n";
     out<<"Evidence laboratories: evidence-METHOD CSV [PARAMETERS...]\n";
     out<<"  evidence-hj-bound CSV PARAMETERS...\n";
     out<<"  evidence-minimum-norm-sdf CSV PARAMETERS...\n";
