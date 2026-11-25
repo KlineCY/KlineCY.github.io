@@ -33,7 +33,7 @@ void influence_project(){
 }
 void shift_project(){
     std::cout<<"SourceOnes,TargetOnes,Alpha,Gamma,Regularization,Query,OracleRatio,EstimatedRatio,OracleFinite,OracleRadius,EstimatedFinite,EstimatedRadius,UnweightedRadius,EffectiveSize\n";
-    const int n=24;for(int s:{6,12,18})for(int t:{6,12,18})for(double alpha:{.1,.2})for(double g:{.5,2.})for(double l:{.01,.2})for(int q:{0,1}){
+    const int n=24;for(int s:{6,12,18})for(int t:{6,12,18})for(double alpha:{.11,.21})for(double g:{.5,2.})for(double l:{.01,.2})for(int q:{0,1}){
         Vec u{n,n,2,2,g,l};for(int i=0;i<n;++i)u.push_back(i<s?1:0);for(int i=0;i<n;++i)u.push_back(i<t?1:0);u.insert(u.end(),{0,1,0,1});
         Vec ratio=ulsif_ratio(u);double w0=double(n-t)/(n-s),w1=double(t)/s,e0=ratio[8],e1=ratio[9];
         Vec a{alpha,q?w1:w0},b{alpha,q?e1:e0},c{alpha,1};for(int i=0;i<n;++i){bool z=i<s;double score=.05*(1+(i*7)%11)+(z?.6:0);a.insert(a.end(),{score,z?w1:w0});b.insert(b.end(),{score,z?e1:e0});c.insert(c.end(),{score,1});}
