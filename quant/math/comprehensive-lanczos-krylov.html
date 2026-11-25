@@ -1,0 +1,34 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>对称Lanczos：Krylov投影、三对角递推与正交证书｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="math"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>对称Lanczos：Krylov投影、三对角递推与正交证书</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-numerics.html">数值线性代数、优化与曲线逼近</a>　<a href="../cpp/comprehensive_numerics.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>Krylov空间的作用</h2><p>高维对称矩阵的谱计算不一定需要全部特征向量。给定起始向量q，Krylov空间由q,Aq,…构成，Lanczos将A投影到该空间的正交基，使投影矩阵在理论上三对角。该结构可用于谱估计、矩阵函数近似及风险主方向分析。</p><div class="equation">$$\mathcal K_m(A,q)=\operatorname{span}(q,Aq,\ldots,A^{m-1}q),\qquad T_m=Q_m^\top A Q_m$$</div></section><section><h2>三项递推</h2><p>对称性使第j步只需减去前一向量与当前向量的分量。浮点计算会破坏正交性，尤其当特征值已开始收敛时，故此实现对所有已构造向量进行两遍重正交化。保留主三对角系数，并独立报告原始投影关系的残差。</p><div class="equation">$$u_j=Aq_j-\beta_{j-1}q_{j-1},\quad \alpha_j=q_j^\top u_j,\quad r_j=u_j-\alpha_jq_j,\quad \beta_j=\|r_j\|_2$$</div></section><section><h2>终止与诊断</h2><p>当下一向量范数低于相对阈值时，表示在给定精度下达到不变子空间。终止残差仍应保留在误差中；不应为了展示理想三对角关系而强制将舍入误差置零。输出每步alpha、beta、最大正交误差和三项关系的剩余误差。</p><div class="equation">$$AQ_m-Q_mT_m=\beta_mq_{m+1}e_m^\top,\quad \|Q_m^\top Q_m-I\|_\infty$$</div></section><section><h2>算例与复杂度</h2><p>矩阵(2,1;1,2)以第一标准基开始，alpha均2，第一beta=1，第二beta=0；两步恢复完整投影。一般密集实现O(mn²+m²n)，全重正交用于教学中的可靠谱诊断；大型稀疏系统应采用矩阵向量接口、选择性重正交或重启。</p><div class="equation">$$\lambda(T_m)\subseteq[\lambda_{\min}(A),\lambda_{\max}(A)]$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Step，Alpha，Beta，OrthogonalityError，ProjectionResidual。</p><p><a href="../research/comprehensive-examples/lanczos-krylov.csv" download>样本CSV</a></p><pre>A1,A2,Start
+2,1,1
+1,2,0
+</pre><pre>./build/kline_quant comprehensive-lanczos-krylov quant/research/comprehensive-examples/lanczos-krylov.csv 2 1e-12</pre><div class="wide"><table><thead><tr><th>Step</th><th>Alpha</th><th>Beta</th><th>OrthogonalityError</th><th>ProjectionResidual</th></tr></thead><tbody><tr><td>1</td><td>2</td><td>1</td><td>0</td><td>0</td></tr><tr><td>2</td><td>2</td><td>0</td><td>0</td><td>0</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report lanczos_krylov(const Mat&amp; x,const Vec&amp; p){
+    auto n=validate(x,1,2,33)-1;require(x.size()==n,"Square Lanczos matrix required");
+    parameters(p,2);auto m=count(p[0],1,n);double tol=positive(p[1]);
+    Mat A;Vec q;
+    for(auto&amp;r:x){A.emplace_back(r.begin(),r.end()-1);q.push_back(r.back());}
+    double scale=0;
+    for(std::size_t i=0;i&lt;n;++i)for(std::size_t j=0;j&lt;n;++j){
+        require(std::abs(A[i][j]-A[j][i])&lt;=1e-12*std::max({1.,std::abs(A[i][j]),std::abs(A[j][i])}),"Symmetric matrix required");
+        scale=std::max(scale,std::abs(A[i][j]));
+    }
+    double norm=positive(std::sqrt(squared(q)));for(double&amp;v:q)v/=norm;
+    Mat basis;Vec prev(n,0);double beta=0;
+    Report out{{"Step","Alpha","Beta","OrthogonalityError","ProjectionResidual"},{}};
+    for(std::size_t k=0;k&lt;m;++k){
+        basis.push_back(q);Vec aq=mul(A,q),r=aq;
+        for(std::size_t i=0;i&lt;n;++i)r[i]-=beta*prev[i];
+        double alpha=dot(q,r);
+        for(std::size_t i=0;i&lt;n;++i)r[i]-=alpha*q[i];
+        for(int pass=0;pass&lt;2;++pass)for(auto&amp;v:basis){
+            double z=dot(r,v);for(std::size_t i=0;i&lt;n;++i)r[i]-=z*v[i];
+        }
+        double b=std::sqrt(squared(r)),orth=0,err=0;
+        for(std::size_t i=0;i&lt;basis.size();++i)for(std::size_t j=0;j&lt;basis.size();++j)
+            orth=std::max(orth,std::abs(dot(basis[i],basis[j])-double(i==j)));
+        for(std::size_t i=0;i&lt;n;++i)err=std::hypot(err,aq[i]-alpha*q[i]-beta*prev[i]-r[i]);
+        out.rows.push_back({double(k+1),alpha,b,orth,err});
+        if(b&lt;=tol*std::max(1.,scale)||k+1==m)break;
+        prev=q;q=r;for(double&amp;v:q)v/=b;beta=b;
+    }
+    return out;
+}</pre><p>参考文献：<a href="https://www.press.jhu.edu/books/title/10678/matrix-computations">Golub and Van Loan (2013), Matrix Computations, 4th ed., Johns Hopkins University Press.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

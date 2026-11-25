@@ -1,0 +1,27 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>形状保持Hermite插值：斜率限制、节点导数与区间单调｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="math"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>形状保持Hermite插值：斜率限制、节点导数与区间单调</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-numerics.html">数值线性代数、优化与曲线逼近</a>　<a href="../cpp/comprehensive_numerics.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>插值目标与金融曲线</h2><p>常规三次样条追求二阶连续性，可能在单调观测之间出现过冲。PCHIP将局部割线斜率转换为受限制的节点导数，从而保持每个单调数据区间的形状。应用于折现曲线或累积分布时，应先确定拟合变量；例如对数贴现单调与贴现价格本身的正性是不同约束。</p><div class="equation">$$h_i=x_{i+1}-x_i,\quad \delta_i=(y_{i+1}-y_i)/h_i$$</div></section><section><h2>内点导数</h2><p>当左右割线异号或任一为零，令节点导数为零；否则使用带区间长度权重的调和平均，限制靠近小斜率的一侧。端点使用一侧割线作为保守斜率。这是局部单调Hermite方案，端点规则与某些软件的PCHIP实现略有差异。</p><div class="equation">$$m_i=\frac{w_1+w_2}{w_1/\delta_{i-1}+w_2/\delta_i},\quad w_1=2h_i+h_{i-1},\ w_2=h_i+2h_{i-1}$$</div></section><section><h2>三次基函数与导数</h2><p>在标准化局部坐标u=(x−x_i)/h_i下，使用四个Hermite基函数合并节点值和节点导数。其导数可解析求得，用来检查单调区间内的斜率符号。节点之间连续一阶导数，不强制二阶导数连续。</p><div class="equation">$$H(u)=(2u^3-3u^2+1)y_i+(u^3-2u^2+u)h_im_i+(-2u^3+3u^2)y_{i+1}+(u^3-u^2)h_im_{i+1}$$</div></section><section><h2>参考与边界</h2><p>线性节点(0,0),(1,1),(2,2)的所有导数为1，插值恢复y=x。对具有平台及方向变化的样本，独立比较区间端点与密集查询的上下界。禁止超出观测范围的外推；曲线的金融无套利条件需针对具体贴现、远期或隐含波动变量另行验证。</p><div class="equation">$$\min(y_i,y_{i+1})\le H(u)\le\max(y_i,y_{i+1}),\quad 0\le u\le1$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Query，Value，Derivative，LowerKnot，UpperKnot。</p><p><a href="../research/comprehensive-examples/pchip-monotone.csv" download>样本CSV</a></p><pre>X,Y
+0,0
+1,1
+2,2
+</pre><pre>./build/kline_quant comprehensive-pchip-monotone quant/research/comprehensive-examples/pchip-monotone.csv 0 0.5 1 1.5 2</pre><div class="wide"><table><thead><tr><th>Query</th><th>Value</th><th>Derivative</th><th>LowerKnot</th><th>UpperKnot</th></tr></thead><tbody><tr><td>0</td><td>0</td><td>1</td><td>0</td><td>1</td></tr><tr><td>0.5</td><td>0.5</td><td>1</td><td>0</td><td>1</td></tr><tr><td>1</td><td>1</td><td>1</td><td>1</td><td>2</td></tr><tr><td>1.5</td><td>1.5</td><td>1</td><td>1</td><td>2</td></tr><tr><td>2</td><td>2</td><td>1</td><td>1</td><td>2</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report pchip_monotone(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,2,2);require(!p.empty()&amp;&amp;p.size()&lt;=100000,"Query points required");parameters(p,p.size());
+    auto n=x.size();Vec h(n-1),delta(n-1),m(n),nodes;
+    for(auto&amp;r:x)nodes.push_back(r[0]);
+    for(std::size_t i=0;i+1&lt;n;++i){h[i]=positive(x[i+1][0]-x[i][0]);delta[i]=(x[i+1][1]-x[i][1])/h[i];}
+    m.front()=delta.front();m.back()=delta.back();
+    for(std::size_t i=1;i+1&lt;n;++i){
+        double a=delta[i-1],b=delta[i];
+        if(a==0||b==0||std::signbit(a)!=std::signbit(b))m[i]=0;
+        else{double u=2*h[i]+h[i-1],v=h[i]+2*h[i-1];m[i]=(u+v)/(u/a+v/b);}
+    }
+    Report out{{"Query","Value","Derivative","LowerKnot","UpperKnot"},{}};
+    for(double q:p){
+        require(q&gt;=nodes.front()&amp;&amp;q&lt;=nodes.back(),"Interpolation outside support");
+        auto it=std::upper_bound(nodes.begin(),nodes.end(),q);
+        auto i=std::min(n-2,std::size_t(it-nodes.begin()-1));
+        double t=(q-nodes[i])/h[i],t2=t*t,t3=t2*t,a=x[i][1],b=x[i+1][1];
+        double y=(2*t3-3*t2+1)*a+(t3-2*t2+t)*h[i]*m[i]+(-2*t3+3*t2)*b+(t3-t2)*h[i]*m[i+1];
+        double der=(6*t2-6*t)*(a-b)/h[i]+(3*t2-4*t+1)*m[i]+(3*t2-2*t)*m[i+1];
+        out.rows.push_back({q,y,der,nodes[i],nodes[i+1]});
+    }
+    return out;
+}</pre><p>参考文献：<a href="https://doi.org/10.1137/0905021">Fritsch and Butland (1984), A Method for Constructing Local Monotone Piecewise Cubic Interpolants, SIAM Journal on Scientific and Statistical Computing.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

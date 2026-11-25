@@ -1,0 +1,30 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>严格凸单纯形QP：活动集穷举与KKT全局证书｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>严格凸单纯形QP：活动集穷举与KKT全局证书</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-numerics.html">数值线性代数、优化与曲线逼近</a>　<a href="../cpp/comprehensive_numerics.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>受约束二次目标</h2><p>最小方差配置、带风险惩罚的预测收益分配及组合跟踪均可写为SPD二次目标加线性项，在非负且权重和1的单纯形上求极小。无约束解简单投影不一定等价于原二次目标的约束解，因为协方差定义非Euclidean距离。</p><div class="equation">$$\min_{w\ge0,\mathbf1^\top w=1}\tfrac12 w^\top Qw+c^\top w,\qquad Q\succ0$$</div></section><section><h2>活动集解析解</h2><p>固定正权重集合S，非活动坐标取零。等式约束下KKT方程可以通过两个SPD系统求解：u=Q_S^{-1}1,v=Q_S^{-1}c_S，乘子ν=−(1+1'v)/(1'u)，权重−v−νu。仅当权重可行且非活动坐标约化梯度非负时，才满足原问题KKT。</p><div class="equation">$$w_S=-Q_S^{-1}(c_S+\nu\mathbf1),\quad \nu=-\frac{1+\mathbf1^\top Q_S^{-1}c_S}{\mathbf1^\top Q_S^{-1}\mathbf1}$$</div></section><section><h2>全局最优证书</h2><p>SPD使目标严格凸，KKT充分必要。枚举全部非空子集，对候选计算原始目标、预算及互补约束残差，挑选满足阈值的最优解。小规模穷举成本指数增长，但可为高维优化器提供独立参考；不应用于大规模交易生产。</p><div class="equation">$$g=Qw+c+\nu\mathbf1,\quad g_i=0\ (w_i&gt;0),\quad g_i\ge0\ (w_i=0),\quad \mathbf1^\top w=1$$</div></section><section><h2>基准与解释</h2><p>Q=2I、c=(−1,0)时，两权重均正，解(0.75,0.25)，乘子−0.5，目标−0.125。改变线性项可触发边界；输出Active代表严格正权重，不代表某个行业因子有显著预测能力。维度限制12，校验原始SPD与预算。</p><div class="equation">$$\phi(w^*)=\tfrac12(w^*)^\top Qw^*+c^\top w^*$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Asset，Weight，Multiplier，Objective，StationarityResidual，BudgetResidual，Active。</p><p><a href="../research/comprehensive-examples/simplex-active-set.csv" download>样本CSV</a></p><pre>Q1,Q2,Linear
+2,0,-1
+0,2,0
+</pre><pre>./build/kline_quant comprehensive-simplex-active-set quant/research/comprehensive-examples/simplex-active-set.csv</pre><div class="wide"><table><thead><tr><th>Asset</th><th>Weight</th><th>Multiplier</th><th>Objective</th><th>StationarityResidual</th><th>BudgetResidual</th><th>Active</th></tr></thead><tbody><tr><td>1</td><td>0.75</td><td>-0.5</td><td>-0.125</td><td>0</td><td>0</td><td>1</td></tr><tr><td>2</td><td>0.25</td><td>-0.5</td><td>-0.125</td><td>0</td><td>0</td><td>1</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report simplex_active_set(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,1,2,13)-1;require(x.size()==d,"Square QP matrix required");parameters(p,0);
+    Mat Q;Vec c;
+    for(auto&amp;r:x){Q.emplace_back(r.begin(),r.end()-1);c.push_back(r.back());}
+    solve_spd(Q,Vec(d,0));
+    Vec best;double obj=std::numeric_limits&lt;double&gt;::infinity(),nu=0,kkt=0;
+    for(std::size_t mask=1;mask&lt;(std::size_t(1)&lt;&lt;d);++mask){
+        std::vector&lt;std::size_t&gt; S;
+        for(std::size_t j=0;j&lt;d;++j)if(mask&amp;(std::size_t(1)&lt;&lt;j))S.push_back(j);
+        auto m=S.size();Mat H(m,Vec(m));Vec b(m),one(m,1);
+        for(std::size_t i=0;i&lt;m;++i){
+            b[i]=c[S[i]];for(std::size_t j=0;j&lt;m;++j)H[i][j]=Q[S[i]][S[j]];
+        }
+        Vec u=solve_spd(H,one),v=solve_spd(H,b),w(d,0);
+        double lambda=-(1+sum(v))/positive(sum(u));bool feasible=true;
+        for(std::size_t i=0;i&lt;m;++i){w[S[i]]=-v[i]-lambda*u[i];if(w[S[i]]&lt;-1e-10)feasible=false;}
+        if(!feasible)continue;
+        Vec g=mul(Q,w);double f=.5*dot(w,g)+dot(c,w),err=0;
+        for(std::size_t i=0;i&lt;d;++i){double z=g[i]+c[i]+lambda;err=std::max(err,w[i]&gt;1e-10?std::abs(z):std::max(0.,-z));}
+        if(err&gt;1e-8*std::max(1.,inf_norm(c))||std::abs(sum(w)-1)&gt;1e-8)continue;
+        if(f&lt;obj){best=w;obj=f;nu=lambda;kkt=err;}
+    }
+    require(!best.empty(),"No active set with valid certificate");
+    Report out{{"Asset","Weight","Multiplier","Objective","StationarityResidual","BudgetResidual","Active"},{}};
+    for(std::size_t j=0;j&lt;d;++j)out.rows.push_back({double(j+1),best[j],nu,obj,kkt,std::abs(sum(best)-1),double(best[j]&gt;1e-10)});
+    return out;
+}</pre><p>参考文献：<a href="https://web.stanford.edu/~boyd/cvxbook/">Boyd and Vandenberghe (2004), Convex Optimization.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

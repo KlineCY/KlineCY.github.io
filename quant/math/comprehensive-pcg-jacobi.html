@@ -1,0 +1,36 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>预条件共轭梯度：残差轨迹与对角尺度｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="math"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>预条件共轭梯度：残差轨迹与对角尺度</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-numerics.html">数值线性代数、优化与曲线逼近</a>　<a href="../cpp/comprehensive_numerics.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>线性方程与二次能量</h2><p>SPD线性系统等价于严格凸二次函数的极小点。共轭梯度依次建立A正交搜索方向，理论上在精确算术的有限维度内收敛；有限精度、特征值分布和尺度差异决定实际迭代数。Jacobi预条件取对角线，针对尺度不均但未必改善所有矩阵。</p><div class="equation">$$Ax=b,\quad \phi(x)=\tfrac12x^\top Ax-b^\top x,\quad M=\operatorname{diag}(A)$$</div></section><section><h2>预条件递推</h2><p>从零向量开始，残差r=b−Ax，预条件残差z=M^{-1}r，搜索方向初始为z。每步步长使二次能量沿方向最小，新的方向使用r'z比值。与未经预条件的递推相比，内积必须使用预条件残差，不能直接将普通CG系数混用。</p><div class="equation">$$\alpha_k=\frac{r_k^\top z_k}{p_k^\top Ap_k},\quad x_{k+1}=x_k+\alpha_kp_k,\quad r_{k+1}=r_k-\alpha_kAp_k,\quad \beta_k=\frac{r_{k+1}^\top z_{k+1}}{r_k^\top z_k}$$</div></section><section><h2>停止条件与原始残差</h2><p>递推残差可能因舍入积累而与真实残差不同，因此每一步输出由原始系统计算的相对残差。每次使用递推方向，但仅按真实残差判断收敛；超出迭代上限保留Converged=0而非伪造成功。输入SPD性通过现有Cholesky核验，所以该教学密集实现含额外O(d³)预处理。</p><div class="equation">$$\rho_k=\frac{\|b-Ax_k\|_2}{\max(\|b\|_2,10^{-300})},\qquad \phi(x^*)=-\tfrac12 b^\top A^{-1}b$$</div></section><section><h2>实验口径</h2><p>对角矩阵diag(2,8)与b=(2,8)时预条件系统相当于单位矩阵，一次迭代得到x=(1,1)，能量−5。关闭预条件则一般需两次。研究中分别报告谱分布、真实残差与运行开销，不以一次特例概括预条件普遍效果。</p><div class="equation">$$\kappa_2(M^{-1/2}AM^{-1/2})\quad\text{versus}\quad\kappa_2(A)$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Iteration，ResidualNorm，RelativeResidual，Energy，Converged。</p><p><a href="../research/comprehensive-examples/pcg-jacobi.csv" download>样本CSV</a></p><pre>A1,A2,RHS
+2,0,2
+0,8,8
+</pre><pre>./build/kline_quant comprehensive-pcg-jacobi quant/research/comprehensive-examples/pcg-jacobi.csv 1e-12 20 1</pre><div class="wide"><table><thead><tr><th>Iteration</th><th>ResidualNorm</th><th>RelativeResidual</th><th>Energy</th><th>Converged</th></tr></thead><tbody><tr><td>0</td><td>8.246211251235</td><td>1</td><td>0</td><td>0</td></tr><tr><td>1</td><td>0</td><td>0</td><td>-5</td><td>1</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report pcg_jacobi(const Mat&amp; x,const Vec&amp; p){
+    auto n=validate(x,1,2,33)-1;
+    require(x.size()==n,"Square PCG system required");parameters(p,3);
+    double tol=positive(p[0]);auto cap=count(p[1],1,10000);
+    require(p[2]==0||p[2]==1,"Preconditioner flag must be binary");
+    Mat A;Vec b;
+    for(auto&amp;r:x){A.emplace_back(r.begin(),r.end()-1);b.push_back(r.back());}
+    solve_spd(A,b);
+    Vec w(n,0),r=b,z(n),dir(n);
+    auto pre=[&amp;](const Vec&amp; r){Vec z(n);for(std::size_t j=0;j&lt;n;++j)z[j]=p[2]?r[j]/A[j][j]:r[j];return z;};
+    double bnorm=std::sqrt(squared(b)),den=std::max(bnorm,1e-300);
+    Report out{{"Iteration","ResidualNorm","RelativeResidual","Energy","Converged"},{}};
+    auto emit=[&amp;](std::size_t k){
+        Vec a=mul(A,w);double e=0;
+        for(std::size_t j=0;j&lt;n;++j)e=std::hypot(e,b[j]-a[j]);
+        bool done=e/den&lt;=tol;
+        out.rows.push_back({double(k),e,e/den,.5*dot(w,a)-dot(w,b),double(done)});
+        return done;
+    };
+    if(emit(0))return out;
+    z=pre(r);dir=z;double rz=positive(dot(r,z));
+    for(std::size_t k=1;k&lt;=cap;++k){
+        Vec q=mul(A,dir);double a=rz/positive(dot(dir,q));
+        for(std::size_t j=0;j&lt;n;++j){w[j]+=a*dir[j];r[j]-=a*q[j];}
+        if(emit(k))break;
+        z=pre(r);double next=dot(r,z);
+        if(next&lt;=0)break;
+        double beta=next/rz;
+        for(std::size_t j=0;j&lt;n;++j)dir[j]=z[j]+beta*dir[j];
+        rz=next;
+    }
+    return out;
+}</pre><p>参考文献：<a href="https://doi.org/10.1137/1.9780898718003.ch9">Saad (2003), Iterative Methods for Sparse Linear Systems, SIAM, Chapter 9.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

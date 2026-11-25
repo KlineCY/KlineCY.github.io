@@ -1,0 +1,38 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>因子协方差线性系统：Woodbury逆、行列式与边际风险｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="math"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>因子协方差线性系统：Woodbury逆、行列式与边际风险</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-numerics.html">数值线性代数、优化与曲线逼近</a>　<a href="../cpp/comprehensive_numerics.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>低秩结构</h2><p>风险模型常将协方差表示为正的特异风险对角矩阵和少数公共因子的外积。令B为已包含因子协方差平方根的加载矩阵，则不需要假定因子本身方差为1；只需特异风险严格正。对资产数远大于因子数的情形，直接求逆整个协方差矩阵会浪费结构。</p><div class="equation">$$\Sigma=D+BB^\top,\qquad D=\operatorname{diag}(d_1,\ldots,d_n),\quad d_i&gt;0$$</div></section><section><h2>Woodbury推导</h2><p>令z=B^	op x。由(D+BB^	op)x=y得到x=D^{-1}(y-Bz)，代回z方程，因子维度的系统为(I+B^	op D^{-1}B)z=B^	op D^{-1}y。该系统对称正定，使用Cholesky求解；无需形成n×n矩阵。</p><div class="equation">$$K=I+B^\top D^{-1}B,\quad \Sigma^{-1}y=D^{-1}y-D^{-1}BK^{-1}B^\top D^{-1}y$$</div></section><section><h2>行列式与证书</h2><p>矩阵行列式引理使对数行列式分解为特异方差之和及小型因子系统的对数行列式。二次型y'Σ^{-1}y是Mahalanobis距离或精度风险计算的重要组成。使用加载矩阵直接回代原始方程，不通过再次求逆来检查误差。</p><div class="equation">$$\log|\Sigma|=\sum_i\log d_i+\log|K|,\quad \log|K|=2\sum_j\log L_{jj},\quad \|\Sigma x-y\|_\infty$$</div></section><section><h2>数值例与规模</h2><p>例中Σ=(3,2;2,7)，行列式17，右端(1,2)，解(3/17,4/17)，二次型11/17。实际时间O(nk²+k³)，存储O(nk+k²)。当因子数接近资产数时优势消失，极小特异风险仍可能导致消减误差，应同时查看原始残差及条件数。</p><div class="equation">$$y^\top\Sigma^{-1}y=\sum_i y_ix_i$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Asset，Solution，LogDet，QuadraticForm，Residual。</p><p><a href="../research/comprehensive-examples/woodbury-risk-solve.csv" download>样本CSV</a></p><pre>SpecificVariance,Factor1,RHS
+2,1,1
+3,2,2
+</pre><pre>./build/kline_quant comprehensive-woodbury-risk-solve quant/research/comprehensive-examples/woodbury-risk-solve.csv</pre><div class="wide"><table><thead><tr><th>Asset</th><th>Solution</th><th>LogDet</th><th>QuadraticForm</th><th>Residual</th></tr></thead><tbody><tr><td>1</td><td>0.1764705882353</td><td>2.833213344056</td><td>0.6470588235294</td><td>0</td></tr><tr><td>2</td><td>0.2352941176471</td><td>2.833213344056</td><td>0.6470588235294</td><td>0</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report woodbury_risk_solve(const Mat&amp; x,const Vec&amp; p){
+    auto k=validate(x,1,3,34)-2,n=x.size();
+    parameters(p,0);
+    require(double(n)*k*k&lt;=5e7,"Factor solve work limit");
+    Mat K=identity(k);
+    Vec rhs(k,0),base(n),diag(n);
+    double ld=0;
+    for(std::size_t i=0;i&lt;n;++i){
+        diag[i]=positive(x[i][0]);base[i]=x[i].back()/diag[i];ld+=std::log(diag[i]);
+        Vec b(x[i].begin()+1,x[i].end()-1);
+        add_outer(K,b,1/diag[i]);
+        for(std::size_t j=0;j&lt;k;++j)rhs[j]+=b[j]*base[i];
+    }
+    Vec z=solve_spd(K,rhs),w(n),btx(k,0);
+    Mat L(k,Vec(k,0));
+    for(std::size_t i=0;i&lt;k;++i)for(std::size_t j=0;j&lt;=i;++j){
+        double v=K[i][j];for(std::size_t h=0;h&lt;j;++h)v-=L[i][h]*L[j][h];
+        L[i][j]=i==j?std::sqrt(positive(v)):v/L[j][j];
+        if(i==j)ld+=2*std::log(L[i][j]);
+    }
+    double quad=0,err=0;
+    for(std::size_t i=0;i&lt;n;++i){
+        Vec b(x[i].begin()+1,x[i].end()-1);
+        w[i]=base[i]-dot(b,z)/diag[i];
+        quad+=x[i].back()*w[i];
+        for(std::size_t j=0;j&lt;k;++j)btx[j]+=b[j]*w[i];
+    }
+    for(std::size_t i=0;i&lt;n;++i){
+        Vec b(x[i].begin()+1,x[i].end()-1);
+        err=std::max(err,std::abs(diag[i]*w[i]+dot(b,btx)-x[i].back()));
+    }
+    Report out{{"Asset","Solution","LogDet","QuadraticForm","Residual"},{}};
+    for(std::size_t i=0;i&lt;n;++i)out.rows.push_back({double(i+1),w[i],ld,quad,err});
+    return out;
+}</pre><p>参考文献：<a href="https://www.press.jhu.edu/books/title/10678/matrix-computations">Golub and Van Loan (2013), Matrix Computations, 4th ed., Johns Hopkins University Press.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>
