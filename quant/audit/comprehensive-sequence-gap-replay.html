@@ -1,0 +1,26 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>分区序列缺口、幂等去重与重放账本｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="audit"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>分区序列缺口、幂等去重与重放账本</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-data.html">量化数据系统、点时一致性与实证审计</a>　<a href="../cpp/comprehensive_data.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>事件标识与分区顺序</h2><p>每个分区独立维护下一个应提交的整数序列，输入是到达顺序。重复序列必须具有相同数值，冲突重复明确拒绝；这里保留全部历史以支持教学重放审计。</p><div class="equation">$$k=(partition,sequence),\quad x(k)=x'(k)\text{ for duplicates}.$$</div></section><section><h2>缓冲与连续提交</h2><p>超过当前期待序列的记录进入有序缓冲；缺口补齐后持续提交连续记录。状态1代表到达时能推进，2表示等待，0表示重复。不同分区之间不假定全局顺序。</p><div class="equation">$$c_p=\max\{s:\{s_0,\ldots,s\}\subseteq K_p\}.$$</div></section><section><h2>幂等守恒</h2><p>按唯一记录提交累计值，重复到达不产生重复现金流或特征增量。输出连续序列、缓冲数量及已提交记录数和总值。</p><div class="equation">$$S_p=\sum_{s=s_0}^{c_p}x_{p,s},\quad N_p=c_p-s_0+1.$$</div></section><section><h2>生产系统边界</h2><p>该算法展示内存事件账本，不宣称已实现分布式exactly-once事务；生产系统还需持久化状态、原子提交、检查点、容错及保留策略。</p><div class="equation">$$F(E\cup\{e,e\})=F(E\cup\{e\}).$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Partition，Sequence，Status，ContiguousThrough，Buffered，CommittedCount，CommittedSum。</p><p><a href="../research/comprehensive-examples/sequence-gap-replay.csv" download>样本CSV</a></p><pre>Partition,Sequence,Value
+1,1,10
+1,3,30
+1,1,10
+1,2,20
+2,1,5
+</pre><pre>./build/kline_quant comprehensive-sequence-gap-replay quant/research/comprehensive-examples/sequence-gap-replay.csv 1</pre><div class="wide"><table><thead><tr><th>Partition</th><th>Sequence</th><th>Status</th><th>ContiguousThrough</th><th>Buffered</th><th>CommittedCount</th><th>CommittedSum</th></tr></thead><tbody><tr><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td><td>1</td><td>10</td></tr><tr><td>1</td><td>3</td><td>2</td><td>1</td><td>1</td><td>1</td><td>10</td></tr><tr><td>1</td><td>1</td><td>0</td><td>1</td><td>1</td><td>1</td><td>10</td></tr><tr><td>1</td><td>2</td><td>1</td><td>3</td><td>0</td><td>3</td><td>60</td></tr><tr><td>2</td><td>1</td><td>1</td><td>1</td><td>0</td><td>1</td><td>5</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report sequence_gap_replay(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,3,3);parameters(p,1);int initial=count(p[0],0,1000000000);
+    struct State{long long next=0;double sum=0;std::map&lt;int,double&gt; seen,pending;};
+    std::map&lt;int,State&gt; states;Report out;out.header={"Partition","Sequence","Status","ContiguousThrough","Buffered","CommittedCount","CommittedSum"};
+    for(const auto&amp;r:x){
+        int id=count(r[0],1,1000000000),seq=count(r[1],initial,1000000000);auto it=states.try_emplace(id);
+        auto&amp;s=it.first-&gt;second;if(it.second)s.next=initial;
+        int status=0;auto old=s.seen.find(seq);
+        if(old!=s.seen.end())require(old-&gt;second==r[2],"conflicting duplicate");
+        else{
+            s.seen[seq]=r[2];s.pending[seq]=r[2];status=seq==s.next?1:2;
+            while(s.next&lt;=1000000000){
+                auto hit=s.pending.find(int(s.next));if(hit==s.pending.end())break;
+                s.sum+=hit-&gt;second;s.pending.erase(hit);++s.next;
+            }
+        }
+        out.rows.push_back({double(id),double(seq),double(status),double(s.next-1),double(s.pending.size()),double(s.next-initial),s.sum});
+    }
+    return out;
+}</pre><p>参考文献：<a href="https://kafka.apache.org/documentation/#design">Apache Kafka Documentation. Design.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

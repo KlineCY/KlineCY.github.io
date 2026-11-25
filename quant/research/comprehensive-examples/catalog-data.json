@@ -1,0 +1,452 @@
+[
+  {
+    "command": "comprehensive-bitemporal-vintage-join",
+    "title": "双时间轴数据修订与可用版本连接",
+    "area": "audit",
+    "columns": [
+      "Type",
+      "Entity",
+      "EffectiveTime",
+      "AvailableTime",
+      "Value"
+    ],
+    "params": [
+      10
+    ],
+    "header": [
+      "Entity",
+      "DecisionTime",
+      "TargetTime",
+      "EffectiveTime",
+      "AvailableTime",
+      "Value",
+      "Valid"
+    ],
+    "file": "bitemporal-vintage-join.csv",
+    "expected_prefix": [
+      [
+        1,
+        3,
+        1,
+        1,
+        2,
+        10,
+        1
+      ],
+      [
+        1,
+        5,
+        1,
+        1,
+        4,
+        12,
+        1
+      ]
+    ],
+    "ref": "Federal Reserve Bank of St. Louis. ALFRED: ArchivaL Federal Reserve Economic Data.",
+    "url": "https://alfred.stlouisfed.org/"
+  },
+  {
+    "command": "comprehensive-watermark-window-ledger",
+    "title": "事件时间水位线与乱序窗口审计",
+    "area": "audit",
+    "columns": [
+      "EventTime",
+      "ArrivalTime",
+      "Value"
+    ],
+    "params": [
+      2,
+      2
+    ],
+    "header": [
+      "WindowStart",
+      "WindowEnd",
+      "AcceptedCount",
+      "Sum",
+      "LateCount",
+      "LateSum"
+    ],
+    "file": "watermark-window-ledger.csv",
+    "expected_prefix": [
+      [
+        0,
+        2,
+        1,
+        2,
+        0,
+        0
+      ],
+      [
+        2,
+        4,
+        0,
+        0,
+        1,
+        4
+      ],
+      [
+        4,
+        6,
+        1,
+        3,
+        0,
+        0
+      ],
+      [
+        6,
+        8,
+        1,
+        5,
+        0,
+        0
+      ]
+    ],
+    "ref": "Apache Flink Documentation. Generating Watermarks.",
+    "url": "https://nightlies.apache.org/flink/flink-docs-stable/docs/dev/datastream/event-time/generating_watermarks/"
+  },
+  {
+    "command": "comprehensive-sequence-gap-replay",
+    "title": "分区序列缺口、幂等去重与重放账本",
+    "area": "audit",
+    "columns": [
+      "Partition",
+      "Sequence",
+      "Value"
+    ],
+    "params": [
+      1
+    ],
+    "header": [
+      "Partition",
+      "Sequence",
+      "Status",
+      "ContiguousThrough",
+      "Buffered",
+      "CommittedCount",
+      "CommittedSum"
+    ],
+    "file": "sequence-gap-replay.csv",
+    "expected_prefix": [
+      [
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        10
+      ],
+      [
+        1,
+        3,
+        2,
+        1,
+        1,
+        1,
+        10
+      ],
+      [
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        10
+      ],
+      [
+        1,
+        2,
+        1,
+        3,
+        0,
+        3,
+        60
+      ],
+      [
+        2,
+        1,
+        1,
+        1,
+        0,
+        1,
+        5
+      ]
+    ],
+    "ref": "Apache Kafka Documentation. Design.",
+    "url": "https://kafka.apache.org/documentation/#design"
+  },
+  {
+    "command": "comprehensive-label-window-availability",
+    "title": "前瞻标签可用时点与训练资格审计",
+    "area": "audit",
+    "columns": [
+      "Type",
+      "Asset",
+      "Time",
+      "ValueOrDecisionTime"
+    ],
+    "params": [
+      1,
+      0.5
+    ],
+    "header": [
+      "Asset",
+      "Start",
+      "End",
+      "Label",
+      "LabelAvailableTime",
+      "TrainingEligible",
+      "Valid"
+    ],
+    "file": "label-window-availability.csv",
+    "expected_prefix": [
+      [
+        1,
+        1,
+        2,
+        0.1,
+        2.5,
+        0,
+        1
+      ],
+      [
+        1,
+        2,
+        3,
+        0.1,
+        3.5,
+        0,
+        1
+      ]
+    ],
+    "ref": "López de Prado, M. (2018). Advances in Financial Machine Learning, Chapters 3 and 7. Wiley.",
+    "url": "https://www.oreilly.com/library/view/advances-in-financial/9781119482086/p01.xhtml"
+  },
+  {
+    "command": "comprehensive-overlapping-label-uniqueness",
+    "title": "重叠标签并发度与样本独特性权重",
+    "area": "audit",
+    "columns": [
+      "Start",
+      "End"
+    ],
+    "params": [],
+    "header": [
+      "Event",
+      "Start",
+      "End",
+      "Length",
+      "AverageUniqueness",
+      "NormalizedWeight"
+    ],
+    "file": "overlapping-label-uniqueness.csv",
+    "expected_prefix": [
+      [
+        1,
+        1,
+        2,
+        2,
+        0.75,
+        1
+      ],
+      [
+        2,
+        2,
+        3,
+        2,
+        0.75,
+        1
+      ]
+    ],
+    "ref": "López de Prado, M. (2018). Advances in Financial Machine Learning, Chapter 4. Wiley.",
+    "url": "https://www.oreilly.com/library/view/advances-in-financial/9781119482086/p01.xhtml"
+  },
+  {
+    "command": "comprehensive-train-only-winsor-standardize",
+    "title": "冻结训练分位数的缩尾与标准化转换",
+    "area": "audit",
+    "columns": [
+      "Train",
+      "Feature"
+    ],
+    "params": [
+      0,
+      1,
+      1e-12
+    ],
+    "header": [
+      "Row",
+      "Train",
+      "Feature",
+      "Original",
+      "Lower",
+      "Upper",
+      "Clipped",
+      "TrainingMean",
+      "TrainingSD",
+      "Standardized"
+    ],
+    "file": "train-only-winsor-standardize.csv",
+    "expected_prefix": [
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        1,
+        2,
+        0.816496580927726,
+        -1.224744871391589
+      ],
+      [
+        2,
+        1,
+        1,
+        2,
+        1,
+        3,
+        2,
+        2,
+        0.816496580927726,
+        0
+      ],
+      [
+        3,
+        1,
+        1,
+        3,
+        1,
+        3,
+        3,
+        2,
+        0.816496580927726,
+        1.224744871391589
+      ],
+      [
+        4,
+        0,
+        1,
+        100,
+        1,
+        3,
+        3,
+        2,
+        0.816496580927726,
+        1.224744871391589
+      ]
+    ],
+    "ref": "scikit-learn Documentation. Common pitfalls and recommended practices.",
+    "url": "https://scikit-learn.org/stable/common_pitfalls.html"
+  },
+  {
+    "command": "comprehensive-corporate-action-return-ledger",
+    "title": "拆股、分红与总收益财富账本",
+    "area": "audit",
+    "columns": [
+      "Time",
+      "UnadjustedClose",
+      "SplitNewPerOld",
+      "CashDividendPerOld"
+    ],
+    "params": [],
+    "header": [
+      "Time",
+      "Close",
+      "Split",
+      "Dividend",
+      "GrossReturn",
+      "TotalReturnIndex"
+    ],
+    "file": "corporate-action-return-ledger.csv",
+    "expected_prefix": [
+      [
+        1,
+        100,
+        1,
+        0,
+        1,
+        100
+      ],
+      [
+        2,
+        50,
+        2,
+        0,
+        1,
+        100
+      ],
+      [
+        3,
+        49,
+        1,
+        1,
+        1,
+        100
+      ]
+    ],
+    "ref": "CRSP. US Stock Databases: Calculations and Methodologies.",
+    "url": "https://www.crsp.org/research/crsp-us-stock-databases/"
+  },
+  {
+    "command": "comprehensive-multi-currency-cash-reconciliation",
+    "title": "多币种现金流与基础货币财富对账",
+    "area": "audit",
+    "columns": [
+      "Time",
+      "AssetValueLocal",
+      "CashLocal",
+      "FXBasePerLocal",
+      "ExternalFlowBase"
+    ],
+    "params": [],
+    "header": [
+      "Time",
+      "AssetBase",
+      "CashBase",
+      "WealthBase",
+      "ExternalFlow",
+      "InvestmentPnL",
+      "FlowAdjustedReturn",
+      "CumulativeIndex"
+    ],
+    "file": "multi-currency-cash-reconciliation.csv",
+    "expected_prefix": [
+      [
+        1,
+        80,
+        20,
+        100,
+        0,
+        0,
+        0,
+        100
+      ],
+      [
+        2,
+        176,
+        44,
+        220,
+        0,
+        120,
+        1.2,
+        220
+      ],
+      [
+        3,
+        200,
+        40,
+        240,
+        20,
+        0,
+        0,
+        220
+      ]
+    ],
+    "ref": "CFA Institute. Global Investment Performance Standards (GIPS).",
+    "url": "https://www.gipsstandards.org/"
+  }
+]

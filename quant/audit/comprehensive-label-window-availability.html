@@ -1,0 +1,20 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>前瞻标签可用时点与训练资格审计｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="audit"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>前瞻标签可用时点与训练资格审计</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-data.html">量化数据系统、点时一致性与实证审计</a>　<a href="../cpp/comprehensive_data.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>标签窗口</h2><p>Type=0记录资产价格及时间，Type=1记录标签起点及训练决策时间。采用精确时间键，不以未来最近价格替代缺失终点；期限由参数H指定。</p><div class="equation">$$y_{i,t}=P_{i,t+H}/P_{i,t}-1.$$</div></section><section><h2>可用时点</h2><p>标签依赖未来窗口，因此只有终点数据及其处理延迟都结束后才能用于训练。起点特征可用不等于同起点标签已经可用。</p><div class="equation">$$\tau^{label}_{i,t}=t+H+\delta,\quad I_{train}=1_{\{\tau^{label}_{i,t}\le T_{fit}\}}.$$</div></section><section><h2>缺失与审计</h2><p>缺失任何端点时标记Valid=0，TrainingEligible=0，数值0仅为占位。输出两个时间边界与资格状态，使训练样本选择可直接检查。</p><div class="equation">$$\mathcal T(T)=\{(i,t):I_{valid}=1,\ \tau^{label}_{i,t}\le T\}.$$</div></section><section><h2>标签与回测</h2><p>本模型的价格收益不包含分红、退市收益或融资费用；应使用经经济含义核对的总收益数据。跨时间分割还需要按标签窗口清除重叠及隔离测试期。</p><div class="equation">$$\mathcal F_{T_{fit}}\supseteq \sigma(y_{i,t}:(i,t)\in\mathcal T(T_{fit})).$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Asset，Start，End，Label，LabelAvailableTime，TrainingEligible，Valid。</p><p><a href="../research/comprehensive-examples/label-window-availability.csv" download>样本CSV</a></p><pre>Type,Asset,Time,ValueOrDecisionTime
+0,1,1,100
+0,1,2,110
+0,1,3,121
+1,1,1,2
+1,1,2,2
+</pre><pre>./build/kline_quant comprehensive-label-window-availability quant/research/comprehensive-examples/label-window-availability.csv 1 0.5</pre><div class="wide"><table><thead><tr><th>Asset</th><th>Start</th><th>End</th><th>Label</th><th>LabelAvailableTime</th><th>TrainingEligible</th><th>Valid</th></tr></thead><tbody><tr><td>1</td><td>1</td><td>2</td><td>0.1</td><td>2.5</td><td>0</td><td>1</td></tr><tr><td>1</td><td>2</td><td>3</td><td>0.1</td><td>3.5</td><td>0</td><td>1</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report label_window_availability(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,4,4);parameters(p,2);double H=positive(p[0]),delay=p[1];require(delay&gt;=0,"negative delay");
+    std::map&lt;std::pair&lt;int,double&gt;,double&gt; prices;
+    for(const auto&amp;r:x)if(count(r[0],0,1)==0){
+        int id=count(r[1],1,1000000000);require(prices.emplace(std::make_pair(id,r[2]),positive(r[3])).second,"duplicate price");
+    }
+    Report out;out.header={"Asset","Start","End","Label","LabelAvailableTime","TrainingEligible","Valid"};
+    for(const auto&amp;r:x)if(r[0]==1){
+        int id=count(r[1],1,1000000000);double end=r[2]+H,avail=end+delay;
+        auto a=prices.find({id,r[2]}),b=prices.find({id,end});bool ok=a!=prices.end()&amp;&amp;b!=prices.end();
+        out.rows.push_back({double(id),r[2],end,ok?b-&gt;second/a-&gt;second-1:0,avail,double(ok&amp;&amp;avail&lt;=r[3]),double(ok)});
+    }
+    require(!out.rows.empty(),"no labels");return out;
+}</pre><p>参考文献：<a href="https://www.oreilly.com/library/view/advances-in-financial/9781119482086/p01.xhtml">López de Prado, M. (2018). Advances in Financial Machine Learning, Chapters 3 and 7. Wiley.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>
