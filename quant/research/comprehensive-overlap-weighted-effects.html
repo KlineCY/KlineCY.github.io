@@ -1,0 +1,29 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>倾向得分重叠加权与协变量平衡｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>倾向得分重叠加权与协变量平衡</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-inference.html">计量识别、弱工具变量与稳健推断</a>　<a href="../cpp/comprehensive_inference.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>目标总体</h2><p>重叠权重将目标总体密度倾斜至处理概率接近0.5的协变量区域，与ATE及ATT不同。对处理组权重1−e(x)，对照组权重e(x)。</p><div class="equation">$$h(x)=e(x)(1-e(x)),\quad w_i=D_i(1-e_i)+(1-D_i)e_i.$$</div></section><section><h2>倾向估计</h2><p>用包含显式截距的logistic模型拟合处理概率，允许岭惩罚。无惩罚且收敛时得分方程使处理组与对照组的加权协变量总和一致；有惩罚时平衡仅近似。</p><div class="equation">$$\ell(\beta)=\sum_i[\log(1+e^{x_i^\top\beta})-D_ix_i^\top\beta]+\lambda\|\beta\|^2/2.$$</div></section><section><h2>Hájek估计</h2><p>组内分别归一权重得到加权结果均值，差为重叠总体效应估计。输出两组有效样本量以及协变量均值最大差异。</p><div class="equation">$$\hat\tau_{OW}=\frac{\sum D_i(1-e_i)y_i}{\sum D_i(1-e_i)}-\frac{\sum(1-D_i)e_iy_i}{\sum(1-D_i)e_i},\quad ESS=\frac{(\sum w_i)^2}{\sum w_i^2}.$$</div></section><section><h2>识别假设</h2><p>因果解释依赖一致性、条件可交换性与重叠总体上的正概率支持；有限样本平衡不能证实不存在未观测混杂。此模型不输出未经推导的标准误，应采用适当的影响函数或重抽样推断。</p><div class="equation">$$\tau_{OW}=\frac{E[h(X)(Y(1)-Y(0))]}{E[h(X)]}.$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Effect，TreatedMean，ControlMean，TreatedESS，ControlESS，MaxBalanceError，ScoreNorm。</p><p><a href="../research/comprehensive-examples/overlap-weighted-effects.csv" download>样本CSV</a></p><pre>Treatment,Y,Intercept
+0,1,1
+0,3,1
+1,4,1
+1,6,1
+</pre><pre>./build/kline_quant comprehensive-overlap-weighted-effects quant/research/comprehensive-examples/overlap-weighted-effects.csv 0 1e-10 100</pre><div class="wide"><table><thead><tr><th>Effect</th><th>TreatedMean</th><th>ControlMean</th><th>TreatedESS</th><th>ControlESS</th><th>MaxBalanceError</th><th>ScoreNorm</th></tr></thead><tbody><tr><td>3</td><td>5</td><td>2</td><td>2</td><td>2</td><td>0</td><td>0</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report overlap_weighted_effects(const Mat&amp; x,const Vec&amp; p){
+    size_t d=validate(x,2,3,32)-2;parameters(p,3);
+    double lam=p[0],tol=positive(p[1]);int cap=count(p[2],1,10000);require(lam&gt;=0,"negative penalty");
+    Mat X;Vec D,y;double treated=0;
+    for(const auto&amp;r:x){D.push_back(count(r[0],0,1));treated+=D.back();y.push_back(r[1]);X.emplace_back(r.begin()+2,r.end());}
+    require(treated&gt;0&amp;&amp;treated&lt;x.size(),"both treatment groups needed");
+    auto eval=[&amp;](const Vec&amp; b){
+        auto s=model_research::regularized_state(b,lam);
+        for(size_t i=0;i&lt;X.size();++i){
+            double z=dot(X[i],b),q=logistic(z);s.value+=model_research::softplus(z)-D[i]*z;
+            for(size_t j=0;j&lt;d;++j){s.gradient[j]+=(q-D[i])*X[i][j];for(size_t k=0;k&lt;d;++k)s.hessian[j][k]+=q*(1-q)*X[i][j]*X[i][k];}
+        }
+        return s;
+    };
+    auto f=model_research::damped_newton(d,tol,cap,eval);
+    Vec mass(2),sq(2),outcome(2);Mat balance(2,Vec(d));
+    for(size_t i=0;i&lt;X.size();++i){
+        int g=int(D[i]);double w=logistic((g?-1:1)*dot(X[i],f.beta));
+        mass[g]+=w;sq[g]+=w*w;outcome[g]+=w*y[i];for(size_t j=0;j&lt;d;++j)balance[g][j]+=w*X[i][j];
+    }
+    positive(mass[0]);positive(mass[1]);double m0=outcome[0]/mass[0],m1=outcome[1]/mass[1],err=0;
+    for(size_t j=0;j&lt;d;++j)err=std::max(err,std::abs(balance[1][j]/mass[1]-balance[0][j]/mass[0]));
+    return scalar({"Effect","TreatedMean","ControlMean","TreatedESS","ControlESS","MaxBalanceError","ScoreNorm"},{m1-m0,m1,m0,mass[1]*mass[1]/sq[1],mass[0]*mass[0]/sq[0],err,inf_norm(f.state.gradient)});
+}</pre><p>参考文献：<a href="https://doi.org/10.1080/01621459.2016.1260466">Li, F., Morgan, K. L., and Zaslavsky, A. M. (2018). Balancing Covariates via Propensity Score Weighting. JASA.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

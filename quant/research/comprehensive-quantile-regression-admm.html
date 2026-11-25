@@ -1,0 +1,29 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>分位数回归ADMM与原始—对偶最优性｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>分位数回归ADMM与原始—对偶最优性</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-inference.html">计量识别、弱工具变量与稳健推断</a>　<a href="../cpp/comprehensive_inference.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>条件分位数目标</h2><p>以检查损失拟合条件分位数，允许误差分布异方差、偏斜及厚尾。用户显式输入截距列；系数估计不额外加入隐式截距。</p><div class="equation">$$\hat\beta_\tau=\arg\min_\beta\sum_i\rho_\tau(y_i-x_i^\top\beta),\quad \rho_\tau(r)=r(\tau-1_{\{r&lt;0\}}).$$</div></section><section><h2>变量拆分</h2><p>令残差z=y−Xβ，ADMM将非光滑检查损失与线性约束拆开。β步为最小二乘，z步逐坐标采用非对称软阈值。</p><div class="equation">$$\beta^{k+1}=(X^\top X)^{-1}X^\top(y-z^k-u^k),\quad v=y-X\beta^{k+1}-u^k.$$</div></section><section><h2>非对称近端算子</h2><p>当v超过正阈值时减去τ/ρ；当v小于负阈值时加(1−τ)/ρ；中间区间置零。采用约束Xβ+z−y=0的缩放对偶变量。</p><div class="equation">$$z_i^{k+1}=\max(v_i-\tau/\rho,0)+\min(v_i+(1-\tau)/\rho,0),\quad u^{k+1}=u^k+X\beta^{k+1}+z^{k+1}-y.$$</div></section><section><h2>停止与外样本</h2><p>监控原始残差以及ρX'(z新−z旧)的对偶残差；达到容差才返回。条件分位数拟合并不保证所有分位水平不交叉，应对多分位预测进行额外一致性检查。</p><div class="equation">$$\|r_p\|_\infty=\|X\beta+z-y\|_\infty,\quad \|r_d\|_\infty=\rho\|X^\top(z^{k+1}-z^k)\|_\infty.$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Feature，Coefficient，PinballLoss，PrimalResidual，DualResidual，Iterations。</p><p><a href="../research/comprehensive-examples/quantile-regression-admm.csv" download>样本CSV</a></p><pre>Y,Intercept
+1,1
+2,1
+3,1
+</pre><pre>./build/kline_quant comprehensive-quantile-regression-admm quant/research/comprehensive-examples/quantile-regression-admm.csv 0.5 1 1e-10 10000</pre><div class="wide"><table><thead><tr><th>Feature</th><th>Coefficient</th><th>PinballLoss</th></tr></thead><tbody><tr><td>1</td><td>2</td><td>1</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report quantile_regression_admm(const Mat&amp; x,const Vec&amp; p){
+    size_t d=validate(x,2,2,33)-1,n=x.size();parameters(p,4);
+    double tau=p[0],rho=positive(p[1]),tol=positive(p[2]);int cap=count(p[3],1,100000);
+    require(tau&gt;0&amp;&amp;tau&lt;1&amp;&amp;double(n)*d*d*cap&lt;=1e9,"invalid quantile controls");
+    Mat X,H(d,Vec(d));Vec y;
+    for(const auto&amp;r:x){y.push_back(r[0]);X.emplace_back(r.begin()+1,r.end());for(size_t a=0;a&lt;d;++a)for(size_t b=0;b&lt;d;++b)H[a][b]+=r[a+1]*r[b+1];}
+    Vec z(n),u(n),w(d);double pr=0,du=0;int it=0;
+    for(;it&lt;cap;++it){
+        Vec rhs(d),old=z;
+        for(size_t i=0;i&lt;n;++i)for(size_t j=0;j&lt;d;++j)rhs[j]+=X[i][j]*(y[i]-z[i]-u[i]);
+        w=solve_spd(H,rhs);Vec dr(d);pr=0;
+        for(size_t i=0;i&lt;n;++i){
+            double fit=dot(X[i],w),v=y[i]-fit-u[i];
+            z[i]=std::max(v-tau/rho,0.)+std::min(v+(1-tau)/rho,0.);
+            double r=fit+z[i]-y[i];u[i]+=r;pr=std::max(pr,std::abs(r));
+            for(size_t j=0;j&lt;d;++j)dr[j]+=rho*X[i][j]*(z[i]-old[i]);
+        }
+        du=inf_norm(dr);if(pr&lt;=tol&amp;&amp;du&lt;=tol){++it;break;}
+    }
+    require(pr&lt;=tol&amp;&amp;du&lt;=tol,"ADMM did not converge");double loss=0;
+    for(size_t i=0;i&lt;n;++i){double r=y[i]-dot(X[i],w);loss+=r*(tau-(r&lt;0));}
+    Report out;out.header={"Feature","Coefficient","PinballLoss","PrimalResidual","DualResidual","Iterations"};
+    for(size_t j=0;j&lt;d;++j)out.rows.push_back({double(j+1),w[j],loss,pr,du,double(it)});
+    return out;
+}</pre><p>参考文献：<a href="https://doi.org/10.1017/CBO9780511754098">Koenker, R. (2005). Quantile Regression. Cambridge University Press.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>
