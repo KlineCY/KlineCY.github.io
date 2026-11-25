@@ -28,7 +28,8 @@ inline Vec ridge_hypergrad(const Vec&amp; x){
     size_t at=4;auto train=ridge_data(x,at,n,d),val=ridge_data(x,at,m,d);require(at==x.size());
     auto ab=ridge_normal(train,l);Vec b=solve(ab.first,ab.second),u=solve(ab.first,b),pred=mv(val.X,b),g(d);double loss=0;
     for(int i=0;i&lt;m;++i){double e=pred[i]-val.y[i];loss+=e*e/m;for(int j=0;j&lt;d;++j)g[j]+=2*e*val.X[i][j]/m;}
-    for(double&amp; z:u)z=-z;double der=dot(g,u);Vec out{loss,der,l*der};out.insert(out.end(),b.begin(),b.end());out.insert(out.end(),u.begin(),u.end());out.insert(out.end(),pred.begin(),pred.end());return out;
+    for(double&amp; z:u){z=-z;}
+    double der=dot(g,u);Vec out{loss,der,l*der};out.insert(out.end(),b.begin(),b.end());out.insert(out.end(),u.begin(),u.end());out.insert(out.end(),pred.begin(),pred.end());return out;
 }
 inline Vec ridge_influence(const Vec&amp; x){
     require(x.size()&gt;=7);int n=integer(x[0],2,200),d=integer(x[1],1,40);double l=x[2];positive(l);size_t at=3;

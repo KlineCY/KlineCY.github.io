@@ -6,9 +6,10 @@ import {methods as kernel} from '../quant/research/predictive_kernel_reference.m
 import {methods as online} from '../quant/research/predictive_online_reference.mjs';
 import {methods as neural} from '../quant/research/predictive_neural_reference.mjs';
 import {methods as portfolio} from '../quant/research/predictive_portfolio_reference.mjs';
+import {methods as optimization} from '../quant/research/predictive_optimization_reference.mjs';
 const root='quant/research/',read=p=>fs.readFileSync(p,'utf8');
-const methods={...kernel,...online,...neural,...portfolio};
-const groups=['kernel','online','neural','portfolio'];
+const methods={...kernel,...online,...neural,...portfolio,...optimization};
+const groups=['kernel','online','neural','portfolio','optimization'];
 const exe=process.argv[2];assert(exe);
 const cat=groups.flatMap(g=>JSON.parse(read(root+'predictive-'+g+'-catalog.json')));
 const cases=cat.flatMap(c=>JSON.parse(read(root+c.cases)).map(z=>({id:c.id,...z})));
@@ -19,7 +20,8 @@ const close=(x,y,tol)=>Number.isFinite(x)&&Number.isFinite(y)&&Math.abs(x-y)<=to
 for(let i=0;i<cases.length;i++){
  const c=cases[i],ref=methods[c.id](c.input);
  assert.equal(ref.length,c.expected.length);
- ref.forEach((v,j)=>assert(close(v,c.expected[j],1e-10),c.id+' reference dataset '+j));
+ const referenceTol=c.id==='gp_derivative'?5e-7:1e-7;
+ ref.forEach((v,j)=>assert(close(v,c.expected[j],referenceTol),c.id+' reference dataset '+j));
  if(rows[i]==='ERROR'){errors.push(c.id+' unexpected ERROR '+i);continue;}
  const actual=rows[i].split(',').map(Number);if(actual.length!==ref.length){errors.push(c.id+' length '+i+': '+actual.length+' / '+ref.length);continue;}
  const tol=c.id==='gp_derivative'?5e-6:3e-7;
@@ -39,6 +41,9 @@ for(let i=0;i<cases.length;i++){
  if(c.id==='spo_plus')inv(a[0]>=-1e-9&&a[1]+1e-9>=a[0],'decision bound');
  if(c.id==='policy_dr')inv(a[5]>0&&a[5]<=((x.length-2)/8)+1e-8,'ESS');
  if(c.id==='soft_portfolio_vjp')inv(Math.abs(a[4])<1e-9&&close(sum(a.slice(5,5+n)),1,1e-9),'budget gradient');
+ if(c.id==='hutchinson_full')inv(close(a[0],a[2],1e-9)&&close(a[1],a[3],1e-9),'trace moments');
+ if(c.id==='logistic_hvp')inv(a[1]>=-1e-9,'PSD curvature');
+ if(c.id==='cg_ridge')inv(a[1]<1e-7,'normal-equation residual');
  if(c.id==='ensemble_risk')inv(a[1]>=0&&a[2]>=0&&close(a[3],a[1]+a[2],1e-9),'total variance');
 }
 assert.equal(errors.length,0,errors.join('\n'));

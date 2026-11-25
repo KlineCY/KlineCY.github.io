@@ -2,7 +2,7 @@ import fs from 'node:fs';import path from 'node:path';import assert from 'node:a
 const root='quant/research/',read=p=>fs.readFileSync(p,'utf8'),main=read(root+'predictive-decision.html'),cli=read('quant/cpp/predictive_cli.cpp');
 const decode=s=>s.replaceAll('&lt;','<').replaceAll('&gt;','>').replaceAll('&amp;','&');
 let count=0,eq=0,links=0,display=0;
-for(const g of ['kernel','online','neural','portfolio']){
+for(const g of ['kernel','online','neural','portfolio','optimization']){
  const cat=JSON.parse(read(root+'predictive-'+g+'-catalog.json')),hub=read(root+'predictive-'+g+'.html'),header=read('quant/cpp/predictive_'+g+'.hpp');
  assert.equal(cat.length,6);assert(main.includes('predictive-'+g+'.html'));assert.equal(decode(hub.match(/<pre>([\s\S]*?)<\/pre>/)[1]),header);
  for(const c of cat){
@@ -15,6 +15,6 @@ for(const g of ['kernel','online','neural','portfolio']){
   for(const m of html.matchAll(/(?:href|src)="([^"]+)"/g)){if(/^https?:\/\//.test(m[1]))continue;assert(fs.existsSync(path.resolve(path.dirname(name),m[1])),name+' -> '+m[1]);links++;}
  }
 }
-assert.equal(count,24);assert.equal(eq,72);
+assert.equal(count,30);assert.equal(eq,90);
 for(const p of ['quant/ml/index.html','quant/research/index.html','quant/cpp/index.html','quant/research/multiscale-research.html','quant/sidebar-v2.js'])assert(read(p).includes('predictive-decision.html'));
-console.log('PASS: '+count+' chapters, '+eq+' strict KaTeX groups, '+display+' published sample values, '+links+' local links and four embedded source files');
+console.log('PASS: '+count+' chapters, '+eq+' strict KaTeX groups, '+display+' published sample values, '+links+' local links and five embedded source files');

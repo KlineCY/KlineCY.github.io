@@ -1,8 +1,15 @@
 #include "predictive_online.hpp"
 #include "predictive_portfolio.hpp"
+#include "predictive_optimization.hpp"
 using namespace pdq;
 using Method=Vec(*)(const Vec&);
 const std::map<std::string,Method> methods={
+    {"adamw_trajectory",pdq::adamw_trajectory},
+    {"ridge_hypergrad",pdq::ridge_hypergrad},
+    {"ridge_influence",pdq::ridge_influence},
+    {"hutchinson_full",pdq::hutchinson_full},
+    {"logistic_hvp",pdq::logistic_hvp},
+    {"cg_ridge",pdq::cg_ridge},
     {"kernel_center",pdq::kernel_center},
     {"fourier_gram",pdq::fourier_gram},
     {"nystrom_ridge",pdq::nystrom_ridge},

@@ -20,7 +20,8 @@ inline Vec fixed_share(const Vec&amp; x){
     int n=(x.size()-3)/k;require(n&gt;=1&amp;&amp;n*k&lt;=100000);Vec p(k,1./k),cum(k),out;double loss=0;
     for(int t=0;t&lt;n;++t){Vec l(x.begin()+3+t*k,x.begin()+3+(t+1)*k);for(int j=0;j&lt;k;++j){prob(l[j]);cum[j]+=l[j];}
         double z=dot(p,l);loss+=z;out.push_back(z);out.insert(out.end(),p.begin(),p.end());double minl=*std::min_element(l.begin(),l.end());
-        for(int j=0;j&lt;k;++j)p[j]*=std::exp(-eta*(l[j]-minl));double den=sum(p);positive(den);
+        for(int j=0;j&lt;k;++j){p[j]*=std::exp(-eta*(l[j]-minl));}
+        double den=sum(p);positive(den);
         for(double&amp; a:p)a=(1-alpha)*a/den+alpha/k;
     }
     double best=*std::min_element(cum.begin(),cum.end());out.insert(out.begin(),{loss,best,loss-best});out.insert(out.end(),p.begin(),p.end());return out;
@@ -60,8 +61,10 @@ inline Vec exp3_observed(const Vec&amp; x){
     Vec logw(k),out;double gain=0;
     for(size_t t=3;t&lt;x.size();t+=2){
         int a=integer(x[t],0,k-1);double r=x[t+1];prob(r);double m=*std::max_element(logw.begin(),logw.end());Vec p(k);
-        for(int j=0;j&lt;k;++j)p[j]=std::exp(logw[j]-m);double den=sum(p);positive(den);
-        for(double&amp; z:p)z=(1-gamma)*z/den+gamma/k;double estimated=r/p[a];
+        for(int j=0;j&lt;k;++j){p[j]=std::exp(logw[j]-m);}
+        double den=sum(p);positive(den);
+        for(double&amp; z:p){z=(1-gamma)*z/den+gamma/k;}
+        double estimated=r/p[a];
         logw[a]+=eta*estimated;gain+=r;out.insert(out.end(),{double(a),r,p[a],estimated});out.insert(out.end(),p.begin(),p.end());
     }
     out.insert(out.begin(),gain);return out;

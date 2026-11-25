@@ -5,7 +5,8 @@ inline Vec simplex(Vec z){
     double mx=*std::max_element(z.begin(),z.end());for(double& v:z)v-=mx;
     Vec s=z;std::sort(s.begin(),s.end(),std::greater<double>());double a=0,tau=0;
     for(size_t i=0;i<s.size();++i){a+=s[i];if(s[i]>(a-1)/(i+1))tau=(a-1)/(i+1);}
-    for(double& v:z)v=std::max(0.,v-tau);return z;
+    for(double& v:z){v=std::max(0.,v-tau);}
+    return z;
 }
 inline Vec stacking_simplex(const Vec& x){
     require(x.size()>=8);int n=integer(x[0],2,200),k=integer(x[1],2,12);double l=x[2];positive(l);require(x.size()==size_t(3+n*(k+1)));
@@ -57,9 +58,11 @@ inline Vec policy_dr(const Vec& x){
 inline Vec soft_portfolio_vjp(const Vec& x){
     require(x.size()>=10);int n=integer(x[0],2,60),m=integer(x[1],2,1000);double temp=x[2],gamma=x[3],cost=x[4],eps=x[5];positive(temp);require(gamma>=0&&cost>=0&&eps>0&&x.size()==size_t(6+2*n+m*n));
     Vec score(x.begin()+6,x.begin()+6+n),old(x.begin()+6+n,x.begin()+6+2*n);for(double v:old)prob(v);require(std::abs(sum(old)-1)<1e-9);
-    for(double& v:score)v/=temp;Vec w=softmax(score),r(m),g(n);Mat R=zeros(m,n);size_t at=6+2*n;
+    for(double& v:score){v/=temp;}
+    Vec w=softmax(score),r(m),g(n);Mat R=zeros(m,n);size_t at=6+2*n;
     for(auto& row:R)for(double& v:row)v=x[at++];
-    for(int t=0;t<m;++t)r[t]=dot(w,R[t]);double mean=avg(r),v=0,turn=0;
+    for(int t=0;t<m;++t){r[t]=dot(w,R[t]);}
+    double mean=avg(r),v=0,turn=0;
     for(int t=0;t<m;++t){v+=sq(r[t]-mean)/m;for(int j=0;j<n;++j)g[j]+=R[t][j]*(1-gamma*(r[t]-mean))/m;}
     for(int j=0;j<n;++j){double d=w[j]-old[j],s=std::sqrt(d*d+eps*eps);turn+=s-eps;g[j]-=cost*d/s;}
     double u=dot(g,w);for(int j=0;j<n;++j)g[j]=w[j]*(g[j]-u)/temp;
