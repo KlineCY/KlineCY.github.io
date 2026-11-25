@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Rademacher迹估计的精确分布与方差｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="depth-labs.css"><link rel="stylesheet" href="predictive-decision.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main class="predictive-decision"><header><h1>Rademacher迹估计的精确分布与方差</h1><p><a href="predictive-decision.html">预测学习与组合决策</a>　<a href="predictive-optimization.html">训练优化与敏感性</a>　<a href="../cpp/predictive_cli.cpp" download>C++17统一入口</a></p></header><section>
+<h2>研究对象与模型</h2>
+<p>大规模Hessian或协方差矩阵的迹可通过随机二次型估计，而不显式求逆或遍历全部对角。对称矩阵与独立Rademacher探针具有明确的方差表达式。</p>
+<div class="equation">$$z_i\overset{iid}{\sim}\{-1,1\},\qquad \widehat t=z^\top Az$$</div>
+<h2>数学推导</h2>
+<p>将二次型拆为固定对角和非对角项。不同无序索引对的符号乘积协方差为零，因此方差为四倍上三角非对角平方和。小维度枚举全部2^d探针，输出解析矩与经验完整分布矩；参考直接构造全部二次型。</p>
+<div class="equation">$$\mathbb E\widehat t=\operatorname{tr}A,\qquad\operatorname{Var}(\widehat t)=4\sum_{i&lt;j}A_{ij}^2$$</div>
+<div class="equation">$$\widehat t-\operatorname{tr}A=2\sum_{i&lt;j}A_{ij}z_iz_j$$</div>
+<h2>数据接口、金融应用及边界</h2>
+<p>输入维数及对称矩阵，维数不超过12以支持完整枚举。输出迹、解析方差、枚举均值方差、探针数和所有二次型。实际高维应用使用独立随机探针及矩阵向量乘，不应枚举指数规模。</p>
+</section>
+<section><h2>独立数值研究</h2><p>60组固定种子合成参数研究，独立参照与实际原生输出逐坐标比较。</p><pre>./quant_predictive hutchinson_full 2 -0.14327769127827028 -0.15743569338574803 -0.15743569338574803 -0.7946450709340372</pre><table><thead><tr><th>输出坐标</th><th>独立参考值</th></tr></thead><tbody><tr><td>0</td><td>-0.937922762212</td></tr><tr><td>1</td><td>0.0991439902074</td></tr><tr><td>2</td><td>-0.937922762212</td></tr><tr><td>3</td><td>0.0991439902074</td></tr><tr><td>4</td><td>4</td></tr><tr><td>5</td><td>-1.25279414898</td></tr><tr><td>6</td><td>-0.623051375441</td></tr><tr><td>7</td><td>-0.623051375441</td></tr></tbody></table><p><a href="predictive-hutchinson-full-cases.json" download>完整参数与参照值</a>　<a href="predictive_optimization_reference.mjs" download>独立参考代码</a>　<a href="../cpp/predictive_optimization.hpp" download>原生C++17源码</a>。</p><p>理论资料：<a href="https://doi.org/10.1145/1944345.1944349">https://doi.org/10.1145/1944345.1944349</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true})"></script></body></html>
