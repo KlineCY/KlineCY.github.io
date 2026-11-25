@@ -1,0 +1,1152 @@
+[
+  {
+    "id": "synthesis_forecast_serial",
+    "title": "事件概率评价：Brier分解与残差序列依赖",
+    "file": "applied-synthesis-forecast-serial.html",
+    "fields": [
+      "Brier",
+      "Reliability",
+      "LjungBox",
+      "Runs",
+      "RunsP"
+    ],
+    "links": [
+      "applied-forecast-brier-groups.html",
+      "applied-inference-ljung-box.html",
+      "applied-inference-runs-exact.html"
+    ],
+    "cases": [
+      {
+        "input": [
+          0.5,
+          0,
+          0.5,
+          0,
+          0.5,
+          1,
+          0.5,
+          1
+        ],
+        "expected": [
+          0.25,
+          0,
+          0.5,
+          2,
+          0.6666666666666666
+        ]
+      },
+      {
+        "input": [
+          0.5,
+          0,
+          0.5,
+          1,
+          0.5,
+          0,
+          0.5,
+          1
+        ],
+        "expected": [
+          0.25,
+          0,
+          4.5,
+          4,
+          0.6666666666666666
+        ]
+      }
+    ],
+    "invalid": [
+      0.5,
+      0,
+      0.5,
+      0,
+      0.5,
+      0
+    ]
+  },
+  {
+    "id": "synthesis_conformal_external",
+    "title": "冻结校准半径到外部区间损失",
+    "file": "applied-synthesis-conformal-external.html",
+    "fields": [
+      "Radius",
+      "Coverage",
+      "MeanWidth",
+      "IntervalScore"
+    ],
+    "links": [
+      "applied-forecast-split-conformal.html",
+      "applied-forecast-interval-score.html"
+    ],
+    "cases": [
+      {
+        "input": [
+          0.25,
+          3,
+          1,
+          2,
+          3,
+          10,
+          12,
+          10,
+          15
+        ],
+        "expected": [
+          3,
+          0.5,
+          6,
+          14
+        ]
+      },
+      {
+        "input": [
+          0.5,
+          3,
+          1,
+          2,
+          3,
+          0,
+          2,
+          0,
+          -1
+        ],
+        "expected": [
+          2,
+          1,
+          4,
+          4
+        ]
+      }
+    ],
+    "invalid": [
+      0.01,
+      2,
+      1,
+      2,
+      0,
+      0
+    ]
+  },
+  {
+    "id": "synthesis_book_markout",
+    "title": "微价格、订单流失衡与被动成交的后续损益",
+    "file": "applied-synthesis-book-markout.html",
+    "fields": [
+      "MicropriceMove",
+      "OFI",
+      "Immediate",
+      "Markout",
+      "Net"
+    ],
+    "links": [
+      "applied-liquidity-microprice.html",
+      "applied-liquidity-ofi-event.html",
+      "applied-liquidity-passive-markout.html"
+    ],
+    "cases": [
+      {
+        "input": [
+          99,
+          101,
+          30,
+          10,
+          100,
+          102,
+          20,
+          20,
+          1,
+          10,
+          99,
+          0.1
+        ],
+        "expected": [
+          0.5,
+          30,
+          10,
+          20,
+          19
+        ]
+      },
+      {
+        "input": [
+          99,
+          101,
+          10,
+          30,
+          98,
+          100,
+          20,
+          20,
+          -1,
+          10,
+          101,
+          0.1
+        ],
+        "expected": [
+          -0.5,
+          -30,
+          10,
+          20,
+          19
+        ]
+      }
+    ],
+    "invalid": [
+      101,
+      99,
+      1,
+      1,
+      100,
+      102,
+      20,
+      20,
+      1,
+      10,
+      99,
+      0.1
+    ]
+  },
+  {
+    "id": "synthesis_auction_arrival",
+    "title": "集合竞价清算到母单执行评价",
+    "file": "applied-synthesis-auction-arrival.html",
+    "fields": [
+      "ClearingPrice",
+      "MarketMatched",
+      "OwnFill",
+      "Execution",
+      "Opportunity",
+      "Total"
+    ],
+    "links": [
+      "applied-liquidity-auction-cross.html",
+      "applied-liquidity-sweep-shortfall.html"
+    ],
+    "cases": [
+      {
+        "input": [
+          100,
+          103,
+          8,
+          4,
+          0.1,
+          101,
+          1,
+          102,
+          5,
+          1,
+          100,
+          3,
+          -1,
+          99,
+          4,
+          -1,
+          101,
+          2
+        ],
+        "expected": [
+          101,
+          5,
+          4,
+          4,
+          12,
+          16.4
+        ]
+      },
+      {
+        "input": [
+          100,
+          98,
+          4,
+          4,
+          0.1,
+          100,
+          1,
+          101,
+          4,
+          -1,
+          99,
+          4
+        ],
+        "expected": [
+          99,
+          4,
+          4,
+          -4,
+          0,
+          -3.6
+        ]
+      }
+    ],
+    "invalid": [
+      100,
+      103,
+      8,
+      6,
+      0.1,
+      101,
+      1,
+      102,
+      5,
+      -1,
+      101,
+      5
+    ]
+  },
+  {
+    "id": "synthesis_rate_credit_shock",
+    "title": "信用零息债的利率与强度顺序重定价",
+    "file": "applied-synthesis-rate-credit-shock.html",
+    "fields": [
+      "Base",
+      "RateOnly",
+      "BothShocks",
+      "RatePnL",
+      "CreditPnL",
+      "TotalPnL"
+    ],
+    "links": [
+      "applied-credit-risky-zero.html",
+      "applied-rates-curve-shock.html"
+    ],
+    "cases": [
+      {
+        "input": [
+          100,
+          1,
+          0,
+          0.6931471805599453,
+          0.4,
+          0.6931471805599453,
+          0.6931471805599453
+        ],
+        "expected": [
+          70,
+          40,
+          35.833333333333336,
+          -30,
+          -4.166666666666664,
+          -34.166666666666664
+        ]
+      },
+      {
+        "input": [
+          100,
+          1,
+          0,
+          0,
+          0.4,
+          0,
+          0.6931471805599453
+        ],
+        "expected": [
+          100,
+          100,
+          70,
+          0,
+          -30,
+          -30
+        ]
+      }
+    ],
+    "invalid": [
+      100,
+      1,
+      0,
+      0.1,
+      0.4,
+      0,
+      -0.2
+    ]
+  },
+  {
+    "id": "synthesis_immunization_shock",
+    "title": "久期免疫后的资产负债完整利率压力",
+    "file": "applied-synthesis-immunization-shock.html",
+    "fields": [
+      "AssetPVShocked",
+      "LiabilityPVShocked",
+      "Surplus",
+      "QuadraticSurplus"
+    ],
+    "links": [
+      "applied-rates-two-zero-immunize.html",
+      "applied-rates-continuous-duration.html"
+    ],
+    "cases": [
+      {
+        "input": [
+          1,
+          3,
+          2,
+          100,
+          0,
+          0.6931471805599453
+        ],
+        "expected": [
+          31.25,
+          25,
+          6.25,
+          24.02265069591007
+        ]
+      },
+      {
+        "input": [
+          1,
+          3,
+          2,
+          100,
+          0.6931471805599453,
+          -0.6931471805599453
+        ],
+        "expected": [
+          125,
+          100,
+          25,
+          6.005662673977517
+        ]
+      }
+    ],
+    "invalid": [
+      1,
+      3,
+      4,
+      100,
+      0,
+      0.1
+    ]
+  },
+  {
+    "id": "synthesis_replication_path",
+    "title": "两期状态复制与自融资路径账本",
+    "file": "applied-synthesis-replication-path.html",
+    "fields": [
+      "Root",
+      "Intermediate",
+      "TerminalPayoff",
+      "RootDelta",
+      "SecondDelta",
+      "HedgeError"
+    ],
+    "links": [
+      "applied-options-two-step-replication.html",
+      "applied-options-discrete-hedge.html",
+      "applied-options-one-step-claim.html"
+    ],
+    "cases": [
+      {
+        "input": [
+          100,
+          100,
+          1.2,
+          0.8,
+          1,
+          1,
+          1,
+          1
+        ],
+        "expected": [
+          11,
+          22,
+          44,
+          0.55,
+          0.9166666666666666,
+          0
+        ]
+      },
+      {
+        "input": [
+          100,
+          100,
+          1.2,
+          0.8,
+          1,
+          -1,
+          -1,
+          -1
+        ],
+        "expected": [
+          11,
+          20,
+          36,
+          -0.45,
+          -1,
+          0
+        ]
+      }
+    ],
+    "invalid": [
+      100,
+      100,
+      1.2,
+      0.8,
+      1,
+      1,
+      0,
+      1
+    ]
+  },
+  {
+    "id": "synthesis_surface_probabilities",
+    "title": "不等距期权曲线的尾概率与凸性联合诊断",
+    "file": "applied-synthesis-surface-probabilities.html",
+    "fields": [
+      "LeftTail",
+      "RightTail",
+      "TailDrop",
+      "Butterfly",
+      "LocalDensity"
+    ],
+    "links": [
+      "applied-options-digital-vertical.html",
+      "applied-options-uneven-butterfly.html"
+    ],
+    "cases": [
+      {
+        "input": [
+          90,
+          100,
+          120,
+          18,
+          12,
+          4,
+          1
+        ],
+        "expected": [
+          0.6,
+          0.4,
+          0.2,
+          1.3333333333333333,
+          0.013333333333333334
+        ]
+      },
+      {
+        "input": [
+          90,
+          100,
+          120,
+          18,
+          15,
+          4,
+          1
+        ],
+        "expected": [
+          0.3,
+          0.55,
+          -0.25,
+          -1.6666666666666667,
+          -0.016666666666666666
+        ]
+      }
+    ],
+    "invalid": [
+      90,
+      100,
+      120,
+      30,
+      5,
+      4,
+      1
+    ]
+  },
+  {
+    "id": "synthesis_netting_cva",
+    "title": "净额与抵押对同一边际违约损失的影响",
+    "file": "applied-synthesis-netting-cva.html",
+    "fields": [
+      "GrossCVA",
+      "NettedCVA",
+      "CollateralizedCVA",
+      "NettingBenefit",
+      "CollateralBenefit"
+    ],
+    "links": [
+      "applied-credit-net-collateral.html",
+      "applied-credit-cva-independent.html"
+    ],
+    "cases": [
+      {
+        "input": [
+          0.4,
+          1,
+          0.1,
+          2,
+          2,
+          10,
+          100,
+          -80,
+          30,
+          -50
+        ],
+        "expected": [
+          3.9,
+          0.6,
+          0.3,
+          3.3,
+          0.3
+        ]
+      },
+      {
+        "input": [
+          0.4,
+          0.9,
+          0.2,
+          2,
+          2,
+          0,
+          10,
+          20,
+          -10,
+          5
+        ],
+        "expected": [
+          1.89,
+          1.62,
+          0,
+          0.27,
+          1.62
+        ]
+      }
+    ],
+    "invalid": [
+      0.4,
+      1,
+      1.1,
+      2,
+      2,
+      10,
+      100,
+      -80,
+      30,
+      -50
+    ]
+  },
+  {
+    "id": "synthesis_dependent_cva",
+    "title": "独立CVA与联合情景违约损失的对照",
+    "file": "applied-synthesis-dependent-cva.html",
+    "fields": [
+      "Independent",
+      "Joint",
+      "Difference",
+      "UndiscountedCovarianceLoss"
+    ],
+    "links": [
+      "applied-credit-wrong-way.html",
+      "applied-credit-cva-independent.html"
+    ],
+    "cases": [
+      {
+        "input": [
+          0.4,
+          0.9,
+          0.5,
+          10,
+          0.01,
+          0.5,
+          50,
+          0.09
+        ],
+        "expected": [
+          0.81,
+          1.242,
+          0.432,
+          0.48
+        ]
+      },
+      {
+        "input": [
+          0.4,
+          0.9,
+          0.5,
+          10,
+          0.09,
+          0.5,
+          50,
+          0.01
+        ],
+        "expected": [
+          0.81,
+          0.378,
+          -0.432,
+          -0.48
+        ]
+      }
+    ],
+    "invalid": [
+      0.4,
+      -0.9,
+      0.5,
+      10,
+      0.01,
+      0.5,
+      50,
+      0.09
+    ]
+  },
+  {
+    "id": "synthesis_investor_manager_return",
+    "title": "同一资金路径的管理人TWR与投资者MWR",
+    "file": "applied-synthesis-investor-manager-return.html",
+    "fields": [
+      "TWR",
+      "MWRAnnualEffective",
+      "Dietz",
+      "Gain"
+    ],
+    "links": [
+      "applied-accounts-twr-exact.html",
+      "applied-accounts-mwr-continuous.html",
+      "applied-accounts-modified-dietz.html"
+    ],
+    "cases": [
+      {
+        "input": [
+          100,
+          100,
+          50,
+          250
+        ],
+        "expected": [
+          0.6666666666666666,
+          0.35078105935821213,
+          0.8,
+          100
+        ]
+      },
+      {
+        "input": [
+          100,
+          110,
+          0,
+          121
+        ],
+        "expected": [
+          0.21,
+          0.1,
+          0.21,
+          21
+        ]
+      }
+    ],
+    "invalid": [
+      100,
+      100,
+      -10,
+      250
+    ]
+  },
+  {
+    "id": "synthesis_futures_borrow_funding",
+    "title": "期货对冲现金与借券资金成本的分账户研究",
+    "file": "applied-synthesis-futures-borrow-funding.html",
+    "fields": [
+      "FuturesVariation",
+      "BorrowFees",
+      "NetFundingPnL",
+      "TerminalCashAfterFees",
+      "MarginShortfall"
+    ],
+    "links": [
+      "applied-accounts-futures-margin.html",
+      "applied-accounts-borrow-accrual.html"
+    ],
+    "cases": [
+      {
+        "input": [
+          2,
+          10,
+          100,
+          80,
+          50,
+          48,
+          52,
+          1000,
+          0.12,
+          0.25,
+          2000,
+          0.06,
+          0.25
+        ],
+        "expected": [
+          40,
+          60,
+          -20,
+          80,
+          20
+        ]
+      },
+      {
+        "input": [
+          -1,
+          5,
+          30,
+          10,
+          20,
+          24,
+          22,
+          1000,
+          0.365,
+          0.0027397260273972603,
+          1000,
+          0.365,
+          0.0027397260273972603
+        ],
+        "expected": [
+          -10,
+          2,
+          -12,
+          18,
+          0
+        ]
+      }
+    ],
+    "invalid": [
+      2,
+      10,
+      100,
+      80,
+      50,
+      48,
+      52,
+      1000,
+      -0.12,
+      0.25,
+      2000,
+      0.06,
+      0.25
+    ]
+  },
+  {
+    "id": "synthesis_budget_tail",
+    "title": "等方差风险预算与尾部情景贡献的分离",
+    "file": "applied-synthesis-budget-tail.html",
+    "fields": [
+      "W1",
+      "W2",
+      "Volatility",
+      "ES",
+      "TailRC1",
+      "TailRC2"
+    ],
+    "links": [
+      "applied-allocation-two-asset-risk-budget.html",
+      "applied-allocation-tail-euler.html"
+    ],
+    "cases": [
+      {
+        "input": [
+          0.2,
+          0.2,
+          0,
+          0.75,
+          0.5,
+          0.1,
+          0.1,
+          0.25,
+          0.3,
+          0.1,
+          0.25,
+          0.1,
+          0.3
+        ],
+        "expected": [
+          0.5,
+          0.5,
+          0.1414213562373095,
+          0.2,
+          0.1,
+          0.1
+        ]
+      },
+      {
+        "input": [
+          0.1,
+          0.2,
+          0,
+          0.5,
+          0.5,
+          0.3,
+          0,
+          0.5,
+          0,
+          0.3
+        ],
+        "expected": [
+          0.6666666666666666,
+          0.3333333333333333,
+          0.09428090415820635,
+          0.2,
+          0.2,
+          0
+        ]
+      }
+    ],
+    "invalid": [
+      0.1,
+      0.2,
+      1,
+      0.5,
+      0.5,
+      0.3,
+      0,
+      0.5,
+      0,
+      0.3
+    ]
+  },
+  {
+    "id": "synthesis_kl_robust",
+    "title": "最小相对熵压力分布到鲁棒价差头寸",
+    "file": "applied-synthesis-kl-robust.html",
+    "fields": [
+      "Q1",
+      "Q2",
+      "KL",
+      "Weight",
+      "WorstAlpha",
+      "Variance",
+      "Objective"
+    ],
+    "links": [
+      "applied-allocation-kl-reverse-stress.html",
+      "applied-allocation-robust-spread.html"
+    ],
+    "cases": [
+      {
+        "input": [
+          0.5,
+          0.5,
+          -1,
+          0.5,
+          1,
+          0.1,
+          1,
+          1,
+          1
+        ],
+        "expected": [
+          0.25,
+          0.75,
+          0.13081203594113697,
+          0.4,
+          0.16,
+          0.16,
+          0.08
+        ]
+      },
+      {
+        "input": [
+          0,
+          0.5,
+          -1,
+          0.5,
+          1,
+          0.1,
+          1,
+          1,
+          1
+        ],
+        "expected": [
+          0.5,
+          0.5,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "invalid": [
+      1.1,
+      0.5,
+      -1,
+      0.5,
+      1,
+      0.1,
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "synthesis_cost_tail",
+    "title": "交易成本最优权重与尾部风险事后检查",
+    "file": "applied-synthesis-cost-tail.html",
+    "fields": [
+      "W1",
+      "W2",
+      "TradeObjective",
+      "ES",
+      "TailRC1",
+      "TailRC2"
+    ],
+    "links": [
+      "applied-allocation-l1-box-trade.html",
+      "applied-allocation-tail-euler.html"
+    ],
+    "cases": [
+      {
+        "input": [
+          0.8,
+          0.2,
+          2,
+          0.2,
+          0,
+          0.6,
+          -0.3,
+          0,
+          1,
+          0.1,
+          -1,
+          1,
+          0.5,
+          0.5,
+          0.1,
+          0.2,
+          0.5,
+          0.3,
+          0.1
+        ],
+        "expected": [
+          0.6,
+          -0.2,
+          0.145,
+          0.16,
+          0.18,
+          -0.02
+        ]
+      },
+      {
+        "input": [
+          0.5,
+          0.5,
+          1,
+          0,
+          0,
+          1,
+          0.5,
+          0.5,
+          1,
+          0,
+          0,
+          1,
+          0.75,
+          0.5,
+          0.1,
+          0.1,
+          0.25,
+          0.3,
+          0.1,
+          0.25,
+          0.1,
+          0.3
+        ],
+        "expected": [
+          0.5,
+          0.5,
+          0,
+          0.2,
+          0.1,
+          0.1
+        ]
+      }
+    ],
+    "invalid": [
+      0.8,
+      0.2,
+      0,
+      0.2,
+      0,
+      0.6,
+      -0.3,
+      0,
+      1,
+      0.1,
+      -1,
+      1,
+      0.5,
+      0.5,
+      0.1,
+      0.2,
+      0.5,
+      0.3,
+      0.1
+    ]
+  },
+  {
+    "id": "synthesis_execution_wealth",
+    "title": "主动买单执行短缺与终端财富的闭合",
+    "file": "applied-synthesis-execution-wealth.html",
+    "fields": [
+      "ActualPnL",
+      "IdealPnL",
+      "Shortfall",
+      "TerminalWealth",
+      "Closure"
+    ],
+    "links": [
+      "applied-liquidity-sweep-asks.html",
+      "applied-liquidity-sweep-shortfall.html"
+    ],
+    "cases": [
+      {
+        "input": [
+          1000,
+          8,
+          102,
+          99,
+          104,
+          0.1,
+          100,
+          3,
+          101,
+          4,
+          103,
+          5
+        ],
+        "expected": [
+          23.3,
+          40,
+          16.7,
+          1023.3,
+          0
+        ]
+      },
+      {
+        "input": [
+          1000,
+          2,
+          99,
+          100,
+          103,
+          0.1,
+          101,
+          3
+        ],
+        "expected": [
+          0,
+          6,
+          6,
+          1000,
+          0
+        ]
+      }
+    ],
+    "invalid": [
+      100,
+      8,
+      102,
+      99,
+      104,
+      0.1,
+      100,
+      3,
+      101,
+      4,
+      103,
+      5
+    ]
+  }
+]
