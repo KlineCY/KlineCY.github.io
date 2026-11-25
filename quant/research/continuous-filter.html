@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>连续多变量状态估计与非线性Gaussian计算｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="depth-labs.css"><link rel="stylesheet" href="finite-state.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main class="finite-state"><header><h1>连续多变量状态估计与非线性Gaussian计算</h1><p><a href="continuous-research.html">连续状态与数值金融研究</a>　<a href="finite-state-research.html">有限状态与动态研究</a>　<a href="../cpp/continuous_research_cli.cpp" download>统一C++17入口</a></p></header><section><h2>统一研究主线</h2><p>离散状态推断可精确枚举有限路径，而金融状态空间模型通常包含连续潜变量。线性Gaussian模型有闭式过滤与平滑；非线性模型需明确采用何种矩近似或后验投影。以下四个模型比较完整批量Gaussian条件分布、确定性求积、局部线性化与集合平方根变换，并在缺失观测与相关状态下检查数值稳定。</p><h3><a href="continuous-kalman-missing.html">缺失异步观测的二维Kalman过滤与RTS平滑</a></h3><p>两个潜在状态可以代表水平与斜率、共同因子与特异信号，或两条流动性潜变量。不同数据源可能在同一时间点只有部分坐标可用。输入掩码定义当前真实到达的观察，缺失坐标不进入似然，也不以零值伪造观测。线性Gaussian且观测噪声独立时，同期两个观察可以顺序进行标量更新，得到与联合更新相同的后验。</p><h3><a href="continuous-nonlinear-gaussian-moments.html">非线性Gaussian变换：球面径向求积与Gauss–Hermite矩对照</a></h3><p>对于非线性组合风险，即使潜变量是Gaussian，输出分布通常也不是Gaussian。采用二维变换(X平方、指数线性组合)，它既包含二次风险暴露又包含凸指数暴露，并具有可独立推导的精确一二阶矩。将其作为确定性求积质量的基准，而不是用同一数值算法生成参考值。</p><h3><a href="continuous-gaussian-density-filter.html">非线性观测的正权重求积后验与EKF退化比较</a></h3><p>扩展Kalman滤波使用观测函数在预测均值的局部导数。对平方观测且预测均值为0时，导数为0，EKF不能利用新观测更新状态方差；但真实后验的幅度信息通常会变化。正权重Gaussian求积直接以各先验节点的观测似然重加权，可保留这种非线性影响。</p><h3><a href="continuous-ensemble-analysis.html">确定性集合平方根更新与样本协方差精确证书</a></h3><p>集合Kalman方法以有限样本近似状态分布。随机扰动观测可能引入额外抽样误差；确定性标量观测平方根更新直接变换集合偏差，使新样本均值与协方差精确匹配基于旧样本协方差的Kalman更新，而无需人为生成每个成员的观测扰动。</p><p><a href="continuous-filter-cases.json" download>完整输入与解析参照</a></p></section><section><h2>完整原生C++17实现</h2><pre>#pragma once
+#include &quot;continuous_research_common.hpp&quot;
+namespace crq {
+// Bivariate linear Gaussian filter and RTS smoother with arbitrary missing coordinate observations.
+// At t=0 the prior is supplied directly. For t&gt;0 x_t=F x_{t-1}+noise.
+inline Vec kalman_missing(const Vec&amp; x){
+    check(x.size()&gt;=18);int n=integer(x[0],1,500);
+    check(x.size()==size_t(15+3*n));
+    M2 F{{{x[1],x[2]},{x[3],x[4]}}},Q=covariance(x[5],x[6],x[7]),P=covariance(x[10],x[11],x[12]);
+    V2 m{x[8],x[9]},R{x[13],x[14]};
+    check(spd(Q)&amp;&amp;spd(P)&amp;&amp;R[0]&gt;0&amp;&amp;R[1]&gt;0);
+    std::vector&lt;V2&gt; pred(n),filt(n),smooth(n);
+    std::vector&lt;M2&gt; pp(n),pf(n),ps(n);
+    double ll=0;int seen=0;
+    for(int t=0;t&lt;n;++t){
+        if(t){m=mult(F,m);P=sym(sum(mult(mult(F,P),trans(F)),Q));}
+        check(spd(P));pred[t]=m;pp[t]=P;
+        int mask=integer(x[15+3*t],0,3);
+        for(int j=0;j&lt;2;++j)if(mask&amp;(1&lt;&lt;j)){
+            ++seen;double error=x[16+3*t+j]-m[j],S=P[j][j]+R[j];check(S&gt;0);
+            V2 h{};h[j]=1;
+            V2 K=scale(mult(P,h),1/S);m=add(m,scale(K,error));
+            M2 A=sum(eye(),outer(K,h),-1);
+            M2 noise=outer(K,K);for(auto&amp; row:noise)for(double&amp; z:row)z*=R[j];
+            P=sym(sum(mult(mult(A,P),trans(A)),noise));
+            ll-=.5*(std::log(2*std::acos(-1.)*S)+error*error/S);
+        }
+        check(spd(P));filt[t]=m;pf[t]=P;
+    }
+    smooth.back()=filt.back();ps.back()=pf.back();
+    for(int t=n-2;t&gt;=0;--t){
+        M2 G=mult(mult(pf[t],trans(F)),inv(pp[t+1]));
+        smooth[t]=add(filt[t],mult(G,sub(smooth[t+1],pred[t+1])));
+        ps[t]=sym(sum(pf[t],mult(mult(G,sum(ps[t+1],pp[t+1],-1)),trans(G))));
+        check(spd(ps[t]));
+    }
+    Vec out{ll,double(seen)};
+    for(int t=0;t&lt;n;++t){append(out,filt[t],pf[t]);append(out,smooth[t],ps[t]);}
+    return out;
+}
+// Third-degree spherical-radial cubature and fifth-order tensor Gaussian quadrature.
+inline Vec nonlinear_gaussian_moments(const Vec&amp; x){
+    check(x.size()==7);
+    double a=x[0],b=x[1],s=x[2],t=x[3],rho=x[4],c=x[5],d=x[6];
+    check(s&gt;0&amp;&amp;t&gt;0&amp;&amp;std::abs(rho)&lt;1);
+    M2 P=covariance(s*s,rho*s*t,t*t),L=cholesky(P);
+    double mu=c*a+d*b,var=c*c*P[0][0]+2*c*d*P[0][1]+d*d*P[1][1];
+    double E=std::exp(mu+.5*var),Ex=a*a+s*s,cxz=c*s*s+d*P[0][1];
+    Vec out{Ex,E,2*std::pow(s,4)+4*a*a*s*s,E*(sq(a+cxz)+s*s-Ex),E*E*std::expm1(var)};
+    auto transform=[&amp;](V2 p){return V2{p[0]*p[0],std::exp(c*p[0]+d*p[1])};};
+    auto eval=[&amp;](const std::vector&lt;V2&gt;&amp; pts,const Vec&amp; weights){
+        std::vector&lt;V2&gt; val;V2 mean{};
+        for(size_t i=0;i&lt;pts.size();++i){V2 y=transform(add(V2{a,b},mult(L,pts[i])));val.push_back(y);mean=add(mean,scale(y,weights[i]));}
+        M2 cov{};
+        for(size_t i=0;i&lt;val.size();++i){M2 z=outer(sub(val[i],mean),sub(val[i],mean));for(auto&amp; row:z)for(double&amp; v:row)v*=weights[i];cov=sum(cov,z);}
+        append(out,mean,cov);
+    };
+    double h=std::sqrt(2.);
+    eval({{h,0},{-h,0},{0,h},{0,-h}},{.25,.25,.25,.25});
+    std::vector&lt;V2&gt; nodes;Vec weights;
+    for(int i=0;i&lt;5;++i)for(int j=0;j&lt;5;++j){nodes.push_back({gh_z[i],gh_z[j]});weights.push_back(gh_w[i]*gh_w[j]);}
+    eval(nodes,weights);
+    return out;
+}
+// Scalar nonlinear Gaussian assumed-density filtering by positive quadrature and EKF.
+inline Vec gaussian_density_filter(const Vec&amp; x){
+    check(x.size()&gt;=7);double m=x[0],v=x[1],phi=x[2],q=x[3],r=x[4];int power=integer(x[5],1,2);
+    check(v&gt;0&amp;&amp;q&gt;0&amp;&amp;r&gt;0&amp;&amp;x.size()&lt;=506);
+    double em=m,ev=v,ghll=0,ekll=0;Vec out{0,0};
+    auto h=[&amp;](double z){return power==1?z:z*z;};
+    for(size_t i=6;i&lt;x.size();++i){
+        double pm=phi*m,pv=phi*phi*v+q,y=x[i],maxlog=-std::numeric_limits&lt;double&gt;::infinity();
+        Vec z(5),weights(5);
+        for(int j=0;j&lt;5;++j){z[j]=pm+std::sqrt(pv)*gh_z[j];weights[j]=std::log(gh_w[j])-.5*(std::log(2*std::acos(-1.)*r)+sq(y-h(z[j]))/r);maxlog=std::max(maxlog,weights[j]);}
+        double den=0;
+        for(double&amp; w:weights){w=std::exp(w-maxlog);den+=w;}
+        ghll+=maxlog+std::log(den);m=0;v=0;
+        for(int j=0;j&lt;5;++j)m+=z[j]*weights[j]/den;
+        for(int j=0;j&lt;5;++j)v+=sq(z[j]-m)*weights[j]/den;
+        em*=phi;ev=phi*phi*ev+q;double derivative=power==1?1:2*em;
+        double S=derivative*derivative*ev+r,K=ev*derivative/S,e=y-h(em);
+        ekll-=.5*(std::log(2*std::acos(-1.)*S)+e*e/S);em+=K*e;ev=sq(1-K*derivative)*ev+K*K*r;
+        out.insert(out.end(),{m,v,em,ev});
+    }
+    out[0]=ghll;out[1]=ekll;return out;
+}
+// Deterministic scalar-observation ensemble square-root analysis.
+inline Vec ensemble_analysis(const Vec&amp; x){
+    check(x.size()&gt;=9);int n=integer(x[0],2,1000);check(x.size()==size_t(5+2*n));
+    double y=x[1],r=x[2];V2 h{x[3],x[4]};check(r&gt;0&amp;&amp;dot(h,h)&gt;0);
+    std::vector&lt;V2&gt; z;V2 mean{};
+    for(int i=0;i&lt;n;++i){z.push_back({x[5+2*i],x[6+2*i]});mean=add(mean,scale(z.back(),1./n));}
+    M2 P{};for(auto a:z)P=sum(P,outer(sub(a,mean),sub(a,mean)),1./(n-1));
+    V2 ph=mult(P,h);double S=dot(h,ph)+r;check(S&gt;0);
+    V2 K=scale(ph,1/S),posterior=add(mean,scale(K,y-dot(h,mean)));
+    M2 target=sym(sum(P,outer(K,ph),-1));
+    double alpha=1/(1+std::sqrt(r/S));std::vector&lt;V2&gt; updated;V2 avg{};
+    for(auto a:z){V2 d=sub(a,mean),v=add(posterior,sub(d,scale(K,alpha*dot(h,d))));updated.push_back(v);avg=add(avg,scale(v,1./n));}
+    M2 cov{};for(auto a:updated)cov=sum(cov,outer(sub(a,avg),sub(a,avg)),1./(n-1));
+    double err=0;for(int i=0;i&lt;2;++i)for(int j=0;j&lt;2;++j)err=std::max(err,std::abs(cov[i][j]-target[i][j]));
+    Vec out;append(out,mean,P);append(out,posterior,target);append(out,avg,cov);out.push_back(err);
+    for(auto a:updated)out.insert(out.end(),a.begin(),a.end());
+    return out;
+}
+}
+</pre><p><a href="../cpp/continuous_research_filter.hpp" download>完整领域源码</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

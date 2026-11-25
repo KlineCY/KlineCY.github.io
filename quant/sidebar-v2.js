@@ -78,6 +78,7 @@
       '<a class="q-menu-link" href="'+route("research")+'integrated-research.html">跨模型研究与完整应用</a>'+
       '<a class="q-menu-link" href="'+route("research")+'applied-systems.html">完整应用研究体系</a>'+
       '<a class="q-menu-link" href="'+route("research")+'finite-state-research.html">有限状态与动态研究</a>'+
+      '<a class="q-menu-link" href="'+route("research")+'continuous-research.html">连续状态与数值金融研究</a>'+
       '<a class="q-menu-link" href="'+route("research")+'advanced-research.html">高级模型研究与数值实验</a>'+
       '<a class="q-menu-link" href="'+route("research")+'model-laboratories.html">完整模型与研究框架</a>'+
       '<a class="q-menu-link" href="'+route("research")+'depth-laboratories.html">量化深度研究专题</a>'+

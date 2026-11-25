@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>连续数值定价、伴随敏感性与强弱误差｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="depth-labs.css"><link rel="stylesheet" href="finite-state.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main class="finite-state"><header><h1>连续数值定价、伴随敏感性与强弱误差</h1><p><a href="continuous-research.html">连续状态与数值金融研究</a>　<a href="finite-state-research.html">有限状态与动态研究</a>　<a href="../cpp/continuous_research_cli.cpp" download>统一C++17入口</a></p></header><section><h2>统一研究主线</h2><p>有限状态树可以通过路径枚举建立精确基准，但连续模型的数值研究必须区分空间、时间、积分截断与模型误差。该领域比较Crank–Nicolson与Rannacher启动、线性系统精确伴随、相关对数正态价差期权的条件积分，以及同一Brownian驱动下OU Euler与精确过程的强误差。</p><h3><a href="continuous-bs-rannacher.html">对数价格网格Crank–Nicolson与Rannacher启动的收敛研究</a></h3><p>欧式看涨支付在执行价处存在折点，二阶价格导数在初始剩余期限处不光滑。Crank–Nicolson在光滑解下具有二阶时间精度，但对高频误差的阻尼不充分。Rannacher启动用两个隐式Euler半步替代最初一个CN步，然后其余时段恢复CN，以减弱初始不规则支付导致的振荡。</p><h3><a href="continuous-tridiagonal-adjoint.html">三对角离散求解的精确反向伴随与参数敏感性</a></h3><p>在PDE、隐式状态估计或数值优化中，目标值往往依赖线性系统解。直接对每个参数分别求扰动后的线性系统会重复大量工作。离散伴随把输出目标的所有矩阵元素敏感性归结为一次原系统求解和一次转置系统求解。</p><h3><a href="continuous-spread-conditional.html">相关对数正态价差期权的条件积分与Margrabe边界</a></h3><p>价差期权支付为两个相关资产到期价值之差减执行价的正部。非零执行价下，两个对数正态变量之差并非对数正态，直接套用单资产BS公式不成立。条件于第二个Gaussian驱动后，第二资产终值固定，第一资产仍为条件对数正态，因此内部条件期望可以解析计算。</p><h3><a href="continuous-ou-coupling.html">同一Brownian驱动下OU Euler的精确强误差分解</a></h3><p>随机微分方程数值模拟需要区分弱误差和强误差。弱误差比较边际期望或分布，而强误差比较同一Brownian路径驱动下的两个终点。若分别独立模拟精确过程和Euler过程，其差的方差无法反映强收敛。</p><p><a href="continuous-pricing-cases.json" download>完整输入与解析参照</a></p></section><section><h2>完整原生C++17实现</h2><pre>#pragma once
+#include &quot;continuous_research_common.hpp&quot;
+namespace crq {
+// European Black-Scholes log-grid: pure Crank-Nicolson versus Rannacher start.
+// Exact Black-Scholes boundaries are used to isolate interior discretization error.
+inline Vec bs_rannacher(const Vec&amp; x){
+    check(x.size()==9);
+    double s=x[0],k=x[1],r=x[2],q=x[3],vol=x[4],T=x[5],width=x[6];
+    int M=integer(x[7],4,4000),N=integer(x[8],1,20000);
+    check(M%2==0&amp;&amp;s&gt;0&amp;&amp;k&gt;0&amp;&amp;vol&gt;0&amp;&amp;T&gt;0&amp;&amp;width&gt;0&amp;&amp;width&lt;=10&amp;&amp;r&gt;=0&amp;&amp;long(M)*N&lt;=20000000);
+    double h=2*width/M,dt=T/N,drift=r-q-.5*vol*vol;
+    double a=.5*vol*vol/(h*h)-drift/(2*h),b=-vol*vol/(h*h)-r,c=.5*vol*vol/(h*h)+drift/(2*h);
+    check(a&gt;=0&amp;&amp;c&gt;=0);
+    Vec spot(M+1);for(int j=0;j&lt;=M;++j)spot[j]=s*std::exp((j-M/2)*h);
+    auto evolve=[&amp;](bool rannacher){
+        Vec v(M+1);for(int j=0;j&lt;=M;++j)v[j]=std::max(spot[j]-k,0.);
+        double time=0,error=0;
+        auto step=[&amp;](double d,double theta){
+            double tau=time+d,lo=bs(spot.front(),k,r,q,vol,tau,1),hi=bs(spot.back(),k,r,q,vol,tau,1);
+            Vec D(M-1,1-theta*d*b),L(M-2,-theta*d*a),U(M-2,-theta*d*c),rhs(M-1);
+            for(int j=1;j&lt;M;++j)rhs[j-1]=v[j]+(1-theta)*d*(a*v[j-1]+b*v[j]+c*v[j+1]);
+            rhs.front()+=theta*d*a*lo;rhs.back()+=theta*d*c*hi;
+            Vec w=tri_solve(D,L,U,rhs);error=std::max(error,residual(tri_mult(D,L,U,w),rhs));
+            v[0]=lo;v[M]=hi;for(int j=1;j&lt;M;++j)v[j]=w[j-1];time=tau;
+        };
+        if(rannacher){step(dt/2,1);step(dt/2,1);}
+        else step(dt,.5);
+        for(int t=1;t&lt;N;++t)step(dt,.5);
+        int j=M/2;double dx=(v[j+1]-v[j-1])/(2*h),dxx=(v[j+1]-2*v[j]+v[j-1])/(h*h);
+        return Vec{v[j],dx/s,(dxx-dx)/(s*s),error};
+    };
+    Vec cn=evolve(false),ra=evolve(true);
+    double exact=bs(s,k,r,q,vol,T,1),st=vol*std::sqrt(T),d1=(std::log(s/k)+(r-q+.5*vol*vol)*T)/st;
+    double delta=std::exp(-q*T)*cdf(d1),gamma=std::exp(-q*T)*pdf(d1)/(s*st);
+    return {cn[0],ra[0],exact,cn[0]-exact,ra[0]-exact,cn[1],ra[1],delta,cn[2],ra[2],gamma,std::max(cn[3],ra[3])};
+}
+// Exact adjoint of a tridiagonal linear solve with respect to all matrix and RHS entries.
+inline Vec tridiagonal_adjoint(const Vec&amp; x){
+    check(!x.empty());int n=integer(x[0],2,5000);
+    check(x.size()==size_t(5*n-1));
+    size_t at=1;auto take=[&amp;](int m){Vec a(x.begin()+at,x.begin()+at+m);at+=m;return a;};
+    Vec d=take(n),l=take(n-1),u=take(n-1),b=take(n),c=take(n);
+    for(int i=0;i&lt;n;++i)check(std::abs(d[i])&gt;(i?std::abs(l[i-1]):0)+(i+1&lt;n?std::abs(u[i]):0)+1e-14);
+    Vec y=tri_solve(d,l,u,b),adj=tri_solve(d,u,l,c);
+    double objective=std::inner_product(c.begin(),c.end(),y.begin(),0.);
+    Vec out{objective};out.insert(out.end(),y.begin(),y.end());out.insert(out.end(),adj.begin(),adj.end());
+    for(int i=0;i&lt;n;++i)out.push_back(-adj[i]*y[i]);
+    for(int i=0;i&lt;n-1;++i)out.push_back(-adj[i+1]*y[i]);
+    for(int i=0;i&lt;n-1;++i)out.push_back(-adj[i]*y[i+1]);
+    out.insert(out.end(),adj.begin(),adj.end());
+    out.push_back(residual(tri_mult(d,l,u,y),b));
+    out.push_back(residual(tri_mult(d,u,l,adj),c));return out;
+}
+// Spread option by conditioning on the second normal factor, then integrating a lognormal call.
+inline Vec spread_conditional(const Vec&amp; x){
+    check(x.size()==11);double s1=x[0],s2=x[1],k=x[2],v1=x[3],v2=x[4],rho=x[5],r=x[6],q1=x[7],q2=x[8],T=x[9];
+    int n=integer(x[10],20,100000);check(n%2==0&amp;&amp;s1&gt;0&amp;&amp;s2&gt;0&amp;&amp;k&gt;=0&amp;&amp;v1&gt;0&amp;&amp;v2&gt;0&amp;&amp;T&gt;0&amp;&amp;std::abs(rho)&lt;1);
+    double a=v1*std::sqrt(T),b=v2*std::sqrt(T),sig=a*std::sqrt(1-rho*rho);
+    auto f=[&amp;](double z){
+        double S2=s2*std::exp((r-q2-.5*v2*v2)*T+b*z),strike=S2+k;
+        double logmu=std::log(s1)+(r-q1-.5*v1*v1)*T+a*rho*z;
+        double d2=(logmu-std::log(strike))/sig,d1=d2+sig;
+        double call=std::exp(logmu+.5*sig*sig)*cdf(d1)-strike*cdf(d2);
+        return std::exp(-r*T)*pdf(z)*std::max(0.,call);
+    };
+    auto simpson=[&amp;](int N){double h=18./N,total=f(-9)+f(9);for(int j=1;j&lt;N;++j)total+=(j%2?4:2)*f(-9+h*j);return h*total/3;};
+    double a1=simpson(n),a2=simpson(2*n),exchange=0;
+    if(k==0){
+        double st=std::sqrt((v1*v1+v2*v2-2*rho*v1*v2)*T);
+        double d1=(std::log(s1/s2)+(q2-q1)*T+.5*st*st)/st,d2=d1-st;
+        exchange=s1*std::exp(-q1*T)*cdf(d1)-s2*std::exp(-q2*T)*cdf(d2);
+    }
+    return {a1,a2,std::abs(a2-a1)/15,exchange,double(k==0),k==0?a2-exchange:0};
+}
+// Strong Euler error against exact OU using the same Brownian motion (no Monte Carlo).
+inline Vec ou_coupling(const Vec&amp; x){
+    check(x.size()==6);double x0=x[0],mu=x[1],k=x[2],vol=x[3],T=x[4];int n=integer(x[5],1,1000000);
+    check(k&gt;0&amp;&amp;vol&gt;=0&amp;&amp;T&gt;0);
+    double h=T/n,a=std::exp(-k*h),b=1-k*h,qe=vol*vol*(-std::expm1(-2*k*h))/(2*k),qu=vol*vol*h;
+    double cross=vol*vol*(-std::expm1(-k*h))/k;
+    double m1=x0,m2=x0,v1=0,v2=0,c=0;
+    for(int j=0;j&lt;n;++j){m1=mu+a*(m1-mu);m2=mu+b*(m2-mu);v1=a*a*v1+qe;v2=b*b*v2+qu;c=a*b*c+cross;}
+    double mse=sq(m1-m2)+v1+v2-2*c;check(mse&gt;=-1e-10*(1+v1+v2));
+    double exactmu=mu+std::exp(-k*T)*(x0-mu),exactv=vol*vol*(-std::expm1(-2*k*T))/(2*k);
+    return {m1,m2,v1,v2,c,std::sqrt(std::max(0.,mse)),m2-m1,v2-v1,exactmu,exactv};
+}
+}
+</pre><p><a href="../cpp/continuous_research_pricing.hpp" download>完整领域源码</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>
