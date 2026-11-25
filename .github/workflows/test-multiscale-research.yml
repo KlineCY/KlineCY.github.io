@@ -38,6 +38,8 @@ jobs:
       - run: python3 scripts/test_multiscale_research.py /tmp/quant_multiscale
       - run: ${{ matrix.compiler }} -std=c++17 -O2 -Wall -Wextra -Werror -pedantic quant/cpp/multiscale_experiments.cpp -o /tmp/quant_multiscale_experiments
       - run: python3 scripts/test_multiscale_experiments.py /tmp/quant_multiscale_experiments
+      - run: ${{ matrix.compiler }} -std=c++17 -O2 -Wall -Wextra -Werror -pedantic quant/cpp/multiscale_advanced_experiments.cpp -o /tmp/quant_multiscale_advanced
+      - run: python3 scripts/test_multiscale_advanced.py /tmp/quant_multiscale_advanced
   curriculum:
     runs-on: ubuntu-latest
     steps:
@@ -48,3 +50,4 @@ jobs:
       - run: npm install --no-save --no-package-lock katex@0.16.11
       - run: node scripts/test_multiscale_curriculum.mjs
       - run: node scripts/test_multiscale_experiments.mjs
+      - run: node scripts/test_multiscale_advanced.mjs
