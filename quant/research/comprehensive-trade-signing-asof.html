@@ -16,16 +16,18 @@
         else{positive(r[2]);positive(r[3]);}
     }
     require(!quotes.empty(),"no quotes");
-    auto asof=[&amp;](double t){
-        auto it=std::upper_bound(quotes.begin(),quotes.end(),t,[](double v,const Vec&amp;r){return v&lt;r[0];});
+    auto asof=[&amp;](double t,size_t limit){
+        auto it=std::upper_bound(quotes.begin(),quotes.begin()+limit,t,[](double v,const Vec&amp;r){return v&lt;r[0];});
         if(it==quotes.begin())return Vec{};
         --it;return t-(*it)[0]&lt;=age?*it:Vec{};
     };
     Report out;out.header={"Time","Price","Quantity","Sign","Mid","EffectiveSpread","FutureMid","Markout","Valid"};
     double last=0,tick=0;
-    for(const auto&amp;r:x)if(r[0]==1){
+    size_t seen=0;
+    for(const auto&amp;r:x){
+        if(r[0]==0){++seen;continue;}
         if(last&gt;0&amp;&amp;r[2]!=last)tick=r[2]&gt;last?1:-1;
-        last=r[2];Vec now=asof(r[1]-lag),future=asof(r[1]+H);
+        last=r[2];Vec now=asof(r[1]-lag,seen),future=asof(r[1]+H,quotes.size());
         double sign=0,mid=0,fm=0;
         if(!now.empty()){mid=now[1];sign=r[2]&gt;mid?1:r[2]&lt;mid?-1:tick;}
         bool valid=sign!=0&amp;&amp;!future.empty()&amp;&amp;r[1]+H&lt;=x.back()[1];

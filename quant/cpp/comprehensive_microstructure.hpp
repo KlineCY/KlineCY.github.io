@@ -51,16 +51,18 @@ inline Report trade_signing_asof(const Mat& x,const Vec& p){
         else{positive(r[2]);positive(r[3]);}
     }
     require(!quotes.empty(),"no quotes");
-    auto asof=[&](double t){
-        auto it=std::upper_bound(quotes.begin(),quotes.end(),t,[](double v,const Vec&r){return v<r[0];});
+    auto asof=[&](double t,size_t limit){
+        auto it=std::upper_bound(quotes.begin(),quotes.begin()+limit,t,[](double v,const Vec&r){return v<r[0];});
         if(it==quotes.begin())return Vec{};
         --it;return t-(*it)[0]<=age?*it:Vec{};
     };
     Report out;out.header={"Time","Price","Quantity","Sign","Mid","EffectiveSpread","FutureMid","Markout","Valid"};
     double last=0,tick=0;
-    for(const auto&r:x)if(r[0]==1){
+    size_t seen=0;
+    for(const auto&r:x){
+        if(r[0]==0){++seen;continue;}
         if(last>0&&r[2]!=last)tick=r[2]>last?1:-1;
-        last=r[2];Vec now=asof(r[1]-lag),future=asof(r[1]+H);
+        last=r[2];Vec now=asof(r[1]-lag,seen),future=asof(r[1]+H,quotes.size());
         double sign=0,mid=0,fm=0;
         if(!now.empty()){mid=now[1];sign=r[2]>mid?1:r[2]<mid?-1:tick;}
         bool valid=sign!=0&&!future.empty()&&r[1]+H<=x.back()[1];
@@ -207,6 +209,7 @@ inline Report hawkes_network_em(const Mat& x,const Vec& p){
             for(int j=0;j<K;++j)score=std::max(score,std::abs((nij[i][j]+u)/A[i][j]-exposure[j]-v));}
         if(score<=tol)break;
     }
+    require(score<=tol,"Hawkes EM did not converge");
     Report out;out.header={"Target","Source","Baseline","Excitation","LogPosterior","ScoreNorm","RowSum"};
     for(int i=0;i<K;++i)for(int j=0;j<K;++j)out.rows.push_back({double(i+1),double(j+1),mu[i],A[i][j],ll,score,sum(A[i])});
     return out;

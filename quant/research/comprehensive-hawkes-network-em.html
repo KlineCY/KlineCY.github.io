@@ -34,6 +34,7 @@
             for(int j=0;j&lt;K;++j)score=std::max(score,std::abs((nij[i][j]+u)/A[i][j]-exposure[j]-v));}
         if(score&lt;=tol)break;
     }
+    require(score&lt;=tol,"Hawkes EM did not converge");
     Report out;out.header={"Target","Source","Baseline","Excitation","LogPosterior","ScoreNorm","RowSum"};
     for(int i=0;i&lt;K;++i)for(int j=0;j&lt;K;++j)out.rows.push_back({double(i+1),double(j+1),mu[i],A[i][j],ll,score,sum(A[i])});
     return out;
