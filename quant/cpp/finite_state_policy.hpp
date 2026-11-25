@@ -15,7 +15,8 @@ inline Vec inventory_schedule(const Vec& x){
         for(int r=0;r<=q;++r)for(int a=0;a<=std::min(r,cap[t]);++a){
             int left=r-a;double v=c[t]*a+eta[t]*a*a+risk*vol[t]*left*left+f[left];
             if(v<cur[r]-1e-12){cur[r]=v;policy[t][r]=a;}
-        }f.swap(cur);
+        }
+        f.swap(cur);
     }
     int r=q;Vec trades;double costs=0,penalty=0;
     for(int t=0;t<n;++t){int a=policy[t][r];require(a>=0);r-=a;trades.push_back(a);costs+=c[t]*a+eta[t]*a*a;penalty+=risk*vol[t]*r*r;}
@@ -59,7 +60,8 @@ inline Vec regime_policy(const Vec& x){
             double z=std::log1p(-fee*std::abs(weights[b]-weights[a]));
             for(int j=0;j<k;++j)z+=p[i][j]*(std::log1p(weights[b]*ret[j])+v[j][b]);
             if(z>next[i][a]+1e-14){next[i][a]=z;pol[t][i][a]=b;}
-        }v.swap(next);
+        }
+        v.swap(next);
     }
     // Independent forward probability flow under the selected policy.
     Mat mass(k,Vec(m));mass[initial][old]=1;double logwealth=0,turn=0;
@@ -67,7 +69,8 @@ inline Vec regime_policy(const Vec& x){
         int b=pol[t][i][a];double z=mass[i][a],dw=std::abs(weights[b]-weights[a]);
         turn+=z*dw;logwealth+=z*std::log1p(-fee*dw);
         for(int j=0;j<k;++j){double q=z*p[i][j];next[j][b]+=q;logwealth+=q*std::log1p(weights[b]*ret[j]);}
-    }mass.swap(next);}
+    }
+        mass.swap(next);}
     double total=0;for(const auto& z:mass)total+=sum(z);
     int first=pol[0][initial][old];
     return {v[initial][old],weights[first],logwealth,turn,total,v[initial][old]-logwealth};
@@ -92,7 +95,8 @@ inline Vec drawdown_chain(const Vec& x){
         int m=std::min(limit,std::max(z.first[3],d));
         next[{j,z.first[1]+move[j],d,m}]+=z.second*p[z.first[0]][j];
         require(next.size()<=1000000);
-    }f.swap(next);}
+    }
+        f.swap(next);}
     double prob=0,wealth=0,elog=0,mass=0,terminaldd=0;
     for(const auto& z:f){double p=z.second;prob+=(z.first[3]>=limit)*p;wealth+=std::exp(step*z.first[1])*p;elog+=step*z.first[1]*p;terminaldd+=(1-std::exp(-step*z.first[2]))*p;mass+=p;}
     return {prob,wealth,elog,terminaldd,mass,double(f.size())};

@@ -18,7 +18,8 @@ inline Vec tagged_queue(const Vec& x){
             g[std::min(i+1,cap)]+=p*add;
             withdraw+=p*own;tw+=t*p*own;
             g[i]+=p*prob[4];
-        }f.swap(g);
+        }
+        f.swap(g);
     }
     return {fill,withdraw,sum(f),tf,tw,occupancy,fill+withdraw+sum(f)};
 }
@@ -36,7 +37,8 @@ inline Vec queue_regime(const Vec& x){
         for(int i=0;i<2;++i)for(int j=0;j<=q;++j){double a=f[i][j];time+=a;
             if(j==0)fill+=a*p[i][0];else g[i][j-1]+=a*p[i][0];
             adverse+=a*p[i][1];g[1-i][j]+=a*p[i][2];g[i][std::max(0,j-1)]+=a*p[i][3];g[i][j]+=a*p[i][4];
-        }f.swap(g);
+        }
+        f.swap(g);
     }
     double survive=sum(f[0])+sum(f[1]);
     return {fill,adverse,survive,reward*fill,time,fill+adverse+survive};
@@ -54,7 +56,8 @@ inline Vec queue_execution_choice(const Vec& x){
         for(int j=0;j<=q;++j){
             double hold=waitcost+exec*(j==0?fillcost:v[j-1])+cancel*v[std::max(0,j-1)]+adverse*(market+shock)+p[3]*v[j];
             a[j]=std::min(market,hold);pol[t][j]=hold<market-1e-12;
-        }v.swap(a);
+        }
+        v.swap(a);
     }
     Vec mass(q+1);mass[q]=1;double actual=0,fills=0,takes=0,exits=0,waiting=0;
     for(int t=0;t<n;++t){Vec next(q+1);
@@ -62,7 +65,8 @@ inline Vec queue_execution_choice(const Vec& x){
             waiting+=z;actual+=z*waitcost;exits+=z*adverse;actual+=z*adverse*(market+shock);
             if(j==0){fills+=z*exec;actual+=z*exec*fillcost;}else next[j-1]+=z*exec;
             next[std::max(0,j-1)]+=z*cancel;next[j]+=z*p[3];
-        }mass.swap(next);
+        }
+        mass.swap(next);
     }
     takes+=sum(mass);actual+=sum(mass)*market;
     return {v[q],double(pol[0][q]),fills,takes,exits,waiting,actual,v[q]-actual};
