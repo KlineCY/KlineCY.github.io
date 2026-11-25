@@ -18,3 +18,13 @@ for(const g of ['kernel','online','neural','portfolio','optimization','distribut
 assert.equal(count,48);assert.equal(eq,144);
 for(const p of ['quant/ml/index.html','quant/research/index.html','quant/cpp/index.html','quant/research/multiscale-research.html','quant/sidebar-v2.js'])assert(read(p).includes('predictive-decision.html'));
 console.log('PASS: '+count+' chapters, '+eq+' strict KaTeX groups, '+display+' published sample values, '+links+' local links and eight embedded source files');
+
+let theoryUnits=0;
+assert(main.includes('predictive-theory.html'));assert(main.includes('predictive-experiments.html'));
+const theory=read(root+'predictive-theory.html');
+for(const g of ['kernel','online','neural','portfolio','optimization','distribution','interpretation','sequence']){
+ const file='predictive-theory-'+g+'.html',html=read(root+file);assert(theory.includes(file));const a=[...html.matchAll(/<div class="equation">\$\$([\s\S]*?)\$\$<\/div>/g)];assert.equal(a.length,6);assert.equal([...html.matchAll(/<section id="unit-\d+">/g)].length,6);
+ for(const m of a){katex.renderToString(decode(m[1]),{throwOnError:true,strict:'error',displayMode:true});theoryUnits++;}
+ for(const m of html.matchAll(/(?:href|src)="([^"]+)"/g)){if(/^https?:\/\//.test(m[1]))continue;assert(fs.existsSync(path.resolve(root,m[1].split('#')[0])),m[1]);}
+}
+assert.equal(theoryUnits,48);console.log('PASS: eight connected theory courses, 48 theory units and strict formulas');
