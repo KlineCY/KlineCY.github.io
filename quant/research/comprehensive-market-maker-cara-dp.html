@@ -1,0 +1,38 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CARA库存约束做市动态规划｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>CARA库存约束做市动态规划</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-microstructure.html">市场微观结构、撮合与动态执行</a>　<a href="../cpp/comprehensive_microstructure.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>离散状态与动作</h2><p>库存限制为整数区间[−Q,Q]，每步选择双边距离或不报价（−1）。成交互斥且最多一单位，成交概率为AΔexp(−kδ)，概率和超过1的动作不可行。该离散模型并非连续模型公式的直接复制。</p><div class="equation">$$p_b=A\Delta e^{-k\delta_b},\quad p_a=A\Delta e^{-k\delta_a},\quad p_0=1-p_b-p_a.$$</div></section><section><h2>风险效用</h2><p>采用指数效用和期末库存二次惩罚。假设成交先发生，随后中点价格独立正态变化；买卖获得相对中点的距离收益。库存风险随成交后库存改变。</p><div class="equation">$$J_0(q)=e^{\gamma\phi q^2},\quad E[e^{-\gamma q\Delta S}]=e^{\gamma^2q^2\sigma^2\Delta/2}.$$</div></section><section><h2>Bellman递推</h2><p>利用CARA平移不变性去掉现金和中点绝对水平，只需对库存状态进行向后递推。最小化指数损失；使用log-sum-exp稳定计算，避免长周期指数溢出。</p><div class="equation">$$J_h(q)=\min_a\sum_{e\in\{-1,0,1\}}p_e(a)e^{-\gamma d_e+\gamma^2(q+e)^2\sigma^2\Delta/2}J_{h-1}(q+e).$$</div></section><section><h2>策略诊断</h2><p>输出每个剩余期限、库存的最优双边距离、两侧成交概率及确定性等价收益；不报价是显式动作，边界库存不能继续增加绝对敞口。</p><div class="equation">$$CE_h(q)=-\gamma^{-1}\log J_h(q).$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Scenario，Remaining，Inventory，BidDistance，AskDistance，CertaintyEquivalent，BuyProbability，SellProbability。</p><p><a href="../research/comprehensive-examples/market-maker-cara-dp.csv" download>样本CSV</a></p><pre>Intensity,Decay,Volatility,TerminalPenalty
+0,1,0,0.1
+</pre><pre>./build/kline_quant comprehensive-market-maker-cara-dp quant/research/comprehensive-examples/market-maker-cara-dp.csv 1 1 1 1 0 1 2</pre><div class="wide"><table><thead><tr><th>Scenario</th><th>Remaining</th><th>Inventory</th><th>BidDistance</th><th>AskDistance</th><th>CertaintyEquivalent</th><th>BuyProbability</th><th>SellProbability</th></tr></thead><tbody><tr><td>1</td><td>1</td><td>-1</td><td>-1</td><td>-1</td><td>-0.1</td><td>0</td><td>0</td></tr><tr><td>1</td><td>1</td><td>0</td><td>-1</td><td>-1</td><td>0</td><td>0</td><td>0</td></tr><tr><td>1</td><td>1</td><td>1</td><td>-1</td><td>-1</td><td>-0.1</td><td>0</td><td>0</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report market_maker_cara_dp(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,4);parameters(p,7);
+    int H=count(p[0],1,500),Q=count(p[1],1,100),G=count(p[6],2,100);
+    double gamma=positive(p[2]),dt=positive(p[3]),lo=p[4],hi=p[5];
+    require(lo&gt;=0&amp;&amp;hi&gt;=lo,"invalid quote grid");
+    require(double(H)*(2*Q+1)*(G+1)*(G+1)*x.size()&lt;=5e7,"DP too large");
+    Vec actions{-1};for(int j=0;j&lt;G;++j)actions.push_back(lo+(hi-lo)*j/(G-1));
+    Report out;out.header={"Scenario","Remaining","Inventory","BidDistance","AskDistance","CertaintyEquivalent","BuyProbability","SellProbability"};
+    for(size_t s=0;s&lt;x.size();++s){
+        const auto&amp;r=x[s];require(r.size()==4&amp;&amp;r[0]&gt;=0&amp;&amp;r[1]&gt;0&amp;&amp;r[2]&gt;=0&amp;&amp;r[3]&gt;=0,"invalid market parameters");
+        double A=r[0],k=r[1],sigma=r[2],phi=r[3];Vec value(2*Q+1);
+        for(int q=-Q;q&lt;=Q;++q)value[q+Q]=gamma*phi*q*q;
+        for(int h=1;h&lt;=H;++h){
+            Vec next(value.size());
+            for(int q=-Q;q&lt;=Q;++q){
+                double best=std::numeric_limits&lt;double&gt;::infinity(),bb=-1,ba=-1,bpb=0,bpa=0;
+                for(double db:actions)for(double da:actions){
+                    if((q==Q&amp;&amp;db&gt;=0)||(q==-Q&amp;&amp;da&gt;=0))continue;
+                    double pb=db&lt;0?0:A*dt*std::exp(-k*db),pa=da&lt;0?0:A*dt*std::exp(-k*da);
+                    if(pb+pa&gt;1)continue;
+                    Vec terms;
+                    auto term=[&amp;](int e,double prob,double dist){
+                        if(prob&gt;0){double inv=q+e;terms.push_back(std::log(prob)-gamma*dist+.5*gamma*gamma*sigma*sigma*dt*inv*inv+value[q+e+Q]);}
+                    };
+                    term(0,1-pb-pa,0);term(1,pb,db);term(-1,pa,da);
+                    double v=logsumexp(terms);
+                    if(v&lt;best-1e-13){best=v;bb=db;ba=da;bpb=pb;bpa=pa;}
+                }
+                next[q+Q]=best;
+                out.rows.push_back({double(s+1),double(h),double(q),bb,ba,-best/gamma,bpb,bpa});
+            }
+            value=next;
+        }
+    }
+    return out;
+}</pre><p>参考文献：<a href="https://doi.org/10.1080/14697680701381228">Avellaneda, M., and Stoikov, S. (2008). High-frequency trading in a limit order book. Quantitative Finance.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

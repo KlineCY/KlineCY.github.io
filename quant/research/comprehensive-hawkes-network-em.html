@@ -1,0 +1,40 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>多维指数Hawkes过程EM与分支矩阵｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>多维指数Hawkes过程EM与分支矩阵</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-microstructure.html">市场微观结构、撮合与动态执行</a>　<a href="../cpp/comprehensive_microstructure.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>条件强度</h2><p>使用归一化指数核，A_ij表示j类事件对i类未来事件的积分激励量，列为来源、行为目标。事件严格排序，观测窗[0,T]，初始历史为空。</p><div class="equation">$$\lambda_i(t)=\mu_i+\sum_j A_{ij}\sum_{t_m&lt;t,\ c_m=j}\beta e^{-\beta(t-t_m)}.$$</div></section><section><h2>潜在父事件与惩罚</h2><p>EM将每个事件的来源划分为背景或历史激励。正伪计数u及率v对应Gamma先验的对数项u log θ−vθ；这保证参数为正并抑制零分母。</p><div class="equation">$$\pi_{m0}=\mu_{c_m}/\lambda_{c_m}(t_m),\quad \pi_{mj}=A_{c_mj}H_j(t_m)/\lambda_{c_m}(t_m).$$</div></section><section><h2>有限窗暴露</h2><p>每个来源事件的激励积分受右端窗口截断；不能直接用来源事件数代替有限窗积分。M步以预期计数加伪计数除以实际暴露加先验率。</p><div class="equation">$$E_j=\sum_{m:c_m=j}(1-e^{-\beta(T-t_m)}),\quad \mu_i^+=\frac{N_{i0}+u}{T+v},\quad A_{ij}^+=\frac{N_{ij}+u}{E_j+v}.$$</div></section><section><h2>收敛与稳定性</h2><p>输出后验目标、得分无穷范数和激励行和。最大行和小于1是谱半径小于1的充分条件；超过1不能仅凭行和判定不平稳，亦不能忽略稳定性检查而外推无限期。</p><div class="equation">$$\rho(A)\le\max_i\sum_j A_{ij}.$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Target，Source，Baseline，Excitation，LogPosterior，ScoreNorm，RowSum。</p><p><a href="../research/comprehensive-examples/hawkes-network-em.csv" download>样本CSV</a></p><pre>Time,Type
+0.5,1
+</pre><pre>./build/kline_quant comprehensive-hawkes-network-em quant/research/comprehensive-examples/hawkes-network-em.csv 1 1 1 1 0.5 1 1 1e-9 1000</pre><div class="wide"><table><thead><tr><th>Target</th><th>Source</th><th>Baseline</th><th>Excitation</th></tr></thead><tbody><tr><td>1</td><td>1</td><td>1</td><td>0.7176332991968</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report hawkes_network_em(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,2);parameters(p,9);
+    int K=count(p[0],1,20),cap=count(p[8],1,100000);
+    double T=positive(p[1]),beta=positive(p[2]),u=positive(p[5]),v=positive(p[6]),tol=positive(p[7]);
+    Vec mu(K,positive(p[3])),exposure(K);Mat A(K,Vec(K,positive(p[4]))),hist;std::vector&lt;int&gt; type;
+    require(double(x.size())*K*cap&lt;=1e8,"EM too large");double last=0;Vec state(K);
+    for(size_t m=0;m&lt;x.size();++m){
+        const auto&amp;r=x[m];require(r.size()==2&amp;&amp;r[0]&gt;last&amp;&amp;r[0]&lt;=T,"invalid event time");
+        int c=count(r[1],1,K)-1;
+        for(double&amp;z:state)z*=std::exp(-beta*(r[0]-last));
+        hist.push_back(state);type.push_back(c);state[c]+=beta;last=r[0];
+        exposure[c]+=-std::expm1(-beta*(T-r[0]));
+    }
+    auto estep=[&amp;](Vec&amp; n0,Mat&amp; nij){
+        n0.assign(K,0);nij.assign(K,Vec(K));double ll=0;
+        for(size_t m=0;m&lt;hist.size();++m){
+            int i=type[m];double intensity=mu[i]+dot(A[i],hist[m]);
+            ll+=std::log(intensity);n0[i]+=mu[i]/intensity;
+            for(int j=0;j&lt;K;++j)nij[i][j]+=A[i][j]*hist[m][j]/intensity;
+        }
+        for(int i=0;i&lt;K;++i){
+            ll+=u*std::log(mu[i])-(T+v)*mu[i];
+            for(int j=0;j&lt;K;++j)ll+=u*std::log(A[i][j])-(exposure[j]+v)*A[i][j];
+        }
+        return ll;
+    };
+    Vec n0;Mat nij;double ll=estep(n0,nij),score=0;
+    for(int iter=0;iter&lt;cap;++iter){
+        for(int i=0;i&lt;K;++i){mu[i]=(n0[i]+u)/(T+v);for(int j=0;j&lt;K;++j)A[i][j]=(nij[i][j]+u)/(exposure[j]+v);}
+        double next=estep(n0,nij);require(next+1e-9&gt;=ll,"EM objective decreased");ll=next;score=0;
+        for(int i=0;i&lt;K;++i){score=std::max(score,std::abs((n0[i]+u)/mu[i]-T-v));
+            for(int j=0;j&lt;K;++j)score=std::max(score,std::abs((nij[i][j]+u)/A[i][j]-exposure[j]-v));}
+        if(score&lt;=tol)break;
+    }
+    Report out;out.header={"Target","Source","Baseline","Excitation","LogPosterior","ScoreNorm","RowSum"};
+    for(int i=0;i&lt;K;++i)for(int j=0;j&lt;K;++j)out.rows.push_back({double(i+1),double(j+1),mu[i],A[i][j],ll,score,sum(A[i])});
+    return out;
+}</pre><p>参考文献：<a href="https://doi.org/10.1080/01621459.1988.10478560">Ogata, Y. (1988). Statistical Models for Earthquake Occurrences and Residual Analysis for Point Processes. JASA.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>
