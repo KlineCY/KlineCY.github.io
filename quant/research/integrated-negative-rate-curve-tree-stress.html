@@ -1,0 +1,19 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>负利率及平行曲线冲击的树—远期一致性｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="depth-labs.css"><link rel="stylesheet" href="integrated-research.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>负利率及平行曲线冲击的树—远期一致性</h1><p><a href="integrated-research.html">跨模型研究课程</a>　<a href="comprehensive-research.html">基础模型目录</a>　<a href="integrated_pricing.py" download>本组实验源码</a></p><p>构造负、零及正连续复利平坦曲线，对每个基准施加平行冲击，比较零波动Ho–Lee树与互换Bootstrap远期。</p></header><section><h2>数学结构与连接关系</h2><div class="equation">$$D(t)=e^{-(r+\Delta r)t},\quad F_{t,t+1}=D(t)/D(t+1)-1=e^{r+\Delta r}-1$$</div><p>构造负、零及正连续复利平坦曲线，对每个基准施加平行冲击，比较零波动Ho–Lee树与互换Bootstrap远期。各阶段输出作为下一阶段的明确输入，独立数值参照不依赖下一阶段求解器。</p></section><section><h2>模型实现、数据口径与文献</h2><p><a href="../assets/comprehensive-ho-lee-curve-tree.html">Ho–Lee利率树精确校准：状态价格、期限漂移与Caplet贡献</a>　<a href="../cpp/comprehensive_pricing.hpp" download>C++17完整实现</a>　<a href="https://doi.org/10.1111/j.1540-6261.1986.tb02528.x">Ho and Lee (1986), Term Structure Movements and Pricing Interest Rate Contingent Claims, Journal of Finance.</a></p><p><a href="../assets/comprehensive-multicurve-forward-bootstrap.html">多曲线利率Bootstrap：OIS贴现、期限投影与Swap重定价</a>　<a href="../cpp/comprehensive_pricing.hpp" download>C++17完整实现</a>　<a href="https://arxiv.org/abs/0905.2770">Bianchetti (2010), Two Curves, One Price: Pricing and Hedging Interest Rate Derivatives Decoupling Forwarding and Discounting Yield Curves, Risk.</a></p><p>全部输入由下方实验源码显式构造，参数与C++接口一致；结果为教学构造情形，不代表真实市场统计量。</p></section><section><h2>独立参考及实验判据</h2><p>检查所有期限短率、远期、平价互换及贴现残差，不将负利率静默截断。</p><p>批量运行：<code>python quant/research/run_integrated_research.py ./build/kline_quant integrated-results</code>。</p><p>输出：<code>integrated-results/negative_rate_curve_tree_stress.csv</code>。该文件由运行程序生成。</p></section><section><h2>可执行实验与证据</h2><pre>def tree_forward_stress(model,report):
+    output=[]
+    for level in (-.02,0,.02,.06):
+        D=[math.exp(-level*t) for t in range(1,5)]
+        for shock in (-.01,0,.01):
+            discount=[D[t-1]*math.exp(-shock*t) for t in range(1,5)]
+            tree=model("ho-lee-curve-tree",[[z] for z in discount],[1,0,.01])
+            A=0;data=[]
+            for t,d in enumerate(discount,1):
+                A+=d;data.append([t,1,d,(1-d)/A])
+            curve=model("multicurve-forward-bootstrap",data,[])
+            for t,r in enumerate(curve):
+                near(r[4],math.expm1(level+shock))
+                near(r[3],math.expm1(level+shock))
+                q=[z for z in tree if z[0]==t]
+                near(sum(z[4]*math.exp(-z[3]) for z in q),discount[t])
+                near(q[0][3],level+shock)
+                output.append([level,shock,t+1,r[4],q[0][3],sum(z[8] for z in q)])
+    report("negative_rate_curve_tree_stress",["BaseRate","ParallelShock","Maturity","Forward","ShortRate","CapletPV"],output)</pre></section><section><h2>经济及数值边界</h2><p>只表示平行平坦曲线和确定性树，真实曲线可有期限形状变化及波动率风险。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

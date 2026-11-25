@@ -1,0 +1,21 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>异步因子测量与滞后多空决策｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="depth-labs.css"><link rel="stylesheet" href="integrated-research.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>异步因子测量与滞后多空决策</h1><p><a href="integrated-research.html">跨模型研究课程</a>　<a href="comprehensive-research.html">基础模型目录</a>　<a href="integrated_dynamics.py" download>本组实验源码</a></p><p>生成部分缺失的两资产因子测量，以前一期过滤状态作为当前两资产对向持仓方向，保持当前测量不进入当前决定。</p></header><section><h2>数学结构与连接关系</h2><div class="equation">$$w_t=\frac12\operatorname{sign}(\hat f_{t-1\mid t-1})(1,-1)^\top,\quad V_{t+1}=V_t(1+w_t^\top r_t)$$</div><p>生成部分缺失的两资产因子测量，以前一期过滤状态作为当前两资产对向持仓方向，保持当前测量不进入当前决定。各阶段输出作为下一阶段的明确输入，独立数值参照不依赖下一阶段求解器。</p></section><section><h2>模型实现、数据口径与文献</h2><p><a href="../research/comprehensive-dynamic-factor-sequential.html">缺失多资产观测的动态因子：信息滤波、创新似然与异步测量</a>　<a href="../cpp/comprehensive_dynamics.hpp" download>C++17完整实现</a>　<a href="https://academic.oup.com/book/16563">Durbin and Koopman (2012), Time Series Analysis by State Space Methods, 2nd ed., Oxford University Press.</a></p><p>全部输入由下方实验源码显式构造，参数与C++接口一致；结果为教学构造情形，不代表真实市场统计量。</p></section><section><h2>独立参考及实验判据</h2><p>改变最后一期测量，之前所有过滤结果不变；输出缺失模式、风险、持仓和净值。</p><p>批量运行：<code>python quant/research/run_integrated_research.py ./build/kline_quant integrated-results</code>。</p><p>输出：<code>integrated-results/asynchronous_factor_to_lagged_decision.csv</code>。该文件由运行程序生成。</p></section><section><h2>可执行实验与证据</h2><pre>def factor_missingness_to_wealth(model,report):
+    output=[]
+    for missing in (0,1,2):
+        data=[]
+        for t in range(6):
+            f=.02*(t-2)
+            data.append([0 if t==0 else 1,f,1,2*f,int(t%3!=missing)])
+        modelrows=model("dynamic-factor-sequential",data,[.8,.01,0,.1,1,2,.02,.03])
+        wealth=1
+        # Use the preceding filtered mean, never the current return or measurement.
+        for t in range(1,6):
+            score=modelrows[t-1][4]
+            r=.01*(t-2)
+            # Two opposite exposures, with no transaction cost in this diagnostic.
+            w=.5 if score&gt;=0 else -.5
+            gross=2*w*r;wealth*=1+gross
+            output.append([missing,t+1,score,modelrows[t-1][5],w,r,gross,wealth])
+        changed=[r[:] for r in data];changed[-1][1]+=10
+        more=model("dynamic-factor-sequential",changed,[.8,.01,0,.1,1,2,.02,.03])
+        for a,b in zip(modelrows[:-1],more[:-1]):check_vector(a,b)
+    report("asynchronous_factor_to_lagged_decision",["MissingPhase","Period","LaggedState","LaggedVariance","Weight1","Return1","GrossReturn","NAV"],output)</pre></section><section><h2>经济及数值边界</h2><p>仅为无交易成本的方向诊断，实际过滤参数需训练期估计及独立风险预算。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

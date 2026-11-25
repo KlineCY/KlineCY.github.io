@@ -1,0 +1,513 @@
+[
+  {
+    "id": "vintage_signal_to_net_wealth",
+    "title": "数据修订、截面Ridge与净值闭环",
+    "group": "portfolio",
+    "function": "vintage_signal",
+    "models": [
+      "bitemporal-vintage-join",
+      "rolling-panel-ridge-longshort"
+    ],
+    "script": "integrated_portfolio.py",
+    "formula": "\\hat\\beta_t=(X_{t-L:t-1}^{\\top}X_{t-L:t-1}+\\lambda I)^{-1}X_{t-L:t-1}^{\\top}y_{t-L:t-1},\\quad w_t=G\\frac{s_t-\\bar s_t}{\\|s_t-\\bar s_t\\|_1}"
+  },
+  {
+    "id": "corporate_actions_factor_diversification",
+    "title": "公司行动、因子协方差与最大分散化",
+    "group": "portfolio",
+    "function": "actions_factor_risk",
+    "models": [
+      "corporate-action-return-ledger",
+      "factor-covariance-estimate",
+      "maximum-diversification-kkt"
+    ],
+    "script": "integrated_portfolio.py",
+    "formula": "G_{it}=\\frac{S_{it}P_{it}+D_{it}}{P_{i,t-1}},\\quad \\Sigma=B\\Sigma_fB^\\top+D,\\quad DR(w)=\\frac{\\sigma^\\top w}{\\sqrt{w^\\top\\Sigma w}}"
+  },
+  {
+    "id": "hierarchical_alpha_views_tracking",
+    "title": "经验贝叶斯Alpha、相对观点与主动风险预算",
+    "group": "portfolio",
+    "function": "alpha_views_allocation",
+    "models": [
+      "empirical-bayes-alpha-grid",
+      "black-litterman-correlated-views",
+      "active-tracking-frontier"
+    ],
+    "script": "integrated_portfolio.py",
+    "formula": "\\mu^+=\\pi+VP^\\top(PVP^\\top+\\Omega)^{-1}(q-P\\pi),\\quad \\Sigma_{\\rm pred}=\\Sigma+M,\\quad a^\\top\\Sigma_{\\rm pred}a\\le\\sigma_{\\rm TE}^2"
+  },
+  {
+    "id": "asymmetric_scenario_risk_frontiers",
+    "title": "下行半方差与Entropic风险的同场景比较",
+    "group": "portfolio",
+    "function": "asymmetric_risk",
+    "models": [
+      "mean-semivariance-simplex",
+      "entropic-risk-allocation"
+    ],
+    "script": "integrated_portfolio.py",
+    "formula": "J_{\\rm semi}(w)=\\frac{\\gamma}{2n}\\sum_t(-r_t^\\top w)_+^2-\\bar r^\\top w,\\quad J_{\\rm ent}(w)=\\eta^{-1}\\log\\frac1n\\sum_te^{-\\eta r_t^\\top w}"
+  },
+  {
+    "id": "filtered_volatility_to_tracking_budget",
+    "title": "GARCH条件风险与主动仓位动态缩放",
+    "group": "portfolio",
+    "function": "volatility_budget",
+    "models": [
+      "garch-targeted-grid",
+      "active-tracking-frontier"
+    ],
+    "script": "integrated_portfolio.py",
+    "formula": "h_t=\\omega+\\alpha r_{t-1}^2+\\beta h_{t-1},\\quad a_t=(u_t,-u_t),\\quad u_t=\\sigma_{\\rm TE}/\\sqrt{2.8h_t}"
+  },
+  {
+    "id": "factor_covariance_woodbury_pcg",
+    "title": "低秩因子风险、Woodbury与PCG证书",
+    "group": "portfolio",
+    "function": "factor_inverse_certificate",
+    "models": [
+      "factor-covariance-estimate",
+      "woodbury-risk-solve",
+      "pcg-jacobi"
+    ],
+    "script": "integrated_portfolio.py",
+    "formula": "\\Sigma=D+BB^\\top,\\quad \\Sigma^{-1}=D^{-1}-D^{-1}B(I+B^\\top D^{-1}B)^{-1}B^\\top D^{-1},\\quad E^*=-\\tfrac12b^\\top\\Sigma^{-1}b"
+  },
+  {
+    "id": "svi_quote_projection_variance_strip",
+    "title": "SVI微笑、静态套利投影与方差条带",
+    "group": "pricing",
+    "function": "smile_to_strip",
+    "models": [
+      "svi-profile-calibration",
+      "call-curve-convex-projection",
+      "variance-strip-quadrature"
+    ],
+    "script": "integrated_pricing.py",
+    "formula": "w(k)=a+b[\\rho(k-m)+\\sqrt{(k-m)^2+\\sigma^2}],\\quad K_{\\rm var}^{[L,U]}=\\frac2T\\int_L^U Q(K)K^{-2}\\,dK"
+  },
+  {
+    "id": "cir_holee_swap_caplet_repricing",
+    "title": "CIR零息曲线、Ho–Lee树与互换Caplet重定价",
+    "group": "pricing",
+    "function": "curve_to_tree",
+    "models": [
+      "cir-zero-curve-grid",
+      "ho-lee-curve-tree",
+      "multicurve-forward-bootstrap"
+    ],
+    "script": "integrated_pricing.py",
+    "formula": "D_{t+1}=\\sum_jQ_{t,j}e^{-r_{t,j}\\Delta t},\\quad K_m=\\frac{\\sum_{i\\le m}D_i\\alpha_i F_i}{\\sum_{i\\le m}D_i\\alpha_i}"
+  },
+  {
+    "id": "quanto_deterministic_heston_equivalence",
+    "title": "Quanto漂移与Heston确定性方差极限",
+    "group": "pricing",
+    "function": "quanto_heston_equivalence",
+    "models": [
+      "quanto-lognormal-option",
+      "heston-fourier-inversion"
+    ],
+    "script": "integrated_pricing.py",
+    "formula": "\\mu_Q=r_f-q-\\rho\\sigma_S\\sigma_X,\\quad F_Q=S_0e^{\\mu_QT},\\quad C_Q=X^*C_{\\rm Heston}(\\xi=0)"
+  },
+  {
+    "id": "integrated_variance_heston_option_strip",
+    "title": "确定性积分方差与期权条带复制",
+    "group": "pricing",
+    "function": "stochastic_variance_limit_strip",
+    "models": [
+      "heston-fourier-inversion",
+      "variance-strip-quadrature"
+    ],
+    "script": "integrated_pricing.py",
+    "formula": "I_T=\\theta T+(V_0-\\theta)\\frac{1-e^{-\\kappa T}}{\\kappa},\\quad \\widehat K_{\\rm var}=\\frac1T\\sum_j\\Delta K_j(f_j+f_{j+1})"
+  },
+  {
+    "id": "negative_rate_curve_tree_stress",
+    "title": "负利率及平行曲线冲击的树—远期一致性",
+    "group": "pricing",
+    "function": "tree_forward_stress",
+    "models": [
+      "ho-lee-curve-tree",
+      "multicurve-forward-bootstrap"
+    ],
+    "script": "integrated_pricing.py",
+    "formula": "D(t)=e^{-(r+\\Delta r)t},\\quad F_{t,t+1}=D(t)/D(t+1)-1=e^{r+\\Delta r}-1"
+  },
+  {
+    "id": "option_replication_greeks_and_parity",
+    "title": "两种定价接口、Delta、Gamma与平价",
+    "group": "pricing",
+    "function": "replication_parity",
+    "models": [
+      "quanto-lognormal-option",
+      "heston-fourier-inversion"
+    ],
+    "script": "integrated_pricing.py",
+    "formula": "\\Delta_C=e^{-qT}\\Phi(d_1),\\quad \\Gamma_C=\\frac{e^{-qT}\\varphi(d_1)}{S\\sigma\\sqrt T},\\quad C-P=Se^{-qT}-Ke^{-rT}"
+  },
+  {
+    "id": "matching_replay_to_trade_costs",
+    "title": "订单撮合、因果交易签名与有效价差",
+    "group": "execution",
+    "function": "replay_to_signs",
+    "models": [
+      "price-time-matching-replay",
+      "trade-signing-asof"
+    ],
+    "script": "integrated_execution.py",
+    "formula": "ES_t=2q_t(P_t-m_{t^-}),\\quad M_t(H)=q_t(m_{t+H}-P_t),\\quad QP=\\mathrm{Notional}"
+  },
+  {
+    "id": "queue_parametric_nonparametric_incidence",
+    "title": "成交撤单竞争风险与非参数累积发生率",
+    "group": "execution",
+    "function": "competing_survival",
+    "models": [
+      "aalen-johansen-incidence",
+      "queue-competing-hazard-fit"
+    ],
+    "script": "integrated_execution.py",
+    "formula": "F_k^{\\rm exp}(t)=\\frac{h_k}{h_1+h_2}(1-e^{-(h_1+h_2)t}),\\quad \\widehat F_k(t)=\\sum_{s\\le t}\\widehat S(s^-)\\frac{d_k(s)}{Y(s)}"
+  },
+  {
+    "id": "liquidity_recovery_to_execution_schedule",
+    "title": "冲击恢复速度到瞬态最优拆单",
+    "group": "execution",
+    "function": "recovery_execution",
+    "models": [
+      "spread-resiliency-profile",
+      "transient-impact-schedule"
+    ],
+    "script": "integrated_execution.py",
+    "formula": "K_{ij}=\\eta e^{-\\kappa|t_i-t_j|},\\quad J(q)=\\tfrac12q^\\top(A+K)q+\\frac{\\gamma}{2}\\sum_t v_t(Q-\\sum_{i\\le t}q_i)^2"
+  },
+  {
+    "id": "two_scale_risk_to_inventory_policy",
+    "title": "微观结构噪声校正到库存动态控制",
+    "group": "execution",
+    "function": "volatility_market_making",
+    "models": [
+      "two-scale-realized-variance",
+      "market-maker-cara-dp"
+    ],
+    "script": "integrated_execution.py",
+    "formula": "\\widehat{IV}_K=\\frac{\\overline{RV}^{(K)}-(\\bar n/n)RV^{fast}}{1-\\bar n/n},\\quad CE_h(q)=-\\gamma^{-1}\\log J_h(q)"
+  },
+  {
+    "id": "hawkes_intensity_to_quote_control",
+    "title": "Hawkes后验强度与做市报价控制",
+    "group": "execution",
+    "function": "point_process_quote_sensitivity",
+    "models": [
+      "hawkes-network-em",
+      "market-maker-cara-dp"
+    ],
+    "script": "integrated_execution.py",
+    "formula": "\\lambda(T)=\\mu+A\\beta e^{-\\beta(T-t_1)},\\quad p_\\pm=\\lambda(T)\\Delta e^{-k\\delta_\\pm}"
+  },
+  {
+    "id": "sequence_watermark_execution_conservation",
+    "title": "序列补缺、迟到事件与执行账本守恒",
+    "group": "execution",
+    "function": "stream_execution_audit",
+    "models": [
+      "sequence-gap-replay",
+      "watermark-window-ledger"
+    ],
+    "script": "integrated_execution.py",
+    "formula": "N_{\\rm unique}=N_{\\rm committed}+N_{\\rm buffered},\\quad S_{\\rm unique}=S_{\\rm accepted}+S_{\\rm late}"
+  },
+  {
+    "id": "train_transform_softmax_frozen_holdout",
+    "title": "冻结训练变换与多分类预测隔离",
+    "group": "learning",
+    "function": "transformed_softmax",
+    "models": [
+      "train-only-winsor-standardize",
+      "softmax-newton-fit"
+    ],
+    "script": "integrated_learning.py",
+    "formula": "z_{ij}=\\frac{\\operatorname{clip}(x_{ij},l_j,u_j)-\\mu_j}{s_j},\\quad p_{ik}=\\frac{e^{z_i^\\top\\beta_k}}{\\sum_\\ell e^{z_i^\\top\\beta_\\ell}}"
+  },
+  {
+    "id": "ranknet_frozen_score_to_panel_positions",
+    "title": "RankNet冻结得分与走步多空仓位",
+    "group": "learning",
+    "function": "rank_signal_portfolio",
+    "models": [
+      "ranknet-linear-fit",
+      "rolling-panel-ridge-longshort"
+    ],
+    "script": "integrated_learning.py",
+    "formula": "L(w)=|\\mathcal P|^{-1}\\sum_{ij}\\log(1+e^{-(x_i-x_j)^\\top w})+\\lambda\\|w\\|^2/2,\\quad s_{it}=\\hat w^\\top x_{it}"
+  },
+  {
+    "id": "softmax_label_shift_symmetric_calibration",
+    "title": "Softmax输出与先验漂移EM校准",
+    "group": "learning",
+    "function": "class_prior_calibration",
+    "models": [
+      "softmax-newton-fit",
+      "label-shift-prior-em"
+    ],
+    "script": "integrated_learning.py",
+    "formula": "q_{ik}=\\frac{p_{ik}\\pi_k/\\pi_k^S}{\\sum_jp_{ij}\\pi_j/\\pi_j^S},\\quad \\pi_k^+=n^{-1}\\sum_iq_{ik}"
+  },
+  {
+    "id": "gamma_positive_risk_to_active_allocation",
+    "title": "Gamma条件正值风险与主动配置",
+    "group": "learning",
+    "function": "probability_decision",
+    "models": [
+      "gamma-log-glm",
+      "active-tracking-frontier"
+    ],
+    "script": "integrated_learning.py",
+    "formula": "\\mu=e^{x^\\top\\beta},\\quad v=\\mu^2/k,\\quad a=(u,-u),\\quad u=\\sigma_{\\rm TE}/\\sqrt{2.8v}"
+  },
+  {
+    "id": "multitask_sparse_loadings_to_risk",
+    "title": "多任务稀疏系数与结构化组合风险",
+    "group": "learning",
+    "function": "multitask_factor_risk",
+    "models": [
+      "multitask-group-lasso",
+      "maximum-diversification-kkt"
+    ],
+    "script": "integrated_learning.py",
+    "formula": "\\widehat B=\\arg\\min_B\\tfrac12\\|Y-XB\\|_F^2+\\lambda\\sum_j\\|B_j\\|_2,\\quad \\Sigma=\\widehat B^\\top S_X\\widehat B+D"
+  },
+  {
+    "id": "rrqr_ridge_validation_path",
+    "title": "秩揭示QR与岭回归验证路径",
+    "group": "learning",
+    "function": "regularization_validation",
+    "models": [
+      "ridge-loocv-gcv-path",
+      "rrqr-regression"
+    ],
+    "script": "integrated_learning.py",
+    "formula": "\\hat y_\\lambda=S_\\lambda y,\\quad CV(\\lambda)=\\frac1n\\sum_i\\left(\\frac{y_i-\\hat y_i}{1-(S_\\lambda)_{ii}}\\right)^2"
+  },
+  {
+    "id": "weak_iv_and_hidden_bias_diagnostics",
+    "title": "弱工具变量与配对隐藏偏差诊断",
+    "group": "inference",
+    "function": "weak_iv_to_sensitivity",
+    "models": [
+      "anderson-rubin-inversion",
+      "rosenbaum-pair-bounds"
+    ],
+    "script": "integrated_inference.py",
+    "formula": "F(b)=\\frac{(RSS_R-RSS_U)/k}{RSS_U/(n-k-1)},\\quad p_U(\\Gamma)=P[\\mathrm{Bin}(n,\\Gamma/(1+\\Gamma))\\ge T]"
+  },
+  {
+    "id": "quantile_empirical_likelihood_tail_comparison",
+    "title": "分位数回归、经验似然与参数化尾风险",
+    "group": "inference",
+    "function": "conditional_quantile_to_tail",
+    "models": [
+      "quantile-regression-admm",
+      "empirical-likelihood-mean",
+      "gaussian-tail-importance"
+    ],
+    "script": "integrated_inference.py",
+    "formula": "\\hat q_\\tau=\\arg\\min_q\\sum_i\\rho_\\tau(L_i-q),\\quad -2\\log R(m)=2\\sum_i\\log[1+\\lambda(L_i-m)]"
+  },
+  {
+    "id": "censoring_and_credit_rate_posterior",
+    "title": "区间删失非参数似然与信用率后验",
+    "group": "inference",
+    "function": "censored_credit_posterior",
+    "models": [
+      "interval-censored-discrete-em",
+      "beta-binomial-hyper-grid"
+    ],
+    "script": "integrated_inference.py",
+    "formula": "p_j^+=n^{-1}\\sum_i\\frac{1_{\\{s_j\\in A_i\\}}p_j}{\\sum_{k:s_k\\in A_i}p_k},\\quad p\\mid k,n\\sim\\mathrm{Beta}(a+k,b+n-k)"
+  },
+  {
+    "id": "overlap_estimation_cluster_score",
+    "title": "重叠加权效应与聚类符号诊断",
+    "group": "inference",
+    "function": "overlap_cluster_invariance",
+    "models": [
+      "overlap-weighted-effects",
+      "cluster-wild-sign-test"
+    ],
+    "script": "integrated_inference.py",
+    "formula": "\\hat\\tau_{OW}=\\bar Y_{1,w}-\\bar Y_{0,w},\\quad T(b)=|\\sum_c\\sum_{i\\in c}(D_i-\\bar D)u_i(b)|"
+  },
+  {
+    "id": "hierarchical_posterior_marginal_risk_budget",
+    "title": "全贝叶斯后验与边际风险预算",
+    "group": "inference",
+    "function": "hierarchical_mean_risk",
+    "models": [
+      "normal-hierarchical-grid",
+      "active-tracking-frontier"
+    ],
+    "script": "integrated_inference.py",
+    "formula": "\\operatorname{Var}(r_i\\mid y)=\\operatorname{Var}(r_i\\mid\\theta_i)+\\operatorname{Var}(\\theta_i\\mid y),\\quad \\mathbf1^\\top a=0"
+  },
+  {
+    "id": "posterior_transition_cumulative_reward",
+    "title": "Dirichlet后验转移与多期累计收益",
+    "group": "inference",
+    "function": "posterior_transition_reward",
+    "models": [
+      "dirichlet-transition-posterior",
+      "markov-cumulative-reward"
+    ],
+    "script": "integrated_inference.py",
+    "formula": "E[C_3\\mid S_1=i]=\\mu_i+\\sum_j E[P_{ij}]\\mu_j+\\sum_j E[(P^2)_{ij}]\\mu_j"
+  },
+  {
+    "id": "production_network_ces_price_counterfactual",
+    "title": "投入产出单位成本与CES局部反事实",
+    "group": "economics",
+    "function": "input_output_ces",
+    "models": [
+      "leontief-dual-price-system",
+      "ces-armington-trade-counterfactual"
+    ],
+    "script": "integrated_economics.py",
+    "formula": "p=(I-A^\\top)^{-1}v,\\quad P=\\left[\\sum_j\\omega_j(p_j\\tau_j)^{1-\\sigma}\\right]^{1/(1-\\sigma)}"
+  },
+  {
+    "id": "labor_matching_to_household_saving",
+    "title": "劳动匹配强度与家庭储蓄决策",
+    "group": "economics",
+    "function": "matching_income_saving",
+    "models": [
+      "matching-free-entry-equilibrium",
+      "household-saving-bellman"
+    ],
+    "script": "integrated_economics.py",
+    "formula": "P_{UE}=\\frac{f}{f+s}(1-e^{-(f+s)\\Delta}),\\quad V_h(a,i)=\\max_{a'}[u((1+r)a+y_i-a')+\\beta\\sum_jP_{ij}V_{h-1}(a',j)]"
+  },
+  {
+    "id": "network_unit_cost_to_cournot_capacity",
+    "title": "生产网络成本冲击与产能约束Cournot",
+    "group": "economics",
+    "function": "cournot_network_cost",
+    "models": [
+      "leontief-dual-price-system",
+      "cournot-capacity-equilibrium"
+    ],
+    "script": "integrated_economics.py",
+    "formula": "q_i(Q)=\\operatorname{clip}((a-bQ-c_i)/b,0,K_i),\\quad Q=\\sum_iq_i(Q)"
+  },
+  {
+    "id": "search_and_replacement_dynamic_value",
+    "title": "求职等待价值与动态离散选择",
+    "group": "economics",
+    "function": "search_replacement_comparison",
+    "models": [
+      "mccall-reservation-wage",
+      "dynamic-logit-replacement"
+    ],
+    "script": "integrated_economics.py",
+    "formula": "R=b+\\beta E[\\max(W/(1-\\beta),R)],\\quad V=\\frac{\\log(e^{-s}+e^{-c})}{1-\\beta}"
+  },
+  {
+    "id": "growth_steady_state_to_income_risk_experiment",
+    "title": "Ramsey稳态与家庭收入风险实验",
+    "group": "economics",
+    "function": "growth_resource_risk",
+    "models": [
+      "ramsey-steady-state-transition",
+      "household-saving-bellman"
+    ],
+    "script": "integrated_economics.py",
+    "formula": "k^*=\\left(\\frac{\\alpha}{\\beta^{-1}-1+\\delta}\\right)^{1/(1-\\alpha)},\\quad c^*=f(k^*)-\\delta k^*"
+  },
+  {
+    "id": "available_labels_to_uniqueness_weights",
+    "title": "标签成熟时间与重叠独特性权重",
+    "group": "economics",
+    "function": "label_vintage_uniqueness",
+    "models": [
+      "label-window-availability",
+      "overlapping-label-uniqueness"
+    ],
+    "script": "integrated_economics.py",
+    "formula": "\\tau^{label}=t+H+\\delta,\\quad u_i=\\frac1{|I_i|}\\sum_{s\\in I_i}\\frac1{c_s},\\quad w_i=nu_i/\\sum_ju_j"
+  },
+  {
+    "id": "toeplitz_arx_prediction_consistency",
+    "title": "Toeplitz预测系统与ARX递归路径",
+    "group": "dynamics",
+    "function": "autoregressive_crosscheck",
+    "models": [
+      "levinson-durbin-path",
+      "arx-recursive-fit"
+    ],
+    "script": "integrated_dynamics.py",
+    "formula": "\\Gamma_p\\phi=\\gamma_{1:p},\\quad Y_{t+h\\mid t}=c+\\phi\\widehat Y_{t+h-1\\mid t}"
+  },
+  {
+    "id": "garch_and_particle_constant_risk_limit",
+    "title": "GARCH与随机波动率的恒定风险极限",
+    "group": "dynamics",
+    "function": "garch_particle_risk",
+    "models": [
+      "garch-targeted-grid",
+      "particle-sv-filter"
+    ],
+    "script": "integrated_dynamics.py",
+    "formula": "h_t=\\bar h,\\quad p(r_t\\mid h_t)=\\frac{e^{-r_t^2/(2h_t)}}{\\sqrt{2\\pi h_t}}"
+  },
+  {
+    "id": "asynchronous_factor_to_lagged_decision",
+    "title": "异步因子测量与滞后多空决策",
+    "group": "dynamics",
+    "function": "factor_missingness_to_wealth",
+    "models": [
+      "dynamic-factor-sequential"
+    ],
+    "script": "integrated_dynamics.py",
+    "formula": "w_t=\\frac12\\operatorname{sign}(\\hat f_{t-1\\mid t-1})(1,-1)^\\top,\\quad V_{t+1}=V_t(1+w_t^\\top r_t)"
+  },
+  {
+    "id": "local_trend_retrospective_interpolation",
+    "title": "局部趋势过滤与事后形状保持插值",
+    "group": "dynamics",
+    "function": "smooth_curve_trend",
+    "models": [
+      "local-trend-filter-grid",
+      "pchip-monotone"
+    ],
+    "script": "integrated_dynamics.py",
+    "formula": "a_t=Fa_{t-1}+\\eta_t,\\quad H(u)=h_{00}(u)y_i+h_{10}(u)hm_i+h_{01}(u)y_{i+1}+h_{11}(u)hm_{i+1}"
+  },
+  {
+    "id": "observable_threshold_to_markov_risk",
+    "title": "可观察阈值状态与Markov期限风险",
+    "group": "dynamics",
+    "function": "threshold_state_risk",
+    "models": [
+      "threshold-ar-fit",
+      "dirichlet-transition-posterior",
+      "markov-cumulative-reward"
+    ],
+    "script": "integrated_dynamics.py",
+    "formula": "P_{ij}^{+}=\\frac{a_{ij}+N_{ij}}{\\sum_k(a_{ik}+N_{ik})},\\quad \\tilde b_i=b_i+2\\mu_i a_i+p_i(\\mu_i^2+v_i)"
+  },
+  {
+    "id": "barrier_simplex_tracking_geometry",
+    "title": "解析中心、预算单纯形与主动风险几何",
+    "group": "dynamics",
+    "function": "numerical_risk_geometry",
+    "models": [
+      "polytope-analytic-center",
+      "simplex-active-set",
+      "active-tracking-frontier"
+    ],
+    "script": "integrated_dynamics.py",
+    "formula": "x^*=\\arg\\min_x[-\\log(b-x)-\\log(x-a)],\\quad TE(a)=\\sqrt{a^\\top\\Sigma a}"
+  }
+]

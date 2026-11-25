@@ -1,0 +1,26 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RankNet冻结得分与走步多空仓位｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="depth-labs.css"><link rel="stylesheet" href="integrated-research.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>RankNet冻结得分与走步多空仓位</h1><p><a href="integrated-research.html">跨模型研究课程</a>　<a href="comprehensive-research.html">基础模型目录</a>　<a href="integrated_learning.py" download>本组实验源码</a></p><p>在三个训练截面构造有序对，以拟合系数产生独立策略面板的固定得分，再用滚动Ridge将得分映射为目标仓位。</p></header><section><h2>数学结构与连接关系</h2><div class="equation">$$L(w)=|\mathcal P|^{-1}\sum_{ij}\log(1+e^{-(x_i-x_j)^\top w})+\lambda\|w\|^2/2,\quad s_{it}=\hat w^\top x_{it}$$</div><p>在三个训练截面构造有序对，以拟合系数产生独立策略面板的固定得分，再用滚动Ridge将得分映射为目标仓位。各阶段输出作为下一阶段的明确输入，独立数值参照不依赖下一阶段求解器。</p></section><section><h2>模型实现、数据口径与文献</h2><p><a href="../ml/comprehensive-ranknet-linear-fit.html">截面排序的线性RankNet：训练对构造、冻结得分与排序损失</a>　<a href="../cpp/comprehensive_learning.hpp" download>C++17完整实现</a>　<a href="https://doi.org/10.1145/1102351.1102363">Burges et al. (2005), Learning to Rank Using Gradient Descent, ICML.</a></p><p><a href="../research/comprehensive-rolling-panel-ridge-longshort.html">走步截面Ridge多空策略：日期隔离、信号预算、成本与逐期账本</a>　<a href="../cpp/comprehensive_portfolio.hpp" download>C++17完整实现</a>　<a href="https://doi.org/10.1093/rfs/hhaa009">Gu, Kelly and Xiu (2020), Empirical Asset Pricing via Machine Learning, Review of Financial Studies; the implementation is a simplified synthetic rolling linear research design.</a></p><p>全部输入由下方实验源码显式构造，参数与C++接口一致；结果为教学构造情形，不代表真实市场统计量。</p></section><section><h2>独立参考及实验判据</h2><p>复算排序梯度、滚动Ridge系数、市场中性权重和每期账户指标。</p><p>批量运行：<code>python quant/research/run_integrated_research.py ./build/kline_quant integrated-results</code>。</p><p>输出：<code>integrated-results/ranknet_frozen_score_to_panel_positions.csv</code>。该文件由运行程序生成。</p></section><section><h2>可执行实验与证据</h2><pre>def rank_signal_portfolio(model,report):
+    output=[]
+    # Train pairwise score and use frozen direction in a subsequent date panel.
+    for lam in (.2,1,5):
+        data=[]
+        for group in (1,2,3):
+            for v in (-1,0,1):data.append([1,group,v,v])
+        for v in (-2,0,2):data.append([0,4,v,v])
+        rank=model("ranknet-linear-fit",data,[lam,1e-9,100])
+        b=rank[0][-1];assert b&gt;0
+        # Feature difference has six pairs of size 1 and three pairs of size 2.
+        g=lam*b-(6/(1+math.exp(b))+6/(1+math.exp(2*b)))/9
+        near(g,0,atol=1e-7)
+        panel=[]
+        for t in range(1,7):
+            for j,v in enumerate((-1,0,1),1):
+                panel.append([t,j,.01*v,b*v])
+        rows=model("rolling-panel-ridge-longshort",panel,[2,.01,.001,1])
+        for t in range(3,7):
+            group=rows[(t-3)*3:(t-2)*3]
+            check_vector([r[3] for r in group],[-.5,0,.5])
+            ref=.04*b/(.01+4*b*b)
+            near(group[0][-1],ref)
+            near(group[0][6],.01)
+            output.append([lam,t,b,ref,group[0][6],group[0][7],group[0][10]])
+    report("ranknet_frozen_score_to_panel_positions",["RankPenalty","Date","RankCoefficient","RollingCoefficient","Gross","Net","NAV"],output)</pre></section><section><h2>经济及数值边界</h2><p>该实验合成排序方向正确，不代表真实排序信号的交易收益或容量。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>
