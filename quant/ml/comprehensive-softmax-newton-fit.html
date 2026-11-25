@@ -1,0 +1,50 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>多分类Softmax完整估计：基准类、Hessian与冻结预测｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="ml"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>多分类Softmax完整估计：基准类、Hessian与冻结预测</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-learning.html">统计学习：完整估计、条件分布与跨域泛化</a>　<a href="../cpp/comprehensive_learning.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>多分类参数识别</h2><p>Softmax的全部类别得分同时增加同一函数时，预测概率不变，因此直接拟合所有系数存在不可识别方向。以最后一类得分固定为零，剩余K−1个类别系数共同估计。岭惩罚作用于这些系数，包括用户显式加入的截距；这个参数化与对全部类别施加对称惩罚不同。</p><div class="equation">$$z_k=x^\top\beta_k,\quad z_K=0,\quad p_k=\exp(z_k)/\sum_{l=1}^K\exp(z_l)$$</div></section><section><h2>完整目标与梯度</h2><p>仅训练标记为1的记录进入负对数似然。使用log-sum-exp计算归一化项，避免指数溢出。每一类别的梯度是预测概率与真实类别指标的差乘特征，另加岭梯度。留出样本无论标签如何改变，都不能影响参数。</p><div class="equation">$$L(\beta)=\sum_{i\in T}\{\log\sum_k e^{z_{ik}}-z_{i,y_i}\}+\tfrac{\lambda}{2}\|\beta\|_2^2,\quad g_k=\sum_i(p_{ik}-1_{y_i=k})x_i+\lambda\beta_k$$</div></section><section><h2>联合曲率与数值求解</h2><p>Hessian的跨类块包含负协方差项，分别对每一类别进行独立二分类并不等价。正岭使整体曲率SPD，使用已有阻尼Newton求解。步长回溯保证目标下降，终止检查无穷范数梯度；未收敛时显式拒绝，避免把最大迭代次数当成收敛。</p><div class="equation">$$H_{kl}=\sum_{i\in T}p_{ik}(\mathbf1_{k=l}-p_{il})x_ix_i^\top+\lambda\mathbf1_{k=l}I$$</div></section><section><h2>基准与研究边界</h2><p>三训练类别各出现一次且特征恒1，对称得分0、概率1/3、损失3ln3，所有留出预测相同。概率并列按类别顺序处理。输出每条记录的概率、训练目标、驻点残差与冻结系数。参数总数不超过32；高维分类通常使用一阶或矩阵无显式Hessian的优化。</p><div class="equation">$$\hat y_i=\arg\max_k p_{ik},\qquad \sum_kp_{ik}=1,\quad \|g(\hat\beta)\|_\infty\le\epsilon$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Row，Train，Label，Predicted，P1，P2，P3，PenalizedNLL，ScoreResidual，Beta1_1，Beta2_1。</p><p><a href="../research/comprehensive-examples/softmax-newton-fit.csv" download>样本CSV</a></p><pre>Train,Label,X1
+1,1,1
+1,2,1
+1,3,1
+0,2,1
+</pre><pre>./build/kline_quant comprehensive-softmax-newton-fit quant/research/comprehensive-examples/softmax-newton-fit.csv 3 1 1e-10 100</pre><div class="wide"><table><thead><tr><th>Row</th><th>Train</th><th>Label</th><th>Predicted</th><th>P1</th><th>P2</th><th>P3</th><th>PenalizedNLL</th><th>ScoreResidual</th><th>Beta1_1</th><th>Beta2_1</th></tr></thead><tbody><tr><td>1</td><td>1</td><td>1</td><td>1</td><td>0.3333333333333</td><td>0.3333333333333</td><td>0.3333333333333</td><td>3.295836866004</td><td>0</td><td>0</td><td>0</td></tr><tr><td>2</td><td>1</td><td>2</td><td>1</td><td>0.3333333333333</td><td>0.3333333333333</td><td>0.3333333333333</td><td>3.295836866004</td><td>0</td><td>0</td><td>0</td></tr><tr><td>3</td><td>1</td><td>3</td><td>1</td><td>0.3333333333333</td><td>0.3333333333333</td><td>0.3333333333333</td><td>3.295836866004</td><td>0</td><td>0</td><td>0</td></tr><tr><td>4</td><td>0</td><td>2</td><td>1</td><td>0.3333333333333</td><td>0.3333333333333</td><td>0.3333333333333</td><td>3.295836866004</td><td>0</td><td>0</td><td>0</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report softmax_newton_fit(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,2,3,34)-2;parameters(p,4);
+    auto K=count(p[0],2,16);auto D=(K-1)*d;
+    double lam=positive(p[1]),tol=positive(p[2]);auto cap=count(p[3],1,1000);
+    require(D&lt;=32&amp;&amp;double(cap)*x.size()*D*D&lt;=5e7,"Softmax work limit");
+    Mat X;std::vector&lt;std::size_t&gt; y;std::vector&lt;std::size_t&gt; train;Vec mass(K,0);
+    for(std::size_t i=0;i&lt;x.size();++i){
+        auto&amp;r=x[i];require(r[0]==0||r[0]==1,"Binary train flag");
+        y.push_back(count(r[1],1,K)-1);X.emplace_back(r.begin()+2,r.end());
+        if(r[0]){train.push_back(i);++mass[y.back()];}
+    }
+    for(double v:mass)positive(v);
+    auto scores=[&amp;](const Vec&amp;w,const Vec&amp; a){
+        Vec z(K,0);for(std::size_t k=0;k&lt;K-1;++k)for(std::size_t j=0;j&lt;d;++j)z[k]+=w[k*d+j]*a[j];
+        return z;
+    };
+    auto evaluate=[&amp;](const Vec&amp;w){
+        auto s=model_research::regularized_state(w,lam);
+        for(auto i:train){
+            auto&amp;a=X[i];Vec z=scores(w,a);double ld=logsumexp(z);
+            s.value+=ld-z[y[i]];for(double&amp;v:z)v=std::exp(v-ld);
+            for(std::size_t k=0;k&lt;K-1;++k)for(std::size_t j=0;j&lt;d;++j){
+                auto u=k*d+j;s.gradient[u]+=(z[k]-double(y[i]==k))*a[j];
+                for(std::size_t l=0;l&lt;K-1;++l)for(std::size_t h=0;h&lt;d;++h)
+                    s.hessian[u][l*d+h]+=z[k]*(double(k==l)-z[l])*a[j]*a[h];
+            }
+        }
+        return s;
+    };
+    auto f=model_research::damped_newton(D,tol,cap,evaluate);
+    Report out{{"Row","Train","Label","Predicted"},{}};
+    for(std::size_t k=1;k&lt;=K;++k)out.header.push_back("P"+std::to_string(k));
+    out.header.insert(out.header.end(),{"PenalizedNLL","ScoreResidual"});
+    for(std::size_t k=1;k&lt;K;++k)for(std::size_t j=1;j&lt;=d;++j)
+        out.header.push_back("Beta"+std::to_string(k)+"_"+std::to_string(j));
+    for(std::size_t i=0;i&lt;x.size();++i){
+        Vec z=scores(f.beta,X[i]);double ld=logsumexp(z);
+        auto k=std::max_element(z.begin(),z.end())-z.begin();
+        Vec r{double(i+1),x[i][0],x[i][1],double(k+1)};
+        for(double v:z)r.push_back(std::exp(v-ld));
+        r.push_back(f.state.value);r.push_back(inf_norm(f.state.gradient));
+        r.insert(r.end(),f.beta.begin(),f.beta.end());out.rows.push_back(r);
+    }
+    return out;
+}</pre><p>参考文献：<a href="https://hastie.su.domains/ElemStatLearn/">Hastie, Tibshirani and Friedman (2009), The Elements of Statistical Learning, 2nd ed., Springer.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

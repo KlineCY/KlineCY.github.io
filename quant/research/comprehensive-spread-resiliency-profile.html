@@ -1,0 +1,20 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>冲击后流动性恢复与剖面最小二乘｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>冲击后流动性恢复与剖面最小二乘</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-microstructure.html">市场微观结构、撮合与动态执行</a>　<a href="../cpp/comprehensive_microstructure.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>冲击后的恢复路径</h2><p>相同事件定义下对齐冲击后的时间，价差或深度缺口随时间回归正常水平。观测权重可反映不同时间桶的样本数量；同一事件跨桶相关性需要额外处理。</p><div class="equation">$$y_i=b+a e^{-\kappa t_i}+\varepsilon_i,\quad \kappa&gt;0.$$</div></section><section><h2>剖面目标</h2><p>固定恢复系数后，基准和振幅为线性参数。通过加权最小二乘解析求解，降低非线性搜索维度。</p><div class="equation">$$\hat\theta(\kappa)=(Z_\kappa^\top WZ_\kappa)^{-1}Z_\kappa^\top Wy,\quad Z_{\kappa,i}=(1,e^{-\kappa t_i}).$$</div></section><section><h2>网格优化与识别</h2><p>在预先固定网格上比较加权残差平方和。恢复速度过小时指数列接近常数，基准与振幅难以分离；应扩大观测跨度而非盲目增加精度。</p><div class="equation">$$\hat\kappa=\arg\min_{\kappa\in\mathcal G}\|W^{1/2}(y-Z_\kappa\hat\theta(\kappa))\|_2^2.$$</div></section><section><h2>半衰期解释</h2><p>半衰期是相对基准偏离缩减一半的时间，而非价格恢复到冲击前水平的保证。样本中若存在多重冲击或制度切换，应分层或采用更丰富动态。</p><div class="equation">$$t_{1/2}=\log(2)/\kappa.$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Decay，Baseline，Amplitude，HalfLife，WeightedSSE。</p><p><a href="../research/comprehensive-examples/spread-resiliency-profile.csv" download>样本CSV</a></p><pre>Elapsed,Spread,Weight
+0,3,1
+1,1.7357588823428847,1
+2,1.2706705664732254,1
+</pre><pre>./build/kline_quant comprehensive-spread-resiliency-profile quant/research/comprehensive-examples/spread-resiliency-profile.csv 0.5 1.5 11</pre><div class="wide"><table><thead><tr><th>Decay</th><th>Baseline</th><th>Amplitude</th><th>HalfLife</th><th>WeightedSSE</th></tr></thead><tbody><tr><td>1</td><td>1</td><td>2</td><td>0.6931471805599</td><td>0</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report spread_resiliency_profile(const Mat&amp; x,const Vec&amp; p){
+    validate(x,3,3);parameters(p,3);
+    double lo=positive(p[0]),hi=p[1];int G=count(p[2],2,10000);require(hi&gt;=lo,"invalid grid");
+    for(const auto&amp;r:x){require(r.size()==3&amp;&amp;r[0]&gt;=0,"invalid elapsed time");positive(r[2]);}
+    Vec best;double obj=std::numeric_limits&lt;double&gt;::infinity();
+    for(int j=0;j&lt;G;++j){
+        double k=lo+(hi-lo)*j/(G-1);Mat A(2,Vec(2));Vec rhs(2);
+        for(const auto&amp;r:x){Vec z{1,std::exp(-k*r[0])};for(int a=0;a&lt;2;++a){rhs[a]+=r[2]*z[a]*r[1];for(int b=0;b&lt;2;++b)A[a][b]+=r[2]*z[a]*z[b];}}
+        if(A[0][0]*A[1][1]-A[0][1]*A[0][1]&lt;=1e-14*A[0][0]*A[1][1])continue;
+        Vec theta=solve_spd(A,rhs);double sse=0;
+        for(const auto&amp;r:x){double e=r[1]-theta[0]-theta[1]*std::exp(-k*r[0]);sse+=r[2]*e*e;}
+        if(sse&lt;obj){obj=sse;best={k,theta[0],theta[1],std::log(2)/k,sse};}
+    }
+    require(!best.empty(),"unidentified profile");
+    return {{"Decay","Baseline","Amplitude","HalfLife","WeightedSSE"},{best}};
+}</pre><p>参考文献：<a href="https://www.nber.org/papers/w11444">Obizhaeva, A. A., and Wang, J. (2013). Optimal trading strategy and supply/demand dynamics. Journal of Financial Markets.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

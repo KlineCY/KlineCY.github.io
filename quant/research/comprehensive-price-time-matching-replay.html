@@ -1,0 +1,47 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>价格—时间优先撮合与逐事件账本｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>价格—时间优先撮合与逐事件账本</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-microstructure.html">市场微观结构、撮合与动态执行</a>　<a href="../cpp/comprehensive_microstructure.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>事件与订单生命周期</h2><p>事件1为限价单、2为部分或全部撤单、3为市价单；方向+1为买、−1为卖。新订单编号唯一，撤单引用既有活跃订单，数量不能超过剩余数量。</p><div class="equation">$$Q_i^{\mathrm{remaining}}=Q_i^{\mathrm{initial}}-Q_i^{\mathrm{filled}}-Q_i^{\mathrm{cancelled}}.$$</div></section><section><h2>优先级</h2><p>主动买单依卖价由低到高匹配，主动卖单依买价由高到低匹配，同价按进入顺序。成交价格取被动订单限价，限价主动单不可穿越自身价格限制。</p><div class="equation">$$j^*=\arg\min_{j\in\mathcal A_t}(a_j,\tau_j),\quad Q_{\mathrm{fill}}=\min(Q_{\mathrm{in}},Q_{j^*}).$$</div></section><section><h2>事件级守恒</h2><p>未成交限价部分入簿，未成交市价部分取消。每一事件检查输入数量与成交、入簿、取消数量一致；盘口深度按当前活跃价格聚合。</p><div class="equation">$$Q_{\mathrm{in}}=Q_{\mathrm{fill}}+Q_{\mathrm{rest}}+Q_{\mathrm{cancel}}.$$</div></section><section><h2>适用边界</h2><p>这是单一交易场所连续竞价的确定性模型，未实现集合竞价、隐藏订单、冰山委托、撮合延迟或跨场所路由；不能据此推断某一真实交易所的全部规则。</p><div class="equation">$$\operatorname{VWAP}_t=\frac{\sum_j P_jQ_j}{\sum_jQ_j}.$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Event，ID，Filled，Notional，Rested，Cancelled，BestBid，BidDepth，BestAsk，AskDepth，ConservationError。</p><p><a href="../research/comprehensive-examples/price-time-matching-replay.csv" download>样本CSV</a></p><pre>Type,ID,Side,Price,Quantity
+1,1,1,99,10
+1,2,-1,101,5
+3,3,1,0,3
+1,4,-1,99,4
+2,2,-1,0,1
+</pre><pre>./build/kline_quant comprehensive-price-time-matching-replay quant/research/comprehensive-examples/price-time-matching-replay.csv</pre><div class="wide"><table><thead><tr><th>Event</th><th>ID</th><th>Filled</th><th>Notional</th><th>Rested</th><th>Cancelled</th><th>BestBid</th><th>BidDepth</th><th>BestAsk</th><th>AskDepth</th><th>ConservationError</th></tr></thead><tbody><tr><td>1</td><td>1</td><td>0</td><td>0</td><td>10</td><td>0</td><td>99</td><td>10</td><td>0</td><td>0</td><td>0</td></tr><tr><td>2</td><td>2</td><td>0</td><td>0</td><td>5</td><td>0</td><td>99</td><td>10</td><td>101</td><td>5</td><td>0</td></tr><tr><td>3</td><td>3</td><td>3</td><td>303</td><td>0</td><td>0</td><td>99</td><td>10</td><td>101</td><td>2</td><td>0</td></tr><tr><td>4</td><td>4</td><td>4</td><td>396</td><td>0</td><td>0</td><td>99</td><td>6</td><td>101</td><td>2</td><td>0</td></tr><tr><td>5</td><td>2</td><td>0</td><td>0</td><td>0</td><td>1</td><td>99</td><td>6</td><td>101</td><td>1</td><td>0</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report price_time_matching_replay(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,5);parameters(p,0);require(x.size()&lt;=5000,"replay too large");
+    struct Order{int id,side;double price,qty;};
+    std::vector&lt;Order&gt; book;std::set&lt;int&gt; ids;
+    Report out;out.header={"Event","ID","Filled","Notional","Rested","Cancelled","BestBid","BidDepth","BestAsk","AskDepth","ConservationError"};
+    for(size_t t=0;t&lt;x.size();++t){
+        const auto&amp;r=x[t];require(r.size()==5,"invalid event width");
+        int type=count(r[0],1,3),id=count(r[1],1,1000000000),side=int(r[2]);
+        require(r[2]==1||r[2]==-1,"invalid side");
+        double qty=positive(r[4]),remain=qty,filled=0,notional=0,rest=0,cancel=0;
+        if(type==2){
+            auto it=std::find_if(book.begin(),book.end(),[&amp;](const Order&amp;o){return o.id==id&amp;&amp;o.qty&gt;0;});
+            require(it!=book.end()&amp;&amp;it-&gt;side==side&amp;&amp;qty&lt;=it-&gt;qty,"invalid cancellation");
+            it-&gt;qty-=qty;cancel=qty;remain=0;
+        }else{
+            require(ids.insert(id).second,"duplicate order ID");
+            if(type==1)positive(r[3]);
+            while(remain&gt;0){
+                size_t best=book.size();
+                for(size_t j=0;j&lt;book.size();++j){
+                    const auto&amp;o=book[j];if(o.qty&lt;=0||o.side==side)continue;
+                    if(type==1&amp;&amp;side*(o.price-r[3])&gt;0)continue;
+                    if(best==book.size()||side*o.price&lt;side*book[best].price)best=j;
+                }
+                if(best==book.size())break;
+                auto&amp;o=book[best];double q=std::min(remain,o.qty);
+                filled+=q;notional+=q*o.price;remain-=q;o.qty-=q;
+            }
+            if(type==1&amp;&amp;remain&gt;0){book.push_back({id,side,r[3],remain});rest=remain;}
+            else cancel=remain;
+        }
+        double bid=0,ask=0,bd=0,ad=0;
+        for(const auto&amp;o:book)if(o.qty&gt;0){
+            if(o.side==1){if(o.price&gt;bid){bid=o.price;bd=0;}if(o.price==bid)bd+=o.qty;}
+            else{if(ask==0||o.price&lt;ask){ask=o.price;ad=0;}if(o.price==ask)ad+=o.qty;}
+        }
+        require(bid==0||ask==0||bid&lt;ask,"crossed resting book");
+        out.rows.push_back({double(t+1),double(id),filled,notional,rest,cancel,bid,bd,ask,ad,qty-filled-rest-cancel});
+    }
+    return out;
+}</pre><p>参考文献：<a href="https://academic.oup.com/book/52292">Harris, L. (2003). Trading and Exchanges: Market Microstructure for Practitioners. Oxford University Press.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

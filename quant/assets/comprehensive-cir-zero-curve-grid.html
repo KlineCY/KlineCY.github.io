@@ -1,0 +1,26 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CIR零息曲线轮廓校准：仿射折现、稳定极限与市场误差｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="assets"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>CIR零息曲线轮廓校准：仿射折现、稳定极限与市场误差</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-pricing.html">金融工程：波动率曲面、定价曲线与随机波动</a>　<a href="../cpp/comprehensive_pricing.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>平方根短率模型</h2><p>CIR短率具有均值回复及随利率水平变化的方差，零息价格在风险中性参数下呈指数仿射形式。当前短率r0由输入固定，校准κ、θ、σ至市场折现曲线。参数均非负，κ及θ严格正；Feller条件是严格不触零的充分条件，并非零息公式存在的必要条件。</p><div class="equation">$$dr_t=\kappa(\theta-r_t)dt+\sigma\sqrt{r_t}dW_t^Q,\qquad P(0,T)=A(T)e^{-B(T)r_0}$$</div></section><section><h2>稳定仿射公式</h2><p>写γ=√(κ²+2σ²)，使用e^{-γT}而非e^{γT}避免长端指数溢出。分母D=κ+γ+(γ−κ)e^{-γT}。对数A中系数为2κθ/σ²，σ很小时使用确定性短率积分极限以避免严重消减；本实现小于1e−7的波动率按该极限近似。</p><div class="equation">$$B(T)=\frac{2(1-e^{-\gamma T})}{D},\quad \log A(T)=\frac{2\kappa\theta}{\sigma^2}\{\log(2\gamma/D)+(\kappa-\gamma)T/2\}$$</div></section><section><h2>网格目标及可识别性</h2><p>在指定三个参数网格中最小化市场折现因子与模型折现因子的对数平方差。对数口径使各期限的相对折现误差更可比；不以市场报价的bid-ask或PV01进行加权。多组参数可能形成相近曲线，因此曲线价格拟合好并不保证动态波动参数可识别。</p><div class="equation">$$J(\kappa,\theta,\sigma)=\sum_i[\log P_{\rm model}(0,T_i)-\log P_{\rm market}(0,T_i)]^2$$</div></section><section><h2>算例与边界</h2><p>r0=θ=.02，σ=0时短率恒定，所有期限折现e^{−.02T}。固定参数网格精确恢复。一般复杂度O(nGκGθGσ)，输出全部期限残差及共同参数。实际利率衍生品校准应结合期权价格或历史短率信息；参数是风险中性参数而非自动等同现实测度。</p><div class="equation">$$\log P_{\sigma=0}(0,T)=-\theta T-(r_0-\theta)(1-e^{-\kappa T})/\kappa$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Maturity，MarketDiscount，ModelDiscount，LogResidual，Kappa，Theta，Sigma，LogSSE。</p><p><a href="../research/comprehensive-examples/cir-zero-curve-grid.csv" download>样本CSV</a></p><pre>Maturity,Discount
+1,0.9801986733067553
+2,0.9607894391523232
+</pre><pre>./build/kline_quant comprehensive-cir-zero-curve-grid quant/research/comprehensive-examples/cir-zero-curve-grid.csv 0.02 1 1 2 0.02 0.02 2 0 0 2</pre><div class="wide"><table><thead><tr><th>Maturity</th><th>MarketDiscount</th><th>ModelDiscount</th><th>LogResidual</th><th>Kappa</th><th>Theta</th><th>Sigma</th><th>LogSSE</th></tr></thead><tbody><tr><td>1</td><td>0.9801986733068</td><td>0.9801986733068</td><td>0</td><td>1</td><td>0.02</td><td>0</td><td>0</td></tr><tr><td>2</td><td>0.9607894391523</td><td>0.9607894391523</td><td>0</td><td>1</td><td>0.02</td><td>0</td><td>0</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report cir_zero_curve_grid(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,2,2);parameters(p,10);double r0=p[0];
+    auto G=count(p[3],2,1000),H=count(p[6],2,1000),J=count(p[9],2,1000);
+    require(r0&gt;=0&amp;&amp;p[1]&gt;0&amp;&amp;p[2]&gt;=p[1]&amp;&amp;p[4]&gt;0&amp;&amp;p[5]&gt;=p[4]&amp;&amp;p[7]&gt;=0&amp;&amp;p[8]&gt;=p[7]&amp;&amp;double(G)*H*J*x.size()&lt;=5e7,"Invalid CIR grid");
+    double prev=0;for(auto&amp;r:x){require(r[0]&gt;prev,"Increasing maturity required");prev=r[0];positive(r[1]);}
+    auto logprice=[&amp;](double T,double k,double theta,double s){
+        if(s&lt;1e-7)return -theta*T-(r0-theta)*(-std::expm1(-k*T))/k;
+        double g=std::hypot(k,std::sqrt(2.)*s),e=std::exp(-g*T);
+        double d=positive(k+g+(g-k)*e),B=-2*std::expm1(-g*T)/d;
+        double A=2*k*theta/(s*s)*(std::log(2*g/d)+(k-g)*T/2);
+        return A-B*r0;
+    };
+    double best=std::numeric_limits&lt;double&gt;::infinity(),k=0,theta=0,sig=0;
+    for(std::size_t i=0;i&lt;G;++i)for(std::size_t j=0;j&lt;H;++j)for(std::size_t h=0;h&lt;J;++h){
+        double a=p[1]+(p[2]-p[1])*i/(G-1),b=p[4]+(p[5]-p[4])*j/(H-1),c=p[7]+(p[8]-p[7])*h/(J-1),f=0;
+        for(auto&amp;r:x)f+=std::pow(logprice(r[0],a,b,c)-std::log(r[1]),2);
+        if(f&lt;best){best=f;k=a;theta=b;sig=c;}
+    }
+    require(std::isfinite(best),"No finite CIR candidate");
+    Report out{{"Maturity","MarketDiscount","ModelDiscount","LogResidual","Kappa","Theta","Sigma","LogSSE"},{}};
+    for(auto&amp;r:x){double v=logprice(r[0],k,theta,sig);out.rows.push_back({r[0],r[1],std::exp(v),v-std::log(r[1]),k,theta,sig,best});}
+    return out;
+}</pre><p>参考文献：<a href="https://doi.org/10.2307/1911242">Cox, Ingersoll and Ross (1985), A Theory of the Term Structure of Interest Rates, Econometrica.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

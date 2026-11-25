@@ -45,7 +45,7 @@ for(const g of groups){
 assert.equal(all.length,48);assert.equal(new Set(all).size,48);
 assert.equal(formulas,194);assert.equal(rows,130);assert.equal(coords,900);
 assert(read("quant/sidebar-v2.js").includes("system-research.html"));
-assert(read("quant/cpp/index.html").includes("<strong>1043</strong>"));
+assert(read("quant/cpp/index.html").includes("<strong>1123</strong>"));
 console.log("PASS: 48 complete system-model topics, 194 rendered formulas, 130 reference rows and 900 reference coordinates");
 
 const studies=read("quant/research/system-studies.html");

@@ -1,0 +1,55 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>走步截面Ridge多空策略：日期隔离、信号预算、成本与逐期账本｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>走步截面Ridge多空策略：日期隔离、信号预算、成本与逐期账本</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-portfolio.html">组合研究：因子风险、主动配置、稳健决策与滚动预测</a>　<a href="../cpp/comprehensive_portfolio.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>数据时间语义</h2><p>每行由决策日期、资产编号、该日期之后实现的单期收益及决策前已可用特征组成。输入必须是固定资产池、每日期完整且按同一资产顺序排列的面板。对决策t，仅使用之前L个完整日期的特征与已实现标签拟合系数；当期收益不进入预测。</p><div class="equation">$$\hat\beta_t=\arg\min_\beta\sum_{s=t-L}^{t-1}\sum_i(\tilde r_{is}-\tilde x_{is}^\top\beta)^2+\lambda\|\beta\|_2^2$$</div></section><section><h2>截面中性与信号预算</h2><p>每个日期分别将特征及训练标签去除等权截面均值。该变换只依赖同日期可见特征及历史训练标签。预测分数以中心化特征乘冻结系数，再减去可能存在的舍入级截面均值；将分数按绝对值和缩放至指定总敞口G。全零得分时持有现金。</p><div class="equation">$$s_{it}=\tilde x_{it}^\top\hat\beta_t,\quad w_{it}=G(s_{it}-\bar s_t)/\sum_j|s_{jt}-\bar s_t|,\quad \sum_i w_{it}=0$$</div></section><section><h2>自融资费用与漂移</h2><p>交易前持仓来自上一期价格变动后的漂移权重，目标持仓以扣费后净值计价。沿用原有自融资固定点求费用，逐日更新NAV、净收益及下一期漂移。输出逐资产分数、贡献和共同账户指标；费用不能简单从持仓权重差乘预设净值后重复扣除。</p><div class="equation">$$f_t=c\sum_i|(1-f_t)w_{it}-w_{i,t}^{-}|,\quad V_{t+1}=V_t(1-f_t)(1+\sum_iw_{it}r_{it})$$</div></section><section><h2>算例与实际研究</h2><p>两个资产每期特征±1、后续收益±.1，L=1、λ=0、G=1，拟合系数.1，目标权重±.5。第二日收益.1，下一日价格漂移使换手1/11，零费用下NAV1.21。该数据为构造基准，不代表实际策略业绩。真实研究还需点时资产池、借券、融资成本、停牌及成交容量，不能直接用完整面板假设外推。</p><div class="equation">$$w_{i,t+1}^{-}=\frac{w_{it}(1+r_{it})}{1+w_t^\top r_t},\qquad R_t^{\rm net}=(1-f_t)(1+w_t^\top r_t)-1$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Date，Asset，Score，Weight，RealizedReturn，Contribution，GrossReturn，NetReturn，Turnover，Fee，NAV，FeatureCoefficient1。</p><p><a href="../research/comprehensive-examples/rolling-panel-ridge-longshort.csv" download>样本CSV</a></p><pre>Date,Asset,Return,Feature1
+1,1,0.1,1
+1,2,-0.1,-1
+2,1,0.1,1
+2,2,-0.1,-1
+3,1,0.1,1
+3,2,-0.1,-1
+</pre><pre>./build/kline_quant comprehensive-rolling-panel-ridge-longshort quant/research/comprehensive-examples/rolling-panel-ridge-longshort.csv 1 0 0 1</pre><div class="wide"><table><thead><tr><th>Date</th><th>Asset</th><th>Score</th><th>Weight</th><th>RealizedReturn</th><th>Contribution</th><th>GrossReturn</th><th>NetReturn</th><th>Turnover</th><th>Fee</th><th>NAV</th><th>FeatureCoefficient1</th></tr></thead><tbody><tr><td>2</td><td>1</td><td>0.1</td><td>0.5</td><td>0.1</td><td>0.05</td><td>0.1</td><td>0.1</td><td>1</td><td>0</td><td>1.1</td><td>0.1</td></tr><tr><td>2</td><td>2</td><td>-0.1</td><td>-0.5</td><td>-0.1</td><td>0.05</td><td>0.1</td><td>0.1</td><td>1</td><td>0</td><td>1.1</td><td>0.1</td></tr><tr><td>3</td><td>1</td><td>0.1</td><td>0.5</td><td>0.1</td><td>0.05</td><td>0.1</td><td>0.1</td><td>0.09090909090909</td><td>0</td><td>1.21</td><td>0.1</td></tr><tr><td>3</td><td>2</td><td>-0.1</td><td>-0.5</td><td>-0.1</td><td>0.05</td><td>0.1</td><td>0.1</td><td>0.09090909090909</td><td>0</td><td>1.21</td><td>0.1</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report rolling_panel_ridge_longshort(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,4,4,35)-3;parameters(p,4);
+    auto L=count(p[0],1,10000);double lam=p[1],cost=p[2],gross=positive(p[3]);
+    require(lam&gt;=0&amp;&amp;cost&gt;=0&amp;&amp;cost&lt;1&amp;&amp;gross&lt;=4&amp;&amp;cost*gross&lt;1,"Invalid strategy controls");
+    std::vector&lt;Mat&gt; days;Vec dates;
+    for(auto&amp;r:x){
+        require(r[2]&gt;=-1,"Return below -100 percent");
+        if(dates.empty()||r[0]!=dates.back()){
+            require(dates.empty()||r[0]&gt;dates.back(),"Date must increase");dates.push_back(r[0]);days.emplace_back();
+        }
+        days.back().push_back(r);
+    }
+    auto n=days[0].size();require(n&gt;=2&amp;&amp;n&lt;=64&amp;&amp;days.size()&gt;L,"Invalid panel shape");
+    std::set&lt;double&gt; ids;for(auto&amp;r:days[0])require(ids.insert(r[1]).second,"Duplicate asset");
+    require(double(days.size()-L)*L*n*d*d&lt;=5e7,"Rolling fit work limit");
+    std::vector&lt;Mat&gt; X;Mat y,ret;
+    for(auto&amp;day:days){
+        require(day.size()==n,"Incomplete panel");
+        Vec mean(d,0),r(n);double avg=0;
+        for(std::size_t i=0;i&lt;n;++i){
+            require(day[i][1]==days[0][i][1],"Asset ordering mismatch");
+            r[i]=day[i][2];avg+=r[i]/n;
+            for(std::size_t j=0;j&lt;d;++j)mean[j]+=day[i][j+3]/n;
+        }
+        Mat z(n,Vec(d));Vec target=r;
+        for(std::size_t i=0;i&lt;n;++i){
+            target[i]-=avg;for(std::size_t j=0;j&lt;d;++j)z[i][j]=day[i][j+3]-mean[j];
+        }
+        X.push_back(z);y.push_back(target);ret.push_back(r);
+    }
+    Vec old(n,0);double nav=1;
+    Report out{{"Date","Asset","Score","Weight","RealizedReturn","Contribution","GrossReturn","NetReturn","Turnover","Fee","NAV"},{}};
+    for(std::size_t j=1;j&lt;=d;++j)out.header.push_back("FeatureCoefficient"+std::to_string(j));
+    for(std::size_t t=L;t&lt;days.size();++t){
+        Mat design;Vec target;
+        for(std::size_t s=t-L;s&lt;t;++s)for(std::size_t i=0;i&lt;n;++i){design.push_back(X[s][i]);target.push_back(y[s][i]);}
+        Vec beta=fit_ridge(design,target,lam,false),score=mul(X[t],beta),w=score;
+        double center=sum(score)/n;for(double&amp;v:w)v-=center;
+        double scale=l1(w);if(scale&lt;=1e-14)w.assign(n,0);else for(double&amp;v:w)v*=gross/scale;
+        auto step=trade_step(old,w,ret[t],cost);nav=positive(nav*(1+step.net));
+        for(std::size_t i=0;i&lt;n;++i){
+            Vec r{dates[t],days[t][i][1],score[i],w[i],ret[t][i],w[i]*ret[t][i],step.gross,step.net,step.turnover,step.fee,nav};
+            r.insert(r.end(),beta.begin(),beta.end());out.rows.push_back(r);
+        }
+        old=step.drift;
+    }
+    return out;
+}</pre><p>参考文献：<a href="https://doi.org/10.1093/rfs/hhaa009">Gu, Kelly and Xiu (2020), Empirical Asset Pricing via Machine Learning, Review of Financial Studies; the implementation is a simplified synthetic rolling linear research design.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

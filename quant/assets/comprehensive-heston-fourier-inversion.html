@@ -1,0 +1,40 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Heston特征函数定价：风险中性概率、复数分支与积分收敛｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="assets"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>Heston特征函数定价：风险中性概率、复数分支与积分收敛</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-pricing.html">金融工程：波动率曲面、定价曲线与随机波动</a>　<a href="../cpp/comprehensive_pricing.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>仿射随机波动率</h2><p>Heston在风险中性测度下令方差服从平方根扩散，并允许股票收益与方差冲击相关。欧式期权可由终端对数远期归一收益的特征函数反演获得，不必逐路径模拟。积分方法能独立验证Monte Carlo，但需要处理复数平方根与对数分支。</p><div class="equation">$$dS/S=(r-q)dt+\sqrt VdW_S,\quad dV=\kappa(\theta-V)dt+\xi\sqrt VdW_V,\quad d\langle W_S,W_V\rangle=\rho dt$$</div></section><section><h2>特征函数</h2><p>令X=ln(S_T/F)，使用衰减指数形式的Heston仿射特征函数。定义b=κ−ρξiu，d=√(b²+ξ²(u²+iu))并选实部非负根，g=(b−d)/(b+d)。实现使用连续常用分支并限制κ&gt;ρξ的数值域，以避免在股价加权变换附近的分母退化。</p><div class="equation">$$\phi(u)=\exp(C(u)+D(u)V_0),\quad D=\frac{b-d}{\xi^2}\frac{1-e^{-dT}}{1-ge^{-dT}},\quad C=\frac{\kappa\theta}{\xi^2}\left[(b-d)T-2\log\frac{1-ge^{-dT}}{1-g}\right]$$</div></section><section><h2>概率反演与价格</h2><p>风险中性尾概率P2通过φ(u)反演，股价加权测度下P1使用φ(u−i)，其中归一化E[e^X]=1。避开零频率直接以中点积分。计算两种积分网格的价格差作为数值诊断，而非严格截断误差界；价格及概率未进行静默裁剪。</p><div class="equation">$$P_2=\tfrac12+\frac1\pi\int_0^\infty\Re\left[\frac{e^{-iuk}\phi(u)}{iu}\right]du,\quad P_1=\tfrac12+\frac1\pi\int_0^\infty\Re\left[\frac{e^{-iuk}\phi(u-i)}{iu}\right]du,\quad C=e^{-rT}(FP_1-KP_2)$$</div></section><section><h2>零波动率之波动极限</h2><p>当ξ=0时，V的路径确定，累计方差为θT+(V0−θ)(1−e^{−κT})/κ，直接使用对数正态解析价格。V0=θ=.04且S=K=100、利率股息0、T=1时退化BS价格约7.965567455。一般ξ&gt;0的积分精度受积分上界、步长、期限和参数影响。</p><div class="equation">$$I_T=\theta T+(V_0-\theta)(1-e^{-\kappa T})/\kappa,\qquad C_{\xi=0}=\operatorname{BS}(S,K,r,q,\sqrt{I_T/T},T)$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Call，Put，P1，P2，Forward，MartingaleResidual，IntegrationDifference，ParityResidual。</p><p><a href="../research/comprehensive-examples/heston-fourier-inversion.csv" download>样本CSV</a></p><pre>Spot,Strike,Rate,Dividend,Time,Kappa,Theta,VolOfVol,Correlation,InitialVariance
+100,100,0,0,1,1,0.04,0,0,0.04
+</pre><pre>./build/kline_quant comprehensive-heston-fourier-inversion quant/research/comprehensive-examples/heston-fourier-inversion.csv 100 2000</pre><div class="wide"><table><thead><tr><th>Call</th><th>Put</th><th>P1</th><th>P2</th><th>Forward</th><th>MartingaleResidual</th><th>IntegrationDifference</th><th>ParityResidual</th></tr></thead><tbody><tr><td>7.965567455406</td><td>7.965567455406</td><td>0.539827837277</td><td>0.460172162723</td><td>100</td><td>0</td><td>0</td><td>0</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report heston_fourier_inversion(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,10,10);parameters(p,2);double upper=positive(p[0]);auto n=count(p[1],100,200000);
+    require(double(n)*x.size()&lt;=5e6,"Fourier work limit");
+    using C=std::complex&lt;double&gt;;const C I(0,1);const double pi=std::acos(-1.);
+    Report out{{"Call","Put","P1","P2","Forward","MartingaleResidual","IntegrationDifference","ParityResidual"},{}};
+    for(auto&amp;r:x){
+        double S=positive(r[0]),K=positive(r[1]),rate=r[2],q=r[3],T=positive(r[4]),kap=positive(r[5]),theta=positive(r[6]),xi=r[7],rho=r[8],v=positive(r[9]);
+        require(xi&gt;=0&amp;&amp;std::abs(rho)&lt;1&amp;&amp;kap&gt;rho*xi,"Invalid Fourier parameter domain");
+        double F=positive(S*std::exp((rate-q)*T)),df=std::exp(-rate*T),k=std::log(K/F),P1=0,P2=0,err=0,mart=0;
+        if(xi==0){
+            double variance=theta*T+(v-theta)*(-std::expm1(-kap*T))/kap,z=std::sqrt(positive(variance));
+            P1=normal(-k/z+z/2);P2=normal(-k/z-z/2);
+        }else{
+            auto phi=[&amp;](C u){
+                C b=kap-rho*xi*I*u,d=std::sqrt(b*b+xi*xi*(u*u+I*u));
+                if(d.real()&lt;0)d=-d;
+                C g=(b-d)/(b+d),e=std::exp(-d*T);
+                C D=(b-d)/(xi*xi)*(1.-e)/(1.-g*e);
+                C a=kap*theta/(xi*xi)*((b-d)*T-2.*std::log((1.-g*e)/(1.-g)));
+                return std::exp(a+D*v);
+            };
+            mart=std::abs(phi(-I)-C(1));
+            auto integrate=[&amp;](std::size_t m){
+                double h=upper/m,a=0,b=0;
+                for(std::size_t j=0;j&lt;m;++j){
+                    double u=(j+.5)*h;C w=std::exp(-I*u*k)/(I*u);
+                    a+=(w*phi(C(u,-1))).real();b+=(w*phi(C(u,0))).real();
+                }
+                return Vec{.5+h*a/pi,.5+h*b/pi};
+            };
+            Vec a=integrate(n),b=integrate(n/2);
+            P1=a[0];P2=a[1];err=std::abs(df*(F*(a[0]-b[0])-K*(a[1]-b[1])));
+        }
+        double call=df*(F*P1-K*P2),put=df*(K*(1-P2)-F*(1-P1));
+        out.rows.push_back({call,put,P1,P2,F,mart,err,call-put-df*(F-K)});
+    }
+    return out;
+}</pre><p>参考文献：<a href="https://doi.org/10.1093/rfs/6.2.327">Heston (1993), A Closed-Form Solution for Options with Stochastic Volatility with Applications to Bond and Currency Options, Review of Financial Studies.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

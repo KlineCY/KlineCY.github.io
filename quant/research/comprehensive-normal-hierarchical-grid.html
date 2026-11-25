@@ -1,0 +1,28 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>异方差正态层级模型的全贝叶斯网格积分｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>异方差正态层级模型的全贝叶斯网格积分</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-bayesian.html">贝叶斯后验、粒子过滤与稀有事件模拟</a>　<a href="../cpp/comprehensive_bayesian.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>层级模型</h2><p>组别估计值y_i具有已知抽样方差s_i²，真实组参数从共同总体均值μ和方差t生成。μ赋予正态先验，t采用用户给定区间上的均匀离散先验；允许t=0表示完全汇聚。</p><div class="equation">$$y_i\mid\theta_i\sim N(\theta_i,s_i^2),\quad \theta_i\mid\mu,t\sim N(\mu,t),\quad \mu\sim N(m_0,v_0).$$</div></section><section><h2>超参数边际积分</h2><p>固定t后，y_i条件于μ独立正态，精度可解析相加。对μ积分得到各网格点边际似然，再以log-sum-exp归一。输出的证据对应离散先验而非连续积分。</p><div class="equation">$$V_t=(v_0^{-1}+\sum_i(s_i^2+t)^{-1})^{-1},\quad M_t=V_t(m_0/v_0+\sum_i y_i/(s_i^2+t)).$$</div></section><section><h2>组参数后验</h2><p>在t固定且已积分μ的条件下，组参数均值是观察值与超均值加权，方差包含组内条件方差及超均值不确定性。对t混合时用全方差公式。</p><div class="equation">$$E[\theta_i\mid y,t]=a_i y_i+(1-a_i)M_t,\quad V[\theta_i\mid y,t]=a_i s_i^2+(1-a_i)^2V_t,\quad a_i=t/(t+s_i^2).$$</div></section><section><h2>投资研究解释</h2><p>与仅代入最大似然超参数的经验贝叶斯不同，此处保留超参数混合不确定性。网格边界、先验尺度及方差估计误差都影响收缩结果，须报告敏感性。</p><div class="equation">$$\operatorname{Var}(\theta_i\mid y)=E_t[\operatorname{Var}(\theta_i\mid y,t)]+\operatorname{Var}_t(E[\theta_i\mid y,t]).$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Group，PosteriorMean，PosteriorVariance，HyperMean，HyperTauSquared，LogEvidence。</p><p><a href="../research/comprehensive-examples/normal-hierarchical-grid.csv" download>样本CSV</a></p><pre>Estimate,Variance
+1,1
+3,1
+</pre><pre>./build/kline_quant comprehensive-normal-hierarchical-grid quant/research/comprehensive-examples/normal-hierarchical-grid.csv 0 1 0 0 1</pre><div class="wide"><table><thead><tr><th>Group</th><th>PosteriorMean</th><th>PosteriorVariance</th><th>HyperMean</th><th>HyperTauSquared</th></tr></thead><tbody><tr><td>1</td><td>1.333333333333</td><td>0.3333333333333</td><td>1.333333333333</td><td>0</td></tr><tr><td>2</td><td>1.333333333333</td><td>0.3333333333333</td><td>1.333333333333</td><td>0</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report normal_hierarchical_grid(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,2,2);parameters(p,5);
+    double m0=p[0],v0=positive(p[1]),lo=p[2],hi=p[3];int G=count(p[4],1,10000);
+    require(lo&gt;=0&amp;&amp;hi&gt;=lo&amp;&amp;(G&gt;1||lo==hi),"invalid tau grid");
+    for(const auto&amp;r:x)positive(r[1]);Vec ts,ms,vs,logs;
+    for(int g=0;g&lt;G;++g){
+        double t=G==1?lo:lo+(hi-lo)*g/(G-1),prec=1/v0,b=m0/v0,c=m0*m0/v0,ld=std::log(v0);
+        for(const auto&amp;r:x){double v=r[1]+t;prec+=1/v;b+=r[0]/v;c+=r[0]*r[0]/v;ld+=std::log(v);}
+        double V=1/prec,M=V*b;
+        ts.push_back(t);ms.push_back(M);vs.push_back(V);
+        logs.push_back(-.5*(x.size()*std::log(2*std::acos(-1.))+ld+std::log(prec)+c-b*b/prec));
+    }
+    double logz=logsumexp(logs);Vec weights;double hm=0,ht=0;
+    for(int g=0;g&lt;G;++g){double w=std::exp(logs[g]-logz);weights.push_back(w);hm+=w*ms[g];ht+=w*ts[g];}
+    Report out;out.header={"Group","PosteriorMean","PosteriorVariance","HyperMean","HyperTauSquared","LogEvidence"};
+    for(size_t i=0;i&lt;x.size();++i){
+        double mean=0,second=0;
+        for(int g=0;g&lt;G;++g){
+            double a=ts[g]/(ts[g]+x[i][1]),m=a*x[i][0]+(1-a)*ms[g],v=a*x[i][1]+(1-a)*(1-a)*vs[g];
+            mean+=weights[g]*m;second+=weights[g]*(v+m*m);
+        }
+        out.rows.push_back({double(i+1),mean,std::max(0.,second-mean*mean),hm,ht,logz-std::log(double(G))});
+    }
+    return out;
+}</pre><p>参考文献：<a href="https://www.stat.columbia.edu/~gelman/book/">Gelman, A., et al. (2013). Bayesian Data Analysis, 3rd ed.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

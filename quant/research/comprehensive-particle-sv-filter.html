@@ -1,0 +1,30 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>随机波动率Bootstrap粒子过滤｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>随机波动率Bootstrap粒子过滤</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-bayesian.html">贝叶斯后验、粒子过滤与稀有事件模拟</a>　<a href="../cpp/comprehensive_bayesian.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>状态空间</h2><p>对数方差按平稳AR(1)演化，给定状态的收益为零均值正态。初始状态以长期均值为中心，标准差由用户提供；允许零过程噪声作为确定性基准。</p><div class="equation">$$h_t=\mu+\phi(h_{t-1}-\mu)+\sigma_h\eta_t,\quad r_t\mid h_t\sim N(0,e^{h_t}).$$</div></section><section><h2>重要性权重</h2><p>Bootstrap proposal采用状态转移本身，因而新粒子权重仅需乘观测密度。保留上一期未重抽样权重，使用对数归一化，并累加预测密度。</p><div class="equation">$$\tilde w_t^{(i)}=w_{t-1}^{(i)}p(r_t\mid h_t^{(i)}),\quad Z_t=\sum_i\tilde w_t^{(i)},\quad w_t^{(i)}=\tilde w_t^{(i)}/Z_t.$$</div></section><section><h2>有效样本量</h2><p>ESS低于N乘阈值时采用系统重抽样，将累积概率与同一随机起点的等距序列比较。过滤矩在重抽样前计算，避免无谓引入二次抽样误差。</p><div class="equation">$$ESS_t=(\sum_i(w_t^{(i)})^2)^{-1},\quad \hat v_t=\sum_iw_t^{(i)}e^{h_t^{(i)}}.$$</div></section><section><h2>随机性与预测</h2><p>固定随机种子使同一实现可复现，但标准库正态分布不保证不同平台位级一致。应以多种种子和粒子数评估Monte Carlo误差；当前观测参与过滤而非前一时点预测。</p><div class="equation">$$\widehat{\log p(r_{1:T})}=\sum_{t=1}^T\log Z_t.$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Time，FilteredLogVariance，FilteredVariance，ESS，LogPredictiveDensity，Resampled。</p><p><a href="../research/comprehensive-examples/particle-sv-filter.csv" download>样本CSV</a></p><pre>Return
+0
+1
+</pre><pre>./build/kline_quant comprehensive-particle-sv-filter quant/research/comprehensive-examples/particle-sv-filter.csv 0 0.5 0 0 100 7 0.5</pre><div class="wide"><table><thead><tr><th>Time</th><th>FilteredLogVariance</th><th>FilteredVariance</th><th>ESS</th><th>LogPredictiveDensity</th><th>Resampled</th></tr></thead><tbody><tr><td>1</td><td>0</td><td>1</td><td>100</td><td>-0.9189385332047</td><td>0</td></tr><tr><td>2</td><td>0</td><td>1</td><td>100</td><td>-1.418938533205</td><td>0</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report particle_sv_filter(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,1,1);parameters(p,7);
+    double mu=p[0],phi=p[1],sig=p[2],init=p[3],threshold=p[6];
+    int N=count(p[4],2,200000);int seed=count(p[5],0,2147483647);
+    require(std::abs(phi)&lt;1&amp;&amp;sig&gt;=0&amp;&amp;init&gt;=0&amp;&amp;threshold&gt;0&amp;&amp;threshold&lt;=1&amp;&amp;double(N)*x.size()&lt;=5e7,"invalid filter controls");
+    std::mt19937 gen(seed);std::normal_distribution&lt;double&gt; normal01(0,1);std::uniform_real_distribution&lt;double&gt; uniform(0,1);
+    Vec h(N),w(N,1./N);for(double&amp;v:h)v=mu+(init==0?0:init*normal01(gen));
+    Report out;out.header={"Time","FilteredLogVariance","FilteredVariance","ESS","LogPredictiveDensity","Resampled"};
+    for(size_t t=0;t&lt;x.size();++t){
+        Vec logs(N);double r=x[t][0];
+        for(int i=0;i&lt;N;++i){
+            h[i]=mu+phi*(h[i]-mu)+(sig==0?0:sig*normal01(gen));
+            require(std::abs(h[i])&lt;700,"log variance overflow");
+            logs[i]=std::log(w[i])-.5*(std::log(2*std::acos(-1.))+h[i]+r*r*std::exp(-h[i]));
+        }
+        double z=logsumexp(logs),mh=0,mv=0,sq=0;
+        for(int i=0;i&lt;N;++i){w[i]=std::exp(logs[i]-z);mh+=w[i]*h[i];mv+=w[i]*std::exp(h[i]);sq+=w[i]*w[i];}
+        double ess=1/sq;bool resample=ess&lt;threshold*N-1e-10;
+        out.rows.push_back({double(t+1),mh,mv,ess,z,double(resample)});
+        if(resample){
+            Vec next(N);double u=uniform(gen)/N,c=w[0];int j=0;
+            for(int i=0;i&lt;N;++i){double q=u+double(i)/N;while(j&lt;N-1&amp;&amp;q&gt;c)c+=w[++j];next[i]=h[j];}
+            h=next;std::fill(w.begin(),w.end(),1./N);
+        }
+    }
+    return out;
+}</pre><p>参考文献：<a href="https://doi.org/10.1049/ip-f-2.1993.0015">Gordon, N. J., Salmond, D. J., and Smith, A. F. M. (1993). Novel approach to nonlinear/non-Gaussian Bayesian state estimation. IEE Proceedings F.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

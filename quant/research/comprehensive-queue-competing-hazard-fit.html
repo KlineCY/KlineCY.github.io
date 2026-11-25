@@ -1,0 +1,39 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>限价队列成交与撤单竞争风险估计｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>限价队列成交与撤单竞争风险估计</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-microstructure.html">市场微观结构、撮合与动态执行</a>　<a href="../cpp/comprehensive_microstructure.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>风险集与观测</h2><p>每条订单记录从进入风险集到首次成交、撤单或右删失的持续时间。协变量在该持续区间内固定，事件编码0、1、2分别表示删失、成交、撤单；不能把撤单后的订单继续计入成交风险集。</p><div class="equation">$$T=\min(T_f,T_c,C),\quad \delta\in\{0,1,2\}.$$</div></section><section><h2>原因别似然</h2><p>两个原因的条件强度分别采用指数连接，暴露时间对两个强度均产生贡献，而事件项只对实际原因贡献。岭惩罚作用于每个回归系数。</p><div class="equation">$$\ell_k(\beta_k)=\sum_i[T_i e^{x_i^\top\beta_k}-1_{\{\delta_i=k\}}x_i^\top\beta_k]+\frac{\lambda}{2}\|\beta_k\|_2^2.$$</div></section><section><h2>梯度与Hessian</h2><p>负对数似然凸；采用精确梯度与正定Hessian、阻尼Newton和下降线搜索。无惩罚时设计矩阵须具有足够秩且原因发生次数非零。</p><div class="equation">$$g_k=X^\top(T\odot e^{X\beta_k}-d_k)+\lambda\beta_k,\quad H_k=X^\top\operatorname{diag}(T\odot e^{X\beta_k})X+\lambda I.$$</div></section><section><h2>期限事件概率</h2><p>在最后一行协变量对应的常强度条件下，期限H内两类累计发生概率由竞争风险共同决定。独立事件概率相加会重复计量；输出概率总和与生存概率必须为1。</p><div class="equation">$$F_k(H)=\frac{h_k}{h_1+h_2}(1-e^{-(h_1+h_2)H}),\quad S(H)=e^{-(h_1+h_2)H}.$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Cause，Coefficient，Hazard，EventProbability，Survival，ScoreNorm。</p><p><a href="../research/comprehensive-examples/queue-competing-hazard-fit.csv" download>样本CSV</a></p><pre>Duration,Event,X
+1,1,1
+1,2,1
+</pre><pre>./build/kline_quant comprehensive-queue-competing-hazard-fit quant/research/comprehensive-examples/queue-competing-hazard-fit.csv 1 0 1e-10 100</pre><div class="wide"><table><thead><tr><th>Cause</th><th>Coefficient</th><th>Hazard</th><th>EventProbability</th><th>Survival</th><th>ScoreNorm</th></tr></thead><tbody><tr><td>1</td><td>-0.6931471805599</td><td>0.5</td><td>0.3160602794143</td><td>0.3678794411714</td><td>0</td></tr><tr><td>2</td><td>-0.6931471805599</td><td>0.5</td><td>0.3160602794143</td><td>0.3678794411714</td><td>0</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report queue_competing_hazard_fit(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,3); parameters(p,4);
+    double H=positive(p[0]),lambda=p[1],tol=positive(p[2]);
+    require(lambda&gt;=0,"lambda must be nonnegative");
+    int cap=count(p[3],1,10000);
+    size_t d=x[0].size()-2;
+    Mat design; Vec duration,event;
+    for(const auto&amp; r:x){
+        duration.push_back(positive(r[0]));
+        event.push_back(count(r[1],0,2));
+        design.emplace_back(r.begin()+2,r.end());
+    }
+    Mat beta; Vec hazards, scores;
+    for(int k=1;k&lt;=2;++k){
+        auto eval=[&amp;](const Vec&amp; b){
+            auto s=model_research::regularized_state(b,lambda);
+            for(size_t i=0;i&lt;x.size();++i){
+                double z=dot(design[i],b),w=duration[i]*std::exp(z),y=event[i]==k;
+                require(std::isfinite(w),"overflow in hazard");
+                s.value+=w-y*z;
+                for(size_t j=0;j&lt;d;++j)s.gradient[j]+=(w-y)*design[i][j];
+                for(size_t j=0;j&lt;d;++j)for(size_t l=0;l&lt;d;++l)
+                    s.hessian[j][l]+=w*design[i][j]*design[i][l];
+            }
+            return s;
+        };
+        auto sol=model_research::damped_newton(d,tol,cap,eval);
+        beta.push_back(sol.beta);scores.push_back(inf_norm(sol.state.gradient));
+        hazards.push_back(std::exp(dot(design.back(),sol.beta)));
+    }
+    double total=sum(hazards),survival=std::exp(-H*total);
+    Report out;out.header={"Cause","Coefficient","Hazard","EventProbability","Survival","ScoreNorm"};
+    for(int k=0;k&lt;2;++k)for(size_t j=0;j&lt;d;++j)
+        out.rows.push_back({double(k+1),beta[k][j],hazards[k],hazards[k]/total*(-std::expm1(-H*total)),survival,scores[k]});
+    return out;
+}</pre><p>参考文献：<a href="https://doi.org/10.1007/978-1-4612-4348-9">Andersen et al. (1993). Statistical Models Based on Counting Processes. Springer.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

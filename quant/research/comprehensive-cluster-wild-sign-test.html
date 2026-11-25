@@ -1,0 +1,19 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>受限模型聚类Wild符号检验｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>受限模型聚类Wild符号检验</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-inference.html">计量识别、弱工具变量与稳健推断</a>　<a href="../cpp/comprehensive_inference.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>聚类结构</h2><p>观测在同一簇内可相关，簇之间在零假设下独立。对候选斜率b拟合受限截距并中心化解释变量，构造簇级得分。这里实现得分符号随机化而非完整重拟合Wild cluster bootstrap-t。</p><div class="equation">$$u_i(b)=y_i-bx_i-\overline{(y-bx)},\quad g_c=\sum_{i\in c}(x_i-\bar x)u_i(b).$$</div></section><section><h2>符号分配</h2><p>以簇为单位乘Rademacher符号，簇内所有观测共用符号；对有限簇数枚举全部2^G种分配，避免Monte Carlo误差。</p><div class="equation">$$T(s)=\left|\sum_{c=1}^G s_cg_c\right|,\quad s_c\in\{-1,1\}.$$</div></section><section><h2>概率计算</h2><p>以原始得分绝对值为阈值，包含相等结果计算双侧尾概率。与独立观测符号翻转相比，枚举单元数是簇数而非行数。</p><div class="equation">$$p(b)=2^{-G}\sum_s1_{\{T(s)\ge T(\mathbf1)\}}.$$</div></section><section><h2>推断条件</h2><p>精确性依赖零假设下簇得分联合符号不变性；受限截距估计可能破坏该性质，因此一般数据中应将它解释为有限样本诊断而非无条件精确置信保证。簇太少时p值高度离散。</p><div class="equation">$$p_{\min}\ge2^{1-G}\quad\text{for nonzero observed score}.$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为NullSlope，ObservedScore，Clusters，Assignments，PValue。</p><p><a href="../research/comprehensive-examples/cluster-wild-sign-test.csv" download>样本CSV</a></p><pre>Y,X,Cluster
+1,1,1
+-1,-1,1
+1,1,2
+-1,-1,2
+</pre><pre>./build/kline_quant comprehensive-cluster-wild-sign-test quant/research/comprehensive-examples/cluster-wild-sign-test.csv 0</pre><div class="wide"><table><thead><tr><th>NullSlope</th><th>ObservedScore</th><th>Clusters</th><th>Assignments</th><th>PValue</th></tr></thead><tbody><tr><td>0</td><td>4</td><td>2</td><td>4</td><td>0.5</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report cluster_wild_sign_test(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,3,3);parameters(p,1);double b=p[0],mx=0,mu=0;
+    for(const auto&amp;r:x){mx+=r[1]/x.size();mu+=(r[0]-b*r[1])/x.size();}
+    std::map&lt;int,double&gt; g;
+    for(const auto&amp;r:x){int c=count(r[2],1,1000000000);g[c]+=(r[1]-mx)*(r[0]-b*r[1]-mu);}
+    require(g.size()&gt;=2&amp;&amp;g.size()&lt;=20,"cluster count must be 2 to 20");
+    Vec v;for(const auto&amp;z:g)v.push_back(z.second);
+    double obs=std::abs(sum(v)),extreme=0;size_t total=size_t(1)&lt;&lt;v.size();
+    for(size_t mask=0;mask&lt;total;++mask){
+        double z=0;for(size_t j=0;j&lt;v.size();++j)z+=((mask&gt;&gt;j)&amp;1?1:-1)*v[j];
+        extreme+=std::abs(z)&gt;=obs-1e-12*std::max(1.,obs);
+    }
+    return scalar({"NullSlope","ObservedScore","Clusters","Assignments","PValue"},{b,obs,double(v.size()),double(total),extreme/total});
+}</pre><p>参考文献：<a href="https://doi.org/10.1162/rest.90.3.414">Cameron, A. C., Gelbach, J. B., and Miller, D. L. (2008). Bootstrap-Based Improvements for Inference with Clustered Errors. Review of Economics and Statistics.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

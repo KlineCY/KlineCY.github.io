@@ -1,0 +1,23 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>双时间轴数据修订与可用版本连接｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="audit"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>双时间轴数据修订与可用版本连接</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-data.html">量化数据系统、点时一致性与实证审计</a>　<a href="../cpp/comprehensive_data.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>双时间轴</h2><p>经济数据的经济归属时点与首次公布、修订时点不同。记录Type=0表示一个版本，Type=1表示查询，其中有效时点是允许的最大经济归属时间，可用时点是决策时间。</p><div class="equation">$$v=(i,t_e,t_a,x),\quad t_e\le t_{target},\quad t_a\le t_{decision}.$$</div></section><section><h2>版本选择</h2><p>在同实体中先选择可见有效时点最大的记录，再选择该时点最新可见修订版本。禁止在历史查询中直接使用最终修订值。相同三元键重复版本拒绝。</p><div class="equation">$$v^*=\arg\max_{v\in\mathcal F_t,\ t_e\le s}(t_e,t_a).$$</div></section><section><h2>陈旧与缺失</h2><p>当目标经济时间减有效时间超过最大年龄，标记不可用。缺失以独立Valid字段编码，数值0只是占位，不能将其解释为真实经济零值。</p><div class="equation">$$I_{valid}=1_{\{v^*\ \mathrm{exists},\,s-t_e^*\le A\}}.$$</div></section><section><h2>时间隔离检查</h2><p>改变决策时点之后发布的修订值，应不改变该决策时点输出。这种变形检验比仅检查输入列名称更能发现时间泄漏。实际时区、公布延迟和交易可行时点须在上游标准化。</p><div class="equation">$$v_{t}(D)=v_t(D\cup D_{available&gt;t}).$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Entity，DecisionTime，TargetTime，EffectiveTime，AvailableTime，Value，Valid。</p><p><a href="../research/comprehensive-examples/bitemporal-vintage-join.csv" download>样本CSV</a></p><pre>Type,Entity,EffectiveTime,AvailableTime,Value
+0,1,1,2,10
+0,1,1,4,12
+1,1,1,3,0
+1,1,1,5,0
+</pre><pre>./build/kline_quant comprehensive-bitemporal-vintage-join quant/research/comprehensive-examples/bitemporal-vintage-join.csv 10</pre><div class="wide"><table><thead><tr><th>Entity</th><th>DecisionTime</th><th>TargetTime</th><th>EffectiveTime</th><th>AvailableTime</th><th>Value</th><th>Valid</th></tr></thead><tbody><tr><td>1</td><td>3</td><td>1</td><td>1</td><td>2</td><td>10</td><td>1</td></tr><tr><td>1</td><td>5</td><td>1</td><td>1</td><td>4</td><td>12</td><td>1</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report bitemporal_vintage_join(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,5,5);parameters(p,1);double age=p[0];require(age&gt;=0,"negative age");
+    std::map&lt;int,Mat&gt; history;std::set&lt;std::tuple&lt;int,double,double&gt;&gt; keys;
+    for(const auto&amp;r:x)if(count(r[0],0,1)==0){
+        int id=count(r[1],1,1000000000);require(r[3]&gt;=r[2],"publication before effective time");
+        require(keys.insert({id,r[2],r[3]}).second,"duplicate vintage");
+        history[id].push_back({r[2],r[3],r[4]});
+    }
+    require(double(x.size())*x.size()&lt;=1e8,"join too large");
+    Report out;out.header={"Entity","DecisionTime","TargetTime","EffectiveTime","AvailableTime","Value","Valid"};
+    for(const auto&amp;r:x)if(r[0]==1){
+        int id=count(r[1],1,1000000000);require(r[2]&lt;=r[3],"future target");
+        Vec best;for(const auto&amp;v:history[id])if(v[0]&lt;=r[2]&amp;&amp;v[1]&lt;=r[3]&amp;&amp;(best.empty()||std::tie(v[0],v[1])&gt;std::tie(best[0],best[1])))best=v;
+        bool valid=!best.empty()&amp;&amp;r[2]-best[0]&lt;=age;
+        out.rows.push_back({double(id),r[3],r[2],valid?best[0]:0,valid?best[1]:0,valid?best[2]:0,double(valid)});
+    }
+    require(!out.rows.empty(),"no queries");return out;
+}</pre><p>参考文献：<a href="https://alfred.stlouisfed.org/">Federal Reserve Bank of St. Louis. ALFRED: ArchivaL Federal Reserve Economic Data.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

@@ -1,0 +1,23 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>均值经验似然与约束概率权重｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>均值经验似然与约束概率权重</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-inference.html">计量识别、弱工具变量与稳健推断</a>　<a href="../cpp/comprehensive_inference.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>非参数似然</h2><p>对样本观测分配未知概率质量，最大化概率乘积，同时满足候选均值约束。与正态似然不同，不需要指定总体密度族。</p><div class="equation">$$\max_{w_i&gt;0}\sum_i\log(nw_i),\quad \sum_iw_i=1,\quad \sum_iw_i(x_i-m)=0.$$</div></section><section><h2>拉格朗日对偶</h2><p>令z_i=x_i−m，最优权重可写成一维乘子函数。对偶方程严格递减，在所有分母为正的区间内有唯一根，前提是候选位于观测值凸包内部。</p><div class="equation">$$w_i=\frac1{n(1+\lambda z_i)},\quad f(\lambda)=\sum_i\frac{z_i}{1+\lambda z_i}=0.$$</div></section><section><h2>稳定求根</h2><p>由正负z给出可行上下界，用二分法求对偶根。候选位于凸包外或非退化边界时没有严格正权重，明确标记不可行而非输出无限似然比；完全相同的样本单独处理。</p><div class="equation">$$-\frac1{\max_i z_i}&lt;\lambda&lt;-\frac1{\min_i z_i}.$$</div></section><section><h2>似然比及验证</h2><p>输出−2对数似然比、权重和及矩残差。在独立同分布与有限正方差等条件下，真实均值附近有Wilks型渐近卡方结果；时序依赖下需要区块经验似然等扩展。</p><div class="equation">$$-2\log R(m)=2\sum_i\log(1+\lambda z_i).$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Candidate，Lambda，LogLikelihoodRatio，WeightSum，MomentResidual，Feasible。</p><p><a href="../research/comprehensive-examples/empirical-likelihood-mean.csv" download>样本CSV</a></p><pre>Observation
+-1
+1
+</pre><pre>./build/kline_quant comprehensive-empirical-likelihood-mean quant/research/comprehensive-examples/empirical-likelihood-mean.csv 0 0.5</pre><div class="wide"><table><thead><tr><th>Candidate</th><th>Lambda</th><th>LogLikelihoodRatio</th><th>WeightSum</th><th>MomentResidual</th><th>Feasible</th></tr></thead><tbody><tr><td>0</td><td>0</td><td>0</td><td>1</td><td>0</td><td>1</td></tr><tr><td>0.5</td><td>-0.6666666666667</td><td>0.5753641449036</td><td>1</td><td>0</td><td>1</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report empirical_likelihood_mean(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,1,1);require(!p.empty(),"candidate grid required");
+    Report out;out.header={"Candidate","Lambda","LogLikelihoodRatio","WeightSum","MomentResidual","Feasible"};
+    for(double m:p){
+        Vec z;for(const auto&amp;r:x)z.push_back(r[0]-m);
+        double mn=*std::min_element(z.begin(),z.end()),mx=*std::max_element(z.begin(),z.end());
+        if(mn==0&amp;&amp;mx==0){out.rows.push_back({m,0,0,1,0,1});continue;}
+        if(mn&gt;=0||mx&lt;=0){out.rows.push_back({m,0,0,0,0,0});continue;}
+        double lo=-1/mx,hi=-1/mn;
+        for(int it=0;it&lt;180;++it){
+            double v=lo+(hi-lo)*.5,f=0;
+            for(double a:z)f+=a/(1+v*a);
+            if(f&gt;0)lo=v;else hi=v;
+        }
+        double l=lo+(hi-lo)*.5,ratio=0,s=0,err=0;
+        for(double a:z){double den=positive(1+l*a),w=1/(x.size()*den);ratio+=2*std::log(den);s+=w;err+=w*a;}
+        out.rows.push_back({m,l,std::max(0.,ratio),s,err,1});
+    }
+    return out;
+}</pre><p>参考文献：<a href="https://doi.org/10.1201/9781420036152">Owen, A. B. (2001). Empirical Likelihood. Chapman &amp; Hall/CRC.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

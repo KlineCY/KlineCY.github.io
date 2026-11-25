@@ -1,0 +1,26 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>瞬态冲击核与最优拆单｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>瞬态冲击核与最优拆单</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-microstructure.html">市场微观结构、撮合与动态执行</a>　<a href="../cpp/comprehensive_microstructure.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>时间核与冲击恢复</h2><p>交易时点严格递增，买入或卖出总量Q通过非负拆单实现。瞬态冲击随时间指数衰减，临时成本各期独立；风险项对每期执行后的未完成库存计量。</p><div class="equation">$$K_{ij}=\eta e^{-\kappa|t_i-t_j|},\quad R_t=Q-\sum_{i\le t}q_i.$$</div></section><section><h2>优化目标</h2><p>二次目标把临时成本、瞬态成本与剩余库存风险统一到同一量纲；若方差输入已经含时长，不能再次乘以时长。</p><div class="equation">$$\min_{q\ge0,\ \mathbf1^\top q=Q}\frac12\sum_i a_iq_i^2+\frac12q^\top Kq+\frac{\gamma}{2}\sum_t v_tR_t^2.$$</div></section><section><h2>矩阵化</h2><p>利用总量约束将剩余库存写成未来拆单和，得到风险矩阵；正临时系数保证Hessian严格正定。通过单纯形活动集求解而非枚举所有分配。</p><div class="equation">$$A_{ij}=a_i1_{\{i=j\}}+K_{ij}+\gamma\sum_{t&lt;\min(i,j)}v_t,\quad q=Qw,\ w\in\Delta.$$</div></section><section><h2>目标分解</h2><p>每期瞬态贡献按半个q_i(Kq)_i分摊，风险按期末剩余库存分摊；贡献相加应恢复目标值。模型仅处理确定性执行时间网格与单方向订单。</p><div class="equation">$$J(q)=\sum_i(C_i^{temp}+C_i^{transient}+C_i^{risk}).$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Time，Quantity，Remaining，TemporaryCost，TransientCost，RiskCost，TotalObjective。</p><p><a href="../research/comprehensive-examples/transient-impact-schedule.csv" download>样本CSV</a></p><pre>Time,Temporary,Variance
+0,1,0
+1,1,0
+</pre><pre>./build/kline_quant comprehensive-transient-impact-schedule quant/research/comprehensive-examples/transient-impact-schedule.csv 2 0 1 0</pre><div class="wide"><table><thead><tr><th>Time</th><th>Quantity</th><th>Remaining</th><th>TemporaryCost</th><th>TransientCost</th><th>RiskCost</th><th>TotalObjective</th></tr></thead><tbody><tr><td>0</td><td>1</td><td>1</td><td>0.5</td><td>0</td><td>0</td><td>1</td></tr><tr><td>1</td><td>1</td><td>0</td><td>0.5</td><td>0</td><td>0</td><td>1</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report transient_impact_schedule(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,3);parameters(p,4);
+    double Q=positive(p[0]),eta=p[1],k=positive(p[2]),gamma=p[3];
+    require(eta&gt;=0&amp;&amp;gamma&gt;=0,"negative penalty");size_t n=x.size();
+    require(n&lt;=12,"active-set dimension limit");Vec prefix(n+1);
+    for(size_t i=0;i&lt;n;++i){require(x[i].size()==3&amp;&amp;x[i][2]&gt;=0,"invalid schedule");positive(x[i][1]);
+        if(i)require(x[i][0]&gt;x[i-1][0],"times must increase");prefix[i+1]=prefix[i]+x[i][2];}
+    Mat A(n,Vec(n+1));
+    for(size_t i=0;i&lt;n;++i)for(size_t j=0;j&lt;n;++j)
+        A[i][j]=(i==j?x[i][1]:0)+eta*std::exp(-k*std::abs(x[i][0]-x[j][0]))+gamma*prefix[std::min(i,j)];
+    auto sol=simplex_active_set(A,{});
+    Vec q(n);for(size_t i=0;i&lt;n;++i)q[i]=Q*sol.rows[i][1];
+    Report out;out.header={"Time","Quantity","Remaining","TemporaryCost","TransientCost","RiskCost","TotalObjective"};
+    double rem=Q,total=0;
+    for(size_t i=0;i&lt;n;++i){
+        rem-=q[i];double c=.5*x[i][1]*q[i]*q[i],z=0;
+        for(size_t j=0;j&lt;n;++j)z+=.5*q[i]*eta*std::exp(-k*std::abs(x[i][0]-x[j][0]))*q[j];
+        double risk=.5*gamma*x[i][2]*rem*rem;total+=c+z+risk;
+        out.rows.push_back({x[i][0],q[i],rem,c,z,risk,0});
+    }
+    for(auto&amp;r:out.rows)r.back()=total;
+    return out;
+}</pre><p>参考文献：<a href="https://www.nber.org/papers/w11444">Obizhaeva, A. A., and Wang, J. (2013). Optimal trading strategy and supply/demand dynamics. Journal of Financial Markets.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

@@ -1,0 +1,38 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>因果时点成交方向识别与报价后收益｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>因果时点成交方向识别与报价后收益</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-microstructure.html">市场微观结构、撮合与动态执行</a>　<a href="../cpp/comprehensive_microstructure.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>报价时间与信息集</h2><p>报价记录类型为0，成交记录为1，时间非递减；所有报价可用时间须真实反映进入策略的信息时点。以t−L为成交方向识别的查询上限，避免以成交后报价解释成交前方向。</p><div class="equation">$$m_t=(b_t+a_t)/2,\quad \tau(t)=\max\{s:s\le t-L\}.$$</div></section><section><h2>中点与tick规则</h2><p>成交高于中点标记主动买入，低于中点标记主动卖出；恰在中点时比较上一次不同成交价，连续同价继承最后非零tick方向。缺失历史或报价超过最大年龄时标记无效，不强行猜测。</p><div class="equation">$$q_t=\operatorname{sign}(P_t-m_{\tau(t)}),\quad P_t=m_{\tau(t)}\Rightarrow q_t=\operatorname{tick}(P_t).$$</div></section><section><h2>成交成本</h2><p>有效价差是成交方向乘成交价相对可见中点偏离的两倍，以价格单位表达。成交量加权汇总时应以有效记录为风险集。</p><div class="equation">$$ES_t=2q_t(P_t-m_{\tau(t)}).$$</div></section><section><h2>事后评价</h2><p>markout是成交方向乘期限末可见中点减成交价；未来报价只用于事后评价，不参与成交方向。期限超过数据范围时禁止使用最后报价向未来外推。</p><div class="equation">$$M_t(H)=q_t(m_{\tau(t+H)}-P_t).$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Time，Price，Quantity，Sign，Mid，EffectiveSpread，FutureMid，Markout，Valid。</p><p><a href="../research/comprehensive-examples/trade-signing-asof.csv" download>样本CSV</a></p><pre>Type,Time,PriceOrBid,AskOrQuantity
+0,0,99,101
+1,1,101,2
+1,2,100,1
+0,3,100,102
+1,4,101,1
+0,5,101,103
+</pre><pre>./build/kline_quant comprehensive-trade-signing-asof quant/research/comprehensive-examples/trade-signing-asof.csv 0 1 10</pre><div class="wide"><table><thead><tr><th>Time</th><th>Price</th><th>Quantity</th><th>Sign</th><th>Mid</th><th>EffectiveSpread</th><th>FutureMid</th><th>Markout</th><th>Valid</th></tr></thead><tbody><tr><td>1</td><td>101</td><td>2</td><td>1</td><td>100</td><td>2</td><td>100</td><td>-1</td><td>1</td></tr><tr><td>2</td><td>100</td><td>1</td><td>-1</td><td>100</td><td>0</td><td>101</td><td>-1</td><td>1</td></tr><tr><td>4</td><td>101</td><td>1</td><td>1</td><td>101</td><td>0</td><td>102</td><td>1</td><td>1</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report trade_signing_asof(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,4);parameters(p,3);
+    double lag=p[0],H=positive(p[1]),age=positive(p[2]);require(lag&gt;=0,"negative lag");
+    Mat quotes;double prev=-std::numeric_limits&lt;double&gt;::infinity();
+    for(const auto&amp;r:x){
+        require(r.size()==4&amp;&amp;r[1]&gt;=prev,"invalid time order");prev=r[1];
+        int type=count(r[0],0,1);
+        if(type==0){require(r[2]&gt;0&amp;&amp;r[3]&gt;=r[2],"invalid quote");quotes.push_back({r[1],(r[2]+r[3])/2});}
+        else{positive(r[2]);positive(r[3]);}
+    }
+    require(!quotes.empty(),"no quotes");
+    auto asof=[&amp;](double t,size_t limit){
+        auto it=std::upper_bound(quotes.begin(),quotes.begin()+limit,t,[](double v,const Vec&amp;r){return v&lt;r[0];});
+        if(it==quotes.begin())return Vec{};
+        --it;return t-(*it)[0]&lt;=age?*it:Vec{};
+    };
+    Report out;out.header={"Time","Price","Quantity","Sign","Mid","EffectiveSpread","FutureMid","Markout","Valid"};
+    double last=0,tick=0;
+    size_t seen=0;
+    for(const auto&amp;r:x){
+        if(r[0]==0){++seen;continue;}
+        if(last&gt;0&amp;&amp;r[2]!=last)tick=r[2]&gt;last?1:-1;
+        last=r[2];Vec now=asof(r[1]-lag,seen),future=asof(r[1]+H,quotes.size());
+        double sign=0,mid=0,fm=0;
+        if(!now.empty()){mid=now[1];sign=r[2]&gt;mid?1:r[2]&lt;mid?-1:tick;}
+        bool valid=sign!=0&amp;&amp;!future.empty()&amp;&amp;r[1]+H&lt;=x.back()[1];
+        if(valid)fm=future[1];
+        out.rows.push_back({r[1],r[2],r[3],sign,mid,2*sign*(r[2]-mid),fm,valid?sign*(fm-r[2]):0,double(valid)});
+    }
+    return out;
+}</pre><p>参考文献：<a href="https://doi.org/10.1111/j.1540-6261.1991.tb02683.x">Lee, C. M. C., and Ready, M. J. (1991). Inferring Trade Direction from Intraday Data. Journal of Finance.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

@@ -1,0 +1,31 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>均值—下行半方差配置：情景凸优化、单纯形投影与边界证书｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>均值—下行半方差配置：情景凸优化、单纯形投影与边界证书</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-portfolio.html">组合研究：因子风险、主动配置、稳健决策与滚动预测</a>　<a href="../cpp/comprehensive_portfolio.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>下行风险定义</h2><p>均值—方差对正负偏离一视同仁；下行半方差以目标收益m为参照，只惩罚低于目标的部分。输入等概率情景收益，使用平均平方短缺与平均收益构成凸目标。目标值m是事先给定的门槛，不随待优化组合的均值改变。</p><div class="equation">$$\min_{w\in\Delta}\frac{\gamma}{2n}\sum_{t=1}^n(m-r_t^\top w)_+^2-\bar r^\top w,\quad \Delta=\{w\ge0,\mathbf1^\top w=1\}$$</div></section><section><h2>梯度和步长上界</h2><p>平方正部在折点处一阶连续，梯度由短缺情景贡献。任一活动集合的Hessian为γ/n乘收益外积和，因此γ/n乘全部情景平方范数之和是全局Lipschitz上界。使用固定安全步长并对单纯形精确投影。</p><div class="equation">$$g(w)=-\bar r-\frac{\gamma}{n}\sum_t(m-r_t^\top w)_+r_t,\quad L\le\frac{\gamma}{n}\sum_t\|r_t\|^2$$</div></section><section><h2>投影与收敛</h2><p>每次将w−g/L投影到预算1、非负上界1。投影梯度映射为零等价于一阶KKT条件；停止检查该映射而非仅看收益变化。若无收益变化导致L=0，采用正的安全尺度。输出目标、下行半方差及预算残差。</p><div class="equation">$$G_L(w)=L[w-\Pi_\Delta(w-g(w)/L)],\quad \|G_L(w)\|_\infty\le\epsilon$$</div></section><section><h2>精确基准</h2><p>两资产在两个情景中收益均分别+.1及−.1，所有配置的风险与均值相同；等权初值满足KKT，目标半方差.005（γ=2）。非退化二资产可通过可行区间网格或一维凸求根独立核验。情景估计误差及目标门槛需样本外研究。</p><div class="equation">$$\operatorname{SemiVar}_m(w)=n^{-1}\sum_t(m-r_t^\top w)_+^2$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Asset，Weight，MeanReturn，DownsideSemivariance，Objective，ProjectedGradientResidual，BudgetResidual。</p><p><a href="../research/comprehensive-examples/mean-semivariance-simplex.csv" download>样本CSV</a></p><pre>Return1,Return2
+0.1,0.1
+-0.1,-0.1
+</pre><pre>./build/kline_quant comprehensive-mean-semivariance-simplex quant/research/comprehensive-examples/mean-semivariance-simplex.csv 0 2 1e-10 10000</pre><div class="wide"><table><thead><tr><th>Asset</th><th>Weight</th><th>MeanReturn</th><th>DownsideSemivariance</th><th>Objective</th><th>ProjectedGradientResidual</th><th>BudgetResidual</th></tr></thead><tbody><tr><td>1</td><td>0.5</td><td>0</td><td>0.005</td><td>0.005</td><td>0</td><td>0</td></tr><tr><td>2</td><td>0.5</td><td>0</td><td>0.005</td><td>0.005</td><td>0</td><td>0</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report mean_semivariance_simplex(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,2,2,32);parameters(p,4);
+    double target=p[0],gamma=positive(p[1]),tol=positive(p[2]);auto cap=count(p[3],1,100000);
+    require(double(cap)*x.size()*d&lt;=1e8,"Semivariance work limit");
+    Vec mean(d,0),w(d,1./d),lo(d,0),hi(d,1);double L=0;
+    for(auto&amp;r:x){L+=gamma*squared(r)/x.size();for(std::size_t j=0;j&lt;d;++j)mean[j]+=r[j]/x.size();}
+    L=std::max(1e-12,L);
+    auto eval=[&amp;](const Vec&amp; w){
+        Vec g=mean;for(double&amp;v:g)v=-v;double s=0;
+        for(auto&amp;r:x){
+            double e=std::max(0.,target-dot(r,w));s+=e*e/x.size();
+            for(std::size_t j=0;j&lt;d;++j)g[j]-=gamma*e*r[j]/x.size();
+        }
+        return std::make_pair(s,g);
+    };
+    double gap=0;auto f=eval(w);
+    for(std::size_t it=0;it&lt;=cap;++it){
+        Vec z=w;for(std::size_t j=0;j&lt;d;++j)z[j]-=f.second[j]/L;
+        Vec next=box_projection(z,lo,hi,1),g(d);
+        for(std::size_t j=0;j&lt;d;++j)g[j]=L*(w[j]-next[j]);gap=inf_norm(g);
+        if(gap&lt;=tol)break;require(it&lt;cap,"Semivariance optimization did not converge");
+        w=next;f=eval(w);
+    }
+    double r=dot(mean,w),obj=.5*gamma*f.first-r;
+    Report out{{"Asset","Weight","MeanReturn","DownsideSemivariance","Objective","ProjectedGradientResidual","BudgetResidual"},{}};
+    for(std::size_t j=0;j&lt;d;++j)out.rows.push_back({double(j+1),w[j],r,f.first,obj,gap,std::abs(sum(w)-1)});
+    return out;
+}</pre><p>参考文献：<a href="https://doi.org/10.1111/j.1540-6261.1952.tb01525.x">Markowitz (1952), Portfolio Selection, Journal of Finance.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

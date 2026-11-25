@@ -46,5 +46,5 @@ for(const file of fixtures){
 for(const directory of [root,cpp,sidebar,read("quant/research/index.html")])assert(directory.includes("numerical-laboratories.html"));
 assert(hub.includes("run_numerical_labs.py")&&hub.includes("catalog.json"));
 assert.equal(lessons,40);assert.equal(formulas,120);assert.equal(commands.size,40);assert.equal(fixtures.size,37);assert.equal(rows,245);
-assert(cpp.includes("<strong>321</strong>")&&cpp.includes("<strong>1043</strong>"));
+assert(cpp.includes("<strong>321</strong>")&&cpp.includes("<strong>1123</strong>"));
 console.log("PASS: "+lessons+" complete numerical chapters, "+formulas+" strict KaTeX equations, "+fixtures.size+" downloadable datasets, "+rows+" input rows and exact C++ source-linked recipes");

@@ -1,0 +1,49 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>双成分混合线性回归：潜状态、固定噪声与EM驻点｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="ml"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>双成分混合线性回归：潜状态、固定噪声与EM驻点</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-learning.html">统计学习：完整估计、条件分布与跨域泛化</a>　<a href="../cpp/comprehensive_learning.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>潜在回归状态</h2><p>单一条件均值可能掩盖多种收益生成机制。两成分混合回归假设潜状态决定条件均值，状态具有常数混合概率，共享已知噪声方差。这里不估计随特征变化的门控网络，也不引入Markov转移，因此状态之间没有显式时序持续性。</p><div class="equation">$$p(y_i\mid x_i)=\pi\varphi_\sigma(y_i-x_i^\top\beta_1)+(1-\pi)\varphi_\sigma(y_i-x_i^\top\beta_2)$$</div></section><section><h2>E步与M步</h2><p>E步由当前参数计算后验责任概率。M步更新混合概率为平均责任，各成分利用责任加权岭回归更新系数。以负对数密度加λ/2系数平方为目标，M步正规方程中的惩罚应为λσ²，不能忽略固定噪声尺度。</p><div class="equation">$$\gamma_i=\frac{\pi\varphi_\sigma(y_i-x_i^\top\beta_1)}{\pi\varphi_\sigma(y_i-x_i^\top\beta_1)+(1-\pi)\varphi_\sigma(y_i-x_i^\top\beta_2)},\quad \pi^{\rm new}=\bar\gamma$$</div></section><section><h2>数值稳定与驻点</h2><p>使用log-sum-exp归一责任，检查惩罚对数似然单调非降。停止时分别复算两个系数梯度及混合概率固定点差，而非仅看参数变化。混合模型目标通常非凸，EM只提供给定初值的局部驻点；标签互换产生等价解，不能据成分编号直接解释经济机制。</p><div class="equation">$$(X^\top W_kX+\lambda\sigma^2I)\hat\beta_k=X^\top W_ky,\quad g_k=\sigma^{-2}X^\top W_k(y-X\beta_k)-\lambda\beta_k$$</div></section><section><h2>基准和实验</h2><p>三条响应全为0、常数特征1、对称初值−1及1。第一次M步将两系数均收缩至0，责任各半、对数似然−3ln(2π)/2。该退化示例检查计算而非成分识别；非退化合成研究比较不同初值及责任加权正规方程，保留局部解差异。</p><div class="equation">$$\mathcal L_{\rm pen}=\sum_i\log p(y_i\mid x_i)-\lambda(\|\beta_1\|^2+\|\beta_2\|^2)/2$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Row，Responsibility1，Responsibility2，MixtureMean，Prior1，PenalizedLogLikelihood，ScoreResidual，Beta1_1，Beta2_1。</p><p><a href="../research/comprehensive-examples/mixture-regression-em.csv" download>样本CSV</a></p><pre>Y,X1
+0,1
+0,1
+0,1
+</pre><pre>./build/kline_quant comprehensive-mixture-regression-em quant/research/comprehensive-examples/mixture-regression-em.csv 1 1 1e-10 200 0.5 -1 1</pre><div class="wide"><table><thead><tr><th>Row</th><th>Responsibility1</th><th>Responsibility2</th><th>MixtureMean</th><th>Prior1</th><th>PenalizedLogLikelihood</th><th>ScoreResidual</th><th>Beta1_1</th><th>Beta2_1</th></tr></thead><tbody><tr><td>1</td><td>0.5</td><td>0.5</td><td>0</td><td>0.5</td><td>-2.756815599614</td><td>0</td><td>0</td><td>0</td></tr><tr><td>2</td><td>0.5</td><td>0.5</td><td>0</td><td>0.5</td><td>-2.756815599614</td><td>0</td><td>0</td><td>0</td></tr><tr><td>3</td><td>0.5</td><td>0.5</td><td>0</td><td>0.5</td><td>-2.756815599614</td><td>0</td><td>0</td><td>0</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report mixture_regression_em(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,2,2,17)-1;parameters(p,5+2*d);
+    double sig=positive(p[0]),lam=positive(p[1]),tol=positive(p[2]),pi=p[4],var=sig*sig;
+    auto cap=count(p[3],1,100000);require(pi&gt;0&amp;&amp;pi&lt;1&amp;&amp;double(cap)*x.size()*d*d&lt;=5e7,"Invalid mixture controls");
+    Vec a(p.begin()+5,p.begin()+5+d),b(p.begin()+5+d,p.end());Mat X;Vec y;
+    for(auto&amp;r:x){X.emplace_back(r.begin()+1,r.end());y.push_back(r[0]);}
+    auto evaluate=[&amp;](const Vec&amp;a,const Vec&amp;b,double prior,Vec&amp; responsibility){
+        require(prior&gt;0&amp;&amp;prior&lt;1,"Mixture weight reached boundary");
+        double f=-.5*lam*(squared(a)+squared(b)),c=-std::log(sig)-.5*std::log(2*std::acos(-1.));
+        responsibility.resize(y.size());
+        for(std::size_t i=0;i&lt;y.size();++i){
+            double u=std::log(prior)+c-.5*std::pow(y[i]-dot(X[i],a),2)/var;
+            double v=std::log1p(-prior)+c-.5*std::pow(y[i]-dot(X[i],b),2)/var;
+            double ld=logsumexp({u,v});f+=ld;responsibility[i]=std::exp(u-ld);
+        }
+        return f;
+    };
+    Vec r;double ll=evaluate(a,b,pi,r),gap=0;
+    for(std::size_t it=0;it&lt;cap;++it){
+        Mat H1(d,Vec(d,0)),H2=H1;Vec z1(d,0),z2(d,0);
+        for(std::size_t i=0;i&lt;y.size();++i){
+            add_outer(H1,X[i],r[i]);add_outer(H2,X[i],1-r[i]);
+            for(std::size_t j=0;j&lt;d;++j){z1[j]+=r[i]*X[i][j]*y[i];z2[j]+=(1-r[i])*X[i][j]*y[i];}
+        }
+        for(std::size_t j=0;j&lt;d;++j){H1[j][j]+=lam*var;H2[j][j]+=lam*var;}
+        pi=sum(r)/r.size();a=solve_spd(H1,z1);b=solve_spd(H2,z2);
+        double next=evaluate(a,b,pi,r);
+        require(next&gt;=ll-1e-10*std::max(1.,std::abs(ll)),"Mixture likelihood decreased");ll=next;
+        Vec g1(d),g2(d);for(std::size_t j=0;j&lt;d;++j){g1[j]=-lam*a[j];g2[j]=-lam*b[j];}
+        for(std::size_t i=0;i&lt;y.size();++i){
+            double u=r[i]*(y[i]-dot(X[i],a))/var,v=(1-r[i])*(y[i]-dot(X[i],b))/var;
+            for(std::size_t j=0;j&lt;d;++j){g1[j]+=u*X[i][j];g2[j]+=v*X[i][j];}
+        }
+        gap=std::max({inf_norm(g1),inf_norm(g2),std::abs(sum(r)/r.size()-pi)});
+        if(gap&lt;=tol)break;
+    }
+    require(gap&lt;=tol,"Mixture regression EM did not converge");
+    Report out{{"Row","Responsibility1","Responsibility2","MixtureMean","Prior1","PenalizedLogLikelihood","ScoreResidual"},{}};
+    for(int k=1;k&lt;=2;++k)for(std::size_t j=1;j&lt;=d;++j)out.header.push_back("Beta"+std::to_string(k)+"_"+std::to_string(j));
+    for(std::size_t i=0;i&lt;y.size();++i){
+        Vec z{double(i+1),r[i],1-r[i],pi*dot(X[i],a)+(1-pi)*dot(X[i],b),pi,ll,gap};
+        z.insert(z.end(),a.begin(),a.end());z.insert(z.end(),b.begin(),b.end());out.rows.push_back(z);
+    }
+    return out;
+}</pre><p>参考文献：<a href="https://doi.org/10.1162/neco.1994.6.2.181">Jordan and Jacobs (1994), Hierarchical Mixtures of Experts and the EM Algorithm, Neural Computation; constant-gating special case.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

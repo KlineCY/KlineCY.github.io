@@ -1,0 +1,38 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>双状态阈值自回归：训练期阈值搜索、分段回归及留出预测｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="ml"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>双状态阈值自回归：训练期阈值搜索、分段回归及留出预测</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-dynamics.html">时间序列估计、潜在状态与期限风险</a>　<a href="../cpp/comprehensive_dynamics.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>可观察状态与非线性</h2><p>阈值自回归由可观察的滞后目标确定状态，而Markov转换模型由不可直接观察的随机状态决定。双状态TAR(1)允许低于或高于阈值时具有不同截距与斜率，可表达均值回复非对称及区间依赖。状态切换发生在已知上一期目标上，不能由当前实现值反向选择。</p><div class="equation">$$Y_t=\begin{cases}c_0+\phi_0Y_{t-1}+\epsilon_t,&amp;Y_{t-1}&lt;c\\ c_1+\phi_1Y_{t-1}+\epsilon_t,&amp;Y_{t-1}\ge c\end{cases}$$</div></section><section><h2>集中参数搜索</h2><p>对每个阈值候选，将训练转换按滞后值分组，要求两组均达到最小样本数。分别拟合含截距的两参数岭回归，截距不惩罚；比较训练RSS加斜率惩罚的目标。零岭且组内解释变量无变化时跳过该候选。</p><div class="equation">$$J(c)=\min_{b_0,b_1}\sum_{t\in T}(Y_t-z_t^\top b_{s_t(c)})^2+\lambda(\phi_0^2+\phi_1^2)$$</div></section><section><h2>留出状态与预测</h2><p>训练选定阈值及两组参数后，后续预测使用上一期已实现目标来选择状态。这是冻结模型参数的滚动一步预测。若希望同一起点多步情景路径，需用递归预测值或模拟误差路径来产生状态，不可直接复用留出真实滞后。</p><div class="equation">$$\hat s_t=\mathbf1_{\{Y_{t-1}\ge\hat c\}},\quad \hat Y_{t\mid t-1}=\hat c_{\hat s_t}+\hat\phi_{\hat s_t}Y_{t-1}$$</div></section><section><h2>精确样本及限制</h2><p>序列−2、−1、2、1循环，阈值0；低组映射−2→−1、−1→2，截距5、斜率3；高组映射2→1、1→−2，截距−5、斜率3。该路径用于验算，不代表稳定TAR。阈值参数的抽样分布非标准，显著性不应直接使用普通t检验。</p><div class="equation">$$RSS(c)=\sum_{t\in T}(Y_t-\hat Y_t(c))^2$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Period，Train，Regime，Actual，Forecast，Threshold，TrainingRSS，InterceptLow，ARLow，InterceptHigh，ARHigh。</p><p><a href="../research/comprehensive-examples/threshold-ar-fit.csv" download>样本CSV</a></p><pre>Train,Value
+1,-2
+1,-1
+1,2
+1,1
+1,-2
+1,-1
+1,2
+1,1
+0,-2
+</pre><pre>./build/kline_quant comprehensive-threshold-ar-fit quant/research/comprehensive-examples/threshold-ar-fit.csv 0 0 2 0 2</pre><div class="wide"><table><thead><tr><th>Period</th><th>Train</th><th>Regime</th><th>Actual</th><th>Forecast</th><th>Threshold</th><th>TrainingRSS</th><th>InterceptLow</th><th>ARLow</th><th>InterceptHigh</th><th>ARHigh</th></tr></thead><tbody><tr><td>2</td><td>1</td><td>0</td><td>-1</td><td>-1</td><td>0</td><td>0</td><td>5</td><td>3</td><td>-5</td><td>3</td></tr><tr><td>3</td><td>1</td><td>0</td><td>2</td><td>2</td><td>0</td><td>0</td><td>5</td><td>3</td><td>-5</td><td>3</td></tr><tr><td>4</td><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td><td>0</td><td>5</td><td>3</td><td>-5</td><td>3</td></tr><tr><td>5</td><td>1</td><td>1</td><td>-2</td><td>-2</td><td>0</td><td>0</td><td>5</td><td>3</td><td>-5</td><td>3</td></tr><tr><td>6</td><td>1</td><td>0</td><td>-1</td><td>-1</td><td>0</td><td>0</td><td>5</td><td>3</td><td>-5</td><td>3</td></tr><tr><td>7</td><td>1</td><td>0</td><td>2</td><td>2</td><td>0</td><td>0</td><td>5</td><td>3</td><td>-5</td><td>3</td></tr><tr><td>8</td><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td><td>0</td><td>5</td><td>3</td><td>-5</td><td>3</td></tr><tr><td>9</td><td>0</td><td>1</td><td>-2</td><td>-2</td><td>0</td><td>0</td><td>5</td><td>3</td><td>-5</td><td>3</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report threshold_ar_fit(const Mat&amp; x,const Vec&amp; p){
+    validate(x,5,2,2);parameters(p,5);
+    double lo=p[0],hi=p[1],lam=p[3];auto G=count(p[2],2,10000),minn=count(p[4],2,x.size());
+    require(hi&gt;=lo&amp;&amp;lam&gt;=0&amp;&amp;double(G)*x.size()&lt;=5e7,"Invalid TAR grid");
+    std::size_t T=0;bool test=false;
+    for(auto&amp;r:x){require(r[0]==0||r[0]==1,"Binary train flag");if(!r[0])test=true;else{require(!test,"Training must be a prefix");++T;}}
+    require(T&gt;=2*minn+1,"Insufficient TAR training");
+    double best=std::numeric_limits&lt;double&gt;::infinity(),cut=0,rss=0;Mat beta;
+    for(std::size_t g=0;g&lt;G;++g){
+        double c=lo+(hi-lo)*g/(G-1);
+        std::vector&lt;Mat&gt; X(2);std::vector&lt;Vec&gt; y(2);
+        for(std::size_t t=1;t&lt;T;++t){auto s=std::size_t(x[t-1][1]&gt;=c);X[s].push_back({1,x[t-1][1]});y[s].push_back(x[t][1]);}
+        if(X[0].size()&lt;minn||X[1].size()&lt;minn)continue;
+        Mat w;double ss=0;
+        try{
+            for(int s=0;s&lt;2;++s){w.push_back(fit_ridge(X[s],y[s],lam,true));for(std::size_t i=0;i&lt;y[s].size();++i)ss+=std::pow(y[s][i]-dot(X[s][i],w[s]),2);}
+        }catch(const std::exception&amp;){continue;}
+        double f=ss+lam*(w[0][1]*w[0][1]+w[1][1]*w[1][1]);
+        if(f&lt;best){best=f;cut=c;rss=ss;beta=w;}
+    }
+    require(!beta.empty(),"No eligible threshold");
+    Report out{{"Period","Train","Regime","Actual","Forecast","Threshold","TrainingRSS","InterceptLow","ARLow","InterceptHigh","ARHigh"},{}};
+    for(std::size_t t=1;t&lt;x.size();++t){
+        auto s=std::size_t(x[t-1][1]&gt;=cut);double f=beta[s][0]+beta[s][1]*x[t-1][1];
+        out.rows.push_back({double(t+1),x[t][0],double(s),x[t][1],f,cut,rss,beta[0][0],beta[0][1],beta[1][0],beta[1][1]});
+    }
+    return out;
+}</pre><p>参考文献：<a href="https://doi.org/10.1007/978-1-4684-7888-4">Tong (1983), Threshold Models in Non-linear Time Series Analysis, Springer.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

@@ -1,0 +1,26 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Beta–Binomial层级违约率后验网格｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>Beta–Binomial层级违约率后验网格</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-bayesian.html">贝叶斯后验、粒子过滤与稀有事件模拟</a>　<a href="../cpp/comprehensive_bayesian.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>异质违约率</h2><p>组内二项计数共享组别违约概率，各组概率由共同Beta超先验生成。对α、β在指定二维等权离散网格积分，保留超参数不确定性。</p><div class="equation">$$K_i\mid p_i\sim\mathrm{Bin}(n_i,p_i),\quad p_i\mid a,b\sim\mathrm{Beta}(a,b).$$</div></section><section><h2>边际计数似然</h2><p>积分组别概率得到Beta–Binomial边际似然；保留二项组合系数以获得正确边际证据，使用lgamma计算Beta函数。</p><div class="equation">$$p(k_i\mid n_i,a,b)=\binom{n_i}{k_i}\frac{B(a+k_i,b+n_i-k_i)}{B(a,b)}.$$</div></section><section><h2>后验混合</h2><p>固定超参数后仍为Beta后验，计算均值和二阶矩，再按超参数边际后验权重混合。输出超参数后验均值，不以它们代入单一Beta分布。</p><div class="equation">$$E[p_i^2\mid a,b,y]=\frac{(a+k_i)(a+k_i+1)}{(a+b+n_i)(a+b+n_i+1)}.$$</div></section><section><h2>信用风险应用</h2><p>组别试验数差异决定收缩程度。若默认事件受共同宏观冲击而组内并非条件独立，Beta–Binomial仅是简化过度离散模型；不可将合成违约率当作真实评级校准。</p><div class="equation">$$\operatorname{Var}(p_i\mid y)=E[p_i^2\mid y]-E[p_i\mid y]^2.$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Group，PosteriorMean，PosteriorVariance，HyperAlpha，HyperBeta，LogEvidence。</p><p><a href="../research/comprehensive-examples/beta-binomial-hyper-grid.csv" download>样本CSV</a></p><pre>Defaults,Trials
+1,2
+2,2
+</pre><pre>./build/kline_quant comprehensive-beta-binomial-hyper-grid quant/research/comprehensive-examples/beta-binomial-hyper-grid.csv 1 1 1 1 1 1</pre><div class="wide"><table><thead><tr><th>Group</th><th>PosteriorMean</th><th>PosteriorVariance</th><th>HyperAlpha</th><th>HyperBeta</th></tr></thead><tbody><tr><td>1</td><td>0.5</td><td>0.05</td><td>1</td><td>1</td></tr><tr><td>2</td><td>0.75</td><td>0.0375</td><td>1</td><td>1</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report beta_binomial_hyper_grid(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,2,2);parameters(p,6);
+    double alo=positive(p[0]),ahi=positive(p[1]),blo=positive(p[3]),bhi=positive(p[4]);
+    int G=count(p[2],1,300),H=count(p[5],1,300);
+    require(ahi&gt;=alo&amp;&amp;bhi&gt;=blo&amp;&amp;(G&gt;1||alo==ahi)&amp;&amp;(H&gt;1||blo==bhi)&amp;&amp;double(G)*H*x.size()&lt;=1e7,"invalid hyper grid");
+    Vec k,n;for(const auto&amp;r:x){n.push_back(count(r[1],0,1000000000));k.push_back(count(r[0],0,int(n.back())));}
+    auto lb=[](double a,double b){return std::lgamma(a)+std::lgamma(b)-std::lgamma(a+b);};
+    Mat grid;Vec logs;
+    for(int i=0;i&lt;G;++i)for(int j=0;j&lt;H;++j){
+        double a=G==1?alo:alo+(ahi-alo)*i/(G-1),b=H==1?blo:blo+(bhi-blo)*j/(H-1),ll=0;
+        for(size_t r=0;r&lt;x.size();++r)ll+=std::lgamma(n[r]+1)-std::lgamma(k[r]+1)-std::lgamma(n[r]-k[r]+1)+lb(a+k[r],b+n[r]-k[r])-lb(a,b);
+        grid.push_back({a,b});logs.push_back(ll);
+    }
+    double z=logsumexp(logs),ha=0,hb=0;Vec w;
+    for(size_t j=0;j&lt;grid.size();++j){w.push_back(std::exp(logs[j]-z));ha+=w.back()*grid[j][0];hb+=w.back()*grid[j][1];}
+    Report out;out.header={"Group","PosteriorMean","PosteriorVariance","HyperAlpha","HyperBeta","LogEvidence"};
+    for(size_t i=0;i&lt;x.size();++i){
+        double m=0,s=0;
+        for(size_t j=0;j&lt;grid.size();++j){double a=grid[j][0]+k[i],b=grid[j][1]+n[i]-k[i],t=a+b;m+=w[j]*a/t;s+=w[j]*a*(a+1)/(t*(t+1));}
+        out.rows.push_back({double(i+1),m,std::max(0.,s-m*m),ha,hb,z-std::log(double(grid.size()))});
+    }
+    return out;
+}</pre><p>参考文献：<a href="https://www.stat.columbia.edu/~gelman/book/">Gelman, A., et al. (2013). Bayesian Data Analysis, 3rd ed.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

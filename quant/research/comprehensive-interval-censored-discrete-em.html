@@ -1,0 +1,35 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>区间删失的离散支持非参数似然EM｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>区间删失的离散支持非参数似然EM</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-inference.html">计量识别、弱工具变量与稳健推断</a>　<a href="../cpp/comprehensive_inference.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>观测机制</h2><p>个体的事件时间只知道属于闭区间[L,U]；L=U表示精确时间。这里在用户事先指定的有限离散支持上估计概率质量，不宣称自动构造完整Turnbull最大交集。</p><div class="equation">$$P(T\in[L_i,U_i])=\sum_{j:s_j\in[L_i,U_i]}p_j.$$</div></section><section><h2>混合似然</h2><p>每条区间记录的贡献为兼容支持点概率之和。对数目标关于概率向量凹，允许多个最大化解；支持点没有观测覆盖时会逐步失去权重。</p><div class="equation">$$\ell(p)=\sum_i\log\sum_j a_{ij}p_j,\quad a_{ij}=1_{\{L_i\le s_j\le U_i\}}.$$</div></section><section><h2>EM更新</h2><p>E步将区间内概率归一得到条件责任权重；M步按全部样本责任权重的均值更新概率。以概率变化及对数似然单调性诊断迭代。</p><div class="equation">$$r_{ij}^{(k)}=\frac{a_{ij}p_j^{(k)}}{\sum_l a_{il}p_l^{(k)}},\quad p_j^{(k+1)}=n^{-1}\sum_i r_{ij}^{(k)}.$$</div></section><section><h2>识别与输出</h2><p>输出支持质量、CDF和对数似然；若区间高度重叠，点质量可能不可唯一识别。改变支持网格的敏感性与区间覆盖率应在研究报告中独立呈现。</p><div class="equation">$$\hat F(t)=\sum_{s_j\le t}\hat p_j.$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Support，Mass，CDF，LogLikelihood，Iterations。</p><p><a href="../research/comprehensive-examples/interval-censored-discrete-em.csv" download>样本CSV</a></p><pre>Lower,Upper
+1,1
+1,2
+2,2
+</pre><pre>./build/kline_quant comprehensive-interval-censored-discrete-em quant/research/comprehensive-examples/interval-censored-discrete-em.csv 1e-11 10000 1 2</pre><div class="wide"><table><thead><tr><th>Support</th><th>Mass</th><th>CDF</th><th>LogLikelihood</th></tr></thead><tbody><tr><td>1</td><td>0.5</td><td>0.5</td><td>-1.38629436112</td></tr><tr><td>2</td><td>0.5</td><td>1</td><td>-1.38629436112</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report interval_censored_discrete_em(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,2,2);require(p.size()&gt;=3,"support required");
+    double tol=positive(p[0]);int cap=count(p[1],1,100000);Vec s(p.begin()+2,p.end());
+    require(std::is_sorted(s.begin(),s.end())&amp;&amp;std::adjacent_find(s.begin(),s.end())==s.end(),"support must increase");
+    require(double(x.size())*s.size()*cap&lt;=1e8,"EM too large");
+    std::vector&lt;std::vector&lt;size_t&gt;&gt; idx;
+    for(const auto&amp;r:x){
+        require(r[0]&lt;=r[1],"reversed interval");std::vector&lt;size_t&gt; a;
+        for(size_t j=0;j&lt;s.size();++j)if(s[j]&gt;=r[0]&amp;&amp;s[j]&lt;=r[1])a.push_back(j);
+        require(!a.empty(),"interval misses support");idx.push_back(a);
+    }
+    Vec w(s.size(),1./s.size());double ll=0;int it=0;
+    auto step=[&amp;](const Vec&amp; v,Vec&amp; next){
+        next.assign(s.size(),0);double value=0;
+        for(const auto&amp;a:idx){
+            double mass=0;for(size_t j:a)mass+=v[j];positive(mass);value+=std::log(mass);
+            for(size_t j:a)next[j]+=v[j]/mass/x.size();
+        }
+        return value;
+    };
+    Vec next;ll=step(w,next);
+    for(;it&lt;cap;++it){
+        double gap=0;for(size_t j=0;j&lt;s.size();++j)gap=std::max(gap,std::abs(next[j]-w[j]));
+        w=next;double v=step(w,next);require(v+1e-10&gt;=ll,"EM decreased");ll=v;
+        if(gap&lt;=tol){++it;break;}
+    }
+    require(it&lt;cap,"EM iteration cap reached");
+    Report out;out.header={"Support","Mass","CDF","LogLikelihood","Iterations"};double cdf=0;
+    for(size_t j=0;j&lt;s.size();++j){cdf+=w[j];out.rows.push_back({s[j],w[j],cdf,ll,double(it)});}
+    return out;
+}</pre><p>参考文献：<a href="https://doi.org/10.1111/j.2517-6161.1976.tb01597.x">Turnbull, B. W. (1976). The Empirical Distribution Function with Arbitrarily Grouped, Censored and Truncated Data. JRSS B.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

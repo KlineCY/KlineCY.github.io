@@ -1,0 +1,20 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>高斯组合损失尾概率的重要性抽样｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>高斯组合损失尾概率的重要性抽样</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-bayesian.html">贝叶斯后验、粒子过滤与稀有事件模拟</a>　<a href="../cpp/comprehensive_bayesian.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>稀有事件目标</h2><p>设标准化组合损失Z为标准正态，估计阈值a以上的尾概率。直接抽样在概率很小时几乎没有命中；指数倾斜将均值移向阈值，提升尾部样本比例。</p><div class="equation">$$p_a=P(Z&gt;a),\quad Q_\theta=N(\theta,1),\quad \theta=\max(a,0).$$</div></section><section><h2>似然比校正</h2><p>在倾斜分布下抽样，权重是原密度除以倾斜密度；没有校正的命中比例不是原分布尾概率。采用独立样本，估计量无偏。</p><div class="equation">$$L(z)=\exp(-\theta z+\theta^2/2),\quad \hat p=N^{-1}\sum_i1_{\{Z_i&gt;a\}}L(Z_i).$$</div></section><section><h2>方差与误差</h2><p>以样本方差除以N得到Monte Carlo标准误，输出事件加权ESS作为稀有事件权重集中度诊断。正态精确尾概率用erfc计算，不采用1−CDF的消减形式。</p><div class="equation">$$\widehat{SE}=\sqrt{\frac{\sum_i(U_i-\bar U)^2}{N(N-1)}},\quad ESS_U=\frac{(\sum_i U_i)^2}{\sum_iU_i^2}.$$</div></section><section><h2>推广边界</h2><p>此例可对应线性高斯投资组合损失，非线性期权、厚尾因子和信用损失必须重新构造proposal与似然比。阈值扫描使用同一随机数便于比较，但结果之间因此相关。</p><div class="equation">$$P(L&gt;\ell)=\tfrac12\operatorname{erfc}((\ell-\mu)/(\sigma\sqrt2)).$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Threshold，ImportanceEstimate，MonteCarloSE，ExactProbability，Tilt，EffectiveSampleSize。</p><p><a href="../research/comprehensive-examples/gaussian-tail-importance.csv" download>样本CSV</a></p><pre>Threshold
+0
+3
+</pre><pre>./build/kline_quant comprehensive-gaussian-tail-importance quant/research/comprehensive-examples/gaussian-tail-importance.csv 0 1 10000 12</pre><div class="wide"><table><thead><tr><th>Threshold</th></tr></thead><tbody><tr><td>0</td></tr><tr><td>3</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report gaussian_tail_importance(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,1,1);parameters(p,4);
+    double mu=p[0],sig=positive(p[1]);int N=count(p[2],2,2000000),seed=count(p[3],0,2147483647);
+    require(double(N)*x.size()&lt;=5e7,"simulation too large");
+    std::mt19937 gen(seed);std::normal_distribution&lt;double&gt; normal01(0,1);Vec noise(N);for(double&amp;v:noise)v=normal01(gen);
+    Report out;out.header={"Threshold","ImportanceEstimate","MonteCarloSE","ExactProbability","Tilt","EffectiveSampleSize"};
+    for(const auto&amp;r:x){
+        double a=(r[0]-mu)/sig,theta=std::max(0.,a);require(std::abs(a)&lt;=12,"threshold outside numerical range");
+        double mean=0,m2=0,total=0,sq=0;int n=0;
+        for(double e:noise){
+            double z=theta+e,u=z&gt;a?std::exp(-theta*z+.5*theta*theta):0;total+=u;sq+=u*u;
+            ++n;double d=u-mean;mean+=d/n;m2+=d*(u-mean);
+        }
+        out.rows.push_back({r[0],mean,std::sqrt(std::max(0.,m2)/(N-1)/N),.5*std::erfc(a/std::sqrt(2.)),theta,sq&gt;0?total*total/sq:0});
+    }
+    return out;
+}</pre><p>参考文献：<a href="https://doi.org/10.1007/978-0-387-21617-1">Glasserman, P. (2004). Monte Carlo Methods in Financial Engineering. Springer.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

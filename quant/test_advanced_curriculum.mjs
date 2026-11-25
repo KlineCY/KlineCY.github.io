@@ -45,7 +45,7 @@ for(const g of groups){
 assert.equal(all.length,48);assert.equal(new Set(all).size,48);
 assert.equal(formulas,220);assert.equal(rows,124);assert.equal(coords,751);
 assert(read("quant/sidebar-v2.js").includes("advanced-research.html"));
-assert(read("quant/cpp/index.html").includes("<strong>1043</strong>"));
+assert(read("quant/cpp/index.html").includes("<strong>1123</strong>"));
 const studies=read("quant/research/advanced-studies.html");
 const scripts=["estimation","finance","numerics","inference"].map(g=>read("quant/research/advanced_studies_"+g+".py")).join("\n");
 const ids=[...studies.matchAll(/<article id="([a-z_]+)"/g)].map(m=>m[1]);

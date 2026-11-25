@@ -1,0 +1,28 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>有限期限储蓄决策与收入Markov风险｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>有限期限储蓄决策与收入Markov风险</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-economics.html">动态经济决策、产业组织与均衡计算</a>　<a href="../cpp/comprehensive_economics.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>预算约束</h2><p>家庭在当前收入和利息收入基础上选择下一期资产，要求消费严格为正。资产网格必须从零开始且严格递增；终端没有遗赠效用。</p><div class="equation">$$c=(1+r)a+y_i-a',\quad a'\in\mathcal A,\quad c&gt;0.$$</div></section><section><h2>效用与收入过程</h2><p>采用CRRA效用，风险厌恶等于1时为对数效用。收入状态转移矩阵按行归一，条件未来效用随收入转移概率加权。</p><div class="equation">$$u(c)=\begin{cases}(c^{1-\gamma}-1)/(1-\gamma),&amp;\gamma\ne1\\\log c,&amp;\gamma=1.\end{cases}$$</div></section><section><h2>有限期Bellman</h2><p>从零终值向后递推，对每个资产和收入状态穷举可行下一期资产。保存最优行动、消费与价值，不依赖连续Euler方程；网格约束可能使最优点落在边界。</p><div class="equation">$$V_h(a,i)=\max_{a'\in\mathcal A,\ c&gt;0}\{u(c)+\beta\sum_jP_{ij}V_{h-1}(a',j)\},\quad V_0=0.$$</div></section><section><h2>政策函数与误差</h2><p>一期剩余时在零遗赠下选择最小资产；更长期的储蓄由未来收入风险与边际效用决定。通过网格细化比较政策、价值和资源约束残差，不把离散解等同于连续模型精确解。</p><div class="equation">$$\frac{\partial u(c)}{\partial c}=c^{-\gamma}.$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Remaining，IncomeState，Asset，NextAsset，Consumption，Value。</p><p><a href="../research/comprehensive-examples/household-saving-bellman.csv" download>样本CSV</a></p><pre>Income,Transition1,Transition2
+1,1,0
+2,0,1
+</pre><pre>./build/kline_quant comprehensive-household-saving-bellman quant/research/comprehensive-examples/household-saving-bellman.csv 1 0.95 1 0 0 1 2</pre><div class="wide"><table><thead><tr><th>Remaining</th><th>IncomeState</th><th>Asset</th><th>NextAsset</th><th>Consumption</th><th>Value</th></tr></thead><tbody><tr><td>1</td><td>1</td><td>0</td><td>0</td><td>1</td><td>0</td></tr><tr><td>1</td><td>1</td><td>1</td><td>0</td><td>2</td><td>0.6931471805599</td></tr><tr><td>1</td><td>1</td><td>2</td><td>0</td><td>3</td><td>1.098612288668</td></tr><tr><td>1</td><td>2</td><td>0</td><td>0</td><td>2</td><td>0.6931471805599</td></tr><tr><td>1</td><td>2</td><td>1</td><td>0</td><td>3</td><td>1.098612288668</td></tr><tr><td>1</td><td>2</td><td>2</td><td>0</td><td>4</td><td>1.38629436112</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report household_saving_bellman(const Mat&amp; x,const Vec&amp; p){
+    size_t K=x.size();validate(x,1,2,33);require(x[0].size()==K+1&amp;&amp;p.size()&gt;=6,"invalid income grid");
+    int H=count(p[0],1,1000);double beta=p[1],gamma=positive(p[2]),r=p[3];
+    require(beta&gt;0&amp;&amp;beta&lt;=1&amp;&amp;r&gt;-1,"invalid household controls");
+    Vec a(p.begin()+4,p.end());require(a.front()==0&amp;&amp;std::is_sorted(a.begin(),a.end())&amp;&amp;std::adjacent_find(a.begin(),a.end())==a.end(),"asset grid must start at zero and increase");
+    size_t M=a.size();require(double(H)*K*K*M*M&lt;=5e7,"household DP too large");
+    for(const auto&amp;z:x){positive(z[0]);double s=0;for(size_t j=1;j&lt;=K;++j){require(z[j]&gt;=0,"negative transition");s+=z[j];}require(std::abs(s-1)&lt;1e-10,"transition row sum");}
+    Mat v(K,Vec(M));Report out;out.header={"Remaining","IncomeState","Asset","NextAsset","Consumption","Value"};
+    for(int h=1;h&lt;=H;++h){
+        Mat next(K,Vec(M));
+        for(size_t i=0;i&lt;K;++i)for(size_t m=0;m&lt;M;++m){
+            double resources=(1+r)*a[m]+x[i][0],best=-std::numeric_limits&lt;double&gt;::infinity(),bc=0,ba=0;
+            for(size_t k=0;k&lt;M;++k){
+                double c=resources-a[k];if(c&lt;=0)continue;
+                double u=gamma==1?std::log(c):std::expm1((1-gamma)*std::log(c))/(1-gamma),ev=0;
+                for(size_t j=0;j&lt;K;++j)ev+=x[i][j+1]*v[j][k];
+                double value=u+beta*ev;if(value&gt;best){best=value;bc=c;ba=a[k];}
+            }
+            require(std::isfinite(best),"no feasible consumption");next[i][m]=best;
+            out.rows.push_back({double(h),double(i+1),a[m],ba,bc,best});
+        }
+        v=next;
+    }
+    return out;
+}</pre><p>参考文献：<a href="https://dynamics.quantecon.org/ifp.html">QuantEcon. The Income Fluctuation Problem I: Basic Model.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

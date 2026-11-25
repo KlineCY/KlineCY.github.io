@@ -1,0 +1,30 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>指数效用与Entropic风险配置：指数倾斜概率和凸最优性｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>指数效用与Entropic风险配置：指数倾斜概率和凸最优性</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-portfolio.html">组合研究：因子风险、主动配置、稳健决策与滚动预测</a>　<a href="../cpp/comprehensive_portfolio.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>指数效用与风险厌恶</h2><p>对等概率离散收益情景，最大化负指数效用等价于最小化收益损失的entropic风险。风险厌恶η决定对较差情景的指数倾斜程度；该风险度量同时使用全部情景，在η较小时可作均值—方差近似。这里约束非负全投资。</p><div class="equation">$$\rho_\eta(w)=\eta^{-1}\log\left(\frac1n\sum_t e^{-\eta r_t^\top w}\right),\quad w\in\Delta,\quad \eta&gt;0$$</div></section><section><h2>指数倾斜及曲率</h2><p>利用log-sum-exp稳定计算目标。梯度为倾斜概率下负收益均值，Hessian为η乘倾斜协方差矩阵，因而凸。任意权重处Hessian谱上界不超过η max_t ||r_t||²，可用作投影梯度固定步长。</p><div class="equation">$$q_t=\frac{e^{-\eta r_t^\top w}}{\sum_s e^{-\eta r_s^\top w}},\quad g=-\sum_tq_tr_t,\quad H=\eta\operatorname{Cov}_q(r)$$</div></section><section><h2>分布稳健解释</h2><p>Gibbs变分原理将log-sum-exp表达为对替代情景概率的最坏预期损失减相对熵惩罚。η越大，相对熵惩罚越弱，目标更关注差情景。输出最大倾斜概率是诊断，不等同于现实世界概率或统计估计的违约概率。</p><div class="equation">$$\rho_\eta(w)=\max_{q\in\Delta_n}\left\{-\sum_tq_t r_t^\top w-\eta^{-1}\sum_tq_t\log(nq_t)\right\}$$</div></section><section><h2>参考与边界</h2><p>情景(.1,−.1)、(−.1,.1)对称，等权组合每期收益0，风险0，倾斜概率各半。对于非对称情景可用二资产网格独立核对。优化收敛按投影梯度残差，输出实际目标而非伪造效用提升；输入情景收益及η单位必须一致。</p><div class="equation">$$\rho_\eta(w)=-E[R_w]+\eta\operatorname{Var}(R_w)/2+O(\eta^2)$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Asset，Weight，EntropicRisk，MeanReturn，WorstTiltMass，ProjectedGradientResidual，BudgetResidual。</p><p><a href="../research/comprehensive-examples/entropic-risk-allocation.csv" download>样本CSV</a></p><pre>Return1,Return2
+0.1,-0.1
+-0.1,0.1
+</pre><pre>./build/kline_quant comprehensive-entropic-risk-allocation quant/research/comprehensive-examples/entropic-risk-allocation.csv 5 1e-10 10000</pre><div class="wide"><table><thead><tr><th>Asset</th><th>Weight</th><th>EntropicRisk</th><th>MeanReturn</th><th>WorstTiltMass</th><th>ProjectedGradientResidual</th><th>BudgetResidual</th></tr></thead><tbody><tr><td>1</td><td>0.5</td><td>0</td><td>0</td><td>0.5</td><td>0</td><td>0</td></tr><tr><td>2</td><td>0.5</td><td>0</td><td>0</td><td>0.5</td><td>0</td><td>0</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report entropic_risk_allocation(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,2,2,32);parameters(p,3);
+    double eta=positive(p[0]),tol=positive(p[1]);auto cap=count(p[2],1,100000);
+    require(double(cap)*x.size()*d&lt;=1e8,"Entropic work limit");
+    double L=0;Vec mean(d,0),w(d,1./d),lo(d,0),hi(d,1);
+    for(auto&amp;r:x){L=std::max(L,eta*squared(r));for(std::size_t j=0;j&lt;d;++j)mean[j]+=r[j]/x.size();}
+    L=std::max(L,1e-12);
+    auto evaluate=[&amp;](const Vec&amp; w){
+        Vec z;for(auto&amp;r:x)z.push_back(-eta*dot(r,w));
+        double ld=logsumexp(z),f=(ld-std::log(double(x.size())))/eta,mass=0;Vec g(d,0);
+        for(std::size_t i=0;i&lt;x.size();++i){
+            double q=std::exp(z[i]-ld);mass=std::max(mass,q);
+            for(std::size_t j=0;j&lt;d;++j)g[j]-=q*x[i][j];
+        }
+        return std::make_tuple(f,mass,g);
+    };
+    auto f=evaluate(w);double gap=0;
+    for(std::size_t it=0;it&lt;=cap;++it){
+        Vec z=w;for(std::size_t j=0;j&lt;d;++j)z[j]-=std::get&lt;2&gt;(f)[j]/L;
+        Vec next=box_projection(z,lo,hi,1),g(d);
+        for(std::size_t j=0;j&lt;d;++j)g[j]=L*(w[j]-next[j]);gap=inf_norm(g);
+        if(gap&lt;=tol)break;require(it&lt;cap,"Entropic optimizer did not converge");w=next;f=evaluate(w);
+    }
+    Report out{{"Asset","Weight","EntropicRisk","MeanReturn","WorstTiltMass","ProjectedGradientResidual","BudgetResidual"},{}};
+    for(std::size_t j=0;j&lt;d;++j)out.rows.push_back({double(j+1),w[j],std::get&lt;0&gt;(f),dot(mean,w),std::get&lt;1&gt;(f),gap,std::abs(sum(w)-1)});
+    return out;
+}</pre><p>参考文献：<a href="https://web.stanford.edu/~boyd/cvxbook/">Boyd and Vandenberghe (2004), Convex Optimization.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

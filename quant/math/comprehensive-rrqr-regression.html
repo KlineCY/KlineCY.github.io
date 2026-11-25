@@ -1,0 +1,59 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>列主元QR回归：秩识别、基本解与残差正交性｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="math"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>列主元QR回归：秩识别、基本解与残差正交性</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-numerics.html">数值线性代数、优化与曲线逼近</a>　<a href="../cpp/comprehensive_numerics.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>列相关与可识别性</h2><p>回归设计矩阵的列接近线性相关时，正规方程会将二范数条件数平方，导致本来就弱识别的参数对舍入误差更加敏感。带列主元的Householder QR在每步选择剩余列范数最大者，将数值独立方向优先提取。对于秩亏系统，预测值可能仍然唯一，系数却有无穷多解。这里将非主元自由变量置零，返回基本最小二乘解，不宣称得到最小二范数解。</p><div class="equation">$$XP=QR,\quad Q^\top Q=I,\qquad \kappa_2(X^\top X)=\kappa_2(X)^2$$</div></section><section><h2>Householder反射与列选择</h2><p>每次重新计算剩余列的截尾范数，避免长期更新造成误差。对选中列构造反射，符号选择使反射向量首项不发生大数消减。相同反射作用于目标变量，最终只解三角块。秩阈值为初始最大列范数乘相对容差；该阈值与列单位相关，研究者应先决定是否标准化。</p><div class="equation">$$v=x+\operatorname{sign}(x_1)\|x\|_2e_1,\quad H=I-2vv^\top/(v^\top v),\quad Hx=-\operatorname{sign}(x_1)\|x\|_2e_1$$</div></section><section><h2>解与可计算证书</h2><p>在截断后的三角块内回代，使用排列恢复原特征顺序。独立在原始设计上计算残差范数和正规方程残差；对于真正秩亏的基本解，残差仍与全部列正交。对于主动截断近相关方向的情形，正规残差可能非零，应与阈值及原始数据尺度结合解释。</p><div class="equation">$$R_{11}\beta_{\mathcal P_1}=Q_1^\top y,\quad \beta_{\mathcal P_2}=0,\quad r=y-X\beta,\quad \|X^\top r\|_\infty$$</div></section><section><h2>复算设计及边界</h2><p>三条观测对应精确直线1+2x，第二列范数较大，先成为主元，输出原顺序系数1、2。将一列改成另一列的倍数可检验秩1的基本解及拟合值。复杂度为O(nd²)，列数至多32；对预测误差、秩阈值和参数经济解释分别评价。</p><div class="equation">$$\min_\beta\|y-X\beta\|_2^2,\quad \operatorname{rank}_\epsilon(X)=\#\{j:|R_{jj}|&gt;\epsilon\max_k\|X_k\|_2\}$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Feature，Coefficient，Rank，ResidualNorm，NormalResidual，PermutationIndex。</p><p><a href="../research/comprehensive-examples/rrqr-regression.csv" download>样本CSV</a></p><pre>Y,X1,X2
+1,1,0
+3,1,1
+5,1,2
+</pre><pre>./build/kline_quant comprehensive-rrqr-regression quant/research/comprehensive-examples/rrqr-regression.csv 1e-10</pre><div class="wide"><table><thead><tr><th>Feature</th><th>Coefficient</th><th>Rank</th><th>ResidualNorm</th><th>NormalResidual</th><th>PermutationIndex</th></tr></thead><tbody><tr><td>1</td><td>1</td><td>2</td><td>0</td><td>0</td><td>2</td></tr><tr><td>2</td><td>2</td><td>2</td><td>0</td><td>0</td><td>1</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report rrqr_regression(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,2,2,33)-1;
+    parameters(p,1);
+    double tol=positive(p[0]);
+    auto n=x.size();
+    require(tol&lt;1&amp;&amp;double(n)*d*d&lt;=5e7,"Invalid QR controls");
+    Mat a(n,Vec(d)); Vec y(n);
+    for(std::size_t i=0;i&lt;n;++i){
+        y[i]=x[i][0];
+        for(std::size_t j=0;j&lt;d;++j)a[i][j]=x[i][j+1];
+    }
+    std::vector&lt;std::size_t&gt; ix(d); std::iota(ix.begin(),ix.end(),0);
+    double scale=0;
+    for(std::size_t j=0;j&lt;d;++j){
+        double z=0;for(std::size_t i=0;i&lt;n;++i)z=std::hypot(z,a[i][j]);
+        scale=std::max(scale,z);
+    }
+    std::size_t rank=0;
+    for(std::size_t k=0;k&lt;std::min(n,d);++k){
+        std::size_t pivot=k;double best=0;
+        for(std::size_t j=k;j&lt;d;++j){
+            double z=0;for(std::size_t i=k;i&lt;n;++i)z=std::hypot(z,a[i][j]);
+            if(z&gt;best){best=z;pivot=j;}
+        }
+        if(best&lt;=tol*scale)break;
+        for(auto&amp; r:a)std::swap(r[k],r[pivot]);
+        std::swap(ix[k],ix[pivot]);
+        Vec v(n-k);
+        for(std::size_t i=k;i&lt;n;++i)v[i-k]=a[i][k]/best;
+        v[0]+=std::copysign(1.,v[0]);
+        double vv=positive(dot(v,v));
+        for(std::size_t j=k;j&lt;d;++j){
+            double h=0;for(std::size_t i=k;i&lt;n;++i)h+=v[i-k]*a[i][j];
+            for(std::size_t i=k;i&lt;n;++i)a[i][j]-=2*h*v[i-k]/vv;
+        }
+        double h=0;for(std::size_t i=k;i&lt;n;++i)h+=v[i-k]*y[i];
+        for(std::size_t i=k;i&lt;n;++i)y[i]-=2*h*v[i-k]/vv;
+        ++rank;
+    }
+    Vec b(d,0),coef(d,0),grad(d,0);
+    for(std::size_t i=rank;i--&gt;0;){
+        double z=y[i];for(std::size_t j=i+1;j&lt;rank;++j)z-=a[i][j]*b[j];
+        b[i]=z/a[i][i];
+    }
+    for(std::size_t j=0;j&lt;d;++j)coef[ix[j]]=b[j];
+    double ss=0;Vec position(d);
+    for(std::size_t j=0;j&lt;d;++j)position[ix[j]]=j+1;
+    for(auto&amp; r:x){
+        Vec z(r.begin()+1,r.end());double e=r[0]-dot(z,coef);ss+=e*e;
+        for(std::size_t j=0;j&lt;d;++j)grad[j]+=z[j]*e;
+    }
+    Report out{{"Feature","Coefficient","Rank","ResidualNorm","NormalResidual","PermutationIndex"},{}};
+    for(std::size_t j=0;j&lt;d;++j)out.rows.push_back({double(j+1),coef[j],double(rank),std::sqrt(ss),inf_norm(grad),position[j]});
+    return out;
+}</pre><p>参考文献：<a href="https://www.press.jhu.edu/books/title/10678/matrix-computations">Golub and Van Loan (2013), Matrix Computations, 4th ed., Johns Hopkins University Press.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

@@ -1,0 +1,50 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>有序Logit：固定阈值下的区间似然、共同斜率与概率预测｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="ml"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>有序Logit：固定阈值下的区间似然、共同斜率与概率预测</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-learning.html">统计学习：完整估计、条件分布与跨域泛化</a>　<a href="../cpp/comprehensive_learning.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>等级预测与潜变量</h2><p>信用等级、市场状态与风险分类有自然顺序，名义多分类模型不会自动利用这种结构。有序Logit假定一个共同潜变量和固定的递增切点。斜率影响所有累积概率，而切点决定等级区间；此实现将切点作为事前参数，避免切点与截距共同移动的识别问题。</p><div class="equation">$$Y_i=k\Longleftrightarrow c_{k-1}&lt;x_i^\top\beta+\epsilon_i\le c_k,\quad F_\epsilon(z)=\sigma(z)$$</div></section><section><h2>区间概率与稳定计算</h2><p>内部等级概率是两个Logistic累积概率之差。直接相减在两个切点远离中心时可能发生消减误差，因此在对数域利用等价恒等式计算内部区间概率；首尾等级分别使用稳定softplus。切点必须有限且严格递增，潜变量误差尺度固定为1。</p><div class="equation">$$P(Y=k\mid x)=F(b)-F(a)=F(b)[1-F(a)](1-e^{a-b}),\quad a=c_{k-1}-\eta,\ b=c_k-\eta$$</div></section><section><h2>梯度及凸性</h2><p>对于有限或无限端点，令F(a)=0或F(b)=1分别对应尾部。负对数概率关于η的导数为1−F(a)−F(b)，二阶导数为f(a)+f(b)非负。固定切点加正岭后得到严格凸优化，采用阻尼Newton，训练之外不重估。</p><div class="equation">$$\partial_\eta[-\log P_k]=1-F(a)-F(b),\quad \partial_\eta^2[-\log P_k]=f(a)+f(b)$$</div></section><section><h2>算例与经济解释</h2><p>切点−1、1，训练一条最低等级和一条最高等级，特征均1，目标对称，系数0。中间等级概率( e−1)/(e+1)，两尾各1/(1+e)。有序模型的比例优势假设可能过强；对不同等级转移机制可扩展为非平行切点或动态模型。本工具不估计切点。</p><div class="equation">$$\Pr(Y\le k\mid x)=\sigma(c_k-x^\top\hat\beta),\quad \log\frac{\Pr(Y\le k)}{1-\Pr(Y\le k)}=c_k-x^\top\hat\beta$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Row，Train，Label，Predicted，P1，P2，P3，PenalizedNLL，ScoreResidual，Coefficient1。</p><p><a href="../research/comprehensive-examples/ordinal-logit-fixed-cuts.csv" download>样本CSV</a></p><pre>Train,Label,X1
+1,1,1
+1,3,1
+0,2,1
+</pre><pre>./build/kline_quant comprehensive-ordinal-logit-fixed-cuts quant/research/comprehensive-examples/ordinal-logit-fixed-cuts.csv 3 1 1e-10 100 -1 1</pre><div class="wide"><table><thead><tr><th>Row</th><th>Train</th><th>Label</th><th>Predicted</th><th>P1</th><th>P2</th><th>P3</th><th>PenalizedNLL</th><th>ScoreResidual</th><th>Coefficient1</th></tr></thead><tbody><tr><td>1</td><td>1</td><td>1</td><td>2</td><td>0.26894142137</td><td>0.46211715726</td><td>0.26894142137</td><td>2.626523375036</td><td>0</td><td>0</td></tr><tr><td>2</td><td>1</td><td>3</td><td>2</td><td>0.26894142137</td><td>0.46211715726</td><td>0.26894142137</td><td>2.626523375036</td><td>0</td><td>0</td></tr><tr><td>3</td><td>0</td><td>2</td><td>2</td><td>0.26894142137</td><td>0.46211715726</td><td>0.26894142137</td><td>2.626523375036</td><td>0</td><td>0</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report ordinal_logit_fixed_cuts(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,2,3,34)-2;
+    require(p.size()&gt;=5,"Ordinal parameters required");parameters(p,p.size());
+    auto K=count(p[0],2,16);require(p.size()==K+3,"Incorrect cutpoint count");
+    double lam=positive(p[1]),tol=positive(p[2]);auto cap=count(p[3],1,1000);
+    Vec cuts(p.begin()+4,p.end());
+    for(std::size_t j=1;j&lt;cuts.size();++j)require(cuts[j]&gt;cuts[j-1],"Increasing cutpoints required");
+    require(double(cap)*x.size()*d*d&lt;=5e7,"Ordinal work limit");
+    Mat X;std::vector&lt;std::size_t&gt; y,train;
+    for(std::size_t i=0;i&lt;x.size();++i){
+        auto&amp;r=x[i];require(r[0]==0||r[0]==1,"Binary train flag");
+        y.push_back(count(r[1],1,K)-1);X.emplace_back(r.begin()+2,r.end());if(r[0])train.push_back(i);
+    }
+    require(!train.empty(),"Training data required");
+    auto logprob=[&amp;](double eta,std::size_t k){
+        if(k==0)return -model_research::softplus(eta-cuts[0]);
+        if(k+1==K)return -model_research::softplus(cuts.back()-eta);
+        double a=cuts[k-1]-eta,b=cuts[k]-eta;
+        return -model_research::softplus(-b)-model_research::softplus(a)+std::log(positive(-std::expm1(cuts[k-1]-cuts[k])));
+    };
+    auto evaluate=[&amp;](const Vec&amp;w){
+        auto s=model_research::regularized_state(w,lam);
+        for(auto i:train){
+            double eta=dot(X[i],w);auto j=y[i];
+            double a=j?logistic(cuts[j-1]-eta):0,b=j+1&lt;K?logistic(cuts[j]-eta):1;
+            s.value-=logprob(eta,j);
+            for(std::size_t k=0;k&lt;d;++k)s.gradient[k]+=(1-a-b)*X[i][k];
+            add_outer(s.hessian,X[i],a*(1-a)+b*(1-b));
+        }
+        return s;
+    };
+    auto f=model_research::damped_newton(d,tol,cap,evaluate);
+    Report out{{"Row","Train","Label","Predicted"},{}};
+    for(std::size_t k=1;k&lt;=K;++k)out.header.push_back("P"+std::to_string(k));
+    out.header.insert(out.header.end(),{"PenalizedNLL","ScoreResidual"});
+    for(std::size_t j=1;j&lt;=d;++j)out.header.push_back("Coefficient"+std::to_string(j));
+    for(std::size_t i=0;i&lt;x.size();++i){
+        double eta=dot(X[i],f.beta);Vec z(K);for(std::size_t k=0;k&lt;K;++k)z[k]=logprob(eta,k);
+        auto k=std::max_element(z.begin(),z.end())-z.begin();
+        Vec r{double(i+1),x[i][0],x[i][1],double(k+1)};
+        for(double v:z)r.push_back(std::exp(v));
+        r.push_back(f.state.value);r.push_back(inf_norm(f.state.gradient));
+        r.insert(r.end(),f.beta.begin(),f.beta.end());out.rows.push_back(r);
+    }
+    return out;
+}</pre><p>参考文献：<a href="https://doi.org/10.1111/j.2517-6161.1980.tb01109.x">McCullagh (1980), Regression Models for Ordinal Data, Journal of the Royal Statistical Society Series B.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

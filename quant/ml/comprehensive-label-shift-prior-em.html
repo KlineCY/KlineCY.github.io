@@ -1,0 +1,39 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>类别先验漂移EM：无标签目标概率、似然与后验重加权｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="ml"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>类别先验漂移EM：无标签目标概率、似然与后验重加权</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-learning.html">统计学习：完整估计、条件分布与跨域泛化</a>　<a href="../cpp/comprehensive_learning.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>标签漂移的可识别假设</h2><p>类别先验变化不同于任意概念漂移。Label shift假设类别条件特征分布在训练与目标域保持一致，仅P(Y)变化；若分类器输出近似训练后验，则可用目标域无标签样本估计新先验。若各类条件分布无法区分，目标先验未必可识别。</p><div class="equation">$$p_T(x\mid y)=p_S(x\mid y),\qquad p_T(y)\ne p_S(y),\quad \frac{p_T(x)}{p_S(x)}=\sum_k p_S(k\mid x)\frac{\pi_{T,k}}{\pi_{S,k}}$$</div></section><section><h2>EM更新</h2><p>给定当前先验π，通过Bayes公式重加权每行训练后验，再对目标域平均调整后验以更新π。最大化的是密度比对数和，与目标域有标签分类损失不同。训练先验必须严格正；允许目标类概率降至零，但任一记录混合概率仍须为正。</p><div class="equation">$$q_{ik}=\frac{p_{ik}\pi_k/\pi^S_k}{\sum_l p_{il}\pi_l/\pi^S_l},\qquad \pi_k^{\rm new}=n^{-1}\sum_i q_{ik}$$</div></section><section><h2>收敛与可辨识性</h2><p>每一步计算目标对数似然，并检查非下降及固定点残差。固定点可能对应平坦目标或边界解，不能仅凭EM收敛声称先验已准确识别。输出原概率、调整概率、新先验、似然与残差，允许独立对比源域概率校准和目标域预测。</p><div class="equation">$$L(\pi)=\sum_i\log\left(\sum_k p_{ik}\frac{\pi_k}{\pi_k^S}\right),\qquad\|\pi-\operatorname{mean}(q)\|_\infty$$</div></section><section><h2>精确算例与限制</h2><p>训练先验各半，三条目标后验为(1,0),(1,0),(0,1)，一次更新得到新先验(2/3,1/3)，调整后验不变。若所有记录概率都等于源先验，似然对π恒定，初始化将被保留，不能解释成可靠的目标比例。复杂度O(nKI)。</p><div class="equation">$$\sum_k\pi_k=1,\quad\sum_k q_{ik}=1$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Row，OriginalP1，OriginalP2，AdjustedP1，AdjustedP2，TargetPrior1，TargetPrior2，LogLikelihood，FixedPointResidual。</p><p><a href="../research/comprehensive-examples/label-shift-prior-em.csv" download>样本CSV</a></p><pre>P1,P2
+1,0
+1,0
+0,1
+</pre><pre>./build/kline_quant comprehensive-label-shift-prior-em quant/research/comprehensive-examples/label-shift-prior-em.csv 1e-10 100 0.5 0.5</pre><div class="wide"><table><thead><tr><th>Row</th><th>OriginalP1</th><th>OriginalP2</th><th>AdjustedP1</th><th>AdjustedP2</th><th>TargetPrior1</th><th>TargetPrior2</th><th>LogLikelihood</th><th>FixedPointResidual</th></tr></thead><tbody><tr><td>1</td><td>1</td><td>0</td><td>1</td><td>0</td><td>0.6666666666667</td><td>0.3333333333333</td><td>0.1698990367954</td><td>0</td></tr><tr><td>2</td><td>1</td><td>0</td><td>1</td><td>0</td><td>0.6666666666667</td><td>0.3333333333333</td><td>0.1698990367954</td><td>0</td></tr><tr><td>3</td><td>0</td><td>1</td><td>0</td><td>1</td><td>0.6666666666667</td><td>0.3333333333333</td><td>0.1698990367954</td><td>0</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report label_shift_prior_em(const Mat&amp; x,const Vec&amp; p){
+    auto K=validate(x,2,2,16);parameters(p,K+2);
+    double tol=positive(p[0]);auto cap=count(p[1],1,100000);
+    Vec prior(p.begin()+2,p.end()),w=prior;
+    for(double v:prior)positive(v);require(std::abs(sum(prior)-1)&lt;=1e-10,"Source prior must sum to one");
+    for(auto&amp;r:x){for(double v:r)require(v&gt;=0&amp;&amp;v&lt;=1,"Invalid posterior");require(std::abs(sum(r)-1)&lt;=1e-10,"Posterior must sum to one");}
+    require(double(cap)*x.size()*K&lt;=1e8,"Label shift work limit");
+    auto evaluate=[&amp;](const Vec&amp;a,Mat* post){
+        Vec mean(K,0);double ll=0;if(post)post-&gt;clear();
+        for(auto&amp;r:x){
+            Vec z(K);for(std::size_t j=0;j&lt;K;++j)z[j]=r[j]*a[j]/prior[j];
+            double mass=positive(sum(z));ll+=std::log(mass);
+            for(std::size_t j=0;j&lt;K;++j){z[j]/=mass;mean[j]+=z[j]/x.size();}
+            if(post)post-&gt;push_back(z);
+        }
+        return std::make_pair(ll,mean);
+    };
+    auto f=evaluate(w,nullptr);double gap=0;
+    for(std::size_t it=0;it&lt;cap;++it){
+        Vec next=f.second;auto g=evaluate(next,nullptr);
+        require(g.first&gt;=f.first-1e-10*std::max(1.,std::abs(f.first)),"EM likelihood decreased");
+        w=next;f=g;Vec e=w;for(std::size_t j=0;j&lt;K;++j)e[j]-=f.second[j];gap=inf_norm(e);
+        if(gap&lt;=tol)break;
+    }
+    require(gap&lt;=tol,"Label shift EM did not converge");
+    Mat post;auto final=evaluate(w,&amp;post);
+    Report out{{"Row"},{}};
+    for(auto prefix:{"OriginalP","AdjustedP","TargetPrior"})for(std::size_t j=1;j&lt;=K;++j)out.header.push_back(std::string(prefix)+std::to_string(j));
+    out.header.insert(out.header.end(),{"LogLikelihood","FixedPointResidual"});
+    for(std::size_t i=0;i&lt;x.size();++i){
+        Vec r{double(i+1)};r.insert(r.end(),x[i].begin(),x[i].end());r.insert(r.end(),post[i].begin(),post[i].end());
+        r.insert(r.end(),w.begin(),w.end());r.push_back(final.first);r.push_back(gap);out.rows.push_back(r);
+    }
+    return out;
+}</pre><p>参考文献：<a href="https://doi.org/10.1162/089976602753284446">Saerens, Latinne and Decaestecker (2002), Adjusting the Outputs of a Classifier to New a Priori Probabilities, Neural Computation.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

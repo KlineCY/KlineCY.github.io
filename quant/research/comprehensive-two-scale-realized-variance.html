@@ -1,0 +1,19 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>双时间尺度实现方差与微观结构噪声校正｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>双时间尺度实现方差与微观结构噪声校正</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-microstructure.html">市场微观结构、撮合与动态执行</a>　<a href="../cpp/comprehensive_microstructure.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>噪声污染</h2><p>高频观测对数价由潜在有效价和微观结构噪声组成，独立零均值噪声使最快频率平方收益和的期望随采样次数增大。</p><div class="equation">$$Y_i=X_i+\epsilon_i,\quad E[RV^{fast}]\approx IV+2n\sigma_\epsilon^2.$$</div></section><section><h2>错位子网格</h2><p>对间隔K的所有错位子网格分别求平方增量并平均，保持样本边界明确。所有长度K的连续跨度恰好覆盖一次；平均慢速收益数为(n−K+1)/K。</p><div class="equation">$$\overline{RV}^{(K)}=\frac1K\sum_{i=K}^n(Y_i-Y_{i-K})^2,\quad \bar n=(n-K+1)/K.$$</div></section><section><h2>噪声消除</h2><p>快慢两尺度的噪声偏差按平均增量数比例抵消，再进行有限样本尺度修正。其依据是独立同分布噪声及近似同一积分方差覆盖，非等距时间与跳跃须额外建模。</p><div class="equation">$$\widehat{IV}_{K}=\frac{\overline{RV}^{(K)}-(\bar n/n)RV^{fast}}{1-\bar n/n}.$$</div></section><section><h2>估计诊断</h2><p>输出快慢平方和、平均计数和校正值；有限样本可出现负估计，不直接截断为零。比较不同K的稳定性，并通过模拟已知潜在方差和噪声方差进行验证。</p><div class="equation">$$K\ge2,\quad K\le n,\quad \bar n/n&lt;1.$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Stride，FastRV，AverageSlowRV，AverageCount，NoiseRatio，AdjustedRV。</p><p><a href="../research/comprehensive-examples/two-scale-realized-variance.csv" download>样本CSV</a></p><pre>LogPrice
+0
+1
+2
+3
+4
+</pre><pre>./build/kline_quant comprehensive-two-scale-realized-variance quant/research/comprehensive-examples/two-scale-realized-variance.csv 2</pre><div class="wide"><table><thead><tr><th>Stride</th><th>FastRV</th><th>AverageSlowRV</th><th>AverageCount</th><th>NoiseRatio</th><th>AdjustedRV</th></tr></thead><tbody><tr><td>2</td><td>4</td><td>6</td><td>1.5</td><td>0.375</td><td>7.2</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report two_scale_realized_variance(const Mat&amp; x,const Vec&amp; p){
+    validate(x,3,1);require(!p.empty(),"stride required");
+    size_t n=x.size()-1;double fast=0;
+    for(size_t i=1;i&lt;x.size();++i){require(x[i].size()==1,"one log price column");double r=x[i][0]-x[i-1][0];fast+=r*r;}
+    Report out;out.header={"Stride","FastRV","AverageSlowRV","AverageCount","NoiseRatio","AdjustedRV"};
+    for(double a:p){
+        int K=count(a,2,int(n));double slow=0;
+        for(size_t i=K;i&lt;x.size();++i){double r=x[i][0]-x[i-K][0];slow+=r*r/K;}
+        double m=double(n-K+1)/K,ratio=m/n;
+        out.rows.push_back({double(K),fast,slow,m,ratio,(slow-ratio*fast)/(1-ratio)});
+    }
+    return out;
+}</pre><p>参考文献：<a href="https://www.nber.org/papers/w10111">Zhang, L., Mykland, P. A., and Aït-Sahalia, Y. (2005). A Tale of Two Time Scales. JASA.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

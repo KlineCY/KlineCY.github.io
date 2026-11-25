@@ -1,0 +1,34 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ARX递归预测：固定训练参数、外生情景路径与多步误差｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="ml"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>ARX递归预测：固定训练参数、外生情景路径与多步误差</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-dynamics.html">时间序列估计、潜在状态与期限风险</a>　<a href="../cpp/comprehensive_dynamics.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>外生路径与预测条件</h2><p>ARX模型将目标滞后及同一期外生变量共同纳入条件均值。多步预测若直接使用未来真实目标作为滞后值，得到的是更新信息后的一步预测，而不是同一预测起点下的多步路径。本实现明确要求训练标志构成连续前缀，外生变量的后段值由事前情景给定。</p><div class="equation">$$Y_t=c+\sum_{j=1}^p\phi_jY_{t-j}+\beta^\top X_t+\epsilon_t$$</div></section><section><h2>训练设计及惩罚</h2><p>前p条训练记录提供滞后初始值，之后构建设计矩阵，加入不受岭惩罚的截距。模型系数通过训练期正规方程估计，λ可取0但设计必须满秩。实际应用中若外生情景由另一个预测器生成，应对该预测器使用同样的信息截止时间。</p><div class="equation">$$\hat w=\arg\min_w\sum_{t=p+1}^{T}(Y_t-z_t^\top w)^2+\lambda\sum_{j&gt;0}w_j^2$$</div></section><section><h2>递归与冻结误差</h2><p>预测从最后p个训练真实目标开始，后段每一步将预测值追加到滞后历史。输入的留出真实目标只用于计算误差，不能进入递归。参数不因后续观测而重估；输出全部留出路径、训练RSS和共同系数。</p><div class="equation">$$\hat Y_{T+h\mid T}=c+\sum_{j=1}^p\phi_j\tilde Y_{T+h-j}+\beta^\top X_{T+h}^{\rm scenario},\quad \tilde Y_s=Y_s\ (s\le T),\ \hat Y_{s\mid T}\ (s&gt;T)$$</div></section><section><h2>参考与边界</h2><p>训练目标1至4形成精确AR(1)关系Y_t=1+Y_{t-1}，交替外生变量提供独立设计方向，留出预测5及6。改变留出标签必须保持预测不变。估计量为条件平方损失，未检查稳定性或外生变量因果性；递归不确定性需要过程噪声与外生情景分布。</p><div class="equation">$$e_h=Y_{T+h}-\hat Y_{T+h\mid T},\qquad \operatorname{RMSE}(H)=\sqrt{H^{-1}\sum_{h=1}^H e_h^2}$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Horizon，Actual，Prediction，Error，TrainingRSS，Intercept，AR1，Exog1。</p><p><a href="../research/comprehensive-examples/arx-recursive-fit.csv" download>样本CSV</a></p><pre>Train,Y,X
+1,1,0
+1,2,1
+1,3,0
+1,4,1
+0,5,0
+0,6,1
+</pre><pre>./build/kline_quant comprehensive-arx-recursive-fit quant/research/comprehensive-examples/arx-recursive-fit.csv 1 0</pre><div class="wide"><table><thead><tr><th>Horizon</th><th>Actual</th><th>Prediction</th><th>Error</th><th>TrainingRSS</th><th>Intercept</th><th>AR1</th><th>Exog1</th></tr></thead><tbody><tr><td>1</td><td>5</td><td>5</td><td>0</td><td>0</td><td>1</td><td>1</td><td>0</td></tr><tr><td>2</td><td>6</td><td>6</td><td>0</td><td>0</td><td>1</td><td>1</td><td>0</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report arx_recursive_fit(const Mat&amp; x,const Vec&amp; p){
+    auto ex=validate(x,4,2,18)-2;parameters(p,2);auto P=count(p[0],1,16);double lam=p[1];
+    require(lam&gt;=0&amp;&amp;1+P+ex&lt;=32,"Invalid ARX model");
+    std::size_t T=0;bool test=false;Vec history;
+    for(auto&amp;r:x){
+        require(r[0]==0||r[0]==1,"Binary train flag");
+        if(!r[0])test=true;
+        else{require(!test,"Training must be a prefix");++T;history.push_back(r[1]);}
+    }
+    require(T&gt;P+1&amp;&amp;T&lt;x.size()&amp;&amp;double(T)*std::pow(1+P+ex,2)&lt;=5e7,"Insufficient ARX training");
+    auto design=[&amp;](std::size_t t,const Vec&amp; h){
+        Vec z{1};for(std::size_t j=1;j&lt;=P;++j)z.push_back(h[t-j]);
+        z.insert(z.end(),x[t].begin()+2,x[t].end());return z;
+    };
+    Mat X;Vec y;
+    for(std::size_t t=P;t&lt;T;++t){X.push_back(design(t,history));y.push_back(history[t]);}
+    Vec w=fit_ridge(X,y,lam,true);double rss=0;
+    for(std::size_t i=0;i&lt;y.size();++i)rss+=std::pow(y[i]-dot(X[i],w),2);
+    Report out{{"Horizon","Actual","Prediction","Error","TrainingRSS","Intercept"},{}};
+    for(std::size_t j=1;j&lt;=P;++j)out.header.push_back("AR"+std::to_string(j));
+    for(std::size_t j=1;j&lt;=ex;++j)out.header.push_back("Exog"+std::to_string(j));
+    for(std::size_t t=T;t&lt;x.size();++t){
+        double f=dot(design(t,history),w);history.push_back(f);
+        Vec r{double(t-T+1),x[t][1],f,x[t][1]-f,rss};r.insert(r.end(),w.begin(),w.end());out.rows.push_back(r);
+    }
+    return out;
+}</pre><p>参考文献：<a href="https://doi.org/10.1007/978-3-319-29854-2">Brockwell and Davis (2016), Introduction to Time Series and Forecasting, 3rd ed., Springer.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

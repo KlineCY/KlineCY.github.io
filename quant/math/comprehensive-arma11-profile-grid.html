@@ -1,0 +1,26 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ARMA(1,1)条件似然轮廓：均值解析剖面与创新递推｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="math"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>ARMA(1,1)条件似然轮廓：均值解析剖面与创新递推</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-dynamics.html">时间序列估计、潜在状态与期限风险</a>　<a href="../cpp/comprehensive_dynamics.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>ARMA的条件创新</h2><p>ARMA(1,1)用过去目标偏差与过去创新共同描述条件均值。对固定φ、θ，残差由观测与候选均值递推。这里将第一条观测作为给定初始目标，初始创新置零，仅计算后n−1条条件似然；它与精确无条件ARMA似然不相同。</p><div class="equation">$$e_t=Y_t-\mu-\phi(Y_{t-1}-\mu)-\theta e_{t-1},\qquad e_0=0$$</div></section><section><h2>均值的线性轮廓</h2><p>在给定φ、θ时，创新关于μ线性。分别递推a_t,b_t使e_t=a_t−b_tμ；平方和最小的μ有解析比值。再将条件创新方差MLE代入高斯负似然，使搜索只需扫描φ与θ的二维网格，且参数限制在平稳、可逆区间内。</p><div class="equation">$$a_t=Y_t-\phi Y_{t-1}-\theta a_{t-1},\quad b_t=(1-\phi)-\theta b_{t-1},\quad \hat\mu=\frac{\sum_ta_tb_t}{\sum_tb_t^2}$$</div></section><section><h2>似然与预测</h2><p>按候选网格计算剖面负似然，选择确定性顺序下的最小目标。使用获选参数与最后条件创新构造下一期预测。若创新方差恰为零，有限高斯方差MLE不存在，因此拒绝退化网格点；不将方差下限人为当作估计值。</p><div class="equation">$$\hat\sigma^2=\frac1{n-1}\sum_t(a_t-b_t\hat\mu)^2,\quad \ell=\frac{n-1}{2}(1+\log(2\pi\hat\sigma^2))$$</div></section><section><h2>精确参考及边界</h2><p>φ=θ=0时只对后两观测2、3估计均值2.5、方差0.25、下一期2.5。一般复杂度O(nGφGθ)。条件似然受到初始化影响，网格最优不代表连续全局最优；持久性接近1时，均值和ARMA相消可能难以辨识。</p><div class="equation">$$\hat Y_{n+1\mid n}=\hat\mu+\hat\phi(Y_n-\hat\mu)+\hat\theta\hat e_n$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为AR，MA，Mean，InnovationVariance，NLL，NextForecast，ConditionalObservations。</p><p><a href="../research/comprehensive-examples/arma11-profile-grid.csv" download>样本CSV</a></p><pre>Value
+1
+2
+3
+</pre><pre>./build/kline_quant comprehensive-arma11-profile-grid quant/research/comprehensive-examples/arma11-profile-grid.csv 0 0 2 0 0 2</pre><div class="wide"><table><thead><tr><th>AR</th><th>MA</th><th>Mean</th><th>InnovationVariance</th><th>NLL</th><th>NextForecast</th><th>ConditionalObservations</th></tr></thead><tbody><tr><td>0</td><td>0</td><td>2.5</td><td>0.25</td><td>1.451582705289</td><td>2.5</td><td>2</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report arma11_profile_grid(const Mat&amp; x,const Vec&amp; p){
+    validate(x,3,1,1);parameters(p,6);
+    double lo=p[0],hi=p[1],ml=p[3],mh=p[4];
+    auto G=count(p[2],2,1000),H=count(p[5],2,1000);
+    require(lo&lt;=hi&amp;&amp;ml&lt;=mh&amp;&amp;lo&gt;-1&amp;&amp;hi&lt;1&amp;&amp;ml&gt;-1&amp;&amp;mh&lt;1&amp;&amp;double(G)*H*x.size()&lt;=5e7,"Invalid ARMA grid");
+    Vec y=column(x,0),best;double score=std::numeric_limits&lt;double&gt;::infinity(),n=y.size()-1;
+    for(std::size_t g=0;g&lt;G;++g)for(std::size_t h=0;h&lt;H;++h){
+        double phi=lo+(hi-lo)*g/(G-1),theta=ml+(mh-ml)*h/(H-1);
+        Vec a(y.size(),0),b(y.size(),0);double ab=0,bb=0;
+        for(std::size_t t=1;t&lt;y.size();++t){
+            a[t]=y[t]-phi*y[t-1]-theta*a[t-1];
+            b[t]=1-phi-theta*b[t-1];ab+=a[t]*b[t];bb+=b[t]*b[t];
+        }
+        double mu=ab/positive(bb),s=0;
+        for(std::size_t t=1;t&lt;y.size();++t)s+=std::pow(a[t]-b[t]*mu,2);
+        double var=s/n;if(!(var&gt;0))continue;
+        double f=.5*n*(1+std::log(2*std::acos(-1.)*var));
+        if(f&lt;score){score=f;best={phi,theta,mu,var,f,mu+phi*(y.back()-mu)+theta*(a.back()-b.back()*mu),n};}
+    }
+    require(!best.empty(),"No positive innovation variance");
+    return scalar({"AR","MA","Mean","InnovationVariance","NLL","NextForecast","ConditionalObservations"},best);
+}</pre><p>参考文献：<a href="https://doi.org/10.1007/978-3-319-29854-2">Brockwell and Davis (2016), Introduction to Time Series and Forecasting, 3rd ed., Springer.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>
