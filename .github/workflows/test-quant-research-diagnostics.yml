@@ -1,0 +1,42 @@
+name: Validate quant research diagnostics
+on:
+  pull_request:
+    paths:
+      - 'quant/research/diagnostic-*'
+      - 'quant/research/research-diagnostics.html'
+      - 'quant/research/index.html'
+      - 'quant/cpp/research_diagnostics.cpp'
+      - 'scripts/test_research_diagnostics.*'
+      - '.github/workflows/test-quant-research-diagnostics.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'quant/research/diagnostic-*'
+      - 'quant/research/research-diagnostics.html'
+      - 'quant/research/index.html'
+      - 'quant/cpp/research_diagnostics.cpp'
+      - 'scripts/test_research_diagnostics.*'
+      - '.github/workflows/test-quant-research-diagnostics.yml'
+permissions:
+  contents: read
+jobs:
+  numerics:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [g++, clang++]
+    steps:
+      - uses: actions/checkout@v4
+      - run: ${{ matrix.compiler }} -std=c++17 -O2 -Wall -Wextra -Werror -pedantic quant/cpp/research_diagnostics.cpp -o /tmp/quant-diagnostics
+      - run: python3 scripts/test_research_diagnostics.py /tmp/quant-diagnostics
+      - run: /tmp/quant-diagnostics --invalid
+  curriculum:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save --no-package-lock katex@0.16.11
+      - run: node scripts/test_research_diagnostics.mjs
