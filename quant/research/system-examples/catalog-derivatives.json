@@ -1,0 +1,259 @@
+[
+  {
+    "command": "system-tridiagonal-cn-option",
+    "title": "Black–Scholes有限差分：Crank–Nicolson、边界条件与三对角求解",
+    "area": "assets",
+    "columns": [
+      "Spot",
+      "Strike",
+      "Rate",
+      "Dividend",
+      "Vol",
+      "Time"
+    ],
+    "file": "tridiagonal-cn-option.csv",
+    "params": [
+      20,
+      40,
+      200,
+      1
+    ],
+    "header": [
+      "Price",
+      "GridSpacing",
+      "TimeStep",
+      "MinimumGridValue",
+      "LinearResidual"
+    ],
+    "expected_prefix": [
+      [
+        0,
+        10,
+        0.025,
+        0,
+        0
+      ]
+    ],
+    "ref": "Wilmott, Howison and Dewynne (1995), The Mathematics of Financial Derivatives, Cambridge University Press.",
+    "url": "https://doi.org/10.1017/CBO9780511812545"
+  },
+  {
+    "command": "system-asian-geometric-exact",
+    "title": "离散几何平均亚式期权：对数协方差与解析基准",
+    "area": "assets",
+    "columns": [
+      "Spot",
+      "Strike",
+      "Rate",
+      "Dividend",
+      "Vol",
+      "Time"
+    ],
+    "file": "asian-geometric-exact.csv",
+    "params": [
+      4
+    ],
+    "header": [
+      "Call",
+      "Put",
+      "LogMean",
+      "LogVariance",
+      "DiscountedGeometricMean",
+      "ParityResidual"
+    ],
+    "expected_prefix": [
+      [
+        10,
+        0,
+        4.605170185988092,
+        0,
+        100,
+        0
+      ]
+    ],
+    "ref": "Kemna and Vorst (1990), A Pricing Method for Options Based on Average Asset Values, Journal of Banking & Finance.",
+    "url": "https://doi.org/10.1016/0378-4266(90)90039-5"
+  },
+  {
+    "command": "system-asian-arithmetic-control",
+    "title": "算术亚式期权模拟：独立pilot控制变量与方差缩减",
+    "area": "assets",
+    "columns": [
+      "Spot",
+      "Strike",
+      "Rate",
+      "Dividend",
+      "Vol",
+      "Time"
+    ],
+    "file": "asian-arithmetic-control.csv",
+    "params": [
+      4,
+      100,
+      500,
+      123
+    ],
+    "header": [
+      "PlainCall",
+      "ControlledCall",
+      "PlainSE",
+      "ControlledSE",
+      "PilotBeta",
+      "ExactGeometricCall",
+      "VarianceReduction"
+    ],
+    "expected_prefix": [
+      [
+        10,
+        10,
+        0,
+        0,
+        0,
+        10,
+        1
+      ]
+    ],
+    "ref": "Glasserman (2004), Monte Carlo Methods in Financial Engineering, Springer.",
+    "url": "https://doi.org/10.1007/978-0-387-21617-1"
+  },
+  {
+    "command": "system-cashflow-zspread-fit",
+    "title": "债券Z-spread校准：贴现曲线、现金流与利差敏感性",
+    "area": "assets",
+    "columns": [
+      "Time",
+      "Cashflow",
+      "BaseDiscount"
+    ],
+    "file": "cashflow-zspread-fit.csv",
+    "params": [
+      110,
+      -0.2,
+      0.2,
+      1e-10
+    ],
+    "header": [
+      "ZSpread",
+      "ModelPrice",
+      "MarketPrice",
+      "SpreadDuration",
+      "SpreadConvexity",
+      "PriceResidual"
+    ],
+    "expected_prefix": [
+      [
+        0,
+        110,
+        110,
+        1.9545454545454546,
+        3.8636363636363638,
+        0
+      ]
+    ],
+    "ref": "Tuckman and Serrat (2011), Fixed Income Securities, 3rd ed., Wiley.",
+    "url": "https://www.wiley.com/"
+  },
+  {
+    "command": "system-swap-curve-keyrate",
+    "title": "利率互换节点风险：对数贴现扰动与关键利率归因",
+    "area": "assets",
+    "columns": [
+      "Time",
+      "Discount",
+      "Accrual"
+    ],
+    "file": "swap-curve-keyrate.csv",
+    "params": [
+      100,
+      0.05,
+      0.00001
+    ],
+    "header": [
+      "Node",
+      "Time",
+      "PV",
+      "ParRate",
+      "KeyRateDerivative",
+      "ParallelDerivative",
+      "ConservationResidual"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        1,
+        -10,
+        0,
+        5,
+        215,
+        0
+      ],
+      [
+        2,
+        2,
+        -10,
+        0,
+        210,
+        215,
+        0
+      ]
+    ],
+    "ref": "Brigo and Mercurio (2006), Interest Rate Models — Theory and Practice, 2nd ed., Springer.",
+    "url": "https://doi.org/10.1007/978-3-662-04553-8"
+  },
+  {
+    "command": "system-credit-tranche-loss",
+    "title": "信用组合分层损失：离散情景、Attachment与Detachment守恒",
+    "area": "assets",
+    "columns": [
+      "Probability",
+      "PortfolioLoss"
+    ],
+    "file": "credit-tranche-loss.csv",
+    "params": [
+      0,
+      0.1,
+      0.3,
+      1
+    ],
+    "header": [
+      "Tranche",
+      "Attachment",
+      "Detachment",
+      "ExpectedLoss",
+      "ExpectedLossRate",
+      "PortfolioExpectedLoss",
+      "ConservationResidual"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        0,
+        0.1,
+        0.05,
+        0.5,
+        0.11,
+        0
+      ],
+      [
+        2,
+        0.1,
+        0.3,
+        0.04,
+        0.2,
+        0.11,
+        0
+      ],
+      [
+        3,
+        0.3,
+        1,
+        0.02,
+        0.028571428571428574,
+        0.11,
+        0
+      ]
+    ],
+    "ref": "Hull and White (2004), Valuation of a CDO and an n-th to Default CDS Without Monte Carlo Simulation, Journal of Derivatives.",
+    "url": "https://doi.org/10.3905/jod.2004.450964"
+  }
+]

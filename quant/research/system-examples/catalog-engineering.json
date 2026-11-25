@@ -1,0 +1,396 @@
+[
+  {
+    "command": "system-corporate-action-ledger",
+    "title": "公司行动与总收益：拆股、现金股息及持仓价值连续性",
+    "area": "audit",
+    "columns": [
+      "Close",
+      "SplitRatio",
+      "DividendPerNewShare"
+    ],
+    "file": "corporate-action-ledger.csv",
+    "params": [
+      1
+    ],
+    "header": [
+      "Time",
+      "Close",
+      "Shares",
+      "DividendCash",
+      "TotalValue",
+      "TotalReturn",
+      "PriceReturn",
+      "ReinvestmentShares"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        100,
+        1,
+        0,
+        100,
+        0,
+        0,
+        1
+      ],
+      [
+        2,
+        50,
+        2,
+        0,
+        100,
+        0,
+        0,
+        2
+      ],
+      [
+        3,
+        49,
+        2,
+        2,
+        100,
+        0,
+        -0.02,
+        2.0408163265306123
+      ]
+    ],
+    "ref": "CRSP, US Stock Databases: Calculations and Methodologies.",
+    "url": "https://www.crsp.org/research/crsp-us-stock-databases/"
+  },
+  {
+    "command": "system-survivorship-cohort",
+    "title": "固定形成期资产池：退市损益、幸存者偏差及组合收益",
+    "area": "audit",
+    "columns": [
+      "Asset",
+      "FormationWeight",
+      "Return",
+      "Delisted"
+    ],
+    "file": "survivorship-cohort.csv",
+    "params": [],
+    "header": [
+      "Asset",
+      "FormationWeight",
+      "Return",
+      "Contribution",
+      "FullReturn",
+      "SurvivorReturn",
+      "SurvivorWeight"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        0.5,
+        0.1,
+        0.05,
+        -0.45,
+        0.1,
+        0.5
+      ],
+      [
+        2,
+        0.5,
+        -1,
+        -0.5,
+        -0.45,
+        0.1,
+        0.5
+      ]
+    ],
+    "ref": "Shumway (1997), The Delisting Bias in CRSP Data, Journal of Finance.",
+    "url": "https://doi.org/10.1111/j.1540-6261.1997.tb03818.x"
+  },
+  {
+    "command": "system-lagged-asof-panel",
+    "title": "跨资产可用时间连接：滞后公布、陈旧度及缺失标记",
+    "area": "feeds",
+    "columns": [
+      "Type",
+      "Asset",
+      "Time",
+      "Value"
+    ],
+    "file": "lagged-asof-panel.csv",
+    "params": [
+      1
+    ],
+    "header": [
+      "Asset",
+      "DecisionTime",
+      "AvailableTime",
+      "Age",
+      "Value",
+      "Missing"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      [
+        1,
+        1,
+        1,
+        0,
+        10,
+        0
+      ],
+      [
+        1,
+        3,
+        1,
+        2,
+        0,
+        1
+      ],
+      [
+        1,
+        4,
+        4,
+        0,
+        20,
+        0
+      ]
+    ],
+    "ref": "Kleppmann (2017), Designing Data-Intensive Applications, O'Reilly.",
+    "url": "https://dataintensive.net/"
+  },
+  {
+    "command": "system-session-ohlcv-bars",
+    "title": "事件时间聚合：交易时段锚定OHLCV、VWAP及空桶",
+    "area": "feeds",
+    "columns": [
+      "Time",
+      "Price",
+      "Volume"
+    ],
+    "file": "session-ohlcv-bars.csv",
+    "params": [
+      0,
+      3,
+      1
+    ],
+    "header": [
+      "BarStart",
+      "BarEnd",
+      "Open",
+      "High",
+      "Low",
+      "Close",
+      "Volume",
+      "VWAP",
+      "TradeCount",
+      "Empty"
+    ],
+    "expected_prefix": [
+      [
+        0,
+        1,
+        10,
+        12,
+        10,
+        12,
+        3,
+        10.666666666666666,
+        2,
+        0
+      ],
+      [
+        1,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      [
+        2,
+        3,
+        11,
+        11,
+        11,
+        11,
+        3,
+        11,
+        1,
+        0
+      ]
+    ],
+    "ref": "Harris (2003), Trading and Exchanges: Market Microstructure for Practitioners, Oxford University Press.",
+    "url": "https://global.oup.com/academic/"
+  },
+  {
+    "command": "system-cross-sectional-weighted-standardize",
+    "title": "加权截面标准化：组内中心化、方差与零分散诊断",
+    "area": "research",
+    "columns": [
+      "Group",
+      "Value",
+      "Weight"
+    ],
+    "file": "cross-sectional-weighted-standardize.csv",
+    "params": [],
+    "header": [
+      "Row",
+      "Group",
+      "Value",
+      "Weight",
+      "GroupMean",
+      "GroupStd",
+      "Z",
+      "Degenerate"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        1,
+        1,
+        1,
+        2,
+        1,
+        -1,
+        0
+      ],
+      [
+        2,
+        1,
+        3,
+        1,
+        2,
+        1,
+        1,
+        0
+      ],
+      [
+        3,
+        2,
+        5,
+        2,
+        5,
+        0,
+        0,
+        1
+      ],
+      [
+        4,
+        2,
+        5,
+        1,
+        5,
+        0,
+        0,
+        1
+      ]
+    ],
+    "ref": "Deville and Särndal (1992), Calibration Estimators in Survey Sampling, JASA.",
+    "url": "https://doi.org/10.1080/01621459.1992.10475217"
+  },
+  {
+    "command": "system-label-interval-purge-folds",
+    "title": "事件标签时间隔离：多折测试区间并集与Embargo",
+    "area": "audit",
+    "columns": [
+      "Start",
+      "End",
+      "Fold"
+    ],
+    "file": "label-interval-purge-folds.csv",
+    "params": [
+      1
+    ],
+    "header": [
+      "TestFold",
+      "Row",
+      "Role",
+      "Overlap",
+      "Embargo",
+      "Start",
+      "End"
+    ],
+    "expected_prefix": [
+      [
+        1,
+        1,
+        2,
+        0,
+        0,
+        0,
+        2
+      ],
+      [
+        1,
+        2,
+        0,
+        1,
+        0,
+        2,
+        4
+      ],
+      [
+        1,
+        3,
+        2,
+        0,
+        0,
+        5,
+        6
+      ],
+      [
+        1,
+        4,
+        0,
+        0,
+        1,
+        7,
+        8
+      ],
+      [
+        2,
+        1,
+        0,
+        1,
+        0,
+        0,
+        2
+      ],
+      [
+        2,
+        2,
+        2,
+        0,
+        0,
+        2,
+        4
+      ],
+      [
+        2,
+        3,
+        0,
+        0,
+        1,
+        5,
+        6
+      ],
+      [
+        2,
+        4,
+        2,
+        0,
+        0,
+        7,
+        8
+      ]
+    ],
+    "ref": "López de Prado (2018), Advances in Financial Machine Learning, Wiley.",
+    "url": "https://www.wiley.com/"
+  }
+]

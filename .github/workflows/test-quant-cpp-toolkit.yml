@@ -13,6 +13,10 @@ on:
       - 'quant/research/depth-examples/**'
       - 'quant/research/model-examples/**'
       - 'quant/research/advanced-examples/**'
+      - 'quant/research/system-examples/**'
+      - 'quant/research/system_study_common.py'
+      - 'quant/research/system_studies_*.py'
+      - 'quant/research/run_system_studies.py'
       - 'quant/research/advanced_study_common.py'
       - 'quant/research/advanced_studies_*.py'
       - 'quant/research/run_advanced_studies.py'
@@ -37,6 +41,10 @@ on:
       - 'quant/research/depth-examples/**'
       - 'quant/research/model-examples/**'
       - 'quant/research/advanced-examples/**'
+      - 'quant/research/system-examples/**'
+      - 'quant/research/system_study_common.py'
+      - 'quant/research/system_studies_*.py'
+      - 'quant/research/run_system_studies.py'
       - 'quant/research/advanced_study_common.py'
       - 'quant/research/advanced_studies_*.py'
       - 'quant/research/run_advanced_studies.py'
@@ -180,3 +188,13 @@ jobs:
           test $(find /tmp/kline-advanced-results/cases -name '*.csv' | wc -l) -eq 48
           test $(find /tmp/kline-advanced-results/studies -name '*.csv' | wc -l) -eq 48
           test -s /tmp/kline-advanced-results/study-summary.csv
+
+      - name: Verify system research analytical references and domain guards
+        run: python quant/cpp/test_system_research.py /tmp/kline_quant
+
+      - name: Reproduce 48 independent research studies and 12 linked pipelines
+        run: |
+          python quant/research/run_system_studies.py /tmp/kline_quant /tmp/kline-system-results
+          test $(find /tmp/kline-system-results/cases -name '*.csv' | wc -l) -eq 48
+          test $(find /tmp/kline-system-results/studies -name '*.csv' | wc -l) -eq 60
+          test -s /tmp/kline-system-results/study-summary.csv
