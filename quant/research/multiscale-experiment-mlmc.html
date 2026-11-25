@@ -11,7 +11,7 @@
         Vec plan=mlmc_plan(design),data{4};
         for(int l=0;l&lt;4;++l){int n=integer(plan[4+l],2,100000);Random rng(seed+10*l+2);
             data.insert(data.end(),{double(n),double(cost[l])});
-            for(int j=0;j&lt;n;++j){Vec z=paired(rng,cost[l],strike,sigma);data.insert(data.end(),l==0?Vec{z[3],0}:Vec{z[2],z[3]});}}
+            for(int j=0;j&lt;n;++j){Vec z=paired(rng,cost[l],strike,sigma);Vec sample=l==0?Vec{z[3],0}:Vec{z[2],z[3]};data.insert(data.end(),sample.begin(),sample.end());}}
         Vec a=mlmc_estimate(data),direct;Random rng(seed+99);
         int n=std::max(2,int(a[3]/8));
         for(int j=0;j&lt;n;++j)direct.push_back(paired(rng,8,strike,sigma)[2]);
