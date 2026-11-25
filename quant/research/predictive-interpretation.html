@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>特征解释、变量筛选与群组校准｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="depth-labs.css"><link rel="stylesheet" href="predictive-decision.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main class="predictive-decision"><header><h1>特征解释、变量筛选与群组校准</h1><p><a href="predictive-decision.html">预测学习与组合决策</a>　<a href="predictive-interpretation.html">特征解释与群组校准</a>　<a href="../cpp/predictive_cli.cpp" download>C++17统一入口</a></p></header><section><p>模型归因与依赖结构、局部非参数平滑、变量选择错误率和重叠群组校准。所有诊断区分模型解释与经济因果识别。</p><h2><a href="predictive-shapley-interaction.html">相关背景样本下二次交互预测的干预式Shapley归因</a></h2><p>60组可复算参数记录。</p><h2><a href="predictive-ale-bilinear.html">累积局部效应ALE的区间差分及加权中心化</a></h2><p>60组可复算参数记录。</p><h2><a href="predictive-conditional-permutation.html">边际与组条件置换重要性的精确期望</a></h2><p>60组可复算参数记录。</p><h2><a href="predictive-knockoff-plus.html">Knockoff+阈值的有限样本选择规则</a></h2><p>60组可复算参数记录。</p><h2><a href="predictive-local-linear-smoother.html">局部线性核平滑的等价权重与边界矩条件</a></h2><p>60组可复算参数记录。</p><h2><a href="predictive-group-calibration.html">重叠群组的迭代均值校准与Brier下降</a></h2><p>60组可复算参数记录。</p></section><section><h2>完整C++17实现</h2><pre>#pragma once
+#include "predictive_kernel.hpp"
+namespace pdq {
+inline Vec shapley_interaction(const Vec&amp; x){
+    require(x.size()&gt;=8);int d=integer(x[0],2,10),n=integer(x[1],1,200);require(x.size()==size_t(3+2*d+d*(d-1)/2+n*d));
+    double intercept=x[2];Vec b(x.begin()+3,x.begin()+3+d),q(x.begin()+3+d,x.begin()+3+2*d);
+    size_t at=3+2*d;Mat A=zeros(d,d);for(int i=0;i&lt;d;++i)for(int j=i+1;j&lt;d;++j)A[i][j]=x[at++];
+    Mat bg=zeros(n,d);for(auto&amp; row:bg)for(double&amp; z:row)z=x[at++];
+    auto f=[&amp;](const Vec&amp; z){double v=intercept+dot(b,z);for(int i=0;i&lt;d;++i)for(int j=i+1;j&lt;d;++j)v+=A[i][j]*z[i]*z[j];return v;};
+    int N=1&lt;&lt;d;Vec v(N),phi(d),fac(d+1,1);for(int i=1;i&lt;=d;++i)fac[i]=i*fac[i-1];
+    for(int mask=0;mask&lt;N;++mask){for(const auto&amp; row:bg){Vec z=row;for(int j=0;j&lt;d;++j)if(mask&amp;(1&lt;&lt;j))z[j]=q[j];v[mask]+=f(z)/n;}}
+    for(int mask=0;mask&lt;N;++mask){int k=0;for(int j=0;j&lt;d;++j)k+=bool(mask&amp;(1&lt;&lt;j));for(int j=0;j&lt;d;++j)if(!(mask&amp;(1&lt;&lt;j)))phi[j]+=fac[k]*fac[d-k-1]/fac[d]*(v[mask|(1&lt;&lt;j)]-v[mask]);}
+    Vec out{v[0],v.back(),sum(phi),v.back()-v[0]-sum(phi)};out.insert(out.end(),phi.begin(),phi.end());return out;
+}
+inline Vec ale_bilinear(const Vec&amp; x){
+    require(x.size()&gt;=10);int k=integer(x[0],2,100),n=integer(x[1],k,100000);double a=x[2],b=x[3],c=x[4];require(x.size()==size_t(6+k+2*n));
+    Vec edge(x.begin()+5,x.begin()+6+k),count(k),diff(k),out;for(int j=1;j&lt;=k;++j)require(edge[j]&gt;edge[j-1]);
+    size_t at=6+k;for(int i=0;i&lt;n;++i){double z=x[at++],w=x[at++];require(z&gt;=edge.front()&amp;&amp;z&lt;=edge.back());int j=std::min(k-1,int(std::upper_bound(edge.begin(),edge.end(),z)-edge.begin())-1);double l=edge[j],u=edge[j+1];
+        diff[j]+=a*(u-l)+b*(u*u-l*l)+c*w*(u-l);++count[j];}
+    Vec level(k);double accum=0;for(int j=0;j&lt;k;++j){positive(count[j]);diff[j]/=count[j];accum+=diff[j];level[j]=accum;}
+    double center=dot(count,level)/n;for(double&amp; z:level){z-=center;}
+    out={center,dot(count,level)/n};for(const auto&amp; a0:{count,diff,level})out.insert(out.end(),a0.begin(),a0.end());return out;
+}
+inline Vec conditional_permutation(const Vec&amp; x){
+    require(x.size()&gt;=9&amp;&amp;(x.size()-1)%4==0);double beta=x[0];int n=(x.size()-1)/4;require(n&lt;=100000);
+    struct Moments{double n=0,s=0,q=0;};std::map&lt;int,Moments&gt; groups;Moments all;Vec p(n),y(n),b(n);std::vector&lt;int&gt; id(n);double base=0;
+    for(int i=0;i&lt;n;++i){size_t j=1+4*i;id[i]=integer(x[j],0,1000000);p[i]=x[j+1];y[i]=x[j+2];b[i]=x[j+3];base+=sq(y[i]-b[i]-beta*p[i])/n;
+        for(Moments* m:{&amp;groups[id[i]],&amp;all}){++m-&gt;n;m-&gt;s+=p[i];m-&gt;q+=sq(p[i]);}}
+    double marginal=0,conditional=0;Vec out;
+    auto expected=[&amp;](double z,const Moments&amp; m){return z*z-2*z*beta*m.s/m.n+beta*beta*m.q/m.n;};
+    for(int i=0;i&lt;n;++i){double z=y[i]-b[i],a=expected(z,all),c=expected(z,groups[id[i]]);marginal+=a/n;conditional+=c/n;out.push_back(c);}
+    out.insert(out.begin(),{base,marginal,conditional,marginal-base,conditional-base});return out;
+}
+inline Vec knockoff_plus(const Vec&amp; x){
+    require(x.size()&gt;=3);double q=x[0];require(q&gt;0&amp;&amp;q&lt;1);Vec w(x.begin()+1,x.end());std::set&lt;double&gt; abs;for(double v:w)if(v!=0)abs.insert(std::abs(v));
+    double t=0,fdp=0,chosen=0;int positives=0,negatives=0;
+    for(double z:abs){int p=0,n=0;for(double a:w){p+=a&gt;=z;n+=a&lt;=-z;}double f=(1.+n)/std::max(1,p);if(f&lt;=q){t=z;fdp=f;positives=p;negatives=n;chosen=1;break;}}
+    Vec out{chosen,t,double(positives),double(negatives),fdp};for(double v:w)out.push_back(chosen&amp;&amp;v&gt;=t?1.:0.);return out;
+}
+inline Vec local_linear_smoother(const Vec&amp; x){
+    require(x.size()&gt;=6&amp;&amp;(x.size()-2)%2==0);double q=x[0],h=x[1];positive(h);int n=(x.size()-2)/2;require(n&lt;=100000);
+    Vec z(n),y(n),a(n);double best=std::numeric_limits&lt;double&gt;::infinity();
+    for(int i=0;i&lt;n;++i){z[i]=x[2+2*i]-q;y[i]=x[3+2*i];a[i]=.5*sq(z[i]/h);best=std::min(best,a[i]);}
+    for(double&amp; v:a){v=std::exp(best-v);}
+    double sw=sum(a);positive(sw);double m=dot(a,z)/sw,ym=dot(a,y)/sw,v=0,c=0;for(int i=0;i&lt;n;++i){v+=a[i]*sq(z[i]-m);c+=a[i]*(z[i]-m)*(y[i]-ym);}positive(v);
+    double slope=c/v,pred=ym-slope*m;Vec w(n);for(int i=0;i&lt;n;++i)w[i]=a[i]/sw-m*a[i]*(z[i]-m)/v;
+    Vec out{pred,slope,sw*sw/dot(a,a),sum(w),dot(w,z)};out.insert(out.end(),w.begin(),w.end());return out;
+}
+inline Vec group_calibration(const Vec&amp; x){
+    require(x.size()&gt;=7);int n=integer(x[0],2,5000),k=integer(x[1],1,100);double eps=x[2];require(eps&gt;0&amp;&amp;eps&lt;1&amp;&amp;x.size()==size_t(3+n*(2+k)));
+    Vec p(n),y(n),count(k);Mat G=zeros(k,n);size_t at=3;
+    for(int i=0;i&lt;n;++i){p[i]=x[at++];prob(p[i]);y[i]=x[at++];require(y[i]==0||y[i]==1);for(int j=0;j&lt;k;++j){G[j][i]=integer(x[at++],0,1);count[j]+=G[j][i];}}
+    for(double v:count){positive(v);}
+    auto brier=[&amp;](){double a=0;for(int i=0;i&lt;n;++i)a+=sq(y[i]-p[i])/n;return a;};
+    double start=brier(),worst=0;int it=0;Vec res(k);
+    auto residual=[&amp;](){Vec e(n);for(int i=0;i&lt;n;++i)e[i]=y[i]-p[i];for(int j=0;j&lt;k;++j)res[j]=dot(G[j],e)/count[j];int j=0;for(int a=1;a&lt;k;++a)if(std::abs(res[a])&gt;std::abs(res[j])+1e-14)j=a;return j;};
+    while(it&lt;100000){int j=residual();if(std::abs(res[j])&lt;=eps)break;for(int i=0;i&lt;n;++i)if(G[j][i])p[i]=std::clamp(p[i]+res[j],0.,1.);++it;}
+    residual();for(double v:res)worst=std::max(worst,std::abs(v));require(worst&lt;=eps+1e-12);
+    Vec out{start,brier(),worst,double(it)};out.insert(out.end(),p.begin(),p.end());out.insert(out.end(),res.begin(),res.end());return out;
+}
+}
+</pre></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true})"></script></body></html>
