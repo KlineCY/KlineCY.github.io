@@ -41,6 +41,9 @@ jobs:
           node-version: '22'
       - run: ${{ matrix.compiler }} -std=c++17 -O2 -Wall -Wextra -Werror -pedantic quant/cpp/predictive_cli.cpp -o /tmp/quant_predictive
       - run: node scripts/test_predictive_decision.mjs /tmp/quant_predictive
+      - run: ${{ matrix.compiler }} -std=c++17 -O2 -Wall -Wextra -Werror -pedantic quant/cpp/predictive_experiments.cpp -o /tmp/predictive_experiments
+      - run: ${{ matrix.compiler }} -std=c++17 -O2 -Wall -Wextra -Werror -pedantic quant/cpp/predictive_advanced_experiments.cpp -o /tmp/predictive_advanced_experiments
+      - run: node scripts/test_predictive_experiments.mjs /tmp/predictive_experiments /tmp/predictive_advanced_experiments
   curriculum:
     runs-on: ubuntu-latest
     steps:
@@ -50,3 +53,4 @@ jobs:
           node-version: '22'
       - run: npm install --no-save --no-package-lock katex@0.16.11
       - run: node scripts/test_predictive_curriculum.mjs
+      - run: node scripts/test_predictive_experiments.mjs --curriculum
