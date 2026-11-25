@@ -7,7 +7,7 @@ Vec pinball(const Vec& x){check(x.size()>=3&&x.size()%2==1);double t=x[0],loss=0
 
 Vec ensemble_crps(const Vec& x){check(x.size()>=3);Vec s(x.begin()+1,x.end());std::sort(s.begin(),s.end());double a=0,b=0,m=s.size();for(size_t i=0;i<s.size();++i){a+=std::abs(s[i]-x[0]);b+=(2.*i-m+1)*s[i];}a/=m;b/=m*m;return {a-b,a,b};}
 
-Vec split_conformal(const Vec& x){check(x.size()>=2&&x[0]>0&&x[0]<1);Vec s(x.begin()+1,x.end());for(double z:s)check(z>=0);std::sort(s.begin(),s.end());size_t k=static_cast<size_t>(std::ceil((s.size()+1)*(1-x[0])-1e-12));check(k>0&&k<=s.size());return {double(k),s[k-1],1-x[0]};}
+Vec split_conformal(const Vec& x){check(x.size()>=2&&x[0]>0&&x[0]<1);Vec s(x.begin()+1,x.end());for(double z:s)check(z>=0);std::sort(s.begin(),s.end());size_t k=static_cast<size_t>(std::ceil((s.size()+1)*(1-x[0])));check(k>0&&k<=s.size());return {double(k),s[k-1],1-x[0]};}
 
 Vec isotonic_fit(const Vec& x){pairs(x);struct B{double sw,sy;size_t n;};std::vector<B> b;for(size_t i=0;i<x.size();i+=2){check(x[i+1]>0);b.push_back({x[i+1],x[i]*x[i+1],1});while(b.size()>1){auto r=b.back(),l=b[b.size()-2];if(l.sy/l.sw<=r.sy/r.sw)break;b.pop_back();b.back()={l.sw+r.sw,l.sy+r.sy,l.n+r.n};}}Vec out;for(auto z:b)out.insert(out.end(),z.n,z.sy/z.sw);return out;}
 
