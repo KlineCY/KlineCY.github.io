@@ -56,4 +56,4 @@ const reports=[...scripts.matchAll(/^\s+report\("([a-z0-9_]+)"/gm)].map(m=>m[1])
 assert.equal(ids.length,92);assert.equal(new Set(ids).size,92);assert.deepEqual(ids.slice().sort(),reports.slice().sort());
 for(const id of ids)assert(studies.includes("comprehensive-results/studies/"+id+".csv"));
 let synthesis=0;for(const g of groups){const h=read("quant/research/comprehensive-course-"+g+".html");for(const m of h.matchAll(/<div class="equation">\$\$([\s\S]*?)\$\$<\/div>/g)){katex.renderToString(unesc(m[1]),{throwOnError:true,strict:"error"});synthesis++;}}
-assert.equal(synthesis,40);console.log("PASS: 80 independent study descriptions, 12 linked pipelines and 40 mathematical synthesis formulas");
+assert.equal(synthesis,68);console.log("PASS: 80 independent study descriptions, 12 linked pipelines and 68 mathematical synthesis formulas");
