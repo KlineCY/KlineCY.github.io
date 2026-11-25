@@ -5,6 +5,12 @@ import tempfile
 from pathlib import Path
 from comprehensive_study_common import INDEX,csvfile,run
 from integrated_portfolio import studies as portfolio
+from integrated_pricing import studies as pricing
+from integrated_execution import studies as execution
+from integrated_learning import studies as learning
+from integrated_inference import studies as inference
+from integrated_economics import studies as economics
+from integrated_dynamics import studies as dynamics
 
 def main(binary,output):
     output.mkdir(parents=True,exist_ok=True)
@@ -22,8 +28,8 @@ def main(binary,output):
             assert all(math.isfinite(v) for r in rows for v in r),name
             csvfile(output/(name+".csv"),header,rows)
             produced[name]=len(rows)
-        for workflow in (portfolio,):workflow(model,report)
-    assert len(produced)==6
+        for workflow in (portfolio,pricing,execution,learning,inference,economics,dynamics):workflow(model,report)
+    assert len(produced)==42
     csvfile(output/"summary.csv",["Pipeline","Rows"],sorted(produced.items()))
     print(f"PASS: {len(produced)} cross-model research pipelines, {sum(produced.values())} output rows")
 
