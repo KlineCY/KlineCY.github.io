@@ -9,6 +9,7 @@ on:
       - 'quant/cpp/index.html'
       - 'quant/sidebar-v2.js'
       - 'scripts/test_quant_applied_systems.*'
+      - 'scripts/test_quant_applied_experiments.*'
       - '.github/workflows/test-quant-applied-systems.yml'
   push:
     branches: [main]
@@ -20,6 +21,7 @@ on:
       - 'quant/cpp/index.html'
       - 'quant/sidebar-v2.js'
       - 'scripts/test_quant_applied_systems.*'
+      - 'scripts/test_quant_applied_experiments.*'
       - '.github/workflows/test-quant-applied-systems.yml'
 permissions:
   contents: read
@@ -34,6 +36,8 @@ jobs:
       - uses: actions/checkout@v4
       - run: ${{ matrix.compiler }} -std=c++17 -O2 -Wall -Wextra -Werror -pedantic quant/cpp/applied_systems.cpp -o /tmp/quant_systems
       - run: python3 scripts/test_quant_applied_systems.py /tmp/quant_systems
+      - run: ${{ matrix.compiler }} -std=c++17 -O2 -Wall -Wextra -Werror -pedantic quant/cpp/applied_experiments.cpp -o /tmp/quant_experiments
+      - run: python3 scripts/test_quant_applied_experiments.py /tmp/quant_experiments
   curriculum:
     runs-on: ubuntu-latest
     steps:
@@ -43,3 +47,4 @@ jobs:
           node-version: '22'
       - run: npm install --no-save --no-package-lock katex@0.16.11
       - run: node scripts/test_quant_applied_systems.mjs
+      - run: node scripts/test_quant_applied_experiments.mjs
