@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>显式持续时间、结构突变与高维面板识别｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="depth-labs.css"><link rel="stylesheet" href="finite-state.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main class="finite-state"><header><h1>显式持续时间、结构突变与高维面板识别</h1><p><a href="finite-state-research.html">有限状态与动态研究</a>　<a href="applied-systems.html">完整应用研究</a>　<a href="../cpp/finite_state_cli.cpp" download>统一C++17入口</a></p></header><section><h2>统一研究主线</h2><p>这组模型统一处理不可直接观察的状态、结构断点及固定效应。在经济时间序列中，状态持续时间并不一定服从几何分布；对面板截面和时序的混合扰动，则必须将非平衡样本的固定效应投影与真实信号识别分离。四个计算模型分别提供似然、最优分段、贝叶斯证据和投影残差。</p><h3><a href="finite-state-duration-study.html">显式持续时间隐半马尔可夫模型：对数前向、后向及Viterbi</a></h3><p>令一段隐藏状态j产生d个观测，持续时间概率为g_j(d)，段内发射概率为观测概率的乘积。模型要求相邻段状态不同，避免同一状态的持续时间被任意拆分。以“第t个观测恰好结束一个完整段”为状态，前向递推对最后一个段的所有可能长度和前驱状态求和；右边界在T处完全结束，因此此处不是右删失模型。</p><h3><a href="finite-state-segmentation.html">最小段长约束的全局最优分段回归</a></h3><p>目标是将序列划分成未知数量的连续常均值段。固定段边界后，对段均值求最小二乘一阶条件即得样本均值，代回损失得到两个前缀和的闭式代价。段代价只依赖本段数据，且断点惩罚可加，因此最优子结构成立。</p><h3><a href="finite-state-bayes-break.html">Bernoulli单断点的边际似然与断点后验</a></h3><p>在无断点模型下，所有Bernoulli观测共享一个未知概率θ；断点模型下，两段分别有独立的Beta(A,B)先验。对每段的θ积分时，似然与Beta密度的幂次合并得到Beta函数之比。观测是有顺序的二元序列，不应额外乘二项组合数。</p><h3><a href="finite-state-two-way-within.html">非平衡面板双向固定效应的交替投影</a></h3><p>对非平衡面板，不同个体的观察日期集合可能不同，单次减去个体均值与日期均值不能一般地得到联合残差。个体组中心化与时间组中心化分别是对应虚拟变量列空间的正交补投影；交替正交投影收敛到两正交补的交集，也就是联合固定效应空间的正交补。</p><p><a href="finite-state-inference-cases.json" download>全部独立解析输入和结果</a>。</p></section><section><h2>完整C++17实现</h2><p>所有方法共享公共输入检查与数值接口。具体输入输出及公式证明见对应计算章节。</p><pre>#pragma once
+#include &quot;finite_state_common.hpp&quot;
+namespace fsq {
+// Segment likelihood with exact right boundary; every state run is a completed segment.
+struct DurationModel {
+    Vec initial;
+    Mat transition,duration,emission;
+    std::vector&lt;int&gt; observations;
+};
+inline DurationModel duration_input(const Vec&amp; x){
+    require(x.size()&gt;=4);
+    int k=count(x[0],2,5),d=count(x[1],1,20),m=count(x[2],2,10),n=count(x[3],1,300);
+    require(x.size()==size_t(4+k+k*k+k*d+k*m+n));
+    size_t at=4;
+    auto take=[&amp;](int z){Vec a(x.begin()+at,x.begin()+at+z);at+=z;distribution(a);return a;};
+    DurationModel a;
+    a.initial=take(k);
+    for(int i=0;i&lt;k;++i){Vec p=take(k);require(p[i]==0);a.transition.push_back(p);}
+    for(int i=0;i&lt;k;++i)a.duration.push_back(take(d));
+    for(int i=0;i&lt;k;++i)a.emission.push_back(take(m));
+    for(int i=0;i&lt;n;++i)a.observations.push_back(count(x[at++],0,m-1));
+    return a;
+}
+struct DurationResult {double loglik,logbest,expectedSegments;Vec posteriorLast,path,occupancy;};
+inline DurationResult duration_smooth(const DurationModel&amp; a){
+    int n=a.observations.size(),k=a.initial.size(),d=a.duration[0].size();
+    double neg=-std::numeric_limits&lt;double&gt;::infinity();
+    Mat f(n+1,Vec(k,neg)),v=f,b=f;
+    std::vector&lt;std::vector&lt;int&gt;&gt; prev(n+1,std::vector&lt;int&gt;(k,-1)),length=prev;
+    // Log segment emissions are accumulated from the right; no subtraction of infinities.
+    auto segments=[&amp;](int t,int j){
+        Vec s(std::min(d,t)+1,neg);s[0]=0;
+        for(int l=1;l&lt;=std::min(d,t);++l)s[l]=s[l-1]+logp(a.emission[j][a.observations[t-l]]);
+        for(size_t l=1;l&lt;s.size();++l)s[l]+=logp(a.duration[j][l-1]);
+        return s;
+    };
+    for(int t=1;t&lt;=n;++t)for(int j=0;j&lt;k;++j){
+        Vec seg=segments(t,j);
+        for(int l=1;l&lt;int(seg.size());++l){
+            int start=t-l;
+            if(start==0){
+                double z=logp(a.initial[j])+seg[l];f[t][j]=logadd(f[t][j],z);
+                if(z&gt;v[t][j]){v[t][j]=z;prev[t][j]=-1;length[t][j]=l;}
+            }else for(int i=0;i&lt;k;++i){
+                double tr=logp(a.transition[i][j])+seg[l];
+                f[t][j]=logadd(f[t][j],f[start][i]+tr);
+                double z=v[start][i]+tr;
+                if(z&gt;v[t][j]){v[t][j]=z;prev[t][j]=i;length[t][j]=l;}
+            }
+        }
+    }
+    double ll=lse(f[n]);require(std::isfinite(ll));
+    for(int j=0;j&lt;k;++j)b[n][j]=0;
+    for(int t=n-1;t&gt;=1;--t)for(int i=0;i&lt;k;++i)for(int j=0;j&lt;k;++j){
+        double e=0;
+        for(int l=1;l&lt;=std::min(d,n-t);++l){
+            e+=logp(a.emission[j][a.observations[t+l-1]]);
+            b[t][i]=logadd(b[t][i],logp(a.transition[i][j])+logp(a.duration[j][l-1])+e+b[t+l][j]);
+        }
+    }
+    Vec occ(k,0),last(k),path(n);
+    double ns=0;
+    for(int t=1;t&lt;=n;++t)for(int j=0;j&lt;k;++j){
+        Vec seg=segments(t,j);
+        for(int l=1;l&lt;int(seg.size());++l){
+            int start=t-l;double pre=neg;
+            if(start==0)pre=logp(a.initial[j]);
+            else for(int i=0;i&lt;k;++i)pre=logadd(pre,f[start][i]+logp(a.transition[i][j]));
+            double mass=std::exp(pre+seg[l]+b[t][j]-ll);
+            ns+=mass;occ[j]+=l*mass;
+        }
+    }
+    for(int j=0;j&lt;k;++j)last[j]=std::exp(f[n][j]-ll);
+    int j=int(std::max_element(v[n].begin(),v[n].end())-v[n].begin()),t=n;
+    double best=v[n][j];
+    while(t&gt;0){int l=length[t][j];require(l&gt;0);for(int z=t-l;z&lt;t;++z)path[z]=j;int i=prev[t][j];t-=l;j=i;}
+    return {ll,best,ns,last,path,occ};
+}
+inline Vec duration_study(const Vec&amp; x){
+    auto a=duration_input(x);auto r=duration_smooth(a);
+    Vec out{r.loglik,r.logbest,r.expectedSegments};
+    out.insert(out.end(),r.posteriorLast.begin(),r.posteriorLast.end());
+    out.insert(out.end(),r.occupancy.begin(),r.occupancy.end());
+    out.insert(out.end(),r.path.begin(),r.path.end());
+    return out;
+}
+// Exact penalized piecewise constant regression with a minimum segment length.
+inline Vec segmentation(const Vec&amp; x){
+    require(x.size()&gt;=4);
+    int m=count(x[0],1,300),n=int(x.size())-2;
+    double penalty=x[1];require(penalty&gt;=0&amp;&amp;n&gt;=m&amp;&amp;n&lt;=3000);
+    Vec s(n+1),q(n+1);
+    for(int i=1;i&lt;=n;++i){s[i]=s[i-1]+x[i+1];q[i]=q[i-1]+sq(x[i+1]);}
+    auto cost=[&amp;](int a,int b){return std::max(0.,q[b]-q[a]-sq(s[b]-s[a])/(b-a));};
+    Vec f(n+1,std::numeric_limits&lt;double&gt;::infinity());f[0]=-penalty;
+    std::vector&lt;int&gt; prev(n+1,-1),parts;
+    for(int t=m;t&lt;=n;++t)for(int a=0;a&lt;=t-m;++a){
+        double v=f[a]+cost(a,t)+penalty;
+        if(v&lt;f[t]-1e-11){f[t]=v;prev[t]=a;}
+    }
+    require(prev[n]&gt;=0);double sse=0;Vec fit(n);
+    for(int t=n;t&gt;0;){int a=prev[t];require(a&gt;=0);sse+=cost(a,t);double u=(s[t]-s[a])/(t-a);for(int i=a;i&lt;t;++i)fit[i]=u;parts.push_back(t);t=a;}
+    std::reverse(parts.begin(),parts.end());
+    Vec out{f[n],sse,double(parts.size())};
+    for(int t:parts)out.push_back(t);
+    out.insert(out.end(),fit.begin(),fit.end());return out;
+}
+// Integrated beta-binomial emission evidence for a Bernoulli change point.
+inline double beta_log(double a,double b){return std::lgamma(a)+std::lgamma(b)-std::lgamma(a+b);}
+inline Vec bayes_break(const Vec&amp; x){
+    require(x.size()&gt;=4);double a=x[0],b=x[1];require(a&gt;0&amp;&amp;b&gt;0);
+    int n=int(x.size())-2;require(n&gt;=2&amp;&amp;n&lt;=5000);
+    Vec s(n+1);
+    for(int i=1;i&lt;=n;++i){require(x[i+1]==0||x[i+1]==1);s[i]=s[i-1]+x[i+1];}
+    auto ll=[&amp;](int l,int r){double k=s[r]-s[l];return beta_log(a+k,b+r-l-k)-beta_log(a,b);};
+    double null=ll(0,n);Vec score;
+    for(int t=1;t&lt;n;++t)score.push_back(ll(0,t)+ll(t,n)-std::log(n-1.));
+    double alt=lse(score);int mode=int(std::max_element(score.begin(),score.end())-score.begin())+1;
+    double posterior=std::exp(alt-logadd(null,alt)),mean=0;
+    Vec out{null,alt,alt-null,posterior,double(mode),0};
+    for(int t=1;t&lt;n;++t){double p=std::exp(score[t-1]-alt);out.push_back(p);mean+=t*p;}
+    out[5]=mean;return out;
+}
+// Two-way fixed effects by alternating orthogonal projections on an unbalanced bipartite panel.
+inline Vec two_way_within(const Vec&amp; x){
+    require(x.size()&gt;=7&amp;&amp;(x.size()-2)%4==0);
+    int ni=count(x[0],2,2000),nt=count(x[1],2,2000),n=int((x.size()-2)/4);
+    require(n&gt;ni+nt-1&amp;&amp;n&lt;=100000);
+    std::vector&lt;int&gt; id(n),time(n),ci(ni),ct(nt);
+    Vec a(n),b(n);
+    std::map&lt;std::pair&lt;int,int&gt;,int&gt; seen;
+    for(int j=0;j&lt;n;++j){id[j]=count(x[2+4*j],0,ni-1);time[j]=count(x[3+4*j],0,nt-1);require(++seen[{id[j],time[j]}]==1);ci[id[j]]++;ct[time[j]]++;a[j]=x[4+4*j];b[j]=x[5+4*j];}
+    for(int v:ci)require(v&gt;0);
+    for(int v:ct)require(v&gt;0);
+    // The group graph must be connected for the stated residual degrees of freedom.
+    std::vector&lt;int&gt; parent(ni+nt);std::iota(parent.begin(),parent.end(),0);
+    auto root=[&amp;](int i){while(parent[i]!=i)i=parent[i];return i;};
+    for(int j=0;j&lt;n;++j)parent[root(id[j])]=root(ni+time[j]);
+    for(int i=1;i&lt;ni+nt;++i)require(root(i)==root(0));
+    auto center=[&amp;](Vec&amp; v,const std::vector&lt;int&gt;&amp; group,const std::vector&lt;int&gt;&amp; counts){
+        Vec mean(counts.size());for(int j=0;j&lt;n;++j)mean[group[j]]+=v[j];
+        for(size_t i=0;i&lt;mean.size();++i)mean[i]/=counts[i];
+        for(int j=0;j&lt;n;++j)v[j]-=mean[group[j]];
+    };
+    auto error=[&amp;](const Vec&amp; v){Vec p(ni),q(nt);for(int j=0;j&lt;n;++j){p[id[j]]+=v[j];q[time[j]]+=v[j];}
+        double e=0;for(double z:p)e=std::max(e,std::abs(z));for(double z:q)e=std::max(e,std::abs(z));return e;};
+    double scale=1;for(double z:a)scale=std::max(scale,std::abs(z));for(double z:b)scale=std::max(scale,std::abs(z));
+    int it=0;double err=0;
+    for(;it&lt;20000;++it){center(a,id,ci);center(a,time,ct);center(b,id,ci);center(b,time,ct);err=std::max(error(a),error(b));if(err&lt;=1e-12*scale)break;}
+    require(it&lt;20000);double aa=std::inner_product(a.begin(),a.end(),a.begin(),0.);
+    require(aa&gt;1e-20*scale*scale&amp;&amp;n&gt;ni+nt);
+    double beta=std::inner_product(a.begin(),a.end(),b.begin(),0.)/aa,rss=0;
+    for(int j=0;j&lt;n;++j)rss+=sq(b[j]-beta*a[j]);
+    return {beta,rss,double(n-ni-nt),std::sqrt(rss/(n-ni-nt)/aa),err};
+}
+}
+</pre><p><a href="../cpp/finite_state_inference.hpp" download>本领域头文件</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

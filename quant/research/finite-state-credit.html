@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>异质信用组合的精确分布、尾部与风险敏感性｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="depth-labs.css"><link rel="stylesheet" href="finite-state.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main class="finite-state"><header><h1>异质信用组合的精确分布、尾部与风险敏感性</h1><p><a href="finite-state-research.html">有限状态与动态研究</a>　<a href="applied-systems.html">完整应用研究</a>　<a href="../cpp/finite_state_cli.cpp" download>统一C++17入口</a></p></header><section><h2>统一研究主线</h2><p>与只使用组合均值或高斯近似不同，独立违约及有限系统状态允许利用概率卷积计算完整有限样本损失分布。由同一分布计算VaR、ES、分层损失以及对单个违约概率的精确导数，避免不一致的风险度量。</p><h3><a href="finite-state-count-credit.html">Poisson–binomial违约数分布与离散ES</a></h3><p>不同借款人的独立违约指示变量可以具有不同概率，因此违约总数不是通常的同参数二项分布。独立性使概率生成函数为各Bernoulli生成函数的乘积，展开系数即为违约数概率。逐一纳入借款人时，新分布是旧分布与二点分布的卷积。</p><h3><a href="finite-state-loss-distribution.html">整数损失单位下的异质敞口卷积</a></h3><p>违约数仅在损失单位相同的时候能直接表示经济损失。将每个违约后的确定损失离散为整数单位w_i，生成函数的指数从1变成w_i。卷积递推在每一借款人处移动相应单位，保留全部损失金额概率。</p><h3><a href="finite-state-tranche-sensitivity.html">信用分层损失的精确违约概率敏感性</a></h3><p>以起赔点A及止赔点B定义分层损失。其他借款人概率固定时，按照第i个借款人违约与否条件化，分层期望损失关于p_i严格为仿射函数。导数可以通过剔除该借款人的损失分布一次求得。</p><h3><a href="finite-state-mixture-count.html">有限系统因子混合下的违约聚集与后验状态</a></h3><p>让所有借款人的违约概率依赖同一离散系统状态，并假设条件于该状态后独立。先在每个状态下对异质概率卷积，再对系统状态权重求平均，得到无条件违约数分布。即使条件独立，无条件违约仍可能聚集。</p><p><a href="finite-state-credit-cases.json" download>全部独立解析输入和结果</a>。</p></section><section><h2>完整C++17实现</h2><p>所有方法共享公共输入检查与数值接口。具体输入输出及公式证明见对应计算章节。</p><pre>#pragma once
+#include &quot;finite_state_common.hpp&quot;
+namespace fsq {
+inline Vec poisson_binomial_pmf(const Vec&amp; p){
+    require(!p.empty()&amp;&amp;p.size()&lt;=500);
+    Vec f(p.size()+1);f[0]=1;
+    size_t i=0;
+    for(double z:p){probability(z);++i;for(size_t j=i;j&gt;0;--j)f[j]=(1-z)*f[j]+z*f[j-1];f[0]*=1-z;}
+    return f;
+}
+inline Vec count_credit(const Vec&amp; x){
+    require(x.size()&gt;=2);double a=x[0];require(a&gt;0&amp;&amp;a&lt;1);
+    Vec p(x.begin()+1,x.end()),f=poisson_binomial_pmf(p);
+    double mean=0,var=0;for(double z:p){mean+=z;var+=z*(1-z);}
+    double acc=0;int q=0;for(;q&lt;int(f.size())-1;++q){acc+=f[q];if(acc&gt;=a-1e-14)break;}
+    double es=q;
+    for(size_t j=q+1;j&lt;f.size();++j)es+=(j-q)*f[j]/(1-a);
+    Vec out{mean,var,double(q),es,sum(f)};out.insert(out.end(),f.begin(),f.end());return out;
+}
+// Integer loss units: weighted independent Bernoulli convolution.
+inline Vec loss_distribution(const Vec&amp; x){
+    require(x.size()&gt;=4&amp;&amp;(x.size()-2)%2==0);
+    double alpha=x[0];require(alpha&gt;0&amp;&amp;alpha&lt;1);int attachment=count(x[1],0,20000);
+    int total=0;Vec f(1,1);double mean=0;
+    for(size_t i=2;i&lt;x.size();i+=2){
+        int w=count(x[i],1,2000);double p=x[i+1];probability(p);require(total+w&lt;=20000);
+        f.resize(total+w+1);
+        for(int j=total+w;j&gt;=0;--j)f[j]=(j&lt;=total?(1-p)*f[j]:0)+(j&gt;=w?p*f[j-w]:0);
+        total+=w;mean+=w*p;
+    }
+    double stop=0,m=0,var=0;int q=0;
+    for(int j=0;j&lt;=total;++j){m+=j*f[j];var+=sq(j-mean)*f[j];stop+=std::max(j-attachment,0)*f[j];}
+    double acc=0;for(;q&lt;total;++q){acc+=f[q];if(acc&gt;=alpha-1e-14)break;}
+    double es=q;for(int j=q+1;j&lt;=total;++j)es+=(j-q)*f[j]/(1-alpha);
+    Vec out{m,var,double(q),es,stop,sum(f)};out.insert(out.end(),f.begin(),f.end());return out;
+}
+// Stop-loss sensitivity uses a leave-one-out loss distribution, not a finite difference.
+inline Vec tranche_sensitivity(const Vec&amp; x){
+    require(x.size()&gt;=4&amp;&amp;x.size()%2==0);
+    int a=count(x[0],0,20000),b=count(x[1],1,20000);require(b&gt;a);
+    Vec base{.9,double(a)};base.insert(base.end(),x.begin()+2,x.end());
+    Vec f=loss_distribution(base);double el=0;
+    auto payoff=[&amp;](int l){return double(std::min(std::max(l-a,0),b-a));};
+    for(size_t j=6;j&lt;f.size();++j)el+=payoff(int(j-6))*f[j];
+    Vec out{el,el/(b-a)};
+    for(size_t i=2;i&lt;x.size();i+=2){
+        int w=count(x[i],1,2000);Vec other{.9,0};
+        for(size_t j=2;j&lt;x.size();j+=2)if(i!=j)other.insert(other.end(),{x[j],x[j+1]});
+        double delta=0;
+        if(other.size()==2)delta=payoff(w)-payoff(0);
+        else{Vec g=loss_distribution(other);for(size_t l=6;l&lt;g.size();++l)delta+=(payoff(int(l-6)+w)-payoff(int(l-6)))*g[l];}
+        out.push_back(delta);
+    }
+    return out;
+}
+// Conditional independence given a finite systemic factor; posterior factor weights after observed count.
+inline Vec mixture_count(const Vec&amp; x){
+    require(x.size()&gt;=4);int k=count(x[0],1,50),n=count(x[1],1,500),obs=count(x[2],0,n);
+    require(x.size()==size_t(3+k*(n+1)));
+    Vec weights,pmf(n+1),post;double mu=0,within=0,between=0;
+    Vec means;size_t j=3;
+    for(int s=0;s&lt;k;++s){double w=x[j++];probability(w);weights.push_back(w);Vec p(x.begin()+j,x.begin()+j+n);j+=n;Vec f=poisson_binomial_pmf(p);
+        double m=sum(p),v=0;for(double z:p)v+=z*(1-z);mu+=w*m;within+=w*v;means.push_back(m);
+        for(int i=0;i&lt;=n;++i)pmf[i]+=w*f[i];
+        post.push_back(w*f[obs]);
+    }
+    distribution(weights);for(int s=0;s&lt;k;++s)between+=weights[s]*sq(means[s]-mu);
+    require(pmf[obs]&gt;0);for(double&amp; z:post)z/=pmf[obs];
+    Vec out{mu,within,between,within+between,pmf[obs],sum(pmf)};
+    out.insert(out.end(),post.begin(),post.end());out.insert(out.end(),pmf.begin(),pmf.end());return out;
+}
+}
+</pre><p><a href="../cpp/finite_state_credit.hpp" download>本领域头文件</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>
