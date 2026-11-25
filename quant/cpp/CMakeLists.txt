@@ -86,3 +86,6 @@ add_test(NAME kline_quant_domain_labs_tests COMMAND kline_quant_domain_labs_test
 add_test(NAME kline_quant_atlas2026_tests COMMAND kline_quant_atlas2026_tests)
 
 add_test(NAME kline_quant_lab24_tests COMMAND kline_quant_lab24_tests)
+
+add_executable(kline_integrated integrated_cli.cpp)
+target_compile_features(kline_integrated PRIVATE cxx_std_17)
