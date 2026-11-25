@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>资产定价限制与统计研究｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="depth-labs.css"><link rel="stylesheet" href="multiscale.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main class="multiscale"><header><h1>资产定价限制与统计研究</h1><p><a href="multiscale-research.html">多尺度与实证研究体系</a>　<a href="multiscale-empirical.html">资产定价与统计研究</a>　<a href="../cpp/multiscale_cli.cpp" download>统一C++17入口</a></p></header><section><h2>统一研究主线</h2><p>从可交易收益空间对随机贴现因子的限制出发，构造候选因子的正交增量、择时曲率与定价误差距离；再从多策略联合随机化、FDR及Sharpe和Rank IC的时序误差明确研究证据。所有模型区分样本内几何恒等式与总体统计推断。</p><h3><a href="multiscale-hj-bound.html">可交易超额收益对随机贴现因子的Hansen–Jagannathan下界</a></h3><p>对于一组同频超额收益，任一能够定价这些收益的随机贴现因子必须满足其与超额收益的乘积期望为零。将SDF对收益空间作线性投影，投影系数由协方差方程确定；正交剩余只会增加方差。</p><h3><a href="multiscale-factor-spanning.html">因子扩充的Sharpe平方增量与正交残差</a></h3><p>已有一组可交易超额收益因子，候选因子的经济价值取决于它在既有因子空间之外的新增风险收益。将候选收益对现有因子作含截距最小二乘，残差与原因子协方差为零。因子组合空间可等价地由原有因子和去掉因子线性部分后的候选资产张成。</p><h3><a href="multiscale-timing-regression.html">Treynor–Mazuy二次市场择时回归与局部Beta</a></h3><p>若投资组合对市场上涨和下跌具有不同暴露，单一线性Beta可能无法描述收益曲率。Treynor–Mazuy模型在市场超额收益的线性项上加入平方项，γ刻画条件收益曲率。市场收益及组合收益须采用同一频率和超额收益口径。</p><h3><a href="multiscale-sdf-distance.html">既有SDF代理的最小定价误差修正距离</a></h3><p>给定候选随机贴现因子和一组资产终点支付及初始价格，候选因子可能无法精确匹配价格。以L2距离最小的调整来消除定价误差，将误差大小与资产支付二阶矩的尺度统一。</p><h3><a href="multiscale-joint-sign-stepdown.html">策略族共用符号随机化的maxT逐步检验</a></h3><p>同一市场日期的多策略损失差具有截面依赖。若零假设下各日期的整行差值向量具有独立联合符号对称性，可对每个日期共同乘正负符号，保留截面相关结构。统计量使用符号翻转下不变的平方和标准化，而非重新计算普通t统计量。</p><h3><a href="multiscale-fdr-stepup.html">BH与BY逐步上升的调整概率及依赖条件</a></h3><p>大量因子研究中，目标可能是控制发现集合内错误发现比例的期望，而不是任何一个错误发现的概率。BH使用排序p值与逐步阈值，BY进一步用调和数扩大校正，以适应一般依赖条件下的FDR控制。</p><h3><a href="multiscale-sharpe-hac.html">Sharpe比率的联合矩Delta法与HAC标准误</a></h3><p>Sharpe是均值与波动率的非线性比率。把均值和二阶原点矩看作联合样本矩，应用Delta法得到影响函数；这使均值、方差及两者的估计协方差同时进入标准误。</p><h3><a href="multiscale-rank-ic-panel.html">变动截面规模的逐日Rank IC与时序标准误</a></h3><p>截面因子预测评价通常在每个日期内比较因子排序和未来收益排序。每个截面分别赋平均秩并计算Pearson相关，得到Spearman Rank IC。各日期资产数可能不同，逐日等权平均可以防止资产数量最大的日期机械主导总体结果。</p></section><section><h2>原生计算实现</h2><pre>#pragma once
+#include &quot;multiscale_common.hpp&quot;
+namespace msq {
+inline Vec colmean(const Mat&amp; x){Vec mu(x[0].size());for(const auto&amp; r:x)for(size_t j=0;j&lt;mu.size();++j)mu[j]+=r[j]/x.size();return mu;}
+inline Mat covariance(const Mat&amp; x,const Vec&amp; mu){
+    int k=mu.size();Mat c(k,Vec(k));for(const auto&amp; r:x)for(int i=0;i&lt;k;++i)for(int j=0;j&lt;k;++j)c[i][j]+=(r[i]-mu[i])*(r[j]-mu[j])/x.size();return c;
+}
+inline double hac_lrv(const Vec&amp; x,int lag){
+    require(lag&gt;=0&amp;&amp;size_t(lag)&lt;x.size());double m=avg(x),v=0;for(double z:x)v+=sq(z-m);
+    for(int l=1;l&lt;=lag;++l){double g=0;for(size_t i=l;i&lt;x.size();++i)g+=(x[i]-m)*(x[i-l]-m);v+=2*(1-double(l)/(lag+1))*g;}
+    return std::max(0.,v/x.size());
+}
+inline Vec hj_bound(const Vec&amp; x){
+    require(x.size()&gt;=6);int k=integer(x[0],1,50),n=integer(x[1],k+1,10000);double m=x[2];positive(m);require(x.size()==size_t(3+k*n));
+    Mat r(n,Vec(k));size_t at=3;for(auto&amp; z:r)for(double&amp; v:z)v=x[at++];
+    Vec mu=colmean(r),z=solve(covariance(r,mu),mu);double sr2=dot(mu,z);require(sr2&gt;=-1e-10);
+    Vec sdf,err(k);double neg=0;
+    for(const auto&amp; a:r){Vec b(k);for(int j=0;j&lt;k;++j)b[j]=a[j]-mu[j];double y=m*(1-dot(z,b));sdf.push_back(y);neg+=y&lt;0;for(int j=0;j&lt;k;++j)err[j]+=y*a[j]/n;}
+    double maxerr=0;for(double e:err)maxerr=std::max(maxerr,std::abs(e));
+    Vec out{std::sqrt(std::max(0.,sr2)),m*std::sqrt(std::max(0.,sr2)),avg(sdf),std::sqrt(var(sdf)*(n-1)/n),neg/n,maxerr};
+    out.insert(out.end(),z.begin(),z.end());out.insert(out.end(),err.begin(),err.end());return out;
+}
+inline Vec factor_spanning(const Vec&amp; x){
+    require(x.size()&gt;=8);int k=integer(x[0],1,40),n=integer(x[1],k+2,10000);require(x.size()==size_t(2+n*(k+1)));
+    Mat a(n,Vec(k+1));size_t at=2;for(auto&amp; r:a)for(double&amp; z:r)z=x[at++];
+    Vec mu=colmean(a);Mat c=covariance(a,mu),f(k,Vec(k));Vec fm(mu.begin(),mu.begin()+k),cross(k);
+    for(int i=0;i&lt;k;++i){cross[i]=c[i][k];for(int j=0;j&lt;k;++j)f[i][j]=c[i][j];}
+    Vec beta=solve(f,cross),z=solve(f,fm);double alpha=mu[k]-dot(beta,fm),v=c[k][k]-dot(beta,cross);positive(v);
+    double base=dot(fm,z),add=sq(alpha)/v,both=dot(mu,solve(c,mu));
+    Vec out{base,both,add,alpha,v,both-base-add};out.insert(out.end(),beta.begin(),beta.end());return out;
+}
+inline Vec timing_regression(const Vec&amp; x){
+    require(x.size()&gt;=8&amp;&amp;x.size()%2==0);int n=x.size()/2;require(n&gt;=4&amp;&amp;n&lt;=10000);
+    Mat a(3,Vec(3));Vec b(3),y(n);Mat X(n,Vec(3));
+    for(int i=0;i&lt;n;++i){double f=x[2*i];X[i]={1,f,f*f};y[i]=x[2*i+1];
+        for(int j=0;j&lt;3;++j){b[j]+=X[i][j]*y[i];for(int k=0;k&lt;3;++k)a[j][k]+=X[i][j]*X[i][k];}}
+    Vec beta=solve(a,b),v=solve(a,{0,0,1});double rss=0;for(int i=0;i&lt;n;++i)rss+=sq(y[i]-dot(X[i],beta));
+    require(v[2]&gt;0);return {beta[0],beta[1],beta[2],rss,double(n-3),std::sqrt(rss/(n-3)*v[2]),beta[1]+2*beta[2]*x[0],beta[1]+2*beta[2]*x[x.size()-2]};
+}
+inline Vec sdf_distance(const Vec&amp; x){
+    require(x.size()&gt;=7);int k=integer(x[0],1,40),n=integer(x[1],k,10000);require(x.size()==size_t(2+k+n*(k+1)));
+    Vec q(x.begin()+2,x.begin()+2+k),error(k);Mat a(k,Vec(k)),pay(n,Vec(k));Vec m(n);size_t at=2+k;
+    for(int i=0;i&lt;n;++i){m[i]=x[at++];for(double&amp; z:pay[i])z=x[at++];
+        for(int j=0;j&lt;k;++j){error[j]+=m[i]*pay[i][j]/n;for(int l=0;l&lt;k;++l)a[j][l]+=pay[i][j]*pay[i][l]/n;}}
+    for(int j=0;j&lt;k;++j)error[j]-=q[j];
+    Vec z=solve(a,error),correct(k);double d2=dot(z,error),real=0,negative=0;Vec mnew;
+    for(int i=0;i&lt;n;++i){double d=dot(pay[i],z),v=m[i]-d;mnew.push_back(v);real+=d*d/n;negative+=v&lt;0;for(int j=0;j&lt;k;++j)correct[j]+=v*pay[i][j]/n;}
+    for(int j=0;j&lt;k;++j)correct[j]-=q[j];
+    Vec out{std::sqrt(std::max(0.,d2)),real,d2-real,negative/n};out.insert(out.end(),error.begin(),error.end());out.insert(out.end(),correct.begin(),correct.end());out.insert(out.end(),mnew.begin(),mnew.end());return out;
+}
+inline Vec joint_sign_stepdown(const Vec&amp; x){
+    require(x.size()&gt;=6);int n=integer(x[0],2,18),k=integer(x[1],2,20);require(x.size()==size_t(2+n*k)&amp;&amp;double(1&lt;&lt;n)*n*k&lt;=5e7);
+    Vec d(k),obs(k);Mat z(n,Vec(k));size_t at=2;
+    for(auto&amp; r:z)for(double&amp; v:r)v=x[at++];
+    for(const auto&amp; r:z)for(int j=0;j&lt;k;++j){d[j]+=sq(r[j]);obs[j]+=r[j];}
+    for(int j=0;j&lt;k;++j){positive(d[j]);d[j]=std::sqrt(d[j]);obs[j]=std::abs(obs[j]/d[j]);}
+    std::vector&lt;int&gt; order(k);std::iota(order.begin(),order.end(),0);
+    std::stable_sort(order.begin(),order.end(),[&amp;](int a,int b){return obs[a]&gt;obs[b];});
+    Vec raw(k),single(k),step(k);
+    int N=1&lt;&lt;n;
+    for(int mask=0;mask&lt;N;++mask){Vec t(k);
+        for(int i=0;i&lt;n;++i){double sign=(mask&amp;(1&lt;&lt;i))?1:-1;for(int j=0;j&lt;k;++j)t[j]+=sign*z[i][j];}
+        for(int j=0;j&lt;k;++j){t[j]=std::abs(t[j]/d[j]);raw[j]+=t[j]+1e-12&gt;=obs[j];}
+        double maximum=*std::max_element(t.begin(),t.end()),sub=0;
+        for(int j=0;j&lt;k;++j)single[j]+=maximum+1e-12&gt;=obs[j];
+        for(int j=k-1;j&gt;=0;--j){int a=order[j];sub=std::max(sub,t[a]);step[a]+=sub+1e-12&gt;=obs[a];}
+    }
+    for(int j=0;j&lt;k;++j){raw[j]/=N;single[j]/=N;step[j]/=N;}
+    for(int j=1;j&lt;k;++j)step[order[j]]=std::max(step[order[j]],step[order[j-1]]);
+    Vec out{double(N)};out.insert(out.end(),obs.begin(),obs.end());out.insert(out.end(),raw.begin(),raw.end());out.insert(out.end(),single.begin(),single.end());out.insert(out.end(),step.begin(),step.end());return out;
+}
+inline Vec fdr_stepup(const Vec&amp; x){
+    require(x.size()&gt;=2&amp;&amp;x.size()&lt;=100001);double alpha=x[0];require(alpha&gt;0&amp;&amp;alpha&lt;1);int n=x.size()-1;
+    std::vector&lt;std::pair&lt;double,int&gt;&gt; p;double harmonic=0;for(int i=0;i&lt;n;++i){prob(x[i+1]);p.push_back({x[i+1],i});harmonic+=1./(i+1);}
+    std::sort(p.begin(),p.end());Vec bh(n),by(n);double b=1,y=1;int rb=0,ry=0;
+    for(int j=n-1;j&gt;=0;--j){b=std::min(b,p[j].first*n/(j+1));y=std::min(y,p[j].first*n*harmonic/(j+1));bh[p[j].second]=b;by[p[j].second]=y;rb+=b&lt;=alpha;ry+=y&lt;=alpha;}
+    Vec out{double(rb),double(ry),harmonic};out.insert(out.end(),bh.begin(),bh.end());out.insert(out.end(),by.begin(),by.end());return out;
+}
+inline Vec sharpe_hac(const Vec&amp; x){
+    require(x.size()&gt;=5);Vec r(x.begin()+1,x.end());int n=r.size(),lag=integer(x[0],0,n-1);double mu=avg(r),q=dot(r,r)/n,v=q-mu*mu;positive(v);
+    double s=std::sqrt(v),a=q/(v*s),b=-mu/(2*v*s);Vec psi;
+    for(double z:r)psi.push_back(a*(z-mu)+b*(z*z-q));
+    double lr=hac_lrv(psi,lag),se=std::sqrt(lr/n),iid=std::sqrt(hac_lrv(psi,0)/n),sr=mu/s;
+    return {sr,mu,s,se,iid,lr,sr-1.959963984540054*se,sr+1.959963984540054*se};
+}
+inline Vec midrank(const Vec&amp; x){
+    std::vector&lt;int&gt; o(x.size());std::iota(o.begin(),o.end(),0);std::stable_sort(o.begin(),o.end(),[&amp;](int a,int b){return x[a]&lt;x[b];});Vec r(x.size());
+    for(int a=0;a&lt;int(o.size());){int b=a+1;while(b&lt;int(o.size())&amp;&amp;x[o[a]]==x[o[b]])++b;for(int i=a;i&lt;b;++i)r[o[i]]=(a+b+1)/2.;a=b;}return r;
+}
+inline Vec rank_ic_panel(const Vec&amp; x){
+    require(x.size()&gt;=16);int n=integer(x[0],2,10000),lag=integer(x[1],0,n-1);size_t at=2;Vec ic;
+    for(int t=0;t&lt;n;++t){require(at&lt;x.size());int k=integer(x[at++],3,10000);require(at+2*size_t(k)&lt;=x.size());Vec a,b;
+        for(int j=0;j&lt;k;++j){a.push_back(x[at++]);b.push_back(x[at++]);}Vec r=midrank(a),s=midrank(b);
+        double va=var(r),vb=var(s);positive(va);positive(vb);ic.push_back(cov(r,s)/std::sqrt(va*vb));}
+    require(at==x.size());double mu=avg(ic),sd=std::sqrt(var(ic)),se=std::sqrt(hac_lrv(ic,lag)/n),p=0;for(double z:ic)p+=z&gt;0;
+    Vec out{mu,sd,sd&gt;0?mu/sd:0,se,p/n,double(n)};out.insert(out.end(),ic.begin(),ic.end());return out;
+}
+}
+</pre><p><a href="../cpp/multiscale_empirical.hpp" download>完整头文件</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>
