@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>有限与无限期Markov控制、鲁棒决策与停止规则｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="depth-labs.css"><link rel="stylesheet" href="finite-state.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main class="finite-state"><header><h1>有限与无限期Markov控制、鲁棒决策与停止规则</h1><p><a href="finite-state-research.html">有限状态与动态研究</a>　<a href="applied-systems.html">完整应用研究</a>　<a href="../cpp/finite_state_cli.cpp" download>统一C++17入口</a></p></header><section><h2>统一研究主线</h2><p>Bellman方程将未来随机收益的比较归结为状态价值递推。有限期限可以精确回溯；无限期折现模型使用策略迭代和残差证书；转移概率不确定时可以使用总变差集合求最坏条件期望。最优停止是可随状态提前结束决策的特殊控制模型。</p><h3><a href="finite-state-mdp-optimal.html">有限期Markov决策的回溯与前向占用测度</a></h3><p>已知有限状态、动作、转移矩阵和即时奖励时，有限期决策的最优策略通常随剩余期限变化。固定最后一期价值为0，通过向前一时间层回溯，在每个状态比较所有动作的即时奖励与贴现未来期望。</p><h3><a href="finite-state-policy-iteration.html">无限期折现MDP的策略迭代与Bellman误差界</a></h3><p>对固定平稳策略，期望折现累计奖励满足线性方程。由于转移矩阵的谱半径为1且折现因子小于1，矩阵I−γP可逆。策略评价使用带主元的消元求解。</p><h3><a href="finite-state-worst-tv.html">总变差不确定集中的最坏期望与质量搬运</a></h3><p>当转移概率估计存在误差，可在总变差球中考虑给定价值向量的最坏条件期望。一次概率搬运从高价值状态移出质量并放入低价值状态，总变差预算对应可搬运的总概率。</p><h3><a href="finite-state-stopping-policy.html">状态依赖 liquidation 的最优停止与现金闭合</a></h3><p>持有可清算资产时，投资者观察当前市场状态，可以立即取得状态对应的清算价值，或支付一期持有成本继续等待。期限结束必须清算。与固定执行日不同，停止时间依赖已观察状态。</p><p><a href="finite-state-control-cases.json" download>全部独立解析输入和结果</a>。</p></section><section><h2>完整C++17实现</h2><p>所有方法共享公共输入检查与数值接口。具体输入输出及公式证明见对应计算章节。</p><pre>#pragma once
+#include &quot;finite_state_common.hpp&quot;
+namespace fsq {
+// Finite-horizon discounted MDP with state/action dependent transition and reward.
+struct MDP {int horizon,n,m,initial;double discount;Mat reward;std::vector&lt;Mat&gt; p;};
+inline MDP mdp_input(const Vec&amp; x){
+    require(x.size()&gt;=7);int t=count(x[0],1,500),n=count(x[1],2,20),m=count(x[2],1,20),initial=count(x[3],0,n-1);
+    double d=x[4];require(d&gt;0&amp;&amp;d&lt;=1&amp;&amp;x.size()==size_t(5+n*m*(1+n)));
+    MDP a{t,n,m,initial,d,Mat(n,Vec(m)),std::vector&lt;Mat&gt;(n,Mat(m,Vec(n)))};
+    size_t at=5;
+    for(int i=0;i&lt;n;++i)for(int j=0;j&lt;m;++j){a.reward[i][j]=x[at++];for(int k=0;k&lt;n;++k)a.p[i][j][k]=x[at++];distribution(a.p[i][j]);}
+    return a;
+}
+inline Vec mdp_optimal(const Vec&amp; x){
+    MDP a=mdp_input(x);Vec v(a.n);std::vector&lt;std::vector&lt;int&gt;&gt; policy(a.horizon,std::vector&lt;int&gt;(a.n));
+    for(int t=a.horizon-1;t&gt;=0;--t){Vec next(a.n,-std::numeric_limits&lt;double&gt;::infinity());
+        for(int i=0;i&lt;a.n;++i)for(int j=0;j&lt;a.m;++j){
+            double z=a.reward[i][j]+a.discount*std::inner_product(a.p[i][j].begin(),a.p[i][j].end(),v.begin(),0.);
+            if(z&gt;next[i]+1e-12){next[i]=z;policy[t][i]=j;}}
+        v.swap(next);
+    }
+    Vec mass(a.n);mass[a.initial]=1;double gain=0,df=1;Vec use(a.m);
+    for(int t=0;t&lt;a.horizon;++t){Vec next(a.n);
+        for(int i=0;i&lt;a.n;++i){int j=policy[t][i];gain+=df*mass[i]*a.reward[i][j];use[j]+=mass[i];for(int k=0;k&lt;a.n;++k)next[k]+=mass[i]*a.p[i][j][k];}
+        mass.swap(next);df*=a.discount;
+    }
+    Vec out{v[a.initial],gain,v[a.initial]-gain,sum(mass)};for(int j:policy[0])out.push_back(j);out.insert(out.end(),use.begin(),use.end());out.insert(out.end(),mass.begin(),mass.end());return out;
+}
+// Discounted infinite horizon policy iteration, exact Gaussian elimination for policy evaluation.
+inline Vec solve_linear(Mat a,Vec b){
+    int n=b.size();require(a.size()==b.size());
+    for(int j=0;j&lt;n;++j){int p=j;for(int i=j+1;i&lt;n;++i)if(std::abs(a[i][j])&gt;std::abs(a[p][j]))p=i;
+        require(std::abs(a[p][j])&gt;1e-14);std::swap(a[p],a[j]);std::swap(b[p],b[j]);double d=a[j][j];
+        for(int k=j;k&lt;n;++k)a[j][k]/=d;
+        b[j]/=d;
+        for(int i=0;i&lt;n;++i)if(i!=j){double z=a[i][j];for(int k=j;k&lt;n;++k)a[i][k]-=z*a[j][k];b[i]-=z*b[j];}}
+    return b;
+}
+inline Vec policy_iteration(const Vec&amp; x){
+    MDP a=mdp_input(x);require(a.discount&lt;1);std::vector&lt;int&gt; policy(a.n);Vec v;int iteration=0;
+    for(;iteration&lt;1000;++iteration){
+        Mat b(a.n,Vec(a.n));Vec r(a.n);
+        for(int i=0;i&lt;a.n;++i){r[i]=a.reward[i][policy[i]];for(int j=0;j&lt;a.n;++j)b[i][j]=(i==j?1.:0.)-a.discount*a.p[i][policy[i]][j];}
+        v=solve_linear(b,r);bool changed=false;
+        for(int i=0;i&lt;a.n;++i){int best=policy[i];double maxv=v[i];for(int j=0;j&lt;a.m;++j){double z=a.reward[i][j]+a.discount*std::inner_product(a.p[i][j].begin(),a.p[i][j].end(),v.begin(),0.);
+                if(z&gt;maxv+1e-11){best=j;maxv=z;}}
+            if(best!=policy[i]){policy[i]=best;changed=true;}}
+        if(!changed)break;
+    }
+    require(iteration&lt;1000);double residual=0;
+    for(int i=0;i&lt;a.n;++i){double best=-std::numeric_limits&lt;double&gt;::infinity();for(int j=0;j&lt;a.m;++j)best=std::max(best,a.reward[i][j]+a.discount*std::inner_product(a.p[i][j].begin(),a.p[i][j].end(),v.begin(),0.));residual=std::max(residual,std::abs(best-v[i]));}
+    Vec out{v[a.initial],residual,residual/(1-a.discount),double(iteration+1)};out.insert(out.end(),v.begin(),v.end());for(int j:policy)out.push_back(j);return out;
+}
+// Finite-state robust Bellman operator: adversary moves probability mass in a TV ball.
+inline Vec worst_tv(const Vec&amp; x){
+    require(x.size()&gt;=5&amp;&amp;x.size()%2==1);double eps=x[0];probability(eps);
+    Vec p,v;for(size_t i=1;i&lt;x.size();i+=2){p.push_back(x[i]);v.push_back(x[i+1]);}distribution(p);
+    int n=p.size();std::vector&lt;int&gt; order(n);std::iota(order.begin(),order.end(),0);
+    std::stable_sort(order.begin(),order.end(),[&amp;](int i,int j){return v[i]&lt;v[j];});
+    Vec q=p;double remain=eps;int lo=0,hi=n-1;
+    while(lo&lt;hi&amp;&amp;remain&gt;1e-15){int a=order[lo],b=order[hi];if(v[a]&gt;=v[b])break;
+        double z=std::min({remain,1-q[a],q[b]});q[a]+=z;q[b]-=z;remain-=z;
+        if(q[a]&gt;=1-1e-15)++lo;
+        if(q[b]&lt;=1e-15)--hi;
+        if(z==0&amp;&amp;lo&lt;hi&amp;&amp;q[a]&lt;1-1e-15&amp;&amp;q[b]&gt;1e-15)break;
+    }
+    double nominal=std::inner_product(p.begin(),p.end(),v.begin(),0.),worst=std::inner_product(q.begin(),q.end(),v.begin(),0.),tv=0;
+    for(int i=0;i&lt;n;++i)tv+=std::abs(q[i]-p[i])/2;
+    Vec out{nominal,worst,tv,nominal-worst};out.insert(out.end(),q.begin(),q.end());return out;
+}
+// Optimal liquidation with random finite-state price and an explicit stopping payoff.
+inline Vec stopping_policy(const Vec&amp; x){
+    require(x.size()&gt;=8);int n=count(x[0],1,500),k=count(x[1],2,30),initial=count(x[2],0,k-1);
+    double discount=x[3],carry=x[4];require(discount&gt;0&amp;&amp;discount&lt;=1&amp;&amp;carry&gt;=0&amp;&amp;x.size()==size_t(5+k+k*k));
+    Vec payoff(x.begin()+5,x.begin()+5+k);Mat p(k,Vec(k));size_t at=5+k;
+    for(int i=0;i&lt;k;++i){for(int j=0;j&lt;k;++j)p[i][j]=x[at++];distribution(p[i]);}
+    Vec v=payoff;std::vector&lt;std::vector&lt;int&gt;&gt; stop(n,std::vector&lt;int&gt;(k));
+    for(int t=n-1;t&gt;=0;--t){Vec g(k);for(int i=0;i&lt;k;++i){double cont=-carry+discount*std::inner_product(p[i].begin(),p[i].end(),v.begin(),0.);stop[t][i]=payoff[i]&gt;=cont;g[i]=std::max(payoff[i],cont);}v.swap(g);}
+    Vec mass(k);mass[initial]=1;double df=1,actual=0,et=0,early=0;
+    for(int t=0;t&lt;n;++t){Vec next(k);for(int i=0;i&lt;k;++i){
+        if(stop[t][i]){actual+=df*mass[i]*payoff[i];et+=t*mass[i];early+=mass[i];}
+        else{actual-=df*mass[i]*carry;for(int j=0;j&lt;k;++j)next[j]+=mass[i]*p[i][j];}}
+        df*=discount;mass.swap(next);
+    }
+    actual+=df*std::inner_product(mass.begin(),mass.end(),payoff.begin(),0.);et+=n*sum(mass);
+    return {v[initial],double(stop[0][initial]),early,et,actual,v[initial]-actual,early+sum(mass)};
+}
+}
+</pre><p><a href="../cpp/finite_state_control.hpp" download>本领域头文件</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

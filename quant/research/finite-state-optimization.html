@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>离散运输、匹配与序列对齐的精确优化｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="depth-labs.css"><link rel="stylesheet" href="finite-state.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main class="finite-state"><header><h1>离散运输、匹配与序列对齐的精确优化</h1><p><a href="finite-state-research.html">有限状态与动态研究</a>　<a href="applied-systems.html">完整应用研究</a>　<a href="../cpp/finite_state_cli.cpp" download>统一C++17入口</a></p></header><section><h2>统一研究主线</h2><p>有限状态优化不仅适用于时间序列决策，也适用于截面资源分配及概率分布比较。运输与匹配建立供需守恒和最小成本结构；序列对齐在明确路径约束下比较动态模式；一维最优运输从概率质量的单调耦合得到距离。</p><h3><a href="finite-state-transport-flow.html">整数最小成本运输的残量网络与反向弧</a></h3><p>给定整数供给、需求及单位运输成本，在二部网络中建立源到供给节点、供给到需求节点、需求到汇点的容量边。直接贪心选择最便宜的供需边一般不能保证全局最优，因为早期分配可能占用后续稀缺匹配。</p><h3><a href="finite-state-band-dtw.html">带扭曲惩罚与带宽约束的动态时间规整</a></h3><p>两段金融序列可能具有相近形状但发生时点略有偏移。DTW在由对角、水平、垂直步组成的单调路径上对齐两个序列，对每对匹配位置计算平方差，并对非对角步收费。</p><h3><a href="finite-state-assignment.html">子集动态规划的精确最小费用一对一匹配</a></h3><p>在资产替代、订单与执行通道匹配等问题中，每个对象只能匹配一个对象。将已经使用的目标集合S作为状态，处理的源对象个数由集合大小唯一确定；不同匹配历史只要具有相同集合便可合并。</p><h3><a href="finite-state-wasserstein.html">不等质量经验分布的一维Wasserstein距离</a></h3><p>对于一维离散分布及凸距离成本，最优耦合可按分位次序单调匹配。交换任意交叉配对不会增加凸成本，因此从两边最小支持点开始，反复搬运两剩余质量的较小者，得到满足边际约束的单调运输。</p><p><a href="finite-state-optimization-cases.json" download>全部独立解析输入和结果</a>。</p></section><section><h2>完整C++17实现</h2><p>所有方法共享公共输入检查与数值接口。具体输入输出及公式证明见对应计算章节。</p><pre>#pragma once
+#include &quot;finite_state_common.hpp&quot;
+namespace fsq {
+// Integer transport by successive shortest residual paths with reverse arcs.
+inline Vec transport_flow(const Vec&amp; x){
+    require(x.size()&gt;=8);
+    int m=count(x[0],1,20),n=count(x[1],1,20);
+    require(x.size()==size_t(2+m+n+m*n));
+    std::vector&lt;int&gt; supply(m),demand(n);int s=0,d=0;
+    for(int i=0;i&lt;m;++i){supply[i]=count(x[2+i],0,1000);s+=supply[i];}
+    for(int j=0;j&lt;n;++j){demand[j]=count(x[2+m+j],0,1000);d+=demand[j];}
+    require(s==d&amp;&amp;s&gt;0&amp;&amp;s&lt;=5000);
+    struct Arc{int to,rev,cap;double cost;};
+    int source=m+n,sink=source+1,N=sink+1;
+    std::vector&lt;std::vector&lt;Arc&gt;&gt; g(N);
+    auto arc=[&amp;](int a,int b,int cap,double c){int i=g[a].size(),j=g[b].size();g[a].push_back({b,j,cap,c});g[b].push_back({a,i,0,-c});return i;};
+    for(int i=0;i&lt;m;++i)arc(source,i,supply[i],0);
+    std::vector&lt;std::vector&lt;int&gt;&gt; idx(m,std::vector&lt;int&gt;(n));
+    for(int i=0;i&lt;m;++i)for(int j=0;j&lt;n;++j){double c=x[2+m+n+i*n+j];require(std::abs(c)&lt;=1e8);idx[i][j]=arc(i,m+j,s,c);}
+    for(int j=0;j&lt;n;++j)arc(m+j,sink,demand[j],0);
+    double cost=0;int done=0;
+    while(done&lt;s){
+        Vec dist(N,std::numeric_limits&lt;double&gt;::infinity());dist[source]=0;
+        std::vector&lt;int&gt; prev(N,-1),edge(N,-1);
+        for(int k=0;k&lt;N-1;++k){bool any=false;for(int i=0;i&lt;N;++i)if(std::isfinite(dist[i]))for(int j=0;j&lt;int(g[i].size());++j){
+            const auto&amp; e=g[i][j];if(e.cap&gt;0&amp;&amp;dist[i]+e.cost&lt;dist[e.to]-1e-10){dist[e.to]=dist[i]+e.cost;prev[e.to]=i;edge[e.to]=j;any=true;}}
+            if(!any)break;
+        }
+        require(prev[sink]&gt;=0);int f=s-done,steps=0;
+        for(int j=sink;j!=source;j=prev[j]){require(prev[j]&gt;=0&amp;&amp;++steps&lt;=N);f=std::min(f,g[prev[j]][edge[j]].cap);}
+        for(int j=sink;j!=source;j=prev[j]){auto&amp; e=g[prev[j]][edge[j]];e.cap-=f;g[j][e.rev].cap+=f;}
+        done+=f;cost+=f*dist[sink];
+    }
+    Vec out{cost,double(done),0};double direct=0;
+    for(int i=0;i&lt;m;++i)for(int j=0;j&lt;n;++j){double z=s-g[i][idx[i][j]].cap;out.push_back(z);direct+=z*x[2+m+n+i*n+j];}
+    out[2]=cost-direct;return out;
+}
+// Weighted edit-distance style sequence alignment with a symmetric band.
+inline Vec band_dtw(const Vec&amp; x){
+    require(x.size()&gt;=6);
+    int n=count(x[0],1,1000),m=count(x[1],1,1000),b=count(x[2],0,1000);
+    double penalty=x[3];require(penalty&gt;=0&amp;&amp;x.size()==size_t(4+n+m)&amp;&amp;std::abs(n-m)&lt;=b);
+    Vec a(x.begin()+4,x.begin()+4+n),c(x.begin()+4+n,x.end());
+    Mat f(n+1,Vec(m+1,std::numeric_limits&lt;double&gt;::infinity()));
+    std::vector&lt;std::vector&lt;int&gt;&gt; p(n+1,std::vector&lt;int&gt;(m+1,-1));f[0][0]=0;
+    for(int i=1;i&lt;=n;++i)for(int j=std::max(1,i-b);j&lt;=std::min(m,i+b);++j){
+        std::array&lt;double,3&gt; q{f[i-1][j-1],f[i-1][j]+penalty,f[i][j-1]+penalty};
+        int k=int(std::min_element(q.begin(),q.end())-q.begin());f[i][j]=q[k]+sq(a[i-1]-c[j-1]);p[i][j]=k;
+    }
+    require(std::isfinite(f[n][m]));double loss=0,steps=0,warp=0;int i=n,j=m;Vec path;
+    while(i&gt;0&amp;&amp;j&gt;0){path.insert(path.end(),{double(i-1),double(j-1)});loss+=sq(a[i-1]-c[j-1]);++steps;int k=p[i][j];require(k&gt;=0);
+        if(k==0){--i;--j;}else if(k==1){--i;++warp;}else{--j;++warp;}
+    }
+    require(i==0&amp;&amp;j==0);Vec out{f[n][m],loss,warp,steps,f[n][m]-loss-penalty*warp};
+    for(int k=int(path.size())-2;k&gt;=0;k-=2)out.insert(out.end(),{path[k],path[k+1]});
+    return out;
+}
+// Minimum-cost matching on a small square bipartite graph by subset dynamic programming.
+inline Vec assignment(const Vec&amp; x){
+    require(!x.empty());int n=count(x[0],1,18);require(x.size()==size_t(1+n*n));
+    int N=1&lt;&lt;n;Vec f(N,std::numeric_limits&lt;double&gt;::infinity());std::vector&lt;int&gt; pick(N,-1),pop(N);f[0]=0;
+    for(int mask=1;mask&lt;N;++mask)pop[mask]=pop[mask&gt;&gt;1]+(mask&amp;1);
+    for(int mask=0;mask&lt;N-1;++mask){int i=pop[mask];for(int j=0;j&lt;n;++j)if(!(mask&amp;(1&lt;&lt;j))){
+        int z=mask|(1&lt;&lt;j);double v=f[mask]+x[1+i*n+j];if(v&lt;f[z]-1e-12){f[z]=v;pick[z]=j;}
+    }}
+    Vec out{f[N-1]},perm(n);double direct=0;
+    int mask=N-1;for(int i=n-1;i&gt;=0;--i){int j=pick[mask];require(j&gt;=0);perm[i]=j;direct+=x[1+i*n+j];mask^=1&lt;&lt;j;}
+    out.push_back(direct);out.insert(out.end(),perm.begin(),perm.end());return out;
+}
+// One-dimensional Wasserstein distance by monotone transport with arbitrary positive masses.
+inline Vec wasserstein(const Vec&amp; x){
+    require(x.size()&gt;=6);int m=count(x[0],1,1000),n=count(x[1],1,1000);
+    require(x.size()==size_t(2+2*m+2*n));
+    std::vector&lt;std::pair&lt;double,double&gt;&gt; a,b;Vec p,q;
+    for(int i=0;i&lt;m;++i){a.push_back({x[2+2*i],x[3+2*i]});p.push_back(a.back().second);}
+    for(int j=0;j&lt;n;++j){b.push_back({x[2+2*m+2*j],x[3+2*m+2*j]});q.push_back(b.back().second);}
+    distribution(p);distribution(q);std::sort(a.begin(),a.end());std::sort(b.begin(),b.end());
+    double w1=0,w2=0,mass=0;size_t i=0,j=0;double l=a[0].second,r=b[0].second;
+    while(i&lt;a.size()&amp;&amp;j&lt;b.size()){
+        double z=std::min(l,r),d=a[i].first-b[j].first;mass+=z;w1+=z*std::abs(d);w2+=z*d*d;l-=z;r-=z;
+        if(l&lt;=1e-15){++i;if(i&lt;a.size())l=a[i].second;}
+        if(r&lt;=1e-15){++j;if(j&lt;b.size())r=b[j].second;}
+    }
+    require(std::abs(mass-1)&lt;1e-10);
+    // Independent CDF-area identity for W1.
+    std::map&lt;double,double&gt; delta;
+    for(auto z:a)delta[z.first]+=z.second;
+    for(auto z:b)delta[z.first]-=z.second;
+    double area=0,c=0,prev=delta.begin()-&gt;first;
+    for(auto z:delta){area+=std::abs(c)*(z.first-prev);c+=z.second;prev=z.first;}
+    return {w1,std::sqrt(w2),area,mass,w1-area};
+}
+}
+</pre><p><a href="../cpp/finite_state_optimization.hpp" download>本领域头文件</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>
