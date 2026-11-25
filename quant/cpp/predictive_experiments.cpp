@@ -101,7 +101,7 @@ void utility_project(){
     std::cout<<"Temperature,RiskPenalty,Fee,Shift,TrainStartUtility,TrainFinalUtility,TestUtility,TestMean,TestVariance,Turnover,W0,W1,W2,GradientSum\n";
     for(double T:{.3,.7,1.})for(double gamma:{0.,5.,20.})for(double fee:{0.,.001,.005})for(double shift:{0.,.01}){
         Vec train=portfolio_data(0,24,0),test=portfolio_data(24,16,shift),s{0.,0.,0.};Vec init=utility(s,T,gamma,fee,train);
-        for(int j=0;j<60;++j){Vec a=utility(s,T,gamma,fee,train);for(int i=0;i<3;++i)s[i]+=5*a[8+i];}
+        for(int j=0;j<200;++j){Vec a=utility(s,T,gamma,fee,train);for(int i=0;i<3;++i)s[i]+=.1*a[8+i];}
         Vec a=utility(s,T,gamma,fee,train),b=utility(s,T,gamma,fee,test);
         row({T,gamma,fee,shift,init[0],a[0],b[0],b[1],b[2],b[3],b[5],b[6],b[7],b[4]});
     }
