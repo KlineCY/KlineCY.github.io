@@ -1,0 +1,78 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>嵌套走步训练、风险约束多空策略与资金账本｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="depth-labs.css"><link rel="stylesheet" href="integrated-research.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>嵌套走步训练、风险约束多空策略与资金账本</h1><p><a href="integrated-native-projects.html">原生项目目录</a>　<a href="integrated-research.html">联合研究课程</a>　<a href="../cpp/integrated_projects.hpp" download>完整C++17源码</a>　<a href="../cpp/integrated_cli.cpp" download>命令行程序</a></p></header><section><h2>信息结构与收益定义</h2><p>每个决策日期包含同一资产集合，Return为该次决策之后实现的单期收益，Feature列必须在决策前可用。资产按固定顺序排列；截面特征和历史训练目标分别去除当日等权均值。模型使用前L个完整日期，最后V个历史日期只用于内层走步评估候选正则强度，每个验证日又拥有独立的历史训练窗口。首个策略决策日位于L+V之后。</p><div class="equation">$$\tilde x_{it}=x_{it}-\bar x_t,\quad \tilde y_{it}=r_{it}-\bar r_t,\quad \hat\beta_{v,\lambda}=(X_{v-L:v-1}^\top X_{v-L:v-1}+\lambda I)^{-1}X_{v-L:v-1}^\top y_{v-L:v-1}$$</div></section><section><h2>嵌套模型选择</h2><p>同一预测期限下选择历史验证MSE最小的λ；再用最终决策日以前的完整训练窗重估。候选并列时保留输入顺序。留出当天收益仅用于交易账本，不会改变本期参数、预测、协方差或目标持仓。</p><div class="equation">$$\hat\lambda_t=\arg\min_{\lambda\in\Lambda}\frac1{Vn}\sum_{v=t-V}^{t-1}\sum_i(\tilde y_{iv}-\tilde x_{iv}^\top\hat\beta_{v,\lambda})^2,\qquad s_{it}=\tilde x_{it}^\top\hat\beta_{t,\hat\lambda_t}$$</div></section><section><h2>收缩风险与约束配置</h2><p>协方差使用同一历史窗口的原始资产收益、样本分母L−1；以样本平均方差为目标作固定强度球形收缩，并加正方差下限。优化包含预测Alpha、风险和相对漂移持仓的二次交易惩罚。单资产绝对权重上限1/n使组合总敞口不超过1，零预算保证目标市场价值中性。该约束不保证因子暴露中性。</p><div class="equation">$$\Sigma_t=(1-\delta)S_t+\delta\frac{\operatorname{tr}(S_t)}n I+\epsilon I,\quad \min_{\mathbf1^\top w=0,\ |w_i|\le1/n}\frac{\gamma}{2}w^\top\Sigma_tw-s_t^\top w+\frac{\kappa}{2}\|w-w_t^-\|_2^2$$</div></section><section><h2>自融资交易与逐期账本</h2><p>目标权重以扣费后净值定义，费用与实际成交金额存在固定点关系。交易发生后才观察本期实现收益，计算组合净收益和漂移权重。零净敞口目标不代表漂移后仍然中性，因此下一期优化使用真实漂移账户。</p><div class="equation">$$f_t=c\sum_i|(1-f_t)w_{it}-w^-_{it}|,\quad V_{t+1}=V_t(1-f_t)(1+w_t^\top r_t),\quad w^-_{i,t+1}=\frac{w_{it}(1+r_{it})}{1+w_t^\top r_t}$$</div></section><section><h2>数值证书与研究边界</h2><p>独立Python参照用逐日期密集消元复算验证MSE、最终系数、样本协方差及KKT乘子区间，验证费用固定点、NAV、回撤和未来标签变形不影响已生成权重。样本包含36个日期、6个资产、2个特征；只用于验证机制。此实现尚不含多期标签成熟时间、变动资产池、借券与融资利率、市场冲击和成交量容量。</p><div class="equation">$$\exists\nu:\quad g_i+\nu=0\ (|w_i|&lt;1/n),\quad g_i+\nu\le0\ (w_i=1/n),\quad g_i+\nu\ge0\ (w_i=-1/n)$$</div></section><section><h2>数据结构、参数及运行</h2><p>CSV列：Date，Asset，Return，Feature1，Feature2。<a href="integrated-examples/nested-panel-risk-strategy.csv" download>完整样本数据</a>。</p><table><thead><tr><th>参数</th><th>含义</th></tr></thead><tbody><tr><td>L</td><td>每次训练历史日期数</td></tr><tr><td>V</td><td>内层走步验证日期数</td></tr><tr><td>gamma</td><td>风险厌恶</td></tr><tr><td>shrink</td><td>球形协方差收缩强度</td></tr><tr><td>floor</td><td>协方差正则下限</td></tr><tr><td>cost</td><td>单边成交金额费率</td></tr><tr><td>turn</td><td>二次漂移持仓惩罚</td></tr><tr><td>lambda...</td><td>候选正岭强度路径</td></tr></tbody></table><pre>./build/kline_integrated nested-panel-risk-strategy quant/research/integrated-examples/nested-panel-risk-strategy.csv 10 5 4 0.25 0.0001 0.001 0.02 0.001 0.01 0.1</pre><p><a href="../cpp/test_integrated_projects.py" download>独立测试源码</a>。</p></section><section><h2>完整C++17实现</h2><pre>inline Report nested_panel_risk_strategy(const Mat&amp; x,const Vec&amp; p){
+    auto d=validate(x,8,4,19)-3;
+    require(p.size()&gt;=8,"Training, validation, risk, shrinkage, floor, cost, turnover and penalty path required");
+    parameters(p,p.size());
+    auto L=count(p[0],2,1000),V=count(p[1],1,100);
+    double gamma=positive(p[2]),shrink=p[3],floor=positive(p[4]),cost=p[5],turn=p[6];
+    require(shrink&gt;=0&amp;&amp;shrink&lt;=1&amp;&amp;cost&gt;=0&amp;&amp;cost&lt;1&amp;&amp;turn&gt;=0,"Invalid risk or cost controls");
+    Vec penalties(p.begin()+7,p.end());
+    require(penalties.size()&lt;=20,"Penalty path limit");
+    for(double lam:penalties)positive(lam);
+    std::vector&lt;Mat&gt; days;Vec dates;
+    for(auto&amp;r:x){
+        require(r[2]&gt;=-1,"Return below -100 percent");
+        if(dates.empty()||r[0]!=dates.back()){
+            require(dates.empty()||r[0]&gt;dates.back(),"Increasing dates required");
+            dates.push_back(r[0]);days.emplace_back();
+        }
+        days.back().push_back(r);
+    }
+    auto n=days.front().size(),T=days.size();
+    require(n&gt;=2&amp;&amp;n&lt;=32&amp;&amp;T&gt;L+V&amp;&amp;double(T)*V*L*n*d*d*penalties.size()&lt;=5e7,"Invalid panel size or estimation work limit");
+    std::set&lt;double&gt; ids;
+    for(auto&amp;r:days.front())require(ids.insert(r[1]).second,"Duplicate asset");
+    std::vector&lt;Mat&gt; X;Mat Y,R;
+    for(auto&amp;day:days){
+        require(day.size()==n,"Incomplete panel");
+        Vec avg(d,0),ret(n);double mean=0;
+        for(std::size_t i=0;i&lt;n;++i){
+            require(day[i][1]==days.front()[i][1],"Asset order mismatch");
+            ret[i]=day[i][2];mean+=ret[i]/n;
+            for(std::size_t j=0;j&lt;d;++j)avg[j]+=day[i][j+3]/n;
+        }
+        Mat z(n,Vec(d));Vec y=ret;
+        for(std::size_t i=0;i&lt;n;++i){
+            y[i]-=mean;
+            for(std::size_t j=0;j&lt;d;++j)z[i][j]=day[i][j+3]-avg[j];
+        }
+        X.push_back(z);Y.push_back(y);R.push_back(ret);
+    }
+    auto fit=[&amp;](std::size_t end,double lam){
+        Mat design;Vec target;
+        for(std::size_t t=end-L;t&lt;end;++t)for(std::size_t i=0;i&lt;n;++i){
+            design.push_back(X[t][i]);target.push_back(Y[t][i]);
+        }
+        return fit_ridge(design,target,lam,false);
+    };
+    Vec old(n,0);double nav=1,peak=1;
+    Report out{{"Date","Asset","SelectedPenalty","ValidationMSE","Score","Weight","PretradeWeight","RealizedReturn","Contribution","PredictedVariance","Objective","KKTResidual","GrossReturn","NetReturn","Turnover","Fee","NAV","Drawdown","GrossExposure","NetExposure"},{}};
+    for(std::size_t j=1;j&lt;=d;++j)out.header.push_back("Coefficient"+std::to_string(j));
+    for(std::size_t t=L+V;t&lt;T;++t){
+        double best=std::numeric_limits&lt;double&gt;::infinity(),lam=penalties.front();
+        for(double candidate:penalties){
+            double mse=0;
+            for(std::size_t v=t-V;v&lt;t;++v){
+                Vec b=fit(v,candidate),prediction=mul(X[v],b);
+                for(std::size_t i=0;i&lt;n;++i)mse+=std::pow(Y[v][i]-prediction[i],2)/(V*n);
+            }
+            if(mse&lt;best){best=mse;lam=candidate;}
+        }
+        Vec beta=fit(t,lam),score=mul(X[t],beta);
+        Mat S=researchflow::covariance_window(R,t-L,t,shrink,floor),H=S,problem;
+        for(std::size_t i=0;i&lt;n;++i){
+            H[i][i]+=turn/gamma;
+            Vec row=H[i];row.insert(row.end(),{score[i]+turn*old[i],-1./n,1./n});problem.push_back(row);
+        }
+        auto opt=model_research::box_covariance_qp(problem,{0,gamma,1e-9,10000});
+        Vec w;for(auto&amp;r:opt.rows)w.push_back(r[1]);
+        double risk=dot(w,mul(S,w)),obj=.5*gamma*risk-dot(score,w);
+        for(std::size_t i=0;i&lt;n;++i)obj+=.5*turn*std::pow(w[i]-old[i],2);
+        auto step=trade_step(old,w,R[t],cost);nav=positive(nav*(1+step.net));peak=std::max(peak,nav);
+        for(std::size_t i=0;i&lt;n;++i){
+            Vec row{dates[t],days[t][i][1],lam,best,score[i],w[i],old[i],R[t][i],w[i]*R[t][i],risk,obj,opt.rows[i][5],step.gross,step.net,step.turnover,step.fee,nav,1-nav/peak,l1(w),sum(w)};
+            row.insert(row.end(),beta.begin(),beta.end());out.rows.push_back(row);
+        }
+        old=step.drift;
+    }
+    return out;
+}</pre></section><section><h2>基础模型与参考文献</h2><p><a href="../research/comprehensive-rolling-panel-ridge-longshort.html">走步截面Ridge多空策略：日期隔离、信号预算、成本与逐期账本</a></p><p><a href="../ml/comprehensive-ridge-loocv-gcv-path.html">岭回归全路径：留一解析误差、广义交叉验证及有效自由度</a></p><p><a href="../research/comprehensive-factor-covariance-estimate.html">多资产因子协方差估计：载荷拟合、特异风险与结构化收缩</a></p><p><a href="https://doi.org/10.1093/rfs/hhaa009">Gu, Kelly and Xiu (2020), Empirical Asset Pricing via Machine Learning.</a></p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

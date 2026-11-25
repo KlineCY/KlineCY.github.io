@@ -67,7 +67,7 @@ inline Report nested_panel_risk_strategy(const Mat& x,const Vec& p){
             if(mse<best){best=mse;lam=candidate;}
         }
         Vec beta=fit(t,lam),score=mul(X[t],beta);
-        Mat S=covariance_window(R,t-L,t,shrink,floor),H=S,problem;
+        Mat S=researchflow::covariance_window(R,t-L,t,shrink,floor),H=S,problem;
         for(std::size_t i=0;i<n;++i){
             H[i][i]+=turn/gamma;
             Vec row=H[i];row.insert(row.end(),{score[i]+turn*old[i],-1./n,1./n});problem.push_back(row);
