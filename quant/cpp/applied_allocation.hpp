@@ -1,17 +1,79 @@
 #pragma once
-#include "applied_common.hpp"
-namespace applied_allocation {
-Vec neutral_projection(const Vec& x){pairs(x);check(x.size()>=6);double n=x.size()/2.,b=0,bb=0,v=0,bv=0;for(size_t i=0;i<x.size();i+=2){v+=x[i];b+=x[i+1];bb+=sq(x[i+1]);bv+=x[i]*x[i+1];}double det=n*bb-b*b;check(det>1e-12*std::max(1.,n*bb));double l=(bb*v-b*bv)/det,m=(n*bv-b*v)/det;Vec out;double a=0,c=0;for(size_t i=0;i<x.size();i+=2){double w=x[i]-l-m*x[i+1];out.push_back(w);a+=w;c+=w*x[i+1];}out.insert(out.end(),{a,c});return out;}
-
-Vec l1_box_trade(const Vec& x){check(!x.empty()&&x.size()%6==0);Vec out;double obj=0;for(size_t i=0;i<x.size();i+=6){double v=x[i],w=x[i+1],a=x[i+2],c=x[i+3],l=x[i+4],u=x[i+5];check(a>0&&c>=0&&l<=u);double z=v-w,t=w+std::copysign(std::max(0.,std::abs(z)-c/a),z);t=std::clamp(t,l,u);out.push_back(t);obj+=.5*a*sq(t-v)+c*std::abs(t-w);}out.push_back(obj);return out;}
-
-Vec kl_reverse_stress(const Vec& x){check(x.size()>=5&&x.size()%2==1);Vec p,v;double s=0;for(size_t i=1;i<x.size();i+=2){check(x[i]>0);p.push_back(x[i]);v.push_back(x[i+1]);s+=x[i];}check(std::abs(s-1)<1e-10&&x[0]>*std::min_element(v.begin(),v.end())&&x[0]<*std::max_element(v.begin(),v.end()));auto tilt=[&](double l){Vec q;for(size_t i=0;i<p.size();++i)q.push_back(std::log(p[i])+l*v[i]);double m=*std::max_element(q.begin(),q.end()),z=0;for(double& a:q){a=std::exp(a-m);z+=a;}for(double& a:q)a/=z;return q;};auto av=[&](const Vec& q){return std::inner_product(q.begin(),q.end(),v.begin(),0.);};double a=-100,b=100;check(av(tilt(a))<=x[0]&&av(tilt(b))>=x[0]);for(int i=0;i<100;++i){double m=(a+b)/2;if(av(tilt(m))<x[0])a=m;else b=m;}double l=(a+b)/2;Vec q=tilt(l);double kl=0,mu=av(q);for(size_t i=0;i<q.size();++i)if(q[i]>0)kl+=q[i]*std::log(q[i]/p[i]);q.insert(q.end(),{l,kl,mu});return q;}
-
-Vec tail_euler(const Vec& x){check(x.size()>=6&&(x.size()-3)%3==0&&x[2]>0&&x[2]<1);struct S{double p,a,b,l;};std::vector<S> z;double p=0;for(size_t i=3;i<x.size();i+=3){prob(x[i]);p+=x[i];z.push_back({x[i],x[i+1],x[i+2],x[0]*x[i+1]+x[1]*x[i+2]});}check(std::abs(p-1)<1e-10);std::sort(z.begin(),z.end(),[](S a,S b){return a.l>b.l;});double m=1-x[2],left=m,c1=0,c2=0,es=0;for(size_t i=0;i<z.size()&&left>1e-14*m;){size_t j=i;double mass=0;while(j<z.size()&&z[j].l==z[i].l)mass+=z[j++].p;double take=std::min(left,mass);if(mass>0)for(size_t k=i;k<j;++k){double w=take*z[k].p/mass;c1+=w*z[k].a;c2+=w*z[k].b;es+=w*z[k].l;}left-=take;i=j;}check(left<=1e-10*m);c1*=x[0]/m;c2*=x[1]/m;es/=m;return {es,c1,c2,es-c1-c2};}
-
-Vec two_asset_risk_budget(const Vec& x){size(x,3);double a=x[0],b=x[1],r=x[2];check(a>0&&b>0&&std::abs(r)<1);double w=b/(a+b),v=1-w,c=r*a*b,s=std::sqrt(sq(w*a)+sq(v*b)+2*w*v*c);check(s>0);return {w,v,s,w*(w*a*a+v*c)/s,v*(w*c+v*b*b)/s};}
-
-Vec robust_spread(const Vec& x){size(x,5);check(x[1]>=0&&x[2]>0&&x[3]>0&&x[4]>=0);double z=std::copysign(std::max(0.,std::abs(x[0])-x[1])/(x[2]*x[3]),x[0]);z=std::clamp(z,-x[4],x[4]);double a=z*x[0]-std::abs(z)*x[1],v=z*z*x[2];return {z,a,v,a-.5*x[3]*v};}
-
-Vec neutral_risk_pipeline(const Vec& x){check(x.size()>=10&&(x.size()-1)%3==0&&x[0]>0);size_t n=(x.size()-1)/3;Vec v;for(size_t i=1;i<x.size();i+=3){check(x[i+2]>0);v.insert(v.end(),{x[i],x[i+1]});}Vec w=neutral_projection(v);w.resize(n);double var=0;for(size_t i=0;i<n;++i)var+=sq(w[i]*x[3+3*i]);double a=var>0?std::min(1.,x[0]/std::sqrt(var)):1,g=0,net=0,b=0;for(size_t i=0;i<n;++i){w[i]*=a;g+=std::abs(w[i]);net+=w[i];b+=w[i]*x[2+3*i];}w.insert(w.end(),{g,var*a*a,a,net,b});return w;}
+#include "evidence_common.hpp"
+namespace kline { namespace applied_allocation {
+using namespace evidence;
+inline Report brinson_fachler(const Mat& x,const Vec& p){
+    validate(x,1,4,4);
+    parameters(p,0);
+    double wp=0,wb=0,rb=0;
+    for(auto&r:x){require(r[0]>=0&&r[1]>=0&&r[2]>=-1&&r[3]>=-1,"Invalid group");
+    wp+=r[0];
+    wb+=r[1];
+    rb+=r[1]*r[3];
+    }require(std::abs(wp-1)<1e-9&&std::abs(wb-1)<1e-9,"Weights must sum to one");
+    Report o{{"Group","Allocation","Selection","Interaction","Total"},{}};
+    for(std::size_t i=0;
+    i<x.size();
+    ++i){auto&r=x[i];
+    double d=r[0]-r[1],e=r[2]-r[3],a=d*(r[3]-rb),s=r[1]*e,z=d*e;
+    o.rows.push_back({double(i+1),a,s,z,a+s+z});
+    }return o;
+    
 }
+
+inline Report carino(const Mat& x,const Vec& p){
+    validate(x,1,4,4);
+    parameters(p,0);
+    auto k=[](double a,double b){positive(1+a);
+    positive(1+b);
+    double d=a-b;
+    return d==0?1/(1+b):std::log1p(d/(1+b))/d;
+    };
+    double a=0,b=0;
+    for(auto&r:x){positive(1+r[0]);
+    positive(1+r[1]);
+    require(std::abs(r[2]+r[3]-(r[0]-r[1]))<1e-9,"Contributions do not reconcile");
+    a+=std::log1p(r[0]);
+    b+=std::log1p(r[1]);
+    }double K=k(std::expm1(a),std::expm1(b));
+    Report o{{"Period","LocalK","GlobalK","LinkedA","LinkedB"},{}};
+    for(std::size_t i=0;
+    i<x.size();
+    ++i){auto&r=x[i];
+    double u=k(r[0],r[1]);
+    o.rows.push_back({double(i+1),u,K,r[2]*u/K,r[3]*u/K});
+    }return o;
+    
+}
+
+inline Report daily_leverage(const Mat& x,const Vec& p){
+    validate(x,1,1,1);
+    parameters(p,2);
+    double L=p[0],c=p[1],s=1,v=1;
+    require(c>=0&&c<1,"Invalid cost");
+    Report o{{"Period","UnderlyingNAV","LeveragedNAV","StaticMultipleNAV","Gap"},{}};
+    for(std::size_t i=0;
+    i<x.size();
+    ++i){double r=x[i][0];
+    s*=positive(1+r);
+    v*=positive(1+L*r-c);
+    double u=1+L*(s-1);
+    o.rows.push_back({double(i+1),s,v,u,v-u});
+    }return o;
+    
+}
+
+inline Report active_wealth(const Mat& x,const Vec& p){
+    validate(x,1,2,2);
+    parameters(p,0);
+    double a=1,b=1;
+    Report o{{"Period","PortfolioNAV","BenchmarkNAV","ArithmeticActive","RelativeWealth"},{}};
+    for(std::size_t i=0;
+    i<x.size();
+    ++i){a*=positive(1+x[i][0]);
+    b*=positive(1+x[i][1]);
+    o.rows.push_back({double(i+1),a,b,a-b,a/b-1});
+    }return o;
+    
+}
+} }

@@ -4,9 +4,9 @@
 #include "applied_liquidity.hpp"
 #include "applied_rates.hpp"
 #include "applied_options.hpp"
-#include "applied_credit.hpp"
+#include "applied_lab_credit.hpp"
 #include "applied_accounts.hpp"
-#include "applied_allocation.hpp"
+#include "applied_lab_allocation.hpp"
 namespace applied_synthesis {
 Vec forecast_serial(const Vec& x){pairs(x);Vec b=applied_forecast::brier_groups(x),r{1},s;for(size_t i=0;i<x.size();i+=2){double e=x[i+1]-x[i];check(e!=0);r.push_back(e);s.push_back(e>0?1:-1);}Vec q=applied_inference::ljung_box(r),v=applied_inference::runs_exact(s);return {b[0],b[1],q[0],v[0],v[4]};}
 

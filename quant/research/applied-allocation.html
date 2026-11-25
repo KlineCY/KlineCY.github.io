@@ -1,2 +1,92 @@
-<!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>组合约束、情景优化与鲁棒风险证书｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><link rel="stylesheet" href="applied-systems.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main class="applied-systems"><header><h1>组合约束、情景优化与鲁棒风险证书</h1><p><a href="applied-systems.html">完整应用研究体系</a>　<a href="integrated-research.html">跨模型量化研究</a>　<a href="../cpp/applied_systems.cpp" download>统一C++17入口</a></p></header><section><h2>研究链与学习顺序</h2><p>从正交投影和凸目标的解析子问题，到尾部风险归因、指数倾斜反向压力以及风险预算，建立可核算的组合决策研究链。</p><p><a href="../cpp/applied_allocation.hpp" download>完整组内实现</a>　<a href="applied-allocation-cases.json" download>数值参照</a></p><h3><a href="applied-allocation-neutral-projection.html">美元及单因子中性的最小距离投影</a></h3><p>构造拉格朗日函数，对w求一阶条件得w=v−A转置乘乘子。代入约束解出两维乘子；当因子载荷非常量时矩阵AA转置正定，投影唯一。</p><h3><a href="applied-allocation-l1-box-trade.html">含L1成本与盒约束的对角二次交易决策</a></h3><p>以交易量w−w0为新变量，将目标写成二次项和绝对值惩罚。零交易处次梯度覆盖区间[−c,c]，若目标偏差未超过成本阈值则不交易；否则软阈值缩减偏差，再由一维凸性将最优点投影到盒区间。</p><h3><a href="applied-allocation-kl-reverse-stress.html">KL最小概率倾斜与反向压力测试</a></h3><p>带期望约束的KL优化一阶条件产生指数族倾斜。配分函数对数的一阶导为倾斜均值，二阶导为方差，目标均值严格位于支持区间内部时可用二分寻找唯一乘子；减最大指数防止溢出。</p><h3><a href="applied-allocation-tail-euler.html">离散尾部风险的Euler贡献与边界平局</a></h3><p>先按组合损失排序，并将尾部剩余概率在损失相同的边界情景中按原概率比例分配。固定尾部选取权重给出ES的一个次梯度；由损失线性加总得到Euler贡献闭合。</p><h3><a href="applied-allocation-two-asset-risk-budget.html">两资产正权重等风险预算的解析证书</a></h3><p>两个资产的协方差交叉项在两侧相消，正权重下等风险预算简化为两边波动率乘权重相等。用全额投资条件解出逆波动率权重，再按Euler公式核对风险贡献。</p><h3><a href="applied-allocation-robust-spread.html">市场中性价差头寸的椭球Alpha鲁棒最优解</a></h3><p>将Alpha不确定集投影到价差方向得到估计收益加减不确定半径。最坏收益对头寸的绝对值产生惩罚；结合二次风险，最优价差权重由软阈值解析给出。</p><h3><a href="applied-allocation-neutral-risk-pipeline.html">约束投影、特异风险预算与目标仓位完整决策</a></h3><p>先在美元和单因子约束下投影原始信号；再在对角特异风险模型下计算方差，按波动率上限对所有资产等比例缩放。线性零约束在统一缩放下保持，因此风险控制不会重新引入因子敞口。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>组合归因与路径依赖｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"><style>body{margin:0;background:white;color:#182a35;font:16px/1.95 "Times New Roman","SimSun",serif}.main{margin-left:252px;padding:24px 32px 64px}main{max-width:1120px;margin:auto}header,article,section{border:1px solid #cbd4dc;padding:24px 28px;margin:18px 0;background:white}.equation,pre,.wide{overflow:auto}pre{border:1px solid #cbd4dc;padding:14px;font:14px/1.7 "Times New Roman",monospace}table{border-collapse:collapse;width:100%}th,td{padding:7px 10px;border:1px solid #ccd5dd;text-align:right;background:white;white-space:nowrap}a{color:#1a5478}@media(max-width:790px){.main{margin:0;padding:12px}header,article,section{padding:15px}}</style></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>组合归因与路径依赖</h1><p>四项独立研究方法：数学定义、推导、适用条件、构造样本、解析基准与C++17实现。数据均为教学构造。</p><p><a href="../research/applied-laboratories.html">量化研究应用实验室</a>　<a href="../cpp/applied_allocation.hpp" download>完整源码</a></p><nav><a href="#brinson-fachler">Brinson–Fachler单期归因</a>　｜　<a href="#carino">Cariño多期归因链接</a>　｜　<a href="#daily-leverage">每日重置杠杆的复利路径</a>　｜　<a href="#active-wealth">算术主动收益与相对财富</a></nav></header><article id="brinson-fachler"><h2>Brinson–Fachler单期归因</h2><p>配置贡献为主动权重乘相对整体基准的行业收益，选择贡献为基准权重乘行业超额收益，交互项为主动权重与行业超额收益的乘积。两套权重均和为1。</p><div class="equation">$$A_i=(w_i^P-w_i^B)(r_i^B-R^B),\quad S_i=w_i^B(r_i^P-r_i^B)$$</div><div class="equation">$$I_i=(w_i^P-w_i^B)(r_i^P-r_i^B),\quad \sum_i(A_i+S_i+I_i)=R^P-R^B$$</div><p>两个行业贡献0.014与−0.006，合计主动收益0.008。权重均为同期初口径；现金与未分类资产需纳入分组。</p><h3>构造样本与数值复算</h3><p><a href="../research/applied-examples/brinson-fachler.csv" download>下载CSV</a>　<a href="../cpp/applied_allocation.hpp" download>算法源码</a></p><pre>PortfolioWeight,BenchmarkWeight,PortfolioReturn,BenchmarkReturn
+0.6,0.5,0.1,0.08
+0.4,0.5,0.02,0.04
+</pre><pre>./build/kline_quant applied-brinson-fachler quant/research/applied-examples/brinson-fachler.csv</pre><div class="wide"><table><thead><tr><th>Group</th><th>Allocation</th><th>Selection</th><th>Interaction</th><th>Total</th></tr></thead><tbody><tr><td>1</td><td>0.002</td><td>0.01</td><td>0.002</td><td>0.014</td></tr><tr><td>2</td><td>0.002</td><td>-0.01</td><td>0.002</td><td>-0.006</td></tr></tbody></table></div><p>参考文献：Brinson and Fachler (1985), Measuring non-US equity portfolio performance, Journal of Portfolio Management.</p></article><article id="carino"><h2>Cariño多期归因链接</h2><p>局部算术主动贡献乘对数系数后跨期可加，再除以总期系数恢复累计算术差。两收益相同时取连续极限1／（1＋r）。</p><div class="equation">$$k_t=\frac{\log(1+r_t^P)-\log(1+r_t^B)}{r_t^P-r_t^B},\quad K=\frac{\log(1+R^P)-\log(1+R^B)}{R^P-R^B}$$</div><div class="equation">$$C_j=\sum_t c_{tj}k_t/K,\quad \sum_j C_j=R^P-R^B$$</div><p>组合和基准均累计涨10％，总链接贡献为零，单项仍可非零。每期贡献须先与主动收益核对，避免直接加总日度差。</p><h3>构造样本与数值复算</h3><p><a href="../research/applied-examples/carino.csv" download>下载CSV</a>　<a href="../cpp/applied_allocation.hpp" download>算法源码</a></p><pre>Portfolio,Benchmark,ComponentA,ComponentB
+0.1,0,0.06,0.04
+0,0.1,-0.07,-0.03
+</pre><pre>./build/kline_quant applied-carino quant/research/applied-examples/carino.csv</pre><div class="wide"><table><thead><tr><th>Period</th><th>LocalK</th><th>GlobalK</th><th>LinkedA</th><th>LinkedB</th></tr></thead><tbody><tr><td>1</td><td>0.953101798043</td><td>0.909090909091</td><td>0.0629047186709</td><td>0.0419364791139</td></tr><tr><td>2</td><td>0.953101798043</td><td>0.909090909091</td><td>-0.0733888384493</td><td>-0.0314523593354</td></tr></tbody></table></div><p>参考文献：Cariño (1999), Combining attribution effects over time, Journal of Performance Measurement.</p></article><article id="daily-leverage"><h2>每日重置杠杆的复利路径</h2><p>每期重设杠杆L，净值为逐期杠杆收益乘积，静态比较仅对累计收益乘L。差值体现路径和费用；净值非正时拒绝输入。</p><div class="equation">$$V_t=V_{t-1}(1+Lr_t-c),\quad S_t=S_{t-1}(1+r_t)$$</div><div class="equation">$$V_t^{\mathrm{static}}=1+L(S_t-1)$$</div><p>标的涨10％再跌1／11回到1，2倍每日重置净值约0.9818。趋势路径也可能使日重置结果更高，不能只用波动判断所有路径。</p><h3>构造样本与数值复算</h3><p><a href="../research/applied-examples/daily-leverage.csv" download>下载CSV</a>　<a href="../cpp/applied_allocation.hpp" download>算法源码</a></p><pre>Return
+0.1
+-0.09090909090909091
+</pre><pre>./build/kline_quant applied-daily-leverage quant/research/applied-examples/daily-leverage.csv 2 0</pre><div class="wide"><table><thead><tr><th>Period</th><th>UnderlyingNAV</th><th>LeveragedNAV</th><th>StaticMultipleNAV</th><th>Gap</th></tr></thead><tbody><tr><td>1</td><td>1.1</td><td>1.2</td><td>1.2</td><td>0</td></tr><tr><td>2</td><td>1</td><td>0.981818181818</td><td>1</td><td>-0.0181818181818</td></tr></tbody></table></div><p>参考文献：Bacon (2008), Practical Portfolio Performance Measurement and Attribution, Wiley.</p></article><article id="active-wealth"><h2>算术主动收益与相对财富</h2><p>财富差和相对财富比为不同主动表现口径。相对收益每期乘数为组合与基准总收益率之比，基准累计收益非零时一般不同。</p><div class="equation">$$R_{0,t}^P-R_{0,t}^B=V_t^P-V_t^B$$</div><div class="equation">$$R_{0,t}^{\mathrm{rel}}=V_t^P/V_t^B-1=(R_{0,t}^P-R_{0,t}^B)/(1+R_{0,t}^B)$$</div><p>案例组合0.99、基准1.05，算术差−0.06，相对财富−5.714％。需相同日期、币种、复权和费用口径。</p><h3>构造样本与数值复算</h3><p><a href="../research/applied-examples/active-wealth.csv" download>下载CSV</a>　<a href="../cpp/applied_allocation.hpp" download>算法源码</a></p><pre>Portfolio,Benchmark
+0.1,0.05
+-0.1,0
+</pre><pre>./build/kline_quant applied-active-wealth quant/research/applied-examples/active-wealth.csv</pre><div class="wide"><table><thead><tr><th>Period</th><th>PortfolioNAV</th><th>BenchmarkNAV</th><th>ArithmeticActive</th><th>RelativeWealth</th></tr></thead><tbody><tr><td>1</td><td>1.1</td><td>1.05</td><td>0.05</td><td>0.047619047619</td></tr><tr><td>2</td><td>0.99</td><td>1.05</td><td>-0.06</td><td>-0.0571428571429</td></tr></tbody></table></div><p>参考文献：Bacon (2008), Practical Portfolio Performance Measurement and Attribution, Wiley.</p></article><section><h2>C++17完整实现</h2><pre>#pragma once
+#include "evidence_common.hpp"
+namespace kline { namespace applied_allocation {
+using namespace evidence;
+inline Report brinson_fachler(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,4,4);
+    parameters(p,0);
+    double wp=0,wb=0,rb=0;
+    for(auto&amp;r:x){require(r[0]&gt;=0&amp;&amp;r[1]&gt;=0&amp;&amp;r[2]&gt;=-1&amp;&amp;r[3]&gt;=-1,"Invalid group");
+    wp+=r[0];
+    wb+=r[1];
+    rb+=r[1]*r[3];
+    }require(std::abs(wp-1)&lt;1e-9&amp;&amp;std::abs(wb-1)&lt;1e-9,"Weights must sum to one");
+    Report o{{"Group","Allocation","Selection","Interaction","Total"},{}};
+    for(std::size_t i=0;
+    i&lt;x.size();
+    ++i){auto&amp;r=x[i];
+    double d=r[0]-r[1],e=r[2]-r[3],a=d*(r[3]-rb),s=r[1]*e,z=d*e;
+    o.rows.push_back({double(i+1),a,s,z,a+s+z});
+    }return o;
+    
+}
+
+inline Report carino(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,4,4);
+    parameters(p,0);
+    auto k=[](double a,double b){positive(1+a);
+    positive(1+b);
+    double d=a-b;
+    return d==0?1/(1+b):std::log1p(d/(1+b))/d;
+    };
+    double a=0,b=0;
+    for(auto&amp;r:x){positive(1+r[0]);
+    positive(1+r[1]);
+    require(std::abs(r[2]+r[3]-(r[0]-r[1]))&lt;1e-9,"Contributions do not reconcile");
+    a+=std::log1p(r[0]);
+    b+=std::log1p(r[1]);
+    }double K=k(std::expm1(a),std::expm1(b));
+    Report o{{"Period","LocalK","GlobalK","LinkedA","LinkedB"},{}};
+    for(std::size_t i=0;
+    i&lt;x.size();
+    ++i){auto&amp;r=x[i];
+    double u=k(r[0],r[1]);
+    o.rows.push_back({double(i+1),u,K,r[2]*u/K,r[3]*u/K});
+    }return o;
+    
+}
+
+inline Report daily_leverage(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,1,1);
+    parameters(p,2);
+    double L=p[0],c=p[1],s=1,v=1;
+    require(c&gt;=0&amp;&amp;c&lt;1,"Invalid cost");
+    Report o{{"Period","UnderlyingNAV","LeveragedNAV","StaticMultipleNAV","Gap"},{}};
+    for(std::size_t i=0;
+    i&lt;x.size();
+    ++i){double r=x[i][0];
+    s*=positive(1+r);
+    v*=positive(1+L*r-c);
+    double u=1+L*(s-1);
+    o.rows.push_back({double(i+1),s,v,u,v-u});
+    }return o;
+    
+}
+
+inline Report active_wealth(const Mat&amp; x,const Vec&amp; p){
+    validate(x,1,2,2);
+    parameters(p,0);
+    double a=1,b=1;
+    Report o{{"Period","PortfolioNAV","BenchmarkNAV","ArithmeticActive","RelativeWealth"},{}};
+    for(std::size_t i=0;
+    i&lt;x.size();
+    ++i){a*=positive(1+x[i][0]);
+    b*=positive(1+x[i][1]);
+    o.rows.push_back({double(i+1),a,b,a-b,a/b-1});
+    }return o;
+    
+}
+} }
+</pre></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});"></script></body></html>
