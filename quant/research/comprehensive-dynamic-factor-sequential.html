@@ -1,0 +1,27 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>缺失多资产观测的动态因子：信息滤波、创新似然与异步测量｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>缺失多资产观测的动态因子：信息滤波、创新似然与异步测量</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-dynamics.html">时间序列估计、潜在状态与期限风险</a>　<a href="../cpp/comprehensive_dynamics.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>潜在共同因子</h2><p>多资产信号可能共享一个潜在状态，但各资产在不同时间可用。标量动态因子设状态按AR(1)演化，观测为已知加载乘状态加相互独立测量噪声。给定加载及噪声方差，缺失观测自然通过跳过对应似然项处理，无须将缺失填为零。</p><div class="equation">$$f_t=\phi f_{t-1}+u_t,\quad u_t\sim N(0,Q),\qquad y_{it}=b_if_t+\epsilon_{it},\quad \epsilon_{it}\sim N(0,R_i)$$</div></section><section><h2>时间间隔的传播</h2><p>输入Gap是自上一行后的整数状态步数，首行Gap允许为0。传播m→φ^g m，方差加累计过程噪声；通过逐步递推避免φ接近1时几何级数的消减误差。φ限制在[−1,1]，允许随机游走特例。</p><div class="equation">$$m^-= \phi^g m,\qquad P^-=\phi^{2g}P+Q\sum_{j=0}^{g-1}\phi^{2j}$$</div></section><section><h2>序贯测量更新</h2><p>在同一时点，条件独立的测量可依次进行标量Kalman更新，与联合高斯条件分布等价。使用P_new=PR/(b²P+R)避免直接减去接近相等的方差。每次创新似然按当时已处理的测量条件化，累积得到联合似然。</p><div class="equation">$$S_i=b_i^2P+R_i,\quad K_i=Pb_i/S_i,\quad m^+=m+K_i(y_i-b_im),\quad P^+=PR_i/S_i$$</div></section><section><h2>精确算例</h2><p>先验N(0,1)，两个测量值1和3，加载与噪声方差均1，后验精度3、均值4/3。下一期φ=1、Q=0且两观测缺失，状态不变。该函数只过滤给定参数的状态，未学习载荷或处理相关测量噪声；更一般的因子模型需显式协方差矩阵和识别约束。</p><div class="equation">$$(P^+)^{-1}=(P^-)^{-1}+\sum_{i\in O_t}b_i^2/R_i,\quad m^+=P^+(m^-/P^-+\sum_{i\in O_t}b_i y_i/R_i)$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Period，Gap，PriorMean，PriorVariance，PosteriorMean，PosteriorVariance，ObservedCount，InnovationNLL，CumulativeNLL。</p><p><a href="../research/comprehensive-examples/dynamic-factor-sequential.csv" download>样本CSV</a></p><pre>Gap,Value1,Observed1,Value2,Observed2
+0,1,1,3,1
+1,0,0,0,0
+</pre><pre>./build/kline_quant comprehensive-dynamic-factor-sequential quant/research/comprehensive-examples/dynamic-factor-sequential.csv 1 0 0 1 1 1 1 1</pre><div class="wide"><table><thead><tr><th>Period</th><th>Gap</th><th>PriorMean</th><th>PriorVariance</th><th>PosteriorMean</th><th>PosteriorVariance</th><th>ObservedCount</th></tr></thead><tbody><tr><td>1</td><td>0</td><td>0</td><td>1</td><td>1.333333333333</td><td>0.3333333333333</td><td>2</td></tr><tr><td>2</td><td>1</td><td>1.333333333333</td><td>0.3333333333333</td><td>1.333333333333</td><td>0.3333333333333</td><td>0</td><td>0</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report dynamic_factor_sequential(const Mat&amp; x,const Vec&amp; p){
+    auto cols=validate(x,1,3,65);require((cols-1)%2==0,"Observation pairs required");
+    auto d=(cols-1)/2;parameters(p,4+2*d);
+    double phi=p[0],Q=p[1],m=p[2],P=positive(p[3]);
+    require(std::abs(phi)&lt;=1&amp;&amp;Q&gt;=0,"Invalid factor dynamics");
+    for(std::size_t j=0;j&lt;d;++j)positive(p[4+d+j]);
+    double cum=0,work=0;Report out{{"Period","Gap","PriorMean","PriorVariance","PosteriorMean","PosteriorVariance","ObservedCount","InnovationNLL","CumulativeNLL"},{}};
+    for(std::size_t t=0;t&lt;x.size();++t){
+        auto&amp;r=x[t];auto gap=count(r[0],0,100000);
+        require(t==0||gap&gt;0,"Increasing observation time required");work+=gap;require(work&lt;=5e7,"Factor propagation limit");
+        for(std::size_t h=0;h&lt;gap;++h){m*=phi;P=phi*phi*P+Q;}
+        double pm=m,pv=P,ll=0,n=0;
+        for(std::size_t j=0;j&lt;d;++j){
+            double flag=r[2+2*j];require(flag==0||flag==1,"Binary observation flag");
+            if(flag){
+                double b=p[4+j],R=p[4+d+j],S=positive(b*b*P+R),e=r[1+2*j]-b*m;
+                ll+=.5*(std::log(2*std::acos(-1.)*S)+e*e/S);
+                m+=P*b*e/S;P=P*R/S;++n;
+            }
+        }
+        cum+=ll;out.rows.push_back({double(t+1),double(gap),pm,pv,m,P,n,ll,cum});
+    }
+    return out;
+}</pre><p>参考文献：<a href="https://academic.oup.com/book/16563">Durbin and Koopman (2012), Time Series Analysis by State Space Methods, 2nd ed., Oxford University Press.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

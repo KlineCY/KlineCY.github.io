@@ -1,0 +1,23 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Levinson–Durbin递推：Toeplitz预测系统、反射系数与创新方差｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="../research/depth-labs.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="math"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>Levinson–Durbin递推：Toeplitz预测系统、反射系数与创新方差</h1><p><a href="../research/comprehensive-research.html">完整研究课程</a>　<a href="../research/comprehensive-course-dynamics.html">时间序列估计、潜在状态与期限风险</a>　<a href="../cpp/comprehensive_dynamics.hpp" download>本组C++17源码</a>　<a href="../cpp/comprehensive_common.hpp" download>公共数学接口</a></p></header><section><h2>线性预测与Toeplitz结构</h2><p>平稳中心化序列的最优线性一步预测由自协方差确定，p阶Yule–Walker系统的矩阵元素依赖滞后差。逐阶重新解密集系统需要重复大量运算。Levinson–Durbin递推把上一阶系数和预测误差方差扩展到下一阶，反射系数同时给出偏自相关。</p><div class="equation">$$\Gamma_p\phi^{(p)}=\gamma_{1:p},\quad(\Gamma_p)_{ij}=\gamma_{|i-j|}$$</div></section><section><h2>递推推导</h2><p>从v0=γ0开始，新滞后系数用剩余协方差除以上一阶创新方差。原有系数按逆序反射项调整，创新方差乘1−κ²。每步必须满足|κ|&lt;1及正创新方差，这与扩展Toeplitz正定性相联系；非正定输入不应通过截断负方差掩盖。</p><div class="equation">$$\kappa_p=\frac{\gamma_p-\sum_{j=1}^{p-1}\phi^{(p-1)}_j\gamma_{p-j}}{v_{p-1}},\quad \phi_j^{(p)}=\phi_j^{(p-1)}-\kappa_p\phi_{p-j}^{(p-1)},\quad v_p=v_{p-1}(1-\kappa_p^2)$$</div></section><section><h2>独立残差</h2><p>程序输出每阶所有系数及共同创新方差、反射系数，并重新以原始协方差回代Yule–Walker方程。递推本身O(P²)，完整逐阶残差审计为O(P³)。创新方差是指定线性预测空间下的均方误差，而不是自动等同于真实条件方差。</p><div class="equation">$$v_p=\gamma_0-(\phi^{(p)})^\top\gamma_{1:p},\qquad r_p=\|\Gamma_p\phi^{(p)}-\gamma_{1:p}\|_\infty$$</div></section><section><h2>参考与边界</h2><p>γ0=1、γ1=0.5、γ2=0.25来自理论AR(1)协方差。第一阶系数0.5、创新方差0.75，第二反射系数0，额外滞后不改善线性预测。估计样本协方差时应固定一致分母或检查Toeplitz正定性；样本PACF波动不等同真实模型阶数。</p><div class="equation">$$\gamma_k=\gamma_0\rho^{|k|}\Longrightarrow\phi^{(p)}=(\rho,0,\ldots,0)$$</div></section><section><h2>输入、解析参考及复现实验</h2><p>输入为教学构造数据。参数顺序与函数代码一致，表中为独立解析参考；完整字段为Order，Lag，Coefficient，Reflection，InnovationVariance，NormalResidual。</p><p><a href="../research/comprehensive-examples/levinson-durbin-path.csv" download>样本CSV</a></p><pre>Autocovariance
+1
+0.5
+0.25
+</pre><pre>./build/kline_quant comprehensive-levinson-durbin-path quant/research/comprehensive-examples/levinson-durbin-path.csv 2</pre><div class="wide"><table><thead><tr><th>Order</th><th>Lag</th><th>Coefficient</th><th>Reflection</th><th>InnovationVariance</th><th>NormalResidual</th></tr></thead><tbody><tr><td>1</td><td>1</td><td>0.5</td><td>0.5</td><td>0.75</td><td>0</td></tr><tr><td>2</td><td>1</td><td>0.5</td><td>0</td><td>0.75</td><td>0</td></tr><tr><td>2</td><td>2</td><td>0</td><td>0</td><td>0.75</td><td>0</td></tr></tbody></table></div><p><a href="../research/comprehensive-studies.html">参数扫描、独立参照与联合实验</a></p></section><section><h2>C++17完整实现</h2><pre>inline Report levinson_durbin_path(const Mat&amp; x,const Vec&amp; p){
+    validate(x,2,1,1);parameters(p,1);auto P=count(p[0],1,std::min&lt;std::size_t&gt;(x.size()-1,256));
+    Vec gamma=column(x,0),phi;double v=positive(gamma[0]);
+    Report out{{"Order","Lag","Coefficient","Reflection","InnovationVariance","NormalResidual"},{}};
+    for(std::size_t k=1;k&lt;=P;++k){
+        double a=gamma[k];for(std::size_t j=1;j&lt;k;++j)a-=phi[j-1]*gamma[k-j];
+        double reflection=a/v;require(std::abs(reflection)&lt;1,"Toeplitz covariance not positive definite");
+        Vec next(k);next[k-1]=reflection;
+        for(std::size_t j=1;j&lt;k;++j)next[j-1]=phi[j-1]-reflection*phi[k-j-1];
+        v=positive(v*(1-reflection*reflection));phi=next;
+        double err=0;
+        for(std::size_t i=1;i&lt;=k;++i){
+            double z=-gamma[i];for(std::size_t j=1;j&lt;=k;++j)z+=gamma[i&gt;j?i-j:j-i]*phi[j-1];
+            err=std::max(err,std::abs(z));
+        }
+        for(std::size_t j=0;j&lt;k;++j)out.rows.push_back({double(k),double(j+1),phi[j],reflection,v,err});
+    }
+    return out;
+}</pre><p>参考文献：<a href="https://doi.org/10.1007/978-3-319-29854-2">Brockwell and Davis (2016), Introduction to Time Series and Forecasting, 3rd ed., Springer.</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>
