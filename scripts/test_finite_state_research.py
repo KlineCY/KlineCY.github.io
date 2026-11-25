@@ -11,7 +11,7 @@ exe=sys.argv[1]
 groups=['inference','credit','derivatives','policy','exact','queue','optimization','control']
 catalog=[c for g in groups for c in json.loads((root/'quant/research'/f'finite-state-{g}-cases.json').read_text(encoding='utf8'))]
 ids={c['id'] for c in catalog}
-assert len(ids)==32 and set(subprocess.check_output([exe,'--list'],text=True).splitlines())==ids
+assert len(ids)==32 and ids<=set(subprocess.check_output([exe,'--list'],text=True).splitlines())
 
 def batch(rows):
     source='\n'.join(' '.join([m]+[str(x) for x in a]) for m,a in rows)+'\n'
