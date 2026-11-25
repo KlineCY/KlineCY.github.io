@@ -1,0 +1,343 @@
+[
+  {
+    "id": "forecast_brier_groups",
+    "title": "Brier分数的可靠性、分辨率与不确定性",
+    "file": "applied-forecast-brier-groups.html",
+    "fields": [
+      "Brier",
+      "Reliability",
+      "Resolution",
+      "Uncertainty",
+      "Closure"
+    ],
+    "cases": [
+      {
+        "input": [
+          0.25,
+          0,
+          0.25,
+          1,
+          0.75,
+          1,
+          0.75,
+          1
+        ],
+        "expected": [
+          0.1875,
+          0.0625,
+          0.0625,
+          0.1875,
+          0
+        ]
+      },
+      {
+        "input": [
+          0.5,
+          0,
+          0.5,
+          1
+        ],
+        "expected": [
+          0.25,
+          0,
+          0,
+          0.25,
+          0
+        ]
+      }
+    ],
+    "invalid": [
+      1.2,
+      0
+    ]
+  },
+  {
+    "id": "forecast_pinball",
+    "title": "分位数预测的Pinball损失与非对称决策",
+    "file": "applied-forecast-pinball.html",
+    "fields": [
+      "MeanLoss",
+      "Underprediction",
+      "Overprediction"
+    ],
+    "cases": [
+      {
+        "input": [
+          0.9,
+          4,
+          2,
+          1,
+          2
+        ],
+        "expected": [
+          0.95,
+          1,
+          1
+        ]
+      },
+      {
+        "input": [
+          0.5,
+          1,
+          3,
+          5,
+          3
+        ],
+        "expected": [
+          1,
+          1,
+          1
+        ]
+      }
+    ],
+    "invalid": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "forecast_ensemble_crps",
+    "title": "经验预测分布的CRPS与样本内距离",
+    "file": "applied-forecast-ensemble-crps.html",
+    "fields": [
+      "CRPS",
+      "ObservationDistance",
+      "PairDistance"
+    ],
+    "cases": [
+      {
+        "input": [
+          1,
+          0,
+          2
+        ],
+        "expected": [
+          0.5,
+          1,
+          0.5
+        ]
+      },
+      {
+        "input": [
+          0,
+          0,
+          1,
+          2
+        ],
+        "expected": [
+          0.5555555555555556,
+          1,
+          0.4444444444444444
+        ]
+      }
+    ],
+    "invalid": [
+      1,
+      1
+    ]
+  },
+  {
+    "id": "forecast_split_conformal",
+    "title": "Split conformal有限样本秩修正",
+    "file": "applied-forecast-split-conformal.html",
+    "fields": [
+      "Rank",
+      "Radius",
+      "NominalLowerCoverage"
+    ],
+    "cases": [
+      {
+        "input": [
+          0.25,
+          1,
+          4,
+          2
+        ],
+        "expected": [
+          3,
+          4,
+          0.75
+        ]
+      },
+      {
+        "input": [
+          0.4,
+          0.1,
+          0.4,
+          0.2,
+          0.3
+        ],
+        "expected": [
+          3,
+          0.3,
+          0.6
+        ]
+      }
+    ],
+    "invalid": [
+      0.01,
+      1,
+      2
+    ]
+  },
+  {
+    "id": "forecast_isotonic_fit",
+    "title": "加权保序回归与PAVA合并",
+    "file": "applied-forecast-isotonic-fit.html",
+    "fields": [
+      "FittedValues"
+    ],
+    "cases": [
+      {
+        "input": [
+          0.1,
+          1,
+          0.8,
+          1,
+          0.2,
+          3,
+          0.9,
+          1
+        ],
+        "expected": [
+          0.1,
+          0.35,
+          0.35,
+          0.9
+        ]
+      },
+      {
+        "input": [
+          3,
+          1,
+          2,
+          1,
+          1,
+          1
+        ],
+        "expected": [
+          2,
+          2,
+          2
+        ]
+      }
+    ],
+    "invalid": [
+      0.1,
+      0
+    ]
+  },
+  {
+    "id": "forecast_interval_score",
+    "title": "区间评分、覆盖率与区间宽度",
+    "file": "applied-forecast-interval-score.html",
+    "fields": [
+      "MeanScore",
+      "Coverage",
+      "MeanWidth"
+    ],
+    "cases": [
+      {
+        "input": [
+          0.2,
+          0,
+          2,
+          1,
+          0,
+          2,
+          3
+        ],
+        "expected": [
+          7,
+          0.5,
+          2
+        ]
+      },
+      {
+        "input": [
+          0.5,
+          0,
+          1,
+          0,
+          1,
+          2,
+          2
+        ],
+        "expected": [
+          1,
+          1,
+          1
+        ]
+      }
+    ],
+    "invalid": [
+      0.2,
+      2,
+      1,
+      0
+    ]
+  },
+  {
+    "id": "forecast_frozen_calibration",
+    "title": "冻结PAVA映射：训练与外部Brier改善",
+    "file": "applied-forecast-frozen-calibration.html",
+    "fields": [
+      "RawBrier",
+      "CalibratedBrier",
+      "Improvement",
+      "TrainBlocks"
+    ],
+    "cases": [
+      {
+        "input": [
+          3,
+          0.2,
+          0,
+          0.5,
+          1,
+          0.8,
+          0,
+          0.3,
+          0,
+          0.9,
+          1
+        ],
+        "expected": [
+          0.05,
+          0.125,
+          -0.075,
+          2
+        ]
+      },
+      {
+        "input": [
+          2,
+          0.2,
+          0,
+          0.8,
+          1,
+          0.2,
+          0,
+          0.9,
+          1
+        ],
+        "expected": [
+          0.025,
+          0,
+          0.025,
+          2
+        ]
+      }
+    ],
+    "invalid": [
+      2,
+      0.8,
+      0,
+      0.2,
+      1,
+      0.5,
+      0
+    ]
+  }
+]

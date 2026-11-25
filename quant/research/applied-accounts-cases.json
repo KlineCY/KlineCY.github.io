@@ -1,0 +1,334 @@
+[
+  {
+    "id": "accounts_twr_exact",
+    "title": "现金流时点估值与时间加权收益",
+    "file": "applied-accounts-twr-exact.html",
+    "fields": [
+      "TWR",
+      "EndingValue",
+      "TotalExternalFlow",
+      "CapitalGain"
+    ],
+    "cases": [
+      {
+        "input": [
+          100,
+          110,
+          90,
+          180,
+          0
+        ],
+        "expected": [
+          -0.01,
+          180,
+          90,
+          -10
+        ]
+      },
+      {
+        "input": [
+          100,
+          90,
+          -40,
+          55,
+          0
+        ],
+        "expected": [
+          -0.01,
+          55,
+          -40,
+          -5
+        ]
+      }
+    ],
+    "invalid": [
+      100,
+      110,
+      -120
+    ]
+  },
+  {
+    "id": "accounts_modified_dietz",
+    "title": "Modified Dietz加权资本收益近似",
+    "file": "applied-accounts-modified-dietz.html",
+    "fields": [
+      "Return",
+      "Gain",
+      "WeightedCapital"
+    ],
+    "cases": [
+      {
+        "input": [
+          100,
+          165,
+          50,
+          0.5
+        ],
+        "expected": [
+          0.12,
+          15,
+          125
+        ]
+      },
+      {
+        "input": [
+          100,
+          65,
+          -50,
+          0.5
+        ],
+        "expected": [
+          0.2,
+          15,
+          75
+        ]
+      }
+    ],
+    "invalid": [
+      100,
+      90,
+      -200,
+      1
+    ]
+  },
+  {
+    "id": "accounts_mwr_continuous",
+    "title": "单次终值型资金加权收益率的连续复利反演",
+    "file": "applied-accounts-mwr-continuous.html",
+    "fields": [
+      "ContinuousIRR",
+      "AnnualEffective",
+      "TerminalResidual"
+    ],
+    "cases": [
+      {
+        "input": [
+          2,
+          250,
+          0,
+          100,
+          1,
+          50
+        ],
+        "expected": [
+          0.30068298763515355,
+          0.35078105935821213,
+          0
+        ]
+      },
+      {
+        "input": [
+          1,
+          80,
+          0,
+          100
+        ],
+        "expected": [
+          -0.2231435513142097,
+          -0.2,
+          0
+        ]
+      }
+    ],
+    "invalid": [
+      1,
+      100,
+      1,
+      100
+    ]
+  },
+  {
+    "id": "accounts_high_water_fee",
+    "title": "高水位绩效费的逐期单位净值账本",
+    "file": "applied-accounts-high-water-fee.html",
+    "fields": [
+      "FeesTotal",
+      "TerminalNAV",
+      "HighWaterMark",
+      "FeePeriods"
+    ],
+    "cases": [
+      {
+        "input": [
+          0.2,
+          100,
+          1.2,
+          0.5,
+          2
+        ],
+        "expected": [
+          4,
+          116,
+          116,
+          1
+        ]
+      },
+      {
+        "input": [
+          0.2,
+          100,
+          0.9,
+          1.2
+        ],
+        "expected": [
+          1.6,
+          106.4,
+          106.4,
+          1
+        ]
+      }
+    ],
+    "invalid": [
+      1.1,
+      100,
+      1.2
+    ]
+  },
+  {
+    "id": "accounts_futures_margin",
+    "title": "期货逐日盯市、资金下限与追缴需求",
+    "file": "applied-accounts-futures-margin.html",
+    "fields": [
+      "TerminalCash",
+      "TotalVariation",
+      "MinimumCash",
+      "PeakShortfall"
+    ],
+    "cases": [
+      {
+        "input": [
+          2,
+          10,
+          100,
+          80,
+          50,
+          48,
+          52
+        ],
+        "expected": [
+          140,
+          40,
+          60,
+          20
+        ]
+      },
+      {
+        "input": [
+          -1,
+          5,
+          30,
+          10,
+          20,
+          24,
+          22
+        ],
+        "expected": [
+          20,
+          -10,
+          10,
+          0
+        ]
+      }
+    ],
+    "invalid": [
+      1.2,
+      10,
+      100,
+      80,
+      50,
+      48
+    ]
+  },
+  {
+    "id": "accounts_borrow_accrual",
+    "title": "空头借券费用的日计数与逐期归因",
+    "file": "applied-accounts-borrow-accrual.html",
+    "fields": [
+      "PeriodCostsThenTotal"
+    ],
+    "cases": [
+      {
+        "input": [
+          1000,
+          0.12,
+          0.25,
+          2000,
+          0.06,
+          0.25
+        ],
+        "expected": [
+          30,
+          30,
+          60
+        ]
+      },
+      {
+        "input": [
+          1000,
+          0.365,
+          0.0027397260273972603
+        ],
+        "expected": [
+          1,
+          1
+        ]
+      }
+    ],
+    "invalid": [
+      1000,
+      -0.1,
+      0.25
+    ]
+  },
+  {
+    "id": "accounts_flow_performance_pipeline",
+    "title": "账户申赎、精确TWR与Dietz近似的同路径对照",
+    "file": "applied-accounts-flow-performance-pipeline.html",
+    "fields": [
+      "TWR",
+      "Dietz",
+      "AmountGain",
+      "EndingNAV",
+      "Difference"
+    ],
+    "cases": [
+      {
+        "input": [
+          100,
+          0.1,
+          90,
+          -0.1,
+          0
+        ],
+        "expected": [
+          -0.01,
+          -0.06896551724137931,
+          -10,
+          180,
+          0.05896551724137931
+        ]
+      },
+      {
+        "input": [
+          100,
+          0.1,
+          0,
+          0.1,
+          0
+        ],
+        "expected": [
+          0.21,
+          0.21,
+          21,
+          121,
+          0
+        ]
+      }
+    ],
+    "invalid": [
+      100,
+      -1,
+      10
+    ]
+  }
+]

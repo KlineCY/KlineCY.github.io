@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>组合优化的约束几何、成本阈值与尾部风险证书｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="depth-labs.css"><link rel="stylesheet" href="applied-systems.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main class="applied-systems"><header><h1>组合优化的约束几何、成本阈值与尾部风险证书</h1><p><a href="applied-theory.html">应用研究理论体系</a>　<a href="applied-systems.html">完整应用研究</a>　<a href="applied-experiments.html">完整参数项目</a></p></header><section><h2>研究对象与统一数学框架</h2><p>实际组合决策常同时面对暴露约束、风险预算、交易成本、估计误差和情景损失。只有明确每一项对应的数学目标、可行域与概率模型，才能判断局部解析解能否推广到完整投资组合优化。</p><p><a href="applied-allocation-systems.html">本领域全部计算专题</a>　<a href="applied-experiment-allocation.html">对应完整参数研究</a>。</p></section><section>
+<h2>1．线性中性约束与欧氏投影</h2>
+<p>给定原始目标仓位v及满行秩线性暴露矩阵A，最小化欧氏距离并要求Aw=0。拉格朗日函数对w求导得到w=v−A转置乘乘子；将该式代入约束，解出乘子并得到正交投影矩阵。满行秩保证AA转置可逆。</p>
+<div class="equation">$$w^*=\arg\min_{Aw=0}\tfrac12\|w-v\|_2^2=v-A^\top(AA^\top)^{-1}Av$$</div>
+<div class="equation">$$P=I-A^\top(AA^\top)^{-1}A,\quad P=P^\top=P^2,\quad Aw^*=0,\quad (v-w^*)^\top w^*=0$$</div>
+<p>投影矩阵对称且幂等，投影结果在零空间内，原目标与结果之差位于行空间；两者正交形成最优性证书。若暴露矩阵秩亏，需要去掉重复约束或使用适当伪逆。风险加权投影会改变距离度量，不应与欧氏投影混同。</p>
+</section>
+<section>
+<h2>2．协方差风险、Euler贡献及两资产解析关系</h2>
+<p>在正半定协方差矩阵Σ下，波动率是仓位向量的正齐次函数。对仓位求导并乘以各权重，Euler恒等式将组合波动率分解为各资产风险贡献；贡献可以为负，反映边际风险对冲。</p>
+<div class="equation">$$\sigma_p=\sqrt{w^\top\Sigma w},\quad RC_i=\frac{w_i(\Sigma w)_i}{\sigma_p},\quad \sum_iRC_i=\sigma_p$$</div>
+<div class="equation">$$w_1(\Sigma w)_1=w_2(\Sigma w)_2\Rightarrow w_1^2\sigma_1^2=w_2^2\sigma_2^2,\quad w_1=\frac{\sigma_2}{\sigma_1+\sigma_2}$$</div>
+<p>两资产、正权重、等风险预算时，两个贡献相等的方程中协方差交叉项恰好抵消，故权重与各自波动率成反比。多资产时交叉项通常不会同时抵消，逆波动率权重一般不保证所有风险贡献相等。</p>
+</section>
+<section>
+<h2>3．线性交易成本的次梯度与不交易区间</h2>
+<p>独立坐标二次目标加入L1交易费用。令交易量z=w−w0，目标变为a/2乘(z−d)平方加c|z|。在z=0处绝对值次梯度为区间[−1,1]；若ad落在[−c,c]内，零交易满足最优性条件，否则在相应正负半轴求导得到软阈值解。</p>
+<div class="equation">$$0\in a(z-d)+c\,\partial|z|,\quad z=0\Longleftrightarrow |d|\le c/a$$</div>
+<div class="equation">$$w^*=\operatorname{clip}_{[\ell,u]}(w^0+\operatorname{sign}(d)(|d|-c/a)_+)$$</div>
+<p>若进一步存在盒约束，一维凸函数在无约束最优点外单调，故将最优点截断至可行区间即可。完整多资产协方差、总换手及净敞口约束会使坐标联立，需要一般凸优化方法；解析坐标解可作为独立数值基准。</p>
+</section>
+<section>
+<h2>4．KL最小倾斜、配分函数及反向压力</h2>
+<p>设参考离散情景概率p_i严格为正，希望在给定期望约束下找到最接近参考分布的概率q。对相对熵目标构造归一化与均值约束的拉格朗日函数，一阶条件得到指数倾斜分布。配分函数对数的导数是倾斜后的期望，二阶导数是方差。</p>
+<div class="equation">$$\min_{q_i\ge0,\ \sum q_i=1,\ \sum q_ix_i=m}\sum_iq_i\log(q_i/p_i),\quad q_i(\lambda)=\frac{p_ie^{\lambda x_i}}{Z(\lambda)}$$</div>
+<div class="equation">$$\frac{d}{d\lambda}\log Z(\lambda)=\mathbb E_{q_\lambda}X,\quad \frac{d^2}{d\lambda^2}\log Z(\lambda)=\operatorname{Var}_{q_\lambda}(X)&gt;0$$</div>
+<p>目标均值位于情景支持区间内部且取值非退化时，倾斜均值对乘子严格递增，可以二分反演。对数和指数计算需减去最大对数权重以控制数值溢出。该方法给出最小相对熵压力分布，目标均值仍由研究者的压力条件决定。</p>
+</section>
+<section>
+<h2>5．Expected Shortfall的凸表示和离散尾部概率</h2>
+<p>对组合损失L，ES可通过对阈值z最小化凸分段线性函数表示。离散分布在分位点可能存在原子概率，因此概率尾部质量需要部分使用分位点情景。阈值的一阶次梯度条件确保尾部概率1−α恰位于严格与含等号尾概率之间。</p>
+<div class="equation">$$ES_\alpha(L)=\min_z\left[z+\frac{\mathbb E(L-z)_+}{1-\alpha}\right],\quad \Pr(L&gt;z)\le1-\alpha\le\Pr(L\ge z)$$</div>
+<div class="equation">$$L_s=\sum_iw_i\ell_{si},\quad RC_i^{ES}=\frac{w_i}{1-\alpha}\sum_sm_s\ell_{si},\quad \sum_iRC_i^{ES}=ES_\alpha$$</div>
+<p>若固定一个有效的边界概率分配，将ES写成情景损失的线性加权，则各资产的Euler贡献由单位资产损失乘实际权重并在选中尾部概率上加权。若有平局，贡献可能不唯一；本网站采用同损失组内按概率比例分配的明确规则。</p>
+</section>
+<section>
+<h2>6．椭球估计误差与最坏情形Alpha</h2>
+<p>若Alpha向量属于以估计值为中心的椭球集合，给定仓位w的最坏线性收益等于名义估计收益减椭球在仓位方向的支撑函数。将市场中性价差仓位限制为(z,−z)，该支撑惩罚缩减为δ|z|。</p>
+<div class="equation">$$\mathcal U=\{\hat\mu+Au:\|u\|_2\le\delta\},\quad \min_{\mu\in\mathcal U}w^\top\mu=w^\top\hat\mu-\delta\|A^\top w\|_2$$</div>
+<div class="equation">$$\max_{|z|\le b}\left[z\hat a-\delta|z|-\tfrac12\gamma v z^2\right],\quad z^*=\operatorname{clip}_{[-b,b]}\left[\frac{\operatorname{sign}(\hat a)(|\hat a|-\delta)_+}{\gamma v}\right]$$</div>
+<p>将最坏Alpha与二次方差风险组合，得到与L1软阈值同样的数学结构：估计价差优势不足不确定半径时不持仓，超过后按风险厌恶和价差方差缩放。这种鲁棒惩罚描述估计不确定性，交易成本则描述实际调仓摩擦；两者即使形式相近，经济含义不同。</p>
+</section>
+<section>
+<h2>7．研究链中的风险约束与独立评价</h2>
+<p>线性中性投影产生满足约束的仓位；统一风险缩放保持所有齐次零暴露约束，因为A(aw)=aAw。若原方差为零，在简化模型中无需缩放，但实际协方差估计误差可能仍产生风险。</p>
+<div class="equation">$$\tilde w=P_{\ker A}v,\quad a=\min(1,\sigma_*/\sqrt{\tilde w^\top\Sigma\tilde w}),\quad w=a\tilde w,\quad Aw=0$$</div>
+<div class="equation">$$\min_w J(w)\quad\text{s.t.}\quad Aw=0,\ \ell\le w\le u,\ ES_\alpha(w)\le B$$</div>
+<p>交易成本目标与尾部风险评价可以分阶段连接：先按既定交易目标优化，再冻结权重用独立情景分布计算ES及贡献。成本提高导致交易收缩，却不保证最坏情景损失同步下降，因为多空头寸变化可改变情景排序。若ES本身属于约束，必须将其显式加入优化问题。</p>
+</section><section><h2>计算方法、完整代码与独立实验</h2><p><a href="applied-allocation-neutral-projection.html">allocation neutral projection</a>　<a href="applied-allocation-l1-box-trade.html">allocation l1 box trade</a>　<a href="applied-allocation-kl-reverse-stress.html">allocation kl reverse stress</a>　<a href="applied-allocation-tail-euler.html">allocation tail euler</a>　<a href="applied-allocation-two-asset-risk-budget.html">allocation two asset risk budget</a>　<a href="applied-allocation-robust-spread.html">allocation robust spread</a>　<a href="applied-allocation-neutral-risk-pipeline.html">allocation neutral risk pipeline</a>　<a href="applied-synthesis-budget-tail.html">synthesis budget tail</a>　<a href="applied-synthesis-cost-tail.html">synthesis cost tail</a>。</p><p>各计算专题保留C++17源码及独立数值参照；相应参数项目提供完整CSV和可执行批量研究入口。</p></section><section><h2>参考文献</h2><p><a href="https://web.stanford.edu/~boyd/cvxbook/">Boyd &amp; Vandenberghe (2004), Convex Optimization</a>。<br><a href="https://doi.org/10.1111/j.1540-6261.1952.tb01525.x">Markowitz (1952), Portfolio Selection</a>。<br><a href="https://doi.org/10.21314/JOR.2000.038">Rockafellar &amp; Uryasev (2000), Optimization of Conditional Value-at-Risk</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

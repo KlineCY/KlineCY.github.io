@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>无套利状态复制、最优停止与离散对冲的数学结构｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="depth-labs.css"><link rel="stylesheet" href="applied-systems.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main class="applied-systems"><header><h1>无套利状态复制、最优停止与离散对冲的数学结构</h1><p><a href="applied-theory.html">应用研究理论体系</a>　<a href="applied-systems.html">完整应用研究</a>　<a href="applied-experiments.html">完整参数项目</a></p></header><section><h2>研究对象与统一数学框架</h2><p>衍生品定价的出发点是复制与无套利，而非对未来实际涨跌概率的直接预测。离散状态模型提供清晰的定价方程、动态交易现金账本以及提前行权的最优停止结构；期权曲线形状又从无套利支付组合给出分布信息。</p><p><a href="applied-options.html">本领域全部计算专题</a>　<a href="applied-experiment-options.html">对应完整参数研究</a>。</p></section><section>
+<h2>1．单期完全市场与唯一状态复制</h2>
+<p>考虑两种终端状态和两个线性独立交易工具：股票及无风险现金。只要终端上涨和下跌价格不同，就能用股票数量与期初现金唯一复制任意两个终端支付。若无风险终值落在两种股票终值之间，市场无套利，复制价格同时等于按唯一风险中性概率折现的期望。</p>
+<div class="equation">$$\begin{pmatrix}S_u&amp;R\\S_d&amp;R\end{pmatrix}\begin{pmatrix}\Delta\\B\end{pmatrix}=\begin{pmatrix}H_u\\H_d\end{pmatrix},\quad \Delta=\frac{H_u-H_d}{S_u-S_d}$$</div>
+<div class="equation">$$q=\frac{RS_0-S_d}{S_u-S_d},\quad S_d&lt;RS_0&lt;S_u\Rightarrow 0&lt;q&lt;1,\quad V_0=R^{-1}[qH_u+(1-q)H_d]$$</div>
+<p>风险中性概率由交易价格和无风险增长因子决定，通常不等于现实发生概率。它是一种与可交易资产价格一致的定价权重。实际概率仍在资产收益预测与风险管理中发挥作用。</p>
+</section>
+<section>
+<h2>2．多期树的条件期望与自融资</h2>
+<p>重组二叉树每期价格乘上涨或下跌因子，同一时间相同上涨次数对应相同节点。对每个节点应用单期复制，得到逐期折现条件期望。反复使用迭代期望可将根节点价格表示为终端二项分布支付的折现期望。</p>
+<div class="equation">$$S_{i,j}=S_0u^jd^{i-j},\quad V_{i,j}=R^{-1}[qV_{i+1,j+1}+(1-q)V_{i+1,j}]$$</div>
+<div class="equation">$$V_0=R^{-n}\sum_{j=0}^n{n\choose j}q^j(1-q)^{n-j}\Phi(S_0u^jd^{n-j})$$</div>
+<p>该等价关系提供两条独立计算路线：局部节点复制与直接终端枚举。对于欧式期权，两者应完全一致；若股票路径交易与现金融资规则一致，每条树路径的复制组合都应精确匹配终端支付。</p>
+</section>
+<section>
+<h2>3．美式期权与Snell包络</h2>
+<p>美式期权允许在到期前选择停止并获得当前内在支付。对终端价值相同的欧式合约，向后递推的每个美式节点取立即支付与继续持有价值的最大值；归纳说明美式价值不低于欧式。将各期价值按无风险资产折现，最优停止价值即折现支付过程的Snell包络。</p>
+<div class="equation">$$V^A_t=\max\{\Phi(S_t),R^{-1}\mathbb E_q[V^A_{t+1}\mid\mathcal F_t]\}$$</div>
+<div class="equation">$$\frac{V_t^A}{R^t}=\operatorname*{ess\,sup}_{\tau\in\mathcal T_{t,T}}\mathbb E_q\left[\frac{\Phi(S_\tau)}{R^\tau}\mid\mathcal F_t\right],\quad V_t^A\ge V_t^E$$</div>
+<p>对于不分红股票的看涨期权，非负利率下保留选择权且推迟支付执行价通常优于提前行权；这一结论依赖可融资、无分红与标准支付等假设。负利率或股息改变机会成本，美式看跌也可能出现严格提前执行区域。</p>
+</section>
+<section>
+<h2>4．看涨价格曲线的单调、凸性与数字概率</h2>
+<p>在同一到期日和贴现因子D下，看涨支付对执行价单调递减且凸。对执行价求导时，若终端分布在该执行价无原子，导数等于负折现尾概率；相邻执行价价差给出区间平均尾概率。更高阶导数在存在密度时对应风险中性密度。</p>
+<div class="equation">$$C(K)=D\,\mathbb E_q[(S_T-K)_+],\quad -\partial_KC(K)=D\Pr_q(S_T&gt;K),\quad \partial_K^2 C(K)=Df_q(K)$$</div>
+<div class="equation">$$s_L=\frac{C_2-C_1}{K_2-K_1},\quad s_R=\frac{C_3-C_2}{K_3-K_2},\quad s_R\ge s_L$$</div>
+<p>对于非等距执行价，凸性要求右割线斜率不小于左割线斜率。用端点看涨价格对中间执行价作线性插值并减去中间报价，得到非负蝶式组合价值。有限网格差分仅提供离散诊断，不能直接声称识别连续密度。</p>
+</section>
+<section>
+<h2>5．动态Delta账户与路径现金闭合</h2>
+<p>期初复制组合由股票与现金组成。每期先使旧现金按融资增长因子滚动，再根据新节点Delta在实际新价格买卖股票差额。该交易不注入额外资本，买卖金额在股票与现金之间转移。终点组合价值与期权支付的差定义复制误差。</p>
+<div class="equation">$$B_0=V_0-\Delta_0S_0,\quad B_{t+1}=RB_t-(\Delta_{t+1}-\Delta_t)S_{t+1}$$</div>
+<div class="equation">$$W_T=RB_{T-1}+\Delta_{T-1}S_T,\quad \varepsilon=W_T-\Phi(S_T)$$</div>
+<p>对于精确二叉树、无交易费、同一利率和无股息，节点复制应沿每条可实现路径产生零误差。连续扩散的离散Delta对冲则可能存在离散化、波动率模型误差与交易费用，因此零误差是树模型结构证书，非真实市场普遍结论。</p>
+</section>
+<section>
+<h2>6．多Greek对冲与剩余二阶风险</h2>
+<p>对小幅股价与波动率变化，期权价值变化可按Delta、Gamma、Vega及交叉导数展开。若使用标的及一个Vega非零的期权作为两个工具，可以用两条线性约束消除初始组合的Delta和Vega，但一般仍保留Gamma及其他高阶风险。</p>
+<div class="equation">$$\Delta V\approx \Delta\,\Delta S+\nu\,\Delta\sigma+\tfrac12\Gamma(\Delta S)^2+\cdots$$</div>
+<div class="equation">$$n_h=-\nu_p/\nu_h,\quad n_S=-(\Delta_p+n_h\Delta_h),\quad \Gamma_{res}=\Gamma_p+n_h\Gamma_h$$</div>
+<p>对冲合约与被对冲组合应统一合约乘数、报价币种和波动率单位。风险敏感性随时间、价格和波动率移动，需要重新估计；线性中性化只针对局部扰动，不能代替完整情景重定价。</p>
+</section>
+<section>
+<h2>7．独立数值验证的结构设计</h2>
+<p>原生实验在多个执行价、资金增长因子、步数及支付方向上分别计算欧式和美式价格；欧式以终端概率组合数为独立参照，美式以递归停止问题为参照。另一个联合实验固定两期树并枚举全部实际涨跌路径，检查自融资现金账本。</p>
+<div class="equation">$$V_A-V_E\ge0,\qquad \varepsilon(\omega)=0\quad\forall\omega\in\{u,d\}^2$$</div>
+<div class="equation">$$T=n\Delta t,\quad R_{total}=R^n\qquad\text{fixed step parameters do not fix total horizon}$$</div>
+<p>结构性质包括美式价值不低于欧式、非负利率无股息看涨无严格提前行权、路径复制误差为零。改变步数而固定每步u、d、R会同时改变总期限与分布，故参数研究不应误读为固定期限的连续模型收敛。</p>
+</section><section><h2>计算方法、完整代码与独立实验</h2><p><a href="applied-options-one-step-claim.html">options one step claim</a>　<a href="applied-options-american-tree.html">options american tree</a>　<a href="applied-options-digital-vertical.html">options digital vertical</a>　<a href="applied-options-uneven-butterfly.html">options uneven butterfly</a>　<a href="applied-options-discrete-hedge.html">options discrete hedge</a>　<a href="applied-options-delta-vega-neutral.html">options delta vega neutral</a>　<a href="applied-options-two-step-replication.html">options two step replication</a>　<a href="applied-synthesis-replication-path.html">synthesis replication path</a>。</p><p>各计算专题保留C++17源码及独立数值参照；相应参数项目提供完整CSV和可执行批量研究入口。</p></section><section><h2>参考文献</h2><p><a href="https://doi.org/10.1016/0304-405X(79)90015-1">Cox, Ross &amp; Rubinstein (1979), Option Pricing: A Simplified Approach</a>。<br><a href="https://doi.org/10.1086/260062">Black &amp; Scholes (1973), The Pricing of Options and Corporate Liabilities</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

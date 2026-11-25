@@ -76,6 +76,7 @@
       '<a class="q-menu-link" href="'+route("research")+'comprehensive-research.html">完整量化研究课程</a>'+
       '<a class="q-menu-link" href="'+route("research")+'system-research.html">系统化量化研究与实验</a>'+
       '<a class="q-menu-link" href="'+route("research")+'integrated-research.html">跨模型研究与完整应用</a>'+
+      '<a class="q-menu-link" href="'+route("research")+'applied-systems.html">完整应用研究体系</a>'+
       '<a class="q-menu-link" href="'+route("research")+'advanced-research.html">高级模型研究与数值实验</a>'+
       '<a class="q-menu-link" href="'+route("research")+'model-laboratories.html">完整模型与研究框架</a>'+
       '<a class="q-menu-link" href="'+route("research")+'depth-laboratories.html">量化深度研究专题</a>'+

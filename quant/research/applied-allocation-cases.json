@@ -1,0 +1,388 @@
+[
+  {
+    "id": "allocation_neutral_projection",
+    "title": "美元及单因子中性的最小距离投影",
+    "file": "applied-allocation-neutral-projection.html",
+    "fields": [
+      "ProjectedWeightsThenNetThenBeta"
+    ],
+    "cases": [
+      {
+        "input": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          2
+        ],
+        "expected": [
+          0.16666666666666666,
+          -0.3333333333333333,
+          0.16666666666666666,
+          0,
+          0
+        ]
+      },
+      {
+        "input": [
+          1,
+          0,
+          -2,
+          1,
+          1,
+          2
+        ],
+        "expected": [
+          1,
+          -2,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "invalid": [
+      1,
+      1,
+      2,
+      1,
+      3,
+      1
+    ]
+  },
+  {
+    "id": "allocation_l1_box_trade",
+    "title": "含L1成本与盒约束的对角二次交易决策",
+    "file": "applied-allocation-l1-box-trade.html",
+    "fields": [
+      "WeightsThenObjective"
+    ],
+    "cases": [
+      {
+        "input": [
+          0.8,
+          0.2,
+          2,
+          0.2,
+          0,
+          0.6,
+          -0.3,
+          0,
+          1,
+          0.1,
+          -1,
+          1
+        ],
+        "expected": [
+          0.6,
+          -0.2,
+          0.145
+        ]
+      },
+      {
+        "input": [
+          0.1,
+          0,
+          1,
+          0.2,
+          -1,
+          1
+        ],
+        "expected": [
+          0,
+          0.005
+        ]
+      }
+    ],
+    "invalid": [
+      0.1,
+      0,
+      0,
+      0.2,
+      -1,
+      1
+    ]
+  },
+  {
+    "id": "allocation_kl_reverse_stress",
+    "title": "KL最小概率倾斜与反向压力测试",
+    "file": "applied-allocation-kl-reverse-stress.html",
+    "fields": [
+      "TiltedWeightsThenLambdaThenKLThenMean"
+    ],
+    "cases": [
+      {
+        "input": [
+          0.5,
+          0.5,
+          -1,
+          0.5,
+          1
+        ],
+        "expected": [
+          0.25,
+          0.75,
+          0.5493061443340549,
+          0.13081203594113697,
+          0.5
+        ]
+      },
+      {
+        "input": [
+          0,
+          0.5,
+          -1,
+          0.5,
+          1
+        ],
+        "expected": [
+          0.5,
+          0.5,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "invalid": [
+      1.1,
+      0.5,
+      -1,
+      0.5,
+      1
+    ]
+  },
+  {
+    "id": "allocation_tail_euler",
+    "title": "离散尾部风险的Euler贡献与边界平局",
+    "file": "applied-allocation-tail-euler.html",
+    "fields": [
+      "ES",
+      "Contribution1",
+      "Contribution2",
+      "Closure"
+    ],
+    "cases": [
+      {
+        "input": [
+          0.5,
+          0.5,
+          0.75,
+          0.5,
+          0.1,
+          0.1,
+          0.25,
+          0.3,
+          0.1,
+          0.25,
+          0.1,
+          0.3
+        ],
+        "expected": [
+          0.2,
+          0.1,
+          0.1,
+          0
+        ]
+      },
+      {
+        "input": [
+          1,
+          -1,
+          0.5,
+          0.5,
+          0.2,
+          0.1,
+          0.5,
+          0.1,
+          0.3
+        ],
+        "expected": [
+          0.1,
+          0.2,
+          -0.1,
+          0
+        ]
+      }
+    ],
+    "invalid": [
+      0.5,
+      0.5,
+      0.9,
+      0.4,
+      0.1,
+      0.1,
+      0.4,
+      0.2,
+      0.2
+    ]
+  },
+  {
+    "id": "allocation_two_asset_risk_budget",
+    "title": "两资产正权重等风险预算的解析证书",
+    "file": "applied-allocation-two-asset-risk-budget.html",
+    "fields": [
+      "Weight1",
+      "Weight2",
+      "Volatility",
+      "Risk1",
+      "Risk2"
+    ],
+    "cases": [
+      {
+        "input": [
+          0.1,
+          0.2,
+          0
+        ],
+        "expected": [
+          0.6666666666666666,
+          0.3333333333333333,
+          0.09428090415820635,
+          0.047140452079103175,
+          0.047140452079103175
+        ]
+      },
+      {
+        "input": [
+          0.2,
+          0.2,
+          0.5
+        ],
+        "expected": [
+          0.5,
+          0.5,
+          0.17320508075688773,
+          0.08660254037844387,
+          0.08660254037844387
+        ]
+      }
+    ],
+    "invalid": [
+      0.1,
+      0.2,
+      1
+    ]
+  },
+  {
+    "id": "allocation_robust_spread",
+    "title": "市场中性价差头寸的椭球Alpha鲁棒最优解",
+    "file": "applied-allocation-robust-spread.html",
+    "fields": [
+      "SpreadWeight",
+      "WorstAlpha",
+      "Variance",
+      "Objective"
+    ],
+    "cases": [
+      {
+        "input": [
+          0.1,
+          0.02,
+          0.04,
+          2,
+          2
+        ],
+        "expected": [
+          1,
+          0.08,
+          0.04,
+          0.04
+        ]
+      },
+      {
+        "input": [
+          -0.1,
+          0.02,
+          0.04,
+          2,
+          0.5
+        ],
+        "expected": [
+          -0.5,
+          0.04,
+          0.01,
+          0.03
+        ]
+      }
+    ],
+    "invalid": [
+      0.1,
+      -0.02,
+      0.04,
+      2,
+      2
+    ]
+  },
+  {
+    "id": "allocation_neutral_risk_pipeline",
+    "title": "约束投影、特异风险预算与目标仓位完整决策",
+    "file": "applied-allocation-neutral-risk-pipeline.html",
+    "fields": [
+      "WeightsThenGrossThenVarianceThenScaleThenNetThenBeta"
+    ],
+    "cases": [
+      {
+        "input": [
+          0.1,
+          1,
+          0,
+          0.1,
+          -2,
+          1,
+          0.1,
+          1,
+          2,
+          0.1
+        ],
+        "expected": [
+          0.4082482904638631,
+          -0.8164965809277261,
+          0.4082482904638631,
+          1.6329931618554523,
+          0.01,
+          0.4082482904638631,
+          0,
+          0
+        ]
+      },
+      {
+        "input": [
+          1,
+          1,
+          0,
+          0.1,
+          0,
+          1,
+          0.1,
+          0,
+          2,
+          0.1
+        ],
+        "expected": [
+          0.16666666666666666,
+          -0.3333333333333333,
+          0.16666666666666666,
+          0.6666666666666666,
+          0.0016666666666666668,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "invalid": [
+      0.1,
+      1,
+      1,
+      0.1,
+      2,
+      1,
+      0.1,
+      3,
+      1,
+      0.1
+    ]
+  }
+]

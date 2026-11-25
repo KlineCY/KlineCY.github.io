@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>微观结构到执行损益：深度、清算、交易方向与现金守恒｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="depth-labs.css"><link rel="stylesheet" href="applied-systems.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main class="applied-systems"><header><h1>微观结构到执行损益：深度、清算、交易方向与现金守恒</h1><p><a href="applied-theory.html">应用研究理论体系</a>　<a href="applied-systems.html">完整应用研究</a>　<a href="applied-experiments.html">完整参数项目</a></p></header><section><h2>研究对象与统一数学框架</h2><p>市场微观结构研究的核心是可见订单、撮合优先规则、订单流变化及成交后的价格信息。对策略收益进行真实执行评价时，应从事件状态构造交易，再以现金与持仓账本汇总损益，避免将行情预测指标直接解释为可实现利润。</p><p><a href="applied-liquidity.html">本领域全部计算专题</a>　<a href="applied-experiment-liquidity.html">对应完整参数研究</a>。</p></section><section>
+<h2>1．最优盘口的价格和数量几何</h2>
+<p>最优买卖价定义中点与报价价差。归一化买卖队列差在−1至1之间，它描述某时点可见深度的相对方向。微价格将对侧报价按本侧深度加权，等于中点加半价差乘深度失衡。</p>
+<div class="equation">$$m=(a+b)/2,\quad s=a-b,\quad I=(Q_b-Q_a)/(Q_b+Q_a)$$</div>
+<div class="equation">$$m_\mu=\frac{aQ_b+bQ_a}{Q_b+Q_a}=m+\frac{sI}{2}$$</div>
+<p>微价格在买深度大时向卖价移动，在卖深度大时向买价移动；这反映一个静态启发式状态估计，不等同于风险中性价格或真实成交概率。若一侧深度为零、盘口交叉或事件时间不一致，必须单独处理数据域。</p>
+</section>
+<section>
+<h2>2．盘口事件失衡与时间可用性</h2>
+<p>深度失衡是存量指标，而订单流失衡是相邻盘口状态的增量。买价提高时引入新最优买量，买价降低时移除旧最优买量；同价时取数量变化。卖侧使用相反方向。该符号约定使买侧流动性增强和卖侧流动性减弱均表现为正OFI。</p>
+<div class="equation">$$e_b=\mathbf1\{b_t\ge b_{t-1}\}Q_t^b-\mathbf1\{b_t\le b_{t-1}\}Q_{t-1}^b$$</div>
+<div class="equation">$$e_a=-\mathbf1\{a_t\le a_{t-1}\}Q_t^a+\mathbf1\{a_t\ge a_{t-1}\}Q_{t-1}^a,\quad OFI_t=e_b+e_a$$</div>
+<p>盘口事件必须按可用时间和交易序号排序；若事件丢失，起止两个快照的OFI不能恢复中间撤单、补单与价位跳转的真实路径。预测模型使用决策时点已到达的信息，成交后OFI只能用于事后解释。</p>
+</section>
+<section>
+<h2>3．多档卖盘供给函数及价格保护</h2>
+<p>市场化买单先访问最优卖价，按价格优先消耗可见数量。保护限价L截断可访问档位，成交量为母单量与可见合格深度的较小者。按每档实际成交数量累计成交名义，成交均价是该名义除以已成交量。</p>
+<div class="equation">$$q_j=\min\left(Q_j,\left(Q-\sum_{k&lt;j}q_k\right)_+\right)\mathbf1\{p_j\le L\},\quad Q_f=\sum_jq_j$$</div>
+<div class="equation">$$N=\sum_jp_jq_j,\quad \bar P=N/Q_f\quad(Q_f&gt;0)$$</div>
+<p>在静态订单簿中，扩大母单量可能使成交均价上升并最终遇到可见深度上限。提高保护价可扩大可访问集合，但会增加允许的成交价格。上述性质不意味着真实未来冲击与静态扫单成本相同；动态补单、隐藏深度和竞争订单均会改变执行结果。</p>
+</section>
+<section>
+<h2>4．同价订单分配的整数约束</h2>
+<p>按比例分配时，理想成交量为母单可分配量乘该订单在总队列中的比例。整数交易单位要求将理想值离散化。先取每个份额的整数部分，再依据余数优先分配剩余手数，能够保持总量守恒并使每个实际分配与理想份额的差小于1。</p>
+<div class="equation">$$a_i=\lfloor Qs_i/S\rfloor,\quad S=\sum_i s_i,\quad r_i=Qs_i-Sa_i$$</div>
+<div class="equation">$$a_i'\in\{a_i,a_i+1\},\quad 0\le a_i'\le s_i,\quad \sum_i a_i'=Q$$</div>
+<p>同价FIFO则依据时间优先逐单消耗，其分配与比例算法可能显著不同。交易所支持多种产品特定匹配规则，包括优先权、最小配额和剩余FIFO等；本网站的余数分配明确为独立教学规则，不能推断任何具体产品实盘的队列位置。</p>
+</section>
+<section>
+<h2>5．集合竞价的多目标清算</h2>
+<p>在给定候选价下，买方愿意成交量为限价不低于该价的数量总和，卖方愿意成交量为限价不高于该价的数量总和。两边可匹配成交量由较小者决定，剩余量表现为买卖失衡。简化竞价选择最大成交量、最小失衡、最接近参考价及价格优先的确定性字典序。</p>
+<div class="equation">$$B(p)=\sum_iq_i^b\mathbf1\{p_i^b\ge p\},\quad A(p)=\sum_iq_i^a\mathbf1\{p_i^a\le p\}$$</div>
+<div class="equation">$$V(p)=\min(B(p),A(p)),\quad p^*=\arg\min_p(-V(p),|B(p)-A(p)|,|p-p_{ref}|,p)$$</div>
+<p>市场整体匹配量并非个别订单的实际分配。执行研究需要独立订单回报或明确分配规则，不能把市场匹配量直接记为自有成交量。真实交易所还可能引入市价单、特殊订单类别、参考价保护和产品特定的平局规则。</p>
+</section>
+<section>
+<h2>6．被动成交的价差收益与后续价格变化</h2>
+<p>给定成交方向s，买入取正、卖出取负，即时相对于中点的盯市优势等于s乘成交数量与中点价差。未来中点变化对盯市结果的贡献为持仓方向乘价格移动；将即时优势与未来变化相加即可恢复未来盯市损益。</p>
+<div class="equation">$$G_0=sq(m_0-p),\quad G_h=sq(m_h-p)$$</div>
+<div class="equation">$$G_h-G_0=sq(m_h-m_0),\quad G_{net}=G_0+sq(m_h-m_0)-qf$$</div>
+<p>如果被动买单在低于中点成交后市场下跌，早期价差捕获可能被逆向选择抵消。手续费与返佣须按实际成交数量和方向口径计入。未来中点盯市不是平仓现金流，不能忽略平仓价差与进一步交易成本。</p>
+</section>
+<section>
+<h2>7．执行短缺、机会成本与财富闭合</h2>
+<p>母单买入量Q若全部在到达价P0成交，终点盯市理想损益为Q(PT−P0)。真实成交名义N、成交量Qf与单位费用f给出已成交持仓的终点盯市损益。二者相减得到实际价格成本、未成交机会成本和显式费用之和。</p>
+<div class="equation">$$G_{ideal}=Q(P_T-P_0),\quad G_{actual}=Q_fP_T-N-fQ_f$$</div>
+<div class="equation">$$G_{ideal}-G_{actual}=(N-P_0Q_f)+(Q-Q_f)(P_T-P_0)+fQ_f$$</div>
+<p>这一恒等式能在交易和会计模块之间形成独立检验：现金余额减少的是成交名义与显式费用，机会成本仅是相对于假设基准的经济评价，不属于实际现金扣款。二维参数研究对母单大小和保护价逐点验证数量约束及损益闭合。</p>
+</section><section><h2>计算方法、完整代码与独立实验</h2><p><a href="applied-liquidity-microprice.html">liquidity microprice</a>　<a href="applied-liquidity-sweep-asks.html">liquidity sweep asks</a>　<a href="applied-liquidity-pro-rata-lots.html">liquidity pro rata lots</a>　<a href="applied-liquidity-auction-cross.html">liquidity auction cross</a>　<a href="applied-liquidity-ofi-event.html">liquidity ofi event</a>　<a href="applied-liquidity-passive-markout.html">liquidity passive markout</a>　<a href="applied-liquidity-sweep-shortfall.html">liquidity sweep shortfall</a>　<a href="applied-synthesis-execution-wealth.html">synthesis execution wealth</a>。</p><p>各计算专题保留C++17源码及独立数值参照；相应参数项目提供完整CSV和可执行批量研究入口。</p></section><section><h2>参考文献</h2><p><a href="https://doi.org/10.1093/jjfinec/nbt003">Cont, Kukanov &amp; Stoikov (2014), The Price Impact of Order Book Events</a>。<br><a href="https://www.cmegroup.com/education/matching-algorithm-overview">CME Group, Matching Algorithm Overview</a>。<br><a href="https://www.nasdaqtrader.com/Trader.aspx?id=OpenClose">Nasdaq, Opening and Closing Crosses</a>。<br><a href="https://doi.org/10.21314/JOR.2001.041">Almgren &amp; Chriss (2001), Optimal Execution of Portfolio Transactions</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

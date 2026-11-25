@@ -1,0 +1,53 @@
+name: Validate complete applied research systems
+on:
+  pull_request:
+    paths:
+      - 'quant/research/applied-*'
+      - 'quant/research/index.html'
+      - 'quant/research/integrated-research.html'
+      - 'quant/cpp/applied_*'
+      - 'quant/cpp/index.html'
+      - 'quant/sidebar-v2.js'
+      - 'scripts/test_quant_applied_systems.*'
+      - 'scripts/test_quant_applied_experiments.*'
+      - 'scripts/test_quant_applied_theory.mjs'
+      - '.github/workflows/test-quant-applied-systems.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'quant/research/applied-*'
+      - 'quant/research/index.html'
+      - 'quant/research/integrated-research.html'
+      - 'quant/cpp/applied_*'
+      - 'quant/cpp/index.html'
+      - 'quant/sidebar-v2.js'
+      - 'scripts/test_quant_applied_systems.*'
+      - 'scripts/test_quant_applied_experiments.*'
+      - 'scripts/test_quant_applied_theory.mjs'
+      - '.github/workflows/test-quant-applied-systems.yml'
+permissions:
+  contents: read
+jobs:
+  numerics:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [g++, clang++]
+    steps:
+      - uses: actions/checkout@v4
+      - run: ${{ matrix.compiler }} -std=c++17 -O2 -Wall -Wextra -Werror -pedantic quant/cpp/applied_systems.cpp -o /tmp/quant_systems
+      - run: python3 scripts/test_quant_applied_systems.py /tmp/quant_systems
+      - run: ${{ matrix.compiler }} -std=c++17 -O2 -Wall -Wextra -Werror -pedantic quant/cpp/applied_experiments.cpp -o /tmp/quant_experiments
+      - run: python3 scripts/test_quant_applied_experiments.py /tmp/quant_experiments
+  curriculum:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save --no-package-lock katex@0.16.11
+      - run: node scripts/test_quant_applied_systems.mjs
+      - run: node scripts/test_quant_applied_experiments.mjs
+      - run: node scripts/test_quant_applied_theory.mjs

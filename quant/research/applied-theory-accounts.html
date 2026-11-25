@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>投资绩效、资金现金流与保证金会计的数学体系｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="depth-labs.css"><link rel="stylesheet" href="applied-systems.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main class="applied-systems"><header><h1>投资绩效、资金现金流与保证金会计的数学体系</h1><p><a href="applied-theory.html">应用研究理论体系</a>　<a href="applied-systems.html">完整应用研究</a>　<a href="applied-experiments.html">完整参数项目</a></p></header><section><h2>研究对象与统一数学框架</h2><p>投资组合收益率与投资者资金收益对应不同研究对象。外部申购、赎回及内部交易必须根据其时间和会计性质明确分类。TWR、MWR和Dietz提供不同的绩效定义，融资费用、期货盯市和绩效费则决定可实现的账户净值。</p><p><a href="applied-accounts.html">本领域全部计算专题</a>　<a href="applied-experiment-accounts.html">对应完整参数研究</a>。</p></section><section>
+<h2>1．财富递推与外部资金的独立计量</h2>
+<p>设期初投资价值V_{t−1}^+，本期投资收益r_t先作用于已投资资金，形成申赎前价值V_t^-，然后外部现金流F_t改变资产规模。该递推将投资损益和资金流入分离，累计金额损益等于终末价值减初始价值再减外部流入之和。</p>
+<div class="equation">$$V_t^-=V_{t-1}^+(1+r_t),\quad V_t^+=V_t^-+F_t$$</div>
+<div class="equation">$$G_T=V_T^+-V_0-\sum_{t=1}^TF_t=\sum_tV_{t-1}^+r_t$$</div>
+<p>外部资本流的计量必须区分股息、内部证券买卖、融资与真正投资者申赎。内部交易只是资产与现金的转换，不应重复记作外部资本流；交易成本则直接影响投资财富。</p>
+</section>
+<section>
+<h2>2．时间加权收益的几何链接</h2>
+<p>在每个外部流发生前后都有正确估值时，子区间投资增长因子可由申赎前期末价值除以上次申赎后的起点价值获得。将所有子区间增长因子几何相乘得到TWR，外部资金大小不直接进入子区间收益率。</p>
+<div class="equation">$$g_t=\frac{V_t^-}{V_{t-1}^+}=1+r_t,\quad R_{TWR}=\prod_tg_t-1$$</div>
+<div class="equation">$$\log(1+R_{TWR})=\sum_t\log(1+r_t)\quad(r_t&gt;-1)$$</div>
+<p>若现金流导致期初价值为零或负值，标准比例收益的解释会变得不适用，需要另行定义。若估值只在低频日期获得，大额期中现金流可能使近似TWR偏离精确链接结果；此时需要明确估值频率与现金流时间约定。</p>
+</section>
+<section>
+<h2>3．资金加权收益率的反演条件</h2>
+<p>资金加权收益率将各投资者投入按其实际持有时间滚动至终点，再与最终赎回价值匹配。若仅有非负投入和唯一正终值，使用连续复利r时终值函数严格递增，因而在满足根括区间的条件下有唯一根。有效年收益率为指数增长因子减1。</p>
+<div class="equation">$$f(r)=\sum_iI_ie^{r(T-t_i)}-V_T,\quad f'(r)=\sum_iI_i(T-t_i)e^{r(T-t_i)}&gt;0$$</div>
+<div class="equation">$$r_{annual}=e^r-1,\qquad f(r_L)\le0\le f(r_U)$$</div>
+<p>一般现金流可能发生多次符号变化，从而产生多个IRR或没有满足条件的IRR。代码限制单一正终值结构并明确拒绝不符合约定的现金流，而不是把一任意数值根称为唯一投资者收益。</p>
+</section>
+<section>
+<h2>4．Dietz近似及收益路径误差</h2>
+<p>Modified Dietz使用金额损益作为分子，将各外部现金流按资金在评估期内停留比例加权进入分母。该结构可由简单线性累积近似得到：假定同一期间收益率r按时间比例作用于每笔资金，则终值约为初始资金加外部流再加r乘加权资金。</p>
+<div class="equation">$$V_T\approx V_0+\sum_iF_i+r\left(V_0+\sum_iw_iF_i\right),\quad w_i=(T-t_i)/T$$</div>
+<div class="equation">$$R_{MD}=\frac{V_T-V_0-\sum_iF_i}{V_0+\sum_iw_iF_i}$$</div>
+<p>当收益路径剧烈波动或中途有大额资金流时，线性近似与精确TWR、MWR的差可能显著。Dietz不应和精确IRR混用；报告时需要一致的累计或年化口径。</p>
+</section>
+<section>
+<h2>5．绩效费、高水位及路径依赖</h2>
+<p>固定单位数量、逐期结晶的简化高水位机制按扣费前单位净值高于历史高水位的部分收费；扣费后净值与原高水位的较大者形成下一期高水位。亏损后净值恢复但未超过历史高水位时，不重复收取绩效费。</p>
+<div class="equation">$$F_t=\eta(\tilde N_t-H_{t-1})_+,\quad N_t=\tilde N_t-F_t$$</div>
+<div class="equation">$$H_t=\max(H_{t-1},N_t),\quad F_{cum}=\sum_tF_t$$</div>
+<p>费率结构可能还包含管理费、绝对或相对门槛、结晶日期、申赎均衡和不同份额类别。由于高水位取决于完整历史路径，只有起终点净值无法恢复已支付费用；需逐期记录。</p>
+</section>
+<section>
+<h2>6．期货结算、保证金资金缺口及借券成本</h2>
+<p>期货日度结算将价格差乘有符号合约张数与合约乘数直接计入现金。最终结算损益在固定持仓下望远镜相加，但中间现金最低点取决于完整价格路径。即使最终盈利，也可能因中途资金短缺而无法继续持仓。</p>
+<div class="equation">$$C_t=C_{t-1}+nm(F_t-F_{t-1}),\quad C_T-C_0=nm(F_T-F_0),\quad M_{gap}=\max_t(H-C_t)_+$$</div>
+<div class="equation">$$C_{borrow}=\sum_t N_tb_t\Delta_t,\quad G_{funding}=G_F-C_{borrow}$$</div>
+<p>现货空头需考虑借券费、价格变化及抵押利息。简化借券费用使用逐期名义金额、年化费率和年分数的乘积；实际还可能有借券召回和费率内生变化。资金账户研究需分别保留期货现金流和现货融资成本。</p>
+</section>
+<section>
+<h2>7．同一策略路径的投资者与管理人比较</h2>
+<p>两段策略收益+20%及−10%以不同次序发生时，几何TWR均为8%。若首年末追加资金F，第二年收益作用于不同资金规模，终值和投资者年化MWR随路径改变。两年单次投入结构可用增长因子的一元二次方程直接反演，为连续复利数值解提供独立参照。</p>
+<div class="equation">$$V_2=(100(1+r_1)+F)(1+r_2),\quad R_{TWR}=(1+r_1)(1+r_2)-1$$</div>
+<div class="equation">$$100g^2+Fg=V_2,\quad g=\frac{-F+\sqrt{F^2+400V_2}}{200}$$</div>
+<p>这一设计说明管理人收益与投资者收益并非矛盾，二者衡量不同经济对象。真实绩效比较还需考虑费用口径、风险暴露、现金流时点及组合可交易性。网站中的合成路径仅用于精确识别这些机制。</p>
+</section><section><h2>计算方法、完整代码与独立实验</h2><p><a href="applied-accounts-twr-exact.html">accounts twr exact</a>　<a href="applied-accounts-modified-dietz.html">accounts modified dietz</a>　<a href="applied-accounts-mwr-continuous.html">accounts mwr continuous</a>　<a href="applied-accounts-high-water-fee.html">accounts high water fee</a>　<a href="applied-accounts-futures-margin.html">accounts futures margin</a>　<a href="applied-accounts-borrow-accrual.html">accounts borrow accrual</a>　<a href="applied-accounts-flow-performance-pipeline.html">accounts flow performance pipeline</a>　<a href="applied-synthesis-investor-manager-return.html">synthesis investor manager return</a>。</p><p>各计算专题保留C++17源码及独立数值参照；相应参数项目提供完整CSV和可执行批量研究入口。</p></section><section><h2>参考文献</h2><p><a href="https://www.gipsstandards.org/standards/gips-standards-for-firms/gips-standards-handbook-for-firms/">CFA Institute, GIPS Standards Handbook for Firms</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>
