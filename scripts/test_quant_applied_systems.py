@@ -34,8 +34,9 @@ for (method,args),a,b in zip(rows,batch(rows),expected):
     compare(a,b,(method,args))
 invalid = [(c['id'],c['invalid']) for c in catalog]+[(c['id'],[]) for c in catalog]
 invalid += [('unknown_method',[1]),('forecast_brier_groups',['NaN',0]),('forecast_brier_groups',['0.2bad',0])]
-for row,result in zip(invalid,batch(invalid)):
-    assert result is None,(row,result)
+invalid += [('inference_ljung_box',[1,.2,.2,.2]),('inference_ljung_box',[2,1e-6,1e-6,1e-6,1e-6])]
+errors=[(row,result) for row,result in zip(invalid,batch(invalid)) if result is not None]
+assert not errors, errors
 print(f'PASS: {len(rows)} fixed independent cases, {sum(map(len,expected))} numerical coordinates, {len(invalid)} malformed or out-of-domain inputs')
 
 rng = random.Random(20261125)

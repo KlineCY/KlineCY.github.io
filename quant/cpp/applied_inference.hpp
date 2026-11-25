@@ -11,7 +11,7 @@ Vec runs_exact(const Vec& x){check(x.size()>=2&&x.size()<=60);int a=0,b=0,r=1;fo
 
 Vec circular_boot_var(const Vec& x){check(x.size()>=3);size_t n=x.size()-1,b=integer(x[0],1,n);check(n%b==0);Vec s(x.begin()+1,x.end());double avg=mean(s),v=0;for(size_t i=0;i<n;++i){double t=0;for(size_t j=0;j<b;++j)t+=s[(i+j)%n];v+=sq(t/b-avg);}v/=n;return {avg,v,v/(n/b)};}
 
-Vec ljung_box(const Vec& x){check(x.size()>=4);size_t n=x.size()-1,h=integer(x[0],1,n-1);Vec y(x.begin()+1,x.end());double m=mean(y),den=0,q=0,first=0,last=0;for(double z:y)den+=sq(z-m);check(den>0);for(size_t k=1;k<=h;++k){double r=0;for(size_t j=k;j<n;++j)r+=(y[j]-m)*(y[j-k]-m);r/=den;if(k==1)first=r;last=r;q+=double(n)*(n+2)*r*r/(n-k);}return {q,first,last};}
+Vec ljung_box(const Vec& x){check(x.size()>=4);size_t n=x.size()-1,h=integer(x[0],1,n-1);Vec y(x.begin()+1,x.end());check(*std::min_element(y.begin(),y.end())<*std::max_element(y.begin(),y.end()));long double m=std::accumulate(y.begin(),y.end(),0.L)/n,den=0,q=0,first=0,last=0;for(double z:y){long double d=z-m;den+=d*d;}check(den>0);for(size_t k=1;k<=h;++k){long double r=0;for(size_t j=k;j<n;++j)r+=(y[j]-m)*(y[j-k]-m);r/=den;if(k==1)first=r;last=r;q+=static_cast<long double>(n)*(n+2)*r*r/(n-k);}return {double(q),double(first),double(last)};}
 
 Vec pit_joint(const Vec& x){check(x.size()>=3);Vec y{1};y.insert(y.end(),x.begin(),x.end());return {pit_ks(x)[2],pit_cvm(x)[0],pit_ad(x)[0],ljung_box(y)[0]};}
 }
