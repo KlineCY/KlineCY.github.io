@@ -13,8 +13,10 @@ with tempfile.TemporaryDirectory() as tmp:
         name=c["command"][14:]
         rows,_=verify(binary,c)
         for j,h in enumerate(c["header"]):
-            if h in {"ConservationResidual","ReconstructionError","StationarityResidual","BudgetResidual","KKTResidual","LinearResidual","PriceResidual","ProbabilityResidual","ResidualNorm"}:
+            if h in {"ConservationResidual","ReconstructionError","StationarityResidual","BudgetResidual","KKTResidual","LinearResidual","PriceResidual","ProbabilityResidual"}:
                 for r in rows:assert abs(r[j])<=1e-6,(name,h,r[j])
+        if name=="pcg-jacobi":
+            assert rows[-1][-1]==1 and rows[-1][2]<=1e-10,(name,rows[-1])
         original=ROOT/c["file"]
         run(binary,name,original.with_suffix(".absent"),good=False)
         run(binary,name,params=c["params"]+["bad"],good=False)

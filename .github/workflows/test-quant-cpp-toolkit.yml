@@ -209,3 +209,10 @@ jobs:
 
       - name: Verify eighty comprehensive model references and malformed inputs
         run: python quant/cpp/test_comprehensive_research.py /tmp/kline_quant
+
+      - name: Reproduce eighty comprehensive independent numerical studies
+        run: |
+          python quant/research/run_comprehensive_studies.py /tmp/kline_quant /tmp/kline-comprehensive-results
+          test $(find /tmp/kline-comprehensive-results/cases -name '*.csv' | wc -l) -eq 80
+          test $(find /tmp/kline-comprehensive-results/studies -name '*.csv' | wc -l) -eq 80
+          test -s /tmp/kline-comprehensive-results/study-summary.csv
