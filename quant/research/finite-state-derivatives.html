@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>路径依赖与多次行权的有限状态衍生品定价｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="depth-labs.css"><link rel="stylesheet" href="finite-state.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main class="finite-state"><header><h1>路径依赖与多次行权的有限状态衍生品定价</h1><p><a href="finite-state-research.html">有限状态与动态研究</a>　<a href="applied-systems.html">完整应用研究</a>　<a href="../cpp/finite_state_cli.cpp" download>统一C++17入口</a></p></header><section><h2>统一研究主线</h2><p>价格树的节点本身未必包含支付所需的全部历史信息。障碍触发、路径最大值、多次行权次数和冷却期必须进入状态；具有状态依赖贴现因子的模型又需要区分真实概率和状态价格。这组课程从条件期望、状态扩展与最优停止三个角度建立统一离散定价框架。</p><h3><a href="finite-state-barrier-rebate.html">离散障碍、即时返还与敲入敲出分解</a></h3><p>离散观察下，向下敲出合约在第一次价格不高于H时终止并立即支付返还；尚未触发的节点仍有继续价值。每次在树上回溯时，触发节点直接置为返还，未触发节点使用下一期价值的风险中性贴现期望。</p><h3><a href="finite-state-swing-rights.html">带最短行权间隔的多次行权动态规划</a></h3><p>具有多次行权权利的合约允许持有人在到期前选择多个停止时点，每次最多执行一个单位，且相邻执行日期至少相隔g步。仅以当前价格作为状态无法决定可用权利，须加入剩余次数r与冷却期c。可行行动为等待，或者在冷却结束且权利非零时行权。</p><h3><a href="finite-state-lookback-max.html">路径最大值状态压缩与固定执行价回望看涨</a></h3><p>固定执行价回望看涨的支付取决于整个观察路径的最高价格，普通重组树即使最终节点相同也可能有不同支付。把节点和截至当前的最高节点价格组成扩展状态，只有相同扩展状态的历史才能合并。</p><h3><a href="finite-state-state-price-chain.html">状态依赖随机贴现因子与Arrow–Debreu价格传播</a></h3><p>有限经济状态的真实转移矩阵为P，当前状态i对应一期随机贴现因子m_i。状态价格矩阵Q不必是随机矩阵，因为行和代表一期贴现价格而非概率。逐期将当前状态价格乘Q，得到每个终点状态的贴现概率质量。</p><p><a href="finite-state-derivatives-cases.json" download>全部独立解析输入和结果</a>。</p></section><section><h2>完整C++17实现</h2><p>所有方法共享公共输入检查与数值接口。具体输入输出及公式证明见对应计算章节。</p><pre>#pragma once
+#include &quot;finite_state_common.hpp&quot;
+namespace fsq {
+struct Tree {
+    double s,k,u,d,r,q,cp;
+    int n;
+    double spot(int t,int j) const {double v=s*std::pow(u,j)*std::pow(d,t-j);require(std::isfinite(v)&amp;&amp;v&gt;0);return v;}
+    double payoff(int t,int j) const{return std::max(0.,cp*(spot(t,j)-k));}
+};
+inline Tree tree_input(const Vec&amp; x){
+    require(x.size()&gt;=7);
+    Tree z{x[0],x[1],x[2],x[3],x[4],0,x[6],count(x[5],1,300)};
+    require(z.s&gt;0&amp;&amp;z.k&gt;0&amp;&amp;z.d&gt;0&amp;&amp;z.d&lt;z.r&amp;&amp;z.r&lt;z.u&amp;&amp;(z.cp==1||z.cp==-1));
+    z.q=(z.r-z.d)/(z.u-z.d);
+    return z;
+}
+inline double eu_tree(const Tree&amp; z){
+    Vec v(z.n+1);
+    for(int j=0;j&lt;=z.n;++j)v[j]=z.payoff(z.n,j);
+    for(int t=z.n-1;t&gt;=0;--t)for(int j=0;j&lt;=t;++j)v[j]=(z.q*v[j+1]+(1-z.q)*v[j])/z.r;
+    return v[0];
+}
+// Discretely monitored down-and-out option; rebate is paid when the barrier is touched.
+inline Vec barrier_rebate(const Vec&amp; x){
+    require(x.size()==9);
+    Tree z=tree_input(x);double h=x[7],rebate=x[8];require(h&gt;0&amp;&amp;rebate&gt;=0);
+    Vec v(z.n+1),hit(z.n+1),reb(z.n+1);
+    for(int j=0;j&lt;=z.n;++j){bool ko=z.spot(z.n,j)&lt;=h;v[j]=ko?rebate:z.payoff(z.n,j);hit[j]=ko;reb[j]=ko?rebate:0;}
+    for(int t=z.n-1;t&gt;=0;--t)for(int j=0;j&lt;=t;++j){
+        if(z.spot(t,j)&lt;=h){v[j]=rebate;hit[j]=1;reb[j]=rebate;}
+        else{v[j]=(z.q*v[j+1]+(1-z.q)*v[j])/z.r;hit[j]=z.q*hit[j+1]+(1-z.q)*hit[j];reb[j]=(z.q*reb[j+1]+(1-z.q)*reb[j])/z.r;}
+    }
+    double plain=eu_tree(z),ko=v[0]-reb[0],ki=plain-ko;
+    return {v[0],ko,reb[0],ki,plain,hit[0],ko+ki-plain};
+}
+// Multiple exercise rights; one unit per date, mandatory refraction after exercise.
+inline Vec swing_rights(const Vec&amp; x){
+    require(x.size()==9);Tree z=tree_input(x);
+    int rights=count(x[7],1,20),gap=count(x[8],1,301);
+    require(z.n&lt;=160);
+    // State: remaining rights and dates until the next exercise is permitted.
+    int cool=std::min(gap-1,z.n+1);
+    std::vector&lt;Mat&gt; nxt(rights+1,Mat(cool+1,Vec(z.n+1))),cur=nxt;
+    for(int j=0;j&lt;=z.n;++j)for(int r=1;r&lt;=rights;++r)nxt[r][0][j]=z.payoff(z.n,j);
+    int first=0;
+    for(int t=z.n-1;t&gt;=0;--t){
+        auto cont=[&amp;](int r,int c,int j){return (z.q*nxt[r][c][j+1]+(1-z.q)*nxt[r][c][j])/z.r;};
+        for(int r=1;r&lt;=rights;++r)for(int c=0;c&lt;=cool;++c)for(int j=0;j&lt;=t;++j){
+            double wait=cont(r,std::max(0,c-1),j);
+            double use=c==0?z.payoff(t,j)+cont(r-1,cool,j):-1;
+            cur[r][c][j]=std::max(wait,use);
+            if(t==0&amp;&amp;r==rights&amp;&amp;c==0&amp;&amp;j==0)first=use&gt;wait+1e-12;
+        }
+        cur.swap(nxt);
+    }
+    return {nxt[rights][0][0],nxt[1][0][0],double(first),nxt[rights][0][0]-nxt[1][0][0]};
+}
+// Discrete fixed-strike lookback call, recombining path states indexed by the maximum node.
+inline Vec lookback_max(const Vec&amp; x){
+    require(x.size()==7);Tree z=tree_input(x);require(z.cp==1&amp;&amp;z.n&lt;=20);
+    Vec levels;
+    for(int t=0;t&lt;=z.n;++t)for(int j=0;j&lt;=t;++j)levels.push_back(z.spot(t,j));
+    std::sort(levels.begin(),levels.end());levels.erase(std::unique(levels.begin(),levels.end()),levels.end());
+    auto idx=[&amp;](double s){return int(std::lower_bound(levels.begin(),levels.end(),s)-levels.begin());};
+    std::vector&lt;std::map&lt;int,double&gt;&gt; f(1);f[0][idx(z.s)]=1;
+    for(int t=0;t&lt;z.n;++t){
+        std::vector&lt;std::map&lt;int,double&gt;&gt; nxt(t+2);
+        for(int j=0;j&lt;=t;++j)for(auto p:f[j]){
+            nxt[j][std::max(p.first,idx(z.spot(t+1,j)))]+=(1-z.q)*p.second;
+            nxt[j+1][std::max(p.first,idx(z.spot(t+1,j+1)))]+=z.q*p.second;
+        }
+        f.swap(nxt);
+    }
+    double v=0,em=0,prob=0,mass=0;int states=0;
+    for(const auto&amp; a:f)for(auto p:a){double m=levels[p.first];mass+=p.second;em+=m*p.second;v+=std::max(m-z.k,0.)*p.second;prob+=(m&gt;z.k)*p.second;++states;}
+    return {v/std::pow(z.r,z.n),em,prob,mass,double(states),eu_tree(z)};
+}
+// Finite state Arrow-Debreu prices and Markov discount factors (state-dependent).
+inline Vec state_price_chain(const Vec&amp; x){
+    require(x.size()&gt;=5);int k=count(x[0],2,20),n=count(x[1],1,500);
+    require(x.size()==size_t(2+3*k+k*k));
+    Vec a(x.begin()+2,x.begin()+2+k);distribution(a);
+    Vec m(x.begin()+2+k,x.begin()+2+2*k),h(x.begin()+2+2*k,x.begin()+2+3*k);
+    Mat p(k,Vec(k));for(int i=0;i&lt;k;++i){require(m[i]&gt;0);for(int j=0;j&lt;k;++j)p[i][j]=x[2+3*k+i*k+j];distribution(p[i]);}
+    Vec price=a,prob=a;
+    for(int t=0;t&lt;n;++t){Vec next(k),np(k);for(int i=0;i&lt;k;++i)for(int j=0;j&lt;k;++j){next[j]+=price[i]*m[i]*p[i][j];np[j]+=prob[i]*p[i][j];}price.swap(next);prob.swap(np);}
+    double v=std::inner_product(price.begin(),price.end(),h.begin(),0.),e=std::inner_product(prob.begin(),prob.end(),h.begin(),0.);
+    Vec out{v,sum(price),e,sum(prob)};out.insert(out.end(),price.begin(),price.end());out.insert(out.end(),prob.begin(),prob.end());return out;
+}
+}
+</pre><p><a href="../cpp/finite_state_derivatives.hpp" download>本领域头文件</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>离散交易、动态配置与路径风险的闭环控制｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="depth-labs.css"><link rel="stylesheet" href="finite-state.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main class="finite-state"><header><h1>离散交易、动态配置与路径风险的闭环控制</h1><p><a href="finite-state-research.html">有限状态与动态研究</a>　<a href="applied-systems.html">完整应用研究</a>　<a href="../cpp/finite_state_cli.cpp" download>统一C++17入口</a></p></header><section><h2>统一研究主线</h2><p>实际投资决策往往同时受数量整数性、现金预算、交易成本、终端完成条件和状态转移约束。通过在有限状态上直接优化，可以将可行性与价值函数明确写入同一模型，并使用独立前向现金或概率传播检验回溯结果。</p><h3><a href="finite-state-inventory-schedule.html">带容量约束与库存风险的全局整数执行日程</a></h3><p>设母单剩余库存r，每期最多执行C_t个整数单位。即时交易成本由线性价差和二次冲击组成，剩余库存承担持有风险惩罚。终端必须完成，任何未完成的末端状态价值均为无穷。</p><h3><a href="finite-state-lot-rebalance.html">含显式费用与现金守恒的两资产整数手数再平衡</a></h3><p>连续权重转换为可交易手数后，实际费用会减少财富并改变权重分母。设目标风险资产权重及剩余现金权重，在整数持仓上计算扣费后的现金余额、财富及实际权重，只有现金非负且财富为正的候选才可行。</p><h3><a href="finite-state-regime-policy.html">状态切换、调仓费用与有限期对数财富策略</a></h3><p>投资者观察当前经济状态与上一次选择的离散风险资产暴露，决定下一期暴露。每次改变暴露都以绝对差收取比例费用，下一状态决定下一期资产收益。采用终端对数财富效用，乘法财富更新转化为逐期可加的对数增长。</p><h3><a href="finite-state-drawdown-chain.html">对数财富格点上的路径回撤概率与终值风险</a></h3><p>单独使用终值收益无法识别期间内的最大回撤。令对数财富在步长h的整数格点上变化，当前回撤为历史最高对数财富减当前对数财富，新增收益后回撤按正部递推。为计算是否曾超过阈值H，只需将历史最大回撤在H处截断。</p><p><a href="finite-state-policy-cases.json" download>全部独立解析输入和结果</a>。</p></section><section><h2>完整C++17实现</h2><p>所有方法共享公共输入检查与数值接口。具体输入输出及公式证明见对应计算章节。</p><pre>#pragma once
+#include &quot;finite_state_common.hpp&quot;
+namespace fsq {
+// Inventory schedule with terminal completion, capacity, convex cost and time-dependent risk.
+inline Vec inventory_schedule(const Vec&amp; x){
+    require(x.size()&gt;=6&amp;&amp;(x.size()-2)%4==0);int q=count(x[0],1,300),n=int((x.size()-2)/4);
+    require(n&lt;=100);double risk=x[1];require(risk&gt;=0);
+    Vec c(n),eta(n),vol(n);std::vector&lt;int&gt; cap(n);
+    int capacity=0;
+    for(int t=0;t&lt;n;++t){c[t]=x[2+4*t];eta[t]=x[3+4*t];vol[t]=x[4+4*t];cap[t]=count(x[5+4*t],0,q);require(c[t]&gt;=0&amp;&amp;eta[t]&gt;=0&amp;&amp;vol[t]&gt;=0);capacity+=cap[t];}
+    require(capacity&gt;=q);
+    Vec f(q+1,std::numeric_limits&lt;double&gt;::infinity());f[0]=0;
+    std::vector&lt;std::vector&lt;int&gt;&gt; policy(n,std::vector&lt;int&gt;(q+1,-1));
+    for(int t=n-1;t&gt;=0;--t){Vec cur(q+1,std::numeric_limits&lt;double&gt;::infinity());
+        for(int r=0;r&lt;=q;++r)for(int a=0;a&lt;=std::min(r,cap[t]);++a){
+            int left=r-a;double v=c[t]*a+eta[t]*a*a+risk*vol[t]*left*left+f[left];
+            if(v&lt;cur[r]-1e-12){cur[r]=v;policy[t][r]=a;}
+        }
+        f.swap(cur);
+    }
+    int r=q;Vec trades;double costs=0,penalty=0;
+    for(int t=0;t&lt;n;++t){int a=policy[t][r];require(a&gt;=0);r-=a;trades.push_back(a);costs+=c[t]*a+eta[t]*a*a;penalty+=risk*vol[t]*r*r;}
+    Vec out{f[q],costs,penalty,double(r),f[q]-costs-penalty};out.insert(out.end(),trades.begin(),trades.end());return out;
+}
+// Two-asset integer lot rebalance with actual cash budget and per-lot fees.
+inline Vec lot_rebalance(const Vec&amp; x){
+    require(x.size()==11);
+    int cash=count(x[0],0,100000),a=count(x[1],0,300),b=count(x[2],0,300),p=count(x[3],1,10000),q=count(x[4],1,10000),f=count(x[5],0,10000);
+    double w1=x[6],w2=x[7],gamma=x[8];int ma=count(x[9],0,300),mb=count(x[10],0,300);
+    probability(w1);probability(w2);require(w1+w2&lt;=1+1e-12&amp;&amp;gamma&gt;=0);
+    double v=cash+a*p+b*q;require(v&gt;0);
+    double best=std::numeric_limits&lt;double&gt;::infinity();Vec out;
+    for(int i=0;i&lt;=ma;++i)for(int j=0;j&lt;=mb;++j){
+        double fees=double(f)*(std::abs(i-a)+std::abs(j-b));
+        double c=v-i*p-j*q-fees,wealth=v-fees;
+        if(c&lt;0||wealth&lt;=0)continue;
+        double e=sq(i*p/wealth-w1)+sq(j*q/wealth-w2)+sq(c/wealth-(1-w1-w2));
+        double obj=e+gamma*fees/v;
+        if(obj&lt;best-1e-14){best=obj;out={double(i),double(j),c,fees,wealth,e,obj,wealth-c-i*p-j*q};}
+    }
+    require(!out.empty());return out;
+}
+// Finite horizon consumption-free allocation with regimes, discrete exposure and switching fee.
+// At each decision the next realized multiplier depends on next regime, then regime is observed.
+inline Vec regime_policy(const Vec&amp; x){
+    require(x.size()&gt;=8);
+    int n=count(x[0],1,100),k=count(x[1],2,10),m=count(x[2],2,30),initial=count(x[3],0,k-1),old=count(x[4],0,m-1);
+    double fee=x[5];require(fee&gt;=0);
+    require(x.size()==size_t(6+m+k+k*k));
+    Vec weights(x.begin()+6,x.begin()+6+m),ret(x.begin()+6+m,x.begin()+6+m+k);
+    for(int j=0;j&lt;m;++j){probability(weights[j]);if(j)require(weights[j]&gt;weights[j-1]);}
+    Mat p(k,Vec(k));size_t at=6+m+k;
+    for(int i=0;i&lt;k;++i){for(int j=0;j&lt;k;++j)p[i][j]=x[at++];distribution(p[i]);}
+    for(double w:weights)for(double r:ret)require(1+w*r&gt;0);
+    require(fee*(weights.back()-weights.front())&lt;1);
+    Mat v(k,Vec(m));std::vector&lt;std::vector&lt;std::vector&lt;int&gt;&gt;&gt; pol(n,std::vector&lt;std::vector&lt;int&gt;&gt;(k,std::vector&lt;int&gt;(m)));
+    for(int t=n-1;t&gt;=0;--t){
+        Mat next(k,Vec(m,-std::numeric_limits&lt;double&gt;::infinity()));
+        for(int i=0;i&lt;k;++i)for(int a=0;a&lt;m;++a)for(int b=0;b&lt;m;++b){
+            double z=std::log1p(-fee*std::abs(weights[b]-weights[a]));
+            for(int j=0;j&lt;k;++j)z+=p[i][j]*(std::log1p(weights[b]*ret[j])+v[j][b]);
+            if(z&gt;next[i][a]+1e-14){next[i][a]=z;pol[t][i][a]=b;}
+        }
+        v.swap(next);
+    }
+    // Independent forward probability flow under the selected policy.
+    Mat mass(k,Vec(m));mass[initial][old]=1;double logwealth=0,turn=0;
+    for(int t=0;t&lt;n;++t){Mat next(k,Vec(m));for(int i=0;i&lt;k;++i)for(int a=0;a&lt;m;++a){
+        int b=pol[t][i][a];double z=mass[i][a],dw=std::abs(weights[b]-weights[a]);
+        turn+=z*dw;logwealth+=z*std::log1p(-fee*dw);
+        for(int j=0;j&lt;k;++j){double q=z*p[i][j];next[j][b]+=q;logwealth+=q*std::log1p(weights[b]*ret[j]);}
+    }
+        mass.swap(next);}
+    double total=0;for(const auto&amp; z:mass)total+=sum(z);
+    int first=pol[0][initial][old];
+    return {v[initial][old],weights[first],logwealth,turn,total,v[initial][old]-logwealth};
+}
+// Exact path-dependent drawdown probabilities on a log-wealth lattice.
+inline Vec drawdown_chain(const Vec&amp; x){
+    require(x.size()&gt;=7);int n=count(x[0],1,150),k=count(x[1],2,8),init=count(x[2],0,k-1),limit=count(x[3],1,1000);
+    double step=x[4];require(step&gt;0&amp;&amp;step&lt;=1);
+    require(x.size()==size_t(5+k+k*k));
+    std::vector&lt;int&gt; move(k);for(int i=0;i&lt;k;++i)move[i]=count(x[5+i],-10,10);
+    require(n*step*10&lt;=600);
+    Mat p(k,Vec(k));size_t a=5+k;
+    for(int i=0;i&lt;k;++i){for(int j=0;j&lt;k;++j)p[i][j]=x[a++];distribution(p[i]);}
+    // State (current regime, log-wealth index, drawdown from running peak, max drawdown).
+    // The maximum drawdown is capped at the monitoring threshold.
+    using Key=std::array&lt;int,4&gt;;std::map&lt;Key,double&gt; f;
+    f[{init,0,0,0}]=1;
+    require(n&lt;=60&amp;&amp;limit&lt;=100);
+    for(int t=0;t&lt;n;++t){std::map&lt;Key,double&gt; next;for(const auto&amp; z:f)for(int j=0;j&lt;k;++j){
+        if(p[z.first[0]][j]==0)continue;
+        int d=std::max(0,z.first[2]-move[j]);
+        int m=std::min(limit,std::max(z.first[3],d));
+        next[{j,z.first[1]+move[j],d,m}]+=z.second*p[z.first[0]][j];
+        require(next.size()&lt;=1000000);
+    }
+        f.swap(next);}
+    double prob=0,wealth=0,elog=0,mass=0,terminaldd=0;
+    for(const auto&amp; z:f){double p=z.second;prob+=(z.first[3]&gt;=limit)*p;wealth+=std::exp(step*z.first[1])*p;elog+=step*z.first[1]*p;terminaldd+=(1-std::exp(-step*z.first[2]))*p;mass+=p;}
+    return {prob,wealth,elog,terminaldd,mass,double(f.size())};
+}
+}
+</pre><p><a href="../cpp/finite_state_policy.hpp" download>本领域头文件</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

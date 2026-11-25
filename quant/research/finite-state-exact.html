@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>有限样本随机化、秩统计与序贯检验｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="depth-labs.css"><link rel="stylesheet" href="finite-state.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main class="finite-state"><header><h1>有限样本随机化、秩统计与序贯检验</h1><p><a href="finite-state-research.html">有限状态与动态研究</a>　<a href="applied-systems.html">完整应用研究</a>　<a href="../cpp/finite_state_cli.cpp" download>统一C++17入口</a></p></header><section><h2>统一研究主线</h2><p>在样本较小或统计量分布有大量离散质量时，渐近正态近似可能失真。本组研究通过明确的条件随机化空间与精确概率卷积得到可解释的零分布。序贯检验则处理依赖历史而停止观察的决策机制，直接计算有限期限错误率及未决概率。</p><h3><a href="finite-state-stratified-exact.html">分层2×2设计的精确条件随机化检验</a></h3><p>在每一预先定义的层中，固定样本数N、成功数S与处理组数M。零假设为层内标签可交换时，处理组成功数服从超几何分布。若各层独立随机化，总处理成功数的条件分布是各层超几何分布的卷积，而非忽略层结构的单一超几何分布。</p><h3><a href="finite-state-rank-sum-exact.html">含平局的Mann–Whitney秩和精确置换分布</a></h3><p>在固定合并样本及组大小m条件下，零假设认为组标签可交换。将排序值的平局位置赋平均秩，并把秩乘2化成整数，使每种选择m个观测的组合对应一个整数秩和。即使存在平局，不同原始索引的观测仍是不同的可交换单位。</p><h3><a href="finite-state-signed-rank-exact.html">含零差和平局的配对Wilcoxon符号秩检验</a></h3><p>配对研究先对每对结果取差值。零差按Wilcoxon约定剔除，对其余绝对差值赋平均秩。若给定绝对差值后各符号独立且对称，则每个秩以二分之一概率进入正秩和。由此构造条件生成函数。</p><h3><a href="finite-state-sequential-test.html">有限期限Bernoulli序贯似然比的吸收概率</a></h3><p>检验两个固定Bernoulli参数p0与p1。逐期似然比只依赖观察数t和累计成功数s，因此所有尚未停止的历史可以合并。每次新观测后，如果对数似然比达到上界或下界，就把概率质量转移到对应吸收决策；否则继续传播。</p><p><a href="finite-state-exact-cases.json" download>全部独立解析输入和结果</a>。</p></section><section><h2>完整C++17实现</h2><p>所有方法共享公共输入检查与数值接口。具体输入输出及公式证明见对应计算章节。</p><pre>#pragma once
+#include &quot;finite_state_common.hpp&quot;
+namespace fsq {
+inline Vec convolution(const Vec&amp; a,const Vec&amp; b){
+    require(a.size()+b.size()&lt;=200001);
+    Vec c(a.size()+b.size()-1);
+    for(size_t i=0;i&lt;a.size();++i)if(a[i]!=0)for(size_t j=0;j&lt;b.size();++j)c[i+j]+=a[i]*b[j];
+    return c;
+}
+inline double log_choose(int n,int k){
+    if(k&lt;0||k&gt;n)return -std::numeric_limits&lt;double&gt;::infinity();
+    return std::lgamma(n+1.)-std::lgamma(k+1.)-std::lgamma(n-k+1.);
+}
+inline Vec hypergeometric(int n,int k,int m){
+    require(n&gt;=1&amp;&amp;k&gt;=0&amp;&amp;k&lt;=n&amp;&amp;m&gt;=0&amp;&amp;m&lt;=n);
+    Vec p(std::min(k,m)+1);double denom=log_choose(n,m);
+    for(int i=std::max(0,m-n+k);i&lt;=std::min(k,m);++i)p[i]=std::exp(log_choose(k,i)+log_choose(n-k,m-i)-denom);
+    double s=sum(p);require(s&gt;0);for(double&amp; z:p)z/=s;return p;
+}
+inline Vec tails(const Vec&amp; f,int obs){
+    require(obs&gt;=0&amp;&amp;obs&lt;int(f.size())&amp;&amp;f[obs]&gt;0);
+    double lo=0,hi=0,mean=0,var=0;
+    for(int j=0;j&lt;int(f.size());++j){if(j&lt;=obs)lo+=f[j];if(j&gt;=obs)hi+=f[j];mean+=j*f[j];}
+    for(int j=0;j&lt;int(f.size());++j)var+=sq(j-mean)*f[j];
+    return {mean,var,lo,hi,std::min(1.,2*std::min(lo,hi)),f[obs]};
+}
+// Stratified 2x2 conditional randomization: the total treated-success count.
+inline Vec stratified_exact(const Vec&amp; x){
+    require(!x.empty()&amp;&amp;x.size()%4==0&amp;&amp;x.size()&lt;=160);
+    Vec f{1};int observed=0;
+    for(size_t i=0;i&lt;x.size();i+=4){
+        int n=count(x[i],1,1000),k=count(x[i+1],0,n),m=count(x[i+2],0,n),o=count(x[i+3],std::max(0,m-n+k),std::min(k,m));
+        observed+=o;f=convolution(f,hypergeometric(n,k,m));
+    }
+    Vec a=tails(f,observed),out{double(observed)};out.insert(out.end(),a.begin(),a.end());out.insert(out.end(),f.begin(),f.end());return out;
+}
+// Exact rank-sum permutation with midranks (scaled by two to avoid fractional indices).
+inline Vec rank_sum_exact(const Vec&amp; x){
+    require(x.size()&gt;=4);int m=count(x[0],1,40),n=int(x.size())-1;require(n&gt;=3&amp;&amp;n&lt;=40&amp;&amp;m&lt;n);
+    Vec z(x.begin()+1,x.end());std::vector&lt;int&gt; order(n),rank(n);std::iota(order.begin(),order.end(),0);
+    std::stable_sort(order.begin(),order.end(),[&amp;](int i,int j){return z[i]&lt;z[j];});
+    for(int l=0;l&lt;n;){int r=l+1;while(r&lt;n&amp;&amp;z[order[l]]==z[order[r]])++r;for(int i=l;i&lt;r;++i)rank[order[i]]=l+r+1;l=r;}
+    int cap=n*(n+1),obs=std::accumulate(rank.begin(),rank.begin()+m,0);
+    Mat f(m+1,Vec(cap+1));f[0][0]=1;int seen=0;
+    for(int r:rank){++seen;for(int k=std::min(seen,m);k&gt;=1;--k)for(int s=cap;s&gt;=r;--s)f[k][s]+=f[k-1][s-r];}
+    double den=sum(f[m]);for(double&amp; v:f[m])v/=den;
+    Vec p=tails(f[m],obs);
+    return {obs/2.,obs/2.-m*(m+1)/2.,p[0]/2.,p[1]/4.,p[2],p[3],p[4],p[5]};
+}
+// Wilcoxon signed rank conditional on observed nonzero absolute differences.
+inline Vec signed_rank_exact(const Vec&amp; x){
+    Vec a;for(double v:x)if(v!=0)a.push_back(v);int n=a.size();require(n&gt;=1&amp;&amp;n&lt;=40);
+    std::vector&lt;int&gt; order(n),rank(n);std::iota(order.begin(),order.end(),0);
+    std::sort(order.begin(),order.end(),[&amp;](int i,int j){return std::abs(a[i])&lt;std::abs(a[j]);});
+    for(int l=0;l&lt;n;){int r=l+1;while(r&lt;n&amp;&amp;std::abs(a[order[l]])==std::abs(a[order[r]]))++r;for(int i=l;i&lt;r;++i)rank[order[i]]=l+r+1;l=r;}
+    Vec f{1};int obs=0;
+    for(int i=0;i&lt;n;++i){int r=rank[i];if(a[i]&gt;0)obs+=r;Vec g(r+1);g[0]=g[r]=.5;f=convolution(f,g);}
+    Vec p=tails(f,obs);
+    return {double(n),obs/2.,p[0]/2.,p[1]/4.,p[2],p[3],p[4],p[5]};
+}
+// Finite-horizon sequential Bernoulli likelihood-ratio test with absorbing decisions.
+inline Vec sequential_test(const Vec&amp; x){
+    require(x.size()==6);int n=count(x[0],1,2000);double p0=x[1],p1=x[2],low=x[3],high=x[4],truth=x[5];
+    require(p0&gt;0&amp;&amp;p0&lt;p1&amp;&amp;p1&lt;1&amp;&amp;low&lt;0&amp;&amp;high&gt;0);probability(truth);
+    double up=std::log(p1/p0),down=std::log((1-p1)/(1-p0));
+    Vec alive(1,1);double accept0=0,accept1=0,et=0;
+    for(int t=1;t&lt;=n;++t){Vec next(t+1);
+        for(int s=0;s&lt;t;++s){next[s]+=(1-truth)*alive[s];next[s+1]+=truth*alive[s];}
+        for(int s=0;s&lt;=t;++s){double lr=s*up+(t-s)*down;
+            if(lr&lt;=low){accept0+=next[s];et+=t*next[s];next[s]=0;}
+            else if(lr&gt;=high){accept1+=next[s];et+=t*next[s];next[s]=0;}}
+        alive.swap(next);
+    }
+    double undecided=sum(alive);et+=n*undecided;
+    return {accept0,accept1,undecided,et,accept0+accept1+undecided};
+}
+}
+</pre><p><a href="../cpp/finite_state_exact.hpp" download>本领域头文件</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>
