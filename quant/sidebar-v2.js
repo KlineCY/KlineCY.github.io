@@ -73,6 +73,7 @@
       subsection("feedsCategoryNav","按数据类别","feedChoices",page==="feeds"),
     research:
       '<a class="q-menu-link" href="'+route("research")+'evidence-ledger.html">多资产交易会计与自融资约束</a>'+
+      '<a class="q-menu-link" href="'+route("research")+'comprehensive-research.html">完整量化研究课程</a>'+
       '<a class="q-menu-link" href="'+route("research")+'system-research.html">系统化量化研究与实验</a>'+
       '<a class="q-menu-link" href="'+route("research")+'advanced-research.html">高级模型研究与数值实验</a>'+
       '<a class="q-menu-link" href="'+route("research")+'model-laboratories.html">完整模型与研究框架</a>'+
