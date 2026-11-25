@@ -1,0 +1,19 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>基础货币收益与熵风险配置｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="depth-labs.css"><link rel="stylesheet" href="integrated-research.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>基础货币收益与熵风险配置</h1><p><a href="integrated-research.html">跨模型研究课程</a>　<a href="comprehensive-research.html">基础模型目录</a>　<a href="integrated_wealth.py" download>本组实验源码</a></p><p>逐资产生成本币财富和汇率路径，账本恢复基础货币逐期收益；再以统一日期的双资产情景最小化熵风险。</p></header><section><h2>数学结构与连接关系</h2><div class="equation">$$1+r_t^{B}=(1+r_t^{L})(1+r_t^{FX}),\quad \min_{w\in\Delta}\eta^{-1}\log E[e^{-\eta w^\top r^B}]$$</div><p>逐资产生成本币财富和汇率路径，账本恢复基础货币逐期收益；再以统一日期的双资产情景最小化熵风险。各阶段输出作为下一阶段的明确输入，独立数值参照不依赖下一阶段求解器。</p></section><section><h2>模型实现、数据口径与文献</h2><p><a href="../audit/comprehensive-multi-currency-cash-reconciliation.html">多币种现金流与基础货币财富对账</a>　<a href="../cpp/comprehensive_data.hpp" download>C++17完整实现</a>　<a href="https://www.gipsstandards.org/">CFA Institute. Global Investment Performance Standards (GIPS).</a></p><p><a href="../research/comprehensive-entropic-risk-allocation.html">指数效用与Entropic风险配置：指数倾斜概率和凸最优性</a>　<a href="../cpp/comprehensive_portfolio.hpp" download>C++17完整实现</a>　<a href="https://web.stanford.edu/~boyd/cvxbook/">Boyd and Vandenberghe (2004), Convex Optimization.</a></p><p>全部输入由下方实验源码显式构造，参数与C++接口一致；结果为教学构造情形，不代表真实市场统计量。</p></section><section><h2>独立参考及实验判据</h2><p>检查逐期复合收益公式、权重和及独立计算的指数风险目标。</p><p>批量运行：<code>python quant/research/run_integrated_research.py ./build/kline_quant integrated-results</code>。</p><p>输出：<code>integrated-results/base_currency_returns_entropic_allocation.csv</code>。该文件由运行程序生成。</p></section><section><h2>可执行实验与证据</h2><pre>def currency_risk_allocation(model,report):
+    out=[]
+    local=[[.02,-.01],[-.01,.03],[.01,.015],[-.03,-.02],[.025,-.005]]
+    for fxscale in (0,.01,.03):
+        fx=[fxscale*v for v in (1,-1,0,2,-2)]
+        gross=[]
+        for i in range(2):
+            localvalue=100;FX=1;rows=[[0,100,0,1,0]]
+            for t,r in enumerate(local,1):
+                localvalue*=1+r[i];FX*=1+fx[t-1]*(i==1)
+                rows.append([t,localvalue,0,FX,0])
+            ledger=model("multi-currency-cash-reconciliation",rows,[])
+            gross.append([r[6] for r in ledger[1:]])
+            for t,v in enumerate(gross[-1]):near(v,(1+local[t][i])*(1+fx[t]*(i==1))-1)
+        scen=[[gross[i][t] for i in range(2)] for t in range(5)]
+        alloc=model("entropic-risk-allocation",scen,[5,1e-9,20000]);w=[r[1] for r in alloc]
+        near(sum(w),1);near(alloc[0][2],math.log(sum(math.exp(-5*dot(w,r)) for r in scen)/5)/5)
+        out.append([fxscale,*w,alloc[0][2],alloc[0][3],alloc[0][4]])
+    report("base_currency_returns_entropic_allocation",["FXScale","Weight1","Weight2","EntropicRisk","ExpectedReturn","MaximumTiltMass"],out)</pre></section><section><h2>经济及数值边界</h2><p>五个等权情景用于检验口径连接，不是实际汇率风险分布或实证结果。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

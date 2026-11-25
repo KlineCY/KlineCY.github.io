@@ -1,0 +1,30 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>公司行动、因子协方差与最大分散化｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="depth-labs.css"><link rel="stylesheet" href="integrated-research.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>公司行动、因子协方差与最大分散化</h1><p><a href="integrated-research.html">跨模型研究课程</a>　<a href="comprehensive-research.html">基础模型目录</a>　<a href="integrated_portfolio.py" download>本组实验源码</a></p><p>由原始收盘价、拆股比例及现金股息生成逐期总收益，使用共同因子估计三资产载荷和特异风险，再求最大分散化组合。</p></header><section><h2>数学结构与连接关系</h2><div class="equation">$$G_{it}=\frac{S_{it}P_{it}+D_{it}}{P_{i,t-1}},\quad \Sigma=B\Sigma_fB^\top+D,\quad DR(w)=\frac{\sigma^\top w}{\sqrt{w^\top\Sigma w}}$$</div><p>由原始收盘价、拆股比例及现金股息生成逐期总收益，使用共同因子估计三资产载荷和特异风险，再求最大分散化组合。各阶段输出作为下一阶段的明确输入，独立数值参照不依赖下一阶段求解器。</p></section><section><h2>模型实现、数据口径与文献</h2><p><a href="../audit/comprehensive-corporate-action-return-ledger.html">拆股、分红与总收益财富账本</a>　<a href="../cpp/comprehensive_data.hpp" download>C++17完整实现</a>　<a href="https://www.crsp.org/research/crsp-us-stock-databases/">CRSP. US Stock Databases: Calculations and Methodologies.</a></p><p><a href="../research/comprehensive-factor-covariance-estimate.html">多资产因子协方差估计：载荷拟合、特异风险与结构化收缩</a>　<a href="../cpp/comprehensive_portfolio.hpp" download>C++17完整实现</a>　<a href="https://doi.org/10.1016/S0047-259X(03)00096-4">Ledoit and Wolf (2004), A well-conditioned estimator for large-dimensional covariance matrices, Journal of Multivariate Analysis; structural factor shrinkage differs from the paper's estimated shrinkage intensity.</a></p><p><a href="../research/comprehensive-maximum-diversification-kkt.html">最大分散化组合：齐次比率变换、非负二次优化与风险贡献</a>　<a href="../cpp/comprehensive_portfolio.hpp" download>C++17完整实现</a>　<a href="https://www.tobam.fr/wp-content/uploads/2014/12/TOBAM-JoPM-Maximum-Div-2008.pdf">Choueifaty and Coignard (2008), Toward Maximum Diversification, Journal of Portfolio Management.</a></p><p>全部输入由下方实验源码显式构造，参数与C++接口一致；结果为教学构造情形，不代表真实市场统计量。</p></section><section><h2>独立参考及实验判据</h2><p>在四种拆股比例下比较载荷、组合权重和风险；独立复算一元回归斜率及风险二次型。</p><p>批量运行：<code>python quant/research/run_integrated_research.py ./build/kline_quant integrated-results</code>。</p><p>输出：<code>integrated-results/corporate_actions_factor_diversification.csv</code>。该文件由运行程序生成。</p></section><section><h2>可执行实验与证据</h2><pre>def actions_factor_risk(model,report):
+    output=[]
+    f=[-.04,.02,.01,-.02,.03,.01,-.01,.04]
+    e=[.01,-.01,.01,-.01,-.01,.01,-.01,.01]
+    for split in (.5,1,2,4):
+        prices=[]
+        for beta in (1,2,3):
+            prices0=[[0,100,1,0]];price=100
+            for t,(a,b) in enumerate(zip(f,e),1):
+                ratio=split if t==4 else 1
+                dividend=1 if t==6 else 0
+                value=price*(1+beta*a+.2*beta*b)
+                price=(value-dividend)/ratio
+                prices0.append([t,price,ratio,dividend])
+            ret=model("corporate-action-return-ledger",prices0,[])
+            prices.append([r[4]-1 for r in ret[1:]])
+        data=[[f[t],*[prices[i][t] for i in range(3)]] for t in range(len(f))]
+        rows=model("factor-covariance-estimate",data,[1,0,0,.001])
+        S=[r[4:] for r in rows]
+        wrows=model("maximum-diversification-kkt",S,[1e-9,10000])
+        w=[r[1] for r in wrows]
+        near(sum(w),1)
+        var=dot(w,mv(S,w));sig=[math.sqrt(S[i][i]) for i in range(3)]
+        near(wrows[0][3],dot(w,sig)/math.sqrt(var))
+        for i,r in enumerate(rows):
+            y=prices[i];mf=sum(f)/len(f);my=sum(y)/len(y)
+            beta=sum((a-mf)*(b-my) for a,b in zip(f,y))/sum((a-mf)**2 for a in f)
+            near(r[3],beta)
+            output.append([split,i+1,r[3],r[2],w[i],var,wrows[0][3]])
+    report("corporate_actions_factor_diversification",["Split","Asset","Loading","SpecificVariance","Weight","PortfolioVariance","DiversificationRatio"],output)</pre></section><section><h2>经济及数值边界</h2><p>不含税费、退市和真实股息再投资摩擦；因子风险假定特异误差不相关。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

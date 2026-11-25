@@ -1,0 +1,55 @@
+name: Validate integrated quant research
+on:
+  push:
+    branches: [main, quant-integrated-research-20261125]
+    paths:
+      - 'quant/cpp/**'
+      - 'quant/research/integrated*'
+      - 'quant/research/integrated*/**'
+      - 'quant/research/run_integrated_research.py'
+      - 'quant/research/comprehensive*'
+      - 'quant/test_integrated_curriculum.mjs'
+      - '.github/workflows/test-quant-integrated.yml'
+  pull_request:
+    paths:
+      - 'quant/cpp/**'
+      - 'quant/research/integrated*'
+      - 'quant/research/integrated*/**'
+      - 'quant/research/run_integrated_research.py'
+      - 'quant/test_integrated_curriculum.mjs'
+      - '.github/workflows/test-quant-integrated.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  numerical:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [g++, clang++]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build the C++17 research executables
+        run: |
+          ${{ matrix.compiler }} -std=c++17 -O2 -Wall -Wextra -Wpedantic quant/cpp/cli.cpp -o /tmp/kline_quant
+          ${{ matrix.compiler }} -std=c++17 -O2 -Wall -Wextra -Wpedantic quant/cpp/integrated_cli.cpp -o /tmp/kline_integrated
+      - name: Verify native integrated project references
+        run: python quant/cpp/test_integrated_projects.py /tmp/kline_integrated
+      - name: Run all independent cross-model research pipelines
+        run: |
+          python quant/research/run_integrated_research.py /tmp/kline_quant /tmp/integrated-results
+          test $(find /tmp/integrated-results -name '*.csv' | wc -l) -eq 61
+          test -s /tmp/integrated-results/summary.csv
+  curriculum:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save --no-package-lock katex@0.16.11
+      - run: node quant/test_integrated_curriculum.mjs

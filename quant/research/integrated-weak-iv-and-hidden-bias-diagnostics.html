@@ -1,0 +1,18 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>弱工具变量与配对隐藏偏差诊断｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="depth-labs.css"><link rel="stylesheet" href="integrated-research.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>弱工具变量与配对隐藏偏差诊断</h1><p><a href="integrated-research.html">跨模型研究课程</a>　<a href="comprehensive-research.html">基础模型目录</a>　<a href="integrated_inference.py" download>本组实验源码</a></p><p>在已知第一阶段强度的合成结构方程中反演AR检验，并另外计算配对研究的Rosenbaum敏感性界，展示两类识别风险的不同对象。</p></header><section><h2>数学结构与连接关系</h2><div class="equation">$$F(b)=\frac{(RSS_R-RSS_U)/k}{RSS_U/(n-k-1)},\quad p_U(\Gamma)=P[\mathrm{Bin}(n,\Gamma/(1+\Gamma))\ge T]$$</div><p>在已知第一阶段强度的合成结构方程中反演AR检验，并另外计算配对研究的Rosenbaum敏感性界，展示两类识别风险的不同对象。各阶段输出作为下一阶段的明确输入，独立数值参照不依赖下一阶段求解器。</p></section><section><h2>模型实现、数据口径与文献</h2><p><a href="../research/comprehensive-anderson-rubin-inversion.html">Anderson–Rubin弱工具变量置信集反演</a>　<a href="../cpp/comprehensive_inference.hpp" download>C++17完整实现</a>　<a href="https://doi.org/10.1214/aoms/1177730090">Anderson, T. W., and Rubin, H. (1949). Estimation of the Parameters of a Single Equation in a Complete System of Stochastic Equations. Annals of Mathematical Statistics.</a></p><p><a href="../research/comprehensive-rosenbaum-pair-bounds.html">配对观察研究Rosenbaum隐藏偏差敏感性界</a>　<a href="../cpp/comprehensive_inference.hpp" download>C++17完整实现</a>　<a href="https://doi.org/10.1007/978-1-4757-3692-2">Rosenbaum, P. R. (2002). Observational Studies, 2nd ed. Springer.</a></p><p>全部输入由下方实验源码显式构造，参数与C++接口一致；结果为教学构造情形，不代表真实市场统计量。</p></section><section><h2>独立参考及实验判据</h2><p>独立计算正交设计的F值和残差方差，并核对隐藏偏差上界的单调方向。</p><p>批量运行：<code>python quant/research/run_integrated_research.py ./build/kline_quant integrated-results</code>。</p><p>输出：<code>integrated-results/weak_iv_and_hidden_bias_diagnostics.csv</code>。该文件由运行程序生成。</p></section><section><h2>可执行实验与证据</h2><pre>def weak_iv_to_sensitivity(model,report):
+    output=[]
+    for strength in (.1,.5,1):
+        data=[]
+        for z,u in itertools.product((-1,1),repeat=2):
+            d=strength*z+.3*u
+            data.append([2*d+.2*u,d,z])
+        candidates=[0,1,2,3]
+        rows=model("anderson-rubin-inversion",data,[4,*candidates])
+        for r in rows:
+            b=r[0];v=(2-b)*.3+.2
+            F=2*((2-b)*strength)**2/v**2
+            near(r[1],F);near(r[3],2*v*v)
+            # Sensitivity of paired, sign-based inference is a separate identification diagnostic.
+            pair=model("rosenbaum-pair-bounds",[[1],[2],[-1],[3]],[1,2])
+            assert pair[1][4]&gt;=pair[0][4]
+            output.append([strength,b,F,r[2],pair[0][4],pair[1][4]])
+    report("weak_iv_and_hidden_bias_diagnostics",["FirstStageStrength","Candidate","ARStatistic","Accepted","PairPAtGamma1","PairUpperAtGamma2"],output)</pre></section><section><h2>经济及数值边界</h2><p>两项诊断针对不同研究设计，不合并成单一置信集；经典AR依赖同方差误差。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

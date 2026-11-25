@@ -1,0 +1,18 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>确定性积分方差与期权条带复制｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="depth-labs.css"><link rel="stylesheet" href="integrated-research.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main><header><h1>确定性积分方差与期权条带复制</h1><p><a href="integrated-research.html">跨模型研究课程</a>　<a href="comprehensive-research.html">基础模型目录</a>　<a href="integrated_pricing.py" download>本组实验源码</a></p><p>在不同初始方差下使用Heston确定性方差极限生成密集执行价期权条带，比较连续模型积分方差与有限网格复制。</p></header><section><h2>数学结构与连接关系</h2><div class="equation">$$I_T=\theta T+(V_0-\theta)\frac{1-e^{-\kappa T}}{\kappa},\quad \widehat K_{\rm var}=\frac1T\sum_j\Delta K_j(f_j+f_{j+1})$$</div><p>在不同初始方差下使用Heston确定性方差极限生成密集执行价期权条带，比较连续模型积分方差与有限网格复制。各阶段输出作为下一阶段的明确输入，独立数值参照不依赖下一阶段求解器。</p></section><section><h2>模型实现、数据口径与文献</h2><p><a href="../assets/comprehensive-heston-fourier-inversion.html">Heston特征函数定价：风险中性概率、复数分支与积分收敛</a>　<a href="../cpp/comprehensive_pricing.hpp" download>C++17完整实现</a>　<a href="https://doi.org/10.1093/rfs/6.2.327">Heston (1993), A Closed-Form Solution for Options with Stochastic Volatility with Applications to Bond and Currency Options, Review of Financial Studies.</a></p><p><a href="../assets/comprehensive-variance-strip-quadrature.html">模型无关方差互换复制：OTM期权条带、有限执行价与积分误差</a>　<a href="../cpp/comprehensive_pricing.hpp" download>C++17完整实现</a>　<a href="https://emanuelderman.com/more-than-you-ever-wanted-to-know-about-volatility-swaps/">Demeterfi, Derman, Kamal and Zou (1999), More Than You Ever Wanted to Know About Volatility Swaps, Goldman Sachs Quantitative Strategies Research Notes.</a></p><p>全部输入由下方实验源码显式构造，参数与C++接口一致；结果为教学构造情形，不代表真实市场统计量。</p></section><section><h2>独立参考及实验判据</h2><p>独立Black公式核对每个期权节点，再对三种执行价步长比较复制误差。</p><p>批量运行：<code>python quant/research/run_integrated_research.py ./build/kline_quant integrated-results</code>。</p><p>输出：<code>integrated-results/integrated_variance_heston_option_strip.csv</code>。该文件由运行程序生成。</p></section><section><h2>可执行实验与证据</h2><pre>def stochastic_variance_limit_strip(model,report):
+    output=[]
+    F=100;k=.8;theta=.04;T=1.5
+    for v0 in (.01,.04,.09):
+        variance=theta*T+(v0-theta)*(-math.expm1(-k*T))/k
+        for step in (4,2,1):
+            strikes=list(range(20,301,step))
+            rows=model("heston-fourier-inversion",[[F,K,0,0,T,k,theta,0,0,v0] for K in strikes],[80,100])
+            data=[]
+            for K,r in zip(strikes,rows):
+                c=forward_call(F,K,variance);near(r[0],c,atol=1e-7)
+                near(r[0]-r[1],F-K)
+                data.append([K,max(0,r[0]),max(0,r[1])])
+            strip=model("variance-strip-quadrature",data,[F,T,1e-8])
+            estimate=strip[-1][5]
+            assert abs(estimate-variance/T)&lt;.002
+            output.append([v0,step,variance/T,estimate,estimate-variance/T])
+    report("integrated_variance_heston_option_strip",["InitialVariance","StrikeSpacing","AnalyticVarianceRate","StripVarianceRate","Difference"],output)</pre></section><section><h2>经济及数值边界</h2><p>仅考察零vol-of-vol极限；不能将结果推广为一般Heston的全域积分误差界。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>
