@@ -78,7 +78,7 @@ def stream_vintage_join(model,report):
         # Sequence index is the effective time, and the explicit economic clock starts
         # later than the three source timestamps so availability cannot precede effective time.
         x=[[0,1,j,available[j]+3,10*j] for j in (1,2,3)]
-        queries=[[1,1,3,t] for t in range(4,8)]
+        queries=[[1,1,3,t,0] for t in range(4,8)]
         result=model("bitemporal-vintage-join",x+queries,[3])
         for r in result:
             visible=[j for j in available if available[j]+3<=r[1]]
