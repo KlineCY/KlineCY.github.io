@@ -14,7 +14,7 @@ function equations(h){
         katex.renderToString(unesc(m[1]),{throwOnError:true,strict:"error"});count++;
     }
 }
-assert.equal(cat.length,42);assert.equal(new Set(cat.map(c=>c.id)).size,42);
+assert.equal(cat.length,60);assert.equal(new Set(cat.map(c=>c.id)).size,60);
 for(const c of cat){
     const path="integrated-"+c.id.replaceAll("_","-")+".html",h=read(root+path),s=read(root+c.script);
     assert(hub.includes(path));assert(h.includes("integrated-results/"+c.id+".csv"));
@@ -24,6 +24,7 @@ for(const c of cat){
     for(const model of c.models)assert(h.includes("comprehensive-"+model+".html"),model);
     equations(h);
 }
+assert.equal(new Set(cat.flatMap(c=>c.models)).size,80);
 assert.equal(native.length,4);
 for(const c of native){
     const path="integrated-native-"+c.id+".html",h=read(root+path);
@@ -34,6 +35,6 @@ for(const c of native){
     assert(h.includes("integrated-examples/"+c.file));
     equations(h);
 }
-assert(count>=58);assert(read("quant/sidebar-v2.js").includes("integrated-research.html"));
+assert(count>=76);assert(read("quant/sidebar-v2.js").includes("integrated-research.html"));
 assert(read("quant/index.html").includes("integrated-research.html"));
-console.log("PASS: 42 cross-model chapters, four native project chapters, "+count+" rendered equations, source and navigation fidelity");
+console.log("PASS: 60 cross-model chapters, four native project chapters, "+count+" rendered equations, source and navigation fidelity");
