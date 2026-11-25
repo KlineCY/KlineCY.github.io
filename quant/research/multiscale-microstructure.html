@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>高频风险估计与市场时钟｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="depth-labs.css"><link rel="stylesheet" href="multiscale.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main class="multiscale"><header><h1>高频风险估计与市场时钟</h1><p><a href="multiscale-research.html">多尺度与实证研究体系</a>　<a href="multiscale-microstructure.html">高频风险与市场时钟</a>　<a href="../cpp/multiscale_cli.cpp" download>统一C++17入口</a></p></header><section><h2>统一研究主线</h2><p>从非同步区间到刷新时间、时间移位与噪声矩校正，区分观测频率、潜在价格变化和微观结构污染，再通过成交量时钟将逐笔交易转化为严格守恒的事件特征。八项方法各自明确数据可用时刻及统计假设。</p><h3><a href="multiscale-hy-covariance.html">非同步交易序列的Hayashi–Yoshida协方差</a></h3><p>两资产的成交时点通常不一致。直接按行号相乘会错误配对不同时间区间；先同步到规则网格又可能丢弃真实成交间隔信息。HY估计利用每个价格变化覆盖的时间区间，只要两个区间具有正长度交集就累加收益乘积。</p><h3><a href="multiscale-refresh-covariance.html">刷新时间同步与上一笔价格采样</a></h3><p>刷新时间定义为两个资产均出现新观察后的最早时间。到该时点分别取两资产最新且已发生的价格。这样产生同步观测，但会以交易较稀疏的资产为约束，舍弃某些高频变化。</p><h3><a href="multiscale-hy-shift-grid.html">异步协方差的时间移位曲线与领先滞后诊断</a></h3><p>对第二资产时间区间施加已指定的一组移位，计算每个移位下HY交叉项及重叠长度。移位符号明确为给第二资产时间加δ；若正移位使曲线峰值增加，表示该数据排列在这一移位下更加一致。</p><h3><a href="multiscale-bipower-variation.html">实现方差、双幂变差及跳跃风险分解</a></h3><p>连续扩散的相邻标准化收益绝对值乘积具有已知正态矩，因而乘π/2可恢复局部方差尺度。与平方收益相比，孤立跳跃与邻近小幅扩散收益的乘积阶数更低。在适当高频渐近条件下，BV对有限活动跳跃更稳健。</p><h3><a href="multiscale-noise-moments.html">加性价格噪声的一阶自协方差矩识别</a></h3><p>在潜在增量独立、观测噪声独立同分布且与潜在价格独立的简化模型中，噪声差分产生负一阶自协方差：相邻观测收益共享同一个噪声项但符号相反。二阶及更高滞后理论噪声自协方差为零。</p><h3><a href="multiscale-lag-cov-noise.html">重叠长差分的双资产已知噪声校正</a></h3><p>假设等间隔潜在收益具有同一协方差Σ且跨期不相关，价格观测误差独立于潜在增量，在同一期内两资产噪声协方差为Ω。k步长差分包含k个潜在增量，但噪声仅来自两个端点，因此信号与噪声的增长尺度不同。</p><h3><a href="multiscale-weighted-preaverage.html">任意离散权重的预平均及精确噪声矩校正</a></h3><p>预平均将连续若干高频收益按窗口权重线性组合。潜在独立增量的方差贡献为权重平方和A；对独立价格噪声差分展开，内部噪声系数为相邻权重差，首末端为边界权重。故噪声方差贡献由B精确决定。</p><h3><a href="multiscale-volume-bars.html">精确成交量时钟的跨栏拆分与名义金额守恒</a></h3><p>与固定时间栏不同，成交量时钟在累计成交量达到指定阈值时结束一栏。若单笔交易跨越栏边界，需要在同一价格及方向下拆分成交量，保证每个完整栏的量恰为阈值，避免把整个跨栏交易错误分配至单一栏。</p></section><section><h2>原生计算实现</h2><pre>#pragma once
+#include &quot;multiscale_common.hpp&quot;
+namespace msq {
+struct Ticks{Vec t,p;};
+inline Ticks ticks(const Vec&amp; x,size_t&amp; at,int n){
+    require(at+2*size_t(n)&lt;=x.size());Ticks a;
+    for(int i=0;i&lt;n;++i){double t=x[at++],p=x[at++];positive(p);require(i==0||t&gt;a.t.back());a.t.push_back(t);a.p.push_back(std::log(p));}
+    return a;
+}
+inline std::pair&lt;Ticks,Ticks&gt; two_ticks(const Vec&amp; x,size_t at=0){
+    require(x.size()&gt;=at+2);int n=integer(x[at++],2,50000),m=integer(x[at++],2,50000);
+    require(at+2*size_t(n+m)==x.size());Ticks a=ticks(x,at,n),b=ticks(x,at,m);return {a,b};
+}
+inline Vec hy(const Ticks&amp; a,const Ticks&amp; b,double shift){
+    size_t i=1,j=1;double c=0,overlap=0,n=0,v1=0,v2=0;
+    for(size_t k=1;k&lt;a.p.size();++k)v1+=sq(a.p[k]-a.p[k-1]);
+    for(size_t k=1;k&lt;b.p.size();++k)v2+=sq(b.p[k]-b.p[k-1]);
+    while(i&lt;a.t.size()&amp;&amp;j&lt;b.t.size()){
+        double l=std::max(a.t[i-1],b.t[j-1]+shift),r=std::min(a.t[i],b.t[j]+shift);
+        if(l&lt;r){c+=(a.p[i]-a.p[i-1])*(b.p[j]-b.p[j-1]);overlap+=r-l;++n;}
+        double t=a.t[i],s=b.t[j]+shift;
+        if(t&lt;=s)++i;
+        if(s&lt;=t)++j;
+    }
+    return {c,v1,v2,n,overlap};
+}
+inline Vec hy_covariance(const Vec&amp; x){auto a=two_ticks(x);return hy(a.first,a.second,0);}
+inline Vec refresh_covariance(const Vec&amp; x){
+    auto ab=two_ticks(x);const Ticks&amp; a=ab.first;const Ticks&amp; b=ab.second;
+    size_t i=0,j=0;double now=std::max(a.t[0],b.t[0]);Vec t,u,v;
+    while(true){
+        while(i+1&lt;a.t.size()&amp;&amp;a.t[i+1]&lt;=now)++i;
+        while(j+1&lt;b.t.size()&amp;&amp;b.t[j+1]&lt;=now)++j;
+        t.push_back(now);u.push_back(a.p[i]);v.push_back(b.p[j]);
+        if(i+1==a.t.size()||j+1==b.t.size())break;
+        now=std::max(a.t[i+1],b.t[j+1]);
+    }
+    require(t.size()&gt;=2);double c=0,p=0,q=0;
+    for(size_t k=1;k&lt;t.size();++k){double y=u[k]-u[k-1],z=v[k]-v[k-1];c+=y*z;p+=y*y;q+=z*z;}
+    Vec out{c,p,q,double(t.size()),t.back()-t.front()};
+    out.insert(out.end(),t.begin(),t.end());return out;
+}
+inline Vec hy_shift_grid(const Vec&amp; x){
+    require(x.size()&gt;=12);int k=integer(x[0],1,201);require(x.size()&gt;size_t(k+1));
+    auto a=two_ticks(x,k+1);Vec out{0,0,0};double best=-1,lag=0,c=0;
+    for(int j=0;j&lt;k;++j){double d=x[j+1];require(j==0||d&gt;x[j]);Vec z=hy(a.first,a.second,d);
+        if(std::abs(z[0])&gt;best){best=std::abs(z[0]);lag=d;c=z[0];}
+        out.insert(out.end(),{d,z[0],z[3],z[4]});}
+    out[0]=lag;out[1]=c;out[2]=best;return out;
+}
+inline Vec bipower_variation(const Vec&amp; x){
+    require(x.size()&gt;=3&amp;&amp;x.size()&lt;=100000);double pi=std::acos(-1.),rv=0,bv=0,iq=0;
+    for(size_t i=0;i&lt;x.size();++i){rv+=sq(x[i]);iq+=sq(sq(x[i]));if(i)bv+=std::abs(x[i]*x[i-1]);}
+    bv*=pi/2*x.size()/(x.size()-1.);
+    return {rv,bv,rv-bv,std::max(rv-bv,0.),x.size()*iq/3};
+}
+inline Vec noise_moments(const Vec&amp; x){
+    require(x.size()&gt;=3&amp;&amp;x.size()&lt;=100000);double m=avg(x),a=0,b=0;
+    for(size_t i=0;i&lt;x.size();++i){a+=sq(x[i]-m);if(i)b+=(x[i]-m)*(x[i-1]-m);}
+    // Empirical moments use a common centered-return convention, not an unbiased variance estimate.
+    a/=x.size();b/=x.size()-1;
+    return {m,a,b,-b,a+2*b,std::max(0.,-b),std::max(0.,a+2*b)};
+}
+inline Vec lag_cov_noise(const Vec&amp; x){
+    require(x.size()&gt;=8&amp;&amp;(x.size()-4)%2==0);int lag=integer(x[0],1,10000);double u=x[1],v=x[2],rho=x[3];
+    require(u&gt;=0&amp;&amp;v&gt;=0&amp;&amp;sq(rho)&lt;=u*v+1e-15);
+    int n=int((x.size()-4)/2);require(lag&lt;n);
+    double a=0,b=0,c=0;
+    for(int j=lag;j&lt;n;++j){double r=x[4+2*j]-x[4+2*(j-lag)],s=x[5+2*j]-x[5+2*(j-lag)];
+        a+=r*r;b+=s*s;c+=r*s;}
+    double w=double(n-lag)*lag,steps=n-1.,factor=steps/w;
+    return {a*factor,b*factor,c*factor,(a-2*(n-lag)*u)*factor,(b-2*(n-lag)*v)*factor,(c-2*(n-lag)*rho)*factor,double(n-lag),factor};
+}
+inline Vec weighted_preaverage(const Vec&amp; x){
+    require(x.size()&gt;=7);int k=integer(x[0],2,1000);double noise=x[1];require(noise&gt;=0&amp;&amp;x.size()&gt;size_t(k+2));
+    Vec w(x.begin()+2,x.begin()+2+k);int n=int(x.size()-2-k);require(n&gt;=k+1&amp;&amp;n&lt;=100000);
+    double A=dot(w,w),B=sq(w.front())+sq(w.back());positive(A);
+    for(int j=1;j&lt;k;++j)B+=sq(w[j]-w[j-1]);
+    double raw=0;int m=n-k+1;
+    for(int i=0;i&lt;m;++i){double z=0;for(int j=0;j&lt;k;++j)z+=w[j]*x[2+k+i+j];raw+=z*z;}
+    double factor=double(n)/(m*A);
+    return {raw,A,B,m*noise*B,raw*factor,(raw-m*noise*B)*factor,double(m),factor};
+}
+inline Vec volume_bars(const Vec&amp; x){
+    require(x.size()&gt;=5&amp;&amp;(x.size()-1)%4==0);double target=x[0];positive(target);
+    Vec out{0,0,0,0,0};double vol=0,signedv=0,notional=0,o=0,h=0,l=0,c=0,start=0,last=0,total=0,nt=0,sv=0;int bars=0;
+    auto emit=[&amp;](bool full){out.insert(out.end(),{start,last,o,h,l,c,vol,signedv,notional/vol,full?1.:0.});++bars;require(bars&lt;=50000);vol=0;signedv=0;notional=0;};
+    for(size_t i=1;i&lt;x.size();i+=4){
+        double t=x[i],price=x[i+1],q=x[i+2],sgn=x[i+3];positive(price);positive(q);require((sgn==1||sgn==-1)&amp;&amp;(i==1||t&gt;=last));require(q/target&lt;=50000);
+        total+=q;nt+=q*price;sv+=q*sgn;
+        while(q&gt;0){
+            if(vol==0){start=t;o=h=l=price;}h=std::max(h,price);l=std::min(l,price);c=price;last=t;
+            double room=target-vol;positive(room);bool full=q&gt;=room;double z=full?room:q;
+            vol=full?target:vol+z;q=full?q-z:0;signedv+=sgn*z;notional+=price*z;
+            if(full||vol&gt;=target)emit(true);
+        }
+    }
+    if(vol&gt;0)emit(false);
+    out[0]=bars;out[1]=total;out[2]=nt;out[3]=sv;double conserved=0;for(size_t i=5;i&lt;out.size();i+=10)conserved+=out[i+6];out[4]=total-conserved;return out;
+}
+}
+</pre><p><a href="../cpp/multiscale_microstructure.hpp" download>完整头文件</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

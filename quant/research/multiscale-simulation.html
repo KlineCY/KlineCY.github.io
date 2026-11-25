@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>随机模拟、解析矩与方差控制｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="depth-labs.css"><link rel="stylesheet" href="multiscale.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main class="multiscale"><header><h1>随机模拟、解析矩与方差控制</h1><p><a href="multiscale-research.html">多尺度与实证研究体系</a>　<a href="multiscale-simulation.html">随机模拟与方差控制</a>　<a href="../cpp/multiscale_cli.cpp" download>统一C++17入口</a></p></header><section><h2>统一研究主线</h2><p>从单路径支付、层间耦合、控制变量到全局样本成本预算，分别区分时间离散化偏差、统计误差、路径随机性和估计系数误差。八项方法既能独立运行，又可连接完整多层模拟研究。</p><h3><a href="multiscale-mlmc-plan.html">多层Monte Carlo的方差预算与成本最优分配</a></h3><p>用逐级差分代替在最细网格直接独立模拟。设第零层为粗层支付，随后每层为同一随机输入下细层与粗层的支付差。层间抽样独立时，估计方差是各层差分样本均值方差之和。给定每层单路径成本与先导方差估计，成本最小化问题只有一个全局方差预算。</p><h3><a href="multiscale-mlmc-estimate.html">独立层样本的望远镜估计与抽样误差</a></h3><p>给定各层独立样本的实际支付对，先在每对内求差，再计算层均值和无偏样本方差。望远镜恒等式只依赖相邻层的边际分布一致，耦合方式影响差分方差但不改变期望。</p><h3><a href="multiscale-asian-coupling.html">同一布朗路径下的亚洲期权粗细监测耦合</a></h3><p>几何布朗运动具有精确对数转移。对两倍时间步长的粗网格，直接聚合相邻两个细网格增量，而非另行生成独立正态变量。由此细粗路径在共同监测节点上具有相同股票价格。</p><h3><a href="multiscale-asian-moments.html">加权算术与几何平均的解析协方差及控制变量</a></h3><p>在风险中性GBM下，对数价格联合正态。任意非负且和为1的监测权重将对数几何平均转化为正态线性组合；算术平均为对数正态变量的加权和。联合正态矩母函数给出一阶、二阶及混合矩。</p><h3><a href="multiscale-stratified-call.html">正态分层下欧式看涨支付的解析条件矩</a></h3><p>把标准正态轴按指定边界分成互斥区间，并将每个区间与看涨实值条件相交。通过完成平方，截断指数矩可以直接化为标准正态CDF差。支付的一次和二次矩由指数矩的线性组合得到。</p><h3><a href="multiscale-greek-estimators.html">共同随机数下路径导数与似然比Greeks</a></h3><p>期权价值对参数求导有两条路径：固定标准正态随机数，对映射后的支付求导；或固定终点价格，对其概率密度的对数求导。前者要求适当的可微性与交换积分条件，后者可用于支付不连续的数字期权。</p><h3><a href="multiscale-bridge-path.html">多监测节点的Brownian bridge条件存活定价</a></h3><p>对GBM取对数后，在给定两个端点的条件下，区间内路径为具有确定端点的布朗桥；漂移不影响条件桥的越界概率。若任一端点不高于下障碍，则连续存活概率为零。否则反射原理给出区间存活概率。</p><h3><a href="multiscale-frozen-control.html">独立先导样本的控制变量系数及样本外方差评价</a></h3><p>控制变量需要已知期望，例如风险中性测度下可预测持仓的贴现自融资股票收益具有零均值。先导样本估计控制系数，再固定该系数用于独立外部样本。这样可避免利用同一批最终支付反复选择控制系数所引入的选择偏误。</p></section><section><h2>原生计算实现</h2><pre>#pragma once
+#include &quot;multiscale_common.hpp&quot;
+namespace msq {
+inline Vec mlmc_plan(const Vec&amp; x){
+    require(x.size()&gt;=3&amp;&amp;x.size()%2==1);double e=x[0];positive(e);
+    double h=0;for(size_t i=1;i&lt;x.size();i+=2){require(x[i]&gt;=0&amp;&amp;x[i+1]&gt;0);h+=std::sqrt(x[i]*x[i+1]);}
+    Vec n;double v=0,c=0;
+    for(size_t i=1;i&lt;x.size();i+=2){
+        double k=std::max(2.,std::ceil(h*std::sqrt(x[i]/x[i+1])/sq(e)));require(k&lt;=1e9);
+        n.push_back(k);v+=x[i]/k;c+=x[i+1]*k;
+    }
+    Vec out{v,c,sq(h/e),h};out.insert(out.end(),n.begin(),n.end());return out;
+}
+inline Vec mlmc_estimate(const Vec&amp; x){
+    require(x.size()&gt;=7);int l=integer(x[0],1,30);size_t p=1;double est=0,v=0,c=0;Vec means,vars,counts;
+    for(int j=0;j&lt;l;++j){
+        require(p+2&lt;=x.size());int n=integer(x[p++],2,100000);double cost=x[p++];positive(cost);require(p+2*size_t(n)&lt;=x.size());
+        Vec d;for(int i=0;i&lt;n;++i){double f=x[p++],g=x[p++];if(j==0)require(g==0);d.push_back(f-g);}
+        double m=avg(d),z=var(d);est+=m;v+=z/n;c+=cost*n;means.push_back(m);vars.push_back(z);counts.push_back(n);
+    }
+    require(p==x.size());Vec out{est,v,std::sqrt(v),c};out.insert(out.end(),means.begin(),means.end());out.insert(out.end(),vars.begin(),vars.end());out.insert(out.end(),counts.begin(),counts.end());return out;
+}
+inline Vec asian_coupling(const Vec&amp; x){
+    require(x.size()&gt;=7);double s=x[0],k=x[1],r=x[2],sigma=x[3],T=x[4];positive(s);positive(k);positive(T);require(sigma&gt;=0);
+    int n=int(x.size())-5;require(n&gt;=2&amp;&amp;n%2==0&amp;&amp;n&lt;=10000);double h=T/n,drift=(r-.5*sigma*sigma)*h,vol=sigma*std::sqrt(h),y=std::log(s),a=0,b=0,coarse=y;
+    for(int j=0;j&lt;n;j+=2){y+=drift+vol*x[5+j];a+=std::exp(y);y+=drift+vol*x[6+j];a+=std::exp(y);
+        coarse+=2*drift+vol*(x[5+j]+x[6+j]);b+=std::exp(coarse);}
+    a/=n;b/=n/2;double df=std::exp(-r*T),f=df*std::max(a-k,0.),g=df*std::max(b-k,0.);
+    return {a,b,f,g,f-g,std::exp(y),std::exp(coarse),std::exp(y)-std::exp(coarse)};
+}
+inline Vec asian_moments(const Vec&amp; x){
+    require(x.size()&gt;=5&amp;&amp;(x.size()-3)%2==0);double S=x[0],r=x[1],sigma=x[2];positive(S);require(sigma&gt;=0);
+    int n=int((x.size()-3)/2);require(n&lt;=1000);Vec t(n),w(n),m(n);double mt=0,ea=0,vg=0,va=0,cross=0;
+    for(int i=0;i&lt;n;++i){t[i]=x[3+2*i];w[i]=x[4+2*i];require(t[i]&gt;0&amp;&amp;w[i]&gt;=0&amp;&amp;(i==0||t[i]&gt;t[i-1]));mt+=w[i]*t[i];m[i]=S*std::exp(r*t[i]);ea+=w[i]*m[i];}
+    require(std::abs(sum(w)-1)&lt;1e-10);
+    Vec g(n);
+    for(int i=0;i&lt;n;++i)for(int j=0;j&lt;n;++j){double c=sq(sigma)*std::min(t[i],t[j]);vg+=w[i]*w[j]*c;g[i]+=w[j]*c;va+=w[i]*w[j]*m[i]*m[j]*std::expm1(c);}
+    double eg=S*std::exp((r-.5*sq(sigma))*mt+.5*vg),vG=sq(eg)*std::expm1(vg);
+    for(int i=0;i&lt;n;++i)cross+=w[i]*m[i]*eg*std::expm1(g[i]);
+    double beta=vG&gt;0?cross/vG:0,remaining=std::max(0.,va-beta*cross);
+    return {ea,va,eg,vG,cross,beta,remaining};
+}
+inline Vec stratified_call(const Vec&amp; x){
+    require(x.size()&gt;=5);double S=x[0],K=x[1],r=x[2],sig=x[3],T=x[4];positive(S);positive(K);positive(sig);positive(T);
+    require(x.size()&lt;=105);double s=sig*std::sqrt(T),m=std::log(S)+(r-.5*sig*sig)*T,k=(std::log(K)-m)/s,df=std::exp(-r*T);
+    Vec cuts{-std::numeric_limits&lt;double&gt;::infinity()};
+    for(size_t i=5;i&lt;x.size();++i){require(x[i]&gt;cuts.back()&amp;&amp;std::abs(x[i])&lt;=8);cuts.push_back(x[i]);}
+    cuts.push_back(std::numeric_limits&lt;double&gt;::infinity());Vec out{0,0,0,0};double e=0,e2=0,within=0,mass=0;
+    for(size_t i=1;i&lt;cuts.size();++i){
+        double a=cuts[i-1],b=cuts[i],p=normalmass(a,b);positive(p);double lo=std::max(a,k),u=0,v=0;
+        if(lo&lt;b){double z0=normalmass(lo,b),z1=std::exp(m+.5*s*s)*normalmass(lo-s,b-s),z2=std::exp(2*m+2*s*s)*normalmass(lo-2*s,b-2*s);
+            u=df*(z1-K*z0);v=df*df*(z2-2*K*z1+K*K*z0);}
+        double mu=u/p,second=v/p,variance=std::max(0.,second-mu*mu);e+=u;e2+=v;within+=p*variance;mass+=p;
+        out.insert(out.end(),{p,mu,variance});
+    }
+    out[0]=e;out[1]=std::max(0.,e2-e*e);out[2]=within;out[3]=mass;return out;
+}
+inline Vec greek_estimators(const Vec&amp; x){
+    require(x.size()&gt;=7);double S=x[0],K=x[1],r=x[2],sigma=x[3],T=x[4];positive(S);positive(K);positive(sigma);positive(T);
+    double st=std::sqrt(T),v=sigma*st,df=std::exp(-r*T);Mat values(6);
+    for(size_t i=5;i&lt;x.size();++i){double z=x[i],p=S*std::exp((r-.5*sigma*sigma)*T+v*z),pay=df*std::max(p-K,0.);bool itm=p&gt;K;
+        values[0].push_back(pay);values[1].push_back(itm?df*p/S:0);values[2].push_back(pay*z/(S*v));
+        values[3].push_back(itm?df*p*(st*z-sigma*T):0);values[4].push_back(pay*((z*z-1)/sigma-st*z));values[5].push_back(itm?df*z/(S*v):0);}
+    Vec out;for(const auto&amp; a:values){out.push_back(avg(a));out.push_back(var(a));}
+    double d1=(std::log(S/K)+(r+.5*sigma*sigma)*T)/v,d2=d1-v;
+    out.insert(out.end(),{S*cdf(d1)-K*df*cdf(d2),cdf(d1),S*pdf(d1)*st,df*pdf(d2)/(S*v)});return out;
+}
+inline Vec bridge_path(const Vec&amp; x){
+    require(x.size()&gt;=10&amp;&amp;(x.size()-6)%2==0);double h=x[0],sigma=x[1],r=x[2],K=x[3],S=x[4],cp=x[5];
+    positive(h);positive(sigma);positive(K);positive(S);require(cp==1||cp==-1);
+    double prev=0,logsurv=0,last=S;bool alive=S&gt;h;Vec p;
+    for(size_t i=6;i&lt;x.size();i+=2){double t=x[i],s=x[i+1];positive(s);require(t&gt;prev);double a=0;
+        if(last&gt;h&amp;&amp;s&gt;h){double z=2*std::log(last/h)*std::log(s/h)/(sq(sigma)*(t-prev));a=-std::expm1(-z);logsurv+=std::log(a);}
+        else alive=false;
+        p.push_back(a);last=s;prev=t;}
+    double survival=alive?std::exp(logsurv):0,vanilla=std::exp(-r*prev)*std::max(cp*(last-K),0.);
+    Vec out{alive?vanilla:0,vanilla*survival,survival,vanilla};out.insert(out.end(),p.begin(),p.end());return out;
+}
+inline Vec frozen_control(const Vec&amp; x){
+    require(x.size()&gt;=10&amp;&amp;(x.size()-2)%2==0);int n=integer(x[0],2,100000);double known=x[1];int total=int((x.size()-2)/2);require(total&gt;=n+2);
+    Vec yp,cp,yt,ct;
+    for(int i=0;i&lt;total;++i){double y=x[2+2*i],c=x[3+2*i];if(i&lt;n){yp.push_back(y);cp.push_back(c);}else{yt.push_back(y);ct.push_back(c);}}
+    double vp=var(cp);positive(vp);double beta=cov(yp,cp)/vp;Vec adjusted;
+    for(size_t i=0;i&lt;yt.size();++i)adjusted.push_back(yt[i]-beta*(ct[i]-known));
+    double a=var(yt),b=var(adjusted);return {beta,avg(yt),avg(adjusted),a,b,a-b,avg(ct),double(yt.size())};
+}
+}
+</pre><p><a href="../cpp/multiscale_simulation.hpp" download>完整头文件</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>
