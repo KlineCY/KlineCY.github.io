@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>八套完整跨模型联合研究项目｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="depth-labs.css"><link rel="stylesheet" href="finite-state.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main class="finite-state"><header><h1>八套完整跨模型联合研究项目</h1><p><a href="finite-state-research.html">有限状态与动态研究</a>　<a href="finite-state-projects.html">完整联合研究项目</a>　<a href="../cpp/finite_state_cli.cpp" download>统一C++17入口</a></p></header><section><h2>从基础计算到完整决策</h2><p>八个项目将状态推断、精确损失分布、价格树、离散控制、微观结构与数值最优性证书连接起来。每个项目具有独立输入、明确状态、决策目标、数学递推和解析参照。另以Python路径及可行解枚举验证非退化情景。</p><p><a href="finite-state-projects-cases.json" download>解析算例</a>　<a href="finite_state_project_reference.py" download>独立Python参考程序</a></p><h3><a href="finite-state-duration-filter.html">右删失显式持续时间过滤：从观测到下一期预测</a></h3><p>离线完整段模型将T规定为一个段结束日期，但实盘信号在任意观察日期产生，当前段可能尚未完成。直接使用完整段后验会对状态持续时间施加额外的结束条件。本项目把状态和当前年龄扩展成有限Markov链，通过离散风险率将原始持续时间分布转化为下一期延续或换段概率。</p><h3><a href="finite-state-credit-posterior-stress.html">观察违约数后的系统状态更新与分层压力估值</a></h3><p>考虑一组与下一期组合条件独立的校准违约观测，观察到的违约数用于更新系统状态概率。下一期分层损失由状态条件下的独立异质违约模型给出。此前静态系统状态模型只返回违约数分布；本项目将后验状态权重、加权损失卷积和概率不确定性放在同一链上。</p><h3><a href="finite-state-robust-mdp.html">转移概率不确定下的有限期鲁棒策略与前向对抗检验</a></h3><p>有限期投资决策不仅面临未来收益随机性，还面临转移矩阵本身的估计误差。本项目在每个时点、状态和动作处允许转移概率在各自总变差球内独立变化。矩形性使对抗选择可在Bellman递推内逐行求解，而不必联合优化全部未来转移矩阵。</p><h3><a href="finite-state-drawdown-policy.html">将最大回撤超限概率内生化的动态配置策略</a></h3><p>传统动态对数财富配置忽略路径内最大回撤，事后计算回撤风险无法改变当时决策。本项目将当前回撤、此前暴露和是否已越过阈值加入状态。暴露以离散索引表示，切换费用按索引距离转化为对数财富格点扣减；下一期收益由新暴露及转移到的市场状态决定。</p><h3><a href="finite-state-asian-additive.html">整数加法树的算术平均期权与路径面积状态</a></h3><p>算术平均期权的支付依赖所有观察日期的价格和，普通价格树无法恢复该和。为得到可精确合并的教学格点，采用零利率下的加法对称随机游走，并要求最低可能价格为正。价格位移和累计位移均为整数，因此可以用有限的二维状态合并路径，而无需对浮点累计价格做近似分箱。</p><h3><a href="finite-state-hidden-queue-choice.html">隐藏流动性状态的贝叶斯挂单决策与信息价值</a></h3><p>执行者只能看到市场执行、前方取消、不利退出与无变化事件，不能直接观察真实流动性状态。状态依赖的事件概率提供信息；每次观察事件后先按Bayes公式更新状态后验，再通过对称Markov切换得到下一事件前的预测信念。队列位置与信念共同决定继续挂单的经济价值。</p><h3><a href="finite-state-transport-stress.html">有限支持Wasserstein型压力估值的原始—对偶闭合</a></h3><p>总变差压力只约束被搬运的概率质量，不区分把概率移到近邻或极端场景所需代价。本项目允许从参考支持点i到压力支持点j的运输成本c_ij，固定参考边际分布，目标最大化压力情景期望损失。每一参考点至少存在零成本目的地，保证任意非负预算下可行。</p><h3><a href="finite-state-nonlinear-risk-jet.html">二阶自动微分与非线性Gaussian风险分解</a></h3><p>非线性风险暴露不能仅靠线性Delta与协方差衡量。定义二阶Jet同时携带函数值、梯度及对称Hessian的三个独立坐标。每次加法、乘法和复合映射都按微分规则传播，避免有限差分的步长选择和舍入误差。以稳定softplus、交互项及平方项构造二维非线性投资损益函数。</p></section><section><h2>完整C++17实现</h2><pre>#pragma once
+#include &quot;finite_state_inference.hpp&quot;
+#include &quot;finite_state_credit.hpp&quot;
+#include &quot;finite_state_control.hpp&quot;
+#include &quot;finite_state_derivatives.hpp&quot;
+#include &quot;finite_state_queue.hpp&quot;
+namespace fsq {
+// Age-expanded online filter. The last segment need not finish at the observation boundary.
+inline Vec duration_filter(const Vec&amp; x){
+    auto a=duration_input(x);
+    int k=a.initial.size(),d=a.duration[0].size(),n=a.observations.size(),m=a.emission[0].size();
+    Mat survive(k,Vec(d+1));
+    for(int j=0;j&lt;k;++j)for(int l=d-1;l&gt;=0;--l)survive[j][l]=survive[j][l+1]+a.duration[j][l];
+    auto advance=[&amp;](const Mat&amp; f){
+        Mat g(k,Vec(d));
+        for(int j=0;j&lt;k;++j)for(int l=0;l&lt;d;++l)if(f[j][l]&gt;0){
+            require(survive[j][l]&gt;0);
+            double p=a.duration[j][l]/survive[j][l];
+            for(int i=0;i&lt;k;++i)g[i][0]+=f[j][l]*p*a.transition[j][i];
+            if(l+1&lt;d)g[j][l+1]+=f[j][l]*(1-p);
+        }
+        return g;
+    };
+    Mat f(k,Vec(d));
+    for(int j=0;j&lt;k;++j)f[j][0]=a.initial[j];
+    double ll=0;
+    Vec out;
+    for(int t=0;t&lt;n;++t){
+        double z=0;
+        for(int j=0;j&lt;k;++j)for(int l=0;l&lt;d;++l){f[j][l]*=a.emission[j][a.observations[t]];z+=f[j][l];}
+        require(z&gt;0);ll+=std::log(z);
+        for(auto&amp; row:f)for(double&amp; v:row)v/=z;
+        if(t+1&lt;n)f=advance(f);
+    }
+    out.push_back(ll);
+    for(const auto&amp; row:f)out.push_back(sum(row));
+    double age=0;for(int j=0;j&lt;k;++j)for(int l=0;l&lt;d;++l)age+=(l+1)*f[j][l];out.push_back(age);
+    Mat g=advance(f);Vec state(k),predict(m);
+    for(int j=0;j&lt;k;++j){state[j]=sum(g[j]);for(int i=0;i&lt;m;++i)predict[i]+=state[j]*a.emission[j][i];}
+    out.insert(out.end(),state.begin(),state.end());out.insert(out.end(),predict.begin(),predict.end());
+    for(const auto&amp; row:f)out.insert(out.end(),row.begin(),row.end());
+    return out;
+}
+// A systemic-state credit mixture with posterior state weights and a TV stress on these weights.
+inline Vec credit_posterior_stress(const Vec&amp; x){
+    require(x.size()&gt;=8);int k=count(x[0],2,20),n=count(x[1],1,100),obs=count(x[2],0,n);
+    int attach=count(x[3],0,20000),detach=count(x[4],1,20000);double radius=x[5];
+    require(detach&gt;attach&amp;&amp;x.size()==size_t(6+n+k*(n+1)));probability(radius);
+    Vec weights(x.begin()+6,x.begin()+6+n);for(double w:weights)count(w,1,2000);
+    Vec data{double(k),double(n),double(obs)},prior,loss;
+    size_t at=6+n;
+    for(int s=0;s&lt;k;++s){
+        double p=x[at++];prior.push_back(p);data.push_back(p);
+        Vec tr{double(attach),double(detach)};
+        for(int i=0;i&lt;n;++i){double z=x[at++];data.push_back(z);tr.insert(tr.end(),{weights[i],z});}
+        loss.push_back(tranche_sensitivity(tr)[0]);
+    }
+    Vec mix=mixture_count(data),post(mix.begin()+6,mix.begin()+6+k),stress{radius};
+    for(int i=0;i&lt;k;++i)stress.insert(stress.end(),{post[i],-loss[i]});
+    Vec worst=worst_tv(stress);
+    double priorEL=std::inner_product(prior.begin(),prior.end(),loss.begin(),0.);
+    double postEL=std::inner_product(post.begin(),post.end(),loss.begin(),0.);
+    Vec out{mix[4],priorEL,postEL,-worst[1],-worst[1]-postEL,worst[2]};
+    out.insert(out.end(),post.begin(),post.end());out.insert(out.end(),worst.begin()+4,worst.end());out.insert(out.end(),loss.begin(),loss.end());return out;
+}
+// Finite horizon robust MDP with independent row-wise total variation balls.
+inline Vec robust_mdp(const Vec&amp; x){
+    require(x.size()&gt;=8);double eps=x[0];probability(eps);
+    Vec y(x.begin()+1,x.end());MDP a=mdp_input(y);
+    require(a.horizon&lt;=100&amp;&amp;a.n&lt;=10&amp;&amp;a.m&lt;=10);
+    Vec robust(a.n),nominal(a.n);
+    std::vector&lt;std::vector&lt;int&gt;&gt; pol(a.horizon,std::vector&lt;int&gt;(a.n));
+    std::vector&lt;Mat&gt; worst(a.horizon,Mat(a.n,Vec(a.n)));
+    for(int t=a.horizon-1;t&gt;=0;--t){
+        Vec r(a.n,-std::numeric_limits&lt;double&gt;::infinity()),v=r;
+        for(int i=0;i&lt;a.n;++i){
+            for(int b=0;b&lt;a.m;++b){
+                Vec arg{eps};
+                for(int j=0;j&lt;a.n;++j)arg.insert(arg.end(),{a.p[i][b][j],robust[j]});
+                Vec w=worst_tv(arg);
+                double q=a.reward[i][b]+a.discount*w[1];
+                double n=a.reward[i][b]+a.discount*std::inner_product(a.p[i][b].begin(),a.p[i][b].end(),nominal.begin(),0.);
+                v[i]=std::max(v[i],n);
+                if(q&gt;r[i]+1e-12){r[i]=q;pol[t][i]=b;worst[t][i]=Vec(w.begin()+4,w.end());}
+            }
+        }
+        robust.swap(r);nominal.swap(v);
+    }
+    Vec mass(a.n),base(a.n);mass[a.initial]=base[a.initial]=1;
+    double gain=0,basegain=0,df=1,tv=0;
+    for(int t=0;t&lt;a.horizon;++t){
+        Vec nm(a.n),nb(a.n);
+        for(int i=0;i&lt;a.n;++i){
+            int b=pol[t][i];gain+=df*mass[i]*a.reward[i][b];basegain+=df*base[i]*a.reward[i][b];
+            for(int j=0;j&lt;a.n;++j){
+                nm[j]+=mass[i]*worst[t][i][j];nb[j]+=base[i]*a.p[i][b][j];
+                tv+=mass[i]*std::abs(worst[t][i][j]-a.p[i][b][j])/2;
+            }
+        }
+        mass.swap(nm);base.swap(nb);df*=a.discount;
+    }
+    return {robust[a.initial],nominal[a.initial],basegain,gain,robust[a.initial]-gain,tv,sum(mass),double(pol[0][a.initial])};
+}
+// Risk-aware discrete exposure. A log-wealth penalty is charged once when the drawdown limit is crossed.
+inline Vec drawdown_policy(const Vec&amp; x){
+    require(x.size()&gt;=9);int n=count(x[0],1,100),k=count(x[1],2,6),m=count(x[2],2,12),initial=count(x[3],0,k-1),old=count(x[4],0,m-1);
+    int H=count(x[5],1,100),cost=count(x[6],0,20);double step=x[7],pen=x[8];
+    require(step&gt;0&amp;&amp;step&lt;=1&amp;&amp;pen&gt;=0&amp;&amp;x.size()==size_t(9+m*k+k*k));
+    std::vector&lt;std::vector&lt;int&gt;&gt; move(m,std::vector&lt;int&gt;(k));
+    size_t at=9;
+    for(int b=0;b&lt;m;++b)for(int j=0;j&lt;k;++j)move[b][j]=count(x[at++],-20,20);
+    Mat p(k,Vec(k));
+    for(int i=0;i&lt;k;++i){for(int j=0;j&lt;k;++j)p[i][j]=x[at++];distribution(p[i]);}
+    // The absorbing drawdown state H represents a previously crossed threshold.
+    auto index=[&amp;](int i,int a,int h){return (i*m+a)*(H+1)+h;};
+    int states=k*m*(H+1);
+    auto next=[&amp;](int h,int a,int b,int j){
+        int charge=cost*std::abs(a-b);
+        // Trading cost occurs before the next return: an intraperiod breach counts.
+        int before=h+charge,after=std::max(0,before-move[b][j]);
+        if(h==H||before&gt;=H||after&gt;=H)return H;
+        return after;
+    };
+    Vec v(states);
+    std::vector&lt;std::vector&lt;int&gt;&gt; pol(n,std::vector&lt;int&gt;(states));
+    for(int t=n-1;t&gt;=0;--t){
+        Vec u(states,-std::numeric_limits&lt;double&gt;::infinity());
+        for(int i=0;i&lt;k;++i)for(int a=0;a&lt;m;++a)for(int h=0;h&lt;=H;++h){
+            int s=index(i,a,h);
+            for(int b=0;b&lt;m;++b){
+                int c=cost*std::abs(a-b);double z=0;
+                for(int j=0;j&lt;k;++j){
+                    int nh=next(h,a,b,j);
+                    z+=p[i][j]*(step*(move[b][j]-c)-pen*(h&lt;H&amp;&amp;nh==H)+v[index(j,b,nh)]);
+                }
+                if(z&gt;u[s]+1e-12){u[s]=z;pol[t][s]=b;}
+            }
+        }
+        v.swap(u);
+    }
+    int start=index(initial,old,0);Vec mass(states);mass[start]=1;
+    double growth=0,turn=0;
+    for(int t=0;t&lt;n;++t){
+        Vec u(states);
+        for(int i=0;i&lt;k;++i)for(int a=0;a&lt;m;++a)for(int h=0;h&lt;=H;++h){
+            int s=index(i,a,h),b=pol[t][s],c=cost*std::abs(a-b);
+            turn+=mass[s]*std::abs(a-b);
+            for(int j=0;j&lt;k;++j){double z=mass[s]*p[i][j];int nh=next(h,a,b,j);u[index(j,b,nh)]+=z;growth+=z*step*(move[b][j]-c);}
+        }
+        mass.swap(u);
+    }
+    double breach=0;
+    for(int i=0;i&lt;k;++i)for(int a=0;a&lt;m;++a)breach+=mass[index(i,a,H)];
+    double obj=growth-pen*breach;
+    return {v[start],double(pol[0][start]),growth,breach,turn,obj,v[start]-obj,sum(mass)};
+}
+// Arithmetic average payoff in an additive, risk-neutral integer tree at zero rates.
+inline Vec asian_additive(const Vec&amp; x){
+    require(x.size()==5);int s=count(x[0],1,100000),jump=count(x[1],1,1000),n=count(x[2],1,80);
+    double strike=x[3],cp=x[4];require(s&gt;n*jump&amp;&amp;strike&gt;0&amp;&amp;(cp==1||cp==-1));
+    // At time t, j is the signed price displacement and a is the sum of signed displacements.
+    std::map&lt;std::pair&lt;int,int&gt;,double&gt; f;f[{0,0}]=1;
+    for(int t=0;t&lt;n;++t){
+        std::map&lt;std::pair&lt;int,int&gt;,double&gt; g;
+        for(const auto&amp; z:f)for(int a:{-1,1}){
+            int j=z.first.first+a,area=z.first.second+j;
+            g[{j,area}]+=.5*z.second;
+        }
+        f.swap(g);
+    }
+    double value=0,plain=0,mean=0,var=0,mass=0,prob=0;
+    for(auto z:f){
+        double avg=s+double(jump)*z.first.second/(n+1),end=s+jump*z.first.first,w=z.second;
+        value+=w*std::max(0.,cp*(avg-strike));plain+=w*std::max(0.,cp*(end-strike));
+        mean+=w*avg;var+=w*sq(avg-s);mass+=w;prob+=w*(cp*(avg-strike)&gt;0);
+    }
+    return {value,plain,mean,var,prob,mass,double(f.size())};
+}
+// Posterior-aware quote decision with hidden two-state liquidity and independent state transition after each event.
+inline Vec hidden_queue_choice(const Vec&amp; x){
+    require(x.size()==14);int n=count(x[0],1,7),q=count(x[1],0,10);
+    double b=x[2],wait=x[3],fill=x[4],market=x[5],shock=x[6];probability(b);
+    require(wait&gt;=0&amp;&amp;market&gt;=0&amp;&amp;shock&gt;=0);
+    Mat p(2,Vec(4));
+    for(int i=0;i&lt;2;++i){p[i]={x[7+3*i],x[8+3*i],x[9+3*i],1-x[7+3*i]-x[8+3*i]-x[9+3*i]};distribution(p[i]);}
+    double switchp=x[13];probability(switchp);
+    // The posterior after observing an event is propagated through a symmetric regime transition.
+    auto update=[&amp;](double prior,int e){
+        double a=(1-prior)*p[0][e],c=prior*p[1][e],prob=a+c;
+        double post=prob&gt;0?c/prob:prior;
+        return std::pair&lt;double,double&gt;{prob,switchp+(1-2*switchp)*post};
+    };
+    auto evaluate=[&amp;](auto&amp;&amp; self,int t,int j,double prior)-&gt;std::pair&lt;double,int&gt;{
+        if(t==0)return {market,0};
+        double hold=wait;
+        for(int e=0;e&lt;4;++e){
+            auto [pr,next]=update(prior,e);if(pr==0)continue;
+            double v=e==2?market+shock:(e==0&amp;&amp;j==0?fill:self(self,t-1,e==0||e==1?std::max(0,j-1):j,next).first);
+            hold+=pr*v;
+        }
+        return hold&lt;market-1e-12?std::pair&lt;double,int&gt;{hold,1}:std::pair&lt;double,int&gt;{market,0};
+    };
+    // Fully observable state lower bound: transition happens after observing the current event.
+    Mat v(2,Vec(q+1,market));
+    for(int t=1;t&lt;=n;++t){
+        Mat u(2,Vec(q+1));
+        for(int i=0;i&lt;2;++i)for(int j=0;j&lt;=q;++j){
+            double hold=wait;
+            auto cont=[&amp;](int l){return (1-switchp)*v[i][l]+switchp*v[1-i][l];};
+            hold+=p[i][0]*(j==0?fill:cont(j-1))+p[i][1]*cont(std::max(0,j-1))+p[i][2]*(market+shock)+p[i][3]*cont(j);
+            u[i][j]=std::min(market,hold);
+        }
+        v.swap(u);
+    }
+    auto result=evaluate(evaluate,n,q,b);
+    double lower=(1-b)*v[0][q]+b*v[1][q];
+    auto [pr,posterior]=update(b,0);
+    return {result.first,double(result.second),lower,market,result.first-lower,pr,posterior};
+}
+// Finite support distributionally robust risk: transport budget and exact piecewise-linear dual.
+inline Vec transport_stress(const Vec&amp; x){
+    require(x.size()&gt;=5);int m=count(x[0],1,30),n=count(x[1],1,30);double budget=x[2];require(budget&gt;=0&amp;&amp;x.size()==size_t(3+m+n+m*n));
+    Vec p(x.begin()+3,x.begin()+3+m);distribution(p);
+    Vec payoff(x.begin()+3+m,x.begin()+3+m+n);
+    Mat c(m,Vec(n));size_t at=3+m+n;
+    Vec cand{0};
+    for(int i=0;i&lt;m;++i){
+        double low=std::numeric_limits&lt;double&gt;::infinity();
+        for(int j=0;j&lt;n;++j){c[i][j]=x[at++];require(c[i][j]&gt;=0);low=std::min(low,c[i][j]);}
+        require(low==0);
+        for(int j=0;j&lt;n;++j)for(int l=0;l&lt;j;++l)if(c[i][j]!=c[i][l]){
+            double a=(payoff[j]-payoff[l])/(c[i][j]-c[i][l]);if(a&gt;0&amp;&amp;std::isfinite(a))cand.push_back(a);
+        }
+    }
+    double best=std::numeric_limits&lt;double&gt;::infinity(),lambda=0;
+    for(double a:cand){
+        double z=a*budget;
+        for(int i=0;i&lt;m;++i){
+            double mx=-std::numeric_limits&lt;double&gt;::infinity();
+            for(int j=0;j&lt;n;++j)mx=std::max(mx,payoff[j]-a*c[i][j]);
+            z+=p[i]*mx;
+        }
+        if(z&lt;best-1e-11){best=z;lambda=a;}
+    }
+    // A primal optimizer is obtained by mixing tied active plans with low and high transport cost.
+    double cl=0,ch=0,pl=0,ph=0;
+    std::vector&lt;int&gt; lo(m),hi(m);
+    for(int i=0;i&lt;m;++i){
+        double mx=-std::numeric_limits&lt;double&gt;::infinity();
+        for(int j=0;j&lt;n;++j)mx=std::max(mx,payoff[j]-lambda*c[i][j]);
+        lo[i]=hi[i]=-1;
+        for(int j=0;j&lt;n;++j)if(std::abs(payoff[j]-lambda*c[i][j]-mx)&lt;=1e-9*(1+std::abs(mx))){
+            if(lo[i]&lt;0||c[i][j]&lt;c[i][lo[i]])lo[i]=j;
+            if(hi[i]&lt;0||c[i][j]&gt;c[i][hi[i]])hi[i]=j;
+        }
+        require(lo[i]&gt;=0&amp;&amp;hi[i]&gt;=0);cl+=p[i]*c[i][lo[i]];ch+=p[i]*c[i][hi[i]];
+        pl+=p[i]*payoff[lo[i]];ph+=p[i]*payoff[hi[i]];
+    }
+    require(cl&lt;=budget+1e-8);
+    double a=lambda==0?0:ch&gt;cl?std::clamp((budget-cl)/(ch-cl),0.,1.):0;
+    double used=(1-a)*cl+a*ch,primal=(1-a)*pl+a*ph;
+    Vec out{best,lambda,primal,used,best-primal};Vec dest(n);
+    for(int i=0;i&lt;m;++i){dest[lo[i]]+=(1-a)*p[i];dest[hi[i]]+=a*p[i];}
+    out.insert(out.end(),dest.begin(),dest.end());return out;
+}
+// Second-order jet: exact gradient and Hessian propagation for a two-dimensional nonlinear Gaussian transform.
+struct Jet {
+    double v;
+    std::array&lt;double,2&gt; g{};
+    std::array&lt;double,3&gt; h{};
+};
+inline Jet variable(double v,int i){Jet a{v};a.g[i]=1;return a;}
+inline Jet plus(Jet a,Jet b){
+    Jet c{a.v+b.v};for(int i=0;i&lt;2;++i)c.g[i]=a.g[i]+b.g[i];for(int i=0;i&lt;3;++i)c.h[i]=a.h[i]+b.h[i];return c;
+}
+inline Jet mul(Jet a,Jet b){
+    Jet c{a.v*b.v};
+    for(int i=0;i&lt;2;++i)c.g[i]=a.g[i]*b.v+a.v*b.g[i];
+    c.h[0]=a.h[0]*b.v+a.v*b.h[0]+2*a.g[0]*b.g[0];
+    c.h[1]=a.h[1]*b.v+a.v*b.h[1]+a.g[0]*b.g[1]+a.g[1]*b.g[0];
+    c.h[2]=a.h[2]*b.v+a.v*b.h[2]+2*a.g[1]*b.g[1];return c;
+}
+inline Jet compose(Jet a,double v,double d,double dd){
+    Jet c{v};for(int i=0;i&lt;2;++i)c.g[i]=d*a.g[i];
+    c.h[0]=d*a.h[0]+dd*sq(a.g[0]);c.h[1]=d*a.h[1]+dd*a.g[0]*a.g[1];c.h[2]=d*a.h[2]+dd*sq(a.g[1]);return c;
+}
+inline Jet exponential(Jet a){double z=std::exp(a.v);return compose(a,z,z,z);}
+inline Jet logarithm(Jet a){require(a.v&gt;0);return compose(a,std::log(a.v),1/a.v,-1/sq(a.v));}
+inline Vec nonlinear_risk_jet(const Vec&amp; x){
+    require(x.size()==9);
+    double a=x[0],b=x[1],c=x[2],d=x[3],e=x[4],f=x[5],s=x[6],t=x[7],rho=x[8];
+    require(s&gt;0&amp;&amp;t&gt;0&amp;&amp;std::abs(rho)&lt;1);
+    // g(X,Y)=log(1+exp(c X+d Y))+e XY+f X^2.
+    Jet X=variable(a,0),Y=variable(b,1);
+    Jet linear=plus(mul(Jet{c},X),mul(Jet{d},Y));
+    // Stable softplus with analytic first and second derivatives.
+    double z=linear.v,p=z&gt;=0?1/(1+std::exp(-z)):std::exp(z)/(1+std::exp(z));
+    Jet g=compose(linear,std::max(z,0.)+std::log1p(std::exp(-std::abs(z))),p,p*(1-p));
+    g=plus(g,plus(mul(Jet{e},mul(X,Y)),mul(Jet{f},mul(X,X))));
+    double v=s*s,w=t*t,u=rho*s*t;
+    double correction=.5*(g.h[0]*v+2*g.h[1]*u+g.h[2]*w);
+    double delta= sq(g.g[0])*v+2*g.g[0]*g.g[1]*u+sq(g.g[1])*w;
+    // The variance of the centered quadratic Gaussian term is 1/2 tr((H Sigma)^2).
+    double h00=g.h[0]*v+g.h[1]*u,h01=g.h[0]*u+g.h[1]*w,h10=g.h[1]*v+g.h[2]*u,h11=g.h[1]*u+g.h[2]*w;
+    double quad=.5*(h00*h00+2*h01*h10+h11*h11);
+    return {g.v,g.g[0],g.g[1],g.h[0],g.h[1],g.h[2],g.v+correction,delta,quad,delta+quad};
+}
+}
+</pre><p><a href="../cpp/finite_state_projects.hpp" download>本项目头文件</a>。</p></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true});"></script></body></html>

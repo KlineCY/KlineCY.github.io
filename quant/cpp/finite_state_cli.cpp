@@ -6,9 +6,18 @@
 #include "finite_state_queue.hpp"
 #include "finite_state_optimization.hpp"
 #include "finite_state_control.hpp"
+#include "finite_state_projects.hpp"
 using namespace fsq;
 using Method=Vec(*)(const Vec&);
 const std::map<std::string,Method> methods={
+    {"duration_filter",fsq::duration_filter},
+    {"credit_posterior_stress",fsq::credit_posterior_stress},
+    {"robust_mdp",fsq::robust_mdp},
+    {"drawdown_policy",fsq::drawdown_policy},
+    {"asian_additive",fsq::asian_additive},
+    {"hidden_queue_choice",fsq::hidden_queue_choice},
+    {"transport_stress",fsq::transport_stress},
+    {"nonlinear_risk_jet",fsq::nonlinear_risk_jet},
     {"duration_study",fsq::duration_study},
     {"segmentation",fsq::segmentation},
     {"bayes_break",fsq::bayes_break},
