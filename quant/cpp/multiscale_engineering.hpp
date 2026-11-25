@@ -33,10 +33,10 @@ inline Vec delist_wealth(const Vec& x){
 inline Vec delayed_orders(const Vec& x){
     require(x.size()>=12);int n=integer(x[0],1,1000),m=integer(x[1],1,10000);require(x.size()==size_t(2+5*n+5*m)&&n*m<=1000000);
     struct Order{double arrival,end,q,limit,filled=0,notional=0,first=-1,last=-1;int side;};std::vector<Order> o;
-    for(int i=0;i<n;++i){size_t j=2+5*i;double signal=x[j],delay=x[j+1],end=x[j+2],q=x[j+3],limit=x[j+4];require(delay>=0&&end>=signal+delay&&q!=0&&limit>0);
+    for(int i=0;i<n;++i){size_t j=2+5*i;double signal=x[j],delay=x[j+1],end=x[j+2],q=x[j+3],limit=x[j+4];require(signal>=0&&delay>=0&&end>=signal+delay&&q!=0&&limit>0);
         double arrival=signal+delay;require(i==0||arrival>=o.back().arrival);o.push_back({arrival,end,std::abs(q),limit,0,0,-1,-1,q>0?1:-1});}
     double prev=-std::numeric_limits<double>::infinity(),buy=0,sell=0,notional=0;
-    for(int i=0;i<m;++i){size_t j=2+5*n+5*i;double t=x[j],bid=x[j+1],ask=x[j+2],b=x[j+3],a=x[j+4];require(t>prev&&bid>0&&ask>=bid&&a>=0&&b>=0);prev=t;
+    for(int i=0;i<m;++i){size_t j=2+5*n+5*i;double t=x[j],bid=x[j+1],ask=x[j+2],b=x[j+3],a=x[j+4];require(t>=0&&t>prev&&bid>0&&ask>=bid&&a>=0&&b>=0);prev=t;
         for(auto& z:o){if(z.arrival>t)break;if(t>z.end||z.filled>=z.q)continue;
             double price=z.side==1?ask:bid;if((z.side==1&&price>z.limit)||(z.side==-1&&price<z.limit))continue;
             double& size=z.side==1?a:b;double q=std::min(z.q-z.filled,size);if(q<=0)continue;

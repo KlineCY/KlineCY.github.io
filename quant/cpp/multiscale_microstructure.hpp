@@ -88,10 +88,11 @@ inline Vec volume_bars(const Vec& x){
     for(size_t i=1;i<x.size();i+=4){
         double t=x[i],price=x[i+1],q=x[i+2],sgn=x[i+3];positive(price);positive(q);require((sgn==1||sgn==-1)&&(i==1||t>=last));require(q/target<=50000);
         total+=q;nt+=q*price;sv+=q*sgn;
-        while(q>1e-12*target){
+        while(q>0){
             if(vol==0){start=t;o=h=l=price;}h=std::max(h,price);l=std::min(l,price);c=price;last=t;
-            double z=std::min(q,target-vol);vol+=z;q-=z;signedv+=sgn*z;notional+=price*z;
-            if(vol>=target*(1-1e-12))emit(true);
+            double room=target-vol;positive(room);bool full=q>=room;double z=full?room:q;
+            vol=full?target:vol+z;q=full?q-z:0;signedv+=sgn*z;notional+=price*z;
+            if(full||vol>=target)emit(true);
         }
     }
     if(vol>0)emit(false);

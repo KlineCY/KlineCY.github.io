@@ -1,0 +1,45 @@
+name: Validate multiscale quantitative research
+on:
+  pull_request:
+    paths:
+      - 'quant/research/multiscale-*'
+      - 'quant/research/multiscale_*.py'
+      - 'quant/research/index.html'
+      - 'quant/cpp/multiscale_*'
+      - 'quant/cpp/index.html'
+      - 'quant/sidebar-v2.js'
+      - 'scripts/test_multiscale*'
+      - '.github/workflows/test-multiscale-research.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'quant/research/multiscale-*'
+      - 'quant/research/multiscale_*.py'
+      - 'quant/research/index.html'
+      - 'quant/cpp/multiscale_*'
+      - 'quant/cpp/index.html'
+      - 'quant/sidebar-v2.js'
+      - 'scripts/test_multiscale*'
+      - '.github/workflows/test-multiscale-research.yml'
+permissions:
+  contents: read
+jobs:
+  numerics:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [g++, clang++]
+    steps:
+      - uses: actions/checkout@v4
+      - run: ${{ matrix.compiler }} -std=c++17 -O2 -Wall -Wextra -Werror -pedantic quant/cpp/multiscale_cli.cpp -o /tmp/quant_multiscale
+      - run: python3 scripts/test_multiscale_research.py /tmp/quant_multiscale
+  curriculum:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save --no-package-lock katex@0.16.11
+      - run: node scripts/test_multiscale_curriculum.mjs
