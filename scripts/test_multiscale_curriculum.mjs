@@ -36,3 +36,13 @@ for(const g of groups){
 assert.equal(methods.size,40);assert.equal(equations,120);
 for(const p of [root+'index.html',root+'finite-state-research.html',root+'continuous-research.html','quant/cpp/index.html','quant/sidebar-v2.js'])assert(read(p).includes('multiscale-research.html'),p);
 console.log('PASS: '+methods.size+' research chapters, '+equations+' strict KaTeX groups, '+coordinates+' displayed reference values, '+links+' local links, five embedded source files');
+
+let theory=0;
+assert(main.includes('multiscale-theory.html'));
+for(const g of ['simulation','microstructure','engineering','empirical']){
+ const filename=root+'multiscale-theory-'+g+'.html',html=read(filename);
+ assert(read(root+'multiscale-theory.html').includes('multiscale-theory-'+g+'.html'));
+ for(const a of html.matchAll(/<div class="equation">\$\$([\s\S]*?)\$\$<\/div>/g)){katex.renderToString(decode(a[1]),{throwOnError:true,strict:'error',displayMode:true});theory++;}
+ for(const a of html.matchAll(/(?:href|src)="([^"]+)"/g)){if(/^https?:\/\//.test(a[1]))continue;assert(fs.existsSync(path.resolve(path.dirname(filename),a[1])),filename+' -> '+a[1]);}
+}
+assert.equal(theory,36);console.log('PASS: '+theory+' theory units, formulas and links');
