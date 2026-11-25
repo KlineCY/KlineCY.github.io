@@ -1,0 +1,35 @@
+name: Validate continuous-state numerical research
+on:
+  pull_request:
+    paths:
+      - 'quant/research/continuous-*'
+      - 'quant/research/continuous_reference.py'
+      - 'quant/cpp/continuous_research_*'
+      - 'scripts/test_continuous_*'
+      - '.github/workflows/test-continuous-research.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'quant/research/continuous-*'
+      - 'quant/research/continuous_reference.py'
+      - 'quant/cpp/continuous_research_*'
+      - 'scripts/test_continuous_*'
+      - '.github/workflows/test-continuous-research.yml'
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        compiler: [g++, clang++]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: ${{ matrix.compiler }} -std=c++17 -O2 -Wall -Wextra -Werror -pedantic quant/cpp/continuous_research_cli.cpp -o /tmp/quant_continuous
+      - run: python scripts/test_continuous_research.py /tmp/quant_continuous
+      - run: npm install --no-save --no-package-lock katex@0.16.11
+      - run: node scripts/test_continuous_curriculum.mjs
