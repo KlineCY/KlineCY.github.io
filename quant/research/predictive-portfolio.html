@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>预测学习到组合优化与离线策略评价｜Kline Quant</title><link rel="stylesheet" href="../sidebar-v2.css"><link rel="stylesheet" href="depth-labs.css"><link rel="stylesheet" href="predictive-decision.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></head><body><aside id="quantSidebar" class="sidebar" data-page="research"></aside><script src="../sidebar-v2.js"></script><div class="main"><main class="predictive-decision"><header><h1>预测学习到组合优化与离线策略评价</h1><p><a href="predictive-decision.html">预测学习与组合决策</a>　<a href="predictive-portfolio.html">预测到组合决策</a>　<a href="../cpp/predictive_cli.cpp" download>C++17统一入口</a></p></header><section><p>预测误差、风险估计与可执行决策之间的数学关系。六项方法涉及堆叠、可微优化层、决策代理损失、离线策略评价及组合风险。</p><h2><a href="predictive-stacking-simplex.html">样本外预测堆叠的单纯形Ridge与全局参照</a></h2><p>60组可复算参数记录。</p><h2><a href="predictive-neutral-layer-vjp.html">市场中性二次组合层及隐式反向传播</a></h2><p>60组可复算参数记录。</p><h2><a href="predictive-spo-plus.html">带个券上限的线性决策SPO与SPO+代理损失</a></h2><p>60组可复算参数记录。</p><h2><a href="predictive-policy-dr.html">二元离线策略的双重稳健、IPW与有效样本量</a></h2><p>60组可复算参数记录。</p><h2><a href="predictive-soft-portfolio-vjp.html">Softmax长仓组合的收益风险与平滑换手反传</a></h2><p>60组可复算参数记录。</p><h2><a href="predictive-ensemble-risk.html">预测集成的模型内与模型间组合风险分解</a></h2><p>60组可复算参数记录。</p></section><section><h2>完整C++17实现</h2><pre>#pragma once
+#include "predictive_neural.hpp"
+namespace pdq {
+inline Vec simplex(Vec z){
+    double mx=*std::max_element(z.begin(),z.end());for(double&amp; v:z)v-=mx;
+    Vec s=z;std::sort(s.begin(),s.end(),std::greater&lt;double&gt;());double a=0,tau=0;
+    for(size_t i=0;i&lt;s.size();++i){a+=s[i];if(s[i]&gt;(a-1)/(i+1))tau=(a-1)/(i+1);}
+    for(double&amp; v:z){v=std::max(0.,v-tau);}
+    return z;
+}
+inline Vec stacking_simplex(const Vec&amp; x){
+    require(x.size()&gt;=8);int n=integer(x[0],2,200),k=integer(x[1],2,12);double l=x[2];positive(l);require(x.size()==size_t(3+n*(k+1)));
+    Mat P=zeros(n,k),A=zeros(k,k);Vec y(n),b(k),w(k,1./k);size_t at=3;double trace=0;
+    for(int i=0;i&lt;n;++i){for(double&amp; v:P[i])v=x[at++];y[i]=x[at++];}
+    for(int j=0;j&lt;k;++j){for(int i=0;i&lt;n;++i)b[j]+=P[i][j]*y[i]/n;for(int h=0;h&lt;k;++h){for(int i=0;i&lt;n;++i)A[j][h]+=P[i][j]*P[i][h]/n;if(j==h){A[j][h]+=l;trace+=A[j][h];}}}
+    positive(trace);double r=0;
+    for(int t=0;t&lt;100000;++t){
+        Vec g=mv(A,w),z(k);for(int j=0;j&lt;k;++j)z[j]=w[j]-(g[j]-b[j])/trace;z=simplex(z);r=0;for(int j=0;j&lt;k;++j)r=std::max(r,std::abs(z[j]-w[j]));w=z;if(r&lt;1e-13)break;
+    }
+    require(r&lt;1e-9);Vec fit=mv(P,w);double loss=0;for(int i=0;i&lt;n;++i)loss+=sq(fit[i]-y[i])/n;
+    Vec out{loss,l*dot(w,w),loss+l*dot(w,w),sum(w)};out.insert(out.end(),w.begin(),w.end());out.insert(out.end(),fit.begin(),fit.end());return out;
+}
+inline Vec neutral_layer_vjp(const Vec&amp; x){
+    require(x.size()&gt;=10);int n=integer(x[0],2,40);double gamma=x[1],eta=x[2];positive(gamma);require(eta&gt;=0&amp;&amp;x.size()==size_t(3+3*n+n*n));
+    Vec mu(x.begin()+3,x.begin()+3+n),old(x.begin()+3+n,x.begin()+3+2*n),r(x.begin()+3+2*n,x.begin()+3+3*n),ones(n,1.),b(n);
+    Mat A=zeros(n,n);size_t at=3+3*n;Mat L=zeros(n,n);for(auto&amp; row:L)for(double&amp; v:row)v=x[at++];
+    for(int i=0;i&lt;n;++i)for(int j=0;j&lt;n;++j)A[i][j]=gamma*dot(L[i],L[j])+(i==j?eta:0);
+    for(int i=0;i&lt;n;++i)b[i]=mu[i]+eta*old[i];
+    Vec a=solve(A,b),u=solve(A,ones);positive(sum(u));double nu=sum(a)/sum(u);Vec w(n),g=solve(A,r);
+    double c=sum(g)/sum(u);for(int i=0;i&lt;n;++i){w[i]=a[i]-nu*u[i];g[i]-=c*u[i];}
+    Vec out{dot(w,r),nu,sum(w),sum(g)};out.insert(out.end(),w.begin(),w.end());out.insert(out.end(),g.begin(),g.end());return out;
+}
+inline Vec capped_linear(const Vec&amp; c,const Vec&amp; caps){
+    int n=c.size();std::vector&lt;int&gt; ids(n);std::iota(ids.begin(),ids.end(),0);std::stable_sort(ids.begin(),ids.end(),[&amp;](int a,int b){return c[a]&lt;c[b];});Vec w(n);double left=1;
+    for(int j:ids){w[j]=std::min(left,caps[j]);left-=w[j];}require(left&lt;1e-10);return w;
+}
+inline Vec spo_plus(const Vec&amp; x){
+    require(x.size()&gt;=6&amp;&amp;x.size()%3==0);int n=x.size()/3;require(n&lt;=1000);
+    Vec c(x.begin(),x.begin()+n),p(x.begin()+n,x.begin()+2*n),caps(x.begin()+2*n,x.end()),z(n);
+    for(int i=0;i&lt;n;++i){prob(caps[i]);z[i]=2*p[i]-c[i];}require(sum(caps)&gt;=1);
+    Vec a=capped_linear(c,caps),b=capped_linear(p,caps),d=capped_linear(z,caps),grad(n);
+    double regret=dot(c,b)-dot(c,a),surrogate=dot(z,a)-dot(z,d);for(int i=0;i&lt;n;++i)grad[i]=2*(a[i]-d[i]);
+    Vec out{regret,surrogate,dot(c,a),dot(c,b)};for(const auto&amp; v:{a,b,d,grad})out.insert(out.end(),v.begin(),v.end());return out;
+}
+inline Vec policy_dr(const Vec&amp; x){
+    require(x.size()&gt;=10&amp;&amp;(x.size()-2)%8==0);double cap=x[0],floor=x[1];positive(cap);require(floor&gt;0&amp;&amp;floor&lt;=1);
+    int n=(x.size()-2)/8;require(n&gt;=2);Vec d,ipw,dr;double wsum=0,w2=0,ips=0,clipped=0,cc=0;
+    for(int t=0;t&lt;n;++t){
+        size_t i=2+8*t;int a=integer(x[i],0,1);double p=x[i+1],q=x[i+2],r=x[i+3],m0=x[i+4],m1=x[i+5],e0=x[i+6],e1=x[i+7];
+        require(p&gt;=floor&amp;&amp;p&lt;=1-floor);prob(q);prob(r);prob(m0);prob(m1);require(e0==0||e0==1);require(e1==0||e1==1);
+        require((q==1||e0==1)&amp;&amp;(q==0||e1==1));double target=a?q:1-q,logging=a?p:1-p,w=target/logging,base=(1-q)*m0+q*m1,hat=a?m1:m0;
+        d.push_back(base);ipw.push_back(w*r);dr.push_back(base+w*(r-hat));wsum+=w;w2+=w*w;ips+=w*r;
+        double v=std::min(w,cap);clipped+=v*r;cc+=v;
+    }
+    positive(wsum);positive(w2);positive(cc);Vec out{avg(d),avg(ipw),avg(dr),ips/wsum,clipped/cc,wsum*wsum/w2,std::sqrt(var(dr)/n)};
+    out.insert(out.end(),dr.begin(),dr.end());return out;
+}
+inline Vec soft_portfolio_vjp(const Vec&amp; x){
+    require(x.size()&gt;=10);int n=integer(x[0],2,60),m=integer(x[1],2,1000);double temp=x[2],gamma=x[3],cost=x[4],eps=x[5];positive(temp);require(gamma&gt;=0&amp;&amp;cost&gt;=0&amp;&amp;eps&gt;0&amp;&amp;x.size()==size_t(6+2*n+m*n));
+    Vec score(x.begin()+6,x.begin()+6+n),old(x.begin()+6+n,x.begin()+6+2*n);for(double v:old)prob(v);require(std::abs(sum(old)-1)&lt;1e-9);
+    for(double&amp; v:score){v/=temp;}
+    Vec w=softmax(score),r(m),g(n);Mat R=zeros(m,n);size_t at=6+2*n;
+    for(auto&amp; row:R)for(double&amp; v:row)v=x[at++];
+    for(int t=0;t&lt;m;++t){r[t]=dot(w,R[t]);}
+    double mean=avg(r),v=0,turn=0;
+    for(int t=0;t&lt;m;++t){v+=sq(r[t]-mean)/m;for(int j=0;j&lt;n;++j)g[j]+=R[t][j]*(1-gamma*(r[t]-mean))/m;}
+    for(int j=0;j&lt;n;++j){double d=w[j]-old[j],s=std::sqrt(d*d+eps*eps);turn+=s-eps;g[j]-=cost*d/s;}
+    double u=dot(g,w);for(int j=0;j&lt;n;++j)g[j]=w[j]*(g[j]-u)/temp;
+    Vec out{mean-gamma*v/2-cost*turn,mean,v,turn,sum(g)};out.insert(out.end(),w.begin(),w.end());out.insert(out.end(),g.begin(),g.end());return out;
+}
+inline Vec ensemble_risk(const Vec&amp; x){
+    require(x.size()&gt;=7);int n=integer(x[0],1,50),k=integer(x[1],2,100);require(x.size()==size_t(2+n+k*(1+2*n)));
+    Vec w(x.begin()+2,x.begin()+2+n),p(k),mu(k),v(k),out;size_t at=2+n;
+    for(int j=0;j&lt;k;++j){p[j]=x[at++];prob(p[j]);Vec a(n),d(n);for(double&amp; z:a)z=x[at++];for(double&amp; z:d){z=x[at++];require(z&gt;=0);}mu[j]=dot(w,a);for(int i=0;i&lt;n;++i)v[j]+=sq(w[i])*d[i];}
+    require(std::abs(sum(p)-1)&lt;1e-10);double m=dot(p,mu),within=dot(p,v),between=0;for(int j=0;j&lt;k;++j)between+=p[j]*sq(mu[j]-m);
+    out={m,within,between,within+between};out.insert(out.end(),mu.begin(),mu.end());out.insert(out.end(),v.begin(),v.end());return out;
+}
+}
+</pre></section></main></div><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:true})"></script></body></html>

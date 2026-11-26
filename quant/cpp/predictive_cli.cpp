@@ -1,0 +1,81 @@
+#include "predictive_online.hpp"
+#include "predictive_portfolio.hpp"
+#include "predictive_optimization.hpp"
+#include "predictive_distribution.hpp"
+#include "predictive_interpretation.hpp"
+#include "predictive_sequence.hpp"
+using namespace pdq;
+using Method=Vec(*)(const Vec&);
+const std::map<std::string,Method> methods={
+    {"weighted_conformal",pdq::weighted_conformal},
+    {"ulsif_ratio",pdq::ulsif_ratio},
+    {"energy_score",pdq::energy_score},
+    {"variogram_score",pdq::variogram_score},
+    {"ipcw_brier_curve",pdq::ipcw_brier_curve},
+    {"conformal_risk_grid",pdq::conformal_risk_grid},
+    {"shapley_interaction",pdq::shapley_interaction},
+    {"ale_bilinear",pdq::ale_bilinear},
+    {"conditional_permutation",pdq::conditional_permutation},
+    {"knockoff_plus",pdq::knockoff_plus},
+    {"local_linear_smoother",pdq::local_linear_smoother},
+    {"group_calibration",pdq::group_calibration},
+    {"causal_conv_vjp",pdq::causal_conv_vjp},
+    {"diagonal_scan_vjp",pdq::diagonal_scan_vjp},
+    {"gru_scalar_vjp",pdq::gru_scalar_vjp},
+    {"patch_embedding_vjp",pdq::patch_embedding_vjp},
+    {"ohlc_raster",pdq::ohlc_raster},
+    {"matured_gaussian_loss",pdq::matured_gaussian_loss},
+    {"adamw_trajectory",pdq::adamw_trajectory},
+    {"ridge_hypergrad",pdq::ridge_hypergrad},
+    {"ridge_influence",pdq::ridge_influence},
+    {"hutchinson_full",pdq::hutchinson_full},
+    {"logistic_hvp",pdq::logistic_hvp},
+    {"cg_ridge",pdq::cg_ridge},
+    {"kernel_center",pdq::kernel_center},
+    {"fourier_gram",pdq::fourier_gram},
+    {"nystrom_ridge",pdq::nystrom_ridge},
+    {"ridge_loo",pdq::ridge_loo},
+    {"gp_derivative",pdq::gp_derivative},
+    {"harmonic_graph",pdq::harmonic_graph},
+    {"delayed_ogd",pdq::delayed_ogd},
+    {"fixed_share",pdq::fixed_share},
+    {"recursive_ridge",pdq::recursive_ridge},
+    {"passive_aggressive",pdq::passive_aggressive},
+    {"adaptive_miscoverage",pdq::adaptive_miscoverage},
+    {"exp3_observed",pdq::exp3_observed},
+    {"sparsemax_vjp",pdq::sparsemax_vjp},
+    {"layernorm_vjp",pdq::layernorm_vjp},
+    {"rmsnorm_vjp",pdq::rmsnorm_vjp},
+    {"gelu_vjp",pdq::gelu_vjp},
+    {"causal_attention_vjp",pdq::causal_attention_vjp},
+    {"infonce_vjp",pdq::infonce_vjp},
+    {"stacking_simplex",pdq::stacking_simplex},
+    {"neutral_layer_vjp",pdq::neutral_layer_vjp},
+    {"spo_plus",pdq::spo_plus},
+    {"policy_dr",pdq::policy_dr},
+    {"soft_portfolio_vjp",pdq::soft_portfolio_vjp},
+    {"ensemble_risk",pdq::ensemble_risk}
+};
+double number(const std::string& s){size_t pos=0;double v=std::stod(s,&pos);require(pos==s.size()&&std::isfinite(v));return v;}
+void run(const std::string& id,const Vec& x){
+    auto it=methods.find(id);require(it!=methods.end()&&x.size()<=300000);
+    Vec y=it->second(x);require(!y.empty());
+    for(double v:y)require(std::isfinite(v));
+    for(size_t i=0;i<y.size();++i){if(i)std::cout<<',';std::cout<<y[i];}
+    std::cout<<'\n';
+}
+int main(int argc,char** argv){
+    std::cout<<std::setprecision(17);
+    try{
+        require(argc>=2);std::string id=argv[1];
+        if(id=="--list"){require(argc==2);for(const auto& a:methods)std::cout<<a.first<<'\n';return 0;}
+        if(id=="--batch"){
+            require(argc==2);std::string line;
+            while(std::getline(std::cin,line)){
+                try{std::istringstream s(line);std::string m,v;require(bool(s>>m));Vec x;while(s>>v)x.push_back(number(v));run(m,x);}
+                catch(const std::exception&){std::cout<<"ERROR\n";}
+            }return 0;
+        }
+        Vec x;for(int i=2;i<argc;++i)x.push_back(number(argv[i]));run(id,x);
+    }catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}
+}

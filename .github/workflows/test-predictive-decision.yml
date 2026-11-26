@@ -1,0 +1,56 @@
+name: Validate predictive learning and decisions
+on:
+  pull_request:
+    paths:
+      - 'quant/research/predictive-*'
+      - 'quant/research/predictive_*.mjs'
+      - 'quant/cpp/predictive_*'
+      - 'quant/cpp/multiscale_common.hpp'
+      - 'quant/ml/index.html'
+      - 'quant/research/index.html'
+      - 'quant/cpp/index.html'
+      - 'quant/sidebar-v2.js'
+      - 'scripts/test_predictive*'
+      - '.github/workflows/test-predictive-decision.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'quant/research/predictive-*'
+      - 'quant/research/predictive_*.mjs'
+      - 'quant/cpp/predictive_*'
+      - 'quant/cpp/multiscale_common.hpp'
+      - 'quant/ml/index.html'
+      - 'quant/research/index.html'
+      - 'quant/cpp/index.html'
+      - 'quant/sidebar-v2.js'
+      - 'scripts/test_predictive*'
+      - '.github/workflows/test-predictive-decision.yml'
+permissions:
+  contents: read
+jobs:
+  numerics:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [g++, clang++]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: ${{ matrix.compiler }} -std=c++17 -O2 -Wall -Wextra -Werror -pedantic quant/cpp/predictive_cli.cpp -o /tmp/quant_predictive
+      - run: node scripts/test_predictive_decision.mjs /tmp/quant_predictive
+      - run: ${{ matrix.compiler }} -std=c++17 -O2 -Wall -Wextra -Werror -pedantic quant/cpp/predictive_experiments.cpp -o /tmp/predictive_experiments
+      - run: ${{ matrix.compiler }} -std=c++17 -O2 -Wall -Wextra -Werror -pedantic quant/cpp/predictive_advanced_experiments.cpp -o /tmp/predictive_advanced_experiments
+      - run: node scripts/test_predictive_experiments.mjs /tmp/predictive_experiments /tmp/predictive_advanced_experiments
+  curriculum:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save --no-package-lock katex@0.16.11
+      - run: node scripts/test_predictive_curriculum.mjs
+      - run: node scripts/test_predictive_experiments.mjs --curriculum
