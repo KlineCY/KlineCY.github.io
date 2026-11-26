@@ -79,6 +79,7 @@
       '<a class="q-menu-link" href="'+route("research")+'applied-systems.html">完整应用研究体系</a>'+
       '<a class="q-menu-link" href="'+route("research")+'multiscale-research.html">多尺度与实证量化研究</a>'+
       '<a class="q-menu-link" href="'+route("research")+'predictive-decision.html">金融预测学习与组合决策</a>'+
+      '<a class="q-menu-link" href="'+route("research")+'structured-cashflow.html">抵押贷款证券与结构化现金流</a>'+
       '<a class="q-menu-link" href="'+route("research")+'finite-state-research.html">有限状态与动态研究</a>'+
       '<a class="q-menu-link" href="'+route("research")+'continuous-research.html">连续状态与数值金融研究</a>'+
       '<a class="q-menu-link" href="'+route("research")+'advanced-research.html">高级模型研究与数值实验</a>'+
